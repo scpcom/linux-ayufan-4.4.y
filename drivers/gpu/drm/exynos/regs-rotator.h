@@ -70,4 +70,3 @@
 #define ROT_MAX(max, mask)		((max) & (mask))
 
 #endif /* EXYNOS_REGS_ROTATOR_H */
-

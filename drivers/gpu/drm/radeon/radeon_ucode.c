@@ -164,4 +164,3 @@ int radeon_ucode_validate(const struct firmware *fw)
 
 	return -EINVAL;
 }
-

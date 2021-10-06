@@ -34,8 +34,6 @@
 #define msb(x)                  ((u8)((u16) x >> 8))
 #define lsb(x)                  ((u8)((u16) x &  0x00FF))
 
-
-
 #define CMD_POWER_UP				0x01
 #define CMD_POWER_UP_A10_NRESP			1
 #define CMD_POWER_UP_A10_NARGS			5
@@ -100,7 +98,6 @@
 #define CMD_FM_RSQ_STATUS_A30_NARGS		1
 #define CMD_FM_RSQ_STATUS_A30_NRESP		23
 
-
 #define CMD_FM_SEEK_START			0x31
 #define CMD_FM_SEEK_START_NARGS			1
 #define CMD_FM_SEEK_START_NRESP			1
@@ -132,7 +129,6 @@
 #define CMD_AM_SEEK_START_NARGS			1
 #define CMD_AM_SEEK_START_NRESP			1
 
-
 #define CMD_AM_ACF_STATUS			0x45
 #define CMD_AM_ACF_STATUS_NRESP			6
 #define CMD_AM_ACF_STATUS_NARGS			1
@@ -142,7 +138,6 @@
 #define CMD_FM_ACF_STATUS_NARGS			1
 
 #define CMD_MAX_ARGS_COUNT			(10)
-
 
 enum si476x_acf_status_report_bits {
 	SI476X_ACF_BLEND_INT	= (1 << 4),
@@ -384,7 +379,6 @@ static int si476x_cmd_tune_seek_freq(struct si476x_core *core,
 				     uint8_t *resp, size_t respn)
 {
 	int err;
-
 
 	atomic_set(&core->stc, 0);
 	err = si476x_core_send_command(core, cmd, args, argn, resp, respn,
@@ -681,7 +675,6 @@ int si476x_core_cmd_ana_audio_pin_cfg(struct si476x_core *core,
 }
 EXPORT_SYMBOL_GPL(si476x_core_cmd_ana_audio_pin_cfg);
 
-
 /**
  * si476x_cmd_intb_pin_cfg - send 'INTB_PIN_CFG' command to the device
  * @core - device to send the command to
@@ -731,8 +724,6 @@ static int si476x_core_cmd_intb_pin_cfg_a20(struct si476x_core *core,
 					resp, ARRAY_SIZE(resp),
 					SI476X_DEFAULT_TIMEOUT);
 }
-
-
 
 /**
  * si476x_cmd_am_rsq_status - send 'AM_RSQ_STATUS' command to the
@@ -866,7 +857,6 @@ int si476x_core_cmd_am_acf_status(struct si476x_core *core,
 	return err;
 }
 EXPORT_SYMBOL_GPL(si476x_core_cmd_am_acf_status);
-
 
 /**
  * si476x_cmd_fm_seek_start - send 'FM_SEEK_START' command to the
@@ -1041,7 +1031,6 @@ int si476x_core_cmd_fm_phase_div_status(struct si476x_core *core)
 }
 EXPORT_SYMBOL_GPL(si476x_core_cmd_fm_phase_div_status);
 
-
 /**
  * si476x_cmd_am_seek_start - send 'FM_SEEK_START' command to the
  * device
@@ -1069,8 +1058,6 @@ int si476x_core_cmd_am_seek_start(struct si476x_core *core,
 					 resp, sizeof(resp));
 }
 EXPORT_SYMBOL_GPL(si476x_core_cmd_am_seek_start);
-
-
 
 static int si476x_core_cmd_power_up_a10(struct si476x_core *core,
 					struct si476x_power_up_args *puargs)
@@ -1280,7 +1267,6 @@ static int si476x_core_cmd_fm_rsq_status_a20(struct si476x_core *core,
 
 	return err;
 }
-
 
 static int si476x_core_cmd_fm_rsq_status_a30(struct si476x_core *core,
 					struct si476x_rsq_status_args *rsqargs,

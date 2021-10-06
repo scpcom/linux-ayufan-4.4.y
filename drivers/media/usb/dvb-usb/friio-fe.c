@@ -117,7 +117,6 @@ error:
 	return -EREMOTEIO;
 }
 
-
 /* set pll frequency via the demodulator's I2C register */
 static int jdvbt90502_pll_set_freq(struct jdvbt90502_state *state, u32 freq)
 {
@@ -261,7 +260,6 @@ static int jdvbt90502_read_signal_strength(struct dvb_frontend *fe,
 	return 0;
 }
 
-
 /* filter out un-supported properties to notify users */
 static int jdvbt90502_set_property(struct dvb_frontend *fe,
 				   struct dtv_property *tvp)
@@ -323,7 +321,6 @@ static int jdvbt90502_set_frontend(struct dvb_frontend *fe)
 
 	return 0;
 }
-
 
 /**
  * (reg, val) commad list to initialize this module.
@@ -399,13 +396,11 @@ error:
 	return -EREMOTEIO;
 }
 
-
 static void jdvbt90502_release(struct dvb_frontend *fe)
 {
 	struct jdvbt90502_state *state = fe->demodulator_priv;
 	kfree(state);
 }
-
 
 static struct dvb_frontend_ops jdvbt90502_ops;
 

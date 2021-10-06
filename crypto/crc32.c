@@ -54,7 +54,6 @@ static int crc32_cra_init(struct crypto_tfm *tfm)
 	return 0;
 }
 
-
 /*
  * Setting the seed allows arbitrary accumulators and flexible XOR policy
  * If your algorithm starts with ~0, then XOR with ~0 before you set

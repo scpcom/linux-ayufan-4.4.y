@@ -115,7 +115,6 @@ unsigned long neigh_rand_reach_time(unsigned long base)
 }
 EXPORT_SYMBOL(neigh_rand_reach_time);
 
-
 static int neigh_forced_gc(struct neigh_table *tbl)
 {
 	int shrunk = 0;
@@ -618,7 +617,6 @@ out:
 }
 EXPORT_SYMBOL(pneigh_lookup);
 
-
 int pneigh_delete(struct neigh_table *tbl, struct net *net, const void *pkey,
 		  struct net_device *dev)
 {
@@ -1048,8 +1046,6 @@ static void neigh_update_hhs(struct neighbour *neigh)
 		}
 	}
 }
-
-
 
 /* Generic update routine.
    -- lladdr is new lladdr or NULL, if it is not supplied.
@@ -3225,4 +3221,3 @@ static int __init neigh_init(void)
 }
 
 subsys_initcall(neigh_init);
-

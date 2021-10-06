@@ -200,7 +200,6 @@ static int hpfs_statfs(struct dentry *dentry, struct kstatfs *buf)
 	return 0;
 }
 
-
 long hpfs_ioctl(struct file *file, unsigned cmd, unsigned long arg)
 {
 	switch (cmd) {
@@ -225,7 +224,6 @@ long hpfs_ioctl(struct file *file, unsigned cmd, unsigned long arg)
 		}
 	}
 }
-
 
 static struct kmem_cache * hpfs_inode_cachep;
 

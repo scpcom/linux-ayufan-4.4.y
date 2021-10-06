@@ -120,7 +120,6 @@ cifs_build_devname(char *nodename, const char *prepath)
 	return dev;
 }
 
-
 /**
  * cifs_compose_mount_options	-	creates mount options for refferral
  * @sb_mountdata:	parent/root DFS mount options (template)

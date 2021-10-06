@@ -55,7 +55,6 @@
 #include <linux/linkage.h>
 #include "sha1_mb_mgr_datastruct.S"
 
-
 .extern sha1_x8_avx
 
 # LINUX register definitions
@@ -170,7 +169,6 @@ start_loop:
 
 	vmovdqa %xmm0, _lens + 0*16(state)
 	vmovdqa %xmm1, _lens + 1*16(state)
-
 
 	# "state" and "args" are the same address, arg1
 	# len is arg2

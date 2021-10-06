@@ -89,7 +89,6 @@ bool ConfigSettings::writeSizes(const QString& key, const QList<int>& value)
 	return true;
 }
 
-
 /*
  * set the new data
  * TODO check the value
@@ -230,7 +229,6 @@ void ConfigItem::testUpdateMenu(bool v)
 	} else if (listView()->updateAll)
 		updateMenu();
 }
-
 
 /*
  * construct a menu entry
@@ -1010,7 +1008,6 @@ ConfigInfoView::ConfigInfoView(QWidget* parent, const char *name)
 	: Parent(parent), sym(0), _menu(0)
 {
 	setObjectName(name);
-
 
 	if (!objectName().isEmpty()) {
 		configSettings->beginGroup(objectName());

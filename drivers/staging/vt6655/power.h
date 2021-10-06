@@ -44,7 +44,6 @@ PSvEnablePowerSaving(
 	unsigned short wListenInterval
 );
 
-
 bool
 PSbIsNextTBTTWakeUp(
 	void *hDeviceContext

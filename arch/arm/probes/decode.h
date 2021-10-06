@@ -41,7 +41,6 @@ void __init find_str_pc_offset(void);
 
 #endif
 
-
 /*
  * Update ITSTATE after normal execution of an IT block instruction.
  *
@@ -81,7 +80,6 @@ static inline void __kprobes bx_write_pc(long pcv, struct pt_regs *regs)
 	regs->ARM_pc = pcv;
 }
 
-
 #if __LINUX_ARM_ARCH__ >= 6
 
 /* Kernels built for >= ARMv6 should never run on <= ARMv5 hardware, so... */
@@ -103,7 +101,6 @@ static inline void __kprobes load_write_pc(long pcv, struct pt_regs *regs)
 	else
 		regs->ARM_pc = pcv;
 }
-
 
 #if __LINUX_ARM_ARCH__ >= 7
 
@@ -131,7 +128,6 @@ static inline void __kprobes alu_write_pc(long pcv, struct pt_regs *regs)
 	else
 		regs->ARM_pc = pcv;
 }
-
 
 /*
  * Test if load/store instructions writeback the address register.
@@ -325,7 +321,6 @@ struct decode_checker {
 #define DECODE_END			\
 	{.bits = DECODE_TYPE_END}
 
-
 struct decode_header {
 	union decode_item	type_regs;
 	union decode_item	mask;
@@ -337,7 +332,6 @@ struct decode_header {
 	{.bits = (_mask)},					\
 	{.bits = (_value)}
 
-
 struct decode_table {
 	struct decode_header	header;
 	union decode_item	table;
@@ -347,7 +341,6 @@ struct decode_table {
 	DECODE_HEADER(DECODE_TYPE_TABLE, _mask, _value, 0),	\
 	{.table = (_table)}
 
-
 struct decode_custom {
 	struct decode_header	header;
 	union decode_item	decoder;
@@ -356,7 +349,6 @@ struct decode_custom {
 #define DECODE_CUSTOM(_mask, _value, _decoder)			\
 	DECODE_HEADER(DECODE_TYPE_CUSTOM, _mask, _value, 0),	\
 	{.action = (_decoder)}
-
 
 struct decode_simulate {
 	struct decode_header	header;
@@ -370,7 +362,6 @@ struct decode_simulate {
 #define DECODE_SIMULATE(_mask, _value, _handler)	\
 	DECODE_SIMULATEX(_mask, _value, _handler, 0)
 
-
 struct decode_emulate {
 	struct decode_header	header;
 	union decode_item	handler;
@@ -382,7 +373,6 @@ struct decode_emulate {
 
 #define DECODE_EMULATE(_mask, _value, _handler)		\
 	DECODE_EMULATEX(_mask, _value, _handler, 0)
-
 
 struct decode_or {
 	struct decode_header	header;

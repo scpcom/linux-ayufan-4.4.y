@@ -73,7 +73,6 @@ void __iomem *pci_iomap_wc_range(struct pci_dev *dev,
 	resource_size_t len = pci_resource_len(dev, bar);
 	unsigned long flags = pci_resource_flags(dev, bar);
 
-
 	if (flags & IORESOURCE_IO)
 		return NULL;
 

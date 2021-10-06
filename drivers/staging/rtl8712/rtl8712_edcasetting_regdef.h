@@ -34,4 +34,3 @@
 #define RL			(RTL8712_EDCASETTING_ + 0x24)
 
 #endif /* __RTL8712_EDCASETTING_REGDEF_H__ */
-

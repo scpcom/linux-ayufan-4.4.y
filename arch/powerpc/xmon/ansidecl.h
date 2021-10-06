@@ -84,11 +84,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #define	_ANSIDECL_H	1
 
-
 /* Every source file includes this file,
    so they will all get the switch for lint.  */
 /* LINTLIBRARY */
-
 
 #if defined (__STDC__) || defined (_AIX) || (defined (__mips) && defined (_SYSTYPE_SVR4)) || defined(WIN32)
 /* All known AIX compilers implement these things (but don't always

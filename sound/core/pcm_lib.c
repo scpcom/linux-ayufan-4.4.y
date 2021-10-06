@@ -788,7 +788,6 @@ void snd_interval_mulkdiv(const struct snd_interval *a, unsigned int k,
 
 /* ---- */
 
-
 /**
  * snd_interval_ratnum - refine the interval value
  * @i: interval to refine
@@ -1282,7 +1281,6 @@ static int snd_pcm_hw_rule_list(struct snd_pcm_hw_params *params,
 	return snd_interval_list(hw_param_interval(params, rule->var), list->count, list->list, list->mask);
 }		
 
-
 /**
  * snd_pcm_hw_constraint_list - apply a list of constraints to a parameter
  * @runtime: PCM runtime instance
@@ -1313,7 +1311,6 @@ static int snd_pcm_hw_rule_ranges(struct snd_pcm_hw_params *params,
 	return snd_interval_ranges(hw_param_interval(params, rule->var),
 				   r->count, r->ranges, r->mask);
 }
-
 
 /**
  * snd_pcm_hw_constraint_ranges - apply list of range constraints to a parameter
@@ -1640,7 +1637,6 @@ static int _snd_pcm_hw_param_first(struct snd_pcm_hw_params *params,
 	return changed;
 }
 
-
 /**
  * snd_pcm_hw_param_first - refine config space and return minimum value
  * @pcm: PCM instance
@@ -1686,7 +1682,6 @@ static int _snd_pcm_hw_param_last(struct snd_pcm_hw_params *params,
 	}
 	return changed;
 }
-
 
 /**
  * snd_pcm_hw_param_last - refine config space and return maximum value

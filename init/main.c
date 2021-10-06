@@ -808,7 +808,6 @@ int __init_or_module do_one_initcall(initcall_t fn)
 	return ret;
 }
 
-
 extern initcall_t __initcall_start[];
 extern initcall_t __initcall0_start[];
 extern initcall_t __initcall1_start[];

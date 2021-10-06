@@ -140,7 +140,6 @@ struct CYZ_BOOT_CTRL {
         unsigned long   data[CYZ_BOOT_NWORDS];
 };
 
-
 #ifndef DP_WINDOW_SIZE
 /*
  *	Memory Window Sizes
@@ -411,7 +410,6 @@ struct CH_CTRL {
 	__u32 ichar;
 	__u32 filler[7];
 };
-
 
 /*
  *	BUF_CTRL - This per channel structure contains

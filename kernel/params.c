@@ -287,7 +287,6 @@ char *parse_args(const char *doing,
 	EXPORT_SYMBOL(param_get_##name);				\
 	EXPORT_SYMBOL(param_ops_##name)
 
-
 STANDARD_PARAM_DEF(byte, unsigned char, "%hhu", kstrtou8);
 STANDARD_PARAM_DEF(short, short, "%hi", kstrtos16);
 STANDARD_PARAM_DEF(ushort, unsigned short, "%hu", kstrtou16);

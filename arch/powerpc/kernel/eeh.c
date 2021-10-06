@@ -46,7 +46,6 @@
 #include <asm/ppc-pci.h>
 #include <asm/rtas.h>
 
-
 /** Overview:
  *  EEH, or "Extended Error Handling" is a PCI bridge technology for
  *  dealing with PCI bus errors that can't be dealt with within the
@@ -611,7 +610,6 @@ int eeh_check_failure(const volatile void __iomem *token)
 }
 EXPORT_SYMBOL(eeh_check_failure);
 
-
 /**
  * eeh_pci_enable - Enable MMIO or DMA transfers for this slot
  * @pe: EEH PE
@@ -664,7 +662,6 @@ int eeh_pci_enable(struct eeh_pe *pe, int function)
 		if (rc & active_flag)
 			return 0;
 	}
-
 
 	/* Issue the request */
 	rc = eeh_ops->set_option(pe, function);
@@ -1286,7 +1283,6 @@ int eeh_unfreeze_pe(struct eeh_pe *pe, bool sw_state)
 
 	return ret;
 }
-
 
 static struct pci_device_id eeh_reset_ids[] = {
 	{ PCI_DEVICE(0x19a2, 0x0710) },	/* Emulex, BE     */

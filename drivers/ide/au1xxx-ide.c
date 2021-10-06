@@ -284,7 +284,6 @@ static void auide_dma_start(ide_drive_t *drive )
 {
 }
 
-
 static int auide_dma_setup(ide_drive_t *drive, struct ide_cmd *cmd)
 {
 	if (auide_build_dmatable(drive, cmd) == 0)

@@ -1020,7 +1020,6 @@ static unsigned long msc_win_to_user(void *data, void *src, size_t len)
 	return ret;
 }
 
-
 /*
  * file operations' callbacks
  */

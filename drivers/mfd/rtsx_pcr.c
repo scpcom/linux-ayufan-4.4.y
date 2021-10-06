@@ -599,7 +599,6 @@ int rtsx_pci_card_pull_ctl_disable(struct rtsx_pcr *pcr, int card)
 	else
 		return -EINVAL;
 
-
 	return rtsx_pci_set_pull_ctl(pcr, tbl);
 }
 EXPORT_SYMBOL_GPL(rtsx_pci_card_pull_ctl_disable);

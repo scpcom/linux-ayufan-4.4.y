@@ -499,7 +499,6 @@ static void print_sample_brstacksym(union perf_event *event __maybe_unused,
 	}
 }
 
-
 static void print_sample_addr(union perf_event *event,
 			  struct perf_sample *sample,
 			  struct thread *thread,
@@ -1267,7 +1266,6 @@ static int is_directory(const char *base_path, const struct dirent *dent)
 		if (script_dirent.d_type != DT_DIR &&			\
 		    (script_dirent.d_type != DT_UNKNOWN ||		\
 		     !is_directory(lang_path, &script_dirent)))
-
 
 #define RECORD_SUFFIX			"-record"
 #define REPORT_SUFFIX			"-report"
@@ -2065,7 +2063,6 @@ int cmd_script(int argc, const char **argv, const char *prefix __maybe_unused)
 		pr_debug("perf script started with script %s\n\n", script_name);
 		script_started = true;
 	}
-
 
 	err = perf_session__check_output_opt(session);
 	if (err < 0)

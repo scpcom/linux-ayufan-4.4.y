@@ -118,5 +118,4 @@ struct frad_conf
 #define FRAD_CLOCK_INT		0x0001
 #define FRAD_CLOCK_EXT		0x0000
 
-
 #endif /* _UAPI_FRAD_H_ */

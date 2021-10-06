@@ -42,4 +42,3 @@ void init_landisk_IRQ(void);
 #include <asm/io_generic.h>
 
 #endif  /* __ASM_SH_IODATA_LANDISK_H */
-

@@ -17,7 +17,6 @@
 #define USE_RAPF
 #define RAPF_MIN_BUF_SIZE	(3*L1_CACHE_BYTES)
 
-
 /* The "double write" in this code is because the Meta will not fault
  * immediately unless the memory pipe is forced to by e.g. a data stall or
  * another memory op. The second write should be discarded by the write
@@ -40,7 +39,6 @@
 		: "=r" (to), "=r" (from), "=r" (ret)		 \
 		: "0" (to), "1" (from), "2" (ret)		 \
 		: "D1Ar1", "memory")
-
 
 #define __asm_copy_to_user_1(to, from, ret)	\
 	__asm_copy_user_cont(to, from, ret,	\
@@ -812,7 +810,6 @@ EXPORT_SYMBOL(__copy_user);
 #define __asm_copy_from_user_32bit_rapf_loop(to, from, ret, n, id)	\
 	__asm_copy_user_32bit_rapf_loop(to, from, ret, n, id,		\
 		"SUB	%1, %1, #4\n")
-
 
 /* Copy from user to kernel, zeroing the bytes that were inaccessible in
    userland.  The return-value is the number of bytes that were

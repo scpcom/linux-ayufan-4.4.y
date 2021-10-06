@@ -65,7 +65,6 @@ MODULE_LICENSE("Dual MPL/GPL");
 
 INT_MODULE_PARM(epp_mode, 1);
 
-
 /*====================================================================*/
 
 #define FORCE_EPP_MODE	0x08
@@ -176,7 +175,6 @@ static void parport_cs_release(struct pcmcia_device *link)
 
 	pcmcia_disable_device(link);
 } /* parport_cs_release */
-
 
 static const struct pcmcia_device_id parport_ids[] = {
 	PCMCIA_DEVICE_FUNC_ID(3),

@@ -31,7 +31,6 @@
 #ifndef _ECHO_DSP_
 #define _ECHO_DSP_
 
-
 /**** Echogals: Darla20, Gina20, Layla20, and Darla24 ****/
 #if defined(ECHOGALS_FAMILY)
 
@@ -63,8 +62,6 @@
 
 #endif
 
-
-
 /*
  *
  *  Max inputs and outputs
@@ -74,7 +71,6 @@
 #define DSP_MAXAUDIOINPUTS		16	/* Max audio input channels */
 #define DSP_MAXAUDIOOUTPUTS		16	/* Max audio output channels */
 #define DSP_MAXPIPES			32	/* Max total pipes (input + output) */
-
 
 /*
  *
@@ -86,7 +82,6 @@
 #define CHI32_STATUS_REG		5
 #define CHI32_VECTOR_REG		6
 #define CHI32_DATA_REG			7
-
 
 /*
  *
@@ -101,7 +96,6 @@
 #define CHI32_STATUS_HOST_READ_FULL	0x00000004
 #define CHI32_STATUS_HOST_WRITE_EMPTY	0x00000002
 #define CHI32_STATUS_IRQ		0x00000040
-
 
 /* 
  *
@@ -118,7 +112,6 @@
 #define DSP_FNC_LOAD_LAYLA24_EXTERNAL_ASIC	0xa1
 #define DSP_FNC_LOAD_3G_ASIC			0xa0
 
-
 /*
  *
  * Defines to handle the MIDI input state engine; these are used to properly
@@ -131,7 +124,6 @@
 #define MIDI_IN_STATE_TS_LOW	2
 #define MIDI_IN_STATE_F1_DATA 	3
 #define MIDI_IN_SKIP_DATA	(-1)
-
 
 /*----------------------------------------------------------------------------
 
@@ -176,7 +168,6 @@ SET_LAYLA24_FREQUENCY_REG command.
 
 #define LAYLA24_MAGIC_NUMBER			677376000
 #define LAYLA24_CONTINUOUS_CLOCK		0x000e
-
 
 /*
  *
@@ -230,7 +221,6 @@ SET_LAYLA24_FREQUENCY_REG command.
 
 #endif /* !DSP_56361 */
 
-
 /*
  *
  * Timeouts
@@ -240,7 +230,6 @@ SET_LAYLA24_FREQUENCY_REG command.
 #define HANDSHAKE_TIMEOUT		20000	/* send_vector command timeout (20ms) */
 #define VECTOR_BUSY_TIMEOUT		100000	/* 100ms */
 #define MIDI_OUT_DELAY_USEC		2000	/* How long to wait after MIDI fills up */
-
 
 /*
  *
@@ -257,7 +246,6 @@ SET_LAYLA24_FREQUENCY_REG command.
 						 * some such */
 #define DSP_FLAG_PROFESSIONAL_SPDIF	0x0008	/* 1 Professional, 0 Consumer */
 
-
 /*
  *
  * Clock detect bits reported by the DSP for Gina20, Layla20, Darla24, and Mia
@@ -268,7 +256,6 @@ SET_LAYLA24_FREQUENCY_REG command.
 #define GLDM_CLOCK_DETECT_BIT_SUPER	0x0004
 #define GLDM_CLOCK_DETECT_BIT_SPDIF	0x0008
 #define GLDM_CLOCK_DETECT_BIT_ESYNC	0x0010
-
 
 /*
  *
@@ -285,7 +272,6 @@ SET_LAYLA24_FREQUENCY_REG command.
 #define GML_CLOCK_DETECT_BIT_ESYNC	0x0020
 #define GML_CLOCK_DETECT_BIT_ADAT	0x0040
 
-
 /*
  *
  * Layla clock numbers to send to DSP
@@ -296,7 +282,6 @@ SET_LAYLA24_FREQUENCY_REG command.
 #define LAYLA20_CLOCK_SPDIF		1
 #define LAYLA20_CLOCK_WORD		2
 #define LAYLA20_CLOCK_SUPER		3
-
 
 /*
  *
@@ -310,7 +295,6 @@ SET_LAYLA24_FREQUENCY_REG command.
 #define GD_CLOCK_SPDIFIN		3
 #define GD_CLOCK_UNDEF			0xff
 
-
 /*
  *
  * Gina/Darla S/PDIF status bits
@@ -322,7 +306,6 @@ SET_LAYLA24_FREQUENCY_REG command.
 #define GD_SPDIF_STATUS_48		2
 #define GD_SPDIF_STATUS_UNDEF		0xff
 
-
 /*
  *
  * Layla20 output clocks
@@ -331,7 +314,6 @@ SET_LAYLA24_FREQUENCY_REG command.
 
 #define LAYLA20_OUTPUT_CLOCK_SUPER	0
 #define LAYLA20_OUTPUT_CLOCK_WORD	1
-
 
 /****************************************************************************
 
@@ -350,7 +332,6 @@ SET_LAYLA24_FREQUENCY_REG command.
 #define GD24_88200	0x8
 #define GD24_EXT_SYNC	0x9
 
-
 /*
  *
  * Return values from the DSP when ASIC is loaded
@@ -359,7 +340,6 @@ SET_LAYLA24_FREQUENCY_REG command.
 
 #define ASIC_ALREADY_LOADED	0x1
 #define ASIC_NOT_LOADED		0x0
-
 
 /*
  *
@@ -429,7 +409,6 @@ SET_LAYLA24_FREQUENCY_REG command.
 #define DSP_AUDIOFORM_SS_32BE	10	/* 32 bit stereo big endian */
 #define DSP_AUDIOFORM_INVALID	0xFF	/* Invalid audio format */
 
-
 /*
  *
  * Super-interleave is defined as interleaving by 4 or more.  Darla20 and Gina20
@@ -448,7 +427,6 @@ SET_LAYLA24_FREQUENCY_REG command.
 #define DSP_AUDIOFORM_SUPER_INTERLEAVE_16LE	0x40
 #define DSP_AUDIOFORM_SUPER_INTERLEAVE_24LE	0xc0
 #define DSP_AUDIOFORM_SUPER_INTERLEAVE_32LE	0x80
-
 
 /*
  *
@@ -495,7 +473,6 @@ SET_LAYLA24_FREQUENCY_REG command.
 #define GML_DIGITAL_MODE_CLEAR_MASK	0xffffcfff
 #define GML_SPDIF_FORMAT_CLEAR_MASK	0xfffff01f
 
-
 /*
  *
  * Mia sample rate and clock setting constants
@@ -512,7 +489,6 @@ SET_LAYLA24_FREQUENCY_REG command.
 #define MIA_SPDIF96	0x00000144
 
 #define MIA_MIDI_REV	1	/* Must be Mia rev 1 for MIDI support */
-
 
 /*
  *
@@ -584,7 +560,6 @@ SET_LAYLA24_FREQUENCY_REG command.
 #define INDIGO_EXPRESS_QUAD_SPEED	0x04
 #define INDIGO_EXPRESS_CLOCK_MASK	0x17
 
-
 /*
  *
  * Gina20 & Layla20 have input gain controls for the analog inputs;
@@ -594,7 +569,6 @@ SET_LAYLA24_FREQUENCY_REG command.
 
 #define GL20_INPUT_GAIN_MAGIC_NUMBER	0xC8
 
-
 /*
  *
  * Defines how much time must pass between DSP load attempts
@@ -602,7 +576,6 @@ SET_LAYLA24_FREQUENCY_REG command.
  */
 
 #define DSP_LOAD_ATTEMPT_PERIOD		1000000L	/* One second */
-
 
 /*
  *
@@ -620,7 +593,6 @@ SET_LAYLA24_FREQUENCY_REG command.
 #define MAX_REC_TAPS		192
 #define DSP_MIDI_OUT_FIFO_SIZE	64
 
-
 /* sg_entry is a single entry for the scatter-gather list.  The array of struct
 sg_entry struct is read by the DSP, so all values must be little-endian. */
 
@@ -630,7 +602,6 @@ struct sg_entry {
 	u32 addr;
 	u32 size;
 };
-
 
 /****************************************************************************
 

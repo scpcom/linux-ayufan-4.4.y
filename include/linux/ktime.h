@@ -107,7 +107,6 @@ static inline ktime_t timeval_to_ktime(struct timeval tv)
 /* Convert ktime_t to nanoseconds - NOP in the scalar storage format: */
 #define ktime_to_ns(kt)			((kt).tv64)
 
-
 /**
  * ktime_equal - Compares two ktime_t variables to see if they are equal
  * @cmp1:	comparable1

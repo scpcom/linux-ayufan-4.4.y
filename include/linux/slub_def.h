@@ -110,7 +110,6 @@ static inline void sysfs_slab_remove(struct kmem_cache *s)
 }
 #endif
 
-
 /**
  * virt_to_obj - returns address of the beginning of object.
  * @s: object's kmem_cache

@@ -561,7 +561,6 @@ void mdfld_dsi_output_init(struct drm_device *dev,
 		goto dsi_init_err0;
 	}
 
-
 	connector = &dsi_connector->base.base;
 	drm_connector_init(dev, connector, &mdfld_dsi_connector_funcs,
 						DRM_MODE_CONNECTOR_LVDS);

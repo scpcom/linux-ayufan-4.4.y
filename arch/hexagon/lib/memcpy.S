@@ -147,7 +147,6 @@
  * Codesize : 784 bytes
  */
 
-
 #define ptr_out		R0	/*  destination  pounter  */
 #define ptr_in		R1	/*  source pointer  */
 #define len		R2	/*  length of copy in bytes  */

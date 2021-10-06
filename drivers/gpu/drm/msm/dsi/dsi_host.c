@@ -970,7 +970,6 @@ static int dsi_long_read_resp(u8 *buf, const struct mipi_dsi_msg *msg)
 	return msg->rx_len;
 }
 
-
 static int dsi_cmd_dma_tx(struct msm_dsi_host *msm_host, int len)
 {
 	int ret;

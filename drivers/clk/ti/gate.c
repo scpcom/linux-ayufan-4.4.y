@@ -304,7 +304,6 @@ static void __init of_ti_composite_gate_clk_setup(struct device_node *node)
 CLK_OF_DECLARE(ti_composite_gate_clk, "ti,composite-gate-clock",
 	       of_ti_composite_gate_clk_setup);
 
-
 static void __init of_ti_clkdm_gate_clk_setup(struct device_node *node)
 {
 	_of_ti_gate_clk_setup(node, &omap_gate_clkdm_clk_ops, NULL);

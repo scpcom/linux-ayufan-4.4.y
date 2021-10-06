@@ -52,7 +52,6 @@
 #define IEEE80211_DEFAULT_RATES_MASK (IEEE80211_OFDM_DEFAULT_RATES_MASK | \
 				      IEEE80211_CCK_DEFAULT_RATES_MASK)
 
-
 /* This really should be 8, but not for our firmware */
 #define MAX_SUPPORTED_RATES 32
 #define MAX_COUNTRY_TRIPLETS 32
@@ -101,7 +100,6 @@ struct wl12xx_ie_country {
 	u8 country_string[IEEE80211_COUNTRY_STRING_LEN];
 	struct country_triplet triplets[MAX_COUNTRY_TRIPLETS];
 } __packed;
-
 
 /* Templates */
 

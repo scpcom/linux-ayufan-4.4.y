@@ -188,7 +188,6 @@ eb66p_map_irq(const struct pci_dev *dev, u8 slot, u8 pin)
 	return COMMON_TABLE_LOOKUP;
 }
 
-
 /*
  * The AlphaPC64 is very similar to the EB66+ except that its slots
  * are numbered differently.  In the code below, I have used slot
@@ -310,7 +309,6 @@ alphapc164_init_pci(void)
 	cia_init_pci();
 	SMC93x_Init();
 }
-
 
 /*
  * The System Vector

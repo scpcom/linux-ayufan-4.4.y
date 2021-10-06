@@ -137,4 +137,3 @@ static inline void pps_sub_ts(struct pps_event_time *ts, struct timespec64 delta
 }
 
 #endif /* LINUX_PPS_KERNEL_H */
-

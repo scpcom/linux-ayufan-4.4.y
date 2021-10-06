@@ -90,7 +90,6 @@ ENTRY(restore_image)
 	.align	2
 1:	.long	swsusp_arch_regs_cpu0
 
-
 @ swsusp_arch_suspend()
 @ - prepare pc for resume, return from function without swsusp_save on resume
 @ - save registers in swsusp_arch_regs_cpu0

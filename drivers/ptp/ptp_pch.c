@@ -523,7 +523,6 @@ static struct ptp_clock_info ptp_pch_caps = {
 	.enable		= ptp_pch_enable,
 };
 
-
 #ifdef CONFIG_PM
 static s32 pch_suspend(struct pci_dev *pdev, pm_message_t state)
 {

@@ -214,7 +214,6 @@ static int __tda18271_write_regs(struct dvb_frontend *fe, int idx, int len,
 		max = 39;
 	}
 
-
 	/*
 	 * If lock_i2c is true, it will take the I2C bus for tda18271 private
 	 * usage during the entire write ops, as otherwise, bad things could
@@ -284,7 +283,6 @@ int tda18271_charge_pump_source(struct dvb_frontend *fe,
 {
 	return __tda18271_charge_pump_source(fe, pll, force, true);
 }
-
 
 int tda18271_init_regs(struct dvb_frontend *fe)
 {

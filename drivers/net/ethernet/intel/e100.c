@@ -173,7 +173,6 @@
 #include <linux/rtnetlink.h>
 #include <asm/unaligned.h>
 
-
 #define DRV_NAME		"e100"
 #define DRV_EXT			"-NAPI"
 #define DRV_VERSION		"3.5.24-k2"DRV_EXT
@@ -895,7 +894,6 @@ static int e100_exec_cb(struct nic *nic, struct sk_buff *skb,
 	if (unlikely(!nic->cbs_avail))
 		err = -ENOSPC;
 
-
 	/* Order is important otherwise we'll be in a race with h/w:
 	 * set S-bit in current first, then clear S-bit in previous. */
 	cb->command |= cpu_to_le16(cb_s);
@@ -946,7 +944,6 @@ static u16 mdio_ctrl_hw(struct nic *nic, u32 addr, u32 dir, u32 reg, u16 data)
 	u32 data_out = 0;
 	unsigned int i;
 	unsigned long flags;
-
 
 	/*
 	 * Stratus87247: we shouldn't be writing the MDI control
@@ -1682,7 +1679,6 @@ static void e100_update_stats(struct nic *nic)
 		}
 	}
 
-
 	if (e100_exec_cmd(nic, cuc_dump_reset, 0))
 		netif_printk(nic, tx_err, KERN_DEBUG, nic->netdev,
 			     "exec cuc_dump_reset failed\n");
@@ -2091,7 +2087,6 @@ static void e100_rx_clean(struct nic *nic, unsigned int *work_done,
 		if (-EAGAIN == err || -ENODATA == err)
 			break;
 	}
-
 
 	/* On EAGAIN, hit quota so have more work to do, restart once
 	 * cleanup is complete.

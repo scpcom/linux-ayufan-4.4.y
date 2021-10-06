@@ -383,7 +383,6 @@ void cxgb4_dcb_handle_fw_update(struct adapter *adap,
 /* Data Center Bridging netlink operations.
  */
 
-
 /* Get current DCB enabled/disabled state.
  */
 static u8 cxgb4_getstate(struct net_device *dev)
@@ -465,7 +464,6 @@ static void cxgb4_getpgtccfg_tx(struct net_device *dev, int tc,
 	return cxgb4_getpgtccfg(dev, (7 - tc), prio_type, pgid, bw_per,
 				up_tc_map, 1);
 }
-
 
 static void cxgb4_getpgtccfg_rx(struct net_device *dev, int tc,
 				u8 *prio_type, u8 *pgid, u8 *bw_per,
@@ -817,7 +815,6 @@ static int __cxgb4_setapp(struct net_device *dev, u8 app_idtype, u16 app_id,
 	struct port_info *pi = netdev2pinfo(dev);
 	struct adapter *adap = pi->adapter;
 	int i, err;
-
 
 	if (!cxgb4_dcb_state_synced(pi->dcb.state))
 		return -EINVAL;

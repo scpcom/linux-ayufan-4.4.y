@@ -361,7 +361,6 @@ static void mpc85xx_cds_show_cpuinfo(struct seq_file *m)
 	seq_printf(m, "PLL setting\t: 0x%x\n", ((phid1 >> 24) & 0x3f));
 }
 
-
 /*
  * Called very early, device-tree isn't unflattened
  */

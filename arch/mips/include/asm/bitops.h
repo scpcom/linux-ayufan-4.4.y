@@ -54,7 +54,6 @@ int __mips_test_and_clear_bit(unsigned long nr,
 int __mips_test_and_change_bit(unsigned long nr,
 			       volatile unsigned long *addr);
 
-
 /*
  * set_bit - Atomically set a bit in memory
  * @nr: the bit to set

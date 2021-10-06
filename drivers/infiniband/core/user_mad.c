@@ -833,7 +833,6 @@ out:
 	return ret;
 }
 
-
 static int ib_umad_unreg_agent(struct ib_umad_file *file, u32 __user *arg)
 {
 	struct ib_mad_agent *agent = NULL;

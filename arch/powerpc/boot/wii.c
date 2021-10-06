@@ -30,7 +30,6 @@ BSS_STACK(8192);
 #define MEM2_TOP		(0x10000000 + 64*1024*1024)
 #define FIRMWARE_DEFAULT_SIZE	(12*1024*1024)
 
-
 struct mipc_infohdr {
 	char magic[3];
 	u8 version;
@@ -155,4 +154,3 @@ void platform_init(unsigned long r3, unsigned long r4, unsigned long r5)
 
 	platform_ops.fixups = platform_fixups;
 }
-

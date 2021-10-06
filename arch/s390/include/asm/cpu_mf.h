@@ -38,7 +38,6 @@ static inline int cpum_sf_avail(void)
 	return MACHINE_HAS_LPP && test_facility(68);
 }
 
-
 struct cpumf_ctr_info {
 	u16   cfvn;
 	u16   auth_ctl;

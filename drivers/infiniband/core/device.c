@@ -81,7 +81,6 @@ static LIST_HEAD(client_list);
 static DEFINE_MUTEX(device_mutex);
 static DECLARE_RWSEM(lists_rwsem);
 
-
 static int ib_device_check_mandatory(struct ib_device *device)
 {
 #define IB_MANDATORY_FUNC(x) { offsetof(struct ib_device, x), #x }
@@ -133,7 +132,6 @@ static struct ib_device *__ib_device_get_by_name(const char *name)
 
 	return NULL;
 }
-
 
 static int alloc_name(char *name)
 {

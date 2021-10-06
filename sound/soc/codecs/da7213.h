@@ -137,7 +137,6 @@
 #define DA7213_DAC_NG_ON_THRESHOLD	0xB1
 #define DA7213_DAC_NG_CTRL		0xB2
 
-
 /*
  * Bit fields
  */
@@ -475,7 +474,6 @@
 /* DA7213_DAC_NG_CTRL = 0xB2 */
 #define DA7213_DAC_NG_EN_SHIFT					7
 #define DA7213_DAC_NG_EN_MAX					0x1
-
 
 /*
  * General defines

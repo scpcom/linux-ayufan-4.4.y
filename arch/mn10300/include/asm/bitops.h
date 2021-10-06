@@ -54,7 +54,6 @@
 
 #define clear_bit(nr, addr) ___clear_bit((nr), (addr))
 
-
 static inline void __clear_bit(unsigned long nr, volatile void *addr)
 {
 	unsigned int *a = (unsigned int *) addr;

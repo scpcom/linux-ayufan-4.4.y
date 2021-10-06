@@ -63,5 +63,4 @@
 #define AT_NO_AUTOMOUNT		0x800	/* Suppress terminal automount traversal */
 #define AT_EMPTY_PATH		0x1000	/* Allow empty relative pathname */
 
-
 #endif /* _UAPI_LINUX_FCNTL_H */

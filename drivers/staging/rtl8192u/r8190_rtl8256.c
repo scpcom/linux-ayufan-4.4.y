@@ -218,7 +218,6 @@ phy_RF8256_Config_ParaFile_Fail:
 	RT_TRACE(COMP_ERR, "PHY Initialization failed\n");
 }
 
-
 void PHY_SetRF8256CCKTxPower(struct net_device *dev, u8 powerlevel)
 {
 	u32	TxAGC = 0;
@@ -236,7 +235,6 @@ void PHY_SetRF8256CCKTxPower(struct net_device *dev, u8 powerlevel)
 		TxAGC = 0x24;
 	rtl8192_setBBreg(dev, rTxAGC_CCK_Mcs32, bTxAGCRateCCK, TxAGC);
 }
-
 
 void PHY_SetRF8256OFDMTxPower(struct net_device *dev, u8 powerlevel)
 {

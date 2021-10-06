@@ -29,7 +29,6 @@ struct usb_stream_packet {
 	unsigned length;
 };
 
-
 struct usb_stream_config {
 	unsigned version;
 	unsigned sample_rate;

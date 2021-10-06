@@ -43,7 +43,6 @@
 /* Base offset for all DRA7XX dma requests */
 #define DRA7XX_DMA_REQ_START	1
 
-
 /*
  * IP blocks
  */
@@ -2376,7 +2375,6 @@ static struct omap_hwmod dra7xx_wd_timer2_hwmod = {
 		},
 	},
 };
-
 
 /*
  * Interfaces

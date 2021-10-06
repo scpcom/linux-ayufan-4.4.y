@@ -55,7 +55,6 @@ static LIST_HEAD(pdev_bus_registered_devices);
 static LIST_HEAD(pdev_bus_removed_devices);
 static DECLARE_WORK(pdev_bus_worker, goldfish_pdev_worker);
 
-
 static void goldfish_pdev_worker(struct work_struct *work)
 {
 	int ret;

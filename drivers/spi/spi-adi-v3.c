@@ -363,7 +363,6 @@ static const struct adi_spi_transfer_ops adi_spi_transfer_ops_u32 = {
 	.duplex = adi_spi_u32_duplex,
 };
 
-
 /* test if there is more transfer to be done */
 static void adi_spi_next_transfer(struct adi_spi_master *drv)
 {

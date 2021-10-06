@@ -51,19 +51,15 @@
 #define _IO_SYNC_		BIT(13)
 #define _IO_CMDMASK_	(0x1F80)
 
-
 /*
 	For prompt mode accessing, caller shall free io_req
 	Otherwise, io_handler will free io_req
 */
 
-
-
 /*  IO STATUS TYPE */
 #define _IO_ERR_		BIT(2)
 #define _IO_SUCCESS_	BIT(1)
 #define _IO_DONE_		BIT(0)
-
 
 #define IO_RD32			(_IO_SYNC_ | _IO_WORD_)
 #define IO_RD16			(_IO_SYNC_ | _IO_HW_)
@@ -89,8 +85,6 @@
 
 #define IO_WR_BURST(x)		(_IO_WRITE_ | _IO_SYNC_ | _IO_BURST_ | ( (x) & _IOSZ_MASK_))
 #define IO_RD_BURST(x)		(_IO_SYNC_ | _IO_BURST_ | ( (x) & _IOSZ_MASK_))
-
-
 
 /* below is for the intf_option bit defition... */
 
@@ -135,7 +129,6 @@ struct reg_protocol_rd {
 	/* u32		Value; */
 #else
 
-
 /* DW1 */
 	u32 Reserved1  :4;
 	u32 NumOfTrans :4;
@@ -145,7 +138,6 @@ struct reg_protocol_rd {
 	/* DW2 */
 	u32 WriteEnable : 1;
 	u32 ByteCount :7;
-
 
 	u32 Reserved3 : 3;
 	u32 Byte4Access : 1;
@@ -167,9 +159,7 @@ struct reg_protocol_rd {
 
 };
 
-
 struct reg_protocol_wt {
-
 
 #ifdef __LITTLE_ENDIAN
 

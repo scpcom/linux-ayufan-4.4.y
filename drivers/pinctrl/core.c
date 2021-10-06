@@ -37,7 +37,6 @@
 #include "pinmux.h"
 #include "pinconf.h"
 
-
 static bool pinctrl_dummy_state;
 
 /* Mutex taken to protect pinctrl_list */
@@ -57,7 +56,6 @@ static LIST_HEAD(pinctrl_list);
 
 /* List of pinctrl maps (struct pinctrl_maps) */
 LIST_HEAD(pinctrl_maps);
-
 
 /**
  * pinctrl_provide_dummies() - indicate if pinctrl provides dummy state support

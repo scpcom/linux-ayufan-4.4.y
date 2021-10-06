@@ -620,7 +620,6 @@ static int soc_tplg_init_kcontrol(struct soc_tplg *tplg,
 	return 0;
 }
 
-
 static int soc_tplg_create_tlv_db_scale(struct soc_tplg *tplg,
 	struct snd_kcontrol_new *kc, struct snd_soc_tplg_tlv_dbscale *scale)
 {

@@ -52,7 +52,6 @@ static u32 config_data_crc32(struct rsxx_card_cfg *cfg)
 	return ~crc32(~0, &cfg->data, sizeof(cfg->data));
 }
 
-
 /*----------------- Config Byte Swap Functions -------------------*/
 static void config_hdr_be_to_cpu(struct card_cfg_hdr *hdr)
 {
@@ -92,7 +91,6 @@ static void config_data_cpu_to_le(struct rsxx_card_cfg *cfg)
 	for (i = 0; i < (sizeof(cfg->data) / 4); i++)
 		data[i] = (__force u32) cpu_to_le32(data[i]);
 }
-
 
 /*----------------- Config Operations ------------------*/
 static int rsxx_save_config(struct rsxx_cardinfo *card)
@@ -208,4 +206,3 @@ int rsxx_load_config(struct rsxx_cardinfo *card)
 
 	return 0;
 }
-

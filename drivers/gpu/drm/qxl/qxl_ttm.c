@@ -441,7 +441,6 @@ void qxl_ttm_fini(struct qxl_device *qdev)
 	DRM_INFO("qxl: ttm finalized\n");
 }
 
-
 #define QXL_DEBUGFS_MEM_TYPES 2
 
 #if defined(CONFIG_DEBUG_FS)

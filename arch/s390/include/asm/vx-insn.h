@@ -13,7 +13,6 @@
 
 #ifdef __ASSEMBLY__
 
-
 /* Macros to generate vector instruction byte code */
 
 #define REG_NUM_INVALID	       255
@@ -407,7 +406,6 @@
 	VUPLL	\vr1, \vr2, 2
 .endm
 
-
 /* Vector integer instructions */
 
 /* VECTOR EXCLUSIVE OR */
@@ -474,7 +472,6 @@
 	.word	(VX_R(v3) << 12)
 	MRXBOPC	0, 0x7D, v1, v2, v3
 .endm
-
 
 #endif	/* __ASSEMBLY__ */
 #endif	/* __ASM_S390_VX_INSN_H */

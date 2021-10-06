@@ -865,7 +865,6 @@ static void perf_top__mmap_read_idx(struct perf_top *top, int idx)
 			break;
 		}
 
-
 		if (event->header.type == PERF_RECORD_SAMPLE) {
 			perf_event__process_sample(&top->tool, event, evsel,
 						   &sample, machine);

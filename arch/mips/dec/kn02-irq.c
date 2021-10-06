@@ -16,7 +16,6 @@
 
 #include <asm/dec/kn02.h>
 
-
 /*
  * Bits 7:0 of the Control Register are write-only -- the
  * corresponding bits of the Status Register have a different

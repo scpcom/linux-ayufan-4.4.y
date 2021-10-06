@@ -65,7 +65,6 @@ tblovfl:
 	.long	error
 	.long	error
 
-
 |
 |	ovf_r_k --- overflow result calculation
 |
@@ -290,7 +289,6 @@ end_ovfr:
 	movel	LOCAL_HI(%a1),LOCAL_HI(%a0)
 	movel	LOCAL_LO(%a1),LOCAL_LO(%a0)
 	rts
-
 
 |
 |	ERROR

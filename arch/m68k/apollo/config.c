@@ -107,7 +107,6 @@ static void __init dn_setup_model(void)
 			break;
 	}
 
-
 }
 
 int dn_serial_console_wait_key(struct console *co) {
@@ -214,7 +213,6 @@ u32 dn_gettimeoffset(void)
 
 int dn_dummy_hwclk(int op, struct rtc_time *t) {
 
-
   if(!op) { /* read */
     t->tm_sec=rtc->second;
     t->tm_min=rtc->minute;
@@ -281,4 +279,3 @@ static void dn_heartbeat(int on) {
 	}
 }
 #endif
-

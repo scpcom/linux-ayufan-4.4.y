@@ -340,7 +340,6 @@ static irqreturn_t aha1542_interrupt(int irq, void *dev_id)
 			memcpy(tmp_cmd->sense_buffer, &ccb[mbo].cdb[ccb[mbo].cdblen],
 			       SCSI_SENSE_BUFFERSIZE);
 
-
 		/* is there mail :-) */
 
 		/* more error checking left out here */
@@ -783,7 +782,6 @@ static int aha1542_release(struct Scsi_Host *sh)
 	scsi_host_put(sh);
 	return 0;
 }
-
 
 /*
  * This is a device reset.  This is handled by sending a special command

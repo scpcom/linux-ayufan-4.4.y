@@ -17,7 +17,6 @@
 #include "io.h"
 #include "ops.h"
 
-
 #define MPSC_CHR_1		0x000c
 
 #define MPSC_CHR_2		0x0010

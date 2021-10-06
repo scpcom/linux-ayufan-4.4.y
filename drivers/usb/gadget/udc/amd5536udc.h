@@ -96,7 +96,6 @@
 #define UDC_DEVCFG_SPD_LS			0x2
 /*#define UDC_DEVCFG_SPD_FS			0x3*/
 
-
 /* Device Control Register --------------------------------------------------*/
 #define UDC_DEVCTL_ADDR				0x404
 
@@ -118,7 +117,6 @@
 #define UDC_DEVCTL_TDE				3
 #define UDC_DEVCTL_RDE				2
 #define UDC_DEVCTL_RES				0
-
 
 /* Device Status Register ---------------------------------------------------*/
 #define UDC_DEVSTS_ADDR				0x408
@@ -145,7 +143,6 @@
 
 #define UDC_DEVSTS_CFG_MASK			0x0000000f
 #define UDC_DEVSTS_CFG_OFS			0
-
 
 /* Device Interrupt Register ------------------------------------------------*/
 #define UDC_DEVINT_ADDR				0x40c

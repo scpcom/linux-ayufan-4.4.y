@@ -201,7 +201,6 @@ static int soc_compr_free(struct snd_compr_stream *cstream)
 	if (!codec_dai->active)
 		codec_dai->rate = 0;
 
-
 	if (rtd->dai_link->compr_ops && rtd->dai_link->compr_ops->shutdown)
 		rtd->dai_link->compr_ops->shutdown(cstream);
 
@@ -326,7 +325,6 @@ static int soc_compr_trigger_fe(struct snd_compr_stream *cstream, int cmd)
 		stream = SNDRV_PCM_STREAM_PLAYBACK;
 	else
 		stream = SNDRV_PCM_STREAM_CAPTURE;
-
 
 	mutex_lock_nested(&fe->card->mutex, SND_SOC_CARD_CLASS_RUNTIME);
 

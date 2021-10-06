@@ -44,7 +44,6 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-
 enum mdp4_pipe {
 	VG1 = 0,
 	VG2 = 1,
@@ -410,7 +409,6 @@ static inline uint32_t REG_MDP4_OVLP_CSC_CONFIG(uint32_t i0) { return 0x00000200
 
 static inline uint32_t REG_MDP4_OVLP_CSC(uint32_t i0) { return 0x00002000 + __offset_OVLP(i0); }
 
-
 static inline uint32_t REG_MDP4_OVLP_CSC_MV(uint32_t i0, uint32_t i1) { return 0x00002400 + __offset_OVLP(i0) + 0x4*i1; }
 
 static inline uint32_t REG_MDP4_OVLP_CSC_MV_VAL(uint32_t i0, uint32_t i1) { return 0x00002400 + __offset_OVLP(i0) + 0x4*i1; }
@@ -564,7 +562,6 @@ static inline uint32_t REG_MDP4_DMA_BLEND_TRANS_HIGH(enum mdp4_dma i0) { return 
 static inline uint32_t REG_MDP4_DMA_FETCH_CONFIG(enum mdp4_dma i0) { return 0x00001004 + __offset_DMA(i0); }
 
 static inline uint32_t REG_MDP4_DMA_CSC(enum mdp4_dma i0) { return 0x00003000 + __offset_DMA(i0); }
-
 
 static inline uint32_t REG_MDP4_DMA_CSC_MV(enum mdp4_dma i0, uint32_t i1) { return 0x00003400 + __offset_DMA(i0) + 0x4*i1; }
 
@@ -815,7 +812,6 @@ static inline uint32_t REG_MDP4_PIPE_FETCH_CONFIG(enum mdp4_pipe i0) { return 0x
 static inline uint32_t REG_MDP4_PIPE_SOLID_COLOR(enum mdp4_pipe i0) { return 0x00021008 + 0x10000*i0; }
 
 static inline uint32_t REG_MDP4_PIPE_CSC(enum mdp4_pipe i0) { return 0x00024000 + 0x10000*i0; }
-
 
 static inline uint32_t REG_MDP4_PIPE_CSC_MV(enum mdp4_pipe i0, uint32_t i1) { return 0x00024400 + 0x10000*i0 + 0x4*i1; }
 
@@ -1168,6 +1164,5 @@ static inline uint32_t MDP4_DSI_UNDERFLOW_CLR_COLOR(uint32_t val)
 #define MDP4_DSI_CTRL_POLARITY_HSYNC_LOW			0x00000001
 #define MDP4_DSI_CTRL_POLARITY_VSYNC_LOW			0x00000002
 #define MDP4_DSI_CTRL_POLARITY_DATA_EN_LOW			0x00000004
-
 
 #endif /* MDP4_XML */

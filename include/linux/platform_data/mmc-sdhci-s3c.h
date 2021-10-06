@@ -52,5 +52,4 @@ struct s3c_sdhci_platdata {
 	void	(*cfg_gpio)(struct platform_device *dev, int width);
 };
 
-
 #endif /* __PLATFORM_DATA_SDHCI_S3C_H */

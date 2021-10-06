@@ -180,7 +180,6 @@ int __init sfi_parse_mrtc(struct sfi_table_header *table)
 	return 0;
 }
 
-
 /*
  * Parsing GPIO table first, since the DEVS table will need this table
  * to map the pin name to the actual pin.

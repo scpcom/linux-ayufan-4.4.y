@@ -10,7 +10,6 @@
  *  more details.
  */
 
-
 /*
  * Intel 810 Chipset Family PRM 15 3.1 
  * GC Register Memory Address Map 
@@ -62,7 +61,6 @@
 #define DRAMCL                0x03001
 #define DRAMCH                0x03002
  
-
 /* Span Cursor Registers (04000h 04FFFh) */
 #define UI_SC_CTL             0x04008 
 
@@ -142,7 +140,6 @@
 #define DSLH                  0x40078
 #define DSLRADD               0x4007C
 
-
 /* LCD/TV-Out and HW DVD Registers (60000h 6FFFFh) */
 /* LCD/TV-Out */
 #define HTOTAL                0x60000
@@ -167,7 +164,6 @@
 #define CURCNTR               0x70080
 #define CURBASE               0x70084
 #define CURPOS                0x70088
-
 
 /* VGA Registers */
 

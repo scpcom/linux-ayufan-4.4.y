@@ -111,7 +111,6 @@
 #define OTP_MAX_LL_ITEMS_6x50		(7)	/* OTP blocks for 6x50 */
 #define OTP_MAX_LL_ITEMS_2x00		(4)	/* OTP blocks for 2x00 */
 
-
 #define IWLAGN_NUM_QUEUES		20
 
 #endif /* __iwl_agn_hw_h__ */

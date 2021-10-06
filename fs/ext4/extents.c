@@ -733,7 +733,6 @@ ext4_ext_binsearch_idx(struct inode *inode,
 	struct ext4_extent_header *eh = path->p_hdr;
 	struct ext4_extent_idx *r, *l, *m;
 
-
 	ext_debug("binsearch for %u(idx):  ", block);
 
 	l = EXT_FIRST_INDEX(eh) + 1;
@@ -2129,7 +2128,6 @@ merge:
 	if (!(gb_flags & EXT4_GET_BLOCKS_PRE_IO))
 		ext4_ext_try_to_merge(handle, inode, path, nearex);
 
-
 	/* time to correct all indexes above */
 	err = ext4_ext_correct_indexes(handle, inode, path);
 	if (err)
@@ -2571,7 +2569,6 @@ static int ext4_remove_blocks(handle_t *handle, struct inode *inode,
 			   from, to, le32_to_cpu(ex->ee_block), ee_len);
 	return 0;
 }
-
 
 /*
  * ext4_ext_rm_leaf() Removes the extents associated with the
@@ -4253,7 +4250,6 @@ static int get_implied_cluster_alloc(struct super_block *sb,
 	return 0;
 }
 
-
 /*
  * Block allocation/map/preallocation routine for extents based files
  *
@@ -4321,7 +4317,6 @@ int ext4_ext_map_blocks(handle_t *handle, struct inode *inode,
 		ext4_lblk_t ee_block = le32_to_cpu(ex->ee_block);
 		ext4_fsblk_t ee_start = ext4_ext_pblock(ex);
 		unsigned short ee_len;
-
 
 		/*
 		 * unwritten extents are treated as holes, except that

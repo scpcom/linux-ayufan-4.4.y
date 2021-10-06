@@ -506,8 +506,6 @@ error_free:
 		DRM_ERROR("Couldn't update BO_VA (%d)\n", r);
 }
 
-
-
 int amdgpu_gem_va_ioctl(struct drm_device *dev, void *data,
 			  struct drm_file *filp)
 {

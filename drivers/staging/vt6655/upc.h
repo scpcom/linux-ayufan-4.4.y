@@ -33,9 +33,7 @@
 
 /*---------------------  Export Definitions -------------------------*/
 
-
 /* For memory mapped IO */
-
 
 #define VNSvInPortB(dwIOAddress, pbyData) \
 	(*(pbyData) = ioread8(dwIOAddress))

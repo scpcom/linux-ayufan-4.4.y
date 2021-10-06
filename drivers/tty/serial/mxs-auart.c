@@ -294,7 +294,6 @@ static void mxs_auart_tx_chars(struct mxs_auart_port *s)
 		return;
 	}
 
-
 	while (!(readl(s->port.membase + AUART_STAT) &
 		 AUART_STAT_TXFF)) {
 		if (s->port.x_char) {
@@ -1287,7 +1286,6 @@ static int mxs_auart_probe(struct platform_device *pdev)
 	r = platform_get_resource(pdev, IORESOURCE_MEM, 0);
 	if (!r)
 		return -ENXIO;
-
 
 	s->port.mapbase = r->start;
 	s->port.membase = ioremap(r->start, resource_size(r));

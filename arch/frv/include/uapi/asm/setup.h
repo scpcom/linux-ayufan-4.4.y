@@ -14,5 +14,4 @@
 
 #define COMMAND_LINE_SIZE       512
 
-
 #endif /* _UAPI_ASM_SETUP_H */

@@ -64,7 +64,6 @@ void do_IRQ(int irq, struct pt_regs *regs)
 	}
 #endif
 
-
 #ifdef CONFIG_4KSTACKS
 	curctx = (union irq_ctx *) current_thread_info();
 	irqctx = hardirq_ctx[smp_processor_id()];

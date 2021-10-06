@@ -63,7 +63,6 @@
 #define ST33ZP24_SPI_BUFFER_SIZE (TPM_BUFSIZE + (TPM_BUFSIZE / 2) +\
 				  MAX_SPI_LATENCY)
 
-
 struct st33zp24_spi_phy {
 	struct spi_device *spi_device;
 	struct spi_transfer spi_xfer;

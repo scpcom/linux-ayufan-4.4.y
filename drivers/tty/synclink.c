@@ -171,7 +171,6 @@ struct tx_holding_buffer {
 	unsigned char *	buffer;
 };
 
-
 /*
  * Device instance data structure
  */
@@ -322,7 +321,6 @@ struct mgsl_struct {
  * I/O address of the specified USC registers.
  */
 
-
 #define DCPIN 2		/* Bit 1 of I/O address */
 #define SDPIN 4		/* Bit 2 of I/O address */
 
@@ -369,7 +367,6 @@ struct mgsl_struct {
 #define TCCR	0x3c	/* Transmit Character count Register */
 #define TC1R	0x3e	/* Time Constant 1 Register */
 
-
 /*
  * MACRO DEFINITIONS FOR DMA REGISTERS
  */
@@ -400,7 +397,6 @@ struct mgsl_struct {
 #define NRARL	0xbc	/* Next Receive Address Register (low) */
 #define NRARU	0xbe	/* Next Receive Address Register (high) */
 
-
 /*
  * MACRO DEFINITIONS FOR MODEM STATUS BITS
  */
@@ -411,7 +407,6 @@ struct mgsl_struct {
 #define MODEMSTATUS_CTS 0x10
 #define MODEMSTATUS_RI  0x04
 #define MODEMSTATUS_DCD 0x01
-
 
 /*
  * Channel Command/Address Register (CCAR) Command Codes
@@ -436,7 +431,6 @@ struct mgsl_struct {
 #define RTCmd_SerialDataMSBFirst	0xa800
 #define RTCmd_SelectBigEndian		0xb000
 #define RTCmd_SelectLittleEndian	0xb800
-
 
 /*
  * DMA Command/Address Register (DCAR) Command Codes
@@ -494,7 +488,6 @@ struct mgsl_struct {
 #define TRANSMIT_DATA		BIT2
 #define IO_PIN			BIT1
 #define MISC			BIT0
-
 
 /*
  * Receive status Bits in Receive Command/status Register RCSR
@@ -554,7 +547,6 @@ struct mgsl_struct {
 #define TXSTATUS_ALL			0x00fa
 #define usc_UnlatchTxstatusBits(a,b) usc_OutReg( (a), TCSR, (u16)((a)->tcsr_value + ((b) & 0x00FF)) )
 				
-
 #define MISCSTATUS_RXC_LATCHED		BIT15
 #define MISCSTATUS_RXC			BIT14
 #define MISCSTATUS_TXC_LATCHED		BIT13
@@ -651,7 +643,6 @@ void usc_ClearIrqPendingBits( struct mgsl_struct *info, u16 IrqMask );
 /* Transmit status Bits in Transmit Control status Register (TCSR) */
 /* and Transmit Interrupt Control Register (TICR) (except BIT2, BIT0) */
 
-
 #define DISABLE_UNCONDITIONAL    0
 #define DISABLE_END_OF_FRAME     1
 #define ENABLE_UNCONDITIONAL     2
@@ -702,7 +693,6 @@ static void usc_enable_async_clock( struct mgsl_struct *info, u32 DataRate );
 static void usc_loopback_frame( struct mgsl_struct *info );
 
 static void mgsl_tx_timeout(unsigned long context);
-
 
 static void usc_loopmode_cancel_transmit( struct mgsl_struct * info );
 static void usc_loopmode_insert_request( struct mgsl_struct * info );
@@ -904,7 +894,6 @@ static struct tty_driver *serial_driver;
 
 /* number of characters left in xmit buffer before we ask for more */
 #define WAKEUP_CHARS 256
-
 
 static void mgsl_change_params(struct mgsl_struct *info);
 static void mgsl_wait_until_sent(struct tty_struct *tty, int timeout);
@@ -2717,7 +2706,6 @@ static int mgsl_wait_event(struct mgsl_struct * info, int __user * mask_ptr)
 	
 	spin_unlock_irqrestore(&info->irq_spinlock,flags);
 	
-
 	for(;;) {
 		schedule();
 		if (signal_pending(current)) {
@@ -3247,7 +3235,6 @@ static void dtr_rts(struct tty_port *port, int on)
 	spin_unlock_irqrestore(&info->irq_spinlock,flags);
 }
 
-
 /* block_til_ready()
  * 
  * 	Block the current process until the specified port
@@ -3615,7 +3602,6 @@ static int mgsl_allocate_dma_buffers(struct mgsl_struct *info)
 		/* Calculate the number of PAGE_SIZE buffers needed for */
 		/* receive and transmit DMA buffers. */
 
-
 		/* Calculate the number of DMA buffers necessary to */
 		/* hold 7 max size receive frames and one max size transmit frame. */
 		/* The receive buffer count is bumped by one so we avoid an */
@@ -3861,7 +3847,6 @@ static void mgsl_free_dma_buffers( struct mgsl_struct *info )
 
 }	/* end of mgsl_free_dma_buffers() */
 
-
 /*
  * mgsl_alloc_intermediate_rxbuffer_memory()
  * 
@@ -3972,7 +3957,6 @@ static void mgsl_free_intermediate_txbuffer_memory(struct mgsl_struct *info)
 	info->tx_holding_count = 0;
 
 }	/* end of mgsl_free_intermediate_txbuffer_memory() */
-
 
 /*
  * load_next_tx_holding_buffer()
@@ -4252,7 +4236,6 @@ static const struct tty_port_operations mgsl_port_ops = {
 	.carrier_raised = carrier_raised,
 	.dtr_rts = dtr_rts,
 };
-
 
 /* mgsl_allocate_device()
  * 
@@ -4841,7 +4824,6 @@ static void usc_set_sdlc_mode( struct mgsl_struct *info )
 
 	usc_set_txidle( info );
 
-
 	usc_TCmd( info, TCmd_SelectTicrdma_level );
 
 	/* Transmit Interrupt Control Register (TICR)
@@ -4926,7 +4908,6 @@ static void usc_set_sdlc_mode( struct mgsl_struct *info )
 
 	usc_OutReg( info, CMCR, RegValue );
 
-
 	/* Hardware Configuration Register (HCR)
 	 *
 	 * <15..14>	00	CTR0 Divisor:00=32,01=16,10=8,11=4
@@ -4992,7 +4973,6 @@ static void usc_set_sdlc_mode( struct mgsl_struct *info )
  		else
  			Tc = -1;
  				  
-
 		/* Write 16-bit Time Constant for BRG1 */
 		usc_OutReg( info, TC1R, Tc );
 
@@ -5011,7 +4991,6 @@ static void usc_set_sdlc_mode( struct mgsl_struct *info )
 	}
 
 	usc_OutReg( info, HCR, RegValue );
-
 
 	/* Channel Control/status Register (CCSR)
 	 *
@@ -5033,13 +5012,11 @@ static void usc_set_sdlc_mode( struct mgsl_struct *info )
 
 	usc_OutReg( info, CCSR, 0x1020 );
 
-
 	if ( info->params.flags & HDLC_FLAG_AUTO_CTS ) {
 		usc_OutReg( info, SICR,
 			    (u16)(usc_InReg(info,SICR) | SICR_CTS_INACTIVE) );
 	}
 	
-
 	/* enable Master Interrupt Enable bit (MIE) */
 	usc_EnableMasterIrqBit( info );
 
@@ -5091,7 +5068,6 @@ static void usc_set_sdlc_mode( struct mgsl_struct *info )
 	else
 		usc_OutDmaReg( info, DCR, 0x800b );
 
-
 	/* Receive DMA mode Register (RDMR)
 	 *
 	 * <15..14>	11	DMA mode = Linked List Buffer mode
@@ -5107,7 +5083,6 @@ static void usc_set_sdlc_mode( struct mgsl_struct *info )
 
 	usc_OutDmaReg( info, RDMR, 0xf200 );
 
-
 	/* Transmit DMA mode Register (TDMR)
 	 *
 	 * <15..14>	11	DMA mode = Linked List Buffer mode
@@ -5122,7 +5097,6 @@ static void usc_set_sdlc_mode( struct mgsl_struct *info )
 	 */
 
 	usc_OutDmaReg( info, TDMR, 0xf200 );
-
 
 	/* DMA Interrupt Control Register (DICR)
 	 *
@@ -5173,7 +5147,6 @@ static void usc_set_sdlc_mode( struct mgsl_struct *info )
 	}
 
 	usc_OutReg( info, CCR, RegValue );
-
 
 	/*
 	 * Burst/Dwell Control Register
@@ -5279,13 +5252,11 @@ static void usc_enable_aux_clock( struct mgsl_struct *info, u32 data_rate )
 		else
 			XtalSpeed = 14745600;
 
-
 		/* Tc = (Xtal/Speed) - 1 */
 		/* If twice the remainder of (Xtal/Speed) is greater than Speed */
 		/* then rounding up gives a more precise time constant. Instead */
 		/* of rounding up and then subtracting 1 we just don't subtract */
 		/* the one in this case. */
-
 
 		Tc = (u16)(XtalSpeed/data_rate);
 		if ( !(((XtalSpeed % data_rate) * 2) / data_rate) )
@@ -5587,7 +5558,6 @@ static void usc_start_transmitter( struct mgsl_struct *info )
 			}
 		}
 
-
 		if ( info->params.mode == MGSL_MODE_ASYNC ) {
 			if ( !info->tx_active ) {
 				usc_UnlatchTxstatusBits(info, TXSTATUS_ALL);
@@ -5817,13 +5787,11 @@ static void usc_reset( struct mgsl_struct *info )
 	
 	outw( 0x000c,info->io_base + SDPIN );
 
-
 	outw( 0,info->io_base );
 	outw( 0,info->io_base + CCAR );
 
 	/* select little endian byte ordering */
 	usc_RTCmd( info, RTCmd_SelectLittleEndian );
-
 
 	/* Port Control Register (PCR)
 	 *
@@ -5840,7 +5808,6 @@ static void usc_reset( struct mgsl_struct *info )
 	 */
 
 	usc_OutReg( info, PCR, 0xf0f5 );
-
 
 	/*
 	 * Input/Output Control Register
@@ -5896,7 +5863,6 @@ static void usc_set_async_mode( struct mgsl_struct *info )
 		RegValue |= BIT14;
 	usc_OutReg( info, CMR, RegValue );
 
-	
 	/* Receiver mode Register (RMR)
 	 *
 	 * <15..13>	000	encoding = None
@@ -5922,12 +5888,10 @@ static void usc_set_async_mode( struct mgsl_struct *info )
 
 	usc_OutReg( info, RMR, RegValue );
 
-
 	/* Set IRQ trigger level */
 
 	usc_RCmd( info, RCmd_SelectRicrIntLevel );
 
-	
 	/* Receive Interrupt Control Register (RICR)
 	 *
 	 * <15..8>	?		RxFIFO IRQ Request Level
@@ -5953,7 +5917,6 @@ static void usc_set_async_mode( struct mgsl_struct *info )
 	usc_UnlatchRxstatusBits( info, RXSTATUS_ALL );
 	usc_ClearIrqPendingBits( info, RECEIVE_STATUS );
 
-	
 	/* Transmit mode Register (TMR)
 	 *
 	 * <15..13>	000	encoding = None
@@ -5981,12 +5944,10 @@ static void usc_set_async_mode( struct mgsl_struct *info )
 
 	usc_set_txidle( info );
 
-
 	/* Set IRQ trigger level */
 
 	usc_TCmd( info, TCmd_SelectTicrIntLevel );
 
-	
 	/* Transmit Interrupt Control Register (TICR)
 	 *
 	 * <15..8>	?	Transmit FIFO IRQ Level
@@ -6009,7 +5970,6 @@ static void usc_set_async_mode( struct mgsl_struct *info )
 
 	usc_enable_async_clock( info, info->params.data_rate );
 
-	
 	/* Channel Control/status Register (CCSR)
 	 *
 	 * <15>		X	RCC FIFO Overflow status (RO)
@@ -6306,7 +6266,6 @@ static void usc_enable_async_clock( struct mgsl_struct *info, u32 data_rate )
 		
 		usc_OutReg( info, CMCR, 0x0f64 );
 
-
 		/*
 		 * Write 16-bit Time Constant for BRG0
 		 * Time Constant = (ClkSpeed / data_rate) - 1
@@ -6318,7 +6277,6 @@ static void usc_enable_async_clock( struct mgsl_struct *info, u32 data_rate )
 		else
 			usc_OutReg( info, TC0R, (u16)((921600/data_rate) - 1) );
 
-		
 		/*
 		 * Hardware Configuration Register (HCR)
 		 * Clear Bit 1, BRG0 mode = Continuous
@@ -6327,7 +6285,6 @@ static void usc_enable_async_clock( struct mgsl_struct *info, u32 data_rate )
 
 		usc_OutReg( info, HCR,
 			    (u16)((usc_InReg( info, HCR ) & ~BIT1) | BIT0) );
-
 
 		/* Input/Output Control Reg, <2..0> = 100, Drive RxC pin with BRG0 */
 
@@ -6560,7 +6517,6 @@ static bool mgsl_get_rx_frame(struct mgsl_struct *info)
 			goto Cleanup;
 		}
 	}
-
 
 	/* check status of receive frame */
 	
@@ -6815,7 +6771,6 @@ static bool mgsl_get_raw_rx_frame(struct mgsl_struct *info)
 			framesize = framesize % DMABUFFERSIZE;
 		}
 
-
 		if ( debug_level >= DEBUG_LEVEL_BH )
 			printk("%s(%d):mgsl_get_raw_rx_frame(%s) status=%04X size=%d\n",
 				__FILE__,__LINE__,info->device_name,status,framesize);
@@ -6840,7 +6795,6 @@ static bool mgsl_get_raw_rx_frame(struct mgsl_struct *info)
 
 		ReturnCode = true;
 	}
-
 
 	if ( info->rx_enabled && info->rx_overflow ) {
 		/* The receiver needs to restarted because of
@@ -7109,7 +7063,6 @@ static bool mgsl_dma_test( struct mgsl_struct *info )
 	
 	spin_unlock_irqrestore(&info->irq_spinlock,flags);
 
-
 	/* SETUP TRANSMIT AND RECEIVE DMA BUFFERS */
 
 	FrameSize = TESTFRAMESIZE;
@@ -7143,7 +7096,6 @@ static bool mgsl_dma_test( struct mgsl_struct *info )
 	info->tx_buffer_list[1].count = 0;
 	info->rx_buffer_list[1].count = 0;
 	
-
 	/***************************/
 	/* Program 16C32 receiver. */
 	/***************************/
@@ -7166,7 +7118,6 @@ static bool mgsl_dma_test( struct mgsl_struct *info )
 	usc_OutReg( info, RMR, (unsigned short)((usc_InReg(info, RMR) & 0xfffc) | 0x0002) );
 	
 	spin_unlock_irqrestore(&info->irq_spinlock,flags);
-
 
 	/*************************************************************/
 	/* WAIT FOR RECEIVER TO DMA ALL PARAMETERS FROM BUFFER ENTRY */
@@ -7192,7 +7143,6 @@ static bool mgsl_dma_test( struct mgsl_struct *info )
 			break;
 		}
 	}
-
 
 	/******************************/
 	/* Program 16C32 transmitter. */
@@ -7223,7 +7173,6 @@ static bool mgsl_dma_test( struct mgsl_struct *info )
 	
 	spin_unlock_irqrestore(&info->irq_spinlock,flags);
 
-
 	/**********************************/
 	/* WAIT FOR TRANSMIT FIFO TO FILL */
 	/**********************************/
@@ -7252,7 +7201,6 @@ static bool mgsl_dma_test( struct mgsl_struct *info )
 			}
 	}
 
-
 	if ( rc )
 	{
 		/* Enable 16C32 transmitter. */
@@ -7264,7 +7212,6 @@ static bool mgsl_dma_test( struct mgsl_struct *info )
 		usc_OutReg( info, TMR, (unsigned short)((usc_InReg(info, TMR) & 0xfffc) | 0x0002) );
 		
 		spin_unlock_irqrestore(&info->irq_spinlock,flags);
-
 
 		/******************************/
 		/* WAIT FOR TRANSMIT COMPLETE */
@@ -7291,7 +7238,6 @@ static bool mgsl_dma_test( struct mgsl_struct *info )
 		}
 	}
 
-
 	if ( rc ){
 		/* CHECK FOR TRANSMIT ERRORS */
 		if ( status & (BIT5 | BIT1) )
@@ -7314,7 +7260,6 @@ static bool mgsl_dma_test( struct mgsl_struct *info )
 			status=info->rx_buffer_list[0].status;
 		}
 	}
-
 
 	if ( rc ) {
 		/* CHECK FOR RECEIVE ERRORS */
@@ -7434,7 +7379,6 @@ static bool mgsl_memory_test( struct mgsl_struct *info )
 	return true;
 
 }	/* End Of mgsl_memory_test() */
-
 
 /* mgsl_load_pci_memory()
  * 
@@ -8058,7 +8002,6 @@ static void hdlcdev_exit(struct mgsl_struct *info)
 
 #endif /* CONFIG_HDLC */
 
-
 static int synclink_init_one (struct pci_dev *dev,
 					const struct pci_device_id *ent)
 {
@@ -8115,4 +8058,3 @@ static int synclink_init_one (struct pci_dev *dev,
 static void synclink_remove_one (struct pci_dev *dev)
 {
 }
-

@@ -7,7 +7,6 @@
 #ifndef _DEF_BF54X_H
 #define _DEF_BF54X_H
 
-
 /* ************************************************************** */
 /*   SYSTEM & MMR ADDRESS DEFINITIONS COMMON TO ALL ADSP-BF54x    */
 /* ************************************************************** */
@@ -1642,7 +1641,6 @@
 #define AMBEN_B0_B1_B2	0x0006		/* Enable Async Memory Banks 0, 1, and 2			*/
 #define AMBEN_ALL		0x0008		/* Enable Async Memory Banks (all) 0, 1, 2, and 3	*/
 
-
 /* Bit masks for EBIU_AMBCTL0 */
 
 #define                   B0RDYEN  0x1        /* Bank 0 ARDY Enable */
@@ -1877,7 +1875,6 @@
 #define                     PxM14  0x30000000 /* GPIO Mux 14 */
 #define                     PxM15  0xc0000000 /* GPIO Mux 15 */
 
-
 /* Bit masks for PINTx_MASK_SET/CLEAR, PINTx_REQUEST, PINTx_LATCH, PINTx_EDGE_SET/CLEAR, PINTx_INVERT_SET/CLEAR, PINTx_PINTSTATE */
 
 #define                       IB0  0x1        /* Interrupt Bit 0 */
@@ -2042,7 +2039,6 @@
 #define DLEN_18		(5 << 15) /* 101 - 18 bits */
 #define DLEN_24		(6 << 15) /* 110 - 24 bits */
 
-
 /* Bit masks for EPPIx_FS2W_LVB */
 
 #define                   F1VB_BD  0xff       /* Vertical Blanking before Field 1 Active Data */
@@ -2061,7 +2057,6 @@
 #define                  HIGH_ODD  0xff00     /* Upper Limit for Odd Bytes (Chroma) */
 #define                  LOW_EVEN  0xff0000   /* Lower Limit for Even Bytes (Luma) */
 #define                 HIGH_EVEN  0xff000000 /* Upper Limit for Even Bytes (Luma) */
-
 
 /* ******************************************* */
 /*     MULTI BIT MACRO ENUMERATIONS            */

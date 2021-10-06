@@ -15,4 +15,3 @@
 #endif
 
 #endif /* __ASM_CPU_SH2_FREQ_H */
-

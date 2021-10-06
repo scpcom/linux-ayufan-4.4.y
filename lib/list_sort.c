@@ -276,7 +276,6 @@ static int __init list_sort_test(void)
 		goto exit;
 	}
 
-
 	if (count != TEST_LIST_LEN) {
 		pr_err("error: bad list length %d", count);
 		goto exit;

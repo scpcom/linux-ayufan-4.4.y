@@ -134,7 +134,6 @@ void __init numa_setup(void)
 	memblock_dump_all();
 }
 
-
 /*
  * numa_init_early() - Initialization initcall
  *

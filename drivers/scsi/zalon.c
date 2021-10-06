@@ -44,8 +44,6 @@ static struct ncr_chip zalon720_chip __initdata = {
 	.features =	FE_WIDE | FE_DIFF | FE_EHP| FE_MUX | FE_EA,
 };
 
-
-
 #if 0
 /* FIXME:
  * Is this function dead code? or is someone planning on using it in the

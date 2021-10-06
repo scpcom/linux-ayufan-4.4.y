@@ -341,7 +341,6 @@ do {                                                        \
 
 #endif /* CONFIG_CPU_MIPSR6 */
 
-
 #define     _StoreHW(addr, value, res, type) \
 do {                                                        \
 		__asm__ __volatile__ (                      \
@@ -566,7 +565,6 @@ do {                                                        \
 } while(0)
 
 #endif /* CONFIG_CPU_MIPSR6 */
-
 
 #define     _LoadHWU(addr, value, res, type) \
 do {                                                        \

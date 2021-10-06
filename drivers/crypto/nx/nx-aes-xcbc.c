@@ -30,7 +30,6 @@
 #include "nx_csbcpb.h"
 #include "nx.h"
 
-
 struct xcbc_state {
 	u8 state[AES_BLOCK_SIZE];
 	unsigned int count;
@@ -192,7 +191,6 @@ static int nx_xcbc_update(struct shash_desc *desc,
 	int data_len;
 
 	spin_lock_irqsave(&nx_ctx->lock, irq_flags);
-
 
 	total = sctx->count + len;
 

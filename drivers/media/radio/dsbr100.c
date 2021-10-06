@@ -250,7 +250,6 @@ static int usb_dsbr100_s_ctrl(struct v4l2_ctrl *ctrl)
 	return -EINVAL;
 }
 
-
 /* USB subsystem interface begins here */
 
 /*
@@ -280,7 +279,6 @@ static void usb_dsbr100_disconnect(struct usb_interface *intf)
 	mutex_unlock(&radio->v4l2_lock);
 	v4l2_device_put(&radio->v4l2_dev);
 }
-
 
 /* Suspend device - stop device. */
 static int usb_dsbr100_suspend(struct usb_interface *intf, pm_message_t message)

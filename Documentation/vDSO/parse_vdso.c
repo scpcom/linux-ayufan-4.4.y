@@ -44,7 +44,6 @@ extern void vdso_init_from_auxv(void *auxv);
 extern void vdso_init_from_sysinfo_ehdr(uintptr_t base);
 extern void *vdso_sym(const char *version, const char *name);
 
-
 /* And here's the code. */
 #ifndef ELF_BITS
 # if ULONG_MAX > 0xffffffffUL

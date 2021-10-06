@@ -938,7 +938,6 @@ static struct virtio_config_ops virtio_ccw_config_ops = {
 	.del_vqs = virtio_ccw_del_vqs,
 };
 
-
 /*
  * ccw bus driver related functions
  */

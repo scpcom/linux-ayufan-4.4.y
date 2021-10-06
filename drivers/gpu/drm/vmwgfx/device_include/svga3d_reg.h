@@ -46,5 +46,4 @@
 #include "svga3d_dx.h"
 #include "svga3d_devcaps.h"
 
-
 #endif /* _SVGA3D_REG_H_ */

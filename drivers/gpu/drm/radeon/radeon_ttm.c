@@ -60,7 +60,6 @@ static struct radeon_device *radeon_get_rdev(struct ttm_bo_device *bdev)
 	return rdev;
 }
 
-
 /*
  * Global memory.
  */

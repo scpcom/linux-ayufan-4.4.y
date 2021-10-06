@@ -34,7 +34,6 @@
 #define INTC		3
 #define INTD		4
 
-
 void __init miccpt_pci_preinit(void)
 {
 	irq_set_irq_type(IXP4XX_GPIO_IRQ(INTA), IRQ_TYPE_LEVEL_LOW);

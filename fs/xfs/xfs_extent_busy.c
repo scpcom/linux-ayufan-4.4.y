@@ -297,7 +297,6 @@ out_force_log:
 	return false;
 }
 
-
 /*
  * For a given extent [fbno, flen], make sure we can reuse it safely.
  */

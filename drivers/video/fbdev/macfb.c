@@ -797,7 +797,6 @@ static int __init macfb_init(void)
 			macfb_defined.activate = FB_ACTIVATE_NOW;
 			break;
 
-		
 		/*
 		 * Assorted weirdos
 		 * We think this may be like the LC II

@@ -131,7 +131,6 @@
 #define BT848_SCLOOP_HFILT_MEDP (2<<3)
 #define BT848_SCLOOP_HFILT_MAXP (3<<3)
 
-
 #define BT848_OFORM            0x048
 #define BT848_OFORM_RANGE      (1<<7)
 #define BT848_OFORM_CORE0      (0<<5)
@@ -237,7 +236,6 @@
 #define BT848_VBI_PACK_DEL_EXT_FRAME  2
 #define BT848_VBI_PACK_DEL_VBI_PKT_HI 1
 
-
 #define BT848_INT_STAT         0x100
 #define BT848_INT_MASK         0x104
 
@@ -264,7 +262,6 @@
 #define BT848_INT_HSYNC   (1<<2)
 #define BT848_INT_VSYNC   (1<<1)
 #define BT848_INT_FMTCHG  (1<<0)
-
 
 #define BT848_GPIO_DMA_CTL             0x10C
 #define BT848_GPIO_DMA_CTL_GPINTC      (1<<15)
@@ -303,7 +300,6 @@
 #define BT848_GPIO_REG_INP     0x11C
 #define BT848_RISC_COUNT       0x120
 #define BT848_GPIO_DATA        0x200
-
 
 /* Bt848 RISC commands */
 
@@ -345,7 +341,6 @@
 #define BT848_RISC_WRITE123    (0x09U<<28)
 #define BT848_RISC_SKIP123     (0x0aU<<28)
 #define BT848_RISC_WRITE1S23   (0x0bU<<28)
-
 
 /* Bt848A and higher only !! */
 #define BT848_TGLB             0x080

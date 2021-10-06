@@ -20,7 +20,6 @@
 #ifndef __RTL8712_MACSETTING_BITDEF_H__
 #define __RTL8712_MACSETTING_BITDEF_H__
 
-
 /*MACID*/
 /*BSSID*/
 
@@ -41,7 +40,4 @@
 
 /*BUILDUSER*/
 
-
-
 #endif /* __RTL8712_MACSETTING_BITDEF_H__*/
-

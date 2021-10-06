@@ -55,7 +55,6 @@ cifs_spnego_key_destroy(struct key *key)
 	kfree(key->payload.data[0]);
 }
 
-
 /*
  * keytype for CIFS spnego keys
  */

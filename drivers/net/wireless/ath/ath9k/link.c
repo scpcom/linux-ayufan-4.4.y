@@ -28,7 +28,6 @@ void ath_tx_complete_poll_work(struct work_struct *work)
 	int i;
 	bool needreset = false;
 
-
 	if (sc->tx99_state) {
 		ath_dbg(ath9k_hw_common(sc->sc_ah), RESET,
 			"skip tx hung detection on tx99\n");

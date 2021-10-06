@@ -3,7 +3,6 @@
 
 #define __packed2__	__attribute__((packed, aligned(2)))
 
-
 #ifndef __KERNEL__
 typedef u16 __fs16;
 typedef u32 __fs16;
@@ -20,7 +19,6 @@ typedef __fs32 sysv_zone_t;
 /* 0 is non-existent */
 #define SYSV_BADBL_INO	1	/* inode of bad blocks file */
 #define SYSV_ROOT_INO	2	/* inode of root directory */
-
 
 /* Xenix super-block data on disk */
 #define XENIX_NICINOD	100	/* number of inode cache entries */

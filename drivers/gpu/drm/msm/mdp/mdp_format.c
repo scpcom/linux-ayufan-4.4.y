@@ -16,7 +16,6 @@
  * this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 #include "msm_drv.h"
 #include "mdp_kms.h"
 

@@ -1241,7 +1241,6 @@ SYSCALL_DEFINE2(osf_usleep_thread, struct timeval32 __user *, sleep,
 	return -EFAULT;
 }
 
-
 struct timex32 {
 	unsigned int modes;	/* mode selector */
 	long offset;		/* time offset (usec) */

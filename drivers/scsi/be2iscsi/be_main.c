@@ -480,7 +480,6 @@ static ssize_t beiscsi_show_boot_eth_info(void *data, int type, char *buf)
 	return rc;
 }
 
-
 static umode_t beiscsi_tgt_get_attr_visibility(void *data, int type)
 {
 	umode_t rc;
@@ -519,7 +518,6 @@ static umode_t beiscsi_ini_get_attr_visibility(void *data, int type)
 	return rc;
 }
 
-
 static umode_t beiscsi_eth_get_attr_visibility(void *data, int type)
 {
 	umode_t rc;
@@ -548,7 +546,6 @@ static const struct pci_device_id beiscsi_pci_id_table[] = {
 	{ 0 }
 };
 MODULE_DEVICE_TABLE(pci, beiscsi_pci_id_table);
-
 
 static struct scsi_host_template beiscsi_sht = {
 	.module = THIS_MODULE,
@@ -1531,7 +1528,6 @@ static void adapter_get_sol_cqe(struct beiscsi_hba *phba,
 			csol_cqe->i_flags |= ISCSI_FLAG_CMD_OVERFLOW;
 	}
 }
-
 
 static void hwi_complete_cmd(struct beiscsi_conn *beiscsi_conn,
 			     struct beiscsi_hba *phba, struct sol_cqe *psol)
@@ -2603,7 +2599,6 @@ static void beiscsi_find_mem_req(struct beiscsi_hba *phba)
 	phba->mem_req[HWI_MEM_ADDN_CONTEXT] =
 					    sizeof(struct hwi_context_memory);
 
-
 	phba->mem_req[HWI_MEM_WRB] = sizeof(struct iscsi_wrb)
 	    * (phba->params.wrbs_per_cxn)
 	    * phba->params.cxns_per_ctrl;
@@ -3479,7 +3474,6 @@ beiscsi_create_def_data(struct beiscsi_hba *phba,
 	return 0;
 }
 
-
 static int
 beiscsi_post_template_hdr(struct beiscsi_hba *phba)
 {
@@ -3659,7 +3653,6 @@ beiscsi_create_wrb_rings(struct beiscsi_hba *phba,
 
 			cid_count_ulp[ulp_base_num]--;
 		}
-
 
 		hwi_build_be_sgl_by_offset(phba, &pwrb_arr[i], &sgl);
 		status = be_cmd_wrbq_create(&phba->ctrl, &sgl,
@@ -4358,7 +4351,6 @@ static int beiscsi_get_boot_info(struct beiscsi_hba *phba)
 
 		if (ret == -ENXIO)
 			phba->get_boot = 0;
-
 
 		return ret;
 	}
@@ -5069,7 +5061,6 @@ static int beiscsi_mtask(struct iscsi_task *task)
 		pwrb_typeoffset = SKH_WRB_TYPE_OFFSET;
 	}
 
-
 	switch (task->hdr->opcode & ISCSI_OPCODE_MASK) {
 	case ISCSI_OP_LOGIN:
 		AMAP_SET_BITS(struct amap_iscsi_wrb, cmdsn_itt, pwrb, 1);
@@ -5460,7 +5451,6 @@ beiscsi_hw_health_check(struct work_struct *work)
 			      msecs_to_jiffies(1000));
 }
 
-
 static pci_ers_result_t beiscsi_eeh_err_detected(struct pci_dev *pdev,
 		pci_channel_state_t state)
 {
@@ -5644,7 +5634,6 @@ static int beiscsi_dev_probe(struct pci_dev *pcidev,
 
 	phba->fw_timeout = false;
 	phba->mac_addr_set = false;
-
 
 	switch (pcidev->device) {
 	case BE_DEVICE_ID1:
@@ -5866,7 +5855,6 @@ static struct pci_driver beiscsi_pci_driver = {
 	.id_table = beiscsi_pci_id_table,
 	.err_handler = &beiscsi_eeh_handlers
 };
-
 
 static int __init beiscsi_module_init(void)
 {

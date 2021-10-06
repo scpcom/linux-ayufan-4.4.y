@@ -97,11 +97,9 @@ do {						\
 #define PM8001_MSG_DBG(HBA, CMD)		\
 	PM8001_CHECK_LOGGING(HBA, PM8001_MSG_LOGGING, CMD)
 
-
 #define PM8001_USE_TASKLET
 #define PM8001_USE_MSIX
 #define PM8001_READ_VPD
-
 
 #define DEV_IS_EXPANDER(type)	((type == SAS_EDGE_EXPANDER_DEVICE) || (type == SAS_FANOUT_EXPANDER_DEVICE))
 #define IS_SPCV_12G(dev)	((dev->device == 0X8074)		\
@@ -554,7 +552,6 @@ struct pm8001_fw_image_header {
 	__be32 startup_entry;
 } __attribute__((packed, aligned(4)));
 
-
 /**
  * FW Flash Update status values
  */
@@ -732,4 +729,3 @@ pm8001_ccb_task_free_done(struct pm8001_hba_info *pm8001_ha,
 }
 
 #endif
-

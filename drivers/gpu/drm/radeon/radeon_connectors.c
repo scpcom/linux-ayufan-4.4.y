@@ -967,7 +967,6 @@ static int radeon_lvds_set_property(struct drm_connector *connector,
 	return 0;
 }
 
-
 static const struct drm_connector_helper_funcs radeon_lvds_connector_helper_funcs = {
 	.get_modes = radeon_lvds_get_modes,
 	.mode_valid = radeon_lvds_mode_valid,

@@ -45,7 +45,6 @@
 #define BX_DIGITAL_IN	18	/* 8 */
 #define BX_NUM		26
 
-
 #include <linux/delay.h>
 #include <linux/init.h>
 #include <linux/interrupt.h>

@@ -37,7 +37,6 @@ void brcmf_commonring_register_cb(struct brcmf_commonring *commonring,
 	commonring->cr_ctx = ctx;
 }
 
-
 void brcmf_commonring_config(struct brcmf_commonring *commonring, u16 depth,
 			     u16 item_len, void *buf_addr)
 {
@@ -57,7 +56,6 @@ void brcmf_commonring_config(struct brcmf_commonring *commonring, u16 depth,
 	commonring->f_ptr = 0;
 }
 
-
 void brcmf_commonring_lock(struct brcmf_commonring *commonring)
 		__acquires(&commonring->lock)
 {
@@ -67,13 +65,11 @@ void brcmf_commonring_lock(struct brcmf_commonring *commonring)
 	commonring->flags = flags;
 }
 
-
 void brcmf_commonring_unlock(struct brcmf_commonring *commonring)
 		__releases(&commonring->lock)
 {
 	spin_unlock_irqrestore(&commonring->lock, commonring->flags);
 }
-
 
 bool brcmf_commonring_write_available(struct brcmf_commonring *commonring)
 {
@@ -114,7 +110,6 @@ again:
 	return false;
 }
 
-
 void *brcmf_commonring_reserve_for_write(struct brcmf_commonring *commonring)
 {
 	void *ret_ptr;
@@ -147,7 +142,6 @@ again:
 	commonring->was_full = true;
 	return NULL;
 }
-
 
 void *
 brcmf_commonring_reserve_for_write_multiple(struct brcmf_commonring *commonring,
@@ -187,7 +181,6 @@ again:
 	return NULL;
 }
 
-
 int brcmf_commonring_write_complete(struct brcmf_commonring *commonring)
 {
 	void *address;
@@ -209,7 +202,6 @@ int brcmf_commonring_write_complete(struct brcmf_commonring *commonring)
 	return -EIO;
 }
 
-
 void brcmf_commonring_write_cancel(struct brcmf_commonring *commonring,
 				   u16 n_items)
 {
@@ -218,7 +210,6 @@ void brcmf_commonring_write_cancel(struct brcmf_commonring *commonring,
 	else
 		commonring->w_ptr -= n_items;
 }
-
 
 void *brcmf_commonring_get_read_ptr(struct brcmf_commonring *commonring,
 				    u16 *n_items)
@@ -236,7 +227,6 @@ void *brcmf_commonring_get_read_ptr(struct brcmf_commonring *commonring,
 	return commonring->buf_addr +
 	       (commonring->r_ptr * commonring->item_len);
 }
-
 
 int brcmf_commonring_read_complete(struct brcmf_commonring *commonring,
 				   u16 n_items)

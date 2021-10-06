@@ -31,7 +31,6 @@ static inline unsigned long leon_get_ctable_ptr(void)
 	return (retval & SRMMU_CTX_PMASK) << 4;
 }
 
-
 unsigned long leon_swprobe(unsigned long vaddr, unsigned long *paddr)
 {
 

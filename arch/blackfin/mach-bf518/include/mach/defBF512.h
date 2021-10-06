@@ -41,12 +41,10 @@
 #define SIC_ISR1                        0xFFC00160     /* Interrupt Statur register */
 #define SIC_IWR1                        0xFFC00164     /* Interrupt Wakeup register */
 
-
 /* Watchdog Timer			(0xFFC00200 - 0xFFC002FF)								*/
 #define WDOG_CTL			0xFFC00200	/* Watchdog Control Register				*/
 #define WDOG_CNT			0xFFC00204	/* Watchdog Count Register					*/
 #define WDOG_STAT			0xFFC00208	/* Watchdog Status Register					*/
-
 
 /* Real Time Clock		(0xFFC00300 - 0xFFC003FF)									*/
 #define RTC_STAT			0xFFC00300	/* RTC Status Register						*/
@@ -56,7 +54,6 @@
 #define RTC_ALARM			0xFFC00310	/* RTC Alarm Time Register					*/
 #define RTC_FAST			0xFFC00314	/* RTC Prescaler Enable Register			*/
 #define RTC_PREN			0xFFC00314	/* RTC Prescaler Enable Alternate Macro		*/
-
 
 /* UART0 Controller		(0xFFC00400 - 0xFFC004FF)									*/
 #define UART0_THR			0xFFC00400	/* Transmit Holding register				*/
@@ -442,14 +439,12 @@
 #define MDMA_S1_CURR_X_COUNT	0xFFC00FF0	/* MemDMA Stream 1 Source Current X Count Register					*/
 #define MDMA_S1_CURR_Y_COUNT	0xFFC00FF8	/* MemDMA Stream 1 Source Current Y Count Register					*/
 
-
 /* Parallel Peripheral Interface (0xFFC01000 - 0xFFC010FF)				*/
 #define PPI_CONTROL			0xFFC01000	/* PPI Control Register			*/
 #define PPI_STATUS			0xFFC01004	/* PPI Status Register			*/
 #define PPI_COUNT			0xFFC01008	/* PPI Transfer Count Register	*/
 #define PPI_DELAY			0xFFC0100C	/* PPI Delay Count Register		*/
 #define PPI_FRAME			0xFFC01010	/* PPI Frame Length Register	*/
-
 
 /* Two-Wire Interface		(0xFFC01400 - 0xFFC014FF)								*/
 #define TWI0_REGBASE			0xFFC01400
@@ -470,7 +465,6 @@
 #define TWI0_RCV_DATA8		0xFFC01488	/* FIFO Receive Data Single Byte Register	*/
 #define TWI0_RCV_DATA16		0xFFC0148C	/* FIFO Receive Data Double Byte Register	*/
 
-
 /* General Purpose I/O Port G (0xFFC01500 - 0xFFC015FF)												*/
 #define PORTGIO					0xFFC01500	/* Port G I/O Pin State Specify Register				*/
 #define PORTGIO_CLEAR			0xFFC01504	/* Port G I/O Peripheral Interrupt Clear Register		*/
@@ -489,7 +483,6 @@
 #define PORTGIO_EDGE			0xFFC01538	/* Port G I/O Source Sensitivity Register				*/
 #define PORTGIO_BOTH			0xFFC0153C	/* Port G I/O Set on BOTH Edges Register				*/
 #define PORTGIO_INEN			0xFFC01540	/* Port G I/O Input Enable Register						*/
-
 
 /* General Purpose I/O Port H (0xFFC01700 - 0xFFC017FF)												*/
 #define PORTHIO					0xFFC01700	/* Port H I/O Pin State Specify Register				*/
@@ -510,7 +503,6 @@
 #define PORTHIO_BOTH			0xFFC0173C	/* Port H I/O Set on BOTH Edges Register				*/
 #define PORTHIO_INEN			0xFFC01740	/* Port H I/O Input Enable Register						*/
 
-
 /* UART1 Controller		(0xFFC02000 - 0xFFC020FF)								*/
 #define UART1_THR			0xFFC02000	/* Transmit Holding register			*/
 #define UART1_RBR			0xFFC02000	/* Receive Buffer register				*/
@@ -525,13 +517,11 @@
 #define UART1_SCR			0xFFC0201C	/* SCR Scratch Register					*/
 #define UART1_GCTL			0xFFC02024	/* Global Control Register				*/
 
-
 /* Pin Control Registers	(0xFFC03200 - 0xFFC032FF)											*/
 #define PORTF_FER			0xFFC03200	/* Port F Function Enable Register (Alternate/Flag*)	*/
 #define PORTG_FER			0xFFC03204	/* Port G Function Enable Register (Alternate/Flag*)	*/
 #define PORTH_FER			0xFFC03208	/* Port H Function Enable Register (Alternate/Flag*)	*/
 #define BFIN_PORT_MUX			0xFFC0320C	/* Port Multiplexer Control Register					*/
-
 
 /* Handshake MDMA Registers	(0xFFC03300 - 0xFFC033FF)										*/
 #define HMDMA0_CONTROL		0xFFC03300	/* Handshake MDMA0 Control Register					*/
@@ -550,7 +540,6 @@
 #define HMDMA1_ECOUNT		0xFFC03354	/* HMDMA1 Current Edge Count Register				*/
 #define HMDMA1_BCOUNT		0xFFC03358	/* HMDMA1 Current Block Count Register				*/
 
-
 /* GPIO PIN mux (0xFFC03210 - OxFFC03288) */
 #define PORTF_MUX               0xFFC03210      /* Port F mux control */
 #define PORTG_MUX               0xFFC03214      /* Port G mux control */
@@ -567,7 +556,6 @@
 #define MISCPORT_DRIVE          0xFFC03280      /* Misc Port drive strength control */
 #define MISCPORT_SLEW           0xFFC03284      /* Misc Port slew control */
 #define MISCPORT_HYSTERESIS     0xFFC03288      /* Misc Port Schmitt trigger control */
-
 
 /***********************************************************************************
 ** System MMR Register Bits And Macros
@@ -596,7 +584,6 @@
 /* SYSCR Masks																				*/
 #define BMODE				0x0007	/* Boot Mode - Latched During HW Reset From Mode Pins	*/
 #define	NOBOOT				0x0010	/* Execute From L1 or ASYNC Bank 0 When BMODE = 0		*/
-
 
 /* *************  SYSTEM INTERRUPT CONTROLLER MASKS *************************************/
 /* Peripheral Masks For SIC_ISR, SIC_IWR, SIC_IMASK										*/
@@ -684,7 +671,6 @@
 #define P29_IVG(x)		(((x)&0xF)-7) << 0x14	/* Peripheral #29 assigned IVG #x	*/
 #define P30_IVG(x)		(((x)&0xF)-7) << 0x18	/* Peripheral #30 assigned IVG #x	*/
 #define P31_IVG(x)		(((x)&0xF)-7) << 0x1C	/* Peripheral #31 assigned IVG #x	*/
-
 
 /* SIC_IMASK Masks																		*/
 #define SIC_UNMASK_ALL	0x00000000					/* Unmask all peripheral interrupts	*/
@@ -960,7 +946,6 @@
 #define B3WAT_14		0xE0000000  /* B3 Write Access Time = 14 cycles					*/
 #define B3WAT_15		0xF0000000  /* B3 Write Access Time = 15 cycles					*/
 
-
 /* **********************  SDRAM CONTROLLER MASKS  **********************************************/
 /* EBIU_SDGCTL Masks																			*/
 #define SCTLE			0x00000001	/* Enable SDRAM Signals										*/
@@ -1032,7 +1017,6 @@
 #define SDEASE			0x0010		/* SDRAM EAB Sticky Error Status		*/
 #define BGSTAT			0x0020		/* Bus Grant Status						*/
 
-
 /* **************************  DMA CONTROLLER MASKS  ********************************/
 
 /* DMAx_PERIPHERAL_MAP, MDMA_yy_PERIPHERAL_MAP Masks								*/
@@ -1081,7 +1065,6 @@
 #define UNDR			0x2000		/* FIFO Underrun Error				*/
 #define ERR_DET			0x4000		/* Error Detected Indicator			*/
 #define ERR_NCOR		0x8000		/* Error Not Corrected Indicator	*/
-
 
 /*  *******************  PIN CONTROL REGISTER MASKS  ************************/
 /* PORT_MUX Masks															*/
@@ -1201,7 +1184,6 @@
 #define                         PWM_CHCL  0xffc03730   /* PWM Channel CL Duty Control (SR mode only) */
 #define                          PWM_LSI  0xffc03734   /* PWM Low Side Invert (SR mode only) */
 #define                        PWM_STAT2  0xffc03738   /* PWM Status Register 2 */
-
 
 /* ********************************************************** */
 /*     SINGLE BIT MACRO PAIRS (bit mask and negated one)      */

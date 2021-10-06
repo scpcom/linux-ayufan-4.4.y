@@ -46,7 +46,6 @@
 #define SMP_DIRECT 1
 #define SMP_INDIRECT 2
 
-
 int pm80xx_bar4_shift(struct pm8001_hba_info *pm8001_ha, u32 shift_value)
 {
 	u32 reg_val;
@@ -913,7 +912,6 @@ pm80xx_set_sas_protocol_timer_config(struct pm8001_hba_info *pm8001_ha)
 
 	if (SASConfigPage.STP_IDLE_TMO > 0x3FFFFFF)
 		SASConfigPage.STP_IDLE_TMO = 0x3FFFFFF;
-
 
 	SASConfigPage.OPNRJT_RTRY_INTVL =         (SAS_MFD << 16) |
 						SAS_OPNRJT_RTRY_INTVL;
@@ -3826,7 +3824,6 @@ static int pm80xx_chip_smp_req(struct pm8001_hba_info *pm8001_ha,
 		pm8001_ha->smp_exp_mode = SMP_DIRECT;
 	else
 		pm8001_ha->smp_exp_mode = SMP_INDIRECT;
-
 
 	tmp_addr = cpu_to_le64((u64)sg_dma_address(&task->smp_task.smp_req));
 	preq_dma_addr = (char *)phys_to_virt(tmp_addr);

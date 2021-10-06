@@ -336,7 +336,6 @@ static inline void snd_pcm_pack_audio_tstamp_report(__u32 *data, __u32 *accuracy
 	*accuracy = report->accuracy;
 }
 
-
 struct snd_pcm_runtime {
 	/* -- Status -- */
 	struct snd_pcm_substream *trigger_master;
@@ -486,7 +485,6 @@ struct snd_pcm_substream {
 
 #define SUBSTREAM_BUSY(substream) ((substream)->ref_count > 0)
 
-
 struct snd_pcm_str {
 	int stream;				/* stream (direction) */
 	struct snd_pcm *pcm;
@@ -579,7 +577,6 @@ int snd_pcm_attach_substream(struct snd_pcm *pcm, int stream, struct file *file,
 			     struct snd_pcm_substream **rsubstream);
 void snd_pcm_detach_substream(struct snd_pcm_substream *substream);
 int snd_pcm_mmap_data(struct snd_pcm_substream *substream, struct file *file, struct vm_area_struct *area);
-
 
 #ifdef CONFIG_SND_DEBUG
 void snd_pcm_debug_name(struct snd_pcm_substream *substream,

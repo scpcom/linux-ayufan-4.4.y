@@ -29,8 +29,6 @@
 
 #include "pvrusb2-video-v4l.h"
 
-
-
 #include "pvrusb2-hdw-internal.h"
 #include "pvrusb2-debug.h"
 #include <linux/videodev2.h>
@@ -42,7 +40,6 @@ struct routing_scheme {
 	const int *def;
 	unsigned int cnt;
 };
-
 
 static const int routing_scheme0[] = {
 	[PVR2_CVAL_INPUT_TV] = SAA7115_COMPOSITE4,

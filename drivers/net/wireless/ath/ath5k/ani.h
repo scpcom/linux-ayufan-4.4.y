@@ -35,7 +35,6 @@ enum ath5k_phy_error_code;
 #define ATH5K_ANI_MAX_FIRSTEP_LVL	2
 #define ATH5K_ANI_MAX_NOISE_IMM_LVL	1
 
-
 /**
  * enum ath5k_ani_mode - mode for ANI / noise sensitivity
  *
@@ -54,7 +53,6 @@ enum ath5k_ani_mode {
 	ATH5K_ANI_MODE_MANUAL_HIGH	= 2,
 	ATH5K_ANI_MODE_AUTO		= 3
 };
-
 
 /**
  * struct ath5k_ani_state - ANI state and associated counters

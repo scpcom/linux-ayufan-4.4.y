@@ -12,7 +12,6 @@
 
 #include "ebb.h"
 
-
 /*
  * Run a calibrated instruction loop and count instructions executed using
  * EBBs. Make sure the counts look right.

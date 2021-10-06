@@ -67,7 +67,6 @@ static uint32_t float_to_u32_mul_1000000(struct i2c_client *client,
 	return man & 0xffffffff;
 }
 
-
 /*
  * Read a 8/16/32-bit i2c register.  The value is returned in 'val'.
  * Returns zero if successful, or non-zero otherwise.

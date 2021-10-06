@@ -82,7 +82,6 @@ static s32 iol_InitLLTTable(struct adapter *padapter, u8 txpktbuf_bndy)
 	return rst;
 }
 
-
 s32 rtl8188e_iol_efuse_patch(struct adapter *padapter)
 {
 	s32	result = _SUCCESS;

@@ -431,4 +431,3 @@ MACHINE_START(NET2BIG, "LaCie 2Big Network")
 	.fixup		= tag_fixup_mem32,
 	.restart	= orion5x_restart,
 MACHINE_END
-

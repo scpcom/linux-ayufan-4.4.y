@@ -103,7 +103,6 @@ bssclear_end:
 	mov	CONFIG_KERNEL_TEXT_ADDRESS,a0
 	jmp	(a0)
 
-
 ###############################################################################
 #
 # Cache flush routines
@@ -131,7 +130,6 @@ mn10300_dcache_flush_inv_loop:
 mn10300_dcache_flush_inv_end:
 	ret	[],0
 #endif /* CONFIG_MN10300_CACHE_WBACK */
-
 
 ###############################################################################
 #

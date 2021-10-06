@@ -129,7 +129,6 @@ static void ad_marker_response_received(struct bond_marker *marker,
 					struct port *port);
 static void ad_update_actor_keys(struct port *port, bool reset);
 
-
 /* ================= api to bonding and kernel code ================== */
 
 /**
@@ -389,7 +388,6 @@ static u16 __ad_timer_to_ticks(u16 timer_type, u16 par)
 
 	return retval;
 }
-
 
 /* ================= ad_rx_machine helper functions ================== */
 

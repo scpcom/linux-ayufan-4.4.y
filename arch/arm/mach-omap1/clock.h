@@ -43,7 +43,6 @@ struct omap_clk {
 #define CK_16XX		(1 << 3)	/* 16xx, 17xx, 5912 */
 #define CK_1710		(1 << 4)	/* 1710 extra for rate selection */
 
-
 /* Temporary, needed during the common clock framework conversion */
 #define __clk_get_name(clk)	(clk->name)
 #define __clk_get_parent(clk)	(clk->parent)

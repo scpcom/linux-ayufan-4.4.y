@@ -329,7 +329,6 @@ list_empty(struct list_head *head)
 	 &pos->member != (head);					\
 	 pos = tmp, tmp = __container_of(pos->member.next, tmp, member))
 
-
 #define list_for_each_entry_reverse(pos, head, member)			\
 	for (pos = __container_of((head)->prev, pos, member);		\
 	     &pos->member != (head);					\

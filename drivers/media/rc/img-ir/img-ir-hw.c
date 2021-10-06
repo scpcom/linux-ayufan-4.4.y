@@ -606,7 +606,6 @@ static void img_ir_set_decoder(struct img_ir_priv *priv,
 	/* set up and enable */
 	img_ir_write(priv, IMG_IR_CONTROL, hw->reg_timings.ctrl);
 
-
 unlock:
 	spin_unlock_irq(&priv->lock);
 }
@@ -848,7 +847,6 @@ static void img_ir_handle_data(struct img_ir_priv *priv, u32 len, u64 raw)
 		dev_dbg(priv->dev, "decode failed (%d)\n", ret);
 		return;
 	}
-
 
 	/* we mustn't update the end timer while trying to stop it */
 	if (dec->repeat && !hw->stopping) {

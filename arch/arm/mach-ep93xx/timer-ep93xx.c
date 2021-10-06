@@ -85,7 +85,6 @@ static int ep93xx_clkevt_set_next_event(unsigned long next,
         return 0;
 }
 
-
 static int ep93xx_clkevt_shutdown(struct clock_event_device *evt)
 {
 	/* Disable timer */

@@ -174,7 +174,6 @@ static u32 ath9k_hw_ar9287_dump_eeprom(struct ath_hw *ah, bool dump_base_hdr,
 }
 #endif
 
-
 static int ath9k_hw_ar9287_check_eeprom(struct ath_hw *ah)
 {
 	u32 sum = 0, el, integer;
@@ -947,7 +946,6 @@ static void ath9k_hw_ar9287_set_board_values(struct ath_hw *ah,
 			      AR9280_PHY_RXGAIN_TXRX_MARGIN,
 			      pModal->rxTxMarginCh[i]);
 	}
-
 
 	if (IS_CHAN_HT40(chan))
 		REG_RMW_FIELD(ah, AR_PHY_SETTLING,

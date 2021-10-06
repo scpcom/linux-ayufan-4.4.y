@@ -45,7 +45,6 @@ do {									\
 			   (MAX_INSN_SIZE * sizeof(kprobe_opcode_t)));	\
 } while (0)
 
-
 #define kretprobe_blacklist_size 0
 
 void arch_remove_kprobe(struct kprobe *p);
@@ -72,7 +71,6 @@ struct prev_kprobe {
 	((((ADDR) + MAX_JPROBES_STACK_SIZE) > MAX_JPROBES_STACK_ADDR)	\
 		? MAX_JPROBES_STACK_ADDR - (ADDR)			\
 		: MAX_JPROBES_STACK_SIZE)
-
 
 #define SKIP_DELAYSLOT 0x0001
 

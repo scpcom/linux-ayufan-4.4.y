@@ -101,7 +101,6 @@ typedef struct {
 #define REG_RD_ADDR_strmux_rw_cfg 0
 #define REG_WR_ADDR_strmux_rw_cfg 0
 
-
 /* Constants */
 enum {
   regk_strmux_ata                          = 0x00000003,

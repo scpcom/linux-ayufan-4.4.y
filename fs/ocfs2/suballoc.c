@@ -998,7 +998,6 @@ int ocfs2_reserve_new_metadata_blocks(struct ocfs2_super *osb,
 					     (u32)osb->slot_num, NULL,
 					     ALLOC_GROUPS_FROM_GLOBAL|ALLOC_NEW_GROUP);
 
-
 	if (status >= 0) {
 		status = 0;
 		if (slot != OCFS2_INVALID_SLOT)

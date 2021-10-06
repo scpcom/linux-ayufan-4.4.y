@@ -572,7 +572,6 @@ static int trust_fan_readings(struct adm1031_data *data, int chan)
 	return res;
 }
 
-
 static ssize_t show_fan(struct device *dev,
 			struct device_attribute *attr, char *buf)
 {
@@ -683,7 +682,6 @@ static SENSOR_DEVICE_ATTR(fan##offset##_div, S_IRUGO | S_IWUSR,		\
 
 fan_offset(1);
 fan_offset(2);
-
 
 /* Temps */
 static ssize_t show_temp(struct device *dev,

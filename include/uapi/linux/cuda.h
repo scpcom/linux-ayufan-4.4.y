@@ -29,5 +29,4 @@
 #define CUDA_GET_DEVICE_LIST	0x1a
 #define CUDA_GET_SET_IIC	0x22
 
-
 #endif /* _UAPI_LINUX_CUDA_H */

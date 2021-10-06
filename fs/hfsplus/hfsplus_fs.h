@@ -1,11 +1,4 @@
-/*
- *  linux/include/linux/hfsplus_fs.h
- *
- * Copyright (C) 1999
- * Brad Boyer (flar@pants.nu)
- * (C) 2003 Ardis Technologies <roman@ardistech.com>
- *
- */
+
 
 #ifndef _LINUX_HFSPLUS_FS_H
 #define _LINUX_HFSPLUS_FS_H
@@ -51,8 +44,7 @@ do {								\
 		pr_cont(fmt, ##__VA_ARGS__);			\
 } while (0)
 
-/* Runtime config options */
-#define HFSPLUS_DEF_CR_TYPE    0x3F3F3F3F  /* '????' */
+#define HFSPLUS_DEF_CR_TYPE    0x3F3F3F3F   
 
 #define HFSPLUS_TYPE_DATA 0x00
 #define HFSPLUS_TYPE_RSRC 0xFF
@@ -62,14 +54,12 @@ typedef int (*btree_keycmp)(const hfsplus_btree_key *,
 
 #define NODE_HASH_SIZE	256
 
-/* B-tree mutex nested subclasses */
 enum hfsplus_btree_mutex_classes {
 	CATALOG_BTREE_MUTEX,
 	EXTENTS_BTREE_MUTEX,
 	ATTR_BTREE_MUTEX,
 };
 
-/* An HFS+ BTree held in memory */
 struct hfs_btree {
 	struct super_block *sb;
 	struct inode *inode;
@@ -99,7 +89,6 @@ struct hfs_btree {
 
 struct page;
 
-/* An HFS+ BTree node in memory */
 struct hfs_bnode {
 	struct hfs_btree *tree;
 
@@ -126,17 +115,10 @@ struct hfs_bnode {
 #define HFS_BNODE_DIRTY		3
 #define HFS_BNODE_DELETED	4
 
-/*
- * Attributes file states
- */
 #define HFSPLUS_EMPTY_ATTR_TREE		0
 #define HFSPLUS_CREATING_ATTR_TREE	1
 #define HFSPLUS_VALID_ATTR_TREE		2
 #define HFSPLUS_FAILED_ATTR_TREE	3
-
-/*
- * HFS+ superblock info (built from Volume Header on disk)
- */
 
 struct hfsplus_vh;
 struct hfs_btree;
@@ -154,29 +136,24 @@ struct hfsplus_sb_info {
 	struct inode *hidden_dir;
 	struct nls_table *nls;
 
-	/* Runtime variables */
 	u32 blockoffset;
 	sector_t part_start;
 	sector_t sect_count;
 	int fs_shift;
 
-	/* immutable data from the volume header */
 	u32 alloc_blksz;
 	int alloc_blksz_shift;
 	u32 total_blocks;
 	u32 data_clump_blocks, rsrc_clump_blocks;
 
-	/* mutable data from the volume header, protected by alloc_mutex */
 	u32 free_blocks;
 	struct mutex alloc_mutex;
 
-	/* mutable data from the volume header, protected by vh_mutex */
 	u32 next_cnid;
 	u32 file_count;
 	u32 folder_count;
 	struct mutex vh_mutex;
 
-	/* Config options */
 	u32 creator;
 	u32 type;
 
@@ -187,9 +164,9 @@ struct hfsplus_sb_info {
 	int part, session;
 	unsigned long flags;
 
-	int work_queued;               /* non-zero delayed work is queued */
-	struct delayed_work sync_work; /* FS sync delayed work */
-	spinlock_t work_lock;          /* protects sync_work and work_queued */
+	int work_queued;                
+	struct delayed_work sync_work;  
+	spinlock_t work_lock;           
 };
 
 #define HFSPLUS_SB_WRITEBACKUP	0
@@ -204,13 +181,9 @@ static inline struct hfsplus_sb_info *HFSPLUS_SB(struct super_block *sb)
 	return sb->s_fs_info;
 }
 
-
 struct hfsplus_inode_info {
 	atomic_t opencnt;
 
-	/*
-	 * Extent allocation information, protected by extents_lock.
-	 */
 	u32 first_blocks;
 	u32 clump_blocks;
 	u32 alloc_blocks;
@@ -221,28 +194,16 @@ struct hfsplus_inode_info {
 	unsigned int extent_state;
 	struct mutex extents_lock;
 
-	/*
-	 * Immutable data.
-	 */
 	struct inode *rsrc_inode;
 	__be32 create_date;
 
-	/*
-	 * Protected by sbi->vh_mutex.
-	 */
 	u32 linkid;
 
-	/*
-	 * Accessed using atomic bitops.
-	 */
 	unsigned long flags;
 
-	/*
-	 * Protected by i_mutex.
-	 */
 	sector_t fs_blocks;
-	u8 userflags;		/* BSD user file flags */
-	u32 subfolders;		/* Subfolder count (HFSX only) */
+	u8 userflags;		 
+	u32 subfolders;		 
 	struct list_head open_dir_list;
 	loff_t phys_size;
 
@@ -252,11 +213,11 @@ struct hfsplus_inode_info {
 #define HFSPLUS_EXT_DIRTY	0x0001
 #define HFSPLUS_EXT_NEW		0x0002
 
-#define HFSPLUS_I_RSRC		0	/* represents a resource fork */
-#define HFSPLUS_I_CAT_DIRTY	1	/* has changes in the catalog tree */
-#define HFSPLUS_I_EXT_DIRTY	2	/* has changes in the extent tree */
-#define HFSPLUS_I_ALLOC_DIRTY	3	/* has changes in the allocation file */
-#define HFSPLUS_I_ATTR_DIRTY	4	/* has changes in the attributes tree */
+#define HFSPLUS_I_RSRC		0	 
+#define HFSPLUS_I_CAT_DIRTY	1	 
+#define HFSPLUS_I_EXT_DIRTY	2	 
+#define HFSPLUS_I_ALLOC_DIRTY	3	 
+#define HFSPLUS_I_ATTR_DIRTY	4	 
 
 #define HFSPLUS_IS_RSRC(inode) \
 	test_bit(HFSPLUS_I_RSRC, &HFSPLUS_I(inode)->flags)
@@ -266,12 +227,6 @@ static inline struct hfsplus_inode_info *HFSPLUS_I(struct inode *inode)
 	return container_of(inode, struct hfsplus_inode_info, vfs_inode);
 }
 
-/*
- * Mark an inode dirty, and also mark the btree in which the
- * specific type of metadata is stored.
- * For data or metadata that gets written back by into the catalog btree
- * by hfsplus_write_inode a plain mark_inode_dirty call is enough.
- */
 static inline void hfsplus_mark_inode_dirty(struct inode *inode,
 		unsigned int flag)
 {
@@ -280,13 +235,13 @@ static inline void hfsplus_mark_inode_dirty(struct inode *inode,
 }
 
 struct hfs_find_data {
-	/* filled by caller */
+	 
 	hfsplus_btree_key *search_key;
 	hfsplus_btree_key *key;
-	/* filled by find */
+	 
 	struct hfs_btree *tree;
 	struct hfs_bnode *bnode;
-	/* filled by findrec */
+	 
 	int record;
 	int keyoffset, keylength;
 	int entryoffset, entrylength;
@@ -298,9 +253,6 @@ struct hfsplus_readdir_data {
 	struct hfsplus_cat_key key;
 };
 
-/*
- * Find minimum acceptible I/O size for an hfsplus sb.
- */
 static inline unsigned short hfsplus_min_io_size(struct super_block *sb)
 {
 	return max_t(unsigned short, bdev_logical_block_size(sb->s_bdev),
@@ -342,31 +294,23 @@ static inline unsigned short hfsplus_min_io_size(struct super_block *sb)
 #define hfs_brec_goto hfsplus_brec_goto
 #define hfs_part_find hfsplus_part_find
 
-/*
- * definitions for ext2 flag ioctls (linux really needs a generic
- * interface for this).
- */
 
-/* ext2 ioctls (EXT2_IOC_GETFLAGS and EXT2_IOC_SETFLAGS) to support
- * chattr/lsattr */
+
+
 #define HFSPLUS_IOC_EXT2_GETFLAGS	FS_IOC_GETFLAGS
 #define HFSPLUS_IOC_EXT2_SETFLAGS	FS_IOC_SETFLAGS
 
 
-/*
- * hfs+-specific ioctl for making the filesystem bootable
- */
+
 #define HFSPLUS_IOC_BLESS _IO('h', 0x80)
 
 typedef int (*search_strategy_t)(struct hfs_bnode *,
 				struct hfs_find_data *,
 				int *, int *, int *);
 
-/*
- * Functions in any *.c used in other files
- */
 
-/* attributes.c */
+
+
 int __init hfsplus_create_attr_tree_cache(void);
 void hfsplus_destroy_attr_tree_cache(void);
 int hfsplus_attr_bin_cmp_key(const hfsplus_btree_key *k1,
@@ -383,12 +327,10 @@ int hfsplus_create_attr(struct inode *inode, const char *name,
 int hfsplus_delete_attr(struct inode *inode, const char *name);
 int hfsplus_delete_all_attrs(struct inode *dir, u32 cnid);
 
-/* bitmap.c */
 int hfsplus_block_allocate(struct super_block *sb, u32 size, u32 offset,
 			   u32 *max);
 int hfsplus_block_free(struct super_block *sb, u32 offset, u32 count);
 
-/* btree.c */
 u32 hfsplus_calc_btree_clump_size(u32 block_size, u32 node_size, u64 sectors,
 				  int file_id);
 struct hfs_btree *hfs_btree_open(struct super_block *sb, u32 id);
@@ -397,7 +339,7 @@ int hfs_btree_write(struct hfs_btree *tree);
 struct hfs_bnode *hfs_bmap_alloc(struct hfs_btree *tree);
 void hfs_bmap_free(struct hfs_bnode *node);
 
-/* bnode.c */
+
 void hfs_bnode_read(struct hfs_bnode *node, void *buf, int off, int len);
 u16 hfs_bnode_read_u16(struct hfs_bnode *node, int off);
 u8 hfs_bnode_read_u8(struct hfs_bnode *node, int off);
@@ -419,13 +361,11 @@ void hfs_bnode_get(struct hfs_bnode *node);
 void hfs_bnode_put(struct hfs_bnode *node);
 bool hfs_bnode_need_zeroout(struct hfs_btree *tree);
 
-/* brec.c */
 u16 hfs_brec_lenoff(struct hfs_bnode *node, u16 rec, u16 *off);
 u16 hfs_brec_keylen(struct hfs_bnode *node, u16 rec);
 int hfs_brec_insert(struct hfs_find_data *fd, void *entry, int entry_len);
 int hfs_brec_remove(struct hfs_find_data *fd);
 
-/* bfind.c */
 int hfs_find_init(struct hfs_btree *tree, struct hfs_find_data *fd);
 void hfs_find_exit(struct hfs_find_data *fd);
 int hfs_find_1st_rec_by_cnid(struct hfs_bnode *bnode, struct hfs_find_data *fd,
@@ -438,7 +378,6 @@ int hfs_brec_find(struct hfs_find_data *fd, search_strategy_t do_key_compare);
 int hfs_brec_read(struct hfs_find_data *fd, void *rec, int rec_len);
 int hfs_brec_goto(struct hfs_find_data *fd, int cnt);
 
-/* catalog.c */
 int hfsplus_cat_case_cmp_key(const hfsplus_btree_key *k1,
 			     const hfsplus_btree_key *k2);
 int hfsplus_cat_bin_cmp_key(const hfsplus_btree_key *k1,
@@ -456,11 +395,9 @@ int hfsplus_delete_cat(u32 cnid, struct inode *dir, struct qstr *str);
 int hfsplus_rename_cat(u32 cnid, struct inode *src_dir, struct qstr *src_name,
 		       struct inode *dst_dir, struct qstr *dst_name);
 
-/* dir.c */
 extern const struct inode_operations hfsplus_dir_inode_operations;
 extern const struct file_operations hfsplus_dir_operations;
 
-/* extents.c */
 int hfsplus_ext_cmp_key(const hfsplus_btree_key *k1,
 			const hfsplus_btree_key *k2);
 int hfsplus_ext_write_extent(struct inode *inode);
@@ -471,7 +408,6 @@ int hfsplus_free_fork(struct super_block *sb, u32 cnid,
 int hfsplus_file_extend(struct inode *inode, bool zeroout);
 void hfsplus_file_truncate(struct inode *inode);
 
-/* inode.c */
 extern const struct address_space_operations hfsplus_aops;
 extern const struct address_space_operations hfsplus_btree_aops;
 extern const struct dentry_operations hfsplus_dentry_operations;
@@ -487,29 +423,23 @@ int hfsplus_cat_write_inode(struct inode *inode);
 int hfsplus_file_fsync(struct file *file, loff_t start, loff_t end,
 		       int datasync);
 
-/* ioctl.c */
 long hfsplus_ioctl(struct file *filp, unsigned int cmd, unsigned long arg);
 
-/* options.c */
 void hfsplus_fill_defaults(struct hfsplus_sb_info *opts);
 int hfsplus_parse_options_remount(char *input, int *force);
 int hfsplus_parse_options(char *input, struct hfsplus_sb_info *sbi);
 int hfsplus_show_options(struct seq_file *seq, struct dentry *root);
 
-/* part_tbl.c */
 int hfs_part_find(struct super_block *sb, sector_t *part_start,
 		  sector_t *part_size);
 
-/* super.c */
 struct inode *hfsplus_iget(struct super_block *sb, unsigned long ino);
 void hfsplus_mark_mdb_dirty(struct super_block *sb);
 
-/* tables.c */
 extern u16 hfsplus_case_fold_table[];
 extern u16 hfsplus_decompose_table[];
 extern u16 hfsplus_compose_table[];
 
-/* unicode.c */
 int hfsplus_strcasecmp(const struct hfsplus_unistr *s1,
 		       const struct hfsplus_unistr *s2);
 int hfsplus_strcmp(const struct hfsplus_unistr *s1,
@@ -523,16 +453,16 @@ int hfsplus_compare_dentry(const struct dentry *parent,
 			   const struct dentry *dentry, unsigned int len,
 			   const char *str, const struct qstr *name);
 
-/* wrapper.c */
+
 int hfsplus_submit_bio(struct super_block *sb, sector_t sector, void *buf,
 		       void **data, int rw);
 int hfsplus_read_wrapper(struct super_block *sb);
 
-/* time macros */
+
 #define __hfsp_mt2ut(t)		(be32_to_cpu(t) - 2082844800U)
 #define __hfsp_ut2mt(t)		(cpu_to_be32(t + 2082844800U))
 
-/* compatibility */
+
 #define hfsp_mt2ut(t)		(struct timespec){ .tv_sec = __hfsp_mt2ut(t) }
 #define hfsp_ut2mt(t)		__hfsp_ut2mt((t).tv_sec)
 #define hfsp_now2mt()		__hfsp_ut2mt(get_seconds())

@@ -20,7 +20,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-
 #include <linux/input.h>
 #include <linux/hid.h>
 
@@ -120,7 +119,6 @@ static void hid_lg3ff_set_autocenter(struct input_dev *dev, u16 magnitude)
 	hid_hw_request(hid, report, HID_REQ_SET_REPORT);
 }
 
-
 static const signed short ff3_joystick_ac[] = {
 	FF_CONSTANT,
 	FF_AUTOCENTER,
@@ -153,4 +151,3 @@ int lg3ff_init(struct hid_device *hid)
 	hid_info(hid, "Force feedback for Logitech Flight System G940 by Gary Stein <LordCnidarian@gmail.com>\n");
 	return 0;
 }
-

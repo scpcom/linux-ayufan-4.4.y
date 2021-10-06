@@ -42,7 +42,6 @@
 #include <linux/io.h>
 #include <linux/uaccess.h>
 
-
 #define DRV_NAME "advantechwdt"
 #define WATCHDOG_NAME "Advantech WDT"
 #define WATCHDOG_TIMEOUT 60		/* 60 sec default timeout */

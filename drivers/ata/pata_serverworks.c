@@ -156,7 +156,6 @@ static unsigned long serverworks_osb4_filter(struct ata_device *adev, unsigned l
 	return mask;
 }
 
-
 /**
  *	serverworks_csb_filter	-	mode selection filter
  *	@adev: ATA device

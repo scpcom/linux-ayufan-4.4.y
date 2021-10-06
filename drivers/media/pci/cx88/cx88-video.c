@@ -1325,7 +1325,6 @@ static int cx8800_initdev(struct pci_dev *pci_dev,
 		goto fail_core;
 	}
 
-
 	/* initialize driver struct */
 	spin_lock_init(&dev->slock);
 

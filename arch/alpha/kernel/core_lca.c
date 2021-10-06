@@ -25,7 +25,6 @@
 #include "proto.h"
 #include "pci_impl.h"
 
-
 /*
  * BIOS32-style PCI interface:
  */
@@ -46,14 +45,12 @@
 #define MCHK_K_DCPERR		0x0092
 #define MCHK_K_ICPERR		0x0094
 
-
 /*
  * Platform-specific machine-check reasons:
  */
 #define MCHK_K_SIO_SERR		0x204	/* all platforms so far */
 #define MCHK_K_SIO_IOCHK	0x206	/* all platforms so far */
 #define MCHK_K_DCSR		0x208	/* all but Noname */
-
 
 /*
  * Given a bus, device, and function number, compute resulting

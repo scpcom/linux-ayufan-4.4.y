@@ -37,7 +37,6 @@
 #define SCSI_NL_GRP_FC_EVENTS		(1<<2)		/* Group 2 */
 #define SCSI_NL_GRP_CNT			3
 
-
 /* SCSI_TRANSPORT_MSG event message header */
 struct scsi_nl_hdr {
 	uint8_t version;
@@ -68,14 +67,12 @@ struct scsi_nl_hdr {
 	/* user -> kernel */
 /* SCSI_NL_SHOST_VENDOR msgtype is kernel->user and user->kernel */
 
-
 /*
  * Message Structures :
  */
 
 /* macro to round up message lengths to 8byte boundary */
 #define SCSI_NL_MSGALIGN(len)		(((len) + 7) & ~7)
-
 
 /*
  * SCSI HOST Vendor Unique messages :
@@ -94,7 +91,6 @@ struct scsi_nl_host_vendor_msg {
 	uint16_t vmsg_datalen;
 } __attribute__((aligned(sizeof(uint64_t))));
 
-
 /*
  * Vendor ID:
  *   If transports post vendor-unique events, they must pass a well-known
@@ -109,7 +105,6 @@ struct scsi_nl_host_vendor_msg {
 #define SCSI_NL_VID_TYPE_PCI		((__u64)0x01 << SCSI_NL_VID_TYPE_SHIFT)
 #define SCSI_NL_VID_ID_MASK		(~ SCSI_NL_VID_TYPE_MASK)
 
-
 #define INIT_SCSI_NL_HDR(hdr, t, mtype, mlen)			\
 	{							\
 	(hdr)->version = SCSI_NL_VERSION;			\
@@ -120,4 +115,3 @@ struct scsi_nl_host_vendor_msg {
 	}
 
 #endif /* SCSI_NETLINK_H */
-

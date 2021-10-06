@@ -12,7 +12,6 @@
 
 #include <uapi/asm/psr.h>
 
-
 #ifndef __ASSEMBLY__
 /* Get the %psr register. */
 static inline unsigned int get_psr(void)

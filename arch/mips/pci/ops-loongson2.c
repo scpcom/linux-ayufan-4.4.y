@@ -31,7 +31,6 @@
 #define ID_SEL_BEGIN 11
 #define MAX_DEV_NUM (31 - ID_SEL_BEGIN)
 
-
 static int loongson_pcibios_config_access(unsigned char access_type,
 				      struct pci_bus *bus,
 				      unsigned int devfn, int where,
@@ -112,7 +111,6 @@ static int loongson_pcibios_config_access(unsigned char access_type,
 	return 0;
 
 }
-
 
 /*
  * We can't address 8 and 16 bit words directly.  Instead we have to

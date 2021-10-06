@@ -367,7 +367,6 @@ xen_swiotlb_free_coherent(struct device *hwdev, size_t size, void *vaddr,
 }
 EXPORT_SYMBOL_GPL(xen_swiotlb_free_coherent);
 
-
 /*
  * Map a single buffer of the indicated size for DMA in streaming mode.  The
  * physical address to use is returned.

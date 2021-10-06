@@ -18,7 +18,6 @@
 #include <asm/time.h>
 #include <asm/dpmc.h>
 
-
 /* this is the table of CCLK frequencies, in Hz */
 /* .driver_data is the entry in the auxiliary dpm_state_table[] */
 static struct cpufreq_frequency_table bfin_freq_table[] = {

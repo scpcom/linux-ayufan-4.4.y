@@ -492,7 +492,6 @@ static struct rtnl_link_ops macvtap_link_ops __read_mostly = {
 	.dellink	= macvtap_dellink,
 };
 
-
 static void macvtap_sock_write_space(struct sock *sk)
 {
 	wait_queue_head_t *wqueue;

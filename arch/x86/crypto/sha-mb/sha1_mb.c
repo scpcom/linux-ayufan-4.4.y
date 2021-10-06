@@ -252,7 +252,6 @@ static struct sha1_hash_ctx *sha1_ctx_mgr_submit(struct sha1_ctx_mgr *mgr,
 		return ctx;
 	}
 
-
 	if (flags & HASH_FIRST) {
 		/* Init digest */
 		sha1_init_digest(ctx->job.result_digest);
@@ -497,7 +496,6 @@ static int sha1_mb_update(struct shash_desc *desc, const u8 *data,
 	struct sha1_hash_ctx *sha_ctx;
 	int ret = 0, nbytes;
 
-
 	/* sanity check */
 	if (rctx->tag.cpu != smp_processor_id()) {
 		pr_err("mcryptd error: cpu clash\n");
@@ -672,7 +670,6 @@ static int sha1_mb_import(struct shash_desc *desc, const void *in)
 	return 0;
 }
 
-
 static struct shash_alg sha1_mb_shash_alg = {
 	.digestsize	=	SHA1_DIGEST_SIZE,
 	.init		=	sha1_mb_init,
@@ -822,7 +819,6 @@ static unsigned long sha1_mb_flusher(struct mcryptd_alg_cstate *cstate)
 	unsigned long next_flush = 0;
 	struct sha1_hash_ctx *sha_ctx;
 
-
 	cur_time = jiffies;
 
 	while (!list_empty(&cstate->work_list)) {
@@ -898,7 +894,6 @@ static int __init sha1_mb_mod_init(void)
 	err = crypto_register_ahash(&sha1_mb_async_alg);
 	if (err)
 		goto err1;
-
 
 	return 0;
 err1:

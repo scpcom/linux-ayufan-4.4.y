@@ -317,7 +317,6 @@
 #define reg_ser_r_masked_intr___dav___bit 3
 #define reg_ser_r_masked_intr_offset 56
 
-
 /* Constants */
 #define regk_ser_active                           0x00000000
 #define regk_ser_bits1                            0x00000000

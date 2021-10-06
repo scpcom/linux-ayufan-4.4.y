@@ -31,7 +31,6 @@
 #include <linux/uaccess.h>
 #include <linux/io.h>
 
-
 #define WATCHDOG_VERSION  "1.00"
 #define WATCHDOG_NAME     "W83977F WDT"
 
@@ -282,7 +281,6 @@ static int wdt_get_status(int *status)
 
 	return 0;
 }
-
 
 /*
  *	/dev/watchdog handling

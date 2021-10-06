@@ -34,7 +34,6 @@
 #ifndef _MLX4_EN_PORT_H_
 #define _MLX4_EN_PORT_H_
 
-
 #define SET_PORT_GEN_ALL_VALID	0x7
 #define SET_PORT_PROMISC_SHIFT	31
 #define SET_PORT_MC_PROMISC_SHIFT	30
@@ -45,7 +44,6 @@
 struct mlx4_set_vlan_fltr_mbox {
 	__be32 entry[VLAN_FLTR_SIZE];
 };
-
 
 enum {
 	MLX4_MCAST_CONFIG       = 0,
@@ -100,7 +98,6 @@ struct mlx4_en_query_port_context {
 	__be64 mac;
 	u8 transceiver;
 };
-
 
 struct mlx4_en_stat_out_mbox {
 	/* Received frames with a length of 64 octets */
@@ -582,6 +579,5 @@ struct mlx4_en_stat_out_mbox {
 	/* Total dropped Xmited packets */
 	__be32 TDROP;
 };
-
 
 #endif

@@ -16,7 +16,6 @@
 
 #include <linux/iio/common/st_sensors_i2c.h>
 
-
 #define ST_SENSORS_I2C_MULTIREAD	0x80
 
 static unsigned int st_sensors_i2c_get_irq(struct iio_dev *indio_dev)

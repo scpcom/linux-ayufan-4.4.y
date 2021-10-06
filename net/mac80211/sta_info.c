@@ -740,7 +740,6 @@ static bool sta_info_buffer_expired(struct sta_info *sta, struct sk_buff *skb)
 	return time_after(jiffies, info->control.jiffies + timeout);
 }
 
-
 static bool sta_info_cleanup_expire_buffered_ac(struct ieee80211_local *local,
 						struct sta_info *sta, int ac)
 {
@@ -1031,7 +1030,6 @@ void sta_info_stop(struct ieee80211_local *local)
 	del_timer_sync(&local->sta_cleanup);
 	rhashtable_destroy(&local->sta_hash);
 }
-
 
 int __sta_info_flush(struct ieee80211_sub_if_data *sdata, bool vlans)
 {

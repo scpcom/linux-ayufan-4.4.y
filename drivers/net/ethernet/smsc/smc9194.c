@@ -161,7 +161,6 @@ static struct devlist smc_devlist[] __initdata = {
 #define PRINTK(x)
 #endif
 
-
 /*------------------------------------------------------------------------
  .
  . The internal workings of the driver.  If you are changing anything
@@ -170,7 +169,6 @@ static struct devlist smc_devlist[] __initdata = {
  .
  -------------------------------------------------------------------------*/
 #define CARDNAME "SMC9194"
-
 
 /* store this information for the driver.. */
 struct smc_local {
@@ -188,7 +186,6 @@ struct smc_local {
 	*/
 	int	packets_waiting;
 };
-
 
 /*-----------------------------------------------------------------
  .
@@ -230,7 +227,6 @@ static int smc_close(struct net_device *dev);
  . programs ) and multicast modes.
 */
 static void smc_set_multicast_list(struct net_device *dev);
-
 
 /*---------------------------------------------------------------
  .
@@ -399,7 +395,6 @@ static void smc_shutdown( int ioaddr )
 #endif
 }
 
-
 /*
  . Function: smc_setmulticast( int ioaddr, struct net_device *dev )
  . Purpose:
@@ -416,7 +411,6 @@ static void smc_shutdown( int ioaddr )
  .
  . This routine is based very heavily on the one provided by Peter Cammaert.
 */
-
 
 static void smc_setmulticast(int ioaddr, struct net_device *dev)
 {
@@ -742,7 +736,6 @@ static int __init smc_findirq(int ioaddr)
 	int	timeout = 20;
 	unsigned long cookie;
 
-
 	cookie = probe_irq_on();
 
 	/*
@@ -750,7 +743,6 @@ static int __init smc_findirq(int ioaddr)
 	 * by allocating a small chunk of memory, which will give an interrupt
 	 * when done.
 	 */
-
 
 	SMC_SELECT_BANK(2);
 	/* enable ALLOCation interrupts ONLY */
@@ -1037,7 +1029,6 @@ static void print_packet( byte * buf, int length )
 }
 #endif
 
-
 /*
  * Open and Initialize the board
  *
@@ -1227,7 +1218,6 @@ done:
 	outw( MC_RELEASE, ioaddr + MMU_CMD );
 }
 
-
 /*************************************************************************
  . smc_tx
  .
@@ -1250,7 +1240,6 @@ static void smc_tx( struct net_device * dev )
 	byte saved_packet;
 	byte packet_no;
 	word tx_status;
-
 
 	/* assume bank 2  */
 
@@ -1322,7 +1311,6 @@ static irqreturn_t smc_interrupt(int irq, void * dev_id)
 	word	saved_pointer;
 	int handled = 0;
 
-
 	PRINTK3((CARDNAME": SMC interrupt started\n"));
 
 	saved_bank = inw( ioaddr + BANK_SELECT );
@@ -1333,7 +1321,6 @@ static irqreturn_t smc_interrupt(int irq, void * dev_id)
 	mask = inb( ioaddr + INT_MASK );
 	/* clear all interrupts */
 	outb( 0, ioaddr + INT_MASK );
-
 
 	/* set a timeout value, so I don't stay here forever */
 	timeout = 4;
@@ -1407,7 +1394,6 @@ static irqreturn_t smc_interrupt(int irq, void * dev_id)
 		}
 	} while ( timeout -- );
 
-
 	/* restore state register */
 	SMC_SELECT_BANK( 2 );
 	outb( mask, ioaddr + INT_MASK );
@@ -1420,7 +1406,6 @@ static irqreturn_t smc_interrupt(int irq, void * dev_id)
 	PRINTK3((CARDNAME ": Interrupt done\n"));
 	return IRQ_RETVAL(handled);
 }
-
 
 /*----------------------------------------------------
  . smc_close

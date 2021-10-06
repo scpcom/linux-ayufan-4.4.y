@@ -594,4 +594,3 @@ void __init ipv6_addr_label_rtnl_register(void)
 	__rtnl_register(PF_INET6, RTM_GETADDRLABEL, ip6addrlbl_get,
 			ip6addrlbl_dump, NULL);
 }
-

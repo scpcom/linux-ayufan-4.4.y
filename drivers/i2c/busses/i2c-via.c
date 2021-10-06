@@ -66,7 +66,6 @@ static int bit_via_getsda(void *data)
 	return (0 != (inb(I2C_IN) & I2C_SDA));
 }
 
-
 static struct i2c_algo_bit_data bit_data = {
 	.setsda		= bit_via_setsda,
 	.setscl		= bit_via_setscl,
@@ -82,7 +81,6 @@ static struct i2c_adapter vt586b_adapter = {
 	.name		= "VIA i2c",
 	.algo_data	= &bit_data,
 };
-
 
 static const struct pci_device_id vt586b_ids[] = {
 	{ PCI_DEVICE(PCI_VENDOR_ID_VIA, PCI_DEVICE_ID_VIA_82C586_3) },
@@ -147,7 +145,6 @@ static void vt586b_remove(struct pci_dev *dev)
 	release_region(I2C_DIR, IOSPACE);
 	pm_io_base = 0;
 }
-
 
 static struct pci_driver vt586b_driver = {
 	.name		= "vt586b_smbus",

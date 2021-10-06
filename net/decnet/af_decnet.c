@@ -42,7 +42,6 @@
  *                          prepare for sendpage etc.
  */
 
-
 /******************************************************************************
     (c) 1995-1998 E.M. Serrat		emserrat@geocities.com
 
@@ -149,7 +148,6 @@ static void dn_keepalive(struct sock *sk);
 #define DN_SK_HASH_SHIFT 8
 #define DN_SK_HASH_SIZE (1 << DN_SK_HASH_SHIFT)
 #define DN_SK_HASH_MASK (DN_SK_HASH_SIZE - 1)
-
 
 static const struct proto_ops dn_proto_ops;
 static DEFINE_RWLOCK(dn_hash_lock);
@@ -433,8 +431,6 @@ found:
 	return sk;
 }
 
-
-
 static void dn_destruct(struct sock *sk)
 {
 	struct dn_scp *scp = DN_SK(sk);
@@ -558,7 +554,6 @@ static void dn_keepalive(struct sock *sk)
 		dn_nsp_send_link(sk, DN_NOCHANGE, 0);
 }
 
-
 /*
  * Timer for shutdown/destroyed sockets.
  * When socket is dead & no packets have been sent for a
@@ -671,8 +666,6 @@ char *dn_addr2asc(__u16 addr, char *buf)
 	return buf;
 }
 
-
-
 static int dn_create(struct net *net, struct socket *sock, int protocol,
 		     int kern)
 {
@@ -695,7 +688,6 @@ static int dn_create(struct net *net, struct socket *sock, int protocol,
 		return -ESOCKTNOSUPPORT;
 	}
 
-
 	if ((sk = dn_alloc_sock(net, sock, GFP_KERNEL, kern)) == NULL)
 		return -ENOBUFS;
 
@@ -703,7 +695,6 @@ static int dn_create(struct net *net, struct socket *sock, int protocol,
 
 	return 0;
 }
-
 
 static int
 dn_release(struct socket *sock)
@@ -781,7 +772,6 @@ static int dn_bind(struct socket *sock, struct sockaddr *uaddr, int addr_len)
 
 	return rv;
 }
-
 
 static int dn_auto_bind(struct socket *sock)
 {
@@ -1005,7 +995,6 @@ static inline int dn_check_state(struct sock *sk, struct sockaddr_dn *addr, int 
 	return -EINVAL;
 }
 
-
 static void dn_access_copy(struct sk_buff *skb, struct accessdata_dn *acc)
 {
 	unsigned char *ptr = skb->data;
@@ -1178,7 +1167,6 @@ static int dn_accept(struct socket *sock, struct socket *newsock, int flags)
 	return err;
 }
 
-
 static int dn_getname(struct socket *sock, struct sockaddr *uaddr,int *uaddr_len,int peer)
 {
 	struct sockaddr_dn *sa = (struct sockaddr_dn *)uaddr;
@@ -1206,7 +1194,6 @@ static int dn_getname(struct socket *sock, struct sockaddr *uaddr,int *uaddr_len
 
 	return 0;
 }
-
 
 static unsigned int dn_poll(struct file *file, struct socket *sock, poll_table  *wait)
 {
@@ -1295,7 +1282,6 @@ out:
 
 	return err;
 }
-
 
 static int dn_shutdown(struct socket *sock, int how)
 {
@@ -1641,7 +1627,6 @@ static int __dn_getsockopt(struct socket *sock, int level,int optname, char __us
 	return 0;
 }
 
-
 static int dn_data_ready(struct sock *sk, struct sk_buff_head *q, int flags, int target)
 {
 	struct sk_buff *skb;
@@ -1670,7 +1655,6 @@ static int dn_data_ready(struct sock *sk, struct sk_buff_head *q, int flags, int
 
 	return 0;
 }
-
 
 static int dn_recvmsg(struct socket *sock, struct msghdr *msg, size_t size,
 		      int flags)
@@ -1712,7 +1696,6 @@ static int dn_recvmsg(struct socket *sock, struct msghdr *msg, size_t size,
 
 	if (flags & MSG_WAITALL)
 		target = size;
-
 
 	/*
 	 * See if there is data ready to read, sleep if there isn't
@@ -1803,7 +1786,6 @@ static int dn_recvmsg(struct socket *sock, struct msghdr *msg, size_t size,
 
 	rv = copied;
 
-
 	if (eor && (sk->sk_type == SOCK_SEQPACKET))
 		msg->msg_flags |= MSG_EOR;
 
@@ -1821,7 +1803,6 @@ out:
 
 	return rv;
 }
-
 
 static inline int dn_queue_too_long(struct dn_scp *scp, struct sk_buff_head *queue, int flags)
 {
@@ -1945,7 +1926,6 @@ static int dn_sendmsg(struct socket *sock, struct msghdr *msg, size_t size)
 		}
 		flags |= MSG_EOR;
 	}
-
 
 	err = dn_check_state(sk, addr, addr_len, &timeo, flags);
 	if (err)

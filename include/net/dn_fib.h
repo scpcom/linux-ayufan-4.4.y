@@ -41,7 +41,6 @@ struct dn_fib_info {
 #define dn_fib_dev		fib_nh[0].nh_dev
 };
 
-
 #define DN_FIB_RES_RESET(res)	((res).nh_sel = 0)
 #define DN_FIB_RES_NH(res)	((res).fi->fib_nh[(res).nh_sel])
 
@@ -71,7 +70,6 @@ struct dn_fib_node {
 	u8		fn_scope;
 	u8		fn_state;
 };
-
 
 struct dn_fib_table {
 	struct hlist_node hlist;

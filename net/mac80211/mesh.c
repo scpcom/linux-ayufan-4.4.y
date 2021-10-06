@@ -1370,7 +1370,6 @@ out:
 	sdata_unlock(sdata);
 }
 
-
 void ieee80211_mesh_init_sdata(struct ieee80211_sub_if_data *sdata)
 {
 	struct ieee80211_if_mesh *ifmsh = &sdata->u.mesh;

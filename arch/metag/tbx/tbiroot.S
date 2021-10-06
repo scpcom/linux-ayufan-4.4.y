@@ -19,7 +19,6 @@
  */
 #include <asm/tbx.h>
 
-
 /* If signals need to be exchanged we must create a TBI Root Block */
 
 	.data
@@ -30,7 +29,6 @@ ___pTBIs:
 	.long	0 /* Bgnd+Int root block ptrs */
 	.long	0
 	.size	___pTBIs,.-___pTBIs
-
 
 /*
  * Return ___pTBIs value specific to execution level with promotion/demotion
@@ -50,7 +48,6 @@ ___TBI:
 	SWAPNZ	D0Re0,D1Re0			/* Swap if asked */
 	MOV	PC,D1RtP
 	.size	___TBI,.-___TBI
-
 
 /*
  * Return identifier of the current thread in TBI segment or signal format with
@@ -80,7 +77,6 @@ ___TBIThreadId:
 	MOV 	PC,D1RtP			/* Return */
 	.size	___TBIThrdPrivId,.-___TBIThrdPrivId
 	.size	___TBIThreadId,.-___TBIThreadId 
-
 
 /*
  * End of tbiroot.S

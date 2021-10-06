@@ -212,7 +212,6 @@ static __inline__ unsigned char parport_pc_read_status(struct parport *p)
 	return inb(STATUS(p));
 }
 
-
 static __inline__ void parport_pc_disable_irq(struct parport *p)
 {
 	__parport_pc_frob_control (p, 0x10, 0x00);

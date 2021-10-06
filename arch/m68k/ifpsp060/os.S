@@ -296,7 +296,6 @@ dmwluae:movs.l		%d0,(%a0)		| store user longword
 dmwls:	move.l		%d0,(%a0)		| store super longword
 	rts
 
-
 #if 0
 |###############################################
 
@@ -375,8 +374,6 @@ _060_real_trace:
 	.global		_060_real_access
 _060_real_access:
 	bral	buserr
-
-
 
 | Execption handling for movs access to illegal memory
 	.section .fixup,#alloc,#execinstr

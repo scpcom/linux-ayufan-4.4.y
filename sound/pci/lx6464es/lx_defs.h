@@ -86,15 +86,12 @@
 						    * management: notify driver
 						    * instead of polling */
 
-
 #define MAX_STREAM_BUFFER 5	/* max amount of stream buffers. */
 
 #define MICROBLAZE_IBL_MIN		 32
 #define MICROBLAZE_IBL_DEFAULT	        128
 #define MICROBLAZE_IBL_MAX		512
 /* #define MASK_GRANULARITY		(2*MICROBLAZE_IBL_MAX-1) */
-
-
 
 /* command opcodes, see reference for details */
 
@@ -187,10 +184,8 @@ enum stream_flags {
 	SF_ASIO		= 0x80000000, /* ASIO.*/
 };
 
-
 #define MASK_SPL_COUNT_HI 0x00FFFFFF /* 4 MSBits are status bits */
 #define PSTATE_OFFSET             28 /* 4 MSBits are status bits */
-
 
 #define MASK_STREAM_HAS_MAPPING	(1L << 12)
 #define MASK_STREAM_IS_ASIO	(1L <<  9)
@@ -210,7 +205,6 @@ enum stream_flags {
 
 #define MASK_BUFFER_ID	        0xFF /* the cancel command awaits a buffer ID,
 				      * may be 0xFF for "current". */
-
 
 /* code adapted from PcxErr_e.h */
 
@@ -256,7 +250,6 @@ enum stream_flags {
 #define E_CLASS_REAL_TIME_ERROR          0x0600
 #define E_CLASS_DIRECTSHOW               0x0700
 #define E_CLASS_FREE                     0x0700
-
 
 /* Complete DRV error code for the general class */
 #define ED_GN           (ERROR_VALUE | E_SOURCE_DRV | E_CLASS_GENERAL)
@@ -369,8 +362,5 @@ enum stream_flags {
 #define EB_SPC_REFUSED                  (EB_WCC | 0xFD)
 #define EB_CSN_REFUSED                  (EB_WCC | 0xFE)
 #define EB_CSE_REFUSED                  (EB_WCC | 0xFF)
-
-
-
 
 #endif /* LX_DEFS_H */

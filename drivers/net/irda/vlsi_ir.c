@@ -1354,7 +1354,6 @@ static void vlsi_tx_timeout(struct net_device *ndev)
 {
 	vlsi_irda_dev_t *idev = netdev_priv(ndev);
 
-
 	vlsi_reg_debug(ndev->base_addr, __func__);
 	vlsi_ring_debug(idev->tx_ring);
 
@@ -1708,7 +1707,6 @@ static void vlsi_irda_remove(struct pci_dev *pdev)
  * operations on our own (particularly reflecting the pdev->current_state)
  * otherwise we might get cheated by pci-pm.
  */
-
 
 static int vlsi_irda_suspend(struct pci_dev *pdev, pm_message_t state)
 {

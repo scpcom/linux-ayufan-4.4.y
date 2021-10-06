@@ -876,5 +876,4 @@ vmci_q_header_buf_ready(const struct vmci_queue_header *consume_q_header,
 	return consume_q_size - free_space - 1;
 }
 
-
 #endif /* _VMW_VMCI_DEF_H_ */

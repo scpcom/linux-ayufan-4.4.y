@@ -373,7 +373,6 @@ const char *parse_sdma_flags(
 
 #define __parse_sdma_flags(desc0, desc1) parse_sdma_flags(p, desc0, desc1)
 
-
 #define lrh_name(lrh) { HFI1_##lrh, #lrh }
 #define show_lnh(lrh)                    \
 __print_symbolic(lrh,                    \
@@ -418,7 +417,6 @@ __print_symbolic(opcode,                                   \
 	ib_opcode_name(UC_RDMA_WRITE_ONLY_WITH_IMMEDIATE), \
 	ib_opcode_name(UD_SEND_ONLY),                      \
 	ib_opcode_name(UD_SEND_ONLY_WITH_IMMEDIATE))
-
 
 #define LRH_PRN "vl %d lver %d sl %d lnh %d,%s dlid %.4x len %d slid %.4x"
 #define BTH_PRN \
@@ -554,7 +552,6 @@ DEFINE_EVENT(hfi1_ibhdr_template, output_ibhdr,
 
 #undef TRACE_SYSTEM
 #define TRACE_SYSTEM hfi1_snoop
-
 
 TRACE_EVENT(snoop_capture,
 	TP_PROTO(struct hfi1_devdata *dd,
@@ -751,7 +748,6 @@ DECLARE_EVENT_CLASS(hfi1_bct_template,
 		BCT(vl[15].shared)
 	)
 );
-
 
 DEFINE_EVENT(hfi1_bct_template, bct_set,
 	     TP_PROTO(struct hfi1_devdata *dd, struct buffer_control *bc),

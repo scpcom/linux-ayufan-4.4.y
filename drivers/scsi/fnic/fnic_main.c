@@ -718,7 +718,6 @@ static int fnic_probe(struct pci_dev *pdev, const struct pci_device_id *ent)
 		goto err_out_clear_intr;
 	}
 
-
 	/* initialize all fnic locks */
 	spin_lock_init(&fnic->fnic_lock);
 
@@ -1157,4 +1156,3 @@ static void __exit fnic_cleanup_module(void)
 
 module_init(fnic_init_module);
 module_exit(fnic_cleanup_module);
-

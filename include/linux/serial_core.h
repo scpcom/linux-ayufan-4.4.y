@@ -20,7 +20,6 @@
 #ifndef LINUX_SERIAL_CORE_H
 #define LINUX_SERIAL_CORE_H
 
-
 #include <linux/compiler.h>
 #include <linux/interrupt.h>
 #include <linux/circ_buf.h>
@@ -284,7 +283,6 @@ struct uart_state {
 };
 
 #define UART_XMIT_SIZE	PAGE_SIZE
-
 
 /* number of characters left in xmit buffer before we ask for more */
 #define WAKEUP_CHARS		256

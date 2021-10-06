@@ -5,7 +5,6 @@
  * Copyright (C) 2004  Andriy Skulysh
  */
 
-
 #define ADDRAH	0xa4000080
 #define ADDRAL	0xa4000082
 #define ADDRBH	0xa4000084

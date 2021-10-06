@@ -12,7 +12,6 @@
 #include <stddef.h>
 #include <dwarf-regs.h>
 
-
 struct pt_regs_dwarfnum {
 	const char *name;
 	unsigned int dwarfnum;

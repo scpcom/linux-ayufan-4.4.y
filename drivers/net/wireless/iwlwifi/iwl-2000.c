@@ -52,7 +52,6 @@
 #define EEPROM_2000_TX_POWER_VERSION	(6)
 #define EEPROM_2000_EEPROM_VERSION	(0x805)
 
-
 #define IWL2030_FW_PRE "iwlwifi-2030-"
 #define IWL2030_MODULE_FIRMWARE(api) IWL2030_FW_PRE __stringify(api) ".ucode"
 
@@ -77,7 +76,6 @@ static const struct iwl_base_params iwl2000_base_params = {
 	.shadow_reg_enable = false, /* TODO: fix bugs using this feature */
 	.scd_chain_ext_wa = true,
 };
-
 
 static const struct iwl_base_params iwl2030_base_params = {
 	.eeprom_size = OTP_LOW_IMAGE_SIZE,
@@ -125,7 +123,6 @@ static const struct iwl_eeprom_params iwl20x0_eeprom_params = {
 	.eeprom_params = &iwl20x0_eeprom_params,		\
 	.led_mode = IWL_LED_RF_STATE,				\
 	.max_ht_ampdu_exponent = IEEE80211_HT_MAX_AMPDU_64K
-
 
 const struct iwl_cfg iwl2000_2bgn_cfg = {
 	.name = "Intel(R) Centrino(R) Wireless-N 2200 BGN",

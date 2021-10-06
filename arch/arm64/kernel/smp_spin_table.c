@@ -48,7 +48,6 @@ static void write_pen_release(u64 val)
 	__flush_dcache_area(start, size);
 }
 
-
 static int smp_spin_table_cpu_init(unsigned int cpu)
 {
 	struct device_node *dn;

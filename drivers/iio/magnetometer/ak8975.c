@@ -484,7 +484,6 @@ static int ak8975_setup_irq(struct ak8975_data *data)
 	return rc;
 }
 
-
 /*
  * Perform some start-of-day setup, including reading the asa calibration
  * values and caching them.

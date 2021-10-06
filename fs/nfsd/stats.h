@@ -8,7 +8,6 @@
 
 #include <uapi/linux/nfsd/stats.h>
 
-
 struct nfsd_stats {
 	unsigned int	rchits;		/* repcache hits */
 	unsigned int	rcmisses;	/* repcache hits */
@@ -32,7 +31,6 @@ struct nfsd_stats {
 #endif
 
 };
-
 
 extern struct nfsd_stats	nfsdstats;
 extern struct svc_stat		nfsd_svcstats;

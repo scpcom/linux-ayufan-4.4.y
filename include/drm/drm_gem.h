@@ -169,7 +169,6 @@ int drm_gem_handle_create(struct drm_file *file_priv,
 			  u32 *handlep);
 int drm_gem_handle_delete(struct drm_file *filp, u32 handle);
 
-
 void drm_gem_free_mmap_offset(struct drm_gem_object *obj);
 int drm_gem_create_mmap_offset(struct drm_gem_object *obj);
 int drm_gem_create_mmap_offset_size(struct drm_gem_object *obj, size_t size);

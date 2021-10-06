@@ -127,7 +127,6 @@
 /* FIFO Ready */
 #define CL_SD_STS_FIFORDY(x)	CL_SD_CTL_FIFOLC(x)
 
-
 /* CL: Stream Descriptor x Last Valid Index */
 #define CL_SD_LVI_SHIFT			0
 #define CL_SD_LVI_MASK			(0xff << CL_SD_LVI_SHIFT)

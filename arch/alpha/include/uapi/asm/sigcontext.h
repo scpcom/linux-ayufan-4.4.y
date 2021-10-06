@@ -30,5 +30,4 @@ struct sigcontext {
 	 unsigned long	sc_fp_trigger_inst;
 };
 
-
 #endif

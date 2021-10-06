@@ -346,5 +346,3 @@ static void ircomm_ttp_flow_indication(void *instance, void *sap,
 	if (self->notify.flow_indication)
 		self->notify.flow_indication(self->notify.instance, self, cmd);
 }
-
-

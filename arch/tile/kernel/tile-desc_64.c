@@ -2129,9 +2129,6 @@ const struct tilegx_operand tilegx_operands[35] =
   }
 };
 
-
-
-
 /* Given a set of bundle bits and the lookup FSM for a specific pipe,
  * returns which instruction the bundle contains in that pipe.
  */
@@ -2153,7 +2150,6 @@ find_opcode(tilegx_bundle_bits bits, const unsigned short *table)
     index = next - TILEGX_OPC_NONE;
   }
 }
-
 
 int
 parse_insn_tilegx(tilegx_bundle_bits bits,

@@ -366,7 +366,6 @@ static const struct key_entry asus_keymap[] = {
 	{KE_END, 0},
 };
 
-
 /*
  * This function evaluates an ACPI method, given an int as parameter, the
  * method is searched within the scope of the handle, can be NULL. The output
@@ -1402,7 +1401,6 @@ static int asus_rfkill_init(struct asus_laptop *asus)
 	if (result)
 		goto exit;
 
-
 	if (!acpi_check_handle(asus->handle, METHOD_WLAN, NULL) &&
 	    asus->wled_type == TYPE_RFKILL)
 		result = asus_rfkill_setup(asus, &asus->wlan, "asus-wlan",
@@ -1654,7 +1652,6 @@ normal:
 
 	return supported ? attr->mode : 0;
 }
-
 
 static const struct attribute_group asus_attr_group = {
 	.is_visible	= asus_sysfs_is_visible,

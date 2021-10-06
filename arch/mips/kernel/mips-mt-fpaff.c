@@ -186,7 +186,6 @@ out_unlock:
 	return real_len;
 }
 
-
 static int __init fpaff_thresh(char *str)
 {
 	get_option(&str, &fpaff_threshold);

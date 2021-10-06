@@ -86,7 +86,6 @@ static const u_short my_sagp = 0xffff ;	/* short group address (n.u.) */
 #define MA	smc->hw.fddi_home_addr
 #endif
 
-
 /*
  * useful interrupt bits
  */
@@ -106,7 +105,6 @@ static const int mac_imsk3l = FM_SRPERRQ2 | FM_SRPERRQ1 ;
 
 static const int mac_beacon_imsk2u = FM_SOTRBEC | FM_SMYBEC | FM_SBEC |
 			FM_SLOCLM | FM_SHICLM | FM_SMYCLM | FM_SCLM ;
-
 
 static u_long mac_get_tneg(struct s_smc *smc)
 {
@@ -324,7 +322,6 @@ static void init_tx(struct s_smc *smc)
 	smc->hw.fp.tx[QUEUE_A0] = queue = &smc->hw.fp.tx_q[QUEUE_A0] ;
 	queue->tx_bmu_ctl = (HW_PTR) ADDR(B0_XA_CSR) ;
 	queue->tx_bmu_dsc = (HW_PTR) ADDR(B5_XA_DA) ;
-
 
 	llc_recover_tx(smc) ;
 }
@@ -649,7 +646,6 @@ static void disable_formac(struct s_smc *smc)
 	outpw(FM_A(FM_IMSK3L),MW) ;
 }
 
-
 static void mac_ring_up(struct s_smc *smc, int up)
 {
 	if (up) {
@@ -813,7 +809,6 @@ void mac3_irq(struct s_smc *smc, u_short code_s3u, u_short code_s3l)
 		smt_stat_counter(smc,1);
 	}
 
-
 	if (code_s3u & FM_SRPERRQ2) {	/* parity error receive queue 2 */
 		SMT_PANIC(smc,SMT_E0115, SMT_E0115_MSG) ;
 	}
@@ -821,7 +816,6 @@ void mac3_irq(struct s_smc *smc, u_short code_s3u, u_short code_s3l)
 		SMT_PANIC(smc,SMT_E0116, SMT_E0116_MSG) ;
 	}
 }
-
 
 /*
  * take formac offline
@@ -992,7 +986,6 @@ static int init_mac(struct s_smc *smc, int all)
 
 	return 0;
 }
-
 
 /*
  * called by CFM
@@ -1415,7 +1408,6 @@ static void smt_split_up_fifo(struct s_smc *smc)
 	TRANSMIT BUFFER MEMORY DIVERSION
 	-------------------------------------------------------------
 
-
 		 | no sync bw	| sync bw available and | sync bw available and
 		 | available	| SynchTxMode = SPLIT	| SynchTxMode = ALL
 	-----------------------------------------------------------------------
@@ -1489,4 +1481,3 @@ void formac_reinit_tx(struct s_smc *smc)
 		(void)init_mac(smc,0) ;
 	}
 }
-

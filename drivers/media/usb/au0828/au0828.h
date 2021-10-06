@@ -279,7 +279,6 @@ struct au0828_dev {
 	char *dig_transfer_buffer[URB_COUNT];
 };
 
-
 /* ----------------------------------------------------------- */
 #define au0828_read(dev, reg) au0828_readreg(dev, reg)
 #define au0828_write(dev, reg, value) au0828_writereg(dev, reg, value)

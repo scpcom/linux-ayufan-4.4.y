@@ -167,7 +167,6 @@ enum i2400m_brh {
 	I2400M_BRH_USE_CHECKSUM = 0x00000100,
 };
 
-
 /**
  * i2400m_bootrom_header - Header for a boot-mode command
  *
@@ -185,7 +184,6 @@ struct i2400m_bootrom_header {
 	char payload[0];
 } __attribute__ ((packed));
 
-
 /*
  * Data / control protocol
  */
@@ -201,7 +199,6 @@ enum i2400m_pt {
 	I2400M_PT_ILLEGAL
 };
 
-
 /*
  * Payload for a data packet
  *
@@ -210,7 +207,6 @@ enum i2400m_pt {
 struct i2400m_pl_data_hdr {
 	__le32 reserved;
 } __attribute__((packed));
-
 
 /*
  * Payload for an extended data packet
@@ -253,7 +249,6 @@ enum i2400m_ro_type {
 	I2400M_RO_TYPE_PACKET_WS,
 };
 
-
 /* Misc constants */
 enum {
 	I2400M_PL_ALIGN = 16,	/* Payload data size alignment */
@@ -270,7 +265,6 @@ enum {
 	I2400M_ACK_BARKER = 0xfeedbabe,
 	I2400M_D2H_MSG_BARKER = 0xbeefbabe,
 };
-
 
 /*
  * Hardware payload descriptor
@@ -322,8 +316,6 @@ struct i2400m_msg_hdr {
 	struct i2400m_pld pld[0];
 } __attribute__ ((packed));
 
-
-
 /*
  * L3/L4 control protocol
  */
@@ -373,7 +365,6 @@ enum i2400m_mt {
 	I2400M_MT_REPORT_KEY_REQUEST 	= 0xe005,
 };
 
-
 /*
  * Message Ack Status codes
  *
@@ -399,7 +390,6 @@ enum i2400m_ms {
 	I2400M_MS_MAX
 };
 
-
 /**
  * i2400m_tlv - enumeration of the different types of TLVs
  *
@@ -420,13 +410,11 @@ enum i2400m_tlv {
 	I2400M_TLV_CONFIG_DL_HOST_REORDER = 615,
 };
 
-
 struct i2400m_tlv_hdr {
 	__le16 type;
 	__le16 length;		/* payload's */
 	__u8   pl[0];
 } __attribute__((packed));
-
 
 struct i2400m_l3l4_hdr {
 	__le16 type;
@@ -437,7 +425,6 @@ struct i2400m_l3l4_hdr {
 	__le16 resv2;
 	struct i2400m_tlv_hdr pl[0];
 } __attribute__((packed));
-
 
 /**
  * i2400m_system_state - different states of the device
@@ -463,7 +450,6 @@ enum i2400m_system_state {
 	I2400M_SS_MAX,
 };
 
-
 /**
  * i2400m_tlv_system_state - report on the state of the system
  *
@@ -474,7 +460,6 @@ struct i2400m_tlv_system_state {
 	__le32 state;
 } __attribute__((packed));
 
-
 struct i2400m_tlv_l4_message_versions {
 	struct i2400m_tlv_hdr hdr;
 	__le16 major;
@@ -483,14 +468,12 @@ struct i2400m_tlv_l4_message_versions {
 	__le16 reserved;
 } __attribute__((packed));
 
-
 struct i2400m_tlv_detailed_device_info {
 	struct i2400m_tlv_hdr hdr;
 	__u8 reserved1[400];
 	__u8 mac_address[ETH_ALEN];
 	__u8 reserved2[2];
 } __attribute__((packed));
-
 
 enum i2400m_rf_switch_status {
 	I2400M_RF_SWITCH_ON = 1,
@@ -504,7 +487,6 @@ struct i2400m_tlv_rf_switches_status {
 	__u8 reserved[2];
 } __attribute__((packed));
 
-
 enum {
 	i2400m_rf_operation_on = 1,
 	i2400m_rf_operation_off = 2
@@ -514,7 +496,6 @@ struct i2400m_tlv_rf_operation {
 	struct i2400m_tlv_hdr hdr;
 	__le32 status;	/* 1 ON, 2 OFF */
 } __attribute__((packed));
-
 
 enum i2400m_tlv_reset_type {
 	I2400M_RESET_TYPE_COLD = 1,
@@ -526,14 +507,12 @@ struct i2400m_tlv_device_reset_type {
 	__le32 reset_type;
 } __attribute__((packed));
 
-
 struct i2400m_tlv_config_idle_parameters {
 	struct i2400m_tlv_hdr hdr;
 	__le32 idle_timeout;	/* 100 to 300000 ms [5min], 100 increments
 				 * 0 disabled */
 	__le32 idle_paging_interval;	/* frames */
 } __attribute__((packed));
-
 
 enum i2400m_media_status {
 	I2400M_MEDIA_STATUS_LINK_UP = 1,
@@ -545,7 +524,6 @@ struct i2400m_tlv_media_status {
 	struct i2400m_tlv_hdr hdr;
 	__le32 media_status;
 } __attribute__((packed));
-
 
 /* New in v1.4 */
 struct i2400m_tlv_config_idle_timeout {
@@ -567,6 +545,5 @@ struct i2400m_tlv_config_dl_host_reorder {
 	__u8 reorder; 		/* 0 disabled, 1 enabled */
 	__u8 reserved[3];
 } __attribute__((packed));
-
 
 #endif /* #ifndef __LINUX__WIMAX__I2400M_H__ */

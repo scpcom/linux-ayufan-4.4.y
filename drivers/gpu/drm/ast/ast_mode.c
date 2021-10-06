@@ -219,7 +219,6 @@ static bool ast_get_vbios_mode_info(struct drm_crtc *crtc, struct drm_display_mo
 
 	return true;
 
-
 }
 static void ast_set_std_reg(struct drm_crtc *crtc, struct drm_display_mode *mode,
 			    struct ast_vbios_mode_info *vbios_mode)
@@ -614,7 +613,6 @@ static void ast_crtc_commit(struct drm_crtc *crtc)
 	ast_set_index_reg_mask(ast, AST_IO_SEQ_PORT, 0x1, 0xdf, 0);
 }
 
-
 static const struct drm_crtc_helper_funcs ast_crtc_helper_funcs = {
 	.dpms = ast_crtc_dpms,
 	.mode_fixup = ast_crtc_mode_fixup,
@@ -690,7 +688,6 @@ static void ast_encoder_destroy(struct drm_encoder *encoder)
 	kfree(encoder);
 }
 
-
 static struct drm_encoder *ast_best_single_encoder(struct drm_connector *connector)
 {
 	int enc_id = connector->encoder_ids[0];
@@ -699,7 +696,6 @@ static struct drm_encoder *ast_best_single_encoder(struct drm_connector *connect
 		return drm_encoder_find(connector->dev, enc_id);
 	return NULL;
 }
-
 
 static const struct drm_encoder_funcs ast_enc_funcs = {
 	.destroy = ast_encoder_destroy,
@@ -732,7 +728,6 @@ static void ast_encoder_commit(struct drm_encoder *encoder)
 {
 
 }
-
 
 static const struct drm_encoder_helper_funcs ast_enc_helper_funcs = {
 	.dpms = ast_encoder_dpms,

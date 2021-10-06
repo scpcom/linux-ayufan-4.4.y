@@ -322,7 +322,6 @@ extern int num_io_requests;
 #define MVR_PCI_WIN1_REMAP      (u32)(0x00008438)
     #define MVRPW1R_ENABLE      (u32)(0x00000001)
 
-
 /* structures */
 
 /* inbound list dynamic source entry */

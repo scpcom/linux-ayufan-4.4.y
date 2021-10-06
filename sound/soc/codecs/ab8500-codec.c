@@ -301,7 +301,6 @@ static const struct snd_kcontrol_new dapm_ad2_select[] = {
 	SOC_DAPM_ENUM("AD2 Source Select", dapm_enum_ad2_sel),
 };
 
-
 /* ANC */
 
 static const char * const enum_anc_in_sel[] = {"Mic 1 / DMic 6",
@@ -323,8 +322,6 @@ static const struct snd_kcontrol_new dapm_anc_ear_mute[] = {
 	SOC_DAPM_SINGLE("Switch", AB8500_DIGMULTCONF1,
 			AB8500_DIGMULTCONF1_ANCSEL, 1, 0),
 };
-
-
 
 /* Sidetone left */
 
@@ -887,7 +884,6 @@ static const struct snd_soc_dapm_route ab8500_dapm_routes[] = {
 
 	{"Vibra 1", NULL, "VIB1 Enable"},
 	{"Vibra 2", NULL, "VIB2 Enable"},
-
 
 	/* Mic 2 */
 

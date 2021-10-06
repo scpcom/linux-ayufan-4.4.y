@@ -967,7 +967,6 @@ sn_sal_console_write(struct console *co, const char *s, unsigned count)
 	}
 }
 
-
 /**
  * sn_sal_console_setup - Set up console for early printing
  * @co: Console to work with

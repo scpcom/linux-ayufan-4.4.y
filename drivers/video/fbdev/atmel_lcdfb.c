@@ -460,7 +460,6 @@ static const struct fb_videomode *atmel_lcdfb_choose_mode(struct fb_var_screenin
 	return fbmode;
 }
 
-
 /**
  *      atmel_lcdfb_check_var - Validates a var passed in.
  *      @var: frame buffer variable screen structure
@@ -701,7 +700,6 @@ static int atmel_lcdfb_set_par(struct fb_info *info)
 		dev_dbg(info->device, "  updated pixclk:     %lu KHz\n",
 					PICOS2KHZ(info->var.pixclock));
 	}
-
 
 	/* Initialize control register 2 */
 	value = pdata->default_lcdcon2;

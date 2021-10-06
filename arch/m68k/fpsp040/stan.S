@@ -182,7 +182,6 @@ TANOK1:
 	blts		TANMAIN
 	bra		REDUCEX
 
-
 TANMAIN:
 |--THIS IS THE USUAL CASE, |X| <= 15 PI.
 |--THE ARGUMENT REDUCTION IS DONE BY TABLE LOOK UP.
@@ -237,9 +236,7 @@ TANCONT:
 
 	fmulx		%fp3,%fp1		| ...S(Q1+S(Q2+S(Q3+SQ4)))
 
-
 	faddx		%fp2,%fp0		| ...R+RS(P1+S(P2+SP3))
-
 
 	fadds		#0x3F800000,%fp1	| ...1+S(Q1+...)
 
@@ -275,10 +272,8 @@ NODD:
 
 	fmulx		%fp3,%fp0		| ...S(Q1+S(Q2+S(Q3+SQ4)))
 
-
 	faddx		%fp2,%fp1		| ...R+RS(P1+S(P2+SP3))
 	fadds		#0x3F800000,%fp0	| ...1+S(Q1+...)
-
 
 	fmovex		%fp1,-(%sp)
 	eoril		#0x80000000,(%sp)
@@ -301,7 +296,6 @@ TANSM:
 	fmovex		(%sp)+,%fp0	|last inst - possible exception set
 
 	bra		t_frcinx
-
 
 REDUCEX:
 |--WHEN REDUCEX IS USED, THE CODE WILL INEVITABLY BE SLOW.
@@ -444,10 +438,8 @@ RESTORE:
 	movel		(%a7)+,%d2
 	fmovemx	(%a7)+,%fp2-%fp5
 
-
 	movel		N(%a6),%d0
         rorl		#1,%d0
-
 
 	bra		TANCONT
 

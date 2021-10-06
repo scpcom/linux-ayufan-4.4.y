@@ -26,7 +26,6 @@
 #define MIPS_CPU_IPI_RESCHED_IRQ 0	/* SW int 0 for resched */
 #define MIPS_CPU_IPI_CALL_IRQ 1		/* SW int 1 for call */
 
-
 static void ipi_resched_dispatch(void)
 {
 	do_IRQ(MIPS_CPU_IPI_RESCHED_IRQ);

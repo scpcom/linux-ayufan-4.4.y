@@ -121,7 +121,6 @@ static u8 i2c_atmel_read_status(struct tpm_chip *chip)
 	priv->len = 0;
 	memset(priv->buffer, 0, sizeof(priv->buffer));
 
-
 	/* Once the TPM has completed the command the command remains readable
 	 * until another command is issued. */
 	rc = i2c_master_recv(client, priv->buffer, sizeof(priv->buffer));

@@ -1165,7 +1165,6 @@ static int do_mmap_private(struct vm_area_struct *vma,
 		 * make a private copy of the data and map that instead */
 	}
 
-
 	/* allocate some memory to hold the mapping
 	 * - note that this may not return a page-aligned address if the object
 	 *   we're allocating is smaller than a page

@@ -187,7 +187,6 @@ extern const struct attribute_group *pcibus_groups[];
 extern struct device_type pci_dev_type;
 extern const struct attribute_group *pci_bus_groups[];
 
-
 /**
  * pci_match_one_device - Tell if a PCI device structure has a matching
  *                        PCI device id structure

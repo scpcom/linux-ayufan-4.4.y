@@ -37,7 +37,6 @@ int hwwep = 1;
 static int channels = 0x3fff;
 static char *ifname = "wlan%d";
 
-
 static struct rtl819x_ops rtl819xp_ops = {
 	.nic_type			= NIC_8192E,
 	.get_eeprom_size		= rtl92e_get_eeprom_size,
@@ -199,7 +198,6 @@ bool rtl92e_set_rf_state(struct net_device *dev,
 		if (!priv->rtllib->RfOffReason) {
 			priv->rtllib->RfOffReason = 0;
 			bActionAllowed = true;
-
 
 			if (rtState == eRfOff &&
 			    ChangeSource >= RF_CHANGE_BY_HW)
@@ -406,7 +404,6 @@ static void _rtl92e_qos_activate(void *data)
 
 	for (i = 0; i <  QOS_QUEUE_NUM; i++)
 		priv->rtllib->SetHwRegHandler(dev, HW_VAR_AC_PARAM, (u8 *)(&i));
-
 
 success:
 	mutex_unlock(&priv->mutex);
@@ -892,7 +889,6 @@ static void _rtl92e_init_priv_constant(struct net_device *dev)
 
 	pPSC->RegMaxLPSAwakeIntvl = 5;
 }
-
 
 static void _rtl92e_init_priv_variable(struct net_device *dev)
 {
@@ -1426,7 +1422,6 @@ static void _rtl92e_watchdog_wq_cb(void *data)
 		ieee->LinkDetectInfo.NumTxOkInPeriod > 100)
 			bBusyTraffic = true;
 
-
 		if (ieee->LinkDetectInfo.NumRxOkInPeriod > 4000 ||
 		    ieee->LinkDetectInfo.NumTxOkInPeriod > 4000) {
 			bHigherBusyTraffic = true;
@@ -1474,7 +1469,6 @@ static void _rtl92e_watchdog_wq_cb(void *data)
 			priv->check_roaming_cnt++;
 		else
 			priv->check_roaming_cnt = 0;
-
 
 		if (priv->check_roaming_cnt > 0) {
 			if (ieee->eRFPowerState == eRfOff)
@@ -1559,7 +1553,6 @@ void rtl92e_tx_enable(struct net_device *dev)
 
 	rtllib_reset_queue(priv->rtllib);
 }
-
 
 static void _rtl92e_free_rx_ring(struct net_device *dev)
 {
@@ -1962,12 +1955,10 @@ long rtl92e_translate_to_dbm(struct r8192_priv *priv, u8 signal_strength_index)
 	return signal_power;
 }
 
-
 void rtl92e_update_rx_statistics(struct r8192_priv *priv,
 				 struct rtllib_rx_stats *pprevious_stats)
 {
 	int weighting = 0;
-
 
 	if (priv->stats.recv_signal_power == 0)
 		priv->stats.recv_signal_power =
@@ -2017,8 +2008,6 @@ void rtl92e_copy_mpdu_stats(struct rtllib_rx_stats *psrc_stats,
 	ptarget_stats->bIsAMPDU = psrc_stats->bIsAMPDU;
 	ptarget_stats->bFirstMPDU = psrc_stats->bFirstMPDU;
 }
-
-
 
 static void _rtl92e_rx_normal(struct net_device *dev)
 {
@@ -2196,7 +2185,6 @@ static int _rtl92e_try_up(struct net_device *dev)
 	return _rtl92e_up(dev, false);
 }
 
-
 static int _rtl92e_close(struct net_device *dev)
 {
 	struct r8192_priv *priv = rtllib_priv(dev);
@@ -2259,7 +2247,6 @@ static void _rtl92e_set_multicast(struct net_device *dev)
 	priv->promisc = promisc;
 
 }
-
 
 static int _rtl92e_set_mac_adr(struct net_device *dev, void *mac)
 {
@@ -2399,7 +2386,6 @@ out:
 	return ret;
 }
 
-
 static irqreturn_t _rtl92e_irq(int irq, void *netdev)
 {
 	struct net_device *dev = (struct net_device *) netdev;
@@ -2533,8 +2519,6 @@ done:
 	return IRQ_HANDLED;
 }
 
-
-
 /****************************************************************************
 	---------------------------- PCI_STUFF---------------------------
 *****************************************************************************/
@@ -2610,7 +2594,6 @@ static int _rtl92e_pci_probe(struct pci_dev *pdev,
 		netdev_err(dev, "request_mem_region failed!");
 		goto err_rel_rtllib;
 	}
-
 
 	ioaddr = (unsigned long)ioremap_nocache(pmem_start, pmem_len);
 	if (ioaddr == (unsigned long)NULL) {

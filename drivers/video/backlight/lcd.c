@@ -333,7 +333,6 @@ void devm_lcd_device_unregister(struct device *dev, struct lcd_device *ld)
 }
 EXPORT_SYMBOL(devm_lcd_device_unregister);
 
-
 static void __exit lcd_class_exit(void)
 {
 	class_destroy(lcd_class);

@@ -45,7 +45,6 @@
 #define HST_STS_DONE	0x80
 #define HST_STS_BAD	0x1c
 
-
 #define HST_CNTL1_TIMEOUT	0x80
 #define HST_CNTL1_LAST		0x40
 
@@ -56,7 +55,6 @@
 #define HST_CNTL2_BYTE_DATA	0x02
 #define HST_CNTL2_WORD_DATA	0x03
 #define HST_CNTL2_BLOCK		0x05
-
 
 #define HST_CNTL2_SIZEMASK	0x38
 
@@ -329,7 +327,6 @@ static u32 ali1563_func(struct i2c_adapter *a)
 	    I2C_FUNC_SMBUS_BYTE_DATA | I2C_FUNC_SMBUS_WORD_DATA |
 	    I2C_FUNC_SMBUS_BLOCK_DATA;
 }
-
 
 static int ali1563_setup(struct pci_dev *dev)
 {

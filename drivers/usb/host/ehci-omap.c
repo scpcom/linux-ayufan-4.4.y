@@ -249,7 +249,6 @@ err_phy:
 	return ret;
 }
 
-
 /**
  * ehci_hcd_omap_remove - shutdown processing for EHCI HCDs
  * @pdev: USB Host Controller being removed

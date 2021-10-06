@@ -783,7 +783,6 @@ void __pm_wakeup_event(struct wakeup_source *ws, unsigned int msec)
 }
 EXPORT_SYMBOL_GPL(__pm_wakeup_event);
 
-
 /**
  * pm_wakeup_event - Notify the PM core of a wakeup event.
  * @dev: Device the wakeup event is related to.

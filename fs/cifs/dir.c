@@ -187,7 +187,6 @@ check_name(struct dentry *direntry)
 	return 0;
 }
 
-
 /* Inode operations in similar order to how they appear in Linux file fs.h */
 
 static int
@@ -634,7 +633,6 @@ int cifs_mknod(struct inode *inode, struct dentry *direntry, umode_t mode,
 
 	if (!(cifs_sb->mnt_cifs_flags & CIFS_MOUNT_UNX_EMUL))
 		goto mknod_out;
-
 
 	cifs_dbg(FYI, "sfu compat create special file\n");
 

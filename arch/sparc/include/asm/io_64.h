@@ -227,7 +227,6 @@ static inline void outl(u32 l, unsigned long addr)
 	writel(l, (volatile void __iomem *)addr);
 }
 
-
 #define inb_p(__addr) 		inb(__addr)
 #define outb_p(__b, __addr)	outb(__b, __addr)
 #define inw_p(__addr)		inw(__addr)
@@ -348,7 +347,6 @@ static inline void sbus_memcpy_fromio(void *dst, const volatile void __iomem *sr
 		src++;
 	}
 }
-
 
 static inline void memcpy_fromio(void *dst, const volatile void __iomem *src,
 				 __kernel_size_t n)

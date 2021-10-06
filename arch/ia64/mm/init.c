@@ -352,7 +352,6 @@ void ia64_mmu_init(void *my_cpu_data)
 		      " to cover mapped address space.\n"
 		      " Try using a smaller page size.\n");
 
-
 	/* place the VMLPT at the end of each page-table mapped region: */
 	pta = POW2(61) - POW2(vmlpt_bits);
 

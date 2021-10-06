@@ -28,7 +28,6 @@
 #include "hda_jack.h"
 #include "hda_generic.h"
 
-
 static const struct hda_codec_ops ca0110_patch_ops = {
 	.build_controls = snd_hda_gen_build_controls,
 	.build_pcms = snd_hda_gen_build_pcms,
@@ -51,7 +50,6 @@ static int ca0110_parse_auto_config(struct hda_codec *codec)
 
 	return 0;
 }
-
 
 static int patch_ca0110(struct hda_codec *codec)
 {
@@ -78,7 +76,6 @@ static int patch_ca0110(struct hda_codec *codec)
 	snd_hda_gen_free(codec);
 	return err;
 }
-
 
 /*
  * patch entries

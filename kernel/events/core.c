@@ -1657,7 +1657,6 @@ static int __perf_remove_from_context(void *info)
 	return 0;
 }
 
-
 /*
  * Remove the event from a task's (or a CPU's) list of events.
  *
@@ -5061,7 +5060,6 @@ static void perf_sample_regs_intr(struct perf_regs *regs_intr,
 	regs_intr->abi  = perf_reg_abi(current);
 }
 
-
 /*
  * Get remaining task size from user stack pointer.
  *
@@ -7880,7 +7878,6 @@ perf_event_alloc(struct perf_event_attr *attr, int cpu,
 	INIT_LIST_HEAD(&event->rb_entry);
 	INIT_LIST_HEAD(&event->active_entry);
 	INIT_HLIST_NODE(&event->hlist_entry);
-
 
 	init_waitqueue_head(&event->waitq);
 	init_irq_work(&event->pending, perf_pending_event);

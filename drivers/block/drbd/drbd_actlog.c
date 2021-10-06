@@ -30,7 +30,6 @@
 #include <linux/dynamic_debug.h>
 #include "drbd_int.h"
 
-
 enum al_transaction_types {
 	AL_TR_UPDATE = 0,
 	AL_TR_INITIALIZED = 0xffff

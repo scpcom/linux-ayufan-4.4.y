@@ -35,7 +35,6 @@ struct disk_index_entry {
 	__le32 none_free_before;
 } __packed;
 
-
 #define MAX_METADATA_BITMAPS 255
 struct disk_metadata_index {
 	__le32 csum;

@@ -353,7 +353,6 @@ static const unsigned short seq_display_on[] = {
 	ENDDEF, 0x0000
 };
 
-
 static int s6e63m0_spi_write_byte(struct s6e63m0 *lcd, int addr, int data)
 {
 	u16 buf[1];
@@ -441,7 +440,6 @@ static int s6e63m0_gamma_ctl(struct s6e63m0 *lcd, int gamma)
 
 	return ret;
 }
-
 
 static int s6e63m0_ldi_init(struct s6e63m0 *lcd)
 {
@@ -854,4 +852,3 @@ module_spi_driver(s6e63m0_driver);
 MODULE_AUTHOR("InKi Dae <inki.dae@samsung.com>");
 MODULE_DESCRIPTION("S6E63M0 LCD Driver");
 MODULE_LICENSE("GPL");
-

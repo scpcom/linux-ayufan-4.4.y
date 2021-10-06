@@ -3,7 +3,6 @@
 #include <linux/string.h>
 #include <linux/kallsyms.h>
 
-
 #define DEBUG 1
 
 static struct iommu_table_entry * __init
@@ -22,7 +21,6 @@ find_dependents_of(struct iommu_table_entry *start,
 
 	return NULL;
 }
-
 
 void __init sort_iommu_table(struct iommu_table_entry *start,
 			     struct iommu_table_entry *finish) {

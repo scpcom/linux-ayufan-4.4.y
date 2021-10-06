@@ -431,7 +431,6 @@ static struct platform_driver uctrl_driver = {
 	.remove		= uctrl_remove,
 };
 
-
 module_platform_driver(uctrl_driver);
 
 MODULE_LICENSE("GPL");

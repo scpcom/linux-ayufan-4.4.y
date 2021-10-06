@@ -178,4 +178,3 @@ module_pci_driver(delkin_cb_pci_driver);
 MODULE_AUTHOR("Mark Lord");
 MODULE_DESCRIPTION("Basic support for Delkin/ASKA/Workbit Cardbus IDE");
 MODULE_LICENSE("GPL");
-

@@ -40,7 +40,6 @@ struct nouveau_channel {
 	struct nvif_object user;
 };
 
-
 int  nouveau_channel_new(struct nouveau_drm *, struct nvif_device *,
 			 u32 arg0, u32 arg1, struct nouveau_channel **);
 void nouveau_channel_del(struct nouveau_channel **);

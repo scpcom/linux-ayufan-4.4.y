@@ -52,7 +52,6 @@
 #include <pcmcia/cistpl.h>
 #include <pcmcia/ds.h>
 
-
 /*====================================================================*/
 
 /* Parameters that can be set with 'insmod' */

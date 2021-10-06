@@ -632,7 +632,6 @@ static inline void set_debugt(void) { }
 static inline void debugt(const char *func, const char *msg) { }
 #endif /* DEBUGT */
 
-
 static DECLARE_DELAYED_WORK(fd_timeout, floppy_shutdown);
 static const char *timeout_message;
 

@@ -128,7 +128,6 @@ struct radeon_fence *r200_copy_dma(struct radeon_device *rdev,
 	return fence;
 }
 
-
 static int r200_get_vtx_size_1(uint32_t vtx_fmt_1)
 {
 	int vtx_size, i, tex_size;

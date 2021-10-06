@@ -38,4 +38,3 @@ extern struct rw_semaphore trace_event_sem;
 	trace_seq_putmem_hex(s, &(x), sizeof(x))
 
 #endif
-

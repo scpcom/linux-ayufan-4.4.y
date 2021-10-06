@@ -2572,7 +2572,6 @@ static const unsigned char fontdata_8x8[FONTDATAMAX] = {
 
 };
 
-
 const struct font_desc font_vga_8x8 = {
 	.idx	= VGA8x8_IDX,
 	.name	= "VGA8x8",

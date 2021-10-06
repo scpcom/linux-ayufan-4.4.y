@@ -57,7 +57,6 @@ static struct sctp_hmac sctp_hmac_list[SCTP_AUTH_NUM_HMACS] = {
 #endif
 };
 
-
 void sctp_auth_key_put(struct sctp_auth_bytes *key)
 {
 	if (!key)
@@ -219,7 +218,6 @@ static struct sctp_auth_bytes *sctp_auth_make_key_vector(
 	return new;
 }
 
-
 /* Make a key vector based on our local parameters */
 static struct sctp_auth_bytes *sctp_auth_make_local_vector(
 				    const struct sctp_association *asoc,
@@ -242,7 +240,6 @@ static struct sctp_auth_bytes *sctp_auth_make_peer_vector(
 					 asoc->peer.peer_hmacs,
 					 gfp);
 }
-
 
 /* Set the value of the association shared key base on the parameters
  * given.  The algorithm is:
@@ -298,7 +295,6 @@ static struct sctp_auth_bytes *sctp_auth_asoc_create_secret(
 				*last_vector;
 	struct sctp_auth_bytes	*secret = NULL;
 	int	cmp;
-
 
 	/* Now we need to build the key vectors
 	 * SCTP-AUTH , Section 6.1
@@ -380,7 +376,6 @@ nomem:
 	return -ENOMEM;
 }
 
-
 /* Public interface to create the association shared key.
  * See code above for the algorithm.
  */
@@ -421,7 +416,6 @@ int sctp_auth_asoc_init_active_key(struct sctp_association *asoc, gfp_t gfp)
 
 	return 0;
 }
-
 
 /* Find the endpoint pair shared key based on the key_id */
 struct sctp_shared_key *sctp_auth_get_shkey(
@@ -514,7 +508,6 @@ void sctp_auth_destroy_hmacs(struct crypto_hash *auth_hmacs[])
 	kfree(auth_hmacs);
 }
 
-
 struct sctp_hmac *sctp_auth_get_hmac(__u16 hmac_id)
 {
 	return &sctp_hmac_list[hmac_id];
@@ -597,7 +590,6 @@ int sctp_auth_asoc_verify_hmac_id(const struct sctp_association *asoc,
 	return __sctp_auth_find_hmacid(hmacs->hmac_ids, n_elt, hmac_id);
 }
 
-
 /* Cache the default HMAC id.  This to follow this text from SCTP-AUTH:
  * Section 6.1:
  *   The receiver of a HMAC-ALGO parameter SHOULD use the first listed
@@ -632,7 +624,6 @@ void sctp_auth_asoc_set_default_hmac(struct sctp_association *asoc,
 		}
 	}
 }
-
 
 /* Check to see if the given chunk is supposed to be authenticated */
 static int __sctp_auth_cid(sctp_cid_t chunk, struct sctp_chunks_param *param)

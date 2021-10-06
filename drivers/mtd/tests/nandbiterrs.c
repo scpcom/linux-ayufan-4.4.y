@@ -262,7 +262,6 @@ exit:
 	return err;
 }
 
-
 /* Writes 'random' data to page and then re-writes that same data repeatedly.
    This eventually develops bit errors (bits written as '1' will slowly become
    '0'), which are corrected as far as the ECC is capable of. */

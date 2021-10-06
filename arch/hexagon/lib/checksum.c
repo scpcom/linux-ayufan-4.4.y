@@ -20,7 +20,6 @@
 
 /*  This was derived from arch/alpha/lib/checksum.c  */
 
-
 #include <linux/module.h>
 #include <linux/string.h>
 
@@ -28,7 +27,6 @@
 #include <net/checksum.h>
 #include <linux/uaccess.h>
 #include <asm/intrinsics.h>
-
 
 /*  Vector value operations  */
 #define SIGN(x, y)	((0x8000ULL*x)<<y)
@@ -41,7 +39,6 @@
 	+ CARRY(d, 0))
 #define VR_SELECT(a, b, c, d)	(SELECT(a, 48) + SELECT(b, 32) + SELECT(c, 16) \
 	+ SELECT(d, 0))
-
 
 /* optimized HEXAGON V3 intrinsic version */
 static inline unsigned short from64to16(u64 x)

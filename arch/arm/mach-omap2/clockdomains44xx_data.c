@@ -434,7 +434,6 @@ static struct clockdomain *clockdomains_omap44xx[] __initdata = {
 	NULL
 };
 
-
 void __init omap44xx_clockdomains_init(void)
 {
 	clkdm_register_platform_funcs(&omap4_clkdm_operations);

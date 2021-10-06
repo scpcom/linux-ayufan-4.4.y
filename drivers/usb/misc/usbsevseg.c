@@ -17,7 +17,6 @@
 #include <linux/string.h>
 #include <linux/usb.h>
 
-
 #define DRIVER_AUTHOR "Harrison Metzger <harrisonmetz@gmail.com>"
 #define DRIVER_DESC "USB 7 Segment Driver"
 
@@ -295,7 +294,6 @@ static ssize_t show_attr_textmode(struct device *dev,
 	}
 	strcat(buf, "\n");
 
-
 	return strlen(buf);
 }
 
@@ -318,7 +316,6 @@ static ssize_t set_attr_textmode(struct device *dev,
 }
 
 static DEVICE_ATTR(textmode, S_IRUGO | S_IWUSR, show_attr_textmode, set_attr_textmode);
-
 
 MYDEV_ATTR_SIMPLE_UNSIGNED(powered, update_display_powered);
 MYDEV_ATTR_SIMPLE_UNSIGNED(mode_msb, update_display_mode);

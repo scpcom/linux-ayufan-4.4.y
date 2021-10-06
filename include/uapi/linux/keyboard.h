@@ -22,7 +22,6 @@
 	may increase the number of keymaps beyond MAX_NR_OF_USER_KEYMAPS. */
 #define MAX_NR_OF_USER_KEYMAPS 256 	/* should be at least 7 */
 
-
 #define MAX_NR_FUNC	256	/* max nr of strings assigned to keys */
 
 #define KT_LATIN	0	/* we depend on this being zero */
@@ -301,7 +300,6 @@
 #define K_F244		K(KT_FN,253)
 #define K_F245		K(KT_FN,254)
 #define K_UNDO		K(KT_FN,255)
-
 
 #define K_HOLE		K(KT_SPEC,0)
 #define K_ENTER		K(KT_SPEC,1)

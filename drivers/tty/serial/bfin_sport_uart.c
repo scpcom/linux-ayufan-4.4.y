@@ -706,7 +706,6 @@ static struct console sport_uart_console = {
 #define SPORT_UART_CONSOLE	NULL
 #endif /* CONFIG_SERIAL_BFIN_SPORT_CONSOLE */
 
-
 static struct uart_driver sport_uart_reg = {
 	.owner		= THIS_MODULE,
 	.driver_name	= DRV_NAME,

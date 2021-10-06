@@ -35,7 +35,6 @@
 
 #include <asm/fb.h>
 
-
     /*
      *  Frame buffer device initialization and setup routines
      */
@@ -520,7 +519,6 @@ static int fb_show_logo_line(struct fb_info *info, int rotate,
 	return logo->height;
 }
 
-
 #ifdef CONFIG_FB_LOGO_EXTRA
 
 #define FB_LOGO_EX_NUM_MAX 10
@@ -591,7 +589,6 @@ static inline int fb_show_extra_logos(struct fb_info *info, int y, int rotate)
 
 #endif /* CONFIG_FB_LOGO_EXTRA */
 
-
 int fb_prepare_logo(struct fb_info *info, int rotate)
 {
 	int depth = fb_get_color_depth(&info->var, &info->fix);
@@ -640,7 +637,6 @@ int fb_prepare_logo(struct fb_info *info, int rotate)
 		fb_logo.depth = 4;
 	else
 		fb_logo.depth = 1;
-
 
  	if (fb_logo.depth > 4 && depth > 4) {
  		switch (info->fix.visual) {
@@ -965,7 +961,6 @@ fb_set_var(struct fb_info *info, struct fb_var_screeninfo *var)
 
 		if (!ret)
 		    fb_delete_videomode(&mode1, &info->modelist);
-
 
 		ret = (ret) ? -EINVAL : 0;
 		goto done;

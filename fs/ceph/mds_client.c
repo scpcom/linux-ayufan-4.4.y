@@ -56,7 +56,6 @@ static void __wake_requests(struct ceph_mds_client *mdsc,
 
 static const struct ceph_connection_operations mds_con_ops;
 
-
 /*
  * mds reply parsing
  */
@@ -341,7 +340,6 @@ static void destroy_reply_info(struct ceph_mds_reply_info_parsed *info)
 		return;
 	free_pages((unsigned long)info->dir_in, get_order(info->dir_buf_size));
 }
-
 
 /*
  * sessions
@@ -827,7 +825,6 @@ random:
 	dout("choose_mds chose random mds%d\n", mds);
 	return mds;
 }
-
 
 /*
  * session messages
@@ -1331,7 +1328,6 @@ static int send_flushmsg_ack(struct ceph_mds_client *mdsc,
 	ceph_con_send(&session->s_con, msg);
 	return 0;
 }
-
 
 /*
  * Note new cap ttl, and any transition from stale -> not stale (fresh?).
@@ -2462,7 +2458,6 @@ static void handle_reply(struct ceph_mds_session *session, struct ceph_msg *msg)
 		dout("have to return ESTALE on request %llu", req->r_tid);
 	}
 
-
 	if (head->safe) {
 		req->r_got_safe = true;
 		__unregister_request(mdsc, req);
@@ -2565,8 +2560,6 @@ out:
 	ceph_mdsc_put_request(req);
 	return;
 }
-
-
 
 /*
  * handle mds notification that our request has been forwarded.
@@ -2730,7 +2723,6 @@ bad:
 	return;
 }
 
-
 /*
  * called under session->mutex.
  */
@@ -2892,7 +2884,6 @@ out_dput:
 	return err;
 }
 
-
 /*
  * If an MDS fails and recovers, clients need to reconnect in order to
  * reestablish shared state.  This includes all caps issued through
@@ -3040,7 +3031,6 @@ fail_nopagelist:
 	return;
 }
 
-
 /*
  * compare old and new mdsmaps, kicking requests
  * and closing out old connections as necessary
@@ -3133,8 +3123,6 @@ static void check_new_map(struct ceph_mds_client *mdsc,
 		}
 	}
 }
-
-
 
 /*
  * leases
@@ -3354,8 +3342,6 @@ static void drop_leases(struct ceph_mds_client *mdsc)
 	}
 	mutex_unlock(&mdsc->mutex);
 }
-
-
 
 /*
  * delayed work -- periodically trim expired leases, renew caps with mds
@@ -3725,7 +3711,6 @@ void ceph_mdsc_destroy(struct ceph_fs_client *fsc)
 	dout("mdsc_destroy %p done\n", mdsc);
 }
 
-
 /*
  * handle mds map update.
  */
@@ -3899,7 +3884,6 @@ static struct ceph_auth_handshake *get_authorizer(struct ceph_connection *con,
 
 	return auth;
 }
-
 
 static int verify_authorizer_reply(struct ceph_connection *con, int len)
 {

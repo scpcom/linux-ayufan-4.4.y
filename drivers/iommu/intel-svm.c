@@ -235,7 +235,6 @@ static void intel_invalidate_range(struct mmu_notifier *mn,
 			      (end - start + PAGE_SIZE - 1) >> VTD_PAGE_SHIFT, 0, 0);
 }
 
-
 static void intel_flush_pasid_dev(struct intel_svm *svm, struct intel_svm_dev *sdev, int pasid)
 {
 	struct qi_desc desc;

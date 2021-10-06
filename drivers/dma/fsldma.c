@@ -990,7 +990,6 @@ static int fsl_dma_device_config(struct dma_chan *dchan,
 	return 0;
 }
 
-
 /**
  * fsl_dma_memcpy_issue_pending - Issue the DMA start command
  * @chan : Freescale DMA channel

@@ -1132,7 +1132,6 @@ int nilfs_sufile_trim_fs(struct inode *sufile, struct fstrim_range *range)
 		put_bh(su_bh);
 	}
 
-
 	if (nblocks) {
 		/* discard last extent */
 		if (start < start_block) {

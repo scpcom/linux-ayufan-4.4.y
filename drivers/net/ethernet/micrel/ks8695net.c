@@ -549,7 +549,6 @@ rx_finished:
 	return received;
 }
 
-
 /**
  *	ks8695_poll - Receive packet by NAPI poll method
  *	@ksp: Private data for the KS8695 Ethernet
@@ -612,7 +611,6 @@ ks8695_link_irq(int irq, void *dev_id)
 
 	return IRQ_HANDLED;
 }
-
 
 /* KS8695 Device functions */
 
@@ -715,7 +713,6 @@ ks8695_shutdown(struct ks8695_priv *ksp)
 		}
 	}
 }
-
 
 /**
  *	ks8695_setup_irq - IRQ setup helper function

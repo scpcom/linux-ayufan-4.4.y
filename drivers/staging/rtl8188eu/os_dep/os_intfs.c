@@ -264,7 +264,6 @@ static void rtw_proc_init_one(struct net_device *dev)
 	}
 	entry->write_proc = proc_set_read_reg;
 
-
 	entry = create_proc_read_entry("fwstate", S_IFREG | S_IRUGO,
 				   dir_dev, proc_get_fwstate, dev);
 	if (!entry) {
@@ -865,7 +864,6 @@ u8 rtw_init_drv_sw(struct adapter *padapter)
 {
 	u8	ret8 = _SUCCESS;
 
-
 	RT_TRACE(_module_os_intfs_c_, _drv_info_, ("+rtw_init_drv_sw\n"));
 
 	if ((rtw_init_cmd_priv(&padapter->cmdpriv)) == _FAIL) {
@@ -923,7 +921,6 @@ u8 rtw_init_drv_sw(struct adapter *padapter)
 
 exit:
 	RT_TRACE(_module_os_intfs_c_, _drv_info_, ("-rtw_init_drv_sw\n"));
-
 
 	return ret8;
 }
@@ -1095,7 +1092,6 @@ netdev_open_error:
 
 	return _FAIL;
 }
-
 
 int rtw_ips_pwr_up(struct adapter *padapter)
 {

@@ -247,7 +247,6 @@ DECLARE_EVENT_CLASS(random__extract_entropy,
 		  (void *)__entry->IP)
 );
 
-
 DEFINE_EVENT(random__extract_entropy, extract_entropy,
 	TP_PROTO(const char *pool_name, int nbytes, int entropy_count,
 		 unsigned long IP),

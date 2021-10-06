@@ -13,5 +13,4 @@ typedef struct _diva_um_idi_adapter {
 	dword status;
 } diva_um_idi_adapter_t;
 
-
 #endif

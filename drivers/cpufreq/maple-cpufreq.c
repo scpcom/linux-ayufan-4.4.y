@@ -242,5 +242,4 @@ bail_noprops:
 
 module_init(maple_cpufreq_init);
 
-
 MODULE_LICENSE("GPL");

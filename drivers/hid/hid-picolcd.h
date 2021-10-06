@@ -67,7 +67,6 @@ struct picolcd_pending {
 	u8 raw_data[64];
 };
 
-
 #define PICOLCD_KEYS 17
 
 /* Per device data structure */
@@ -179,7 +178,6 @@ static inline void picolcd_exit_devfs(struct picolcd_data *data)
 }
 #endif /* CONFIG_DEBUG_FS */
 
-
 #ifdef CONFIG_HID_PICOLCD_FB
 int picolcd_fb_reset(struct picolcd_data *data, int clear);
 
@@ -206,7 +204,6 @@ static inline void picolcd_fb_refresh(struct picolcd_data *data)
 }
 #define picolcd_fbinfo(d) NULL
 #endif /* CONFIG_HID_PICOLCD_FB */
-
 
 #ifdef CONFIG_HID_PICOLCD_BACKLIGHT
 int picolcd_init_backlight(struct picolcd_data *data,
@@ -236,7 +233,6 @@ static inline void picolcd_suspend_backlight(struct picolcd_data *data)
 
 #endif /* CONFIG_HID_PICOLCD_BACKLIGHT */
 
-
 #ifdef CONFIG_HID_PICOLCD_LCD
 int picolcd_init_lcd(struct picolcd_data *data,
 		struct hid_report *report);
@@ -259,7 +255,6 @@ static inline int picolcd_resume_lcd(struct picolcd_data *data)
 }
 #endif /* CONFIG_HID_PICOLCD_LCD */
 
-
 #ifdef CONFIG_HID_PICOLCD_LEDS
 int picolcd_init_leds(struct picolcd_data *data,
 		struct hid_report *report);
@@ -280,7 +275,6 @@ static inline void picolcd_leds_set(struct picolcd_data *data)
 {
 }
 #endif /* CONFIG_HID_PICOLCD_LEDS */
-
 
 #ifdef CONFIG_HID_PICOLCD_CIR
 int picolcd_raw_cir(struct picolcd_data *data,

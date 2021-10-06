@@ -373,7 +373,6 @@ static inline void da850_evm_setup_emac_rmii(int rmii_sel)
 static inline void da850_evm_setup_emac_rmii(int rmii_sel) { }
 #endif
 
-
 #define DA850_KEYS_DEBOUNCE_MS	10
 /*
  * At 200ms polling interval it is possible to miss an
@@ -1366,7 +1365,6 @@ static __init void da850_evm_init(void)
 	ret = da8xx_register_i2c(0, &da850_evm_i2c_0_pdata);
 	if (ret)
 		pr_warn("%s: I2C0 registration failed: %d\n", __func__, ret);
-
 
 	ret = da8xx_register_watchdog();
 	if (ret)

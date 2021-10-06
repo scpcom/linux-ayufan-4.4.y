@@ -82,7 +82,6 @@ dma_unmap_page(struct device *dev, dma_addr_t dma_address, size_t size,
 	dma_sync_for_cpu(phys_to_virt(dma_address), size, direction);
 }
 
-
 static inline void
 dma_unmap_sg(struct device *dev, struct scatterlist *sglist, int nhwentries,
 	     enum dma_data_direction direction)

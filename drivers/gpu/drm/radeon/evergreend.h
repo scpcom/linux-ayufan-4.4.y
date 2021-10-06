@@ -816,7 +816,6 @@
 #       define PIN3_AUDIO_ENABLED                         (1 << 27)
 #       define AUDIO_ENABLED                              (1 << 31)
 
-
 #define	GC_USER_SHADER_PIPE_CONFIG			0x8954
 #define		INACTIVE_QD_PIPES(x)				((x) << 8)
 #define		INACTIVE_QD_PIPES_MASK				0x0000FF00
@@ -1515,7 +1514,6 @@
 #define LINK_CNTL2                                        0x88 /* F0 */
 #       define TARGET_LINK_SPEED_MASK                     (0xf << 0)
 #       define SELECTABLE_DEEMPHASIS                      (1 << 6)
-
 
 /*
  * UVD

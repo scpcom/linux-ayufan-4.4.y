@@ -79,7 +79,6 @@ static void __gfs2_ail_flush(struct gfs2_glock *gl, bool fsync,
 	gfs2_log_unlock(sdp);
 }
 
-
 static void gfs2_ail_empty_gl(struct gfs2_glock *gl)
 {
 	struct gfs2_sbd *sdp = gl->gl_name.ln_sbd;
@@ -625,4 +624,3 @@ const struct gfs2_glock_operations *gfs2_glops_list[] = {
 	[LM_TYPE_QUOTA] = &gfs2_quota_glops,
 	[LM_TYPE_JOURNAL] = &gfs2_journal_glops,
 };
-

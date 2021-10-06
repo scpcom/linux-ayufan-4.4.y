@@ -1,7 +1,6 @@
 #ifndef __ASM_FPU_H
 #define __ASM_FPU_H
 
-
 /*
  * MAX floating point unit state size (FSAVE/FRESTORE)
  */

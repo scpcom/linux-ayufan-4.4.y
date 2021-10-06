@@ -82,7 +82,6 @@
 #define HCR_VIRT_EXCP_MASK (HCR_VA | HCR_VI | HCR_VF)
 #define HCR_INT_OVERRIDE   (HCR_FMO | HCR_IMO)
 
-
 /* Hyp System Control Register (SCTLR_EL2) bits */
 #define SCTLR_EL2_EE	(1 << 25)
 #define SCTLR_EL2_WXN	(1 << 19)

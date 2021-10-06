@@ -42,7 +42,6 @@
  * fault address - VMALLOC_START.
  */
 
-
 /* PGDIR_SHIFT determines what a third-level page table entry can map */
 #ifdef __PAGETABLE_PMD_FOLDED
 #define PGDIR_SHIFT	(PAGE_SHIFT + PAGE_SHIFT + PTE_ORDER - 3)
@@ -52,7 +51,6 @@
 #define PMD_SHIFT	(PAGE_SHIFT + (PAGE_SHIFT + PTE_ORDER - 3))
 #define PMD_SIZE	(1UL << PMD_SHIFT)
 #define PMD_MASK	(~(PMD_SIZE-1))
-
 
 #define PGDIR_SHIFT	(PMD_SHIFT + (PAGE_SHIFT + PMD_ORDER - 3))
 #endif
@@ -151,7 +149,6 @@
 extern pte_t invalid_pte_table[PTRS_PER_PTE];
 extern pte_t empty_bad_page_table[PTRS_PER_PTE];
 
-
 #ifndef __PAGETABLE_PMD_FOLDED
 /*
  * For 3-level pagetables we defines these ourselves, for 2-level the
@@ -160,7 +157,6 @@ extern pte_t empty_bad_page_table[PTRS_PER_PTE];
 typedef struct { unsigned long pmd; } pmd_t;
 #define pmd_val(x)	((x).pmd)
 #define __pmd(x)	((pmd_t) { (x) } )
-
 
 extern pmd_t invalid_pmd_table[PTRS_PER_PMD];
 #endif

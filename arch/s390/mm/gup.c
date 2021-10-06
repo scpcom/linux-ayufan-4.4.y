@@ -101,7 +101,6 @@ static inline int gup_huge_pmd(pmd_t *pmdp, pmd_t pmd, unsigned long addr,
 	return 1;
 }
 
-
 static inline int gup_pmd_range(pud_t *pudp, pud_t pud, unsigned long addr,
 		unsigned long end, int write, struct page **pages, int *nr)
 {

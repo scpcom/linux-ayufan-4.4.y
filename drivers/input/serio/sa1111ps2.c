@@ -264,7 +264,6 @@ static int ps2_probe(struct sa1111_dev *dev)
 		goto free;
 	}
 
-
 	serio->id.type		= SERIO_8042;
 	serio->write		= ps2_write;
 	serio->open		= ps2_open;

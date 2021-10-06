@@ -110,7 +110,6 @@ struct io_pgtable_ops *alloc_io_pgtable_ops(enum io_pgtable_fmt fmt,
  */
 void free_io_pgtable_ops(struct io_pgtable_ops *ops);
 
-
 /*
  * Internal structures for page table allocator implementations.
  */

@@ -4,7 +4,6 @@
 #include "util/evsel.h"
 #include "ui/helpline.h"
 
-
 enum {
 	ANN_COL__PERCENT,
 	ANN_COL__OFFSET,

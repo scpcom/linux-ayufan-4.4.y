@@ -167,4 +167,3 @@ struct msm_dsi_pll *msm_dsi_pll_init(struct platform_device *pdev,
 
 	return pll;
 }
-

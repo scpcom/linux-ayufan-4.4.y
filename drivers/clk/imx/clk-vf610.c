@@ -99,7 +99,6 @@ static const char *vadc_sels[]	= { "pll6_video_div", "pll3_usb_otg_div", "pll3_u
 static const char *ftm_ext_sels[]	= {"sirc_128k", "sxosc", "fxosc_half", "audio_ext", };
 static const char *ftm_fix_sels[]	= { "sxosc", "ipg_bus", };
 
-
 static struct clk_div_table pll4_audio_div_table[] = {
 	{ .val = 0, .div = 1 },
 	{ .val = 1, .div = 2 },

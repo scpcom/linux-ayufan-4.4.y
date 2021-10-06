@@ -14,7 +14,6 @@
  *
  */
 
-
 #include <linux/export.h>
 #include <linux/kthread.h>
 #include <linux/interrupt.h>
@@ -28,7 +27,6 @@
 #include "mei_dev.h"
 #include "hbm.h"
 #include "client.h"
-
 
 /**
  * mei_irq_compl_handler - dispatch complete handlers
@@ -298,7 +296,6 @@ int mei_irq_read_handler(struct mei_device *dev,
 		ret = mei_cl_irq_read_msg(cl, mei_hdr, cmpl_list);
 	}
 
-
 reset_slots:
 	/* reset the number of slots and header */
 	*slots = mei_count_full_read_slots(dev);
@@ -315,7 +312,6 @@ end:
 	return ret;
 }
 EXPORT_SYMBOL_GPL(mei_irq_read_handler);
-
 
 /**
  * mei_irq_write_handler -  dispatch write requests
@@ -334,7 +330,6 @@ int mei_irq_write_handler(struct mei_device *dev, struct mei_cl_cb *cmpl_list)
 	struct mei_cl_cb *list;
 	s32 slots;
 	int ret;
-
 
 	if (!mei_hbuf_acquire(dev))
 		return 0;
@@ -430,7 +425,6 @@ int mei_irq_write_handler(struct mei_device *dev, struct mei_cl_cb *cmpl_list)
 }
 EXPORT_SYMBOL_GPL(mei_irq_write_handler);
 
-
 /**
  * mei_connect_timeout  - connect/disconnect timeouts
  *
@@ -463,7 +457,6 @@ void mei_timer(struct work_struct *work)
 
 	struct mei_device *dev = container_of(work,
 					struct mei_device, timer_work.work);
-
 
 	mutex_lock(&dev->device_lock);
 

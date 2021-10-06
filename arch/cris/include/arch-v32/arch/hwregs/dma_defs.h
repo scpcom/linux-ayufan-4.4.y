@@ -383,7 +383,6 @@ typedef struct {
 #define REG_RD_ADDR_dma_rw_stream_cmd 156
 #define REG_WR_ADDR_dma_rw_stream_cmd 156
 
-
 /* Constants */
 enum {
   regk_dma_ack_pkt                         = 0x00000100,

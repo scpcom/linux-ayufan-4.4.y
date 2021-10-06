@@ -426,7 +426,6 @@ static void __cvmx_pcie_rc_initialize_config_space(int pcie_port)
 	pciercx_cfg030.s.ur_en = 1;
 	cvmx_pcie_cfgx_write(pcie_port, CVMX_PCIERCX_CFG030(pcie_port), pciercx_cfg030.u32);
 
-
 	if (octeon_has_feature(OCTEON_FEATURE_NPEI)) {
 		union cvmx_npei_ctl_status2 npei_ctl_status2;
 		/*
@@ -492,7 +491,6 @@ static void __cvmx_pcie_rc_initialize_config_space(int pcie_port)
 	/* Use CVMX_PCIERCX_CFG067 hardware default */
 	cvmx_pcie_cfgx_write(pcie_port, CVMX_PCIERCX_CFG069(pcie_port), 0);
 
-
 	/* Active State Power Management (PCIE*_CFG032[ASLPC]) */
 	pciercx_cfg032.u32 = cvmx_pcie_cfgx_read(pcie_port, CVMX_PCIERCX_CFG032(pcie_port));
 	pciercx_cfg032.s.aslpc = 0; /* Active state Link PM control. */
@@ -513,7 +511,6 @@ static void __cvmx_pcie_rc_initialize_config_space(int pcie_port)
 	pciercx_cfg006.s.subbnum = 1;
 	cvmx_pcie_cfgx_write(pcie_port, CVMX_PCIERCX_CFG006(pcie_port), pciercx_cfg006.u32);
 
-
 	/*
 	 * Memory-mapped I/O BAR (PCIERCn_CFG008)
 	 * Most applications should disable the memory-mapped I/O BAR by
@@ -523,7 +520,6 @@ static void __cvmx_pcie_rc_initialize_config_space(int pcie_port)
 	pciercx_cfg008.s.mb_addr = 0x100;
 	pciercx_cfg008.s.ml_addr = 0;
 	cvmx_pcie_cfgx_write(pcie_port, CVMX_PCIERCX_CFG008(pcie_port), pciercx_cfg008.u32);
-
 
 	/*
 	 * Prefetchable BAR (PCIERCn_CFG009,PCIERCn_CFG010,PCIERCn_CFG011)
@@ -1137,7 +1133,6 @@ static int __cvmx_pcie_rc_initialize_link_gen2(int pcie_port)
 	return 0;
 }
 
-
 /**
  * Initialize a PCIe gen 2 port for use in host(RC) mode. It doesn't enumerate
  * the bus.
@@ -1511,7 +1506,6 @@ static	void set_cfg_read_retry(u32 retry_cnt)
 	cvmx_write_csr(CVMX_PEMX_CTL_STATUS(1), pemx_ctl.u64);
 }
 
-
 static u32 disable_cfg_read_retry(void)
 {
 	u32 retry_cnt;
@@ -1744,7 +1738,6 @@ static int octeon_pcie_write_config(unsigned int pcie_port, struct pci_bus *bus,
 	pr_debug("pcie_cfg_wr port=%d b=%d devfn=0x%03x"
 		 " reg=0x%03x size=%d val=%08x\n", pcie_port, bus_number, devfn,
 		 reg, size, val);
-
 
 	switch (size) {
 	case 4:

@@ -24,7 +24,6 @@
 #include <asm/wrperfmon.h>
 #include <asm/hw_irq.h>
 
-
 /* The maximum number of PMCs on any Alpha CPU whatsoever. */
 #define MAX_HWEVENTS 3
 #define PMC_NO_INDEX -1
@@ -50,8 +49,6 @@ struct cpu_hw_events {
 	unsigned long		idx_mask;
 };
 DEFINE_PER_CPU(struct cpu_hw_events, cpu_hw_events);
-
-
 
 /*
  * A structure to hold the description of the PMCs available on a particular
@@ -93,7 +90,6 @@ struct alpha_pmu_t {
  */
 static const struct alpha_pmu_t *alpha_pmu;
 
-
 #define HW_OP_UNSUPPORTED -1
 
 /*
@@ -118,7 +114,6 @@ enum ev67_pmc_event_type {
 };
 #define EV67_NUM_EVENT_TYPES (EV67_LAST_ET-EV67_CYCLES)
 
-
 /* Mapping of the hw event types to the perf tool interface */
 static const int ev67_perfmon_event_map[] = {
 	[PERF_COUNT_HW_CPU_CYCLES]	 = EV67_CYCLES,
@@ -142,7 +137,6 @@ static const struct ev67_mapping_t ev67_mapping[] = {
 	{EV67_PCTR_INSTR_BCACHEMISS, 1}, /* EV67_BCACHEMISS */
 	{EV67_PCTR_CYCLES_MBOX, 1}	 /* EV67_MBOXREPLAY */
 };
-
 
 /*
  * Check that a group of events can be simultaneously scheduled on to the
@@ -204,12 +198,10 @@ success:
 	return 0;
 }
 
-
 static int ev67_raw_event_valid(u64 config)
 {
 	return config >= EV67_CYCLES && config < EV67_LAST_ET;
 };
-
 
 static const struct alpha_pmu_t ev67_pmu = {
 	.event_map = ev67_perfmon_event_map,
@@ -222,8 +214,6 @@ static const struct alpha_pmu_t ev67_pmu = {
 	.check_constraints = ev67_check_constraints,
 	.raw_event_valid = ev67_raw_event_valid,
 };
-
-
 
 /*
  * Helper routines to ensure that we read/write only the correct PMC bits
@@ -288,7 +278,6 @@ static int alpha_perf_event_set_period(struct perf_event *event,
 	return ret;
 }
 
-
 /*
  * Calculates the count (the 'delta') since the last time the PMC was read.
  *
@@ -332,7 +321,6 @@ again:
 	return new_raw_count;
 }
 
-
 /*
  * Collect all HW events into the array event[].
  */
@@ -362,8 +350,6 @@ static int collect_events(struct perf_event *group, int max_count,
 	return n;
 }
 
-
-
 /*
  * Check that a group of events can be simultaneously scheduled on to the PMU.
  */
@@ -380,7 +366,6 @@ static int alpha_check_constraints(struct perf_event **events,
 
 	return alpha_pmu->check_constraints(events, evtypes, n_ev);
 }
-
 
 /*
  * If new events have been scheduled then update cpuc with the new
@@ -422,8 +407,6 @@ static void maybe_change_configuration(struct cpu_hw_events *cpuc)
 	}
 	cpuc->config = cpuc->event[0]->hw.config_base;
 }
-
-
 
 /* Schedule perf HW event on to PMU.
  *  - this function is called from outside this module via the pmu struct
@@ -475,8 +458,6 @@ static int alpha_pmu_add(struct perf_event *event, int flags)
 	return ret;
 }
 
-
-
 /* Disable performance monitoring unit
  *  - this function is called from outside this module via the pmu struct
  *    returned from perf event initialisation.
@@ -519,14 +500,12 @@ static void alpha_pmu_del(struct perf_event *event, int flags)
 	perf_pmu_enable(event->pmu);
 }
 
-
 static void alpha_pmu_read(struct perf_event *event)
 {
 	struct hw_perf_event *hwc = &event->hw;
 
 	alpha_perf_event_update(event, hwc, hwc->idx, 0);
 }
-
 
 static void alpha_pmu_stop(struct perf_event *event, int flags)
 {
@@ -546,7 +525,6 @@ static void alpha_pmu_stop(struct perf_event *event, int flags)
 	if (cpuc->enabled)
 		wrperfmon(PERFMON_CMD_DISABLE, (1UL<<hwc->idx));
 }
-
 
 static void alpha_pmu_start(struct perf_event *event, int flags)
 {
@@ -568,7 +546,6 @@ static void alpha_pmu_start(struct perf_event *event, int flags)
 		wrperfmon(PERFMON_CMD_ENABLE, (1UL<<hwc->idx));
 }
 
-
 /*
  * Check that CPU performance counters are supported.
  * - currently support EV67 and later CPUs.
@@ -588,15 +565,11 @@ static int supported_cpu(void)
 	return (cputype >= EV67_CPU) && (cputype <= EV69_CPU);
 }
 
-
-
 static void hw_perf_event_destroy(struct perf_event *event)
 {
 	/* Nothing to be done! */
 	return;
 }
-
-
 
 static int __hw_perf_event_init(struct perf_event *event)
 {
@@ -743,7 +716,6 @@ static void alpha_pmu_enable(struct pmu *pmu)
 	}
 }
 
-
 /*
  * Main entry point - disable HW performance counters.
  */
@@ -772,7 +744,6 @@ static struct pmu pmu = {
 	.read		= alpha_pmu_read,
 };
 
-
 /*
  * Main entry point - don't know when this is called but it
  * obviously dumps debug info.
@@ -799,7 +770,6 @@ void perf_event_print_debug(void)
 
 	local_irq_restore(flags);
 }
-
 
 /*
  * Performance Monitoring Interrupt Service Routine called when a PMC
@@ -872,8 +842,6 @@ static void alpha_perf_event_irq_handler(unsigned long la_ptr,
 
 	return;
 }
-
-
 
 /*
  * Init call to initialise performance events at kernel startup.

@@ -355,7 +355,6 @@
 #define U300_SYSCON_C2OAR_PCM_I2S0_CORE_CLK			(0x0002)
 #define U300_SYSCON_C2OAR_PCM_I2S0_CLK				(0x0001)
 
-
 /*
  * The clocking hierarchy currently looks like this.
  * NOTE: the idea is NOT to show how the clocks are routed on the chip!
@@ -1171,7 +1170,6 @@ static const struct of_device_id u300_clk_match[] __initconst = {
 	},
 	{}
 };
-
 
 void __init u300_clk_init(void __iomem *base)
 {

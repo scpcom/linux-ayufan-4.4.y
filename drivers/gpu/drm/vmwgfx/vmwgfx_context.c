@@ -70,7 +70,6 @@ static const struct vmw_user_resource_conv user_context_conv = {
 const struct vmw_user_resource_conv *user_context_converter =
 	&user_context_conv;
 
-
 static const struct vmw_res_func vmw_legacy_context_func = {
 	.res_type = vmw_res_context,
 	.needs_backup = false,
@@ -136,7 +135,6 @@ static void vmw_hw_context_destroy(struct vmw_resource *res)
 		SVGA3dCmdHeader header;
 		SVGA3dCmdDestroyContext body;
 	} *cmd;
-
 
 	if (res->func->destroy == vmw_gb_context_destroy ||
 	    res->func->destroy == vmw_dx_context_destroy) {
@@ -216,8 +214,6 @@ static int vmw_gb_context_init(struct vmw_private *dev_priv,
 		}
 	}
 
-
-
 	vmw_resource_activate(res, vmw_hw_context_destroy);
 	return 0;
 
@@ -283,7 +279,6 @@ out_early:
 		res_free(res);
 	return ret;
 }
-
 
 /*
  * GB context.
@@ -383,7 +378,6 @@ static int vmw_gb_context_unbind(struct vmw_resource *res,
 	} *cmd2;
 	uint32_t submit_size;
 	uint8_t *cmd;
-
 
 	BUG_ON(bo->mem.mem_type != VMW_PL_MOB);
 
@@ -537,7 +531,6 @@ static int vmw_dx_context_bind(struct vmw_resource *res,
 	res->backup_dirty = false;
 	vmw_fifo_commit(dev_priv, sizeof(*cmd));
 
-
 	return 0;
 }
 
@@ -600,7 +593,6 @@ static int vmw_dx_context_unbind(struct vmw_resource *res,
 	} *cmd2;
 	uint32_t submit_size;
 	uint8_t *cmd;
-
 
 	BUG_ON(bo->mem.mem_type != VMW_PL_MOB);
 

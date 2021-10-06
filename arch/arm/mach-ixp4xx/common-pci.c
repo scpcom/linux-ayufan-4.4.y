@@ -35,7 +35,6 @@
 #include <asm/mach/pci.h>
 #include <mach/hardware.h>
 
-
 /*
  * IXP4xx PCI read function is dependent on whether we are 
  * running A0 or B0 (AppleGate) silicon.
@@ -334,7 +333,6 @@ void __init ixp4xx_pci_preinit(void)
 		ixp4xx_pci_read = ixp4xx_pci_read_errata;
 	} else
 		ixp4xx_pci_read = ixp4xx_pci_read_no_errata;
-
 
 	/* hook in our fault handler for PCI errors */
 	hook_fault_code(16+6, abort_handler, SIGBUS, 0,

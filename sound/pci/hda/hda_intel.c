@@ -117,7 +117,6 @@ enum {
 #define TERA_NUM_CAPTURE	3
 #define TERA_NUM_PLAYBACK	4
 
-
 static int index[SNDRV_CARDS] = SNDRV_DEFAULT_IDX;
 static char *id[SNDRV_CARDS] = SNDRV_DEFAULT_STR;
 static bool enable[SNDRV_CARDS] = SNDRV_DEFAULT_ENABLE_PNP;
@@ -208,7 +207,6 @@ MODULE_PARM_DESC(snoop, "Enable/disable snooping");
 #define hda_snoop		true
 #endif
 
-
 MODULE_LICENSE("GPL");
 MODULE_SUPPORTED_DEVICE("{{Intel, ICH6},"
 			 "{Intel, ICH6M},"
@@ -251,7 +249,6 @@ MODULE_DESCRIPTION("Intel HDA driver");
 #define SUPPORT_VGA_SWITCHEROO
 #endif
 #endif
-
 
 /*
  */
@@ -1118,7 +1115,6 @@ static const struct dev_pm_ops azx_pm = {
 #else
 #define AZX_PM_OPS	NULL
 #endif /* CONFIG_PM */
-
 
 static int azx_probe_continue(struct azx *chip);
 

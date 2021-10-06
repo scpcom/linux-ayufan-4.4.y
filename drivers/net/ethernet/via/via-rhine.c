@@ -20,7 +20,6 @@
 	410 Severn Ave., Suite 210
 	Annapolis MD 21403
 
-
 	This driver contains some changes from the original Donald Becker
 	version. He may or may not be interested in bug reports on this
 	code. You can find his versions at:
@@ -65,7 +64,6 @@ static bool avoid_D3;
 /* Maximum number of multicast addresses to filter (vs. rx-all-multicast).
    The Rhine has a 64 element 8390-like hash table. */
 static const int multicast_filter_limit = 32;
-
 
 /* Operational parameters that are set at compile time. */
 
@@ -217,7 +215,6 @@ http://www.scyld.com/expert/NWay.html
 ftp://ftp.via.com.tw/public/lan/Products/NIC/VT86C100A/Datasheet/VT86C100A03.pdf
 ftp://ftp.via.com.tw/public/lan/Products/NIC/VT6102/Datasheet/VT6102_021.PDF
 
-
 IVc. Errata
 
 The VT86C100A manual is not reliable information.
@@ -227,7 +224,6 @@ and unaligned IP headers on receive.
 The chip does not pad to minimum transmit length.
 
 */
-
 
 /* This table drives the PCI probe routines. It's mostly boilerplate in all
    of the drivers, and will likely be provided by some future kernel.
@@ -499,7 +495,6 @@ struct rhine_private {
 #define BYTE_REG_BITS_SET(x, m, p)   do { iowrite8((ioread8((p)) & (~(m)))|(x), (p)); } while (0)
 #define WORD_REG_BITS_SET(x, m, p)   do { iowrite16((ioread16((p)) & (~(m)))|(x), (p)); } while (0)
 #define DWORD_REG_BITS_SET(x, m, p)  do { iowrite32((ioread32((p)) & (~(m)))|(x), (p)); } while (0)
-
 
 static int  mdio_read(struct net_device *dev, int phy_id, int location);
 static void mdio_write(struct net_device *dev, int phy_id, int location, int value);
@@ -2448,7 +2443,6 @@ static int rhine_close(struct net_device *dev)
 	return 0;
 }
 
-
 static void rhine_remove_one_pci(struct pci_dev *pdev)
 {
 	struct net_device *dev = pci_get_drvdata(pdev);
@@ -2642,13 +2636,11 @@ static int __init rhine_init(void)
 	return 0;
 }
 
-
 static void __exit rhine_cleanup(void)
 {
 	platform_driver_unregister(&rhine_driver_platform);
 	pci_unregister_driver(&rhine_driver_pci);
 }
-
 
 module_init(rhine_init);
 module_exit(rhine_cleanup);

@@ -283,7 +283,6 @@ do_illegal_instruction(struct pt_regs *regs)
 	force_sig(SIGILL, current);
 }
 
-
 /*
  * Handle unaligned memory accesses from user space. Kill task.
  *
@@ -338,7 +337,6 @@ do_debug(struct pt_regs *regs)
 	force_sig(SIGTRAP, current);
 }
 
-
 static void set_handler(int idx, void *handler)
 {
 	unsigned int cpu;
@@ -356,7 +354,6 @@ void * __init trap_set_handler(int cause, void *handler)
 	set_handler(EXC_TABLE_DEFAULT / 4 + cause, handler);
 	return previous;
 }
-
 
 static void trap_init_excsave(void)
 {

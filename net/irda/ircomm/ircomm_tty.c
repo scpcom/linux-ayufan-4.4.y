@@ -370,7 +370,6 @@ static int ircomm_tty_block_til_ready(struct ircomm_tty_cb *self,
 	return retval;
 }
 
-
 static int ircomm_tty_install(struct tty_driver *driver, struct tty_struct *tty)
 {
 	struct ircomm_tty_cb *self;

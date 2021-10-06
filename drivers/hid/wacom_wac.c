@@ -1724,7 +1724,6 @@ static int wacom_wac_finger_event(struct hid_device *hdev,
 		break;
 	}
 
-
 	if (usage->usage_index + 1 == field->report_count) {
 		if (usage->hid == wacom_wac->features.last_slot_field)
 			wacom_wac_finger_slot(wacom_wac, wacom_wac->touch_input);
@@ -2563,7 +2562,6 @@ int wacom_setup_pen_input_capabilities(struct input_dev *input_dev,
 	/* penabled devices have fixed resolution for each model */
 	input_abs_set_res(input_dev, ABS_X, features->x_resolution);
 	input_abs_set_res(input_dev, ABS_Y, features->y_resolution);
-
 
 	switch (features->type) {
 	case GRAPHIRE_BT:

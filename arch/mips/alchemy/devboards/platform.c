@@ -43,12 +43,10 @@ void prom_putchar(unsigned char c)
 		alchemy_uart_putchar(AU1000_UART0_PHYS_ADDR, c);
 }
 
-
 static struct platform_device db1x00_rtc_dev = {
 	.name	= "rtc-au1xxx",
 	.id	= -1,
 };
-
 
 static void db1x_power_off(void)
 {

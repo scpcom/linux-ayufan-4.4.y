@@ -11,7 +11,6 @@
 
 #include <uapi/asm/signal.h>
 
-
 #ifdef CONFIG_TRAD_SIGNALS
 #define sig_uses_siginfo(ka)	((ka)->sa.sa_flags & SA_SIGINFO)
 #else

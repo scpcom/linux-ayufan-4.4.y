@@ -483,7 +483,6 @@ static struct bcap_route adv7183_routes[] = {
 	},
 };
 
-
 static const unsigned adv7183_gpio[] = {
 	GPIO_PF13, /* reset pin */
 	GPIO_PF2,  /* output enable pin */

@@ -1,7 +1,6 @@
 #ifndef _LINUX_DCCP_H
 #define _LINUX_DCCP_H
 
-
 #include <linux/in.h>
 #include <linux/interrupt.h>
 #include <linux/ktime.h>

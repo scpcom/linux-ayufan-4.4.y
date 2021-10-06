@@ -84,7 +84,6 @@
 #define BITM_ROM_SYSCTRL_WUA_OVERRIDE   (0x01000000)
 #define BITM_ROM_SYSCTRL_CGU_LOCKINGEN  (0x10000000)    /* Unlocks the CGU_CTL register */
 
-
 /* Structures for the syscontrol() function */
 struct STRUCT_ROM_SYSCTRL {
 	uint32_t ulCGU_CTL;

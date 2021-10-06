@@ -220,4 +220,3 @@ const struct cpu_operations cpu_psci_ops = {
 	.cpu_kill	= cpu_psci_cpu_kill,
 #endif
 };
-

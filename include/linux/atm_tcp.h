@@ -8,7 +8,6 @@
 
 #include <uapi/linux/atm_tcp.h>
 
-
 struct atm_tcp_ops {
 	int (*attach)(struct atm_vcc *vcc,int itf);
 	int (*create_persistent)(int itf);

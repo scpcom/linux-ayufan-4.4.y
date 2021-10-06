@@ -156,7 +156,6 @@ wont_overwrite:
 		ldw	r4, =KERNEL_IMAGE_START
 		mov	pc, r4			@ call kernel
 
-
 		.align	2
 		.type	LC0, #object
 LC0:		.word	LC0			@ r1

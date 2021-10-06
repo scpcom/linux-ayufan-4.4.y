@@ -8,7 +8,6 @@
  *	David Mosberger-Tang <davidm@hpl.hp.com>
  */
 
-
 #include <asm/fpu.h>
 #include <asm/page.h>
 #include <asm/auxvec.h>
@@ -185,8 +184,6 @@ typedef elf_greg_t elf_gregset_t[ELF_NGREG];
 
 typedef struct ia64_fpreg elf_fpreg_t;
 typedef elf_fpreg_t elf_fpregset_t[ELF_NFPREG];
-
-
 
 struct pt_regs;	/* forward declaration... */
 extern void ia64_elf_core_copy_regs (struct pt_regs *src, elf_gregset_t dst);

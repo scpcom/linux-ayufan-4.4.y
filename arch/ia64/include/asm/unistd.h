@@ -9,8 +9,6 @@
 
 #include <uapi/asm/unistd.h>
 
-
-
 #define NR_syscalls			323 /* length of syscall table */
 
 /*

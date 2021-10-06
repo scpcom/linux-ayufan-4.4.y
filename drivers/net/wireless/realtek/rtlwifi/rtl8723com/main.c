@@ -26,7 +26,6 @@
 #include "../wifi.h"
 #include <linux/module.h>
 
-
 MODULE_AUTHOR("Realtek WlanFAE	<wlanfae@realtek.com>");
 MODULE_AUTHOR("Larry Finger	<Larry.Finger@lwfinger.net>");
 MODULE_LICENSE("GPL");

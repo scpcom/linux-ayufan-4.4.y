@@ -335,7 +335,6 @@ static int ctr_crypt(struct blkcipher_desc *desc, struct scatterlist *dst,
 	return err;
 }
 
-
 static struct crypto_alg cast5_algs[6] = { {
 	.cra_name		= "__ecb-cast5-avx",
 	.cra_driver_name	= "__driver-ecb-cast5-avx",

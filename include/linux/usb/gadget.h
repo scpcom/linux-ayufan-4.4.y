@@ -526,7 +526,6 @@ static inline void usb_ep_fifo_flush(struct usb_ep *ep)
 		ep->ops->fifo_flush(ep);
 }
 
-
 /*-------------------------------------------------------------------------*/
 
 struct usb_dcd_config_params {
@@ -535,7 +534,6 @@ struct usb_dcd_config_params {
 	__le16 bU2DevExitLat;	/* U2 Device exit Latency */
 #define USB_DEFAULT_U2_DEV_EXIT_LAT	0x1F4	/* Less then 500 microsec */
 };
-
 
 struct usb_gadget;
 struct usb_gadget_driver;
@@ -1074,8 +1072,6 @@ struct usb_gadget_driver {
 	struct device_driver	driver;
 };
 
-
-
 /*-------------------------------------------------------------------------*/
 
 /* driver modules register and unregister, as usual.
@@ -1250,7 +1246,6 @@ extern void usb_udc_vbus_handler(struct usb_gadget *gadget, bool status);
 
 extern struct usb_ep *usb_ep_autoconfig(struct usb_gadget *,
 			struct usb_endpoint_descriptor *);
-
 
 extern struct usb_ep *usb_ep_autoconfig_ss(struct usb_gadget *,
 			struct usb_endpoint_descriptor *,

@@ -13,7 +13,6 @@
  * wlanfae <wlanfae@realtek.com>
 ******************************************************************************/
 
-
 #ifndef R8190P_DEF_H
 #define R8190P_DEF_H
 
@@ -95,7 +94,6 @@ enum rtl819x_loopback {
 #define HAL_PRIME_CHNL_OFFSET_LOWER		1
 #define HAL_PRIME_CHNL_OFFSET_UPPER		2
 
-
 enum version_8190_loopback {
 	VERSION_8190_BD = 0x3,
 	VERSION_8190_BE
@@ -161,7 +159,6 @@ struct tx_fwinfo_8190pci {
 	u32			Reserved2:1;
 	u32			PacketID:13;
 
-
 };
 
 struct log_int_8190 {
@@ -208,7 +205,6 @@ struct phy_sts_cck_819xpci {
 	u8	cck_agc_rpt;
 };
 
-
 #define		PHY_RSSI_SLID_WIN_MAX				100
 #define		PHY_Beacon_RSSI_SLID_WIN_MAX		10
 
@@ -249,7 +245,6 @@ struct tx_desc {
 	u32	Reserved6;
 	u32	Reserved7;
 };
-
 
 struct tx_desc_cmd {
 	u16	PktSize;
@@ -294,7 +289,6 @@ struct rx_desc {
 	u32	BufferAddress;
 
 };
-
 
 struct rx_fwinfo {
 	u16			Reserved1:12;

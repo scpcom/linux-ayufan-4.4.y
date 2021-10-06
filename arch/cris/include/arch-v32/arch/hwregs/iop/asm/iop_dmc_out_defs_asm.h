@@ -299,7 +299,6 @@
 #define reg_iop_dmc_out_r_masked_intr___cmd_rq___bit 8
 #define reg_iop_dmc_out_r_masked_intr_offset 96
 
-
 /* Constants */
 #define regk_iop_dmc_out_ack_pkt                  0x00000100
 #define regk_iop_dmc_out_array                    0x00000008

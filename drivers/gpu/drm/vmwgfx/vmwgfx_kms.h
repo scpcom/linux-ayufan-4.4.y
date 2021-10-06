@@ -79,7 +79,6 @@ struct vmw_kms_dirty {
 
 #define VMWGFX_NUM_DISPLAY_UNITS 8
 
-
 #define vmw_framebuffer_to_vfb(x) \
 	container_of(x, struct vmw_framebuffer, base)
 #define vmw_framebuffer_to_vfbs(x) \
@@ -117,12 +116,10 @@ struct vmw_framebuffer_surface {
 	bool is_dmabuf_proxy;  /* true if this is proxy surface for DMA buf */
 };
 
-
 struct vmw_framebuffer_dmabuf {
 	struct vmw_framebuffer base;
 	struct vmw_dma_buffer *buffer;
 };
-
 
 /*
  * Basic cursor manipulation
@@ -136,7 +133,6 @@ int vmw_cursor_update_dmabuf(struct vmw_private *dev_priv,
 			     u32 hotspotX, u32 hotspotY);
 void vmw_cursor_update_position(struct vmw_private *dev_priv,
 				bool show, int x, int y);
-
 
 /**
  * Base class display unit.
@@ -321,6 +317,5 @@ int vmw_kms_stdu_dma(struct vmw_private *dev_priv,
 		     int increment,
 		     bool to_surface,
 		     bool interruptible);
-
 
 #endif

@@ -2066,4 +2066,3 @@ amdgpu_atombios_encoder_get_dig_info(struct amdgpu_encoder *amdgpu_encoder)
 
 	return dig;
 }
-

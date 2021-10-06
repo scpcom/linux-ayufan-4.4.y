@@ -328,7 +328,6 @@ static int __init bcm63xx_register_pci(void)
 	return 0;
 }
 
-
 static int __init bcm63xx_pci_init(void)
 {
 	if (!bcm63xx_pci_enabled)

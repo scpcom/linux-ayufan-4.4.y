@@ -301,7 +301,6 @@
 #define NAU8825_POWER_DOWN_DACL	(1 << 8)
 #define NAU8825_CHANRGE_PUMP_EN	(1 << 5)
 
-
 /* System Clock Source */
 enum {
 	NAU8825_CLK_MCLK = 0,
@@ -336,6 +335,5 @@ struct nau8825 {
 
 int nau8825_enable_jack_detect(struct snd_soc_codec *codec,
 				struct snd_soc_jack *jack);
-
 
 #endif  /* __NAU8825_H__ */

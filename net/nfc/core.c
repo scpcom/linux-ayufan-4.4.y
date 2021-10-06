@@ -535,7 +535,6 @@ int nfc_data_exchange(struct nfc_dev *dev, u32 target_idx, struct sk_buff *skb,
 		goto error;
 	}
 
-
 error:
 	device_unlock(&dev->dev);
 	return rc;

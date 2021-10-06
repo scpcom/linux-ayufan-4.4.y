@@ -28,7 +28,6 @@
 #include "edma-pcm.h"
 #include "davinci-i2s.h"
 
-
 /*
  * NOTE:  terminology here is confusing.
  *

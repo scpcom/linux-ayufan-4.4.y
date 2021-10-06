@@ -343,7 +343,6 @@
 	 ((1 << (32-(1+DBL_EXP_LENGTH))) - 1 );				\
     Dallp2(dbl_valueB) = 0xFFFFFFFF
     
-
 /* The high bit is always zero so arithmetic or logical shifts will work. */
 #define Dbl_right_align(srcdstA,srcdstB,shift,extent)			\
     if( shift >= 32 ) 							\
@@ -540,7 +539,6 @@
     Dextallp1(valA) = 0; Dextallp2(valB) = 0;	\
     Dextallp3(valC) = 0; Dextallp4(valD) = 0
 
-
 #define Dblext_isnotzero_mantissap3(valC) (Dextallp3(valC)!=0)
 #define Dblext_isnotzero_mantissap4(valD) (Dextallp3(valD)!=0)
 #define Dblext_isone_lowp2(val) (Dextlowp2(val)!=0)
@@ -672,7 +670,6 @@
 	        Dextallp2(rightb)) \
 		    Dextallp1(resulta) = Dextallp1(lefta)+Dextallp1(righta)+1; \
 	    else Dextallp1(resulta) = Dextallp1(lefta)+Dextallp1(righta)
-
 
 #define Dblext_arithrightshiftby1(srcdstA,srcdstB,srcdstC,srcdstD)	\
     Shiftdouble(Dextallp3(srcdstC),Dextallp4(srcdstD),1,Dextallp4(srcdstD)); \

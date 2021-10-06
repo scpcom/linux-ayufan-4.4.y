@@ -1155,7 +1155,6 @@ static int aif2clk_ev(struct snd_soc_dapm_widget *w,
 		else
 			adc = WM8994_AIF2ADCL_ENA | WM8994_AIF2ADCR_ENA;
 
-
 		val = snd_soc_read(codec, WM8994_AIF2_CONTROL_2);
 		if ((val & WM8994_AIF2DACL_SRC) &&
 		    (val & WM8994_AIF2DACR_SRC))
@@ -3321,7 +3320,6 @@ static void wm8994_handle_pdata(struct wm8994_priv *wm8994)
 		dev_err(wm8994->hubs.codec->dev,
 			"Failed to add DRC mode controls: %d\n", ret);
 
-
 	dev_dbg(codec->dev, "%d ReTune Mobile configurations\n",
 		pdata->num_retune_mobile_cfgs);
 
@@ -3600,7 +3598,6 @@ static void wm8958_mic_id(void *data, u16 status)
 		snd_soc_jack_report(wm8994->micdet[0].jack, SND_JACK_HEADSET,
 				    SND_JACK_HEADSET);
 	}
-
 
 	if (status & 0xfc) {
 		dev_dbg(codec->dev, "Detected headphone\n");
@@ -4100,7 +4097,6 @@ static int wm8994_codec_probe(struct snd_soc_codec *codec)
 			dev_warn(codec->dev,
 				 "Failed to request Mic1 detect IRQ: %d\n",
 				 ret);
-
 
 		ret = wm8994_request_irq(wm8994->wm8994,
 					 WM8994_IRQ_MIC1_SHRT,

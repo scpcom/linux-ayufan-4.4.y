@@ -78,7 +78,6 @@ static void vco_set(void __iomem *lockreg,
 	writel(0, lockreg);
 }
 
-
 static unsigned long icst_recalc_rate(struct clk_hw *hw,
 				      unsigned long parent_rate)
 {

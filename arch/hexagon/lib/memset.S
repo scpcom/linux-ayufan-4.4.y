@@ -16,10 +16,8 @@
  * 02110-1301, USA.
  */
 
-
 /* HEXAGON assembly optimized memset */
 /* Replaces the standard library function memset */
-
 
         .macro HEXAGON_OPT_FUNC_BEGIN name
 	.text
@@ -161,7 +159,6 @@ HEXAGON_OPT_FUNC_BEGIN memset
 	}
 HEXAGON_OPT_FUNC_FINISH memset
 #endif
-
 
 /*  FUNCTION: memset (v3 and higher version)  */
 #if __HEXAGON_ARCH__ >= 3

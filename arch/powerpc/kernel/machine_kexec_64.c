@@ -9,7 +9,6 @@
  * Version 2.  See the file COPYING for more details.
  */
 
-
 #include <linux/kexec.h>
 #include <linux/smp.h>
 #include <linux/thread_info.h>

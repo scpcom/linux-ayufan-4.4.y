@@ -1,23 +1,4 @@
-/*
- *  Information interface for ALSA driver
- *  Copyright (c) by Jaroslav Kysela <perex@perex.cz>
- *
- *
- *   This program is free software; you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation; either version 2 of the License, or
- *   (at your option) any later version.
- *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
- *
- *   You should have received a copy of the GNU General Public License
- *   along with this program; if not, write to the Free Software
- *   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
- *
- */
+
 
 #include <linux/init.h>
 #include <linux/time.h>
@@ -74,10 +55,6 @@ struct snd_info_private_data {
 static int snd_info_version_init(void);
 static void snd_info_disconnect(struct snd_info_entry *entry);
 
-/*
-
- */
-
 static struct snd_info_entry *snd_proc_root;
 struct snd_info_entry *snd_seq_root;
 EXPORT_SYMBOL(snd_seq_root);
@@ -114,9 +91,6 @@ static bool valid_pos(loff_t pos, size_t count)
 	return true;
 }
 
-/*
- * file ops for binary proc files
- */
 static loff_t snd_info_entry_llseek(struct file *file, loff_t offset, int orig)
 {
 	struct snd_info_private_data *data;
@@ -310,9 +284,6 @@ static const struct file_operations snd_info_entry_operations =
 	.release =		snd_info_entry_release,
 };
 
-/*
- * file ops for text proc files
- */
 static ssize_t snd_info_text_entry_write(struct file *file,
 					 const char __user *buffer,
 					 size_t count, loff_t *offset)
@@ -367,7 +338,7 @@ static int snd_info_seq_show(struct seq_file *seq, void *p)
 	struct snd_info_entry *entry = data->entry;
 
 	if (entry->c.text.read) {
-		data->rbuffer->buffer = (char *)seq; /* XXX hack! */
+		data->rbuffer->buffer = (char *)seq;  
 		entry->c.text.read(entry, data->rbuffer);
 	}
 	return 0;
@@ -496,10 +467,7 @@ int __exit snd_info_done(void)
 	return 0;
 }
 
-/*
- * create a card proc file
- * called from init.c
- */
+
 int snd_info_card_create(struct snd_card *card)
 {
 	char str[8];
@@ -516,7 +484,6 @@ int snd_info_card_create(struct snd_card *card)
 	return 0;
 }
 
-/* register all pending info entries */
 static int snd_info_register_recursive(struct snd_info_entry *entry)
 {
 	struct snd_info_entry *p;
@@ -537,11 +504,6 @@ static int snd_info_register_recursive(struct snd_info_entry *entry)
 	return 0;
 }
 
-/*
- * register the card proc file
- * called from init.c
- * can be called multiple times for reinitialization
- */
 int snd_info_card_register(struct snd_card *card)
 {
 	struct proc_dir_entry *p;
@@ -566,9 +528,6 @@ int snd_info_card_register(struct snd_card *card)
 	return 0;
 }
 
-/*
- * called on card->id change
- */
 void snd_info_card_id_change(struct snd_card *card)
 {
 	mutex_lock(&info_mutex);
@@ -583,10 +542,6 @@ void snd_info_card_id_change(struct snd_card *card)
 	mutex_unlock(&info_mutex);
 }
 
-/*
- * de-register the card proc file
- * called from init.c
- */
 void snd_info_card_disconnect(struct snd_card *card)
 {
 	if (!card)
@@ -599,10 +554,6 @@ void snd_info_card_disconnect(struct snd_card *card)
 	mutex_unlock(&info_mutex);
 }
 
-/*
- * release the card proc file resources
- * called from init.c
- */
 int snd_info_card_free(struct snd_card *card)
 {
 	if (!card)
@@ -612,17 +563,6 @@ int snd_info_card_free(struct snd_card *card)
 	return 0;
 }
 
-
-/**
- * snd_info_get_line - read one line from the procfs buffer
- * @buffer: the procfs buffer
- * @line: the buffer to store
- * @len: the max. buffer size
- *
- * Reads one line from the buffer and stores the string.
- *
- * Return: Zero if successful, or 1 if error or EOF.
- */
 int snd_info_get_line(struct snd_info_buffer *buffer, char *line, int len)
 {
 	int c = -1;
@@ -648,18 +588,6 @@ int snd_info_get_line(struct snd_info_buffer *buffer, char *line, int len)
 
 EXPORT_SYMBOL(snd_info_get_line);
 
-/**
- * snd_info_get_str - parse a string token
- * @dest: the buffer to store the string token
- * @src: the original string
- * @len: the max. length of token - 1
- *
- * Parses the original string and copy a token to the given
- * string buffer.
- *
- * Return: The updated pointer of the original string so that
- * it can be used for the next call.
- */
 const char *snd_info_get_str(char *dest, const char *src, int len)
 {
 	int c;
@@ -686,19 +614,6 @@ const char *snd_info_get_str(char *dest, const char *src, int len)
 
 EXPORT_SYMBOL(snd_info_get_str);
 
-/*
- * snd_info_create_entry - create an info entry
- * @name: the proc file name
- * @parent: the parent directory
- *
- * Creates an info entry with the given file name and initializes as
- * the default state.
- *
- * Usually called from other functions such as
- * snd_info_create_card_entry().
- *
- * Return: The pointer of the new instance, or %NULL on failure.
- */
 static struct snd_info_entry *
 snd_info_create_entry(const char *name, struct snd_info_entry *parent)
 {
@@ -722,16 +637,6 @@ snd_info_create_entry(const char *name, struct snd_info_entry *parent)
 	return entry;
 }
 
-/**
- * snd_info_create_module_entry - create an info entry for the given module
- * @module: the module pointer
- * @name: the file name
- * @parent: the parent directory
- *
- * Creates a new info entry and assigns it to the given module.
- *
- * Return: The pointer of the new instance, or %NULL on failure.
- */
 struct snd_info_entry *snd_info_create_module_entry(struct module * module,
 					       const char *name,
 					       struct snd_info_entry *parent)
@@ -744,16 +649,6 @@ struct snd_info_entry *snd_info_create_module_entry(struct module * module,
 
 EXPORT_SYMBOL(snd_info_create_module_entry);
 
-/**
- * snd_info_create_card_entry - create an info entry for the given card
- * @card: the card instance
- * @name: the file name
- * @parent: the parent directory
- *
- * Creates a new info entry and assigns it to the given card.
- *
- * Return: The pointer of the new instance, or %NULL on failure.
- */
 struct snd_info_entry *snd_info_create_card_entry(struct snd_card *card,
 					     const char *name,
 					     struct snd_info_entry * parent)
@@ -780,12 +675,6 @@ static void snd_info_disconnect(struct snd_info_entry *entry)
 	entry->p = NULL;
 }
 
-/**
- * snd_info_free_entry - release the info entry
- * @entry: the info entry
- *
- * Releases the info entry.
- */
 void snd_info_free_entry(struct snd_info_entry * entry)
 {
 	struct snd_info_entry *p, *n;
@@ -798,7 +687,6 @@ void snd_info_free_entry(struct snd_info_entry * entry)
 		mutex_unlock(&info_mutex);
 	}
 
-	/* free all children at first */
 	list_for_each_entry_safe(p, n, &entry->children, list)
 		snd_info_free_entry(p);
 
@@ -811,14 +699,6 @@ void snd_info_free_entry(struct snd_info_entry * entry)
 
 EXPORT_SYMBOL(snd_info_free_entry);
 
-/**
- * snd_info_register - register the info entry
- * @entry: the info entry
- *
- * Registers the proc info entry.
- *
- * Return: Zero if successful, or a negative error code on failure.
- */
 int snd_info_register(struct snd_info_entry * entry)
 {
 	struct proc_dir_entry *root, *p = NULL;
@@ -854,10 +734,6 @@ int snd_info_register(struct snd_info_entry * entry)
 
 EXPORT_SYMBOL(snd_info_register);
 
-/*
-
- */
-
 static void snd_info_version_read(struct snd_info_entry *entry, struct snd_info_buffer *buffer)
 {
 	snd_iprintf(buffer,
@@ -873,5 +749,5 @@ static int __init snd_info_version_init(void)
 	if (entry == NULL)
 		return -ENOMEM;
 	entry->c.text.read = snd_info_version_read;
-	return snd_info_register(entry); /* freed in error path */
+	return snd_info_register(entry); 
 }

@@ -37,4 +37,3 @@
 	THUNK ___preempt_schedule, preempt_schedule
 	THUNK ___preempt_schedule_notrace, preempt_schedule_notrace
 #endif
-

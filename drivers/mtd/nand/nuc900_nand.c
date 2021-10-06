@@ -215,7 +215,6 @@ static void nuc900_nand_command_lp(struct mtd_info *mtd, unsigned int command,
 		;
 }
 
-
 static void nuc900_nand_enable(struct nuc900_nand *nand)
 {
 	unsigned int val;

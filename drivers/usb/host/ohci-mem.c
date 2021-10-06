@@ -136,4 +136,3 @@ ed_free (struct ohci_hcd *hc, struct ed *ed)
 {
 	dma_pool_free (hc->ed_cache, ed, ed->dma);
 }
-

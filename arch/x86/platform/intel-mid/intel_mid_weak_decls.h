@@ -9,7 +9,6 @@
  * of the License.
  */
 
-
 /* For every CPU addition a new get_<cpuname>_ops interface needs
  * to be added.
  */

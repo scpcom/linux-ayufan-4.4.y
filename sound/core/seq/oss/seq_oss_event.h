@@ -108,5 +108,4 @@ int snd_seq_oss_process_event(struct seq_oss_devinfo *dp, union evrec *q, struct
 int snd_seq_oss_process_timer_event(struct seq_oss_timer *rec, union evrec *q);
 int snd_seq_oss_event_input(struct snd_seq_event *ev, int direct, void *private_data, int atomic, int hop);
 
-
 #endif /* __SEQ_OSS_EVENT_H */

@@ -64,7 +64,6 @@
 #include "mptscsih.h"
 #include "mptsas.h"
 
-
 #define my_NAME		"Fusion MPT SAS Host driver"
 #define my_VERSION	MPT_LINUX_VERSION_COMMON
 #define MYNAM		"mptsas"
@@ -359,7 +358,6 @@ mptsas_cleanup_fw_event_q(MPT_ADAPTER *ioc)
 			mptsas_free_fw_event(ioc, fw_event);
 	}
 }
-
 
 static inline MPT_ADAPTER *phy_to_ioc(struct sas_phy *phy)
 {
@@ -820,7 +818,6 @@ mptsas_del_device_components(MPT_ADAPTER *ioc)
 	mutex_unlock(&ioc->sas_device_info_mutex);
 }
 
-
 /*
  * mptsas_setup_wide_ports
  *
@@ -1022,7 +1019,6 @@ mptsas_queue_rescan(MPT_ADAPTER *ioc)
 	mptsas_add_fw_event(ioc, fw_event, msecs_to_jiffies(1));
 }
 
-
 /**
  * mptsas_target_reset
  *
@@ -1043,7 +1039,6 @@ mptsas_target_reset(MPT_ADAPTER *ioc, u8 channel, u8 id)
 	SCSITaskMgmt_t	*pScsiTm;
 	if (mpt_set_taskmgmt_in_progress_flag(ioc) != 0)
 		return 0;
-
 
 	mf = mpt_get_msg_frame(mptsasDeviceResetCtx, ioc);
 	if (mf == NULL) {
@@ -1181,7 +1176,6 @@ mptsas_schedule_target_reset(void *iocp)
 	return;
 }
 
-
 /**
  *	mptsas_taskmgmt_complete - complete SAS task management function
  *	@ioc: Pointer to MPT_ADAPTER structure
@@ -1271,7 +1265,6 @@ mptsas_taskmgmt_complete(MPT_ADAPTER *ioc, MPT_FRAME_HDR *mf, MPT_FRAME_HDR *mr)
 		mptsas_queue_device_delete(ioc,
 			&target_reset_list->sas_event_data);
 
-
 	ioc->schedule_target_reset(ioc);
 
 	return 1;
@@ -1325,7 +1318,6 @@ mptsas_ioc_reset(MPT_ADAPTER *ioc, int reset_phase)
  out:
 	return rc;
 }
-
 
 /**
  * enum device_state -
@@ -1680,8 +1672,6 @@ mptsas_firmware_event_work(struct work_struct *work)
 	}
 }
 
-
-
 static int
 mptsas_slave_configure(struct scsi_device *sdev)
 {
@@ -1809,7 +1799,6 @@ mptsas_target_destroy(struct scsi_target *starget)
 	mptsas_del_device_component_by_os(ioc, starget->channel,
 	    starget->id);
 
-
 	if (starget->channel == MPTSAS_RAID_CHANNEL)
 		goto out;
 
@@ -1837,7 +1826,6 @@ mptsas_target_destroy(struct scsi_target *starget)
 	kfree(starget->hostdata);
 	starget->hostdata = NULL;
 }
-
 
 static int
 mptsas_slave_alloc(struct scsi_device *sdev)
@@ -1968,7 +1956,6 @@ static enum blk_eh_timer_return mptsas_eh_timed_out(struct scsi_cmnd *sc)
 done:
 	return rc;
 }
-
 
 static struct scsi_host_template mptsas_driver_template = {
 	.module				= THIS_MODULE,
@@ -2774,7 +2761,6 @@ mptsas_sas_expander_pg1(MPT_ADAPTER *ioc, struct mptsas_phyinfo *phy_info,
 	if (error)
 		goto out_free_consistent;
 
-
 	mptsas_print_expander_pg1(ioc, buffer);
 
 	/* save config data */
@@ -3500,7 +3486,6 @@ mptsas_delete_expander_siblings(MPT_ADAPTER *ioc, struct mptsas_portinfo
 	}
 }
 
-
 /**
  *	mptsas_expander_delete - remove this expander
  *	@ioc: Pointer to MPT_ADAPTER structure
@@ -3535,7 +3520,6 @@ static void mptsas_expander_delete(MPT_ADAPTER *ioc,
 		if (!force)
 			return;
 	}
-
 
 	/*
 	 * Obtain the port_info instance to the parent port
@@ -3592,7 +3576,6 @@ static void mptsas_expander_delete(MPT_ADAPTER *ioc,
 	kfree(port_info);
 }
 
-
 /**
  * mptsas_send_expander_event - expanders events
  * @ioc: Pointer to MPT_ADAPTER structure
@@ -3638,7 +3621,6 @@ mptsas_send_expander_event(struct fw_event_work *fw_event)
 
 	mptsas_free_fw_event(ioc, fw_event);
 }
-
 
 /**
  * mptsas_expander_add -
@@ -4020,7 +4002,6 @@ mptsas_scan_sas_topology(MPT_ADAPTER *ioc)
 	}
 }
 
-
 static void
 mptsas_handle_queue_full_event(struct fw_event_work *fw_event)
 {
@@ -4033,7 +4014,6 @@ mptsas_handle_queue_full_event(struct fw_event_work *fw_event)
 	int channel = -1;
 	int fw_id, fw_channel;
 	u16 current_depth;
-
 
 	ioc = fw_event->ioc;
 	qfull_data = (EventDataQueueFull_t *)fw_event->event_data;
@@ -4107,7 +4087,6 @@ mptsas_handle_queue_full_event(struct fw_event_work *fw_event)
 
 	mptsas_free_fw_event(ioc, fw_event);
 }
-
 
 static struct mptsas_phyinfo *
 mptsas_find_phyinfo_by_sas_address(MPT_ADAPTER *ioc, u64 sas_address)
@@ -4287,7 +4266,6 @@ mptsas_adding_inactive_raid_components(MPT_ADAPTER *ioc, u8 channel, u8 id)
 			|| !(sas_device.flags &
 			MPI_SAS_DEVICE0_FLAGS_DEVICE_MAPPED))
 			continue;
-
 
 		phy_info = mptsas_find_phyinfo_by_sas_address(ioc,
 		    sas_device.sas_address);
@@ -5373,7 +5351,6 @@ static struct pci_device_id mptsas_pci_table[] = {
 	{0}	/* Terminating entry */
 };
 MODULE_DEVICE_TABLE(pci, mptsas_pci_table);
-
 
 static struct pci_driver mptsas_driver = {
 	.name		= "mptsas",

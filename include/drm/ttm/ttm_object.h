@@ -134,7 +134,6 @@ struct ttm_base_object {
 				 enum ttm_ref_type ref_type);
 };
 
-
 /**
  * struct ttm_prime_object - Modified base object that is prime-aware
  *

@@ -654,7 +654,6 @@ static int davinci_mcasp_set_ch_constraints(struct davinci_mcasp *mcasp)
 	return ret;
 }
 
-
 static int davinci_mcasp_set_tdm_slot(struct snd_soc_dai *dai,
 				      unsigned int tx_mask,
 				      unsigned int rx_mask,

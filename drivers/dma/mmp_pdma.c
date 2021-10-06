@@ -334,7 +334,6 @@ static void start_pending_queue(struct mmp_pdma_chan *chan)
 	chan->idle = false;
 }
 
-
 /* desc->tx_list ==> pending list */
 static dma_cookie_t mmp_pdma_tx_submit(struct dma_async_tx_descriptor *tx)
 {

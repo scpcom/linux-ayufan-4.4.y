@@ -33,7 +33,6 @@
 
 #include <asm/octeon/cvmx-config.h>
 
-
 #include <asm/octeon/cvmx-mdio.h>
 #include <asm/octeon/cvmx-pko.h>
 #include <asm/octeon/cvmx-helper.h>

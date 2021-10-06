@@ -658,7 +658,6 @@ _fpsp_ovfl:
 	btst		&0x5,EXC_CMDREG(%a6)	# is instr an fmove out?
 	bne.w		fovfl_out
 
-
 	lea		FP_SRC(%a6),%a0		# pass: ptr to src op
 	bsr.l		fix_skewed_ops		# fix src op
 
@@ -774,7 +773,6 @@ fovfl_inex_on:
 
 ########################################################################
 fovfl_out:
-
 
 #$#	mov.l		FP_SRC_EX(%a6),TRAP_SRCOP_EX(%a6)
 #$#	mov.l		FP_SRC_HI(%a6),TRAP_SRCOP_HI(%a6)
@@ -897,7 +895,6 @@ _fpsp_unfl:
 
 	btst		&0x5,EXC_CMDREG(%a6)	# is instr an fmove out?
 	bne.w		funfl_out
-
 
 	lea		FP_SRC(%a6),%a0		# pass: ptr to src op
 	bsr.l		fix_skewed_ops		# fix src op
@@ -1048,7 +1045,6 @@ funfl_inex_on2:
 
 #######################################################################
 funfl_out:
-
 
 #$#	mov.l		FP_SRC_EX(%a6),TRAP_SRCOP_EX(%a6)
 #$#	mov.l		FP_SRC_HI(%a6),TRAP_SRCOP_HI(%a6)
@@ -1248,7 +1244,6 @@ fu_cont:
 	bfextu		EXC_CMDREG(%a6){&0:&6},%d0
 	cmpi.b		%d0,&0x13
 	beq.w		fu_in_pack
-
 
 # I'm not sure at this point what FPSR bits are valid for this instruction.
 # so, since the emulation routines re-create them anyways, zero exception field
@@ -1503,7 +1498,6 @@ fu_out:
 	cmpi.b		%d0,&0x7
 	beq.w		fu_out_pack
 
-
 # I'm not sure at this point what FPSR bits are valid for this instruction.
 # so, since the emulation routines re-create them anyways, zero exception field.
 # fmove out doesn't affect ccodes.
@@ -1685,7 +1679,6 @@ fu_snan:
 
 	unlk		%a6
 
-
 	bra.l		_real_snan
 
 fu_operr:
@@ -1699,7 +1692,6 @@ fu_operr:
 	frestore	FP_SRC(%a6)
 
 	unlk		%a6
-
 
 	bra.l		_real_operr
 
@@ -1798,13 +1790,11 @@ fu_inex:
 
 	unlk		%a6
 
-
 	bra.l		_real_inex
 
 #########################################################################
 #########################################################################
 fu_in_pack:
-
 
 # I'm not sure at this point what FPSR bits are valid for this instruction.
 # so, since the emulation routines re-create them anyways, zero exception field
@@ -2062,7 +2052,6 @@ fu_trace_p:
 #########################################################
 fu_out_pack:
 
-
 # I'm not sure at this point what FPSR bits are valid for this instruction.
 # so, since the emulation routines re-create them anyways, zero exception field.
 # fmove out doesn't affect ccodes.
@@ -2208,7 +2197,6 @@ fu_snan_s_p:
 
 	add.l		&LOCAL_SIZE-0x8,%sp
 
-
 	bra.l		_real_snan
 
 fu_operr_p:
@@ -2248,7 +2236,6 @@ fu_operr_p_s:
 
 	add.l		&LOCAL_SIZE-0x8,%sp
 
-
 	bra.l		_real_operr
 
 fu_inex_p2:
@@ -2287,7 +2274,6 @@ fu_inex_s_p2:
 	mov.l		LOCAL_SIZE+FP_DST_LO(%sp),LOCAL_SIZE+0xc(%sp)
 
 	add.l		&LOCAL_SIZE-0x8,%sp
-
 
 	bra.l		_real_inex
 
@@ -2504,7 +2490,6 @@ iea_op:
 
 	btst		&0xa,%d0		# is src fmt x or p?
 	bne.b		iea_op_pack		# packed
-
 
 	mov.l		EXC_EXTWPTR(%a6),%a0	# pass: ptr to #<data>
 	lea		FP_SRC(%a6),%a1		# pass: ptr to super addr
@@ -3127,7 +3112,6 @@ _fpsp_operr:
 	btst		&13,%d0			# is instr an fmove out?
 	bne.b		foperr_out		# fmove out
 
-
 # here, we simply see if the operand in the fsave frame needs to be "unskewed".
 # this would be the case for opclass two operations with a source infinity or
 # denorm operand in the sgl or dbl format. NANs also become skewed, but can't
@@ -3322,7 +3306,6 @@ _fpsp_snan:
 
 	btst		&13,%d0			# is instr an fmove out?
 	bne.w		fsnan_out		# fmove out
-
 
 # here, we simply see if the operand in the fsave frame needs to be "unskewed".
 # this would be the case for opclass two operations with a source infinity or
@@ -3615,7 +3598,6 @@ _fpsp_inex:
 	btst		&13,%d0			# is instr an fmove out?
 	bne.w		finex_out		# fmove out
 
-
 # the hardware, for "fabs" and "fneg" w/ a long source format, puts the
 # longword integer directly into the upper longword of the mantissa along
 # w/ an exponent value of 0x401e. we convert this to extended precision here.
@@ -3785,7 +3767,6 @@ _fpsp_dz:
 	mov.l		%d0,EXC_OPWORD(%a6)
 
 ##############################################################################
-
 
 # here, we simply see if the operand in the fsave frame needs to be "unskewed".
 # this would be the case for opclass two operations with a source zero
@@ -5358,7 +5339,6 @@ SCOK1:
 	blt.b		SCMAIN
 	bra.w		SREDUCEX
 
-
 #--THIS IS THE USUAL CASE, |X| <= 15 PI.
 #--THE ARGUMENT REDUCTION IS DONE BY TABLE LOOK UP.
 SCMAIN:
@@ -5518,7 +5498,6 @@ NEVEN:
 
 	fmul.x		%fp0,%fp1		# S(B2+...)
 	fmul.x		%fp2,%fp0		# s(a1+...)
-
 
 	fadd.s		COSB1(%pc),%fp1		# B1+S(B2...)
 	fmul.x		RPRIME(%a6),%fp0	# R'S(A1+...)
@@ -8420,7 +8399,6 @@ LP1CONT1:
 	fmov.l		%d0,%fpcr
 	fadd.x		KLOG2(%a6),%fp0		# FINAL ADD
 	bra		t_inx2
-
 
 LOGNEAR1:
 
@@ -22195,7 +22173,6 @@ truncate:
 	bgt.b		dbl_done		# no; it's dbl
 	rts					# no; it's ext
 
-
 #
 # ext_grs(): extract guard, round and sticky bits according to
 #	     rounding precision.
@@ -23706,13 +23683,11 @@ pos_res:
 	fmul.x		PLOG2(%pc),%fp0	# if pos, mul by LOG2
 	fmov.l		%fp0,%d6	# put ILOG in d6 as a lword
 
-
 # A4. Clr INEX bit.
 #     The operation in A3 above may have set INEX2.
 
 A4_str:
 	fmov.l		&0,%fpsr	# zero all of fpsr - nothing needed
-
 
 # A5. Set ICTR = 0;
 #     ICTR is a flag used in A13.  It must be set before the
@@ -23770,7 +23745,6 @@ len_ck:
 	bra.b		A7_str		# finished here
 LEN_ng:
 	mov.l		&1,%d4		# min LEN is 1
-
 
 # A7. Calculate SCALE.
 #     SCALE is equal to 10^ISCALE, where ISCALE is the number
@@ -24017,7 +23991,6 @@ A10_st:
 	or.l		&1,8(%a2)	# or in 1 to lsb of mantissa
 	fmov.x		FP_SCR1(%a6),%fp0	# write adjusted Y back to fpu
 
-
 # A11. Restore original FPCR; set size ext.
 #      Perform FINT operation in the user's rounding mode.  Keep
 #      the size to extended.  The sintdo entry point in the sint
@@ -24028,7 +24001,6 @@ A11_st:
 	mov.l		USER_FPCR(%a6),L_SCR1(%a6)	# save it for later
 	and.l		&0x00000030,USER_FPCR(%a6)	# set size to ext,
 #					;block exceptions
-
 
 # A12. Calculate YINT = FINT(Y) according to user's rounding mode.
 #      The FPSP routine sintd0 is used.  The output is in fp0.
@@ -24265,7 +24237,6 @@ zer_m:
 	addq.l		&3,%a0		# a0 points to M16 byte in result
 	bsr		binstr		# call binstr to convert mant
 
-
 # A15. Convert the exponent to bcd.
 #      As in A14 above, the exp is converted to bcd and the
 #      digits are stored in the final string.
@@ -24357,7 +24328,6 @@ x_loop_fin:
 	tst.b		%d0		# check if e4 is zero
 	beq.b		A16_st		# if zero, skip rest
 	or.l		&opaop_mask,USER_FPSR(%a6)	# set OPERR & AIOP in USER_FPSR
-
 
 # A16. Write sign bits to final string.
 #	   Sigma is bit 31 of initial value; RHO is bit 31 of d6 (ILOG).

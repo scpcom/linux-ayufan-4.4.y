@@ -33,5 +33,4 @@ extern volatile unsigned char* sun3_intreg;
 #define SUN3_VEC_VMESCSI1	(IRQ_USER+1)
 #define SUN3_VEC_CG		(IRQ_USER+104)
 
-
 #endif /* SUN3INTS_H */

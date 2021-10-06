@@ -128,7 +128,6 @@ static void __init ls1x_irq_init(int base)
 		__raw_writel(n ? 0x0 : 0xe000, LS1X_INTC_INTEDGE(n));
 	}
 
-
 	for (n = base; n < LS1X_IRQS; n++) {
 		irq_set_chip_and_handler(n, &ls1x_irq_chip,
 					 handle_level_irq);

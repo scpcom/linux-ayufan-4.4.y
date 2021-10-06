@@ -296,7 +296,6 @@ static inline long pmac_call_feature(int selector, struct device_node* node,
  */
 #define PMAC_FTR_DEVICE_CAN_WAKE	PMAC_FTR_DEF(22)
 
-
 /* Don't use those directly, they are for the sake of pmac_setup.c */
 extern long pmac_do_feature_call(unsigned int selector, ...);
 extern void pmac_feature_init(void);

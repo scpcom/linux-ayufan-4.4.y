@@ -27,7 +27,6 @@
 #include "msm_drv.h"
 #include "hdmi.xml.h"
 
-
 struct hdmi_phy;
 struct hdmi_platform_config;
 
@@ -160,7 +159,6 @@ int hdmi_audio_info_setup(struct hdmi *hdmi, bool enabled,
 	uint32_t num_of_channels, uint32_t channel_allocation,
 	uint32_t level_shift, bool down_mix);
 void hdmi_audio_set_sample_rate(struct hdmi *hdmi, int rate);
-
 
 /*
  * hdmi bridge:

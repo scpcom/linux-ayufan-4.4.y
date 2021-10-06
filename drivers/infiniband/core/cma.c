@@ -2303,7 +2303,6 @@ static int cma_resolve_iboe_route(struct rdma_id_private *id_priv)
 	int ret;
 	struct net_device *ndev = NULL;
 
-
 	work = kzalloc(sizeof *work, GFP_KERNEL);
 	if (!work)
 		return -ENOMEM;

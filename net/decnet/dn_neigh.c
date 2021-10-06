@@ -215,7 +215,6 @@ static int dn_long_output(struct neighbour *neigh, struct sock *sk,
 	struct dn_long_packet *lp;
 	struct dn_skb_cb *cb = DN_SKB_CB(skb);
 
-
 	if (skb_headroom(skb) < headroom) {
 		struct sk_buff *skb2 = skb_realloc_headroom(skb, headroom);
 		if (skb2 == NULL) {
@@ -262,7 +261,6 @@ static int dn_short_output(struct neighbour *neigh, struct sock *sk,
 	struct dn_short_packet *sp;
 	unsigned char *data;
 	struct dn_skb_cb *cb = DN_SKB_CB(skb);
-
 
 	if (skb_headroom(skb) < headroom) {
 		struct sk_buff *skb2 = skb_realloc_headroom(skb, headroom);
@@ -542,7 +540,6 @@ int dn_neigh_elist(struct net_device *dev, unsigned char *ptr, int n)
 
 	return state.t;
 }
-
 
 #ifdef CONFIG_PROC_FS
 

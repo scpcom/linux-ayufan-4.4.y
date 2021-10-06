@@ -124,7 +124,6 @@ static int mpd4_lvds_pll_set_rate(struct clk_hw *hw, unsigned long rate,
 	return 0;
 }
 
-
 static const struct clk_ops mpd4_lvds_pll_ops = {
 	.enable = mpd4_lvds_pll_enable,
 	.disable = mpd4_lvds_pll_disable,

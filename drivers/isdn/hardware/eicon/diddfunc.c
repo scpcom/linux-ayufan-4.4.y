@@ -19,7 +19,6 @@
 #define DBG_MINIMUM  (DL_LOG + DL_FTL + DL_ERR)
 #define DBG_DEFAULT  (DBG_MINIMUM + DL_XLOG + DL_REG)
 
-
 extern void DIVA_DIDD_Read(void *, int);
 extern char *DRIVERRELEASE_DIDD;
 static dword notify_handle;

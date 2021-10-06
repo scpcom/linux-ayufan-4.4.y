@@ -17,7 +17,6 @@
 #include <asm/types.h>
 #include <linux/atomic.h>
 
-
 extern atomic_t ppc_n_lost_interrupts;
 
 /* This number is used when no interrupt has been assigned */

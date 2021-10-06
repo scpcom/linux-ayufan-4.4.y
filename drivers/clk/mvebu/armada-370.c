@@ -181,4 +181,3 @@ static void __init a370_clk_init(struct device_node *np)
 		mvebu_clk_gating_setup(cgnp, a370_gating_desc);
 }
 CLK_OF_DECLARE(a370_clk, "marvell,armada-370-core-clock", a370_clk_init);
-

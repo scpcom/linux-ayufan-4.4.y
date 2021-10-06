@@ -145,7 +145,6 @@ static int iscsit_dataout_check_unsolicited_sequence(
 	struct iscsi_data *hdr = (struct iscsi_data *) buf;
 	u32 payload_length = ntoh24(hdr->dlength);
 
-
 	if ((be32_to_cpu(hdr->offset) < cmd->seq_start_offset) ||
 	   ((be32_to_cpu(hdr->offset) + payload_length) > cmd->seq_end_offset)) {
 		pr_err("Command ITT: 0x%08x with Offset: %u,"

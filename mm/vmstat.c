@@ -426,7 +426,6 @@ void dec_zone_page_state(struct page *page, enum zone_stat_item item)
 EXPORT_SYMBOL(dec_zone_page_state);
 #endif
 
-
 /*
  * Fold a differential into the global counters.
  * Returns the number of counters updated.
@@ -870,7 +869,6 @@ const char * const vmstat_text[] = {
 #endif /* CONFIG_VM_EVENTS_COUNTERS */
 };
 #endif /* CONFIG_PROC_FS || CONFIG_SYSFS || CONFIG_NUMA */
-
 
 #if (defined(CONFIG_DEBUG_FS) && defined(CONFIG_COMPACTION)) || \
      defined(CONFIG_PROC_FS)
@@ -1439,7 +1437,6 @@ static bool need_update(int cpu)
 	}
 	return false;
 }
-
 
 /*
  * Shepherd worker thread that checks the

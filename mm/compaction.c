@@ -1619,7 +1619,6 @@ break_loop:
 	return rc;
 }
 
-
 /* Compact all zones within a node */
 static void __compact_pgdat(pg_data_t *pgdat, struct compact_control *cc)
 {

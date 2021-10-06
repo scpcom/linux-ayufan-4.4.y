@@ -241,7 +241,6 @@ struct snd_enc_wma {
 	__u32 super_block_align; /* WMA Type-specific data */
 };
 
-
 /**
  * struct snd_enc_vorbis
  * @quality: Sets encoding quality to n, between -1 (low) and 10 (high).
@@ -269,7 +268,6 @@ struct snd_enc_vorbis {
 	__u32 min_bit_rate;
 	__u32 downmix;
 } __attribute__((packed, aligned(4)));
-
 
 /**
  * struct snd_enc_real

@@ -449,4 +449,3 @@ struct msm_dsi_pll *msm_dsi_phy_get_pll(struct msm_dsi_phy *phy)
 
 	return phy->pll;
 }
-

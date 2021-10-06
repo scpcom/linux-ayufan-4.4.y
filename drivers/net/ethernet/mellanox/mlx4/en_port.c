@@ -31,7 +31,6 @@
  *
  */
 
-
 #include <linux/if_vlan.h>
 
 #include <linux/mlx4/device.h>
@@ -39,7 +38,6 @@
 
 #include "en_port.h"
 #include "mlx4_en.h"
-
 
 int mlx4_SET_VLAN_FLTR(struct mlx4_dev *dev, struct mlx4_en_priv *priv)
 {
@@ -376,4 +374,3 @@ out:
 	mlx4_free_cmd_mailbox(mdev->dev, mailbox);
 	return err;
 }
-

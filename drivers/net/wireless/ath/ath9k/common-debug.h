@@ -14,8 +14,6 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-
-
 /**
  * struct ath_rx_stats - RX Statistics
  * @rx_pkts_all:  No. of total frames received, including ones that

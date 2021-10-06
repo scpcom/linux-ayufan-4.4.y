@@ -19,7 +19,6 @@
 #include <drv_types.h>
 #include <wlan_bssdef.h>
 
-
 /*	Commented by Albert 20101105 */
 /*	Increase the SURVEY_TO value from 100 to 150  ( 100ms to 150ms ) */
 /*	The Realtek 8188CE SoftAP will spend around 100ms to send the probe response after receiving the probe request. */
@@ -74,7 +73,6 @@
 #define _HW_STATE_STATION_	0x02
 #define _HW_STATE_AP_			0x03
 
-
 #define		_1M_RATE_	0
 #define		_2M_RATE_	1
 #define		_5M_RATE_	2
@@ -88,7 +86,6 @@
 #define		_48M_RATE_	10
 #define		_54M_RATE_	11
 
-
 extern unsigned char WMM_OUI23A[];
 extern unsigned char WPS_OUI23A[];
 extern unsigned char WFD_OUI23A[];
@@ -96,7 +93,6 @@ extern unsigned char P2P_OUI23A[];
 
 extern unsigned char WMM_INFO_OUI23A[];
 extern unsigned char WMM_PARA_OUI23A[];
-
 
 /*  */
 /*  Channel Plan Type. */
@@ -596,14 +592,12 @@ struct cmd_hdl {
 	int (*h2cfuns)(struct rtw_adapter *padapter, const u8 *pbuf);
 };
 
-
 int read_macreg_hdl(struct rtw_adapter *padapter, u8 *pbuf);
 int write_macreg_hdl(struct rtw_adapter *padapter, u8 *pbuf);
 int read_bbreg_hdl(struct rtw_adapter *padapter, u8 *pbuf);
 int write_bbreg_hdl(struct rtw_adapter *padapter, u8 *pbuf);
 int read_rfreg_hdl(struct rtw_adapter *padapter, u8 *pbuf);
 int write_rfreg_hdl(struct rtw_adapter *padapter, u8 *pbuf);
-
 
 int NULL_hdl23a(struct rtw_adapter *padapter, const u8 *pbuf);
 int join_cmd_hdl23a(struct rtw_adapter *padapter, const u8 *pbuf);

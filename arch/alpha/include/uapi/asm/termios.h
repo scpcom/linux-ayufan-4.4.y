@@ -66,5 +66,4 @@ struct termio {
 #define _VEOL2	6
 #define _VSWTC	7
 
-
 #endif /* _UAPI_ALPHA_TERMIOS_H */

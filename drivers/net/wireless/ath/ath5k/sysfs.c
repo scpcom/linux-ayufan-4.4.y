@@ -95,7 +95,6 @@ static struct attribute_group ath5k_attribute_group_ani = {
 	.attrs = ath5k_sysfs_entries_ani,
 };
 
-
 /*** register / unregister ***/
 
 int

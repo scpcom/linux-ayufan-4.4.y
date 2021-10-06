@@ -99,7 +99,6 @@
 #define RGS3  %r10
 #define RGS3d %r10d
 
-
 #define lookup_32bit(t0, t1, t2, t3, src, dst, interleave_op, il_reg) \
 	movzbl		src ## bl,        RID1d;     \
 	movzbl		src ## bh,        RID2d;     \

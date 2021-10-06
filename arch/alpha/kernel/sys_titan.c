@@ -36,7 +36,6 @@
 #include "machvec_impl.h"
 #include "err_impl.h"
 
-
 /*
  * Titan generic
  */
@@ -173,7 +172,6 @@ titan_srm_device_interrupt(unsigned long vector)
 	handle_irq(irq);
 }
 
-
 static void __init
 init_titan_irqs(struct irq_chip * ops, int imin, int imax)
 {
@@ -255,7 +253,6 @@ titan_dispatch_irqs(u64 mask)
 	}
 }
   
-
 /*
  * Titan Family
  */
@@ -337,7 +334,6 @@ titan_init_pci(void)
 	locate_and_init_vga(NULL);
 }
 
-
 /*
  * Privateer
  */
@@ -359,7 +355,6 @@ privateer_init_pci(void)
 	return titan_init_pci();
 }
 
-
 /*
  * The System Vectors.
  */

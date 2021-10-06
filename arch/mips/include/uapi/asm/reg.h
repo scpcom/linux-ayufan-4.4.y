@@ -97,7 +97,6 @@
 #define MIPS64_EF_R26		26
 #define MIPS64_EF_R27		27
 
-
 #define MIPS64_EF_R28		28
 #define MIPS64_EF_R29		29
 #define MIPS64_EF_R30		30

@@ -29,7 +29,6 @@ perform architecturally forbidden (to PL3) operations (like setting control
 registers).
 */
 
-
 #include <asm/asm-offsets.h>
 #include <asm/unistd.h>
 #include <asm/errno.h>
@@ -256,7 +255,6 @@ syscall_nosys:
 	be	R%syscall_exit(%sr7,%r1)
 	ldo	-ENOSYS(%r0),%r28		   /* set errno */
 
-
 /* Warning! This trace code is a virtual duplicate of the code above so be
  * sure to maintain both! */
 .Ltracesys:
@@ -399,7 +397,6 @@ tracesys_sigexit:
 	ldil	L%syscall_exit_rfi,%r1
 	be,n	R%syscall_exit_rfi(%sr7,%r1)
 
-
 	/*********************************************************
 		32/64-bit Light-Weight-Syscall ABI
 
@@ -502,8 +499,6 @@ lws_exit:
 #endif
 	be,n	0(%sr7, %r31)
 
-
-	
 	/***************************************************
 		Implementing 32bit CAS as an atomic operation:
 
@@ -660,7 +655,6 @@ cas_action:
 	   Each of the entries must be relocated. */
 	ASM_EXCEPTIONTABLE_ENTRY(1b-linux_gateway_page, 3b-linux_gateway_page)
 	ASM_EXCEPTIONTABLE_ENTRY(2b-linux_gateway_page, 3b-linux_gateway_page)
-
 
 	/***************************************************
 		New CAS implementation which uses pointers and variable size
@@ -944,5 +938,3 @@ END(lws_lock_start)
 	.previous
 
 .end
-
-

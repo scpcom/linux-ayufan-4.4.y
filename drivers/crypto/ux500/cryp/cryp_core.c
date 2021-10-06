@@ -1701,7 +1701,6 @@ static int ux500_cryp_resume(struct device *dev)
 		device_data->current_ctx = NULL;
 	spin_unlock(&device_data->ctx_lock);
 
-
 	if (!device_data->current_ctx)
 		up(&driver_data.device_allocation);
 	else

@@ -150,7 +150,6 @@ static void fq_flow_set_throttled(struct fq_sched_data *q, struct fq_flow *f)
 		q->time_next_delayed_flow = f->time_next_packet;
 }
 
-
 static struct kmem_cache *fq_flow_cachep __read_mostly;
 
 static void fq_flow_add_tail(struct fq_flow_head *head, struct fq_flow *flow)
@@ -293,7 +292,6 @@ static struct fq_flow *fq_classify(struct sk_buff *skb, struct fq_sched_data *q)
 	q->inactive_flows++;
 	return f;
 }
-
 
 /* remove one skb from head of flow queue */
 static struct sk_buff *fq_dequeue_head(struct Qdisc *sch, struct fq_flow *flow)

@@ -82,7 +82,6 @@
 #define __initdata_refok __refdata
 #define __exit_refok     __ref
 
-
 #ifdef MODULE
 #define __exitused
 #else

@@ -178,5 +178,3 @@ bool evergreen_dma_is_lockup(struct radeon_device *rdev, struct radeon_ring *rin
 	}
 	return radeon_ring_test_lockup(rdev, ring);
 }
-
-

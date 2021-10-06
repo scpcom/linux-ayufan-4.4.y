@@ -29,7 +29,6 @@
 #define WKUP_MOD					0x400
 #define PLL_MOD						0x500
 
-
 /* Chip-specific module offsets */
 #define OMAP24XX_GR_MOD					OCP_MOD
 #define OMAP24XX_DSP_MOD				0x800
@@ -205,7 +204,6 @@
 /* CM_IDLEST_MDM and PM_WKST_MDM shared bits */
 #define OMAP2430_ST_MDM_SHIFT				0
 #define OMAP2430_ST_MDM_MASK				(1 << 0)
-
 
 /* 3430 register bits shared between CM & PRM registers */
 
@@ -423,8 +421,6 @@
 #define OMAP3430_EN_CORE_SHIFT				0
 #define OMAP3430_EN_CORE_MASK				(1 << 0)
 
-
-
 /*
  * Maximum time(us) it takes to output the signal WUCLKOUT of the last
  * pad of the I/O ring after asserting WUCLKIN high.  Tero measured
@@ -556,4 +552,3 @@ extern void omap_prcm_irq_complete(void);
 # endif
 
 #endif
-

@@ -69,7 +69,6 @@
 #define LS1X_DAY_OFFSET		(21)
 #define LS1X_MONTH_OFFSET	(26)
 
-
 #define LS1X_SEC_MASK		(0x3f)
 #define LS1X_MIN_MASK		(0x3f)
 #define LS1X_HOUR_MASK		(0x1f)

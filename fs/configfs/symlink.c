@@ -108,7 +108,6 @@ out:
 	return ret;
 }
 
-
 static int get_target(const char *symname, struct path *path,
 		      struct config_item **target, struct super_block *sb)
 {
@@ -130,7 +129,6 @@ static int get_target(const char *symname, struct path *path,
 
 	return ret;
 }
-
 
 int configfs_symlink(struct inode *dir, struct dentry *dentry, const char *symname)
 {
@@ -302,4 +300,3 @@ const struct inode_operations configfs_symlink_inode_operations = {
 	.put_link = free_page_put_link,
 	.setattr = configfs_setattr,
 };
-

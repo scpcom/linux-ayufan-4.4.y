@@ -384,7 +384,6 @@ int ip_rcv(struct sk_buff *skb, struct net_device *dev, struct packet_type *pt, 
 	if (skb->pkt_type == PACKET_OTHERHOST)
 		goto drop;
 
-
 	net = dev_net(dev);
 	IP_UPD_PO_STATS_BH(net, IPSTATS_MIB_IN, skb->len);
 

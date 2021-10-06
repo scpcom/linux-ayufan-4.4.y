@@ -58,7 +58,6 @@ static irqreturn_t floppy_hardint(int irq, void *dev_id)
 	if (!doing_vdma)
 		return floppy_interrupt(irq, dev_id);
 
-
 	st = 1;
 	for (lcount=virtual_dma_count, lptr=virtual_dma_addr;
 	     lcount; lcount--, lptr++) {
@@ -97,12 +96,10 @@ static void vdma_nop(unsigned int dummy)
 {
 }
 
-
 static int vdma_get_dma_residue(unsigned int dummy)
 {
 	return virtual_dma_count + virtual_dma_residue;
 }
-
 
 static int fd_request_irq(void)
 {

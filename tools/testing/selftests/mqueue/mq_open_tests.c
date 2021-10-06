@@ -72,7 +72,6 @@ static inline void __set(FILE *stream, int value, char *err_msg)
 		perror(err_msg);
 }
 
-
 void shutdown(int exit_val, char *err_cause, int line_no)
 {
 	static int in_shutdown = 0;

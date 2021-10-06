@@ -25,7 +25,6 @@
 
 #include <uapi/linux/omapfb.h>
 
-
 struct omap_lcd_config {
 	char panel_name[16];
 	char ctrl_name[16];

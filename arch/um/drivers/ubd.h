@@ -12,4 +12,3 @@ extern int io_thread(void *arg);
 extern int kernel_fd;
 
 #endif
-

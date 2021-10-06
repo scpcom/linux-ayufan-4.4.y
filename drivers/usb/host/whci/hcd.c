@@ -77,7 +77,6 @@ out:
 	return ret;
 }
 
-
 /*
  * Stop the wireless host controller.
  *
@@ -109,7 +108,6 @@ static int whc_get_frame_number(struct usb_hcd *usb_hcd)
 	/* Frame numbers are not applicable to WUSB. */
 	return -ENOSYS;
 }
-
 
 /*
  * Queue an URB to the ASL or PZL
@@ -211,7 +209,6 @@ static void whc_endpoint_reset(struct usb_hcd *usb_hcd,
 
 	spin_unlock_irqrestore(&whc->lock, flags);
 }
-
 
 static struct hc_driver whc_hc_driver = {
 	.description = "whci-hcd",
@@ -316,7 +313,6 @@ error:
 	usb_put_hcd(usb_hcd);
 	return ret;
 }
-
 
 static void whc_remove(struct umc_dev *umc)
 {

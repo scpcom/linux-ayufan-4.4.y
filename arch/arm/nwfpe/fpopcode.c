@@ -60,4 +60,3 @@ const float32 float32Constant[] = {
 	0x3f000000,		/* single 0.5 */
 	0x41200000		/* single 10.0 */
 };
-

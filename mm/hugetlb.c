@@ -1756,7 +1756,6 @@ static void return_unused_surplus_pages(struct hstate *h,
 	}
 }
 
-
 /*
  * vma_needs_reservation, vma_commit_reservation and vma_end_reservation
  * are used by the huge page allocation routines to manage reservations.
@@ -2349,7 +2348,6 @@ static ssize_t nr_hugepages_mempolicy_store(struct kobject *kobj,
 }
 HSTATE_ATTR(nr_hugepages_mempolicy);
 #endif
-
 
 static ssize_t nr_overcommit_hugepages_show(struct kobject *kobj,
 					struct kobj_attribute *attr, char *buf)

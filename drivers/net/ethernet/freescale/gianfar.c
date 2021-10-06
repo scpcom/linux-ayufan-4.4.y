@@ -1768,7 +1768,6 @@ static phy_interface_t gfar_get_interface(struct net_device *dev)
 	return PHY_INTERFACE_MODE_MII;
 }
 
-
 /* Initializes driver's PHY state, and attaches to the PHY.
  * Returns 0 on success.
  */
@@ -3316,7 +3315,6 @@ static int gfar_poll_tx(struct napi_struct *napi, int budget)
 	return 0;
 }
 
-
 #ifdef CONFIG_NET_POLL_CONTROLLER
 /* Polling 'interrupt' - used by things like netconsole to send skbs
  * without having to re-enable interrupts. It's not called while
@@ -3483,7 +3481,6 @@ static void gfar_set_multi(struct net_device *dev)
 	}
 }
 
-
 /* Clears each of the exact match registers to zero, so they
  * don't interfere with normal reception
  */
@@ -3524,7 +3521,6 @@ static void gfar_set_hash_for_addr(struct net_device *dev, u8 *addr)
 	tempval |= value;
 	gfar_write(priv->hash_regs[whichreg], tempval);
 }
-
 
 /* There are multiple MAC Address register pairs on some controllers
  * This function sets the numth pair to a given address

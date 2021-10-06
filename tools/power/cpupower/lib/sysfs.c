@@ -20,7 +20,6 @@
 #define MAX_LINE_LEN 4096
 #define SYSFS_PATH_MAX 255
 
-
 static unsigned int sysfs_read_file(const char *path, char *buf, size_t buflen)
 {
 	int fd;
@@ -41,7 +40,6 @@ static unsigned int sysfs_read_file(const char *path, char *buf, size_t buflen)
 
 	return (unsigned int) numread;
 }
-
 
 /* CPUFREQ sysfs access **************************************************/
 
@@ -110,7 +108,6 @@ static const char *cpufreq_value_files[MAX_CPUFREQ_VALUE_READ_FILES] = {
 	[STATS_NUM_TRANSITIONS] = "stats/total_trans"
 };
 
-
 static unsigned long sysfs_cpufreq_get_one_value(unsigned int cpu,
 						 enum cpufreq_value which)
 {
@@ -148,7 +145,6 @@ static const char *cpufreq_string_files[MAX_CPUFREQ_STRING_FILES] = {
 	[SCALING_DRIVER] = "scaling_driver",
 	[SCALING_GOVERNOR] = "scaling_governor",
 };
-
 
 static char *sysfs_cpufreq_get_one_string(unsigned int cpu,
 					   enum cpufreq_string which)
@@ -322,7 +318,6 @@ sysfs_get_freq_available_governors(unsigned int cpu) {
 	}
 	return NULL;
 }
-
 
 struct cpufreq_available_frequencies *
 sysfs_get_available_frequencies(unsigned int cpu) {
@@ -568,7 +563,6 @@ int sysfs_modify_freq_policy_max(unsigned int cpu, unsigned long max_freq)
 					     value, strlen(value));
 };
 
-
 int sysfs_modify_freq_policy_min(unsigned int cpu, unsigned long min_freq)
 {
 	char value[SYSFS_PATH_MAX];
@@ -578,7 +572,6 @@ int sysfs_modify_freq_policy_min(unsigned int cpu, unsigned long min_freq)
 	return sysfs_cpufreq_write_one_value(cpu, WRITE_SCALING_MIN_FREQ,
 					     value, strlen(value));
 };
-
 
 int sysfs_set_freq_policy(unsigned int cpu, struct cpufreq_policy *policy)
 {

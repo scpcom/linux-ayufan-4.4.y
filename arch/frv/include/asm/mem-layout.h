@@ -60,7 +60,6 @@
 
 #define KERNEL_IO_START			__UL(0xe0000000)
 
-
 /*****************************************************************************/
 /*
  * memory layout from userspace's point of view

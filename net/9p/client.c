@@ -90,7 +90,6 @@ static int safe_errno(int err)
 	return err;
 }
 
-
 /* Interpret mount option for protocol version */
 static int get_protocol_version(char *s)
 {
@@ -472,7 +471,6 @@ p9_parse_header(struct p9_fcall *pdu, int32_t *size, int8_t *type, int16_t *tag,
 		*tag = r_tag;
 	if (size)
 		*size = r_size;
-
 
 rewind_and_exit:
 	if (rewind)
@@ -1108,7 +1106,6 @@ struct p9_fid *p9_client_attach(struct p9_client *clnt, struct p9_fid *afid,
 	struct p9_fid *fid;
 	struct p9_qid qid;
 
-
 	p9_debug(P9_DEBUG_9P, ">>> TATTACH afid %d uname %s aname %s\n",
 		 afid ? afid->fid : -1, uname, aname);
 	fid = p9_fid_create(clnt);
@@ -1172,7 +1169,6 @@ struct p9_fid *p9_client_walk(struct p9_fid *oldfid, uint16_t nwname,
 		fid->uid = oldfid->uid;
 	} else
 		fid = oldfid;
-
 
 	p9_debug(P9_DEBUG_9P, ">>> TWALK fids %d,%d nwname %ud wname[0] %s\n",
 		 oldfid->fid, fid->fid, nwname, wnames ? wnames[0] : NULL);

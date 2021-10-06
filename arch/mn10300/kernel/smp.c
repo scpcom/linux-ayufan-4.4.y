@@ -273,7 +273,6 @@ static void mn10300_ipi_chip_disable(struct irq_data *d)
 	mn10300_ipi_disable(d->irq);
 }
 
-
 /**
  * mn10300_ipi_ack - Acknowledge an IPI interrupt in the PIC
  * @irq: The IPI to be acknowledged.

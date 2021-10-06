@@ -826,4 +826,3 @@ void vnt_update_pre_ed_threshold(struct vnt_private *priv, int scanning)
 	vnt_control_out_u8(priv, MESSAGE_REQUEST_BBREG, 0xc9, cr_201);
 	vnt_control_out_u8(priv, MESSAGE_REQUEST_BBREG, 0xce, cr_206);
 }
-

@@ -29,7 +29,6 @@
 
 static struct sock *dnrmg = NULL;
 
-
 static struct sk_buff *dnrmg_build_message(struct sk_buff *rt_skb, int *errp)
 {
 	struct sk_buff *skb = NULL;
@@ -86,7 +85,6 @@ static void dnrmg_send_peer(struct sk_buff *skb)
 	netlink_broadcast(dnrmg, skb2, 0, group, GFP_ATOMIC);
 }
 
-
 static unsigned int dnrmg_hook(void *priv,
 			struct sk_buff *skb,
 			const struct nf_hook_state *state)
@@ -94,7 +92,6 @@ static unsigned int dnrmg_hook(void *priv,
 	dnrmg_send_peer(skb);
 	return NF_ACCEPT;
 }
-
 
 #define RCV_SKB_FAIL(err) do { netlink_ack(skb, nlh, (err)); return; } while (0)
 
@@ -148,7 +145,6 @@ static void __exit dn_rtmsg_fini(void)
 	netlink_kernel_release(dnrmg);
 }
 
-
 MODULE_DESCRIPTION("DECnet Routing Message Grabulator");
 MODULE_AUTHOR("Steven Whitehouse <steve@chygwyn.com>");
 MODULE_LICENSE("GPL");
@@ -156,4 +152,3 @@ MODULE_ALIAS_NET_PF_PROTO(PF_NETLINK, NETLINK_DNRTMSG);
 
 module_init(dn_rtmsg_init);
 module_exit(dn_rtmsg_fini);
-

@@ -381,7 +381,6 @@ static inline pgprot_t pgprot_large_2_4k(pgprot_t pgprot)
 	return new;
 }
 
-
 typedef struct page *pgtable_t;
 
 extern pteval_t __supported_pte_mask;

@@ -6,7 +6,6 @@
 #include <ppc-asm.h>
 #include "reg.h"
 
-
 /* ppc-asm.h defines most of the reg aliases, but not r1/r2. */
 #define r1 1
 #define r2 2
@@ -75,7 +74,6 @@
 	rldicr  reg,reg,32,31;		\
 	oris    reg,reg,(expr)@h;	\
 	ori     reg,reg,(expr)@l;
-
 
 #if defined(_CALL_ELF) && _CALL_ELF == 2
 #define ENTRY_POINT(name) \

@@ -17,7 +17,6 @@
 
 #include <linux/iio/common/st_sensors.h>
 
-
 int st_sensors_allocate_trigger(struct iio_dev *indio_dev,
 				const struct iio_trigger_ops *trigger_ops)
 {

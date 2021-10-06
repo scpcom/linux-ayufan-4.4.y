@@ -31,19 +31,16 @@
 
 #define CS4349_I2C_INCR		0x80
 
-
 /* Device and Revision ID */
 #define CS4349_REVA		0xF0	/* Rev A */
 #define CS4349_REVB		0xF1	/* Rev B */
 #define CS4349_REVC2		0xFF	/* Rev C2 */
-
 
 /* PDN_DONE Poll Maximum
  * If soft ramp is set it will take much longer to power down
  * the system.
  */
 #define PDN_POLL_MAX		900
-
 
 /* Bitfield Definitions */
 

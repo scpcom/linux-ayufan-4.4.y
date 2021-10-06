@@ -618,7 +618,6 @@ static struct snd_soc_dai_ops fsl_spdif_dai_ops = {
 	.shutdown = fsl_spdif_shutdown,
 };
 
-
 /*
  * FSL SPDIF IEC958 controller(mixer) functions
  *

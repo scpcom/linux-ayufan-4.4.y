@@ -46,7 +46,6 @@
 
 #include "atmel-pcm.h"
 
-
 static int atmel_pcm_preallocate_dma_buffer(struct snd_pcm *pcm,
 	int stream)
 {
@@ -144,7 +143,6 @@ static const struct snd_pcm_hardware atmel_pcm_hardware = {
 	.buffer_bytes_max	= ATMEL_SSC_DMABUF_SIZE,
 };
 
-
 /*--------------------------------------------------------------------------*\
  * Data types
 \*--------------------------------------------------------------------------*/
@@ -204,7 +202,6 @@ static void atmel_pcm_dma_irq(u32 ssc_sr,
 
 	snd_pcm_period_elapsed(substream);
 }
-
 
 /*--------------------------------------------------------------------------*\
  * PCM operations

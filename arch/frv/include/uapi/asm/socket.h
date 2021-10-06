@@ -86,4 +86,3 @@
 #define SO_DETACH_BPF		SO_DETACH_FILTER
 
 #endif /* _ASM_SOCKET_H */
-

@@ -38,7 +38,6 @@
 /* SMC LAN91C111 */
 #define PA_LAN		(PA_PERIPHERAL + 0x01800000)
 
-
 #define FPGA_SRSTR      (PA_FPGA + 0x000)	/* System reset */
 #define FPGA_IRQ0SR     (PA_FPGA + 0x010)	/* IRQ0 status */
 #define FPGA_IRQ0MR     (PA_FPGA + 0x020)	/* IRQ0 mask */
@@ -65,13 +64,11 @@
 #define FPGA_ATAESR     (PA_FPGA + 0x170)	/* ATA extended bus status */
 #define FPGA_IRQPOLR    (PA_FPGA + 0x180)	/* IRQx polarity */
 
-
 #define SDK7780_NR_IRL			15
 /* IDE/ATA interrupt */
 #define IRQ_CFCARD			evt2irq(0x3c0)
 /* SMC interrupt */
 #define IRQ_ETHERNET			evt2irq(0x2c0)
-
 
 /* arch/sh/boards/renesas/sdk7780/irq.c */
 void init_sdk7780_IRQ(void);

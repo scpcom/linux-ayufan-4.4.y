@@ -71,7 +71,6 @@ struct quicc32_pram {
     unsigned short  tmp_mb;		/* Temp */
 };
 
-
 /*****************************************************************
         HDLC parameter RAM
 *****************************************************************/
@@ -121,8 +120,6 @@ struct hdlc_pram {
     unsigned short  tmp;            /* temp */
     unsigned short  tmp_mb;         /* temp */
 };
-
-
 
 /*****************************************************************
         UART parameter RAM
@@ -181,8 +178,6 @@ struct uart_pram {
     unsigned short  rccr;           /* Rx control char register */
     unsigned short  rlbc;           /* Receive last break char */
 };
-
-
 
 /*****************************************************************
         BISYNC parameter RAM

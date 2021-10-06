@@ -1010,7 +1010,6 @@ static struct sk_buff *__pfkey_xfrm_state2msg(const struct xfrm_state *x,
 	return skb;
 }
 
-
 static inline struct sk_buff *pfkey_xfrm_state2msg(const struct xfrm_state *x)
 {
 	struct sk_buff *skb;
@@ -1037,7 +1036,6 @@ static struct xfrm_state * pfkey_msg2xfrm_state(struct net *net,
 	const struct sadb_x_sec_ctx *sec_ctx;
 	uint16_t proto;
 	int err;
-
 
 	sa = ext_hdrs[SADB_EXT_SA - 1];
 	if (!sa ||
@@ -2584,7 +2582,6 @@ static int pfkey_migrate(struct sock *sk, struct sk_buff *skb,
 }
 #endif
 
-
 static int pfkey_spdget(struct sock *sk, struct sk_buff *skb, const struct sadb_msg *hdr, void * const *ext_hdrs)
 {
 	struct net *net = sock_net(sk);
@@ -3413,7 +3410,6 @@ static int set_sadb_address(struct sk_buff *skb, int sasize, int type,
 
 	return 0;
 }
-
 
 static int set_sadb_kmaddress(struct sk_buff *skb, const struct xfrm_kmaddress *k)
 {

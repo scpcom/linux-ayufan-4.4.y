@@ -2938,7 +2938,6 @@ static int igb_set_rxfh(struct net_device *netdev, const u32 *indir,
 		if (indir[i] >= num_queues)
 			return -EINVAL;
 
-
 	for (i = 0; i < IGB_RETA_SIZE; i++)
 		adapter->rss_indir_tbl[i] = indir[i];
 

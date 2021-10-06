@@ -79,5 +79,4 @@ struct el_common_EV6_mcheck {
 	unsigned long PCTX;
 };
 
-
 #endif /* __ALPHA_MCE_H */

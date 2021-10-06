@@ -50,7 +50,6 @@ static const struct {
 	{ 7, 131 },
 };
 
-
 static void da9052_wdt_release_resources(struct kref *r)
 {
 }
@@ -173,7 +172,6 @@ static const struct watchdog_ops da9052_wdt_ops = {
 	.ref = da9052_wdt_ref,
 	.unref = da9052_wdt_unref,
 };
-
 
 static int da9052_wdt_probe(struct platform_device *pdev)
 {

@@ -71,7 +71,6 @@ static const char * const ext_clock_names[3] = {"IEC958 In", "Word Clock 1xFS",
 /* chip address on SPI bus */
 #define AK4620_ADDR		0x02	/* ADC/DAC */
 
-
 /*
  * GPIO pins
  */
@@ -260,7 +259,6 @@ static unsigned char qtet_ak4113_read(void *private_data, unsigned char reg)
 			AK4113_ADDR, reg);
 }
 
-
 /*
  * AK4620 section
  */
@@ -401,7 +399,6 @@ static struct snd_akm4xxx akm_qtet_dac = {
 };
 
 /* Communication routines with the CPLD */
-
 
 /* Writes data to external register reg, both reg and data are
  * GPIO representations */
@@ -666,7 +663,6 @@ static int qtet_php_put(struct snd_kcontrol *kcontrol,
 #define PRIV_SW(xid, xbit, xreg)	[xid] = {.bit = xbit,\
 	.set_register = set_##xreg,\
 	.get_register = get_##xreg, }
-
 
 #define PRIV_ENUM2(xid, xbit, xreg, xtext1, xtext2)	[xid] = {.bit = xbit,\
 	.set_register = set_##xreg,\
@@ -1036,7 +1032,6 @@ static int qtet_init(struct snd_ice1712 *ice)
 
 	/* CPLD Initialize */
 	set_cpld(ice, 0);
-
 
 	ice->num_total_dacs = 2;
 	ice->num_total_adcs = 2;

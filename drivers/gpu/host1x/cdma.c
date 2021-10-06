@@ -16,7 +16,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 #include <asm/cacheflush.h>
 #include <linux/device.h>
 #include <linux/dma-mapping.h>

@@ -49,7 +49,6 @@ static struct notifier_block __maybe_unused iwmmxt_notifier_block = {
 	.notifier_call	= iwmmxt_do,
 };
 
-
 static u32 __init pj4_cp_access_read(void)
 {
 	u32 value;

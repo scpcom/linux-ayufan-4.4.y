@@ -74,7 +74,6 @@ struct  seminfo {
  * allocating the sop array.
  */
 
-
 #define SEMMNI  32000           /* <= IPCMNI  max # of semaphore identifiers */
 #define SEMMSL  32000           /* <= INT_MAX max num of semaphores per id */
 #define SEMMNS  (SEMMNI*SEMMSL) /* <= INT_MAX max # of semaphores in system */
@@ -87,6 +86,5 @@ struct  seminfo {
 #define SEMMNU  SEMMNS          /* num of undo structures system wide */
 #define SEMMAP  SEMMNS          /* # of entries in semaphore map */
 #define SEMUSZ  20		/* sizeof struct sem_undo */
-
 
 #endif /* _UAPI_LINUX_SEM_H */

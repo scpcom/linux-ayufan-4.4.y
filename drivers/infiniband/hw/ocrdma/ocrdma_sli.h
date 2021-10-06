@@ -351,7 +351,6 @@ struct ocrdma_modify_eqd_req {
 	struct ocrdma_modify_eqd_cmd cmd;
 };
 
-
 struct ocrdma_modify_eq_delay_rsp {
 	struct ocrdma_mbx_rsp hdr;
 	u32 rsvd0;
@@ -1188,7 +1187,6 @@ struct ocrdma_qp_params {
 	u32 qkey;
 };
 
-
 struct ocrdma_modify_qp {
 	struct ocrdma_mqe_hdr hdr;
 	struct ocrdma_mbx_hdr req;
@@ -1988,7 +1986,6 @@ struct ocrdma_tx_stats {
 	u32 ack_timeouts;
 	u32 rsvd[5];
 };
-
 
 struct ocrdma_tx_qp_err_stats {
 	u32 local_length_errors;

@@ -28,7 +28,6 @@
 #include <drm/drmP.h>
 #include "ast_drv.h"
 
-
 #include <drm/drm_fb_helper.h>
 #include <drm/drm_crtc_helper.h>
 
@@ -61,7 +60,6 @@ uint8_t ast_get_index_reg_mask(struct ast_private *ast,
 	ret = ast_io_read8(ast, base + 1) & mask;
 	return ret;
 }
-
 
 static int ast_detect_chip(struct drm_device *dev, bool *need_post)
 {
@@ -218,7 +216,6 @@ static int ast_get_dram_info(struct drm_device *dev)
 
 	ast_write32(ast, 0xf004, 0x1e6e0000);
 	ast_write32(ast, 0xf000, 0x1);
-
 
 	ast_write32(ast, 0x10000, 0xfc600309);
 
@@ -560,7 +557,6 @@ void ast_gem_free_object(struct drm_gem_object *obj)
 	ast_bo_unref(&ast_bo);
 }
 
-
 static inline u64 ast_bo_mmap_offset(struct ast_bo *bo)
 {
 	return drm_vma_node_offset_addr(&bo->bo.vma_node);
@@ -586,4 +582,3 @@ ast_dumb_mmap_offset(struct drm_file *file,
 	return 0;
 
 }
-

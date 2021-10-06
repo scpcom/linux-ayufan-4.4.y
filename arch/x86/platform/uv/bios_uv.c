@@ -70,7 +70,6 @@ s64 uv_bios_call_reentrant(enum uv_bios_cmd which, u64 a1, u64 a2, u64 a3,
 	return ret;
 }
 
-
 long sn_partition_id;
 EXPORT_SYMBOL_GPL(sn_partition_id);
 long sn_coherency_id;
@@ -81,7 +80,6 @@ long system_serial_number;
 EXPORT_SYMBOL_GPL(system_serial_number);
 int uv_type;
 EXPORT_SYMBOL_GPL(uv_type);
-
 
 s64 uv_bios_get_sn_info(int fc, int *uvtype, long *partid, long *coher,
 		long *region, long *ssn)
@@ -182,7 +180,6 @@ int uv_bios_set_legacy_vga_target(bool decode, int domain, int bus)
 				(u64)decode, (u64)domain, (u64)bus, 0, 0);
 }
 EXPORT_SYMBOL_GPL(uv_bios_set_legacy_vga_target);
-
 
 #ifdef CONFIG_EFI
 void uv_bios_init(void)

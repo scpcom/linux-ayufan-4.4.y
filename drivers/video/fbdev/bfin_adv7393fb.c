@@ -495,7 +495,6 @@ static int bfin_adv7393_fb_probe(struct i2c_client *client,
 		goto free_irq_ppi;
 	}
 
-
 	if (register_framebuffer(&fbdev->info) < 0) {
 		dev_err(&client->dev, "unable to register framebuffer\n");
 		ret = -EFAULT;

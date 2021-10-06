@@ -68,7 +68,6 @@ static inline void *krealloc(void *p, size_t s, gfp_t gfp)
 	return realloc(p, s);
 }
 
-
 static inline unsigned long __get_free_page(gfp_t gfp)
 {
 	void *p;

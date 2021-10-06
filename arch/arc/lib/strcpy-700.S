@@ -63,7 +63,6 @@ r3z:	lsr.f	r1,r3,24
 charloop:
 	ldb.ab	r3,[r1,1]
 
-
 	brne.d	r3,0,charloop
 	stb.ab	r3,[r10,1]
 	j	[blink]

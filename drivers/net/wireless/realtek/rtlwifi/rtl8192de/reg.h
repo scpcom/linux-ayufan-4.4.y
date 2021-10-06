@@ -140,7 +140,6 @@
 #define REG_BB_ACCEESS_CTRL		0x01E8
 #define REG_BB_ACCESS_DATA		0x01EC
 
-
 /* ----------------------------------------------------- */
 /*	0x0200h ~ 0x027Fh	TXDMA Configuration */
 /* ----------------------------------------------------- */
@@ -194,7 +193,6 @@
 #define REG_MGQ_INFORMATION		0x0410
 #define REG_HGQ_INFORMATION		0x0414
 #define REG_BCNQ_INFORMATION		0x0418
-
 
 #define REG_CPU_MGQ_INFORMATION		0x041C
 #define REG_FWHW_TXQ_CTRL		0x0420
@@ -311,7 +309,6 @@
 #define REG_CTS2TO			0x0641
 #define REG_EIFS			0x0642
 
-
 /* WMA, BA, CCX */
 #define REG_NAV_CTRL			0x0650
 #define REG_BACAMCMD			0x0654
@@ -320,7 +317,6 @@
 #define REG_FWDLY			0x0661
 #define REG_RXERR_RPT			0x0664
 #define REG_WMAC_TRXPTCL_CTL		0x0668
-
 
 /* Security  */
 #define REG_CAMCMD			0x0670
@@ -344,7 +340,6 @@
 #define REG_PKT_MON_CTRL		0x06B4
 #define REG_BT_COEX_TABLE		0x06C0
 #define REG_WMAC_RESP_TXINFO		0x06D8
-
 
 /* ----------------------------------------------------- */
 /*	Redifine 8192C register definition for compatibility */
@@ -492,7 +487,6 @@
 #define	BW_OPMODE_5G			BIT(1)
 #define	BW_OPMODE_11J			BIT(0)
 
-
 /* ----------------------------------------------------- */
 /*     8192C CAM Config Setting (offset 0x250, 1 byte)   */
 /* ----------------------------------------------------- */
@@ -506,7 +500,6 @@
 #define	CAM_AES				0x04
 #define	CAM_WEP104			0x05
 #define	CAM_SMS4			0x6
-
 
 #define	TOTAL_CAM_ENTRY			32
 #define	HALF_CAM_ENTRY			16
@@ -611,10 +604,8 @@
 #define	EEPROM_CID_QMI				0x0D
 #define EEPROM_CID_WHQL				0xFE
 
-
 #define	RTL8192_EEPROM_ID			0x8129
 #define	EEPROM_WAPI_SUPPORT			0x78
-
 
 #define RTL8190_EEPROM_ID		0x8129	/* 0-1 */
 #define EEPROM_HPON			0x02 /* LDO settings.2-5 */
@@ -737,7 +728,6 @@
 /* SPS0_CTRL */
 #define SW18_FPWM				BIT(3)
 
-
 /* SYS_ISO_CTRL */
 #define ISO_MD2PP				BIT(0)
 #define ISO_UA2USB				BIT(1)
@@ -752,7 +742,6 @@
 
 #define PWC_EV25V				BIT(14)
 #define PWC_EV12V				BIT(15)
-
 
 /* SYS_FUNC_EN */
 #define FEN_BBRSTB				BIT(0)
@@ -813,7 +802,6 @@
 #define SYS_CLK_EN				BIT(12)
 #define RING_CLK_EN				BIT(13)
 
-
 /* 9346CR */
 #define	BOOT_FROM_EEPROM			BIT(4)
 #define	EEPROM_EN				BIT(5)
@@ -838,8 +826,6 @@
 #define RF_RSTB					BIT(1)
 #define RF_SDMRSTB				BIT(2)
 
-
-
 /* LDOA15_CTRL */
 #define LDA15_EN				BIT(0)
 #define LDA15_STBY				BIT(1)
@@ -847,15 +833,12 @@
 #define LDA15_REG_VOS				BIT(3)
 #define _LDA15_VOADJ(x)				(((x) & 0x7) << 4)
 
-
-
 /* LDOV12D_CTRL */
 #define LDV12_EN				BIT(0)
 #define LDV12_SDBY				BIT(1)
 #define LPLDO_HSM				BIT(2)
 #define LPLDO_LSM_DIS				BIT(3)
 #define _LDV12_VADJ(x)				(((x) & 0xF) << 4)
-
 
 /* AFE_XTAL_CTRL */
 #define XTAL_EN					BIT(0)
@@ -874,12 +857,10 @@
 #define _XTAL_BT_DRV(x)				(((x) & 0x3) << 21)
 #define _XTAL_GPIO(x)				(((x) & 0x7) << 23)
 
-
 #define CKDLY_AFE				BIT(26)
 #define CKDLY_USB				BIT(27)
 #define CKDLY_DIG				BIT(28)
 #define CKDLY_BT				BIT(29)
-
 
 /* AFE_PLL_CTRL */
 #define APLL_EN					BIT(0)
@@ -900,7 +881,6 @@
 #define APLL_320EN				BIT(14)
 #define APLL_80EN				BIT(15)
 #define APLL_1MEN				BIT(24)
-
 
 /* EFUSE_CTRL */
 #define ALD_EN					BIT(18)
@@ -951,13 +931,11 @@
 #define _LLT_OP(x)				(((x) & 0x3) << 30)
 #define _LLT_OP_VALUE(x)			(((x) >> 30) & 0x3)
 
-
 /* ----------------------------------------------------- */
 /*	0x0400h ~ 0x047Fh	Protocol Configuration	 */
 /* ----------------------------------------------------- */
 #define	RETRY_LIMIT_SHORT_SHIFT			8
 #define	RETRY_LIMIT_LONG_SHIFT			0
-
 
 /* ----------------------------------------------------- */
 /*	0x0500h ~ 0x05FFh	EDCA Configuration */
@@ -1008,7 +986,6 @@
 /* Min Spacing related settings. */
 #define	MAX_MSS_DENSITY_2T			0x13
 #define	MAX_MSS_DENSITY_1T			0x0A
-
 
 /* BB-PHY register PMAC 0x100 PHY 0x800 - 0xEFF */
 /* 1. PMAC duplicate register due to connection: */

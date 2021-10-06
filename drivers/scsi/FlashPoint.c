@@ -15,7 +15,6 @@
 
 */
 
-
 #ifdef CONFIG_SCSI_FLASHPOINT
 
 #define MAX_CARDS	8
@@ -5413,7 +5412,6 @@ static void FPT_hostDataXferRestart(struct sccb *currSCCB)
 		sg_index = 0xffff;	/*Index by long words into sg list. */
 		data_count = 0;		/*Running count of SG xfer counts. */
 
-
 		while (data_count < currSCCB->Sccb_ATC) {
 
 			sg_index++;
@@ -7166,7 +7164,6 @@ static void FPT_utilUpdateResidual(struct sccb *p_SCCB)
 		partial_cnt = 0x0000;
 
 		sg_index = p_SCCB->Sccb_sgseg;
-
 
 		if (p_SCCB->Sccb_SGoffset) {
 

@@ -198,7 +198,6 @@ CEPH_DEFINE_SHOW_FUNC(caps_show)
 CEPH_DEFINE_SHOW_FUNC(dentry_lru_show)
 CEPH_DEFINE_SHOW_FUNC(mds_sessions_show)
 
-
 /*
  * debugfs
  */
@@ -220,7 +219,6 @@ static int congestion_kb_get(void *data, u64 *val)
 
 DEFINE_SIMPLE_ATTRIBUTE(congestion_kb_fops, congestion_kb_get,
 			congestion_kb_set, "%llu\n");
-
 
 void ceph_fs_debugfs_cleanup(struct ceph_fs_client *fsc)
 {
@@ -305,7 +303,6 @@ out:
 	ceph_fs_debugfs_cleanup(fsc);
 	return err;
 }
-
 
 #else  /* CONFIG_DEBUG_FS */
 

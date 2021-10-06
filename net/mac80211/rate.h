@@ -117,7 +117,6 @@ int ieee80211_init_rate_ctrl_alg(struct ieee80211_local *local,
 				 const char *name);
 void rate_control_deinitialize(struct ieee80211_local *local);
 
-
 /* Rate control algorithms */
 #ifdef CONFIG_MAC80211_RC_MINSTREL
 int rc80211_minstrel_init(void);
@@ -144,6 +143,5 @@ static inline void rc80211_minstrel_ht_exit(void)
 {
 }
 #endif
-
 
 #endif /* IEEE80211_RATE_H */

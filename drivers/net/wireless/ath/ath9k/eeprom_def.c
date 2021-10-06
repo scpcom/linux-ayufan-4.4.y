@@ -257,7 +257,6 @@ static u32 ath9k_hw_def_dump_eeprom(struct ath_hw *ah, bool dump_base_hdr,
 }
 #endif
 
-
 static int ath9k_hw_def_check_eeprom(struct ath_hw *ah)
 {
 	struct ar5416_eeprom_def *eep = &ah->eeprom.def;
@@ -657,7 +656,6 @@ static void ath9k_hw_def_set_board_values(struct ath_hw *ah,
 			      AR_PHY_CCK_TX_CTRL_TX_DAC_SCALE_CCK,
 			      pModal->miscBits);
 
-
 	if (AR_SREV_9280_20(ah) && AR5416_VER_MASK >= AR5416_EEP_MINOR_VER_20) {
 		if (IS_CHAN_2GHZ(chan))
 			REG_RMW_FIELD(ah, AR_AN_TOP1, AR_AN_TOP1_DACIPMODE,
@@ -885,7 +883,6 @@ static void ath9k_hw_set_def_power_cal_table(struct ath_hw *ah,
 				pRawDataset = pEepData->calPierData2G[i];
 			else
 				pRawDataset = pEepData->calPierData5G[i];
-
 
 			if (OLC_FOR_AR9280_20_LATER) {
 				u8 pcdacIdx;

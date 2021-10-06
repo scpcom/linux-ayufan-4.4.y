@@ -35,7 +35,6 @@
 #include "xc5000.h"
 #include "tda18271.h"
 
-
 static int tuner = -1;
 module_param(tuner, int, 0444);
 MODULE_PARM_DESC(tuner, "tuner type");

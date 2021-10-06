@@ -105,7 +105,6 @@ struct usb338x_fifo_regs {
 	u32     unused[3];
 } __packed;
 
-
 /* Link layer */
 struct usb338x_ll_regs {
 	/* offset 0x700 */

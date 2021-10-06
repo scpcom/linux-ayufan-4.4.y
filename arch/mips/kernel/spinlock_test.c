@@ -36,8 +36,6 @@ static int ss_get(void *data, u64 *val)
 
 DEFINE_SIMPLE_ATTRIBUTE(fops_ss, ss_get, NULL, "%llu\n");
 
-
-
 struct spin_multi_state {
 	raw_spinlock_t lock;
 	atomic_t start_wait;

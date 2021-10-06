@@ -18,7 +18,6 @@
 #include "r8190P_rtl8256.h"
 #include "rtl_pm.h"
 
-
 int rtl92e_suspend(struct pci_dev *pdev, pm_message_t state)
 {
 	struct net_device *dev = pci_get_drvdata(pdev);
@@ -110,4 +109,3 @@ out:
 	RT_TRACE(COMP_POWER, "<================r8192E resume call.\n");
 	return 0;
 }
-

@@ -351,7 +351,6 @@ struct iwl_phy_cfg_cmd {
 #define PHY_CFG_RX_CHAIN_B	BIT(13)
 #define PHY_CFG_RX_CHAIN_C	BIT(14)
 
-
 /* Target of the NVM_ACCESS_CMD */
 enum {
 	NVM_ACCESS_TARGET_CACHE = 0,
@@ -590,7 +589,6 @@ struct iwl_error_resp {
 	__le64 timestamp;
 } __packed;
 
-
 /* Common PHY, MAC and Bindings definitions */
 
 #define MAX_MACS_IN_BINDING	(3)
@@ -651,8 +649,6 @@ enum iwl_time_event_type {
 
 	TE_MAX
 }; /* MAC_EVENT_TYPE_API_E_VER_1 */
-
-
 
 /* Time event - defines for command API v1 */
 
@@ -870,7 +866,6 @@ struct iwl_time_event_notif {
 	__le32 status;
 } __packed; /* MAC_TIME_EVENT_NTFY_API_S_VER_1 */
 
-
 /* Bindings and Time Quota */
 
 /**
@@ -914,7 +909,6 @@ struct iwl_time_quota_data {
 struct iwl_time_quota_cmd {
 	struct iwl_time_quota_data quotas[MAX_BINDINGS];
 } __packed; /* TIME_QUOTA_ALLOCATION_CMD_API_S_VER_1 */
-
 
 /* PHY context */
 

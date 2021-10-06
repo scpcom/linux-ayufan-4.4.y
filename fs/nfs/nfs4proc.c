@@ -2586,7 +2586,6 @@ out_err:
 	return status;
 }
 
-
 static struct nfs4_state *nfs4_do_open(struct inode *dir,
 					struct nfs_open_context *ctx,
 					int flags,
@@ -3865,7 +3864,6 @@ static int _nfs4_proc_link(struct inode *inode, struct inode *dir, struct qstr *
 			nfs_setsecurity(inode, res.fattr, res.label);
 	}
 
-
 	nfs4_label_free(res.label);
 
 out:
@@ -5025,7 +5023,6 @@ out:
 	return status;
 }
 #endif	/* CONFIG_NFS_V4_SECURITY_LABEL */
-
 
 static void nfs4_init_boot_verifier(const struct nfs_client *clp,
 				    nfs4_verifier *bootverf)
@@ -6332,7 +6329,6 @@ static const struct xattr_handler nfs4_xattr_nfs4_label_handler = {
 	.set	= nfs4_xattr_set_nfs4_label,
 };
 #endif
-
 
 /*
  * nfs_fhget will use either the mounted_on_fileid or the fileid
@@ -8598,7 +8594,6 @@ static bool nfs4_match_stateid(const nfs4_stateid *s1,
 {
 	return nfs4_stateid_match(s1, s2);
 }
-
 
 static const struct nfs4_state_recovery_ops nfs40_reboot_recovery_ops = {
 	.owner_flag_bit = NFS_OWNER_RECLAIM_REBOOT,

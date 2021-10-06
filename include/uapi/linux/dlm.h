@@ -71,5 +71,4 @@ struct dlm_lksb {
 #define DLM_LSFL_FS     	0x00000004
 #define DLM_LSFL_NEWEXCL     	0x00000008
 
-
 #endif /* _UAPI__DLM_DOT_H__ */

@@ -27,7 +27,6 @@
 
 #ifdef CONFIG_X86_32
 
-
 extern unsigned long asmlinkage efi_call_phys(void *, ...);
 
 /*
@@ -172,7 +171,6 @@ static inline efi_status_t efi_thunk_set_virtual_address_map(
 	return EFI_SUCCESS;
 }
 #endif /* CONFIG_EFI_MIXED */
-
 
 /* arch specific definitions used by the stub code */
 

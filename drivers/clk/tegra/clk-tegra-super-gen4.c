@@ -147,4 +147,3 @@ void __init tegra_super_clk_gen4_init(void __iomem *clk_base,
 	*dt_clk = clk;
 #endif
 }
-

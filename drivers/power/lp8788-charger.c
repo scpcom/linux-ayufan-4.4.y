@@ -574,7 +574,6 @@ static int lp8788_irq_register(struct platform_device *pdev,
 		return -EINVAL;
 	}
 
-
 	return 0;
 }
 

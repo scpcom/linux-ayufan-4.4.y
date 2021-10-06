@@ -556,7 +556,6 @@ static struct mmc_host_ops toshsd_ops = {
 	.get_cd = toshsd_get_cd,
 };
 
-
 static void toshsd_powerdown(struct toshsd_host *host)
 {
 	/* mask all interrupts */

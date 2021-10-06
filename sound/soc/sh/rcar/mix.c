@@ -24,7 +24,6 @@ struct rsnd_mix {
 		     ((pos) = (struct rsnd_mix *)(priv)->mix + i);	\
 	     i++)
 
-
 static void rsnd_mix_soft_reset(struct rsnd_mod *mod)
 {
 	rsnd_mod_write(mod, MIX_SWRSR, 0);

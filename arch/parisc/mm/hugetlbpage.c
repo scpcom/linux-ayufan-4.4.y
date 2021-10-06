@@ -19,7 +19,6 @@
 #include <asm/cacheflush.h>
 #include <asm/mmu_context.h>
 
-
 unsigned long
 hugetlb_get_unmapped_area(struct file *file, unsigned long addr,
 		unsigned long len, unsigned long pgoff, unsigned long flags)
@@ -41,7 +40,6 @@ hugetlb_get_unmapped_area(struct file *file, unsigned long addr,
 	/* we need to make sure the colouring is OK */
 	return arch_get_unmapped_area(file, addr, len, pgoff, flags);
 }
-
 
 pte_t *huge_pte_alloc(struct mm_struct *mm,
 			unsigned long addr, unsigned long sz)
@@ -141,7 +139,6 @@ void set_huge_pte_at(struct mm_struct *mm, unsigned long addr,
 	purge_tlb_end(flags);
 }
 
-
 pte_t huge_ptep_get_and_clear(struct mm_struct *mm, unsigned long addr,
 			      pte_t *ptep)
 {
@@ -155,7 +152,6 @@ pte_t huge_ptep_get_and_clear(struct mm_struct *mm, unsigned long addr,
 
 	return entry;
 }
-
 
 void huge_ptep_set_wrprotect(struct mm_struct *mm,
 				unsigned long addr, pte_t *ptep)
@@ -184,7 +180,6 @@ int huge_ptep_set_access_flags(struct vm_area_struct *vma,
 	purge_tlb_end(flags);
 	return changed;
 }
-
 
 int pmd_huge(pmd_t pmd)
 {

@@ -350,7 +350,6 @@ restore_all:
 	trap1(#HVM_TRAP1_VMRTE)
 	/* Notreached */
 
-
 	.globl _K_enter_genex
 _K_enter_genex:
 	vm_event_entry(do_genex)

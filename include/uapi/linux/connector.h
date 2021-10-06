@@ -47,7 +47,6 @@
 #define CN_VSS_IDX			0xA     /* HyperV VSS */
 #define CN_VSS_VAL			0x1     /* queries from the kernel */
 
-
 #define CN_NETLINK_USERS		11	/* Highest index + 1 */
 
 /*

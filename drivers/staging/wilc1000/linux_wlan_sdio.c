@@ -6,8 +6,6 @@
 #include <linux/mmc/sdio.h>
 #include <linux/mmc/host.h>
 
-
-
 #define SDIO_MODALIAS "wilc1000_sdio"
 
 #if defined(CUSTOMER_PLATFORM)
@@ -38,7 +36,6 @@ static const struct sdio_device_id wilc_sdio_ids[] = {
 	{ },
 };
 
-
 static void wilc_sdio_interrupt(struct sdio_func *func)
 {
 	struct wilc_sdio *wl_sdio;
@@ -51,7 +48,6 @@ static void wilc_sdio_interrupt(struct sdio_func *func)
 	sdio_claim_host(func);
 #endif
 }
-
 
 int linux_sdio_cmd52(sdio_cmd52_t *cmd)
 {
@@ -84,7 +80,6 @@ int linux_sdio_cmd52(sdio_cmd52_t *cmd)
 	return 1;
 }
 
-
 int linux_sdio_cmd53(sdio_cmd53_t *cmd)
 {
 	struct sdio_func *func = g_linux_wlan->wilc_sdio_func;
@@ -106,7 +101,6 @@ int linux_sdio_cmd53(sdio_cmd53_t *cmd)
 	}
 
 	sdio_release_host(func);
-
 
 	if (ret < 0) {
 		PRINT_ER("wilc_sdio_cmd53..failed, err(%d)\n", ret);
@@ -221,7 +215,6 @@ int linux_sdio_init(void *pv)
 	 *      TODO :
 	 **/
 
-
 	sdio_default_speed = linux_sdio_get_speed();
 	return 1;
 }
@@ -232,7 +225,6 @@ void linux_sdio_deinit(void *pv)
 	/**
 	 *      TODO :
 	 **/
-
 
 	sdio_unregister_driver(&wilc_bus);
 }
@@ -246,6 +238,3 @@ int linux_sdio_set_default_speed(void)
 {
 	return linux_sdio_set_speed(sdio_default_speed);
 }
-
-
-

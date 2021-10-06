@@ -271,7 +271,6 @@ struct lpfc_idiag {
 						 * discovery */
 #endif /* H_LPFC_DEBUG_FS */
 
-
 /*
  * Driver debug utility routines outside of debugfs. The debug utility
  * routines implemented here is intended to be used in the instrumented

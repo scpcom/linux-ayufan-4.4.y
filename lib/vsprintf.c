@@ -1209,7 +1209,6 @@ char *escaped_string(char *buf, char *end, u8 *addr, struct printf_spec spec,
 	if (ZERO_OR_NULL_PTR(addr))
 		return string(buf, end, NULL, spec);	/* NULL pointer */
 
-
 	do {
 		switch (fmt[count++]) {
 		case 'a':

@@ -68,7 +68,6 @@ smb2_open_file(const unsigned int xid, struct cifs_open_parms *oparms,
 	if (rc)
 		goto out;
 
-
 	 if (oparms->tcon->use_resilient) {
 		nr_ioctl_req.Timeout = 0; /* use server default (120 seconds) */
 		nr_ioctl_req.Reserved = 0;

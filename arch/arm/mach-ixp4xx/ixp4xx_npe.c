@@ -408,7 +408,6 @@ static int npe_reset(struct npe *npe)
 	return 0;
 }
 
-
 int npe_send_message(struct npe *npe, const void *msg, const char *what)
 {
 	const u32 *send = msg;
@@ -503,7 +502,6 @@ int npe_send_recv_message(struct npe *npe, void *msg, const char *what)
 	}
 	return 0;
 }
-
 
 int npe_load_firmware(struct npe *npe, const char *name, struct device *dev)
 {
@@ -667,7 +665,6 @@ err:
 	return err;
 }
 
-
 struct npe *npe_request(unsigned id)
 {
 	if (id < NPE_COUNT)
@@ -681,7 +678,6 @@ void npe_release(struct npe *npe)
 {
 	module_put(THIS_MODULE);
 }
-
 
 static int __init npe_init_module(void)
 {

@@ -738,7 +738,6 @@ void rtl8723e_dm_bt_set_bt_dm(struct ieee80211_hw *hw,
 			btdm_8723->ignore_wlan_act,
 			btdm->ignore_wlan_act);
 
-
 		RT_TRACE(rtlpriv, COMP_BT_COEXIST, DBG_DMESG,
 			"[BTCoex], original/new bPtaOn=0x%x/ 0x%x\n",
 			btdm_8723->pta_on, btdm->pta_on);
@@ -1633,7 +1632,6 @@ static void rtl8723e_dm_bt_bt_enable_disable_check(struct ieee80211_hw *hw)
 	}
 }
 
-
 void rtl8723e_dm_bt_coexist_8723(struct ieee80211_hw *hw)
 {
 	struct rtl_priv *rtlpriv = rtl_priv(hw);
@@ -1698,7 +1696,6 @@ static void rtl8723e_dm_bt_parse_bt_info(struct ieee80211_hw *hw,
 	else
 		hal_coex_8723.c2h_bt_inquiry_page = false;
 
-
 	if (bt_info & BTINFO_B_CONNECTION) {
 		RT_TRACE(rtlpriv, COMP_BT_COEXIST, DBG_DMESG,
 			"[BTC2H], BTInfo: bConnect=true\n");
@@ -1746,7 +1743,6 @@ void rtl_8723e_c2h_command_handle(struct ieee80211_hw *hw)
 	for (index = 0; index < c2h_event.cmd_len; index++)
 		ptmp_buf[index] = rtl_read_byte(rtlpriv,
 					REG_C2HEVT_MSG_NORMAL + 2 + index);
-
 
 	switch (c2h_event.cmd_id) {
 	case C2H_BT_RSSI:

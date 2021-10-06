@@ -3,7 +3,6 @@
 
 #include <uapi/asm/unistd.h>
 
-
 # ifdef CONFIG_X86_X32_ABI
 #  define __SYSCALL_MASK (~(__X32_SYSCALL_BIT))
 # else

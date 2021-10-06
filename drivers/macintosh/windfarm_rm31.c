@@ -96,7 +96,6 @@ static int failure_state;
 #define HIGH_OVER_AVERAGE	(10 << 16)
 #define HIGH_OVER_IMMEDIATE	(14 << 16)
 
-
 static void cpu_max_all_fans(void)
 {
 	int i;
@@ -601,7 +600,6 @@ static void rm31_new_control(struct wf_control *ct)
 			cpu_fans[1][2];
 	have_all_controls = all_controls;
 }
-
 
 static void rm31_new_sensor(struct wf_sensor *sr)
 {

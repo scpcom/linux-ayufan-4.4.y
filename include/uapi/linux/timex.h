@@ -123,7 +123,6 @@ struct timex {
 #define MOD_MICRO	ADJ_MICRO
 #define MOD_NANO	ADJ_NANO
 
-
 /*
  * Status codes (timex.status)
  */
@@ -161,6 +160,5 @@ struct timex {
 #define TIME_WAIT	4	/* leap second has occurred */
 #define TIME_ERROR	5	/* clock not synchronized */
 #define TIME_BAD	TIME_ERROR /* bw compat */
-
 
 #endif /* _UAPI_LINUX_TIMEX_H */

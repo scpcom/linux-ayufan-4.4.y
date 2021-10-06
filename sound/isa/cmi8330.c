@@ -192,7 +192,6 @@ MODULE_DEVICE_TABLE(pnp_card, snd_cmi8330_pnpids);
 
 #endif
 
-
 static struct snd_kcontrol_new snd_cmi8330_controls[] = {
 WSS_DOUBLE("Master Playback Volume", 0,
 		CMI8330_MASTVOL, CMI8330_MASTVOL, 4, 0, 15, 0),
@@ -279,7 +278,6 @@ static unsigned char cmi8330_sb_init_values[][2] = {
 	{ SB_DSP4_OUTPUT_SW, 0 },
 	{ SB_DSP4_SPEAKER_DEV, 0 },
 };
-
 
 static int cmi8330_add_sb_mixers(struct snd_sb *chip)
 {
@@ -477,7 +475,6 @@ static int snd_cmi8330_pcm(struct snd_card *card, struct snd_cmi8330 *chip)
 	return 0;
 }
 
-
 #ifdef CONFIG_PM
 static int snd_cmi8330_suspend(struct snd_card *card)
 {
@@ -501,7 +498,6 @@ static int snd_cmi8330_resume(struct snd_card *card)
 	return 0;
 }
 #endif
-
 
 /*
  */
@@ -681,7 +677,6 @@ static struct isa_driver snd_cmi8330_driver = {
 		.name	= DEV_NAME
 	},
 };
-
 
 #ifdef CONFIG_PNP
 static int snd_cmi8330_pnp_detect(struct pnp_card_link *pcard,

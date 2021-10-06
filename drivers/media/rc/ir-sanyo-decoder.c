@@ -85,7 +85,6 @@ static int ir_sanyo_decode(struct rc_dev *dev, struct ir_raw_event ev)
 		}
 		break;
 
-
 	case STATE_HEADER_SPACE:
 		if (ev.pulse)
 			break;

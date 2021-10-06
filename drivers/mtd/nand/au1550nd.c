@@ -21,7 +21,6 @@
 #include <asm/mach-au1x00/au1000.h>
 #include <asm/mach-au1x00/au1550nd.h>
 
-
 struct au1550nd_ctx {
 	struct mtd_info info;
 	struct nand_chip chip;

@@ -1,7 +1,6 @@
 #ifndef _UAPI__ASM_ALPHA_FPU_H
 #define _UAPI__ASM_ALPHA_FPU_H
 
-
 /*
  * Alpha floating-point control register defines:
  */
@@ -118,6 +117,5 @@ ieee_fpcr_to_swcr(unsigned long fp)
 	sw |= (~fp >> 41) & IEEE_TRAP_ENABLE_DNO;
 	return sw;
 }
-
 
 #endif /* _UAPI__ASM_ALPHA_FPU_H */

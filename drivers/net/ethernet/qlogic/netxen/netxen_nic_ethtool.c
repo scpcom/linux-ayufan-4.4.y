@@ -903,7 +903,6 @@ netxen_get_dump_data(struct net_device *netdev, struct ethtool_dump *dump,
 	struct netxen_adapter *adapter = netdev_priv(netdev);
 	struct netxen_minidump *mdump = &adapter->mdump;
 
-
 	if (!adapter->fw_mdump_rdy) {
 		netdev_info(netdev, "Dump not available\n");
 		return -EINVAL;

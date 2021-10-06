@@ -144,7 +144,6 @@ struct pt3_adapter {
 	int num_desc_bufs;  /* == num_bufs * DATA_BUF_XFERS / DESCS_IN_PAGE */
 };
 
-
 struct pt3_board {
 	struct pci_dev *pdev;
 	void __iomem *regs[2];
@@ -165,7 +164,6 @@ struct pt3_board {
 
 	struct pt3_adapter *adaps[PT3_NUM_FE];
 };
-
 
 /*
  * prototypes

@@ -105,7 +105,6 @@ static struct ata_port_operations marvell_ops = {
 	.prereset		= marvell_pre_reset,
 };
 
-
 /**
  *	marvell_init_one - Register Marvell ATA PCI device with kernel services
  *	@pdev: PCI device to register

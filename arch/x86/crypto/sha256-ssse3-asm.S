@@ -107,8 +107,6 @@ y0 = %r13d
 y1 = %r14d
 y2 = %r15d
 
-
-
 _INP_END_SIZE = 8
 _INP_SIZE = 8
 _XFER_SIZE = 16

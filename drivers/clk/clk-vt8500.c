@@ -203,7 +203,6 @@ static int vt8500_dclk_set_rate(struct clk_hw *hw, unsigned long rate,
 	return 0;
 }
 
-
 static const struct clk_ops vt8500_gated_clk_ops = {
 	.enable = vt8500_dclk_enable,
 	.disable = vt8500_dclk_disable,
@@ -691,7 +690,6 @@ static __init void vtwm_pll_clk_init(struct device_node *node, int pll_type)
 	rc = of_clk_add_provider(node, of_clk_src_simple_get, clk);
 	clk_register_clkdev(clk, clk_name, NULL);
 }
-
 
 /* Wrappers for initialization functions */
 

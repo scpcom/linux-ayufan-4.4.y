@@ -6,7 +6,6 @@
 
 /* Second argument to futex syscall */
 
-
 #define FUTEX_WAIT		0
 #define FUTEX_WAKE		1
 #define FUTEX_FD		2
@@ -122,7 +121,6 @@ struct robust_list_head {
  * match of any bit.
  */
 #define FUTEX_BITSET_MATCH_ANY	0xffffffff
-
 
 #define FUTEX_OP_SET		0	/* *(int *)UADDR2 = OPARG; */
 #define FUTEX_OP_ADD		1	/* *(int *)UADDR2 += OPARG; */

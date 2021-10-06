@@ -278,6 +278,7 @@ struct btrfs_io_bio {
 	unsigned int stripe_index;
 	u64 logical;
 	u8 *csum;
+
 	u8 csum_inline[BTRFS_BIO_INLINE_CSUM_SIZE];
 	u8 *csum_allocated;
 	btrfs_io_bio_end_io_t *end_io;

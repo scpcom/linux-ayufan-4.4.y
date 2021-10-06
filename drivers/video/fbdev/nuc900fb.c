@@ -42,7 +42,6 @@
 
 #include "nuc900fb.h"
 
-
 /*
  *  Initialize the nuc900 video (dual) buffer address
  */
@@ -343,7 +342,6 @@ static struct fb_ops nuc900fb_ops = {
 	.fb_imageblit		= cfb_imageblit,
 };
 
-
 static inline void modify_gpio(void __iomem *reg,
 			       unsigned long set, unsigned long mask)
 {
@@ -380,7 +378,6 @@ static int nuc900fb_init_registers(struct fb_info *info)
 
 	return 0;
 }
-
 
 /*
  *    Alloc the SDRAM region of NUC900 for the frame buffer.
@@ -526,7 +523,6 @@ static int nuc900fb_probe(struct platform_device *pdev)
 		return -EINVAL;
 	}
 
-
 	display = mach_info->displays + mach_info->default_display;
 
 	irq = platform_get_irq(pdev, 0);
@@ -566,7 +562,6 @@ static int nuc900fb_probe(struct platform_device *pdev)
 	}
 
 	fbi->irq_base = fbi->io + REG_LCM_INT_CS;
-
 
 	/* Stop the LCD */
 	writel(0, fbi->io + REG_LCM_DCCS);

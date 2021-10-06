@@ -37,7 +37,6 @@ static int reg_read(struct dsa_switch *ds, int addr, int reg)
 		__ret;						\
 	})
 
-
 static int reg_write(struct dsa_switch *ds, int addr, int reg, u16 val)
 {
 	struct mii_bus *bus = dsa_host_dev_to_mii_bus(ds->master_dev);

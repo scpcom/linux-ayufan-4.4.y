@@ -89,7 +89,6 @@ struct ntrig_data {
 	__u16 sensor_physical_height;
 };
 
-
 /*
  * This function converts the 4 byte raw firmware code into
  * a string containing 5 comma separated numbers.
@@ -759,7 +758,6 @@ static int ntrig_event (struct hid_device *hid, struct hid_field *field,
 			break;
 
 		nd->reading_mt = 0;
-
 
 		/*
 		 * Activation state machine logic:

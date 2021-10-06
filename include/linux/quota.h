@@ -179,7 +179,6 @@ static inline struct kqid make_kqid_projid(kprojid_t projid)
 	return kqid;
 }
 
-
 extern spinlock_t dq_data_lock;
 
 /* Maximal numbers of writes for quota operation (insert/delete/update)

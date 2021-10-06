@@ -178,7 +178,6 @@ static void free_buckets(struct flex_array *buckets)
 	flex_array_free(buckets);
 }
 
-
 static void __table_instance_destroy(struct table_instance *ti)
 {
 	free_buckets(ti->buckets);

@@ -935,7 +935,6 @@ static void cmd_loop(unsigned char *src, int numbytes, struct inbuf_t *inbuf)
 	cs->cbytes = cbytes;
 }
 
-
 /* process a block of data received through the control channel
  */
 void gigaset_isoc_input(struct inbuf_t *inbuf)
@@ -968,7 +967,6 @@ void gigaset_isoc_input(struct inbuf_t *inbuf)
 		inbuf->head = head;
 	}
 }
-
 
 /* == data output ========================================================== */
 

@@ -1079,7 +1079,6 @@ static void stfsm_prepare_rw_seq(struct stfsm *fsm,
 	seq->dummy = ((cfg->dummy_cycles & 0x3f) << 16 |	/* cycles */
 		      (cfg->addr_pads - 1) << 22);		/* pads */
 
-
 	/* Instruction sequence */
 	i = 0;
 	if (cfg->write)
@@ -1632,7 +1631,6 @@ static int stfsm_write(struct stfsm *fsm, const uint8_t *buf,
 		readl(fsm->base + SPI_FAST_SEQ_CFG);
 	else
 		udelay(fsm->fifo_dir_delay);
-
 
 	/* Write data to FIFO, before starting sequence (see GNBvd79593) */
 	if (size_lb) {

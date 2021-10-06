@@ -112,7 +112,6 @@ static void sas_phye_resume_timeout(struct work_struct *work)
 	sas_deform_port(phy, 1);
 }
 
-
 /* ---------- Phy class registration ---------- */
 
 int sas_register_phys(struct sas_ha_struct *sas_ha)

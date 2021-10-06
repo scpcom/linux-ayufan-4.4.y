@@ -11,7 +11,6 @@
 #ifndef _XTENSA_PLATFORM_ISS_SIMCALL_H
 #define _XTENSA_PLATFORM_ISS_SIMCALL_H
 
-
 /*
  *  System call like services offered by the simulator host.
  */
@@ -114,4 +113,3 @@ static inline int simc_lseek(int fd, uint32_t off, int whence)
 }
 
 #endif /* _XTENSA_PLATFORM_ISS_SIMCALL_H */
-

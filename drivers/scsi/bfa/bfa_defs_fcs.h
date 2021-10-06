@@ -253,7 +253,6 @@ struct bfa_lport_attr_s {
 	u16	authfail;	/*  auth failed state */
 };
 
-
 /*
  * VPORT states
  */

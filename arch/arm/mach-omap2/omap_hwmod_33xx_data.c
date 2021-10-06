@@ -315,7 +315,6 @@ static struct omap_hwmod am33xx_usbss_hwmod = {
 	},
 };
 
-
 /*
  * Interfaces
  */

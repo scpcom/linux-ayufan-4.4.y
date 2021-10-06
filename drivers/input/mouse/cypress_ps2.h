@@ -77,7 +77,6 @@
 #define CYTP_RESP_RETRY 0x01
 #define CYTP_RESP_ERROR 0xfe
 
-
 #define CYTP_105001_WIDTH  97   /* Dell XPS 13 */
 #define CYTP_105001_HIGH   59
 #define CYTP_DEFAULT_WIDTH (CYTP_105001_WIDTH)
@@ -167,7 +166,6 @@ struct cytp_data {
 
 	int tp_metrics_supported;
 };
-
 
 #ifdef CONFIG_MOUSE_PS2_CYPRESS
 int cypress_detect(struct psmouse *psmouse, bool set_properties);

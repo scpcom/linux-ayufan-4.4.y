@@ -522,7 +522,6 @@ void r600_voltage_control_enable_pins(struct radeon_device *rdev,
 	WREG32(UPPER_GPIO_ENABLE, upper_32_bits(mask));
 }
 
-
 void r600_voltage_control_program_voltages(struct radeon_device *rdev,
 					   enum r600_power_level index, u64 pins)
 {

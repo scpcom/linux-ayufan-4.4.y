@@ -13,7 +13,6 @@
 
 #include "ebb.h"
 
-
 /*
  * Tests a pinned cpu event vs an EBB - in that order. The pinned cpu event
  * should remain and the EBB event should fail to enable.

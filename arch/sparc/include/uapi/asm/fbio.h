@@ -216,7 +216,6 @@ struct fb_clut32 {
 #define LEO_SETGAMMA	_IOW('L', 68, int) /* Not yet implemented */
 #define LEO_GETGAMMA	_IOR('L', 69, int) /* Not yet implemented */
 
-
 /* These are exported to userland for applications to use */
 /* Mappable offsets for the cg14: control registers */
 #define MDI_DIRECT_MAP 0x10000000
@@ -254,6 +253,5 @@ struct fb_clut32 {
 #define LEO_LC_SS1_KRN_MAP     0x01008000
 #define LEO_LD_GBL_MAP         0x01009000
 #define LEO_UNK2_MAP           0x0100a000
-
 
 #endif /* _UAPI__LINUX_FBIO_H */

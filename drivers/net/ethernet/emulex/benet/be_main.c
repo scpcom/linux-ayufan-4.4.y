@@ -837,7 +837,6 @@ static void unmap_tx_frag(struct device *dev, struct be_eth_wrb *wrb,
 	dma_addr_t dma;
 	u32 frag_len = le32_to_cpu(wrb->frag_len);
 
-
 	dma = (u64)le32_to_cpu(wrb->frag_pa_hi) << 32 |
 		(u64)le32_to_cpu(wrb->frag_pa_lo);
 	if (frag_len) {

@@ -43,7 +43,6 @@ __wsum csum_and_copy_to_user(const void *src, void __user *dst, int len,
 	return sum;
 }
 
-
 #define csum_partial_copy_nocheck csum_partial_copy
 /*
  *	Fold a partial checksum without adding pseudo headers

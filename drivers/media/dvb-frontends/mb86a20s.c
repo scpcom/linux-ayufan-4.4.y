@@ -878,7 +878,6 @@ static int mb86a20s_get_pre_ber(struct dvb_frontend *fe,
 		"%s: bit count before Viterbi for layer %c: %d.\n",
 		__func__, 'A' + layer, *count);
 
-
 	/*
 	 * As we get TMCC data from the frontend, we can better estimate the
 	 * BER bit counters, in order to do the BER measure during a longer
@@ -1860,7 +1859,6 @@ static int mb86a20s_initfe(struct dvb_frontend *fe)
 	if (rc < 0)
 		goto err;
 
-
 err:
 	if (fe->ops.i2c_gate_ctrl)
 		fe->ops.i2c_gate_ctrl(fe, 1);
@@ -2021,7 +2019,6 @@ static int mb86a20s_read_signal_strength_from_cache(struct dvb_frontend *fe,
 						    u16 *strength)
 {
 	struct dtv_frontend_properties *c = &fe->dtv_property_cache;
-
 
 	*strength = c->strength.stat[0].uvalue;
 

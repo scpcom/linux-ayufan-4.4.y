@@ -3657,7 +3657,6 @@ static u8 rt2800_compensate_txpower(struct rt2x00_dev *rt2x00dev, int is_rate_b,
 	return min_t(u8, txpower, 0xc);
 }
 
-
 enum {
 	TX_PWR_CFG_0_IDX,
 	TX_PWR_CFG_1_IDX,

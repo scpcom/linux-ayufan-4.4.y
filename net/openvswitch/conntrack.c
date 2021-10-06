@@ -201,7 +201,6 @@ static int ovs_ct_set_mark(struct sk_buff *skb, struct sw_flow_key *key,
 	struct nf_conn *ct;
 	u32 new_mark;
 
-
 	/* The connection could be invalid, in which case set_mark is no-op. */
 	ct = nf_ct_get(skb, &ctinfo);
 	if (!ct)

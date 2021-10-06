@@ -298,7 +298,6 @@ static long ctcm_check_irb_error(struct ccw_device *cdev, struct irb *irb)
 	return PTR_ERR(irb);
 }
 
-
 /**
  * Check sense of a unit check.
  *
@@ -448,7 +447,6 @@ int ctcm_close(struct net_device *dev)
 		fsm_event(priv->fsm, DEV_EVENT_STOP, dev);
 	return 0;
 }
-
 
 /**
  * Transmit a packet.
@@ -1014,7 +1012,6 @@ done:
 
 	return NETDEV_TX_OK;	/* handle freeing of skb here */
 }
-
 
 /**
  * Sets MTU of an interface.
@@ -1688,7 +1685,6 @@ static int ctcm_shutdown_device(struct ccwgroup_device *cgdev)
 
 }
 
-
 static void ctcm_remove_device(struct ccwgroup_device *cgdev)
 {
 	struct ctcm_priv *priv = dev_get_drvdata(&cgdev->dev);
@@ -1870,4 +1866,3 @@ module_exit(ctcm_exit);
 MODULE_AUTHOR("Peter Tiedemann <ptiedem@de.ibm.com>");
 MODULE_DESCRIPTION("Network driver for S/390 CTC + CTCMPC (SNA)");
 MODULE_LICENSE("GPL");
-

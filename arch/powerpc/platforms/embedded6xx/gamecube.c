@@ -28,7 +28,6 @@
 #include "flipper-pic.h"
 #include "usbgecko_udbg.h"
 
-
 static void gamecube_spin(void)
 {
 	/* spin until power button pressed */
@@ -90,7 +89,6 @@ define_machine(gamecube) {
 	.machine_shutdown	= gamecube_shutdown,
 };
 
-
 static const struct of_device_id gamecube_of_bus[] = {
 	{ .compatible = "nintendo,flipper", },
 	{ },
@@ -105,4 +103,3 @@ static int __init gamecube_device_probe(void)
 	return 0;
 }
 device_initcall(gamecube_device_probe);
-

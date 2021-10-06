@@ -191,7 +191,6 @@ static struct platform_device tosascoop_device = {
 	.resource	= tosa_scoop_resources,
 };
 
-
 /*
  * SCOOP Device Jacket
  */
@@ -601,7 +600,6 @@ static struct resource tc6393xb_resources[] = {
 	},
 };
 
-
 static int tosa_tc6393xb_enable(struct platform_device *dev)
 {
 	int rc;
@@ -791,7 +789,6 @@ static struct tc6393xb_platform_data tosa_tc6393xb_data = {
 
 	.resume_restore = 1,
 };
-
 
 static struct platform_device tc6393xb_device = {
 	.name	= "tc6393xb",

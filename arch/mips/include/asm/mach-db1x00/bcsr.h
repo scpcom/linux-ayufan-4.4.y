@@ -12,7 +12,6 @@
 #ifndef _DB1XXX_BCSR_H_
 #define _DB1XXX_BCSR_H_
 
-
 /* BCSR base addresses on various boards. BCSR base 2 refers to the
  * physical address of the first HEXLEDS register, which is usually
  * a variable offset from the WHOAMI register.
@@ -169,7 +168,6 @@ enum bcsr_whoami_boards {
 #define BCSR_BOARD_SD0WP		0x4000	/* DB1100 */
 #define BCSR_BOARD_SD1WP		0x8000	/* DB1100 */
 
-
 /* DB/PB1200/1300 */
 #define BCSR_RESETS_ETH			0x0001
 #define BCSR_RESETS_CAMERA		0x0002
@@ -212,7 +210,6 @@ enum bcsr_whoami_boards {
 #define BCSR_SWITCHES_DIP_8		0x0001
 #define BCSR_SWITCHES_ROTARY		0x0F00
 
-
 #define BCSR_PCMCIA_PC0VPP		0x0003
 #define BCSR_PCMCIA_PC0VCC		0x000C
 #define BCSR_PCMCIA_PC0DRVEN		0x0010
@@ -222,13 +219,11 @@ enum bcsr_whoami_boards {
 #define BCSR_PCMCIA_PC1DRVEN		0x1000
 #define BCSR_PCMCIA_PC1RST		0x8000
 
-
 #define BCSR_LEDS_DECIMALS		0x0003
 #define BCSR_LEDS_LED0			0x0100
 #define BCSR_LEDS_LED1			0x0200
 #define BCSR_LEDS_LED2			0x0400
 #define BCSR_LEDS_LED3			0x0800
-
 
 #define BCSR_SYSTEM_RESET		0x8000	/* clear to reset */
 #define BCSR_SYSTEM_PWROFF		0x4000	/* set to power off */
@@ -237,8 +232,6 @@ enum bcsr_whoami_boards {
 #define BCSR_SYSTEM_UDMAMODE		0x0100	/* DB1300 */
 #define BCSR_SYSTEM_WAKEONIRQ		0x0200	/* DB1300 */
 #define BCSR_SYSTEM_VDDI1300		0x3C00	/* DB1300 */
-
-
 
 /* initialize BCSR for a board. Provide the PHYSICAL addresses of both
  * BCSR spaces.

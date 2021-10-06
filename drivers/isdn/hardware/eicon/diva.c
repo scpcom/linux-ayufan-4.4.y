@@ -512,7 +512,6 @@ diva_xdi_read(void *adapter, void *os_handle, void __user *dst,
 	return (ret);
 }
 
-
 irqreturn_t diva_os_irq_wrapper(int irq, void *context)
 {
 	diva_os_xdi_adapter_t *a = context;

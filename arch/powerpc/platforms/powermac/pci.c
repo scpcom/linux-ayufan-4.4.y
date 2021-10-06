@@ -1252,4 +1252,3 @@ struct pci_controller_ops pmac_pci_controller_ops = {
 	.enable_device_hook	= pmac_pci_enable_device_hook,
 #endif
 };
-

@@ -99,4 +99,3 @@ static void __exit xenfs_exit(void)
 
 module_init(xenfs_init);
 module_exit(xenfs_exit);
-

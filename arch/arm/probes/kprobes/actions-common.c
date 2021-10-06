@@ -17,7 +17,6 @@
 
 #include "core.h"
 
-
 static void __kprobes simulate_ldm1stm1(probes_opcode_t insn,
 		struct arch_probes_insn *asi,
 		struct pt_regs *regs)
@@ -168,4 +167,3 @@ kprobe_decode_ldmstm(probes_opcode_t insn, struct arch_probes_insn *asi,
 	asi->insn_handler = handler;
 	return INSN_GOOD_NO_SLOT;
 }
-

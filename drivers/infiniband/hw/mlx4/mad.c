@@ -222,7 +222,6 @@ static void smp_snoop(struct ib_device *ibdev, u8 port_num, const struct ib_mad 
 	u32 bn, pkey_change_bitmap;
 	int i;
 
-
 	struct mlx4_ib_dev *dev = to_mdev(ibdev);
 	if ((mad->mad_hdr.mgmt_class == IB_MGMT_CLASS_SUBN_LID_ROUTED ||
 	     mad->mad_hdr.mgmt_class == IB_MGMT_CLASS_SUBN_DIRECTED_ROUTE) &&
@@ -409,7 +408,6 @@ int mlx4_ib_find_real_gid(struct ib_device *ibdev, u8 port, __be64 guid)
 	}
 	return -1;
 }
-
 
 static int find_slave_port_pkey_ix(struct mlx4_ib_dev *dev, int slave,
 				   u8 port, u16 pkey, u16 *ix)
@@ -1180,7 +1178,6 @@ static int is_proxy_qp0(struct mlx4_ib_dev *dev, int qpn, int slave)
 	return (qpn >= proxy_start && qpn <= proxy_start + 1);
 }
 
-
 int mlx4_ib_send_to_wire(struct mlx4_ib_dev *dev, int slave, u8 port,
 			 enum ib_qp_type dest_qpt, u16 pkey_index,
 			 u32 remote_qpn, u32 qkey, struct ib_ah_attr *attr,
@@ -1199,7 +1196,6 @@ int mlx4_ib_send_to_wire(struct mlx4_ib_dev *dev, int slave, u8 port,
 	u16 wire_pkey_ix;
 	int src_qpnum;
 	u8 sgid_index;
-
 
 	sqp_ctx = dev->sriov.sqps[port-1];
 
@@ -1275,7 +1271,6 @@ int mlx4_ib_send_to_wire(struct mlx4_ib_dev *dev, int slave, u8 port,
 	if (vlan_id < 0x1000)
 		vlan_id |= (attr->sl & 7) << 13;
 	to_mah(ah)->av.eth.vlan = cpu_to_be16(vlan_id);
-
 
 	ret = ib_post_send(send_qp, &wr.wr, &bad_wr);
 out:
@@ -1526,7 +1521,6 @@ static void mlx4_ib_free_pv_qp_bufs(struct mlx4_ib_demux_pv_ctx *ctx,
 		rx_buf_size = sizeof (struct mlx4_mad_rcv_buf);
 		tx_buf_size = sizeof (struct mlx4_mad_snd_buf);
 	}
-
 
 	for (i = 0; i < MLX4_NUM_TUNNEL_BUFS; i++) {
 		ib_dma_unmap_single(ctx->ib_dev, tun_qp->ring[i].map,
@@ -1879,7 +1873,6 @@ err_wq:
 	ctx->wq = NULL;
 	ib_destroy_qp(ctx->qp[1].qp);
 	ctx->qp[1].qp = NULL;
-
 
 err_qp0:
 	if (ctx->has_smi)

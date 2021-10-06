@@ -1,7 +1,6 @@
 #ifndef __ASM_SH_FUTEX_IRQ_H
 #define __ASM_SH_FUTEX_IRQ_H
 
-
 static inline int atomic_futex_op_xchg_set(int oparg, u32 __user *uaddr,
 					   int *oldval)
 {

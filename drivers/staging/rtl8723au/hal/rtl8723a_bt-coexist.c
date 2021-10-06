@@ -72,7 +72,6 @@ if ((BTCoexDbgLevel == _bt_dbg_on_)) {\
 #define DCMD_Printf(...)
 #define RT_ASSERT(...)
 
-
 #define GetDefaultAdapter(padapter)	padapter
 
 #define PlatformZeroMemory(ptr, sz)	memset(ptr, 0, sz)
@@ -3258,7 +3257,6 @@ bthci_CmdSetACLLinkDataFlowMode(struct rtw_adapter *padapter,
 		pBtMgnt->ExtConfig.CurrentConnectHandle,
 		pBtMgnt->ExtConfig.CurrentIncomingTrafficMode,
 		pBtMgnt->ExtConfig.CurrentOutgoingTrafficMode));
-
 
 	PPacketIrpEvent = (struct packet_irp_hcievent_data *)(&localBuf[0]);
 
@@ -6914,7 +6912,6 @@ static void btdm_2AntIgnoreWlanAct(struct rtw_adapter *padapter, u8 bEnable)
 	RTPRINT(FBT, BT_TRACE,
 		("[BTCoex], turn Ignore WlanAct %s\n", (bEnable ? "ON" : "OFF")));
 	pBtdm8723->bCurIgnoreWlanAct = bEnable;
-
 
 	if (pBtdm8723->bPreIgnoreWlanAct == pBtdm8723->bCurIgnoreWlanAct)
 		return;

@@ -71,5 +71,4 @@ int mei_txe_aliveness_set_sync(struct mei_device *dev, u32 req);
 
 int mei_txe_setup_satt2(struct mei_device *dev, phys_addr_t addr, u32 range);
 
-
 #endif /* _MEI_HW_TXE_H_ */

@@ -366,7 +366,6 @@ static struct regulator_consumer_supply pwm_backlight_supply[] = {
 	REGULATOR_SUPPLY("power", "pwm_backlight"),
 };
 
-
 static struct gpio magician_bl_gpios[] = {
 	{ EGPIO_MAGICIAN_BL_POWER,	GPIOF_DIR_OUT, "Backlight power" },
 	{ EGPIO_MAGICIAN_BL_POWER2,	GPIOF_DIR_OUT, "Backlight power 2" },
@@ -749,7 +748,6 @@ static struct pxamci_platform_data magician_mci_info = {
 	.gpio_card_ro_invert	= 1,
 	.gpio_power		= EGPIO_MAGICIAN_SD_POWER,
 };
-
 
 /*
  * USB OHCI

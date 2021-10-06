@@ -54,7 +54,6 @@ void dsa_slave_mii_bus_init(struct dsa_switch *ds)
 	ds->slave_mii_bus->phy_mask = ~ds->phys_mii_mask;
 }
 
-
 /* slave device handling ****************************************************/
 static int dsa_slave_get_iflink(const struct net_device *dev)
 {
@@ -544,7 +543,6 @@ static int dsa_slave_bridge_port_leave(struct net_device *dev)
 	struct dsa_switch *ds = p->parent;
 	int ret = -EOPNOTSUPP;
 
-
 	if (ds->drv->port_leave_bridge)
 		ret = ds->drv->port_leave_bridge(ds, p->port,
 						 dsa_slave_br_port_mask(ds, p->bridge_dev));
@@ -623,7 +621,6 @@ static struct sk_buff *dsa_slave_notag_xmit(struct sk_buff *skb,
 	/* Just return the original SKB */
 	return skb;
 }
-
 
 /* ethtool operations *******************************************************/
 static int

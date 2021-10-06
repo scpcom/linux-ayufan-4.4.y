@@ -117,5 +117,4 @@ static inline unsigned long bcm63xx_enetdmacreg(enum bcm63xx_regs_enetdmac reg)
 	return bcm63xx_regs_enetdmac[reg];
 }
 
-
 #endif /* ! BCM63XX_DEV_ENET_H_ */

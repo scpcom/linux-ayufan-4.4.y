@@ -140,7 +140,6 @@ u32 pnv_get_supported_cpuidle_states(void)
 }
 EXPORT_SYMBOL_GPL(pnv_get_supported_cpuidle_states);
 
-
 static void pnv_fastsleep_workaround_apply(void *info)
 
 {

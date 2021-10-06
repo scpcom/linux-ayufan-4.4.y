@@ -671,7 +671,6 @@ static int cdce706_remove(struct i2c_client *client)
 	return 0;
 }
 
-
 #ifdef CONFIG_OF
 static const struct of_device_id cdce706_dt_match[] = {
 	{ .compatible = "ti,cdce706" },

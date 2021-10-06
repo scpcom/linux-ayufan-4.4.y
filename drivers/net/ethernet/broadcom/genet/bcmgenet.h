@@ -397,7 +397,6 @@ struct bcmgenet_mib_counters {
 #define DMA_MAX_PKT_SIZE_MASK		0xFFFF
 #define DMA_MAX_PKT_SIZE_SHIFT		16
 
-
 /* DMA control register */
 #define DMA_EN				(1 << 0)
 #define DMA_RING_BUF_EN_SHIFT		0x01

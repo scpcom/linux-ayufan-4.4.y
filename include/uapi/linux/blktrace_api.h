@@ -63,7 +63,6 @@ enum blktrace_notify {
 	__BLK_TN_MESSAGE,		/* Character string message */
 };
 
-
 /*
  * Trace actions in full. Additionally, read or write is masked
  */

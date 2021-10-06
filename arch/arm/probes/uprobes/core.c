@@ -132,7 +132,6 @@ void arch_uprobe_copy_ixol(struct page *page, unsigned long vaddr,
 	kunmap_atomic(xol_page_kaddr);
 }
 
-
 int arch_uprobe_pre_xol(struct arch_uprobe *auprobe, struct pt_regs *regs)
 {
 	struct uprobe_task *utask = current->utask;

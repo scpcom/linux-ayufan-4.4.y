@@ -223,7 +223,6 @@ static int a4xx_hw_init(struct msm_gpu *gpu)
 	gpu_write(gpu, REG_A4XX_CP_PROTECT(6), 0x67000800);
 	gpu_write(gpu, REG_A4XX_CP_PROTECT(7), 0x64001600);
 
-
 	/* RB registers */
 	gpu_write(gpu, REG_A4XX_CP_PROTECT(8), 0x60003300);
 

@@ -60,7 +60,6 @@ APB_DEVICE(uart3, "fpga:09", UART3,    NULL);
 APB_DEVICE(sci1,  "fpga:0a", SCI1,     NULL);
 APB_DEVICE(mmc1,  "fpga:0b", MMCI1,    &mmc1_plat_data);
 
-
 static struct amba_device *amba_devs[] __initdata = {
 	&uart3_device,
 	&sci1_device,

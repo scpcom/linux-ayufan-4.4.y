@@ -10,7 +10,6 @@
 #ifndef __ASM_ALPHA_FLOPPY_H
 #define __ASM_ALPHA_FLOPPY_H
 
-
 #define fd_inb(port)			inb_p(port)
 #define fd_outb(value,port)		outb_p(value,port)
 

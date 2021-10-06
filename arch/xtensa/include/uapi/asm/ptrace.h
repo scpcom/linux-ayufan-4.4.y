@@ -73,5 +73,4 @@
 #define PTRACE_GETXTREGS	18
 #define PTRACE_SETXTREGS	19
 
-
 #endif /* _UAPI_XTENSA_PTRACE_H */

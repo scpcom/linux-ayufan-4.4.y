@@ -1,8 +1,4 @@
-/*
- *  linux/fs/open.c
- *
- *  Copyright (C) 1991, 1992  Linus Torvalds
- */
+
 
 #include <linux/string.h>
 #include <linux/mm.h>
@@ -40,7 +36,6 @@ int do_truncate(struct dentry *dentry, loff_t length, unsigned int time_attrs,
 	int ret;
 	struct iattr newattrs;
 
-	/* Not pretty: "inode->i_size" shouldn't really be signed. But it is. */
 	if (length < 0)
 		return -EINVAL;
 
@@ -51,7 +46,7 @@ int do_truncate(struct dentry *dentry, loff_t length, unsigned int time_attrs,
 		newattrs.ia_valid |= ATTR_FILE;
 	}
 
-	/* Remove suid, sgid, and file capabilities on truncate too */
+	
 	ret = dentry_needs_remove_privs(dentry);
 	if (ret < 0)
 		return ret;
@@ -59,7 +54,7 @@ int do_truncate(struct dentry *dentry, loff_t length, unsigned int time_attrs,
 		newattrs.ia_valid |= ret | ATTR_FORCE;
 
 	mutex_lock(&dentry->d_inode->i_mutex);
-	/* Note any delegations or leases have already been broken: */
+	
 	ret = notify_change(dentry, &newattrs, NULL);
 	mutex_unlock(&dentry->d_inode->i_mutex);
 	return ret;
@@ -72,7 +67,6 @@ long vfs_truncate(struct path *path, loff_t length)
 
 	inode = path->dentry->d_inode;
 
-	/* For directories it's -EISDIR, for other non-regulars - -EINVAL */
 	if (S_ISDIR(inode->i_mode))
 		return -EISDIR;
 	if (!S_ISREG(inode->i_mode))
@@ -94,10 +88,6 @@ long vfs_truncate(struct path *path, loff_t length)
 	if (error)
 		goto mnt_drop_write_and_out;
 
-	/*
-	 * Make sure that there are no leases.  get_write_access() protects
-	 * against the truncate racing with a lease-granting setlease().
-	 */
 	error = break_lease(inode, O_WRONLY);
 	if (error)
 		goto put_write_and_out;
@@ -123,7 +113,7 @@ static long do_sys_truncate(const char __user *pathname, loff_t length)
 	struct path path;
 	int error;
 
-	if (length < 0)	/* sorry, but loff_t says... */
+	if (length < 0)	 
 		return -EINVAL;
 
 retry:
@@ -166,7 +156,6 @@ static long do_sys_ftruncate(unsigned int fd, loff_t length, int small)
 	if (!f.file)
 		goto out;
 
-	/* explicitly opened as large or we are on 64-bit box */
 	if (f.file->f_flags & O_LARGEFILE)
 		small = 0;
 
@@ -177,7 +166,7 @@ static long do_sys_ftruncate(unsigned int fd, loff_t length, int small)
 		goto out_putf;
 
 	error = -EINVAL;
-	/* Cannot ftruncate over 2^31 bytes without large file support */
+	 
 	if (small && length > MAX_NON_LFS)
 		goto out_putf;
 
@@ -210,7 +199,6 @@ COMPAT_SYSCALL_DEFINE2(ftruncate, unsigned int, fd, compat_ulong_t, length)
 }
 #endif
 
-/* LFS versions of truncate are only needed on 32 bit machines */
 #if BITS_PER_LONG == 32
 SYSCALL_DEFINE2(truncate64, const char __user *, path, loff_t, length)
 {
@@ -221,8 +209,7 @@ SYSCALL_DEFINE2(ftruncate64, unsigned int, fd, loff_t, length)
 {
 	return do_sys_ftruncate(fd, length, 0);
 }
-#endif /* BITS_PER_LONG == 32 */
-
+#endif  
 
 int vfs_fallocate(struct file *file, int mode, loff_t offset, loff_t len)
 {
@@ -232,26 +219,21 @@ int vfs_fallocate(struct file *file, int mode, loff_t offset, loff_t len)
 	if (offset < 0 || len <= 0)
 		return -EINVAL;
 
-	/* Return error if mode is not supported */
 	if (mode & ~FALLOC_FL_SUPPORTED_MASK)
 		return -EOPNOTSUPP;
 
-	/* Punch hole and zero range are mutually exclusive */
 	if ((mode & (FALLOC_FL_PUNCH_HOLE | FALLOC_FL_ZERO_RANGE)) ==
 	    (FALLOC_FL_PUNCH_HOLE | FALLOC_FL_ZERO_RANGE))
 		return -EOPNOTSUPP;
 
-	/* Punch hole must have keep size set */
 	if ((mode & FALLOC_FL_PUNCH_HOLE) &&
 	    !(mode & FALLOC_FL_KEEP_SIZE))
 		return -EOPNOTSUPP;
 
-	/* Collapse range should only be used exclusively. */
 	if ((mode & FALLOC_FL_COLLAPSE_RANGE) &&
 	    (mode & ~FALLOC_FL_COLLAPSE_RANGE))
 		return -EINVAL;
 
-	/* Insert range should only be used exclusively. */
 	if ((mode & FALLOC_FL_INSERT_RANGE) &&
 	    (mode & ~FALLOC_FL_INSERT_RANGE))
 		return -EINVAL;
@@ -259,25 +241,15 @@ int vfs_fallocate(struct file *file, int mode, loff_t offset, loff_t len)
 	if (!(file->f_mode & FMODE_WRITE))
 		return -EBADF;
 
-	/*
-	 * We can only allow pure fallocate on append only files
-	 */
 	if ((mode & ~FALLOC_FL_KEEP_SIZE) && IS_APPEND(inode))
 		return -EPERM;
 
 	if (IS_IMMUTABLE(inode))
 		return -EPERM;
 
-	/*
-	 * We cannot allow any fallocate operation on an active swapfile
-	 */
 	if (IS_SWAPFILE(inode))
 		return -ETXTBSY;
 
-	/*
-	 * Revalidate the write permissions, in case security policy has
-	 * changed since the files were opened.
-	 */
 	ret = security_file_permission(file, MAY_WRITE);
 	if (ret)
 		return ret;
@@ -285,14 +257,9 @@ int vfs_fallocate(struct file *file, int mode, loff_t offset, loff_t len)
 	if (S_ISFIFO(inode->i_mode))
 		return -ESPIPE;
 
-	/*
-	 * Let individual file system decide if it supports preallocation
-	 * for directories or not.
-	 */
 	if (!S_ISREG(inode->i_mode) && !S_ISDIR(inode->i_mode))
 		return -ENODEV;
 
-	/* Check for wrap through zero too */
 	if (((offset + len) > inode->i_sb->s_maxbytes) || ((offset + len) < 0))
 		return -EFBIG;
 
@@ -302,13 +269,6 @@ int vfs_fallocate(struct file *file, int mode, loff_t offset, loff_t len)
 	sb_start_write(inode->i_sb);
 	ret = file->f_op->fallocate(file, mode, offset, len);
 
-	/*
-	 * Create inotify and fanotify events.
-	 *
-	 * To keep the logic simple always create events if fallocate succeeds.
-	 * This implies that events are even created if the file size remains
-	 * unchanged, e.g. when using flag FALLOC_FL_KEEP_SIZE.
-	 */
 	if (ret == 0)
 		fsnotify_modify(file);
 
@@ -329,11 +289,7 @@ SYSCALL_DEFINE4(fallocate, int, fd, int, mode, loff_t, offset, loff_t, len)
 	return error;
 }
 
-/*
- * access() needs to use the real uid/gid, not the effective uid/gid.
- * We do this by temporarily clearing all FS-related capabilities and
- * switching the fsuid/fsgid around to the real ones.
- */
+
 SYSCALL_DEFINE3(faccessat, int, dfd, const char __user *, filename, int, mode)
 {
 	const struct cred *old_cred;
@@ -343,7 +299,7 @@ SYSCALL_DEFINE3(faccessat, int, dfd, const char __user *, filename, int, mode)
 	int res;
 	unsigned int lookup_flags = LOOKUP_FOLLOW;
 
-	if (mode & ~S_IRWXO)	/* where's F_OK, X_OK, W_OK, R_OK? */
+	if (mode & ~S_IRWXO)	 
 		return -EINVAL;
 
 	override_cred = prepare_creds();
@@ -354,7 +310,7 @@ SYSCALL_DEFINE3(faccessat, int, dfd, const char __user *, filename, int, mode)
 	override_cred->fsgid = override_cred->gid;
 
 	if (!issecure(SECURE_NO_SETUID_FIXUP)) {
-		/* Clear the capabilities if we switch to a non-root user */
+		 
 		kuid_t root_uid = make_kuid(override_cred->user_ns, 0);
 		if (!uid_eq(override_cred->uid, root_uid))
 			cap_clear(override_cred->cap_effective);
@@ -372,29 +328,17 @@ retry:
 	inode = d_backing_inode(path.dentry);
 
 	if ((mode & MAY_EXEC) && S_ISREG(inode->i_mode)) {
-		/*
-		 * MAY_EXEC on regular files is denied if the fs is mounted
-		 * with the "noexec" flag.
-		 */
+		
 		res = -EACCES;
 		if (path_noexec(&path))
 			goto out_path_release;
 	}
 
 	res = inode_permission(inode, mode | MAY_ACCESS);
-	/* SuS v2 requires we report a read only fs too */
+	
 	if (res || !(mode & S_IWOTH) || special_file(inode->i_mode))
 		goto out_path_release;
-	/*
-	 * This is a rare case where using __mnt_is_readonly()
-	 * is OK without a mnt_want/drop_write() pair.  Since
-	 * no actual write to the fs is performed here, we do
-	 * not need to telegraph to that to anyone.
-	 *
-	 * By doing this, we accept that this access is
-	 * inherently racy and know that the fs may change
-	 * state before we even see this result.
-	 */
+	
 	if (__mnt_is_readonly(path.mnt))
 		res = -EROFS;
 
@@ -671,7 +615,7 @@ out:
 
 int open_check_o_direct(struct file *f)
 {
-	/* NB: we're sure to have correct a_ops only after f_op->open */
+	
 	if (f->f_flags & O_DIRECT) {
 		if (!f->f_mapping->a_ops || !f->f_mapping->a_ops->direct_IO)
 			return -EINVAL;
@@ -712,7 +656,6 @@ static int do_dentry_open(struct file *f,
 		f->f_mode |= FMODE_WRITER;
 	}
 
-	/* POSIX.1-2008/SUSv4 Section XSI 2.9.7 */
 	if (S_ISREG(inode->i_mode))
 		f->f_mode |= FMODE_ATOMIC_POS;
 
@@ -766,33 +709,12 @@ cleanup_file:
 	return error;
 }
 
-/**
- * finish_open - finish opening a file
- * @file: file pointer
- * @dentry: pointer to dentry
- * @open: open callback
- * @opened: state of open
- *
- * This can be used to finish opening a file passed to i_op->atomic_open().
- *
- * If the open callback is set to NULL, then the standard f_op->open()
- * filesystem callback is substituted.
- *
- * NB: the dentry reference is _not_ consumed.  If, for example, the dentry is
- * the return value of d_splice_alias(), then the caller needs to perform dput()
- * on it after finish_open().
- *
- * On successful return @file is a fully instantiated open file.  After this, if
- * an error occurs in ->atomic_open(), it needs to clean up with fput().
- *
- * Returns zero on success or -errno if the open failed.
- */
 int finish_open(struct file *file, struct dentry *dentry,
 		int (*open)(struct inode *, struct file *),
 		int *opened)
 {
 	int error;
-	BUG_ON(*opened & FILE_OPENED); /* once it's opened, it's opened */
+	BUG_ON(*opened & FILE_OPENED);  
 
 	file->f_path.dentry = dentry;
 	error = do_dentry_open(file, d_backing_inode(dentry), open,
@@ -804,20 +726,6 @@ int finish_open(struct file *file, struct dentry *dentry,
 }
 EXPORT_SYMBOL(finish_open);
 
-/**
- * finish_no_open - finish ->atomic_open() without opening the file
- *
- * @file: file pointer
- * @dentry: dentry or NULL (as returned from ->lookup())
- *
- * This can be used to set the result of a successful lookup in ->atomic_open().
- *
- * NB: unlike finish_open() this function does consume the dentry reference and
- * the caller need not dput() it.
- *
- * Returns "1" which must be the return value of ->atomic_open() after having
- * called this function.
- */
 int finish_no_open(struct file *file, struct dentry *dentry)
 {
 	file->f_path.dentry = dentry;
@@ -831,12 +739,6 @@ char *file_path(struct file *filp, char *buf, int buflen)
 }
 EXPORT_SYMBOL(file_path);
 
-/**
- * vfs_open - open the file at the given path
- * @path: path to open
- * @file: newly allocated file with f_flag initialized
- * @cred: credentials to use
- */
 int vfs_open(const struct path *path, struct file *file,
 	     const struct cred *cred)
 {
@@ -857,7 +759,6 @@ struct file *dentry_open(const struct path *path, int flags,
 
 	validate_creds(cred);
 
-	/* We must always pass in a valid mount pointer. */
 	BUG_ON(!path->mnt);
 
 	f = get_empty_filp();
@@ -865,13 +766,13 @@ struct file *dentry_open(const struct path *path, int flags,
 		f->f_flags = flags;
 		error = vfs_open(path, f, cred);
 		if (!error) {
-			/* from now on we need fput() to dispose of f */
+			 
 			error = open_check_o_direct(f);
 			if (error) {
 				fput(f);
 				f = ERR_PTR(error);
 			}
-		} else { 
+		} else {
 			put_filp(f);
 			f = ERR_PTR(error);
 		}
@@ -890,15 +791,8 @@ static inline int build_open_flags(int flags, umode_t mode, struct open_flags *o
 	else
 		op->mode = 0;
 
-	/* Must never be set by userspace */
 	flags &= ~FMODE_NONOTIFY & ~O_CLOEXEC;
 
-	/*
-	 * O_SYNC is implemented as __O_SYNC|O_DSYNC.  As many places only
-	 * check for O_DSYNC if the need any syncing at all we enforce it's
-	 * always set instead of having to deal with possibly weird behaviour
-	 * for malicious applications setting only __O_SYNC.
-	 */
 	if (flags & __O_SYNC)
 		flags |= O_DSYNC;
 
@@ -909,10 +803,7 @@ static inline int build_open_flags(int flags, umode_t mode, struct open_flags *o
 		if (!(acc_mode & MAY_WRITE))
 			return -EINVAL;
 	} else if (flags & O_PATH) {
-		/*
-		 * If we have O_PATH in the open flag. Then we
-		 * cannot have anything other than the below set of flags
-		 */
+		 
 		flags &= O_DIRECTORY | O_NOFOLLOW | O_PATH;
 		acc_mode = 0;
 	} else {
@@ -921,12 +812,9 @@ static inline int build_open_flags(int flags, umode_t mode, struct open_flags *o
 
 	op->open_flag = flags;
 
-	/* O_TRUNC implies we need access checks for write permissions */
 	if (flags & O_TRUNC)
 		acc_mode |= MAY_WRITE;
 
-	/* Allow the LSM permission hook to distinguish append
-	   access from general write access. */
 	if (flags & O_APPEND)
 		acc_mode |= MAY_APPEND;
 
@@ -948,17 +836,6 @@ static inline int build_open_flags(int flags, umode_t mode, struct open_flags *o
 	return 0;
 }
 
-/**
- * file_open_name - open file and return file pointer
- *
- * @name:	struct filename containing path to open
- * @flags:	open flags as per the open(2) second argument
- * @mode:	mode for the new file if O_CREAT is set, else ignored
- *
- * This is the helper to open a file from kernelspace if you really
- * have to.  But in generally you should not do this, so please move
- * along, nothing to see here..
- */
 struct file *file_open_name(struct filename *name, int flags, umode_t mode)
 {
 	struct open_flags op;
@@ -966,22 +843,11 @@ struct file *file_open_name(struct filename *name, int flags, umode_t mode)
 	return err ? ERR_PTR(err) : do_filp_open(AT_FDCWD, name, &op);
 }
 
-/**
- * filp_open - open file and return file pointer
- *
- * @filename:	path to open
- * @flags:	open flags as per the open(2) second argument
- * @mode:	mode for the new file if O_CREAT is set, else ignored
- *
- * This is the helper to open a file from kernelspace if you really
- * have to.  But in generally you should not do this, so please move
- * along, nothing to see here..
- */
 struct file *filp_open(const char *filename, int flags, umode_t mode)
 {
 	struct filename *name = getname_kernel(filename);
 	struct file *file = ERR_CAST(name);
-	
+
 	if (!IS_ERR(name)) {
 		file = file_open_name(name, flags, mode);
 		putname(name);
@@ -1048,10 +914,6 @@ SYSCALL_DEFINE4(openat, int, dfd, const char __user *, filename, int, flags,
 
 #ifndef __alpha__
 
-/*
- * For backward compatibility?  Maybe this should be moved
- * into arch/i386 instead?
- */
 SYSCALL_DEFINE2(creat, const char __user *, pathname, umode_t, mode)
 {
 	return sys_open(pathname, O_CREAT | O_WRONLY | O_TRUNC, mode);
@@ -1059,10 +921,6 @@ SYSCALL_DEFINE2(creat, const char __user *, pathname, umode_t, mode)
 
 #endif
 
-/*
- * "id" is the POSIX thread ID. We use the
- * files pointer for this..
- */
 int filp_close(struct file *filp, fl_owner_t id)
 {
 	int retval = 0;
@@ -1085,16 +943,10 @@ int filp_close(struct file *filp, fl_owner_t id)
 
 EXPORT_SYMBOL(filp_close);
 
-/*
- * Careful here! We test whether the file pointer is NULL before
- * releasing the fd. This ensures that one clone task can't release
- * an fd while another clone is opening it.
- */
 SYSCALL_DEFINE1(close, unsigned int, fd)
 {
 	int retval = __close_fd(current->files, fd);
 
-	/* can't restart close syscall because file table entry was cleared */
 	if (unlikely(retval == -ERESTARTSYS ||
 		     retval == -ERESTARTNOINTR ||
 		     retval == -ERESTARTNOHAND ||
@@ -1105,10 +957,6 @@ SYSCALL_DEFINE1(close, unsigned int, fd)
 }
 EXPORT_SYMBOL(sys_close);
 
-/*
- * This routine simulates a hangup on the tty, to arrange that users
- * are given clean terminals at login time.
- */
 SYSCALL_DEFINE0(vhangup)
 {
 	if (capable(CAP_SYS_TTY_CONFIG)) {
@@ -1118,12 +966,6 @@ SYSCALL_DEFINE0(vhangup)
 	return -EPERM;
 }
 
-/*
- * Called when an inode is about to be open.
- * We use this to disallow opening large files on 32bit systems if
- * the caller didn't specify O_LARGEFILE.  On 64bit systems we force
- * on this flag in sys_open.
- */
 int generic_file_open(struct inode * inode, struct file * filp)
 {
 	if (!(filp->f_flags & O_LARGEFILE) && i_size_read(inode) > MAX_NON_LFS)
@@ -1133,12 +975,6 @@ int generic_file_open(struct inode * inode, struct file * filp)
 
 EXPORT_SYMBOL(generic_file_open);
 
-/*
- * This is used by subsystems that don't want seekable
- * file descriptors. The function is not supposed to ever fail, the only
- * reason it returns an 'int' and not 'void' is so that it can be plugged
- * directly into file_operations structure.
- */
 int nonseekable_open(struct inode *inode, struct file *filp)
 {
 	filp->f_mode &= ~(FMODE_LSEEK | FMODE_PREAD | FMODE_PWRITE);

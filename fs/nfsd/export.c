@@ -285,7 +285,6 @@ svc_expkey_update(struct cache_detail *cd, struct svc_expkey *new,
 		return NULL;
 }
 
-
 #define	EXPORT_HASHBITS		8
 #define	EXPORT_HASHMAX		(1<< EXPORT_HASHBITS)
 
@@ -798,7 +797,6 @@ svc_export_update(struct svc_export *new, struct svc_export *old)
 		return NULL;
 }
 
-
 static struct svc_expkey *
 exp_find_key(struct cache_detail *cd, struct auth_domain *clp, int fsid_type,
 	     u32 *fsidv, struct cache_req *reqp)
@@ -864,8 +862,6 @@ exp_parent(struct cache_detail *cd, struct auth_domain *clp, struct path *path)
 	path->dentry = saved;
 	return exp;
 }
-
-
 
 /*
  * Obtain the root fh on behalf of a client.

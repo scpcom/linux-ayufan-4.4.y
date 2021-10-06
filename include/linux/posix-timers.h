@@ -7,7 +7,6 @@
 #include <linux/timex.h>
 #include <linux/alarmtimer.h>
 
-
 static inline unsigned long long cputime_to_expires(cputime_t expires)
 {
 	return (__force unsigned long long)expires;

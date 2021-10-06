@@ -52,7 +52,6 @@
 #define	INTC_INTPRI_PREGS	8		/* 8 Priority Registers */
 #define	INTC_INTPRI_PPREG	8		/* 8 Priorities per Register */
 
-
 /*
  * Mapper between the vector ordinal and the IRQ number
  * passed to kernel/device drivers.
@@ -132,11 +131,9 @@ void __init plat_irq_setup(void)
 		panic("Unable to remap INTC\n");
 	}
 
-
 	/* Set default: per-line enable/disable, priority driven ack/eoi */
 	for (i = 0; i < NR_INTC_IRQS; i++)
 		irq_set_chip_and_handler(i, &intc_irq_type, handle_level_irq);
-
 
 	/* Disable all interrupts and set all priorities to 0 to avoid trouble */
 	__raw_writel(-1, INTC_INTDSB_0);
@@ -144,7 +141,6 @@ void __init plat_irq_setup(void)
 
 	for (reg = INTC_INTPRI_0, i = 0; i < INTC_INTPRI_PREGS; i++, reg += 8)
 		__raw_writel( NO_PRIORITY, reg);
-
 
 #ifdef CONFIG_SH_CAYMAN
 	{

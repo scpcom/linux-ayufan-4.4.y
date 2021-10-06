@@ -37,7 +37,6 @@ enum vtpm_shared_page_state {
 /* The backend should only change state to IDLE or FINISH, while the
  * frontend should only change to SUBMIT or CANCEL. */
 
-
 struct vtpm_shared_page {
 	uint32_t length;         /* request/response length in bytes */
 

@@ -18,7 +18,6 @@
  *    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-
 #include "cxd2820r_priv.h"
 
 /* Max transfer size done by I2C transfer functions */
@@ -528,7 +527,6 @@ static enum dvbfe_search cxd2820r_search(struct dvb_frontend *fe)
 	ret = cxd2820r_set_frontend(fe);
 	if (ret)
 		goto error;
-
 
 	/* frontend lock wait loop count */
 	switch (priv->delivery_system) {

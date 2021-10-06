@@ -20,7 +20,6 @@
 #include "drm_crtc.h"
 #include "drm_crtc_helper.h"
 
-
 struct mdp4_dtv_encoder {
 	struct drm_encoder base;
 	struct clk *src_clk;

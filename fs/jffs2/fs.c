@@ -109,7 +109,6 @@ int jffs2_do_setattr (struct inode *inode, struct iattr *iattr)
 	else
 		ri->mode = cpu_to_jemode(inode->i_mode);
 
-
 	ri->isize = cpu_to_je32((ivalid & ATTR_SIZE)?iattr->ia_size:inode->i_size);
 	ri->atime = cpu_to_je32(I_SEC((ivalid & ATTR_ATIME)?iattr->ia_atime:inode->i_atime));
 	ri->mtime = cpu_to_je32(I_SEC((ivalid & ATTR_MTIME)?iattr->ia_mtime:inode->i_mtime));
@@ -151,7 +150,6 @@ int jffs2_do_setattr (struct inode *inode, struct iattr *iattr)
 	inode->i_mode = jemode_to_cpu(ri->mode);
 	i_uid_write(inode, je16_to_cpu(ri->uid));
 	i_gid_write(inode, je16_to_cpu(ri->gid));
-
 
 	old_metadata = f->metadata;
 
@@ -230,7 +228,6 @@ int jffs2_statfs(struct dentry *dentry, struct kstatfs *buf)
 
 	return 0;
 }
-
 
 void jffs2_evict_inode (struct inode *inode)
 {

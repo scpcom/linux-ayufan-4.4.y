@@ -557,7 +557,6 @@
 #define reg_pinmux_rw_iop_usb___usb0___bit 0
 #define reg_pinmux_rw_iop_usb_offset 28
 
-
 /* Constants */
 #define regk_pinmux_no                            0x00000000
 #define regk_pinmux_rw_gio_pa_default             0x00000000

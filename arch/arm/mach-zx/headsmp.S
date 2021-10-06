@@ -26,7 +26,6 @@ ENTRY(zx_suspend_iram_sz)
         .word	. - zx_resume_jump
 ENDPROC(zx_secondary_startup_pa)
 
-
 ENTRY(zx_secondary_startup)
 	bl	v7_invalidate_l1
 	b	secondary_startup

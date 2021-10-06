@@ -36,8 +36,6 @@
  LILO/INSMOD command-line options:
     fdomain=<PORT_BASE>,<IRQ>[,<ADAPTER_ID>]
 
-
-    
  NOTE:
 
  The Adaptec AHA-2920C has an Adaptec AIC-7850 chip on it.
@@ -48,8 +46,6 @@
  "2920", so you'll have to look on the card for a Future Domain logo, or a
  letter after the 2920.
 
- 
- 
  THANKS:
 
  Thanks to Adaptec for providing PCI boards for testing.  This finally
@@ -57,8 +53,6 @@
  not have a BIOS at a standard ISA location.  For PCI boards, LILO/INSMOD
  command-line options should no longer be needed.  --RF 18Nov98
 
-
- 
  DESCRIPTION:
  
  This is the Linux low-level SCSI driver for Future Domain TMC-1660/1680
@@ -90,8 +84,6 @@
  your board.  Please refer to the Seagate driver for more information and
  possible support.
 
- 
- 
  HISTORY:
 
  Linux       Driver      Driver
@@ -131,7 +123,6 @@
              5.48        18 Nov 1998  BIOS no longer needed for PCI detection
  2.2.0       5.50        28 Dec 1998  Support insmod parameters
  
-
  REFERENCES USED:
 
  "TMC-1800 SCSI Chip Specification (FDC-1800T)", Future Domain Corporation,
@@ -162,8 +153,6 @@
  "18C30 Technical Reference Manual", Future Domain Corporation, 1993, page
  6-1.
 
-
- 
  NOTES ON REFERENCES:
 
  The Maxtor manuals were free.  Maxtor telephone technical support is
@@ -178,8 +167,6 @@
  provided some information on the phone and have sent a few useful FAXs.
  They have been much more helpful since they started to recognize that the
  word "Linux" refers to an operating system :-).
-
- 
 
  ALPHA TESTERS:
 
@@ -234,8 +221,6 @@
  
  All of the alpha testers deserve much thanks.
 
-
-
  NOTES ON USER DEFINABLE OPTIONS:
 
  DEBUG: This turns on the printing of various debug information.
@@ -282,7 +267,6 @@
 #include <linux/slab.h>
 #include <scsi/scsicam.h>
 
-
 #include <scsi/scsi.h>
 #include <scsi/scsi_cmnd.h>
 #include <scsi/scsi_device.h>
@@ -296,7 +280,6 @@ MODULE_DESCRIPTION("Future domain SCSI driver");
 MODULE_LICENSE("GPL");
 #endif
 
-  
 #define VERSION          "$Revision: 5.51 $"
 
 /* START OF USER DEFINABLE OPTIONS */
@@ -575,7 +558,6 @@ int fdomain_setup(char *str)
 
 __setup("fdomain=", fdomain_setup);
 
-
 static void do_pause(unsigned amount)	/* Pause for amount*10 milliseconds */
 {
 	mdelay(10*amount);
@@ -813,7 +795,6 @@ static int fdomain_isa_detect( int *irq, int *iobase )
 }
 
 #endif /* !PCMCIA */
-
 
 /* PCI detection function: int fdomain_pci_bios_detect(int* irq, int*
    iobase) This function gets the Interrupt Level and I/O base address from
@@ -1624,8 +1605,6 @@ static int fdomain_16x0_biosparam(struct scsi_device *sdev,
       The table at 0x1fcc are I/O ports addresses for the various
       operations.  I calculate these by hand in this driver code.
 
-      
-      
       For the ISA-200S version of BIOS Version 2.0:
 
       The drive parameter table starts at 0x1f33.
@@ -1633,8 +1612,6 @@ static int fdomain_16x0_biosparam(struct scsi_device *sdev,
       WARNING: Assume that the table entry is 25 bytes long.  Someone needs
       to check this for the Quantum ISA-200S card.
 
-      
-      
       For BIOS Version 3.2:
 
       The drive parameter table starts at 0x1f70.  Each entry is

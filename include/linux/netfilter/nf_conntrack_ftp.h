@@ -3,7 +3,6 @@
 
 #include <uapi/linux/netfilter/nf_conntrack_ftp.h>
 
-
 #define FTP_PORT	21
 
 #define NF_CT_FTP_SEQ_PICKUP	(1 << 0)

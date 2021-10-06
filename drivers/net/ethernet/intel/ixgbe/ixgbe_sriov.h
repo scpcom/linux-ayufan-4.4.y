@@ -69,4 +69,3 @@ static inline void ixgbe_set_vmvir(struct ixgbe_adapter *adapter,
 }
 
 #endif /* _IXGBE_SRIOV_H_ */
-

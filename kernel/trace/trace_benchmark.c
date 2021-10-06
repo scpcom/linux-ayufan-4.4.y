@@ -89,7 +89,6 @@ static void trace_do_benchmark(void)
 	bm_total += delta;
 	bm_totalsq += delta * delta;
 
-
 	if (bm_cnt > 1) {
 		/*
 		 * Apply Welford's method to calculate standard deviation:

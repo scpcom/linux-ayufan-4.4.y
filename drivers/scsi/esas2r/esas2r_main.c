@@ -467,7 +467,6 @@ static int esas2r_probe(struct pci_dev *pcid,
 		return -ENODEV;
 	}
 
-
 	esas2r_fw_event_on(a);
 
 	esas2r_log_dev(ESAS2R_LOG_INFO, &(host->shost_gendev),
@@ -717,7 +716,6 @@ int esas2r_show_info(struct seq_file *m, struct Scsi_Host *sh)
 		   a->flash_rev,
 		   a->fw_rev[0] ? a->fw_rev : "(none)");
 
-
 	seq_printf(m, "Adapter information:\n"
 		   "--------------------\n"
 		   "Model: %s\n"
@@ -832,7 +830,6 @@ static u32 get_physaddr_from_sgc(struct esas2r_sg_context *sgc, u64 *addr)
 				sgc->cur_sgel = sg_next(sgc->cur_sgel);
 				++(sgc->sgel_count);
 			}
-
 
 			len = sg_dma_len(sgc->cur_sgel);
 			(*addr) = sg_dma_address(sgc->cur_sgel);
@@ -1032,7 +1029,6 @@ static int esas2r_check_active_queue(struct esas2r_adapter *a,
 
 	return 2;               /* found */
 
-
 }
 
 int esas2r_eh_abort(struct scsi_cmnd *cmd)
@@ -1190,7 +1186,6 @@ retry:
 				   cmd->device->id,
 				   cmd->device->lun);
 		}
-
 
 		return FAILED;
 	}

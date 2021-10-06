@@ -28,7 +28,6 @@
 #include "vmwgfx_kms.h"
 #include <drm/drm_plane_helper.h>
 
-
 #define vmw_crtc_to_ldu(x) \
 	container_of(x, struct vmw_legacy_display_unit, base.crtc)
 #define vmw_encoder_to_ldu(x) \
@@ -60,7 +59,6 @@ static void vmw_ldu_destroy(struct vmw_legacy_display_unit *ldu)
 	vmw_du_cleanup(&ldu->base);
 	kfree(ldu);
 }
-
 
 /*
  * Legacy Display Unit CRTC functions
@@ -130,7 +128,6 @@ static int vmw_ldu_commit_list(struct vmw_private *dev_priv)
 	BUG_ON(i != lds->num_active);
 
 	lds->last_num_active = lds->num_active;
-
 
 	/* Find the first du with a cursor. */
 	list_for_each_entry(entry, &lds->active, active) {
@@ -268,7 +265,6 @@ static int vmw_ldu_crtc_set_config(struct drm_mode_set *set)
 		return vmw_ldu_commit_list(dev_priv);
 	}
 
-
 	/* we now know we want to set a mode */
 	mode = set->mode;
 	fb = set->fb;
@@ -303,7 +299,6 @@ static struct drm_crtc_funcs vmw_legacy_crtc_funcs = {
 	.destroy = vmw_ldu_crtc_destroy,
 	.set_config = vmw_ldu_crtc_set_config,
 };
-
 
 /*
  * Legacy Display Unit encoder functions
@@ -451,7 +446,6 @@ int vmw_kms_ldu_close_display(struct vmw_private *dev_priv)
 
 	return 0;
 }
-
 
 int vmw_kms_ldu_do_dmabuf_dirty(struct vmw_private *dev_priv,
 				struct vmw_framebuffer *framebuffer,

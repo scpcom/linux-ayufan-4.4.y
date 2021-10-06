@@ -7,7 +7,6 @@
 #include <gtk/gtk.h>
 #pragma GCC diagnostic error "-Wstrict-prototypes"
 
-
 struct perf_gtk_context {
 	GtkWidget *main_window;
 	GtkWidget *notebook;

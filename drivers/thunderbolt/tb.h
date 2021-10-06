@@ -92,7 +92,6 @@ struct tb_path {
 	int path_length; /* number of hops */
 };
 
-
 /**
  * struct tb - main thunderbolt bus structure
  */
@@ -190,7 +189,6 @@ static inline int tb_port_write(struct tb_port *port, void *buffer,
 #define tb_warn(tb, fmt, arg...) dev_warn(&(tb)->nhi->pdev->dev, fmt, ## arg)
 #define tb_info(tb, fmt, arg...) dev_info(&(tb)->nhi->pdev->dev, fmt, ## arg)
 
-
 #define __TB_SW_PRINT(level, sw, fmt, arg...)           \
 	do {                                            \
 		struct tb_switch *__sw = (sw);          \
@@ -200,7 +198,6 @@ static inline int tb_port_write(struct tb_port *port, void *buffer,
 #define tb_sw_WARN(sw, fmt, arg...) __TB_SW_PRINT(tb_WARN, sw, fmt, ##arg)
 #define tb_sw_warn(sw, fmt, arg...) __TB_SW_PRINT(tb_warn, sw, fmt, ##arg)
 #define tb_sw_info(sw, fmt, arg...) __TB_SW_PRINT(tb_info, sw, fmt, ##arg)
-
 
 #define __TB_PORT_PRINT(level, _port, fmt, arg...)                      \
 	do {                                                            \
@@ -214,7 +211,6 @@ static inline int tb_port_write(struct tb_port *port, void *buffer,
 	__TB_PORT_PRINT(tb_warn, port, fmt, ##arg)
 #define tb_port_info(port, fmt, arg...) \
 	__TB_PORT_PRINT(tb_info, port, fmt, ##arg)
-
 
 struct tb *thunderbolt_alloc_and_start(struct tb_nhi *nhi);
 void thunderbolt_shutdown_and_free(struct tb *tb);
@@ -243,7 +239,6 @@ bool tb_path_is_invalid(struct tb_path *path);
 
 int tb_drom_read(struct tb_switch *sw);
 int tb_drom_read_uid_only(struct tb_switch *sw, u64 *uid);
-
 
 static inline int tb_route_length(u64 route)
 {

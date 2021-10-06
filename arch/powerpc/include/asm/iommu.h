@@ -128,7 +128,6 @@ int get_iommu_order(unsigned long size, struct iommu_table *tbl)
 	return __ilog2((size - 1) >> tbl->it_page_shift) + 1;
 }
 
-
 struct scatterlist;
 
 #ifdef CONFIG_PPC64

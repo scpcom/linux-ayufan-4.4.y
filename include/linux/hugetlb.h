@@ -275,7 +275,6 @@ static inline int is_file_hugepages(struct file *file)
 	return 0;
 }
 
-
 #else /* !CONFIG_HUGETLBFS */
 
 #define is_file_hugepages(file)			0

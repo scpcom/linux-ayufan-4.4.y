@@ -59,7 +59,6 @@
    to try to allocate the buffer as one chunk. */
 #define OSST_FIRST_ORDER  (15-PAGE_SHIFT)
 
-
 /* The following lines define defaults for properties that can be set
    separately for each drive using the MTSTOPTIONS ioctl. */
 
@@ -101,6 +100,5 @@
 /* If OSST_SYSV is non-zero, the tape behaves according to the SYS V semantics.
    The default is BSD semantics. */
 #define OSST_SYSV 0
-
 
 #endif

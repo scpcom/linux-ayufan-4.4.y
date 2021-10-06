@@ -14,7 +14,6 @@
 #ifndef _INET6_HASHTABLES_H
 #define _INET6_HASHTABLES_H
 
-
 #if IS_ENABLED(CONFIG_IPV6)
 #include <linux/in6.h>
 #include <linux/ipv6.h>

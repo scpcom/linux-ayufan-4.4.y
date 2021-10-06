@@ -93,7 +93,6 @@ typedef unsigned long old_sigset_t;		/* at least 32 bits */
 #define MINSIGSTKSZ    2048
 #define SIGSTKSZ       8192
 
-
 #define SIG_BLOCK	1	/* for blocking signals */
 #define SIG_UNBLOCK	2	/* for unblocking signals */
 #define SIG_SETMASK	3	/* for setting the signal mask */
@@ -114,6 +113,5 @@ typedef struct sigaltstack {
 	size_t ss_size;
 	int ss_flags;
 } stack_t;
-
 
 #endif /* _UAPI_ASM_SIGNAL_H */

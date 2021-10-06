@@ -955,7 +955,6 @@ err:
 	return ret;
 }
 
-
 static const struct net_device_ops xcan_netdev_ops = {
 	.ndo_open	= xcan_open,
 	.ndo_stop	= xcan_close,

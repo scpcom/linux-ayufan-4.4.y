@@ -1065,7 +1065,6 @@ static int ethoc_probe(struct platform_device *pdev)
 		netdev->mem_end   = mem->end;
 	}
 
-
 	/* obtain device IRQ number */
 	res = platform_get_resource(pdev, IORESOURCE_IRQ, 0);
 	if (!res) {
@@ -1326,4 +1325,3 @@ module_platform_driver(ethoc_driver);
 MODULE_AUTHOR("Thierry Reding <thierry.reding@avionic-design.de>");
 MODULE_DESCRIPTION("OpenCores Ethernet MAC driver");
 MODULE_LICENSE("GPL v2");
-

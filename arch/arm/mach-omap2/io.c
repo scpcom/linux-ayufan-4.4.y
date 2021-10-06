@@ -759,7 +759,6 @@ void __init dra7xx_init_late(void)
 }
 #endif
 
-
 void __init omap_sdrc_init(struct omap_sdrc_params *sdrc_cs0,
 				      struct omap_sdrc_params *sdrc_cs1)
 {

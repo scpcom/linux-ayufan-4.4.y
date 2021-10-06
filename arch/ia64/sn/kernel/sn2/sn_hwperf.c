@@ -373,7 +373,6 @@ err:
 	return e;
 }
 
-
 static int sn_topology_show(struct seq_file *s, void *d)
 {
 	int sz;

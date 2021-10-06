@@ -263,7 +263,6 @@ static struct qp_list qp_guest_endpoints = {
 			     (DIV_ROUND_UP(_QPE.produce_size, PAGE_SIZE) + \
 			      DIV_ROUND_UP(_QPE.consume_size, PAGE_SIZE) + 2))
 
-
 /*
  * Frees kernel VA space for a given queue and its queue header, and
  * frees physical data pages.

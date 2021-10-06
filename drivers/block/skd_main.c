@@ -349,7 +349,6 @@ struct skd_device {
 
 	u32 timo_slot;
 
-
 	struct work_struct completion_worker;
 };
 
@@ -403,7 +402,6 @@ static inline void skd_reg_write64(struct skd_device *skdev, u64 val,
 			 skdev->name, __func__, __LINE__, offset, val);
 	}
 }
-
 
 #define SKD_IRQ_DEFAULT SKD_IRQ_MSI
 static int skd_isr_type = SKD_IRQ_DEFAULT;
@@ -2683,7 +2681,6 @@ static void skd_process_scsi_inq(struct skd_device *skdev,
 		skd_do_driver_inq(skdev, skcomp, skerr, scsi_req->cdb, buf);
 }
 
-
 static int skd_isr_completion_posted(struct skd_device *skdev,
 					int limit, int *enqueued)
 {
@@ -4696,7 +4693,6 @@ static void skd_destruct(struct skd_device *skdev)
 	if (skdev == NULL)
 		return;
 
-
 	pr_debug("%s:%s:%d disk\n", skdev->name, __func__, __LINE__);
 	skd_free_disk(skdev);
 
@@ -4759,7 +4755,6 @@ static const struct block_device_operations skd_blockdev_ops = {
 	.ioctl		= skd_bdev_ioctl,
 	.getgeo		= skd_bdev_getgeo,
 };
-
 
 /*
  *****************************************************************************
@@ -4866,7 +4861,6 @@ static int skd_pci_probe(struct pci_dev *pdev, const struct pci_device_id *ent)
 	} else
 		skdev->pcie_error_reporting_is_enabled = 1;
 
-
 	pci_set_drvdata(pdev, skdev);
 
 	skdev->disk->driverfs_dev = &pdev->dev;
@@ -4921,7 +4915,6 @@ static int skd_pci_probe(struct pci_dev *pdev, const struct pci_device_id *ent)
 			rc = -ENXIO;
 		goto err_out_timer;
 	}
-
 
 #ifdef SKD_VMK_POLL_HANDLER
 	if (skdev->irq_type == SKD_IRQ_MSIX) {

@@ -136,7 +136,6 @@ static void enable_sb1250_irq(struct irq_data *d)
 	sb1250_unmask_irq(sb1250_irq_owner[irq], irq);
 }
 
-
 static void ack_sb1250_irq(struct irq_data *d)
 {
 	unsigned int irq = d->irq;
@@ -202,7 +201,6 @@ void __init init_sb1250_irqs(void)
 		sb1250_irq_owner[i] = 0;
 	}
 }
-
 
 /*
  *  arch_init_irq is called early in the boot sequence from init/main.c via

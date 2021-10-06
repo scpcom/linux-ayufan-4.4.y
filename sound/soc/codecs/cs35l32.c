@@ -345,7 +345,6 @@ static int cs35l32_i2c_probe(struct i2c_client *i2c_client,
 	unsigned int devid = 0;
 	unsigned int reg;
 
-
 	cs35l32 = devm_kzalloc(&i2c_client->dev, sizeof(struct cs35l32_private),
 			       GFP_KERNEL);
 	if (!cs35l32) {
@@ -556,7 +555,6 @@ static const struct of_device_id cs35l32_of_match[] = {
 	{},
 };
 MODULE_DEVICE_TABLE(of, cs35l32_of_match);
-
 
 static const struct i2c_device_id cs35l32_id[] = {
 	{"cs35l32", 0},

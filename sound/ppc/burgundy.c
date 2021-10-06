@@ -26,7 +26,6 @@
 #include "pmac.h"
 #include "burgundy.h"
 
-
 /* Waits for busy flag to clear */
 static inline void
 snd_pmac_burgundy_busy_wait(struct snd_pmac *chip)
@@ -568,7 +567,6 @@ BURGUNDY_SWITCH_B("Headphone Playback Switch", 0,
 	MASK_ADDR_BURGUNDY_MORE_OUTPUTENABLES,
 	BURGUNDY_HP_LEFT, BURGUNDY_HP_RIGHT, 1);
 
-
 #ifdef PMAC_SUPPORT_AUTOMUTE
 /*
  * auto-mute stuffs
@@ -612,7 +610,6 @@ static void snd_pmac_burgundy_update_automute(struct snd_pmac *chip, int do_noti
 	}
 }
 #endif /* PMAC_SUPPORT_AUTOMUTE */
-
 
 /*
  * initialize burgundy

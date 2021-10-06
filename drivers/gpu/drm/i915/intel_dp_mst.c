@@ -56,7 +56,6 @@ static bool intel_dp_mst_compute_config(struct intel_encoder *encoder,
 	 */
 	lane_count = drm_dp_max_lane_count(intel_dp->dpcd);
 
-
 	pipe_config->lane_count = lane_count;
 
 	pipe_config->pipe_bpp = 24;
@@ -465,9 +464,11 @@ static void intel_dp_register_mst_connector(struct drm_connector *connector)
 {
 	struct intel_connector *intel_connector = to_intel_connector(connector);
 	struct drm_device *dev = connector->dev;
+
 	drm_modeset_lock_all(dev);
 	intel_connector_add_to_fbdev(intel_connector);
 	drm_modeset_unlock_all(dev);
+
 	drm_connector_register(&intel_connector->base);
 }
 

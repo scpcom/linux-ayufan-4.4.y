@@ -131,7 +131,6 @@ struct cache_detail {
 	struct net		*net;
 };
 
-
 /* this must be embedded in any request structure that
  * identifies an object that will want a callback on
  * a cache fill
@@ -188,7 +187,6 @@ sunrpc_cache_update(struct cache_detail *detail,
 extern int
 sunrpc_cache_pipe_upcall(struct cache_detail *detail, struct cache_head *h);
 
-
 extern void cache_clean_deferred(void *owner);
 
 static inline struct cache_head  *cache_get(struct cache_head *h)
@@ -196,7 +194,6 @@ static inline struct cache_head  *cache_get(struct cache_head *h)
 	kref_get(&h->ref);
 	return h;
 }
-
 
 static inline void cache_put(struct cache_head *h, struct cache_detail *cd)
 {

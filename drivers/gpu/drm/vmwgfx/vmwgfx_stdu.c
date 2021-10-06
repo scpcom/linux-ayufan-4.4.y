@@ -36,8 +36,6 @@
 #define vmw_connector_to_stdu(x) \
 	container_of(x, struct vmw_screen_target_display_unit, base.connector)
 
-
-
 enum stdu_content_type {
 	SAME_AS_DISPLAY = 0,
 	SEPARATE_SURFACE,
@@ -86,7 +84,6 @@ struct vmw_stdu_surface_copy {
 	SVGA3dCmdSurfaceCopy body;
 };
 
-
 /**
  * struct vmw_screen_target_display_unit
  *
@@ -111,11 +108,7 @@ struct vmw_screen_target_display_unit {
 	bool defined;
 };
 
-
-
 static void vmw_stdu_destroy(struct vmw_screen_target_display_unit *stdu);
-
-
 
 /******************************************************************************
  * Screen Target Display Unit helper Functions
@@ -134,8 +127,6 @@ static int vmw_stdu_pin_display(struct vmw_screen_target_display_unit *stdu)
 {
 	return vmw_resource_pin(&stdu->display_srf->res, false);
 }
-
-
 
 /**
  * vmw_stdu_unpin_display - unpins the resource associated with display surface
@@ -163,12 +154,9 @@ static void vmw_stdu_unpin_display(struct vmw_screen_target_display_unit *stdu)
 	}
 }
 
-
-
 /******************************************************************************
  * Screen Target Display Unit CRTC Functions
  *****************************************************************************/
-
 
 /**
  * vmw_stdu_crtc_destroy - cleans up the STDU
@@ -230,8 +218,6 @@ static int vmw_stdu_define_st(struct vmw_private *dev_priv,
 	return 0;
 }
 
-
-
 /**
  * vmw_stdu_bind_st - Binds a surface to a Screen Target
  *
@@ -251,7 +237,6 @@ static int vmw_stdu_bind_st(struct vmw_private *dev_priv,
 		SVGA3dCmdHeader header;
 		SVGA3dCmdBindGBScreenTarget body;
 	} *cmd;
-
 
 	if (!stdu->defined) {
 		DRM_ERROR("No screen target defined\n");
@@ -345,8 +330,6 @@ static int vmw_stdu_update_st(struct vmw_private *dev_priv,
 	return 0;
 }
 
-
-
 /**
  * vmw_stdu_destroy_st - Destroy a Screen Target
  *
@@ -362,7 +345,6 @@ static int vmw_stdu_destroy_st(struct vmw_private *dev_priv,
 		SVGA3dCmdHeader header;
 		SVGA3dCmdDestroyGBScreenTarget body;
 	} *cmd;
-
 
 	/* Nothing to do if not successfully defined */
 	if (unlikely(!stdu->defined))
@@ -392,8 +374,6 @@ static int vmw_stdu_destroy_st(struct vmw_private *dev_priv,
 	return ret;
 }
 
-
-
 /**
  * vmw_stdu_crtc_set_config - Sets a mode
  *
@@ -419,7 +399,6 @@ static int vmw_stdu_crtc_set_config(struct drm_mode_set *set)
 	struct drm_connector *connector;
 	int    ret;
 
-
 	if (!set || !set->crtc)
 		return -EINVAL;
 
@@ -430,7 +409,6 @@ static int vmw_stdu_crtc_set_config(struct drm_mode_set *set)
 	mode     = set->mode;
 	new_fb   = set->fb;
 	dev_priv = vmw_priv(crtc->dev);
-
 
 	if (set->num_connectors > 1) {
 		DRM_ERROR("Too many connectors\n");
@@ -444,11 +422,9 @@ static int vmw_stdu_crtc_set_config(struct drm_mode_set *set)
 		return -EINVAL;
 	}
 
-
 	/* Since they always map one to one these are safe */
 	connector = &stdu->base.connector;
 	encoder   = &stdu->base.encoder;
-
 
 	/*
 	 * After this point the CRTC will be considered off unless a new fb
@@ -482,11 +458,9 @@ static int vmw_stdu_crtc_set_config(struct drm_mode_set *set)
 			return ret;
 	}
 
-
 	/* Any of these conditions means the caller wants CRTC off */
 	if (set->num_connectors == 0 || !mode || !new_fb)
 		return 0;
-
 
 	if (set->x + mode->hdisplay > new_fb->width ||
 	    set->y + mode->vdisplay > new_fb->height) {
@@ -511,7 +485,6 @@ static int vmw_stdu_crtc_set_config(struct drm_mode_set *set)
 		struct vmw_surface content_srf;
 		struct drm_vmw_size display_base_size = {0};
 		struct vmw_surface *display_srf;
-
 
 		display_base_size.width  = mode->hdisplay;
 		display_base_size.height = mode->vdisplay;
@@ -553,7 +526,6 @@ static int vmw_stdu_crtc_set_config(struct drm_mode_set *set)
 			content_srf = *new_vfbs->surface;
 		}
 
-
 		ret = vmw_surface_gb_priv_define(crtc->dev,
 				0, /* because kernel visible only */
 				content_srf.flags,
@@ -574,7 +546,6 @@ static int vmw_stdu_crtc_set_config(struct drm_mode_set *set)
 		new_vfbs = vmw_framebuffer_to_vfbs(new_fb);
 		stdu->display_srf = new_vfbs->surface;
 	}
-
 
 	ret = vmw_stdu_pin_display(stdu);
 	if (unlikely(ret != 0)) {
@@ -600,7 +571,6 @@ static int vmw_stdu_crtc_set_config(struct drm_mode_set *set)
 	if (unlikely(ret != 0))
 		goto err_unpin_destroy_st;
 
-
 	connector->encoder = encoder;
 	encoder->crtc      = crtc;
 
@@ -618,8 +588,6 @@ err_unref_content:
 	stdu->content_fb = NULL;
 	return ret;
 }
-
-
 
 /**
  * vmw_stdu_crtc_page_flip - Binds a buffer to a screen target
@@ -675,14 +643,12 @@ static int vmw_stdu_crtc_page_flip(struct drm_crtc *crtc,
 		}
 	}
 
-
 	if (!new_fb) {
 		/* Blanks the display */
 		(void) vmw_stdu_update_st(dev_priv, stdu);
 
 		return 0;
 	}
-
 
 	if (stdu->content_fb_type == SAME_AS_DISPLAY) {
 		stdu->display_srf = vmw_framebuffer_to_vfbs(new_fb)->surface;
@@ -730,7 +696,6 @@ err_out:
 	stdu->content_fb = NULL;
 	return ret;
 }
-
 
 /**
  * vmw_stdu_dmabuf_clip - Callback to encode a suface DMA command cliprect
@@ -1036,7 +1001,6 @@ out_finish:
 	return ret;
 }
 
-
 /*
  *  Screen Target CRTC dispatch table
  */
@@ -1050,8 +1014,6 @@ static struct drm_crtc_funcs vmw_stdu_crtc_funcs = {
 	.set_config = vmw_stdu_crtc_set_config,
 	.page_flip = vmw_stdu_crtc_page_flip,
 };
-
-
 
 /******************************************************************************
  * Screen Target Display Unit Encoder Functions
@@ -1076,8 +1038,6 @@ static struct drm_encoder_funcs vmw_stdu_encoder_funcs = {
 	.destroy = vmw_stdu_encoder_destroy,
 };
 
-
-
 /******************************************************************************
  * Screen Target Display Unit Connector Functions
  *****************************************************************************/
@@ -1097,8 +1057,6 @@ static void vmw_stdu_connector_destroy(struct drm_connector *connector)
 	vmw_stdu_destroy(vmw_connector_to_stdu(connector));
 }
 
-
-
 static struct drm_connector_funcs vmw_stdu_connector_funcs = {
 	.dpms = vmw_du_connector_dpms,
 	.save = vmw_du_connector_save,
@@ -1108,8 +1066,6 @@ static struct drm_connector_funcs vmw_stdu_connector_funcs = {
 	.set_property = vmw_du_connector_set_property,
 	.destroy = vmw_stdu_connector_destroy,
 };
-
-
 
 /**
  * vmw_stdu_init - Sets up a Screen Target Display Unit
@@ -1128,7 +1084,6 @@ static int vmw_stdu_init(struct vmw_private *dev_priv, unsigned unit)
 	struct drm_connector *connector;
 	struct drm_encoder *encoder;
 	struct drm_crtc *crtc;
-
 
 	stdu = kzalloc(sizeof(*stdu), GFP_KERNEL);
 	if (!stdu)
@@ -1167,8 +1122,6 @@ static int vmw_stdu_init(struct vmw_private *dev_priv, unsigned unit)
 	return 0;
 }
 
-
-
 /**
  *  vmw_stdu_destroy - Cleans up a vmw_screen_target_display_unit
  *
@@ -1183,8 +1136,6 @@ static void vmw_stdu_destroy(struct vmw_screen_target_display_unit *stdu)
 	vmw_du_cleanup(&stdu->base);
 	kfree(stdu);
 }
-
-
 
 /******************************************************************************
  * Screen Target Display KMS Functions
@@ -1209,7 +1160,6 @@ int vmw_kms_stdu_init_display(struct vmw_private *dev_priv)
 {
 	struct drm_device *dev = dev_priv->dev;
 	int i, ret;
-
 
 	/* Do nothing if Screen Target support is turned off */
 	if (!VMWGFX_ENABLE_SCREEN_TARGET_OTABLE)
@@ -1245,8 +1195,6 @@ err_vblank_cleanup:
 	drm_vblank_cleanup(dev);
 	return ret;
 }
-
-
 
 /**
  * vmw_kms_stdu_close_display - Cleans up after vmw_kms_stdu_init_display

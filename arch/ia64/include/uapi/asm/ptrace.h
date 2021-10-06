@@ -54,9 +54,7 @@
  * This is because ar.ec is saved as part of ar.pfs.
  */
 
-
 #include <asm/fpu.h>
-
 
 #ifndef __ASSEMBLY__
 
@@ -202,7 +200,6 @@ struct switch_stack {
 	unsigned long ar_bspstore;	/* RSE dirty base (preserved) */
 	unsigned long pr;		/* 64 predicate registers (1 bit each) */
 };
-
 
 /* pt_all_user_regs is used for PTRACE_GETREGS PTRACE_SETREGS */
 struct pt_all_user_regs {

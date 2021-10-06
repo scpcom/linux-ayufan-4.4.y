@@ -95,7 +95,6 @@ static void *_opcode_stats_seq_next(struct seq_file *s, void *v, loff_t *pos)
 	return pos;
 }
 
-
 static void _opcode_stats_seq_stop(struct seq_file *s, void *v)
 {
 	/* nothing allocated */
@@ -280,4 +279,3 @@ void qib_dbg_exit(void)
 }
 
 #endif
-

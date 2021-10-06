@@ -192,7 +192,6 @@ static void host_stop(struct ci_hdrc *ci)
 	}
 }
 
-
 void ci_hdrc_host_destroy(struct ci_hdrc *ci)
 {
 	if (ci->role == CI_ROLE_HOST && ci->hcd)

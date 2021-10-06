@@ -254,7 +254,6 @@ void __init tegra30_init_speedo_data(struct tegra_sku_info *sku_info)
 	BUILD_BUG_ON(ARRAY_SIZE(soc_process_speedos) !=
 			THRESHOLD_INDEX_COUNT);
 
-
 	rev_sku_to_speedo_ids(sku_info);
 	fuse_speedo_calib(&cpu_speedo_val, &soc_speedo_val);
 	pr_debug("Tegra CPU speedo value %u\n", cpu_speedo_val);

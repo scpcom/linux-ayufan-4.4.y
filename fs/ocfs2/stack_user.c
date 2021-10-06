@@ -877,7 +877,6 @@ static int sync_lock(struct ocfs2_cluster_connection *conn,
 	return status;
 }
 
-
 static int version_lock(struct ocfs2_cluster_connection *conn, int mode,
 		int flags)
 {
@@ -1059,7 +1058,6 @@ out:
 	return rc;
 }
 
-
 static int user_cluster_this_node(struct ocfs2_cluster_connection *conn,
 				  unsigned int *this_node)
 {
@@ -1098,7 +1096,6 @@ static struct ocfs2_stack_plugin ocfs2_user_plugin = {
 	.sp_ops		= &ocfs2_user_plugin_ops,
 	.sp_owner	= THIS_MODULE,
 };
-
 
 static int __init ocfs2_user_plugin_init(void)
 {

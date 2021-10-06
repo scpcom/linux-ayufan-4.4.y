@@ -1,8 +1,4 @@
-/*
- *  linux/fs/stat.c
- *
- *  Copyright (C) 1991, 1992  Linus Torvalds
- */
+
 
 #include <linux/export.h>
 #include <linux/mm.h>
@@ -37,18 +33,7 @@ void generic_fillattr(struct inode *inode, struct kstat *stat)
 
 EXPORT_SYMBOL(generic_fillattr);
 
-/**
- * vfs_getattr_nosec - getattr without security checks
- * @path: file to get attributes from
- * @stat: structure to return attributes in
- *
- * Get attributes without calling security_inode_getattr.
- *
- * Currently the only caller other than vfs_getattr is internal to the
- * filehandle lookup code, which uses only the inode number and returns
- * no attributes to any user.  Any other code probably wants
- * vfs_getattr.
- */
+
 int vfs_getattr_nosec(struct path *path, struct kstat *stat)
 {
 	struct inode *inode = d_backing_inode(path->dentry);
@@ -133,10 +118,7 @@ EXPORT_SYMBOL(vfs_lstat);
 
 #ifdef __ARCH_WANT_OLD_STAT
 
-/*
- * For backward compatibility?  Maybe this should be moved
- * into arch/i386 instead?
- */
+
 static int cp_old_stat(struct kstat *stat, struct __old_kernel_stat __user * statbuf)
 {
 	static int warncount = 5;
@@ -147,7 +129,7 @@ static int cp_old_stat(struct kstat *stat, struct __old_kernel_stat __user * sta
 		printk(KERN_WARNING "VFS: Warning: %s using old stat() call. Recompile your binary.\n",
 			current->comm);
 	} else if (warncount < 0) {
-		/* it's laughable, but... */
+		 
 		warncount = 0;
 	}
 
@@ -211,7 +193,7 @@ SYSCALL_DEFINE2(fstat, unsigned int, fd, struct __old_kernel_stat __user *, stat
 	return error;
 }
 
-#endif /* __ARCH_WANT_OLD_STAT */
+#endif  
 
 #if BITS_PER_LONG == 32
 #  define choose_32_64(a,b) a
@@ -352,8 +334,6 @@ SYSCALL_DEFINE3(readlink, const char __user *, path, char __user *, buf,
 	return sys_readlinkat(AT_FDCWD, path, buf, bufsiz);
 }
 
-
-/* ---------- LFS-64 ----------- */
 #if defined(__ARCH_WANT_STAT64) || defined(__ARCH_WANT_COMPAT_STAT64)
 
 #ifndef INIT_STRUCT_STAT64_PADDING
@@ -366,7 +346,7 @@ static long cp_new_stat64(struct kstat *stat, struct stat64 __user *statbuf)
 
 	INIT_STRUCT_STAT64_PADDING(tmp);
 #ifdef CONFIG_MIPS
-	/* mips has weird padding, so we don't get 64 bits there */
+	 
 	tmp.st_dev = new_encode_dev(stat->dev);
 	tmp.st_rdev = new_encode_dev(stat->rdev);
 #else
@@ -441,9 +421,9 @@ SYSCALL_DEFINE4(fstatat64, int, dfd, const char __user *, filename,
 		return error;
 	return cp_new_stat64(&stat, statbuf);
 }
-#endif /* __ARCH_WANT_STAT64 || __ARCH_WANT_COMPAT_STAT64 */
+#endif 
 
-/* Caller is here responsible for sufficient locking (ie. inode->i_lock) */
+
 void __inode_add_bytes(struct inode *inode, loff_t bytes)
 {
 	inode->i_blocks += bytes >> 9;
@@ -500,8 +480,7 @@ EXPORT_SYMBOL(inode_get_bytes);
 
 void inode_set_bytes(struct inode *inode, loff_t bytes)
 {
-	/* Caller is here responsible for sufficient locking
-	 * (ie. inode->i_lock) */
+	 
 	inode->i_blocks = bytes >> 9;
 	inode->i_bytes = bytes & 511;
 }

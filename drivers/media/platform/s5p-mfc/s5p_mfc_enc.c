@@ -2148,4 +2148,3 @@ void s5p_mfc_enc_init(struct s5p_mfc_ctx *ctx)
 	f.fmt.pix_mp.pixelformat = DEF_DST_FMT_ENC;
 	ctx->dst_fmt = find_format(&f, MFC_FMT_ENC);
 }
-

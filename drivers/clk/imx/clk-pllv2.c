@@ -161,7 +161,6 @@ static int clk_pllv2_set_rate(struct clk_hw *hw, unsigned long rate,
 
 	pllbase = pll->base;
 
-
 	ret = __clk_pllv2_set_rate(rate, parent_rate, &dp_op, &dp_mfd, &dp_mfn);
 	if (ret)
 		return ret;

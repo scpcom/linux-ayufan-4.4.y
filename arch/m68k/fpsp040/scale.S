@@ -77,7 +77,6 @@ no_denorm:
 	fmovex		FPTEMP(%a6),%fp0	|simply return dest
 	rts
 
-
 |
 | Source is within 2^14 range.  To perform the int operation,
 | move it to d0.
@@ -156,7 +155,6 @@ sneg_pos:
 	fmovel		USER_FPCR(%a6),%FPCR
 	fmovex		FPTEMP(%a6),%fp0	|write result to fp0
 	rts
-
 
 |
 | The result exponent is below denorm value.  Test for catastrophic
@@ -248,7 +246,6 @@ not_zero:
 	orl		#neg_mask,USER_FPSR(%a6) |set N
 fix_exit:
 	bras		sm_dnrm
-
 
 |
 | The result has underflowed to zero. Return zero and set

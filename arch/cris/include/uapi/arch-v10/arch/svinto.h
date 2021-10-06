@@ -37,7 +37,6 @@ typedef struct etrax_dma_descr {
 	unsigned char  fifo_len;              /* 15 */
 } etrax_dma_descr;
 
-
 /* Use this for constant numbers only */
 #define RESET_DMA_NUM( n ) \
   *R_DMA_CH##n##_CMD = IO_STATE( R_DMA_CH0_CMD, cmd, reset )
@@ -46,7 +45,6 @@ typedef struct etrax_dma_descr {
  * having two macros makes it possible to use constant expressions. 
  */
 #define RESET_DMA( n ) RESET_DMA_NUM( n )
-
 
 /* Use this for constant numbers only */
 #define WAIT_DMA_NUM( n ) \

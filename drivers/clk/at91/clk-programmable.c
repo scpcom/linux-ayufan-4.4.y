@@ -264,7 +264,6 @@ of_at91_clk_prog_setup(struct device_node *np, struct at91_pmc *pmc,
 	}
 }
 
-
 void __init of_at91rm9200_clk_prog_setup(struct device_node *np,
 					 struct at91_pmc *pmc)
 {

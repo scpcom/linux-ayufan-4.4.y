@@ -23,8 +23,6 @@
  *
  */
 
-
-
 #include <linux/delay.h>
 #include <linux/interrupt.h>
 #include <linux/init.h>
@@ -41,7 +39,6 @@ struct wtm_spec {
 	/* rate change needs atomic mute/unmute of all dacs*/
 	struct mutex mute_mutex;
 };
-
 
 /*
  *	2*ADC 6*DAC no1 ringbuffer r/w on i2c bus
@@ -70,7 +67,6 @@ static inline unsigned char stac9460_2_get(struct snd_ice1712 *ice, int reg)
 {
 	return snd_vt1724_read_i2c(ice, STAC9460_2_I2C_ADDR, reg);
 }
-
 
 /*
  *	DAC mute control
@@ -119,8 +115,6 @@ static void stac9460_dac_mute_all(struct snd_ice1712 *ice, unsigned char mute,
 		}
 	}
 }
-
-
 
 #define stac9460_dac_mute_info		snd_ctl_boolean_mono_info
 
@@ -405,7 +399,6 @@ static int stac9460_mic_sw_info(struct snd_kcontrol *kcontrol,
 	return snd_ctl_enum_info(uinfo, 1, 2, texts);
 }
 
-
 static int stac9460_mic_sw_get(struct snd_kcontrol *kcontrol,
 				struct snd_ctl_elem_value *ucontrol)
 {
@@ -445,7 +438,6 @@ static int stac9460_mic_sw_put(struct snd_kcontrol *kcontrol,
 	return change;
 }
 
-
 /*
  * Handler for setting correct codec rate - called when rate change is detected
  */
@@ -482,7 +474,6 @@ static void stac9460_set_rate_val(struct snd_ice1712 *ice, unsigned int rate)
 	stac9460_dac_mute_all(ice, 1, &changed);
 	mutex_unlock(&spec->mute_mutex);
 }
-
 
 /*Limits value in dB for fader*/
 static const DECLARE_TLV_DB_SCALE(db_scale_dac, -19125, 75, 0);
@@ -562,8 +553,6 @@ static struct snd_kcontrol_new stac9640_controls[] = {
 	}
 };
 
-
-
 /*INIT*/
 static int wtm_add_controls(struct snd_ice1712 *ice)
 {
@@ -601,7 +590,6 @@ static int wtm_init(struct snd_ice1712 *ice)
 	ice->spec = spec;
 	mutex_init(&spec->mute_mutex);
 
-
 	/*initialize codec*/
 	p = stac_inits_wtm;
 	for (; *p != (unsigned short)-1; p += 2) {
@@ -611,7 +599,6 @@ static int wtm_init(struct snd_ice1712 *ice)
 	ice->gpio.set_pro_rate = stac9460_set_rate_val;
 	return 0;
 }
-
 
 static unsigned char wtm_eeprom[] = {
 	[ICE_EEP2_SYSCONF]      = 0x67, /*SYSCONF: clock 192KHz, mpu401,
@@ -629,7 +616,6 @@ static unsigned char wtm_eeprom[] = {
 	[ICE_EEP2_GPIO_STATE1]  = 0x80,
 	[ICE_EEP2_GPIO_STATE2]  = 0x00,
 };
-
 
 /*entry point*/
 struct snd_ice1712_card_info snd_vt1724_wtm_cards[] = {

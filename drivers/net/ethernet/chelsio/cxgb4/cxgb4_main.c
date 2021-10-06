@@ -4747,7 +4747,6 @@ static int init_one(struct pci_dev *pdev, const struct pci_device_id *ent)
 	if (err)
 		goto out_free_adapter;
 
-
 	if (!is_t4(adapter->params.chip)) {
 		s_qpp = (QUEUESPERPAGEPF0_S +
 			(QUEUESPERPAGEPF1_S - QUEUESPERPAGEPF0_S) *

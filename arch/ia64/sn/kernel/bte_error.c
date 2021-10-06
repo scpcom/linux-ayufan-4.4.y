@@ -242,7 +242,6 @@ bte_crb_error_handler(cnodeid_t cnode, int btenum,
 {
 	struct bteinfo_s *bte;
 
-
 	bte = &(NODEPDA(cnode)->bte_if[btenum]);
 
 	/*
@@ -257,4 +256,3 @@ bte_crb_error_handler(cnodeid_t cnode, int btenum,
 		bte->bte_cnode, bte->bte_num, ioe->ie_errortype));
 	bte_error_handler((unsigned long) NODEPDA(cnode));
 }
-

@@ -4,4 +4,3 @@
 extern void flat_init_apic_ldr(void);
 
 #endif
-

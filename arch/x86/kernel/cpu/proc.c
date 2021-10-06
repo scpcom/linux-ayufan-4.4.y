@@ -4,9 +4,7 @@
 #include <linux/seq_file.h>
 #include <linux/cpufreq.h>
 
-/*
- *	Get CPU information for use by the procfs.
- */
+
 static void show_cpuinfo_core(struct seq_file *m, struct cpuinfo_x86 *c,
 			      unsigned int cpu)
 {
@@ -86,7 +84,7 @@ static int show_cpuinfo(struct seq_file *m, void *v)
 			   freq / 1000, (freq % 1000));
 	}
 
-	/* Cache size */
+	
 	if (c->x86_cache_size >= 0)
 		seq_printf(m, "cache size\t: %d KB\n", c->x86_cache_size);
 

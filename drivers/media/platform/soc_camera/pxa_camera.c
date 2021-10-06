@@ -357,7 +357,6 @@ static int pxa_init_dma_channel(struct pxa_camera_dev *pcdev,
 	dev_dbg(dev, "DMA: sg_first=%p, sglen=%d, ofs=%d, dma.desc=%x\n",
 		*sg_first, sglen, *sg_first_ofs, pxa_dma->sg_dma);
 
-
 	for_each_sg(*sg_first, sg, sglen, i) {
 		dma_len = sg_dma_len(sg);
 

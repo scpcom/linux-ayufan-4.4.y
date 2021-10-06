@@ -46,7 +46,6 @@
 #include <linux/io.h>
 #include <linux/uaccess.h>
 
-
 static struct platform_device *ibwdt_platform_device;
 static unsigned long ibwdt_is_open;
 static DEFINE_SPINLOCK(ibwdt_lock);
@@ -107,7 +106,6 @@ module_param(nowayout, bool, 0);
 MODULE_PARM_DESC(nowayout,
 		"Watchdog cannot be stopped once started (default="
 				__MODULE_STRING(WATCHDOG_NOWAYOUT) ")");
-
 
 /*
  *	Watchdog Operations

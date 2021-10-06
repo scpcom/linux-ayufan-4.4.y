@@ -322,7 +322,6 @@ u8 usb_read8(struct adapter *adapter, u32 addr)
 	u16 len;
 	u8 data = 0;
 
-
 	request = 0x05;
 	requesttype = 0x01;/* read_in */
 	index = 0;/* n/a */
@@ -331,7 +330,6 @@ u8 usb_read8(struct adapter *adapter, u32 addr)
 	len = 1;
 
 	usbctrl_vendorreq(adapter, request, wvalue, index, &data, len, requesttype);
-
 
 	return data;
 
@@ -365,7 +363,6 @@ u32 usb_read32(struct adapter *adapter, u32 addr)
 	u16 len;
 	__le32 data;
 
-
 	request = 0x05;
 	requesttype = 0x01;/* read_in */
 	index = 0;/* n/a */
@@ -374,7 +371,6 @@ u32 usb_read32(struct adapter *adapter, u32 addr)
 	len = 4;
 
 	usbctrl_vendorreq(adapter, request, wvalue, index, &data, len, requesttype);
-
 
 	return le32_to_cpu(data);
 }
@@ -466,7 +462,6 @@ u32 usb_read_port(struct adapter *adapter, u32 addr, u32 cnt, u8 *rmem)
 	size_t tmpaddr = 0;
 	size_t alignment = 0;
 	u32 ret = _SUCCESS;
-
 
 	if (adapter->bDriverStopped || adapter->bSurpriseRemoved ||
 	    adapter->pwrctrlpriv.pnp_bstop_trx) {
@@ -576,7 +571,6 @@ int usb_write16(struct adapter *adapter, u32 addr, u16 val)
 	u16 len;
 	__le32 data;
 
-
 	request = 0x05;
 	requesttype = 0x00;/* write_out */
 	index = 0;/* n/a */
@@ -589,7 +583,6 @@ int usb_write16(struct adapter *adapter, u32 addr, u16 val)
 	return usbctrl_vendorreq(adapter, request, wvalue,
 				 index, &data, len, requesttype);
 
-
 }
 
 int usb_write32(struct adapter *adapter, u32 addr, u32 val)
@@ -601,7 +594,6 @@ int usb_write32(struct adapter *adapter, u32 addr, u32 val)
 	u16 len;
 	__le32 data;
 
-
 	request = 0x05;
 	requesttype = 0x00;/* write_out */
 	index = 0;/* n/a */
@@ -612,7 +604,6 @@ int usb_write32(struct adapter *adapter, u32 addr, u32 val)
 
 	return usbctrl_vendorreq(adapter, request, wvalue,
 				 index, &data, len, requesttype);
-
 
 }
 
@@ -707,7 +698,6 @@ u32 usb_write_port(struct adapter *padapter, u32 addr, u32 cnt, u8 *wmem)
 	struct xmit_buf *pxmitbuf = (struct xmit_buf *)wmem;
 	struct xmit_frame *pxmitframe = (struct xmit_frame *)pxmitbuf->priv_data;
 	struct usb_device *pusbd = pdvobj->pusbdev;
-
 
 	RT_TRACE(_module_hci_ops_os_c_, _drv_err_, ("+usb_write_port\n"));
 

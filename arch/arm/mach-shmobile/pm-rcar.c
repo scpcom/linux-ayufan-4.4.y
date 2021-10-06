@@ -38,7 +38,6 @@
 #define PWRONSR_OFFS		0x10	/* Power Resume Status Register */
 #define PWRER_OFFS		0x14	/* Power Shutoff/Resume Error */
 
-
 #define SYSCSR_RETRIES		100
 #define SYSCSR_DELAY_US		1
 

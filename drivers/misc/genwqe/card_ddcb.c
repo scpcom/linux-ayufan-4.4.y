@@ -838,7 +838,6 @@ int __genwqe_enqueue_ddcb(struct genwqe_dev *cd, struct ddcb_requ *req,
 	else
 		pddcb->xdir = 0x0;
 
-
 	pddcb->psp = (((req->cmd.asiv_length / 8) << 4) |
 		      ((req->cmd.asv_length  / 8)));
 	pddcb->disp_ts_64 = cpu_to_be64(req->cmd.disp_ts);

@@ -22,7 +22,6 @@
 #define CE_HOST_BRIDGE_VENDOR_ID	0x10a9
 #define CE_HOST_BRIDGE_DEVICE_ID	0x4001
 
-
 #define TIOCE_NUM_M40_ATES		4096
 #define TIOCE_NUM_M3240_ATES		2048
 #define TIOCE_NUM_PORTS			2
@@ -663,7 +662,6 @@ typedef volatile struct tioce {
 #define CE_URE_SEL2_MASK		(0x7FFFFULL << CE_URE_SEL2_SHFT)
 #define CE_URE_SEL3_MASK		(0x7FFFFULL << CE_URE_SEL3_SHFT)
 
-
 /* ce_ure_pipe_mask register bit masks & shifts */
 #define CE_URE_MASK1_SHFT		0
 #define CE_URE_MASK2_SHFT		20
@@ -671,7 +669,6 @@ typedef volatile struct tioce {
 #define CE_URE_MASK1_MASK		(0x7FFFFULL << CE_URE_MASK1_SHFT)
 #define CE_URE_MASK2_MASK		(0x7FFFFULL << CE_URE_MASK2_SHFT)
 #define CE_URE_MASK3_MASK		(0x7FFFFULL << CE_URE_MASK3_SHFT)
-
 
 /* ce_ure_pcie_control1 register bit masks & shifts */
 #define CE_URE_SI			(0x1ULL << 0)
@@ -745,7 +742,6 @@ typedef volatile struct tioce {
 /* PCI MEM Space */
 #define CE_PIO_MEM_SPACE		0x200000000
 #define CE_PIO_MEM_SPACE_LEN		TIO_HWIN_SIZE
-
 
 /*
  * CE PCI Enhanced Config Space shifts & masks

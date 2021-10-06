@@ -94,7 +94,4 @@ static inline int cpu_last_thread_sibling(int cpu)
 	return cpu | (threads_per_core - 1);
 }
 
-
-
 #endif /* _ASM_POWERPC_CPUTHREADS_H */
-

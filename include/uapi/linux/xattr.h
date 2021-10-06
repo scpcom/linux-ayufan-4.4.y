@@ -1,12 +1,4 @@
-/*
-  File: linux/xattr.h
 
-  Extended attributes handling.
-
-  Copyright (C) 2001 by Andreas Gruenbacher <a.gruenbacher@computer.org>
-  Copyright (c) 2001-2002 Silicon Graphics, Inc.  All Rights Reserved.
-  Copyright (c) 2004 Red Hat, Inc., James Morris <jmorris@redhat.com>
-*/
 
 #include <linux/libc-compat.h>
 
@@ -16,11 +8,11 @@
 #if __UAPI_DEF_XATTR
 #define __USE_KERNEL_XATTR_DEFS
 
-#define XATTR_CREATE	0x1	/* set value, fail if attr already exists */
-#define XATTR_REPLACE	0x2	/* set value, fail if attr does not exist */
+#define XATTR_CREATE	0x1	
+#define XATTR_REPLACE	0x2	
 #endif
 
-/* Namespaces */
+
 #define XATTR_OS2_PREFIX "os2."
 #define XATTR_OS2_PREFIX_LEN (sizeof(XATTR_OS2_PREFIX) - 1)
 
@@ -42,7 +34,7 @@
 #define XATTR_USER_PREFIX "user."
 #define XATTR_USER_PREFIX_LEN (sizeof(XATTR_USER_PREFIX) - 1)
 
-/* Security namespace */
+
 #define XATTR_EVM_SUFFIX "evm"
 #define XATTR_NAME_EVM XATTR_SECURITY_PREFIX XATTR_EVM_SUFFIX
 
@@ -73,5 +65,4 @@
 #define XATTR_POSIX_ACL_DEFAULT  "posix_acl_default"
 #define XATTR_NAME_POSIX_ACL_DEFAULT XATTR_SYSTEM_PREFIX XATTR_POSIX_ACL_DEFAULT
 
-
-#endif /* _UAPI_LINUX_XATTR_H */
+#endif  

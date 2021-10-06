@@ -1041,7 +1041,6 @@ out:
 }
 EXPORT_SYMBOL(ib_resolve_eth_dmac);
 
-
 int ib_modify_qp(struct ib_qp *qp,
 		 struct ib_qp_attr *qp_attr,
 		 int qp_attr_mask)

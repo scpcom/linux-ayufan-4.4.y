@@ -143,7 +143,6 @@
 #define MASK_D0M_HSTXVREGEN                   0x0002
 #define MASK_CLM_HSTXVREGEN                   0x0001
 
-
 #define TXOPTIONCNTRL                         0x0238
 #define MASK_CONTCLKMODE                      0x00000001
 
@@ -342,7 +341,6 @@
 #define PHY_CTL0                              0x8531
 #define MASK_PHY_SYSCLK_IND                   0x02
 #define MASK_PHY_CTL                          0x01
-
 
 #define PHY_CTL1                              0x8532 /* Not in REF_01 */
 #define MASK_PHY_AUTO_RST1                    0xf0

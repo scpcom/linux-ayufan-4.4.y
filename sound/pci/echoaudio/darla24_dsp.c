@@ -28,7 +28,6 @@
 
 ****************************************************************************/
 
-
 static int init_hw(struct echoaudio *chip, u16 device_id, u16 subdevice_id)
 {
 	int err;
@@ -59,14 +58,10 @@ static int init_hw(struct echoaudio *chip, u16 device_id, u16 subdevice_id)
 	return err;
 }
 
-
-
 static int set_mixer_defaults(struct echoaudio *chip)
 {
 	return init_line_levels(chip);
 }
-
-
 
 static u32 detect_input_clocks(const struct echoaudio *chip)
 {
@@ -84,15 +79,11 @@ static u32 detect_input_clocks(const struct echoaudio *chip)
 	return clock_bits;
 }
 
-
-
 /* The Darla24 has no ASIC. Just do nothing */
 static int load_asic(struct echoaudio *chip)
 {
 	return 0;
 }
-
-
 
 static int set_sample_rate(struct echoaudio *chip, u32 rate)
 {
@@ -150,8 +141,6 @@ static int set_sample_rate(struct echoaudio *chip, u32 rate)
 	return send_vector(chip, DSP_VC_SET_GD_AUDIO_STATE);
 }
 
-
-
 static int set_input_clock(struct echoaudio *chip, u16 clock)
 {
 	if (snd_BUG_ON(clock != ECHO_CLOCK_INTERNAL &&
@@ -160,4 +149,3 @@ static int set_input_clock(struct echoaudio *chip, u16 clock)
 	chip->input_clock = clock;
 	return set_sample_rate(chip, chip->sample_rate);
 }
-

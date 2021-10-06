@@ -24,7 +24,6 @@
     interrupts and PLX Gen 1 requirement flag */
 #define PCIE_RC_CONFIG_MASK_OFF 0
 
-
 /**
  * Structure used for obtaining PCIe config information, read from the PCIE
  * subsystem /ctl file at initialization

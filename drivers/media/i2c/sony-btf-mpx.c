@@ -41,7 +41,6 @@ MODULE_PARM_DESC(debug, "debug level 0=off(default) 1=on");
  * IF/MPX address:   0x42/0x40   0x43/0x44
  */
 
-
 static int force_mpx_mode = -1;
 module_param(force_mpx_mode, int, 0644);
 
@@ -274,7 +273,6 @@ static int mpx_setup(struct sony_btf_mpx *t)
 #endif
 	return 0;
 }
-
 
 static int sony_btf_mpx_s_std(struct v4l2_subdev *sd, v4l2_std_id std)
 {

@@ -433,7 +433,6 @@ int setup_sigcontext(struct pt_regs *regs, struct sigcontext __user *sc)
 		err |= __put_user(rddsp(DSP_MASK), &sc->sc_dsp);
 	}
 
-
 	/*
 	 * Save FPU state to signal context. Signal handler
 	 * will "inherit" current FPU state.

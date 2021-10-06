@@ -251,7 +251,6 @@ struct acpi_gpe_event_info *acpi_ev_low_get_gpe_info(u32 gpe_number,
 	return (&gpe_block->event_info[gpe_index]);
 }
 
-
 /*******************************************************************************
  *
  * FUNCTION:    acpi_ev_get_gpe_event_info
@@ -611,7 +610,6 @@ error_exit:
 	return_VOID;
 }
 
-
 /*******************************************************************************
  *
  * FUNCTION:    acpi_ev_asynch_enable_gpe
@@ -637,7 +635,6 @@ static void ACPI_SYSTEM_XFACE acpi_ev_asynch_enable_gpe(void *context)
 
 	return;
 }
-
 
 /*******************************************************************************
  *
@@ -676,7 +673,6 @@ acpi_status acpi_ev_finish_gpe(struct acpi_gpe_event_info * gpe_event_info)
 	(void)acpi_hw_low_set_gpe(gpe_event_info, ACPI_GPE_CONDITIONAL_ENABLE);
 	return (AE_OK);
 }
-
 
 /*******************************************************************************
  *

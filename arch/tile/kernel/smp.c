@@ -160,7 +160,6 @@ void evaluate_message(int tag)
 	}
 }
 
-
 /*
  * flush_icache_range() code uses smp_call_function().
  */
@@ -192,7 +191,6 @@ void flush_icache_range(unsigned long start, unsigned long end)
 }
 EXPORT_SYMBOL(flush_icache_range);
 
-
 #ifdef CONFIG_IRQ_WORK
 void arch_irq_work_raise(void)
 {
@@ -200,7 +198,6 @@ void arch_irq_work_raise(void)
 		send_IPI_single(smp_processor_id(), MSG_TAG_IRQ_WORK);
 }
 #endif
-
 
 /* Called when smp_send_reschedule() triggers IRQ_RESCHEDULE. */
 static irqreturn_t handle_reschedule_ipi(int irq, void *token)

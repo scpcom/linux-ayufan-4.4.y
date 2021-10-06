@@ -160,7 +160,6 @@ xlog_align(
 	return bp->b_addr + BBTOB(offset);
 }
 
-
 /*
  * nbblks should be uint, but oh well.  Just want to catch that 32-bit length.
  */
@@ -2483,7 +2482,6 @@ xfs_recover_inode_owner_change(
 	if (error)
 		goto out_free_ip;
 
-
 	if (in_f->ilf_fields & XFS_ILOG_DOWNER) {
 		ASSERT(in_f->ilf_fields & XFS_ILOG_DBROOT);
 		error = xfs_bmbt_change_owner(NULL, ip, XFS_DATA_FORK,
@@ -2841,7 +2839,6 @@ xlog_recover_dquot_pass2(
 	xfs_dq_logformat_t	*dq_f;
 	uint			type;
 
-
 	/*
 	 * Filesystems are required to send in quota flags at mount time.
 	 */
@@ -2969,7 +2966,6 @@ xlog_recover_efi_pass2(
 	xfs_efi_release(efip);
 	return 0;
 }
-
 
 /*
  * This routine is called when an EFD format structure is found in a committed
@@ -3205,7 +3201,6 @@ xlog_recover_dquot_ra_pass2(
 	struct xfs_dq_logformat	*dq_f;
 	uint			type;
 	int			len;
-
 
 	if (mp->m_qflags == 0)
 		return;
@@ -4592,7 +4587,6 @@ xlog_do_recover(
 	xfs_reinit_percpu_counters(log->l_mp);
 
 	xfs_buf_relse(bp);
-
 
 	xlog_recover_check_summary(log);
 

@@ -171,7 +171,6 @@ static int smu_slotspow_get(struct wf_sensor *sr, s32 *value)
 	return 0;
 }
 
-
 static struct wf_sensor_ops smu_cputemp_ops = {
 	.get_value	= smu_cputemp_get,
 	.release	= smu_ads_release,
@@ -192,7 +191,6 @@ static struct wf_sensor_ops smu_slotspow_ops = {
 	.release	= smu_ads_release,
 	.owner		= THIS_MODULE,
 };
-
 
 static struct smu_ad_sensor *smu_ads_create(struct device_node *node)
 {
@@ -333,7 +331,6 @@ static struct wf_sensor_ops smu_cpu_power_ops = {
 	.owner		= THIS_MODULE,
 };
 
-
 static struct smu_cpu_power_sensor *
 smu_cpu_power_create(struct wf_sensor *volts, struct wf_sensor *amps)
 {
@@ -472,11 +469,9 @@ static void __exit smu_sensors_exit(void)
 	}
 }
 
-
 module_init(smu_sensors_init);
 module_exit(smu_sensors_exit);
 
 MODULE_AUTHOR("Benjamin Herrenschmidt <benh@kernel.crashing.org>");
 MODULE_DESCRIPTION("SMU sensor objects for PowerMacs thermal control");
 MODULE_LICENSE("GPL");
-

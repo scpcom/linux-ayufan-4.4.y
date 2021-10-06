@@ -1,11 +1,4 @@
-/*
- *  linux/fs/hfsplus/super.c
- *
- * Copyright (C) 2001
- * Brad Boyer (flar@allandria.com)
- * (C) 2003 Ardis Technologies <roman@ardistech.com>
- *
- */
+
 
 #include <linux/module.h>
 #include <linux/init.h>
@@ -183,14 +176,6 @@ static int hfsplus_sync_fs(struct super_block *sb, int wait)
 
 	hfs_dbg(SUPER, "hfsplus_sync_fs\n");
 
-	/*
-	 * Explicitly write out the special metadata inodes.
-	 *
-	 * While these special inodes are marked as hashed and written
-	 * out peridocically by the flusher threads we redirty them
-	 * during writeout of normal inodes, and thus the life lock
-	 * prevents us from getting the latest state to disk.
-	 */
 	error = filemap_write_and_wait(sbi->cat_tree->inode->i_mapping);
 	error2 = filemap_write_and_wait(sbi->ext_tree->inode->i_mapping);
 	if (!error)
@@ -340,7 +325,7 @@ static int hfsplus_remount(struct super_block *sb, int *flags, char *data)
 			sb->s_flags |= MS_RDONLY;
 			*flags |= MS_RDONLY;
 		} else if (force) {
-			/* nothing */
+			 
 		} else if (vhdr->attributes &
 				cpu_to_be32(HFSPLUS_VOL_SOFTLOCK)) {
 			pr_warn("filesystem is marked locked, leaving read-only.\n");
@@ -398,7 +383,6 @@ static int hfsplus_fill_super(struct super_block *sb, void *data, int silent)
 		goto out_unload_nls;
 	}
 
-	/* temporarily use utf8 to correctly find the hidden dir below */
 	nls = sbi->nls;
 	sbi->nls = load_nls("utf8");
 	if (!sbi->nls) {
@@ -406,7 +390,6 @@ static int hfsplus_fill_super(struct super_block *sb, void *data, int silent)
 		goto out_unload_nls;
 	}
 
-	/* Grab the volume header */
 	if (hfsplus_read_wrapper(sb)) {
 		if (!silent)
 			pr_warn("unable to find HFS+ superblock\n");
@@ -414,7 +397,6 @@ static int hfsplus_fill_super(struct super_block *sb, void *data, int silent)
 	}
 	vhdr = sbi->s_vhdr;
 
-	/* Copy parts of the volume header into the superblock */
 	sb->s_magic = HFSPLUS_VOLHEAD_SIG;
 	if (be16_to_cpu(vhdr->version) < HFSPLUS_MIN_VERSION ||
 	    be16_to_cpu(vhdr->version) > HFSPLUS_CURRENT_VERSION) {
@@ -446,7 +428,6 @@ static int hfsplus_fill_super(struct super_block *sb, void *data, int silent)
 		goto out_free_vhdr;
 	}
 
-	/* Set up operations so we can load metadata */
 	sb->s_op = &hfsplus_sops;
 	sb->s_maxbytes = MAX_LFS_FILESIZE;
 
@@ -454,7 +435,7 @@ static int hfsplus_fill_super(struct super_block *sb, void *data, int silent)
 		pr_warn("Filesystem was not cleanly unmounted, running fsck.hfsplus is recommended.  mounting read-only.\n");
 		sb->s_flags |= MS_RDONLY;
 	} else if (test_and_clear_bit(HFSPLUS_SB_FORCE, &sbi->flags)) {
-		/* nothing */
+		 
 	} else if (vhdr->attributes & cpu_to_be32(HFSPLUS_VOL_SOFTLOCK)) {
 		pr_warn("Filesystem is marked locked, mounting read-only.\n");
 		sb->s_flags |= MS_RDONLY;
@@ -466,7 +447,6 @@ static int hfsplus_fill_super(struct super_block *sb, void *data, int silent)
 
 	err = -EINVAL;
 
-	/* Load metadata objects (B*Trees) */
 	sbi->ext_tree = hfs_btree_open(sb, HFSPLUS_EXT_CNID);
 	if (!sbi->ext_tree) {
 		pr_err("failed to load extents file\n");
@@ -496,7 +476,6 @@ static int hfsplus_fill_super(struct super_block *sb, void *data, int silent)
 	}
 	sbi->alloc_file = inode;
 
-	/* Load the root directory */
 	root = hfsplus_iget(sb, HFSPLUS_ROOT_CNID);
 	if (IS_ERR(root)) {
 		pr_err("failed to load root directory\n");
@@ -533,10 +512,7 @@ static int hfsplus_fill_super(struct super_block *sb, void *data, int silent)
 		hfs_find_exit(&fd);
 
 	if (!(sb->s_flags & MS_RDONLY)) {
-		/*
-		 * H+LX == hfsplusutils, H+Lx == this driver, H+lx is unused
-		 * all three are registered with Apple for our use
-		 */
+		 
 		vhdr->last_mount_vers = cpu_to_be32(HFSP_MOUNT_VERSION);
 		vhdr->modify_date = hfsp_now2mt();
 		be32_add_cpu(&vhdr->write_count, 1);
@@ -562,12 +538,9 @@ static int hfsplus_fill_super(struct super_block *sb, void *data, int silent)
 			err = hfsplus_init_inode_security(sbi->hidden_dir,
 								root, &str);
 			if (err == -EOPNOTSUPP)
-				err = 0; /* Operation is not supported. */
+				err = 0;  
 			else if (err) {
-				/*
-				 * Try to delete anyway without
-				 * error analysis.
-				 */
+				 
 				hfsplus_delete_cat(sbi->hidden_dir->i_ino,
 							root, &str);
 				mutex_unlock(&sbi->vh_mutex);
@@ -688,10 +661,6 @@ static void __exit exit_hfsplus_fs(void)
 {
 	unregister_filesystem(&hfsplus_fs_type);
 
-	/*
-	 * Make sure all delayed rcu free inodes are flushed before we
-	 * destroy cache.
-	 */
 	rcu_barrier();
 	hfsplus_destroy_attr_tree_cache();
 	kmem_cache_destroy(hfsplus_inode_cachep);

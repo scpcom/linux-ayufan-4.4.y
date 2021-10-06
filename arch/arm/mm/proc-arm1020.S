@@ -474,7 +474,6 @@ arm1020_crval:
 	@ define struct processor (see <asm/proc-fns.h> and proc-macros.S)
 	define_processor_functions arm1020, dabort=v4t_early_abort, pabort=legacy_pabort
 
-
 	.section ".rodata"
 
 	string	cpu_arch_name, "armv5t"

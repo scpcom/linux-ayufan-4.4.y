@@ -61,7 +61,6 @@ struct tracing_data *tracing_data_get(struct list_head *pattrs,
 				      int fd, bool temp);
 int tracing_data_put(struct tracing_data *tdata);
 
-
 struct addr_location;
 
 struct perf_session;

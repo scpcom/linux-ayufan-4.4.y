@@ -458,7 +458,6 @@ static int ms_read_bytes(struct rtsx_usb_ms *host, u8 tpc,
 	for (i = 0; i < cnt; i++)
 		data[i] = *ptr++;
 
-
 	if (int_reg && (host->ifmode != MEMSTICK_SERIAL))
 		*int_reg = *ptr & 0x0F;
 

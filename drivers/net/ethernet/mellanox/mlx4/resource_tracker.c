@@ -2081,7 +2081,6 @@ static int vlan_add_to_slave(struct mlx4_dev *dev, int slave, u16 vlan,
 	return 0;
 }
 
-
 static void vlan_del_from_slave(struct mlx4_dev *dev, int slave, u16 vlan,
 				int port)
 {
@@ -2832,7 +2831,6 @@ int mlx4_QUERY_MPT_wrapper(struct mlx4_dev *dev, int slave,
 		err = -EBUSY;
 		goto out;
 	}
-
 
 out:
 	put_res(dev, slave, id, RES_MPT);
@@ -3843,7 +3841,6 @@ int mlx4_RTS2RTS_QP_wrapper(struct mlx4_dev *dev, int slave,
 	adjust_proxy_tun_qkey(dev, vhcr, context);
 	return mlx4_GEN_QP_wrapper(dev, slave, vhcr, inbox, outbox, cmd);
 }
-
 
 int mlx4_SQERR2RTS_QP_wrapper(struct mlx4_dev *dev, int slave,
 			      struct mlx4_vhcr *vhcr,

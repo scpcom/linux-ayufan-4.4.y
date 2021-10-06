@@ -16,7 +16,6 @@
  * 02110-1301, USA
  */
 
-
 #ifndef FLOW_NETLINK_H
 #define FLOW_NETLINK_H 1
 

@@ -176,7 +176,6 @@ void prom_getstring(phandle node, char *prop, char *user_buf, int ubuf_size)
 }
 EXPORT_SYMBOL(prom_getstring);
 
-
 /* Search siblings at 'node_start' for a node with name
  * 'nodename'.  Return node if successful, zero if not.
  */

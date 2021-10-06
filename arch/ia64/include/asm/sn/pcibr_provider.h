@@ -23,7 +23,6 @@
 #define IS_PIC_SOFT(ps)     (ps->pbi_bridge_type == PCIBR_BRIDGETYPE_PIC)
 #define IS_TIOCP_SOFT(ps)   (ps->pbi_bridge_type == PCIBR_BRIDGETYPE_TIOCP)
 
-
 /*
  * The different PCI Bridge types supported on the SGI Altix platforms
  */
@@ -48,7 +47,6 @@
 #define IS_PCI32_MAPPED(x)              ((u64)(x) < PCI32_DIRECT_BASE && \
                                          (u64)(x) >= PCI32_MAPPED_BASE)
 #define IS_PCI32_DIRECT(x)              ((u64)(x) >= PCI32_MAPPED_BASE)
-
 
 /*
  * Bridge PMU Address Transaltion Entry Attibutes

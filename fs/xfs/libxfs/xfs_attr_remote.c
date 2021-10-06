@@ -542,7 +542,6 @@ xfs_attr_rmtval_set(
 		if (error)
 			return error;
 
-
 		/* roll attribute extent map forwards */
 		lblkno += map.br_blockcount;
 		blkcnt -= map.br_blockcount;

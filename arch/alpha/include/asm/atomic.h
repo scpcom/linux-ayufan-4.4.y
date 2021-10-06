@@ -13,7 +13,6 @@
  * than regular operations.
  */
 
-
 #define ATOMIC_INIT(i)		{ (i) }
 #define ATOMIC64_INIT(i)	{ (i) }
 
@@ -164,7 +163,6 @@ static __inline__ int __atomic_add_unless(atomic_t *v, int a, int u)
 	smp_mb();
 	return old;
 }
-
 
 /**
  * atomic64_add_unless - add unless the number is a given value

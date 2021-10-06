@@ -65,7 +65,6 @@ module_param_array(card,  int, NULL, 0444);
 
 static unsigned long tm6000_devused;
 
-
 struct tm6000_board {
 	char            *name;
 	char		eename[16];		/* EEPROM name */
@@ -1021,7 +1020,6 @@ static int fill_board_specific_data(struct tm6000_core *dev)
 	return v4l2_device_register(&dev->udev->dev, &dev->v4l2_dev);
 }
 
-
 static void use_alternative_detection_method(struct tm6000_core *dev)
 {
 	int i, model = -1;
@@ -1305,7 +1303,6 @@ static int tm6000_usb_probe(struct usb_interface *interface,
 			}
 		}
 	}
-
 
 	printk(KERN_INFO "tm6000: New video device @ %s Mbps (%04x:%04x, ifnum %d)\n",
 		speed,

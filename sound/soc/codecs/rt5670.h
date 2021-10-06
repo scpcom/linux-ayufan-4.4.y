@@ -167,7 +167,6 @@
 #define RT5670_GEN_CTRL2			0xfb
 #define RT5670_GEN_CTRL3			0xfc
 
-
 /* Index of Codec Private Register definition */
 #define RT5670_DIG_VOL				0x00
 #define RT5670_PR_ALC_CTRL_1			0x01
@@ -212,7 +211,6 @@
 #define RT5670_EQ_GN_HIP2			0xb2
 #define RT5670_EQ_PRE_VOL			0xb3
 #define RT5670_EQ_PST_VOL			0xb4
-
 
 /* global definition */
 #define RT5670_L_MUTE				(0x1 << 15)
@@ -1815,7 +1813,6 @@
 #define RT5670_ZCD_HP_SFT			15
 #define RT5670_ZCD_HP_DIS			(0x0 << 15)
 #define RT5670_ZCD_HP_EN			(0x1 << 15)
-
 
 /* Codec Private Register definition */
 /* 3D Speaker Control (0x63) */

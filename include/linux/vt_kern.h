@@ -192,5 +192,4 @@ extern void vt_set_led_state(int console, int leds);
 extern void vt_kbd_con_start(int console);
 extern void vt_kbd_con_stop(int console);
 
-
 #endif /* _VT_KERN_H */

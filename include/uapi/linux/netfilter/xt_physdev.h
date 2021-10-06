@@ -3,7 +3,6 @@
 
 #include <linux/types.h>
 
-
 #define XT_PHYSDEV_OP_IN		0x01
 #define XT_PHYSDEV_OP_OUT		0x02
 #define XT_PHYSDEV_OP_BRIDGED		0x04

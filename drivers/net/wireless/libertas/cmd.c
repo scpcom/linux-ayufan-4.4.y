@@ -56,7 +56,6 @@ static int lbs_cmd_async_callback(struct lbs_private *priv, unsigned long extra,
 	return 0;
 }
 
-
 /**
  *  is_command_allowed_in_ps - tests if a command is allowed in Power Save mode
  *
@@ -1550,7 +1549,6 @@ void lbs_ps_confirm_sleep(struct lbs_private *priv)
 	lbs_deb_leave(LBS_DEB_HOST);
 }
 
-
 /**
  * lbs_set_tpc_cfg - Configures the transmission power control functionality
  *
@@ -1613,7 +1611,6 @@ int lbs_set_power_adapt_cfg(struct lbs_private *priv, int enable, int8_t p0,
 
 	return ret;
 }
-
 
 struct cmd_ctrl_node *__lbs_cmd_async(struct lbs_private *priv,
 	uint16_t command, struct cmd_header *in_cmd, int in_cmd_size,

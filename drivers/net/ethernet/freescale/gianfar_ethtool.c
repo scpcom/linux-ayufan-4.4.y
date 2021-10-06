@@ -184,7 +184,6 @@ static void gfar_gdrvinfo(struct net_device *dev,
 	strlcpy(drvinfo->bus_info, "N/A", sizeof(drvinfo->bus_info));
 }
 
-
 static int gfar_ssettings(struct net_device *dev, struct ethtool_cmd *cmd)
 {
 	struct gfar_private *priv = netdev_priv(dev);
@@ -195,7 +194,6 @@ static int gfar_ssettings(struct net_device *dev, struct ethtool_cmd *cmd)
 
 	return phy_ethtool_sset(phydev, cmd);
 }
-
 
 /* Return the current settings in the ethtool_cmd structure */
 static int gfar_gsettings(struct net_device *dev, struct ethtool_cmd *cmd)

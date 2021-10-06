@@ -23,7 +23,6 @@
 #define _GNU_SOURCE
 #include <getopt.h>
 
-
 struct ihex_binrec {
 	struct ihex_binrec *next; /* not part of the real data structure */
         uint32_t addr;

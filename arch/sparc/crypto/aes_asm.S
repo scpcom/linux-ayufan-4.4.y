@@ -482,7 +482,6 @@ ENTRY(aes_sparc64_encrypt_192)
 	ldd		[%o0 + 0xa0], %f48
 	ldd		[%o0 + 0xa8], %f50
 
-
 	ENCRYPT_128(12, 4, 6, 0, 2)
 
 	st		%f4, [%o2 + 0x00]

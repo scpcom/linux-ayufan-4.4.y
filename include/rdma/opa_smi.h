@@ -76,7 +76,6 @@ struct opa_smp {
 	} route;
 } __packed;
 
-
 /* Subnet management attributes */
 /* ... */
 #define OPA_ATTRIB_ID_NODE_DESCRIPTION		cpu_to_be16(0x0010)

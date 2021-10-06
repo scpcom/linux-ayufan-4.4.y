@@ -272,7 +272,6 @@ typedef struct {
 } reg_iop_dmc_in_r_masked_intr;
 #define REG_RD_ADDR_iop_dmc_in_r_masked_intr 100
 
-
 /* Constants */
 enum {
   regk_iop_dmc_in_ack_pkt                  = 0x00000100,

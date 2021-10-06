@@ -490,7 +490,6 @@ int iser_send_data_out(struct iscsi_conn *conn,
 	iser_dbg("data-out itt: %d, offset: %ld, sz: %ld\n",
 		 itt, buf_offset, data_seg_len);
 
-
 	err = iser_post_send(&iser_conn->ib_conn, tx_desc, true);
 	if (!err)
 		return 0;

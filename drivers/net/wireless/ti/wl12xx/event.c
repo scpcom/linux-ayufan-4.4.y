@@ -50,7 +50,6 @@ int wl12xx_process_mailbox_events(struct wl1271 *wl)
 	struct wl12xx_event_mailbox *mbox = wl->mbox;
 	u32 vector;
 
-
 	vector = le32_to_cpu(mbox->events_vector);
 	vector &= ~(le32_to_cpu(mbox->events_mask));
 

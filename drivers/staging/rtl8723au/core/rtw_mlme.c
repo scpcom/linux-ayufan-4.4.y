@@ -1649,7 +1649,6 @@ exit:
 	return candidate;
 }
 
-
 int rtw_do_join_adhoc(struct rtw_adapter *adapter)
 {
 	struct mlme_priv *pmlmepriv = &adapter->mlmepriv;

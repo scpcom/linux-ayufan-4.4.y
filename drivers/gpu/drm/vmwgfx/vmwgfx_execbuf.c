@@ -110,7 +110,6 @@ static int vmw_bo_to_validate_list(struct vmw_sw_context *sw_context,
 				   bool validate_as_mob,
 				   uint32_t *p_val_node);
 
-
 /**
  * vmw_resources_unreserve - unreserve resources previously reserved for
  * command submission.
@@ -367,7 +366,6 @@ static int vmw_resource_context_res_add(struct vmw_private *dev_priv,
 				return ret;
 		}
 	}
-
 
 	/* Add all resources bound to the context to the validation list */
 	mutex_lock(&dev_priv->binding_mutex);
@@ -669,7 +667,6 @@ static int vmw_cmd_res_reloc_add(struct vmw_private *dev_priv,
 	return 0;
 }
 
-
 /**
  * vmw_cmd_res_check - Check that a resource is present and if so, put it
  * on the resource validate list unless it's already there.
@@ -773,7 +770,6 @@ static int vmw_rebind_all_dx_query(struct vmw_resource *ctx_res)
 		SVGA3dCmdHeader header;
 		SVGA3dCmdDXBindAllQuery body;
 	} *cmd;
-
 
 	dx_query_mob = vmw_context_get_dx_query_mob(ctx_res);
 
@@ -1077,7 +1073,6 @@ static int vmw_cmd_present_check(struct vmw_private *dev_priv,
 		SVGA3dCmdPresent body;
 	} *cmd;
 
-
 	cmd = container_of(header, struct vmw_sid_cmd, header);
 
 	return vmw_cmd_res_check(dev_priv, sw_context, vmw_res_surface,
@@ -1136,7 +1131,6 @@ static int vmw_query_bo_switch_prepare(struct vmw_private *dev_priv,
 
 	return 0;
 }
-
 
 /**
  * vmw_query_bo_switch_commit - Finalize switching pinned query buffer
@@ -1328,8 +1322,6 @@ out_no_reloc:
 	return ret;
 }
 
-
-
 /**
  * vmw_cmd_dx_define_query - validate a SVGA_3D_CMD_DX_DEFINE_QUERY command.
  *
@@ -1352,7 +1344,6 @@ static int vmw_cmd_dx_define_query(struct vmw_private *dev_priv,
 	struct vmw_resource_val_node *ctx_node = sw_context->dx_ctx_node;
 	struct vmw_resource *cotable_res;
 
-
 	if (ctx_node == NULL) {
 		DRM_ERROR("DX Context not set for query.\n");
 		return -EINVAL;
@@ -1370,8 +1361,6 @@ static int vmw_cmd_dx_define_query(struct vmw_private *dev_priv,
 
 	return ret;
 }
-
-
 
 /**
  * vmw_cmd_dx_bind_query - validate a SVGA_3D_CMD_DX_BIND_QUERY command.
@@ -1397,7 +1386,6 @@ static int vmw_cmd_dx_bind_query(struct vmw_private *dev_priv,
 	struct vmw_dma_buffer *vmw_bo;
 	int    ret;
 
-
 	cmd = container_of(header, struct vmw_dx_bind_query_cmd, header);
 
 	/*
@@ -1417,8 +1405,6 @@ static int vmw_cmd_dx_bind_query(struct vmw_private *dev_priv,
 
 	return ret;
 }
-
-
 
 /**
  * vmw_cmd_begin_gb_query - validate a  SVGA_3D_CMD_BEGIN_GB_QUERY command.
@@ -1772,7 +1758,6 @@ static int vmw_cmd_draw(struct vmw_private *dev_priv,
 	return 0;
 }
 
-
 static int vmw_cmd_tex_state(struct vmw_private *dev_priv,
 			     struct vmw_sw_context *sw_context,
 			     SVGA3dCmdHeader *header)
@@ -1853,7 +1838,6 @@ static int vmw_cmd_check_define_gmrfb(struct vmw_private *dev_priv,
 	return ret;
 }
 
-
 /**
  * vmw_cmd_res_switch_backup - Utility function to handle backup buffer
  * switching
@@ -1892,7 +1876,6 @@ static int vmw_cmd_res_switch_backup(struct vmw_private *dev_priv,
 
 	return 0;
 }
-
 
 /**
  * vmw_cmd_switch_backup - Utility function to handle backup buffer switching
@@ -2099,7 +2082,6 @@ static int vmw_cmd_invalidate_gb_surface(struct vmw_private *dev_priv,
 				 user_surface_converter,
 				 &cmd->body.sid, NULL);
 }
-
 
 /**
  * vmw_cmd_shader_define - Validate an SVGA_3D_CMD_SHADER_DEFINE
@@ -2999,7 +2981,6 @@ static int vmw_cmd_dx_bind_shader(struct vmw_private *dev_priv,
 		goto out_unref;
 	}
 
-
 	ret = vmw_cmd_res_switch_backup(dev_priv, sw_context, res_node,
 					&cmd->body.mobid,
 					cmd->body.offsetInBytes);
@@ -3376,7 +3357,6 @@ static int vmw_cmd_check(struct vmw_private *dev_priv,
 	/* Handle any none 3D commands */
 	if (unlikely(cmd_id < SVGA_CMD_MAX))
 		return vmw_cmd_check_not_3d(dev_priv, sw_context, buf, size);
-
 
 	cmd_id = header->id;
 	*size = header->size + sizeof(SVGA3dCmdHeader);
@@ -3934,7 +3914,6 @@ int vmw_execbuf_process(struct drm_file *file_priv,
 		if (unlikely(ret != 0))
 			goto out_unlock;
 
-
 		ret = copy_from_user(sw_context->cmd_bounce,
 				     user_commands, command_size);
 
@@ -4132,7 +4111,6 @@ static void vmw_execbuf_unpin_panic(struct vmw_private *dev_priv)
 		dev_priv->dummy_query_bo_pinned = false;
 	}
 }
-
 
 /**
  * __vmw_execbuf_release_pinned_bo - Flush queries and unpin the pinned

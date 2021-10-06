@@ -39,7 +39,6 @@ struct wf_lm87_sensor {
 };
 #define wf_to_lm87(c) container_of(c, struct wf_lm87_sensor, sens)
 
-
 static int wf_lm87_read_reg(struct i2c_client *chip, int reg)
 {
 	int rc, tries = 0;
@@ -191,11 +190,9 @@ static void __exit wf_lm87_sensor_exit(void)
 	i2c_del_driver(&wf_lm87_driver);
 }
 
-
 module_init(wf_lm87_sensor_init);
 module_exit(wf_lm87_sensor_exit);
 
 MODULE_AUTHOR("Benjamin Herrenschmidt <benh@kernel.crashing.org>");
 MODULE_DESCRIPTION("LM87 sensor objects for PowerMacs thermal control");
 MODULE_LICENSE("GPL");
-

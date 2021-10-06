@@ -131,7 +131,6 @@ Outgoing, dev->hard_header==NULL
 Resume
   If dev->hard_header==NULL we are unlikely to restore sensible ll header.
 
-
 On transmit:
 ------------
 
@@ -1824,7 +1823,6 @@ out:
 oom:
 	return 0;
 }
-
 
 /*
  *	Output a raw packet to a device layer. This bypasses all the other
@@ -3826,7 +3824,6 @@ static int packet_getsockopt(struct socket *sock, int level, int optname,
 	return 0;
 }
 
-
 static int packet_notifier(struct notifier_block *this,
 			   unsigned long msg, void *ptr)
 {
@@ -3876,7 +3873,6 @@ static int packet_notifier(struct notifier_block *this,
 	rcu_read_unlock();
 	return NOTIFY_DONE;
 }
-
 
 static int packet_ioctl(struct socket *sock, unsigned int cmd,
 			unsigned long arg)
@@ -3955,7 +3951,6 @@ static unsigned int packet_poll(struct file *file, struct socket *sock,
 	spin_unlock_bh(&sk->sk_write_queue.lock);
 	return mask;
 }
-
 
 /* Dirty? Well, I still did not learn better way to account
  * for user mmaps.
@@ -4409,7 +4404,6 @@ static struct pernet_operations packet_net_ops = {
 	.init = packet_net_init,
 	.exit = packet_net_exit,
 };
-
 
 static void __exit packet_exit(void)
 {

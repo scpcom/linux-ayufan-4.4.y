@@ -40,4 +40,3 @@ static inline void xgifb_reg_or(unsigned long port, u8 index, unsigned data_or)
 	xgifb_reg_set(port, index, temp);
 }
 #endif
-

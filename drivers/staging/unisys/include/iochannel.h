@@ -568,7 +568,6 @@ struct spar_io_channel_protocol {
 						 * max - 1 bytes */
 } __packed;
 
-
 /*
  * INLINE functions for initializing and accessing I/O data channels
  */

@@ -20,7 +20,6 @@
 #include "led.h"
 #include "wme.h"
 
-
 void ieee80211_tx_status_irqsafe(struct ieee80211_hw *hw,
 				 struct sk_buff *skb)
 {

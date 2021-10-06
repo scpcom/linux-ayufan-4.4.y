@@ -29,7 +29,6 @@
 #define SMU7_CONTEXT_ID_SMC        1
 #define SMU7_CONTEXT_ID_VBIOS      2
 
-
 #define SMU7_CONTEXT_ID_SMC        1
 #define SMU7_CONTEXT_ID_VBIOS      2
 
@@ -80,7 +79,6 @@
 #define SCRATCH_B_TARG_SAMU_INDEX_MASK  (0x7<<SCRATCH_B_TARG_SAMU_INDEX_SHIFT)
 #define SCRATCH_B_CURR_SAMU_INDEX_SHIFT 27
 #define SCRATCH_B_CURR_SAMU_INDEX_MASK  (0x7<<SCRATCH_B_CURR_SAMU_INDEX_SHIFT)
-
 
 struct SMU7_PIDController
 {
@@ -167,4 +165,3 @@ enum  DisplayConfig {
 #pragma pack(pop)
 
 #endif
-

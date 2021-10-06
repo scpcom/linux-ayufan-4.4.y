@@ -638,7 +638,6 @@ static int dvb_dmxdev_filter_start(struct dmxdev_filter *filter)
 		*secfilter = NULL;
 		*secfeed = NULL;
 
-
 		/* find active filter/feed with same PID */
 		for (i = 0; i < dmxdev->filternum; i++) {
 			if (dmxdev->filter[i].state >= DMXDEV_STATE_GO &&

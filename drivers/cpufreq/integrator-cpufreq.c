@@ -72,7 +72,6 @@ static int integrator_verify_policy(struct cpufreq_policy *policy)
 	return 0;
 }
 
-
 static int integrator_set_target(struct cpufreq_policy *policy,
 				 unsigned int target_freq,
 				 unsigned int relation)

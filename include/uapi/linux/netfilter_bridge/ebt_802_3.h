@@ -52,7 +52,6 @@ struct ebt_802_3_hdr {
 	} llc;
 };
 
-
 struct ebt_802_3_info {
 	__u8  sap;
 	__be16 type;

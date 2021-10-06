@@ -9,7 +9,6 @@
  * for more details.
  */
 
-
 /* This file contains some function for controlling the access to the  */
 /* ST-DMA chip that may be shared between devices. Currently we have:  */
 /*   TT:     Floppy and ACSI bus                                       */
@@ -26,7 +25,6 @@
 /* chip. The interrupt is routed to falhd.c if IDE is configured, the  */
 /* model is a Falcon and the interrupt was caused by the HD controller */
 /* (can be determined by looking at its status register).              */
-
 
 #include <linux/types.h>
 #include <linux/kdev_t.h>
@@ -49,15 +47,11 @@ static irq_handler_t stdma_isr;
 static void *stdma_isr_data;			/* data passed to isr */
 static DECLARE_WAIT_QUEUE_HEAD(stdma_wait);	/* wait queue for ST-DMA */
 
-
-
-
 /***************************** Prototypes *****************************/
 
 static irqreturn_t stdma_int (int irq, void *dummy);
 
 /************************* End of Prototypes **************************/
-
 
 /**
  * stdma_try_lock - attempt to acquire ST DMA interrupt "lock"
@@ -84,7 +78,6 @@ int stdma_try_lock(irq_handler_t handler, void *data)
 }
 EXPORT_SYMBOL(stdma_try_lock);
 
-
 /*
  * Function: void stdma_lock( isrfunc isr, void *data )
  *
@@ -109,7 +102,6 @@ void stdma_lock(irq_handler_t handler, void *data)
 	wait_event(stdma_wait, stdma_try_lock(handler, data));
 }
 EXPORT_SYMBOL(stdma_lock);
-
 
 /*
  * Function: void stdma_release( void )
@@ -137,7 +129,6 @@ void stdma_release(void)
 }
 EXPORT_SYMBOL(stdma_release);
 
-
 /**
  * stdma_is_locked_by - allow lock holder to check whether it needs to release.
  * @handler: interrupt handler previously used to acquire lock.
@@ -157,7 +148,6 @@ int stdma_is_locked_by(irq_handler_t handler)
 	return result;
 }
 EXPORT_SYMBOL(stdma_is_locked_by);
-
 
 /*
  * Function: int stdma_islocked( void )
@@ -180,7 +170,6 @@ int stdma_islocked(void)
 }
 EXPORT_SYMBOL(stdma_islocked);
 
-
 /*
  * Function: void stdma_init( void )
  *
@@ -202,7 +191,6 @@ void __init stdma_init(void)
 			"ST-DMA floppy,ACSI,IDE,Falcon-SCSI", stdma_int))
 		pr_err("Couldn't register ST-DMA interrupt\n");
 }
-
 
 /*
  * Function: void stdma_int()

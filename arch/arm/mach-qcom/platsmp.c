@@ -21,7 +21,6 @@
 
 #include <asm/smp_plat.h>
 
-
 #define VDD_SC1_ARRAY_CLAMP_GFS_CTL	0x35a0
 #define SCSS_CPU1CORE_RESET		0x2d80
 #define SCSS_DBG_STATUS_CORE_PWRDUP	0x2e64

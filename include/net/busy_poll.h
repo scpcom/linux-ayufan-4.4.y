@@ -64,7 +64,6 @@ static inline bool sk_can_busy_loop(struct sock *sk)
 	       !need_resched() && !signal_pending(current);
 }
 
-
 static inline bool busy_loop_timeout(unsigned long end_time)
 {
 	unsigned long now = busy_loop_us_clock();

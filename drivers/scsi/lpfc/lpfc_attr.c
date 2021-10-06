@@ -1938,7 +1938,6 @@ lpfc_##attr##_store(struct device *dev, struct device_attribute *attr, \
 		return -EINVAL;\
 }
 
-
 #define LPFC_ATTR(name, defval, minval, maxval, desc) \
 static uint lpfc_##name = defval;\
 module_param(lpfc_##name, uint, S_IRUGO);\
@@ -2555,7 +2554,6 @@ lpfc_oas_lun_status_show(struct device *dev, struct device_attribute *attr,
 }
 static DEVICE_ATTR(lpfc_xlane_lun_status, S_IRUGO,
 		   lpfc_oas_lun_status_show, NULL);
-
 
 /**
  * lpfc_oas_lun_state_set - enable or disable a lun for Optimized Access Storage
@@ -3513,7 +3511,6 @@ lpfc_stat_data_ctrl_store(struct device *dev, struct device_attribute *attr,
 	return -EINVAL;
 }
 
-
 /**
  * lpfc_stat_data_ctrl_show - Read function for lpfc_stat_data_ctrl sysfs file
  * @dev: Pointer to class device object.
@@ -3589,7 +3586,6 @@ static DEVICE_ATTR(lpfc_stat_data_ctrl, S_IRUGO | S_IWUSR,
 #define STAT_DATA_SIZE_PER_TARGET(NUM_BUCKETS) ((NUM_BUCKETS) * 11 + 18)
 #define MAX_STAT_DATA_SIZE_PER_TARGET \
 	STAT_DATA_SIZE_PER_TARGET(LPFC_MAX_BUCKET_COUNT)
-
 
 /**
  * sysfs_drvr_stat_data_read - Read function for lpfc_drvr_stat_data attribute
@@ -4533,7 +4529,6 @@ LPFC_ATTR_RW(fcp_io_sched, 0, 0, 1, "Determine scheduling algorithm for "
 LPFC_ATTR_RW(fcp2_no_tgt_reset, 0, 0, 1, "Determine bus reset behavior for "
 	     "FCP2 devices [0] - issue tgt reset, [1] - no tgt reset");
 
-
 /*
 # lpfc_cr_delay & lpfc_cr_count: Default values for I/O colaesing
 # cr_delay (msec) or cr_count outstanding commands. cr_delay can take
@@ -5141,7 +5136,6 @@ lpfc_free_sysfs_attr(struct lpfc_vport *vport)
 	sysfs_remove_bin_file(&shost->shost_dev.kobj, &sysfs_mbox_attr);
 	sysfs_remove_bin_file(&shost->shost_dev.kobj, &sysfs_ctlreg_attr);
 }
-
 
 /*
  * Dynamic FC Host Attributes Support

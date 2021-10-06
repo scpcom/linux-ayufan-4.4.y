@@ -294,7 +294,6 @@ struct sigcontext_64 {
 #define _fpstate_ia32			_fpstate_32
 #define sigcontext_ia32			sigcontext_32
 
-
 # ifdef __i386__
 struct sigcontext {
 	__u16				gs, __gsh;

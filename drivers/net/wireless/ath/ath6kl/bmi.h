@@ -183,7 +183,6 @@
  * Response format: none
  */
 
-
 #define BMI_LZ_STREAM_START                13
 /*
  * Semantics: Begin an LZ-compressed stream of input

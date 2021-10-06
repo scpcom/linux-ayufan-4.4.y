@@ -45,7 +45,6 @@ static void icedcc_putc(int ch)
 	asm("mcr p14, 0, %0, c0, c5, 0" : : "r" (ch));
 }
 
-
 #elif defined(CONFIG_CPU_XSCALE)
 
 static void icedcc_putc(int ch)
@@ -140,7 +139,6 @@ void __stack_chk_fail(void)
 }
 
 extern int do_decompress(u8 *input, int len, u8 *output, void (*error)(char *x));
-
 
 void
 decompress_kernel(unsigned long output_start, unsigned long free_mem_ptr_p,

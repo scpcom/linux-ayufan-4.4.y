@@ -816,8 +816,6 @@ static int af9035_read_config(struct dvb_usb_device *d)
 		return 0;
 	}
 
-
-
 	/* check if there is dual tuners */
 	ret = af9035_rd_reg(d, state->eeprom_addr + EEPROM_TS_MODE, &tmp);
 	if (ret < 0)
@@ -1014,7 +1012,6 @@ err:
 
 	return ret;
 }
-
 
 static int af9035_fc0011_tuner_callback(struct dvb_usb_device *d,
 		int cmd, int arg)
@@ -1595,7 +1592,6 @@ err:
 	return ret;
 }
 
-
 static int it930x_tuner_detach(struct dvb_usb_adapter *adap)
 {
 	struct state *state = adap_to_priv(adap);
@@ -1613,7 +1609,6 @@ static int it930x_tuner_detach(struct dvb_usb_adapter *adap)
 
 	return 0;
 }
-
 
 static int af9035_tuner_detach(struct dvb_usb_adapter *adap)
 {
@@ -1771,7 +1766,6 @@ err:
 
 	return ret;
 }
-
 
 #if IS_ENABLED(CONFIG_RC_CORE)
 static int af9035_rc_query(struct dvb_usb_device *d)

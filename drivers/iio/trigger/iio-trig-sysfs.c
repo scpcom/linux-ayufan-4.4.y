@@ -79,7 +79,6 @@ static const struct attribute_group *iio_sysfs_trig_groups[] = {
 	NULL
 };
 
-
 /* Nothing to actually do upon release */
 static void iio_trigger_sysfs_release(struct device *dev)
 {
@@ -207,7 +206,6 @@ static int iio_sysfs_trigger_remove(int id)
 	mutex_unlock(&iio_sysfs_trig_list_mut);
 	return 0;
 }
-
 
 static int __init iio_sysfs_trig_init(void)
 {

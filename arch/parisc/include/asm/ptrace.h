@@ -6,7 +6,6 @@
 
 #include <uapi/asm/ptrace.h>
 
-
 #define task_regs(task) ((struct pt_regs *) ((char *)(task) + TASK_REGS))
 
 #define arch_has_single_step()	1

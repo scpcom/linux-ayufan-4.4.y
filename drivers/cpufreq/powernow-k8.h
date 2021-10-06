@@ -146,7 +146,6 @@ struct powernow_k8_data {
 #define EXT_VID_MASK 0x3f
 #define EXT_FID_MASK 0x3f
 
-
 /*
  * Version 1.4 of the PSB table. This table is constructed by BIOS and is
  * to tell the OS's power management driver which VIDs and FIDs are

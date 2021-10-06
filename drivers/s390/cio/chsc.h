@@ -249,5 +249,4 @@ static inline int scm_update_information(void) { return 0; }
 static inline int scm_process_availability_information(void) { return 0; }
 #endif /* CONFIG_SCM_BUS */
 
-
 #endif

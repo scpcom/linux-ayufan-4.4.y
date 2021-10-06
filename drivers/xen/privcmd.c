@@ -275,7 +275,6 @@ static long privcmd_ioctl_mmap(void __user *udata)
 			    &pagelist,
 			    mmap_gfn_range, &state);
 
-
 out_up:
 	up_write(&mm->mmap_sem);
 

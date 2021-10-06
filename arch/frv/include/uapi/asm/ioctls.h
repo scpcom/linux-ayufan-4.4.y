@@ -7,4 +7,3 @@
 #include <asm-generic/ioctls.h>
 
 #endif /* __ASM_IOCTLS_H__ */
-

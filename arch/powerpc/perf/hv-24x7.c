@@ -593,7 +593,6 @@ static void event_uniq_destroy(struct rb_root *root)
 		kfree(pos);
 }
 
-
 /*
  * ensure the event structure's sizes are self consistent and don't cause us to
  * read outside of the event
@@ -1140,7 +1139,6 @@ out:
 	put_cpu_var(hv_24x7_resb);
 	return ret;
 }
-
 
 static int h_24x7_event_init(struct perf_event *event)
 {

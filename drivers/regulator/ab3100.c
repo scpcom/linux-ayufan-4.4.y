@@ -115,7 +115,6 @@ static const unsigned int ldo_k_typ_voltages[] = {
 	1800000,
 };
 
-
 /* The regulator devices */
 static struct ab3100_regulator
 ab3100_regulators[AB3100_NUM_REGULATORS] = {
@@ -655,7 +654,6 @@ ab3100_regulator_of_probe(struct platform_device *pdev, struct device_node *np)
 
 	return 0;
 }
-
 
 static int ab3100_regulators_probe(struct platform_device *pdev)
 {

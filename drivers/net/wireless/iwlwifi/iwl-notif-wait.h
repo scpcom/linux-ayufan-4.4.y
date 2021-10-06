@@ -111,7 +111,6 @@ struct iwl_notification_wait {
 	bool triggered, aborted;
 };
 
-
 /* caller functions */
 void iwl_notification_wait_init(struct iwl_notif_wait_data *notif_data);
 void iwl_notification_wait_notify(struct iwl_notif_wait_data *notif_data,

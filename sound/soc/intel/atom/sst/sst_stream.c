@@ -312,7 +312,6 @@ int sst_resume_stream(struct intel_sst_drv *sst_drv_ctx, int str_id)
 	return retval;
 }
 
-
 /**
  * sst_drop_stream - Send msg for stopping stream
  * @str_id:		stream ID

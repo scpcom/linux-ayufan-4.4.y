@@ -2090,7 +2090,6 @@ out:
 
 }
 
-
 static int
 jme_tx_tso(struct sk_buff *skb, __le16 *mss, u8 *flags)
 {
@@ -2363,7 +2362,6 @@ jme_change_mtu(struct net_device *netdev, int new_mtu)
 	if (((new_mtu + ETH_HLEN) > MAX_ETHERNET_JUMBO_PACKET_SIZE) ||
 		((new_mtu) < IPV6_MIN_MTU))
 		return -EINVAL;
-
 
 	netdev->mtu = new_mtu;
 	netdev_update_features(netdev);

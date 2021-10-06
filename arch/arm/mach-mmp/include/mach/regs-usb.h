@@ -25,7 +25,6 @@
 #define MMP3_FSIC_REGBASE	(0xf0003000)
 #define MMP3_FSIC_PHYBASE	(0xf0003800)
 
-
 #define USB_REG_RANGE		(0x1ff)
 #define USB_PHY_RANGE		(0xff)
 

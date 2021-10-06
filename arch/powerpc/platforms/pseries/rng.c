@@ -15,7 +15,6 @@
 #include <asm/machdep.h>
 #include <asm/plpar_wrappers.h>
 
-
 static int pseries_get_random_long(unsigned long *v)
 {
 	unsigned long retbuf[PLPAR_HCALL_BUFSIZE];

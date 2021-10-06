@@ -80,7 +80,6 @@ struct snic_tgt {
 	struct snic_tgt_priv tdata;
 };
 
-
 struct snic_fw_req;
 
 void snic_disc_init(struct snic_disc *);

@@ -48,7 +48,6 @@ _doze:
 	DOZE
 	b	.
 
-
 _GLOBAL(idle_spin)
 	blr
 
@@ -86,4 +85,3 @@ sleep_common:
 	ld	r0,16(r1)
 	mtlr	r0
 	blr
-

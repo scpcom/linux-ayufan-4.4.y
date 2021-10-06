@@ -14,7 +14,6 @@
  *
  */
 
-
 /* Be sure that virtual mapping is defined right */
 #ifndef __ASM_ARCH_HARDWARE_H
 #error You must include hardware.h not SA-1100.h
@@ -70,7 +69,6 @@
 #define _PCMCIA1IO	_PCMCIAIO (1)	/* PCMCIA 1 I/O                    */
 #define _PCMCIA1Attr	_PCMCIAAttr (1)	/* PCMCIA 1 Attribute              */
 #define _PCMCIA1Mem	_PCMCIAMem (1)	/* PCMCIA 1 Memory                 */
-
 
 /*
  * Universal Serial Bus (USB) Device Controller (UDC) control registers
@@ -185,7 +183,6 @@
 #define UDCSR_SUSIR	0x00000008	/* SUSpend Interrupt Request       */
 #define UDCSR_RESIR	0x00000010	/* RESume Interrupt Request        */
 #define UDCSR_RSTIR	0x00000020	/* ReSeT Interrupt Request         */
-
 
 /*
  * Universal Asynchronous Receiver/Transmitter (UART) control registers
@@ -397,7 +394,6 @@
 #define UTSR1_FRE	0x00000010	/* receive FRaming Error (read)    */
 #define UTSR1_ROR	0x00000020	/* Receive FIFO Over-Run (read)    */
 
-
 /*
  * Synchronous Data Link Controller (SDLC) control registers
  *
@@ -517,7 +513,6 @@
 #define SDSR1_CRE	0x00000040	/* receive CRC Error (read)        */
 #define SDSR1_ROR	0x00000080	/* Receive FIFO Over-Run (read)    */
 
-
 /*
  * High-Speed Serial to Parallel controller (HSSP) control registers
  *
@@ -597,7 +592,6 @@
                 	        	/*  (inverted)                     */
 #define HSCR2_RcDataH	(HSCR2_RXP*1)	/*  Receive Data active High       */
                 	        	/*  (non-inverted)                 */
-
 
 /*
  * Multi-media Communications Port (MCP) control registers
@@ -727,7 +721,6 @@
 #define MCCR1_F10MHz	(MCCR1_CFS*1)	/*  Freq. (fmc) = ~ 10 MHz         */
                 	        	/*  (9.585 MHz)                    */
 
-
 /*
  * Synchronous Serial Port (SSP) control registers
  *
@@ -807,7 +800,6 @@
                 	        	/* Service request (read)          */
 #define SSSR_ROR	0x00000040	/* Receive FIFO Over-Run           */
 
-
 /*
  * Operating System (OS) timer control registers
  *
@@ -855,7 +847,6 @@
 #define OIER_E1 	OIER_E (1)	/* match interrupt Enable 1        */
 #define OIER_E2 	OIER_E (2)	/* match interrupt Enable 2        */
 #define OIER_E3 	OIER_E (3)	/* match interrupt Enable 3        */
-
 
 /*
  * Power Manager (PM) control registers
@@ -1011,7 +1002,6 @@
 
 #define POSR_OOK	0x00000001	/* RTC Oscillator (32.768 kHz) OK  */
 
-
 /*
  * Reset Controller (RC) control registers
  *
@@ -1030,7 +1020,6 @@
 #define RCSR_SWR	0x00000002	/* SoftWare Reset                  */
 #define RCSR_WDR	0x00000004	/* Watch-Dog Reset                 */
 #define RCSR_SMR	0x00000008	/* Sleep-Mode Reset                */
-
 
 /*
  * Test unit control registers
@@ -1074,7 +1063,6 @@
                 	(6 << FShft (TUCR_TSEL))
 #define TUCR_VDDL	        	/*  VDDL ring osc./4 on GPIO [27]  */ \
                 	(7 << FShft (TUCR_TSEL))
-
 
 /*
  * General-Purpose Input/Output (GPIO) control registers
@@ -1184,7 +1172,6 @@
 #define GPDR_In 	0       	/* Input                           */
 #define GPDR_Out	1       	/* Output                          */
 
-
 /*
  * Interrupt Controller (IC) control registers
  *
@@ -1261,7 +1248,6 @@
                 	        	/*  (ICMR ignored)                 */
 #define ICCR_IdleMskInt	(ICCR_DIM*1)	/*  Idle-mode non-Masked Interrupt */
                 	        	/*  enable (ICMR used)             */
-
 
 /*
  * Peripheral Pin Controller (PPC) control registers
@@ -1340,7 +1326,6 @@
 #define PPFR_SP4	0x00040000	/* Ser. Port 4 MCP/SSP             */
 #define PPFR_PerEn	0       	/* Peripheral Enabled              */
 #define PPFR_PPCEn	1       	/* PPC Enabled                     */
-
 
 /*
  * Dynamic Random-Access Memory (DRAM) control registers
@@ -1424,7 +1409,6 @@
                 	        		/* deassertion 0/1           */
 #define MDCNFG_SA1110_TWR2	Fld(2, 30)	/* SDRAM write recovery 0/1  */
 
-
 /*
  * Static memory control registers
  *
@@ -1493,7 +1477,6 @@
 #define MSC_CeilRec(Tcpu)       	/*  Ceil. of Rec [0..28 Tcpu]      */ \
                 	((((Tcpu) + 3)/4) << FShft (MSC_RRR))
 
-
 /*
  * Personal Computer Memory Card International Association (PCMCIA) control
  * register
@@ -1553,13 +1536,11 @@
 #define MDREFR_KAPD		(1 << 29)
 #define MDREFR_SLFRSH		(1 << 31)
 
-
 /*
  * Direct Memory Access (DMA) control registers
  */
 #define DMA_SIZE	(6 * 0x20)
 #define DMA_PHYS	0xb0000000
-
 
 /*
  * Liquid Crystal Display (LCD) control registers

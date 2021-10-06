@@ -111,7 +111,6 @@ enum acm_method {
 	eAcmWay2_SW			= 2,
 };
 
-
 struct acm {
 	u64		UsedTime;
 	u64		MediumTime;
@@ -170,7 +169,6 @@ union qos_tclas {
 };
 
 #define IsACValid(ac)		((ac >= 0 && ac <= 7) ? true : false)
-
 
 union aci_aifsn {
 	u8	charData;

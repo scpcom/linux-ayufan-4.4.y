@@ -597,4 +597,3 @@ module_i2c_driver(wf_fcu_driver);
 MODULE_AUTHOR("Benjamin Herrenschmidt <benh@kernel.crashing.org>");
 MODULE_DESCRIPTION("FCU control objects for PowerMacs thermal control");
 MODULE_LICENSE("GPL");
-

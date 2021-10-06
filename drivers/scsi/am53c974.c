@@ -166,7 +166,6 @@ static void pci_esp_dma_drain(struct esp *esp)
 	u8 resid;
 	int lim = 1000;
 
-
 	if ((esp->sreg & ESP_STAT_PMASK) == ESP_DOP ||
 	    (esp->sreg & ESP_STAT_PMASK) == ESP_DIP)
 		/* Data-In or Data-Out, nothing to be done */

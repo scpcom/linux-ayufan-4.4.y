@@ -12,7 +12,6 @@
  * (at your option) any later version.
  */
 
-
 /*
  * The Mass Storage Gadget acts as a USB Mass Storage device,
  * appearing to the host as a disk drive or as a CD-ROM drive.  In
@@ -26,7 +25,6 @@
  * business logic is implemented in f_mass_storage.* file.  Read
  * comments in this file for more detailed description.
  */
-
 
 #include <linux/kernel.h>
 #include <linux/usb/ch9.h>
@@ -148,7 +146,6 @@ static struct usb_configuration msg_config_driver = {
 	.bConfigurationValue	= 1,
 	.bmAttributes		= USB_CONFIG_ATT_SELFPOWER,
 };
-
 
 /****************************** Gadget Bind ******************************/
 

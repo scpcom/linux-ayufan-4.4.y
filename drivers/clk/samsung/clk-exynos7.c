@@ -65,7 +65,6 @@ PNAME(mout_topc_cc_pll_half_p) = { "mout_topc_cc_pll",
 PNAME(mout_topc_mfc_pll_half_p) = { "mout_topc_mfc_pll",
 	"ffac_topc_mfc_pll_div2"};
 
-
 PNAME(mout_topc_bus0_pll_out_p) = {"mout_topc_bus0_pll",
 	"ffac_topc_bus0_pll_div2"};
 

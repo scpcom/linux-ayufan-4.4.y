@@ -111,7 +111,6 @@ int ips_leave23a(struct rtw_adapter *padapter)
 	return result;
 }
 
-
 static bool rtw_pwr_unassociated_idle(struct rtw_adapter *adapter)
 {
 	struct mlme_priv *pmlmepriv = &adapter->mlmepriv;

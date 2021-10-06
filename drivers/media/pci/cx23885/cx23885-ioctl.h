@@ -27,7 +27,6 @@ int cx23885_g_chip_info(struct file *file, void *fh,
 int cx23885_g_register(struct file *file, void *fh,
 		       struct v4l2_dbg_register *reg);
 
-
 int cx23885_s_register(struct file *file, void *fh,
 		       const struct v4l2_dbg_register *reg);
 

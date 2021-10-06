@@ -97,7 +97,6 @@ static const char * const boot_msg =
 #include	"h/smc.h"
 #include	"h/smtstate.h"
 
-
 // Define module-wide (static) routines
 static int skfp_driver_init(struct net_device *dev);
 static int skfp_open(struct net_device *dev);
@@ -113,7 +112,6 @@ static netdev_tx_t skfp_send_pkt(struct sk_buff *skb,
 static void send_queued_packets(struct s_smc *smc);
 static void CheckSourceAddress(unsigned char *frame, unsigned char *hw_addr);
 static void ResetAdapter(struct s_smc *smc);
-
 
 // Functions needed by the hardware module
 void *mac_drv_get_space(struct s_smc *smc, u_int size);
@@ -457,7 +455,6 @@ fail:
 	return err;
 }				// skfp_driver_init
 
-
 /*
  * =============
  * = skfp_open =
@@ -518,7 +515,6 @@ static int skfp_open(struct net_device *dev)
 	return 0;
 }				// skfp_open
 
-
 /*
  * ==============
  * = skfp_close =
@@ -566,7 +562,6 @@ static int skfp_close(struct net_device *dev)
 
 	return 0;
 }				// skfp_close
-
 
 /*
  * ==================
@@ -637,7 +632,6 @@ static irqreturn_t skfp_interrupt(int irq, void *dev_id)
 
 	return IRQ_HANDLED;
 }				// skfp_interrupt
-
 
 /*
  * ======================
@@ -777,7 +771,6 @@ static struct net_device_stats *skfp_ctl_get_stats(struct net_device *dev)
 	bp->stats.port_hardware_present[0] = bp->cmd_rsp_virt->smt_mib_get.port_hardware_present[0];
 	bp->stats.port_hardware_present[1] = bp->cmd_rsp_virt->smt_mib_get.port_hardware_present[1];
 
-
 	/* Fill the bp->stats structure with the FDDI counter values */
 
 	bp->stats.mac_frame_cts = bp->cmd_rsp_virt->cntrs_get.cntrs.frame_cnt.ls;
@@ -795,7 +788,6 @@ static struct net_device_stats *skfp_ctl_get_stats(struct net_device *dev)
 #endif
 	return (struct net_device_stats *)&bp->os.MacStat;
 }				// ctl_get_stat
-
 
 /*
  * ==============================
@@ -844,8 +836,6 @@ static void skfp_ctl_set_multicast_list(struct net_device *dev)
 	skfp_ctl_set_multicast_list_wo_lock(dev);
 	spin_unlock_irqrestore(&bp->DriverLock, Flags);
 }				// skfp_ctl_set_multicast_list
-
-
 
 static void skfp_ctl_set_multicast_list_wo_lock(struct net_device *dev)
 {
@@ -898,7 +888,6 @@ static void skfp_ctl_set_multicast_list_wo_lock(struct net_device *dev)
 	}
 }				// skfp_ctl_set_multicast_list_wo_lock
 
-
 /*
  * ===========================
  * = skfp_ctl_set_mac_address =
@@ -925,7 +914,6 @@ static int skfp_ctl_set_mac_address(struct net_device *dev, void *addr)
 	skfddi_priv *bp = &smc->os;
 	unsigned long Flags;
 
-
 	memcpy(dev->dev_addr, p_sockaddr->sa_data, FDDI_K_ALEN);
 	spin_lock_irqsave(&bp->DriverLock, Flags);
 	ResetAdapter(smc);
@@ -933,7 +921,6 @@ static int skfp_ctl_set_mac_address(struct net_device *dev, void *addr)
 
 	return 0;		/* always return zero */
 }				// skfp_ctl_set_mac_address
-
 
 /*
  * ==============
@@ -956,7 +943,6 @@ static int skfp_ctl_set_mac_address(struct net_device *dev, void *addr)
  *   cmd - ?
  *
  */
-
 
 static int skfp_ioctl(struct net_device *dev, struct ifreq *rq, int cmd)
 {
@@ -989,7 +975,6 @@ static int skfp_ioctl(struct net_device *dev, struct ifreq *rq, int cmd)
 
 	return status;
 }				// skfp_ioctl
-
 
 /*
  * =====================
@@ -1076,7 +1061,6 @@ static netdev_tx_t skfp_send_pkt(struct sk_buff *skb,
 	return NETDEV_TX_OK;
 
 }				// skfp_send_pkt
-
 
 /*
  * =======================
@@ -1194,7 +1178,6 @@ static void send_queued_packets(struct s_smc *smc)
 
 }				// send_queued_packets
 
-
 /************************
  * 
  * CheckSourceAddress
@@ -1215,7 +1198,6 @@ static void CheckSourceAddress(unsigned char *frame, unsigned char *hw_addr)
 	memcpy(&frame[1 + 6], hw_addr, ETH_ALEN);
 	frame[8] |= SRBit;
 }				// CheckSourceAddress
-
 
 /************************
  *
@@ -1254,7 +1236,6 @@ static void ResetAdapter(struct s_smc *smc)
 	skfp_ctl_set_multicast_list_wo_lock(smc->os.dev);
 }				// ResetAdapter
 
-
 //--------------- functions called by hardware module ----------------
 
 /************************
@@ -1286,7 +1267,6 @@ void llc_restart_tx(struct s_smc *smc)
 	netif_start_queue(bp->dev);// system may send again if it was blocked
 
 }				// llc_restart_tx
-
 
 /************************
  *
@@ -1323,7 +1303,6 @@ void *mac_drv_get_space(struct s_smc *smc, unsigned int size)
 		((char *) virt - (char *)smc->os.SharedMemAddr)));
 	return virt;
 }				// mac_drv_get_space
-
 
 /************************
  *
@@ -1367,7 +1346,6 @@ void *mac_drv_get_desc_mem(struct s_smc *smc, unsigned int size)
 	return virt + size;
 }				// mac_drv_get_desc_mem
 
-
 /************************
  *
  *	mac_drv_virt2phys
@@ -1386,7 +1364,6 @@ unsigned long mac_drv_virt2phys(struct s_smc *smc, void *virt)
 	return smc->os.SharedMemDMA +
 		((char *) virt - (char *)smc->os.SharedMemAddr);
 }				// mac_drv_virt2phys
-
 
 /************************
  *
@@ -1421,7 +1398,6 @@ u_long dma_master(struct s_smc * smc, void *virt, int len, int flag)
 	return smc->os.SharedMemDMA +
 		((char *) virt - (char *)smc->os.SharedMemAddr);
 }				// dma_master
-
 
 /************************
  *
@@ -1473,7 +1449,6 @@ void dma_complete(struct s_smc *smc, volatile union s_fp_descr *descr, int flag)
 	}
 }				// dma_complete
 
-
 /************************
  *
  *	mac_drv_tx_complete
@@ -1514,7 +1489,6 @@ void mac_drv_tx_complete(struct s_smc *smc, volatile struct s_smt_fp_txd *txd)
 
 	pr_debug("leaving mac_drv_tx_complete\n");
 }				// mac_drv_tx_complete
-
 
 /************************
  *
@@ -1670,7 +1644,6 @@ void mac_drv_rx_complete(struct s_smc *smc, volatile struct s_smt_fp_rxd *rxd,
 
 }				// mac_drv_rx_complete
 
-
 /************************
  *
  *	mac_drv_requeue_rxd
@@ -1749,7 +1722,6 @@ void mac_drv_requeue_rxd(struct s_smc *smc, volatile struct s_smt_fp_rxd *rxd,
 	}
 }				// mac_drv_requeue_rxd
 
-
 /************************
  *
  *	mac_drv_fill_rxd
@@ -1816,7 +1788,6 @@ void mac_drv_fill_rxd(struct s_smc *smc)
 	pr_debug("leaving mac_drv_fill_rxd\n");
 }				// mac_drv_fill_rxd
 
-
 /************************
  *
  *	mac_drv_clear_rxd
@@ -1861,7 +1832,6 @@ void mac_drv_clear_rxd(struct s_smc *smc, volatile struct s_smt_fp_rxd *rxd,
 
 	}
 }				// mac_drv_clear_rxd
-
 
 /************************
  *
@@ -1921,7 +1891,6 @@ int mac_drv_rx_init(struct s_smc *smc, int len, int fc,
 	return 0;
 }				// mac_drv_rx_init
 
-
 /************************
  *
  *	smt_timer_poll
@@ -1940,7 +1909,6 @@ int mac_drv_rx_init(struct s_smc *smc, int len, int fc,
 void smt_timer_poll(struct s_smc *smc)
 {
 }				// smt_timer_poll
-
 
 /************************
  *
@@ -1993,7 +1961,6 @@ void ring_status_indication(struct s_smc *smc, u_long status)
 	pr_debug("]\n");
 }				// ring_status_indication
 
-
 /************************
  *
  *	smt_get_time
@@ -2013,7 +1980,6 @@ unsigned long smt_get_time(void)
 {
 	return jiffies;
 }				// smt_get_time
-
 
 /************************
  *
@@ -2047,7 +2013,6 @@ void smt_stat_counter(struct s_smc *smc, int stat)
 		break;
 	}
 }				// smt_stat_counter
-
 
 /************************
  *
@@ -2106,7 +2071,6 @@ void cfm_state_change(struct s_smc *smc, int c_state)
 #endif				// DRIVERDEBUG
 }				// cfm_state_change
 
-
 /************************
  *
  *	ecm_state_change
@@ -2161,7 +2125,6 @@ void ecm_state_change(struct s_smc *smc, int e_state)
 #endif				//DRIVERDEBUG
 }				// ecm_state_change
 
-
 /************************
  *
  *	rmt_state_change
@@ -2215,7 +2178,6 @@ void rmt_state_change(struct s_smc *smc, int r_state)
 	pr_debug("[rmt_state_change: %s]\n", s);
 #endif				// DRIVERDEBUG
 }				// rmt_state_change
-
 
 /************************
  *

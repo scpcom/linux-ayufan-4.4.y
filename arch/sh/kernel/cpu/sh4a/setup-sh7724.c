@@ -1302,4 +1302,3 @@ static int __init sh7724_sleep_setup(void)
 	return 0;
 }
 arch_initcall(sh7724_sleep_setup);
-

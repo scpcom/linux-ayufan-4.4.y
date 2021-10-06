@@ -41,7 +41,6 @@ static inline int ieee754sp_issnan(union ieee754sp x)
 	return SPMANT(x) & SP_MBIT(SP_FBITS - 1);
 }
 
-
 /*
  * Raise the Invalid Operation IEEE 754 exception
  * and convert the signaling NaN supplied to a quiet NaN.
@@ -78,7 +77,6 @@ static unsigned ieee754sp_get_rounding(int sn, unsigned xm)
 	}
 	return xm;
 }
-
 
 /* generate a normal/denormal number with over,under handling
  * sn is sign

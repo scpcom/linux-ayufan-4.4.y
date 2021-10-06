@@ -510,7 +510,6 @@ static int lo_rw_aio(struct loop_device *lo, struct loop_cmd *cmd,
 	return 0;
 }
 
-
 static inline int lo_rw_simple(struct loop_device *lo,
 		struct request *rq, loff_t pos, bool rw)
 {

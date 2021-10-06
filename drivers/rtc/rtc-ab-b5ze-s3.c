@@ -290,7 +290,6 @@ static int abb5zes3_rtc_set_time(struct device *dev, struct rtc_time *tm)
 				ABB5ZES3_RTC_SEC_LEN);
 	mutex_unlock(&data->lock);
 
-
 	return ret;
 }
 

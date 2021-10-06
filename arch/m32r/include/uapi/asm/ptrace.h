@@ -11,7 +11,6 @@
 #ifndef _UAPI_ASM_M32R_PTRACE_H
 #define _UAPI_ASM_M32R_PTRACE_H
 
-
 /* 0 - 13 are integer registers (general purpose registers).  */
 #define PT_R4		0
 #define PT_R5		1
@@ -51,7 +50,6 @@
 #define PT_PC		30
 #define PT_CBR		31
 #define PT_EVB		32
-
 
 /* Control registers.  */
 #define SPR_CR0 PT_PSW
@@ -112,6 +110,5 @@ struct pt_regs {
 #define PTRACE_SETREGS		13
 
 #define PTRACE_OLDSETOPTIONS	21
-
 
 #endif /* _UAPI_ASM_M32R_PTRACE_H */

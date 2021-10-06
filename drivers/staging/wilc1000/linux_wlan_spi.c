@@ -80,7 +80,6 @@ struct spi_driver wilc_bus __refdata = {
 	.remove = __exit_p(wilc_bus_remove),
 };
 
-
 void linux_spi_deinit(void *vp)
 {
 
@@ -91,13 +90,10 @@ void linux_spi_deinit(void *vp)
 
 }
 
-
-
 int linux_spi_init(void *vp)
 {
 	int ret = 1;
 	static int called;
-
 
 	if (called == 0) {
 		called++;
@@ -235,7 +231,6 @@ int linux_spi_write(u8 *b, u32 len)
 
 	/* change return value to match WILC interface */
 	(ret < 0) ? (ret = 0) : (ret = 1);
-
 
 	return ret;
 }

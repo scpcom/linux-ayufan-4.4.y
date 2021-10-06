@@ -141,7 +141,6 @@ END(ia64_pal_call_stacked)
 #define PAL_PSR_BITS_TO_SET						      \
 	(IA64_PSR_BN)
 
-
 GLOBAL_ENTRY(ia64_pal_call_phys_static)
 	.prologue ASM_UNW_PRLG_RP|ASM_UNW_PRLG_PFS, ASM_UNW_PRLG_GRSAVE(4)
 	alloc loc1 = ar.pfs,4,7,0,0

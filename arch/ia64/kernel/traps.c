@@ -280,7 +280,6 @@ static DEFINE_PER_CPU(struct fpu_swa_msg, cpulast);
 DECLARE_PER_CPU(struct fpu_swa_msg, cpulast);
 static struct fpu_swa_msg last __cacheline_aligned;
 
-
 /*
  * Handle floating-point assist faults and traps.
  */

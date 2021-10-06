@@ -149,7 +149,6 @@ static struct platform_device ntosd2_leds_dev = {
 	},
 };
 
-
 static struct platform_device *davinci_ntosd2_devices[] __initdata = {
 	&davinci_fb_device,
 	&ntosd2_leds_dev,

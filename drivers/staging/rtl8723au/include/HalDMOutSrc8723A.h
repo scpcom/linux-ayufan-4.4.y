@@ -26,19 +26,14 @@
 #define IQK_BB_REG_NUM			9
 #define HP_THERMAL_NUM		8
 
-
 /*  */
 /*  structure and define */
 /*  */
-
-
-
 
 /*------------------------Export global variable----------------------------*/
 /*------------------------Export global variable----------------------------*/
 /*------------------------Export Marco Definition---------------------------*/
 /* define DM_MultiSTA_InitGainChangeNotify(Event) {DM_DigTable.CurMultiSTAConnectState = Event;} */
-
 
 /*  */
 /*  function prototype */

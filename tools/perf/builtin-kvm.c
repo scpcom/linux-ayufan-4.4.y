@@ -114,7 +114,6 @@ struct vcpu_event_record {
 	struct kvm_event *last_event;
 };
 
-
 static void init_kvm_event_record(struct perf_kvm_stat *kvm)
 {
 	unsigned int i;
@@ -1328,7 +1327,6 @@ static int kvm_events_live(struct perf_kvm_stat *kvm,
 		.mode = PERF_DATA_MODE_WRITE,
 	};
 
-
 	/* event handling */
 	kvm->tool.sample = process_sample_event;
 	kvm->tool.comm   = perf_event__process_comm;
@@ -1373,7 +1371,6 @@ static int kvm_events_live(struct perf_kvm_stat *kvm,
 
 	if (target__none(&kvm->opts.target))
 		kvm->opts.target.system_wide = true;
-
 
 	/*
 	 * generate the event list

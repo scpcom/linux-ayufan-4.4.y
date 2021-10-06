@@ -165,7 +165,6 @@ static void atmel_pwm_config_v1(struct pwm_chip *chip, struct pwm_device *pwm,
 	struct atmel_pwm_chip *atmel_pwm = to_atmel_pwm_chip(chip);
 	unsigned int val;
 
-
 	atmel_pwm_ch_writel(atmel_pwm, pwm->hwpwm, PWMV1_CUPD, dty);
 
 	val = atmel_pwm_ch_readl(atmel_pwm, pwm->hwpwm, PWM_CMR);

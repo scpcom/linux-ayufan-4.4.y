@@ -144,7 +144,6 @@ extern void bad_put_le(void);
 #define PUT_LE(x, val)					\
 	PLE(x, val, 64, PLE(x, val, 32, PLE(x, val, 16, LAST_PLE(x, val))))
 
-
 #define NSYMS (sizeof(required_syms) / sizeof(required_syms[0]))
 
 #define BITSFUNC3(name, bits, suffix) name##bits##suffix

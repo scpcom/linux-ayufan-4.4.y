@@ -224,7 +224,6 @@ static int exynos4210_power_off(struct samsung_usb2_phy_instance *inst)
 	return 0;
 }
 
-
 static const struct samsung_usb2_common_phy exynos4210_phys[] = {
 	{
 		.label		= "device",

@@ -33,7 +33,6 @@ void __init c293_pcie_pic_init(void)
 	mpic_init(mpic);
 }
 
-
 /*
  * Setup the architecture
  */

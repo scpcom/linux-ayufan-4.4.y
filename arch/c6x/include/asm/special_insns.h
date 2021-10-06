@@ -11,7 +11,6 @@
 #ifndef _ASM_C6X_SPECIAL_INSNS_H
 #define _ASM_C6X_SPECIAL_INSNS_H
 
-
 #define get_creg(reg) \
 	({ unsigned int __x; \
 	   asm volatile ("mvc .s2 " #reg ",%0\n" : "=b"(__x)); __x; })

@@ -354,7 +354,6 @@ pseq_handler_check_detection(struct pri_detector *pde)
 	return NULL;
 }
 
-
 /* free pulse queue and sequences list and give objects back to pools */
 static void pri_detector_reset(struct pri_detector *pde, u64 ts)
 {

@@ -16,7 +16,6 @@
 #include <linux/regmap.h>
 #include <linux/rtc/sirfsoc_rtciobrg.h>
 
-
 #define RTC_CN			0x00
 #define RTC_ALARM0		0x04
 #define RTC_ALARM1		0x18

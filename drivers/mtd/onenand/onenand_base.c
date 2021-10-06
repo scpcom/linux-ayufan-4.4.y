@@ -2031,7 +2031,6 @@ static int onenand_write_ops_nolock(struct mtd_info *mtd, loff_t to,
 	return ret;
 }
 
-
 /**
  * onenand_write_oob_nolock - [INTERN] OneNAND write out-of-band
  * @param mtd		MTD device structure
@@ -2232,7 +2231,6 @@ static int onenand_block_isbad_nolock(struct mtd_info *mtd, loff_t ofs, int allo
 	return bbm->isbad_bbt(mtd, ofs, allowbbt);
 }
 
-
 static int onenand_multiblock_erase_verify(struct mtd_info *mtd,
 					   struct erase_info *instr)
 {
@@ -2372,7 +2370,6 @@ static int onenand_multiblock_erase(struct mtd_info *mtd,
 	}
 	return 0;
 }
-
 
 /**
  * onenand_block_by_block_erase - [INTERN] erase block(s) using regular erase

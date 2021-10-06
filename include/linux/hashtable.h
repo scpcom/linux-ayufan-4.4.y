@@ -201,5 +201,4 @@ static inline void hash_del_rcu(struct hlist_node *node)
 	hlist_for_each_entry_safe(obj, tmp,\
 		&name[hash_min(key, HASH_BITS(name))], member)
 
-
 #endif

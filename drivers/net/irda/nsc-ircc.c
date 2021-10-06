@@ -810,7 +810,6 @@ static int nsc_ircc_probe_338(nsc_chip_t *chip, chipio_t *info)
 	return 0;
 }
 
-
 /*
  * Function nsc_ircc_init_39x (chip, info)
  *
@@ -2166,7 +2165,6 @@ static int nsc_ircc_net_open(struct net_device *dev)
 	char hwname[32];
 	__u8 bank;
 	
-	
 	IRDA_ASSERT(dev != NULL, return -1;);
 	self = netdev_priv(dev);
 	
@@ -2227,7 +2225,6 @@ static int nsc_ircc_net_close(struct net_device *dev)
 	int iobase;
 	__u8 bank;
 
-	
 	IRDA_ASSERT(dev != NULL, return -1;);
 
 	self = netdev_priv(dev);
@@ -2392,7 +2389,6 @@ MODULE_AUTHOR("Dag Brattli <dagb@cs.uit.no>");
 MODULE_DESCRIPTION("NSC IrDA Device Driver");
 MODULE_LICENSE("GPL");
 
-
 module_param(qos_mtt_bits, int, 0);
 MODULE_PARM_DESC(qos_mtt_bits, "Minimum Turn Time");
 module_param_array(io, int, NULL, 0);
@@ -2406,4 +2402,3 @@ MODULE_PARM_DESC(dongle_id, "Type-id of used dongle");
 
 module_init(nsc_ircc_init);
 module_exit(nsc_ircc_cleanup);
-

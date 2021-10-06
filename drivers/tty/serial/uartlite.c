@@ -137,7 +137,6 @@ static int ulite_receive(struct uart_port *port, int stat)
 	if (stat & ULITE_STATUS_FRAME)
 		port->icount.frame++;
 
-
 	/* drop byte with parity error if IGNPAR specificed */
 	if (stat & port->ignore_status_mask & ULITE_STATUS_PARITY)
 		stat &= ~ULITE_STATUS_RXVALID;
@@ -146,7 +145,6 @@ static int ulite_receive(struct uart_port *port, int stat)
 
 	if (stat & ULITE_STATUS_PARITY)
 		flag = TTY_PARITY;
-
 
 	stat &= ~port->ignore_status_mask;
 

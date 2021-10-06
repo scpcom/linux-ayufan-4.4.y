@@ -211,7 +211,6 @@ struct powercap_zone_constraint {
 	struct powercap_zone_constraint_ops *ops;
 };
 
-
 /* For clients to get their device pointer, may be used for dev_dbgs */
 #define POWERCAP_GET_DEV(power_zone)	(&power_zone->dev)
 

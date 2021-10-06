@@ -194,7 +194,6 @@ static int cs5530_is_palmax(void)
 	return 0;
 }
 
-
 /**
  *	cs5530_init_chip	-	Chipset init
  *

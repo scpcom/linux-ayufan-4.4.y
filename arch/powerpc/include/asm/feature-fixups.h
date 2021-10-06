@@ -54,7 +54,6 @@ label##5:							\
 	.endif;							\
 	.popsection;
 
-
 /* CPU feature dependent sections */
 #define BEGIN_FTR_SECTION_NESTED(label)	START_FTR_SECTION(label)
 #define BEGIN_FTR_SECTION		START_FTR_SECTION(97)

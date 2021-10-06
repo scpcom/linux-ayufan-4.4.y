@@ -496,7 +496,6 @@ bail:
 	return status;
 }
 
-
 struct ocfs2_triggers {
 	struct jbd2_buffer_trigger_type	ot_triggers;
 	int				ot_offset;
@@ -1104,7 +1103,6 @@ int ocfs2_journal_load(struct ocfs2_journal *journal, int local, int replayed)
 done:
 	return status;
 }
-
 
 /* 'full' flag tells us whether we clear out all blocks or if we just
  * mark the journal clean */

@@ -52,7 +52,6 @@ struct sd {
 	u8 snapshot_pressed;
 };
 
-
 /* .priv is what goes to register 8 for this mode, known working values:
    0x00 -> 176x144, cropped
    0x01 -> 176x144, cropped

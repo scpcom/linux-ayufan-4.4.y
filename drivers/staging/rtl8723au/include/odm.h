@@ -13,7 +13,6 @@
  *
  ******************************************************************************/
 
-
 #ifndef	__HALDMOUTSRC_H__
 #define __HALDMOUTSRC_H__
 
@@ -37,13 +36,11 @@
 #define	TRAFFIC_LOW	0
 #define	TRAFFIC_HIGH	1
 
-
 /*  */
 /* 3 Tx Power Tracking */
 /* 3============================================================ */
 #define		DPK_DELTA_MAPPING_NUM	13
 #define		index_mapping_HP_NUM	15
-
 
 /*  */
 /* 3 PSD Handler */
@@ -80,7 +77,6 @@
 #define			ANTTESTALL		0x00		/* Ant A or B will be Testing */
 #define		ANTTESTA		0x01		/* Ant A will be Testing */
 #define		ANTTESTB		0x02		/* Ant B will be testing */
-
 
 /*  */
 /*  structure and define */
@@ -251,7 +247,6 @@ struct odm_packet_info {
 	bool		bPacketBeacon;
 };
 
-
 enum {
 	/*  BB Team */
 	ODM_DIG			= 0x00000001,
@@ -287,7 +282,6 @@ enum odm_cmninfo {
 	ODM_CMNINFO_BINHCT_TEST,
 	ODM_CMNINFO_BWIFI_TEST,
 	ODM_CMNINFO_SMART_CONCURRENT,
-
 
 	/*  */
 	/*  Dynamic value: */
@@ -380,7 +374,6 @@ enum odm_mac_phy_mode {
 	ODM_DMSP	= 1,
 	ODM_DMDP	= 2,
 };
-
 
 enum odm_bt_coexist {
 	ODM_BT_BUSY		= 1,
@@ -643,7 +636,6 @@ struct dm_odm_t {
 	u8			RSSI_BT;		/* come from BT */
 	struct odm_rate_adapt	RateAdaptive;
 
-
 	struct odm_rf_cal_t	RFCalibrateInfo;
 };	/*  DM_Dynamic_Mechanism_Structure */
 
@@ -687,7 +679,6 @@ enum dm_dig_op {
 #define		DM_DIG_THRESH_LOW			35
 
 #define		DM_SCAN_RSSI_TH				0x14 /* scan return issue for LC */
-
 
 #define		DM_FALSEALARM_THRESH_LOW	400
 #define		DM_FALSEALARM_THRESH_HIGH	1000
@@ -766,7 +757,6 @@ enum dm_dig_op {
 /* 3 BB Power Save */
 /* 3=========================================================== */
 
-
 enum dm_1r_cca {
 	CCA_1R =0,
 	CCA_2R = 1,
@@ -802,8 +792,6 @@ extern	u32 OFDMSwingTable23A[OFDM_TABLE_SIZE_92D];
 extern	u8 CCKSwingTable_Ch1_Ch1323A[CCK_TABLE_SIZE][8];
 extern	u8 CCKSwingTable_Ch1423A [CCK_TABLE_SIZE][8];
 
-
-
 /*  20100514 Joseph: Add definition for antenna switching test after link. */
 /*  This indicates two different the steps. */
 /*  In SWAW_STEP_PEAK, driver needs to switch antenna and listen to the signal on the air. */
@@ -819,7 +807,6 @@ void ODM_Write_CCK_CCA_Thres23a(struct dm_odm_t *pDM_Odm, u8	CurCCK_CCAThres);
 
 void ODM_SetAntenna(struct dm_odm_t *pDM_Odm, u8 Antenna);
 
-
 #define dm_RF_Saving	ODM_RF_Saving23a
 void ODM_RF_Saving23a(struct dm_odm_t *pDM_Odm, u8 bForceInNormal);
 
@@ -829,7 +816,6 @@ void ODM_TXPowerTrackingCheck23a(struct dm_odm_t *pDM_Odm);
 bool ODM_RAStateCheck23a(struct dm_odm_t *pDM_Odm, s32 RSSI, bool bForceUpdate,
 		      u8 *pRATRState);
 
-
 u32 ConvertTo_dB23a(u32 Value);
 
 u32 GetPSDData(struct dm_odm_t *pDM_Odm, unsigned int point, u8 initial_gain_psd);
@@ -837,7 +823,6 @@ u32 GetPSDData(struct dm_odm_t *pDM_Odm, unsigned int point, u8 initial_gain_psd
 void odm_DIG23abyRSSI_LPS(struct dm_odm_t *pDM_Odm);
 
 u32 ODM_Get_Rate_Bitmap23a(struct hal_data_8723a *pHalData, u32 macid, u32 ra_mask, u8 rssi_level);
-
 
 void ODM23a_DMInit(struct dm_odm_t *pDM_Odm);
 

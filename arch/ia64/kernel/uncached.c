@@ -28,7 +28,6 @@
 #include <asm/tlbflush.h>
 #include <asm/sn/arch.h>
 
-
 extern void __init efi_memmap_walk_uc(efi_freemem_callback_t, void *);
 
 struct uncached_pool {
@@ -42,7 +41,6 @@ struct uncached_pool {
 
 struct uncached_pool uncached_pools[MAX_NUMNODES];
 
-
 static void uncached_ipi_visibility(void *data)
 {
 	int status;
@@ -54,7 +52,6 @@ static void uncached_ipi_visibility(void *data)
 		atomic_inc(&uc_pool->status);
 }
 
-
 static void uncached_ipi_mc_drain(void *data)
 {
 	int status;
@@ -64,7 +61,6 @@ static void uncached_ipi_mc_drain(void *data)
 	if (status != PAL_STATUS_SUCCESS)
 		atomic_inc(&uc_pool->status);
 }
-
 
 /*
  * Add a new chunk of uncached memory pages to the specified pool.
@@ -171,7 +167,6 @@ failed:
 	return -1;
 }
 
-
 /*
  * uncached_alloc_page
  *
@@ -214,7 +209,6 @@ unsigned long uncached_alloc_page(int starting_nid, int n_pages)
 }
 EXPORT_SYMBOL(uncached_alloc_page);
 
-
 /*
  * uncached_free_page
  *
@@ -237,7 +231,6 @@ void uncached_free_page(unsigned long uc_addr, int n_pages)
 	gen_pool_free(pool, uc_addr, n_pages * PAGE_SIZE);
 }
 EXPORT_SYMBOL(uncached_free_page);
-
 
 /*
  * uncached_build_memmap,
@@ -263,7 +256,6 @@ static int __init uncached_build_memmap(u64 uc_start, u64 uc_end, void *arg)
 	}
 	return 0;
 }
-
 
 static int __init uncached_init(void)
 {

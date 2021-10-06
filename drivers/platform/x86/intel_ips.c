@@ -1550,7 +1550,6 @@ static int ips_probe(struct pci_dev *dev, const struct pci_device_id *id)
 		goto error_free;
 	}
 
-
 	ips->regmap = ioremap(pci_resource_start(dev, 0),
 			      pci_resource_len(dev, 0));
 	if (!ips->regmap) {

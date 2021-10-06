@@ -505,7 +505,6 @@
 #define			SQ_TEX_VTX_VALID_TEXTURE			0x2
 #define			SQ_TEX_VTX_VALID_BUFFER				0x3
 
-
 #define	SX_MISC						0x28350
 #define	SX_MEMORY_EXPORT_BASE				0x9010
 #define	SX_DEBUG_1					0x9054

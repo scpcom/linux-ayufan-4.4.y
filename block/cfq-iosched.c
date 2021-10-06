@@ -829,7 +829,6 @@ static inline enum wl_class_t cfqq_class(struct cfq_queue *cfqq)
 	return BE_WORKLOAD;
 }
 
-
 static enum wl_type_t cfqq_type(struct cfq_queue *cfqq)
 {
 	if (!cfq_cfqq_sync(cfqq))

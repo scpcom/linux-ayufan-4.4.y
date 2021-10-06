@@ -266,4 +266,3 @@ void hwt_wait_time(struct s_smc *smc, u_long start, long int duration)
 	}
 }
 #endif
-

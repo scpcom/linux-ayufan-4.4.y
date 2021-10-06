@@ -27,10 +27,8 @@ struct sk_buff;
 struct net_device;
 struct cmd_ds_command;
 
-
 /* ethtool.c */
 extern const struct ethtool_ops lbs_ethtool_ops;
-
 
 /* tx.c */
 void lbs_send_tx_feedback(struct lbs_private *priv, u32 try_count);
@@ -39,7 +37,6 @@ netdev_tx_t lbs_hard_start_xmit(struct sk_buff *skb,
 
 /* rx.c */
 int lbs_process_rxed_packet(struct lbs_private *priv, struct sk_buff *);
-
 
 /* main.c */
 struct lbs_private *lbs_add_card(void *card, struct device *dmdev);

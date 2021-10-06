@@ -91,7 +91,6 @@ ast_ttm_global_release(struct ast_private *ast)
 	ast->ttm.mem_global_ref.release = NULL;
 }
 
-
 static void ast_bo_ttm_destroy(struct ttm_buffer_object *tbo)
 {
 	struct ast_bo *bo;
@@ -196,7 +195,6 @@ static int ast_bo_move(struct ttm_buffer_object *bo,
 	return r;
 }
 
-
 static void ast_ttm_backend_destroy(struct ttm_tt *tt)
 {
 	ttm_tt_fini(tt);
@@ -206,7 +204,6 @@ static void ast_ttm_backend_destroy(struct ttm_tt *tt)
 static struct ttm_backend_func ast_tt_backend_func = {
 	.destroy = &ast_ttm_backend_destroy,
 };
-
 
 static struct ttm_tt *ast_ttm_tt_create(struct ttm_bo_device *bdev,
 				 unsigned long size, uint32_t page_flags,

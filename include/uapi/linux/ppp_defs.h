@@ -66,7 +66,6 @@
 #define PPP_INITFCS	0xffff	/* Initial FCS value */
 #define PPP_GOODFCS	0xf0b8	/* Good final FCS value */
 
-
 /*
  * Extended asyncmap - allows any character to be escaped.
  */

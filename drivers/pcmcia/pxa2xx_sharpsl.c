@@ -105,7 +105,6 @@ static void sharpsl_pcmcia_socket_state(struct soc_pcmcia_socket *skt,
 	}
 }
 
-
 static int sharpsl_pcmcia_configure_socket(struct soc_pcmcia_socket *skt,
 				       const socket_state_t *state)
 {

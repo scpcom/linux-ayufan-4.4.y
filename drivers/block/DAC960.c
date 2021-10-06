@@ -16,10 +16,8 @@
 
 */
 
-
 #define DAC960_DriverVersion			"2.5.49"
 #define DAC960_DriverDate			"21 Aug 2007"
-
 
 #include <linux/module.h>
 #include <linux/types.h>
@@ -52,7 +50,6 @@
 #include "DAC960.h"
 
 #define DAC960_GAM_MINOR	252
-
 
 static DEFINE_MUTEX(DAC960_mutex);
 static DAC960_Controller_T *DAC960_Controllers[DAC960_MaxControllers];
@@ -168,7 +165,6 @@ static const struct block_device_operations DAC960_BlockDeviceOperations = {
 	.revalidate_disk	= DAC960_revalidate_disk,
 };
 
-
 /*
   DAC960_AnnounceDriver announces the Driver Version and Date, Author's Name,
   Copyright Notice, and Electronic Mail Address.
@@ -182,7 +178,6 @@ static void DAC960_AnnounceDriver(DAC960_Controller_T *Controller)
   DAC960_Announce("Copyright 1998-2001 by Leonard N. Zubkoff "
 		  "<lnz@dandelion.com>\n", Controller);
 }
-
 
 /*
   DAC960_Failure prints a standardized error message, and then returns false.
@@ -253,7 +248,6 @@ static void free_dma_loaf(struct pci_dev *dev, struct dma_loaf *loaf_handle)
 		pci_free_consistent(dev, loaf_handle->length,
 			loaf_handle->cpu_base, loaf_handle->dma_base);
 }
-
 
 /*
   DAC960_CreateAuxiliaryStructures allocates and initializes the auxiliary
@@ -370,7 +364,6 @@ static bool DAC960_CreateAuxiliaryStructures(DAC960_Controller_T *Controller)
   return true;
 }
 
-
 /*
   DAC960_DestroyAuxiliaryStructures deallocates the auxiliary data
   structures for Controller.
@@ -387,7 +380,6 @@ static void DAC960_DestroyAuxiliaryStructures(DAC960_Controller_T *Controller)
   dma_addr_t RequestSenseDMA;
   DAC960_Command_T *CommandGroup = NULL;
   
-
   if (Controller->FirmwareType == DAC960_V2_Controller)
         RequestSensePool = Controller->V2.RequestSensePool;
 
@@ -459,7 +451,6 @@ static void DAC960_DestroyAuxiliaryStructures(DAC960_Controller_T *Controller)
     }
 }
 
-
 /*
   DAC960_V1_ClearCommand clears critical fields of Command for DAC960 V1
   Firmware Controllers.
@@ -472,7 +463,6 @@ static inline void DAC960_V1_ClearCommand(DAC960_Command_T *Command)
   Command->V1.CommandStatus = 0;
 }
 
-
 /*
   DAC960_V2_ClearCommand clears critical fields of Command for DAC960 V2
   Firmware Controllers.
@@ -484,7 +474,6 @@ static inline void DAC960_V2_ClearCommand(DAC960_Command_T *Command)
   memset(CommandMailbox, 0, sizeof(DAC960_V2_CommandMailbox_T));
   Command->V2.CommandStatus = 0;
 }
-
 
 /*
   DAC960_AllocateCommand allocates a Command structure from Controller's
@@ -503,7 +492,6 @@ static inline DAC960_Command_T *DAC960_AllocateCommand(DAC960_Controller_T
   return Command;
 }
 
-
 /*
   DAC960_DeallocateCommand deallocates Command, returning it to Controller's
   free list.
@@ -517,7 +505,6 @@ static inline void DAC960_DeallocateCommand(DAC960_Command_T *Command)
   Command->Next = Controller->FreeCommands;
   Controller->FreeCommands = Command;
 }
-
 
 /*
   DAC960_WaitForCommand waits for a wake_up on Controller's Command Wait Queue.
@@ -583,7 +570,6 @@ static void DAC960_BA_QueueCommand(DAC960_Command_T *Command)
   Controller->V2.NextCommandMailbox = NextCommandMailbox;
 }
 
-
 /*
   DAC960_LP_QueueCommand queues Command for DAC960 LP Series Controllers.
 */
@@ -607,7 +593,6 @@ static void DAC960_LP_QueueCommand(DAC960_Command_T *Command)
     NextCommandMailbox = Controller->V2.FirstCommandMailbox;
   Controller->V2.NextCommandMailbox = NextCommandMailbox;
 }
-
 
 /*
   DAC960_LA_QueueCommandDualMode queues Command for DAC960 LA Series
@@ -634,7 +619,6 @@ static void DAC960_LA_QueueCommandDualMode(DAC960_Command_T *Command)
   Controller->V1.NextCommandMailbox = NextCommandMailbox;
 }
 
-
 /*
   DAC960_LA_QueueCommandSingleMode queues Command for DAC960 LA Series
   Controllers with Single Mode Firmware.
@@ -659,7 +643,6 @@ static void DAC960_LA_QueueCommandSingleMode(DAC960_Command_T *Command)
     NextCommandMailbox = Controller->V1.FirstCommandMailbox;
   Controller->V1.NextCommandMailbox = NextCommandMailbox;
 }
-
 
 /*
   DAC960_PG_QueueCommandDualMode queues Command for DAC960 PG Series
@@ -686,7 +669,6 @@ static void DAC960_PG_QueueCommandDualMode(DAC960_Command_T *Command)
   Controller->V1.NextCommandMailbox = NextCommandMailbox;
 }
 
-
 /*
   DAC960_PG_QueueCommandSingleMode queues Command for DAC960 PG Series
   Controllers with Single Mode Firmware.
@@ -712,7 +694,6 @@ static void DAC960_PG_QueueCommandSingleMode(DAC960_Command_T *Command)
   Controller->V1.NextCommandMailbox = NextCommandMailbox;
 }
 
-
 /*
   DAC960_PD_QueueCommand queues Command for DAC960 PD Series Controllers.
 */
@@ -728,7 +709,6 @@ static void DAC960_PD_QueueCommand(DAC960_Command_T *Command)
   DAC960_PD_WriteCommandMailbox(ControllerBaseAddress, CommandMailbox);
   DAC960_PD_NewCommand(ControllerBaseAddress);
 }
-
 
 /*
   DAC960_P_QueueCommand queues Command for DAC960 P Series Controllers.
@@ -775,7 +755,6 @@ static void DAC960_P_QueueCommand(DAC960_Command_T *Command)
   DAC960_PD_NewCommand(ControllerBaseAddress);
 }
 
-
 /*
   DAC960_ExecuteCommand executes Command and waits for completion.
 */
@@ -795,7 +774,6 @@ static void DAC960_ExecuteCommand(DAC960_Command_T *Command)
 	  return;
   wait_for_completion(&Completion);
 }
-
 
 /*
   DAC960_V1_ExecuteType3 executes a DAC960 V1 Firmware Controller Type 3
@@ -819,7 +797,6 @@ static bool DAC960_V1_ExecuteType3(DAC960_Controller_T *Controller,
   DAC960_DeallocateCommand(Command);
   return (CommandStatus == DAC960_V1_NormalCompletion);
 }
-
 
 /*
   DAC960_V1_ExecuteTypeB executes a DAC960 V1 Firmware Controller Type 3B
@@ -845,7 +822,6 @@ static bool DAC960_V1_ExecuteType3B(DAC960_Controller_T *Controller,
   DAC960_DeallocateCommand(Command);
   return (CommandStatus == DAC960_V1_NormalCompletion);
 }
-
 
 /*
   DAC960_V1_ExecuteType3D executes a DAC960 V1 Firmware Controller Type 3D
@@ -873,7 +849,6 @@ static bool DAC960_V1_ExecuteType3D(DAC960_Controller_T *Controller,
   DAC960_DeallocateCommand(Command);
   return (CommandStatus == DAC960_V1_NormalCompletion);
 }
-
 
 /*
   DAC960_V2_GeneralInfo executes a DAC960 V2 Firmware General Information
@@ -910,7 +885,6 @@ static bool DAC960_V2_GeneralInfo(DAC960_Controller_T *Controller)
   DAC960_DeallocateCommand(Command);
   return (CommandStatus == DAC960_V2_NormalCompletion);
 }
-
 
 /*
   DAC960_V2_ControllerInfo executes a DAC960 V2 Firmware Controller
@@ -949,7 +923,6 @@ static bool DAC960_V2_NewControllerInfo(DAC960_Controller_T *Controller)
   DAC960_DeallocateCommand(Command);
   return (CommandStatus == DAC960_V2_NormalCompletion);
 }
-
 
 /*
   DAC960_V2_LogicalDeviceInfo executes a DAC960 V2 Firmware Controller Logical
@@ -992,7 +965,6 @@ static bool DAC960_V2_NewLogicalDeviceInfo(DAC960_Controller_T *Controller,
   DAC960_DeallocateCommand(Command);
   return (CommandStatus == DAC960_V2_NormalCompletion);
 }
-
 
 /*
   DAC960_V2_PhysicalDeviceInfo executes a DAC960 V2 Firmware Controller "Read
@@ -1047,7 +1019,6 @@ static bool DAC960_V2_NewPhysicalDeviceInfo(DAC960_Controller_T *Controller,
   return (CommandStatus == DAC960_V2_NormalCompletion);
 }
 
-
 static void DAC960_V2_ConstructNewUnitSerialNumber(
 	DAC960_Controller_T *Controller,
 	DAC960_V2_CommandMailbox_T *CommandMailbox, int Channel, int TargetID,
@@ -1080,7 +1051,6 @@ static void DAC960_V2_ConstructNewUnitSerialNumber(
 			     .SegmentByteCount =
 		CommandMailbox->SCSI_10.DataTransferSize;
 }
-
 
 /*
   DAC960_V2_NewUnitSerialNumber executes an SCSI pass-through
@@ -1116,7 +1086,6 @@ static bool DAC960_V2_NewInquiryUnitSerialNumber(DAC960_Controller_T *Controller
       return (CommandStatus == DAC960_V2_NormalCompletion);
 }
 
-
 /*
   DAC960_V2_DeviceOperation executes a DAC960 V2 Firmware Controller Device
   Operation IOCTL Command and waits for completion.  It returns true on
@@ -1145,7 +1114,6 @@ static bool DAC960_V2_DeviceOperation(DAC960_Controller_T *Controller,
   DAC960_DeallocateCommand(Command);
   return (CommandStatus == DAC960_V2_NormalCompletion);
 }
-
 
 /*
   DAC960_V1_EnableMemoryMailboxInterface enables the Memory Mailbox Interface
@@ -1201,7 +1169,6 @@ static bool DAC960_V1_EnableMemoryMailboxInterface(DAC960_Controller_T
 
   if (!init_dma_loaf(PCI_Device, DmaPages, DmaPagesSize))
 	return false;
-
 
   if ((hw_type == DAC960_PD_Controller) || (hw_type == DAC960_P_Controller)) 
 	goto skip_mailboxes;
@@ -1349,7 +1316,6 @@ skip_mailboxes:
       }
   return false;
 }
-
 
 /*
   DAC960_V2_EnableMemoryMailboxInterface enables the Memory Mailbox Interface
@@ -1535,7 +1501,6 @@ static bool DAC960_V2_EnableMemoryMailboxInterface(DAC960_Controller_T
 					CommandMailbox, CommandMailboxDMA);
   return (CommandStatus == DAC960_V2_NormalCompletion);
 }
-
 
 /*
   DAC960_V1_ReadControllerConfiguration reads the Configuration Information
@@ -1777,7 +1742,6 @@ static bool DAC960_V1_ReadControllerConfiguration(DAC960_Controller_T
   return true;
 }
 
-
 /*
   DAC960_V2_ReadControllerConfiguration reads the Configuration Information
   from DAC960 V2 Firmware Controllers and initializes the Controller structure.
@@ -1797,7 +1761,6 @@ static bool DAC960_V2_ReadControllerConfiguration(DAC960_Controller_T
   memcpy(ControllerInfo, Controller->V2.NewControllerInformation,
 			sizeof(DAC960_V2_ControllerInfo_T));
 	 
-  
   if (!DAC960_V2_GeneralInfo(Controller))
     return DAC960_Failure(Controller, "GET HEALTH STATUS");
 
@@ -1908,7 +1871,6 @@ static bool DAC960_V2_ReadControllerConfiguration(DAC960_Controller_T
   return true;
 }
 
-
 /*
   DAC960_ReportControllerConfiguration reports the Configuration Information
   for Controller.
@@ -1954,7 +1916,6 @@ static bool DAC960_ReportControllerConfiguration(DAC960_Controller_T
     }
   return true;
 }
-
 
 /*
   DAC960_V1_ReadDeviceConfiguration reads the Device Configuration Information
@@ -2103,7 +2064,6 @@ static bool DAC960_V1_ReadDeviceConfiguration(DAC960_Controller_T
   return true;
 }
 
-
 /*
   DAC960_V2_ReadDeviceConfiguration reads the Device Configuration Information
   for DAC960 V2 Firmware Controllers by requesting the Physical Device
@@ -2171,7 +2131,6 @@ static bool DAC960_V2_ReadDeviceConfiguration(DAC960_Controller_T
   return true;
 }
 
-
 /*
   DAC960_SanitizeInquiryData sanitizes the Vendor, Model, Revision, and
   Product Serial Number fields of the Inquiry Standard Data and Inquiry
@@ -2228,7 +2187,6 @@ static void DAC960_SanitizeInquiryData(DAC960_SCSI_Inquiry_T
     }
   SerialNumber[SerialNumberLength] = '\0';
 }
-
 
 /*
   DAC960_V1_ReportDeviceConfiguration reports the Device Configuration
@@ -2325,7 +2283,6 @@ static bool DAC960_V1_ReportDeviceConfiguration(DAC960_Controller_T
     }
   return true;
 }
-
 
 /*
   DAC960_V2_ReportDeviceConfiguration reports the Device Configuration
@@ -2555,7 +2512,6 @@ static bool DAC960_RegisterBlockDevice(DAC960_Controller_T *Controller)
   return true;
 }
 
-
 /*
   DAC960_UnregisterBlockDevice unregisters the Block Device structures
   associated with Controller.
@@ -2646,7 +2602,6 @@ static bool DAC960_ReportErrorStatus(DAC960_Controller_T *Controller,
   return false;
 }
 
-
 /*
  * DAC960_DetectCleanup releases the resources that were allocated
  * during DAC960_DetectController().  DAC960_DetectController can
@@ -2699,7 +2654,6 @@ static void DAC960_DetectCleanup(DAC960_Controller_T *Controller)
   DAC960_Controllers[Controller->ControllerNumber] = NULL;
   kfree(Controller);
 }
-
 
 /*
   DAC960_DetectController detects Mylex DAC960/AcceleRAID/eXtremeRAID
@@ -3088,7 +3042,6 @@ DAC960_InitializeController(DAC960_Controller_T *Controller)
   return false;
 }
 
-
 /*
   DAC960_FinalizeController finalizes Controller.
 */
@@ -3144,7 +3097,6 @@ static void DAC960_FinalizeController(DAC960_Controller_T *Controller)
   DAC960_DetectCleanup(Controller);
 }
 
-
 /*
   DAC960_Probe verifies controller's existence and
   initializes the DAC960 Driver for that controller.
@@ -3181,7 +3133,6 @@ DAC960_Probe(struct pci_dev *dev, const struct pci_device_id *entry)
   return 0;
 }
 
-
 /*
   DAC960_Finalize finalizes the DAC960 Driver.
 */
@@ -3193,7 +3144,6 @@ static void DAC960_Remove(struct pci_dev *PCI_Device)
   if (Controller != NULL)
       DAC960_FinalizeController(Controller);
 }
-
 
 /*
   DAC960_V1_QueueReadWriteCommand prepares and queues a Read/Write Command for
@@ -3248,7 +3198,6 @@ static void DAC960_V1_QueueReadWriteCommand(DAC960_Command_T *Command)
     }
   DAC960_QueueCommand(Command);
 }
-
 
 /*
   DAC960_V2_QueueReadWriteCommand prepares and queues a Read/Write Command for
@@ -3322,7 +3271,6 @@ static void DAC960_V2_QueueReadWriteCommand(DAC960_Command_T *Command)
     }
   DAC960_QueueCommand(Command);
 }
-
 
 static int DAC960_process_queue(DAC960_Controller_T *Controller, struct request_queue *req_q)
 {
@@ -3402,7 +3350,6 @@ static void DAC960_ProcessRequest(DAC960_Controller_T *controller)
 		}
 	}
 }
-
 
 /*
   DAC960_queue_partial_rw extracts one bio from the request already
@@ -3530,7 +3477,6 @@ static void DAC960_V1_ReadWriteError(DAC960_Command_T *Command)
 	       Command->LogicalDriveNumber, Command->BlockNumber,
 	       Command->BlockNumber + Command->BlockCount - 1);
 }
-
 
 /*
   DAC960_V1_ProcessCompletedCommand performs completion processing for Command
@@ -4334,7 +4280,6 @@ static void DAC960_V1_ProcessCompletedCommand(DAC960_Command_T *Command)
   wake_up(&Controller->CommandWaitQueue);
 }
 
-
 /*
   DAC960_V2_ReadWriteError prints an appropriate error message for Command
   when an error occurs on a Read or Write operation.
@@ -4374,7 +4319,6 @@ static void DAC960_V2_ReadWriteError(DAC960_Command_T *Command)
 	       Command->LogicalDriveNumber, Command->BlockNumber,
 	       Command->BlockNumber + Command->BlockCount - 1);
 }
-
 
 /*
   DAC960_V2_ReportEvent prints an appropriate message when a Controller Event
@@ -4594,7 +4538,6 @@ static void DAC960_V2_ReportEvent(DAC960_Controller_T *Controller,
     }
 }
 
-
 /*
   DAC960_V2_ReportProgress prints an appropriate progress message for
   Logical Device Long Operations.
@@ -4616,7 +4559,6 @@ static void DAC960_V2_ReportProgress(DAC960_Controller_T *Controller,
 		  (100 * (BlocksCompleted >> 7)) / (LogicalDeviceSize >> 7));
   Controller->EphemeralProgressMessage = false;
 }
-
 
 /*
   DAC960_V2_ProcessCompletedCommand performs completion processing for Command
@@ -5147,7 +5089,6 @@ static void DAC960_V2_ProcessCompletedCommand(DAC960_Command_T *Command)
 			Controller->V2.NewPhysicalDeviceInformation->TargetID,
 		Controller->V2.NewPhysicalDeviceInformation->LogicalUnit - 1);
 
-
 	      DAC960_QueueCommand(Command);
 	      return;
 	    }
@@ -5337,7 +5278,6 @@ static irqreturn_t DAC960_BA_InterruptHandler(int IRQ_Channel,
   return IRQ_HANDLED;
 }
 
-
 /*
   DAC960_LP_InterruptHandler handles hardware interrupts from DAC960 LP Series
   Controllers.
@@ -5379,7 +5319,6 @@ static irqreturn_t DAC960_LP_InterruptHandler(int IRQ_Channel,
   return IRQ_HANDLED;
 }
 
-
 /*
   DAC960_LA_InterruptHandler handles hardware interrupts from DAC960 LA Series
   Controllers.
@@ -5416,7 +5355,6 @@ static irqreturn_t DAC960_LA_InterruptHandler(int IRQ_Channel,
   spin_unlock_irqrestore(&Controller->queue_lock, flags);
   return IRQ_HANDLED;
 }
-
 
 /*
   DAC960_PG_InterruptHandler handles hardware interrupts from DAC960 PG Series
@@ -5455,7 +5393,6 @@ static irqreturn_t DAC960_PG_InterruptHandler(int IRQ_Channel,
   return IRQ_HANDLED;
 }
 
-
 /*
   DAC960_PD_InterruptHandler handles hardware interrupts from DAC960 PD Series
   Controllers.
@@ -5488,7 +5425,6 @@ static irqreturn_t DAC960_PD_InterruptHandler(int IRQ_Channel,
   spin_unlock_irqrestore(&Controller->queue_lock, flags);
   return IRQ_HANDLED;
 }
-
 
 /*
   DAC960_P_InterruptHandler handles hardware interrupts from DAC960 P Series
@@ -5562,7 +5498,6 @@ static irqreturn_t DAC960_P_InterruptHandler(int IRQ_Channel,
   return IRQ_HANDLED;
 }
 
-
 /*
   DAC960_V1_QueueMonitoringCommand queues a Monitoring Command to DAC960 V1
   Firmware Controllers.
@@ -5578,7 +5513,6 @@ static void DAC960_V1_QueueMonitoringCommand(DAC960_Command_T *Command)
   CommandMailbox->Type3.BusAddress = Controller->V1.NewEnquiryDMA;
   DAC960_QueueCommand(Command);
 }
-
 
 /*
   DAC960_V2_QueueMonitoringCommand queues a Monitoring Command to DAC960 V2
@@ -5610,7 +5544,6 @@ static void DAC960_V2_QueueMonitoringCommand(DAC960_Command_T *Command)
     CommandMailbox->ControllerInfo.DataTransferSize;
   DAC960_QueueCommand(Command);
 }
-
 
 /*
   DAC960_MonitoringTimerFunction is the timer function for monitoring
@@ -5742,7 +5675,6 @@ static bool DAC960_CheckStatusBuffer(DAC960_Controller_T *Controller,
   return true;
 }
 
-
 /*
   DAC960_Message prints Driver Messages.
 */
@@ -5839,7 +5771,6 @@ static void DAC960_Message(DAC960_MessageLevel_T MessageLevel,
   BeginningOfLine = (Buffer[Length-1] == '\n');
 }
 
-
 /*
   DAC960_ParsePhysicalDevice parses spaces followed by a Physical Device
   Channel:TargetID specification from a User Command string.  It updates
@@ -5872,7 +5803,6 @@ static bool DAC960_ParsePhysicalDevice(DAC960_Controller_T *Controller,
   return true;
 }
 
-
 /*
   DAC960_ParseLogicalDrive parses spaces followed by a Logical Drive Number
   specification from a User Command string.  It updates LogicalDriveNumber and
@@ -5897,7 +5827,6 @@ static bool DAC960_ParseLogicalDrive(DAC960_Controller_T *Controller,
   *LogicalDriveNumber = XLogicalDriveNumber;
   return true;
 }
-
 
 /*
   DAC960_V1_SetDeviceState sets the Device State for a Physical Device for
@@ -5953,7 +5882,6 @@ static void DAC960_V1_SetDeviceState(DAC960_Controller_T *Controller,
       break;
     }
 }
-
 
 /*
   DAC960_V1_ExecuteUserCommand executes a User Command for DAC960 V1 Firmware
@@ -6168,7 +6096,6 @@ failure:
   return true;
 }
 
-
 /*
   DAC960_V2_TranslatePhysicalDevice translates a Physical Device Channel and
   TargetID into a Logical Device.  It returns true on success and false
@@ -6215,7 +6142,6 @@ static bool DAC960_V2_TranslatePhysicalDevice(DAC960_Command_T *Command,
 	 sizeof(DAC960_V2_CommandMailbox_T));
   return (Command->V2.CommandStatus == DAC960_V2_NormalCompletion);
 }
-
 
 /*
   DAC960_V2_ExecuteUserCommand executes a User Command for DAC960 V2 Firmware
@@ -6596,7 +6522,6 @@ static void DAC960_CreateProcEntries(DAC960_Controller_T *Controller)
 	proc_create_data("user_command", S_IWUSR | S_IRUSR, ControllerProcEntry, &dac960_user_command_proc_fops, Controller);
 	Controller->ControllerProcEntry = ControllerProcEntry;
 }
-
 
 /*
   DAC960_DestroyProcEntries destroys the /proc/rd/... entries for the
@@ -7095,7 +7020,6 @@ static struct DAC960_privdata DAC960_GEM_privdata = {
 	.InterruptHandler =	DAC960_GEM_InterruptHandler,
 	.MemoryWindowSize =	DAC960_GEM_RegisterWindowSize,
 };
-
 
 static struct DAC960_privdata DAC960_BA_privdata = {
 	.HardwareType =		DAC960_BA_Controller,

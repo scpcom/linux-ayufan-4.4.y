@@ -156,7 +156,6 @@ struct aa_replacedby {
 	struct aa_profile __rcu *profile;
 };
 
-
 /* struct aa_profile - basic confinement data
  * @base - base components of the profile (name, refcount, lists, lock ...)
  * @count: reference count of the obj
@@ -238,7 +237,6 @@ void aa_free_namespace_kref(struct kref *kref);
 struct aa_namespace *aa_find_namespace(struct aa_namespace *root,
 				       const char *name);
 
-
 void aa_free_replacedby_kref(struct kref *kref);
 struct aa_profile *aa_alloc_profile(const char *name);
 struct aa_profile *aa_new_null_profile(struct aa_profile *parent, int hat);
@@ -255,7 +253,6 @@ ssize_t aa_remove_profiles(char *name, size_t size);
 #define PROF_REPLACE 0
 
 #define unconfined(X) ((X)->mode == APPARMOR_UNCONFINED)
-
 
 static inline struct aa_profile *aa_deref_parent(struct aa_profile *p)
 {

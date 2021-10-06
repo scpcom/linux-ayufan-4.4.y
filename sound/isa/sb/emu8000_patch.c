@@ -27,7 +27,6 @@ static int emu8000_reset_addr;
 module_param(emu8000_reset_addr, int, 0444);
 MODULE_PARM_DESC(emu8000_reset_addr, "reset write address at each time (makes slowdown)");
 
-
 /*
  * Open up channels.
  */
@@ -293,7 +292,6 @@ snd_emu8000_sample_free(struct snd_emux *rec, struct snd_sf_sample *sp,
 	}
 	return 0;
 }
-
 
 /*
  * sample_reset callback - terminate voices

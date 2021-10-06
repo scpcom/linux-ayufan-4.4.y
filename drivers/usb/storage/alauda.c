@@ -132,7 +132,6 @@ struct alauda_info {
 
 static int init_alauda(struct us_data *us);
 
-
 /*
  * The table of devices
  */
@@ -170,7 +169,6 @@ static struct us_unusual_dev alauda_unusual_dev_list[] = {
 };
 
 #undef UNUSUAL_DEV
-
 
 /*
  * Media handling

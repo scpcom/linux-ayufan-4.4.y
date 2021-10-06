@@ -229,7 +229,6 @@ void __init opal_sys_param_init(void)
 		goto out_free_perm;
 	}
 
-
 	if (of_property_read_u8_array(sysparam, "param-perm", perm, count)) {
 		pr_err("SYSPARAM: Missing property param-perm in the DT\n");
 		goto out_free_perm;

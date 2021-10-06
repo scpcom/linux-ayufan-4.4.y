@@ -441,7 +441,6 @@ error:
 }
 */
 
-
 /**
  * v9fs_clear_inode - release an inode
  * @inode: inode to release
@@ -1457,4 +1456,3 @@ static const struct inode_operations v9fs_symlink_inode_operations = {
 	.getattr = v9fs_vfs_getattr,
 	.setattr = v9fs_vfs_setattr,
 };
-

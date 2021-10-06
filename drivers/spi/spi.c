@@ -327,7 +327,6 @@ struct bus_type spi_bus_type = {
 };
 EXPORT_SYMBOL_GPL(spi_bus_type);
 
-
 static int spi_drv_probe(struct device *dev)
 {
 	const struct spi_driver		*sdrv = to_spi_driver(dev->driver);
@@ -721,7 +720,6 @@ static int spi_map_buf(struct spi_master *master, struct device *dev,
 			sg_buf = buf;
 			sg_set_buf(&sgt->sgl[i], sg_buf, min);
 		}
-
 
 		buf += min;
 		len -= min;
@@ -1669,7 +1667,6 @@ static struct class spi_master_class = {
 	.dev_groups	= spi_master_groups,
 };
 
-
 /**
  * spi_alloc_master - allocate SPI master controller
  * @dev: the controller, possibly using the platform_bus
@@ -1990,7 +1987,6 @@ struct spi_master *spi_busnum_to_master(u16 bus_num)
 	return master;
 }
 EXPORT_SYMBOL_GPL(spi_busnum_to_master);
-
 
 /*-------------------------------------------------------------------------*/
 
@@ -2327,7 +2323,6 @@ int spi_async_locked(struct spi_device *spi, struct spi_message *message)
 
 }
 EXPORT_SYMBOL_GPL(spi_async_locked);
-
 
 /*-------------------------------------------------------------------------*/
 
@@ -2707,4 +2702,3 @@ err0:
  * include needing to have boardinfo data structures be much more public.
  */
 postcore_initcall(spi_init);
-

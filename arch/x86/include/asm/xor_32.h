@@ -174,7 +174,6 @@ xor_pII_mmx_4(unsigned long bytes, unsigned long *p1, unsigned long *p2,
 	kernel_fpu_end();
 }
 
-
 static void
 xor_pII_mmx_5(unsigned long bytes, unsigned long *p1, unsigned long *p2,
 	      unsigned long *p3, unsigned long *p4, unsigned long *p5)

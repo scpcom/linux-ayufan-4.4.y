@@ -114,7 +114,6 @@ DEFINE_REGSET(OFF, 0);		/* offset */
 #define ICH_RESETREGS			0x02	/* reset busmaster registers */
 #define ICH_STARTBM			0x01	/* start busmaster operation */
 
-
 /* global block */
 #define ICH_REG_GLOB_CNT		0x3c	/* dword - global control */
 #define   ICH_TRIE		0x00000040	/* tertiary resume interrupt enable */
@@ -154,7 +153,6 @@ DEFINE_REGSET(OFF, 0);		/* offset */
 #define   ICH_CAS		0x01		/* codec access semaphore */
 
 #define ICH_MAX_FRAGS		32		/* max hw frags */
-
 
 /*
  *  
@@ -387,7 +385,6 @@ static unsigned short snd_intel8x0m_codec_read(struct snd_ac97 *ac97,
 		iagetword(chip, 0); /* clear semaphore */
 	return res;
 }
-
 
 /*
  * DMA I/O
@@ -632,7 +629,6 @@ static struct snd_pcm_hardware snd_intel8x0m_stream =
 	.fifo_size =		0,
 };
 
-
 static int snd_intel8x0m_pcm_open(struct snd_pcm_substream *substream, struct ichdev *ichdev)
 {
 	static unsigned int rates[] = { 8000,  9600, 12000, 16000 };
@@ -684,7 +680,6 @@ static int snd_intel8x0m_capture_close(struct snd_pcm_substream *substream)
 	return 0;
 }
 
-
 static struct snd_pcm_ops snd_intel8x0m_playback_ops = {
 	.open =		snd_intel8x0m_playback_open,
 	.close =	snd_intel8x0m_playback_close,
@@ -706,7 +701,6 @@ static struct snd_pcm_ops snd_intel8x0m_capture_ops = {
 	.trigger =	snd_intel8x0m_pcm_trigger,
 	.pointer =	snd_intel8x0m_pcm_pointer,
 };
-
 
 struct ich_pcm_table {
 	char *suffix;
@@ -808,7 +802,6 @@ static int snd_intel8x0m_pcm(struct intel8x0m *chip)
 	return 0;
 }
 	
-
 /*
  *  Mixer part
  */
@@ -824,7 +817,6 @@ static void snd_intel8x0m_mixer_free_ac97(struct snd_ac97 *ac97)
 	struct intel8x0m *chip = ac97->private_data;
 	chip->ac97 = NULL;
 }
-
 
 static int snd_intel8x0m_mixer(struct intel8x0m *chip, int ac97_clock)
 {
@@ -879,7 +871,6 @@ static int snd_intel8x0m_mixer(struct intel8x0m *chip, int ac97_clock)
 			  igetdword(chip, ICHREG(GLOB_CNT)) & ~ICH_AC97COLD);
 	return err;
 }
-
 
 /*
  *

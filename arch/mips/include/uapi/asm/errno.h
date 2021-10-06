@@ -125,5 +125,4 @@
 
 #define EDQUOT		1133	/* Quota exceeded */
 
-
 #endif /* _UAPI_ASM_ERRNO_H */

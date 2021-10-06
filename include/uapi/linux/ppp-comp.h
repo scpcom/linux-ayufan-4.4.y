@@ -10,7 +10,6 @@
 #ifndef _UAPI_NET_PPP_COMP_H
 #define _UAPI_NET_PPP_COMP_H
 
-
 /*
  * CCP codes.
  */
@@ -88,6 +87,5 @@
 #define CILEN_PREDICTOR_1	2	/* length of its config option */
 #define CI_PREDICTOR_2		2	/* config option for Predictor-2 */
 #define CILEN_PREDICTOR_2	2	/* length of its config option */
-
 
 #endif /* _UAPI_NET_PPP_COMP_H */

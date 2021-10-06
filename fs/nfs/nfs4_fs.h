@@ -181,7 +181,6 @@ struct nfs4_state {
 	atomic_t count;
 };
 
-
 struct nfs4_exception {
 	struct nfs4_state *state;
 	struct inode *inode;

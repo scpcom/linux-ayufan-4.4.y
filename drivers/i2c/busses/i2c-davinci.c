@@ -279,7 +279,6 @@ static int i2c_davinci_init(struct davinci_i2c_dev *dev)
 	dev_dbg(dev->dev, "bus_freq = %dkHz, bus_delay = %d\n",
 		pdata->bus_freq, pdata->bus_delay);
 
-
 	/* Take the I2C module out of reset: */
 	davinci_i2c_reset_ctrl(dev, 1);
 

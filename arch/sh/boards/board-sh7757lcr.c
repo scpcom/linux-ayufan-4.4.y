@@ -609,4 +609,3 @@ static struct sh_machine_vector mv_sh7757lcr __initmv = {
 	.mv_init_irq		= init_sh7757lcr_IRQ,
 	.mv_mode_pins		= sh7757lcr_mode_pins,
 };
-

@@ -2033,8 +2033,3 @@ const struct ethtool_ops mlx4_en_ethtool_ops = {
 	.get_module_info = mlx4_en_get_module_info,
 	.get_module_eeprom = mlx4_en_get_module_eeprom
 };
-
-
-
-
-

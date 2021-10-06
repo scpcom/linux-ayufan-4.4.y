@@ -234,7 +234,6 @@ struct nubus_dirent
 	int mask;
 };
 
-
 /* We'd like to get rid of this eventually.  Only daynaport.c uses it now. */
 static inline void *nubus_slot_addr(int slot)
 {

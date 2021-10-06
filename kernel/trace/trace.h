@@ -42,7 +42,6 @@ enum trace_type {
 	__TRACE_LAST_TYPE,
 };
 
-
 #undef __field
 #define __field(type, item)		type	item;
 
@@ -350,7 +349,6 @@ struct tracer_flags {
 /* Makes more easy to define a tracer opt */
 #define TRACER_OPT(s, b)	.name = #s, .bit = b
 
-
 struct trace_option_dentry {
 	struct tracer_opt		*opt;
 	struct tracer_flags		*flags;
@@ -420,7 +418,6 @@ struct tracer {
 	bool			use_max_tr;
 #endif
 };
-
 
 /* Only current can touch trace_recursion */
 
@@ -749,7 +746,6 @@ extern int __trace_graph_entry(struct trace_array *tr,
 extern void __trace_graph_return(struct trace_array *tr,
 				 struct ftrace_graph_ret *trace,
 				 unsigned long flags, int pc);
-
 
 #ifdef CONFIG_DYNAMIC_FTRACE
 /* TODO: make this variable */

@@ -119,5 +119,4 @@ void ath9k_hw_reset_calibration(struct ath_hw *ah,
 s16 ath9k_hw_getchan_noise(struct ath_hw *ah, struct ath9k_channel *chan,
 			   s16 nf);
 
-
 #endif /* CALIB_H */

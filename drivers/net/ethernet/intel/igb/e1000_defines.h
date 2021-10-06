@@ -112,7 +112,6 @@
 #define E1000_MRQC_RSS_FIELD_IPV6              0x00100000
 #define E1000_MRQC_RSS_FIELD_IPV6_TCP          0x00200000
 
-
 /* Management Control */
 #define E1000_MANC_SMBUS_EN      0x00000001 /* SMBus Enabled - RO */
 #define E1000_MANC_ASF_EN        0x00000002 /* ASF Enabled - RO */
@@ -256,7 +255,6 @@
 #define SPEED_2500  2500
 #define HALF_DUPLEX 1
 #define FULL_DUPLEX 2
-
 
 #define ADVERTISE_10_HALF                 0x0001
 #define ADVERTISE_10_FULL                 0x0002
@@ -430,7 +428,6 @@
 /* Extended Interrupt Cause Set */
 /* E1000_EITR_CNT_IGNR is only for 82576 and newer */
 #define E1000_EITR_CNT_IGNR     0x80000000 /* Don't reset counters on write */
-
 
 /* Transmit Descriptor Control */
 /* Enable the counting of descriptors still to be processed. */
@@ -669,7 +666,6 @@
 #define SR_1000T_REMOTE_RX_STATUS 0x1000 /* Remote receiver OK */
 #define SR_1000T_LOCAL_RX_STATUS  0x2000 /* Local receiver OK */
 
-
 /* PHY 1000 MII Register/Bit Definitions */
 /* PHY Registers defined by IEEE */
 #define PHY_CONTROL      0x00 /* Control Register */
@@ -719,7 +715,6 @@
 #define E1000_I210_FIFO_SEL_TX_LEGACY	E1000_I210_FIFO_SEL_TX_QAV(0)
 #define E1000_I210_FIFO_SEL_BMC2OS_TX	0x06
 #define E1000_I210_FIFO_SEL_BMC2OS_RX	0x01
-
 
 /* Offset to data in NVM read/write registers */
 #define E1000_NVM_RW_REG_DATA   16

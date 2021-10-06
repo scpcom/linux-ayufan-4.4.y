@@ -1,11 +1,4 @@
-/*
- * sys_ia32.h - Linux ia32 syscall interfaces
- *
- * Copyright (c) 2008 Jaswinder Singh Rajput
- *
- * This file is released under the GPLv2.
- * See the file COPYING for more details.
- */
+
 
 #ifndef _ASM_X86_SYS_IA32_H
 #define _ASM_X86_SYS_IA32_H
@@ -19,7 +12,6 @@
 #include <asm/compat.h>
 #include <asm/ia32.h>
 
-/* ia32/sys_ia32.c */
 asmlinkage long sys32_truncate64(const char __user *, unsigned long, unsigned long);
 asmlinkage long sys32_ftruncate64(unsigned int, unsigned long, unsigned long);
 
@@ -46,10 +38,10 @@ asmlinkage long sys32_fadvise64(int, unsigned, unsigned, size_t, int);
 asmlinkage long sys32_fallocate(int, int, unsigned,
 				unsigned, unsigned, unsigned);
 
-/* ia32/ia32_signal.c */
+
 asmlinkage long sys32_sigreturn(void);
 asmlinkage long sys32_rt_sigreturn(void);
 
-#endif /* CONFIG_COMPAT */
+#endif 
 
-#endif /* _ASM_X86_SYS_IA32_H */
+#endif 

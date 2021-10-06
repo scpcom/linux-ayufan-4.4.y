@@ -268,7 +268,6 @@ static inline struct xfs_qoff_logitem *QOFF_ITEM(struct xfs_log_item *lip)
 	return container_of(lip, struct xfs_qoff_logitem, qql_item);
 }
 
-
 /*
  * This returns the number of iovecs needed to log the given quotaoff item.
  * We only need 1 iovec for an quotaoff item.  It just logs the

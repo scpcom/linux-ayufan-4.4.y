@@ -494,7 +494,6 @@ int kvmppc_core_vcpu_translate(struct kvm_vcpu *vcpu,
 	return 0;
 }
 
-
 int kvmppc_mmu_itlb_index(struct kvm_vcpu *vcpu, gva_t eaddr)
 {
 	unsigned int as = !!(vcpu->arch.shared->msr & MSR_IS);

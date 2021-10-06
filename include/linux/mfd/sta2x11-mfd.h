@@ -263,11 +263,9 @@ u32 sta2x11_sctl_mask(struct pci_dev *pdev, u32 reg, u32 mask, u32 val)
 #define SCTL_SCPLLFCTRL_DITHER_DISABLE_MASK     0x03
 #define SCTL_SCPLLFCTRL_DITHER_DISABLE_SHIFT       4
 
-
 #define SCTL_SCRESFRACT		0x10	/* PLL fractional input register */
 
 #define SCTL_SCRESFRACT_MASK	0x0000ffff
-
 
 #define SCTL_SCRESCTRL1		0x14	/* Peripheral reset control 1 */
 #define SCTL_SCRESXTRL2		0x18	/* Peripheral reset control 2 */

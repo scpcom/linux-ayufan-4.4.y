@@ -7,7 +7,6 @@
 
 #include <linux/errno.h>
 
-
 /*
  * Both the MPOL_* mempolicy mode and the MPOL_F_* optional mode flags are
  * passed by the user to either set_mempolicy() or mbind() in an 'int' actual.
@@ -68,6 +67,5 @@ enum mpol_rebind_step {
 #define MPOL_F_REBINDING (1 << 2)	/* identify policies in rebinding */
 #define MPOL_F_MOF	(1 << 3) /* this policy wants migrate on fault */
 #define MPOL_F_MORON	(1 << 4) /* Migrate On protnone Reference On Node */
-
 
 #endif /* _UAPI_LINUX_MEMPOLICY_H */

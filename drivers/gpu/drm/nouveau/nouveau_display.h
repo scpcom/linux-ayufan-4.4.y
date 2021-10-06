@@ -48,7 +48,7 @@ struct nouveau_display {
 	struct drm_property *underscan_property;
 	struct drm_property *underscan_hborder_property;
 	struct drm_property *underscan_vborder_property;
-	/* not really hue and saturation: */
+	
 	struct drm_property *vibrant_hue_property;
 	struct drm_property *color_vibrance_property;
 };

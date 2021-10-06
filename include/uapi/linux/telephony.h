@@ -213,7 +213,6 @@ struct phone_codec_data
 ******************************************************************************/
 #define PHONE_VAD			_IOW ('q', 0xA9, int)
 
-
 /******************************************************************************
 *
 * The exception structure allows us to multiplex multiple events onto the
@@ -257,6 +256,4 @@ union telephony_exception {
 	unsigned int bytes;
 };
 
-
 #endif		/* TELEPHONY_H */
-

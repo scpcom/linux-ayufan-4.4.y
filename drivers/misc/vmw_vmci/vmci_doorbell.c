@@ -29,7 +29,6 @@
 #include "vmci_driver.h"
 #include "vmci_route.h"
 
-
 #define VMCI_DOORBELL_INDEX_BITS	6
 #define VMCI_DOORBELL_INDEX_TABLE_SIZE	(1 << VMCI_DOORBELL_INDEX_BITS)
 #define VMCI_DOORBELL_HASH(_idx)	hash_32(_idx, VMCI_DOORBELL_INDEX_BITS)
@@ -81,7 +80,6 @@ static u32 last_notify_idx_reserved;
 
 /* This is a one entry cache used to by the index allocation. */
 static u32 last_notify_idx_released = PAGE_SIZE;
-
 
 /*
  * Utility function that retrieves the privilege flags associated

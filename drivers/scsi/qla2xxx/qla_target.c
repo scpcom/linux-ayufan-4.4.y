@@ -2145,8 +2145,6 @@ skip_explict_conf:
 	/* Sense with len > 24, is it possible ??? */
 }
 
-
-
 /* diff  */
 static inline int
 qlt_hba_err_chk_enabled(struct se_cmd *se_cmd)
@@ -2253,7 +2251,6 @@ qlt_set_t10dif_tags(struct se_cmd *se_cmd, struct crc_context *ctx)
 	}
 }
 
-
 static inline int
 qlt_build_ctio_crc2_pkt(struct qla_tgt_prm *prm, scsi_qla_host_t *vha)
 {
@@ -2342,7 +2339,6 @@ qlt_build_ctio_crc2_pkt(struct qla_tgt_prm *prm, scsi_qla_host_t *vha)
 		break;
 	}
 
-
 	/* ---- PKT ---- */
 	/* Update entry type to indicate Command Type CRC_2 IOCB */
 	pkt->entry_type  = CTIO_CRC2;
@@ -2359,7 +2355,6 @@ qlt_build_ctio_crc2_pkt(struct qla_tgt_prm *prm, scsi_qla_host_t *vha)
 		return -EAGAIN;
 	} else
 		ha->tgt.cmds[h-1] = prm->cmd;
-
 
 	pkt->handle  = h | CTIO_COMPLETION_HANDLE_MARK;
 	pkt->nport_handle = prm->cmd->loop_id;
@@ -2383,11 +2378,9 @@ qlt_build_ctio_crc2_pkt(struct qla_tgt_prm *prm, scsi_qla_host_t *vha)
 	else if (cmd->dma_data_direction == DMA_FROM_DEVICE)
 		pkt->flags = cpu_to_le16(CTIO7_FLAGS_DATA_OUT);
 
-
 	pkt->dseg_count = prm->tot_dsds;
 	/* Fibre channel byte count */
 	pkt->transfer_length = cpu_to_le32(transfer_length);
-
 
 	/* ----- CRC context -------- */
 
@@ -2414,7 +2407,6 @@ qlt_build_ctio_crc2_pkt(struct qla_tgt_prm *prm, scsi_qla_host_t *vha)
 	pkt->crc_context_address[1] = cpu_to_le32(MSD(crc_ctx_dma));
 	pkt->crc_context_len = CRC_CONTEXT_LEN_FW;
 
-
 	if (!bundling) {
 		cur_dsd = (uint32_t *) &crc_ctx_pkt->u.nobundling.data_address;
 	} else {
@@ -2434,7 +2426,6 @@ qlt_build_ctio_crc2_pkt(struct qla_tgt_prm *prm, scsi_qla_host_t *vha)
 	crc_ctx_pkt->prot_opts  = cpu_to_le16(fw_prot_opts);
 	crc_ctx_pkt->byte_count = cpu_to_le32(data_bytes);
 	crc_ctx_pkt->guard_seed = cpu_to_le16(0);
-
 
 	/* Walks data segments */
 	pkt->flags |= cpu_to_le16(CTIO7_FLAGS_DSD_PTR);
@@ -2463,7 +2454,6 @@ crc_queuing_error:
 
 	return QLA_FUNCTION_FAILED;
 }
-
 
 /*
  * Callback to setup response of xmit_type of QLA_TGT_XMIT_DATA and *
@@ -2606,7 +2596,6 @@ int qlt_xmit_response(struct qla_tgt_cmd *cmd, int xmit_type,
 	} else
 		qlt_24xx_init_ctio_to_isp(pkt, &prm);
 
-
 	cmd->state = QLA_TGT_STATE_PROCESSED; /* Mid-level is done processing */
 	cmd->cmd_sent_to_fw = 1;
 
@@ -2706,7 +2695,6 @@ out_unlock_free_unmap:
 }
 EXPORT_SYMBOL(qlt_rdy_to_xfer);
 
-
 /*
  * Checks the guard or meta-data for the type of error
  * detected by the HBA.
@@ -2759,7 +2747,6 @@ qlt_handle_dif_error(struct scsi_qla_host *vha, struct qla_tgt_cmd *cmd,
 		if (cmd->prot_sg_cnt) {
 			uint32_t i, k = 0, num_ent;
 			struct scatterlist *sg, *sgl;
-
 
 			sgl = cmd->prot_sg;
 
@@ -2840,7 +2827,6 @@ qlt_handle_dif_error(struct scsi_qla_host *vha, struct qla_tgt_cmd *cmd,
 out:
 	return 1;
 }
-
 
 /* If hardware_lock held on entry, might drop it, then reaquire */
 /* This function sends the appropriate CTIO to ISP 2xxx or 24xx */
@@ -3349,7 +3335,6 @@ qlt_host_reset_handler(struct qla_hw_data *ha)
 	spin_unlock_irqrestore(&ha->hardware_lock, flags);
 }
 
-
 /*
  * ha->hardware_lock supposed to be held on entry. Might drop it, then reaquire
  */
@@ -3452,7 +3437,6 @@ static void qlt_do_ctio_completion(struct scsi_qla_host *vha, uint32_t handle,
 			    vha->vp_idx, status, cmd->state, se_cmd);
 			break;
 		}
-
 
 		/* "cmd->state == QLA_TGT_STATE_ABORTED" means
 		 * cmd is already aborted/terminated, we don't
@@ -5158,8 +5142,6 @@ static void qlt_24xx_atio_pkt(struct scsi_qla_host *vha,
 			qlt_send_busy(vha, atio, SAM_STAT_TASK_SET_FULL);
 			break;
 		}
-
-
 
 		if (likely(atio->u.isp24.fcp_cmnd.task_mgmt_flags == 0)) {
 			rc = qlt_chk_qfull_thresh_hold(vha, atio);

@@ -27,7 +27,6 @@
 # define PCICR_ENDIANNESS 0
 #endif
 
-
 static struct resource sh7785_pci_resources[] = {
 	{
 		.name	= "PCI IO",

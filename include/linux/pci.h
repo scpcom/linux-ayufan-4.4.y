@@ -16,7 +16,6 @@
 #ifndef LINUX_PCI_H
 #define LINUX_PCI_H
 
-
 #include <linux/mod_devicetable.h>
 
 #include <linux/types.h>
@@ -609,7 +608,6 @@ struct pci_dynids {
 	struct list_head list;      /* for IDs added at runtime */
 };
 
-
 /*
  * PCI Error Recovery System (PCI-ERS).  If a PCI device driver provides
  * a set of callbacks in struct pci_error_handlers, that device driver
@@ -660,7 +658,6 @@ struct pci_error_handlers {
 	/* Device driver may resume normal operations */
 	void (*resume)(struct pci_dev *dev);
 };
-
 
 struct module;
 struct pci_driver {
@@ -1151,7 +1148,6 @@ int __must_check pci_bus_alloc_resource(struct pci_bus *bus,
 						  resource_size_t),
 			void *alignf_data);
 
-
 int pci_remap_iospace(const struct resource *res, phys_addr_t phys_addr);
 
 static inline pci_bus_addr_t pci_bus_address(struct pci_dev *pdev, int bar)
@@ -1536,7 +1532,6 @@ static inline const char *pci_name(const struct pci_dev *pdev)
 	return dev_name(&pdev->dev);
 }
 
-
 /* Some archs don't want to expose struct resource to userland as-is
  * in sysfs and /proc
  */
@@ -1549,7 +1544,6 @@ static inline void pci_resource_to_user(const struct pci_dev *dev, int bar,
 	*end = rsrc->end;
 }
 #endif /* HAVE_ARCH_PCI_RESOURCE_TO_USER */
-
 
 /*
  *  The world is not perfect and supplies us with broken PCI devices.

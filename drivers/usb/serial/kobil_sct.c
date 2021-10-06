@@ -22,7 +22,6 @@
  * (Adapter K), B1 Professional and KAAN Professional (Adapter B)
  */
 
-
 #include <linux/kernel.h>
 #include <linux/errno.h>
 #include <linux/slab.h>
@@ -48,7 +47,6 @@
 
 #define KOBIL_TIMEOUT		500
 #define KOBIL_BUF_LENGTH	300
-
 
 /* Function prototypes */
 static int kobil_port_probe(struct usb_serial_port *probe);
@@ -112,7 +110,6 @@ struct kobil_private {
 	__u16 device_type;
 };
 
-
 static int kobil_port_probe(struct usb_serial_port *port)
 {
 	struct usb_serial *serial = port->serial;
@@ -144,7 +141,6 @@ static int kobil_port_probe(struct usb_serial_port *port)
 
 	return 0;
 }
-
 
 static int kobil_port_remove(struct usb_serial_port *port)
 {
@@ -252,14 +248,12 @@ static int kobil_open(struct tty_struct *tty, struct usb_serial_port *port)
 	return 0;
 }
 
-
 static void kobil_close(struct usb_serial_port *port)
 {
 	/* FIXME: Add rts/dtr methods */
 	usb_kill_urb(port->interrupt_out_urb);
 	usb_kill_urb(port->interrupt_in_urb);
 }
-
 
 static void kobil_read_int_callback(struct urb *urb)
 {
@@ -284,11 +278,9 @@ static void kobil_read_int_callback(struct urb *urb)
 	dev_dbg(&port->dev, "%s - Send read URB returns: %i\n", __func__, result);
 }
 
-
 static void kobil_write_int_callback(struct urb *urb)
 {
 }
-
 
 static int kobil_write(struct tty_struct *tty, struct usb_serial_port *port,
 			const unsigned char *buf, int count)
@@ -358,13 +350,11 @@ static int kobil_write(struct tty_struct *tty, struct usb_serial_port *port,
 	return count;
 }
 
-
 static int kobil_write_room(struct tty_struct *tty)
 {
 	/* FIXME */
 	return 8;
 }
-
 
 static int kobil_tiocmget(struct tty_struct *tty)
 {

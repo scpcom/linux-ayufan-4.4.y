@@ -69,7 +69,6 @@
 #define KN02XA_EAR_ADDRESS	(0x7ffffff<<2)	/* address involved */
 #define KN02XA_EAR_RES_0	(0x3<<0)	/* unused */
 
-
 #ifndef __ASSEMBLY__
 
 #include <linux/interrupt.h>

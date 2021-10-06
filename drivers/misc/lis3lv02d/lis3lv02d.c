@@ -445,7 +445,6 @@ int lis3lv02d_poweron(struct lis3lv02d *lis3)
 }
 EXPORT_SYMBOL_GPL(lis3lv02d_poweron);
 
-
 static void lis3lv02d_joystick_poll(struct input_polled_dev *pidev)
 {
 	struct lis3lv02d *lis3 = pidev->private;
@@ -859,7 +858,6 @@ static struct attribute_group lis3lv02d_attribute_group = {
 	.attrs = lis3lv02d_attributes
 };
 
-
 static int lis3lv02d_add_fs(struct lis3lv02d *lis3)
 {
 	lis3->pdev = platform_device_register_simple(DRIVER_NAME, -1, NULL, 0);
@@ -1095,7 +1093,6 @@ int lis3lv02d_init_dt(struct lis3lv02d *lis3)
 		pdata->st_max_limits[1] = sval;
 	if (of_property_read_s32(np, "st,max-limit-z", &sval) == 0)
 		pdata->st_max_limits[2] = sval;
-
 
 	lis3->pdata = pdata;
 

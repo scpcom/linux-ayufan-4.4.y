@@ -183,7 +183,6 @@ typedef uint8_t PPSMC_Result;
 #define PPSMC_MSG_DisableBAPM               ((uint32_t) 0x121)
 #define PPSMC_MSG_UVD_DPM_Config            ((uint32_t) 0x124)
 
-
 typedef uint16_t PPSMC_Msg;
 
 #pragma pack(pop)

@@ -245,4 +245,3 @@ void netup_unidvb_ci_unregister(struct netup_unidvb_dev *dev, int num)
 	state = &dev->ci[num];
 	dvb_ca_en50221_release(&state->ca);
 }
-

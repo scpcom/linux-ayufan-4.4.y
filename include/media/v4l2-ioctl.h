@@ -290,7 +290,6 @@ struct v4l2_ioctl_ops {
 					bool valid_prio, unsigned int cmd, void *arg);
 };
 
-
 /* v4l debugging and diagnostics */
 
 /* Device debug flags to be used with the video device debug attribute */

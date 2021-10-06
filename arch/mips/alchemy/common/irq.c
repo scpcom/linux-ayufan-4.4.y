@@ -76,7 +76,6 @@ struct alchemy_irqmap {
 static int au1x_ic_settype(struct irq_data *d, unsigned int type);
 static int au1300_gpic_settype(struct irq_data *d, unsigned int type);
 
-
 /* NOTE on interrupt priorities: The original writers of this code said:
  *
  * Because of the tight timing of SETUP token to reply transactions,

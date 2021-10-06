@@ -402,7 +402,6 @@ static struct platform_device isp1362_hcd_device = {
 };
 #endif
 
-
 #if IS_ENABLED(CONFIG_USB_NET2272)
 static struct resource net2272_bfin_resources[] = {
 	{
@@ -423,8 +422,6 @@ static struct platform_device net2272_bfin_device = {
 	.resource = net2272_bfin_resources,
 };
 #endif
-
-
 
 #if IS_ENABLED(CONFIG_MTD_PHYSMAP)
 static struct mtd_partition para_partitions[] = {
@@ -461,8 +458,6 @@ static struct platform_device para_flash_device = {
 	.resource      = &para_flash_resource,
 };
 #endif
-
-
 
 static const unsigned int cclk_vlev_datasheet[] =
 {

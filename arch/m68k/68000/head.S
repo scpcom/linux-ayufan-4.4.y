@@ -15,7 +15,6 @@
 #include <asm/asm-offsets.h>
 #include <asm/thread_info.h>
 
-
 /*****************************************************************************
  * UCSIMM and UCDIMM use CONFIG_MEMORY_RESERVE to reserve some RAM
  *****************************************************************************/
@@ -103,7 +102,6 @@ _pll_settle:
 	subw	#1, %d0
 	bne	_pll_settle
 #endif /* CONFIG_M68x328 */
-
 
 /*****************************************************************************
  * If running kernel from ROM some specific initialization has to be done.

@@ -34,7 +34,6 @@ struct panel_module {
 };
 #define to_panel_module(x) container_of(x, struct panel_module, base)
 
-
 /*
  * Encoder:
  */
@@ -44,7 +43,6 @@ struct panel_encoder {
 	struct panel_module *mod;
 };
 #define to_panel_encoder(x) container_of(x, struct panel_encoder, base)
-
 
 static void panel_encoder_destroy(struct drm_encoder *encoder)
 {
@@ -152,7 +150,6 @@ struct panel_connector {
 	struct panel_module *mod;
 };
 #define to_panel_connector(x) container_of(x, struct panel_connector, base)
-
 
 static void panel_connector_destroy(struct drm_connector *connector)
 {

@@ -238,4 +238,3 @@ module_platform_driver(psc_i2s_driver);
 MODULE_AUTHOR("Grant Likely <grant.likely@secretlab.ca>");
 MODULE_DESCRIPTION("Freescale MPC5200 PSC in I2S mode ASoC Driver");
 MODULE_LICENSE("GPL");
-

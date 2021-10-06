@@ -546,7 +546,6 @@ int ring_buffer_wait(struct ring_buffer *buffer, int cpu, bool full)
 		work = &cpu_buffer->irq_work;
 	}
 
-
 	while (true) {
 		if (full)
 			prepare_to_wait(&work->full_waiters, &wait, TASK_INTERRUPTIBLE);
@@ -783,7 +782,6 @@ EXPORT_SYMBOL_GPL(ring_buffer_normalize_time_stamp);
 #define RB_PAGE_NORMAL		0UL
 #define RB_PAGE_HEAD		1UL
 #define RB_PAGE_UPDATE		2UL
-
 
 #define RB_FLAG_MASK		3UL
 

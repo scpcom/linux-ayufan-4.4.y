@@ -373,7 +373,6 @@ typedef struct {
 #define REG_RD_ADDR_iop_spu_rw_brp 204
 #define REG_WR_ADDR_iop_spu_rw_brp 204
 
-
 /* Constants */
 enum {
   regk_iop_spu_attn_hi                     = 0x00000005,

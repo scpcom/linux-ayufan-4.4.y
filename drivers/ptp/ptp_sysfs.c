@@ -66,7 +66,6 @@ const struct attribute_group *ptp_groups[] = {
 	NULL,
 };
 
-
 static ssize_t extts_enable_store(struct device *dev,
 				  struct device_attribute *attr,
 				  const char *buf, size_t count)

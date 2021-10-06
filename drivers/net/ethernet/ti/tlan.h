@@ -19,12 +19,9 @@
  *
  ********************************************************************/
 
-
 #include <linux/io.h>
 #include <linux/types.h>
 #include <linux/netdevice.h>
-
-
 
 	/*****************************************************************
 	 * TLan Definitions
@@ -55,7 +52,6 @@
 #define TX_TIMEOUT		(10*HZ)	 /* We need time for auto-neg */
 #define MAX_TLAN_BOARDS		8	 /* Max number of boards installed
 					    at a time */
-
 
 	/*****************************************************************
 	 * Device Identification Definitions
@@ -96,8 +92,6 @@ struct tlan_adapter_entry {
 #define TLAN_DUPLEX_HALF	1
 #define TLAN_DUPLEX_FULL	2
 
-
-
 	/*****************************************************************
 	 * EISA Definitions
 	 *
@@ -115,8 +109,6 @@ struct tlan_adapter_entry {
 #define EISA_REG3    0xc8f   /* EISA Configuration Register 3 */
 #define EISA_APROM   0xc90   /* Ethernet Address PROM */
 
-
-
 	/*****************************************************************
 	 * Rx/Tx List Definitions
 	 *
@@ -132,12 +124,10 @@ struct tlan_adapter_entry {
 #define TLAN_CSTAT_PASS_CRC	0x0200
 #define TLAN_CSTAT_DP_PR	0x0100
 
-
 struct tlan_buffer {
 	u32	count;
 	u32	address;
 };
-
 
 struct tlan_list {
 	u32		forward;
@@ -146,11 +136,7 @@ struct tlan_list {
 	struct tlan_buffer buffer[TLAN_BUFFERS_PER_LIST];
 };
 
-
 typedef u8 TLanBuffer[TLAN_MAX_FRAME_SIZE];
-
-
-
 
 	/*****************************************************************
 	 * PHY definitions
@@ -159,9 +145,6 @@ typedef u8 TLanBuffer[TLAN_MAX_FRAME_SIZE];
 
 #define TLAN_PHY_MAX_ADDR	0x1F
 #define TLAN_PHY_NONE		0x20
-
-
-
 
 	/*****************************************************************
 	 * TLAN Private Information Structure
@@ -210,9 +193,6 @@ struct tlan_priv {
 	struct work_struct			tlan_tqueue;
 };
 
-
-
-
 	/*****************************************************************
 	 * TLan Driver Timer Definitions
 	 *
@@ -228,9 +208,6 @@ struct tlan_priv {
 
 #define TLAN_TIMER_ACT_DELAY		(HZ/10)
 
-
-
-
 	/*****************************************************************
 	 * TLan Driver Eeprom Definitions
 	 *
@@ -240,8 +217,6 @@ struct tlan_priv {
 #define TLAN_EEPROM_STOP	1
 
 #define TLAN_EEPROM_SIZE	256
-
-
 
 	/*****************************************************************
 	 * Host Register Offsets and Contents
@@ -271,7 +246,6 @@ struct tlan_priv {
 #define		TLAN_HI_IV_MASK		0x1FE0
 #define		TLAN_HI_IT_MASK		0x001C
 #define TLAN_DIO_DATA			0x0C
-
 
 /* ThunderLAN Internal Register DIO Offsets */
 
@@ -352,8 +326,6 @@ struct tlan_priv {
 #define		TLAN_ID_RX_EOF		0x02
 #define		TLAN_ID_RX_EOC		0x01
 
-
-
 /* ThunderLAN Interrupt Codes */
 
 #define TLAN_INT_NUMBER_OF_INTS	8
@@ -366,8 +338,6 @@ struct tlan_priv {
 #define TLAN_INT_TX_EOC			0x0005
 #define TLAN_INT_STATUS_CHECK		0x0006
 #define TLAN_INT_RX_EOC			0x0007
-
-
 
 /* ThunderLAN MII Registers */
 
@@ -448,18 +418,12 @@ static inline u8 tlan_dio_read8(u16 base_addr, u16 internal_addr)
 
 }
 
-
-
-
 static inline u16 tlan_dio_read16(u16 base_addr, u16 internal_addr)
 {
 	outw(internal_addr, base_addr + TLAN_DIO_ADR);
 	return inw((base_addr + TLAN_DIO_DATA) + (internal_addr & 0x2));
 
 }
-
-
-
 
 static inline u32 tlan_dio_read32(u16 base_addr, u16 internal_addr)
 {
@@ -468,9 +432,6 @@ static inline u32 tlan_dio_read32(u16 base_addr, u16 internal_addr)
 
 }
 
-
-
-
 static inline void tlan_dio_write8(u16 base_addr, u16 internal_addr, u8 data)
 {
 	outw(internal_addr, base_addr + TLAN_DIO_ADR);
@@ -478,18 +439,12 @@ static inline void tlan_dio_write8(u16 base_addr, u16 internal_addr, u8 data)
 
 }
 
-
-
-
 static inline void tlan_dio_write16(u16 base_addr, u16 internal_addr, u16 data)
 {
 	outw(internal_addr, base_addr + TLAN_DIO_ADR);
 	outw(data, base_addr + TLAN_DIO_DATA + (internal_addr & 0x2));
 
 }
-
-
-
 
 static inline void tlan_dio_write32(u16 base_addr, u16 internal_addr, u32 data)
 {

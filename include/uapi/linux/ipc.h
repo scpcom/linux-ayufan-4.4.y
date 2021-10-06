@@ -77,5 +77,4 @@ struct ipc_kludge {
 
 #define IPCCALL(version,op)	((version)<<16 | (op))
 
-
 #endif /* _UAPI_LINUX_IPC_H */

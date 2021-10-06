@@ -37,7 +37,6 @@
 #define SET_INFRABUFFER_EMPTY	1
 #define GET_INFRACODE		2
 
-
 struct igorplugusb {
 	struct rc_dev *rc;
 	struct device *dev;

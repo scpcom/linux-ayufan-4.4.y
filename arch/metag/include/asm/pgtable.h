@@ -145,7 +145,6 @@ static inline pte_t pte_mkhuge(pte_t pte)    { return pte; }
 #define pgprot_noncached(prot)						\
 	__pgprot(pgprot_val(prot) & ~_PAGE_CACHEABLE)
 
-
 /*
  * Conversion functions: convert a page and protection to a page entry,
  * and a page entry and page directory to the page they refer to.

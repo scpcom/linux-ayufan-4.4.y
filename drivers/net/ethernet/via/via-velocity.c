@@ -227,7 +227,6 @@ static void mac_set_vlan_cam(struct mac_regs __iomem *regs, int idx,
 	BYTE_REG_BITS_SET(CAMCR_PS_MAR, CAMCR_PS1 | CAMCR_PS0, &regs->CAMCR);
 }
 
-
 /**
  *	mac_wol_reset	-	reset WOL after exiting low power
  *	@regs: register block of this velocity
@@ -1550,7 +1549,6 @@ static int velocity_alloc_rx_buf(struct velocity_info *vptr, int idx)
 	return 0;
 }
 
-
 static int velocity_rx_refill(struct velocity_info *vptr)
 {
 	int dirty = vptr->rx.dirty, done = 0;
@@ -2449,7 +2447,6 @@ static int velocity_ioctl(struct net_device *dev, struct ifreq *rq, int cmd)
 	if (!netif_running(dev))
 		velocity_set_power_state(vptr, PCI_D3hot);
 
-
 	return ret;
 }
 
@@ -2833,7 +2830,6 @@ static int velocity_probe(struct device *dev, int irq,
 
 	for (i = 0; i < 6; i++)
 		netdev->dev_addr[i] = readb(&regs->PAR[i]);
-
 
 	drv_string = dev_driver_string(dev);
 
@@ -3522,7 +3518,6 @@ static void set_pending_timer_val(int *val, u32 us)
 
 	*val = (mult << 6) | ((us >> shift) & 0x3f);
 }
-
 
 static int velocity_get_coalesce(struct net_device *dev,
 		struct ethtool_coalesce *ecmd)

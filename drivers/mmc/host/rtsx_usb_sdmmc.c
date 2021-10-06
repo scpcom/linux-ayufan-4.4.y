@@ -777,7 +777,6 @@ static int sdmmc_get_ro(struct mmc_host *mmc)
 
 	mutex_unlock(&ucr->dev_mutex);
 
-
 	/* Treat failed detection as non-ro */
 	if (err)
 		return 0;

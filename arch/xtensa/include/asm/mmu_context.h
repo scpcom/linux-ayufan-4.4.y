@@ -146,7 +146,6 @@ static inline void destroy_context(struct mm_struct *mm)
 	invalidate_page_directory();
 }
 
-
 static inline void enter_lazy_tlb(struct mm_struct *mm, struct task_struct *tsk)
 {
 	/* Nothing to do. */

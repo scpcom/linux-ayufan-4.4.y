@@ -51,4 +51,3 @@ struct mpu_rate omap1_rate_table[] = {
 			CK_16XX|CK_1510|CK_310|CK_7XX },
 	{ 0, 0, 0, 0, 0 },
 };
-

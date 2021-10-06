@@ -118,7 +118,6 @@ typedef struct _gpt_mbr_record {
 	__le32	size_in_lba;    /* used by EFI - size of pt in LBA */
 } __packed gpt_mbr_record;
 
-
 typedef struct _legacy_mbr {
 	u8 boot_code[440];
 	__le32 unique_mbr_signature;

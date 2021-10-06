@@ -1049,7 +1049,6 @@ int iwl_mvm_sta_tx_agg_stop(struct iwl_mvm *mvm, struct ieee80211_vif *vif,
 	u16 txq_id;
 	int err;
 
-
 	/*
 	 * If mac80211 is cleaning its state, then say that we finished since
 	 * our state has been cleared anyway.
@@ -1349,7 +1348,6 @@ static int iwl_mvm_send_sta_igtk(struct iwl_mvm *mvm,
 				    sizeof(igtk_cmd), &igtk_cmd);
 }
 
-
 static inline u8 *iwl_mvm_get_mac_addr(struct iwl_mvm *mvm,
 				       struct ieee80211_vif *vif,
 				       struct ieee80211_sta *sta)
@@ -1366,7 +1364,6 @@ static inline u8 *iwl_mvm_get_mac_addr(struct iwl_mvm *mvm,
 						lockdep_is_held(&mvm->mutex));
 		return sta->addr;
 	}
-
 
 	return NULL;
 }

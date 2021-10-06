@@ -464,7 +464,6 @@ static ssize_t pm8001_ctl_fatal_log_show(struct device *cdev,
 
 static DEVICE_ATTR(fatal_log, S_IRUGO, pm8001_ctl_fatal_log_show, NULL);
 
-
 /**
  ** pm8001_ctl_gsm_log_show - gsm dump collection
  ** @cdev:pointer to embedded class device
@@ -750,4 +749,3 @@ struct device_attribute *pm8001_host_attrs[] = {
 	&dev_attr_ob_log,
 	NULL,
 };
-

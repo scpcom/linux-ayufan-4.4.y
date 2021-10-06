@@ -253,7 +253,6 @@ static int mxl301rf_sleep(struct dvb_frontend *fe)
 	return ret;
 }
 
-
 /* init sequence is not public.
  * the parent must have init'ed the device.
  * just wake up here.
@@ -291,7 +290,6 @@ static const struct dvb_tuner_ops mxl301rf_ops = {
 	.get_rf_strength = mxl301rf_get_rf_strength,
 };
 
-
 static int mxl301rf_probe(struct i2c_client *client,
 			  const struct i2c_device_id *id)
 {
@@ -325,7 +323,6 @@ static int mxl301rf_remove(struct i2c_client *client)
 	kfree(state);
 	return 0;
 }
-
 
 static const struct i2c_device_id mxl301rf_id[] = {
 	{"mxl301rf", 0},

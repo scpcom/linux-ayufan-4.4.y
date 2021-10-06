@@ -510,7 +510,6 @@ static RECONFIG_DEVICE_ATTR(modelname);
 static DEVICE_ATTR_RO(init_pin_configs);
 static DEVICE_ATTR_RO(driver_pin_configs);
 
-
 #ifdef CONFIG_SND_HDA_PATCH_LOADER
 
 /* parser mode */
@@ -602,7 +601,6 @@ static void parse_##name##_mode(char *buf, struct hda_bus *bus, \
 DEFINE_PARSE_ID_MODE(vendor_id);
 DEFINE_PARSE_ID_MODE(subsystem_id);
 DEFINE_PARSE_ID_MODE(revision_id);
-
 
 struct hda_patch_item {
 	const char *tag;

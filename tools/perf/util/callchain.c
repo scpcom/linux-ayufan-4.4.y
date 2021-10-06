@@ -386,7 +386,6 @@ create_child(struct callchain_node *parent, bool inherit_children)
 	return new;
 }
 
-
 /*
  * Fill the node with callchain values
  */

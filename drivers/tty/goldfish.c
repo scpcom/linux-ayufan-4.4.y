@@ -273,7 +273,6 @@ static int goldfish_tty_probe(struct platform_device *pdev)
 	if (ret)
 		goto err_request_irq_failed;
 
-
 	ttydev = tty_port_register_device(&qtty->port, goldfish_tty_driver,
 							pdev->id, &pdev->dev);
 	if (IS_ERR(ttydev)) {

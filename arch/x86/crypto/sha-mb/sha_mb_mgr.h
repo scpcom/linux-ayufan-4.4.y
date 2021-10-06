@@ -54,7 +54,6 @@
 #ifndef __SHA_MB_MGR_H
 #define __SHA_MB_MGR_H
 
-
 #include <linux/types.h>
 
 #define NUM_SHA1_DIGEST_WORDS 5
@@ -97,7 +96,6 @@ struct sha1_mb_mgr {
 	/* byte 4 is set to FF as a flag */
 	struct sha1_lane_data ldata[8];
 };
-
 
 #define SHA1_MB_MGR_NUM_LANES_AVX2 8
 

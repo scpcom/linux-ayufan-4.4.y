@@ -72,7 +72,6 @@ struct intc_desc_int {
 	bool skip_suspend;
 };
 
-
 enum {
 	REG_FN_ERR = 0,
 	REG_FN_TEST_BASE = 1,

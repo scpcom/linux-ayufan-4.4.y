@@ -21,7 +21,6 @@
 
 #include <linux/iio/common/st_sensors.h>
 
-
 int st_sensors_get_buffer_element(struct iio_dev *indio_dev, u8 *buf)
 {
 	u8 *addr;

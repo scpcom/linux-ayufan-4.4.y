@@ -106,7 +106,6 @@ int cfg80211_mgd_wext_siwfreq(struct net_device *dev,
 			goto out;
 	}
 
-
 	wdev->wext.connect.channel = chan;
 
 	/*

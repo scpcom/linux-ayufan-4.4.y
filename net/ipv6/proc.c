@@ -127,7 +127,6 @@ static const char *const icmp6type2name[256] = {
 	[NDISC_REDIRECT] = "Redirects",
 };
 
-
 static const struct snmp_mib snmp6_udp6_list[] = {
 	SNMP_MIB_ITEM("Udp6InDatagrams", UDP_MIB_INDATAGRAMS),
 	SNMP_MIB_ITEM("Udp6NoPorts", UDP_MIB_NOPORTS),
@@ -343,4 +342,3 @@ void ipv6_misc_proc_exit(void)
 {
 	unregister_pernet_subsys(&ipv6_proc_ops);
 }
-

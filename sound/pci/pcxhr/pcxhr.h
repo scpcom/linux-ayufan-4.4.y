@@ -30,7 +30,6 @@
 #define PCXHR_DRIVER_VERSION		0x000906	/* 0.9.6 */
 #define PCXHR_DRIVER_VERSION_STRING	"0.9.6"		/* 0.9.6 */
 
-
 #define PCXHR_MAX_CARDS		6
 #define PCXHR_PLAYBACK_STREAMS	4
 
@@ -124,7 +123,6 @@ struct pcxhr_mgr {
 	unsigned char dsp_reset;	/* copy of PCXHR_DSP_RESET register */
 };
 
-
 enum pcxhr_stream_status {
 	PCXHR_STREAM_STATUS_FREE,
 	PCXHR_STREAM_STATUS_OPEN,
@@ -151,7 +149,6 @@ struct pcxhr_stream {
 	int channels;
 };
 
-
 enum pcxhr_pipe_status {
 	PCXHR_PIPE_UNDEFINED,
 	PCXHR_PIPE_DEFINED
@@ -162,7 +159,6 @@ struct pcxhr_pipe {
 	int is_capture;		/* this is a capture pipe */
 	int first_audio;	/* first audio num */
 };
-
 
 struct snd_pcxhr {
 	struct snd_card *card;

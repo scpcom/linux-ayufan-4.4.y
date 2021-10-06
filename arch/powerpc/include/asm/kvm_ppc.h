@@ -352,7 +352,6 @@ static inline u32 kvmppc_set_field(u64 inst, int msb, int lsb, int value)
 	__u;					\
 })
 
-
 #define set_reg_val(id, val)	({		\
 	u64 __v;				\
 	switch (one_reg_size(id)) {		\

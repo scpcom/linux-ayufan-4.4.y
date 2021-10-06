@@ -21,14 +21,12 @@
 #include <net/netlink.h>
 #include <net/pkt_sched.h>
 
-
 struct prio_sched_data {
 	int bands;
 	struct tcf_proto __rcu *filter_list;
 	u8  prio2band[TC_PRIO_MAX+1];
 	struct Qdisc *queues[TCQ_PRIO_BANDS];
 };
-
 
 static struct Qdisc *
 prio_classify(struct sk_buff *skb, struct Qdisc *sch, int *qerr)
@@ -141,7 +139,6 @@ static unsigned int prio_drop(struct Qdisc *sch)
 	}
 	return 0;
 }
-
 
 static void
 prio_reset(struct Qdisc *sch)
@@ -296,7 +293,6 @@ static unsigned long prio_bind(struct Qdisc *sch, unsigned long parent, u32 clas
 {
 	return prio_get(sch, classid);
 }
-
 
 static void prio_put(struct Qdisc *q, unsigned long cl)
 {

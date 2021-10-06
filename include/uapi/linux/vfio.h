@@ -16,7 +16,6 @@
 
 #define VFIO_API_VERSION	0
 
-
 /* Kernel & User level defines for VFIO IOCTLs. */
 
 /* Extensions */

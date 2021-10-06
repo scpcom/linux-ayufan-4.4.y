@@ -181,7 +181,6 @@ out:
 	return err;
 }
 
-
 /* echo 0>/dev/oprofile/enable */
 void oprofile_stop(void)
 {
@@ -198,7 +197,6 @@ void oprofile_stop(void)
 out:
 	mutex_unlock(&start_mutex);
 }
-
 
 void oprofile_shutdown(void)
 {
@@ -266,14 +264,12 @@ static int __init oprofile_init(void)
 	return oprofilefs_register();
 }
 
-
 static void __exit oprofile_exit(void)
 {
 	oprofilefs_unregister();
 	if (!timer_mode)
 		oprofile_arch_exit();
 }
-
 
 module_init(oprofile_init);
 module_exit(oprofile_exit);

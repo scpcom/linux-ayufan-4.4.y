@@ -53,7 +53,6 @@
 #include <sound/vx_core.h>
 #include "vx_cmd.h"
 
-
 /*
  * read three pending pcm bytes via inb()
  */
@@ -155,7 +154,6 @@ static int vx_set_stream_format(struct vx_core *chip, struct vx_pipe *pipe,
 	return vx_send_msg(chip, &rmh);
 }
 
-
 /*
  * vx_set_format - set the format of a pipe
  * @pipe: the affected pipe
@@ -211,7 +209,6 @@ static int vx_set_ibl(struct vx_core *chip, struct vx_ibl_info *info)
 	return 0;
 }
 
-
 /*
  * vx_get_pipe_state - get the state of a pipe
  * @pipe: the pipe to be checked
@@ -234,7 +231,6 @@ static int vx_get_pipe_state(struct vx_core *chip, struct vx_pipe *pipe, int *st
 		*state = (rmh.Stat[0] & (1 << pipe->number)) ? 1 : 0;
 	return err;
 }
-
 
 /*
  * vx_query_hbuffer_size - query available h-buffer size in bytes
@@ -261,7 +257,6 @@ static int vx_query_hbuffer_size(struct vx_core *chip, struct vx_pipe *pipe)
 		result = rmh.Stat[0] & 0xffff;
 	return result;
 }
-
 
 /*
  * vx_pipe_can_start - query whether a pipe is ready for start
@@ -313,7 +308,6 @@ static int vx_send_irqa(struct vx_core *chip)
 	vx_init_rmh(&rmh, CMD_SEND_IRQA);
 	return vx_send_msg(chip, &rmh);
 }
-
 
 #define MAX_WAIT_FOR_DSP        250
 /*
@@ -377,7 +371,6 @@ static int vx_toggle_pipe(struct vx_core *chip, struct vx_pipe *pipe, int state)
 	return err < 0 ? -EIO : 0;
 }
 
-    
 /*
  * vx_stop_pipe - stop a pipe
  * @pipe: the pipe to be stopped
@@ -391,7 +384,6 @@ static int vx_stop_pipe(struct vx_core *chip, struct vx_pipe *pipe)
 	vx_set_pipe_cmd_params(&rmh, pipe->is_capture, pipe->number, 0);
 	return vx_send_msg(chip, &rmh);
 }
-
 
 /*
  * vx_alloc_pipe - allocate a pipe and initialize the pipe instance
@@ -447,7 +439,6 @@ static int vx_alloc_pipe(struct vx_core *chip, int capture,
 	return 0;
 }
 
-
 /*
  * vx_free_pipe - release a pipe
  * @pipe: pipe to be released
@@ -464,7 +455,6 @@ static int vx_free_pipe(struct vx_core *chip, struct vx_pipe *pipe)
 	return 0;
 }
 
-
 /*
  * vx_start_stream - start the stream
  *
@@ -480,7 +470,6 @@ static int vx_start_stream(struct vx_core *chip, struct vx_pipe *pipe)
 	return vx_send_msg(chip, &rmh);
 }
 
-
 /*
  * vx_stop_stream - stop the stream
  *
@@ -494,7 +483,6 @@ static int vx_stop_stream(struct vx_core *chip, struct vx_pipe *pipe)
 	vx_set_stream_cmd_params(&rmh, pipe->is_capture, pipe->number);
 	return vx_send_msg(chip, &rmh);
 }
-
 
 /*
  * playback hw information
@@ -518,7 +506,6 @@ static struct snd_pcm_hardware vx_pcm_playback_hw = {
 	.periods_max =		VX_MAX_PERIODS,
 	.fifo_size =		126,
 };
-
 
 /*
  * vx_pcm_playback_open - open callback for playback
@@ -585,7 +572,6 @@ static int vx_pcm_playback_close(struct snd_pcm_substream *subs)
 	return 0;
 
 }
-
 
 /*
  * vx_notify_end_of_buffer - send "end-of-buffer" notifier at the given pipe
@@ -869,7 +855,6 @@ static int vx_pcm_prepare(struct snd_pcm_substream *subs)
 	return 0;
 }
 
-
 /*
  * operators for PCM playback
  */
@@ -885,7 +870,6 @@ static struct snd_pcm_ops vx_pcm_playback_ops = {
 	.page =		snd_pcm_lib_get_vmalloc_page,
 	.mmap =		snd_pcm_lib_mmap_vmalloc,
 };
-
 
 /*
  * playback hw information
@@ -909,7 +893,6 @@ static struct snd_pcm_hardware vx_pcm_capture_hw = {
 	.periods_max =		VX_MAX_PERIODS,
 	.fifo_size =		126,
 };
-
 
 /*
  * vx_pcm_capture_open - open callback for capture
@@ -1001,8 +984,6 @@ static int vx_pcm_capture_close(struct snd_pcm_substream *subs)
 	vx_free_pipe(chip, pipe);
 	return 0;
 }
-
-
 
 #define DMA_READ_ALIGN	6	/* hardware alignment for read */
 
@@ -1106,7 +1087,6 @@ static struct snd_pcm_ops vx_pcm_capture_ops = {
 	.mmap =		snd_pcm_lib_mmap_vmalloc,
 };
 
-
 /*
  * interrupt handler for pcm streams
  */
@@ -1164,7 +1144,6 @@ void vx_pcm_update_intr(struct vx_core *chip, unsigned int events)
 	}
 }
 
-
 /*
  * vx_init_audio_io - check the available audio i/o and allocate pipe arrays
  */
@@ -1207,7 +1186,6 @@ static int vx_init_audio_io(struct vx_core *chip)
 
 	return 0;
 }
-
 
 /*
  * free callback for pcm

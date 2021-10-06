@@ -43,7 +43,6 @@
 #define debug(...)
 #endif
 
-
 #define DEFAULT_FDT_VERSION	17
 
 /*
@@ -60,7 +59,6 @@ extern int phandle_format;	/* Use linux,phandle or phandle properties */
 #define PHANDLE_BOTH	0x3
 
 typedef uint32_t cell_t;
-
 
 #define streq(a, b)	(strcmp((a), (b)) == 0)
 #define strneq(a, b, n)	(strncmp((a), (b), (n)) == 0)
@@ -86,7 +84,6 @@ struct data {
 	char *val;
 	struct marker *markers;
 };
-
 
 #define empty_data ((struct data){ 0 /* all .members = 0 or NULL */ })
 
@@ -233,7 +230,6 @@ struct reserve_info *chain_reserve_entry(struct reserve_info *first,
 					 struct reserve_info *list);
 struct reserve_info *add_reserve_entry(struct reserve_info *list,
 				       struct reserve_info *new);
-
 
 struct boot_info {
 	struct reserve_info *reservelist;

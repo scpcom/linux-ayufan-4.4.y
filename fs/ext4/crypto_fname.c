@@ -361,7 +361,6 @@ int ext4_fname_disk_to_usr(struct inode *inode,
 	return _ext4_fname_disk_to_usr(inode, hinfo, &iname, oname);
 }
 
-
 /**
  * ext4_fname_usr_to_disk() - converts a filename from user space to disk space
  */

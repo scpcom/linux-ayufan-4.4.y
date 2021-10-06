@@ -75,7 +75,6 @@ static void i2c_pca_pf_writebyte32(void *pd, int reg, int val)
 	iowrite8(val, i2c->reg_base + reg * 4);
 }
 
-
 static int i2c_pca_pf_waitforcompletion(void *pd)
 {
 	struct i2c_pca_pf_data *i2c = pd;
@@ -128,7 +127,6 @@ static irqreturn_t i2c_pca_pf_handler(int this_irq, void *dev_id)
 
 	return IRQ_HANDLED;
 }
-
 
 static int i2c_pca_pf_probe(struct platform_device *pdev)
 {

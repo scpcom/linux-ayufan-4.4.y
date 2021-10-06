@@ -737,7 +737,6 @@ static int temac_start_xmit(struct sk_buff *skb, struct net_device *ndev)
 	return NETDEV_TX_OK;
 }
 
-
 static void ll_temac_recv(struct net_device *ndev)
 {
 	struct temac_local *lp = netdev_priv(ndev);
@@ -1091,7 +1090,6 @@ static int temac_of_probe(struct platform_device *op)
 		rc = -ENOMEM;
 		goto err_iounmap_2;
 	}
-
 
 	/* Retrieve the MAC address */
 	addr = of_get_property(op->dev.of_node, "local-mac-address", &size);

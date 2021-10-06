@@ -372,7 +372,6 @@ finish:
 	fw_dump_bit = 1 << SST_VDRTCL0_DSRAMPGE_SHIFT;
 	writel(reg & ~fw_dump_bit, sst->addr.pci_cfg + SST_VDRTCTL0);
 
-
 	/* disable DMA finish function for SSP0 & SSP1 */
 	sst_dsp_shim_update_bits_unlocked(sst, SST_CSR2, SST_CSR2_SDFD_SSP1,
 		SST_CSR2_SDFD_SSP1);
@@ -587,7 +586,6 @@ static int hsw_block_disable(struct sst_mem_block *block)
 	val &= ~SST_VDRTCL2_DCLCGE;
 	writel(val, sst->addr.pci_cfg + SST_VDRTCTL2);
 
-
 	val = readl(sst->addr.pci_cfg + SST_VDRTCTL0);
 	bit = hsw_block_get_bit(block);
 	/* don't disable DSRAM[0], keep it always enable for FW dump*/
@@ -659,7 +657,6 @@ static int hsw_init(struct sst_dsp *sst, struct sst_pdata *pdata)
 	ret = dma_coerce_mask_and_coherent(dev, DMA_BIT_MASK(31));
 	if (ret)
 		return ret;
-
 
 	/* register DSP memory blocks - ideally we should get this from ACPI */
 	for (i = 0; i < region_count; i++) {

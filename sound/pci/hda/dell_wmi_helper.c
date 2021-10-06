@@ -31,7 +31,6 @@ static void update_dell_wmi_micmute_led(struct hda_codec *codec,
 	}
 }
 
-
 static void alc_fixup_dell_wmi(struct hda_codec *codec,
 			       const struct hda_fixup *fix, int action)
 {

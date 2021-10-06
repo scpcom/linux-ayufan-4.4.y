@@ -56,7 +56,6 @@ void br_fdb_fini(void)
 	kmem_cache_destroy(br_fdb_cache);
 }
 
-
 /* if topology_changing then use forward_delay (default 15 sec)
  * otherwise keep longer (default 5 minutes)
  */

@@ -173,7 +173,6 @@ enum WIFI_REG_DOMAIN {
 
 #define get_tofr_ds(pframe)	((GetToDs(pframe) << 1) | GetFrDs(pframe))
 
-
 #define SetMFrag(pbuf)	\
 	*(__le16 *)(pbuf) |= cpu_to_le16(_MORE_FRAG_)
 
@@ -243,7 +242,6 @@ enum WIFI_REG_DOMAIN {
 
 #define SetDuration(pbuf, dur) \
 	*(__le16 *)((size_t)(pbuf) + 2) = cpu_to_le16(0xffff & (dur))
-
 
 #define SetPriority(pbuf, tid)	\
 	*(__le16 *)(pbuf) |= cpu_to_le16(tid & 0xf)
@@ -412,7 +410,6 @@ static inline int IsFrameTypeCtrl(unsigned char *pframe)
 #define _HT_ADD_INFO_IE_	61 /* _HT_EXTRA_INFO_IE_ */
 #define _WAPI_IE_		68
 
-
 #define	EID_BSSCoexistence	72 /*  20/40 BSS Coexistence */
 #define	EID_BSSIntolerantChlReport	73
 #define _RIC_Descriptor_IE_	75
@@ -480,7 +477,6 @@ static inline int IsFrameTypeCtrl(unsigned char *pframe)
 #define _WMM_IE_Length_				7  /*  for WMM STA */
 #define _WMM_Para_Element_Length_		24
 
-
 /*-----------------------------------------------------------------------------
 				Below is the definition for 802.11n
 ------------------------------------------------------------------------------*/
@@ -492,7 +488,6 @@ static inline int IsFrameTypeCtrl(unsigned char *pframe)
 
 #define GetOrderBit(pbuf)			\
 	(((*(unsigned short *)(pbuf)) & le16_to_cpu(_ORDER_)) != 0)
-
 
 /**
  * struct rtw_ieee80211_bar - HT Block Ack Request
@@ -635,7 +630,6 @@ enum ht_cap_ampdu_factor {
  */
 #define IEEE80211_MIN_AMPDU_BUF 0x8
 #define IEEE80211_MAX_AMPDU_BUF 0x40
-
 
 #define OP_MODE_PURE                    0
 #define OP_MODE_MAY_BE_LEGACY_STAS      1
@@ -838,7 +832,6 @@ enum ht_cap_ampdu_factor {
 #define	P2P_PRESENCE_REQUEST			1
 #define	P2P_PRESENCE_RESPONSE			2
 #define	P2P_GO_DISC_REQUEST			3
-
 
 #define	P2P_MAX_PERSISTENT_GROUP_NUM		10
 

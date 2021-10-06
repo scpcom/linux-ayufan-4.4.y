@@ -429,6 +429,4 @@ int rsxx_reg_access(struct rsxx_cardinfo *card,
 void rsxx_eeh_save_issued_creg(struct rsxx_cardinfo *card);
 void rsxx_kick_creg_queue(struct rsxx_cardinfo *card);
 
-
-
 #endif /* __DRIVERS_BLOCK_RSXX_H__ */

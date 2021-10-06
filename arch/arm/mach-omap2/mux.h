@@ -349,4 +349,3 @@ int omap_mux_init(const char *name, u32 flags,
 		  struct omap_mux *package_subset,
 		  struct omap_board_mux *board_mux,
 		  struct omap_ball *package_balls);
-

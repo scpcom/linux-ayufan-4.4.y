@@ -77,7 +77,6 @@ _warpdrive_disable_ddio(struct MPT3SAS_ADAPTER *ioc)
 	return;
 }
 
-
 /**
  * mpt3sas_get_num_volumes - Get number of volumes in the ioc
  * @ioc: per adapter object
@@ -103,7 +102,6 @@ mpt3sas_get_num_volumes(struct MPT3SAS_ADAPTER *ioc)
 	}
 	return vol_cnt;
 }
-
 
 /**
  * mpt3sas_init_warpdrive_properties - Set properties for warpdrive direct I/O.
@@ -247,7 +245,6 @@ mpt3sas_init_warpdrive_properties(struct MPT3SAS_ADAPTER *ioc,
 	raid_device->max_lba = le64_to_cpu(vol_pg0->MaxLBA);
 	raid_device->stripe_sz = le32_to_cpu(vol_pg0->StripeSize);
 	raid_device->block_sz = le16_to_cpu(vol_pg0->BlockSize);
-
 
 	kfree(vol_pg0);
 	return;

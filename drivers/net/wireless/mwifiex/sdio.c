@@ -28,7 +28,6 @@
 #include "11n.h"
 #include "sdio.h"
 
-
 #define SDIO_VERSION	"1.0"
 
 /* The mwifiex_sdio_remove() callback function is called when
@@ -295,7 +294,6 @@ static int mwifiex_sdio_suspend(struct device *dev)
 #define SDIO_DEVICE_ID_MARVELL_8801   (0x9139)
 /* Device ID for SD8997 */
 #define SDIO_DEVICE_ID_MARVELL_8997   (0x9141)
-
 
 /* WLAN IDs */
 static const struct sdio_device_id mwifiex_ids[] = {
@@ -1976,7 +1974,6 @@ static int mwifiex_register_dev(struct mwifiex_adapter *adapter)
 			    "cannot set SDIO block size\n");
 		return ret;
 	}
-
 
 	adapter->dev = &func->dev;
 

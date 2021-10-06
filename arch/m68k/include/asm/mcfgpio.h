@@ -87,7 +87,6 @@ static inline void gpio_free(unsigned gpio)
 
 #endif /* CONFIG_GPIOLIB */
 
-
 /*
  * The Freescale Coldfire family is quite varied in how they implement GPIO.
  * Some parts have 8 bit ports, some have 16bit and some have 32bit; some have

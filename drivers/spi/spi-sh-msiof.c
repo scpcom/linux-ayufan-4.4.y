@@ -33,7 +33,6 @@
 
 #include <asm/unaligned.h>
 
-
 struct sh_msiof_chipdata {
 	u16 tx_fifo_size;
 	u16 rx_fifo_size;
@@ -179,7 +178,6 @@ struct sh_msiof_spi_priv {
 #define IER_RFSERRE	0x00000020 /* Receive Frame Sync Error Enable */
 #define IER_RFUDFE	0x00000010 /* Receive FIFO Underflow Enable */
 #define IER_RFOVFE	0x00000008 /* Receive FIFO Overflow Enable */
-
 
 static u32 sh_msiof_read(struct sh_msiof_spi_priv *p, int reg_offs)
 {
@@ -538,7 +536,6 @@ static int sh_msiof_spi_setup(struct spi_device *spi)
 
 	if (spi->cs_gpio >= 0)
 		gpio_set_value(spi->cs_gpio, !(spi->mode & SPI_CS_HIGH));
-
 
 	pm_runtime_put(&p->pdev->dev);
 

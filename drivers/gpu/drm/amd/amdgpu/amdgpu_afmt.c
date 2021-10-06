@@ -44,7 +44,6 @@ static const struct amdgpu_afmt_acr amdgpu_afmt_predefined_acr[] = {
     { 148500,  4096, 148500,  6272, 165000,  6144, 148500 }, /* 148.50       MHz */
 };
 
-
 /*
  * calculate CTS and N values if they are not found in the table
  */

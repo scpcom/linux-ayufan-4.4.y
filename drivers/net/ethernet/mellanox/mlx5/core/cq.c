@@ -87,7 +87,6 @@ void mlx5_cq_event(struct mlx5_core_dev *dev, u32 cqn, int event_type)
 		complete(&cq->free);
 }
 
-
 int mlx5_core_create_cq(struct mlx5_core_dev *dev, struct mlx5_core_cq *cq,
 			struct mlx5_create_cq_mbox_in *in, int inlen)
 {
@@ -198,7 +197,6 @@ int mlx5_core_query_cq(struct mlx5_core_dev *dev, struct mlx5_core_cq *cq,
 	return err;
 }
 EXPORT_SYMBOL(mlx5_core_query_cq);
-
 
 int mlx5_core_modify_cq(struct mlx5_core_dev *dev, struct mlx5_core_cq *cq,
 			struct mlx5_modify_cq_mbox_in *in, int in_sz)

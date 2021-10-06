@@ -1034,4 +1034,3 @@ void zfcp_fc_gs_destroy(struct zfcp_adapter *adapter)
 	kfree(adapter->gs);
 	adapter->gs = NULL;
 }
-

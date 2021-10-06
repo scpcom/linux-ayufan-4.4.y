@@ -375,7 +375,6 @@ struct mlx4_port {
 	u8                     port_num;
 };
 
-
 static void mlx4_port_release(struct kobject *kobj)
 {
 	struct mlx4_port *p = container_of(kobj, struct mlx4_port, kobj);

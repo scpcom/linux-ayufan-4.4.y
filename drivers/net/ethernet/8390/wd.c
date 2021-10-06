@@ -22,7 +22,6 @@
 	Paul Gortmaker	: multiple card support for module users, support
 			  for non-standard memory sizes.
 
-
 */
 
 static const char version[] =
@@ -74,7 +73,6 @@ static u32 wd_msg_enable;
 #define	 NIC16			0x40	/* Enable 16 bit access from the 8390. */
 #define WD_NIC_OFFSET	16		/* Offset to the 8390 from the base_addr. */
 #define WD_IO_EXTENT	32
-
 
 /*	Probe for the WD8003 and WD8013.  These cards have the station
 	address PROM at I/O ports <base>+8 to <base>+13, with a checksum
@@ -465,7 +463,6 @@ wd_block_output(struct net_device *dev, int count, const unsigned char *buf,
 	int wd_cmdreg = dev->base_addr - WD_NIC_OFFSET; /* WD_CMDREG */
 	void __iomem *shmem = ei_status.mem + ((start_page - WD_START_PG)<<8);
 
-
 	if (ei_status.word16) {
 		/* Turn on and off 16 bit access so that reboot works. */
 		outb(ISA16 | ei_status.reg5, wd_cmdreg+WD_CMDREG5);
@@ -474,7 +471,6 @@ wd_block_output(struct net_device *dev, int count, const unsigned char *buf,
 	} else
 		memcpy_toio(shmem, buf, count);
 }
-
 
 static int
 wd_close(struct net_device *dev)
@@ -494,7 +490,6 @@ wd_close(struct net_device *dev)
 
 	return 0;
 }
-
 
 #ifdef MODULE
 #define MAX_WD_CARDS	4	/* Max number of wd cards per module */

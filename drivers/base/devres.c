@@ -374,7 +374,6 @@ int devres_destroy(struct device *dev, dr_release_t release,
 }
 EXPORT_SYMBOL_GPL(devres_destroy);
 
-
 /**
  * devres_release - Find a device resource and destroy it, calling release
  * @dev: Device to find resource from

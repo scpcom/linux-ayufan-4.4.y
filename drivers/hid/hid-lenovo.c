@@ -275,7 +275,6 @@ static ssize_t attr_sensitivity_store_cptkbd(struct device *dev,
 	return count;
 }
 
-
 static struct device_attribute dev_attr_fn_lock_cptkbd =
 	__ATTR(fn_lock, S_IWUSR | S_IRUGO,
 			attr_fn_lock_show_cptkbd,
@@ -285,7 +284,6 @@ static struct device_attribute dev_attr_sensitivity_cptkbd =
 	__ATTR(sensitivity, S_IWUSR | S_IRUGO,
 			attr_sensitivity_show_cptkbd,
 			attr_sensitivity_store_cptkbd);
-
 
 static struct attribute *lenovo_attributes_cptkbd[] = {
 	&dev_attr_fn_lock_cptkbd.attr,
@@ -866,7 +864,6 @@ static int lenovo_input_configured(struct hid_device *hdev,
 
 	return 0;
 }
-
 
 static const struct hid_device_id lenovo_devices[] = {
 	{ HID_USB_DEVICE(USB_VENDOR_ID_LENOVO, USB_DEVICE_ID_LENOVO_TPKBD) },

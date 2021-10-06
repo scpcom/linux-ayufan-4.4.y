@@ -278,7 +278,6 @@ static int em28xx_stop_feed(struct dvb_demux_feed *feed)
 	return err;
 }
 
-
 /* ------------------------------------------------------------------ */
 static int em28xx_dvb_bus_ctrl(struct dvb_frontend *fe, int acquire)
 {

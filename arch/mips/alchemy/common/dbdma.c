@@ -976,7 +976,6 @@ u32 au1xxx_dbdma_put_dscr(u32 chanid, au1x_ddma_desc_t *dscr)
 	return nbytes;
 }
 
-
 static unsigned long alchemy_dbdma_pm_data[NUM_DBDMA_CHANS + 1][6];
 
 static int alchemy_dbdma_suspend(void)

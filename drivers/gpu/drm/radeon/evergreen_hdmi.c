@@ -385,7 +385,6 @@ void dce4_set_audio_packet(struct drm_encoder *encoder, u32 offset)
 		  AFMT_RESET_FIFO_WHEN_AUDIO_DIS | AFMT_60958_CS_UPDATE);
 }
 
-
 void dce4_set_mute(struct drm_encoder *encoder, u32 offset, bool mute)
 {
 	struct drm_device *dev = encoder->dev;

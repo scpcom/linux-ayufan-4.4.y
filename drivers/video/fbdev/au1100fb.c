@@ -384,7 +384,6 @@ static struct fb_ops au1100fb_ops =
 	.fb_mmap		= au1100fb_fb_mmap,
 };
 
-
 /*-------------------------------------------------------------------------*/
 
 static int au1100fb_setup(struct au1100fb_device *fbdev)

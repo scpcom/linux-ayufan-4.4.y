@@ -336,7 +336,6 @@ static void ctrl_set_default(struct mmphw_ctrl *ctrl)
 	tmp |= 0xfff0;
 	writel_relaxed(tmp, ctrl->reg_base + LCD_TOP_CTRL);
 
-
 	/* disable all interrupts */
 	irq_mask = path_imasks(0) | err_imask(0) |
 		   path_imasks(1) | err_imask(1);

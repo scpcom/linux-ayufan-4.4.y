@@ -111,7 +111,6 @@
 #include <linux/uaccess.h>
 #include <linux/mutex.h>
 
-
 static DEFINE_MUTEX(nvram_mutex);
 static DEFINE_SPINLOCK(nvram_state_lock);
 static int nvram_open_cnt;	/* #times opened */

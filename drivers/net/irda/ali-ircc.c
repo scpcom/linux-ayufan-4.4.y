@@ -180,7 +180,6 @@ static int __init ali_ircc_init(void)
 			info.dma = dma[i];
 			info.irq = irq[i];
 			
-			
 			/* Enter Configuration */
 			outb(chip->entr1, cfg_base);
 			outb(chip->entr2, cfg_base);
@@ -386,7 +385,6 @@ static int ali_ircc_open(int i, chipio_t *info)
 		
 	self->io.dongle_id = dongle_id;
 
-	
 	return 0;
 
  err_out4:
@@ -402,7 +400,6 @@ static int ali_ircc_open(int i, chipio_t *info)
 	free_netdev(dev);
 	return err;
 }
-
 
 /*
  * Function ali_ircc_close (self)
@@ -435,7 +432,6 @@ static int __exit ali_ircc_close(struct ali_ircc_cb *self)
 
 	dev_self[self->index] = NULL;
 	free_netdev(self->netdev);
-	
 	
 	return 0;
 }
@@ -477,7 +473,6 @@ static int ali_ircc_probe_53(ali_chip_t *chip, chipio_t *info)
 {
 	int cfg_base = info->cfg_base;
 	int hi, low, reg;
-	
 	
 	/* Enter Configuration */
 	outb(chip->entr1, cfg_base);
@@ -530,7 +525,6 @@ static int ali_ircc_probe_53(ali_chip_t *chip, chipio_t *info)
 	/* Exit configuration */
 	outb(0xbb, cfg_base);
 		
-	
 	return 0;	
 }
 
@@ -546,7 +540,6 @@ static int ali_ircc_setup(chipio_t *info)
 	unsigned char tmp;
 	int version;
 	int iobase = info->fir_base;
-	
 	
 	/* Locking comments :
 	 * Most operations here need to be protected. We are called before
@@ -596,7 +589,6 @@ static int ali_ircc_setup(chipio_t *info)
 	/* Disable Interrupt */
 	outb(0x00, iobase+FIR_IER);
 	
-	
 	/* Switch to SIR space */
 	FIR2SIR(iobase);
 	
@@ -606,7 +598,6 @@ static int ali_ircc_setup(chipio_t *info)
 	/* Enable receive interrupts */ 
 	// outb(UART_IER_RDI, iobase+UART_IER); //benjamin 2000/11/23 01:25PM
 	// Turn on the interrupts in ali_ircc_net_open
-	
 	
 	return 0;
 }
@@ -623,7 +614,6 @@ static int ali_ircc_read_dongle_id (int i, chipio_t *info)
 	int dongle_id, reg;
 	int cfg_base = info->cfg_base;
 	
-		
 	/* Enter Configuration */
 	outb(chips[i].entr1, cfg_base);
 	outb(chips[i].entr2, cfg_base);
@@ -642,7 +632,6 @@ static int ali_ircc_read_dongle_id (int i, chipio_t *info)
 	/* Exit configuration */
 	outb(0xbb, cfg_base);
 			
-	
 	return dongle_id;
 }
 
@@ -657,7 +646,6 @@ static irqreturn_t ali_ircc_interrupt(int irq, void *dev_id)
 	struct net_device *dev = dev_id;
 	struct ali_ircc_cb *self;
 	int ret;
-		
 		
 	self = netdev_priv(dev);
 	
@@ -683,7 +671,6 @@ static irqreturn_t ali_ircc_fir_interrupt(struct ali_ircc_cb *self)
 {
 	__u8 eir, OldMessageCount;
 	int iobase, tmp;
-	
 	
 	iobase = self->io.fir_base;
 	
@@ -810,7 +797,6 @@ static irqreturn_t ali_ircc_sir_interrupt(struct ali_ircc_cb *self)
 	int iobase;
 	int iir, lsr;
 	
-	
 	iobase = self->io.sir_base;
 
 	iir = inb(iobase+UART_IIR) & UART_IIR_ID;
@@ -845,10 +831,8 @@ static irqreturn_t ali_ircc_sir_interrupt(struct ali_ircc_cb *self)
 		
 	}
 	
-	
 	return IRQ_RETVAL(iir);
 }
-
 
 /*
  * Function ali_ircc_sir_receive (self)
@@ -896,7 +880,6 @@ static void ali_ircc_sir_write_wakeup(struct ali_ircc_cb *self)
 
 	IRDA_ASSERT(self != NULL, return;);
 
-	
 	iobase = self->io.sir_base;
 
 	/* Finished with frame?  */
@@ -950,7 +933,6 @@ static void ali_ircc_change_speed(struct ali_ircc_cb *self, __u32 baud)
 	struct net_device *dev = self->netdev;
 	int iobase;
 	
-	
 	pr_debug("%s(), setting speed = %d\n", __func__, baud);
 	
 	/* This function *must* be called with irq off and spin-lock.
@@ -964,7 +946,6 @@ static void ali_ircc_change_speed(struct ali_ircc_cb *self, __u32 baud)
 	if (baud > 115200)
 	{
 		
-					
 		ali_ircc_fir_change_speed(self, baud);			
 		
 		/* Install FIR xmit handler*/
@@ -985,7 +966,6 @@ static void ali_ircc_change_speed(struct ali_ircc_cb *self, __u32 baud)
 		dev->netdev_ops = &ali_ircc_sir_ops;
 	}
 	
-		
 	SetCOMInterrupts(self, TRUE);	// 2000/11/24 11:43AM
 		
 	netif_wake_queue(self->netdev);	
@@ -999,7 +979,6 @@ static void ali_ircc_fir_change_speed(struct ali_ircc_cb *priv, __u32 baud)
 	struct ali_ircc_cb *self = priv;
 	struct net_device *dev;
 
-		
 	IRDA_ASSERT(self != NULL, return;);
 
 	dev = self->netdev;
@@ -1036,7 +1015,6 @@ static void ali_ircc_sir_change_speed(struct ali_ircc_cb *priv, __u32 speed)
 	int lcr;    /* Line control reg */
 	int divisor;
 
-	
 	pr_debug("%s(), Setting speed to: %d\n", __func__, speed);
 
 	IRDA_ASSERT(self != NULL, return;);
@@ -1095,7 +1073,6 @@ static void ali_ircc_change_dongle_speed(struct ali_ircc_cb *priv, int speed)
 	int iobase,dongle_id;
 	int tmp = 0;
 			
-	
 	iobase = self->io.fir_base; 	/* or iobase = self->io.sir_base; */
 	dongle_id = self->io.dongle_id;
 	
@@ -1278,7 +1255,6 @@ static int ali_ircc_sir_write(int iobase, int fifo_size, __u8 *buf, int len)
 {
 	int actual = 0;
 	
-		
 	/* Tx FIFO should be empty! */
 	if (!(inb(iobase+UART_LSR) & UART_LSR_THRE)) {
 		pr_debug("%s(), failed, fifo not empty!\n", __func__);
@@ -1308,7 +1284,6 @@ static int ali_ircc_net_open(struct net_device *dev)
 	int iobase;
 	char hwname[32];
 		
-	
 	IRDA_ASSERT(dev != NULL, return -1;);
 	
 	self = netdev_priv(dev);
@@ -1351,7 +1326,6 @@ static int ali_ircc_net_open(struct net_device *dev)
 	 */
 	self->irlap = irlap_open(dev, &self->qos, hwname);
 		
-	
 	return 0;
 }
 
@@ -1367,7 +1341,6 @@ static int ali_ircc_net_close(struct net_device *dev)
 	struct ali_ircc_cb *self;
 	//int iobase;
 			
-		
 	IRDA_ASSERT(dev != NULL, return -1;);
 
 	self = netdev_priv(dev);
@@ -1389,7 +1362,6 @@ static int ali_ircc_net_close(struct net_device *dev)
 	free_irq(self->io.irq, dev);
 	free_dma(self->io.dma);
 
-	
 	return 0;
 }
 
@@ -1407,7 +1379,6 @@ static netdev_tx_t ali_ircc_fir_hard_xmit(struct sk_buff *skb,
 	int iobase;
 	__u32 speed;
 	int mtt, diff;
-	
 	
 	self = netdev_priv(dev);
 	iobase = self->io.fir_base;
@@ -1499,7 +1470,6 @@ static netdev_tx_t ali_ircc_fir_hard_xmit(struct sk_buff *skb,
 						outb(TIMER_IIR_2ms, iobase+FIR_TIMER_IIR);
 					}
 					
-					
 					/* Start timer */
 					outb(inb(iobase+FIR_CR) | CR_TIMER_EN, iobase+FIR_CR);
 					self->io.direction = IO_XMIT;
@@ -1540,13 +1510,10 @@ static netdev_tx_t ali_ircc_fir_hard_xmit(struct sk_buff *skb,
 	return NETDEV_TX_OK;	
 }
 
-
 static void ali_ircc_dma_xmit(struct ali_ircc_cb *self)
 {
 	int iobase, tmp;
 	unsigned char FIFO_OPTI, Hi, Lo;
-	
-	
 	
 	iobase = self->io.fir_base;
 	
@@ -1614,7 +1581,6 @@ static int  ali_ircc_dma_xmit_complete(struct ali_ircc_cb *self)
 {
 	int iobase;
 	int ret = TRUE;
-	
 	
 	iobase = self->io.fir_base;
 	
@@ -1684,7 +1650,6 @@ static int  ali_ircc_dma_xmit_complete(struct ali_ircc_cb *self)
 static int ali_ircc_dma_receive(struct ali_ircc_cb *self) 
 {
 	int iobase, tmp;
-	
 	
 	iobase = self->io.fir_base;
 	
@@ -1907,8 +1872,6 @@ static int  ali_ircc_dma_receive_complete(struct ali_ircc_cb *self)
 	return TRUE;
 }
 
-
-
 /*
  * Function ali_ircc_sir_hard_xmit (skb, dev)
  *
@@ -1922,7 +1885,6 @@ static netdev_tx_t ali_ircc_sir_hard_xmit(struct sk_buff *skb,
 	unsigned long flags;
 	int iobase;
 	__u32 speed;
-	
 	
 	IRDA_ASSERT(dev != NULL, return NETDEV_TX_OK;);
 	
@@ -1971,10 +1933,8 @@ static netdev_tx_t ali_ircc_sir_hard_xmit(struct sk_buff *skb,
 
 	dev_kfree_skb(skb);
 	
-	
 	return NETDEV_TX_OK;	
 }
-
 
 /*
  * Function ali_ircc_net_ioctl (dev, rq, cmd)
@@ -1988,7 +1948,6 @@ static int ali_ircc_net_ioctl(struct net_device *dev, struct ifreq *rq, int cmd)
 	struct ali_ircc_cb *self;
 	unsigned long flags;
 	int ret = 0;
-	
 	
 	IRDA_ASSERT(dev != NULL, return -1;);
 
@@ -2028,7 +1987,6 @@ static int ali_ircc_net_ioctl(struct net_device *dev, struct ifreq *rq, int cmd)
 		ret = -EOPNOTSUPP;
 	}
 	
-	
 	return ret;
 }
 
@@ -2043,7 +2001,6 @@ static int ali_ircc_is_receiving(struct ali_ircc_cb *self)
 	unsigned long flags;
 	int status = FALSE;
 	int iobase;		
-	
 	
 	IRDA_ASSERT(self != NULL, return FALSE;);
 
@@ -2069,7 +2026,6 @@ static int ali_ircc_is_receiving(struct ali_ircc_cb *self)
 	}
 	
 	spin_unlock_irqrestore(&self->lock, flags);
-	
 	
 	return status;
 }
@@ -2163,7 +2119,6 @@ static void SIR2FIR(int iobase)
 {
 	//unsigned char tmp;
 		
-	
 	/* Already protected (change_speed() or setup()), no need to lock.
 	 * Jean II */
 	
@@ -2183,7 +2138,6 @@ static void SIR2FIR(int iobase)
 static void FIR2SIR(int iobase)
 {
 	unsigned char val;
-	
 	
 	/* Already protected (change_speed() or setup()), no need to lock.
 	 * Jean II */
@@ -2205,7 +2159,6 @@ MODULE_AUTHOR("Benjamin Kong <benjamin_kong@ali.com.tw>");
 MODULE_DESCRIPTION("ALi FIR Controller Driver");
 MODULE_LICENSE("GPL");
 MODULE_ALIAS("platform:" ALI_IRCC_DRIVER_NAME);
-
 
 module_param_array(io, int, NULL, 0);
 MODULE_PARM_DESC(io, "Base I/O addresses");

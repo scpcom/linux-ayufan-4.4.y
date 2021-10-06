@@ -32,7 +32,6 @@ MODULE_AUTHOR("Ondrej Zary");
 MODULE_DESCRIPTION("Syntek STK1135 USB Camera Driver");
 MODULE_LICENSE("GPL");
 
-
 /* specific webcam descriptor */
 struct sd {
 	struct gspca_dev gspca_dev;	/* !! must be the first item */

@@ -204,7 +204,6 @@
 	rte
 .endm
 
-
 .macro SAVE_SWITCH_STACK
 	moveml	%a3-%a6/%d6-%d7,%sp@-
 .endm

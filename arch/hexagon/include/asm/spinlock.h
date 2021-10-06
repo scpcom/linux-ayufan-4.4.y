@@ -109,7 +109,6 @@ static inline void arch_write_lock(arch_rwlock_t *lock)
 	);
 }
 
-
 static inline int arch_write_trylock(arch_rwlock_t *lock)
 {
 	int temp;

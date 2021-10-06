@@ -98,7 +98,6 @@ struct mei_nfc_if_version {
 	u8 radio_type;
 } __packed;
 
-
 #define MEI_NFC_CMD_MAINTENANCE 0x00
 #define MEI_NFC_SUBCMD_IF_VERSION 0x01
 
@@ -303,4 +302,3 @@ void mei_cl_bus_dev_fixup(struct mei_cl_device *cldev)
 			f->hook(cldev);
 	}
 }
-

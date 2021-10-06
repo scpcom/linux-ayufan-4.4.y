@@ -350,7 +350,6 @@ static void sd_stopN(struct gspca_dev *gspca_dev)
 	pac207_write_reg(gspca_dev, 0x0f, 0x00); /* Power Control */
 }
 
-
 static void pac207_do_auto_gain(struct gspca_dev *gspca_dev)
 {
 	struct sd *sd = (struct sd *) gspca_dev;

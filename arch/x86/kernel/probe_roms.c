@@ -265,4 +265,3 @@ void __init probe_roms(void)
 		start = adapter_rom_resources[i++].end & ~2047UL;
 	}
 }
-

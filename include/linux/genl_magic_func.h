@@ -352,7 +352,6 @@ static inline int s_name ## _to_unpriv_skb(struct sk_buff *skb,		\
 	return s_name ## _to_skb(skb, s, 1);				\
 }
 
-
 #undef __field
 #define __field(attr_nr, attr_flag, name, nla_type, type, __get, __put,	\
 		__is_signed)						\
@@ -374,7 +373,6 @@ static inline int s_name ## _to_unpriv_skb(struct sk_buff *skb,		\
 	}
 
 #include GENL_MAGIC_INCLUDE_FILE
-
 
 /* Functions for initializing structs to default values.  */
 

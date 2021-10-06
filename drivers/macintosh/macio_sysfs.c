@@ -2,7 +2,6 @@
 #include <linux/stat.h>
 #include <asm/macio.h>
 
-
 #define macio_config_of_attr(field, format_string)			\
 static ssize_t								\
 field##_show (struct device *dev, struct device_attribute *attr,	\

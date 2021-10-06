@@ -25,7 +25,6 @@
  *
  **************************************************************************/
 
-
 #include <drm/drmP.h>
 #include "vmwgfx_drv.h"
 
@@ -449,7 +448,6 @@ int vmw_overlay_pause_all(struct vmw_private *dev_priv)
 
 	return 0;
 }
-
 
 static bool vmw_overlay_available(const struct vmw_private *dev_priv)
 {

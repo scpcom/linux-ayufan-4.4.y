@@ -237,7 +237,6 @@ static unsigned int expand_bits_16[4] = {
 	0xffffffff
 };
 
-
 static void draw_byte_32(unsigned char *font, unsigned int *base, int rb)
 {
 	int l, bits;

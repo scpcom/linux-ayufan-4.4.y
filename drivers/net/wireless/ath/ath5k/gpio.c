@@ -24,7 +24,6 @@
 #include "reg.h"
 #include "debug.h"
 
-
 /**
  * DOC: GPIO/LED functions
  *
@@ -38,7 +37,6 @@
  * are available from hw. Vendors might also provide LEDs connected to the
  * GPIO pins, we handle them through the LED subsystem on led.c
  */
-
 
 /**
  * ath5k_hw_set_ledstate() - Set led state
@@ -210,4 +208,3 @@ ath5k_hw_set_gpio_intr(struct ath5k_hw *ah, unsigned int gpio,
 	/* Enable GPIO interrupts */
 	AR5K_REG_ENABLE_BITS(ah, AR5K_PIMR, AR5K_IMR_GPIO);
 }
-

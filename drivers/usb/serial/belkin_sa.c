@@ -54,7 +54,6 @@ static int  belkin_sa_tiocmget(struct tty_struct *tty);
 static int  belkin_sa_tiocmset(struct tty_struct *tty,
 					unsigned int set, unsigned int clear);
 
-
 static const struct usb_device_id id_table[] = {
 	{ USB_DEVICE(BELKIN_SA_VID, BELKIN_SA_PID) },
 	{ USB_DEVICE(BELKIN_OLD_VID, BELKIN_OLD_PID) },
@@ -98,7 +97,6 @@ struct belkin_sa_private {
 	unsigned char		last_msr;
 	int			bad_flow_control;
 };
-
 
 /*
  * ***************************************************************************

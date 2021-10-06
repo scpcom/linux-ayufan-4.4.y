@@ -47,7 +47,6 @@
 STATIC int	xfs_qm_init_quotainos(xfs_mount_t *);
 STATIC int	xfs_qm_init_quotainfo(xfs_mount_t *);
 
-
 STATIC void	xfs_qm_dqfree_one(struct xfs_dquot *dqp);
 /*
  * We use the batch lookup interface to iterate over the dquots as it
@@ -120,7 +119,6 @@ restart:
 
 	return last_error;
 }
-
 
 /*
  * Purge a dquot from all tracking data structures and free it.
@@ -671,7 +669,6 @@ out_free_qinf:
 	return error;
 }
 
-
 /*
  * Gets called when unmounting a filesystem or when all quotas get
  * turned off.
@@ -804,7 +801,6 @@ xfs_qm_qino_alloc(
 		xfs_finish_inode_setup(*ip);
 	return error;
 }
-
 
 STATIC void
 xfs_qm_reset_dqcounts(
@@ -984,7 +980,6 @@ xfs_qm_dqiterate(
 		for (i = 0; i < nmaps; i++) {
 			ASSERT(map[i].br_startblock != DELAYSTARTBLOCK);
 			ASSERT(map[i].br_blockcount);
-
 
 			lblkno += map[i].br_blockcount;
 
@@ -1585,7 +1580,6 @@ xfs_qm_dqfree_one(
 
 /* --------------- utility functions for vnodeops ---------------- */
 
-
 /*
  * Given an inode, a uid, gid and prid make sure that we have
  * allocated relevant dquot(s) on disk, and that we won't exceed inode
@@ -1750,7 +1744,6 @@ xfs_qm_vop_chown(
 	uint		bfield = XFS_IS_REALTIME_INODE(ip) ?
 				 XFS_TRANS_DQ_RTBCOUNT : XFS_TRANS_DQ_BCOUNT;
 
-
 	ASSERT(xfs_isilocked(ip, XFS_ILOCK_EXCL));
 	ASSERT(XFS_IS_QUOTA_RUNNING(ip->i_mount));
 
@@ -1796,7 +1789,6 @@ xfs_qm_vop_chown_reserve(
 	struct xfs_dquot	*gdq_delblks = NULL;
 	struct xfs_dquot	*pdq_delblks = NULL;
 	int			error;
-
 
 	ASSERT(xfs_isilocked(ip, XFS_ILOCK_EXCL|XFS_ILOCK_SHARED));
 	ASSERT(XFS_IS_QUOTA_RUNNING(mp));
@@ -1935,4 +1927,3 @@ xfs_qm_vop_create_dqattach(
 		xfs_trans_mod_dquot(tp, pdqp, XFS_TRANS_DQ_ICOUNT, 1);
 	}
 }
-

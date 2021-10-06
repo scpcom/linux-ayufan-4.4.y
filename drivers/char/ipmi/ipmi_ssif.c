@@ -526,7 +526,6 @@ static int ssif_i2c_send(struct ssif_info *ssif_info,
 	return 0;
 }
 
-
 static void msg_done_handler(struct ssif_info *ssif_info, int result,
 			     unsigned char *data, unsigned int len);
 
@@ -566,7 +565,6 @@ static void retry_timeout(unsigned long data)
 	if (waiting)
 		start_get(ssif_info);
 }
-
 
 static void ssif_alert(struct i2c_client *client, unsigned int data)
 {
@@ -716,7 +714,6 @@ static void msg_done_handler(struct ssif_info *ssif_info, int result,
 		ssif_inc_stat(ssif_info, received_messages);
 		ssif_inc_stat(ssif_info, received_message_parts);
 	}
-
 
  continue_op:
 	if (ssif_info->ssif_debug & SSIF_DEBUG_STATE)
@@ -1422,7 +1419,6 @@ static int ssif_probe(struct i2c_client *client, const struct i2c_device_id *id)
 	int               i;
 	u8		  slave_addr = 0;
 	struct ssif_addr_info *addr_info = NULL;
-
 
 	resp = kmalloc(IPMI_MAX_MSG_LENGTH, GFP_KERNEL);
 	if (!resp)

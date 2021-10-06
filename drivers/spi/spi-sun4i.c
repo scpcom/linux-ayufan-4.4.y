@@ -186,7 +186,6 @@ static int sun4i_spi_transfer_one(struct spi_master *master,
 	/* Clear pending interrupts */
 	sun4i_spi_write(sspi, SUN4I_INT_STA_REG, ~0);
 
-
 	reg = sun4i_spi_read(sspi, SUN4I_CTL_REG);
 
 	/* Reset FIFOs */
@@ -211,7 +210,6 @@ static int sun4i_spi_transfer_one(struct spi_master *master,
 		reg |= SUN4I_CTL_LMTF;
 	else
 		reg &= ~SUN4I_CTL_LMTF;
-
 
 	/*
 	 * If it's a TX only transfer, we don't want to fill the RX

@@ -71,7 +71,6 @@ static unsigned char aud_regs[] = {
 	0x00, 0x00,
 };
 
-
 static unsigned char vid_regs[] = {
 	0xF2, 0x0f,
 	0xAA, 0x00,
@@ -209,8 +208,6 @@ static int write_reg_fp(struct i2c_client *client, u16 addr, u16 val)
 	if (buf == NULL)
 		return -ENOMEM;
 
-
-
 	memset(buf, 0xcd, 6);
 
 	usb = go->hpi_context;
@@ -272,8 +269,6 @@ static int read_reg_fp(struct i2c_client *client, u16 addr, u16 *val)
 	if (buf == NULL)
 		return -ENOMEM;
 
-
-
 	memset(buf, 0xcd, 6);
 	usb = go->hpi_context;
 	if (mutex_lock_interruptible(&usb->i2c_lock) != 0) {
@@ -293,7 +288,6 @@ static int read_reg_fp(struct i2c_client *client, u16 addr, u16 *val)
 
 	return 0;
 }
-
 
 static int write_regs(struct i2c_client *client, u8 *regs)
 {
@@ -320,7 +314,6 @@ static int write_regs_fp(struct i2c_client *client, u16 *regs)
 	}
 	return 0;
 }
-
 
 /* ------------------------------------------------------------------------- */
 
@@ -450,7 +443,6 @@ static int s2250_s_audio_routing(struct v4l2_subdev *sd, u32 input, u32 output,
 	state->audio_input = input;
 	return 0;
 }
-
 
 static int s2250_log_status(struct v4l2_subdev *sd)
 {

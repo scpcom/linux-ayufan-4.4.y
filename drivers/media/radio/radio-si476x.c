@@ -147,7 +147,6 @@ static const struct v4l2_ctrl_ops si476x_ctrl_ops = {
 	.s_ctrl			= si476x_radio_s_ctrl,
 };
 
-
 enum si476x_ctrl_idx {
 	SI476X_IDX_RSSI_THRESHOLD,
 	SI476X_IDX_SNR_THRESHOLD,
@@ -839,8 +838,6 @@ static int si476x_radio_s_hw_freq_seek(struct file *file, void *priv,
 unlock:
 	si476x_core_unlock(radio->core);
 
-
-
 	return err;
 }
 
@@ -1179,7 +1176,6 @@ static const struct v4l2_file_operations si476x_fops = {
 	.release		= si476x_radio_fops_release,
 };
 
-
 static const struct v4l2_ioctl_ops si4761_ioctl_ops = {
 	.vidioc_querycap		= si476x_radio_querycap,
 	.vidioc_g_tuner			= si476x_radio_g_tuner,
@@ -1199,14 +1195,11 @@ static const struct v4l2_ioctl_ops si4761_ioctl_ops = {
 #endif
 };
 
-
 static const struct video_device si476x_viddev_template = {
 	.fops			= &si476x_fops,
 	.name			= DRIVER_NAME,
 	.release		= video_device_release_empty,
 };
-
-
 
 static ssize_t si476x_radio_read_acf_blob(struct file *file,
 					  char __user *user_buf,
@@ -1363,7 +1356,6 @@ static const struct file_operations radio_rsq_primary_fops = {
 	.read	= si476x_radio_read_rsq_primary_blob,
 };
 
-
 static int si476x_radio_init_debugfs(struct si476x_radio *radio)
 {
 	struct dentry	*dentry;
@@ -1420,7 +1412,6 @@ exit:
 	return ret;
 }
 
-
 static int si476x_radio_add_new_custom(struct si476x_radio *radio,
 				       enum si476x_ctrl_idx idx)
 {
@@ -1469,7 +1460,6 @@ static int si476x_radio_probe(struct platform_device *pdev)
 
 	video_set_drvdata(&radio->videodev, radio);
 	platform_set_drvdata(pdev, radio);
-
 
 	radio->v4l2dev.ctrl_handler = &radio->ctrl_handler;
 	v4l2_ctrl_handler_init(&radio->ctrl_handler,

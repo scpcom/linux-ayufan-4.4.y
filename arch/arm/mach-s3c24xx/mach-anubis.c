@@ -422,7 +422,6 @@ static void __init anubis_init(void)
 				ARRAY_SIZE(anubis_i2c_devs));
 }
 
-
 MACHINE_START(ANUBIS, "Simtec-Anubis")
 	/* Maintainer: Ben Dooks <ben@simtec.co.uk> */
 	.atag_offset	= 0x100,

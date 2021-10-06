@@ -275,7 +275,6 @@ static void __init rb532_nand_setup(void)
 	rb532_nand_data.chip.chip_delay = NAND_CHIP_DELAY;
 }
 
-
 static int __init plat_setup_devices(void)
 {
 	/* Look for the CF card reader */

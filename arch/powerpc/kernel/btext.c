@@ -66,7 +66,6 @@ static inline void rmci_maybe_off(void)
 #endif
 }
 
-
 #ifdef CONFIG_PPC32
 /* Calc BAT values for mapping the display and store them
  * in disp_BAT.  Those values are then used from head.S to map
@@ -110,7 +109,6 @@ void __init btext_prepare_BAT(void)
 	logicalDisplayBase = (void *) (vaddr + lowbits);
 }
 #endif
-
 
 /* This function can be used to enable the early boot text when doing
  * OF booting or within bootx init. It must be followed by a btext_unmap()
@@ -362,7 +360,6 @@ void btext_flushline(void)
 	__asm__ __volatile__ ("sync" ::: "memory");
 }
 
-
 #ifndef NO_SCROLL
 static void scrollscreen(void)
 {
@@ -420,7 +417,6 @@ static unsigned int expand_bits_16[4] = {
 	0xffff0000,
 	0xffffffff
 };
-
 
 static void draw_byte_32(unsigned char *font, unsigned int *base, int rb)
 {
@@ -943,4 +939,3 @@ static unsigned char vga_font[cmapsz] = {
 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 0x00, 0x00, 0x00, 0x00,
 };
-

@@ -51,7 +51,6 @@ struct mcf_platform_uart {
 #define	MCFUART_UOP1		0x38		/* Output Port Bit Set (w) */
 #define	MCFUART_UOP0		0x3c		/* Output Port Bit Reset (w) */
 
-
 /*
  *	Define bit flags in Mode Register 1 (MR1).
  */

@@ -50,7 +50,6 @@
 #include <rdma/iw_portmap.h>
 #include <rdma/rdma_netlink.h>
 
-
 #define IWPM_NL_RETRANS		3
 #define IWPM_NL_TIMEOUT		(10*HZ)
 #define IWPM_MAPINFO_SKB_COUNT	20

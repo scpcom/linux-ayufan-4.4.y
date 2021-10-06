@@ -75,7 +75,6 @@ union _FP_UNION_Q
    } bits __attribute__((packed));
 };
 
-
 #define FP_DECL_Q(X)		_FP_DECL(4,X)
 #define FP_UNPACK_RAW_Q(X,val)	_FP_UNPACK_RAW_4(Q,X,val)
 #define FP_UNPACK_RAW_QP(X,val)	_FP_UNPACK_RAW_4_P(Q,X,val)

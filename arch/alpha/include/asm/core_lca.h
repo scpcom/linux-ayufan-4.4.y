@@ -157,7 +157,6 @@
 #define LCA_PMR_DIV_MIN DIV_1
 #define LCA_PMR_DIV_MAX DIV_16
 
-
 /*
  * Data structure for handling LCA machine checks.  Correctable errors
  * result in a short logout frame, uncorrectable ones in a long one.
@@ -227,7 +226,6 @@ union el_lca {
 			set_hae(msb);				\
 		}						\
 	} while (0)
-
 
 __EXTERN_INLINE unsigned int lca_ioread8(void __iomem *xaddr)
 {

@@ -58,7 +58,6 @@
 
 #define TI_EXTRA_VID_PID_COUNT	5
 
-
 /* Structures */
 
 struct ti_port {
@@ -82,7 +81,6 @@ struct ti_device {
 	int			td_is_3410;
 	int			td_urb_error;
 };
-
 
 /* Function Declarations */
 
@@ -134,7 +132,6 @@ static int ti_write_byte(struct usb_serial_port *port, struct ti_device *tdev,
 			 unsigned long addr, __u8 mask, __u8 byte);
 
 static int ti_download_firmware(struct ti_device *tdev);
-
 
 /* Data */
 
@@ -347,7 +344,6 @@ free_tdev:
 	return status;
 }
 
-
 static void ti_release(struct usb_serial *serial)
 {
 	struct ti_device *tdev = usb_get_serial_data(serial);
@@ -528,7 +524,6 @@ release_lock:
 	return status;
 }
 
-
 static void ti_close(struct usb_serial_port *port)
 {
 	struct ti_device *tdev;
@@ -574,7 +569,6 @@ static void ti_close(struct usb_serial_port *port)
 		mutex_unlock(&tdev->td_open_close_lock);
 }
 
-
 static int ti_write(struct tty_struct *tty, struct usb_serial_port *port,
 			const unsigned char *data, int count)
 {
@@ -595,7 +589,6 @@ static int ti_write(struct tty_struct *tty, struct usb_serial_port *port,
 	return count;
 }
 
-
 static int ti_write_room(struct tty_struct *tty)
 {
 	struct usb_serial_port *port = tty->driver_data;
@@ -613,7 +606,6 @@ static int ti_write_room(struct tty_struct *tty)
 	dev_dbg(&port->dev, "%s - returns %d\n", __func__, room);
 	return room;
 }
-
 
 static int ti_chars_in_buffer(struct tty_struct *tty)
 {
@@ -659,7 +651,6 @@ static void ti_throttle(struct tty_struct *tty)
 
 }
 
-
 static void ti_unthrottle(struct tty_struct *tty)
 {
 	struct usb_serial_port *port = tty->driver_data;
@@ -698,7 +689,6 @@ static int ti_ioctl(struct tty_struct *tty,
 	}
 	return -ENOIOCTLCMD;
 }
-
 
 static void ti_set_termios(struct tty_struct *tty,
 		struct usb_serial_port *port, struct ktermios *old_termios)
@@ -833,7 +823,6 @@ static void ti_set_termios(struct tty_struct *tty,
 	kfree(config);
 }
 
-
 static int ti_tiocmget(struct tty_struct *tty)
 {
 	struct usb_serial_port *port = tty->driver_data;
@@ -863,7 +852,6 @@ static int ti_tiocmget(struct tty_struct *tty)
 
 	return result;
 }
-
 
 static int ti_tiocmset(struct tty_struct *tty,
 				unsigned int set, unsigned int clear)
@@ -897,7 +885,6 @@ static int ti_tiocmset(struct tty_struct *tty,
 	return ti_set_mcr(tport, mcr);
 }
 
-
 static void ti_break(struct tty_struct *tty, int break_state)
 {
 	struct usb_serial_port *port = tty->driver_data;
@@ -916,7 +903,6 @@ static void ti_break(struct tty_struct *tty, int break_state)
 	if (status)
 		dev_dbg(&port->dev, "%s - error setting break, %d\n", __func__, status);
 }
-
 
 static void ti_interrupt_callback(struct urb *urb)
 {
@@ -1001,7 +987,6 @@ exit:
 			__func__, retval);
 }
 
-
 static void ti_bulk_in_callback(struct urb *urb)
 {
 	struct ti_port *tport = urb->context;
@@ -1061,7 +1046,6 @@ exit:
 			__func__, retval);
 }
 
-
 static void ti_bulk_out_callback(struct urb *urb)
 {
 	struct ti_port *tport = urb->context;
@@ -1089,7 +1073,6 @@ static void ti_bulk_out_callback(struct urb *urb)
 	ti_send(tport);
 }
 
-
 static void ti_recv(struct usb_serial_port *port, unsigned char *data,
 		int length)
 {
@@ -1108,7 +1091,6 @@ static void ti_recv(struct usb_serial_port *port, unsigned char *data,
 		length -= cnt;
 	} while (length > 0);
 }
-
 
 static void ti_send(struct ti_port *tport)
 {
@@ -1162,7 +1144,6 @@ unlock:
 	return;
 }
 
-
 static int ti_set_mcr(struct ti_port *tport, unsigned int mcr)
 {
 	unsigned long flags;
@@ -1179,7 +1160,6 @@ static int ti_set_mcr(struct ti_port *tport, unsigned int mcr)
 
 	return status;
 }
-
 
 static int ti_get_lsr(struct ti_port *tport, u8 *lsr)
 {
@@ -1212,7 +1192,6 @@ free_data:
 	return status;
 }
 
-
 static int ti_get_serial_info(struct ti_port *tport,
 	struct serial_struct __user *ret_arg)
 {
@@ -1243,7 +1222,6 @@ static int ti_get_serial_info(struct ti_port *tport,
 	return 0;
 }
 
-
 static int ti_set_serial_info(struct tty_struct *tty, struct ti_port *tport,
 	struct serial_struct __user *new_arg)
 {
@@ -1262,7 +1240,6 @@ static int ti_set_serial_info(struct tty_struct *tty, struct ti_port *tport,
 
 	return 0;
 }
-
 
 static void ti_handle_new_msr(struct ti_port *tport, __u8 msr)
 {
@@ -1298,7 +1275,6 @@ static void ti_handle_new_msr(struct ti_port *tport, __u8 msr)
 	tty_kref_put(tty);
 }
 
-
 static void ti_stop_read(struct ti_port *tport, struct tty_struct *tty)
 {
 	unsigned long flags;
@@ -1310,7 +1286,6 @@ static void ti_stop_read(struct ti_port *tport, struct tty_struct *tty)
 
 	spin_unlock_irqrestore(&tport->tp_lock, flags);
 }
-
 
 static int ti_restart_read(struct ti_port *tport, struct tty_struct *tty)
 {
@@ -1334,7 +1309,6 @@ static int ti_restart_read(struct ti_port *tport, struct tty_struct *tty)
 	return status;
 }
 
-
 static int ti_command_out_sync(struct ti_device *tdev, __u8 command,
 	__u16 moduleid, __u16 value, __u8 *data, int size)
 {
@@ -1354,7 +1328,6 @@ static int ti_command_out_sync(struct ti_device *tdev, __u8 command,
 	return status;
 }
 
-
 static int ti_command_in_sync(struct ti_device *tdev, __u8 command,
 	__u16 moduleid, __u16 value, __u8 *data, int size)
 {
@@ -1373,7 +1346,6 @@ static int ti_command_in_sync(struct ti_device *tdev, __u8 command,
 
 	return status;
 }
-
 
 static int ti_write_byte(struct usb_serial_port *port,
 			struct ti_device *tdev, unsigned long addr,

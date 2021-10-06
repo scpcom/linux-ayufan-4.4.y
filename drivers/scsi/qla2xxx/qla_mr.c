@@ -12,7 +12,6 @@
 #include <scsi/scsi_tcq.h>
 #include <linux/utsname.h>
 
-
 /* QLAFX00 specific Mailbox implementation functions */
 
 /*
@@ -434,7 +433,6 @@ qlafx00_mbx_reg_test(scsi_qla_host_t *vha)
 	ql_dbg(ql_dbg_mbx + ql_dbg_verbose, vha, 0x116f,
 	    "Entered %s.\n", __func__);
 
-
 	mcp->mb[0] = MBC_MAILBOX_REGISTER_TEST;
 	mcp->mb[1] = 0xAAAA;
 	mcp->mb[2] = 0x5555;
@@ -451,7 +449,6 @@ qlafx00_mbx_reg_test(scsi_qla_host_t *vha)
 	mcp->mb[13] = 0x6B6B;
 	mcp->mb[14] = 0x3636;
 	mcp->mb[15] = 0xCCCC;
-
 
 	mcp->out_mb = MBX_15|MBX_14|MBX_13|MBX_12|MBX_11|MBX_10|MBX_9|MBX_8|
 			MBX_7|MBX_6|MBX_5|MBX_4|MBX_3|MBX_2|MBX_1|MBX_0;
@@ -1100,7 +1097,6 @@ qlafx00_fw_ready(scsi_qla_host_t *vha)
 		ql_dbg(ql_dbg_init, vha, 0x013c,
 		    "fw_state=%x curr time=%lx.\n", state[0], jiffies);
 	} while (1);
-
 
 	if (rval)
 		ql_dbg(ql_dbg_init, vha, 0x013d,

@@ -182,7 +182,6 @@ struct fw_hdr {
 	/* define the size of boot loader */
 	u32 dmem_size;
 
-
 	/* --- LONG WORD 1 ---- */
 	/* define the size of FW in IMEM */
 	u32 img_imem_size;
@@ -372,4 +371,3 @@ void rtl92s_set_fw_joinbss_report_cmd(struct ieee80211_hw *hw,
 				      u8 mstatus, u8 ps_qosinfo);
 
 #endif
-

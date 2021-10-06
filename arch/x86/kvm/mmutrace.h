@@ -73,7 +73,6 @@ TRACE_EVENT(
 		  __print_flags(__entry->pferr, "|", kvm_mmu_trace_pferr_flags))
 );
 
-
 /* We just walked a paging element */
 TRACE_EVENT(
 	kvm_mmu_paging_element,
@@ -298,7 +297,6 @@ TRACE_EVENT(
 		  __entry->mmu_valid_gen, __entry->mmu_used_pages
 	)
 );
-
 
 TRACE_EVENT(
 	check_mmio_spte,

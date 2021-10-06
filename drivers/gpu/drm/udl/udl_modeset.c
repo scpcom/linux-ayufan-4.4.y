@@ -247,7 +247,6 @@ static int udl_crtc_write_mode_to_hw(struct drm_crtc *crtc)
 	return retval;
 }
 
-
 static void udl_crtc_dpms(struct drm_crtc *crtc, int mode)
 {
 	struct drm_device *dev = crtc->dev;
@@ -351,7 +350,6 @@ static int udl_crtc_mode_set(struct drm_crtc *crtc,
 	udl_handle_damage(ufb, 0, 0, ufb->base.width, ufb->base.height);
 	return 0;
 }
-
 
 static void udl_crtc_disable(struct drm_crtc *crtc)
 {

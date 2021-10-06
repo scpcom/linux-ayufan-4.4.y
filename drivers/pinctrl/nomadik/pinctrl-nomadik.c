@@ -168,7 +168,6 @@ typedef unsigned long pin_cfg_t;
 #define PIN_SLEEPMODE_DISABLED	(0 << PIN_SLEEPMODE_SHIFT)
 #define PIN_SLEEPMODE_ENABLED	(1 << PIN_SLEEPMODE_SHIFT)
 
-
 /* Shortcuts.  Use these instead of separate DIR, PULL, and VAL.  */
 #define PIN_INPUT_PULLDOWN	(PIN_DIR_INPUT | PIN_PULL_DOWN)
 #define PIN_INPUT_PULLUP	(PIN_DIR_INPUT | PIN_PULL_UP)
@@ -228,7 +227,6 @@ typedef unsigned long pin_cfg_t;
 /* These appear in DB8540 and later ASICs */
 #define NMK_GPIO_EDGELEVEL 0x5C
 #define NMK_GPIO_LEVEL	0x60
-
 
 /* Pull up/down values */
 enum nmk_gpio_pull {
@@ -635,7 +633,6 @@ int nmk_gpio_get_mode(int gpio)
 	return (afunc ? NMK_GPIO_ALT_A : 0) | (bfunc ? NMK_GPIO_ALT_B : 0);
 }
 EXPORT_SYMBOL(nmk_gpio_get_mode);
-
 
 /* IRQ functions */
 static inline int nmk_gpio_get_bitmask(int gpio)

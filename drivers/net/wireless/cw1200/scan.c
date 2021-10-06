@@ -310,7 +310,6 @@ void cw1200_scan_failed_cb(struct cw1200_common *priv)
 	}
 }
 
-
 void cw1200_scan_complete_cb(struct cw1200_common *priv,
 				struct wsm_scan_complete *arg)
 {

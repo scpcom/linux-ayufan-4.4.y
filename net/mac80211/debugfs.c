@@ -58,7 +58,6 @@ static const struct file_operations name## _ops = {			\
 #define DEBUGFS_ADD_MODE(name, mode)					\
 	debugfs_create_file(#name, mode, phyd, local, &name## _ops);
 
-
 DEBUGFS_READONLY_FILE(user_power, "%d",
 		      local->user_power_level);
 DEBUGFS_READONLY_FILE(power, "%d",

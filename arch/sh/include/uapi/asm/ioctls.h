@@ -71,7 +71,6 @@
 # define TIOCPKT_DOSTOP		32
 # define TIOCPKT_IOCTL		64
 
-
 #define TIOCNOTTY	_IO('T', 34) /* 0x5422 */
 #define TIOCSETD	_IOW('T', 35, int) /* 0x5423 */
 #define TIOCGETD	_IOR('T', 36, int) /* 0x5424 */

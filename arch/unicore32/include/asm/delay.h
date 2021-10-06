@@ -49,4 +49,3 @@ extern void __const_udelay(unsigned long);
 	  __udelay(n))
 
 #endif /* __UNICORE_DELAY_H__ */
-

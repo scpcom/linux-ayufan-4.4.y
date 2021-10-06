@@ -1580,7 +1580,6 @@ static int vpfe_s_fmt(struct file *file, void *priv,
 	if (ret)
 		return ret;
 
-
 	if (!cmp_v4l2_format(fmt, &format)) {
 		/* Sensor format is different from the requested format
 		 * so we need to change it

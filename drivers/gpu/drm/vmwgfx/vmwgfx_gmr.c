@@ -124,7 +124,6 @@ static void vmw_gmr2_unbind(struct vmw_private *dev_priv,
 	vmw_fifo_commit(dev_priv, define_size);
 }
 
-
 int vmw_gmr_bind(struct vmw_private *dev_priv,
 		 const struct vmw_sg_table *vsgt,
 		 unsigned long num_pages,
@@ -142,7 +141,6 @@ int vmw_gmr_bind(struct vmw_private *dev_priv,
 
 	return vmw_gmr2_bind(dev_priv, &data_iter, num_pages, gmr_id);
 }
-
 
 void vmw_gmr_unbind(struct vmw_private *dev_priv, int gmr_id)
 {

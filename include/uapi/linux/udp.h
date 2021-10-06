@@ -37,5 +37,4 @@ struct udphdr {
 #define UDP_ENCAP_ESPINUDP	2 /* draft-ietf-ipsec-udp-encaps-06 */
 #define UDP_ENCAP_L2TPINUDP	3 /* rfc2661 */
 
-
 #endif /* _UAPI_LINUX_UDP_H */

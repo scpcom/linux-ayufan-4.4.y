@@ -319,7 +319,6 @@ static int set_lcd_level(int level)
 		return -ENODEV;
 	}
 
-
 	status = acpi_execute_simple_method(handle, NULL, level);
 	if (ACPI_FAILURE(status))
 		return -ENODEV;

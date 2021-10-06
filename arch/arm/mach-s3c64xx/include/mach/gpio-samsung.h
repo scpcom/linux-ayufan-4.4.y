@@ -91,4 +91,3 @@ enum s3c_gpio_number {
 #define GPIO_BOARD_START (S3C64XX_GPQ(S3C64XX_GPIO_Q_NR) + 1)
 
 #endif /* GPIO_SAMSUNG_S3C64XX_H */
-

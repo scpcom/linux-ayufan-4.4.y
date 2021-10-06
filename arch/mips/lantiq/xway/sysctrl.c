@@ -45,7 +45,6 @@
 /* power status register */
 #define PWDSR(x) ((x) ? (PMU_PWDSR1) : (PMU_PWDSR))
 
-
 /* PMU register for ar10 and grx390 */
 
 /* First register set */

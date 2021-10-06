@@ -67,7 +67,6 @@
 
 #define MPT_DEBUG_TRIGGER_DIAG		0x00200000
 
-
 #define MPT_CHECK_LOGGING(IOC, CMD, BITS)			\
 {								\
 	if (IOC->logging_level & BITS)				\
@@ -140,8 +139,6 @@
 
 #define dTriggerDiagPrintk(IOC, CMD)			\
 	MPT_CHECK_LOGGING(IOC, CMD, MPT_DEBUG_TRIGGER_DIAG)
-
-
 
 /* inline functions for dumping debug data*/
 

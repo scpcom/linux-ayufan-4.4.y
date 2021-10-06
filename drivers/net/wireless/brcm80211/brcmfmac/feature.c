@@ -24,7 +24,6 @@
 #include "fwil.h"
 #include "feature.h"
 
-
 /* Module param feature_disable (global for all devices) */
 static int brcmf_feature_disable;
 module_param_named(feature_disable, brcmf_feature_disable, int, 0);

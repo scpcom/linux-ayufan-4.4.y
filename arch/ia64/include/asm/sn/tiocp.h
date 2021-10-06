@@ -12,7 +12,6 @@
 #define TIOCP_PCI64_CMDTYPE_MEM         (0x1ull << 60)
 #define TIOCP_PCI64_CMDTYPE_MSI         (0x3ull << 60)
 
-
 /*****************************************************************************
  *********************** TIOCP MMR structure mapping ***************************
  *****************************************************************************/
@@ -111,7 +110,6 @@ struct tiocp{
 	u64	max_latency;			/* 0x000{430,,,5F0} */
 	u64	clear_all;			/* 0x000{438,,,5F8} */
     } cp_buf_count[8];
-
 
     /* 0x000600-0x0009FF -- PCI/X registers */
     u64		cp_pcix_bus_err_addr;		/* 0x000600 */

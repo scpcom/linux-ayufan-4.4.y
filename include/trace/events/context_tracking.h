@@ -51,7 +51,6 @@ DEFINE_EVENT(context_tracking_user, user_exit,
 	TP_ARGS(dummy)
 );
 
-
 #endif /*  _TRACE_CONTEXT_TRACKING_H */
 
 /* This part must be outside protection */

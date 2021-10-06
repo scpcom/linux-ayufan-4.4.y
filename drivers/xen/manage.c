@@ -317,7 +317,6 @@ static int setup_shutdown_watcher(void)
 		return err;
 	}
 
-
 #ifdef CONFIG_MAGIC_SYSRQ
 	err = register_xenbus_watch(&sysrq_watch);
 	if (err) {

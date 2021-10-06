@@ -1364,7 +1364,6 @@ csio_lnode_state_to_str(struct csio_lnode *ln, int8_t *str)
 	strcpy(str, "UNKNOWN");
 } /* csio_lnode_state_to_str */
 
-
 int
 csio_get_phy_port_stats(struct csio_hw *hw, uint8_t portid,
 			struct fw_fcoe_port_stats *port_stats)
@@ -1417,7 +1416,6 @@ csio_ln_mgmt_wr_handler(struct csio_hw *hw, void *wr, uint32_t len)
 	struct csio_mgmtm *mgmtm = csio_hw_to_mgmtm(hw);
 	struct csio_ioreq *io_req = NULL;
 	struct fw_fcoe_els_ct_wr *wr_cmd;
-
 
 	wr_cmd = (struct fw_fcoe_els_ct_wr *) wr;
 

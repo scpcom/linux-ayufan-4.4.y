@@ -48,7 +48,6 @@
  *			| ....  |	+-----------+
  */
 
-
 #define USBHSF_RUNTIME_PWCTRL	(1 << 0)
 
 /* status */

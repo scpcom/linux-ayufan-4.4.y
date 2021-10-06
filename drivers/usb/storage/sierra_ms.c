@@ -59,7 +59,6 @@ static int sierra_set_ms_mode(struct usb_device *udev, __u16 eSWocMode)
 	return result;
 }
 
-
 static int sierra_get_swoc_info(struct usb_device *udev,
 				struct swoc_info *swocInfo)
 {
@@ -87,7 +86,6 @@ static void debug_swoc(const struct device *dev, struct swoc_info *swocInfo)
 	dev_dbg(dev, "SWIMS: Linux SKU: %04X\n", swocInfo->LinuxSKU);
 	dev_dbg(dev, "SWIMS: Linux Version: %04X\n", swocInfo->LinuxVer);
 }
-
 
 static ssize_t show_truinst(struct device *dev, struct device_attribute *attr,
 			char *buf)
@@ -196,4 +194,3 @@ complete:
 
 	return 0;
 }
-

@@ -945,7 +945,6 @@ static int nfs4_copy_lock_stateid(nfs4_stateid *dst,
 	fl_owner_t fl_owner;
 	int ret = -ENOENT;
 
-
 	if (lockowner == NULL)
 		goto out;
 
@@ -1378,7 +1377,6 @@ static void nfs4_state_mark_recovery_failed(struct nfs4_state *state, int error)
 	set_bit(NFS_STATE_RECOVERY_FAILED, &state->flags);
 	nfs4_state_mark_open_context_bad(state);
 }
-
 
 static int nfs4_reclaim_locks(struct nfs4_state *state, const struct nfs4_state_recovery_ops *ops)
 {

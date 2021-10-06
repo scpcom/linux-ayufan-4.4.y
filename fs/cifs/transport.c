@@ -570,7 +570,6 @@ cifs_call_async(struct TCP_Server_Info *server, struct smb_rqst *rqst,
 	list_add_tail(&mid->qhead, &server->pending_mid_q);
 	spin_unlock(&GlobalMid_Lock);
 
-
 	cifs_in_send_inc(server);
 	rc = smb_send_rqst(server, rqst);
 	cifs_in_send_dec(server);

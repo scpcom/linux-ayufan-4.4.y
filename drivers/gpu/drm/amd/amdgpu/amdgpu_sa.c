@@ -419,7 +419,6 @@ static void amdgpu_sa_bo_dump_fence(struct fence *fence, struct seq_file *m)
 	if (s_fence) {
 		struct amdgpu_ring *ring;
 
-
 		ring = container_of(s_fence->sched, struct amdgpu_ring, sched);
 		seq_printf(m, " protected by 0x%016x on ring %d",
 			   s_fence->base.seqno, ring->idx);

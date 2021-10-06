@@ -200,7 +200,6 @@ static inline const struct raid6_calls *raid6_choose_gen(
 	return best;
 }
 
-
 /* Try to pick the best algorithm */
 /* This code uses the gfmul table as convenient data set to abuse */
 

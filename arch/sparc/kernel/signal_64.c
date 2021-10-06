@@ -553,4 +553,3 @@ void do_notify_resume(struct pt_regs *regs, unsigned long orig_i0, unsigned long
 	}
 	user_enter();
 }
-

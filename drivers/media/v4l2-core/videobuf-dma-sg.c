@@ -681,4 +681,3 @@ void videobuf_queue_sg_init(struct videobuf_queue *q,
 				 priv, &sg_ops, ext_lock);
 }
 EXPORT_SYMBOL_GPL(videobuf_queue_sg_init);
-

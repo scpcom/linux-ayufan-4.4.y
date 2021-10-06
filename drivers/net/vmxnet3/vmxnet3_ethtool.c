@@ -24,14 +24,12 @@
  *
  */
 
-
 #include "vmxnet3_int.h"
 
 struct vmxnet3_stat_desc {
 	char desc[ETH_GSTRING_LEN];
 	int  offset;
 };
-
 
 /* per tq stats maintained by the device */
 static const struct vmxnet3_stat_desc
@@ -112,7 +110,6 @@ vmxnet3_global_stats[] = {
 					 tx_timeout_count) }
 };
 
-
 struct rtnl_link_stats64 *
 vmxnet3_get_stats64(struct net_device *netdev,
 		   struct rtnl_link_stats64 *stats)
@@ -182,7 +179,6 @@ vmxnet3_get_sset_count(struct net_device *netdev, int sset)
 	}
 }
 
-
 /* This is a version 2 of the vmxnet3 ethtool_regs which goes hand in hand with
  * the version 2 of the vmxnet3 support for ethtool(8) --register-dump.
  * Therefore, if any registers are added, removed or modified, then a version
@@ -201,7 +197,6 @@ vmxnet3_get_regs_len(struct net_device *netdev)
 		sizeof(u32));
 }
 
-
 static void
 vmxnet3_get_drvinfo(struct net_device *netdev, struct ethtool_drvinfo *drvinfo)
 {
@@ -215,7 +210,6 @@ vmxnet3_get_drvinfo(struct net_device *netdev, struct ethtool_drvinfo *drvinfo)
 	strlcpy(drvinfo->bus_info, pci_name(adapter->pdev),
 		sizeof(drvinfo->bus_info));
 }
-
 
 static void
 vmxnet3_get_strings(struct net_device *netdev, u32 stringset, u8 *buf)
@@ -343,7 +337,6 @@ vmxnet3_get_ethtool_stats(struct net_device *netdev,
 		*buf++ = *(u64 *)(base + vmxnet3_global_stats[i].offset);
 }
 
-
 /* This is a version 2 of the vmxnet3 ethtool_regs which goes hand in hand with
  * the version 2 of the vmxnet3 support for ethtool(8) --register-dump.
  * Therefore, if any registers are added, removed or modified, then a version
@@ -445,7 +438,6 @@ vmxnet3_get_regs(struct net_device *netdev, struct ethtool_regs *regs, void *p)
 	}
 }
 
-
 static void
 vmxnet3_get_wol(struct net_device *netdev, struct ethtool_wolinfo *wol)
 {
@@ -454,7 +446,6 @@ vmxnet3_get_wol(struct net_device *netdev, struct ethtool_wolinfo *wol)
 	wol->supported = WAKE_UCAST | WAKE_ARP | WAKE_MAGIC;
 	wol->wolopts = adapter->wol;
 }
-
 
 static int
 vmxnet3_set_wol(struct net_device *netdev, struct ethtool_wolinfo *wol)
@@ -472,7 +463,6 @@ vmxnet3_set_wol(struct net_device *netdev, struct ethtool_wolinfo *wol)
 
 	return 0;
 }
-
 
 static int
 vmxnet3_get_settings(struct net_device *netdev, struct ethtool_cmd *ecmd)
@@ -495,7 +485,6 @@ vmxnet3_get_settings(struct net_device *netdev, struct ethtool_cmd *ecmd)
 	return 0;
 }
 
-
 static void
 vmxnet3_get_ringparam(struct net_device *netdev,
 		      struct ethtool_ringparam *param)
@@ -512,7 +501,6 @@ vmxnet3_get_ringparam(struct net_device *netdev,
 	param->rx_mini_pending = 0;
 	param->rx_jumbo_pending = adapter->rx_ring2_size;
 }
-
 
 static int
 vmxnet3_set_ringparam(struct net_device *netdev,
@@ -628,7 +616,6 @@ out:
 
 	return err;
 }
-
 
 static int
 vmxnet3_get_rxnfc(struct net_device *netdev, struct ethtool_rxnfc *info,

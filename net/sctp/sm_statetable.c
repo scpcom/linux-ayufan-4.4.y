@@ -56,7 +56,6 @@ static const sctp_sm_table_entry_t *sctp_chunk_event_lookup(struct net *net,
 							    sctp_cid_t cid,
 							    sctp_state_t state);
 
-
 static const sctp_sm_table_entry_t bug = {
 	.fn = sctp_sf_bug,
 	.name = "sctp_sf_bug"
@@ -527,7 +526,6 @@ chunk_event_table_unknown[SCTP_STATE_NUM_STATES] = {
 	/* SCTP_STATE_SHUTDOWN_ACK_SENT */
 	TYPE_SCTP_FUNC(sctp_sf_unk_chunk),
 };	/* chunk unknown */
-
 
 #define TYPE_SCTP_PRIMITIVE_ASSOCIATE  { \
 	/* SCTP_STATE_CLOSED */ \

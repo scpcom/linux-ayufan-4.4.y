@@ -5,7 +5,6 @@
 #define W977_EFIO2_BASE 0x3f0
 #define W977_DEVICE_IR 0x06
 
-
 /*
  * Enter extended function mode
  */

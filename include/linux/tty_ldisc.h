@@ -130,7 +130,6 @@
 #include <linux/fs.h>
 #include <linux/wait.h>
 
-
 /*
  * the semaphore definition
  */
@@ -155,7 +154,6 @@ do {								\
 	__init_ldsem((sem), #sem, &__key);			\
 } while (0)
 
-
 extern int ldsem_down_read(struct ld_semaphore *sem, long timeout);
 extern int ldsem_down_read_trylock(struct ld_semaphore *sem);
 extern int ldsem_down_write(struct ld_semaphore *sem, long timeout);
@@ -174,7 +172,6 @@ extern int ldsem_down_write_nested(struct ld_semaphore *sem, int subclass,
 # define ldsem_down_write_nested(sem, subclass, timeout)	\
 		ldsem_down_write(sem, timeout)
 #endif
-
 
 struct tty_ldisc_ops {
 	int	magic;

@@ -216,4 +216,3 @@ fp_fgetman(struct fp_ext *dest, struct fp_ext *src)
 
 	return dest;
 }
-

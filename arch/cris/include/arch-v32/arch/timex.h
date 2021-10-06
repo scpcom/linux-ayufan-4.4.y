@@ -28,4 +28,3 @@ static inline unsigned long get_us_in_jiffie_highres(void)
 }
 
 #endif
-

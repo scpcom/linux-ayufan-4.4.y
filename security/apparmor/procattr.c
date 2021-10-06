@@ -18,7 +18,6 @@
 #include "include/domain.h"
 #include "include/procattr.h"
 
-
 /**
  * aa_getprocattr - Return the profile information for @profile
  * @profile: the profile to print profile info about  (NOT NULL)

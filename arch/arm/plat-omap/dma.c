@@ -783,7 +783,6 @@ omap_dma_set_prio_lch(int lch, unsigned char read_prio,
 	return 0;
 }
 
-
 /*
  * Clears any DMA state so the DMA engine is ready to restart with new buffers
  * through omap_start_dma(). Any buffers in flight are discarded.
@@ -1322,7 +1321,6 @@ static int omap_system_dma_probe(struct platform_device *pdev)
 		return -ENOMEM;
 	}
 
-
 	if (dma_omap2plus()) {
 		dma_linked_lch = kzalloc(sizeof(struct dma_link_info) *
 						dma_lch_count, GFP_KERNEL);
@@ -1466,5 +1464,3 @@ static int __init omap_dma_cmdline_reserve_ch(char *str)
 }
 
 __setup("omap_dma_reserve_ch=", omap_dma_cmdline_reserve_ch);
-
-

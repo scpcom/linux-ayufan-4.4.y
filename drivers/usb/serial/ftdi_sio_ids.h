@@ -7,14 +7,11 @@
  *
  */
 
-
 /**********************************/
 /***** devices using FTDI VID *****/
 /**********************************/
 
-
 #define FTDI_VID	0x0403	/* Vendor Id */
-
 
 /*** "original" FTDI device PIDs ***/
 
@@ -26,7 +23,6 @@
 #define FTDI_FTX_PID   0x6015 /* FT-X series (FT201X, FT230X, FT231X, etc) */
 #define FTDI_SIO_PID	0x8372	/* Product Id SIO application of 8U100AX */
 #define FTDI_232RL_PID  0xFBFA  /* Product ID for FT232RL */
-
 
 /*** third-party PIDs (using FTDI_VID) ***/
 
@@ -576,12 +572,9 @@
 #define FTDI_CUSTOMWARE_MINIPLEX2WI_PID	0xfd4a	/* MiniPlex-2Wi */
 #define FTDI_CUSTOMWARE_MINIPLEX3_PID	0xfd4b	/* MiniPlex-3 series */
 
-
 /********************************/
 /** third-party VID/PID combos **/
 /********************************/
-
-
 
 /*
  * Atmel STK541
@@ -1355,7 +1348,6 @@
  * Submitted by John G. Rogers
  */
 #define SEGWAY_RMP200_PID	0xe729
-
 
 /*
  * Accesio USB Data Acquisition products (http://www.accesio.com/)

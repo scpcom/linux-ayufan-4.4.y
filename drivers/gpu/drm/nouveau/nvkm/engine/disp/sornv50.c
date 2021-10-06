@@ -49,7 +49,6 @@ nv50_sor_power(NV50_DISP_MTHD_V1)
 	} else
 		return ret;
 
-
 	nvkm_msec(device, 2000,
 		if (!(nvkm_rd32(device, 0x61c004 + soff) & 0x80000000))
 			break;

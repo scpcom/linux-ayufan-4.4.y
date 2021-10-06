@@ -1936,8 +1936,6 @@ static int trinity_parse_sys_info_table(struct radeon_device *rdev)
 							    pi->sys_info.uvd_clock_table_entries[i].dclk_did);
 		}
 
-
-
 	}
 	return 0;
 }

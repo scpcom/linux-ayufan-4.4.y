@@ -238,7 +238,6 @@ TRACE_EVENT(kvm_s390_stop_request,
 		      __entry->stop_irq, __entry->flags)
 	);
 
-
 /*
  * Trace point for enabling channel I/O instruction support.
  */
@@ -279,7 +278,6 @@ TRACE_EVENT(kvm_s390_enable_disable_ibs,
 	    TP_printk("%s ibs on cpu %d",
 		      __entry->state ? "enabling" : "disabling", __entry->id)
 	);
-
 
 #endif /* _TRACE_KVMS390_H */
 

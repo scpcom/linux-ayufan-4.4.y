@@ -57,7 +57,6 @@ static u32 sdio_mux_table[] = {0, 1, 2, 3};
 static const char *const fephy_mux_p[] __initconst = { "25m", "125m"};
 static u32 fephy_mux_table[] = {0, 1};
 
-
 static struct hisi_mux_clock hix5hd2_mux_clks[] __initdata = {
 	{ HIX5HD2_SFC_MUX, "sfc_mux", sfc_mux_p, ARRAY_SIZE(sfc_mux_p),
 		CLK_SET_RATE_PARENT, 0x5c, 8, 3, 0, sfc_mux_table, },

@@ -1355,7 +1355,6 @@ union security_list_options {
 					struct qstr *name, void **ctx,
 					u32 *ctxlen);
 
-
 #ifdef CONFIG_SECURITY_PATH
 	int (*path_unlink)(struct path *dir, struct dentry *dentry);
 	int (*path_mkdir)(struct path *dir, struct dentry *dentry,

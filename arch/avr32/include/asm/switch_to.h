@@ -45,5 +45,4 @@ extern struct task_struct *__switch_to(struct task_struct *,
 				   &next->thread.cpu_context);		\
 	} while (0)
 
-
 #endif /* __ASM_AVR32_SWITCH_TO_H */

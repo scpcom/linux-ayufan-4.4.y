@@ -140,7 +140,6 @@ static void nv_crtc_calc_state_ext(struct drm_crtc *crtc, struct drm_display_mod
 	if (drm->device.info.chipset > 0x40 && dot_clock <= (pll_lim.vco1.max_freq / 2))
 		memset(&pll_lim.vco2, 0, sizeof(pll_lim.vco2));
 
-
 	if (!clk->pll_calc(clk, &pll_lim, dot_clock, pv))
 		return;
 

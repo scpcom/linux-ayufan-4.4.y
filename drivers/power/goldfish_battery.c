@@ -62,7 +62,6 @@ enum {
 	BATTERY_INT_MASK        = BATTERY_STATUS_CHANGED | AC_STATUS_CHANGED,
 };
 
-
 static int goldfish_ac_get_property(struct power_supply *psy,
 			enum power_supply_property psp,
 			union power_supply_propval *val)

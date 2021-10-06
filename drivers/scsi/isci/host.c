@@ -107,7 +107,6 @@
 #define NORMALIZE_PUT_POINTER(x) \
 	((x) & SMU_COMPLETION_QUEUE_PUT_POINTER_MASK)
 
-
 /**
  * NORMALIZE_EVENT_POINTER() -
  *
@@ -764,7 +763,6 @@ static void sci_controller_initialize_completion_queue(struct isci_host *ihost)
 	writel(completion_queue_control_value,
 	       &ihost->smu_registers->completion_queue_control);
 
-
 	/* Set the completion queue get pointer and enable the queue */
 	completion_queue_get_value = (
 		(SMU_CQGR_GEN_VAL(POINTER, 0))
@@ -1226,7 +1224,6 @@ static enum sci_status sci_controller_stop_phys(struct isci_host *ihost)
 	return status;
 }
 
-
 /**
  * isci_host_deinit - shutdown frame reception and dma
  * @ihost: host to take down
@@ -1433,13 +1430,11 @@ sci_controller_set_interrupt_coalescence(struct isci_host *ihost,
 	       SMU_ICC_GEN_VAL(TIMER, timeout_encode),
 	       &ihost->smu_registers->interrupt_coalesce_control);
 
-
 	ihost->interrupt_coalesce_number = (u16)coalesce_number;
 	ihost->interrupt_coalesce_timeout = coalesce_timeout / 100;
 
 	return SCI_SUCCESS;
 }
-
 
 static void sci_controller_ready_state_enter(struct sci_base_state_machine *sm)
 {
@@ -2159,7 +2154,6 @@ static enum sci_status sci_controller_initialize(struct isci_host *ihost)
 	 * / @todo The AFE settings are supposed to be correct for the B0 but
 	 * /       presently they seem to be wrong. */
 	sci_controller_afe_initialization(ihost);
-
 
 	/* Take the hardware out of reset */
 	writel(0, &ihost->smu_registers->soft_reset_control);

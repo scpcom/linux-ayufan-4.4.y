@@ -209,7 +209,6 @@ int main(int argc, const char *argv[])
 		}
 	}
 		
-
 	for (i = 0; i < ARRAY_SIZE(commands); i++) {
 		struct cmd_struct *p = commands + i;
 		if (strcmp(p->cmd, cmd))

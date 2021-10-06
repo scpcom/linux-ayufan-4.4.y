@@ -26,7 +26,6 @@
 #include "da7219.h"
 #include "da7219-aad.h"
 
-
 /*
  * Detection control
  */
@@ -261,7 +260,6 @@ static void da7219_aad_hptest_work(struct work_struct *work)
 		snd_soc_jack_report(da7219_aad->jack, report,
 				    SND_JACK_HEADSET | SND_JACK_LINEOUT);
 }
-
 
 /*
  * IRQ
@@ -749,7 +747,6 @@ static void da7219_aad_handle_pdata(struct snd_soc_codec *codec)
 		snd_soc_update_bits(codec, DA7219_ACCDET_CONFIG_7, mask, cfg);
 	}
 }
-
 
 /*
  * Init/Exit

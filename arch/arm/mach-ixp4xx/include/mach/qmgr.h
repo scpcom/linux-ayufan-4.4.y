@@ -83,7 +83,6 @@ int __qmgr_request_queue(unsigned int queue, unsigned int len /* dwords */,
 
 void qmgr_release_queue(unsigned int queue);
 
-
 static inline void qmgr_put_entry(unsigned int queue, u32 val)
 {
 	struct qmgr_regs __iomem *qmgr_regs = IXP4XX_QMGR_BASE_VIRT;

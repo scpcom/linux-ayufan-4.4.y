@@ -565,7 +565,6 @@ __attribute_const__ int ib_rate_to_mult(enum ib_rate rate);
  */
 __attribute_const__ int ib_rate_to_mbps(enum ib_rate rate);
 
-
 /**
  * enum ib_mr_type - memory region type
  * @IB_MR_TYPE_MEM_REG:       memory region that is used for

@@ -102,7 +102,6 @@ int acpiphp_register_attention(struct acpiphp_attention_info *info)
 }
 EXPORT_SYMBOL_GPL(acpiphp_register_attention);
 
-
 /**
  * acpiphp_unregister_attention - unset attention LED callback
  * @info: must match the pointer used to register
@@ -123,7 +122,6 @@ int acpiphp_unregister_attention(struct acpiphp_attention_info *info)
 }
 EXPORT_SYMBOL_GPL(acpiphp_unregister_attention);
 
-
 /**
  * enable_slot - power on and enable a slot
  * @hotplug_slot: slot to enable
@@ -140,7 +138,6 @@ static int enable_slot(struct hotplug_slot *hotplug_slot)
 	return acpiphp_enable_slot(slot->acpi_slot);
 }
 
-
 /**
  * disable_slot - disable and power off a slot
  * @hotplug_slot: slot to disable
@@ -156,7 +153,6 @@ static int disable_slot(struct hotplug_slot *hotplug_slot)
 	/* disable the specified slot */
 	return acpiphp_disable_slot(slot->acpi_slot);
 }
-
 
 /**
  * set_attention_status - set attention LED
@@ -182,7 +178,6 @@ static int set_attention_status(struct hotplug_slot *hotplug_slot, u8 status)
 	return retval;
 }
 
-
 /**
  * get_power_status - get power status of a slot
  * @hotplug_slot: slot to get status
@@ -201,7 +196,6 @@ static int get_power_status(struct hotplug_slot *hotplug_slot, u8 *value)
 
 	return 0;
 }
-
 
 /**
  * get_attention_status - get attention LED status
@@ -228,7 +222,6 @@ static int get_attention_status(struct hotplug_slot *hotplug_slot, u8 *value)
 	return retval;
 }
 
-
 /**
  * get_latch_status - get latch status of a slot
  * @hotplug_slot: slot to get status
@@ -247,7 +240,6 @@ static int get_latch_status(struct hotplug_slot *hotplug_slot, u8 *value)
 
 	return 0;
 }
-
 
 /**
  * get_adapter_status - get adapter status of a slot
@@ -334,7 +326,6 @@ error:
 	return retval;
 }
 
-
 void acpiphp_unregister_hotplug_slot(struct acpiphp_slot *acpiphp_slot)
 {
 	struct slot *slot = acpiphp_slot->slot;
@@ -346,7 +337,6 @@ void acpiphp_unregister_hotplug_slot(struct acpiphp_slot *acpiphp_slot)
 	if (retval)
 		pr_err("pci_hp_deregister failed with error %d\n", retval);
 }
-
 
 void __init acpiphp_init(void)
 {

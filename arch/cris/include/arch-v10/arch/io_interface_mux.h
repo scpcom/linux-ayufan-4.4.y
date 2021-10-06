@@ -3,10 +3,8 @@
  * $Id: io_interface_mux.h,v 1.1 2004/12/13 12:21:53 starvik Exp $
  */
 
-
 #ifndef _IO_INTERFACE_MUX_H
 #define _IO_INTERFACE_MUX_H
-
 
 /* C.f. ETRAX100LX Designer's Reference 20.9 */
 

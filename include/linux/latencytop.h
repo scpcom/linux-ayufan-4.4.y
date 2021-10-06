@@ -24,8 +24,6 @@ struct latency_record {
 	unsigned long	max;
 };
 
-
-
 extern int latencytop_enabled;
 void __account_scheduler_latency(struct task_struct *task, int usecs, int inter);
 static inline void

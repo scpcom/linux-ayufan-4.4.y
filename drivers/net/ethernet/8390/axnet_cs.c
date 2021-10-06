@@ -71,7 +71,6 @@ MODULE_AUTHOR("David Hinds <dahinds@users.sourceforge.net>");
 MODULE_DESCRIPTION("Asix AX88190 PCMCIA ethernet driver");
 MODULE_LICENSE("GPL");
 
-
 /*====================================================================*/
 
 static int axnet_config(struct pcmcia_device *link);
@@ -402,7 +401,6 @@ static int axnet_resume(struct pcmcia_device *link)
 
 	return 0;
 }
-
 
 /*======================================================================
 

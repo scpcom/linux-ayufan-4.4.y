@@ -134,13 +134,11 @@ static struct platform_device bfin_spi0_device = {
 };
 #endif  /* spi master and devices */
 
-
 #if IS_ENABLED(CONFIG_FB_HITACHI_TX09)
 static struct platform_device hitachi_fb_device = {
 	.name = "hitachi-tx09",
 };
 #endif
-
 
 #if IS_ENABLED(CONFIG_SMC91X)
 #include <linux/smc91x.h>

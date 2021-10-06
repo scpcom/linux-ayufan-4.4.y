@@ -199,7 +199,6 @@ void atl1c_post_phy_linkchg(struct atl1c_hw *hw, u16 link_speed);
 #define REG_LTSSM_ID_CTRL		0x12FC
 #define LTSSM_ID_EN_WRO			0x1000
 
-
 /* Selene Master Control Register */
 #define REG_MASTER_CTRL			0x1400
 #define MASTER_CTRL_OTP_SEL		BIT(31)
@@ -578,7 +577,6 @@ void atl1c_post_phy_linkchg(struct atl1c_hw *hw, u16 link_speed);
 	TXQ_CFGV |\
 	FIELDX(TXQ_TXF_BURST_NUM, L2CB_TXQ_TXF_BURST_PREF))
 
-
 /* Jumbo packet Threshold for task offload */
 #define REG_TX_TSO_OFFLOAD_THRESH	0x1594 /* In 8-bytes */
 #define TX_TSO_OFFLOAD_THRESH_MASK	0x07FF
@@ -780,7 +778,6 @@ void atl1c_post_phy_linkchg(struct atl1c_hw *hw, u16 link_speed);
 #define L1D_MPW_PHYID1			0xD01C  /* V7 */
 #define L1D_MPW_PHYID2			0xD01D  /* V1-V6 */
 #define L1D_MPW_PHYID3			0xD01E  /* V8 */
-
 
 /* Autoneg Advertisement Register */
 #define ADVERTISE_DEFAULT_CAP \
@@ -990,7 +987,6 @@ void atl1c_post_phy_linkchg(struct atl1c_hw *hw, u16 link_speed);
 
 #define MIIDBG_CABLE1TH_DET             0x3E
 #define CABLE1TH_DET_EN                 0x8000
-
 
 /******* dev 3 *********/
 #define MIIEXT_PCS                      3

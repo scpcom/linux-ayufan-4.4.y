@@ -28,4 +28,3 @@ __asm__ __volatile__(
 	: "dx", "di");
 return __res;
 }
-

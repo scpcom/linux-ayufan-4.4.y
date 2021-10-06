@@ -427,7 +427,6 @@ l_exc:
 2:	jr	ra
 	 nop
 
-
 #define SEXC(n)				\
 s_exc_p ## n ## u:			\
 	jr	ra;			\

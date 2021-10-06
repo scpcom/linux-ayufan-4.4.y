@@ -991,7 +991,6 @@ static int ti_hecc_remove(struct platform_device *pdev)
 	return 0;
 }
 
-
 #ifdef CONFIG_PM
 static int ti_hecc_suspend(struct platform_device *pdev, pm_message_t state)
 {

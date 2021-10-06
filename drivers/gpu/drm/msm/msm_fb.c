@@ -28,7 +28,6 @@ struct msm_framebuffer {
 };
 #define to_msm_framebuffer(x) container_of(x, struct msm_framebuffer, base)
 
-
 static int msm_framebuffer_create_handle(struct drm_framebuffer *fb,
 		struct drm_file *file_priv,
 		unsigned int *handle)

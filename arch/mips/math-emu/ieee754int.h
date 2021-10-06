@@ -82,7 +82,6 @@ static inline int ieee754_class_nan(int xc)
 #define EXPLODEXSP EXPLODESP(x, xc, xs, xe, xm)
 #define EXPLODEYSP EXPLODESP(y, yc, ys, ye, ym)
 
-
 #define COMPXDP \
 	u64 xm; int xe; int xs __maybe_unused; int xc
 

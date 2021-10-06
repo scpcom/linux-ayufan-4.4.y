@@ -108,7 +108,6 @@ static const struct file_operations show_diag_stat_fops = {
 	.release	= seq_release,
 };
 
-
 static int __init show_diag_stat_init(void)
 {
 	debugfs_create_file("diag_stat", 0400, NULL, NULL,

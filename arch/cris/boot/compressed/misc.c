@@ -301,7 +301,6 @@ void decompress_kernel(void)
 	hwprot = REG_RD(pinmux, regi_pinmux, rw_hwprot);
 #endif
 
-
 #ifdef CONFIG_ETRAX_DEBUG_PORT0
 	serial_setup(regi_ser0);
 #endif

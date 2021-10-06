@@ -44,4 +44,3 @@
 #define		_54M_RATE_	11
 
 #endif
-

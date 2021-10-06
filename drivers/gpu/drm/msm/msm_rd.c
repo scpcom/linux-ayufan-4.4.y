@@ -196,7 +196,6 @@ static int rd_release(struct inode *inode, struct file *file)
 	return 0;
 }
 
-
 static const struct file_operations rd_debugfs_fops = {
 	.owner = THIS_MODULE,
 	.open = rd_open,

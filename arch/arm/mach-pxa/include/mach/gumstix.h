@@ -12,7 +12,6 @@
 #define GPIO_GUMSTIX_BTRESET          7
 #define GPIO_GUMSTIX_BTRESET_MD		(GPIO_GUMSTIX_BTRESET | GPIO_OUT)
 
-
 /*
 GPIOn - Input from MAX823 (or equiv), normalizing USB +5V into a clean
 interrupt signal for determining cable presence. On the gumstix F,
@@ -55,7 +54,6 @@ has detected a cable insertion; driven low otherwise. */
 #define GPIO_GUMSTIX_ETH1_MD		(GPIO_GUMSTIX_ETH1 | GPIO_IN)
 #define GUMSTIX_ETH1_IRQ		PXA_GPIO_TO_IRQ(GPIO_GUMSTIX_ETH1)
 
-
 /* CF reset line */
 #define GPIO8_RESET			8
 
@@ -89,4 +87,3 @@ has detected a cable insertion; driven low otherwise. */
 /* for expansion boards that can't be programatically detected */
 extern int am200_init(void);
 extern int am300_init(void);
-

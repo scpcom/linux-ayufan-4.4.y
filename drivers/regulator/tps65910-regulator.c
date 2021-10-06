@@ -698,7 +698,6 @@ static int tps65911_set_voltage_sel(struct regulator_dev *dev,
 	return -EINVAL;
 }
 
-
 static int tps65910_list_voltage_dcdc(struct regulator_dev *dev,
 					unsigned selector)
 {

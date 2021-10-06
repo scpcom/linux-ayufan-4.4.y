@@ -472,7 +472,6 @@ static void octeon_wdt_calc_parameters(int t)
 
 	timeout_sec = max_timeout_sec;
 
-
 	/*
 	 * Find the largest interrupt period, that can evenly divide
 	 * the requested heartbeat time.

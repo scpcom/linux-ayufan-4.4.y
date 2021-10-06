@@ -76,5 +76,4 @@ struct shm_info {
 	__kernel_ulong_t swap_successes;
 };
 
-
 #endif /* _UAPI_LINUX_SHM_H_ */

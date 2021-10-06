@@ -211,7 +211,6 @@ static struct pci_driver kahlua_driver = {
 	.remove		= remove_one,
 };
 
-
 static int __init kahlua_init_module(void)
 {
 	printk(KERN_INFO "Cyrix Kahlua VSA1 XpressAudio support (c) Copyright 2003 Red Hat Inc\n");
@@ -223,7 +222,5 @@ static void kahlua_cleanup_module(void)
 	pci_unregister_driver(&kahlua_driver);
 }
 
-
 module_init(kahlua_init_module);
 module_exit(kahlua_cleanup_module);
-

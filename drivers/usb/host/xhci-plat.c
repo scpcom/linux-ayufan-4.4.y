@@ -1,15 +1,4 @@
-/*
- * xhci-plat.c - xHCI host controller driver platform Bus Glue.
- *
- * Copyright (C) 2012 Texas Instruments Incorporated - http://www.ti.com
- * Author: Sebastian Andrzej Siewior <bigeasy@linutronix.de>
- *
- * A lot of code borrowed from the Linux xHCI driver.
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * version 2 as published by the Free Software Foundation.
- */
+
 
 #include <linux/clk.h>
 #include <linux/dma-mapping.h>
@@ -38,15 +27,10 @@ static const struct xhci_driver_overrides xhci_plat_overrides __initconst = {
 
 static void xhci_plat_quirks(struct device *dev, struct xhci_hcd *xhci)
 {
-	/*
-	 * As of now platform drivers don't provide MSI support so we ensure
-	 * here that the generic code does not try to make a pci_dev from our
-	 * dev struct in order to setup MSI
-	 */
+	 
 	xhci->quirks |= XHCI_PLAT;
 }
 
-/* called during probe() after chip reset completes */
 static int xhci_plat_setup(struct usb_hcd *hcd)
 {
 	struct device_node *of_node = hcd->self.controller->of_node;
@@ -94,15 +78,13 @@ static int xhci_plat_probe(struct platform_device *pdev)
 	if (irq < 0)
 		return -ENODEV;
 
-	/* Try to set 64-bit DMA first */
 	if (WARN_ON(!pdev->dev.dma_mask))
-		/* Platform did not initialize dma_mask */
+		 
 		ret = dma_coerce_mask_and_coherent(&pdev->dev,
 						   DMA_BIT_MASK(64));
 	else
 		ret = dma_set_mask_and_coherent(&pdev->dev, DMA_BIT_MASK(64));
 
-	/* If seting 64-bit DMA mask fails, fall back to 32-bit DMA mask */
 	if (ret) {
 		ret = dma_set_mask_and_coherent(&pdev->dev, DMA_BIT_MASK(32));
 		if (ret)
@@ -123,10 +105,6 @@ static int xhci_plat_probe(struct platform_device *pdev)
 	hcd->rsrc_start = res->start;
 	hcd->rsrc_len = resource_size(res);
 
-	/*
-	 * Not all platforms have a clk so it is not an error if the
-	 * clock does not exists.
-	 */
 	clk = devm_clk_get(&pdev->dev, NULL);
 	if (!IS_ERR(clk)) {
 		ret = clk_prepare_enable(clk);
@@ -232,14 +210,6 @@ static int xhci_plat_suspend(struct device *dev)
 	struct usb_hcd	*hcd = dev_get_drvdata(dev);
 	struct xhci_hcd	*xhci = hcd_to_xhci(hcd);
 
-	/*
-	 * xhci_suspend() needs `do_wakeup` to know whether host is allowed
-	 * to do wakeup during suspend. Since xhci_plat_suspend is currently
-	 * only designed for system suspend, device_may_wakeup() is enough
-	 * to dertermine whether host is allowed to do wakeup. Need to
-	 * reconsider this when xhci_plat_suspend enlarges its scope, e.g.,
-	 * also applies to runtime suspend.
-	 */
 	return xhci_suspend(xhci, device_may_wakeup(dev));
 }
 
@@ -257,7 +227,7 @@ static const struct dev_pm_ops xhci_plat_pm_ops = {
 #define DEV_PM_OPS	(&xhci_plat_pm_ops)
 #else
 #define DEV_PM_OPS	NULL
-#endif /* CONFIG_PM */
+#endif  
 
 #ifdef CONFIG_OF
 static const struct of_device_id usb_xhci_of_match[] = {
@@ -273,7 +243,7 @@ MODULE_DEVICE_TABLE(of, usb_xhci_of_match);
 #endif
 
 static const struct acpi_device_id usb_xhci_acpi_match[] = {
-	/* XHCI-compliant USB Controller */
+	 
 	{ "PNP0D10", },
 	{ }
 };

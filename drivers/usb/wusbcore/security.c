@@ -58,13 +58,11 @@ int wusbhc_sec_create(struct wusbhc *wusbhc)
 	return 0;
 }
 
-
 /* Called when the HC is destroyed */
 void wusbhc_sec_destroy(struct wusbhc *wusbhc)
 {
 	destroy_workqueue(wusbhc->wq_security);
 }
-
 
 /**
  * wusbhc_next_tkid - generate a new, currently unused, TKID
@@ -145,7 +143,6 @@ void wusbhc_sec_stop(struct wusbhc *wusbhc)
 	cancel_work_sync(&wusbhc->gtk_rekey_work);
 }
 
-
 /** @returns encryption type name */
 const char *wusb_et_name(u8 x)
 {
@@ -209,7 +206,6 @@ static int wusb_dev_set_gtk(struct wusbhc *wusbhc, struct wusb_dev *wusb_dev)
 		&wusbhc->gtk.descr, wusbhc->gtk.descr.bLength,
 		USB_CTRL_SET_TIMEOUT);
 }
-
 
 /* FIXME: prototype for adding security */
 int wusb_dev_sec_add(struct wusbhc *wusbhc,

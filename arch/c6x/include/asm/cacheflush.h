@@ -52,7 +52,6 @@ do {								  \
 			(unsigned long) page_address(page) + PAGE_SIZE)); \
 } while (0)
 
-
 #define copy_to_user_page(vma, page, vaddr, dst, src, len) \
 do {						     \
 	memcpy(dst, src, len);			     \

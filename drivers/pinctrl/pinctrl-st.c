@@ -1170,7 +1170,6 @@ static int st_pctl_dt_setup_retime(struct st_pinctrl *info,
 	return -EINVAL;
 }
 
-
 static struct regmap_field *st_pc_get_value(struct device *dev,
 					    struct regmap *regmap, int bank,
 					    int data, int lsb, int msb)

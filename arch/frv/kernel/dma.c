@@ -35,7 +35,6 @@ struct frv_dma_channel {
 	void			*data;
 };
 
-
 #define __get_DMAC(IO,X)	({ *(volatile unsigned long *)((IO) + DMAC_##X##x); })
 
 #define __set_DMAC(IO,X,V)					\
@@ -48,7 +47,6 @@ do {								\
 do {								\
 	*(volatile unsigned long *)((IO) + DMAC_##X##x) = (V);	\
 } while(0)
-
 
 static struct frv_dma_channel frv_dma_channels[FRV_DMA_NCHANS] = {
 	[0] = {

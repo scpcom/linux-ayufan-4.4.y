@@ -13,7 +13,6 @@
 
 #include <uapi/asm/unistd.h>
 
-
 #define NR_syscalls 340
 
 /*

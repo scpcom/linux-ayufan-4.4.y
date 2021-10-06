@@ -371,7 +371,6 @@ struct fw_info {
 	struct fw_hdr fw_hdr;
 };
 
-
 struct trace_params {
 	u32 data[TRACE_LEN / 4];
 	u32 mask[TRACE_LEN / 4];

@@ -105,4 +105,3 @@
 
 #endif /* ndef ASM */
 #endif /* GENERIC_NCR5380_H */
-

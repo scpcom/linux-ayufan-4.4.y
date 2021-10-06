@@ -83,7 +83,6 @@ sk_load_byte_positive_offset:
 	pop	SKBDATA;			\
 	pop	%r9;
 
-
 bpf_slow_path_word:
 	bpf_slow_path_common(4)
 	js	bpf_error

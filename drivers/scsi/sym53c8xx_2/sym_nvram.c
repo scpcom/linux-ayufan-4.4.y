@@ -236,7 +236,6 @@ static void sym_display_Symbios_nvram(struct sym_device *np, Symbios_nvram *nvra
 static void sym_display_Tekram_nvram(struct sym_device *np, Tekram_nvram *nvram) { (void)np; (void)nvram; }
 #endif	/* SYM_CONF_DEBUG_NVRAM */
 
-
 /*
  *  24C16 EEPROM reading.
  *

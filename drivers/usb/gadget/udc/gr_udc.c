@@ -183,7 +183,6 @@ static void gr_seq_ep_show(struct seq_file *seq, struct gr_ep *ep)
 	seq_puts(seq, "\n");
 }
 
-
 static int gr_seq_show(struct seq_file *seq, void *v)
 {
 	struct gr_udc *dev = seq->private;
@@ -1577,7 +1576,6 @@ static int gr_ep_enable(struct usb_ep *_ep,
 	ep->ep.maxpacket = max;
 	ep->dma_start = 0;
 
-
 	if (nt) {
 		/*
 		 * Maximum possible size of all payloads in one microframe
@@ -1820,7 +1818,6 @@ static int gr_fifo_status(struct usb_ep *_ep)
 
 	return bytes;
 }
-
 
 /* Empty data from internal buffers of an endpoint. */
 static void gr_fifo_flush(struct usb_ep *_ep)

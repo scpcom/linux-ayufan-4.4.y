@@ -97,7 +97,6 @@ SYSCALL_DEFINE6(mmap, unsigned long, addr, unsigned long, len,
 }
 #endif
 
-
 /* Provide the actual syscall number to call mapping. */
 #undef __SYSCALL
 #define __SYSCALL(nr, call) [nr] = (call),

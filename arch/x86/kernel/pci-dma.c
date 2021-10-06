@@ -33,21 +33,15 @@ int force_iommu __read_mostly = 0;
 int iommu_merge __read_mostly = 0;
 
 int no_iommu __read_mostly;
-/* Set this to 1 if there is a HW IOMMU in the system */
+
 int iommu_detected __read_mostly = 0;
 
-/*
- * This variable becomes 1 if iommu=pt is passed on the kernel command line.
- * If this variable is 1, IOMMU implementations do no DMA translation for
- * devices and allow every device to access to whole physical memory. This is
- * useful if a user wants to use an IOMMU only for KVM device assignment to
- * guests and not for driver dma translation.
- */
+
 int iommu_pass_through __read_mostly;
 
 extern struct iommu_table_entry __iommu_table[], __iommu_table_end[];
 
-/* Dummy device used for NULL arguments (normally ISA). */
+
 struct device x86_dma_fallback_dev = {
 	.init_name = "fallback device",
 	.coherent_dma_mask = ISA_DMA_BIT_MASK,
@@ -55,7 +49,6 @@ struct device x86_dma_fallback_dev = {
 };
 EXPORT_SYMBOL(x86_dma_fallback_dev);
 
-/* Number of entries preallocated for DMA-API debugging */
 #define PREALLOC_DMA_DEBUG_ENTRIES       65536
 
 void __init pci_iommu_alloc(void)
@@ -89,7 +82,7 @@ void *dma_generic_alloc_coherent(struct device *dev, size_t size,
 	flag &= ~__GFP_ZERO;
 again:
 	page = NULL;
-	/* CMA can be used only in the context which permits sleeping */
+	 
 	if (gfpflags_allow_blocking(flag)) {
 		page = dma_alloc_from_contiguous(dev, count, get_order(size));
 		if (page && page_to_phys(page) + size > dma_mask) {
@@ -97,7 +90,7 @@ again:
 			page = NULL;
 		}
 	}
-	/* fallback */
+	 
 	if (!page)
 		page = alloc_pages_node(dev_to_node(dev), flag, get_order(size));
 	if (!page)
@@ -144,10 +137,6 @@ bool arch_dma_alloc_attrs(struct device **dev, gfp_t *gfp)
 }
 EXPORT_SYMBOL(arch_dma_alloc_attrs);
 
-/*
- * See <Documentation/x86/x86_64/boot-options.txt> for the iommu kernel
- * parameter documentation.
- */
 static __init int iommu_setup(char *p)
 {
 	iommu_merge = 1;
@@ -158,7 +147,7 @@ static __init int iommu_setup(char *p)
 	while (*p) {
 		if (!strncmp(p, "off", 3))
 			no_iommu = 1;
-		/* gart_parse_options has more force support */
+		 
 		if (!strncmp(p, "force", 5))
 			force_iommu = 1;
 		if (!strncmp(p, "noforce", 7)) {
@@ -202,7 +191,7 @@ static __init int iommu_setup(char *p)
 #ifdef CONFIG_CALGARY_IOMMU
 		if (!strncmp(p, "calgary", 7))
 			use_calgary = 1;
-#endif /* CONFIG_CALGARY_IOMMU */
+#endif  
 
 		p += strcspn(p, ",");
 		if (*p == ',')
@@ -226,24 +215,9 @@ int dma_supported(struct device *dev, u64 mask)
 	if (ops->dma_supported)
 		return ops->dma_supported(dev, mask);
 
-	/* Copied from i386. Doesn't make much sense, because it will
-	   only work for pci_alloc_coherent.
-	   The caller just has to use GFP_DMA in this case. */
 	if (mask < DMA_BIT_MASK(24))
 		return 0;
 
-	/* Tell the device to use SAC when IOMMU force is on.  This
-	   allows the driver to use cheaper accesses in some cases.
-
-	   Problem with this is that if we overflow the IOMMU area and
-	   return DAC as fallback address the device may not handle it
-	   correctly.
-
-	   As a special case some controllers have a 39bit address
-	   mode that is as efficient as 32bit (aic79xx). Don't force
-	   SAC for these.  Assume all masks <= 40 bits are of this
-	   type. Normally this doesn't make any difference, but gives
-	   more gentle handling of IOMMU overflow. */
 	if (iommu_sac_force && (mask >= DMA_BIT_MASK(40))) {
 		dev_info(dev, "Force SAC with mask %Lx\n", mask);
 		return 0;
@@ -270,12 +244,11 @@ static int __init pci_iommu_init(void)
 
 	return 0;
 }
-/* Must execute after PCI subsystem */
+ 
 rootfs_initcall(pci_iommu_init);
 
 #ifdef CONFIG_PCI
-/* Many VIA bridges seem to corrupt data for DAC. Disable it here */
-
+ 
 static void via_no_dac(struct pci_dev *dev)
 {
 	if (forbid_dac == 0) {

@@ -66,4 +66,3 @@ u32 bcom_gen_bd_tx_task[] = {
 	0x20000000,
 	0x4000ffff,
 };
-

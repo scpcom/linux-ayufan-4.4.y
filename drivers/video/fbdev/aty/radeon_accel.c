@@ -130,7 +130,6 @@ static void radeonfb_prim_copyarea(struct radeonfb_info *rinfo,
 	OUTREG(DST_HEIGHT_WIDTH, (h << 16) | w);
 }
 
-
 void radeonfb_copyarea(struct fb_info *info, const struct fb_copyarea *area)
 {
 	struct radeonfb_info *rinfo = info->par;

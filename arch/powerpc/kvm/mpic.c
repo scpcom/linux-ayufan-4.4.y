@@ -238,7 +238,6 @@ struct openpic {
 	uint32_t irq_msi;
 };
 
-
 static void mpic_irq_raise(struct openpic *opp, struct irq_dest *dst,
 			   int output)
 {

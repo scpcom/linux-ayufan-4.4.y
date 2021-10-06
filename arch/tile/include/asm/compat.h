@@ -82,7 +82,6 @@ struct compat_sysctl {
 	unsigned int	__unused[4];
 };
 
-
 struct compat_flock {
 	short		l_type;
 	short		l_whence;

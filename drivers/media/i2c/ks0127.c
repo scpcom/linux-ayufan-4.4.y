@@ -52,7 +52,6 @@ MODULE_LICENSE("GPL");
 #define I2C_KS0127_ADDON   0xD8
 #define I2C_KS0127_ONBOARD 0xDA
 
-
 /* ks0127 control registers */
 #define KS_STAT     0x00
 #define KS_CMDA     0x01
@@ -183,7 +182,6 @@ MODULE_LICENSE("GPL");
 #define KS_GAMMAD30 0x7e
 #define KS_GAMMAD31 0x7f
 
-
 /****************************************************************************
 * mga_dev : represents one ks0127 chip.
 ****************************************************************************/
@@ -206,7 +204,6 @@ static inline struct ks0127 *to_ks0127(struct v4l2_subdev *sd)
 {
 	return container_of(sd, struct ks0127, sd);
 }
-
 
 static int debug; /* insmod parameter */
 
@@ -296,7 +293,6 @@ static void init_reg_defaults(void)
 	table[KS_CMDF]     = 0x02;
 }
 
-
 /* We need to manually read because of a bug in the KS0127 chip.
  *
  * An explanation from kayork@mail.utexas.edu:
@@ -310,7 +306,6 @@ static void init_reg_defaults(void)
  * So we have to do the read ourself.  Big deal.
  *	   workaround in i2c-algo-bit
  */
-
 
 static u8 ks0127_read(struct v4l2_subdev *sd, u8 reg)
 {
@@ -338,7 +333,6 @@ static u8 ks0127_read(struct v4l2_subdev *sd, u8 reg)
 	return val;
 }
 
-
 static void ks0127_write(struct v4l2_subdev *sd, u8 reg, u8 val)
 {
 	struct i2c_client *client = v4l2_get_subdevdata(sd);
@@ -351,7 +345,6 @@ static void ks0127_write(struct v4l2_subdev *sd, u8 reg, u8 val)
 	ks->regs[reg] = val;
 }
 
-
 /* generic bit-twiddling */
 static void ks0127_and_or(struct v4l2_subdev *sd, u8 reg, u8 and_v, u8 or_v)
 {
@@ -361,8 +354,6 @@ static void ks0127_and_or(struct v4l2_subdev *sd, u8 reg, u8 and_v, u8 or_v)
 	val = (val & and_v) | or_v;
 	ks0127_write(sd, reg, val);
 }
-
-
 
 /****************************************************************************
 * ks0127 private api
@@ -389,7 +380,6 @@ static void ks0127_init(struct v4l2_subdev *sd)
 
 	for (i = 58; i < 64; i++)
 		ks0127_write(sd, i, table[i]);
-
 
 	if ((ks0127_read(sd, KS_STAT) & 0x80) == 0) {
 		v4l2_dbg(1, debug, sd, "ks0122s found\n");
@@ -661,7 +651,6 @@ static const struct v4l2_subdev_ops ks0127_ops = {
 };
 
 /* ----------------------------------------------------------------------- */
-
 
 static int ks0127_probe(struct i2c_client *client, const struct i2c_device_id *id)
 {

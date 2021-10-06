@@ -480,7 +480,6 @@ int snd_hdac_ext_stream_get_spbmaxfifo(struct hdac_ext_bus *ebus,
 }
 EXPORT_SYMBOL_GPL(snd_hdac_ext_stream_get_spbmaxfifo);
 
-
 /**
  * snd_hdac_ext_stop_streams - stop all stream if running
  * @ebus: HD-audio ext core bus

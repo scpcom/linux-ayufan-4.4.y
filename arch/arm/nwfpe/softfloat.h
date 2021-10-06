@@ -32,7 +32,6 @@ this code that are retained.
 #ifndef __SOFTFLOAT_H__
 #define __SOFTFLOAT_H__
 
-
 /*
 -------------------------------------------------------------------------------
 The macro `FLOATX80' must be defined to enable the extended double-precision

@@ -141,4 +141,3 @@ void mlx4_en_sqp_event(struct mlx4_qp *qp, enum mlx4_event event)
 {
     return;
 }
-

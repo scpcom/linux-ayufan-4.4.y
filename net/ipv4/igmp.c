@@ -123,7 +123,6 @@ int sysctl_igmp_llm_reports __read_mostly = 1;
 #define IGMP_QUERY_RESPONSE_INTERVAL		(10*HZ)
 #define IGMP_QUERY_ROBUSTNESS_VARIABLE		2
 
-
 #define IGMP_INITIAL_REPORT_DELAY		(1)
 
 /* IGMP_INITIAL_REPORT_DELAY is not from IGMP specs!
@@ -256,13 +255,11 @@ static void igmp_mod_timer(struct ip_mc_list *im, int max_delay)
 	spin_unlock_bh(&im->lock);
 }
 
-
 /*
  *	Send an IGMP report.
  */
 
 #define IGMP_SIZE (sizeof(struct igmphdr)+sizeof(struct iphdr)+4)
-
 
 static int is_in(struct ip_mc_list *pmc, struct ip_sf_list *psf, int type,
 	int gdeleted, int sdeleted)
@@ -771,7 +768,6 @@ static void igmp_ifc_event(struct in_device *in_dev)
 	igmp_ifc_start_timer(in_dev, 1);
 }
 
-
 static void igmp_timer_expire(unsigned long data)
 {
 	struct ip_mc_list *im = (struct ip_mc_list *)data;
@@ -886,7 +882,6 @@ static bool igmp_heard_query(struct in_device *in_dev, struct sk_buff *skb,
 	__be32			group = ih->group;
 	int			max_delay;
 	int			mark = 0;
-
 
 	if (len == 8) {
 		if (ih->code == 0) {
@@ -1045,7 +1040,6 @@ drop:
 }
 
 #endif
-
 
 /*
  *	Add a filter to a device
@@ -1249,7 +1243,6 @@ static void igmp_group_added(struct ip_mc_list *im)
 #endif
 }
 
-
 /*
  *	Multicast list managers
  */
@@ -1304,7 +1297,6 @@ static void ip_mc_hash_remove(struct in_device *in_dev,
 		mc_hash = &aux->next_hash;
 	*mc_hash = im->next_hash;
 }
-
 
 /*
  *	A socket has joined a multicast group on device dev.

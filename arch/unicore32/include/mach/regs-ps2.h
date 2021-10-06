@@ -17,4 +17,3 @@
  * counter reg PS2_CNT
  */
 #define PS2_CNT		(PKUNITY_PS2_BASE + 0x0068)
-

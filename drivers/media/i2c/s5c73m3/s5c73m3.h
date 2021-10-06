@@ -320,7 +320,6 @@ enum s5c73m3_oif_pads {
 #define  COMM_FW_UPDATE_FAIL			0x0007
 #define  COMM_FW_UPDATE_BUSY			0xffff
 
-
 #define S5C73M3_MAX_SUPPLIES			6
 #define S5C73M3_DEFAULT_MCLK_FREQ		24000000U
 

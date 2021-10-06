@@ -60,7 +60,6 @@ static int uas_use_uas_driver(struct usb_interface *intf,
 	unsigned long flags = id->driver_info;
 	int r, alt;
 
-
 	alt = uas_find_uas_alt_setting(intf);
 	if (alt < 0)
 		return 0;

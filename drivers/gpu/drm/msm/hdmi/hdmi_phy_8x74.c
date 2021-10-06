@@ -23,7 +23,6 @@ struct hdmi_phy_8x74 {
 };
 #define to_hdmi_phy_8x74(x) container_of(x, struct hdmi_phy_8x74, base)
 
-
 static void phy_write(struct hdmi_phy_8x74 *phy, u32 reg, u32 data)
 {
 	msm_writel(data, phy->mmio + reg);

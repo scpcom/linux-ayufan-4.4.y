@@ -130,7 +130,6 @@ static struct legacy_data legacy_data[NR_HOST];
 static struct ata_host *legacy_host[NR_HOST];
 static int nr_legacy_host;
 
-
 static int probe_all;		/* Set to check all ISA port ranges */
 static int ht6560a;		/* HT 6560A on primary 1, second 2, both 3 */
 static int ht6560b;		/* HT 6560A on primary 1, second 2, both 3 */
@@ -198,7 +197,6 @@ static int legacy_probe_add(unsigned long port, unsigned int irq,
 	free->private = private;
 	return 0;
 }
-
 
 /**
  *	legacy_set_mode		-	mode setting
@@ -517,7 +515,6 @@ static void opti82c611a_set_piomode(struct ata_port *ap,
 	/* Exit command mode */
 	iowrite8(0x83,  ap->ioaddr.nsect_addr);
 }
-
 
 static struct ata_port_operations opti82c611a_port_ops = {
 	.inherits	= &legacy_base_port_ops,
@@ -931,7 +928,6 @@ static __init int probe_chip_type(struct legacy_probe *probe)
 	return BIOS;
 }
 
-
 /**
  *	legacy_init_one		-	attach a legacy interface
  *	@pl: probe record
@@ -1134,7 +1130,6 @@ static __init void probe_qdi_vlb(void)
 	for (i = 0; i < 2; i++) {
 		unsigned long port = qd_port[i];
 		u8 r, res;
-
 
 		if (request_region(port, 2, "pata_qdi")) {
 			/* Check for a card */

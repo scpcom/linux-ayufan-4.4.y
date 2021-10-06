@@ -1,24 +1,4 @@
-/*
- * sys_ia32.c: Conversion between 32bit and 64bit native syscalls. Based on
- *             sys_sparc32
- *
- * Copyright (C) 2000		VA Linux Co
- * Copyright (C) 2000		Don Dugger <n0ano@valinux.com>
- * Copyright (C) 1999		Arun Sharma <arun.sharma@intel.com>
- * Copyright (C) 1997,1998	Jakub Jelinek (jj@sunsite.mff.cuni.cz)
- * Copyright (C) 1997		David S. Miller (davem@caip.rutgers.edu)
- * Copyright (C) 2000		Hewlett-Packard Co.
- * Copyright (C) 2000		David Mosberger-Tang <davidm@hpl.hp.com>
- * Copyright (C) 2000,2001,2002	Andi Kleen, SuSE Labs (x86-64 port)
- *
- * These routines maintain argument size conversion between 32bit and 64bit
- * environment. In 2.5 most of this should be moved to a generic directory.
- *
- * This file assumes that there is a hole at the end of user address space.
- *
- * Some of the functions are LE specific currently. These are
- * hopefully all marked.  This should be fixed.
- */
+
 
 #include <linux/kernel.h>
 #include <linux/sched.h>
@@ -49,7 +29,6 @@
 
 #define AA(__x)		((unsigned long)(__x))
 
-
 asmlinkage long sys32_truncate64(const char __user *filename,
 				 unsigned long offset_low,
 				 unsigned long offset_high)
@@ -63,10 +42,6 @@ asmlinkage long sys32_ftruncate64(unsigned int fd, unsigned long offset_low,
        return sys_ftruncate(fd, ((loff_t) offset_high << 32) | offset_low);
 }
 
-/*
- * Another set for IA32/LFS -- x86_64 struct stat is different due to
- * support for 64bit inode numbers.
- */
 static int cp_stat64(struct stat64 __user *ubuf, struct kstat *stat)
 {
 	typeof(ubuf->st_uid) uid = 0;
@@ -137,12 +112,6 @@ asmlinkage long sys32_fstatat(unsigned int dfd, const char __user *filename,
 	return cp_stat64(statbuf, &stat);
 }
 
-/*
- * Linux/i386 didn't use to be able to handle more than
- * 4 system call parameters, so these system calls used a memory
- * block for parameter passing..
- */
-
 struct mmap_arg_struct32 {
 	unsigned int addr;
 	unsigned int len;
@@ -172,7 +141,6 @@ asmlinkage long sys32_waitpid(compat_pid_t pid, unsigned int __user *stat_addr,
 	return compat_sys_wait4(pid, stat_addr, options, NULL);
 }
 
-/* warning: next two assume little endian */
 asmlinkage long sys32_pread(unsigned int fd, char __user *ubuf, u32 count,
 			    u32 poslo, u32 poshi)
 {
@@ -187,11 +155,6 @@ asmlinkage long sys32_pwrite(unsigned int fd, const char __user *ubuf,
 			  ((loff_t)AA(poshi) << 32) | AA(poslo));
 }
 
-
-/*
- * Some system calls that need sign extended arguments. This could be
- * done by a generic wrapper.
- */
 long sys32_fadvise64_64(int fd, __u32 offset_low, __u32 offset_high,
 			__u32 len_low, __u32 len_high, int advice)
 {

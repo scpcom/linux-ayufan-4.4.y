@@ -48,7 +48,6 @@
 #define ISAR_CMD_TIMERIRQ_OFF	0x20
 #define ISAR_CMD_TIMERIRQ_ON	0x21
 
-
 #define ISAR_IIS_MSCMSD		0x3f
 #define ISAR_IIS_VNR		0x15
 #define ISAR_IIS_DKEY		0x03

@@ -766,7 +766,6 @@ static inline void rcu_preempt_sleep_check(void)
 #define rcu_dereference_protected(p, c) \
 	__rcu_dereference_protected((p), (c), __rcu)
 
-
 /**
  * rcu_dereference() - fetch RCU-protected pointer for dereferencing
  * @p: The pointer to read, prior to dereferencing
@@ -1116,7 +1115,6 @@ bool rcu_is_nocb_cpu(int cpu);
 static inline bool rcu_is_nocb_cpu(int cpu) { return false; }
 #endif
 
-
 /* Only for use by adaptive-ticks code. */
 #ifdef CONFIG_NO_HZ_FULL_SYSIDLE
 bool rcu_sys_is_idle(void);
@@ -1133,6 +1131,5 @@ static inline void rcu_sysidle_force_exit(void)
 }
 
 #endif /* #else #ifdef CONFIG_NO_HZ_FULL_SYSIDLE */
-
 
 #endif /* __LINUX_RCUPDATE_H */

@@ -364,7 +364,6 @@ int hid_sensor_parse_common_attributes(struct hid_sensor_hub_device *hsdev,
 					struct hid_sensor_common *st)
 {
 
-
 	hid_sensor_get_reporting_interval(hsdev, usage_id, st);
 
 	sensor_hub_input_get_attribute_info(hsdev,

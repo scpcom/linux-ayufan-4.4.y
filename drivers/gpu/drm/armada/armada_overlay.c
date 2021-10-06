@@ -45,7 +45,6 @@ struct armada_ovl_plane {
 #define drm_to_armada_ovl_plane(p) \
 	container_of(p, struct armada_ovl_plane, base.base)
 
-
 static void
 armada_ovl_update_attr(struct armada_ovl_plane_properties *prop,
 	struct armada_crtc *dcrtc)

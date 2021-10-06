@@ -1030,5 +1030,4 @@ extern int db_fc_threshold;
 extern int db_coalescing_threshold;
 extern int use_dsgl;
 
-
 #endif

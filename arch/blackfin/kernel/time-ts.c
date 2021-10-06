@@ -23,7 +23,6 @@
 #include <asm/gptimers.h>
 #include <asm/nmi.h>
 
-
 #if defined(CONFIG_CYCLES_CLOCKSOURCE)
 
 static notrace cycle_t bfin_read_cycles(struct clocksource *cs)
@@ -351,7 +350,6 @@ void bfin_coretmr_clockevent_init(void)
 	clockevents_register_device(evt);
 }
 #endif /* CONFIG_TICKSOURCE_CORETMR */
-
 
 void read_persistent_clock(struct timespec *ts)
 {

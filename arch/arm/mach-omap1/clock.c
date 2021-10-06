@@ -609,7 +609,6 @@ void omap1_clk_disable_unused(struct clk *clk)
 
 #endif
 
-
 int clk_enable(struct clk *clk)
 {
 	unsigned long flags;

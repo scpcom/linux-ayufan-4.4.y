@@ -214,7 +214,6 @@ struct cdrom_subchnl
 	union cdrom_addr cdsc_reladdr;
 };
 
-
 /* This struct is used by the CDROMREADTOCENTRY ioctl */
 struct cdrom_tocentry 
 {
@@ -513,8 +512,6 @@ struct cdrom_generic_command
 /* Not in Mt. Fuji, but in ATAPI 2.6 -- deprecated now in favor
  * of MODE_SENSE_POWER_PAGE */
 #define GPMODE_CDROM_PAGE		0x0d
-
-
 
 /* DVD struct types */
 #define DVD_STRUCT_PHYSICAL	0x00

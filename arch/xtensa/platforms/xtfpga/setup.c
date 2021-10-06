@@ -55,7 +55,6 @@ void platform_restart(void)
 	/* Flush and reset the mmu, simulate a processor reset, and
 	 * jump to the reset vector. */
 
-
 	__asm__ __volatile__ ("movi	a2, 15\n\t"
 			      "wsr	a2, icountlevel\n\t"
 			      "movi	a2, 0\n\t"
@@ -307,7 +306,6 @@ static struct platform_device *platform_devices[] __initdata = {
 	&xtavnet_uart,
 };
 
-
 static int __init xtavnet_init(void)
 {
 	/* Ethernet MAC address.  */
@@ -317,7 +315,6 @@ static int __init xtavnet_init(void)
 	 * reports the actual clock rate.
 	 */
 	serial_platform_data[0].uartclk = *(long *)XTFPGA_CLKFRQ_VADDR;
-
 
 	/* register platform devices */
 	platform_add_devices(platform_devices, ARRAY_SIZE(platform_devices));

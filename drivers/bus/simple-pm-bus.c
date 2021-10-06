@@ -13,7 +13,6 @@
 #include <linux/platform_device.h>
 #include <linux/pm_runtime.h>
 
-
 static int simple_pm_bus_probe(struct platform_device *pdev)
 {
 	struct device_node *np = pdev->dev.of_node;

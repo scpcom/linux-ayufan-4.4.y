@@ -28,7 +28,6 @@
 #include "dvb_frontend.h"
 #include "l64781.h"
 
-
 struct l64781_state {
 	struct i2c_adapter* i2c;
 	const struct l64781_config* config;
@@ -47,7 +46,6 @@ static int debug;
 
 module_param(debug, int, 0644);
 MODULE_PARM_DESC(debug, "Turn on/off frontend debugging (default:off).");
-
 
 static int l64781_writereg (struct l64781_state* state, u8 reg, u8 data)
 {
@@ -89,7 +87,6 @@ static void apply_tps (struct l64781_state* state)
 	   to the TPS received from transmission. */
 	l64781_writereg (state, 0x2a, 0x02);
 }
-
 
 static void reset_afc (struct l64781_state* state)
 {
@@ -249,7 +246,6 @@ static int get_frontend(struct dvb_frontend *fe)
 	struct l64781_state* state = fe->demodulator_priv;
 	int tmp;
 
-
 	tmp = l64781_readreg(state, 0x04);
 	switch(tmp & 3) {
 	case 0:
@@ -346,7 +342,6 @@ static int get_frontend(struct dvb_frontend *fe)
 	default:
 		printk("Unexpected value for hierarchy\n");
 	}
-
 
 	tmp = l64781_readreg (state, 0x1d);
 	p->inversion = (tmp & 0x80) ? INVERSION_ON : INVERSION_OFF;

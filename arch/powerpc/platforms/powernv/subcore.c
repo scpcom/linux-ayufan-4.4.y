@@ -26,7 +26,6 @@
 #include "subcore.h"
 #include "powernv.h"
 
-
 /*
  * Split/unsplit procedure:
  *

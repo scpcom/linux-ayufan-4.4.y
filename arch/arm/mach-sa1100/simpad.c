@@ -132,7 +132,6 @@ static struct map_desc simpad_io_desc[] __initdata = {
 	},
 };
 
-
 static void simpad_uart_pm(struct uart_port *port, u_int state, u_int oldstate)
 {
 	if (port->mapbase == (u_int)&Ser1UTCR0) {
@@ -151,7 +150,6 @@ static void simpad_uart_pm(struct uart_port *port, u_int state, u_int oldstate)
 static struct sa1100_port_fns simpad_port_fns __initdata = {
 	.pm	   = simpad_uart_pm,
 };
-
 
 static struct mtd_partition simpad_partitions[] = {
 	{
@@ -176,7 +174,6 @@ static struct flash_platform_data simpad_flash_data = {
 	.nr_parts    = ARRAY_SIZE(simpad_partitions),
 };
 
-
 static struct resource simpad_flash_resources [] = {
 	DEFINE_RES_MEM(SA1100_CS0_PHYS, SZ_16M),
 	DEFINE_RES_MEM(SA1100_CS1_PHYS, SZ_16M),
@@ -191,8 +188,6 @@ static struct mcp_plat_data simpad_mcp_data = {
 	.sclk_rate	= 11981000,
 	.codec_pdata	= &simpad_ucb1x00_data,
 };
-
-
 
 static void __init simpad_map_io(void)
 {
@@ -218,7 +213,6 @@ static void __init simpad_map_io(void)
 	/*
 	 * Set up registers for sleep mode.
 	 */
-
 
 	PWER = PWER_GPIO0| PWER_RTC;
 	PGSR = 0x818;
@@ -248,7 +242,6 @@ static void simpad_power_off(void)
 	while(1);
 
 	local_irq_enable(); /* we won't ever call it */
-
 
 }
 
@@ -354,8 +347,6 @@ static struct platform_device *devices[] __initdata = {
 	&simpad_i2c,
 };
 
-
-
 static int __init simpad_init(void)
 {
 	int ret;
@@ -388,7 +379,6 @@ static int __init simpad_init(void)
 }
 
 arch_initcall(simpad_init);
-
 
 MACHINE_START(SIMPAD, "Simpad")
 	/* Maintainer: Holger Freyther */

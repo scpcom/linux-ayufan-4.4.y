@@ -1128,7 +1128,6 @@ static int __init init(void)
 		goto error;
 	}
 
-
 	virtscsi_cmd_pool =
 		mempool_create_slab_pool(VIRTIO_SCSI_MEMPOOL_SZ,
 					 virtscsi_cmd_cache);

@@ -110,7 +110,6 @@ static void check_cx686_slop(struct cpuinfo_x86 *c)
 	}
 }
 
-
 static void set_cx86_reorder(void)
 {
 	u8 ccr3;
@@ -153,7 +152,6 @@ static void geode_configure(void)
 
 	ccr3 = getCx86(CX86_CCR3);
 	setCx86(CX86_CCR3, (ccr3 & 0x0f) | 0x10);	/* enable MAPEN */
-
 
 	/* FPU fast, DTE cache, Mem bypass */
 	setCx86_old(CX86_CCR4, getCx86_old(CX86_CCR4) | 0x38);

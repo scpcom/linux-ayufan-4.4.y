@@ -174,7 +174,6 @@ int __down_read_trylock(struct rw_semaphore *sem)
 	unsigned long flags;
 	int ret = 0;
 
-
 	raw_spin_lock_irqsave(&sem->wait_lock, flags);
 
 	if (sem->count >= 0 && list_empty(&sem->wait_list)) {
@@ -300,4 +299,3 @@ void __downgrade_write(struct rw_semaphore *sem)
 
 	raw_spin_unlock_irqrestore(&sem->wait_lock, flags);
 }
-

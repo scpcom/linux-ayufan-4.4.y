@@ -36,7 +36,6 @@ struct simdisk {
 	int fd;
 };
 
-
 static int simdisk_count = CONFIG_BLK_DEV_SIMDISK_COUNT;
 module_param(simdisk_count, int, S_IRUGO);
 MODULE_PARM_DESC(simdisk_count, "Number of simdisk units.");

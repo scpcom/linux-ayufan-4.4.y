@@ -69,7 +69,6 @@
 #define AT91_SMC_PS_16			(2 << 28)
 #define AT91_SMC_PS_32			(3 << 28)
 
-
 /*
  * This function converts a setup timing expressed in nanoseconds into an
  * encoded value that can be written in the SMC_SETUP register.

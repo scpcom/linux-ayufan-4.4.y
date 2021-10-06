@@ -54,4 +54,3 @@ void thermal_gov_user_space_unregister(void)
 {
 	thermal_unregister_governor(&thermal_gov_user_space);
 }
-

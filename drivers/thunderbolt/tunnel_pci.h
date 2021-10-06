@@ -27,4 +27,3 @@ void tb_pci_deactivate(struct tb_pci_tunnel *tunnel);
 bool tb_pci_is_invalid(struct tb_pci_tunnel *tunnel);
 
 #endif
-

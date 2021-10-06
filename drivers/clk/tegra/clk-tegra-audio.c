@@ -222,4 +222,3 @@ void __init tegra_audio_clk_init(void __iomem *clk_base,
 		*dt_clk = clk;
 	}
 }
-

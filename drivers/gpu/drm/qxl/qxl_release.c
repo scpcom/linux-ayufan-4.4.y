@@ -291,7 +291,6 @@ void qxl_release_backoff_reserve_list(struct qxl_release *release)
 	ttm_eu_backoff_reservation(&release->ticket, &release->bos);
 }
 
-
 int qxl_alloc_surface_release_reserved(struct qxl_device *qdev,
 				       enum qxl_surface_cmd_type surface_cmd_type,
 				       struct qxl_release *create_rel,
@@ -476,4 +475,3 @@ void qxl_release_fence_buffer_objects(struct qxl_release *release)
 	spin_unlock(&glob->lru_lock);
 	ww_acquire_fini(&release->ticket);
 }
-

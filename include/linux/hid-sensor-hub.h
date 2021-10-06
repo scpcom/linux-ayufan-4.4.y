@@ -151,7 +151,6 @@ int sensor_hub_register_callback(struct hid_sensor_hub_device *hsdev,
 int sensor_hub_remove_callback(struct hid_sensor_hub_device *hsdev,
 			u32 usage_id);
 
-
 /* Hid sensor hub core interfaces */
 
 /**

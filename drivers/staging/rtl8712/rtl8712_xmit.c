@@ -335,7 +335,6 @@ u8 r8712_append_mpdu_unit(struct xmit_buf *pxmitbuf,
 	return _SUCCESS;
 }
 
-
 u8 r8712_xmitframe_aggr_1st(struct xmit_buf *pxmitbuf,
 			struct xmit_frame *pxmitframe)
 {

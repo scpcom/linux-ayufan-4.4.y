@@ -120,7 +120,6 @@ int afu_release(struct inode *inode, struct file *file)
 		 __func__, ctx->pe);
 	cxl_context_detach(ctx);
 
-
 	/*
 	 * Delete the context's mapping pointer, unless it's created by the
 	 * kernel API, in which case leave it so it can be freed by reclaim_ctx()
@@ -294,7 +293,6 @@ unsigned int afu_poll(struct file *file, struct poll_table_struct *poll)
 	int mask = 0;
 	unsigned long flags;
 
-
 	poll_wait(file, &ctx->wq, poll);
 
 	pr_devel("afu_poll wait done pe: %i\n", ctx->pe);
@@ -434,7 +432,6 @@ static const struct file_operations afu_master_fops = {
 	.compat_ioctl   = afu_compat_ioctl,
 	.mmap           = afu_mmap,
 };
-
 
 static char *cxl_devnode(struct device *dev, umode_t *mode)
 {

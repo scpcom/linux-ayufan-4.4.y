@@ -455,7 +455,6 @@ errout:
 	rtnl_set_sk_err(net, RTNLGRP_LINK, err);
 }
 
-
 /*
  * Dump information about all ports, in response to GETLINK
  */
@@ -1213,7 +1212,6 @@ static int br_fill_info(struct sk_buff *skb, const struct net_device *brdev)
 
 	return 0;
 }
-
 
 static struct rtnl_af_ops br_af_ops __read_mostly = {
 	.family			= AF_BRIDGE,

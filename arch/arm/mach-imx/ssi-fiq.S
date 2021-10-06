@@ -144,4 +144,3 @@ imx_ssi_fiq_tx_buffer:
 		.word 0x0
 .L_imx_ssi_fiq_end:
 imx_ssi_fiq_end:
-

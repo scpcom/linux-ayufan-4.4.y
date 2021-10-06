@@ -203,4 +203,3 @@ void __init arch_init_irq(void)
 {
 	of_irq_init(of_irq_ids);
 }
-

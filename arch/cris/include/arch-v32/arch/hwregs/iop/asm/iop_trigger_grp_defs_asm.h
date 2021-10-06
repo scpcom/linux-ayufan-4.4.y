@@ -137,7 +137,6 @@
 #define reg_iop_trigger_grp_r_masked_intr___trig3___bit 3
 #define reg_iop_trigger_grp_r_masked_intr_offset 32
 
-
 /* Constants */
 #define regk_iop_trigger_grp_fall                 0x00000002
 #define regk_iop_trigger_grp_fall_lo              0x00000006

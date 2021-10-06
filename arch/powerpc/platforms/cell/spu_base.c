@@ -528,7 +528,6 @@ int spu_add_dev_attr_group(struct attribute_group *attrs)
 }
 EXPORT_SYMBOL_GPL(spu_add_dev_attr_group);
 
-
 void spu_remove_dev_attr(struct device_attribute *attr)
 {
 	struct spu *spu;
@@ -650,7 +649,6 @@ static unsigned long long spu_acct_time(struct spu *spu,
 
 	return time / NSEC_PER_MSEC;
 }
-
 
 static ssize_t spu_stat_show(struct device *dev,
 				struct device_attribute *attr, char *buf)

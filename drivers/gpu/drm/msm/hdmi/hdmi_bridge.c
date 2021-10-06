@@ -207,7 +207,6 @@ static const struct drm_bridge_funcs hdmi_bridge_funcs = {
 		.mode_set = hdmi_bridge_mode_set,
 };
 
-
 /* initialize bridge */
 struct drm_bridge *hdmi_bridge_init(struct hdmi *hdmi)
 {

@@ -23,7 +23,6 @@
 
 #include "fc0011.h"
 
-
 /* Tuner registers */
 enum {
 	FC11_REG_0,
@@ -67,7 +66,6 @@ enum FC11_REG_VCOCAL_bits {
 	FC11_VCOCAL_RESET	= 0x80, /* VCO calibration reset */
 };
 
-
 struct fc0011_priv {
 	struct i2c_adapter *i2c;
 	u8 addr;
@@ -75,7 +73,6 @@ struct fc0011_priv {
 	u32 frequency;
 	u32 bandwidth;
 };
-
 
 static int fc0011_writereg(struct fc0011_priv *priv, u8 reg, u8 val)
 {

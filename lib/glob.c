@@ -122,7 +122,6 @@ backtrack:
 }
 EXPORT_SYMBOL(glob_match);
 
-
 #ifdef CONFIG_GLOB_SELFTEST
 
 #include <linux/printk.h>

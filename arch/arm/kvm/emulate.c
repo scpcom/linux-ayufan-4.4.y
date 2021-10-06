@@ -259,7 +259,6 @@ void kvm_skip_instr(struct kvm_vcpu *vcpu, bool is_wide_instr)
 	kvm_adjust_itstate(vcpu);
 }
 
-
 /******************************************************************************
  * Inject exceptions into the guest
  */

@@ -284,5 +284,4 @@ static inline void __swahb32s(__u32 *p)
 #endif
 }
 
-
 #endif /* _UAPI_LINUX_SWAB_H */

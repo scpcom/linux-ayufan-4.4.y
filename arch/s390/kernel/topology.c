@@ -431,7 +431,6 @@ static const struct cpumask *cpu_thread_mask(int cpu)
 	return &per_cpu(cpu_topology, cpu).thread_mask;
 }
 
-
 const struct cpumask *cpu_coregroup_mask(int cpu)
 {
 	return &per_cpu(cpu_topology, cpu).core_mask;

@@ -283,4 +283,3 @@ machine_crash_setup(void)
 }
 
 __initcall(machine_crash_setup);
-

@@ -196,7 +196,6 @@ static int virtio_gpu_execbuffer_ioctl(struct drm_device *dev, void *data,
 	return virtio_gpu_execbuffer(dev, execbuffer, file_priv);
 }
 
-
 static int virtio_gpu_getparam_ioctl(struct drm_device *dev, void *data,
 				     struct drm_file *file_priv)
 {

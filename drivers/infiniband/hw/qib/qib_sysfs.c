@@ -292,7 +292,6 @@ static struct bin_attribute cc_setting_bin_attr = {
 	.size = PAGE_SIZE,
 };
 
-
 static ssize_t qib_portattr_show(struct kobject *kobj,
 	struct attribute *attr, char *buf)
 {
@@ -314,7 +313,6 @@ static ssize_t qib_portattr_store(struct kobject *kobj,
 
 	return pattr->store(ppd, buf, len);
 }
-
 
 static const struct sysfs_ops qib_port_ops = {
 	.show = qib_portattr_show,
@@ -540,7 +538,6 @@ static ssize_t show_boardversion(struct device *device,
 	return scnprintf(buf, PAGE_SIZE, "%s", dd->boardversion);
 }
 
-
 static ssize_t show_localbus_info(struct device *device,
 				  struct device_attribute *attr, char *buf)
 {
@@ -551,7 +548,6 @@ static ssize_t show_localbus_info(struct device *device,
 	/* The string printed here is already newline-terminated. */
 	return scnprintf(buf, PAGE_SIZE, "%s", dd->lbus_info);
 }
-
 
 static ssize_t show_nctxts(struct device *device,
 			   struct device_attribute *attr, char *buf)

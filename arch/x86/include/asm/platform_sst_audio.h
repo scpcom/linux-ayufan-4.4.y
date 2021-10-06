@@ -137,4 +137,3 @@ struct sst_platform_info {
 };
 int add_sst_platform_device(void);
 #endif
-

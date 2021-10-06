@@ -560,11 +560,9 @@ store_spi_transport_min_period(struct device *cdev,
 						 &tp->min_period);
 }
 
-
 static DEVICE_ATTR(min_period, S_IRUGO,
 		   show_spi_transport_min_period,
 		   store_spi_transport_min_period);
-
 
 static ssize_t show_spi_host_signalling(struct device *cdev,
 					struct device_attribute *attr,
@@ -629,7 +627,6 @@ enum spi_compare_returns {
 	SPI_COMPARE_FAILURE,
 	SPI_COMPARE_SKIP_TEST,
 };
-
 
 /* This is for read/write Domain Validation:  If the device supports
  * an echo buffer, we do read/write tests to it */
@@ -701,7 +698,6 @@ spi_dv_device_echo_buffer(struct scsi_device *sdev, u8 *buffer,
 				 */
 				return SPI_COMPARE_SKIP_TEST;
 
-
 			sdev_printk(KERN_ERR, sdev, "Write Buffer failure %x\n", result);
 			return SPI_COMPARE_FAILURE;
 		}
@@ -764,7 +760,6 @@ spi_dv_retrain(struct scsi_device *sdev, u8 *buffer, u8 *ptr,
 	struct scsi_target *starget = sdev->sdev_target;
 	int period = 0, prevperiod = 0; 
 	enum spi_compare_returns retval;
-
 
 	for (;;) {
 		int newperiod;
@@ -831,7 +826,6 @@ spi_dv_device_get_echo_buffer(struct scsi_device *sdev, u8 *buffer)
 		READ_BUFFER, 0x0b, 0, 0, 0, 0, 0, 0, 4, 0
 	};
 
-	
 	/* We send a set of three TURs to clear any outstanding 
 	 * unit attention conditions if they exist (Otherwise the
 	 * buffer tests won't be happy).  If the TUR still fails
@@ -994,7 +988,6 @@ spi_dv_device_internal(struct scsi_device *sdev, u8 *buffer)
 	}
 }
 
-
 /**	spi_dv_device - Do Domain Validation on the device
  *	@sdev:		scsi device to validate
  *
@@ -1071,7 +1064,6 @@ spi_dv_device_work_wrapper(struct work_struct *work)
 	spi_dv_pending(sdev->sdev_target) = 0;
 	scsi_device_put(sdev);
 }
-
 
 /**
  *	spi_schedule_dv_device - schedule domain validation to occur on the device

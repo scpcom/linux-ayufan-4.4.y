@@ -36,7 +36,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/slab.h>
@@ -80,7 +79,6 @@ static int cx25840_debug;
 module_param_named(debug,cx25840_debug, int, 0644);
 
 MODULE_PARM_DESC(debug, "Debugging messages [0=Off (default) 1=On]");
-
 
 /* ----------------------------------------------------------------------- */
 static void cx23888_std_setup(struct i2c_client *client);

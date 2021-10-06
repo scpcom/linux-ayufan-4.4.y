@@ -50,7 +50,6 @@
 #include <pcmcia/ciscode.h>
 #include <pcmcia/ds.h>
 
-
 /* To minimize the size of the driver source I only define operating
  * constants if they are used several times. You'll need the manual
  * if you want to understand driver details.
@@ -154,7 +153,6 @@ MODULE_LICENSE("GPL");
 
 /* Special hook for setting if_port when module is loaded */
 INT_MODULE_PARM(if_port, 0);
-
 
 /*====================================================================*/
 

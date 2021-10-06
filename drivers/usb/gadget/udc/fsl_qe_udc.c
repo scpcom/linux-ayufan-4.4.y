@@ -706,7 +706,6 @@ static inline void qe_usb_disable(struct qe_udc *udc)
  *		USB and EP basic manipulate function end		      *
  *----------------------------------------------------------------------------*/
 
-
 /******************************************************************************
 		UDC transmit and receive process
  ******************************************************************************/
@@ -2195,7 +2194,6 @@ static int tx_irq(struct qe_udc *udc)
 	}
 	return res;
 }
-
 
 /* setup packect's rx is handle in the function too */
 static void rx_irq(struct qe_udc *udc)

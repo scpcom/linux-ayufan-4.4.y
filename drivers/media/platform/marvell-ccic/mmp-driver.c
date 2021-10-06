@@ -93,9 +93,6 @@ static struct mmp_camera *mmpcam_find_device(struct platform_device *pdev)
 	return NULL;
 }
 
-
-
-
 /*
  * Power-related registers; this almost certainly belongs
  * somewhere else.
@@ -453,7 +450,6 @@ out_power_down:
 	return ret;
 }
 
-
 static int mmpcam_remove(struct mmp_camera *cam)
 {
 	struct mcam_camera *mcam = &cam->mcam;
@@ -503,7 +499,6 @@ static int mmpcam_resume(struct platform_device *pdev)
 
 #endif
 
-
 static struct platform_driver mmpcam_driver = {
 	.probe		= mmpcam_probe,
 	.remove		= mmpcam_platform_remove,
@@ -515,7 +510,6 @@ static struct platform_driver mmpcam_driver = {
 		.name	= "mmp-camera",
 	}
 };
-
 
 static int __init mmpcam_init_module(void)
 {

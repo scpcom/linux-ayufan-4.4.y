@@ -47,7 +47,6 @@ struct kgd_mem {
 	void *cpu_ptr;
 };
 
-
 static int alloc_gtt_mem(struct kgd_dev *kgd, size_t size,
 			void **mem_obj, uint64_t *gpu_addr,
 			void **cpu_ptr);

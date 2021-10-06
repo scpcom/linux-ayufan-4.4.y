@@ -75,7 +75,6 @@ FLOATFUNC(fres);
 FLOATFUNC(frsqrte);
 FLOATFUNC(fsel);
 
-
 #define OP31		0x1f		/*   31 */
 #define LFS		0x30		/*   48 */
 #define LFSU		0x31		/*   49 */
@@ -145,7 +144,6 @@ FLOATFUNC(fsel);
 #define FABS		0x108		/*  264 */
 #define MFFS		0x247		/*  583 */
 #define MTFSF		0x2c7		/*  711 */
-
 
 #define AB	2
 #define AC	3

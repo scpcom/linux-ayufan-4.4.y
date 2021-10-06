@@ -93,7 +93,6 @@ unsigned int ceph_str_hash_linux(const char *str, unsigned int length)
 	return hash;
 }
 
-
 unsigned int ceph_str_hash(int type, const char *s, unsigned int len)
 {
 	switch (type) {

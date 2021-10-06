@@ -273,7 +273,6 @@ syscall_dotrace:
 	/* Return code is already in r3 thanks to do_syscall_trace_enter() */
 	b	.Lsyscall_exit
 
-
 syscall_enosys:
 	li	r3,-ENOSYS
 	b	.Lsyscall_exit
@@ -368,7 +367,6 @@ _GLOBAL(save_nvgprs)
 	std	r0,_TRAP(r1)
 	blr
 
-	
 /*
  * The sigsuspend and rt_sigsuspend system calls can call do_signal
  * and thus put the process into the stopped state where we might
@@ -1247,7 +1245,6 @@ _GLOBAL_TOC(_mcount)
 	mtctr	r5
 	bctrl
 	nop
-
 
 #ifdef CONFIG_FUNCTION_GRAPH_TRACER
 	b	ftrace_graph_caller

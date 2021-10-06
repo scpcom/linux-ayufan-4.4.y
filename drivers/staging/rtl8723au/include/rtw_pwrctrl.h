@@ -23,7 +23,6 @@
 #define FW_PWR2		2
 #define FW_PWR3		3
 
-
 #define HW_PWR0		7
 #define HW_PWR1		6
 #define HW_PWR2		2
@@ -31,7 +30,6 @@
 #define HW_PWR4		8
 
 #define FW_PWRMSK	0x7
-
 
 #define XMIT_ALIVE	BIT(0)
 #define RECV_ALIVE	BIT(1)
@@ -52,7 +50,6 @@ enum Power_Mgnt {
 	PM_Card_Disable,
 	PS_MODE_NUM
 };
-
 
 /* BIT[2:0] = HW state
  * BIT[3] = Protocol PS state,  0: active, 1: sleep state
@@ -84,11 +81,9 @@ enum Power_Mgnt {
 #define PS_STATE_S3		(PS_ALL_ON)
 #define PS_STATE_S4		((PS_ST_ACTIVE) | (PS_ALL_ON))
 
-
 #define PS_IS_RF_ON(x)	((x) & (PS_ALL_ON))
 #define PS_IS_ACTIVE(x)	((x) & (PS_ST_ACTIVE))
 #define CLR_PS_STATE(x)	((x) = ((x) & (0xF0)))
-
 
 struct reportpwrstate_parm {
 	unsigned char mode;
@@ -132,7 +127,6 @@ enum rt_rf_power_state {
 	(ppsc->cur_ps_level &= (~(_PS_FLAG)))
 #define	RT_SET_PS_LEVEL(ppsc, _PS_FLAG)				\
 	(ppsc->cur_ps_level |= _PS_FLAG)
-
 
 enum {
 	PSBBREG_RF0 = 0,

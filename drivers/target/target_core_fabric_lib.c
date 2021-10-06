@@ -43,7 +43,6 @@
 #include "target_core_internal.h"
 #include "target_core_pr.h"
 
-
 static int sas_get_pr_transport_id(
 	struct se_node_acl *nacl,
 	int *format_code,

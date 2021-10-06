@@ -114,7 +114,6 @@ void __init __sp804_clocksource_and_sched_clock_init(void __iomem *base,
 	}
 }
 
-
 static void __iomem *clkevt_base;
 static unsigned long clkevt_reload;
 

@@ -92,7 +92,6 @@ extern void jbd2_free(void *ptr, size_t size);
  **/
 typedef struct jbd2_journal_handle handle_t;	/* Atomic operation type */
 
-
 /**
  * typedef journal_t - The journal_t maintains all of the journaling state information for a single filesystem.
  *
@@ -225,7 +224,6 @@ struct jbd2_journal_revoke_tail {
 #define JBD2_FLAG_SAME_UUID	2	/* block has same uuid as previous */
 #define JBD2_FLAG_DELETED	4	/* block deleted by this transaction */
 #define JBD2_FLAG_LAST_TAG	8	/* last tag in this descriptor block */
-
 
 /*
  * The journal superblock.  All fields are in big-endian byte order.
@@ -493,7 +491,6 @@ struct jbd2_journal_handle
 	struct lockdep_map	h_lockdep_map;
 #endif
 };
-
 
 /*
  * Some stats for checkpoint phase
@@ -1152,7 +1149,6 @@ void __jbd2_journal_clean_checkpoint_list(journal_t *journal, bool destroy);
 int __jbd2_journal_remove_checkpoint(struct journal_head *);
 void jbd2_journal_destroy_checkpoint(journal_t *journal);
 void __jbd2_journal_insert_checkpoint(struct journal_head *, transaction_t *);
-
 
 /*
  * Triggers

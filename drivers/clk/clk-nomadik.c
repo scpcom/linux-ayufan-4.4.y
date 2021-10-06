@@ -245,7 +245,6 @@ static unsigned long pll_clk_recalc_rate(struct clk_hw *hw,
 	return 0;
 }
 
-
 static const struct clk_ops pll_clk_ops = {
 	.enable = pll_clk_enable,
 	.disable = pll_clk_disable,

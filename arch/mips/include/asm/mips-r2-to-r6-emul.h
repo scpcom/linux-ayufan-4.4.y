@@ -78,7 +78,6 @@ struct r2_decoder_table {
 	int     (*func)(struct pt_regs *regs, u32 inst);
 };
 
-
 extern void do_trap_or_bp(struct pt_regs *regs, unsigned int code,
 			  const char *str);
 

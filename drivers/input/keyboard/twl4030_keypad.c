@@ -132,7 +132,6 @@ struct twl4030_keypad {
 #define KEYP_EDR_MIS_FALLING		0x40
 #define KEYP_EDR_MIS_RISING		0x80
 
-
 /*----------------------------------------------------------------------*/
 
 static int twl4030_kpread(struct twl4030_keypad *kp,

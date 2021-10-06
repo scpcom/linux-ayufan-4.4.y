@@ -55,7 +55,6 @@ static void from_gdb_regs(unsigned long *gdb_regs, struct pt_regs *kernel_regs,
 	kernel_regs->bta	= gdb_regs[_BTA];
 }
 
-
 void pt_regs_to_gdb_regs(unsigned long *gdb_regs, struct pt_regs *kernel_regs)
 {
 	to_gdb_regs(gdb_regs, kernel_regs, (struct callee_regs *)

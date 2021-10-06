@@ -82,7 +82,6 @@ efi_file_read(void *handle, unsigned long *size, void *addr)
 	return fh->read(handle, size, addr);
 }
 
-
 efi_status_t
 efi_file_size(efi_system_table_t *sys_table_arg, void *__fh,
 	      efi_char16_t *filename_16, void **handle, u64 *file_sz)
@@ -134,8 +133,6 @@ grow:
 	return status;
 }
 
-
-
 void efi_char16_printk(efi_system_table_t *sys_table_arg,
 			      efi_char16_t *str)
 {
@@ -144,7 +141,6 @@ void efi_char16_printk(efi_system_table_t *sys_table_arg,
 	out = (struct efi_simple_text_output_protocol *)sys_table_arg->con_out;
 	out->output_string(out, str);
 }
-
 
 /*
  * This function handles the architcture specific differences between arm and

@@ -86,7 +86,6 @@ static inline void irda_start_timer(struct timer_list *ptimer, int timeout,
 	mod_timer(ptimer, jiffies + timeout);
 }
 
-
 void irlap_start_slot_timer(struct irlap_cb *self, int timeout);
 void irlap_start_query_timer(struct irlap_cb *self, int S, int s);
 void irlap_start_final_timer(struct irlap_cb *self, int timeout);
@@ -102,4 +101,3 @@ void irlmp_start_idle_timer(struct lap_cb *, int timeout);
 void irlmp_stop_idle_timer(struct lap_cb *self);
 
 #endif
-

@@ -1,10 +1,4 @@
-/*
- * linux/fs/hfsplus/attributes.c
- *
- * Vyacheslav Dubeyko <slava@dubeyko.com>
- *
- * Handling of records in attributes tree
- */
+
 
 #include "hfsplus_fs.h"
 #include "hfsplus_raw.h"
@@ -65,13 +59,6 @@ int hfsplus_attr_build_key(struct super_block *sb, hfsplus_btree_key *key,
 		len = 0;
 	}
 
-	/* The length of the key, as stored in key_len field, does not include
-	 * the size of the key_len field itself.
-	 * So, offsetof(hfsplus_attr_key, key_name) is a trick because
-	 * it takes into consideration key_len field (__be16) of
-	 * hfsplus_attr_key structure instead of length field (__be16) of
-	 * hfsplus_attr_unistr structure.
-	 */
 	key->key_len =
 		cpu_to_be16(offsetof(struct hfsplus_attr_key, key_name) +
 				2 * len);
@@ -96,17 +83,11 @@ static int hfsplus_attr_build_record(hfsplus_attr_entry *entry, int record_type,
 				u32 cnid, const void *value, size_t size)
 {
 	if (record_type == HFSPLUS_ATTR_FORK_DATA) {
-		/*
-		 * Mac OS X supports only inline data attributes.
-		 * Do nothing
-		 */
+		
 		memset(entry, 0, sizeof(*entry));
 		return sizeof(struct hfsplus_attr_fork_data);
 	} else if (record_type == HFSPLUS_ATTR_EXTENTS) {
-		/*
-		 * Mac OS X supports only inline data attributes.
-		 * Do nothing.
-		 */
+		
 		memset(entry, 0, sizeof(*entry));
 		return sizeof(struct hfsplus_attr_extents);
 	} else if (record_type == HFSPLUS_ATTR_INLINE_DATA) {
@@ -120,14 +101,11 @@ static int hfsplus_attr_build_record(hfsplus_attr_entry *entry, int record_type,
 			return HFSPLUS_INVALID_ATTR_RECORD;
 		entry->inline_data.length = cpu_to_be16(len);
 		memcpy(entry->inline_data.raw_bytes, value, len);
-		/*
-		 * Align len on two-byte boundary.
-		 * It needs to add pad byte if we have odd len.
-		 */
+		
 		len = round_up(len, 2);
 		return offsetof(struct hfsplus_attr_inline_data, raw_bytes) +
 					len;
-	} else /* invalid input */
+	} else 
 		memset(entry, 0, sizeof(*entry));
 
 	return HFSPLUS_INVALID_ATTR_RECORD;
@@ -226,7 +204,6 @@ int hfsplus_create_attr(struct inode *inode,
 		goto failed_create_attr;
 	}
 
-	/* Mac OS X supports only inline data attributes. */
 	entry_size = hfsplus_attr_build_record(entry_ptr,
 					HFSPLUS_ATTR_INLINE_DATA,
 					inode->i_ino,
@@ -275,7 +252,7 @@ static int __hfsplus_delete_attr(struct inode *inode, u32 cnid,
 
 	switch (be32_to_cpu(record_type)) {
 	case HFSPLUS_ATTR_INLINE_DATA:
-		/* All is OK. Do nothing. */
+		 
 		break;
 	case HFSPLUS_ATTR_FORK_DATA:
 	case HFSPLUS_ATTR_EXTENTS:

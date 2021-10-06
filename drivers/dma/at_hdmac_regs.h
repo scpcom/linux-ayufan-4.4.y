@@ -15,7 +15,6 @@
 
 #define	AT_DMA_MAX_NR_CHANNELS	8
 
-
 #define	AT_DMA_GCFG	0x00	/* Global Configuration Register */
 #define		AT_DMA_IF_BIGEND(i)	(0x1 << (i))	/* AHB-Lite Interface i in Big-endian mode */
 #define		AT_DMA_ARB_CFG	(0x1 << 4)	/* Arbiter mode. */
@@ -64,7 +63,6 @@
 #define		AT_DMA_EMPT(x)	(0x1 << (16 + (x)))
 #define		AT_DMA_STAL(x)	(0x1 << (24 + (x)))
 
-
 #define	AT_DMA_CH_REGS_BASE	0x3C	/* Channel registers base address */
 #define	ch_regs(x)	(AT_DMA_CH_REGS_BASE + (x) * 0x28) /* Channel x base addr */
 
@@ -77,7 +75,6 @@
 #define	ATC_CFG_OFFSET		0x14	/* Configuration Register */
 #define	ATC_SPIP_OFFSET		0x18	/* Src PIP Configuration Register */
 #define	ATC_DPIP_OFFSET		0x1C	/* Dst PIP Configuration Register */
-
 
 /* Bitfield definitions */
 
@@ -162,7 +159,6 @@
 #define	ATC_DPIP_HOLE(x)	(0xFFFFU & (x))
 #define	ATC_DPIP_BOUNDARY(x)	((0x3FF & (x)) << 16)
 
-
 /*--  descriptors  -----------------------------------------------------*/
 
 /* LLI == Linked List Item; aka DMA buffer descriptor */
@@ -212,7 +208,6 @@ txd_to_at_desc(struct dma_async_tx_descriptor *txd)
 {
 	return container_of(txd, struct at_desc, txd);
 }
-
 
 /*--  Channels  --------------------------------------------------------*/
 
@@ -350,7 +345,6 @@ static inline struct at_dma *to_at_dma(struct dma_device *ddev)
 	return container_of(ddev, struct at_dma, dma_common);
 }
 
-
 /*--  Helper functions  ------------------------------------------------*/
 
 static struct device *chan2dev(struct dma_chan *chan)
@@ -390,7 +384,6 @@ static void atc_dump_lli(struct at_dma_chan *atchan, struct at_lli *lli)
 		 lli->ctrla, lli->ctrlb, &lli->dscr);
 }
 
-
 static void atc_setup_irq(struct at_dma *atdma, int chan_id, int on)
 {
 	u32 ebci;
@@ -413,7 +406,6 @@ static void atc_disable_chan_irq(struct at_dma *atdma, int chan_id)
 {
 	atc_setup_irq(atdma, chan_id, 0);
 }
-
 
 /**
  * atc_chan_is_enabled - test if given channel is enabled

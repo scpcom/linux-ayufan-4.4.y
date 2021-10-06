@@ -149,7 +149,6 @@ static const char * const page_flag_names[] = {
 	[KPF_MMAP_EXCLUSIVE]	= "1:mmap_exclusive",
 };
 
-
 static const char * const debugfs_known_mountpoints[] = {
 	"/sys/kernel/debug",
 	"/debug",
@@ -201,7 +200,6 @@ static int		hwpoison_forget_fd;
 static unsigned long	total_pages;
 static unsigned long	nr_pages[HASH_SIZE];
 static uint64_t		page_flags[HASH_SIZE];
-
 
 /*
  * helper functions
@@ -297,7 +295,6 @@ static unsigned long pagemap_pfn(uint64_t val)
 	return pfn;
 }
 
-
 /*
  * page flag names
  */
@@ -339,7 +336,6 @@ static char *page_flag_longname(uint64_t flags)
 
 	return buf;
 }
-
 
 /*
  * page list and summary
@@ -409,7 +405,6 @@ static void show_summary(void)
 	printf("             total\t%10lu %8lu\n",
 			total_pages, pages2mb(total_pages));
 }
-
 
 /*
  * page flag filters
@@ -688,7 +683,6 @@ static void walk_addr_ranges(void)
 
 	close(kpageflags_fd);
 }
-
 
 /*
  * user interface

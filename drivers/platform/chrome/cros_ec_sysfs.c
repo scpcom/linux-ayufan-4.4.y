@@ -294,4 +294,3 @@ static struct attribute *__ec_attrs[] = {
 struct attribute_group cros_ec_attr_group = {
 	.attrs = __ec_attrs,
 };
-

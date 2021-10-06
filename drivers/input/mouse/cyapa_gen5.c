@@ -22,7 +22,6 @@
 #include <linux/pm_runtime.h>
 #include "cyapa.h"
 
-
 /* Macro of TSG firmware image */
 #define CYAPA_TSG_FLASH_MAP_BLOCK_SIZE      0x80
 #define CYAPA_TSG_IMG_FW_HDR_SIZE           13
@@ -134,7 +133,6 @@
 /* The offset only valid for retrieve PWC and panel scan commands */
 #define GEN5_RESP_DATA_STRUCTURE_OFFSET      10
 #define GEN5_PWC_DATA_ELEMENT_SIZE_MASK      0x07
-
 
 struct cyapa_pip_touch_record {
 	/*
@@ -2816,7 +2814,6 @@ int cyapa_pip_irq_handler(struct cyapa *cyapa)
 
 int cyapa_pip_bl_activate(struct cyapa *cyapa) { return 0; }
 int cyapa_pip_bl_deactivate(struct cyapa *cyapa) { return 0; }
-
 
 const struct cyapa_dev_ops cyapa_gen5_ops = {
 	.check_fw = cyapa_pip_check_fw,

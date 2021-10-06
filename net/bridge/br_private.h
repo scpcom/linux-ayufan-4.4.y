@@ -924,7 +924,6 @@ int br_set_hello_time(struct net_bridge *br, unsigned long x);
 int br_set_max_age(struct net_bridge *br, unsigned long x);
 int br_set_ageing_time(struct net_bridge *br, u32 ageing_time);
 
-
 /* br_stp_if.c */
 void br_stp_enable_bridge(struct net_bridge *br);
 void br_stp_disable_bridge(struct net_bridge *br);

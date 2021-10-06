@@ -192,8 +192,6 @@ TRACE_EVENT(kvm_ack_irq,
 
 #endif /* defined(CONFIG_HAVE_KVM_IRQFD) */
 
-
-
 #define KVM_TRACE_MMIO_READ_UNSATISFIED 0
 #define KVM_TRACE_MMIO_READ 1
 #define KVM_TRACE_MMIO_WRITE 2

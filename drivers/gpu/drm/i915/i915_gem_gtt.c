@@ -1854,6 +1854,7 @@ static void gen6_ppgtt_insert_entries(struct i915_address_space *vm,
 			act_pte = 0;
 		}
 	}
+
 	if (pt_vaddr)
 		kunmap_px(ppgtt, pt_vaddr);
 }

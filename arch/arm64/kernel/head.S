@@ -181,7 +181,6 @@ section_table:
 	.short	0			// NumberOfLineNumbers
 	.long	0x42100040		// Characteristics (section flags)
 
-
 	.ascii	".text"
 	.byte	0
 	.byte	0

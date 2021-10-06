@@ -23,12 +23,6 @@ static inline int is_kernel_rodata(unsigned long addr)
 		addr < (unsigned long)__end_rodata;
 }
 
-/**
- * kfree_const - conditionally free memory
- * @x: pointer to the memory
- *
- * Function calls kfree only if @x is not in .rodata section.
- */
 void kfree_const(const void *x)
 {
 	if (!is_kernel_rodata((unsigned long)x))
@@ -36,11 +30,6 @@ void kfree_const(const void *x)
 }
 EXPORT_SYMBOL(kfree_const);
 
-/**
- * kstrdup - allocate space for and copy an existing string
- * @s: the string to duplicate
- * @gfp: the GFP mask used in the kmalloc() call when allocating memory
- */
 char *kstrdup(const char *s, gfp_t gfp)
 {
 	size_t len;
@@ -57,15 +46,6 @@ char *kstrdup(const char *s, gfp_t gfp)
 }
 EXPORT_SYMBOL(kstrdup);
 
-/**
- * kstrdup_const - conditionally duplicate an existing const string
- * @s: the string to duplicate
- * @gfp: the GFP mask used in the kmalloc() call when allocating memory
- *
- * Function returns source string if it is in .rodata section otherwise it
- * fallbacks to kstrdup.
- * Strings allocated by kstrdup_const should be freed by kfree_const.
- */
 const char *kstrdup_const(const char *s, gfp_t gfp)
 {
 	if (is_kernel_rodata((unsigned long)s))
@@ -75,12 +55,6 @@ const char *kstrdup_const(const char *s, gfp_t gfp)
 }
 EXPORT_SYMBOL(kstrdup_const);
 
-/**
- * kstrndup - allocate space for and copy an existing string
- * @s: the string to duplicate
- * @max: read at most @max chars from @s
- * @gfp: the GFP mask used in the kmalloc() call when allocating memory
- */
 char *kstrndup(const char *s, size_t max, gfp_t gfp)
 {
 	size_t len;
@@ -99,13 +73,6 @@ char *kstrndup(const char *s, size_t max, gfp_t gfp)
 }
 EXPORT_SYMBOL(kstrndup);
 
-/**
- * kmemdup - duplicate region of memory
- *
- * @src: memory region to duplicate
- * @len: memory region length
- * @gfp: GFP mask to use
- */
 void *kmemdup(const void *src, size_t len, gfp_t gfp)
 {
 	void *p;
@@ -117,23 +84,10 @@ void *kmemdup(const void *src, size_t len, gfp_t gfp)
 }
 EXPORT_SYMBOL(kmemdup);
 
-/**
- * memdup_user - duplicate memory region from user space
- *
- * @src: source address in user space
- * @len: number of bytes to copy
- *
- * Returns an ERR_PTR() on failure.
- */
 void *memdup_user(const void __user *src, size_t len)
 {
 	void *p;
 
-	/*
-	 * Always use GFP_KERNEL, since copy_from_user() can sleep and
-	 * cause pagefault, which makes it pointless to use GFP_NOFS
-	 * or GFP_ATOMIC.
-	 */
 	p = kmalloc_track_caller(len, GFP_KERNEL);
 	if (!p)
 		return ERR_PTR(-ENOMEM);
@@ -147,11 +101,6 @@ void *memdup_user(const void __user *src, size_t len)
 }
 EXPORT_SYMBOL(memdup_user);
 
-/*
- * strndup_user - duplicate an existing string from user space
- * @s: The string to duplicate
- * @n: Maximum number of bytes to copy, including the trailing NUL.
- */
 char *strndup_user(const char __user *s, long n)
 {
 	char *p;
@@ -198,19 +147,12 @@ void __vma_link_list(struct mm_struct *mm, struct vm_area_struct *vma,
 		next->vm_prev = vma;
 }
 
-/* Check if the vma is being used as a stack by this task */
 static int vm_is_stack_for_task(struct task_struct *t,
 				struct vm_area_struct *vma)
 {
 	return (vma->vm_start <= KSTK_ESP(t) && vma->vm_end >= KSTK_ESP(t));
 }
 
-/*
- * Check if the vma is being used as a stack.
- * If is_group is non-zero, check in the entire thread group or else
- * just check in the current task. Returns the task_struct of the task
- * that the vma is stack for. Must be called under rcu_read_lock().
- */
 struct task_struct *task_of_stack(struct task_struct *task,
 				struct vm_area_struct *vma, bool in_group)
 {
@@ -237,12 +179,6 @@ void arch_pick_mmap_layout(struct mm_struct *mm)
 }
 #endif
 
-/*
- * Like get_user_pages_fast() except its IRQ-safe in that it won't fall
- * back to the regular GUP.
- * If the architecture not support this function, simply return with no
- * page pinned
- */
 int __weak __get_user_pages_fast(unsigned long start,
 				 int nr_pages, int write, struct page **pages)
 {
@@ -250,30 +186,6 @@ int __weak __get_user_pages_fast(unsigned long start,
 }
 EXPORT_SYMBOL_GPL(__get_user_pages_fast);
 
-/**
- * get_user_pages_fast() - pin user pages in memory
- * @start:	starting user address
- * @nr_pages:	number of pages from start to pin
- * @write:	whether pages will be written to
- * @pages:	array that receives pointers to the pages pinned.
- *		Should be at least nr_pages long.
- *
- * Returns number of pages pinned. This may be fewer than the number
- * requested. If nr_pages is 0 or negative, returns 0. If no pages
- * were pinned, returns -errno.
- *
- * get_user_pages_fast provides equivalent functionality to get_user_pages,
- * operating on current and current->mm, with force=0 and vma=NULL. However
- * unlike get_user_pages, it must be called without mmap_sem held.
- *
- * get_user_pages_fast may take mmap_sem and page table locks, so no
- * assumptions can be made about lack of locking. get_user_pages_fast is to be
- * implemented in a way that is advantageous (vs get_user_pages()) when the
- * user memory area is already faulted in and present in ptes. However if the
- * pages have to be faulted in, it may turn out to be slightly slower so
- * callers need to carefully consider what to use. On many architectures,
- * get_user_pages_fast simply falls back to get_user_pages.
- */
 int __weak get_user_pages_fast(unsigned long start,
 				int nr_pages, int write, struct page **pages)
 {
@@ -335,7 +247,6 @@ static inline void *__page_rmapping(struct page *page)
 	return (void *)mapping;
 }
 
-/* Neutral page->mapping pointer to address_space or anon_vma or other */
 void *page_rmapping(struct page *page)
 {
 	page = compound_head(page);
@@ -357,7 +268,6 @@ struct address_space *page_mapping(struct page *page)
 {
 	unsigned long mapping;
 
-	/* This happens if someone calls flush_dcache_page on slab page */
 	if (unlikely(PageSlab(page)))
 		return NULL;
 
@@ -398,9 +308,6 @@ int overcommit_kbytes_handler(struct ctl_table *table, int write,
 	return ret;
 }
 
-/*
- * Committed memory limit enforced when OVERCOMMIT_NEVER policy is used
- */
 unsigned long vm_commit_limit(void)
 {
 	unsigned long allowed;
@@ -415,15 +322,7 @@ unsigned long vm_commit_limit(void)
 	return allowed;
 }
 
-/**
- * get_cmdline() - copy the cmdline value to a buffer.
- * @task:     the task whose cmdline value to copy.
- * @buffer:   the buffer to copy to.
- * @buflen:   the length of the buffer. Larger cmdline values are truncated
- *            to this length.
- * Returns the size of the cmdline field copied. Note that the copy does
- * not guarantee an ending NULL byte.
- */
+
 int get_cmdline(struct task_struct *task, char *buffer, int buflen)
 {
 	int res = 0;
@@ -432,7 +331,7 @@ int get_cmdline(struct task_struct *task, char *buffer, int buflen)
 	if (!mm)
 		goto out;
 	if (!mm->arg_end)
-		goto out_mm;	/* Shh! No looking before we're done */
+		goto out_mm;	
 
 	len = mm->arg_end - mm->arg_start;
 
@@ -441,10 +340,7 @@ int get_cmdline(struct task_struct *task, char *buffer, int buflen)
 
 	res = access_process_vm(task, mm->arg_start, buffer, len, 0);
 
-	/*
-	 * If the nul at the end of args has been overwritten, then
-	 * assume application is using setproctitle(3).
-	 */
+	
 	if (res > 0 && buffer[res-1] != '\0' && len < buflen) {
 		len = strnlen(buffer, res);
 		if (len < res) {

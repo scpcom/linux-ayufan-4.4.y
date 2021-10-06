@@ -1162,7 +1162,6 @@ static bool tipc_node_check_state(struct tipc_node *n, struct sk_buff *skb,
 		return false;
 	rcv_nxt = l->rcv_nxt;
 
-
 	if (likely((state == SELF_UP_PEER_UP) && (usr != TUNNEL_PROTOCOL)))
 		return true;
 

@@ -216,7 +216,6 @@ bool r600_dma_is_lockup(struct radeon_device *rdev, struct radeon_ring *ring)
 	return radeon_ring_test_lockup(rdev, ring);
 }
 
-
 /**
  * r600_dma_ring_test - simple async dma engine test
  *

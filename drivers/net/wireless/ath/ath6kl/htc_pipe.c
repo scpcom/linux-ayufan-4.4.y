@@ -976,7 +976,6 @@ static int ath6kl_htc_pipe_rx_complete(struct ath6kl *ar, struct sk_buff *skb,
 		goto free_skb;
 	}
 
-
 	netdata = skb->data;
 	netlen = skb->len;
 

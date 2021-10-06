@@ -85,4 +85,3 @@ _GLOBAL(relocate)
 p_dyn:	.llong	__dynamic_start - 0b
 p_rela:	.llong	__rela_dyn_start - 0b
 p_st:	.llong	_stext - 0b
-

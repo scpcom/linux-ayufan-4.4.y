@@ -340,7 +340,6 @@ static void atl1e_rx_mode(struct net_device *netdev,
 	atl1e_irq_enable(adapter);
 }
 
-
 static void __atl1e_vlan_mode(netdev_features_t features, u32 *mac_ctrl_data)
 {
 	if (features & NETIF_F_HW_VLAN_CTAG_RX) {
@@ -424,7 +423,6 @@ static int atl1e_set_features(struct net_device *netdev,
 
 	if (changed & NETIF_F_RXALL)
 		atl1e_rx_mode(netdev, features);
-
 
 	return 0;
 }
@@ -708,7 +706,6 @@ static void atl1e_clean_rx_ring(struct atl1e_adapter *adapter)
 		&adapter->rx_ring;
 	struct atl1e_rx_page_desc *rx_page_desc = rx_ring->rx_page_desc;
 	u16 i, j;
-
 
 	if (adapter->ring_vir_addr == NULL)
 		return;

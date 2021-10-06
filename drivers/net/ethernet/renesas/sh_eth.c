@@ -965,7 +965,6 @@ static void sh_eth_set_receive_align(struct sk_buff *skb)
 		skb_reserve(skb, SH_ETH_RX_ALIGN - reserve);
 }
 
-
 /* CPU <-> EDMAC endian convert */
 static inline __u32 cpu_to_edmac(struct sh_eth_private *mdp, u32 x)
 {
@@ -2618,7 +2617,6 @@ static void sh_eth_tsu_read_entry(void *reg, u8 *addr)
 	addr[4] = (val >> 8) & 0xff;
 	addr[5] = val & 0xff;
 }
-
 
 static int sh_eth_tsu_find_entry(struct net_device *ndev, const u8 *addr)
 {

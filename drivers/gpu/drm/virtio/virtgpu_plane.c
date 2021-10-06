@@ -86,7 +86,6 @@ static void virtio_gpu_plane_atomic_update(struct drm_plane *plane,
 				   plane->state->crtc_y);
 }
 
-
 static const struct drm_plane_helper_funcs virtio_gpu_plane_helper_funcs = {
 	.atomic_check		= virtio_gpu_plane_atomic_check,
 	.atomic_update		= virtio_gpu_plane_atomic_update,

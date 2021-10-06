@@ -580,7 +580,6 @@ void amdgpu_fbdev_restore_mode(struct amdgpu_device *adev);
 
 void amdgpu_fb_output_poll_changed(struct amdgpu_device *adev);
 
-
 int amdgpu_align_pitch(struct amdgpu_device *adev, int width, int bpp, bool tiled);
 
 /* amdgpu_display.c */

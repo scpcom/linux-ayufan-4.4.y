@@ -611,7 +611,6 @@ static u16 kv_convert_2bit_index_to_voltage(struct radeon_device *rdev,
 	return kv_convert_8bit_index_to_voltage(rdev, (u16)vid_8bit);
 }
 
-
 static int kv_set_vid(struct radeon_device *rdev, u32 index, u32 vid)
 {
 	struct kv_power_info *pi = kv_get_pi(rdev);
@@ -1012,7 +1011,6 @@ static int kv_populate_samu_table(struct radeon_device *rdev)
 
 	return ret;
 }
-
 
 static int kv_populate_acp_table(struct radeon_device *rdev)
 {
@@ -2895,4 +2893,3 @@ u32 kv_dpm_get_mclk(struct radeon_device *rdev, bool low)
 
 	return pi->sys_info.bootup_uma_clk;
 }
-

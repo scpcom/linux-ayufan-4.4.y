@@ -214,7 +214,6 @@ struct mei_cl *mei_hbm_cl_find_by_cmd(struct mei_device *dev, void *buf)
 	return NULL;
 }
 
-
 /**
  * mei_hbm_start_wait - wait for start response message.
  *
@@ -701,7 +700,6 @@ static void mei_hbm_cl_flow_control_res(struct mei_device *dev,
 	}
 }
 
-
 /**
  * mei_hbm_cl_disconnect_req - sends disconnect message to fw.
  *
@@ -847,7 +845,6 @@ static void mei_hbm_cl_res(struct mei_device *dev,
 	cl->timer_count = 0;
 	wake_up(&cl->wait);
 }
-
 
 /**
  * mei_hbm_fw_disconnect_req - disconnect request initiated by ME firmware
@@ -1241,4 +1238,3 @@ int mei_hbm_dispatch(struct mei_device *dev, struct mei_msg_hdr *hdr)
 	}
 	return 0;
 }
-

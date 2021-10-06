@@ -369,7 +369,6 @@ static void ahd_release_simq(struct ahd_softc *ahd);
 
 static int ahd_linux_unit;
 
-
 /************************** OS Utility Wrappers *******************************/
 void ahd_delay(long);
 void
@@ -385,7 +384,6 @@ ahd_delay(long usec)
 		usec -= 1024;
 	}
 }
-
 
 /***************************** Low Level I/O **********************************/
 uint8_t ahd_inb(struct ahd_softc * ahd, long port);

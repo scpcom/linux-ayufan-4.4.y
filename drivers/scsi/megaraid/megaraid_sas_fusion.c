@@ -58,7 +58,6 @@
 #include "megaraid_sas_fusion.h"
 #include "megaraid_sas.h"
 
-
 extern void megasas_free_cmds(struct megasas_instance *instance);
 extern struct megasas_cmd *megasas_get_cmd(struct megasas_instance
 					   *instance);
@@ -92,8 +91,6 @@ void megasas_start_timer(struct megasas_instance *instance,
 			 void *fn, unsigned long interval);
 extern struct megasas_mgmt_info megasas_mgmt_info;
 extern int resetwaittime;
-
-
 
 /**
  * megasas_enable_intr_fusion -	Enables interrupts
@@ -205,7 +202,6 @@ megasas_fire_cmd_fusion(struct megasas_instance *instance,
 #endif
 }
 
-
 /**
  * megasas_teardown_frame_pool_fusion -	Destroy the cmd frame DMA pool
  * @instance:				Adapter soft state
@@ -265,7 +261,6 @@ megasas_free_cmds_fusion(struct megasas_instance *instance)
 
 	u32 max_cmds, req_sz, reply_sz, io_frames_sz;
 
-
 	req_sz = fusion->request_alloc_sz;
 	reply_sz = fusion->reply_alloc_sz;
 	io_frames_sz = fusion->io_frames_alloc_sz;
@@ -319,7 +314,6 @@ static int megasas_create_frame_pool_fusion(struct megasas_instance *instance)
 
 	fusion = instance->ctrl_context;
 	max_cmd = instance->max_fw_cmds;
-
 
 	/*
 	 * Use DMA pool facility provided by PCI layer
@@ -1873,7 +1867,6 @@ megasas_build_syspd_fusion(struct megasas_instance *instance,
 		instance->msix_vectors ?
 		(raw_smp_processor_id() % instance->msix_vectors) : 0;
 
-
 	if (!fp_possible) {
 		/* system pd firmware path */
 		io_request->Function  = MEGASAS_MPI2_FUNCTION_LD_IO_REQUEST;
@@ -2996,7 +2989,6 @@ void  megasas_fusion_crash_dump_wq(struct work_struct *work)
 	u32 status_reg;
 	u8 partial_copy = 0;
 
-
 	status_reg = instance->instancet->read_fw_status_reg(instance->reg_set);
 
 	/*
@@ -3054,7 +3046,6 @@ void  megasas_fusion_crash_dump_wq(struct work_struct *work)
 		readl(&instance->reg_set->outbound_scratch_pad);
 	}
 }
-
 
 /* Fusion OCR work queue */
 void megasas_fusion_ocr_wq(struct work_struct *work)

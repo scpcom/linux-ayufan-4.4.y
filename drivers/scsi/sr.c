@@ -60,7 +60,6 @@
 #include "scsi_logging.h"
 #include "sr.h"
 
-
 MODULE_DESCRIPTION("SCSI cdrom (sr) driver");
 MODULE_LICENSE("GPL");
 MODULE_ALIAS_BLOCKDEV_MAJOR(SCSI_CDROM_MAJOR);
@@ -476,7 +475,6 @@ static int sr_init_command(struct scsi_cmnd *SCpnt)
 
 	this_count = (scsi_bufflen(SCpnt) >> 9) / (s_size >> 9);
 
-
 	SCSI_LOG_HLQUEUE(2, scmd_printk(KERN_INFO, SCpnt,
 					"%s %d/%u 512 byte blocks.\n",
 					(rq_data_dir(rq) == WRITE) ?
@@ -747,7 +745,6 @@ fail:
 	return error;
 }
 
-
 static void get_sectorsize(struct scsi_cd *cd)
 {
 	unsigned char cmd[10];
@@ -769,7 +766,6 @@ static void get_sectorsize(struct scsi_cd *cd)
 		retries--;
 
 	} while (the_result && retries);
-
 
 	if (the_result) {
 		cd->capacity = 0x1fffff;
@@ -847,7 +843,6 @@ static void get_capabilities(struct scsi_cd *cd)
 		"",
 		""
 	};
-
 
 	/* allocate transfer buffer */
 	buffer = kmalloc(512, GFP_KERNEL | GFP_DMA);

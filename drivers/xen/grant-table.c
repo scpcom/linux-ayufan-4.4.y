@@ -582,7 +582,6 @@ static int grow_gnttab_list(unsigned int more_frames)
 			goto grow_nomem;
 	}
 
-
 	for (i = grefs_per_grant_frame * nr_grant_frames;
 	     i < grefs_per_grant_frame * new_nr_grant_frames - 1; i++)
 		gnttab_entry(i) = i + 1;

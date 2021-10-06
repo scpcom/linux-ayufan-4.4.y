@@ -861,7 +861,6 @@ static int si476x_core_remove(struct i2c_client *client)
 	return 0;
 }
 
-
 static const struct i2c_device_id si476x_id[] = {
 	{ "si4761", SI476X_CHIP_SI4761 },
 	{ "si4764", SI476X_CHIP_SI4764 },
@@ -879,7 +878,6 @@ static struct i2c_driver si476x_core_driver = {
 	.id_table       = si476x_id,
 };
 module_i2c_driver(si476x_core_driver);
-
 
 MODULE_AUTHOR("Andrey Smirnov <andrew.smirnov@gmail.com>");
 MODULE_DESCRIPTION("Si4761/64/68 AM/FM MFD core device driver");

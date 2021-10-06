@@ -269,7 +269,6 @@ static u32 make_nonsignal_event_id(struct kfd_process *p)
 		id++)
 		;
 
-
 	if (id < KFD_LAST_NONSIGNAL_EVENT_ID) {
 		p->next_nonsignal_event_id = id + 1;
 		return id;
@@ -684,8 +683,6 @@ static bool copy_signaled_event_data(uint32_t num_events,
 	return true;
 
 }
-
-
 
 static long user_timeout_to_jiffies(uint32_t user_timeout_ms)
 {

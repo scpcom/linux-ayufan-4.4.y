@@ -455,7 +455,6 @@ DEFINE_EVENT_CONDITION(foo_template, foo_with_template_cond,
 	TP_ARGS(foo, bar),
 	TP_CONDITION(!(bar % 8)));
 
-
 DEFINE_EVENT_FN(foo_template, foo_with_template_fn,
 	TP_PROTO(const char *foo, int bar),
 	TP_ARGS(foo, bar),
@@ -481,7 +480,6 @@ DEFINE_EVENT_PRINT(foo_template, foo_with_template_print,
 #endif
 
 /***** NOTICE! The #if protection ends here. *****/
-
 
 /*
  * There are several ways I could have done this. If I left out the

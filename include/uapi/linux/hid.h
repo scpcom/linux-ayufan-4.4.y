@@ -25,8 +25,6 @@
 #ifndef _UAPI__HID_H
 #define _UAPI__HID_H
 
-
-
 /*
  * USB HID (Human Interface Device) interface class code
  */
@@ -61,6 +59,5 @@
 #define HID_DT_PHYSICAL			(USB_TYPE_CLASS | 0x03)
 
 #define HID_MAX_DESCRIPTOR_SIZE		4096
-
 
 #endif /* _UAPI__HID_H */

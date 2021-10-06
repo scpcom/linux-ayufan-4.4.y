@@ -308,7 +308,6 @@ static const struct ad5686_chip_info ad5686_chip_info_tbl[] = {
 	},
 };
 
-
 static int ad5686_probe(struct spi_device *spi)
 {
 	struct ad5686_state *st;

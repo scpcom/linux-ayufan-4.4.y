@@ -1,61 +1,4 @@
-/*
- *  lpc_ich.c - LPC interface for Intel ICH
- *
- *  LPC bridge function of the Intel ICH contains many other
- *  functional units, such as Interrupt controllers, Timers,
- *  Power Management, System Management, GPIO, RTC, and LPC
- *  Configuration Registers.
- *
- *  This driver is derived from lpc_sch.
 
- *  Copyright (c) 2011 Extreme Engineering Solution, Inc.
- *  Author: Aaron Sierra <asierra@xes-inc.com>
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License 2 as published
- *  by the Free Software Foundation.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; see the file COPYING.  If not, write to
- *  the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
- *
- *  This driver supports the following I/O Controller hubs:
- *	(See the intel documentation on http://developer.intel.com.)
- *	document number 290655-003, 290677-014: 82801AA (ICH), 82801AB (ICHO)
- *	document number 290687-002, 298242-027: 82801BA (ICH2)
- *	document number 290733-003, 290739-013: 82801CA (ICH3-S)
- *	document number 290716-001, 290718-007: 82801CAM (ICH3-M)
- *	document number 290744-001, 290745-025: 82801DB (ICH4)
- *	document number 252337-001, 252663-008: 82801DBM (ICH4-M)
- *	document number 273599-001, 273645-002: 82801E (C-ICH)
- *	document number 252516-001, 252517-028: 82801EB (ICH5), 82801ER (ICH5R)
- *	document number 300641-004, 300884-013: 6300ESB
- *	document number 301473-002, 301474-026: 82801F (ICH6)
- *	document number 313082-001, 313075-006: 631xESB, 632xESB
- *	document number 307013-003, 307014-024: 82801G (ICH7)
- *	document number 322896-001, 322897-001: NM10
- *	document number 313056-003, 313057-017: 82801H (ICH8)
- *	document number 316972-004, 316973-012: 82801I (ICH9)
- *	document number 319973-002, 319974-002: 82801J (ICH10)
- *	document number 322169-001, 322170-003: 5 Series, 3400 Series (PCH)
- *	document number 320066-003, 320257-008: EP80597 (IICH)
- *	document number 324645-001, 324646-001: Cougar Point (CPT)
- *	document number TBD : Patsburg (PBG)
- *	document number TBD : DH89xxCC
- *	document number TBD : Panther Point
- *	document number TBD : Lynx Point
- *	document number TBD : Lynx Point-LP
- *	document number TBD : Wellsburg
- *	document number TBD : Avoton SoC
- *	document number TBD : Coleto Creek
- *	document number TBD : Wildcat Point-LP
- *	document number TBD : 9 Series
- */
 
 #define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
 
@@ -96,37 +39,37 @@
 struct lpc_ich_priv {
 	int chipset;
 
-	int abase;		/* ACPI base */
-	int actrl_pbase;	/* ACPI control or PMC base */
-	int gbase;		/* GPIO base */
-	int gctrl;		/* GPIO control */
+	int abase;		 
+	int actrl_pbase;	 
+	int gbase;		 
+	int gctrl;		 
 
-	int abase_save;		/* Cached ACPI base value */
-	int actrl_pbase_save;		/* Cached ACPI control or PMC base value */
-	int gctrl_save;		/* Cached GPIO control value */
+	int abase_save;		 
+	int actrl_pbase_save;		 
+	int gctrl_save;		 
 };
 
 static struct resource wdt_ich_res[] = {
-	/* ACPI - TCO */
+	 
 	{
 		.flags = IORESOURCE_IO,
 	},
-	/* ACPI - SMI */
+	 
 	{
 		.flags = IORESOURCE_IO,
 	},
-	/* GCS or PMC */
+	 
 	{
 		.flags = IORESOURCE_MEM,
 	},
 };
 
 static struct resource gpio_ich_res[] = {
-	/* GPIO */
+	 
 	{
 		.flags = IORESOURCE_IO,
 	},
-	/* ACPI - GPE0 */
+	 
 	{
 		.flags = IORESOURCE_IO,
 	},
@@ -146,74 +89,74 @@ static struct mfd_cell lpc_ich_gpio_cell = {
 	.ignore_resource_conflicts = true,
 };
 
-/* chipset related info */
+
 enum lpc_chipsets {
-	LPC_ICH = 0,	/* ICH */
-	LPC_ICH0,	/* ICH0 */
-	LPC_ICH2,	/* ICH2 */
-	LPC_ICH2M,	/* ICH2-M */
-	LPC_ICH3,	/* ICH3-S */
-	LPC_ICH3M,	/* ICH3-M */
-	LPC_ICH4,	/* ICH4 */
-	LPC_ICH4M,	/* ICH4-M */
-	LPC_CICH,	/* C-ICH */
-	LPC_ICH5,	/* ICH5 & ICH5R */
-	LPC_6300ESB,	/* 6300ESB */
-	LPC_ICH6,	/* ICH6 & ICH6R */
-	LPC_ICH6M,	/* ICH6-M */
-	LPC_ICH6W,	/* ICH6W & ICH6RW */
-	LPC_631XESB,	/* 631xESB/632xESB */
-	LPC_ICH7,	/* ICH7 & ICH7R */
-	LPC_ICH7DH,	/* ICH7DH */
-	LPC_ICH7M,	/* ICH7-M & ICH7-U */
-	LPC_ICH7MDH,	/* ICH7-M DH */
-	LPC_NM10,	/* NM10 */
-	LPC_ICH8,	/* ICH8 & ICH8R */
-	LPC_ICH8DH,	/* ICH8DH */
-	LPC_ICH8DO,	/* ICH8DO */
-	LPC_ICH8M,	/* ICH8M */
-	LPC_ICH8ME,	/* ICH8M-E */
-	LPC_ICH9,	/* ICH9 */
-	LPC_ICH9R,	/* ICH9R */
-	LPC_ICH9DH,	/* ICH9DH */
-	LPC_ICH9DO,	/* ICH9DO */
-	LPC_ICH9M,	/* ICH9M */
-	LPC_ICH9ME,	/* ICH9M-E */
-	LPC_ICH10,	/* ICH10 */
-	LPC_ICH10R,	/* ICH10R */
-	LPC_ICH10D,	/* ICH10D */
-	LPC_ICH10DO,	/* ICH10DO */
-	LPC_PCH,	/* PCH Desktop Full Featured */
-	LPC_PCHM,	/* PCH Mobile Full Featured */
-	LPC_P55,	/* P55 */
-	LPC_PM55,	/* PM55 */
-	LPC_H55,	/* H55 */
-	LPC_QM57,	/* QM57 */
-	LPC_H57,	/* H57 */
-	LPC_HM55,	/* HM55 */
-	LPC_Q57,	/* Q57 */
-	LPC_HM57,	/* HM57 */
-	LPC_PCHMSFF,	/* PCH Mobile SFF Full Featured */
-	LPC_QS57,	/* QS57 */
-	LPC_3400,	/* 3400 */
-	LPC_3420,	/* 3420 */
-	LPC_3450,	/* 3450 */
-	LPC_EP80579,	/* EP80579 */
-	LPC_CPT,	/* Cougar Point */
-	LPC_CPTD,	/* Cougar Point Desktop */
-	LPC_CPTM,	/* Cougar Point Mobile */
-	LPC_PBG,	/* Patsburg */
-	LPC_DH89XXCC,	/* DH89xxCC */
-	LPC_PPT,	/* Panther Point */
-	LPC_LPT,	/* Lynx Point */
-	LPC_LPT_LP,	/* Lynx Point-LP */
-	LPC_WBG,	/* Wellsburg */
-	LPC_AVN,	/* Avoton SoC */
-	LPC_BAYTRAIL,   /* Bay Trail SoC */
-	LPC_COLETO,	/* Coleto Creek */
-	LPC_WPT_LP,	/* Wildcat Point-LP */
-	LPC_BRASWELL,	/* Braswell SoC */
-	LPC_9S,		/* 9 Series */
+	LPC_ICH = 0,	
+	LPC_ICH0,	
+	LPC_ICH2,	
+	LPC_ICH2M,	
+	LPC_ICH3,	
+	LPC_ICH3M,	
+	LPC_ICH4,	
+	LPC_ICH4M,	
+	LPC_CICH,	
+	LPC_ICH5,	
+	LPC_6300ESB,	
+	LPC_ICH6,	
+	LPC_ICH6M,	
+	LPC_ICH6W,	
+	LPC_631XESB,	
+	LPC_ICH7,	
+	LPC_ICH7DH,	
+	LPC_ICH7M,	
+	LPC_ICH7MDH,	
+	LPC_NM10,	
+	LPC_ICH8,	
+	LPC_ICH8DH,	
+	LPC_ICH8DO,	
+	LPC_ICH8M,	
+	LPC_ICH8ME,	
+	LPC_ICH9,	
+	LPC_ICH9R,	
+	LPC_ICH9DH,	
+	LPC_ICH9DO,	
+	LPC_ICH9M,	
+	LPC_ICH9ME,	
+	LPC_ICH10,	
+	LPC_ICH10R,	
+	LPC_ICH10D,	
+	LPC_ICH10DO,	
+	LPC_PCH,	
+	LPC_PCHM,	
+	LPC_P55,	
+	LPC_PM55,	
+	LPC_H55,	
+	LPC_QM57,	
+	LPC_H57,	
+	LPC_HM55,	
+	LPC_Q57,	
+	LPC_HM57,	
+	LPC_PCHMSFF,	
+	LPC_QS57,	
+	LPC_3400,	
+	LPC_3420,	
+	LPC_3450,	
+	LPC_EP80579,	
+	LPC_CPT,	
+	LPC_CPTD,	
+	LPC_CPTM,	
+	LPC_PBG,	
+	LPC_DH89XXCC,	
+	LPC_PPT,	
+	LPC_LPT,	
+	LPC_LPT_LP,	
+	LPC_WBG,	
+	LPC_AVN,	
+	LPC_BAYTRAIL,   
+	LPC_COLETO,	
+	LPC_WPT_LP,	
+	LPC_BRASWELL,	
+	LPC_9S,		
 };
 
 static struct lpc_ich_info lpc_chipset_info[] = {
@@ -527,12 +470,6 @@ static struct lpc_ich_info lpc_chipset_info[] = {
 	},
 };
 
-/*
- * This data only exists for exporting the supported PCI ids
- * via MODULE_DEVICE_TABLE.  We do not actually register a
- * pci_driver, because the I/O Controller Hub has also other
- * functions that probably will be registered by other drivers.
- */
 static const struct pci_device_id lpc_ich_ids[] = {
 	{ PCI_VDEVICE(INTEL, 0x0f1c), LPC_BAYTRAIL},
 	{ PCI_VDEVICE(INTEL, 0x1c41), LPC_CPT},
@@ -757,7 +694,7 @@ static const struct pci_device_id lpc_ich_ids[] = {
 	{ PCI_VDEVICE(INTEL, 0x9cc6), LPC_WPT_LP},
 	{ PCI_VDEVICE(INTEL, 0x9cc7), LPC_WPT_LP},
 	{ PCI_VDEVICE(INTEL, 0x9cc9), LPC_WPT_LP},
-	{ 0, },			/* End of list */
+	{ 0, },			
 };
 MODULE_DEVICE_TABLE(pci, lpc_ich_ids);
 
@@ -789,19 +726,13 @@ static void lpc_ich_enable_acpi_space(struct pci_dev *dev)
 
 	switch (lpc_chipset_info[priv->chipset].iTCO_version) {
 	case 3:
-		/*
-		 * Some chipsets (eg Avoton) enable the ACPI space in the
-		 * ACPI BASE register.
-		 */
+		 
 		pci_read_config_byte(dev, priv->abase, &reg_save);
 		pci_write_config_byte(dev, priv->abase, reg_save | 0x2);
 		priv->abase_save = reg_save;
 		break;
 	default:
-		/*
-		 * Most chipsets enable the ACPI space in the ACPI control
-		 * register.
-		 */
+		 
 		pci_read_config_byte(dev, priv->actrl_pbase, &reg_save);
 		pci_write_config_byte(dev, priv->actrl_pbase, reg_save | 0x80);
 		priv->actrl_pbase_save = reg_save;
@@ -860,11 +791,6 @@ static void lpc_ich_finalize_gpio_cell(struct pci_dev *dev)
 	cell->pdata_size = sizeof(struct lpc_ich_info);
 }
 
-/*
- * We don't check for resource conflict globally. There are 2 or 3 independent
- * GPIO groups and it's enough to have access to one of these to instantiate
- * the device.
- */
 static int lpc_ich_check_conflict_gpio(struct resource *res)
 {
 	int ret;
@@ -893,7 +819,6 @@ static int lpc_ich_init_gpio(struct pci_dev *dev)
 	bool acpi_conflict = false;
 	struct resource *res;
 
-	/* Setup power management base register */
 	pci_read_config_dword(dev, priv->abase, &base_addr_cfg);
 	base_addr = base_addr_cfg & 0x0000ff80;
 	if (!base_addr) {
@@ -907,11 +832,7 @@ static int lpc_ich_init_gpio(struct pci_dev *dev)
 	res->end = base_addr + ACPIBASE_GPE_END;
 	ret = acpi_check_resource_conflict(res);
 	if (ret) {
-		/*
-		 * This isn't fatal for the GPIO, but we have to make sure that
-		 * the platform_device subsystem doesn't see this resource
-		 * or it will register an invalid region.
-		 */
+		 
 		lpc_ich_gpio_cell.num_resources--;
 		acpi_conflict = true;
 	} else {
@@ -919,7 +840,7 @@ static int lpc_ich_init_gpio(struct pci_dev *dev)
 	}
 
 gpe0_done:
-	/* Setup GPIO base register */
+	 
 	pci_read_config_dword(dev, priv->gbase, &base_addr_cfg);
 	base_addr = base_addr_cfg & 0x0000ff80;
 	if (!base_addr) {
@@ -928,7 +849,7 @@ gpe0_done:
 		goto gpio_done;
 	}
 
-	/* Older devices provide fewer GPIO and have a smaller resource size. */
+	
 	res = &gpio_ich_res[ICH_RES_GPIO];
 	res->start = base_addr;
 	switch (lpc_chipset_info[priv->chipset].gpio_version) {
@@ -943,7 +864,7 @@ gpe0_done:
 
 	ret = lpc_ich_check_conflict_gpio(res);
 	if (ret < 0) {
-		/* this isn't necessarily fatal for the GPIO */
+		 
 		acpi_conflict = true;
 		goto gpio_done;
 	}
@@ -969,7 +890,6 @@ static int lpc_ich_init_wdt(struct pci_dev *dev)
 	int ret;
 	struct resource *res;
 
-	/* Setup power management base register */
 	pci_read_config_dword(dev, priv->abase, &base_addr_cfg);
 	base_addr = base_addr_cfg & 0x0000ff80;
 	if (!base_addr) {
@@ -988,19 +908,8 @@ static int lpc_ich_init_wdt(struct pci_dev *dev)
 
 	lpc_ich_enable_acpi_space(dev);
 
-	/*
-	 * iTCO v2:
-	 * Get the Memory-Mapped GCS register. To get access to it
-	 * we have to read RCBA from PCI Config space 0xf0 and use
-	 * it as base. GCS = RCBA + ICH6_GCS(0x3410).
-	 *
-	 * iTCO v3:
-	 * Get the Power Management Configuration register.  To get access
-	 * to it we have to read the PMC BASE from config space and address
-	 * the register at offset 0x8.
-	 */
 	if (lpc_chipset_info[priv->chipset].iTCO_version == 1) {
-		/* Don't register iomem for TCO ver 1 */
+		 
 		lpc_ich_wdt_cell.num_resources--;
 	} else if (lpc_chipset_info[priv->chipset].iTCO_version == 2) {
 		pci_read_config_dword(dev, RCBABASE, &base_addr_cfg);
@@ -1078,10 +987,6 @@ static int lpc_ich_probe(struct pci_dev *dev,
 			cell_added = true;
 	}
 
-	/*
-	 * We only care if at least one or none of the cells registered
-	 * successfully.
-	 */
 	if (!cell_added) {
 		dev_warn(&dev->dev, "No MFD cells added\n");
 		lpc_ich_restore_config_space(dev);

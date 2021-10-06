@@ -11,7 +11,6 @@
 #ifndef VFIO_H
 #define VFIO_H
 
-
 #include <linux/iommu.h>
 #include <linux/mm.h>
 #include <linux/workqueue.h>

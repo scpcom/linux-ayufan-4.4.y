@@ -62,7 +62,6 @@ struct ds1685_priv {
 	void (*post_ram_clear)(void);
 };
 
-
 /**
  * struct ds1685_rtc_platform_data - platform data structure.
  * @plat_prepare_poweroff: platform-specific pre-poweroff function.
@@ -87,7 +86,6 @@ struct ds1685_rtc_platform_data {
 	void (*plat_post_ram_clear)(void);
 };
 
-
 /*
  * Time Registers.
  */
@@ -103,7 +101,6 @@ struct ds1685_rtc_platform_data {
 #define RTC_YEAR		0x09	/* Year 00-99 */
 #define RTC_CENTURY		0x48	/* Century 00-99 */
 #define RTC_MDAY_ALARM		0x49	/* Alarm Day of Month 01-31 */
-
 
 /*
  * Bit masks for the Time registers in BCD Mode (DM = 0).
@@ -135,8 +132,6 @@ struct ds1685_rtc_platform_data {
 #define RTC_MDAY_ALARM_MASK	0xff	/* x x x x x x x x */
 #define RTC_HRS_AMPM_MASK	BIT(7)	/* Mask for the AM/PM bit */
 
-
-
 /*
  * Control Registers.
  */
@@ -146,7 +141,6 @@ struct ds1685_rtc_platform_data {
 #define RTC_CTRL_D		0x0d	/* Control Register D */
 #define RTC_EXT_CTRL_4A		0x4a	/* Extended Control Register 4A */
 #define RTC_EXT_CTRL_4B		0x4b	/* Extended Control Register 4B */
-
 
 /*
  * Bit names in Control Register A.
@@ -174,7 +168,6 @@ struct ds1685_rtc_platform_data {
 #define RTC_CTRL_B_DSE		BIT(0)	/* Daylight Savings Enable */
 #define RTC_CTRL_B_PAU_MASK	0x70	/* PIE + AIE + UIE */
 
-
 /*
  * Bit names in Control Register C.
  *
@@ -187,7 +180,6 @@ struct ds1685_rtc_platform_data {
 #define RTC_CTRL_C_UF		BIT(4)	/* Update-Ended Interrupt Flag */
 #define RTC_CTRL_C_PAU_MASK	0x70	/* PF + AF + UF */
 
-
 /*
  * Bit names in Control Register D.
  *
@@ -195,7 +187,6 @@ struct ds1685_rtc_platform_data {
  * be written to.
  */
 #define RTC_CTRL_D_VRT		BIT(7)	/* Valid RAM and Time */
-
 
 /*
  * Bit names in Extended Control Register 4A.
@@ -219,7 +210,6 @@ struct ds1685_rtc_platform_data {
 #endif
 #define RTC_CTRL_4A_RWK_MASK	0x07	/* RF + WF + KF */
 
-
 /*
  * Bit names in Extended Control Register 4B.
  */
@@ -232,7 +222,6 @@ struct ds1685_rtc_platform_data {
 #define RTC_CTRL_4B_WIE		BIT(1)	/* Wake-Up Alarm-Interrupt Enable */
 #define RTC_CTRL_4B_KSE		BIT(0)	/* Kickstart Interrupt-Enable */
 #define RTC_CTRL_4B_RWK_MASK	0x07	/* RIE + WIE + KSE */
-
 
 /*
  * Misc register names in Bank 1.
@@ -249,7 +238,6 @@ struct ds1685_rtc_platform_data {
 #define RTC_BANK1_SSN_BYTE_6	0x46	/* 6th Byte of Serial Number */
 #define RTC_BANK1_SSN_CRC	0x47	/* Serial CRC Byte */
 #define RTC_BANK1_RAM_DATA_PORT	0x53	/* Extended RAM Data Port */
-
 
 /*
  * Model-specific registers in Bank 1.
@@ -278,7 +266,6 @@ struct ds1685_rtc_platform_data {
 #define RTC_BANK1_WRITE_CTR	0x5e	/* RTC Write Counter */
 #endif
 
-
 /*
  * Model numbers.
  *
@@ -291,7 +278,6 @@ struct ds1685_rtc_platform_data {
 #define RTC_MODEL_DS1689	0x73	/* DS1688/DS1691/DS1689/DS1693 */
 #define RTC_MODEL_DS17485	0x74	/* DS17485/DS17487 */
 #define RTC_MODEL_DS17885	0x78	/* DS17885/DS17887 */
-
 
 /*
  * Periodic Interrupt Rates / Square-Wave Output Frequency
@@ -334,7 +320,6 @@ struct ds1685_rtc_platform_data {
 #define RTC_SQW_32768HZ		32768	/*  1    -   -   -   -  */
 #define RTC_MAX_USER_FREQ	8192
 
-
 /*
  * NVRAM data & addresses:
  *   - 50 bytes of NVRAM are available just past the clock registers.
@@ -364,7 +349,6 @@ struct ds1685_rtc_platform_data {
 #endif
 #define NVRAM_TOTAL_SZ_BANK0	(NVRAM_SZ_TIME + NVRAM_SZ_BANK0)
 #define NVRAM_TOTAL_SZ		(NVRAM_TOTAL_SZ_BANK0 + NVRAM_SZ_EXTND)
-
 
 /*
  * Function Prototypes.

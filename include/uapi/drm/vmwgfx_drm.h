@@ -35,7 +35,6 @@
 #define DRM_VMW_MAX_SURFACE_FACES 6
 #define DRM_VMW_MAX_MIP_LEVELS 24
 
-
 #define DRM_VMW_GET_PARAM            0
 #define DRM_VMW_ALLOC_DMABUF         1
 #define DRM_VMW_UNREF_DMABUF         2
@@ -685,7 +684,6 @@ struct drm_vmw_fence_arg {
 	 uint32_t pad64;
 };
 
-
 /*************************************************************************/
 /**
  * DRM_VMW_FENCE_EVENT
@@ -730,7 +728,6 @@ struct drm_vmw_fence_event_arg {
 	uint32_t flags;
 };
 
-
 /*************************************************************************/
 /**
  * DRM_VMW_PRESENT
@@ -764,7 +761,6 @@ struct drm_vmw_present_arg {
 	uint32_t num_clips;
 	uint32_t pad64;
 };
-
 
 /*************************************************************************/
 /**
@@ -815,7 +811,6 @@ struct drm_vmw_update_layout_arg {
 	uint64_t rects;
 };
 
-
 /*************************************************************************/
 /**
  * DRM_VMW_CREATE_SHADER - Create shader
@@ -831,7 +826,6 @@ enum drm_vmw_shader_type {
 	drm_vmw_shader_type_vs = 0,
 	drm_vmw_shader_type_ps,
 };
-
 
 /**
  * struct drm_vmw_shader_create_arg
@@ -1005,7 +999,6 @@ union drm_vmw_gb_surface_reference_arg {
 	struct drm_vmw_gb_surface_ref_rep rep;
 	struct drm_vmw_surface_arg req;
 };
-
 
 /*************************************************************************/
 /**

@@ -9,7 +9,6 @@
 
 #include <asm-generic/mman-common.h>
 
-
 #define PROT_SAO	0x10		/* Strong Access Ordering */
 
 #define MAP_RENAME      MAP_ANONYMOUS   /* In SunOS terminology */

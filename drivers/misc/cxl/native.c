@@ -438,7 +438,6 @@ static int remove_process_element(struct cxl_context *ctx)
 	return rc;
 }
 
-
 void cxl_assign_psn_space(struct cxl_context *ctx)
 {
 	if (!ctx->afu->pp_size || ctx->master) {

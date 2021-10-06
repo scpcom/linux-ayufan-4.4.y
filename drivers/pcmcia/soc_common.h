@@ -15,7 +15,6 @@
 #include <pcmcia/ss.h>
 #include <pcmcia/cistpl.h>
 
-
 struct device;
 struct pcmcia_low_level;
 
@@ -123,7 +122,6 @@ struct pcmcia_low_level {
 #endif
 };
 
-
 struct soc_pcmcia_timing {
 	unsigned short io;
 	unsigned short mem;
@@ -137,7 +135,6 @@ void soc_pcmcia_init_one(struct soc_pcmcia_socket *skt,
 void soc_pcmcia_remove_one(struct soc_pcmcia_socket *skt);
 int soc_pcmcia_add_one(struct soc_pcmcia_socket *skt);
 
-
 #ifdef CONFIG_PCMCIA_DEBUG
 
 extern void soc_pcmcia_debug(struct soc_pcmcia_socket *skt, const char *func,
@@ -149,7 +146,6 @@ extern void soc_pcmcia_debug(struct soc_pcmcia_socket *skt, const char *func,
 #else
 #define debug(skt, lvl, fmt, arg...) do { } while (0)
 #endif
-
 
 /*
  * The PC Card Standard, Release 7, section 4.13.4, says that twIORD
@@ -178,7 +174,6 @@ extern void soc_pcmcia_debug(struct soc_pcmcia_socket *skt, const char *func,
  * so the (relatively infrequent) polling is "just to be sure."
  */
 #define SOC_PCMCIA_POLL_PERIOD    (2*HZ)
-
 
 /* I/O pins replacing memory pins
  * (PCMCIA System Architecture, 2nd ed., by Don Anderson, p.75)

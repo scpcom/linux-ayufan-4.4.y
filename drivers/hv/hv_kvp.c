@@ -76,7 +76,6 @@ static int dm_reg_value;
 
 static void kvp_send_key(struct work_struct *dummy);
 
-
 static void kvp_respond_to_host(struct hv_kvp_msg *msg, int error);
 static void kvp_timeout_func(struct work_struct *dummy);
 static void kvp_register(int);
@@ -158,7 +157,6 @@ static int kvp_handle_handshake(struct hv_kvp_msg *msg)
 	return 0;
 }
 
-
 /*
  * Callback when data is received from user mode.
  */
@@ -225,7 +223,6 @@ static int kvp_on_msg(void *msg, int len)
 
 	return 0;
 }
-
 
 static int process_ob_ipinfo(void *in_msg, void *out_msg, int op)
 {
@@ -333,9 +330,6 @@ static void process_ib_ipinfo(void *in_msg, void *out_msg, int op)
 		out->body.kvp_ip_val.addr_family = in->kvp_ip_val.addr_family;
 	}
 }
-
-
-
 
 static void
 kvp_send_key(struct work_struct *dummy)

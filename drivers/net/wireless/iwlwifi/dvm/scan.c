@@ -980,7 +980,6 @@ int __must_check iwl_scan_initiate(struct iwl_priv *priv,
 	return 0;
 }
 
-
 /*
  * internal short scan, this function should only been called while associated.
  * It will reset and tune the radio to prevent possible RF related problem

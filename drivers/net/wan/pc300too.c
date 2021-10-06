@@ -55,7 +55,6 @@ static unsigned int CLOCK_BASE;
 #define PC300_CHMEDIA_MASK(port) (0x00000020UL << ((port) * 3))
 #define PC300_CTYPE_MASK	 (0x00000800UL)
 
-
 enum { PC300_RSV = 1, PC300_X21, PC300_TE }; /* card types */
 
 /*
@@ -74,8 +73,6 @@ typedef struct {
 	u32 init_ctrl;		/* 50h : EEPROM ctrl, Init Ctrl, etc */
 }plx9050;
 
-
-
 typedef struct port_s {
 	struct napi_struct napi;
 	struct net_device *netdev;
@@ -93,8 +90,6 @@ typedef struct port_s {
 	u8 chan;		/* physical port # - 0 or 1 */
 }port_t;
 
-
-
 typedef struct card_s {
 	int type;		/* RSV, X21, etc. */
 	int n_ports;		/* 1 or 2 ports */
@@ -110,12 +105,10 @@ typedef struct card_s {
 	port_t ports[2];
 }card_t;
 
-
 #define get_port(card, port)	     ((port) < (card)->n_ports ? \
 					 (&(card)->ports[port]) : (NULL))
 
 #include "hd64572.c"
-
 
 static void pc300_set_iface(port_t *port)
 {
@@ -165,8 +158,6 @@ static void pc300_set_iface(port_t *port)
 	}
 }
 
-
-
 static int pc300_open(struct net_device *dev)
 {
 	port_t *port = dev_to_port(dev);
@@ -180,16 +171,12 @@ static int pc300_open(struct net_device *dev)
 	return 0;
 }
 
-
-
 static int pc300_close(struct net_device *dev)
 {
 	sca_close(dev);
 	hdlc_close(dev);
 	return 0;
 }
-
-
 
 static int pc300_ioctl(struct net_device *dev, struct ifreq *ifr, int cmd)
 {
@@ -257,8 +244,6 @@ static int pc300_ioctl(struct net_device *dev, struct ifreq *ifr, int cmd)
 	pc300_set_iface(port);
 	return 0;
 }
-
-
 
 static void pc300_pci_remove_one(struct pci_dev *pdev)
 {
@@ -475,8 +460,6 @@ static int pc300_pci_init_one(struct pci_dev *pdev,
 	return 0;
 }
 
-
-
 static const struct pci_device_id pc300_pci_tbl[] = {
 	{ PCI_VENDOR_ID_CYCLADES, PCI_DEVICE_ID_PC300_RX_1, PCI_ANY_ID,
 	  PCI_ANY_ID, 0, 0, 0 },
@@ -489,14 +472,12 @@ static const struct pci_device_id pc300_pci_tbl[] = {
 	{ 0, }
 };
 
-
 static struct pci_driver pc300_pci_driver = {
 	.name =          "PC300",
 	.id_table =      pc300_pci_tbl,
 	.probe =         pc300_pci_init_one,
 	.remove =        pc300_pci_remove_one,
 };
-
 
 static int __init pc300_init_module(void)
 {
@@ -513,8 +494,6 @@ static int __init pc300_init_module(void)
 
 	return pci_register_driver(&pc300_pci_driver);
 }
-
-
 
 static void __exit pc300_cleanup_module(void)
 {

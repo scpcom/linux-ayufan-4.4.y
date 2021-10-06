@@ -339,7 +339,6 @@ extern char _SecondaryResetVector_text_start;
 extern char _SecondaryResetVector_text_end;
 #endif
 
-
 #ifdef CONFIG_S32C1I_SELFTEST
 #if XCHAL_HAVE_S32C1I
 
@@ -452,7 +451,6 @@ static int __init check_s32c1i(void)
 #endif /* XCHAL_HAVE_S32C1I */
 early_initcall(check_s32c1i);
 #endif /* CONFIG_S32C1I_SELFTEST */
-
 
 void __init setup_arch(char **cmdline_p)
 {
@@ -660,7 +658,6 @@ c_show(struct seq_file *f, void *slot)
 		     XCHAL_NUM_MISC_REGS,
 		     XCHAL_NUM_IBREAK,
 		     XCHAL_NUM_DBREAK);
-
 
 	/* Interrupt. */
 	seq_printf(f,"num ints\t: %d\n"

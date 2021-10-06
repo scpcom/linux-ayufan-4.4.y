@@ -139,7 +139,6 @@ static int vnet_send_attr(struct vio_driver_state *vio)
 	       pkt.ack_freq, pkt.plnk_updt, pkt.options,
 	       (unsigned long long)pkt.mtu, pkt.cflags, pkt.ipv4_lso_maxlen);
 
-
 	return vio_ldc_send(vio, &pkt, sizeof(pkt));
 }
 

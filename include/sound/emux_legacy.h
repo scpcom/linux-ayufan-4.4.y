@@ -51,7 +51,6 @@
 #define _EMUX_OSS_COOKED_FLAG		0x40	/* not supported */
 #define _EMUX_OSS_MODE_VALUE_MASK	0x3F
 
-
 /*
  * mode type definitions
  */
@@ -79,7 +78,6 @@ enum {
 /*20*/	EMUX_MD_PAN_EXCHANGE,	/* 0/1: exchange panning direction (def=0) */
 	EMUX_MD_END,
 };
-
 
 /*
  * effect parameters
@@ -141,6 +139,5 @@ enum {
 #define EMUX_FX_FLAG_OFF	0
 #define EMUX_FX_FLAG_SET	1
 #define EMUX_FX_FLAG_ADD	2
-
 
 #endif /* __SOUND_EMUX_LEGACY_H */

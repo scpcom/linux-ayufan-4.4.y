@@ -94,7 +94,6 @@ static inline void enetsw_writeb(struct bcm_enet_priv *priv,
 	bcm_writeb(val, priv->base + off);
 }
 
-
 /* io helpers to access shared registers */
 static inline u32 enet_dma_readl(struct bcm_enet_priv *priv, u32 off)
 {
@@ -422,7 +421,6 @@ static int bcm_enet_receive_queue(struct net_device *dev, int budget)
 
 	return processed;
 }
-
 
 /*
  * try to or force reclaim of transmitted buffers
@@ -1324,7 +1322,6 @@ static const u32 unused_mib_regs[] = {
 	ETH_MIB_RX_ALL_PKTS,
 };
 
-
 static void bcm_enet_get_drvinfo(struct net_device *netdev,
 				 struct ethtool_drvinfo *drvinfo)
 {
@@ -1934,7 +1931,6 @@ out:
 	return ret;
 }
 
-
 /*
  * exit func, stops hardware and unregisters netdevice
  */
@@ -2346,7 +2342,6 @@ static int bcm_enetsw_open(struct net_device *dev)
 		if (port->force_duplex_full)
 			override |= ENETSW_IMPOV_FDX_MASK;
 
-
 		enetsw_writeb(priv, override, ENETSW_PORTOV_REG(i));
 		enetsw_writeb(priv, 0, ENETSW_PTCTRL_REG(i));
 	}
@@ -2518,7 +2513,6 @@ static const struct net_device_ops bcm_enetsw_ops = {
 	.ndo_change_mtu		= bcm_enet_change_mtu,
 	.ndo_do_ioctl		= bcm_enetsw_ioctl,
 };
-
 
 static const struct bcm_enet_stats bcm_enetsw_gstrings_stats[] = {
 	{ "rx_packets", DEV_STAT(rx_packets), -1 },
@@ -2815,7 +2809,6 @@ out:
 	return ret;
 }
 
-
 /* exit func, stops hardware and unregisters netdevice */
 static int bcm_enetsw_remove(struct platform_device *pdev)
 {
@@ -2912,7 +2905,6 @@ static void __exit bcm_enet_exit(void)
 	platform_driver_unregister(&bcm63xx_enetsw_driver);
 	platform_driver_unregister(&bcm63xx_enet_shared_driver);
 }
-
 
 module_init(bcm_enet_init);
 module_exit(bcm_enet_exit);

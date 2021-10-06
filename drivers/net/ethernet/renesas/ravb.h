@@ -198,7 +198,6 @@ enum ravb_reg {
 	MAFCR	= 0x0778,
 };
 
-
 /* Register bits of the Ethernet AVB */
 /* CCC */
 enum CCC_BIT {

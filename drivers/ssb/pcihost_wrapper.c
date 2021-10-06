@@ -17,7 +17,6 @@
 #include <linux/slab.h>
 #include <linux/ssb/ssb.h>
 
-
 #ifdef CONFIG_PM_SLEEP
 static int ssb_pcihost_suspend(struct device *d)
 {

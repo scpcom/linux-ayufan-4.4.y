@@ -63,7 +63,6 @@ struct tx_fifo {
 	void *tail;		/* Next free start in DMA mem */
 };
 
-
 struct eventflag		// for keeping track of Interrupt Events
 {
 	//--------tx part
@@ -117,7 +116,6 @@ struct via_ircc_cb {
 	unsigned int RxDataReady;
 	unsigned int RxLastCount;
 };
-
 
 //---------I=Infrared,  H=Host, M=Misc, T=Tx, R=Rx, ST=Status,
 //         CF=Config, CT=Control, L=Low, H=High, C=Count
@@ -403,14 +401,12 @@ static void SetFIFO(__u16 iobase, __u16 value)
 //**********************Version
 #define GetFIRVersion(BaseAddr)		ReadReg(BaseAddr,VERSION)
 
-
 static void SetTimer(__u16 iobase, __u8 count)
 {
 	EnTimerInt(iobase, OFF);
 	WriteReg(iobase, TIMER, count);
 	EnTimerInt(iobase, ON);
 }
-
 
 static void SetSendByte(__u16 iobase, __u32 count)
 {
@@ -479,7 +475,6 @@ static __u16 GetRecvByte(__u16 iobase, struct via_ircc_cb * self)
 	wTmp1 = high;
 	wTmp = (wTmp1 << 8) | low;
 
-
 	if (wTmp >= self->RxLastCount)
 		ret = wTmp - self->RxLastCount;
 	else
@@ -524,7 +519,6 @@ static void Tdelay(__u16 scale)
 		}
 	}
 }
-
 
 static void ActClk(__u16 iobase, __u8 value)
 {

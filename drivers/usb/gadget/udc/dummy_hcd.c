@@ -12,7 +12,6 @@
  * (at your option) any later version.
  */
 
-
 /*
  * This exposes a device side "USB gadget" API, driven by requests to a
  * Linux-USB host controller driver.  USB traffic is simulated; there's
@@ -219,7 +218,6 @@ struct urbp {
 	struct sg_mapping_iter	miter;
 	u32			miter_started;
 };
-
 
 enum dummy_rh_state {
 	DUMMY_RH_RESET,
@@ -1541,7 +1539,6 @@ static struct dummy_ep *find_endpoint(struct dummy *dum, u8 address)
 #define Intf_InRequest	(Intf_Request | USB_DIR_IN)
 #define Ep_Request	(USB_TYPE_STANDARD | USB_RECIP_ENDPOINT)
 #define Ep_InRequest	(Ep_Request | USB_DIR_IN)
-
 
 /**
  * handle_control_request() - handles all control transfers

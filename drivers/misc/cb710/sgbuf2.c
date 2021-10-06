@@ -143,4 +143,3 @@ void cb710_sg_dwiter_write_next_block(struct sg_mapping_iter *miter, uint32_t da
 		sg_dwiter_write_slow(miter, data);
 }
 EXPORT_SYMBOL_GPL(cb710_sg_dwiter_write_next_block);
-

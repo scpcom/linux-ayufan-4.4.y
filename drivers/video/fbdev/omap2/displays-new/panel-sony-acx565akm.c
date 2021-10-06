@@ -344,7 +344,6 @@ static int acx565akm_get_actual_brightness(struct panel_drv_data *ddata)
 	return bv;
 }
 
-
 static int acx565akm_bl_update_status(struct backlight_device *dev)
 {
 	struct panel_drv_data *ddata = dev_get_drvdata(&dev->dev);
@@ -843,7 +842,6 @@ static int acx565akm_probe(struct spi_device *spi)
 	bldev->props.brightness = brightness;
 
 	acx565akm_bl_update_status(bldev);
-
 
 	ddata->videomode = acx565akm_panel_timings;
 

@@ -84,7 +84,6 @@ struct sigcontext {
 	__u32	sc_reserved;
 };
 
-
 #endif /* _MIPS_SIM == _MIPS_SIM_ABI64 || _MIPS_SIM == _MIPS_SIM_NABI32 */
 
 #endif /* _UAPI_ASM_SIGCONTEXT_H */

@@ -1,20 +1,4 @@
-/*
-   linear.c : Multiple Devices driver for Linux
-	      Copyright (C) 1994-96 Marc ZYNGIER
-	      <zyngier@ufr-info-p7.ibp.fr> or
-	      <maz@gloups.fdn.fr>
 
-   Linear mode management functions.
-
-   This program is free software; you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2, or (at your option)
-   any later version.
-
-   You should have received a copy of the GNU General Public License
-   (for example /usr/src/linux/COPYING); if not, write to the Free
-   Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-*/
 
 #include <linux/blkdev.h>
 #include <linux/raid/md_u.h>
@@ -24,9 +8,6 @@
 #include "md.h"
 #include "linear.h"
 
-/*
- * find which device holds a particular offset
- */
 static inline struct dev_info *which_dev(struct mddev *mddev, sector_t sector)
 {
 	int lo, mid, hi;
@@ -35,10 +16,6 @@ static inline struct dev_info *which_dev(struct mddev *mddev, sector_t sector)
 	lo = 0;
 	hi = mddev->raid_disks - 1;
 	conf = mddev->private;
-
-	/*
-	 * Binary Search
-	 */
 
 	while (hi > lo) {
 
@@ -133,9 +110,6 @@ static struct linear_conf *linear_conf(struct mddev *mddev, int raid_disks)
 	else
 		queue_flag_set_unlocked(QUEUE_FLAG_DISCARD, mddev->queue);
 
-	/*
-	 * Here we calculate the device offsets.
-	 */
 	conf->disks[0].end_sector = conf->disks[0].rdev->sectors;
 
 	for (i = 1; i < raid_disks; i++)
@@ -174,14 +148,7 @@ static int linear_run (struct mddev *mddev)
 
 static int linear_add(struct mddev *mddev, struct md_rdev *rdev)
 {
-	/* Adding a drive to a linear array allows the array to grow.
-	 * It is permitted if the new drive has a matching superblock
-	 * already on it, with raid_disk equal to raid_disks.
-	 * It is achieved by creating a new linear_private_data structure
-	 * and swapping it in in-place of the current one.
-	 * The current one is never freed until the array is stopped.
-	 * This avoids races.
-	 */
+	 
 	struct linear_conf *newconf, *oldconf;
 
 	if (rdev->saved_raid_disk != mddev->raid_disks)
@@ -238,9 +205,7 @@ static void linear_make_request(struct mddev *mddev, struct bio *bio)
 			goto out_of_bounds;
 
 		if (unlikely(bio_end_sector(bio) > end_sector)) {
-			/* This bio crosses a device boundary, so we have to
-			 * split it.
-			 */
+			 
 			split = bio_split(bio, end_sector -
 					  bio->bi_iter.bi_sector,
 					  GFP_NOIO, fs_bio_set);
@@ -254,7 +219,7 @@ static void linear_make_request(struct mddev *mddev, struct bio *bio)
 
 		if (unlikely((split->bi_rw & REQ_DISCARD) &&
 			 !blk_queue_discard(bdev_get_queue(split->bi_bdev)))) {
-			/* Just ignore it */
+			
 			bio_endio(split);
 		} else
 			generic_make_request(split);
@@ -312,6 +277,6 @@ module_init(linear_init);
 module_exit(linear_exit);
 MODULE_LICENSE("GPL");
 MODULE_DESCRIPTION("Linear device concatenation personality for MD");
-MODULE_ALIAS("md-personality-1"); /* LINEAR - deprecated*/
+MODULE_ALIAS("md-personality-1");  
 MODULE_ALIAS("md-linear");
 MODULE_ALIAS("md-level--1");

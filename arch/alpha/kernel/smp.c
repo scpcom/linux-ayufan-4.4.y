@@ -43,7 +43,6 @@
 #include "proto.h"
 #include "irq_impl.h"
 
-
 #define DEBUG_SMP 0
 #if DEBUG_SMP
 #define DBGS(args)	printk args

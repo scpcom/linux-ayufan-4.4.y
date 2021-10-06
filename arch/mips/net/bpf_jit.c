@@ -104,7 +104,6 @@ struct jit_ctx {
 	u32 *target;
 };
 
-
 static inline int optimize_div(u32 *k)
 {
 	/* power of 2 divides can be implemented with right shift */
@@ -585,7 +584,6 @@ static void restore_bpf_jit_regs(struct jit_ctx *ctx,
 static unsigned int get_stack_depth(struct jit_ctx *ctx)
 {
 	int sp_off = 0;
-
 
 	/* How may s* regs do we need to preserved? */
 	sp_off += hweight32(ctx->flags >> SEEN_SREG_SFT) * SZREG;

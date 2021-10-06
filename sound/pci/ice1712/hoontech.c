@@ -322,7 +322,6 @@ static int snd_ice1712_ez8_init(struct snd_ice1712 *ice)
 	return 0;
 }
 
-
 /* entry point */
 struct snd_ice1712_card_info snd_ice1712_hoontech_cards[] = {
 	{

@@ -112,7 +112,6 @@ enum ipipe_input_entity {
 	IPIPE_INPUT_CCDC = 2,
 };
 
-
 struct vpfe_ipipe_device {
 	struct v4l2_subdev subdev;
 	struct media_pad pads[IPIPE_PADS_NUM];

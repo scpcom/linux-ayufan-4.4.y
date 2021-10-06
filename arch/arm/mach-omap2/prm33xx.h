@@ -24,7 +24,6 @@
 #define AM33XX_PRM_REGADDR(inst, reg)                         \
 	AM33XX_L4_WK_IO_ADDRESS(AM33XX_PRM_BASE + (inst) + (reg))
 
-
 /* PRM instances */
 #define AM33XX_PRM_OCP_SOCKET_MOD	0x0B00
 #define AM33XX_PRM_PER_MOD		0x0C00

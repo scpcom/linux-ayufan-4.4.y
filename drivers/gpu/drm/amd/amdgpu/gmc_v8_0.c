@@ -38,7 +38,6 @@
 #include "vid.h"
 #include "vi.h"
 
-
 static void gmc_v8_0_set_gart_funcs(struct amdgpu_device *adev);
 static void gmc_v8_0_set_irq_funcs(struct amdgpu_device *adev);
 
@@ -82,7 +81,6 @@ static const u32 stoney_mgcg_cgcg_init[] =
 {
 	mmMC_MEM_POWER_LS, 0xffffffff, 0x00000104
 };
-
 
 static void gmc_v8_0_init_golden_registers(struct amdgpu_device *adev)
 {
@@ -1206,7 +1204,6 @@ static int gmc_v8_0_soft_reset(void *handle)
 		if (gmc_v8_0_wait_for_idle(adev)) {
 			dev_warn(adev->dev, "Wait for GMC idle timed out !\n");
 		}
-
 
 		tmp = RREG32(mmSRBM_SOFT_RESET);
 		tmp |= srbm_soft_reset;

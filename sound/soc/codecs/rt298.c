@@ -131,7 +131,6 @@ static bool rt298_volatile_register(struct device *dev, unsigned int reg)
 		return false;
 	}
 
-
 }
 
 static bool rt298_readable_register(struct device *dev, unsigned int reg)
@@ -554,7 +553,6 @@ static const struct snd_soc_dapm_widget rt298_dapm_widgets[] = {
 	SND_SOC_DAPM_SUPPLY_S("LV", 2, RT298_POWER_CTRL1,
 		13, 1, NULL, 0),
 
-
 	SND_SOC_DAPM_SUPPLY("MCLK MODE", RT298_PLL_CTRL1,
 		5, 0, NULL, 0),
 	SND_SOC_DAPM_SUPPLY("MIC1 Input Buffer", SND_SOC_NOPM,
@@ -914,7 +912,6 @@ static int rt298_set_bclk_ratio(struct snd_soc_dai *dai, unsigned int ratio)
 		snd_soc_update_bits(codec,
 			RT298_I2S_CTRL1, 0x1000, 0x0);
 
-
 	return 0;
 }
 
@@ -1255,7 +1252,6 @@ static int rt298_i2c_remove(struct i2c_client *i2c)
 
 	return 0;
 }
-
 
 static struct i2c_driver rt298_i2c_driver = {
 	.driver = {

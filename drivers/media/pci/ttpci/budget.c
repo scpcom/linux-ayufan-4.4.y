@@ -52,7 +52,6 @@
 #include "isl6423.h"
 #include "lnbh24.h"
 
-
 static int diseqc_method;
 module_param(diseqc_method, int, 0444);
 MODULE_PARM_DESC(diseqc_method, "Select DiSEqC method for subsystem id 13c2:1003, 0: default, 1: more reliable (for newer revisions only)");
@@ -426,7 +425,6 @@ static int alps_tdhd1_204_request_firmware(struct dvb_frontend *fe, const struct
 
 	return request_firmware(fw, name, &budget->dev->pci->dev);
 }
-
 
 static int i2c_readreg(struct i2c_adapter *i2c, u8 adr, u8 reg)
 {

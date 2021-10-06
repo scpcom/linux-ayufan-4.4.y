@@ -28,7 +28,6 @@ static int kdb_hello_cmd(int argc, const char **argv)
 	return 0;
 }
 
-
 static int __init kdb_hello_cmd_init(void)
 {
 	/*

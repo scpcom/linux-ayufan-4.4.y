@@ -37,7 +37,6 @@
 #define DMA_IRQ_CHAN_NR			8
 #define DMA_IRQ_CHAN_WIDTH		4
 
-
 #define DMA_IRQ_STAT(x)		((x) * 0x04 + 0x10)
 
 #define DMA_STAT		0x30
@@ -82,7 +81,6 @@
 
 #define DMA_CHAN_CUR_PARA	0x1c
 
-
 /*
  * Various hardware related defines
  */
@@ -124,7 +122,6 @@ struct sun6i_dma_lli {
 	 */
 	struct sun6i_dma_lli	*v_lli_next;
 };
-
 
 struct sun6i_desc {
 	struct virt_dma_desc	vd;

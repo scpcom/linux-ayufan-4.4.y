@@ -193,7 +193,6 @@
 #include "pcm1796.h"
 #include "cs2000.h"
 
-
 #define GPIO_D2X_EXT_POWER	0x0020
 #define GPIO_D2_ALT		0x0080
 #define GPIO_D2_OUTPUT_ENABLE	0x0100
@@ -220,7 +219,6 @@
 
 #define PCM1796_REG_BASE	16
 
-
 struct xonar_pcm179x {
 	struct xonar_generic generic;
 	unsigned int dacs;
@@ -238,7 +236,6 @@ struct xonar_hdav {
 	struct xonar_pcm179x pcm179x;
 	struct xonar_hdmi hdmi;
 };
-
 
 static inline void pcm1796_write_spi(struct oxygen *chip, unsigned int codec,
 				     u8 reg, u8 value)
@@ -812,7 +809,6 @@ static int st_output_switch_get(struct snd_kcontrol *ctl,
 	return 0;
 }
 
-
 static int st_output_switch_put(struct snd_kcontrol *ctl,
 				struct snd_ctl_elem_value *value)
 {
@@ -869,7 +865,6 @@ static int st_hp_volume_offset_get(struct snd_kcontrol *ctl,
 	mutex_unlock(&chip->mutex);
 	return 0;
 }
-
 
 static int st_hp_volume_offset_put(struct snd_kcontrol *ctl,
 				   struct snd_ctl_elem_value *value)

@@ -1,8 +1,4 @@
-/*
- * Copyright (C) 2008 Red Hat, Inc. All rights reserved.
- *
- * This file is released under the GPL.
- */
+
 
 #include <linux/sysfs.h>
 #include <linux/dm-ioctl.h>
@@ -122,10 +118,6 @@ static struct kobj_type dm_ktype = {
 	.release	= dm_kobject_release,
 };
 
-/*
- * Initialize kobj
- * because nobody using md yet, no need to call explicit dm_get/put
- */
 int dm_sysfs_init(struct mapped_device *md)
 {
 	return kobject_init_and_add(dm_kobject(md), &dm_ktype,
@@ -133,9 +125,6 @@ int dm_sysfs_init(struct mapped_device *md)
 				    "%s", "dm");
 }
 
-/*
- * Remove kobj, called after all references removed
- */
 void dm_sysfs_exit(struct mapped_device *md)
 {
 	struct kobject *kobj = dm_kobject(md);

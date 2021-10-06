@@ -59,7 +59,6 @@ static const struct file_operations name## _ops = {			\
 			goto err;					\
 	} while (0)
 
-
 #define DEBUGFS_ADD_PREFIX(prefix, name, parent)			\
 	do {								\
 		entry = debugfs_create_file(#name, 0400, parent,	\
@@ -115,6 +114,5 @@ static const struct file_operations sub## _ ##name## _ops = {		\
 
 #define DEBUGFS_FWSTATS_ADD(sub, name)					\
 	DEBUGFS_ADD(sub## _ ##name, stats)
-
 
 #endif /* WL1271_DEBUGFS_H */

@@ -170,7 +170,6 @@ static void a3d_read(struct a3d *a3d, unsigned char *data)
 	}
 }
 
-
 /*
  * a3d_poll() reads and analyzes A3D joystick data.
  */

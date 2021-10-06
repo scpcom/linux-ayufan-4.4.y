@@ -24,7 +24,6 @@
 #include <linux/hw_random.h>
 #include <asm/vio.h>
 
-
 static int pseries_rng_read(struct hwrng *rng, void *data, size_t max, bool wait)
 {
 	u64 buffer[PLPAR_HCALL_BUFSIZE];

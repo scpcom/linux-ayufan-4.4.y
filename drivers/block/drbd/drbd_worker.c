@@ -55,7 +55,6 @@ static int make_resync_request(struct drbd_device *, int);
  *
  */
 
-
 /* About the global_state_lock
    Each state transition on an device holds a read lock. In case we have
    to evaluate the resync after dependencies, we grab a write lock, because

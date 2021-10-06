@@ -1865,7 +1865,6 @@ static int sci_baud_calc_frame_len(unsigned int smr_val)
 	return len;
 }
 
-
 /* calculate sample rate, BRR, and clock select for HSCIF */
 static void sci_baud_calc_hscif(unsigned int bps, unsigned long freq,
 				int *brr, unsigned int *srr,

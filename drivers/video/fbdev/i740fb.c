@@ -418,7 +418,6 @@ static int i740fb_decode_var(const struct fb_var_screeninfo *var,
 		  var->left_margin, var->right_margin, var->upper_margin,
 		  var->lower_margin);
 
-
 	bpp = var->bits_per_pixel;
 	switch (bpp) {
 	case 1 ... 8:

@@ -477,7 +477,6 @@ static const struct ov772x_color_format ov772x_cfmts[] = {
 	},
 };
 
-
 /*
  * window size list
  */

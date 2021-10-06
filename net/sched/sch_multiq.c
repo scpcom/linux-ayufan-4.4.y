@@ -26,7 +26,6 @@
 #include <net/netlink.h>
 #include <net/pkt_sched.h>
 
-
 struct multiq_sched_data {
 	u16 bands;
 	u16 max_bands;
@@ -34,7 +33,6 @@ struct multiq_sched_data {
 	struct tcf_proto __rcu *filter_list;
 	struct Qdisc **queues;
 };
-
 
 static struct Qdisc *
 multiq_classify(struct sk_buff *skb, struct Qdisc *sch, int *qerr)
@@ -170,7 +168,6 @@ static unsigned int multiq_drop(struct Qdisc *sch)
 	}
 	return 0;
 }
-
 
 static void
 multiq_reset(struct Qdisc *sch)
@@ -333,7 +330,6 @@ static unsigned long multiq_bind(struct Qdisc *sch, unsigned long parent,
 {
 	return multiq_get(sch, classid);
 }
-
 
 static void multiq_put(struct Qdisc *q, unsigned long cl)
 {

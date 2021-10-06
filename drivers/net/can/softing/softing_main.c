@@ -633,7 +633,6 @@ static const struct can_bittiming_const softing_btr_const = {
 	.brp_inc = 1,
 };
 
-
 static struct net_device *softing_netdev_create(struct softing *card,
 						uint16_t chip_id)
 {

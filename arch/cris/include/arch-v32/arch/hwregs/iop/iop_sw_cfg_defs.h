@@ -717,7 +717,6 @@ typedef struct {
 #define REG_RD_ADDR_iop_sw_cfg_rw_sdp_cfg 236
 #define REG_WR_ADDR_iop_sw_cfg_rw_sdp_cfg 236
 
-
 /* Constants */
 enum {
   regk_iop_sw_cfg_a                        = 0x00000001,

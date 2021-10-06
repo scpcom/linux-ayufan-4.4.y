@@ -400,7 +400,6 @@ out:
 	return retval;
 }
 
-
 static int init586(struct net_device *dev)
 {
 	void *ptr;
@@ -676,7 +675,6 @@ static void *alloc_rfa(struct net_device *dev,void *ptr)
 
 	return ptr;
 }
-
 
 /**************************************************
  * Interrupt Handler ...

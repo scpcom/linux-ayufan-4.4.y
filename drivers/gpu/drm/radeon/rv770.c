@@ -971,7 +971,6 @@ static void rv770_pcie_gart_fini(struct radeon_device *rdev)
 	radeon_gart_table_vram_free(rdev);
 }
 
-
 static void rv770_agp_enable(struct radeon_device *rdev)
 {
 	u32 tmp;
@@ -1069,7 +1068,6 @@ static void rv770_mc_program(struct radeon_device *rdev)
 	 * to stop it overwriting our objects */
 	rv515_vga_render_disable(rdev);
 }
-
 
 /*
  * CP.
@@ -1385,7 +1383,6 @@ static void rv770_gpu_init(struct radeon_device *rdev)
 	WREG32(CGTS_TCC_DISABLE, 0);
 	WREG32(CGTS_USER_SYS_TCC_DISABLE, 0);
 	WREG32(CGTS_USER_TCC_DISABLE, 0);
-
 
 	num_qd_pipes = R7XX_MAX_PIPES - r600_count_pipe_bits((cc_gc_shader_pipe_config & INACTIVE_QD_PIPES_MASK) >> 8);
 	WREG32(VGT_OUT_DEALLOC_CNTL, (num_qd_pipes * 4) & DEALLOC_DIST_MASK);

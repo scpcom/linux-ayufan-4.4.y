@@ -38,4 +38,3 @@ struct cik_ih_ring_entry {
 #define CIK_INTSRC_SQ_INTERRUPT_MSG	0xEF
 
 #endif
-

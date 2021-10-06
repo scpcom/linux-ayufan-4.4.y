@@ -25,7 +25,6 @@
 
 #include <asm/ps3.h>
 
-
 struct ps3_storage_region {
 	unsigned int id;
 	u64 start;

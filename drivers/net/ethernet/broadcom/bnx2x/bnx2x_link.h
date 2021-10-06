@@ -19,15 +19,11 @@
 #ifndef BNX2X_LINK_H
 #define BNX2X_LINK_H
 
-
-
 /***********************************************************/
 /*                         Defines                         */
 /***********************************************************/
 #define DEFAULT_PHY_DEV_ADDR	3
 #define E2_DEFAULT_PHY_DEV_ADDR	5
-
-
 
 #define BNX2X_FLOW_CTRL_AUTO		PORT_FEATURE_FLOW_CONTROL_AUTO
 #define BNX2X_FLOW_CTRL_TX		PORT_FEATURE_FLOW_CONTROL_TX
@@ -98,7 +94,6 @@
 					    FW_PARAM_MDIO_CTRL_OFFSET)
 #define FW_PARAM_SET(phy_addr, phy_type, mdio_access) \
 	(phy_addr | phy_type | mdio_access << FW_PARAM_MDIO_CTRL_OFFSET)
-
 
 #define PFC_BRB_FULL_LB_XOFF_THRESHOLD				170
 #define PFC_BRB_FULL_LB_XON_THRESHOLD				250
@@ -480,7 +475,6 @@ struct bnx2x_nig_brb_pfc_port_params {
 	u32 llfc_low_priority_classes;
 };
 
-
 /* ETS port configuration params */
 struct bnx2x_ets_bw_params {
 	u8 bw;
@@ -519,7 +513,6 @@ int bnx2x_update_pfc(struct link_params *params,
 		      struct link_vars *vars,
 		      struct bnx2x_nig_brb_pfc_port_params *pfc_params);
 
-
 /* Used to configure the ETS to disable */
 int bnx2x_ets_disabled(struct link_params *params,
 		       struct link_vars *vars);
@@ -530,7 +523,6 @@ void bnx2x_ets_bw_limit(const struct link_params *params, const u32 cos0_bw,
 
 /* Used to configure the ETS to strict */
 int bnx2x_ets_strict(const struct link_params *params, const u8 strict_cos);
-
 
 /*  Configure the COS to ETS according to BW and SP settings.*/
 int bnx2x_ets_e3b0_config(const struct link_params *params,

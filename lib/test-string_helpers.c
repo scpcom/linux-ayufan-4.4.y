@@ -335,7 +335,6 @@ out:
 				       (exp_result2));                         \
 	} while (0)
 
-
 static __init void test_string_get_size_check(const char *units,
 					      const char *exp,
 					      char *res,

@@ -28,13 +28,11 @@
 
 ****************************************************************************/
 
-
 static int read_dsp(struct echoaudio *chip, u32 *data);
 static int set_professional_spdif(struct echoaudio *chip, char prof);
 static int load_asic_generic(struct echoaudio *chip, u32 cmd, short asic);
 static int check_asic_status(struct echoaudio *chip);
 static int update_flags(struct echoaudio *chip);
-
 
 static int init_hw(struct echoaudio *chip, u16 device_id, u16 subdevice_id)
 {
@@ -67,15 +65,11 @@ static int init_hw(struct echoaudio *chip, u16 device_id, u16 subdevice_id)
 	return err;
 }
 
-
-
 static int set_mixer_defaults(struct echoaudio *chip)
 {
 	chip->professional_spdif = false;
 	return init_line_levels(chip);
 }
-
-
 
 static u32 detect_input_clocks(const struct echoaudio *chip)
 {
@@ -98,8 +92,6 @@ static u32 detect_input_clocks(const struct echoaudio *chip)
 
 	return clock_bits;
 }
-
-
 
 /* ASIC status check - some cards have one or two ASICs that need to be
 loaded.  Once that load is complete, this function is called to see if
@@ -135,8 +127,6 @@ static int check_asic_status(struct echoaudio *chip)
 	return -EIO;
 }
 
-
-
 /* Layla20 has an ASIC in the external box */
 static int load_asic(struct echoaudio *chip)
 {
@@ -153,8 +143,6 @@ static int load_asic(struct echoaudio *chip)
 	/* Check if ASIC is alive and well. */
 	return check_asic_status(chip);
 }
-
-
 
 static int set_sample_rate(struct echoaudio *chip, u32 rate)
 {
@@ -180,8 +168,6 @@ static int set_sample_rate(struct echoaudio *chip, u32 rate)
 	clear_handshake(chip);
 	return send_vector(chip, DSP_VC_SET_LAYLA_SAMPLE_RATE);
 }
-
-
 
 static int set_input_clock(struct echoaudio *chip, u16 clock_source)
 {
@@ -221,8 +207,6 @@ static int set_input_clock(struct echoaudio *chip, u16 clock_source)
 	return 0;
 }
 
-
-
 static int set_output_clock(struct echoaudio *chip, u16 clock)
 {
 	switch (clock) {
@@ -246,8 +230,6 @@ static int set_output_clock(struct echoaudio *chip, u16 clock)
 	return send_vector(chip, DSP_VC_UPDATE_CLOCKS);
 }
 
-
-
 /* Set input bus gain (one unit is 0.5dB !) */
 static int set_input_gain(struct echoaudio *chip, u16 input, int gain)
 {
@@ -263,8 +245,6 @@ static int set_input_gain(struct echoaudio *chip, u16 input, int gain)
 	return 0;
 }
 
-
-
 /* Tell the DSP to reread the flags from the comm page */
 static int update_flags(struct echoaudio *chip)
 {
@@ -273,8 +253,6 @@ static int update_flags(struct echoaudio *chip)
 	clear_handshake(chip);
 	return send_vector(chip, DSP_VC_UPDATE_FLAGS);
 }
-
-
 
 static int set_professional_spdif(struct echoaudio *chip, char prof)
 {

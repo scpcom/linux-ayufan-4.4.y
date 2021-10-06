@@ -269,7 +269,6 @@
 #define reg_iop_sap_out_rw_gio___oe_logic___width 2
 #define reg_iop_sap_out_rw_gio_offset 28
 
-
 /* Constants */
 #define regk_iop_sap_out_and                      0x00000002
 #define regk_iop_sap_out_clk0                     0x00000000

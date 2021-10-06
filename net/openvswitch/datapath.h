@@ -1,20 +1,4 @@
-/*
- * Copyright (c) 2007-2014 Nicira, Inc.
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of version 2 of the GNU General Public
- * License as published by the Free Software Foundation.
- *
- * This program is distributed in the hope that it will be useful, but
- * WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
- * General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
- * 02110-1301, USA
- */
+
 
 #ifndef DATAPATH_H
 #define DATAPATH_H 1
@@ -36,21 +20,6 @@
 
 #define SAMPLE_ACTION_DEPTH 3
 
-/**
- * struct dp_stats_percpu - per-cpu packet processing statistics for a given
- * datapath.
- * @n_hit: Number of received packets for which a matching flow was found in
- * the flow table.
- * @n_miss: Number of received packets that had no matching flow in the flow
- * table.  The sum of @n_hit and @n_miss is the number of packets that have
- * been received by the datapath.
- * @n_lost: Number of received packets that had no matching flow in the flow
- * table that could not be sent to userspace (normally due to an overflow in
- * one of the datapath's queues).
- * @n_mask_hit: Number of masks looked up for flow match.
- *   @n_mask_hit / (@n_hit + @n_missed)  will be the average masks looked
- *   up per packet.
- */
 struct dp_stats_percpu {
 	u64 n_hit;
 	u64 n_missed;
@@ -59,62 +28,27 @@ struct dp_stats_percpu {
 	struct u64_stats_sync syncp;
 };
 
-/**
- * struct datapath - datapath for flow-based packet switching
- * @rcu: RCU callback head for deferred destruction.
- * @list_node: Element in global 'dps' list.
- * @table: flow table.
- * @ports: Hash table for ports.  %OVSP_LOCAL port always exists.  Protected by
- * ovs_mutex and RCU.
- * @stats_percpu: Per-CPU datapath statistics.
- * @net: Reference to net namespace.
- *
- * Context: See the comment on locking at the top of datapath.c for additional
- * locking information.
- */
 struct datapath {
 	struct rcu_head rcu;
 	struct list_head list_node;
 
-	/* Flow table. */
 	struct flow_table table;
 
-	/* Switch ports. */
 	struct hlist_head *ports;
 
-	/* Stats. */
 	struct dp_stats_percpu __percpu *stats_percpu;
 
-	/* Network namespace ref. */
 	possible_net_t net;
 
 	u32 user_features;
 };
 
-/**
- * struct ovs_skb_cb - OVS data in skb CB
- * @input_vport: The original vport packet came in on. This value is cached
- * when a packet is received by OVS.
- * @mru: The maximum received fragement size; 0 if the packet is not
- * fragmented.
- */
 struct ovs_skb_cb {
 	struct vport		*input_vport;
 	u16			mru;
 };
 #define OVS_CB(skb) ((struct ovs_skb_cb *)(skb)->cb)
 
-/**
- * struct dp_upcall - metadata to include with a packet to send to userspace
- * @cmd: One of %OVS_PACKET_CMD_*.
- * @userdata: If nonnull, its variable-length value is passed to userspace as
- * %OVS_PACKET_ATTR_USERDATA.
- * @portid: Netlink portid to which packet should be sent.  If @portid is 0
- * then no packet is sent and the packet is accounted in the datapath's @n_lost
- * counter.
- * @egress_tun_info: If nonnull, becomes %OVS_PACKET_ATTR_EGRESS_TUN_KEY.
- * @mru: If not zero, Maximum received IP fragment size.
- */
 struct dp_upcall_info {
 	struct ip_tunnel_info *egress_tun_info;
 	const struct nlattr *userdata;
@@ -125,16 +59,12 @@ struct dp_upcall_info {
 	u16 mru;
 };
 
-/**
- * struct ovs_net - Per net-namespace data for ovs.
- * @dps: List of datapaths to enable dumping them all out.
- * Protected by genl_mutex.
- */
+
 struct ovs_net {
 	struct list_head dps;
 	struct work_struct dp_notify_work;
 
-	/* Module reference for configuring conntrack. */
+	
 	bool xt_label;
 };
 
@@ -204,7 +134,6 @@ void ovs_dp_notify_wq(struct work_struct *work);
 int action_fifos_init(void);
 void action_fifos_exit(void);
 
-/* 'KEY' must not have any bits set outside of the 'MASK' */
 #define OVS_MASKED(OLD, KEY, MASK) ((KEY) | ((OLD) & ~(MASK)))
 #define OVS_SET_MASKED(OLD, KEY, MASK) ((OLD) = OVS_MASKED(OLD, KEY, MASK))
 
@@ -213,4 +142,4 @@ do {								\
 	if (logging_allowed && net_ratelimit())			\
 		pr_info("netlink: " fmt "\n", ##__VA_ARGS__);	\
 } while (0)
-#endif /* datapath.h */
+#endif  

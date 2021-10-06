@@ -85,7 +85,6 @@ static void uwb_rc_sys_release(struct device *dev)
 	kfree(rc);
 }
 
-
 void uwb_rc_init(struct uwb_rc *rc)
 {
 	struct uwb_dev *uwb_dev = &rc->uwb_dev;
@@ -106,7 +105,6 @@ void uwb_rc_init(struct uwb_rc *rc)
 	uwb_rc_pal_init(rc);
 }
 EXPORT_SYMBOL_GPL(uwb_rc_init);
-
 
 struct uwb_rc *uwb_rc_alloc(void)
 {
@@ -237,7 +235,6 @@ static int uwb_rc_sys_add(struct uwb_rc *rc)
 	return sysfs_create_group(&rc->uwb_dev.dev.kobj, &rc_attr_group);
 }
 
-
 static void __uwb_rc_sys_rm(struct uwb_rc *rc)
 {
 	sysfs_remove_group(&rc->uwb_dev.dev.kobj, &rc_attr_group);
@@ -283,8 +280,6 @@ int uwb_rc_mac_addr_setup(struct uwb_rc *rc)
 	return 0;
 }
 
-
-
 static int uwb_rc_setup(struct uwb_rc *rc)
 {
 	int result;
@@ -324,7 +319,6 @@ error_ie_setup:
 error:
 	return result;
 }
-
 
 /**
  * Register a new UWB radio controller
@@ -394,7 +388,6 @@ error_rc_start:
 	return result;
 }
 EXPORT_SYMBOL_GPL(uwb_rc_add);
-
 
 static int uwb_dev_offair_helper(struct device *dev, void *priv)
 {

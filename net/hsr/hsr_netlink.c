@@ -27,7 +27,6 @@ static const struct nla_policy hsr_policy[IFLA_HSR_MAX + 1] = {
 	[IFLA_HSR_SEQ_NR]		= { .type = NLA_U16 },
 };
 
-
 /* Here, it seems a netdevice has already been allocated for us, and the
  * hsr_dev_setup routine has been executed. Nice!
  */
@@ -112,8 +111,6 @@ static struct rtnl_link_ops hsr_link_ops __read_mostly = {
 	.fill_info	= hsr_fill_info,
 };
 
-
-
 /* attribute policy */
 /* NLA_BINARY missing in libnl; use NLA_UNSPEC in userspace instead. */
 static const struct nla_policy hsr_genl_policy[HSR_A_MAX + 1] = {
@@ -137,8 +134,6 @@ static struct genl_family hsr_genl_family = {
 static const struct genl_multicast_group hsr_mcgrps[] = {
 	{ .name = "hsr-network", },
 };
-
-
 
 /* This is called if for some node with MAC address addr, we only get frames
  * over one of the slave interfaces. This would indicate an open network ring
@@ -201,7 +196,6 @@ void hsr_nl_nodedown(struct hsr_priv *hsr, unsigned char addr[ETH_ALEN])
 	if (!msg_head)
 		goto nla_put_failure;
 
-
 	res = nla_put(skb, HSR_A_NODE_ADDR, ETH_ALEN, addr);
 	if (res < 0)
 		goto nla_put_failure;
@@ -220,7 +214,6 @@ fail:
 	netdev_warn(master->dev, "Could not send HSR node down\n");
 	rcu_read_unlock();
 }
-
 
 /* HSR_C_GET_NODE_STATUS lets userspace query the internal HSR node table
  * about the status of a specific node in the network, defined by its MAC
@@ -265,7 +258,6 @@ static int hsr_get_node_status(struct sk_buff *skb_in, struct genl_info *info)
 		goto invalid;
 	if (!is_hsr_master(hsr_dev))
 		goto invalid;
-
 
 	/* Send reply */
 
@@ -392,7 +384,6 @@ static int hsr_get_node_list(struct sk_buff *skb_in, struct genl_info *info)
 	if (!is_hsr_master(hsr_dev))
 		goto invalid;
 
-
 	/* Send reply */
 
 	skb_out = genlmsg_new(NLMSG_GOODSIZE, GFP_KERNEL);
@@ -443,7 +434,6 @@ nla_put_failure:
 fail:
 	return res;
 }
-
 
 static const struct genl_ops hsr_ops[] = {
 	{

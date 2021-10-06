@@ -223,7 +223,6 @@ static int v9fs_dir_readdir_dotl(struct file *file, struct dir_context *ctx)
 	}
 }
 
-
 /**
  * v9fs_dir_release - close a directory
  * @inode: inode of the directory

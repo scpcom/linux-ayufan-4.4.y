@@ -261,7 +261,6 @@ snic_cleanup(struct snic *snic)
 	return 0;
 } /* end of snic_cleanup */
 
-
 static void
 snic_iounmap(struct snic *snic)
 {
@@ -457,7 +456,6 @@ snic_probe(struct pci_dev *pdev, const struct pci_device_id *ent)
 			goto err_rel_regions;
 		}
 	}
-
 
 	/* Map vNIC resources from BAR0 */
 	if (!(pci_resource_flags(pdev, 0) & IORESOURCE_MEM)) {
@@ -766,7 +764,6 @@ prob_end:
 	return ret;
 } /* end of snic_probe */
 
-
 /*
  * snic_remove : invoked on unbinding the interface to cleanup the
  * resources allocated in snic_probe on initialization.
@@ -834,7 +831,6 @@ snic_remove(struct pci_dev *pdev)
 	/* this frees Scsi_Host and snic memory (continuous chunk) */
 	scsi_host_put(snic->shost);
 } /* end of snic_remove */
-
 
 struct snic_global *snic_glob;
 

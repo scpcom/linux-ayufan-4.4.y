@@ -29,7 +29,6 @@
 	: "r" (uaddr), "r" (oparg), "i" (-EFAULT) \
 	: "p2", "memory")
 
-
 static inline int
 futex_atomic_op_inuser(int encoded_op, int __user *uaddr)
 {

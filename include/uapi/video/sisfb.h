@@ -205,5 +205,4 @@ struct sis_memreq {
 /*         (for IN-KERNEL usage only)         */
 /**********************************************/
 
-
 #endif /* _UAPI_LINUX_SISFB_H_ */

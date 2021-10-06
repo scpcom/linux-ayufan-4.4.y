@@ -8,7 +8,6 @@
  * This vDSO turns all calls into a syscall so that UML can trap them.
  */
 
-
 /* Disable profiling for userspace code */
 #define DISABLE_BRANCH_PROFILING
 

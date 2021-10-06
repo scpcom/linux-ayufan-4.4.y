@@ -187,7 +187,6 @@ static struct irq_domain_ops mdp5_hw_irqdomain_ops = {
 	.xlate = irq_domain_xlate_onecell,
 };
 
-
 int mdp5_irq_domain_init(struct mdp5_kms *mdp5_kms)
 {
 	struct device *dev = mdp5_kms->dev->dev;

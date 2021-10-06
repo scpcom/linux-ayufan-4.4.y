@@ -358,7 +358,6 @@ static const struct snd_kcontrol_new cs42l73_snd_controls[] = {
 	SOC_SINGLE("HL Limiter Release Rate", CS42L73_LIMRRATEHL, 0,
 			0x3F, 0),
 
-
 	SOC_SINGLE("HL Limiter Switch", CS42L73_LIMRRATEHL, 7, 1, 0),
 	SOC_SINGLE("HL Limiter All Channels Switch", CS42L73_LIMRRATEHL, 6, 1,
 			0),
@@ -519,7 +518,6 @@ static int cs42l73_ear_amp_event(struct snd_soc_dapm_widget *w,
 	}
 	return 0;
 }
-
 
 static int cs42l73_hp_amp_event(struct snd_soc_dapm_widget *w,
 	struct snd_kcontrol *kcontrol, int event)
@@ -1159,7 +1157,6 @@ static int cs42l73_pcm_startup(struct snd_pcm_substream *substream,
 					&constraints_12_24);
 	return 0;
 }
-
 
 #define CS42L73_FORMATS (SNDRV_PCM_FMTBIT_S16_LE | SNDRV_PCM_FMTBIT_S20_3LE |\
 	SNDRV_PCM_FMTBIT_S24_LE)

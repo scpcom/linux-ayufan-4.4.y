@@ -104,7 +104,6 @@ struct mei_cl_cb *mei_amthif_find_read_list_entry(struct mei_device *dev,
 	return NULL;
 }
 
-
 /**
  * mei_amthif_read - read data from AMTHIF client
  *
@@ -142,7 +141,6 @@ int mei_amthif_read(struct mei_device *dev, struct file *file,
 	/* Check for if we can block or not*/
 	if (cb == NULL && file->f_flags & O_NONBLOCK)
 		return -EAGAIN;
-
 
 	dev_dbg(dev->dev, "waiting for amthif data\n");
 	while (cb == NULL) {
@@ -371,8 +369,6 @@ unsigned int mei_amthif_poll(struct mei_device *dev,
 
 	return mask;
 }
-
-
 
 /**
  * mei_amthif_irq_write - write iamthif command in irq thread context.

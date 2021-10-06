@@ -19,8 +19,6 @@
 #define DE_STATE2_DE_MEM_FIFO_EMPTY                      1
 #define DE_STATE2_DE_RESERVED                            0:0
 
-
-
 #define SYSTEM_CTRL                                   0x000000
 #define SYSTEM_CTRL_DPMS                              31:30
 #define SYSTEM_CTRL_DPMS_VPHP                         0
@@ -1046,7 +1044,6 @@
 #define GPIO_INTERRUPT_STATUS_25_ACTIVE                 1
 #define GPIO_INTERRUPT_STATUS_25_RESET                  1
 
-
 #define PANEL_DISPLAY_CTRL                            0x080000
 #define PANEL_DISPLAY_CTRL_RESERVED_1_MASK            31:30
 #define PANEL_DISPLAY_CTRL_RESERVED_1_MASK_DISABLE    0
@@ -1075,7 +1072,6 @@
 #define PANEL_DISPLAY_CTRL_TFT_DISP_24 0
 #define PANEL_DISPLAY_CTRL_TFT_DISP_36 1
 #define PANEL_DISPLAY_CTRL_TFT_DISP_18 2
-
 
 #define PANEL_DISPLAY_CTRL_DUAL_DISPLAY               19:19
 #define PANEL_DISPLAY_CTRL_DUAL_DISPLAY_DISABLE       0
@@ -1663,7 +1659,6 @@
 #define CRT_DISPLAY_CTRL_SHIFT_VGA_DAC_DISABLE        1
 #define CRT_DISPLAY_CTRL_SHIFT_VGA_DAC_ENABLE         0
 
-
 #define CRT_DISPLAY_CTRL_RESERVED_2_MASK	      25:24
 #define CRT_DISPLAY_CTRL_RESERVED_2_MASK_ENABLE	      3
 #define CRT_DISPLAY_CTRL_RESERVED_2_MASK_DISABLE      0
@@ -1675,7 +1670,6 @@
 #define CRT_DISPLAY_CTRL_RGBBIT                       24:24
 #define CRT_DISPLAY_CTRL_RGBBIT_24BIT                 0
 #define CRT_DISPLAY_CTRL_RGBBIT_12BIT                 1
-
 
 #define CRT_DISPLAY_CTRL_RESERVED_3_MASK	      15:15
 #define CRT_DISPLAY_CTRL_RESERVED_3_MASK_DISABLE      0
@@ -2044,7 +2038,6 @@
 #define I2C_DATA14                                      0x010052
 #define I2C_DATA15                                      0x010053
 
-
 #define ZV0_CAPTURE_CTRL                                0x090000
 #define ZV0_CAPTURE_CTRL_FIELD_INPUT                    27:27
 #define ZV0_CAPTURE_CTRL_FIELD_INPUT_EVEN_FIELD         0
@@ -2347,14 +2340,9 @@
 #define DMA_ABORT_INTERRUPT_INT_0_CLEAR                 0
 #define DMA_ABORT_INTERRUPT_INT_0_FINISHED              1
 
-
-
-
-
 /* Default i2c CLK and Data GPIO. These are the default i2c pins */
 #define DEFAULT_I2C_SCL                     30
 #define DEFAULT_I2C_SDA                     31
-
 
 #define GPIO_DATA_SM750LE                               0x020018
 #define GPIO_DATA_SM750LE_1                             1:1
@@ -2367,6 +2355,5 @@
 #define GPIO_DATA_DIRECTION_SM750LE_0                   0:0
 #define GPIO_DATA_DIRECTION_SM750LE_0_INPUT             0
 #define GPIO_DATA_DIRECTION_SM750LE_0_OUTPUT            1
-
 
 #endif

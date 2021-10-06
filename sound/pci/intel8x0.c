@@ -161,7 +161,6 @@ DEFINE_REGSET(SP, 0x60);	/* SPDIF out */
 #define ICH_RESETREGS			0x02	/* reset busmaster registers */
 #define ICH_STARTBM			0x01	/* start busmaster operation */
 
-
 /* global block */
 #define ICH_REG_GLOB_CNT		0x2c	/* dword - global control */
 #define   ICH_PCM_SPDIF_MASK	0xc0000000	/* s/pdif pcm slot mask (ICH4) */
@@ -226,7 +225,6 @@ DEFINE_REGSET(SP, 0x60);	/* SPDIF out */
 #define   ICH_LDI_MASK		0x00000003	/* last codec read data input */
 
 #define ICH_MAX_FRAGS		32		/* max hw frags */
-
 
 /*
  * registers for Ali5455
@@ -673,7 +671,6 @@ static void snd_intel8x0_ali_codec_write(struct snd_ac97 *ac97, unsigned short r
 	iputword(chip, ICHREG(ALI_CPR_ADDR), reg);
 	snd_intel8x0_ali_codec_ready(chip, ALI_CSPSR_WRITE_OK);
 }
-
 
 /*
  * DMA I/O
@@ -1708,7 +1705,6 @@ static int snd_intel8x0_pcm(struct intel8x0 *chip)
 	return 0;
 }
 	
-
 /*
  *  Mixer part
  */
@@ -2381,7 +2377,6 @@ static int snd_intel8x0_mixer(struct intel8x0 *chip, int ac97_clock,
 			  igetdword(chip, ICHREG(GLOB_CNT)) & ~ICH_AC97COLD);
 	return err;
 }
-
 
 /*
  *

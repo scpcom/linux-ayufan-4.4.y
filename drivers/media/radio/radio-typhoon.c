@@ -174,7 +174,5 @@ static void __exit typhoon_exit(void)
 	isa_unregister_driver(&typhoon_driver.driver);
 }
 
-
 module_init(typhoon_init);
 module_exit(typhoon_exit);
-

@@ -163,7 +163,6 @@ static int sst_save_dsp_context_v2(struct intel_sst_drv *sst)
 	return 0;
 }
 
-
 static struct intel_sst_ops mrfld_ops = {
 	.interrupt = intel_sst_interrupt_mrfld,
 	.irq_thread = intel_sst_irq_thread_mrfld,
@@ -353,7 +352,6 @@ static inline void sst_save_shim64(struct intel_sst_drv *ctx,
 	shim_regs->imrx = sst_shim_read64(shim, SST_IMRX);
 	shim_regs->csr = sst_shim_read64(shim, SST_CSR);
 
-
 	spin_unlock_irqrestore(&ctx->ipc_spin_lock, irq_flags);
 }
 
@@ -531,7 +529,6 @@ static int intel_sst_resume(struct device *dev)
 	block = sst_create_block(ctx, 0, FW_DWNL_ID);
 	if (block == NULL)
 		return -ENOMEM;
-
 
 	/* start and wait for ack */
 	ctx->ops->start(ctx);

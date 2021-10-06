@@ -622,7 +622,6 @@ static SOC_ENUM_SINGLE_DECL(
 static const struct snd_kcontrol_new rt5651_inr2_mux =
 	SOC_DAPM_ENUM("INR2 source", rt5651_inr2_enum);
 
-
 /* Stereo ADC source */
 static const char * const rt5651_stereo1_adc1_src[] = {"DD MIX", "ADC"};
 

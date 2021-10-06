@@ -53,7 +53,6 @@ static int s5p_mfc_alloc_dec_temp_buffers_v5(struct s5p_mfc_ctx *ctx)
 	return 0;
 }
 
-
 /* Release temporary buffers for decoding */
 static void s5p_mfc_release_dec_desc_buffer_v5(struct s5p_mfc_ctx *ctx)
 {
@@ -1471,7 +1470,6 @@ static void s5p_mfc_try_run_v5(struct s5p_mfc_dev *dev)
 		s5p_mfc_clock_off();
 	}
 }
-
 
 static void s5p_mfc_cleanup_queue_v5(struct list_head *lh, struct vb2_queue *vq)
 {

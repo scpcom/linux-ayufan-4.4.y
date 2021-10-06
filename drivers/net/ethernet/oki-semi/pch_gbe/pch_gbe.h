@@ -301,8 +301,6 @@ struct pch_gbe_regs {
 /* Wake On LAN Address Mask */
 #define PCH_GBE_WLA_BUSY        0x80000000
 
-
-
 /* TX/RX descriptor defines */
 #define PCH_GBE_MAX_TXD                     4096
 #define PCH_GBE_DEFAULT_TXD                  256
@@ -325,7 +323,6 @@ struct pch_gbe_regs {
 #define PCH_GBE_FC_TX_PAUSE		2
 #define PCH_GBE_FC_FULL			3
 #define PCH_GBE_FC_DEFAULT		PCH_GBE_FC_FULL
-
 
 struct pch_gbe_hw;
 /**
@@ -461,7 +458,6 @@ struct pch_gbe_tx_desc {
 	u8 reserved2;
 	u16 gbec_status;
 };
-
 
 /**
  * struct pch_gbe_buffer - Buffer information

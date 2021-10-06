@@ -75,7 +75,6 @@ static const struct font_desc *fonts[] = {
 #error No fonts configured.
 #endif
 
-
 /**
  *	find_font - find a font
  *	@name: string name of a font
@@ -96,7 +95,6 @@ const struct font_desc *find_font(const char *name)
 	  return fonts[i];
    return NULL;
 }
-
 
 /**
  *	get_default_font - get default font

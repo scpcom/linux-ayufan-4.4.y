@@ -22,7 +22,6 @@
 
 #include "entry-header.S"
 
-
 	.align	5
 #if !(IS_ENABLED(CONFIG_TRACE_IRQFLAGS) || IS_ENABLED(CONFIG_CONTEXT_TRACKING))
 /*
@@ -417,4 +416,3 @@ ENTRY(sys_oabi_call_table)
 #undef OBSOLETE
 
 #endif
-

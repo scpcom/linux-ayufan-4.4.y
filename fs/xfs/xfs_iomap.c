@@ -37,7 +37,6 @@
 #include "xfs_dquot_item.h"
 #include "xfs_dquot.h"
 
-
 #define XFS_WRITEIO_ALIGN(mp,off)	(((off) >> mp->m_writeio_log) \
 						<< mp->m_writeio_log)
 #define XFS_WRITE_IMAPS		XFS_BMAP_MAX_NMAP

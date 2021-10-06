@@ -23,19 +23,16 @@
  * decompressor framework
  */
 
-
 /*
  * The reason that multiply two is that a CPU can request new I/O
  * while it is waiting previous request.
  */
 #define MAX_DECOMPRESSOR	(num_online_cpus() * 2)
 
-
 int squashfs_max_decompressors(void)
 {
 	return MAX_DECOMPRESSOR;
 }
-
 
 struct squashfs_stream {
 	void			*comp_opts;
@@ -45,12 +42,10 @@ struct squashfs_stream {
 	wait_queue_head_t	wait;
 };
 
-
 struct decomp_stream {
 	void *stream;
 	struct list_head list;
 };
-
 
 static void put_decomp_stream(struct decomp_stream *decomp_strm,
 				struct squashfs_stream *stream)
@@ -104,7 +99,6 @@ out:
 	return ERR_PTR(err);
 }
 
-
 void squashfs_decompressor_destroy(struct squashfs_sb_info *msblk)
 {
 	struct squashfs_stream *stream = msblk->stream;
@@ -124,7 +118,6 @@ void squashfs_decompressor_destroy(struct squashfs_sb_info *msblk)
 		kfree(stream);
 	}
 }
-
 
 static struct decomp_stream *get_decomp_stream(struct squashfs_sb_info *msblk,
 					struct squashfs_stream *stream)
@@ -180,7 +173,6 @@ wait:
 
 	return decomp_strm;
 }
-
 
 int squashfs_decompress(struct squashfs_sb_info *msblk, struct buffer_head **bh,
 	int b, int offset, int length, struct squashfs_page_actor *output)

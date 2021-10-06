@@ -1,7 +1,6 @@
 /* SandyBridge-EP/IvyTown uncore support */
 #include "perf_event_intel_uncore.h"
 
-
 /* SNB-EP Box level control */
 #define SNBEP_PMON_BOX_CTL_RST_CTRL	(1 << 0)
 #define SNBEP_PMON_BOX_CTL_RST_CTRS	(1 << 1)
@@ -184,7 +183,6 @@
 #define HSWEP_C0_MSR_PMON_BOX_FILTER0		0xe05
 #define HSWEP_CBO_MSR_OFFSET			0x10
 
-
 #define HSWEP_CB0_MSR_PMON_BOX_FILTER_TID		(0x3fULL << 0)
 #define HSWEP_CB0_MSR_PMON_BOX_FILTER_LINK	(0xfULL << 6)
 #define HSWEP_CB0_MSR_PMON_BOX_FILTER_STATE	(0x7fULL << 17)
@@ -193,7 +191,6 @@
 #define HSWEP_CB0_MSR_PMON_BOX_FILTER_C6		(0x1ULL << 61)
 #define HSWEP_CB0_MSR_PMON_BOX_FILTER_NC		(0x1ULL << 62)
 #define HSWEP_CB0_MSR_PMON_BOX_FILTER_ISOC	(0x1ULL << 63)
-
 
 /* Haswell-EP Sbox */
 #define HSWEP_S0_MSR_PMON_CTR0			0x726
@@ -208,7 +205,6 @@
 #define HSWEP_PCU_MSR_PMON_CTL0			0x711
 #define HSWEP_PCU_MSR_PMON_BOX_CTL		0x710
 #define HSWEP_PCU_MSR_PMON_BOX_FILTER		0x715
-
 
 DEFINE_UNCORE_FORMAT_ATTR(event, event, "config:0-7");
 DEFINE_UNCORE_FORMAT_ATTR(event_ext, event, "config:0-7,21");
@@ -985,7 +981,6 @@ static struct intel_uncore_type snbep_uncore_qpi = {
 	.event_descs		= snbep_uncore_qpi_events,
 	.format_group		= &snbep_uncore_qpi_format_group,
 };
-
 
 static struct intel_uncore_type snbep_uncore_r2pcie = {
 	.name		= "r2pcie",
@@ -2423,7 +2418,6 @@ static struct intel_uncore_type bdx_uncore_irp = {
 	.ops			= &hswep_uncore_irp_ops,
 	.format_group		= &snbep_uncore_format_group,
 };
-
 
 static struct event_constraint bdx_uncore_r2pcie_constraints[] = {
 	UNCORE_EVENT_CONSTRAINT(0x10, 0x3),

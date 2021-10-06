@@ -191,7 +191,6 @@ static loff_t vcs_lseek(struct file *file, loff_t offset, int orig)
 	return fixed_size_llseek(file, offset, orig, size);
 }
 
-
 static ssize_t
 vcs_read(struct file *file, char __user *buf, size_t count, loff_t *ppos)
 {

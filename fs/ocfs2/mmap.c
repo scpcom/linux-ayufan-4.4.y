@@ -43,7 +43,6 @@
 #include "super.h"
 #include "ocfs2_trace.h"
 
-
 static int ocfs2_fault(struct vm_area_struct *area, struct vm_fault *vmf)
 {
 	sigset_t oldset;
@@ -190,4 +189,3 @@ out:
 	vma->vm_ops = &ocfs2_file_vm_ops;
 	return 0;
 }
-

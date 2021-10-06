@@ -65,7 +65,6 @@ MODULE_PARM_DESC(index, "Index value for Harmony driver.");
 module_param(id, charp, 0444);
 MODULE_PARM_DESC(id, "ID string for Harmony driver.");
 
-
 static struct parisc_device_id snd_harmony_devtable[] = {
 	/* bushmaster / flounder */
 	{ HPHW_FIO, HVERSION_REV_ANY_ID, HVERSION_ANY_ID, 0x0007A }, 

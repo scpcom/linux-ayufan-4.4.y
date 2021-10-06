@@ -47,7 +47,6 @@ static u32 hba_id_counter;
 static DEFINE_SPINLOCK(hba_lock);
 static LIST_HEAD(hba_list);
 
-
 int transport_backend_register(const struct target_backend_ops *ops)
 {
 	struct target_backend *tb, *old;

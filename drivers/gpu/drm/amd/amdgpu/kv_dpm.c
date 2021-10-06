@@ -69,7 +69,6 @@ static void kv_dpm_powergate_vce(struct amdgpu_device *adev, bool gate);
 static void kv_dpm_powergate_samu(struct amdgpu_device *adev, bool gate);
 static void kv_dpm_powergate_acp(struct amdgpu_device *adev, bool gate);
 
-
 static u32 kv_convert_vid2_to_vid7(struct amdgpu_device *adev,
 				   struct sumo_vid_mapping_table *vid_mapping_table,
 				   u32 vid_2bit)
@@ -698,7 +697,6 @@ static u16 kv_convert_2bit_index_to_voltage(struct amdgpu_device *adev,
 	return kv_convert_8bit_index_to_voltage(adev, (u16)vid_8bit);
 }
 
-
 static int kv_set_vid(struct amdgpu_device *adev, u32 index, u32 vid)
 {
 	struct kv_power_info *pi = kv_get_pi(adev);
@@ -1101,7 +1099,6 @@ static int kv_populate_samu_table(struct amdgpu_device *adev)
 
 	return ret;
 }
-
 
 static int kv_populate_acp_table(struct amdgpu_device *adev)
 {

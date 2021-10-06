@@ -440,7 +440,6 @@ ENTRY(ce_aes_xts_encrypt)
 	pop		{r4-r6, pc}
 ENDPROC(ce_aes_xts_encrypt)
 
-
 ENTRY(ce_aes_xts_decrypt)
 	push		{r4-r6, lr}
 

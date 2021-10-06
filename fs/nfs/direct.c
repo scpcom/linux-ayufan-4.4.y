@@ -180,7 +180,6 @@ nfs_direct_select_verf(struct nfs_direct_req *dreq,
 	return verfp;
 }
 
-
 /*
  * nfs_direct_set_hdr_verf - set the write/commit verifier
  * @dreq - direct request possibly spanning multiple servers
@@ -844,7 +843,6 @@ static const struct nfs_pgio_completion_ops nfs_direct_write_completion_ops = {
 	.init_hdr = nfs_direct_pgio_init,
 	.completion = nfs_direct_write_completion,
 };
-
 
 /*
  * NB: Return the value of the first error return code.  Subsequent

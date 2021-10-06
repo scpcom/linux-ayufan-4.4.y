@@ -86,10 +86,8 @@
  */
 #define LV_COMPAT_CYL 0xFFFE
 
-
 #define FCX_MAX_DATA_FACTOR 65536
 #define DASD_ECKD_RCD_DATA_SIZE 256
-
 
 /*****************************************************************************
  * SECTION: Type Definitions
@@ -425,7 +423,6 @@ struct dasd_psf_ssc_data {
 	unsigned char reserved[59];
 } __attribute__((packed));
 
-
 /*
  * some structures and definitions for alias handling
  */
@@ -436,7 +433,6 @@ struct dasd_unit_address_configuration {
 	} unit[256];
 } __attribute__((packed));
 
-
 #define MAX_DEVICES_PER_LCU 256
 
 /* flags on the LCU  */
@@ -444,7 +440,6 @@ struct dasd_unit_address_configuration {
 #define UPDATE_PENDING	0x02
 
 enum pavtype {NO_PAV, BASE_PAV, HYPER_PAV};
-
 
 struct alias_root {
 	struct list_head serverlist;
@@ -526,8 +521,6 @@ struct dasd_eckd_private {
 
 	u32 fcx_max_data;
 };
-
-
 
 int dasd_alias_make_device_known_to_lcu(struct dasd_device *);
 void dasd_alias_disconnect_device_from_lcu(struct dasd_device *);

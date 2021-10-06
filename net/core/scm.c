@@ -38,7 +38,6 @@
 #include <net/scm.h>
 #include <net/cls_cgroup.h>
 
-
 /*
  *	Only allow a user to send credentials, that they could set with
  *	setu(g)id.

@@ -137,7 +137,6 @@ static int ps3stor_probe_access(struct ps3_storage_device *dev)
 	return 0;
 }
 
-
 /**
  *	ps3stor_setup - Setup a storage device before use
  *	@dev: Pointer to a struct ps3_storage_device
@@ -232,7 +231,6 @@ fail:
 }
 EXPORT_SYMBOL_GPL(ps3stor_setup);
 
-
 /**
  *	ps3stor_teardown - Tear down a storage device after use
  *	@dev: Pointer to a struct ps3_storage_device
@@ -260,7 +258,6 @@ void ps3stor_teardown(struct ps3_storage_device *dev)
 			__LINE__, error);
 }
 EXPORT_SYMBOL_GPL(ps3stor_teardown);
-
 
 /**
  *	ps3stor_read_write_sectors - read/write from/to a storage device
@@ -310,7 +307,6 @@ u64 ps3stor_read_write_sectors(struct ps3_storage_device *dev, u64 lpar,
 }
 EXPORT_SYMBOL_GPL(ps3stor_read_write_sectors);
 
-
 /**
  *	ps3stor_send_command - send a device command to a storage device
  *	@dev: Pointer to a struct ps3_storage_device
@@ -355,7 +351,6 @@ u64 ps3stor_send_command(struct ps3_storage_device *dev, u64 cmd, u64 arg1,
 	return 0;
 }
 EXPORT_SYMBOL_GPL(ps3stor_send_command);
-
 
 MODULE_LICENSE("GPL");
 MODULE_DESCRIPTION("PS3 Storage Bus Library");

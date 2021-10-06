@@ -16,5 +16,4 @@ struct sigcontext {
 	unsigned long sc_sar; /* cr11 */
 };
 
-
 #endif

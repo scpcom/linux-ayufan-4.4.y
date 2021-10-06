@@ -45,7 +45,6 @@ struct prefix_info {
 	struct in6_addr		prefix;
 };
 
-
 #include <linux/netdevice.h>
 #include <net/if_inet6.h>
 #include <net/ipv6.h>
@@ -326,7 +325,6 @@ static inline void in6_ifa_hold(struct inet6_ifaddr *ifp)
 {
 	atomic_inc(&ifp->refcnt);
 }
-
 
 /*
  *	compute link-local solicited-node multicast address

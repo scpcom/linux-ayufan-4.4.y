@@ -156,7 +156,6 @@ struct snd_midi_op {
 #define SNDRV_GM_PAN(cp)			(((cp)->control[10]<<7)|((cp)->control[42]))
 #define SNDRV_GM_EXPRESSION(cp)		(((cp)->control[11]<<7)|((cp)->control[43]))
 
-
 /* MIDI mode */
 #define SNDRV_MIDI_MODE_NONE	0	/* Generic midi */
 #define SNDRV_MIDI_MODE_GM	1

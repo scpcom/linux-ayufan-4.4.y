@@ -114,7 +114,6 @@ struct ib_pma_portcounters {
 	__be32 port_xmit_wait;
 } __packed;
 
-
 #define IB_PMA_SEL_SYMBOL_ERROR                 cpu_to_be16(0x0001)
 #define IB_PMA_SEL_LINK_ERROR_RECOVERY          cpu_to_be16(0x0002)
 #define IB_PMA_SEL_LINK_DOWNED                  cpu_to_be16(0x0004)

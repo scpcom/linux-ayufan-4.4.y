@@ -1869,7 +1869,6 @@ static void cyttsp4_mt_close(struct input_dev *input)
 	mutex_unlock(&md->report_lock);
 }
 
-
 static int cyttsp4_setup_input_device(struct cyttsp4 *cd)
 {
 	struct device *dev = cd->dev;

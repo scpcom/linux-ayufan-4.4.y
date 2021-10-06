@@ -69,7 +69,6 @@
  */
 #define ALARM_DISABLED	((u32)~0)
 
-
 struct sam9_rtc {
 	void __iomem		*rtt;
 	struct rtc_device	*rtcdev;

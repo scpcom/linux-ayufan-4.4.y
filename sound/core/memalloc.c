@@ -155,7 +155,6 @@ static void snd_free_dev_iram(struct snd_dma_buffer *dmab)
  *
  */
 
-
 /**
  * snd_dma_alloc_pages - allocate the buffer area according to the given type
  * @type: the DMA buffer type
@@ -254,7 +253,6 @@ int snd_dma_alloc_pages_fallback(int type, struct device *device, size_t size,
 		return -ENOMEM;
 	return 0;
 }
-
 
 /**
  * snd_dma_free_pages - release the allocated buffer

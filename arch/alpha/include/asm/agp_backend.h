@@ -38,5 +38,4 @@ struct alpha_agp_ops {
 	unsigned long (*translate)(alpha_agp_info *, dma_addr_t);
 };
 
-
 #endif /* _ALPHA_AGP_BACKEND_H */

@@ -215,7 +215,6 @@ static int friq_test_proto( PIA *pi, char * scratch, int verbose )
         return (r || (e[0] && e[1]));
 }
 
-
 static void friq_log_adapter( PIA *pi, char * scratch, int verbose )
 
 {       char    *mode_string[6] = {"4-bit","8-bit",

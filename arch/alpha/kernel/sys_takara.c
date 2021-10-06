@@ -145,7 +145,6 @@ takara_init_irq(void)
 	common_init_isa_dma();
 }
 
-
 /*
  * The Takara has PCI devices 1, 2, and 3 configured to slots 20,
  * 19, and 18 respectively, in the default configuration. They can
@@ -258,7 +257,6 @@ takara_init_pci(void)
 		pc873xx_enable_ide();
 	}
 }
-
 
 /*
  * The System Vector

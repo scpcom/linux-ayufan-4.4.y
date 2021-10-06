@@ -153,5 +153,4 @@ static inline int dm_sm_register_threshold_callback(struct dm_space_map *sm,
 	return -EINVAL;
 }
 
-
 #endif	/* _LINUX_DM_SPACE_MAP_H */

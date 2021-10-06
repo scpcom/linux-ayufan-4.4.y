@@ -70,7 +70,6 @@ module_param(selfshrinking, bool, S_IRUGO);
 #define TMEM_POOL_PAGESIZE_SHIFT   4
 #define TMEM_VERSION_SHIFT        24
 
-
 struct tmem_pool_uuid {
 	u64 uuid_lo;
 	u64 uuid_hi;
@@ -152,7 +151,6 @@ static int xen_tmem_flush_object(u32 pool_id, struct tmem_oid oid)
 {
 	return xen_tmem_op(TMEM_FLUSH_OBJECT, pool_id, oid, 0, 0, 0, 0, 0);
 }
-
 
 #ifdef CONFIG_CLEANCACHE
 static int xen_tmem_destroy_pool(u32 pool_id)

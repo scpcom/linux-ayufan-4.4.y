@@ -4,7 +4,6 @@
 #include <asm/page.h>
 #include <asm/setup.h>
 
-
 #define MMU_BASE	8		/* MMU flags base in cpu_mmu_flags */
 
 .text

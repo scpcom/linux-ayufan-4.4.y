@@ -526,7 +526,6 @@ static int __iommu_group_for_each_dev(struct iommu_group *group, void *data,
 	return ret;
 }
 
-
 int iommu_group_for_each_dev(struct iommu_group *group, void *data,
 			     int (*fn)(struct device *, void *))
 {
@@ -975,7 +974,6 @@ static int iommu_bus_init(struct bus_type *bus, const struct iommu_ops *ops)
 	err = bus_for_each_dev(bus, NULL, &cb, add_iommu_group);
 	if (err)
 		goto out_err;
-
 
 	return 0;
 

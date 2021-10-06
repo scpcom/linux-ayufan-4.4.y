@@ -1,12 +1,4 @@
-/*
- * syscalls.h - Linux syscall interfaces (non-arch-specific)
- *
- * Copyright (c) 2004 Randy Dunlap
- * Copyright (c) 2004 Open Source Development Labs
- *
- * This file is released under the GPLv2.
- * See the file COPYING for more details.
- */
+
 
 #ifndef _LINUX_SYSCALLS_H
 #define _LINUX_SYSCALLS_H
@@ -80,15 +72,6 @@ union bpf_attr;
 #include <linux/key.h>
 #include <trace/syscall.h>
 
-/*
- * __MAP - apply a macro to syscall arguments
- * __MAP(n, m, t1, a1, t2, a2, ..., tn, an) will expand to
- *    m(t1, a1), m(t2, a2), ..., m(tn, an)
- * The first argument must be equal to the amount of type/name
- * pairs given.  Note that this list of pairs (i.e. the arguments
- * of __MAP starting at the third one) is in the same format as
- * for SYSCALL_DEFINE<n>/COMPAT_SYSCALL_DEFINE<n>
- */
 #define __MAP0(m,...)
 #define __MAP1(m,t,a) m(t,a)
 #define __MAP2(m,t,a,...) m(t,a), __MAP1(m,__VA_ARGS__)
@@ -160,7 +143,7 @@ extern struct trace_event_functions exit_syscall_print_funcs;
 	static struct syscall_metadata __used			\
 	  __syscall_meta_##sname = {				\
 		.name 		= "sys"#sname,			\
-		.syscall_nr	= -1,	/* Filled in at boot */	\
+		.syscall_nr	= -1,	 	\
 		.nb_args 	= nb,				\
 		.types		= nb ? types_##sname : NULL,	\
 		.args		= nb ? args_##sname : NULL,	\

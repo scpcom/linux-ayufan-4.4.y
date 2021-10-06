@@ -643,7 +643,6 @@ END_FTR_SECTION_IFSET(CPU_FTR_EMB_HV)
 		  unknown_exception, EXC_XFER_EE)
 #endif /* CONFIG_SPE_POSSIBLE */
 
-
 	/* Performance Monitor */
 	EXCEPTION(0x2060, PERFORMANCE_MONITOR, PerformanceMonitor, \
 		  performance_monitor_exception, EXC_XFER_STD)
@@ -1174,7 +1173,6 @@ __secondary_start:
 	li	r5,0		/* no device tree */
 	li	r6,0		/* not boot cpu */
 	bl	restore_to_as0
-
 
 	lis	r3,__secondary_hold_acknowledge@h
 	ori	r3,r3,__secondary_hold_acknowledge@l

@@ -52,7 +52,6 @@ struct stv6110x_devctl {
 	int (*tuner_get_status) (struct dvb_frontend *fe, u32 *status);
 };
 
-
 #if IS_REACHABLE(CONFIG_DVB_STV6110x)
 
 extern struct stv6110x_devctl *stv6110x_attach(struct dvb_frontend *fe,

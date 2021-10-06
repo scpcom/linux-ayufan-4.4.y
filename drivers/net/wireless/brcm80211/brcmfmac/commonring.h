@@ -15,7 +15,6 @@
 #ifndef BRCMFMAC_COMMONRING_H
 #define BRCMFMAC_COMMONRING_H
 
-
 struct brcmf_commonring {
 	u16 r_ptr;
 	u16 w_ptr;
@@ -40,7 +39,6 @@ struct brcmf_commonring {
 
 	atomic_t outstanding_tx;
 };
-
 
 void brcmf_commonring_register_cb(struct brcmf_commonring *commonring,
 				  int (*cr_ring_bell)(void *ctx),
@@ -67,6 +65,5 @@ int brcmf_commonring_read_complete(struct brcmf_commonring *commonring,
 
 #define brcmf_commonring_n_items(commonring) (commonring->depth)
 #define brcmf_commonring_len_item(commonring) (commonring->item_len)
-
 
 #endif /* BRCMFMAC_COMMONRING_H */

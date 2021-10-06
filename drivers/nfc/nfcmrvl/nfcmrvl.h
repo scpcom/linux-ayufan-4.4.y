@@ -107,7 +107,6 @@ struct nfcmrvl_private *nfcmrvl_nci_register_dev(enum nfcmrvl_phy phy,
 				struct device *dev,
 				struct nfcmrvl_platform_data *pdata);
 
-
 void nfcmrvl_chip_reset(struct nfcmrvl_private *priv);
 void nfcmrvl_chip_halt(struct nfcmrvl_private *priv);
 

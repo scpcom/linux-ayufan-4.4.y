@@ -519,7 +519,6 @@ static int pb1200_mmc1_card_inserted(void *mmc_host)
 	return (bcsr_read(BCSR_SIGSTAT) & BCSR_INT_SD1INSERT) ? 1 : 0;
 }
 
-
 static struct au1xmmc_platform_data db1200_mmc_platdata[2] = {
 	[0] = {
 		.cd_setup	= db1200_mmc_cd_setup,

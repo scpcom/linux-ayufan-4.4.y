@@ -1363,7 +1363,6 @@ static void nvme_cancel_queue_ios(struct request *req, void *data, bool reserved
 	else
 		cqe.status = cpu_to_le16(NVME_SC_ABORT_REQ << 1);
 
-
 	dev_warn(nvmeq->q_dmadev, "Cancelling I/O %d QID %d\n",
 						req->tag, nvmeq->qid);
 	ctx = cancel_cmd_info(cmd, &fn);

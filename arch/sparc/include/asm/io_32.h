@@ -140,8 +140,6 @@ void ioport_unmap(void __iomem *);
 struct pci_dev;
 void pci_iounmap(struct pci_dev *dev, void __iomem *);
 
-
-
 /*
  * At the moment, we do not use CMOS_READ anywhere outside of rtc.c,
  * so rtc_port is static in it. This should not change unless a new
@@ -164,6 +162,5 @@ void sbus_set_sbus64(struct device *, int);
 #endif
 
 #define __ARCH_HAS_NO_PAGE_ZERO_MAPPED		1
-
 
 #endif /* !(__SPARC_IO_H) */

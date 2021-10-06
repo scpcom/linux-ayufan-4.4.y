@@ -687,6 +687,7 @@ radeon_crtc_set_config(struct drm_mode_set *set)
 	pm_runtime_put_autosuspend(dev->dev);
 	return ret;
 }
+
 static const struct drm_crtc_funcs radeon_crtc_funcs = {
 	.cursor_set2 = radeon_crtc_cursor_set2,
 	.cursor_move = radeon_crtc_cursor_move,

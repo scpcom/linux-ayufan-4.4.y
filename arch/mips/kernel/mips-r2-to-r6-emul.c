@@ -262,7 +262,6 @@ static int jr_func(struct pt_regs *regs, u32 ir)
 	if (err < 0)
 		return SIGEMT;
 
-
 	/* Computed EPC */
 	cepc = regs->cp0_epc;
 
@@ -2361,7 +2360,6 @@ static const struct file_operations mipsr2_clear_fops = {
 	.llseek			= seq_lseek,
 	.release		= single_release,
 };
-
 
 static int __init mipsr2_init_debugfs(void)
 {

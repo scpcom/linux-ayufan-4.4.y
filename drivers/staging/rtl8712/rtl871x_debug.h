@@ -29,7 +29,6 @@
 #include "osdep_service.h"
 #include "drv_types.h"
 
-
 #define _drv_emerg_			1
 #define _drv_alert_			2
 #define _drv_crit_			3
@@ -39,7 +38,6 @@
 #define _drv_info_			7
 #define _drv_dump_			8
 #define	_drv_debug_			9
-
 
 #define _module_rtl871x_xmit_c_		BIT(0)
 #define _module_xmit_osdep_c_		BIT(1)
@@ -164,4 +162,3 @@
 #define ERR_8712 _dbgdump
 
 #endif	/*__RTL871X_DEBUG_H__*/
-

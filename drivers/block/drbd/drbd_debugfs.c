@@ -11,7 +11,6 @@
 #include "drbd_req.h"
 #include "drbd_debugfs.h"
 
-
 /**********************************************************************
  * Whenever you change the file format, remember to bump the version. *
  **********************************************************************/

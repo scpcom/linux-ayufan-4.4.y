@@ -99,10 +99,8 @@
 #define MCU_SIM_PICR                0x0000
 #define MCU_SIM_PITR                0x0000
 
-
 #include <asm/m68360_regs.h>
 
-	
 /*
  * By the time this RAM specific code begins to execute, DPRAM
  * and DRAM should already be mapped and accessible.
@@ -115,7 +113,6 @@ _stext:
 	ori.w	#MCU_DISABLE_INTRPTS, %sr	/* disable interrupts: */
 	/* We should not need to setup the boot stack the reset should do it. */
 	movea.l	#RAMEND, %sp		/* set up stack at the end of DRAM:*/
-
 
 set_mbar_register:
 	moveq.l	#0x07, %d1			/* Setup MBAR */
@@ -213,7 +210,6 @@ copy_vectors:
 	move.l	#_ramvec, %a1
 	movec	%a1, %vbr
 
-
 	/* Copy data segment from ROM to RAM */
 	moveal	#_etext, %a0
 	moveal	#_sdata, %a1
@@ -262,7 +258,6 @@ lp:
 _exit:
 	jmp	_exit
 
-
 	.data
 	.align 4
 env:
@@ -281,7 +276,6 @@ _ramend:
 	.long   0
 _dprbase:
 	.long	0xffffe000
-
 
 	.text
 

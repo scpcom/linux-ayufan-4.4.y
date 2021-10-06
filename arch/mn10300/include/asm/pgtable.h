@@ -226,7 +226,6 @@ do {							\
 #define pmd_clear(xp)	do { set_pmd(xp, __pmd(0)); } while (0)
 #define	pmd_bad(x)	0
 
-
 #define pages_to_mb(x) ((x) >> (20 - PAGE_SHIFT))
 
 #ifndef __ASSEMBLY__

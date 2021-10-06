@@ -4,7 +4,6 @@
 #include <linux/kconfig.h>
 #include "dvb_frontend.h"
 
-
 /** struct fc0011_config - fc0011 hardware config
  *
  * @i2c_address: I2C bus address.

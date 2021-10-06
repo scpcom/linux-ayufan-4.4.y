@@ -96,7 +96,6 @@ struct op_export_reply {
 	int returncode;
 } __attribute__((packed));
 
-
 #define PACK_OP_EXPORT_REQUEST(pack, request)  do {\
 	usbip_net_pack_usb_device(pack, &(request)->udev);\
 } while (0)
@@ -139,7 +138,6 @@ struct op_crypkey_request {
 struct op_crypkey_reply {
 	uint32_t __reserved;
 } __attribute__((packed));
-
 
 /* ---------------------------------------------------------------------- */
 /* Retrieve the list of exported USB devices. */

@@ -21,7 +21,6 @@
 
 #include "usbgecko_udbg.h"
 
-
 #define EXI_CLK_32MHZ           5
 
 #define EXI_CSR                 0x00
@@ -40,7 +39,6 @@
 
 #define UG_READ_ATTEMPTS	100
 #define UG_WRITE_ATTEMPTS	100
-
 
 static void __iomem *ug_io_base;
 
@@ -325,4 +323,3 @@ void __init udbg_init_usbgecko(void)
 }
 
 #endif /* CONFIG_PPC_EARLY_DEBUG_USBGECKO */
-

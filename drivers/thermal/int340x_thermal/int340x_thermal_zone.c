@@ -134,7 +134,6 @@ static int int340x_thermal_set_trip_temp(struct thermal_zone_device *zone,
 	return 0;
 }
 
-
 static int int340x_thermal_get_trip_hyst(struct thermal_zone_device *zone,
 		int trip, int *temp)
 {

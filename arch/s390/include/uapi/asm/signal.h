@@ -125,5 +125,4 @@ typedef struct sigaltstack {
         size_t ss_size;
 } stack_t;
 
-
 #endif /* _UAPI_ASMS390_SIGNAL_H */

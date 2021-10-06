@@ -580,7 +580,6 @@ static int pt_identify(struct pt_unit *tape)
 	return 0;
 }
 
-
 /*
  * returns  0, with id set if drive is detected
  *	   -1, if drive detection failed

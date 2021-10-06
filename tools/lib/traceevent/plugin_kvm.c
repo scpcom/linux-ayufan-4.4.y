@@ -81,7 +81,6 @@ static const char *disassemble(unsigned char *insn, int len, uint64_t rip,
 
 #endif
 
-
 #define VMX_EXIT_REASONS			\
 	_ER(EXCEPTION_NMI,	 0)		\
 	_ER(EXTERNAL_INTERRUPT,	 1)		\
@@ -328,7 +327,6 @@ static int kvm_emulate_insn_handler(struct trace_seq *s,
 			 failed ? " FAIL" : "");
 	return 0;
 }
-
 
 static int kvm_nested_vmexit_inject_handler(struct trace_seq *s, struct pevent_record *record,
 					    struct event_format *event, void *context)

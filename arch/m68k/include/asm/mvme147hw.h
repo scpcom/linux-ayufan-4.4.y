@@ -21,7 +21,6 @@ typedef struct {
 
 #define m147_rtc ((MK48T02 * volatile)0xfffe07f8)
 
-
 struct pcc_regs {
    volatile u_long	dma_tadr;
    volatile u_long	dma_dadr;
@@ -61,7 +60,6 @@ struct pcc_regs {
 
 #define m147_pcc ((struct pcc_regs * volatile)0xfffe1000)
 
-
 #define PCC_INT_ENAB		0x08
 
 #define PCC_TIMER_INT_CLR	0x80
@@ -83,7 +81,6 @@ struct pcc_regs {
 #define PCC_IRQ_TIMER2		(IRQ_USER+9)
 #define PCC_IRQ_SOFTWARE1	(IRQ_USER+10)
 #define PCC_IRQ_SOFTWARE2	(IRQ_USER+11)
-
 
 #define M147_SCC_A_ADDR		0xfffe3002
 #define M147_SCC_B_ADDR		0xfffe3000

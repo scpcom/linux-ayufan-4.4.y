@@ -41,7 +41,6 @@
 #include <linux/slab.h>
 #include <asm/div64.h>
 
-
 /* Required number of TX DMA slots per TX frame.
  * This currently is 2, because we put the header and the ieee80211 frame
  * into separate slots. */

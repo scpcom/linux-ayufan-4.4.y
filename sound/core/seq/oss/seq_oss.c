@@ -39,7 +39,6 @@ MODULE_LICENSE("GPL");
 MODULE_ALIAS_SNDRV_MINOR(SNDRV_MINOR_OSS_SEQUENCER);
 MODULE_ALIAS_SNDRV_MINOR(SNDRV_MINOR_OSS_MUSIC);
 
-
 /*
  * prototypes
  */
@@ -59,7 +58,6 @@ static ssize_t odev_read(struct file *file, char __user *buf, size_t count, loff
 static ssize_t odev_write(struct file *file, const char __user *buf, size_t count, loff_t *offset);
 static long odev_ioctl(struct file *file, unsigned int cmd, unsigned long arg);
 static unsigned int odev_poll(struct file *file, poll_table * wait);
-
 
 /*
  * module interface
@@ -164,7 +162,6 @@ odev_read(struct file *file, char __user *buf, size_t count, loff_t *offset)
 		return -ENXIO;
 	return snd_seq_oss_read(dp, buf, count);
 }
-
 
 static ssize_t
 odev_write(struct file *file, const char __user *buf, size_t count, loff_t *offset)
@@ -273,7 +270,6 @@ info_read(struct snd_info_entry *entry, struct snd_info_buffer *buf)
 	snd_seq_oss_midi_info_read(buf);
 	mutex_unlock(&register_mutex);
 }
-
 
 static int __init
 register_proc(void)

@@ -66,7 +66,6 @@ static int locomoled_probe(struct locomo_dev *ldev)
 	return  devm_led_classdev_register(&ldev->dev, &locomo_led1);
 }
 
-
 static struct locomo_driver locomoled_driver = {
 	.drv = {
 		.name = "locomoled"

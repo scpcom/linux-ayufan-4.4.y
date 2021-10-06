@@ -889,7 +889,6 @@ int kvmppc_xics_hcall(struct kvm_vcpu *vcpu, u32 req)
 }
 EXPORT_SYMBOL_GPL(kvmppc_xics_hcall);
 
-
 /* -- Initialisation code etc. -- */
 
 static int xics_debug_show(struct seq_file *m, void *private)

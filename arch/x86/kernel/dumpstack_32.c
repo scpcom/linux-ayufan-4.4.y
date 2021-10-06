@@ -23,7 +23,6 @@ static void *is_irq_stack(void *p, void *irq)
 	return irq + THREAD_SIZE;
 }
 
-
 static void *is_hardirq_stack(unsigned long *stack, int cpu)
 {
 	void *irq = per_cpu(hardirq_stack, cpu);
@@ -119,7 +118,6 @@ show_stack_log_lvl(struct task_struct *task, struct pt_regs *regs,
 	pr_cont("\n");
 	show_trace_log_lvl(task, regs, sp, bp, log_lvl);
 }
-
 
 void show_regs(struct pt_regs *regs)
 {

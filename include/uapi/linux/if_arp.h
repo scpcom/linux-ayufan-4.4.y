@@ -108,7 +108,6 @@
 #define	ARPOP_InREPLY	9		/* InARP reply			*/
 #define	ARPOP_NAK	10		/* (ATM)ARP NAK			*/
 
-
 /* ARP ioctl request. */
 struct arpreq {
   struct sockaddr	arp_pa;		/* protocol address		*/
@@ -156,6 +155,5 @@ struct arphdr {
 #endif
 
 };
-
 
 #endif /* _UAPI_LINUX_IF_ARP_H */

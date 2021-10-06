@@ -20,7 +20,6 @@
 
 #include <asm/opal.h>
 
-
 struct ipmi_smi_powernv {
 	u64			interface_id;
 	struct ipmi_device_id	ipmi_id;
@@ -303,7 +302,6 @@ static const struct of_device_id ipmi_powernv_match[] = {
 	{ },
 };
 
-
 static struct platform_driver powernv_ipmi_driver = {
 	.driver = {
 		.name		= "ipmi-powernv",
@@ -312,7 +310,6 @@ static struct platform_driver powernv_ipmi_driver = {
 	.probe	= ipmi_powernv_probe,
 	.remove	= ipmi_powernv_remove,
 };
-
 
 module_platform_driver(powernv_ipmi_driver);
 

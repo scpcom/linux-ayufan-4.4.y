@@ -389,7 +389,6 @@ static int __init b1pci_init(void)
 	} else
 		strcpy(rev, "1.0");
 
-
 	err = pci_register_driver(&b1pci_pci_driver);
 	if (!err) {
 		strlcpy(capi_driver_b1pci.revision, rev, 32);

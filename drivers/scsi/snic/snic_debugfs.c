@@ -303,7 +303,6 @@ snic_stats_show(struct seq_file *sfp, void *data)
 		(u64) atomic64_read(&stats->fw.io_errs),
 		(u64) atomic64_read(&stats->fw.scsi_errs));
 
-
 	/* Dump Miscellenous Stats */
 	seq_printf(sfp,
 		   "\n---------------------------------------------\n"

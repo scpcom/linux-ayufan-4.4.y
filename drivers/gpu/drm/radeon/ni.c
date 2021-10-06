@@ -225,7 +225,6 @@ MODULE_FIRMWARE("radeon/ARUBA_pfp.bin");
 MODULE_FIRMWARE("radeon/ARUBA_me.bin");
 MODULE_FIRMWARE("radeon/ARUBA_rlc.bin");
 
-
 static const u32 cayman_golden_registers2[] =
 {
 	0x3e5c, 0xffffffff, 0x00000000,
@@ -1046,7 +1045,6 @@ static void cayman_gpu_init(struct radeon_device *rdev)
 	tmp = (gb_addr_config & ROW_SIZE_MASK) >> ROW_SIZE_SHIFT;
 	rdev->config.cayman.mem_row_size_in_kb = 1 << tmp;
 
-
 	/* setup tiling info dword.  gb_addr_config is not adequate since it does
 	 * not have bank info, so create a custom tiling dword.
 	 * bits 3:0   num_pipes
@@ -1204,7 +1202,6 @@ static void cayman_gpu_init(struct radeon_device *rdev)
 	WREG32(PA_SC_FIFO_SIZE, (SC_PRIM_FIFO_SIZE(rdev->config.cayman.sc_prim_fifo_size) |
 				 SC_HIZ_TILE_FIFO_SIZE(rdev->config.cayman.sc_hiz_tile_fifo_size) |
 				 SC_EARLYZ_TILE_FIFO_SIZE(rdev->config.cayman.sc_earlyz_tile_fifo_size)));
-
 
 	WREG32(VGT_NUM_INSTANCES, 1);
 

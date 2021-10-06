@@ -25,8 +25,6 @@
 #include "fpu_emu.h"
 #include "control_w.h"
 
-
-
 #ifndef NON_REENTRANT_FPU
 /*  Local storage on the stack: */
 #define FPU_accum_0	-4(%ebp)	/* ms word */
@@ -41,7 +39,6 @@ FPU_accum_0:
 FPU_accum_1:
 	.long	0
 #endif /* NON_REENTRANT_FPU */
-
 
 .text
 ENTRY(FPU_u_mul)
@@ -130,7 +127,6 @@ L_extent_zero:
 	movl	%ecx,%eax
 	jmp	fpu_reg_round
 
-
 #ifdef PARANOID
 L_bugged:
 	pushl	EX_INTERNAL|0x205
@@ -145,4 +141,3 @@ L_exit:
 	leave
 	ret
 #endif /* PARANOID */ 
-

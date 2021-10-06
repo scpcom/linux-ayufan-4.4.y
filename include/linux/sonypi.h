@@ -37,7 +37,6 @@
 
 #include <uapi/linux/sonypi.h>
 
-
 /* used only for communication between v4l and sonypi */
 
 #define SONYPI_COMMAND_GETCAMERA		 1	/* obsolete */

@@ -22,7 +22,6 @@
 
 #define NLMDBG_FACILITY		NLMDBG_SVCSUBS
 
-
 /*
  * Global file hash table
  */

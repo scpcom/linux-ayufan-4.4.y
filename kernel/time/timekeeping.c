@@ -992,7 +992,6 @@ error: /* even if we error out, we forwarded the time, so call update */
 }
 EXPORT_SYMBOL(timekeeping_inject_offset);
 
-
 /**
  * timekeeping_get_tai_offset - Returns current TAI offset from UTC
  *
@@ -1121,7 +1120,6 @@ void getrawmonotonic64(struct timespec64 *ts)
 	*ts = ts64;
 }
 EXPORT_SYMBOL(getrawmonotonic64);
-
 
 /**
  * timekeeping_valid_for_hres - Check if timekeeping is suitable for hres

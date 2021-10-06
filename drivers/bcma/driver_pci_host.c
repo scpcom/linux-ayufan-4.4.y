@@ -484,7 +484,6 @@ void bcma_core_pci_hostmode_init(struct bcma_drv_pci *pc)
 	pcicore_write32(pc, BCMA_CORE_PCI_SBTOPCI2,
 			BCMA_CORE_PCI_SBTOPCI_MEM | pci_membase_1G);
 
-
 	/* As per PCI Express Base Spec 1.1 we need to wait for
 	 * at least 100 ms from the end of a reset (cold/warm/hot)
 	 * before issuing configuration requests to PCI Express

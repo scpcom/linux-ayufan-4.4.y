@@ -178,5 +178,3 @@ void __init isa_init_irq(unsigned int host_irq)
 				IRQ_NOREQUEST | IRQ_NOPROBE, IRQ_NOAUTOEN);
 	}
 }
-
-

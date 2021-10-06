@@ -162,10 +162,8 @@ static void __exit spu_gov_exit(void)
 	cpufreq_unregister_governor(&spu_governor);
 }
 
-
 module_init(spu_gov_init);
 module_exit(spu_gov_exit);
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Christian Krafft <krafft@de.ibm.com>");
-

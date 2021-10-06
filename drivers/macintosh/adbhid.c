@@ -921,7 +921,6 @@ static void adbhid_input_unregister(int id)
 	adbhid[id] = NULL;
 }
 
-
 static u16
 adbhid_input_reregister(int id, int default_id, int org_handler_id,
 			int cur_handler_id, int mk)
@@ -1243,7 +1242,6 @@ init_microspeed(int id)
 	    0x00,	/* norm speed = 0x00 (fastest) */
 	    0x10,	/* extended protocol, no speed change */
 	    0x07);	/* all buttons enabled as mouse buttons, no locking */
-
 
 	adb_request(&req, NULL, ADBREQ_SYNC, 1, ADB_FLUSH(id));
 }

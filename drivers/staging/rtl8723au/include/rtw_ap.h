@@ -18,7 +18,6 @@
 #include <osdep_service.h>
 #include <drv_types.h>
 
-
 #ifdef CONFIG_8723AU_AP_MODE
 
 /* external function */

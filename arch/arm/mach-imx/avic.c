@@ -78,7 +78,6 @@ static int avic_set_irq_fiq(unsigned int irq, unsigned int type)
 }
 #endif /* CONFIG_FIQ */
 
-
 static struct mxc_extra_irq avic_extra_irq = {
 #ifdef CONFIG_FIQ
 	.set_irq_fiq = avic_set_irq_fiq,

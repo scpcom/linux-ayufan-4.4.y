@@ -151,7 +151,6 @@ static int tt3650_ci_read_attribute_mem(struct dvb_ca_en50221 *ca, int slot, int
 	buf[0] = (address >> 8) & 0x0F;
 	buf[1] = address;
 
-
 	ret = tt3650_ci_msg_locked(ca, TT3650_CMD_CI_RD_ATTR, buf, 2, 3);
 
 	ci_dbg("%04x -> %d 0x%02x", address, ret, buf[2]);
@@ -449,7 +448,6 @@ static int tt3650_rc_query(struct dvb_usb_device *d)
 	return 0;
 }
 
-
 /* Callbacks for DVB USB */
 static int ttusb2_identify_state (struct usb_device *udev, struct
 		dvb_usb_device_properties *props, struct dvb_usb_device_description **desc,
@@ -465,7 +463,6 @@ static int ttusb2_power_ctrl(struct dvb_usb_device *d, int onoff)
 	ttusb2_msg(d, CMD_POWER, &b, 0, NULL, 0);
 	return ttusb2_msg(d, CMD_POWER, &b, 1, NULL, 0);
 }
-
 
 static struct tda10086_config tda10086_config = {
 	.demod_address = 0x0e,

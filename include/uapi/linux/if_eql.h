@@ -33,7 +33,6 @@
 #define EQL_GETMASTRCFG (SIOCDEVPRIVATE + 4)
 #define EQL_SETMASTRCFG (SIOCDEVPRIVATE + 5)
 
-
 typedef struct master_config {
 	char	master_name[16];
 	int	max_slaves;
@@ -49,6 +48,5 @@ typedef struct slaving_request {
 	char	slave_name[16];
 	long	priority;
 } slaving_request_t;
-
 
 #endif /* _UAPI_LINUX_IF_EQL_H */

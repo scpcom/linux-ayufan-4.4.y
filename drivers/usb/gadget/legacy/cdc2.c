@@ -17,7 +17,6 @@
 #include "u_serial.h"
 #include "u_ecm.h"
 
-
 #define DRIVER_DESC		"CDC Composite Gadget"
 #define DRIVER_VERSION		"King Kamehameha Day 2008"
 

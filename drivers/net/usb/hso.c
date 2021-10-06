@@ -71,7 +71,6 @@
 #include <linux/serial_core.h>
 #include <linux/serial.h>
 
-
 #define MOD_AUTHOR			"Option Wireless"
 #define MOD_DESCRIPTION			"USB High Speed Option driver"
 #define MOD_LICENSE			"GPL"
@@ -214,7 +213,6 @@ struct hso_tiocmget {
 	u16    prev_UART_state_bitmap;
 	struct uart_icount icount;
 };
-
 
 struct hso_serial {
 	struct hso_device *parent;
@@ -1155,9 +1153,6 @@ static void hso_resubmit_rx_bulk_urb(struct hso_serial *serial, struct urb *urb)
 	}
 }
 
-
-
-
 static void put_rxbuf_data_and_resubmit_bulk_urb(struct hso_serial *serial)
 {
 	int count;
@@ -1197,7 +1192,6 @@ static void put_rxbuf_data_and_resubmit_ctrl_urb(struct hso_serial *serial)
 	} else
 		serial->rx_state = RX_IDLE;
 }
-
 
 /* read callback for Diag and CS port */
 static void hso_std_serial_read_bulk_callback(struct urb *urb)
@@ -1639,7 +1633,6 @@ static int hso_get_count(struct tty_struct *tty,
 	return 0;
 }
 
-
 static int hso_serial_tiocmget(struct tty_struct *tty)
 {
 	int retval;
@@ -1735,7 +1728,6 @@ static int hso_serial_ioctl(struct tty_struct *tty,
 	}
 	return ret;
 }
-
 
 /* starts a transmit */
 static void hso_kick_transmit(struct hso_serial *serial)
@@ -2052,7 +2044,6 @@ static int put_rxbuf_data(struct urb *urb, struct hso_serial *serial)
 
 	return 0;
 }
-
 
 /* Base driver functions */
 

@@ -343,7 +343,6 @@ int ccw_device_start_timeout(struct ccw_device *cdev, struct ccw1 *cpa,
 					    expires);
 }
 
-
 /**
  * ccw_device_halt() - halt I/O request processing
  * @cdev: target ccw device

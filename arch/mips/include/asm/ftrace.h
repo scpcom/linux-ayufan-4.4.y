@@ -74,7 +74,6 @@ do {						\
 #define safe_store_stack(src, dst, error) \
 	safe_store(STR(PTR_S), src, dst, error)
 
-
 #ifdef CONFIG_DYNAMIC_FTRACE
 static inline unsigned long ftrace_call_adjust(unsigned long addr)
 {

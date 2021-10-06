@@ -31,7 +31,6 @@
 #include "pcxhr_core.h"
 #include "pcxhr_mix22.h"
 
-
 /* registers used on the DSP and Xilinx (port 2) : HR stereo cards only */
 #define PCXHR_DSP_RESET		0x20
 #define PCXHR_XLX_CFG		0x24
@@ -48,7 +47,6 @@
 /* byte access only ! */
 #define PCXHR_INPB(mgr, x)	inb((mgr)->port[PCXHR_DSP] + (x))
 #define PCXHR_OUTPB(mgr, x, data) outb((data), (mgr)->port[PCXHR_DSP] + (x))
-
 
 /* values for PCHR_DSP_RESET register */
 #define PCXHR_DSP_RESET_DSP	0x01
@@ -110,7 +108,6 @@
 #define PCXHR_SELMIC_PREAMPLI_OFFSET	2
 #define PCXHR_SELMIC_PREAMPLI_MASK	0x0C
 #define PCXHR_SELMIC_PHANTOM_ALIM	0x80
-
 
 static const unsigned char g_hr222_p_level[] = {
     0x00,   /* [000] -49.5 dB:	AKM[000] = -1.#INF dB	(mute) */
@@ -215,7 +212,6 @@ static const unsigned char g_hr222_p_level[] = {
     0xff,   /* [099] +0.0 dB:	AKM[255] = +0.000 dB	(diff=0.00000 dB) */
 };
 
-
 static void hr222_config_akm(struct pcxhr_mgr *mgr, unsigned short data)
 {
 	unsigned short mask = 0x8000;
@@ -230,7 +226,6 @@ static void hr222_config_akm(struct pcxhr_mgr *mgr, unsigned short data)
 	/* termiate access to codec registers */
 	PCXHR_INPB(mgr, PCXHR_XLX_RUER);
 }
-
 
 static int hr222_set_hw_playback_level(struct pcxhr_mgr *mgr,
 				       int idx, int level)
@@ -252,7 +247,6 @@ static int hr222_set_hw_playback_level(struct pcxhr_mgr *mgr,
 	hr222_config_akm(mgr, cmd);
 	return 0;
 }
-
 
 static int hr222_set_hw_capture_level(struct pcxhr_mgr *mgr,
 				      int level_l, int level_r, int level_mic)
@@ -316,7 +310,6 @@ int hr222_sub_init(struct pcxhr_mgr *mgr)
 
 	return 0;
 }
-
 
 /* calc PLL register */
 /* TODO : there is a very similar fct in pcxhr.c */
@@ -505,7 +498,6 @@ int hr222_get_external_clock(struct pcxhr_mgr *mgr,
 	return 0;
 }
 
-
 int hr222_read_gpio(struct pcxhr_mgr *mgr, int is_gpi, int *value)
 {
 	if (is_gpi) {
@@ -518,7 +510,6 @@ int hr222_read_gpio(struct pcxhr_mgr *mgr, int is_gpi, int *value)
 	}
 	return 0;
 }
-
 
 int hr222_write_gpo(struct pcxhr_mgr *mgr, int value)
 {
@@ -574,7 +565,6 @@ int hr222_update_analog_audio_level(struct snd_pcxhr *chip,
 		return hr222_set_hw_playback_level(chip->mgr, channel, vol);
 	}
 }
-
 
 /*texts[5] = {"Line", "Digital", "Digi+SRC", "Mic", "Line+Mic"}*/
 #define SOURCE_LINE	0
@@ -632,7 +622,6 @@ int hr222_set_audio_source(struct snd_pcxhr *chip)
 	return 0;
 }
 
-
 int hr222_iec958_capture_byte(struct snd_pcxhr *chip,
 			     int aes_idx, unsigned char *aes_bits)
 {
@@ -652,7 +641,6 @@ int hr222_iec958_capture_byte(struct snd_pcxhr *chip,
 	*aes_bits = temp;
 	return 0;
 }
-
 
 int hr222_iec958_update_byte(struct snd_pcxhr *chip,
 			     int aes_idx, unsigned char aes_bits)
@@ -704,7 +692,6 @@ static void hr222_phantom_power(struct pcxhr_mgr *mgr, int power)
 	dev_dbg(&mgr->pci->dev, "hr222_phantom_power : set %d\n", power);
 }
 
-
 /* mic level */
 static const DECLARE_TLV_DB_SCALE(db_scale_mic_hr222, -9850, 50, 650);
 
@@ -755,7 +742,6 @@ static struct snd_kcontrol_new hr222_control_mic_level = {
 	.tlv = { .p = db_scale_mic_hr222 },
 };
 
-
 /* mic boost level */
 static const DECLARE_TLV_DB_SCALE(db_scale_micboost_hr222, 0, 1800, 5400);
 
@@ -805,7 +791,6 @@ static struct snd_kcontrol_new hr222_control_mic_boost = {
 	.tlv = { .p = db_scale_micboost_hr222 },
 };
 
-
 /******************* Phantom power switch *******************/
 #define hr222_phantom_power_info	snd_ctl_boolean_mono_info
 
@@ -843,7 +828,6 @@ static struct snd_kcontrol_new hr222_phantom_power_switch = {
 	.get = hr222_phantom_power_get,
 	.put = hr222_phantom_power_put,
 };
-
 
 int hr222_add_mic_controls(struct snd_pcxhr *chip)
 {

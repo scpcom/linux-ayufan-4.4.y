@@ -83,7 +83,6 @@ static const struct pci_device_id tw68_pci_tbl[] = {
 
 /* ------------------------------------------------------------------ */
 
-
 /*
  * The device is given a "soft reset". According to the specifications,
  * after this "all register content remain unchanged", so we also write

@@ -644,7 +644,6 @@ send_uframe(struct layer2 *l2, struct sk_buff *skb, u_char cmd, u_char cr)
 	enqueue_super(l2, skb);
 }
 
-
 inline u_char
 get_PollFlag(struct layer2 *l2, struct sk_buff *skb)
 {
@@ -1149,7 +1148,6 @@ transmit_enquiry(struct layer2 *l2)
 	test_and_clear_bit(FLG_ACK_PEND, &l2->flag);
 	start_t200(l2, 9);
 }
-
 
 static void
 nrerrorrecovery(struct FsmInst *fi)

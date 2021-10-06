@@ -320,7 +320,6 @@ issue_sc_end:
 	return ret;
 } /* end of snic_issue_scsi_req */
 
-
 /*
  * snic_queuecommand
  * Routine to send a scsi cdb to LLD
@@ -536,7 +535,6 @@ snic_process_icmnd_cmpl_status(struct snic *snic,
 	return ret;
 } /* end of snic_process_icmnd_cmpl_status */
 
-
 /*
  * snic_icmnd_cmpl_handler
  * Routine to handle icmnd completions
@@ -669,7 +667,6 @@ snic_icmnd_cmpl_handler(struct snic *snic, struct snic_fw_req *fwreq)
 		 jiffies_to_msecs(jiffies - start_time), (ulong) fwreq,
 		 SNIC_TRC_CMD(sc), SNIC_TRC_CMD_STATE_FLAGS(sc));
 
-
 	if (sc->scsi_done)
 		sc->scsi_done(sc);
 
@@ -706,7 +703,6 @@ snic_proc_dr_cmpl_locked(struct snic *snic,
 
 		return;
 	}
-
 
 	if (CMD_FLAGS(sc) & SNIC_DEV_RST_TIMEDOUT) {
 		SNIC_TRC(snic->shost->host_no, cmnd_id, (ulong) sc,
@@ -959,8 +955,6 @@ ioctl_dev_rst:
 
 	snic_process_itmf_cmpl(snic, fwreq, cmnd_id, hdr_stat, sc);
 } /* end of snic_itmf_cmpl_handler */
-
-
 
 static void
 snic_hba_reset_scsi_cleanup(struct snic *snic, struct scsi_cmnd *sc)
@@ -1352,7 +1346,6 @@ snic_issue_tm_req(struct snic *snic,
 		      "issu_tmreq: Task mgmt req %d. rqi %p w/ tag %x\n",
 		      tmf, rqi, tag);
 
-
 	if (tmf == SNIC_ITMF_LUN_RESET) {
 		tmreq = snic_dr_req_init(snic, rqi);
 		req_id = SCSI_NO_TAG;
@@ -1584,7 +1577,6 @@ snic_send_abort_and_wait(struct snic *snic, struct scsi_cmnd *sc)
 		      "send_abt_cmd: sc %p Tag %x flags 0x%llx\n",
 		      sc, tag, CMD_FLAGS(sc));
 
-
 	ret = 0;
 
 abts_pending:
@@ -1623,7 +1615,6 @@ snic_abort_cmd(struct scsi_cmnd *sc)
 		goto abort_end;
 	}
 
-
 	ret = snic_send_abort_and_wait(snic, sc);
 	if (ret)
 		goto abort_end;
@@ -1642,8 +1633,6 @@ abort_end:
 
 	return ret;
 }
-
-
 
 static int
 snic_is_abts_pending(struct snic *snic, struct scsi_cmnd *lr_sc)
@@ -1724,10 +1713,8 @@ snic_dr_clean_single_req(struct snic *snic,
 	if (!rqi)
 		goto skip_clean;
 
-
 	if (CMD_STATE(sc) == SNIC_IOREQ_ABTS_PENDING)
 		goto skip_clean;
-
 
 	if ((CMD_FLAGS(sc) & SNIC_DEVICE_RESET) &&
 			(!(CMD_FLAGS(sc) & SNIC_DEV_RST_ISSUED))) {
@@ -2319,7 +2306,6 @@ snic_reset(struct Scsi_Host *shost, struct scsi_cmnd *sc)
 	snic_set_state(snic, SNIC_FWRESET);
 	spin_unlock_irqrestore(&snic->snic_lock, flags);
 
-
 	/* Wait for all the IOs that are entered in Qcmd */
 	while (atomic_read(&snic->ios_inflight))
 		schedule_timeout(msecs_to_jiffies(1));
@@ -2515,7 +2501,6 @@ snic_internal_abort_io(struct snic *snic, struct scsi_cmnd *sc, int tmf)
 
 		goto skip_internal_abts;
 	}
-
 
 	if (!(CMD_FLAGS(sc) & SNIC_IO_ISSUED)) {
 		SNIC_SCSI_DBG(snic->shost,

@@ -53,7 +53,6 @@ static const struct sysfs_ops odev_attr_ops = {
 	.store = odev_attr_store,
 };
 
-
 static struct kset *exofs_kset;
 
 static ssize_t osdname_show(struct exofs_dev *edp, char *buf)

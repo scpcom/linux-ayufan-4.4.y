@@ -83,7 +83,6 @@ static void ichxrom_cleanup(struct ichxrom_window *window)
 	}
 }
 
-
 static int ichxrom_init_one(struct pci_dev *pdev,
 			    const struct pci_device_id *ent)
 {
@@ -293,7 +292,6 @@ static int ichxrom_init_one(struct pci_dev *pdev,
 			goto out;
 		}
 
-
 		/* Calculate the new value of map_top */
 		map_top += map->mtd->size;
 
@@ -313,7 +311,6 @@ static int ichxrom_init_one(struct pci_dev *pdev,
 	}
 	return 0;
 }
-
 
 static void ichxrom_remove_one(struct pci_dev *pdev)
 {

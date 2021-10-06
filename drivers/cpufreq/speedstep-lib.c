@@ -103,7 +103,6 @@ static unsigned int pentium3_get_frequency(enum speedstep_processor processor)
 	return msr_decode_mult[j].ratio * msr_decode_fsb[i].value * 100;
 }
 
-
 static unsigned int pentiumM_get_frequency(void)
 {
 	u32 msr_lo, msr_tmp;
@@ -168,7 +167,6 @@ static unsigned int pentium_core_get_frequency(void)
 	return ret;
 }
 
-
 static unsigned int pentium4_get_frequency(void)
 {
 	struct cpuinfo_x86 *c = &boot_cpu_data;
@@ -221,7 +219,6 @@ static unsigned int pentium4_get_frequency(void)
 	return ret;
 }
 
-
 /* Warning: may get called from smp_call_function_single. */
 unsigned int speedstep_get_frequency(enum speedstep_processor processor)
 {
@@ -243,7 +240,6 @@ unsigned int speedstep_get_frequency(enum speedstep_processor processor)
 	return 0;
 }
 EXPORT_SYMBOL_GPL(speedstep_get_frequency);
-
 
 /*********************************************************************
  *                 DETECT SPEEDSTEP-CAPABLE PROCESSOR                *
@@ -371,7 +367,6 @@ unsigned int speedstep_detect_processor(void)
 	}
 }
 EXPORT_SYMBOL_GPL(speedstep_detect_processor);
-
 
 /*********************************************************************
  *                     DETECT SPEEDSTEP SPEEDS                       *

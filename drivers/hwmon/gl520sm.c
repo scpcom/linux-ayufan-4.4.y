@@ -810,7 +810,6 @@ static const struct attribute_group gl520_group_temp2 = {
 	.attrs = gl520_attributes_temp2,
 };
 
-
 /*
  * Real code
  */

@@ -127,7 +127,6 @@ static inline void debug_dmem_freed(struct imx21 *imx21, int size)
 	imx21->dmem_usage.value -= size;
 }
 
-
 static void debug_isoc_submitted(struct imx21 *imx21,
 	int frame, struct td *td)
 {
@@ -169,7 +168,6 @@ static inline void debug_isoc_completed(struct imx21 *imx21,
 		*trace_failed = *trace;
 	}
 }
-
 
 static char *format_ep(struct usb_host_endpoint *ep, char *buf, int bufsize)
 {
@@ -518,7 +516,6 @@ failed_create_rootdir:
 	imx21->debug_root = NULL;
 }
 
-
 static void remove_debug_files(struct imx21 *imx21)
 {
 	if (imx21->debug_root) {
@@ -528,4 +525,3 @@ static void remove_debug_files(struct imx21 *imx21)
 }
 
 #endif
-

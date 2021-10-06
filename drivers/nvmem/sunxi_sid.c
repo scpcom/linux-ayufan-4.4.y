@@ -16,7 +16,6 @@
  *
  */
 
-
 #include <linux/device.h>
 #include <linux/io.h>
 #include <linux/module.h>
@@ -26,7 +25,6 @@
 #include <linux/regmap.h>
 #include <linux/slab.h>
 #include <linux/random.h>
-
 
 static struct nvmem_config econfig = {
 	.name = "sunxi-sid",

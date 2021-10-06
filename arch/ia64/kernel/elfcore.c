@@ -5,7 +5,6 @@
 
 #include <asm/elf.h>
 
-
 Elf64_Half elf_core_extra_phdrs(void)
 {
 	return GATE_EHDR->e_phnum;

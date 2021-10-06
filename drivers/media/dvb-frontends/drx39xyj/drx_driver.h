@@ -153,7 +153,6 @@ extern int drx_i2c_error_g;
 			      TUNER_MODE_SUB4 | TUNER_MODE_SUB5 | \
 			      TUNER_MODE_SUB6 | TUNER_MODE_SUB7)
 
-
 enum tuner_lock_status {
 	TUNER_LOCKED,
 	TUNER_NOT_LOCKED
@@ -1344,7 +1343,6 @@ struct drx_version_list {
 		enum drxmpeg_str_width width_str;
 					/**< MPEG start width                 */
 	};
-
 
 /*========================================*/
 

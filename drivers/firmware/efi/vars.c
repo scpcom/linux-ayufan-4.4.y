@@ -1061,7 +1061,6 @@ int __efivar_entry_iter(int (*func)(struct efivar_entry *, void *),
 		return err;
 	}
 
-
 	list_for_each_entry_safe_continue((*prev), n, head, list) {
 		err = func(*prev, data);
 		if (err)

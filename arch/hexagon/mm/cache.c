@@ -110,9 +110,6 @@ void hexagon_inv_dcache_range(unsigned long start, unsigned long end)
 	local_irq_restore(flags);
 }
 
-
-
-
 /*
  * This is just really brutal and shouldn't be used anyways,
  * especially on V2.  Left here just in case.

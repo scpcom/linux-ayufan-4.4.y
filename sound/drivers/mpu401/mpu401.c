@@ -143,7 +143,6 @@ static struct platform_driver snd_mpu401_driver = {
 	},
 };
 
-
 #ifdef CONFIG_PNP
 
 #define IO_EXTENT 2

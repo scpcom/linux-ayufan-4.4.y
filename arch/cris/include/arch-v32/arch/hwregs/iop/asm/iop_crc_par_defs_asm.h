@@ -150,7 +150,6 @@
 #define reg_iop_crc_par_rw_strb_rec_dif_in___last___width 2
 #define reg_iop_crc_par_rw_strb_rec_dif_in_offset 64
 
-
 /* Constants */
 #define regk_iop_crc_par_calc                     0x00000001
 #define regk_iop_crc_par_ccitt                    0x00000002

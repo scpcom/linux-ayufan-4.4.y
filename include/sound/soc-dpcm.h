@@ -158,5 +158,4 @@ static inline void dpcm_path_put(struct snd_soc_dapm_widget_list **list)
 	kfree(*list);
 }
 
-
 #endif

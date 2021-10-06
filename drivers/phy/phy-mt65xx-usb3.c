@@ -370,7 +370,6 @@ static struct phy *mt65xx_phy_xlate(struct device *dev,
 	struct device_node *phy_np = args->np;
 	int index;
 
-
 	if (args->args_count != 1) {
 		dev_err(dev, "invalid number of cells in 'phy' property\n");
 		return ERR_PTR(-EINVAL);

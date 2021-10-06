@@ -993,7 +993,6 @@ static int skl_calc_wrpll_link(struct drm_i915_private *dev_priv,
 	else
 		p1 = 1;
 
-
 	switch (p0) {
 	case DPLL_CFGCR2_PDIV_1:
 		p0 = 1;

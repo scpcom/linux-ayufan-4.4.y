@@ -819,7 +819,6 @@ static int sur40_vidioc_enum_frameintervals(struct file *file, void *priv,
 	return 0;
 }
 
-
 static const struct usb_device_id sur40_table[] = {
 	{ USB_DEVICE(ID_MICROSOFT, ID_SUR40) },  /* Samsung SUR40 */
 	{ }                                      /* terminating null entry */

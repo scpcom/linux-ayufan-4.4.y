@@ -46,7 +46,6 @@
 #define AAT1290_FLASH_TM_NUM_LEVELS	16
 #define AAT1290_MM_CURRENT_SCALE_SIZE	15
 
-
 struct aat1290_led_config_data {
 	/* maximum LED current in movie mode */
 	u32 max_mm_current;

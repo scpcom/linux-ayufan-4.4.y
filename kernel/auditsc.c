@@ -2157,7 +2157,6 @@ void __audit_bprm(struct linux_binprm *bprm)
 	context->execve.argc = bprm->argc;
 }
 
-
 /**
  * audit_socketcall - record audit data for sys_socketcall
  * @nargs: number of args, which should not be more than AUDITSC_ARGS.

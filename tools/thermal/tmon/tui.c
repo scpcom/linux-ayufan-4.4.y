@@ -64,7 +64,6 @@ static int maxwidth = 200;
 #define TITLE_BAR_HIGHT 1
 #define SENSOR_WIN_HIGHT 4 /* one row for tz name, one for trip points */
 
-
 /* daemon mode flag (set by startup parameter -d) */
 static int  tui_disabled;
 
@@ -574,7 +573,6 @@ const char data_win_title[] = " THERMAL DATA ";
 void show_data_w(void)
 {
 	int i;
-
 
 	if (tui_disabled || !thermal_data_window)
 		return;

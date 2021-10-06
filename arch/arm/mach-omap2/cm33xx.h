@@ -373,7 +373,6 @@
 #define AM33XX_CM_CEFUSE_CEFUSE_CLKCTRL_OFFSET		0x0020
 #define AM33XX_CM_CEFUSE_CEFUSE_CLKCTRL			AM33XX_CM_REGADDR(AM33XX_CM_CEFUSE_MOD, 0x0020)
 
-
 #ifndef __ASSEMBLER__
 int am33xx_cm_init(const struct omap_prcm_init_data *data);
 #endif /* ASSEMBLER */

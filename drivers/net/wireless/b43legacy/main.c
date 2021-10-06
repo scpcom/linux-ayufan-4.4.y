@@ -53,7 +53,6 @@
 #include "xmit.h"
 #include "radio.h"
 
-
 MODULE_DESCRIPTION("Broadcom B43legacy wireless driver");
 MODULE_AUTHOR("Martin Langer");
 MODULE_AUTHOR("Stefano Brivio");
@@ -89,7 +88,6 @@ static const struct ssb_device_id b43legacy_ssb_tbl[] = {
 	{},
 };
 MODULE_DEVICE_TABLE(ssb, b43legacy_ssb_tbl);
-
 
 /* Channel and ratetables are shared for all devices.
  * They can't be const, because ieee80211 puts some precalculated
@@ -164,7 +162,6 @@ static void b43legacy_wireless_core_exit(struct b43legacy_wldev *dev);
 static int b43legacy_wireless_core_init(struct b43legacy_wldev *dev);
 static void b43legacy_wireless_core_stop(struct b43legacy_wldev *dev);
 static int b43legacy_wireless_core_start(struct b43legacy_wldev *dev);
-
 
 static int b43legacy_ratelimit(struct b43legacy_wl *wl)
 {
@@ -3052,7 +3049,6 @@ static int b43legacy_phy_versioning(struct b43legacy_wldev *dev)
 	b43legacydbg(dev->wl, "Found PHY: Analog %u, Type %u, Revision %u\n",
 	       analog_type, phy_type, phy_rev);
 
-
 	/* Get RADIO versioning */
 	if (dev->dev->bus->chip_id == 0x4317) {
 		if (dev->dev->bus->chip_rev == 0)
@@ -3093,7 +3089,6 @@ static int b43legacy_phy_versioning(struct b43legacy_wldev *dev)
 	}
 	b43legacydbg(dev->wl, "Found Radio: Manuf 0x%X, Version 0x%X,"
 		     " Revision %u\n", radio_manuf, radio_ver, radio_rev);
-
 
 	phy->radio_manuf = radio_manuf;
 	phy->radio_ver = radio_ver;

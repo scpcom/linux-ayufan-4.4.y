@@ -178,7 +178,6 @@ int copy_thread(unsigned long clone_flags, unsigned long sp,
 	if (clone_flags & CLONE_SETTLS)
 		childregs->tp = childregs->regs[4];
 
-
 #if CHIP_HAS_TILE_DMA()
 	/*
 	 * No DMA in the new thread.  We model this on the fact that
@@ -196,7 +195,6 @@ int copy_thread(unsigned long clone_flags, unsigned long sp,
 	memset(&p->thread.hardwall[0], 0,
 	       sizeof(struct hardwall_task) * HARDWALL_TYPES);
 #endif
-
 
 	/*
 	 * Start the new thread with the current architecture state
@@ -406,7 +404,6 @@ static void restore_arch_state(const struct thread_struct *t)
 #endif
 }
 
-
 void _prepare_arch_switch(struct task_struct *next)
 {
 #if CHIP_HAS_TILE_DMA()
@@ -415,7 +412,6 @@ void _prepare_arch_switch(struct task_struct *next)
 		save_tile_dma_state(dma);
 #endif
 }
-
 
 struct task_struct *__sched _switch_to(struct task_struct *prev,
 				       struct task_struct *next)

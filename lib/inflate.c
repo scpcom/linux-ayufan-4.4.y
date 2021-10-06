@@ -57,7 +57,6 @@
    lbits and dbits tuning parameters.
  */
 
-
 /*
    Notes beyond the 1.93a appnote.txt:
 
@@ -144,7 +143,6 @@ struct huft {
   } v;
 };
 
-
 /* Function prototypes */
 STATIC int INIT huft_build OF((unsigned *, unsigned, unsigned, 
 		const ush *, const ush *, struct huft **, int *));
@@ -155,7 +153,6 @@ STATIC int INIT inflate_fixed OF((void));
 STATIC int INIT inflate_dynamic OF((void));
 STATIC int INIT inflate_block OF((int *));
 STATIC int INIT inflate OF((void));
-
 
 /* The inflate algorithm uses a sliding 32 K byte window on the uncompressed
    stream to find repeated byte strings.  This is implemented here as a
@@ -187,8 +184,6 @@ static const ush cpdext[] = {         /* Extra bits for distance codes */
         0, 0, 0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6,
         7, 7, 8, 8, 9, 9, 10, 10, 11, 11,
         12, 12, 13, 13};
-
-
 
 /* Macros for inflate() bit peeking and grabbing.
    The usage is:
@@ -305,18 +300,14 @@ static void free(void *where)
    possibly even between compilers.  Your mileage may vary.
  */
 
-
 STATIC const int lbits = 9;          /* bits in base literal/length lookup table */
 STATIC const int dbits = 6;          /* bits in base distance lookup table */
-
 
 /* If BMAX needs to be larger than 16, then h and x[] should be ulg. */
 #define BMAX 16         /* maximum bit length of any code (16 for explode) */
 #define N_MAX 288       /* maximum number of codes in any set */
 
-
 STATIC unsigned hufts;         /* track memory usage */
-
 
 STATIC int INIT huft_build(
 	unsigned *b,            /* code lengths in bits (all assumed <= BMAX) */
@@ -561,8 +552,6 @@ DEBG("huft7 ");
   return ret;
 }
 
-
-
 STATIC int INIT huft_free(
 	struct huft *t         /* table to free */
 	)
@@ -571,7 +560,6 @@ STATIC int INIT huft_free(
    each table. */
 {
   register struct huft *p, *q;
-
 
   /* Go through linked list, freeing from the malloced (t[-1]) address. */
   p = t;
@@ -583,7 +571,6 @@ STATIC int INIT huft_free(
   } 
   return 0;
 }
-
 
 STATIC int INIT inflate_codes(
 	struct huft *tl,    /* literal/length decoder tables */
@@ -601,7 +588,6 @@ STATIC int INIT inflate_codes(
   unsigned ml, md;      /* masks for bl and bd bits */
   register ulg b;       /* bit buffer */
   register unsigned k;  /* number of bits in bit buffer */
-
 
   /* make local copies of globals */
   b = bb;                       /* initialize bit buffer */
@@ -685,7 +671,6 @@ STATIC int INIT inflate_codes(
     }
   }
 
-
   /* restore the globals from the locals */
   wp = w;                       /* restore global window pointer */
   bb = b;                       /* restore global bit buffer */
@@ -697,8 +682,6 @@ STATIC int INIT inflate_codes(
  underrun:
   return 4;			/* Input underrun */
 }
-
-
 
 STATIC int INIT inflate_stored(void)
 /* "decompress" an inflated type 0 (stored) block. */
@@ -715,11 +698,9 @@ DEBG("<stor");
   k = bk;
   w = wp;                       /* initialize window position */
 
-
   /* go to byte boundary */
   n = k & 7;
   DUMPBITS(n);
-
 
   /* get the length and its complement */
   NEEDBITS(16)
@@ -729,7 +710,6 @@ DEBG("<stor");
   if (n != (unsigned)((~b) & 0xffff))
     return 1;                   /* error in compressed data */
   DUMPBITS(16)
-
 
   /* read and output the compressed data */
   while (n--)
@@ -744,7 +724,6 @@ DEBG("<stor");
     DUMPBITS(8)
   }
 
-
   /* restore the globals from the locals */
   wp = w;                       /* restore global window pointer */
   bb = b;                       /* restore global bit buffer */
@@ -756,7 +735,6 @@ DEBG("<stor");
  underrun:
   return 4;			/* Input underrun */
 }
-
 
 /*
  * We use `noinline' here to prevent gcc-3.5 from using too much stack space
@@ -807,7 +785,6 @@ DEBG("<fix");
     return i;
   }
 
-
   /* decompress until an end-of-block code */
   if (inflate_codes(tl, td, bl, bd)) {
     free(l);
@@ -820,7 +797,6 @@ DEBG("<fix");
   huft_free(td);
   return 0;
 }
-
 
 /*
  * We use `noinline' here to prevent gcc-3.5 from using too much stack space
@@ -859,7 +835,6 @@ DEBG("<dyn");
   /* make local bit buffer */
   b = bb;
   k = bk;
-
 
   /* read in table lengths */
   NEEDBITS(5)
@@ -1028,8 +1003,6 @@ underrun:
   goto out;
 }
 
-
-
 STATIC int INIT inflate_block(
 	int *e                  /* last block flag */
 	)
@@ -1045,18 +1018,15 @@ STATIC int INIT inflate_block(
   b = bb;
   k = bk;
 
-
   /* read in last block bit */
   NEEDBITS(1)
   *e = (int)b & 1;
   DUMPBITS(1)
 
-
   /* read in block type */
   NEEDBITS(2)
   t = (unsigned)b & 3;
   DUMPBITS(2)
-
 
   /* restore the global bit buffer */
   bb = b;
@@ -1079,8 +1049,6 @@ STATIC int INIT inflate_block(
   return 4;			/* Input underrun */
 }
 
-
-
 STATIC int INIT inflate(void)
 /* decompress an inflated entry */
 {
@@ -1092,7 +1060,6 @@ STATIC int INIT inflate(void)
   wp = 0;
   bk = 0;
   bb = 0;
-
 
   /* decompress until the last block */
   h = 0;
@@ -1118,7 +1085,6 @@ STATIC int INIT inflate(void)
 
   /* flush out slide */
   flush_output(wp);
-
 
   /* return success */
 #ifdef DEBUG
@@ -1305,5 +1271,3 @@ static int INIT gunzip(void)
     error("out of input data");
     return -1;
 }
-
-

@@ -189,7 +189,6 @@ loff_t nfs42_proc_llseek(struct file *filep, loff_t offset, int whence)
 	return err;
 }
 
-
 static void
 nfs42_layoutstat_prepare(struct rpc_task *task, void *calldata)
 {

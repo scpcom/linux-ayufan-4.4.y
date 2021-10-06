@@ -12,7 +12,6 @@
 #ifndef _UAPI_ASM_POWERPC_TERMIOS_H
 #define _UAPI_ASM_POWERPC_TERMIOS_H
 
-
 #include <asm/ioctls.h>
 #include <asm/termbits.h>
 
@@ -70,7 +69,5 @@ struct termio {
 #define _VTIME	7
 #define _VEOL2	8
 #define _VSWTC	9
-
-
 
 #endif /* _UAPI_ASM_POWERPC_TERMIOS_H */

@@ -18,8 +18,6 @@
  *   GNU General Public License for more details.
  */
 
-
-
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
@@ -100,8 +98,6 @@ static inline int in_order(struct timespec a, struct timespec b)
 	return 1;
 }
 
-
-
 int consistency_test(int clock_type, unsigned long seconds)
 {
 	struct timespec list[CALLS_PER_LOOP];
@@ -159,7 +155,6 @@ int consistency_test(int clock_type, unsigned long seconds)
 	printf("[OK]\n");
 	return 0;
 }
-
 
 int main(int argc, char *argv[])
 {

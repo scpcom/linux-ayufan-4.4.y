@@ -210,4 +210,3 @@ exc_##label##_book3e:
 	mtspr	SPRN_IVOR##vector_number,r3;
 
 #endif /* _ASM_POWERPC_EXCEPTION_64E_H */
-

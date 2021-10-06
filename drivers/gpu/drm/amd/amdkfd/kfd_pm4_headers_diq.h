@@ -173,7 +173,6 @@ struct pm4__release_mem {
 };
 #endif
 
-
 /*--------------------_SET_CONFIG_REG-------------------- */
 
 #ifndef _PM4__SET_CONFIG_REG_DEFINED
@@ -285,6 +284,5 @@ struct pm4__wait_reg_mem {
 
 };
 #endif
-
 
 #endif /* KFD_PM4_HEADERS_DIQ_H_ */

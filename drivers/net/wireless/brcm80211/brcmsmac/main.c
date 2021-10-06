@@ -5434,7 +5434,6 @@ int brcms_c_set_channel(struct brcms_c_info *wlc, u16 channel)
 	if (!brcms_c_valid_chanspec_db(wlc->cmi, chspec))
 		return -EINVAL;
 
-
 	if (!wlc->pub->up && brcms_is_mband_unlocked(wlc)) {
 		if (wlc->band->bandunit != chspec_bandunit(chspec))
 			wlc->bandinit_pending = true;
@@ -6342,7 +6341,6 @@ brcms_c_d11hdrs_mac80211(struct brcms_c_info *wlc, struct ieee80211_hw *hw,
 		use_cts |=
 		    txrate[k]->
 		    flags & IEEE80211_TX_RC_USE_CTS_PROTECT ? true : false;
-
 
 		/*
 		 * (1) RATE:

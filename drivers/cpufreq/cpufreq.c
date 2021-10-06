@@ -469,7 +469,6 @@ void cpufreq_freq_transition_end(struct cpufreq_policy *policy,
 }
 EXPORT_SYMBOL_GPL(cpufreq_freq_transition_end);
 
-
 /*********************************************************************
  *                          SYSFS INTERFACE                          *
  *********************************************************************/
@@ -1756,7 +1755,6 @@ int cpufreq_unregister_notifier(struct notifier_block *nb, unsigned int list)
 }
 EXPORT_SYMBOL(cpufreq_unregister_notifier);
 
-
 /*********************************************************************
  *                              GOVERNORS                            *
  *********************************************************************/
@@ -2053,7 +2051,6 @@ void cpufreq_unregister_governor(struct cpufreq_governor *governor)
 	return;
 }
 EXPORT_SYMBOL_GPL(cpufreq_unregister_governor);
-
 
 /*********************************************************************
  *                          POLICY INTERFACE                         *

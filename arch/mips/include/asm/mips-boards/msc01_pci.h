@@ -50,7 +50,6 @@
 #define MSC01_PCI_CFG_OFS		0x2380
 #define MSC01_PCI_SWAP_OFS		0x2388
 
-
 /*****************************************************************************
  * Register encodings
  ****************************************************************************/
@@ -178,7 +177,6 @@
 #define MSC01_PCI_BAR0_T_SHF		0
 #define MSC01_PCI_BAR0_T_MSK		0x00000001
 #define MSC01_PCI_BAR0_T_BIT		MSC01_PCI_BAR0_T_MSK
-
 
 #define MSC01_PCI_CFG_RA_SHF		17
 #define MSC01_PCI_CFG_RA_MSK		0x00020000

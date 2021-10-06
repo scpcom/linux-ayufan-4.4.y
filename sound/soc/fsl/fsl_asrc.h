@@ -85,7 +85,6 @@
 #define REG_ASRMCR1C			0xC8
 #define REG_ASRMCR1(i)			(REG_ASRMCR1A + (i << 2))
 
-
 /* REG0 0x00 REG_ASRCTR */
 #define ASRCTR_ATSi_SHIFT(i)		(20 + i)
 #define ASRCTR_ATSi_MASK(i)		(1 << ASRCTR_ATSi_SHIFT(i))
@@ -281,7 +280,6 @@
 #define ASRMCR1i_OW16_SHIFT		0
 #define ASRMCR1i_OW16_MASK		(1 << ASRMCR1i_OW16_SHIFT)
 #define ASRMCR1i_OW16(v)		((v) << ASRMCR1i_OW16_SHIFT)
-
 
 enum asrc_pair_index {
 	ASRC_INVALID_PAIR = -1,

@@ -233,7 +233,6 @@ static void tda8290_set_params(struct dvb_frontend *fe,
 		tuner_i2c_xfer_send(&priv->i2c_props, pll_bw_nom, 2);
 	}
 
-
 	if (fe->ops.analog_ops.i2c_gate_ctrl)
 		fe->ops.analog_ops.i2c_gate_ctrl(fe, 1);
 

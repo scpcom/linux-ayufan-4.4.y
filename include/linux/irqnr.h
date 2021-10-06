@@ -3,7 +3,6 @@
 
 #include <uapi/linux/irqnr.h>
 
-
 extern int nr_irqs;
 extern struct irq_desc *irq_to_desc(unsigned int irq);
 unsigned int irq_get_next_irq(unsigned int offset);
@@ -14,7 +13,6 @@ unsigned int irq_get_next_irq(unsigned int offset);
 		if (!desc)						\
 			;						\
 		else
-
 
 # define for_each_irq_desc_reverse(irq, desc)				\
 	for (irq = nr_irqs - 1, desc = irq_to_desc(irq); irq >= 0;	\

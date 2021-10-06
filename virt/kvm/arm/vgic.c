@@ -1290,9 +1290,6 @@ static void __kvm_vgic_flush_hwstate(struct kvm_vcpu *vcpu)
 			overflow = 1;
 	}
 
-
-
-
 epilog:
 	if (overflow) {
 		vgic_enable_underflow(vcpu);
@@ -1379,7 +1376,6 @@ static bool vgic_process_maintenance(struct kvm_vcpu *vcpu)
 
 			WARN_ON(vgic_irq_is_edge(vcpu, vlr.irq));
 			WARN_ON(vlr.state & LR_STATE_MASK);
-
 
 			/*
 			 * kvm_notify_acked_irq calls kvm_set_irq()

@@ -164,7 +164,6 @@ TRACE_EVENT_CONDITION(mm_page_free,
 
 	TP_ARGS(page, order),
 
-
 	/*
 	 * This trace can be potentially called from an offlined cpu.
 	 * Since trace points use RCU and RCU should not be used from

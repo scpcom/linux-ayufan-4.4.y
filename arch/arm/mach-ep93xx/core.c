@@ -81,7 +81,6 @@ void __init ep93xx_init_irq(void)
 	vic_init(EP93XX_VIC2_BASE, 32, EP93XX_VIC2_VALID_IRQ_MASK, 0);
 }
 
-
 /*************************************************************************
  * EP93xx System Controller Software Locked register handling
  *************************************************************************/
@@ -276,7 +275,6 @@ void __init ep93xx_register_flash(unsigned int width,
 	platform_device_register(&ep93xx_flash);
 }
 
-
 /*************************************************************************
  * EP93xx ethernet peripheral handling
  *************************************************************************/
@@ -315,7 +313,6 @@ void __init ep93xx_register_eth(struct ep93xx_eth_data *data, int copy_addr)
 	ep93xx_eth_data = *data;
 	platform_device_register(&ep93xx_eth_device);
 }
-
 
 /*************************************************************************
  * EP93xx i2c peripheral handling
@@ -500,7 +497,6 @@ void ep93xx_pwm_release_gpio(struct platform_device *pdev)
 }
 EXPORT_SYMBOL(ep93xx_pwm_release_gpio);
 
-
 /*************************************************************************
  * EP93xx video peripheral handling
  *************************************************************************/
@@ -547,7 +543,6 @@ void __init ep93xx_register_fb(struct ep93xxfb_mach_info *data)
 	platform_device_register(&ep93xx_fb_device);
 	platform_device_register(&ep93xx_bl_device);
 }
-
 
 /*************************************************************************
  * EP93xx matrix keypad peripheral handling
@@ -811,7 +806,6 @@ void ep93xx_ide_release_gpio(struct platform_device *pdev)
 		gpio_free(EP93XX_GPIO_LINE_H(i));
 	gpio_free(EP93XX_GPIO_LINE_EGPIO15);
 	gpio_free(EP93XX_GPIO_LINE_EGPIO2);
-
 
 	/* GPIO ports E[7:2], G[7:4] and H used by GPIO */
 	ep93xx_devcfg_set_bits(EP93XX_SYSCON_DEVCFG_EONIDE |

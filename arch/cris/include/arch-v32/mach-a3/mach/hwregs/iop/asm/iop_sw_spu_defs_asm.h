@@ -502,7 +502,6 @@
 #define reg_iop_sw_spu_r_mpu_intr___intr15___bit 15
 #define reg_iop_sw_spu_r_mpu_intr_offset 132
 
-
 /* Constants */
 #define regk_iop_sw_spu_copy                      0x00000000
 #define regk_iop_sw_spu_no                        0x00000000

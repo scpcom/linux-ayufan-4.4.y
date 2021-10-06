@@ -52,7 +52,6 @@
 #define IWL100_FW_PRE "iwlwifi-100-"
 #define IWL100_MODULE_FIRMWARE(api) IWL100_FW_PRE __stringify(api) ".ucode"
 
-
 static const struct iwl_base_params iwl1000_base_params = {
 	.num_of_queues = IWLAGN_NUM_QUEUES,
 	.eeprom_size = OTP_LOW_IMAGE_SIZE,

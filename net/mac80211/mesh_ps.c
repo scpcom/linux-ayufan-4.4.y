@@ -10,7 +10,6 @@
 #include "mesh.h"
 #include "wme.h"
 
-
 /* mesh PS management */
 
 /**
@@ -356,7 +355,6 @@ void ieee80211_mps_rx_h_sta_process(struct sta_info *sta,
 		mps_set_sta_nonpeer_pm(sta, hdr);
 	}
 }
-
 
 /* mesh PS frame release */
 

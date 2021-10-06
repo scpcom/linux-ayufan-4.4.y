@@ -90,7 +90,6 @@ MODULE_PARM_DESC(timeout,
 	"Watchdog timeout in seconds. (1<=timeout<=3600, default="
 				__MODULE_STRING(WATCHDOG_TIMEOUT) ")");
 
-
 static bool nowayout = WATCHDOG_NOWAYOUT;
 module_param(nowayout, bool, 0);
 MODULE_PARM_DESC(nowayout,

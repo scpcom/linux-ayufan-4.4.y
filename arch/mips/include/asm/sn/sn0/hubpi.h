@@ -191,7 +191,6 @@
 #define PI_ERR_CLEAR_ALL_A	0x00aaaaaa
 #define PI_ERR_CLEAR_ALL_B	0x00555555
 
-
 /*
  * The following three macros define all possible error int pends.
  */
@@ -360,7 +359,6 @@ typedef union pi_err_stat1 {
 typedef u64	rtc_time_t;
 
 #endif /* !__ASSEMBLY__ */
-
 
 /* Bits in PI_SYSAD_ERRCHK_EN */
 #define PI_SYSAD_ERRCHK_ECCGEN	0x01	/* Enable ECC generation	    */

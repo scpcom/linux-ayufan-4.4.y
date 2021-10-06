@@ -94,7 +94,6 @@ void queue_free (Queue_t *queue)
 	kfree(queue->alloc);
 }
      
-
 /*
  * Function: int __queue_add(Queue_t *queue, struct scsi_cmnd *SCpnt, int head)
  * Purpose : Add a new command onto a queue, adding REQUEST_SENSE to head.

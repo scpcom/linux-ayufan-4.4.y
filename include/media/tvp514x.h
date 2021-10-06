@@ -107,5 +107,4 @@ struct tvp514x_platform_data {
 	bool vs_polarity;
 };
 
-
 #endif				/* ifndef _TVP514X_H */

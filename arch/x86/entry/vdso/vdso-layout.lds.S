@@ -71,12 +71,10 @@ SECTIONS
 
 	.fake_shstrtab	: { *(.fake_shstrtab) }		:text
 
-
 	.note		: { *(.note.*) }		:text	:note
 
 	.eh_frame_hdr	: { *(.eh_frame_hdr) }		:text	:eh_frame_hdr
 	.eh_frame	: { KEEP (*(.eh_frame)) }	:text
-
 
 	/*
 	 * Text is well-separated from actual data: there's plenty of

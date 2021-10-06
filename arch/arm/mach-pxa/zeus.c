@@ -159,7 +159,6 @@ static void __init zeus_init_irq(void)
 	irq_set_chained_handler(gpio_to_irq(ZEUS_ISA_GPIO), zeus_irq_handler);
 }
 
-
 /*
  * Platform devices
  */
@@ -515,7 +514,6 @@ struct platform_device zeus_max6369_device = {
 static pxa2xx_audio_ops_t zeus_ac97_info = {
 	.reset_gpio = 95,
 };
-
 
 /*
  * USB host
@@ -928,4 +926,3 @@ MACHINE_START(ARCOM_ZEUS, "Arcom/Eurotech ZEUS")
 	.init_machine	= zeus_init,
 	.restart	= pxa_restart,
 MACHINE_END
-

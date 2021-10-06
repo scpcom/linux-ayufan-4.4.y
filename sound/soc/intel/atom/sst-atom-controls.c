@@ -581,7 +581,6 @@ static int fill_swm_input(struct snd_soc_component *cmpnt,
 	return nb_inputs;
 }
 
-
 /**
  * called with lock held
  */
@@ -829,7 +828,6 @@ static int sst_get_ssp_mode(struct snd_soc_dai *dai, unsigned int fmt)
 
 	return -EINVAL;
 }
-
 
 int sst_fill_ssp_config(struct snd_soc_dai *dai, unsigned int fmt)
 {

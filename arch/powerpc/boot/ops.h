@@ -142,7 +142,6 @@ static inline void *create_node(const void *parent, const char *name)
 	return dt_ops.create_node ? dt_ops.create_node(parent, name) : NULL;
 }
 
-
 static inline void *find_node_by_prop_value(const void *prev,
                                             const char *propname,
                                             const char *propval, int proplen)
@@ -199,7 +198,6 @@ void __dt_fixup_mac_addresses(u32 startindex, ...);
 #define dt_fixup_mac_addresses(...) \
 	__dt_fixup_mac_addresses(0, __VA_ARGS__, NULL)
 
-
 static inline void *find_node_by_linuxphandle(const u32 linuxphandle)
 {
 	return find_node_by_prop_value(NULL, "linux,phandle",
@@ -232,7 +230,6 @@ static inline void exit(void)
 	for(;;);
 }
 #define fatal(args...) { printf(args); exit(); }
-
 
 #define BSS_STACK(size) \
 	static char _bss_stack[size]; \

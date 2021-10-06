@@ -1310,7 +1310,6 @@ static int igb_alloc_q_vector(struct igb_adapter *adapter,
 	return 0;
 }
 
-
 /**
  *  igb_alloc_q_vectors - Allocate memory for interrupt vectors
  *  @adapter: board private structure to initialize

@@ -92,7 +92,6 @@
 	(cond) ? 0 : -ETIMEDOUT; \
 })
 
-
 #define readb_poll_timeout(addr, val, cond, delay_us, timeout_us) \
 	readx_poll_timeout(readb, addr, val, cond, delay_us, timeout_us)
 

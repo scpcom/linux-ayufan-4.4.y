@@ -2,15 +2,12 @@
  
 /* Written 1995-2000 by Werner Almesberger, EPFL LRC/ICA */
  
-
 #ifndef _UAPILINUX_ATMDEV_H
 #define _UAPILINUX_ATMDEV_H
-
 
 #include <linux/atmapi.h>
 #include <linux/atm.h>
 #include <linux/atmioc.h>
-
 
 #define ESI_LEN		6
 
@@ -29,7 +26,6 @@
 #define ATM_DS3_PCR	(8000*12)
 			/* DS3: 12 cells in a 125 usec time slot */
 
-
 #define __AAL_STAT_ITEMS \
     __HANDLE_ITEM(tx);			/* TX okay */ \
     __HANDLE_ITEM(tx_err);		/* TX errors */ \
@@ -43,13 +39,11 @@ struct atm_aal_stats {
 #undef __HANDLE_ITEM
 };
 
-
 struct atm_dev_stats {
 	struct atm_aal_stats aal0;
 	struct atm_aal_stats aal34;
 	struct atm_aal_stats aal5;
 } __ATM_API_ALIGN;
-
 
 #define ATM_GETLINKRATE	_IOW('a',ATMIOC_ITF+1,struct atmif_sioc)
 					/* get link rate */
@@ -155,7 +149,6 @@ struct atm_dev_stats {
  * __ATM_LM_XTLOC(x) <= __ATM_LM_XTRMT(x)
  */
 
-
 struct atm_iobuf {
 	int length;
 	void __user *buffer;
@@ -209,7 +202,5 @@ struct atm_cirange {
     "RELEASED", "HASQOS",	"LISTEN",	"META", \
     "256",	"512",		"1024",		"2048", \
     "SESSION",	"HASSAP",	"BOUND",	"CLOSE"
-
-
 
 #endif /* _UAPILINUX_ATMDEV_H */

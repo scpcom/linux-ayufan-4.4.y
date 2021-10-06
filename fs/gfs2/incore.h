@@ -214,7 +214,6 @@ struct lm_lockname {
 	 ((name1)->ln_type == (name2)->ln_type) &&	\
 	 ((name1)->ln_sbd == (name2)->ln_sbd))
 
-
 struct gfs2_glock_operations {
 	void (*go_sync) (struct gfs2_glock *gl);
 	int (*go_xmote_bh) (struct gfs2_glock *gl, struct gfs2_holder *gh);
@@ -842,4 +841,3 @@ static inline void gfs2_sbstats_inc(const struct gfs2_glock *gl, int which)
 }
 
 #endif /* __INCORE_DOT_H__ */
-

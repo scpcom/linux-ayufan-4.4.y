@@ -39,7 +39,6 @@ struct ion_cma_buffer_info {
 	struct sg_table *table;
 };
 
-
 /* ION CMA heap operations functions */
 static int ion_cma_allocate(struct ion_heap *heap, struct ion_buffer *buffer,
 			    unsigned long len, unsigned long align,

@@ -420,7 +420,6 @@ ieee80211_tx_h_multicast_ps_buf(struct ieee80211_tx_data *tx)
 		return TX_CONTINUE;
 	}
 
-
 	/* no buffering for ordered frames */
 	if (ieee80211_has_order(hdr->frame_control))
 		return TX_CONTINUE;

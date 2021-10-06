@@ -188,7 +188,6 @@ typedef struct {
 	u8 unused;		/* pads to 4-byte boundary */
 }pkt_desc;
 
-
 /*
 	Descriptor Status definitions:
 

@@ -128,7 +128,6 @@ g84_fifo_chan_engine_fini(struct nvkm_fifo_chan *base,
 	return 0;
 }
 
-
 int
 g84_fifo_chan_engine_init(struct nvkm_fifo_chan *base,
 			  struct nvkm_engine *engine)

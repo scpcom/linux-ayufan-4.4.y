@@ -13,7 +13,6 @@
  * Some ideas are from omap-aes.c drivers.
  */
 
-
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/slab.h>
@@ -522,7 +521,6 @@ static int atmel_tdes_crypt_start(struct atmel_tdes_dev *dd)
 		if (sg_dma_len(dd->in_sg) != sg_dma_len(dd->out_sg))
 			fast = 0;
 	}
-
 
 	if (fast)  {
 		count = min(dd->total, sg_dma_len(dd->in_sg));

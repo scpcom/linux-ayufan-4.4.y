@@ -57,7 +57,6 @@ struct BacktraceBundle {
 	insns[TILE_MAX_INSTRUCTIONS_PER_BUNDLE];
 };
 
-
 /* Locates an instruction inside the given bundle that
  * has the specified mnemonic, and whose first 'num_operands_to_match'
  * operands exactly match those in 'operand_values'.

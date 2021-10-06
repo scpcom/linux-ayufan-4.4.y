@@ -64,7 +64,6 @@ struct electra_cf_socket {
 
 #define	POLL_INTERVAL		(2 * HZ)
 
-
 static int electra_cf_present(struct electra_cf_socket *cf)
 {
 	unsigned int gpio;
@@ -233,7 +232,6 @@ static int electra_cf_probe(struct platform_device *ofdev)
 		status = -ENOMEM;
 		goto fail1;
 	}
-
 
 	cf->io_base = (unsigned long)cf->io_virt - VMALLOC_END;
 

@@ -895,7 +895,6 @@ static int max1363_monitor_mode_update(struct max1363_state *st, int enabled)
 			i += 3;
 		}
 
-
 	ret = st->send(st->client, tx_buf, len);
 	if (ret < 0)
 		goto error_ret;

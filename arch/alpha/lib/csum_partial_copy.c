@@ -13,7 +13,6 @@
 #include <linux/string.h>
 #include <asm/uaccess.h>
 
-
 #define ldq_u(x,y) \
 __asm__ __volatile__("ldq_u %0,%1":"=r" (x):"m" (*(const unsigned long *)(y)))
 
@@ -37,7 +36,6 @@ __asm__ __volatile__("insql %1,%2,%0":"=r" (z):"r" (x),"r" (y))
 
 #define insqh(x,y,z) \
 __asm__ __volatile__("insqh %1,%2,%0":"=r" (z):"r" (x),"r" (y))
-
 
 #define __get_user_u(x,ptr)				\
 ({							\
@@ -69,7 +67,6 @@ __asm__ __volatile__("insqh %1,%2,%0":"=r" (z):"r" (x),"r" (y))
 	__puu_err;					\
 })
 
-
 static inline unsigned short from64to16(unsigned long x)
 {
 	/* Using extract instructions is a bit more efficient
@@ -92,8 +89,6 @@ static inline unsigned short from64to16(unsigned long x)
 	/* Similarly, out_v.us[2] is always zero for the final add.  */
 	return out_v.us[0] + out_v.us[1];
 }
-
-
 
 /*
  * Ok. This isn't fun, but this is the EASY case.

@@ -360,7 +360,6 @@ static inline void rtsx_usb_init_cmd(struct rtsx_ucr *ucr)
 #define	CARD_SHARE_MS			0x02
 #define CARD_SHARE_MASK			0x03
 
-
 /* SD30_DRIVE_SEL */
 #define DRIVER_TYPE_A			0x05
 #define DRIVER_TYPE_B			0x03

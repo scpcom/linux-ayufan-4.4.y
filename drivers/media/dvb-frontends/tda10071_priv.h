@@ -115,5 +115,4 @@ struct tda10071_cmd {
 	u8 len;
 };
 
-
 #endif /* TDA10071_PRIV */

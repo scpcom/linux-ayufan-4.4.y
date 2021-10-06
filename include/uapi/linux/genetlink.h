@@ -82,5 +82,4 @@ enum {
 
 #define CTRL_ATTR_MCAST_GRP_MAX (__CTRL_ATTR_MCAST_GRP_MAX - 1)
 
-
 #endif /* _UAPI__LINUX_GENERIC_NETLINK_H */

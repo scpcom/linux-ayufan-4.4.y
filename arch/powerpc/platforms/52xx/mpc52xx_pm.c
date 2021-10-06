@@ -106,7 +106,6 @@ int mpc52xx_pm_prepare(void)
 	return -ENOSYS;
 }
 
-
 char saved_sram[0x4000];
 
 int mpc52xx_pm_enter(suspend_state_t state)

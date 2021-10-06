@@ -15,10 +15,8 @@
  * this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 #include "msm_drv.h"
 #include "mdp_kms.h"
-
 
 struct mdp_irq_wait {
 	struct mdp_irq irq;

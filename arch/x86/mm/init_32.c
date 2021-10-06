@@ -961,4 +961,3 @@ void mark_rodata_ro(void)
 		debug_checkwx();
 }
 #endif
-

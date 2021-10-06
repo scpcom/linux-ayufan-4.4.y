@@ -488,7 +488,6 @@ v9fs_file_mmap(struct file *filp, struct vm_area_struct *vma)
 {
 	int retval;
 
-
 	retval = generic_file_mmap(filp, vma);
 	if (!retval)
 		vma->vm_ops = &v9fs_file_vm_ops;
@@ -540,7 +539,6 @@ v9fs_vm_page_mkwrite(struct vm_area_struct *vma, struct vm_fault *vmf)
 	struct page *page = vmf->page;
 	struct file *filp = vma->vm_file;
 	struct inode *inode = file_inode(filp);
-
 
 	p9_debug(P9_DEBUG_VFS, "page %p fid %lx\n",
 		 page, (unsigned long)filp->private_data);
@@ -609,7 +607,6 @@ static void v9fs_mmap_vm_close(struct vm_area_struct *vma)
 			(vma->vm_end - vma->vm_start - 1),
 	};
 
-
 	p9_debug(P9_DEBUG_VFS, "9p VMA close, %p, flushing", vma);
 
 	inode = file_inode(vma->vm_file);
@@ -620,7 +617,6 @@ static void v9fs_mmap_vm_close(struct vm_area_struct *vma)
 	might_sleep();
 	sync_inode(inode, &wbc);
 }
-
 
 static const struct vm_operations_struct v9fs_file_vm_ops = {
 	.fault = filemap_fault,
@@ -634,7 +630,6 @@ static const struct vm_operations_struct v9fs_mmap_file_vm_ops = {
 	.map_pages = filemap_map_pages,
 	.page_mkwrite = v9fs_vm_page_mkwrite,
 };
-
 
 const struct file_operations v9fs_cached_file_operations = {
 	.llseek = generic_file_llseek,

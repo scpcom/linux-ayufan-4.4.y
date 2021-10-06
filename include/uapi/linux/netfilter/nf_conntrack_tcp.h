@@ -50,5 +50,4 @@ struct nf_ct_tcp_flags {
 	__u8 mask;
 };
 
-
 #endif /* _UAPI_NF_CONNTRACK_TCP_H */

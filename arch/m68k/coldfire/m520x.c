@@ -103,7 +103,6 @@ static struct clk * const disable_clks[] __initconst = {
 	&__clk_0_35, /* mcfwdt.0 */
 };
 
-
 static void __init m520x_clk_init(void)
 {
 	unsigned i;

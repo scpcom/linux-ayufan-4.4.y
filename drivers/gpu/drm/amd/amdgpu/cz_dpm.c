@@ -590,7 +590,6 @@ static int cz_dpm_early_init(void *handle)
 	return 0;
 }
 
-
 static int cz_dpm_late_init(void *handle)
 {
 	struct amdgpu_device *adev = (struct amdgpu_device *)handle;
@@ -1284,7 +1283,6 @@ static int cz_dpm_enable(struct amdgpu_device *adev)
 		BUG();
 	}
 
-
 	ret = cz_start_dpm(adev);
 	if (ret) {
 		DRM_ERROR("%s DPM enable failed\n", chip_name);
@@ -1826,7 +1824,6 @@ static int cz_update_uvd_dpm(struct amdgpu_device *adev, bool gate)
 {
 	return cz_enable_uvd_dpm(adev, !gate);
 }
-
 
 static void cz_dpm_powergate_uvd(struct amdgpu_device *adev, bool gate)
 {

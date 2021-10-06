@@ -52,7 +52,6 @@ do {								\
 		pr_cont(fmt, ##__VA_ARGS__);			\
 } while (0)
 
-
 /*
  * struct hfs_inode_info
  *

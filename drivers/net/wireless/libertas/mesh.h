@@ -4,7 +4,6 @@
 #ifndef _LBS_MESH_H_
 #define _LBS_MESH_H_
 
-
 #include <net/iw_handler.h>
 #include <net/lib80211.h>
 
@@ -39,13 +38,11 @@ struct net_device *lbs_mesh_set_dev(struct lbs_private *priv,
 void lbs_mesh_set_txpd(struct lbs_private *priv,
 	struct net_device *dev, struct txpd *txpd);
 
-
 /* Command handling */
 
 struct cmd_ds_command;
 struct cmd_ds_mesh_access;
 struct cmd_ds_mesh_config;
-
 
 /* Ethtool statistics */
 
@@ -56,7 +53,6 @@ void lbs_mesh_ethtool_get_stats(struct net_device *dev,
 int lbs_mesh_ethtool_get_sset_count(struct net_device *dev, int sset);
 void lbs_mesh_ethtool_get_strings(struct net_device *dev,
 	uint32_t stringset, uint8_t *s);
-
 
 #else
 
@@ -71,7 +67,5 @@ void lbs_mesh_ethtool_get_strings(struct net_device *dev,
 #define lbs_mesh_activated(priv) (false)
 
 #endif
-
-
 
 #endif

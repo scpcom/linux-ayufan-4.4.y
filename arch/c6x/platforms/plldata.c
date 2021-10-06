@@ -151,7 +151,6 @@ struct clk c6x_mdio_clk = {
 	.name = "mdio",
 };
 
-
 #ifdef CONFIG_SOC_TMS320C6455
 static struct clk_lookup c6455_clks[] = {
 	CLK(NULL, "pll1", &c6x_soc_pll1.sysclks[0]),
@@ -165,7 +164,6 @@ static struct clk_lookup c6455_clks[] = {
 	CLK("2c81800.mdio", NULL, &c6x_mdio_clk),
 	CLK("", NULL, NULL)
 };
-
 
 static void __init c6455_setup_clocks(struct device_node *node)
 {
@@ -284,7 +282,6 @@ static void __init c6472_setup_clocks(struct device_node *node)
 	c6x_clks_init(c6472_clks);
 }
 #endif /* CONFIG_SOC_TMS320C6472 */
-
 
 #ifdef CONFIG_SOC_TMS320C6474
 static struct clk_lookup c6474_clks[] = {

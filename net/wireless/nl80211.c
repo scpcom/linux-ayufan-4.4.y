@@ -2085,7 +2085,6 @@ static int nl80211_set_wds_peer(struct sk_buff *skb, struct genl_info *info)
 	return rdev_set_wds_peer(rdev, dev, bssid);
 }
 
-
 static int nl80211_set_wiphy(struct sk_buff *skb, struct genl_info *info)
 {
 	struct cfg80211_registered_device *rdev;
@@ -3917,7 +3916,6 @@ static int nl80211_dump_station(struct sk_buff *skb,
 		sta_idx++;
 	}
 
-
  out:
 	cb->args[2] = sta_idx;
 	err = skb->len;
@@ -4670,7 +4668,6 @@ static int nl80211_dump_mpath(struct sk_buff *skb,
 		path_idx++;
 	}
 
-
  out:
 	cb->args[2] = path_idx;
 	err = skb->len;
@@ -4960,7 +4957,6 @@ static int nl80211_req_set_reg(struct sk_buff *skb, struct genl_info *info)
 	enum nl80211_user_reg_hint_type user_reg_hint_type;
 	u32 owner_nlportid;
 
-
 	/*
 	 * You should only get this when cfg80211 hasn't yet initialized
 	 * completely when built-in to the kernel right between the time
@@ -5169,7 +5165,6 @@ do {									    \
 	}								    \
 } while (0)
 
-
 	if (!info->attrs[NL80211_ATTR_MESH_CONFIG])
 		return -EINVAL;
 	if (nla_parse_nested(tb, NL80211_MESHCONF_ATTR_MAX,
@@ -5315,7 +5310,6 @@ static int nl80211_parse_mesh_setup(struct genl_info *info,
 		(nla_get_u8(tb[NL80211_MESH_SETUP_ENABLE_VENDOR_METRIC])) ?
 		 IEEE80211_PATH_METRIC_VENDOR :
 		 IEEE80211_PATH_METRIC_AIRTIME;
-
 
 	if (tb[NL80211_MESH_SETUP_IE]) {
 		struct nlattr *ieattr =
@@ -10369,7 +10363,6 @@ int cfg80211_vendor_cmd_reply(struct sk_buff *skb)
 	return genlmsg_reply(skb, rdev->cur_cmd_info);
 }
 EXPORT_SYMBOL_GPL(cfg80211_vendor_cmd_reply);
-
 
 static int nl80211_set_qos_map(struct sk_buff *skb,
 			       struct genl_info *info)

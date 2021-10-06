@@ -179,5 +179,3 @@ const struct file_operations tpm_fops = {
 	.write = tpm_write,
 	.release = tpm_release,
 };
-
-

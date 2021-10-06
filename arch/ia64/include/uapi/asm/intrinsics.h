@@ -7,7 +7,6 @@
 #ifndef _UAPI_ASM_IA64_INTRINSICS_H
 #define _UAPI_ASM_IA64_INTRINSICS_H
 
-
 #ifndef __ASSEMBLY__
 
 #include <linux/types.h>
@@ -84,12 +83,10 @@ extern unsigned long __bad_increment_for_ia64_fetch_and_add (void);
 
 #endif
 
-
 #ifndef __ASSEMBLY__
 
 #define IA64_INTRINSIC_API(name)	ia64_native_ ## name
 #define IA64_INTRINSIC_MACRO(name)	ia64_native_ ## name
-
 
 /************************************************/
 /* Instructions paravirtualized for correctness */
@@ -102,7 +99,6 @@ extern unsigned long __bad_increment_for_ia64_fetch_and_add (void);
 #define ia64_thash			IA64_INTRINSIC_API(thash)
 #define ia64_get_cpuid			IA64_INTRINSIC_API(get_cpuid)
 #define ia64_get_pmd			IA64_INTRINSIC_API(get_pmd)
-
 
 /************************************************/
 /* Instructions paravirtualized for performance */

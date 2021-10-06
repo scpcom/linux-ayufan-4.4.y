@@ -16,8 +16,6 @@
 
 #include <uapi/linux/acct.h>
 
-
-
 #ifdef CONFIG_BSD_PROCESS_ACCT
 struct vfsmount;
 struct super_block;

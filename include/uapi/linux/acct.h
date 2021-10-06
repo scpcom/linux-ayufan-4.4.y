@@ -120,5 +120,4 @@ struct acct_v3
 #define AHZ		(HZ)
 #endif	/* __KERNEL */
 
-
 #endif /* _UAPI_LINUX_ACCT_H */

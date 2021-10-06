@@ -188,7 +188,6 @@ extern int ccw_device_start_timeout_key(struct ccw_device *, struct ccw1 *,
 					unsigned long, __u8, __u8,
 					unsigned long, int);
 
-
 extern int ccw_device_resume(struct ccw_device *);
 extern int ccw_device_halt(struct ccw_device *, unsigned long);
 extern int ccw_device_clear(struct ccw_device *, unsigned long);
@@ -208,7 +207,6 @@ int ccw_device_get_mdc(struct ccw_device *cdev, u8 mask);
 
 extern int ccw_device_set_online(struct ccw_device *cdev);
 extern int ccw_device_set_offline(struct ccw_device *cdev);
-
 
 extern struct ciw *ccw_device_get_ciw(struct ccw_device *, __u32 cmd);
 extern __u8 ccw_device_get_path_mask(struct ccw_device *);

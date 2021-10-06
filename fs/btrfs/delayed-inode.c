@@ -1385,7 +1385,6 @@ out:
 	kfree(async_work);
 }
 
-
 static int btrfs_wq_run_delayed_node(struct btrfs_delayed_root *delayed_root,
 				     struct btrfs_fs_info *fs_info, int nr)
 {
@@ -1495,7 +1494,6 @@ int btrfs_insert_delayed_dir_index(struct btrfs_trans_handle *trans,
 	 * so reserving metadata failure is impossible
 	 */
 	BUG_ON(ret);
-
 
 	mutex_lock(&delayed_node->mutex);
 	ret = __btrfs_add_delayed_insertion_item(delayed_node, delayed_item);
@@ -1999,4 +1997,3 @@ void btrfs_destroy_delayed_inodes(struct btrfs_root *root)
 		btrfs_release_delayed_node(prev_node);
 	}
 }
-

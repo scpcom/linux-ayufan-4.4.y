@@ -133,4 +133,3 @@ static inline struct dvb_frontend *mxl5005s_attach(struct dvb_frontend *fe,
 #endif /* CONFIG_DVB_TUNER_MXL5005S */
 
 #endif /* __MXL5005S_H */
-

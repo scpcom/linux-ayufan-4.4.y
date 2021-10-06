@@ -35,7 +35,6 @@ static void RxPktPendingTimeout(unsigned long data)
 	u8 index = 0;
 	bool bPktInBuf = false;
 
-
 	spin_lock_irqsave(&(ieee->reorder_spinlock), flags);
 	//PlatformAcquireSpinLock(Adapter, RT_RX_SPINLOCK);
 	IEEE80211_DEBUG(IEEE80211_DL_REORDER,"==================>%s()\n",__func__);
@@ -108,7 +107,6 @@ static void TsAddBaProcess(unsigned long data)
 	TsInitAddBA(ieee, pTxTs, BA_POLICY_IMMEDIATE, false);
 	IEEE80211_DEBUG(IEEE80211_DL_BA, "TsAddBaProcess(): ADDBA Req is started!! \n");
 }
-
 
 static void ResetTsCommonInfo(PTS_COMMON_INFO pTsCommonInfo)
 {
@@ -215,7 +213,6 @@ static void AdmitTS(struct ieee80211_device *ieee,
 		mod_timer(&pTsCommonInfo->InactTimer, jiffies + MSECS(InactTime));
 }
 
-
 static PTS_COMMON_INFO SearchAdmitTRStream(struct ieee80211_device *ieee,
 					   u8 *Addr, u8 TID,
 					   TR_SELECT TxRxSelect)
@@ -313,7 +310,6 @@ static void MakeTSEntry(PTS_COMMON_INFO pTsCommonInfo, u8 *Addr,
 	pTsCommonInfo->TClasProc = TCLAS_Proc;
 	pTsCommonInfo->TClasNum = TCLAS_Num;
 }
-
 
 bool GetTs(
 	struct ieee80211_device		*ieee,

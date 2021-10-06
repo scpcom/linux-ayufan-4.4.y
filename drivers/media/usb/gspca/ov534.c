@@ -94,7 +94,6 @@ enum sensors {
 static int sd_start(struct gspca_dev *gspca_dev);
 static void sd_stopN(struct gspca_dev *gspca_dev);
 
-
 static const struct v4l2_pix_format ov772x_mode[] = {
 	{320, 240, V4L2_PIX_FMT_YUYV, V4L2_FIELD_NONE,
 	 .bytesperline = 320 * 2,
@@ -1047,7 +1046,6 @@ static void setlightfreq(struct gspca_dev *gspca_dev, s32 val)
 	}
 	sccb_reg_write(gspca_dev, 0x2b, val);
 }
-
 
 /* this function is called at probe time */
 static int sd_config(struct gspca_dev *gspca_dev,

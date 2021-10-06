@@ -180,7 +180,6 @@ static int __init amd_gpio_init(void)
 	struct pci_dev *pdev = NULL;
 	const struct pci_device_id *ent;
 
-
 	/* We look for our device - AMD South Bridge
 	 * I don't know about a system with two such bridges,
 	 * so we can assume that there is max. one device.

@@ -129,7 +129,6 @@ au1000_set_ac97_recv_slots(struct snd_au1000 *au1000, long recv_slots)
 	spin_unlock(&au1000->ac97_lock);
 }
 
-
 static void
 au1000_release_dma_link(struct audio_stream *stream)
 {
@@ -491,7 +490,6 @@ snd_au1000_pcm_new(struct snd_au1000 *au1000)
 	return 0;
 }
 
-
 /*-------------------------- AC97 CODEC Control ------------------------------*/
 
 static unsigned short
@@ -531,7 +529,6 @@ get the interrupt driven case to work efficiently */
 	return data;
 
 }
-
 
 static void
 snd_au1000_ac97_write(struct snd_ac97 *ac97, unsigned short reg, unsigned short val)

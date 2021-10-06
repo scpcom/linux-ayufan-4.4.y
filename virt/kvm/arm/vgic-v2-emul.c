@@ -715,7 +715,6 @@ static int vgic_attr_regs_access(struct kvm_device *dev,
 		goto out;
 	}
 
-
 	spin_lock(&vgic->lock);
 
 	/*

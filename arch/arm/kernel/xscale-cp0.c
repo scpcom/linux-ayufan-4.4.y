@@ -53,7 +53,6 @@ static struct notifier_block dsp_notifier_block = {
 	.notifier_call	= dsp_do,
 };
 
-
 #ifdef CONFIG_IWMMXT
 static int iwmmxt_do(struct notifier_block *self, unsigned long cmd, void *t)
 {
@@ -85,7 +84,6 @@ static struct notifier_block iwmmxt_notifier_block = {
 	.notifier_call	= iwmmxt_do,
 };
 #endif
-
 
 static u32 __init xscale_cp_access_read(void)
 {
@@ -138,7 +136,6 @@ static int __init cpu_has_iwmmxt(void)
 
 	return !!hi;
 }
-
 
 /*
  * If we detect that the CPU has iWMMXt (and CONFIG_IWMMXT=y), we

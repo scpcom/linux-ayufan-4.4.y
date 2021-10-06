@@ -161,7 +161,6 @@ void read_persistent_clock(struct timespec *ts)
 	ts->tv_nsec = (INITIAL_JIFFIES % HZ) * (NSEC_PER_SEC / HZ);
 }
 
-
 void __init time_init(void)
 {
 	arch_gettimeoffset = m32r_gettimeoffset;

@@ -89,7 +89,6 @@ static int hippi_header(struct sk_buff *skb, struct net_device *dev,
 	return -((int)HIPPI_HLEN);
 }
 
-
 /*
  *	Determine the packet's protocol ID.
  */
@@ -161,7 +160,6 @@ static const struct header_ops hippi_header_ops = {
 	.create		= hippi_header,
 };
 
-
 static void hippi_setup(struct net_device *dev)
 {
 	dev->header_ops			= &hippi_header_ops;
@@ -177,7 +175,6 @@ static void hippi_setup(struct net_device *dev)
 	dev->addr_len		= HIPPI_ALEN;
 	dev->tx_queue_len	= 25 /* 5 */;
 	memset(dev->broadcast, 0xFF, HIPPI_ALEN);
-
 
 	/*
 	 * HIPPI doesn't support broadcast+multicast and we only use

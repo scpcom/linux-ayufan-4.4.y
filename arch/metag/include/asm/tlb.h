@@ -20,7 +20,6 @@
 			flush_tlb_range(vma, vma->vm_start, vma->vm_end);     \
 	} while (0)
 
-
 #else
 
 #define tlb_start_vma(tlb, vma)			do { } while (0)

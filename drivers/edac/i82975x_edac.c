@@ -131,7 +131,6 @@ NOTE: Only ONE of the three must be enabled
 #define I82975X_DRB_CH1R2		0x182
 #define I82975X_DRB_CH1R3		0x183
 
-
 #define I82975X_DRA		0x108	/* DRAM Row Attribute (4b x 8)
 					 *  defines the PAGE SIZE to be used
 					 *	for the rank
@@ -152,7 +151,6 @@ NOTE: Only ONE of the three must be enabled
 #define I82975X_DRA_CH1R01		0x188
 #define I82975X_DRA_CH1R23		0x189
 
-
 #define I82975X_BNKARC	0x10e /* Type of device in each rank - Bank Arch (16b)
 					 *
 					 * 15:8  reserved
@@ -166,8 +164,6 @@ NOTE: Only ONE of the three must be enabled
 					 */
 #define I82975X_C0BNKARC	0x10e
 #define I82975X_C1BNKARC	0x18e
-
-
 
 #define I82975X_DRC		0x120 /* DRAM Controller Mode0 (32b)
 					 *
@@ -191,7 +187,6 @@ NOTE: Only ONE of the three must be enabled
 					 */
 #define I82975X_DRC_CH0M0		0x120
 #define I82975X_DRC_CH1M0		0x1A0
-
 
 #define I82975X_DRC_M1	0x124 /* DRAM Controller Mode1 (32b)
 					 * 31	0=Standard Address Map

@@ -17,7 +17,6 @@
 #include <linux/module.h>
 #include <linux/ratelimit.h>
 
-
 #define MIN_TTYB_SIZE	256
 #define TTYB_ALIGN_MASK	255
 
@@ -409,7 +408,6 @@ int tty_prepare_flip_string(struct tty_port *port, unsigned char **chars,
 	return space;
 }
 EXPORT_SYMBOL_GPL(tty_prepare_flip_string);
-
 
 static int
 receive_buf(struct tty_struct *tty, struct tty_buffer *head, int count)

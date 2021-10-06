@@ -29,10 +29,8 @@
 #include <linux/timex.h>
 #include <linux/profile.h>
 
-
 unsigned long (*mach_random_get_entropy)(void);
 EXPORT_SYMBOL_GPL(mach_random_get_entropy);
-
 
 /*
  * timer_interrupt() needs to keep up the real-time clock,

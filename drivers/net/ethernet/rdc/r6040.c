@@ -737,7 +737,6 @@ static int r6040_up(struct net_device *dev)
 	return 0;
 }
 
-
 /* Read/set MAC address routines */
 static void r6040_mac_address(struct net_device *dev)
 {
@@ -1252,7 +1251,6 @@ static void r6040_remove_one(struct pci_dev *pdev)
 	free_netdev(dev);
 	pci_disable_device(pdev);
 }
-
 
 static const struct pci_device_id r6040_pci_tbl[] = {
 	{ PCI_DEVICE(PCI_VENDOR_ID_RDC, 0x6040) },

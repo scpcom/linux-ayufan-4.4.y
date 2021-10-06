@@ -108,4 +108,3 @@ _mmu_off:
 	rfi
 _mmu_on:
 	b _zimage_start_lib
-

@@ -557,7 +557,7 @@ EXPORT_SYMBOL(drm_framebuffer_unregister_private);
  *
  * Cleanup framebuffer. This function is intended to be used from the drivers
  * ->destroy callback. It can also be used to clean up driver private
- *  framebuffers embedded into a larger structure.
+ * framebuffers embedded into a larger structure.
  *
  * Note that this function does not remove the fb from active usuage - if it is
  * still used anywhere, hilarity can ensue since userspace could call getfb on
@@ -1754,7 +1754,6 @@ int drm_mode_getresources(struct drm_device *dev, void *data,
 	if (!drm_core_check_feature(dev, DRIVER_MODESET))
 		return -EINVAL;
 
-
 	mutex_lock(&file_priv->fbs_lock);
 	/*
 	 * For the non-control nodes we need to limit the list of resources
@@ -2929,7 +2928,6 @@ out:
 	return ret;
 
 }
-
 
 /**
  * drm_mode_cursor_ioctl - set CRTC's cursor configuration

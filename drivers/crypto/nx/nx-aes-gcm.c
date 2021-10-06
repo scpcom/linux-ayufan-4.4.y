@@ -30,7 +30,6 @@
 #include "nx_csbcpb.h"
 #include "nx.h"
 
-
 static int gcm_aes_nx_set_key(struct crypto_aead *tfm,
 			      const u8           *in_key,
 			      unsigned int        key_len)
@@ -381,7 +380,6 @@ static int gcm_aes_nx_crypt(struct aead_request *req, int enc,
 			NX_CPB_FDM(csbcpb) |= NX_FDM_INTERMEDIATE;
 		else
 			NX_CPB_FDM(csbcpb) &= ~NX_FDM_INTERMEDIATE;
-
 
 		rc = nx_hcall_sync(nx_ctx, &nx_ctx->op,
 				   req->base.flags & CRYPTO_TFM_REQ_MAY_SLEEP);

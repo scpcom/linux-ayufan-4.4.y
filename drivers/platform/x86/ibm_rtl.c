@@ -207,7 +207,6 @@ static struct device_attribute *rtl_attributes[] = {
 	NULL
 };
 
-
 static int rtl_setup_sysfs(void) {
 	int ret, i;
 
@@ -225,7 +224,6 @@ static void rtl_teardown_sysfs(void) {
 		device_remove_file(rtl_subsys.dev_root, rtl_attributes[i]);
 	bus_unregister(&rtl_subsys);
 }
-
 
 static struct dmi_system_id __initdata ibm_rtl_dmi_table[] = {
 	{                                                  \

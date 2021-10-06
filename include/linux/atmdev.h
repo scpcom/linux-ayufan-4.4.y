@@ -2,7 +2,6 @@
 #ifndef LINUX_ATMDEV_H
 #define LINUX_ATMDEV_H
 
-
 #include <linux/wait.h> /* wait_queue_head_t */
 #include <linux/time.h> /* struct timeval */
 #include <linux/net.h>
@@ -32,7 +31,6 @@ struct k_atm_aal_stats {
 	__AAL_STAT_ITEMS
 #undef __HANDLE_ITEM
 };
-
 
 struct k_atm_dev_stats {
 	struct k_atm_aal_stats aal0;
@@ -67,7 +65,6 @@ enum {
 	ATM_VF_IS_CLIP,		/* in use by CLIP protocol */
 };
 
-
 #define ATM_VF2VS(flags) \
     (test_bit(ATM_VF_READY,&(flags)) ? ATM_VS_CONNECTED : \
      test_bit(ATM_VF_RELEASED,&(flags)) ? ATM_VS_CLOSING : \
@@ -75,11 +72,9 @@ enum {
      test_bit(ATM_VF_REGIS,&(flags)) ? ATM_VS_INUSE : \
      test_bit(ATM_VF_BOUND,&(flags)) ? ATM_VS_BOUND : ATM_VS_IDLE)
 
-
 enum {
 	ATM_DF_REMOVED,		/* device was removed from atm_devs list */
 };
-
 
 #define ATM_PHY_SIG_LOST    0	/* no carrier/light */
 #define ATM_PHY_SIG_UNKNOWN 1	/* carrier/light status is unknown */
@@ -168,12 +163,10 @@ struct atm_dev {
 	struct list_head dev_list;	/* linkage */
 };
 
- 
 /* OF: send_Oam Flags */
 
 #define ATM_OF_IMMED  1		/* Attempt immediate delivery */
 #define ATM_OF_INRATE 2		/* Attempt in-rate delivery */
-
 
 /*
  * ioctl, getsockopt, and setsockopt are optional and can be set to NULL.
@@ -239,18 +232,15 @@ void vcc_insert_socket(struct sock *sk);
 
 void atm_dev_release_vccs(struct atm_dev *dev);
 
-
 static inline void atm_force_charge(struct atm_vcc *vcc,int truesize)
 {
 	atomic_add(truesize, &sk_atm(vcc)->sk_rmem_alloc);
 }
 
-
 static inline void atm_return(struct atm_vcc *vcc,int truesize)
 {
 	atomic_sub(truesize, &sk_atm(vcc)->sk_rmem_alloc);
 }
-
 
 static inline int atm_may_send(struct atm_vcc *vcc,unsigned int size)
 {
@@ -258,12 +248,10 @@ static inline int atm_may_send(struct atm_vcc *vcc,unsigned int size)
 	       sk_atm(vcc)->sk_sndbuf;
 }
 
-
 static inline void atm_dev_hold(struct atm_dev *dev)
 {
 	atomic_inc(&dev->refcnt);
 }
-
 
 static inline void atm_dev_put(struct atm_dev *dev)
 {
@@ -274,7 +262,6 @@ static inline void atm_dev_put(struct atm_dev *dev)
 		put_device(&dev->class_dev);
 	}
 }
-
 
 int atm_charge(struct atm_vcc *vcc,int truesize);
 struct sk_buff *atm_alloc_charge(struct atm_vcc *vcc,int pdu_size,
@@ -304,7 +291,6 @@ void register_atm_ioctl(struct atm_ioctl *);
  * deregister_atm_ioctl - remove the ioctl handler
  */
 void deregister_atm_ioctl(struct atm_ioctl *);
-
 
 /* register_atmdevice_notifier - register atm_dev notify events
  *

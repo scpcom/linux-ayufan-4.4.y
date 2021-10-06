@@ -21,7 +21,6 @@
 #define OPERAND_SIGNED	0x200	/* Operand printed as signed value */
 #define OPERAND_LENGTH	0x400	/* Operand printed as length (+1) */
 
-
 struct s390_operand {
 	int bits;		/* The number of bits in the operand. */
 	int shift;		/* The number of bits to shift. */
@@ -33,7 +32,6 @@ struct s390_insn {
 	unsigned char opfrag;
 	unsigned char format;
 };
-
 
 static inline int insn_length(unsigned char code)
 {

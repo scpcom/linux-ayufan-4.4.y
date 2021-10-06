@@ -53,4 +53,3 @@ void prom_console_write_buf(const char *buf, int len)
 		buf++;
 	}
 }
-

@@ -5022,7 +5022,6 @@ enum skl_disp_power_wells {
 #define _PIPEB_FRMCOUNT_G4X	(dev_priv->info.display_mmio_offset + 0x71040)
 #define _PIPEB_FLIPCOUNT_G4X	(dev_priv->info.display_mmio_offset + 0x71044)
 
-
 /* Display B control */
 #define _DSPBCNTR		(dev_priv->info.display_mmio_offset + 0x71180)
 #define   DISPPLANE_ALPHA_TRANS_ENABLE		(1<<15)

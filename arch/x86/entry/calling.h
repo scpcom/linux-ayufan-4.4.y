@@ -231,4 +231,3 @@ For 32-bit we have the following conventions - kernel is built with
 	.endm
 
 #endif /* CONFIG_X86_64 */
-

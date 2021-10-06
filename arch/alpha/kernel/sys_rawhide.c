@@ -29,11 +29,9 @@
 #include "pci_impl.h"
 #include "machvec_impl.h"
 
-
 /*
  * HACK ALERT! only the boot cpu is used for interrupts.
  */
-
 
 /* Note mask bit is true for ENABLED irqs.  */
 
@@ -240,7 +238,6 @@ rawhide_map_irq(const struct pci_dev *dev, u8 slot, u8 pin)
 		irq += 24 * hose->index;
 	return irq;
 }
-
 
 /*
  * The System Vector

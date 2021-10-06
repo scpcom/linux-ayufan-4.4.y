@@ -109,4 +109,3 @@ void free_input_mapper_list(struct list_head *head)
 		kfree(entry);
 	}
 }
-

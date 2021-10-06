@@ -92,7 +92,6 @@
 #define DPRINTK(stuff...)
 #endif
 
-
 #define NR_SUPERIOS 3
 static struct superio_struct {	/* For Super-IO chips autodetection */
 	int io;
@@ -895,7 +894,6 @@ static size_t parport_pc_ecp_write_block_pio(struct parport *port,
 #endif /* IEEE 1284 support */
 #endif /* Allowed to use FIFO/DMA */
 
-
 /*
  *	******************************************
  *	INITIALISATION AND MODULE STUFF BELOW HERE
@@ -950,7 +948,6 @@ static struct superio_struct *find_free_superio(void)
 			return &superios[i];
 	return NULL;
 }
-
 
 /* Super-IO chipset detection, Winbond, SMSC */
 static void show_parconfig_smsc37c669(int io, int key)
@@ -1036,7 +1033,6 @@ static void show_parconfig_smsc37c669(int io, int key)
 		}
 	}
 }
-
 
 static void show_parconfig_winbond(int io, int key)
 {
@@ -1191,7 +1187,6 @@ static void decode_smsc(int efer, int key, int devid, int devrev)
 		func(efer, key);
 }
 
-
 static void winbond_check(int io, int key)
 {
 	int origval, devid, devrev, oldid, x_devid, x_devrev, x_oldid;
@@ -1314,7 +1309,6 @@ out:
 	release_region(io, 3);
 }
 
-
 static void detect_and_report_winbond(void)
 {
 	if (verbose_probing)
@@ -1397,7 +1391,6 @@ static int get_superio_irq(struct parport *p)
 		return s->irq;
 	return PARPORT_IRQ_NONE;
 }
-
 
 /* --- Mode detection ------------------------------------- */
 
@@ -2593,7 +2586,6 @@ static int sio_via_probe(struct pci_dev *pdev, int autoirq, int autodma,
 	return 0;
 }
 
-
 enum parport_pc_sio_types {
 	sio_via_686a = 0,   /* Via VT82C686A motherboard Super I/O */
 	sio_via_8231,	    /* Via VT8231 south bridge integrated Super IO */
@@ -2647,7 +2639,6 @@ enum parport_pc_pci_cards {
 	netmos_9865,
 	quatech_sppxp100,
 };
-
 
 /* each element directly indexed from enum list, above
  * (but offset by last_sio) */

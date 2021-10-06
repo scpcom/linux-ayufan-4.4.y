@@ -221,7 +221,6 @@ static int configfs_dirent_exists(struct configfs_dirent *parent_sd,
 	return 0;
 }
 
-
 int configfs_make_dirent(struct configfs_dirent * parent_sd,
 			 struct dentry * dentry, void * element,
 			 umode_t mode, int type)
@@ -407,7 +406,6 @@ static void configfs_remove_dir(struct config_item * item)
 	 */
 	dput(dentry);
 }
-
 
 /* attaches attribute's configfs_dirent to the dentry corresponding to the
  * attribute file
@@ -964,7 +962,6 @@ static int configfs_dump(struct configfs_dirent *sd, int level)
 	return ret;
 }
 #endif
-
 
 /*
  * configfs_depend_item() and configfs_undepend_item()

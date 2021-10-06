@@ -26,4 +26,3 @@ struct swsusp_arch_regs {
 #endif
 
 #endif /* __UNICORE_SUSPEND_H__ */
-

@@ -10,7 +10,6 @@
 #include <linux/irqflags.h>
 #include <linux/export.h>
 
-
 /**
  * __mips_set_bit - Atomically set a bit in memory.  This is called by
  * set_bit() if it cannot find a faster solution.
@@ -31,7 +30,6 @@ void __mips_set_bit(unsigned long nr, volatile unsigned long *addr)
 	raw_local_irq_restore(flags);
 }
 EXPORT_SYMBOL(__mips_set_bit);
-
 
 /**
  * __mips_clear_bit - Clears a bit in memory.  This is called by clear_bit() if
@@ -54,7 +52,6 @@ void __mips_clear_bit(unsigned long nr, volatile unsigned long *addr)
 }
 EXPORT_SYMBOL(__mips_clear_bit);
 
-
 /**
  * __mips_change_bit - Toggle a bit in memory.	This is called by change_bit()
  * if it cannot find a faster solution.
@@ -75,7 +72,6 @@ void __mips_change_bit(unsigned long nr, volatile unsigned long *addr)
 	raw_local_irq_restore(flags);
 }
 EXPORT_SYMBOL(__mips_change_bit);
-
 
 /**
  * __mips_test_and_set_bit - Set a bit and return its old value.  This is
@@ -102,7 +98,6 @@ int __mips_test_and_set_bit(unsigned long nr,
 }
 EXPORT_SYMBOL(__mips_test_and_set_bit);
 
-
 /**
  * __mips_test_and_set_bit_lock - Set a bit and return its old value.  This is
  * called by test_and_set_bit_lock() if it cannot find a faster solution.
@@ -128,7 +123,6 @@ int __mips_test_and_set_bit_lock(unsigned long nr,
 }
 EXPORT_SYMBOL(__mips_test_and_set_bit_lock);
 
-
 /**
  * __mips_test_and_clear_bit - Clear a bit and return its old value.  This is
  * called by test_and_clear_bit() if it cannot find a faster solution.
@@ -152,7 +146,6 @@ int __mips_test_and_clear_bit(unsigned long nr, volatile unsigned long *addr)
 	return res;
 }
 EXPORT_SYMBOL(__mips_test_and_clear_bit);
-
 
 /**
  * __mips_test_and_change_bit - Change a bit and return its old value.	This is

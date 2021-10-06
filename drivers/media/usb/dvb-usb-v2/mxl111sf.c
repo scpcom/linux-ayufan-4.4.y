@@ -339,7 +339,6 @@ fail:
 	return -ENODEV;
 }
 
-
 static int mxl111sf_ep6_streaming_ctrl(struct dvb_frontend *fe, int onoff)
 {
 	struct mxl111sf_state *state = fe_to_priv(fe);

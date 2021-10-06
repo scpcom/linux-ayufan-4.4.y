@@ -18,7 +18,6 @@
 #ifndef __ASM_OPENRISC_ELF_H
 #define __ASM_OPENRISC_ELF_H
 
-
 #include <linux/types.h>
 #include <uapi/asm/elf.h>
 

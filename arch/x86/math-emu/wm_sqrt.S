@@ -28,7 +28,6 @@
 #include "exception.h"
 #include "fpu_emu.h"
 
-
 #ifndef NON_REENTRANT_FPU
 /*	Local storage on the stack: */
 #define FPU_accum_3	-4(%ebp)	/* ms word */
@@ -71,7 +70,6 @@ FPU_fsqrt_arg_1:
 FPU_fsqrt_arg_0:
 	.long	0		/* ls word, at most the ms bit is set */
 #endif /* NON_REENTRANT_FPU */ 
-
 
 .text
 ENTRY(wm_sqrt)
@@ -350,7 +348,6 @@ sqrt_round_result:
 	movw	EXP_BIAS,EXP(%edi)	/* Result is in  [1.0 .. 2.0) */
 	jmp	fpu_reg_round
 
-
 sqrt_near_exact_x:
 /* First, the estimate must be rounded up. */
 	addl	$1,%edi
@@ -410,7 +407,6 @@ sqrt_near_exact_large:
 	sbbl	$0,%esi
 	movl	$0xffffff00,%eax
 	jmp	sqrt_round_result
-
 
 sqrt_get_more_precision:
 /* This case is almost the same as the above, except we start

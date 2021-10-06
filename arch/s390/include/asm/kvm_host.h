@@ -10,7 +10,6 @@
  *    Author(s): Carsten Otte <cotte@de.ibm.com>
  */
 
-
 #ifndef ASM_KVM_HOST_H
 #define ASM_KVM_HOST_H
 

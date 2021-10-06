@@ -726,7 +726,6 @@ int __init_memblock memblock_remove(phys_addr_t base, phys_addr_t size)
 	return memblock_remove_range(&memblock.memory, base, size);
 }
 
-
 int __init_memblock memblock_free(phys_addr_t base, phys_addr_t size)
 {
 	memblock_dbg("   memblock_free: [%#016llx-%#016llx] %pF\n",
@@ -821,7 +820,6 @@ int __init_memblock memblock_mark_mirror(phys_addr_t base, phys_addr_t size)
 
 	return memblock_setclr_flag(base, size, 1, MEMBLOCK_MIRROR);
 }
-
 
 /**
  * __next_reserved_mem_region - next function for for_each_reserved_region()

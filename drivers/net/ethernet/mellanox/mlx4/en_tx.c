@@ -271,7 +271,6 @@ static void mlx4_en_stamp_wqe(struct mlx4_en_priv *priv,
 	}
 }
 
-
 static u32 mlx4_en_free_tx_desc(struct mlx4_en_priv *priv,
 				struct mlx4_en_tx_ring *ring,
 				int index, u8 owner, u64 timestamp)
@@ -348,7 +347,6 @@ static u32 mlx4_en_free_tx_desc(struct mlx4_en_priv *priv,
 	dev_consume_skb_any(skb);
 	return tx_info->nr_txbb;
 }
-
 
 int mlx4_en_free_tx_buf(struct net_device *dev, struct mlx4_en_tx_ring *ring)
 {
@@ -466,7 +464,6 @@ static bool mlx4_en_process_tx_cq(struct net_device *dev,
 		index = cons_index & size_mask;
 		cqe = mlx4_en_get_cqe(buf, index, priv->cqe_size) + factor;
 	}
-
 
 	/*
 	 * To prevent CQ overflow we first update CQ consumer and only then
@@ -1027,4 +1024,3 @@ tx_drop:
 	priv->stats.tx_dropped++;
 	return NETDEV_TX_OK;
 }
-

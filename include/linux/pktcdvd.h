@@ -24,7 +24,6 @@
 #define PKT_WRITE_CONGESTION_ON    10000
 #define PKT_WRITE_CONGESTION_OFF   9000
 
-
 struct packet_settings
 {
 	__u32			size;		/* packet size in (512 byte) sectors */

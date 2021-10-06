@@ -144,7 +144,6 @@ static int au0828_get_key_au8522(struct au0828_rc *ir)
 	/* Something arrived. Get the data */
 	rc = au8522_rc_read(ir, 0xe3, 0x11, buf, sizeof(buf));
 
-
 	if (rc < 0)
 		return rc;
 

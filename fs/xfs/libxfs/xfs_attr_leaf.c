@@ -43,7 +43,6 @@
 #include "xfs_dir2.h"
 #include "xfs_log.h"
 
-
 /*
  * xfs_attr_leaf.c
  *
@@ -363,7 +362,6 @@ xfs_attr_namesp_match(int arg_flags, int ondisk_flags)
 {
 	return XFS_ATTR_NSP_ONDISK(ondisk_flags) == XFS_ATTR_NSP_ARGS_TO_ONDISK(arg_flags);
 }
-
 
 /*========================================================================
  * External routines when attribute fork size < XFS_LITINO(mp).
@@ -2361,7 +2359,6 @@ xfs_attr3_leaf_moveents(
 	ASSERT(start_d <= ichdr_d->count);
 	ASSERT(count <= ichdr_s->count);
 
-
 	/*
 	 * Move the entries in the destination leaf up to make a hole?
 	 */
@@ -2530,7 +2527,6 @@ xfs_attr_leaf_newentsize(
 		*local = 0;
 	return xfs_attr_leaf_entsize_remote(args->namelen);
 }
-
 
 /*========================================================================
  * Manage the INCOMPLETE flag in a leaf entry

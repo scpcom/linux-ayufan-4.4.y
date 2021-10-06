@@ -7,9 +7,7 @@
 
 #include <asm/bootinfo-apollo.h>
 
-
 extern u_long apollo_model;
-
 
 /*
    see scn2681 data sheet for more info.
@@ -46,7 +44,6 @@ struct mc146818 {
         unsigned char day_of_week, day_of_month;
         unsigned char month, year;
 };
-
 
 #define IO_BASE 0x80000000
 

@@ -117,7 +117,6 @@
 
 #include "HalVerDef.h"
 
-
 u8	/* return the final channel plan decision */
 hal_com_get_channel_plan23a(
 	struct rtw_adapter	*padapter,

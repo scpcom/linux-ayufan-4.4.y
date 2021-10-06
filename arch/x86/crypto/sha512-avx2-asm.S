@@ -124,7 +124,6 @@ frame_size = frame_GPRSAVE + GPRSAVE_SIZE
 	mov	\p2, \p1
 .endm
 
-
 # COPY_YMM_AND_BSWAP ymm, [mem], byte_flip_mask
 # Load ymm with mem and byte swap each dword
 .macro COPY_YMM_AND_BSWAP p1 p2 p3
@@ -229,7 +228,6 @@ frame_size = frame_GPRSAVE + GPRSAVE_SIZE
 	vpxor		YTMP4, YTMP3, YTMP3		# YTMP3 = W[-15] ror 1 ^ W[-15] >> 7
 	vpxor		YTMP1, YTMP3, YTMP1		# YTMP1 = s0
 
-
 	# Add three components, w[t-16], w[t-7] and sigma0
 	vpaddq		YTMP1, YTMP0, YTMP0		# YTMP0 = W[-16] + W[-7] + s0
 	# Move to appropriate lanes for calculating w[16] and w[17]
@@ -243,19 +241,16 @@ frame_size = frame_GPRSAVE + GPRSAVE_SIZE
 	vperm2f128	$0x11, Y_3, Y_3, YTMP2		# YTMP2 = W[-2] {BABA}
 	vpsrlq		$6, YTMP2, YTMP4		# YTMP4 = W[-2] >> 6 {BABA}
 
-
 	mov	a, y3		# y3 = a                                # MAJA
 	rorx	$41, e, y0	# y0 = e >> 41				# S1A
 	rorx	$18, e, y1	# y1 = e >> 18				# S1B
 	add	1*8+frame_XFER(%rsp), h		# h = k + w + h         # --
 	or	c, y3		# y3 = a|c                              # MAJA
 
-
 	mov	f, y2		# y2 = f                                # CH
 	rorx	$34, a, T1	# T1 = a >> 34				# S0B
 	xor	y1, y0		# y0 = (e>>41) ^ (e>>18)		# S1
 	xor	g, y2		# y2 = f^g                              # CH
-
 
 	rorx	$14, e, y1	# y1 = (e >> 14)			# S1
 	xor	y1, y0		# y0 = (e>>41) ^ (e>>18) ^ (e>>14)	# S1
@@ -282,7 +277,6 @@ frame_size = frame_GPRSAVE + GPRSAVE_SIZE
 	add	y3, h		# h = t1 + S0 + MAJ                     # --
 
 	RotateState
-
 
 ################################### RND N + 2 #########################################
 
@@ -365,12 +359,10 @@ frame_size = frame_GPRSAVE + GPRSAVE_SIZE
 	add	3*8+frame_XFER(%rsp), h		# h = k + w + h         # --
 	or	c, y3		# y3 = a|c                              # MAJA
 
-
 	mov	f, y2		# y2 = f                                # CH
 	rorx	$34, a, T1	# T1 = a >> 34				# S0B
 	xor	y1, y0		# y0 = (e>>41) ^ (e>>18)		# S1
 	xor	g, y2		# y2 = f^g                              # CH
-
 
 	rorx	$14, e, y1	# y1 = (e >> 14)			# S1
 	and	e, y2		# y2 = (f^g)&e                          # CH
@@ -545,7 +537,6 @@ frame_size = frame_GPRSAVE + GPRSAVE_SIZE
 	and	b, y3		# y3 = (a|c)&b                          # MAJA
 	and	c, T1		# T1 = a&c                              # MAJB
 	add	y0, y2		# y2 = S1 + CH                          # --
-
 
 	add	h, d		# d = k + w + h + d                     # --
 	or	T1, y3		# y3 = MAJ = (a|c)&b)|(a&c)             # MAJ

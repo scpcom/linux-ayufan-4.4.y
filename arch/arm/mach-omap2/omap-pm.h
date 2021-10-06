@@ -54,7 +54,6 @@ int __init omap_pm_if_init(void);
  * Device-driver-originated constraints (via board-*.c files, platform_data)
  */
 
-
 /**
  * omap_pm_set_max_mpu_wakeup_lat - set the maximum MPU wakeup latency
  * @dev: struct device * requesting the constraint
@@ -91,7 +90,6 @@ int __init omap_pm_if_init(void);
  */
 int omap_pm_set_max_mpu_wakeup_lat(struct device *dev, long t);
 
-
 /**
  * omap_pm_set_min_bus_tput - set minimum bus throughput needed by device
  * @dev: struct device * requesting the constraint
@@ -123,14 +121,12 @@ int omap_pm_set_max_mpu_wakeup_lat(struct device *dev, long t);
  */
 int omap_pm_set_min_bus_tput(struct device *dev, u8 agent_id, unsigned long r);
 
-
 /*
  * CPUFreq-originated constraint
  *
  * In the future, this should be handled by custom OPP clocktype
  * functions.
  */
-
 
 /*
  * Device context loss tracking

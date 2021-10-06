@@ -8,7 +8,6 @@
 
 #include "ebb.h"
 
-
 /*
  * Test various attributes of the EBB event are enforced.
  */
@@ -24,12 +23,10 @@ int event_attributes(void)
 	FAIL_IF(event_open(&event));
 	event_close(&event);
 
-
 	event_init(&event, 0x001e); /* CYCLES - no PMC specified */
 	event_leader_ebb_init(&event);
 	/* Expected to fail, no PMC specified */
 	FAIL_IF(event_open(&event) == 0);
-
 
 	event_init(&event, 0x2001e);
 	event_leader_ebb_init(&event);
@@ -37,13 +34,11 @@ int event_attributes(void)
 	/* Expected to fail, not exclusive */
 	FAIL_IF(event_open(&event) == 0);
 
-
 	event_init(&event, 0x3001e);
 	event_leader_ebb_init(&event);
 	event.attr.freq = 1;
 	/* Expected to fail, sets freq */
 	FAIL_IF(event_open(&event) == 0);
-
 
 	event_init(&event, 0x4001e);
 	event_leader_ebb_init(&event);
@@ -51,20 +46,17 @@ int event_attributes(void)
 	/* Expected to fail, sets sample_period */
 	FAIL_IF(event_open(&event) == 0);
 
-
 	event_init(&event, 0x1001e);
 	event_leader_ebb_init(&event);
 	event.attr.enable_on_exec = 1;
 	/* Expected to fail, sets enable_on_exec */
 	FAIL_IF(event_open(&event) == 0);
 
-
 	event_init(&event, 0x1001e);
 	event_leader_ebb_init(&event);
 	event.attr.inherit = 1;
 	/* Expected to fail, sets inherit */
 	FAIL_IF(event_open(&event) == 0);
-
 
 	event_init(&leader, 0x1001e);
 	event_leader_ebb_init(&leader);
@@ -78,7 +70,6 @@ int event_attributes(void)
 	event_close(&leader);
 	event_close(&event);
 
-
 	event_init(&leader, 0x1001e);
 	event_leader_ebb_init(&leader);
 	FAIL_IF(event_open(&leader));
@@ -88,7 +79,6 @@ int event_attributes(void)
 	/* Expected to fail, event doesn't request EBB, leader does */
 	FAIL_IF(event_open_with_group(&event, leader.fd) == 0);
 	event_close(&leader);
-
 
 	event_init(&leader, 0x1001e);
 	event_leader_ebb_init(&leader);
@@ -104,13 +94,11 @@ int event_attributes(void)
 	FAIL_IF(event_open_with_group(&event, leader.fd) == 0);
 	event_close(&leader);
 
-
 	event_init(&leader, 0x1001e);
 	event_leader_ebb_init(&leader);
 	leader.attr.exclusive = 0;
 	/* Expected to fail, leader isn't exclusive */
 	FAIL_IF(event_open(&leader) == 0);
-
 
 	event_init(&leader, 0x1001e);
 	event_leader_ebb_init(&leader);

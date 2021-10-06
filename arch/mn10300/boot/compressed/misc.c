@@ -152,7 +152,6 @@ static long bytes_out;
 static uch *output_data;
 static unsigned long output_ptr;
 
-
 static unsigned long free_mem_ptr = (unsigned long) &end;
 static unsigned long free_mem_end_ptr = (unsigned long) &end + 0x90000;
 

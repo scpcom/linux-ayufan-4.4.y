@@ -73,7 +73,6 @@
 #define	FW_PS_ISR_ENABLE		BIT(4)
 #define	FW_PS_IMR_ENABLE		BIT(5)
 
-
 #define	FW_PS_ACK			BIT(6)
 #define	FW_PS_TOGGLE			BIT(7)
 
@@ -192,7 +191,6 @@ enum rtl8188e_h2c_cmd {
 	SET_BITS_TO_LE_1BYTE((__cmd)+1, 0, 8, __value)
 #define SET_88E_H2CCMD_WOWLAN_GPIO_DURATION(__cmd, __value)		\
 	SET_BITS_TO_LE_1BYTE((__cmd)+2, 0, 8, __value)
-
 
 #define SET_H2CCMD_PWRMODE_PARM_MODE(__ph2ccmd, __val)			\
 	SET_BITS_TO_LE_1BYTE(__ph2ccmd, 0, 8, __val)

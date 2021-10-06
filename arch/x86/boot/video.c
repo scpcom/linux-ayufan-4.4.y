@@ -217,7 +217,6 @@ static unsigned int mode_menu(void)
 		putchar('\a');	/* Beep! */
 	}
 
-
 	for (;;) {
 		display_menu();
 

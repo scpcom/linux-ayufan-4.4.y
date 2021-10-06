@@ -18,7 +18,6 @@
 #include <asm/time.h>
 #include <asm/irq_cpu.h>
 
-
 #define PORT(_base,_irq)				\
 	{						\
 		.iobase		= _base,		\
@@ -136,7 +135,6 @@ static void __init sni_pcit_resource_init(void)
 	for (i = 0; i < ARRAY_SIZE(pcit_io_resources); i++)
 		request_resource(&sni_io_resource, pcit_io_resources + i);
 }
-
 
 extern struct pci_ops sni_pcit_ops;
 

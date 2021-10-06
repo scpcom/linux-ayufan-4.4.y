@@ -67,7 +67,6 @@
 #include "i2400m.h"
 #include <linux/kthread.h>
 
-
 /*
  * Error Density Count: cheapo error density (over time) counter
  *
@@ -158,7 +157,6 @@ enum {
 	USB_DEVICE_ID_I6250 = 0x0187,
 };
 
-
 /**
  * struct i2400mu - descriptor for a USB connected i2400m
  *
@@ -241,7 +239,6 @@ struct i2400mu {
 	struct dentry *debugfs_dentry;
 	unsigned i6050:1;	/* 1 if this is a 6050 based SKU */
 };
-
 
 static inline
 void i2400mu_init(struct i2400mu *i2400mu)

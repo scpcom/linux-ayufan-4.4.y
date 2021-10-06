@@ -81,4 +81,3 @@ void request_event_sources_irqs(struct device_node *np,
 		}
 	}
 }
-

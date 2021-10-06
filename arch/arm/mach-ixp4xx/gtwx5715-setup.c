@@ -103,7 +103,6 @@ static struct resource gtwx5715_uart_resources[] = {
 	{ },
 };
 
-
 static struct plat_serial8250_port gtwx5715_uart_platform_data[] = {
 	{
 	.mapbase	= IXP4XX_UART2_BASE_PHYS,
@@ -161,7 +160,6 @@ static void __init gtwx5715_init(void)
 	platform_add_devices(gtwx5715_devices, ARRAY_SIZE(gtwx5715_devices));
 }
 
-
 MACHINE_START(GTWX5715, "Gemtek GTWX5715 (Linksys WRV54G)")
 	/* Maintainer: George Joseph */
 	.map_io		= ixp4xx_map_io,
@@ -175,5 +173,3 @@ MACHINE_START(GTWX5715, "Gemtek GTWX5715 (Linksys WRV54G)")
 #endif
 	.restart	= ixp4xx_restart,
 MACHINE_END
-
-

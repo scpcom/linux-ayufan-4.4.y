@@ -24,7 +24,6 @@
 #define ADV7511_MONITOR_DETECT 0
 #define ADV7511_EDID_DETECT 1
 
-
 struct adv7511_monitor_detect {
 	int present;
 };

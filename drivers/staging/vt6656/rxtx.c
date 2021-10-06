@@ -773,7 +773,6 @@ static void vnt_fill_txkey(struct vnt_usb_send_context *tx_context,
 		if (ieee80211_has_a4(hdr->frame_control))
 			ether_addr_copy(mic_hdr->addr4, hdr->addr4);
 
-
 		memcpy(key_buffer, tx_key->key, WLAN_KEY_LEN_CCMP);
 
 		break;

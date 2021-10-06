@@ -34,7 +34,6 @@
 #include <net/checksum.h>
 #endif /* CONFIG_NET */
 
-
 /*
  * String functions
  */

@@ -209,8 +209,8 @@ static inline void __downgrade_write(struct rw_semaphore *sem)
 static inline void rwsem_atomic_add(long delta, struct rw_semaphore *sem)
 {
 	asm volatile(LOCK_PREFIX _ASM_ADD "%1,%0"
-		     : "+m" (sem->count)
-		     : "er" (delta));
+			: "+m" (sem->count)
+			: "er" (delta));
 }
 
 /*
@@ -218,7 +218,7 @@ static inline void rwsem_atomic_add(long delta, struct rw_semaphore *sem)
  */
 static inline long rwsem_atomic_update(long delta, struct rw_semaphore *sem)
 {
-	return delta + xadd(&sem->count, delta);
+       return delta + xadd(&sem->count, delta);
 }
 
 #endif /* __KERNEL__ */

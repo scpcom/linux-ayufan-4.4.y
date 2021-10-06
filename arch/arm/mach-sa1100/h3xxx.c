@@ -82,7 +82,6 @@ static struct flash_platform_data h3xxx_flash_data = {
 static struct resource h3xxx_flash_resource =
 	DEFINE_RES_MEM(SA1100_CS0_PHYS, SZ_32M);
 
-
 /*
  * H3xxx uart support
  */
@@ -314,4 +313,3 @@ void __init h3xxx_map_io(void)
 	GPCR = 0x0fffffff;	/* All outputs are set low by default */
 	GPDR = 0;		/* Configure all GPIOs as input */
 }
-

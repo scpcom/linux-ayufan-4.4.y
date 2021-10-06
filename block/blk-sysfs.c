@@ -193,7 +193,6 @@ static ssize_t queue_write_same_max_show(struct request_queue *q, char *page)
 		(unsigned long long)q->limits.max_write_same_sectors << 9);
 }
 
-
 static ssize_t
 queue_max_sectors_store(struct request_queue *q, const char *page, size_t count)
 {

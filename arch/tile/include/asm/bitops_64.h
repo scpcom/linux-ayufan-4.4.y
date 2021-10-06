@@ -44,7 +44,6 @@ static inline void change_bit(unsigned nr, volatile unsigned long *addr)
 	} while (guess != oldval);
 }
 
-
 /*
  * The test_and_xxx_bit() routines require a memory fence before we
  * start the operation, and after the operation completes.  We use
@@ -63,7 +62,6 @@ static inline int test_and_set_bit(unsigned nr, volatile unsigned long *addr)
 	return val;
 }
 
-
 static inline int test_and_clear_bit(unsigned nr, volatile unsigned long *addr)
 {
 	int val;
@@ -74,7 +72,6 @@ static inline int test_and_clear_bit(unsigned nr, volatile unsigned long *addr)
 	barrier();
 	return val;
 }
-
 
 static inline int test_and_change_bit(unsigned nr,
 				      volatile unsigned long *addr)

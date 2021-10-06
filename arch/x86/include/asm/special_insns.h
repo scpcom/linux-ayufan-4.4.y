@@ -1,7 +1,6 @@
 #ifndef _ASM_X86_SPECIAL_INSNS_H
 #define _ASM_X86_SPECIAL_INSNS_H
 
-
 #ifdef __KERNEL__
 
 #include <asm/nops.h>
@@ -262,7 +261,6 @@ static inline void pcommit_sfence(void)
 }
 
 #define nop() asm volatile ("nop")
-
 
 #endif /* __KERNEL__ */
 

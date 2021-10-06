@@ -20,7 +20,6 @@
 #include <asm/mmzone.h>
 #include <asm/numa.h>
 
-
 /*
  * The following structures are usually initialized by ACPI or
  * similar mechanisms and describe the NUMA characteristics of the machine.

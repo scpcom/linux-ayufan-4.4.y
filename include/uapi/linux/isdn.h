@@ -139,5 +139,4 @@ typedef struct {
 #define ISDN_NET_DM_AUTO	0x80    /* this interface is autodial     */
 #define ISDN_NET_DIALMODE(x) ((&(x))->flags & ISDN_NET_DIALMODE_MASK)
 
-
 #endif /* _UAPI__ISDN_H__ */

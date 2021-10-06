@@ -541,7 +541,6 @@ static int spi_cmd_complete(u8 cmd, u32 adr, u8 *b, u32 sz, u8 clockless)
 					}
 				}
 
-
 				ix += nbytes;
 				sz -= nbytes;
 			}
@@ -576,7 +575,6 @@ static int spi_cmd_complete(u8 cmd, u32 adr, u8 *b, u32 sz, u8 clockless)
 
 				if (result == N_FAIL)
 					break;
-
 
 				/**
 				 * Read bytes
@@ -741,7 +739,6 @@ static int spi_data_write(u8 *b, u32 sz)
 		ix += nbytes;
 		sz -= nbytes;
 	} while (sz);
-
 
 	return result;
 }
@@ -1011,7 +1008,6 @@ static int spi_init(wilc_wlan_inp_t *inp, wilc_debug_func func)
 		g_spi.crc_off = 1;
 	}
 
-
 	/**
 	 *      make sure can read back chip id correctly
 	 **/
@@ -1057,13 +1053,9 @@ static int spi_read_size(u32 *size)
 		*size = tmp;
 	}
 
-
-
 _fail_:
 	return ret;
 }
-
-
 
 static int spi_read_int(u32 *int_status)
 {

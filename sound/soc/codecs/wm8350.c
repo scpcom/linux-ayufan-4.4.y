@@ -1151,7 +1151,6 @@ static int wm8350_set_bias_level(struct snd_soc_codec *codec,
 			wm8350_reg_write(wm8350, WM8350_POWER_MGMT_1,
 					 pm1);
 
-
 			/* enable analogue bias */
 			pm1 |= WM8350_BIASEN;
 			wm8350_reg_write(wm8350, WM8350_POWER_MGMT_1, pm1);

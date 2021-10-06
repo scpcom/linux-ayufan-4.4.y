@@ -189,7 +189,6 @@ struct arm_ccn {
 	struct arm_ccn_dt dt;
 };
 
-
 static int arm_ccn_node_to_xp(int node)
 {
 	return node / CCN_NUM_XP_PORTS;
@@ -199,7 +198,6 @@ static int arm_ccn_node_to_xp_port(int node)
 {
 	return node % CCN_NUM_XP_PORTS;
 }
-
 
 /*
  * Bit shifts and masks in these defines must be kept in sync with
@@ -264,7 +262,6 @@ static struct attribute_group arm_ccn_pmu_format_attr_group = {
 	.attrs = arm_ccn_pmu_format_attrs,
 };
 
-
 struct arm_ccn_pmu_event {
 	struct device_attribute attr;
 	u32 type;
@@ -321,7 +318,6 @@ struct arm_ccn_pmu_event {
 
 #define CCN_EVENT_CYCLES(_name) { .attr = CCN_EVENT_ATTR(_name), \
 		.type = CCN_TYPE_CYCLES }
-
 
 static ssize_t arm_ccn_pmu_event_show(struct device *dev,
 		struct device_attribute *attr, char *buf)
@@ -445,7 +441,6 @@ static struct attribute_group arm_ccn_pmu_events_attr_group = {
 	.is_visible = arm_ccn_pmu_events_is_visible,
 	.attrs = arm_ccn_pmu_events_attrs,
 };
-
 
 static u64 *arm_ccn_pmu_get_cmp_mask(struct arm_ccn *ccn, const char *name)
 {
@@ -577,7 +572,6 @@ static ktime_t arm_ccn_pmu_timer_period(void)
 	return ns_to_ktime((u64)arm_ccn_pmu_poll_period_us * 1000);
 }
 
-
 static const struct attribute_group *arm_ccn_pmu_attr_groups[] = {
 	&arm_ccn_pmu_events_attr_group,
 	&arm_ccn_pmu_format_attr_group,
@@ -585,7 +579,6 @@ static const struct attribute_group *arm_ccn_pmu_attr_groups[] = {
 	&arm_ccn_pmu_cpumask_attr_group,
 	NULL
 };
-
 
 static int arm_ccn_pmu_alloc_bit(unsigned long *bitmap, unsigned long size)
 {
@@ -1170,7 +1163,6 @@ static enum hrtimer_restart arm_ccn_pmu_timer_handler(struct hrtimer *hrtimer)
 	return HRTIMER_RESTART;
 }
 
-
 static int arm_ccn_pmu_cpu_notifier(struct notifier_block *nb,
 		unsigned long action, void *hcpu)
 {
@@ -1196,7 +1188,6 @@ static int arm_ccn_pmu_cpu_notifier(struct notifier_block *nb,
 
 	return NOTIFY_OK;
 }
-
 
 static DEFINE_IDA(arm_ccn_pmu_ida);
 
@@ -1315,7 +1306,6 @@ static void arm_ccn_pmu_cleanup(struct arm_ccn *ccn)
 	ida_simple_remove(&arm_ccn_pmu_ida, ccn->dt.id);
 }
 
-
 static int arm_ccn_for_each_valid_region(struct arm_ccn *ccn,
 		int (*callback)(struct arm_ccn *ccn, int region,
 		void __iomem *base, u32 type, u32 id))
@@ -1391,7 +1381,6 @@ static int arm_ccn_init_nodes(struct arm_ccn *ccn, int region,
 	return 0;
 }
 
-
 static irqreturn_t arm_ccn_error_handler(struct arm_ccn *ccn,
 		const u32 *err_sig_val)
 {
@@ -1405,7 +1394,6 @@ static irqreturn_t arm_ccn_error_handler(struct arm_ccn *ccn,
 
 	return IRQ_HANDLED;
 }
-
 
 static irqreturn_t arm_ccn_irq_handler(int irq, void *dev_id)
 {
@@ -1437,7 +1425,6 @@ static irqreturn_t arm_ccn_irq_handler(int irq, void *dev_id)
 
 	return res;
 }
-
 
 static int arm_ccn_probe(struct platform_device *pdev)
 {
@@ -1485,7 +1472,6 @@ static int arm_ccn_probe(struct platform_device *pdev)
 
 		ccn->irq = irq;
 	}
-
 
 	/* Build topology */
 

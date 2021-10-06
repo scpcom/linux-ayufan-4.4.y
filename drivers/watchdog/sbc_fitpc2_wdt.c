@@ -25,7 +25,6 @@
 #include <linux/io.h>
 #include <linux/uaccess.h>
 
-
 static bool nowayout = WATCHDOG_NOWAYOUT;
 static unsigned int margin = 60;	/* (secs) Default is 1 minute */
 static unsigned long wdt_status;
@@ -109,13 +108,11 @@ out:
 	return len;
 }
 
-
 static const struct watchdog_info ident = {
 	.options	= WDIOF_MAGICCLOSE | WDIOF_SETTIMEOUT |
 				WDIOF_KEEPALIVEPING,
 	.identity	= WATCHDOG_NAME,
 };
-
 
 static long fitpc2_wdt_ioctl(struct file *file, unsigned int cmd,
 							unsigned long arg)
@@ -179,7 +176,6 @@ static int fitpc2_wdt_release(struct inode *inode, struct file *file)
 
 	return 0;
 }
-
 
 static const struct file_operations fitpc2_wdt_fops = {
 	.owner		= THIS_MODULE,

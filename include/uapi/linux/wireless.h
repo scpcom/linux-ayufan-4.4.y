@@ -663,7 +663,6 @@
 #define IW_EVENT_CAPA_SET(event_capa, cmd) (event_capa[IW_EVENT_CAPA_INDEX(cmd)] |= IW_EVENT_CAPA_MASK(cmd))
 #define IW_EVENT_CAPA_SET_KERNEL(event_capa) {event_capa[0] |= IW_EVENT_CAPA_K_0; event_capa[1] |= IW_EVENT_CAPA_K_1; }
 
-
 /****************************** TYPES ******************************/
 
 /* --------------------------- SUBTYPES --------------------------- */
@@ -688,7 +687,6 @@ struct	iw_point
   __u16		length;		/* number of fields or size in bytes */
   __u16		flags;		/* Optional params */
 };
-
 
 /*
  *	A frequency
@@ -1112,7 +1110,6 @@ struct iw_event
 			  (char *) NULL)
 #define IW_EV_POINT_LEN	(IW_EV_LCP_LEN + sizeof(struct iw_point) - \
 			 IW_EV_POINT_OFF)
-
 
 /* Size of the Event prefix when packed in stream */
 #define IW_EV_LCP_PK_LEN	(4)

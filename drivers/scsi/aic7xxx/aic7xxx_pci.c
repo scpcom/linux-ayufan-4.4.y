@@ -2203,7 +2203,6 @@ ahc_aic7880h_setup(struct ahc_softc *ahc)
 	return error;
 }
 
-
 static int
 ahc_aha2940Pro_setup(struct ahc_softc *ahc)
 {

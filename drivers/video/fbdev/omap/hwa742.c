@@ -127,7 +127,6 @@ struct {
 	unsigned long		pix_tx_time;
 	unsigned long		line_upd_time;
 
-
 	struct omapfb_device	*fbdev;
 	struct lcd_ctrl_extif	*extif;
 	const struct lcd_ctrl	*int_ctrl;
@@ -784,7 +783,6 @@ static void calc_hwa742_clk_rates(unsigned long ext_clk,
 		*sys_clk, *pix_clk);
 }
 
-
 static int setup_tearsync(unsigned long pix_clk, int extif_div)
 {
 	int hdisp, vdisp;
@@ -977,7 +975,6 @@ static int hwa742_init(struct omapfb_device *fbdev, int ext_mode,
 		goto err4;
 	}
 
-
 	if (!(hwa742_read_reg(HWA742_PLL_DIV_REG) & 0x80)) {
 		dev_err(fbdev->dev,
 		      "HWA742: controller not initialized by the bootloader\n");
@@ -1056,4 +1053,3 @@ struct lcd_ctrl hwa742_ctrl = {
 	.suspend		= hwa742_suspend,
 	.resume			= hwa742_resume,
 };
-

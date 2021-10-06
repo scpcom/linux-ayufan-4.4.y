@@ -113,7 +113,6 @@ static struct console amiga_console_driver = {
 	.index	= -1,
 };
 
-
     /*
      *  Motherboard Resources present in all Amiga models
      */
@@ -136,7 +135,6 @@ static struct {
 };
 
 static struct resource ram_resource[NUM_MEMINFO];
-
 
     /*
      *  Parse an Amiga-specific record in the bootinfo
@@ -360,13 +358,11 @@ static void __init amiga_identify(void)
 #undef AMIGAHW_ANNOUNCE
 }
 
-
 static unsigned long amiga_random_get_entropy(void)
 {
 	/* VPOSR/VHPOSR provide at least 17 bits of data changing at 1.79 MHz */
 	return *(unsigned long *)&amiga_custom.vposr;
 }
-
 
     /*
      *  Setup the Amiga configuration info
@@ -589,7 +585,6 @@ jmp_addr_label040:
 		;
 }
 
-
     /*
      *  Debugging
      */
@@ -756,7 +751,6 @@ static void amiga_get_model(char *model)
 {
 	strcpy(model, amiga_model_name);
 }
-
 
 static void amiga_get_hardware_list(struct seq_file *m)
 {

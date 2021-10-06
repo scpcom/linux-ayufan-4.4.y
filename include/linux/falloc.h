@@ -3,7 +3,6 @@
 
 #include <uapi/linux/falloc.h>
 
-
 /*
  * Space reservation ioctls and argument structure
  * are designed to be compatible with the legacy XFS ioctls.

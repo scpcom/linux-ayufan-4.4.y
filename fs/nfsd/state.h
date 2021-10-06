@@ -573,7 +573,6 @@ enum nfsd4_cb_op {
 	NFSPROC4_CLNT_CB_SEQUENCE,
 };
 
-
 struct nfsd4_compound_state;
 struct nfsd_net;
 

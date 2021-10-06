@@ -145,7 +145,6 @@
 #define ISMT_SPGT_SPD_400K	(0x2 << 30)	/* 400 kHz */
 #define ISMT_SPGT_SPD_1M	(0x3 << 30)	/* 1 MHz */
 
-
 /* MSI Control Register (MSICTL) bit definitions */
 #define ISMT_MSICTL_MSIE	0x01	/* MSI Enable */
 
@@ -637,7 +636,6 @@ static irqreturn_t ismt_handle_isr(struct ismt_priv *priv)
 
 	return IRQ_HANDLED;
 }
-
 
 /**
  * ismt_do_interrupt() - IRQ interrupt handler

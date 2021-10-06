@@ -1172,7 +1172,6 @@ xfs_vm_writepage(
 				  wbc, end_index);
 	}
 
-
 	/*
 	 * Reserve log space if we might write beyond the on-disk inode size.
 	 */

@@ -89,7 +89,6 @@ static void octeon2_usb_clocks_start(struct device *dev)
 	u32 clock_rate = 12000000;
 	bool is_crystal_clock = false;
 
-
 	mutex_lock(&octeon2_usb_clocks_mutex);
 
 	octeon2_usb_clock_start_cnt++;
@@ -423,7 +422,6 @@ device_initcall(octeon_ohci_device_init);
 
 #endif /* CONFIG_USB */
 
-
 static struct of_device_id __initdata octeon_ids[] = {
 	{ .compatible = "simple-bus", },
 	{ .compatible = "cavium,octeon-6335-uctl", },
@@ -622,7 +620,6 @@ int __init octeon_prune_device_tree(void)
 		pr_err("Error: No /aliases node in device tree.");
 		return -EINVAL;
 	}
-
 
 	mac_addr_base =
 		((octeon_bootinfo->mac_addr_base[0] & 0xffull)) << 40 |

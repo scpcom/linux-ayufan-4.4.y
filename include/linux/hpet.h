@@ -3,7 +3,6 @@
 
 #include <uapi/linux/hpet.h>
 
-
 /*
  * Offsets into HPET Registers
  */
@@ -57,7 +56,6 @@ struct hpet {
 
 #define	HPET_LEG_RT_CNF_MASK		(2UL)
 #define	HPET_ENABLE_CNF_MASK		(1UL)
-
 
 /*
  * Timer configuration register

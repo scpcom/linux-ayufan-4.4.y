@@ -192,7 +192,6 @@ debug	move.l	"(%sp)+,%d1"
 	jne	\label
 .endm
 
-
 | test if %pc is the base register for the indirect addr mode
 .macro	fp_test_basereg_d16	label
 	btst	#20,%d2
@@ -209,7 +208,6 @@ debug	move.l	"(%sp)+,%d1"
 	btst	#6,%d2
 	jne	\label
 .endm
-
 
 | addressing mode: data register direct
 .macro	fp_mode_data_direct

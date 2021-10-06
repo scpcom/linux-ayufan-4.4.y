@@ -234,7 +234,6 @@ static int get_burstcount(struct tpm_chip *chip)
 	return -EBUSY;
 } /* get_burstcount() */
 
-
 /*
  * wait_for_tpm_stat_cond
  * @param: chip, chip description

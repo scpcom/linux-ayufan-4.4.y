@@ -11,4 +11,3 @@ int enable_sdio_interrupt(void);
 void disable_sdio_interrupt(void);
 int linux_sdio_set_max_speed(void);
 int linux_sdio_set_default_speed(void);
-

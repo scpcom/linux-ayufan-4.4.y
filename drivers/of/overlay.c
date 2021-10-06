@@ -509,7 +509,6 @@ int of_overlay_destroy(int id)
 		goto out;
 	}
 
-
 	list_del(&ov->node);
 	of_changeset_revert(&ov->cset);
 	of_free_overlay_info(ov);

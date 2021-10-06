@@ -171,7 +171,6 @@ struct agp_bridge_data {
 
 #define PGE_EMPTY(b, p)	(!(p) || (p) == (unsigned long) (b)->scratch_page)
 
-
 struct agp_device_ids {
 	unsigned short device_id; /* first, to make table easier to read */
 	enum chipset_type chipset;
@@ -223,7 +222,6 @@ static inline void agp_free_page_array(struct agp_memory *mem)
 {
 	kvfree(mem->pages);
 }
-
 
 /* generic routines for agp>=3 */
 int agp3_generic_fetch_size(void);

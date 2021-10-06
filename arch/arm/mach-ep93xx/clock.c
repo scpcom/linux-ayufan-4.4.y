@@ -39,7 +39,6 @@ struct clk {
 	int		(*set_rate)(struct clk *clk, unsigned long rate);
 };
 
-
 static unsigned long get_uart_rate(struct clk *clk);
 
 static int set_keytchclk_rate(struct clk *clk, unsigned long rate);
@@ -474,7 +473,6 @@ int clk_set_rate(struct clk *clk, unsigned long rate)
 	return -EINVAL;
 }
 EXPORT_SYMBOL(clk_set_rate);
-
 
 static char fclk_divisors[] = { 1, 2, 4, 8, 16, 1, 1, 1 };
 static char hclk_divisors[] = { 1, 2, 4, 5, 6, 8, 16, 32 };

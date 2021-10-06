@@ -86,7 +86,6 @@
 					 CRYP_CR_KEYRDEN_MASK |\
 					 CRYP_CR_DATATYPE_MASK)
 
-
 #define CRYP_SR_INFIFO_READY_MASK	(BIT(0) | BIT(1))
 #define CRYP_SR_IFEM_MASK		BIT(0)
 #define CRYP_SR_BUSY_MASK		BIT(4)
@@ -113,7 +112,6 @@
  */
 #define CRYP_DMA_REQ_MASK		(BIT(1) | BIT(0))
 #define CRYP_DMA_REQ_MASK_POS		0
-
 
 struct cryp_system_context {
 	/* CRYP Register structure */

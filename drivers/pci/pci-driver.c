@@ -857,7 +857,6 @@ static int pci_pm_resume(struct device *dev)
 
 #ifdef CONFIG_HIBERNATE_CALLBACKS
 
-
 /*
  * pcibios_pm_ops - provide arch-specific hooks when a PCI device is doing
  * a hibernate transition

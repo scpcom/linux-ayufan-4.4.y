@@ -1443,7 +1443,6 @@ static void fas216_busservice_intr(FAS216_Info *info, unsigned int stat, unsigne
 		info->scsi.phase = PHASE_COMMAND;
 		return;
 
-
 	/*
 	 * Selection    -> Message Out
 	 */
@@ -2096,7 +2095,6 @@ done:
 
 	panic("scsi%d.H: null scsi_done function in fas216_done",
 		info->host->host_no);
-
 
 request_sense:
 	if (SCpnt->cmnd[0] == REQUEST_SENSE)

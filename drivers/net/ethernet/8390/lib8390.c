@@ -13,7 +13,6 @@
 	410 Severn Ave., Suite 210
 	Annapolis MD 21403
 
-
   This is the chip-specific code for many 8390-based ethernet adaptors.
   This is not a complete driver, it must be combined with board-specific
   code such as ne.c, wd.c, 3c503.c, etc.
@@ -22,7 +21,6 @@
   PCMCIA ones either) it is easy to break some card by what seems like
   a simple innocent change. Please contact me or Donald if you think
   you have found something that needs changing. -- PG
-
 
   Changelog:
 
@@ -188,8 +186,6 @@ MODULE_PARM_DESC(msg_enable, "Debug message level (see linux/netdevice.h for bit
  *	activities on the chip." [lkml, 25 Jul 2007]
  */
 
-
-
 /**
  * ei_open - Open/initialize the board.
  * @dev: network device to initialize
@@ -322,7 +318,6 @@ static netdev_tx_t __ei_start_xmit(struct sk_buff *skb,
 	spin_lock_irqsave(&ei_local->page_lock, flags);
 	ei_outb_p(0x00, e8390_base + EN0_IMR);
 	spin_unlock_irqrestore(&ei_local->page_lock, flags);
-
 
 	/*
 	 *	Slow phase with lock held.
@@ -988,9 +983,6 @@ static struct net_device *____alloc_ei_netdev(int size)
 	return alloc_netdev(sizeof(struct ei_device) + size, "eth%d",
 			    NET_NAME_UNKNOWN, ethdev_setup);
 }
-
-
-
 
 /* This page of functions should be 8390 generic */
 /* Follow National Semi's recommendations for initializing the "NIC". */

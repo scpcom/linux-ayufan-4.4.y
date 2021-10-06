@@ -155,7 +155,6 @@ static int max8997_battery_probe(struct platform_device *pdev)
 
 	platform_set_drvdata(pdev, charger);
 
-
 	charger->dev = &pdev->dev;
 	charger->iodev = iodev;
 

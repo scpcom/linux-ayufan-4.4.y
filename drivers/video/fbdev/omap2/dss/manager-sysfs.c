@@ -461,7 +461,6 @@ static MANAGER_ATTR(cpr_coef, S_IRUGO|S_IWUSR,
 		manager_cpr_coef_show,
 		manager_cpr_coef_store);
 
-
 static struct attribute *manager_sysfs_attrs[] = {
 	&manager_attr_name.attr,
 	&manager_attr_display.attr,

@@ -115,7 +115,6 @@
 #define bfin_read_UART1_RXCNT()		bfin_read32(UART1_RXCNT)
 #define bfin_write_UART1_RXCNT(val)	bfin_write32(UART1_RXCNT, val)
 
-
 /* SPI0 Registers */
 
 #define bfin_read_SPI0_CTL()		bfin_read32(SPI0_CTL)
@@ -260,13 +259,9 @@
 #define bfin_read_TIMER7_WIDTH()             bfin_read32(TIMER7_WIDTH)
 #define bfin_write_TIMER7_WIDTH(val)         bfin_write32(TIMER7_WIDTH, val)
 
-
-
-
 /* Two Wire Interface Registers (TWI0) */
 
 /* SPORT1 Registers */
-
 
 /* SMC Registers */
 #define bfin_read_SMC_GCTL() bfin_read32(SMC_GCTL)
@@ -320,7 +315,6 @@
 #define bfin_write_DMC0_DLLCTL(val) bfin_write32(DMC0_DLLCTL, val)
 
 /* DDR BankRead and Write Count Registers */
-
 
 /* DMA Channel 0 Registers */
 
@@ -1099,7 +1093,6 @@
 #define bfin_read_DMA20_CURR_BWM_COUNT()	bfin_read32(DMA20_CURR_BWM_COUNT)
 #define bfin_write_DMA20_CURR_BWM_COUNT(val)	bfin_write32(DMA20_CURR_BWM_COUNT, val)
 
-
 /* MDMA Stream 0 Registers (DMA Channel 21 and 22) */
 
 #define bfin_read_MDMA0_DEST_CRC0_NEXT_DESC_PTR() 	bfin_read32(MDMA0_DEST_CRC0_NEXT_DESC_PTR)
@@ -1210,7 +1203,6 @@
 #define bfin_read_MDMA1_SRC_CRC1_CURR_Y_COUNT()		bfin_read32(MDMA1_SRC_CRC1_CURR_Y_COUNT)
 #define bfin_write_MDMA1_SRC_CRC1_CURR_Y_COUNT(val)	bfin_write32(MDMA1_SRC_CRC1_CURR_Y_COUNT, val)
 
-
 /* MDMA Stream 2 Registers (DMA Channel 25 and 26) */
 
 #define bfin_read_MDMA2_DEST_NEXT_DESC_PTR() 		bfin_read32(MDMA2_DEST_NEXT_DESC_PTR)
@@ -1320,7 +1312,6 @@
 #define bfin_write_MDMA3_SRC_CURR_X_COUNT(val)		bfin_write32(MDMA3_SRC_CURR_X_COUNT, val)
 #define bfin_read_MDMA3_SRC_CURR_Y_COUNT()		bfin_read32(MDMA3_SRC_CURR_Y_COUNT)
 #define bfin_write_MDMA3_SRC_CURR_Y_COUNT(val)		bfin_write32(MDMA3_SRC_CURR_Y_COUNT, val)
-
 
 /* DMA Channel 29 Registers */
 
@@ -1988,9 +1979,7 @@
 #define bfin_read_DMA46_CURR_BWM_COUNT()	bfin_read32(DMA46_CURR_BWM_COUNT)
 #define bfin_write_DMA46_CURR_BWM_COUNT(val)	bfin_write32(DMA46_CURR_BWM_COUNT, val)
 
-
 /* EPPI1 Registers */
-
 
 /* Port Interrubfin_read_()t 0 Registers (32-bit) */
 
@@ -2171,8 +2160,6 @@
 #define bfin_read_PORTA_REVID()		bfin_read32(PORTA_REVID)
 #define bfin_write_PORTA_REVID(val)	bfin_write32(PORTA_REVID, val)
 
-
-
 /* Port B Registers */
 #define bfin_read_PORTB_FER()		bfin_read32(PORTB_FER)
 #define bfin_write_PORTB_FER(val)	bfin_write32(PORTB_FER, val)
@@ -2212,7 +2199,6 @@
 #define bfin_write_PORTB_LOCK(val)	bfin_write32(PORTB_LOCK, val)
 #define bfin_read_PORTB_REVID()		bfin_read32(PORTB_REVID)
 #define bfin_write_PORTB_REVID(val)	bfin_write32(PORTB_REVID, val)
-
 
 /* Port C Registers */
 #define bfin_read_PORTC_FER()		bfin_read32(PORTC_FER)
@@ -2254,7 +2240,6 @@
 #define bfin_read_PORTC_REVID()		bfin_read32(PORTC_REVID)
 #define bfin_write_PORTC_REVID(val)	bfin_write32(PORTC_REVID, val)
 
-
 /* Port D Registers */
 #define bfin_read_PORTD_FER()		bfin_read32(PORTD_FER)
 #define bfin_write_PORTD_FER(val)	bfin_write32(PORTD_FER, val)
@@ -2294,7 +2279,6 @@
 #define bfin_write_PORTD_LOCK(val)	bfin_write32(PORTD_LOCK, val)
 #define bfin_read_PORTD_REVID()		bfin_read32(PORTD_REVID)
 #define bfin_write_PORTD_REVID(val)	bfin_write32(PORTD_REVID, val)
-
 
 /* Port E Registers */
 #define bfin_read_PORTE_FER()		bfin_read32(PORTE_FER)
@@ -2336,7 +2320,6 @@
 #define bfin_read_PORTE_REVID()		bfin_read32(PORTE_REVID)
 #define bfin_write_PORTE_REVID(val)	bfin_write32(PORTE_REVID, val)
 
-
 /* Port F Registers */
 #define bfin_read_PORTF_FER()		bfin_read32(PORTF_FER)
 #define bfin_write_PORTF_FER(val)	bfin_write32(PORTF_FER, val)
@@ -2377,7 +2360,6 @@
 #define bfin_read_PORTF_REVID()		bfin_read32(PORTF_REVID)
 #define bfin_write_PORTF_REVID(val)	bfin_write32(PORTF_REVID, val)
 
-
 /* Port G Registers */
 #define bfin_read_PORTG_FER()		bfin_read32(PORTG_FER)
 #define bfin_write_PORTG_FER(val)	bfin_write32(PORTG_FER, val)
@@ -2417,9 +2399,6 @@
 #define bfin_write_PORTG_LOCK(val)	bfin_write32(PORTG_LOCK, val)
 #define bfin_read_PORTG_REVID()		bfin_read32(PORTG_REVID)
 #define bfin_write_PORTG_REVID(val)	bfin_write32(PORTG_REVID, val)
-
-
-
 
 /* CAN Controller 0 Config 1 Registers */
 
@@ -3251,4 +3230,3 @@
 #define bfin_read_USB_APHY_CNTRL() bfin_read8(USB_PHY_CTL)
 
 #endif /* _CDEF_BF60X_H */
-

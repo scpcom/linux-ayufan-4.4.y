@@ -74,7 +74,6 @@
 #define PONTIS_CS_RDATA		(1<<6)	/* CS8416 -> VT1720 */
 #define PONTIS_CS_WDATA		(1<<7)	/* VT1720 -> CS8416 */
 
-
 /*
  * get the current register value of WM codec
  */
@@ -366,7 +365,6 @@ static unsigned int spi_read_byte(struct snd_ice1712 *ice)
 	return val;
 }
 
-
 static void spi_write(struct snd_ice1712 *ice, unsigned int dev, unsigned int reg, unsigned int data)
 {
 	snd_ice1712_gpio_set_dir(ice, PONTIS_CS_CS|PONTIS_CS_WDATA|PONTIS_CS_CLK);
@@ -405,7 +403,6 @@ static unsigned int spi_read(struct snd_ice1712 *ice, unsigned int dev, unsigned
 	snd_ice1712_gpio_set_dir(ice, ice->gpio.direction);
 	return val;
 }
-
 
 /*
  * SPDIF input source
@@ -446,7 +443,6 @@ static int cs_source_put(struct snd_kcontrol *kcontrol, struct snd_ctl_elem_valu
 	mutex_unlock(&ice->gpio_mutex);
 	return change;
 }
-
 
 /*
  * GPIO controls
@@ -625,7 +621,6 @@ static struct snd_kcontrol_new pontis_controls[] = {
 	},
 };
 
-
 /*
  * WM codec registers
  */
@@ -689,7 +684,6 @@ static void cs_proc_init(struct snd_ice1712 *ice)
 		snd_info_set_text_ops(entry, ice, cs_proc_regs_read);
 }
 
-
 static int pontis_add_controls(struct snd_ice1712 *ice)
 {
 	unsigned int i;
@@ -706,7 +700,6 @@ static int pontis_add_controls(struct snd_ice1712 *ice)
 
 	return 0;
 }
-
 
 /*
  * initialize the chip
@@ -791,7 +784,6 @@ static int pontis_init(struct snd_ice1712 *ice)
 
 	return 0;
 }
-
 
 /*
  * Pontis boards don't provide the EEPROM data at all.

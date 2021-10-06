@@ -190,8 +190,6 @@ static int dm_read_eeprom_word(struct usbnet *dev, u8 offset, void *value)
 	return dm_read_shared_word(dev, 0, offset, value);
 }
 
-
-
 static int dm9601_get_eeprom_len(struct net_device *dev)
 {
 	return DM_EEPROM_LEN;

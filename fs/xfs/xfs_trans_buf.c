@@ -551,7 +551,6 @@ xfs_trans_log_buf(xfs_trans_t	*tp,
 		xfs_buf_item_log(bip, first, last);
 }
 
-
 /*
  * Invalidate a buffer that is being used within a transaction.
  *

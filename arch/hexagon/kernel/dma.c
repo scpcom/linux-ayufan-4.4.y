@@ -46,7 +46,6 @@ EXPORT_SYMBOL(dma_supported);
 
 static struct gen_pool *coherent_pool;
 
-
 /* Allocates from a pool of uncached memory that was reserved at boot time */
 
 static void *hexagon_dma_alloc_coherent(struct device *dev, size_t size,

@@ -22,7 +22,6 @@
 #define PERFMON_CMD_I_STAT 8
 #define PERFMON_CMD_PMPC 9
 
-
 /* EV5/EV56/PCA56 Counters */
 #define EV5_PCTR_0 (1UL<<0)
 #define EV5_PCTR_1 (1UL<<1)
@@ -55,7 +54,6 @@
 
 #define EV67_PCTR_0_COUNT_MASK 0xfffffUL
 #define EV67_PCTR_1_COUNT_MASK 0xfffffUL
-
 
 /*
  * The Alpha Architecure Handbook, vers. 4 (1998) appears to have a misprint

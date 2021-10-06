@@ -16,7 +16,6 @@
 #include <linux/sunrpc/xdr.h>
 #include <linux/export.h>
 
-
 /**
  * xdr_skb_read_bits - copy some data bits from skb to internal buffer
  * @desc: sk_buff copy helper

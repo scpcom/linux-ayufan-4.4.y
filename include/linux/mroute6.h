@@ -1,7 +1,6 @@
 #ifndef __LINUX_MROUTE6_H
 #define __LINUX_MROUTE6_H
 
-
 #include <linux/pim.h>
 #include <linux/skbuff.h>	/* for struct sk_buff_head */
 #include <net/net_namespace.h>

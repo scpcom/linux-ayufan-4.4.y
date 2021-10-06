@@ -25,7 +25,6 @@
 #include <linux/resource_ext.h>
 #include <asm/io.h>
 
-
 struct resource ioport_resource = {
 	.name	= "PCI IO",
 	.start	= 0,
@@ -676,7 +675,6 @@ out:
 	write_unlock(&resource_lock);
 	return err;
 }
-
 
 /**
  * allocate_resource - allocate empty slot in the resource tree given range & alignment.

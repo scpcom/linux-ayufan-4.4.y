@@ -1363,8 +1363,6 @@ static inline void bnx2x_update_drv_flags(struct bnx2x *bp, u32 flags, u32 set)
 	}
 }
 
-
-
 /**
  * bnx2x_fill_fw_str - Fill buffer with FW version string
  *

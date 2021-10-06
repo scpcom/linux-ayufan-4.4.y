@@ -30,4 +30,3 @@ int dlm_slots_assign(struct dlm_ls *ls, int *num_slots, int *slots_size,
 void dlm_lsop_recover_done(struct dlm_ls *ls);
 
 #endif                          /* __MEMBER_DOT_H__ */
-

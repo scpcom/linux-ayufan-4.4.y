@@ -55,7 +55,6 @@ static irqreturn_t rt_timer_irq(int irq, void *_rt)
 	return IRQ_HANDLED;
 }
 
-
 static int rt_timer_request(struct rt_timer *rt)
 {
 	int err = request_irq(rt->irq, rt_timer_irq, 0,

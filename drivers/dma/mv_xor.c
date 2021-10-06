@@ -1288,7 +1288,6 @@ static struct platform_driver mv_xor_driver = {
 	},
 };
 
-
 static int __init mv_xor_init(void)
 {
 	return platform_driver_register(&mv_xor_driver);

@@ -6,7 +6,6 @@
 #ifndef _PARPORT_H_
 #define _PARPORT_H_
 
-
 #include <linux/jiffies.h>
 #include <linux/proc_fs.h>
 #include <linux/spinlock.h>

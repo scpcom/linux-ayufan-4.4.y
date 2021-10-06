@@ -59,7 +59,6 @@
 #include "vg468.h"
 #include "ricoh.h"
 
-
 static irqreturn_t i365_count_irq(int, void *);
 static inline int _check_irq(int irq, int flags)
 {
@@ -1160,7 +1159,6 @@ static CLASS_DEVICE_ATTR(info, S_IRUGO, show_info, NULL);
 	return retval; \
 } while (0)
 	
-
 static int pcic_get_status(struct pcmcia_socket *s, u_int *value)
 {
 	unsigned int sock = container_of(s, struct i82365_socket, socket)->number;
@@ -1218,7 +1216,6 @@ static int pcic_init(struct pcmcia_socket *s)
 	}
 	return 0;
 }
-
 
 static struct pccard_operations pcic_operations = {
 	.init			= pcic_init,

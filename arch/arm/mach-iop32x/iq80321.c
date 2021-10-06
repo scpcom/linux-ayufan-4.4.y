@@ -44,7 +44,6 @@ static void __init iq80321_timer_init(void)
 	iop_init_time(200000000);
 }
 
-
 /*
  * IQ80321 I/O.
  */
@@ -62,7 +61,6 @@ void __init iq80321_map_io(void)
 	iop3xx_map_io();
 	iotable_init(iq80321_io_desc, ARRAY_SIZE(iq80321_io_desc));
 }
-
 
 /*
  * IQ80321 PCI.
@@ -115,7 +113,6 @@ static int __init iq80321_pci_init(void)
 }
 
 subsys_initcall(iq80321_pci_init);
-
 
 /*
  * IQ80321 machine initialisation.

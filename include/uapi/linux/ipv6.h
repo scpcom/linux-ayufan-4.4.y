@@ -55,7 +55,6 @@ struct ipv6_rt_hdr {
 	 */
 };
 
-
 struct ipv6_opt_hdr {
 	__u8 		nexthdr;
 	__u8 		hdrlen;
@@ -131,7 +130,6 @@ struct ipv6hdr {
 	struct	in6_addr	daddr;
 };
 
-
 /* index values for the variables in ipv6_devconf */
 enum {
 	DEVCONF_FORWARDING = 0,
@@ -176,6 +174,5 @@ enum {
 	DEVCONF_IGNORE_ROUTES_WITH_LINKDOWN,
 	DEVCONF_MAX
 };
-
 
 #endif /* _UAPI_IPV6_H */

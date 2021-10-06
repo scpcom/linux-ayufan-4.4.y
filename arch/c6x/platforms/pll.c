@@ -200,7 +200,6 @@ void clk_unregister(struct clk *clk)
 }
 EXPORT_SYMBOL(clk_unregister);
 
-
 static u32 pll_read(struct pll_data *pll, int reg)
 {
 	return soc_readl(pll->base + reg);
@@ -321,7 +320,6 @@ static unsigned long clk_pllclk_recalc(struct clk *clk)
 
 	return rate;
 }
-
 
 static void __init __init_clk(struct clk *clk)
 {

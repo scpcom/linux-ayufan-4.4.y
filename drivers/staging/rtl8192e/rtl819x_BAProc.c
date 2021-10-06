@@ -172,7 +172,6 @@ static struct sk_buff *rtllib_DELBA(struct rtllib_device *ieee, u8 *dst,
 	*tag++ = ACT_CAT_BA;
 	*tag++ = ACT_DELBA;
 
-
 	put_unaligned_le16(DelbaParamSet.shortData, tag);
 	tag += 2;
 
@@ -354,7 +353,6 @@ int rtllib_rx_ADDBARsp(struct rtllib_device *ieee, struct sk_buff *skb)
 		goto OnADDBARsp_Reject;
 	}
 
-
 	if (!GetTs(ieee, (struct ts_common_info **)(&pTS), dst,
 		   (u8)(pBaParamSet->field.TID), TX_DIR, false)) {
 		netdev_warn(ieee->dev, "%s(): can't get TS\n", __func__);
@@ -365,7 +363,6 @@ int rtllib_rx_ADDBARsp(struct rtllib_device *ieee, struct sk_buff *skb)
 	pTS->bAddBaReqInProgress = false;
 	pPendingBA = &pTS->TxPendingBARecord;
 	pAdmittedBA = &pTS->TxAdmittedBARecord;
-
 
 	if (pAdmittedBA->bValid == true) {
 		netdev_dbg(ieee->dev, "%s(): ADDBA response already admitted\n",
@@ -385,7 +382,6 @@ int rtllib_rx_ADDBARsp(struct rtllib_device *ieee, struct sk_buff *skb)
 		DeActivateBAEntry(ieee, pPendingBA);
 	}
 
-
 	if (*pStatusCode == ADDBA_STATUS_SUCCESS) {
 		if (pBaParamSet->field.BAPolicy == BA_POLICY_DELAYED) {
 			pTS->bAddBaReqDelayed = true;
@@ -393,7 +389,6 @@ int rtllib_rx_ADDBARsp(struct rtllib_device *ieee, struct sk_buff *skb)
 			ReasonCode = DELBA_REASON_END_BA;
 			goto OnADDBARsp_Reject;
 		}
-
 
 		pAdmittedBA->DialogToken = *pDialogToken;
 		pAdmittedBA->BaTimeoutValue = *pBaTimeoutVal;

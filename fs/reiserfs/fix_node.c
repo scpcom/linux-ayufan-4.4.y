@@ -600,7 +600,6 @@ static int get_num_ver(int mode, struct tree_balance *tb, int h,
 	return needed_nodes;
 }
 
-
 /*
  * Set parameters for balancing.
  * Performs write of results of analysis of balancing into structure tb,

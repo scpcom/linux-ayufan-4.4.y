@@ -104,7 +104,6 @@ struct streamzap_ir {
 	char			phys[64];
 };
 
-
 /* local function prototypes */
 static int streamzap_probe(struct usb_interface *interface,
 			   const struct usb_device_id *id);

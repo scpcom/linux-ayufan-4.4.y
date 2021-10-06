@@ -69,7 +69,6 @@ MODULE_PARM_DESC(ac97_clock, "AC'97 codec clock (default 48000Hz).");
 static bool enable;
 module_param(enable, bool, 0444);
 
-
 /*
  *  Direct registers
  */
@@ -203,7 +202,6 @@ DEFINE_VIA_REGSET(MI, 0x50);
 #define  VIA_MC97_CTRL_SECONDARY 0x40
 #define  VIA_MC97_CTRL_INIT     (VIA_MC97_CTRL_ENABLE|\
                                  VIA_MC97_CTRL_SECONDARY)
-
 
 /*
  * pcm stream
@@ -346,7 +344,6 @@ static int build_via_table(struct viadev *dev, struct snd_pcm_substream *substre
 	return 0;
 }
 
-
 static int clean_via_table(struct viadev *dev, struct snd_pcm_substream *substream,
 			   struct pci_dev *pci)
 {
@@ -474,7 +471,6 @@ static void snd_via82xx_channel_reset(struct via82xx_modem *chip, struct viadev 
 	// outl(0, VIADEV_REG(viadev, OFFSET_CURR_PTR));
 	viadev->lastpos = 0;
 }
-
 
 /*
  *  Interrupt handler
@@ -683,7 +679,6 @@ static int snd_via82xx_hw_free(struct snd_pcm_substream *substream)
 	return 0;
 }
 
-
 /*
  * set up the table pointer
  */
@@ -735,7 +730,6 @@ static struct snd_pcm_hardware snd_via82xx_hw =
 	.fifo_size =		0,
 };
 
-
 /*
  * open callback skeleton
  */
@@ -767,7 +761,6 @@ static int snd_via82xx_modem_pcm_open(struct via82xx_modem *chip, struct viadev 
 
 	return 0;
 }
-
 
 /*
  * open callback for playback
@@ -802,7 +795,6 @@ static int snd_via82xx_pcm_close(struct snd_pcm_substream *substream)
 	return 0;
 }
 
-
 /* via686 playback callbacks */
 static struct snd_pcm_ops snd_via686_playback_ops = {
 	.open =		snd_via82xx_playback_open,
@@ -828,7 +820,6 @@ static struct snd_pcm_ops snd_via686_capture_ops = {
 	.pointer =	snd_via686_pcm_pointer,
 	.page =		snd_pcm_sgbuf_ops_page,
 };
-
 
 static void init_viadev(struct via82xx_modem *chip, int idx, unsigned int reg_offset,
 			int direction)
@@ -871,11 +862,9 @@ static int snd_via686_pcm_new(struct via82xx_modem *chip)
 	return 0;
 }
 
-
 /*
  *  Mixer part
  */
-
 
 static void snd_via82xx_mixer_free_ac97_bus(struct snd_ac97_bus *bus)
 {
@@ -888,7 +877,6 @@ static void snd_via82xx_mixer_free_ac97(struct snd_ac97 *ac97)
 	struct via82xx_modem *chip = ac97->private_data;
 	chip->ac97 = NULL;
 }
-
 
 static int snd_via82xx_mixer_new(struct via82xx_modem *chip)
 {
@@ -917,7 +905,6 @@ static int snd_via82xx_mixer_new(struct via82xx_modem *chip)
 
 	return 0;
 }
-
 
 /*
  * proc interface
@@ -1154,7 +1141,6 @@ static int snd_via82xx_create(struct snd_card *card,
 	*r_via = chip;
 	return 0;
 }
-
 
 static int snd_via82xx_probe(struct pci_dev *pci,
 			     const struct pci_device_id *pci_id)

@@ -698,12 +698,10 @@ struct ivtv {
 	wait_queue_head_t event_waitq;  /* wake up when the next decoder event arrives */
 	wait_queue_head_t vsync_waitq;  /* wake up when the next decoder vsync arrives */
 
-
 	/* Mailbox */
 	struct ivtv_mailbox_data enc_mbox;              /* encoder mailboxes */
 	struct ivtv_mailbox_data dec_mbox;              /* decoder mailboxes */
 	struct ivtv_api_cache api_cache[256]; 		/* cached API commands */
-
 
 	/* I2C */
 	struct i2c_adapter i2c_adap;
@@ -721,7 +719,6 @@ struct ivtv {
 	u32 pgm_info_read_idx;          /* last index in pgm_info read by the application */
 	struct v4l2_enc_idx_entry pgm_info[IVTV_MAX_PGM_INDEX]; /* filled from the pgm cyclic buffer on the card */
 
-
 	/* Miscellaneous */
 	u32 open_id;			/* incremented each time an open occurs, is >= 1 */
 	int search_pack_header;         /* 1 if ivtv_copy_buf_to_user() is scanning for a pack header (0xba) */
@@ -733,14 +730,11 @@ struct ivtv {
 	unsigned long dualwatch_jiffies;/* jiffies value of the previous dualwatch check */
 	u32 dualwatch_stereo_mode;      /* current detected dualwatch stereo mode */
 
-
 	/* VBI state info */
 	struct vbi_info vbi;            /* VBI-specific data */
 
-
 	/* YUV playback */
 	struct yuv_playback_info yuv_info;              /* YUV playback data */
-
 
 	/* OSD support */
 	unsigned long osd_video_pbase;

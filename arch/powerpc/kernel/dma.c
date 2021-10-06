@@ -377,4 +377,3 @@ static int __init dma_init(void)
        return 0;
 }
 fs_initcall(dma_init);
-

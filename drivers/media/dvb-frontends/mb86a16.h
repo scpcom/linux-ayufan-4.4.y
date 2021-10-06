@@ -24,15 +24,12 @@
 #include <linux/dvb/frontend.h>
 #include "dvb_frontend.h"
 
-
 struct mb86a16_config {
 	u8 demod_address;
 
 	int (*set_voltage)(struct dvb_frontend *fe,
 			   enum fe_sec_voltage voltage);
 };
-
-
 
 #if IS_REACHABLE(CONFIG_DVB_MB86A16)
 

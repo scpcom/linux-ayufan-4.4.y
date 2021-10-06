@@ -58,7 +58,6 @@ store_intc_userimask(struct device *dev,
 static DEVICE_ATTR(userimask, S_IRUSR | S_IWUSR,
 		   show_intc_userimask, store_intc_userimask);
 
-
 static int __init userimask_sysdev_init(void)
 {
 	if (unlikely(!uimask))

@@ -167,7 +167,6 @@ static ssize_t cpia2_v4l_read(struct file *file, char __user *buf, size_t count,
 	return ret;
 }
 
-
 /******************************************************************************
  *
  *  cpia2_v4l_poll
@@ -183,7 +182,6 @@ static unsigned int cpia2_v4l_poll(struct file *filp, struct poll_table_struct *
 	mutex_unlock(&cam->v4l2_lock);
 	return res;
 }
-
 
 static int sync(struct camera_data *cam, int frame_nr)
 {
@@ -942,7 +940,6 @@ static int cpia2_dqbuf(struct file *file, void *fh, struct v4l2_buffer *buf)
 		frame = cb->num;
 	}
 
-
 	buf->index = frame;
 	buf->bytesused = cam->buffers[buf->index].length;
 	buf->flags = V4L2_BUF_FLAG_MAPPED | V4L2_BUF_FLAG_DONE
@@ -1237,7 +1234,6 @@ static void __init check_parameters(void)
 
 /************   Module Stuff ***************/
 
-
 /******************************************************************************
  *
  * cpia2_init/module_init
@@ -1251,7 +1247,6 @@ static int __init cpia2_init(void)
 	cpia2_usb_init();
 	return 0;
 }
-
 
 /******************************************************************************
  *

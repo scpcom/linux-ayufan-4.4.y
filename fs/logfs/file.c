@@ -181,7 +181,6 @@ static int logfs_releasepage(struct page *page, gfp_t only_xfs_uses_this)
 	return 0; /* None of these are easy to release */
 }
 
-
 long logfs_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 {
 	struct inode *inode = file_inode(file);

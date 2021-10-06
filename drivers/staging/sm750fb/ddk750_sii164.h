@@ -11,7 +11,6 @@ typedef enum _sii164_hot_plug_mode_t {
 	SII164_HOTPLUG_USE_HTPLG            /* Use Hot Plug detect bit. */
 } sii164_hot_plug_mode_t;
 
-
 /* Silicon Image SiI164 chip prototype */
 long sii164InitChip(
 	unsigned char edgeSelect,
@@ -28,7 +27,6 @@ long sii164InitChip(
 
 unsigned short sii164GetVendorID(void);
 unsigned short sii164GetDeviceID(void);
-
 
 #ifdef SII164_FULL_FUNCTIONS
 void sii164ResetChip(void);

@@ -5652,7 +5652,6 @@ static void gfx_v7_0_set_gds_init(struct amdgpu_device *adev)
 	}
 }
 
-
 int gfx_v7_0_get_cu_info(struct amdgpu_device *adev,
 								   struct amdgpu_cu_info *cu_info)
 {

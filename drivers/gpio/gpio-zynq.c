@@ -60,7 +60,6 @@
 #define ZYNQ_GPIO_BANK5_PIN_MAX(str)	(ZYNQ_GPIO_BANK5_PIN_MIN(str) + \
 					ZYNQ##str##_GPIO_BANK5_NGPIO - 1)
 
-
 /* Register offsets for the GPIO device */
 /* LSW Mask & Data -WO */
 #define ZYNQ_GPIO_DATA_LSW_OFFSET(BANK)	(0x000 + (8 * BANK))

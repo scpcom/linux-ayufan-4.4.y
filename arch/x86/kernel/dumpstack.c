@@ -18,7 +18,6 @@
 
 #include <asm/stacktrace.h>
 
-
 int panic_on_unrecovered_nmi;
 int panic_on_io_nmi;
 unsigned int code_bytes = 64;

@@ -369,7 +369,6 @@ struct pending_req {
 	struct gntab_unmap_queue_data gnttab_unmap_data;
 };
 
-
 #define vbd_sz(_v)	((_v)->bdev->bd_part ? \
 			 (_v)->bdev->bd_part->nr_sects : \
 			  get_capacity((_v)->bdev->bd_disk))

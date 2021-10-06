@@ -26,5 +26,4 @@
 #define DIVERT_REL_ERR  0x04  /* module not registered */
 #define DIVERT_REG_NAME isdn_register_divert
 
-
 #endif /* _UAPI_LINUX_ISDN_DIVERTIF_H */

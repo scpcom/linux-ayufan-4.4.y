@@ -24,9 +24,7 @@
 #include <linux/slab.h>
 #include "via_aux.h"
 
-
 static const char *name = "SiI 164 PanelLink Transmitter";
-
 
 static void probe(struct via_aux_bus *bus, u8 addr)
 {

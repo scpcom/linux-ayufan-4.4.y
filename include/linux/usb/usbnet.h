@@ -214,7 +214,6 @@ extern void usbnet_cdc_status(struct usbnet *, struct urb *);
 			|USB_CDC_PACKET_TYPE_PROMISCUOUS \
 			|USB_CDC_PACKET_TYPE_DIRECTED)
 
-
 /* we record the state for each of our queued skbs */
 enum skb_state {
 	illegal = 0,

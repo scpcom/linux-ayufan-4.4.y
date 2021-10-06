@@ -112,7 +112,6 @@ struct freecom_status {
 
 static int init_freecom(struct us_data *us);
 
-
 /*
  * The table of devices
  */
@@ -408,7 +407,6 @@ static int freecom_transport(struct scsi_cmnd *srb, struct us_data *us)
 
 		usb_stor_dbg(us, "Transfer happy\n");
 		break;
-
 
 	case DMA_NONE:
 		/* Easy, do nothing. */

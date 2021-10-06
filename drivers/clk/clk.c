@@ -2020,7 +2020,6 @@ static int clk_summary_show(struct seq_file *s, void *data)
 	return 0;
 }
 
-
 static int clk_summary_open(struct inode *inode, struct file *file)
 {
 	return single_open(file, clk_summary_show, inode->i_private);
@@ -2088,7 +2087,6 @@ static int clk_dump(struct seq_file *s, void *data)
 	seq_puts(s, "}\n");
 	return 0;
 }
-
 
 static int clk_dump_open(struct inode *inode, struct file *file)
 {
@@ -2555,7 +2553,6 @@ struct clk *clk_register(struct device *dev, struct clk_hw *hw)
 		ret = -ENOMEM;
 		goto fail_parent_names;
 	}
-
 
 	/* copy each string name in case parent_names is __initdata */
 	for (i = 0; i < core->num_parents; i++) {
@@ -3104,7 +3101,6 @@ const char *of_clk_get_parent_name(struct device_node *np, int index)
 			clk_put(clk);
 		}
 	}
-
 
 	of_node_put(clkspec.np);
 	return clk_name;

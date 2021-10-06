@@ -101,7 +101,6 @@ struct w1_slave
 
 typedef void (*w1_slave_found_callback)(struct w1_master *, u64);
 
-
 /**
  * struct w1_bus_master - operations available on a bus master
  *

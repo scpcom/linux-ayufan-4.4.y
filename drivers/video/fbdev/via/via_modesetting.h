@@ -28,10 +28,8 @@
 
 #include <linux/types.h>
 
-
 #define VIA_PITCH_SIZE	(1<<3)
 #define VIA_PITCH_MAX	0x3FF8
-
 
 struct via_display_timing {
 	u16 hor_total;
@@ -47,7 +45,6 @@ struct via_display_timing {
 	u16 ver_sync_start;
 	u16 ver_sync_end;
 };
-
 
 void via_set_primary_timing(const struct via_display_timing *timing);
 void via_set_secondary_timing(const struct via_display_timing *timing);

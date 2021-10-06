@@ -83,7 +83,6 @@ struct da9150_gpadc {
 	struct completion complete;
 };
 
-
 static irqreturn_t da9150_gpadc_irq(int irq, void *data)
 {
 

@@ -28,7 +28,6 @@
 
 /***************************/
 
-
 #define BFIN_DSUBBANKS	4
 #define BFIN_DWAYS		2
 #define BFIN_DLINES		64

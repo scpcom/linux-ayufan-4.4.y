@@ -27,5 +27,4 @@
 #define SND_DEV_AMIDI		13	/* Like /dev/midi (obsolete) */
 #define SND_DEV_ADMMIDI		14	/* Like /dev/dmmidi (onsolete) */
 
-
 #endif /* _UAPI_LINUX_SOUND_H */

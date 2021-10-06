@@ -577,7 +577,6 @@ static int sh_mobile_lcdc_display_notify(struct sh_mobile_lcdc_chan *ch,
 		console_lock();
 		if (lock_fb_info(info)) {
 
-
 			ch->display.width = monspec->max_x * 10;
 			ch->display.height = monspec->max_y * 10;
 
@@ -594,7 +593,6 @@ static int sh_mobile_lcdc_display_notify(struct sh_mobile_lcdc_chan *ch,
 				/* New monitor or have to wake up */
 				fb_set_suspend(info, 0);
 			}
-
 
 			unlock_fb_info(info);
 		}
@@ -1869,7 +1867,6 @@ static int sh_mobile_lcdc_pan(struct fb_var_screeninfo *var,
 		lcdc_write(ch->lcdc, _LDRCNTR, ldrcntr ^ LDRCNTR_SRS);
 	else
 		lcdc_write(ch->lcdc, _LDRCNTR, ldrcntr ^ LDRCNTR_MRS);
-
 
 	sh_mobile_lcdc_deferred_io_touch(info);
 

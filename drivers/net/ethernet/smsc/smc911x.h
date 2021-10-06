@@ -207,7 +207,6 @@ static inline void SMC_outsl(struct smc911x_local *lp, int reg,
 #endif /* SMC_USE_16BIT */
 #endif /* SMC_DYNAMIC_BUS_CONFIG */
 
-
 #ifdef SMC_USE_PXA_DMA
 
 #include <mach/dma.h>
@@ -295,7 +294,6 @@ smc_pxa_dma_outsl(struct smc911x_local *lp, u_long physaddr,
 }
 #endif
 #endif	 /* SMC_USE_PXA_DMA */
-
 
 /* Chip Parameters and Register Definitions */
 
@@ -716,7 +714,6 @@ static const struct chip_id chip_ids[] =  {
 #define SMC_SET_TX_FIFO(lp, x) 	SMC_outl( x, lp, TX_DATA_FIFO )
 #define SMC_GET_RX_FIFO(lp)	SMC_inl( lp, RX_DATA_FIFO )
 
-
 /* I/O mapped register read/write macros */
 #define SMC_GET_TX_STS_FIFO(lp)		SMC_inl( lp, TX_STATUS_FIFO )
 #define SMC_GET_RX_STS_FIFO(lp)		SMC_inl( lp, RX_STATUS_FIFO )
@@ -885,8 +882,6 @@ static const struct chip_id chip_ids[] =  {
 #define SMC_SET_PHY_INT_MASK(lp,phy,x)	SMC_SET_MII( (lp), PHY_INT_MASK, phy, x )
 #define SMC_GET_PHY_SPECIAL(lp,phy,x)	SMC_GET_MII( (lp), PHY_SPECIAL, phy, x )
 
-
-
 /* Misc read/write macros */
 
 #ifndef SMC_GET_MAC_ADDR
@@ -911,7 +906,6 @@ static const struct chip_id chip_ids[] =  {
 				(addr[3] << 24));		\
 		 SMC_SET_MAC_CSR((lp), ADDRH, addr[4]|(addr[5] << 8));\
 	} while (0)
-
 
 #define SMC_WRITE_EEPROM_CMD(lp, cmd, addr)				\
 	do {								\

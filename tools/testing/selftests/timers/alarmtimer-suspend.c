@@ -20,7 +20,6 @@
  *   GNU General Public License for more details.
  */
 
-
 #include <stdio.h>
 #include <unistd.h>
 #include <time.h>
@@ -55,7 +54,6 @@ static inline int ksft_exit_fail(void)
 #define CLOCK_TAI			11
 #define NR_CLOCKIDS			12
 
-
 #define NSEC_PER_SEC 1000000000ULL
 #define UNREASONABLE_LAT (NSEC_PER_SEC * 5) /* hopefully we resume in 5 secs */
 
@@ -63,7 +61,6 @@ static inline int ksft_exit_fail(void)
 int alarmcount;
 int alarm_clock_id;
 struct timespec start_time;
-
 
 char *clockstring(int clockid)
 {
@@ -93,7 +90,6 @@ char *clockstring(int clockid)
 	};
 	return "UNKNOWN_CLOCKID";
 }
-
 
 long long timespec_sub(struct timespec a, struct timespec b)
 {

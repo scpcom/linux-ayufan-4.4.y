@@ -41,7 +41,6 @@ MODULE_PARM_DESC(vbi_debug, "enable debug messages [vbi]");
 #define VBI_NTSC_LINE_COUNT 12
 #define VBI_PAL_LINE_COUNT 18
 
-
 int cx23885_vbi_fmt(struct file *file, void *priv,
 	struct v4l2_format *f)
 {
@@ -253,7 +252,6 @@ static void cx23885_stop_streaming(struct vb2_queue *q)
 	}
 	spin_unlock_irqrestore(&dev->slock, flags);
 }
-
 
 struct vb2_ops cx23885_vbi_qops = {
 	.queue_setup    = queue_setup,

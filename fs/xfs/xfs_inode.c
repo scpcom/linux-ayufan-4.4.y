@@ -591,7 +591,6 @@ xfs_lock_two_inodes(
 	}
 }
 
-
 void
 __xfs_iflock(
 	struct xfs_inode	*ip)
@@ -846,7 +845,6 @@ xfs_ialloc(
 		memset(&(ip->i_d.di_pad2[0]), 0, sizeof(ip->i_d.di_pad2));
 		ip->i_d.di_crtime = ip->i_d.di_mtime;
 	}
-
 
 	flags = XFS_ILOG_CORE;
 	switch (mode & S_IFMT) {
@@ -1198,7 +1196,6 @@ xfs_create(
 	}
 	if (error)
 		goto out_trans_cancel;
-
 
 	xfs_ilock(dp, XFS_IOLOCK_EXCL | XFS_ILOCK_EXCL |
 		      XFS_IOLOCK_PARENT | XFS_ILOCK_PARENT);
@@ -2294,7 +2291,6 @@ xfs_ifree_cluster(
 			lip = lip->li_bio_list;
 		}
 
-
 		/*
 		 * For each inode in memory attempt to add it to the inode
 		 * buffer and set it up for being staled on buffer IO
@@ -3283,7 +3279,6 @@ out_free:
 out_put:
 	xfs_perag_put(pag);
 	return 0;
-
 
 cluster_corrupt_out:
 	/*

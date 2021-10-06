@@ -146,7 +146,6 @@
 #define reg_iop_sap_in_rw_gio___logic___width 2
 #define reg_iop_sap_in_rw_gio_offset 8
 
-
 /* Constants */
 #define regk_iop_sap_in_and                       0x00000002
 #define regk_iop_sap_in_ext_clk200                0x00000003

@@ -109,7 +109,6 @@ fail:
 	return status;
 }
 
-
 unsigned long get_dram_base(efi_system_table_t *sys_table_arg)
 {
 	efi_status_t status;

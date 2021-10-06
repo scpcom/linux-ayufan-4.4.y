@@ -81,11 +81,14 @@
 #define GUC_CTL_CTXINFO			0
 #define   GUC_CTL_CTXNUM_IN16_SHIFT	0
 #define   GUC_CTL_BASE_ADDR_SHIFT	12
+
 #define GUC_CTL_ARAT_HIGH		1
 #define GUC_CTL_ARAT_LOW		2
+
 #define GUC_CTL_DEVICE_INFO		3
 #define   GUC_CTL_GTTYPE_SHIFT		0
 #define   GUC_CTL_COREFAMILY_SHIFT	7
+
 #define GUC_CTL_LOG_PARAMS		4
 #define   GUC_LOG_VALID			(1 << 0)
 #define   GUC_LOG_NOTIFY_ON_HALF_FULL	(1 << 1)
@@ -97,9 +100,12 @@
 #define   GUC_LOG_ISR_PAGES		3
 #define   GUC_LOG_ISR_SHIFT		9
 #define   GUC_LOG_BUF_ADDR_SHIFT	12
+
 #define GUC_CTL_PAGE_FAULT_CONTROL	5
+
 #define GUC_CTL_WA			6
 #define   GUC_CTL_WA_UK_BY_DRIVER	(1 << 3)
+
 #define GUC_CTL_FEATURE			7
 #define   GUC_CTL_VCS2_ENABLED		(1 << 0)
 #define   GUC_CTL_KERNEL_SUBMISSIONS	(1 << 1)
@@ -109,6 +115,7 @@
 #define   GUC_CTL_PREEMPTION_LOG	(1 << 5)
 #define   GUC_CTL_ENABLE_SLPC		(1 << 7)
 #define   GUC_CTL_RESET_ON_PREMPT_FAILURE	(1 << 8)
+
 #define GUC_CTL_DEBUG			8
 #define   GUC_LOG_VERBOSITY_SHIFT	0
 #define   GUC_LOG_VERBOSITY_LOW		(0 << GUC_LOG_VERBOSITY_SHIFT)

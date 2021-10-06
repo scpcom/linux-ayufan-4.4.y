@@ -56,7 +56,6 @@ static struct {
 	void *vss_context; /* for the channel callback */
 } vss_transaction;
 
-
 static void vss_respond_to_host(int error);
 
 /*
@@ -150,7 +149,6 @@ static int vss_on_msg(void *msg, int len)
 	return 0;
 }
 
-
 static void vss_send_op(struct work_struct *dummy)
 {
 	int op = vss_transaction.msg->vss_hdr.operation;
@@ -233,7 +231,6 @@ void hv_vss_onchannelcallback(void *context)
 	u32 recvlen;
 	u64 requestid;
 	struct hv_vss_msg *vss_msg;
-
 
 	struct icmsg_hdr *icmsghdrp;
 	struct icmsg_negotiate *negop = NULL;

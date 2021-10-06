@@ -9,5 +9,4 @@ enum {
 	IPSET_ERR_BITMAP_RANGE_SIZE,
 };
 
-
 #endif /* _UAPI__IP_SET_BITMAP_H */

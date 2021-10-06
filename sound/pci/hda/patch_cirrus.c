@@ -138,7 +138,6 @@ enum {
 /* Cirrus Logic CS4213 is like CS4210 but does not have SPDIF input/output */
 #define CS4213_VENDOR_NID	0x09
 
-
 static inline int cs_vendor_coef_get(struct hda_codec *codec, unsigned int idx)
 {
 	struct cs_spec *spec = codec->spec;
@@ -1241,7 +1240,6 @@ static int patch_cs4213(struct hda_codec *codec)
 	cs_free(codec);
 	return err;
 }
-
 
 /*
  * patch entries

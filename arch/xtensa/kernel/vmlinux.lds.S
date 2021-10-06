@@ -170,7 +170,6 @@ SECTIONS
 		   .SecondaryResetVector.text);
 #endif
 
-  
     __boot_reloc_table_end = ABSOLUTE(.) ;
 
     INIT_SETUP(XCHAL_ICACHE_LINESIZE)

@@ -153,7 +153,6 @@
 #define HDMI_TG_EN			(1 << 0)
 #define HDMI_FIELD_EN			(1 << 1)
 
-
 /* HDMI Version 1.4 */
 /* Control registers */
 /* #define HDMI_INTC_CON		HDMI_CTRL_BASE(0x0000) */

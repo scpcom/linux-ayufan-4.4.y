@@ -40,7 +40,6 @@ MODULE_AUTHOR("David Hinds <dahinds@users.sourceforge.net>");
 MODULE_DESCRIPTION("PCMCIA Driver Services");
 MODULE_LICENSE("GPL");
 
-
 /*====================================================================*/
 
 static void pcmcia_check_driver(struct pcmcia_driver *p_drv)
@@ -76,9 +75,7 @@ static void pcmcia_check_driver(struct pcmcia_driver *p_drv)
 	return;
 }
 
-
 /*======================================================================*/
-
 
 struct pcmcia_dynid {
 	struct list_head		node;
@@ -212,7 +209,6 @@ void pcmcia_unregister_driver(struct pcmcia_driver *driver)
 }
 EXPORT_SYMBOL(pcmcia_unregister_driver);
 
-
 /* pcmcia_device handling */
 
 static struct pcmcia_device *pcmcia_get_dev(struct pcmcia_device *p_dev)
@@ -249,7 +245,6 @@ static void pcmcia_release_dev(struct device *dev)
 	kref_put(&p_dev->function_config->ref, pcmcia_release_function);
 	kfree(p_dev);
 }
-
 
 static int pcmcia_device_probe(struct device *dev)
 {
@@ -316,7 +311,6 @@ put_dev:
 		put_device(dev);
 	return ret;
 }
-
 
 /*
  * Removes a PCMCIA card from the device tree and socket list.
@@ -398,7 +392,6 @@ static int pcmcia_device_remove(struct device *dev)
 
 	return 0;
 }
-
 
 /*
  * pcmcia_device_query -- determine information about a pcmcia device
@@ -482,7 +475,6 @@ static int pcmcia_device_query(struct pcmcia_device *p_dev)
 	kfree(vers1);
 	return 0;
 }
-
 
 static struct pcmcia_device *pcmcia_device_add(struct pcmcia_socket *s,
 					       unsigned int function)
@@ -606,7 +598,6 @@ static struct pcmcia_device *pcmcia_device_add(struct pcmcia_socket *s,
 	return NULL;
 }
 
-
 static int pcmcia_card_add(struct pcmcia_socket *s)
 {
 	cistpl_longlink_mfc_t mfc;
@@ -663,7 +654,6 @@ static int pcmcia_card_add(struct pcmcia_socket *s)
 	return ret;
 }
 
-
 static int pcmcia_requery_callback(struct device *dev, void *_data)
 {
 	struct pcmcia_device *p_dev = to_pcmcia_dev(dev);
@@ -674,7 +664,6 @@ static int pcmcia_requery_callback(struct device *dev, void *_data)
 
 	return 0;
 }
-
 
 static void pcmcia_requery(struct pcmcia_socket *s)
 {
@@ -729,7 +718,6 @@ static void pcmcia_requery(struct pcmcia_socket *s)
 	if (bus_rescan_devices(&pcmcia_bus_type))
 		dev_warn(&s->dev, "rescanning the bus failed\n");
 }
-
 
 #ifdef CONFIG_PCMCIA_LOAD_CIS
 
@@ -799,7 +787,6 @@ static inline int pcmcia_load_firmware(struct pcmcia_device *dev,
 }
 
 #endif
-
 
 static inline int pcmcia_devmatch(struct pcmcia_device *dev,
 				  const struct pcmcia_device_id *did)
@@ -902,7 +889,6 @@ static inline int pcmcia_devmatch(struct pcmcia_device *dev,
 
 	return 1;
 }
-
 
 static int pcmcia_bus_match(struct device *dev, struct device_driver *drv)
 {
@@ -1179,7 +1165,6 @@ static int pcmcia_dev_suspend(struct device *dev, pm_message_t state)
 	return ret;
 }
 
-
 static int pcmcia_dev_resume(struct device *dev)
 {
 	struct pcmcia_device *p_dev = to_pcmcia_dev(dev);
@@ -1215,7 +1200,6 @@ static int pcmcia_dev_resume(struct device *dev)
  out:
 	return ret;
 }
-
 
 static int pcmcia_bus_suspend_callback(struct device *dev, void *_data)
 {
@@ -1308,7 +1292,6 @@ static int pcmcia_bus_early_resume(struct pcmcia_socket *skt)
 	return 0;
 }
 
-
 /*
  * NOTE: This is racy. There's no guarantee the card will still be
  * physically present, even if the call to this function returns
@@ -1332,7 +1315,6 @@ struct pcmcia_device *pcmcia_dev_present(struct pcmcia_device *_p_dev)
 	return ret;
 }
 EXPORT_SYMBOL(pcmcia_dev_present);
-
 
 static struct pcmcia_callback pcmcia_bus_callback = {
 	.owner = THIS_MODULE,
@@ -1402,14 +1384,12 @@ static void pcmcia_bus_remove_socket(struct device *dev,
 	return;
 }
 
-
 /* the pcmcia_bus_interface is used to handle pcmcia socket devices */
 static struct class_interface pcmcia_bus_interface __refdata = {
 	.class = &pcmcia_socket_class,
 	.add_dev = &pcmcia_bus_add_socket,
 	.remove_dev = &pcmcia_bus_remove_socket,
 };
-
 
 struct bus_type pcmcia_bus_type = {
 	.name = "pcmcia",
@@ -1421,7 +1401,6 @@ struct bus_type pcmcia_bus_type = {
 	.suspend = pcmcia_dev_suspend,
 	.resume = pcmcia_dev_resume,
 };
-
 
 static int __init init_pcmcia_bus(void)
 {
@@ -1445,7 +1424,6 @@ static int __init init_pcmcia_bus(void)
 fs_initcall(init_pcmcia_bus); /* one level after subsys_initcall so that
 			       * pcmcia_socket_class is already registered */
 
-
 static void __exit exit_pcmcia_bus(void)
 {
 	class_interface_unregister(&pcmcia_bus_interface);
@@ -1453,6 +1431,5 @@ static void __exit exit_pcmcia_bus(void)
 	bus_unregister(&pcmcia_bus_type);
 }
 module_exit(exit_pcmcia_bus);
-
 
 MODULE_ALIAS("ds");

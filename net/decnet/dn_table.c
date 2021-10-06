@@ -181,7 +181,6 @@ static void dn_free_node(struct dn_fib_node *f)
 	kmem_cache_free(dn_hash_kmem, f);
 }
 
-
 static struct dn_zone *dn_new_zone(struct dn_hash *table, int z)
 {
 	int i;
@@ -222,7 +221,6 @@ static struct dn_zone *dn_new_zone(struct dn_hash *table, int z)
 	write_unlock_bh(&dn_fib_tables_lock);
 	return dz;
 }
-
 
 static int dn_fib_nh_match(struct rtmsg *r, struct nlmsghdr *nlh, struct nlattr *attrs[], struct dn_fib_info *fi)
 {
@@ -374,7 +372,6 @@ errout:
 	nlmsg_cancel(skb, nlh);
 	return -EMSGSIZE;
 }
-
 
 static void dn_rtmsg_fib(int event, struct dn_fib_node *f, int z, u32 tb_id,
 			struct nlmsghdr *nlh, struct netlink_skb_parms *req)
@@ -659,7 +656,6 @@ out:
 	return err;
 }
 
-
 static int dn_fib_table_delete(struct dn_fib_table *tb, struct rtmsg *r, struct nlattr *attrs[],
 			       struct nlmsghdr *n, struct netlink_skb_parms *req)
 {
@@ -669,7 +665,6 @@ static int dn_fib_table_delete(struct dn_fib_table *tb, struct rtmsg *r, struct 
 	struct dn_zone *dz;
 	dn_fib_key_t key;
 	int matched;
-
 
 	if (z > 16)
 		return -EINVAL;
@@ -828,7 +823,6 @@ out:
 	read_unlock(&dn_fib_tables_lock);
 	return err;
 }
-
 
 struct dn_fib_table *dn_fib_get_table(u32 n, int create)
 {

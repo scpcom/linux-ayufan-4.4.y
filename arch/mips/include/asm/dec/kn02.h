@@ -28,7 +28,6 @@
 #define KN02_CSR	(6*KN02_SLOT_SIZE)	/* system ctrl & status reg */
 #define KN02_SYS_ROM_7	(7*KN02_SLOT_SIZE)	/* system board ROM (alias) */
 
-
 /*
  * System Control & Status Register bits.
  */
@@ -48,7 +47,6 @@
 #define KN02_CSR_BAUD38		(1<<8)		/* DZ11 38/19kbps ext. rate */
 #define KN02_CSR_IOINT		(0xff<<0)	/* IRQ status bits (r/o) */
 #define KN02_CSR_LEDS		(0xff<<0)	/* ~diagnostic LEDs (w/o) */
-
 
 /*
  * CPU interrupt bits.
@@ -71,14 +69,12 @@
 #define KN02_CSR_INR_TC1	1	/* TURBOchannel slot #1 */
 #define KN02_CSR_INR_TC0	0	/* TURBOchannel slot #0 */
 
-
 #define KN02_IRQ_BASE		8	/* first IRQ assigned to CSR */
 #define KN02_IRQ_LINES		8	/* number of CSR interrupts */
 
 #define KN02_IRQ_NR(n)		((n) + KN02_IRQ_BASE)
 #define KN02_IRQ_MASK(n)	(1 << (n))
 #define KN02_IRQ_ALL		0xff
-
 
 #ifndef __ASSEMBLY__
 

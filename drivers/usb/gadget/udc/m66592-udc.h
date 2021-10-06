@@ -410,7 +410,6 @@
 
 #define M66592_INVALID_REG	0x7E
 
-
 #define get_pipectr_addr(pipenum)	(M66592_PIPE1CTR + (pipenum - 1) * 2)
 
 #define M66592_MAX_SAMPLING	10
@@ -602,5 +601,3 @@ static inline void m66592_write_fifo(struct m66592 *m66592,
 }
 
 #endif	/* ifndef __M66592_UDC_H__ */
-
-

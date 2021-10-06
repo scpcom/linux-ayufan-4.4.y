@@ -41,7 +41,6 @@ static void tegra_secondary_init(unsigned int cpu)
 	cpumask_set_cpu(cpu, &tegra_cpu_init_mask);
 }
 
-
 static int tegra20_boot_secondary(unsigned int cpu, struct task_struct *idle)
 {
 	cpu = cpu_logical_map(cpu);

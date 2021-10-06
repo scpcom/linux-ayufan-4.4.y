@@ -41,7 +41,6 @@ static inline int ksft_exit_fail(void)
 
 #define UNRESONABLE_LATENCY 40000000 /* 40ms in nanosecs */
 
-
 #define CLOCK_REALTIME			0
 #define CLOCK_MONOTONIC			1
 #define CLOCK_PROCESS_CPUTIME_ID	2
@@ -97,7 +96,6 @@ struct timespec timespec_add(struct timespec ts, unsigned long long ns)
 	return ts;
 }
 
-
 long long timespec_sub(struct timespec a, struct timespec b)
 {
 	long long ret = NSEC_PER_SEC * b.tv_sec + b.tv_nsec;
@@ -149,8 +147,6 @@ int nanosleep_lat_test(int clockid, long long ns)
 
 	return 0;
 }
-
-
 
 int main(int argc, char **argv)
 {

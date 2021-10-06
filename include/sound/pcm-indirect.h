@@ -105,7 +105,6 @@ snd_pcm_indirect_playback_pointer(struct snd_pcm_substream *substream,
 	return bytes_to_frames(substream->runtime, rec->sw_io);
 }
 
-
 /*
  * helper function for capture ack callback
  */

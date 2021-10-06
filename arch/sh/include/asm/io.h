@@ -224,7 +224,6 @@ __BUILD_IOPORT_STRING(q, u64)
 
 #endif
 
-
 #define IO_SPACE_LIMIT 0xffffffff
 
 /* synco on SH-4A, otherwise a nop */

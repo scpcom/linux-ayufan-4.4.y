@@ -128,7 +128,6 @@
 #define REG_BB_ACCEESS_CTRL		0x01E8
 #define REG_BB_ACCESS_DATA		0x01EC
 
-
 /*  */
 /*  */
 /*	0x0200h ~ 0x027Fh	TXDMA Configuration */
@@ -149,7 +148,6 @@
 #define REG_RXDMA_AGG_PG_TH		0x0280
 #define REG_RXPKT_NUM			0x0284
 #define REG_RXDMA_STATUS		0x0288
-
 
 /*  */
 /*  */
@@ -191,7 +189,6 @@
 	/*  UART Rx Descriptor Address */
 #define	REG_UART_RX_DESA		0x0378
 
-
 /*  spec version 11 */
 /*  */
 /*  */
@@ -205,7 +202,6 @@
 #define REG_MGQ_INFORMATION		0x0410
 #define REG_HGQ_INFORMATION		0x0414
 #define REG_BCNQ_INFORMATION		0x0418
-
 
 #define REG_CPU_MGQ_INFORMATION		0x041C
 #define REG_FWHW_TXQ_CTRL		0x0420
@@ -231,7 +227,6 @@
 #define REG_INIRTS_RATE_SEL		0x0480
 #define REG_INIDATA_RATE_SEL		0x0484
 
-
 #define REG_POWER_STATUS		0x04A4
 #define REG_POWER_STAGE1		0x04B4
 #define REG_POWER_STAGE2		0x04B8
@@ -249,8 +244,6 @@
 #define REG_PKT_LOSE_RPT		0x04E1
 #define REG_PTCL_ERR_STATUS		0x04E2
 #define REG_DUMMY			0x04FC
-
-
 
 /*  */
 /*  */
@@ -351,7 +344,6 @@
 #define REG_RXERR_RPT			0x0664
 #define REG_WMAC_TRXPTCL_CTL		0x0668
 
-
 /*  Security */
 #define REG_CAMCMD			0x0670
 #define REG_CAMWRITE			0x0674
@@ -378,7 +370,6 @@
 #define REG_MACID1			0x0700
 #define REG_BSSID1			0x0708
 
-
 /*  */
 /*  */
 /*	0xFE00h ~ 0xFE55h	USB Configuration */
@@ -400,7 +391,6 @@
 #define REG_TEST_SIE_MAC_ADDR		0xFE70		/*  0xFE70~0xFE75 */
 #define REG_TEST_SIE_STRING		0xFE80		/*  0xFE80~0xFEB9 */
 
-
 /*  For normal chip */
 #define REG_NORMAL_SIE_VID		0xFE60		/*  0xFE60~0xFE61 */
 #define REG_NORMAL_SIE_PID		0xFE62		/*  0xFE62~0xFE63 */
@@ -411,7 +401,6 @@
 #define REG_NORMAL_SIE_GPS_EP		0xFE6D		/*  RTL8723 only */
 #define REG_NORMAL_SIE_MAC_ADDR		0xFE70		/*  0xFE70~0xFE75 */
 #define REG_NORMAL_SIE_STRING		0xFE80		/*  0xFE80~0xFEDF */
-
 
 /*  */
 /*  */
@@ -449,7 +438,6 @@
 	/*  Redifine MACID register, to compatible prior ICs. */
 #define	IDR0				MACIDR0
 #define	IDR4				MACIDR4
-
 
 /*  */
 /*  9. Security Control Registers	(Offset: ) */
@@ -563,7 +551,6 @@ Default: 00b.
 #define	BW_OPMODE_5G			BIT(1)
 #define	BW_OPMODE_11J			BIT(0)
 
-
 /*  */
 /* 8192C CAM Config Setting (offset 0x250, 1 byte) */
 /*  */
@@ -592,7 +579,6 @@ Default: 00b.
 #define	SCR_UseDK			0x01
 #define	SCR_TxSecEnable			0x02
 #define	SCR_RxSecEnable			0x04
-
 
 /*  */
 /*  12. Host Interrupt Status Registers	 (Offset: 0x0300 - 0x030F) */
@@ -667,7 +653,6 @@ Default: 00b.
 #define	IMR_OCPINT			BIT(1)
 #define	IMR_WLANOFF			BIT(0)
 
-
 /*        8192C EEPROM/EFUSE share register definition. */
 
 /*  Default Value for EEPROM or EFUSE!!! */
@@ -714,7 +699,6 @@ Default: 00b.
 #define EEPROM_USB_OPTIONAL1			0xE
 #define EEPROM_CHANNEL_PLAN_BY_HW_MASK		0x80
 
-
 #define EEPROM_CID_DEFAULT			0x0
 #define EEPROM_CID_TOSHIBA			0x4
  /*  CCX test. By Bruce, 2009-02-25. */
@@ -722,7 +706,6 @@ Default: 00b.
 #define EEPROM_CID_QMI				0x0D
  /*  added by chiyoko for dtm, 20090108 */
 #define EEPROM_CID_WHQL				0xFE
-
 
 #define	RTL_EEPROM_ID				0x8129
 
@@ -738,7 +721,6 @@ Default: 00b.
 #define EEPROM_TEST_CHIRP_K		0x0F
 #define EEPROM_TEST_EP_SETTING		0x0E
 #define EEPROM_TEST_USB_PHY		0x10
-
 
 /*  */
 /*  EEPROM address for Normal chip */
@@ -836,9 +818,7 @@ enum {
 #define EP_NUMBER_MASK			0x30	/* bit 4:5 0Eh */
 #define EP_NUMBER_SHIFT			4
 
-
 #define USB_PHY_PARA_SIZE		5
-
 
 /*  */
 /*	EEPROM default value definitions */
@@ -857,7 +837,6 @@ enum {
 #define EEPROM_DEF_PID_0		0x92	/*  Byte 0x0C */
 #define EEPROM_DEF_PID_1		0x81
 
-
 #define EEPROM_TEST_DEF_USB_OPT		0x80	/*  Byte 0x0E */
 #define EEPROM_NORMAL_DEF_USB_OPT	0x00	/*  Byte 0x0E */
 
@@ -871,7 +850,6 @@ enum {
 #define EEPROM_DEF_TSSI_A		0x09	/*  Byte 0x78 */
 #define EEPROM_DEF_TSSI_B		0x09	/*  Byte 0x79 */
 
-
 #define EEPROM_DEF_THERMAL_METER	0x12	/*  Byte 0x7A */
 
 	/*  Check if power safety spec is need */
@@ -879,7 +857,6 @@ enum {
 #define RF_OPTION2			0x7A
 #define RF_OPTION3			0x7B
 #define RF_OPTION4			0x7C
-
 
 #define	EEPROM_USB_SN			BIT(0)
 #define	EEPROM_USB_REMOTE_WAKEUP	BIT(1)
@@ -943,8 +920,6 @@ Current IOREG MAP
 #define	RCR_MXDMA_OFFSET		8
 #define	RCR_FIFO_OFFSET			13
 
-
-
 /*  */
 /* 8192c USB specific Regsiter Offset and Content definition, */
 /* 2009.08.18, added by vivi. for merge 92c and 92C into one driver */
@@ -988,7 +963,6 @@ Current IOREG MAP
 /* 2 SPS0_CTRL */
 #define SW18_FPWM			BIT(3)
 
-
 /* 2 SYS_ISO_CTRL */
 #define ISO_MD2PP			BIT(0)
 #define ISO_UA2USB			BIT(1)
@@ -1003,7 +977,6 @@ Current IOREG MAP
 
 #define PWC_EV25V			BIT(14)
 #define PWC_EV12V			BIT(15)
-
 
 /* 2 SYS_FUNC_EN */
 #define FEN_BBRSTB			BIT(0)
@@ -1064,9 +1037,7 @@ Current IOREG MAP
 #define SYS_CLK_EN			BIT(12)
 #define RING_CLK_EN			BIT(13)
 
-
 /* 2 9346CR */
-
 
 #define		EEDO			BIT(0)
 #define		EEDI			BIT(1)
@@ -1079,18 +1050,14 @@ Current IOREG MAP
 #define		EEM0			BIT(6)
 #define		EEM1			BIT(7)
 
-
 /* 2 AFE_MISC */
 #define AFE_BGEN			BIT(0)
 #define AFE_MBEN			BIT(1)
 #define MAC_ID_EN			BIT(7)
 
-
 /* 2 SPS0_CTRL */
 
-
 /* 2 SPS_OCP_CFG */
-
 
 /* 2 RSV_CTRL */
 #define WLOCK_ALL			BIT(0)
@@ -1107,8 +1074,6 @@ Current IOREG MAP
 #define RF_RSTB				BIT(1)
 #define RF_SDMRSTB			BIT(2)
 
-
-
 /* 2 LDOA15_CTRL */
 #define LDA15_EN			BIT(0)
 #define LDA15_STBY			BIT(1)
@@ -1116,15 +1081,12 @@ Current IOREG MAP
 #define LDA15_REG_VOS			BIT(3)
 #define _LDA15_VOADJ(x)			(((x) & 0x7) << 4)
 
-
-
 /* 2 LDOV12D_CTRL */
 #define LDV12_EN			BIT(0)
 #define LDV12_SDBY			BIT(1)
 #define LPLDO_HSM			BIT(2)
 #define LPLDO_LSM_DIS			BIT(3)
 #define _LDV12_VADJ(x)			(((x) & 0xF) << 4)
-
 
 /* 2 AFE_XTAL_CTRL */
 #define XTAL_EN				BIT(0)
@@ -1143,12 +1105,10 @@ Current IOREG MAP
 #define _XTAL_BT_DRV(x)			(((x) & 0x3) << 21)
 #define _XTAL_GPIO(x)			(((x) & 0x7) << 23)
 
-
 #define CKDLY_AFE			BIT(26)
 #define CKDLY_USB			BIT(27)
 #define CKDLY_DIG			BIT(28)
 #define CKDLY_BT			BIT(29)
-
 
 /* 2 AFE_PLL_CTRL */
 #define APLL_EN				BIT(0)
@@ -1169,7 +1129,6 @@ Current IOREG MAP
 #define APLL_320EN			BIT(14)
 #define APLL_80EN			BIT(15)
 #define APLL_1MEN			BIT(24)
-
 
 /* 2 EFUSE_CTRL */
 #define ALD_EN				BIT(18)
@@ -1198,7 +1157,6 @@ Current IOREG MAP
 /* 2 ACLK_MON */
 #define RSM_EN				BIT(0)
 #define Timer_EN			BIT(4)
-
 
 /* 2 GPIO_MUXCFG */
 #define TRSW0EN				BIT(2)
@@ -1229,11 +1187,9 @@ Current IOREG MAP
 
 #define  SECCAM_CLR			BIT(30)
 
-
 /* 2 FSIMR */
 
 /* 2 FSISR */
-
 
 /* 2 8051FWDL */
 /* 2 MCUFWDL */
@@ -1248,7 +1204,6 @@ Current IOREG MAP
 
 /* 2REG_HPON_FSM */
 #define BOND92CE_1T2R_CFG		BIT(22)
-
 
 /* 2 REG_SYS_CFG */
 #define XCLK_VLD			BIT(0)
@@ -1303,12 +1258,10 @@ Current IOREG MAP
 /*  */
 /*  */
 
-
 /* 2 Function Enable Registers */
 /* 2 CR */
 
 #define REG_LBMODE			(REG_CR + 3)
-
 
 #define HCI_TXDMA_EN			BIT(0)
 #define HCI_RXDMA_EN			BIT(1)
@@ -1329,7 +1282,6 @@ Current IOREG MAP
 #define LOOPBACK_PHY			0x1
 #define LOOPBACK_DMA			0x7
 
-
 /* 2 PBP - Page Size Register */
 #define GET_RX_PAGE_SIZE(value)		((value) & 0xF)
 #define GET_TX_PAGE_SIZE(value)		(((value) & 0xF0) >> 4)
@@ -1343,7 +1295,6 @@ Current IOREG MAP
 #define PBP_256				0x2
 #define PBP_512				0x3
 #define PBP_1024			0x4
-
 
 /* 2 TX/RXDMA */
 #define RXDMA_ARBBW_EN			BIT(0)
@@ -1375,10 +1326,7 @@ Current IOREG MAP
 #define QUEUE_NORMAL			2
 #define QUEUE_HIGH			3
 
-
-
 /* 2 TRXFF_BNDY */
-
 
 /* 2 LLT_INIT */
 #define _LLT_NO_ACTIVE			0x0
@@ -1389,7 +1337,6 @@ Current IOREG MAP
 #define _LLT_INIT_ADDR(x)		(((x) & 0xFF) << 8)
 #define _LLT_OP(x)			(((x) & 0x3) << 30)
 #define _LLT_OP_VALUE(x)		(((x) >> 30) & 0x3)
-
 
 /* 2 BB_ACCESS_CTRL */
 #define BB_WRITE_READ_MASK		(BIT(31) | BIT(30))
@@ -1410,11 +1357,9 @@ Current IOREG MAP
 	/*  NOTE: in RQPN_NPQ register */
 #define _NPQ(x)				((x) & 0xFF)
 
-
 #define HPQ_PUBLIC_DIS			BIT(24)
 #define LPQ_PUBLIC_DIS			BIT(25)
 #define LD_RQPN				BIT(31)
-
 
 /* 2 TDECTRL */
 #define BCN_VALID			BIT(16)
@@ -1424,7 +1369,6 @@ Current IOREG MAP
 /* 2 TDECTL */
 #define BLK_DESC_NUM_SHIFT		4
 #define BLK_DESC_NUM_MASK		0xF
-
 
 /* 2 TXDMA_OFFSET_CHK */
 #define DROP_DATA_EN			BIT(9)
@@ -1440,11 +1384,9 @@ Current IOREG MAP
 /* 2 INIRTSMCS_SEL */
 #define _INIRTSMCS_SEL(x)		((x) & 0x3F)
 
-
 /* 2 SPEC SIFS */
 #define _SPEC_SIFS_CCK(x)		((x) & 0xFF)
 #define _SPEC_SIFS_OFDM(x)		(((x) & 0xFF) << 8)
-
 
 /* 2 RRSR */
 
@@ -1457,7 +1399,6 @@ Current IOREG MAP
 #define RRSR_RSC_UPPER_SUBCHANNEL	0x1
 #define RRSR_RSC_LOWER_SUBCHANNEL	0x2
 #define RRSR_RSC_DUPLICATE_MODE		0x3
-
 
 /* 2 ARFR */
 #define USE_SHORT_G1			BIT(20)
@@ -1472,11 +1413,9 @@ Current IOREG MAP
 #define _AGGLMT_MCS6(x)			(((x) & 0xF) << 24)
 #define _AGGLMT_MCS7(x)			(((x) & 0xF) << 28)
 
-
 /* 2 RL */
 #define	RETRY_LIMIT_SHORT_SHIFT		8
 #define	RETRY_LIMIT_LONG_SHIFT		0
-
 
 /* 2 DARFRC */
 #define _DARF_RC1(x)			((x) & 0x1F)
@@ -1489,7 +1428,6 @@ Current IOREG MAP
 #define _DARF_RC7(x)			(((x) & 0x1F) << 16)
 #define _DARF_RC8(x)			(((x) & 0x1F) << 24)
 
-
 /* 2 RARFRC */
 #define _RARF_RC1(x)			((x) & 0x1F)
 #define _RARF_RC2(x)			(((x) & 0x1F) << 8)
@@ -1501,14 +1439,11 @@ Current IOREG MAP
 #define _RARF_RC7(x)			(((x) & 0x1F) << 16)
 #define _RARF_RC8(x)			(((x) & 0x1F) << 24)
 
-
 /*  */
 /*  */
 /*	0x0500h ~ 0x05FFh	EDCA Configuration */
 /*  */
 /*  */
-
-
 
 /* 2 EDCA setting */
 #define AC_PARAM_TXOP_LIMIT_OFFSET	16
@@ -1516,38 +1451,30 @@ Current IOREG MAP
 #define AC_PARAM_ECW_MIN_OFFSET		8
 #define AC_PARAM_AIFS_OFFSET		0
 
-
 /* 2 EDCA_VO_PARAM */
 #define _AIFS(x)			(x)
 #define _ECW_MAX_MIN(x)			((x) << 8)
 #define _TXOP_LIMIT(x)			((x) << 16)
 
-
 #define _BCNIFS(x)			((x) & 0xFF)
 #define _BCNECW(x)			(((x) & 0xF))<< 8)
 
-
 #define _LRL(x)				((x) & 0x3F)
 #define _SRL(x)				(((x) & 0x3F) << 8)
-
 
 /* 2 SIFS_CCK */
 #define _SIFS_CCK_CTX(x)		((x) & 0xFF)
 #define _SIFS_CCK_TRX(x)		(((x) & 0xFF) << 8);
 
-
 /* 2 SIFS_OFDM */
 #define _SIFS_OFDM_CTX(x)		((x) & 0xFF)
 #define _SIFS_OFDM_TRX(x)		(((x) & 0xFF) << 8);
 
-
 /* 2 TBTT PROHIBIT */
 #define _TBTT_PROHIBIT_HOLD(x)		(((x) & 0xFF) << 8)
 
-
 /* 2 REG_RD_CTRL */
 #define DIS_EDCA_CNT_DWN		BIT(11)
-
 
 /* 2 BCN_CTRL */
 #define EN_MBSSID			BIT(1)
@@ -1568,8 +1495,6 @@ Current IOREG MAP
 #define	AcmHw_ViqStatus			BIT(5)
 #define	AcmHw_VoqStatus			BIT(6)
 
-
-
 /*  */
 /*  */
 /*	0x0600h ~ 0x07FFh	WMAC Configuration */
@@ -1580,10 +1505,8 @@ Current IOREG MAP
 #define APSDOFF				BIT(6)
 #define APSDOFF_STATUS			BIT(7)
 
-
 /* 2 BWOPMODE */
 #define BW_20MHZ			BIT(2)
-
 
 #define RATE_BITMAP_ALL			0xFFFFF
 
@@ -1599,8 +1522,6 @@ Current IOREG MAP
 #define ACRC				BIT(8)
 #define CFENDFORM			BIT(9)
 #define ICV				BIT(10)
-
-
 
 /* 2 RCR */
 #define AAP				BIT(0)
@@ -1634,12 +1555,9 @@ Current IOREG MAP
 
 /* 2 MBIDCAMCFG */
 
-
-
 /* 2 AMPDU_MIN_SPACE */
 #define _MIN_SPACE(x)			((x) & 0x7)
 #define _SHORT_GI_PADDING(x)		(((x) & 0x1F) << 3)
-
 
 /* 2 RXERR_RPT */
 #define RXERR_TYPE_OFDM_PPDU		0
@@ -1661,7 +1579,6 @@ Current IOREG MAP
 #define RXERR_RPT_RST			BIT(27)
 #define _RXERR_RPT_SEL(type)		((type) << 28)
 
-
 /* 2 SECCFG */
 #define	SCR_TxUseDK			BIT(0)	/* Force Tx Use Default Key */
 #define	SCR_RxUseDK			BIT(1)	/* Force Rx Use Default Key */
@@ -1669,8 +1586,6 @@ Current IOREG MAP
 #define	SCR_RxDecEnable			BIT(3)	/* Enable Rx Decryption */
 #define	SCR_SKByA2			BIT(4)	/* Search kEY BY A2 */
 #define	SCR_NoSKMC			BIT(5)	/* No Key Search Multicast */
-
-
 
 /*  */
 /*  */
@@ -1692,7 +1607,6 @@ Current IOREG MAP
 /* 2 Special Option */
 #define USB_AGG_EN			BIT(3)
 
-
 /* 2REG_C2HEVT_CLEAR */
 	/*  Set by driver and notify FW that the driver has read the
 	    C2H command message */
@@ -1700,7 +1614,6 @@ Current IOREG MAP
 	/*  Set by FW indicating that FW had set the C2H command message
 	    and it's not yet read by driver. */
 #define C2H_EVT_FW_CLOSE		0xFF
-
 
 /* 2REG_MULTI_FUNC_CTRL(For RTL8723 Only) */
 	/*  Enable GPIO[9] as WiFi HW PDn source */
@@ -1759,7 +1672,6 @@ Current IOREG MAP
 /*  */
 #define REG_SYSON_REG_LOCK		0x001C
 
-
 /*  */
 /*  */
 /*	0x0100h ~ 0x01FFh	MACTOP General Configuration */
@@ -1767,13 +1679,11 @@ Current IOREG MAP
 /*  */
 #define REG_FTIMR			0x0138
 
-
 /*  */
 /*  */
 /*	0x0200h ~ 0x027Fh	TXDMA Configuration */
 /*  */
 /*  */
-
 
 /*  */
 /*  */
@@ -1781,13 +1691,11 @@ Current IOREG MAP
 /*  */
 /*  */
 
-
 /*  */
 /*  */
 /*	0x0300h ~ 0x03FFh	PCIe */
 /*  */
 /*  */
-
 
 /*  */
 /*  */
@@ -1795,7 +1703,6 @@ Current IOREG MAP
 /*  */
 /*  */
 #define REG_EARLY_MODE_CONTROL		0x4D0
-
 
 /*  */
 /*  */
@@ -1807,7 +1714,6 @@ Current IOREG MAP
 #define DIS_ATIM			BIT(0)
 #define DIS_BCNQ_SUB			BIT(1)
 #define DIS_TSF_UDT			BIT(4)
-
 
 /*  */
 /*  */
@@ -1826,7 +1732,6 @@ Current IOREG MAP
 /*  By Bruce, 2011-07-18. */
 /*  */
 #define	REG_NAV_UPPER			0x0652	/*  unit of 128 */
-
 
 /*  */
 /*	8723 Regsiter Bit and Content definition */
@@ -1933,7 +1838,6 @@ Current IOREG MAP
 #define SPS_SEL				BIT(24) /*  1:LDO regulator mode;
 						    0:Switching regulator mode*/
 
-
 /*  */
 /*  */
 /*	0x0100h ~ 0x01FFh	MACTOP General Configuration */
@@ -1955,7 +1859,6 @@ Current IOREG MAP
 
 /* 2 BB_ACCESS_CTRL */
 
-
 /*  */
 /*  */
 /*	0x0200h ~ 0x027Fh	TXDMA Configuration */
@@ -1969,7 +1872,6 @@ Current IOREG MAP
 /* 2 TDECTL */
 
 /* 2 TXDMA_OFFSET_CHK */
-
 
 /*  */
 /*  */
@@ -1995,7 +1897,6 @@ Current IOREG MAP
 
 /* 2 RARFRC */
 
-
 /*  */
 /*  */
 /*	0x0500h ~ 0x05FFh	EDCA Configuration */
@@ -2017,7 +1918,6 @@ Current IOREG MAP
 /* 2 BCN_CTRL */
 
 /* 2 ACMHWCTRL */
-
 
 /*  */
 /*  */
@@ -2045,7 +1945,6 @@ Current IOREG MAP
 
 /* 2 SECCFG */
 
-
 /*  */
 /*  */
 /*	0xFE00h ~ 0xFE55h	RTL8723 SDIO Configuration */
@@ -2070,7 +1969,6 @@ Current IOREG MAP
 
 /*  8723 EFUSE */
 #define HWSET_MAX_SIZE			256
-
 
 /* USB interrupt */
 #define	UHIMR_TIMEOUT2			BIT(31)

@@ -35,7 +35,6 @@
 #include "pci_impl.h"
 #include "machvec_impl.h"
 
-
 /* Note mask bit is true for ENABLED irqs.  */
 static unsigned long cached_irq_mask;
 /* dp264 boards handle at max four CPUs */
@@ -300,7 +299,6 @@ clipper_init_irq(void)
 	init_tsunami_irqs(&clipper_irq_type, 24, 63);
 }
 
-
 /*
  * PCI Fixup configuration.
  *
@@ -534,7 +532,6 @@ webbrick_init_arch(void)
 	hose_head->sg_isa->align_entry = 4;
 	hose_head->sg_pci->align_entry = 4;
 }
-
 
 /*
  * The System Vectors

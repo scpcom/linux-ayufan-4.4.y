@@ -655,7 +655,6 @@ int amd_iommu_bind_pasid(struct pci_dev *pdev, int pasid,
 	if (pasid_state == NULL)
 		goto out;
 
-
 	atomic_set(&pasid_state->count, 1);
 	init_waitqueue_head(&pasid_state->wq);
 	spin_lock_init(&pasid_state->lock);

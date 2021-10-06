@@ -33,7 +33,6 @@
 #include <linux/kthread.h>
 #include <linux/uaccess.h>
 
-
 static struct resource da9063_regulators_resources[] = {
 	{
 		.name	= "LDO_LIM",
@@ -74,7 +73,6 @@ static struct resource da9063_hwmon_resources[] = {
 		.flags	= IORESOURCE_IRQ,
 	},
 };
-
 
 static const struct mfd_cell da9063_devs[] = {
 	{

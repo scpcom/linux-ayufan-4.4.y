@@ -90,7 +90,6 @@ static const struct alps_nibble_commands alps_v6_nibble_commands[] = {
 	{ PSMOUSE_CMD_SETSCALE11,	0x00 }, /* f */
 };
 
-
 #define ALPS_DUALPOINT		0x02	/* touchpad has trackstick */
 #define ALPS_PASS		0x04	/* device has a pass-through port */
 
@@ -3037,4 +3036,3 @@ int alps_detect(struct psmouse *psmouse, bool set_properties)
 
 	return 0;
 }
-

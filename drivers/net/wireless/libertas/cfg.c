@@ -21,7 +21,6 @@
 #include "cmd.h"
 #include "mesh.h"
 
-
 #define CHAN2G(_channel, _freq, _flags) {        \
 	.band             = IEEE80211_BAND_2GHZ, \
 	.center_freq      = (_freq),             \
@@ -54,7 +53,6 @@ static struct ieee80211_channel lbs_2ghz_channels[] = {
 	.flags    = (_flags),                   \
 }
 
-
 /* Table 6 in section 3.2.1.1 */
 static struct ieee80211_rate lbs_rates[] = {
 	RATETAB_ENT(10,  0,  0),
@@ -78,7 +76,6 @@ static struct ieee80211_supported_band lbs_band_2ghz = {
 	.n_bitrates = ARRAY_SIZE(lbs_rates),
 };
 
-
 static const u32 cipher_suites[] = {
 	WLAN_CIPHER_SUITE_WEP40,
 	WLAN_CIPHER_SUITE_WEP104,
@@ -89,7 +86,6 @@ static const u32 cipher_suites[] = {
 /* Time to stay on the channel */
 #define LBS_DWELL_PASSIVE 100
 #define LBS_DWELL_ACTIVE  40
-
 
 /***************************************************************************
  * Misc utility functions
@@ -125,7 +121,6 @@ static int lbs_auth_to_authtype(enum nl80211_auth_type auth_type)
 	return ret;
 }
 
-
 /*
  * Various firmware commands need the list of supported rates, but with
  * the hight-bit set for basic rates
@@ -144,7 +139,6 @@ static int lbs_add_rates(u8 *rates)
 	return ARRAY_SIZE(lbs_rates);
 }
 
-
 /***************************************************************************
  * TLV utility functions
  *
@@ -152,7 +146,6 @@ static int lbs_add_rates(u8 *rates)
  * same structure: type, length, data*. The only difference: for IEs, the
  * type and length are u8, but for TLVs they're __le16.
  */
-
 
 /*
  * Add ssid TLV
@@ -175,7 +168,6 @@ static int lbs_add_ssid_tlv(u8 *tlv, const u8 *ssid, int ssid_len)
 	memcpy(ssid_tlv->ssid, ssid, ssid_len);
 	return sizeof(ssid_tlv->header) + ssid_len;
 }
-
 
 /*
  * Add channel list TLV (section 8.4.2)
@@ -232,7 +224,6 @@ static int lbs_add_channel_list_tlv(struct lbs_private *priv, u8 *tlv,
 	}
 	return sizeof(struct mrvl_ie_header) + chanscanparamsize;
 }
-
 
 /*
  * Add rates TLV
@@ -332,7 +323,6 @@ static int lbs_add_common_rates_tlv(u8 *tlv, struct cfg80211_bss *bss)
 	return sizeof(rate_tlv->header) + n;
 }
 
-
 /*
  * Add auth type TLV.
  *
@@ -356,7 +346,6 @@ static int lbs_add_auth_type_tlv(u8 *tlv, enum nl80211_auth_type auth_type)
 	return sizeof(*auth);
 }
 
-
 /*
  * Add channel (phy ds) TLV
  */
@@ -377,7 +366,6 @@ static int lbs_add_channel_tlv(u8 *tlv, u8 channel)
 	ds->channel = channel;
 	return sizeof(*ds);
 }
-
 
 /*
  * Add (empty) CF param TLV of the form:
@@ -477,8 +465,6 @@ static int lbs_cfg_set_mesh_channel(struct wiphy *wiphy,
 	return ret;
 }
 
-
-
 /*
  * Scanning
  */
@@ -490,7 +476,6 @@ static int lbs_cfg_set_mesh_channel(struct wiphy *wiphy,
  * while.
  */
 #define LBS_SCAN_BEFORE_NAP 4
-
 
 /*
  * When the firmware reports back a scan-result, it gives us an "u8 rssi",
@@ -669,7 +654,6 @@ static int lbs_ret_scan(struct lbs_private *priv, unsigned long dummy,
 	return ret;
 }
 
-
 /*
  * Our scan command contains a TLV, consting of a SSID TLV, a channel list
  * TLV and a rates TLV. Determine the maximum size of them:
@@ -828,9 +812,6 @@ static int lbs_cfg_scan(struct wiphy *wiphy,
 	return ret;
 }
 
-
-
-
 /*
  * Events
  */
@@ -862,13 +843,9 @@ void lbs_send_mic_failureevent(struct lbs_private *priv, u32 event)
 	lbs_deb_leave(LBS_DEB_CFG80211);
 }
 
-
-
-
 /*
  * Connect/disconnect
  */
-
 
 /*
  * This removes all WEP keys
@@ -955,7 +932,6 @@ static int lbs_set_wep_keys(struct lbs_private *priv)
 	return ret;
 }
 
-
 /*
  * Enable/Disable RSN status
  */
@@ -984,7 +960,6 @@ static int lbs_enable_rsn(struct lbs_private *priv, int enable)
 	lbs_deb_leave(LBS_DEB_CFG80211);
 	return ret;
 }
-
 
 /*
  * Set WPA/WPA key material
@@ -1043,7 +1018,6 @@ static int lbs_set_key_material(struct lbs_private *priv,
 	return ret;
 }
 
-
 /*
  * Sets the auth type (open, shared, etc) in the firmware. That
  * we use CMD_802_11_AUTHENTICATE is misleading, this firmware
@@ -1083,7 +1057,6 @@ static int lbs_set_authtype(struct lbs_private *priv,
 	lbs_deb_leave_args(LBS_DEB_CFG80211, "ret %d", ret);
 	return ret;
 }
-
 
 /*
  * Create association request
@@ -1501,7 +1474,6 @@ static int lbs_cfg_set_default_key(struct wiphy *wiphy,
 	return 0;
 }
 
-
 static int lbs_cfg_add_key(struct wiphy *wiphy, struct net_device *netdev,
 			   u8 idx, bool pairwise, const u8 *mac_addr,
 			   struct key_params *params)
@@ -1564,7 +1536,6 @@ static int lbs_cfg_add_key(struct wiphy *wiphy, struct net_device *netdev,
 	return ret;
 }
 
-
 static int lbs_cfg_del_key(struct wiphy *wiphy, struct net_device *netdev,
 			   u8 key_index, bool pairwise, const u8 *mac_addr)
 {
@@ -1599,7 +1570,6 @@ static int lbs_cfg_del_key(struct wiphy *wiphy, struct net_device *netdev,
 
 	return 0;
 }
-
 
 /*
  * Get station
@@ -1643,9 +1613,6 @@ static int lbs_cfg_get_station(struct wiphy *wiphy, struct net_device *dev,
 	return 0;
 }
 
-
-
-
 /*
  * Change interface
  */
@@ -1681,8 +1648,6 @@ static int lbs_change_intf(struct wiphy *wiphy, struct net_device *dev,
 	return ret;
 }
 
-
-
 /*
  * IBSS (Ad-Hoc)
  */
@@ -1693,7 +1658,6 @@ static int lbs_change_intf(struct wiphy *wiphy, struct net_device *dev,
  *  9 (QoS), 11 (APSD), 12 (unused), 14 (unused), 15 (unused)
  */
 #define CAPINFO_MASK (~(0xda00))
-
 
 static void lbs_join_post(struct lbs_private *priv,
 			  struct cfg80211_ibss_params *params,
@@ -1886,8 +1850,6 @@ static int lbs_ibss_join_existing(struct lbs_private *priv,
 	return ret;
 }
 
-
-
 static int lbs_ibss_start_new(struct lbs_private *priv,
 	struct cfg80211_ibss_params *params)
 {
@@ -1951,7 +1913,6 @@ static int lbs_ibss_start_new(struct lbs_private *priv,
 	cmd.capability = cpu_to_le16(capability);
 	lbs_add_rates(cmd.rates);
 
-
 	ret = lbs_cmd_with_response(priv, CMD_802_11_AD_HOC_START, &cmd);
 	if (ret)
 		goto out;
@@ -1972,7 +1933,6 @@ static int lbs_ibss_start_new(struct lbs_private *priv,
 	lbs_deb_leave_args(LBS_DEB_CFG80211, "ret %d", ret);
 	return ret;
 }
-
 
 static int lbs_join_ibss(struct wiphy *wiphy, struct net_device *dev,
 		struct cfg80211_ibss_params *params)
@@ -2007,12 +1967,10 @@ static int lbs_join_ibss(struct wiphy *wiphy, struct net_device *dev,
 	} else
 		ret = lbs_ibss_start_new(priv, params);
 
-
  out:
 	lbs_deb_leave_args(LBS_DEB_CFG80211, "ret %d", ret);
 	return ret;
 }
-
 
 static int lbs_leave_ibss(struct wiphy *wiphy, struct net_device *dev)
 {
@@ -2036,9 +1994,6 @@ static int lbs_leave_ibss(struct wiphy *wiphy, struct net_device *dev)
 	return ret;
 }
 
-
-
-
 /*
  * Initialization
  */
@@ -2057,7 +2012,6 @@ static struct cfg80211_ops lbs_cfg80211_ops = {
 	.join_ibss = lbs_join_ibss,
 	.leave_ibss = lbs_leave_ibss,
 };
-
 
 /*
  * At this time lbs_private *priv doesn't even exist, so we just allocate
@@ -2091,7 +2045,6 @@ struct wireless_dev *lbs_cfg_alloc(struct device *dev)
 	lbs_deb_leave_args(LBS_DEB_CFG80211, "ret %d", ret);
 	return ERR_PTR(ret);
 }
-
 
 static void lbs_cfg_set_regulatory_hint(struct lbs_private *priv)
 {
@@ -2194,7 +2147,6 @@ void lbs_scan_deinit(struct lbs_private *priv)
 	lbs_deb_enter(LBS_DEB_CFG80211);
 	cancel_delayed_work_sync(&priv->scan_work);
 }
-
 
 void lbs_cfg_free(struct lbs_private *priv)
 {

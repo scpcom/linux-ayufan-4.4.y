@@ -96,7 +96,6 @@ static int mpc85xx_l2ctlr_of_probe(struct platform_device *dev)
 		return -EINVAL;
 	}
 
-
 	rem = l2cache_size % sram_params.sram_size;
 	ways = LOCK_WAYS_FULL * sram_params.sram_size / l2cache_size;
 	if (rem || (ways & (ways - 1))) {

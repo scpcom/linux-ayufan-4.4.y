@@ -629,7 +629,6 @@ static inline void s3c24xx_i2c_disable_bus(struct s3c24xx_i2c *i2c)
 	writel(tmp, i2c->regs + S3C2410_IICCON);
 }
 
-
 /* s3c24xx_i2c_set_master
  *
  * get the i2c bus for a master transaction
@@ -1168,7 +1167,6 @@ static int s3c24xx_i2c_probe(struct platform_device *pdev)
 	}
 
 	dev_dbg(&pdev->dev, "clock source %p\n", i2c->clk);
-
 
 	/* map the registers */
 

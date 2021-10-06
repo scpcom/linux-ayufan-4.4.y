@@ -14,7 +14,6 @@
 #ifndef _ASM_TILE_SETUP_H
 #define _ASM_TILE_SETUP_H
 
-
 #include <linux/pfn.h>
 #include <linux/init.h>
 #include <uapi/asm/setup.h>

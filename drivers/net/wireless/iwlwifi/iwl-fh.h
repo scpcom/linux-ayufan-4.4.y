@@ -95,7 +95,6 @@
  */
 #define FH_KW_MEM_ADDR_REG		     (FH_MEM_LOWER_BOUND + 0x97C)
 
-
 /**
  * TFD Circular Buffers Base (CBBC) addresses
  *
@@ -127,7 +126,6 @@ static inline unsigned int FH_MEM_CBBC_QUEUE(unsigned int chnl)
 	WARN_ON_ONCE(chnl >= 32);
 	return FH_MEM_CBBC_20_31_LOWER_BOUND + 4 * (chnl - 20);
 }
-
 
 /**
  * Rx SRAM Control and Status Registers (RSCSR)
@@ -455,7 +453,6 @@ struct iwl_rb_status {
 	__le16 finished_fr_nam;
 	__le32 __unused;
 } __packed;
-
 
 #define TFD_QUEUE_SIZE_MAX      (256)
 #define TFD_QUEUE_SIZE_BC_DUP	(64)

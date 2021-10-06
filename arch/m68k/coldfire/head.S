@@ -253,7 +253,6 @@ _copy_romfs:
 	movel	%a1,_ramstart
 #endif /* CONFIG_ROMFS_FS */
 
-
 	/*
 	 *	Zero out the bss region.
 	 */

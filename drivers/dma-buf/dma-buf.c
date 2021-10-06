@@ -653,7 +653,6 @@ void dma_buf_kunmap(struct dma_buf *dmabuf, unsigned long page_num,
 }
 EXPORT_SYMBOL_GPL(dma_buf_kunmap);
 
-
 /**
  * dma_buf_mmap - Setup up a userspace mmap with the given vma
  * @dmabuf:	[in]	buffer that should back the vma

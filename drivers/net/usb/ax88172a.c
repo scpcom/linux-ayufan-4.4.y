@@ -226,7 +226,6 @@ err:
 	return ret;
 }
 
-
 static int ax88172a_bind(struct usbnet *dev, struct usb_interface *intf)
 {
 	int ret;

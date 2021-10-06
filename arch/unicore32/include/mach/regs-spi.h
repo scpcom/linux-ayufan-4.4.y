@@ -95,4 +95,3 @@
  */
 #define SPI_IMR_RXFIM		FIELD(1, 1, 4)
 #define SPI_IMR_MSTIM		FIELD(1, 1, 5)
-

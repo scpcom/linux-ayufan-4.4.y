@@ -726,7 +726,6 @@ int mlx4_QUERY_DEV_CAP(struct mlx4_dev *dev, struct mlx4_dev_cap *dev_cap)
 #define QUERY_DEV_CAP_QP_RATE_LIMIT_MAX_OFFSET	0xd0
 #define QUERY_DEV_CAP_QP_RATE_LIMIT_MIN_OFFSET	0xd2
 
-
 	dev_cap->flags2 = 0;
 	mailbox = mlx4_alloc_cmd_mailbox(dev);
 	if (IS_ERR(mailbox))
@@ -1453,7 +1452,6 @@ int mlx4_UNMAP_FA(struct mlx4_dev *dev)
 			MLX4_CMD_TIME_CLASS_B, MLX4_CMD_NATIVE);
 }
 
-
 int mlx4_RUN_FW(struct mlx4_dev *dev)
 {
 	return mlx4_cmd(dev, 0, 0, 0, MLX4_CMD_RUN_FW,
@@ -1514,7 +1512,6 @@ int mlx4_QUERY_FW(struct mlx4_dev *dev)
 
 	if (mlx4_is_slave(dev))
 		goto out;
-
 
 	MLX4_GET(cmd_if_rev, outbox, QUERY_FW_CMD_IF_REV_OFFSET);
 	if (cmd_if_rev < MLX4_COMMAND_INTERFACE_MIN_REV ||
@@ -2380,7 +2377,6 @@ int mlx4_virt2phy_port_map(struct mlx4_dev *dev, u32 port1, u32 port2)
 	return err;
 }
 
-
 int mlx4_SET_ICM_SIZE(struct mlx4_dev *dev, u64 icm_size, u64 *aux_pages)
 {
 	int ret = mlx4_cmd_imm(dev, icm_size, aux_pages, 0, 0,
@@ -2466,7 +2462,6 @@ EXPORT_SYMBOL_GPL(mlx4_wol_write);
 enum {
 	ADD_TO_MCG = 0x26,
 };
-
 
 void mlx4_opreq_action(struct work_struct *work)
 {

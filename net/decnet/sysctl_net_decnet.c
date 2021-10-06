@@ -28,7 +28,6 @@
 #include <net/dn_dev.h>
 #include <net/dn_route.h>
 
-
 int decnet_debug_level;
 int decnet_time_wait = 30;
 int decnet_dn_count = 1;

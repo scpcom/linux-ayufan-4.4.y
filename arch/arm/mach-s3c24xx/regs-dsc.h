@@ -9,7 +9,6 @@
  * S3C2440/S3C2412 Signal Drive Strength Control
 */
 
-
 #ifndef __ASM_ARCH_REGS_DSC_H
 #define __ASM_ARCH_REGS_DSC_H __FILE__
 
@@ -22,4 +21,3 @@
 #define S3C2440_DSC1	   S3C2410_GPIOREG(0xc8)
 
 #endif	/* __ASM_ARCH_REGS_DSC_H */
-

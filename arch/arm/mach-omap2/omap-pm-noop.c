@@ -90,7 +90,6 @@ int omap_pm_set_min_bus_tput(struct device *dev, u8 agent_id, unsigned long r)
  * DSP Bridge-specific constraints
  */
 
-
 /**
  * omap_pm_enable_off_mode - notify OMAP PM that off-mode is enabled
  *

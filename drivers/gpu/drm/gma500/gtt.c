@@ -24,7 +24,6 @@
 #include "psb_drv.h"
 #include "blitter.h"
 
-
 /*
  *	GTT resource allocator - manage page mappings in GTT space
  */

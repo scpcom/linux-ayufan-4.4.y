@@ -18,7 +18,6 @@
 #define __IO_PREFIX mpr2
 #include <asm/io_generic.h>
 
-
 #define SETBITS_OUTB(mask, reg)   __raw_writeb(__raw_readb(reg) | mask, reg)
 #define SETBITS_OUTW(mask, reg)   __raw_writew(__raw_readw(reg) | mask, reg)
 #define SETBITS_OUTL(mask, reg)   __raw_writel(__raw_readl(reg) | mask, reg)
@@ -26,9 +25,7 @@
 #define CLRBITS_OUTW(mask, reg)   __raw_writew(__raw_readw(reg) & ~mask, reg)
 #define CLRBITS_OUTL(mask, reg)   __raw_writel(__raw_readl(reg) & ~mask, reg)
 
-
 #define PA_LED          PORT_PADR      /* LED */
-
 
 /* BSC */
 #define CMNCR           0xA4FD0000UL
@@ -48,7 +45,6 @@
 #define CS5BWCR         0xA4FD0038UL
 #define CS6AWCR         0xA4FD003CUL
 #define CS6BWCR         0xA4FD0040UL
-
 
 /* usb */
 

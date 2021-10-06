@@ -99,7 +99,6 @@ static void ehci_enable_event(struct ehci_hcd *ehci, unsigned event,
 	}
 }
 
-
 /* Poll the STS_ASS status bit; see when it agrees with CMD_ASE */
 static void ehci_poll_ASS(struct ehci_hcd *ehci)
 {
@@ -145,7 +144,6 @@ static void ehci_disable_ASE(struct ehci_hcd *ehci)
 	ehci_clear_command_bit(ehci, CMD_ASE);
 }
 
-
 /* Poll the STS_PSS status bit; see when it agrees with CMD_PSE */
 static void ehci_poll_PSS(struct ehci_hcd *ehci)
 {
@@ -190,7 +188,6 @@ static void ehci_disable_PSE(struct ehci_hcd *ehci)
 {
 	ehci_clear_command_bit(ehci, CMD_PSE);
 }
-
 
 /* Poll the STS_HALT status bit; see when a dead controller stops */
 static void ehci_handle_controller_death(struct ehci_hcd *ehci)
@@ -279,7 +276,6 @@ static void ehci_handle_intr_unlinks(struct ehci_hcd *ehci)
 	ehci->intr_unlinking = false;
 }
 
-
 /* Start another free-iTDs/siTDs cycle */
 static void start_free_itds(struct ehci_hcd *ehci)
 {
@@ -323,7 +319,6 @@ static void end_free_itds(struct ehci_hcd *ehci)
 		start_free_itds(ehci);
 }
 
-
 /* Handle lost (or very late) IAA interrupts */
 static void ehci_iaa_watchdog(struct ehci_hcd *ehci)
 {
@@ -363,7 +358,6 @@ static void ehci_iaa_watchdog(struct ehci_hcd *ehci)
 	end_unlink_async(ehci);
 }
 
-
 /* Enable the I/O watchdog, if appropriate */
 static void turn_on_io_watchdog(struct ehci_hcd *ehci)
 {
@@ -381,7 +375,6 @@ static void turn_on_io_watchdog(struct ehci_hcd *ehci)
 			ehci->async_count + ehci->intr_count > 0))
 		ehci_enable_event(ehci, EHCI_HRTIMER_IO_WATCHDOG, true);
 }
-
 
 /*
  * Handler functions for the hrtimer event types.

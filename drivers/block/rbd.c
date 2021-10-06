@@ -2,7 +2,6 @@
 /*
    rbd.c -- Export ceph rados objects as a Linux block device
 
-
    based on drivers/block/osdblk.c:
 
    Copyright 2009 Red Hat, Inc.
@@ -19,8 +18,6 @@
    You should have received a copy of the GNU General Public License
    along with this program; see the file COPYING.  If not, write to
    the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
-
-
 
    For usage instructions, please refer to:
 
@@ -2017,7 +2014,6 @@ rbd_osd_req_create_copyup(struct rbd_obj_request *obj_request)
 
 	return osd_req;
 }
-
 
 static void rbd_osd_req_destroy(struct ceph_osd_request *osd_req)
 {

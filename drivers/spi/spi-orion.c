@@ -604,7 +604,6 @@ out:
 	return status;
 }
 
-
 static int orion_spi_remove(struct platform_device *pdev)
 {
 	struct spi_master *master = platform_get_drvdata(pdev);

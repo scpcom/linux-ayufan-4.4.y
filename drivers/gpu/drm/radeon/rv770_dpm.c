@@ -958,7 +958,6 @@ static int rv770_populate_smc_acpi_state(struct radeon_device *rdev,
 		table->ACPIState.levels[0].gen2PCIE = 0;
 	}
 
-
 	mpll_ad_func_cntl_2 |= BIAS_GEN_PDNB | RESET_EN;
 
 	mpll_dq_func_cntl_2 |= BIAS_GEN_PDNB | RESET_EN;
@@ -1506,7 +1505,6 @@ void r7xx_start_smc(struct radeon_device *rdev)
 	rv770_start_smc(rdev);
 	rv770_start_smc_clock(rdev);
 }
-
 
 void r7xx_stop_smc(struct radeon_device *rdev)
 {

@@ -14,7 +14,6 @@
  * Hans de Goede <hdegoede@redhat.com>
  */
 
-
 #include <linux/device.h>
 #include <linux/libps2.h>
 #include <linux/input/mt.h>

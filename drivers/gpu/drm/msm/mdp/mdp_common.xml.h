@@ -44,7 +44,6 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-
 enum mdp_chroma_samp_type {
 	CHROMA_FULL = 0,
 	CHROMA_H2V1 = 1,
@@ -98,6 +97,5 @@ enum mdp_bpc_alpha {
 	BPC6A = 2,
 	BPC8A = 3,
 };
-
 
 #endif /* MDP_COMMON_XML */

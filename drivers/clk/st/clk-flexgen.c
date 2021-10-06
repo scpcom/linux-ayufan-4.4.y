@@ -206,7 +206,6 @@ static struct clk *clk_register_flexgen(const char *name,
 	fgxbar->mux.shift = xbar_shift;
 	fgxbar->mux.table = NULL;
 
-
 	/* Pre-divider's gate config (in xbar register)*/
 	fgxbar->pgate.lock = lock;
 	fgxbar->pgate.reg = xbar_reg;

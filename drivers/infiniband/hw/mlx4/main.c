@@ -539,7 +539,6 @@ static int ib_link_query_port(struct ib_device *ibdev, u8 port,
 	if (err)
 		goto out;
 
-
 	props->lid		= be16_to_cpup((__be16 *) (out_mad->data + 16));
 	props->lmc		= out_mad->data[34] & 0x7;
 	props->sm_lid		= be16_to_cpup((__be16 *) (out_mad->data + 18));
@@ -1318,7 +1317,6 @@ static int parse_flow_attr(struct mlx4_dev *dev,
 		mlx4_spec->ib.qpn_mask =
 			cpu_to_be32(MLX4_IB_FLOW_QPN_MASK);
 		break;
-
 
 	case IB_FLOW_SPEC_IPV4:
 		type = MLX4_NET_TRANS_RULE_ID_IPV4;

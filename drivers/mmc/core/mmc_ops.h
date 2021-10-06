@@ -33,4 +33,3 @@ int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
 		bool ignore_crc);
 
 #endif
-

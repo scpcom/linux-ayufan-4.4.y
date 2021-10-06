@@ -13,7 +13,6 @@
 #ifndef __ISDNIF_H__
 #define __ISDNIF_H__
 
-
 #include <linux/skbuff.h>
 #include <uapi/linux/isdnif.h>
 
@@ -52,7 +51,6 @@
 #define DSS1_STAT_INVOKE_RES  ((0x80 << 8) | ISDN_PTYPE_EURO)   /* Result for invocation */
 #define DSS1_STAT_INVOKE_ERR  ((0x81 << 8) | ISDN_PTYPE_EURO)   /* Error Return for invocation */
 #define DSS1_STAT_INVOKE_BRD  ((0x82 << 8) | ISDN_PTYPE_EURO)   /* Deliver invoke broadcast info */
-
 
 /*********************************************************************/
 /* structures for DSS1 commands and callback                         */
@@ -233,7 +231,6 @@ typedef struct setup_parm {
     unsigned char plan;     /* Numbering plan      */
     unsigned char screen;   /* Screening info      */
 } setup_parm;
-
 
 #ifdef CONFIG_ISDN_TTY_FAX
 /* T.30 Fax G3 */

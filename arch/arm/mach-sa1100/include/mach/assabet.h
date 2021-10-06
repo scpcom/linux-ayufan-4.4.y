@@ -12,7 +12,6 @@
 #ifndef __ASM_ARCH_ASSABET_H
 #define __ASM_ARCH_ASSABET_H
 
-
 /* System Configuration Register flags */
 
 #define ASSABET_SCR_SDRAM_LOW	(1<<2)	/* SDRAM size (low bit) */
@@ -85,7 +84,6 @@ extern void assabet_uda1341_reset(int set);
 #define ASSABET_BSR_RAD_DSR	(1 << 29)
 #define ASSABET_BSR_RAD_DCD	(1 << 30)
 #define ASSABET_BSR_RAD_RI	(1 << 31)
-
 
 /* GPIOs (bitmasks) for which the generic definition doesn't say much */
 #define ASSABET_GPIO_RADIO_IRQ		GPIO_GPIO (14)	/* Radio interrupt request  */

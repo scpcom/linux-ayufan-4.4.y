@@ -458,7 +458,6 @@ _transport_expander_report_manufacture(struct MPT3SAS_ADAPTER *ioc,
 	return rc;
 }
 
-
 /**
  * _transport_delete_port - helper function to removing a port
  * @ioc: per adapter object
@@ -867,7 +866,6 @@ mpt3sas_transport_add_host_phy(struct MPT3SAS_ADAPTER *ioc, struct _sas_phy
 	struct sas_phy *phy;
 	int phy_index = mpt3sas_phy->phy_id;
 
-
 	INIT_LIST_HEAD(&mpt3sas_phy->port_siblings);
 	phy = sas_phy_alloc(parent_dev, phy_index);
 	if (!phy) {
@@ -917,7 +915,6 @@ mpt3sas_transport_add_host_phy(struct MPT3SAS_ADAPTER *ioc, struct _sas_phy
 	mpt3sas_phy->phy = phy;
 	return 0;
 }
-
 
 /**
  * mpt3sas_transport_add_expander_phy - report expander phy to transport

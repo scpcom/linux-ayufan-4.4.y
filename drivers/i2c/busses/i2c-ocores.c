@@ -268,7 +268,6 @@ static int ocores_init(struct device *dev, struct ocores_i2c *i2c)
 	return 0;
 }
 
-
 static u32 ocores_func(struct i2c_adapter *adap)
 {
 	return I2C_FUNC_I2C | I2C_FUNC_SMBUS_EMUL;

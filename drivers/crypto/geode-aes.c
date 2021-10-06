@@ -232,7 +232,6 @@ geode_encrypt(struct crypto_tfm *tfm, u8 *out, const u8 *in)
 	geode_aes_crypt(op);
 }
 
-
 static void
 geode_decrypt(struct crypto_tfm *tfm, u8 *out, const u8 *in)
 {
@@ -510,7 +509,6 @@ static void geode_aes_remove(struct pci_dev *dev)
 	pci_release_regions(dev);
 	pci_disable_device(dev);
 }
-
 
 static int geode_aes_probe(struct pci_dev *dev, const struct pci_device_id *id)
 {

@@ -179,7 +179,6 @@ end_ext_grs:
 	.set	ad_1_sgl,0x00000100	|  constant to add 1 to l-bit in sgl prec
 	.set	ad_1_dbl,0x00000800	|  constant to add 1 to l-bit in dbl prec
 
-
 |Jump table for adding 1 to the l-bit indexed by rnd prec
 
 add_to_l:

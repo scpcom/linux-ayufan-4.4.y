@@ -20,7 +20,6 @@
 #include "main.h"
 #include "fw.h"
 
-
 void mwifiex_init_11h_params(struct mwifiex_private *priv)
 {
 	priv->state_11h.is_11h_enabled = true;

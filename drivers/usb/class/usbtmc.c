@@ -31,7 +31,6 @@
 #include <linux/usb.h>
 #include <linux/usb/tmc.h>
 
-
 #define RIGOL			1
 #define USBTMC_HEADER_SIZE	12
 #define USBTMC_MINOR_BASE	176
@@ -577,7 +576,6 @@ static ssize_t usbtmc_read(struct file *filp, char __user *buf,
 
 			dev_dbg(dev, "Bulk-IN header: remaining(%zu), buf(%p), buffer(%p) done(%zu)\n", remaining,buf,buffer,done);
 
-
 			/* Copy buffer to user space */
 			if (copy_to_user(buf + done, &buffer[USBTMC_HEADER_SIZE], actual)) {
 				/* There must have been an addressing problem */
@@ -1091,7 +1089,6 @@ static struct usb_class_driver usbtmc_class = {
 	.fops =		&fops,
 	.minor_base =	USBTMC_MINOR_BASE,
 };
-
 
 static int usbtmc_probe(struct usb_interface *intf,
 			const struct usb_device_id *id)

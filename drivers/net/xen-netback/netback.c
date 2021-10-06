@@ -89,7 +89,6 @@ module_param(fatal_skb_slots, uint, 0444);
  */
 #define XEN_NETBACK_TX_COPY_LEN 128
 
-
 static void xenvif_idx_release(struct xenvif_queue *queue, u16 pending_idx,
 			       u8 status);
 
@@ -221,7 +220,6 @@ static void xenvif_rx_queue_maybe_wake(struct xenvif_queue *queue)
 
 	spin_unlock_irq(&queue->rx_queue.lock);
 }
-
 
 static void xenvif_rx_queue_purge(struct xenvif_queue *queue)
 {
@@ -601,7 +599,6 @@ static void xenvif_rx_action(struct xenvif_queue *queue)
 			XENVIF_RX_CB(skb)->meta_slots_used--;
 		}
 
-
 		queue->stats.tx_bytes += skb->len;
 		queue->stats.tx_packets++;
 
@@ -819,7 +816,6 @@ static int xenvif_count_requests(struct xenvif_queue *queue,
 
 	return slots;
 }
-
 
 struct xenvif_tx_cb {
 	u16 pending_idx;
@@ -1765,7 +1761,6 @@ static inline void xenvif_tx_dealloc_action(struct xenvif_queue *queue)
 				   XEN_NETIF_RSP_OKAY);
 }
 
-
 /* Called after netfront has transmitted */
 int xenvif_tx_action(struct xenvif_queue *queue, int budget)
 {
@@ -1818,7 +1813,6 @@ static void xenvif_idx_release(struct xenvif_queue *queue, u16 pending_idx,
 
 	spin_unlock_irqrestore(&queue->response_lock, flags);
 }
-
 
 static void make_tx_response(struct xenvif_queue *queue,
 			     struct xen_netif_tx_request *txp,

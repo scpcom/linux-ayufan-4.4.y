@@ -253,5 +253,3 @@ extern int oaktrail_crtc_hdmi_mode_set(struct drm_crtc *crtc, struct drm_display
 						struct drm_display_mode *adjusted_mode, int x, int y,
 						struct drm_framebuffer *old_fb);
 extern void oaktrail_crtc_hdmi_dpms(struct drm_crtc *crtc, int mode);
-
-

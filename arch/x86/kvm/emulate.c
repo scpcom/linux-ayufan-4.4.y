@@ -5237,7 +5237,6 @@ int x86_emulate_insn(struct x86_emulate_ctxt *ctxt)
 	if ((ctxt->d & DstMask) == ImplicitOps)
 		goto special_insn;
 
-
 	if ((ctxt->dst.type == OP_MEM) && !(ctxt->d & Mov)) {
 		/* optimisation - avoid slow emulated read if Mov */
 		rc = segmented_read(ctxt, ctxt->dst.addr.mem,

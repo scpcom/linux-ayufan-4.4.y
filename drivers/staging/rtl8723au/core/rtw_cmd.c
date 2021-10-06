@@ -316,7 +316,6 @@ post_process:
 	}
 }
 
-
 int rtw_sitesurvey_cmd23a(struct rtw_adapter *padapter,
 			  struct cfg80211_ssid *ssid, int ssid_num,
 			  struct rtw_ieee80211_channel *ch, int ch_num)

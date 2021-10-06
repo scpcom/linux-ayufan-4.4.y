@@ -52,7 +52,6 @@
 #include <linux/ratelimit.h>
 #include <linux/vmalloc.h>
 
-
 /* number of characters left in xmit buffer before select has we have room */
 #define WAKEUP_CHARS 256
 
@@ -78,7 +77,6 @@
 #define ECHO_COMMIT_WATERMARK	256
 #define ECHO_BLOCK		256
 #define ECHO_DISCARD_WATERMARK	N_TTY_BUF_SIZE - (ECHO_BLOCK + 32)
-
 
 #undef N_TTY_TRACE
 #ifdef N_TTY_TRACE
@@ -2132,7 +2130,6 @@ static int job_control(struct tty_struct *tty, struct file *file)
 
 	return __tty_check_change(tty, SIGTTIN);
 }
-
 
 /**
  *	n_tty_read		-	read function for tty

@@ -221,7 +221,6 @@ struct pmcraid_ioadl_desc {
 #define IOADL_FLAGS_READ_LAST    PMC_BIT8(1)
 #define IOADL_FLAGS_WRITE_LAST   PMC_BIT8(1)
 
-
 /* additional IOARCB data which can be CDB or additional request parameters
  * or list of IOADLs. Firmware supports max of 512 bytes for IOARCB, hence then
  * number of IOADLs are limted to 27. In case they are more than 27, they will
@@ -632,7 +631,6 @@ struct pmcraid_isr_param {
 	u8 hrrq_id;			/* hrrq entry index */
 };
 
-
 /* AEN message header sent as part of event data to applications */
 struct pmcraid_aen_msg {
 	u32 hostno;
@@ -665,8 +663,6 @@ struct pmcraid_hostrcb {
 
 #define PMCRAID_AEN_HDR_SIZE	sizeof(struct pmcraid_aen_msg)
 
-
-
 /*
  * Per adapter structure maintained by LLD
  */
@@ -692,7 +688,6 @@ struct pmcraid_instance {
 	struct pmcraid_hostrcb ldn;
 	struct pmcraid_hostrcb ccn;
 	struct pmcraid_state_msg scn;	/* controller state change msg */
-
 
 	/* Bus address of start of HRRQ */
 	dma_addr_t hrrq_start_bus_addr[PMCRAID_NUM_MSIX_VECTORS];
@@ -720,7 +715,6 @@ struct pmcraid_instance {
 
 	/* Expected toggle bit at host */
 	u8 host_toggle_bit[PMCRAID_NUM_MSIX_VECTORS];
-
 
 	/* Wait Q for  threads to wait for Reset IOA completion */
 	wait_queue_head_t reset_wait_q;
@@ -778,8 +772,6 @@ struct pmcraid_instance {
 
 	/* should add/delete resources to mid-layer now ?*/
 	atomic_t expose_resources;
-
-
 
 	u32 ioa_state:4;	/* For IOA Reset sequence FSM */
 #define IOA_STATE_OPERATIONAL       0x0
@@ -1020,7 +1012,6 @@ static struct pmcraid_ioasc_error pmcraid_ioasc_error_table[] = {
 	(__type == SCSI_READ_CMD || __type == SCSI_WRITE_CMD) ? 1 : 0;\
 })
 
-
 /*
  * pmcraid_ioctl_header - definition of header structure that precedes all the
  * buffers given as ioctl arguments.
@@ -1090,6 +1081,5 @@ struct pmcraid_passthrough_ioctl_buffer {
 
 #define PMCRAID_IOCTL_DOWNLOAD_MICROCODE     \
 	FMW_IOCTL(2, sizeof(struct pmcraid_passthrough_ioctl_buffer))
-
 
 #endif /* _PMCRAID_H */

@@ -125,7 +125,6 @@ static int hix5hd2_boot_secondary(unsigned int cpu, struct task_struct *idle)
 	return 0;
 }
 
-
 struct smp_operations hix5hd2_smp_ops __initdata = {
 	.smp_prepare_cpus	= hisi_common_smp_prepare_cpus,
 	.smp_boot_secondary	= hix5hd2_boot_secondary,
@@ -133,7 +132,6 @@ struct smp_operations hix5hd2_smp_ops __initdata = {
 	.cpu_die		= hix5hd2_cpu_die,
 #endif
 };
-
 
 #define SC_SCTL_REMAP_CLR      0x00000100
 #define HIP01_BOOT_ADDRESS     0x80000000
@@ -154,7 +152,6 @@ static int hip01_boot_secondary(unsigned int cpu, struct task_struct *idle)
 	phys_addr_t jumpaddr;
 	unsigned int remap_reg_value = 0;
 	struct device_node *node;
-
 
 	jumpaddr = virt_to_phys(secondary_startup);
 	hip01_set_boot_addr(HIP01_BOOT_ADDRESS, jumpaddr);

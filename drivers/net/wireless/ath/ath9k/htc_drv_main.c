@@ -1798,7 +1798,6 @@ out:
 	return ret;
 }
 
-
 static int ath9k_htc_get_stats(struct ieee80211_hw *hw,
 			       struct ieee80211_low_level_stats *stats)
 {
@@ -1834,7 +1833,6 @@ struct base_eep_header *ath9k_htc_get_eeprom_base(struct ath9k_htc_priv *priv)
 			&priv->ah->eeprom.map9287.baseEepHeader;
 	return pBase;
 }
-
 
 static int ath9k_htc_get_antenna(struct ieee80211_hw *hw, u32 *tx_ant,
 				 u32 *rx_ant)

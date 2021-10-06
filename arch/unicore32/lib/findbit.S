@@ -97,4 +97,3 @@ ENDPROC(find_next_bit)
 		rsub	r3, r3, #31
 		add	r0, r2, r3
 		mov	pc, lr
-

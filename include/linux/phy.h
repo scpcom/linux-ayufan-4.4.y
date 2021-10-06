@@ -46,7 +46,6 @@
 #define PHY_GBIT_FEATURES	(PHY_BASIC_FEATURES | \
 				 PHY_1000BT_FEATURES)
 
-
 /*
  * Set phydev->irq to PHY_POLL if interrupts are not supported,
  * or not desired for this PHY.  Set to PHY_IGNORE_INTERRUPT if
@@ -124,7 +123,6 @@ static inline const char *phy_modes(phy_interface_t interface)
 		return "unknown";
 	}
 }
-
 
 #define PHY_INIT_TIMEOUT	100000
 #define PHY_STATE_TIME		1
@@ -216,7 +214,6 @@ int mdiobus_read(struct mii_bus *bus, int addr, u32 regnum);
 int mdiobus_read_nested(struct mii_bus *bus, int addr, u32 regnum);
 int mdiobus_write(struct mii_bus *bus, int addr, u32 regnum, u16 val);
 int mdiobus_write_nested(struct mii_bus *bus, int addr, u32 regnum, u16 val);
-
 
 #define PHY_INTERRUPT_DISABLED	0x0
 #define PHY_INTERRUPT_ENABLED	0x80000000

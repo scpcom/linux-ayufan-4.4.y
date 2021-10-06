@@ -453,7 +453,6 @@ static int arc_pmu_device_probe(struct platform_device *pdev)
 		char str[9];
 	} cc_name;
 
-
 	READ_BCR(ARC_REG_PCT_BUILD, pct_bcr);
 	if (!pct_bcr.v) {
 		pr_err("This core does not have performance counters!\n");

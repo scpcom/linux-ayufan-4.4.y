@@ -88,7 +88,6 @@
 #include "include/policy_unpack.h"
 #include "include/resource.h"
 
-
 /* root profile namespace */
 struct aa_namespace *root_ns;
 
@@ -559,7 +558,6 @@ void __init aa_free_root_ns(void)
 	 aa_put_namespace(ns);
 }
 
-
 static void free_replacedby(struct aa_replacedby *r)
 {
 	if (r) {
@@ -568,7 +566,6 @@ static void free_replacedby(struct aa_replacedby *r)
 		kzfree(r);
 	}
 }
-
 
 void aa_free_replacedby_kref(struct kref *kref)
 {

@@ -89,7 +89,6 @@ static struct {
 #define cpuhp_lock_acquire()      lock_map_acquire(&cpu_hotplug.dep_map)
 #define cpuhp_lock_release()      lock_map_release(&cpu_hotplug.dep_map)
 
-
 void get_online_cpus(void)
 {
 	might_sleep();
@@ -693,7 +692,6 @@ cpu_hotplug_pm_callback(struct notifier_block *nb,
 
 	return NOTIFY_OK;
 }
-
 
 static int __init cpu_hotplug_pm_sync_init(void)
 {

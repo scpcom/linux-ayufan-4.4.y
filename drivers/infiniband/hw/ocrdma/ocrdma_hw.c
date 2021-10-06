@@ -1497,7 +1497,6 @@ int ocrdma_mbx_dealloc_pd(struct ocrdma_dev *dev, struct ocrdma_pd *pd)
 	return status;
 }
 
-
 static int ocrdma_mbx_alloc_pd_range(struct ocrdma_dev *dev)
 {
 	int status = -ENOMEM;
@@ -2151,7 +2150,6 @@ int ocrdma_qp_state_change(struct ocrdma_qp *qp, enum ib_qp_state new_ib_state,
 		spin_unlock_irqrestore(&qp->q_lock, flags);
 		return 1;
 	}
-
 
 	if (new_state == OCRDMA_QPS_INIT) {
 		ocrdma_init_hwq_ptr(qp);

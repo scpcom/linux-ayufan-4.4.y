@@ -21,7 +21,6 @@ struct termio {
 	unsigned char c_cc[NCC];	/* control characters */
 };
 
-
 /* modem lines */
 #define TIOCM_LE	0x001
 #define TIOCM_DTR	0x002

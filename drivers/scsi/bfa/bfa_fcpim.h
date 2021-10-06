@@ -54,7 +54,6 @@ void bfa_fcp_res_recfg(struct bfa_s *bfa, u16 num_ioim_fw, u16 max_ioim_fw);
 	bfa_mem_get_dmabuf_kva(_fcp, (_tag & BFA_IOIM_IOTAG_MASK),	\
 	BFI_IOIM_SNSLEN)
 
-
 #define BFA_ITNIM_MIN   32
 #define BFA_ITNIM_MAX   1024
 
@@ -65,7 +64,6 @@ void bfa_fcp_res_recfg(struct bfa_s *bfa, u16 num_ioim_fw, u16 max_ioim_fw);
 #define BFA_TSKIM_MAX   512
 #define BFA_FCPIM_PATHTOV_DEF	(30 * 1000)	/* in millisecs */
 #define BFA_FCPIM_PATHTOV_MAX	(90 * 1000)	/* in millisecs */
-
 
 #define bfa_itnim_ioprofile_update(__itnim, __index)			\
 	(__itnim->ioprofile.iocomps[__index]++)

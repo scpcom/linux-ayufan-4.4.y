@@ -14,7 +14,6 @@
 #ifndef _UAPI__ISDNIF_H__
 #define _UAPI__ISDNIF_H__
 
-
 /*
  * Values for general protocol-selection
  */
@@ -51,6 +50,5 @@
 #define ISDN_PROTO_L3_FCLASS2	2	/* Fax Group 2/3 CLASS 2 */
 #define ISDN_PROTO_L3_FCLASS1	3	/* Fax Group 2/3 CLASS 1 */
 #define ISDN_PROTO_L3_MAX	7	/* Max. 8 Protocols */
-
 
 #endif /* _UAPI__ISDNIF_H__ */

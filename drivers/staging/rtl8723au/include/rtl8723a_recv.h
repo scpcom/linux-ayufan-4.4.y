@@ -31,7 +31,6 @@
 #define PHY_RSSI_SLID_WIN_MAX		100
 #define PHY_LINKQUALITY_SLID_WIN_MAX	20
 
-
 struct phy_stat {
 	unsigned int phydw0;
 	unsigned int phydw1;

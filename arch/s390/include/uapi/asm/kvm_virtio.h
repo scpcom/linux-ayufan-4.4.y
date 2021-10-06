@@ -54,7 +54,6 @@ struct kvm_vqconfig {
  * This is pagesize for historical reasons. */
 #define KVM_S390_VIRTIO_RING_ALIGN	4096
 
-
 /* These values are supposed to be in ext_params on an interrupt */
 #define VIRTIO_PARAM_MASK		0xff
 #define VIRTIO_PARAM_VRING_INTERRUPT	0x0

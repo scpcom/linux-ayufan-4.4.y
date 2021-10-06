@@ -464,7 +464,6 @@ out_kill_deq:
 	return error;
 }
 
-
 /*
  * Probe routine for each detected JobR subsystem.
  */

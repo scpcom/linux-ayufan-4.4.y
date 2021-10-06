@@ -201,7 +201,6 @@
 #define reg_iop_timer_grp_r_masked_intr___tmr3___bit 3
 #define reg_iop_timer_grp_r_masked_intr_offset 112
 
-
 /* Constants */
 #define regk_iop_timer_grp_clk200                 0x00000000
 #define regk_iop_timer_grp_clk_gen                0x00000002

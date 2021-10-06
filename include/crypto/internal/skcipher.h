@@ -123,4 +123,3 @@ static inline u32 skcipher_request_flags(struct skcipher_request *req)
 }
 
 #endif	/* _CRYPTO_INTERNAL_SKCIPHER_H */
-

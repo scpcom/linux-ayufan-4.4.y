@@ -112,7 +112,6 @@ static void omap_set_gpio_direction(struct gpio_bank *bank, int gpio,
 	bank->context.oe = l;
 }
 
-
 /* set data out value using dedicate set/clear register */
 static void omap_set_gpio_dataout_reg(struct gpio_bank *bank, unsigned offset,
 				      int enable)

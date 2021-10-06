@@ -78,7 +78,6 @@ struct usb_descriptor_header *fsg_fs_function[] = {
 };
 EXPORT_SYMBOL_GPL(fsg_fs_function);
 
-
 /*
  * USB 2.0 devices need to expose both high speed and full speed
  * descriptors, unless they only run at full speed.
@@ -107,7 +106,6 @@ struct usb_endpoint_descriptor fsg_hs_bulk_out_desc = {
 	.bInterval =		1,	/* NAK every 1 uframe */
 };
 EXPORT_SYMBOL_GPL(fsg_hs_bulk_out_desc);
-
 
 struct usb_descriptor_header *fsg_hs_function[] = {
 	(struct usb_descriptor_header *) &fsg_intf_desc,
@@ -162,7 +160,6 @@ struct usb_descriptor_header *fsg_ss_function[] = {
 	NULL,
 };
 EXPORT_SYMBOL_GPL(fsg_ss_function);
-
 
  /*-------------------------------------------------------------------------*/
 
@@ -280,7 +277,6 @@ out:
 }
 EXPORT_SYMBOL_GPL(fsg_lun_open);
 
-
 /*-------------------------------------------------------------------------*/
 
 /*
@@ -317,7 +313,6 @@ void store_cdrom_address(u8 *dest, int msf, u32 addr)
 EXPORT_SYMBOL_GPL(store_cdrom_address);
 
 /*-------------------------------------------------------------------------*/
-
 
 ssize_t fsg_show_ro(struct fsg_lun *curlun, char *buf)
 {

@@ -727,7 +727,6 @@ nfs4_decode_mp_ds_addr(struct net *net, struct xdr_stream *xdr, gfp_t gfp_flags)
 	char *startsep = "";
 	char *endsep = "";
 
-
 	/* r_netid */
 	p = xdr_inline_decode(xdr, 4);
 	if (unlikely(!p))
@@ -897,4 +896,3 @@ pnfs_nfs_generic_sync(struct inode *inode, bool datasync)
 	return pnfs_layoutcommit_inode(inode, true);
 }
 EXPORT_SYMBOL_GPL(pnfs_nfs_generic_sync);
-

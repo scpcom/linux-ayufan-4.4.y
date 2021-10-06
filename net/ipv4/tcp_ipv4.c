@@ -310,7 +310,6 @@ static void do_redirect(struct sk_buff *skb, struct sock *sk)
 		dst->ops->redirect(dst, sk, skb);
 }
 
-
 /* handle ICMP messages on TCP_NEW_SYN_RECV request sockets */
 void tcp_req_err(struct sock *sk, u32 seq, bool abort)
 {
@@ -861,7 +860,6 @@ static void tcp_v4_reqsk_destructor(struct request_sock *req)
 	kfree(inet_rsk(req)->opt);
 }
 
-
 #ifdef CONFIG_TCP_MD5SIG
 /*
  * RFC2385 MD5 checksumming requires a mapping of
@@ -1246,7 +1244,6 @@ drop:
 	return 0;
 }
 EXPORT_SYMBOL(tcp_v4_conn_request);
-
 
 /*
  * The three way handshake has completed - we got a valid synack -

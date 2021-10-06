@@ -249,4 +249,3 @@ static inline int exynos_drm_ippnb_send_event(unsigned long val, void *v)
 #endif
 
 #endif /* _EXYNOS_DRM_IPP_H_ */
-

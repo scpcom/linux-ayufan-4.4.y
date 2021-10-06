@@ -286,7 +286,6 @@ static int ttc_rate_change_clocksource_cb(struct notifier_block *nb,
 			~TTC_CLK_CNTRL_PSV_MASK;
 		ttccs->scale_clk_ctrl_reg_new |= psv << TTC_CLK_CNTRL_PSV_SHIFT;
 
-
 		/* scale down: adjust divider in post-change notification */
 		if (ndata->new_rate < ndata->old_rate)
 			return NOTIFY_DONE;

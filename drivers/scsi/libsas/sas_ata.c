@@ -57,7 +57,6 @@ static enum ata_completion_errors sas_to_ata_err(struct task_status_struct *ts)
 		case SAS_NAK_R_ERR:
 			return AC_ERR_ATA_BUS;
 
-
 		case SAS_DATA_UNDERRUN:
 			/*
 			 * Some programs that use the taskfile interface
@@ -493,7 +492,6 @@ static void sas_ata_post_internal(struct ata_queued_cmd *qc)
 		sas_ata_internal_abort(task);
 	}
 }
-
 
 static void sas_ata_set_dmamode(struct ata_port *ap, struct ata_device *ata_dev)
 {

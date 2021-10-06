@@ -103,11 +103,9 @@ static u32 logging_level;
 MODULE_PARM_DESC(logging_level,
 	" bits for enabling additional logging info (default=0)");
 
-
 static ushort max_sectors = 0xFFFF;
 module_param(max_sectors, ushort, 0);
 MODULE_PARM_DESC(max_sectors, "max sectors, range 64 to 32767  default=32767");
-
 
 static int missing_delay[2] = {-1, -1};
 module_param_array(missing_delay, int, NULL, 0);
@@ -141,17 +139,14 @@ static int disable_discovery = -1;
 module_param(disable_discovery, int, 0);
 MODULE_PARM_DESC(disable_discovery, " disable discovery ");
 
-
 /* permit overriding the host protection capabilities mask (EEDP/T10 PI) */
 static int prot_mask = -1;
 module_param(prot_mask, int, 0);
 MODULE_PARM_DESC(prot_mask, " host protection capabilities mask, def=7 ");
 
-
 /* raid transport support */
 struct raid_template *mpt3sas_raid_template;
 struct raid_template *mpt2sas_raid_template;
-
 
 /**
  * struct sense_info - common structure for obtaining sense keys
@@ -557,7 +552,6 @@ mpt3sas_get_sdev_from_target(struct MPT3SAS_ADAPTER *ioc,
 
 	return ret;
 }
-
 
 struct _sas_device *
 __mpt3sas_get_sdev_by_addr(struct MPT3SAS_ADAPTER *ioc,
@@ -1690,7 +1684,6 @@ _scsih_set_level(struct MPT3SAS_ADAPTER *ioc,
 			       &sdev->sdev_gendev, level);
 }
 
-
 /**
  * _scsih_get_volume_capabilities - volume capabilities
  * @ioc: per adapter object
@@ -1967,7 +1960,6 @@ scsih_slave_configure(struct scsi_device *sdev)
 
 	if (!ssp_target)
 		_scsih_display_sata_capabilities(ioc, handle, sdev);
-
 
 	scsih_change_queue_depth(sdev, qdepth);
 
@@ -2579,7 +2571,6 @@ scsih_target_reset(struct scsi_cmnd *scmd)
 	return r;
 }
 
-
 /**
  * scsih_host_reset - eh threads main host reset routine
  * @scmd: pointer to scsi command object
@@ -2665,7 +2656,6 @@ _scsih_fw_event_del_from_list(struct MPT3SAS_ADAPTER *ioc, struct fw_event_work
 	}
 	spin_unlock_irqrestore(&ioc->fw_event_lock, flags);
 }
-
 
  /**
  * mpt3sas_send_trigger_data_event - send event for processing trigger data
@@ -2880,7 +2870,6 @@ _scsih_ublock_io_all_device(struct MPT3SAS_ADAPTER *ioc)
 		_scsih_internal_device_unblock(sdev, sas_device_priv_data);
 	}
 }
-
 
 /**
  * _scsih_ublock_io_device - prepare device to be deleted
@@ -3247,7 +3236,6 @@ _scsih_tm_tr_complete(struct MPT3SAS_ADAPTER *ioc, u16 smid, u8 msix_index,
 	return _scsih_check_for_pending_tm(ioc, smid);
 }
 
-
 /**
  * _scsih_sas_control_complete - completion routine
  * @ioc: per adapter object
@@ -3387,7 +3375,6 @@ _scsih_tm_volume_tr_complete(struct MPT3SAS_ADAPTER *ioc, u16 smid,
 
 	return _scsih_check_for_pending_tm(ioc, smid);
 }
-
 
 /**
  * _scsih_check_for_pending_tm - check for pending task management
@@ -3647,7 +3634,6 @@ _scsih_check_ir_config_unhide_events(struct MPT3SAS_ADAPTER *ioc,
 	}
 }
 
-
 /**
  * _scsih_check_volume_delete_events - set delete flag for volumes
  * @ioc: per adapter object
@@ -3825,8 +3811,6 @@ _scsih_eedp_error_handling(struct scsi_cmnd *scmd, u16 ioc_status)
 	    SAM_STAT_CHECK_CONDITION;
 }
 
-
-
 /**
  * scsih_qcmd - main scsi request entry point
  * @scmd: pointer to scsi command object
@@ -3875,7 +3859,6 @@ scsih_qcmd(struct Scsi_Host *shost, struct scsi_cmnd *scmd)
 		scmd->scsi_done(scmd);
 		return 0;
 	}
-
 
 	/* host recovery or link resets sent via IOCTLs */
 	if (ioc->shost_recovery || ioc->ioc_link_reset_in_progress)
@@ -5046,11 +5029,7 @@ _scsih_done(struct MPT3SAS_ADAPTER *ioc, u16 smid, u8 msix_index, u32 reply)
 	return 1;
 }
 
-
-
-
 #define MPT3_MAX_LUNS (255)
-
 
 /**
  * _scsih_check_access_status - check access flags
@@ -5139,7 +5118,6 @@ _scsih_check_device(struct MPT3SAS_ADAPTER *ioc,
 	struct scsi_target *starget;
 	struct MPT3SAS_TARGET *sas_target_priv_data;
 	u32 device_info;
-
 
 	if ((mpt3sas_config_get_sas_device_pg0(ioc, &mpi_reply, &sas_device_pg0,
 	    MPI2_SAS_DEVICE_PGAD_FORM_HANDLE, handle)))
@@ -5596,7 +5574,6 @@ _scsih_sas_topology_change_event(struct MPT3SAS_ADAPTER *ioc,
 
 			_scsih_check_device(ioc, sas_address, handle,
 			    phy_number, link_rate);
-
 
 		case MPI2_EVENT_SAS_TOPO_RC_TARG_ADDED:
 
@@ -8017,7 +7994,6 @@ scsih_shutdown(struct pci_dev *pdev)
 	_scsih_ir_shutdown(ioc);
 	mpt3sas_base_detach(ioc);
 }
-
 
 /**
  * _scsih_probe_boot_devices - reports 1st device

@@ -198,7 +198,6 @@ typedef struct {
 } reg_ata_r_masked_intr;
 #define REG_RD_ADDR_ata_r_masked_intr 40
 
-
 /* Constants */
 enum {
   regk_ata_active                          = 0x00000001,

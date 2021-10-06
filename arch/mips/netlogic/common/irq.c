@@ -180,7 +180,6 @@ static void __init nlm_init_percpu_irqs(void)
 #endif
 }
 
-
 void nlm_setup_pic_irq(int node, int picirq, int irq, int irt)
 {
 	struct nlm_pic_irq *pic_data;

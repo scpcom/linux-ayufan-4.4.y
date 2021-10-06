@@ -213,7 +213,6 @@ static const struct ath6kl_hw hw_list[] = {
  */
 #define WLAN_CONFIG_DISCONNECT_TIMEOUT 10
 
-
 #define ATH6KL_DATA_OFFSET    64
 struct sk_buff *ath6kl_buf_alloc(int size)
 {
@@ -1596,7 +1595,6 @@ static const char *ath6kl_init_get_hif_name(enum ath6kl_hif_type type)
 
 	return NULL;
 }
-
 
 static const struct fw_capa_str_map {
 	int id;

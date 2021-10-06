@@ -406,7 +406,6 @@ static int elan_smbus_prepare_fw_update(struct i2c_client *client)
 	return 0;
 }
 
-
 static int elan_smbus_write_fw_block(struct i2c_client *client,
 				     const u8 *page, u16 checksum, int idx)
 {
@@ -439,7 +438,6 @@ static int elan_smbus_write_fw_block(struct i2c_client *client,
 			idx, 2, error);
 		return error;
 	}
-
 
 	/* Wait for F/W to update one page ROM data. */
 	usleep_range(8000, 10000);

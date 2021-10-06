@@ -223,4 +223,3 @@ void pio2_gpio_exit(struct pio2_card *card)
 	gpiochip_remove(&(card->gc));
 	kfree(label);
 }
-

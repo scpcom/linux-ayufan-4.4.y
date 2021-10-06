@@ -102,7 +102,6 @@ enum atk_pack_member {
 #define _HWMON_OLD_PACK_LIMIT2	3
 #define _HWMON_OLD_PACK_ENABLE	4
 
-
 struct atk_data {
 	struct device *hwmon_dev;
 	acpi_handle atk_handle;
@@ -131,7 +130,6 @@ struct atk_data {
 		u32 id;
 	} debugfs;
 };
-
 
 typedef ssize_t (*sysfs_show_func)(struct device *dev,
 			struct device_attribute *attr, char *buf);
@@ -280,7 +278,6 @@ static void atk_init_attribute(struct device_attribute *attr, char *name,
 	attr->store = NULL;
 }
 
-
 static union acpi_object *atk_get_pack_member(struct atk_data *data,
 						union acpi_object *pack,
 						enum atk_pack_member m)
@@ -313,7 +310,6 @@ static union acpi_object *atk_get_pack_member(struct atk_data *data,
 
 	return &pack->package.elements[offset];
 }
-
 
 /*
  * New package format is:

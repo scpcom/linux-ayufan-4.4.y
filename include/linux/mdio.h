@@ -11,7 +11,6 @@
 
 #include <uapi/linux/mdio.h>
 
-
 static inline bool mdio_phy_id_is_c45(int phy_id)
 {
 	return (phy_id & MDIO_PHY_ID_C45) && !(phy_id & ~MDIO_PHY_ID_C45_MASK);

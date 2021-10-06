@@ -490,7 +490,6 @@ void cdv_intel_attach_force_audio_property(struct drm_connector *connector)
 	drm_object_attach_property(&connector->base, prop, 0);
 }
 
-
 static const char *broadcast_rgb_names[] = {
 	"Full",
 	"Limited 16:235",

@@ -135,7 +135,6 @@ struct otg_fsm_ops {
 	int	(*start_gadget)(struct otg_fsm *fsm, int on);
 };
 
-
 static inline int otg_chrg_vbus(struct otg_fsm *fsm, int on)
 {
 	if (!fsm->ops->chrg_vbus)

@@ -600,7 +600,6 @@ bool snd_hda_check_amp_caps(struct hda_codec *codec, hda_nid_t nid,
 #define nid_has_volume(codec, nid, dir) \
 	snd_hda_check_amp_caps(codec, nid, dir, AC_AMPCAP_NUM_STEPS)
 
-
 /* flags for hda_nid_item */
 #define HDA_NID_ITEM_AMP	(1<<0)
 

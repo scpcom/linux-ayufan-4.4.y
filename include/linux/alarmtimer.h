@@ -18,7 +18,6 @@ enum alarmtimer_restart {
 	ALARMTIMER_RESTART,
 };
 
-
 #define ALARMTIMER_STATE_INACTIVE	0x00
 #define ALARMTIMER_STATE_ENQUEUED	0x01
 

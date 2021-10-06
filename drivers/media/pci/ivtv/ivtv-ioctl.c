@@ -858,7 +858,6 @@ static int ivtv_s_selection(struct file *file, void *fh,
 	if (sel->target != V4L2_SEL_TGT_COMPOSE)
 		return -EINVAL;
 
-
 	if (sel->type != V4L2_BUF_TYPE_VIDEO_OUTPUT ||
 	    !(itv->v4l2_cap & V4L2_CAP_VIDEO_OUTPUT))
 		return -EINVAL;
@@ -1295,7 +1294,6 @@ static int ivtv_encoder_cmd(struct file *file, void *fh, struct v4l2_encoder_cmd
 {
 	struct ivtv_open_id *id = fh2id(fh);
 	struct ivtv *itv = id->itv;
-
 
 	switch (enc->cmd) {
 	case V4L2_ENC_CMD_START:

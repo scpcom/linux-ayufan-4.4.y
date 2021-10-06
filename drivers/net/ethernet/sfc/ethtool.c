@@ -759,7 +759,6 @@ static void efx_ethtool_get_wol(struct net_device *net_dev,
 	return efx->type->get_wol(efx, wol);
 }
 
-
 static int efx_ethtool_set_wol(struct net_device *net_dev,
 			       struct ethtool_wolinfo *wol)
 {

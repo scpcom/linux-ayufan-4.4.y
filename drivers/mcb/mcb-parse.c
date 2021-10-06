@@ -119,7 +119,6 @@ int chameleon_parse_cells(struct mcb_bus *bus, phys_addr_t mapbase,
 	pr_debug("header->minor = %d\n", header->minor);
 	pr_debug("header->bus_type = 0x%x\n", header->bus_type);
 
-
 	pr_debug("header->magic = 0x%x\n", header->magic);
 	pr_debug("header->filename = \"%.*s\"\n", CHAMELEON_FILENAME_LEN,
 		header->filename);

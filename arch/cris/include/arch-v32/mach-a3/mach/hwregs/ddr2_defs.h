@@ -202,7 +202,6 @@ typedef struct {
 #define REG_RD_ADDR_ddr2_rw_dqs_dll_ctrl 52
 #define REG_WR_ADDR_ddr2_rw_dqs_dll_ctrl 52
 
-
 /* Constants */
 enum {
   regk_ddr2_al0                            = 0x00000000,

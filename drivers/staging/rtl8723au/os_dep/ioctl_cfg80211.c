@@ -857,8 +857,6 @@ exit:
 
 	DBG_8723A("%s, ret =%d\n", __func__, ret);
 
-
-
 	return ret;
 }
 

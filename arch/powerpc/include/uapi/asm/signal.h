@@ -112,7 +112,6 @@ typedef struct sigaltstack {
 	size_t ss_size;
 } stack_t;
 
-
 #ifndef __powerpc64__
 /*
  * These are parameters to dbg_sigreturn syscall.  They enable or

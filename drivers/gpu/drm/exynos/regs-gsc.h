@@ -263,7 +263,6 @@
 #define GSC_VPOSITION			0xA7C
 #define GSC_VPOS_F(x)			((x) << 0)
 
-
 /* G-Scaler clock initial count */
 #define GSC_CLK_INIT_COUNT		0xC00
 #define GSC_CLK_GATE_MODE_INIT_CNT(x)	((x) << 0)

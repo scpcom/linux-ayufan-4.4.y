@@ -221,13 +221,3 @@ static int irlan_provider_state_data(struct irlan_cb *self, IRLAN_EVENT event,
 
 	return 0;
 }
-
-
-
-
-
-
-
-
-
-

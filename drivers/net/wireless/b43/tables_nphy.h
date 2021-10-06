@@ -68,7 +68,6 @@ struct nphy_gain_ctl_workaround_entry {
 struct nphy_gain_ctl_workaround_entry *b43_nphy_get_gain_ctl_workaround_ent(
 	struct b43_wldev *dev, bool ghz5, bool ext_lna);
 
-
 /* The N-PHY tables. */
 #define B43_NTAB_TYPEMASK		0xF0000000
 #define B43_NTAB_8BIT			0x10000000

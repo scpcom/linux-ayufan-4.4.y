@@ -141,5 +141,4 @@ struct ethhdr {
 	__be16		h_proto;		/* packet type ID field	*/
 } __attribute__((packed));
 
-
 #endif /* _UAPI_LINUX_IF_ETHER_H */

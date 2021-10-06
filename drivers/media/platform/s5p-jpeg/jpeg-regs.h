@@ -169,7 +169,6 @@
 /* JPEG AC Huffman table register */
 #define S5P_JPG_HACTBLG(n)		(0x8c0 + (n) * 0x400)
 
-
 /* Register and bit definitions for Exynos 4x12 */
 
 /* JPEG Codec Control Registers */
@@ -202,7 +201,6 @@
 
 #define EXYNOS4_QUAN_TBL_ENTRY_REG	0x100
 #define EXYNOS4_HUFF_TBL_ENTRY_REG	0x200
-
 
 /****************************************************************/
 /* Bit definition part						*/
@@ -247,7 +245,6 @@
 #define EXYNOS4_MOD_REG_SUBSAMPLE_422	(1 << 0)
 #define EXYNOS4_MOD_REG_SUBSAMPLE_420	(2 << 0)
 #define EXYNOS4_MOD_REG_SUBSAMPLE_GRAY	(3 << 0)
-
 
 /* JPEG IMAGE SIZE Register bit */
 #define EXYNOS4_X_SIZE_SHIFT		0
@@ -646,4 +643,3 @@
 #define EXYNOS3250_JPEG_DEC_COEF3		0x04a80102
 
 #endif /* JPEG_REGS_H_ */
-

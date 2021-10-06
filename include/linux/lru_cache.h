@@ -210,7 +210,6 @@ struct lru_cache {
 	/* see below: flag-bits for lru_cache */
 	unsigned long flags;
 
-
 	void  *lc_private;
 	const char *name;
 
@@ -218,7 +217,6 @@ struct lru_cache {
 	struct hlist_head *lc_slot;
 	struct lc_element **lc_element;
 };
-
 
 /* flag-bits for lru_cache */
 enum {

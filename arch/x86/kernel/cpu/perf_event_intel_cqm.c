@@ -605,7 +605,6 @@ static bool intel_cqm_rmid_stabilize(unsigned int *available)
 		list_add_tail(&entry->list, &cqm_rmid_free_lru);
 	}
 
-
 	return __rmid_valid(intel_cqm_rotation_rmid);
 }
 

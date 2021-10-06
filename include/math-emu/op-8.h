@@ -71,7 +71,6 @@
       X##_f[_i] = 0;							\
   } while (0)
 
-
 /* Right shift with sticky-lsb. 
  * What this actually means is that we do a standard right-shift,
  * but that if any of the bits that fall off the right hand side

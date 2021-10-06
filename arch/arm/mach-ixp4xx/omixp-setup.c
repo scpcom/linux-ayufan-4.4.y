@@ -195,7 +195,6 @@ static struct platform_device ixdp425_eth[] = {
 	},
 };
 
-
 static struct platform_device *devixp_pldev[] __initdata = {
 	&omixp_uart,
 	&omixp_flash_device[0],

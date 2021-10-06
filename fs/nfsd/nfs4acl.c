@@ -801,7 +801,6 @@ out_nfserr:
 		return nfserrno(host_error);
 }
 
-
 static short
 ace2type(struct nfs4_ace *ace)
 {

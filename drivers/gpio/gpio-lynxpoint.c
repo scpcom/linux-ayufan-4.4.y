@@ -131,7 +131,6 @@ static int lp_gpio_request(struct gpio_chip *chip, unsigned offset)
 	/* enable input sensing */
 	outl(inl(conf2) & ~GPINDIS_BIT, conf2);
 
-
 	return 0;
 }
 

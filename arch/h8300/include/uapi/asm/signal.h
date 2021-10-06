@@ -111,5 +111,4 @@ typedef struct sigaltstack {
 	size_t ss_size;
 } stack_t;
 
-
 #endif /* _UAPI_H8300_SIGNAL_H */

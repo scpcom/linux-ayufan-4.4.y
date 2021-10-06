@@ -107,7 +107,6 @@ static const char *bank4_names(const struct threshold_block *b)
 	}
 };
 
-
 static bool lvt_interrupt_supported(unsigned int bank, u32 msr_high_bits)
 {
 	/*

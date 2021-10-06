@@ -4,7 +4,6 @@
  *  Licensed under the terms of the GNU GPL License version 2.
  */
 
-
 #include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>

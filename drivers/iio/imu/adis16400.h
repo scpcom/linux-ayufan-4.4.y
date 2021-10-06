@@ -200,7 +200,6 @@ ssize_t adis16400_read_data_from_ring(struct device *dev,
 				      struct device_attribute *attr,
 				      char *buf);
 
-
 int adis16400_update_scan_mode(struct iio_dev *indio_dev,
 	const unsigned long *scan_mask);
 irqreturn_t adis16400_trigger_handler(int irq, void *p);

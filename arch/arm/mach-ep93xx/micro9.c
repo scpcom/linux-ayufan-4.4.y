@@ -58,7 +58,6 @@ static void __init micro9_register_flash(void)
 		ep93xx_register_flash(width, EP93XX_CS1_PHYS_BASE, SZ_64M);
 }
 
-
 /*************************************************************************
  * Micro9 Ethernet
  *************************************************************************/
@@ -66,14 +65,12 @@ static struct ep93xx_eth_data __initdata micro9_eth_data = {
 	.phy_id		= 0x1f,
 };
 
-
 static void __init micro9_init_machine(void)
 {
 	ep93xx_init_devices();
 	ep93xx_register_eth(&micro9_eth_data, 1);
 	micro9_register_flash();
 }
-
 
 #ifdef CONFIG_MACH_MICRO9H
 MACHINE_START(MICRO9, "Contec Micro9-High")

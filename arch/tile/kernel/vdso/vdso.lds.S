@@ -14,12 +14,10 @@
 
 #define VDSO_VERSION_STRING	LINUX_2.6
 
-
 OUTPUT_ARCH(tile)
 
 /* The ELF entry point can be used to set the AT_SYSINFO value. */
 ENTRY(__vdso_rt_sigreturn);
-
 
 SECTIONS
 {
@@ -58,7 +56,6 @@ SECTIONS
 	}
 }
 
-
 /*
  * We must supply the ELF program headers explicitly to get just one
  * PT_LOAD segment, and set the flags explicitly to make segments read-only.
@@ -70,7 +67,6 @@ PHDRS
 	note		PT_NOTE		FLAGS(4);		/* PF_R */
 	eh_frame_hdr	PT_GNU_EH_FRAME;
 }
-
 
 /*
  * This controls what userland symbols we export from the vDSO.

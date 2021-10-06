@@ -108,7 +108,6 @@
 #undef memset
 #define memzero(s, n)	memset((s), 0, (n))
 
-
 static void error(char *m);
 
 /*

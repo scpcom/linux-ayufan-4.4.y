@@ -63,7 +63,6 @@ extern ia64_mv_setup_msi_irq_t		sn_setup_msi_irq;
 extern ia64_mv_teardown_msi_irq_t	sn_teardown_msi_irq;
 extern ia64_mv_pci_fixup_bus_t		sn_pci_fixup_bus;
 
-
 /*
  * This stuff has dual use!
  *

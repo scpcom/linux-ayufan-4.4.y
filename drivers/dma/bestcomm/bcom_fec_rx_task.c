@@ -75,4 +75,3 @@ u32 bcom_fec_rx_task[] = {
 	0x00000000,
 	0x4000ffff,
 };
-

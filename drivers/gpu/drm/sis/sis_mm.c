@@ -40,7 +40,6 @@
 #define VIDEO_TYPE 0
 #define AGP_TYPE 1
 
-
 struct sis_memblock {
 	struct drm_mm_node mm_node;
 	struct sis_memreq req;
@@ -289,7 +288,6 @@ int sis_idle(struct drm_device *dev)
 	return 0;
 }
 
-
 void sis_lastclose(struct drm_device *dev)
 {
 	drm_sis_private_t *dev_priv = dev->dev_private;
@@ -330,7 +328,6 @@ void sis_reclaim_buffers_locked(struct drm_device *dev,
 	}
 
 	sis_idle(dev);
-
 
 	list_for_each_entry_safe(entry, next, &file_priv->obj_list,
 				 owner_list) {

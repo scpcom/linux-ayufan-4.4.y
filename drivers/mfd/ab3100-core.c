@@ -376,7 +376,6 @@ int ab3100_event_unregister(struct ab3100 *ab3100,
 }
 EXPORT_SYMBOL(ab3100_event_unregister);
 
-
 static int ab3100_event_registers_startup_state_get(struct device *dev,
 					     u8 *event)
 {

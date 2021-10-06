@@ -276,7 +276,6 @@ struct fm_patch {
 	struct fm_patch *next;
 };
 
-
 /*
  * A structure to keep track of each hardware voice
  */

@@ -31,7 +31,6 @@
 #include <sound/core.h>
 #include <sound/sb.h>
 
-
 irqreturn_t snd_sb8dsp_midi_interrupt(struct snd_sb *chip)
 {
 	struct snd_rawmidi *rmidi;

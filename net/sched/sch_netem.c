@@ -149,7 +149,6 @@ struct netem_skb_cb {
 	ktime_t		tstamp_save;
 };
 
-
 static struct sk_buff *netem_rb_to_skb(struct rb_node *rb)
 {
 	return container_of(rb, struct sk_buff, rbnode);
@@ -306,7 +305,6 @@ static bool loss_event(struct netem_sched_data *q)
 
 	return false;	/* not reached */
 }
-
 
 /* tabledist - return a pseudo-randomly distributed value with mean mu and
  * std deviation sigma.  Uses table lookup to approximate the desired
@@ -1150,7 +1148,6 @@ static struct Qdisc_ops netem_qdisc_ops __read_mostly = {
 	.dump		=	netem_dump,
 	.owner		=	THIS_MODULE,
 };
-
 
 static int __init netem_module_init(void)
 {

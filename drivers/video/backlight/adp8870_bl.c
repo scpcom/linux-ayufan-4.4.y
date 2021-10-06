@@ -22,7 +22,6 @@
 #define ADP8870_EXT_FEATURES
 #define ADP8870_USE_LEDS
 
-
 #define ADP8870_MFDVID	0x00  /* Manufacturer and device ID */
 #define ADP8870_MDCR	0x01  /* Device mode and status */
 #define ADP8870_INT_STAT 0x02  /* Interrupts status */
@@ -139,7 +138,6 @@ static int adp8870_read(struct i2c_client *client, int reg, uint8_t *val)
 	*val = ret;
 	return 0;
 }
-
 
 static int adp8870_write(struct i2c_client *client, u8 reg, u8 val)
 {
@@ -596,7 +594,6 @@ static ssize_t adp8870_bl_l5_dark_max_store(struct device *dev,
 static DEVICE_ATTR(l5_dark_max, 0664, adp8870_bl_l5_dark_max_show,
 			adp8870_bl_l5_dark_max_store);
 
-
 static ssize_t adp8870_bl_l4_indoor_max_show(struct device *dev,
 		struct device_attribute *attr, char *buf)
 {
@@ -610,7 +607,6 @@ static ssize_t adp8870_bl_l4_indoor_max_store(struct device *dev,
 }
 static DEVICE_ATTR(l4_indoor_max, 0664, adp8870_bl_l4_indoor_max_show,
 			adp8870_bl_l4_indoor_max_store);
-
 
 static ssize_t adp8870_bl_l3_office_max_show(struct device *dev,
 				     struct device_attribute *attr, char *buf)
@@ -690,7 +686,6 @@ static ssize_t adp8870_bl_l4_indoor_dim_store(struct device *dev,
 }
 static DEVICE_ATTR(l4_indoor_dim, 0664, adp8870_bl_l4_indoor_dim_show,
 			adp8870_bl_l4_indoor_dim_store);
-
 
 static ssize_t adp8870_bl_l3_office_dim_show(struct device *dev,
 			struct device_attribute *attr, char *buf)

@@ -116,5 +116,4 @@ extern int max_kernel_seg;
 #define VMALLOC_END (PKMAP_BASE-PAGE_SIZE*2)
 #endif /*  !__ASSEMBLY__  */
 
-
 #endif /* _ASM_HEXAGON_MEM_LAYOUT_H */

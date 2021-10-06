@@ -982,7 +982,6 @@ struct ctio_a64_ret_entry {
 #define OF_FORCE_DISC       BIT_30	/* Disconnects mandatory */
 #define OF_SSTS             BIT_31	/* Send SCSI status */
 
-
 /*
  * BUS parameters/settings structure - UNUSED
  */
@@ -1000,7 +999,6 @@ struct bus_param {
 	uint8_t scsi_bus_dead:1;	/* SCSI Bus is Dead, when 5 back to back resets failed */
 };
 
-
 struct qla_driver_setup {
 	uint32_t no_sync:1;
 	uint32_t no_wide:1;
@@ -1010,7 +1008,6 @@ struct qla_driver_setup {
 	uint16_t wide_mask;
 	uint16_t ppr_mask;
 };
-
 
 /*
  * Linux Host Adapter structure

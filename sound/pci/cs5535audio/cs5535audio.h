@@ -136,4 +136,3 @@ static inline void olpc_capture_close(struct snd_ac97 *ac97) { }
 int snd_cs5535audio_pcm(struct cs5535audio *cs5535audio);
 
 #endif /* __SOUND_CS5535AUDIO_H */
-

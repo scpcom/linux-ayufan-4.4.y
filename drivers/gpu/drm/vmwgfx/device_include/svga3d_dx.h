@@ -721,7 +721,6 @@ struct SVGA3dCmdDXInvalidateSubResource {
 #include "vmware_pack_end.h"
 SVGA3dCmdDXInvalidateSubResource;   /* SVGA_3D_CMD_DX_INVALIDATE_SUBRESOURCE */
 
-
 /*
  * Raw byte wise transfer from a buffer surface into another surface
  * of the requested box.
@@ -739,7 +738,6 @@ struct SVGA3dCmdDXTransferFromBuffer {
 }
 #include "vmware_pack_end.h"
 SVGA3dCmdDXTransferFromBuffer;   /* SVGA_3D_CMD_DX_TRANSFER_FROM_BUFFER */
-
 
 /*
  * Raw byte wise transfer from a buffer surface into another surface
@@ -761,7 +759,6 @@ struct SVGA3dCmdDXPredTransferFromBuffer {
 SVGA3dCmdDXPredTransferFromBuffer;
 /* SVGA_3D_CMD_DX_PRED_TRANSFER_FROM_BUFFER */
 
-
 typedef
 #include "vmware_pack_begin.h"
 struct SVGA3dCmdDXSurfaceCopyAndReadback {
@@ -772,7 +769,6 @@ struct SVGA3dCmdDXSurfaceCopyAndReadback {
 #include "vmware_pack_end.h"
 SVGA3dCmdDXSurfaceCopyAndReadback;
 /* SVGA_3D_CMD_DX_SURFACE_COPY_AND_READBACK */
-
 
 typedef
 #include "vmware_pack_begin.h"
@@ -993,7 +989,6 @@ struct SVGA3dCmdDXDestroyElementLayout {
 #include "vmware_pack_end.h"
 SVGA3dCmdDXDestroyElementLayout;
 /* SVGA_3D_CMD_DX_DESTROY_ELEMENTLAYOUT */
-
 
 #define SVGA3D_DX_MAX_RENDER_TARGETS 8
 

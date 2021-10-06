@@ -16,7 +16,6 @@
 #include <asm/mmu.h>
 #include <linux/spinlock.h>
 
-
 /* Structure used internally */
 	/* The internals are here for the inline functions
 	 * sake, certainly not for the user to mess with !
@@ -30,7 +29,6 @@ struct bcom_sram {
 };
 
 extern struct bcom_sram *bcom_sram;
-
 
 /* Public API */
 extern int  bcom_sram_init(struct device_node *sram_node, char *owner);
@@ -49,6 +47,4 @@ static inline void *bcom_sram_pa2va(phys_addr_t pa) {
 		(unsigned long)(pa - bcom_sram->base_phys);
 }
 
-
 #endif  /* __BESTCOMM_SRAM_H__ */
-

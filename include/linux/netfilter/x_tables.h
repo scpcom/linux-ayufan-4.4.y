@@ -1,7 +1,6 @@
 #ifndef _X_TABLES_H
 #define _X_TABLES_H
 
-
 #include <linux/netdevice.h>
 #include <linux/static_key.h>
 #include <uapi/linux/netfilter/x_tables.h>
@@ -363,7 +362,6 @@ static inline unsigned long ifname_compare_aligned(const char *_a,
 	BUILD_BUG_ON(IFNAMSIZ > 4 * sizeof(unsigned long));
 	return ret;
 }
-
 
 /* On SMP, ip(6)t_entry->counters.pcnt holds address of the
  * real (percpu) counter.  On !SMP, its just the packet count,

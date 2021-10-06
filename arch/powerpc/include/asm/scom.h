@@ -103,7 +103,6 @@ static inline scom_map_t scom_map(struct device_node *ctrl_dev,
  */
 struct device_node *scom_find_parent(struct device_node *dev);
 
-
 /**
  * scom_map_device - Map a device's block of SCOM registers
  * @dev: OF node of the device
@@ -117,7 +116,6 @@ struct device_node *scom_find_parent(struct device_node *dev);
  * property
  */
 extern scom_map_t scom_map_device(struct device_node *dev, int index);
-
 
 /**
  * scom_unmap - Unmap a block of SCOM registers
@@ -159,7 +157,6 @@ static inline int scom_write(scom_map_t map, u64 reg, u64 value)
 {
 	return scom_controller->write(map, reg, value);
 }
-
 
 #endif /* CONFIG_PPC_SCOM */
 #endif /* __ASSEMBLY__ */

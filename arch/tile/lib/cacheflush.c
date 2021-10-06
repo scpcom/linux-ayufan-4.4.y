@@ -18,12 +18,10 @@
 #include <arch/icache.h>
 #include <arch/spr_def.h>
 
-
 void __flush_icache_range(unsigned long start, unsigned long end)
 {
 	invalidate_icache((const void *)start, end - start, PAGE_SIZE);
 }
-
 
 /* Force a load instruction to issue. */
 static inline void force_load(char *p)

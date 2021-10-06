@@ -3,7 +3,6 @@
 
 #include <uapi/linux/cm4000_cs.h>
 
-
 #define	DEVICE_NAME		"cmm"
 #define	MODULE_NAME		"cm4000_cs"
 

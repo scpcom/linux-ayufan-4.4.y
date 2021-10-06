@@ -604,7 +604,6 @@ xfs_dir2_block_leaf_p(struct xfs_dir2_block_tail *btp)
 	return ((struct xfs_dir2_leaf_entry *)btp) - be32_to_cpu(btp->count);
 }
 
-
 /*
  * Attribute storage layout
  *
@@ -845,8 +844,6 @@ static inline int xfs_attr_leaf_entsize_local_max(int bsize)
 {
 	return (((bsize) >> 1) + ((bsize) >> 2));
 }
-
-
 
 /*
  * Remote attribute block format definition

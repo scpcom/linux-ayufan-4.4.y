@@ -299,7 +299,6 @@ exit:
 void rtw_set_supported_rate23a(u8 *SupportedRates, uint mode)
 {
 
-
 	memset(SupportedRates, 0, NDIS_802_11_LENGTH_RATES_EX);
 
 	switch (mode) {
@@ -404,8 +403,6 @@ int rtw_generate_ie23a(struct registry_priv *pregistrypriv)
 		ie = rtw_set_ie23a(ie, WLAN_EID_EXT_SUPP_RATES, (rateLen - 8),
 				(pdev_network->SupportedRates + 8), &sz);
 	}
-
-
 
 	/* return _SUCCESS; */
 

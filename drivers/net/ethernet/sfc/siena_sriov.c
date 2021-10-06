@@ -932,8 +932,6 @@ static void efx_siena_sriov_vfdi(struct work_struct *work)
 	(void)efx_siena_sriov_memcpy(efx, copy, ARRAY_SIZE(copy));
 }
 
-
-
 /* After a reset the event queues inside the guests no longer exist. Fill the
  * event ring in guest memory with VFDI reset events, then (re-initialise) the
  * event queue to raise an interrupt. The guest driver will then recover.

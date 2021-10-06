@@ -156,4 +156,3 @@ __v7m_proc_info:
 	.long	0			@ proc_info_list.user
 	.long	nop_cache_fns		@ proc_info_list.cache
 	.size	__v7m_proc_info, . - __v7m_proc_info
-

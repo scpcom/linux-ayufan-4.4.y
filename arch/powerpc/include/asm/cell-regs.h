@@ -50,7 +50,6 @@ union ppe_spe_reg {
 	};
 };
 
-
 struct cbe_pmd_regs {
 	/* Debug Bus Control */
 	u64	pad_0x0000;					/* 0x0000 */
@@ -216,7 +215,6 @@ struct cbe_iic_regs {
 extern struct cbe_iic_regs __iomem *cbe_get_iic_regs(struct device_node *np);
 extern struct cbe_iic_regs __iomem *cbe_get_cpu_iic_regs(int cpu);
 
-
 struct cbe_mic_tm_regs {
 	u8	pad_0x0000_0x0040[0x0040 - 0x0000];		/* 0x0000 */
 
@@ -303,7 +301,6 @@ struct cbe_mic_tm_regs {
 extern struct cbe_mic_tm_regs __iomem *cbe_get_mic_tm_regs(struct device_node *np);
 extern struct cbe_mic_tm_regs __iomem *cbe_get_cpu_mic_tm_regs(int cpu);
 
-
 /* Cell page table entries */
 #define CBE_IOPTE_PP_W		0x8000000000000000ul /* protection: write */
 #define CBE_IOPTE_PP_R		0x4000000000000000ul /* protection: read */
@@ -321,6 +318,5 @@ extern u32 cbe_node_to_cpu(int node);
 
 /* Init this module early */
 extern void cbe_regs_init(void);
-
 
 #endif /* CBE_REGS_H */

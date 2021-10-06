@@ -392,10 +392,6 @@
 /* PCMCIA Interface */
 #define SA1111_PCMCIA		0x1600
 
-
-
-
-
 extern struct bus_type sa1111_bus_type;
 
 #define SA1111_DEVID_SBI	(1 << 0)

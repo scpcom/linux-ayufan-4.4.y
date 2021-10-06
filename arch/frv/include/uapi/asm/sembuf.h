@@ -23,4 +23,3 @@ struct semid64_ds {
 };
 
 #endif /* _ASM_SEMBUF_H */
-

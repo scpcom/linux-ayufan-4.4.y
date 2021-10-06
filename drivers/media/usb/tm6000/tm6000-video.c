@@ -379,7 +379,6 @@ static inline void print_err_status(struct tm6000_core *dev,
 	}
 }
 
-
 /*
  * Controls the isoc copy of each urb packet
  */
@@ -620,7 +619,6 @@ static int tm6000_prepare_isoc(struct tm6000_core *dev)
 		    max_packets, num_bufs, sb_size,
 		    dev->isoc_in.maxsize, size);
 
-
 	if (tm6000_alloc_urb_buffers(dev) < 0) {
 		tm6000_err("cannot allocate memory for urb buffers\n");
 
@@ -744,7 +742,6 @@ buffer_prepare(struct videobuf_queue *vq, struct videobuf_buffer *vb,
 	int rc = 0;
 
 	BUG_ON(NULL == fh->fmt);
-
 
 	/* FIXME: It assumes depth=2 */
 	/* The only currently supported format is 16 bits/pixel */

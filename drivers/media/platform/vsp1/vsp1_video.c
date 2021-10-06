@@ -153,7 +153,6 @@ static const struct vsp1_format_info *vsp1_get_format_info(u32 fourcc)
 	return NULL;
 }
 
-
 static struct v4l2_subdev *
 vsp1_video_remote_subdev(struct media_pad *local, u32 *pad)
 {

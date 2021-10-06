@@ -16,7 +16,6 @@
 
 #include <linux/mfd/lm3533.h>
 
-
 #define LM3533_MAX_CURRENT_MIN		5000
 #define LM3533_MAX_CURRENT_MAX		29800
 #define LM3533_MAX_CURRENT_STEP		800
@@ -28,7 +27,6 @@
 #define LM3533_REG_MAX_CURRENT_BASE	0x1f
 #define LM3533_REG_CTRLBANK_ENABLE	0x27
 #define LM3533_REG_BRIGHTNESS_BASE	0x40
-
 
 static inline u8 lm3533_ctrlbank_get_reg(struct lm3533_ctrlbank *cb, u8 base)
 {
@@ -141,7 +139,6 @@ lm3533_ctrlbank_get(brightness, BRIGHTNESS);
  */
 lm3533_ctrlbank_set(pwm, PWM);
 lm3533_ctrlbank_get(pwm, PWM);
-
 
 MODULE_AUTHOR("Johan Hovold <jhovold@gmail.com>");
 MODULE_DESCRIPTION("LM3533 Control Bank interface");

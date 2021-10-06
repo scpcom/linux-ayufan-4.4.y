@@ -27,7 +27,6 @@
 #include "reg.h"
 #include "debug.h"
 
-
 /**
  * DOC: Hardware descriptor functions
  *
@@ -43,7 +42,6 @@
  * have function pointers on &struct ath5k_hw we initialize at runtime based on
  * the chip used.
  */
-
 
 /************************\
 * TX Control descriptors *
@@ -427,7 +425,6 @@ ath5k_hw_setup_mrr_tx_desc(struct ath5k_hw *ah,
 	return 0;
 }
 
-
 /***********************\
 * TX Status descriptors *
 \***********************/
@@ -542,7 +539,6 @@ ath5k_hw_proc_4word_tx_status(struct ath5k_hw *ah,
 
 	return 0;
 }
-
 
 /****************\
 * RX Descriptors *
@@ -755,7 +751,6 @@ ath5k_hw_proc_5212_rx_status(struct ath5k_hw *ah,
 	}
 	return 0;
 }
-
 
 /********\
 * Attach *

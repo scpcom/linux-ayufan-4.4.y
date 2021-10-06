@@ -59,7 +59,6 @@
 #define PIC_HOST_INTR_ADDR              0x0000FFFFFFFFFFFFUL
 #define PIC_PCI64_ATTR_TARG_SHFT        60
 
-
 /*****************************************************************************
  *********************** PIC MMR structure mapping ***************************
  *****************************************************************************/
@@ -163,7 +162,6 @@ struct pic {
 	u64	max_latency;			/* 0x000{430,,,5F0} */
 	u64	clear_all;			/* 0x000{438,,,5F8} */
     } p_buf_count[8];
-
 
     /* 0x000600-0x0009FF -- PCI/X registers */
     u64		p_pcix_bus_err_addr;		/* 0x000600 */

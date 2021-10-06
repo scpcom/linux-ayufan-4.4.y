@@ -136,7 +136,6 @@ static char *collie_ac_supplied_to[] = {
 	"backup-battery",
 };
 
-
 static struct gpio_charger_platform_data collie_power_data = {
 	.name			= "charger",
 	.type			= POWER_SUPPLY_TYPE_MAINS,
@@ -217,7 +216,6 @@ static int __init collie_uart_init(void)
 device_initcall(collie_uart_init);
 
 #endif
-
 
 static struct resource locomo_resources[] = {
 	[0] = DEFINE_RES_MEM(0x40000000, SZ_8K),
@@ -382,7 +380,6 @@ static void __init collie_init(void)
 	GPSR |= _COLLIE_GPIO_UCB1x00_RESET;
 
 	sa11x0_ppc_configure_mcp();
-
 
 	platform_scoop_config = &collie_pcmcia_config;
 

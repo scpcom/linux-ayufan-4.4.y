@@ -84,7 +84,6 @@ psb_intel_mode_get_pixel_multiplier(const struct drm_display_mode *mode)
 	       >> INTEL_MODE_PIXEL_MULTIPLIER_SHIFT;
 }
 
-
 /*
  * Hold information useally put on the device driver privates here,
  * since it needs to be shared across multiple of devices drivers privates.

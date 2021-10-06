@@ -117,7 +117,6 @@
 
 #define MPT_MAX_CALLBACKS		32
 
-
 #define	 CAN_SLEEP			1
 #define  NO_SLEEP			0
 
@@ -331,7 +330,6 @@ struct Mpi2ManufacturingPage10_t {
 	U32	Reserved5[18];			/* 24h - 60h*/
 };
 
-
 /* Miscellaneous options */
 struct Mpi2ManufacturingPage11_t {
 	MPI2_CONFIG_PAGE_HEADER Header;		/* 00h */
@@ -366,7 +364,6 @@ struct MPT3SAS_TARGET {
 	u8	tm_busy;
 	struct _sas_device *sdev;
 };
-
 
 /*
  * per device private data
@@ -423,8 +420,6 @@ struct _internal_cmd {
 	u16	status;
 	u16	smid;
 };
-
-
 
 /**
  * struct _sas_device - attached device information
@@ -676,7 +671,6 @@ struct _tr_list {
 	u16	state;
 };
 
-
 /**
  * struct adapter_reply_queue - the reply queue struct
  * @ioc: per adapter object
@@ -710,8 +704,6 @@ typedef void (*MPT_BUILD_SG)(struct MPT3SAS_ADAPTER *ioc, void *psge,
 		dma_addr_t data_in_dma, size_t data_in_sz);
 typedef void (*MPT_BUILD_ZERO_LEN_SGE)(struct MPT3SAS_ADAPTER *ioc,
 		void *paddr);
-
-
 
 /* IOC Facts and Port Facts converted from little endian to cpu */
 union mpi3_version_union {
@@ -1244,7 +1236,6 @@ void mpt3sas_base_update_missing_delay(struct MPT3SAS_ADAPTER *ioc,
 	u16 device_missing_delay, u8 io_missing_delay);
 
 int mpt3sas_port_enable(struct MPT3SAS_ADAPTER *ioc);
-
 
 /* scsih shared API */
 u8 mpt3sas_scsih_event_callback(struct MPT3SAS_ADAPTER *ioc, u8 msix_index,

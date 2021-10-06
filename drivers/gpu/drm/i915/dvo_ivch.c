@@ -170,7 +170,6 @@ static const uint16_t backup_addresses[] = {
 	0x10		/* this must come last */
 };
 
-
 struct ivch_priv {
 	bool quiet;
 
@@ -180,7 +179,6 @@ struct ivch_priv {
 
 	uint16_t reg_backup[ARRAY_SIZE(backup_addresses)];
 };
-
 
 static void ivch_dump_regs(struct intel_dvo_device *dvo);
 /**

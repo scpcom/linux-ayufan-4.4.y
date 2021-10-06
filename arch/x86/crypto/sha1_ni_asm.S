@@ -73,7 +73,6 @@
 #define MSG3		%xmm6
 #define SHUF_MASK	%xmm7
 
-
 /*
  * Intel SHA Extensions optimized implementation of a SHA-1 update function
  *

@@ -151,7 +151,6 @@ static struct gpiod_lookup_table qi_lb60_nand_gpio_table = {
 	},
 };
 
-
 /* Keyboard*/
 
 #define KEY_QI_QI	KEY_F13

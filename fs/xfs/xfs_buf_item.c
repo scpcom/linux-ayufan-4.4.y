@@ -30,7 +30,6 @@
 #include "xfs_trace.h"
 #include "xfs_log.h"
 
-
 kmem_zone_t	*xfs_buf_item_zone;
 
 static inline struct xfs_buf_log_item *BUF_ITEM(struct xfs_log_item *lip)
@@ -257,7 +256,6 @@ xfs_buf_item_format_segment(
 		return;
 	}
 
-
 	/*
 	 * Fill in an iovec for each set of contiguous chunks.
 	 */
@@ -322,7 +320,6 @@ xfs_buf_item_format(
 	ASSERT((bip->bli_flags & XFS_BLI_STALE) ||
 	       (xfs_blft_from_flags(&bip->__bli_format) > XFS_BLFT_UNKNOWN_BUF
 	        && xfs_blft_from_flags(&bip->__bli_format) < XFS_BLFT_MAX_BUF));
-
 
 	/*
 	 * If it is an inode buffer, transfer the in-memory state to the
@@ -788,7 +785,6 @@ xfs_buf_item_init(
 		return error;
 	}
 
-
 	for (i = 0; i < bip->bli_format_count; i++) {
 		chunks = DIV_ROUND_UP(BBTOB(bp->b_maps[i].bm_len),
 				      XFS_BLF_CHUNK);
@@ -810,7 +806,6 @@ xfs_buf_item_init(
 	xfs_buf_hold(bp);
 	return 0;
 }
-
 
 /*
  * Mark bytes first through last inclusive as dirty in the buf
@@ -932,7 +927,6 @@ xfs_buf_item_log(
 	}
 }
 
-
 /*
  * Return 1 if the buffer has been logged or ordered in a transaction (at any
  * point, not just the current transaction) and 0 if not.
@@ -975,7 +969,6 @@ xfs_buf_item_relse(
 	xfs_buf_rele(bp);
 	xfs_buf_item_free(bip);
 }
-
 
 /*
  * Add the given log item with its callback to the list of callbacks

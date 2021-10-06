@@ -228,7 +228,6 @@ static unsigned short snd_cs46xx_ac97_read(struct snd_ac97 * ac97,
 	return val;
 }
 
-
 static void snd_cs46xx_codec_write(struct snd_cs46xx *chip,
 				   unsigned short reg,
 				   unsigned short val,
@@ -309,7 +308,6 @@ static void snd_cs46xx_ac97_write(struct snd_ac97 *ac97,
 
 	snd_cs46xx_codec_write(chip, reg, val, codec_index);
 }
-
 
 /*
  *  Chip initialization
@@ -1088,7 +1086,6 @@ static int _cs46xx_adjust_sample_rate (struct snd_cs46xx *chip, struct snd_cs46x
 }
 #endif
 
-
 static int snd_cs46xx_playback_hw_params(struct snd_pcm_substream *substream,
 					 struct snd_pcm_hw_params *hw_params)
 {
@@ -1119,7 +1116,6 @@ static int snd_cs46xx_playback_hw_params(struct snd_pcm_substream *substream,
 		return -ENXIO;
 	}
 
-
 	if (cs46xx_dsp_pcm_channel_set_period (chip,cpcm->pcm_channel,period_size)) {
 		 mutex_unlock(&chip->spos_mutex);
 		 return -EINVAL;
@@ -1137,7 +1133,6 @@ static int snd_cs46xx_playback_hw_params(struct snd_pcm_substream *substream,
 		runtime->dma_area = cpcm->hw_buf.area;
 		runtime->dma_addr = cpcm->hw_buf.addr;
 		runtime->dma_bytes = cpcm->hw_buf.bytes;
-
 
 #ifdef CONFIG_SND_CS46XX_NEW_DSP
 		if (cpcm->pcm_channel_id == DSP_PCM_MAIN_CHANNEL) {
@@ -1522,7 +1517,6 @@ static int _cs46xx_playback_open_channel (struct snd_pcm_substream *substream,in
 	cpcm->pcm_channel = NULL; 
 	cpcm->pcm_channel_id = pcm_channel_id;
 
-
 	snd_pcm_hw_constraint_list(runtime, 0,
 				   SNDRV_PCM_HW_PARAM_PERIOD_BYTES, 
 				   &hw_constraints_period_sizes);
@@ -1800,7 +1794,6 @@ int snd_cs46xx_pcm(struct snd_cs46xx *chip, int device)
 
 	return 0;
 }
-
 
 #ifdef CONFIG_SND_CS46XX_NEW_DSP
 int snd_cs46xx_pcm_rear(struct snd_cs46xx *chip, int device)
@@ -2088,7 +2081,6 @@ static int snd_cs46xx_pcm_capture_get(struct snd_kcontrol *kcontrol,
 	return 0;
 }
 
-
 static int snd_cs46xx_pcm_capture_put(struct snd_kcontrol *kcontrol, 
                                       struct snd_ctl_elem_value *ucontrol)
 {
@@ -2149,7 +2141,6 @@ static int snd_herc_spdif_select_put(struct snd_kcontrol *kcontrol,
 	return (val1 != (int)snd_cs46xx_peekBA0(chip, BA0_EGPIODR));
 }
 
-
 static int snd_cs46xx_spdif_info(struct snd_kcontrol *kcontrol, struct snd_ctl_elem_info *uinfo)
 {
 	uinfo->type = SNDRV_CTL_ELEM_TYPE_IEC958;
@@ -2187,7 +2178,6 @@ static int snd_cs46xx_spdif_default_put(struct snd_kcontrol *kcontrol,
 		((unsigned int)_wrap_all_bits(ucontrol->value.iec958.status[3]))  |
 		/* left and right validity bit */
 		(1 << 13) | (1 << 12);
-
 
 	change = (unsigned int)ins->spdif_csuv_default != val;
 	ins->spdif_csuv_default = val;
@@ -2241,7 +2231,6 @@ static int snd_cs46xx_spdif_stream_put(struct snd_kcontrol *kcontrol,
 		/* left and right validity bit */
 		(1 << 13) | (1 << 12);
 
-
 	change = ins->spdif_csuv_stream != val;
 	ins->spdif_csuv_stream = val;
 
@@ -2254,7 +2243,6 @@ static int snd_cs46xx_spdif_stream_put(struct snd_kcontrol *kcontrol,
 }
 
 #endif /* CONFIG_SND_CS46XX_NEW_DSP */
-
 
 static struct snd_kcontrol_new snd_cs46xx_controls[] = {
 {
@@ -2391,7 +2379,6 @@ static struct snd_kcontrol_new snd_hercules_controls[] = {
 	.put = snd_herc_spdif_select_put,
 },
 };
-
 
 static void snd_cs46xx_codec_reset (struct snd_ac97 * ac97)
 {
@@ -2713,7 +2700,6 @@ int snd_cs46xx_midi(struct snd_cs46xx *chip, int device)
 	return 0;
 }
 
-
 /*
  * gameport interface
  */
@@ -2919,7 +2905,6 @@ static void snd_cs46xx_hw_stop(struct snd_cs46xx *chip)
 	snd_cs46xx_pokeBA0(chip, BA0_CLKCR1, tmp);
 }
 
-
 static int snd_cs46xx_free(struct snd_cs46xx *chip)
 {
 	int idx;
@@ -3092,7 +3077,6 @@ static int snd_cs46xx_chip_init(struct snd_cs46xx *chip)
 	snd_cs46xx_pokeBA0(chip, BA0_SERC2, SERC2_SI1F_AC97 | SERC1_SO1EN);
 	snd_cs46xx_pokeBA0(chip, BA0_SERMC1, SERMC1_PTC_AC97 | SERMC1_MSPE);
 
-
 #ifdef CONFIG_SND_CS46XX_NEW_DSP
 	snd_cs46xx_pokeBA0(chip, BA0_SERC7, SERC7_ASDI2EN);
 	snd_cs46xx_pokeBA0(chip, BA0_SERC3, 0);
@@ -3102,7 +3086,6 @@ static int snd_cs46xx_chip_init(struct snd_cs46xx *chip)
 #endif
 
 	mdelay(5);
-
 
 	/*
 	 * Wait for the codec ready signal from the AC97 codec.
@@ -3117,7 +3100,6 @@ static int snd_cs46xx_chip_init(struct snd_cs46xx *chip)
 			goto ok1;
 		msleep(10);
 	}
-
 
 	dev_err(chip->card->dev,
 		"create - never read codec ready from AC'97\n");
@@ -3153,7 +3135,6 @@ static int snd_cs46xx_chip_init(struct snd_cs46xx *chip)
 #ifdef CONFIG_SND_CS46XX_NEW_DSP
 	snd_cs46xx_pokeBA0(chip, BA0_ACCTL2, ACCTL_VFRM | ACCTL_ESYN | ACCTL_RSTN);
 #endif
-
 
 	/*
 	 *  Wait until we've sampled input slots 3 and 4 as valid, meaning that
@@ -3197,7 +3178,6 @@ static int snd_cs46xx_chip_init(struct snd_cs46xx *chip)
 	 */
 
 	snd_cs46xx_pokeBA0(chip, BA0_ACOSV, ACOSV_SLV3 | ACOSV_SLV4);
-
 
 	/*
 	 *  Power down the DAC and ADC.  We will power them up (if) when we need
@@ -3312,7 +3292,6 @@ int snd_cs46xx_start_dsp(struct snd_cs46xx *chip)
 
 	return 0;
 }
-
 
 /*
  *	AMP control - null AMP
@@ -3489,7 +3468,6 @@ static void hercules_init(struct snd_cs46xx *chip)
 	snd_cs46xx_pokeBA0(chip, BA0_EGPIOPTR, EGPIODR_GPOE0);
 }
 
-
 /*
  *	Game Theatre XP card - EGPIO[2] is used to enable the external amp.
  */ 
@@ -3554,7 +3532,6 @@ static void hercules_mixer_init (struct snd_cs46xx *chip)
 #endif
 }
 
-
 #if 0
 /*
  *	Untested
@@ -3579,7 +3556,6 @@ static void amp_voyetra_4294(struct snd_cs46xx *chip, int change)
 	}
 }
 #endif
-
 
 /*
  *	Handle the CLKRUN on a thinkpad. We must disable CLKRUN support
@@ -3611,7 +3587,6 @@ static void clkrun_hack(struct snd_cs46xx *chip, int change)
 		outw(nval, chip->acpi_port + 0x10);
 }
 
-	
 /*
  * detect intel piix4
  */
@@ -3632,7 +3607,6 @@ static void clkrun_init(struct snd_cs46xx *chip)
 	chip->acpi_port = pp << 8;
 	pci_dev_put(pdev);
 }
-
 
 /*
  * Card subid table
@@ -3758,7 +3732,6 @@ static struct cs_card_type cards[] = {
 	{} /* terminator */
 };
 
-
 /*
  * APM support
  */
@@ -3873,7 +3846,6 @@ static int snd_cs46xx_resume(struct device *dev)
 
 SIMPLE_DEV_PM_OPS(snd_cs46xx_pm, snd_cs46xx_suspend, snd_cs46xx_resume);
 #endif /* CONFIG_PM_SLEEP */
-
 
 /*
  */

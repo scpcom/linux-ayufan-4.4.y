@@ -1184,7 +1184,6 @@ ath9k_hw_get_btcoex_scheme(struct ath_hw *ah)
 }
 #endif /* CONFIG_ATH9K_BTCOEX_SUPPORT */
 
-
 #ifdef CONFIG_ATH9K_WOW
 int ath9k_hw_wow_apply_pattern(struct ath_hw *ah, u8 *user_pattern,
 			       u8 *user_mask, int pattern_count,

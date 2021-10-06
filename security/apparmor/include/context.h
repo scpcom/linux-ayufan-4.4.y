@@ -85,7 +85,6 @@ int aa_set_current_hat(struct aa_profile *profile, u64 token);
 int aa_restore_previous_profile(u64 cookie);
 struct aa_profile *aa_get_task_profile(struct task_struct *task);
 
-
 /**
  * aa_cred_profile - obtain cred's profiles
  * @cred: cred to obtain profiles from  (NOT NULL)

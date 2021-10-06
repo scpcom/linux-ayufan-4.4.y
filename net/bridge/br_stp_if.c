@@ -20,7 +20,6 @@
 #include "br_private.h"
 #include "br_private_stp.h"
 
-
 /* Port id is composed of priority and port number.
  * NB: some bits of priority are dropped to
  *     make room for more ports.

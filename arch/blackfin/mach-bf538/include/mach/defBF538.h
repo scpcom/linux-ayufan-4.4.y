@@ -38,12 +38,10 @@
 #define	SIC_IAR5			0xFFC00138	/* Interrupt Assignment	Register 5 */
 #define	SIC_IAR6			0xFFC0013C	/* Interrupt Assignment	Register 6 */
 
-
 /* Watchdog Timer (0xFFC00200 -	0xFFC002FF) */
 #define	WDOG_CTL	0xFFC00200  /* Watchdog	Control	Register */
 #define	WDOG_CNT	0xFFC00204  /* Watchdog	Count Register */
 #define	WDOG_STAT	0xFFC00208  /* Watchdog	Status Register */
-
 
 /* Real	Time Clock (0xFFC00300 - 0xFFC003FF) */
 #define	RTC_STAT	0xFFC00300  /* RTC Status Register */
@@ -53,7 +51,6 @@
 #define	RTC_ALARM	0xFFC00310  /* RTC Alarm Time Register */
 #define	RTC_FAST	0xFFC00314  /* RTC Prescaler Enable Register */
 #define	RTC_PREN		0xFFC00314  /* RTC Prescaler Enable Register (alternate	macro) */
-
 
 /* UART0 Controller (0xFFC00400	- 0xFFC004FF) */
 #define	UART0_THR	      0xFFC00400  /* Transmit Holding register */
@@ -68,7 +65,6 @@
 #define	UART0_SCR	      0xFFC0041C  /* SCR Scratch Register */
 #define	UART0_GCTL		     0xFFC00424	 /* Global Control Register */
 
-
 /* SPI0	Controller (0xFFC00500 - 0xFFC005FF) */
 
 #define	SPI0_CTL			0xFFC00500  /* SPI0 Control Register */
@@ -79,7 +75,6 @@
 #define	SPI0_BAUD			0xFFC00514  /* SPI0 Baud rate Register */
 #define	SPI0_SHADOW			0xFFC00518  /* SPI0_RDBR Shadow	Register */
 #define SPI0_REGBASE			SPI0_CTL
-
 
 /* TIMER 0, 1, 2 Registers (0xFFC00600 - 0xFFC006FF) */
 #define	TIMER0_CONFIG			0xFFC00600     /* Timer	0 Configuration	Register */
@@ -101,7 +96,6 @@
 #define	TIMER_DISABLE				0xFFC00644	/* Timer Disable Register */
 #define	TIMER_STATUS				0xFFC00648	/* Timer Status	Register */
 
-
 /* Programmable	Flags (0xFFC00700 - 0xFFC007FF) */
 #define	FIO_FLAG_D				0xFFC00700  /* Flag Mask to directly specify state of pins */
 #define	FIO_FLAG_C			0xFFC00704  /* Peripheral Interrupt Flag Register (clear) */
@@ -120,7 +114,6 @@
 #define	FIO_EDGE			0xFFC00738  /* Flag Source Sensitivity Register */
 #define	FIO_BOTH			0xFFC0073C  /* Flag Set	on BOTH	Edges Register */
 #define	FIO_INEN					0xFFC00740  /* Flag Input Enable Register  */
-
 
 /* SPORT0 Controller (0xFFC00800 - 0xFFC008FF) */
 #define	SPORT0_TCR1				0xFFC00800  /* SPORT0 Transmit Configuration 1 Register */
@@ -146,7 +139,6 @@
 #define	SPORT0_MRCS2			0xFFC00858  /* SPORT0 Multi-Channel Receive Select Register 2 */
 #define	SPORT0_MRCS3			0xFFC0085C  /* SPORT0 Multi-Channel Receive Select Register 3 */
 
-
 /* SPORT1 Controller (0xFFC00900 - 0xFFC009FF) */
 #define	SPORT1_TCR1				0xFFC00900  /* SPORT1 Transmit Configuration 1 Register */
 #define	SPORT1_TCR2				0xFFC00904  /* SPORT1 Transmit Configuration 2 Register */
@@ -171,7 +163,6 @@
 #define	SPORT1_MRCS2			0xFFC00958  /* SPORT1 Multi-Channel Receive Select Register 2 */
 #define	SPORT1_MRCS3			0xFFC0095C  /* SPORT1 Multi-Channel Receive Select Register 3 */
 
-
 /* External Bus	Interface Unit (0xFFC00A00 - 0xFFC00AFF) */
 /* Asynchronous	Memory Controller  */
 #define	EBIU_AMGCTL			0xFFC00A00  /* Asynchronous Memory Global Control Register */
@@ -184,14 +175,10 @@
 #define	EBIU_SDRRC			0xFFC00A18  /* SDRAM Refresh Rate Control Register */
 #define	EBIU_SDSTAT			0xFFC00A1C  /* SDRAM Status Register */
 
-
-
 /* DMA Controller 0 Traffic Control Registers (0xFFC00B00 - 0xFFC00BFF) */
 
 #define	DMAC0_TC_PER			0xFFC00B0C	/* DMA Controller 0 Traffic Control Periods Register */
 #define	DMAC0_TC_CNT			0xFFC00B10	/* DMA Controller 0 Traffic Control Current Counts Register */
-
-
 
 /* DMA Controller 0 (0xFFC00C00	- 0xFFC00FFF)							 */
 
@@ -363,14 +350,12 @@
 #define	MDMA_S1_CURR_X_COUNT	0xFFC00EF0	/* MemDMA0 Stream 1 Source Current X Count Register */
 #define	MDMA_S1_CURR_Y_COUNT	0xFFC00EF8	/* MemDMA0 Stream 1 Source Current Y Count Register */
 
-
 /* Parallel Peripheral Interface (PPI) (0xFFC01000 - 0xFFC010FF) */
 #define	PPI_CONTROL			0xFFC01000	/* PPI Control Register */
 #define	PPI_STATUS			0xFFC01004	/* PPI Status Register */
 #define	PPI_COUNT			0xFFC01008	/* PPI Transfer	Count Register */
 #define	PPI_DELAY			0xFFC0100C	/* PPI Delay Count Register */
 #define	PPI_FRAME			0xFFC01010	/* PPI Frame Length Register */
-
 
 /* Two-Wire Interface 0	(0xFFC01400 - 0xFFC014FF)			 */
 #define	TWI0_CLKDIV			0xFFC01400	/* Serial Clock	Divider	Register */
@@ -396,7 +381,6 @@
 #define	TWI0_PRESCALE	 TWI0_CONTROL
 #define	TWI0_INT_SRC	 TWI0_INT_STAT
 #define	TWI0_INT_ENABLE	 TWI0_INT_MASK
-
 
 /* General-Purpose Ports  (0xFFC01500 -	0xFFC015FF)	 */
 
@@ -431,8 +415,6 @@
 
 #define	DMAC1_TC_PER			0xFFC01B0C	/* DMA Controller 1 Traffic Control Periods Register */
 #define	DMAC1_TC_CNT			0xFFC01B10	/* DMA Controller 1 Traffic Control Current Counts Register */
-
-
 
 /* DMA Controller 1 (0xFFC01C00	- 0xFFC01FFF)							 */
 #define	DMA8_NEXT_DESC_PTR		0xFFC01C00	/* DMA Channel 8 Next Descriptor Pointer Register */
@@ -659,7 +641,6 @@
 #define	MDMA_S3_CURR_X_COUNT	0xFFC01FF0	/* MemDMA1 Stream 1 Source Current X Count Register */
 #define	MDMA_S3_CURR_Y_COUNT	0xFFC01FF8	/* MemDMA1 Stream 1 Source Current Y Count Register */
 
-
 /* UART1 Controller		(0xFFC02000 - 0xFFC020FF)	 */
 #define	UART1_THR			0xFFC02000	/* Transmit Holding register */
 #define	UART1_RBR			0xFFC02000	/* Receive Buffer register */
@@ -673,7 +654,6 @@
 #define	UART1_SCR			0xFFC0201C	/* SCR Scratch Register */
 #define	UART1_GCTL			0xFFC02024	/* Global Control Register */
 
-
 /* UART2 Controller		(0xFFC02100 - 0xFFC021FF)	 */
 #define	UART2_THR			0xFFC02100	/* Transmit Holding register */
 #define	UART2_RBR			0xFFC02100	/* Receive Buffer register */
@@ -686,7 +666,6 @@
 #define	UART2_LSR			0xFFC02114	/* Line	Status Register */
 #define	UART2_SCR			0xFFC0211C	/* SCR Scratch Register */
 #define	UART2_GCTL			0xFFC02124	/* Global Control Register */
-
 
 /* Two-Wire Interface 1	(0xFFC02200 - 0xFFC022FF)			 */
 #define	TWI1_CLKDIV			0xFFC02200	/* Serial Clock	Divider	Register */
@@ -707,12 +686,10 @@
 #define	TWI1_RCV_DATA16		0xFFC0228C	/* FIFO	Receive	Data Double Byte Register */
 #define TWI1_REGBASE		TWI1_CLKDIV
 
-
 /* the following are for backwards compatibility */
 #define	TWI1_PRESCALE	  TWI1_CONTROL
 #define	TWI1_INT_SRC	  TWI1_INT_STAT
 #define	TWI1_INT_ENABLE	  TWI1_INT_MASK
-
 
 /* SPI1	Controller		(0xFFC02300 - 0xFFC023FF)	 */
 #define	SPI1_CTL			0xFFC02300  /* SPI1 Control Register */
@@ -758,7 +735,6 @@
 #define	SPORT2_MRCS2		0xFFC02558	/* SPORT2 Multi-Channel	Receive	Select Register	2 */
 #define	SPORT2_MRCS3		0xFFC0255C	/* SPORT2 Multi-Channel	Receive	Select Register	3 */
 
-
 /* SPORT3 Controller		(0xFFC02600 - 0xFFC026FF)			 */
 #define	SPORT3_TCR1			0xFFC02600	/* SPORT3 Transmit Configuration 1 Register */
 #define	SPORT3_TCR2			0xFFC02604	/* SPORT3 Transmit Configuration 2 Register */
@@ -782,7 +758,6 @@
 #define	SPORT3_MRCS1		0xFFC02654	/* SPORT3 Multi-Channel	Receive	Select Register	1 */
 #define	SPORT3_MRCS2		0xFFC02658	/* SPORT3 Multi-Channel	Receive	Select Register	2 */
 #define	SPORT3_MRCS3		0xFFC0265C	/* SPORT3 Multi-Channel	Receive	Select Register	3 */
-
 
 /* CAN Controller		(0xFFC02A00 - 0xFFC02FFF)				 */
 /* For Mailboxes 0-15											 */
@@ -1206,7 +1181,6 @@
 #define	CAN_MB_DATA1(x)		(CAN_MB00_DATA1+((x)*0x20))
 #define	CAN_MB_DATA0(x)		(CAN_MB00_DATA0+((x)*0x20))
 
-
 /*********************************************************************************** */
 /* System MMR Register Bits and	Macros */
 /******************************************************************************* */
@@ -1221,7 +1195,6 @@
 /* SYSCR Masks													 */
 #define	BMODE			0x0006	/* Boot	Mode - Latched During HW Reset From Mode Pins */
 #define	NOBOOT			0x0010	/* Execute From	L1 or ASYNC Bank 0 When	BMODE =	0 */
-
 
 /* *************  SYSTEM INTERRUPT CONTROLLER MASKS ***************** */
 
@@ -1262,7 +1235,6 @@
 /* the following are for backwards compatibility */
 #define	DMA0_ERR_IRQ		DMAC0_ERR_IRQ
 #define	DMA1_ERR_IRQ		DMAC1_ERR_IRQ
-
 
 /* Peripheral Masks For	SIC_ISR1, SIC_IWR1, SIC_IMASK1	 */
 #define	CAN_ERR_IRQ			0x00000001	/* CAN Error Interrupt Request */
@@ -1351,7 +1323,6 @@
 #define	POLC		0x4000		/* PPI Clock Polarity */
 #define	POLS		0x8000		/* PPI Frame Sync Polarity */
 
-
 /* PPI_STATUS Masks					     */
 #define	FLD			0x0400	/* Field Indicator   */
 #define	FT_ERR		0x0800	/* Frame Track Error */
@@ -1359,7 +1330,6 @@
 #define	UNDR		0x2000	/* FIFO	Underrun Error */
 #define	ERR_DET		0x4000	/* Error Detected Indicator */
 #define	ERR_NCOR	0x8000	/* Error Not Corrected Indicator */
-
 
 /* **********  DMA CONTROLLER MASKS  ***********************/
 
@@ -1395,7 +1365,6 @@
 #define	PMAP_UART1TX	    0x9000  /* PMAP UART1 Transmit DMA */
 #define	PMAP_UART2RX	    0xA000  /* PMAP UART2 Receive DMA */
 #define	PMAP_UART2TX	    0xB000  /* PMAP UART2 Transmit DMA */
-
 
 /*  *************  GENERAL PURPOSE TIMER MASKS	******************** */
 /* PWM Timer bit definitions */

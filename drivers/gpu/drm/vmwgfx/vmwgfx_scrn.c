@@ -28,7 +28,6 @@
 #include "vmwgfx_kms.h"
 #include <drm/drm_plane_helper.h>
 
-
 #define vmw_crtc_to_sou(x) \
 	container_of(x, struct vmw_screen_object_unit, base.crtc)
 #define vmw_encoder_to_sou(x) \
@@ -74,7 +73,6 @@ struct vmw_kms_sou_dirty_cmd {
 	SVGA3dCmdBlitSurfaceToScreen body;
 };
 
-
 /*
  * Other structs.
  */
@@ -105,7 +103,6 @@ static void vmw_sou_destroy(struct vmw_screen_object_unit *sou)
 	vmw_du_cleanup(&sou->base);
 	kfree(sou);
 }
-
 
 /*
  * Screen Object Display Unit CRTC functions
@@ -358,7 +355,6 @@ static int vmw_sou_crtc_set_config(struct drm_mode_set *set)
 		return 0;
 	}
 
-
 	/* we now know we want to set a mode */
 	mode = set->mode;
 	fb = set->fb;
@@ -495,7 +491,6 @@ static int vmw_sou_crtc_page_flip(struct drm_crtc *crtc,
 		ret = vmw_kms_sou_do_surface_dirty(dev_priv, vfb,
 						   &clips, NULL, NULL,
 						   0, 0, 1, 1, &fence);
-
 
 	if (ret != 0)
 		goto out_no_fence;
@@ -960,7 +955,6 @@ out_revert:
 
 	return ret;
 }
-
 
 /**
  * vmw_sou_readback_fifo_commit - Callback to submit a set of readback clips.

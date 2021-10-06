@@ -251,7 +251,6 @@ static unsigned int pcc_get(u_short sock, unsigned int reg)
 	return val;
 }
 
-
 static void pcc_set(u_short sock, unsigned int reg, unsigned int data)
 {
 	outw(data, reg);
@@ -353,7 +352,6 @@ static void add_pcc_socket(ulong base, int irq, ulong mapaddr,
 
 	return;
 }
-
 
 /*====================================================================*/
 
@@ -617,7 +615,6 @@ static CLASS_DEVICE_ATTR(exca, S_IRUGO, show_exca, NULL);
 	return retval;					\
 } while (0)
 
-
 static int pcc_get_status(struct pcmcia_socket *s, u_int *value)
 {
 	unsigned int sock = container_of(s, struct pcc_socket, socket)->number;
@@ -680,7 +677,6 @@ static struct pccard_operations pcc_operations = {
 	.set_io_map		= pcc_set_io_map,
 	.set_mem_map		= pcc_set_mem_map,
 };
-
 
 /*====================================================================*/
 

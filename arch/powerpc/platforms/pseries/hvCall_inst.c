@@ -102,7 +102,6 @@ static const struct file_operations hcall_inst_seq_fops = {
 #define	HCALL_ROOT_DIR		"hcall_inst"
 #define CPU_NAME_BUF_SIZE	32
 
-
 static void probe_hcall_entry(void *ignored, unsigned long opcode, unsigned long *args)
 {
 	struct hcall_stats *h;

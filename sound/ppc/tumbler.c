@@ -23,7 +23,6 @@
  *	
  */
 
-
 #include <linux/init.h>
 #include <linux/delay.h>
 #include <linux/i2c.h>
@@ -116,7 +115,6 @@ struct pmac_tumbler {
 	u8  acs;
 };
 
-
 /*
  */
 
@@ -138,7 +136,6 @@ static int send_init_client(struct pmac_keywest *i2c, unsigned int *regs)
 	}
 	return 0;
 }
-
 
 static int tumbler_init_client(struct pmac_keywest *i2c)
 {
@@ -251,7 +248,6 @@ static int tumbler_set_master_volume(struct pmac_tumbler *mix)
 	return 0;
 }
 
-
 /* output volume */
 static int tumbler_info_master_volume(struct snd_kcontrol *kcontrol,
 				      struct snd_ctl_elem_info *uinfo)
@@ -325,7 +321,6 @@ static int tumbler_put_master_switch(struct snd_kcontrol *kcontrol,
 	}
 	return change;
 }
-
 
 /*
  * TAS3001c dynamic range compression
@@ -482,7 +477,6 @@ static int tumbler_put_drc_switch(struct snd_kcontrol *kcontrol,
 	return change;
 }
 
-
 /*
  * mono volumes
  */
@@ -608,7 +602,6 @@ static struct tumbler_mono_vol snapper_treble_vol_info = {
 	.table = snapper_treble_volume_table,
 };
 
-
 #define DEFINE_MONO(xname,type) { \
 	.iface = SNDRV_CTL_ELEM_IFACE_MIXER,\
 	.name = xname, \
@@ -626,7 +619,6 @@ static struct tumbler_mono_vol snapper_treble_vol_info = {
 	.put = tumbler_put_mono, \
 	.private_value = (unsigned long)(&snapper_##type##_vol_info), \
 }
-
 
 /*
  * snapper mixer volumes
@@ -715,7 +707,6 @@ static int snapper_put_mix(struct snd_kcontrol *kcontrol,
 	}
 	return change;
 }
-
 
 /*
  * mute switches. FIXME: Turn that into software mute when both outputs are muted
@@ -837,7 +828,6 @@ static int snapper_put_capture_source(struct snd_kcontrol *kcontrol,
 	.private_value = ofs, \
 }
 
-
 /*
  */
 static struct snd_kcontrol_new tumbler_mixers[] = {
@@ -928,7 +918,6 @@ static struct snd_kcontrol_new tumbler_drc_sw = {
 	.get = tumbler_get_drc_switch,
 	.put = tumbler_put_drc_switch
 };
-
 
 #ifdef PMAC_SUPPORT_AUTOMUTE
 /*
@@ -1041,7 +1030,6 @@ static void tumbler_update_automute(struct snd_pmac *chip, int do_notify)
 	}
 }
 #endif /* PMAC_SUPPORT_AUTOMUTE */
-
 
 /* interrupt - headphone plug changed */
 static irqreturn_t headphone_intr(int irq, void *devid)

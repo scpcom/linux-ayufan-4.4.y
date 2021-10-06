@@ -22,7 +22,6 @@
 
 #include <uapi/linux/usb/audio.h>
 
-
 struct usb_audio_control {
 	struct list_head list;
 	const char *name;

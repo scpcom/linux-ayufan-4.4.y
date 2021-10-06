@@ -11,4 +11,3 @@
 #define SIOCGSTAMPNS	0x8907		/* Get stamp (timespec) */
 
 #endif /* !(_ASM_SPARC_SOCKIOS_H) */
-

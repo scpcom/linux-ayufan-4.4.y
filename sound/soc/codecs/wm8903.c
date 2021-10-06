@@ -404,7 +404,6 @@ static int wm8903_class_w_put(struct snd_kcontrol *kcontrol,
 	SOC_SINGLE_EXT(xname, reg, shift, max, invert, \
 		snd_soc_dapm_get_volsw, wm8903_class_w_put)
 
-
 static int wm8903_deemph[] = { 0, 32000, 44100, 48000 };
 
 static int wm8903_set_deemph(struct snd_soc_codec *codec)
@@ -603,7 +602,6 @@ static SOC_ENUM_SINGLE_DECL(rinput_enum,
 
 static SOC_ENUM_SINGLE_DECL(rinput_inv_enum,
 			    WM8903_ANALOGUE_RIGHT_INPUT_1, 4, rinput_mux_text);
-
 
 static const char *sidetone_text[] = {
 	"None", "Left", "Right"

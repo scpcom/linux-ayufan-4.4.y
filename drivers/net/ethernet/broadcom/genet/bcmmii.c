@@ -8,7 +8,6 @@
  * published by the Free Software Foundation.
  */
 
-
 #include <linux/types.h>
 #include <linux/delay.h>
 #include <linux/wait.h>
@@ -162,7 +161,6 @@ void bcmgenet_mii_setup(struct net_device *dev)
 
 	phy_print_status(phydev);
 }
-
 
 static int bcmgenet_fixed_phy_link_update(struct net_device *dev,
 					  struct fixed_phy_status *status)

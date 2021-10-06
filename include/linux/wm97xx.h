@@ -94,7 +94,6 @@
 #define	WM9705_MASK_SYNC	0x0030	/* rising/falling edge on mask initiates sample */
 #define WM9705_PDD(i)		(i & 0x000f)	/* pen detect comparator threshold */
 
-
 /* WM9713 Bits */
 #define WM9713_PDPOL		0x0400	/* Pen down polarity */
 #define WM9713_POLL		0x0200	/* initiate a polling measurement */
@@ -138,9 +137,7 @@
 #define WM97XX_GPIO_14		(1 << 14)
 #define WM97XX_GPIO_15		(1 << 15)
 
-
 #define AC97_LINK_FRAME		21	/* time in uS for AC97 link frame */
-
 
 /*---------------- Return codes from sample reading functions ---------------*/
 
@@ -241,7 +238,6 @@ struct wm97xx_codec_drv {
 	void (*dig_restore) (struct wm97xx *);
 	void (*aux_prepare) (struct wm97xx *);
 };
-
 
 /* Machine specific and accelerated touch operations */
 struct wm97xx_mach_ops {

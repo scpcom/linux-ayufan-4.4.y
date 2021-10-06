@@ -555,4 +555,3 @@ TRACE_EVENT(gfs2_rs,
 #define TRACE_INCLUDE_PATH .
 #define TRACE_INCLUDE_FILE trace_gfs2
 #include <trace/define_trace.h>
-

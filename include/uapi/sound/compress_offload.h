@@ -29,7 +29,6 @@
 #include <sound/asound.h>
 #include <sound/compress_params.h>
 
-
 #define SNDRV_COMPRESS_VERSION SNDRV_PROTOCOL_VERSION(0, 1, 2)
 /**
  * struct snd_compressed_buffer - compressed buffer

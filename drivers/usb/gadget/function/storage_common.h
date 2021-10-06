@@ -31,7 +31,6 @@
 #define LWARN(lun, fmt, args...)	_LMSG(pr_warn, lun, fmt, ## args)
 #define LINFO(lun, fmt, args...)	_LMSG(pr_info, lun, fmt, ## args)
 
-
 #ifdef DUMP_MSGS
 
 #  define dump_msg(fsg, /* const char * */ label,			\

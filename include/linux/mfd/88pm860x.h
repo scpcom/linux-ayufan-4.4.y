@@ -34,7 +34,6 @@ enum {
 	PM8606_ID_MAX,
 };
 
-
 /* 8606 Registers */
 #define PM8606_DCM_BOOST		(0x00)
 #define PM8606_PWM			(0x01)

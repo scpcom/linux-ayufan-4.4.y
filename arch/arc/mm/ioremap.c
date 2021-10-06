@@ -80,7 +80,6 @@ void __iomem *ioremap_prot(phys_addr_t paddr, unsigned long size,
 }
 EXPORT_SYMBOL(ioremap_prot);
 
-
 void iounmap(const void __iomem *addr)
 {
 	if (addr >= (void __force __iomem *)ARC_UNCACHED_ADDR_SPACE)

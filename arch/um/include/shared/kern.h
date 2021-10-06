@@ -19,4 +19,3 @@ extern int pause(void);
 extern void exit(int);
 
 #endif
-

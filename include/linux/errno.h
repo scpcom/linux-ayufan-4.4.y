@@ -3,7 +3,6 @@
 
 #include <uapi/linux/errno.h>
 
-
 /*
  * These should never be seen by user programs.  To return one of ERESTART*
  * codes, signal_pending() MUST be set.  Note that ptrace can observe these

@@ -194,7 +194,6 @@ MODULE_PARM_DESC(txselect,
 /* Below because most, but not all, fields of IntMask have that full suffix */
 #define INT_MASK_PM(fldname, port) SYM_MASK(IntMask, fldname##Mask##_##port)
 
-
 #define SYM_LSB(regname, fldname) (QIB_7322_##regname##_##fldname##_LSB)
 
 /*
@@ -896,7 +895,6 @@ static inline u64 read_7322_creg(const struct qib_devdata *dd, u16 regno)
 		return 0;
 	return readq(&dd->cspec->cregbase[regno]);
 
-
 }
 
 static inline u32 read_7322_creg32(const struct qib_devdata *dd, u16 regno)
@@ -904,7 +902,6 @@ static inline u32 read_7322_creg32(const struct qib_devdata *dd, u16 regno)
 	if (!dd->cspec->cregbase || !(dd->flags & QIB_PRESENT))
 		return 0;
 	return readl(&dd->cspec->cregbase[regno]);
-
 
 }
 
@@ -1020,7 +1017,6 @@ static inline u32 read_7322_creg32_port(const struct qib_pportdata *ppd,
 #define QIB_E_RESET ERR_MASK(ResetNegated)
 #define QIB_E_HARDWARE ERR_MASK(HardwareErr)
 #define QIB_E_INVALIDADDR ERR_MASK(InvalidAddrErr)
-
 
 /*
  * Per chip (rather than per-port) errors.  Most either do
@@ -7225,7 +7221,6 @@ static void qib_7322_txchk_change(struct qib_devdata *dd, u32 start,
 	 */
 	qib_read_kreg32(dd, kr_scratch);
 }
-
 
 /* useful for trigger analyzers, etc. */
 static void writescratch(struct qib_devdata *dd, u32 val)

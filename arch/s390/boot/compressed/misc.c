@@ -171,4 +171,3 @@ unsigned long decompress_kernel(void)
 	puts("Ok, booting the kernel.\n");
 	return (unsigned long) output;
 }
-

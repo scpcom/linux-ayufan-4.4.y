@@ -237,5 +237,4 @@ static inline void load_lirc_codec(void) { }
 static inline void load_xmp_decode(void) { }
 #endif
 
-
 #endif /* _RC_CORE_PRIV */

@@ -54,7 +54,6 @@
 #include <linux/linkage.h>
 #include "sha1_mb_mgr_datastruct.S"
 
-
 .extern sha1_x8_avx2
 
 # LINUX register definitions
@@ -85,7 +84,6 @@
 
 #define extra_blocks    %arg2
 #define p               %arg2
-
 
 # STACK_SPACE needs to be an odd multiple of 8
 _XMM_SAVE_SIZE  = 10*16
@@ -203,7 +201,6 @@ LABEL skip_ %I
 	call	sha1_x8_avx2
 	# state and idx are intact
 
-
 len_is_0:
 	# process completed job "idx"
 	imul    $_LANE_DATA_size, idx, lane_data
@@ -246,7 +243,6 @@ return_null:
 	xor     job_rax, job_rax
 	jmp     return
 ENDPROC(sha1_mb_mgr_flush_avx2)
-
 
 #################################################################
 

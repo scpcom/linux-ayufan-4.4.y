@@ -9,7 +9,6 @@
 #ifndef _UAPI_ASM_POWERPC_ELF_H
 #define _UAPI_ASM_POWERPC_ELF_H
 
-
 #include <linux/types.h>
 
 #include <asm/ptrace.h>
@@ -88,7 +87,6 @@
 /* keep this the last entry. */
 #define R_PPC_NUM		95
 
-
 #define ELF_NGREG	48	/* includes nip, msr, lr, etc. */
 #define ELF_NFPREG	33	/* includes fpscr */
 
@@ -156,7 +154,6 @@ typedef elf_vrreg_t elf_vrregset_t[ELF_NVRREG];
 typedef elf_vrreg_t elf_vrregset_t32[ELF_NVRREG32];
 typedef elf_fpreg_t elf_vsrreghalf_t32[ELF_NVSRHALFREG];
 #endif
-
 
 /*
  * The requirements here are:
@@ -311,6 +308,5 @@ struct ppc64_opd_entry
 	unsigned long funcaddr;
 	unsigned long r2;
 };
-
 
 #endif /* _UAPI_ASM_POWERPC_ELF_H */

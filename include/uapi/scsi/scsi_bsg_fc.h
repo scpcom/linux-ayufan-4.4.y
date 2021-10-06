@@ -33,7 +33,6 @@
 /* Default BSG request timeout (in seconds) */
 #define FC_DEFAULT_BSG_TIMEOUT		(10 * HZ)
 
-
 /*
  * Request Message Codes supported by the FC Transport
  */
@@ -54,8 +53,6 @@
 #define FC_BSG_RPT_ELS			(FC_BSG_RPT_MASK | 0x00000001)
 #define FC_BSG_RPT_CT			(FC_BSG_RPT_MASK | 0x00000002)
 
-
-
 /*
  * FC Address Identifiers in Message Structures :
  *
@@ -66,7 +63,6 @@
  *     element [1] is bits 15:8 of the FC Address Identifier
  *     element [2] is bits 7:0 of the FC Address Identifier
  */
-
 
 /*
  * FC Host Messages
@@ -90,7 +86,6 @@ struct fc_bsg_host_add_rport {
  * There is no additional response data - fc_bsg_reply->result is sufficient
  */
 
-
 /* FC_BSG_HST_DEL_RPORT : */
 
 /* Request:
@@ -110,7 +105,6 @@ struct fc_bsg_host_del_rport {
 /* Response:
  * There is no additional response data - fc_bsg_reply->result is sufficient
  */
-
 
 /* FC_BSG_HST_ELS_NOLOGIN : */
 
@@ -176,7 +170,6 @@ struct fc_bsg_ctels_reply {
 	} rjt_data;
 };
 
-
 /* FC_BSG_HST_CT : */
 
 /* Request:
@@ -206,7 +199,6 @@ struct fc_bsg_host_ct {
  * The reply structure is an fc_bsg_ctels_reply structure
  */
 
-
 /* FC_BSG_HST_VENDOR : */
 
 /* Request:
@@ -231,8 +223,6 @@ struct fc_bsg_host_vendor_reply {
 	uint32_t vendor_rsp[0];
 };
 
-
-
 /*
  * FC Remote Port Messages
  */
@@ -255,7 +245,6 @@ struct fc_bsg_rport_els {
  * The reply structure is an fc_bsg_ctels_reply structure
  */
 
-
 /* FC_BSG_RPT_CT : */
 
 /* Request:
@@ -274,9 +263,6 @@ struct fc_bsg_rport_ct {
  * The reply structure is an fc_bsg_ctels_reply structure
  */
 
-
-
-
 /* request (CDB) structure of the sg_io_v4 */
 struct fc_bsg_request {
 	uint32_t msgcode;
@@ -291,7 +277,6 @@ struct fc_bsg_request {
 		struct fc_bsg_rport_ct		r_ct;
 	} rqst_data;
 } __attribute__((packed));
-
 
 /* response (request sense data) structure of the sg_io_v4 */
 struct fc_bsg_reply {
@@ -315,6 +300,4 @@ struct fc_bsg_reply {
 	} reply_data;
 };
 
-
 #endif /* SCSI_BSG_FC_H */
-

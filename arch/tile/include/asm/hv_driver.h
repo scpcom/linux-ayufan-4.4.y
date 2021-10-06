@@ -56,5 +56,4 @@ tile_hv_dev_pwritea(int devhdl, __hv32 flags, __hv32 sgl_len,
 			      offset, (HV_IntArg)callback);
 }
 
-
 #endif /* _ASM_TILE_HV_DRIVER_H */

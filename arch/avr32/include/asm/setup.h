@@ -13,7 +13,6 @@
 
 #include <uapi/asm/setup.h>
 
-
 /* Magic number indicating that a tag table is present */
 #define ATAG_MAGIC	0xa2a25441
 

@@ -426,7 +426,6 @@ static void atombios_disable_ss(struct radeon_device *rdev, int pll_id)
 	}
 }
 
-
 union atom_enable_ss {
 	ENABLE_LVDS_SS_PARAMETERS lvds_ss;
 	ENABLE_LVDS_SS_PARAMETERS_V2 lvds_ss_2;

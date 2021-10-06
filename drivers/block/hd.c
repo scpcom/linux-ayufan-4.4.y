@@ -151,7 +151,6 @@ if ((do_hd = (x)) != NULL) \
 else \
 	del_timer(&device_timer);
 
-
 #if (HD_DELAY > 0)
 
 #include <linux/i8253.h>

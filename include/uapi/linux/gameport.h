@@ -8,8 +8,6 @@
 #ifndef _UAPI_GAMEPORT_H
 #define _UAPI_GAMEPORT_H
 
-
-
 #define GAMEPORT_MODE_DISABLED		0
 #define GAMEPORT_MODE_RAW		1
 #define GAMEPORT_MODE_COOKED		2

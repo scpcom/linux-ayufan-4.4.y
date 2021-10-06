@@ -89,7 +89,6 @@ STATIC int	xfs_da3_blk_unlink(xfs_da_state_t *state,
 				  xfs_da_state_blk_t *drop_blk,
 				  xfs_da_state_blk_t *save_blk);
 
-
 kmem_zone_t *xfs_da_state_zone;	/* anchor for state struct zone */
 
 /*
@@ -1510,7 +1509,6 @@ xfs_da3_node_lookup_int(
 
 		blk->magic = XFS_DA_NODE_MAGIC;
 
-
 		/*
 		 * Search an intermediate node for a match.
 		 */
@@ -1899,7 +1897,6 @@ xfs_da3_path_shift(
 		       info->magic == cpu_to_be16(XFS_ATTR_LEAF_MAGIC) ||
 		       info->magic == cpu_to_be16(XFS_ATTR3_LEAF_MAGIC));
 
-
 		/*
 		 * Note: we flatten the magic number to a single type so we
 		 * don't have to compare against crc/non-crc types elsewhere.
@@ -1941,7 +1938,6 @@ xfs_da3_path_shift(
 	*result = 0;
 	return 0;
 }
-
 
 /*========================================================================
  * Utility routines.

@@ -29,8 +29,6 @@
  *   (spin_lock_bh) to prevent concurrent use.
  */
 
-
-
 #include <asm/delay.h>
 #include <asm/uaccess.h>
 
@@ -53,7 +51,6 @@
 #include "hostap_80211.h"
 #include "hostap.h"
 #include "hostap_ap.h"
-
 
 /* #define final_version */
 
@@ -110,7 +107,6 @@ MODULE_PARM_DESC(dev_template, "Prefix for network device name (default: "
 #define HFA384X_TX_CTRL_FLAGS \
 	(HFA384X_TX_CTRL_802_11 | HFA384X_TX_CTRL_TX_EX)
 
-
 /* ca. 1 usec */
 #define HFA384X_CMD_BUSY_TIMEOUT 5000
 #define HFA384X_BAP_BUSY_TIMEOUT 50000
@@ -123,7 +119,6 @@ MODULE_PARM_DESC(dev_template, "Prefix for network device name (default: "
  * waiting for long time. */
 #define HFA384X_INIT_TIMEOUT (HZ / 2) /* 500 ms */
 #define HFA384X_ALLOC_COMPL_TIMEOUT (HZ / 20) /* 50 ms */
-
 
 static void prism2_hw_reset(struct net_device *dev);
 static void prism2_check_sta_fw_version(local_info_t *local);
@@ -142,21 +137,16 @@ static int prism2_download_genesis(local_info_t *local,
 static int prism2_get_ram_size(local_info_t *local);
 #endif /* PRISM2_DOWNLOAD_SUPPORT */
 
-
-
-
 #ifndef final_version
 /* magic value written to SWSUPPORT0 reg. for detecting whether card is still
  * present */
 #define HFA384X_MAGIC 0x8A32
 #endif
 
-
 static u16 hfa384x_read_reg(struct net_device *dev, u16 reg)
 {
 	return HFA384X_INW(reg);
 }
-
 
 static void hfa384x_read_regs(struct net_device *dev,
 			      struct hfa384x_regs *regs)
@@ -167,7 +157,6 @@ static void hfa384x_read_regs(struct net_device *dev,
 	regs->offset1 = HFA384X_INW(HFA384X_OFFSET1_OFF);
 	regs->swsupport0 = HFA384X_INW(HFA384X_SWSUPPORT0_OFF);
 }
-
 
 /**
  * __hostap_cmd_queue_free - Free Prism2 command queue entry (private)
@@ -194,7 +183,6 @@ static inline void __hostap_cmd_queue_free(local_info_t *local,
 		kfree(entry);
 }
 
-
 /**
  * hostap_cmd_queue_free - Free Prism2 command queue entry
  * @local: pointer to private Host AP driver data
@@ -213,7 +201,6 @@ static inline void hostap_cmd_queue_free(local_info_t *local,
 	__hostap_cmd_queue_free(local, entry, del_req);
 	spin_unlock_irqrestore(&local->cmdlock, flags);
 }
-
 
 /**
  * prism2_clear_cmd_queue - Free all pending Prism2 command queue entries
@@ -244,7 +231,6 @@ static void prism2_clear_cmd_queue(local_info_t *local)
 	}
 	spin_unlock_irqrestore(&local->cmdlock, flags);
 }
-
 
 /**
  * hfa384x_cmd_issue - Issue a Prism2 command to the hardware
@@ -304,7 +290,6 @@ static int hfa384x_cmd_issue(struct net_device *dev,
 
 	return 0;
 }
-
 
 /**
  * hfa384x_cmd - Issue a Prism2 command and wait (sleep) for completion
@@ -476,7 +461,6 @@ static int hfa384x_cmd(struct net_device *dev, u16 cmd, u16 param0,
 	return res;
 }
 
-
 /**
  * hfa384x_cmd_callback - Issue a Prism2 command; callback when completed
  * @dev: pointer to net_device
@@ -541,7 +525,6 @@ static int hfa384x_cmd_callback(struct net_device *dev, u16 cmd, u16 param0,
 	return ret;
 }
 
-
 /**
  * __hfa384x_cmd_no_wait - Issue a Prism2 command (private)
  * @dev: pointer to net_device
@@ -578,7 +561,6 @@ static int __hfa384x_cmd_no_wait(struct net_device *dev, u16 cmd, u16 param0,
 
 	return 0;
 }
-
 
 /**
  * hfa384x_cmd_wait - Issue a Prism2 command and busy wait for completion
@@ -629,7 +611,6 @@ static int hfa384x_cmd_wait(struct net_device *dev, u16 cmd, u16 param0)
 	return res;
 }
 
-
 /**
  * hfa384x_cmd_no_wait - Issue a Prism2 command; do not wait for completion
  * @dev: pointer to net_device
@@ -641,7 +622,6 @@ static inline int hfa384x_cmd_no_wait(struct net_device *dev, u16 cmd,
 {
 	return __hfa384x_cmd_no_wait(dev, cmd, param0, 6);
 }
-
 
 /**
  * prism2_cmd_ev - Prism2 command completion event handler
@@ -732,7 +712,6 @@ static void prism2_cmd_ev(struct net_device *dev)
 	}
 }
 
-
 static int hfa384x_wait_offset(struct net_device *dev, u16 o_off)
 {
 	int tries = HFA384X_BAP_BUSY_TIMEOUT;
@@ -745,7 +724,6 @@ static int hfa384x_wait_offset(struct net_device *dev, u16 o_off)
 	}
 	return res;
 }
-
 
 /* Offset must be even */
 static int hfa384x_setup_bap(struct net_device *dev, u16 bap, u16 id,
@@ -796,7 +774,6 @@ static int hfa384x_setup_bap(struct net_device *dev, u16 bap, u16 id,
  out:
 	return ret;
 }
-
 
 static int hfa384x_get_rid(struct net_device *dev, u16 rid, void *buf, int len,
 			   int exact_len)
@@ -871,7 +848,6 @@ static int hfa384x_get_rid(struct net_device *dev, u16 rid, void *buf, int len,
 	return rlen;
 }
 
-
 static int hfa384x_set_rid(struct net_device *dev, u16 rid, void *buf, int len)
 {
 	struct hostap_interface *iface;
@@ -931,14 +907,12 @@ static int hfa384x_set_rid(struct net_device *dev, u16 rid, void *buf, int len)
 	return res;
 }
 
-
 static void hfa384x_disable_interrupts(struct net_device *dev)
 {
 	/* disable interrupts and clear event status */
 	HFA384X_OUTW(0, HFA384X_INTEN_OFF);
 	HFA384X_OUTW(0xffff, HFA384X_EVACK_OFF);
 }
-
 
 static void hfa384x_enable_interrupts(struct net_device *dev)
 {
@@ -947,25 +921,21 @@ static void hfa384x_enable_interrupts(struct net_device *dev)
 	HFA384X_OUTW(HFA384X_EVENT_MASK, HFA384X_INTEN_OFF);
 }
 
-
 static void hfa384x_events_no_bap0(struct net_device *dev)
 {
 	HFA384X_OUTW(HFA384X_EVENT_MASK & ~HFA384X_BAP0_EVENTS,
 		     HFA384X_INTEN_OFF);
 }
 
-
 static void hfa384x_events_all(struct net_device *dev)
 {
 	HFA384X_OUTW(HFA384X_EVENT_MASK, HFA384X_INTEN_OFF);
 }
 
-
 static void hfa384x_events_only_cmd(struct net_device *dev)
 {
 	HFA384X_OUTW(HFA384X_EV_CMD, HFA384X_INTEN_OFF);
 }
-
 
 static u16 hfa384x_allocate_fid(struct net_device *dev, int len)
 {
@@ -995,7 +965,6 @@ static u16 hfa384x_allocate_fid(struct net_device *dev, int len)
 
 	return fid;
 }
-
 
 static int prism2_reset_port(struct net_device *dev)
 {
@@ -1039,7 +1008,6 @@ static int prism2_reset_port(struct net_device *dev)
 	return res;
 }
 
-
 static int prism2_get_version_info(struct net_device *dev, u16 rid,
 				   const char *txt)
 {
@@ -1064,7 +1032,6 @@ static int prism2_get_version_info(struct net_device *dev, u16 rid,
 	       __le16_to_cpu(comp.minor), __le16_to_cpu(comp.variant));
 	return 0;
 }
-
 
 static int prism2_setup_rids(struct net_device *dev)
 {
@@ -1287,7 +1254,6 @@ static int prism2_setup_rids(struct net_device *dev)
 	return ret;
 }
 
-
 static int prism2_hw_init(struct net_device *dev, int initial)
 {
 	struct hostap_interface *iface;
@@ -1342,7 +1308,6 @@ static int prism2_hw_init(struct net_device *dev, int initial)
 	HFA384X_OUTW(HFA384X_EV_CMD, HFA384X_EVACK_OFF);
 	return 0;
 }
-
 
 static int prism2_hw_init2(struct net_device *dev, int initial)
 {
@@ -1441,7 +1406,6 @@ static int prism2_hw_init2(struct net_device *dev, int initial)
 	return 1;
 }
 
-
 static int prism2_hw_enable(struct net_device *dev, int initial)
 {
 	struct hostap_interface *iface;
@@ -1480,7 +1444,6 @@ static int prism2_hw_enable(struct net_device *dev, int initial)
 	return 0;
 }
 
-
 static int prism2_hw_config(struct net_device *dev, int initial)
 {
 	struct hostap_interface *iface;
@@ -1511,7 +1474,6 @@ static int prism2_hw_config(struct net_device *dev, int initial)
 
 	return 0;
 }
-
 
 static void prism2_hw_shutdown(struct net_device *dev, int no_disable)
 {
@@ -1546,7 +1508,6 @@ static void prism2_hw_shutdown(struct net_device *dev, int no_disable)
 	else
 		prism2_clear_cmd_queue(local);
 }
-
 
 static void prism2_hw_reset(struct net_device *dev)
 {
@@ -1627,12 +1588,10 @@ static void prism2_hw_reset(struct net_device *dev)
 	/* TODO: restore beacon TIM bits for STAs that have buffered frames */
 }
 
-
 static void prism2_schedule_reset(local_info_t *local)
 {
 	schedule_work(&local->reset_queue);
 }
-
 
 /* Called only as scheduled task after noticing card timeout in interrupt
  * context */
@@ -1655,7 +1614,6 @@ static void handle_reset_queue(struct work_struct *work)
 			}
 	}
 }
-
 
 static int prism2_get_txfid_idx(local_info_t *local)
 {
@@ -1682,7 +1640,6 @@ static int prism2_get_txfid_idx(local_info_t *local)
 
 	return -1;
 }
-
 
 /* Called only from hardware IRQ */
 static void prism2_transmit_cb(struct net_device *dev, long context,
@@ -1750,7 +1707,6 @@ static void prism2_transmit_cb(struct net_device *dev, long context,
 	netif_stop_queue(dev);
 }
 
-
 /* Called only from software IRQ if PCI bus master is not used (with bus master
  * this can be called both from software and hardware IRQ) */
 static int prism2_transmit(struct net_device *dev, int idx)
@@ -1797,7 +1753,6 @@ static int prism2_transmit(struct net_device *dev, int idx)
 
 	return 0;
 }
-
 
 /* Send IEEE 802.11 frame (convert the header into Prism2 TX descriptor and
  * send the payload with this descriptor) */
@@ -1888,7 +1843,6 @@ fail:
 	return ret;
 }
 
-
 /* Some SMP systems have reported number of odd errors with hostap_pci. fid
  * register has changed values between consecutive reads for an unknown reason.
  * This should really not happen, so more debugging is needed. This test
@@ -1925,7 +1879,6 @@ static u16 prism2_read_fid_reg(struct net_device *dev, u16 reg)
 	return HFA384X_INW(reg);
 #endif /* EXTRA_FID_READ_TESTS */
 }
-
 
 /* Called only as a tasklet (software IRQ) */
 static void prism2_rx(local_info_t *local)
@@ -2029,7 +1982,6 @@ static void prism2_rx(local_info_t *local)
 	goto rx_exit;
 }
 
-
 /* Called only as a tasklet (software IRQ) */
 static void hostap_rx_skb(local_info_t *local, struct sk_buff *skb)
 {
@@ -2087,7 +2039,6 @@ static void hostap_rx_skb(local_info_t *local, struct sk_buff *skb)
 	dev_kfree_skb(skb);
 }
 
-
 /* Called only as a tasklet (software IRQ) */
 static void hostap_rx_tasklet(unsigned long data)
 {
@@ -2097,7 +2048,6 @@ static void hostap_rx_tasklet(unsigned long data)
 	while ((skb = skb_dequeue(&local->rx_list)) != NULL)
 		hostap_rx_skb(local, skb);
 }
-
 
 /* Called only from hardware IRQ */
 static void prism2_alloc_ev(struct net_device *dev)
@@ -2164,7 +2114,6 @@ static void prism2_alloc_ev(struct net_device *dev)
 	 * then card reset after all txfids have been leaked. */
 }
 
-
 /* Called only as a tasklet (software IRQ) */
 static void hostap_tx_callback(local_info_t *local,
 			       struct hfa384x_tx_frame *txdesc, int ok,
@@ -2214,7 +2163,6 @@ static void hostap_tx_callback(local_info_t *local,
 	cb->func(skb, ok, cb->data);
 }
 
-
 /* Called only as a tasklet (software IRQ) */
 static int hostap_tx_compl_read(local_info_t *local, int error,
 				struct hfa384x_tx_frame *txdesc,
@@ -2263,7 +2211,6 @@ static int hostap_tx_compl_read(local_info_t *local, int error,
 	return ret;
 }
 
-
 /* Called only as a tasklet (software IRQ) */
 static void prism2_tx_ev(local_info_t *local)
 {
@@ -2292,7 +2239,6 @@ static void prism2_tx_ev(local_info_t *local)
 	HFA384X_OUTW(HFA384X_EV_TX, HFA384X_EVACK_OFF);
 }
 
-
 /* Called only as a tasklet (software IRQ) */
 static void hostap_sta_tx_exc_tasklet(unsigned long data)
 {
@@ -2315,7 +2261,6 @@ static void hostap_sta_tx_exc_tasklet(unsigned long data)
 		dev_kfree_skb(skb);
 	}
 }
-
 
 /* Called only as a tasklet (software IRQ) */
 static void prism2_txexc(local_info_t *local)
@@ -2395,7 +2340,6 @@ static void prism2_txexc(local_info_t *local)
 	       txdesc.addr3, txdesc.addr4);
 }
 
-
 /* Called only as a tasklet (software IRQ) */
 static void hostap_info_tasklet(unsigned long data)
 {
@@ -2407,7 +2351,6 @@ static void hostap_info_tasklet(unsigned long data)
 		dev_kfree_skb(skb);
 	}
 }
-
 
 /* Called only as a tasklet (software IRQ) */
 static void prism2_info(local_info_t *local)
@@ -2474,7 +2417,6 @@ static void prism2_info(local_info_t *local)
 	HFA384X_OUTW(HFA384X_EV_INFO, HFA384X_EVACK_OFF);
 }
 
-
 /* Called only as a tasklet (software IRQ) */
 static void hostap_bap_tasklet(unsigned long data)
 {
@@ -2512,7 +2454,6 @@ static void hostap_bap_tasklet(unsigned long data)
 	clear_bit(HOSTAP_BITS_BAP_TASKLET2, &local->bits);
 }
 
-
 /* Called only from hardware IRQ */
 static void prism2_infdrop(struct net_device *dev)
 {
@@ -2531,7 +2472,6 @@ static void prism2_infdrop(struct net_device *dev)
 		last_inquire = jiffies;
 	}
 }
-
 
 /* Called only from hardware IRQ */
 static void prism2_ev_tick(struct net_device *dev)
@@ -2564,7 +2504,6 @@ static void prism2_ev_tick(struct net_device *dev)
 	} else
 		prev_stuck = 0;
 }
-
 
 /* Called only from hardware IRQ */
 static void prism2_check_magic(local_info_t *local)
@@ -2603,7 +2542,6 @@ static void prism2_check_magic(local_info_t *local)
 #endif /* final_version */
 #endif /* !PRISM2_PCI */
 }
-
 
 /* Called only from hardware IRQ */
 static irqreturn_t prism2_interrupt(int irq, void *dev_id)
@@ -2732,7 +2670,6 @@ static irqreturn_t prism2_interrupt(int irq, void *dev_id)
 	return IRQ_RETVAL(events);
 }
 
-
 static void prism2_check_sta_fw_version(local_info_t *local)
 {
 	struct hfa384x_comp_ident comp;
@@ -2788,7 +2725,6 @@ static void prism2_check_sta_fw_version(local_info_t *local)
 
 	hostap_check_sta_fw_version(local->ap, local->sta_fw_ver);
 }
-
 
 static void hostap_passive_scan(unsigned long data)
 {
@@ -2850,7 +2786,6 @@ static void hostap_passive_scan(unsigned long data)
 	add_timer(&local->passive_scan_timer);
 }
 
-
 /* Called only as a scheduled task when communications quality values should
  * be updated. */
 static void handle_comms_qual_update(struct work_struct *work)
@@ -2859,7 +2794,6 @@ static void handle_comms_qual_update(struct work_struct *work)
 		container_of(work, local_info_t, comms_qual_update);
 	prism2_update_comms_qual(local->dev);
 }
-
 
 /* Software watchdog - called as a timer. Hardware interrupt (Tick event) is
  * used to monitor that local->last_tick_timer is being updated. If not,
@@ -2891,7 +2825,6 @@ static void hostap_tick_timer(unsigned long data)
 	local->tick_timer.expires = jiffies + 2 * HZ;
 	add_timer(&local->tick_timer);
 }
-
 
 #ifndef PRISM2_NO_PROCFS_DEBUG
 static int prism2_registers_proc_show(struct seq_file *m, void *v)
@@ -2962,7 +2895,6 @@ static const struct file_operations prism2_registers_proc_fops = {
 
 #endif /* PRISM2_NO_PROCFS_DEBUG */
 
-
 struct set_tim_data {
 	struct list_head list;
 	int aid;
@@ -3009,7 +2941,6 @@ static int prism2_set_tim(struct net_device *dev, int aid, int set)
 	return 0;
 }
 
-
 static void handle_set_tim_queue(struct work_struct *work)
 {
 	local_info_t *local = container_of(work, local_info_t, set_tim_queue);
@@ -3044,7 +2975,6 @@ static void handle_set_tim_queue(struct work_struct *work)
 	}
 }
 
-
 static void prism2_clear_set_tim_queue(local_info_t *local)
 {
 	struct list_head *ptr, *n;
@@ -3056,7 +2986,6 @@ static void prism2_clear_set_tim_queue(local_info_t *local)
 		kfree(entry);
 	}
 }
-
 
 /*
  * HostAP uses two layers of net devices, where the inner
@@ -3261,7 +3190,6 @@ while (0)
 	return NULL;
 }
 
-
 static int hostap_hw_ready(struct net_device *dev)
 {
 	struct hostap_interface *iface;
@@ -3289,7 +3217,6 @@ static int hostap_hw_ready(struct net_device *dev)
 
 	return -1;
 }
-
 
 static void prism2_free_local_data(struct net_device *dev)
 {
@@ -3386,7 +3313,6 @@ static void prism2_free_local_data(struct net_device *dev)
 	free_netdev(local->dev);
 }
 
-
 #if (defined(PRISM2_PCI) && defined(CONFIG_PM)) || defined(PRISM2_PCCARD)
 static void prism2_suspend(struct net_device *dev)
 {
@@ -3407,7 +3333,6 @@ static void prism2_suspend(struct net_device *dev)
 	prism2_hw_shutdown(dev, 0);
 }
 #endif /* (PRISM2_PCI && CONFIG_PM) || PRISM2_PCCARD */
-
 
 /* These might at some point be compiled separately and used as separate
  * kernel modules or linked into one */

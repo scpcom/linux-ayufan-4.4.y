@@ -96,7 +96,6 @@ struct snic_req_info {
 	struct completion *dr_done;
 };
 
-
 #define rqi_to_req(rqi)	\
 	((struct snic_host_req *) (((struct snic_req_info *)rqi)->req))
 

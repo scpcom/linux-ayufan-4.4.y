@@ -107,7 +107,6 @@ void __iomem *sun3_ioremap(unsigned long phys, unsigned long size,
 }
 EXPORT_SYMBOL(sun3_ioremap);
 
-
 void __iomem *__ioremap(unsigned long phys, unsigned long size, int cache)
 {
 

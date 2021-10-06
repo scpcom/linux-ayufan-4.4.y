@@ -20,7 +20,6 @@
 
 #include <linux/power/bq24190_charger.h>
 
-
 #define	BQ24190_MANUFACTURER	"Texas Instruments"
 
 #define BQ24190_REG_ISC		0x00 /* Input Source Control */

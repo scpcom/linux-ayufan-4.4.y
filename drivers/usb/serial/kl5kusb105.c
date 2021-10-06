@@ -51,7 +51,6 @@
 #define DRIVER_AUTHOR "Utz-Uwe Haus <haus@uuhaus.de>, Johan Hovold <jhovold@gmail.com>"
 #define DRIVER_DESC "KLSI KL5KUSB105 chipset USB->Serial Converter driver"
 
-
 /*
  * Function prototypes
  */
@@ -118,11 +117,9 @@ struct klsi_105_private {
 	spinlock_t			lock;
 };
 
-
 /*
  * Handle vendor specific USB requests
  */
-
 
 #define KLSI_TIMEOUT	 5000 /* default urb timeout */
 
@@ -207,7 +204,6 @@ static int klsi_105_get_line_state(struct usb_serial_port *port,
 	kfree(status_buf);
 	return rc;
 }
-
 
 /*
  * Driver's tty interface functions

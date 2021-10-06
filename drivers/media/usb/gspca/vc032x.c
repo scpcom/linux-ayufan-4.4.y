@@ -65,7 +65,6 @@ enum sensors {
 	NSENSORS
 };
 
-
 static const struct v4l2_pix_format vc0321_mode[] = {
 	{320, 240, V4L2_PIX_FMT_YVYU, V4L2_FIELD_NONE,
 		.bytesperline = 320 * 2,
@@ -3126,7 +3125,6 @@ static void usb_exchange(struct gspca_dev *gspca_dev,
 	}
 	/*not reached*/
 }
-
 
 /* this function is called at probe time */
 static int sd_config(struct gspca_dev *gspca_dev,

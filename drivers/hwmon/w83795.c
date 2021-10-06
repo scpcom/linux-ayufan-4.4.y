@@ -42,11 +42,9 @@ static const unsigned short normal_i2c[] = {
 	0x2c, 0x2d, 0x2e, 0x2f, I2C_CLIENT_END
 };
 
-
 static bool reset;
 module_param(reset, bool, 0);
 MODULE_PARM_DESC(reset, "Set to 1 to reset chip, not recommended");
-
 
 #define W83795_REG_BANKSEL		0x00
 #define W83795_REG_VENDORID		0xfd
@@ -159,7 +157,6 @@ static const u8 IN_LSB_SHIFT_IDX[][2] = {
 	{0x06, 0x09},	/* VSEN17 */
 };
 
-
 #define W83795_REG_FAN(index)		(0x2E + (index))
 #define W83795_REG_FAN_MIN_HL(index)	(0xB6 + (index))
 #define W83795_REG_FAN_MIN_LSB(index)	(0xC4 + (index) / 2)
@@ -176,7 +173,6 @@ static const u8 IN_LSB_SHIFT_IDX[][2] = {
 
 #define W83795_REG_OVT_CFG		0x58
 #define OVT_CFG_SEL			(1 << 7)
-
 
 #define W83795_REG_FCMS1		0x201
 #define W83795_REG_FCMS2		0x208
@@ -1191,7 +1187,6 @@ store_fanin(struct device *dev, struct device_attribute *attr,
 	return count;
 }
 
-
 static ssize_t
 show_temp_pwm(struct device *dev, struct device_attribute *attr, char *buf)
 {
@@ -1325,7 +1320,6 @@ store_sf4_temp(struct device *dev, struct device_attribute *attr,
 	return count;
 }
 
-
 static ssize_t
 show_temp(struct device *dev, struct device_attribute *attr, char *buf)
 {
@@ -1362,7 +1356,6 @@ store_temp(struct device *dev, struct device_attribute *attr,
 	mutex_unlock(&data->update_lock);
 	return count;
 }
-
 
 static ssize_t
 show_dts_mode(struct device *dev, struct device_attribute *attr, char *buf)
@@ -1424,7 +1417,6 @@ store_dts_ext(struct device *dev, struct device_attribute *attr,
 	return count;
 }
 
-
 static ssize_t
 show_temp_mode(struct device *dev, struct device_attribute *attr, char *buf)
 {
@@ -1481,7 +1473,6 @@ store_temp_mode(struct device *dev, struct device_attribute *attr,
 	mutex_unlock(&data->update_lock);
 	return count;
 }
-
 
 /* show/store VIN */
 static ssize_t
@@ -1557,7 +1548,6 @@ store_in(struct device *dev, struct device_attribute *attr,
 	return count;
 }
 
-
 #ifdef CONFIG_SENSORS_W83795_FANCTRL
 static ssize_t
 show_sf_setup(struct device *dev, struct device_attribute *attr, char *buf)
@@ -1611,7 +1601,6 @@ store_sf_setup(struct device *dev, struct device_attribute *attr,
 	return count;
 }
 #endif
-
 
 #define NOT_USED			-1
 
@@ -1751,7 +1740,6 @@ store_sf_setup(struct device *dev, struct device_attribute *attr,
 		show_sf4_temp, store_sf4_temp, 5, index - 1),		\
 	SENSOR_ATTR_2(temp##index##_auto_point7_temp, S_IRUGO | S_IWUSR,\
 		show_sf4_temp, store_sf4_temp, 6, index - 1) }
-
 
 static struct sensor_device_attribute_2 w83795_in[][5] = {
 	SENSOR_ATTR_IN(0),
@@ -2256,7 +2244,6 @@ static int w83795_remove(struct i2c_client *client)
 
 	return 0;
 }
-
 
 static const struct i2c_device_id w83795_id[] = {
 	{ "w83795g", w83795g },

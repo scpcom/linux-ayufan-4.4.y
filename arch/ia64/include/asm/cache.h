@@ -1,7 +1,6 @@
 #ifndef _ASM_IA64_CACHE_H
 #define _ASM_IA64_CACHE_H
 
-
 /*
  * Copyright (C) 1998-2000 Hewlett-Packard Co
  *	David Mosberger-Tang <davidm@hpl.hp.com>

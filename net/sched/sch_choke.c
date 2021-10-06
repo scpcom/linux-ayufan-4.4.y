@@ -407,7 +407,6 @@ static const struct nla_policy choke_policy[TCA_CHOKE_MAX + 1] = {
 	[TCA_CHOKE_MAX_P]	= { .type = NLA_U32 },
 };
 
-
 static void choke_free(void *addr)
 {
 	kvfree(addr);

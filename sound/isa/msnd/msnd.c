@@ -52,7 +52,6 @@
 
 #define LOGNAME			"msnd"
 
-
 void snd_msnd_init_queue(void *base, int start, int size)
 {
 	writew(PCTODSP_BASED(start), base + JQS_wStart);
@@ -253,7 +252,6 @@ void snd_msnd_dsp_halt(struct snd_msnd *chip, struct file *file)
 	}
 }
 EXPORT_SYMBOL(snd_msnd_dsp_halt);
-
 
 int snd_msnd_DARQ(struct snd_msnd *chip, int bank)
 {
@@ -474,7 +472,6 @@ static struct snd_pcm_hardware snd_msnd_capture = {
 	.fifo_size =		0,
 };
 
-
 static int snd_msnd_playback_open(struct snd_pcm_substream *substream)
 {
 	struct snd_pcm_runtime *runtime = substream->runtime;
@@ -500,7 +497,6 @@ static int snd_msnd_playback_close(struct snd_pcm_substream *substream)
 	clear_bit(F_AUDIO_WRITE_INUSE, &chip->flags);
 	return 0;
 }
-
 
 static int snd_msnd_playback_hw_params(struct snd_pcm_substream *substream,
 					struct snd_pcm_hw_params *params)
@@ -570,7 +566,6 @@ snd_msnd_playback_pointer(struct snd_pcm_substream *substream)
 	return bytes_to_frames(substream->runtime, chip->playDMAPos);
 }
 
-
 static struct snd_pcm_ops snd_msnd_playback_ops = {
 	.open =		snd_msnd_playback_open,
 	.close =	snd_msnd_playback_close,
@@ -637,7 +632,6 @@ static int snd_msnd_capture_trigger(struct snd_pcm_substream *substream,
 	return -EINVAL;
 }
 
-
 static snd_pcm_uframes_t
 snd_msnd_capture_pointer(struct snd_pcm_substream *substream)
 {
@@ -646,7 +640,6 @@ snd_msnd_capture_pointer(struct snd_pcm_substream *substream)
 
 	return bytes_to_frames(runtime, chip->captureDMAPos);
 }
-
 
 static int snd_msnd_capture_hw_params(struct snd_pcm_substream *substream,
 					struct snd_pcm_hw_params *params)
@@ -667,7 +660,6 @@ static int snd_msnd_capture_hw_params(struct snd_pcm_substream *substream,
 	return 0;
 }
 
-
 static struct snd_pcm_ops snd_msnd_capture_ops = {
 	.open =		snd_msnd_capture_open,
 	.close =	snd_msnd_capture_close,
@@ -677,7 +669,6 @@ static struct snd_pcm_ops snd_msnd_capture_ops = {
 	.trigger =	snd_msnd_capture_trigger,
 	.pointer =	snd_msnd_capture_pointer,
 };
-
 
 int snd_msnd_pcm(struct snd_card *card, int device)
 {
@@ -701,4 +692,3 @@ EXPORT_SYMBOL(snd_msnd_pcm);
 
 MODULE_DESCRIPTION("Common routines for Turtle Beach Multisound drivers");
 MODULE_LICENSE("GPL");
-

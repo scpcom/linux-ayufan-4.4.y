@@ -64,7 +64,6 @@ static const unsigned short normal_i2c[] = { 0x28, 0x29, 0x2a, 0x2b, 0x2c, 0x2d,
 #define LM96080_REG_MAN_ID		0x3e
 #define LM96080_REG_DEV_ID		0x3f
 
-
 /*
  * Conversions. Rounding and limit checking is only done on the TO_REG
  * variants. Note that you should be a bit careful with which arguments

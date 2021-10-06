@@ -30,7 +30,6 @@
 
 #include <net/ax88796.h>
 
-
 /* Rename the lib8390.c functions to show that they are in this driver */
 #define __ei_open ax_ei_open
 #define __ei_close ax_ei_close
@@ -166,7 +165,6 @@ static void ax_reset_8390(struct net_device *dev)
 	ei_outb(ENISR_RESET, addr + EN0_ISR);	/* Ack intr. */
 }
 
-
 static void ax_get_8390_hdr(struct net_device *dev, struct e8390_pkt_hdr *hdr,
 			    int ring_page)
 {
@@ -202,7 +200,6 @@ static void ax_get_8390_hdr(struct net_device *dev, struct e8390_pkt_hdr *hdr,
 
 	le16_to_cpus(&hdr->count);
 }
-
 
 /*
  * Block input and output, similar to the Crynwr packet driver. If

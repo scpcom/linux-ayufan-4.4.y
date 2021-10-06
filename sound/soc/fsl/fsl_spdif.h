@@ -37,7 +37,6 @@
 #define REG_SPDIF_SRFM			0x44	/* FreqMeas Register */
 #define REG_SPDIF_STC			0x50	/* SPDIFTxClk Register */
 
-
 /* SPDIF Configuration register */
 #define SCR_RXFIFO_CTL_OFFSET		23
 #define SCR_RXFIFO_CTL_MASK		(1 << SCR_RXFIFO_CTL_OFFSET)
@@ -171,11 +170,9 @@ enum spdif_txrate {
 };
 #define SPDIF_TXRATE_MAX		(SPDIF_TXRATE_192000 + 1)
 
-
 #define SPDIF_CSTATUS_BYTE		6
 #define SPDIF_UBITS_SIZE		96
 #define SPDIF_QSUB_SIZE			(SPDIF_UBITS_SIZE / 8)
-
 
 #define FSL_SPDIF_RATES_PLAYBACK	(SNDRV_PCM_RATE_32000 |	\
 					 SNDRV_PCM_RATE_44100 |	\

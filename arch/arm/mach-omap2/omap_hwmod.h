@@ -224,7 +224,6 @@ struct omap_hwmod_opt_clk {
 	struct clk	*_clk;
 };
 
-
 /* omap_hwmod_omap2_firewall.flags bits */
 #define OMAP_FIREWALL_L3		(1 << 0)
 #define OMAP_FIREWALL_L4		(1 << 1)
@@ -242,7 +241,6 @@ struct omap_hwmod_omap2_firewall {
 	u8 l4_prot_group;
 	u8 flags;
 };
-
 
 /*
  * omap_hwmod_addr_space.flags bits
@@ -270,7 +268,6 @@ struct omap_hwmod_addr_space {
 	u8 flags;
 };
 
-
 /*
  * omap_hwmod_ocp_if.user bits: these indicate the initiators that use this
  * interface to interact with the hwmod.  Used to add sleep dependencies
@@ -287,7 +284,6 @@ struct omap_hwmod_addr_space {
 
 /* omap_hwmod_ocp_if._int_flags possibilities */
 #define _OCPIF_INT_FLAGS_REGISTERED	(1 << 0)
-
 
 /**
  * struct omap_hwmod_ocp_if - OCP interface data
@@ -321,7 +317,6 @@ struct omap_hwmod_ocp_if {
 	u8				flags;
 	u8				_int_flags;
 };
-
 
 /* Macros for use in struct omap_hwmod_sysconfig */
 
@@ -474,7 +469,6 @@ struct omap_hwmod_omap4_prcm {
 	u8		flags;
 	int		context_lost_counter;
 };
-
 
 /*
  * omap_hwmod.flags definitions

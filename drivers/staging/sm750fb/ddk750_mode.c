@@ -72,8 +72,6 @@ static unsigned long displayControlAdjust_SM750LE(mode_parameter_t *pModeParam, 
 	return dispControl;
 }
 
-
-
 /* only timing related registers will be  programed */
 static int programModeRegisters(mode_parameter_t *pModeParam, pll_value_t *pll)
 {
@@ -100,12 +98,10 @@ static int programModeRegisters(mode_parameter_t *pModeParam, pll_value_t *pll)
 		FIELD_VALUE(0, CRT_VERTICAL_SYNC, HEIGHT, pModeParam->vertical_sync_height)
 		| FIELD_VALUE(0, CRT_VERTICAL_SYNC, START, pModeParam->vertical_sync_start - 1));
 
-
 		ulTmpValue = FIELD_VALUE(0, CRT_DISPLAY_CTRL, VSYNC_PHASE, pModeParam->vertical_sync_polarity)|
 					  FIELD_VALUE(0, CRT_DISPLAY_CTRL, HSYNC_PHASE, pModeParam->horizontal_sync_polarity)|
 					  FIELD_SET(0, CRT_DISPLAY_CTRL, TIMING, ENABLE)|
 					  FIELD_SET(0, CRT_DISPLAY_CTRL, PLANE, ENABLE);
-
 
 		if (getChipType() == SM750LE) {
 			displayControlAdjust_SM750LE(pModeParam, ulTmpValue);
@@ -158,7 +154,6 @@ static int programModeRegisters(mode_parameter_t *pModeParam, pll_value_t *pll)
 			& FIELD_CLEAR(PANEL_DISPLAY_CTRL, TIMING)
 			& FIELD_CLEAR(PANEL_DISPLAY_CTRL, PLANE);
 
-
 		/* May a hardware bug or just my test chip (not confirmed).
 		* PANEL_DISPLAY_CTRL register seems requiring few writes
 		* before a value can be successfully written in.
@@ -198,5 +193,3 @@ int ddk750_setModeTiming(mode_parameter_t *parm, clock_type_t clock)
 	programModeRegisters(parm, &pll);
 	return 0;
 }
-
-

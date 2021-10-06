@@ -16,7 +16,6 @@
 #ifndef _UAPI__LINUX_IF_PPPOX_H
 #define _UAPI__LINUX_IF_PPPOX_H
 
-
 #include <linux/types.h>
 #include <asm/byteorder.h>
 
@@ -151,6 +150,5 @@ struct pppoe_hdr {
 
 /* Length of entire PPPoE + PPP header */
 #define PPPOE_SES_HLEN	8
-
 
 #endif /* _UAPI__LINUX_IF_PPPOX_H */

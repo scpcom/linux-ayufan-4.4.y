@@ -31,7 +31,6 @@
 #include <arch/interrupts.h>
 #include <arch/spr_def.h>
 
-
 /*
  * Implement a per-cpu "hardwall" resource class such as UDN or IPI.
  * We use "hardwall" nomenclature throughout for historical reasons.
@@ -116,7 +115,6 @@ struct hardwall_info {
 #endif
 };
 
-
 /* /proc/tile/hardwall */
 static struct proc_dir_entry *hardwall_proc_dir;
 
@@ -153,7 +151,6 @@ static int __init noipi(char *str)
 early_param("noipi", noipi);
 #endif
 
-
 /*
  * Low-level primitives for UDN/IDN
  */
@@ -189,7 +186,6 @@ early_param("noipi", noipi);
 	if (cpu_online(cpu))          \
 		cpumask_set_cpu(cpu, dst);    \
 } while (0)
-
 
 /* Does the given rectangle contain the given x,y coordinate? */
 static int contains(struct hardwall_info *r, int x, int y)
@@ -905,7 +901,6 @@ static void hardwall_destroy(struct hardwall_info *info)
 	kfree(info);
 }
 
-
 static int hardwall_proc_show(struct seq_file *sf, void *v)
 {
 	struct hardwall_info *info = sf->private;
@@ -967,7 +962,6 @@ void proc_tile_hardwall_init(struct proc_dir_entry *root)
 		hwt->proc_dir = proc_mkdir(hwt->name, hardwall_proc_dir);
 	}
 }
-
 
 /*
  * Character device support via ioctl/close.

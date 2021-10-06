@@ -337,7 +337,6 @@ resource_size_t nd_namespace_blk_validate(struct nd_namespace_blk *nsblk)
 }
 EXPORT_SYMBOL(nd_namespace_blk_validate);
 
-
 static int nd_namespace_label_update(struct nd_region *nd_region,
 		struct device *dev)
 {

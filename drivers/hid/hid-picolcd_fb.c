@@ -440,7 +440,6 @@ static struct fb_ops picolcdfb_ops = {
 	.fb_set_par   = picolcd_set_par,
 };
 
-
 /* Callback from deferred IO workqueue */
 static void picolcd_fb_deferred_io(struct fb_info *info, struct list_head *pagelist)
 {
@@ -451,7 +450,6 @@ static const struct fb_deferred_io picolcd_fb_defio = {
 	.delay = HZ / PICOLCDFB_UPDATE_RATE_DEFAULT,
 	.deferred_io = picolcd_fb_deferred_io,
 };
-
 
 /*
  * The "fb_update_rate" sysfs attribute

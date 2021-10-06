@@ -137,7 +137,6 @@ static struct gfs2_sbd *init_sbd(struct super_block *sb)
 	return sdp;
 }
 
-
 /**
  * gfs2_check_sb - Check superblock
  * @sdp: the filesystem

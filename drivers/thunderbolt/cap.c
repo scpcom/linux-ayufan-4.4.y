@@ -9,7 +9,6 @@
 
 #include "tb.h"
 
-
 struct tb_cap_any {
 	union {
 		struct tb_cap_basic basic;

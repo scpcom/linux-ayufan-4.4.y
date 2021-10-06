@@ -68,7 +68,6 @@
 		WREG8(MGAREG_CRTC_DATA, v);			\
 	} while (0)						\
 
-
 #define WREG_ECRT(reg, v)					\
 	do {							\
 		WREG8(MGAREG_CRTCEXT_INDEX, reg);				\
@@ -137,7 +136,6 @@ struct mga_encoder {
 	struct drm_encoder base;
 	int last_dpms;
 };
-
 
 struct mga_i2c_chan {
 	struct i2c_adapter adapter;
@@ -218,7 +216,6 @@ struct mga_device {
 	/* SE model number stored in reg 0x1e24 */
 	u32 unique_rev_id;
 };
-
 
 struct mgag200_bo {
 	struct ttm_buffer_object bo;

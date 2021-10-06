@@ -1620,7 +1620,6 @@ static const u32 godavari_golden_registers[] =
 	0x30934, 0xffffffff, 0x00000000
 };
 
-
 static void cik_init_golden_registers(struct radeon_device *rdev)
 {
 	/* Some of the registers might be dependent on GRBM_GFX_INDEX */
@@ -1831,7 +1830,6 @@ static const u32 hawaii_io_mc_regs[HAWAII_IO_MC_REGS_SIZE][2] =
 	{0x00000098, 0x10010000},
 	{0x0000009f, 0x00c79000}
 };
-
 
 /**
  * cik_srbm_select - select specific register instances

@@ -153,7 +153,6 @@ static void sun6i_spi_set_cs(struct spi_device *spi, bool enable)
 	sun6i_spi_write(sspi, SUN6I_TFR_CTL_REG, reg);
 }
 
-
 static int sun6i_spi_transfer_one(struct spi_master *master,
 				  struct spi_device *spi,
 				  struct spi_transfer *tfr)

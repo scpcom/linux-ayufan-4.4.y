@@ -128,7 +128,6 @@ static const struct file_operations fops_debug = {
 
 #define DMA_BUF_LEN 1024
 
-
 static ssize_t read_file_ani(struct file *file, char __user *user_buf,
 			     size_t count, loff_t *ppos)
 {

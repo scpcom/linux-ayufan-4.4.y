@@ -1,21 +1,4 @@
-/*
- * Copyright (C) 2007 Oracle.  All rights reserved.
- * Copyright (C) 2014 Fujitsu.  All rights reserved.
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public
- * License v2 as published by the Free Software Foundation.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * General Public License for more details.
- *
- * You should have received a copy of the GNU General Public
- * License along with this program; if not, write to the
- * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
- * Boston, MA 021110-1307, USA.
- */
+
 
 #include <linux/kthread.h>
 #include <linux/slab.h>
@@ -34,22 +17,17 @@
 
 struct __btrfs_workqueue {
 	struct workqueue_struct *normal_wq;
-	/* List head pointing to ordered work list */
+	 
 	struct list_head ordered_list;
 
-	/* Spinlock for ordered_list */
 	spinlock_t list_lock;
 
-	/* Thresholding related variants */
 	atomic_t pending;
 
-	/* Up limit of concurrency workers */
 	int limit_active;
 
-	/* Current number of concurrency workers */
 	int current_active;
 
-	/* Threshold to change current_active */
 	int thresh;
 	unsigned int count;
 	spinlock_t thres_lock;
@@ -106,16 +84,12 @@ __btrfs_alloc_workqueue(const char *name, unsigned int flags, int limit_active,
 	atomic_set(&ret->pending, 0);
 	if (thresh == 0)
 		thresh = DFT_THRESHOLD;
-	/* For low threshold, disabling threshold is a better choice */
+	 
 	if (thresh < DFT_THRESHOLD) {
 		ret->current_active = limit_active;
 		ret->thresh = NO_THRESHOLD;
 	} else {
-		/*
-		 * For threshold-able wq, let its concurrency grow on demand.
-		 * Use minimal max_active at alloc time to reduce resource
-		 * usage.
-		 */
+		 
 		ret->current_active = 1;
 		ret->thresh = thresh;
 	}
@@ -172,11 +146,6 @@ struct btrfs_workqueue *btrfs_alloc_workqueue(const char *name,
 	return ret;
 }
 
-/*
- * Hook for threshold which will be called in btrfs_queue_work.
- * This hook WILL be called in IRQ handler context,
- * so workqueue_set_max_active MUST NOT be called in this hook
- */
 static inline void thresh_queue_hook(struct __btrfs_workqueue *wq)
 {
 	if (wq->thresh == NO_THRESHOLD)
@@ -184,11 +153,6 @@ static inline void thresh_queue_hook(struct __btrfs_workqueue *wq)
 	atomic_inc(&wq->pending);
 }
 
-/*
- * Hook for threshold which will be called before executing the work,
- * This hook is called in kthread content.
- * So workqueue_set_max_active is called here.
- */
 static inline void thresh_exec_hook(struct __btrfs_workqueue *wq)
 {
 	int new_current_active;
@@ -200,20 +164,13 @@ static inline void thresh_exec_hook(struct __btrfs_workqueue *wq)
 
 	atomic_dec(&wq->pending);
 	spin_lock(&wq->thres_lock);
-	/*
-	 * Use wq->count to limit the calling frequency of
-	 * workqueue_set_max_active.
-	 */
+	 
 	wq->count++;
 	wq->count %= (wq->thresh / 4);
 	if (!wq->count)
 		goto  out;
 	new_current_active = wq->current_active;
 
-	/*
-	 * pending may be changed later, but it's OK since we really
-	 * don't need it so accurate to calculate new_max_active.
-	 */
 	pending = atomic_read(&wq->pending);
 	if (pending > wq->thresh)
 		new_current_active++;
@@ -248,27 +205,16 @@ static void run_ordered_work(struct __btrfs_workqueue *wq)
 		if (!test_bit(WORK_DONE_BIT, &work->flags))
 			break;
 
-		/*
-		 * we are going to call the ordered done function, but
-		 * we leave the work item on the list as a barrier so
-		 * that later work items that are done don't have their
-		 * functions called before this one returns
-		 */
 		if (test_and_set_bit(WORK_ORDER_DONE_BIT, &work->flags))
 			break;
 		trace_btrfs_ordered_sched(work);
 		spin_unlock_irqrestore(lock, flags);
 		work->ordered_func(work);
 
-		/* now take the lock again and drop our item from the list */
 		spin_lock_irqsave(lock, flags);
 		list_del(&work->ordered_list);
 		spin_unlock_irqrestore(lock, flags);
 
-		/*
-		 * we don't want to call the ordered free functions
-		 * with the lock held though
-		 */
 		work->ordered_free(work);
 		trace_btrfs_all_work_done(work);
 	}
@@ -280,14 +226,6 @@ static void normal_work_helper(struct btrfs_work *work)
 	struct __btrfs_workqueue *wq;
 	int need_order = 0;
 
-	/*
-	 * We should not touch things inside work in the following cases:
-	 * 1) after work->func() if it has no ordered_free
-	 *    Since the struct is freed in work->func().
-	 * 2) after setting WORK_DONE_BIT
-	 *    The work may be freed in other threads almost instantly.
-	 * So we save the needed things here.
-	 */
 	if (work->ordered_func)
 		need_order = 1;
 	wq = work->wq;

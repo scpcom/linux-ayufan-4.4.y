@@ -88,7 +88,6 @@ static void raid6_sse21_gen_syndrome(int disks, size_t bytes, void **ptrs)
 	kernel_fpu_end();
 }
 
-
 static void raid6_sse21_xor_syndrome(int disks, int start, int stop,
 				     size_t bytes, void **ptrs)
  {
@@ -472,7 +471,6 @@ static void raid6_sse24_gen_syndrome(int disks, size_t bytes, void **ptrs)
 	asm volatile("sfence" : : : "memory");
 	kernel_fpu_end();
  }
-
 
 const struct raid6_calls raid6_sse2x4 = {
 	raid6_sse24_gen_syndrome,

@@ -2164,7 +2164,6 @@ extern void radeon_commit_ring(drm_radeon_private_t *dev_priv);
 	}								\
 } while (0)
 
-
 #endif				/* CONFIG_DRM_RADEON_UMS */
 
 #endif				/* __RADEON_DRV_H__ */

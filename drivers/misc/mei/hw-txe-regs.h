@@ -238,7 +238,6 @@ enum {
 #define   HIER_INT_EN_MSK \
 	 (HIER_INT_0_EN | HIER_INT_1_EN | HIER_INT_2_EN)
 
-
 /* SEC Memory Space IPC output payload.
  *
  * This register is part of the output payload which SEC provides to host.
@@ -253,7 +252,6 @@ enum {
 #define SICR_HOST_ALIVENESS_REQ_REG      0x214C
 #define   SICR_HOST_ALIVENESS_REQ_REQUESTED    BIT(0)
 
-
 /* SeC Interrupt Cause Register - Host IPC Readiness
  *
  * This register is both an ICR to SeC and it is also exposed
@@ -262,7 +260,6 @@ enum {
  * to synchronize with SeC about IPC interface state.
  */
 #define SICR_HOST_IPC_READINESS_REQ_REG  0x2150
-
 
 #define SICR_HOST_IPC_READINESS_HOST_RDY  BIT(0)
 #define SICR_HOST_IPC_READINESS_SEC_RDY   BIT(1)
@@ -281,14 +278,10 @@ enum {
 #define SICR_SEC_IPC_OUTPUT_STATUS_REG   0x2154
 #  define SEC_IPC_OUTPUT_STATUS_RDY BIT(0)
 
-
-
 /*  MEI IPC Message payload size 64 bytes */
 #define PAYLOAD_SIZE        64
 
 /* MAX size for SATT range 32MB */
 #define SATT_RANGE_MAX     (32 << 20)
 
-
 #endif /* _MEI_HW_TXE_REGS_H_ */
-

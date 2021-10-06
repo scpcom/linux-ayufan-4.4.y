@@ -437,7 +437,6 @@ static int vidioc_log_status(struct file *file, void *priv)
 	return 0;
 }
 
-
 static int cx25821_vidioc_querycap(struct file *file, void *priv,
 			    struct v4l2_capability *cap)
 {

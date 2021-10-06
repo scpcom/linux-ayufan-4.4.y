@@ -20,7 +20,6 @@
 #include "include/audit.h"
 #include "include/apparmor.h"
 
-
 /**
  * aa_split_fqname - split a fqname into a profile and namespace name
  * @fqname: a full qualified name in namespace profile format (NOT NULL)

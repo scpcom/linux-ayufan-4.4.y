@@ -134,8 +134,6 @@ enum wide_opcode {
 /* conf */
 #define UseASER1Input 1
 
-
-
 /*
  * The following defines are for the flags in the rsConfig01/23 registers of
  * the SP.
@@ -172,7 +170,6 @@ enum wide_opcode {
 /* SP constants */
 #define FG_INTERVAL_TIMER_PERIOD                0x0051
 #define BG_INTERVAL_TIMER_PERIOD                0x0100
-
 
 /* Only SP accessible registers */
 #define SP_ASER_COUNTDOWN 0x8040

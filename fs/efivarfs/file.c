@@ -143,7 +143,6 @@ efivarfs_ioc_setxflags(struct file *file, void __user *arg)
 	if (flags & FS_IMMUTABLE_FL)
 		i_flags |= S_IMMUTABLE;
 
-
 	error = mnt_want_write_file(file);
 	if (error)
 		return error;

@@ -674,7 +674,6 @@ void target_complete_cmd(struct se_cmd *cmd, u8 scsi_status)
 
 	cmd->scsi_status = scsi_status;
 
-
 	spin_lock_irqsave(&cmd->t_state_lock, flags);
 	cmd->transport_state &= ~CMD_T_BUSY;
 

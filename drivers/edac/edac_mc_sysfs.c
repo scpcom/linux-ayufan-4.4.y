@@ -377,7 +377,6 @@ static umode_t csrow_dev_is_visible(struct kobject *kobj,
 	return attr->mode;
 }
 
-
 static const struct attribute_group csrow_dev_dimm_group = {
 	.attrs = dynamic_csrow_dimm_attr,
 	.is_visible = csrow_dev_is_visible,

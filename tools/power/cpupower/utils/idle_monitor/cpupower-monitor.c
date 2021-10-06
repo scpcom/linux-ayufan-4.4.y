@@ -7,7 +7,6 @@
  *
  */
 
-
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
@@ -131,7 +130,6 @@ void print_header(int topology_depth)
 	printf("\n");
 }
 
-
 void print_results(int topology_depth, int cpu)
 {
 	unsigned int mon;
@@ -202,7 +200,6 @@ void print_results(int topology_depth, int cpu)
 		printf("\n");
 }
 
-
 /* param: string passed by -m param (The list of monitors to show)
  *
  * Monitors must have been registered already, matching monitors
@@ -218,7 +215,6 @@ static void parse_monitor_param(char *param)
 	int mon, hits = 0;
 	char *tmp = param, *token;
 	struct cpuidle_monitor *tmp_mons[MONITORS_MAX];
-
 
 	for (mon = 0; mon < MONITORS_MAX; mon++, tmp = NULL) {
 		token = strtok(tmp, ",");
@@ -339,7 +335,6 @@ int do_interval_measure(int i)
 
 	for (num = 0; num < avail_monitors; num++)
 		monitors[num]->stop();
-
 
 	return 0;
 }

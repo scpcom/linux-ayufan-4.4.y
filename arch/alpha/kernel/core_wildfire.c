@@ -307,7 +307,6 @@ wildfire_init_arch(void)
 	/* With multiple PCI buses, we play with I/O as physical addrs.  */
 	ioport_resource.end = ~0UL;
 
-
 	/* Probe the hardware for info about configuration. */
 	wildfire_hardware_probe();
 
@@ -437,7 +436,6 @@ struct pci_ops wildfire_pci_ops =
 	.write =	wildfire_write_config,
 };
 
-
 /*
  * NUMA Support
  */

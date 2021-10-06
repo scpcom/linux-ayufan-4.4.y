@@ -25,4 +25,3 @@
  * INTC Control Reg INTC_ICCR.
  */
 #define INTC_ICCR	(PKUNITY_INTC_BASE + 0x0014)
-

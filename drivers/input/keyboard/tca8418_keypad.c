@@ -242,7 +242,6 @@ static int tca8418_configure(struct tca8418_keypad *keypad_data,
 	if (error < 0)
 		return -ENODEV;
 
-
 	/* Assemble a mask for row and column registers */
 	reg  =  ~(~0 << rows);
 	reg += (~(~0 << cols)) << 8;

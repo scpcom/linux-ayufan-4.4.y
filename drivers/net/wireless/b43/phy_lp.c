@@ -31,7 +31,6 @@
 #include "phy_common.h"
 #include "tables_lpphy.h"
 
-
 static inline u16 channel2freq_lp(u8 channel)
 {
 	if (channel < 14)
@@ -1823,7 +1822,6 @@ static void lpphy_stop_tx_tone(struct b43_wldev *dev)
 		udelay(100);
 	}
 }
-
 
 static void lpphy_papd_cal(struct b43_wldev *dev, struct lpphy_tx_gains gains,
 			   int mode, bool useindex, u8 index)

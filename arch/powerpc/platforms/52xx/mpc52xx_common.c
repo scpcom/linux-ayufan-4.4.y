@@ -127,7 +127,6 @@ static const struct of_device_id mpc52xx_gpio_wkup[] __initconst = {
 	{}
 };
 
-
 /**
  * mpc52xx_map_common_devices: iomap devices required by common code
  */

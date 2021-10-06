@@ -30,7 +30,6 @@
 static DEFINE_MUTEX(mISDN_mutex);
 static u_int	*debug;
 
-
 struct mISDNtimerdev {
 	int			next_id;
 	struct list_head	pending;
@@ -225,7 +224,6 @@ mISDN_ioctl(struct file *filep, unsigned int cmd, unsigned long arg)
 {
 	struct mISDNtimerdev	*dev = filep->private_data;
 	int			id, tout, ret = 0;
-
 
 	if (*debug & DEBUG_TIMER)
 		printk(KERN_DEBUG "%s(%p, %x, %lx)\n", __func__,

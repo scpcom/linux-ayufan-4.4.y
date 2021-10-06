@@ -37,7 +37,6 @@
 #define BX_DIGITAL_IN	4	/* 0 */
 #define BX_NUM		4
 
-
 #include <linux/delay.h>
 #include <linux/init.h>
 #include <linux/interrupt.h>

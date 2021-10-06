@@ -56,7 +56,6 @@ struct netns_xfrm {
 	struct work_struct	policy_hash_work;
 	struct xfrm_policy_hthresh policy_hthresh;
 
-
 	struct sock		*nlsk;
 	struct sock		*nlsk_stash;
 

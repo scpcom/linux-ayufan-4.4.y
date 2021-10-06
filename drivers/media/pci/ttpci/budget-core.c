@@ -34,7 +34,6 @@
  * the project's page is at http://www.linuxtv.org/ 
  */
 
-
 #include "budget.h"
 #include "ttpci-eeprom.h"
 
@@ -231,7 +230,6 @@ static void vpeirq(unsigned long data)
 	}
 }
 
-
 static int ttpci_budget_debiread_nolock(struct budget *budget, u32 config,
 		int addr, int count, int nobusyloop)
 {
@@ -315,7 +313,6 @@ int ttpci_budget_debiwrite(struct budget *budget, u32 config, int addr,
 	return ttpci_budget_debiwrite_nolock(budget, config, addr,
 					     count, value, nobusyloop);
 }
-
 
 /****************************************************************************
  * DVB API SECTION

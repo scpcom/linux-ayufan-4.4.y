@@ -19,7 +19,6 @@
  *   GNU General Public License for more details.
  */
 
-
 #include <stdio.h>
 #include <unistd.h>
 #include <time.h>
@@ -53,7 +52,6 @@ static inline int ksft_exit_fail(void)
 #define CLOCK_HWSPECIFIC		10
 #define CLOCK_TAI			11
 #define NR_CLOCKIDS			12
-
 
 #define NSEC_PER_SEC 1000000000ULL
 #define UNRESONABLE_LATENCY 40000000 /* 40ms in nanosecs */
@@ -93,7 +91,6 @@ char *clockstring(int clockid)
 	return "UNKNOWN_CLOCKID";
 }
 
-
 long long timespec_sub(struct timespec a, struct timespec b)
 {
 	long long ret = NSEC_PER_SEC * b.tv_sec + b.tv_nsec;
@@ -101,7 +98,6 @@ long long timespec_sub(struct timespec a, struct timespec b)
 	ret -= NSEC_PER_SEC * a.tv_sec + a.tv_nsec;
 	return ret;
 }
-
 
 void sigalarm(int signo)
 {

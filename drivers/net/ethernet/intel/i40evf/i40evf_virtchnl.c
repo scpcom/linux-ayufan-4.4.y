@@ -113,7 +113,6 @@ int i40evf_verify_api_ver(struct i40evf_adapter *adapter)
 			break;
 	}
 
-
 	err = (i40e_status)le32_to_cpu(event.desc.cookie_low);
 	if (err)
 		goto out_alloc;

@@ -42,7 +42,6 @@ static inline void __delay(unsigned long loops)
 
 extern void __bad_udelay(void);
 
-
 #ifdef CONFIG_CPU_HAS_NO_MULDIV64
 /*
  * The simpler m68k and ColdFire processors do not have a 32*32->64

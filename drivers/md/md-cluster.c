@@ -8,7 +8,6 @@
  *
  */
 
-
 #include <linux/module.h>
 #include <linux/dlm.h>
 #include <linux/sched.h>
@@ -47,7 +46,6 @@ struct resync_info {
 #define		MD_CLUSTER_WAITING_FOR_NEWDISK		1
 #define		MD_CLUSTER_SUSPEND_READ_BALANCING	2
 #define		MD_CLUSTER_BEGIN_JOIN_CLUSTER		3
-
 
 struct md_cluster_info {
 	/* dlm lock space and resources for clustered raid. */
@@ -377,7 +375,6 @@ static void remove_suspend_info(struct mddev *mddev, int slot)
 	mddev->pers->quiesce(mddev, 2);
 }
 
-
 static void process_suspend_info(struct mddev *mddev,
 		int slot, sector_t lo, sector_t hi)
 {
@@ -426,7 +423,6 @@ static void process_add_new_disk(struct mddev *mddev, struct cluster_msg *cmsg)
 			NEW_DEV_TIMEOUT);
 	clear_bit(MD_CLUSTER_WAITING_FOR_NEWDISK, &cinfo->state);
 }
-
 
 static void process_metadata_update(struct mddev *mddev, struct cluster_msg *msg)
 {
@@ -639,7 +635,6 @@ static int gather_all_resync_info(struct mddev *mddev, int total_slots)
 	char str[64];
 	sector_t lo, hi;
 
-
 	for (i = 0; i < total_slots; i++) {
 		memset(str, '\0', 64);
 		snprintf(str, 64, "bitmap%04d", i);
@@ -751,7 +746,6 @@ static int join(struct mddev *mddev, int nodes)
 	/* get sync CR lock on no-new-dev. */
 	if (dlm_lock_sync(cinfo->no_new_dev_lockres, DLM_LOCK_CR))
 		pr_err("md-cluster: failed to get a sync CR lock on no-new-dev!(%d)\n", ret);
-
 
 	pr_info("md-cluster: Joined cluster %s slot %d\n", str, cinfo->slot_number);
 	snprintf(str, 64, "bitmap%04d", cinfo->slot_number - 1);

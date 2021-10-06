@@ -1230,7 +1230,6 @@ static int pnv_pci_vf_assign_m64(struct pci_dev *pdev, u16 num_vfs)
 						 0, /* unused */
 						 size);
 
-
 			if (rc != OPAL_SUCCESS) {
 				dev_err(&pdev->dev, "Failed to map M64 window #%d: %lld\n",
 					win, rc);
@@ -1613,7 +1612,6 @@ static u64 pnv_pci_ioda_dma_get_required_mask(struct pci_dev *pdev)
 	pe = &phb->ioda.pe_array[pdn->pe_number];
 	if (!pe->tce_bypass_enabled)
 		return __dma_get_required_mask(&pdev->dev);
-
 
 	end = pe->tce_bypass_base + memblock_end_of_DRAM();
 	mask = 1ULL << (fls64(end) - 1);
@@ -2462,7 +2460,6 @@ static void pnv_ioda2_msi_eoi(struct irq_data *d)
 	icp_native_eoi(d);
 }
 
-
 static void set_msi_irq_chip(struct pnv_phb *phb, unsigned int virq)
 {
 	struct irq_data *idata;
@@ -3178,7 +3175,6 @@ static void __init pnv_pci_init_ioda_phb(struct device_node *np,
 	if (phb->ioda.io_size)
 		pr_info("                  IO: 0x%x [segment=0x%x]\n",
 			phb->ioda.io_size, phb->ioda.io_segsize);
-
 
 	phb->hose->ops = &pnv_pci_ops;
 	phb->get_pe_state = pnv_ioda_get_pe_state;

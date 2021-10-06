@@ -28,7 +28,6 @@
 #include "firmware.h"
 #include "usb.h"
 
-
 #define IOCTL_RESP_TIMEOUT		2000
 
 #define BRCMF_USB_RESET_GETVER_SPINWAIT	100	/* in unit of ms */
@@ -87,7 +86,6 @@
 				 * value
 				 */
 #define DL_IMAGE_TOOBIG	7	/* firmware image too big */
-
 
 struct trx_header_le {
 	__le32 magic;		/* "HDR0" */
@@ -459,7 +457,6 @@ static void brcmf_usb_del_fromq(struct brcmf_usbdev_info *devinfo,
 	spin_unlock_irqrestore(&devinfo->qlock, flags);
 }
 
-
 static void brcmf_usb_tx_complete(struct urb *urb)
 {
 	struct brcmf_usbreq *req = (struct brcmf_usbreq *)urb->context;
@@ -632,7 +629,6 @@ static int brcmf_usb_tx(struct device *dev, struct sk_buff *skb)
 fail:
 	return ret;
 }
-
 
 static int brcmf_usb_up(struct device *dev)
 {
@@ -817,7 +813,6 @@ brcmf_usb_resetcfg(struct brcmf_usbdev_info *devinfo)
 		return -EINVAL;
 	}
 }
-
 
 static int
 brcmf_usb_dl_send_bulk(struct brcmf_usbdev_info *devinfo, void *buffer, int len)
@@ -1034,7 +1029,6 @@ brcmf_usb_fw_download(struct brcmf_usbdev_info *devinfo)
 	return err;
 }
 
-
 static void brcmf_usb_detach(struct brcmf_usbdev_info *devinfo)
 {
 	brcmf_dbg(USB, "Enter, devinfo %p\n", devinfo);
@@ -1049,7 +1043,6 @@ static void brcmf_usb_detach(struct brcmf_usbdev_info *devinfo)
 	kfree(devinfo->tx_reqs);
 	kfree(devinfo->rx_reqs);
 }
-
 
 static int check_file(const u8 *headers)
 {
@@ -1089,7 +1082,6 @@ static const char *brcmf_usb_get_fwname(struct brcmf_usbdev_info *devinfo)
 		return NULL;
 	}
 }
-
 
 static
 struct brcmf_usbdev *brcmf_usb_attach(struct brcmf_usbdev_info *devinfo,

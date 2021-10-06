@@ -120,4 +120,3 @@ MACHINE_START(EBSA285, "EBSA285")
 	.init_time	= footbridge_timer_init,
 	.restart	= footbridge_restart,
 MACHINE_END
-

@@ -26,10 +26,8 @@
 #include "fpu_emu.h"
 #include "control_w.h"
 
-
 /* #define	dSIGL(x)	(x) */
 /* #define	dSIGH(x)	4(x) */
-
 
 #ifndef NON_REENTRANT_FPU
 /*
@@ -157,7 +155,6 @@ L_no_adjust:
 L_no_overflow:
 	jmp	LRound_precision	/* Do the rounding as required */
 
-
 /*---------------------------------------------------------------------------+
  |  Divide:   Return  arg1/arg2 to arg3.                                     |
  |                                                                           |
@@ -174,7 +171,6 @@ L_no_overflow:
  |               .ffffffff ffffffff                                          |
  |                                                                           |
  +---------------------------------------------------------------------------*/
-
 
 L_Full_Division:
 	/* Save extended dividend in local register */
@@ -438,7 +434,6 @@ LRound_precision:
 	movl	FPU_result_1,%ebx
 	movl	FPU_result_2,%eax
 	jmp	fpu_reg_round
-
 
 #ifdef PARANOID
 /* The logic is wrong if we got here */

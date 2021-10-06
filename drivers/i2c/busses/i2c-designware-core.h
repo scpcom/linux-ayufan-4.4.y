@@ -22,14 +22,12 @@
  *
  */
 
-
 #define DW_IC_CON_MASTER		0x1
 #define DW_IC_CON_SPEED_STD		0x2
 #define DW_IC_CON_SPEED_FAST		0x4
 #define DW_IC_CON_10BITADDR_MASTER	0x10
 #define DW_IC_CON_RESTART_EN		0x20
 #define DW_IC_CON_SLAVE_DISABLE		0x40
-
 
 /**
  * struct dw_i2c_dev - private i2c-designware data

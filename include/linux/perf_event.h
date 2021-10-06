@@ -369,7 +369,6 @@ struct pmu {
 	 */
 	size_t				task_ctx_size;
 
-
 	/*
 	 * Return the count value for a counter.
 	 */
@@ -753,7 +752,6 @@ extern u64 perf_event_read_local(struct perf_event *event);
 extern u64 perf_event_read_value(struct perf_event *event,
 				 u64 *enabled, u64 *running);
 
-
 struct perf_sample_data {
 	/*
 	 * Fields set by perf_sample_data_init(), group so as to
@@ -987,7 +985,6 @@ extern int perf_proc_update_handler(struct ctl_table *table, int write,
 extern int perf_cpu_time_max_percent_handler(struct ctl_table *table, int write,
 		void __user *buffer, size_t *lenp,
 		loff_t *ppos);
-
 
 static inline bool perf_paranoid_tracepoint_raw(void)
 {

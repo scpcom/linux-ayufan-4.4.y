@@ -419,7 +419,6 @@ static struct regulator_init_data omap4_vdd3 = {
 	.consumer_supplies		= omap4_vdd3_supply,
 };
 
-
 static struct twl_regulator_driver_data omap4_vdd1_drvdata = {
 	.get_voltage = twl_get_voltage,
 	.set_voltage = twl_set_voltage,

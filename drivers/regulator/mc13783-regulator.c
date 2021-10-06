@@ -115,7 +115,6 @@
 
 #define MC13783_REG_POWERMISC_PWGTSPI_M			(3 << 15)
 
-
 /* Voltage Values */
 static const int mc13783_sw1x_val[] = {
 	900000, 925000, 950000, 975000,

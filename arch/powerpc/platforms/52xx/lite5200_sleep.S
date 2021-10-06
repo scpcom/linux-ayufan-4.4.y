@@ -3,7 +3,6 @@
 #include <asm/processor.h>
 #include <asm/cache.h>
 
-
 #define SDRAM_CTRL	0x104
 #define SC_MODE_EN	(1<<31)
 #define SC_CKE		(1<<30)
@@ -17,7 +16,6 @@
 #define CDM_CE		0x214
 #define CDM_SDRAM	(1<<3)
 
-
 /* helpers... beware: r10 and r4 are overwritten */
 #define SAVE_SPRN(reg, addr)		\
 	mfspr	r10, SPRN_##reg;	\
@@ -28,7 +26,6 @@
 	mtspr	SPRN_##reg, r10;	\
 	sync;				\
 	isync;
-
 
 	.data
 registers:
@@ -51,7 +48,6 @@ lite5200_low_power:
 	sub	r4, r4, r3
 	stw	r4, 0(r3)
 
-
 	/*
 	 * save stuff BDI overwrites
 	 * 0xf0 (0xe0->0x100 gets overwritten when BDI connected;
@@ -70,7 +66,6 @@ lite5200_low_power:
 
 	/* flush caches [destroys r3, r4] */
 	bl	flush_data_cache
-
 
 	/* copy code to sram */
 	mr	r4, r7
@@ -101,7 +96,6 @@ lite5200_low_power:
 	mtlr	r7
 	blrl
 	/* doesn't return */
-
 
 sram_code:
 	/* self refresh */
@@ -149,7 +143,6 @@ sram_code:
 	li	r12, 1
 	bl	udelay
 
-
 	/* turn off with QT chip */
 	li	r4, 0x02
 	stb	r4, GPIOW_GPIOE(r8)	/* enable gpio_wkup1 */
@@ -175,7 +168,6 @@ sram_code:
   1:
 	b	1b
 
-
 	/* local udelay in sram is needed */
   udelay: /* r11 - tb_ticks_per_usec, r12 - usecs, overwrites r13 */
 	mullw	r12, r12, r11
@@ -189,22 +181,17 @@ sram_code:
 
 sram_code_end:
 
-
-
 /* uboot jumps here on resume */
 lite5200_wakeup:
 	bl	restore_regs
-
 
 	/* HIDs, MSR */
 	LOAD_SPRN(HID1, 0x19)
 	LOAD_SPRN(HID2, 0x1a)
 
-
 	/* address translation is tricky (see turn_on_mmu) */
 	mfmsr	r10
 	ori	r10, r10, MSR_DR | MSR_IR
-
 
 	mtspr	SPRN_SRR1, r10
 	lis	r10, mmu_on@h
@@ -215,7 +202,6 @@ lite5200_wakeup:
 mmu_on:
 	/* kernel offset (r4 is still set from restore_registers) */
 	addis	r4, r4, CONFIG_KERNEL_START@h
-
 
 	/* restore MSR */
 	lwz	r10, (4*0x1b)(r4)
@@ -237,7 +223,6 @@ mmu_on:
 	sync
 	isync
 
-
 	/* restore 0xf0 (BDI2000) */
 	lis	r3, CONFIG_KERNEL_START@h
 	lwz	r10, (0x1d*4)(r4)
@@ -245,9 +230,7 @@ mmu_on:
 
 	LOAD_SPRN(LR, 0x1c)
 
-
 	blr
-
 
 /* ---------------------------------------------------------------------- */
 /* boring code: helpers */
@@ -315,7 +298,6 @@ save_regs:
 	SAVE_SPRN(TBRU,  0x5b)
 
 	blr
-
 
 /* restore registers */
 #define LOAD_BAT(n, addr)		\
@@ -390,8 +372,6 @@ restore_regs:
 	LOAD_SPRN(TBWU,  0x5b);
 
 	blr
-
-
 
 /* cache flushing code. copied from arch/ppc/boot/util.S */
 #define NUM_CACHE_LINES (128*8)

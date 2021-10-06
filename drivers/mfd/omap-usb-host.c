@@ -92,7 +92,6 @@
 #define is_ehci_tll_mode(x)	(x == OMAP_EHCI_PORT_MODE_TLL)
 #define is_ehci_hsic_mode(x)	(x == OMAP_EHCI_PORT_MODE_HSIC)
 
-
 struct usbhs_hcd_omap {
 	int				nports;
 	struct clk			**utmi_clk;
@@ -867,7 +866,6 @@ static const struct of_device_id usbhs_omap_dt_ids[] = {
 };
 
 MODULE_DEVICE_TABLE(of, usbhs_omap_dt_ids);
-
 
 static struct platform_driver usbhs_omap_driver = {
 	.driver = {

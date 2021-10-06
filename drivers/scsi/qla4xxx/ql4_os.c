@@ -1008,7 +1008,6 @@ exit_set_chap:
 	return rc;
 }
 
-
 static int qla4xxx_get_host_stats(struct Scsi_Host *shost, char *buf, int len)
 {
 	struct scsi_qla_host *ha = to_qla_host(shost);
@@ -6033,7 +6032,6 @@ static int qla4xxx_get_bidi_chap(struct scsi_qla_host *ha, char *username,
 	return ret;
 }
 
-
 static int qla4xxx_get_boot_target(struct scsi_qla_host *ha,
 				   struct ql4_boot_session_info *boot_sess,
 				   uint16_t ddb_index)
@@ -6185,7 +6183,6 @@ static int qla4xxx_setup_boot_info(struct scsi_qla_host *ha)
 		return QLA_SUCCESS;
 	}
 
-
 	ha->boot_kset = iscsi_boot_create_host_kset(ha->host->host_no);
 	if (!ha->boot_kset)
 		goto kset_free;
@@ -6234,7 +6231,6 @@ kset_free:
 	iscsi_boot_destroy_kset(ha->boot_kset);
 	return -ENOMEM;
 }
-
 
 static void qla4xxx_get_param_ddb(struct ddb_entry *ddb_entry,
 				  struct ql4_tuple_ddb *tddb)
@@ -8501,7 +8497,6 @@ void qla4xxx_build_ddb_list(struct scsi_qla_host *ha, int is_reset)
 		qla4xxx_remove_failed_ddb(ha, &list_st);
 		schedule_timeout_uninterruptible(HZ / 10);
 	} while (time_after(wtime, jiffies));
-
 
 	qla4xxx_build_nt_list(ha, &list_nt, &list_st, is_reset);
 

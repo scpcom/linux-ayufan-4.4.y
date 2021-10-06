@@ -994,7 +994,6 @@ static void preview_config_averager(struct isp_prev_device *prev, u8 average)
 		       average, OMAP3_ISP_IOMEM_PREV, ISPPRV_AVE);
 }
 
-
 /*
  * preview_config_input_format - Configure the input format
  * @prev: The preview engine

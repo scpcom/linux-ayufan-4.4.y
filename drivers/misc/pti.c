@@ -985,4 +985,3 @@ module_exit(pti_exit);
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Ken Mills, Jay Freyensee");
 MODULE_DESCRIPTION("PTI Driver");
-

@@ -117,7 +117,6 @@ void *waiterfn(void *arg)
 	pthread_exit(NULL);
 }
 
-
 int main(int argc, char *argv[])
 {
 	unsigned int old_val;

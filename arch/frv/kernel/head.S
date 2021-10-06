@@ -225,7 +225,6 @@ __head_sdram_moved:
 0:	movsg		lr,gr26
 	addi		gr26,#__head_reference-0b,gr26
 
-
 ###############################################################################
 #
 # move the kernel image down to the bottom of the SDRAM
@@ -273,7 +272,6 @@ __head_kernel_moved:
 	call		0f
 0:	movsg		lr,gr26
 	addi		gr26,#__head_reference-0b,gr26
-
 
 ###############################################################################
 #
@@ -469,7 +467,6 @@ __head_mmu_enabled:
 	andi		gr22,#~(PSR_PIL|PSR_PS|PSR_S),gr22
 	ori		gr22,#PSR_ET,gr22
 	sti		gr22,@(gr28,REG_PSR)
-
 
 ###############################################################################
 #

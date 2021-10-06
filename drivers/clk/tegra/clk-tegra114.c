@@ -401,7 +401,6 @@ static struct tegra_clk_pll_freq_table pll_a_freq_table[] = {
 	{0, 0, 0, 0, 0, 0},
 };
 
-
 static struct tegra_clk_pll_params pll_a_params = {
 	.input_min = 2000000,
 	.input_max = 31000000,

@@ -19,7 +19,6 @@
 #include "sm750_help.h"
 #include "sm750_cursor.h"
 
-
 #define PEEK32(addr) \
 readl(cursor->mmio + (addr))
 
@@ -55,7 +54,6 @@ writel((data), cursor->mmio + (addr))
 
 #define HWC_COLOR_3                         0xC
 #define HWC_COLOR_3_RGB565                  15:0
-
 
 /* hw_cursor_xxx works for voyager,718 and 750 */
 void hw_cursor_enable(struct lynx_cursor *cursor)
@@ -154,9 +152,7 @@ void hw_cursor_setData(struct lynx_cursor *cursor,
 
 	}
 
-
 }
-
 
 void hw_cursor_setData2(struct lynx_cursor *cursor,
 			u16 rop, const u8 *pcol, const u8 *pmsk)

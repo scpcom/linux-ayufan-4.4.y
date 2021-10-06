@@ -223,7 +223,6 @@ static void destroy_srq_user(struct ib_pd *pd, struct mlx5_ib_srq *srq)
 	ib_umem_release(srq->umem);
 }
 
-
 static void destroy_srq_kernel(struct mlx5_ib_dev *dev, struct mlx5_ib_srq *srq)
 {
 	kfree(srq->wrid);

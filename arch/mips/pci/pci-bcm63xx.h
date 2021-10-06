@@ -13,7 +13,6 @@
  */
 #define CARDBUS_PCI_IDSEL	0x8
 
-
 #define PCIE_BUS_BRIDGE		0
 #define PCIE_BUS_DEVICE		1
 

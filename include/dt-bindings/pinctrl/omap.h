@@ -88,4 +88,3 @@
 #define OMAP4_UART4_RX		0x11c
 
 #endif
-

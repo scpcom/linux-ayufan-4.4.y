@@ -2,13 +2,11 @@
  
 /* Written 1999 by Greg Banks, NEC Australia <gnb@linuxfan.com>. Based on suni.h */
  
-
 #ifndef DRIVER_ATM_IDT77105_H
 #define DRIVER_ATM_IDT77105_H
 
 #include <linux/atmdev.h>
 #include <linux/atmioc.h>
-
 
 /* IDT77105 registers */
 

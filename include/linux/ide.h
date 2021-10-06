@@ -1339,7 +1339,6 @@ struct ide_pm_state {
 	void*	data;		/* for driver use */
 };
 
-
 int ide_pci_init_one(struct pci_dev *, const struct ide_port_info *, void *);
 int ide_pci_init_two(struct pci_dev *, struct pci_dev *,
 		     const struct ide_port_info *, void *);
@@ -1576,6 +1575,5 @@ static inline void ide_set_drivedata(ide_drive_t *drive, void *data)
 
 #define ide_host_for_each_port(i, port, host) \
 	for ((i) = 0; ((port) = (host)->ports[i]) || (i) < MAX_HOST_PORTS; (i)++)
-
 
 #endif /* _IDE_H */

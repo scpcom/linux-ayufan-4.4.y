@@ -51,7 +51,6 @@ static int avmcs_probe(struct pcmcia_device *p_dev)
 	return avmcs_config(p_dev);
 } /* avmcs_attach */
 
-
 static void avmcs_detach(struct pcmcia_device *link)
 {
 	avmcs_release(link);
@@ -122,7 +121,6 @@ static int avmcs_config(struct pcmcia_device *link)
 		return -ENODEV;
 	}
 
-
 	switch (cardtype) {
 	case AVM_CARDTYPE_M1: addcard = b1pcmcia_addcard_m1; break;
 	case AVM_CARDTYPE_M2: addcard = b1pcmcia_addcard_m2; break;
@@ -140,13 +138,11 @@ static int avmcs_config(struct pcmcia_device *link)
 
 } /* avmcs_config */
 
-
 static void avmcs_release(struct pcmcia_device *link)
 {
 	b1pcmcia_delcard(link->resource[0]->start, link->irq);
 	pcmcia_disable_device(link);
 } /* avmcs_release */
-
 
 static const struct pcmcia_device_id avmcs_ids[] = {
 	PCMCIA_DEVICE_PROD_ID12("AVM", "ISDN-Controller B1", 0x95d42008, 0x845dc335),

@@ -999,7 +999,6 @@ static void hvsi_unthrottle(struct tty_struct *tty)
 	}
 	spin_unlock_irqrestore(&hp->lock, flags);
 
-
 	h_vio_signal(hp->vtermno, VIO_IRQ_ENABLE);
 }
 
@@ -1034,7 +1033,6 @@ static int hvsi_tiocmset(struct tty_struct *tty,
 
 	return 0;
 }
-
 
 static const struct tty_operations hvsi_ops = {
 	.open = hvsi_open,

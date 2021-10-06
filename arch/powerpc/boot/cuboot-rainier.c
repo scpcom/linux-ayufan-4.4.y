@@ -34,7 +34,6 @@
 
 static bd_t bd;
 
-
 static void rainier_fixups(void)
 {
 	unsigned long sysclk = 33333333;

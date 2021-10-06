@@ -83,7 +83,6 @@
 #include "m88rs2000.h"
 #include "ts2020.h"
 
-
 #define LME2510_C_S7395	"dvb-usb-lme2510c-s7395.fw";
 #define LME2510_C_LG	"dvb-usb-lme2510c-lg.fw";
 #define LME2510_C_S0194	"dvb-usb-lme2510c-s0194.fw";
@@ -114,7 +113,6 @@ MODULE_PARM_DESC(firmware, "set default firmware 0=Sharp7395 1=LG");
 static int pid_filter;
 module_param_named(pid, pid_filter, int, 0644);
 MODULE_PARM_DESC(pid, "set default 0=default 1=off 2=on");
-
 
 DVB_DEFINE_MOD_OPT_ADAPTER_NR(adapter_nr);
 
@@ -496,10 +494,8 @@ static int lme2510_pid_filter(struct dvb_usb_adapter *adap, int index, u16 pid,
 		mutex_unlock(&d->i2c_mutex);
 	}
 
-
 	return ret;
 }
-
 
 static int lme2510_return_status(struct dvb_usb_device *d)
 {
@@ -892,7 +888,6 @@ static int dm04_lme2510_set_voltage(struct dvb_frontend *fe,
 	if (st->tuner_config == TUNER_RS2000)
 		if (st->fe_set_voltage)
 			st->fe_set_voltage(fe, voltage);
-
 
 	return (ret < 0) ? -ENODEV : 0;
 }
@@ -1353,4 +1348,3 @@ MODULE_FIRMWARE(LME2510_C_S0194);
 MODULE_FIRMWARE(LME2510_C_RS2000);
 MODULE_FIRMWARE(LME2510_LG);
 MODULE_FIRMWARE(LME2510_S0194);
-

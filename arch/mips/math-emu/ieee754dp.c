@@ -41,7 +41,6 @@ static inline int ieee754dp_issnan(union ieee754dp x)
 	return (DPMANT(x) & DP_MBIT(DP_FBITS - 1)) == DP_MBIT(DP_FBITS - 1);
 }
 
-
 /*
  * Raise the Invalid Operation IEEE 754 exception
  * and convert the signaling NaN supplied to a quiet NaN.
@@ -78,7 +77,6 @@ static u64 ieee754dp_get_rounding(int sn, u64 xm)
 	}
 	return xm;
 }
-
 
 /* generate a normal/denormal number with over,under handling
  * sn is sign

@@ -189,8 +189,6 @@ __typeof__(__builtin_choose_expr(sizeof(x) > sizeof(0UL), 0ULL, 0UL))
 	asm volatile("call __put_user_" #size : "=a" (__ret_pu)	\
 		     : "0" ((typeof(*(ptr)))(x)), "c" (ptr) : "ebx")
 
-
-
 #ifdef CONFIG_X86_32
 #define __put_user_asm_u64(x, addr, err, errret)			\
 	asm volatile(ASM_STAC "\n"					\
@@ -746,4 +744,3 @@ copy_to_user(void __user *to, const void *from, unsigned long n)
 #undef __copy_to_user_overflow
 
 #endif /* _ASM_X86_UACCESS_H */
-

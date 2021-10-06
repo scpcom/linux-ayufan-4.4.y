@@ -3485,7 +3485,6 @@ static int brcmf_sdio_kso_init(struct brcmf_sdio *bus)
 	return 0;
 }
 
-
 static int brcmf_sdio_bus_preinit(struct device *dev)
 {
 	struct brcmf_bus *bus_if = dev_get_drvdata(dev);
@@ -4086,7 +4085,6 @@ static void brcmf_sdio_firmware_callback(struct device *dev,
 		  offsetof(struct sdpcmd_regs, tosbmailboxdata));
 	err = sdio_enable_func(sdiodev->func[SDIO_FUNC_2]);
 
-
 	brcmf_dbg(INFO, "enable F2: err=%d\n", err);
 
 	/* If F2 successfully enabled, set core and enable interrupts */
@@ -4373,4 +4371,3 @@ int brcmf_sdio_sleep(struct brcmf_sdio *bus, bool sleep)
 
 	return ret;
 }
-

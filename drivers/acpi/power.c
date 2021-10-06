@@ -171,7 +171,6 @@ static int acpi_power_get_state(acpi_handle handle, int *state)
 	char node_name[5];
 	struct acpi_buffer buffer = { sizeof(node_name), node_name };
 
-
 	if (!handle || !state)
 		return -EINVAL;
 

@@ -16,7 +16,6 @@
 #ifndef __sv_addr_ag_h__
 #define __sv_addr_ag_h__
 
-
 #define __test_sv_addr__ 0
 
 /*------------------------------------------------------------
@@ -134,6 +133,4 @@ IO_RD(R_EXT_DMA_0_STAT) & IO_MASK( R_EXT_DMA_0_STAT, S )
    == IO_STATE( R_EXT_DMA_0_STAT, S, STARTED )
 #endif
 
-
 #endif  /* ifndef __sv_addr_ag_h__ */
-

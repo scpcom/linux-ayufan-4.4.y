@@ -16,7 +16,6 @@
 #define STIH41X_SBC_COMMS_BASE          (STIH41X_SBC_LPM_BASE + 0x100000)
 #define STIH41X_SBC_ASC1_BASE           (STIH41X_SBC_COMMS_BASE + 0x31000)
 
-
 #define VIRT_ADDRESS(x)		(x - 0x1000000)
 
 #if IS_ENABLED(CONFIG_STIH41X_DEBUG_ASC2)
@@ -37,7 +36,6 @@
 
 #define ASC_STA_TX_FULL         (1<<9)
 #define ASC_STA_TX_EMPTY        (1<<1)
-
 
 		.macro	addruart, rp, rv, tmp
 		ldr	\rp,      =DEBUG_LL_UART_BASE	@ physical base

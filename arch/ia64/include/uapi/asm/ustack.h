@@ -5,7 +5,6 @@
  * Constants for the user stack size
  */
 
-
 /* Make a default stack size of 2GiB */
 #define DEFAULT_USER_STACK_SIZE	(1UL << 31)
 

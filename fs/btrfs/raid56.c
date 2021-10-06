@@ -698,7 +698,6 @@ static noinline int lock_stripe_add(struct btrfs_raid_bio *rbio)
 				goto out;
 			}
 
-
 			/*
 			 * we couldn't merge with the running
 			 * rbio, see if we can merge with the
@@ -1258,7 +1257,6 @@ static noinline void finish_rmw(struct btrfs_raid_bio *rbio)
 			memcpy(pointers[nr_data], pointers[0], PAGE_SIZE);
 			run_xor(pointers + 1, nr_data - 1, PAGE_CACHE_SIZE);
 		}
-
 
 		for (stripe = 0; stripe < rbio->real_stripes; stripe++)
 			kunmap(page_in_rbio(rbio, stripe, pagenr, 0));

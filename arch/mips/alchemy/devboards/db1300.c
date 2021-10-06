@@ -66,7 +66,6 @@
 #define DB1300_NAND_PHYS_ADDR	0x20000000
 #define DB1300_NAND_PHYS_END	0x20000fff
 
-
 static struct i2c_board_info db1300_i2c_devs[] __initdata = {
 	{ I2C_BOARD_INFO("wm8731", 0x1b), },	/* I2S audio codec */
 	{ I2C_BOARD_INFO("ne1619", 0x2d), },	/* adm1025-compat hwmon */
@@ -838,7 +837,6 @@ int __init db1300_dev_setup(void)
 
 	return platform_add_devices(db1300_dev, ARRAY_SIZE(db1300_dev));
 }
-
 
 int __init db1300_board_setup(void)
 {

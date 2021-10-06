@@ -99,7 +99,6 @@ static void init_act220(void);
 #define TIME_CONST (9000000ul/115200ul)
 #endif
 
-
 /* timeout for sequences in jiffies (=5/100s), must be longer than TIME_CONST */
 #define SIR_TIMEOUT	(HZ*5/100)
 
@@ -580,7 +579,6 @@ static int init_hardware(void)
 
 	soutp(UART_MCR, UART_MCR_RTS|UART_MCR_DTR|UART_MCR_OUT2);
 	udelay(100);
-
 
 	/* -RTS low -> send control byte */
 	soutp(UART_MCR, UART_MCR_DTR|UART_MCR_OUT2);

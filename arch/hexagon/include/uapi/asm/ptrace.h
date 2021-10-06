@@ -40,5 +40,4 @@ extern const char *regs_query_register_name(unsigned int offset);
 #define arch_has_single_step()	(1)
 #endif
 
-
 #endif

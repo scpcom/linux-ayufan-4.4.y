@@ -71,7 +71,6 @@ static struct dentry *coda_lookup(struct inode *dir, struct dentry *entry, unsig
 	return d_splice_alias(inode, entry);
 }
 
-
 int coda_permission(struct inode *inode, int mask)
 {
 	int error;
@@ -97,7 +96,6 @@ int coda_permission(struct inode *inode, int mask)
 
 	return error;
 }
-
 
 static inline void coda_dir_update_mtime(struct inode *dir)
 {
@@ -222,7 +220,6 @@ static int coda_link(struct dentry *source_de, struct inode *dir_inode,
 	inc_nlink(inode);
 	return 0;
 }
-
 
 static int coda_symlink(struct inode *dir_inode, struct dentry *de,
 			const char *symname)
@@ -496,8 +493,6 @@ static int coda_dentry_delete(const struct dentry * dentry)
 	}
 	return 0;
 }
-
-
 
 /*
  * This is called when we want to check if the inode has

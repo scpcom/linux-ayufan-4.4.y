@@ -91,7 +91,6 @@ static inline bool cgroup_freezing(struct task_struct *task)
  * waking up the parent.
  */
 
-
 /**
  * freezer_do_not_count - tell freezer to ignore %current
  *

@@ -50,7 +50,6 @@ enum E_In84{
 #define T_REC   0x40
 #define T_NULL  0x80
 
-
 struct us428_ctls {
 	unsigned char   Fader[9];
 	unsigned char 	Transport;

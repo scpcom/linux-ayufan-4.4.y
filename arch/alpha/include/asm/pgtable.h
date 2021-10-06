@@ -228,7 +228,6 @@ extern inline void pmd_set(pmd_t * pmdp, pte_t * ptep)
 extern inline void pgd_set(pgd_t * pgdp, pmd_t * pmdp)
 { pgd_val(*pgdp) = _PAGE_TABLE | ((((unsigned long) pmdp) - PAGE_OFFSET) << (32-PAGE_SHIFT)); }
 
-
 extern inline unsigned long
 pmd_page_vaddr(pmd_t pmd)
 {

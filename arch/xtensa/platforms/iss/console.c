@@ -67,7 +67,6 @@ static int rs_open(struct tty_struct *tty, struct file * filp)
 	return 0;
 }
 
-
 /*
  * ------------------------------------------------------------
  * iss_serial_close()
@@ -85,7 +84,6 @@ static void rs_close(struct tty_struct *tty, struct file * filp)
 		del_timer_sync(&serial_timer);
 	spin_unlock_bh(&timer_lock);
 }
-
 
 static int rs_write(struct tty_struct * tty,
 		    const unsigned char *buf, int count)
@@ -119,7 +117,6 @@ static void rs_poll(unsigned long priv)
 		mod_timer(&serial_timer, jiffies + SERIAL_TIMER_VALUE);
 	spin_unlock(&timer_lock);
 }
-
 
 static int rs_put_char(struct tty_struct *tty, unsigned char ch)
 {
@@ -213,7 +210,6 @@ int __init rs_init(void)
 	return 0;
 }
 
-
 static __exit void rs_exit(void)
 {
 	int error;
@@ -225,7 +221,6 @@ static __exit void rs_exit(void)
 	tty_port_destroy(&serial_port);
 }
 
-
 /* We use `late_initcall' instead of just `__initcall' as a workaround for
  * the fact that (1) simcons_tty_init can't be called before tty_init,
  * (2) tty_init is called via `module_init', (3) if statically linked,
@@ -236,7 +231,6 @@ static __exit void rs_exit(void)
  */
 
 late_initcall(rs_init);
-
 
 #ifdef CONFIG_SERIAL_CONSOLE
 
@@ -253,7 +247,6 @@ static struct tty_driver* iss_console_device(struct console *c, int *index)
 	*index = c->index;
 	return serial_driver;
 }
-
 
 static struct console sercons = {
 	.name = "ttyS",
@@ -272,4 +265,3 @@ static int __init iss_console_init(void)
 console_initcall(iss_console_init);
 
 #endif /* CONFIG_SERIAL_CONSOLE */
-

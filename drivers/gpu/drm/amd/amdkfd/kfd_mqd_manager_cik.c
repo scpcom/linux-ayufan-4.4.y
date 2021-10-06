@@ -454,4 +454,3 @@ struct mqd_manager *mqd_manager_init_cik(enum KFD_MQD_TYPE type,
 
 	return mqd;
 }
-

@@ -2777,7 +2777,6 @@ static const struct macb_config emac_config = {
 	.init = at91ether_init,
 };
 
-
 static const struct macb_config zynqmp_config = {
 	.caps = MACB_CAPS_GIGABIT_MODE_AVAILABLE | MACB_CAPS_JUMBO,
 	.dma_burst_length = 16,

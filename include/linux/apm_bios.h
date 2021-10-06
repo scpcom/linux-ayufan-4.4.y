@@ -17,7 +17,6 @@
 
 #include <uapi/linux/apm_bios.h>
 
-
 #define APM_CS		(GDT_ENTRY_APMBIOS_BASE * 8)
 #define APM_CS_16	(APM_CS + 8)
 #define APM_DS		(APM_CS_16 + 8)

@@ -2148,7 +2148,6 @@ nfs_access_cache_scan(struct shrinker *shrink, struct shrink_control *sc)
 	return nfs_do_access_cache_scan(nr_to_scan);
 }
 
-
 unsigned long
 nfs_access_cache_count(struct shrinker *shrink, struct shrink_control *sc)
 {

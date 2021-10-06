@@ -63,7 +63,6 @@ enum rc_type {
 			 RC_BIT_RC6_6A_32 | RC_BIT_RC6_MCE | RC_BIT_SHARP | \
 			 RC_BIT_XMP)
 
-
 #define RC_SCANCODE_UNKNOWN(x)			(x)
 #define RC_SCANCODE_OTHER(x)			(x)
 #define RC_SCANCODE_NEC(addr, cmd)		(((addr) << 8) | (cmd))

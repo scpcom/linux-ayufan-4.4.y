@@ -75,7 +75,6 @@ static struct powerdomain core_24xx_pwrdm = {
 	.voltdm		  = { .name = "core" },
 };
 
-
 /*
  * 2430-specific powerdomains
  */

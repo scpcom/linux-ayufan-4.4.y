@@ -1257,7 +1257,6 @@ static const struct ivtv_card ivtv_card_kikyou = {
 	.i2c = &ivtv_i2c_std,
 };
 
-
 static const struct ivtv_card *ivtv_card_list[] = {
 	&ivtv_card_pvr250,
 	&ivtv_card_pvr350,

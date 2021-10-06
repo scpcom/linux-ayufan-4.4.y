@@ -83,7 +83,6 @@ static void deinit_qib_mregion(struct qib_mregion *mr)
 		kfree(mr->map[--i]);
 }
 
-
 /**
  * qib_get_dma_mr - get a DMA memory region
  * @pd: protection domain for this memory region
@@ -115,7 +114,6 @@ struct ib_mr *qib_get_dma_mr(struct ib_pd *pd, int acc)
 		ret = ERR_PTR(rval);
 		goto bail;
 	}
-
 
 	rval = qib_alloc_lkey(&mr->mr, 1);
 	if (rval) {

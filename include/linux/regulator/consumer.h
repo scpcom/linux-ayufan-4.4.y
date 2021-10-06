@@ -301,7 +301,6 @@ regulator_get_optional(struct device *dev, const char *id)
 	return ERR_PTR(-ENODEV);
 }
 
-
 static inline struct regulator *__must_check
 devm_regulator_get_optional(struct device *dev, const char *id)
 {

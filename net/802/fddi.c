@@ -154,7 +154,6 @@ static const struct header_ops fddi_header_ops = {
 	.create		= fddi_header,
 };
 
-
 static void fddi_setup(struct net_device *dev)
 {
 	dev->header_ops		= &fddi_header_ops;

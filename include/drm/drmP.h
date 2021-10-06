@@ -1044,7 +1044,6 @@ extern int drm_prime_sg_to_page_addr_arrays(struct sg_table *sgt, struct page **
 extern struct sg_table *drm_prime_pages_to_sg(struct page **pages, unsigned int nr_pages);
 extern void drm_prime_gem_destroy(struct drm_gem_object *obj, struct sg_table *sg);
 
-
 extern struct drm_dma_handle *drm_pci_alloc(struct drm_device *dev, size_t size,
 					    size_t align);
 extern void drm_pci_free(struct drm_device *dev, struct drm_dma_handle * dmah);

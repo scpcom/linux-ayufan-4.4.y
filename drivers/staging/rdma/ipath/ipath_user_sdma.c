@@ -475,7 +475,6 @@ static int ipath_user_sdma_queue_pkts(const struct ipath_devdata *dd,
 			goto free_pbc;
 		}
 
-
 		idx++;
 		while (pktnwc < pktnw && idx < niov) {
 			const size_t slen = iov[idx].iov_len;
@@ -871,4 +870,3 @@ u32 ipath_user_sdma_inflight_counter(struct ipath_user_sdma_queue *pq)
 {
 	return pq->counter;
 }
-

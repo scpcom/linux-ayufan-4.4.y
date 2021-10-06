@@ -19,7 +19,6 @@
 #define VERIFY_READ     0
 #define VERIFY_WRITE    1
 
-
 /*
  * The fs value determines whether argument validity checking should be
  * performed or not.  If get_fs() == USER_DS, checking is performed, with
@@ -29,7 +28,6 @@
  */
 
 #define MAKE_MM_SEG(a)  ((mm_segment_t) { (a) })
-
 
 #define KERNEL_DS       MAKE_MM_SEG(0)
 #define USER_DS         MAKE_MM_SEG(1)
@@ -205,7 +203,6 @@ static inline int __get_user_fn(void *x, const void __user *ptr, unsigned long s
 	might_fault();						\
 	__put_user(x, ptr);					\
 })
-
 
 int __put_user_bad(void) __attribute__((noreturn));
 

@@ -37,7 +37,6 @@ static struct nand_ecclayout nand_oob_sm_small = {
 	}
 };
 
-
 static int sm_block_markbad(struct mtd_info *mtd, loff_t ofs)
 {
 	struct mtd_oob_ops ops;
@@ -54,7 +53,6 @@ static int sm_block_markbad(struct mtd_info *mtd, loff_t ofs)
 	ops.ooblen = mtd->oobsize;
 	ops.oobbuf = (void *)&oob;
 	ops.datbuf = NULL;
-
 
 	ret = mtd_write_oob(mtd, ofs, &ops);
 	if (ret < 0 || ops.oobretlen != SM_OOB_SIZE) {

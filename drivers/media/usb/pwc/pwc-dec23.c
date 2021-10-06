@@ -96,7 +96,6 @@ static void build_bit_powermask_table(struct pwc_dec23_private *pdec)
 	}
 }
 
-
 static void build_table_color(const unsigned int romtable[16][8],
 			      unsigned char p0004[16][1024],
 			      unsigned char p8004[16][256])
@@ -291,7 +290,6 @@ static unsigned char pwc_crop_table[256 + 2*MAX_OUTER_CROP_VALUE];
 #else
 #define CLAMP(x) ((x)>255?255:((x)<0?0:x))
 #endif
-
 
 /* If the type or the command change, we rebuild the lookup table */
 void pwc_dec23_init(struct pwc_device *pdev, const unsigned char *cmd)

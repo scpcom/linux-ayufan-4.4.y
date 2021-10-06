@@ -12,7 +12,6 @@
 #include <linux/linkage.h>
 #include <asm/assembler.h>
 
-
 ENTRY(armada_38x_scu_power_up)
 	mrc     p15, 4, r1, c15, c0	@ get SCU base address
 	orr	r1, r1, #0x8		@ SCU CPU Power Status Register

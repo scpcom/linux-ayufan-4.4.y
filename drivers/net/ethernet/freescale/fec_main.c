@@ -1148,7 +1148,6 @@ fec_stop(struct net_device *ndev)
 	}
 }
 
-
 static void
 fec_timeout(struct net_device *ndev)
 {
@@ -3206,7 +3205,6 @@ static int fec_enet_init(struct net_device *ndev)
 			cbd_base += txq->tx_ring_size;
 		}
 	}
-
 
 	/* The FEC Ethernet specific entries in the device structure */
 	ndev->watchdog_timeo = TX_TIMEOUT;

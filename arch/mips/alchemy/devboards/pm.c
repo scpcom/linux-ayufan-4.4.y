@@ -20,7 +20,6 @@
  * is to trigger a wakeup.
  */
 
-
 static unsigned long db1x_pm_sleep_secs;
 static unsigned long db1x_pm_wakemsk;
 static unsigned long db1x_pm_last_wakesrc;
@@ -63,7 +62,6 @@ static int db1x_pm_enter(suspend_state_t state)
 
 	/* ...and now the sandman can come! */
 	au_sleep();
-
 
 	/* restore CPLD regs */
 	for (i = BCSR_STATUS; i <= BCSR_SYSTEM; i++)

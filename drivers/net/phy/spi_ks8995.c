@@ -141,7 +141,6 @@ static int ks8995_read(struct ks8995_switch *ks, char *buf,
 	return err ? err : count;
 }
 
-
 static int ks8995_write(struct ks8995_switch *ks, char *buf,
 		 unsigned offset, size_t count)
 {

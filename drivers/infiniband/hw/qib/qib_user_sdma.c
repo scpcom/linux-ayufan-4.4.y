@@ -333,7 +333,6 @@ static int qib_user_sdma_page_to_frags(const struct qib_devdata *dd,
 	offset = 0;
 	dma_mapped = 1;
 
-
 next_fragment:
 
 	/*
@@ -1349,7 +1348,6 @@ static int qib_user_sdma_push_pkts(struct qib_pportdata *ppd,
 	 * won't update this process, it is OK to directly
 	 * modify without sdma lock.
 	 */
-
 
 	pq->num_pending += count;
 	/*

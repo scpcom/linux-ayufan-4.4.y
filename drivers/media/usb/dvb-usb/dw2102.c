@@ -153,7 +153,6 @@ static int dw210x_op_rw(struct usb_device *dev, u8 request, u16 value,
 	if (!u8buf)
 		return -ENOMEM;
 
-
 	if (flags == DW210X_WRITE_MSG)
 		memcpy(u8buf, data, len);
 	ret = usb_control_msg(dev, pipe, request, request_type | USB_TYPE_VENDOR,
@@ -2289,7 +2288,6 @@ static int dw2102_probe(struct usb_interface *intf,
 	p7500->rc.core.rc_query = prof_rc_query;
 	p7500->rc.core.rc_codes = RC_MAP_TBS_NEC;
 	p7500->adapter->fe[0].frontend_attach = prof_7500_frontend_attach;
-
 
 	s421 = kmemdup(&su3000_properties,
 		       sizeof(struct dvb_usb_device_properties), GFP_KERNEL);

@@ -45,7 +45,6 @@ EXPORT_SYMBOL(sound_timer_devs);
 
 int num_sound_timers = 1;
 
-
 static int sound_alloc_audiodev(void);
 
 int sound_install_audiodrv(int vers, char *name, struct audio_driver *driver,
@@ -253,4 +252,3 @@ void sound_unload_timerdev(int dev)
 		sound_timer_devs[dev] = NULL;
 }
 EXPORT_SYMBOL(sound_unload_timerdev);
-

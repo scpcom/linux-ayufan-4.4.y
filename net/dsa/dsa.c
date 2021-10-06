@@ -27,7 +27,6 @@
 
 char dsa_driver_version[] = "0.1";
 
-
 /* switch driver registration ***********************************************/
 static DEFINE_MUTEX(dsa_switch_drivers_mutex);
 static LIST_HEAD(dsa_switch_drivers);
@@ -317,7 +316,6 @@ static int dsa_switch_setup_one(struct dsa_switch *ds, struct device *parent)
 	if (ret < 0)
 		goto out;
 
-
 	/*
 	 * Create network devices for physical switch ports.
 	 */
@@ -393,7 +391,6 @@ dsa_switch_setup(struct dsa_switch_tree *dst, int index,
 	}
 	netdev_info(dst->master_netdev, "[%d]: detected a %s switch\n",
 		    index, name);
-
 
 	/*
 	 * Allocate and initialise switch state.
@@ -506,7 +503,6 @@ static int dsa_switch_resume(struct dsa_switch *ds)
 }
 #endif
 
-
 /* link polling *************************************************************/
 static void dsa_link_poll_work(struct work_struct *ugly)
 {
@@ -531,7 +527,6 @@ static void dsa_link_poll_timer(unsigned long _dst)
 
 	schedule_work(&dst->link_poll_work);
 }
-
 
 /* platform driver init and cleanup *****************************************/
 static int dev_is_class(struct device *dev, void *class)

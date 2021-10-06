@@ -159,4 +159,3 @@
 #define OMAP1510_INT_FPGA23		(OMAP_FPGA_IRQ_BASE + 23)
 
 #endif /*  __ASM_ARCH_OMAP15XX_H */
-

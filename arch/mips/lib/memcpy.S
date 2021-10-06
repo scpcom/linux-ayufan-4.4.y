@@ -593,7 +593,6 @@
 	jr	ra
 	 nop
 
-
 #define SEXC(n)							\
 	.set	reorder;			/* DADDI_WAR */ \
 .Ls_exc_p ## n ## u\@:						\
@@ -717,8 +716,6 @@ LEAF(__copy_from_user_eva)
 __copy_from_user_common:
 	__BUILD_COPY_USER EVA_MODE USEROP KERNELOP
 END(__copy_from_user_eva)
-
-
 
 /*
  * __copy_to_user (EVA)

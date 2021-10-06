@@ -273,7 +273,6 @@ struct i40evf_adapter {
 	u32 aq_wait_count;
 };
 
-
 /* needed by i40evf_ethtool.c */
 extern char i40evf_driver_name[];
 extern const char i40evf_driver_version[];

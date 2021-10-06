@@ -35,7 +35,6 @@
 #include <asm/homecache.h>
 #include <hv/hypervisor.h>
 
-
 /*
  * This stuff is not in elf.h and is not in any other kernel include.
  * This stuff is needed below in the little boot notes parser to
@@ -52,7 +51,6 @@ struct Elf32_Bhdr {
 #define roundupsz(X) (((X) + 3) & ~3)
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
-
 
 void machine_shutdown(void)
 {
@@ -72,7 +70,6 @@ void machine_crash_shutdown(struct pt_regs *regs)
 	 * architecture (and enforced in machine_kexec_prepare below).
 	 */
 }
-
 
 int machine_kexec_prepare(struct kimage *image)
 {
@@ -259,7 +256,6 @@ static void setup_quasi_va_is_pa(void)
 			__set_pte(ptep, pfn_pte(pfn, pte));
 	}
 }
-
 
 void machine_kexec(struct kimage *image)
 {

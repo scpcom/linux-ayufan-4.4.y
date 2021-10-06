@@ -84,7 +84,6 @@ struct inode *ceph_get_dentry_parent_inode(struct dentry *dentry)
 	return inode;
 }
 
-
 /*
  * for readdir, we encode the directory frag and offset within that
  * frag into f_pos.
@@ -360,7 +359,6 @@ more:
 		     " on frag %x, end=%d, complete=%d\n", err, frag,
 		     (int)req->r_reply_info.dir_end,
 		     (int)req->r_reply_info.dir_complete);
-
 
 		/* note next offset and last dentry name */
 		rinfo = &req->r_reply_info;

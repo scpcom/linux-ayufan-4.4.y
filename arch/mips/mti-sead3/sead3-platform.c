@@ -145,7 +145,6 @@ static struct platform_device pled_device = {
 	.resource		= pled_resources
 };
 
-
 static struct resource fled_resources[] = {
 	{
 		.start			= 0x1f000218,

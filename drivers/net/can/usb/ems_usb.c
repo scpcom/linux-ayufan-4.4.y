@@ -730,7 +730,6 @@ static int ems_usb_open(struct net_device *netdev)
 		return err;
 	}
 
-
 	netif_start_queue(netdev);
 
 	return 0;

@@ -86,7 +86,6 @@ ENTRY(crc_t10dif_pcl)
 	# for sizes less than 128, we can't fold 64B at a time...
 	jl	_less_than_128
 
-
 	# load the initial crc value
 	movd	arg1_low32, %xmm10	# initial crc
 
@@ -129,7 +128,6 @@ ENTRY(crc_t10dif_pcl)
 	# at this section of the code, there is 64*x+y (0<=y<64) bytes of
 	# buffer. The _fold_64_B_loop will fold 64B at a time
 	# until we have 64+y Bytes of buffer
-
 
 	# fold 64B at a time. This section of the code folds 4 xmm
 	# registers in parallel
@@ -204,12 +202,10 @@ _fold_64_B_loop:
 	jge	_fold_64_B_loop
 	##################################################################
 
-
 	add	$128, arg2
 	# at this point, the buffer pointer is pointing at the last y Bytes
 	# of the buffer the 64B of folded data is in 4 of the xmm
 	# registers: xmm0, xmm1, xmm2, xmm3
-
 
 	# fold the 8 xmm registers to 1 xmm register with different constants
 
@@ -264,7 +260,6 @@ _fold_64_B_loop:
 	pxor	%xmm8, %xmm7
 	pxor	%xmm6, %xmm7
 
-
 	# instead of 64, we add 48 to the loop counter to save 1 instruction
 	# from the loop instead of a cmp instruction, we use the negative
 	# flag with the jl instruction
@@ -292,7 +287,6 @@ _16B_reduction_loop:
 
 	#now we have 16+z bytes left to reduce, where 0<= z < 16.
 	#first, we reduce the data in the xmm7 register
-
 
 _final_reduction_for_128:
 	# check if any more data to fold. If not, compute the CRC of
@@ -388,7 +382,6 @@ _less_than_128:
 	pshufb	%xmm11, %xmm7	# byte-reflect the plaintext
 	pxor	%xmm0, %xmm7
 
-
 	# update the buffer pointer
 	add	$16, arg2
 
@@ -397,7 +390,6 @@ _less_than_128:
 	sub	$32, arg3
 
 	jmp	_16B_reduction_loop
-
 
 .align 16
 _less_than_32:
@@ -423,7 +415,6 @@ _less_than_32:
 	sub	$16, arg3
 	movdqa	rk1(%rip), %xmm10	# rk1 and rk2 in xmm10
 	jmp	_get_last_two_xmms
-
 
 .align 16
 _less_than_16_left:
@@ -610,8 +601,6 @@ rk19:
 .quad 0x6ee3000000000000
 rk20:
 .quad 0xe7b5000000000000
-
-
 
 mask1:
 .octa 0x80808080808080808080808080808080

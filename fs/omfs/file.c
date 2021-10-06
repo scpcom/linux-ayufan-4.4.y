@@ -380,4 +380,3 @@ const struct address_space_operations omfs_aops = {
 	.write_end = generic_write_end,
 	.bmap = omfs_bmap,
 };
-

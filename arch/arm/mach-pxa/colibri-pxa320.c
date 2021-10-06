@@ -262,4 +262,3 @@ MACHINE_START(COLIBRI320, "Toradex Colibri PXA320")
 	.init_time	= pxa_timer_init,
 	.restart	= pxa_restart,
 MACHINE_END
-

@@ -60,8 +60,6 @@
 #endif
 #include "opa_compat.h"
 
-
-
 #define IB_VLARB_LOWPRI_0_31    1
 #define IB_VLARB_LOWPRI_32_63   2
 #define IB_VLARB_HIGHPRI_0_31   3
@@ -120,7 +118,6 @@ struct ib_pma_portcounters_cong {
 #define IB_CC_SVCTYPE_UC 0x1
 #define IB_CC_SVCTYPE_RD 0x2
 #define IB_CC_SVCTYPE_UD 0x3
-
 
 /*
  * There should be an equivalent IB #define for the following, but

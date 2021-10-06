@@ -105,7 +105,6 @@ static const struct file_operations fc_fops = {
 	.write = fc_write,
 };
 
-
 /* Device part .. */
 static int fc_probe(struct fmc_device *fmc);
 static int fc_remove(struct fmc_device *fmc);
@@ -180,7 +179,6 @@ static int fc_remove(struct fmc_device *fmc)
 
 	return 0;
 }
-
 
 static int fc_init(void)
 {

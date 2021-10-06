@@ -37,7 +37,6 @@
 #include <asm/mmu.h>
 #include <asm/machdep.h>
 
-
 /*
  * This isn't a module but we expose that to userspace
  * via /proc so leave the definitions here

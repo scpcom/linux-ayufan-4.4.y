@@ -16,7 +16,6 @@
  * of the License.
  */
 
-
 #include <linux/acpi.h>
 #include "tpm.h"
 

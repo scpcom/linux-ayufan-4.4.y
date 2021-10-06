@@ -45,7 +45,6 @@
 
 #include "musb_core.h"
 
-
 /* ----------------------------------------------------------------------- */
 
 #define is_buffer_mapped(req) (is_dma_capable() && \
@@ -2101,7 +2100,6 @@ __acquires(musb->lock)
 	/* clear HR */
 	else if (devctl & MUSB_DEVCTL_HR)
 		musb_writeb(mbase, MUSB_DEVCTL, MUSB_DEVCTL_SESSION);
-
 
 	/* what speed did we negotiate? */
 	power = musb_readb(mbase, MUSB_POWER);

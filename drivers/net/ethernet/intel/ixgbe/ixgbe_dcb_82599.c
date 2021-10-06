@@ -242,7 +242,6 @@ s32 ixgbe_dcb_config_pfc_82599(struct ixgbe_hw *hw, u8 pfc_en, u8 *prio_tc)
 			max_tc = prio_tc[i];
 	}
 
-
 	/* Configure PFC Tx thresholds per TC */
 	for (i = 0; i <= max_tc; i++) {
 		int enabled = 0;
@@ -366,4 +365,3 @@ s32 ixgbe_dcb_hw_config_82599(struct ixgbe_hw *hw, u8 pfc_en, u16 *refill,
 
 	return 0;
 }
-

@@ -119,7 +119,6 @@ union ieee754dp ieee754dp_fmina(union ieee754dp x, union ieee754dp y);
 union ieee754dp ieee754dp_fmax(union ieee754dp x, union ieee754dp y);
 union ieee754dp ieee754dp_fmaxa(union ieee754dp x, union ieee754dp y);
 
-
 /* 5 types of floating point number
 */
 enum {

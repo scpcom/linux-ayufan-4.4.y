@@ -147,26 +147,21 @@
 #define BCK1_BCKUP_MASK					0xFF
 #define BCK1_BCKUP_SHIFT				0
 
-
 /*Register BCK2  (0x80) register.RegisterDescription */
 #define BCK2_BCKUP_MASK					0xFF
 #define BCK2_BCKUP_SHIFT				0
-
 
 /*Register BCK3  (0x80) register.RegisterDescription */
 #define BCK3_BCKUP_MASK					0xFF
 #define BCK3_BCKUP_SHIFT				0
 
-
 /*Register BCK4  (0x80) register.RegisterDescription */
 #define BCK4_BCKUP_MASK					0xFF
 #define BCK4_BCKUP_SHIFT				0
 
-
 /*Register BCK5  (0x80) register.RegisterDescription */
 #define BCK5_BCKUP_MASK					0xFF
 #define BCK5_BCKUP_SHIFT				0
-
 
 /*Register PUADEN  (0x80) register.RegisterDescription */
 #define PUADEN_EN3P_MASK				0x80
@@ -186,20 +181,17 @@
 #define PUADEN_BOOT0P_MASK				0x01
 #define PUADEN_BOOT0P_SHIFT				0
 
-
 /*Register REF	(0x80) register.RegisterDescription */
 #define REF_VMBCH_SEL_MASK				0x0C
 #define REF_VMBCH_SEL_SHIFT				2
 #define REF_ST_MASK					0x03
 #define REF_ST_SHIFT					0
 
-
 /*Register VRTC  (0x80) register.RegisterDescription */
 #define VRTC_VRTC_OFFMASK_MASK				0x08
 #define VRTC_VRTC_OFFMASK_SHIFT				3
 #define VRTC_ST_MASK					0x03
 #define VRTC_ST_SHIFT					0
-
 
 /*Register VIO	(0x80) register.RegisterDescription */
 #define VIO_ILMAX_MASK					0xC0
@@ -208,7 +200,6 @@
 #define VIO_SEL_SHIFT					2
 #define VIO_ST_MASK					0x03
 #define VIO_ST_SHIFT					0
-
 
 /*Register VDD1  (0x80) register.RegisterDescription */
 #define VDD1_VGAIN_SEL_MASK				0xC0
@@ -220,18 +211,15 @@
 #define VDD1_ST_MASK					0x03
 #define VDD1_ST_SHIFT					0
 
-
 /*Register VDD1_OP  (0x80) register.RegisterDescription */
 #define VDD1_OP_CMD_MASK				0x80
 #define VDD1_OP_CMD_SHIFT				7
 #define VDD1_OP_SEL_MASK				0x7F
 #define VDD1_OP_SEL_SHIFT				0
 
-
 /*Register VDD1_SR  (0x80) register.RegisterDescription */
 #define VDD1_SR_SEL_MASK				0x7F
 #define VDD1_SR_SEL_SHIFT				0
-
 
 /*Register VDD2  (0x80) register.RegisterDescription */
 #define VDD2_VGAIN_SEL_MASK				0xC0
@@ -243,7 +231,6 @@
 #define VDD2_ST_MASK					0x03
 #define VDD2_ST_SHIFT					0
 
-
 /*Register VDD2_OP  (0x80) register.RegisterDescription */
 #define VDD2_OP_CMD_MASK				0x80
 #define VDD2_OP_CMD_SHIFT				7
@@ -254,13 +241,11 @@
 #define VDD2_SR_SEL_MASK				0x7F
 #define VDD2_SR_SEL_SHIFT				0
 
-
 /*Registers VDD1, VDD2 voltage values definitions */
 #define VDD1_2_NUM_VOLT_FINE				73
 #define VDD1_2_NUM_VOLT_COARSE				3
 #define VDD1_2_MIN_VOLT					6000
 #define VDD1_2_OFFSET					125
-
 
 /*Register VDD3  (0x80) register.RegisterDescription */
 #define VDD3_CKINEN_MASK				0x04
@@ -278,13 +263,11 @@
 #define LDO_ST_ON_BIT					0x01
 #define LDO_ST_MODE_BIT					0x02	
 
-
 /* Registers LDO1 to LDO8 in tps65910 */
 #define LDO1_SEL_MASK					0xFC
 #define LDO3_SEL_MASK					0x7C
 #define LDO_MIN_VOLT					1000
 #define LDO_MAX_VOLT					3300
-
 
 /*Register VDIG1  (0x80) register.RegisterDescription */
 #define VDIG1_SEL_MASK					0x0C
@@ -292,13 +275,11 @@
 #define VDIG1_ST_MASK					0x03
 #define VDIG1_ST_SHIFT					0
 
-
 /*Register VDIG2  (0x80) register.RegisterDescription */
 #define VDIG2_SEL_MASK					0x0C
 #define VDIG2_SEL_SHIFT					2
 #define VDIG2_ST_MASK					0x03
 #define VDIG2_ST_SHIFT					0
-
 
 /*Register VAUX1  (0x80) register.RegisterDescription */
 #define VAUX1_SEL_MASK					0x0C
@@ -306,13 +287,11 @@
 #define VAUX1_ST_MASK					0x03
 #define VAUX1_ST_SHIFT					0
 
-
 /*Register VAUX2  (0x80) register.RegisterDescription */
 #define VAUX2_SEL_MASK					0x0C
 #define VAUX2_SEL_SHIFT					2
 #define VAUX2_ST_MASK					0x03
 #define VAUX2_ST_SHIFT					0
-
 
 /*Register VAUX33  (0x80) register.RegisterDescription */
 #define VAUX33_SEL_MASK					0x0C
@@ -320,13 +299,11 @@
 #define VAUX33_ST_MASK					0x03
 #define VAUX33_ST_SHIFT					0
 
-
 /*Register VMMC  (0x80) register.RegisterDescription */
 #define VMMC_SEL_MASK					0x0C
 #define VMMC_SEL_SHIFT					2
 #define VMMC_ST_MASK					0x03
 #define VMMC_ST_SHIFT					0
-
 
 /*Register VPLL  (0x80) register.RegisterDescription */
 #define VPLL_SEL_MASK					0x0C
@@ -334,13 +311,11 @@
 #define VPLL_ST_MASK					0x03
 #define VPLL_ST_SHIFT					0
 
-
 /*Register VDAC  (0x80) register.RegisterDescription */
 #define VDAC_SEL_MASK					0x0C
 #define VDAC_SEL_SHIFT					2
 #define VDAC_ST_MASK					0x03
 #define VDAC_ST_SHIFT					0
-
 
 /*Register THERM  (0x80) register.RegisterDescription */
 #define THERM_THERM_HD_MASK				0x20
@@ -354,11 +329,9 @@
 #define THERM_THERM_STATE_MASK				0x01
 #define THERM_THERM_STATE_SHIFT				0
 
-
 /*Register BBCH  (0x80) register.RegisterDescription */
 #define BBCH_BBSEL_MASK					0x06
 #define BBCH_BBSEL_SHIFT				1
-
 
 /*Register DCDCCTRL  (0x80) register.RegisterDescription */
 #define DCDCCTRL_VDD2_PSKIP_MASK			0x20
@@ -371,7 +344,6 @@
 #define DCDCCTRL_DCDCCKEXT_SHIFT			2
 #define DCDCCTRL_DCDCCKSYNC_MASK			0x03
 #define DCDCCTRL_DCDCCKSYNC_SHIFT			0
-
 
 /*Register DEVCTRL  (0x80) register.RegisterDescription */
 #define DEVCTRL_PWR_OFF_MASK				0x80
@@ -391,7 +363,6 @@
 #define DEVCTRL_DEV_OFF_MASK				0x01
 #define DEVCTRL_DEV_OFF_SHIFT				0
 
-
 /*Register DEVCTRL2  (0x80) register.RegisterDescription */
 #define DEVCTRL2_TSLOT_LENGTH_MASK			0x30
 #define DEVCTRL2_TSLOT_LENGTH_SHIFT			4
@@ -403,7 +374,6 @@
 #define DEVCTRL2_PWON_LP_RST_SHIFT			1
 #define DEVCTRL2_IT_POL_MASK				0x01
 #define DEVCTRL2_IT_POL_SHIFT				0
-
 
 /*Register SLEEP_KEEP_LDO_ON  (0x80) register.RegisterDescription */
 #define SLEEP_KEEP_LDO_ON_VDAC_KEEPON_MASK		0x80
@@ -423,7 +393,6 @@
 #define SLEEP_KEEP_LDO_ON_VMMC_KEEPON_MASK		0x01
 #define SLEEP_KEEP_LDO_ON_VMMC_KEEPON_SHIFT		0
 
-
 /*Register SLEEP_KEEP_RES_ON  (0x80) register.RegisterDescription */
 #define SLEEP_KEEP_RES_ON_THERM_KEEPON_MASK		0x80
 #define SLEEP_KEEP_RES_ON_THERM_KEEPON_SHIFT		7
@@ -441,7 +410,6 @@
 #define SLEEP_KEEP_RES_ON_VDD1_KEEPON_SHIFT		1
 #define SLEEP_KEEP_RES_ON_VIO_KEEPON_MASK		0x01
 #define SLEEP_KEEP_RES_ON_VIO_KEEPON_SHIFT		0
-
 
 /*Register SLEEP_SET_LDO_OFF  (0x80) register.RegisterDescription */
 #define SLEEP_SET_LDO_OFF_VDAC_SETOFF_MASK		0x80
@@ -461,7 +429,6 @@
 #define SLEEP_SET_LDO_OFF_VMMC_SETOFF_MASK		0x01
 #define SLEEP_SET_LDO_OFF_VMMC_SETOFF_SHIFT		0
 
-
 /*Register SLEEP_SET_RES_OFF  (0x80) register.RegisterDescription */
 #define SLEEP_SET_RES_OFF_DEFAULT_VOLT_MASK		0x80
 #define SLEEP_SET_RES_OFF_DEFAULT_VOLT_SHIFT		7
@@ -477,7 +444,6 @@
 #define SLEEP_SET_RES_OFF_VDD1_SETOFF_SHIFT		1
 #define SLEEP_SET_RES_OFF_VIO_SETOFF_MASK		0x01
 #define SLEEP_SET_RES_OFF_VIO_SETOFF_SHIFT		0
-
 
 /*Register EN1_LDO_ASS	(0x80) register.RegisterDescription */
 #define EN1_LDO_ASS_VDAC_EN1_MASK			0x80
@@ -497,7 +463,6 @@
 #define EN1_LDO_ASS_VMMC_EN1_MASK			0x01
 #define EN1_LDO_ASS_VMMC_EN1_SHIFT			0
 
-
 /*Register EN1_SMPS_ASS  (0x80) register.RegisterDescription */
 #define EN1_SMPS_ASS_RSVD_MASK				0xE0
 #define EN1_SMPS_ASS_RSVD_SHIFT				5
@@ -511,7 +476,6 @@
 #define EN1_SMPS_ASS_VDD1_EN1_SHIFT			1
 #define EN1_SMPS_ASS_VIO_EN1_MASK			0x01
 #define EN1_SMPS_ASS_VIO_EN1_SHIFT			0
-
 
 /*Register EN2_LDO_ASS	(0x80) register.RegisterDescription */
 #define EN2_LDO_ASS_VDAC_EN2_MASK			0x80
@@ -531,7 +495,6 @@
 #define EN2_LDO_ASS_VMMC_EN2_MASK			0x01
 #define EN2_LDO_ASS_VMMC_EN2_SHIFT			0
 
-
 /*Register EN2_SMPS_ASS  (0x80) register.RegisterDescription */
 #define EN2_SMPS_ASS_RSVD_MASK				0xE0
 #define EN2_SMPS_ASS_RSVD_SHIFT				5
@@ -545,7 +508,6 @@
 #define EN2_SMPS_ASS_VDD1_EN2_SHIFT			1
 #define EN2_SMPS_ASS_VIO_EN2_MASK			0x01
 #define EN2_SMPS_ASS_VIO_EN2_SHIFT			0
-
 
 /*Register EN3_LDO_ASS	(0x80) register.RegisterDescription */
 #define EN3_LDO_ASS_VDAC_EN3_MASK			0x80
@@ -564,7 +526,6 @@
 #define EN3_LDO_ASS_VDIG1_EN3_SHIFT			1
 #define EN3_LDO_ASS_VMMC_EN3_MASK			0x01
 #define EN3_LDO_ASS_VMMC_EN3_SHIFT			0
-
 
 /*Register SPARE  (0x80) register.RegisterDescription */
 #define SPARE_SPARE_MASK				0xFF
@@ -632,7 +593,6 @@
 #define INT_STS_PWRHOLD_F_IT_MASK			0x01
 #define INT_STS_PWRHOLD_F_IT_SHIFT			0
 
-
 /*Register INT_MSK  (0x80) register.RegisterDescription */
 #define INT_MSK_RTC_PERIOD_IT_MSK_MASK			0x80
 #define INT_MSK_RTC_PERIOD_IT_MSK_SHIFT			7
@@ -650,7 +610,6 @@
 #define INT_MSK_VMBHI_IT_MSK_SHIFT			1
 #define INT_MSK_PWRHOLD_F_IT_MSK_MASK			0x01
 #define INT_MSK_PWRHOLD_F_IT_MSK_SHIFT			0
-
 
 /*Register INT_STS2  (0x80) register.RegisterDescription */
 #define INT_STS2_GPIO3_F_IT_MASK			0x80
@@ -670,7 +629,6 @@
 #define INT_STS2_GPIO0_R_IT_MASK			0x01
 #define INT_STS2_GPIO0_R_IT_SHIFT			0
 
-
 /*Register INT_MSK2  (0x80) register.RegisterDescription */
 #define INT_MSK2_GPIO3_F_IT_MSK_MASK			0x80
 #define INT_MSK2_GPIO3_F_IT_MSK_SHIFT			7
@@ -688,7 +646,6 @@
 #define INT_MSK2_GPIO0_F_IT_MSK_SHIFT			1
 #define INT_MSK2_GPIO0_R_IT_MSK_MASK			0x01
 #define INT_MSK2_GPIO0_R_IT_MSK_SHIFT			0
-
 
 /*Register INT_STS3  (0x80) register.RegisterDescription */
 #define INT_STS3_PWRDN_IT_MASK				0x80
@@ -708,7 +665,6 @@
 #define INT_STS3_GPIO4_R_IT_MASK			0x01
 #define INT_STS3_GPIO4_R_IT_SHIFT			0
 
-
 /*Register INT_MSK3  (0x80) register.RegisterDescription */
 #define INT_MSK3_PWRDN_IT_MSK_MASK			0x80
 #define INT_MSK3_PWRDN_IT_MSK_SHIFT			7
@@ -727,7 +683,6 @@
 #define INT_MSK3_GPIO4_R_IT_MSK_MASK			0x01
 #define INT_MSK3_GPIO4_R_IT_MSK_SHIFT			0
 
-
 /*Register GPIO  (0x80) register.RegisterDescription */
 #define GPIO_SLEEP_MASK                         0x80
 #define GPIO_SLEEP_SHIFT                        7
@@ -742,16 +697,13 @@
 #define GPIO_SET_MASK                           0x01
 #define GPIO_SET_SHIFT                          0
 
-
 /*Register JTAGVERNUM  (0x80) register.RegisterDescription */
 #define JTAGVERNUM_VERNUM_MASK				0x0F
 #define JTAGVERNUM_VERNUM_SHIFT				0
 
-
 /* Register VDDCTRL (0x27) bit definitions */
 #define VDDCTRL_ST_MASK                                  0x03
 #define VDDCTRL_ST_SHIFT                                 0
-
 
 /*Register VDDCTRL_OP  (0x28) bit definitios */
 #define VDDCTRL_OP_CMD_MASK                              0x80
@@ -759,11 +711,9 @@
 #define VDDCTRL_OP_SEL_MASK                              0x7F
 #define VDDCTRL_OP_SEL_SHIFT                             0
 
-
 /*Register VDDCTRL_SR  (0x29) bit definitions */
 #define VDDCTRL_SR_SEL_MASK                              0x7F
 #define VDDCTRL_SR_SEL_SHIFT                             0
-
 
 /* IRQ Definitions */
 #define TPS65910_IRQ_VBAT_VMBDCH			0

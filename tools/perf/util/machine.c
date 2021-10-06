@@ -1208,7 +1208,6 @@ static int machine__process_kernel_mmap_event(struct machine *machine,
 					     PERF_RECORD_MISC_CPUMODE_UNKNOWN))
 				continue;
 
-
 			kernel = dso;
 			break;
 		}

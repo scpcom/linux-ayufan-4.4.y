@@ -115,7 +115,6 @@
 #define USBSTS_PERIODIC_SCHEDULE	0x00004000
 #define USBSTS_ASYNC_SCHEDULE		0x00008000
 
-
 /* Interrupt Enable Register Bit Masks */
 #define USBINTR_INT_EN                          (0x00000001)
 #define USBINTR_ERR_INT_EN                      (0x00000002)
@@ -282,7 +281,6 @@ struct mv_dqh {
 	u8	setup_buffer[8];
 	u32	reserved2[4];
 };
-
 
 #define DTD_NEXT_TERMINATE		(0x00000001)
 #define DTD_IOC				(0x00008000)

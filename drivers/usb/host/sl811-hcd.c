@@ -57,7 +57,6 @@
 
 #include "sl811.h"
 
-
 MODULE_DESCRIPTION("SL811HS USB Host Controller Driver");
 MODULE_LICENSE("GPL");
 MODULE_ALIAS("platform:sl811-hcd");
@@ -373,7 +372,6 @@ static struct sl811h_ep	*start(struct sl811 *sl811, u8 bank)
 		} else if (ep->nak_count)
 			control |= SL11H_HCTLMASK_AFTERSOF;
 	}
-
 
 	switch (ep->nextpid) {
 	case USB_PID_IN:
@@ -1054,7 +1052,6 @@ sl811h_get_frame(struct usb_hcd *hcd)
 	return sl811->frame;
 }
 
-
 /*-------------------------------------------------------------------------*/
 
 /* the virtual root hub timer IRQ checks for hub status */
@@ -1365,7 +1362,6 @@ sl811h_bus_resume(struct usb_hcd *hcd)
 #define	sl811h_bus_resume	NULL
 
 #endif
-
 
 /*-------------------------------------------------------------------------*/
 
@@ -1798,7 +1794,6 @@ sl811h_resume(struct platform_device *dev)
 #define	sl811h_resume	NULL
 
 #endif
-
 
 /* this driver is exported so sl811_cs can depend on it */
 struct platform_driver sl811h_driver = {

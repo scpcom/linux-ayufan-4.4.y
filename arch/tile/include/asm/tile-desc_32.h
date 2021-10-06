@@ -23,7 +23,6 @@
 
 #include <arch/opcode.h>
 
-
 enum
 {
   TILEPRO_MAX_OPERANDS = 5 /* mm */
@@ -428,9 +427,6 @@ typedef enum
   TILEPRO_OPC_NONE
 } tilepro_mnemonic;
 
-
-
-
 typedef enum
 {
   TILEPRO_PIPELINE_X0,
@@ -483,13 +479,11 @@ struct tilepro_operand
   unsigned int (*extract) (tilepro_bundle_bits bundle);
 };
 
-
 extern const struct tilepro_operand tilepro_operands[];
 
 /* One finite-state machine per pipe for rapid instruction decoding. */
 extern const unsigned short * const
 tilepro_bundle_decoder_fsms[TILEPRO_NUM_PIPELINE_ENCODINGS];
-
 
 struct tilepro_opcode
 {
@@ -525,7 +519,6 @@ struct tilepro_opcode
 
 extern const struct tilepro_opcode tilepro_opcodes[];
 
-
 /* Used for non-textual disassembly into structs. */
 struct tilepro_decoded_instruction
 {
@@ -534,20 +527,16 @@ struct tilepro_decoded_instruction
   int operand_values[TILEPRO_MAX_OPERANDS];
 };
 
-
 /* Disassemble a bundle into a struct for machine processing. */
 extern int parse_insn_tilepro(tilepro_bundle_bits bits,
                               unsigned int pc,
                               struct tilepro_decoded_instruction
                               decoded[TILEPRO_MAX_INSTRUCTIONS_PER_BUNDLE]);
 
-
 /* Given a set of bundle bits and a specific pipe, returns which
  * instruction the bundle contains in that pipe.
  */
 extern const struct tilepro_opcode *
 find_opcode(tilepro_bundle_bits bits, tilepro_pipeline pipe);
-
-
 
 #endif /* opcode_tilepro_h */

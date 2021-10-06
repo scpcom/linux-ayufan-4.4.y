@@ -528,7 +528,6 @@ static struct class gpio_class = {
 	.class_attrs =	gpio_class_attrs,
 };
 
-
 /**
  * gpiod_export - export a GPIO through sysfs
  * @gpio: gpio to make available, already requested
@@ -801,7 +800,6 @@ static int __init gpiolib_sysfs_init(void)
 		spin_lock_irqsave(&gpio_lock, flags);
 	}
 	spin_unlock_irqrestore(&gpio_lock, flags);
-
 
 	return status;
 }

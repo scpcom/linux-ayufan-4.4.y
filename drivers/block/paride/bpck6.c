@@ -19,7 +19,6 @@
    Version 2.0.2 - fixed version string usage, and made ppc functions static 
 */
 
-
 #define BACKPACK_VERSION "2.0.2"
 
 #include <linux/module.h>
@@ -36,7 +35,6 @@
 /* PARAMETERS */
 static bool verbose; /* set this to 1 to see debugging messages and whatnot */
  
-
 #define PPCSTRUCT(pi) ((Interface *)(pi->private))
 
 /****************************************************************/

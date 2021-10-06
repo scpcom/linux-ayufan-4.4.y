@@ -112,7 +112,6 @@ static void init_latency_info(struct latency_info *li, int startup)
 	li->interrupt_cnt = 0;
 }
 
-
 static void start_timer(int timer, u64 interval)
 {
 	union cvmx_ciu_timx timx;
@@ -129,7 +128,6 @@ static void start_timer(int timer, u64 interval)
 	li.timer_start2 = read_c0_cvmcount();
 	raw_local_irq_restore(flags);
 }
-
 
 static irqreturn_t cvm_oct_ciu_timer_interrupt(int cpl, void *dev_id)
 {

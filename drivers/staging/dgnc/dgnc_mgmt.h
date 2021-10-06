@@ -22,4 +22,3 @@ int dgnc_mgmt_open(struct inode *inode, struct file *file);
 int dgnc_mgmt_close(struct inode *inode, struct file *file);
 long dgnc_mgmt_ioctl(struct file *file, unsigned int cmd, unsigned long arg);
 #endif
-

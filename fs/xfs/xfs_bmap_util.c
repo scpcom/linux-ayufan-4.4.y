@@ -590,7 +590,6 @@ xfs_getbmap(
 		return -EINVAL;
 	bmvend = bmv->bmv_offset + bmv->bmv_length;
 
-
 	if (bmv->bmv_count > ULONG_MAX / sizeof(struct getbmapx))
 		return -ENOMEM;
 	out = kmem_zalloc_large(bmv->bmv_count * sizeof(struct getbmapx), 0);
@@ -1770,7 +1769,6 @@ xfs_swap_extents(
 	lock_flags |= XFS_ILOCK_EXCL;
 	xfs_trans_ijoin(tp, ip, lock_flags);
 	xfs_trans_ijoin(tp, tip, lock_flags);
-
 
 	/* Verify all data are being swapped */
 	if (sxp->sx_offset != 0 ||

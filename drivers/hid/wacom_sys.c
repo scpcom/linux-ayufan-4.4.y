@@ -1125,7 +1125,6 @@ static ssize_t wacom_store_speed(struct device *dev,
 static DEVICE_ATTR(speed, DEV_ATTR_RW_PERM,
 		wacom_show_speed, wacom_store_speed);
 
-
 static ssize_t wacom_show_remote_mode(struct kobject *kobj,
 				      struct kobj_attribute *kattr,
 				      char *buf, int index)

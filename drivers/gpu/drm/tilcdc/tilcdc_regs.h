@@ -108,7 +108,6 @@
 #define LCDC_CLK_RESET_REG                       0x70
 #define LCDC_CLK_MAIN_RESET                      BIT(3)
 
-
 /*
  * Helpers:
  */

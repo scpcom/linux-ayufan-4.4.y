@@ -643,7 +643,6 @@ static int a2065_init_one(struct zorro_dev *z,
 			  const struct zorro_device_id *ent);
 static void a2065_remove_one(struct zorro_dev *z);
 
-
 static struct zorro_device_id a2065_zorro_tbl[] = {
 	{ ZORRO_PROD_CBM_A2065_1 },
 	{ ZORRO_PROD_CBM_A2065_2 },
@@ -754,7 +753,6 @@ static int a2065_init_one(struct zorro_dev *z,
 
 	return 0;
 }
-
 
 static void a2065_remove_one(struct zorro_dev *z)
 {

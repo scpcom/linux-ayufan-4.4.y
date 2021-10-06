@@ -698,7 +698,6 @@ static int snd_als300_create(struct snd_card *card,
 	}
 	chip->irq = pci->irq;
 
-
 	snd_als300_init(chip);
 
 	err = snd_als300_ac97(chip);

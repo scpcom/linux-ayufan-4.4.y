@@ -88,7 +88,6 @@ static void tda827x_set_std(struct dvb_frontend *fe,
 		dprintk("setting tda827x to system %s\n", mode);
 }
 
-
 /* ------------------------------------------------------------------ */
 
 struct tda827x_data {
@@ -656,7 +655,6 @@ err:
 	       __func__, priv->i2c_addr << 1);
 	return rc;
 }
-
 
 static int tda827xa_set_analog_params(struct dvb_frontend *fe,
 				      struct analog_parameters *params)

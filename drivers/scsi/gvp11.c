@@ -16,7 +16,6 @@
 #include "wd33c93.h"
 #include "gvp11.h"
 
-
 #define CHECK_WD33C93
 
 struct gvp11_hostdata {

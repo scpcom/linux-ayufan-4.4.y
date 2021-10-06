@@ -230,7 +230,6 @@ s32 ixgbe_dcb_config_pfc_82598(struct ixgbe_hw *hw, u8 pfc_en)
 	/* Configure flow control refresh threshold value */
 	IXGBE_WRITE_REG(hw, IXGBE_FCRTV, hw->fc.pause_time / 2);
 
-
 	return 0;
 }
 

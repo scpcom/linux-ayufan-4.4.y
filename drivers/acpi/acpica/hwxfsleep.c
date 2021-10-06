@@ -109,7 +109,6 @@ acpi_hw_set_firmware_waking_vectors(struct acpi_table_facs *facs,
 {
 	ACPI_FUNCTION_TRACE(acpi_hw_set_firmware_waking_vectors);
 
-
 	/*
 	 * According to the ACPI specification 2.0c and later, the 64-bit
 	 * waking vector should be cleared and the 32-bit waking vector should

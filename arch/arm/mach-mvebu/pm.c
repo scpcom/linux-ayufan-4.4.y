@@ -229,7 +229,6 @@ static int __init mvebu_pm_init(void)
 	return 0;
 }
 
-
 late_initcall(mvebu_pm_init);
 
 int __init mvebu_pm_suspend_init(void (*board_pm_enter)(void __iomem *sdram_reg,

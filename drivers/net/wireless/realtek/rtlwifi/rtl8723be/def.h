@@ -30,7 +30,6 @@
 #define HAL_PRIME_CHNL_OFFSET_LOWER		1
 #define HAL_PRIME_CHNL_OFFSET_UPPER		2
 
-
 #define RX_MPDU_QUEUE				0
 #define CHIP_8723B				(BIT(1) | BIT(2))
 #define NORMAL_CHIP				BIT(3)

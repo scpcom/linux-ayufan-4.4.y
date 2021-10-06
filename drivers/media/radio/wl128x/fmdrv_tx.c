@@ -423,4 +423,3 @@ int fm_tx_set_freq(struct fmdev *fmdev, u32 freq_to_set)
 
 	return 0;
 }
-

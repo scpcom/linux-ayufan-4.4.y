@@ -106,7 +106,6 @@ struct gr_regs {
 #define GR_STATUS_FN_MASK	0x000007ff
 #define GR_STATUS_FN_POS	0
 
-
 #define MAX_CTRL_PL_SIZE 64 /* As per USB standard for full and high speed */
 
 /*-------------------------------------------------------------------------*/

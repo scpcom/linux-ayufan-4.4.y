@@ -140,7 +140,6 @@ u64 stable_page_flags(struct page *page)
 	} else if (is_zero_pfn(page_to_pfn(page)))
 		u |= 1 << KPF_ZERO_PAGE;
 
-
 	/*
 	 * Caveats on high order pages: page->_count will only be set
 	 * -1 on the head page; SLUB/SLQB do the same for PG_slab;

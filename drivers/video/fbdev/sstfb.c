@@ -74,7 +74,6 @@
 
 #undef SST_DEBUG
 
-
 /*
  * Includes
  */
@@ -89,7 +88,6 @@
 #include <asm/io.h>
 #include <linux/uaccess.h>
 #include <video/sstfb.h>
-
 
 /* initialized by setup */
 
@@ -117,7 +115,6 @@ static struct sst_spec voodoo_spec[] = {
  { .name = "Voodoo Graphics", .default_gfx_clock = 50000, .max_gfxclk = 60 },
  { .name = "Voodoo2",	      .default_gfx_clock = 75000, .max_gfxclk = 85 },
 };
-
 
 /*
  * debug functions
@@ -234,7 +231,6 @@ static int __sst_wait_idle(u8 __iomem *vbase)
 	}
 }
 
-
 /* dac access */
 /* dac_read should be remaped to FbiInit2 (via the pci reg init_enable) */
 static u8 __sst_dac_read(u8 __iomem *vbase, u8 reg)
@@ -335,7 +331,6 @@ static void sstfb_clear_screen(struct fb_info *info)
 	/* clear screen */
 	fb_memset(info->screen_base, 0, info->fix.smem_len);
 }
-
 
 /**
  *      sstfb_check_var - Optional function.  Validates a var passed in.
@@ -763,7 +758,6 @@ static int sstfb_ioctl(struct fb_info *info, unsigned int cmd,
 	return -EINVAL;
 }
 
-
 /*
  * Screen-to-Screen BitBlt 2D command (for the bmove fb op.) - Voodoo2 only
  */
@@ -788,7 +782,6 @@ static void sstfb_copyarea(struct fb_info *info, const struct fb_copyarea *area)
 	sst_wait_idle();
 }
 #endif
-
 
 /*
  * FillRect 2D command (solidfill or invert (via ROP_XOR)) - Voodoo2 only
@@ -816,8 +809,6 @@ static void sstfb_fillrect(struct fb_info *info, const struct fb_fillrect *rect)
 	sst_wait_idle();
 }
 #endif
-
-
 
 /* 
  * get lfb size 
@@ -856,7 +847,6 @@ static int sst_get_memsize(struct fb_info *info, __u32 *memsize)
 	f_ddprintk("detected memsize: %dMB\n", *memsize >> 20);
 	return 1;
 }
-
 
 /* 
  * DAC detection routines 
@@ -955,7 +945,6 @@ static int sst_detect_ics(struct fb_info *info)
 	}
 	return 0;
 }
-
 
 /*
  * gfx, video, pci fifo should be reset, dram refresh disabled
@@ -1103,7 +1092,6 @@ static void sst_set_vidmod_ics(struct fb_info *info, const int bpp)
  * dram refresh disabled, FbiInit remaped.
  * TODO: mmh.. maybe i should put the "prerequisite" in the func ...
  */
-
 
 static struct dac_switch dacs[] = {
 	{	.name		= "TI TVP3409",
@@ -1305,7 +1293,6 @@ static int sstfb_setup(char *options)
 	return 0;
 }
 
-
 static struct fb_ops sstfb_ops = {
 	.owner		= THIS_MODULE,
 	.fb_check_var	= sstfb_check_var,
@@ -1436,7 +1423,6 @@ static int sstfb_probe(struct pci_dev *pdev, const struct pci_device_id *id)
 	if (device_create_file(info->dev, &device_attrs[0]))
 		printk(KERN_WARNING "sstfb: can't create sysfs entry.\n");
 
-
 	fb_info(info, "%s frame buffer device at 0x%p\n",
 		fix->id, info->screen_base);
 
@@ -1476,7 +1462,6 @@ static void sstfb_remove(struct pci_dev *pdev)
 	framebuffer_release(info);
 }
 
-
 static const struct pci_device_id sstfb_id_tbl[] = {
 	{ PCI_DEVICE(PCI_VENDOR_ID_3DFX, PCI_DEVICE_ID_3DFX_VOODOO ),
 		.driver_data = ID_VOODOO1, },
@@ -1491,7 +1476,6 @@ static struct pci_driver sstfb_driver = {
 	.probe		= sstfb_probe,
 	.remove		= sstfb_remove,
 };
-
 
 static int sstfb_init(void)
 {
@@ -1508,7 +1492,6 @@ static void sstfb_exit(void)
 {
 	pci_unregister_driver(&sstfb_driver);
 }
-
 
 module_init(sstfb_init);
 module_exit(sstfb_exit);
@@ -1529,4 +1512,3 @@ module_param(slowpci, bool, 0);
 MODULE_PARM_DESC(slowpci, "Uses slow PCI settings (0 or 1) (default=0)");
 module_param(mode_option, charp, 0);
 MODULE_PARM_DESC(mode_option, "Initial video mode (default=" DEFAULT_VIDEO_MODE ")");
-

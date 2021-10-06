@@ -19,7 +19,6 @@
 #include <drv_types.h>
 #include <net/lib80211.h>
 
-
 #define is_wep_enc(alg) (alg == WLAN_CIPHER_SUITE_WEP40 || \
 			 alg == WLAN_CIPHER_SUITE_WEP104)
 

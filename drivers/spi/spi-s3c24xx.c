@@ -619,7 +619,6 @@ static int s3c24xx_spi_remove(struct platform_device *dev)
 	return 0;
 }
 
-
 #ifdef CONFIG_PM
 
 static int s3c24xx_spi_suspend(struct device *dev)

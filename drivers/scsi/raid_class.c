@@ -56,7 +56,6 @@ struct raid_component {
 	ac_to_raid_internal(ac);					\
 })
 	
-
 static int raid_match(struct attribute_container *cont, struct device *dev)
 {
 	/* We have to look for every subsystem that could house
@@ -191,7 +190,6 @@ raid_attr_show_internal(attr, %s, name,					\
 )									\
 static DEVICE_ATTR(attr, S_IRUGO, raid_show_##attr, NULL)
 
-
 #define raid_attr_ro_internal(attr, code)				\
 raid_attr_show_internal(attr, %d, rd->attr, code)			\
 static DEVICE_ATTR(attr, S_IRUGO, raid_show_##attr, NULL)
@@ -205,7 +203,6 @@ static DEVICE_ATTR(attr, S_IRUGO, raid_show_##attr, NULL)
 #define raid_attr_ro_fn(attr)	raid_attr_ro_internal(attr, ATTR_CODE(attr))
 #define raid_attr_ro_state(attr)	raid_attr_ro_states(attr, attr, )
 #define raid_attr_ro_state_fn(attr)	raid_attr_ro_states(attr, attr, ATTR_CODE(attr))
-
 
 raid_attr_ro_state(level);
 raid_attr_ro_fn(resync);
@@ -314,4 +311,3 @@ MODULE_LICENSE("GPL");
 
 module_init(raid_init);
 module_exit(raid_exit);
-

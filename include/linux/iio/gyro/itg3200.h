@@ -95,7 +95,6 @@
 #define ITG3200_CLK_EXT_32K		0x04
 #define ITG3200_CLK_EXT_19M		0x05
 
-
 /**
  * struct itg3200 - device instance specific data
  * @i2c:    actual i2c_client
@@ -119,7 +118,6 @@ int itg3200_write_reg_8(struct iio_dev *indio_dev,
 
 int itg3200_read_reg_8(struct iio_dev *indio_dev,
 		u8 reg_address, u8 *val);
-
 
 #ifdef CONFIG_IIO_BUFFER
 

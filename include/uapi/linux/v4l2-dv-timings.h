@@ -267,7 +267,6 @@
 		V4L2_DV_FL_CAN_REDUCE_FPS | V4L2_DV_FL_IS_CE_VIDEO) \
 }
 
-
 /* VESA Discrete Monitor Timings as per version 1.0, revision 12 */
 
 #define V4L2_DV_BT_DMT_640X350P85 { \

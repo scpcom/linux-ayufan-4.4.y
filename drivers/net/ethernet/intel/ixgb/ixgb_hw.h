@@ -788,5 +788,4 @@ void ixgb_write_pci_cfg(struct ixgb_hw *hw,
 			 u32 reg,
 			 u16 * value);
 
-
 #endif /* _IXGB_HW_H_ */

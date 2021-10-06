@@ -44,7 +44,6 @@ struct ADDBA_request {
 	__le16		BA_starting_seqctrl;
 }  __packed;
 
-
 /*	===============WPS Section=============== */
 /*	WPS attribute ID */
 #define WPS_ATTR_VER1				0x104A

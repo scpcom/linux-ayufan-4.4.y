@@ -60,4 +60,3 @@ inline static void sms_ir_event(struct smscore_device_t *coredev,
 #endif
 
 #endif /* __SMS_IR_H__ */
-

@@ -119,4 +119,3 @@
 #define MXR_LAYER_CFG_VP_VAL(x)		MXR_MASK_VAL(x, 3, 0)
 
 #endif /* SAMSUNG_REGS_MIXER_H */
-

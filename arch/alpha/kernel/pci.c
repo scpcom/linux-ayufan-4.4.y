@@ -26,7 +26,6 @@
 #include "proto.h"
 #include "pci_impl.h"
 
-
 /*
  * Some string constants used by the various core logics. 
  */
@@ -362,7 +361,6 @@ common_init_pci(void)
 	}
 }
 
-
 struct pci_controller * __init
 alloc_pci_controller(void)
 {
@@ -385,7 +383,6 @@ alloc_resource(void)
 
 	return res;
 }
-
 
 /* Provide information on locations of various I/O regions in physical
    memory.  Do this on a per-card basis so that we choose the right hose.  */

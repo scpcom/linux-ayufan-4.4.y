@@ -65,7 +65,6 @@ static int gpio2_to_irq(struct gpio_chip *chip, unsigned offset)
 	return alchemy_gpio2_to_irq(offset + ALCHEMY_GPIO2_BASE);
 }
 
-
 static int gpio1_get(struct gpio_chip *chip, unsigned offset)
 {
 	return alchemy_gpio1_get_value(offset + ALCHEMY_GPIO1_BASE);

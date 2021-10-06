@@ -22,7 +22,6 @@
 #include <linux/slab.h>
 #include <linux/spinlock.h>
 
-
 /**
  * sunxi_usb_reset... - reset bits in usb clk registers handling
  */

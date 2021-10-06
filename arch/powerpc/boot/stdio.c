@@ -154,7 +154,6 @@ int vsprintf(char *buf, const char *fmt, va_list args)
 	                        /* 'z' support added 23/7/1999 S.H.    */
 				/* 'z' changed to 'Z' --davidm 1/25/99 */
 
-	
 	for (str=buf ; *fmt ; ++fmt) {
 		if (*fmt != '%') {
 			*str++ = *fmt;
@@ -251,7 +250,6 @@ int vsprintf(char *buf, const char *fmt, va_list args)
 				(unsigned long) va_arg(args, void *), 16,
 				field_width, precision, flags);
 			continue;
-
 
 		case 'n':
 			if (qualifier == 'l') {

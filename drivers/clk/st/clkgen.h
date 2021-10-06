@@ -23,7 +23,6 @@ static inline unsigned long clkgen_read(void __iomem	*base,
 	return (readl(base + field->offset) >> field->shift) & field->mask;
 }
 
-
 static inline void clkgen_write(void __iomem *base, struct clkgen_field *field,
 				  unsigned long val)
 {
@@ -47,4 +46,3 @@ static inline void clkgen_write(void __iomem *base, struct clkgen_field *field,
 		&pll->data->field, val)
 
 #endif /*__CLKGEN_INFO_H*/
-

@@ -23,7 +23,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-
 #include <linux/input.h>
 #include <linux/usb.h>
 #include <linux/hid.h>
@@ -1154,7 +1153,6 @@ static int lg4ff_handle_multimode_wheel(struct hid_device *hid, u16 *real_produc
 
 	return LG4FF_MMODE_IS_MULTIMODE;
 }
-
 
 int lg4ff_init(struct hid_device *hid)
 {

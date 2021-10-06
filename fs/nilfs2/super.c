@@ -154,7 +154,6 @@ void nilfs_warning(struct super_block *sb, const char *function,
 	va_end(args);
 }
 
-
 struct inode *nilfs_alloc_inode(struct super_block *sb)
 {
 	struct nilfs_inode_info *ii;

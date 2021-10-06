@@ -15,7 +15,6 @@
 #include <linux/pci_regs.h>
 #include <linux/slab.h>
 
-
 /*
 MODULE_DESCRIPTION("SSB Broadcom Gigabit Ethernet driver");
 MODULE_AUTHOR("Michael Buesch");
@@ -27,7 +26,6 @@ static const struct ssb_device_id ssb_gige_tbl[] = {
 	{},
 };
 /* MODULE_DEVICE_TABLE(ssb, ssb_gige_tbl); */
-
 
 static inline u8 gige_read8(struct ssb_gige *dev, u16 offset)
 {

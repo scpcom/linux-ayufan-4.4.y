@@ -79,7 +79,6 @@ struct event_constraint {
 #define PERF_X86_EVENT_AUTO_RELOAD	0x0400 /* use PEBS auto-reload */
 #define PERF_X86_EVENT_FREERUNNING	0x0800 /* use freerunning PEBS */
 
-
 struct amd_nb {
 	int nb_id;  /* NorthBridge id */
 	int refcnt; /* reference count */
@@ -389,7 +388,6 @@ struct cpu_hw_events {
 	__EVENT_CONSTRAINT(code, n, 			\
 			  INTEL_ARCH_EVENT_MASK|X86_ALL_EVENT_FLAGS, \
 			  HWEIGHT(n), 0, PERF_X86_EVENT_PEBS_NA_HSW)
-
 
 /*
  * We define the end marker as having a weight of -1

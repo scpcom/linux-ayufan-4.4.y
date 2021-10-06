@@ -36,7 +36,6 @@ static int parse_ofpart_partitions(struct mtd_info *master,
 	int nr_parts, i, ret = 0;
 	bool dedicated = true;
 
-
 	if (!data)
 		return 0;
 

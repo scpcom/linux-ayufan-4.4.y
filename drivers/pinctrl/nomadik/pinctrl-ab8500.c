@@ -226,7 +226,6 @@ static const unsigned i2ctrig2_b_1_pins[] = { AB8500_PIN_W17 };
 /* Altfunction C column */
 static const unsigned usbvdat_c_1_pins[] = { AB8500_PIN_W17 };
 
-
 #define AB8500_PIN_GROUP(a, b) { .name = #a, .pins = a##_pins,		\
 			.npins = ARRAY_SIZE(a##_pins), .altsetting = b }
 

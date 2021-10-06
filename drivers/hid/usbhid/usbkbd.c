@@ -64,7 +64,6 @@ static const unsigned char usb_kbd_keycode[256] = {
 	150,158,159,128,136,177,178,176,142,152,173,140
 };
 
-
 /**
  * struct usb_kbd - state of each attached keyboard
  * @dev:	input device associated with this keyboard

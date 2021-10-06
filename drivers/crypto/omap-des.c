@@ -1124,7 +1124,6 @@ static int omap_des_probe(struct platform_device *pdev)
 		}
 	}
 
-
 	INIT_LIST_HEAD(&dd->list);
 	spin_lock(&list_lock);
 	list_add_tail(&dd->list, &dev_list);

@@ -36,7 +36,6 @@
 #define HW_BROADWAY_ICR		0x00
 #define HW_BROADWAY_IMR		0x04
 
-
 /*
  * IRQ chip hooks.
  *
@@ -75,7 +74,6 @@ static void hlwd_pic_unmask(struct irq_data *d)
 
 	setbits32(io_base + HW_BROADWAY_IMR, 1 << irq);
 }
-
 
 static struct irq_chip hlwd_pic = {
 	.name		= "hlwd-pic",
@@ -232,4 +230,3 @@ void hlwd_quiesce(void)
 
 	__hlwd_quiesce(io_base);
 }
-

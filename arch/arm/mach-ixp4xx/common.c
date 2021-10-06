@@ -300,7 +300,6 @@ void __init ixp4xx_init_irq(void)
 	}
 }
 
-
 /*************************************************************************
  * IXP4xx timer tick
  * We use OS timer1 on the CPU for the timer tick and the timestamp 

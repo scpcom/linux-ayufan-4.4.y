@@ -158,7 +158,6 @@ static int mv_hsic_phy_exit(struct phy *phy)
 	return 0;
 }
 
-
 static const struct phy_ops hsic_ops = {
 	.init		= mv_hsic_phy_init,
 	.power_on	= mv_hsic_phy_power_on,

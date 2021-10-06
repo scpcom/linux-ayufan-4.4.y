@@ -6,7 +6,6 @@
 #ifndef __LINUX_NFSACL_H
 #define __LINUX_NFSACL_H
 
-
 #include <linux/posix_acl.h>
 #include <linux/sunrpc/xdr.h>
 #include <uapi/linux/nfsacl.h>

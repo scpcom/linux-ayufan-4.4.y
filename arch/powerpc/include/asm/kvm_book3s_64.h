@@ -330,7 +330,6 @@ static inline pte_t kvmppc_read_update_linux_pte(pte_t *ptep, int writing)
 	return new_pte;
 }
 
-
 /* Return HPTE cache control bits corresponding to Linux pte bits */
 static inline unsigned long hpte_cache_bits(unsigned long pte_val)
 {

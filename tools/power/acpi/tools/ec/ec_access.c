@@ -19,7 +19,6 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-
 #define EC_SPACE_SIZE 256
 #define SYSFS_PATH "/sys/kernel/debug/ec/ec0/io"
 

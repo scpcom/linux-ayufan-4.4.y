@@ -155,7 +155,6 @@ const struct xfs_buf_ops xfs_dir3_free_buf_ops = {
 	.verify_write = xfs_dir3_free_write_verify,
 };
 
-
 static int
 __xfs_dir3_free_read(
 	struct xfs_trans	*tp,

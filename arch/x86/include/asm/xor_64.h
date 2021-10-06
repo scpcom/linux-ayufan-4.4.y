@@ -9,7 +9,6 @@ static struct xor_block_template xor_block_sse = {
 	.do_5 = xor_sse_5,
 };
 
-
 /* Also try the AVX routines */
 #include <asm/xor_avx.h>
 

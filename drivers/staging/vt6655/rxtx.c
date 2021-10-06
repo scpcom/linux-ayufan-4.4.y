@@ -505,7 +505,6 @@ s_uFillDataHead(
 	if (pTxDataHead == NULL)
 		return 0;
 
-
 	if (byPktType == PK_TYPE_11GB || byPktType == PK_TYPE_11GA) {
 		if (byFBOption == AUTO_FB_NONE) {
 			struct vnt_tx_datahead_g *buf = pTxDataHead;
@@ -628,7 +627,6 @@ s_uFillDataHead(
 	}
 	return 0;
 }
-
 
 static
 void
@@ -1085,7 +1083,6 @@ s_cbFillTxBufHead(struct vnt_private *pDevice, unsigned char byPktType,
 		byFBOption = AUTO_FB_0;
 	else if (fifo_ctl & FIFOCTL_AUTO_FB_1)
 		byFBOption = AUTO_FB_1;
-
 
 	/* Set RrvTime/RTS/CTS Buffer */
 	wTxBufSize = sizeof(struct vnt_tx_fifo_head);

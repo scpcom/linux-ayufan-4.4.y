@@ -26,4 +26,3 @@ extern const char ex_handler_unhandled;
 void microblaze_unwind(struct task_struct *task, struct stack_trace *trace);
 
 #endif	/* __MICROBLAZE_UNWIND_H */
-

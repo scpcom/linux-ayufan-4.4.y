@@ -83,7 +83,6 @@ MODULE_PARM_DESC(amp_gpio, "GPIO pin number for external amp. (default = -1)");
 #define MAX_CAPTURES	1
 #define NR_DSPS		(MAX_PLAYBACKS + MAX_CAPTURES)
 
-
 /*
  * maestro3 registers
  */
@@ -189,7 +188,6 @@ MODULE_PARM_DESC(amp_gpio, "GPIO pin number for external amp. (default = -1)");
 
 #define PCI_DDMA_CTRL           0x60
 #define DDMA_ENABLE             0x00000001
-
 
 /* Allegro registers */
 #define HOST_INT_CTRL           0x18
@@ -398,7 +396,6 @@ MODULE_PARM_DESC(amp_gpio, "GPIO pin number for external amp. (default = -1)");
 #define REV_B_DATA_MEMORY_END           0x2BFF
 #define REV_B_DATA_MEMORY_UNIT_LENGTH   0x0080
 #define REV_B_DATA_MEMORY_LENGTH        (REV_B_DATA_MEMORY_END - REV_B_DATA_MEMORY_BEGIN + 1)
-
 
 #define NUM_UNITS_KERNEL_CODE          16
 #define NUM_UNITS_KERNEL_DATA           2
@@ -977,7 +974,6 @@ static void snd_m3_assp_continue(struct snd_m3 *chip)
 	snd_m3_outb(chip, chip->reset_state | REGB_ENABLE_RESET, DSP_PORT_CONTROL_REG_B);
 }
 
-
 /*
  * This makes me sad. the maestro3 has lists
  * internally that must be packed.. 0 terminates,
@@ -1269,7 +1265,6 @@ static void snd_m3_pcm_setup2(struct snd_m3 *chip, struct m3_dma *s,
 			  freq);
 }
 
-
 static const struct play_vals {
 	u16 addr, val;
 } pv[] = {
@@ -1295,7 +1290,6 @@ static const struct play_vals {
 	{SRC3_DIRECTION_OFFSET + 20, 0}, /* filtertap */
 	{SRC3_DIRECTION_OFFSET + 21, 0} /* booster */
 };
-
 
 /* the mode passed should be already shifted and masked */
 static void
@@ -1498,7 +1492,6 @@ snd_m3_pcm_pointer(struct snd_pcm_substream *subs)
 	return bytes_to_frames(subs->runtime, ptr);
 }
 
-
 /* update pointer */
 /* spinlock held! */
 static void snd_m3_update_ptr(struct snd_m3 *chip, struct m3_dma *s)
@@ -1677,7 +1670,6 @@ static irqreturn_t snd_m3_interrupt(int irq, void *dev_id)
 	return IRQ_HANDLED;
 }
 
-
 /*
  */
 
@@ -1722,7 +1714,6 @@ static struct snd_pcm_hardware snd_m3_capture =
 	.periods_min =		1,
 	.periods_max =		1024,
 };
-
 
 /*
  */
@@ -1881,7 +1872,6 @@ snd_m3_pcm(struct snd_m3 * chip, int device)
 	return 0;
 }
 
-
 /*
  * ac97 interface
  */
@@ -1940,7 +1930,6 @@ snd_m3_ac97_write(struct snd_ac97 *ac97, unsigned short reg, unsigned short val)
 		snd_m3_outb(chip, reg & 0x7f, CODEC_COMMAND);
 	}
 }
-
 
 static void snd_m3_remote_codec_config(struct snd_m3 *chip, int isremote)
 {
@@ -2089,7 +2078,6 @@ static int snd_m3_mixer(struct snd_m3 *chip)
 	return 0;
 }
 
-
 /*
  * initialize ASSP
  */
@@ -2190,7 +2178,6 @@ static void snd_m3_assp_init(struct snd_m3 *chip)
 	chip->msrc_list.max = MAX_INSTANCE_MINISRC;
 }
 
-
 static int snd_m3_assp_client_init(struct snd_m3 *chip, struct m3_dma *s, int index)
 {
 	int data_bytes = 2 * ( MINISRC_TMP_BUFFER_SIZE / 2 + 
@@ -2229,7 +2216,6 @@ static int snd_m3_assp_client_init(struct snd_m3 *chip, struct m3_dma *s, int in
 
 	return 0;
 }
-
 
 /* 
  * this works for the reference board, have to find
@@ -2357,7 +2343,6 @@ snd_m3_enable_ints(struct snd_m3 *chip)
 	     io + ASSP_CONTROL_C);
 }
 
-
 /*
  */
 
@@ -2404,7 +2389,6 @@ static int snd_m3_free(struct snd_m3 *chip)
 	kfree(chip);
 	return 0;
 }
-
 
 /*
  * APM support

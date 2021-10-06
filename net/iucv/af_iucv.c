@@ -1672,7 +1672,6 @@ static int iucv_sock_getsockopt(struct socket *sock, int level, int optname,
 	return 0;
 }
 
-
 /* Callback wrappers - called from iucv base support */
 static int iucv_callback_connreq(struct iucv_path *path,
 				 u8 ipvmid[8], u8 ipuser[16])
@@ -2462,4 +2461,3 @@ MODULE_DESCRIPTION("IUCV Sockets ver " VERSION);
 MODULE_VERSION(VERSION);
 MODULE_LICENSE("GPL");
 MODULE_ALIAS_NETPROTO(PF_IUCV);
-

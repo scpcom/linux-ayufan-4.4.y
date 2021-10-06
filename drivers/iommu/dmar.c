@@ -793,7 +793,6 @@ int __init dmar_dev_scope_init(void)
 	return dmar_dev_scope_status;
 }
 
-
 int __init dmar_table_init(void)
 {
 	static int dmar_table_initialized;
@@ -898,7 +897,6 @@ int __init detect_intel_iommu(void)
 
 	return ret ? 1 : -ENODEV;
 }
-
 
 static void unmap_iommu(struct intel_iommu *iommu)
 {
@@ -1422,7 +1420,6 @@ int dmar_enable_qi(struct intel_iommu *iommu)
 
 	qi = iommu->qi;
 
-
 	desc_page = alloc_pages_node(iommu->node, GFP_ATOMIC | __GFP_ZERO, 0);
 	if (!desc_page) {
 		kfree(qi);
@@ -1498,7 +1495,6 @@ static const char *dmar_get_fault_reason(u8 fault_reason, int *fault_type)
 		return "Unknown";
 	}
 }
-
 
 static inline int dmar_msi_reg(struct intel_iommu *iommu, int irq)
 {

@@ -552,7 +552,6 @@ static int sr9800_link_reset(struct usbnet *dev)
 	return 0;
 }
 
-
 static int sr9800_set_default_mode(struct usbnet *dev)
 {
 	u16 rx_ctl;

@@ -765,4 +765,3 @@ void rtl92ce_tx_polling(struct ieee80211_hw *hw, u8 hw_queue)
 			       BIT(0) << (hw_queue));
 	}
 }
-

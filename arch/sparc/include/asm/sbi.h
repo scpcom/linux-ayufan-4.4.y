@@ -62,7 +62,6 @@ struct sbi_regs {
  *  Bits           31      27      23      19      15      11      7       3      0
  */
 
-
 #ifndef __ASSEMBLY__
 
 static inline int acquire_sbi(int devid, int mask)

@@ -301,7 +301,6 @@ LEAF(csum_partial)
 	.set	noreorder
 	END(csum_partial)
 
-
 /*
  * checksum and copy routines based on memcpy.S
  *

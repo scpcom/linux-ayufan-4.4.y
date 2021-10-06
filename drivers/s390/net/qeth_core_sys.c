@@ -647,8 +647,6 @@ static ssize_t qeth_dev_blkt_total_store(struct device *dev,
 				   &card->info.blkt.time_total, 5000);
 }
 
-
-
 static DEVICE_ATTR(total, 0644, qeth_dev_blkt_total_show,
 		   qeth_dev_blkt_total_store);
 

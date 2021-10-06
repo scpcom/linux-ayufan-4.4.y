@@ -369,4 +369,3 @@ int snd_efw_command_set_sampling_rate(struct snd_efw *efw, unsigned int rate)
 {
 	return command_set_clock(efw, UINT_MAX, rate);
 }
-

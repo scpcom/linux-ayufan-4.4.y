@@ -279,7 +279,6 @@ struct ov2640_win_size {
 	const struct regval_list	*regs;
 };
 
-
 struct ov2640_priv {
 	struct v4l2_subdev		subdev;
 	struct v4l2_ctrl_handler	hdl;

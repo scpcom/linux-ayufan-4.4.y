@@ -205,7 +205,6 @@ int sgdma_tx_buffer(struct altera_tse_private *priv, struct tse_buffer *buffer)
 	return 1;
 }
 
-
 /* tx_lock held to protect access to queued tx list
  */
 u32 sgdma_tx_completions(struct altera_tse_private *priv)
@@ -298,7 +297,6 @@ u32 sgdma_rx_status(struct altera_tse_private *priv)
 
 	return rxstatus;
 }
-
 
 /* Private functions */
 static void sgdma_setup_descrip(struct sgdma_descrip __iomem *desc,
@@ -457,7 +455,6 @@ queue_tx(struct altera_tse_private *priv, struct tse_buffer *buffer)
 {
 	list_add_tail(&buffer->lh, &priv->txlisthd);
 }
-
 
 /* adds a tse_buffer to the tail of a rx buffer list
  * assumes the caller is managing and holding a mutual exclusion

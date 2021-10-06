@@ -60,7 +60,6 @@ static const u16 ssm2602_reg[SSM2602_CACHEREGNUM] = {
 	0x0000, 0x0000
 };
 
-
 /*Appending several "None"s just for OSS mixer use*/
 static const char *ssm2602_input_select[] = {
 	"Line", "Mic",

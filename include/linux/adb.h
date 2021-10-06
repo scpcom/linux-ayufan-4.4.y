@@ -6,7 +6,6 @@
 
 #include <uapi/linux/adb.h>
 
-
 struct adb_request {
 	unsigned char data[32];
 	int nbytes;

@@ -1880,7 +1880,6 @@ static const struct pmu_probe_info armv7_pmu_probe_table[] = {
 	{ /* sentinel value */ }
 };
 
-
 static int armv7_pmu_device_probe(struct platform_device *pdev)
 {
 	return arm_pmu_device_probe(pdev, armv7_pmu_of_device_ids,

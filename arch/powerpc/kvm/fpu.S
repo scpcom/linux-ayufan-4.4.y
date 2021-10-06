@@ -101,7 +101,6 @@ FPS_THREE_IN(fnmadds)
 FPS_THREE_IN(fnmsubs)
 FPS_THREE_IN(fsel)
 
-
 /* Instructions operating on double parameters */
 
 /*

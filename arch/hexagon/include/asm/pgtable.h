@@ -131,7 +131,6 @@ extern unsigned long _dflt_cache_att;
 #define PAGE_KERNEL	__pgprot(_PAGE_PRESENT | _PAGE_READ | \
 				_PAGE_WRITE | _PAGE_EXECUTE | _dflt_cache_att)
 
-
 /*
  * Aliases for mapping mmap() protection bits to page protections.
  * These get used for static initialization, so using the _dflt_cache_att
@@ -391,7 +390,6 @@ static inline int pte_write(pte_t pte)
 {
 	return pte_val(pte) & _PAGE_WRITE;
 }
-
 
 /* pte_exec - "is PTE marked as executable?" */
 static inline int pte_exec(pte_t pte)

@@ -39,7 +39,6 @@ nv10_fence_emit(struct nouveau_fence *fence)
 	return ret;
 }
 
-
 static int
 nv10_fence_sync(struct nouveau_fence *fence,
 		struct nouveau_channel *prev, struct nouveau_channel *chan)

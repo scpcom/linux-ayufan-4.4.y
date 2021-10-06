@@ -727,7 +727,6 @@ static void dce_v8_0_program_fmt(struct drm_encoder *encoder)
 	WREG32(mmFMT_BIT_DEPTH_CONTROL + amdgpu_crtc->crtc_offset, tmp);
 }
 
-
 /* display watermark setup */
 /**
  * dce_v8_0_line_buffer_adjust - Set up the line buffer
@@ -1839,7 +1838,6 @@ static void dce_v8_0_afmt_setmode(struct drm_encoder *encoder,
 	       (8 << AFMT_60958_2__AFMT_60958_CS_CHANNEL_NUMBER_7__SHIFT));
 
 	dce_v8_0_audio_write_speaker_allocation(encoder);
-
 
 	WREG32(mmAFMT_AUDIO_PACKET_CONTROL2 + offset,
 	       (0xff << AFMT_AUDIO_PACKET_CONTROL2__AFMT_AUDIO_CHANNEL_ENABLE__SHIFT));

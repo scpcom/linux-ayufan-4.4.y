@@ -21,7 +21,6 @@
 #define BPL	8
 #include "atafb_utils.h"
 
-
 /* Copies a 8 plane column from 's', height 'h', to 'd'. */
 
 /* This expands a 8 bit color into two longs for two movepl (8 plane)
@@ -334,7 +333,6 @@ void cleanup_module(void)
 {
 }
 #endif /* MODULE */
-
 
     /*
      *  Visible symbols for modules

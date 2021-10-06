@@ -211,7 +211,6 @@
 #define reg_bif_slave_r_masked_intr___bus_acquire___bit 1
 #define reg_bif_slave_r_masked_intr_offset 76
 
-
 /* Constants */
 #define regk_bif_slave_active_hi                  0x00000003
 #define regk_bif_slave_active_lo                  0x00000002

@@ -43,4 +43,3 @@ struct m66592_platdata {
 };
 
 #endif /* __LINUX_USB_M66592_H */
-

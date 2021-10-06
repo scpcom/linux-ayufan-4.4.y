@@ -160,10 +160,8 @@
 #include <linux/export.h>
 #include "i2400m.h"
 
-
 #define D_SUBMODULE fw
 #include "debug-levels.h"
-
 
 static const __le32 i2400m_ACK_BARKER[4] = {
 	cpu_to_le32(I2400M_ACK_BARKER),
@@ -171,7 +169,6 @@ static const __le32 i2400m_ACK_BARKER[4] = {
 	cpu_to_le32(I2400M_ACK_BARKER),
 	cpu_to_le32(I2400M_ACK_BARKER)
 };
-
 
 /**
  * Prepare a boot-mode command for delivery
@@ -199,7 +196,6 @@ void i2400m_bm_cmd_prepare(struct i2400m_bootrom_header *cmd)
 }
 EXPORT_SYMBOL_GPL(i2400m_bm_cmd_prepare);
 
-
 /*
  * Database of known barkers.
  *
@@ -212,7 +208,6 @@ static struct i2400m_barker_db {
 	__le32 data[4];
 } *i2400m_barker_db;
 static size_t i2400m_barker_db_used, i2400m_barker_db_size;
-
 
 static
 int i2400m_zrealloc_2x(void **ptr, size_t *_count, size_t el_size,
@@ -236,7 +231,6 @@ int i2400m_zrealloc_2x(void **ptr, size_t *_count, size_t el_size,
 	} else
 		return -ENOMEM;
 }
-
 
 /*
  * Add a barker to the database
@@ -265,7 +259,6 @@ int i2400m_barker_db_add(u32 barker_id)
 	return 0;
 }
 
-
 void i2400m_barker_db_exit(void)
 {
 	kfree(i2400m_barker_db);
@@ -273,7 +266,6 @@ void i2400m_barker_db_exit(void)
 	i2400m_barker_db_size = 0;
 	i2400m_barker_db_used = 0;
 }
-
 
 /*
  * Helper function to add all the known stable barkers to the barker
@@ -296,7 +288,6 @@ int i2400m_barker_db_known_barkers(void)
 error_add:
        return result;
 }
-
 
 /*
  * Initialize the barker database
@@ -362,7 +353,6 @@ error_add:
 	kfree(i2400m_barker_db);
 	return result;
 }
-
 
 /*
  * Recognize a boot barker
@@ -434,7 +424,6 @@ int i2400m_is_boot_barker(struct i2400m *i2400m,
 	return result;
 }
 EXPORT_SYMBOL_GPL(i2400m_is_boot_barker);
-
 
 /*
  * Verify the ack data received
@@ -532,7 +521,6 @@ error_ack_short:
 		i2400m, opcode, ack, ack_size, (int) result);
 	return result;
 }
-
 
 /**
  * i2400m_bm_cmd - Execute a boot mode command
@@ -632,7 +620,6 @@ error_cmd_send:
 	return result;
 }
 
-
 /**
  * i2400m_download_chunk - write a single chunk of data to the device's memory
  *
@@ -677,7 +664,6 @@ static int i2400m_download_chunk(struct i2400m *i2400m, const void *chunk,
 		addr, direct, do_csum, ret);
 	return ret;
 }
-
 
 /*
  * Download a BCF file's sections to the device
@@ -762,7 +748,6 @@ error_send:
 	return ret;
 }
 
-
 /*
  * Indicate if the device emitted a reboot barker that indicates
  * "signed boot"
@@ -772,7 +757,6 @@ unsigned i2400m_boot_is_signed(struct i2400m *i2400m)
 {
 	return likely(i2400m->sboot);
 }
-
 
 /*
  * Do the final steps of uploading firmware
@@ -834,7 +818,6 @@ int i2400m_dnload_finalize(struct i2400m *i2400m,
 	d_fnend(3, dev, "returning %d\n", ret);
 	return ret;
 }
-
 
 /**
  * i2400m_bootrom_init - Reboots a powered device into boot mode
@@ -1012,7 +995,6 @@ error_timeout:
 	goto exit_timeout;
 }
 
-
 /*
  * Read the MAC addr
  *
@@ -1061,7 +1043,6 @@ error_read_mac:
 	return result;
 }
 
-
 /*
  * Initialize a non signed boot
  *
@@ -1091,7 +1072,6 @@ int i2400m_dnload_init_nonsigned(struct i2400m *i2400m)
 	d_fnend(5, dev, "(i2400m %p) = %d\n", i2400m, ret);
 	return ret;
 }
-
 
 /*
  * Initialize the signed boot process
@@ -1134,7 +1114,6 @@ int i2400m_dnload_init_signed(struct i2400m *i2400m,
 	return ret;
 }
 
-
 /*
  * Initialize the firmware download at the device size
  *
@@ -1170,7 +1149,6 @@ int i2400m_dnload_init(struct i2400m *i2400m,
 	}
 	return result;
 }
-
 
 /*
  * Run consistency tests on the firmware file and load up headers
@@ -1239,7 +1217,6 @@ int i2400m_fw_hdr_check(struct i2400m *i2400m,
 			 i2400m->fw_name, index, offset, date);
 	return 0;
 }
-
 
 /*
  * Run consistency tests on the firmware file and load up headers
@@ -1312,7 +1289,6 @@ error_zrealloc:
 	return result;
 }
 
-
 /*
  * Match a barker to a BCF header module ID
  *
@@ -1365,7 +1341,6 @@ const struct i2400m_bcf_hdr *i2400m_bcf_hdr_find(struct i2400m *i2400m)
 		barker);
 	return NULL;
 }
-
 
 /*
  * Download the firmware to the device
@@ -1498,13 +1473,11 @@ int i2400m_fw_bootstrap(struct i2400m *i2400m, const struct firmware *fw,
 	return ret;
 }
 
-
 /* Refcounted container for firmware data */
 struct i2400m_fw {
 	struct kref kref;
 	const struct firmware *fw;
 };
-
 
 static
 void i2400m_fw_destroy(struct kref *kref)
@@ -1515,7 +1488,6 @@ void i2400m_fw_destroy(struct kref *kref)
 	kfree(i2400m_fw);
 }
 
-
 static
 struct i2400m_fw *i2400m_fw_get(struct i2400m_fw *i2400m_fw)
 {
@@ -1524,13 +1496,11 @@ struct i2400m_fw *i2400m_fw_get(struct i2400m_fw *i2400m_fw)
 	return i2400m_fw;
 }
 
-
 static
 void i2400m_fw_put(struct i2400m_fw *i2400m_fw)
 {
 	kref_put(&i2400m_fw->kref, i2400m_fw_destroy);
 }
-
 
 /**
  * i2400m_dev_bootstrap - Bring the device to a known state and upload firmware
@@ -1600,7 +1570,6 @@ out:
 }
 EXPORT_SYMBOL_GPL(i2400m_dev_bootstrap);
 
-
 void i2400m_fw_cache(struct i2400m *i2400m)
 {
 	int result;
@@ -1641,7 +1610,6 @@ out:
 	spin_unlock(&i2400m->rx_lock);
 }
 
-
 void i2400m_fw_uncache(struct i2400m *i2400m)
 {
 	struct i2400m_fw *i2400m_fw;
@@ -1654,4 +1622,3 @@ void i2400m_fw_uncache(struct i2400m *i2400m)
 	if (i2400m_fw != NULL && i2400m_fw != (void *) ~0)
 		i2400m_fw_put(i2400m_fw);
 }
-

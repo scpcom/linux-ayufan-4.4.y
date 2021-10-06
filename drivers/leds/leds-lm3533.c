@@ -21,7 +21,6 @@
 
 #include <linux/mfd/lm3533.h>
 
-
 #define LM3533_LVCTRLBANK_MIN		2
 #define LM3533_LVCTRLBANK_MAX		5
 #define LM3533_LVCTRLBANK_COUNT		4
@@ -44,7 +43,6 @@
 
 #define LM3533_LED_FLAG_PATTERN_ENABLE		1
 
-
 struct lm3533_led {
 	struct lm3533 *lm3533;
 	struct lm3533_ctrlbank cb;
@@ -57,7 +55,6 @@ struct lm3533_led {
 	struct work_struct work;
 	u8 new_brightness;
 };
-
 
 static inline struct lm3533_led *to_lm3533_led(struct led_classdev *cdev)
 {

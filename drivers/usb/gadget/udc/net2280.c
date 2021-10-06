@@ -68,7 +68,6 @@
 
 #define USE_RDK_LEDS		/* GPIO pins control three LEDs */
 
-
 static const char driver_name[] = "net2280";
 static const char driver_desc[] = DRIVER_DESC;
 
@@ -1856,7 +1855,6 @@ done:
 }
 static DEVICE_ATTR_RO(queues);
 
-
 #else
 
 #define device_create_file(a, b)	(0)
@@ -2742,7 +2740,6 @@ static void defect7374_workaround(struct net2280 *dev, struct usb_ctrlrequest r)
 
 		continue;
 	}
-
 
 	if (ack_wait_timeout >= DEFECT_7374_NUMBEROF_MAX_WAIT_LOOPS) {
 		ep_err(dev, "FAIL: Defect 7374 workaround waited but failed "
@@ -3730,7 +3727,6 @@ static void net2280_shutdown(struct pci_dev *pdev)
 	writel(0, &dev->usb->usbctl);
 
 }
-
 
 /*-------------------------------------------------------------------------*/
 

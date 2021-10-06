@@ -107,7 +107,6 @@ static const uint32_t aes_hdr[] = {	/* dev 1 function 2 - devfn = 0xa */
 	0x0,	0x0,	0x0,	0x0,
 };
 
-
 static const uint32_t isa_hdr[] = {  /* dev f function 0 - devfn = 78 */
 	0xfffffff9, 0xffffff01, 0xffffffc1, 0xffffffe1,
 	0xffffff81, 0xffffffc1, 0x0, 0x0,

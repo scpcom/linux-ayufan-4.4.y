@@ -705,7 +705,6 @@ int fsl_rio_setup(struct platform_device *dev)
 			((i == 0) ? RIO_INB_ATMU_REGS_PORT1_OFFSET :
 			RIO_INB_ATMU_REGS_PORT2_OFFSET));
 
-
 		/* Set to receive any dist ID for serial RapidIO controller. */
 		if (port->phy_type == RIO_PHY_SERIAL)
 			out_be32((priv->regs_win

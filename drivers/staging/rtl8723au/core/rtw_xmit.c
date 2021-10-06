@@ -2374,4 +2374,3 @@ int rtw_ack_tx_wait23a(struct xmit_priv *pxmitpriv, u32 timeout_ms)
 
 	return rtw_sctx_wait23a(pack_tx_ops);
 }
-

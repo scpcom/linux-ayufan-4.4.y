@@ -82,7 +82,6 @@ static bool ecc4_busy;
 
 #define to_davinci_nand(m) container_of(m, struct davinci_nand_info, mtd)
 
-
 static inline unsigned int davinci_nand_readl(struct davinci_nand_info *info,
 		int offset)
 {
@@ -897,4 +896,3 @@ module_platform_driver(nand_davinci_driver);
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Texas Instruments");
 MODULE_DESCRIPTION("Davinci NAND flash driver");
-

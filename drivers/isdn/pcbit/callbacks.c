@@ -46,7 +46,6 @@ void cb_out_1(struct pcbit_dev *dev, struct pcbit_chan *chan,
 	int len;
 	ushort refnum;
 
-
 #ifdef DEBUG
 	printk(KERN_DEBUG "Called Party Number: %s\n",
 	       cbdata->data.setup.CalledPN);
@@ -62,7 +61,6 @@ void cb_out_1(struct pcbit_dev *dev, struct pcbit_chan *chan,
 		printk("capi_conn_req failed\n");
 		return;
 	}
-
 
 	refnum = last_ref_num++ & 0x7fffU;
 
@@ -100,7 +98,6 @@ void cb_out_2(struct pcbit_dev *dev, struct pcbit_chan *chan,
 
 	pcbit_l2_write(dev, MSG_CONN_ACTV_RESP, refnum, skb, len);
 
-
 	ictl.command = ISDN_STAT_DCONN;
 	ictl.driver = dev->id;
 	ictl.arg = chan->id;
@@ -121,7 +118,6 @@ void cb_out_2(struct pcbit_dev *dev, struct pcbit_chan *chan,
 	pcbit_l2_write(dev, MSG_SELP_REQ, refnum, skb, len);
 }
 
-
 /*
  * Incoming call received
  * inform user
@@ -134,7 +130,6 @@ void cb_in_1(struct pcbit_dev *dev, struct pcbit_chan *chan,
 	unsigned short refnum;
 	struct sk_buff *skb;
 	int len;
-
 
 	ictl.command = ISDN_STAT_ICALL;
 	ictl.driver = dev->id;
@@ -169,7 +164,6 @@ void cb_in_1(struct pcbit_dev *dev, struct pcbit_chan *chan,
 
 	dev->dev_if->statcallb(&ictl);
 
-
 	if ((len = capi_conn_resp(chan, &skb)) < 0) {
 		printk(KERN_DEBUG "capi_conn_resp failed\n");
 		return;
@@ -198,7 +192,6 @@ void cb_in_2(struct pcbit_dev *dev, struct pcbit_chan *chan,
 		printk(KERN_DEBUG "capi_conn_active_req failed\n");
 		return;
 	}
-
 
 	refnum = last_ref_num++ & 0x7fffU;
 	chan->s_refnum = refnum;
@@ -233,7 +226,6 @@ void cb_in_3(struct pcbit_dev *dev, struct pcbit_chan *chan,
 
 }
 
-
 /*
  * Received disconnect ind on active state
  * send disconnect resp
@@ -262,7 +254,6 @@ void cb_disc_1(struct pcbit_dev *dev, struct pcbit_chan *chan,
 	ictl.arg = chan->id;
 	dev->dev_if->statcallb(&ictl);
 }
-
 
 /*
  *  User HANGUP on active/call proceeding state

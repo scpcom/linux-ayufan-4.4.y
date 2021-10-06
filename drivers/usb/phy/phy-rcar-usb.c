@@ -71,7 +71,6 @@ struct rcar_usb_phy_priv {
 
 #define usb_phy_to_priv(p) container_of(p, struct rcar_usb_phy_priv, phy)
 
-
 /*
  * USB initial/install operation.
  *

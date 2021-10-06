@@ -132,7 +132,6 @@ static const u32 stoney_golden_settings_a11[] =
 	mmFBC_MISC, 0x1f311fff, 0x14302000,
 };
 
-
 static void dce_v11_0_init_golden_registers(struct amdgpu_device *adev)
 {
 	switch (adev->asic_type) {
@@ -769,7 +768,6 @@ static void dce_v11_0_program_fmt(struct drm_encoder *encoder)
 
 	WREG32(mmFMT_BIT_DEPTH_CONTROL + amdgpu_crtc->crtc_offset, tmp);
 }
-
 
 /* display watermark setup */
 /**

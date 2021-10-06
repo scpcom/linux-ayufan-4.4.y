@@ -690,7 +690,6 @@ out:
 		goto re_read;
 	}
 
-
 out_no_sb:
 	if (test_bit(BITMAP_STALE, &bitmap->flags))
 		bitmap->events_cleared = bitmap->mddev->events;
@@ -967,7 +966,6 @@ static int bitmap_file_test_bit(struct bitmap *bitmap, sector_t block)
 	kunmap_atomic(paddr);
 	return set;
 }
-
 
 /* this gets called when the md device is ready to unplug its underlying
  * (slave) device queues -- before we let any writes go down, we need to
@@ -1909,7 +1907,6 @@ err:
 }
 EXPORT_SYMBOL_GPL(bitmap_copy_from_slot);
 
-
 void bitmap_status(struct seq_file *seq, struct bitmap *bitmap)
 {
 	unsigned long chunk_kb;
@@ -2435,4 +2432,3 @@ struct attribute_group md_bitmap_group = {
 	.name = "bitmap",
 	.attrs = md_bitmap_attrs,
 };
-

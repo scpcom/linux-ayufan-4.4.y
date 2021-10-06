@@ -21,7 +21,6 @@ static handle_t *ext4_get_nojournal(void)
 	return handle;
 }
 
-
 /* Decrement the non-pointer handle value */
 static void ext4_put_nojournal(handle_t *handle)
 {

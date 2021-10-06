@@ -108,7 +108,6 @@
 
 /* Triton Core internal information (END) */
 
-
 /* subchip/slave 0 0x48 - POWER */
 #define TWL6030_BASEADD_RTC		0x0000
 #define TWL6030_BASEADD_SECURED_REG	0x0017
@@ -1047,7 +1046,6 @@ static void clocks_init(struct device *dev,
 }
 
 /*----------------------------------------------------------------------*/
-
 
 static int twl_remove(struct i2c_client *client)
 {

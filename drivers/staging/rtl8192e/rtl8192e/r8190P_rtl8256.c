@@ -82,7 +82,6 @@ bool rtl92e_config_rf(struct net_device *dev)
 
 		pPhyReg = &priv->PHYRegDef[eRFPath];
 
-
 		switch (eRFPath) {
 		case RF90_PATH_A:
 		case RF90_PATH_C:
@@ -178,7 +177,6 @@ void rtl92e_set_cck_tx_power(struct net_device *dev, u8 powerlevel)
 		TxAGC = 0x24;
 	rtl92e_set_bb_reg(dev, rTxAGC_CCK_Mcs32, bTxAGCRateCCK, TxAGC);
 }
-
 
 void rtl92e_set_ofdm_tx_power(struct net_device *dev, u8 powerlevel)
 {

@@ -300,7 +300,6 @@ int nilfs_near_disk_full(struct the_nilfs *);
 void nilfs_fall_back_super_block(struct the_nilfs *);
 void nilfs_swap_super_block(struct the_nilfs *);
 
-
 static inline void nilfs_get_root(struct nilfs_root *root)
 {
 	atomic_inc(&root->count);

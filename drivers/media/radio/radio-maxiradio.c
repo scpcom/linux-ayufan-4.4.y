@@ -32,7 +32,6 @@
  *      - Uses video_ioctl2 for parsing and to add debug support
  */
 
-
 #include <linux/module.h>
 #include <linux/init.h>
 #include <linux/ioport.h>

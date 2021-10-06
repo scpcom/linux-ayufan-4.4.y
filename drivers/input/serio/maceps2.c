@@ -115,7 +115,6 @@ static void maceps2_close(struct serio *dev)
 	free_irq(data->irq, dev);
 }
 
-
 static struct serio *maceps2_allocate_port(int idx)
 {
 	struct serio *serio;

@@ -42,7 +42,6 @@
 /*  XCEP CPLD base */
 #define XCEP_CPLD_BASE		0xf0000000
 
-
 /* Flash partitions. */
 
 static struct mtd_partition xcep_partitions[] = {
@@ -95,8 +94,6 @@ static struct platform_device flash_device = {
 	.num_resources = 1,
 };
 
-
-
 /* SMC LAN91C111 network controller. */
 
 static struct resource smc91x_resources[] = {
@@ -133,12 +130,10 @@ static struct platform_device smc91x_device = {
 	},
 };
 
-
 static struct platform_device *devices[] __initdata = {
 	&flash_device,
 	&smc91x_device,
 };
-
 
 /* We have to state that there are HWMON devices on the I2C bus on XCEP.
  * Drivers for HWMON verify capabilities of the adapter when loading and
@@ -146,7 +141,6 @@ static struct platform_device *devices[] __initdata = {
 static struct i2c_pxa_platform_data xcep_i2c_platform_data  = {
 	.class = I2C_CLASS_HWMON
 };
-
 
 static mfp_cfg_t xcep_pin_config[] __initdata = {
 	GPIO79_nCS_3,	/* SMC 91C111 chip select. */
@@ -188,4 +182,3 @@ MACHINE_START(XCEP, "Iskratel XCEP")
 	.init_time	= pxa_timer_init,
 	.restart	= pxa_restart,
 MACHINE_END
-

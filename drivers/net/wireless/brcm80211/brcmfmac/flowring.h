@@ -15,10 +15,8 @@
 #ifndef BRCMFMAC_FLOWRING_H
 #define BRCMFMAC_FLOWRING_H
 
-
 #define BRCMF_FLOWRING_HASHSIZE		256
 #define BRCMF_FLOWRING_INVALID_ID	0xFFFFFFFF
-
 
 struct brcmf_flowring_hash {
 	u8 mac[ETH_ALEN];
@@ -56,7 +54,6 @@ struct brcmf_flowring {
 	struct brcmf_flowring_tdls_entry *tdls_entry;
 };
 
-
 u32 brcmf_flowring_lookup(struct brcmf_flowring *flow, u8 da[ETH_ALEN],
 			  u8 prio, u8 ifidx);
 u32 brcmf_flowring_create(struct brcmf_flowring *flow, u8 da[ETH_ALEN],
@@ -79,6 +76,5 @@ void brcmf_flowring_delete_peer(struct brcmf_flowring *flow, int ifidx,
 				u8 peer[ETH_ALEN]);
 void brcmf_flowring_add_tdls_peer(struct brcmf_flowring *flow, int ifidx,
 				  u8 peer[ETH_ALEN]);
-
 
 #endif /* BRCMFMAC_FLOWRING_H */

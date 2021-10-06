@@ -16,7 +16,6 @@
 
 #define MAX_PCBIT_CARDS 4
 
-
 #define BLOCK_TIMER
 
 #ifdef __KERNEL__
@@ -123,8 +122,6 @@ struct pcbit_ioctl {
 		unsigned long l2_status;
 	} info;
 };
-
-
 
 #define PCBIT_IOCTL_GETSTAT  0x01    /* layer2 status */
 #define PCBIT_IOCTL_LWMODE   0x02    /* linear write mode */

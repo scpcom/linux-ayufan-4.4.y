@@ -56,7 +56,6 @@ struct	s_oem_ids {
 } ;
 #endif	/* MULT_OEM */
 
-
 struct s_smt_hw {
 	/*
 	 * global

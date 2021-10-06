@@ -22,7 +22,6 @@
 
 #include <linux/if_ether.h>
 
-
 #define INTF_HEADER_LEN     4
 
 struct rfc_1042_hdr {
@@ -442,7 +441,6 @@ enum P2P_MODES {
 #define CONNECT_ERR_ASSOC_ERR_AUTH_REFUSED	0xFFFD
 #define CONNECT_ERR_AUTH_MSG_UNHANDLED		0xFFFE
 #define CONNECT_ERR_STA_FAILURE			0xFFFF
-
 
 #define CMD_F_HOSTCMD           (1 << 0)
 

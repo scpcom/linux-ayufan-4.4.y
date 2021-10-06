@@ -105,7 +105,6 @@ struct brcmf_bcdc {
 	unsigned char buf[BRCMF_DCMD_MAXLEN];
 };
 
-
 static int
 brcmf_proto_bcdc_msg(struct brcmf_pub *drvr, int ifidx, uint cmd, void *buf,
 		     uint len, bool set)

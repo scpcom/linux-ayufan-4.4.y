@@ -357,7 +357,6 @@ another_entry:
 	return true;
 }
 
-
 /*
  * Create PRD list for each I-block consumed by the command. This routine
  * determines how much data is required from each I-block being consumed
@@ -705,7 +704,6 @@ static void esas2r_handle_pending_reset(struct esas2r_adapter *a, u32 currtime)
 		}
 	}
 }
-
 
 /* This function must be called once per timer tick */
 void esas2r_timer_tick(struct esas2r_adapter *a)

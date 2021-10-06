@@ -118,7 +118,6 @@ dma_sync_single_range_for_device(struct device *dev, dma_addr_t dma_handle,
 	mn10300_dcache_flush_inv();
 }
 
-
 static inline
 void dma_sync_sg_for_cpu(struct device *dev, struct scatterlist *sg,
 			 int nelems, enum dma_data_direction direction)

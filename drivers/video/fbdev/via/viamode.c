@@ -349,7 +349,6 @@ int NUM_TOTAL_VX855_ModeXregs = ARRAY_SIZE(VX855_ModeXregs);
 int NUM_TOTAL_CLE266_ModeXregs = ARRAY_SIZE(CLE266_ModeXregs);
 int NUM_TOTAL_PATCH_MODE = ARRAY_SIZE(res_patch_table);
 
-
 static const struct fb_videomode *get_best_mode(
 	const struct fb_videomode *modes, int n,
 	int hres, int vres, int refresh)

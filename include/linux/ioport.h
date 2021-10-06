@@ -105,7 +105,6 @@ struct resource {
 /* PCI control bits.  Shares IORESOURCE_BITS with above PCI ROM.  */
 #define IORESOURCE_PCI_FIXED		(1<<4)	/* Do not move resource */
 
-
 /* helpers to define resources */
 #define DEFINE_RES_NAMED(_start, _size, _name, _flags)			\
 	{								\
@@ -180,7 +179,6 @@ static inline bool resource_contains(struct resource *r1, struct resource *r2)
 	return r1->start <= r2->start && r1->end >= r2->end;
 }
 
-
 /* Convenience shorthand with allocation */
 #define request_region(start,n,name)		__request_region(&ioport_resource, (start), (n), (name), 0)
 #define request_muxed_region(start,n,name)	__request_region(&ioport_resource, (start), (n), (name), IORESOURCE_MUXED)
@@ -247,7 +245,6 @@ static inline bool resource_overlaps(struct resource *r1, struct resource *r2)
 {
        return (r1->start <= r2->end && r1->end >= r2->start);
 }
-
 
 #endif /* __ASSEMBLY__ */
 #endif	/* _LINUX_IOPORT_H */

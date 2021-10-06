@@ -37,7 +37,6 @@ static void dummy_perf(struct pt_regs *regs)
 #endif
 }
 
-
 static DEFINE_RAW_SPINLOCK(pmc_owner_lock);
 static void *pmc_owner_caller; /* mostly for debugging */
 perf_irq_t perf_irq = dummy_perf;

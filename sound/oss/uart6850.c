@@ -77,7 +77,6 @@ static DEFINE_SPINLOCK(lock);
 static void (*midi_input_intr) (int dev, unsigned char data);
 static void poll_uart6850(unsigned long dummy);
 
-
 static DEFINE_TIMER(uart6850_timer, poll_uart6850, 0, 0);
 
 static void uart6850_input_loop(void)
@@ -244,7 +243,6 @@ static struct midi_operations uart6850_operations =
 	.command	= uart6850_command,
 	.buffer_status	= uart6850_buffer_status
 };
-
 
 static void __init attach_uart6850(struct address_info *hw_config)
 {

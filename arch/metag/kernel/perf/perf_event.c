@@ -499,7 +499,6 @@ static const int metag_pmu_cache_events[C(MAX)][C(OP_MAX)][C(RESULT_MAX)] = {
 	},
 };
 
-
 static void _hw_perf_event_destroy(struct perf_event *event)
 {
 	atomic_t *active_events = &metag_pmu->active_events;

@@ -1085,6 +1085,7 @@ static void gen6_pm_rps_work(struct work_struct *work)
 		spin_unlock_irq(&dev_priv->irq_lock);
 		return;
 	}
+
 	pm_iir = dev_priv->rps.pm_iir;
 	dev_priv->rps.pm_iir = 0;
 	/* Make sure not to corrupt PMIMR state used by ringbuffer on GEN6 */

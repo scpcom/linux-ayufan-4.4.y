@@ -3,7 +3,6 @@
 
 #include <uapi/asm/a.out.h>
 
-
 /* Assume that start addresses below 4G belong to a TASO application.
    Unfortunately, there is no proper bit in the exec header to check.
    Worse, we have to notice the start address before swapping to use

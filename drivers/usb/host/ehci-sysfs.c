@@ -18,7 +18,6 @@
 
 /* this file is part of ehci-hcd.c */
 
-
 /* Display the ports dedicated to the companion controller */
 static ssize_t show_companion(struct device *dev,
 			      struct device_attribute *attr,
@@ -74,7 +73,6 @@ static ssize_t store_companion(struct device *dev,
 }
 static DEVICE_ATTR(companion, 0644, show_companion, store_companion);
 
-
 /*
  * Display / Set uframe_periodic_max
  */
@@ -89,7 +87,6 @@ static ssize_t show_uframe_periodic_max(struct device *dev,
 	n = scnprintf(buf, PAGE_SIZE, "%d\n", ehci->uframe_periodic_max);
 	return n;
 }
-
 
 static ssize_t store_uframe_periodic_max(struct device *dev,
 					struct device_attribute *attr,
@@ -157,7 +154,6 @@ out_unlock:
 	return ret;
 }
 static DEVICE_ATTR(uframe_periodic_max, 0644, show_uframe_periodic_max, store_uframe_periodic_max);
-
 
 static inline int create_sysfs_files(struct ehci_hcd *ehci)
 {

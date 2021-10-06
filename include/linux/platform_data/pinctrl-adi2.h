@@ -6,7 +6,6 @@
  * Licensed under the GPLv2 or later
  */
 
-
 #ifndef PINCTRL_ADI2_H
 #define PINCTRL_ADI2_H
 

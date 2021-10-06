@@ -33,7 +33,6 @@
 #define USB8997_PID_1		0x2052
 #define USB8997_PID_2		0x204e
 
-
 #define USB8XXX_FW_DNLD		1
 #define USB8XXX_FW_READY	2
 #define USB8XXX_FW_MAX_RETRY	3

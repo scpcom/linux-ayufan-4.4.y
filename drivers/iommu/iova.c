@@ -179,7 +179,6 @@ move_left:
 
 	spin_unlock_irqrestore(&iovad->iova_rbtree_lock, flags);
 
-
 	return 0;
 }
 

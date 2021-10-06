@@ -43,7 +43,6 @@ static const struct file_operations fops_modal_eeprom = {
 	.llseek = default_llseek,
 };
 
-
 void ath9k_cmn_debug_modal_eeprom(struct dentry *debugfs_phy,
 				  struct ath_hw *ah)
 {

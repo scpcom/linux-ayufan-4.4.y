@@ -458,7 +458,6 @@ out_free:
 	return rc;
 }
 
-
 static const struct file_operations ecryptfs_miscdev_fops = {
 	.owner   = THIS_MODULE,
 	.open    = ecryptfs_miscdev_open,

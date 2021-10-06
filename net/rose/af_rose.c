@@ -1210,7 +1210,6 @@ static int rose_sendmsg(struct socket *sock, struct msghdr *msg, size_t len)
 	return len;
 }
 
-
 static int rose_recvmsg(struct socket *sock, struct msghdr *msg, size_t size,
 			int flags)
 {
@@ -1271,7 +1270,6 @@ static int rose_recvmsg(struct socket *sock, struct msghdr *msg, size_t size,
 
 	return copied;
 }
-
 
 static int rose_ioctl(struct socket *sock, unsigned int cmd, unsigned long arg)
 {

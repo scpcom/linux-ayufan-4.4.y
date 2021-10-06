@@ -201,7 +201,6 @@ static int get_gart_ranges_callback(u64 start, u64 end, void *arg)
 	return 1;
 }
 
-
 /* Gather all the required information to prepare elf headers for ram regions */
 static void fill_up_crash_elf_data(struct crash_elf_data *ced,
 				   struct kimage *image)

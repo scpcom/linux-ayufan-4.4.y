@@ -42,7 +42,6 @@
  *
  */
 
-
 #include "h/types.h"
 #include "h/fddi.h"
 #include "h/smc.h"
@@ -1261,7 +1260,6 @@ void sm_pm_ls_latch(struct s_smc *smc, int phy, int on_off)
 	phy = phy ; on_off = on_off ;
 }
 
-
 /*
  * PCM pseudo code
  * receive actions are called AFTER the bit n is received,
@@ -1987,7 +1985,6 @@ void list_phy(struct s_smc *smc)
 		printf("\tLEM_err : %ld\n",smc->y[np].lem.lem_errors) ;
 	}
 }
-
 
 #ifdef	CONCENTRATOR
 void pcm_lem_dump(struct s_smc *smc)

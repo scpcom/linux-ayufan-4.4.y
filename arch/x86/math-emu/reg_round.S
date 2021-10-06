@@ -71,7 +71,6 @@
  |  This may be changed in a future version.                                 |
  +---------------------------------------------------------------------------*/
 
-
 #include "fpu_emu.h"
 #include "exception.h"
 #include "control_w.h"
@@ -83,7 +82,6 @@
 /* Flags for FPU_denormal */
 #define	DENORMAL	$1
 #define	UNMASKED_UNDERFLOW $2
-
 
 #ifndef NON_REENTRANT_FPU
 /*	Make the code re-entrant by putting
@@ -101,7 +99,6 @@ FPU_bits_lost:
 FPU_denormal:
 	.byte	0
 #endif /* NON_REENTRANT_FPU */
-
 
 .text
 .globl fpu_reg_round
@@ -165,7 +162,6 @@ Denorm_done:
 	jmp	L_bugged_denorm	/* There is no bug, just a bad control word */
 #endif /* PARANOID */ 
 #endif /* PECULIAR_486 */
-
 
 /* Round etc to 24 bit precision */
 LRound_To_24:
@@ -246,7 +242,6 @@ LDo_truncate_24:
 	movb	LOST_DOWN,FPU_bits_lost
 	jmp	L_Re_normalise
 
-
 /* Round etc to 53 bit precision */
 LRound_To_53:
 	movl	%esi,%ecx
@@ -319,7 +314,6 @@ LTruncate_53:
 	movb	LOST_DOWN,FPU_bits_lost
 	andl	$0xfffff800,%ebx	/* Truncate to 53 bits */
 	jmp	L_Re_normalise
-
 
 /* Round etc to 64 bit precision */
 LRound_To_64:
@@ -438,7 +432,6 @@ fpu_Arith_exit:
 	leave
 	ret
 
-
 /*
  * Set the FPU status flags to represent precision loss due to
  * round-up.
@@ -462,7 +455,6 @@ L_precision_lost_down:
 	popl	%eax
 	popl	%edx
 	jmp	L_no_precision_loss
-
 
 /*
  * The number is a denormal (which might get rounded up to a normal)
@@ -553,11 +545,9 @@ Denorm_shift_more_than_64:
 	popl	%ecx
 	jmp	Denorm_done
 
-
 Unmasked_underflow:
 	movb	UNMASKED_UNDERFLOW,FPU_denormal
 	jmp	Denorm_done
-
 
 /* Undo the de-normalisation. */
 Normalise_result:
@@ -609,7 +599,6 @@ LPseudoDenormal:
 	movl	TAG_Special,%edx
 	jmp	L_deNormalised
 
-
 /*
  * The operations resulted in a number too small to represent.
  * Masked response.
@@ -630,7 +619,6 @@ L_underflow_to_zero:
 	movl	TAG_Zero,%edx
 	jmp	L_Store_significand
 
-
 /* The operations resulted in a number too large to represent. */
 L_overflow:
 	addw	EXTENDED_Ebias,EXP(%edi)	/* Set for unmasked response. */
@@ -638,7 +626,6 @@ L_overflow:
 	call	arith_overflow
 	pop	%edi
 	jmp	fpu_reg_round_signed_special_exit
-
 
 Signal_underflow:
 	/* The number may have been changed to a non-denormal */
@@ -657,7 +644,6 @@ Do_unmasked_underflow:
 	popl	%eax
 	popl	%eax
 	jmp	L_Normalised
-
 
 #ifdef PARANOID
 #ifdef PECULIAR_486

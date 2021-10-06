@@ -108,7 +108,6 @@ struct mrstouch_dev {
 	int (*read_finish)(struct mrstouch_dev *tsdev);
 };
 
-
 /*************************** NEC and Maxim Interface ************************/
 
 static int mrstouch_nec_adc_read_prepare(struct mrstouch_dev *tsdev)
@@ -236,7 +235,6 @@ ipc_error:
 	dev_err(tsdev->dev, "ipc error during adc read\n");
 	return err;
 }
-
 
 /*************************** Freescale Interface ************************/
 
@@ -474,7 +472,6 @@ static int mrstouch_chan_parse(struct mrstouch_dev *tsdev)
 	return found;
 }
 
-
 /*
  * Writes touch screen channels to ADC address selection registers
  */
@@ -565,7 +562,6 @@ static int mrstouch_adc_init(struct mrstouch_dev *tsdev)
 
 	return 0;
 }
-
 
 /* Probe function for touch screen driver */
 static int mrstouch_probe(struct platform_device *pdev)

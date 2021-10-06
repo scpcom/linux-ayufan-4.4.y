@@ -44,7 +44,6 @@
 #define KN02BA_IO_INR_PBNC	1	/* ~HALT button debouncer */
 #define KN02BA_IO_INR_PBNO	0	/* HALT button debouncer */
 
-
 /*
  * Memory Error Register bits.
  */

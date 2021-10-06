@@ -18,7 +18,6 @@
 #include <asm/mb86943a.h>
 #include "head.inc"
 
-
 #define __551_DARS0	0xfeff0100
 #define __551_DARS1	0xfeff0104
 #define __551_DARS2	0xfeff0108

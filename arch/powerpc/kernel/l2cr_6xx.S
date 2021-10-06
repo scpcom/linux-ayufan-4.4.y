@@ -282,7 +282,6 @@ BEGIN_FTR_SECTION
 END_FTR_SECTION_IFSET(CPU_FTR_L2CR)
 	blr
 
-
 /*
  * Here is a similar routine for dealing with the L3 cache
  * on the 745x family of chips
@@ -404,7 +403,6 @@ END_FTR_SECTION_IFSET(CPU_FTR_L3CR)
 /* --- End of PowerLogix code ---
  */
 
-
 /* flush_disable_L1()	- Flush and disable L1 cache
  *
  * clobbers r0, r3, ctr, cr0
@@ -466,5 +464,3 @@ _GLOBAL(__inval_enable_L1)
 	sync
 
  	blr
-
-

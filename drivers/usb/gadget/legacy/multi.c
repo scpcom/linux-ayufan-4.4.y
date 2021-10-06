@@ -12,7 +12,6 @@
  * (at your option) any later version.
  */
 
-
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/netdevice.h>
@@ -25,13 +24,11 @@
 #  define USB_ETH_RNDIS y
 #endif
 
-
 #define DRIVER_DESC		"Multifunction Composite Gadget"
 
 MODULE_DESCRIPTION(DRIVER_DESC);
 MODULE_AUTHOR("Michal Nazarewicz");
 MODULE_LICENSE("GPL");
-
 
 #include "f_mass_storage.h"
 
@@ -51,7 +48,6 @@ USB_ETHERNET_MODULE_PARAMETERS();
 #define MULTI_VENDOR_NUM	0x1d6b	/* Linux Foundation */
 #define MULTI_PRODUCT_NUM	0x0104	/* Multifunction Composite Gadget */
 
-
 enum {
 	__MULTI_NO_CONFIG,
 #ifdef CONFIG_USB_G_MULTI_RNDIS
@@ -61,7 +57,6 @@ enum {
 	MULTI_CDC_CONFIG_NUM,
 #endif
 };
-
 
 static struct usb_device_descriptor device_desc = {
 	.bLength =		sizeof device_desc,
@@ -101,9 +96,6 @@ static struct usb_gadget_strings *dev_strings[] = {
 	},
 	NULL,
 };
-
-
-
 
 /****************************** Configurations ******************************/
 
@@ -208,7 +200,6 @@ static __ref int rndis_config_register(struct usb_composite_dev *cdev)
 
 #endif
 
-
 /********** CDC ECM **********/
 
 #ifdef CONFIG_USB_G_MULTI_CDC
@@ -290,8 +281,6 @@ static __ref int cdc_config_register(struct usb_composite_dev *cdev)
 }
 
 #endif
-
-
 
 /****************************** Gadget Bind ******************************/
 
@@ -424,7 +413,6 @@ static int __ref multi_bind(struct usb_composite_dev *cdev)
 	dev_info(&gadget->dev, DRIVER_DESC "\n");
 	return 0;
 
-
 	/* error recovery */
 fail_otg_desc:
 	kfree(otg_desc[0]);
@@ -478,9 +466,7 @@ static int multi_unbind(struct usb_composite_dev *cdev)
 	return 0;
 }
 
-
 /****************************** Some noise ******************************/
-
 
 static struct usb_composite_driver multi_driver = {
 	.name		= "g_multi",

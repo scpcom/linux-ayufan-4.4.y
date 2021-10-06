@@ -43,7 +43,6 @@
 #include <linux/types.h>
 #include <scsi/libsas.h>
 
-
 /* for Request Opcode of IOMB */
 #define OPC_INB_ECHO				1	/* 0x000 */
 #define OPC_INB_PHYSTART			4	/* 0x004 */
@@ -149,7 +148,6 @@ struct mpi_msg_hdr{
 	/* Bits [31] - Message Valid bit */
 } __attribute__((packed, aligned(4)));
 
-
 /*
  * brief the data structure of PHY Start Command
  * use to describe enable the phy (64 bytes)
@@ -161,7 +159,6 @@ struct phy_start_req {
 	u32	reserved[5];
 } __attribute__((packed, aligned(4)));
 
-
 /*
  * brief the data structure of PHY Start Command
  * use to disable the phy (64 bytes)
@@ -171,7 +168,6 @@ struct phy_stop_req {
 	__le32	phy_id;
 	u32	reserved[13];
 } __attribute__((packed, aligned(4)));
-
 
 /* set device bits fis - device to host */
 struct  set_dev_bits_fis {
@@ -224,7 +220,6 @@ struct sata_completion_resp {
 	u32	sata_resp[12];
 } __attribute__((packed, aligned(4)));
 
-
 /*
  * brief the data structure of SAS HW Event Notification
  * use to alert the host about the hardware event(64 bytes)
@@ -236,7 +231,6 @@ struct hw_event_resp {
 	struct sas_identify_frame	sas_identify;
 	struct dev_to_host_fis	sata_fis;
 } __attribute__((packed, aligned(4)));
-
 
 /*
  * brief the data structure of  REGISTER DEVICE Command
@@ -253,7 +247,6 @@ struct reg_dev_req {
 	u32	reserved[8];
 } __attribute__((packed, aligned(4)));
 
-
 /*
  * brief the data structure of  DEREGISTER DEVICE Command
  * use to request spc to remove all internal resources associated
@@ -265,7 +258,6 @@ struct dereg_dev_req {
 	__le32	device_id;
 	u32	reserved[13];
 } __attribute__((packed, aligned(4)));
-
 
 /*
  * brief the data structure of DEVICE_REGISTRATION Response
@@ -279,7 +271,6 @@ struct dev_reg_resp {
 	u32	reserved[12];
 } __attribute__((packed, aligned(4)));
 
-
 /*
  * brief the data structure of Local PHY Control Command
  * use to issue PHY CONTROL to local phy (64 bytes)
@@ -289,7 +280,6 @@ struct local_phy_ctl_req {
 	__le32	phyop_phyid;
 	u32	reserved1[13];
 } __attribute__((packed, aligned(4)));
-
 
 /**
  * brief the data structure of Local Phy Control Response
@@ -301,7 +291,6 @@ struct local_phy_ctl_resp {
 	__le32	status;
 	u32	reserved[12];
 } __attribute__((packed, aligned(4)));
-
 
 #define OP_BITS 0x0000FF00
 #define ID_BITS 0x000000FF
@@ -319,7 +308,6 @@ struct port_ctl_req {
 	u32	reserved1[11];
 } __attribute__((packed, aligned(4)));
 
-
 /*
  * brief the data structure of HW Event Ack Command
  * use to acknowledge receive HW event (64 bytes)
@@ -333,7 +321,6 @@ struct hw_event_ack_req {
 	u32	reserved1[11];
 } __attribute__((packed, aligned(4)));
 
-
 /*
  * brief the data structure of SSP Completion Response
  * use to indicate a SSP Completion  (n bytes)
@@ -346,7 +333,6 @@ struct ssp_completion_resp {
 	struct ssp_response_iu  ssp_resp_iu;
 	__le32	residual_count;
 } __attribute__((packed, aligned(4)));
-
 
 #define SSP_RESCV_BIT	0x00010000
 
@@ -384,7 +370,6 @@ struct general_event_resp {
 	__le32	status;
 	__le32	inb_IOMB_payload[14];
 } __attribute__((packed, aligned(4)));
-
 
 #define GENERAL_EVENT_PAYLOAD	14
 #define OPCODE_BITS	0x00000fff
@@ -454,7 +439,6 @@ struct task_abort_resp {
 	u32	reserved[12];
 } __attribute__((packed, aligned(4)));
 
-
 /**
  * brief the data structure of SAS Diagnostic Start/End Command
  * use to describe MPI SAS Diagnostic Start/End Command (64 bytes)
@@ -464,7 +448,6 @@ struct sas_diag_start_end_req {
 	__le32	operation_phyid;
 	u32	reserved[13];
 } __attribute__((packed, aligned(4)));
-
 
 /**
  * brief the data structure of SAS Diagnostic Execute Command
@@ -480,7 +463,6 @@ struct sas_diag_execute_req{
 	__le32	pERF1CTL;
 	u32	reserved[8];
 } __attribute__((packed, aligned(4)));
-
 
 #define SAS_DIAG_PARAM_BYTES 24
 
@@ -548,7 +530,6 @@ struct ssp_ini_tm_start_req {
 	u32	reserved[8];
 } __attribute__((packed, aligned(4)));
 
-
 struct ssp_info_unit {
 	u8	lun[8];/* SCSI Logical Unit Number */
 	u8	reserved1;/* reserved */
@@ -562,7 +543,6 @@ struct ssp_info_unit {
 	/* B1-0 : reserved */
 	u8	cdb[16];/* The SCSI CDB up to 16 bytes length */
 } __attribute__((packed, aligned(4)));
-
 
 /**
  * brief the data structure of SSP INI IO Start Command
@@ -580,7 +560,6 @@ struct ssp_ini_io_start_req {
 	__le32	esgl;
 } __attribute__((packed, aligned(4)));
 
-
 /**
  * brief the data structure of Firmware download
  * use to describe MPI FW DOWNLOAD Command (64 bytes)
@@ -597,7 +576,6 @@ struct fw_flash_Update_req {
 	__le32	ext_reserved;
 } __attribute__((packed, aligned(4)));
 
-
 #define FWFLASH_IOMB_RESERVED_LEN 0x07
 /**
  * brief the data structure of FW_FLASH_UPDATE Response
@@ -609,7 +587,6 @@ struct fw_flash_Update_resp {
 	__le32	status;
 	u32	reserved[13];
 } __attribute__((packed, aligned(4)));
-
 
 /**
  * brief the data structure of Get NVM Data Command
@@ -626,7 +603,6 @@ struct get_nvm_data_req {
 	u32	reserved1;
 } __attribute__((packed, aligned(4)));
 
-
 struct set_nvm_data_req {
 	__le32	tag;
 	__le32	len_ir_vpdd;
@@ -637,7 +613,6 @@ struct set_nvm_data_req {
 	__le32	resp_len;
 	u32	reserved1;
 } __attribute__((packed, aligned(4)));
-
 
 #define TWI_DEVICE	0x0
 #define C_SEEPROM	0x1
@@ -661,7 +636,6 @@ struct get_nvm_data_resp {
 	__le32		nvm_data[12];
 } __attribute__((packed, aligned(4)));
 
-
 /**
  * brief the data structure of SAS Diagnostic Start/End Response
  * use to describe MPI SAS Diagnostic Start/End Response (64 bytes)
@@ -672,7 +646,6 @@ struct sas_diag_start_end_resp {
 	__le32		status;
 	u32		reserved[13];
 } __attribute__((packed, aligned(4)));
-
 
 /**
  * brief the data structure of SAS Diagnostic Execute Response
@@ -687,7 +660,6 @@ struct sas_diag_execute_resp {
 	u32		reserved[11];
 } __attribute__((packed, aligned(4)));
 
-
 /**
  * brief the data structure of Set Device State Response
  * use to describe MPI Set Device State Response (64 bytes)
@@ -700,7 +672,6 @@ struct set_dev_state_resp {
 	__le32		pds_nds;
 	u32		reserved[11];
 } __attribute__((packed, aligned(4)));
-
 
 #define NDS_BITS 0x0F
 #define PDS_BITS 0xF0
@@ -860,7 +831,6 @@ struct set_dev_state_resp {
 #define MSIX_TABLE_BASE	  (MSIX_TABLE_OFFSET + MSIX_INTERRUPT_CONTROL_OFFSET)
 #define MSIX_INTERRUPT_DISABLE		0x1
 #define MSIX_INTERRUPT_ENABLE		0x0
-
 
 /* state definition for Scratch Pad1 register */
 #define SCRATCH_PAD1_POR		0x00  /* power on reset state */
@@ -1035,4 +1005,3 @@ struct set_dev_state_resp {
 #define SHIFT_REG_64K_MASK				0xffff0000
 #define SHIFT_REG_BIT_SHIFT				8
 #endif
-

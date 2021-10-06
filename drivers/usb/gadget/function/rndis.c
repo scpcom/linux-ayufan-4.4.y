@@ -42,7 +42,6 @@
 
 #include "rndis.h"
 
-
 /* The driver for your USB chip needs to support ep0 OUT to work with
  * RNDIS, plus all three CDC Ethernet endpoints (interrupt not optional).
  *
@@ -167,7 +166,6 @@ static const u32 oid_supported_list[] =
 #endif	/* RNDIS_WAKEUP */
 #endif	/* RNDIS_PM */
 };
-
 
 /* NDIS Functions */
 static int gen_ndis_query_resp(struct rndis_params *params, u32 OID, u8 *buf,
@@ -717,7 +715,6 @@ static int rndis_keepalive_response(struct rndis_params *params,
 	params->resp_avail(params->v);
 	return 0;
 }
-
 
 /*
  * Device to Host Comunication

@@ -1,7 +1,6 @@
 #ifndef _LINUX_POLL_H
 #define _LINUX_POLL_H
 
-
 #include <linux/compiler.h>
 #include <linux/ktime.h>
 #include <linux/wait.h>
@@ -97,7 +96,6 @@ extern void poll_freewait(struct poll_wqueues *pwq);
 extern int poll_schedule_timeout(struct poll_wqueues *pwq, int state,
 				 ktime_t *expires, unsigned long slack);
 extern long select_estimate_accuracy(struct timespec *tv);
-
 
 static inline int poll_schedule(struct poll_wqueues *pwq, int state)
 {

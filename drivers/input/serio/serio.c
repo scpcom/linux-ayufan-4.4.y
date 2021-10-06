@@ -140,7 +140,6 @@ static void serio_find_driver(struct serio *serio)
 			 serio->phys, serio->name, error);
 }
 
-
 /*
  * Serio event processing.
  */
@@ -742,7 +741,6 @@ void serio_unregister_child_port(struct serio *serio)
 	mutex_unlock(&serio_mutex);
 }
 EXPORT_SYMBOL(serio_unregister_child_port);
-
 
 /*
  * Serio driver operations

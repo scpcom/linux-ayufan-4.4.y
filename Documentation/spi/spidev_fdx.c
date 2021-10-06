@@ -11,7 +11,6 @@
 #include <linux/types.h>
 #include <linux/spi/spidev.h>
 
-
 static int verbose;
 
 static void do_read(int fd, int len)

@@ -76,13 +76,11 @@ do { \
 
 #endif /* !(__ASSEMBLY__) */
 
-
 /* AUXIO2 (Power Off Control) */
 extern volatile u8 __iomem *auxio_power_register;
 
 #define	AUXIO_POWER_DETECT_FAILURE	32
 #define	AUXIO_POWER_CLEAR_FAILURE	2
 #define	AUXIO_POWER_OFF			1
-
 
 #endif /* !(_SPARC_AUXIO_H) */

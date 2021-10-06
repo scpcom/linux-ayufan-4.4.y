@@ -14,7 +14,6 @@
 #include <linux/kernel.h>
 #include <linux/syscalls.h>
 
-
 asmlinkage long sys32_unimplemented(int r26, int r25, int r24, int r23,
 	int r22, int r21, int r20)
 {

@@ -254,7 +254,6 @@
 #include <stdint.h>
 #endif
 
-
 /** Code indicating translation services required within the RPC path.
  * These indicate whether there is a translatable struct at the start
  * of the RPC buffer and what information that struct contains.
@@ -293,7 +292,6 @@ enum iorpc_format_e
   IORPC_FORMAT_USER_POLLFD,
 };
 
-
 /** Generate an opcode given format and code. */
 #define IORPC_OPCODE(FORMAT, CODE) (((FORMAT) << 16) | (CODE))
 
@@ -330,7 +328,6 @@ union iorpc_offset
 #endif
 };
 
-
 /** Homing and cache hinting bits that can be used by IO devices. */
 struct iorpc_mem_attr
 {
@@ -346,7 +343,6 @@ struct iorpc_mem_attr
 
 /** Set the IO pin bit. */
 #define IORPC_MEM_BUFFER_FLAG_IO_PIN (1 << 1)
-
 
 /** A structure used to describe memory registration.  Different
     protection levels describe memory differently, so this union
@@ -387,7 +383,6 @@ union iorpc_mem_buffer
   hv;                           /**< Buffer parameters for HV driver. */
 };
 
-
 /** A structure used to describe interrupts.  The format differs slightly
  *  for user and kernel interrupts.  As with the mem_buffer_t, translation
  *  between the formats is done at each level. */
@@ -410,7 +405,6 @@ union iorpc_interrupt
   kernel;      /**< Interrupt as described by the kernel. */
 
 };
-
 
 /** A structure used to describe interrupts used with poll().  The format
  *  differs significantly for requests from user to kernel, and kernel to
@@ -435,7 +429,6 @@ union iorpc_pollfd_setup
 
 };
 
-
 /** A structure used to describe previously set up interrupts used with
  *  poll().  The format differs significantly for requests from user to
  *  kernel, and kernel to hypervisor.  As with the mem_buffer_t, translation
@@ -456,7 +449,6 @@ union iorpc_pollfd
 
 };
 
-
 /** The various iorpc devices use error codes from -1100 to -1299.
  *
  * This range is distinct from netio (-700 to -799), the hypervisor
@@ -467,7 +459,6 @@ enum gxio_err_e {
 
   /** Largest iorpc error number. */
   GXIO_ERR_MAX = -1101,
-
 
   /********************************************************/
   /*                   Generic Error Codes                */
@@ -530,8 +521,6 @@ enum gxio_err_e {
   /** Permissions error. */
   GXIO_ERR_PERM = -1119,
 
-
-
   /********************************************************/
   /*                 Test Device Error Codes              */
   /********************************************************/
@@ -542,11 +531,9 @@ enum gxio_err_e {
   /** Illegal buffer slot. */
   GXIO_TEST_ERR_BUFFER_SLOT = -1121,
 
-
   /********************************************************/
   /*                    MPIPE Error Codes                 */
   /********************************************************/
-
 
   /** Invalid buffer size. */
   GXIO_MPIPE_ERR_INVAL_BUFFER_SIZE = -1131,
@@ -626,7 +613,6 @@ enum gxio_err_e {
   /** Classifier encountered undefined symbol. */
   GXIO_MPIPE_ERR_CLASSIFIER_UNDEF_SYMBOL = -1177,
 
-
   /********************************************************/
   /*                    TRIO  Error Codes                 */
   /********************************************************/
@@ -666,7 +652,6 @@ enum gxio_err_e {
 
   /** Invalid ASID. */
   GXIO_TRIO_ERR_BAD_ASID = -1191,
-
 
   /********************************************************/
   /*                    MICA Error Codes                  */
@@ -709,6 +694,5 @@ enum gxio_err_e {
   /** Smallest iorpc error number. */
   GXIO_ERR_MIN = -1299
 };
-
 
 #endif /* !_HV_IORPC_H_ */

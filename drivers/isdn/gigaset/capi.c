@@ -353,7 +353,6 @@ static void send_data_b3_conf(struct cardstate *cs, struct capi_ctr *ctr,
 	capi_ctr_handle_message(ctr, appl, cskb);
 }
 
-
 /*
  * driver interface functions
  * ==========================
@@ -1274,7 +1273,6 @@ static void do_facility_req(struct gigaset_capi_ctr *iif,
 	dump_cmsg(DEBUG_CMD, __func__, cmsg);
 	capi_ctr_handle_message(&iif->ctr, ap->id, cskb);
 }
-
 
 /*
  * process LISTEN_REQ message
@@ -2254,7 +2252,6 @@ static inline capi_send_handler_t lookup_capi_send_handler(const u16 cmd)
 			return capi_send_handler_table[i].handler;
 	return NULL;
 }
-
 
 /**
  * gigaset_send_message() - accept a CAPI message from an application

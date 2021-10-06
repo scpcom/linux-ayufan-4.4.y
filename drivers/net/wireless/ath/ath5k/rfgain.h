@@ -306,7 +306,6 @@ static const struct ath5k_ini_rfgain rfgain_2316[] = {
 	{ AR5K_RF_GAIN(63),	{ 0x00000000, 0x000000f0 } },
 };
 
-
 /* Initial RF Gain settings for RF5413 */
 static const struct ath5k_ini_rfgain rfgain_5413[] = {
 	/*			      5GHz	2GHz	*/
@@ -375,7 +374,6 @@ static const struct ath5k_ini_rfgain rfgain_5413[] = {
 	{ AR5K_RF_GAIN(62),	{ 0x000000f9, 0x000000f9 } },
 	{ AR5K_RF_GAIN(63),	{ 0x000000f9, 0x000000f9 } },
 };
-
 
 /* Initial RF Gain settings for RF2425 */
 static const struct ath5k_ini_rfgain rfgain_2425[] = {
@@ -481,7 +479,6 @@ struct ath5k_gain_opt {
 	const struct ath5k_gain_opt_step	go_step[AR5K_GAIN_STEP_COUNT];
 };
 
-
 /*
  * RF5111
  * Parameters on gos_param:
@@ -531,4 +528,3 @@ static const struct ath5k_gain_opt rfgain_opt_5112 = {
 		{ { 0, 1, 0, 1, 1, 0, 1 }, -16 },
 	}
 };
-

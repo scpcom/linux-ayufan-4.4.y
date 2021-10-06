@@ -1074,7 +1074,6 @@ bool __init early_init_dt_verify(void *params)
 	return true;
 }
 
-
 void __init early_init_dt_scan_nodes(void)
 {
 	/* Retrieve various information from the /chosen node */

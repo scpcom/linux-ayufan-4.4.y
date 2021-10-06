@@ -129,7 +129,6 @@ enum tomoyo_conditions_index {
 	TOMOYO_ENVP_ENTRY,
 };
 
-
 /* Index numbers for stat(). */
 enum tomoyo_path_stat_index {
 	/* Do not change this order. */

@@ -454,7 +454,6 @@ static struct fb_fix_screeninfo bfin_lq035_fb_fix = {
 	.accel		= FB_ACCEL_NONE,
 };
 
-
 static int bfin_lq035_fb_open(struct fb_info *info, int user)
 {
 	unsigned long flags;
@@ -495,7 +494,6 @@ static int bfin_lq035_fb_release(struct fb_info *info, int user)
 	lq035_open_cnt--;
 	spin_unlock_irqrestore(&bfin_lq035_lock, flags);
 
-
 	if (lq035_open_cnt <= 0) {
 
 		bfin_write_PPI_CONTROL(0);
@@ -506,7 +504,6 @@ static int bfin_lq035_fb_release(struct fb_info *info, int user)
 
 	return 0;
 }
-
 
 static int bfin_lq035_fb_check_var(struct fb_var_screeninfo *var,
 				   struct fb_info *info)
@@ -759,7 +756,6 @@ static int bfin_lq035_probe(struct platform_device *pdev)
 	bfin_lq035_fb.fix = bfin_lq035_fb_fix;
 	bfin_lq035_fb.flags = FBINFO_DEFAULT;
 
-
 	bfin_lq035_fb.pseudo_palette = devm_kzalloc(&pdev->dev,
 						    sizeof(u32) * 16,
 						    GFP_KERNEL);
@@ -832,9 +828,7 @@ static int bfin_lq035_remove(struct platform_device *pdev)
 
 	free_dma(CH_PPI);
 
-
 	fb_dealloc_cmap(&bfin_lq035_fb.cmap);
-
 
 	lcd_device_unregister(lcd_dev);
 	backlight_device_unregister(bl_dev);

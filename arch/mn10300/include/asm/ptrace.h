@@ -13,7 +13,6 @@
 
 #include <uapi/asm/ptrace.h>
 
-
 #define user_mode(regs)			(((regs)->epsw & EPSW_nSL) == EPSW_nSL)
 #define instruction_pointer(regs)	((regs)->pc)
 #define user_stack_pointer(regs)	((regs)->sp)

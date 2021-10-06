@@ -21,7 +21,6 @@ static DEFINE_SPINLOCK(cxn_owners_lock);
 
 int __nongpreldata cxn_pinned = -1;
 
-
 /*****************************************************************************/
 /*
  * initialise a new context

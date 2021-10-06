@@ -22,7 +22,6 @@
 
 #include "pcie-iproc.h"
 
-
 /* NS: CLASS field is R/O, and set to wrong 0x200 value */
 static void bcma_pcie2_fixup_class(struct pci_dev *dev)
 {

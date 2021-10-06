@@ -489,7 +489,6 @@ out:
 	return ret;
 }
 
-
 int wl1271_acx_sg_enable(struct wl1271 *wl, bool enable)
 {
 	struct acx_bt_wlan_coex *pta;
@@ -1344,7 +1343,6 @@ out:
 	return ret;
 }
 EXPORT_SYMBOL_GPL(wl1271_acx_set_ht_capabilities);
-
 
 int wl1271_acx_set_ht_information(struct wl1271 *wl,
 				   struct wl12xx_vif *wlvif,

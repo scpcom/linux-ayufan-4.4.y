@@ -105,7 +105,6 @@ static const char alx_gstrings_stats[][ETH_GSTRING_LEN] = {
 
 #define ALX_NUM_STATS ARRAY_SIZE(alx_gstrings_stats)
 
-
 static u32 alx_get_supported_speeds(struct alx_hw *hw)
 {
 	u32 supported = SUPPORTED_10baseT_Half |
@@ -203,7 +202,6 @@ static void alx_get_pauseparam(struct net_device *netdev,
 	pause->tx_pause = !!(hw->flowctrl & ALX_FC_TX);
 	pause->rx_pause = !!(hw->flowctrl & ALX_FC_RX);
 }
-
 
 static int alx_set_pauseparam(struct net_device *netdev,
 			      struct ethtool_pauseparam *pause)

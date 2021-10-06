@@ -147,7 +147,6 @@ void MACvSetShortRetryLimit(void __iomem *dwIoBase, unsigned char byRetryLimit)
 	VNSvOutPortB(dwIoBase + MAC_REG_SRT, byRetryLimit);
 }
 
-
 /*
  * Description:
  *      Set 802.11 Long Retry Limit

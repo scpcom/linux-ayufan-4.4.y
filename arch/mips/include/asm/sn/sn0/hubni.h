@@ -156,7 +156,6 @@
 #define NVS_TYPE_MASK		(UINT64_CAST 0x7)
 #define NVS_ERROR_MASK		(UINT64_CAST 0x4)  /* bit set means error */
 
-
 #define	 PIOTYPE_READ		0	/* VECTOR_PARMS and VECTOR_STATUS   */
 #define	 PIOTYPE_WRITE		1	/* VECTOR_PARMS and VECTOR_STATUS   */
 #define	 PIOTYPE_UNDEFINED	2	/* VECTOR_PARMS and VECTOR_STATUS   */
@@ -190,7 +189,6 @@
 				 (UINT64_CAST 0x3f0 << NPP_MAXBURST_SHFT))
 #define NPP_RESET_DEFAULTS	((UINT64_CAST 6	    << NPP_NULLTO_SHFT) | \
 				 (UINT64_CAST 0x3f0 << NPP_MAXBURST_SHFT))
-
 
 /* NI_PORT_ERROR mask and shift definitions */
 

@@ -601,7 +601,6 @@ static struct attribute *netstat_attrs[] = {
 	NULL
 };
 
-
 static struct attribute_group netstat_group = {
 	.name  = "statistics",
 	.attrs  = netstat_attrs,
@@ -825,7 +824,6 @@ static ssize_t store_rps_dev_flow_table_cnt(struct netdev_rx_queue *queue,
 static struct rx_queue_attribute rps_cpus_attribute =
 	__ATTR(rps_cpus, S_IRUGO | S_IWUSR, show_rps_map, store_rps_map);
 
-
 static struct rx_queue_attribute rps_dev_flow_table_cnt_attribute =
 	__ATTR(rps_flow_cnt, S_IRUGO | S_IWUSR,
 	    show_rps_dev_flow_table_cnt, store_rps_dev_flow_table_cnt);
@@ -845,7 +843,6 @@ static void rx_queue_release(struct kobject *kobj)
 #ifdef CONFIG_RPS
 	struct rps_map *map;
 	struct rps_dev_flow_table *flow_table;
-
 
 	map = rcu_dereference_protected(queue->rps_map, 1);
 	if (map) {

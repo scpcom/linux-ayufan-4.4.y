@@ -122,7 +122,6 @@ struct gsmi_log_entry_type_1 {
 	u32	instance;
 } __packed;
 
-
 /*
  * Some platforms don't have explicit SMI handshake
  * and need to wait for SMI to complete.

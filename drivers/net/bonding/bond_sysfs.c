@@ -454,7 +454,6 @@ static ssize_t bonding_show_carrier(struct device *d,
 static DEVICE_ATTR(use_carrier, S_IRUGO | S_IWUSR,
 		   bonding_show_carrier, bonding_sysfs_store_option);
 
-
 /* Show currently active_slave. */
 static ssize_t bonding_show_active_slave(struct device *d,
 					 struct device_attribute *attr,
@@ -506,7 +505,6 @@ static ssize_t bonding_show_ad_aggregator(struct device *d,
 }
 static DEVICE_ATTR(ad_aggregator, S_IRUGO, bonding_show_ad_aggregator, NULL);
 
-
 /* Show number of active 802.3ad ports. */
 static ssize_t bonding_show_ad_num_ports(struct device *d,
 					 struct device_attribute *attr,
@@ -525,7 +523,6 @@ static ssize_t bonding_show_ad_num_ports(struct device *d,
 	return count;
 }
 static DEVICE_ATTR(ad_num_ports, S_IRUGO, bonding_show_ad_num_ports, NULL);
-
 
 /* Show current 802.3ad actor key. */
 static ssize_t bonding_show_ad_actor_key(struct device *d,
@@ -546,7 +543,6 @@ static ssize_t bonding_show_ad_actor_key(struct device *d,
 }
 static DEVICE_ATTR(ad_actor_key, S_IRUGO, bonding_show_ad_actor_key, NULL);
 
-
 /* Show current 802.3ad partner key. */
 static ssize_t bonding_show_ad_partner_key(struct device *d,
 					   struct device_attribute *attr,
@@ -565,7 +561,6 @@ static ssize_t bonding_show_ad_partner_key(struct device *d,
 	return count;
 }
 static DEVICE_ATTR(ad_partner_key, S_IRUGO, bonding_show_ad_partner_key, NULL);
-
 
 /* Show current 802.3ad partner mac. */
 static ssize_t bonding_show_ad_partner_mac(struct device *d,
@@ -619,7 +614,6 @@ static ssize_t bonding_show_queue_id(struct device *d,
 static DEVICE_ATTR(queue_id, S_IRUGO | S_IWUSR, bonding_show_queue_id,
 		   bonding_sysfs_store_option);
 
-
 /* Show the all_slaves_active flag. */
 static ssize_t bonding_show_slaves_active(struct device *d,
 					  struct device_attribute *attr,
@@ -643,7 +637,6 @@ static ssize_t bonding_show_resend_igmp(struct device *d,
 }
 static DEVICE_ATTR(resend_igmp, S_IRUGO | S_IWUSR,
 		   bonding_show_resend_igmp, bonding_sysfs_store_option);
-
 
 static ssize_t bonding_show_lp_interval(struct device *d,
 					struct device_attribute *attr,
@@ -813,4 +806,3 @@ void bond_prepare_sysfs_group(struct bonding *bond)
 {
 	bond->dev->sysfs_groups[0] = &bonding_group;
 }
-

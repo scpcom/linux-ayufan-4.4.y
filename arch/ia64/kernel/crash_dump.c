@@ -47,4 +47,3 @@ copy_oldmem_page(unsigned long pfn, char *buf,
 		memcpy(buf, (vaddr + offset), csize);
 	return csize;
 }
-

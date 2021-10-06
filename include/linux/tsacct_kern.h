@@ -37,5 +37,3 @@ static inline void acct_clear_integrals(struct task_struct *tsk)
 #endif /* CONFIG_TASK_XACCT */
 
 #endif
-
-

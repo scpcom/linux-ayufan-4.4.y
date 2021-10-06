@@ -836,7 +836,6 @@ static int au8522_get_tune_settings(struct dvb_frontend *fe,
 
 static struct dvb_frontend_ops au8522_ops;
 
-
 static void au8522_release(struct dvb_frontend *fe)
 {
 	struct au8522_state *state = fe->demodulator_priv;

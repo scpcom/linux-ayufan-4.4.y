@@ -135,7 +135,6 @@ done:
 	return 0;
 }
 
-
 static struct ctl_table debug_table[] = {
 	{
 		.procname	= "rpc_debug",

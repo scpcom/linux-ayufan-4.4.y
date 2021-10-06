@@ -270,7 +270,6 @@
 #define reg_iop_dmc_in_r_masked_intr___full___bit 5
 #define reg_iop_dmc_in_r_masked_intr_offset 100
 
-
 /* Constants */
 #define regk_iop_dmc_in_ack_pkt                   0x00000100
 #define regk_iop_dmc_in_array                     0x00000008

@@ -482,7 +482,6 @@ static const struct tty_operations if_ops = {
 	.tiocmset =		if_tiocmset,
 };
 
-
 /* wakeup tasklet for the write operation */
 static void if_wake(unsigned long data)
 {

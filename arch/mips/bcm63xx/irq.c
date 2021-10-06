@@ -20,7 +20,6 @@
 #include <bcm63xx_io.h>
 #include <bcm63xx_irq.h>
 
-
 static DEFINE_SPINLOCK(ipic_lock);
 static DEFINE_SPINLOCK(epic_lock);
 
@@ -33,7 +32,6 @@ static unsigned int ext_irq_start, ext_irq_end;
 static unsigned int ext_irq_cfg_reg1, ext_irq_cfg_reg2;
 static void (*internal_irq_mask)(struct irq_data *d);
 static void (*internal_irq_unmask)(struct irq_data *d, const struct cpumask *m);
-
 
 static inline u32 get_ext_irq_perf_reg(int irq)
 {

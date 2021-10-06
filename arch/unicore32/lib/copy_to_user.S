@@ -93,4 +93,3 @@ ENDPROC(__copy_to_user)
 	rsub	r0, r0, r2
 	copy_abort_end
 	.popsection
-

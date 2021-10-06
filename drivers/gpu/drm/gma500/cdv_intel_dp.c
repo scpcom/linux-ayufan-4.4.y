@@ -314,7 +314,6 @@ static bool is_edp(struct gma_encoder *encoder)
 	return encoder->type == INTEL_OUTPUT_EDP;
 }
 
-
 static void cdv_intel_dp_start_link_train(struct gma_encoder *encoder);
 static void cdv_intel_dp_complete_link_train(struct gma_encoder *encoder);
 static void cdv_intel_dp_link_down(struct gma_encoder *encoder);
@@ -1103,7 +1102,6 @@ cdv_intel_dp_mode_set(struct drm_encoder *encoder, struct drm_display_mode *mode
 	}
 }
 
-
 /* If the sink supports it, try to set the power state appropriately */
 static void cdv_intel_dp_sink_dpms(struct gma_encoder *encoder, int mode)
 {
@@ -1270,7 +1268,6 @@ cdv_intel_get_adjust_request_pre_emphasis(uint8_t link_status[DP_LINK_STATUS_SIZ
 	return ((l >> s) & 3) << DP_TRAIN_PRE_EMPHASIS_SHIFT;
 }
 
-
 #if 0
 static char	*voltage_names[] = {
 	"0.4V", "0.6V", "0.8V", "1.2V"
@@ -1328,7 +1325,6 @@ cdv_intel_get_adjust_train(struct gma_encoder *encoder)
 	for (lane = 0; lane < 4; lane++)
 		intel_dp->train_set[lane] = v | p;
 }
-
 
 static uint8_t
 cdv_intel_get_lane_status(uint8_t link_status[DP_LINK_STATUS_SIZE],
@@ -1405,7 +1401,6 @@ cdv_intel_dp_set_link_train(struct gma_encoder *encoder,
 
 	return true;
 }
-
 
 static bool
 cdv_intel_dplink_set_level(struct gma_encoder *encoder,
@@ -1492,7 +1487,6 @@ cdv_intel_dp_set_vswing_premph(struct gma_encoder *encoder, uint8_t signal_level
 	return;	
 }
 
-
 /* Enable corresponding port and start training pattern 1 */
 static void
 cdv_intel_dp_start_link_train(struct gma_encoder *encoder)
@@ -1529,7 +1523,6 @@ cdv_intel_dp_start_link_train(struct gma_encoder *encoder)
 
 	DRM_DEBUG_KMS("Start train\n");
 		reg = DP | DP_LINK_TRAIN_PAT_1;
-
 
 	for (;;) {
 		/* Use intel_dp->train_set[0] to set the voltage and pre emphasis values */
@@ -1686,7 +1679,6 @@ cdv_intel_dp_link_down(struct gma_encoder *encoder)
 
 	DRM_DEBUG_KMS("\n");
 
-
 	{
 		DP &= ~DP_LINK_TRAIN_MASK;
 		REG_WRITE(intel_dp->output_reg, DP | DP_LINK_TRAIN_PAT_IDLE);
@@ -1766,7 +1758,6 @@ static int cdv_intel_dp_get_modes(struct drm_connector *connector)
 	struct edid *edid = NULL;
 	int ret = 0;
 	int edp = is_edp(intel_encoder);
-
 
 	edid = drm_get_edid(connector, &intel_dp->adapter);
 	if (edid) {
@@ -1943,7 +1934,6 @@ static const struct drm_encoder_funcs cdv_intel_dp_enc_funcs = {
 	.destroy = cdv_intel_dp_encoder_destroy,
 };
 
-
 static void cdv_intel_dp_add_properties(struct drm_connector *connector)
 {
 	cdv_intel_attach_force_audio_property(connector);
@@ -2029,7 +2019,6 @@ cdv_intel_dp_init(struct drm_device *dev, struct psb_intel_mode_device *mode_dev
         else
 		gma_encoder->type = INTEL_OUTPUT_EDP;
 
-
 	gma_encoder->dev_priv=intel_dp;
 	intel_dp->encoder = gma_encoder;
 	intel_dp->output_reg = output_reg;
@@ -2100,7 +2089,6 @@ cdv_intel_dp_init(struct drm_device *dev, struct psb_intel_mode_device *mode_dev
                 DRM_DEBUG_KMS("cur t1_t3 %d t8 %d t9 %d t10 %d t11_t12 %d\n",
                               cur.t1_t3, cur.t8, cur.t9, cur.t10, cur.t11_t12);
 
-
 		intel_dp->panel_power_up_delay = cur.t1_t3 / 10;
                 intel_dp->backlight_on_delay = cur.t8 / 10;
                 intel_dp->backlight_off_delay = cur.t9 / 10;
@@ -2113,7 +2101,6 @@ cdv_intel_dp_init(struct drm_device *dev, struct psb_intel_mode_device *mode_dev
 
                 DRM_DEBUG_KMS("backlight on delay %d, off delay %d\n",
                               intel_dp->backlight_on_delay, intel_dp->backlight_off_delay);
-
 
 		cdv_intel_edp_panel_vdd_on(gma_encoder);
 		ret = cdv_intel_dp_aux_native_read(gma_encoder, DP_DPCD_REV,

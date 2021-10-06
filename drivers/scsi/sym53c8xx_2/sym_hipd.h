@@ -146,7 +146,6 @@
  */
 #define	SYM_CONF_MIN_ASYNC (40)
 
-
 /*
  * MEMORY ALLOCATOR.
  */
@@ -1040,7 +1039,6 @@ struct sym_hcb {
 #endif
 
 #define HCB_BA(np, lbl)	(np->hcb_ba + offsetof(struct sym_hcb, lbl))
-
 
 /*
  *  FIRMWARES (sym_fw.c)

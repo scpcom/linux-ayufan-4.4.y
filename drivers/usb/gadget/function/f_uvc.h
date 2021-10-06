@@ -25,4 +25,3 @@ void uvc_function_connect(struct uvc_device *uvc);
 void uvc_function_disconnect(struct uvc_device *uvc);
 
 #endif /* _F_UVC_H_ */
-

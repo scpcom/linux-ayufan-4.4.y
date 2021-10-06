@@ -159,7 +159,6 @@ static inline bool task_has_mempolicy(struct task_struct *task)
 }
 #endif
 
-
 /* bits in struct cpuset flags field */
 typedef enum {
 	CS_ONLINE,
@@ -1818,7 +1817,6 @@ static s64 cpuset_read_s64(struct cgroup_subsys_state *css, struct cftype *cft)
 	/* Unrechable but makes gcc happy */
 	return 0;
 }
-
 
 /*
  * for the common functions, 'private' gives the type of file

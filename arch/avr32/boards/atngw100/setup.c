@@ -90,7 +90,6 @@ static struct mtd_partition nand_partitions[] = {
 	},
 };
 
-
 static struct atmel_nand_data atngw100mkii_nand_data __initdata = {
 	.cle		= 21,
 	.ale		= 22,

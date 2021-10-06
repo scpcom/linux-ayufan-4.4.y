@@ -549,7 +549,6 @@ do {									\
 	__ret;								\
 })
 
-
 #define __wait_event_freezable_exclusive(wq, condition)			\
 	___wait_event(wq, condition, TASK_INTERRUPTIBLE, 1, 0,		\
 			schedule(); try_to_freeze())
@@ -562,7 +561,6 @@ do {									\
 		__ret = __wait_event_freezable_exclusive(wq, condition);\
 	__ret;								\
 })
-
 
 #define __wait_event_interruptible_locked(wq, condition, exclusive, irq) \
 ({									\
@@ -592,7 +590,6 @@ do {									\
 	__set_current_state(TASK_RUNNING);				\
 	__ret;								\
 })
-
 
 /**
  * wait_event_interruptible_locked - sleep until a condition gets true
@@ -710,7 +707,6 @@ do {									\
 	((condition)							\
 	 ? 0 : __wait_event_interruptible_locked(wq, condition, 1, 1))
 
-
 #define __wait_event_killable(wq, condition)				\
 	___wait_event(wq, condition, TASK_KILLABLE, 0, 0, schedule())
 
@@ -737,7 +733,6 @@ do {									\
 		__ret = __wait_event_killable(wq, condition);		\
 	__ret;								\
 })
-
 
 #define __wait_event_lock_irq(wq, condition, lock, cmd)			\
 	(void)___wait_event(wq, condition, TASK_UNINTERRUPTIBLE, 0, 0,	\
@@ -802,7 +797,6 @@ do {									\
 		break;							\
 	__wait_event_lock_irq(wq, condition, lock, );			\
 } while (0)
-
 
 #define __wait_event_interruptible_lock_irq(wq, condition, lock, cmd)	\
 	___wait_event(wq, condition, TASK_INTERRUPTIBLE, 0, 0,		\
@@ -958,7 +952,6 @@ int wake_bit_function(wait_queue_t *wait, unsigned mode, int sync, void *key);
 		INIT_LIST_HEAD(&(wait)->task_list);			\
 		(wait)->flags = 0;					\
 	} while (0)
-
 
 extern int bit_wait(struct wait_bit_key *, int);
 extern int bit_wait_io(struct wait_bit_key *, int);

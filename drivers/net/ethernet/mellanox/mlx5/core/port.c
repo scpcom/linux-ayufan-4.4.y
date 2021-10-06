@@ -75,7 +75,6 @@ ex1:
 }
 EXPORT_SYMBOL_GPL(mlx5_core_access_reg);
 
-
 struct mlx5_reg_pcap {
 	u8			rsvd0;
 	u8			port_num;

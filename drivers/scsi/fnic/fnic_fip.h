@@ -19,7 +19,6 @@
 #ifndef _FNIC_FIP_H_
 #define _FNIC_FIP_H_
 
-
 #define FCOE_CTLR_START_DELAY    2000    /* ms after first adv. to choose FCF */
 #define FCOE_CTLR_FIPVLAN_TOV    2000    /* ms after FIP VLAN disc */
 #define FCOE_CTLR_MAX_SOL        8

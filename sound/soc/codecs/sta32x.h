@@ -69,7 +69,6 @@
 #define STA32X_FDRC2    0x2c
 /* Reserved 0x2d */
 
-
 /* STA326 register field definitions */
 
 /* 0x00 CONFA */
@@ -186,7 +185,6 @@
 #define STA32X_CFUD_WA		0x02
 #define STA32X_CFUD_R1		0x04
 #define STA32X_CFUD_RA		0x08
-
 
 /* biquad filter coefficient table offsets */
 #define STA32X_C1_BQ_BASE	0

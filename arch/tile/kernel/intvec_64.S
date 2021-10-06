@@ -544,7 +544,6 @@ intvec_\vecname:
 
 	.endm
 
-
 	/*
 	 * Save the rest of the registers that we didn't save in the actual
 	 * vector itself.  We can't use r0-r10 inclusive here.
@@ -901,7 +900,6 @@ STD_ENTRY(interrupt_return)
 	 */
 	IRQ_DISABLE(r20, r21)
 	TRACE_IRQS_OFF  /* Note: clobbers registers r0-r29 */
-
 
 	/* Check to see if there is any work to do before returning to user. */
 	{

@@ -32,19 +32,16 @@ perfmon_handler(struct task_struct *task, void *buf, pfm_ovfl_arg_t *arg,
 	return 0;
 }
 
-
 static int perfmon_start(void)
 {
 	allow_ints = 1;
 	return 0;
 }
 
-
 static void perfmon_stop(void)
 {
 	allow_ints = 0;
 }
-
 
 #define OPROFILE_FMT_UUID { \
 	0x77, 0x7a, 0x6e, 0x61, 0x20, 0x65, 0x73, 0x69, 0x74, 0x6e, 0x72, 0x20, 0x61, 0x65, 0x0a, 0x6c }
@@ -54,7 +51,6 @@ static pfm_buffer_fmt_t oprofile_fmt = {
  	.fmt_uuid	    = OPROFILE_FMT_UUID,
  	.fmt_handler	    = perfmon_handler,
 };
-
 
 static char *get_cpu_type(void)
 {
@@ -69,7 +65,6 @@ static char *get_cpu_type(void)
 			return "ia64/ia64";
 	}
 }
-
 
 /* all the ops are handled via userspace for IA64 perfmon */
 
@@ -88,7 +83,6 @@ int perfmon_init(struct oprofile_operations *ops)
 	printk(KERN_INFO "oprofile: using perfmon.\n");
 	return 0;
 }
-
 
 void perfmon_exit(void)
 {

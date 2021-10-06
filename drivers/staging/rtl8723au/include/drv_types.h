@@ -18,13 +18,11 @@
 
 ------------------------------------------------------------------------------*/
 
-
 #ifndef __DRV_TYPES_H__
 #define __DRV_TYPES_H__
 
 #include <osdep_service.h>
 #include <wlan_bssdef.h>
-
 
 enum _NIC_VERSION {
 	RTL8711_NIC,
@@ -33,7 +31,6 @@ enum _NIC_VERSION {
 	RTL8716_NIC
 
 };
-
 
 #include <rtw_ht.h>
 
@@ -126,7 +123,6 @@ struct registry_priv {
 
 	u8 regulatory_tid;
 };
-
 
 #define MAX_CONTINUAL_URB_ERR 4
 

@@ -46,4 +46,3 @@
 #define	_BARKER_SHT			0
 
 #endif	/*	__RTL8712_RATECTRL_BITDEF_H__*/
-

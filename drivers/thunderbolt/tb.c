@@ -12,9 +12,7 @@
 #include "tb_regs.h"
 #include "tunnel_pci.h"
 
-
 /* enumeration & hot plug handling */
-
 
 static void tb_scan_port(struct tb_port *port);
 
@@ -93,7 +91,6 @@ static void tb_free_unplugged_children(struct tb_switch *sw)
 		}
 	}
 }
-
 
 /**
  * find_pci_up_port() - return the first PCIe up port on @sw or NULL

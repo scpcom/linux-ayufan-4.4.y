@@ -34,7 +34,6 @@
 #include "nouveau_display.h"
 #include "nvreg.h"
 
-
 struct nouveau_plane {
 	struct drm_plane base;
 	bool flip;

@@ -847,4 +847,3 @@ MODULE_DESCRIPTION("Zarlink VP310/MT312/ZL10313 DVB-S Demodulator driver");
 MODULE_AUTHOR("Andreas Oberritter <obi@linuxtv.org>");
 MODULE_AUTHOR("Matthias Schwarzott <zzam@gentoo.org>");
 MODULE_LICENSE("GPL");
-

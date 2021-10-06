@@ -169,7 +169,6 @@ int gdth_show_info(struct seq_file *m, struct Scsi_Host *host)
 
     TRACE2(("gdth_get_info() ha %d\n",ha->hanum));
 
-    
     /* request is i.e. "cat /proc/scsi/gdth/0" */ 
     /* format: %-15s\t%-10s\t%-15s\t%s */
     /* driver parameters */

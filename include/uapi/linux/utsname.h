@@ -30,5 +30,4 @@ struct new_utsname {
 	char domainname[__NEW_UTS_LEN + 1];
 };
 
-
 #endif /* _UAPI_LINUX_UTSNAME_H */

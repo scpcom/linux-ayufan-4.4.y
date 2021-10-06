@@ -25,7 +25,6 @@
 #include <linux/export.h>
 #include <sound/memalloc.h>
 
-
 /* table entries are align to 32 */
 #define SGBUF_TBL_ALIGN		32
 #define sgbuf_align_table(tbl)	ALIGN((tbl), SGBUF_TBL_ALIGN)

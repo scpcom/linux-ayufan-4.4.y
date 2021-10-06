@@ -246,7 +246,6 @@ static bool __vmw_piter_sg_next(struct vmw_piter *viter)
 	return __sg_page_iter_next(&viter->iter);
 }
 
-
 /**
  * Helper functions to return a pointer to the current page.
  *
@@ -265,7 +264,6 @@ static struct page *__vmw_piter_sg_page(struct vmw_piter *viter)
 {
 	return sg_page_iter_page(&viter->iter);
 }
-
 
 /**
  * Helper functions to return the DMA address of the current page.
@@ -290,7 +288,6 @@ static dma_addr_t __vmw_piter_sg_addr(struct vmw_piter *viter)
 {
 	return sg_page_iter_dma_address(&viter->iter);
 }
-
 
 /**
  * vmw_piter_start - Initialize a struct vmw_piter.
@@ -500,7 +497,6 @@ static void vmw_ttm_unmap_dma(struct vmw_ttm_tt *vmw_tt)
 	vmw_tt->mapped = false;
 }
 
-
 /**
  * vmw_bo_map_dma - Make sure buffer object pages are visible to the device
  *
@@ -519,7 +515,6 @@ int vmw_bo_map_dma(struct ttm_buffer_object *bo)
 	return vmw_ttm_map_dma(vmw_tt);
 }
 
-
 /**
  * vmw_bo_unmap_dma - Make sure buffer object pages are visible to the device
  *
@@ -535,7 +530,6 @@ void vmw_bo_unmap_dma(struct ttm_buffer_object *bo)
 
 	vmw_ttm_unmap_dma(vmw_tt);
 }
-
 
 /**
  * vmw_bo_sg_table - Return a struct vmw_sg_table object for a
@@ -555,7 +549,6 @@ const struct vmw_sg_table *vmw_bo_sg_table(struct ttm_buffer_object *bo)
 
 	return &vmw_tt->vsgt;
 }
-
 
 static int vmw_ttm_bind(struct ttm_tt *ttm, struct ttm_mem_reg *bo_mem)
 {
@@ -613,7 +606,6 @@ static int vmw_ttm_unbind(struct ttm_tt *ttm)
 	return 0;
 }
 
-
 static void vmw_ttm_destroy(struct ttm_tt *ttm)
 {
 	struct vmw_ttm_tt *vmw_be =
@@ -630,7 +622,6 @@ static void vmw_ttm_destroy(struct ttm_tt *ttm)
 
 	kfree(vmw_be);
 }
-
 
 static int vmw_ttm_populate(struct ttm_tt *ttm)
 {
@@ -665,7 +656,6 @@ static void vmw_ttm_unpopulate(struct ttm_tt *ttm)
 						 dma_ttm.ttm);
 	struct vmw_private *dev_priv = vmw_tt->dev_priv;
 	struct ttm_mem_global *glob = vmw_mem_glob(dev_priv);
-
 
 	if (vmw_tt->mob) {
 		vmw_mob_destroy(vmw_tt->mob);
@@ -831,7 +821,6 @@ static void vmw_move_notify(struct ttm_buffer_object *bo,
 	vmw_query_move_notify(bo, mem);
 }
 
-
 /**
  * vmw_swap_notify - TTM move_notify_callback
  *
@@ -841,7 +830,6 @@ static void vmw_swap_notify(struct ttm_buffer_object *bo)
 {
 	ttm_bo_wait(bo, false, false, false);
 }
-
 
 struct ttm_bo_driver vmw_bo_driver = {
 	.ttm_tt_create = &vmw_ttm_tt_create,

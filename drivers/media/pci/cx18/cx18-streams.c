@@ -105,7 +105,6 @@ static struct {
 	},
 };
 
-
 static void cx18_dma_free(struct videobuf_queue *q,
 	struct cx18_stream *s, struct cx18_videobuf_buffer *buf)
 {

@@ -160,7 +160,6 @@ retry:
 			submit->bos[i].flags |= BO_LOCKED;
 		}
 
-
 		/* if locking succeeded, pin bo: */
 		ret = msm_gem_get_iova_locked(&msm_obj->base,
 				submit->gpu->id, &iova);

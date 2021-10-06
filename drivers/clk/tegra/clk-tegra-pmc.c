@@ -100,7 +100,6 @@ void __init tegra_pmc_clk_init(void __iomem *pmc_base,
 				3, 0, &clk_out_lock);
 		*dt_clk = clk;
 
-
 		dt_clk = tegra_lookup_dt_id(data->gate_id, tegra_clks);
 		if (!dt_clk)
 			continue;
@@ -128,4 +127,3 @@ void __init tegra_pmc_clk_init(void __iomem *pmc_base,
 	clk_register_clkdev(clk, "blink", NULL);
 	*dt_clk = clk;
 }
-

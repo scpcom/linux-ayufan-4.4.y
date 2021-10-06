@@ -704,7 +704,6 @@ void amdgpu_dummy_page_fini(struct amdgpu_device *adev)
 	adev->dummy_page.page = NULL;
 }
 
-
 /* ATOM accessor methods */
 /*
  * ATOM is an interpreted byte code stored in tables in the vbios.  The
@@ -1619,7 +1618,6 @@ void amdgpu_device_fini(struct amdgpu_device *adev)
 	amdgpu_debugfs_remove_files(adev);
 }
 
-
 /*
  * Suspend & resume.
  */
@@ -1886,7 +1884,6 @@ retry:
 
 	return r;
 }
-
 
 /*
  * Debugfs

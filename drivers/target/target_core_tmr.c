@@ -455,4 +455,3 @@ int core_tmr_lun_reset(
 			dev->transport->name);
 	return 0;
 }
-

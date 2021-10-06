@@ -12,7 +12,6 @@
 static unsigned int isc_refs[MAX_ISC + 1];
 static DEFINE_SPINLOCK(isc_ref_lock);
 
-
 /**
  * isc_register - register an I/O interruption subclass.
  * @isc: I/O interruption subclass to register

@@ -902,7 +902,6 @@ void nf_conntrack_free(struct nf_conn *ct)
 }
 EXPORT_SYMBOL_GPL(nf_conntrack_free);
 
-
 /* Allocate a new conntrack: we return -ENOMEM if classification
    failed due to stress.  Otherwise it really is unclassifiable. */
 static struct nf_conntrack_tuple_hash *

@@ -90,7 +90,6 @@ struct sal_to_os_boot *sal_state_for_booting_cpu = &sal_boot_rendez_state[0];
 #define set_brendez_area(x)
 #endif
 
-
 /*
  * ITC synchronization related stuff:
  */
@@ -436,7 +435,6 @@ smp_callin (void)
 	cpumask_set_cpu(cpuid, &cpu_callin_map);
 	Dprintk("Stack on CPU %d at about %p\n",cpuid, &cpuid);
 }
-
 
 /*
  * Activate a secondary processor.  head.S calls this.

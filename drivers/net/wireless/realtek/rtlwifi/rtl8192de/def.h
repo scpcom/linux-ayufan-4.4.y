@@ -144,7 +144,6 @@ enum version_8192d {
 #define ROM_VERSION_MASK		(BIT(11)|BIT(10)|BIT(9)|BIT(8))
 #define CUT_VERSION_MASK		(BIT(15)|BIT(14)|BIT(13)|BIT(12))
 
-
 /* Get element */
 #define GET_CVID_IC_TYPE(version)	((version) & IC_TYPE_MASK)
 #define GET_CVID_CHIP_TYPE(version)	((version) & CHIP_TYPE_MASK)

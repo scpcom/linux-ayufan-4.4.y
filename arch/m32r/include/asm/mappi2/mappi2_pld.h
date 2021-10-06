@@ -52,7 +52,6 @@
 /* Power Control of MMC and CF */
 #define PLD_CPCR		__reg16(PLD_BASE + 0x14000)
 
-
 /*==== ICU ====*/
 #define  M32R_IRQ_PC104        (5)   /* INT4(PC/104) */
 #define  M32R_IRQ_I2C          (28)  /* I2C-BUS     */
@@ -69,7 +68,6 @@
 #define  PLD_IRQ_MMCCARD      (37)  /* MMC Card Insert */
 #define  PLD_IRQ_MMCIRQ       (38)  /* MMC Transfer Done */
 #endif
-
 
 #if 0
 /* LED Control
@@ -103,7 +101,6 @@
 #define PLD_CRC16INDATA		__reg16(PLD_BASE + 0x18006)
 #define PLD_CRC16ADATA		__reg16(PLD_BASE + 0x18008)
 #define PLD_CRC16AINDATA	__reg16(PLD_BASE + 0x1800a)
-
 
 #if 0
 /* RTC */

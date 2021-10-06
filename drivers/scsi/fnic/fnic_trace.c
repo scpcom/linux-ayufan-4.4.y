@@ -43,7 +43,6 @@ int fnic_fc_tracing_enabled = 1;
 int fnic_fc_trace_cleared = 1;
 static DEFINE_SPINLOCK(fnic_fc_trace_lock);
 
-
 /*
  * fnic_trace_get_buf - Give buffer pointer to user to fill up trace information
  *

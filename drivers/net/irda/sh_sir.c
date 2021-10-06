@@ -98,9 +98,7 @@
 
 /************************************************************************
 
-
 			structure
-
 
 ************************************************************************/
 struct sh_sir_self {
@@ -119,9 +117,7 @@ struct sh_sir_self {
 
 /************************************************************************
 
-
 			common function
-
 
 ************************************************************************/
 static void sh_sir_write(struct sh_sir_self *self, u32 offset, u16 data)
@@ -147,9 +143,7 @@ static void sh_sir_update_bits(struct sh_sir_self *self, u32 offset,
 
 /************************************************************************
 
-
 			CRC function
-
 
 ************************************************************************/
 static void sh_sir_crc_reset(struct sh_sir_self *self)
@@ -207,9 +201,7 @@ crc_init_out:
 
 /************************************************************************
 
-
 			baud rate functions
-
 
 ************************************************************************/
 #define SCLK_BASE 1843200 /* 1.8432MHz */
@@ -373,9 +365,7 @@ static int sh_sir_set_baudrate(struct sh_sir_self *self, u32 baudrate)
 
 /************************************************************************
 
-
 			iobuf function
-
 
 ************************************************************************/
 static int __sh_sir_init_iobuf(iobuff_t *io, int size)
@@ -426,9 +416,7 @@ iobuf_err:
 
 /************************************************************************
 
-
 			status function
-
 
 ************************************************************************/
 static void sh_sir_clear_all_err(struct sh_sir_self *self)
@@ -583,9 +571,7 @@ static irqreturn_t sh_sir_irq(int irq, void *dev_id)
 
 /************************************************************************
 
-
 			net_device_ops function
-
 
 ************************************************************************/
 static int sh_sir_hard_xmit(struct sk_buff *skb, struct net_device *ndev)
@@ -696,9 +682,7 @@ static const struct net_device_ops sh_sir_ndo = {
 
 /************************************************************************
 
-
 			platform_driver function
-
 
 ************************************************************************/
 static int sh_sir_probe(struct platform_device *pdev)

@@ -208,7 +208,6 @@ static unsigned qnx6_match(struct super_block *s, int len, const char *name,
 	return 0;
 }
 
-
 unsigned qnx6_find_entry(int len, struct inode *dir, const char *name,
 			 struct page **res_page)
 {

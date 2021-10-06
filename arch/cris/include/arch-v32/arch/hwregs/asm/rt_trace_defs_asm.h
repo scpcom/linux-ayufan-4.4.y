@@ -106,7 +106,6 @@
 /* Register r_redir, scope rt_trace, type r */
 #define reg_rt_trace_r_redir_offset 20
 
-
 /* Constants */
 #define regk_rt_trace_brk                         0x0000000c
 #define regk_rt_trace_dbg                         0x00000003

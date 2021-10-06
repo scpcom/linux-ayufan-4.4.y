@@ -18,7 +18,6 @@
 #include "io.h"
 #include "ops.h"
 
-
 #define EXI_CLK_32MHZ           5
 
 #define EXI_CSR                 0x00
@@ -35,10 +34,8 @@
 
 #define EXI_DATA                0x10
 
-
 /* virtual address base for input/output, retrieved from device tree */
 static void *ug_io_base;
-
 
 static u32 ug_io_transaction(u32 in)
 {
@@ -144,4 +141,3 @@ void *ug_probe(void)
 		ug_io_base = NULL;
 	return ug_io_base;
 }
-

@@ -53,7 +53,6 @@ static void sas_queue_event(int event, unsigned long *pending,
 	}
 }
 
-
 void __sas_drain_work(struct sas_ha_struct *ha)
 {
 	struct workqueue_struct *wq = ha->core.shost->work_q;

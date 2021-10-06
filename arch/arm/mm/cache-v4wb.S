@@ -173,7 +173,6 @@ ENTRY(v4wb_coherent_user_range)
 	mcr	p15, 0, r0, c7, c10, 4		@ drain WB
 	ret	lr
 
-
 /*
  *	dma_inv_range(start, end)
  *

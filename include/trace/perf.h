@@ -83,7 +83,6 @@ static inline void perf_test_probe_##call(void)				\
 	check_trace_callback_type_##call(perf_trace_##template);	\
 }
 
-
 #undef DEFINE_EVENT_PRINT
 #define DEFINE_EVENT_PRINT(template, name, proto, args, print)	\
 	DEFINE_EVENT(template, name, PARAMS(proto), PARAMS(args))

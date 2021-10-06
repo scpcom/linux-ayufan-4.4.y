@@ -95,7 +95,6 @@ enum bfa_itnim_event {
 	list_add_tail(&(__ioim)->qe, &(__ioim)->fcpim->ioim_comp_q);	\
 } while (0)
 
-
 #define bfa_ioim_cb_profile_comp(__fcpim, __ioim) do {			\
 	if ((__fcpim)->profile_comp)					\
 		(__fcpim)->profile_comp(__ioim);			\
@@ -130,7 +129,6 @@ enum bfa_ioim_event {
 	BFA_IOIM_SM_IOTOV	= 18,	/*  ITN offline TOV */
 };
 
-
 /*
  *  BFA TSKIM related definitions
  */
@@ -147,7 +145,6 @@ enum bfa_ioim_event {
 	if ((__tskim)->notify)						\
 		bfa_itnim_tskdone((__tskim)->itnim);      \
 } while (0)
-
 
 enum bfa_tskim_event {
 	BFA_TSKIM_SM_START	= 1,	/*  TM command start		*/
@@ -310,7 +307,6 @@ bfa_fcpim_meminfo(struct bfa_iocfc_cfg_s *cfg, u32 *km_len)
 		cfg->fwcfg.num_tskim_reqs = BFA_TSKIM_MIN;
 	*km_len += cfg->fwcfg.num_tskim_reqs * sizeof(struct bfa_tskim_s);
 }
-
 
 static void
 bfa_fcpim_attach(struct bfa_fcp_mod_s *fcp, void *bfad,
@@ -2676,7 +2672,6 @@ bfa_ioim_qresume(void *cbarg)
 	bfa_sm_send_event(ioim, BFA_IOIM_SM_QRESUME);
 }
 
-
 static void
 bfa_ioim_notify_cleanup(struct bfa_ioim_s *ioim)
 {
@@ -2738,7 +2733,6 @@ bfa_ioim_delayed_comp(struct bfa_ioim_s *ioim, bfa_boolean_t iotov)
 	list_del(&ioim->qe);
 	list_add_tail(&ioim->qe, &ioim->fcpim->ioim_comp_q);
 }
-
 
 /*
  * Memory allocation and initialization.
@@ -2932,7 +2926,6 @@ bfa_ioim_tov(struct bfa_ioim_s *ioim)
 	bfa_trc(ioim->bfa, ioim->iotag);
 	bfa_sm_send_event(ioim, BFA_IOIM_SM_IOTOV);
 }
-
 
 /*
  * Allocate IOIM resource for initiator mode I/O request.
@@ -3570,7 +3563,6 @@ bfa_tskim_isr(struct bfa_s *bfa, struct bfi_msg_s *m)
 	}
 }
 
-
 struct bfa_tskim_s *
 bfa_tskim_alloc(struct bfa_s *bfa, struct bfad_tskim_s *dtsk)
 {
@@ -3849,7 +3841,6 @@ bfa_iotag_attach(struct bfa_fcp_mod_s *fcp)
 
 	bfa_mem_kva_curp(fcp) = (u8 *) iotag;
 }
-
 
 /**
  * To send config req, first try to use throttle value from flash

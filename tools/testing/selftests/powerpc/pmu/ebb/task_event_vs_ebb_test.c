@@ -13,7 +13,6 @@
 
 #include "ebb.h"
 
-
 /*
  * Tests a per-task event vs an EBB - in that order. The EBB should push the
  * per-task event off the PMU.

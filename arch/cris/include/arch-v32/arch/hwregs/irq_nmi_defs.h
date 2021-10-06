@@ -93,7 +93,6 @@ typedef struct {
 #define REG_RD_ADDR_irq_nmi_rw_cmd 0
 #define REG_WR_ADDR_irq_nmi_rw_cmd 0
 
-
 /* Constants */
 enum {
   regk_irq_nmi_ack_irq                     = 0x00000002,

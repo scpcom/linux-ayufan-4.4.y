@@ -502,7 +502,6 @@ static inline int fpu_want_lazy_restore(struct fpu *fpu, unsigned int cpu)
 	return fpu == this_cpu_read_stable(fpu_fpregs_owner_ctx) && cpu == fpu->last_cpu;
 }
 
-
 /*
  * Wrap lazy FPU TS handling in a 'hw fpregs activation/deactivation'
  * idiom, which is then paired with the sw-flag (fpregs_active) later on:

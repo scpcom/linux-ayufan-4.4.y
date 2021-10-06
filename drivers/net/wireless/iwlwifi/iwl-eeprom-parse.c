@@ -136,7 +136,6 @@ enum eeprom_sku_bits {
 #define EEPROM_RF_CFG_TX_ANT_MSK(x) ((x >> 8)  & 0xF) /* bits 8-11  */
 #define EEPROM_RF_CFG_RX_ANT_MSK(x) ((x >> 12) & 0xF) /* bits 12-15 */
 
-
 /*
  * EEPROM bands
  * These are the channel numbers from each band in the order
@@ -313,7 +312,6 @@ struct iwl_eeprom_channel {
 	u8 flags;
 	s8 max_power_avg;
 } __packed;
-
 
 enum iwl_eeprom_enhanced_txpwr_flags {
 	IWL_EEPROM_ENH_TXP_FL_VALID = BIT(0),

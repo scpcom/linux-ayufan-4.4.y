@@ -34,7 +34,6 @@
 #define RD88F5181L_GE_NOR_BOOT_BASE		0xff000000
 #define RD88F5181L_GE_NOR_BOOT_SIZE		SZ_16M
 
-
 /*****************************************************************************
  * 16M NOR Flash on Device bus Boot chip select
  ****************************************************************************/
@@ -58,7 +57,6 @@ static struct platform_device rd88f5181l_ge_nor_boot_flash = {
 	.num_resources		= 1,
 	.resource		= &rd88f5181l_ge_nor_boot_flash_resource,
 };
-
 
 /*****************************************************************************
  * General Setup

@@ -501,5 +501,4 @@ enum
 	LNKW_X8			= 0x8
 };
 
-
 #endif /* __PPC4XX_PCI_H__ */

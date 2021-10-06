@@ -25,7 +25,6 @@
 #include <linux/pps_kernel.h>
 #include <linux/ptp_clock.h>
 
-
 struct ptp_clock_request {
 	enum {
 		PTP_CLK_REQ_EXTTS,
@@ -131,7 +130,6 @@ extern struct ptp_clock *ptp_clock_register(struct ptp_clock_info *info,
  */
 
 extern int ptp_clock_unregister(struct ptp_clock *ptp);
-
 
 enum ptp_clock_events {
 	PTP_CLOCK_ALARM,

@@ -479,7 +479,6 @@ static struct SMapI m_RF_Cal_Map[] = {
 	{          0,  0x00 },    /* Table End */
 };
 
-
 static struct SMap2  m_KM_Map[] = {
 	{   47900000,  3, 2 },
 	{   61100000,  3, 1 },
@@ -764,7 +763,6 @@ static struct SMap m_RF_Cal_DC_Over_DT_Map[] = {
 	{ 865000000, 0x9A },
 	{         0, 0x00 },    /* Table End */
 };
-
 
 static struct SMap  m_IR_Meas_Map[] = {
 	{ 200000000, 0x05 },

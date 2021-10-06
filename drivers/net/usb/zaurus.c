@@ -29,7 +29,6 @@
 #include <linux/usb/cdc.h>
 #include <linux/usb/usbnet.h>
 
-
 /*
  * All known Zaurii lie about their standards conformance.  At least
  * the earliest SA-1100 models lie by saying they support CDC Ethernet.
@@ -127,7 +126,6 @@ static const struct driver_info	olympus_mxl_info = {
 	.tx_fixup =	zaurus_tx_fixup,
 };
 #define	OLYMPUS_MXL_INFO	((unsigned long)&olympus_mxl_info)
-
 
 /* Some more recent products using Lineo/Belcarra code will wrongly claim
  * CDC MDLM conformance.  They aren't conformant:  data endpoints live

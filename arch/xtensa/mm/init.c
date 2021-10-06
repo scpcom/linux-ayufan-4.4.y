@@ -228,7 +228,6 @@ int __init mem_reserve(unsigned long start, unsigned long end, int must_exist)
 	return 0;
 }
 
-
 /*
  * Initialize the bootmem system and give it all low memory we have available.
  */
@@ -304,7 +303,6 @@ void __init bootmem_init(void)
 	}
 
 }
-
 
 void __init zones_init(void)
 {

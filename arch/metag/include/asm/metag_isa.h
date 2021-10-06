@@ -13,7 +13,6 @@
 #ifndef _ASM_METAG_ISA_H_
 #define _ASM_METAG_ISA_H_
 
-
 /* L1 cache layout */
 
 /* Data cache line size as bytes and shift */
@@ -29,7 +28,6 @@
 
 /* Number of ways in the instruction cache */
 #define ICACHE_WAYS       4
-
 
 /*
  * CACHEWD/CACHEWL instructions use the bottom 8 bits of the data presented to

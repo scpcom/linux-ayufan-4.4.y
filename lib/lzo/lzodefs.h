@@ -11,7 +11,6 @@
  *  Richard Purdie <rpurdie@openedhand.com>
  */
 
-
 #define COPY4(dst, src)	\
 		put_unaligned(get_unaligned((const u32 *)(src)), (u32 *)(dst))
 #if defined(__x86_64__)

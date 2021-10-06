@@ -1067,7 +1067,6 @@ struct qla_tgt_srr_ctio {
 #define QLA_TGT_XMIT_STATUS		2
 #define QLA_TGT_XMIT_ALL		(QLA_TGT_XMIT_STATUS|QLA_TGT_XMIT_DATA)
 
-
 extern struct qla_tgt_data qla_target;
 
 /*

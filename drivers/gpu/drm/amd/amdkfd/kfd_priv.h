@@ -449,7 +449,6 @@ struct kfd_process_device {
 	/* The device that owns this data. */
 	struct kfd_dev *dev;
 
-
 	/* per-process-per device QCM data structure */
 	struct qcm_process_device qpd;
 

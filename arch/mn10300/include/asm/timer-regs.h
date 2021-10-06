@@ -275,7 +275,6 @@
 #define	TM15MD_COUNT_ENABLE	0x80	/* timer count enable */
 #endif	/* CONFIG_AM34_2 */
 
-
 #define	TM4BR			__SYSREG(0xd4003090, u16)  /* timer 4 base register */
 #define	TM5BR			__SYSREG(0xd4003092, u16)  /* timer 5 base register */
 #define	TM45BR			__SYSREG(0xd4003090, u32)  /* timer 4:5 base register */

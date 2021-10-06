@@ -17,8 +17,6 @@
 
 #include "rtllib.h"
 
-
-
 struct chnl_txpow_triple {
 	u8 FirstChnl;
 	u8  NumChnls;

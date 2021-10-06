@@ -81,7 +81,6 @@ struct acpiphp_bridge {
 	bool is_going_away;
 };
 
-
 /*
  * struct acpiphp_slot - PCI slot information
  *
@@ -97,7 +96,6 @@ struct acpiphp_slot {
 	u8		device;		/* pci device# */
 	u32		flags;		/* see below */
 };
-
 
 /*
  * struct acpiphp_func - PCI function information

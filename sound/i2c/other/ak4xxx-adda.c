@@ -131,7 +131,6 @@ void snd_akm4xxx_reset(struct snd_akm4xxx *ak, int state)
 
 EXPORT_SYMBOL(snd_akm4xxx_reset);
 
-
 /*
  * Volume conversion table for non-linear volumes
  * from -63.5dB (mute) to 0dB step 0.5dB

@@ -38,7 +38,6 @@
 #define SND_CS8403
 #include <sound/cs8403.h>
 
-
 /*
  * CS8427 via SPI mode (for Audiophile), emulated I2C
  */
@@ -207,7 +206,6 @@ static void snd_ice1712_delta_cs8403_spdif_write(struct snd_ice1712 *ice, unsign
 	mutex_unlock(&ice->gpio_mutex);
 }
 
-
 static void delta_spdif_default_get(struct snd_ice1712 *ice, struct snd_ctl_elem_value *ucontrol)
 {
 	snd_cs8403_decode_spdif_bits(&ucontrol->value.iec958, ice->spdif.cs8403_bits);
@@ -253,7 +251,6 @@ static int delta_spdif_stream_put(struct snd_ice1712 *ice, struct snd_ctl_elem_v
 	}
 	return change;
 }
-
 
 /*
  * AK4524 on Delta 44 and 66 to choose the chip mask
@@ -378,7 +375,6 @@ static void vx442_ak4524_set_rate_val(struct snd_akm4xxx *ak, unsigned int rate)
 		snd_akm4xxx_reset(ak, 0);
 	}
 }
-
 
 /*
  * SPDIF ops for Delta 1010, Dio, 66
@@ -530,7 +526,6 @@ static struct snd_ak4xxx_private akm_delta66e_priv = {
 	.add_flags = 0,
 	.mask_flags = 0,
 };
-
 
 static struct snd_akm4xxx akm_delta44 = {
 	.type = SND_AK4524,
@@ -762,7 +757,6 @@ static int snd_ice1712_delta_init(struct snd_ice1712 *ice)
 	return err;
 }
 
-
 /*
  * additional controls for M-Audio cards
  */
@@ -777,7 +771,6 @@ static struct snd_kcontrol_new snd_ice1712_deltadio2496_spdif_in_select =
 ICE1712_GPIO(SNDRV_CTL_ELEM_IFACE_MIXER, "IEC958 Input Optical", 0, ICE1712_DELTA_SPDIF_INPUT_SELECT, 0, 0);
 static struct snd_kcontrol_new snd_ice1712_delta_spdif_in_status =
 ICE1712_GPIO(SNDRV_CTL_ELEM_IFACE_MIXER, "Delta IEC958 Input Status", 0, ICE1712_DELTA_SPDIF_IN_STAT, 1, SNDRV_CTL_ELEM_ACCESS_READ | SNDRV_CTL_ELEM_ACCESS_VOLATILE);
-
 
 static int snd_ice1712_delta_add_controls(struct snd_ice1712 *ice)
 {
@@ -852,7 +845,6 @@ static int snd_ice1712_delta_add_controls(struct snd_ice1712 *ice)
 
 	return 0;
 }
-
 
 /* entry point */
 struct snd_ice1712_card_info snd_ice1712_delta_cards[] = {

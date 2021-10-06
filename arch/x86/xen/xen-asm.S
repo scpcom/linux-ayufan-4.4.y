@@ -43,7 +43,6 @@ ENDPATCH(xen_irq_enable_direct)
 	ENDPROC(xen_irq_enable_direct)
 	RELOC(xen_irq_enable_direct, 2b+1)
 
-
 /*
  * Disabling events is simply a matter of making the event mask
  * non-zero.
@@ -72,7 +71,6 @@ ENDPATCH(xen_save_fl_direct)
 	ret
 	ENDPROC(xen_save_fl_direct)
 	RELOC(xen_save_fl_direct, 0)
-
 
 /*
  * In principle the caller should be passing us a value return from
@@ -103,7 +101,6 @@ ENDPATCH(xen_restore_fl_direct)
 	ret
 	ENDPROC(xen_restore_fl_direct)
 	RELOC(xen_restore_fl_direct, 2b+1)
-
 
 /*
  * Force an event check by making a hypercall, but preserve regs

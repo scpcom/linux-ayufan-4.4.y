@@ -10,7 +10,6 @@
 
 #include <uapi/asm/errno.h>
 
-
 /* The biggest error number defined here or in <linux/errno.h>. */
 #define EMAXERRNO	1133
 

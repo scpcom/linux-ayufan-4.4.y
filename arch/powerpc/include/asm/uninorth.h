@@ -204,11 +204,9 @@
 
 /* Uninorth 1.5 rev. has additional perf. monitor registers at 0xf00-0xf50 */
 
-
 /*
  * U3 specific registers
  */
-
 
 /* U3 Toggle */
 #define U3_TOGGLE_REG			0x00e0

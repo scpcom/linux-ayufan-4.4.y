@@ -256,7 +256,6 @@ done:
 	    fimc_hw_get_frame_index(fimc), cap->active_buf_cnt);
 }
 
-
 static int start_streaming(struct vb2_queue *q, unsigned int count)
 {
 	struct fimc_ctx *ctx = q->drv_priv;
@@ -436,7 +435,6 @@ static void buffer_queue(struct vb2_buffer *vb)
 	}
 
 	min_bufs = vid_cap->reqbufs_count > 1 ? 2 : 1;
-
 
 	if (vb2_is_streaming(&vid_cap->vbq) &&
 	    vid_cap->active_buf_cnt >= min_bufs &&

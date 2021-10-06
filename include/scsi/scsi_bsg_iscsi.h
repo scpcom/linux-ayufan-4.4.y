@@ -35,7 +35,6 @@
 /* Default BSG request timeout (in seconds) */
 #define ISCSI_DEFAULT_BSG_TIMEOUT      (10 * HZ)
 
-
 /*
  * Request Message Codes supported by the iSCSI Transport
  */
@@ -46,7 +45,6 @@
 
 /* iscsi host Message Codes */
 #define ISCSI_BSG_HST_VENDOR           (ISCSI_BSG_HST_MASK | 0x000000FF)
-
 
 /*
  * iSCSI Host Messages
@@ -76,7 +74,6 @@ struct iscsi_bsg_host_vendor_reply {
 	uint32_t vendor_rsp[0];
 };
 
-
 /* request (CDB) structure of the sg_io_v4 */
 struct iscsi_bsg_request {
 	uint32_t msgcode;
@@ -84,7 +81,6 @@ struct iscsi_bsg_request {
 		struct iscsi_bsg_host_vendor    h_vendor;
 	} rqst_data;
 } __attribute__((packed));
-
 
 /* response (request sense data) structure of the sg_io_v4 */
 struct iscsi_bsg_reply {
@@ -105,6 +101,5 @@ struct iscsi_bsg_reply {
 		struct iscsi_bsg_host_vendor_reply      vendor_reply;
 	} reply_data;
 };
-
 
 #endif /* SCSI_BSG_ISCSI_H */

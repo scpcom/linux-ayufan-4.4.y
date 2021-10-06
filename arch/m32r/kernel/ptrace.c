@@ -211,7 +211,6 @@ static int ptrace_setregs(struct task_struct *tsk, void __user *uregs)
 	return ret;
 }
 
-
 static inline int
 check_condition_bit(struct task_struct *child)
 {

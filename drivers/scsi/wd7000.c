@@ -187,7 +187,6 @@
 #include <scsi/scsi_host.h>
 #include <scsi/scsicam.h>
 
-
 #undef  WD7000_DEBUG		/* general debug                */
 #ifdef WD7000_DEBUG
 #define dprintk printk
@@ -226,7 +225,6 @@
  */
 #define WD7000_Q	16
 #define WD7000_SG	16
-
 
 /*
  *  WD7000-specific mailbox structure
@@ -332,7 +330,6 @@ static const Signature signatures[] = {
 	{"SSTBIOS", 0x0000d, 7}	/* "SSTBIOS" @ offset 0x0000d */
 };
 #define NUM_SIGNATURES ARRAY_SIZE(signatures)
-
 
 /*
  *  I/O Port Offsets and Bit Definitions
@@ -614,7 +611,6 @@ static void __init setup_error(char *mesg, int *ints)
 		printk(KERN_ERR "wd7000_setup: \"wd7000=%d,%d,0x%x,%d,%d\" -> %s\n", ints[1], ints[2], ints[3], ints[4], ints[5], mesg);
 }
 
-
 /*
  * Note: You can now set these options from the kernel's "command line".
  * The syntax is:
@@ -741,7 +737,6 @@ static inline void wd7000_enable_intr(Adapter * host)
 	outb(host->control, host->iobase + ASC_CONTROL);
 }
 
-
 static inline void wd7000_enable_dma(Adapter * host)
 {
 	unsigned long flags;
@@ -754,7 +749,6 @@ static inline void wd7000_enable_dma(Adapter * host)
 	release_dma_lock(flags);
 
 }
-
 
 #define WAITnexttimeout 200	/* 2 seconds */
 
@@ -772,7 +766,6 @@ static inline short WAIT(unsigned port, unsigned mask, unsigned allof, unsigned 
 
 	return (1);
 }
-
 
 static inline int command_out(Adapter * host, unchar * cmd, int len)
 {
@@ -793,7 +786,6 @@ static inline int command_out(Adapter * host, unchar * cmd, int len)
 
 	return (0);
 }
-
 
 /*
  *  This version of alloc_scbs is in preparation for supporting multiple
@@ -857,7 +849,6 @@ static inline Scb *alloc_scbs(struct Scsi_Host *host, int needed)
 	return (scb);
 }
 
-
 static inline void free_scb(Scb * scb)
 {
 	unsigned long flags;
@@ -871,7 +862,6 @@ static inline void free_scb(Scb * scb)
 
 	spin_unlock_irqrestore(&scbpool_lock, flags);
 }
-
 
 static inline void init_scbs(void)
 {
@@ -890,7 +880,6 @@ static inline void init_scbs(void)
 	scbs[MAX_SCBS - 1].next = NULL;
 	scbs[MAX_SCBS - 1].SCpnt = NULL;
 }
-
 
 static int mail_out(Adapter * host, Scb * scbptr)
 /*
@@ -946,7 +935,6 @@ static int mail_out(Adapter * host, Scb * scbptr)
 	return (1);
 }
 
-
 static int make_code(unsigned hosterr, unsigned scsierr)
 {
 #ifdef WD7000_DEBUG
@@ -994,7 +982,6 @@ static int make_code(unsigned hosterr, unsigned scsierr)
 }
 
 #define wd7000_intr_ack(host)   outb (0, host->iobase + ASC_INTR_ACK)
-
 
 static irqreturn_t wd7000_intr(int irq, void *dev_id)
 {
@@ -1174,7 +1161,6 @@ static int wd7000_diagnostics(Adapter * host, int code)
 	return (1);
 }
 
-
 static int wd7000_adapter_reset(Adapter * host)
 {
 	InitCmd init_cmd = {
@@ -1251,7 +1237,6 @@ static int wd7000_init(Adapter * host)
 	if (wd7000_adapter_reset(host) == -1)
 		return 0;
 
-
 	if (request_irq(host->irq, wd7000_intr, 0, "wd7000", host)) {
 		printk("wd7000_init: can't get IRQ %d.\n", host->irq);
 		return (0);
@@ -1273,7 +1258,6 @@ static int wd7000_init(Adapter * host)
 	return (1);
 }
 
-
 static void wd7000_revision(Adapter * host)
 {
 	static IcbRevLvl icb = { ICB_OP_GET_REVISION };
@@ -1294,7 +1278,6 @@ static void wd7000_revision(Adapter * host)
 	host->rev2 = icb.secondary;
 }
 
-
 static int wd7000_set_info(struct Scsi_Host *host, char *buffer, int length)
 {
 	dprintk("Buffer = <%.*s>, length = %d\n", length, buffer, length);
@@ -1305,7 +1288,6 @@ static int wd7000_set_info(struct Scsi_Host *host, char *buffer, int length)
 	dprintk("Sorry, this function is currently out of order...\n");
 	return (length);
 }
-
 
 static int wd7000_show_info(struct seq_file *m, struct Scsi_Host *host)
 {
@@ -1360,7 +1342,6 @@ static int wd7000_show_info(struct seq_file *m, struct Scsi_Host *host)
 
 	return 0;
 }
-
 
 /*
  *  Returns the number of adapters this driver is supporting.

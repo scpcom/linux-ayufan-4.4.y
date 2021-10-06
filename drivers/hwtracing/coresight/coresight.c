@@ -539,7 +539,6 @@ static void coresight_fixup_orphan_conns(struct coresight_device *csdev)
 				 csdev, coresight_orphan_match);
 }
 
-
 static int coresight_name_match(struct device *dev, void *data)
 {
 	char *to_match;

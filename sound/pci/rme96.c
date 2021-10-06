@@ -1120,8 +1120,6 @@ snd_rme96_trigger(struct rme96 *rme96,
 	writel(rme96->wcreg, rme96->iobase + RME96_IO_CONTROL_REGISTER);
 }
 
-
-
 static irqreturn_t
 snd_rme96_interrupt(int irq,
 		    void *dev_id)
@@ -2232,7 +2230,6 @@ snd_rme96_dac_volume_put(struct snd_kcontrol *kcontrol, struct snd_ctl_elem_valu
 	struct rme96 *rme96 = snd_kcontrol_chip(kcontrol);
         int change = 0;
 	unsigned int vol, maxvol;
-
 
 	if (!RME96_HAS_ANALOG_OUT(rme96))
 		return -EINVAL;

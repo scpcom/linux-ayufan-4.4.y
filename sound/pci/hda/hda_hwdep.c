@@ -57,7 +57,6 @@ static int get_wcap_ioctl(struct hda_codec *codec,
 	return 0;
 }
 
-
 /*
  */
 static int hda_hwdep_ioctl(struct snd_hwdep *hw, struct file *file,

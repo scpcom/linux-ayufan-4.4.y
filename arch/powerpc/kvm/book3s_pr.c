@@ -1598,7 +1598,6 @@ static int kvmppc_core_create_memslot_pr(struct kvm_memory_slot *slot,
 	return 0;
 }
 
-
 #ifdef CONFIG_PPC64
 static int kvm_vm_ioctl_get_smmu_info_pr(struct kvm *kvm,
 					 struct kvm_ppc_smmu_info *info)
@@ -1738,7 +1737,6 @@ static struct kvmppc_ops kvm_ops_pr = {
 	.hcall_implemented = kvmppc_hcall_impl_pr,
 #endif
 };
-
 
 int kvmppc_book3s_init_pr(void)
 {

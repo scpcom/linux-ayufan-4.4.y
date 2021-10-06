@@ -2921,7 +2921,6 @@ pl330_probe(struct amba_device *adev, const struct amba_id *id)
 	if (ret)
 		dev_err(&adev->dev, "unable to set the seg size\n");
 
-
 	dev_info(&adev->dev,
 		"Loaded driver for PL330 DMAC-%x\n", adev->periphid);
 	dev_info(&adev->dev,

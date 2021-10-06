@@ -93,5 +93,4 @@ struct kvm_vcpu_arch_shared {
 
 #define MAGIC_PAGE_FLAG_NOT_MAPPED_NX	(1 << 0)
 
-
 #endif /* _UAPI__POWERPC_KVM_PARA_H__ */

@@ -71,7 +71,6 @@ static int gssx_enc_in_token(struct xdr_stream *xdr,
 	return 0;
 }
 
-
 static int gssx_dec_buffer(struct xdr_stream *xdr,
 			   gssx_buffer *buf)
 {
@@ -488,7 +487,6 @@ static int gssx_enc_name(struct xdr_stream *xdr,
 
 	return err;
 }
-
 
 static int gssx_dec_name(struct xdr_stream *xdr,
 			 struct gssx_name *name)

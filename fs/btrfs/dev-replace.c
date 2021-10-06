@@ -51,7 +51,6 @@ static u64 __btrfs_dev_replace_cancel(struct btrfs_fs_info *fs_info);
 static int btrfs_dev_replace_kthread(void *data);
 static int btrfs_dev_replace_continue_on_mount(struct btrfs_fs_info *fs_info);
 
-
 int btrfs_init_dev_replace(struct btrfs_fs_info *fs_info)
 {
 	struct btrfs_key key;

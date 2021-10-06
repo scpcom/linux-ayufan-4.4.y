@@ -172,7 +172,6 @@ void ctcm_chx_txidle(fsm_instance *fi, int event, void *arg);
 extern const fsm_node ch_fsm[];
 extern int ch_fsm_len;
 
-
 /*
  * ----- non-static actions for ctcmpc channel statemachine ----
  *
@@ -251,7 +250,6 @@ static void dev_action_chdown(fsm_instance * fi, int event, void *arg);
 extern const fsm_node dev_fsm[];
 extern int dev_fsm_len;
 
-
 /*
  * Definitions for the MPC Group statemachine
  */
@@ -294,7 +292,6 @@ MPCG_STATE_XID7INITF	XID2(7) negotiations complete.
 			      Transitioning to READY.
 
 MPCG_STATE_READY	      Ready for Data Transfer.
-
 
 States from ctc_mpc_establish_connectivity call
 ==============================================================

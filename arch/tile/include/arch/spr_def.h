@@ -16,7 +16,6 @@
 
 #include <uapi/arch/spr_def.h>
 
-
 /*
  * In addition to including the proper base SPR definition file, depending
  * on machine architecture, this file defines several macros which allow

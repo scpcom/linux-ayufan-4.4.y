@@ -80,8 +80,6 @@
 #define MMIO_CNTR_REG_OFFSET	0x40000
 #define MMIO_REG_END_OFFSET	0x80000
 
-
-
 /* Extended Feature Bits */
 #define FEATURE_PREFETCH	(1ULL<<0)
 #define FEATURE_PPR		(1ULL<<1)
@@ -383,7 +381,6 @@ extern struct kmem_cache *amd_iommu_irq_cache;
 #define APERTURE_RANGE_INDEX(a)	((a) >> APERTURE_RANGE_SHIFT)
 #define APERTURE_PAGE_INDEX(a)	(((a) >> 21) & 0x3fULL)
 
-
 /*
  * This struct is used to pass information about
  * incoming PPR faults around.
@@ -396,7 +393,6 @@ struct amd_iommu_fault {
 	u16 flags;      /* Fault flags */
 
 };
-
 
 struct iommu_domain;
 struct irq_domain;

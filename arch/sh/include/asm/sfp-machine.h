@@ -81,4 +81,3 @@
 #define FP_EX_INEXACT		(1<<0)
 
 #endif
-

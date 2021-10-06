@@ -189,7 +189,6 @@
 #define reg_ddr2_rw_dqs_dll_ctrl___dqs360_delay___width 7
 #define reg_ddr2_rw_dqs_dll_ctrl_offset 52
 
-
 /* Constants */
 #define regk_ddr2_al0                             0x00000000
 #define regk_ddr2_al1                             0x00000008

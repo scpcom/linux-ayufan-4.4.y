@@ -287,7 +287,6 @@ static int stac9460_mic_sw_info(struct snd_kcontrol *kcontrol,
 	return snd_ctl_enum_info(uinfo, 1, 2, texts);
 }
 
-
 static int stac9460_mic_sw_get(struct snd_kcontrol *kcontrol,
 	       		struct snd_ctl_elem_value *ucontrol)
 {
@@ -351,7 +350,6 @@ static void stac9460_set_rate_val(struct snd_ice1712 *ice, unsigned int rate)
 	}
 	mutex_unlock(&spec->mute_mutex);
 }
-
 
 static const DECLARE_TLV_DB_SCALE(db_scale_dac, -19125, 75, 0);
 static const DECLARE_TLV_DB_SCALE(db_scale_adc, 0, 150, 0);
@@ -549,7 +547,6 @@ static unsigned char prodigy192_ak4114_read(void *private_data,
 	return data;
 }
 
-
 static int ak4114_input_sw_info(struct snd_kcontrol *kcontrol,
 	       			struct snd_ctl_elem_info *uinfo)
 {
@@ -557,7 +554,6 @@ static int ak4114_input_sw_info(struct snd_kcontrol *kcontrol,
 
 	return snd_ctl_enum_info(uinfo, 1, 2, texts);
 }
-
 
 static int ak4114_input_sw_get(struct snd_kcontrol *kcontrol,
 	       		struct snd_ctl_elem_value *ucontrol)
@@ -591,7 +587,6 @@ static int ak4114_input_sw_put(struct snd_kcontrol *kcontrol,
 	return change;
 }
 
-
 static struct snd_kcontrol_new ak4114_controls[] = {
 	{
 		.iface = SNDRV_CTL_ELEM_IFACE_MIXER,
@@ -602,7 +597,6 @@ static struct snd_kcontrol_new ak4114_controls[] = {
 
 	}
 };
-
 
 static int prodigy192_ak4114_init(struct snd_ice1712 *ice)
 {
@@ -648,14 +642,12 @@ static void stac9460_proc_regs_read(struct snd_info_entry *entry,
 	}
 }
 
-
 static void stac9460_proc_init(struct snd_ice1712 *ice)
 {
 	struct snd_info_entry *entry;
 	if (!snd_card_proc_new(ice->card, "stac9460_codec", &entry))
 		snd_info_set_text_ops(entry, ice, stac9460_proc_regs_read);
 }
-
 
 static int prodigy192_add_controls(struct snd_ice1712 *ice)
 {
@@ -762,7 +754,6 @@ static int prodigy192_init(struct snd_ice1712 *ice)
 	return err;
 }
 
-
 /*
  * Aureon boards don't provide the EEPROM data except for the vendor IDs.
  * hence the driver needs to sets up it properly.
@@ -789,7 +780,6 @@ static unsigned char prodigy71_eeprom[] = {
 					 * 1 = SPDIF-OUT from ice1724
 					 */
 };
-
 
 /* entry point */
 struct snd_ice1712_card_info snd_vt1724_prodigy192_cards[] = {

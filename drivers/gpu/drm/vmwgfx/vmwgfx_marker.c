@@ -25,7 +25,6 @@
  *
  **************************************************************************/
 
-
 #include "vmwgfx_drv.h"
 
 struct vmw_marker {
@@ -115,7 +114,6 @@ static u64 vmw_fifo_lag(struct vmw_marker_queue *queue)
 	spin_unlock(&queue->lock);
 	return queue->lag;
 }
-
 
 static bool vmw_lag_lt(struct vmw_marker_queue *queue,
 		       uint32_t us)

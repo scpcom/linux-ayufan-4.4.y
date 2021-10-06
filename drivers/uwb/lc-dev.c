@@ -236,7 +236,6 @@ static ssize_t uwb_dev_RSSI_store(struct device *dev,
 }
 static DEVICE_ATTR(RSSI, S_IRUGO | S_IWUSR, uwb_dev_RSSI_show, uwb_dev_RSSI_store);
 
-
 static struct attribute *uwb_dev_attrs[] = {
 	&dev_attr_EUI_48.attr,
 	&dev_attr_DevAddr.attr,
@@ -268,13 +267,11 @@ static int __uwb_dev_sys_add(struct uwb_dev *uwb_dev, struct device *parent_dev)
 	return device_add(dev);
 }
 
-
 static void __uwb_dev_sys_rm(struct uwb_dev *uwb_dev)
 {
 	dev_set_drvdata(&uwb_dev->dev, NULL);
 	device_del(&uwb_dev->dev);
 }
-
 
 /**
  * Register and initialize a new UWB device
@@ -310,14 +307,12 @@ int uwb_dev_add(struct uwb_dev *uwb_dev, struct device *parent_dev,
 	return result;
 }
 
-
 void uwb_dev_rm(struct uwb_dev *uwb_dev)
 {
 	mutex_lock(&uwb_dev->mutex);
 	__uwb_dev_sys_rm(uwb_dev);
 	mutex_unlock(&uwb_dev->mutex);
 }
-
 
 static
 int __uwb_dev_try_get(struct device *dev, void *__target_uwb_dev)
@@ -330,7 +325,6 @@ int __uwb_dev_try_get(struct device *dev, void *__target_uwb_dev)
 	} else
 		return 0;
 }
-
 
 /**
  * Given a UWB device descriptor, validate and refcount it
@@ -346,7 +340,6 @@ struct uwb_dev *uwb_dev_try_get(struct uwb_rc *rc, struct uwb_dev *uwb_dev)
 		return NULL;
 }
 EXPORT_SYMBOL_GPL(uwb_dev_try_get);
-
 
 /**
  * Remove a device from the system [grunt for other functions]
@@ -370,7 +363,6 @@ int __uwb_dev_offair(struct uwb_dev *uwb_dev, struct uwb_rc *rc)
 	return 0;
 }
 
-
 /**
  * A device went off the air, clean up after it!
  *
@@ -393,7 +385,6 @@ void uwbd_dev_offair(struct uwb_beca_e *bce)
 		__uwb_dev_offair(uwb_dev, uwb_dev->rc);
 	}
 }
-
 
 /**
  * A device went on the air, start it up!

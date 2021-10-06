@@ -1010,7 +1010,6 @@ struct {
 #include "vmware_pack_end.h"
 SVGA3dCmdEndQuery;                  /* SVGA_3D_CMD_END_QUERY */
 
-
 /*
  * SVGA3D_CMD_WAIT_FOR_QUERY --
  *
@@ -1056,7 +1055,6 @@ struct {
 #include "vmware_pack_end.h"
 SVGA3dQueryResult;
 
-
 /*
  * SVGA_3D_CMD_BLIT_SURFACE_TO_SCREEN --
  *
@@ -1101,8 +1099,6 @@ struct {
 }
 #include "vmware_pack_end.h"
 SVGA3dCmdGenerateMipmaps;             /* SVGA_3D_CMD_GENERATE_MIPMAPS */
-
-
 
 typedef
 #include "vmware_pack_begin.h"
@@ -1177,7 +1173,6 @@ struct SVGA3dCmdOpenContextSurface {
 #include "vmware_pack_end.h"
 SVGA3dCmdOpenContextSurface;   /* SVGA_3D_CMD_OPEN_CONTEXT_SURFACE */
 
-
 /*
  * Logic ops
  */
@@ -1203,7 +1198,6 @@ struct SVGA3dCmdLogicOpsBitBlt {
 #include "vmware_pack_end.h"
 SVGA3dCmdLogicOpsBitBlt;   /* SVGA_3D_CMD_LOGICOPS_BITBLT */
 
-
 typedef
 #include "vmware_pack_begin.h"
 struct SVGA3dCmdLogicOpsTransBlt {
@@ -1221,7 +1215,6 @@ struct SVGA3dCmdLogicOpsTransBlt {
 }
 #include "vmware_pack_end.h"
 SVGA3dCmdLogicOpsTransBlt;   /* SVGA_3D_CMD_LOGICOPS_TRANSBLT */
-
 
 typedef
 #include "vmware_pack_begin.h"
@@ -1241,7 +1234,6 @@ struct SVGA3dCmdLogicOpsStretchBlt {
 #include "vmware_pack_end.h"
 SVGA3dCmdLogicOpsStretchBlt;   /* SVGA_3D_CMD_LOGICOPS_STRETCHBLT */
 
-
 typedef
 #include "vmware_pack_begin.h"
 struct SVGA3dCmdLogicOpsColorFill {
@@ -1257,7 +1249,6 @@ struct SVGA3dCmdLogicOpsColorFill {
 }
 #include "vmware_pack_end.h"
 SVGA3dCmdLogicOpsColorFill;   /* SVGA_3D_CMD_LOGICOPS_COLORFILL */
-
 
 typedef
 #include "vmware_pack_begin.h"
@@ -1303,7 +1294,6 @@ struct SVGA3dCmdLogicOpsClearTypeBlend {
 }
 #include "vmware_pack_end.h"
 SVGA3dCmdLogicOpsClearTypeBlend;   /* SVGA_3D_CMD_LOGICOPS_CLEARTYPEBLEND */
-
 
 /*
  * Guest-backed objects definitions.
@@ -1468,7 +1458,6 @@ struct {
    uint16 pShaderBValues;
    uint16 vShaderBValues;
 
-
    SVGAGBVertexStream streams[SVGA3D_MAX_VERTEX_ARRAYS];
    SVGA3dVertexDivisor divisors[SVGA3D_MAX_VERTEX_ARRAYS];
    uint32 numVertexDecls;
@@ -1551,7 +1540,6 @@ struct SVGA3dCmdDefineGBMob {
 #include "vmware_pack_end.h"
 SVGA3dCmdDefineGBMob;   /* SVGA_3D_CMD_DEFINE_GB_MOB */
 
-
 /*
  * Destroys an object in the OTable.
  */
@@ -1563,7 +1551,6 @@ struct SVGA3dCmdDestroyGBMob {
 }
 #include "vmware_pack_end.h"
 SVGA3dCmdDestroyGBMob;   /* SVGA_3D_CMD_DESTROY_GB_MOB */
-
 
 /*
  * Define a memory object (Mob) in the OTable with a PPN64 base.
@@ -1751,7 +1738,6 @@ struct SVGA3dCmdReadbackGBImagePartial {
 #include "vmware_pack_end.h"
 SVGA3dCmdReadbackGBImagePartial; /* SVGA_3D_CMD_READBACK_GB_IMAGE_PARTIAL */
 
-
 /*
  * Invalidate an image in a guest-backed surface.
  * (Notify the device that the contents can be lost.)
@@ -1794,7 +1780,6 @@ struct SVGA3dCmdInvalidateGBImagePartial {
 }
 #include "vmware_pack_end.h"
 SVGA3dCmdInvalidateGBImagePartial; /* SVGA_3D_CMD_INVALIDATE_GB_IMAGE_PARTIAL */
-
 
 /*
  * Define a guest-backed context.
@@ -1924,7 +1909,6 @@ struct {
 #include "vmware_pack_end.h"
 SVGA3dCmdSetGBShaderConstInline;   /* SVGA_3D_CMD_SET_GB_SHADERCONSTS_INLINE */
 
-
 typedef
 #include "vmware_pack_begin.h"
 struct {
@@ -1945,7 +1929,6 @@ struct {
 #include "vmware_pack_end.h"
 SVGA3dCmdEndGBQuery;                  /* SVGA_3D_CMD_END_GB_QUERY */
 
-
 /*
  * SVGA_3D_CMD_WAIT_FOR_GB_QUERY --
  *
@@ -1964,7 +1947,6 @@ struct {
 }
 #include "vmware_pack_end.h"
 SVGA3dCmdWaitForGBQuery;          /* SVGA_3D_CMD_WAIT_FOR_GB_QUERY */
-
 
 typedef
 #include "vmware_pack_begin.h"
@@ -1985,7 +1967,6 @@ struct {
 #include "vmware_pack_end.h"
 SVGA3dCmdMapMobIntoGart;          /* SVGA_3D_CMD_MAP_MOB_INTO_GART */
 
-
 typedef
 #include "vmware_pack_begin.h"
 struct {
@@ -1994,7 +1975,6 @@ struct {
 }
 #include "vmware_pack_end.h"
 SVGA3dCmdUnmapGartRange;          /* SVGA_3D_CMD_UNMAP_GART_RANGE */
-
 
 /*
  * Screen Targets

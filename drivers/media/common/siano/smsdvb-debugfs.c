@@ -326,7 +326,6 @@ static void smsdvb_print_isdb_stats_ex(struct smsdvb_debugfs *debug_data,
 			      p->layer_info[i].tmcc_errors);
 	}
 
-
 	debug_data->stats_count = n;
 	spin_unlock(&debug_data->lock);
 

@@ -16,7 +16,6 @@
 #include <asm/types.h>
 #include <asm/percpu.h>
 
-
 /*
  * Addressing Terminology
  *
@@ -63,7 +62,6 @@
  *		The actual values are configuration dependent and are set at
  *		boot time. M & N values are set by the hardware/BIOS at boot.
  */
-
 
 /*
  * Maximum number of bricks in all partitions and in all coherency domains.
@@ -149,7 +147,6 @@ static inline unsigned long uv_soc_phys_ram_to_gpa(unsigned long paddr)
 	return paddr | uv_hub_info->gnode_upper;
 }
 
-
 /* socket virtual --> UV global physical address */
 static inline unsigned long uv_gpa(void *v)
 {
@@ -173,7 +170,6 @@ static inline void *uv_pnode_offset_to_vaddr(int pnode, unsigned long offset)
 {
 	return __va(((unsigned long)pnode << uv_hub_info->m_val) | offset);
 }
-
 
 /*
  * Access global MMRs using the low memory MMR32 space. This region supports
@@ -310,6 +306,4 @@ static inline void uv_hub_send_ipi(int pnode, int apicid, int vector)
 	/* not currently needed on ia64 */
 }
 
-
 #endif /* __ASM_IA64_UV_HUB__ */
-

@@ -947,7 +947,6 @@ fail:
 	return err;
 }
 
-
 static void wd719x_pci_remove(struct pci_dev *pdev)
 {
 	struct Scsi_Host *sh = pci_get_drvdata(pdev);

@@ -14,4 +14,3 @@
 
 /* shift to put page number into pte */
 #define PTE_RPN_SHIFT	(17)
-

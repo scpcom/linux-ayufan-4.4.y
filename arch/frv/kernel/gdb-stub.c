@@ -1892,7 +1892,6 @@ void gdbstub(int sigval)
 		case 'r':
 			break;
 
-
 			/* step to next instruction */
 		case 's':
 			__debug_regs->dcr |= DCR_SE;

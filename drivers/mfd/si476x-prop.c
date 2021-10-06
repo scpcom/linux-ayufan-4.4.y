@@ -154,7 +154,6 @@ static bool si476x_core_is_valid_property(struct si476x_core *core,
 	return is_valid_property[core->revision](core, property);
 }
 
-
 static bool si476x_core_is_readonly_property(struct si476x_core *core,
 					     u16 property)
 {
@@ -195,7 +194,6 @@ static bool si476x_core_regmap_writable_register(struct device *dev,
 		!si476x_core_is_readonly_property(core, (u16) reg);
 }
 
-
 static int si476x_core_regmap_write(void *context, unsigned int reg,
 				    unsigned int val)
 {
@@ -216,7 +214,6 @@ static int si476x_core_regmap_read(void *context, unsigned int reg,
 
 	return 0;
 }
-
 
 static const struct regmap_config si476x_regmap_config = {
 	.reg_bits = 16,

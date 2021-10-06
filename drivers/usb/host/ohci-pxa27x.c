@@ -402,7 +402,6 @@ static int ohci_pxa_of_init(struct platform_device *pdev)
 /* configure so an HC device and id are always provided */
 /* always called with process context; sleeping is OK */
 
-
 /**
  * usb_hcd_pxa27x_probe - initialize pxa27x-based HCDs
  * Context: !in_interrupt()
@@ -498,7 +497,6 @@ int usb_hcd_pxa27x_probe (const struct hc_driver *driver, struct platform_device
 	return retval;
 }
 
-
 /* may be called without controller electrically present */
 /* may be called with controller, bus, and devices active */
 
@@ -554,7 +552,6 @@ static int ohci_hcd_pxa27x_drv_suspend(struct device *dev)
 	struct ohci_hcd *ohci = hcd_to_ohci(hcd);
 	bool do_wakeup = device_may_wakeup(dev);
 	int ret;
-
 
 	if (time_before(jiffies, ohci->next_statechange))
 		msleep(5);

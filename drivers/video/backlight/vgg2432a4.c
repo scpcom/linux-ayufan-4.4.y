@@ -107,7 +107,6 @@ static const struct ili9320_reg vgg_init0[] = {
 	},
 };
 
-
 static int vgg2432a4_lcd_init(struct ili9320 *lcd,
 			      struct ili9320_platdata *cfg)
 {

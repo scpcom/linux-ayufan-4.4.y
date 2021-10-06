@@ -420,7 +420,6 @@ static inline void tpg_s_bytesperline(struct tpg_data *tpg, unsigned plane, unsi
 	}
 }
 
-
 static inline unsigned tpg_g_line_width(const struct tpg_data *tpg, unsigned plane)
 {
 	unsigned w = 0;

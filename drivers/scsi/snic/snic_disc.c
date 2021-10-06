@@ -24,7 +24,6 @@
 #include "snic.h"
 #include "snic_io.h"
 
-
 /* snic target types */
 static const char * const snic_tgt_type_str[] = {
 	[SNIC_TGT_DAS] = "DAS",
@@ -60,7 +59,6 @@ snic_report_tgt_init(struct snic_host_req *req, u32 hid, u8 *buf, u32 len,
 		     dma_addr_t rsp_buf_pa, ulong ctx)
 {
 	struct snic_sg_desc *sgd = NULL;
-
 
 	snic_io_hdr_enc(&req->hdr, SNIC_REQ_REPORT_TGTS, 0, SCSI_NO_TAG, hid,
 			1, ctx);
@@ -122,7 +120,6 @@ snic_queue_report_tgt_req(struct snic *snic)
 
 		goto error;
 	}
-
 
 	SNIC_BUG_ON(pa == 0);
 	rqi->sge_va = (ulong) buf;
@@ -388,7 +385,6 @@ snic_handle_tgt_disc(struct work_struct *work)
 
 	kfree(tgtid);
 } /* end of snic_handle_tgt_disc */
-
 
 int
 snic_report_tgt_cmpl_handler(struct snic *snic, struct snic_fw_req *fwreq)

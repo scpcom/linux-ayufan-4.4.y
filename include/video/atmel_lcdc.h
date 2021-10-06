@@ -31,7 +31,6 @@
 #define ATMEL_LCDC_WIRING_BGR	0
 #define ATMEL_LCDC_WIRING_RGB	1
 
-
  /* LCD Controller info data structure, stored in device platform_data */
 struct atmel_lcdfb_pdata {
 	unsigned int		guard_time;

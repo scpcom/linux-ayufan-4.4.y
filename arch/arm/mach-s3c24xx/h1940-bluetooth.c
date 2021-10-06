@@ -131,7 +131,6 @@ static int h1940bt_remove(struct platform_device *pdev)
 	return 0;
 }
 
-
 static struct platform_driver h1940bt_driver = {
 	.driver		= {
 		.name	= DRV_NAME,

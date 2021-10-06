@@ -136,4 +136,3 @@ void thermal_gov_fair_share_unregister(void)
 {
 	thermal_unregister_governor(&thermal_gov_fair_share);
 }
-

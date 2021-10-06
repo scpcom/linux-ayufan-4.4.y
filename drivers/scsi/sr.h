@@ -29,7 +29,6 @@ struct scsi_device;
 /* In fact, it is very slow if it has to spin up first */
 #define IOCTL_TIMEOUT 30*HZ
 
-
 typedef struct scsi_cd {
 	struct scsi_driver *driver;
 	unsigned capacity;	/* size in blocks                       */

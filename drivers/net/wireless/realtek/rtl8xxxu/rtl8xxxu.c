@@ -1326,7 +1326,6 @@ static void rtl8723a_disable_rf(struct rtl8xxxu_priv *priv)
 	rtl8xxxu_write8(priv, REG_SPS0_CTRL, sps0);
 }
 
-
 static void rtl8723a_stop_tx_beacon(struct rtl8xxxu_priv *priv)
 {
 	u8 val8;
@@ -1340,7 +1339,6 @@ static void rtl8723a_stop_tx_beacon(struct rtl8xxxu_priv *priv)
 	val8 &= ~BIT(0);
 	rtl8xxxu_write8(priv, REG_TBTT_PROHIBIT + 2, val8);
 }
-
 
 /*
  * The rtl8723a has 3 channel groups for it's efuse settings. It only
@@ -2366,7 +2364,6 @@ static int rtl8xxxu_init_phy_bb(struct rtl8xxxu_priv *priv)
 	else
 		rtl8xxxu_init_phy_regs(priv, rtl8723a_phy_1t_init_table);
 
-
 	if (priv->rtlchip == 0x8188c && priv->hi_pa &&
 	    priv->vendor_umc && priv->chip_cut == 1)
 		rtl8xxxu_write8(priv, REG_OFDM0_AGC_PARM1 + 2, 0x50);
@@ -2993,7 +2990,6 @@ static void rtl8xxxu_restore_regs(struct rtl8xxxu_priv *priv, const u32 *regs,
 	for (i = 0; i < count; i++)
 		rtl8xxxu_write32(priv, regs[i], backup[i]);
 }
-
 
 static void rtl8xxxu_path_adda_on(struct rtl8xxxu_priv *priv, const u32 *regs,
 				  bool path_a_on)
@@ -5116,7 +5112,6 @@ static void rtl8xxxu_int_complete(struct urb *urb)
 	}
 }
 
-
 static int rtl8xxxu_submit_int_urb(struct ieee80211_hw *hw)
 {
 	struct rtl8xxxu_priv *priv = hw->priv;
@@ -5985,7 +5980,6 @@ static void __exit rtl8xxxu_module_exit(void)
 {
 	usb_deregister(&rtl8xxxu_driver);
 }
-
 
 MODULE_DEVICE_TABLE(usb, dev_table);
 

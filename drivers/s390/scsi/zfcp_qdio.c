@@ -277,7 +277,6 @@ int zfcp_qdio_send(struct zfcp_qdio *qdio, struct zfcp_qdio_req *q_req)
 	return 0;
 }
 
-
 static void zfcp_qdio_setup_init_data(struct qdio_initialize *id,
 				      struct zfcp_qdio *qdio)
 {

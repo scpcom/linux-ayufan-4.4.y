@@ -145,7 +145,6 @@
 #define SDMA_PKT_COPY_LINEAR_DST_ADDR_HI_dst_addr_63_32_shift  0
 #define SDMA_PKT_COPY_LINEAR_DST_ADDR_HI_DST_ADDR_63_32(x) (((x) & SDMA_PKT_COPY_LINEAR_DST_ADDR_HI_dst_addr_63_32_mask) << SDMA_PKT_COPY_LINEAR_DST_ADDR_HI_dst_addr_63_32_shift)
 
-
 /*
 ** Definitions for SDMA_PKT_COPY_BROADCAST_LINEAR packet
 */
@@ -254,7 +253,6 @@
 #define SDMA_PKT_COPY_BROADCAST_LINEAR_DST2_ADDR_HI_dst2_addr_63_32_mask   0xFFFFFFFF
 #define SDMA_PKT_COPY_BROADCAST_LINEAR_DST2_ADDR_HI_dst2_addr_63_32_shift  0
 #define SDMA_PKT_COPY_BROADCAST_LINEAR_DST2_ADDR_HI_DST2_ADDR_63_32(x) (((x) & SDMA_PKT_COPY_BROADCAST_LINEAR_DST2_ADDR_HI_dst2_addr_63_32_mask) << SDMA_PKT_COPY_BROADCAST_LINEAR_DST2_ADDR_HI_dst2_addr_63_32_shift)
-
 
 /*
 ** Definitions for SDMA_PKT_COPY_LINEAR_SUBWIN packet
@@ -416,7 +414,6 @@
 #define SDMA_PKT_COPY_LINEAR_SUBWIN_DW_12_src_ha_mask   0x00000001
 #define SDMA_PKT_COPY_LINEAR_SUBWIN_DW_12_src_ha_shift  30
 #define SDMA_PKT_COPY_LINEAR_SUBWIN_DW_12_SRC_HA(x) (((x) & SDMA_PKT_COPY_LINEAR_SUBWIN_DW_12_src_ha_mask) << SDMA_PKT_COPY_LINEAR_SUBWIN_DW_12_src_ha_shift)
-
 
 /*
 ** Definitions for SDMA_PKT_COPY_TILED packet
@@ -589,7 +586,6 @@
 #define SDMA_PKT_COPY_TILED_COUNT_count_mask   0x000FFFFF
 #define SDMA_PKT_COPY_TILED_COUNT_count_shift  0
 #define SDMA_PKT_COPY_TILED_COUNT_COUNT(x) (((x) & SDMA_PKT_COPY_TILED_COUNT_count_mask) << SDMA_PKT_COPY_TILED_COUNT_count_shift)
-
 
 /*
 ** Definitions for SDMA_PKT_COPY_L2T_BROADCAST packet
@@ -795,7 +791,6 @@
 #define SDMA_PKT_COPY_L2T_BROADCAST_COUNT_count_mask   0x000FFFFF
 #define SDMA_PKT_COPY_L2T_BROADCAST_COUNT_count_shift  0
 #define SDMA_PKT_COPY_L2T_BROADCAST_COUNT_COUNT(x) (((x) & SDMA_PKT_COPY_L2T_BROADCAST_COUNT_count_mask) << SDMA_PKT_COPY_L2T_BROADCAST_COUNT_count_shift)
-
 
 /*
 ** Definitions for SDMA_PKT_COPY_T2T packet
@@ -1044,7 +1039,6 @@
 #define SDMA_PKT_COPY_T2T_DW_14_src_sw_shift  24
 #define SDMA_PKT_COPY_T2T_DW_14_SRC_SW(x) (((x) & SDMA_PKT_COPY_T2T_DW_14_src_sw_mask) << SDMA_PKT_COPY_T2T_DW_14_src_sw_shift)
 
-
 /*
 ** Definitions for SDMA_PKT_COPY_TILED_SUBWIN packet
 */
@@ -1249,7 +1243,6 @@
 #define SDMA_PKT_COPY_TILED_SUBWIN_DW_13_tile_sw_shift  24
 #define SDMA_PKT_COPY_TILED_SUBWIN_DW_13_TILE_SW(x) (((x) & SDMA_PKT_COPY_TILED_SUBWIN_DW_13_tile_sw_mask) << SDMA_PKT_COPY_TILED_SUBWIN_DW_13_tile_sw_shift)
 
-
 /*
 ** Definitions for SDMA_PKT_COPY_STRUCT packet
 */
@@ -1346,7 +1339,6 @@
 #define SDMA_PKT_COPY_STRUCT_LINEAR_ADDR_HI_linear_addr_63_32_shift  0
 #define SDMA_PKT_COPY_STRUCT_LINEAR_ADDR_HI_LINEAR_ADDR_63_32(x) (((x) & SDMA_PKT_COPY_STRUCT_LINEAR_ADDR_HI_linear_addr_63_32_mask) << SDMA_PKT_COPY_STRUCT_LINEAR_ADDR_HI_linear_addr_63_32_shift)
 
-
 /*
 ** Definitions for SDMA_PKT_WRITE_UNTILED packet
 */
@@ -1397,7 +1389,6 @@
 #define SDMA_PKT_WRITE_UNTILED_DATA0_data0_mask   0xFFFFFFFF
 #define SDMA_PKT_WRITE_UNTILED_DATA0_data0_shift  0
 #define SDMA_PKT_WRITE_UNTILED_DATA0_DATA0(x) (((x) & SDMA_PKT_WRITE_UNTILED_DATA0_data0_mask) << SDMA_PKT_WRITE_UNTILED_DATA0_data0_shift)
-
 
 /*
 ** Definitions for SDMA_PKT_WRITE_TILED packet
@@ -1545,7 +1536,6 @@
 #define SDMA_PKT_WRITE_TILED_DATA0_data0_shift  0
 #define SDMA_PKT_WRITE_TILED_DATA0_DATA0(x) (((x) & SDMA_PKT_WRITE_TILED_DATA0_data0_mask) << SDMA_PKT_WRITE_TILED_DATA0_data0_shift)
 
-
 /*
 ** Definitions for SDMA_PKT_WRITE_INCR packet
 */
@@ -1626,7 +1616,6 @@
 #define SDMA_PKT_WRITE_INCR_COUNT_count_shift  0
 #define SDMA_PKT_WRITE_INCR_COUNT_COUNT(x) (((x) & SDMA_PKT_WRITE_INCR_COUNT_count_mask) << SDMA_PKT_WRITE_INCR_COUNT_count_shift)
 
-
 /*
 ** Definitions for SDMA_PKT_INDIRECT packet
 */
@@ -1685,7 +1674,6 @@
 #define SDMA_PKT_INDIRECT_CSA_ADDR_HI_csa_addr_63_32_shift  0
 #define SDMA_PKT_INDIRECT_CSA_ADDR_HI_CSA_ADDR_63_32(x) (((x) & SDMA_PKT_INDIRECT_CSA_ADDR_HI_csa_addr_63_32_mask) << SDMA_PKT_INDIRECT_CSA_ADDR_HI_csa_addr_63_32_shift)
 
-
 /*
 ** Definitions for SDMA_PKT_SEMAPHORE packet
 */
@@ -1735,7 +1723,6 @@
 #define SDMA_PKT_SEMAPHORE_ADDR_HI_addr_63_32_shift  0
 #define SDMA_PKT_SEMAPHORE_ADDR_HI_ADDR_63_32(x) (((x) & SDMA_PKT_SEMAPHORE_ADDR_HI_addr_63_32_mask) << SDMA_PKT_SEMAPHORE_ADDR_HI_addr_63_32_shift)
 
-
 /*
 ** Definitions for SDMA_PKT_FENCE packet
 */
@@ -1774,7 +1761,6 @@
 #define SDMA_PKT_FENCE_DATA_data_shift  0
 #define SDMA_PKT_FENCE_DATA_DATA(x) (((x) & SDMA_PKT_FENCE_DATA_data_mask) << SDMA_PKT_FENCE_DATA_data_shift)
 
-
 /*
 ** Definitions for SDMA_PKT_SRBM_WRITE packet
 */
@@ -1812,7 +1798,6 @@
 #define SDMA_PKT_SRBM_WRITE_DATA_data_shift  0
 #define SDMA_PKT_SRBM_WRITE_DATA_DATA(x) (((x) & SDMA_PKT_SRBM_WRITE_DATA_data_mask) << SDMA_PKT_SRBM_WRITE_DATA_data_shift)
 
-
 /*
 ** Definitions for SDMA_PKT_PRE_EXE packet
 */
@@ -1842,7 +1827,6 @@
 #define SDMA_PKT_PRE_EXE_EXEC_COUNT_exec_count_mask   0x00003FFF
 #define SDMA_PKT_PRE_EXE_EXEC_COUNT_exec_count_shift  0
 #define SDMA_PKT_PRE_EXE_EXEC_COUNT_EXEC_COUNT(x) (((x) & SDMA_PKT_PRE_EXE_EXEC_COUNT_exec_count_mask) << SDMA_PKT_PRE_EXE_EXEC_COUNT_exec_count_shift)
-
 
 /*
 ** Definitions for SDMA_PKT_COND_EXE packet
@@ -1888,7 +1872,6 @@
 #define SDMA_PKT_COND_EXE_EXEC_COUNT_exec_count_mask   0x00003FFF
 #define SDMA_PKT_COND_EXE_EXEC_COUNT_exec_count_shift  0
 #define SDMA_PKT_COND_EXE_EXEC_COUNT_EXEC_COUNT(x) (((x) & SDMA_PKT_COND_EXE_EXEC_COUNT_exec_count_mask) << SDMA_PKT_COND_EXE_EXEC_COUNT_exec_count_shift)
-
 
 /*
 ** Definitions for SDMA_PKT_CONSTANT_FILL packet
@@ -1946,7 +1929,6 @@
 #define SDMA_PKT_CONSTANT_FILL_COUNT_count_mask   0x003FFFFF
 #define SDMA_PKT_CONSTANT_FILL_COUNT_count_shift  0
 #define SDMA_PKT_CONSTANT_FILL_COUNT_COUNT(x) (((x) & SDMA_PKT_CONSTANT_FILL_COUNT_count_mask) << SDMA_PKT_CONSTANT_FILL_COUNT_count_shift)
-
 
 /*
 ** Definitions for SDMA_PKT_POLL_REGMEM packet
@@ -2024,7 +2006,6 @@
 #define SDMA_PKT_POLL_REGMEM_DW5_retry_count_shift  16
 #define SDMA_PKT_POLL_REGMEM_DW5_RETRY_COUNT(x) (((x) & SDMA_PKT_POLL_REGMEM_DW5_retry_count_mask) << SDMA_PKT_POLL_REGMEM_DW5_retry_count_shift)
 
-
 /*
 ** Definitions for SDMA_PKT_ATOMIC packet
 */
@@ -2097,7 +2078,6 @@
 #define SDMA_PKT_ATOMIC_LOOP_INTERVAL_loop_interval_shift  0
 #define SDMA_PKT_ATOMIC_LOOP_INTERVAL_LOOP_INTERVAL(x) (((x) & SDMA_PKT_ATOMIC_LOOP_INTERVAL_loop_interval_mask) << SDMA_PKT_ATOMIC_LOOP_INTERVAL_loop_interval_shift)
 
-
 /*
 ** Definitions for SDMA_PKT_TIMESTAMP_SET packet
 */
@@ -2128,7 +2108,6 @@
 #define SDMA_PKT_TIMESTAMP_SET_INIT_DATA_HI_init_data_63_32_mask   0xFFFFFFFF
 #define SDMA_PKT_TIMESTAMP_SET_INIT_DATA_HI_init_data_63_32_shift  0
 #define SDMA_PKT_TIMESTAMP_SET_INIT_DATA_HI_INIT_DATA_63_32(x) (((x) & SDMA_PKT_TIMESTAMP_SET_INIT_DATA_HI_init_data_63_32_mask) << SDMA_PKT_TIMESTAMP_SET_INIT_DATA_HI_init_data_63_32_shift)
-
 
 /*
 ** Definitions for SDMA_PKT_TIMESTAMP_GET packet
@@ -2161,7 +2140,6 @@
 #define SDMA_PKT_TIMESTAMP_GET_WRITE_ADDR_HI_write_addr_63_32_shift  0
 #define SDMA_PKT_TIMESTAMP_GET_WRITE_ADDR_HI_WRITE_ADDR_63_32(x) (((x) & SDMA_PKT_TIMESTAMP_GET_WRITE_ADDR_HI_write_addr_63_32_mask) << SDMA_PKT_TIMESTAMP_GET_WRITE_ADDR_HI_write_addr_63_32_shift)
 
-
 /*
 ** Definitions for SDMA_PKT_TIMESTAMP_GET_GLOBAL packet
 */
@@ -2193,7 +2171,6 @@
 #define SDMA_PKT_TIMESTAMP_GET_GLOBAL_WRITE_ADDR_HI_write_addr_63_32_shift  0
 #define SDMA_PKT_TIMESTAMP_GET_GLOBAL_WRITE_ADDR_HI_WRITE_ADDR_63_32(x) (((x) & SDMA_PKT_TIMESTAMP_GET_GLOBAL_WRITE_ADDR_HI_write_addr_63_32_mask) << SDMA_PKT_TIMESTAMP_GET_GLOBAL_WRITE_ADDR_HI_write_addr_63_32_shift)
 
-
 /*
 ** Definitions for SDMA_PKT_TRAP packet
 */
@@ -2217,7 +2194,6 @@
 #define SDMA_PKT_TRAP_INT_CONTEXT_int_context_mask   0x0FFFFFFF
 #define SDMA_PKT_TRAP_INT_CONTEXT_int_context_shift  0
 #define SDMA_PKT_TRAP_INT_CONTEXT_INT_CONTEXT(x) (((x) & SDMA_PKT_TRAP_INT_CONTEXT_int_context_mask) << SDMA_PKT_TRAP_INT_CONTEXT_int_context_shift)
-
 
 /*
 ** Definitions for SDMA_PKT_NOP packet

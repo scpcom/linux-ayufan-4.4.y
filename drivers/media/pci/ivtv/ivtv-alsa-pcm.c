@@ -185,7 +185,6 @@ static int snd_ivtv_pcm_capture_open(struct snd_pcm_substream *substream)
 		return 0;
 	}
 
-
 	runtime->hw = snd_ivtv_hw_capture;
 	snd_pcm_hw_constraint_integer(runtime, SNDRV_PCM_HW_PARAM_PERIODS);
 	itvsc->capture_pcm_substream = substream;
@@ -233,7 +232,6 @@ static int snd_ivtv_pcm_ioctl(struct snd_pcm_substream *substream,
 	snd_ivtv_unlock(itvsc);
 	return ret;
 }
-
 
 static int snd_pcm_alloc_vmalloc_buffer(struct snd_pcm_substream *subs,
 					size_t size)

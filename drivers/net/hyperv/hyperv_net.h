@@ -63,7 +63,6 @@ struct ndis_recv_scale_cap { /* NDIS_RECEIVE_SCALE_CAPABILITIES */
 	u16 num_indirect_tabent;
 } __packed;
 
-
 /* ndis_recv_scale_param flags */
 #define NDIS_RSS_PARAM_FLAG_BASE_CPU_UNCHANGED     0x0001
 #define NDIS_RSS_PARAM_FLAG_HASH_INFO_UNCHANGED    0x0002
@@ -186,7 +185,6 @@ struct rndis_device {
 	unsigned char hw_mac_adr[ETH_ALEN];
 };
 
-
 /* Interface */
 int netvsc_device_add(struct hv_device *device, void *additional_info);
 int netvsc_device_remove(struct hv_device *device);
@@ -209,7 +207,6 @@ int rndis_filter_receive(struct hv_device *dev,
 
 int rndis_filter_set_packet_filter(struct rndis_device *dev, u32 new_filter);
 int rndis_filter_set_device_mac(struct hv_device *hdev, char *mac);
-
 
 #define NVSP_INVALID_PROTOCOL_VERSION	((u32)0xFFFFFFFF)
 
@@ -483,7 +480,6 @@ union nvsp_1_message_uber {
 						send_rndis_pkt_complete;
 } __packed;
 
-
 /*
  * Network VSP protocol version 2 messages:
  */
@@ -612,7 +608,6 @@ struct nvsp_message {
 	union nvsp_all_messages msg;
 } __packed;
 
-
 #define NETVSC_MTU 65536
 #define NETVSC_MTU_MIN 68
 
@@ -620,7 +615,6 @@ struct nvsp_message {
 #define NETVSC_RECEIVE_BUFFER_SIZE_LEGACY	(1024*1024*15)  /* 15MB */
 #define NETVSC_SEND_BUFFER_SIZE			(1024 * 1024 * 15)   /* 15MB */
 #define NETVSC_INVALID_INDEX			-1
-
 
 #define NETVSC_RECEIVE_BUFFER_ID		0xcafe
 #define NETVSC_SEND_BUFFER_ID			0
@@ -1153,7 +1147,6 @@ struct rcondis_mp_deactivate_vc_complete {
 	u32 status;
 };
 
-
 /* union with all of the RNDIS messages */
 union rndis_message_container {
 	struct rndis_packet pkt;
@@ -1193,7 +1186,6 @@ struct rndis_message {
 	union rndis_message_container msg;
 };
 
-
 /* Handy macros */
 
 /* get the size of an RNDIS message. Pass in the message type, */
@@ -1226,10 +1218,7 @@ struct rndis_message {
 #define RNDIS_MESSAGE_RAW_PTR_TO_MESSAGE_PTR(rndis_msg)	\
 	((void *) rndis_msg)
 
-
 #define __struct_bcount(x)
-
-
 
 #define RNDIS_HEADER_SIZE	(sizeof(struct rndis_message) - \
 				 sizeof(union rndis_message_container))
@@ -1259,6 +1248,5 @@ struct rndis_message {
 #define TRANSPORT_INFO_IPV4_UDP ((INFO_IPV4 << 16) | INFO_UDP)
 #define TRANSPORT_INFO_IPV6_TCP ((INFO_IPV6 << 16) | INFO_TCP)
 #define TRANSPORT_INFO_IPV6_UDP ((INFO_IPV6 << 16) | INFO_UDP)
-
 
 #endif /* _HYPERV_NET_H */

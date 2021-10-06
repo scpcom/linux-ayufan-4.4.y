@@ -40,9 +40,6 @@
 #define FRAME_R32	32
 #define FRAME_SIZE	40
 
-
-
-
 /*
  * On entry:
  *

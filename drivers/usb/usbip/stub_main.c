@@ -1,21 +1,4 @@
-/*
- * Copyright (C) 2003-2008 Takahiro Hirofuchi
- *
- * This is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
- * USA.
- */
+
 
 #include <linux/string.h>
 #include <linux/module.h>
@@ -28,30 +11,19 @@
 #define DRIVER_DESC "USB/IP Host Driver"
 
 struct kmem_cache *stub_priv_cache;
-/*
- * busid_tables defines matching busids that usbip can grab. A user can change
- * dynamically what device is locally used and what device is exported to a
- * remote host.
- */
+ 
 #define MAX_BUSID 16
 static struct bus_id_priv busid_table[MAX_BUSID];
 static spinlock_t busid_table_lock;
 
 static void init_busid_table(void)
 {
-	/*
-	 * This also sets the bus_table[i].status to
-	 * STUB_BUSID_OTHER, which is 0.
-	 */
+	 
 	memset(busid_table, 0, sizeof(busid_table));
 
 	spin_lock_init(&busid_table_lock);
 }
 
-/*
- * Find the index of the busid by name.
- * Must be called with busid_table_lock held.
- */
 static int get_busid_idx(const char *busid)
 {
 	int i;
@@ -86,7 +58,7 @@ static int add_match_busid(char *busid)
 	int ret = -1;
 
 	spin_lock(&busid_table_lock);
-	/* already registered? */
+	 
 	if (get_busid_idx(busid) >= 0) {
 		ret = 0;
 		goto out;
@@ -118,7 +90,7 @@ int del_match_busid(char *busid)
 	if (idx < 0)
 		goto out;
 
-	/* found */
+	
 	ret = 0;
 
 	if (busid_table[idx].status == STUB_BUSID_OTHER)
@@ -158,7 +130,6 @@ static ssize_t store_match_busid(struct device_driver *dev, const char *buf,
 	if (count < 5)
 		return -EINVAL;
 
-	/* busid needs to include \0 termination */
 	len = strlcpy(busid, buf + 4, BUSID_SIZE);
 	if (sizeof(busid) <= len)
 		return -EINVAL;
@@ -191,7 +162,6 @@ static ssize_t rebind_store(struct device_driver *dev, const char *buf,
 	int len;
 	struct bus_id_priv *bid;
 
-	/* buf length should be less that BUSID_SIZE */
 	len = strnlen(buf, BUSID_SIZE);
 
 	if (!(len < BUSID_SIZE))
@@ -317,10 +287,6 @@ static void __exit usbip_host_exit(void)
 	driver_remove_file(&stub_driver.drvwrap.driver,
 			   &driver_attr_rebind);
 
-	/*
-	 * deregister() calls stub_disconnect() for all devices. Device
-	 * specific data is cleared in stub_disconnect().
-	 */
 	usb_deregister_device_driver(&stub_driver);
 
 	kmem_cache_destroy(stub_priv_cache);

@@ -113,7 +113,6 @@ void __init mem_init(void)
 	mem_init_print_info(NULL);
 }
 
-
 #ifdef CONFIG_BLK_DEV_INITRD
 void free_initrd_mem(unsigned long start, unsigned long end)
 {

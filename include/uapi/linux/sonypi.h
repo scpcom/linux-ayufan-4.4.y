@@ -142,5 +142,4 @@
 /* get temperature (C) */
 #define SONYPI_IOCGTEMP		_IOR('v', 12, __u8)
 
-
 #endif /* _UAPI_SONYPI_H_ */

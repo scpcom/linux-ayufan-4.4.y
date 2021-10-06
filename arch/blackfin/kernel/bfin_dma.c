@@ -36,7 +36,6 @@ static int __init blackfin_dma_init(void)
 
 	printk(KERN_INFO "Blackfin DMA Controller\n");
 
-
 #if ANOMALY_05000480
 	bfin_write_DMAC_TC_PER(0x0111);
 #endif

@@ -473,7 +473,6 @@ struct as10x_token_cmd_t {
 	struct as10x_cmd_t r;
 } __packed;
 
-
 /**************************/
 /* FUNCTION DECLARATION   */
 /**************************/

@@ -40,7 +40,6 @@ struct iio_poll_func {
 	s64 timestamp;
 };
 
-
 struct iio_poll_func
 *iio_alloc_pollfunc(irqreturn_t (*h)(int irq, void *p),
 		    irqreturn_t (*thread)(int irq, void *p),

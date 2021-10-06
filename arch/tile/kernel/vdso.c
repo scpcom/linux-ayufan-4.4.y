@@ -27,7 +27,6 @@
 /* The alignment of the vDSO. */
 #define VDSO_ALIGNMENT  PAGE_SIZE
 
-
 static unsigned int vdso_pages;
 static struct page **vdso_pagelist;
 

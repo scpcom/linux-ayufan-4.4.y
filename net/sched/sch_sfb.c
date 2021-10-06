@@ -216,7 +216,6 @@ static u32 sfb_compute_qlen(u32 *prob_r, u32 *avgpm_r, const struct sfb_sched_da
 	return qlen;
 }
 
-
 static void sfb_init_perturbation(u32 slot, struct sfb_sched_data *q)
 {
 	q->bins[slot].perturbation = prandom_u32();
@@ -317,7 +316,6 @@ static int sfb_enqueue(struct sk_buff *skb, struct Qdisc *sch)
 	} else {
 		sfbhash = skb_get_hash_perturb(skb, q->bins[slot].perturbation);
 	}
-
 
 	if (!sfbhash)
 		sfbhash = 1;
@@ -665,7 +663,6 @@ static unsigned long sfb_bind(struct Qdisc *sch, unsigned long parent,
 {
 	return 0;
 }
-
 
 static const struct Qdisc_class_ops sfb_class_ops = {
 	.graft		=	sfb_graft,

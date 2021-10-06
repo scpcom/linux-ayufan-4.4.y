@@ -1537,7 +1537,6 @@ static void ttusb_dec_exit_rc(struct ttusb_dec *dec)
 	}
 }
 
-
 static void ttusb_dec_exit_usb(struct ttusb_dec *dec)
 {
 	int i;

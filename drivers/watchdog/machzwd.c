@@ -45,7 +45,6 @@
 #include <linux/io.h>
 #include <linux/uaccess.h>
 
-
 /* ports */
 #define ZF_IOBASE	0x218
 #define INDEX		0x218
@@ -71,7 +70,6 @@
 #define GEN_SMI		0x0400
 #define GEN_RESET	0x0800
 
-
 /* utilities */
 
 #define WD1	0
@@ -81,13 +79,11 @@
 #define zf_writeb(port, data)  { outb(port, INDEX); outb(data, DATA_B); }
 #define zf_get_ZFL_version()   zf_readw(ZFL_VERSION)
 
-
 static unsigned short zf_readw(unsigned char port)
 {
 	outb(port, INDEX);
 	return inw(DATA_W);
 }
-
 
 MODULE_AUTHOR("Fernando Fuganti <fuganti@conectiva.com.br>");
 MODULE_DESCRIPTION("MachZ ZF-Logic Watchdog driver");
@@ -106,7 +102,6 @@ static const struct watchdog_info zf_info = {
 	.firmware_version	= 1,
 	.identity		= "ZF-Logic watchdog",
 };
-
 
 /*
  * action refers to action taken when watchdog resets
@@ -130,7 +125,6 @@ static DEFINE_SPINLOCK(zf_port_lock);
 static DEFINE_TIMER(zf_timer, zf_ping, 0, 0);
 static unsigned long next_heartbeat;
 
-
 /* timeout for user land heart beat (10 seconds) */
 #define ZF_USER_TIMEO (HZ*10)
 
@@ -147,12 +141,10 @@ static unsigned long next_heartbeat;
 	pr_debug(":%s:%d: " format, __func__, __LINE__ , ## args)
 #endif
 
-
 static inline void zf_set_status(unsigned char new)
 {
 	zf_writeb(STATUS, new);
 }
-
 
 /* CONTROL register functions */
 
@@ -165,7 +157,6 @@ static inline void zf_set_control(unsigned short new)
 {
 	zf_writew(CONTROL, new);
 }
-
 
 /* WD#? counter functions */
 /*
@@ -206,7 +197,6 @@ static void zf_timer_off(void)
 	pr_info("Watchdog timer is now disabled\n");
 }
 
-
 /*
  * start hardware timer
  */
@@ -235,7 +225,6 @@ static void zf_timer_on(void)
 
 	pr_info("Watchdog timer is now enabled\n");
 }
-
 
 static void zf_ping(unsigned long data)
 {
@@ -376,7 +365,6 @@ static struct miscdevice zf_miscdev = {
 	.fops = &zf_fops,
 };
 
-
 /*
  * The device needs to learn about soft shutdowns in order to
  * turn the timebomb registers off.
@@ -441,7 +429,6 @@ no_reboot:
 no_region:
 	return ret;
 }
-
 
 static void __exit zf_exit(void)
 {

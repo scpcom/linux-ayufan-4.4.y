@@ -408,7 +408,6 @@ void diva_free_dma_map(void *hdev, struct _diva_dma_map_entry *pmap)
 	diva_free_dma_mapping(pmap);
 }
 
-
 /*********************************************************
  ** I/O port utilities
  *********************************************************/

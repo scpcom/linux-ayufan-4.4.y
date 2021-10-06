@@ -33,7 +33,6 @@
 #include <asm/runlatch.h>
 #include <asm/smp.h>
 
-
 unsigned long cpuidle_disable = IDLE_NO_OVERRIDE;
 EXPORT_SYMBOL(cpuidle_disable);
 

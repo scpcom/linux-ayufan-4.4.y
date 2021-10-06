@@ -456,7 +456,6 @@ static int philips_europa_tuner_init(struct dvb_frontend *fe)
 	static u8 msg[] = { 0x00, 0x40};
 	struct i2c_msg init_msg = {.addr = 0x43,.flags = 0,.buf = msg,.len = sizeof(msg) };
 
-
 	if (philips_td1316_tuner_init(fe))
 		return -EIO;
 	msleep(1);
@@ -964,7 +963,6 @@ static struct qt1010_config videomate_t750_qt1010_config = {
 	.i2c_address = 0x62
 };
 
-
 /* ==================================================================
  * tda10086 based DVB-S cards, helper functions
  */
@@ -1201,7 +1199,6 @@ static struct s5h1411_config kworld_s5h1411_config = {
 	.mpeg_timing   =
 		S5H1411_MPEGTIMING_CONTINOUS_NONINVERTING_CLOCK,
 };
-
 
 /* ==================================================================
  * Core code

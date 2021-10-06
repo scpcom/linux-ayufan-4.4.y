@@ -49,5 +49,4 @@
 #define PAL_wtint	62
 #define PAL_rti		63
 
-
 #endif /* _UAPI__ALPHA_PAL_H */

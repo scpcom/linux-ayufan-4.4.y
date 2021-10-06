@@ -4,7 +4,6 @@
 #include <asm/sigcontext.h>
 #include <linux/compiler.h>
 
-
 /* On the Sparc the signal handlers get passed a 'sub-signal' code
  * for certain signal types, which we document here.
  */
@@ -150,7 +149,6 @@ struct sigstack {
 #define MINSIGSTKSZ	4096
 #define SIGSTKSZ	16384
 
-
 #include <asm-generic/signal-defs.h>
 
 #ifndef __KERNEL__
@@ -174,7 +172,6 @@ typedef struct sigaltstack {
 	int			ss_flags;
 	size_t			ss_size;
 } stack_t;
-
 
 #endif /* !(__ASSEMBLY__) */
 

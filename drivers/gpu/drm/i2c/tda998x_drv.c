@@ -72,7 +72,6 @@ struct tda998x_priv {
 
 #define REG_CURPAGE               0xff                /* write */
 
-
 /* Page 00h: General Control */
 #define REG_VERSION_LSB           REG(0x00, 0x00)     /* read */
 #define REG_MAIN_CNTRL0           REG(0x00, 0x01)     /* read/write */
@@ -256,7 +255,6 @@ struct tda998x_priv {
 # define SEL_CLK_ENA_SC_CLK       (1 << 3)
 #define REG_ANA_GENERAL           REG(0x02, 0x12)     /* read/write */
 
-
 /* Page 09h: EDID Control */
 #define REG_EDID_DATA_0           REG(0x09, 0x00)     /* read */
 /* next 127 successive registers are the EDID block */
@@ -266,14 +264,12 @@ struct tda998x_priv {
 #define REG_DDC_SEGM_ADDR         REG(0x09, 0xfd)     /* read/write */
 #define REG_DDC_SEGM              REG(0x09, 0xfe)     /* read/write */
 
-
 /* Page 10h: information frames and packets */
 #define REG_IF1_HB0               REG(0x10, 0x20)     /* read/write */
 #define REG_IF2_HB0               REG(0x10, 0x40)     /* read/write */
 #define REG_IF3_HB0               REG(0x10, 0x60)     /* read/write */
 #define REG_IF4_HB0               REG(0x10, 0x80)     /* read/write */
 #define REG_IF5_HB0               REG(0x10, 0xa0)     /* read/write */
-
 
 /* Page 11h: audio settings and content info packets */
 #define REG_AIP_CNTRL_0           REG(0x11, 0x00)     /* read/write */
@@ -310,7 +306,6 @@ struct tda998x_priv {
 # define DIP_IF_FLAGS_IF5         (1 << 5)
 #define REG_CH_STAT_B(x)          REG(0x11, 0x14 + (x)) /* read/write */
 
-
 /* Page 12h: HDCP and OTP */
 #define REG_TX3                   REG(0x12, 0x9a)     /* read/write */
 #define REG_TX4                   REG(0x12, 0x9b)     /* read/write */
@@ -318,10 +313,7 @@ struct tda998x_priv {
 #define REG_TX33                  REG(0x12, 0xb8)     /* read/write */
 # define TX33_HDMI                (1 << 1)
 
-
 /* Page 13h: Gamut related metadata packets */
-
-
 
 /* CEC registers: (not paged)
  */
@@ -347,7 +339,6 @@ struct tda998x_priv {
 # define CEC_ENAMODS_EN_RXSENS    (1 << 2)
 # define CEC_ENAMODS_EN_HDMI      (1 << 1)
 # define CEC_ENAMODS_EN_CEC       (1 << 0)
-
 
 /* Device versions: */
 #define TDA9989N2                 0x0101

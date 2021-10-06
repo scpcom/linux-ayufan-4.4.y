@@ -65,7 +65,6 @@
 ##
 ## clobbers ymm0-15
 
-
 # TRANSPOSE8 r0, r1, r2, r3, r4, r5, r6, r7, t0, t1
 # "transpose" data in {r0...r7} using temps {t0...t1}
 # Input looks like: {r0 r1 r2 r3 r4 r5 r6 r7}
@@ -238,7 +237,6 @@ RSP_SAVE = %rdx
 # ymm13                T7      W14
 # ymm14                T8      W15
 # ymm15                T9      W16
-
 
 A  =     %ymm0
 B  =     %ymm1
@@ -450,7 +448,6 @@ lloop:
 
 	ret
 ENDPROC(sha1_x8_avx2)
-
 
 .data
 

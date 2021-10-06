@@ -2082,7 +2082,6 @@ static int rtl8169_set_features(struct net_device *dev,
 	return 0;
 }
 
-
 static inline u32 rtl8169_tx_vlan_tag(struct sk_buff *skb)
 {
 	return (skb_vlan_tag_present(skb)) ?
@@ -3663,7 +3662,6 @@ static void rtl8411_hw_phy_config(struct rtl8169_private *tp)
 		{ 0x01, 0x328a },
 		{ 0x1f, 0x0000 }
 	};
-
 
 	rtl_apply_firmware(tp);
 

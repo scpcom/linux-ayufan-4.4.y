@@ -83,7 +83,6 @@
 #define MCFDEBUG_BAAR_RESET	0x00000005
 /* Fields not yet implemented */
 
-
 /* This routine wrappers up the wdebug asm instruction so that the register
  * and value can be relatively easily specified.  The biggest hassle here is
  * that the debug module instructions (2 longs) must be long word aligned and

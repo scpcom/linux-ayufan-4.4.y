@@ -68,7 +68,6 @@ int token_profit[0x10000];
 unsigned char best_table[256][2];
 unsigned char best_table_len[256];
 
-
 static void usage(void)
 {
 	fprintf(stderr, "Usage: kallsyms [--all-symbols] "
@@ -220,14 +219,12 @@ static int symbol_valid(struct sym_entry *s)
 	int i;
 	char *sym_name = (char *)s->sym + 1;
 
-
 	if (s->addr < kernel_start_addr)
 		return 0;
 
 	/* skip prefix char */
 	if (symbol_prefix_char && *sym_name == symbol_prefix_char)
 		sym_name++;
-
 
 	/* if --all-symbols is not specified, then symbols outside the text
 	 * and inittext sections are discarded */
@@ -418,7 +415,6 @@ static void write_src(void)
 		printf("\t.short\t%d\n", best_idx[i]);
 	printf("\n");
 }
-
 
 /* table lookup compression functions */
 

@@ -171,7 +171,6 @@ snic_alloc_vnic_res(struct snic *snic)
 		  snic->cq_count,
 		  snic->intr_count);
 
-
 	/* Allocate WQs used for SCSI IOs */
 	for (i = 0; i < snic->wq_count; i++) {
 		ret = svnic_wq_alloc(snic->vdev,

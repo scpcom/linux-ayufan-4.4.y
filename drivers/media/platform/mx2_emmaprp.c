@@ -489,7 +489,6 @@ static int vidioc_try_fmt(struct v4l2_format *f)
 {
 	enum v4l2_field field;
 
-
 	if (!find_format(f))
 		return -EINVAL;
 
@@ -683,7 +682,6 @@ static const struct v4l2_ioctl_ops emmaprp_ioctl_ops = {
 	.vidioc_streamon	= vidioc_streamon,
 	.vidioc_streamoff	= vidioc_streamoff,
 };
-
 
 /*
  * Queue operations
@@ -970,7 +968,6 @@ static int emmaprp_probe(struct platform_device *pdev)
 	}
 
 	return 0;
-
 
 rel_m2m:
 	v4l2_m2m_release(pcdev->m2m_dev);

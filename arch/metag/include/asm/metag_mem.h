@@ -80,7 +80,6 @@
 #define LINCORE_DATA_BASE  0x82000000
 #define LINCORE_DATA_LIMIT 0x83FFFFFF
 
-
 /* The core can support locked icache lines in this region */
 #define LINCORE_ICACHE_BASE  0x84000000
 #define LINCORE_ICACHE_LIMIT 0x85FFFFFF
@@ -509,7 +508,6 @@
 
 #endif /* METAC_2_1 */
 
-
 /* Registers within the SYSC register region */
 #define METAC_ID                0x04830000
 #define     METAC_ID_MAJOR_BITS     0xFF000000
@@ -779,7 +777,6 @@
 #else /* METAC_1_2 */
 #define     SYSC_ATOMIC_SOURCE_BIT    0x00000010
 #endif /* !METAC_1_2 */
-
 
 #ifdef METAC_2_1
 
@@ -1089,7 +1086,6 @@
 #define     DBGPORT_MDBGCTRL1_BYTE_ROUND_S          0
 #define         DBGPORT_MDBGCTRL1_BYTE_ROUND_8_BIT  0x00000001
 #define         DBGPORT_MDBGCTRL1_BYTE_ROUND_16_BIT 0x00000002
-
 
 /* L2 Cache registers */
 #define SYSC_L2C_INIT              0x048300C0

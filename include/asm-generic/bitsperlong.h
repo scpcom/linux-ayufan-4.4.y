@@ -3,7 +3,6 @@
 
 #include <uapi/asm-generic/bitsperlong.h>
 
-
 #ifdef CONFIG_64BIT
 #define BITS_PER_LONG 64
 #else

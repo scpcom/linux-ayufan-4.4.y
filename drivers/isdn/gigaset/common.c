@@ -545,7 +545,6 @@ void gigaset_at_init(struct at_state_t *at_state, struct bc_state *bcs,
 		at_state->replystruct = cs->tabcid;
 }
 
-
 static void gigaset_inbuf_init(struct inbuf_t *inbuf, struct cardstate *cs)
 /* inbuf->read must be allocated before! */
 {
@@ -864,7 +863,6 @@ static void cleanup_cs(struct cardstate *cs)
 		wake_up_interruptible(&cs->waitqueue);
 	}
 }
-
 
 /**
  * gigaset_start() - start device operations

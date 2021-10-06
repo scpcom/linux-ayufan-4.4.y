@@ -50,7 +50,6 @@ void sas_resume_sata(struct asd_sas_port *port);
 void sas_ata_end_eh(struct ata_port *ap);
 #else
 
-
 static inline int dev_is_sata(struct domain_device *dev)
 {
 	return 0;

@@ -167,7 +167,6 @@ static int kvm_set_irq_inatomic(struct kvm *kvm, int irq_source_id, u32 irq,
 	return ret;
 }
 
-
 static irqreturn_t kvm_assigned_dev_msi(int irq, void *dev_id)
 {
 	struct kvm_assigned_dev_kernel *assigned_dev = dev_id;
@@ -840,7 +839,6 @@ out:
 	mutex_unlock(&kvm->lock);
 	return r;
 }
-
 
 static int kvm_vm_ioctl_set_msix_nr(struct kvm *kvm,
 				    struct kvm_assigned_msix_nr *entry_nr)

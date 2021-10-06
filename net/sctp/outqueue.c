@@ -693,7 +693,6 @@ int sctp_outq_uncork(struct sctp_outq *q)
 	return sctp_outq_flush(q, 0);
 }
 
-
 /*
  * Try to flush an outqueue.
  *

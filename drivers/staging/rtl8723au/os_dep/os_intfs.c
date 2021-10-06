@@ -479,7 +479,6 @@ int rtw_init_drv_sw23a(struct rtw_adapter *padapter)
 		goto exit;
 	}
 
-
 	if (init_mlme_ext_priv23a(padapter) == _FAIL) {
 		RT_TRACE(_module_os_intfs_c_, _drv_err_,
 			 "Can't init mlme_ext_priv\n");

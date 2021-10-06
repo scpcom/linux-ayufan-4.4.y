@@ -163,7 +163,6 @@ static inline u16 FAN_TO_REG(unsigned long val)
 #define PWM_TO_REG(val)			clamp_val(val, 0, 255)
 #define PWM_FROM_REG(val)		(val)
 
-
 /*
  * ZONEs have the following parameters:
  *    Limit (low) temp,           1. degC
@@ -1011,7 +1010,6 @@ static SENSOR_DEVICE_ATTR(temp##offset##_max, S_IRUGO | S_IWUSR,	\
 show_temp_reg(1);
 show_temp_reg(2);
 show_temp_reg(3);
-
 
 /* Automatic PWM control */
 

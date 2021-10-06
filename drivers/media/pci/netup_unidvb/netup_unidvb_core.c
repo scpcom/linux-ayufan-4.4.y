@@ -972,7 +972,6 @@ static void netup_unidvb_finidev(struct pci_dev *pci_dev)
 		"%s(): device has been successfully stopped\n", __func__);
 }
 
-
 static struct pci_device_id netup_unidvb_pci_tbl[] = {
 	{ PCI_DEVICE(0x1b55, 0x18f6) },
 	{ 0, }

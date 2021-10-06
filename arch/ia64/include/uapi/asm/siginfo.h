@@ -7,7 +7,6 @@
 #ifndef _UAPI_ASM_IA64_SIGINFO_H
 #define _UAPI_ASM_IA64_SIGINFO_H
 
-
 #define __ARCH_SI_PREAMBLE_SIZE	(4 * sizeof(int))
 
 #define HAVE_ARCH_SIGINFO_T
@@ -120,6 +119,5 @@ typedef struct siginfo {
 
 #undef NSIGTRAP
 #define NSIGTRAP	4
-
 
 #endif /* _UAPI_ASM_IA64_SIGINFO_H */

@@ -11,7 +11,6 @@
 #ifndef _ASM_M32R_PTRACE_H
 #define _ASM_M32R_PTRACE_H
 
-
 #include <asm/m32r.h>		/* M32R_PSW_BSM, M32R_PSW_BPM */
 #include <uapi/asm/ptrace.h>
 

@@ -242,7 +242,6 @@ static int mxb_probe(struct saa7146_dev *dev)
 		return -ENOMEM;
 	}
 
-
 	snprintf(mxb->i2c_adapter.name, sizeof(mxb->i2c_adapter.name), "mxb%d", mxb_num);
 
 	saa7146_i2c_adapter_prepare(dev, &mxb->i2c_adapter, SAA7146_I2C_BUS_BIT_RATE_480);

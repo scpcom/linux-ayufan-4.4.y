@@ -34,7 +34,6 @@
 #define	RTL8723A_TRANS_LPS_TO_ACT_STEPS	15
 #define	RTL8723A_TRANS_END_STEPS	1
 
-
 /* format
  * { offset, cut_msk, fab_msk|interface_msk, base|cmd, msk, value },  comments here
  */
@@ -59,7 +58,6 @@
 	{0x0005, PWR_CUT_ALL_MSK, PWR_FAB_ALL_MSK, PWR_INTF_ALL_MSK, PWR_BASEADDR_MAC, PWR_CMD_POLLING, BIT(1), 0}, /*wait till 0x04[9] = 0 polling until return 0 to disable*/	\
 	{0x0000, PWR_CUT_ALL_MSK, PWR_FAB_ALL_MSK, PWR_INTF_USB_MSK, PWR_BASEADDR_MAC, PWR_CMD_WRITE, BIT(5), BIT(5)}, /*0x00[5] = 1b'1 analog Ips to digital , 1:isolation*/   \
 	{0x0020, PWR_CUT_ALL_MSK, PWR_FAB_ALL_MSK, PWR_INTF_USB_MSK, PWR_BASEADDR_MAC, PWR_CMD_WRITE, BIT(0), 0}, /*0x20[0] = 1b'0 disable LDOA12 MACRO block*/   \
-
 
 #define RTL8723A_TRANS_CARDEMU_TO_SUS													\
 	{0x0005, PWR_CUT_ALL_MSK, PWR_FAB_ALL_MSK, PWR_INTF_USB_MSK, PWR_BASEADDR_MAC, PWR_CMD_WRITE, BIT(3)|BIT(4), BIT(3)}, /*0x04[12:11] = 2b'01 enable WL suspend*/
@@ -111,7 +109,6 @@
 
 #define RTL8723A_TRANS_END															\
 	{0xFFFF, PWR_CUT_ALL_MSK, PWR_FAB_ALL_MSK, PWR_INTF_ALL_MSK, 0, PWR_CMD_END, 0, 0},
-
 
 extern struct wlan_pwr_cfg rtl8723AU_power_on_flow[RTL8723A_TRANS_CARDEMU_TO_ACT_STEPS+RTL8723A_TRANS_END_STEPS];
 extern struct wlan_pwr_cfg rtl8723AU_radio_off_flow[RTL8723A_TRANS_ACT_TO_CARDEMU_STEPS+RTL8723A_TRANS_END_STEPS];

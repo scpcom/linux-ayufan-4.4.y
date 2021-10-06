@@ -492,7 +492,6 @@ error:
 	return err;
 }
 
-
 static int fsl_pq_mdio_remove(struct platform_device *pdev)
 {
 	struct device *device = &pdev->dev;

@@ -68,7 +68,6 @@ const u8 gf100_pte_storage_type_map[256] =
 	0xfe, 0xfe, 0xfe, 0xfe, 0xff, 0xfd, 0xfe, 0xff
 };
 
-
 static void
 gf100_vm_map_pgt(struct nvkm_gpuobj *pgd, u32 index, struct nvkm_memory *pgt[2])
 {

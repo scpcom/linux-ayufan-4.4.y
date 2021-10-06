@@ -213,7 +213,6 @@ static int mmp_clk_mix_determine_rate(struct clk_hw *hw,
 	unsigned int div;
 	int i, j;
 
-
 	mix_rate_best = 0;
 	parent_rate_best = 0;
 	gap_best = ULONG_MAX;

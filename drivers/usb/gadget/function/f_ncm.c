@@ -398,7 +398,6 @@ struct ndp_parser_opts {
 		.next_ndp_index = 1,				\
 	}
 
-
 #define INIT_NDP32_OPTS {					\
 		.nth_sign = USB_CDC_NCM_NTH32_SIGN,		\
 		.ndp_sign = USB_CDC_NCM_NDP32_NOCRC_SIGN,	\
@@ -791,7 +790,6 @@ invalid:
 	/* device either stalls (value < 0) or reports success */
 	return value;
 }
-
 
 static int ncm_set_alt(struct usb_function *f, unsigned intf, unsigned alt)
 {

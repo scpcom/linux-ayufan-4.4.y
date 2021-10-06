@@ -47,19 +47,13 @@
 #include <net/bluetooth/bluetooth.h>
 #include <net/bluetooth/hci_core.h>
 
-
-
 /* ======================== Module parameters ======================== */
-
 
 MODULE_AUTHOR("Marcel Holtmann <marcel@holtmann.org>");
 MODULE_DESCRIPTION("Bluetooth driver for the Anycom BlueCard (LSE039/LSE041)");
 MODULE_LICENSE("GPL");
 
-
-
 /* ======================== Local structures ======================== */
-
 
 struct bluecard_info {
 	struct pcmcia_device *p_dev;
@@ -80,16 +74,13 @@ struct bluecard_info {
 	unsigned long hw_state;		/* Status of the hardware and LED control */
 };
 
-
 static int bluecard_config(struct pcmcia_device *link);
 static void bluecard_release(struct pcmcia_device *link);
 
 static void bluecard_detach(struct pcmcia_device *p_dev);
 
-
 /* Default baud rate: 57600, 115200, 230400 or 460800 */
 #define DEFAULT_BAUD_RATE  230400
-
 
 /* Hardware states */
 #define CARD_READY             1
@@ -117,7 +108,6 @@ static void bluecard_detach(struct pcmcia_device *p_dev);
 #define PKT_BAUD_RATE_115200  0x81
 #define PKT_BAUD_RATE_230400  0x82
 #define PKT_BAUD_RATE_460800  0x83
-
 
 /* These are the register offsets */
 #define REG_COMMAND     0x20
@@ -150,10 +140,7 @@ static void bluecard_detach(struct pcmcia_device *p_dev);
 /* REG_RX_CONTROL */
 #define RTS_LEVEL_SHIFT_BITS  0x02
 
-
-
 /* ======================== LED handling routines ======================== */
-
 
 static void bluecard_activity_led_timeout(u_long arg)
 {
@@ -171,7 +158,6 @@ static void bluecard_activity_led_timeout(u_long arg)
 		outb(0x00, iobase + 0x30);
 	}
 }
-
 
 static void bluecard_enable_activity_led(struct bluecard_info *info)
 {
@@ -195,10 +181,7 @@ static void bluecard_enable_activity_led(struct bluecard_info *info)
 	}
 }
 
-
-
 /* ======================== Interrupt handling ======================== */
-
 
 static int bluecard_write(unsigned int iobase, unsigned int offset, __u8 *buf, int len)
 {
@@ -213,7 +196,6 @@ static int bluecard_write(unsigned int iobase, unsigned int offset, __u8 *buf, i
 
 	return actual;
 }
-
 
 static void bluecard_write_wakeup(struct bluecard_info *info)
 {
@@ -339,7 +321,6 @@ static void bluecard_write_wakeup(struct bluecard_info *info)
 	clear_bit(XMIT_SENDING, &(info->tx_state));
 }
 
-
 static int bluecard_read(unsigned int iobase, unsigned int offset, __u8 *buf, int size)
 {
 	int i, n, len;
@@ -366,7 +347,6 @@ static int bluecard_read(unsigned int iobase, unsigned int offset, __u8 *buf, in
 
 	return len;
 }
-
 
 static void bluecard_receive(struct bluecard_info *info,
 			     unsigned int offset)
@@ -489,12 +469,10 @@ static void bluecard_receive(struct bluecard_info *info,
 
 		}
 
-
 	}
 
 	info->hdev->stat.byte_rx += len;
 }
-
 
 static irqreturn_t bluecard_interrupt(int irq, void *dev_inst)
 {
@@ -556,10 +534,7 @@ static irqreturn_t bluecard_interrupt(int irq, void *dev_inst)
 	return IRQ_HANDLED;
 }
 
-
-
 /* ======================== Device specific HCI commands ======================== */
-
 
 static int bluecard_hci_set_baud_rate(struct hci_dev *hdev, int baud)
 {
@@ -605,10 +580,7 @@ static int bluecard_hci_set_baud_rate(struct hci_dev *hdev, int baud)
 	return 0;
 }
 
-
-
 /* ======================== HCI interface ======================== */
-
 
 static int bluecard_hci_flush(struct hci_dev *hdev)
 {
@@ -619,7 +591,6 @@ static int bluecard_hci_flush(struct hci_dev *hdev)
 
 	return 0;
 }
-
 
 static int bluecard_hci_open(struct hci_dev *hdev)
 {
@@ -638,7 +609,6 @@ static int bluecard_hci_open(struct hci_dev *hdev)
 	return 0;
 }
 
-
 static int bluecard_hci_close(struct hci_dev *hdev)
 {
 	struct bluecard_info *info = hci_get_drvdata(hdev);
@@ -654,7 +624,6 @@ static int bluecard_hci_close(struct hci_dev *hdev)
 
 	return 0;
 }
-
 
 static int bluecard_hci_send_frame(struct hci_dev *hdev, struct sk_buff *skb)
 {
@@ -681,10 +650,7 @@ static int bluecard_hci_send_frame(struct hci_dev *hdev, struct sk_buff *skb)
 	return 0;
 }
 
-
-
 /* ======================== Card services HCI interaction ======================== */
-
 
 static int bluecard_open(struct bluecard_info *info)
 {
@@ -800,7 +766,6 @@ static int bluecard_open(struct bluecard_info *info)
 	return 0;
 }
 
-
 static int bluecard_close(struct bluecard_info *info)
 {
 	unsigned int iobase = info->p_dev->resource[0]->start;
@@ -843,12 +808,10 @@ static int bluecard_probe(struct pcmcia_device *link)
 	return bluecard_config(link);
 }
 
-
 static void bluecard_detach(struct pcmcia_device *link)
 {
 	bluecard_release(link);
 }
-
 
 static int bluecard_config(struct pcmcia_device *link)
 {
@@ -888,7 +851,6 @@ failed:
 	bluecard_release(link);
 	return -ENODEV;
 }
-
 
 static void bluecard_release(struct pcmcia_device *link)
 {

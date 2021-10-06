@@ -576,7 +576,6 @@ int asoc_qcom_lpass_platform_register(struct platform_device *pdev)
 		return ret;
 	}
 
-
 	return devm_snd_soc_register_platform(&pdev->dev,
 			&lpass_platform_driver);
 }

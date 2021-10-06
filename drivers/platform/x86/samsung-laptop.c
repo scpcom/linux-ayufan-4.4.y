@@ -43,7 +43,6 @@
  */
 #define MAX_BRIGHT	0x07
 
-
 #define SABI_IFACE_MAIN			0x00
 #define SABI_IFACE_SUB			0x02
 #define SABI_IFACE_COMPLETE		0x04

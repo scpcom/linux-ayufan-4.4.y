@@ -28,7 +28,6 @@ struct ieee80211_crypto_alg {
 	struct ieee80211_crypto_ops *ops;
 };
 
-
 struct ieee80211_crypto {
 	struct list_head algs;
 	spinlock_t lock;
@@ -153,7 +152,6 @@ int ieee80211_unregister_crypto_ops(struct ieee80211_crypto_ops *ops)
 	return del_alg ? 0 : -1;
 }
 
-
 struct ieee80211_crypto_ops *ieee80211_get_crypto_ops(const char *name)
 {
 	unsigned long flags;
@@ -179,7 +177,6 @@ struct ieee80211_crypto_ops *ieee80211_get_crypto_ops(const char *name)
 	else
 		return NULL;
 }
-
 
 static void *ieee80211_crypt_null_init(int keyidx) { return (void *) 1; }
 static void ieee80211_crypt_null_deinit(void *priv) {}

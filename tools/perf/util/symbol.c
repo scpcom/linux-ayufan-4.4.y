@@ -1460,7 +1460,6 @@ int dso__load(struct dso *dso, struct map *map, symbol_filter_t filter)
 		dso->symtab_type == DSO_BINARY_TYPE__GUEST_KMODULE ||
 		dso->symtab_type == DSO_BINARY_TYPE__GUEST_KMODULE_COMP;
 
-
 	/*
 	 * Read the build id if possible. This is required for
 	 * DSO_BINARY_TYPE__BUILDID_DEBUGINFO to work

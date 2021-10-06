@@ -598,7 +598,6 @@ static int lb_init(struct team *team)
 		u64_stats_init(&team_lb_stats->syncp);
 	}
 
-
 	INIT_DELAYED_WORK(&lb_priv->ex->stats.refresh_dw, lb_stats_refresh);
 
 	err = team_options_register(team, lb_options, ARRAY_SIZE(lb_options));

@@ -85,7 +85,6 @@ struct cs_char {
 /* Timeout to wait for pending HSI transfers to complete */
 #define CS_HSI_TRANSFER_TIMEOUT_MS      500
 
-
 #define RX_PTR_BOUNDARY_SHIFT		8
 #define RX_PTR_MAX_SHIFT		(RX_PTR_BOUNDARY_SHIFT + \
 						CS_MAX_BUFFERS_SHIFT)

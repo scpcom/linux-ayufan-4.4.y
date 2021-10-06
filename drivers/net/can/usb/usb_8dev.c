@@ -112,7 +112,6 @@ enum usb_8dev_cmd {
 
 #define USB_8DEV_RP_MASK		0x7F  /* Mask for Receive Error Bit */
 
-
 /* table of devices that work with this driver */
 static const struct usb_device_id usb_8dev_table[] = {
 	{ USB_DEVICE(USB_8DEV_VENDOR_ID, USB_8DEV_PRODUCT_ID) },

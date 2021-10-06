@@ -65,4 +65,3 @@ void *spu_get_profile_private_kref(struct spu_context *ctx)
 	return ctx->prof_priv_kref;
 }
 EXPORT_SYMBOL_GPL(spu_get_profile_private_kref);
-

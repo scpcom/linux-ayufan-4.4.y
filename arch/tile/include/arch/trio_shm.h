@@ -14,7 +14,6 @@
 
 /* Machine-generated file; do not edit. */
 
-
 #ifndef __ARCH_TRIO_SHM_H__
 #define __ARCH_TRIO_SHM_H__
 

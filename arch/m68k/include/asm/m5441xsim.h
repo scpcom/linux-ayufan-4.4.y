@@ -98,7 +98,6 @@
 #define	MCFPIT_BASE2		0xFC088000	/* Base address of TIMER2 */
 #define	MCFPIT_BASE3		0xFC08C000	/* Base address of TIMER3 */
 
-
 #define MCF_IRQ_PIT1		(MCFINT2_VECBASE + MCFINT2_PIT1)
 
 /*

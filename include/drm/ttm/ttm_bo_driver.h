@@ -265,8 +265,6 @@ struct ttm_mem_type_manager_func {
  * It's set up by the ttm_bo_driver::init_mem_type method.
  */
 
-
-
 struct ttm_mem_type_manager {
 	struct ttm_bo_device *bdev;
 
@@ -487,7 +485,6 @@ struct ttm_bo_global {
 	 */
 	atomic_t bo_count;
 };
-
 
 #define TTM_NUM_MEM_TYPES 8
 

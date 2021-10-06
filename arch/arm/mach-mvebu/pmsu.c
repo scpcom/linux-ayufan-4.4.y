@@ -41,7 +41,6 @@
 #include <asm/tlbflush.h>
 #include "common.h"
 
-
 #define PMSU_BASE_OFFSET    0x100
 #define PMSU_REG_SIZE	    0x1000
 

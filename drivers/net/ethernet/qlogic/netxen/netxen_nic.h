@@ -420,7 +420,6 @@ struct rcv_desc {
 #define netxen_get_lro_sts_mss(sts_data1)		\
 	((sts_data1 >> 32) & 0x0FFFF)
 
-
 struct status_desc {
 	__le64 status_desc_data[2];
 } __attribute__ ((aligned(16)));
@@ -938,7 +937,6 @@ typedef struct {
 #define NX_HOST_INT_CRB_MODE_NOTX	3
 #define NX_HOST_INT_CRB_MODE_NORXTX	4
 
-
 /* MAC */
 
 #define MC_COUNT_P2	16
@@ -1194,7 +1192,6 @@ typedef struct {
 #define NX_CDRP_CMD_TEMP_SIZE           0x0000002f
 #define NX_CDRP_CMD_GET_TEMP_HDR        0x00000030
 
-
 #define NX_DUMP_STATE_ARRAY_LEN		16
 #define NX_DUMP_CAP_SIZE_ARRAY_LEN	8
 
@@ -1203,7 +1200,6 @@ typedef struct {
 #define NX_ENABLE_FW_DUMP               0xaddfeed
 #define NX_DISABLE_FW_DUMP              0xbadfeed
 #define NX_FORCE_FW_RESET               0xdeaddead
-
 
 /* Fw dump levels */
 static const u32 FW_DUMP_LEVELS[] = { 0x3, 0x7, 0xf, 0x1f, 0x3f, 0x7f, 0xff };
@@ -1233,7 +1229,6 @@ static const u32 FW_DUMP_LEVELS[] = { 0x3, 0x7, 0xf, 0x1f, 0x3f, 0x7f, 0xff };
 	writel(data, (void __iomem *) (bar0 + NX_FW_DUMP_REG2 + LSW(addr)));\
 	readl((void __iomem *) (bar0 + NX_FW_DUMP_REG2 + LSW(addr)));  \
 } while (0)
-
 
 /*
 Entry Type Defines
@@ -1298,8 +1293,6 @@ Entry Type Defines
 #define NX_PCI_READ_32(ADDR)			readl((ADDR))
 #define NX_PCI_WRITE_32(DATA, ADDR)	writel(DATA, (ADDR))
 
-
-
 struct netxen_minidump {
 	u32 pos;			/* position in the dump buffer */
 	u8  fw_supports_md;		/* FW supports Mini cordump */
@@ -1314,8 +1307,6 @@ struct netxen_minidump {
 	void *md_template;		/* FW template will be stored */
 	void *md_capture_buff;		/* FW dump will be stored */
 };
-
-
 
 struct netxen_minidump_template_hdr {
 	u32 entry_type;
@@ -1355,7 +1346,6 @@ struct netxen_common_entry_hdr {
 		u32 entry_ctrl_word;
 	};
 };
-
 
 /* Generic Entry Including Header */
 struct netxen_minidump_entry {
@@ -1414,7 +1404,6 @@ struct netxen_minidump_entry_rdrom {
 	u32 read_addr;
 	u32 read_data_size;
 };
-
 
 /* Read CRB and Control Entry Header */
 struct netxen_minidump_entry_crb {

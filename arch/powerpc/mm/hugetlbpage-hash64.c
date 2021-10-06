@@ -43,7 +43,6 @@ int __hash_page_huge(unsigned long ea, unsigned long access, unsigned long vsid,
 	 *	page is currently not DIRTY.
 	 */
 
-
 	do {
 		old_pte = pte_val(*ptep);
 		/* If PTE busy, retry the access */

@@ -105,7 +105,6 @@ static struct {
 };
 #undef BRCMF_FWS_TLV_DEF
 
-
 static const char *brcmf_fws_get_tlv_name(enum brcmf_fws_tlv_type id)
 {
 	int i;
@@ -414,7 +413,6 @@ enum brcmf_fws_hanger_item_state {
 	BRCMF_FWS_HANGER_ITEM_STATE_INUSE,
 	BRCMF_FWS_HANGER_ITEM_STATE_INUSE_SUPPRESSED
 };
-
 
 /**
  * struct brcmf_fws_hanger_item - single entry for tx pending packet.

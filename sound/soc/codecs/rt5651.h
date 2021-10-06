@@ -134,7 +134,6 @@
 #define RT5651_DUMMY2				0xfb
 #define RT5651_DUMMY3				0xfc
 
-
 /* Index of Codec Private Register definition */
 #define RT5651_BIAS_CUR1			0x12
 #define RT5651_BIAS_CUR3			0x14
@@ -172,7 +171,6 @@
 #define RT5651_EQ_GN_HIP2			0xb2
 #define RT5651_EQ_PRE_VOL			0xb3
 #define RT5651_EQ_PST_VOL			0xb4
-
 
 /* global definition */
 #define RT5651_L_MUTE				(0x1 << 15)
@@ -504,7 +502,6 @@
 /* PDM I2C/Data Control 2 (0x32) */
 #define RT5651_PDM_I2C_ADDR			(0xff << 8)
 #define RT5651_PDM_I2C_CMD_PATTERN		(0xff)
-
 
 /* REC Left Mixer Control 1 (0x3b) */
 #define RT5651_G_LN_L2_RM_L_MASK		(0x7 << 13)

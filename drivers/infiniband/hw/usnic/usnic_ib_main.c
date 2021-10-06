@@ -415,7 +415,6 @@ static void *usnic_ib_device_add(struct pci_dev *dev)
 	us_ibdev->ib_dev.get_dma_mr = usnic_ib_get_dma_mr;
 	us_ibdev->ib_dev.get_port_immutable = usnic_port_immutable;
 
-
 	if (ib_register_device(&us_ibdev->ib_dev, NULL))
 		goto err_fwd_dealloc;
 

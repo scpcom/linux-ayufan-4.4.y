@@ -173,7 +173,6 @@ static int fimc_pipeline_s_power(struct fimc_pipeline *p, bool on)
 
 		ret = __subdev_set_power(p->subdevs[idx], on);
 
-
 		if (ret < 0 && ret != -ENXIO)
 			goto error;
 	}

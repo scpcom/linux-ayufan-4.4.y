@@ -224,7 +224,6 @@ static int set_video_mode_Nala(struct pwc_device *pdev, int size, int pixfmt,
 	return 0;
 }
 
-
 static int set_video_mode_Timon(struct pwc_device *pdev, int size, int pixfmt,
 				int frames, int *compression, int send_to_cam)
 {
@@ -274,7 +273,6 @@ static int set_video_mode_Timon(struct pwc_device *pdev, int size, int pixfmt,
 		pdev->frame_size = (pdev->width * pdev->height * 12) / 8;
 	return 0;
 }
-
 
 static int set_video_mode_Kiara(struct pwc_device *pdev, int size, int pixfmt,
 				int frames, int *compression, int send_to_cam)

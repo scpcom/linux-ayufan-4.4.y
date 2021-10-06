@@ -126,7 +126,6 @@ static void mdp4_plane_cleanup_fb(struct drm_plane *plane,
 	msm_framebuffer_cleanup(fb, mdp4_kms->id);
 }
 
-
 static int mdp4_plane_atomic_check(struct drm_plane *plane,
 		struct drm_plane_state *state)
 {

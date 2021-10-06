@@ -1276,7 +1276,6 @@ static int pxa_ep_set_halt(struct usb_ep *_ep, int value)
 	unsigned long flags;
 	int rc;
 
-
 	if (!_ep)
 		return -EINVAL;
 	udc_usb_ep = container_of(_ep, struct udc_usb_ep, usb_ep);

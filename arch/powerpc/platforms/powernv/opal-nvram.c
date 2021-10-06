@@ -95,4 +95,3 @@ void __init opal_nvram_init(void)
 	ppc_md.nvram_write = opal_nvram_write;
 	ppc_md.nvram_size = opal_nvram_size;
 }
-

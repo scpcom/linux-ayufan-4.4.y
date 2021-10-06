@@ -17,4 +17,3 @@ extern int port_rcv_fd(int fd);
 extern void port_remove_dev(void *d);
 
 #endif
-

@@ -40,7 +40,6 @@ struct kvm_regs {
 struct kvm_fpu {
 };
 
-
 /*
  * For MIPS, we use KVM_SET_ONE_REG and KVM_GET_ONE_REG to access various
  * registers.  The id field is broken down as follows:
@@ -68,7 +67,6 @@ struct kvm_fpu {
 #define KVM_REG_MIPS_CP0	(KVM_REG_MIPS | 0x0000000000010000ULL)
 #define KVM_REG_MIPS_KVM	(KVM_REG_MIPS | 0x0000000000020000ULL)
 #define KVM_REG_MIPS_FPU	(KVM_REG_MIPS | 0x0000000000030000ULL)
-
 
 /*
  * KVM_REG_MIPS_GP - General purpose registers from kvm_regs.
@@ -111,7 +109,6 @@ struct kvm_fpu {
 #define KVM_REG_MIPS_LO		(KVM_REG_MIPS_GP | KVM_REG_SIZE_U64 | 33)
 #define KVM_REG_MIPS_PC		(KVM_REG_MIPS_GP | KVM_REG_SIZE_U64 | 34)
 
-
 /*
  * KVM_REG_MIPS_KVM - KVM specific control registers.
  */
@@ -146,7 +143,6 @@ struct kvm_fpu {
  */
 #define KVM_REG_MIPS_COUNT_HZ	    (KVM_REG_MIPS_KVM | KVM_REG_SIZE_U64 | 2)
 
-
 /*
  * KVM_REG_MIPS_FPU - Floating Point and MIPS SIMD Architecture (MSA) registers.
  *
@@ -177,7 +173,6 @@ struct kvm_fpu {
  */
 #define KVM_REG_MIPS_MSA_IR	 (KVM_REG_MIPS_MSACR | KVM_REG_SIZE_U32 |  0)
 #define KVM_REG_MIPS_MSA_CSR	 (KVM_REG_MIPS_MSACR | KVM_REG_SIZE_U32 |  1)
-
 
 /*
  * KVM MIPS specific structures and definitions

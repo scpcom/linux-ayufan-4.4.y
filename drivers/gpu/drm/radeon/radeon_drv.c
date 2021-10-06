@@ -321,7 +321,6 @@ static int radeon_resume(struct drm_device *dev)
 	return 0;
 }
 
-
 static const struct file_operations radeon_driver_old_fops = {
 	.owner = THIS_MODULE,
 	.open = drm_open,

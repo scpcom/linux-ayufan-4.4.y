@@ -350,7 +350,6 @@ typedef struct {
 } reg_pio_r_masked_intr;
 #define REG_RD_ADDR_pio_r_masked_intr 112
 
-
 /* Constants */
 enum {
   regk_pio_a2                              = 0x00000003,

@@ -62,7 +62,6 @@ static int skcipher_crypt_blkcipher(struct skcipher_request *req,
 		.flags = req->base.flags,
 	};
 
-
 	return crypt(&desc, req->dst, req->src, req->cryptlen);
 }
 

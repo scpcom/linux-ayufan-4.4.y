@@ -119,7 +119,6 @@
 			  * active ports within), then next HFI */
 #define HFI1_ALG_COUNT  2 /* number of algorithm choices */
 
-
 /* User commands. */
 #define HFI1_CMD_ASSIGN_CTXT     1	/* allocate HFI and context */
 #define HFI1_CMD_CTXT_INFO       2	/* find out what resources we got */
@@ -402,7 +401,6 @@ struct hfi1_pkt_header {
 	__be32 bth[3];
 	struct hfi1_kdeth_header kdeth;
 } __packed;
-
 
 /*
  * The list of usermode accessible registers.

@@ -257,7 +257,6 @@ static int qxl_device_init(struct qxl_device *qdev,
 		 (unsigned long)qdev->surfaceram_base,
 		 (unsigned long)qdev->surfaceram_size);
 
-
 	qdev->gc_queue = create_singlethread_workqueue("qxl_gc");
 	INIT_WORK(&qdev->gc_work, qxl_gc_work);
 
@@ -346,5 +345,3 @@ out:
 	kfree(qdev);
 	return r;
 }
-
-

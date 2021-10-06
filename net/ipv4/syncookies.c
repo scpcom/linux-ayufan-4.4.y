@@ -71,7 +71,6 @@ static u32 cookie_hash(__be32 saddr, __be32 daddr, __be16 sport, __be16 dport,
 	return tmp[17];
 }
 
-
 /*
  * when syncookies are in effect and tcp timestamps are enabled we encode
  * tcp options in the lower bits of the timestamp value that will be
@@ -103,7 +102,6 @@ __u32 cookie_init_timestamp(struct request_sock *req)
 	}
 	return ts;
 }
-
 
 static __u32 secure_tcp_syn_cookie(__be32 saddr, __be32 daddr, __be16 sport,
 				   __be16 dport, __u32 sseq, __u32 data)

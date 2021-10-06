@@ -45,7 +45,6 @@ static void __init iq80331_timer_init(void)
 		iop_init_time(266000000);
 }
 
-
 /*
  * IQ80331 PCI.
  */
@@ -97,7 +96,6 @@ static int __init iq80331_pci_init(void)
 }
 
 subsys_initcall(iq80331_pci_init);
-
 
 /*
  * IQ80331 machine initialisation.

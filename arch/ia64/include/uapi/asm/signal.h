@@ -8,7 +8,6 @@
 #ifndef _UAPI_ASM_IA64_SIGNAL_H
 #define _UAPI_ASM_IA64_SIGNAL_H
 
-
 #define SIGHUP		 1
 #define SIGINT		 2
 #define SIGQUIT		 3
@@ -100,7 +99,6 @@
 #endif
 #define SIGSTKSZ	262144	/* default stack size for sigaltstack() */
 
-
 #include <asm-generic/signal-defs.h>
 
 # ifndef __ASSEMBLY__
@@ -115,7 +113,6 @@ typedef struct sigaltstack {
 	int ss_flags;
 	size_t ss_size;
 } stack_t;
-
 
 # endif /* !__ASSEMBLY__ */
 #endif /* _UAPI_ASM_IA64_SIGNAL_H */

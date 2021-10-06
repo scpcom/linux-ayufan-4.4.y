@@ -117,7 +117,6 @@ typedef struct {
 #define REG_RD_ADDR_clkgen_rw_clk_ctrl 4
 #define REG_WR_ADDR_clkgen_rw_clk_ctrl 4
 
-
 /* Constants */
 enum {
   regk_clkgen_eth1000_rx                   = 0x0000000c,

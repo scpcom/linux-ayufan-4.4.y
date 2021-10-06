@@ -44,11 +44,9 @@
  * END_DESC
 */
 
-
 #include "float.h"
 #include "sgl_float.h"
 #include "dbl_float.h"
-
 
 /*
  *  Double Floating-point Multiply Fused Add
@@ -2652,4 +2650,3 @@ unsigned int *status;
 		else Set_inexactflag();
     	return(NOEXCEPTION);
 }
-

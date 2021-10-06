@@ -85,7 +85,6 @@ struct snd_maya44 {
 	struct mutex mutex;
 };
 
-
 /* write the given register and save the data to the cache */
 static void wm8776_write(struct snd_ice1712 *ice, struct snd_wm8776 *wm,
 			 unsigned char reg, unsigned short val)
@@ -114,7 +113,6 @@ static int wm8776_write_bits(struct snd_ice1712 *ice, struct snd_wm8776 *wm,
 	}
 	return 0;
 }
-
 
 /*
  * WM8776 volume controls
@@ -433,7 +431,6 @@ static int maya_pb_route_put(struct snd_kcontrol *kcontrol,
 					 maya_pb_route_shift(idx));
 }
 
-
 /*
  * controls to be added
  */
@@ -541,7 +538,6 @@ static int maya44_add_controls(struct snd_ice1712 *ice)
 	return 0;
 }
 
-
 /*
  * initialize a wm8776 chip
  */
@@ -589,7 +585,6 @@ static void wm8776_init(struct snd_ice1712 *ice,
 		wm8776_write(ice, wm, reg, data);
 	}
 }
-
 
 /*
  * change the rate on the WM8776 codecs.
@@ -672,7 +667,6 @@ static struct snd_pcm_hw_constraint_list dac_rates = {
 	.mask = 0
 };
 
-
 /*
  * chip addresses on I2C bus
  */
@@ -719,7 +713,6 @@ static int maya44_init(struct snd_ice1712 *ice)
 
 	return 0;
 }
-
 
 /*
  * Maya44 boards don't provide the EEPROM data except for the vendor IDs.

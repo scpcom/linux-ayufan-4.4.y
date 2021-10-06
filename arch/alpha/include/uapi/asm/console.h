@@ -46,5 +46,4 @@
 #define ENV_LANGUAGE		0x0E
 #define ENV_TTY_DEV		0x0F
 
-
 #endif /* _UAPI__AXP_CONSOLE_H */

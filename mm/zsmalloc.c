@@ -612,7 +612,6 @@ static inline void zs_pool_stat_destroy(struct zs_pool *pool)
 }
 #endif
 
-
 /*
  * For each size class, zspages are divided into different groups
  * depending on how "full" they are. This was done so that we could
@@ -1377,7 +1376,6 @@ static unsigned long obj_malloc(struct page *first_page,
 
 	return obj;
 }
-
 
 /**
  * zs_malloc - Allocate block of given size from pool.

@@ -459,7 +459,6 @@ SND_SOC_DAPM_INPUT("MIC2"),
 SND_SOC_DAPM_VMID("Vmid"),
 };
 
-
 static const struct snd_soc_dapm_route alc5632_dapm_routes[] = {
 	/* Playback streams */
 	{"Left DAC", NULL, "AIFRXL"},

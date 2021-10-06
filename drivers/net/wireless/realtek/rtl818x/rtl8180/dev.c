@@ -946,7 +946,6 @@ static int rtl8180_init_hw(struct ieee80211_hw *dev)
 		rtl8180_set_anaparam2(priv, RTL8225SE_ANAPARAM2_ON);
 		rtl8180_set_anaparam3(priv, RTL8225SE_ANAPARAM3);
 
-
 		rtl818x_iowrite8(priv, &priv->map->CONFIG5,
 			    rtl818x_ioread8(priv, &priv->map->CONFIG5) & 0x7F);
 
@@ -1463,7 +1462,6 @@ static void rtl8180_conf_erp(struct ieee80211_hw *dev,
 
 	/* HW should use 4uS units for EIFS (I'm sure for rtl8185)*/
 	hw_eifs = DIV_ROUND_UP(eifs, 4);
-
 
 	rtl818x_iowrite8(priv, &priv->map->SLOT, priv->slot_time);
 	rtl818x_iowrite8(priv, &priv->map->SIFS, sifs);

@@ -12,7 +12,6 @@
 #include <asm/siginfo.h>
 #include <asm/signal.h>
 
-
 static bool first_fault = true;
 
 static int bcm5301x_abort_handler(unsigned long addr, unsigned int fsr,

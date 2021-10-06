@@ -244,4 +244,3 @@ struct mmci_host {
 #define dma_inprogress(host)	(0)
 #endif
 };
-

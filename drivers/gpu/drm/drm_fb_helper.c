@@ -1262,7 +1262,6 @@ retry:
 	info->var.xoffset = var->xoffset;
 	info->var.yoffset = var->yoffset;
 
-
 fail:
 	drm_atomic_clean_old_fb(dev, plane_mask, ret);
 
@@ -1455,7 +1454,6 @@ static int drm_fb_helper_single_fb_probe(struct drm_fb_helper *fb_helper,
 	for (i = 0; i < fb_helper->crtc_count; i++)
 		if (fb_helper->crtc_info[i].mode_set.num_connectors)
 			fb_helper->crtc_info[i].mode_set.fb = fb_helper->fb;
-
 
 	info->var.pixclock = 0;
 	if (register_framebuffer(info) < 0)

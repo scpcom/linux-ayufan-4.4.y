@@ -663,7 +663,6 @@ typedef struct {
 } reg_gio_r_pwm_in_cnt;
 #define REG_RD_ADDR_gio_r_pwm_in_cnt 240
 
-
 /* Constants */
 enum {
   regk_gio_anyedge                         = 0x00000007,

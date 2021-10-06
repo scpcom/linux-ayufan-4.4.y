@@ -147,7 +147,6 @@ static int tw9903_s_std(struct v4l2_subdev *sd, v4l2_std_id norm)
 	return 0;
 }
 
-
 static int tw9903_s_ctrl(struct v4l2_ctrl *ctrl)
 {
 	struct tw9903 *dec = container_of(ctrl->handler, struct tw9903, hdl);

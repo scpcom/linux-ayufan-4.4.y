@@ -96,7 +96,6 @@ static int isp_video_capture_start_streaming(struct vb2_queue *q,
 	    test_bit(ST_ISP_VID_CAP_STREAMING, &isp->state))
 		return 0;
 
-
 	dma->cmd = DMA_OUTPUT_COMMAND_ENABLE;
 	dma->notify_dma_done = DMA_OUTPUT_NOTIFY_DMA_DONE_ENABLE;
 	dma->buffer_address = is->is_dma_p_region +

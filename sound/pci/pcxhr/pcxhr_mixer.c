@@ -243,7 +243,6 @@ static struct snd_kcontrol_new pcxhr_control_output_switch = {
 	.put =		pcxhr_audio_sw_put
 };
 
-
 #define PCXHR_DIGITAL_LEVEL_MIN		0x000	/* -110 dB */
 #define PCXHR_DIGITAL_LEVEL_MAX		0x1ff	/* +18 dB */
 #define PCXHR_DIGITAL_ZERO_LEVEL	0x1b7	/*  0 dB */
@@ -344,7 +343,6 @@ static int pcxhr_update_audio_pipe_level(struct snd_pcxhr *chip,
 	return 0;
 }
 
-
 /* shared */
 static int pcxhr_digital_vol_info(struct snd_kcontrol *kcontrol,
 				  struct snd_ctl_elem_info *uinfo)
@@ -355,7 +353,6 @@ static int pcxhr_digital_vol_info(struct snd_kcontrol *kcontrol,
 	uinfo->value.integer.max = PCXHR_DIGITAL_LEVEL_MAX;   /*   18.0 dB */
 	return 0;
 }
-
 
 static int pcxhr_pcm_vol_get(struct snd_kcontrol *kcontrol,
 			     struct snd_ctl_elem_value *ucontrol)
@@ -422,7 +419,6 @@ static struct snd_kcontrol_new snd_pcxhr_pcm_vol =
 	.tlv = { .p = db_scale_digital },
 };
 
-
 static int pcxhr_pcm_sw_get(struct snd_kcontrol *kcontrol,
 			    struct snd_ctl_elem_value *ucontrol)
 {
@@ -468,7 +464,6 @@ static struct snd_kcontrol_new pcxhr_control_pcm_switch = {
 	.get =		pcxhr_pcm_sw_get,
 	.put =		pcxhr_pcm_sw_put
 };
-
 
 /*
  * monitoring level control
@@ -569,8 +564,6 @@ static struct snd_kcontrol_new pcxhr_control_monitor_sw = {
 	.get =          pcxhr_monitor_sw_get,
 	.put =          pcxhr_monitor_sw_put
 };
-
-
 
 /*
  * audio source select
@@ -704,7 +697,6 @@ static struct snd_kcontrol_new pcxhr_control_audio_src = {
 	.get =		pcxhr_audio_src_get,
 	.put =		pcxhr_audio_src_put,
 };
-
 
 /*
  * clock type selection
@@ -1111,7 +1103,6 @@ static void pcxhr_init_audio_levels(struct snd_pcxhr *chip)
 
 	return;
 }
-
 
 int pcxhr_create_mixer(struct pcxhr_mgr *mgr)
 {

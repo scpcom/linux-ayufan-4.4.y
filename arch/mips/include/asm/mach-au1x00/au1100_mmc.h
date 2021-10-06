@@ -52,7 +52,6 @@ struct au1xmmc_platform_data {
 #define SD0_BASE	0xB0600000
 #define SD1_BASE	0xB0680000
 
-
 /*
  *  Register offsets.
  */
@@ -72,18 +71,15 @@ struct au1xmmc_platform_data {
 #define SD_RESP0	(0x0034)
 #define SD_TIMEOUT	(0x0038)
 
-
 /*
  *  SD_TXPORT bit definitions.
  */
 #define SD_TXPORT_TXD	(0x000000ff)
 
-
 /*
  *  SD_RXPORT bit definitions.
  */
 #define SD_RXPORT_RXD	(0x000000ff)
-
 
 /*
  *  SD_CONFIG bit definitions.
@@ -113,13 +109,11 @@ struct au1xmmc_platform_data {
 #define SD_CONFIG_CD	(0x40000000)
 #define SD_CONFIG_SI	(0x80000000)
 
-
 /*
  *  SD_ENABLE bit definitions.
  */
 #define SD_ENABLE_CE	(0x00000001)
 #define SD_ENABLE_R	(0x00000002)
-
 
 /*
  *  SD_CONFIG2 bit definitions.
@@ -135,7 +129,6 @@ struct au1xmmc_platform_data {
 #define SD_CONFIG2_RW	(0x00000200)
 #define SD_CONFIG2_DP	(0x00000400)
 
-
 /*
  *  SD_BLKSIZE bit definitions.
  */
@@ -143,7 +136,6 @@ struct au1xmmc_platform_data {
 #define SD_BLKSIZE_BS_SHIFT	 (0)
 #define SD_BLKSIZE_BC	(0x01ff0000)
 #define SD_BLKSIZE_BC_SHIFT	(16)
-
 
 /*
  *  SD_STATUS bit definitions.
@@ -178,7 +170,6 @@ struct au1xmmc_platform_data {
 #define SD_STATUS_CD	(0x40000000)
 #define SD_STATUS_SI	(0x80000000)
 
-
 /*
  *  SD_CMD bit definitions.
  */
@@ -205,6 +196,5 @@ struct au1xmmc_platform_data {
 #define SD_CMD_RT_5	(0x00050000)
 #define SD_CMD_RT_6	(0x00060000)
 #define SD_CMD_RT_1B	(0x00810000)
-
 
 #endif /* __ASM_AU1100_MMC_H */

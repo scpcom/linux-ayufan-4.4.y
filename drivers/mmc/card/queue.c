@@ -280,7 +280,6 @@ int mmc_init_queue(struct mmc_queue *mq, struct mmc_card *card,
 		if (ret)
 			goto cleanup_queue;
 
-
 		mqrq_prev->sg = mmc_alloc_sg(host->max_segs, &ret);
 		if (ret)
 			goto cleanup_queue;
@@ -364,7 +363,6 @@ int mmc_packed_init(struct mmc_queue *mq, struct mmc_card *card)
 	struct mmc_queue_req *mqrq_cur = &mq->mqrq[0];
 	struct mmc_queue_req *mqrq_prev = &mq->mqrq[1];
 	int ret = 0;
-
 
 	mqrq_cur->packed = kzalloc(sizeof(struct mmc_packed), GFP_KERNEL);
 	if (!mqrq_cur->packed) {

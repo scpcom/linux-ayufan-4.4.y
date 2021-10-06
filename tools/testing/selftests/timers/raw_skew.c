@@ -38,7 +38,6 @@ static inline int ksft_exit_fail(void)
 }
 #endif
 
-
 #define CLOCK_MONOTONIC_RAW		4
 #define NSEC_PER_SEC 1000000000LL
 

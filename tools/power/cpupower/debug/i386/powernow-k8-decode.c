@@ -53,7 +53,6 @@ out:
 	return err;
 }
 
-
 /* Return a frequency in MHz, given an input fid */
 static uint32_t find_freq_from_fid(uint32_t fid)
 {
@@ -86,7 +85,6 @@ int main (int argc, char *argv[])
 		exit(1);
 	}
 
-	
 	printf("cpu %d currently at %d MHz and %d mV\n",
 			cpu,
 			find_freq_from_fid(fid),

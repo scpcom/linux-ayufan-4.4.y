@@ -130,8 +130,6 @@ struct igmpmsg {
  *	That's all usermode folks
  */
 
-
-
 #define MFC_ASSERT_THRESH (3*HZ)		/* Maximal freq. of asserts */
 
 /*
@@ -141,6 +139,5 @@ struct igmpmsg {
 #define IGMPMSG_NOCACHE		1		/* Kern cache fill request to mrouted */
 #define IGMPMSG_WRONGVIF	2		/* For PIM assert processing (unused) */
 #define IGMPMSG_WHOLEPKT	3		/* For PIM Register processing */
-
 
 #endif /* _UAPI__LINUX_MROUTE_H */

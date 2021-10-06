@@ -34,12 +34,10 @@ static inline int ksft_exit_fail(void)
 }
 #endif
 
-
 /* serializes shared list access */
 pthread_mutex_t list_lock = PTHREAD_MUTEX_INITIALIZER;
 /* serializes console output */
 pthread_mutex_t print_lock = PTHREAD_MUTEX_INITIALIZER;
-
 
 #define MAX_THREADS 128
 #define LISTSIZE 128
@@ -48,7 +46,6 @@ int done = 0;
 
 struct timespec global_list[LISTSIZE];
 int listcount = 0;
-
 
 void checklist(struct timespec *list, int size)
 {
@@ -108,7 +105,6 @@ void *shared_thread(void *arg)
 	return NULL;
 }
 
-
 /* Each independent thread fills in its own
  * list. This stresses clock_gettime() lock contention.
  */
@@ -167,7 +163,6 @@ int main(int argc, char **argv)
 
 	if (thread_count > MAX_THREADS)
 		thread_count = MAX_THREADS;
-
 
 	setbuf(stdout, NULL);
 

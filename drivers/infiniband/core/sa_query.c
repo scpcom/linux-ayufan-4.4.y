@@ -142,7 +142,6 @@ static const struct nla_policy ib_nl_policy[LS_NLA_TYPE_MAX] = {
 	[LS_NLA_TYPE_QOS_CLASS]		= {.type = NLA_U16},
 };
 
-
 static void ib_sa_add_one(struct ib_device *device);
 static void ib_sa_remove_one(struct ib_device *device, void *client_data);
 

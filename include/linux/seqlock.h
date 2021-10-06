@@ -90,7 +90,6 @@ static inline void seqcount_lockdep_reader_access(const seqcount_t *s)
 
 #define SEQCNT_ZERO(lockname) { .sequence = 0, SEQCOUNT_DEP_MAP_INIT(lockname)}
 
-
 /**
  * __read_seqcount_begin - begin a seq-read critical section (without barrier)
  * @s: pointer to seqcount_t
@@ -219,8 +218,6 @@ static inline int read_seqcount_retry(const seqcount_t *s, unsigned start)
 	smp_rmb();
 	return __read_seqcount_retry(s, start);
 }
-
-
 
 static inline void raw_write_seqcount_begin(seqcount_t *s)
 {

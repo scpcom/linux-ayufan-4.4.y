@@ -35,7 +35,6 @@
 #include "odm_precomp.h"
 #include "odm.h"
 
-
 /* 2TODO: We should define 8192S firmware related macro settings here!! */
 #define RTL819X_DEFAULT_RF_TYPE			RF_1T2R
 #define RTL819X_TOTAL_RF_PATH				2
@@ -90,7 +89,6 @@ struct rt_8723a_firmware_hdr {
 	u8		Subversion;	/*  FW Subversion, default 0x00 */
 	u8		Rsvd1;
 
-
 	/*  LONG WORD 1 ---- */
 	u8		Month;	/*  Release time Month field */
 	u8		Date;	/*  Release time Date field */
@@ -110,7 +108,6 @@ struct rt_8723a_firmware_hdr {
 
 #define DRIVER_EARLY_INT_TIME		0x05
 #define BCN_DMA_ATIME_INT_TIME		0x02
-
 
 /*  BK, BE, VI, VO, HCCA, MANAGEMENT, COMMAND, HIGH, BEACON. */
 #define MAX_TX_QUEUE		9
@@ -150,7 +147,6 @@ struct rt_8723a_firmware_hdr {
 #define WMM_NORMAL_PAGE_NUM_HPQ		0x29
 #define WMM_NORMAL_PAGE_NUM_LPQ		0x1C
 #define WMM_NORMAL_PAGE_NUM_NPQ		0x1C
-
 
 /*  */
 /*	Chip specific */

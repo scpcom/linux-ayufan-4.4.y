@@ -43,7 +43,6 @@
 
 #include "uverbs.h"
 
-
 static void __ib_umem_release(struct ib_device *dev, struct ib_umem *umem, int dirty)
 {
 	struct scatterlist *sg;

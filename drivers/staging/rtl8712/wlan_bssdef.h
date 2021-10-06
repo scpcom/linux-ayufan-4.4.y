@@ -230,4 +230,3 @@ enum UAPSD_MAX_SP {
 #define NUM_PMKID_CACHE NUM_PRE_AUTH_KEY
 
 #endif /* #ifndef WLAN_BSSDEF_H_ */
-

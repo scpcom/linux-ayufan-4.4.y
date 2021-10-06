@@ -96,7 +96,6 @@
  * phase:                   unused
  */
 
-
 /* interrupt coalescing */
 /* #define INT_COAL */
 
@@ -1312,7 +1311,6 @@ static int gdth_test_busy(gdth_ha_str *ha)
     return (gdtsema0 & 1);
 }
 
-
 static int gdth_get_cmd_index(gdth_ha_str *ha)
 {
     int i;
@@ -1330,7 +1328,6 @@ static int gdth_get_cmd_index(gdth_ha_str *ha)
     return 0;
 }
 
-
 static void gdth_set_sema0(gdth_ha_str *ha)
 {
     TRACE(("gdth_set_sema0() hanum %d\n", ha->hanum));
@@ -1347,7 +1344,6 @@ static void gdth_set_sema0(gdth_ha_str *ha)
         writeb(1, &((gdt6m_dpram_str __iomem *)ha->brd)->i960r.sema0_reg);
     }
 }
-
 
 static void gdth_copy_command(gdth_ha_str *ha)
 {
@@ -1406,7 +1402,6 @@ static void gdth_copy_command(gdth_ha_str *ha)
         memcpy_toio(&dp6m_ptr->u.ic.gdt_dpr_cmd[dp_offset],cmd_ptr,cp_count);
     }
 }
-
 
 static void gdth_release_event(gdth_ha_str *ha)
 {
@@ -1468,7 +1463,6 @@ static int gdth_wait(gdth_ha_str *ha, int index, u32 time)
 
     return (answer_found);
 }
-
 
 static int gdth_internal_cmd(gdth_ha_str *ha, u8 service, u16 opcode,
                                             u32 p1, u64 p2, u64 p3)
@@ -1544,7 +1538,6 @@ static int gdth_internal_cmd(gdth_ha_str *ha, u8 service, u16 opcode,
     return (ha->status != S_OK ? 0:1);
 }
     
-
 /* search for devices */
 
 static int gdth_search_drives(gdth_ha_str *ha)
@@ -1978,7 +1971,6 @@ static int gdth_analyse_hdrive(gdth_ha_str *ha, u16 hdrive)
 
     return 1;
 }
-
 
 /* command queueing/sending functions */
 
@@ -2832,7 +2824,6 @@ static int gdth_special_cmd(gdth_ha_str *ha, Scsi_Cmnd *scp)
     return cmd_index;
 }    
 
-
 /* Controller event handling functions */
 static gdth_evt_str *gdth_store_event(gdth_ha_str *ha, u16 source, 
                                       u16 idx, gdth_evt_data *evt)
@@ -2951,7 +2942,6 @@ static void gdth_clear_events(void)
     eoldidx = elastidx = 0;
     ebuffer[0].event_source = 0;
 }
-
 
 /* SCSI interface functions */
 
@@ -3583,7 +3573,6 @@ static char *async_cache_tab[] = {
         "GDT HA %u, async. status 75 unknown",
 };
 
-
 static int gdth_async_event(gdth_ha_str *ha)
 {
     gdth_cmd_str *cmdp;
@@ -3913,7 +3902,6 @@ static enum blk_eh_timer_return gdth_timed_out(struct scsi_cmnd *scp)
 	return retval;
 }
 
-
 static int gdth_eh_bus_reset(Scsi_Cmnd *scp)
 {
     gdth_ha_str *ha = shost_priv(scp->device->host);
@@ -3994,7 +3982,6 @@ static int gdth_bios_param(struct scsi_device *sdev,struct block_device *bdev,se
     return 0;
 }
 
-
 static int gdth_queuecommand_lck(struct scsi_cmnd *scp,
 				void (*done)(struct scsi_cmnd *))
 {
@@ -4031,7 +4018,6 @@ static int __gdth_queuecommand(gdth_ha_str *ha, struct scsi_cmnd *scp,
     gdth_next(ha);
     return 0;
 }
-
 
 static int gdth_open(struct inode *inode, struct file *filep)
 {

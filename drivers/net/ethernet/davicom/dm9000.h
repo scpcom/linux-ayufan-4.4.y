@@ -177,4 +177,3 @@
 #define DSPCR_INIT_PARAM	0xE100	/* DSP init parameter */
 
 #endif /* _DM9000X_H_ */
-

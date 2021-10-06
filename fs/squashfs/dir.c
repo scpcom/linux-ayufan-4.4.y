@@ -106,7 +106,6 @@ static int get_dir_index_using_offset(struct super_block *sb,
 	return length + 3;
 }
 
-
 static int squashfs_readdir(struct file *file, struct dir_context *ctx)
 {
 	struct inode *inode = file_inode(file);
@@ -227,7 +226,6 @@ failed_read:
 	kfree(dire);
 	return 0;
 }
-
 
 const struct file_operations squashfs_dir_ops = {
 	.read = generic_read_dir,

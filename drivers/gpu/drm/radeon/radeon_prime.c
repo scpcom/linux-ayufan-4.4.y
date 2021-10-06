@@ -108,7 +108,6 @@ void radeon_gem_prime_unpin(struct drm_gem_object *obj)
 	radeon_bo_unreserve(bo);
 }
 
-
 struct reservation_object *radeon_gem_prime_res_obj(struct drm_gem_object *obj)
 {
 	struct radeon_bo *bo = gem_to_radeon_bo(obj);

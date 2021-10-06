@@ -360,7 +360,6 @@ static const u32 bf_sbox[256 * 4] = {
 #define EROUND(a, b, n)  do { b ^= P[n]; a ^= bf_F(b); } while (0)
 #define DROUND(a, b, n)  do { a ^= bf_F(b); b ^= P[n]; } while (0)
 
-
 /*
  * encrypt isdn data frame
  * every block with 9 samples is encrypted
@@ -448,7 +447,6 @@ dsp_bf_encrypt(struct dsp *dsp, u8 *data, int len)
 	dsp->bf_crypt_pos = j;
 
 }
-
 
 /*
  * decrypt isdn data frame
@@ -557,7 +555,6 @@ dsp_bf_decrypt(struct dsp *dsp, u8 *data, int len)
 	dsp->bf_sync = sync;
 }
 
-
 /* used to encrypt S and P boxes */
 static inline void
 encrypt_block(const u32 *P, const u32 *S, u32 *dst, u32 *src)
@@ -660,7 +657,6 @@ dsp_bf_init(struct dsp *dsp, const u8 *key, uint keylen)
 
 	return 0;
 }
-
 
 /*
  * turn encryption off

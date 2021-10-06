@@ -95,7 +95,6 @@
 #define RFS3  %r10
 #define RFS3d %r10d
 
-
 #define lookup_32bit(src, dst, op1, op2, op3, interleave_op, il_reg) \
 	movzbl		src ## bh,     RID1d;    \
 	movzbl		src ## bl,     RID2d;    \

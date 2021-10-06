@@ -264,4 +264,3 @@ module_platform_driver(sdhci_pxav2_driver);
 MODULE_DESCRIPTION("SDHCI driver for pxav2");
 MODULE_AUTHOR("Marvell International Ltd.");
 MODULE_LICENSE("GPL v2");
-

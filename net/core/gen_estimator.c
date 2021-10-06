@@ -63,7 +63,6 @@
 
    T = A/(-ln(1-W))
 
-
    NOTES.
 
    * avbps and avpps are scaled by 2^5.

@@ -211,7 +211,6 @@ static int mma9551_config_incli_event(struct iio_dev *indio_dev,
 			return -EINVAL;
 		}
 
-
 		ret = mma9551_set_power_state(data->client, true);
 		if (ret < 0)
 			return ret;

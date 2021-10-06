@@ -16,4 +16,3 @@ stub_segv_handler(int sig, siginfo_t *info, void *p)
 			      &uc->uc_mcontext);
 	trap_myself();
 }
-

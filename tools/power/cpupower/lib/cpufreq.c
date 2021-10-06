@@ -4,7 +4,6 @@
  *  Licensed under the terms of the GNU GPL License version 2.
  */
 
-
 #include <stdio.h>
 #include <errno.h>
 #include <stdlib.h>
@@ -92,7 +91,6 @@ void cpufreq_put_available_governors(struct cpufreq_available_governors *any)
 	}
 }
 
-
 struct cpufreq_available_frequencies
 *cpufreq_get_available_frequencies(unsigned int cpu)
 {
@@ -114,7 +112,6 @@ void cpufreq_put_available_frequencies(struct cpufreq_available_frequencies
 	}
 }
 
-
 struct cpufreq_affected_cpus *cpufreq_get_affected_cpus(unsigned int cpu)
 {
 	return sysfs_get_freq_affected_cpus(cpu);
@@ -135,7 +132,6 @@ void cpufreq_put_affected_cpus(struct cpufreq_affected_cpus *any)
 	}
 }
 
-
 struct cpufreq_affected_cpus *cpufreq_get_related_cpus(unsigned int cpu)
 {
 	return sysfs_get_freq_related_cpus(cpu);
@@ -146,7 +142,6 @@ void cpufreq_put_related_cpus(struct cpufreq_affected_cpus *any)
 	cpufreq_put_affected_cpus(any);
 }
 
-
 int cpufreq_set_policy(unsigned int cpu, struct cpufreq_policy *policy)
 {
 	if (!policy || !(policy->governor))
@@ -155,18 +150,15 @@ int cpufreq_set_policy(unsigned int cpu, struct cpufreq_policy *policy)
 	return sysfs_set_freq_policy(cpu, policy);
 }
 
-
 int cpufreq_modify_policy_min(unsigned int cpu, unsigned long min_freq)
 {
 	return sysfs_modify_freq_policy_min(cpu, min_freq);
 }
 
-
 int cpufreq_modify_policy_max(unsigned int cpu, unsigned long max_freq)
 {
 	return sysfs_modify_freq_policy_max(cpu, max_freq);
 }
-
 
 int cpufreq_modify_policy_governor(unsigned int cpu, char *governor)
 {

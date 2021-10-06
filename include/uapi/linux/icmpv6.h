@@ -10,7 +10,6 @@ struct icmp6hdr {
 	__u8		icmp6_code;
 	__sum16		icmp6_cksum;
 
-
 	union {
 		__be32			un_data32[1];
 		__be16			un_data16[2];
@@ -77,7 +76,6 @@ struct icmp6hdr {
 #define icmp6_rt_lifetime	icmp6_dataun.u_nd_ra.rt_lifetime
 #define icmp6_router_pref	icmp6_dataun.u_nd_ra.router_pref
 };
-
 
 #define ICMPV6_ROUTER_PREF_LOW		0x3
 #define ICMPV6_ROUTER_PREF_MEDIUM	0x0
@@ -161,6 +159,5 @@ struct icmp6_filter {
 #define MLD2_BLOCK_OLD_SOURCES	6
 
 #define MLD2_ALL_MCR_INIT { { { 0xff,0x02,0,0,0,0,0,0,0,0,0,0,0,0,0,0x16 } } }
-
 
 #endif /* _UAPI_LINUX_ICMPV6_H */

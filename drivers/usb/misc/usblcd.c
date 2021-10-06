@@ -27,7 +27,6 @@
 #define IOCTL_GET_HARD_VERSION	1
 #define IOCTL_GET_DRV_VERSION	2
 
-
 static DEFINE_MUTEX(lcd_mutex);
 static const struct usb_device_id id_table[] = {
 	{ .idVendor = 0x10D2, .match_flags = USB_DEVICE_ID_MATCH_VENDOR, },
@@ -36,7 +35,6 @@ static const struct usb_device_id id_table[] = {
 MODULE_DEVICE_TABLE(usb, id_table);
 
 static DEFINE_MUTEX(open_disc_mutex);
-
 
 struct usb_lcd {
 	struct usb_device	*udev;			/* init: probe_lcd */
@@ -63,7 +61,6 @@ struct usb_lcd {
 
 static struct usb_driver lcd_driver;
 
-
 static void lcd_delete(struct kref *kref)
 {
 	struct usb_lcd *dev = to_lcd_dev(kref);
@@ -72,7 +69,6 @@ static void lcd_delete(struct kref *kref)
 	kfree(dev->bulk_in_buffer);
 	kfree(dev);
 }
-
 
 static int lcd_open(struct inode *inode, struct file *file)
 {

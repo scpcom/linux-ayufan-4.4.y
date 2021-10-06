@@ -55,7 +55,6 @@
 
 #include <net/ip_vs.h>
 
-
 /*
  *    It is for garbage collection of stale IPVS lblc entries,
  *    when the table is full.
@@ -73,7 +72,6 @@
  */
 #define COUNT_FOR_FULL_EXPIRATION   30
 
-
 /*
  *     for IPVS lblc entry hash table
  */
@@ -83,7 +81,6 @@
 #define IP_VS_LBLC_TAB_BITS     CONFIG_IP_VS_LBLC_TAB_BITS
 #define IP_VS_LBLC_TAB_SIZE     (1 << IP_VS_LBLC_TAB_BITS)
 #define IP_VS_LBLC_TAB_MASK     (IP_VS_LBLC_TAB_SIZE - 1)
-
 
 /*
  *      IPVS lblc entry represents an association between destination
@@ -98,7 +95,6 @@ struct ip_vs_lblc_entry {
 	struct rcu_head		rcu_head;
 };
 
-
 /*
  *      IPVS lblc hash table
  */
@@ -112,7 +108,6 @@ struct ip_vs_lblc_table {
 	int                     counter;        /* counter for no expire */
 	bool			dead;
 };
-
 
 /*
  *      IPVS LBLC sysctl table
@@ -162,7 +157,6 @@ ip_vs_lblc_hashkey(int af, const union nf_inet_addr *addr)
 	return (ntohl(addr_fold)*2654435761UL) & IP_VS_LBLC_TAB_MASK;
 }
 
-
 /*
  *	Hash an entry in the ip_vs_lblc_table.
  *	returns bool success.
@@ -175,7 +169,6 @@ ip_vs_lblc_hash(struct ip_vs_lblc_table *tbl, struct ip_vs_lblc_entry *en)
 	hlist_add_head_rcu(&en->list, &tbl->bucket[hash]);
 	atomic_inc(&tbl->entries);
 }
-
 
 /* Get ip_vs_lblc_entry associated with supplied parameters. */
 static inline struct ip_vs_lblc_entry *
@@ -191,7 +184,6 @@ ip_vs_lblc_get(int af, struct ip_vs_lblc_table *tbl,
 
 	return NULL;
 }
-
 
 /*
  * Create or update an ip_vs_lblc_entry, which is a mapping of a destination IP
@@ -224,7 +216,6 @@ ip_vs_lblc_new(struct ip_vs_lblc_table *tbl, const union nf_inet_addr *daddr,
 
 	return en;
 }
-
 
 /*
  *      Flush all the entries of the specified table.
@@ -281,7 +272,6 @@ static inline void ip_vs_lblc_full_check(struct ip_vs_service *svc)
 	}
 	tbl->rover = j;
 }
-
 
 /*
  *      Periodical timer handler for IPVS lblc table
@@ -342,7 +332,6 @@ static void ip_vs_lblc_check_expire(unsigned long data)
 	mod_timer(&tbl->periodic_timer, jiffies + CHECK_EXPIRE_INTERVAL);
 }
 
-
 static int ip_vs_lblc_init_svc(struct ip_vs_service *svc)
 {
 	int i;
@@ -380,7 +369,6 @@ static int ip_vs_lblc_init_svc(struct ip_vs_service *svc)
 	return 0;
 }
 
-
 static void ip_vs_lblc_done_svc(struct ip_vs_service *svc)
 {
 	struct ip_vs_lblc_table *tbl = svc->sched_data;
@@ -396,7 +384,6 @@ static void ip_vs_lblc_done_svc(struct ip_vs_service *svc)
 	IP_VS_DBG(6, "LBLC hash table (memory=%Zdbytes) released\n",
 		  sizeof(*tbl));
 }
-
 
 static inline struct ip_vs_dest *
 __ip_vs_lblc_schedule(struct ip_vs_service *svc)
@@ -454,7 +441,6 @@ __ip_vs_lblc_schedule(struct ip_vs_service *svc)
 	return least;
 }
 
-
 /*
  *   If this destination server is overloaded and there is a less loaded
  *   server, then return true.
@@ -474,7 +460,6 @@ is_overloaded(struct ip_vs_dest *dest, struct ip_vs_service *svc)
 	}
 	return 0;
 }
-
 
 /*
  *    Locality-Based (weighted) Least-Connection scheduling
@@ -530,7 +515,6 @@ out:
 
 	return dest;
 }
-
 
 /*
  *      IPVS LBLC Scheduler structure
@@ -625,7 +609,6 @@ static void __exit ip_vs_lblc_cleanup(void)
 	unregister_pernet_subsys(&ip_vs_lblc_ops);
 	rcu_barrier();
 }
-
 
 module_init(ip_vs_lblc_init);
 module_exit(ip_vs_lblc_cleanup);

@@ -16,7 +16,6 @@
 #include <linux/atalk.h>
 #include <linux/export.h>
 
-
 static __inline__ struct atalk_iface *atalk_get_interface_idx(loff_t pos)
 {
 	struct atalk_iface *i;

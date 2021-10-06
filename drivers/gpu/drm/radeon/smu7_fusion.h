@@ -297,4 +297,3 @@ typedef struct SMU7_Fusion_GIODpmTable SMU7_Fusion_GIODpmTable;
 #pragma pack(pop)
 
 #endif
-

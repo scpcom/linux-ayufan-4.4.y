@@ -13,7 +13,6 @@
  * Some ideas are from omap-sham.c drivers.
  */
 
-
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/slab.h>

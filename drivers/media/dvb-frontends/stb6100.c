@@ -234,7 +234,6 @@ static int stb6100_write_reg(struct stb6100_state *state, u8 reg, u8 data)
 	return stb6100_write_reg_range(state, &data, reg, 1);
 }
 
-
 static int stb6100_get_status(struct dvb_frontend *fe, u32 *status)
 {
 	int rc;
@@ -328,7 +327,6 @@ static int stb6100_get_frequency(struct dvb_frontend *fe, u32 *frequency)
 		state->frequency, odiv, psd2, state->reference,	fvco, nint, nfrac);
 	return 0;
 }
-
 
 static int stb6100_set_frequency(struct dvb_frontend *fe, u32 frequency)
 {

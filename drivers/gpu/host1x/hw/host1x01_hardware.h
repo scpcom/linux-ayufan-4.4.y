@@ -84,7 +84,6 @@ static inline u32 host1x_class_host_indoff_reg_read(
 	return v;
 }
 
-
 /* cdma opcodes */
 static inline u32 host1x_opcode_setclass(
 	unsigned class_id, unsigned offset, unsigned mask)

@@ -39,7 +39,6 @@
 
 #include "stk-webcam.h"
 
-
 static int hflip = -1;
 module_param(hflip, int, 0444);
 MODULE_PARM_DESC(hflip, "Horizontal image flip (mirror). Defaults to 0");
@@ -120,7 +119,6 @@ static const struct dmi_system_id stk_upside_down_dmi_table[] = {
 	},
 	{}
 };
-
 
 /*
  * Basic stuff
@@ -264,7 +262,6 @@ static struct regval stk1125_initvals[] = {
 
 	{0xffff, 0xff},
 };
-
 
 static int stk_initialise(struct stk_camera *dev)
 {
@@ -739,7 +736,6 @@ static unsigned int v4l_stk_poll(struct file *fp, poll_table *wait)
 	return res;
 }
 
-
 static void stk_v4l_vm_open(struct vm_area_struct *vma)
 {
 	struct stk_sio_buffer *sbuf = vma->vm_private_data;
@@ -815,7 +811,6 @@ static int stk_vidioc_enum_input(struct file *filp,
 	return 0;
 }
 
-
 static int stk_vidioc_g_input(struct file *filp, void *priv, unsigned int *i)
 {
 	*i = 0;
@@ -852,7 +847,6 @@ static int stk_s_ctrl(struct v4l2_ctrl *ctrl)
 	}
 	return 0;
 }
-
 
 static int stk_vidioc_enum_fmt_vid_cap(struct file *filp,
 		void *priv, struct v4l2_fmtdesc *fmtd)
@@ -1170,7 +1164,6 @@ static int stk_vidioc_streamoff(struct file *filp,
 	return 0;
 }
 
-
 static int stk_vidioc_g_parm(struct file *filp,
 		void *priv, struct v4l2_streamparm *sp)
 {
@@ -1253,7 +1246,6 @@ static struct video_device stk_v4l_data = {
 	.release = stk_v4l_dev_release,
 };
 
-
 static int stk_register_video_device(struct stk_camera *dev)
 {
 	int err;
@@ -1270,7 +1262,6 @@ static int stk_register_video_device(struct stk_camera *dev)
 			 video_device_node_name(&dev->vdev));
 	return err;
 }
-
 
 /* USB Stuff */
 

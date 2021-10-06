@@ -41,7 +41,6 @@
 #define PWRSTS_OFF_RET_ON	(PWRSTS_OFF_RET | PWRSTS_ON)
 #define PWRSTS_INA_ON		(PWRSTS_INACTIVE | PWRSTS_ON)
 
-
 /*
  * Powerdomain flags (struct powerdomain.flags)
  *

@@ -10,7 +10,6 @@
  * of the GNU General Public License, incorporated herein by reference.
  */
 
-
 #include "platform.h"
 #include "di_defs.h"
 #include "divasync.h"

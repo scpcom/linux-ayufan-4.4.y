@@ -394,7 +394,6 @@ static struct mutex btrfsic_mutex;
 static int btrfsic_is_initialized;
 static struct btrfsic_dev_state_hashtable btrfsic_dev_state_hashtable;
 
-
 static void btrfsic_block_init(struct btrfsic_block *b)
 {
 	b->magic_num = BTRFSIC_BLOCK_MAGIC_NUMBER;

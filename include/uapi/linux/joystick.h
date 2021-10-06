@@ -25,8 +25,6 @@
 #ifndef _UAPI_LINUX_JOYSTICK_H
 #define _UAPI_LINUX_JOYSTICK_H
 
-
-
 #include <linux/types.h>
 #include <linux/input.h>
 
@@ -131,6 +129,5 @@ struct JS_DATA_SAVE_TYPE_64 {
 	struct JS_DATA_TYPE JS_SAVE;
 	struct JS_DATA_TYPE JS_CORR;
 };
-
 
 #endif /* _UAPI_LINUX_JOYSTICK_H */

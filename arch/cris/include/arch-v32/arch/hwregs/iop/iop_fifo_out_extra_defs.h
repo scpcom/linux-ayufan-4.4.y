@@ -154,7 +154,6 @@ typedef struct {
 } reg_iop_fifo_out_extra_r_masked_intr;
 #define REG_RD_ADDR_iop_fifo_out_extra_r_masked_intr 28
 
-
 /* Constants */
 enum {
   regk_iop_fifo_out_extra_no               = 0x00000000,

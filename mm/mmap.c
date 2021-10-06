@@ -108,7 +108,6 @@ void vma_set_page_prot(struct vm_area_struct *vma)
 	}
 }
 
-
 int sysctl_overcommit_memory __read_mostly = OVERCOMMIT_GUESS;  /* heuristic overcommit */
 int sysctl_overcommit_ratio __read_mostly = 50;	/* default is 50% */
 unsigned long sysctl_overcommit_kbytes __read_mostly;
@@ -2631,7 +2630,6 @@ SYSCALL_DEFINE2(munmap, unsigned long, addr, size_t, len)
 	profile_munmap(addr);
 	return vm_munmap(addr, len);
 }
-
 
 /*
  * Emulation of deprecated remap_file_pages() syscall.

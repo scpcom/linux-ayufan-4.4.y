@@ -3,7 +3,6 @@
  * Licensed under the GPL-2 or later.
  */
 
-
 #ifndef _MACH_GPIO_H_
 #define _MACH_GPIO_H_
 

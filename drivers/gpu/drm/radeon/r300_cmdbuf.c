@@ -537,7 +537,6 @@ static __inline__ int r300_emit_bitblt_multi(drm_radeon_private_t *dev_priv,
 	int count, ret;
 	RING_LOCALS;
 
-
 	count = (*cmd & RADEON_CP_PACKET_COUNT_MASK) >> 16;
 
 	if (*cmd & 0x8000) {
@@ -1002,7 +1001,6 @@ static inline int r300_emit_r500fp(drm_radeon_private_t *dev_priv,
 
 	return 0;
 }
-
 
 /**
  * Parses and validates a user-supplied command buffer and emits appropriate

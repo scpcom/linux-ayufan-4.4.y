@@ -71,7 +71,6 @@ static inline int notify_page_fault(struct pt_regs *regs)
 	return ret;
 }
 
-
 /*
  * Unlock any spinlocks which will prevent us from getting the
  * message out.

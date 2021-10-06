@@ -55,7 +55,6 @@ struct pnfs_block_dev;
  */
 #define PNFS_BLOCK_UUID_LEN	128
 
-
 struct pnfs_block_volume {
 	enum pnfs_block_volume_type	type;
 	union {

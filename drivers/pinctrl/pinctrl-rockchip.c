@@ -2208,7 +2208,6 @@ static struct rockchip_pin_ctrl rk3368_pin_ctrl = {
 		.drv_calc_reg		= rk3368_calc_drv_reg_and_bit,
 };
 
-
 static const struct of_device_id rockchip_pinctrl_dt_match[] = {
 	{ .compatible = "rockchip,rk2928-pinctrl",
 		.data = (void *)&rk2928_pin_ctrl },

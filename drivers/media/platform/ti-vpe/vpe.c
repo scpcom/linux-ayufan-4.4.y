@@ -223,7 +223,6 @@ static const struct vpe_port_data port_data[11] = {
 	},
 };
 
-
 /* driver info for each of the supported video formats */
 struct vpe_fmt {
 	char	*name;			/* human-readable name */
@@ -400,7 +399,6 @@ struct vpe_ctx {
 
 	unsigned int		src_mv_buf_selector;
 };
-
 
 /*
  * M2M devices get 2 queues.
@@ -1705,7 +1703,6 @@ static int vpe_g_selection(struct file *file, void *fh,
 
 	return 0;
 }
-
 
 static int vpe_s_selection(struct file *file, void *fh,
 		struct v4l2_selection *s)

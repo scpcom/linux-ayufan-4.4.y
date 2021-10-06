@@ -136,7 +136,6 @@ out:
 	return res;
 }
 
-
 static int squashfs_read_cache(struct page *target_page, u64 block, int bsize,
 	int pages, struct page **page)
 {

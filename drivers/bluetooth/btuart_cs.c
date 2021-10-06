@@ -48,19 +48,13 @@
 #include <net/bluetooth/bluetooth.h>
 #include <net/bluetooth/hci_core.h>
 
-
-
 /* ======================== Module parameters ======================== */
-
 
 MODULE_AUTHOR("Marcel Holtmann <marcel@holtmann.org>");
 MODULE_DESCRIPTION("Bluetooth driver for Bluetooth PCMCIA cards with HCI UART interface");
 MODULE_LICENSE("GPL");
 
-
-
 /* ======================== Local structures ======================== */
-
 
 struct btuart_info {
 	struct pcmcia_device *p_dev;
@@ -77,19 +71,16 @@ struct btuart_info {
 	struct sk_buff *rx_skb;
 };
 
-
 static int btuart_config(struct pcmcia_device *link);
 static void btuart_release(struct pcmcia_device *link);
 
 static void btuart_detach(struct pcmcia_device *p_dev);
-
 
 /* Maximum baud rate */
 #define SPEED_MAX  115200
 
 /* Default baud rate: 57600, 115200, 230400 or 460800 */
 #define DEFAULT_BAUD_RATE  115200
-
 
 /* Transmit states  */
 #define XMIT_SENDING	1
@@ -103,10 +94,7 @@ static void btuart_detach(struct pcmcia_device *p_dev);
 #define RECV_WAIT_SCO_HEADER	3
 #define RECV_WAIT_DATA		4
 
-
-
 /* ======================== Interrupt handling ======================== */
-
 
 static int btuart_write(unsigned int iobase, int fifo_size, __u8 *buf, int len)
 {
@@ -125,7 +113,6 @@ static int btuart_write(unsigned int iobase, int fifo_size, __u8 *buf, int len)
 
 	return actual;
 }
-
 
 static void btuart_write_wakeup(struct btuart_info *info)
 {
@@ -170,7 +157,6 @@ static void btuart_write_wakeup(struct btuart_info *info)
 
 	clear_bit(XMIT_SENDING, &(info->tx_state));
 }
-
 
 static void btuart_receive(struct btuart_info *info)
 {
@@ -242,7 +228,6 @@ static void btuart_receive(struct btuart_info *info)
 				struct hci_acl_hdr *ah;
 				struct hci_sco_hdr *sh;
 
-
 				switch (info->rx_state) {
 
 				case RECV_WAIT_EVENT_HEADER:
@@ -281,7 +266,6 @@ static void btuart_receive(struct btuart_info *info)
 
 	} while (inb(iobase + UART_LSR) & UART_LSR_DR);
 }
-
 
 static irqreturn_t btuart_interrupt(int irq, void *dev_inst)
 {
@@ -338,7 +322,6 @@ static irqreturn_t btuart_interrupt(int irq, void *dev_inst)
 	return r;
 }
 
-
 static void btuart_change_speed(struct btuart_info *info,
 				unsigned int speed)
 {
@@ -390,10 +373,7 @@ static void btuart_change_speed(struct btuart_info *info,
 	spin_unlock_irqrestore(&(info->lock), flags);
 }
 
-
-
 /* ======================== HCI interface ======================== */
-
 
 static int btuart_hci_flush(struct hci_dev *hdev)
 {
@@ -405,12 +385,10 @@ static int btuart_hci_flush(struct hci_dev *hdev)
 	return 0;
 }
 
-
 static int btuart_hci_open(struct hci_dev *hdev)
 {
 	return 0;
 }
-
 
 static int btuart_hci_close(struct hci_dev *hdev)
 {
@@ -418,7 +396,6 @@ static int btuart_hci_close(struct hci_dev *hdev)
 
 	return 0;
 }
-
 
 static int btuart_hci_send_frame(struct hci_dev *hdev, struct sk_buff *skb)
 {
@@ -445,10 +422,7 @@ static int btuart_hci_send_frame(struct hci_dev *hdev, struct sk_buff *skb)
 	return 0;
 }
 
-
-
 /* ======================== Card services HCI interaction ======================== */
-
 
 static int btuart_open(struct btuart_info *info)
 {
@@ -515,7 +489,6 @@ static int btuart_open(struct btuart_info *info)
 	return 0;
 }
 
-
 static int btuart_close(struct btuart_info *info)
 {
 	unsigned long flags;
@@ -560,7 +533,6 @@ static int btuart_probe(struct pcmcia_device *link)
 
 	return btuart_config(link);
 }
-
 
 static void btuart_detach(struct pcmcia_device *link)
 {
@@ -645,7 +617,6 @@ failed:
 	btuart_release(link);
 	return -ENODEV;
 }
-
 
 static void btuart_release(struct pcmcia_device *link)
 {

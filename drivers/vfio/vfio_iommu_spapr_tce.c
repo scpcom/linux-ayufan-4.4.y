@@ -942,7 +942,6 @@ static long tce_iommu_ioctl(void *iommu_data,
 		mutex_unlock(&container->lock);
 		return ret;
 
-
 	case VFIO_IOMMU_DISABLE:
 		if (container->v2)
 			break;
@@ -1288,4 +1287,3 @@ MODULE_VERSION(DRIVER_VERSION);
 MODULE_LICENSE("GPL v2");
 MODULE_AUTHOR(DRIVER_AUTHOR);
 MODULE_DESCRIPTION(DRIVER_DESC);
-

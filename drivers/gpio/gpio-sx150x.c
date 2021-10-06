@@ -583,7 +583,6 @@ static int sx150x_init_hw(struct sx150x_chip *chip,
 			return err;
 	}
 
-
 	if (pdata->oscio_is_gpo)
 		sx150x_set_oscio(chip, 0);
 

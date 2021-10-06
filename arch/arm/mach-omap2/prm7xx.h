@@ -31,7 +31,6 @@
 #define DRA7XX_PRM_REGADDR(inst, reg)				\
 	OMAP2_L4_IO_ADDRESS(DRA7XX_PRM_BASE + (inst) + (reg))
 
-
 /* PRM instances */
 #define DRA7XX_PRM_OCP_SOCKET_INST	0x0000
 #define DRA7XX_PRM_CKGEN_INST		0x0100

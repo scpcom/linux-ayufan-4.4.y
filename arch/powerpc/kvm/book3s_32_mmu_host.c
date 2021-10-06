@@ -87,7 +87,6 @@ static u16 kvmppc_sid_hash(struct kvm_vcpu *vcpu, u64 gvsid)
 		     ((gvsid >> (SID_MAP_BITS * 0)) & SID_MAP_MASK));
 }
 
-
 static struct kvmppc_sid_map *find_sid_vsid(struct kvm_vcpu *vcpu, u64 gvsid)
 {
 	struct kvmppc_sid_map *map;
@@ -238,7 +237,6 @@ next_pteg:
 	dprintk_mmu("KVM:   %08x - %08x\n", pteg[10], pteg[11]);
 	dprintk_mmu("KVM:   %08x - %08x\n", pteg[12], pteg[13]);
 	dprintk_mmu("KVM:   %08x - %08x\n", pteg[14], pteg[15]);
-
 
 	/* Now tell our Shadow PTE code about the new page */
 

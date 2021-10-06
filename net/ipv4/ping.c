@@ -250,7 +250,6 @@ static void inet_get_ping_group_range_net(struct net *net, kgid_t *low,
 	} while (read_seqretry(&net->ipv4.ping_group_range.lock, seq));
 }
 
-
 int ping_init_sock(struct sock *sk)
 {
 	struct net *net = sock_net(sk);
@@ -954,7 +953,6 @@ int ping_queue_rcv_skb(struct sock *sk, struct sk_buff *skb)
 	return 0;
 }
 EXPORT_SYMBOL_GPL(ping_queue_rcv_skb);
-
 
 /*
  *	All we need to do is get the socket.

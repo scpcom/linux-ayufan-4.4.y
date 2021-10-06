@@ -32,7 +32,6 @@ module_param_array_named(eeprom, ff_eeprom, charp, &ff_nr_eeprom, 0444);
 static int ff_nr_dev = 1;
 module_param_named(ndev, ff_nr_dev, int, 0444);
 
-
 /* Lazily, don't support the "standard" module parameters */
 
 /*
@@ -129,7 +128,6 @@ static int ff_irq_request(struct fmc_device *fmc, irq_handler_t handler,
 
 /* FIXME: should also have some fake FMC GPIO mapping */
 
-
 /*
  * This work function is called when we changed the eeprom. It removes the
  * current fmc device and registers a new one, with different identifiers.
@@ -161,7 +159,6 @@ static void ff_work_fn(struct work_struct *work)
 }
 
 static DECLARE_DELAYED_WORK(ff_work, ff_work_fn);
-
 
 /* low-level i2c */
 static int ff_eeprom_read(struct fmc_device *fmc, uint32_t offset,
@@ -228,8 +225,6 @@ static int ff_validate(struct fmc_device *fmc, struct fmc_driver *drv)
 			return i;
 	return -ENOENT;
 }
-
-
 
 static struct fmc_operations ff_fmc_operations = {
 	.read32 =		ff_readl,

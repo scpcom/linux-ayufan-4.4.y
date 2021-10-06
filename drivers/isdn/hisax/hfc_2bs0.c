@@ -138,7 +138,6 @@ hfc_clear_fifo(struct BCState *bcs)
 	return;
 }
 
-
 static struct sk_buff
 *
 hfc_empty_fifo(struct BCState *bcs, int count)
@@ -506,7 +505,6 @@ hfc_l2l1(struct PStack *st, int pr, void *arg)
 		break;
 	}
 }
-
 
 static void
 close_hfcstate(struct BCState *bcs)

@@ -46,7 +46,6 @@
 #define BX_DIGITAL_IN	chip->bx_digital_in
 #define BX_NUM		chip->bx_num
 
-
 #include <linux/delay.h>
 #include <linux/init.h>
 #include <linux/interrupt.h>

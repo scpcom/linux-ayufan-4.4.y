@@ -357,7 +357,6 @@ struct compress_alg {
 			      unsigned int slen, u8 *dst, unsigned int *dlen);
 };
 
-
 #define cra_ablkcipher	cra_u.ablkcipher
 #define cra_blkcipher	cra_u.blkcipher
 #define cra_cipher	cra_u.cipher
@@ -1872,4 +1871,3 @@ static inline int crypto_comp_decompress(struct crypto_comp *tfm,
 }
 
 #endif	/* _LINUX_CRYPTO_H */
-

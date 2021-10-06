@@ -246,7 +246,6 @@ static int bcm590xx_get_enable_register(int id)
 			reg = BCM590XX_OTG_CTRL;
 		}
 
-
 	return reg;
 }
 

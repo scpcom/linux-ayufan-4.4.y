@@ -73,7 +73,6 @@ int gxio_mpipe_init_buffer_stack_aux(gxio_mpipe_context_t *context,
 
 EXPORT_SYMBOL(gxio_mpipe_init_buffer_stack_aux);
 
-
 struct alloc_notif_rings_param {
 	unsigned int count;
 	unsigned int first;
@@ -313,7 +312,6 @@ int gxio_mpipe_init_edma_ring_aux(gxio_mpipe_context_t *context, void *mem_va,
 }
 
 EXPORT_SYMBOL(gxio_mpipe_init_edma_ring_aux);
-
 
 int gxio_mpipe_commit_rules(gxio_mpipe_context_t *context, const void *blob,
 			    size_t blob_size)

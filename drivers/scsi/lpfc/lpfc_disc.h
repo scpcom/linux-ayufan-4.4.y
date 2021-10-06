@@ -23,7 +23,6 @@
 #define FC_MAXLOOP           126      /* max devices supported on a fc loop */
 #define LPFC_DISC_FLOGI_TMO  10	      /* Discovery FLOGI ratov */
 
-
 /* This is the protocol dependent definition for a Node List Entry.
  * This is used by Fibre Channel protocol to support FCP.
  */
@@ -158,7 +157,6 @@ struct lpfc_node_rrq {
 #define NLP_FIRSTBURST     0x40000000	/* Target supports FirstBurst */
 #define NLP_RPI_REGISTERED 0x80000000	/* nlp_rpi is valid */
 
-
 /* ndlp usage management macros */
 #define NLP_CHK_NODE_ACT(ndlp)		(((ndlp)->nlp_usg_map \
 						& NLP_USG_NODE_ACT_BIT) \
@@ -267,4 +265,3 @@ struct lpfc_node_rrq {
 #define NLP_EVT_DEVICE_RM         0xb	/* Device not found in NS / ALPAmap */
 #define NLP_EVT_DEVICE_RECOVERY   0xc	/* Device existence unknown */
 #define NLP_EVT_MAX_EVENT         0xd
-

@@ -82,7 +82,6 @@
 #include <asm/byteorder.h>
 #include <asm/uaccess.h>
 
-
 #define DRV_NAME "acenic"
 
 #undef INDEX_DEBUG
@@ -112,7 +111,6 @@
 #ifndef PCI_DEVICE_ID_NETGEAR_GA620T
 #define PCI_DEVICE_ID_NETGEAR_GA620T	0x630a
 #endif
-
 
 /*
  * Farallon used the DEC vendor ID by mistake and they seem not
@@ -341,7 +339,6 @@ MODULE_DEVICE_TABLE(pci, acenic_pci_tbl);
 #define RX_PANIC_JUMBO_REFILL	(3*RX_PANIC_JUMBO_THRES)/2
 #define RX_LOW_JUMBO_THRES	(3*RX_JUMBO_SIZE)/4
 
-
 /*
  * Size of the mini ring entries, basically these just should be big
  * enough to take TCP ACKs
@@ -391,7 +388,6 @@ MODULE_DEVICE_TABLE(pci, acenic_pci_tbl);
 #define DEF_TRACE		0
 #define DEF_STAT		(2 * TICKS_PER_SEC)
 
-
 static int link_state[ACE_MAX_MOD_PARMS];
 static int trace[ACE_MAX_MOD_PARMS];
 static int tx_coal_tick[ACE_MAX_MOD_PARMS];
@@ -423,7 +419,6 @@ MODULE_PARM_DESC(max_tx_desc, "AceNIC/3C985/GA620 max number of transmit descrip
 MODULE_PARM_DESC(rx_coal_tick, "AceNIC/3C985/GA620 max clock ticks to wait from first rx descriptor arrives");
 MODULE_PARM_DESC(max_rx_desc, "AceNIC/3C985/GA620 max number of receive descriptors to wait");
 MODULE_PARM_DESC(tx_ratio, "AceNIC/3C985/GA620 ratio of NIC memory used for TX/RX descriptors (range 0-63)");
-
 
 static const char version[] =
   "acenic.c: v0.92 08/05/2002  Jes Sorensen, linux-acenic@SunSITE.dk\n"
@@ -750,7 +745,6 @@ static void ace_free_descriptors(struct net_device *dev)
 	}
 }
 
-
 static int ace_allocate_descriptors(struct net_device *dev)
 {
 	struct ace_private *ap = netdev_priv(dev);
@@ -815,7 +809,6 @@ fail:
 	return 1;
 }
 
-
 /*
  * Generic cleanup handling data allocated during init. Used when the
  * module is unloaded or if an error occurs during initialization
@@ -840,7 +833,6 @@ static void ace_init_cleanup(struct net_device *dev)
 	iounmap(ap->regs);
 }
 
-
 /*
  * Commands are considered to be slow.
  */
@@ -855,7 +847,6 @@ static inline void ace_issue_cmd(struct ace_regs __iomem *regs, struct cmd *cmd)
 
 	writel(idx, &regs->CmdPrd);
 }
-
 
 static int ace_init(struct net_device *dev)
 {
@@ -1502,7 +1493,6 @@ static int ace_init(struct net_device *dev)
 	return ecode;
 }
 
-
 static void ace_set_rxtx_parms(struct net_device *dev, int jumbo)
 {
 	struct ace_private *ap = netdev_priv(dev);
@@ -1540,7 +1530,6 @@ static void ace_set_rxtx_parms(struct net_device *dev, int jumbo)
 	}
 }
 
-
 static void ace_watchdog(struct net_device *data)
 {
 	struct net_device *dev = data;
@@ -1564,7 +1553,6 @@ static void ace_watchdog(struct net_device *data)
 #endif
 	}
 }
-
 
 static void ace_tasklet(unsigned long arg)
 {
@@ -1604,7 +1592,6 @@ static void ace_tasklet(unsigned long arg)
 	ap->tasklet_pending = 0;
 }
 
-
 /*
  * Copy the contents of the NIC's trace buffer to kernel memory.
  */
@@ -1616,7 +1603,6 @@ static void ace_dump_trace(struct ace_private *ap)
 		    return;
 #endif
 }
-
 
 /*
  * Load the standard rx ring.
@@ -1630,7 +1616,6 @@ static void ace_load_std_rx_ring(struct net_device *dev, int nr_bufs)
 	struct ace_private *ap = netdev_priv(dev);
 	struct ace_regs __iomem *regs = ap->regs;
 	short i, idx;
-
 
 	prefetchw(&ap->cur_rx_bufs);
 
@@ -1687,7 +1672,6 @@ static void ace_load_std_rx_ring(struct net_device *dev, int nr_bufs)
 	goto out;
 }
 
-
 static void ace_load_mini_rx_ring(struct net_device *dev, int nr_bufs)
 {
 	struct ace_private *ap = netdev_priv(dev);
@@ -1739,7 +1723,6 @@ static void ace_load_mini_rx_ring(struct net_device *dev, int nr_bufs)
 	       "mini receive buffers\n");
 	goto out;
 }
-
 
 /*
  * Load the jumbo rx ring, this may happen at any time if the MTU
@@ -1803,7 +1786,6 @@ static void ace_load_jumbo_rx_ring(struct net_device *dev, int nr_bufs)
 		       "jumbo receive buffers\n");
 	goto out;
 }
-
 
 /*
  * All events are considered to be slow (RX/TX ints do not generate
@@ -1914,7 +1896,6 @@ static u32 ace_handle_event(struct net_device *dev, u32 evtcsm, u32 evtprd)
 	return evtcsm;
 }
 
-
 static void ace_rx_int(struct net_device *dev, u32 rxretprd, u32 rxretcsm)
 {
 	struct ace_private *ap = netdev_priv(dev);
@@ -1933,7 +1914,6 @@ static void ace_rx_int(struct net_device *dev, u32 rxretprd, u32 rxretcsm)
 		u32 skbidx;
 		int bd_flags, desc_type, mapsize;
 		u16 csum;
-
 
 		/* make sure the rx descriptor isn't read before rxretprd */
 		if (idx == rxretcsm)
@@ -2034,7 +2014,6 @@ static void ace_rx_int(struct net_device *dev, u32 rxretprd, u32 rxretcsm)
 	goto out;
 }
 
-
 static inline void ace_tx_int(struct net_device *dev,
 			      u32 txcsm, u32 idx)
 {
@@ -2098,7 +2077,6 @@ static inline void ace_tx_int(struct net_device *dev,
 	 *							--ANK
 	 */
 }
-
 
 static irqreturn_t ace_interrupt(int irq, void *dev_id)
 {
@@ -2281,7 +2259,6 @@ static int ace_open(struct net_device *dev)
 	return 0;
 }
 
-
 static int ace_close(struct net_device *dev)
 {
 	struct ace_private *ap = netdev_priv(dev);
@@ -2296,7 +2273,6 @@ static int ace_close(struct net_device *dev)
 	 * by the first irq.
 	 */
 	netif_stop_queue(dev);
-
 
 	if (ap->promisc) {
 		cmd.evt = C_SET_PROMISC_MODE;
@@ -2363,7 +2339,6 @@ static int ace_close(struct net_device *dev)
 	return 0;
 }
 
-
 static inline dma_addr_t
 ace_map_tx_skb(struct ace_private *ap, struct sk_buff *skb,
 	       struct sk_buff *tail, u32 idx)
@@ -2381,7 +2356,6 @@ ace_map_tx_skb(struct ace_private *ap, struct sk_buff *skb,
 	dma_unmap_len_set(info, maplen, skb->len);
 	return mapping;
 }
-
 
 static inline void
 ace_load_tx_bd(struct ace_private *ap, struct tx_desc *desc, u64 addr,
@@ -2404,7 +2378,6 @@ ace_load_tx_bd(struct ace_private *ap, struct tx_desc *desc, u64 addr,
 		desc->vlanres = vlan_tag;
 	}
 }
-
 
 static netdev_tx_t ace_start_xmit(struct sk_buff *skb,
 				  struct net_device *dev)
@@ -2541,7 +2514,6 @@ overflow:
 	printk(KERN_WARNING "%s: Transmit ring stuck full\n", dev->name);
 	return NETDEV_TX_BUSY;
 }
-
 
 static int ace_change_mtu(struct net_device *dev, int new_mtu)
 {
@@ -2741,7 +2713,6 @@ static int ace_set_mac_addr(struct net_device *dev, void *p)
 	return 0;
 }
 
-
 static void ace_set_multicast_list(struct net_device *dev)
 {
 	struct ace_private *ap = netdev_priv(dev);
@@ -2795,7 +2766,6 @@ static void ace_set_multicast_list(struct net_device *dev)
 	}
 }
 
-
 static struct net_device_stats *ace_get_stats(struct net_device *dev)
 {
 	struct ace_private *ap = netdev_priv(dev);
@@ -2808,7 +2778,6 @@ static struct net_device_stats *ace_get_stats(struct net_device *dev)
 
 	return &dev->stats;
 }
-
 
 static void ace_copy(struct ace_regs __iomem *regs, const __be32 *src,
 		     u32 dest, int size)
@@ -2836,7 +2805,6 @@ static void ace_copy(struct ace_regs __iomem *regs, const __be32 *src,
 	}
 }
 
-
 static void ace_clear(struct ace_regs __iomem *regs, u32 dest, int size)
 {
 	void __iomem *tdest;
@@ -2860,7 +2828,6 @@ static void ace_clear(struct ace_regs __iomem *regs, u32 dest, int size)
 		size -= tsize;
 	}
 }
-
 
 /*
  * Download the firmware into the SRAM on the NIC
@@ -2932,7 +2899,6 @@ static int ace_load_firmware(struct net_device *dev)
 	return ret;
 }
 
-
 /*
  * The eeprom on the AceNIC is an Atmel i2c EEPROM.
  *
@@ -2976,7 +2942,6 @@ static void eeprom_start(struct ace_regs __iomem *regs)
 	mb();
 }
 
-
 static void eeprom_prep(struct ace_regs __iomem *regs, u8 magic)
 {
 	short i;
@@ -3013,7 +2978,6 @@ static void eeprom_prep(struct ace_regs __iomem *regs, u8 magic)
 	}
 }
 
-
 static int eeprom_check_ack(struct ace_regs __iomem *regs)
 {
 	int state;
@@ -3040,7 +3004,6 @@ static int eeprom_check_ack(struct ace_regs __iomem *regs)
 
 	return state;
 }
-
 
 static void eeprom_stop(struct ace_regs __iomem *regs)
 {
@@ -3072,7 +3035,6 @@ static void eeprom_stop(struct ace_regs __iomem *regs)
 	writel(local, &regs->LocalCtrl);
 	mb();
 }
-
 
 /*
  * Read a whole byte from the EEPROM.

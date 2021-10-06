@@ -194,7 +194,6 @@ void ndisc_send_redirect(struct sk_buff *skb, const struct in6_addr *target);
 int ndisc_mc_map(const struct in6_addr *addr, char *buf, struct net_device *dev,
 		 int dir);
 
-
 /*
  *	IGMP
  */
@@ -205,7 +204,6 @@ void igmp6_cleanup(void);
 int igmp6_event_query(struct sk_buff *skb);
 
 int igmp6_event_report(struct sk_buff *skb);
-
 
 #ifdef CONFIG_SYSCTL
 int ndisc_ifinfo_sysctl_change(struct ctl_table *ctl, int write,

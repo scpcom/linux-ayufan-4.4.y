@@ -559,7 +559,6 @@ static void sun4v_virq_disable(struct irq_data *data)
 	unsigned long dev_ino = irq_data_to_ino(data);
 	int err;
 
-
 	err = sun4v_vintr_set_valid(dev_handle, dev_ino,
 				    HV_INTR_DISABLED);
 	if (err != HV_EOK)

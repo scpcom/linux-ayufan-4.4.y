@@ -72,7 +72,6 @@ static inline void reload_jiffies_counter(u32 cnt)
 		 TM0MD_INIT_COUNTER |		\
 		 TM1MD_INIT_COUNTER << 8;
 
-
 	TM01MD = JC_TIMER_CLKSRC |		\
 		 TM1MD_SRC_TM0CASCADE << 8 |	\
 		 TM0MD_COUNT_ENABLE |		\
@@ -82,7 +81,6 @@ static inline void reload_jiffies_counter(u32 cnt)
 }
 
 #endif /* !__ASSEMBLY__ */
-
 
 /*
  * timestamp counter specifications

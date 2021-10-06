@@ -45,14 +45,12 @@
 /* device and proc interface name */
 #define SNDRV_SEQ_OSS_PROCNAME		"oss"
 
-
 /*
  * type definitions
  */
 
 typedef unsigned int reltime_t;
 typedef unsigned int abstime_t;
-
 
 /*
  * synthesizer channel information
@@ -73,7 +71,6 @@ struct seq_oss_synthinfo {
 	int is_midi;
 	int midi_mapped;
 };
-
 
 /*
  * sequencer client information
@@ -109,7 +106,6 @@ struct seq_oss_devinfo {
 	struct seq_oss_timer *timer;
 };
 
-
 /*
  * function prototypes
  */
@@ -130,7 +126,6 @@ void snd_seq_oss_reset(struct seq_oss_devinfo *dp);
 
 /* */
 void snd_seq_oss_process_queue(struct seq_oss_devinfo *dp, abstime_t time);
-
 
 /* proc interface */
 void snd_seq_oss_system_info_read(struct snd_info_buffer *buf);
@@ -167,7 +162,6 @@ snd_seq_oss_fill_addr(struct seq_oss_devinfo *dp, struct snd_seq_event *ev,
 	ev->dest.client = dest_client;
 	ev->dest.port = dest_port;
 }
-
 
 /* misc. functions for proc interface */
 char *enabled_str(int bool);

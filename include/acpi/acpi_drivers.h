@@ -75,7 +75,6 @@
                                        PCI
    -------------------------------------------------------------------------- */
 
-
 /* ACPI PCI Interrupt Link (pci_link.c) */
 
 int acpi_irq_penalty_init(void);

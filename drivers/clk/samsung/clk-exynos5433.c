@@ -3067,7 +3067,6 @@ static void __init exynos5433_cmu_aud_init(struct device_node *np)
 CLK_OF_DECLARE(exynos5433_cmu_aud, "samsung,exynos5433-cmu-aud",
 		exynos5433_cmu_aud_init);
 
-
 /*
  * Register offset definitions for CMU_BUS{0|1|2}
  */

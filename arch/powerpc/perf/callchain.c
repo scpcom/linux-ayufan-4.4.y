@@ -23,7 +23,6 @@
 #include "../kernel/ppc32.h"
 #endif
 
-
 /*
  * Is sp valid as the address of the next kernel stack frame after prev_sp?
  * The next frame may be in a different stack area but should not go

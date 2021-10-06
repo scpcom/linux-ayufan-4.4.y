@@ -17,5 +17,4 @@ enum {
 	IPSET_ERR_HASH_RANGE,
 };
 
-
 #endif /* _UAPI__IP_SET_HASH_H */

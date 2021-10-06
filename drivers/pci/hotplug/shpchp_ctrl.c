@@ -344,7 +344,6 @@ err_exit:
 	return(rc);
 }
 
-
 /**
  * remove_board - Turns off slot and LEDs
  * @p_slot: target &slot
@@ -386,7 +385,6 @@ static int remove_board(struct slot *p_slot)
 
 	return 0;
 }
-
 
 struct pushbutton_work_info {
 	struct slot *p_slot;
@@ -565,7 +563,6 @@ static void interrupt_event_handler(struct work_struct *work)
 	kfree(info);
 }
 
-
 static int shpchp_enable_slot (struct slot *p_slot)
 {
 	u8 getstatus = 0;
@@ -621,7 +618,6 @@ static int shpchp_enable_slot (struct slot *p_slot)
 	mutex_unlock(&p_slot->ctrl->crit_sect);
 	return retval;
 }
-
 
 static int shpchp_disable_slot (struct slot *p_slot)
 {

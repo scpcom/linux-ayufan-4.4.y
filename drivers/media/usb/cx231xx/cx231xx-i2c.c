@@ -28,7 +28,6 @@
 #include <media/v4l2-common.h>
 #include <media/tuner.h>
 
-
 /* ----------------------------------------------------------- */
 
 static unsigned int i2c_scan;

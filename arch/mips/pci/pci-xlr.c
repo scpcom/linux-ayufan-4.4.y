@@ -103,7 +103,6 @@ static int nlm_pcibios_read(struct pci_bus *bus, unsigned int devfn,
 	return PCIBIOS_SUCCESSFUL;
 }
 
-
 static int nlm_pcibios_write(struct pci_bus *bus, unsigned int devfn,
 		int where, int size, u32 val)
 {

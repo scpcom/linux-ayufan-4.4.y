@@ -596,7 +596,6 @@ static inline int verbs_mtu_enum_to_int(struct ib_device *dev, enum ib_mtu mtu)
 	return ib_mtu_enum_to_int(mtu);
 }
 
-
 /**
  * hfi1_modify_qp - modify the attributes of a queue pair
  * @ibqp: the queue pair who's attributes we're modifying

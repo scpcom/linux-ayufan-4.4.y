@@ -23,7 +23,6 @@
 #ifndef __SOUND_MIXART_CORE_H
 #define __SOUND_MIXART_CORE_H
 
-
 enum mixart_message_id {
 	MSG_CONNECTOR_GET_AUDIO_INFO         = 0x050008,
 	MSG_CONNECTOR_GET_OUT_AUDIO_LEVEL    = 0x050009,
@@ -62,7 +61,6 @@ enum mixart_message_id {
 	MSG_CLOCK_SET_PROPERTIES             = 0x200002,
 };
 
-
 struct mixart_msg
 {
 	u32          message_id;
@@ -81,7 +79,6 @@ struct mixart_enum_connector_resp
 	u32  current_uid_index;
 	struct mixart_uid uid[MIXART_MAX_PHYS_CONNECTORS];
 } __attribute__((packed));
-
 
 /* used for following struct */
 #define MIXART_FLOAT_P_22_0_TO_HEX      0x41b00000  /* 22.0f */
@@ -144,7 +141,6 @@ struct mixart_audio_info_resp
 	struct mixart_audio_info info;
 } __attribute__((packed));
 
-
 /* used for nb_bytes_max_per_sample */
 #define MIXART_FLOAT_P__4_0_TO_HEX      0x40800000  /* +4.0f */
 #define MIXART_FLOAT_P__8_0_TO_HEX      0x41000000  /* +8.0f */
@@ -195,7 +191,6 @@ struct mixart_delete_group_resp
 	u32  status;
 	u32  unused[2];
 } __attribute__((packed));
-
 
 /* 	MSG_STREAM_START_INPUT_STAGE_PACKET  = 0x130000 + 7,
 	MSG_STREAM_START_OUTPUT_STAGE_PACKET = 0x130000 + 8,
@@ -252,8 +247,6 @@ struct mixart_group_state_resp
 	u64           scheduler;
 } __attribute__((packed));
 
-
-
 /* Structures used by the MSG_SERVICES_TIMER_NOTIFY command */
 
 struct mixart_sample_pos
@@ -269,7 +262,6 @@ struct mixart_timer_notify
 	u32                  stream_count;
 	struct mixart_sample_pos  streams[MIXART_MAX_STREAM_PER_CARD * MIXART_MAX_CARDS];
 } __attribute__((packed));
-
 
 /*	MSG_CONSOLE_GET_CLOCK_UID            = 0x070003,
  */
@@ -303,7 +295,6 @@ enum mixart_clock_mode {
 	CM_NOT_CONCERNED
 };
 
-
 struct mixart_clock_properties
 {
 	u32 error_code;
@@ -327,7 +318,6 @@ struct mixart_clock_properties_resp
 	u32 status;
 	u32 clock_mode;
 } __attribute__((packed));
-
 
 /*	MSG_STREAM_SET_INPUT_STAGE_PARAM     = 0x13000F */
 /*	MSG_STREAM_SET_OUTPUT_STAGE_PARAM    = 0x130010 */
@@ -410,10 +400,8 @@ struct mixart_stream_param_desc
 
 } __attribute__((packed));
 
-
 /*	MSG_CONNECTOR_GET_OUT_AUDIO_LEVEL    = 0x050009,
  */
-
 
 struct mixart_get_out_audio_level
 {
@@ -425,7 +413,6 @@ struct mixart_get_out_audio_level
 	u32 monitor_mute1;
 	u32 monitor_mute2;
 } __attribute__((packed));
-
 
 /*	MSG_CONNECTOR_SET_OUT_AUDIO_LEVEL    = 0x05000A,
  */
@@ -453,7 +440,6 @@ struct mixart_set_out_audio_level
 	u32 reserved4np;
 } __attribute__((packed));
 
-
 /*	MSG_SYSTEM_ENUM_PHYSICAL_IO          = 0x16000E,
  */
 
@@ -467,7 +453,6 @@ struct mixart_uid_enumeration
 	u32 current_uid_index;
 	struct mixart_uid uid[MIXART_MAX_PHYS_IO];
 } __attribute__((packed));
-
 
 /*	MSG_PHYSICALIO_SET_LEVEL             = 0x0F0008,
 	MSG_PHYSICALIO_GET_LEVEL             = 0x0F000C,
@@ -484,7 +469,6 @@ struct mixart_io_level
 	s32 channel; /* 0=left, 1=right, -1=both, -2=both same */
 	struct mixart_io_channel_level level[2];
 } __attribute__((packed));
-
 
 /*	MSG_STREAM_SET_IN_AUDIO_LEVEL        = 0x130015,
  */
@@ -508,7 +492,6 @@ struct mixart_set_in_audio_level_req
 } __attribute__((packed));
 
 /* response is a 32 bit status */
-
 
 /*	MSG_STREAM_SET_OUT_STREAM_LEVEL      = 0x130017,
  */
@@ -553,7 +536,6 @@ struct mixart_set_out_stream_level_req
 } __attribute__((packed));
 
 /* response to this request is a u32 status value */
-
 
 /* exported */
 void snd_mixart_init_mailbox(struct mixart_mgr *mgr);

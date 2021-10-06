@@ -16,7 +16,6 @@
 #ifndef __IRQ_ATMEL_AIC_COMMON_H
 #define __IRQ_ATMEL_AIC_COMMON_H
 
-
 int aic_common_set_type(struct irq_data *d, unsigned type, unsigned *val);
 
 int aic_common_set_priority(int priority, unsigned *val);

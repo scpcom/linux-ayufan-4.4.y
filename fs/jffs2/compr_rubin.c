@@ -18,11 +18,9 @@
 #include <linux/errno.h>
 #include "compr.h"
 
-
 #define RUBIN_REG_SIZE   16
 #define UPPER_BIT_RUBIN    (((long) 1)<<(RUBIN_REG_SIZE-1))
 #define LOWER_BITS_RUBIN   ((((long) 1)<<(RUBIN_REG_SIZE-1))-1)
-
 
 #define BIT_DIVIDER_MIPS 1043
 static int bits_mips[8] = { 277, 249, 290, 267, 229, 341, 212, 241};
@@ -84,7 +82,6 @@ static inline int pullbit(struct pushpull *pp)
 	return bit;
 }
 
-
 static void init_rubin(struct rubin_state *rs, int div, int *bits)
 {
 	int c;
@@ -97,7 +94,6 @@ static void init_rubin(struct rubin_state *rs, int div, int *bits)
 	for (c=0; c<8; c++)
 		rs->bits[c] = bits[c];
 }
-
 
 static int encode(struct rubin_state *rs, long A, long B, int symbol)
 {
@@ -134,7 +130,6 @@ static int encode(struct rubin_state *rs, long A, long B, int symbol)
 	return 0;
 }
 
-
 static void end_rubin(struct rubin_state *rs)
 {
 
@@ -146,7 +141,6 @@ static void end_rubin(struct rubin_state *rs)
 		rs->q <<= 1;
 	}
 }
-
 
 static void init_decode(struct rubin_state *rs, int div, int *bits)
 {
@@ -225,8 +219,6 @@ static int decode(struct rubin_state *rs, long A, long B)
 	return symbol;
 }
 
-
-
 static int out_byte(struct rubin_state *rs, unsigned char byte)
 {
 	int i, ret;
@@ -256,8 +248,6 @@ static int in_byte(struct rubin_state *rs)
 
 	return result;
 }
-
-
 
 static int rubin_do_compress(int bit_divider, int *bits, unsigned char *data_in,
 			     unsigned char *cpage_out, uint32_t *sourcelen,
@@ -379,7 +369,6 @@ static void rubin_do_decompress(int bit_divider, int *bits,
 	while (outpos < destlen)
 		page_out[outpos++] = in_byte(&rs);
 }
-
 
 static int jffs2_rubinmips_decompress(unsigned char *data_in,
 				      unsigned char *cpage_out,

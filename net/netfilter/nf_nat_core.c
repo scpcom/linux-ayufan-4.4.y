@@ -38,7 +38,6 @@ static const struct nf_nat_l3proto __rcu *nf_nat_l3protos[NFPROTO_NUMPROTO]
 static const struct nf_nat_l4proto __rcu **nf_nat_l4protos[NFPROTO_NUMPROTO]
 						__read_mostly;
 
-
 inline const struct nf_nat_l3proto *
 __nf_nat_l3proto_find(u8 family)
 {

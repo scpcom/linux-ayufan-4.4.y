@@ -1469,7 +1469,6 @@ static int test_pcomp(struct crypto_pcomp *tfm,
 	return 0;
 }
 
-
 static int test_cprng(struct crypto_rng *tfm, struct cprng_testvec *template,
 		      unsigned int tcount)
 {
@@ -1752,7 +1751,6 @@ static int alg_test_cprng(const struct alg_test_desc *desc, const char *driver,
 	return err;
 }
 
-
 static int drbg_cavs_test(struct drbg_testvec *test, int pr,
 			  const char *driver, u32 type, u32 mask)
 {
@@ -1819,7 +1817,6 @@ outbuf:
 	kzfree(buf);
 	return ret;
 }
-
 
 static int alg_test_drbg(const struct alg_test_desc *desc, const char *driver,
 			 u32 type, u32 mask)

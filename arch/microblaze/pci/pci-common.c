@@ -1247,7 +1247,6 @@ void pcibios_claim_one_bus(struct pci_bus *bus)
 }
 EXPORT_SYMBOL_GPL(pcibios_claim_one_bus);
 
-
 /* pcibios_finish_adding_to_bus
  *
  * This is to be called by the hotplug code after devices have been
@@ -1501,4 +1500,3 @@ int early_find_capability(struct pci_controller *hose, int bus, int devfn,
 {
 	return pci_bus_find_capability(fake_pci_bus(hose, bus), devfn, cap);
 }
-

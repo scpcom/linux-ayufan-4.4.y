@@ -24,7 +24,6 @@
 
 #include "u_ether.h"
 
-
 /*
  * This component encapsulates the Ethernet link glue needed to provide
  * one (!) network link through the USB gadget stack, normally "usb0".
@@ -211,7 +210,6 @@ rx_submit(struct eth_dev *dev, struct usb_request *req, gfp_t gfp_flags)
 
 	if (!out)
 		return -ENOTCONN;
-
 
 	/* Padding up to RX_EXTRA handles minor disagreements with host.
 	 * Normally we use the USB "terminate on short read" convention;

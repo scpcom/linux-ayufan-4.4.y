@@ -1835,7 +1835,6 @@ vpfe_ipipe_init(struct vpfe_ipipe_device *ipipe, struct platform_device *pdev)
 			  V4L2_CID_CONTRAST, 0,
 			  IPIPE_CONTRAST_HIGH, 1, 16);
 
-
 	v4l2_ctrl_handler_setup(&ipipe->ctrls);
 	sd->ctrl_handler = &ipipe->ctrls;
 

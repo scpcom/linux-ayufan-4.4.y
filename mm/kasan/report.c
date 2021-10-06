@@ -259,7 +259,6 @@ void kasan_report(unsigned long addr, size_t size,
 	kasan_report_error(&info);
 }
 
-
 #define DEFINE_ASAN_REPORT_LOAD(size)                     \
 void __asan_report_load##size##_noabort(unsigned long addr) \
 {                                                         \

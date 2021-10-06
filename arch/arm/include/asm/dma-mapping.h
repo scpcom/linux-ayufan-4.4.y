@@ -265,8 +265,6 @@ extern int dmabounce_register_dev(struct device *, unsigned long,
  */
 extern void dmabounce_unregister_dev(struct device *);
 
-
-
 /*
  * The scatter list versions of the above methods.
  */

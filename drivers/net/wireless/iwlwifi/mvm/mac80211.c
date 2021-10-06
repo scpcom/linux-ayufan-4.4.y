@@ -3059,7 +3059,6 @@ static void iwl_mvm_mac_update_tkip_key(struct ieee80211_hw *hw,
 	iwl_mvm_update_tkip_key(mvm, vif, keyconf, sta, iv32, phase1key);
 }
 
-
 static bool iwl_mvm_rx_aux_roc(struct iwl_notif_wait_data *notif_wait,
 			       struct iwl_rx_packet *pkt, void *data)
 {

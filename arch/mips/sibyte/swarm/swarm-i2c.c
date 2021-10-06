@@ -13,7 +13,6 @@
 #include <linux/init.h>
 #include <linux/kernel.h>
 
-
 static struct i2c_board_info swarm_i2c_info1[] __initdata = {
 	{
 		I2C_BOARD_INFO("m41t81", 0x68),

@@ -417,7 +417,6 @@ static int __init sta2x11_scr_init(void)
 	return platform_driver_register(&sta2x11_scr_platform_driver);
 }
 
-
 /*
  * What follows are the PCI devices that host the above pdevs.
  * Each logic block is 4kB and they are all consecutive: we use this info.
@@ -510,7 +509,6 @@ static struct mfd_cell sta2x11_mfd1_bar0[] = {
 static struct mfd_cell sta2x11_mfd1_bar1[] = {
 	DEV(STA2X11_MFD_APB_SOC_REGS_NAME, apb_soc_regs_resources),
 };
-
 
 static int sta2x11_mfd_suspend(struct pci_dev *pdev, pm_message_t state)
 {

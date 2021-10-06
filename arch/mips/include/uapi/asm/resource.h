@@ -9,7 +9,6 @@
 #ifndef _ASM_RESOURCE_H
 #define _ASM_RESOURCE_H
 
-
 /*
  * These five resource limit IDs have a MIPS/Linux-specific ordering,
  * the rest comes from the generic header:

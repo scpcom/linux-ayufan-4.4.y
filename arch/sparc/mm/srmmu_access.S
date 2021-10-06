@@ -41,7 +41,6 @@ SUN_PI_(sta	%g1, [%g2] ASI_M_MMUREGS)
 	 nop
 ENDPROC(srmmu_set_ctable_ptr)
 
-
 /* void srmmu_set_context(int context) */
 ENTRY(srmmu_set_context)
 	mov	SRMMU_CTX_REG, %g1
@@ -50,7 +49,6 @@ SUN_PI_(sta	%o0, [%g1] ASI_M_MMUREGS)
 	retl
 	 nop
 ENDPROC(srmmu_set_context)
-
 
 /* int srmmu_get_context(void) */
 ENTRY(srmmu_get_context)
@@ -61,7 +59,6 @@ SUN_PI_(lda	[%o0] ASI_M_MMUREGS, %o0)
 	 nop
 ENDPROC(srmmu_get_context)
 
-
 /* unsigned int srmmu_get_fstatus(void) */
 ENTRY(srmmu_get_fstatus)
 	mov	SRMMU_FAULT_STATUS, %o0
@@ -70,7 +67,6 @@ SUN_PI_(lda	[%o0] ASI_M_MMUREGS, %o0)
 	retl
 	 nop
 ENDPROC(srmmu_get_fstatus)
-
 
 /* unsigned int srmmu_get_faddr(void) */
 ENTRY(srmmu_get_faddr)

@@ -161,7 +161,6 @@ static unsigned int nf_hash_frag(__be32 id, const struct in6_addr *saddr,
 			    (__force u32)id, nf_frags.rnd);
 }
 
-
 static unsigned int nf_hashfn(const struct inet_frag_queue *q)
 {
 	const struct frag_queue *nq;
@@ -214,7 +213,6 @@ static inline struct frag_queue *fq_find(struct net *net, __be32 id,
 	}
 	return container_of(q, struct frag_queue, q);
 }
-
 
 static int nf_ct_frag6_queue(struct frag_queue *fq, struct sk_buff *skb,
 			     const struct frag_hdr *fhdr, int nhoff)

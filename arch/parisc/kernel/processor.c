@@ -83,7 +83,6 @@ init_percpu_prof(unsigned long cpunum)
 	p->prof_multiplier = 1;
 }
 
-
 /**
  * processor_probe - Determine if processor driver should claim this device.
  * @dev: The device which has been found.
@@ -278,8 +277,6 @@ void __init collect_boot_cpu_data(void)
 	boot_cpu_data.cpu_name = cpu_name_version[boot_cpu_data.cpu_type][0];
 	boot_cpu_data.family_name = cpu_name_version[boot_cpu_data.cpu_type][1];
 }
-
-
 
 /**
  * init_per_cpu - Handle individual processor initializations.

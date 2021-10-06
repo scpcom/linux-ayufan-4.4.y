@@ -103,7 +103,6 @@ static int ehci_mxc_drv_probe(struct platform_device *pdev)
 	if (priv->phyclk)
 		clk_prepare_enable(priv->phyclk);
 
-
 	/* call platform specific init function */
 	if (pdata->init) {
 		ret = pdata->init(pdev);

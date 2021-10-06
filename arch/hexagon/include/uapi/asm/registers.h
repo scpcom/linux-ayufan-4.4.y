@@ -2,7 +2,6 @@
  * Register definitions for the Hexagon architecture
  */
 
-
 #ifndef _ASM_REGISTERS_H
 #define _ASM_REGISTERS_H
 

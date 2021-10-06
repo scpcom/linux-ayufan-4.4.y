@@ -84,5 +84,4 @@ struct cramfs_super {
 				| CRAMFS_FLAG_WRONG_SIGNATURE \
 				| CRAMFS_FLAG_SHIFTED_ROOT_OFFSET )
 
-
 #endif /* _UAPI__CRAMFS_H */

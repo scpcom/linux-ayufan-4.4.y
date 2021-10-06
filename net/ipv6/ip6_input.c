@@ -198,7 +198,6 @@ drop:
  *	Deliver the packet to the host
  */
 
-
 static int ip6_input_finish(struct net *net, struct sock *sk, struct sk_buff *skb)
 {
 	const struct inet6_protocol *ipprot;
@@ -273,7 +272,6 @@ discard:
 	kfree_skb(skb);
 	return 0;
 }
-
 
 int ip6_input(struct sk_buff *skb)
 {

@@ -83,7 +83,6 @@ static const struct file_operations iwl_dbgfs_##name##_ops = {          \
 	.llseek = generic_file_llseek,					\
 };
 
-
 #define DEBUGFS_READ_WRITE_FILE_OPS(name)                               \
 static const struct file_operations iwl_dbgfs_##name##_ops = {          \
 	.write = iwl_dbgfs_##name##_write,                              \
@@ -579,7 +578,6 @@ static ssize_t iwl_dbgfs_temperature_read(struct file *file,
 	pos += scnprintf(buf + pos, bufsz - pos, "%d\n", priv->temperature);
 	return simple_read_from_buffer(user_buf, count, ppos, buf, pos);
 }
-
 
 static ssize_t iwl_dbgfs_sleep_level_override_write(struct file *file,
 						    const char __user *user_buf,
@@ -1765,7 +1763,6 @@ static ssize_t iwl_dbgfs_sensitivity_read(struct file *file,
 	kfree(buf);
 	return ret;
 }
-
 
 static ssize_t iwl_dbgfs_chain_noise_read(struct file *file,
 					char __user *user_buf,

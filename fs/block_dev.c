@@ -1245,6 +1245,7 @@ static int __blkdev_get(struct block_device *bdev, fmode_t mode, int for_part)
 				else if (ret == -ENOMEDIUM)
 					invalidate_partitions(disk, bdev);
 			}
+
 			if (ret)
 				goto out_clear;
 		} else {

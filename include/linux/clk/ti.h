@@ -304,5 +304,4 @@ static inline int omap36xx_clk_legacy_init(void) { return -ENXIO; }
 static inline int am35xx_clk_legacy_init(void) { return -ENXIO; }
 #endif
 
-
 #endif

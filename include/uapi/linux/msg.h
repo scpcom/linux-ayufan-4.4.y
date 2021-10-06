@@ -84,5 +84,4 @@ struct msginfo {
 #define __MSGSEG ((MSGPOOL * 1024) / MSGSSZ) /* max no. of segments */
 #define MSGSEG (__MSGSEG <= 0xffff ? __MSGSEG : 0xffff)
 
-
 #endif /* _UAPI_LINUX_MSG_H */

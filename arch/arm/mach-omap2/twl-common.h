@@ -29,7 +29,6 @@
 #define TWL_COMMON_REGULATOR_VPLL1	(1 << 4)
 #define TWL_COMMON_REGULATOR_VPLL2	(1 << 5)
 
-
 struct twl4030_platform_data;
 struct twl6040_platform_data;
 struct omap_tw4030_pdata;

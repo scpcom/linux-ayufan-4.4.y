@@ -23,7 +23,6 @@
     PA header file -- do not include this header file for non-PA builds.
 #endif
 
-
 /*
  *  These macros are designed to be portable to all machines that have
  *  a wordsize greater than or equal to 32 bits that support the portable
@@ -39,7 +38,6 @@
 #ifndef HOSTWDSZ
 #define	HOSTWDSZ	32
 #endif
-
 
 /*###########################  Macros  ######################################*/
 

@@ -1,24 +1,4 @@
-/*
- * xHCI host controller driver PCI Bus Glue.
- *
- * Copyright (C) 2008 Intel Corp.
- *
- * Author: Sarah Sharp
- * Some code borrowed from the Linux EHCI driver.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 as
- * published by the Free Software Foundation.
- *
- * This program is distributed in the hope that it will be useful, but
- * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
- * or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
- * for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
- */
+
 
 #include <linux/pci.h>
 #include <linux/slab.h>
@@ -34,7 +14,6 @@
 #define PROG_DONE		(1 << 30)
 #define SSIC_PORT_UNUSED	(1 << 31)
 
-/* Device for a quirk */
 #define PCI_VENDOR_ID_FRESCO_LOGIC	0x1b73
 #define PCI_DEVICE_ID_FRESCO_LOGIC_PDK	0x1000
 #define PCI_DEVICE_ID_FRESCO_LOGIC_FL1009	0x1009
@@ -62,16 +41,9 @@ static const struct xhci_driver_overrides xhci_pci_overrides __initconst = {
 	.reset = xhci_pci_setup,
 };
 
-/* called after powerup, by probe or system-pm "wakeup" */
 static int xhci_pci_reinit(struct xhci_hcd *xhci, struct pci_dev *pdev)
 {
-	/*
-	 * TODO: Implement finding debug ports later.
-	 * TODO: see if there are any quirks that need to be added to handle
-	 * new extended capabilities.
-	 */
-
-	/* PCI Memory-Write-Invalidate cycle support is optional (uncommon) */
+	 
 	if (!pci_set_mwi(pdev))
 		xhci_dbg(xhci, "MWI active\n");
 
@@ -83,7 +55,6 @@ static void xhci_pci_quirks(struct device *dev, struct xhci_hcd *xhci)
 {
 	struct pci_dev		*pdev = to_pci_dev(dev);
 
-	/* Look for vendor-specific quirks */
 	if (pdev->vendor == PCI_VENDOR_ID_FRESCO_LOGIC &&
 			(pdev->device == PCI_DEVICE_ID_FRESCO_LOGIC_PDK ||
 			 pdev->device == PCI_DEVICE_ID_FRESCO_LOGIC_FL1400)) {
@@ -104,10 +75,7 @@ static void xhci_pci_quirks(struct device *dev, struct xhci_hcd *xhci)
 		}
 		if (pdev->device == PCI_DEVICE_ID_FRESCO_LOGIC_PDK)
 			xhci->quirks |= XHCI_BROKEN_STREAMS;
-		/* Fresco Logic confirms: all revisions of this chip do not
-		 * support MSI, even though some of them claim to in their PCI
-		 * capabilities.
-		 */
+		 
 		xhci->quirks |= XHCI_BROKEN_MSI;
 		xhci_dbg_trace(xhci, trace_xhci_dbg_quirks,
 				"QUIRK: Fresco Logic revision %u "
@@ -126,7 +94,6 @@ static void xhci_pci_quirks(struct device *dev, struct xhci_hcd *xhci)
 	if (pdev->vendor == PCI_VENDOR_ID_AMD && xhci->hci_version == 0x96)
 		xhci->quirks |= XHCI_AMD_0x96_HOST;
 
-	/* AMD PLL quirk */
 	if (pdev->vendor == PCI_VENDOR_ID_AMD && usb_amd_find_chipset_info())
 		xhci->quirks |= XHCI_AMD_PLL_FIX;
 
@@ -143,14 +110,7 @@ static void xhci_pci_quirks(struct device *dev, struct xhci_hcd *xhci)
 		xhci->quirks |= XHCI_EP_LIMIT_QUIRK;
 		xhci->limit_active_eps = 64;
 		xhci->quirks |= XHCI_SW_BW_CHECKING;
-		/*
-		 * PPT desktop boards DH77EB and DH77DF will power back on after
-		 * a few seconds of being shutdown.  The fix for this is to
-		 * switch the ports from xHCI to EHCI on shutdown.  We can't use
-		 * DMI information to find those particular boards (since each
-		 * vendor will change the board name), so we have to key off all
-		 * PPT chipsets.
-		 */
+		 
 		xhci->quirks |= XHCI_SPURIOUS_REBOOT;
 	}
 	if (pdev->vendor == PCI_VENDOR_ID_INTEL &&
@@ -178,7 +138,6 @@ static void xhci_pci_quirks(struct device *dev, struct xhci_hcd *xhci)
 	if (pdev->vendor == PCI_VENDOR_ID_VIA)
 		xhci->quirks |= XHCI_RESET_ON_RESUME;
 
-	/* See https://bugzilla.kernel.org/show_bug.cgi?id=79511 */
 	if (pdev->vendor == PCI_VENDOR_ID_VIA &&
 			pdev->device == 0x3432)
 		xhci->quirks |= XHCI_BROKEN_STREAMS;
@@ -207,9 +166,8 @@ static void xhci_pme_acpi_rtd3_enable(struct pci_dev *dev)
 }
 #else
 static void xhci_pme_acpi_rtd3_enable(struct pci_dev *dev) { }
-#endif /* CONFIG_ACPI */
+#endif  
 
-/* called during probe() after chip reset completes */
 static int xhci_pci_setup(struct usb_hcd *hcd)
 {
 	struct xhci_hcd		*xhci;
@@ -229,7 +187,7 @@ static int xhci_pci_setup(struct usb_hcd *hcd)
 
 	xhci_dbg(xhci, "Got SBRN %u\n", (unsigned int) xhci->sbrn);
 
-	/* Find any debug ports */
+	
 	retval = xhci_pci_reinit(xhci, pdev);
 	if (!retval)
 		return retval;
@@ -237,10 +195,6 @@ static int xhci_pci_setup(struct usb_hcd *hcd)
 	return retval;
 }
 
-/*
- * We need to register our own PCI probe function (instead of the USB core's
- * function) in order to create a second roothub under xHCI.
- */
 static int xhci_pci_probe(struct pci_dev *dev, const struct pci_device_id *id)
 {
 	int retval;
@@ -250,21 +204,16 @@ static int xhci_pci_probe(struct pci_dev *dev, const struct pci_device_id *id)
 
 	driver = (struct hc_driver *)id->driver_data;
 
-	/* Prevent runtime suspending between USB-2 and USB-3 initialization */
+	
 	pm_runtime_get_noresume(&dev->dev);
 
-	/* Register the USB 2.0 roothub.
-	 * FIXME: USB core must know to register the USB 2.0 roothub first.
-	 * This is sort of silly, because we could just set the HCD driver flags
-	 * to say USB 2.0, but I'm not sure what the implications would be in
-	 * the other parts of the HCD code.
-	 */
+	
 	retval = usb_hcd_pci_probe(dev, id);
 
 	if (retval)
 		goto put_runtime_pm;
 
-	/* USB 2.0 roothub is stored in the PCI device now. */
+	
 	hcd = dev_get_drvdata(&dev->dev);
 	xhci = hcd_to_xhci(hcd);
 	xhci->shared_hcd = usb_create_shared_hcd(driver, &dev->dev,
@@ -278,8 +227,7 @@ static int xhci_pci_probe(struct pci_dev *dev, const struct pci_device_id *id)
 			IRQF_SHARED);
 	if (retval)
 		goto put_usb3_hcd;
-	/* Roothub already marked as USB 3.0 speed */
-
+	 
 	if (!(xhci->quirks & XHCI_BROKEN_STREAMS) &&
 			HCC_MAX_PSA(xhci->hcc_params) >= 4)
 		xhci->shared_hcd->can_do_streams = 1;
@@ -287,7 +235,6 @@ static int xhci_pci_probe(struct pci_dev *dev, const struct pci_device_id *id)
 	if (xhci->quirks & XHCI_PME_STUCK_QUIRK)
 		xhci_pme_acpi_rtd3_enable(dev);
 
-	/* USB-2 and USB-3 roothubs initialized, allow runtime pm suspend */
 	pm_runtime_put_noidle(&dev->dev);
 
 	return 0;
@@ -313,21 +260,12 @@ static void xhci_pci_remove(struct pci_dev *dev)
 	}
 	usb_hcd_pci_remove(dev);
 
-	/* Workaround for spurious wakeups at shutdown with HSW */
 	if (xhci->quirks & XHCI_SPURIOUS_WAKEUP)
 		pci_set_power_state(dev, PCI_D3hot);
 }
 
 #ifdef CONFIG_PM
-/*
- * In some Intel xHCI controllers, in order to get D3 working,
- * through a vendor specific SSIC CONFIG register at offset 0x883c,
- * SSIC PORT need to be marked as "unused" before putting xHCI
- * into D3. After D3 exit, the SSIC port need to be marked as "used".
- * Without this change, xHCI might not enter D3 state.
- * Make sure PME works on some Intel xHCI controllers by writing 1 to clear
- * the Internal PME flag bit in vendor specific PMCTRL register at offset 0x80a4
- */
+ 
 static void xhci_pme_quirk(struct usb_hcd *hcd, bool suspend)
 {
 	struct xhci_hcd	*xhci = hcd_to_xhci(hcd);
@@ -344,14 +282,9 @@ static void xhci_pme_quirk(struct usb_hcd *hcd, bool suspend)
 					SSIC_PORT_CFG2 +
 					i * SSIC_PORT_CFG2_OFFSET;
 
-			/*
-			 * Notify SSIC that SSIC profile programming
-			 * is not done.
-			 */
 			val = readl(reg) & ~PROG_DONE;
 			writel(val, reg);
 
-			/* Mark SSIC port as unused(suspend) or used(resume) */
 			val = readl(reg);
 			if (suspend)
 				val |= SSIC_PORT_UNUSED;
@@ -359,7 +292,6 @@ static void xhci_pme_quirk(struct usb_hcd *hcd, bool suspend)
 				val &= ~SSIC_PORT_UNUSED;
 			writel(val, reg);
 
-			/* Notify SSIC that SSIC profile programming is done */
 			val = readl(reg) | PROG_DONE;
 			writel(val, reg);
 			readl(reg);
@@ -377,10 +309,6 @@ static int xhci_pci_suspend(struct usb_hcd *hcd, bool do_wakeup)
 	struct xhci_hcd	*xhci = hcd_to_xhci(hcd);
 	struct pci_dev		*pdev = to_pci_dev(hcd->self.controller);
 
-	/*
-	 * Systems with the TI redriver that loses port status change events
-	 * need to have the registers polled during D3, so avoid D3cold.
-	 */
 	if (xhci->quirks & XHCI_COMP_MODE_QUIRK)
 		pdev->no_d3cold = true;
 
@@ -396,24 +324,6 @@ static int xhci_pci_resume(struct usb_hcd *hcd, bool hibernated)
 	struct pci_dev		*pdev = to_pci_dev(hcd->self.controller);
 	int			retval = 0;
 
-	/* The BIOS on systems with the Intel Panther Point chipset may or may
-	 * not support xHCI natively.  That means that during system resume, it
-	 * may switch the ports back to EHCI so that users can use their
-	 * keyboard to select a kernel from GRUB after resume from hibernate.
-	 *
-	 * The BIOS is supposed to remember whether the OS had xHCI ports
-	 * enabled before resume, and switch the ports back to xHCI when the
-	 * BIOS/OS semaphore is written, but we all know we can't trust BIOS
-	 * writers.
-	 *
-	 * Unconditionally switch the ports back to xHCI after a system resume.
-	 * It should not matter whether the EHCI or xHCI controller is
-	 * resumed first. It's enough to do the switchover in xHCI because
-	 * USB core won't notice anything as the hub driver doesn't start
-	 * running again until after all the devices (including both EHCI and
-	 * xHCI host controllers) have been resumed.
-	 */
-
 	if (pdev->vendor == PCI_VENDOR_ID_INTEL)
 		usb_enable_intel_xhci_ports(pdev);
 
@@ -423,29 +333,24 @@ static int xhci_pci_resume(struct usb_hcd *hcd, bool hibernated)
 	retval = xhci_resume(xhci, hibernated);
 	return retval;
 }
-#endif /* CONFIG_PM */
+#endif  
 
-/*-------------------------------------------------------------------------*/
-
-/* PCI driver selection metadata; PCI hotplugging uses this */
 static const struct pci_device_id pci_ids[] = { {
-	/* handle any USB 3.0 xHCI controller */
+	 
 	PCI_DEVICE_CLASS(PCI_CLASS_SERIAL_USB_XHCI, ~0),
 	.driver_data =	(unsigned long) &xhci_pci_hc_driver,
 	},
-	{ /* end: all zeroes */ }
+	{   }
 };
 MODULE_DEVICE_TABLE(pci, pci_ids);
 
-/* pci driver glue; this is a "new style" PCI driver module */
 static struct pci_driver xhci_pci_driver = {
 	.name =		(char *) hcd_name,
 	.id_table =	pci_ids,
 
 	.probe =	xhci_pci_probe,
 	.remove =	xhci_pci_remove,
-	/* suspend and resume implemented later */
-
+	 
 	.shutdown = 	usb_hcd_pci_shutdown,
 #ifdef CONFIG_PM
 	.driver = {

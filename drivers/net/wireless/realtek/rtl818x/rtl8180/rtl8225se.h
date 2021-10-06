@@ -49,7 +49,6 @@ static inline void rtl8225se_write_phy_cck(struct ieee80211_hw *dev,
 	rtl8180_write_phy(dev, addr, data | 0x10000);
 }
 
-
 const struct rtl818x_rf_ops *rtl8187se_detect_rf(struct ieee80211_hw *);
 void rtl8225se_rf_stop(struct ieee80211_hw *dev);
 void rtl8225se_rf_set_channel(struct ieee80211_hw *dev,

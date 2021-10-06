@@ -531,7 +531,6 @@ int bdc_udc_init(struct bdc *bdc)
 
 	bdc->gadget.sg_supported = false;
 
-
 	bdc->gadget.name = BRCM_BDC_NAME;
 	ret = devm_request_irq(bdc->dev, bdc->irq, bdc_udc_interrupt,
 				IRQF_SHARED , BRCM_BDC_NAME, bdc);

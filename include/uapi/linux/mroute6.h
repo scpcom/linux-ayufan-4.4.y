@@ -116,8 +116,6 @@ struct sioc_mif_req6 {
  *	That's all usermode folks
  */
 
-
-
 /*
  * Structure used to communicate from kernel to multicast router.
  * We'll overlay the structure onto an MLD header (not an IPv6 heder like igmpmsg{}

@@ -73,6 +73,5 @@ efi_status_t __init handle_kernel_image(efi_system_table_t *sys_table_arg,
 		*reserve_size = kernel_memsize;
 	}
 
-
 	return EFI_SUCCESS;
 }

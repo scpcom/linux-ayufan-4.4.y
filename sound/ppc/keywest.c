@@ -18,7 +18,6 @@
  *   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
  */
 
-
 #include <linux/init.h>
 #include <linux/i2c.h>
 #include <linux/delay.h>
@@ -95,7 +94,6 @@ static int keywest_remove(struct i2c_client *client)
 
 	return 0;
 }
-
 
 static const struct i2c_device_id keywest_i2c_id[] = {
 	{ "MAC,tas3004", 0 },		/* instantiated by i2c-powermac */

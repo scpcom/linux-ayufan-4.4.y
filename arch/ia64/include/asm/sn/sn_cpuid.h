@@ -7,7 +7,6 @@
  * Copyright (C) 2000-2005 Silicon Graphics, Inc. All rights reserved.
  */
 
-
 #ifndef _ASM_IA64_SN_SN_CPUID_H
 #define _ASM_IA64_SN_SN_CPUID_H
 
@@ -16,16 +15,12 @@
 #include <asm/sn/pda.h>
 #include <asm/intrinsics.h>
 
-
 /*
  * Functions for converting between cpuids, nodeids and NASIDs.
  * 
  * These are for SGI platforms only.
  *
  */
-
-
-
 
 /*
  *  Definitions of terms (these definitions are for IA64 ONLY. Other architectures
@@ -105,7 +100,6 @@ extern short physical_node_map[];	/* indexed by nasid to get cnode */
 #define cpuid_to_subnode(cpuid)		(sn_nodepda->phys_cpuid[cpuid].subnode)
 #define cpuid_to_slice(cpuid)		(sn_nodepda->phys_cpuid[cpuid].slice)
 
-
 /*
  * Dont use the following in performance critical code. They require scans
  * of potentially large tables.
@@ -129,4 +123,3 @@ extern u8 sn_coherency_id;
 #define partition_coherence_id()	(sn_coherency_id)
 
 #endif /* _ASM_IA64_SN_SN_CPUID_H */
-

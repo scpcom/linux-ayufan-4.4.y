@@ -218,5 +218,4 @@ struct omapfb_display_info {
 	__u32 reserved[5];
 };
 
-
 #endif /* _UAPI__LINUX_OMAPFB_H__ */

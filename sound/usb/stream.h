@@ -9,4 +9,3 @@ int snd_usb_add_audio_stream(struct snd_usb_audio *chip,
 			     struct audioformat *fp);
 
 #endif /* __USBAUDIO_STREAM_H */
-

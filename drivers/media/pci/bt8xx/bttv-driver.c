@@ -215,7 +215,6 @@ static void flush_request_modules(struct bttv *dev)
 #define flush_request_modules(dev) do {} while(0)
 #endif /* CONFIG_MODULES */
 
-
 /* ----------------------------------------------------------------------- */
 /* static data                                                             */
 
@@ -1478,7 +1477,6 @@ static struct v4l2_ctrl_config bttv_ctrl_coring = {
 	.max = 3,
 	.step = 1,
 };
-
 
 /* ----------------------------------------------------------------------- */
 
@@ -2752,7 +2750,6 @@ static int bttv_streamon(struct file *file, void *priv,
 	return videobuf_streamon(bttv_queue(fh));
 }
 
-
 static int bttv_streamoff(struct file *file, void *priv,
 					enum v4l2_buf_type type)
 {
@@ -2760,7 +2757,6 @@ static int bttv_streamoff(struct file *file, void *priv,
 	struct bttv *btv = fh->btv;
 	int retval;
 	int res = bttv_resource(fh);
-
 
 	retval = videobuf_streamoff(bttv_queue(fh));
 	if (retval < 0)
@@ -3913,7 +3909,6 @@ static irqreturn_t bttv_irq(int irq, void *dev_id)
 	return IRQ_RETVAL(handled);
 }
 
-
 /* ----------------------------------------------------------------------- */
 /* initialization                                                          */
 
@@ -3991,7 +3986,6 @@ static int bttv_register_video(struct bttv *btv)
 	bttv_unregister_video(btv);
 	return -1;
 }
-
 
 /* on OpenFirmware machines (PowerMac at least), PCI memory cycle */
 /* response on cards with no firmware is not enabled by OF */

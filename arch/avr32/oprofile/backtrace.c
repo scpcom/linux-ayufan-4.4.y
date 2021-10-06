@@ -77,5 +77,3 @@ void avr32_backtrace(struct pt_regs * const regs, unsigned int depth)
 			head = dump_user_backtrace(head);
 	}
 }
-
-

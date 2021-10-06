@@ -33,7 +33,6 @@
 
  */
 
-
 /* 
 
 NOTE: the current implementation of the port structure as a linked list is
@@ -77,7 +76,6 @@ struct snd_seq_client_port *snd_seq_port_use_ptr(struct snd_seq_client *client,
 	return NULL;		/* not found */
 }
 
-
 /* search for the next port - port is locked if found */
 struct snd_seq_client_port *snd_seq_port_query_nearest(struct snd_seq_client *client,
 						       struct snd_seq_port_info *pinfo)
@@ -108,7 +106,6 @@ struct snd_seq_client_port *snd_seq_port_query_nearest(struct snd_seq_client *cl
 	return found;
 }
 
-
 /* initialize snd_seq_port_subs_info */
 static void port_subs_info_init(struct snd_seq_port_subs_info *grp)
 {
@@ -120,7 +117,6 @@ static void port_subs_info_init(struct snd_seq_port_subs_info *grp)
 	grp->open = NULL;
 	grp->close = NULL;
 }
-
 
 /* create a port, port number is returned (-1 on failure) */
 struct snd_seq_client_port *snd_seq_create_port(struct snd_seq_client *client,
@@ -181,7 +177,6 @@ static int unsubscribe_port(struct snd_seq_client *client,
 			    struct snd_seq_client_port *port,
 			    struct snd_seq_port_subs_info *grp,
 			    struct snd_seq_port_subscribe *info, int send_ack);
-
 
 static struct snd_seq_client_port *get_client_port(struct snd_seq_addr *addr,
 						   struct snd_seq_client **cp)
@@ -275,7 +270,6 @@ static int port_delete(struct snd_seq_client *client,
 	kfree(port);
 	return 0;
 }
-
 
 /* delete a port with the given port id */
 int snd_seq_delete_port(struct snd_seq_client *client, int port)
@@ -400,8 +394,6 @@ int snd_seq_get_port_info(struct snd_seq_client_port * port,
 	return 0;
 }
 
-
-
 /*
  * call callback functions (if any):
  * the callbacks are invoked only when the first (for connection) or
@@ -456,8 +448,6 @@ static int unsubscribe_port(struct snd_seq_client *client,
 	module_put(port->owner);
 	return err;
 }
-
-
 
 /* check if both addresses are identical */
 static inline int addr_match(struct snd_seq_addr *r, struct snd_seq_addr *s)
@@ -629,7 +619,6 @@ int snd_seq_port_disconnect(struct snd_seq_client *connector,
 	kfree(subs);
 	return 0;
 }
-
 
 /* get matched subscriber */
 struct snd_seq_subscribers *snd_seq_port_get_subscription(struct snd_seq_port_subs_info *src_grp,

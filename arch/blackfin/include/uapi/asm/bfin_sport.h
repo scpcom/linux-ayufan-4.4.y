@@ -61,7 +61,6 @@ struct sport_config {
 #define SPORT_IOC_GET_SYSTEMCLOCK         _IOR('P', 0x02, unsigned long)
 #define SPORT_IOC_SET_BAUDRATE            _IOW('P', 0x03, unsigned long)
 
-
 /* SPORT_TCR1 Masks */
 #define TSPEN		0x0001	/* TX enable */
 #define ITCLK		0x0002	/* Internal TX Clock Select */

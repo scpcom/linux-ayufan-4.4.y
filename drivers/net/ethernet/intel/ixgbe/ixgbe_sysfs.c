@@ -227,4 +227,3 @@ int ixgbe_sysfs_init(struct ixgbe_adapter *adapter)
 exit:
 	return rc;
 }
-

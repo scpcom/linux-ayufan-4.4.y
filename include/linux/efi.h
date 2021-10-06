@@ -43,7 +43,6 @@ typedef u16 efi_char16_t;		/* UNICODE character */
 typedef u64 efi_physical_addr_t;
 typedef void *efi_handle_t;
 
-
 typedef struct {
 	u8 b[16];
 } efi_guid_t;
@@ -743,7 +742,6 @@ typedef struct {
 	unsigned int image_data_type;
 	unsigned long unload;
 } efi_loaded_image_t;
-
 
 typedef struct {
 	u64 size;

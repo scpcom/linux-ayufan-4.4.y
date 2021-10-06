@@ -247,7 +247,6 @@ static int namevalue_size_xe(struct ocfs2_xattr_entry *xe)
 	return namevalue_size(xe->xe_name_len, value_len);
 }
 
-
 static int ocfs2_xattr_bucket_get_name_value(struct super_block *sb,
 					     struct ocfs2_xattr_header *xh,
 					     int index,
@@ -3768,7 +3767,6 @@ static int ocfs2_find_xe_in_bucket(struct inode *inode,
 			break;
 		}
 
-
 		xe_name = bucket_block(bucket, block_off) + new_offset;
 		if (!memcmp(name, xe_name, name_len)) {
 			*xe_index = i;
@@ -5565,7 +5563,6 @@ static int ocfs2_xattr_set_entry_bucket(struct inode *inode,
 	if (ret != -ENOSPC)
 		mlog_errno(ret);
 
-
 out:
 	return ret;
 }
@@ -7080,7 +7077,6 @@ static int ocfs2_reflink_xattr_in_block(struct ocfs2_xattr_reflink *args,
 	struct buffer_head *new_blk_bh = NULL;
 	struct ocfs2_xattr_block *xb =
 			(struct ocfs2_xattr_block *)blk_bh->b_data;
-
 
 	if (le16_to_cpu(xb->xb_flags) & OCFS2_XATTR_INDEXED)
 		indexed = 1;

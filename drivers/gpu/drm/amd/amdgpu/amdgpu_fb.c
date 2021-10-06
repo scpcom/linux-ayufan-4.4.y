@@ -63,7 +63,6 @@ static struct fb_ops amdgpufb_ops = {
 	.fb_debug_leave = drm_fb_helper_debug_leave,
 };
 
-
 int amdgpu_align_pitch(struct amdgpu_device *adev, int width, int bpp, bool tiled)
 {
 	int aligned = width;
@@ -148,7 +147,6 @@ static int amdgpufb_create_pinned_object(struct amdgpu_fbdev *rfbdev,
 		if (ret)
 			dev_err(adev->dev, "FB failed to set tiling flags\n");
 	}
-
 
 	ret = amdgpu_bo_pin_restricted(rbo, AMDGPU_GEM_DOMAIN_VRAM, 0, 0, NULL);
 	if (ret) {

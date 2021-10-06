@@ -45,7 +45,6 @@ static void __init fix_hypertransport_config(int num, int slot, int func)
 		}
 	}
 
-
 }
 
 static void __init via_bugs(int  num, int slot, int func)
@@ -588,7 +587,6 @@ static void __init force_disable_hpet(int num, int slot, int func)
 	pr_info("x86/hpet: Will disable the HPET for this platform because it's not reliable\n");
 #endif
 }
-
 
 #define QFLAG_APPLY_ONCE 	0x1
 #define QFLAG_APPLIED		0x2

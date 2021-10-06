@@ -459,7 +459,6 @@ static const struct file_operations rpc_info_operations = {
 	.release	= rpc_info_release,
 };
 
-
 /*
  * Description of fs contents.
  */

@@ -181,8 +181,6 @@ static int atmel_hlcdc_rgb_mode_valid(struct drm_connector *connector,
 	return atmel_hlcdc_dc_mode_valid(rgb->dc, mode);
 }
 
-
-
 static struct drm_encoder *
 atmel_hlcdc_rgb_best_encoder(struct drm_connector *connector)
 {

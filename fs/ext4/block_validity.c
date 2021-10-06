@@ -239,4 +239,3 @@ int ext4_check_blockref(const char *function, unsigned int line,
 	}
 	return 0;
 }
-

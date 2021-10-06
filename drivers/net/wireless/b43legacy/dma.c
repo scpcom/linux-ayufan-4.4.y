@@ -238,7 +238,6 @@ return 0;
 	return idx_to_prio[ring->index];
 }
 
-
 static u16 b43legacy_dmacontroller_base(enum b43legacy_dmatype type,
 					int controller_idx)
 {

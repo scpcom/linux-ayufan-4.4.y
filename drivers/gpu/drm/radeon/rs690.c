@@ -341,7 +341,6 @@ static void rs690_crtc_bandwidth_compute(struct radeon_device *rdev,
 	a.full = dfixed_const(1);
 	wm->consumption_rate.full = dfixed_div(a, consumption_time);
 
-
 	/* Determine line time
 	 *  LineTime = total time for one line of displayhtotal
 	 *  LineTime = total number of horizontal pixels

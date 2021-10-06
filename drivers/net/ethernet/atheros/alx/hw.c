@@ -676,7 +676,6 @@ void alx_enable_aspm(struct alx_hw *hw, bool l0s_en, bool l1_en)
 	alx_write_mem32(hw, ALX_PMCTRL, pmctrl);
 }
 
-
 static u32 ethadv_to_hw_cfg(struct alx_hw *hw, u32 ethadv_cfg)
 {
 	u32 cfg = 0;
@@ -773,7 +772,6 @@ int alx_setup_speed_duplex(struct alx_hw *hw, u32 ethadv, u8 flowctrl)
 
 	return err;
 }
-
 
 void alx_post_phy_link(struct alx_hw *hw)
 {

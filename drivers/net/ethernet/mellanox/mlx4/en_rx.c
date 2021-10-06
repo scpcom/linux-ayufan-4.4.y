@@ -141,7 +141,6 @@ static void mlx4_en_free_frag(struct mlx4_en_priv *priv,
 	const struct mlx4_en_frag_info *frag_info = &priv->frag_info[i];
 	u32 next_frag_end = frags[i].page_offset + 2 * frag_info->frag_stride;
 
-
 	if (next_frag_end > frags[i].page_size)
 		dma_unmap_page(priv->ddev, frags[i].dma, frags[i].page_size,
 			       PCI_DMA_FROMDEVICE);
@@ -534,7 +533,6 @@ void mlx4_en_deactivate_rx_ring(struct mlx4_en_priv *priv,
 	mlx4_en_destroy_allocator(priv, ring);
 }
 
-
 static int mlx4_en_complete_rx_desc(struct mlx4_en_priv *priv,
 				    struct mlx4_en_rx_desc *rx_desc,
 				    struct mlx4_en_rx_alloc *frags,
@@ -578,7 +576,6 @@ fail:
 	}
 	return 0;
 }
-
 
 static struct sk_buff *mlx4_en_rx_skb(struct mlx4_en_priv *priv,
 				      struct mlx4_en_rx_desc *rx_desc,
@@ -1017,7 +1014,6 @@ out:
 	mlx4_en_update_rx_prod_db(ring);
 	return polled;
 }
-
 
 void mlx4_en_rx_irq(struct mlx4_cq *mcq)
 {

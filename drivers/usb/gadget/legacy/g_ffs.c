@@ -148,7 +148,6 @@ static int gfs_bind(struct usb_composite_dev *cdev);
 static int gfs_unbind(struct usb_composite_dev *cdev);
 static int gfs_do_config(struct usb_configuration *c);
 
-
 static struct usb_composite_driver gfs_driver = {
 	.name		= DRIVER_NAME,
 	.dev		= &gfs_dev_desc,
@@ -453,7 +452,6 @@ static int gfs_unbind(struct usb_composite_dev *cdev)
 	int i;
 
 	ENTER();
-
 
 #ifdef CONFIG_USB_FUNCTIONFS_RNDIS
 	usb_put_function(f_rndis);

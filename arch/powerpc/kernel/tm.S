@@ -43,7 +43,6 @@ END_FTR_SECTION_IFSET(CPU_FTR_VSX);		\
 #define TM_FRAME_L0	TM_FRAME_SIZE-16
 #define TM_FRAME_L1	TM_FRAME_SIZE-8
 
-
 /* In order to access the TM SPRs, TM must be enabled.  So, do so: */
 _GLOBAL(tm_enable)
 	mfmsr	r4
@@ -252,7 +251,6 @@ dont_backup_fp:
 	std	r5, _CCR(r7)
 	std	r6, _XER(r7)
 
-
 	/* ******************** TAR, DSCR ********** */
 	mfspr	r3, SPRN_TAR
 	mfspr	r4, SPRN_DSCR
@@ -297,7 +295,6 @@ dont_backup_fp:
 	mtspr	SPRN_DSCR, r0
 
 	blr
-
 
 	/* void tm_recheckpoint(struct thread_struct *thread,
 	 *			unsigned long orig_msr)

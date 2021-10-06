@@ -23,7 +23,6 @@
 #include <linux/i2c/max732x.h>
 #include <linux/of.h>
 
-
 /*
  * Each port of MAX732x (including MAX7319) falls into one of the
  * following three types:

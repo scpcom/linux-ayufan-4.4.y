@@ -101,7 +101,6 @@ int main(int argc, char **argv)
 	printf("%s: Test the uninitialized futex value in FUTEX_WAIT\n",
 	       basename(argv[0]));
 
-
 	ret = pthread_create(&thr, NULL, wait_thread, NULL);
 	if (ret) {
 		error("pthread_create\n", errno);

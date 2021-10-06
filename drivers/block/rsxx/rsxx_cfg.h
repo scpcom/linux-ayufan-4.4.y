@@ -67,6 +67,4 @@ struct rsxx_card_cfg {
 #define RSXX_INTR_COAL_EXPLICIT           1
 #define RSXX_INTR_COAL_AUTO_TUNE          2
 
-
 #endif /* __RSXX_CFG_H__ */
-

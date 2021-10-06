@@ -196,4 +196,3 @@ int snd_bebob_create_hwdep_device(struct snd_bebob *bebob)
 end:
 	return err;
 }
-

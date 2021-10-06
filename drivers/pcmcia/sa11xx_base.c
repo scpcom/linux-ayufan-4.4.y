@@ -45,7 +45,6 @@
 #include "soc_common.h"
 #include "sa11xx_base.h"
 
-
 /*
  * sa1100_pcmcia_default_mecr_timing
  * ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

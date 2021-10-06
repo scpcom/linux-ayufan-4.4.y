@@ -4441,7 +4441,6 @@ int cgroupstats_build(struct cgroupstats *stats, struct dentry *dentry)
 	return 0;
 }
 
-
 /*
  * seq_file methods for the tasks/procs files. The seq_file position is the
  * next pid to display; the seq_file iterator is a pointer to the pid

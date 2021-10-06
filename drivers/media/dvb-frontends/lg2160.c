@@ -1058,7 +1058,6 @@ static int lg216x_get_property(struct dvb_frontend *fe,
 		lg216x_get_frontend(fe) : 0;
 }
 
-
 static int lg2160_set_frontend(struct dvb_frontend *fe)
 {
 	struct lg216x_state *state = fe->demodulator_priv;

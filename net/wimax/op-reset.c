@@ -38,7 +38,6 @@
 #define D_SUBMODULE op_reset
 #include "debug-levels.h"
 
-
 /**
  * wimax_reset - Reset a WiMAX device
  *
@@ -90,7 +89,6 @@ int wimax_reset(struct wimax_dev *wimax_dev)
 	return result;
 }
 EXPORT_SYMBOL(wimax_reset);
-
 
 /*
  * Exporting to user space over generic netlink

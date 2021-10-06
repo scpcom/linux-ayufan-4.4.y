@@ -26,7 +26,6 @@
 #error "Obsolete pre 2007 wireless extensions are not supported"
 #endif
 
-
 #ifdef CONFIG_8723AU_AP_MODE
 
 /* STA flags */
@@ -54,8 +53,6 @@
 #define WPA_CIPHER_TKIP		BIT(3)
 #define WPA_CIPHER_CCMP		BIT(4)
 
-
-
 #define WPA_SELECTOR_LEN 4
 extern u8 RTW_WPA_OUI23A_TYPE[] ;
 extern u16 RTW_WPA_VERSION23A ;
@@ -68,7 +65,6 @@ extern u8 WPA_CIPHER_SUITE_TKIP23A[];
 extern u8 WPA_CIPHER_SUITE_WRAP23A[];
 extern u8 WPA_CIPHER_SUITE_CCMP23A[];
 extern u8 WPA_CIPHER_SUITE_WEP10423A[];
-
 
 #define RSN_HEADER_LEN 4
 #define RSN_SELECTOR_LEN 4
@@ -144,7 +140,6 @@ enum NETWORK_TYPE
 #define IsSupportedTxOFDM(NetType) (NetType & (WIRELESS_11G|WIRELESS_11A) ? true : false)
 #define IsSupportedTxMCS(NetType) (NetType & (WIRELESS_11_24N|WIRELESS_11_5N) ? true : false)
 
-
 #define MIN_FRAG_THRESHOLD     256U
 #define	MAX_FRAG_THRESHOLD     2346U
 
@@ -165,7 +160,6 @@ struct ieee80211_snap_hdr {
 	u8    oui[P80211_OUI_LEN];    /* organizational universal id */
 } __attribute__ ((packed));
 
-
 #define SNAP_SIZE sizeof(struct ieee80211_snap_hdr)
 
 #define WLAN_REASON_JOIN_WRONG_CHANNEL       65534
@@ -173,7 +167,6 @@ struct ieee80211_snap_hdr {
 
 #define IEEE80211_CCK_RATE_LEN			4
 #define IEEE80211_NUM_OFDM_RATESLEN	8
-
 
 #define IEEE80211_CCK_RATE_1MB		        0x02
 #define IEEE80211_CCK_RATE_2MB		        0x04
@@ -229,7 +222,6 @@ struct ieee80211_snap_hdr {
 
 #define WEP_KEYS 4
 
-
 /* MAX_RATES_LENGTH needs to be 12.  The spec says 8, and many APs
  * only use 8, and then use extended rates for the remaining supported
  * rates.  Other APs, however, stick all of their supported rates on the
@@ -258,7 +250,6 @@ join_res:
 #define WME_OUI_SUBTYPE_PARAMETER_ELEMENT 1
 #define WME_OUI_SUBTYPE_TSPEC_ELEMENT 2
 #define WME_VERSION 1
-
 
 #define OUI_BROADCOM 0x00904c /* Broadcom (Epigram) */
 
@@ -327,7 +318,6 @@ uint	rtw_get_rateset_len23a(u8	*rateset);
 
 struct registry_priv;
 int rtw_generate_ie23a(struct registry_priv *pregistrypriv);
-
 
 int rtw_get_bit_value_from_ieee_value23a(u8 val);
 

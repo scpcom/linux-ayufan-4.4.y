@@ -169,7 +169,6 @@ static struct s3c2410fb_display qt2410_lcd_cfg[] __initdata = {
 	},
 };
 
-
 static struct s3c2410fb_mach_info qt2410_fb_info __initdata = {
 	.displays 	= qt2410_lcd_cfg,
 	.num_displays 	= ARRAY_SIZE(qt2410_lcd_cfg),

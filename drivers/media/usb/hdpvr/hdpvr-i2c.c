@@ -31,7 +31,6 @@
 #define Z8F0811_IR_TX_I2C_ADDR	0x70
 #define Z8F0811_IR_RX_I2C_ADDR	0x71
 
-
 struct i2c_client *hdpvr_register_ir_tx_i2c(struct hdpvr_device *dev)
 {
 	struct IR_i2c_init_data *init_data = &dev->ir_i2c_init_data;

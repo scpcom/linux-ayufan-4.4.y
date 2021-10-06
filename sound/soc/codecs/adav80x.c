@@ -242,7 +242,6 @@ static int adav80x_dapm_pll_check(struct snd_soc_dapm_widget *source,
 	return adav80x->pll_src == ADAV80X_PLL_SRC_XTAL;
 }
 
-
 static const struct snd_soc_dapm_route adav80x_dapm_routes[] = {
 	{ "DAC Select", "ADC", "ADC" },
 	{ "DAC Select", "Playback", "AIFIN" },

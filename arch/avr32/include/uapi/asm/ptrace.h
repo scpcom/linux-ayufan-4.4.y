@@ -120,7 +120,6 @@ struct pt_regs {
 	unsigned long r12_orig;
 };
 
-
 #endif /* ! __ASSEMBLY__ */
 
 #endif /* _UAPI__ASM_AVR32_PTRACE_H */

@@ -399,4 +399,3 @@ int fmc_get_mode(struct fmdev *, u8 *);
 #define FM_FREQ_MUL 50
 
 #endif
-

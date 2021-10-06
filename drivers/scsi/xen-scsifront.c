@@ -58,7 +58,6 @@
 
 #include <asm/xen/hypervisor.h>
 
-
 #define GRANT_INVALID_REF	0
 
 #define VSCSIFRONT_OP_ADD_LUN	1
@@ -826,7 +825,6 @@ free_sring:
 
 	return err;
 }
-
 
 static int scsifront_probe(struct xenbus_device *dev,
 			   const struct xenbus_device_id *id)

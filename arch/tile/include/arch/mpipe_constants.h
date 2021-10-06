@@ -12,7 +12,6 @@
  *   more details.
  */
 
-
 #ifndef __ARCH_MPIPE_CONSTANTS_H__
 #define __ARCH_MPIPE_CONSTANTS_H__
 

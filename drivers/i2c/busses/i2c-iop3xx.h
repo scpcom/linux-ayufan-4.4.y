@@ -14,7 +14,6 @@
     GNU General Public License for more details.			     */
 /* ------------------------------------------------------------------------- */
 
-
 #ifndef I2C_IOP3XX_H
 #define I2C_IOP3XX_H 1
 
@@ -51,7 +50,6 @@
 #define IOP3XX_ICR_MSTOP	0x0002	/* 1=send a STOP after next data byte */
 #define IOP3XX_ICR_MSTART	0x0001	/* 1=initiate a START */
 
-
 #define IOP3XX_ISR_BERRD	0x0400	/* 1=BUS ERROR Detected */
 #define IOP3XX_ISR_SAD		0x0200	/* 1=Slave ADdress Detected */
 #define IOP3XX_ISR_GCAD		0x0100	/* 1=General Call Address Detected */
@@ -81,7 +79,6 @@
 #define I2C_ERR			321
 #define I2C_ERR_BERR		(I2C_ERR+0)
 #define I2C_ERR_ALD		(I2C_ERR+1)
-
 
 #define	CR_OFFSET		0
 #define	SR_OFFSET		0x4

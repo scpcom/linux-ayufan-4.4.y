@@ -94,7 +94,6 @@ xor_sse_2(unsigned long bytes, unsigned long *p1, unsigned long *p2)
 				ST(i + 2, 2)		\
 					ST(i + 3, 3)	\
 
-
 		PF0(0)
 				PF0(2)
 
@@ -185,7 +184,6 @@ xor_sse_3(unsigned long bytes, unsigned long *p1, unsigned long *p2,
 			ST(i + 1, 1)			\
 				ST(i + 2, 2)		\
 					ST(i + 3, 3)	\
-
 
 		PF0(0)
 				PF0(2)
@@ -287,7 +285,6 @@ xor_sse_4(unsigned long bytes, unsigned long *p1, unsigned long *p2,
 			ST(i + 1, 1)			\
 				ST(i + 2, 2)		\
 					ST(i + 3, 3)	\
-
 
 		PF0(0)
 				PF0(2)
@@ -398,7 +395,6 @@ xor_sse_5(unsigned long bytes, unsigned long *p1, unsigned long *p2,
 			ST(i + 1, 1)			\
 				ST(i + 2, 2)		\
 					ST(i + 3, 3)	\
-
 
 		PF0(0)
 				PF0(2)

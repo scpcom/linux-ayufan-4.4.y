@@ -21,7 +21,6 @@
 #include <asm/machdep.h>
 #include <asm/smp.h>
 
-
 struct powernv_rng {
 	void __iomem *regs;
 	void __iomem *regs_real;
@@ -29,7 +28,6 @@ struct powernv_rng {
 };
 
 static DEFINE_PER_CPU(struct powernv_rng *, powernv_rng);
-
 
 int powernv_hwrng_present(void)
 {

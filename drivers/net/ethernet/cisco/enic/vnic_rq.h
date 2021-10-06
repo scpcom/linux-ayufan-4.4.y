@@ -237,7 +237,6 @@ static inline bool enic_poll_lock_poll(struct vnic_rq *rq)
 	return (rc == ENIC_POLL_STATE_IDLE);
 }
 
-
 static inline void enic_poll_unlock_poll(struct vnic_rq *rq)
 {
 	WARN_ON(atomic_read(&rq->bpoll_state) != ENIC_POLL_STATE_POLL);

@@ -158,7 +158,6 @@ int main(int argc, char *argv[])
 	struct ptp_clock_time *pct;
 	struct ptp_sys_offset *sysoff;
 
-
 	char *progname;
 	int i, c, cnt, fd;
 

@@ -310,7 +310,6 @@ static uint32_t onyx_images[][PCXU_IMAGE_SIZE/sizeof(uint32_t)] __read_mostly = 
 0xffffffff,0xffffffff,0xffffffff,0xffffffff,
 0xffffffff,0xffffffff},
 
-
 /* imiss image
  *
  * ctr0 : counts imiss aligned on 0
@@ -819,7 +818,6 @@ static uint32_t onyx_images[][PCXU_IMAGE_SIZE/sizeof(uint32_t)] __read_mostly = 
    0xffffffff,   0xffffffff,   0xffffffff,   0xffffffff,
    0xffffffff,   0xffffffff},
 
-
 /* addr_inv_abort_alu
  *
  * ctr0: counts ABORT_ALU0L 
@@ -866,8 +864,6 @@ static uint32_t onyx_images[][PCXU_IMAGE_SIZE/sizeof(uint32_t)] __read_mostly = 
 0xffffffff,0xffffffff,0xffffffff,0xffffffff,
 0xffffffff,0xffffffff,0xffffffff,0xffffffff,
 0xffffffff,0xffffffff },
-
-
 
 /* brad_stall
  *
@@ -960,7 +956,6 @@ static uint32_t onyx_images[][PCXU_IMAGE_SIZE/sizeof(uint32_t)] __read_mostly = 
 0xffffffff,0xffffffff,0xffffffff,0xffffffff,
 0xffffffff,0xffffffff,0xffffffff,0xffffffff,
 0xffffffff,0xffffffff },
-
 
 /* dsnt_xfh
  *
@@ -1284,7 +1279,6 @@ static uint32_t onyx_images[][PCXU_IMAGE_SIZE/sizeof(uint32_t)] __read_mostly = 
 0xffffffff,0xffffffff,0xffffffff,0xffffffff,
 0xffffffff,0xffffffff },
 
-
 /* mpb_labort
  *
  * ctr0: counts L_ABORT_ALU0L
@@ -1515,7 +1509,6 @@ static uint32_t onyx_images[][PCXU_IMAGE_SIZE/sizeof(uint32_t)] __read_mostly = 
 0xffffffff,0xffffffff,00000000,00000000,
 0xffffffff,0xffffffff },
 
-
 /* rw_sdfet (READ_SHARED_OR_PRIVATE transactions)
  *
  * ctr0: counts address valid cycles
@@ -1561,7 +1554,6 @@ static uint32_t onyx_images[][PCXU_IMAGE_SIZE/sizeof(uint32_t)] __read_mostly = 
 0xffffffff,0xffffffff,0x00ffffff,0xffffffff,
 00000000,00000000,00000000,00000000,
 0xffffffff,0xffffffff },
-
 
 /* spec_ifet
  *
@@ -1994,7 +1986,6 @@ static uint32_t onyx_images[][PCXU_IMAGE_SIZE/sizeof(uint32_t)] __read_mostly = 
 0xffffffff,0xffffffff,0xffffffff,0xffffffff,
 0xffffffff,0xffffffff },
    
-
 /* go_store
  *
  * ctr0: Overflow for counter 2 
@@ -2042,7 +2033,6 @@ static uint32_t onyx_images[][PCXU_IMAGE_SIZE/sizeof(uint32_t)] __read_mostly = 
    0xffffffff,   0xffffffff,   0xffffffff,   0xffffffff,
    0xffffffff,   0xffffffff
    },
-
 
 /* shlib_call
  *
@@ -2517,7 +2507,6 @@ static uint32_t cuda_images[][PCXW_IMAGE_SIZE/sizeof(uint32_t)] __read_mostly = 
    0x00ffffff,   0xffffffff,   0xffffffff,   0xffffffff,
    },
 
-
 /* big_cpi image  (Image 9)
  * 
  * ctr0 : Total number of CPU clock cycles. 
@@ -2656,7 +2645,6 @@ static uint32_t cuda_images[][PCXW_IMAGE_SIZE/sizeof(uint32_t)] __read_mostly = 
    0xffffffff,   0xffffffff,   0xffffffff,   0xffffffff,
    0xffffffff,   0xffffffff,   0xffffffff,   0xffffffff,
    },
-
 
 /* isnt image  (Image 13)
  * 
@@ -2800,7 +2788,6 @@ static uint32_t cuda_images[][PCXW_IMAGE_SIZE/sizeof(uint32_t)] __read_mostly = 
    0x00ffffff,   0xffffffff,   0x00000000,   0x00000000,
    0x00000000,   0x00000000,   0xffffffff,   0xffffffff,
    },
-
 
 /* rw_wdfet image  (Image 16)
  * 

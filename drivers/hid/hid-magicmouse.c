@@ -398,7 +398,6 @@ static int magicmouse_setup_input(struct input_dev *input, struct hid_device *hd
 		__set_bit(INPUT_PROP_BUTTONPAD, input->propbit);
 	}
 
-
 	__set_bit(EV_ABS, input->evbit);
 
 	error = input_mt_init_slots(input, 16, 0);
@@ -488,7 +487,6 @@ static int magicmouse_input_configured(struct hid_device *hdev,
 
 	return 0;
 }
-
 
 static int magicmouse_probe(struct hid_device *hdev,
 	const struct hid_device_id *id)

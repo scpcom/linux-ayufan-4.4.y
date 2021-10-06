@@ -177,4 +177,3 @@ void __init omap243x_clockdomains_init(void)
 	clkdm_register_clkdms(clockdomains_omap243x);
 	clkdm_complete_init();
 }
-

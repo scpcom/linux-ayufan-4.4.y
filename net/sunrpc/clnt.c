@@ -17,7 +17,6 @@
  *  Copyright (C) 1995,1996 Olaf Kirch <okir@monad.swb.de>
  */
 
-
 #include <linux/module.h>
 #include <linux/types.h>
 #include <linux/kallsyms.h>
@@ -55,7 +54,6 @@
  */
 
 static DECLARE_WAIT_QUEUE_HEAD(destroy_wait);
-
 
 static void	call_start(struct rpc_task *task);
 static void	call_reserve(struct rpc_task *task);
@@ -719,7 +717,6 @@ void rpc_killall_tasks(struct rpc_clnt *clnt)
 {
 	struct rpc_task	*rovr;
 
-
 	if (list_empty(&clnt->cl_tasks))
 		return;
 	dprintk("RPC:       killing all tasks for client %p\n", clnt);
@@ -906,7 +903,6 @@ void rpc_task_reset_client(struct rpc_task *task, struct rpc_clnt *clnt)
 	rpc_task_set_client(task, clnt);
 }
 EXPORT_SYMBOL_GPL(rpc_task_reset_client);
-
 
 static void
 rpc_task_set_rpc_message(struct rpc_task *task, const struct rpc_message *msg)

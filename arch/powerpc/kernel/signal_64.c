@@ -38,7 +38,6 @@
 
 #include "signal.h"
 
-
 #define GP_REGS_SIZE	min(sizeof(elf_gregset_t), sizeof(struct pt_regs))
 #define FP_REGS_SIZE	sizeof(elf_fpregset_t)
 
@@ -664,7 +663,6 @@ int sys_swapcontext(struct ucontext __user *old_ctx,
 	set_thread_flag(TIF_RESTOREALL);
 	return 0;
 }
-
 
 /*
  * Do a signal return; undo the signal stack.

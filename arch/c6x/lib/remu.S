@@ -34,7 +34,6 @@
 	;; remi uses B2 and A5 to hold the input values during the
 	;; call to divu.  It stores B3 in on the stack.
 
-
 	.text
 
 ENTRY(__c6xabi_remu)

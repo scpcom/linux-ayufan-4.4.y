@@ -165,7 +165,6 @@ void gameport_unregister_driver(struct gameport_driver *drv);
 	module_driver(__gameport_driver, gameport_register_driver, \
 		       gameport_unregister_driver)
 
-
 static inline void gameport_trigger(struct gameport *gameport)
 {
 	if (gameport->trigger)

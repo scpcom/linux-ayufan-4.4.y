@@ -27,7 +27,6 @@
 
 #include "vmwgfx_kms.h"
 
-
 /* Might need a hrtimer here? */
 #define VMWGFX_PRESENT_RATE ((HZ / 60 > 0) ? HZ / 60 : 1)
 
@@ -119,7 +118,6 @@ err_unreserve:
 	return ret;
 }
 
-
 void vmw_cursor_update_position(struct vmw_private *dev_priv,
 				bool show, int x, int y)
 {
@@ -132,7 +130,6 @@ void vmw_cursor_update_position(struct vmw_private *dev_priv,
 	count = vmw_mmio_read(fifo_mem + SVGA_FIFO_CURSOR_COUNT);
 	vmw_mmio_write(++count, fifo_mem + SVGA_FIFO_CURSOR_COUNT);
 }
-
 
 /*
  * vmw_du_crtc_cursor_set2 - Driver cursor_set2 callback.
@@ -822,8 +819,6 @@ static int vmw_create_dmabuf_proxy(struct drm_device *dev,
 	return 0;
 }
 
-
-
 static int vmw_kms_new_framebuffer_dmabuf(struct vmw_private *dev_priv,
 					  struct vmw_dma_buffer *dmabuf,
 					  struct vmw_framebuffer **out,
@@ -1072,7 +1067,6 @@ static int vmw_kms_generic_present(struct vmw_private *dev_priv,
 					    num_clips, 1, NULL);
 }
 
-
 int vmw_kms_present(struct vmw_private *dev_priv,
 		    struct drm_file *file_priv,
 		    struct vmw_framebuffer *vfb,
@@ -1158,7 +1152,6 @@ int vmw_kms_cursor_bypass_ioctl(struct drm_device *dev, void *data,
 	struct vmw_display_unit *du;
 	struct drm_crtc *crtc;
 	int ret = 0;
-
 
 	mutex_lock(&dev->mode_config.mutex);
 	if (arg->flags & DRM_VMW_CURSOR_BYPASS_ALL) {
@@ -1302,7 +1295,6 @@ bool vmw_kms_validate_mode_vram(struct vmw_private *dev_priv,
 		 dev_priv->prim_bb_mem : dev_priv->vram_size);
 }
 
-
 /**
  * Function called by DRM code called with vbl_lock held.
  */
@@ -1325,7 +1317,6 @@ int vmw_enable_vblank(struct drm_device *dev, unsigned int pipe)
 void vmw_disable_vblank(struct drm_device *dev, unsigned int pipe)
 {
 }
-
 
 /*
  * Small shared kms functions.
@@ -1522,7 +1513,6 @@ void vmw_guess_mode_timing(struct drm_display_mode *mode)
 	mode->clock = (u32)mode->htotal * (u32)mode->vtotal / 100 * 6;
 	mode->vrefresh = drm_mode_vrefresh(mode);
 }
-
 
 int vmw_du_connector_fill_modes(struct drm_connector *connector,
 				uint32_t max_width, uint32_t max_height)
@@ -1903,7 +1893,6 @@ void vmw_kms_helper_buffer_finish(struct vmw_private *dev_priv,
 
 	vmw_kms_helper_buffer_revert(buf);
 }
-
 
 /**
  * vmw_kms_helper_resource_revert - Undo the actions of

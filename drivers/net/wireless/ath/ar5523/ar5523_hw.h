@@ -174,7 +174,6 @@ struct ar5523_tx_desc {
 	__be32	buflen;		/* payload length */
 } __packed;
 
-
 #define AR5523_ID_BSS		2
 #define AR5523_ID_BROADCAST	0xffffffff
 

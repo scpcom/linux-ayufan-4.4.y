@@ -450,7 +450,6 @@ END_FTR_SECTION_NESTED(CPU_FTR_HAS_PPR,CPU_FTR_HAS_PPR,945)
 	bdnz	0b
 #endif
 
-
 #ifdef CONFIG_IBM440EP_ERR42
 #define PPC440EP_ERR42 isync
 #else
@@ -557,7 +556,6 @@ END_FTR_SECTION_NESTED(CPU_FTR_HAS_PPR,CPU_FTR_HAS_PPR,945)
 #define	cr6	6
 #define	cr7	7
 
-
 /*
  * General Purpose Registers (GPRs)
  *
@@ -598,7 +596,6 @@ END_FTR_SECTION_NESTED(CPU_FTR_HAS_PPR,CPU_FTR_HAS_PPR,945)
 #define	r29	%r29
 #define	r30	%r30
 #define	r31	%r31
-
 
 /* Floating Point Registers (FPRs) */
 

@@ -739,7 +739,6 @@ enum iomux_pins {
 #define MX31_PIN_KEY_COL7_KEY_COL7	IOMUX_MODE(MX31_PIN_KEY_COL7, IOMUX_CONFIG_FUNC)
 #define MX31_PIN_WATCHDOG_RST__WATCHDOG_RST	IOMUX_MODE(MX31_PIN_WATCHDOG_RST, IOMUX_CONFIG_FUNC)
 
-
 /*
  * XXX: The SS0, SS1, SS2, SS3 lines of spi3 are multiplexed with cspi2_ss0,
  * cspi2_ss1, cspi1_ss0 cspi1_ss1

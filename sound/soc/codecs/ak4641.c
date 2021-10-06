@@ -101,7 +101,6 @@ static const char *ak4641_hp_out[] = {"Stereo", "Mono"};
 static const char *ak4641_mic_select[] = {"Internal", "External"};
 static const char *ak4641_mic_or_dac[] = {"Microphone", "Voice DAC"};
 
-
 static const DECLARE_TLV_DB_SCALE(mono_gain_tlv, -1700, 2300, 0);
 static const DECLARE_TLV_DB_SCALE(mic_boost_tlv, 0, 2000, 0);
 static const DECLARE_TLV_DB_SCALE(eq_tlv, -1050, 150, 0);
@@ -111,7 +110,6 @@ static const DECLARE_TLV_DB_SCALE(mic_mono_sidetone_tlv, -400, 400, 0);
 static const DECLARE_TLV_DB_SCALE(capture_tlv, -800, 50, 0);
 static const DECLARE_TLV_DB_SCALE(alc_tlv, -800, 50, 0);
 static const DECLARE_TLV_DB_SCALE(aux_in_tlv, -2100, 300, 0);
-
 
 static SOC_ENUM_SINGLE_DECL(ak4641_mono_out_enum,
 			    AK4641_SIG1, 6, ak4641_mono_out);

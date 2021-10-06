@@ -38,7 +38,6 @@
 #include <asm/pci_x86.h>
 #include <asm/io_apic.h>
 
-
 /*
  * This list of dynamic mappings is for temporarily maintaining
  * original BIOS BAR addresses for possible reinstatement.

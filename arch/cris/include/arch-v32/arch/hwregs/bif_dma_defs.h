@@ -426,7 +426,6 @@ typedef struct {
 } reg_bif_dma_r_pin_stat;
 #define REG_RD_ADDR_bif_dma_r_pin_stat 192
 
-
 /* Constants */
 enum {
   regk_bif_dma_as_master                   = 0x00000001,

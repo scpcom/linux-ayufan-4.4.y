@@ -189,7 +189,6 @@ static void atmel_hlcdc_crtc_enable(struct drm_crtc *c)
 	       !(status & ATMEL_HLCDC_PIXEL_CLK))
 		cpu_relax();
 
-
 	regmap_write(regmap, ATMEL_HLCDC_EN, ATMEL_HLCDC_SYNC);
 	while (!regmap_read(regmap, ATMEL_HLCDC_SR, &status) &&
 	       !(status & ATMEL_HLCDC_SYNC))
@@ -367,4 +366,3 @@ fail:
 	atmel_hlcdc_crtc_destroy(&crtc->base);
 	return ret;
 }
-

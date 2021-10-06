@@ -412,7 +412,6 @@ static const struct v4l2_subdev_ops saa7134_go7007_sd_ops = {
 
 /* --------------------------------------------------------------------------*/
 
-
 /********************* Add/remove functions *********************/
 
 static int saa7134_go7007_init(struct saa7134_dev *dev)

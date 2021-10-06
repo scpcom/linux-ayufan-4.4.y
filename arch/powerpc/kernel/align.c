@@ -32,7 +32,6 @@ struct aligninfo {
 	unsigned char flags;
 };
 
-
 #define INVALID	{ 0, 0 }
 
 /* Bits in the flags field */

@@ -512,13 +512,10 @@ static inline struct nes_qp *to_nesqp(struct ib_qp *ibqp)
 	return container_of(ibqp, struct nes_qp, ibqp);
 }
 
-
-
 /* nes.c */
 void nes_add_ref(struct ib_qp *);
 void nes_rem_ref(struct ib_qp *);
 struct ib_qp *nes_get_qp(struct ib_device *, int);
-
 
 /* nes_hw.c */
 struct nes_adapter *nes_init_adapter(struct nes_device *, u8);

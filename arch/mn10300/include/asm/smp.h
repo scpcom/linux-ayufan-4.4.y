@@ -49,7 +49,6 @@
 #define TIME_OUT_COUNT_BOOT_IPI	100
 #define DELAY_TIME_BOOT_IPI	75000
 
-
 #ifndef __ASSEMBLY__
 
 /**
@@ -79,7 +78,6 @@ static inline int cpu_number_map(int cpu)
 {
 	return cpu;
 }
-
 
 extern cpumask_t cpu_boot_map;
 

@@ -11,7 +11,6 @@
 
 #include "trace.h"
 
-
 struct trace_buffer *trace_buffer_allocate(u64 size)
 {
 	struct trace_buffer *tb;

@@ -17,7 +17,6 @@
 #include <asm/amigaints.h>
 #include <asm/amipcmcia.h>
 
-
 /*
  * Enable/disable a particular machine specific interrupt source.
  * Note that this may affect other interrupts in case of a shared interrupt.
@@ -40,7 +39,6 @@ static struct irq_chip amiga_irq_chip = {
 	.irq_enable	= amiga_irq_enable,
 	.irq_disable	= amiga_irq_disable,
 };
-
 
 /*
  * The builtin Amiga hardware interrupt handlers.
@@ -137,7 +135,6 @@ static void ami_int5(struct irq_desc *desc)
 		generic_handle_irq(IRQ_AMIGA_DSKSYN);
 	}
 }
-
 
 /*
  * void amiga_init_IRQ(void)

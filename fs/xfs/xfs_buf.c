@@ -57,7 +57,6 @@ static kmem_zone_t *xfs_buf_zone;
 #define xb_to_gfp(flags) \
 	((((flags) & XBF_READ_AHEAD) ? __GFP_NORETRY : GFP_NOFS) | __GFP_NOWARN)
 
-
 static inline int
 xfs_buf_is_vmapped(
 	struct xfs_buf	*bp)
@@ -925,7 +924,6 @@ xfs_buf_rele(
 	}
 }
 
-
 /*
  *	Lock a buffer object, if it is not already locked.
  *
@@ -1170,7 +1168,6 @@ next_chunk:
 	bio->bi_iter.bi_sector = sector;
 	bio->bi_end_io = xfs_buf_bio_end_io;
 	bio->bi_private = bp;
-
 
 	for (; size && nr_pages; nr_pages--, page_index++) {
 		int	rbytes, nbytes = PAGE_SIZE - offset;

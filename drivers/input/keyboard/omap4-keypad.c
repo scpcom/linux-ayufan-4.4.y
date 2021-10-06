@@ -110,7 +110,6 @@ static void kbd_write_irqreg(struct omap4_keypad *keypad_data,
 		     keypad_data->base + keypad_data->irqreg_offset + offset);
 }
 
-
 /* Interrupt handlers */
 static irqreturn_t omap4_keypad_irq_handler(int irq, void *dev_id)
 {
@@ -281,7 +280,6 @@ static int omap4_keypad_probe(struct platform_device *pdev)
 		error = -ENOMEM;
 		goto err_release_mem;
 	}
-
 
 	/*
 	 * Enable clocks for the keypad module so that we can read

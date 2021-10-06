@@ -32,11 +32,9 @@
 #include <asm/atarihw.h>
 #endif
 
-
 /*
  * IO/MEM definitions for various ISA bridges
  */
-
 
 #ifdef CONFIG_Q40
 
@@ -82,7 +80,6 @@
 #define MULTI_ISA 1
 #endif
 #endif /* ATARI_ROM_ISA */
-
 
 #if defined(CONFIG_PCI) && defined(CONFIG_COLDFIRE)
 
@@ -241,7 +238,6 @@ static inline u16 __iomem *isa_mtw(unsigned long addr)
     }
 }
 
-
 #define isa_inb(port)      in_8(isa_itb(port))
 #define isa_inw(port)      (ISA_SEX ? in_be16(isa_itw(port)) : in_le16(isa_itw(port)))
 #define isa_inl(port)      (ISA_SEX ? in_be32(isa_itl(port)) : in_le32(isa_itl(port)))
@@ -331,7 +327,6 @@ static inline void isa_delay(void)
        (ISA_SEX ? raw_outsl(isa_itl(port), (u32 *)(buf), (nr)) :  \
                   raw_outsw_swapw(isa_itw(port), (u16 *)(buf), (nr)<<1))
 
-
 #ifdef CONFIG_ATARI_ROM_ISA
 #define isa_rom_inb_p(p)	({ u8 _v = isa_rom_inb(p); isa_delay(); _v; })
 #define isa_rom_inw_p(p)	({ u16 _v = isa_rom_inw(p); isa_delay(); _v; })
@@ -352,7 +347,6 @@ static inline void isa_delay(void)
 #endif /* CONFIG_ATARI_ROM_ISA */
 
 #endif  /* CONFIG_ISA || CONFIG_ATARI_ROM_ISA */
-
 
 #if defined(CONFIG_ISA) && !defined(CONFIG_ATARI_ROM_ISA)
 #define inb     isa_inb

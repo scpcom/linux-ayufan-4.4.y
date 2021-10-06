@@ -1352,7 +1352,6 @@ static void __init uncore_cpumask_init(void)
 	cpu_notifier_register_done();
 }
 
-
 static int __init intel_uncore_init(void)
 {
 	int ret;

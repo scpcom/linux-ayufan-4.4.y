@@ -298,7 +298,6 @@ static int smiapp_pll_update(struct smiapp_sensor *sensor)
 	return 0;
 }
 
-
 /*
  *
  * V4L2 Controls handling

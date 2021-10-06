@@ -1,21 +1,4 @@
-/*
- * Copyright (C) 2007 Oracle.  All rights reserved.
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public
- * License v2 as published by the Free Software Foundation.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * General Public License for more details.
- *
- * You should have received a copy of the GNU General Public
- * License along with this program; if not, write to the
- * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
- * Boston, MA 021110-1307, USA.
- */
-
+ 
 #include <linux/sched.h>
 #include <linux/slab.h>
 #include <linux/spinlock.h>
@@ -137,7 +120,6 @@ static ssize_t btrfs_feature_attr_store(struct kobject *kobj,
 
 	features = get_features(fs_info, fa->feature_set);
 
-	/* Nothing to do */
 	if ((val && (features & fa->feature_bit)) ||
 	    (!val && !(features & fa->feature_bit)))
 		return count;
@@ -162,9 +144,6 @@ static ssize_t btrfs_feature_attr_store(struct kobject *kobj,
 	set_features(fs_info, fa->feature_set, features);
 	spin_unlock(&fs_info->super_lock);
 
-	/*
-	 * We don't want to do full transaction commit from inside sysfs
-	 */
 	btrfs_set_pending(fs_info, COMMIT);
 	wake_up_process(fs_info->transaction_kthread);
 
@@ -375,10 +354,7 @@ static ssize_t btrfs_label_store(struct kobject *kobj,
 	if (fs_info->sb->s_flags & MS_RDONLY)
 		return -EROFS;
 
-	/*
-	 * p_len is the len until the first occurrence of either
-	 * '\n' or '\0'
-	 */
+	
 	p_len = strcspn(buf, "\n");
 
 	if (p_len >= BTRFS_LABEL_SIZE)
@@ -389,9 +365,6 @@ static ssize_t btrfs_label_store(struct kobject *kobj,
 	memcpy(fs_info->super_copy->label, buf, p_len);
 	spin_unlock(&fs_info->super_lock);
 
-	/*
-	 * We don't want to do full transaction commit from inside sysfs
-	 */
 	btrfs_set_pending(fs_info, COMMIT);
 	wake_up_process(fs_info->transaction_kthread);
 
@@ -530,7 +503,6 @@ static void __btrfs_sysfs_remove_fsid(struct btrfs_fs_devices *fs_devs)
 	}
 }
 
-/* when fs_devs is NULL it will remove all fsid kobject */
 void btrfs_sysfs_remove_fsid(struct btrfs_fs_devices *fs_devs)
 {
 	struct list_head *fs_uuids = btrfs_get_fs_uuids();
@@ -568,7 +540,7 @@ const char * const btrfs_feature_set_names[3] = {
 
 char *btrfs_printable_features(enum btrfs_feature_set set, u64 flags)
 {
-	size_t bufsize = 4096; /* safe max, 64 names * 64 bytes */
+	size_t bufsize = 4096;  
 	int len = 0;
 	int i;
 	char *str;
@@ -634,8 +606,6 @@ static void init_feature_attrs(void)
 		}
 	}
 }
-
-/* when one_device is NULL, it removes all device links */
 
 int btrfs_sysfs_rm_device_link(struct btrfs_fs_devices *fs_devices,
 		struct btrfs_device *one_device)
@@ -711,19 +681,12 @@ int btrfs_sysfs_add_device_link(struct btrfs_fs_devices *fs_devices,
 	return error;
 }
 
-/* /sys/fs/btrfs/ entry */
 static struct kset *btrfs_kset;
 
-/* /sys/kernel/debug/btrfs */
 static struct dentry *btrfs_debugfs_root_dentry;
 
-/* Debugging tunables and exported data */
 u64 btrfs_debugfs_test;
 
-/*
- * Can be called by the device discovery thread.
- * And parent can be specified for seed device
- */
 int btrfs_sysfs_add_fsid(struct btrfs_fs_devices *fs_devs,
 				struct kobject *parent)
 {
@@ -825,4 +788,3 @@ void btrfs_exit_sysfs(void)
 	kset_unregister(btrfs_kset);
 	debugfs_remove_recursive(btrfs_debugfs_root_dentry);
 }
-

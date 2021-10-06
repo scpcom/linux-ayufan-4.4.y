@@ -59,7 +59,6 @@ struct termio {
 	unsigned char c_cc[NCCS];	/* control characters */
 };
 
-
 /* modem lines */
 #define TIOCM_LE	0x001		/* line enable */
 #define TIOCM_DTR	0x002		/* data terminal ready */
@@ -75,6 +74,5 @@ struct termio {
 #define TIOCM_OUT1	0x2000
 #define TIOCM_OUT2	0x4000
 #define TIOCM_LOOP	0x8000
-
 
 #endif /* _UAPI_ASM_TERMIOS_H */

@@ -43,7 +43,6 @@
 #include "ifile.h"
 #include "segbuf.h"
 
-
 /*
  * Segment constructor
  */
@@ -1478,7 +1477,6 @@ static void nilfs_segctor_truncate_segments(struct nilfs_sc_info *sci,
 	nilfs_truncate_logs(&sci->sc_segbufs, last);
 }
 
-
 static int nilfs_segctor_collect(struct nilfs_sc_info *sci,
 				 struct the_nilfs *nilfs, int mode)
 {
@@ -2565,7 +2563,6 @@ static int nilfs_segctor_thread(void *arg)
 		spin_lock(&sci->sc_state_lock);
 		timeout = 0;
 	}
-
 
 	if (freezing(current)) {
 		spin_unlock(&sci->sc_state_lock);

@@ -216,13 +216,10 @@ typedef struct HYSDN_CARD {
 typedef struct hycapictrl_info hycapictrl_info;
 #endif /* CONFIG_HYSDN_CAPI */
 
-
 /*****************/
 /* exported vars */
 /*****************/
 extern hysdn_card *card_root;	/* pointer to first card */
-
-
 
 /*************************/
 /* im/exported functions */

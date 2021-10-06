@@ -105,7 +105,6 @@ int smp_generic_cpu_bootable(unsigned int nr)
 	return 1;
 }
 
-
 #ifdef CONFIG_PPC64
 int smp_generic_kick_cpu(int nr)
 {

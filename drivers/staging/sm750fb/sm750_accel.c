@@ -393,4 +393,3 @@ int hw_imageblit(struct lynx_accel *accel,
 
 	    return 0;
 }
-

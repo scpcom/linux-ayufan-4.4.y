@@ -94,5 +94,4 @@ static inline void arch_safe_halt(void)
 	ia64_pal_halt_light();	/* PAL_HALT_LIGHT */
 }
 
-
 #endif /* _ASM_IA64_IRQFLAGS_H */

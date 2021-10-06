@@ -265,7 +265,6 @@
 
 .endm
 
-
 #else   /* Uniprocessor implementation of macros */
 
 .macro  GET_CURR_TASK_ON_CPU    reg

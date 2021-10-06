@@ -340,7 +340,6 @@ void disable_caching(unsigned long start, unsigned long end)
 		imcr_set(mar, imcr_get(mar) & ~1);
 }
 
-
 /*
  *  L1 block operations
  */
@@ -419,7 +418,6 @@ void L2_cache_block_writeback_invalidate_nowait(unsigned int start,
 				     (unsigned int *) end,
 				     IMCR_L2WIBAR, IMCR_L2WIWC);
 }
-
 
 /*
  * L1 and L2 caches configuration

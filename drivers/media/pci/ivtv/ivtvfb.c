@@ -972,7 +972,6 @@ static void ivtvfb_restore(struct ivtv *itv)
 
 /* Initialization */
 
-
 /* Setup our initial video mode */
 static int ivtvfb_init_vidmode(struct ivtv *itv)
 {
@@ -1273,7 +1272,6 @@ static int __init ivtvfb_init(void)
 	struct device_driver *drv;
 	int registered = 0;
 	int err;
-
 
 	if (ivtvfb_card_id < -1 || ivtvfb_card_id >= IVTV_MAX_CARDS) {
 		printk(KERN_ERR "ivtvfb:  ivtvfb_card_id parameter is out of range (valid range: -1 - %d)\n",

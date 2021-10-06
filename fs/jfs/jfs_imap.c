@@ -173,7 +173,6 @@ int diMount(struct inode *ipimap)
 	return (0);
 }
 
-
 /*
  * NAME:	diUnmount()
  *
@@ -211,7 +210,6 @@ int diUnmount(struct inode *ipimap, int mounterror)
 
 	return (0);
 }
-
 
 /*
  *	diSync()
@@ -266,7 +264,6 @@ int diSync(struct inode *ipimap)
 
 	return (0);
 }
-
 
 /*
  * NAME:	diRead()
@@ -402,7 +399,6 @@ int diRead(struct inode *ip)
 
 	return (rc);
 }
-
 
 /*
  * NAME:	diReadSpecial()
@@ -569,8 +565,6 @@ void diFreeSpecial(struct inode *ip)
 	truncate_inode_pages(ip->i_mapping, 0);
 	iput(ip);
 }
-
-
 
 /*
  * NAME:	diWrite()
@@ -821,7 +815,6 @@ int diWrite(tid_t tid, struct inode *ip)
 	return (rc);
 }
 
-
 /*
  * NAME:	diFree(ip)
  *
@@ -1031,7 +1024,6 @@ int diFree(struct inode *ip)
 
 		return (0);
 	}
-
 
 	/*
 	 *	inode extent has become free and above low water mark:
@@ -1320,7 +1312,6 @@ diInitInode(struct inode *ip, int iagno, int ino, int extno, struct iag * iagp)
 	jfs_ip->agstart = le64_to_cpu(iagp->agstart);
 	jfs_ip->active_ag = -1;
 }
-
 
 /*
  * NAME:	diAlloc(pip,dir,ip)
@@ -1615,7 +1606,6 @@ int diAlloc(struct inode *pip, bool dir, struct inode *ip)
 	return (diAllocAny(imap, agno, dir, ip));
 }
 
-
 /*
  * NAME:	diAllocAG(imap,agno,dir,ip)
  *
@@ -1691,7 +1681,6 @@ diAllocAG(struct inomap * imap, int agno, bool dir, struct inode *ip)
 	return (diAllocIno(imap, agno, ip));
 }
 
-
 /*
  * NAME:	diAllocAny(imap,agno,dir,iap)
  *
@@ -1720,7 +1709,6 @@ diAllocAny(struct inomap * imap, int agno, bool dir, struct inode *ip)
 {
 	int ag, rc;
 	int maxag = JFS_SBI(imap->im_ipimap->i_sb)->bmap->db_maxag;
-
 
 	/* try to allocate from the ags following agno up to
 	 * the maximum ag number.
@@ -1753,7 +1741,6 @@ diAllocAny(struct inomap * imap, int agno, bool dir, struct inode *ip)
 	 */
 	return -ENOSPC;
 }
-
 
 /*
  * NAME:	diAllocIno(imap,agno,ip)
@@ -1870,7 +1857,6 @@ static int diAllocIno(struct inomap * imap, int agno, struct inode *ip)
 
 	return (0);
 }
-
 
 /*
  * NAME:	diAllocExt(imap,agno,ip)
@@ -1989,7 +1975,6 @@ static int diAllocExt(struct inomap * imap, int agno, struct inode *ip)
 
 	return (0);
 }
-
 
 /*
  * NAME:	diAllocBit(imap,iagp,ino)
@@ -2122,7 +2107,6 @@ static int diAllocBit(struct inomap * imap, struct iag * iagp, int ino)
 
 	return (0);
 }
-
 
 /*
  * NAME:	diNewExt(imap,iagp,extno)
@@ -2408,7 +2392,6 @@ static int diNewExt(struct inomap * imap, struct iag * iagp, int extno)
 	return (rc);
 }
 
-
 /*
  * NAME:	diNewIAG(imap,iagnop,agno)
  *
@@ -2495,7 +2478,6 @@ diNewIAG(struct inomap * imap, int *iagnop, int agno, struct metapage ** mpp)
 				  "ipimap->i_size is wrong\n");
 			return -EIO;
 		}
-
 
 		/* get the next available iag number */
 		iagno = imap->im_nextiag;
@@ -2982,7 +2964,6 @@ int diExtendFS(struct inode *ipimap, struct inode *ipbmap)
 
 	return rcx;
 }
-
 
 /*
  *	duplicateIXtree()

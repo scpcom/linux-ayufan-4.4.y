@@ -1077,7 +1077,6 @@ static int btt_write_pg(struct btt *btt, struct bio_integrity_payload *bip,
 			while (arena->rtt[i] == (RTT_VALID | new_postmap))
 				cpu_relax();
 
-
 		if (new_postmap >= arena->internal_nlba) {
 			ret = -EIO;
 			goto out_lane;
@@ -1210,7 +1209,6 @@ static int btt_rw_page(struct block_device *bdev, sector_t sector,
 	page_endio(page, rw & WRITE, 0);
 	return 0;
 }
-
 
 static int btt_getgeo(struct block_device *bd, struct hd_geometry *geo)
 {

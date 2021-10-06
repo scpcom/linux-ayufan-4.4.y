@@ -31,7 +31,6 @@ struct rbtn_data {
 	bool suspended;
 };
 
-
 /*
  * acpi functions
  */
@@ -86,7 +85,6 @@ static int rbtn_acquire(struct acpi_device *device, bool enable)
 
 	return 0;
 }
-
 
 /*
  * rfkill device
@@ -163,7 +161,6 @@ static void rbtn_rfkill_event(struct acpi_device *device)
 		rbtn_rfkill_query(rbtn_data->rfkill, device);
 }
 
-
 /*
  * input device
  */
@@ -205,7 +202,6 @@ static void rbtn_input_event(struct rbtn_data *rbtn_data)
 	input_report_key(rbtn_data->input_dev, KEY_RFKILL, 0);
 	input_sync(rbtn_data->input_dev);
 }
-
 
 /*
  * acpi driver
@@ -277,7 +273,6 @@ static struct acpi_driver rbtn_driver = {
 	},
 	.owner = THIS_MODULE,
 };
-
 
 /*
  * notifier export functions
@@ -357,7 +352,6 @@ int dell_rbtn_notifier_unregister(struct notifier_block *nb)
 	return ret;
 }
 EXPORT_SYMBOL_GPL(dell_rbtn_notifier_unregister);
-
 
 /*
  * acpi driver functions
@@ -458,7 +452,6 @@ static void rbtn_notify(struct acpi_device *device, u32 event)
 		break;
 	}
 }
-
 
 /*
  * module functions

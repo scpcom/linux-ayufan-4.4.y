@@ -195,4 +195,3 @@ sh64_switch_to:
 __sh64_switch_to_end:
 .LFE1:
 	.size	sh64_switch_to,.LFE1-sh64_switch_to
-

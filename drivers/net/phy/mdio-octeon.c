@@ -199,7 +199,6 @@ static int octeon_mdiobus_read(struct mii_bus *bus, int phy_id, int regnum)
 		octeon_mdiobus_set_mode(p, C22);
 	}
 
-
 	smi_cmd.u64 = 0;
 	smi_cmd.s.phy_op = op;
 	smi_cmd.s.phy_adr = phy_id;
@@ -228,7 +227,6 @@ static int octeon_mdiobus_write(struct mii_bus *bus, int phy_id,
 	union cvmx_smix_wr_dat smi_wr;
 	unsigned int op = 0; /* MDIO_CLAUSE_22_WRITE */
 	int timeout = 1000;
-
 
 	if (regnum & MII_ADDR_C45) {
 		int r = octeon_mdiobus_c45_addr(p, phy_id, regnum);

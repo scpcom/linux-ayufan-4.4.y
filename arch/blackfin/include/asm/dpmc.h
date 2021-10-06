@@ -265,7 +265,6 @@
 #endif
 	.endm
 
-
 	.macro bfin_sys_mmr_restore
 /* Restore System MMRs */
 	FP.H = hi(SYSMMR_BASE);
@@ -602,7 +601,6 @@
 	PM_POP(2, DCPLB_ADDR2)
 	PM_POP(1, DCPLB_ADDR1)
 	PM_POP(0, DCPLB_ADDR0)
-
 
 	/* Misc non-contiguous registers */
 

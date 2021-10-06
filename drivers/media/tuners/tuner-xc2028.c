@@ -842,7 +842,6 @@ check_device:
 		  hwmodel, (version & 0xf000) >> 12, (version & 0xf00) >> 8,
 		  (version & 0xf0) >> 4, version & 0xf);
 
-
 	if (priv->ctrl.read_not_reliable)
 		goto read_not_reliable;
 

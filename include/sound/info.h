@@ -98,7 +98,6 @@ int snd_info_minor_register(void);
 #define snd_info_minor_register()	0
 #endif
 
-
 #ifdef CONFIG_SND_PROC_FS
 
 extern struct snd_info_entry *snd_seq_root;

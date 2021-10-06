@@ -196,7 +196,6 @@
 #define SDRAM_CL    CL_2
 #endif
 
-
 #ifdef CONFIG_BFIN_KERNEL_CLOCK_MEMINIT_CALC
 /* Equation from section 17 (p17-46) of BF533 HRM */
 #define mem_SDRRC       (((CONFIG_SCLK_HZ / 1000) * SDRAM_Tref) / SDRAM_NRA) - (SDRAM_tRAS_num + SDRAM_tRP_num)
@@ -208,7 +207,6 @@
 #define mem_SDGCTL	CONFIG_MEM_SDGCTL
 #endif
 #endif
-
 
 #if defined(EBIU_DDRCTL0)
 #define MIN_DDR_SCLK(x)	(x*(CONFIG_SCLK_HZ/1000/1000)/1000 + 1)
@@ -497,4 +495,3 @@ static inline void init_dmc(u32 dmc_clk)
 #endif
 
 #endif /*__MEM_INIT_H__*/
-

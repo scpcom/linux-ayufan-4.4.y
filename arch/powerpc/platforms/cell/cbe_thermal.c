@@ -196,7 +196,6 @@ static ssize_t ppe_show_temp(struct device *dev, char *buf, int pos)
 	return sprintf(buf, "%d\n", reg_to_temp(value));
 }
 
-
 /* shows the temperature of the DTS on the PPE,
  * located near the linear thermal sensor */
 static ssize_t ppe_show_temp0(struct device *dev,
@@ -248,7 +247,6 @@ static ssize_t ppe_store_throttle_full_stop(struct device *dev,
 	return store_throttle(cbe_get_cpu_pmd_regs(dev->id), buf, size, 48);
 }
 
-
 static struct device_attribute attr_spu_temperature = {
 	.attr = {.name = "temperature", .mode = 0400 },
 	.show = spu_show_temp,
@@ -257,7 +255,6 @@ static struct device_attribute attr_spu_temperature = {
 static DEVICE_PREFIX_ATTR(spu, throttle_end, 0600);
 static DEVICE_PREFIX_ATTR(spu, throttle_begin, 0600);
 static DEVICE_PREFIX_ATTR(spu, throttle_full_stop, 0600);
-
 
 static struct attribute *spu_attributes[] = {
 	&attr_spu_temperature.attr,
@@ -373,7 +370,6 @@ static int __init init_default_values(void)
 	return 0;
 }
 
-
 static int __init thermal_init(void)
 {
 	int rc = init_default_values();
@@ -396,4 +392,3 @@ module_exit(thermal_exit);
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Christian Krafft <krafft@de.ibm.com>");
-

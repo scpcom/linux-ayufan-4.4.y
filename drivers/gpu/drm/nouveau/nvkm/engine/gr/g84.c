@@ -161,7 +161,6 @@ g84_gr_tlb_flush(struct nvkm_gr *base)
 				       nvkm_rd32(device, 0x400388));
 	}
 
-
 	nvkm_wr32(device, 0x100c80, 0x00000001);
 	nvkm_msec(device, 2000,
 		if (!(nvkm_rd32(device, 0x100c80) & 0x00000001))

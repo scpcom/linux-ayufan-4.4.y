@@ -237,7 +237,6 @@ struct dma_buf *i915_gem_prime_export(struct drm_device *dev,
 	exp_info.flags = flags;
 	exp_info.priv = gem_obj;
 
-
 	if (obj->ops->dmabuf_export) {
 		int ret = obj->ops->dmabuf_export(obj);
 		if (ret)

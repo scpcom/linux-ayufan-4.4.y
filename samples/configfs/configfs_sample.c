@@ -32,8 +32,6 @@
 
 #include <linux/configfs.h>
 
-
-
 /*
  * 01-childless
  *
@@ -131,7 +129,6 @@ static struct childless childless_subsys = {
 	},
 };
 
-
 /* ----------------------------------------------------------------- */
 
 /*
@@ -198,7 +195,6 @@ static struct config_item_type simple_child_type = {
 	.ct_attrs	= simple_child_attrs,
 	.ct_owner	= THIS_MODULE,
 };
-
 
 struct simple_children {
 	struct config_group group;
@@ -276,7 +272,6 @@ static struct configfs_subsystem simple_children_subsys = {
 		},
 	},
 };
-
 
 /* ----------------------------------------------------------------- */
 

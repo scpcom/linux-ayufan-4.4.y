@@ -167,7 +167,6 @@ static inline void __set(FILE *stream, int value, char *err_msg)
 		perror(err_msg);
 }
 
-
 void shutdown(int exit_val, char *err_cause, int line_no)
 {
 	static int in_shutdown = 0;
@@ -444,8 +443,6 @@ void *perf_test_thread(void *arg)
 	printf("\t\tClock resolution:\t\t%lu nsec%s\n", res.tv_nsec,
 	       res.tv_nsec > 1 ? "s" : "");
 
-
-
 	printf("\n\tTest #1: Time send/recv message, queue empty\n");
 	printf("\t\t(%d iterations)\n", TEST1_LOOPS);
 	prio_out = 0;
@@ -465,7 +462,6 @@ void *perf_test_thread(void *arg)
 	nsec = ((unsigned long long)recv_total.tv_sec * 1000000000 +
 		recv_total.tv_nsec) / TEST1_LOOPS;
 	printf("\t\t\t\t\t\t%lld nsec/msg\n", nsec);
-
 
 	for (cur_test = test2; cur_test->desc != NULL; cur_test++) {
 		printf("%s:\n", cur_test->desc);

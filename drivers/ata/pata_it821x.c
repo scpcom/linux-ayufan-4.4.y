@@ -78,7 +78,6 @@
 #include <scsi/scsi_host.h>
 #include <linux/libata.h>
 
-
 #define DRV_NAME "pata_it821x"
 #define DRV_VERSION "0.4.2"
 
@@ -137,7 +136,6 @@ static void it821x_program(struct ata_port *ap, struct ata_device *adev, u16 tim
 		conf = timing & 0xFF;
 	pci_write_config_byte(pdev, 0x54 + 4 * channel, conf);
 }
-
 
 /**
  *	it821x_program_udma	-	program the UDMA registers
@@ -376,7 +374,6 @@ static void it821x_passthru_bmdma_stop(struct ata_queued_cmd *qc)
 	if (itdev->mwdma[unit] != MWDMA_OFF)
 		it821x_program(ap, adev, itdev->pio[unit]);
 }
-
 
 /**
  *	it821x_passthru_dev_select	-	Select master/slave
@@ -720,8 +717,6 @@ static void it821x_probe_firmware(struct ata_port *ap)
 	}
 }
 
-
-
 /**
  *	it821x_port_start	-	port setup
  *	@ap: ATA port being set up
@@ -867,7 +862,6 @@ static void it821x_disable_raid(struct pci_dev *pdev)
 	pci_write_config_byte(pdev, 0x42, 0x36);
 	pci_write_config_byte(pdev, PCI_LATENCY_TIMER, 0x20);
 }
-
 
 static int it821x_init_one(struct pci_dev *pdev, const struct pci_device_id *id)
 {

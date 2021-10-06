@@ -372,4 +372,3 @@ resume_kernel_mode:
 	b	.Lrestore_regs
 
 ##### DONT ADD CODE HERE - .Lrestore_regs actually follows in entry-<isa>.S
-

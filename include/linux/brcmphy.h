@@ -126,7 +126,6 @@
 #define BCM_LED_SRC_OFF		0xe	/* Tied high */
 #define BCM_LED_SRC_ON		0xf	/* Tied low */
 
-
 /*
  * BCM5482: Shadow registers
  * Shadow values go into bits [14:10] of register 0x1c to select a shadow
@@ -157,7 +156,6 @@
 #define BCM5482_SHD_MODE	0x1f	/* 11111: Mode Control Register */
 #define BCM5482_SHD_MODE_1000BX	0x0001	/* Enable 1000BASE-X registers */
 
-
 /*
  * EXPANSION SHADOW ACCESS REGISTERS.  (PHY REG 0x15, 0x16, and 0x17)
  */
@@ -186,7 +184,6 @@
 #define BCM5482_SSD_SGMII_SLAVE_EN	0x0002	/* Slave mode enable */
 #define BCM5482_SSD_SGMII_SLAVE_AD	0x0001	/* Slave auto-detection */
 
-
 /*****************************************************************************/
 /* Fast Ethernet Transceiver definitions. */
 /*****************************************************************************/
@@ -200,7 +197,6 @@
 
 #define MII_BRCM_FET_BRCMTEST		0x1f	/* Brcm test register */
 #define MII_BRCM_FET_BT_SRE		0x0080	/* Shadow register enable */
-
 
 /*** Shadow register definitions ***/
 

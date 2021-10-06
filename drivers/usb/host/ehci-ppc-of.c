@@ -20,7 +20,6 @@
 #include <linux/of_irq.h>
 #include <linux/of_platform.h>
 
-
 static const struct hc_driver ehci_ppc_of_hc_driver = {
 	.description		= hcd_name,
 	.product_desc		= "OF EHCI",
@@ -68,7 +67,6 @@ static const struct hc_driver ehci_ppc_of_hc_driver = {
 	.clear_tt_buffer_complete	= ehci_clear_tt_buffer_complete,
 };
 
-
 /*
  * 440EPx Errata USBH_3
  * Fix: Enable Break Memory Transfer (BMT) in INSNREG3
@@ -88,7 +86,6 @@ ppc44x_enable_bmt(struct device_node *dn)
 	iounmap(insreg_virt);
 	return 0;
 }
-
 
 static int ehci_hcd_ppc_of_probe(struct platform_device *op)
 {
@@ -181,7 +178,6 @@ err_irq:
 	return rv;
 }
 
-
 static int ehci_hcd_ppc_of_remove(struct platform_device *op)
 {
 	struct usb_hcd *hcd = platform_get_drvdata(op);
@@ -218,7 +214,6 @@ static int ehci_hcd_ppc_of_remove(struct platform_device *op)
 	return 0;
 }
 
-
 static const struct of_device_id ehci_hcd_ppc_of_match[] = {
 	{
 		.compatible = "usb-ehci",
@@ -226,7 +221,6 @@ static const struct of_device_id ehci_hcd_ppc_of_match[] = {
 	{},
 };
 MODULE_DEVICE_TABLE(of, ehci_hcd_ppc_of_match);
-
 
 static struct platform_driver ehci_hcd_ppc_of_driver = {
 	.probe		= ehci_hcd_ppc_of_probe,

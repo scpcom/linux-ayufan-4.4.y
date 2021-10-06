@@ -7,7 +7,6 @@
 #ifndef _UAPI__LINUX_IP6_NETFILTER_H
 #define _UAPI__LINUX_IP6_NETFILTER_H
 
-
 #include <linux/netfilter.h>
 
 /* only for userspace compatibility */
@@ -33,7 +32,6 @@
 /* Frag & flags. */
 #define NFC_IP6_FRAG             0x0080
 
-
 /* Per-protocol information: only matters if proto match. */
 /* TCP flags. */
 #define NFC_IP6_TCPFLAGS         0x0100
@@ -58,7 +56,6 @@
 #define NF_IP6_NUMHOOKS		5
 #endif /* ! __KERNEL__ */
 
-
 enum nf_ip6_hook_priorities {
 	NF_IP6_PRI_FIRST = INT_MIN,
 	NF_IP6_PRI_CONNTRACK_DEFRAG = -400,
@@ -74,6 +71,5 @@ enum nf_ip6_hook_priorities {
 	NF_IP6_PRI_CONNTRACK_HELPER = 300,
 	NF_IP6_PRI_LAST = INT_MAX,
 };
-
 
 #endif /* _UAPI__LINUX_IP6_NETFILTER_H */

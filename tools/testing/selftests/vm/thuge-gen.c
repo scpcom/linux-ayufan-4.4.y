@@ -171,7 +171,6 @@ void test_shmget(unsigned long size, unsigned flags)
 	if (shmctl(id, SHM_INFO, (void *)&i) < 0) err("shmctl");
 	Dprintf("alloc %lu res %lu\n", i.shm_tot, i.shm_rss);
 
-
 	Dprintf("id %d\n", id);
 	char *map = shmat(id, NULL, 0600);
 	if (map == (char*)-1) err("shmat");

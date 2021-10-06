@@ -42,7 +42,6 @@ static const struct kvm_irq_level cortexa_vtimer_irq = {
 	.level = 1,
 };
 
-
 /*******************************************************************************
  * Exported reset function
  */

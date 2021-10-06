@@ -286,7 +286,6 @@ static int ps8622_send_config(struct ps8622_bridge *ps8622)
 	if (err)
 		goto error;
 
-
 	if (ps8622->bl) {
 		/* DPCD720, internal PWM */
 		err = ps8622_set(cl, 0x01, 0xa5, 0xa0);

@@ -14,7 +14,6 @@
 
 #include <linux/tty_flags.h>
 
-
 struct serial_struct {
 	int	type;
 	int	line;
@@ -74,7 +73,6 @@ struct serial_struct {
 #define UART_USE_FIFO		0x02
 #define UART_STARTECH		0x04
 #define UART_NATSEMI		0x08
-
 
 /*
  * Multiport serial configuration structure --- external structure

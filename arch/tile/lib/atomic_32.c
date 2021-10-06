@@ -112,7 +112,6 @@ unsigned long _atomic_xor(volatile unsigned long *p, unsigned long mask)
 }
 EXPORT_SYMBOL(_atomic_xor);
 
-
 long long _atomic64_xchg(long long *v, long long n)
 {
 	return __atomic64_xchg(v, __atomic_setup(v), n);
@@ -176,7 +175,6 @@ struct __get_user __atomic_bad_address(int __user *addr)
 		panic("Bad address used for kernel atomic op: %p\n", addr);
 	return (struct __get_user) { .err = -EFAULT };
 }
-
 
 void __init __init_atomic_per_cpu(void)
 {

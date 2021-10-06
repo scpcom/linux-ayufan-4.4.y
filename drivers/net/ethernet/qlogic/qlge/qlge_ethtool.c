@@ -31,7 +31,6 @@
 #include <linux/mm.h>
 #include <linux/vmalloc.h>
 
-
 #include "qlge.h"
 
 struct ql_stats {
@@ -725,4 +724,3 @@ const struct ethtool_ops qlge_ethtool_ops = {
 	.get_strings = ql_get_strings,
 	.get_ethtool_stats = ql_get_ethtool_stats,
 };
-

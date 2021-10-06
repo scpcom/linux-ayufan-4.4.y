@@ -42,7 +42,6 @@ struct display_info {
 	int auto_path;		/* automatically create all path components */
 };
 
-
 /**
  * Report an error with a particular node.
  *

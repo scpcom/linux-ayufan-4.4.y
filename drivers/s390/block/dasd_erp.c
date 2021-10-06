@@ -79,7 +79,6 @@ dasd_free_erp_request(struct dasd_ccw_req *cqr, struct dasd_device * device)
 	atomic_dec(&device->ref_count);
 }
 
-
 /*
  * dasd_default_erp_action just retries the current cqr
  */
@@ -199,4 +198,3 @@ EXPORT_SYMBOL(dasd_default_erp_postaction);
 EXPORT_SYMBOL(dasd_alloc_erp_request);
 EXPORT_SYMBOL(dasd_free_erp_request);
 EXPORT_SYMBOL(dasd_log_sense);
-

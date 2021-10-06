@@ -122,7 +122,6 @@ static int queue_setup(struct vb2_queue *q, const void *parg,
 	return 0;
 }
 
-
 static int buffer_prepare(struct vb2_buffer *vb)
 {
 	struct vb2_v4l2_buffer *vbuf = to_vb2_v4l2_buffer(vb);

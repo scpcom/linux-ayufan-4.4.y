@@ -194,7 +194,6 @@ bool sk_net_capable(const struct sock *sk, int cap)
 }
 EXPORT_SYMBOL(sk_net_capable);
 
-
 #ifdef CONFIG_MEMCG_KMEM
 int mem_cgroup_sockets_init(struct mem_cgroup *memcg, struct cgroup_subsys *ss)
 {
@@ -442,7 +441,6 @@ static void sock_disable_timestamp(struct sock *sk, unsigned long flags)
 			net_disable_timestamp();
 	}
 }
-
 
 int sock_queue_rcv_skb(struct sock *sk, struct sk_buff *skb)
 {
@@ -1011,7 +1009,6 @@ set_rcvbuf:
 	return ret;
 }
 EXPORT_SYMBOL(sock_setsockopt);
-
 
 static void cred_to_ucred(struct pid *pid, const struct cred *cred,
 			  struct ucred *ucred)
@@ -1627,7 +1624,6 @@ EXPORT_SYMBOL_GPL(sk_setup_caps);
  *	Simple resource managers for sockets.
  */
 
-
 /*
  * Write buffer destructor automatically called from kfree_skb.
  */
@@ -1832,7 +1828,6 @@ static long sock_wait_for_wmem(struct sock *sk, long timeo)
 	finish_wait(sk_sleep(sk), &wait);
 	return timeo;
 }
-
 
 /*
  *	Generic send/receive buffer handlers
@@ -2158,7 +2153,6 @@ void __sk_mem_reclaim(struct sock *sk, int amount)
 		sk_leave_memory_pressure(sk);
 }
 EXPORT_SYMBOL(__sk_mem_reclaim);
-
 
 /*
  * Set of default routines for initialising struct proto_ops when
@@ -3024,7 +3018,6 @@ static __net_exit void proto_exit_net(struct net *net)
 {
 	remove_proc_entry("protocols", net->proc_net);
 }
-
 
 static __net_initdata struct pernet_operations proto_net_ops = {
 	.init = proto_init_net,

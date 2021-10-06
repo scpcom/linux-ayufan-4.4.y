@@ -1,7 +1,6 @@
 #ifndef _UAPI_ASMAXP_PTRACE_H
 #define _UAPI_ASMAXP_PTRACE_H
 
-
 /*
  * This struct defines the way the registers are stored on the
  * kernel stack during a system call or other kernel entry
@@ -65,6 +64,5 @@ struct switch_stack {
 	unsigned long r26;
 	unsigned long fp[32];	/* fp[31] is fpcr */
 };
-
 
 #endif /* _UAPI_ASMAXP_PTRACE_H */

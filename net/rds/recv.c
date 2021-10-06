@@ -302,7 +302,6 @@ int rds_notify_queue_get(struct rds_sock *rs, struct msghdr *msghdr)
 	LIST_HEAD(copy);
 	int err = 0;
 
-
 	/* put_cmsg copies to user space and thus may sleep. We can't do this
 	 * with rs_lock held, so first grab as many notifications as we can stuff
 	 * in the user provided cmsg buffer. We don't try to copy more, to avoid

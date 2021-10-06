@@ -296,7 +296,6 @@ err:
 	return -EREMOTEIO;
 }
 
-
 static int EN_set(struct mb86a16_state *state,
 		  int cren,
 		  int afcen)
@@ -778,7 +777,6 @@ static void swp_info_get(struct mb86a16_state *state,
 	*AFCEX_H = (AFCEX & 0x0f00) >> 8;
 }
 
-
 static int swp_freq_calcuation(struct mb86a16_state *state, int i, int v, int *V,  int vmax, int vmin,
 			       int SIGMIN, int fOSC, int afcex_freq, int swp_ofs, unsigned char *SIG1)
 {
@@ -1016,7 +1014,6 @@ static int S45T_set(struct mb86a16_state *state, unsigned char S4T, unsigned cha
 
 	return 0;
 }
-
 
 static int mb86a16_set_fe(struct mb86a16_state *state)
 {

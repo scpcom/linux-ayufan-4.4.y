@@ -1203,7 +1203,6 @@ static int dib9000_fw_get_channel(struct dvb_frontend *fe)
 			state->i2c_read_buffer, sizeof(struct dibDVBTChannel));
 	ch = (struct dibDVBTChannel *)state->i2c_read_buffer;
 
-
 	switch (ch->spectrum_inversion & 0x7) {
 	case 1:
 		state->fe[0]->dtv_property_cache.inversion = INVERSION_ON;

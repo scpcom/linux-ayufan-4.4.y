@@ -78,7 +78,6 @@ int pcibios_enable_device(struct pci_dev *dev, int mask)
 	if ((dev->class >> 16) == PCI_BASE_CLASS_BRIDGE)
 		newcmd |= PCI_COMMAND_IO | PCI_COMMAND_MEMORY;
 
-
 	if (newcmd != cmd) {
 		pr_info("PCI: enabling device %s (0x%04x -> 0x%04x)\n",
 			pci_name(dev), cmd, newcmd);
@@ -101,4 +100,3 @@ char *pcibios_setup(char *str)
 {
 	return str;
 }
-

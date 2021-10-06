@@ -66,7 +66,6 @@ static int full_duplex[MAX_UNITS] = { -1, -1, -1, -1, -1, -1, -1, -1 };
 
 #define PKT_BUF_SZ      1536	/* Size of each temporary Rx buffer. */
 
-
 /* Include files, designed to support most kernel versions 2.0.0 and later. */
 #include <linux/module.h>
 #include <linux/kernel.h>
@@ -94,7 +93,6 @@ static int full_duplex[MAX_UNITS] = { -1, -1, -1, -1, -1, -1, -1, -1 };
 /* These identify the driver base version and may not be removed. */
 static const char version[] =
 	KERN_INFO DRV_NAME ".c:v" DRV_VERSION " " DRV_RELDATE "\n";
-
 
 /* This driver was written to use PCI memory space, however some x86 systems
    work only with I/O space accesses. */
@@ -371,7 +369,6 @@ enum tx_desc_control_bits {
 /* for PHY */
 #define LinkIsUp        0x0004
 
-
 struct netdev_private {
 	/* Descriptor rings first for alignment. */
 	struct fealnx_desc *rx_ring;
@@ -420,7 +417,6 @@ struct netdev_private {
 	void __iomem *mem;
 };
 
-
 static int mdio_read(struct net_device *dev, int phy_id, int location);
 static void mdio_write(struct net_device *dev, int phy_id, int location, int value);
 static int netdev_open(struct net_device *dev);
@@ -451,7 +447,6 @@ static void stop_nic_rx(void __iomem *ioaddr, long crvalue)
 			break;
 	}
 }
-
 
 static void stop_nic_rxtx(void __iomem *ioaddr, long crvalue)
 {
@@ -683,7 +678,6 @@ err_out_res:
 	return err;
 }
 
-
 static void fealnx_remove_one(struct pci_dev *pdev)
 {
 	struct net_device *dev = pci_get_drvdata(pdev);
@@ -702,7 +696,6 @@ static void fealnx_remove_one(struct pci_dev *pdev)
 	} else
 		printk(KERN_ERR "fealnx: remove for unknown device\n");
 }
-
 
 static ulong m80x_send_cmd_to_phy(void __iomem *miiport, int opcode, int phyad, int regad)
 {
@@ -752,7 +745,6 @@ static ulong m80x_send_cmd_to_phy(void __iomem *miiport, int opcode, int phyad, 
 	return miir;
 }
 
-
 static int mdio_read(struct net_device *dev, int phyad, int regad)
 {
 	struct netdev_private *np = netdev_priv(dev);
@@ -791,7 +783,6 @@ static int mdio_read(struct net_device *dev, int phyad, int regad)
 	return data & 0xffff;
 }
 
-
 static void mdio_write(struct net_device *dev, int phyad, int regad, int data)
 {
 	struct netdev_private *np = netdev_priv(dev);
@@ -822,7 +813,6 @@ static void mdio_write(struct net_device *dev, int phyad, int regad, int data)
 	miir &= ~MASK_MIIR_MII_MDC;
 	iowrite32(miir, miiport);
 }
-
 
 static int netdev_open(struct net_device *dev)
 {
@@ -875,7 +865,6 @@ static int netdev_open(struct net_device *dev)
 #endif
 		np->crvalue = 0xe00;	/* rx 128 burst length */
 
-
 // 89/12/29 add,
 // 90/1/16 modify,
 //   np->imrvalue=FBE|TUNF|CNTOVF|RBU|TI|RI;
@@ -925,7 +914,6 @@ static int netdev_open(struct net_device *dev)
 	return rc;
 }
 
-
 static void getlinkstatus(struct net_device *dev)
 /* function: Routine will read MII Status Register to get link status.       */
 /* input   : dev... pointer to the adapter block.                            */
@@ -954,7 +942,6 @@ static void getlinkstatus(struct net_device *dev)
 		}
 	}
 }
-
 
 static void getlinktype(struct net_device *dev)
 {
@@ -1057,7 +1044,6 @@ static void getlinktype(struct net_device *dev)
 	}
 }
 
-
 /* Take lock before calling this */
 static void allocate_rx_buffers(struct net_device *dev)
 {
@@ -1081,7 +1067,6 @@ static void allocate_rx_buffers(struct net_device *dev)
 		++np->really_rx_count;
 	}
 }
-
 
 static void netdev_timer(unsigned long data)
 {
@@ -1118,7 +1103,6 @@ static void netdev_timer(unsigned long data)
 	add_timer(&np->timer);
 }
 
-
 /* Take lock before calling */
 /* Reset chip and disable rx, tx and interrupts */
 static void reset_and_disable_rxtx(struct net_device *dev)
@@ -1143,7 +1127,6 @@ static void reset_and_disable_rxtx(struct net_device *dev)
 		rmb();
 	}
 }
-
 
 /* Take lock before calling */
 /* Restore chip after reset */
@@ -1171,7 +1154,6 @@ static void enable_rxtx(struct net_device *dev)
 	iowrite32(0, ioaddr + TXPDR);
 }
 
-
 static void reset_timer(unsigned long data)
 {
 	struct net_device *dev = (struct net_device *) data;
@@ -1194,7 +1176,6 @@ static void reset_timer(unsigned long data)
 
 	spin_unlock_irqrestore(&np->lock, flags);
 }
-
 
 static void fealnx_tx_timeout(struct net_device *dev)
 {
@@ -1231,7 +1212,6 @@ static void fealnx_tx_timeout(struct net_device *dev)
 	dev->stats.tx_errors++;
 	netif_wake_queue(dev); /* or .._start_.. ?? */
 }
-
 
 /* Initialize the Rx and Tx rings, along with various 'dev' bits. */
 static void init_ring(struct net_device *dev)
@@ -1295,7 +1275,6 @@ static void init_ring(struct net_device *dev)
 	np->tx_ring[i - 1].next_desc = np->tx_ring_dma;
 	np->tx_ring[i - 1].next_desc_logical = &np->tx_ring[0];
 }
-
 
 static netdev_tx_t start_tx(struct sk_buff *skb, struct net_device *dev)
 {
@@ -1372,7 +1351,6 @@ static netdev_tx_t start_tx(struct sk_buff *skb, struct net_device *dev)
 	return NETDEV_TX_OK;
 }
 
-
 /* Take lock before calling */
 /* Chip probably hosed tx ring. Clean up. */
 static void reset_tx_descriptors(struct net_device *dev)
@@ -1407,7 +1385,6 @@ static void reset_tx_descriptors(struct net_device *dev)
 	np->tx_ring[TX_RING_SIZE - 1].next_desc_logical = &np->tx_ring[0];
 }
 
-
 /* Take lock and stop rx before calling this */
 static void reset_rx_descriptors(struct net_device *dev)
 {
@@ -1426,7 +1403,6 @@ static void reset_rx_descriptors(struct net_device *dev)
 	iowrite32(np->rx_ring_dma + ((char*)np->cur_rx - (char*)np->rx_ring),
 		np->mem + RXLBA);
 }
-
 
 /* The interrupt handler does all of the Rx thread work and cleans up
    after the Tx thread. */
@@ -1606,7 +1582,6 @@ static irqreturn_t intr_handler(int irq, void *dev_instance)
 	return IRQ_RETVAL(handled);
 }
 
-
 /* This routine is logically part of the interrupt handler, but separated
    for clarity and better register allocation. */
 static int netdev_rx(struct net_device *dev)
@@ -1743,7 +1718,6 @@ static int netdev_rx(struct net_device *dev)
 	return 0;
 }
 
-
 static struct net_device_stats *get_stats(struct net_device *dev)
 {
 	struct netdev_private *np = netdev_priv(dev);
@@ -1760,7 +1734,6 @@ static struct net_device_stats *get_stats(struct net_device *dev)
 	return &dev->stats;
 }
 
-
 /* for dev->set_multicast_list */
 static void set_rx_mode(struct net_device *dev)
 {
@@ -1770,7 +1743,6 @@ static void set_rx_mode(struct net_device *dev)
 	__set_rx_mode(dev);
 	spin_unlock_irqrestore(lp, flags);
 }
-
 
 /* Take lock before calling */
 static void __set_rx_mode(struct net_device *dev)
@@ -1889,7 +1861,6 @@ static int mii_ioctl(struct net_device *dev, struct ifreq *rq, int cmd)
 	return rc;
 }
 
-
 static int netdev_close(struct net_device *dev)
 {
 	struct netdev_private *np = netdev_priv(dev);
@@ -1943,7 +1914,6 @@ static const struct pci_device_id fealnx_pci_tbl[] = {
 	{} /* terminate list */
 };
 MODULE_DEVICE_TABLE(pci, fealnx_pci_tbl);
-
 
 static struct pci_driver fealnx_driver = {
 	.name		= "fealnx",

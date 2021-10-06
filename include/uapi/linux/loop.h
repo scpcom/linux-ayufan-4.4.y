@@ -9,10 +9,8 @@
 #ifndef _UAPI_LINUX_LOOP_H
 #define _UAPI_LINUX_LOOP_H
 
-
 #define LO_NAME_SIZE	64
 #define LO_KEY_SIZE	32
-
 
 /*
  * Loop flags

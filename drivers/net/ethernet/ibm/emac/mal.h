@@ -93,7 +93,6 @@
 #define   MAL2_ESR_PREI		0x00000040
 #define   MAL2_ESR_PWEI		0x00000020
 
-
 #define MAL_IER			0x02
 /* MAL IER bits */
 #define   MAL_IER_DE		0x00000010

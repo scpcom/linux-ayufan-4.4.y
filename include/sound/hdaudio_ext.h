@@ -148,7 +148,6 @@ void snd_hdac_ext_link_clear_stream_id(struct hdac_ext_link *link,
 	writew(((readw(addr + reg) & ~(mask)) | (val)), \
 		addr + reg)
 
-
 struct hdac_ext_device;
 
 /* ops common to all codec drivers */

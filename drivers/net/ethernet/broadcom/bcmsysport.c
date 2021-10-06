@@ -613,7 +613,6 @@ static unsigned int bcm_sysport_desc_rx(struct bcm_sysport_priv *priv,
 		cb = &priv->rx_cbs[priv->rx_read_ptr];
 		skb = bcm_sysport_rx_refill(priv, cb);
 
-
 		/* We do not have a backing SKB, so we do not a corresponding
 		 * DMA mapping for this incoming packet since
 		 * bcm_sysport_rx_refill always either has both skb and mapping

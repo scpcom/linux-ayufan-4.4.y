@@ -361,7 +361,6 @@ out_mem:
 	sp->dev->stats.rx_dropped++;
 }
 
-
 /* ----------------------------------------------------------------------- */
 
 /*
@@ -526,7 +525,6 @@ static void resync_tnc(unsigned long channel)
 	sp->tty->ops->write(sp->tty, &sp->led_state, 1);
 	sp->tty->ops->write(sp->tty, &resync_cmd, 1);
 
-
 	/* Start resync timer again -- the TNC might be still absent */
 
 	del_timer(&sp->resync_t);
@@ -657,7 +655,6 @@ out_free:
 out:
 	return err;
 }
-
 
 /*
  * Close down a 6pack channel.

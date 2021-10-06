@@ -34,7 +34,6 @@
 #define BR16M	0xF00F
 #define B16_SET (J16 | B16 | BR16)
 
-
 /*
  * This struct defines the way the registers are stored on the stack during a
  * system call/exception. As usual the registers k0/k1 aren't being saved.
@@ -60,6 +59,5 @@ struct pt_regs {
 	unsigned long cp0_ecr;
 	unsigned long cp0_condition;
 };
-
 
 #endif /* _UAPI_ASM_SCORE_PTRACE_H */

@@ -822,7 +822,6 @@ static int ocfs2_write_zero_page(struct inode *inode, u64 abs_from,
 			goto out_unlock;
 		}
 
-
 		/* must not update i_size! */
 		ret = block_commit_write(page, block_start + 1,
 					 block_start + 1);
@@ -2476,7 +2475,6 @@ static ssize_t ocfs2_file_read_iter(struct kiocb *iocb,
 			filp->f_path.dentry->d_name.len,
 			filp->f_path.dentry->d_name.name,
 			to->nr_segs);	/* GRRRRR */
-
 
 	if (!inode) {
 		ret = -EINVAL;

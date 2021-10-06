@@ -26,7 +26,6 @@
  */
 #define KS8695_SDRAM_PA		0x00000000
 
-
 /*
  * We map an entire MiB with the System Configuration Registers in even
  * though only 64KiB is needed. This makes it easier for use with the

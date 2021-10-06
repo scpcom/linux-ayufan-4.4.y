@@ -468,7 +468,6 @@ static void gic_cpu_if_up(struct gic_chip_data *gic)
 	writel_relaxed(bypass | mode | GICC_ENABLE, cpu_base + GIC_CPU_CTRL);
 }
 
-
 static void __init gic_dist_init(struct gic_chip_data *gic)
 {
 	unsigned int i;

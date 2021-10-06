@@ -36,7 +36,6 @@ struct nfcmrvl_platform_data {
 	/* Tell if firmware supports break control for power management */
 	unsigned int break_control;
 
-
 	/*
 	 * I2C specific
 	 */

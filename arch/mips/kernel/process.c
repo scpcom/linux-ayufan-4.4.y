@@ -429,7 +429,6 @@ unsigned long thread_saved_pc(struct task_struct *tsk)
 	return ((unsigned long *)t->reg29)[schedule_mfi.pc_offset];
 }
 
-
 #ifdef CONFIG_KALLSYMS
 /* generic stack unwinding function */
 unsigned long notrace unwind_stack_by_address(unsigned long stack_page,

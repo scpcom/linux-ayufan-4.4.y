@@ -179,7 +179,6 @@ at91_clk_register_master(struct at91_pmc *pmc, unsigned int irq,
 	return clk;
 }
 
-
 static const struct clk_master_layout at91rm9200_master_layout = {
 	.mask = 0x31F,
 	.pres_shift = 2,
@@ -189,7 +188,6 @@ static const struct clk_master_layout at91sam9x5_master_layout = {
 	.mask = 0x373,
 	.pres_shift = 4,
 };
-
 
 static struct clk_master_characteristics * __init
 of_at91_clk_master_get_characteristics(struct device_node *np)

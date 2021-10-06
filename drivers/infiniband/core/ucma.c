@@ -541,7 +541,6 @@ static int ucma_free_ctx(struct ucma_context *ctx)
 	struct ucma_event *uevent, *tmp;
 	LIST_HEAD(list);
 
-
 	ucma_cleanup_multicast(ctx);
 
 	/* Cleanup events not yet reported to the user. */

@@ -90,8 +90,6 @@ struct clock_event_device cf_pit_clockevent = {
 	.irq			= MCF_IRQ_PIT1,
 };
 
-
-
 /***************************************************************************/
 
 static irqreturn_t pit_tick(int irq, void *dummy)

@@ -491,7 +491,6 @@ atmel_hlcdc_plane_prepare_disc_area(struct drm_crtc_state *c_state)
 	    disc_h == primary_state->disc_h)
 		return 0;
 
-
 	primary_state->disc_x = disc_x;
 	primary_state->disc_y = disc_y;
 	primary_state->disc_w = disc_w;

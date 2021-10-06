@@ -306,7 +306,6 @@ out:
 	return ret;
 }
 
-
 /*
  * Begin SPC-3/SPC-4 Persistent Reservations emulation support
  *
@@ -3150,7 +3149,6 @@ core_scsi3_emulate_pro_preempt(struct se_cmd *cmd, int type, int scope,
 		return TCM_INVALID_CDB_FIELD;
 	}
 }
-
 
 static sense_reason_t
 core_scsi3_emulate_pro_register_and_move(struct se_cmd *cmd, u64 res_key,

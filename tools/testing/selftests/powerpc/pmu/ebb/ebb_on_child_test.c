@@ -13,7 +13,6 @@
 
 #include "ebb.h"
 
-
 /*
  * Tests we can setup an EBB on our child. Nothing interesting happens, because
  * even though the event is enabled and running the child hasn't enabled the

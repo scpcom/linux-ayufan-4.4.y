@@ -40,7 +40,6 @@ void __init p1010_rdb_pic_init(void)
 	mpic_init(mpic);
 }
 
-
 /*
  * Setup the architecture
  */

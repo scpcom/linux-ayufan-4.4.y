@@ -419,7 +419,6 @@ static int tilcdc_crtc_mode_set(struct drm_crtc *crtc,
 	else
 		tilcdc_clear(dev, LCDC_RASTER_CTRL_REG, LCDC_RASTER_ORDER);
 
-
 	update_scanout(crtc);
 	tilcdc_crtc_update_clk(crtc);
 

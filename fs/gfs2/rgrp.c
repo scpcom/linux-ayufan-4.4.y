@@ -76,7 +76,6 @@ static int gfs2_rbm_find(struct gfs2_rbm *rbm, u8 state, u32 *minext,
 			 const struct gfs2_inode *ip, bool nowrap,
 			 const struct gfs2_alloc_parms *ap);
 
-
 /**
  * gfs2_setbit - Set a bit in the bitmaps
  * @rbm: The position of the bit to set
@@ -1133,7 +1132,6 @@ static u32 count_unlinked(struct gfs2_rgrpd *rgd)
 	return count;
 }
 
-
 /**
  * gfs2_rgrp_bh_get - Read in a RG's header and bitmaps
  * @rgd: the struct gfs2_rgrpd describing the RG to read in
@@ -2138,7 +2136,6 @@ static unsigned char gfs2_get_block_type(struct gfs2_rgrpd *rgd, u64 block)
 	return gfs2_testbit(&rbm);
 }
 
-
 /**
  * gfs2_alloc_extent - allocate an extent from a given bitmap
  * @rbm: the resource group information
@@ -2503,7 +2500,6 @@ static void gfs2_free_uninit_di(struct gfs2_rgrpd *rgd, u64 blkno)
 	gfs2_statfs_change(sdp, 0, +1, -1);
 }
 
-
 void gfs2_free_di(struct gfs2_rgrpd *rgd, struct gfs2_inode *ip)
 {
 	gfs2_free_uninit_di(rgd, ip->i_no_addr);
@@ -2643,4 +2639,3 @@ void gfs2_rlist_free(struct gfs2_rgrp_list *rlist)
 		rlist->rl_ghs = NULL;
 	}
 }
-

@@ -68,7 +68,6 @@
 #endif
 	.endm
 
-
 @ VFP hardware support entry point.
 @
 @  r0  = instruction opcode (32-bit ARM or two 16-bit Thumb)
@@ -184,7 +183,6 @@ vfp_hw_state_valid:
 					@ instruction address.
 	dec_preempt_count_ti r10, r4
 	ret	r9			@ we think we have handled things
-
 
 look_for_VFP_exceptions:
 	@ Check for synchronous or asynchronous exception

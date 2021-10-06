@@ -339,7 +339,6 @@ static inline bool tcp_too_many_orphans(struct sock *sk, int shift)
 
 bool tcp_check_oom(struct sock *sk, int shift);
 
-
 extern struct proto tcp_prot;
 
 #define TCP_INC_STATS(net, field)	SNMP_INC_STATS((net)->mib.tcp_statistics, field)
@@ -402,7 +401,6 @@ enum tcp_tw_status {
 	TCP_TW_ACK = 2,
 	TCP_TW_SYN = 3
 };
-
 
 enum tcp_tw_status tcp_timewait_state_process(struct inet_timewait_sock *tw,
 					      struct sk_buff *skb,
@@ -715,7 +713,6 @@ static inline u32 tcp_skb_timestamp(const struct sk_buff *skb)
 	return skb->skb_mstamp.stamp_jiffies;
 }
 
-
 #define tcp_flag_byte(th) (((u_int8_t *)th)[13])
 
 #define TCPHDR_FIN 0x01
@@ -775,7 +772,6 @@ struct tcp_skb_cb {
 };
 
 #define TCP_SKB_CB(__skb)	((struct tcp_skb_cb *)&((__skb)->cb[0]))
-
 
 #if IS_ENABLED(CONFIG_IPV6)
 /* This is the variant of inet6_iif() that must be used by TCP,

@@ -1056,7 +1056,6 @@ int css_complete_work(void)
 	return bus_for_each_drv(&css_bus_type, NULL, NULL, css_settle);
 }
 
-
 /*
  * Wait for the initialization of devices to finish, to make sure we are
  * done with our setup if the search for the root device starts.

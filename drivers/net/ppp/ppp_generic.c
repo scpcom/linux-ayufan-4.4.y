@@ -2359,7 +2359,6 @@ char *ppp_dev_name(struct ppp_channel *chan)
 	return name;
 }
 
-
 /*
  * Disconnect a channel from the generic layer.
  * This must be called in process context.

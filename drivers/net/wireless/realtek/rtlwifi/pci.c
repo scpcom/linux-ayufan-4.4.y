@@ -558,7 +558,6 @@ static void _rtl_pci_tx_chk_waitq(struct ieee80211_hw *hw)
 	}
 }
 
-
 static void _rtl_pci_tx_isr(struct ieee80211_hw *hw, int prio)
 {
 	struct rtl_priv *rtlpriv = rtl_priv(hw);

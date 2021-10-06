@@ -425,7 +425,6 @@ fail:
 	return err;
 }
 
-
 #ifdef CONFIG_DRM_TEGRA_STAGING
 static struct tegra_drm_context *tegra_drm_get_context(__u64 context)
 {

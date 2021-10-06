@@ -404,7 +404,6 @@ errout:
 	return retval;
 }
 
-
 /*
  * This routine is called whenever a serial port is opened.  It
  * enables interrupts for a serial port, linking in its async structure into

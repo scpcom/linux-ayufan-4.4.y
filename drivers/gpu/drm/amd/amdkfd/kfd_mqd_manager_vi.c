@@ -166,7 +166,6 @@ static int __update_mqd(struct mqd_manager *mm, void *mqd,
 	return 0;
 }
 
-
 static int update_mqd(struct mqd_manager *mm, void *mqd,
 			struct queue_properties *q)
 {

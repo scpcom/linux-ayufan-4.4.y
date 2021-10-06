@@ -1495,7 +1495,6 @@ tape_3590_irq(struct tape_device *device, struct tape_request *request,
 	return TAPE_IO_STOP;
 }
 
-
 static int tape_3590_read_dev_chars(struct tape_device *device,
 				    struct tape_3590_rdc_data *rdc_data)
 {

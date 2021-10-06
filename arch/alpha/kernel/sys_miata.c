@@ -30,7 +30,6 @@
 #include "pci_impl.h"
 #include "machvec_impl.h"
 
-
 static void 
 miata_srm_device_interrupt(unsigned long vector)
 {
@@ -83,7 +82,6 @@ miata_init_irq(void)
 	setup_irq(16+2, &halt_switch_irqaction);	/* SRM only? */
 	setup_irq(16+6, &timer_cascade_irqaction);
 }
-
 
 /*
  * PCI Fixup configuration.
@@ -261,7 +259,6 @@ miata_kill_arch(int mode)
 	halt();
 #endif
 }
-
 
 /*
  * The System Vector

@@ -141,7 +141,6 @@ ssize_t ade7758_read_data_from_ring(struct device *dev,
 		struct device_attribute *attr,
 		char *buf);
 
-
 int ade7758_configure_ring(struct iio_dev *indio_dev);
 void ade7758_unconfigure_ring(struct iio_dev *indio_dev);
 

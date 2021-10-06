@@ -64,7 +64,6 @@ struct s6e8ax0 {
 	bool  enabled;
 };
 
-
 static struct regulator_bulk_data supplies[] = {
 	{ .supply = "vdd3", },
 	{ .supply = "vci", },

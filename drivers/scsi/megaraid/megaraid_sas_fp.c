@@ -63,7 +63,6 @@ module_param(lb_pending_cmds, int, S_IRUGO);
 MODULE_PARM_DESC(lb_pending_cmds, "Change raid-1 load balancing outstanding "
 	"threshold. Valid Values are 1-128. Default: 4");
 
-
 #define ABS_DIFF(a, b)   (((a) > (b)) ? ((a) - (b)) : ((b) - (a)))
 #define MR_LD_STATE_OPTIMAL 3
 
@@ -182,7 +181,6 @@ void MR_PopulateDrvRaidMap(struct megasas_instance *instance)
 	int i;
 	u16 ld_count;
 
-
 	struct MR_DRV_RAID_MAP_ALL *drv_map =
 			fusion->ld_drv_map[(instance->map_id & 1)];
 	struct MR_DRV_RAID_MAP *pDrvRaidMap = &drv_map->raidMap;
@@ -268,7 +266,6 @@ u8 MR_ValidateMapInfo(struct megasas_instance *instance)
 	u16 ldCount, num_lds;
 	u16 ld;
 	u32 expected_size;
-
 
 	MR_PopulateDrvRaidMap(instance);
 
@@ -563,7 +560,6 @@ static u64  get_row_from_strip(struct megasas_instance *instance,
 	return -1LLU;
 }
 
-
 /*
 ******************************************************************************
 *
@@ -713,7 +709,6 @@ u8 get_arm(struct megasas_instance *instance, u32 ld, u8 span, u64 stripe,
 	return arm;
 }
 
-
 /*
 ******************************************************************************
 *
@@ -751,7 +746,6 @@ static u8 mr_spanset_get_phy_params(struct megasas_instance *instance, u32 ld,
 	/*Get row and span from io_info for Uneven Span IO.*/
 	row	    = io_info->start_row;
 	span	    = io_info->start_span;
-
 
 	if (raid->level == 6) {
 		logArm = get_arm_from_strip(instance, ld, stripRow, map);
@@ -827,7 +821,6 @@ u8 MR_GetPhyParams(struct megasas_instance *instance, u32 ld, u64 stripRow,
 	struct fusion_context *fusion;
 
 	fusion = instance->ctrl_context;
-
 
 	row =  mega_div64_32(stripRow, raid->rowDataSize);
 
@@ -955,7 +948,6 @@ MR_BuildRaidContext(struct megasas_instance *instance,
 
 	stripSize = 1 << raid->stripeShift;
 	stripe_mask = stripSize-1;
-
 
 	/*
 	 * calculate starting row and stripe, and number of strips and rows
@@ -1106,7 +1098,6 @@ MR_BuildRaidContext(struct megasas_instance *instance,
 	/* save pointer to raid->LUN array */
 	*raidLUN = raid->LUN;
 
-
 	/*Get Phy Params only if FP capable, or else leave it to MR firmware
 	  to do the calculation.*/
 	if (io_info->fpOkForIo) {
@@ -1167,7 +1158,6 @@ void mr_update_span_set(struct MR_DRV_RAID_MAP_ALL *map,
 	struct MR_QUAD_ELEMENT    *quad;
 	int ldCount;
 	u16 ld;
-
 
 	for (ldCount = 0; ldCount < MAX_LOGICAL_DRIVES_EXT; ldCount++) {
 		ld = MR_TargetIdToLdGet(ldCount, map);
@@ -1305,7 +1295,6 @@ u8 megasas_get_best_arm_pd(struct megasas_instance *instance,
 	span = ((io_info->span_arm & RAID_CTX_SPANARM_SPAN_MASK)
 			>> RAID_CTX_SPANARM_SPAN_SHIFT);
 	arm = (io_info->span_arm & RAID_CTX_SPANARM_ARM_MASK);
-
 
 	fusion = instance->ctrl_context;
 	drv_map = fusion->ld_drv_map[(instance->map_id & 1)];

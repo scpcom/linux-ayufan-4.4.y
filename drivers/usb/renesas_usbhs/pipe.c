@@ -380,7 +380,6 @@ void usbhs_pipe_set_trans_count_if_bulk(struct usbhs_pipe *pipe, int len)
 	}
 }
 
-
 /*
  *		pipe setup
  */
@@ -803,7 +802,6 @@ void usbhs_pipe_select_fifo(struct usbhs_pipe *pipe, struct usbhs_fifo *fifo)
 	if (fifo)
 		fifo->pipe = pipe;
 }
-
 
 /*
  *		dcp control

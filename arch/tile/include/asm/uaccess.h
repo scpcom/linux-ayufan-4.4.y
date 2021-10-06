@@ -477,7 +477,6 @@ copy_in_user(void __user *to, const void __user *from, unsigned long n)
 }
 #endif
 
-
 extern long strnlen_user(const char __user *str, long n);
 extern long strlen_user(const char __user *str);
 extern long strncpy_from_user(char *dst, const char __user *src, long);

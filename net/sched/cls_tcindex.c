@@ -23,7 +23,6 @@
 #define PERFECT_HASH_THRESHOLD	64	/* use perfect hash if not bigger */
 #define DEFAULT_HASH_SIZE	64	/* optimized for diffserv */
 
-
 struct tcindex_filter_result {
 	struct tcf_exts		exts;
 	struct tcf_result	res;
@@ -36,7 +35,6 @@ struct tcindex_filter {
 	struct tcindex_filter __rcu *next;
 	struct rcu_head rcu;
 };
-
 
 struct tcindex_data {
 	struct tcindex_filter_result *perfect; /* perfect hash; NULL if none */
@@ -78,7 +76,6 @@ tcindex_lookup(struct tcindex_data *p, u16 key)
 	return NULL;
 }
 
-
 static int tcindex_classify(struct sk_buff *skb, const struct tcf_proto *tp,
 			    struct tcf_result *res)
 {
@@ -103,7 +100,6 @@ static int tcindex_classify(struct sk_buff *skb, const struct tcf_proto *tp,
 
 	return tcf_exts_exec(skb, &f->exts, res);
 }
-
 
 static unsigned long tcindex_get(struct tcf_proto *tp, u32 handle)
 {
@@ -334,7 +330,6 @@ tcindex_set_parms(struct net *net, struct tcf_proto *tp, unsigned long base,
 		if (handle >= cp->alloc_hash)
 			goto errout_alloc;
 
-
 	err = -ENOMEM;
 	if (!cp->perfect && !cp->h) {
 		if (valid_perfect_hash(cp)) {
@@ -507,7 +502,6 @@ static bool tcindex_destroy(struct tcf_proto *tp, bool force)
 	call_rcu(&p->rcu, __tcindex_destroy);
 	return true;
 }
-
 
 static int tcindex_dump(struct net *net, struct tcf_proto *tp, unsigned long fh,
     struct sk_buff *skb, struct tcmsg *t)

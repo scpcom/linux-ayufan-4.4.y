@@ -108,7 +108,6 @@ void st5481_usb_pipe_reset(struct st5481_adapter *adapter,
 		     0, pipe, complete, context);
 }
 
-
 /*
   Physical level functions
 */
@@ -194,7 +193,6 @@ static void usb_int_complete(struct urb *urb)
 		WARNING("nonzero urb status received: %d", urb->status);
 		goto exit;
 	}
-
 
 	DBG_PACKET(2, data, INT_PKT_SIZE);
 
@@ -287,7 +285,6 @@ int st5481_setup_usb(struct st5481_adapter *adapter)
 	usb_fill_control_urb(urb, dev,
 			     usb_sndctrlpipe(dev, 0),
 			     NULL, NULL, 0, usb_ctrl_complete, adapter);
-
 
 	fifo_init(&ctrl->msg_fifo.f, ARRAY_SIZE(ctrl->msg_fifo.data));
 

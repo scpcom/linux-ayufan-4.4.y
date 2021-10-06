@@ -309,7 +309,6 @@ static const struct irq_domain_ops idu_irq_ops = {
  * [24+C, N]: Not statically assigned, private-per-core
  */
 
-
 static int __init
 idu_of_init(struct device_node *intc, struct device_node *parent)
 {

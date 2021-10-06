@@ -51,7 +51,6 @@
 #include <asm/assembler.h>
 #include <xen/interface/xen.h>
 
-
 #define XEN_IMM 0xEA1
 
 #define HYPERCALL_SIMPLE(hypercall)		\

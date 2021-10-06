@@ -16,7 +16,6 @@
 
 #define NFSDDBG_FACILITY		NFSDDBG_FH
 
-
 /*
  * our acceptability function.
  * if NOSUBTREECHECK, accept anything
@@ -380,7 +379,6 @@ out:
 	return error;
 }
 
-
 /*
  * Compose a file handle for an NFS reply.
  *
@@ -452,7 +450,6 @@ static bool fsid_type_ok_for_exp(u8 fsid_type, struct svc_export *exp)
 	}
 	return 1;
 }
-
 
 static void set_version_and_fsid_type(struct svc_fh *fhp, struct svc_export *exp, struct svc_fh *ref_fh)
 {

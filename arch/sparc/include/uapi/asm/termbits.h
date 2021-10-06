@@ -71,8 +71,6 @@ struct ktermios {
 #define VSTART   8
 #define VSTOP    9
 
-
-
 #define VSUSP    10
 #define VDSUSP   11  /* SunOS POSIX nicety I do believe... */
 #define VREPRINT 12
@@ -242,7 +240,6 @@ struct ktermios {
 
 /* ioctl (fd, TIOCSERGETLSR, &result) where result may be as below */
 #define TIOCSER_TEMT    0x01	/* Transmitter physically empty */
-
 
 /* tcflow() and TCXONC use these */
 #define	TCOOFF		0

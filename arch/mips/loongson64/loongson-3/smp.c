@@ -427,7 +427,6 @@ static int loongson3_cpu_disable(void)
 	return 0;
 }
 
-
 static void loongson3_cpu_die(unsigned int cpu)
 {
 	while (per_cpu(cpu_state, cpu) != CPU_DEAD)

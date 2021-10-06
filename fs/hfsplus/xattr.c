@@ -1,10 +1,4 @@
-/*
- * linux/fs/hfsplus/xattr.c
- *
- * Vyacheslav Dubeyko <slava@dubeyko.com>
- *
- * Logic of processing extended attributes
- */
+
 
 #include "hfsplus_fs.h"
 #include <linux/posix_acl_xattr.h>
@@ -72,7 +66,6 @@ static void hfsplus_init_header_node(struct inode *attr_file,
 	hfs_dbg(ATTR_MOD, "init_hdr_attr_file: clump %u, node_size %u\n",
 		clump_size, node_size);
 
-	/* The end of the node contains list of record offsets */
 	rec_offsets = (__be16 *)(buf + node_size);
 
 	desc = (struct hfs_bnode_desc *)buf;
@@ -148,20 +141,7 @@ check_attr_tree_state_again:
 			goto check_attr_tree_state_again;
 		break;
 	case HFSPLUS_CREATING_ATTR_TREE:
-		/*
-		 * This state means that another thread is in process
-		 * of AttributesFile creation. Theoretically, it is
-		 * possible to be here. But really __setxattr() method
-		 * first of all calls hfs_find_init() for lookup in
-		 * B-tree of CatalogFile. This method locks mutex of
-		 * CatalogFile's B-tree. As a result, if some thread
-		 * is inside AttributedFile creation operation then
-		 * another threads will be waiting unlocking of
-		 * CatalogFile's B-tree's mutex. However, if code will
-		 * change then we will return error code (-EAGAIN) from
-		 * here. Really, it means that first try to set of xattr
-		 * fails with error but second attempt will have success.
-		 */
+		 
 		return -EAGAIN;
 	case HFSPLUS_VALID_ATTR_TREE:
 		return 0;
@@ -856,19 +836,9 @@ static int hfsplus_osx_getxattr(const struct xattr_handler *handler,
 	if (!strcmp(name, ""))
 		return -EINVAL;
 
-	/*
-	 * Don't allow retrieving properly prefixed attributes
-	 * by prepending them with "osx."
-	 */
 	if (is_known_namespace(name))
 		return -EOPNOTSUPP;
 
-	/*
-	 * osx is the namespace we use to indicate an unprefixed
-	 * attribute on the filesystem (like the ones that OS X
-	 * creates), so we pass the name through unmodified (after
-	 * ensuring it doesn't conflict with another namespace).
-	 */
 	return __hfsplus_getxattr(d_inode(dentry), name, buffer, size);
 }
 
@@ -879,19 +849,9 @@ static int hfsplus_osx_setxattr(const struct xattr_handler *handler,
 	if (!strcmp(name, ""))
 		return -EINVAL;
 
-	/*
-	 * Don't allow setting properly prefixed attributes
-	 * by prepending them with "osx."
-	 */
 	if (is_known_namespace(name))
 		return -EOPNOTSUPP;
 
-	/*
-	 * osx is the namespace we use to indicate an unprefixed
-	 * attribute on the filesystem (like the ones that OS X
-	 * creates), so we pass the name through unmodified (after
-	 * ensuring it doesn't conflict with another namespace).
-	 */
 	return __hfsplus_setxattr(d_inode(dentry), name, buffer, size, flags);
 }
 

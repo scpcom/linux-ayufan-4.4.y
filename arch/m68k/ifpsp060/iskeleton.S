@@ -38,7 +38,6 @@
 #include <asm/entry.h>
 #include <asm/asm-offsets.h>
 
-
 |################################
 | (1) EXAMPLE CALL-OUTS		#
 |				#

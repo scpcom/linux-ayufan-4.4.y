@@ -554,7 +554,6 @@ struct ixgbe_thermal_sensor_data {
 #define IXGBE_TDPT2TCCR(_i)     (0x0CD20 + ((_i) * 4)) /* 8 of these (0-7) */
 #define IXGBE_TDPT2TCSR(_i)     (0x0CD40 + ((_i) * 4)) /* 8 of these (0-7) */
 
-
 /* Security Control Registers */
 #define IXGBE_SECTXCTRL         0x08800
 #define IXGBE_SECTXSTAT         0x08804
@@ -3468,7 +3467,6 @@ struct ixgbe_info {
 	struct ixgbe_mbx_operations	*mbx_ops;
 	const u32			*mvals;
 };
-
 
 /* Error Codes */
 #define IXGBE_ERR_EEPROM                        -1

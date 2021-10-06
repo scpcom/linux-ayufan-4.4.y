@@ -25,7 +25,6 @@ static u32 iobase;
 
 static struct mtd_info *mymtd;
 
-
 /* Is this really the vpp port? */
 static DEFINE_SPINLOCK(l440gx_vpp_lock);
 static int l440gx_vpp_refcnt;
@@ -119,7 +118,6 @@ static int __init init_l440gx(void)
 	/* Set the iobase */
 	iobase = pm_iobase->start;
 	pci_write_config_dword(pm_dev, 0x40, iobase | 1);
-
 
 	/* Set XBCS# */
 	pci_read_config_word(dev, 0x4e, &word);

@@ -162,7 +162,6 @@ static int ar9003_hw_rtt_fill_hist_entry(struct ath_hw *ah, u8 chain, u32 index)
 	val = MS(REG_READ(ah, AR_PHY_RTT_TABLE_SW_INTF_1_B(chain)),
 		 AR_PHY_RTT_SW_RTT_TABLE_DATA);
 
-
 	return val;
 }
 

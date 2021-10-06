@@ -29,7 +29,6 @@
 #define RADEON_TEST_COPY_BLIT 1
 #define RADEON_TEST_COPY_DMA  0
 
-
 /* Test BO GTT->VRAM and VRAM->GTT GPU copies across the whole GTT aperture */
 static void radeon_do_test_moves(struct radeon_device *rdev, int flag)
 {

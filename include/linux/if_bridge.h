@@ -12,7 +12,6 @@
 #ifndef _LINUX_IF_BRIDGE_H
 #define _LINUX_IF_BRIDGE_H
 
-
 #include <linux/netdevice.h>
 #include <uapi/linux/if_bridge.h>
 #include <linux/bitops.h>

@@ -110,7 +110,6 @@ struct pmf_handlers {
 	struct module *owner;
 };
 
-
 /*
  * Drivers who expose platform functions register at init time, this
  * causes the platform functions for that device node to be parsed in
@@ -170,7 +169,6 @@ struct pmf_irq_client {
 	struct pmf_function	*func;
 };
 
-
 /*
  * Register/Unregister a function-capable driver and its handlers
  */
@@ -179,7 +177,6 @@ extern int pmf_register_driver(struct device_node *np,
 			      void *driverdata);
 
 extern void pmf_unregister_driver(struct device_node *np);
-
 
 /*
  * Register/Unregister interrupt clients
@@ -194,7 +191,6 @@ extern void pmf_unregister_irq_client(struct pmf_irq_client *client);
  * Called by the handlers when an irq happens
  */
 extern void pmf_do_irq(struct pmf_function *func);
-
 
 /*
  * Low level call to platform functions.
@@ -216,8 +212,6 @@ extern void pmf_do_irq(struct pmf_function *func);
 extern int pmf_do_functions(struct device_node *np, const char *name,
 			    u32 phandle, u32 flags, struct pmf_args *args);
 
-
-
 /*
  * High level call to a platform function.
  *
@@ -229,7 +223,6 @@ extern int pmf_do_functions(struct device_node *np, const char *name,
 
 extern int pmf_call_function(struct device_node *target, const char *name,
 			     struct pmf_args *args);
-
 
 /*
  * For low latency interrupt usage, you can lookup for on-demand functions
@@ -243,7 +236,6 @@ extern struct pmf_function * pmf_get_function(struct pmf_function *func);
 extern void pmf_put_function(struct pmf_function *func);
 
 extern int pmf_call_one(struct pmf_function *func, struct pmf_args *args);
-
 
 /* Suspend/resume code called by via-pmu directly for now */
 extern void pmac_pfunc_base_suspend(void);

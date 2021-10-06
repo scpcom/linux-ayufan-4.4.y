@@ -32,7 +32,6 @@
 
 #include <asm/uaccess.h>
 
-
 /*
  * Estimate expected accuracy in ns from a timeval.
  *
@@ -89,8 +88,6 @@ long select_estimate_accuracy(struct timespec *tv)
 		return current->timer_slack_ns;
 	return ret;
 }
-
-
 
 struct poll_table_page {
 	struct poll_table_page * next;

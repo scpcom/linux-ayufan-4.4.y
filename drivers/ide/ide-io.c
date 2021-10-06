@@ -23,7 +23,6 @@
  * are deemed to be part of the source code.
  */
  
- 
 #include <linux/module.h>
 #include <linux/types.h>
 #include <linux/string.h>

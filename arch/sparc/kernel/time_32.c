@@ -311,7 +311,6 @@ static struct platform_driver clock_driver = {
 	},
 };
 
-
 /* Probe for the mostek real time clock chip. */
 static int __init clock_init(void)
 {
@@ -350,4 +349,3 @@ void __init time_init(void)
 	else
 		sbus_time_init();
 }
-

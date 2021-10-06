@@ -607,7 +607,6 @@ static void ircomm_tty_watchdog_timer_expired(void *data)
 	ircomm_tty_do_event(self, IRCOMM_TTY_WD_TIMER_EXPIRED, NULL, NULL);
 }
 
-
 /*
  * Function ircomm_tty_do_event (self, event, skb)
  *
@@ -984,4 +983,3 @@ static int ircomm_tty_state_ready(struct ircomm_tty_cb *self,
 	}
 	return ret;
 }
-

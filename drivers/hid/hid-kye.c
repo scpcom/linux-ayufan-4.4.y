@@ -268,7 +268,6 @@ static __u8 easypen_m610x_rdesc_fixed[] = {
 	0xC0                          /*  End Collection                  */
 };
 
-
 /* Original PenSketch M912 report descriptor size */
 #define PENSKETCH_M912_RDESC_ORIG_SIZE	482
 

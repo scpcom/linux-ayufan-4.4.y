@@ -55,7 +55,6 @@
 #define HBR_AVPN	0x0200000000000000UL
 #define HBR_ANDCOND	0x0100000000000000UL
 
-
 /* in hvCall.S */
 EXPORT_SYMBOL(plpar_hcall);
 EXPORT_SYMBOL(plpar_hcall9);
@@ -695,7 +694,6 @@ void hcall_tracepoint_unregfunc(void)
  * shared processor partitions.
  */
 static DEFINE_PER_CPU(unsigned int, hcall_trace_depth);
-
 
 void __trace_hcall_entry(unsigned long opcode, unsigned long *args)
 {

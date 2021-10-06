@@ -772,8 +772,6 @@ struct MR_DRV_RAID_MAP_ALL {
 	struct MR_LD_SPAN_MAP      ldSpanMap[MAX_LOGICAL_DRIVES_EXT - 1];
 } __packed;
 
-
-
 struct MR_FW_RAID_MAP_EXT {
 	/* Not usred in new map */
 	u32                 reserved;
@@ -872,6 +870,5 @@ union desc_value {
 		__le32 high;
 	} u;
 };
-
 
 #endif /* _MEGARAID_SAS_FUSION_H_ */

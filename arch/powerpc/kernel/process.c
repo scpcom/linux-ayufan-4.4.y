@@ -862,7 +862,6 @@ struct task_struct *__switch_to(struct task_struct *prev,
 #endif /* CONFIG_HAVE_HW_BREAKPOINT */
 #endif
 
-
 	new_thread = &new->thread;
 	old_thread = &current->thread;
 
@@ -1672,4 +1671,3 @@ unsigned long arch_randomize_brk(struct mm_struct *mm)
 
 	return ret;
 }
-

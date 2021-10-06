@@ -46,7 +46,6 @@
 #include <asm/hardware.h>
 #endif
 
-
 /* No 4X status reads take longer than this (in usec).
  */
 #define HP_SDC_MAX_REG_DELAY 20000
@@ -256,7 +255,6 @@ switch (val) {						\
 #define HP_SDC_HIL_TO		0x82	/* i8042 HIL watchdog expired */
 #define HP_SDC_HIL_RC		0x84	/* i8042 is auto-configuring loop */
 #define HP_SDC_HIL_DAT		0x60	/* Data from HIL MLC R0 */
-
 
 typedef struct {
 	rwlock_t	ibf_lock;

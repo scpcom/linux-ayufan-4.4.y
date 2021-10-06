@@ -10,7 +10,6 @@
 
 #include <uapi/linux/pmu.h>
 
-
 extern int find_via_pmu(void);
 
 extern int pmu_request(struct adb_request *req,

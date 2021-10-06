@@ -43,5 +43,4 @@
 #define PSR_IMPL_TI		0x4
 #define PSR_IMPL_LEON		0xf
 
-
 #endif /* _UAPI__LINUX_SPARC_PSR_H */

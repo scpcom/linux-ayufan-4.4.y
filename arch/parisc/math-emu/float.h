@@ -353,7 +353,6 @@ struct quadwd {
 
 typedef struct quadwd quad_integer;
 
-
 /* useful typedefs */
 typedef unsigned int sgl_floating_point;
 typedef struct dblwd dbl_floating_point;
@@ -406,12 +405,10 @@ typedef struct dblwd dbl_unsigned;
 #define BADFMT 2
 #define QUAD 3
 
-
 /* Types */
 typedef int boolean;
 typedef int FORMAT;
 typedef int VOID;
-
 
 /* Declare status register equivalent to FPUs architecture.
  *
@@ -538,7 +535,6 @@ typedef int VOID;
 #define Greaterthan(cond) Greaterthanbit(cond)
 #define Exception(cond) Exceptionbit(cond)
 
-
 /* Defines for the extension */
 #define Ext_isone_sign(extent) (Extsign(extent))
 #define Ext_isnotzero(extent) \
@@ -578,4 +574,3 @@ typedef int operation;
 #define FMPY	(2<<2) | 3
 #define FDIV	(3<<2) | 3
 #define FREM	(4<<2) | 3
-

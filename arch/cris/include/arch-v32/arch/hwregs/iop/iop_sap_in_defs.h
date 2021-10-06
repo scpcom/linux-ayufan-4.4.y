@@ -141,7 +141,6 @@ typedef struct {
 #define REG_RD_ADDR_iop_sap_in_rw_gio 8
 #define REG_WR_ADDR_iop_sap_in_rw_gio 8
 
-
 /* Constants */
 enum {
   regk_iop_sap_in_and                      = 0x00000002,

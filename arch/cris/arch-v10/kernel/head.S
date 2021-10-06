@@ -389,7 +389,6 @@ no_command_line:
 		| IO_STATE (R_GEN_CONFIG, dma8, usb) \
 		| IO_STATE (R_GEN_CONFIG, dma9, usb),$r0
 
-
 	move.d	$r0,[genconfig_shadow] ; init a shadow register of R_GEN_CONFIG
 
 	move.d	$r0,[R_GEN_CONFIG]

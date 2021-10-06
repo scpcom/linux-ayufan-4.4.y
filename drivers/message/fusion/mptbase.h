@@ -136,7 +136,6 @@
 
 #define MPT_COALESCING_TIMEOUT		0x10
 
-
 /*
  * SCSI transfer rate defines.
  */
@@ -153,7 +152,6 @@
 
 #define C0_1030				0x08
 #define XL_929				0x01
-
 
 /*
  *	Try to keep these at 2^N-1
@@ -239,7 +237,6 @@ typedef struct _ATTO_CONFIG_PAGE_SCSI_PORT_2
 	ATTO_DEVICE_INFO	DeviceSettings[16];	/* 0Ch */
 } fATTO_CONFIG_PAGE_SCSI_PORT_2, MPI_POINTER PTR_ATTO_CONFIG_PAGE_SCSI_PORT_2,
   ATTO_SCSIPortPage2_t, MPI_POINTER pATTO_SCSIPortPage2_t;
-
 
 /*=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
 /*
@@ -369,7 +366,6 @@ typedef struct _SYSIF_REGS
  * NOTE: Use MPI_{DOORBELL,WRITESEQ,DIAG}_xxx defs in lsi/mpi.h
  * in conjunction with SYSIF_REGS accesses!
  */
-
 
 /*
  *	Dynamic Multi-Pathing specific stuff...
@@ -823,7 +819,6 @@ typedef struct _mpt_sge {
 	dma_addr_t	Address;
 } MptSge_t;
 
-
 #define mpt_msg_flags(ioc) \
 	(ioc->sg_addr_size == sizeof(u64)) ?		\
 	MPI_SCSIIO_MSGFLGS_SENSE_WIDTH_64 : 		\
@@ -869,7 +864,6 @@ typedef struct _MPT_LOCAL_REPLY {
 	u8	skip;
 	u32	pad;
 } MPT_LOCAL_REPLY;
-
 
 /* The TM_STATE variable is used to provide strict single threading of TM
  * requests as well as communicate TM error conditions.
@@ -947,7 +941,6 @@ extern int	 mpt_set_taskmgmt_in_progress_flag(MPT_ADAPTER *ioc);
 extern void	 mpt_clear_taskmgmt_in_progress_flag(MPT_ADAPTER *ioc);
 extern void     mpt_halt_firmware(MPT_ADAPTER *ioc);
 
-
 /*
  *  Public data decl's...
  */
@@ -1004,4 +997,3 @@ extern int mpt_fwfault_debug;
 
 /*}-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
 #endif
-

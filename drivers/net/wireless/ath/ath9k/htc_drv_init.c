@@ -159,7 +159,6 @@ static int ath9k_init_htc_services(struct ath9k_htc_priv *priv, u16 devid,
 	if (ret)
 		goto err;
 
-
 	/* UAPSD */
 	ret = ath9k_htc_connect_svc(priv, WMI_UAPSD_SVC, ath9k_htc_txep,
 				    &priv->uapsd_ep);

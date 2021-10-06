@@ -89,7 +89,6 @@
 #define RTS_TXB2		0x04
 #define INSTRUCTION_RTS(n)	(0x80 | ((n) & 0x07))
 
-
 /* MPC251x registers */
 #define CANSTAT	      0x0e
 #define CANCTRL	      0x0f

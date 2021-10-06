@@ -36,7 +36,6 @@ enum btrfs_feature_set {
 
 #define BTRFS_RAID_ATTR_PTR(_name)    (&btrfs_raid_attr_##_name.attr)
 
-
 struct btrfs_feature_attr {
 	struct kobj_attribute kobj_attr;
 	enum btrfs_feature_set feature_set;

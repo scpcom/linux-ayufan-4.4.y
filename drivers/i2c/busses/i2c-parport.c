@@ -51,7 +51,6 @@ static DEFINE_MUTEX(adapter_list_lock);
 #define MAX_DEVICE 4
 static int parport[MAX_DEVICE] = {0, -1, -1, -1};
 
-
 /* ----- Low-level parallel port access ----------------------------------- */
 
 static void port_write_data(struct parport *p, unsigned char d)

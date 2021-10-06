@@ -51,7 +51,6 @@ extern const struct file_operations cxlflash_cxl_fops;
 #define CXLFLASH_MAX_CMDS               16
 #define CXLFLASH_MAX_CMDS_PER_LUN       CXLFLASH_MAX_CMDS
 
-
 static inline void check_sizes(void)
 {
 	BUILD_BUG_ON_NOT_POWER_OF_2(CXLFLASH_NUM_CMDS);

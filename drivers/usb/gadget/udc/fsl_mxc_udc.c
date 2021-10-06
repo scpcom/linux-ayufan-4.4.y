@@ -105,7 +105,6 @@ int fsl_udc_clk_finalize(struct platform_device *pdev)
 		iounmap(phy_regs);
 	}
 
-
 ioremap_err:
 	/* ULPI transceivers don't need usbpll */
 	if (pdata->phy_mode == FSL_USB2_PHY_ULPI) {

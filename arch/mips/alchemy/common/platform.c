@@ -130,7 +130,6 @@ static void __init alchemy_setup_uarts(int ctype)
 		printk(KERN_INFO "Alchemy: failed to register UARTs\n");
 }
 
-
 /* The dmamask must be set for OHCI/EHCI to work */
 static u64 alchemy_ohci_dmamask = DMA_BIT_MASK(32);
 static u64 __maybe_unused alchemy_ehci_dmamask = DMA_BIT_MASK(32);
@@ -236,7 +235,6 @@ static void __init alchemy_setup_usb(int ctype)
 
 	if (platform_device_register(pdev))
 		printk(KERN_INFO "Alchemy USB: cannot add OHCI0\n");
-
 
 	/* setup EHCI0: Au1200/Au1300 */
 	if ((ctype == ALCHEMY_CPU_AU1200) || (ctype == ALCHEMY_CPU_AU1300)) {
@@ -412,7 +410,6 @@ static void __init alchemy_setup_macs(int ctype)
 	ret = platform_device_register(&au1xxx_eth0_device);
 	if (ret)
 		printk(KERN_INFO "Alchemy: failed to register MAC0\n");
-
 
 	/* Handle 2nd MAC */
 	if (alchemy_get_macs(ctype) < 2)

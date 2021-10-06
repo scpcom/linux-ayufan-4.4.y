@@ -321,7 +321,6 @@
 
 #define DISABLE_STATISTIC_COUNTER_ID_VALUE 0
 
-
 /* This file defines HSI constants common to all microcode flows */
 
 #define PROTOCOL_STATE_BIT_OFFSET 6

@@ -1264,4 +1264,3 @@ int pm8001_clear_task_set(struct domain_device *dev, u8 *lun)
 	rc = pm8001_issue_ssp_tmf(dev, lun, &tmf_task);
 	return rc;
 }
-

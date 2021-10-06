@@ -21,7 +21,6 @@
 #include <linux/syscore_ops.h>
 #include <linux/vexpress.h>
 
-
 #define SYS_CFGDATA		0x0
 
 #define SYS_CFGCTRL		0x4
@@ -37,7 +36,6 @@
 #define SYS_CFGSTAT_ERR		(1 << 1)
 #define SYS_CFGSTAT_COMPLETE	(1 << 0)
 
-
 struct vexpress_syscfg {
 	struct device *dev;
 	void __iomem *base;
@@ -51,7 +49,6 @@ struct vexpress_syscfg_func {
 	int num_templates;
 	u32 template[0]; /* Keep it last! */
 };
-
 
 static int vexpress_syscfg_exec(struct vexpress_syscfg_func *func,
 		int index, bool write, u32 *data)
@@ -140,7 +137,6 @@ static struct regmap_config vexpress_syscfg_regmap_config = {
 	.reg_format_endian = REGMAP_ENDIAN_LITTLE,
 	.val_format_endian = REGMAP_ENDIAN_LITTLE,
 };
-
 
 static struct regmap *vexpress_syscfg_regmap_init(struct device *dev,
 		void *context)
@@ -244,7 +240,6 @@ static struct vexpress_config_bridge_ops vexpress_syscfg_bridge_ops = {
 	.regmap_init = vexpress_syscfg_regmap_init,
 	.regmap_exit = vexpress_syscfg_regmap_exit,
 };
-
 
 static int vexpress_syscfg_probe(struct platform_device *pdev)
 {

@@ -154,7 +154,6 @@ fill_write_buffer(struct configfs_buffer * buffer, const char __user * buf, size
 	return error ? -EFAULT : count;
 }
 
-
 /**
  *	flush_write_buffer - push buffer to config_item.
  *	@dentry:	dentry to the attribute
@@ -174,7 +173,6 @@ flush_write_buffer(struct dentry * dentry, struct configfs_buffer * buffer, size
 
 	return attr->store(item, buffer->page, count);
 }
-
 
 /**
  *	configfs_write_file - write an attribute.

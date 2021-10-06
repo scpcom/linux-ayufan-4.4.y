@@ -119,7 +119,6 @@
 #define EHEA_MAP_SIZE (0x10000)                   /* currently fixed map size */
 #define EHEA_INDEX_MASK (EHEA_MAP_ENTRIES - 1)
 
-
 #define EHEA_WATCH_DOG_TIMEOUT 10*HZ
 
 /* utility functions */
@@ -264,7 +263,6 @@ struct ehea_eq_attr {
 	u32 ist4;
 };
 
-
 /*
  * Event Queue
  */
@@ -380,7 +378,6 @@ struct ehea_port_res {
 	int sq_restart_flag;
 };
 
-
 #define EHEA_MAX_PORTS 16
 
 #define EHEA_NUM_PORTRES_FW_HANDLES    6  /* QP handle, SendCQ handle,
@@ -401,7 +398,6 @@ struct ehea_adapter {
 	int active_ports;
 	struct list_head list;
 };
-
 
 struct ehea_mc_list {
 	struct list_head list;

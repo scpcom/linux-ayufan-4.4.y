@@ -47,7 +47,6 @@ typedef __be32 (*callback_process_op_t)(void *, void *,
 typedef __be32 (*callback_decode_arg_t)(struct svc_rqst *, struct xdr_stream *, void *);
 typedef __be32 (*callback_encode_res_t)(struct svc_rqst *, struct xdr_stream *, void *);
 
-
 struct callback_op {
 	callback_process_op_t process_op;
 	callback_decode_arg_t decode_args;

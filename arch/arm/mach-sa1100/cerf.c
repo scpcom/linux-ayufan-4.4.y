@@ -83,7 +83,6 @@ static struct platform_device cerf_leds = {
 	}
 };
 
-
 static struct platform_device *cerf_devices[] __initdata = {
 	&cerfuart2_device,
 	&cerf_leds,

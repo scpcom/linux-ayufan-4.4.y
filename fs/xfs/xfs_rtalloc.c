@@ -36,7 +36,6 @@
 #include "xfs_icache.h"
 #include "xfs_rtalloc.h"
 
-
 /*
  * Read and return the summary information for a given extent size,
  * bitmap block combination.
@@ -100,7 +99,6 @@ xfs_rtany_summary(
 	*stat = 0;
 	return 0;
 }
-
 
 /*
  * Copy and transform the summary file, given the old and new

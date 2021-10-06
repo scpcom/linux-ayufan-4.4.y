@@ -23,7 +23,6 @@
 
 #include "seq_memory.h"
 
-
 /* === PRIOQ === */
 
 struct snd_seq_prioq {
@@ -32,7 +31,6 @@ struct snd_seq_prioq {
 	int cells;
 	spinlock_t lock;
 };
-
 
 /* create new prioq (constructor) */
 struct snd_seq_prioq *snd_seq_prioq_new(void);

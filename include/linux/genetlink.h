@@ -3,7 +3,6 @@
 
 #include <uapi/linux/genetlink.h>
 
-
 /* All generic netlink requests are serialized by a global lock.  */
 extern void genl_lock(void);
 extern void genl_unlock(void);

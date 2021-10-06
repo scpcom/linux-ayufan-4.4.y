@@ -23,7 +23,6 @@
 #include <asm/tlbflush.h>
 #include "proc-macros.S"
 
-
 /*
  *	flush_user_tlb_range(start, end, mm)
  *
@@ -49,7 +48,6 @@ ENTRY(fa_flush_user_tlb_range)
 	blo	1b
 	mcr	p15, 0, r3, c7, c10, 4		@ data write barrier
 	ret	lr
-
 
 ENTRY(fa_flush_kern_tlb_range)
 	mov	r3, #0

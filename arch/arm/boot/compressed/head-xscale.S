@@ -31,4 +31,3 @@ __XScale_start:
 		bic	r0, r0, #0x05		@ clear DC, MMU
 		bic	r0, r0, #0x1000		@ clear Icache
 		mcr	p15, 0, r0, c1, c0, 0
-

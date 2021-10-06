@@ -22,7 +22,6 @@
 
 #include "u_serial.h"
 
-
 /*
  * This CDC ACM function support just wraps control functions and
  * notifications around the generic serial-over-usb code.
@@ -105,7 +104,6 @@ acm_iad_descriptor = {
 	.bFunctionProtocol =	USB_CDC_ACM_PROTO_AT_V25TER,
 	/* .iFunction =		DYNAMIC */
 };
-
 
 static struct usb_interface_descriptor acm_control_interface_desc = {
 	.bLength =		USB_DT_INTERFACE_SIZE,

@@ -270,7 +270,6 @@ static void bochs_connector_init(struct drm_device *dev)
 	drm_connector_register(connector);
 }
 
-
 int bochs_kms_init(struct bochs_device *bochs)
 {
 	drm_mode_config_init(bochs->dev);

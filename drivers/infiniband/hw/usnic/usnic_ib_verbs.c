@@ -786,6 +786,5 @@ struct ib_mr *usnic_ib_get_dma_mr(struct ib_pd *pd, int acc)
 	return ERR_PTR(-ENOMEM);
 }
 
-
 /* In ib callbacks section - End of stub funcs */
 /* End of ib callbacks section */

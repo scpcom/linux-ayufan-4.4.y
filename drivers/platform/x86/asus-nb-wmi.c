@@ -387,7 +387,6 @@ static struct asus_wmi_driver asus_nb_wmi_driver = {
 	.detect_quirks = asus_nb_wmi_quirks,
 };
 
-
 static int __init asus_nb_wmi_init(void)
 {
 	return asus_wmi_register_driver(&asus_nb_wmi_driver);

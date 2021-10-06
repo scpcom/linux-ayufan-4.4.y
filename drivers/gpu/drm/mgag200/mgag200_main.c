@@ -201,7 +201,6 @@ static int mgag200_device_init(struct drm_device *dev,
  * a PCI device
  */
 
-
 int mgag200_driver_load(struct drm_device *dev, unsigned long flags)
 {
 	struct mga_device *mdev;
@@ -342,7 +341,6 @@ void mgag200_gem_free_object(struct drm_gem_object *obj)
 
 	mgag200_bo_unref(&mgag200_bo);
 }
-
 
 static inline u64 mgag200_bo_mmap_offset(struct mgag200_bo *bo)
 {

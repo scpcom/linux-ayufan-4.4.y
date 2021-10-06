@@ -49,7 +49,6 @@ struct pistachio_mux {
 		.num_parents	= ARRAY_SIZE(_pnames)		\
 	}
 
-
 struct pistachio_div {
 	unsigned int id;
 	unsigned long reg;

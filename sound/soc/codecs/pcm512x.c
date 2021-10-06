@@ -14,7 +14,6 @@
  * General Public License for more details.
  */
 
-
 #include <linux/init.h>
 #include <linux/module.h>
 #include <linux/clk.h>

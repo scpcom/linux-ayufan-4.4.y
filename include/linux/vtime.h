@@ -6,7 +6,6 @@
 #include <asm/vtime.h>
 #endif
 
-
 struct task_struct;
 
 /*
@@ -31,7 +30,6 @@ static inline bool vtime_accounting_enabled(void)
 #ifndef CONFIG_VIRT_CPU_ACCOUNTING
 static inline bool vtime_accounting_enabled(void) { return false; }
 #endif /* !CONFIG_VIRT_CPU_ACCOUNTING */
-
 
 /*
  * Common vtime APIs

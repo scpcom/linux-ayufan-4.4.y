@@ -13,10 +13,8 @@
  *
  ******************************************************************************/
 
-
 #ifndef	__ODM_INTERFACE_H__
 #define __ODM_INTERFACE_H__
-
 
 /*  _cat: implemented by Token-Pasting Operator. */
 

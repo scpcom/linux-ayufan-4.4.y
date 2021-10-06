@@ -10,7 +10,6 @@
 
 #define NFSDDBG_FACILITY	NFSDDBG_PNFS
 
-
 __be32
 nfsd4_block_encode_layoutget(struct xdr_stream *xdr,
 		struct nfsd4_layoutget *lgp)

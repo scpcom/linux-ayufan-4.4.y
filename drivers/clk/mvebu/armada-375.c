@@ -58,7 +58,6 @@ static u32 __init armada_375_get_tclk_freq(void __iomem *sar)
 	return armada_375_tclk_frequencies[tclk_freq_select];
 }
 
-
 static const u32 armada_375_cpu_frequencies[] __initconst = {
 	0, 0, 0, 0, 0, 0,
 	400000000,

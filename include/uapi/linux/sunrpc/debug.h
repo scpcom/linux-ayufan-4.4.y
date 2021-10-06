@@ -26,7 +26,6 @@
 #define RPCDBG_CACHE		0x0800
 #define RPCDBG_ALL		0x7fff
 
-
 /*
  * Declarations for the sysctl debug interface, which allows to read or
  * change the debug flags for rpc, nfs, nfsd, and lockd. Since the sunrpc

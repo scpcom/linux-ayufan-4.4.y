@@ -12,5 +12,4 @@ struct subchannel_id {
 	__u32 sch_no : 16;
 } __attribute__ ((packed, aligned(4)));
 
-
 #endif /* _UAPIASM_SCHID_H */

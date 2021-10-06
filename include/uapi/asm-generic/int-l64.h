@@ -30,5 +30,4 @@ typedef unsigned long __u64;
 
 #endif /* __ASSEMBLY__ */
 
-
 #endif /* _UAPI_ASM_GENERIC_INT_L64_H */

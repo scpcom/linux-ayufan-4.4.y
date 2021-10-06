@@ -81,7 +81,6 @@ static int ignore_interface_quirk(struct snd_usb_audio *chip,
 	return 0;
 }
 
-
 /*
  * Allow alignment on audio sub-slot (channel samples) rather than
  * on audio slots (audio frames)

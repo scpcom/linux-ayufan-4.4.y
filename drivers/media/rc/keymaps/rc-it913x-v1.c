@@ -11,7 +11,6 @@
 #include <media/rc-map.h>
 #include <linux/module.h>
 
-
 static struct rc_map_table it913x_v1_rc[] = {
 	/* Type 1 */
 	{ 0x61d601, KEY_VIDEO },           /* Source */

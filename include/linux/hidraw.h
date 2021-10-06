@@ -15,7 +15,6 @@
 
 #include <uapi/linux/hidraw.h>
 
-
 struct hidraw {
 	unsigned int minor;
 	int exist;

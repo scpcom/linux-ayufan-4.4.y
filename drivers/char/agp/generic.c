@@ -67,7 +67,6 @@ void agp_free_key(int key)
 }
 EXPORT_SYMBOL(agp_free_key);
 
-
 static int agp_get_key(void)
 {
 	int bit;
@@ -281,9 +280,7 @@ struct agp_memory *agp_allocate_memory(struct agp_bridge_data *bridge,
 }
 EXPORT_SYMBOL(agp_allocate_memory);
 
-
 /* End - Generic routines for handling agp_memory structures */
-
 
 static int agp_return_size(void)
 {
@@ -319,7 +316,6 @@ static int agp_return_size(void)
 	return current_size;
 }
 
-
 int agp_num_entries(void)
 {
 	int num_entries;
@@ -354,7 +350,6 @@ int agp_num_entries(void)
 	return num_entries;
 }
 EXPORT_SYMBOL_GPL(agp_num_entries);
-
 
 /**
  *	agp_copy_info  -  copy bridge state information
@@ -439,7 +434,6 @@ int agp_bind_memory(struct agp_memory *curr, off_t pg_start)
 }
 EXPORT_SYMBOL(agp_bind_memory);
 
-
 /**
  *	agp_unbind_memory  -  Removes an agp_memory structure from the GATT
  *
@@ -474,9 +468,7 @@ int agp_unbind_memory(struct agp_memory *curr)
 }
 EXPORT_SYMBOL(agp_unbind_memory);
 
-
 /* End - Routines for handling swapping of agp_memory into the GATT */
-
 
 /* Generic Agp routines - Start */
 static void agp_v2_parse_one(u32 *requested_mode, u32 *bridge_agpstat, u32 *vga_agpstat)
@@ -711,7 +703,6 @@ done:
 	}
 }
 
-
 /**
  * agp_collect_device_status - determine correct agp_cmd from various agp_stat's
  * @bridge: an agp_bridge_data struct allocated for the AGP host bridge.
@@ -766,7 +757,6 @@ u32 agp_collect_device_status(struct agp_bridge_data *bridge, u32 requested_mode
 }
 EXPORT_SYMBOL(agp_collect_device_status);
 
-
 void agp_device_command(u32 bridge_agpstat, bool agp_v3)
 {
 	struct pci_dev *device = NULL;
@@ -788,7 +778,6 @@ void agp_device_command(u32 bridge_agpstat, bool agp_v3)
 }
 EXPORT_SYMBOL(agp_device_command);
 
-
 void get_agp_version(struct agp_bridge_data *bridge)
 {
 	u32 ncapid;
@@ -802,7 +791,6 @@ void get_agp_version(struct agp_bridge_data *bridge)
 	bridge->minor_version = (ncapid >> AGP_MINOR_VERSION_SHIFT) & 0xf;
 }
 EXPORT_SYMBOL(get_agp_version);
-
 
 void agp_generic_enable(struct agp_bridge_data *bridge, u32 requested_mode)
 {
@@ -848,7 +836,6 @@ void agp_generic_enable(struct agp_bridge_data *bridge, u32 requested_mode)
 	agp_device_command(bridge_agpstat, false);
 }
 EXPORT_SYMBOL(agp_generic_enable);
-
 
 int agp_generic_create_gatt_table(struct agp_bridge_data *bridge)
 {
@@ -1029,7 +1016,6 @@ int agp_generic_free_gatt_table(struct agp_bridge_data *bridge)
 }
 EXPORT_SYMBOL(agp_generic_free_gatt_table);
 
-
 int agp_generic_insert_memory(struct agp_memory * mem, off_t pg_start, int type)
 {
 	int num_entries;
@@ -1110,7 +1096,6 @@ int agp_generic_insert_memory(struct agp_memory * mem, off_t pg_start, int type)
 	return 0;
 }
 EXPORT_SYMBOL(agp_generic_insert_memory);
-
 
 int agp_generic_remove_memory(struct agp_memory *mem, off_t pg_start, int type)
 {
@@ -1282,7 +1267,6 @@ EXPORT_SYMBOL(agp_generic_destroy_page);
 
 /* End Basic Page Allocation Routines */
 
-
 /**
  * agp_enable  -  initialise the agp point-to-point connection.
  *
@@ -1421,4 +1405,3 @@ const struct aper_size_info_16 agp3_generic_sizes[AGP_GENERIC_SIZES_ENTRIES] =
 	{   4,    1024, 0, 0xf3f}
 };
 EXPORT_SYMBOL(agp3_generic_sizes);
-

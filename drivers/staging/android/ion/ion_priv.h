@@ -304,7 +304,6 @@ size_t ion_heap_freelist_shrink(struct ion_heap *heap,
  */
 size_t ion_heap_freelist_size(struct ion_heap *heap);
 
-
 /**
  * functions for creating and destroying the built in ion heaps.
  * architectures can add their own custom architecture specific

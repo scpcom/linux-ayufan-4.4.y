@@ -30,7 +30,6 @@
 #include "dvb_frontend.h"
 #include "cx24110.h"
 
-
 struct cx24110_state {
 
 	struct i2c_adapter* i2c;
@@ -111,7 +110,6 @@ static struct {u8 reg; u8 data;} cx24110_regdata[]=
 	 {0x75,0x00}  /* @  " */
 		      /* the remaining registers are for SEC */
 	};
-
 
 static int cx24110_writereg (struct cx24110_state* state, int reg, int data)
 {

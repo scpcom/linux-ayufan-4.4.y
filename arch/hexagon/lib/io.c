@@ -58,7 +58,6 @@ void __raw_writesw(void __iomem *addr, const void *data, int len)
 	while (len-- > 0)
 		*dst = *src++;
 
-
 }
 
 /*  Pretty sure len is pre-adjusted for the length of the access already */
@@ -73,7 +72,6 @@ void __raw_readsl(const void __iomem *addr, void *data, int len)
 	while (len-- > 0)
 		*dst++ = *src;
 
-
 }
 
 void __raw_writesl(void __iomem *addr, const void *data, int len)
@@ -86,6 +84,5 @@ void __raw_writesl(void __iomem *addr, const void *data, int len)
 
 	while (len-- > 0)
 		*dst = *src++;
-
 
 }

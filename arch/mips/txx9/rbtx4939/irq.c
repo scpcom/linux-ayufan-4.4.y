@@ -40,7 +40,6 @@ static struct irq_chip rbtx4939_ioc_irq_chip = {
 	.irq_unmask	= rbtx4939_ioc_irq_unmask,
 };
 
-
 static inline int rbtx4939_ioc_irqroute(void)
 {
 	unsigned char istat = readb(rbtx4939_ifac2_addr);

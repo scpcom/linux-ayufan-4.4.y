@@ -92,7 +92,6 @@
 
 /* SUNI register values */
 
-
 /* MRI is reg 0 */
 #define SUNI_MRI_ID		0x0f	/* R, SUNI revision number */
 #define SUNI_MRI_ID_SHIFT 	0
@@ -222,9 +221,7 @@
 #define SUNI_MT_PMCTST		0x10	/* W, PMC test mode */
 #define SUNI_MT_DS27_53		0x80	/* RW, select between 8- or 16- bit */
 
-
 #define SUNI_IDLE_PATTERN       0x6a    /* idle pattern */
-
 
 #ifdef __KERNEL__
 struct suni_priv {

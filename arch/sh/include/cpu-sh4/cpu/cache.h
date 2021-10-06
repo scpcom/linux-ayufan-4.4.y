@@ -41,4 +41,3 @@
 #define RAMCR			0xFF000074
 
 #endif /* __ASM_CPU_SH4_CACHE_H */
-

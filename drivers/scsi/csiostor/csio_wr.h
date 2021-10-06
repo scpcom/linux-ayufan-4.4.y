@@ -276,7 +276,6 @@ struct csio_qstatus_page {
 	__be16 pidx;
 };
 
-
 enum {
 	CSIO_MAX_FLBUF_PER_IQWR = 4,
 	CSIO_QCREDIT_SZ  = 64,			/* pidx/cidx increments
@@ -313,7 +312,6 @@ struct csio_iqwr_footer {
 #define IQWRF_LEN_GET(x)	(((x) >> 0) & 0x7fffffffU)
 #define IQWRF_GEN_SHIFT		7
 #define IQWRF_TYPE_GET(x)	(((x) >> 4) & 0x3U)
-
 
 /*
  * WR pair:
@@ -488,7 +486,6 @@ int csio_wr_iq_create(struct csio_hw *, void *, int,
 int csio_wr_eq_create(struct csio_hw *, void *, int, int, uint8_t,
 				void (*)(struct csio_hw *, struct csio_mb *));
 int csio_wr_destroy_queues(struct csio_hw *, bool cmd);
-
 
 int csio_wr_get(struct csio_hw *, int, uint32_t,
 			  struct csio_wr_pair *);

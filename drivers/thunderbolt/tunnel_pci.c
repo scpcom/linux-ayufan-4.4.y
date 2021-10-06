@@ -209,8 +209,6 @@ int tb_pci_activate(struct tb_pci_tunnel *tunnel)
 	return 0;
 }
 
-
-
 /**
  * tb_pci_deactivate() - deactivate a tunnel
  */
@@ -229,4 +227,3 @@ void tb_pci_deactivate(struct tb_pci_tunnel *tunnel)
 		tb_path_deactivate(tunnel->path_to_up);
 	list_del_init(&tunnel->list);
 }
-

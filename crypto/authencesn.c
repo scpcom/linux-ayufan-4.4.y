@@ -166,7 +166,6 @@ static int crypto_authenc_esn_genicv(struct aead_request *req,
 	       crypto_authenc_esn_genicv_tail(req, aead_request_flags(req));
 }
 
-
 static void crypto_authenc_esn_encrypt_done(struct crypto_async_request *req,
 					    int err)
 {

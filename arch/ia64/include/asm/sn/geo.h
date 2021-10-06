@@ -62,7 +62,6 @@ typedef struct geo_mem_s {
     char	memslot;	/* The memory slot on the bus */
 } geo_mem_t;
 
-
 typedef union geoid_u {
     geo_common_t	common;
     geo_node_t		node;
@@ -73,7 +72,6 @@ typedef union geoid_u {
     geo_mem_t		mem;
     char		padsize[GEOID_SIZE];
 } geoid_t;
-
 
 /* Preprocessor macros */
 

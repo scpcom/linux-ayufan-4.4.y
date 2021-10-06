@@ -156,7 +156,6 @@ static void __init himalaya_init(void)
 	platform_add_devices(devices, ARRAY_SIZE(devices));
 }
 
-
 MACHINE_START(HIMALAYA, "HTC Himalaya")
 	.atag_offset = 0x100,
 	.map_io = pxa25x_map_io,

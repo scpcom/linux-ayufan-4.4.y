@@ -161,4 +161,3 @@ int aead_register_instance(struct crypto_template *tmpl,
 			   struct aead_instance *inst);
 
 #endif	/* _CRYPTO_INTERNAL_AEAD_H */
-

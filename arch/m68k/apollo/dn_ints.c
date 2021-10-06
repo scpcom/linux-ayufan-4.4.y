@@ -38,7 +38,6 @@ static struct irq_chip apollo_irq_chip = {
 	.irq_eoi	= apollo_irq_eoi,
 };
 
-
 void __init dn_init_IRQ(void)
 {
 	m68k_setup_user_interrupt(VEC_USER + 96, 16);

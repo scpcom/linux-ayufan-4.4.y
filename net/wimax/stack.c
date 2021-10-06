@@ -58,7 +58,6 @@
 #include <linux/module.h>
 #include "wimax-internal.h"
 
-
 #define D_SUBMODULE stack
 #include "debug-levels.h"
 
@@ -82,7 +81,6 @@ static const struct nla_policy wimax_gnl_re_status_change[WIMAX_GNL_ATTR_MAX + 1
 	[WIMAX_GNL_STCH_STATE_NEW] = { .type = NLA_U8 },
 };
 */
-
 
 /*
  * Allocate a Report State Change message
@@ -153,7 +151,6 @@ error_new:
 	return ERR_PTR(result);
 }
 
-
 /*
  * Send a Report State Change message (as created with _alloc).
  *
@@ -185,7 +182,6 @@ out:
 	return result;
 }
 
-
 static
 void __check_new_state(enum wimax_st old_state, enum wimax_st new_state,
 		       unsigned int allowed_states_bm)
@@ -195,7 +191,6 @@ void __check_new_state(enum wimax_st old_state, enum wimax_st new_state,
 		       old_state, new_state);
 	}
 }
-
 
 /*
  * Set the current state of a WiMAX device [unlocking version of
@@ -324,7 +319,6 @@ out:
 		wimax_dev, new_state, old_state);
 }
 
-
 /**
  * wimax_state_change - Set the current state of a WiMAX device
  *
@@ -366,7 +360,6 @@ void wimax_state_change(struct wimax_dev *wimax_dev, enum wimax_st new_state)
 }
 EXPORT_SYMBOL_GPL(wimax_state_change);
 
-
 /**
  * wimax_state_get() - Return the current state of a WiMAX device
  *
@@ -383,7 +376,6 @@ enum wimax_st wimax_state_get(struct wimax_dev *wimax_dev)
 	return state;
 }
 EXPORT_SYMBOL_GPL(wimax_state_get);
-
 
 /**
  * wimax_dev_init - initialize a newly allocated instance
@@ -443,7 +435,6 @@ static const struct genl_ops wimax_gnl_ops[] = {
 	},
 };
 
-
 static
 size_t wimax_addr_scnprint(char *addr_str, size_t addr_str_size,
 			   unsigned char *addr, size_t addr_len)
@@ -456,7 +447,6 @@ size_t wimax_addr_scnprint(char *addr_str, size_t addr_str_size,
 				   cnt == addr_len - 1 ? '\0' : ':');
 	return total;
 }
-
 
 /**
  * wimax_dev_add - Register a new WiMAX device
@@ -523,7 +513,6 @@ error_rfkill_add:
 }
 EXPORT_SYMBOL_GPL(wimax_dev_add);
 
-
 /**
  * wimax_dev_rm - Unregister an existing WiMAX device
  *
@@ -558,7 +547,6 @@ void wimax_dev_rm(struct wimax_dev *wimax_dev)
 }
 EXPORT_SYMBOL_GPL(wimax_dev_rm);
 
-
 /* Debug framework control of debug levels */
 struct d_level D_LEVEL[] = {
 	D_SUBMODULE_DEFINE(debugfs),
@@ -571,7 +559,6 @@ struct d_level D_LEVEL[] = {
 };
 size_t D_LEVEL_SIZE = ARRAY_SIZE(D_LEVEL);
 
-
 struct genl_family wimax_gnl_family = {
 	.id = GENL_ID_GENERATE,
 	.name = "WiMAX",
@@ -583,8 +570,6 @@ struct genl_family wimax_gnl_family = {
 static const struct genl_multicast_group wimax_gnl_mcgrps[] = {
 	{ .name = "msg", },
 };
-
-
 
 /* Shutdown the wimax stack */
 static
@@ -616,7 +601,6 @@ error_register_family:
 }
 module_init(wimax_subsys_init);
 
-
 /* Shutdown the wimax stack */
 static
 void __exit wimax_subsys_exit(void)
@@ -629,4 +613,3 @@ module_exit(wimax_subsys_exit);
 MODULE_AUTHOR("Intel Corporation <linux-wimax@intel.com>");
 MODULE_DESCRIPTION("Linux WiMAX stack");
 MODULE_LICENSE("GPL");
-

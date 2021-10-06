@@ -54,7 +54,6 @@
 #include <linux/io.h>
 #include <linux/uaccess.h>
 
-
 #define WDT_IS_PCI
 #include "wd501p.h"
 
@@ -342,7 +341,6 @@ static irqreturn_t wdtpci_interrupt(int irq, void *dev_id)
 	return IRQ_HANDLED;
 }
 
-
 /**
  *	wdtpci_write:
  *	@file: file handle to the watchdog
@@ -564,7 +562,6 @@ static int wdtpci_notify_sys(struct notifier_block *this, unsigned long code,
  *	Kernel Interfaces
  */
 
-
 static const struct file_operations wdtpci_fops = {
 	.owner		= THIS_MODULE,
 	.llseek		= no_llseek,
@@ -602,7 +599,6 @@ static struct miscdevice temp_miscdev = {
 static struct notifier_block wdtpci_notifier = {
 	.notifier_call = wdtpci_notify_sys,
 };
-
 
 static int wdtpci_init_one(struct pci_dev *dev,
 					const struct pci_device_id *ent)
@@ -703,7 +699,6 @@ out_pci:
 	goto out;
 }
 
-
 static void wdtpci_remove_one(struct pci_dev *pdev)
 {
 	/* here we assume only one device will ever have
@@ -718,7 +713,6 @@ static void wdtpci_remove_one(struct pci_dev *pdev)
 	dev_count--;
 }
 
-
 static const struct pci_device_id wdtpci_pci_tbl[] = {
 	{
 		.vendor	   = PCI_VENDOR_ID_ACCESSIO,
@@ -729,7 +723,6 @@ static const struct pci_device_id wdtpci_pci_tbl[] = {
 	{ 0, }, /* terminate list */
 };
 MODULE_DEVICE_TABLE(pci, wdtpci_pci_tbl);
-
 
 static struct pci_driver wdtpci_driver = {
 	.name		= "wdt_pci",

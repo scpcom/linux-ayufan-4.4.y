@@ -8,10 +8,8 @@
 #include <asm/ptrace.h>
 #include <asm/ftrace.h>
 
-
 	.code64
 	.section .entry.text, "ax"
-
 
 #ifdef CONFIG_FUNCTION_TRACER
 
@@ -254,7 +252,6 @@ GLOBAL(ftrace_regs_caller_end)
 	jmp ftrace_return
 
 END(ftrace_regs_caller)
-
 
 #else /* ! CONFIG_DYNAMIC_FTRACE */
 

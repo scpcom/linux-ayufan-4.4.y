@@ -60,7 +60,6 @@ typedef union
   uint_reg_t word;
 } TRIO_MAP_SQ_DOORBELL_FMT_t;
 
-
 /*
  * Tile PIO Region Configuration - CFG Address Format.
  * This register describes the address format for PIO accesses when the

@@ -69,9 +69,7 @@ typedef long __int_reg_t;
 #endif
 #endif /* __INT_REG_BITS */
 
-
 #ifndef __need_int_reg_t
-
 
 #ifndef __ASSEMBLER__
 /** Unsigned type that can hold a register. */
@@ -86,7 +84,6 @@ typedef __int_reg_t int_reg_t;
 
 /** Number of bits in a register. */
 #define INT_REG_BITS __INT_REG_BITS
-
 
 /* Registers 0 - 55 are "normal", but some perform special roles. */
 
@@ -112,13 +109,11 @@ typedef __int_reg_t int_reg_t;
 
 #define TREG_ZERO     63   /**< "Zero" register; always reads as "0". */
 
-
 /** By convention, this register is used to hold the syscall number. */
 #define TREG_SYSCALL_NR      10
 
 /** Name of register that holds the syscall number, for use in assembly. */
 #define TREG_SYSCALL_NR_NAME r10
-
 
 /**
  * The ABI requires callers to allocate a caller state save area of
@@ -131,7 +126,6 @@ typedef __int_reg_t int_reg_t;
  * try to find the calling frame.
  */
 #define INFO_OP_CANNOT_BACKTRACE 2
-
 
 #endif /* !__need_int_reg_t */
 

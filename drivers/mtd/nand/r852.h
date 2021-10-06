@@ -13,7 +13,6 @@
 #include <linux/mtd/nand.h>
 #include <linux/spinlock.h>
 
-
 /* nand interface + ecc
    byte write/read does one cycle on nand data lines.
    dword write/read does 4 cycles
@@ -55,13 +54,10 @@
 #define R852_CARD_IRQ_GENABLE	0x80	/* general enable */
 #define R852_CARD_IRQ_MASK	0x1D
 
-
-
 /* hardware enable */
 #define R852_HW			0x08
 #define R852_HW_ENABLED		0x01	/* hw enabled */
 #define R852_HW_UNKNOWN		0x80
-
 
 /* dma capabilities */
 #define R852_DMA_CAP		0x09
@@ -70,10 +66,8 @@
 #define R852_DMA1		0x40	/* if set w/bit #7, dma is supported */
 #define R852_DMA2		0x80	/* if set w/bit #6, dma is supported */
 
-
 /* physical DMA address - 32 bit value*/
 #define R852_DMA_ADDR		0x0C
-
 
 /* dma settings */
 #define R852_DMA_SETTINGS	0x10
@@ -91,7 +85,6 @@
 #define R852_DMA_IRQ_ERROR	0x02	/* error did happen */
 #define R852_DMA_IRQ_INTERNAL	0x04	/* (internal hw buffer <-> card) */
 #define R852_DMA_IRQ_MASK	0x07	/* mask of all IRQ bits */
-
 
 /* ECC syndrome format - read from reg #0 will return two copies of these for
    each half of the page.
@@ -147,7 +140,6 @@ struct r852_device {
 
 #define DRV_NAME "r852"
 
-
 #define dbg(format, ...) \
 	if (debug) \
 		printk(KERN_DEBUG DRV_NAME ": " format "\n", ## __VA_ARGS__)
@@ -155,7 +147,6 @@ struct r852_device {
 #define dbg_verbose(format, ...) \
 	if (debug > 1) \
 		printk(KERN_DEBUG DRV_NAME ": " format "\n", ## __VA_ARGS__)
-
 
 #define message(format, ...) \
 	printk(KERN_INFO DRV_NAME ": " format "\n", ## __VA_ARGS__)

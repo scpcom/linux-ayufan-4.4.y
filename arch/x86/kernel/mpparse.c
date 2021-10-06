@@ -341,7 +341,6 @@ static void __init construct_default_ioirq_mptable(int mpc_default_type)
 	mp_save_irq(&intsrc);
 }
 
-
 static void __init construct_ioapic_table(int mpc_default_type)
 {
 	struct mpc_ioapic ioapic;

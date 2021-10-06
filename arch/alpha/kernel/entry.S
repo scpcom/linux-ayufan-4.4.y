@@ -788,7 +788,6 @@ ret_from_kernel_thread:
 	br	$31, ret_to_user
 .end ret_from_kernel_thread
 
-
 /*
  * Special system calls.  Most of these are special in that they either
  * have to play switch_stack games or in some way use the pt_regs struct.

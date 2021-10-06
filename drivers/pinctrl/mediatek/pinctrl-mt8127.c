@@ -279,7 +279,6 @@ static int mt8127_ies_smt_set(struct regmap *regmap, unsigned int pin,
 	return -EINVAL;
 }
 
-
 static const struct mtk_pinctrl_devdata mt8127_pinctrl_data = {
 	.pins = mtk_pins_mt8127,
 	.npins = ARRAY_SIZE(mtk_pins_mt8127),

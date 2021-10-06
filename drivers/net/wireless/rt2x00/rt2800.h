@@ -120,7 +120,6 @@
  * Registers.
  */
 
-
 /*
  * MAC_CSR0_3290: MAC_CSR0 for RT3290 to identity MAC version number.
  */
@@ -243,7 +242,6 @@
 #define PLL_PFD_DELAY_CTRL	FIELD32(0x0c000000)
 #define PLL_LOCK_CTRL		FIELD32(0x70000000)
 #define PLL_VBGBK_EN		FIELD32(0x80000000)
-
 
 /*
  * WLAN_CTRL_CFG
@@ -2099,7 +2097,6 @@ struct mac_iveiv_entry {
 /* BBP 110 */
 #define BBP110_TX2_POWER		FIELD8(0x0f)
 
-
 /*
  * BBP 138: Unknown
  */
@@ -2199,7 +2196,6 @@ struct mac_iveiv_entry {
 /* TODO: verify RFCSR11_MOD usage on other chips */
 #define RFCSR11_PLL_IDOH		FIELD8(0x40)
 
-
 /*
  * RFCSR 12:
  */
@@ -2232,7 +2228,6 @@ struct mac_iveiv_entry {
 
 /* RFCSR 18 */
 #define RFCSR18_XO_TUNE_BYPASS		FIELD8(0x40)
-
 
 /*
  * RFCSR 20:
@@ -2345,7 +2340,6 @@ struct mac_iveiv_entry {
 #define RFCSR55_UNKNOWN			FIELD8(0xc0)
 
 #define RFCSR57_DRV_CC			FIELD8(0xfc)
-
 
 /*
  * RF registers
@@ -2809,7 +2803,6 @@ enum rt2800_eeprom_word {
 #define TOKEN_SLEEP			1
 #define TOKEN_RADIO_OFF			2
 #define TOKEN_WAKEUP			3
-
 
 /*
  * DMA descriptor defines.

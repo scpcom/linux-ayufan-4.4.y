@@ -68,7 +68,6 @@
 #define CH341_NBREAK_BITS_REG1 0x01
 #define CH341_NBREAK_BITS_REG2 0x40
 
-
 static const struct usb_device_id id_table[] = {
 	{ USB_DEVICE(0x4348, 0x5523) },
 	{ USB_DEVICE(0x1a86, 0x7523) },
@@ -304,7 +303,6 @@ static void ch341_close(struct usb_serial_port *port)
 	usb_serial_generic_close(port);
 	usb_kill_urb(port->interrupt_in_urb);
 }
-
 
 /* open this device, set default parameters */
 static int ch341_open(struct tty_struct *tty, struct usb_serial_port *port)

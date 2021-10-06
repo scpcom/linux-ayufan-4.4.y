@@ -80,7 +80,6 @@ void bacct_add_tsk(struct user_namespace *user_ns,
 	strncpy(stats->ac_comm, tsk->comm, sizeof(stats->ac_comm));
 }
 
-
 #ifdef CONFIG_TASK_XACCT
 
 #define KB 1024

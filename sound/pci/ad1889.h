@@ -163,7 +163,6 @@
 #define  AD_AC97_ACIC_ACRDY 0x8000 /* analog codec ready status */
 /* bits 10 -> 14 reserved */
 
-
 #define AD_DS_MEMSIZE	512
 #define AD_OPL_MEMSIZE	16
 #define AD_MIDI_MEMSIZE	16
@@ -176,7 +175,6 @@
 #define AD_CHAN_ADC	0x0002
 #define AD_CHAN_RES	0x0004
 #define AD_CHAN_SYN	0x0008
-
 
 /* The chip would support 4 GB buffers and 16 MB periods,
  * but let's not overdo it ... */

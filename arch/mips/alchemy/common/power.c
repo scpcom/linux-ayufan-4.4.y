@@ -50,7 +50,6 @@ static unsigned int sleep_sys_clocks[5];
 static unsigned int sleep_sys_pinfunc;
 static unsigned int sleep_static_memctlr[4][3];
 
-
 static void save_core_regs(void)
 {
 	/* Clocks and PLLs. */

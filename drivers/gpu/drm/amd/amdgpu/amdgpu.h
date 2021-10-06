@@ -365,7 +365,6 @@ struct amdgpu_dummy_page {
 int amdgpu_dummy_page_init(struct amdgpu_device *adev);
 void amdgpu_dummy_page_fini(struct amdgpu_device *adev);
 
-
 /*
  * Clocks
  */
@@ -796,7 +795,6 @@ struct amdgpu_flip_work {
 	unsigned			shared_count;
 	struct fence			**shared;
 };
-
 
 /*
  * CP & rings.
@@ -1742,7 +1740,6 @@ struct amdgpu_firmware {
  */
 void amdgpu_benchmark(struct amdgpu_device *adev, int test_number);
 
-
 /*
  * Testing
  */
@@ -1822,7 +1819,6 @@ struct amdgpu_cu_info {
 	uint32_t ao_cu_mask;
 	uint32_t bitmap[4][4];
 };
-
 
 /*
  * ASIC specific functions.
@@ -1934,7 +1930,6 @@ struct amdgpu_atcs {
  */
 void *amdgpu_cgs_create_device(struct amdgpu_device *adev);
 void amdgpu_cgs_destroy_device(void *cgs_device);
-
 
 /*
  * Core structure, functions and helpers.

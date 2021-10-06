@@ -23,7 +23,6 @@
 #define A0_4 A0.4,
 #endif
 
-
 /* Size of the TBICTX structure */
 #define TBICTX_BYTES ((TBICTX_AX_REGS*8)+TBICTX_AX)
 

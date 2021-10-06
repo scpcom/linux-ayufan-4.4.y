@@ -32,5 +32,4 @@
 
 #define AT_EXECFN  31	/* filename of program */
 
-
 #endif /* _UAPI_LINUX_AUXVEC_H */

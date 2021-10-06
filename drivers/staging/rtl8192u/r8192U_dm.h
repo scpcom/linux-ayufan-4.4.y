@@ -20,7 +20,6 @@
 #ifndef	__R8192UDM_H__
 #define __R8192UDM_H__
 
-
 /*--------------------------Define Parameters-------------------------------*/
 #define		DM_DIG_THRESH_HIGH					40
 #define		DM_DIG_THRESH_LOW					35
@@ -32,7 +31,6 @@
 #define		BW_AUTO_SWITCH_LOW_HIGH			30
 
 #define		DM_check_fsync_time_interval				500
-
 
 #define		DM_DIG_BACKOFF				12
 #define		DM_DIG_MAX					0x36
@@ -63,7 +61,6 @@
 #define			Tx_Retry_Count_Reg         0x1ac
 #define		RegC38_TH				 20
 /*--------------------------Define Parameters-------------------------------*/
-
 
 /*------------------------------Define structure----------------------------*/
 /* 2007/10/04 MH Define upper and lower threshold of DIG enable or disable. */
@@ -105,7 +102,6 @@ typedef enum tag_dynamic_init_gain_state_definition {
 	DM_STA_DIG_ON,
 	DM_STA_DIG_MAX
 } dm_dig_sta_e;
-
 
 /* 2007/10/08 MH Define RATR state. */
 typedef enum tag_dynamic_ratr_state_definition {
@@ -198,18 +194,15 @@ typedef struct tag_Tx_Config_Cmd_Format {
 } DCMD_TXCMD_T, *PDCMD_TXCMD_T;
 /*------------------------------Define structure----------------------------*/
 
-
 /*------------------------Export global variable----------------------------*/
 extern struct dig dm_digtable;
 extern u8 dm_shadow[16][256];
 extern struct dynamic_rx_path_sel DM_RxPathSelTable;
 /*------------------------Export global variable----------------------------*/
 
-
 /*------------------------Export Marco Definition---------------------------*/
 
 /*------------------------Export Marco Definition---------------------------*/
-
 
 /*--------------------------Exported Function prototype---------------------*/
 void init_hal_dm(struct net_device *dev);
@@ -232,8 +225,6 @@ void dm_shadow_init(struct net_device *dev);
 void dm_initialize_txpower_tracking(struct net_device *dev);
 /*--------------------------Exported Function prototype---------------------*/
 
-
 #endif	/*__R8192UDM_H__ */
-
 
 /* End of r8192U_dm.h */

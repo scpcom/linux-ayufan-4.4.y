@@ -21,7 +21,6 @@
  *
  */
 
-
 #include <linux/interrupt.h>
 #include <linux/io.h>
 #include <linux/module.h>

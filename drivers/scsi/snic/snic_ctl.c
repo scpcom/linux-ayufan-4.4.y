@@ -52,7 +52,6 @@ snic_handle_link(struct work_struct *work)
 		       ((snic->link_status) ? "Up" : "Down"));
 }
 
-
 /*
  * snic_ver_enc : Encodes version str to int
  * version string is similar to netmask string

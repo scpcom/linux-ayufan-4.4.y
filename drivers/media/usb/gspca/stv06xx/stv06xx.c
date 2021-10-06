@@ -578,8 +578,6 @@ static int stv06xx_config(struct gspca_dev *gspca_dev,
 	return -ENODEV;
 }
 
-
-
 /* -- module initialisation -- */
 static const struct usb_device_id device_table[] = {
 	/* QuickCam Express */

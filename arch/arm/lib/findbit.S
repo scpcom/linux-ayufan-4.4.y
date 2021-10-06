@@ -193,4 +193,3 @@ ENDPROC(_find_next_bit_be)
 		cmp	r1, r0			@ Clamp to maxbit
 		movlo	r0, r1
 		ret	lr
-

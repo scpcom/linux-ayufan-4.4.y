@@ -34,7 +34,6 @@ static inline struct mc9s08dz60 *to_mc9s08dz60(struct gpio_chip *gc)
 	return container_of(gc, struct mc9s08dz60, chip);
 }
 
-
 static void mc9s_gpio_to_reg_and_bit(int offset, u8 *reg, u8 *bit)
 {
 	*reg = 0x20 + offset / GPIO_NUM_PER_GROUP;
@@ -71,7 +70,6 @@ static int mc9s08dz60_set(struct mc9s08dz60 *mc9s, unsigned offset, int val)
 		return value;
 
 }
-
 
 static void mc9s08dz60_set_value(struct gpio_chip *gc, unsigned offset, int val)
 {

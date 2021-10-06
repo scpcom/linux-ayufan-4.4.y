@@ -13,7 +13,6 @@
 
 #include "cirrus_drv.h"
 
-
 static void cirrus_user_framebuffer_destroy(struct drm_framebuffer *fb)
 {
 	struct cirrus_framebuffer *cirrus_fb = to_cirrus_framebuffer(fb);
@@ -279,7 +278,6 @@ void cirrus_gem_free_object(struct drm_gem_object *obj)
 
 	cirrus_bo_unref(&cirrus_bo);
 }
-
 
 static inline u64 cirrus_bo_mmap_offset(struct cirrus_bo *bo)
 {

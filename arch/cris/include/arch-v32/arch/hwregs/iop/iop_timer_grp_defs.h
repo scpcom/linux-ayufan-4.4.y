@@ -211,7 +211,6 @@ typedef struct {
 } reg_iop_timer_grp_r_masked_intr;
 #define REG_RD_ADDR_iop_timer_grp_r_masked_intr 112
 
-
 /* Constants */
 enum {
   regk_iop_timer_grp_clk200                = 0x00000000,

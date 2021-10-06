@@ -65,5 +65,4 @@ enum fixed_addresses {
 extern void fixrange_init(unsigned long start, unsigned long end,
 	pgd_t *pgd_base);
 
-
 #endif

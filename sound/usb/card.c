@@ -32,7 +32,6 @@
  *     indeed an AC3 stream packed in SPDIF frames (i.e. no real AC3 stream).
  */
 
-
 #include <linux/bitops.h>
 #include <linux/init.h>
 #include <linux/list.h>
@@ -71,7 +70,6 @@ MODULE_AUTHOR("Takashi Iwai <tiwai@suse.de>");
 MODULE_DESCRIPTION("USB Audio");
 MODULE_LICENSE("GPL");
 MODULE_SUPPORTED_DEVICE("{{Generic,USB Audio}}");
-
 
 static int index[SNDRV_CARDS] = SNDRV_DEFAULT_IDX;	/* Index 0-MAX */
 static char *id[SNDRV_CARDS] = SNDRV_DEFAULT_STR;	/* ID for this card */

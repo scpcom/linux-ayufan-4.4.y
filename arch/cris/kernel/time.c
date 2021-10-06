@@ -31,7 +31,6 @@
 #include <linux/profile.h>
 #include <linux/sched.h>	/* just for sched_clock() - funny that */
 
-
 #define D(x)
 
 #define TICK_SIZE tick

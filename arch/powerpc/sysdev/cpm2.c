@@ -368,4 +368,3 @@ static int cpm_init_par_io(void)
 	return 0;
 }
 arch_initcall(cpm_init_par_io);
-

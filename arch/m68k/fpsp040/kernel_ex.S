@@ -175,7 +175,6 @@ unfl_fin:
 	fmovemx (%a0),%fp0-%fp0		|store result in fp0
 	rts
 
-
 |
 |	t_ovfl2 --- OVFL exception (without inex2 returned)
 |
@@ -248,7 +247,6 @@ ovf_dis:
 ovf_pos:
 	fmovemx ETEMP(%a6),%fp0-%fp0		|move the result to fp0
 	rts
-
 
 |
 |	INEX2 exception

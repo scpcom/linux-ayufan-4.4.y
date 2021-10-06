@@ -5,7 +5,6 @@
 #ifndef __ARCH_PARISC_CACHE_H
 #define __ARCH_PARISC_CACHE_H
 
-
 /*
  * PA 2.0 processors have 64 and 128-byte L2 cachelines; PA 1.1 processors
  * have 32-byte cachelines.  The L1 length appears to be 16 bytes but this

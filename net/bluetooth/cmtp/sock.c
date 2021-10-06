@@ -39,7 +39,6 @@
 
 #include <linux/isdn/capilli.h>
 
-
 #include "cmtp.h"
 
 static struct bt_sock_list cmtp_sk_list = {

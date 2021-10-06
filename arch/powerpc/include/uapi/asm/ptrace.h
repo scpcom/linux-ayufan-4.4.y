@@ -23,7 +23,6 @@
 #ifndef _UAPI_ASM_POWERPC_PTRACE_H
 #define _UAPI_ASM_POWERPC_PTRACE_H
 
-
 #include <linux/types.h>
 
 #ifndef __ASSEMBLY__
@@ -52,7 +51,6 @@ struct pt_regs {
 };
 
 #endif /* __ASSEMBLY__ */
-
 
 /*
  * Offsets used by 'ptrace' system call interface.
@@ -122,11 +120,9 @@ struct pt_regs {
 
 #define PT_FPSCR (PT_FPR0 + 32)	/* each FP reg occupies 1 slot in 64-bit space */
 
-
 #define PT_VR0 82	/* each Vector reg occupies 2 slots in 64-bit */
 #define PT_VSCR (PT_VR0 + 32*2 + 1)
 #define PT_VRSAVE (PT_VR0 + 33*2)
-
 
 /*
  * Only store first 32 VSRs here. The second 32 VSRs in VR0-31

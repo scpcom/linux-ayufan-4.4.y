@@ -2094,7 +2094,6 @@ static int ahash_setkey(struct crypto_ahash *tfm, const u8 *key,
 	return 0;
 }
 
-
 struct talitos_alg_template {
 	u32 type;
 	union {

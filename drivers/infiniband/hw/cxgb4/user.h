@@ -51,7 +51,6 @@ struct c4iw_create_cq_resp {
 	__u32 reserved; /* explicit padding (optional for i386) */
 };
 
-
 enum {
 	C4IW_QPF_ONCHIP = (1<<0)
 };

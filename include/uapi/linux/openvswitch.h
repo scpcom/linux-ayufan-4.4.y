@@ -266,7 +266,6 @@ enum {
 
 #define OVS_VXLAN_EXT_MAX (__OVS_VXLAN_EXT_MAX - 1)
 
-
 /* OVS_VPORT_ATTR_OPTIONS attributes for tunnels.
  */
 enum {

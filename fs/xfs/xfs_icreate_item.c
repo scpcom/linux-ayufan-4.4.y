@@ -68,14 +68,12 @@ xfs_icreate_item_format(
 			sizeof(struct xfs_icreate_log));
 }
 
-
 /* Pinning has no meaning for the create item, so just return. */
 STATIC void
 xfs_icreate_item_pin(
 	struct xfs_log_item	*lip)
 {
 }
-
 
 /* pinning has no meaning for the create item, so just return. */
 STATIC void
@@ -143,7 +141,6 @@ static struct xfs_item_ops xfs_icreate_item_ops = {
 	.iop_committed	= xfs_icreate_item_committed,
 	.iop_committing = xfs_icreate_item_committing,
 };
-
 
 /*
  * Initialize the inode log item for a newly allocated (in-core) inode.

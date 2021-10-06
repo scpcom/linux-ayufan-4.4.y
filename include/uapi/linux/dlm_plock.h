@@ -41,5 +41,4 @@ struct dlm_plock_info {
 	__u64 owner;
 };
 
-
 #endif /* _UAPI__DLM_PLOCK_DOT_H__ */

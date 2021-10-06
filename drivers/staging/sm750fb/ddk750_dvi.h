@@ -59,4 +59,3 @@ unsigned short dviGetVendorID(void);
 unsigned short dviGetDeviceID(void);
 
 #endif
-

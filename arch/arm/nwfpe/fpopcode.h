@@ -23,7 +23,6 @@
 #ifndef __FPOPCODE_H__
 #define __FPOPCODE_H__
 
-
 /*
 ARM Floating Point Instruction Classes
 | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | 

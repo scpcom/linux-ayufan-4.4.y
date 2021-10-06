@@ -11,7 +11,6 @@
 
 #include "mpc8xx_pic.h"
 
-
 #define PIC_VEC_SPURRIOUS      15
 
 extern int cpm_get_irq(struct pt_regs *regs);
@@ -95,7 +94,6 @@ static int mpc8xx_pic_host_map(struct irq_domain *h, unsigned int virq,
 	return 0;
 }
 
-
 static int mpc8xx_pic_host_xlate(struct irq_domain *h, struct device_node *ct,
 			    const u32 *intspec, unsigned int intsize,
 			    irq_hw_number_t *out_hwirq, unsigned int *out_flags)
@@ -118,7 +116,6 @@ static int mpc8xx_pic_host_xlate(struct irq_domain *h, struct device_node *ct,
 
 	return 0;
 }
-
 
 static const struct irq_domain_ops mpc8xx_pic_host_ops = {
 	.map = mpc8xx_pic_host_map,

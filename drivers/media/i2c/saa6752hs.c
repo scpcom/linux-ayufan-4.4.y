@@ -44,7 +44,6 @@
 #define MPEG_TOTAL_TARGET_BITRATE_MAX  27000
 #define MPEG_PID_MAX ((1 << 14) - 1)
 
-
 MODULE_DESCRIPTION("device driver for saa6752hs MPEG2 encoder");
 MODULE_AUTHOR("Andrew de Quincey");
 MODULE_LICENSE("GPL");
@@ -296,7 +295,6 @@ static int saa6752hs_chip_command(struct i2c_client *client,
 
 	return status;
 }
-
 
 static inline void set_reg8(struct i2c_client *client, uint8_t reg, uint8_t val)
 {

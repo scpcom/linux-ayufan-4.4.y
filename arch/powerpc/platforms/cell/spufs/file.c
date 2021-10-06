@@ -156,7 +156,6 @@ static const struct file_operations __fops = {				\
 	.llseek  = generic_file_llseek,					\
 };
 
-
 static int
 spufs_mem_open(struct inode *inode, struct file *file)
 {
@@ -906,7 +905,6 @@ static ssize_t spufs_wbox_write(struct file *file, const char __user *buf,
 			goto out;
 	}
 
-
 	/* write as much as possible */
 	for (count = 4, udata++; (count + 4) <= len; count += 4, udata++) {
 		int ret;
@@ -1312,7 +1310,6 @@ static u64 spufs_signal1_type_get(struct spu_context *ctx)
 DEFINE_SPUFS_ATTRIBUTE(spufs_signal1_type, spufs_signal1_type_get,
 		       spufs_signal1_type_set, "%llu\n", SPU_ATTR_ACQUIRE);
 
-
 static int spufs_signal2_type_set(void *data, u64 val)
 {
 	struct spu_context *ctx = data;
@@ -1454,7 +1451,6 @@ static const struct file_operations spufs_psmap_fops = {
 	.mmap	 = spufs_psmap_mmap,
 	.llseek  = no_llseek,
 };
-
 
 #if SPUFS_MMAP_4K
 static int
@@ -2324,7 +2320,6 @@ static unsigned long long spufs_class2_intrs(struct spu_context *ctx)
 
 	return class2_intrs;
 }
-
 
 static int spufs_show_stat(struct seq_file *s, void *private)
 {

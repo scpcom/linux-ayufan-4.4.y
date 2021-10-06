@@ -9,7 +9,6 @@
 #ifndef _ASM_PTRACE_H
 #define _ASM_PTRACE_H
 
-
 #include <linux/compiler.h>
 #include <linux/linkage.h>
 #include <linux/types.h>

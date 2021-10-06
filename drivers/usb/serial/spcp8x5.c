@@ -62,7 +62,6 @@ struct spcp8x5_usb_ctrl_arg {
 	u16	length;
 };
 
-
 /* spcp8x5 spec register define */
 #define MCR_CONTROL_LINE_RTS		0x02
 #define MCR_CONTROL_LINE_DTR		0x01

@@ -28,7 +28,6 @@
 #include "tpm.h"
 #include "tpm_eventlog.h"
 
-
 static const char* tcpa_event_type_strings[] = {
 	"PREBOOT",
 	"POST CODE",
@@ -78,7 +77,6 @@ static void *tpm_bios_measurements_start(struct seq_file *m, loff_t *pos)
 	struct tcpa_event *event;
 	u32 converted_event_size;
 	u32 converted_event_type;
-
 
 	/* read over *pos measurements */
 	for (i = 0; i < *pos; i++) {

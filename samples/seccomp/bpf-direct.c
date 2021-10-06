@@ -151,7 +151,6 @@ static int install_filter(void)
 		return 1;
 	}
 
-
 	if (prctl(PR_SET_SECCOMP, SECCOMP_MODE_FILTER, &prog)) {
 		perror("prctl");
 		return 1;

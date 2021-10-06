@@ -147,7 +147,6 @@ static int pcips2_probe(struct pci_dev *dev, const struct pci_device_id *id)
 		goto release;
 	}
 
-
 	serio->id.type		= SERIO_8042;
 	serio->write		= pcips2_write;
 	serio->open		= pcips2_open;

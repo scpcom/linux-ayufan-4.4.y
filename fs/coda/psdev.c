@@ -53,7 +53,6 @@
 int           coda_hard;         /* allows signals during upcalls */
 unsigned long coda_timeout = 30; /* .. secs, then signals will dequeue */
 
-
 struct venus_comm coda_comms[MAX_CODADEVS];
 static struct class *coda_psdev_class;
 
@@ -300,7 +299,6 @@ static int coda_psdev_open(struct inode * inode, struct file * file)
 	return err;
 }
 
-
 static int coda_psdev_release(struct inode * inode, struct file * file)
 {
 	struct venus_comm *vcp = (struct venus_comm *) file->private_data;
@@ -339,7 +337,6 @@ static int coda_psdev_release(struct inode * inode, struct file * file)
 	mutex_unlock(&vcp->vc_mutex);
 	return 0;
 }
-
 
 static const struct file_operations coda_psdev_fops = {
 	.owner		= THIS_MODULE,
@@ -434,4 +431,3 @@ static void __exit exit_coda(void)
 
 module_init(init_coda);
 module_exit(exit_coda);
-

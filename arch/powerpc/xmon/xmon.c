@@ -2735,7 +2735,6 @@ take_input(char *str)
 	lineptr = str;
 }
 
-
 static void
 symbol_lookup(void)
 {
@@ -2766,7 +2765,6 @@ symbol_lookup(void)
 		break;
 	}
 }
-
 
 /* Print an address in numeric and symbolic form (if possible) */
 static void xmon_print_symbol(unsigned long address, const char *mid,

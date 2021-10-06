@@ -22,7 +22,6 @@
 
 #include <uapi/linux/uuid.h>
 
-
 static inline int uuid_le_cmp(const uuid_le u1, const uuid_le u2)
 {
 	return memcmp(&u1, &u2, sizeof(uuid_le));

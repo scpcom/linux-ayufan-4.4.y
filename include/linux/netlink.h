@@ -1,7 +1,6 @@
 #ifndef __LINUX_NETLINK_H
 #define __LINUX_NETLINK_H
 
-
 #include <linux/capability.h>
 #include <linux/skbuff.h>
 #include <linux/export.h>
@@ -34,7 +33,6 @@ struct netlink_skb_parms {
 
 #define NETLINK_CB(skb)		(*(struct netlink_skb_parms*)&((skb)->cb))
 #define NETLINK_CREDS(skb)	(&NETLINK_CB((skb)).creds)
-
 
 extern void netlink_table_grab(void);
 extern void netlink_table_ungrab(void);
@@ -126,7 +124,6 @@ netlink_skb_clone(struct sk_buff *skb, gfp_t gfp_mask)
 #endif
 
 #define NLMSG_DEFAULT_SIZE (NLMSG_GOODSIZE - NLMSG_HDRLEN)
-
 
 struct netlink_callback {
 	struct sk_buff		*skb;

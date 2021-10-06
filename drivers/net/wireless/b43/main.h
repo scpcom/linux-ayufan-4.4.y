@@ -38,7 +38,6 @@
 /* Magic helper macro to pad structures. Ignore those above. It's magic. */
 #define PAD_BYTES(nr_bytes)		P4D_BYTES( __LINE__ , (nr_bytes))
 
-
 extern int b43_modparam_verbose;
 
 /* Logmessage verbosity levels. Update the b43_modparam_verbose helptext, if
@@ -102,7 +101,6 @@ void b43_mac_suspend(struct b43_wldev *dev);
 void b43_mac_enable(struct b43_wldev *dev);
 void b43_mac_phy_clock_set(struct b43_wldev *dev, bool on);
 void b43_mac_switch_freq(struct b43_wldev *dev, u8 spurmode);
-
 
 struct b43_request_fw_context;
 int b43_do_request_fw(struct b43_request_fw_context *ctx, const char *name,

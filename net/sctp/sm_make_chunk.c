@@ -1292,7 +1292,6 @@ struct sctp_chunk *sctp_make_auth(const struct sctp_association *asoc)
 	return retval;
 }
 
-
 /********************************************************************
  * 2nd Level Abstractions
  ********************************************************************/
@@ -1931,7 +1930,6 @@ static int sctp_process_inv_paramlength(const struct sctp_association *asoc,
 	return 0;
 }
 
-
 /* Do not attempt to handle the HOST_NAME parm.  However, do
  * send back an indicator to the peer.
  */
@@ -2470,7 +2468,6 @@ clean_up:
 nomem:
 	return 0;
 }
-
 
 /* Update asoc with the option described in param.
  *

@@ -68,7 +68,6 @@
 #include "iwl-io.h"
 #include "iwl-prph.h"
 
-
 static inline void iwl_scd_txq_set_chain(struct iwl_trans *trans,
 					 u16 txq_id)
 {

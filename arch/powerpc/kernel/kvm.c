@@ -536,7 +536,6 @@ static void kvm_check_ins(u32 *inst, u32 features)
 			kvm_patch_ins_lwz(inst, magic_var(pir), inst_rt);
 		break;
 
-
 	/* Stores */
 	case KVM_INST_MTSPR(SPRN_SPRG0):
 		kvm_patch_ins_std(inst, magic_var(sprg0), inst_rt);

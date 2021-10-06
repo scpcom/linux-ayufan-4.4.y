@@ -321,7 +321,6 @@ ssize_t beiscsi_active_session_disp(struct device *dev,
 ssize_t beiscsi_adap_family_disp(struct device *dev,
 				  struct device_attribute *attr, char *buf);
 
-
 ssize_t beiscsi_free_session_disp(struct device *dev,
 				   struct device_attribute *attr, char *buf);
 

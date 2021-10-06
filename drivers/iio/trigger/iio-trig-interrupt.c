@@ -17,7 +17,6 @@
 #include <linux/iio/iio.h>
 #include <linux/iio/trigger.h>
 
-
 struct iio_interrupt_trigger_info {
 	unsigned int irq;
 };

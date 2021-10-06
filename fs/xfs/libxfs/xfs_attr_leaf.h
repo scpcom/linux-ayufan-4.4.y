@@ -36,7 +36,6 @@ typedef struct xfs_attr_inactive_list {
 	int		valuelen;	/* number of bytes in value */
 } xfs_attr_inactive_list_t;
 
-
 /*========================================================================
  * Function prototypes for the kernel.
  *========================================================================*/

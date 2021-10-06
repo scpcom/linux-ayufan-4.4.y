@@ -1072,7 +1072,6 @@ void sctp_v6_protosw_exit(void)
 	proto_unregister(&sctpv6_prot);
 }
 
-
 /* Register with inet6 layer. */
 int sctp_v6_add_protocol(void)
 {

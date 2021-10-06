@@ -116,7 +116,6 @@ static void test_arraymap_sanity(int i, void *data)
 	/* check that key=0 is also found and zero initialized */
 	assert(bpf_lookup_elem(map_fd, &key, &value) == 0 && value == 0);
 
-
 	/* key=0 and key=1 were inserted, check that key=2 cannot be inserted
 	 * due to max_entries limit
 	 */

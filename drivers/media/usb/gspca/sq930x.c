@@ -1139,7 +1139,6 @@ static const struct usb_device_id device_table[] = {
 };
 MODULE_DEVICE_TABLE(usb, device_table);
 
-
 /* -- device connect -- */
 static int sd_probe(struct usb_interface *intf,
 		const struct usb_device_id *id)

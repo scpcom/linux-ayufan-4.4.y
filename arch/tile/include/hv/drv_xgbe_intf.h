@@ -134,7 +134,6 @@ typedef enum
 /** Extract the local offset from an offset */
 #define NETIO_LOCAL_OFFSET(off)   ((off) & 0x00FFFFFFFFFFFFFFULL)
 
-
 /**
  * Get/set offset.
  */
@@ -238,7 +237,6 @@ int __netio_fastio9(uint32_t fastio_index, uint32_t arg0, uint32_t arg1,
   __netio_fastio6((fastio_index) + NETIO_FASTIO_SEND_PKT_CK, ackflag, \
                   size, va, handle, csum0, csum1)
 
-
 /** Format for the "csum0" argument to the __netio_fastio_send routines
  * and LEPP.  Note that this is currently exactly identical to the
  * ShimProtocolOffloadHeader.
@@ -254,7 +252,6 @@ typedef union
   } bits;                            /**< Decomposed method of access. */
   unsigned int word;                 /**< To send out the IDN. */
 } __netio_checksum_header_t;
-
 
 /** Sendv packet with 1 or 2 segments.
  * @param fastio_index Fast I/O index.
@@ -330,7 +327,6 @@ typedef union
   __netio_fastio3_rv3((fastio_index) + NETIO_FASTIO_SEND_PKT_VEC, seqno, \
                       nentries, va)
 
-
 /** An egress DMA command for LEPP. */
 typedef struct
 {
@@ -384,7 +380,6 @@ typedef struct
 
 } lepp_cmd_t;
 
-
 /** A chunk of physical memory for a TSO egress. */
 typedef struct
 {
@@ -399,7 +394,6 @@ typedef struct
   /** The length in bytes. */
   uint16_t length;
 } lepp_frag_t;
-
 
 /** An LEPP command that handles TSO. */
 typedef struct
@@ -451,10 +445,8 @@ typedef struct
 
 } lepp_tso_cmd_t;
 
-
 /** An LEPP completion ring entry. */
 typedef void* lepp_comp_t;
-
 
 /** Maximum number of frags for one TSO command.  This is adapted from
  *  linux's "MAX_SKB_FRAGS", and presumably over-estimates by one, for
@@ -555,7 +547,6 @@ typedef struct
     __attribute__((aligned(CHIP_L2_LINE_SIZE())));
 } lepp_queue_t;
 
-
 /** An internal helper function for determining the number of entries
  *  available in a ring buffer, given that there is one sentinel.
  */
@@ -569,7 +560,6 @@ _lepp_num_free_slots(unsigned int head, unsigned int tail)
    */
   return (head - tail - 1) + ((head <= tail) ? LEPP_COMP_QUEUE_SIZE : 0);
 }
-
 
 /** Returns how many new comp entries can be enqueued. */
 static inline unsigned int
@@ -585,10 +575,8 @@ lepp_qsub(int v1, int v2)
   return delta + ((delta >> 31) & LEPP_COMP_QUEUE_SIZE);
 }
 
-
 /** FIXME: Check this from linux, via a new "pwrite()" call. */
 #define LIPP_VERSION 1
-
 
 /** We use exactly two bytes of alignment padding. */
 #define LIPP_PACKET_PADDING 2

@@ -75,7 +75,6 @@ dma_unmap_page(struct device *dev, dma_addr_t dma_address, size_t size,
 	BUG_ON(direction == DMA_NONE);
 }
 
-
 static inline void
 dma_unmap_sg(struct device *dev, struct scatterlist *sg, int nhwentries,
 	     enum dma_data_direction direction)
@@ -167,6 +166,5 @@ extern int dma_common_get_sgtable(struct device *dev, struct sg_table *sgt,
 
 #define dma_mmap_coherent(d, v, c, h, s) dma_common_mmap(d, v, c, h, s)
 #define dma_get_sgtable(d, t, v, h, s) dma_common_get_sgtable(d, t, v, h, s)
-
 
 #endif

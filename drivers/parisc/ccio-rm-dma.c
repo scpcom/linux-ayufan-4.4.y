@@ -78,7 +78,6 @@ static int ccio_dma_supported( struct pci_dev *dev, u64 mask)
 	return((int) (mask >= 0xffffffffUL));
 }
 
-
 static void *ccio_alloc_consistent(struct pci_dev *dev, size_t size,
 				 dma_addr_t *handle)
 {
@@ -111,7 +110,6 @@ static void ccio_unmap_single(struct pci_dev *dev, dma_addr_t dma_addr,
 	/* Nothing to do */
 }
 
-
 static int ccio_map_sg(struct pci_dev *dev, struct scatterlist *sglist, int nents, int direction)
 {
 	int tmp = nents;
@@ -127,7 +125,6 @@ static int ccio_map_sg(struct pci_dev *dev, struct scatterlist *sglist, int nent
 	return tmp;
 }
 
-
 static void ccio_unmap_sg(struct pci_dev *dev, struct scatterlist *sglist, int nents, int direction)
 {
 #if 0
@@ -142,7 +139,6 @@ static void ccio_unmap_sg(struct pci_dev *dev, struct scatterlist *sglist, int n
 #endif
 }
 
-
 static struct pci_dma_ops ccio_ops = {
 	ccio_dma_supported,
 	ccio_alloc_consistent,
@@ -156,7 +152,6 @@ static struct pci_dma_ops ccio_ops = {
 	NULL,                   /* dma_sync_sg_for_cpu     : ditto */
 	NULL,                   /* dma_sync_sg_for_device     : ditto */
 };
-
 
 /*
 ** Determine if u2 should claim this chip (return 0) or not (return 1).

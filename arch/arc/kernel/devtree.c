@@ -8,7 +8,6 @@
  * published by the Free Software Foundation.
  */
 
-
 #include <linux/init.h>
 #include <linux/reboot.h>
 #include <linux/memblock.h>

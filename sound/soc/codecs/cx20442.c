@@ -24,7 +24,6 @@
 
 #include "cx20442.h"
 
-
 struct cx20442_priv {
 	void *control_data;
 	struct regulator *por;
@@ -200,7 +199,6 @@ static int cx20442_write(struct snd_soc_codec *codec, unsigned int reg,
 	return 0;
 }
 
-
 /*
  * Line discpline related code
  *
@@ -301,7 +299,6 @@ struct tty_ldisc_ops v253_ops = {
 	.write_wakeup = v253_wakeup,
 };
 EXPORT_SYMBOL_GPL(v253_ops);
-
 
 /*
  * Codec DAI

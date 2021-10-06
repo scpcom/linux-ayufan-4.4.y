@@ -42,7 +42,6 @@ struct ceph_osd {
 	struct list_head o_keepalive_item;
 };
 
-
 #define CEPH_OSD_MAX_OP	3
 
 enum ceph_osd_data_type {
@@ -374,4 +373,3 @@ extern int ceph_osdc_create_event(struct ceph_osd_client *osdc,
 extern void ceph_osdc_cancel_event(struct ceph_osd_event *event);
 extern void ceph_osdc_put_event(struct ceph_osd_event *event);
 #endif
-

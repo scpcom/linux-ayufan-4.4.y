@@ -3,7 +3,6 @@
 
 #include <uapi/asm/unistd.h>
 
-
 #define NR_syscalls 326
 
 #define __ARCH_WANT_STAT64

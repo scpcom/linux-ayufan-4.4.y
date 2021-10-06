@@ -37,7 +37,6 @@
 
 #include "at91_udc.h"
 
-
 /*
  * This controller is simple and PIO-only.  It's used in many AT91-series
  * full speed USB controllers, including the at91rm9200 (arm920T, with MMU),
@@ -268,7 +267,6 @@ static inline void create_debug_file(struct at91_udc *udc) {}
 static inline void remove_debug_file(struct at91_udc *udc) {}
 
 #endif
-
 
 /*-------------------------------------------------------------------------*/
 

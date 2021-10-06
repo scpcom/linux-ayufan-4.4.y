@@ -15,7 +15,6 @@
 	.code64
 	.globl entry64, entry64_regs
 
-
 entry64:
 	/* Setup a gdt that should be preserved */
 	lgdt gdt(%rip)

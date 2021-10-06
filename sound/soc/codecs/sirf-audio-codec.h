@@ -9,7 +9,6 @@
 #ifndef _SIRF_AUDIO_CODEC_H
 #define _SIRF_AUDIO_CODEC_H
 
-
 #define AUDIO_IC_CODEC_PWR			(0x00E0)
 #define AUDIO_IC_CODEC_CTRL0			(0x00E4)
 #define AUDIO_IC_CODEC_CTRL1			(0x00E8)

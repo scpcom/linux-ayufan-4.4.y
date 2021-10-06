@@ -44,7 +44,6 @@
 #define OFFSET_TO_REG_WRMASK	(0x10)
 #define OFFSET_TO_REG_INT_TYPE	(0x14)
 
-
 /**
  * @spinlock: used for atomic read/modify/write of registers
  * @base: register base address
@@ -208,7 +207,6 @@ static int tb10x_gpio_probe(struct platform_device *pdev)
 	tb10x_gpio->gc.base		= -1;
 	tb10x_gpio->gc.ngpio		= ngpio;
 	tb10x_gpio->gc.can_sleep	= false;
-
 
 	ret = gpiochip_add(&tb10x_gpio->gc);
 	if (ret < 0) {

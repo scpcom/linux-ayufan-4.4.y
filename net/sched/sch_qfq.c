@@ -19,7 +19,6 @@
 #include <net/pkt_sched.h>
 #include <net/pkt_cls.h>
 
-
 /*  Quick Fair Queueing Plus
     ========================
 
@@ -284,7 +283,6 @@ static struct qfq_aggregate *qfq_find_agg(struct qfq_sched *q,
 	return NULL;
 }
 
-
 /* Update aggregate as a function of the new number of classes. */
 static void qfq_update_agg(struct qfq_sched *q, struct qfq_aggregate *agg,
 			   int new_num_classes)
@@ -353,7 +351,6 @@ static void qfq_destroy_agg(struct qfq_sched *q, struct qfq_aggregate *agg)
 static void qfq_deactivate_class(struct qfq_sched *q, struct qfq_class *cl)
 {
 	struct qfq_aggregate *agg = cl->agg;
-
 
 	list_del(&cl->alist); /* remove from RR queue of the aggregate */
 	if (list_empty(&agg->active)) /* agg is now inactive */
@@ -779,7 +776,6 @@ static int qfq_calc_state(struct qfq_sched *q, const struct qfq_group *grp)
 
 	return state;
 }
-
 
 /*
  * In principle
@@ -1323,7 +1319,6 @@ static void qfq_schedule_agg(struct qfq_sched *q, struct qfq_aggregate *agg)
 skip_update:
 	qfq_slot_insert(grp, agg, roundedS);
 }
-
 
 /* Update agg ts and schedule agg for service */
 static void qfq_activate_agg(struct qfq_sched *q, struct qfq_aggregate *agg,

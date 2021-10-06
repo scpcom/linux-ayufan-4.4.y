@@ -511,7 +511,6 @@ static struct uvcg_control_class {
 	struct config_group	group;
 } uvcg_control_class_fs, uvcg_control_class_ss;
 
-
 static inline struct uvc_descriptor_header
 **uvcg_get_ctl_class_arr(struct config_item *i, struct f_uvc_opts *o)
 {
@@ -1798,7 +1797,6 @@ static struct config_item_type uvcg_color_matching_grp_type = {
 static struct uvcg_streaming_class {
 	struct config_group	group;
 } uvcg_streaming_class_fs, uvcg_streaming_class_hs, uvcg_streaming_class_ss;
-
 
 static inline struct uvc_descriptor_header
 ***__uvcg_get_stream_class_arr(struct config_item *i, struct f_uvc_opts *o)

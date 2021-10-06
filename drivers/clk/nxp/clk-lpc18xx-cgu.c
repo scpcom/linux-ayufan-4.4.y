@@ -549,7 +549,6 @@ static struct clk *lpc18xx_cgu_register_div(struct lpc18xx_cgu_src_clk_div *clk,
 				      &clk->gate.hw, &lpc18xx_gate_ops, 0);
 }
 
-
 static struct clk *lpc18xx_register_base_clk(struct lpc18xx_cgu_base_clk *clk,
 					     void __iomem *reg_base, int n)
 {
@@ -576,7 +575,6 @@ static struct clk *lpc18xx_register_base_clk(struct lpc18xx_cgu_base_clk *clk,
 				      NULL,  NULL,
 				      &clk->gate.hw, &lpc18xx_gate_ops, 0);
 }
-
 
 static struct clk *lpc18xx_cgu_register_pll(struct lpc18xx_cgu_pll_clk *clk,
 					    void __iomem *base)

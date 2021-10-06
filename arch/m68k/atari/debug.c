@@ -31,7 +31,6 @@ static struct console atari_console_driver = {
 	.index	= -1,
 };
 
-
 static inline void ata_mfp_out(char c)
 {
 	while (!(st_mfp.trn_stat & 0x80))	/* wait for tx buf empty */

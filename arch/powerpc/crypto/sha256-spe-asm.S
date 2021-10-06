@@ -64,7 +64,6 @@
 	stw		r24,88(r1);	/* save normal registers	*/ \
 	stw		r25,92(r1);
 
-
 #define FINALIZE \
 	evldw		r14,8(r1);	/* restore SPE registers	*/ \
 	evldw		r15,16(r1);					   \

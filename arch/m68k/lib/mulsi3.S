@@ -102,4 +102,3 @@ SYM (__mulsi3):
 	addl	d1, d0
 
 	rts
-

@@ -325,7 +325,6 @@ sisusb_bulkin_msg(struct sisusb_usb_data *sisusb, unsigned int pipe, void *data,
 	return retval;
 }
 
-
 /* Level 1:  */
 
 /* Send a bulk message of variable size
@@ -520,7 +519,6 @@ static int sisusb_recv_bulk_msg(struct sisusb_usb_data *sisusb, int ep, int len,
 
 		} else
 			return -EIO;
-
 
 		if (thispass) {
 
@@ -2156,7 +2154,6 @@ sisusb_get_ramconfig(struct sisusb_usb_data *sisusb)
 		break;
 	}
 
-
 	dev_info(&sisusb->sisusb_dev->dev, "%dMB %s %cDR S%cRAM, bus width %d\n",
 		 sisusb->vramsize >> 20, ramtypetext1,
 		 ram_datarate[ramtype], ram_dynamictype[ramtype], bw);
@@ -2284,7 +2281,6 @@ sisusb_init_gfxdevice(struct sisusb_usb_data *sisusb, int initscreen)
 
 	return ret;
 }
-
 
 #ifdef INCL_SISUSB_CON
 
@@ -2792,7 +2788,6 @@ sisusb_write(struct file *file, const char __user *buffer, size_t count,
 		else
 			bytes_written = 4;
 
-
 	} else {
 
 		/* Error */
@@ -3298,4 +3293,3 @@ module_exit(usb_sisusb_exit);
 MODULE_AUTHOR("Thomas Winischhofer <thomas@winischhofer.net>");
 MODULE_DESCRIPTION("sisusbvga - Driver for Net2280/SiS315-based USB2VGA dongles");
 MODULE_LICENSE("GPL");
-

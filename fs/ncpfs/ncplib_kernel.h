@@ -12,7 +12,6 @@
 #ifndef _NCPLIB_H
 #define _NCPLIB_H
 
-
 #include <linux/fs.h>
 #include <linux/types.h>
 #include <linux/errno.h>
@@ -94,7 +93,6 @@ int ncp_search_for_fileset(struct ncp_server *server,
 int ncp_ren_or_mov_file_or_subdir(struct ncp_server *server,
 			      struct inode *, const char *, struct inode *, const char *);
 
-
 int
 ncp_LogPhysicalRecord(struct ncp_server *server,
 		      const char *file_id, __u8 locktype,
@@ -153,7 +151,6 @@ int ncp__vol2io(unsigned char *, unsigned int *,
 #define ncp_toupper(t, c)	toupper(c)
 #define ncp_io2vol(S,m,i,n,k,U)	ncp__io2vol(m,i,n,k,U)
 #define ncp_vol2io(S,m,i,n,k,U)	ncp__vol2io(m,i,n,k,U)
-
 
 static inline int ncp_strnicmp(const struct nls_table *t,
 		const unsigned char *s1, const unsigned char *s2, int len)

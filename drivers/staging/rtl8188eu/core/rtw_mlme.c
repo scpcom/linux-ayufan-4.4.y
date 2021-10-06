@@ -231,7 +231,6 @@ exit:
 	return pnetwork;
 }
 
-
 void rtw_free_network_queue(struct adapter *padapter, u8 isfreeall)
 {
 	struct list_head *phead, *plist;
@@ -288,7 +287,6 @@ u8 *rtw_get_capability_from_ie(u8 *ie)
 	return ie + 8 + 2;
 }
 
-
 u16 rtw_get_capability(struct wlan_bssid_ex *bss)
 {
 	__le16	val;
@@ -343,7 +341,6 @@ int is_same_network(struct wlan_bssid_ex *src, struct wlan_bssid_ex *dst)
 
 	memcpy((u8 *)&le_scap, rtw_get_capability_from_ie(src->IEs), 2);
 	memcpy((u8 *)&le_dcap, rtw_get_capability_from_ie(dst->IEs), 2);
-
 
 	s_cap = le16_to_cpu(le_scap);
 	d_cap = le16_to_cpu(le_dcap);
@@ -566,7 +563,6 @@ static int rtw_is_desired_network(struct adapter *adapter, struct wlan_network *
 			bselected = false;
 	}
 
-
 	if ((desired_encmode != Ndis802_11EncryptionDisabled) && (privacy == 0)) {
 		DBG_88E("desired_encmode: %d, privacy: %d\n", desired_encmode, privacy);
 		bselected = false;
@@ -577,7 +573,6 @@ static int rtw_is_desired_network(struct adapter *adapter, struct wlan_network *
 			bselected = false;
 	}
 
-
 	return bselected;
 }
 
@@ -587,7 +582,6 @@ void rtw_atimdone_event_callback(struct adapter *adapter, u8 *pbuf)
 	RT_TRACE(_module_rtl871x_mlme_c_, _drv_err_, ("receive atimdone_evet\n"));
 	return;
 }
-
 
 void rtw_survey_event_callback(struct adapter	*adapter, u8 *pbuf)
 {
@@ -805,7 +799,6 @@ void rtw_free_assoc_resources_locked(struct adapter *adapter)
 		rtw_init_bcmc_stainfo(adapter);
 	}
 
-
 	pwlan = rtw_find_network(&pmlmepriv->scanned_queue, tgt_network->network.MacAddress);
 	if (pwlan)
 		pwlan->fixed = false;
@@ -854,7 +847,6 @@ void rtw_indicate_disconnect(struct adapter *padapter)
 	RT_TRACE(_module_rtl871x_mlme_c_, _drv_err_, ("+rtw_indicate_disconnect\n"));
 
 	_clr_fwstate_(pmlmepriv, _FW_UNDER_LINKING | WIFI_UNDER_WPS);
-
 
 	if (pmlmepriv->to_roaming > 0)
 		_clr_fwstate_(pmlmepriv, _FW_LINKED);
@@ -980,7 +972,6 @@ static void rtw_joinbss_update_network(struct adapter *padapter, struct wlan_net
 		 ("\nfw_state:%x, BSSID:%pM\n",
 		 get_fwstate(pmlmepriv), pnetwork->network.MacAddress));
 
-
 	/*  why not use ptarget_wlan?? */
 	memcpy(&cur_network->network, &pnetwork->network, pnetwork->network.Length);
 	/*  some IEs in pnetwork is wrong, so we should use ptarget_wlan IEs */
@@ -988,7 +979,6 @@ static void rtw_joinbss_update_network(struct adapter *padapter, struct wlan_net
 	memcpy(&cur_network->network.IEs[0], &ptarget_wlan->network.IEs[0], MAX_IE_SZ);
 
 	cur_network->aid = pnetwork->join_res;
-
 
 	rtw_set_signal_stat_timer(&padapter->recvpriv);
 	padapter->recvpriv.signal_strength = ptarget_wlan->network.PhyInfo.SignalStrength;
@@ -1040,7 +1030,6 @@ void rtw_joinbss_event_prehandle(struct adapter *adapter, u8 *pbuf)
 	RT_TRACE(_module_rtl871x_mlme_c_, _drv_info_, ("joinbss event call back received with res=%d\n", pnetwork->join_res));
 
 	rtw_get_encrypt_decrypt_from_registrypriv(adapter);
-
 
 	if (pmlmepriv->assoc_ssid.SsidLength == 0)
 		RT_TRACE(_module_rtl871x_mlme_c_, _drv_err_, ("@@@@@   joinbss event call back  for Any SSid\n"));
@@ -1100,7 +1089,6 @@ void rtw_joinbss_event_prehandle(struct adapter *adapter, u8 *pbuf)
 				spin_unlock_bh(&pmlmepriv->scanned_queue.lock);
 				goto ignore_joinbss_callback;
 			}
-
 
 			/* s3. find ptarget_sta & update ptarget_sta after update cur_network only for station mode */
 			if (check_fwstate(pmlmepriv, WIFI_STATION_STATE) == true) {
@@ -1381,7 +1369,6 @@ void _rtw_join_timeout_handler (unsigned long data)
 	if (adapter->bDriverStopped || adapter->bSurpriseRemoved)
 		return;
 
-
 	spin_lock_bh(&pmlmepriv->lock);
 
 	if (pmlmepriv->to_roaming > 0) { /*  join timeout caused by roaming */
@@ -1476,7 +1463,6 @@ static int rtw_check_join_candidate(struct mlme_priv *pmlmepriv
 	int updated = false;
 	struct adapter *adapter = container_of(pmlmepriv, struct adapter, mlmepriv);
 
-
 	/* check bssid, if needed */
 	if (pmlmepriv->assoc_by_bssid) {
 		if (memcmp(competitor->network.MacAddress, pmlmepriv->assoc_bssid, ETH_ALEN))
@@ -1557,7 +1543,6 @@ int rtw_select_and_join_from_scanned_queue(struct mlme_priv *pmlmepriv)
 			candidate->network.Ssid.Ssid, candidate->network.MacAddress,
 			candidate->network.Configuration.DSConfig);
 	}
-
 
 	/*  check for situation of  _FW_LINKED */
 	if (check_fwstate(pmlmepriv, _FW_LINKED) == true) {
@@ -1956,7 +1941,6 @@ unsigned int rtw_restructure_ht_ie(struct adapter *padapter, u8 *in_ie, u8 *out_
 	struct ht_priv		*phtpriv = &pmlmepriv->htpriv;
 	u32 rx_packet_offset, max_recvbuf_sz;
 
-
 	phtpriv->ht_option = false;
 
 	p = rtw_get_ie(in_ie+12, _HT_CAPABILITY_IE_, &ielen, in_len-12);
@@ -1995,7 +1979,6 @@ unsigned int rtw_restructure_ht_ie(struct adapter *padapter, u8 *in_ie, u8 *out_
 			ht_capie.ampdu_params_info |= (IEEE80211_HT_CAP_AMPDU_DENSITY&(0x07<<2));
 		else
 			ht_capie.ampdu_params_info |= (IEEE80211_HT_CAP_AMPDU_DENSITY&0x00);
-
 
 		rtw_set_ie(out_ie+out_len, _HT_CAPABILITY_IE_,
 			   sizeof(struct rtw_ieee80211_ht_cap), (unsigned char *)&ht_capie, pout_len);
@@ -2040,7 +2023,6 @@ void rtw_update_ht_cap(struct adapter *padapter, u8 *pie, uint ie_len)
 	} else if (pregistrypriv->ampdu_enable == 2) {
 		phtpriv->ampdu_enable = true;
 	}
-
 
 	/* check Max Rx A-MPDU Size */
 	len = 0;

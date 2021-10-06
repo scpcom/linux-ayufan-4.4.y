@@ -21,7 +21,6 @@ struct termio {
 	unsigned char c_cc[NCC];	/* control characters */
 };
 
-
 /* modem lines */
 #define TIOCM_LE	0x001
 #define TIOCM_DTR	0x002
@@ -41,6 +40,5 @@ struct termio {
 #define TIOCM_MODEM_BITS       TIOCM_OUT2      /* IRDA support */
 
 /* ioctl (fd, TIOCSERGETLSR, &result) where result may be as below */
-
 
 #endif /* _UAPI_ASM_TERMIOS_H */

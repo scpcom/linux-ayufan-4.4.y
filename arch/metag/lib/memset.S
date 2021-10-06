@@ -83,4 +83,3 @@ $LByteStub:
 $Lexit:
 	MOV	PC,D1RtP
         .size _memset,.-_memset
-

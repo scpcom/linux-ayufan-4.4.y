@@ -288,7 +288,6 @@ static int bma150_set_high_g_interrupt(struct bma150_data *bma150,
 				BMA150_HIGH_G_EN_REG);
 }
 
-
 static int bma150_set_any_motion_interrupt(struct bma150_data *bma150,
 						u8 enable, u8 dur, u8 thres)
 {

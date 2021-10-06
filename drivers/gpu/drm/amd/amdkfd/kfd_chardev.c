@@ -98,7 +98,6 @@ struct device *kfd_chardev(void)
 	return kfd_device;
 }
 
-
 static int kfd_open(struct inode *inode, struct file *filep)
 {
 	struct kfd_process *process;
@@ -289,7 +288,6 @@ static int kfd_ioctl_create_queue(struct file *filep, struct kfd_process *p,
 		goto err_create_queue;
 
 	args->queue_id = queue_id;
-
 
 	/* Return gpu_id as doorbell offset for mmap usage */
 	args->doorbell_offset = (KFD_MMAP_DOORBELL_MASK | args->gpu_id);
@@ -755,7 +753,6 @@ static int kfd_ioctl_get_clock_counters(struct file *filep,
 
 	return 0;
 }
-
 
 static int kfd_ioctl_get_process_apertures(struct file *filp,
 				struct kfd_process *p, void *data)

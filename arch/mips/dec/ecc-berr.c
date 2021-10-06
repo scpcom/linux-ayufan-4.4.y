@@ -220,7 +220,6 @@ irqreturn_t dec_ecc_be_interrupt(int irq, void *dev_id)
 	die("Unrecoverable bus error", regs);
 }
 
-
 /*
  * Initialization differs a bit between KN02 and KN03/KN05, so we
  * need two variants.  Once set up, all systems can be handled the

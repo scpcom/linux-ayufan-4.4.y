@@ -565,7 +565,6 @@ static struct drm_connector *cirrus_vga_init(struct drm_device *dev)
 	return connector;
 }
 
-
 int cirrus_modeset_init(struct cirrus_device *cdev)
 {
 	struct drm_encoder *encoder;

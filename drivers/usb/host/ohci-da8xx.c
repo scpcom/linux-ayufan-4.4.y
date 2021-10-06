@@ -280,7 +280,6 @@ static const struct hc_driver ohci_da8xx_hc_driver = {
 
 /*-------------------------------------------------------------------------*/
 
-
 /**
  * usb_hcd_da8xx_probe - initialize DA8xx-based HCDs
  * Context: !in_interrupt()
@@ -387,7 +386,6 @@ static int ohci_da8xx_suspend(struct platform_device *pdev,
 	struct ohci_hcd	*ohci	= hcd_to_ohci(hcd);
 	bool		do_wakeup	= device_may_wakeup(&pdev->dev);
 	int		ret;
-
 
 	if (time_before(jiffies, ohci->next_statechange))
 		msleep(5);

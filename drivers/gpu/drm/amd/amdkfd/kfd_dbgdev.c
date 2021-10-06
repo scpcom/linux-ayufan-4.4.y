@@ -703,7 +703,6 @@ static int dbgdev_wave_control_diq(struct kfd_dbgdev *dbgdev,
 	reg_gfx_index.bits.instance_broadcast_writes = 1;
 	reg_gfx_index.bits.se_broadcast_writes = 1;
 
-
 	packets_vec[2].ordinal1 = packets_vec[0].ordinal1;
 	packets_vec[2].bitfields2.reg_offset =
 				GRBM_GFX_INDEX / (sizeof(uint32_t)) -

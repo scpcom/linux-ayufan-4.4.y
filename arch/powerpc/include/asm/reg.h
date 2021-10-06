@@ -851,7 +851,6 @@
 #define SPRN_BKMK	1020	/* Cell Bookmark Register */
 #define SPRN_PA6T_RPCCR	1021	/* Retire PC Trace Control Register */
 
-
 #else /* 32-bit */
 #define SPRN_MMCR0	952	/* Monitor Mode Control Register 0 */
 #define   MMCR0_FC	0x80000000UL /* freeze counters */
@@ -1066,8 +1065,6 @@
 #define SPRN_SPRG_SCRATCH1	SPRN_SPRG1
 #define SPRN_SPRG_SCRATCH2	SPRN_SPRG2
 #endif
-
-
 
 /*
  * An mtfsf instruction with the L bit set. On CPUs that support this a

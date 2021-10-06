@@ -2160,7 +2160,6 @@ nvkm_device_fini(struct nvkm_device *device, bool suspend)
 		}
 	}
 
-
 	if (device->func->fini)
 		device->func->fini(device, suspend);
 

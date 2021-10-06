@@ -82,7 +82,6 @@ static int prism2_enable_aux_port(struct net_device *dev, int enable)
 	return 0;
 }
 
-
 static int hfa384x_from_aux(struct net_device *dev, unsigned int addr, int len,
 			    void *buf)
 {
@@ -112,7 +111,6 @@ static int hfa384x_from_aux(struct net_device *dev, unsigned int addr, int len,
 
 	return 0;
 }
-
 
 static int hfa384x_to_aux(struct net_device *dev, unsigned int addr, int len,
 			  void *buf)
@@ -144,7 +142,6 @@ static int hfa384x_to_aux(struct net_device *dev, unsigned int addr, int len,
 	return 0;
 }
 
-
 static int prism2_pda_ok(u8 *buf)
 {
 	__le16 *pda = (__le16 *) buf;
@@ -172,7 +169,6 @@ static int prism2_pda_ok(u8 *buf)
 
 	return 0;
 }
-
 
 #define prism2_download_aux_dump_npages 65536
 
@@ -238,7 +234,6 @@ static const struct file_operations prism2_download_aux_dump_proc_fops = {
 	.release	= seq_release_private,
 };
 
-
 static u8 * prism2_read_pda(struct net_device *dev)
 {
 	u8 *buf;
@@ -285,7 +280,6 @@ static u8 * prism2_read_pda(struct net_device *dev)
 
 	return buf;
 }
-
 
 static int prism2_download_volatile(local_info_t *local,
 				    struct prism2_download_data *param)
@@ -383,7 +377,6 @@ static int prism2_download_volatile(local_info_t *local,
 	return ret;
 }
 
-
 static int prism2_enable_genesis(local_info_t *local, int hcr)
 {
 	struct net_device *dev = local->dev;
@@ -414,7 +407,6 @@ static int prism2_enable_genesis(local_info_t *local, int hcr)
 	}
 }
 
-
 static int prism2_get_ram_size(local_info_t *local)
 {
 	int ret;
@@ -432,7 +424,6 @@ static int prism2_get_ram_size(local_info_t *local)
 
 	return ret;
 }
-
 
 static int prism2_download_genesis(local_info_t *local,
 				   struct prism2_download_data *param)
@@ -539,7 +530,6 @@ static int prism2_download_genesis(local_info_t *local,
 	return ret;
 }
 
-
 #ifdef PRISM2_NON_VOLATILE_DOWNLOAD
 /* Note! Non-volatile downloading functionality has not yet been tested
  * thoroughly and it may corrupt flash image and effectively kill the card that
@@ -586,7 +576,6 @@ static inline int prism2_download_block(struct net_device *dev,
 
 	return block_len;
 }
-
 
 static int prism2_download_nonvolatile(local_info_t *local,
 				       struct prism2_download_data *dl)
@@ -702,7 +691,6 @@ static int prism2_download_nonvolatile(local_info_t *local,
 }
 #endif /* PRISM2_NON_VOLATILE_DOWNLOAD */
 
-
 static void prism2_download_free_data(struct prism2_download_data *dl)
 {
 	int i;
@@ -714,7 +702,6 @@ static void prism2_download_free_data(struct prism2_download_data *dl)
 		kfree(dl->data[i].data);
 	kfree(dl);
 }
-
 
 static int prism2_download(local_info_t *local,
 			   struct prism2_download_param *param)

@@ -605,7 +605,6 @@ static int sti_hdmi_connector_mode_valid(struct drm_connector *connector,
 		= to_sti_hdmi_connector(connector);
 	struct sti_hdmi *hdmi = hdmi_connector->hdmi;
 
-
 	result = clk_round_rate(hdmi->clk_pix, target);
 
 	DRM_DEBUG_DRIVER("target rate = %d => available rate = %d\n",

@@ -11,7 +11,6 @@
 #define	LINUX_REBOOT_MAGIC2B	369367448
 #define	LINUX_REBOOT_MAGIC2C	537993216
 
-
 /*
  * Commands accepted by the _reboot() system call.
  *
@@ -33,7 +32,5 @@
 #define	LINUX_REBOOT_CMD_RESTART2	0xA1B2C3D4
 #define	LINUX_REBOOT_CMD_SW_SUSPEND	0xD000FCE2
 #define	LINUX_REBOOT_CMD_KEXEC		0x45584543
-
-
 
 #endif /* _UAPI_LINUX_REBOOT_H */

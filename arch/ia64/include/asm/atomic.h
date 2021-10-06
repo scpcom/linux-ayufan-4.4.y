@@ -17,7 +17,6 @@
 #include <asm/intrinsics.h>
 #include <asm/barrier.h>
 
-
 #define ATOMIC_INIT(i)		{ (i) }
 #define ATOMIC64_INIT(i)	{ (i) }
 
@@ -152,7 +151,6 @@ static __inline__ int __atomic_add_unless(atomic_t *v, int a, int u)
 	}
 	return c;
 }
-
 
 static __inline__ long atomic64_add_unless(atomic64_t *v, long a, long u)
 {

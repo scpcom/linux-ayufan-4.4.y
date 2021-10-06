@@ -129,7 +129,6 @@ struct gssx_cb {
 	gssx_buffer application_data;
 };
 
-
 /* This structure is not defined in the protocol.
  * It is used in the kernel to carry around a big buffer
  * as a set of pages */
@@ -158,8 +157,6 @@ struct gssx_res_accept_sec_context {
 	/* struct gssx_cred *delegated_cred_handle; not used in kernel */
 	struct gssx_option_array options;
 };
-
-
 
 #define gssx_enc_indicate_mechs NULL
 #define gssx_dec_indicate_mechs NULL
@@ -261,7 +258,5 @@ int gssx_dec_accept_sec_context(struct rpc_rqst *rqstp,
 #define GSSX_RES_unwrap_sz 0
 #define GSSX_ARG_wrap_size_limit_sz 0
 #define GSSX_RES_wrap_size_limit_sz 0
-
-
 
 #endif /* _LINUX_GSS_RPC_XDR_H */

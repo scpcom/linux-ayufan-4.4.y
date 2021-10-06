@@ -1303,13 +1303,11 @@ void qla4_83xx_enable_mbox_intrs(struct scsi_qla_host *ha)
 	}
 }
 
-
 void qla4_83xx_enable_intrs(struct scsi_qla_host *ha)
 {
 	qla4_83xx_enable_mbox_intrs(ha);
 	qla4_83xx_enable_iocb_intrs(ha);
 }
-
 
 void qla4_83xx_queue_mbox_cmd(struct scsi_qla_host *ha, uint32_t *mbx_cmd,
 			      int incount)

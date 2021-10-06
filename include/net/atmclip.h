@@ -2,7 +2,6 @@
  
 /* Written 1995-2000 by Werner Almesberger, EPFL LRC/ICA */
  
- 
 #ifndef _ATMCLIP_H
 #define _ATMCLIP_H
 
@@ -12,7 +11,6 @@
 #include <linux/atmarp.h>
 #include <linux/spinlock.h>
 #include <net/neighbour.h>
-
 
 #define CLIP_VCC(vcc) ((struct clip_vcc *) ((vcc)->user_back))
 
@@ -32,7 +30,6 @@ struct clip_vcc {
 					/* keep old pop fn for chaining */
 	struct clip_vcc	*next;		/* next VCC */
 };
-
 
 struct atmarp_entry {
 	struct clip_vcc	*vccs;		/* active VCCs; NULL if resolution is

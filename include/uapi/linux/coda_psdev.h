@@ -6,7 +6,6 @@
 #define CODA_PSDEV_MAJOR 67
 #define MAX_CODADEVS  5	   /* how many do we allow */
 
-
 /* messages between coda filesystem in kernel and Venus */
 struct upc_req {
 	struct list_head    uc_chain;

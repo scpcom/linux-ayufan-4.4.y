@@ -58,6 +58,4 @@
 /*BCNERRTH*/
 /*MLT*/
 
-
 #endif /* __RTL8712_TIMECTRL_BITDEF_H__*/
-

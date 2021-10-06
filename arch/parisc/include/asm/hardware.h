@@ -120,7 +120,6 @@ extern void init_parisc_bus(void);
 extern struct device *hwpath_to_device(struct hardware_path *modpath);
 extern void device_to_hwpath(struct device *dev, struct hardware_path *path);
 
-
 /* inventory.c: */
 extern void do_memory_inventory(void);
 extern void do_device_inventory(void);

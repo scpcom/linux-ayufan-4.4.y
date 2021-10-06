@@ -75,11 +75,9 @@
 
 #include "zs.h"
 
-
 MODULE_AUTHOR("Maciej W. Rozycki <macro@linux-mips.org>");
 MODULE_DESCRIPTION("DECstation Z85C30 serial driver");
 MODULE_LICENSE("GPL");
-
 
 static char zs_name[] __initdata = "DECstation Z85C30 serial driver version ";
 static char zs_version[] __initdata = "0.10";
@@ -128,7 +126,6 @@ static u8 zs_init_regs[ZS_NUM_REGS] __initdata = {
  * Debugging.
  */
 #undef ZS_DEBUG_REGS
-
 
 /*
  * Reading and writing Z85C30 registers.
@@ -211,7 +208,6 @@ void zs_dump(void)
 }
 #endif
 
-
 static void zs_spin_lock_cond_irq(spinlock_t *lock, int irq)
 {
 	if (irq)
@@ -263,7 +259,6 @@ static int zs_line_drain(struct zs_port *zport, int irq)
 	return loops;
 }
 
-
 static void load_zsregs(struct zs_port *zport, u8 *regs, int irq)
 {
 	/* Let the current transmission finish.  */
@@ -288,7 +283,6 @@ static void load_zsregs(struct zs_port *zport, u8 *regs, int irq)
 		write_zsreg(zport, R5, regs[5]);
 	return;
 }
-
 
 /*
  * Status handling routines.
@@ -530,7 +524,6 @@ static void zs_break_ctl(struct uart_port *uport, int break_state)
 	spin_unlock_irqrestore(&scc->zlock, flags);
 }
 
-
 /*
  * Interrupt handling routines.
  */
@@ -748,7 +741,6 @@ static irqreturn_t zs_interrupt(int irq, void *dev_id)
 	return status;
 }
 
-
 /*
  * Finally, routines used to initialize the serial port.
  */
@@ -824,7 +816,6 @@ static void zs_shutdown(struct uart_port *uport)
 	if (!irq_guard)
 		free_irq(zport->port.irq, scc);
 }
-
 
 static void zs_reset(struct zs_port *zport)
 {
@@ -975,7 +966,6 @@ static void zs_pm(struct uart_port *uport, unsigned int state,
 	write_zsreg(zport, R5, zport->regs[5]);
 }
 
-
 static const char *zs_type(struct uart_port *uport)
 {
 	return "Z85C30 SCC";
@@ -1043,7 +1033,6 @@ static int zs_verify_port(struct uart_port *uport, struct serial_struct *ser)
 		ret = -EINVAL;
 	return ret;
 }
-
 
 static struct uart_ops zs_ops = {
 	.tx_empty	= zs_tx_empty,
@@ -1123,7 +1112,6 @@ static int __init zs_probe_sccs(void)
 
 	return 0;
 }
-
 
 #ifdef CONFIG_SERIAL_ZS_CONSOLE
 static void zs_console_putchar(struct uart_port *uport, int ch)

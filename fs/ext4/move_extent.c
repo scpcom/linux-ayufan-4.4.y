@@ -465,7 +465,6 @@ mext_check_arguments(struct inode *orig_inode,
 	orig_eof = (i_size_read(orig_inode) + blocksize - 1) >> blkbits;
 	donor_eof = (i_size_read(donor_inode) + blocksize - 1) >> blkbits;
 
-
 	if (donor_inode->i_mode & (S_ISUID|S_ISGID)) {
 		ext4_debug("ext4 move extent: suid or sgid is set"
 			   " to donor file [ino:orig %lu, donor %lu]\n",

@@ -91,7 +91,6 @@ ushort *key_maps[MAX_NR_KEYMAPS] = {
 
 unsigned int keymap_count = 4;
 
-
 /*
  * Philosophy: most people do not define more strings, but they who do
  * often want quite a lot of string space. So, we statically allocate
@@ -120,7 +119,6 @@ char func_buf[] = {
 	'\033', '[', '3', '3', '~', 0, 
 	'\033', '[', '3', '4', '~', 0, 
 };
-
 
 char *funcbufptr = func_buf;
 int funcbufsize = sizeof(func_buf);

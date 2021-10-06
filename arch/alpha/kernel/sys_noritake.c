@@ -136,7 +136,6 @@ noritake_init_irq(void)
 	common_init_isa_dma();
 }
 
-
 /*
  * PCI Fixup configuration.
  *
@@ -280,7 +279,6 @@ noritake_apecs_machine_check(unsigned long vector, unsigned long la_ptr)
                                  || code == MCHK_NO_TABT)));
 }
 #endif
-
 
 /*
  * The System Vectors

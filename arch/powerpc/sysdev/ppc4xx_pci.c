@@ -138,7 +138,6 @@ static int __init ppc4xx_parse_dma_ranges(struct pci_controller *hose,
 		if (!(pci_space & 0x40000000))
 			res->flags &= ~IORESOURCE_PREFETCH;
 
-
 		/* Use that */
 		res->start = pci_addr;
 		/* Beware of 32 bits resources */
@@ -697,7 +696,6 @@ static int __init ppc4xx_pciex_port_reset_sdr(struct ppc4xx_pciex_port *port)
 	}
 	return 0;
 }
-
 
 static void __init ppc4xx_pciex_check_link_sdr(struct ppc4xx_pciex_port *port)
 {
@@ -2199,4 +2197,3 @@ static int __init ppc4xx_pci_find_bridges(void)
 	return 0;
 }
 arch_initcall(ppc4xx_pci_find_bridges);
-

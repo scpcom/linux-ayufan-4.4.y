@@ -13,8 +13,6 @@
 #ifndef _UAPI_HIDRAW_H
 #define _UAPI_HIDRAW_H
 
-
-
 #include <linux/hid.h>
 #include <linux/types.h>
 
@@ -43,7 +41,6 @@ struct hidraw_devinfo {
 #define HIDRAW_MAX_DEVICES 64
 /* number of reports to buffer */
 #define HIDRAW_BUFFER_SIZE 64
-
 
 /* kernel-only API declarations */
 

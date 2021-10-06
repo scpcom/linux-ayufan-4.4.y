@@ -38,7 +38,6 @@
 #define UTIL_FW_MAJOR  3
 #define UTIL_FW_VERSION     (UTIL_FW_MAJOR << 16 | UTIL_FW_MINOR)
 
-
 /*
  * Implementation of host controlled snapshot of the guest.
  */
@@ -65,7 +64,6 @@ enum hv_vss_op {
 	VSS_OP_COUNT /* Number of operations, must be last */
 };
 
-
 /*
  * Header for all VSS messages.
  */
@@ -73,7 +71,6 @@ struct hv_vss_hdr {
 	__u8 operation;
 	__u8 reserved[7];
 } __attribute__((packed));
-
 
 /*
  * Flag values for the hv_vss_check_feature. Linux supports only
@@ -176,7 +173,6 @@ struct hv_do_fcopy {
  */
 #define HV_KVP_EXCHANGE_MAX_VALUE_SIZE          (2048)
 
-
 /*
  * Maximum key size - the registry limit for the length of an entry name
  * is 256 characters, including the null terminator
@@ -231,7 +227,6 @@ struct hv_do_fcopy {
  * value (both are strings) is returned. If the index is invalid
  * (not supported), a NULL key string is returned.
  */
-
 
 /*
  * Registry value types.
@@ -322,7 +317,6 @@ enum hv_kvp_exchg_pool {
 #define MAX_IP_ADDR_SIZE	1024
 #define MAX_GATEWAY_SIZE	512
 
-
 struct hv_kvp_ipaddr_value {
 	__u16	adapter_id[MAX_ADAPTER_ID_SIZE];
 	__u8	addr_family;
@@ -332,7 +326,6 @@ struct hv_kvp_ipaddr_value {
 	__u16	gate_way[MAX_GATEWAY_SIZE];
 	__u16	dns_addr[MAX_IP_ADDR_SIZE];
 } __attribute__((packed));
-
 
 struct hv_kvp_hdr {
 	__u8 operation;

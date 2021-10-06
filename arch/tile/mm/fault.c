@@ -881,7 +881,6 @@ void do_async_page_fault(struct pt_regs *regs)
 }
 #endif /* CHIP_HAS_TILE_DMA() */
 
-
 void vmalloc_sync_all(void)
 {
 #ifdef __tilegx__

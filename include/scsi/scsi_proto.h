@@ -231,7 +231,6 @@ struct scsi_varlen_cdb_hdr {
 #define VOLUME_OVERFLOW     0x0d
 #define MISCOMPARE          0x0e
 
-
 /*
  *  DEVICE TYPES
  *  Please keep them in 0x%02x format for $MODALIAS to work
@@ -276,6 +275,5 @@ enum scsi_protocol {
 struct scsi_lun {
 	__u8 scsi_lun[8];
 };
-
 
 #endif /* _SCSI_PROTO_H_ */

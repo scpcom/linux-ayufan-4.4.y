@@ -25,7 +25,6 @@
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-
 #include <linux/module.h>
 #include <linux/if_vlan.h>
 #include <linux/inet_lro.h>
@@ -229,7 +228,6 @@ static void lro_add_packet(struct net_lro_desc *lro_desc, struct sk_buff *skb,
 
 	lro_desc->last_skb = skb;
 }
-
 
 static int lro_check_tcp_conn(struct net_lro_desc *lro_desc,
 			      struct iphdr *iph,

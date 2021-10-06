@@ -319,7 +319,6 @@ srmmu_not_viking:
 		b	go_to_highmem
 		 nop					! wheee....
 
-
 leon_remap:
 		/* Sanity-check, is MMU enabled */
 		lda	[%g0] ASI_LEON_MMUREGS, %g1
@@ -386,7 +385,6 @@ execute_in_high_mem:
 		 nop				! %o2 holds pointer
 						! to a buf where above string
 						! will get stored by the prom.
-
 
 		/* Check value of "compatible" property.
 		 * "value" => "model"
@@ -496,7 +494,6 @@ sun4m_init:
 		set	AC_M_AFAR, %o0
 		lda	[%o0] ASI_M_MMUREGS, %g0
 		 nop
-
 
 continue_boot:
 

@@ -47,7 +47,6 @@ struct mdp4_crtc {
 		struct drm_gem_object *scanout_bo;
 	} cursor;
 
-
 	/* if there is a pending flip, these will be non-null: */
 	struct drm_pending_vblank_event *event;
 

@@ -10,8 +10,6 @@
 #include <media/v4l2-device.h>
 #include <linux/mutex.h>
 
-
-
 /* GSPCA debug codes */
 
 #define D_PROBE  1
@@ -24,7 +22,6 @@
 
 extern int gspca_debug;
 
-
 #define PDEBUG(level, fmt, ...) \
 	v4l2_dbg(level, gspca_debug, &gspca_dev->v4l2_dev, fmt, ##__VA_ARGS__)
 
@@ -34,7 +31,6 @@ extern int gspca_debug;
 #define GSPCA_MAX_FRAMES 16	/* maximum number of video frame buffers */
 /* image transfers */
 #define MAX_NURBS 4		/* max number of URBs */
-
 
 /* used to list framerates supported by a camera mode (resolution) */
 struct framerates {

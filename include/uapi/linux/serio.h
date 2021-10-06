@@ -8,11 +8,9 @@
 #ifndef _UAPI_SERIO_H
 #define _UAPI_SERIO_H
 
-
 #include <linux/ioctl.h>
 
 #define SPIOCSTYPE	_IOW('q', 0x01, unsigned long)
-
 
 /*
  * bit masks for use in "interrupt" flags (3rd argument)

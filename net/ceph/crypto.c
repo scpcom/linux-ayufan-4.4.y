@@ -419,7 +419,6 @@ out_tfm:
 	return ret;
 }
 
-
 int ceph_decrypt(struct ceph_crypto_key *secret, void *dst, size_t *dst_len,
 		 const void *src, size_t src_len)
 {

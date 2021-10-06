@@ -225,7 +225,6 @@ static const u32 diag_registers[] = {
 	-1
 };
 
-
 static const u32 ext_diag_registers[] = {
 	CRB_XG_STATE_P3P,
 	ISR_INT_STATE_REG,
@@ -439,7 +438,6 @@ static int qlcnic_get_settings(struct net_device *dev,
 
 	return -EIO;
 }
-
 
 static int qlcnic_set_port_config(struct qlcnic_adapter *adapter,
 				  struct ethtool_cmd *ecmd)

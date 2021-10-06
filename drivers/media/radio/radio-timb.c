@@ -39,7 +39,6 @@ struct timbradio {
 	struct mutex		lock;
 };
 
-
 static int timbradio_vidioc_querycap(struct file *file, void  *priv,
 	struct v4l2_capability *v)
 {

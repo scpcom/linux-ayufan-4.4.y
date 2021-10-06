@@ -95,7 +95,6 @@ static int reg_read(struct qm1d1c0042_state *state, u8 reg, u8 *val)
 	return (ret == ARRAY_SIZE(msgs)) ? 0 : ret;
 }
 
-
 static int qm1d1c0042_set_srch_mode(struct qm1d1c0042_state *state, bool fast)
 {
 	if (fast)
@@ -391,7 +390,6 @@ static const struct dvb_tuner_ops qm1d1c0042_ops = {
 	.set_params = qm1d1c0042_set_params,
 };
 
-
 static int qm1d1c0042_probe(struct i2c_client *client,
 			    const struct i2c_device_id *id)
 {
@@ -424,7 +422,6 @@ static int qm1d1c0042_remove(struct i2c_client *client)
 	kfree(state);
 	return 0;
 }
-
 
 static const struct i2c_device_id qm1d1c0042_id[] = {
 	{"qm1d1c0042", 0},

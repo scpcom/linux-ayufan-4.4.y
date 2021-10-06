@@ -21,7 +21,6 @@
 
 #include "vmci_context.h"
 
-
 enum vmci_resource_type {
 	VMCI_RESOURCE_TYPE_ANY,
 	VMCI_RESOURCE_TYPE_API,
@@ -39,7 +38,6 @@ struct vmci_resource {
 	struct kref kref;
 	struct completion done;
 };
-
 
 int vmci_resource_add(struct vmci_resource *resource,
 		      enum vmci_resource_type resource_type,

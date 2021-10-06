@@ -194,7 +194,6 @@ static int perf_release(struct inode *inode, struct file *file)
 	return 0;
 }
 
-
 static const struct file_operations perf_debugfs_fops = {
 	.owner = THIS_MODULE,
 	.open = perf_open,

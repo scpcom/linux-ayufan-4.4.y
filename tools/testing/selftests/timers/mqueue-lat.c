@@ -47,7 +47,6 @@ static inline int ksft_exit_fail(void)
 #define TARGET_TIMEOUT		100000000	/* 100ms in nanoseconds */
 #define UNRESONABLE_LATENCY	40000000	/* 40ms in nanosecs */
 
-
 long long timespec_sub(struct timespec a, struct timespec b)
 {
 	long long ret = NSEC_PER_SEC * b.tv_sec + b.tv_nsec;
@@ -80,7 +79,6 @@ int mqueue_lat_test(void)
 		return -1;
 	}
 	mq_getattr(q, &attr);
-
 
 	count = 100;
 	clock_gettime(CLOCK_MONOTONIC, &start);

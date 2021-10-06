@@ -329,7 +329,6 @@ static int snd_sb8mixer_info_mux(struct snd_kcontrol *kcontrol, struct snd_ctl_e
 	return snd_ctl_enum_info(uinfo, 1, 3, texts);
 }
 
-
 static int snd_sb8mixer_get_mux(struct snd_kcontrol *kcontrol, struct snd_ctl_elem_value *ucontrol)
 {
 	struct snd_sb *sb = snd_kcontrol_chip(kcontrol);
@@ -445,7 +444,6 @@ static int snd_sb16mixer_put_input_sw(struct snd_kcontrol *kcontrol, struct snd_
 	spin_unlock_irqrestore(&sb->mixer_lock, flags);
 	return change;
 }
-
 
 /*
  */

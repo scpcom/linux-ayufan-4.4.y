@@ -182,7 +182,6 @@ int rv730_populate_mclk_value(struct radeon_device *rdev,
 		}
 	}
 
-
 	mclk->mclk730.vMCLK_PWRMGT_CNTL = cpu_to_be32(mclk_pwrmgt_cntl);
 	mclk->mclk730.vDLL_CNTL = cpu_to_be32(dll_cntl);
 	mclk->mclk730.mclk_value = cpu_to_be32(memory_clock);

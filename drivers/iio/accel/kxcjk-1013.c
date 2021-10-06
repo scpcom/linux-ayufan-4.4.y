@@ -1079,7 +1079,6 @@ static irqreturn_t kxcjk1013_event_handler(int irq, void *private)
 				       IIO_EV_DIR_RISING),
 				       data->timestamp);
 
-
 		if (ret & KXCJK1013_REG_INT_SRC2_BIT_YN)
 			iio_push_event(indio_dev,
 				       IIO_MOD_EVENT_CODE(IIO_ACCEL,

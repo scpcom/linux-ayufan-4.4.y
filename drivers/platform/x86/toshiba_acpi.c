@@ -1590,7 +1590,6 @@ static ssize_t kbd_backlight_mode_store(struct device *dev,
 	int mode;
 	int ret;
 
-
 	ret = kstrtoint(buf, 0, &mode);
 	if (ret)
 		return ret;

@@ -192,5 +192,4 @@ extern void radeon_sa_bo_dump_debug_info(struct radeon_sa_manager *sa_manager,
 					 struct seq_file *m);
 #endif
 
-
 #endif

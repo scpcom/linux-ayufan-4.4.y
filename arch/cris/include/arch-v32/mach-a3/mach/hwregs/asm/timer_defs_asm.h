@@ -198,7 +198,6 @@
 #define reg_timer_rw_test___en___bit 1
 #define reg_timer_rw_test_offset 88
 
-
 /* Constants */
 #define regk_timer_ext                            0x00000001
 #define regk_timer_f100                           0x00000007

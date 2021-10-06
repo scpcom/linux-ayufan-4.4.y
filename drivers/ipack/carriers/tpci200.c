@@ -53,7 +53,6 @@ static struct tpci200_board *check_slot(struct ipack_device *dev)
 	if (dev == NULL)
 		return NULL;
 
-
 	tpci200 = dev_get_drvdata(dev->bus->parent);
 
 	if (tpci200 == NULL) {

@@ -100,7 +100,6 @@ xfs_iozero(
 	struct address_space	*mapping;
 	int			status = 0;
 
-
 	mapping = VFS_I(ip)->i_mapping;
 	do {
 		unsigned offset, bytes;
@@ -1040,7 +1039,6 @@ out_unlock:
 	xfs_iunlock(ip, iolock);
 	return error;
 }
-
 
 STATIC int
 xfs_file_open(

@@ -41,7 +41,6 @@
 #include <asm/synch.h>
 #include "head_booke.h"
 
-
 /* As with the other PowerPC ports, it is expected that when code
  * execution begins here, the following registers contain valid, yet
  * optional, information:
@@ -991,7 +990,6 @@ skpinv:	addi	r4,r4,1				/* Increment */
 	SET_IVOR(15, DebugCrit);
 
 	b	head_start_common
-
 
 #ifdef CONFIG_PPC_47x
 

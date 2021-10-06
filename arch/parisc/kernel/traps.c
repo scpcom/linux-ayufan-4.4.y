@@ -164,7 +164,6 @@ static DEFINE_RATELIMIT_STATE(_hppa_rs,
 	}								      \
 }
 
-
 static void do_show_stack(struct unwind_frame_info *info)
 {
 	int i = 1;
@@ -342,7 +341,6 @@ static void default_trap(int code, struct pt_regs *regs)
 
 void (*cpu_lpmc) (int code, struct pt_regs *regs) __read_mostly = default_trap;
 
-
 void transfer_pim_to_trap_frame(struct pt_regs *regs)
 {
     register int i;
@@ -416,7 +414,6 @@ void transfer_pim_to_trap_frame(struct pt_regs *regs)
     regs->kpc = 0;
     regs->orig_r28 = 0;
 }
-
 
 /*
  * This routine is called as a last resort when everything else
@@ -809,7 +806,6 @@ void notrace handle_interruption(int code, struct pt_regs *regs)
 	do_page_fault(regs, code, fault_address);
 }
 
-
 void __init initialize_ivt(const void *iva)
 {
 	extern u32 os_hpmc_size;
@@ -844,7 +840,6 @@ void __init initialize_ivt(const void *iva)
 	ivap[5] = -check;
 }
 	
-
 /* early_trap_init() is called before we set up kernel mappings and
  * write-protect the kernel */
 void  __init early_trap_init(void)

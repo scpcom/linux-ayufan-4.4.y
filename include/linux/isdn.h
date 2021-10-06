@@ -13,7 +13,6 @@
 #ifndef __ISDN_H__
 #define __ISDN_H__
 
-
 #include <linux/errno.h>
 #include <linux/fs.h>
 #include <linux/major.h>
@@ -467,6 +466,5 @@ typedef struct isdn_devt {
 } isdn_dev;
 
 extern isdn_dev *dev;
-
 
 #endif /* __ISDN_H__ */

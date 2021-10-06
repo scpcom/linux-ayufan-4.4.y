@@ -21,7 +21,6 @@
 #include <asm/page.h>
 #include <asm/sections.h>
 
-
 struct fixup_entry {
 	unsigned long	mask;
 	unsigned long	value;

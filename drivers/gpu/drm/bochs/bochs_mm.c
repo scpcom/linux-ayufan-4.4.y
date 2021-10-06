@@ -70,7 +70,6 @@ static void bochs_ttm_global_release(struct bochs_device *bochs)
 	bochs->ttm.mem_global_ref.release = NULL;
 }
 
-
 static void bochs_bo_ttm_destroy(struct ttm_buffer_object *tbo)
 {
 	struct bochs_bo *bo;
@@ -172,7 +171,6 @@ static int bochs_bo_move(struct ttm_buffer_object *bo,
 {
 	return ttm_bo_move_memcpy(bo, evict, no_wait_gpu, new_mem);
 }
-
 
 static void bochs_ttm_backend_destroy(struct ttm_tt *tt)
 {

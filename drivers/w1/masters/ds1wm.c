@@ -28,7 +28,6 @@
 #include "../w1.h"
 #include "../w1_int.h"
 
-
 #define DS1WM_CMD	0x00	/* R/W 4 bits command */
 #define DS1WM_DATA	0x01	/* R/W 8 bits, transmit/receive buffer */
 #define DS1WM_INT	0x02	/* R/W interrupt status */
@@ -123,7 +122,6 @@ static inline u8 ds1wm_read_register(struct ds1wm_data *ds1wm_data, u32 reg)
 {
 	return __raw_readb(ds1wm_data->map + (reg << ds1wm_data->bus_shift));
 }
-
 
 static irqreturn_t ds1wm_isr(int isr, void *data)
 {
@@ -410,7 +408,6 @@ static void ds1wm_search(void *data, struct w1_master *master_dev,
 				"pass: %d bus error, retrying\n", pass);
 			continue; /* start over */
 		}
-
 
 		dev_dbg(&ds1wm_data->pdev->dev,
 			"pass: %d found %0#18llx\n", pass, r_prime);

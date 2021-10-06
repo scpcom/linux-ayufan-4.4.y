@@ -480,7 +480,6 @@ void qib_pcie_reenable(struct qib_devdata *dd, u16 cmd, u8 iline, u8 cline)
 			"pci_enable_device failed after reset: %d\n", r);
 }
 
-
 static int qib_pcie_coalesce;
 module_param_named(pcie_coalesce, qib_pcie_coalesce, int, S_IRUGO);
 MODULE_PARM_DESC(pcie_coalesce, "tune PCIe colescing on some Intel chipsets");

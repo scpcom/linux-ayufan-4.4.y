@@ -9,7 +9,6 @@
  * for more details.
  */
 
-
 /* Used for uploading DSP binary code */
 struct dsp56k_upload {
 	int len;

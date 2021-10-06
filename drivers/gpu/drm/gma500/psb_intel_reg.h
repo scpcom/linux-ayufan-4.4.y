@@ -762,7 +762,6 @@ struct dpst_guardband {
 #define SWF31			0x72418
 #define SWF32			0x7241c
 
-
 /*
  * Palette registers
  */

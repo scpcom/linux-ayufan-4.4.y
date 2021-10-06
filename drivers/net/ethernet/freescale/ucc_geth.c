@@ -63,7 +63,6 @@
 #endif				/* UGETH_VERBOSE_DEBUG */
 #define UGETH_MSG_DEFAULT	(NETIF_MSG_IFUP << 1 ) - 1
 
-
 static DEFINE_SPINLOCK(ugeth_lock);
 
 static struct {
@@ -1844,7 +1843,6 @@ static void ucc_geth_free_rx(struct ucc_geth_private *ugeth)
 	u16 i, j;
 	u8 __iomem *bd;
 
-
 	ug_info = ugeth->ug_info;
 	uf_info = &ug_info->uf_info;
 
@@ -3556,7 +3554,6 @@ static void ucc_geth_timeout(struct net_device *dev)
 
 	schedule_work(&ugeth->timeout_work);
 }
-
 
 #ifdef CONFIG_PM
 

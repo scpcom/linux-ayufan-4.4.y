@@ -55,7 +55,6 @@
  * Implemented on linux by Dave Taht and Eric Dumazet
  */
 
-
 /* CoDel uses a 1024 nsec clock, encoded in u32
  * This gives a range of 2199 seconds, because of signed compares
  */

@@ -121,7 +121,6 @@
 #endif
 #include <net/l3mdev.h>
 
-
 /* The inetsw table contains everything that inet_create needs to
  * build a new socket.
  */
@@ -384,7 +383,6 @@ out_rcu_unlock:
 	rcu_read_unlock();
 	goto out;
 }
-
 
 /*
  *	The peer socket should always be NULL (or else). When we call this
@@ -689,7 +687,6 @@ do_err:
 	return err;
 }
 EXPORT_SYMBOL(inet_accept);
-
 
 /*
  *	This does both peername and sockname.
@@ -1846,4 +1843,3 @@ static int __init ipv4_proc_init(void)
 #endif /* CONFIG_PROC_FS */
 
 MODULE_ALIAS_NETPROTO(PF_INET);
-

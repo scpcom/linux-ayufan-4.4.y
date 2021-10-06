@@ -164,7 +164,6 @@
 #define reg_iop_mpu_rw_intr___addr___width 12
 #define reg_iop_mpu_rw_intr_offset 196
 
-
 /* Constants */
 #define regk_iop_mpu_no                           0x00000000
 #define regk_iop_mpu_r_pc_default                 0x00000000

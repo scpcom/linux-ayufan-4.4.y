@@ -10,5 +10,4 @@ struct pt_regs {
 	unsigned long long pad[2];
 };
 
-
 #endif /* _UAPI__ASM_SH_PTRACE_64_H */

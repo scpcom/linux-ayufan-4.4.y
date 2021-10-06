@@ -562,9 +562,6 @@ static void sun4i_get_apb1_factors(u32 *freq, u32 parent_rate,
 	*p = calcp;
 }
 
-
-
-
 /**
  * sun7i_a20_get_out_factors() - calculates m, p factors for CLK_OUT_A/B
  * CLK_OUT rate is calculated as follows
@@ -758,8 +755,6 @@ static struct clk * __init sunxi_factors_clk_setup(struct device_node *node,
 	return sunxi_factors_register(node, data, &clk_lock, reg);
 }
 
-
-
 /**
  * sunxi_mux_clk_setup() - Setup function for muxes
  */
@@ -802,8 +797,6 @@ static void __init sunxi_mux_clk_setup(struct device_node *node,
 		clk_register_clkdev(clk, clk_name, NULL);
 	}
 }
-
-
 
 /**
  * sunxi_divider_clk_setup() - Setup function for simple divider clocks
@@ -883,8 +876,6 @@ static void __init sunxi_divider_clk_setup(struct device_node *node,
 		clk_register_clkdev(clk, clk_name, NULL);
 	}
 }
-
-
 
 /**
  * sunxi_gates_clk_setup() - Setup function for leaf gates on clocks
@@ -1095,8 +1086,6 @@ free_clkdata:
 	kfree(clk_data);
 }
 
-
-
 /* Matches for factors clocks */
 static const struct of_device_id clk_factors_match[] __initconst = {
 	{.compatible = "allwinner,sun4i-a10-pll1-clk", .data = &sun4i_pll1_data,},
@@ -1132,7 +1121,6 @@ static const struct of_device_id clk_mux_match[] __initconst = {
 	{.compatible = "allwinner,sun6i-a31-ahb1-mux-clk", .data = &sun6i_a31_ahb1_mux_data,},
 	{}
 };
-
 
 static void __init of_sunxi_table_clock_setup(const struct of_device_id *clk_match,
 					      void *function)

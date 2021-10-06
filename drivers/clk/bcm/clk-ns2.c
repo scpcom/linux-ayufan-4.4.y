@@ -49,7 +49,6 @@ static const struct iproc_pll_ctrl genpll_scr = {
 	.status = REG_VAL(0x0, 27, 1),
 };
 
-
 static const struct iproc_clk_ctrl genpll_scr_clk[] = {
 	/* bypass_shift, the last value passed into ENABLE_VAL(), is not defined
 	 * in NS2.  However, it doesn't appear to be used anywhere, so setting

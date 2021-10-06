@@ -229,7 +229,6 @@
 #define GPSR7_1		FM(AVS2)
 #define GPSR7_0		FM(AVS1)
 
-
 /* IPSRx */		/* 0 */			/* 1 */		/* 2 */			/* 3 */				/* 4 */		/* 5 */		/* 6 */			/* 7 */		/* 8 */			/* 9 */		/* A */		/* B */		/* C - F */
 #define IP0_3_0		FM(AVB_MDC)		F_(0, 0)	FM(MSIOF2_SS2_C)	F_(0, 0)			F_(0, 0)	F_(0, 0)	F_(0, 0)		F_(0, 0)	F_(0, 0)		F_(0, 0)	F_(0, 0)	F_(0, 0)	F_(0, 0) F_(0, 0) F_(0, 0) F_(0, 0)
 #define IP0_7_4		FM(AVB_MAGIC)		F_(0, 0)	FM(MSIOF2_SS1_C)	FM(SCK4_A)			F_(0, 0)	F_(0, 0)	F_(0, 0)		F_(0, 0)	F_(0, 0)		F_(0, 0)	F_(0, 0)	F_(0, 0)	F_(0, 0) F_(0, 0) F_(0, 0) F_(0, 0)
@@ -546,7 +545,6 @@ MOD_SEL0_3		MOD_SEL1_3 \
 MOD_SEL0_2_1		MOD_SEL1_2		MOD_SEL2_2_1 \
 			MOD_SEL1_1 \
 			MOD_SEL1_0		MOD_SEL2_0
-
 
 enum {
 	PINMUX_RESERVED = 0,

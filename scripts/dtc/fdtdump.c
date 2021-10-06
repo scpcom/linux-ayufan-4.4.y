@@ -142,7 +142,6 @@ static void dump_blob(void *blob)
 	}
 }
 
-
 int main(int argc, char *argv[])
 {
 	char *buf;

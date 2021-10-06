@@ -307,7 +307,6 @@ static int sirfsoc_pinmux_probe(struct platform_device *pdev)
 	sirfsoc_pinmux_desc.pins = pdata->pads;
 	sirfsoc_pinmux_desc.npins = pdata->pads_cnt;
 
-
 	/* Now register the pin controller and all pins it handles */
 	spmx->pmx = pinctrl_register(&sirfsoc_pinmux_desc, &pdev->dev, spmx);
 	if (IS_ERR(spmx->pmx)) {

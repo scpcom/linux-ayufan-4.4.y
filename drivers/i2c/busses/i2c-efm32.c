@@ -370,7 +370,6 @@ static int efm32_i2c_probe(struct platform_device *pdev)
 		return ret;
 	}
 
-
 	ret = of_property_read_u32(np, "energymicro,location", &location);
 
 	if (ret)

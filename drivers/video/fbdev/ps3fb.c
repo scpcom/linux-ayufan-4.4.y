@@ -38,7 +38,6 @@
 #include <asm/ps3.h>
 #include <asm/ps3gpu.h>
 
-
 #define DEVICE_NAME		"ps3fb"
 
 #define GPU_CMD_BUF_SIZE			(2 * 1024 * 1024)
@@ -132,7 +131,6 @@ struct ps3fb_par {
 	unsigned int fb_offset;		/* start of actual DDR fb */
 	unsigned int pan_offset;
 };
-
 
 #define FIRST_NATIVE_MODE_INDEX	10
 
@@ -249,12 +247,10 @@ static const struct fb_videomode ps3fb_modedb[] = {
     }
 };
 
-
 #define HEAD_A
 #define HEAD_B
 
 #define BPP		4			/* number of bytes per pixel */
-
 
 static int ps3fb_mode;
 module_param(ps3fb_mode, int, 0);
@@ -766,7 +762,6 @@ static int ps3fb_wait_for_vsync(u32 crtc)
 	return 0;
 }
 
-
     /*
      * ioctl
      */
@@ -932,7 +927,6 @@ static irqreturn_t ps3fb_vsync_interrupt(int irq, void *ptr)
 
 	return IRQ_HANDLED;
 }
-
 
 static struct fb_ops ps3fb_ops = {
 	.fb_open	= ps3fb_open,

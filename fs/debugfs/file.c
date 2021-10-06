@@ -387,7 +387,6 @@ struct dentry *debugfs_create_x64(const char *name, umode_t mode,
 }
 EXPORT_SYMBOL_GPL(debugfs_create_x64);
 
-
 static int debugfs_size_t_set(void *data, u64 val)
 {
 	*(size_t *)data = val;
@@ -838,4 +837,3 @@ struct dentry *debugfs_create_devm_seqfile(struct device *dev, const char *name,
 				   &debugfs_devm_entry_ops);
 }
 EXPORT_SYMBOL_GPL(debugfs_create_devm_seqfile);
-

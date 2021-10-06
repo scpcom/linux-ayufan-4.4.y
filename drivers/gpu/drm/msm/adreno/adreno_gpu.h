@@ -186,7 +186,6 @@ struct adreno_platform_config {
 	__ret;                                             \
 })
 
-
 static inline bool adreno_is_a3xx(struct adreno_gpu *gpu)
 {
 	return (gpu->revn >= 300) && (gpu->revn < 400);
@@ -246,7 +245,6 @@ void adreno_wait_ring(struct msm_gpu *gpu, uint32_t ndwords);
 int adreno_gpu_init(struct drm_device *drm, struct platform_device *pdev,
 		struct adreno_gpu *gpu, const struct adreno_gpu_funcs *funcs);
 void adreno_gpu_cleanup(struct adreno_gpu *gpu);
-
 
 /* ringbuffer helpers (the parts that are adreno specific) */
 

@@ -1,12 +1,4 @@
-/*
-  File: fs/xattr.c
 
-  Extended attribute handling.
-
-  Copyright (C) 2001 by Andreas Gruenbacher <a.gruenbacher@computer.org>
-  Copyright (C) 2001 SGI - Silicon Graphics, Inc <linux-xfs@oss.sgi.com>
-  Copyright (c) 2004 Red Hat, Inc., James Morris <jmorris@redhat.com>
- */
 #include <linux/fs.h>
 #include <linux/slab.h>
 #include <linux/file.h>
@@ -24,44 +16,29 @@
 
 #include <asm/uaccess.h>
 
-/*
- * Check permissions for extended attribute access.  This is a bit complicated
- * because different namespaces have very different rules.
- */
+
 static int
 xattr_permission(struct inode *inode, const char *name, int mask)
 {
-	/*
-	 * We can never set or remove an extended attribute on a read-only
-	 * filesystem  or on an immutable / append-only inode.
-	 */
+	
 	if (mask & MAY_WRITE) {
 		if (IS_IMMUTABLE(inode) || IS_APPEND(inode))
 			return -EPERM;
 	}
 
-	/*
-	 * No restriction for security.* and system.* from the VFS.  Decision
-	 * on these is left to the underlying filesystem / security module.
-	 */
+	
 	if (!strncmp(name, XATTR_SECURITY_PREFIX, XATTR_SECURITY_PREFIX_LEN) ||
 	    !strncmp(name, XATTR_SYSTEM_PREFIX, XATTR_SYSTEM_PREFIX_LEN))
 		return 0;
 
-	/*
-	 * The trusted.* namespace can only be accessed by privileged users.
-	 */
+	
 	if (!strncmp(name, XATTR_TRUSTED_PREFIX, XATTR_TRUSTED_PREFIX_LEN)) {
 		if (!capable(CAP_SYS_ADMIN))
 			return (mask & MAY_WRITE) ? -EPERM : -ENODATA;
 		return 0;
 	}
 
-	/*
-	 * In the user.* namespace, only regular files and directories can have
-	 * extended attributes. For sticky directories, only the owner and
-	 * privileged users can write attributes.
-	 */
+	
 	if (!strncmp(name, XATTR_USER_PREFIX, XATTR_USER_PREFIX_LEN)) {
 		if (!S_ISREG(inode->i_mode) && !S_ISDIR(inode->i_mode))
 			return (mask & MAY_WRITE) ? -EPERM : -ENODATA;
@@ -73,22 +50,7 @@ xattr_permission(struct inode *inode, const char *name, int mask)
 	return inode_permission(inode, mask);
 }
 
-/**
- *  __vfs_setxattr_noperm - perform setxattr operation without performing
- *  permission checks.
- *
- *  @dentry - object to perform setxattr on
- *  @name - xattr name to set
- *  @value - value to set @name to
- *  @size - size of @value
- *  @flags - flags to pass into filesystem operations
- *
- *  returns the result of the internal setxattr or setsecurity operations.
- *
- *  This function requires the caller to lock the inode's i_mutex before it
- *  is executed. It also assumes that the caller will make the appropriate
- *  permission checks.
- */
+
 int __vfs_setxattr_noperm(struct dentry *dentry, const char *name,
 		const void *value, size_t size, int flags)
 {
@@ -116,7 +78,6 @@ int __vfs_setxattr_noperm(struct dentry *dentry, const char *name,
 
 	return error;
 }
-
 
 int
 vfs_setxattr(struct dentry *dentry, const char *name, const void *value,
@@ -169,14 +130,6 @@ out_noalloc:
 }
 EXPORT_SYMBOL_GPL(xattr_getsecurity);
 
-/*
- * vfs_getxattr_alloc - allocate memory, if necessary, before calling getxattr
- *
- * Allocate memory, if not already allocated, or re-allocate correct size,
- * before retrieving the extended attribute.
- *
- * Returns the result of alloc, if failed, or the getxattr operation.
- */
 ssize_t
 vfs_getxattr_alloc(struct dentry *dentry, const char *name, char **xattr_value,
 		   size_t xattr_size, gfp_t flags)
@@ -208,7 +161,7 @@ vfs_getxattr_alloc(struct dentry *dentry, const char *name, char **xattr_value,
 	return error;
 }
 
-/* Compare an extended attribute value with the given value */
+
 int vfs_xattr_cmp(struct dentry *dentry, const char *xattr_name,
 		  const char *value, size_t size, gfp_t flags)
 {
@@ -245,10 +198,7 @@ vfs_getxattr(struct dentry *dentry, const char *name, void *value, size_t size)
 				XATTR_SECURITY_PREFIX_LEN)) {
 		const char *suffix = name + XATTR_SECURITY_PREFIX_LEN;
 		int ret = xattr_getsecurity(inode, suffix, value, size);
-		/*
-		 * Only overwrite the return value if a security module
-		 * is actually active.
-		 */
+		
 		if (ret == -EOPNOTSUPP)
 			goto nolsm;
 		return ret;
@@ -315,16 +265,14 @@ out:
 EXPORT_SYMBOL_GPL(vfs_removexattr);
 
 
-/*
- * Extended attribute SET operations
- */
+
 static long
 setxattr(struct dentry *d, const char __user *name, const void __user *value,
 	 size_t size, int flags)
 {
 	int error;
 	void *kvalue = NULL;
-	void *vvalue = NULL;	/* If non-NULL, we used vmalloc() */
+	void *vvalue = NULL;	
 	char kname[XATTR_NAME_MAX + 1];
 
 	if (flags & ~(XATTR_CREATE|XATTR_REPLACE))
@@ -419,9 +367,6 @@ SYSCALL_DEFINE5(fsetxattr, int, fd, const char __user *, name,
 	return error;
 }
 
-/*
- * Extended attribute GET operations
- */
 static ssize_t
 getxattr(struct dentry *d, const char __user *name, void __user *value,
 	 size_t size)
@@ -457,8 +402,7 @@ getxattr(struct dentry *d, const char __user *name, void __user *value,
 		if (size && copy_to_user(value, kvalue, error))
 			error = -EFAULT;
 	} else if (error == -ERANGE && size >= XATTR_SIZE_MAX) {
-		/* The file system tried to returned a value bigger
-		   than XATTR_SIZE_MAX bytes. Not possible. */
+		 
 		error = -E2BIG;
 	}
 	if (vvalue)
@@ -513,15 +457,12 @@ SYSCALL_DEFINE4(fgetxattr, int, fd, const char __user *, name,
 	return error;
 }
 
-/*
- * Extended attribute LIST operations
- */
 static ssize_t
 listxattr(struct dentry *d, char __user *list, size_t size)
 {
 	ssize_t error;
 	char *klist = NULL;
-	char *vlist = NULL;	/* If non-NULL, we used vmalloc() */
+	char *vlist = NULL;	 
 
 	if (size) {
 		if (size > XATTR_LIST_MAX)
@@ -540,8 +481,7 @@ listxattr(struct dentry *d, char __user *list, size_t size)
 		if (size && copy_to_user(list, klist, error))
 			error = -EFAULT;
 	} else if (error == -ERANGE && size >= XATTR_LIST_MAX) {
-		/* The file system tried to returned a list bigger
-		   than XATTR_LIST_MAX bytes. Not possible. */
+		 
 		error = -E2BIG;
 	}
 	if (vlist)
@@ -594,9 +534,6 @@ SYSCALL_DEFINE3(flistxattr, int, fd, char __user *, list, size_t, size)
 	return error;
 }
 
-/*
- * Extended attribute REMOVE operations
- */
 static long
 removexattr(struct dentry *d, const char __user *name)
 {
@@ -663,7 +600,6 @@ SYSCALL_DEFINE2(fremovexattr, int, fd, const char __user *, name)
 	return error;
 }
 
-
 static const char *
 strcmp_prefix(const char *a, const char *a_prefix)
 {
@@ -674,23 +610,11 @@ strcmp_prefix(const char *a, const char *a_prefix)
 	return *a_prefix ? NULL : a;
 }
 
-/*
- * In order to implement different sets of xattr operations for each xattr
- * prefix with the generic xattr API, a filesystem should create a
- * null-terminated array of struct xattr_handler (one for each prefix) and
- * hang a pointer to it off of the s_xattr field of the superblock.
- *
- * The generic_fooxattr() functions will use this list to dispatch xattr
- * operations to the correct xattr_handler.
- */
 #define for_each_xattr_handler(handlers, handler)		\
 		for ((handler) = *(handlers)++;			\
 			(handler) != NULL;			\
 			(handler) = *(handlers)++)
 
-/*
- * Find the xattr_handler with the matching prefix.
- */
 static const struct xattr_handler *
 xattr_resolve_name(const struct xattr_handler **handlers, const char **name)
 {
@@ -709,9 +633,6 @@ xattr_resolve_name(const struct xattr_handler **handlers, const char **name)
 	return handler;
 }
 
-/*
- * Find the handler for the prefix and dispatch its get() operation.
- */
 ssize_t
 generic_getxattr(struct dentry *dentry, const char *name, void *buffer, size_t size)
 {
@@ -723,10 +644,6 @@ generic_getxattr(struct dentry *dentry, const char *name, void *buffer, size_t s
 	return handler->get(handler, dentry, name, buffer, size);
 }
 
-/*
- * Combine the results of the list() operation from every xattr_handler in the
- * list.
- */
 ssize_t
 generic_listxattr(struct dentry *dentry, char *buffer, size_t buffer_size)
 {
@@ -754,26 +671,19 @@ generic_listxattr(struct dentry *dentry, char *buffer, size_t buffer_size)
 	return size;
 }
 
-/*
- * Find the handler for the prefix and dispatch its set() operation.
- */
 int
 generic_setxattr(struct dentry *dentry, const char *name, const void *value, size_t size, int flags)
 {
 	const struct xattr_handler *handler;
 
 	if (size == 0)
-		value = "";  /* empty EA, do not remove */
+		value = "";   
 	handler = xattr_resolve_name(dentry->d_sb->s_xattr, &name);
 	if (!handler)
 		return -EOPNOTSUPP;
 	return handler->set(handler, dentry, name, value, size, flags);
 }
 
-/*
- * Find the handler for the prefix and dispatch its set() operation to remove
- * any associated extended attribute.
- */
 int
 generic_removexattr(struct dentry *dentry, const char *name)
 {
@@ -790,21 +700,6 @@ EXPORT_SYMBOL(generic_listxattr);
 EXPORT_SYMBOL(generic_setxattr);
 EXPORT_SYMBOL(generic_removexattr);
 
-/**
- * xattr_full_name  -  Compute full attribute name from suffix
- *
- * @handler:	handler of the xattr_handler operation
- * @name:	name passed to the xattr_handler operation
- *
- * The get and set xattr handler operations are called with the remainder of
- * the attribute name after skipping the handler's prefix: for example, "foo"
- * is passed to the get operation of a handler with prefix "user." to get
- * attribute "user.foo".  The full name is still "there" in the name though.
- *
- * Note: the list xattr handler operation when called from the vfs is passed a
- * NULL name; some file systems use this operation internally, with varying
- * semantics.
- */
 const char *xattr_full_name(const struct xattr_handler *handler,
 			    const char *name)
 {
@@ -814,15 +709,11 @@ const char *xattr_full_name(const struct xattr_handler *handler,
 }
 EXPORT_SYMBOL(xattr_full_name);
 
-/*
- * Allocate new xattr and copy in the value; but leave the name to callers.
- */
 struct simple_xattr *simple_xattr_alloc(const void *value, size_t size)
 {
 	struct simple_xattr *new_xattr;
 	size_t len;
 
-	/* wrap around? */
 	len = sizeof(*new_xattr) + size;
 	if (len < sizeof(*new_xattr))
 		return NULL;
@@ -836,9 +727,6 @@ struct simple_xattr *simple_xattr_alloc(const void *value, size_t size)
 	return new_xattr;
 }
 
-/*
- * xattr GET operation for in-memory/pseudo filesystems
- */
 int simple_xattr_get(struct simple_xattrs *xattrs, const char *name,
 		     void *buffer, size_t size)
 {
@@ -870,7 +758,6 @@ static int __simple_xattr_set(struct simple_xattrs *xattrs, const char *name,
 	struct simple_xattr *new_xattr = NULL;
 	int err = 0;
 
-	/* value == NULL means remove */
 	if (value) {
 		new_xattr = simple_xattr_alloc(value, size);
 		if (!new_xattr)
@@ -914,31 +801,14 @@ out:
 
 }
 
-/**
- * simple_xattr_set - xattr SET operation for in-memory/pseudo filesystems
- * @xattrs: target simple_xattr list
- * @name: name of the new extended attribute
- * @value: value of the new xattr. If %NULL, will remove the attribute
- * @size: size of the new xattr
- * @flags: %XATTR_{CREATE|REPLACE}
- *
- * %XATTR_CREATE is set, the xattr shouldn't exist already; otherwise fails
- * with -EEXIST.  If %XATTR_REPLACE is set, the xattr should exist;
- * otherwise, fails with -ENODATA.
- *
- * Returns 0 on success, -errno on failure.
- */
 int simple_xattr_set(struct simple_xattrs *xattrs, const char *name,
 		     const void *value, size_t size, int flags)
 {
 	if (size == 0)
-		value = ""; /* empty EA, do not remove */
+		value = "";  
 	return __simple_xattr_set(xattrs, name, value, size, flags);
 }
 
-/*
- * xattr REMOVE operation for in-memory/pseudo filesystems
- */
 int simple_xattr_remove(struct simple_xattrs *xattrs, const char *name)
 {
 	return __simple_xattr_set(xattrs, name, NULL, 0, XATTR_REPLACE);
@@ -949,9 +819,6 @@ static bool xattr_is_trusted(const char *name)
 	return !strncmp(name, XATTR_TRUSTED_PREFIX, XATTR_TRUSTED_PREFIX_LEN);
 }
 
-/*
- * xattr LIST operation for in-memory/pseudo filesystems
- */
 ssize_t simple_xattr_list(struct simple_xattrs *xattrs, char *buffer,
 			  size_t size)
 {
@@ -963,7 +830,6 @@ ssize_t simple_xattr_list(struct simple_xattrs *xattrs, char *buffer,
 	list_for_each_entry(xattr, &xattrs->head, list) {
 		size_t len;
 
-		/* skip "trusted." attributes for unprivileged callers */
 		if (!trusted && xattr_is_trusted(xattr->name))
 			continue;
 
@@ -983,9 +849,6 @@ ssize_t simple_xattr_list(struct simple_xattrs *xattrs, char *buffer,
 	return used;
 }
 
-/*
- * Adds an extended attribute to the list
- */
 void simple_xattr_list_add(struct simple_xattrs *xattrs,
 			   struct simple_xattr *new_xattr)
 {

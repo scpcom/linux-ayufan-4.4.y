@@ -92,7 +92,6 @@ struct phy_info {
 	u8		RxSNR[RF_PATH_MAX];/* per-path's SNR */
 };
 
-
 struct rx_pkt_attrib	{
 	u16	pkt_len;
 	u8	physt;
@@ -234,7 +233,6 @@ struct sta_recv_priv {
 
 };
 
-
 struct recv_buf {
 	struct list_head list;
 
@@ -295,7 +293,6 @@ static inline s32 translate_percentage_to_dbm(u32 SignalStrengthIndex)
 
 	return SignalPower;
 }
-
 
 struct sta_info;
 

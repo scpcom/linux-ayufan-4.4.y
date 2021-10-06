@@ -81,7 +81,6 @@
 #define MCPDM_PDM_UP_MASK		0x7
 #define MCPDM_PDM_DN_MASK		(0x1f << 3)
 
-
 #define MCPDM_PDMOUTFORMAT_LJUST	(0 << 8)
 #define MCPDM_PDMOUTFORMAT_RJUST	(1 << 8)
 

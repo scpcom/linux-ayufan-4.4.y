@@ -649,7 +649,6 @@ static bool intel_fbdev_init_bios(struct drm_device *dev,
 		     crtc->base.id);
 	}
 
-
 	DRM_DEBUG_KMS("using BIOS fb for initial console\n");
 	return true;
 

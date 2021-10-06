@@ -161,7 +161,6 @@
 #define ENUM_ID_SHIFT                             0x08
 #define OBJECT_TYPE_SHIFT                         0x0C
 
-
 /****************************************************/
 /* Graphics Object family definition                */
 /****************************************************/
@@ -264,11 +263,9 @@
                                              GRAPH_OBJECT_ENUM_ID2 << ENUM_ID_SHIFT |\
                                              ENCODER_OBJECT_ID_EXTERNAL_SDVOA << OBJECT_ID_SHIFT)
 
-
 #define ENCODER_EXTERNAL_SDVOB_ENUM_ID1    ( GRAPH_OBJECT_TYPE_ENCODER << OBJECT_TYPE_SHIFT |\
                                              GRAPH_OBJECT_ENUM_ID1 << ENUM_ID_SHIFT |\
                                              ENCODER_OBJECT_ID_EXTERNAL_SDVOB << OBJECT_ID_SHIFT)
-
 
 #define ENCODER_TITFP513_ENUM_ID1          ( GRAPH_OBJECT_TYPE_ENCODER << OBJECT_TYPE_SHIFT |\
                                              GRAPH_OBJECT_ENUM_ID1 << ENUM_ID_SHIFT |\
@@ -294,11 +291,9 @@
                                                    GRAPH_OBJECT_ENUM_ID1 << ENUM_ID_SHIFT |\
                                                    ENCODER_OBJECT_ID_INTERNAL_KLDSCP_TMDS1 << OBJECT_ID_SHIFT)
 
-
 #define ENCODER_INTERNAL_KLDSCP_TMDS1_ENUM_ID2   ( GRAPH_OBJECT_TYPE_ENCODER << OBJECT_TYPE_SHIFT |\
                                                    GRAPH_OBJECT_ENUM_ID2 << ENUM_ID_SHIFT |\
                                                    ENCODER_OBJECT_ID_INTERNAL_KLDSCP_TMDS1 << OBJECT_ID_SHIFT)
-
 
 #define ENCODER_INTERNAL_KLDSCP_DVO1_ENUM_ID1    ( GRAPH_OBJECT_TYPE_ENCODER << OBJECT_TYPE_SHIFT |\
                                                    GRAPH_OBJECT_ENUM_ID1 << ENUM_ID_SHIFT |\
@@ -613,7 +608,6 @@
                                                  GRAPH_OBJECT_ENUM_ID2 << ENUM_ID_SHIFT |\
                                                  CONNECTOR_OBJECT_ID_CROSSFIRE << OBJECT_ID_SHIFT)
 
-
 #define CONNECTOR_HARDCODE_DVI_ENUM_ID1        ( GRAPH_OBJECT_TYPE_CONNECTOR << OBJECT_TYPE_SHIFT |\
                                                  GRAPH_OBJECT_ENUM_ID1 << ENUM_ID_SHIFT |\
                                                  CONNECTOR_OBJECT_ID_HARDCODE_DVI << OBJECT_ID_SHIFT)
@@ -720,7 +714,6 @@
 #define GRAPHICS_OBJECT_CAP_I2C                 0x00000001L
 #define GRAPHICS_OBJECT_CAP_TABLE_ID            0x00000002L
 
-
 #define GRAPHICS_OBJECT_I2CCOMMAND_TABLE_ID                   0x01
 #define GRAPHICS_OBJECT_HOTPLUGDETECTIONINTERUPT_TABLE_ID     0x02
 #define GRAPHICS_OBJECT_ENCODER_OUTPUT_PROTECTION_TABLE_ID    0x03
@@ -730,7 +723,3 @@
 #endif
 
 #endif  /*GRAPHICTYPE */
-
-
-
-

@@ -21,7 +21,6 @@
 #include "vmci_resource.h"
 #include "vmci_driver.h"
 
-
 #define VMCI_RESOURCE_HASH_BITS         7
 #define VMCI_RESOURCE_HASH_BUCKETS      (1 << VMCI_RESOURCE_HASH_BITS)
 
@@ -100,7 +99,6 @@ static u32 vmci_resource_find_id(u32 context_id,
 
 	return VMCI_INVALID_ID;
 }
-
 
 int vmci_resource_add(struct vmci_resource *resource,
 		      enum vmci_resource_type resource_type,

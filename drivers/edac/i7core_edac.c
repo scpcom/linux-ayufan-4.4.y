@@ -57,7 +57,6 @@ MODULE_PARM_DESC(use_pci_fixup, "Enable PCI fixup to seek for hidden devices");
  */
 #define MAX_SOCKET_BUSES	2
 
-
 /*
  * Alter this version for the module when modifications are made
  */
@@ -120,7 +119,6 @@ MODULE_PARM_DESC(use_pci_fixup, "Enable PCI fixup to seek for hidden devices");
 
 #define DIMM_TOP_COR_ERR(r)			(((r) >> 16) & 0x7fff)
 #define DIMM_BOT_COR_ERR(r)			((r) & 0x7fff)
-
 
 	/* OFFSETS for Devices 4,5 and 6 Function 0 */
 
@@ -207,7 +205,6 @@ struct i7core_info {
 	u32	max_dod;
 	u32	ch_map;
 };
-
 
 struct i7core_inject {
 	int	enable;
@@ -557,7 +554,6 @@ static int get_dimm_config(struct mem_ctl_info *mci)
 		/* Devices 4-6 function 0 */
 		pci_read_config_dword(pvt->pci_ch[i][0],
 				MC_CHANNEL_DIMM_INIT_PARAMS, &data);
-
 
 		if (data & THREE_DIMMS_PRESENT)
 			pvt->channel[i].is_3dimms_present = true;
@@ -1020,7 +1016,6 @@ static ssize_t i7core_inject_enable_store(struct device *dev,
 	edac_dbg(0, "Error inject addr match 0x%016llx, ecc 0x%08x, inject 0x%08x\n",
 		 mask, pvt->inject.eccmask, injectmask);
 
-
 	return count;
 }
 
@@ -1149,7 +1144,6 @@ static DEVICE_ATTR(inject_section, S_IRUGO | S_IWUSR,
 
 static DEVICE_ATTR(inject_type, S_IRUGO | S_IWUSR,
 		   i7core_inject_type_show, i7core_inject_type_store);
-
 
 static DEVICE_ATTR(inject_eccmask, S_IRUGO | S_IWUSR,
 		   i7core_inject_eccmask_show, i7core_inject_eccmask_store);
@@ -1931,7 +1925,6 @@ struct memdev_dmi_entry {
 	u16 conf_mem_clk_speed;
 } __attribute__((__packed__));
 
-
 /*
  * Decode the DRAM Clock Frequency, be paranoid, make sure that all
  * memory devices show the same speed, and if they don't then consider
@@ -2237,7 +2230,6 @@ static int i7core_register_mci(struct i7core_dev *i7core_dev)
 	rc = mci_bind_devs(mci, i7core_dev);
 	if (unlikely(rc < 0))
 		goto fail0;
-
 
 	/* Get dimm basic config */
 	get_dimm_config(mci);

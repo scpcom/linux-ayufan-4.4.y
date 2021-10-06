@@ -113,7 +113,6 @@ static void sim_notify_interp(unsigned long load_addr)
 	}
 }
 
-
 int arch_setup_additional_pages(struct linux_binprm *bprm,
 				int executable_stack)
 {
@@ -153,7 +152,6 @@ int arch_setup_additional_pages(struct linux_binprm *bprm,
 
 	return retval;
 }
-
 
 void elf_plat_init(struct pt_regs *regs, unsigned long load_addr)
 {

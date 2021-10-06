@@ -107,7 +107,6 @@ void homecache_free_pages(unsigned long addr, unsigned int order);
 #define __homecache_free_page(page) __homecache_free_pages((page), 0)
 #define homecache_free_page(page) homecache_free_pages((page), 0)
 
-
 /*
  * Report the page home for LOWMEM pages by examining their kernel PTE,
  * or for highmem pages as the default home.
@@ -118,6 +117,5 @@ extern int page_home(struct page *);
 
 #define homecache_kpte_lock() 0
 #define homecache_kpte_unlock(flags) do {} while (0)
-
 
 #endif /* _ASM_TILE_HOMECACHE_H */

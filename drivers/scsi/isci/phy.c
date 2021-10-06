@@ -668,7 +668,6 @@ static const char *phy_event_name(u32 event_code)
 		phy_to_host(iphy)->id, iphy->phy_index, \
 		phy_state_name(state), phy_event_name(code), code)
 
-
 void scu_link_layer_set_txcomsas_timeout(struct isci_phy *iphy, u32 timeout)
 {
 	u32 val;
@@ -1416,7 +1415,6 @@ void isci_phy_init(struct isci_phy *iphy, struct isci_host *ihost, int index)
 	iphy->sas_phy.linkrate = SAS_LINK_RATE_UNKNOWN;
 	memset(&iphy->frame_rcvd, 0, sizeof(iphy->frame_rcvd));
 }
-
 
 /**
  * isci_phy_control() - This function is one of the SAS Domain Template

@@ -8,7 +8,6 @@
 #ifndef _SERIO_H
 #define _SERIO_H
 
-
 #include <linux/types.h>
 #include <linux/interrupt.h>
 #include <linux/list.h>

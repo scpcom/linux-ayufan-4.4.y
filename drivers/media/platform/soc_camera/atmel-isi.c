@@ -667,7 +667,6 @@ static int isi_camera_try_bus_param(struct soc_camera_device *icd,
 	return -EINVAL;
 }
 
-
 static int isi_camera_get_formats(struct soc_camera_device *icd,
 				  unsigned int idx,
 				  struct soc_camera_format_xlate *xlate)

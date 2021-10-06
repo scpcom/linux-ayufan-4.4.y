@@ -131,7 +131,6 @@ extern atomic_t DEBUG_LEVEL;
 #endif
 #define LINUX_TX_SIZE	(64 * 1024)
 
-
 #define WILC_MULTICAST_TABLE_SIZE	8
 
 #if defined (BEAGLE_BOARD)

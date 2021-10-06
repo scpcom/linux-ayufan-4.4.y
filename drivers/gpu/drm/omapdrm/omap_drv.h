@@ -116,7 +116,6 @@ struct omap_drm_private {
 	} commit;
 };
 
-
 #ifdef CONFIG_DEBUG_FS
 int omap_debugfs_init(struct drm_minor *minor);
 void omap_debugfs_cleanup(struct drm_minor *minor);

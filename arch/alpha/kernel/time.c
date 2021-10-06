@@ -72,14 +72,11 @@ void arch_irq_work_raise(void)
 
 #endif /* CONFIG_IRQ_WORK */
 
-
 static inline __u32 rpcc(void)
 {
 	return __builtin_alpha_rpcc();
 }
 
-
-
 /*
  * The RTC as a clock_event_device primitive.
  */
@@ -128,7 +125,6 @@ init_rtc_clockevent(void)
 	clockevents_config_and_register(ce, CONFIG_HZ, 0, 0);
 }
 
-
 /*
  * The QEMU clock as a clocksource primitive.
  */
@@ -147,7 +143,6 @@ static struct clocksource qemu_cs = {
 	.flags                  = CLOCK_SOURCE_IS_CONTINUOUS,
 	.max_idle_ns		= LONG_MAX
 };
-
 
 /*
  * The QEMU alarm as a clock_event_device primitive.
@@ -198,7 +193,6 @@ init_qemu_clockevent(void)
 	clockevents_config_and_register(ce, NSEC_PER_SEC, 1000, LONG_MAX);
 }
 
-
 void __init
 common_init_rtc(void)
 {
@@ -244,7 +238,6 @@ common_init_rtc(void)
 	init_rtc_irq();
 }
 
-
 #ifndef CONFIG_ALPHA_WTINT
 /*
  * The RPCC as a clocksource primitive.
@@ -274,7 +267,6 @@ static struct clocksource clocksource_rpcc = {
 };
 #endif /* ALPHA_WTINT */
 
-
 /* Validate a computed cycle counter result against the known bounds for
    the given processor core.  There's too much brokenness in the way of
    timing hardware for any one method to work everywhere.  :-(
@@ -329,7 +321,6 @@ validate_cc_value(unsigned long cc)
 
 	return cc;
 }
-
 
 /*
  * Calibrate CPU clock using legacy 8254 timer/counter. Stolen from

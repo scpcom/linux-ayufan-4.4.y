@@ -785,7 +785,6 @@ static ssize_t set_pwm_auto_point_temp(struct device *dev,
 	if (err)
 		return err;
 
-
 	mutex_lock(&data->update_lock);
 
 	/* sync the data cache */

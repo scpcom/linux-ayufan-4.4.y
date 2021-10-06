@@ -103,14 +103,12 @@ enum si476x_icop_config {
 	SI476X_ICOP_IC_LINK	= 30,
 };
 
-
 enum si476x_lrout_config {
 	SI476X_LROUT_NOOP	= 0,
 	SI476X_LROUT_TRISTATE	= 1,
 	SI476X_LROUT_AUDIO	= 2,
 	SI476X_LROUT_MPX	= 3,
 };
-
 
 enum si476x_intb_config {
 	SI476X_INTB_NOOP     = 0,
@@ -124,7 +122,6 @@ enum si476x_a1_config {
 	SI476X_A1_TRISTATE = 1,
 	SI476X_A1_IRQ      = 40,
 };
-
 
 struct si476x_pinmux {
 	enum si476x_dclk_config  dclk;
@@ -189,7 +186,6 @@ enum si476x_func {
 	SI476X_FUNC_WB_RECEIVER = 3,
 };
 
-
 /**
  * @xcload: Selects the amount of additional on-chip capacitance to
  *          be connected between XTAL1 and gnd and between XTAL2 and
@@ -224,7 +220,6 @@ struct si476x_power_up_args {
 	enum si476x_xmode   xmode;
 };
 
-
 /**
  * enum si476x_phase_diversity_mode - possbile phase diversity modes
  * for SI4764/5/6/7 chips.
@@ -250,7 +245,6 @@ enum si476x_phase_diversity_mode {
 	SI476X_PHDIV_SECONDARY_COMBINING	= 5,
 };
 
-
 /*
  * Platform dependent definition
  */
@@ -262,6 +256,5 @@ struct si476x_platform_data {
 
 	struct si476x_pinmux pinmux;
 };
-
 
 #endif /* __SI476X_PLATFORM_H__ */

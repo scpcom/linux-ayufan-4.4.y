@@ -107,7 +107,6 @@ int create_rt_thread(pthread_t *pth, void*(*func)(void *), void *arg,
 	return 0;
 }
 
-
 void *waiterfn(void *arg)
 {
 	struct thread_arg *args = (struct thread_arg *)arg;

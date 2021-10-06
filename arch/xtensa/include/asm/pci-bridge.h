@@ -75,7 +75,6 @@ static inline void pcibios_init_resource(struct resource *res,
 	res->child = NULL;
 }
 
-
 /* These are used for config access before all the PCI probing has been done. */
 int early_read_config_byte(struct pci_controller*, int, int, int, u8*);
 int early_read_config_word(struct pci_controller*, int, int, int, u16*);

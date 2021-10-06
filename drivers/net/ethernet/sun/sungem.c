@@ -1249,7 +1249,6 @@ static void gem_stop_dma(struct gem *gp)
 	/* Need to wait a bit ... done by the caller */
 }
 
-
 // XXX dbl check what that function should do when called on PCS PHY
 static void gem_begin_auto_negotiation(struct gem *gp, struct ethtool_cmd *ep)
 {
@@ -1363,7 +1362,6 @@ static int gem_set_link_modes(struct gem *gp)
 
 	netif_info(gp, link, gp->dev, "Link is up at %d Mbps, %s-duplex\n",
 		   speed, (full_duplex ? "full" : "half"));
-
 
 	/* We take the tx queue lock to avoid collisions between
 	 * this code, the tx path and the NAPI-driven error path
@@ -1911,7 +1909,6 @@ static void gem_init_pause_thresholds(struct gem *gp)
 		gp->rx_pause_on = on;
 	}
 
-
 	/* Configure the chip "burst" DMA mode & enable some
 	 * HW bug fixes on Apple version
 	 */
@@ -2069,7 +2066,6 @@ static void gem_reinit_chip(struct gem *gp)
 	gem_init_dma(gp);
 	gem_init_mac(gp);
 }
-
 
 static void gem_stop_phy(struct gem *gp, int wol)
 {
@@ -2637,7 +2633,6 @@ static void gem_set_msglevel(struct net_device *dev, u32 value)
 	gp->msg_enable = value;
 }
 
-
 /* Add more when I understand how to program the chip */
 /* like WAKE_UCAST | WAKE_MCAST | WAKE_BCAST */
 
@@ -3012,7 +3007,6 @@ err_disable_device:
 	return err;
 
 }
-
 
 static struct pci_driver gem_driver = {
 	.name		= GEM_MODULE_NAME,

@@ -258,11 +258,9 @@
 #define NI_DIG4_REGISTER_OFFSET                 (0x12000 - 0x7000)
 #define NI_DIG5_REGISTER_OFFSET                 (0x12C00 - 0x7000)
 
-
 #define NI_DIG_FE_CNTL                               0x7000
 #       define NI_DIG_FE_CNTL_SOURCE_SELECT(x)        ((x) & 0x3)
 #       define NI_DIG_FE_CNTL_SYMCLK_FE_ON            (1<<24)
-
 
 #define NI_DIG_BE_CNTL                    0x7140
 #       define NI_DIG_BE_CNTL_FE_SOURCE_SELECT(x)     (((x) >> 8 ) & 0x3F)
@@ -280,7 +278,6 @@
 #define EVERGREEN_DP3_REGISTER_OFFSET                 (0x1170C - 0x730C)
 #define EVERGREEN_DP4_REGISTER_OFFSET                 (0x1230C - 0x730C)
 #define EVERGREEN_DP5_REGISTER_OFFSET                 (0x12F0C - 0x730C)
-
 
 #define EVERGREEN_DP_VID_STREAM_CNTL                    0x730C
 #       define EVERGREEN_DP_VID_STREAM_CNTL_ENABLE     (1 << 0)

@@ -3,7 +3,6 @@
 
 #include <uapi/asm/termios.h>
 
-
 /*
  * c_cc characters in the termio structure.  Oh, how I love being
  * backwardly compatible.  Notice that character 4 and 5 are

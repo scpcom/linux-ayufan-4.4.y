@@ -120,7 +120,6 @@ static struct usb_function *f_phonet_cfg2;
 static struct usb_function *f_msg_cfg1;
 static struct usb_function *f_msg_cfg2;
 
-
 static struct usb_configuration nokia_config_500ma_driver = {
 	.label		= "Bus Powered",
 	.bConfigurationValue = 1,

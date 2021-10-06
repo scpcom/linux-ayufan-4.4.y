@@ -1363,7 +1363,6 @@ int ext4_ind_remove_space(handle_t *handle, struct inode *inode,
 			goto end_range;
 		}
 
-
 		partial = ext4_find_shared(inode, n, offsets, chain, &nr);
 		if (nr) {
 			if (partial == chain) {

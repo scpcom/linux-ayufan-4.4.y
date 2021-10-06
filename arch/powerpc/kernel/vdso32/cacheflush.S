@@ -69,7 +69,6 @@ V_FUNCTION_BEGIN(__kernel_sync_dicache)
   .cfi_endproc
 V_FUNCTION_END(__kernel_sync_dicache)
 
-
 /*
  * POWER5 version of __kernel_sync_dicache
  */
@@ -82,4 +81,3 @@ V_FUNCTION_BEGIN(__kernel_sync_dicache_p5)
 	blr
   .cfi_endproc
 V_FUNCTION_END(__kernel_sync_dicache_p5)
-

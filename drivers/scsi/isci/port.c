@@ -227,7 +227,6 @@ static void isci_port_link_up(struct isci_host *isci_host,
 						    PORTE_BYTES_DMAED);
 }
 
-
 /**
  * isci_port_link_down() - This function is called by the sci core when a link
  *    becomes inactive.
@@ -711,8 +710,6 @@ static void sci_port_general_link_up_handler(struct isci_port *iport,
 	} else
 		sci_port_invalid_link_up(iport, iphy);
 }
-
-
 
 /**
  * This method returns false if the port only has a single phy object assigned.

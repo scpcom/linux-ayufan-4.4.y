@@ -433,7 +433,6 @@ out_abort:
 	return 0;
 }
 
-
 /*
  *  timer daemon.
  *
@@ -483,7 +482,6 @@ static void sym_timer(struct sym_hcb *np)
 	sym_wakeup_done(np);
 #endif
 }
-
 
 /*
  *  PCI BUS error handler.
@@ -574,7 +572,6 @@ static void sym53c8xx_timer(unsigned long npref)
 	sym_timer(np);
 	spin_unlock_irqrestore(np->s.host->host_lock, flags);
 }
-
 
 /*
  *  What the eh thread wants us to perform.
@@ -684,7 +681,6 @@ static int sym_eh_handler(int op, char *opname, struct scsi_cmnd *cmd)
 			sts==0 ? "complete" :sts==-2 ? "timed-out" : "failed");
 	return sts ? SCSI_FAILED : SCSI_SUCCESS;
 }
-
 
 /*
  * Error handlers called from the eh thread (one thread per HBA).
@@ -875,7 +871,6 @@ static const char *sym53c8xx_info (struct Scsi_Host *host)
 	return SYM_DRIVER_NAME;
 }
 
-
 #ifdef SYM_LINUX_PROC_INFO_SUPPORT
 /*
  *  Proc file system stuff
@@ -1025,7 +1020,6 @@ static int is_keyword(char *ptr, int len, char *verb)
 		return -EINVAL;						\
 	ptr += arg_len; len -= arg_len;
 
-
 /*
  * Parse a control command
  */
@@ -1167,7 +1161,6 @@ printk("sym_user_command: data=%ld\n", uc->data);
 }
 
 #endif	/* SYM_LINUX_USER_COMMAND_SUPPORT */
-
 
 /*
  *  Copy formatted information into the input buffer.
@@ -1396,7 +1389,6 @@ static struct Scsi_Host *sym_attach(struct scsi_host_template *tpnt, int unit,
 
 	return NULL;
  }
-
 
 /*
  *    Detect and try to read SYMBIOS and TEKRAM NVRAM.

@@ -315,7 +315,6 @@ u64 octeon_get_io_clock_rate(void)
 }
 EXPORT_SYMBOL(octeon_get_io_clock_rate);
 
-
 /**
  * Write to the LCD display connected to the bootbus. This display
  * exists on most Cavium evaluation boards. If it doesn't exist, then
@@ -422,7 +421,6 @@ static void octeon_restart(char *command)
 			cvmx_write_csr(CVMX_CIU_SOFT_RST, 1);
 }
 
-
 /**
  * Permanently stop a core.
  *
@@ -441,7 +439,6 @@ static void octeon_kill_core(void *arg)
 	while (true)
 		asm volatile ("wait" ::: "memory");
 }
-
 
 /**
  * Halt the system

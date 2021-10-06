@@ -94,7 +94,6 @@
 #define   MS_OC_INT_EN			(1 << 23)
 #define   SD_OC_INT_EN			(1 << 22)
 
-
 /*
  * macros for easy use
  */

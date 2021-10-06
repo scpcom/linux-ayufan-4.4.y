@@ -96,4 +96,3 @@ cris_flush_line:
 	ret
 	nop
 	.size	cris_flush_cache, . - cris_flush_cache
-

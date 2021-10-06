@@ -60,4 +60,3 @@
 #define PM80XX_IB_OB_QUEUE_SIZE         (32 * 1024)
 #define PM8001_IB_OB_QUEUE_SIZE         (16 * 1024)
 #endif /* PM8001_CTL_H_INCLUDED */
-

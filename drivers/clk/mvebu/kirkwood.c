@@ -226,7 +226,6 @@ static const struct clk_gating_soc_desc kirkwood_gating_desc[] __initconst = {
 	{ }
 };
 
-
 /*
  * Clock Muxing Control
  */
@@ -325,7 +324,6 @@ static void __init kirkwood_clk_init(struct device_node *np)
 {
 	struct device_node *cgnp =
 		of_find_compatible_node(NULL, NULL, "marvell,kirkwood-gating-clock");
-
 
 	if (of_device_is_compatible(np, "marvell,mv88f6180-core-clock"))
 		mvebu_coreclk_setup(np, &mv88f6180_coreclks);

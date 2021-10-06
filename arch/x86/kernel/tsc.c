@@ -439,7 +439,6 @@ static unsigned long calc_pmtimer_ref(u64 deltatsc, u64 pm1, u64 pm2)
 #define CAL2_LATCH	(PIT_TICK_RATE / (1000 / CAL2_MS))
 #define CAL2_PIT_LOOPS	5000
 
-
 /*
  * Try to calibrate the TSC against the Programmable
  * Interrupt Timer and return the frequency of the TSC
@@ -845,7 +844,6 @@ int recalibrate_cpu_khz(void)
 
 EXPORT_SYMBOL(recalibrate_cpu_khz);
 
-
 static unsigned long long cyc2ns_suspend;
 
 void tsc_save_sched_clock_state(void)
@@ -1071,7 +1069,6 @@ int unsynchronized_tsc(void)
 	return 0;
 }
 
-
 static void tsc_refine_calibration_work(struct work_struct *work);
 static DECLARE_DELAYED_WORK(tsc_irqwork, tsc_refine_calibration_work);
 /**
@@ -1144,7 +1141,6 @@ static void tsc_refine_calibration_work(struct work_struct *work)
 out:
 	clocksource_register_khz(&clocksource_tsc, tsc_khz);
 }
-
 
 static int __init init_tsc_clocksource(void)
 {

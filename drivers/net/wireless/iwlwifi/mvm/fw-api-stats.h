@@ -207,7 +207,6 @@ struct mvm_statistics_tx {
 	struct mvm_statistics_tx_channel_width channel_width;
 } __packed; /* STATISTICS_TX_API_S_VER_4 */
 
-
 struct mvm_statistics_bt_activity {
 	__le32 hi_priority_tx_req_cnt;
 	__le32 hi_priority_tx_denied_cnt;

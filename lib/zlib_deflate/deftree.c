@@ -342,7 +342,6 @@ static void init_block(
 #define SMALLEST 1
 /* Index within the heap array of least frequent node in the Huffman tree */
 
-
 /* ===========================================================================
  * Remove the smallest element from the heap and recreate the heap with
  * one less element. Updates heap and heap_len.
@@ -814,7 +813,6 @@ void zlib_tr_stored_type_only(
     s->compressed_len = (s->compressed_len + 3) & ~7L;
 }
 
-
 /* ===========================================================================
  * Send one empty static block to give enough lookahead for inflate.
  * This takes 10 bits, of which 7 may remain in the bit buffer.
@@ -1110,4 +1108,3 @@ static void copy_block(
     memcpy(&s->pending_buf[s->pending], buf, len);
     s->pending += len;
 }
-

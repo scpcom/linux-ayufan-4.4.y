@@ -68,7 +68,6 @@
 static char mv643xx_eth_driver_name[] = "mv643xx_eth";
 static char mv643xx_eth_driver_version[] = "1.4";
 
-
 /*
  * Registers shared between all ports.
  */
@@ -157,7 +156,6 @@ static char mv643xx_eth_driver_version[] = "1.4";
 #define OTHER_MCAST_TABLE(p)		(0x1500 + ((p) << 10))
 #define UNICAST_TABLE(p)		(0x1600 + ((p) << 10))
 
-
 /*
  * SDMA configuration register default value.
  */
@@ -174,7 +172,6 @@ static char mv643xx_eth_driver_version[] = "1.4";
 #else
 #error One of __BIG_ENDIAN or __LITTLE_ENDIAN must be defined
 #endif
-
 
 /*
  * Misc definitions.
@@ -268,7 +265,6 @@ struct tx_desc {
 
 #define TX_IHL_SHIFT			11
 
-
 /* global *******************************************************************/
 struct mv643xx_eth_shared_private {
 	/*
@@ -296,7 +292,6 @@ struct mv643xx_eth_shared_private {
 
 static int mv643xx_eth_open(struct net_device *dev);
 static int mv643xx_eth_stop(struct net_device *dev);
-
 
 /* per-port *****************************************************************/
 struct mib_counters {
@@ -429,7 +424,6 @@ struct mv643xx_eth_private {
 	unsigned int t_clk;
 };
 
-
 /* port register accessors **************************************************/
 static inline u32 rdl(struct mv643xx_eth_private *mp, int offset)
 {
@@ -450,7 +444,6 @@ static inline void wrlp(struct mv643xx_eth_private *mp, int offset, u32 data)
 {
 	writel(data, mp->base + offset);
 }
-
 
 /* rxq/txq helper functions *************************************************/
 static struct mv643xx_eth_private *rxq_to_mp(struct rx_queue *rxq)
@@ -665,7 +658,6 @@ static int rxq_refill(struct rx_queue *rxq, int budget)
 oom:
 	return refilled;
 }
-
 
 /* tx ***********************************************************************/
 static inline unsigned int has_tiny_unaligned_frags(struct sk_buff *skb)
@@ -1046,7 +1038,6 @@ static netdev_tx_t mv643xx_eth_xmit(struct sk_buff *skb, struct net_device *dev)
 	return NETDEV_TX_OK;
 }
 
-
 /* tx napi ******************************************************************/
 static void txq_kick(struct tx_queue *txq)
 {
@@ -1143,7 +1134,6 @@ static int txq_reclaim(struct tx_queue *txq, int budget, int force)
 	return reclaimed;
 }
 
-
 /* tx rate control **********************************************************/
 /*
  * Set total maximum TX rate (shared by all TX queues for this port)
@@ -1224,7 +1214,6 @@ static void txq_set_fixed_prio_mode(struct tx_queue *txq)
 		wrlp(mp, off, val);
 	}
 }
-
 
 /* mii management interface *************************************************/
 static void mv643xx_eth_adjust_link(struct net_device *dev)
@@ -1357,7 +1346,6 @@ static void mib_counters_timer_wrapper(unsigned long _mp)
 	mod_timer(&mp->mib_counters_timer, jiffies + 30 * HZ);
 }
 
-
 /* interrupt coalescing *****************************************************/
 /*
  * Hardware coalescing parameters are set in units of 64 t_clk
@@ -1435,7 +1423,6 @@ static void set_tx_coal(struct mv643xx_eth_private *mp, unsigned int usec)
 
 	wrlp(mp, TX_FIFO_URGENT_THRESHOLD, temp << 4);
 }
-
 
 /* ethtool ******************************************************************/
 struct mv643xx_eth_stats {
@@ -1691,7 +1678,6 @@ mv643xx_eth_set_ringparam(struct net_device *dev, struct ethtool_ringparam *er)
 	return 0;
 }
 
-
 static int
 mv643xx_eth_set_features(struct net_device *dev, netdev_features_t features)
 {
@@ -1768,7 +1754,6 @@ static const struct ethtool_ops mv643xx_eth_ethtool_ops = {
 	.get_wol                = mv643xx_eth_get_wol,
 	.set_wol                = mv643xx_eth_set_wol,
 };
-
 
 /* address handling *********************************************************/
 static void uc_addr_get(struct mv643xx_eth_private *mp, unsigned char *addr)
@@ -1942,7 +1927,6 @@ static int mv643xx_eth_set_mac_address(struct net_device *dev, void *addr)
 	return 0;
 }
 
-
 /* rx/tx queue initialisation ***********************************************/
 static int rxq_init(struct mv643xx_eth_private *mp, int index)
 {
@@ -1997,7 +1981,6 @@ static int rxq_init(struct mv643xx_eth_private *mp, int index)
 	}
 
 	return 0;
-
 
 out_free:
 	if (index == 0 && size <= mp->rx_desc_sram_size)
@@ -2150,7 +2133,6 @@ static void txq_deinit(struct tx_queue *txq)
 				  txq->tx_ring_size * TSO_HEADER_SIZE,
 				  txq->tso_hdrs, txq->tso_hdrs_dma);
 }
-
 
 /* netdev ops and related ***************************************************/
 static int mv643xx_eth_collect_events(struct mv643xx_eth_private *mp)
@@ -2484,7 +2466,6 @@ static int mv643xx_eth_open(struct net_device *dev)
 
 	return 0;
 
-
 out_free:
 	for (i = 0; i < mp->rxq_count; i++)
 		rxq_deinit(mp->rxq + i);
@@ -2629,7 +2610,6 @@ static void mv643xx_eth_netpoll(struct net_device *dev)
 	wrlp(mp, INT_MASK, mp->int_mask);
 }
 #endif
-
 
 /* platform glue ************************************************************/
 static void
@@ -3153,7 +3133,6 @@ static int mv643xx_eth_probe(struct platform_device *pdev)
 
 	init_pscr(mp, pd->speed, pd->duplex);
 
-
 	mib_counters_clear(mp);
 
 	setup_timer(&mp->mib_counters_timer, mib_counters_timer_wrapper,
@@ -3167,7 +3146,6 @@ static int mv643xx_eth_probe(struct platform_device *pdev)
 	netif_napi_add(dev, &mp->napi, mv643xx_eth_poll, NAPI_POLL_WEIGHT);
 
 	setup_timer(&mp->rx_oom, oom_timer_wrapper, (unsigned long)mp);
-
 
 	res = platform_get_resource(pdev, IORESOURCE_IRQ, 0);
 	BUG_ON(!res);

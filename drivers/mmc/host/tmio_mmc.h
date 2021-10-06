@@ -205,5 +205,4 @@ static inline void sd_ctrl_write32(struct tmio_mmc_host *host, int addr, u32 val
 	writew(val >> 16, host->ctl + ((addr + 2) << host->bus_shift));
 }
 
-
 #endif

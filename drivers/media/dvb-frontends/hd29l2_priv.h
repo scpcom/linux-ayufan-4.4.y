@@ -30,7 +30,6 @@
 
 #define HD29L2_XTAL 30400000 /* Hz */
 
-
 #define HD29L2_QAM4NR 0x00
 #define HD29L2_QAM4   0x01
 #define HD29L2_QAM16  0x02

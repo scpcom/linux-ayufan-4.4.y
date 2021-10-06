@@ -131,4 +131,3 @@ ENTRY(cpu_set_pte)
 	@dcacheline_flush	r0, r2, ip
 #endif
 	mov	pc, lr
-

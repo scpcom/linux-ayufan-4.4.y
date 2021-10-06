@@ -185,7 +185,6 @@ static void omap_crtc_set_enabled(struct drm_crtc *crtc, bool enable)
 	}
 }
 
-
 static int omap_crtc_dss_enable(struct omap_overlay_manager *mgr)
 {
 	struct omap_crtc *omap_crtc = omap_crtcs[mgr->id];

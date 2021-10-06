@@ -916,7 +916,6 @@ SOC_DAPM_SINGLE("DAC Switch", WM8996_DSP2_TX_RIGHT_MIXER_ROUTING,
 		0, 1, 0),
 };
 
-
 static const struct snd_soc_dapm_widget wm8996_dapm_widgets[] = {
 SND_SOC_DAPM_INPUT("IN1LN"),
 SND_SOC_DAPM_INPUT("IN1LP"),

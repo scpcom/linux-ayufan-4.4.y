@@ -31,7 +31,6 @@
 #include <asm/div64.h>
 #include "isabelle.h"
 
-
 /* Register default values for ISABELLE driver. */
 static const struct reg_default isabelle_reg_defs[] = {
 	{ 0, 0x00 },

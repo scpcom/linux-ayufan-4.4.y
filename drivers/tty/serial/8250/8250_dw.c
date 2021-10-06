@@ -53,7 +53,6 @@
 /* Helper for fifo size calculation */
 #define DW_UART_CPR_FIFO_SIZE(a)	(((a >> 16) & 0xff) * 16)
 
-
 struct dw8250_data {
 	u8			usr_reg;
 	int			line;

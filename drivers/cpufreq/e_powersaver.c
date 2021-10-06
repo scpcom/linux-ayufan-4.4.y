@@ -397,7 +397,6 @@ static struct cpufreq_driver eps_driver = {
 	.attr		= cpufreq_generic_attr,
 };
 
-
 /* This driver will work only on Centaur C7 processors with
  * Enhanced SpeedStep/PowerSaver registers */
 static const struct x86_cpu_id eps_cpu_id[] = {

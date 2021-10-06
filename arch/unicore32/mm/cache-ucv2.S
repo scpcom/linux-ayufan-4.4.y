@@ -209,4 +209,3 @@ ENTRY(__cpuc_dma_flush_range)
 	nop8
 
 	mov	pc, lr
-

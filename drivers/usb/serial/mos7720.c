@@ -1442,7 +1442,6 @@ static int calc_baud_rate_divisor(struct usb_serial_port *port, int baudrate, in
 	__u16 round1;
 	__u16 round;
 
-
 	dev_dbg(&port->dev, "%s - %d\n", __func__, baudrate);
 
 	for (i = 0; i < ARRAY_SIZE(divisor_table); i++) {
@@ -1615,7 +1614,6 @@ static void change_port_settings(struct tty_struct *tty,
 	mos7720_port->shadowLCR &=
 		~(LCR_BITS_MASK | LCR_STOP_MASK | LCR_PAR_MASK);
 	mos7720_port->shadowLCR |= (lData | lParity | lStop);
-
 
 	/* Disable Interrupts */
 	write_mos_reg(serial, port_number, MOS7720_IER, 0x00);

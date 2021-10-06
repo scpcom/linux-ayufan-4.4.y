@@ -168,7 +168,6 @@ register_appl(struct capi_ctr *ctr, u16 applid, capi_register_params *rparam)
 		       __func__);
 }
 
-
 static void release_appl(struct capi_ctr *ctr, u16 applid)
 {
 	DBG("applid %#x", applid);

@@ -46,7 +46,6 @@
 #include <linux/uaccess.h>
 #include <linux/io.h>
 
-
 #define WATCHDOG_VERSION	"1.14"
 #define WATCHDOG_NAME		"IT87 WDT"
 #define DRIVER_VERSION		WATCHDOG_NAME " driver, v" WATCHDOG_VERSION "\n"

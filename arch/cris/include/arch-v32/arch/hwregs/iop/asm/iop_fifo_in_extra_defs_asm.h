@@ -146,7 +146,6 @@
 #define reg_iop_fifo_in_extra_r_masked_intr___orun___bit 4
 #define reg_iop_fifo_in_extra_r_masked_intr_offset 24
 
-
 /* Constants */
 #define regk_iop_fifo_in_extra_fifo_in            0x00000002
 #define regk_iop_fifo_in_extra_no                 0x00000000

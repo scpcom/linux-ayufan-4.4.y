@@ -1082,7 +1082,6 @@ out:
 	return;
 }
 
-
 static void
 lpfc_mbx_cmpl_local_config_link(struct lpfc_hba *phba, LPFC_MBOXQ_t *pmb)
 {
@@ -3262,7 +3261,6 @@ lpfc_mbx_issue_link_down(struct lpfc_hba *phba)
 	/* turn on Link Attention interrupts - no CLEAR_LA needed */
 }
 
-
 /*
  * This routine handles processing a READ_TOPOLOGY mailbox
  * command upon completion. It is setup in the LPFC_MBOXQ
@@ -3663,7 +3661,6 @@ lpfc_create_static_vport(struct lpfc_hba *phba)
 
 	} while (byte_count &&
 		offset < sizeof(struct static_vport_info));
-
 
 	if ((le32_to_cpu(vport_info->signature) != VPORT_INFO_SIG) ||
 		((le32_to_cpu(vport_info->rev) & VPORT_INFO_REV_MASK)
@@ -4266,7 +4263,6 @@ lpfc_enable_node(struct lpfc_vport *vport, struct lpfc_nodelist *ndlp,
 				 ndlp->nlp_usg_map, ndlp);
 	}
 
-
 	if (state != NLP_STE_UNUSED_NODE)
 		lpfc_nlp_set_state(vport, ndlp, state);
 
@@ -4317,7 +4313,6 @@ lpfc_set_disctmo(struct lpfc_vport *vport)
 		 */
 		tmo = ((phba->fc_ratov * 3) + 3);
 	}
-
 
 	if (!timer_pending(&vport->fc_disctmo)) {
 		lpfc_debugfs_disc_trc(vport, LPFC_DISC_TRC_ELS_CMD,
@@ -4694,7 +4689,6 @@ lpfc_cleanup_node(struct lpfc_vport *vport, struct lpfc_nodelist *ndlp)
 				atomic_read(&ndlp->kref.refcount));
 		lpfc_disable_node(vport, ndlp);
 	}
-
 
 	/* Don't need to clean up REG_LOGIN64 cmds for Default RPI cleanup */
 
@@ -5727,8 +5721,6 @@ lpfc_nlp_init(struct lpfc_vport *vport, struct lpfc_nodelist *ndlp,
 			memset(ndlp->active_rrqs_xri_bitmap, 0,
 			       ndlp->phba->cfg_rrq_xri_bitmap_sz);
 	}
-
-
 
 	lpfc_debugfs_disc_trc(vport, LPFC_DISC_TRC_NODE,
 		"node init:       did:x%x",

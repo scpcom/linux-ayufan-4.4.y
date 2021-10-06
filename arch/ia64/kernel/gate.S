@@ -6,7 +6,6 @@
  * 	David Mosberger-Tang <davidm@hpl.hp.com>
  */
 
-
 #include <asm/asmmacro.h>
 #include <asm/errno.h>
 #include <asm/asm-offsets.h>

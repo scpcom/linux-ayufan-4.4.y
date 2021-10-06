@@ -213,7 +213,6 @@ static int psb_intel_crtc_mode_set(struct drm_crtc *crtc,
 	pipeconf |= PIPEACONF_ENABLE;
 	dpll |= DPLL_VCO_ENABLE;
 
-
 	/* Disable the panel fitter if it was on our pipe */
 	if (psb_intel_panel_fitter_pipe(dev) == pipe)
 		REG_WRITE(PFIT_CONTROL, 0);

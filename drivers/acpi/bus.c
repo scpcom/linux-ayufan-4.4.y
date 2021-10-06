@@ -824,7 +824,6 @@ static int __init acpi_bus_init_irq(void)
 	acpi_status status;
 	char *message = NULL;
 
-
 	/*
 	 * Let the system know what interrupt model we are using by
 	 * evaluating the \_PIC object, if exists.

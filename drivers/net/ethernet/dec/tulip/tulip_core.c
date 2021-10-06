@@ -19,7 +19,6 @@
 #endif
 #define DRV_RELDATE	"Feb 27, 2007"
 
-
 #include <linux/module.h>
 #include <linux/pci.h>
 #include <linux/slab.h>
@@ -104,7 +103,6 @@ static int csr0;
 /* Operational parameters that usually are not changed. */
 /* Time in jiffies before concluding the transmitter is hung. */
 #define TX_TIMEOUT  (4*HZ)
-
 
 MODULE_AUTHOR("The Linux Kernel Team");
 MODULE_DESCRIPTION("Digital 21*4* Tulip ethernet driver");
@@ -205,7 +203,6 @@ struct tulip_chip_table tulip_tbl[] = {
 
 };
 
-
 static const struct pci_device_id tulip_pci_tbl[] = {
 	{ 0x1011, 0x0009, PCI_ANY_ID, PCI_ANY_ID, 0, 0, DC21140 },
 	{ 0x1011, 0x0019, PCI_ANY_ID, PCI_ANY_ID, 0, 0, DC21143 },
@@ -250,7 +247,6 @@ static const struct pci_device_id tulip_pci_tbl[] = {
 };
 MODULE_DEVICE_TABLE(pci, tulip_pci_tbl);
 
-
 /* A full-duplex map for media types. */
 const char tulip_media_cap[32] =
 {0,0,0,16,  3,19,16,24,  27,4,7,5, 0,20,23,20,  28,31,0,0, };
@@ -288,7 +284,6 @@ static void tulip_set_power_state (struct tulip_private *tp,
 	}
 
 }
-
 
 static void tulip_up(struct net_device *dev)
 {
@@ -535,7 +530,6 @@ free_ring:
 	return retval;
 }
 
-
 static void tulip_tx_timeout(struct net_device *dev)
 {
 	struct tulip_private *tp = netdev_priv(dev);
@@ -610,7 +604,6 @@ out_unlock:
 	dev->trans_start = jiffies; /* prevent tx timeout */
 	netif_wake_queue (dev);
 }
-
 
 /* Initialize the Rx and Tx rings, along with various 'dev' bits. */
 static void tulip_init_ring(struct net_device *dev)
@@ -867,7 +860,6 @@ static struct net_device_stats *tulip_get_stats(struct net_device *dev)
 	return &dev->stats;
 }
 
-
 static void tulip_get_drvinfo(struct net_device *dev, struct ethtool_drvinfo *info)
 {
 	struct tulip_private *np = netdev_priv(dev);
@@ -875,7 +867,6 @@ static void tulip_get_drvinfo(struct net_device *dev, struct ethtool_drvinfo *in
 	strlcpy(info->version, DRV_VERSION, sizeof(info->version));
 	strlcpy(info->bus_info, pci_name(np->pdev), sizeof(info->bus_info));
 }
-
 
 static int tulip_ethtool_set_wol(struct net_device *dev,
 				 struct ethtool_wolinfo *wolinfo)
@@ -899,7 +890,6 @@ static void tulip_ethtool_get_wol(struct net_device *dev,
 	wolinfo->wolopts = tp->wolinfo.wolopts;
 	return;
 }
-
 
 static const struct ethtool_ops ops = {
 	.get_drvinfo = tulip_get_drvinfo,
@@ -1003,7 +993,6 @@ static int private_ioctl (struct net_device *dev, struct ifreq *rq, int cmd)
 	return -EOPNOTSUPP;
 }
 
-
 /* Set or clear the multicast filter for this adaptor.
    Note that we only use exclusion around actually queueing the
    new frame, not around filling tp->setup_frame.  This is non-deterministic
@@ -1062,7 +1051,6 @@ static void build_setup_frame_perfect(u16 *setup_frm, struct net_device *dev)
 	*setup_frm++ = eaddrs[1]; *setup_frm++ = eaddrs[1];
 	*setup_frm++ = eaddrs[2]; *setup_frm++ = eaddrs[2];
 }
-
 
 static void set_rx_mode(struct net_device *dev)
 {
@@ -1799,7 +1787,6 @@ err_out_free_netdev:
 	return -ENODEV;
 }
 
-
 /* set the registers according to the given wolopts */
 static void tulip_set_wolopts (struct pci_dev *pdev, u32 wolopts)
 {
@@ -1830,7 +1817,6 @@ static void tulip_set_wolopts (struct pci_dev *pdev, u32 wolopts)
 }
 
 #ifdef CONFIG_PM
-
 
 static int tulip_suspend (struct pci_dev *pdev, pm_message_t state)
 {
@@ -1866,7 +1852,6 @@ save_state:
 
 	return 0;
 }
-
 
 static int tulip_resume(struct pci_dev *pdev)
 {
@@ -1918,7 +1903,6 @@ static int tulip_resume(struct pci_dev *pdev)
 }
 
 #endif /* CONFIG_PM */
-
 
 static void tulip_remove_one(struct pci_dev *pdev)
 {
@@ -1974,7 +1958,6 @@ static struct pci_driver tulip_driver = {
 #endif /* CONFIG_PM */
 };
 
-
 static int __init tulip_init (void)
 {
 #ifdef MODULE
@@ -1995,12 +1978,10 @@ static int __init tulip_init (void)
 	return pci_register_driver(&tulip_driver);
 }
 
-
 static void __exit tulip_cleanup (void)
 {
 	pci_unregister_driver (&tulip_driver);
 }
-
 
 module_init(tulip_init);
 module_exit(tulip_cleanup);

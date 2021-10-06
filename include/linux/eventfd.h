@@ -81,4 +81,3 @@ static inline int eventfd_ctx_remove_wait_queue(struct eventfd_ctx *ctx,
 #endif
 
 #endif /* _LINUX_EVENTFD_H */
-

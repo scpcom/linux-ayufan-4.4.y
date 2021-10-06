@@ -231,9 +231,7 @@ enum radeon_pll_errata {
 	CHIP_ERRATA_PLL_DELAY           = 0x00000004
 };
 
-
 struct radeon_device;
-
 
 /*
  * BIOS.
@@ -250,7 +248,6 @@ struct radeon_dummy_page {
 };
 int radeon_dummy_page_init(struct radeon_device *rdev);
 void radeon_dummy_page_fini(struct radeon_device *rdev);
-
 
 /*
  * Clocks
@@ -666,7 +663,6 @@ int radeon_gart_bind(struct radeon_device *rdev, unsigned offset,
 		     int pages, struct page **pagelist,
 		     dma_addr_t *dma_addr, uint32_t flags);
 
-
 /*
  * GPU MC structures, functions & helpers
  */
@@ -1049,7 +1045,6 @@ int radeon_ring_init(struct radeon_device *rdev, struct radeon_ring *cp, unsigne
 		     unsigned rptr_offs, u32 nop);
 void radeon_ring_fini(struct radeon_device *rdev, struct radeon_ring *cp);
 
-
 /* r600 async dma */
 void r600_dma_stop(struct radeon_device *rdev);
 int r600_dma_resume(struct radeon_device *rdev);
@@ -1109,7 +1104,6 @@ static inline u32 radeon_get_ib_value(struct radeon_cs_parser *p, int idx)
 	return p->ib.ptr[idx];
 }
 
-
 struct radeon_cs_packet {
 	unsigned	idx;
 	unsigned	type;
@@ -1125,7 +1119,6 @@ typedef int (*radeon_packet0_check_t)(struct radeon_cs_parser *p,
 typedef int (*radeon_packet3_check_t)(struct radeon_cs_parser *p,
 				      struct radeon_cs_packet *pkt);
 
-
 /*
  * AGP
  */
@@ -1133,7 +1126,6 @@ int radeon_agp_init(struct radeon_device *rdev);
 void radeon_agp_resume(struct radeon_device *rdev);
 void radeon_agp_suspend(struct radeon_device *rdev);
 void radeon_agp_fini(struct radeon_device *rdev);
-
 
 /*
  * Writeback
@@ -1773,7 +1765,6 @@ struct r600_audio {
  */
 void radeon_benchmark(struct radeon_device *rdev, int test_number);
 
-
 /*
  * Testing
  */
@@ -2211,7 +2202,6 @@ union radeon_asic_config {
 void radeon_agp_disable(struct radeon_device *rdev);
 int radeon_asic_init(struct radeon_device *rdev);
 
-
 /*
  * IOCTL.
  */
@@ -2609,7 +2599,6 @@ void cik_didt_wreg(struct radeon_device *rdev, u32 reg, u32 v);
 
 void r100_pll_errata_after_index(struct radeon_device *rdev);
 
-
 /*
  * ASICs helpers.
  */
@@ -2681,7 +2670,6 @@ int radeon_combios_init(struct radeon_device *rdev);
 void radeon_combios_fini(struct radeon_device *rdev);
 int radeon_atombios_init(struct radeon_device *rdev);
 void radeon_atombios_fini(struct radeon_device *rdev);
-
 
 /*
  * RING helpers.

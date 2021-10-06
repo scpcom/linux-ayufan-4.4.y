@@ -408,7 +408,6 @@ static int ci_usb_phy_init(struct ci_hdrc *ci)
 	return ret;
 }
 
-
 /**
  * ci_platform_configure: do controller configure
  * @ci: the controller

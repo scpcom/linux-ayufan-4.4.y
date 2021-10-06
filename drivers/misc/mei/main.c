@@ -121,7 +121,6 @@ out:
 	return rets;
 }
 
-
 /**
  * mei_read - the read function.
  *
@@ -141,12 +140,10 @@ static ssize_t mei_read(struct file *file, char __user *ubuf,
 	int rets;
 	int err;
 
-
 	if (WARN_ON(!cl || !cl->dev))
 		return -ENODEV;
 
 	dev = cl->dev;
-
 
 	mutex_lock(&dev->device_lock);
 	if (dev->dev_state != MEI_DEV_ENABLED) {
@@ -505,7 +502,6 @@ static long mei_ioctl(struct file *file, unsigned int cmd, unsigned long data)
 	u32 notify_get, notify_req;
 	int rets;
 
-
 	if (WARN_ON(!cl || !cl->dev))
 		return -ENODEV;
 
@@ -596,7 +592,6 @@ static long mei_compat_ioctl(struct file *file,
 	return mei_ioctl(file, cmd, (unsigned long)compat_ptr(data));
 }
 #endif
-
 
 /**
  * mei_poll - the poll function
@@ -884,4 +879,3 @@ module_exit(mei_exit);
 MODULE_AUTHOR("Intel Corporation");
 MODULE_DESCRIPTION("Intel(R) Management Engine Interface");
 MODULE_LICENSE("GPL v2");
-

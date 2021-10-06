@@ -342,7 +342,6 @@ int mlx4_cq_alloc(struct mlx4_dev *dev, int nent,
 		&priv->eq_table.eq[MLX4_CQ_TO_EQ_VECTOR(vector)].tasklet_ctx;
 	INIT_LIST_HEAD(&cq->tasklet_ctx.list);
 
-
 	cq->irq = priv->eq_table.eq[MLX4_CQ_TO_EQ_VECTOR(vector)].irq;
 	return 0;
 

@@ -41,7 +41,6 @@
 
 #define PCC_DEBUG_DBEX
 
-
 /* Poll status interval -- 0 means default to interrupt */
 static int poll_interval = 0;
 
@@ -263,7 +262,6 @@ static unsigned int pcc_get(u_short sock, unsigned int reg)
 	return inl(socket[sock].base + reg);
 }
 
-
 static void pcc_set(u_short sock, unsigned int reg, unsigned int data)
 {
   	outl(data, socket[sock].base + reg);
@@ -334,7 +332,6 @@ static void add_pcc_socket(ulong base, int irq, ulong mapaddr,
 
 	return;
 }
-
 
 /*====================================================================*/
 
@@ -604,7 +601,6 @@ static CLASS_DEVICE_ATTR(exca, S_IRUGO, show_exca, NULL);
 	spin_unlock_irqrestore(&pcc_lock, flags);	\
 	return retval;					\
 } while (0)
-
 
 static int pcc_get_status(struct pcmcia_socket *s, u_int *value)
 {

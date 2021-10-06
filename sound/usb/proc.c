@@ -175,4 +175,3 @@ void snd_usb_proc_pcm_format_add(struct snd_usb_stream *stream)
 	if (!snd_card_proc_new(card, name, &entry))
 		snd_info_set_text_ops(entry, stream, proc_pcm_format_read);
 }
-

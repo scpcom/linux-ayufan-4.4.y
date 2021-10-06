@@ -34,7 +34,6 @@
 #define FIQ_LEVEL_REG		0x30
 #define FIQ_STATUS_REG		0x34
 
-
 struct moxart_irq_data {
 	void __iomem *base;
 	struct irq_domain *domain;

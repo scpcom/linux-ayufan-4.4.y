@@ -615,4 +615,3 @@ MODULE_DESCRIPTION("IguanaWorks USB IR Transceiver");
 MODULE_AUTHOR("Sean Young <sean@mess.org>");
 MODULE_LICENSE("GPL");
 MODULE_DEVICE_TABLE(usb, iguanair_table);
-

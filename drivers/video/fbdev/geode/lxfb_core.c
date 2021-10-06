@@ -333,7 +333,6 @@ static int lxfb_blank(int blank_mode, struct fb_info *info)
 	return lx_blank_display(info, blank_mode);
 }
 
-
 static int lxfb_map_video_memory(struct fb_info *info, struct pci_dev *dev)
 {
 	struct lxfb_par *par = info->par;

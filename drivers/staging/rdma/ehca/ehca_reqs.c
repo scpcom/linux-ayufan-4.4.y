@@ -41,7 +41,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #include "ehca_classes.h"
 #include "ehca_tools.h"
 #include "ehca_qes.h"

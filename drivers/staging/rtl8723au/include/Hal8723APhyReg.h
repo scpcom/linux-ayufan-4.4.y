@@ -246,7 +246,6 @@
 #define rOFDM_RxEVMCSI			0xdd8
 #define rOFDM_SIGReport			0xddc
 
-
 /*  8. PageE(0xE00) */
 #define rTxAGC_A_Rate18_06		0xe00
 #define rTxAGC_A_Rate54_24		0xe04
@@ -966,7 +965,6 @@
 #define bRTL8258_TxLPFBW		0xc	/*  Useless */
 #define bRTL8258_RxLPFBW		0xc00
 #define bRTL8258_RSSILPFBW		0xc0
-
 
 /*  Other Definition */
 

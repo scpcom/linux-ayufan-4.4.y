@@ -221,7 +221,6 @@ end:
 }
 EXPORT_SYMBOL(acpi_parse_art);
 
-
 /* get device name from acpi handle */
 static void get_single_name(acpi_handle handle, char *name)
 {

@@ -23,7 +23,6 @@ FS(tracefs)
 
 #undef FS
 
-
 int filename__read_int(const char *filename, int *value);
 int filename__read_ull(const char *filename, unsigned long long *value);
 

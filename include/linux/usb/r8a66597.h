@@ -478,4 +478,3 @@ struct r8a66597_platdata {
 #define CH0ENDC		0x0001 /* b1: Ch0 DMA Transfer End Int Stat Clear */
 
 #endif /* __LINUX_USB_R8A66597_H */
-

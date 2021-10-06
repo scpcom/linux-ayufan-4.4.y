@@ -46,7 +46,6 @@
 
 /* $XFree86: xc/programs/Xserver/hw/xfree86/drivers/nv/riva_tbl.h,v 1.9 2002/01/30 01:35:03 mvojkovi Exp $ */
 
-
 /*
  * RIVA Fixed Functionality Init Tables.
  */
@@ -1005,4 +1004,3 @@ static unsigned nv10TablePRAMIN_32BPP[][2] =
     {0x0000053D, 0x00000E02},
     {0x00000541, 0x00000E02}
 };
-

@@ -9,13 +9,11 @@
 
 #include "b43legacy.h"
 
-
 /* DMA-Interrupt reasons. */
 #define B43legacy_DMAIRQ_FATALMASK	((1 << 10) | (1 << 11) | (1 << 12) \
 					 | (1 << 14) | (1 << 15))
 #define B43legacy_DMAIRQ_NONFATALMASK	(1 << 13)
 #define B43legacy_DMAIRQ_RX_DONE		(1 << 16)
-
 
 /*** 32-bit DMA Engine. ***/
 
@@ -81,12 +79,10 @@ struct b43legacy_dmadesc32 {
 #define B43legacy_DMA32_DCTL_FRAMEEND		0x40000000
 #define B43legacy_DMA32_DCTL_FRAMESTART		0x80000000
 
-
 /* Misc DMA constants */
 #define B43legacy_DMA_RINGMEMSIZE	PAGE_SIZE
 #define B43legacy_DMA0_RX_FRAMEOFFSET	30
 #define B43legacy_DMA3_RX_FRAMEOFFSET	0
-
 
 /* DMA engine tuning knobs */
 #define B43legacy_TXRING_SLOTS		128
@@ -94,15 +90,11 @@ struct b43legacy_dmadesc32 {
 #define B43legacy_DMA0_RX_BUFFERSIZE	(2304 + 100)
 #define B43legacy_DMA3_RX_BUFFERSIZE	16
 
-
-
 #ifdef CONFIG_B43LEGACY_DMA
-
 
 struct sk_buff;
 struct b43legacy_private;
 struct b43legacy_txstatus;
-
 
 struct b43legacy_dmadesc_meta {
 	/* The kernel DMA-able buffer. */
@@ -162,7 +154,6 @@ struct b43legacy_dmaring {
 #endif /* CONFIG_B43LEGACY_DEBUG*/
 };
 
-
 static inline
 u32 b43legacy_dma_read(struct b43legacy_dmaring *ring,
 		       u16 offset)
@@ -176,7 +167,6 @@ void b43legacy_dma_write(struct b43legacy_dmaring *ring,
 {
 	b43legacy_write32(ring->dev, ring->mmio_base + offset, value);
 }
-
 
 int b43legacy_dma_init(struct b43legacy_wldev *dev);
 void b43legacy_dma_free(struct b43legacy_wldev *dev);
@@ -192,7 +182,6 @@ void b43legacy_dma_handle_txstatus(struct b43legacy_wldev *dev,
 void b43legacy_dma_rx(struct b43legacy_dmaring *ring);
 
 #else /* CONFIG_B43LEGACY_DMA */
-
 
 static inline
 int b43legacy_dma_init(struct b43legacy_wldev *dev)

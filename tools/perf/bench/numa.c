@@ -120,7 +120,6 @@ struct params {
 	char			*node_list_str;
 };
 
-
 /* Global, read-writable area, accessible to all processes and threads: */
 
 struct global_info {
@@ -173,7 +172,6 @@ static const struct option options[] = {
 	OPT_BOOLEAN('B', "data_backwards", &p0.data_backwards,	"access the data backwards as well"),
 	OPT_BOOLEAN('Z', "data_zero_memset", &p0.data_zero_memset,"access the data via glibc bzero only"),
 	OPT_BOOLEAN('r', "data_rand_walk", &p0.data_rand_walk,	"access the data with random (32bit LFSR) walk"),
-
 
 	OPT_BOOLEAN('z', "init_zero"	, &p0.init_zero,	"bzero the initial allocations"),
 	OPT_BOOLEAN('I', "init_random"	, &p0.init_random,	"randomize the contents of the initial allocations"),
@@ -1500,7 +1498,6 @@ static int __bench_numa(const char *name)
 	}
 
 	/* Parent process: */
-
 
 	for (i = 0; i < g->p.nr_proc; i++) {
 		wpid = waitpid(pids[i], &wait_stat, 0);

@@ -111,7 +111,6 @@
 #define ST_GYRO_3_DRDY_IRQ_INT2_MASK		0x08
 #define ST_GYRO_3_MULTIREAD_BIT			true
 
-
 static const struct iio_chan_spec st_gyro_16bit_channels[] = {
 	ST_SENSORS_LSM_CHANNELS(IIO_ANGL_VEL,
 			BIT(IIO_CHAN_INFO_RAW) | BIT(IIO_CHAN_INFO_SCALE),

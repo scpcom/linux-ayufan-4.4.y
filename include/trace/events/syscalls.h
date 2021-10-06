@@ -10,7 +10,6 @@
 #include <asm/ptrace.h>
 #include <asm/syscall.h>
 
-
 #ifdef CONFIG_HAVE_SYSCALL_TRACEPOINTS
 
 TRACE_EVENT_FN(sys_enter,
@@ -69,4 +68,3 @@ TRACE_EVENT_FLAGS(sys_exit, TRACE_EVENT_FL_CAP_ANY)
 
 /* This part must be outside protection */
 #include <trace/define_trace.h>
-

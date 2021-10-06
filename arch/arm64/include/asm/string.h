@@ -52,7 +52,6 @@ extern void *__memset(void *, int, __kernel_size_t);
 #define __HAVE_ARCH_MEMCMP
 extern int memcmp(const void *, const void *, size_t);
 
-
 #if defined(CONFIG_KASAN) && !defined(__SANITIZE_ADDRESS__)
 
 /*

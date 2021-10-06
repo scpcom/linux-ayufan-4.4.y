@@ -74,5 +74,4 @@ struct gnet_estimator {
 	unsigned char	ewma_log;
 };
 
-
 #endif /* __LINUX_GEN_STATS_H */

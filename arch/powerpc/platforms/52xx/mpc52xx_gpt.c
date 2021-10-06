@@ -131,7 +131,6 @@ DEFINE_MUTEX(mpc52xx_gpt_list_mutex);
 #define MPC52xx_GPT_CAN_WDT		(1 << 0)
 #define MPC52xx_GPT_IS_WDT		(1 << 1)
 
-
 /* ---------------------------------------------------------------------
  * Cascaded interrupt controller hooks
  */
@@ -272,7 +271,6 @@ mpc52xx_gpt_irq_setup(struct mpc52xx_gpt_priv *gpt, struct device_node *node)
 
 	dev_dbg(gpt->dev, "%s() complete. virq=%i\n", __func__, cascade_virq);
 }
-
 
 /* ---------------------------------------------------------------------
  * GPIOLIB hooks
@@ -652,7 +650,6 @@ static int mpc52xx_wdt_release(struct inode *inode, struct file *file)
 	clear_bit(0, &wdt_is_active);
 	return 0;
 }
-
 
 static const struct file_operations mpc52xx_wdt_fops = {
 	.owner		= THIS_MODULE,

@@ -409,7 +409,6 @@ static int si4713_powerup(struct si4713_device *sdev)
 	}
 	gpiod_set_value(sdev->gpio_reset, 0);
 
-
 	if (sdev->vdd) {
 		err = regulator_disable(sdev->vdd);
 		if (err)

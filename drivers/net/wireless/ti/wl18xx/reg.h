@@ -233,7 +233,6 @@ enum wl18xx_rdl_num {
 	RDL_MAX = _RDL_LAST - 1,
 };
 
-
 /* FPGA_SPARE_1 register - used to change the PHY ATPG clock at boot time */
 #define WL18XX_PHY_FPGA_SPARE_1		0x8093CA40
 

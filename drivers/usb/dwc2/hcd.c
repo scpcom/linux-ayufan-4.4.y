@@ -2234,7 +2234,6 @@ void dwc2_host_complete(struct dwc2_hsotg *hsotg, struct dwc2_qtd *qtd,
 			 usb_pipein(urb->pipe) ? "IN" : "OUT", status,
 			 urb->actual_length);
 
-
 	if (usb_pipetype(urb->pipe) == PIPE_ISOCHRONOUS) {
 		urb->error_count = dwc2_hcd_urb_get_error_count(qtd->urb);
 		for (i = 0; i < urb->number_of_packets; ++i) {

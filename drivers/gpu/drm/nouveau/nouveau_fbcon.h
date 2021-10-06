@@ -76,4 +76,3 @@ void nouveau_fbcon_output_poll_changed(struct drm_device *dev);
 extern int nouveau_nofbaccel;
 
 #endif /* __NV50_FBCON_H__ */
-

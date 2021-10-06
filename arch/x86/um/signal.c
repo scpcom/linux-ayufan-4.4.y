@@ -4,7 +4,6 @@
  * Licensed under the GPL
  */
 
-
 #include <linux/personality.h>
 #include <linux/ptrace.h>
 #include <linux/kernel.h>

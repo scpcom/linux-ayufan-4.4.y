@@ -445,7 +445,6 @@ denorm_exception_hv:
 	. = 0x1800
 #endif /* CONFIG_CBE_RAS */
 
-
 /*** Out of line interrupts support ***/
 
 	.align	7
@@ -1079,7 +1078,6 @@ unrecov_user_slb:
 
 #endif /* __DISABLED__ */
 
-
 	/*
 	 * Machine check is different because we use a different
 	 * save area: PACA_EXMC instead of PACA_EXGEN.
@@ -1324,7 +1322,6 @@ hmi_exception_after_realmode:
 	EXCEPTION_PROLOG_0(PACA_EXGEN)
 	b	hmi_exception_hv
 
-
 #define MACHINE_CHECK_HANDLER_WINDUP			\
 	/* Clear MSR_RI before setting SRR0 and SRR1. */\
 	li	r0,MSR_RI;				\
@@ -1536,7 +1533,6 @@ unrecov_slb:
 	bl	unrecoverable_exception
 	b	1b
 
-
 #ifdef CONFIG_PPC_970_NAP
 power4_fixup_nap:
 	andc	r9,r9,r10
@@ -1615,7 +1611,6 @@ handle_dabr_fault:
 	addi    r3,r1,STACK_FRAME_OVERHEAD
 	bl      do_break
 12:	b       ret_from_except_lite
-
 
 /* We have a page fault that hash_page could handle but HV refused
  * the PTE insertion

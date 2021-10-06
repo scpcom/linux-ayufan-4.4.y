@@ -470,6 +470,7 @@ static int enter_state(suspend_state_t state)
 	int error;
 
 	trace_suspend_resume(TPS("suspend_enter"), state, true);
+
 	if (state == PM_SUSPEND_FREEZE) {
 #ifdef CONFIG_PM_DEBUG
 		if (pm_test_level != TEST_NONE && pm_test_level <= TEST_CPUS) {

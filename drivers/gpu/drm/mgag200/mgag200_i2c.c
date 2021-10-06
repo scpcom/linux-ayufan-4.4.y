@@ -154,4 +154,3 @@ void mgag200_i2c_destroy(struct mga_i2c_chan *i2c)
 	i2c_del_adapter(&i2c->adapter);
 	kfree(i2c);
 }
-

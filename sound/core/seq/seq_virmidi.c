@@ -314,7 +314,6 @@ static int snd_virmidi_unsubscribe(void *private_data,
 	return 0;
 }
 
-
 /*
  * use callback - allow input to rawmidi device
  */
@@ -343,7 +342,6 @@ static int snd_virmidi_unuse(void *private_data,
 	module_put(rdev->card->module);
 	return 0;
 }
-
 
 /*
  *  Register functions
@@ -425,7 +423,6 @@ static int snd_virmidi_dev_attach_seq(struct snd_virmidi_dev *rdev)
 	return err;
 }
 
-
 /*
  * release the sequencer client
  */
@@ -462,7 +459,6 @@ static int snd_virmidi_dev_register(struct snd_rawmidi *rmidi)
 	}
 	return 0;
 }
-
 
 /*
  * unregister the device

@@ -1,10 +1,4 @@
-/*
-  FUSE: Filesystem in Userspace
-  Copyright (C) 2001-2008  Miklos Szeredi <miklos@szeredi.hu>
 
-  This program can be distributed under the terms of the GNU GPL.
-  See the file COPYING.
-*/
 
 #include "fuse_i.h"
 
@@ -27,10 +21,7 @@ static struct kmem_cache *fuse_req_cachep;
 
 static struct fuse_dev *fuse_get_dev(struct file *file)
 {
-	/*
-	 * Lockless access is OK, because file->private data is set
-	 * once during mount and is valid until the file is released.
-	 */
+	 
 	return ACCESS_ONCE(file->private_data);
 }
 
@@ -117,7 +108,6 @@ void __fuse_get_request(struct fuse_req *req)
 	atomic_inc(&req->count);
 }
 
-/* Must be called with > 1 refcount */
 static void __fuse_put_request(struct fuse_req *req)
 {
 	BUG_ON(atomic_read(&req->count) < 2);
@@ -133,7 +123,7 @@ static void fuse_req_init_context(struct fuse_req *req)
 
 void fuse_set_initialized(struct fuse_conn *fc)
 {
-	/* Make sure stores before this are seen on another CPU */
+	 
 	smp_wmb();
 	fc->initialized = 1;
 }
@@ -162,7 +152,7 @@ static struct fuse_req *__fuse_get_req(struct fuse_conn *fc, unsigned npages,
 		if (intr)
 			goto out;
 	}
-	/* Matches smp_wmb() in fuse_set_initialized() */
+	 
 	smp_rmb();
 
 	err = -ENOTCONN;
@@ -206,11 +196,6 @@ struct fuse_req *fuse_get_req_for_background(struct fuse_conn *fc,
 }
 EXPORT_SYMBOL_GPL(fuse_get_req_for_background);
 
-/*
- * Return request in fuse_file->reserved_req.  However that may
- * currently be in use.  If that is the case, wait for it to become
- * available.
- */
 static struct fuse_req *get_reserved_req(struct fuse_conn *fc,
 					 struct file *file)
 {
@@ -231,9 +216,6 @@ static struct fuse_req *get_reserved_req(struct fuse_conn *fc,
 	return req;
 }
 
-/*
- * Put stolen request back into fuse_file->reserved_req
- */
 static void put_reserved_req(struct fuse_conn *fc, struct fuse_req *req)
 {
 	struct file *file = req->stolen_file;
@@ -248,19 +230,6 @@ static void put_reserved_req(struct fuse_conn *fc, struct fuse_req *req)
 	fput(file);
 }
 
-/*
- * Gets a requests for a file operation, always succeeds
- *
- * This is used for sending the FLUSH request, which must get to
- * userspace, due to POSIX locks which may need to be unlocked.
- *
- * If allocation fails due to OOM, use the reserved request in
- * fuse_file.
- *
- * This is very unlikely to deadlock accidentally, since the
- * filesystem should not have it's own file open.  If deadlock is
- * intentional, it can still be broken by "aborting" the filesystem.
- */
 struct fuse_req *fuse_get_req_nofail_nopages(struct fuse_conn *fc,
 					     struct file *file)
 {
@@ -268,7 +237,7 @@ struct fuse_req *fuse_get_req_nofail_nopages(struct fuse_conn *fc,
 
 	atomic_inc(&fc->num_waiting);
 	wait_event(fc->blocked_waitq, fc->initialized);
-	/* Matches smp_wmb() in fuse_set_initialized() */
+	 
 	smp_rmb();
 	req = fuse_request_alloc(0);
 	if (!req)
@@ -284,10 +253,7 @@ void fuse_put_request(struct fuse_conn *fc, struct fuse_req *req)
 {
 	if (atomic_dec_and_test(&req->count)) {
 		if (test_bit(FR_BACKGROUND, &req->flags)) {
-			/*
-			 * We get here in the unlikely case that a background
-			 * request was allocated but not sent
-			 */
+			 
 			spin_lock(&fc->lock);
 			if (!fc->blocked)
 				wake_up(&fc->blocked_waitq);
@@ -369,14 +335,6 @@ static void flush_bg_queue(struct fuse_conn *fc)
 	}
 }
 
-/*
- * This function is called when a request is finished.  Either a reply
- * has arrived or it was aborted (and not yet sent) or some error
- * occurred during communication with userspace, or the device file
- * was closed.  The requester thread is woken up (if still waiting),
- * the 'end' callback is called if given, else the reference to the
- * request is released
- */
 static void request_end(struct fuse_conn *fc, struct fuse_req *req)
 {
 	struct fuse_iqueue *fiq = &fc->iq;
@@ -395,7 +353,6 @@ static void request_end(struct fuse_conn *fc, struct fuse_req *req)
 		if (fc->num_background == fc->max_background)
 			fc->blocked = 0;
 
-		/* Wake up next waiter, if any */
 		if (!fc->blocked && waitqueue_active(&fc->blocked_waitq))
 			wake_up(&fc->blocked_waitq);
 
@@ -432,14 +389,14 @@ static void request_wait_answer(struct fuse_conn *fc, struct fuse_req *req)
 	int err;
 
 	if (!fc->no_interrupt) {
-		/* Any signal may interrupt this */
+		 
 		err = wait_event_interruptible(req->waitq,
 					test_bit(FR_FINISHED, &req->flags));
 		if (!err)
 			return;
 
 		set_bit(FR_INTERRUPTED, &req->flags);
-		/* matches barrier in fuse_dev_do_read() */
+		 
 		smp_mb__after_atomic();
 		if (test_bit(FR_SENT, &req->flags))
 			queue_interrupt(fiq, req);
@@ -448,7 +405,6 @@ static void request_wait_answer(struct fuse_conn *fc, struct fuse_req *req)
 	if (!test_bit(FR_FORCE, &req->flags)) {
 		sigset_t oldset;
 
-		/* Only fatal signals may interrupt this */
 		block_sigs(&oldset);
 		err = wait_event_interruptible(req->waitq,
 					test_bit(FR_FINISHED, &req->flags));
@@ -458,7 +414,7 @@ static void request_wait_answer(struct fuse_conn *fc, struct fuse_req *req)
 			return;
 
 		spin_lock(&fiq->waitq.lock);
-		/* Request is not yet in userspace, bail out */
+		 
 		if (test_bit(FR_PENDING, &req->flags)) {
 			list_del(&req->list);
 			spin_unlock(&fiq->waitq.lock);
@@ -469,10 +425,6 @@ static void request_wait_answer(struct fuse_conn *fc, struct fuse_req *req)
 		spin_unlock(&fiq->waitq.lock);
 	}
 
-	/*
-	 * Either request is already in userspace, or it was forced.
-	 * Wait it out.
-	 */
 	wait_event(req->waitq, test_bit(FR_FINISHED, &req->flags));
 }
 
@@ -488,13 +440,12 @@ static void __fuse_request_send(struct fuse_conn *fc, struct fuse_req *req)
 	} else {
 		req->in.h.unique = fuse_get_unique(fiq);
 		queue_request(fiq, req);
-		/* acquire extra reference, since request is still needed
-		   after request_end() */
+		 
 		__fuse_get_request(req);
 		spin_unlock(&fiq->waitq.lock);
 
 		request_wait_answer(fc, req);
-		/* Pairs with smp_wmb() in request_end() */
+		 
 		smp_rmb();
 	}
 }
@@ -552,7 +503,6 @@ ssize_t fuse_simple_request(struct fuse_conn *fc, struct fuse_args *args)
 	if (IS_ERR(req))
 		return PTR_ERR(req);
 
-	/* Needs to be done after fuse_get_req() so that fc->minor is valid */
 	fuse_adjust_compat(fc, args);
 
 	req->in.h.opcode = args->in.h.opcode;
@@ -575,11 +525,7 @@ ssize_t fuse_simple_request(struct fuse_conn *fc, struct fuse_args *args)
 	return ret;
 }
 
-/*
- * Called under fc->lock
- *
- * fc->connected must have been checked previously
- */
+
 void fuse_request_send_background_locked(struct fuse_conn *fc,
 					 struct fuse_req *req)
 {
@@ -652,15 +598,10 @@ void fuse_force_forget(struct file *file, u64 nodeid)
 	req->in.args[0].value = &inarg;
 	__clear_bit(FR_ISREPLY, &req->flags);
 	__fuse_request_send(fc, req);
-	/* ignore errors */
+	 
 	fuse_put_request(fc, req);
 }
 
-/*
- * Lock the request.  Up to the next unlock_request() there mustn't be
- * anything that could cause a page-fault.  If the request was already
- * aborted bail out.
- */
 static int lock_request(struct fuse_req *req)
 {
 	int err = 0;
@@ -675,10 +616,6 @@ static int lock_request(struct fuse_req *req)
 	return err;
 }
 
-/*
- * Unlock request.  If it was aborted while locked, caller is responsible
- * for unlocking and ending the request.
- */
 static int unlock_request(struct fuse_req *req)
 {
 	int err = 0;
@@ -715,7 +652,6 @@ static void fuse_copy_init(struct fuse_copy_state *cs, int write,
 	cs->iter = iter;
 }
 
-/* Unmap and put previous page of userspace buffer */
 static void fuse_copy_finish(struct fuse_copy_state *cs)
 {
 	if (cs->currbuf) {
@@ -734,10 +670,6 @@ static void fuse_copy_finish(struct fuse_copy_state *cs)
 	cs->pg = NULL;
 }
 
-/*
- * Get another pagefull of userspace buffer, and map it to kernel
- * address space, and lock request
- */
 static int fuse_copy_fill(struct fuse_copy_state *cs)
 {
 	struct page *page;
@@ -798,7 +730,6 @@ static int fuse_copy_fill(struct fuse_copy_state *cs)
 	return lock_request(cs->req);
 }
 
-/* Do as much copy to/from userspace buffer as we can */
 static int fuse_copy_do(struct fuse_copy_state *cs, void **val, unsigned *size)
 {
 	unsigned ncpy = min(*size, cs->len);
@@ -878,10 +809,6 @@ static int fuse_try_move_page(struct fuse_copy_state *cs, struct page **pagep)
 	if (fuse_check_page(newpage) != 0)
 		goto out_fallback_unlock;
 
-	/*
-	 * This is a new and locked page, it shouldn't be mapped or
-	 * have any special flags on it
-	 */
 	if (WARN_ON(page_mapped(oldpage)))
 		goto out_fallback_unlock;
 	if (WARN_ON(page_has_private(oldpage)))
@@ -963,10 +890,6 @@ static int fuse_ref_page(struct fuse_copy_state *cs, struct page *page,
 	return 0;
 }
 
-/*
- * Copy a page in the request to/from the userspace buffer.  Must be
- * done atomically
- */
 static int fuse_copy_page(struct fuse_copy_state *cs, struct page **pagep,
 			  unsigned offset, unsigned count, int zeroing)
 {
@@ -1004,7 +927,6 @@ static int fuse_copy_page(struct fuse_copy_state *cs, struct page **pagep,
 	return 0;
 }
 
-/* Copy pages in the request to/from userspace buffer */
 static int fuse_copy_pages(struct fuse_copy_state *cs, unsigned nbytes,
 			   int zeroing)
 {
@@ -1026,7 +948,6 @@ static int fuse_copy_pages(struct fuse_copy_state *cs, unsigned nbytes,
 	return 0;
 }
 
-/* Copy a single argument in the request to/from userspace buffer */
 static int fuse_copy_one(struct fuse_copy_state *cs, void *val, unsigned size)
 {
 	while (size) {
@@ -1040,7 +961,6 @@ static int fuse_copy_one(struct fuse_copy_state *cs, void *val, unsigned size)
 	return 0;
 }
 
-/* Copy request arguments to/from userspace buffer */
 static int fuse_copy_args(struct fuse_copy_state *cs, unsigned numargs,
 			  unsigned argpages, struct fuse_arg *args,
 			  int zeroing)
@@ -1069,14 +989,6 @@ static int request_pending(struct fuse_iqueue *fiq)
 		forget_pending(fiq);
 }
 
-/*
- * Transfer an interrupt request to userspace
- *
- * Unlike other requests this is assembled on demand, without a need
- * to allocate a separate fuse_req structure.
- *
- * Called with fiq->waitq.lock held, releases it
- */
 static int fuse_read_interrupt(struct fuse_iqueue *fiq,
 			       struct fuse_copy_state *cs,
 			       size_t nbytes, struct fuse_req *req)
@@ -1223,15 +1135,6 @@ __releases(fiq->waitq.lock)
 		return fuse_read_batch_forget(fiq, cs, nbytes);
 }
 
-/*
- * Read a single request into the userspace filesystem's buffer.  This
- * function waits until a request is available, then removes it from
- * the pending list and copies request data to userspace buffer.  If
- * no reply is needed (FORGET) or request has been aborted or there
- * was an error during the copying then it's finished by calling
- * request_end().  Otherwise add it to the processing list, and set
- * the 'sent' flag.
- */
 static ssize_t fuse_dev_do_read(struct fuse_dev *fud, struct file *file,
 				struct fuse_copy_state *cs, size_t nbytes)
 {
@@ -1280,10 +1183,10 @@ static ssize_t fuse_dev_do_read(struct fuse_dev *fud, struct file *file,
 
 	in = &req->in;
 	reqsize = in->h.len;
-	/* If request is too large, reply with an error and restart the read */
+	 
 	if (nbytes < reqsize) {
 		req->out.h.error = -EIO;
-		/* SETXATTR is special, since it may contain too large data */
+		 
 		if (in->h.opcode == FUSE_SETXATTR)
 			req->out.h.error = -E2BIG;
 		request_end(fc, req);
@@ -1315,7 +1218,7 @@ static ssize_t fuse_dev_do_read(struct fuse_dev *fud, struct file *file,
 	list_move_tail(&req->list, &fpq->processing);
 	spin_unlock(&fpq->lock);
 	set_bit(FR_SENT, &req->flags);
-	/* matches barrier in request_wait_answer() */
+	 
 	smp_mb__after_atomic();
 	if (test_bit(FR_INTERRUPTED, &req->flags))
 		queue_interrupt(fiq, req);
@@ -1336,11 +1239,7 @@ out_end:
 
 static int fuse_dev_open(struct inode *inode, struct file *file)
 {
-	/*
-	 * The fuse device's file's private_data is used to hold
-	 * the fuse_conn(ection) when it is mounted, and is used to
-	 * keep track of whether the file has been mounted already.
-	 */
+	 
 	file->private_data = NULL;
 	return 0;
 }
@@ -1409,10 +1308,7 @@ static ssize_t fuse_dev_splice_read(struct file *in, loff_t *ppos,
 		buf->page = bufs[page_nr].page;
 		buf->offset = bufs[page_nr].offset;
 		buf->len = bufs[page_nr].len;
-		/*
-		 * Need to be careful about this.  Having buf->ops in module
-		 * code can Oops if the buffer persists after module unload.
-		 */
+		 
 		buf->ops = &nosteal_pipe_buf_ops;
 
 		pipe->nrbufs++;
@@ -1793,7 +1689,7 @@ copy_finish:
 static int fuse_notify(struct fuse_conn *fc, enum fuse_notify_code code,
 		       unsigned int size, struct fuse_copy_state *cs)
 {
-	/* Don't try to move pages (yet) */
+	 
 	cs->move_pages = 0;
 
 	switch (code) {
@@ -1821,7 +1717,6 @@ static int fuse_notify(struct fuse_conn *fc, enum fuse_notify_code code,
 	}
 }
 
-/* Look up request on processing list by unique ID */
 static struct fuse_req *request_find(struct fuse_pqueue *fpq, u64 unique)
 {
 	struct fuse_req *req;
@@ -1856,13 +1751,6 @@ static int copy_out_args(struct fuse_copy_state *cs, struct fuse_out *out,
 			      out->page_zeroing);
 }
 
-/*
- * Write a single reply to a request.  First the header is copied from
- * the write buffer.  The request is then searched on the processing
- * list by the unique ID found in the header.  If found, then remove
- * it from the list and copy the rest of the buffer to the request.
- * The request is finished by calling request_end()
- */
 static ssize_t fuse_dev_do_write(struct fuse_dev *fud,
 				 struct fuse_copy_state *cs, size_t nbytes)
 {
@@ -1883,10 +1771,6 @@ static ssize_t fuse_dev_do_write(struct fuse_dev *fud,
 	if (oh.len != nbytes)
 		goto err_finish;
 
-	/*
-	 * Zero oh.unique indicates unsolicited notification message
-	 * and error contains notification code.
-	 */
 	if (!oh.unique) {
 		err = fuse_notify(fc, oh.error, nbytes - sizeof(oh), cs);
 		return err ? err : nbytes;
@@ -1905,7 +1789,6 @@ static ssize_t fuse_dev_do_write(struct fuse_dev *fud,
 	if (!req)
 		goto err_unlock_pq;
 
-	/* Is it an interrupt reply? */
 	if (req->intr_unique == oh.unique) {
 		spin_unlock(&fpq->lock);
 
@@ -2072,11 +1955,6 @@ static unsigned fuse_dev_poll(struct file *file, poll_table *wait)
 	return mask;
 }
 
-/*
- * Abort all requests on the given list (pending or processing)
- *
- * This function releases and reacquires fc->lock
- */
 static void end_requests(struct fuse_conn *fc, struct list_head *head)
 {
 	while (!list_empty(head)) {
@@ -2105,24 +1983,6 @@ static void end_polls(struct fuse_conn *fc)
 	}
 }
 
-/*
- * Abort all requests.
- *
- * Emergency exit in case of a malicious or accidental deadlock, or just a hung
- * filesystem.
- *
- * The same effect is usually achievable through killing the filesystem daemon
- * and all users of the filesystem.  The exception is the combination of an
- * asynchronous request and the tricky deadlock (see
- * Documentation/filesystems/fuse.txt).
- *
- * Aborting requests under I/O goes as follows: 1: Separate out unlocked
- * requests, they should be finished off immediately.  Locked requests will be
- * finished after unlock; see unlock_request(). 2: Finish off the unlocked
- * requests.  It is possible that some request will finish before we can.  This
- * is OK, the request will in that case be removed from the list before we touch
- * it.
- */
 void fuse_abort_conn(struct fuse_conn *fc)
 {
 	struct fuse_iqueue *fiq = &fc->iq;
@@ -2193,7 +2053,7 @@ int fuse_dev_release(struct inode *inode, struct file *file)
 
 		WARN_ON(!list_empty(&fpq->io));
 		end_requests(fc, &fpq->processing);
-		/* Are we the last open device? */
+		 
 		if (atomic_dec_and_test(&fc->dev_count)) {
 			WARN_ON(fc->iq.fasync != NULL);
 			fuse_abort_conn(fc);
@@ -2211,7 +2071,6 @@ static int fuse_dev_fasync(int fd, struct file *file, int on)
 	if (!fud)
 		return -EPERM;
 
-	/* No locking - fasync_helper does its own locking */
 	return fasync_helper(fd, file, on, &fud->fc->iq.fasync);
 }
 
@@ -2248,10 +2107,6 @@ static long fuse_dev_ioctl(struct file *file, unsigned int cmd,
 			if (old) {
 				struct fuse_dev *fud = NULL;
 
-				/*
-				 * Check against file->f_op because CUSE
-				 * uses the same ioctl handler.
-				 */
 				if (old->f_op == file->f_op &&
 				    old->f_cred->user_ns == file->f_cred->user_ns)
 					fud = fuse_get_dev(old);

@@ -47,7 +47,6 @@
 #define ADD(buf, off, max, fmt, args...)				\
 	off += snprintf(&buf[off], max - off, fmt, ##args);
 
-
 struct carl9170_debugfs_fops {
 	unsigned int read_bufsize;
 	umode_t attr;
@@ -293,7 +292,6 @@ static void carl9170_debugfs_format_frame(struct ar9170 *ar,
 	    le16_to_cpu(txc->f.mac_control), le32_to_cpu(txc->f.phy_control),
 	    jiffies_to_msecs(jiffies - arinfo->timeout));
 }
-
 
 static char *carl9170_debugfs_ampdu_state_read(struct ar9170 *ar, char *buf,
 					       size_t bufsize, ssize_t *len)

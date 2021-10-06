@@ -108,8 +108,6 @@ u32 av7110_debiread(struct av7110 *av7110, u32 config, int addr, int count)
 	return result;
 }
 
-
-
 /* av7110 ARM core boot stuff */
 #if 0
 void av7110_reset_arm(struct av7110 *av7110)
@@ -202,7 +200,6 @@ static int load_dram(struct av7110 *av7110, u32 *data, int len)
 	}
 	return 0;
 }
-
 
 /* we cannot write av7110 DRAM directly, so load a bootloader into
  * the DPRAM which implements a simple boot protocol */
@@ -634,7 +631,6 @@ static int av7110_fw_query(struct av7110 *av7110, u16 tag, u16* buf, s16 length)
 	return ret;
 }
 
-
 /****************************************************************************
  * Firmware commands
  ****************************************************************************/
@@ -674,7 +670,6 @@ int av7110_firmversion(struct av7110 *av7110)
 	return 0;
 }
 
-
 int av7110_diseqc_send(struct av7110 *av7110, int len, u8 *msg, unsigned long burst)
 {
 	int i, ret;
@@ -702,7 +697,6 @@ int av7110_diseqc_send(struct av7110 *av7110, int len, u8 *msg, unsigned long bu
 		printk(KERN_ERR "dvb-ttpci: av7110_diseqc_send error %d\n", ret);
 	return ret;
 }
-
 
 #ifdef CONFIG_DVB_AV7110_OSD
 
@@ -847,7 +841,6 @@ static inline int CreateOSDWindow(struct av7110 *av7110, u8 windownr,
 	return av7110_fw_cmd(av7110, COMTYPE_OSD, WCreate, 4,
 			     windownr, disptype, width, height);
 }
-
 
 static enum av7110_osd_palette_type bpp2pal[8] = {
 	Pal1Bit, Pal2Bit, 0, Pal4Bit, 0, 0, 0, Pal8Bit

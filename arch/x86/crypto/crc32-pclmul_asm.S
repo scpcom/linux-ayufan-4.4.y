@@ -40,7 +40,6 @@
 #include <linux/linkage.h>
 #include <asm/inst.h>
 
-
 .align 16
 /*
  * [x4*128+32 mod P(x) << 32)]'  << 1   = 0x154442bd4
@@ -88,8 +87,6 @@
 #define LEN     %edx
 #define CRC     %ecx
 #endif
-
-
 
 .text
 /**

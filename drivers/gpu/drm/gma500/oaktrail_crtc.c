@@ -503,7 +503,6 @@ static int oaktrail_crtc_mode_set(struct drm_crtc *crtc,
 	if (is_mipi)
 		goto oaktrail_crtc_mode_set_exit;
 
-
 	dpll = 0;		/*BIT16 = 0 for 100MHz reference */
 
 	refclk = is_sdvo ? 96000 : dev_priv->core_freq * 1000;
@@ -530,7 +529,6 @@ static int oaktrail_crtc_mode_set(struct drm_crtc *crtc,
 
 	dpll |= DPLL_VGA_MODE_DIS;
 
-
 	dpll |= DPLL_VCO_ENABLE;
 
 	if (is_lvds)
@@ -547,7 +545,6 @@ static int oaktrail_crtc_mode_set(struct drm_crtc *crtc,
 		    (sdvo_pixel_multiply -
 		     1) << SDVO_MULTIPLIER_SHIFT_HIRES;
 	}
-
 
 	/* compute bitmask from p1 value */
 	if (is_sdvo)

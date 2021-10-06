@@ -106,7 +106,6 @@ struct auok190x_init_data {
 	void (*init)(struct auok190xfb_par *par);
 };
 
-
 extern void auok190x_send_command_nowait(struct auok190xfb_par *par, u16 data);
 extern int auok190x_send_command(struct auok190xfb_par *par, u16 data);
 extern void auok190x_send_cmdargs_nowait(struct auok190xfb_par *par, u16 cmd,

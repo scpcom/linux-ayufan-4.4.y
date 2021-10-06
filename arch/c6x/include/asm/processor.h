@@ -80,7 +80,6 @@ struct thread_struct {
 #define alloc_kernel_stack()	__get_free_page(GFP_KERNEL)
 #define free_kernel_stack(page) free_page((page))
 
-
 /* Forward declaration, a strange C thing */
 struct task_struct;
 
@@ -129,7 +128,6 @@ extern const struct seq_operations cpuinfo_op;
 #define HARD_RESET_NOW()
 
 extern unsigned int c6x_core_freq;
-
 
 extern void (*c6x_restart)(void);
 extern void (*c6x_halt)(void);

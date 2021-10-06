@@ -214,7 +214,6 @@ static inline u16 i5100_mtr_numcol(u16 a)
 	return a & ((1 << 2) - 1);
 }
 
-
 static inline u32 i5100_validlog_redmemvalid(u32 a)
 {
 	return a >> 2 & 1;
@@ -1069,7 +1068,6 @@ static int i5100_init_one(struct pci_dev *pdev, const struct pci_device_id *id)
 		goto bail_disable_ch1;
 	}
 
-
 	/* device 19, func 0, Error injection */
 	einj = pci_get_device_func(PCI_VENDOR_ID_INTEL,
 				    PCI_DEVICE_ID_INTEL_5100_19, 0);
@@ -1083,7 +1081,6 @@ static int i5100_init_one(struct pci_dev *pdev, const struct pci_device_id *id)
 		ret = rc;
 		goto bail_disable_einj;
 	}
-
 
 	mci->pdev = &pdev->dev;
 

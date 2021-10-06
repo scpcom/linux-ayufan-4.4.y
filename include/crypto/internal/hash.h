@@ -244,4 +244,3 @@ static inline struct crypto_shash *__crypto_shash_cast(struct crypto_tfm *tfm)
 }
 
 #endif	/* _CRYPTO_INTERNAL_HASH_H */
-

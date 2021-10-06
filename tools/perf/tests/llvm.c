@@ -46,7 +46,6 @@ static struct {
 	},
 };
 
-
 int
 test_llvm__fetch_bpf_obj(void **p_obj_buf,
 			 size_t *p_obj_buf_sz,

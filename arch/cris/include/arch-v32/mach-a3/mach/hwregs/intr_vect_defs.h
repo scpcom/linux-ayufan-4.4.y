@@ -81,7 +81,6 @@
 
 /* C-code for register scope intr_vect */
 
-
 #define STRIDE_intr_vect_rw_mask 4
 /* Register rw_mask0, scope intr_vect, type rw */
 typedef struct {
@@ -318,7 +317,6 @@ typedef struct {
   unsigned int dummy1 : 31;
 } reg_intr_vect_r_guru;
 #define REG_RD_ADDR_intr_vect_r_guru 68
-
 
 /* Register rw_ipi, scope intr_vect, type rw */
 typedef struct 

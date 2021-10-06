@@ -181,7 +181,6 @@ static void ep93xx_keypad_close(struct input_dev *pdev)
 	}
 }
 
-
 #ifdef CONFIG_PM_SLEEP
 static int ep93xx_keypad_suspend(struct device *dev)
 {

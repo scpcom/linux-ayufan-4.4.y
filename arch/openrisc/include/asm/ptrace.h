@@ -18,7 +18,6 @@
 #ifndef __ASM_OPENRISC_PTRACE_H
 #define __ASM_OPENRISC_PTRACE_H
 
-
 #include <asm/spr_defs.h>
 #include <uapi/asm/ptrace.h>
 

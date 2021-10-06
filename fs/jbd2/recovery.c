@@ -53,7 +53,6 @@ static void journal_brelse_array(struct buffer_head *b[], int n)
 		brelse (b[n]);
 }
 
-
 /*
  * When reading from the journal, we are going through the block device
  * layer directly and so there is no readahead being done for us.  We
@@ -123,7 +122,6 @@ failed:
 }
 
 #endif /* __KERNEL__ */
-
 
 /*
  * Read a block from the journal
@@ -224,7 +222,6 @@ static int count_tags(journal_t *journal, struct buffer_head *bh)
 
 	return nr;
 }
-
 
 /* Make sure we wrap around the log correctly! */
 #define wrap(journal, var)						\

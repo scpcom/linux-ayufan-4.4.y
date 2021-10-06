@@ -49,5 +49,4 @@ void enableGPIO(unsigned int enable);
  */
 void enableI2C(unsigned int enable);
 
-
 #endif

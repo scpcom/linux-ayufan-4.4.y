@@ -515,7 +515,6 @@ do { \
 		(u32) readl(mdev->res.vp_regs + reg_id)); \
 } while (0)
 
-
 	DUMPREG(VP_ENABLE);
 	DUMPREG(VP_SRESET);
 	DUMPREG(VP_SHADOW_UPDATE);
@@ -548,4 +547,3 @@ void mxr_reg_dump(struct mxr_device *mdev)
 	mxr_reg_mxr_dump(mdev);
 	mxr_reg_vp_dump(mdev);
 }
-

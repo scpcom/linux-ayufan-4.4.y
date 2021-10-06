@@ -241,7 +241,6 @@ struct d40_interrupt_lookup {
 	int offset;
 };
 
-
 static struct d40_interrupt_lookup il_v4a[] = {
 	{D40_DREG_LCTIS0, D40_DREG_LCICR0, false,  0},
 	{D40_DREG_LCTIS1, D40_DREG_LCICR1, false, 32},
@@ -1293,7 +1292,6 @@ __d40_execute_command_log(struct d40_chan *d40c, enum d40_command command)
 		active_reg = d40c->base->virtbase + D40_DREG_ACTIVE;
 	else
 		active_reg = d40c->base->virtbase + D40_DREG_ACTIVO;
-
 
 	spin_lock_irqsave(&d40c->phy_chan->lock, flags);
 
@@ -2460,7 +2458,6 @@ static int d40_alloc_chan_resources(struct dma_chan *chan)
 		 d40c->phy_chan->num,
 		 d40c->dma_cfg.use_fixed_channel ? ", fixed" : "");
 
-
 	/*
 	 * Only write channel configuration to the DMA if the physical
 	 * resource is free. In case of multiple logical channels
@@ -3080,7 +3077,6 @@ static int __init d40_phy_res_init(struct d40_base *base)
 						       D40_DREG_GCC_SRC);
 			gcc |= D40_DREG_GCC_EVTGRP_ENA(D40_PHYS_TO_GROUP(i),
 						       D40_DREG_GCC_DST);
-
 
 		} else {
 			base->phy_res[i].allocated_src = D40_ALLOC_FREE;

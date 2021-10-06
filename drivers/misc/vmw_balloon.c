@@ -142,7 +142,6 @@ enum vmwballoon_capabilities {
 #define VMW_BALLOON_CMD_BATCHED_2M_UNLOCK	9
 #define VMW_BALLOON_CMD_VMCI_DOORBELL_SET	10
 
-
 /* error codes */
 #define VMW_BALLOON_SUCCESS		        0
 #define VMW_BALLOON_FAILURE		        -1
@@ -195,7 +194,6 @@ static void vmballoon_batch_set_pa(struct vmballoon_batch_page *batch, int idx,
 {
 	batch->pages[idx] = pa;
 }
-
 
 #define VMWARE_BALLOON_CMD(cmd, arg1, arg2, result)		\
 ({								\

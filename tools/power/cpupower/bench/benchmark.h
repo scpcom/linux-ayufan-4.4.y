@@ -25,5 +25,4 @@
 				      (int)atan2(rcnt, rcnt));	       \
 		} }							\
 
-
 void start_benchmark(struct config *config);

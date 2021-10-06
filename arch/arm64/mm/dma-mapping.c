@@ -213,7 +213,6 @@ static dma_addr_t __swiotlb_map_page(struct device *dev, struct page *page,
 	return dev_addr;
 }
 
-
 static void __swiotlb_unmap_page(struct device *dev, dma_addr_t dev_addr,
 				 size_t size, enum dma_data_direction dir,
 				 struct dma_attrs *attrs)
@@ -525,7 +524,6 @@ static int __init dma_debug_do_init(void)
 	return 0;
 }
 fs_initcall(dma_debug_do_init);
-
 
 #ifdef CONFIG_IOMMU_DMA
 #include <linux/dma-iommu.h>

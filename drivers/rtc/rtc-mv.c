@@ -19,7 +19,6 @@
 #include <linux/gfp.h>
 #include <linux/module.h>
 
-
 #define RTC_TIME_REG_OFFS	0
 #define RTC_SECONDS_OFFS	0
 #define RTC_MINUTES_OFFS	8

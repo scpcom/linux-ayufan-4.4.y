@@ -552,7 +552,6 @@ void timer_interrupt(struct pt_regs * regs)
 	 */
 	may_hard_irq_enable();
 
-
 #if defined(CONFIG_PPC32) && defined(CONFIG_PPC_PMAC)
 	if (atomic_read(&ppc_n_lost_interrupts) != 0)
 		do_IRQ(regs);
@@ -628,7 +627,6 @@ unsigned long long sched_clock(void)
 		return get_rtc();
 	return mulhdu(get_tb() - boot_tb, tb_to_ns_scale) << tb_to_ns_shift;
 }
-
 
 #ifdef CONFIG_PPC_PSERIES
 
@@ -987,7 +985,6 @@ void __init time_init(void)
 	of_clk_init(NULL);
 #endif
 }
-
 
 #define FEBRUARY	2
 #define	STARTOFTIME	1970

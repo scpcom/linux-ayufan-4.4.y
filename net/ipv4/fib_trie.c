@@ -2207,7 +2207,6 @@ static void fib_table_print(struct seq_file *seq, struct fib_table *tb)
 		seq_printf(seq, "Id %d:\n", tb->tb_id);
 }
 
-
 static int fib_triestat_seq_show(struct seq_file *seq, void *v)
 {
 	struct net *net = (struct net *)seq->private;

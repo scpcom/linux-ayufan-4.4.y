@@ -376,7 +376,6 @@ static int ipcget_public(struct ipc_namespace *ns, struct ipc_ids *ids,
 	return err;
 }
 
-
 /**
  * ipc_rmid - remove an ipc identifier
  * @ids: ipc identifier set
@@ -712,7 +711,6 @@ err:
 }
 
 #ifdef CONFIG_ARCH_WANT_IPC_PARSE_VERSION
-
 
 /**
  * ipc_parse_version - ipc call version

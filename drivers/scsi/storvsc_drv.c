@@ -101,8 +101,6 @@ struct hv_fc_wwn_packet {
 	u8	secondary_node_wwn[8];
 };
 
-
-
 /*
  * SRB Flag Bits
  */
@@ -134,7 +132,6 @@ struct hv_fc_wwn_packet {
 #define SRB_FLAGS_DONT_START_NEXT_PACKET	0x00800000
 #define SRB_FLAGS_PORT_DRIVER_RESERVED		0x0F000000
 #define SRB_FLAGS_CLASS_DRIVER_RESERVED		0xF0000000
-
 
 /*
  * Platform neutral description of a scsi request -
@@ -205,7 +202,6 @@ struct vmscsi_request {
 
 } __attribute((packed));
 
-
 /*
  * The size of the vmscsi_request has changed in win8. The
  * additional size is because of new elements added to the
@@ -225,7 +221,6 @@ struct vmstor_protocol {
 	int sense_buffer_size;
 	int vmscsi_size_delta;
 };
-
 
 static const struct vmstor_protocol vmstor_protocols[] = {
 	{
@@ -254,7 +249,6 @@ static const struct vmstor_protocol vmstor_protocols[] = {
 		sizeof(struct vmscsi_win8_extension),
 	}
 };
-
 
 /*
  * This structure is sent during the intialization phase to get the different
@@ -378,7 +372,6 @@ static int storvsc_timeout = 180;
 
 static int msft_blist_flags = BLIST_TRY_VPD_PAGES;
 
-
 static void storvsc_on_channel_callback(void *context);
 
 #define STORVSC_MAX_LUNS_PER_TARGET			255
@@ -407,7 +400,6 @@ struct storvsc_cmd_request {
 
 	struct vstor_packet vstor_packet;
 };
-
 
 /* A storvsc device is a device object that contains a vmbus channel */
 struct storvsc_device {
@@ -524,7 +516,6 @@ done:
 	kfree(wrk);
 }
 
-
 /*
  * We can get incoming messages from the host that are not in response to
  * messages that we have sent out. An example of this would be messages
@@ -552,7 +543,6 @@ static inline struct storvsc_device *get_out_stor_device(
 
 	return stor_device;
 }
-
 
 static inline void storvsc_wait_to_drain(struct storvsc_device *dev)
 {
@@ -722,7 +712,6 @@ static int storvsc_channel_init(struct hv_device *device)
 		goto cleanup;
 	}
 
-
 	for (i = 0; i < ARRAY_SIZE(vmstor_protocols); i++) {
 		/* reuse the packet for version range supported */
 		memset(vstor_packet, 0, sizeof(struct vstor_packet));
@@ -776,7 +765,6 @@ static int storvsc_channel_init(struct hv_device *device)
 		ret = -EINVAL;
 		goto cleanup;
 	}
-
 
 	memset(vstor_packet, 0, sizeof(struct vstor_packet));
 	vstor_packet->operation = VSTOR_OPERATION_QUERY_PROPERTIES;
@@ -846,7 +834,6 @@ static int storvsc_channel_init(struct hv_device *device)
 
 	if (process_sub_channels)
 		handle_multichannel_storage(device, max_chns);
-
 
 cleanup:
 	return ret;
@@ -920,7 +907,6 @@ static void storvsc_handle_error(struct vmscsi_request *vm_srb,
 	schedule_work(&wrk->work);
 }
 
-
 static void storvsc_command_completion(struct storvsc_cmd_request *cmd_request)
 {
 	struct scsi_cmnd *scmnd = cmd_request->cmd;
@@ -989,13 +975,11 @@ static void storvsc_on_io_completion(struct hv_device *device,
 		vstor_packet->vm_srb.srb_status = SRB_STATUS_SUCCESS;
 	}
 
-
 	/* Copy over the status...etc */
 	stor_pkt->vm_srb.scsi_status = vstor_packet->vm_srb.scsi_status;
 	stor_pkt->vm_srb.srb_status = vstor_packet->vm_srb.srb_status;
 	stor_pkt->vm_srb.sense_info_length =
 	vstor_packet->vm_srb.sense_info_length;
-
 
 	if ((vstor_packet->vm_srb.scsi_status & 0xFF) == 0x02) {
 		/* CHECK_CONDITION */
@@ -1018,7 +1002,6 @@ static void storvsc_on_io_completion(struct hv_device *device,
 	if (atomic_dec_and_test(&stor_device->num_outstanding_req) &&
 		stor_device->drain_notify)
 		wake_up(&stor_device->waiting_to_drain);
-
 
 }
 
@@ -1174,7 +1157,6 @@ static int storvsc_do_io(struct hv_device *device,
 	if (!stor_device)
 		return -ENODEV;
 
-
 	request->device  = device;
 	/*
 	 * Select an an appropriate channel to send the request out.
@@ -1182,15 +1164,12 @@ static int storvsc_do_io(struct hv_device *device,
 
 	outgoing_channel = vmbus_get_outgoing_channel(device->channel);
 
-
 	vstor_packet->flags |= REQUEST_COMPLETION_FLAG;
 
 	vstor_packet->vm_srb.length = (sizeof(struct vmscsi_request) -
 					vmscsi_size_delta);
 
-
 	vstor_packet->vm_srb.sense_info_length = sense_buffer_size;
-
 
 	vstor_packet->vm_srb.data_transfer_length =
 	request->payload->range.len;
@@ -1297,7 +1276,6 @@ static int storvsc_host_reset_handler(struct scsi_cmnd *scmnd)
 	struct vstor_packet *vstor_packet;
 	int ret, t;
 
-
 	stor_device = get_out_stor_device(device);
 	if (!stor_device)
 		return FAILED;
@@ -1323,7 +1301,6 @@ static int storvsc_host_reset_handler(struct scsi_cmnd *scmnd)
 	t = wait_for_completion_timeout(&request->wait_event, 5*HZ);
 	if (t == 0)
 		return TIMEOUT_ERROR;
-
 
 	/*
 	 * At this point, all outstanding requests in the adapter
@@ -1432,7 +1409,6 @@ static int storvsc_queuecommand(struct Scsi_Host *host, struct scsi_cmnd *scmnd)
 		     scmnd->sc_data_direction);
 		return -EINVAL;
 	}
-
 
 	vm_srb->port_number = host_dev->port;
 	vm_srb->path_id = scmnd->device->channel;
@@ -1584,7 +1560,6 @@ static int storvsc_probe(struct hv_device *device,
 
 	host_dev->port = host->host_no;
 	host_dev->dev = device;
-
 
 	stor_device = kzalloc(sizeof(struct storvsc_device), GFP_KERNEL);
 	if (!stor_device) {

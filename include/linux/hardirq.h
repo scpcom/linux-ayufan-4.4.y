@@ -7,7 +7,6 @@
 #include <linux/vtime.h>
 #include <asm/hardirq.h>
 
-
 extern void synchronize_irq(unsigned int irq);
 extern bool synchronize_hardirq(unsigned int irq);
 

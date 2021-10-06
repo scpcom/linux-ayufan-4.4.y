@@ -110,7 +110,6 @@ static struct irq_chip ia64_msi_chip = {
 	.irq_retrigger		= ia64_msi_retrigger_irq,
 };
 
-
 int arch_setup_msi_irq(struct pci_dev *pdev, struct msi_desc *desc)
 {
 	if (platform_setup_msi_irq)
@@ -211,4 +210,3 @@ void dmar_free_hwirq(int irq)
 	destroy_irq(irq);
 }
 #endif /* CONFIG_INTEL_IOMMU */
-

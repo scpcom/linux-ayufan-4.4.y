@@ -31,4 +31,3 @@
  * Sleep Mode Reset
  */
 #define RESETC_RSSR_SMR		FIELD(1, 1, 3)
-

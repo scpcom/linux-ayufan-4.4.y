@@ -51,7 +51,6 @@ static enum probes_insn __kprobes t32_check_stack(probes_opcode_t insn,
 		DECODE_OR	(0xff9f0fc0, 0xf80d0000),
 		DECODE_CUSTOM	(0xff900fcf, 0xf800000d, STACK_USE_UNKNOWN),
 
-
 		/*                                 xx | Rn | Rt | PUW|   imm8  |*/
 		/* STR (imm 8)		1111 1000 0100 1101 xxxx 110x xxxx xxxx */
 		/* STRB (imm 8)		1111 1000 0000 1101 xxxx 110x xxxx xxxx */

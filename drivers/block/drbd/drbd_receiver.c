@@ -22,7 +22,6 @@
    the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-
 #include <linux/module.h>
 
 #include <asm/uaccess.h>
@@ -69,7 +68,6 @@ static int drbd_disconnected(struct drbd_peer_device *);
 static void conn_wait_active_ee_empty(struct drbd_connection *connection);
 static enum finish_epoch drbd_may_finish_epoch(struct drbd_connection *, struct drbd_epoch *, enum epoch_event);
 static int e_end_block(struct drbd_work *, int);
-
 
 #define GFP_TRY	(__GFP_HIGHMEM | __GFP_NOWARN)
 
@@ -3086,7 +3084,6 @@ static int drbd_uuid_compare(struct drbd_device *const device, int *rule_nr) __m
 			return 1;
 		}
 	}
-
 
 	*rule_nr = 80;
 	peer = device->p_uuid[UI_CURRENT] & ~((u64)1);

@@ -3,7 +3,6 @@
 
 #include <uapi/asm/setup.h>
 
-
 extern void pagetable_init(void);
 extern void pgd_init(unsigned long page);
 

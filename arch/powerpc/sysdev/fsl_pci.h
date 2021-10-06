@@ -16,7 +16,6 @@
 
 struct platform_device;
 
-
 /* FSL PCI controller BRR1 register */
 #define PCI_FSL_BRR1      0xbf8
 #define PCI_FSL_BRR1_VER 0xffff

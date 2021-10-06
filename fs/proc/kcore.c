@@ -39,7 +39,6 @@
 
 static struct proc_dir_entry *proc_root_kcore;
 
-
 #ifndef kc_vaddr_to_offset
 #define	kc_vaddr_to_offset(v) ((v) - PAGE_OFFSET)
 #endif
@@ -133,7 +132,6 @@ static void __kcore_update_ram(struct list_head *list)
 	free_kclist_ents(&garbage);
 }
 
-
 #ifdef CONFIG_HIGHMEM
 /*
  * If no highmem, we can assume [0...max_low_pfn) continuous range of memory
@@ -168,7 +166,6 @@ get_sparsemem_vmemmap_info(struct kcore_list *ent, struct list_head *head)
 	unsigned long nr_pages = ent->size >> PAGE_SHIFT;
 	unsigned long start, end;
 	struct kcore_list *vmm, *tmp;
-
 
 	start = ((unsigned long)pfn_to_page(pfn)) & PAGE_MASK;
 	end = ((unsigned long)pfn_to_page(pfn + nr_pages)) - 1;
@@ -543,7 +540,6 @@ read_kcore(struct file *file, char __user *buffer, size_t buflen, loff_t *fpos)
 
 	return acc;
 }
-
 
 static int open_kcore(struct inode *inode, struct file *filp)
 {

@@ -358,7 +358,6 @@ static struct watchdog_device amt_wd_dev = {
 		.max_timeout = MEI_WD_MAX_TIMEOUT,
 };
 
-
 int mei_watchdog_register(struct mei_device *dev)
 {
 
@@ -388,4 +387,3 @@ void mei_watchdog_unregister(struct mei_device *dev)
 	watchdog_set_drvdata(&amt_wd_dev, NULL);
 	watchdog_unregister_device(&amt_wd_dev);
 }
-

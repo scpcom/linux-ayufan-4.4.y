@@ -28,7 +28,6 @@
 
 ======================================================================*/
 
-
 #include <linux/module.h>
 #include <asm/uaccess.h>
 #include <linux/types.h>
@@ -169,7 +168,6 @@ static int register_device(char *name, unsigned long start, unsigned long length
 	}
 	((slram_priv_t *)(*curmtd)->mtdinfo->priv)->end =
 		((slram_priv_t *)(*curmtd)->mtdinfo->priv)->start + length;
-
 
 	(*curmtd)->mtdinfo->name = name;
 	(*curmtd)->mtdinfo->size = length;

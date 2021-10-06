@@ -99,7 +99,6 @@ copyloop:
 
 flag:	.word	0x2c0003f8
 
-
 // buffer 1 is at 0x2c000400, buffer 2 at 0x2c001000
 
 buffer:	.word	0x2c000400

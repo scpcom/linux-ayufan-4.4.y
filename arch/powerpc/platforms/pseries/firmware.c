@@ -21,7 +21,6 @@
  * 2 of the License, or (at your option) any later version.
  */
 
-
 #include <asm/firmware.h>
 #include <asm/prom.h>
 #include <asm/udbg.h>

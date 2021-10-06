@@ -21,7 +21,6 @@
 
 #include <asm/prom.h>
 
-
 static int sunserial_current_minor = 64;
 
 int sunserial_register_minors(struct uart_driver *drv, int count)

@@ -778,7 +778,6 @@ static int if_usb_issue_boot_command(struct if_usb_card *cardp, int ivalue)
 	return 0;
 }
 
-
 /**
  *  check_fwfile_format - check the validity of Boot2/FW image
  *
@@ -943,7 +942,6 @@ restart:
 	cardp->fw = NULL;
 	lbs_deb_leave(LBS_DEB_USB);
 }
-
 
 #ifdef CONFIG_PM
 static int if_usb_suspend(struct usb_interface *intf, pm_message_t message)

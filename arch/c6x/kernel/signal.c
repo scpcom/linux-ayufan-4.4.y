@@ -19,7 +19,6 @@
 #include <asm/ucontext.h>
 #include <asm/cacheflush.h>
 
-
 /*
  * Do a signal return, undo the signal stack.
  */

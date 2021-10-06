@@ -39,7 +39,6 @@
 #include <mach/irqs.h>
 #include <mach/usb.h>
 
-
 /* OMAP-1510 OHCI has its own MMU for DMA */
 #define OMAP1510_LB_MEMSIZE	32	/* Should be same as SDRAM size */
 #define OMAP1510_LB_CLOCK_DIV	0xfffec10c
@@ -336,7 +335,6 @@ static int usb_hcd_omap_probe (const struct hc_driver *driver,
 		return PTR_ERR(usb_dc_ck);
 	}
 
-
 	hcd = usb_create_hcd (driver, &pdev->dev, dev_name(&pdev->dev));
 	if (!hcd) {
 		retval = -ENOMEM;
@@ -380,7 +378,6 @@ err0:
 	clk_put(usb_host_ck);
 	return retval;
 }
-
 
 /* may be called with controller, bus, and devices active */
 

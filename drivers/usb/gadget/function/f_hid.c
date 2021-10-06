@@ -526,7 +526,6 @@ static int hidg_set_alt(struct usb_function *f, unsigned intf, unsigned alt)
 		hidg->in_ep->driver_data = hidg;
 	}
 
-
 	if (hidg->out_ep != NULL) {
 		/* restart endpoint */
 		usb_ep_disable(hidg->out_ep);

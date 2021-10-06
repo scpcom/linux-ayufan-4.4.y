@@ -18,7 +18,6 @@
  */
 #define MSI_ASYNC_MODE  0x80000000	/* Operate the MSI asynchronously */
 
-
 static inline void msi_set_sync(void)
 {
 	__asm__ __volatile__ ("lda [%0] %1, %%g3\n\t"

@@ -253,8 +253,6 @@ static inline bool imxdma_chan_is_doing_cyclic(struct imxdma_channel *imxdmac)
 	return false;
 }
 
-
-
 static void imx_dmav1_writel(struct imxdma_engine *imxdma, unsigned val,
 			     unsigned offset)
 {

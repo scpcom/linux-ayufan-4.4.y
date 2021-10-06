@@ -35,7 +35,6 @@
 #define WL18XX_DEBUGFS_FWSTATS_FILE_ARRAY(a, b, c) \
 	DEBUGFS_FWSTATS_FILE_ARRAY(a, b, c, wl18xx_acx_statistics)
 
-
 WL18XX_DEBUGFS_FWSTATS_FILE(error, error_frame_non_ctrl, "%u");
 WL18XX_DEBUGFS_FWSTATS_FILE(error, error_frame_ctrl, "%u");
 WL18XX_DEBUGFS_FWSTATS_FILE(error, error_frame_during_protection, "%u");

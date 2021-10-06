@@ -456,7 +456,6 @@ struct trf7970a {
 	struct delayed_work		timeout_work;
 };
 
-
 static int trf7970a_cmd(struct trf7970a *trf, u8 opcode)
 {
 	u8 cmd = TRF7970A_CMD_BIT_CTRL | TRF7970A_CMD_BIT_OPCODE(opcode);

@@ -222,7 +222,6 @@ static void __init cpg_div6_clock_init(struct device_node *np)
 		goto error;
 	}
 
-
 	for (i = 0, valid_parents = 0; i < num_parents; i++) {
 		const char *name = of_clk_get_parent_name(np, i);
 

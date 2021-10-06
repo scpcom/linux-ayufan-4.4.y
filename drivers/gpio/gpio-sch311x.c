@@ -99,7 +99,6 @@ to_sch311x_gpio_block(struct gpio_chip *chip)
 	return container_of(chip, struct sch311x_gpio_block, chip);
 }
 
-
 /*
  *	Super-IO functions
  */
@@ -134,7 +133,6 @@ static inline void sch311x_sio_outb(int sio_config_port, int reg, int val)
 	outb(reg, sio_config_port);
 	outb(val, sio_config_port + 1);
 }
-
 
 /*
  *	GPIO functions
@@ -309,7 +307,6 @@ static struct platform_driver sch311x_gpio_driver = {
 	.probe		= sch311x_gpio_probe,
 	.remove		= sch311x_gpio_remove,
 };
-
 
 /*
  *	Init & exit routines

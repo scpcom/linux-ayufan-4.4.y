@@ -1207,7 +1207,6 @@ static void touchpad_led_exit(void)
  *  cbArg3, byte2  Desired keyboard light level.
  */
 
-
 enum kbd_timeout_unit {
 	KBD_TIMEOUT_SECONDS = 0,
 	KBD_TIMEOUT_MINUTES,

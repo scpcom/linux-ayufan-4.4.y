@@ -28,7 +28,6 @@
 #define SYNTH_KBD_VERSION		(SYNTH_KBD_VERSION_MINOR | \
 					 (SYNTH_KBD_VERSION_MAJOR << 16))
 
-
 /*
  * Message types in the synthetic input protocol
  */
@@ -80,7 +79,6 @@ struct synth_kbd_keystroke {
 	__le32 info; /* Additional information */
 };
 
-
 #define HK_MAXIMUM_MESSAGE_SIZE 256
 
 #define KBD_VSC_SEND_RING_BUFFER_SIZE		(10 * PAGE_SIZE)
@@ -89,7 +87,6 @@ struct synth_kbd_keystroke {
 #define XTKBD_EMUL0     0xe0
 #define XTKBD_EMUL1     0xe1
 #define XTKBD_RELEASE   0x80
-
 
 /*
  * Represents a keyboard device

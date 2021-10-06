@@ -68,7 +68,6 @@ static inline void  kmem_free(const void *ptr)
 	kvfree(ptr);
 }
 
-
 extern void *kmem_zalloc_greedy(size_t *, size_t, size_t);
 
 static inline void *

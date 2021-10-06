@@ -75,7 +75,6 @@ struct sts_entry_fx00 {
 	uint8_t data[32];		/* FCP response/sense information. */
 };
 
-
 #define MAX_HANDLE_COUNT	15
 #define MULTI_STATUS_TYPE_FX00	0x0D
 
@@ -111,7 +110,6 @@ struct tsk_mgmt_entry_fx00 {
 
 	uint8_t reserved_2[32];
 };
-
 
 #define	ABORT_IOCB_TYPE_FX00	0x08		/* Abort IOCB status. */
 struct abort_iocb_entry_fx00 {
@@ -274,7 +272,6 @@ struct register_host_info {
 	uint64_t        utc;			/* UTC (system time) */
 	uint32_t        reserved[64];		/* future additions */
 } __packed;
-
 
 #define QLAFX00_PORT_DATA_INFO (sizeof(struct port_info_data))
 #define QLAFX00_TGT_NODE_LIST_SIZE (sizeof(uint32_t) * 32)
@@ -444,7 +441,6 @@ struct qla_mt_iocb_rsp_fx00 {
 	__le32 status;
 };
 
-
 #define MAILBOX_REGISTER_COUNT_FX00	16
 #define AEN_MAILBOX_REGISTER_COUNT_FX00	8
 #define MAX_FIBRE_DEVICES_FX00	512
@@ -506,7 +502,6 @@ struct mr_data_fx00 {
  */
 #define QLAFX00_GET_TEMPERATURE(ha) ((3153000 - (10000 * \
 	((QLAFX00_RD_REG(ha, QLAFX00_SOC_TEMP_REG) & 0x3FE) >> 1))) / 13825)
-
 
 #define QLAFX00_LOOP_DOWN_TIME		615     /* 600 */
 #define QLAFX00_HEARTBEAT_INTERVAL	6	/* number of seconds */

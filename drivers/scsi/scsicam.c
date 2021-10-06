@@ -20,7 +20,6 @@
 
 #include <scsi/scsicam.h>
 
-
 static int setsize(unsigned long capacity, unsigned int *cyls, unsigned int *hds,
 		   unsigned int *secs);
 
@@ -129,7 +128,6 @@ int scsi_partsize(unsigned char *buf, unsigned long capacity,
 	int i, largest_cyl;
 	int cyl, ext_cyl, end_head, end_cyl, end_sector;
 	unsigned int logical_end, physical_end, ext_physical_end;
-
 
 	if (*(unsigned short *) (buf + 64) == 0xAA55) {
 		for (largest_cyl = -1, i = 0; i < 4; ++i, ++p) {

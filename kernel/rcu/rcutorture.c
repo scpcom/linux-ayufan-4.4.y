@@ -54,7 +54,6 @@
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Paul E. McKenney <paulmck@us.ibm.com> and Josh Triplett <josh@joshtriplett.org>");
 
-
 torture_param(int, cbflood_inter_holdoff, HZ,
 	      "Holdoff between floods (jiffies)");
 torture_param(int, cbflood_intra_holdoff, 1,

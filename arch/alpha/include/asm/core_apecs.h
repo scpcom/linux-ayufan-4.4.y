@@ -116,7 +116,6 @@
 
 #define APECS_IOC_TBIA                  (IDENT_ADDR + 0x1A0000400UL)
 
-
 /*
  * 21071-CA Control and Status registers.
  * These are used to program memory timing,
@@ -180,7 +179,6 @@
 #define APECS_MEM_B7TRB  		(IDENT_ADDR + 0x180000EE0UL)
 #define APECS_MEM_B8TRB  		(IDENT_ADDR + 0x180000F00UL)
 
-
 /*
  * Memory spaces:
  */
@@ -189,7 +187,6 @@
 #define APECS_IO			(IDENT_ADDR + 0x1c0000000UL)
 #define APECS_SPARSE_MEM		(IDENT_ADDR + 0x200000000UL)
 #define APECS_DENSE_MEM		        (IDENT_ADDR + 0x300000000UL)
-
 
 /*
  * Bit definitions for I/O Controller status register 0:
@@ -205,7 +202,6 @@
 #define APECS_IOC_STAT0_P_NBR_MASK	0x7ffff
 
 #define APECS_HAE_ADDRESS		APECS_IOC_HAXR1
-
 
 /*
  * Data structure for handling APECS machine checks:
@@ -350,7 +346,6 @@ struct el_apecs_procdata
 	unsigned long va;           /* Effective VA of fault or miss. */
 	unsigned long bc_tag;       /* Backup Cache Tag Probe Results.*/
 };
-
 
 #ifdef __KERNEL__
 

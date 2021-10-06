@@ -29,7 +29,6 @@
 #define DRV_VERSION	"1.03"
 #define DRV_RELDATE	"9/22/2003"
 
-
 /* The user-configurable values.
    These may be modified when a driver module is loaded.*/
 
@@ -40,7 +39,6 @@ static int options[MAX_UNITS];
 
 /* Force a non std. amount of memory.  Units are 256 byte pages. */
 /* #define PACKETBUF_MEMSIZE	0x40 */
-
 
 #include <linux/module.h>
 #include <linux/kernel.h>
@@ -115,7 +113,6 @@ enum ne2k_pci_chipsets {
 	CH_Winbond_89C940_8c4a,
 };
 
-
 static struct {
 	char *name;
 	int flags;
@@ -134,7 +131,6 @@ static struct {
 	{NULL,}
 };
 
-
 static const struct pci_device_id ne2k_pci_tbl[] = {
 	{ 0x10ec, 0x8029, PCI_ANY_ID, PCI_ANY_ID, 0, 0, CH_RealTek_RTL_8029 },
 	{ 0x1050, 0x0940, PCI_ANY_ID, PCI_ANY_ID, 0, 0, CH_Winbond_89C940 },
@@ -151,7 +147,6 @@ static const struct pci_device_id ne2k_pci_tbl[] = {
 };
 MODULE_DEVICE_TABLE(pci, ne2k_pci_tbl);
 
-
 /* ---- No user-serviceable parts below ---- */
 
 #define NE_BASE	 (dev->base_addr)
@@ -162,7 +157,6 @@ MODULE_DEVICE_TABLE(pci, ne2k_pci_tbl);
 
 #define NESM_START_PG	0x40	/* First page of TX buffer */
 #define NESM_STOP_PG	0x80	/* Last page +1 of RX ring */
-
 
 static int ne2k_pci_open(struct net_device *dev);
 static int ne2k_pci_close(struct net_device *dev);
@@ -176,16 +170,12 @@ static void ne2k_pci_block_output(struct net_device *dev, const int count,
 		const unsigned char *buf, const int start_page);
 static const struct ethtool_ops ne2k_pci_ethtool_ops;
 
-
-
 /* There is no room in the standard 8390 structure for extra info we need,
    so we build a meta/outer-wrapper structure.. */
 struct ne2k_pci_card {
 	struct net_device *dev;
 	struct pci_dev *pci_dev;
 };
-
-
 
 /*
   NEx000-clone boards have a Station Address (SA) PROM (SAPROM) in the packet
@@ -710,7 +700,6 @@ static int ne2k_pci_resume (struct pci_dev *pdev)
 
 #endif /* CONFIG_PM */
 
-
 static struct pci_driver ne2k_driver = {
 	.name		= DRV_NAME,
 	.probe		= ne2k_pci_init_one,
@@ -723,7 +712,6 @@ static struct pci_driver ne2k_driver = {
 
 };
 
-
 static int __init ne2k_pci_init(void)
 {
 /* when a module, this is printed whether or not devices are found in probe */
@@ -732,7 +720,6 @@ static int __init ne2k_pci_init(void)
 #endif
 	return pci_register_driver(&ne2k_driver);
 }
-
 
 static void __exit ne2k_pci_cleanup(void)
 {

@@ -311,7 +311,6 @@ static irqreturn_t i40evf_msix_aq(int irq, void *data)
 	rd32(hw, I40E_VFINT_ICR01);
 	rd32(hw, I40E_VFINT_ICR0_ENA1);
 
-
 	val = rd32(hw, I40E_VFINT_DYN_CTL01) |
 	      I40E_VFINT_DYN_CTL01_CLEARPBA_MASK;
 	wr32(hw, I40E_VFINT_DYN_CTL01, val);
@@ -627,7 +626,6 @@ static void i40evf_configure_rx(struct i40evf_adapter *adapter)
 	int max_frame = netdev->mtu + ETH_HLEN + ETH_FCS_LEN;
 	int i;
 	int rx_buf_len;
-
 
 	adapter->flags &= ~I40EVF_FLAG_RX_PS_CAPABLE;
 	adapter->flags |= I40EVF_FLAG_RX_1BUF_CAPABLE;
@@ -2015,7 +2013,6 @@ static int i40evf_close(struct net_device *netdev)
 
 	if (adapter->state <= __I40EVF_DOWN)
 		return 0;
-
 
 	set_bit(__I40E_DOWN, &adapter->vsi.state);
 

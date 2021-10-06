@@ -197,7 +197,6 @@
 #define reg_mmu_rw_mm_tlb_hi___vpn___width 19
 #define reg_mmu_rw_mm_tlb_hi_offset 24
 
-
 /* Constants */
 #define regk_mmu_execute                          0x00000000
 #define regk_mmu_flush                            0x00000003

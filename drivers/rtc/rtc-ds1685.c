@@ -34,7 +34,6 @@
 
 #define DRV_VERSION	"0.42.0"
 
-
 /* ----------------------------------------------------------------------- */
 /* Standard read/write functions if platform does not provide overrides */
 
@@ -63,7 +62,6 @@ ds1685_write(struct ds1685_priv *rtc, int reg, u8 value)
 		       (reg * rtc->regstep)));
 }
 /* ----------------------------------------------------------------------- */
-
 
 /* ----------------------------------------------------------------------- */
 /* Inlined functions */
@@ -236,7 +234,6 @@ ds1685_rtc_get_ssn(struct ds1685_priv *rtc, u8 *ssn)
 	ssn[7] = rtc->read(rtc, RTC_BANK1_SSN_CRC);
 }
 /* ----------------------------------------------------------------------- */
-
 
 /* ----------------------------------------------------------------------- */
 /* Read/Set Time & Alarm functions */
@@ -526,7 +523,6 @@ ds1685_rtc_set_alarm(struct device *dev, struct rtc_wkalrm *alrm)
 }
 /* ----------------------------------------------------------------------- */
 
-
 /* ----------------------------------------------------------------------- */
 /* /dev/rtcX Interface functions */
 
@@ -559,7 +555,6 @@ ds1685_rtc_alarm_irq_enable(struct device *dev, unsigned int enabled)
 	return 0;
 }
 /* ----------------------------------------------------------------------- */
-
 
 /* ----------------------------------------------------------------------- */
 /* IRQ handler & workqueue. */
@@ -673,7 +668,6 @@ ds1685_rtc_work_queue(struct work_struct *work)
 		rtc->write(rtc, RTC_EXT_CTRL_4A,
 			   (ctrl4a & ~(RTC_CTRL_4A_KF)));
 
-
 		/*
 		 * Sleep 500ms before re-enabling kickstarts.  This allows
 		 * adequate time to avoid reading signal jitter as additional
@@ -736,7 +730,6 @@ ds1685_rtc_work_queue(struct work_struct *work)
 	mutex_unlock(rtc_mutex);
 }
 /* ----------------------------------------------------------------------- */
-
 
 /* ----------------------------------------------------------------------- */
 /* ProcFS interface */
@@ -905,7 +898,6 @@ ds1685_rtc_proc(struct device *dev, struct seq_file *seq)
 #endif /* CONFIG_PROC_FS */
 /* ----------------------------------------------------------------------- */
 
-
 /* ----------------------------------------------------------------------- */
 /* RTC Class operations */
 
@@ -919,7 +911,6 @@ ds1685_rtc_ops = {
 	.alarm_irq_enable = ds1685_rtc_alarm_irq_enable,
 };
 /* ----------------------------------------------------------------------- */
-
 
 /* ----------------------------------------------------------------------- */
 /* SysFS interface */
@@ -1381,7 +1372,6 @@ ds1685_rtc_sysfs_ctrla_grp = {
 	.attrs = ds1685_rtc_sysfs_ctrla_attrs,
 };
 
-
 /*
  * Control Register B bits.
  */
@@ -1520,7 +1510,6 @@ ds1685_rtc_sysfs_ctrl4b_grp = {
 	.name = "ctrl4b",
 	.attrs = ds1685_rtc_sysfs_ctrl4b_attrs,
 };
-
 
 /**
  * struct ds1685_rtc_ctrl_regs.
@@ -1733,7 +1722,6 @@ ds1685_rtc_sysfs_alarm_grp = {
 };
 #endif /* CONFIG_RTC_DS1685_SYSFS_REGS */
 
-
 /**
  * ds1685_rtc_sysfs_register - register sysfs files.
  * @dev: pointer to device structure.
@@ -1812,8 +1800,6 @@ ds1685_rtc_sysfs_unregister(struct device *dev)
 	return 0;
 }
 #endif /* CONFIG_SYSFS */
-
-
 
 /* ----------------------------------------------------------------------- */
 /* Driver Probe/Removal */
@@ -2148,7 +2134,6 @@ static struct platform_driver ds1685_rtc_driver = {
 module_platform_driver(ds1685_rtc_driver);
 /* ----------------------------------------------------------------------- */
 
-
 /* ----------------------------------------------------------------------- */
 /* Poweroff function */
 
@@ -2221,7 +2206,6 @@ ds1685_rtc_poweroff(struct platform_device *pdev)
 }
 EXPORT_SYMBOL(ds1685_rtc_poweroff);
 /* ----------------------------------------------------------------------- */
-
 
 MODULE_AUTHOR("Joshua Kinard <kumba@gentoo.org>");
 MODULE_AUTHOR("Matthias Fuchs <matthias.fuchs@esd-electronics.com>");

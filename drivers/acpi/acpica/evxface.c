@@ -62,7 +62,6 @@ acpi_ev_install_gpe_handler(acpi_handle gpe_device,
 
 #endif
 
-
 /*******************************************************************************
  *
  * FUNCTION:    acpi_install_notify_handler

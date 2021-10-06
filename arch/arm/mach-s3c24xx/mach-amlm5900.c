@@ -143,7 +143,6 @@ static struct s3c2410_uartcfg amlm5900_uartcfgs[] = {
 	}
 };
 
-
 static struct platform_device *amlm5900_devices[] __initdata = {
 #ifdef CONFIG_FB_S3C2410
 	&s3c_device_lcd,

@@ -20,7 +20,6 @@
 
 #include <asm/prom.h>
 
-
 static int
 ohci_ppc_of_start(struct usb_hcd *hcd)
 {
@@ -81,7 +80,6 @@ static const struct hc_driver ohci_ppc_of_hc_driver = {
 #endif
 	.start_port_reset =	ohci_start_port_reset,
 };
-
 
 static int ohci_hcd_ppc_of_probe(struct platform_device *op)
 {
@@ -222,7 +220,6 @@ MODULE_DEVICE_TABLE(of, ohci_hcd_ppc_of_match);
 #error "No endianness selected for ppc-of-ohci"
 #endif
 
-
 static struct platform_driver ohci_hcd_ppc_of_driver = {
 	.probe		= ohci_hcd_ppc_of_probe,
 	.remove		= ohci_hcd_ppc_of_remove,
@@ -232,4 +229,3 @@ static struct platform_driver ohci_hcd_ppc_of_driver = {
 		.of_match_table = ohci_hcd_ppc_of_match,
 	},
 };
-

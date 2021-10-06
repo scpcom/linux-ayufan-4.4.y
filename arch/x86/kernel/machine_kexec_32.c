@@ -37,7 +37,6 @@ static void set_idt(void *newidt, __u16 limit)
 	load_idt(&curidt);
 }
 
-
 static void set_gdt(void *newgdt, __u16 limit)
 {
 	struct desc_ptr curgdt;
@@ -270,4 +269,3 @@ void arch_crash_save_vmcoreinfo(void)
 	VMCOREINFO_CONFIG(X86_PAE);
 #endif
 }
-

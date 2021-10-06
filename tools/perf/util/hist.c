@@ -1215,7 +1215,6 @@ static void hists__remove_entry_filter(struct hists *hists, struct hist_entry *h
 	hists__calc_col_len(hists, h);
 }
 
-
 static bool hists__filter_entry_by_dso(struct hists *hists,
 				       struct hist_entry *he)
 {
@@ -1530,7 +1529,6 @@ size_t perf_evlist__fprintf_nr_events(struct perf_evlist *evlist, FILE *fp)
 
 	return ret;
 }
-
 
 u64 hists__total_period(struct hists *hists)
 {

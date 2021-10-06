@@ -709,7 +709,6 @@ static int snd_aw2_new_pcm(struct aw2 *chip)
 			"snd_pcm_lib_preallocate_pages_for_all error (0x%X)\n",
 			err);
 
-
 	/* Create control */
 	err = snd_ctl_add(chip->card, snd_ctl_new1(&aw2_control, chip));
 	if (err < 0) {

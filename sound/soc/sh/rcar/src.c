@@ -44,7 +44,6 @@ struct rsnd_src {
 	     ((pos) = (struct rsnd_src *)(priv)->src + i);	\
 	     i++)
 
-
 /*
  *		image of SRC (Sampling Rate Converter)
  *
@@ -123,7 +122,6 @@ static void rsnd_src_soft_reset(struct rsnd_mod *mod)
 	rsnd_mod_write(mod, SRC_SWRSR, 0);
 	rsnd_mod_write(mod, SRC_SWRSR, 1);
 }
-
 
 #define rsnd_src_initialize_lock(mod)	__rsnd_src_initialize_lock(mod, 1)
 #define rsnd_src_initialize_unlock(mod)	__rsnd_src_initialize_lock(mod, 0)

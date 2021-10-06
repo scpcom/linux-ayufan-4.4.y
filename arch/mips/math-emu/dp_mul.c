@@ -75,7 +75,6 @@ union ieee754dp ieee754dp_mul(union ieee754dp x, union ieee754dp y)
 	case CLPAIR(IEEE754_CLASS_QNAN, IEEE754_CLASS_INF):
 		return x;
 
-
 	/*
 	 * Infinity handling
 	 */
@@ -97,7 +96,6 @@ union ieee754dp ieee754dp_mul(union ieee754dp x, union ieee754dp y)
 	case CLPAIR(IEEE754_CLASS_NORM, IEEE754_CLASS_ZERO):
 	case CLPAIR(IEEE754_CLASS_DNORM, IEEE754_CLASS_ZERO):
 		return ieee754dp_zero(xs ^ ys);
-
 
 	case CLPAIR(IEEE754_CLASS_DNORM, IEEE754_CLASS_DNORM):
 		DPDNORMX;

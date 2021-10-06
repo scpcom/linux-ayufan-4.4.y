@@ -84,7 +84,6 @@ static unsigned short SMBHSTCFG = 0xD2;
 #define VT596_BLOCK_DATA	0x14
 #define VT596_I2C_BLOCK_DATA	0x34
 
-
 /* If force is set to anything different from 0, we forcibly enable the
    VT596. DANGEROUS! */
 static bool force;
@@ -98,7 +97,6 @@ module_param(force_addr, ushort, 0);
 MODULE_PARM_DESC(force_addr,
 		 "Forcibly enable the SMBus at the given address. "
 		 "EXTREMELY DANGEROUS!");
-
 
 static struct pci_driver vt596_driver;
 static struct i2c_adapter vt596_adapter;
@@ -484,7 +482,6 @@ static int __init i2c_vt596_init(void)
 {
 	return pci_register_driver(&vt596_driver);
 }
-
 
 static void __exit i2c_vt596_exit(void)
 {

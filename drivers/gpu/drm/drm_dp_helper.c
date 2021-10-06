@@ -557,7 +557,6 @@ static int drm_dp_i2c_do_msg(struct drm_dp_aux *aux, struct drm_dp_aux_msg *msg)
 			return ret;
 		}
 
-
 		switch (msg->reply & DP_AUX_NATIVE_REPLY_MASK) {
 		case DP_AUX_NATIVE_REPLY_ACK:
 			/*

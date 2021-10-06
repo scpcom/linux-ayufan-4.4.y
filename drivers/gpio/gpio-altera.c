@@ -234,7 +234,6 @@ static void altera_gpio_irq_edge_handler(struct irq_desc *desc)
 	chained_irq_exit(chip, desc);
 }
 
-
 static void altera_gpio_irq_leveL_high_handler(struct irq_desc *desc)
 {
 	struct altera_gpio_chip *altera_gc;

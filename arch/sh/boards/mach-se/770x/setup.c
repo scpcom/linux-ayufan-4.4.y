@@ -63,7 +63,6 @@ static void __init smsc_setup(char **cmdline_p)
 	outb_p(CONFIG_EXIT, CONFIG_PORT);
 }
 
-
 static struct resource cf_ide_resources[] = {
 	[0] = {
 		.start  = PA_MRSHPC_IO + 0x1f0,

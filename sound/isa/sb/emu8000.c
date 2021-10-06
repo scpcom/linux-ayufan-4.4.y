@@ -178,7 +178,6 @@ snd_emu8000_detect(struct snd_emu8000 *emu)
 	return 0;
 }
 
-
 /*
  * intiailize audio channels
  */
@@ -218,7 +217,6 @@ init_audio(struct snd_emu8000 *emu)
 		EMU8000_CVCF_WRITE(emu, ch, 0);
 	}
 }
-
 
 /*
  * initialize DMA address
@@ -344,7 +342,6 @@ send_array(struct snd_emu8000 *emu, unsigned short *data, int size)
 		EMU8000_INIT4_WRITE(emu, i, *p);
 }
 
-
 /*
  * Send initialization arrays to start up, this just follows the
  * initialisation sequence in the adip.
@@ -364,7 +361,6 @@ init_arrays(struct snd_emu8000 *emu)
 
 	send_array(emu, init4, ARRAY_SIZE(init4)/4);
 }
-
 
 #define UNIQUE_ID1	0xa5b9
 #define UNIQUE_ID2	0x9d53
@@ -460,7 +456,6 @@ skip_detect:
 	emu->dram_checked = 1;
 }
 
-
 /*
  * Initiailise the FM section.  You have to do this to use sample RAM
  * and therefore lose 2 voices.
@@ -506,7 +501,6 @@ snd_emu8000_init_fm(struct snd_emu8000 *emu)
 	EMU8000_VTFT_WRITE(emu, 30, 0x8000FFFF);
 	EMU8000_VTFT_WRITE(emu, 31, 0x8000FFFF);
 }
-
 
 /*
  * The main initialization routine.
@@ -556,7 +550,6 @@ snd_emu8000_init_hw(struct snd_emu8000 *emu)
 	snd_emu8000_update_reverb_mode(emu);
 }
 
-
 /*----------------------------------------------------------------
  * Bass/Treble Equalizer
  *----------------------------------------------------------------*/
@@ -591,7 +584,6 @@ static unsigned short treble_parm[12][9] = {
 	{0x821C, 0xD22A, 0x031C, 0xD32A, 0x0219, 0xD26E, 0x8319, 0xD36E, 0x0002}  /* +12 dB */
 };
 
-
 /*
  * set Emu8000 digital equalizer; from 0 to 11 [-12dB - 12dB]
  */
@@ -618,7 +610,6 @@ snd_emu8000_update_equalizer(struct snd_emu8000 *emu)
 	EMU8000_INIT4_WRITE(emu, 0x15, (unsigned short)(w + 0x0262));
 	EMU8000_INIT4_WRITE(emu, 0x1d, (unsigned short)(w + 0x8362));
 }
-
 
 /*----------------------------------------------------------------
  * Chorus mode control
@@ -822,7 +813,6 @@ snd_emu8000_update_reverb_mode(struct snd_emu8000 *emu)
 	}
 }
 
-
 /*----------------------------------------------------------------
  * mixer interface
  *----------------------------------------------------------------*/
@@ -1017,7 +1007,6 @@ static struct snd_kcontrol_new mixer_fm_reverb_depth_control =
 	.private_value = 0,
 };
 
-
 static struct snd_kcontrol_new *mixer_defs[EMU8000_NUM_CONTROLS] = {
 	&mixer_bass_control,
 	&mixer_treble_control,
@@ -1056,7 +1045,6 @@ __error:
 	}
 	return err;
 }
-
 
 /*
  * free resources
@@ -1152,7 +1140,6 @@ snd_emu8000_new(struct snd_card *card, int index, long port, int seq_ports,
 
 	return 0;
 }
-
 
 /*
  * exported stuff

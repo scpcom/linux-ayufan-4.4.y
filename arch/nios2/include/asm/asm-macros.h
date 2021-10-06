@@ -305,5 +305,4 @@
 	addi	sp, sp, 4
 .endm
 
-
 #endif /* _ASM_NIOS2_ASMMACROS_H */

@@ -67,7 +67,6 @@
 #include "iwl-drv.h"
 #include "iwl-notif-wait.h"
 
-
 void iwl_notification_wait_init(struct iwl_notif_wait_data *notif_wait)
 {
 	spin_lock_init(&notif_wait->notif_wait_lock);

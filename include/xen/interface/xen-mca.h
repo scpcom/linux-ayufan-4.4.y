@@ -172,7 +172,6 @@ struct mcinfo_recovery {
 	} action_info;
 };
 
-
 #define MCINFO_MAXSIZE 768
 struct mc_info {
 	/* Number of mcinfo_* entries in mi_data */
@@ -275,7 +274,6 @@ struct xen_mc_fetch {
 	GUEST_HANDLE(mc_info) data;
 };
 DEFINE_GUEST_HANDLE_STRUCT(xen_mc_fetch);
-
 
 /*
  * This tells the hypervisor to notify a DomU about the machine check error

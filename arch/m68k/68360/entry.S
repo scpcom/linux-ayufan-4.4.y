@@ -161,4 +161,3 @@ ENTRY(resume)
 	RESTORE_SWITCH_STACK
 	movew	%a1@(TASK_THREAD+THREAD_SR),%sr	/* restore thread status reg */
 	rts
-

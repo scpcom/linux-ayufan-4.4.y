@@ -32,7 +32,6 @@ const char bfin_board_name[] = "ADI BF538-EZKIT";
  *  Driver needs to know address, irq and flag pin.
  */
 
-
 #if IS_ENABLED(CONFIG_RTC_DRV_BFIN)
 static struct platform_device rtc_device = {
 	.name = "rtc-bfin",

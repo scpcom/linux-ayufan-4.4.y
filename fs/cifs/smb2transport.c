@@ -131,7 +131,6 @@ smb2_find_smb_ses(struct smb2_hdr *smb2hdr, struct TCP_Server_Info *server)
 	return NULL;
 }
 
-
 int
 smb2_calc_signature(struct smb_rqst *rqst, struct TCP_Server_Info *server)
 {

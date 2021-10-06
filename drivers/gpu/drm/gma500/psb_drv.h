@@ -193,7 +193,6 @@ enum {
 
 #define PSB_NUM_VBLANKS 2
 
-
 #define PSB_2D_SIZE (256*1024*1024)
 #define PSB_MAX_RELOC_PAGES 1024
 
@@ -619,7 +618,6 @@ struct drm_psb_private {
 	uint8_t panel_type;
 };
 
-
 /* Operations for each board type */
 struct psb_ops {
 	const char *name;
@@ -663,8 +661,6 @@ struct psb_ops {
 #endif
 	int i2c_bus;		/* I2C bus identifier for Moorestown */
 };
-
-
 
 extern int drm_crtc_probe_output_modes(struct drm_device *dev, int, int);
 extern int drm_pick_crtcs(struct drm_device *dev);

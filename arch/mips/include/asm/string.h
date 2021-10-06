@@ -10,7 +10,6 @@
 #ifndef _ASM_STRING_H
 #define _ASM_STRING_H
 
-
 /*
  * Most of the inline functions are rather naive implementations so I just
  * didn't bother updating them for 64-bit ...

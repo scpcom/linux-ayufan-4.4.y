@@ -89,7 +89,6 @@ extern ushort ext4_mballoc_debug;
  */
 #define MB_DEFAULT_GROUP_PREALLOC	512
 
-
 struct ext4_free_data {
 	/* MUST be the first member */
 	struct ext4_journal_cb_entry	efd_jce;

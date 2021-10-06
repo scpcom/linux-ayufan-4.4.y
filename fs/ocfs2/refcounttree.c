@@ -100,7 +100,6 @@ static int ocfs2_validate_refcount_block(struct super_block *sb,
 		return rc;
 	}
 
-
 	if (!OCFS2_IS_VALID_REFCOUNT_BLOCK(rb)) {
 		rc = ocfs2_error(sb,
 				 "Refcount block #%llu has bad signature %.*s\n",
@@ -1637,7 +1636,6 @@ static int ocfs2_expand_refcount_tree(handle_t *handle,
 		expand_bh = ref_leaf_bh;
 		get_bh(expand_bh);
 	}
-
 
 	/* Now add a new refcount block into the tree.*/
 	ret = ocfs2_new_leaf_refcount_block(handle, ci, ref_root_bh,
@@ -4251,7 +4249,6 @@ static int ocfs2_reflink(struct dentry *old_dentry, struct inode *dir,
 
 	if (!ocfs2_refcount_tree(OCFS2_SB(inode->i_sb)))
 		return -EOPNOTSUPP;
-
 
 	error = ocfs2_create_inode_in_orphan(dir, inode->i_mode,
 					     &new_orphan_inode);

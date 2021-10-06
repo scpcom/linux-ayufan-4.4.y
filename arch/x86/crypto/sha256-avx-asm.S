@@ -62,7 +62,6 @@
 	mov     \p2, \p1
 .endm
 
-
 .macro MY_ROR p1 p2
 	shld    $(32-(\p1)), \p2, \p2
 .endm
@@ -114,7 +113,6 @@ h = %r11d
 y0 = %r13d
 y1 = %r14d
 y2 = %r15d
-
 
 _INP_END_SIZE = 8
 _INP_SIZE = 8

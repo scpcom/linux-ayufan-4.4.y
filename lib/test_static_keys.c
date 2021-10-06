@@ -39,7 +39,6 @@ extern struct static_key_true base_inv_true_key;
 extern struct static_key_false base_false_key;
 extern struct static_key_false base_inv_false_key;
 
-
 struct test_key {
 	bool			init_state;
 	struct static_key	*key;

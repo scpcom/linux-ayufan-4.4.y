@@ -1280,4 +1280,3 @@ module_platform_driver(crypto4xx_driver);
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("James Hsiao <jhsiao@amcc.com>");
 MODULE_DESCRIPTION("Driver for AMCC PPC4xx crypto accelerator");
-

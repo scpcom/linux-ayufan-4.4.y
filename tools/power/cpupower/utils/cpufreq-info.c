@@ -4,7 +4,6 @@
  *  Licensed under the terms of the GNU GPL License version 2.
  */
 
-
 #include <unistd.h>
 #include <stdio.h>
 #include <errno.h>
@@ -50,7 +49,6 @@ static unsigned int count_cpus(void)
 	/* cpu count starts from 0, on error return 1 (UP) */
 	return ret + 1;
 }
-
 
 static void proc_cpufreq_output(void)
 {
@@ -390,7 +388,6 @@ static int get_freq_kernel(unsigned int cpu, unsigned int human)
 	return 0;
 }
 
-
 /* --hwfreq / -w */
 
 static int get_freq_hardware(unsigned int cpu, unsigned int human)
@@ -458,7 +455,6 @@ static int get_available_governors(unsigned int cpu)
 	cpufreq_put_available_governors(governors);
 	return 0;
 }
-
 
 /* --affected-cpus  / -a */
 

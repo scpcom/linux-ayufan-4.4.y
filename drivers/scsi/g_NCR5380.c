@@ -161,7 +161,6 @@ static void __init internal_setup(int board, char *str, int *ints)
 	}
 }
 
-
 /**
  * 	do_NCR53C80_setup		-	set up entry point
  *	@str: unused
@@ -473,7 +472,6 @@ static int generic_NCR5380_release_resources(struct Scsi_Host *instance)
 	iounmap(((struct NCR5380_hostdata *)instance->hostdata)->iomem);
 	release_mem_region(instance->NCR5380_instance_name, NCR5380_region_size);
 #endif
-
 
 	return 0;
 }

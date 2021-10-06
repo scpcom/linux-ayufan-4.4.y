@@ -257,7 +257,6 @@ void __kprobes disasm_instr(unsigned long addr, struct disasm_state *state,
 			}
 			break;
 
-
 		default:
 			/* Not a Load, Jump or Loop instruction */
 			/* still need to check for limm to extract instr len */

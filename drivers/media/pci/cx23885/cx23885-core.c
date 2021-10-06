@@ -652,7 +652,6 @@ static void cx23885_reset(struct cx23885_dev *dev)
 	cx23885_gpio_setup(dev);
 }
 
-
 static int cx23885_pci_quirks(struct cx23885_dev *dev)
 {
 	dprintk(1, "%s()\n", __func__);
@@ -1064,7 +1063,6 @@ static __le32 *cx23885_risc_field(__le32 *rp, struct scatterlist *sglist,
 	struct scatterlist *sg;
 	unsigned int line, todo, sol;
 
-
 	if (jump) {
 		*(rp++) = cpu_to_le32(RISC_JUMP);
 		*(rp++) = cpu_to_le32(0);
@@ -1237,14 +1235,11 @@ int cx23885_risc_vbibuffer(struct pci_dev *pci, struct cx23885_riscmem *risc,
 		rp = cx23885_risc_field(rp, sglist, bottom_offset, 0x200,
 					bpl, padding, lines, 0, UNSET == top_offset);
 
-
-
 	/* save pointer to jmp instruction address */
 	risc->jmp = rp;
 	BUG_ON((risc->jmp - risc->cpu + 2) * sizeof(*risc->cpu) > risc->size);
 	return 0;
 }
-
 
 void cx23885_free_buffer(struct cx23885_dev *dev, struct cx23885_buffer *buf)
 {

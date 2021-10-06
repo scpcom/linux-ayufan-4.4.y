@@ -52,7 +52,6 @@
 #include <asm/syscalls.h>
 #include <asm/switch_to.h>
 
-
 asmlinkage long ppc32_select(u32 n, compat_ulong_t __user *inp,
 		compat_ulong_t __user *outp, compat_ulong_t __user *exp,
 		compat_uptr_t tvp_x)

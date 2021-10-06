@@ -65,7 +65,6 @@ int gxio_mpipe_init_buffer_stack_aux(gxio_mpipe_context_t *context,
 				     unsigned int mem_flags, unsigned int stack,
 				     unsigned int buffer_size_enum);
 
-
 int gxio_mpipe_alloc_notif_rings(gxio_mpipe_context_t *context,
 				 unsigned int count, unsigned int first,
 				 unsigned int flags);
@@ -103,7 +102,6 @@ int gxio_mpipe_alloc_edma_rings(gxio_mpipe_context_t *context,
 int gxio_mpipe_init_edma_ring_aux(gxio_mpipe_context_t *context, void *mem_va,
 				  size_t mem_size, unsigned int mem_flags,
 				  unsigned int ring, unsigned int channel);
-
 
 int gxio_mpipe_commit_rules(gxio_mpipe_context_t *context, const void *blob,
 			    size_t blob_size);

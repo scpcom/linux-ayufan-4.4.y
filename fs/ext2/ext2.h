@@ -390,7 +390,6 @@ struct ext2_inode {
 #define EXT2_MOUNT_DAX			0
 #endif
 
-
 #define clear_opt(o, opt)		o &= ~EXT2_MOUNT_##opt
 #define set_opt(o, opt)			o |= EXT2_MOUNT_##opt
 #define test_opt(sb, opt)		(EXT2_SB(sb)->s_mount_opt & \
@@ -714,7 +713,6 @@ struct ext2_inode_info {
  * Inode dynamic state flags
  */
 #define EXT2_STATE_NEW			0x00000001 /* inode is newly created */
-
 
 /*
  * Function prototypes

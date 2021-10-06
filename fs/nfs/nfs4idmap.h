@@ -39,7 +39,6 @@
 #include <linux/uidgid.h>
 #include <uapi/linux/nfs_idmap.h>
 
-
 /* Forward declaration to make this header independent of others */
 struct nfs_client;
 struct nfs_server;

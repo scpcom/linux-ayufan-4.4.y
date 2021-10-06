@@ -335,7 +335,6 @@ struct analog_demod_ops {
 
 struct dtv_frontend_properties;
 
-
 /**
  * struct dvb_frontend_ops - Demodulation information and callbacks for
  *			      ditialt TV

@@ -52,7 +52,6 @@ MODULE_AUTHOR("Paul Diefenbaugh");
 MODULE_DESCRIPTION("ACPI AC Adapter Driver");
 MODULE_LICENSE("GPL");
 
-
 static int acpi_ac_add(struct acpi_device *device);
 static int acpi_ac_remove(struct acpi_device *device);
 static void acpi_ac_notify(struct acpi_device *device, u32 event);
@@ -73,7 +72,6 @@ extern struct proc_dir_entry *acpi_lock_ac_dir(void);
 extern void *acpi_unlock_ac_dir(struct proc_dir_entry *acpi_ac_dir);
 static int acpi_ac_open_fs(struct inode *inode, struct file *file);
 #endif
-
 
 static int ac_sleep_before_get_state_ms;
 
@@ -172,7 +170,6 @@ static struct proc_dir_entry *acpi_ac_dir;
 static int acpi_ac_seq_show(struct seq_file *seq, void *offset)
 {
 	struct acpi_ac *ac = seq->private;
-
 
 	if (!ac)
 		return 0;
@@ -322,7 +319,6 @@ static int acpi_ac_add(struct acpi_device *device)
 	int result = 0;
 	struct acpi_ac *ac = NULL;
 
-
 	if (!device)
 		return -EINVAL;
 
@@ -404,7 +400,6 @@ static int acpi_ac_remove(struct acpi_device *device)
 {
 	struct acpi_ac *ac = NULL;
 
-
 	if (!device || !acpi_driver_data(device))
 		return -EINVAL;
 
@@ -434,7 +429,6 @@ static int __init acpi_ac_init(void)
 	if (!acpi_ac_dir)
 		return -ENODEV;
 #endif
-
 
 	result = acpi_bus_register_driver(&acpi_ac_driver);
 	if (result < 0) {

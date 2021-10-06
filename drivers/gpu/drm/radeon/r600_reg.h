@@ -77,7 +77,6 @@
 #       define R600_CHANSIZE                           (1 << 7)
 #       define R600_CHANSIZE_OVERRIDE                  (1 << 10)
 
-
 #define R600_GENERAL_PWRMGT                                        0x618
 #	define R600_OPEN_DRAIN_PADS				   (1 << 11)
 

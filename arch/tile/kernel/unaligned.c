@@ -34,7 +34,6 @@
 #include <arch/spr_def.h>
 #include <arch/opcode.h>
 
-
 /*
  * This file handles unaligned exception for tile-Gx. The tilepro's unaligned
  * exception is supported out of single_step.c
@@ -332,7 +331,6 @@ static bool check_regs(uint64_t rd, uint64_t ra, uint64_t rb,
 	}
 	return unexpected;
 }
-
 
 #define  GX_INSN_X0_MASK   ((1ULL << 31) - 1)
 #define  GX_INSN_X1_MASK   (((1ULL << 31) - 1) << 31)
@@ -801,7 +799,6 @@ void jit_bundle_gen(struct pt_regs *regs, tilegx_bundle_bits bundle,
 	if (!unexpected)
 		WARN_ON(!((load_store_size - 1) & (regs->regs[ra])));
 
-
 	/*
 	 * Fault came from kernel space, here we only need take care of
 	 * unaligned "get_user/put_user" macros defined in "uaccess.h".
@@ -1012,8 +1009,6 @@ void jit_bundle_gen(struct pt_regs *regs, tilegx_bundle_bits bundle,
 #define UA_FIXUP_BFEXT_START(_B_)   (64 - 8 * (_B_))
 #define UA_FIXUP_BFEXT_END(_B_)      63
 #endif /* __LITTLE_ENDIAN */
-
-
 
 	if ((ra != rb) && (rd != TREG_SP) && !alias &&
 	    !y1_br && !y1_lr && !x1_add) {
@@ -1413,7 +1408,6 @@ void jit_bundle_gen(struct pt_regs *regs, tilegx_bundle_bits bundle,
 			return;
 		}
 
-
 		/* Do a cheaper increment, not accurate. */
 		unaligned_fixup_count++;
 		__flush_icache_range((unsigned long)&jit_code_area[idx],
@@ -1430,7 +1424,6 @@ void jit_bundle_gen(struct pt_regs *regs, tilegx_bundle_bits bundle,
 		regs->ex1 = PL_ICS_EX1(USER_PL, 1);
 	}
 }
-
 
 /*
  * C function to generate unalign data JIT. Called from unalign data
@@ -1529,7 +1522,6 @@ void do_unaligned(struct pt_regs *regs, int vecnum)
 		force_sig_info(info.si_signo, &info, current);
 		goto done;
 	}
-
 
 	/* Read the bundle casued the exception! */
 	pc = (tilegx_bundle_bits __user *)(regs->pc);

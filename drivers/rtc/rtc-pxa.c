@@ -95,7 +95,6 @@ struct pxa_rtc {
 	spinlock_t		lock;		/* Protects this structure */
 };
 
-
 static u32 ryxr_calc(struct rtc_time *tm)
 {
 	return ((tm->tm_year + 1900) << RYxR_YEAR_S)

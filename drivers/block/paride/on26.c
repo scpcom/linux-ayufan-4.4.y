@@ -182,7 +182,6 @@ static int on26_test_port( PIA *pi)  /* hard reset */
         return 5;
 }
 
-
 static void on26_read_block( PIA *pi, char * buf, int count )
 
 {       int     k, a, b;

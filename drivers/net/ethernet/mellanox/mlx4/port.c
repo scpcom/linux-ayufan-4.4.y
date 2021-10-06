@@ -642,7 +642,6 @@ static int mlx4_reset_roce_port_gids(struct mlx4_dev *dev, int slave,
 	return err;
 }
 
-
 void mlx4_reset_roce_gids(struct mlx4_dev *dev, int slave)
 {
 	struct mlx4_active_ports actv_ports;

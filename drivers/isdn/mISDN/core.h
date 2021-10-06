@@ -39,7 +39,6 @@ extern int			get_mdevice_count(void);
 #define mISDN_STACK_RUNNING     30
 #define mISDN_STACK_KILLED      31
 
-
 /* manager options */
 #define MGR_OPT_USER		24
 #define MGR_OPT_NETWORK		25

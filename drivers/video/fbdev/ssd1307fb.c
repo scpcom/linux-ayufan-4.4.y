@@ -203,7 +203,6 @@ static void ssd1307fb_update_display(struct ssd1307fb_par *par)
 	kfree(array);
 }
 
-
 static ssize_t ssd1307fb_write(struct fb_info *info, const char __user *buf,
 		size_t count, loff_t *ppos)
 {

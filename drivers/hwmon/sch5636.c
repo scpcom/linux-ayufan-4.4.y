@@ -63,7 +63,6 @@ static const u16 SCH5636_REG_FAN_VAL[SCH5636_NO_FANS] = {
 #define SCH5636_FAN_NOT_PRESENT		0x08
 #define SCH5636_FAN_DEACTIVATED		0x80
 
-
 struct sch5636_data {
 	unsigned short addr;
 	struct device *hwmon_dev;

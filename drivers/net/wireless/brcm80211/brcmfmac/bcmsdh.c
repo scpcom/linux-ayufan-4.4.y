@@ -1117,7 +1117,6 @@ MODULE_DEVICE_TABLE(sdio, brcmf_sdmmc_ids);
 
 static struct brcmfmac_sdio_platform_data *brcmfmac_sdio_pdata;
 
-
 static void brcmf_sdiod_acpi_set_power_manageable(struct device *dev,
 						  int val)
 {
@@ -1265,7 +1264,6 @@ static int brcmf_ops_sdio_suspend(struct device *dev)
 	brcmf_dbg(SDIO, "Enter: F%d\n", func->num);
 	if (func->num != SDIO_FUNC_1)
 		return 0;
-
 
 	bus_if = dev_get_drvdata(dev);
 	sdiodev = bus_if->bus_priv.sdio;

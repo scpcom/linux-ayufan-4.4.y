@@ -210,7 +210,6 @@ static int __init boot_alloc_snapshot(char *str)
 }
 __setup("alloc_snapshot", boot_alloc_snapshot);
 
-
 static char trace_boot_options_buf[MAX_TRACER_SIZE] __initdata;
 
 static int __init set_trace_boot_options(char *str)
@@ -257,7 +256,6 @@ unsigned long long ns2usecs(cycle_t nsec)
 /* trace_options that are only supported by global_trace */
 #define TOP_LEVEL_TRACE_FLAGS (TRACE_ITER_PRINTK |			\
 	       TRACE_ITER_PRINTK_MSGONLY | TRACE_ITER_RECORD_CMD)
-
 
 /*
  * The global_trace is the descriptor that holds the tracing
@@ -2199,7 +2197,6 @@ __trace_array_vprintk(struct ring_buffer *buffer,
 
 	pc = preempt_count();
 	preempt_disable_notrace();
-
 
 	tbuffer = get_trace_buf();
 	if (!tbuffer) {
@@ -4308,7 +4305,6 @@ out:
 	return ret;
 }
 
-
 /**
  * tracing_update_buffers - used by tracing facility to expand ring buffers
  *
@@ -5462,7 +5458,6 @@ static int snapshot_raw_open(struct inode *inode, struct file *filp)
 
 #endif /* CONFIG_TRACER_SNAPSHOT */
 
-
 static const struct file_operations tracing_thresh_fops = {
 	.open		= tracing_open_generic,
 	.read		= tracing_thresh_read,
@@ -6213,7 +6208,6 @@ trace_options_write(struct file *filp, const char __user *ubuf, size_t cnt,
 	return cnt;
 }
 
-
 static const struct file_operations trace_options_fops = {
 	.open = tracing_open_generic,
 	.read = trace_options_read,
@@ -6325,7 +6319,6 @@ struct dentry *trace_create_file(const char *name,
 
 	return ret;
 }
-
 
 static struct dentry *trace_options_init_dentry(struct trace_array *tr)
 {

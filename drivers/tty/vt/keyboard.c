@@ -101,7 +101,6 @@ struct vt_spawn_console vt_spawn_con = {
 	.sig  = 0,
 };
 
-
 /*
  * Internal Data.
  */

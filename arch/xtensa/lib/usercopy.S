@@ -19,7 +19,6 @@
  *  Copyright (C) 2002 Tensilica Inc.
  */
 
-
 /*
  * size_t __xtensa_copy_user (void *dst, const void *src, size_t len);
  *
@@ -70,7 +69,6 @@
 	.section __ex_table, "a";		\
 	.word	9b, handler;			\
 	.previous
-
 
 	.text
 	.align	4
@@ -282,7 +280,6 @@ __xtensa_copy_user:
 .L15:
 	movi	a2, 0		# return success for len bytes copied
 	retw
-
 
 	.section .fixup, "ax"
 	.align	4

@@ -1098,7 +1098,6 @@ int iser_post_recvm(struct iser_conn *iser_conn, int count)
 	return ib_ret;
 }
 
-
 /**
  * iser_start_send - Initiate a Send DTO operation
  *

@@ -90,7 +90,6 @@ static void mwifiex_uap_cleanup_tx_queues(struct mwifiex_private *priv)
 	spin_unlock_irqrestore(&priv->wmm.ra_list_spinlock, flags);
 }
 
-
 static void mwifiex_uap_queue_bridged_pkt(struct mwifiex_private *priv,
 					 struct sk_buff *skb)
 {
@@ -315,7 +314,6 @@ int mwifiex_process_uap_rx_packet(struct mwifiex_private *priv,
 		dev_kfree_skb_any(skb);
 		return ret;
 	}
-
 
 	if (rx_pkt_type != PKT_TYPE_BAR && uap_rx_pd->priority < MAX_NUM_TID) {
 		spin_lock_irqsave(&priv->sta_list_spinlock, flags);

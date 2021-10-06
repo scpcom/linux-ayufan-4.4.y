@@ -132,7 +132,6 @@ struct drm_dp_mst_branch {
 	u8 guid[16];
 };
 
-
 /* sideband msg header - not bit struct */
 struct drm_dp_sideband_msg_hdr {
 	u8 lct;
@@ -200,7 +199,6 @@ struct drm_dp_remote_i2c_read_nak_reply {
 struct drm_dp_remote_i2c_write_ack_reply {
 	u8 port_number;
 };
-
 
 struct drm_dp_sideband_msg_rx {
 	u8 chunk[48];

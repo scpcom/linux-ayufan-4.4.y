@@ -829,7 +829,6 @@ opt:
 	return PARSE_OPT_HELP;
 }
 
-
 int parse_opt_verbosity_cb(const struct option *opt,
 			   const char *arg __maybe_unused,
 			   int unset)

@@ -84,7 +84,6 @@
 #define PMU_I2C_STATUS_DATAREAD	1
 #define PMU_I2C_STATUS_BUSY	0xfe
 
-
 /* Kind of PMU (model) */
 enum {
 	PMU_UNKNOWN,
@@ -134,6 +133,5 @@ enum {
 #define PMU_IOC_CAN_SLEEP	_IOR('B', 5, size_t) 
 /* no param, but historically was _IOR('B', 6, 0), meaning 4 bytes */
 #define PMU_IOC_GRAB_BACKLIGHT	_IOR('B', 6, size_t) 
-
 
 #endif /* _UAPI_LINUX_PMU_H */

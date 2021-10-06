@@ -117,5 +117,4 @@ static inline bool amd_gart_present(void)
 
 #endif
 
-
 #endif /* _ASM_X86_AMD_NB_H */

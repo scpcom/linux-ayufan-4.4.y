@@ -139,4 +139,3 @@ _mmu_on:
 	stw	9, 0(8)
 
 	b _zimage_start_lib
-

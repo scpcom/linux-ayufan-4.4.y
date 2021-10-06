@@ -24,7 +24,6 @@
 
 #include <arch/chip.h>
 
-
 /**
  * Invalidate the instruction cache for the given range of memory.
  *
@@ -88,6 +87,5 @@ invalidate_icache(const void* addr, unsigned long size,
 
   __insn_drain();
 }
-
 
 #endif /* __ARCH_ICACHE_H__ */

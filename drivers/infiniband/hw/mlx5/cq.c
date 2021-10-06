@@ -819,7 +819,6 @@ struct ib_cq *mlx5_ib_create_cq(struct ib_device *ibdev,
 			goto err_cmd;
 		}
 
-
 	kvfree(cqb);
 	return &cq->ibcq;
 
@@ -838,7 +837,6 @@ err_create:
 
 	return ERR_PTR(err);
 }
-
 
 int mlx5_ib_destroy_cq(struct ib_cq *cq)
 {

@@ -33,7 +33,6 @@ static const struct mfd_cell tps6507x_devs[] = {
 	},
 };
 
-
 static int tps6507x_i2c_read_device(struct tps6507x_dev *tps6507x, char reg,
 				  int bytes, void *dest)
 {

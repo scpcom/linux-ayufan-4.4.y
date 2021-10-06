@@ -3,7 +3,6 @@
 
 #include <uapi/linux/resource.h>
 
-
 struct task_struct;
 
 int getrusage(struct task_struct *p, int who, struct rusage __user *ru);

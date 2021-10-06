@@ -199,7 +199,6 @@ static const struct value_name_pair tpc_in_arr[] = {
 };
 #define TPC_IN_SZ ARRAY_SIZE(tpc_in_arr)
 
-
 static const struct value_name_pair variable_length_arr[] = {
 	{0x1, "Rebuild(32)"},
 	{0x2, "Regenerate(32)"},

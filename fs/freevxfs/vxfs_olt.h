@@ -37,7 +37,6 @@
  * by the Veritas Filesystem version 2 and newer.
  */
 
-
 /*
  * OLT magic number (vxfs_olt->olt_magic).
  */

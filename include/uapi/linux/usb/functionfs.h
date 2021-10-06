@@ -1,12 +1,10 @@
 #ifndef _UAPI__LINUX_FUNCTIONFS_H__
 #define _UAPI__LINUX_FUNCTIONFS_H__
 
-
 #include <linux/types.h>
 #include <linux/ioctl.h>
 
 #include <linux/usb/ch9.h>
-
 
 enum {
 	FUNCTIONFS_DESCRIPTORS_MAGIC = 1,
@@ -206,7 +204,6 @@ struct usb_functionfs_strings_head {
 
 #endif
 
-
 /*
  * Events are delivered on the ep0 file descriptor, when the user mode driver
  * reads from this file descriptor after writing the descriptors.  Don't
@@ -240,7 +237,6 @@ struct usb_functionfs_event {
 	__u8				type;
 	__u8				_pad[3];
 } __attribute__((packed));
-
 
 /* Endpoint ioctls */
 /* The same as in gadgetfs */
@@ -282,7 +278,5 @@ struct usb_functionfs_event {
  */
 #define	FUNCTIONFS_ENDPOINT_DESC	_IOR('g', 130, \
 					     struct usb_endpoint_descriptor)
-
-
 
 #endif /* _UAPI__LINUX_FUNCTIONFS_H__ */

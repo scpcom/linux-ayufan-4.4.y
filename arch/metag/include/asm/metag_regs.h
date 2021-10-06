@@ -303,7 +303,6 @@
 ;   MOV     PC,D1RtP
 ;   #endif
 
-
 ; -------------------------------------------------------------------------
 ;                         CONTROL UNIT REGISTERS
 ; -------------------------------------------------------------------------
@@ -455,7 +454,6 @@
  * The following values relate to fields and controls that only a program
  * using the DSP extensions of the META instruction set need to know.
  */
-
 
 #ifndef METAC_1_2
 /*

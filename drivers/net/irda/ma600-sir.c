@@ -62,7 +62,6 @@ static struct dongle_driver ma600 = {
 	.set_speed      = ma600_change_speed,
 };
 
-
 static int __init ma600_sir_init(void)
 {
 	return irda_register_dongle(&ma600);
@@ -250,4 +249,3 @@ MODULE_ALIAS("irda-dongle-11"); /* IRDA_MA600_DONGLE */
 		
 module_init(ma600_sir_init);
 module_exit(ma600_sir_cleanup);
-

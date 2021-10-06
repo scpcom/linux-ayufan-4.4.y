@@ -76,5 +76,4 @@ struct rlimit64 {
  */
 #include <asm/resource.h>
 
-
 #endif /* _UAPI_LINUX_RESOURCE_H */

@@ -50,7 +50,6 @@ static int __init versatile_pci_slot_ignore(char *str)
 }
 __setup("pci_slot_ignore=", versatile_pci_slot_ignore);
 
-
 static void __iomem *versatile_map_bus(struct pci_bus *bus,
 				       unsigned int devfn, int offset)
 {

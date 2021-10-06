@@ -1009,7 +1009,6 @@ static int sunzilog_get_poll_char(struct uart_port *port)
 	struct zilog_channel __iomem *channel
 		= ZILOG_CHANNEL_FROM_PORT(&up->port);
 
-
 	r1 = read_zsreg(channel, R1);
 	if (r1 & (PAR_ERR | Rx_OVR | CRC_ERR)) {
 		writeb(ERR_RES, &channel->control);

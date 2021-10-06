@@ -283,4 +283,3 @@ ev7_register_error_handlers(void)
 
 	cdl_register_subpacket_handler(&ev7_pal_subpacket_handler);
 }
-

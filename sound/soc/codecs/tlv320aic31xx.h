@@ -21,7 +21,6 @@
 			 | SNDRV_PCM_FMTBIT_S24_3LE | SNDRV_PCM_FMTBIT_S24_LE \
 			 | SNDRV_PCM_FMTBIT_S32_LE)
 
-
 #define AIC31XX_STEREO_CLASS_D_BIT	0x1
 #define AIC31XX_MINIDSP_BIT		0x2
 
@@ -132,7 +131,6 @@ struct aic31xx_pdata {
 #define AIC31XX_ADCFGA				0x52
 /* ADC Digital Volume Control Coarse Adjust */
 #define AIC31XX_ADCVOL				0x53
-
 
 /* Page 1 Registers */
 /* Headphone drivers */

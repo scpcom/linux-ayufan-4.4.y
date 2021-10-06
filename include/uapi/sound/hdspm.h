@@ -227,5 +227,4 @@ typedef struct hdspm_version hdspm_version_t;
 typedef struct hdspm_channelfader snd_hdspm_channelfader_t;
 typedef struct hdspm_mixer hdspm_mixer_t;
 
-
 #endif

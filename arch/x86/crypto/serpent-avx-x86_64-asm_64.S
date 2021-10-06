@@ -64,7 +64,6 @@
 #define RK2 %xmm14
 #define RK3 %xmm15
 
-
 #define S0_1(x0, x1, x2, x3, x4)      \
 	vpor		x0,   x3, tp; \
 	vpxor		x3,   x0, x0; \

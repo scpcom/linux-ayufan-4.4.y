@@ -142,7 +142,6 @@ void tile_dev_intr(struct pt_regs *regs, int intnum)
 	set_irq_regs(old_regs);
 }
 
-
 /*
  * Remove an irq from the disabled mask.  If we're in an interrupt
  * context, defer enabling the HW interrupt until we leave.
@@ -246,7 +245,6 @@ void tile_irq_activate(unsigned int irq, int tile_irq_type)
 		irq_set_chip_data(irq, (void *)IS_HW_CLEARED);
 }
 EXPORT_SYMBOL(tile_irq_activate);
-
 
 void ack_bad_irq(unsigned int irq)
 {

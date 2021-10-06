@@ -1202,7 +1202,6 @@ static void iio_buffer_demux_free(struct iio_buffer *buffer)
 	}
 }
 
-
 int iio_push_to_buffers(struct iio_dev *indio_dev, const void *data)
 {
 	int ret;

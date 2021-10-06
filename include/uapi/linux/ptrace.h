@@ -99,5 +99,4 @@ struct ptrace_peeksiginfo_args {
 
 #include <asm/ptrace.h>
 
-
 #endif /* _UAPI_LINUX_PTRACE_H */

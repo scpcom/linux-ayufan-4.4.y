@@ -27,7 +27,3 @@
 #define ERR_CONF_LONG     1009 /* conf line is too long */ 
 #define ERR_INV_CHAN      1010 /* invalid channel number */ 
 #define ERR_ASYNC_TIME    1011 /* timeout sending async data */ 
-
-
-
-

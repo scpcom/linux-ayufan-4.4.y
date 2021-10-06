@@ -37,7 +37,6 @@
 
 #define NILFS_MDT_MAX_RA_BLOCKS		(16 - 1)
 
-
 static int
 nilfs_mdt_insert_new_block(struct inode *inode, unsigned long block,
 			   struct buffer_head *bh,
@@ -467,14 +466,12 @@ nilfs_mdt_write_page(struct page *page, struct writeback_control *wbc)
 	return err;
 }
 
-
 static const struct address_space_operations def_mdt_aops = {
 	.writepage		= nilfs_mdt_write_page,
 };
 
 static const struct inode_operations def_mdt_iops;
 static const struct file_operations def_mdt_fops;
-
 
 int nilfs_mdt_init(struct inode *inode, gfp_t gfp_mask, size_t objsz)
 {

@@ -17,7 +17,6 @@
 #include <linux/types.h>
 #include <linux/tty.h>
 
-
 #define TTY_MAX_COUNT		2
 
 #define MAX_ISSUE_NUM 3
@@ -68,4 +67,3 @@ int register_lte_tty_device(struct tty_dev *tty_dev, struct device *dev);
 void unregister_lte_tty_device(struct tty_dev *tty_dev);
 
 #endif /* _GDM_USB_H_ */
-

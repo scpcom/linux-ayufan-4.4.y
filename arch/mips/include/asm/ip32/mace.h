@@ -144,7 +144,6 @@ struct mace_audio {
 	} chan[3];
 };
 
-
 /* register definitions for parallel port DMA */
 struct mace_parport {
 	/* 0 - do nothing,
@@ -301,7 +300,6 @@ struct mace_perif {
 	struct mace_timers timers;
 	char _pad4[0x10000 - sizeof(struct mace_timers)];
 };
-
 
 /*
  * ISA peripherals

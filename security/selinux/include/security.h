@@ -266,4 +266,3 @@ extern void selnl_notify_policyload(u32 seqno);
 extern int selinux_nlmsg_lookup(u16 sclass, u16 nlmsg_type, u32 *perm);
 
 #endif /* _SELINUX_SECURITY_H_ */
-

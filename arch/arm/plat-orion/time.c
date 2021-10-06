@@ -27,7 +27,6 @@
 #define  BRIDGE_INT_TIMER0	 0x0002
 #define  BRIDGE_INT_TIMER1	 0x0004
 
-
 /*
  * Timer block registers.
  */
@@ -41,7 +40,6 @@
 #define TIMER1_RELOAD_OFF	0x0018
 #define TIMER1_VAL_OFF		0x001c
 
-
 /*
  * SoC-specific data.
  */
@@ -49,12 +47,10 @@ static void __iomem *bridge_base;
 static u32 bridge_timer1_clr_mask;
 static void __iomem *timer_base;
 
-
 /*
  * Number of timer ticks per jiffy.
  */
 static u32 ticks_per_jiffy;
-
 
 /*
  * Orion's sched_clock implementation. It has a resolution of

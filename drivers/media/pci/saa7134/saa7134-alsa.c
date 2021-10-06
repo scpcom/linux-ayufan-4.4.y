@@ -43,7 +43,6 @@
 #define MIXER_ADDR_LINE2	2
 #define MIXER_ADDR_LAST		2
 
-
 static int index[SNDRV_CARDS] = SNDRV_DEFAULT_IDX;	/* Index 0-MAX */
 static char *id[SNDRV_CARDS] = SNDRV_DEFAULT_STR;	/* ID for this card */
 static int enable[SNDRV_CARDS] = {1, [1 ... (SNDRV_CARDS - 1)] = 1};
@@ -74,7 +73,6 @@ typedef struct snd_card_saa7134 {
 	spinlock_t lock;
 } snd_card_saa7134_t;
 
-
 /*
  * PCM structure
  */
@@ -88,7 +86,6 @@ typedef struct snd_card_saa7134_pcm {
 } snd_card_saa7134_pcm_t;
 
 static struct snd_card *snd_saa7134_cards[SNDRV_CARDS];
-
 
 /*
  * saa7134 DMA audio stop
@@ -661,7 +658,6 @@ static void snd_card_saa7134_runtime_free(struct snd_pcm_runtime *runtime)
 	kfree(pcm);
 }
 
-
 /*
  * ALSA hardware params
  *
@@ -1133,7 +1129,6 @@ static int alsa_card_saa7134_create(struct saa7134_dev *dev, int devnum)
 	snd_card_saa7134_t *chip;
 	int err;
 
-
 	if (devnum >= SNDRV_CARDS)
 		return -ENODEV;
 	if (!enable[devnum])
@@ -1160,7 +1155,6 @@ static int alsa_card_saa7134_create(struct saa7134_dev *dev, int devnum)
 
 	chip->pci = dev->pci;
 	chip->iobase = pci_resource_start(dev->pci, 0);
-
 
 	err = request_irq(dev->pci->irq, saa7134_alsa_irq,
 				IRQF_SHARED, dev->name,
@@ -1200,7 +1194,6 @@ __nodev:
 	snd_card_free(card);
 	return err;
 }
-
 
 static int alsa_device_init(struct saa7134_dev *dev)
 {

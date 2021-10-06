@@ -29,7 +29,6 @@
 #include "reg.h"
 #include "debug.h"
 
-
 /******************\
 * Helper functions *
 \******************/
@@ -60,7 +59,6 @@ static u16 ath5k_eeprom_bin2freq(struct ath5k_eeprom_info *ee, u16 bin,
 
 	return val;
 }
-
 
 /*********\
 * Parsers *
@@ -181,7 +179,6 @@ ath5k_eeprom_init_header(struct ath5k_hw *ah)
 
 	return 0;
 }
-
 
 /*
  * Read antenna infos from eeprom
@@ -621,7 +618,6 @@ ath5k_eeprom_init_11bg_2413(struct ath5k_hw *ah, unsigned int mode, int offset)
 	return 0;
 }
 
-
 /*
  * Read power calibration for RF5111 chips
  *
@@ -880,7 +876,6 @@ ath5k_eeprom_read_pcal_info_5111(struct ath5k_hw *ah, int mode)
 	return ath5k_eeprom_convert_pcal_info_5111(ah, mode, pcal);
 }
 
-
 /*
  * Read power calibration for RF5112 chips
  *
@@ -1123,7 +1118,6 @@ ath5k_eeprom_read_pcal_info_5112(struct ath5k_hw *ah, int mode)
 
 	return ath5k_eeprom_convert_pcal_info_5112(ah, mode, gen_chan_info);
 }
-
 
 /*
  * Read power calibration for RF2413 chips
@@ -1458,7 +1452,6 @@ ath5k_eeprom_read_pcal_info_2413(struct ath5k_hw *ah, int mode)
 	return ath5k_eeprom_convert_pcal_info_2413(ah, mode, chinfo);
 }
 
-
 /*
  * Read per rate target power (this is the maximum tx power
  * supported by the card). This info is used when setting
@@ -1546,7 +1539,6 @@ ath5k_eeprom_read_target_rate_pwr_info(struct ath5k_hw *ah, unsigned int mode)
 	return 0;
 }
 
-
 /*
  * Read per channel calibration info from EEPROM
  *
@@ -1577,7 +1569,6 @@ ath5k_eeprom_read_pcal_info(struct ath5k_hw *ah)
 		read_pcal = ath5k_eeprom_read_pcal_info_2413;
 	else
 		read_pcal = ath5k_eeprom_read_pcal_info_5111;
-
 
 	for (mode = AR5K_EEPROM_MODE_11A; mode <= AR5K_EEPROM_MODE_11G;
 	mode++) {
@@ -1732,7 +1723,6 @@ ath5k_eeprom_read_spur_chans(struct ath5k_hw *ah)
 
 	return ret;
 }
-
 
 /***********************\
 * Init/Detach functions *

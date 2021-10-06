@@ -923,7 +923,6 @@ static int __init test_misalignment(void)
 		: "+d"(tmp), "=d"(x));
 	ASSERTCMP(x, ==, 0x55332211);
 
-
 	printk(KERN_NOTICE "___ MOV_LNE ___\n");
 	tmp = 1;
 	tmp2 = 2;

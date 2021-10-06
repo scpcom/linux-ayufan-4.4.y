@@ -3,7 +3,6 @@
 
 /* Written 1995-1999 by Werner Almesberger, EPFL LRC/ICA */
 
-
 #ifndef LINUX_ATM_ZATM_H
 #define LINUX_ATM_ZATM_H
 

@@ -138,7 +138,6 @@ static int pl061_irq_type(struct irq_data *d, unsigned trigger)
 		return -EINVAL;
 	}
 
-
 	spin_lock_irqsave(&chip->lock, flags);
 
 	gpioiev = readb(chip->base + GPIOIEV);

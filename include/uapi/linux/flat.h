@@ -10,7 +10,6 @@
 #ifndef _UAPI_LINUX_FLAT_H
 #define _UAPI_LINUX_FLAT_H
 
-
 #define	FLAT_VERSION			0x00000004L
 
 #ifdef CONFIG_BINFMT_SHARED_FLAT
@@ -52,7 +51,5 @@ struct flat_hdr {
 #define FLAT_FLAG_GZIP   0x0004 /* all but the header is compressed */
 #define FLAT_FLAG_GZDATA 0x0008 /* only data/relocs are compressed (for XIP) */
 #define FLAT_FLAG_KTRACE 0x0010 /* output useful kernel trace for debugging */
-
-
 
 #endif /* _UAPI_LINUX_FLAT_H */

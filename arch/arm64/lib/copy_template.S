@@ -22,7 +22,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 /*
  * Copy a buffer from src to dest (alignment handled by the hardware)
  *

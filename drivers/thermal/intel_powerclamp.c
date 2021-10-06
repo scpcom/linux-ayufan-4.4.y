@@ -86,7 +86,6 @@ static unsigned int control_cpu; /* The cpu assigned to collect stat and update
 				  */
 static bool clamping;
 
-
 static struct task_struct * __percpu *powerclamp_thread;
 static struct thermal_cooling_device *cooling_dev;
 static unsigned long *cpu_clamping_mask;  /* bit map for tracking per cpu
@@ -123,7 +122,6 @@ static const struct kernel_param_ops duration_ops = {
 	.set = duration_set,
 	.get = param_get_int,
 };
-
 
 module_param_cb(duration, &duration_ops, &duration, 0644);
 MODULE_PARM_DESC(duration, "forced idle time for each attempt in msec.");

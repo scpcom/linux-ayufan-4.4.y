@@ -212,7 +212,6 @@ void assabet_uda1341_reset(int set)
 }
 EXPORT_SYMBOL(assabet_uda1341_reset);
 
-
 /*
  * Assabet flash support code.
  */
@@ -271,7 +270,6 @@ static struct resource assabet_flash_resources[] = {
 	DEFINE_RES_MEM(SA1100_CS0_PHYS, SZ_32M),
 	DEFINE_RES_MEM(SA1100_CS1_PHYS, SZ_32M),
 };
-
 
 /*
  * Assabet IrDA support code.
@@ -540,7 +538,6 @@ fixup_assabet(struct tag *tags, char **cmdline)
 	if (machine_has_neponset())
 		printk("Neponset expansion board detected\n");
 }
-
 
 static void assabet_uart_pm(struct uart_port *port, u_int state, u_int oldstate)
 {

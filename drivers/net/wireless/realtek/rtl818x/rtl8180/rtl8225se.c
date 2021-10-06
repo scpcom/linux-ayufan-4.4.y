@@ -187,7 +187,6 @@ static void rtl8187se_rf_writereg(struct ieee80211_hw *dev, u8 addr, u32 data)
 	rtl8187se_three_wire_io(dev, (u8 *)&outdata, 16, 1);
 }
 
-
 static void rtl8225se_write_zebra_agc(struct ieee80211_hw *dev)
 {
 	int i;

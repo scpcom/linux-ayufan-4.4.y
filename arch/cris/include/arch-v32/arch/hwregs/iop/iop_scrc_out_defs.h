@@ -124,7 +124,6 @@ typedef struct {
 typedef unsigned int reg_iop_scrc_out_r_computed_crc;
 #define REG_RD_ADDR_iop_scrc_out_r_computed_crc 20
 
-
 /* Constants */
 enum {
   regk_iop_scrc_out_crc                    = 0x00000001,

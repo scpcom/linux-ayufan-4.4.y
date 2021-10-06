@@ -52,7 +52,6 @@ MODULE_PARM(nfeth_debug, "i");
 MODULE_PARM_DESC(nfeth_debug, "nfeth_debug level (1-2)");
 */
 
-
 static long nfEtherID;
 static int nfEtherIRQ;
 

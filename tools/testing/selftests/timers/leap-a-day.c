@@ -37,8 +37,6 @@
  *   GNU General Public License for more details.
  */
 
-
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -165,7 +163,6 @@ void sigalarm(int signo)
 					time_state_str(ret));
 	}
 }
-
 
 /* Test for known hrtimer failure */
 void test_hrtimer_failure(void)
@@ -316,7 +313,6 @@ int main(int argc, char **argv)
 		/* Wake up 3 seconds before leap */
 		ts.tv_sec = next_leap - 3;
 		ts.tv_nsec = 0;
-
 
 		while (clock_nanosleep(CLOCK_REALTIME, TIMER_ABSTIME, &ts, NULL))
 			printf("Something woke us up, returning to sleep\n");

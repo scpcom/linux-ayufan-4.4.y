@@ -492,7 +492,6 @@ static void radeon_legacy_backlight_exit(struct radeon_encoder *encoder)
 
 #endif
 
-
 static void radeon_lvds_enc_destroy(struct drm_encoder *encoder)
 {
 	struct radeon_encoder *radeon_encoder = to_radeon_encoder(encoder);
@@ -716,7 +715,6 @@ static const struct drm_encoder_helper_funcs radeon_legacy_primary_dac_helper_fu
 	.disable = radeon_legacy_encoder_disable,
 };
 
-
 static const struct drm_encoder_funcs radeon_legacy_primary_dac_enc_funcs = {
 	.destroy = radeon_enc_destroy,
 };
@@ -880,7 +878,6 @@ static const struct drm_encoder_helper_funcs radeon_legacy_tmds_int_helper_funcs
 	.disable = radeon_legacy_encoder_disable,
 };
 
-
 static const struct drm_encoder_funcs radeon_legacy_tmds_int_enc_funcs = {
 	.destroy = radeon_enc_destroy,
 };
@@ -1022,7 +1019,6 @@ static const struct drm_encoder_helper_funcs radeon_legacy_tmds_ext_helper_funcs
 	.commit = radeon_legacy_tmds_ext_commit,
 	.disable = radeon_legacy_encoder_disable,
 };
-
 
 static const struct drm_encoder_funcs radeon_legacy_tmds_ext_enc_funcs = {
 	.destroy = radeon_ext_tmds_enc_destroy,
@@ -1682,11 +1678,9 @@ static const struct drm_encoder_helper_funcs radeon_legacy_tv_dac_helper_funcs =
 	.disable = radeon_legacy_encoder_disable,
 };
 
-
 static const struct drm_encoder_funcs radeon_legacy_tv_dac_enc_funcs = {
 	.destroy = radeon_enc_destroy,
 };
-
 
 static struct radeon_encoder_int_tmds *radeon_legacy_get_tmds_info(struct radeon_encoder *encoder)
 {

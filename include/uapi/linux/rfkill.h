@@ -18,7 +18,6 @@
 #ifndef _UAPI__RFKILL_H
 #define _UAPI__RFKILL_H
 
-
 #include <linux/types.h>
 
 /* define userspace visible states */

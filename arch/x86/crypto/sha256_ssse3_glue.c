@@ -26,7 +26,6 @@
  * SOFTWARE.
  */
 
-
 #define pr_fmt(fmt)	KBUILD_MODNAME ": " fmt
 
 #include <crypto/internal/hash.h>

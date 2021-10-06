@@ -19,7 +19,6 @@
 #include "msm_gem.h"
 #include "msm_mmu.h"
 
-
 /*
  * Power Management:
  */
@@ -663,7 +662,6 @@ int msm_gpu_init(struct drm_device *drm, struct platform_device *pdev,
 		dev_info(drm->dev, "%s: no IOMMU, fallback to VRAM carveout!\n", name);
 	}
 	gpu->id = msm_register_mmu(drm, gpu->mmu);
-
 
 	/* Create ringbuffer: */
 	mutex_lock(&drm->struct_mutex);

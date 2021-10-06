@@ -104,7 +104,6 @@ static int uhci_show_urbp(struct uhci_hcd *uhci, struct urb_priv *urbp,
 	int i, nactive, ninactive;
 	char *ptype;
 
-
 	out += sprintf(out, "urb_priv [%p] ", urbp);
 	out += sprintf(out, "urb [%p] ", urbp->urb);
 	out += sprintf(out, "qh [%p] ", urbp->qh);
@@ -308,7 +307,6 @@ static int uhci_show_status(struct uhci_hcd *uhci, char *buf, int len)
 	unsigned int flbaseadd;
 	unsigned char sof;
 	unsigned short portsc1, portsc2;
-
 
 	usbcmd    = uhci_readw(uhci, USBCMD);
 	usbstat   = uhci_readw(uhci, USBSTS);

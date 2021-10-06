@@ -1631,7 +1631,6 @@ static const struct i2c_device_id s5k6aa_id[] = {
 };
 MODULE_DEVICE_TABLE(i2c, s5k6aa_id);
 
-
 static struct i2c_driver s5k6aa_i2c_driver = {
 	.driver = {
 		.name = DRIVER_NAME

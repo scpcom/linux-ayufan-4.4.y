@@ -177,7 +177,6 @@ ENTRY(omap34xx_cpu_suspend)
 	cmp	r0, #0x0		@ If no context save required,
 	bxeq	r5			@  jump to the WFI code in SRAM
 
-
 	/* Otherwise fall through to the save context code */
 save_context_wfi:
 	/*
@@ -356,7 +355,6 @@ sdrc_dlla_ctrl:
 	.word	SDRC_DLLA_CTRL_V
 ENTRY(omap3_do_wfi_sz)
 	.word	. - omap3_do_wfi
-
 
 /*
  * ==============================

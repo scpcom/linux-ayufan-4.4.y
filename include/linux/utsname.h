@@ -1,7 +1,6 @@
 #ifndef _LINUX_UTSNAME_H
 #define _LINUX_UTSNAME_H
 
-
 #include <linux/sched.h>
 #include <linux/kref.h>
 #include <linux/nsproxy.h>

@@ -693,7 +693,6 @@ static struct gpio_chip xway_chip = {
 	.base = -1,
 };
 
-
 /* --------- register the pinctrl layer --------- */
 static const unsigned xway_exin_pin_map[] = {GPIO0, GPIO1, GPIO2, GPIO39, GPIO46, GPIO9};
 static const unsigned ase_exin_pins_map[] = {GPIO6, GPIO29, GPIO0};

@@ -42,7 +42,6 @@
 #include "xfs_icache.h"
 #include "xfs_sysfs.h"
 
-
 static DEFINE_MUTEX(xfs_uuid_table_mutex);
 static int xfs_uuid_table_size;
 static uuid_t *xfs_uuid_table;
@@ -126,7 +125,6 @@ xfs_uuid_unmount(
 	ASSERT(i < xfs_uuid_table_size);
 	mutex_unlock(&xfs_uuid_table_mutex);
 }
-
 
 STATIC void
 __xfs_free_perag(
@@ -504,7 +502,6 @@ xfs_set_low_space_thresholds(
 		mp->m_low_space[i] = space * (i + 1);
 	}
 }
-
 
 /*
  * Set whether we're using inode alignment.
@@ -1063,7 +1060,6 @@ xfs_unmountfs(
 	if (error)
 		xfs_warn(mp, "Unable to update superblock counters. "
 				"Freespace may not be correct on next mount.");
-
 
 	xfs_log_unmount(mp);
 	xfs_da_unmount(mp);

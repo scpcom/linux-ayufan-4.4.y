@@ -176,7 +176,6 @@ static void sxgbe_mtl_fup_disable(void __iomem *ioaddr, int queue_num)
 	writel(reg_val, ioaddr + SXGBE_MTL_RXQ_OPMODE_REG(queue_num));
 }
 
-
 static void sxgbe_set_tx_mtl_mode(void __iomem *ioaddr, int queue_num,
 				  int tx_mode)
 {

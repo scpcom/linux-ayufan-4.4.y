@@ -41,7 +41,6 @@ enum ccp2_output_entity {
 	CCP2_OUTPUT_MEMORY,
 };
 
-
 /* Logical channel configuration */
 struct isp_interface_lcx_config {
 	int crc;

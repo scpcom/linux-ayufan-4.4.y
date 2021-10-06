@@ -123,7 +123,6 @@ static struct clock_event_device sun4i_clockevent = {
 	.set_next_event = sun4i_clkevt_next_event,
 };
 
-
 static irqreturn_t sun4i_timer_interrupt(int irq, void *dev_id)
 {
 	struct clock_event_device *evt = (struct clock_event_device *)dev_id;

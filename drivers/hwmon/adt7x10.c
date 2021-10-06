@@ -237,7 +237,6 @@ static ssize_t adt7x10_show_temp(struct device *dev,
 	struct sensor_device_attribute *attr = to_sensor_dev_attr(da);
 	struct adt7x10_data *data = dev_get_drvdata(dev);
 
-
 	if (attr->index == 0) {
 		int ret;
 

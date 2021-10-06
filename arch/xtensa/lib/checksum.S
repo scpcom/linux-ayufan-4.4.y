@@ -371,7 +371,6 @@ DST(	s8i	a8, a3, 1	)
 
 ENDPROC(csum_partial_copy_generic)
 
-
 # Exception handler:
 .section .fixup, "ax"
 /*

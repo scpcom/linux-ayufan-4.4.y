@@ -14,7 +14,6 @@
 #define CAPI_MAXCONTR	32	/* maximum number of controller    */
 #define CAPI_MAXDATAWINDOW	8
 
-
 typedef struct kcapi_flagdef {
 	int contr;
 	int flag;
@@ -41,7 +40,5 @@ typedef struct kcapi_carddef {
 #define KCAPI_TRACE_FULL_NO_DATA	2
 #define KCAPI_TRACE_SHORT		3
 #define KCAPI_TRACE_FULL		4
-
-
 
 #endif /* _UAPI__KERNELCAPI_H__ */

@@ -20,4 +20,3 @@ void dlm_recoverd_suspend(struct dlm_ls *ls);
 void dlm_recoverd_resume(struct dlm_ls *ls);
 
 #endif				/* __RECOVERD_DOT_H__ */
-

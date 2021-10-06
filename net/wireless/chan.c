@@ -325,7 +325,6 @@ static int cfg80211_get_chans_dfs_required(struct wiphy *wiphy,
 	return 0;
 }
 
-
 int cfg80211_chandef_dfs_required(struct wiphy *wiphy,
 				  const struct cfg80211_chan_def *chandef,
 				  enum nl80211_iftype iftype)
@@ -454,7 +453,6 @@ bool cfg80211_chandef_dfs_usable(struct wiphy *wiphy,
 
 	return (r1 + r2 > 0);
 }
-
 
 static bool cfg80211_get_chans_dfs_available(struct wiphy *wiphy,
 					     u32 center_freq,
@@ -684,7 +682,6 @@ bool cfg80211_chandef_usable(struct wiphy *wiphy,
 	/* 5 and 10 MHz are only defined for the OFDM PHY */
 	if (width < 20)
 		prohibited_flags |= IEEE80211_CHAN_NO_OFDM;
-
 
 	if (!cfg80211_secondary_chans_ok(wiphy, chandef->center_freq1,
 					 width, prohibited_flags))

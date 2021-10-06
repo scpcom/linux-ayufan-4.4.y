@@ -258,7 +258,6 @@ static const char *sparc_cpu_type;
 static const char *sparc_fpu_type;
 const char *sparc_pmu_type;
 
-
 static void __init set_cpu_and_fpu(int psr_impl, int psr_vers, int fpu_vers)
 {
 	const struct manufacturer_info *manuf;
@@ -364,7 +363,6 @@ static int show_cpuinfo(struct seq_file *m, void *__unused)
 #ifdef CONFIG_SPARC64
 unsigned int dcache_parity_tl1_occurred;
 unsigned int icache_parity_tl1_occurred;
-
 
 static int show_cpuinfo(struct seq_file *m, void *__unused)
 {

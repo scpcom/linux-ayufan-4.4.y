@@ -77,7 +77,6 @@ static const int smb2_req_struct_sizes[NUMBER_OF_SMB2_COMMANDS] = {
 	/* SMB2_OPLOCK_BREAK */ 24 /* BB this is 36 for LEASE_BREAK variant */
 };
 
-
 static void
 smb2_hdr_assemble(struct smb2_hdr *hdr, __le16 smb2_cmd /* command */ ,
 		  const struct cifs_tcon *tcon)
@@ -309,7 +308,6 @@ small_smb2_init(__le16 smb2_command, struct cifs_tcon *tcon,
 /* offset is sizeof smb2_negotiate_req - 4 but rounded up to 8 bytes */
 #define OFFSET_OF_NEG_CONTEXT 0x68  /* sizeof(struct smb2_negotiate_req) - 4 */
 
-
 #define SMB2_PREAUTH_INTEGRITY_CAPABILITIES	cpu_to_le16(1)
 #define SMB2_ENCRYPTION_CAPABILITIES		cpu_to_le16(2)
 
@@ -356,7 +354,6 @@ static void assemble_neg_contexts(struct smb2_negotiate_req *req)
 	return;
 }
 #endif /* SMB311 */
-
 
 /*
  *
@@ -1054,7 +1051,6 @@ SMB2_tdis(const unsigned int xid, struct cifs_tcon *tcon)
 	return rc;
 }
 
-
 static struct create_durable *
 create_durable_buf(void)
 {
@@ -1532,7 +1528,6 @@ SMB2_ioctl(const unsigned int xid, struct cifs_tcon *tcon, u64 persistent_fid,
 	} else
 		iov[0].iov_len = get_rfc1002_length(req) + 4;
 
-
 	rc = SendReceive2(xid, ses, iov, num_iovecs, &resp_buftype, 0);
 	rsp = (struct smb2_ioctl_rsp *)iov[0].iov_base;
 
@@ -1663,7 +1658,6 @@ validate_buf(unsigned int offset, unsigned int buffer_length,
 	char *end_of_smb = smb_len + 4 /* RFC1001 length field */ + (char *)hdr;
 	char *begin_of_buf = 4 /* RFC1001 len field */ + offset + (char *)hdr;
 	char *end_of_buf = begin_of_buf + buffer_length;
-
 
 	if (buffer_length < min_buf_size) {
 		cifs_dbg(VFS, "buffer length %d smaller than minimum size %d\n",

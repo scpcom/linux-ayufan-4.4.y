@@ -120,7 +120,6 @@ static struct rtnl_link_stats64 *l2tp_eth_get_stats64(struct net_device *dev,
 	return stats;
 }
 
-
 static struct net_device_ops l2tp_eth_netdev_ops = {
 	.ndo_init		= l2tp_eth_dev_init,
 	.ndo_uninit		= l2tp_eth_dev_uninit,
@@ -316,12 +315,10 @@ static struct pernet_operations l2tp_eth_net_ops = {
 	.size = sizeof(struct l2tp_eth_net),
 };
 
-
 static const struct l2tp_nl_cmd_ops l2tp_eth_nl_cmd_ops = {
 	.session_create	= l2tp_eth_create,
 	.session_delete	= l2tp_session_delete,
 };
-
 
 static int __init l2tp_eth_init(void)
 {

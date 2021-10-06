@@ -45,7 +45,6 @@
  */
 #define TILCDC_DEFAULT_MAX_BANDWIDTH  (1280*1024*60)
 
-
 struct tilcdc_drm_private {
 	void __iomem *mmio;
 

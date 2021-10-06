@@ -74,7 +74,6 @@ struct devstate_ctl_reg {
 	u8  nbits;		/* number of bits per device */
 };
 
-
 /*
  * This describes a region of status bits indicating the state of
  * various devices. This is used internally to wait for status
@@ -182,7 +181,6 @@ static void dscr_write(u32 reg, u32 val)
 	else
 		soc_writel(val, dscr.base + reg);
 }
-
 
 /*
  * Drivers can use this interface to enable/disable SoC IP blocks.
@@ -364,7 +362,6 @@ static void __init dscr_parse_rmii_resets(struct device_node *node,
 	}
 }
 
-
 static void __init dscr_parse_privperm(struct device_node *node,
 				       void __iomem *base)
 {
@@ -442,7 +439,6 @@ static void __init dscr_parse_kick_regs(struct device_node *node,
 		dscr.kick_key[1] = vals[3];
 	}
 }
-
 
 /*
  * SoCs may provide controls to enable/disable individual IP blocks. These

@@ -43,10 +43,8 @@
 
 #include <net/ip_vs.h>
 
-
 #define SERVER_STRING "227 "
 #define CLIENT_STRING "PORT"
-
 
 /*
  * List of ports (up to IP_VS_APP_MAX_PORTS) to be handled by helper
@@ -57,10 +55,8 @@ static unsigned short ports[IP_VS_APP_MAX_PORTS] = {21, 0};
 module_param_array(ports, ushort, &ports_count, 0444);
 MODULE_PARM_DESC(ports, "Ports to monitor for FTP control commands");
 
-
 /*	Dummy variable */
 static int ip_vs_ftp_pasv;
-
 
 static int
 ip_vs_ftp_init_conn(struct ip_vs_app *app, struct ip_vs_conn *cp)
@@ -70,13 +66,11 @@ ip_vs_ftp_init_conn(struct ip_vs_app *app, struct ip_vs_conn *cp)
 	return 0;
 }
 
-
 static int
 ip_vs_ftp_done_conn(struct ip_vs_app *app, struct ip_vs_conn *cp)
 {
 	return 0;
 }
-
 
 /*
  * Get <addr,port> from the string "xxx.xxx.xxx.xxx,ppp,ppp", started
@@ -296,7 +290,6 @@ static int ip_vs_ftp_out(struct ip_vs_app *app, struct ip_vs_conn *cp,
 	return 1;
 }
 
-
 /*
  * Look at incoming ftp packets to catch the PASV/PORT command
  * (outside-to-inside).
@@ -416,7 +409,6 @@ static int ip_vs_ftp_in(struct ip_vs_app *app, struct ip_vs_conn *cp,
 	return 1;
 }
 
-
 static struct ip_vs_app ip_vs_ftp = {
 	.name =		"ftp",
 	.type =		IP_VS_APP_TYPE_FTP,
@@ -497,7 +489,6 @@ static void __exit ip_vs_ftp_exit(void)
 	unregister_pernet_subsys(&ip_vs_ftp_ops);
 	/* rcu_barrier() is called by netns */
 }
-
 
 module_init(ip_vs_ftp_init);
 module_exit(ip_vs_ftp_exit);

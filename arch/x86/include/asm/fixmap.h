@@ -45,7 +45,6 @@ extern unsigned long __FIXADDR_TOP;
 			 PAGE_SIZE)
 #endif
 
-
 /*
  * Here we define all the compile-time 'special' virtual
  * addresses. The point is to have a constant address at
@@ -133,7 +132,6 @@ enum fixed_addresses {
 #endif
 	__end_of_fixed_addresses
 };
-
 
 extern void reserve_top_address(unsigned long reserve);
 

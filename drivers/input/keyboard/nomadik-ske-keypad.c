@@ -315,7 +315,6 @@ static int __init ske_keypad_probe(struct platform_device *pdev)
 		goto err_pclk_disable;
 	}
 
-
 	/* go through board initialization helpers */
 	if (keypad->board->init)
 		keypad->board->init();

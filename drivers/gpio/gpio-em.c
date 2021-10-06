@@ -118,7 +118,6 @@ static void em_gio_irq_relres(struct irq_data *d)
 	gpiochip_unlock_as_irq(&p->gpio_chip, irqd_to_hwirq(d));
 }
 
-
 #define GIO_ASYNC(x) (x + 8)
 
 static unsigned char em_gio_sense_table[IRQ_TYPE_SENSE_MASK + 1] = {

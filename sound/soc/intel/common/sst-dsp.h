@@ -150,7 +150,6 @@
 #define SST_HMDC_HDDA_E1_ALLCH	(SST_HMDC_HDDA_E1_CH0 | SST_HMDC_HDDA_E1_CH1 | \
 				 SST_HMDC_HDDA_E1_CH2 | SST_HMDC_HDDA_E1_CH3)
 
-
 /* SST Vendor Defined Registers and bits */
 #define SST_VDRTCTL0		0xa0
 #define SST_VDRTCTL1		0xa4

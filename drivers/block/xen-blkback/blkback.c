@@ -187,7 +187,6 @@ static void make_response(struct xen_blkif *blkif, u64 id,
 	     (pos) = container_of(n, typeof(*(pos)), node), \
 	     (n) = (&(pos)->node != NULL) ? rb_next(&(pos)->node) : NULL)
 
-
 /*
  * We don't need locking around the persistent grant helpers
  * because blkback uses a single-thread for each backed, so we
@@ -749,7 +748,6 @@ static void xen_blkbk_unmap_and_respond(struct pending_req *req)
 	gnttab_unmap_refs_async(&req->gnttab_unmap_data);
 }
 
-
 /*
  * Unmap the grant references.
  *
@@ -1089,8 +1087,6 @@ static void end_block_io_op(struct bio *bio)
 	bio_put(bio);
 }
 
-
-
 /*
  * Function to copy the from the ring buffer the 'struct blkif_request'
  * (which has the sectors we want, number of them, grant references, etc),
@@ -1401,8 +1397,6 @@ static int dispatch_rw_block_io(struct xen_blkif *blkif,
 	msleep(1); /* back off a bit */
 	return -EIO;
 }
-
-
 
 /*
  * Put a response on the ring on how the operation fared.

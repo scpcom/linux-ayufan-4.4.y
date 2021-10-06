@@ -161,7 +161,6 @@ static const struct watchdog_info ident = {
 	.identity = "SBC7240",
 };
 
-
 static long fop_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 {
 	switch (cmd) {

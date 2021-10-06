@@ -14,7 +14,6 @@
 #include "core.h"
 #include "dsp.h"
 
-
 #define DATA_S sample_silence
 #define SIZE_S (&sizeof_silence)
 #define DATA_GA sample_german_all
@@ -227,7 +226,6 @@ dsp_audio_generate_ulaw_samples(void)
 	}
 }
 
-
 /****************************
  * tone sequence definition *
  ****************************/
@@ -429,7 +427,6 @@ void dsp_tone_copy(struct dsp *dsp, u8 *data, int len)
 	return;
 }
 
-
 /*******************************
  * send HW message to hfc card *
  *******************************/
@@ -451,7 +448,6 @@ dsp_tone_hw_message(struct dsp *dsp, u8 *sample, int len)
 			dev_kfree_skb(nskb);
 	}
 }
-
 
 /*****************
  * timer expires *
@@ -482,7 +478,6 @@ dsp_tone_timeout(void *arg)
 	tone->tl.expires = jiffies + (pat->seq[index] * HZ) / 8000;
 	add_timer(&tone->tl);
 }
-
 
 /********************
  * set/release tone *

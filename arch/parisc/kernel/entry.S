@@ -28,7 +28,6 @@
  *  - handle in assembly and use shadowed registers only
  *  - save registers to kernel stack and handle in assembly or C */
 
-
 #include <asm/psw.h>
 #include <asm/cache.h>		/* for L1_CACHE_SHIFT */
 #include <asm/assembly.h>	/* for LDREG/STREG defines */
@@ -661,7 +660,6 @@
 	or		%r26,%r0,\pte
 	.endm 
 
-
 	/*
 	 * Fault_vectors are architecturally required to be aligned on a 2K
 	 * boundary
@@ -783,7 +781,6 @@ ENTRY(ret_from_kernel_thread)
 	b	finish_child_return
 	nop
 ENDPROC(ret_from_kernel_thread)
-
 
 	/*
 	 * struct task_struct *_switch_to(struct task_struct *prev,
@@ -1039,7 +1036,6 @@ intr_extint:
 	ldo	R%intr_return(%r2), %r2	/* return to intr_return, not here */
 ENDPROC(syscall_exit_rfi)
 
-
 	/* Generic interruptions (illegal insn, unaligned, page fault, etc) */
 
 ENTRY(intr_save)		/* for os_hpmc */
@@ -1068,11 +1064,9 @@ ENTRY(intr_save)		/* for os_hpmc */
 
 	cmpib,COND(=),n        6,%r26,skip_save_ior
 
-
 	mfctl           %cr20, %r16 /* isr */
 	nop		/* serialize mfctl on PA 2.0 to avoid 4 cycle penalty */
 	mfctl           %cr21, %r17 /* ior */
-
 
 #ifdef CONFIG_64BIT
 	/*
@@ -1097,7 +1091,6 @@ ENTRY(intr_save)		/* for os_hpmc */
 	STREG           %r16, PT_ISR(%r29)
 	STREG           %r17, PT_IOR(%r29)
 
-
 skip_save_ior:
 	virt_map
 	save_general	%r29
@@ -1118,7 +1111,6 @@ skip_save_ior:
 	b		handle_interruption
 	ldo		R%intr_check_sig(%r2), %r2
 ENDPROC(intr_save)
-
 
 	/*
 	 * Note for all tlb miss handlers:
@@ -1398,7 +1390,6 @@ nadtlb_probe_check:
 	b nadtlb_nullify                       /* Nullify return insn */
 	nop
 
-
 #ifdef CONFIG_64BIT
 itlb_miss_20w:
 
@@ -1514,7 +1505,6 @@ naitlb_check_alias_11:
 
 	rfir
 	nop
-
 
 itlb_miss_20:
 	get_pgd		spc,ptp
@@ -1982,7 +1972,6 @@ syscall_do_resched:
 	nop
 ENDPROC(syscall_exit)
 
-
 #ifdef CONFIG_FUNCTION_TRACER
 	.import ftrace_function_trampoline,code
 ENTRY(_mcount)
@@ -2129,7 +2118,6 @@ get_register:
 	bv      %r0(%r25)    /* r31 */
 	copy    %r31,%r1
 
-
 set_register:
 	/*
 	 * set_register is used by the non access tlb miss handlers to
@@ -2202,4 +2190,3 @@ set_register:
 	copy    %r1,%r30
 	bv      %r0(%r25)    /* r31 */
 	copy    %r1,%r31
-

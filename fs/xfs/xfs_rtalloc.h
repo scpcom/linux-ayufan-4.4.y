@@ -122,7 +122,6 @@ int xfs_rtfree_range(struct xfs_mount *mp, struct xfs_trans *tp,
 		     xfs_rtblock_t start, xfs_extlen_t len,
 		     struct xfs_buf **rbpp, xfs_fsblock_t *rsb);
 
-
 #else
 # define xfs_rtallocate_extent(t,b,min,max,l,a,f,p,rb)  (ENOSYS)
 # define xfs_rtfree_extent(t,b,l)                       (ENOSYS)

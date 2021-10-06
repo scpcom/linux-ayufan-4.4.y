@@ -324,4 +324,3 @@ void  sound_timer_init(struct sound_lowlev_timer *t, char *name)
 	sound_timer_devs[n] = &sound_timer;
 }
 EXPORT_SYMBOL(sound_timer_init);
-

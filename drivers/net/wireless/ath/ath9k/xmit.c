@@ -34,7 +34,6 @@
 #define NUM_SYMBOLS_PER_USEC(_usec) (_usec >> 2)
 #define NUM_SYMBOLS_PER_USEC_HALFGI(_usec) (((_usec*5)-4)/18)
 
-
 static u16 bits_per_symbol[][2] = {
 	/* 20MHz 40MHz */
 	{    26,   54 },     /*  0: BPSK */
@@ -422,7 +421,6 @@ static void ath_tx_count_frames(struct ath_softc *sc, struct ath_buf *bf,
 		bf = bf->bf_next;
 	}
 }
-
 
 static void ath_tx_complete_aggr(struct ath_softc *sc, struct ath_txq *txq,
 				 struct ath_buf *bf, struct list_head *bf_q,
@@ -2262,7 +2260,6 @@ static int ath_tx_prepare(struct ieee80211_hw *hw, struct sk_buff *skb,
 	setup_frame_info(hw, sta, skb, frmlen);
 	return 0;
 }
-
 
 /* Upon failure caller should free skb */
 int ath_tx_start(struct ieee80211_hw *hw, struct sk_buff *skb,

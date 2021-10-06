@@ -15,8 +15,6 @@
 #ifndef _UAPI_ASM_X86_IST_H
 #define _UAPI_ASM_X86_IST_H
 
-
-
 #include <linux/types.h>
 
 struct ist_info {

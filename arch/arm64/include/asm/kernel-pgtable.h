@@ -19,7 +19,6 @@
 #ifndef __ASM_KERNEL_PGTABLE_H
 #define __ASM_KERNEL_PGTABLE_H
 
-
 /*
  * The linear mapping and the start of memory are both 2M aligned (per
  * the arm64 booting.txt requirements). Hence we can use section mapping
@@ -78,6 +77,5 @@
 #else
 #define SWAPPER_MM_MMUFLAGS	(PTE_ATTRINDX(MT_NORMAL) | SWAPPER_PTE_FLAGS)
 #endif
-
 
 #endif	/* __ASM_KERNEL_PGTABLE_H */

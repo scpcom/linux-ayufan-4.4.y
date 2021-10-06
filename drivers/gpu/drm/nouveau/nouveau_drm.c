@@ -296,7 +296,6 @@ nouveau_accel_init(struct nouveau_drm *drm)
 		}
 	}
 
-
 	nouveau_bo_move_init(drm);
 }
 

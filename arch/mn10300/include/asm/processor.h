@@ -130,7 +130,6 @@ static inline void start_thread(struct pt_regs *regs,
 	regs->sp = new_sp;
 }
 
-
 /* Free all resources held by a thread. */
 extern void release_thread(struct task_struct *);
 

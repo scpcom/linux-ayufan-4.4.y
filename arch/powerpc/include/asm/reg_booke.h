@@ -687,7 +687,6 @@
 #define SPRN_PBU1	0x3FD	/* Protection Bound Upper 1 */
 #define SPRN_PBU2	0x3FF	/* Protection Bound Upper 2 */
 
-
 /* Bit definitions for the DBCR. */
 #define DBCR_EDM	DBCR0_EDM
 #define DBCR_IDM	DBCR0_IDM

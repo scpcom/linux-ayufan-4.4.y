@@ -31,7 +31,6 @@
 #include <asm/io.h>
 #include <asm/uaccess.h>
 
-
 /**
  * The msg member must be at the end of the struct, as it's followed by the
  * message data.

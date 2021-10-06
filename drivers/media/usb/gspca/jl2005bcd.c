@@ -24,7 +24,6 @@
 #include <linux/slab.h>
 #include "gspca.h"
 
-
 MODULE_AUTHOR("Theodore Kilgore <kilgota@auburn.edu>");
 MODULE_DESCRIPTION("JL2005B/C/D USB Camera Driver");
 MODULE_LICENSE("GPL");
@@ -36,7 +35,6 @@ MODULE_LICENSE("GPL");
 /* Maximum transfer size to use. */
 #define JL2005C_MAX_TRANSFER 0x200
 #define FRAME_HEADER_LEN 16
-
 
 /* specific webcam descriptor */
 struct sd {
@@ -50,7 +48,6 @@ struct sd {
 	int block_size;	/* block size of camera */
 	int vga;	/* 1 if vga cam, 0 if cif cam */
 };
-
 
 /* Camera has two resolution settings. What they are depends on model. */
 static const struct v4l2_pix_format cif_mode[] = {
@@ -297,7 +294,6 @@ static int jl2005c_stream_start_cif_small(struct gspca_dev *gspca_dev)
 	return retval;
 }
 
-
 static int jl2005c_stop(struct gspca_dev *gspca_dev)
 {
 	int retval;
@@ -400,9 +396,6 @@ quit_stream:
 	kfree(buffer);
 }
 
-
-
-
 /* This function is called at probe time */
 static int sd_config(struct gspca_dev *gspca_dev,
 			const struct usb_device_id *id)
@@ -497,8 +490,6 @@ static void sd_stop0(struct gspca_dev *gspca_dev)
 	dev->work_thread = NULL;
 	mutex_lock(&gspca_dev->usb_lock);
 }
-
-
 
 /* sub-driver description */
 static const struct sd_desc sd_desc = {

@@ -1,20 +1,4 @@
-/*
- * drivers/net/phy/marvell.c
- *
- * Driver for Marvell PHYs
- *
- * Author: Andy Fleming
- *
- * Copyright (c) 2004 Freescale Semiconductor, Inc.
- *
- * Copyright (c) 2013 Michael Stapelberg <michael@stapelberg.de>
- *
- * This program is free software; you can redistribute  it and/or modify it
- * under  the terms of  the GNU General  Public License as published by the
- * Free Software Foundation;  either version 2 of the  License, or (at your
- * option) any later version.
- *
- */
+
 #include <linux/kernel.h>
 #include <linux/string.h>
 #include <linux/errno.h>
@@ -93,19 +77,16 @@
 #define MII_88E1318S_PHY_MSCR1_REG	16
 #define MII_88E1318S_PHY_MSCR1_PAD_ODD	BIT(6)
 
-/* Copper Specific Interrupt Enable Register */
 #define MII_88E1318S_PHY_CSIER                              0x12
-/* WOL Event Interrupt Enable */
+ 
 #define MII_88E1318S_PHY_CSIER_WOL_EIE                      BIT(7)
 
-/* LED Timer Control Register */
 #define MII_88E1318S_PHY_LED_PAGE                           0x03
 #define MII_88E1318S_PHY_LED_TCR                            0x12
 #define MII_88E1318S_PHY_LED_TCR_FORCE_INT                  BIT(15)
 #define MII_88E1318S_PHY_LED_TCR_INTn_ENABLE                BIT(7)
 #define MII_88E1318S_PHY_LED_TCR_INT_ACTIVE_LOW             BIT(11)
 
-/* Magic Packet MAC address registers */
 #define MII_88E1318S_PHY_MAGIC_PACKET_WORD2                 0x17
 #define MII_88E1318S_PHY_MAGIC_PACKET_WORD1                 0x18
 #define MII_88E1318S_PHY_MAGIC_PACKET_WORD0                 0x19
@@ -141,7 +122,6 @@ static int marvell_ack_interrupt(struct phy_device *phydev)
 {
 	int err;
 
-	/* Clear the interrupts by reading the reg */
 	err = phy_read(phydev, MII_M1011_IEVENT);
 
 	if (err < 0)
@@ -168,7 +148,6 @@ static int marvell_set_polarity(struct phy_device *phydev, int polarity)
 	int err;
 	int val;
 
-	/* get the current settings */
 	reg = phy_read(phydev, MII_M1011_PHY_SCR);
 	if (reg < 0)
 		return reg;
@@ -190,7 +169,7 @@ static int marvell_set_polarity(struct phy_device *phydev, int polarity)
 	}
 
 	if (val != reg) {
-		/* Set the new polarity value in the register */
+		 
 		err = phy_write(phydev, MII_M1011_PHY_SCR, val);
 		if (err)
 			return err;
@@ -203,9 +182,6 @@ static int marvell_config_aneg(struct phy_device *phydev)
 {
 	int err;
 
-	/* The Marvell PHY has an errata which requires
-	 * that certain registers get written in order
-	 * to restart autonegotiation */
 	err = phy_write(phydev, MII_BMCR, BMCR_RESET);
 
 	if (err < 0)
@@ -247,11 +223,6 @@ static int marvell_config_aneg(struct phy_device *phydev)
 	if (phydev->autoneg != AUTONEG_ENABLE) {
 		int bmcr;
 
-		/*
-		 * A write to speed/duplex bits (that is performed by
-		 * genphy_config_aneg() call above) must be followed by
-		 * a software reset. Otherwise, the write has no effect.
-		 */
 		bmcr = phy_read(phydev, MII_BMCR);
 		if (bmcr < 0)
 			return bmcr;
@@ -265,20 +236,7 @@ static int marvell_config_aneg(struct phy_device *phydev)
 }
 
 #ifdef CONFIG_OF_MDIO
-/*
- * Set and/or override some configuration registers based on the
- * marvell,reg-init property stored in the of_node for the phydev.
- *
- * marvell,reg-init = <reg-page reg mask value>,...;
- *
- * There may be one or more sets of <reg-page reg mask value>:
- *
- * reg-page: which register bank to use.
- * reg: the register.
- * mask: if non-zero, ANDed with existing register value.
- * value: ORed with the masked value and written to the regiser.
- *
- */
+ 
 static int marvell_of_reg_init(struct phy_device *phydev)
 {
 	const __be32 *paddr;
@@ -343,7 +301,7 @@ static int marvell_of_reg_init(struct phy_device *phydev)
 {
 	return 0;
 }
-#endif /* CONFIG_OF_MDIO */
+#endif  
 
 static int m88e1121_config_aneg(struct phy_device *phydev)
 {
@@ -450,8 +408,8 @@ static int m88e1116r_config_init(struct phy_device *phydev)
 		return err;
 
 	temp = phy_read(phydev, MII_M1011_PHY_SCR);
-	temp |= (7 << 12);	/* max number of gigabit attempts */
-	temp |= (1 << 11);	/* enable downshift */
+	temp |= (7 << 12);	 
+	temp |= (1 << 11);	 
 	temp |= MII_M1011_PHY_SCR_AUTO_CROSS;
 	err = phy_write(phydev, MII_M1011_PHY_SCR, temp);
 	if (err < 0)
@@ -485,7 +443,6 @@ static int m88e3016_config_init(struct phy_device *phydev)
 {
 	int reg;
 
-	/* Enable Scrambler and Auto-Crossover */
 	reg = phy_read(phydev, MII_88E3016_PHY_SPEC_CTRL);
 	if (reg < 0)
 		return reg;
@@ -554,7 +511,6 @@ static int m88e1111_config_init(struct phy_device *phydev)
 		if (err < 0)
 			return err;
 
-		/* make sure copper is selected */
 		err = phy_read(phydev, MII_M1145_PHY_EXT_ADDR_PAGE);
 		if (err < 0)
 			return err;
@@ -583,7 +539,6 @@ static int m88e1111_config_init(struct phy_device *phydev)
 		if (err < 0)
 			return err;
 
-		/* soft reset */
 		err = phy_write(phydev, MII_BMCR, BMCR_RESET);
 		if (err < 0)
 			return err;
@@ -629,22 +584,18 @@ static int m88e1118_config_init(struct phy_device *phydev)
 {
 	int err;
 
-	/* Change address */
 	err = phy_write(phydev, MII_MARVELL_PHY_PAGE, 0x0002);
 	if (err < 0)
 		return err;
 
-	/* Enable 1000 Mbit */
 	err = phy_write(phydev, 0x15, 0x1070);
 	if (err < 0)
 		return err;
 
-	/* Change address */
 	err = phy_write(phydev, MII_MARVELL_PHY_PAGE, 0x0003);
 	if (err < 0)
 		return err;
 
-	/* Adjust LED Control */
 	if (phydev->dev_flags & MARVELL_PHY_M1118_DNS323_LEDS)
 		err = phy_write(phydev, 0x10, 0x1100);
 	else
@@ -656,7 +607,6 @@ static int m88e1118_config_init(struct phy_device *phydev)
 	if (err < 0)
 		return err;
 
-	/* Reset address */
 	err = phy_write(phydev, MII_MARVELL_PHY_PAGE, 0x0);
 	if (err < 0)
 		return err;
@@ -668,12 +618,10 @@ static int m88e1149_config_init(struct phy_device *phydev)
 {
 	int err;
 
-	/* Change address */
 	err = phy_write(phydev, MII_MARVELL_PHY_PAGE, 0x0002);
 	if (err < 0)
 		return err;
 
-	/* Enable 1000 Mbit */
 	err = phy_write(phydev, 0x15, 0x1048);
 	if (err < 0)
 		return err;
@@ -682,7 +630,6 @@ static int m88e1149_config_init(struct phy_device *phydev)
 	if (err < 0)
 		return err;
 
-	/* Reset address */
 	err = phy_write(phydev, MII_MARVELL_PHY_PAGE, 0x0);
 	if (err < 0)
 		return err;
@@ -695,7 +642,6 @@ static int m88e1145_config_init(struct phy_device *phydev)
 	int err;
 	int temp;
 
-	/* Take care of errata E0 & E1 */
 	err = phy_write(phydev, 0x1d, 0x001b);
 	if (err < 0)
 		return err;
@@ -733,8 +679,8 @@ static int m88e1145_config_init(struct phy_device *phydev)
 				return temp;
 
 			temp &= 0xf03f;
-			temp |= 2 << 9;	/* 36 ohm */
-			temp |= 2 << 6;	/* 39 ohm */
+			temp |= 2 << 9;	 
+			temp |= 2 << 6;	 
 
 			err = phy_write(phydev, 0x1e, temp);
 			if (err < 0)
@@ -771,15 +717,7 @@ static int m88e1145_config_init(struct phy_device *phydev)
 	return 0;
 }
 
-/* marvell_read_status
- *
- * Generic status code does not detect Fiber correctly!
- * Description:
- *   Check the link, then figure out the current state
- *   by comparing what we advertise with what the link partner
- *   advertises.  Start by checking the gigabit possibilities,
- *   then move on to 10/100.
- */
+
 static int marvell_read_status(struct phy_device *phydev)
 {
 	int adv;
@@ -788,8 +726,6 @@ static int marvell_read_status(struct phy_device *phydev)
 	int lpagb;
 	int status = 0;
 
-	/* Update the link, but return if there
-	 * was an error */
 	err = genphy_update_link(phydev);
 	if (err)
 		return err;
@@ -909,12 +845,11 @@ static int m88e1318_set_wol(struct phy_device *phydev, struct ethtool_wolinfo *w
 	oldpage = phy_read(phydev, MII_MARVELL_PHY_PAGE);
 
 	if (wol->wolopts & WAKE_MAGIC) {
-		/* Explicitly switch to page 0x00, just to be sure */
+		 
 		err = phy_write(phydev, MII_MARVELL_PHY_PAGE, 0x00);
 		if (err < 0)
 			return err;
 
-		/* Enable the WOL interrupt */
 		temp = phy_read(phydev, MII_88E1318S_PHY_CSIER);
 		temp |= MII_88E1318S_PHY_CSIER_WOL_EIE;
 		err = phy_write(phydev, MII_88E1318S_PHY_CSIER, temp);
@@ -926,7 +861,6 @@ static int m88e1318_set_wol(struct phy_device *phydev, struct ethtool_wolinfo *w
 		if (err < 0)
 			return err;
 
-		/* Setup LED[2] as interrupt pin (active low) */
 		temp = phy_read(phydev, MII_88E1318S_PHY_LED_TCR);
 		temp &= ~MII_88E1318S_PHY_LED_TCR_FORCE_INT;
 		temp |= MII_88E1318S_PHY_LED_TCR_INTn_ENABLE;
@@ -940,7 +874,6 @@ static int m88e1318_set_wol(struct phy_device *phydev, struct ethtool_wolinfo *w
 		if (err < 0)
 			return err;
 
-		/* Store the device address for the magic packet */
 		err = phy_write(phydev, MII_88E1318S_PHY_MAGIC_PACKET_WORD2,
 				((phydev->attached_dev->dev_addr[5] << 8) |
 				 phydev->attached_dev->dev_addr[4]));
@@ -957,7 +890,6 @@ static int m88e1318_set_wol(struct phy_device *phydev, struct ethtool_wolinfo *w
 		if (err < 0)
 			return err;
 
-		/* Clear WOL status and enable magic packet matching */
 		temp = phy_read(phydev, MII_88E1318S_PHY_WOL_CTRL);
 		temp |= MII_88E1318S_PHY_WOL_CTRL_CLEAR_WOL_STATUS;
 		temp |= MII_88E1318S_PHY_WOL_CTRL_MAGIC_PACKET_MATCH_ENABLE;
@@ -970,7 +902,6 @@ static int m88e1318_set_wol(struct phy_device *phydev, struct ethtool_wolinfo *w
 		if (err < 0)
 			return err;
 
-		/* Clear WOL status and disable magic packet matching */
 		temp = phy_read(phydev, MII_88E1318S_PHY_WOL_CTRL);
 		temp |= MII_88E1318S_PHY_WOL_CTRL_CLEAR_WOL_STATUS;
 		temp &= ~MII_88E1318S_PHY_WOL_CTRL_MAGIC_PACKET_MATCH_ENABLE;

@@ -168,7 +168,6 @@ eb_lookup_vmas(struct eb_vmas *eb,
 
 	return 0;
 
-
 err:
 	while (!list_empty(&objects)) {
 		obj = list_first_entry(&objects,

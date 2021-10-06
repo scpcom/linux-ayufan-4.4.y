@@ -109,7 +109,6 @@ MODULE_PARM_DESC(use_dma, "enable/disable DMA");
 #define	use_dma		0
 #endif	/* !USE_DMA */
 
-
 static const char driver_name[] = "omap_udc";
 static const char driver_desc[] = DRIVER_DESC;
 
@@ -353,7 +352,6 @@ write_packet(u8 *buf, struct omap_req *req, unsigned max)
 
 /* FIXME change r/w fifo calling convention */
 
-
 /* return:  0 = still running, 1 = completed, negative = errno */
 static int write_fifo(struct omap_ep *ep, struct omap_req *req)
 {
@@ -507,7 +505,6 @@ static u16 dma_dest_len(struct omap_ep *ep, dma_addr_t start)
 		end += 0x10000;
 	return end - start;
 }
-
 
 /* Each USB transfer request using DMA maps to one or more DMA transfers.
  * When DMA completion isn't request completion, the UDC continues with
@@ -859,7 +856,6 @@ static void dma_channel_release(struct omap_ep *ep)
 	ep->lch = -1;
 	/* has_dma still set, till endpoint is fully quiesced */
 }
-
 
 /*-------------------------------------------------------------------------*/
 
@@ -2048,7 +2044,6 @@ static int omap_udc_start(struct usb_gadget *g,
 	int		status = -ENODEV;
 	struct omap_ep	*ep;
 	unsigned long	flags;
-
 
 	spin_lock_irqsave(&udc->lock, flags);
 	/* reset state */

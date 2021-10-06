@@ -110,7 +110,6 @@ struct net_local {
 #endif
 };
 
-
 static int  sbni_card_probe( unsigned long );
 static int  sbni_pci_probe( struct net_device  * );
 static struct net_device  *sbni_probe1(struct net_device *, unsigned long, int);
@@ -291,7 +290,6 @@ static int __init sbni_init(struct net_device *dev)
 	return  -ENODEV;
 }
 
-
 static int __init
 sbni_pci_probe( struct net_device  *dev )
 {
@@ -342,7 +340,6 @@ sbni_pci_probe( struct net_device  *dev )
 	}
 	return  -ENODEV;
 }
-
 
 static struct net_device * __init
 sbni_probe1( struct net_device  *dev,  unsigned long  ioaddr,  int  irq )
@@ -527,7 +524,6 @@ sbni_interrupt( int  irq,  void  *dev_id )
 	return IRQ_HANDLED;
 }
 
-
 static void
 handle_channel( struct net_device  *dev )
 {
@@ -580,7 +576,6 @@ handle_channel( struct net_device  *dev )
 #endif
 }
 
-
 /*
  * Routine returns 1 if it need to acknoweledge received frame.
  * Empty frame received without errors won't be acknoweledged.
@@ -619,7 +614,6 @@ recv_frame( struct net_device  *dev )
 	return  !frame_ok  ||  framelen > 4;
 }
 
-
 static void
 send_frame( struct net_device  *dev )
 {
@@ -653,7 +647,6 @@ send_frame( struct net_device  *dev )
 	 * frame sended then in prepare_to_send next frame
 	 */
 
-
 	if( nl->framelen ) {
 		download_data( dev, &crc );
 		nl->in_stats.all_tx_number++;
@@ -670,7 +663,6 @@ do_send:
 		outb( inb( dev->base_addr + CSR0 ) | TR_REQ,
 		      dev->base_addr + CSR0 );
 }
-
 
 /*
  * Write the frame data into adapter's buffer memory, and calculate CRC.
@@ -693,7 +685,6 @@ download_data( struct net_device  *dev,  u32  *crc_p )
 		outb( 0, dev->base_addr + DAT ),
 		*crc_p = CRC32( 0, *crc_p );
 }
-
 
 static int
 upload_data( struct net_device  *dev,  unsigned  framelen,  unsigned  frameno,
@@ -748,7 +739,6 @@ upload_data( struct net_device  *dev,  unsigned  framelen,  unsigned  frameno,
 	return  frame_ok;
 }
 
-
 static inline void
 send_complete( struct net_device *dev )
 {
@@ -769,7 +759,6 @@ send_complete( struct net_device *dev )
 	nl->state &= ~(FL_WAIT_ACK | FL_NEED_RESEND);
 	nl->framelen   = 0;
 }
-
 
 static void
 interpret_ack( struct net_device  *dev,  unsigned  ack )
@@ -798,7 +787,6 @@ interpret_ack( struct net_device  *dev,  unsigned  ack )
 
 	nl->state &= ~FL_WAIT_ACK;
 }
-
 
 /*
  * Glue received frame with previous fragments of packet.
@@ -829,7 +817,6 @@ append_frame_to_pkt( struct net_device  *dev,  unsigned  framelen,  u32  crc )
 
 	return  1;
 }
-
 
 /*
  * Prepare to start output on adapter.
@@ -866,7 +853,6 @@ prepare_to_send( struct sk_buff  *skb,  struct net_device  *dev )
 #endif
 }
 
-
 static void
 drop_xmit_queue( struct net_device  *dev )
 {
@@ -895,7 +881,6 @@ drop_xmit_queue( struct net_device  *dev )
 	dev->trans_start = jiffies;
 #endif
 }
-
 
 static void
 send_frame_header( struct net_device  *dev,  u32  *crc_p )
@@ -929,7 +914,6 @@ send_frame_header( struct net_device  *dev,  u32  *crc_p )
 	*crc_p = crc;
 }
 
-
 /*
  * if frame tail not needed (incorrect number or received twice),
  * it won't store, but CRC will be calculated
@@ -943,7 +927,6 @@ skip_tail( unsigned int  ioaddr,  unsigned int  tail_len,  u32 crc )
 
 	return  crc == CRC32_REMAINDER;
 }
-
 
 /*
  * Preliminary checks if frame header is correct, calculates its CRC
@@ -985,7 +968,6 @@ check_fhdr( u32  ioaddr,  u32  *framelen,  u32  *frameno,  u32  *ack,
 	return  1;
 }
 
-
 static struct sk_buff *
 get_rx_buf( struct net_device  *dev )
 {
@@ -997,7 +979,6 @@ get_rx_buf( struct net_device  *dev )
 	skb_reserve( skb, 2 );		/* Align IP on longword boundaries */
 	return  skb;
 }
-
 
 static void
 indicate_pkt( struct net_device  *dev )
@@ -1020,7 +1001,6 @@ indicate_pkt( struct net_device  *dev )
 #endif
 	nl->rx_buf_p = NULL;	/* protocol driver will clear this sk_buff */
 }
-
 
 /* -------------------------------------------------------------------------- */
 
@@ -1069,7 +1049,6 @@ sbni_watchdog( unsigned long  arg )
 
 	spin_unlock_irqrestore( &nl->lock, flags );
 }
-
 
 static unsigned char  rxl_tab[] = {
 	0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x08,
@@ -1127,7 +1106,6 @@ change_level( struct net_device  *dev )
 	nl->prev_rxl_rcvd = nl->cur_rxl_rcvd;
 	nl->cur_rxl_rcvd  = 0;
 }
-
 
 static void
 timeout_change_level( struct net_device  *dev )
@@ -1206,7 +1184,6 @@ handler_attached:
 	return 0;
 }
 
-
 static int
 sbni_close( struct net_device  *dev )
 {
@@ -1244,7 +1221,6 @@ sbni_close( struct net_device  *dev )
 	return 0;
 }
 
-
 /*
 	Valid combinations in CSR0 (for probing):
 
@@ -1269,7 +1245,6 @@ sbni_close( struct net_device  *dev )
 */
 
 #define VALID_DECODER (2 + 8 + 0x10 + 0x20 + 0x80 + 0x100 + 0x200)
-
 
 static int
 sbni_card_probe( unsigned long  ioaddr )
@@ -1380,7 +1355,6 @@ sbni_ioctl( struct net_device  *dev,  struct ifreq  *ifr,  int  cmd )
 	return  error;
 }
 
-
 #ifdef CONFIG_SBNI_MULTILINE
 
 static int
@@ -1415,7 +1389,6 @@ enslave( struct net_device  *dev,  struct net_device  *slave_dev )
 	netdev_notice(dev, "slave device (%s) attached\n", slave_dev->name);
 	return  0;
 }
-
 
 static int
 emancipate( struct net_device  *dev )
@@ -1462,7 +1435,6 @@ set_multicast_list( struct net_device  *dev )
 	return;		/* sbni always operate in promiscuos mode */
 }
 
-
 #ifdef MODULE
 module_param_array(io, int, NULL, 0);
 module_param_array(irq, int, NULL, 0);
@@ -1472,7 +1444,6 @@ module_param_array(mac, int, NULL, 0);
 module_param(skip_pci_probe, bool, 0);
 
 MODULE_LICENSE("GPL");
-
 
 int __init init_module( void )
 {
@@ -1626,4 +1597,3 @@ static u32  crc32tab[] __attribute__ ((aligned(8))) = {
 	0x616495A3,  0x1663A535,  0x8F6AF48F,  0xF86DC419,
 	0x660951BA,  0x110E612C,  0x88073096,  0xFF000000
 };
-

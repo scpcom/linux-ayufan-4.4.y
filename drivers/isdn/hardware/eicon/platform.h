@@ -10,7 +10,6 @@
  * of the GNU General Public License, incorporated herein by reference.
  */
 
-
 #ifndef	__PLATFORM_H__
 #define	__PLATFORM_H__
 
@@ -47,7 +46,6 @@
 
 #define MEMORY_SPACE_TYPE  0
 #define PORT_SPACE_TYPE    1
-
 
 #include <linux/string.h>
 
@@ -137,7 +135,6 @@ typedef void (*DIVA_DI_PRINTF)(unsigned char *, ...);
 
 #define dtrc(p) DBG_PRV0(p)
 #define dbug(a, p) DBG_PRV1(p)
-
 
 typedef struct e_info_s E_INFO;
 

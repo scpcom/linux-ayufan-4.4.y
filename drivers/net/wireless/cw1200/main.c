@@ -100,7 +100,6 @@ static struct ieee80211_rate cw1200_mcs_rates[] = {
 #define cw1200_n_rates		(cw1200_mcs_rates)
 #define cw1200_n_rates_size	(ARRAY_SIZE(cw1200_mcs_rates))
 
-
 #define CHAN2G(_channel, _freq, _flags) {			\
 	.band			= IEEE80211_BAND_2GHZ,		\
 	.center_freq		= (_freq),			\
@@ -250,7 +249,6 @@ static const struct wiphy_wowlan_support cw1200_wowlan_support = {
 	.flags = WIPHY_WOWLAN_ANY | WIPHY_WOWLAN_DISCONNECT,
 };
 #endif
-
 
 static struct ieee80211_hw *cw1200_init_common(const u8 *macaddr,
 						const bool have_5ghz)

@@ -277,7 +277,6 @@ enum vlsi_pio_irintr {
 #define RINGSIZE_TO_RXSIZE(rs)		((((rs)&0x0f00)>>6)+4)
 #define RINGSIZE_TO_TXSIZE(rs)		((((rs)&0xf000)>>10)+4)
 
-
 /* ------------------------------------------ */
 
 /* VLSI_PIO_PROMPT: Ring Prompting Register (u16, write-to-start) */
@@ -459,7 +458,6 @@ calc_width_bits(unsigned baudrate, unsigned widthselect, unsigned clockselect)
  */
 
 /* ------------------------------------------ */
-
 
 /* VLSI_PIO_MAXPKT: Maximum Packet Length register (u16, rw) */
 
@@ -754,4 +752,3 @@ typedef struct vlsi_irda_dev {
 /********************************************************/
 
 #endif /* IRDA_VLSI_FIR_H */
-

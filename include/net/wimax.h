@@ -430,8 +430,6 @@ struct wimax_dev {
 	struct dentry *debugfs_dentry;
 };
 
-
-
 /*
  * WiMAX stack public API for device drivers
  * -----------------------------------------
@@ -466,7 +464,6 @@ enum wimax_st wimax_state_get(struct wimax_dev *);
 void wimax_report_rfkill_hw(struct wimax_dev *, enum wimax_rf_state);
 void wimax_report_rfkill_sw(struct wimax_dev *, enum wimax_rf_state);
 
-
 /*
  * Free-form messaging to/from user space
  *
@@ -498,7 +495,6 @@ int wimax_msg(struct wimax_dev *, const char *, const void *, size_t, gfp_t);
 const void *wimax_msg_data_len(struct sk_buff *, size_t *);
 const void *wimax_msg_data(struct sk_buff *);
 ssize_t wimax_msg_len(struct sk_buff *);
-
 
 /*
  * WiMAX stack user space API

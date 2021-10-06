@@ -641,7 +641,6 @@ int rsnd_ssi_is_dma_mode(struct rsnd_mod *mod)
 	return mod->ops == &rsnd_ssi_dma_ops;
 }
 
-
 /*
  *		Non SSI
  */
@@ -687,7 +686,6 @@ static void rsnd_ssi_parent_setup(struct rsnd_priv *priv, struct rsnd_ssi *ssi)
 		break;
 	}
 }
-
 
 static void rsnd_of_parse_ssi(struct platform_device *pdev,
 			      const struct rsnd_of_data *of_data,

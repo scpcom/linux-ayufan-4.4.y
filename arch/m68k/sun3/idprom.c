@@ -92,8 +92,6 @@ void sun3_get_model(unsigned char* model)
 	}
 }
 
-
-
 /* Calculate the IDPROM checksum (xor of the data bytes). */
 static unsigned char __init calc_idprom_cksum(struct idprom *idprom)
 {

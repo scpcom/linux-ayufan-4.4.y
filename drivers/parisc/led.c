@@ -66,7 +66,6 @@ static char lcd_text[32]          __read_mostly;
 static char lcd_text_default[32]  __read_mostly;
 static int  lcd_no_led_support    __read_mostly = 0; /* KittyHawk doesn't support LED on its LCD */
 
-
 static struct workqueue_struct *led_wq;
 static void led_work_func(struct work_struct *);
 static DECLARE_DELAYED_WORK(led_task, led_work_func);
@@ -102,7 +101,6 @@ struct pdc_chassis_lcd_info_ret_block {
 	char _pad;
 };
 
-
 /* LCD_CMD and LCD_DATA for KittyHawk machines */
 #define KITTYHAWK_LCD_CMD  F_EXTEND(0xf0190000UL) /* 64bit-ready */
 #define KITTYHAWK_LCD_DATA (KITTYHAWK_LCD_CMD+1)
@@ -120,7 +118,6 @@ lcd_info __attribute__((aligned(8))) __read_mostly =
 	.reset_cmd1 =		0x80,
 	.reset_cmd2 =		0xc0,
 };
-
 
 /* direct access to some of the lcd_info variables */
 #define LCD_CMD_REG	lcd_info.lcd_cmd_reg_addr	 
@@ -174,7 +171,6 @@ static int led_proc_open(struct inode *inode, struct file *file)
 {
 	return single_open(file, led_proc_show, PDE_DATA(inode));
 }
-
 
 static ssize_t led_proc_write(struct file *file, const char *buf,
 	size_t count, loff_t *pos)
@@ -292,7 +288,6 @@ static void led_ASP_driver(unsigned char leds)
 	}
 }
 
-
 /*
    ** 
    ** led_LASI_driver()
@@ -303,7 +298,6 @@ static void led_LASI_driver(unsigned char leds)
 	leds = ~leds;
 	gsc_writeb( leds, LED_DATA_REG );
 }
-
 
 /*
    ** 
@@ -339,7 +333,6 @@ static void led_LCD_driver(unsigned char leds)
 		}
 	}
 }
-
 
 /*
    ** 
@@ -393,7 +386,6 @@ static __inline__ int led_get_net_activity(void)
 #endif
 }
 
-
 /*
    ** 
    ** led_get_diskio_activity()
@@ -418,8 +410,6 @@ static __inline__ int led_get_diskio_activity(void)
 
 	return (changed ? LED_DISK_IO : 0);
 }
-
-
 
 /*
    ** led_work_func()
@@ -625,7 +615,6 @@ void __init register_led_regions(void)
 		break;
 	}
 }
-
 
 /*
    ** 

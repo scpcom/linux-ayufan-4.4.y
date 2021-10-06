@@ -57,7 +57,6 @@
 #define GEMINI_USB1_BASE	0x69000000
 #define GEMINI_BIG_ENDIAN_BASE	0x80000000
 
-
 /*
  * UART Clock when System clk is 150MHz
  */

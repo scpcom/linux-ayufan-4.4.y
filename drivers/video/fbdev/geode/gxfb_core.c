@@ -410,7 +410,6 @@ static int gxfb_probe(struct pci_dev *pdev, const struct pci_device_id *id)
 		goto err;
 	}
 
-
 	/* Clear the frame buffer of garbage. */
         memset_io(info->screen_base, 0, info->fix.smem_len);
 

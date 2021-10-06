@@ -23,5 +23,4 @@
 
 #include <asm-generic/signal.h>
 
-
 #endif /* _UAPI_ASM_TILE_SIGNAL_H */

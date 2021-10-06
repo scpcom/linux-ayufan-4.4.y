@@ -933,7 +933,6 @@ static int nfs4_server_common_setup(struct nfs_server *server,
 			server->client->cl_auth->au_flavor == RPC_AUTH_UNIX)
 		server->caps |= NFS_CAP_UIDGID_NOMAP;
 
-
 	/* Probe the root fh to retrieve its FSID and filehandle */
 	error = nfs4_get_rootfh(server, mntfh, auth_probe);
 	if (error < 0)

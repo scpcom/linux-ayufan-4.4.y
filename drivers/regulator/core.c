@@ -1876,7 +1876,6 @@ void regulator_bulk_unregister_supply_alias(struct device *dev,
 }
 EXPORT_SYMBOL_GPL(regulator_bulk_unregister_supply_alias);
 
-
 /* Manage enable GPIO list. Same GPIO pin can be shared among regulators */
 static int regulator_ena_gpio_request(struct regulator_dev *rdev,
 				const struct regulator_config *config)

@@ -48,7 +48,6 @@ MODULE_PARM_DESC(enable, "Enable "NAME_ALLCAPS".");
 
 static int snd_us122l_card_used[SNDRV_CARDS];
 
-
 static int us122l_create_usbmidi(struct snd_card *card)
 {
 	static struct snd_usb_midi_endpoint_info quirk_data = {
@@ -186,7 +185,6 @@ static const struct vm_operations_struct usb_stream_hwdep_vm_ops = {
 	.fault = usb_stream_hwdep_vm_fault,
 	.close = usb_stream_hwdep_vm_close,
 };
-
 
 static int usb_stream_hwdep_open(struct snd_hwdep *hw, struct file *file)
 {
@@ -477,7 +475,6 @@ static int usb_stream_hwdep_new(struct snd_card *card)
 		dev->bus->busnum, dev->devnum);
 	return 0;
 }
-
 
 static bool us122l_create_card(struct snd_card *card)
 {

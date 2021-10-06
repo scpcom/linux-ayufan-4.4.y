@@ -511,7 +511,6 @@ static int bcm63xx_pcie_write(struct pci_bus *bus, unsigned int devfn,
 	if (bus->number == PCIE_BUS_DEVICE)
 		reg += PCIE_DEVICE_OFFSET;
 
-
 	data = bcm_pcie_readl(reg);
 
 	data = preprocess_write(data, val, where, size);
@@ -519,7 +518,6 @@ static int bcm63xx_pcie_write(struct pci_bus *bus, unsigned int devfn,
 
 	return PCIBIOS_SUCCESSFUL;
 }
-
 
 struct pci_ops bcm63xx_pcie_ops = {
 	.read	= bcm63xx_pcie_read,

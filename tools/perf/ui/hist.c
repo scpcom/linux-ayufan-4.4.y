@@ -339,7 +339,6 @@ static int64_t hpp__sort_##_type(struct perf_hpp_fmt *fmt __maybe_unused, 	\
 	return __hpp__sort(a, b, he_get_raw_##_field);				\
 }
 
-
 #define HPP_PERCENT_FNS(_type, _field)					\
 __HPP_COLOR_PERCENT_FN(_type, _field)					\
 __HPP_ENTRY_PERCENT_FN(_type, _field)					\
@@ -420,7 +419,6 @@ struct perf_hpp_fmt perf_hpp__format[] = {
 LIST_HEAD(perf_hpp__list);
 LIST_HEAD(perf_hpp__sort_list);
 
-
 #undef HPP__COLOR_PRINT_FNS
 #undef HPP__COLOR_ACC_PRINT_FNS
 #undef HPP__PRINT_FNS
@@ -439,7 +437,6 @@ LIST_HEAD(perf_hpp__sort_list);
 #undef __HPP_SORT_FN
 #undef __HPP_SORT_ACC_FN
 #undef __HPP_SORT_RAW_FN
-
 
 void perf_hpp__init(void)
 {

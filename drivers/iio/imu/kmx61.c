@@ -1023,7 +1023,6 @@ static const struct iio_info kmx61_mag_info = {
 	.validate_trigger	= kmx61_mag_validate_trigger,
 };
 
-
 static int kmx61_data_rdy_trigger_set_state(struct iio_trigger *trig,
 					    bool state)
 {

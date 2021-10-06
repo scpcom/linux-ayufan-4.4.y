@@ -385,7 +385,6 @@ static int mdfld_restore_display_registers(struct drm_device *dev, int pipenum)
 	REG_WRITE(mipi_reg, temp);
 	mdelay(1);
 
-
 	/* Set DSI host to exit from Utra Low Power State */
 	temp = REG_READ(device_ready_reg);
 	temp &= ~ULPS_MASK;

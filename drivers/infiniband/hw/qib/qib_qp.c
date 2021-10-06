@@ -215,7 +215,6 @@ static inline unsigned qpn_hash(struct qib_ibdev *dev, u32 qpn)
 		(dev->qp_table_size - 1);
 }
 
-
 /*
  * Put the QP into the hash table.
  * The hash table holds a reference to the QP.
@@ -985,7 +984,6 @@ struct ib_qp *qib_create_qp(struct ib_pd *ibpd,
 	size_t sg_list_sz;
 	struct ib_qp *ret;
 	gfp_t gfp;
-
 
 	if (init_attr->cap.max_send_sge > ib_qib_max_sges ||
 	    init_attr->cap.max_send_wr > ib_qib_max_qp_wrs ||

@@ -373,7 +373,6 @@ static u32 omap44xx_prm_read_reset_sources(void)
 	if (inst == PRM_INSTANCE_UNKNOWN)
 		return 0;
 
-
 	v = omap4_prm_read_inst_reg(inst,
 				    OMAP4_RM_RSTST);
 

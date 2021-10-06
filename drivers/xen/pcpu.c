@@ -47,7 +47,6 @@
 #include <asm/xen/hypervisor.h>
 #include <asm/xen/hypercall.h>
 
-
 /*
  * @cpu_id: Xen physical cpu logic number
  * @flags: Xen physical cpu status flag

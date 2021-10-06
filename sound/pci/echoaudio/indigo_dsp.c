@@ -28,11 +28,9 @@
 
 ****************************************************************************/
 
-
 static int set_vmixer_gain(struct echoaudio *chip, u16 output, u16 pipe,
 			   int gain);
 static int update_vmixer_level(struct echoaudio *chip);
-
 
 static int init_hw(struct echoaudio *chip, u16 device_id, u16 subdevice_id)
 {
@@ -63,29 +61,21 @@ static int init_hw(struct echoaudio *chip, u16 device_id, u16 subdevice_id)
 	return err;
 }
 
-
-
 static int set_mixer_defaults(struct echoaudio *chip)
 {
 	return init_line_levels(chip);
 }
-
-
 
 static u32 detect_input_clocks(const struct echoaudio *chip)
 {
 	return ECHO_CLOCK_BIT_INTERNAL;
 }
 
-
-
 /* The Indigo has no ASIC. Just do nothing */
 static int load_asic(struct echoaudio *chip)
 {
 	return 0;
 }
-
-
 
 static int set_sample_rate(struct echoaudio *chip, u32 rate)
 {
@@ -128,8 +118,6 @@ static int set_sample_rate(struct echoaudio *chip, u32 rate)
 	return 0;
 }
 
-
-
 /* This function routes the sound from a virtual channel to a real output */
 static int set_vmixer_gain(struct echoaudio *chip, u16 output, u16 pipe,
 			   int gain)
@@ -152,8 +140,6 @@ static int set_vmixer_gain(struct echoaudio *chip, u16 output, u16 pipe,
 	return 0;
 }
 
-
-
 /* Tell the DSP to read and update virtual mixer levels in comm page. */
 static int update_vmixer_level(struct echoaudio *chip)
 {
@@ -162,4 +148,3 @@ static int update_vmixer_level(struct echoaudio *chip)
 	clear_handshake(chip);
 	return send_vector(chip, DSP_VC_SET_VMIXER_GAIN);
 }
-

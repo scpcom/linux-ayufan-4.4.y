@@ -13,7 +13,6 @@ struct device;
 #ifndef MFD_AB3100_H
 #define MFD_AB3100_H
 
-
 #define AB3100_P1A	0xc0
 #define AB3100_P1B	0xc1
 #define AB3100_P1C	0xc2

@@ -28,7 +28,6 @@
 #include <linux/mfd/da9063/pdata.h>
 #include <linux/mfd/da9063/registers.h>
 
-
 /* Definition for registering regmap bit fields using a mask */
 #define BFIELD(_reg, _mask) \
 	REG_FIELD(_reg, __builtin_ffs((int)_mask) - 1, \
@@ -894,7 +893,6 @@ static void __exit da9063_regulator_cleanup(void)
 	platform_driver_unregister(&da9063_regulator_driver);
 }
 module_exit(da9063_regulator_cleanup);
-
 
 /* Module information */
 MODULE_AUTHOR("Krystian Garbaciak <krystian.garbaciak@diasemi.com>");

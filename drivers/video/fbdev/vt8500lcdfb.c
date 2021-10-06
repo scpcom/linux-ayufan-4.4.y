@@ -40,7 +40,6 @@
 #include <linux/memblock.h>
 #endif
 
-
 #define to_vt8500lcd_info(__info) container_of(__info, \
 						struct vt8500lcd_info, fb)
 

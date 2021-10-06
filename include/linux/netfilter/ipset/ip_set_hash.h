@@ -3,7 +3,6 @@
 
 #include <uapi/linux/netfilter/ipset/ip_set_hash.h>
 
-
 #define IPSET_DEFAULT_HASHSIZE		1024
 #define IPSET_MIMINAL_HASHSIZE		64
 #define IPSET_DEFAULT_MAXELEM		65536

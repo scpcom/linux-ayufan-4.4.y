@@ -13,7 +13,6 @@
  * Some ideas are from omap-aes.c driver.
  */
 
-
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/slab.h>
@@ -69,7 +68,6 @@
 #define ATMEL_AES_QUEUE_LENGTH	50
 
 #define ATMEL_AES_DMA_THRESHOLD		16
-
 
 struct atmel_aes_caps {
 	bool	has_dualbuff;
@@ -442,7 +440,6 @@ static int atmel_aes_crypt_dma_start(struct atmel_aes_dev *dd)
 			fast = 0;
 	}
 
-
 	if (fast)  {
 		count = min(dd->total, sg_dma_len(dd->in_sg));
 		count = min(count, sg_dma_len(dd->out_sg));
@@ -646,7 +643,6 @@ static int atmel_aes_crypt_dma_stop(struct atmel_aes_dev *dd)
 
 	return err;
 }
-
 
 static int atmel_aes_buff_init(struct atmel_aes_dev *dd)
 {

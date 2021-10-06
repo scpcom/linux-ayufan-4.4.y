@@ -41,7 +41,6 @@
 #define Qintp2(object) (object)
 #define Qintp3(object) (object)
 
-
 /*
  * These macros will be used specifically by the convert instructions.
  *
@@ -89,7 +88,6 @@
 #define Sgl_isone_stickybit(sgl_value,exponent)		\
     (exponent < (SGL_P - 2) ?				\
      Sall(sgl_value) << (SGL_EXP_LENGTH + 2 + exponent) : FALSE)
-
 
 /* 
  * Double format macros
@@ -209,7 +207,6 @@
      (exponent<(DBL_P-2) ? (Dallp2(dbl_valueB) << (exponent + (34-DBL_P))) : \
       FALSE))
 
-
 /* Int macros */
 
 #define Int_from_sgl_mantissa(sgl_value,exponent)	\
@@ -223,7 +220,6 @@
 
 #define Int_negate(int_value) int_value = -int_value
 
-
 /* Dint macros */
 
 #define Dint_from_sgl_mantissa(sgl_value,exponent,dresultA,dresultB)	\
@@ -236,7 +232,6 @@
     	Dintp1(dresultA) = Sall(sgl_value) >> (63 - exponent);		\
     	Dintp2(dresultB) = Sall(sgl_value) << (exponent - 31);		\
     }}
-
 
 #define Dint_from_dbl_mantissa(dbl_valueA,dbl_valueB,exponent,destA,destB) \
     {if (exponent < 32) {						\
@@ -291,7 +286,6 @@
     dest->wd0 = Dintp1(srcA);		\
     dest->wd1 = Dintp2(srcB)
 
-
 /* other macros  */
 
 #define Find_ms_one_bit(value, position)	\
@@ -306,7 +300,6 @@
 	    position--;				\
 	else position -= 2;			\
     }
-
 
 /*
  * Unsigned int macros

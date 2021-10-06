@@ -30,7 +30,6 @@ static int rtw_hw_suspend(struct adapter *padapter)
 	struct pwrctrl_priv *pwrpriv = &padapter->pwrctrlpriv;
 	struct net_device *pnetdev = padapter->pnetdev;
 
-
 	if ((!padapter->bup) || (padapter->bDriverStopped) ||
 	    (padapter->bSurpriseRemoved)) {
 		DBG_88E("padapter->bup=%d bDriverStopped=%d bSurpriseRemoved = %d\n",
@@ -92,7 +91,6 @@ static int rtw_hw_resume(struct adapter *padapter)
 	struct pwrctrl_priv *pwrpriv = &padapter->pwrctrlpriv;
 	struct net_device *pnetdev = padapter->pnetdev;
 
-
 	/* system resume */
 	DBG_88E("==> rtw_hw_resume\n");
 	_enter_pwrlock(&pwrpriv->lock);
@@ -119,7 +117,6 @@ static int rtw_hw_resume(struct adapter *padapter)
 	pwrpriv->bips_processing = false;
 
 	_exit_pwrlock(&pwrpriv->lock);
-
 
 	return 0;
 error_exit:
@@ -174,7 +171,6 @@ int ips_leave(struct adapter *padapter)
 	struct mlme_priv *pmlmepriv = &(padapter->mlmepriv);
 	int result = _SUCCESS;
 	int keyid;
-
 
 	_enter_pwrlock(&pwrpriv->lock);
 
@@ -352,7 +348,6 @@ static u8 PS_RDY_CHECK(struct adapter *padapter)
 	struct pwrctrl_priv	*pwrpriv = &padapter->pwrctrlpriv;
 	struct mlme_priv	*pmlmepriv = &(padapter->mlmepriv);
 
-
 	curr_time = jiffies;
 	delta_time = curr_time - pwrpriv->DelayLPSLastTimeStamp;
 
@@ -421,7 +416,6 @@ s32 LPS_RF_ON_check(struct adapter *padapter, u32 delay_ms)
 	u32 start_time;
 	u8 bAwake = false;
 	s32 err = 0;
-
 
 	start_time = jiffies;
 	while (1) {

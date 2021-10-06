@@ -159,5 +159,4 @@ extern int xics_get_irq_server(unsigned int virq, const struct cpumask *cpumask,
 #define xics_get_irq_server(virq, cpumask, strict_check) (xics_default_server)
 #endif
 
-
 #endif /* _XICS_H */

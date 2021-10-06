@@ -12,7 +12,6 @@
 #include <asm/bootinfo.h>
 #include <asm/byteorder.h>
 
-
 static char bootinfo_tmp[1536] __initdata;
 
 static void *bootinfo_copy;

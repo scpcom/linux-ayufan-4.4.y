@@ -553,7 +553,6 @@ static void __init mainstone_init(void)
 	mainstone_init_keypad();
 }
 
-
 static struct map_desc mainstone_io_desc[] __initdata = {
   	{	/* CPLD */
 		.virtual	=  MST_FPGA_VIRT,

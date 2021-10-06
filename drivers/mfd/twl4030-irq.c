@@ -112,7 +112,6 @@ static int nr_sih_modules;
 #define TWL4030_MODULE_KEYPAD_KEYP	TWL4030_MODULE_KEYPAD
 #define TWL4030_MODULE_INT_PWR		TWL4030_MODULE_INT
 
-
 /*
  * Order in this table matches order in PIH_ISR.  That is,
  * BIT(n) in PIH_ISR is sih_modules[n].

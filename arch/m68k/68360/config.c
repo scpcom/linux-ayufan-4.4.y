@@ -46,7 +46,6 @@ extern QUICC *pquicc;
 // unsigned int system_clock = 33000000l;
 extern unsigned long int system_clock; //In kernel setup.c
 
-
 static irqreturn_t hw_tick(int irq, void *dummy)
 {
   /* Reset Timer1 */
@@ -126,7 +125,6 @@ _bsc0(char *, getserialnum)
 _bsc1(unsigned char *, gethwaddr, int, a)
 _bsc1(char *, getbenv, char *, a)
 #endif
-
 
 void __init config_BSP(char *command, int len)
 {

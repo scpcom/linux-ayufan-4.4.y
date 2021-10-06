@@ -44,7 +44,6 @@
 
 #define MAX_LOOPS 10000
 
-
 static void nftl_add_mtd(struct mtd_blktrans_ops *tr, struct mtd_info *mtd)
 {
 	struct NFTLrecord *nftl;
@@ -793,7 +792,6 @@ static int nftl_getgeo(struct mtd_blktrans_dev *dev,  struct hd_geometry *geo)
  * Module stuff
  *
  ****************************************************************************/
-
 
 static struct mtd_blktrans_ops nftl_tr = {
 	.name		= "nftl",

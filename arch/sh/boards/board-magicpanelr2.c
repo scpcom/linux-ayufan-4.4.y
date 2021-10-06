@@ -353,7 +353,6 @@ static struct platform_device *mpr2_devices[] __initdata = {
 	&flash_device,
 };
 
-
 static int __init mpr2_devices_setup(void)
 {
 	regulator_register_fixed(0, dummy_supplies, ARRAY_SIZE(dummy_supplies));

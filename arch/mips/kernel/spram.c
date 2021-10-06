@@ -62,7 +62,6 @@ static void ispram_store_tag(unsigned int offset, unsigned int data)
 	ehb();
 }
 
-
 static unsigned int ispram_load_tag(unsigned int offset)
 {
 	unsigned int data;
@@ -95,7 +94,6 @@ static void dspram_store_tag(unsigned int offset, unsigned int data)
 	write_c0_errctl(errctl);
 	ehb();
 }
-
 
 static unsigned int dspram_load_tag(unsigned int offset)
 {

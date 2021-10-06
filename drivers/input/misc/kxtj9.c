@@ -404,7 +404,6 @@ static struct attribute_group kxtj9_attribute_group = {
 	.attrs = kxtj9_attributes
 };
 
-
 #ifdef CONFIG_INPUT_KXTJ9_POLLED_MODE
 static void kxtj9_poll(struct input_polled_dev *dev)
 {

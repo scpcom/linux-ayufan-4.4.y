@@ -65,7 +65,6 @@ extern long long timespec_diff_us(struct timespec start, struct timespec end);
 				"could be inaccurate\n"), mes, ov);		\
 }
 
-
 /* Taken over from x86info project sources  -> return 0 on success */
 #include <sched.h>
 #include <sys/types.h>

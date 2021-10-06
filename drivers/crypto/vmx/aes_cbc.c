@@ -177,7 +177,6 @@ static int p8_aes_cbc_decrypt(struct blkcipher_desc *desc,
 	return ret;
 }
 
-
 struct crypto_alg p8_aes_cbc_alg = {
 	.cra_name = "cbc(aes)",
 	.cra_driver_name = "p8_aes_cbc",

@@ -4,7 +4,6 @@
 #ifndef _UAPI__ASM_SH_PTRACE_H
 #define _UAPI__ASM_SH_PTRACE_H
 
-
 #define PTRACE_GETREGS		12	/* General registers */
 #define PTRACE_SETREGS		13
 
@@ -29,6 +28,5 @@
 #else
 #include <asm/ptrace_32.h>
 #endif
-
 
 #endif /* _UAPI__ASM_SH_PTRACE_H */

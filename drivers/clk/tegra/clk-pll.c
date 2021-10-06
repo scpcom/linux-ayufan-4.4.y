@@ -1554,7 +1554,6 @@ static const struct clk_ops tegra_clk_plle_tegra114_ops = {
 	.recalc_rate = clk_pll_recalc_rate,
 };
 
-
 struct clk *tegra_clk_register_pllxc(const char *name, const char *parent_name,
 			  void __iomem *clk_base, void __iomem *pmc,
 			  unsigned long flags,

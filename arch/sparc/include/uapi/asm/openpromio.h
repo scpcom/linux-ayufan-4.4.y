@@ -44,7 +44,6 @@ struct openpromio
 #define OPROMCONS_STDOUT_IS_FB  0x2     /* stdout is a framebuffer */
 #define OPROMCONS_OPENPROM      0x4     /* supports openboot */
 
-
 /*
  *  NetBSD/OpenBSD /dev/openprom definitions.
  */
@@ -66,4 +65,3 @@ struct opiocdesc
 #define	OPIOCGETCHILD	_IOWR('O', 6, int)
 
 #endif /* _SPARC_OPENPROMIO_H */
-

@@ -5,7 +5,6 @@
 #ifndef _UAPI_ASM_M68K_BOOTINFO_MAC_H
 #define _UAPI_ASM_M68K_BOOTINFO_MAC_H
 
-
     /*
      *  Macintosh-specific tags (all __be32)
      */
@@ -22,7 +21,6 @@
 #define BI_MAC_MEMSIZE		0x8009	/* Mac RAM size (sanity check) */
 #define BI_MAC_CPUID		0x800a	/* Mac CPU type (sanity check) */
 #define BI_MAC_ROMBASE		0x800b	/* Mac system ROM base address */
-
 
     /*
      *  Macintosh hardware profile data - unused, see macintosh.h for
@@ -47,7 +45,6 @@
 #define BI_MAC_PMU		0x801f	/* Mac power management / poweroff hardware */
 #define BI_MAC_IOP_SWIM		0x8020	/* Mac SWIM floppy IOP */
 #define BI_MAC_IOP_ADB		0x8021	/* Mac ADB IOP */
-
 
     /*
      * Macintosh Gestalt numbers (BI_MAC_MODEL)
@@ -108,12 +105,10 @@
 #define MAC_MODEL_PB280C	103
 #define MAC_MODEL_PB150		115
 
-
     /*
      *  Latest Macintosh bootinfo version
      */
 
 #define MAC_BOOTI_VERSION	MK_BI_VERSION(2, 0)
-
 
 #endif /* _UAPI_ASM_M68K_BOOTINFO_MAC_H */

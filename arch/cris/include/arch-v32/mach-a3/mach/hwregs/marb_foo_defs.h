@@ -360,7 +360,6 @@ typedef struct {
 #define REG_RD_ADDR_marb_foo_rw_no_snoop_rq 900
 #define REG_WR_ADDR_marb_foo_rw_no_snoop_rq 900
 
-
 /* Constants */
 enum {
   regk_marb_foo_ccdstat                    = 0x0000000e,
@@ -614,7 +613,6 @@ typedef unsigned int reg_marb_foo_bp_r_brk_size;
 typedef unsigned int reg_marb_foo_bp_rw_ack;
 #define REG_RD_ADDR_marb_foo_bp_rw_ack 40
 #define REG_WR_ADDR_marb_foo_bp_rw_ack 40
-
 
 /* Constants */
 enum {

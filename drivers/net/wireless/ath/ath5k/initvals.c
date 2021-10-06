@@ -780,7 +780,6 @@ static const struct ath5k_ini rf5111_ini_common_end[] = {
 	{ 0xa23c,		0x13c889af },
 };
 
-
 /* Initial mode-specific settings for AR5212 + RF5112
  * (Written after ar5212_ini) */
 static const struct ath5k_ini_mode rf5112_ini_mode_end[] = {
@@ -832,7 +831,6 @@ static const struct ath5k_ini rf5112_ini_common_end[] = {
 	{ AR5K_PHY_DAG_CCK_CTL,	0x000001b5 },
 	{ 0xa23c,		0x13c889af },
 };
-
 
 /* Initial mode-specific settings for RF5413/5414
  * (Written after ar5212_ini) */
@@ -1367,7 +1365,6 @@ static const struct ath5k_ini rf5112_ini_bbgain[] = {
 	{ AR5K_BB_GAIN(62), 0x00000010 },
 	{ AR5K_BB_GAIN(63), 0x0000001a },
 };
-
 
 /**
  * ath5k_hw_ini_registers() - Write initial register dump common for all modes

@@ -51,7 +51,6 @@
 #define IS_LVDS(c)	(c->output_flag & SDVO_LVDS_MASK)
 #define IS_TV_OR_LVDS(c) (c->output_flag & (SDVO_TV_MASK | SDVO_LVDS_MASK))
 
-
 static const char *tv_format_names[] = {
 	"NTSC_M"   , "NTSC_J"  , "NTSC_443",
 	"PAL_B"    , "PAL_D"   , "PAL_G"   ,
@@ -1790,7 +1789,6 @@ set_value:
 	if (!psb_intel_sdvo_set_value(psb_intel_sdvo, cmd, &temp_value, 2))
 		return -EIO;
 
-
 done:
 	if (psb_intel_sdvo->base.base.crtc) {
 		struct drm_crtc *crtc = psb_intel_sdvo->base.base.crtc;
@@ -2271,7 +2269,6 @@ static bool psb_intel_sdvo_tv_create_property(struct psb_intel_sdvo *psb_intel_s
 	for (i = 0 ; i < TV_FORMAT_NUM; i++)
 		if (format_map & (1 << i))
 			psb_intel_sdvo_connector->tv_format_supported[psb_intel_sdvo_connector->format_supported_num++] = i;
-
 
 	psb_intel_sdvo_connector->tv_format =
 			drm_property_create(dev, DRM_MODE_PROP_ENUM,

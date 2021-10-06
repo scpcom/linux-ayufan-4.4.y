@@ -119,7 +119,6 @@
 /* define maximum number of possible waiting incoming calls */
 #define MAX_WAITING_CALLS 2
 
-
 #ifdef __KERNEL__
 
 extern const char *CardType[];
@@ -314,7 +313,6 @@ struct Param {
 	setup_parm setup;	/* from isdnif.h numbers and Serviceindicator */
 	u_char moderate;	/* transfer mode and rate (bearer octet 4) */
 };
-
 
 struct PStack {
 	struct PStack *next;
@@ -632,7 +630,6 @@ struct asus_hw {
 	unsigned int u7;
 	unsigned int pots;
 };
-
 
 struct hfc_hw {
 	unsigned int addr;
@@ -968,14 +965,12 @@ struct IsdnCardState {
 #endif
 };
 
-
 #define schedule_event(s, ev)	do { test_and_set_bit(ev, &s->event); schedule_work(&s->tqueue); } while (0)
 
 #define  MON0_RX	1
 #define  MON1_RX	2
 #define  MON0_TX	4
 #define  MON1_TX	8
-
 
 #ifdef ISDN_CHIP_ISAC
 #undef ISDN_CHIP_ISAC

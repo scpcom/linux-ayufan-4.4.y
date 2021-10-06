@@ -455,7 +455,6 @@ static int psb_pci_probe(struct pci_dev *pdev, const struct pci_device_id *ent)
 	return drm_get_pci_dev(pdev, ent, &driver);
 }
 
-
 static void psb_pci_remove(struct pci_dev *pdev)
 {
 	struct drm_device *dev = pci_get_drvdata(pdev);

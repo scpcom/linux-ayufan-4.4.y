@@ -19,7 +19,6 @@
 #include "reg.h"
 #include "ebb.h"
 
-
 void (*ebb_user_func)(void);
 
 void ebb_hook(void)

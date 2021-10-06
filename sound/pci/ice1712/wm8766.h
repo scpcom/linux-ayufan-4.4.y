@@ -150,8 +150,6 @@ struct snd_wm8766 {
 	u16 regs[WM8766_REG_COUNT];	/* 9-bit registers */
 };
 
-
-
 void snd_wm8766_init(struct snd_wm8766 *wm);
 void snd_wm8766_resume(struct snd_wm8766 *wm);
 void snd_wm8766_set_if(struct snd_wm8766 *wm, u16 dac);

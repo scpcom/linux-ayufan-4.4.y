@@ -175,8 +175,6 @@ START_FIELDS
 .endif
 .endm
 
-
-
 # macro RES_B name, size [, align]
 .macro RES_B _name, _size, _align=1
 RES_int _name _size _align
@@ -211,7 +209,6 @@ RES_int _name 32*(_size) _align
 .macro RES_Z _name, _size, _align=64
 RES_int _name 64*(_size) _align
 .endm
-
 
 #endif
 
@@ -259,7 +256,6 @@ _MB_MGR_align =  _STRUCT_ALIGN
 
 _args_digest    =     _args + _digest
 _args_data_ptr  =     _args + _data_ptr
-
 
 ########################################################################
 #### Define constants

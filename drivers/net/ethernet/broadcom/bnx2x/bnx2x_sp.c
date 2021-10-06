@@ -509,7 +509,6 @@ static void __bnx2x_vlan_mac_h_write_unlock(struct bnx2x *bp,
 	}
 }
 
-
 /**
  * __bnx2x_vlan_mac_h_read_lock - lock the vlan mac head list reader lock
  *

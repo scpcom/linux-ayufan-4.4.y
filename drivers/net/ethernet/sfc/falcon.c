@@ -1187,7 +1187,6 @@ static void falcon_reconfigure_xgxs_core(struct efx_nic *efx)
 	efx_writeo(efx, &reg, FR_AB_XX_SD_CTL);
 }
 
-
 /* Try to bring up the Falcon side of the Falcon-Phy XAUI link */
 static bool falcon_xmac_link_ok_retry(struct efx_nic *efx, int tries)
 {

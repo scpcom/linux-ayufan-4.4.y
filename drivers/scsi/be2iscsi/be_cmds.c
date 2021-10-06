@@ -823,7 +823,6 @@ struct be_mcc_wrb *wrb_from_mccq(struct beiscsi_hba *phba)
 	return wrb;
 }
 
-
 int beiscsi_cmd_eq_create(struct be_ctrl_info *ctrl,
 			  struct be_queue_info *eq, int eq_delay)
 {

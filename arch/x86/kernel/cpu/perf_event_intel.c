@@ -691,7 +691,6 @@ static __initconst const u64 snb_hw_cache_event_ids
 					 HSW_L3_MISS_REMOTE_HOP0|HSW_L3_MISS_REMOTE_HOP1| \
 					 HSW_L3_MISS_REMOTE_HOP2P)
 
-
 static __initconst const u64 hsw_hw_cache_event_ids
 				[PERF_COUNT_HW_CACHE_MAX]
 				[PERF_COUNT_HW_CACHE_OP_MAX]
@@ -1830,7 +1829,6 @@ again:
 	}
 
 	inc_irq_stat(apic_perf_irqs);
-
 
 	/*
 	 * Ignore a range of extra bits in status that do not indicate
@@ -3422,7 +3420,6 @@ __init int intel_pmu_init(void)
 		else
 			x86_pmu.extra_regs = intel_snb_extra_regs;
 
-
 		/* all extra regs are per-cpu when HT is on */
 		x86_pmu.flags |= PMU_FL_HAS_RSP_1;
 		x86_pmu.flags |= PMU_FL_NO_HT_SHARING;
@@ -3471,7 +3468,6 @@ __init int intel_pmu_init(void)
 
 		pr_cont("IvyBridge events, ");
 		break;
-
 
 	case 60: /* 22nm Haswell Core */
 	case 63: /* 22nm Haswell Server */

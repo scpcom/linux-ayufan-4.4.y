@@ -18,7 +18,6 @@ extern asmlinkage unsigned int arm_check_condition(u32 opcode, u32 psr);
 #define ARM_OPCODE_CONDTEST_PASS   1
 #define ARM_OPCODE_CONDTEST_UNCOND 2
 
-
 /*
  * Assembler opcode byteswap helpers.
  * These are only intended for use by this header: don't use them directly,
@@ -44,7 +43,6 @@ extern asmlinkage unsigned int arm_check_condition(u32 opcode, u32 psr);
 )
 #define ___asm_opcode_identity32(x) ((x) & 0xFFFFFFFF)
 #define ___asm_opcode_identity16(x) ((x) & 0xFFFF)
-
 
 /*
  * Opcode byteswap helpers
@@ -96,7 +94,6 @@ extern asmlinkage unsigned int arm_check_condition(u32 opcode, u32 psr);
 #define ___opcode_identity16(x) ((u16)(x))
 
 #endif /* ! __ASSEMBLY__ */
-
 
 #ifdef CONFIG_CPU_ENDIAN_BE8
 

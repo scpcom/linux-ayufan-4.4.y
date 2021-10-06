@@ -46,5 +46,4 @@ extern struct idr sess_idr;
 extern struct mutex auth_id_lock;
 extern spinlock_t sess_idr_lock;
 
-
 #endif   /*** ISCSI_TARGET_H ***/

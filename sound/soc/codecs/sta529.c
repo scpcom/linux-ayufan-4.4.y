@@ -135,7 +135,6 @@ static bool sta529_readable(struct device *dev, unsigned int reg)
 	}
 }
 
-
 static const char *pwm_mode_text[] = { "Binary", "Headphone", "Ternary",
 	"Phase-shift"};
 

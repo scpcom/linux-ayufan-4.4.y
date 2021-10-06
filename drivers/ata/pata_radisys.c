@@ -181,7 +181,6 @@ static unsigned int radisys_qc_issue(struct ata_queued_cmd *qc)
 	return ata_bmdma_qc_issue(qc);
 }
 
-
 static struct scsi_host_template radisys_sht = {
 	ATA_BMDMA_SHT(DRV_NAME),
 };
@@ -193,7 +192,6 @@ static struct ata_port_operations radisys_pata_ops = {
 	.set_piomode		= radisys_set_piomode,
 	.set_dmamode		= radisys_set_dmamode,
 };
-
 
 /**
  *	radisys_init_one - Register PIIX ATA PCI device with kernel services

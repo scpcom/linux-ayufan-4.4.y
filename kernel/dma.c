@@ -19,8 +19,6 @@
 #include <linux/init.h>
 #include <asm/dma.h>
 
-
-
 /* A note on resource allocation:
  *
  * All drivers needing DMA channels, should allocate and release them
@@ -36,7 +34,6 @@
  * in the kernel.
  */
 
-
 DEFINE_SPINLOCK(dma_spin_lock);
 
 /*
@@ -44,7 +41,6 @@ DEFINE_SPINLOCK(dma_spin_lock);
  */
 
 #ifdef MAX_DMA_CHANNELS
-
 
 /* Channel n is busy iff dma_chan_busy[n].lock != 0.
  * DMA0 used to be reserved for DRAM refresh, but apparently not any more...
@@ -59,7 +55,6 @@ struct dma_chan {
 static struct dma_chan dma_chan_busy[MAX_DMA_CHANNELS] = {
 	[4] = { 1, "cascade" },
 };
-
 
 /**
  * request_dma - request and reserve a system DMA channel

@@ -240,4 +240,3 @@ free_clk:
 
 	return ERR_PTR(ret);
 }
-

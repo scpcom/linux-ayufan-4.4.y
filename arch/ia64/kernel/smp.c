@@ -136,8 +136,6 @@ handle_IPI (int irq, void *dev_id)
 	return IRQ_HANDLED;
 }
 
-
-
 /*
  * Called with preemption disabled.
  */

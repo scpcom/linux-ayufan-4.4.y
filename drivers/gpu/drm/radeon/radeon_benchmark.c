@@ -71,7 +71,6 @@ static int radeon_benchmark_do_move(struct radeon_device *rdev, unsigned size,
 	return jiffies_to_msecs(end_jiffies - start_jiffies);
 }
 
-
 static void radeon_benchmark_log_results(int n, unsigned size,
 					 unsigned int time,
 					 unsigned sdomain, unsigned ddomain,

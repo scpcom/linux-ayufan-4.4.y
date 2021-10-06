@@ -38,7 +38,6 @@
 #include "h/smc.h"
 #include "h/smt_p.h"
 
-
 #ifndef	SLIM_SMT
 
 #ifdef ESS
@@ -73,7 +72,6 @@ static const struct fddi_addr null_addr = {{0,0,0,0,0,0}} ;
 	-------------------------------------------------------------
 */
 
-
 /*
 	-------------------------------------------------------------
 	LOCAL FUNCTIONS:
@@ -103,7 +101,6 @@ void ess_para_change(struct s_smc *smc);
 int ess_raf_received_pack(struct s_smc *smc, SMbuf *mb, struct smt_header *sm,
 			  int fs);
 static int process_bw_alloc(struct s_smc *smc, long int payload, long int overhead);
-
 
 /*
  * --------------------------------------------------------------------------
@@ -463,7 +460,6 @@ static int process_bw_alloc(struct s_smc *smc, long int payload, long int overhe
 	smc->mib.a[PATH0].fddiPATHSbaPayload = payload ;
 	smc->mib.a[PATH0].fddiPATHSbaOverhead = overhead ;
 
-
 	DB_ESSN(2,"tsync = %lx\n",smc->ess.sync_bw,0) ;
 
 	ess_config_fifo(smc) ;
@@ -717,4 +713,3 @@ static void ess_config_fifo(struct s_smc *smc)
 #endif /* ESS */
 
 #endif	/* no SLIM_SMT */
-

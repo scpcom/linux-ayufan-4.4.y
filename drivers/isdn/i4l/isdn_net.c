@@ -38,7 +38,6 @@
 #include "isdn_concap.h"
 #endif
 
-
 /*
  * Outline of new tbusy handling:
  *
@@ -1035,7 +1034,6 @@ error:
 
 }
 
-
 /*
  *  Helper function for isdn_net_start_xmit.
  *  When called, the connection is already established.
@@ -1127,7 +1125,6 @@ isdn_net_adjust_hdr(struct sk_buff *skb, struct net_device *dev)
 		}
 	}
 }
-
 
 static void isdn_net_tx_timeout(struct net_device *ndev)
 {
@@ -1404,7 +1401,6 @@ isdn_net_type_trans(struct sk_buff *skb, struct net_device *dev)
 	return htons(ETH_P_802_2);
 }
 
-
 /*
  * CISCO HDLC keepalive specific stuff
  */
@@ -1488,7 +1484,6 @@ isdn_ciscohdlck_dev_ioctl(struct net_device *dev, struct ifreq *ifr, int cmd)
 	}
 	return (rc);
 }
-
 
 static int isdn_net_ioctl(struct net_device *dev,
 			  struct ifreq *ifr, int cmd)

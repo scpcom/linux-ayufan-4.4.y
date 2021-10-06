@@ -880,7 +880,6 @@ static int dac33_prepare_chip(struct snd_pcm_substream *substream,
 		return -EINVAL;
 	}
 
-
 	aictrl_a = dac33_read_reg_cache(codec, DAC33_SER_AUDIOIF_CTRL_A);
 	aictrl_a &= ~(DAC33_NCYCL_MASK | DAC33_WLEN_MASK);
 	/* Read FIFO control A, and clear FIFO flush bit */

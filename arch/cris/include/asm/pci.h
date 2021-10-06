@@ -1,7 +1,6 @@
 #ifndef __ASM_CRIS_PCI_H
 #define __ASM_CRIS_PCI_H
 
-
 #ifdef __KERNEL__
 #include <linux/mm.h>		/* for struct page */
 
@@ -44,7 +43,6 @@ struct pci_dev;
 #define HAVE_PCI_MMAP
 extern int pci_mmap_page_range(struct pci_dev *dev, struct vm_area_struct *vma,
 			       enum pci_mmap_state mmap_state, int write_combine);
-
 
 #endif /* __KERNEL__ */
 

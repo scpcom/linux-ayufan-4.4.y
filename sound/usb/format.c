@@ -146,7 +146,6 @@ static u64 parse_audio_format_i_type(struct snd_usb_audio *chip,
 	return pcm_formats;
 }
 
-
 /*
  * parse the format descriptor and stores the possible sample rates
  * on the audioformat table (audio class v1).
@@ -521,4 +520,3 @@ int snd_usb_parse_audio_format(struct snd_usb_audio *chip,
 #endif
 	return 0;
 }
-

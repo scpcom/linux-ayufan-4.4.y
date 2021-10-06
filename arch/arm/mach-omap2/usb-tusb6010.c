@@ -157,7 +157,6 @@ static struct platform_device tusb_device = {
 	.resource	= tusb_resources,
 };
 
-
 /* this may be called only from board-*.c setup code */
 int __init
 tusb6010_setup_interface(struct musb_hdrc_platform_data *data,

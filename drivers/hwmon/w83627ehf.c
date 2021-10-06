@@ -1484,7 +1484,6 @@ store_pwm_enable(struct device *dev, struct device_attribute *attr,
 	return count;
 }
 
-
 #define show_tol_temp(reg) \
 static ssize_t show_##reg(struct device *dev, struct device_attribute *attr, \
 				char *buf) \
@@ -1733,7 +1732,6 @@ static struct sensor_device_attribute sda_sf3_arrays[] = {
 		    store_fan_stop_output, 1),
 };
 
-
 /*
  * pwm1 and pwm3 don't support max and step settings on all chips.
  * Need to check support while generating/removing attribute files.
@@ -1760,7 +1758,6 @@ show_vid(struct device *dev, struct device_attribute *attr, char *buf)
 	return sprintf(buf, "%d\n", vid_from_reg(data->vid, data->vrm));
 }
 static DEVICE_ATTR(cpu0_vid, S_IRUGO, show_vid, NULL);
-
 
 /* Case open detection */
 

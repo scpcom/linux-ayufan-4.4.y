@@ -133,7 +133,6 @@ static int vesa_set_mode(struct mode_info *mode)
 		return -1;	/* Invalid mode */
 	}
 
-
 	initregs(&ireg);
 	ireg.ax = 0x4f02;
 	ireg.bx = vesa_mode;
@@ -155,7 +154,6 @@ static int vesa_set_mode(struct mode_info *mode)
 
 	return 0;
 }
-
 
 #ifndef _WAKEUP
 

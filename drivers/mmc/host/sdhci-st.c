@@ -346,7 +346,6 @@ static const struct sdhci_pltfm_data sdhci_st_pdata = {
 		SDHCI_QUIRK2_STOP_WITH_TC,
 };
 
-
 static int sdhci_st_probe(struct platform_device *pdev)
 {
 	struct device_node *np = pdev->dev.of_node;

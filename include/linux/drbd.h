@@ -57,7 +57,6 @@ extern const char *drbd_buildtag(void);
 #define PRO_VERSION_MIN 86
 #define PRO_VERSION_MAX 101
 
-
 enum drbd_io_error_p {
 	EP_PASS_ON, /* FIXME should the better be named "Ignore"? */
 	EP_CALL_HELPER,
@@ -365,7 +364,6 @@ enum drbd_timeout_flag {
 #define DRBD_MD_MAGIC_07   (DRBD_MAGIC+3)
 #define DRBD_MD_MAGIC_08   (DRBD_MAGIC+4)
 #define DRBD_MD_MAGIC_84_UNCLEAN	(DRBD_MAGIC+5)
-
 
 /* how I came up with this magic?
  * base64 decode "actlog==" ;) */

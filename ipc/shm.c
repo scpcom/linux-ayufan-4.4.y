@@ -186,7 +186,6 @@ static inline void shm_rmid(struct ipc_namespace *ns, struct shmid_kernel *s)
 	ipc_rmid(&shm_ids(ns), &s->shm_perm);
 }
 
-
 static int __shm_open(struct vm_area_struct *vma)
 {
 	struct file *file = vma->vm_file;

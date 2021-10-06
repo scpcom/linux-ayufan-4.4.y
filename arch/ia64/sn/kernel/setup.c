@@ -53,7 +53,6 @@
 #include "xtalk/hubdev.h"
 #include <asm/sn/klconfig.h>
 
-
 DEFINE_PER_CPU(struct pda_s, pda_percpu);
 
 #define MAX_PHYS_MEMORY		(1UL << IA64_MAX_PHYS_BITS)	/* Max physical address supported */
@@ -772,4 +771,3 @@ sn_kernel_launch_event(void)
 		printk(KERN_ERR "KEXEC is not supported in this PROM, Please update the PROM.\n");
 }
 EXPORT_SYMBOL(sn_prom_feature_available);
-

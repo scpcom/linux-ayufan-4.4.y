@@ -59,7 +59,6 @@ struct Scsi_Host *NCR_700_detect(struct scsi_host_template *,
 int NCR_700_release(struct Scsi_Host *host);
 irqreturn_t NCR_700_intr(int, void *);
 
-
 enum NCR_700_Host_State {
 	NCR_700_HOST_BUSY,
 	NCR_700_HOST_FREE,
@@ -83,7 +82,6 @@ struct NCR_700_Device_Parameters {
 	unsigned char cmnd[MAX_COMMAND_SIZE];
 	__u8	depth;
 };
-
 
 /* The SYNC negotiation sequence looks like:
  * 
@@ -471,7 +469,6 @@ struct NCR_700_Host_Parameters {
 		       #symbol, A_##symbol##_used[i], val)); \
 	} \
 }
-
 
 static inline __u8
 NCR_700_readb(struct Scsi_Host *host, __u32 reg)

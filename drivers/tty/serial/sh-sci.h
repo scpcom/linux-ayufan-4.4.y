@@ -6,7 +6,6 @@
 #define SCI_MAJOR		204
 #define SCI_MINOR_START		8
 
-
 /*
  * SCI register subset common for all port types.
  * Not all registers will exist on all parts.
@@ -30,7 +29,6 @@ enum {
 
 	SCIx_NR_REGS,
 };
-
 
 /* SCSMR (Serial Mode Register) */
 #define SCSMR_CHR	BIT(6)	/* 7-bit Character Length */
@@ -108,7 +106,6 @@ enum {
 /* SCPDR (Serial Port Data Register), SCIFA/SCIFB only */
 #define SCPDR_RTSD	BIT(4)	/* Serial Port RTS Output Pin Data */
 #define SCPDR_CTSD	BIT(3)	/* Serial Port CTS Input Pin Data */
-
 
 #define SCxSR_TEND(port)	(((port)->type == PORT_SCI) ? SCI_TEND   : SCIF_TEND)
 #define SCxSR_RDxF(port)	(((port)->type == PORT_SCI) ? SCI_RDRF   : SCIF_RDF)

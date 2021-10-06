@@ -105,7 +105,6 @@ struct inode *coda_cnode_make(struct CodaFid *fid, struct super_block *sb)
 	return inode;
 }
 
-
 /* Although we treat Coda file identifiers as immutable, there is one
  * special case for files created during a disconnection where they may
  * not be globally unique. When an identifier collision is detected we
@@ -165,4 +164,3 @@ struct inode *coda_cnode_makectl(struct super_block *sb)
 	}
 	return ERR_PTR(-ENOMEM);
 }
-

@@ -58,7 +58,6 @@ struct ktermios {
 #define VLNEXT 15
 #define VEOL2 16
 
-
 /* c_iflag bits */
 #define IGNBRK	0000001
 #define BRKINT	0000002

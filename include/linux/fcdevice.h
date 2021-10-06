@@ -23,7 +23,6 @@
 #ifndef _LINUX_FCDEVICE_H
 #define _LINUX_FCDEVICE_H
 
-
 #include <linux/if_fc.h>
 
 #ifdef __KERNEL__

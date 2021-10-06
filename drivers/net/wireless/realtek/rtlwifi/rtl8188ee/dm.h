@@ -170,7 +170,6 @@
 #define	DM_REG_ANT_TRAIN_PARA1_11N			0x7b0
 #define	DM_REG_ANT_TRAIN_PARA2_11N			0x7b4
 
-
 /*DIG Related*/
 #define	DM_BIT_IGI_11N					0x0000007F
 

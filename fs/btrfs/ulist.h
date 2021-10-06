@@ -1,9 +1,4 @@
-/*
- * Copyright (C) 2011 STRATO AG
- * written by Arne Jansen <sensille@gmx.net>
- * Distributed under the GNU GPL license version 2.
- *
- */
+
 
 #ifndef __ULIST__
 #define __ULIST__
@@ -11,39 +6,29 @@
 #include <linux/list.h>
 #include <linux/rbtree.h>
 
-/*
- * ulist is a generic data structure to hold a collection of unique u64
- * values. The only operations it supports is adding to the list and
- * enumerating it.
- * It is possible to store an auxiliary value along with the key.
- *
- */
+
 struct ulist_iterator {
 #ifdef CONFIG_BTRFS_DEBUG
 	int i;
 #endif
-	struct list_head *cur_list;  /* hint to start search */
+	struct list_head *cur_list;  
 };
 
-/*
- * element of the list
- */
+
 struct ulist_node {
-	u64 val;		/* value to store */
-	u64 aux;		/* auxiliary value saved along with the val */
+	u64 val;		
+	u64 aux;		
 
 #ifdef CONFIG_BTRFS_DEBUG
-	int seqnum;		/* sequence number this node is added */
+	int seqnum;		
 #endif
 
-	struct list_head list;  /* used to link node */
-	struct rb_node rb_node;	/* used to speed up search */
+	struct list_head list;  
+	struct rb_node rb_node;	
 };
 
 struct ulist {
-	/*
-	 * number of elements stored in list
-	 */
+	
 	unsigned long nnodes;
 
 	struct list_head nodes;
@@ -59,7 +44,6 @@ int ulist_add_merge(struct ulist *ulist, u64 val, u64 aux,
 		    u64 *old_aux, gfp_t gfp_mask);
 int ulist_del(struct ulist *ulist, u64 val, u64 aux);
 
-/* just like ulist_add_merge() but take a pointer for the aux data */
 static inline int ulist_add_merge_ptr(struct ulist *ulist, u64 val, void *aux,
 				      void **old_aux, gfp_t gfp_mask)
 {

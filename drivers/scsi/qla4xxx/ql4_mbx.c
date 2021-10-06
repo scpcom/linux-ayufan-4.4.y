@@ -1697,7 +1697,6 @@ exit_set_chap:
 	return ret;
 }
 
-
 int qla4xxx_get_uni_chap_at_index(struct scsi_qla_host *ha, char *username,
 				  char *password, uint16_t chap_index)
 {

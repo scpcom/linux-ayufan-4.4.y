@@ -100,7 +100,6 @@
 #define SNIC_LUN_RESET_TIMEOUT		30000		/* msec */
 #define SNIC_HOST_RESET_TIMEOUT		30000		/* msec */
 
-
 /*
  * These are protected by the hashed req_lock.
  */
@@ -198,7 +197,6 @@ do {						\
 			WARN_ON_ONCE(EXPR); \
 		} \
 	 })
-
 
 extern const char *snic_state_str[];
 
@@ -381,7 +379,6 @@ int snic_host_reset(struct scsi_cmnd *);
 int snic_reset(struct Scsi_Host *, struct scsi_cmnd *);
 void snic_shutdown_scsi_cleanup(struct snic *);
 
-
 int snic_request_intr(struct snic *);
 void snic_free_intr(struct snic *);
 int snic_set_intr_mode(struct snic *);
@@ -390,7 +387,6 @@ void snic_clear_intr_mode(struct snic *);
 int snic_fwcq_cmpl_handler(struct snic *, int);
 int snic_wq_cmpl_handler(struct snic *, int);
 void snic_free_wq_buf(struct vnic_wq *, struct vnic_wq_buf *);
-
 
 void snic_log_q_error(struct snic *);
 void snic_handle_link_event(struct snic *);

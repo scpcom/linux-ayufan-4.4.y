@@ -25,7 +25,6 @@
 #include <linux/slab.h>
 #include "pci.h"
 
-
 void pci_update_resource(struct pci_dev *dev, int resno)
 {
 	struct pci_bus_region region;

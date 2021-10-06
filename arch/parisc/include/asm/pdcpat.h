@@ -10,7 +10,6 @@
  * Copyright 2000,2004 (c) Grant Grundler <grundler()nahspam.parisc-linux.org>
  */
 
-
 #define PDC_PAT_CELL           	64L   /* Interface for gaining and 
                                          * manipulatin g cell state within PD */
 #define PDC_PAT_CELL_GET_NUMBER    0L   /* Return Cell number */
@@ -27,7 +26,6 @@
 #define PDC_PAT_CELL_GET_REMOTE_PDH 17L /* Read Remote PDH Buffer */
 #define PDC_PAT_CELL_GET_DBG_INFO   128L  /* Return DBG Buffer Info */
 #define PDC_PAT_CELL_CHANGE_ALIAS   129L  /* Change Non-Equivalent Alias Chacking */
-
 
 /*
 ** Arg to PDC_PAT_CELL_MODULE memaddr[4]
@@ -58,14 +56,11 @@
 #define PAT_UFO             6         /* HPA Space (UFO for Mariposa) */
 #define PAT_GNIP            7         /* GNI Reserved Space */
 
-
-
 /* PDC PAT CHASSIS LOG -- Platform logging & forward progress functions */
 
 #define PDC_PAT_CHASSIS_LOG		65L
 #define PDC_PAT_CHASSIS_WRITE_LOG    	0L /* Write Log Entry */
 #define PDC_PAT_CHASSIS_READ_LOG     	1L /* Read  Log Entry */
-
 
 /* PDC PAT CPU  -- CPU configuration within the protection domain */
 
@@ -105,7 +100,6 @@
 #define HPMC_SET_PARAMS_INTR 	    1L /* Rendezvous Interrupt */
 #define HPMC_SET_PARAMS_WAKE 	    2L /* Wake up processor */
 
-
 /*  PDC PAT IO  -- On-line services for I/O modules */
 
 #define PDC_PAT_IO                  71L
@@ -135,7 +129,6 @@
 #define PDC_PAT_IO_GET_PROC_VIEW        29L /* Get Processor view of IO address */
 #define PDC_PAT_IO_PROG_SBA_DIR_RANGE   30L /* Program directed range */
 
-
 /* PDC PAT MEM  -- Manage memory page deallocation */
 
 #define PDC_PAT_MEM            72L
@@ -159,7 +152,6 @@
 #define PDC_PAT_MEM_CLEAN_RANGE    	128L /*Clean Mem in specific range*/
 #define PDC_PAT_MEM_GET_TBL_SIZE   	131L /* Get Memory Table Size     */
 #define PDC_PAT_MEM_GET_TBL        	132L /* Get Memory Table          */
-
 
 /* PDC PAT NVOLATILE  --  Access Non-Volatile Memory */
 
@@ -186,7 +178,6 @@
 #define PAT_MEMUSE_GI			128
 #define PAT_MEMUSE_GNI			129
 
-
 #ifndef __ASSEMBLY__
 #include <linux/types.h>
 
@@ -200,7 +191,6 @@ extern int pdc_pat_get_irt(void *r_addr, unsigned long cell_num);
 #define pdc_pat_get_irt_size(num_entries, cell_numn)	PDC_BAD_PROC
 #define pdc_pat_get_irt(r_addr, cell_num)		PDC_BAD_PROC
 #endif	/* ! CONFIG_64BIT */
-
 
 struct pdc_pat_cell_num {
 	unsigned long cell_num;
@@ -252,7 +242,6 @@ struct pdc_pat_pd_addr_map_entry {
 #define PAT_GET_IOC(value)	(((value) >> 40) & 0xffUL)
 #define PAT_GET_MOD_PAGES(value) ((value) & 0xffffffUL)
 
-
 /*
 ** PDC_PAT_CELL_GET_INFO return block
 */
@@ -271,7 +260,6 @@ typedef struct pdc_pat_cell_info_rtn_block {
 	unsigned long reserved[21];
 } pdc_pat_cell_info_rtn_block_t;
 
-
 /* FIXME: mod[508] should really be a union of the various mod components */
 struct pdc_pat_cell_mod_maddr_block {	/* PDC_PAT_CELL_MODULE */
 	unsigned long cba;		/* func 0 cfg space address */
@@ -283,7 +271,6 @@ struct pdc_pat_cell_mod_maddr_block {	/* PDC_PAT_CELL_MODULE */
 
 typedef struct pdc_pat_cell_mod_maddr_block pdc_pat_cell_mod_maddr_block_t;
 
-
 extern int pdc_pat_chassis_send_log(unsigned long status, unsigned long data);
 extern int pdc_pat_cell_get_number(struct pdc_pat_cell_num *cell_info);
 extern int pdc_pat_cell_module(unsigned long *actcnt, unsigned long ploc, unsigned long mod, unsigned long view_type, void *mem_addr);
@@ -293,10 +280,8 @@ extern int pdc_pat_cpu_get_number(struct pdc_pat_cpu_num *cpu_info, void *hpa);
 
 extern int pdc_pat_pd_get_addr_map(unsigned long *actual_len, void *mem_addr, unsigned long count, unsigned long offset);
 
-
 extern int pdc_pat_io_pci_cfg_read(unsigned long pci_addr, int pci_size, u32 *val); 
 extern int pdc_pat_io_pci_cfg_write(unsigned long pci_addr, int pci_size, u32 val); 
-
 
 /* Flag to indicate this is a PAT box...don't use this unless you
 ** really have to...it might go away some day.

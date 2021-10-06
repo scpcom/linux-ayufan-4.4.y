@@ -57,7 +57,6 @@
 /*			EEPROM/Efuse Default Value */
 #define EEPROM_Default_CrystalCap_8723A		0x20
 
-
 /*        EEPROM/EFUSE data structure definition. */
 #define	MAX_CHNL_GROUP		3+9
 

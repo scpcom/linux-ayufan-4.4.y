@@ -250,7 +250,6 @@ void meta_intc_unmask_irq_simple(struct irq_data *data)
 	record_irq_is_unmasked(data);
 }
 
-
 /**
  * meta_intc_mask_irq() - mask an external irq using HWMASKEXT
  * @data:	data for the external irq to mask

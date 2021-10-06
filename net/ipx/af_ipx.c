@@ -337,7 +337,6 @@ out:
 	return NOTIFY_DONE;
 }
 
-
 static __exit void ipxitf_cleanup(void)
 {
 	struct ipx_interface *i, *tmp;
@@ -1021,7 +1020,6 @@ static int ipxitf_create(struct ipx_interface_definition *idef)
 		ipxitf_insert(intrfc);
 	}
 
-
 	/* If the network number is known, add a route */
 	rc = 0;
 	if (!intrfc->if_netnum)
@@ -1576,7 +1574,6 @@ out:
 	return rc;
 }
 
-
 static int ipx_getname(struct socket *sock, struct sockaddr *uaddr,
 			int *uaddr_len, int peer)
 {
@@ -1752,7 +1749,6 @@ out:
 	return rc;
 }
 
-
 static int ipx_recvmsg(struct socket *sock, struct msghdr *msg, size_t size,
 		       int flags)
 {
@@ -1831,7 +1827,6 @@ out:
 	return rc;
 }
 
-
 static int ipx_ioctl(struct socket *sock, unsigned int cmd, unsigned long arg)
 {
 	int rc = 0;
@@ -1904,7 +1899,6 @@ static int ipx_ioctl(struct socket *sock, unsigned int cmd, unsigned long arg)
 
 	return rc;
 }
-
 
 #ifdef CONFIG_COMPAT
 static int ipx_compat_ioctl(struct socket *sock, unsigned int cmd, unsigned long arg)

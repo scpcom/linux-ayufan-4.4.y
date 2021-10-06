@@ -7,7 +7,6 @@
 #ifndef __LINUX_MII_H__
 #define __LINUX_MII_H__
 
-
 #include <linux/if.h>
 #include <uapi/linux/mii.h>
 
@@ -40,7 +39,6 @@ extern unsigned int mii_check_media (struct mii_if_info *mii,
 extern int generic_mii_ioctl(struct mii_if_info *mii_if,
 			     struct mii_ioctl_data *mii_data, int cmd,
 			     unsigned int *duplex_changed);
-
 
 static inline struct mii_ioctl_data *if_mii(struct ifreq *rq)
 {

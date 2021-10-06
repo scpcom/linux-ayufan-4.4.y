@@ -35,7 +35,6 @@
 #include "iscsi_target.h"
 #include <target/iscsi/iscsi_target_stat.h>
 
-
 /* Start items for lio_target_portal_cit */
 
 static inline struct iscsi_tpg_np *to_iscsi_tpg_np(struct config_item *item)
@@ -948,7 +947,6 @@ static ssize_t iscsi_tpg_auth_##name##_store(struct config_item *item,		\
 										\
 CONFIGFS_ATTR(iscsi_tpg_auth_, name);
 
-
 DEF_TPG_AUTH_STR(userid, NAF_USERID_SET);
 DEF_TPG_AUTH_STR(password, NAF_PASSWORD_SET);
 DEF_TPG_AUTH_STR(userid_mutual, NAF_USERID_IN_SET);
@@ -1158,7 +1156,6 @@ out:
 	return -EINVAL;
 }
 
-
 static ssize_t lio_target_tpg_dynamic_sessions_show(struct config_item *item,
 		char *page)
 {
@@ -1362,7 +1359,6 @@ static ssize_t iscsi_disc_##name##_show(struct config_item *item, char *page) \
 CONFIGFS_ATTR_RO(iscsi_disc_, name)
 
 DEF_DISC_AUTH_INT(authenticate_target);
-
 
 static ssize_t iscsi_disc_enforce_discovery_auth_show(struct config_item *item,
 		char *page)

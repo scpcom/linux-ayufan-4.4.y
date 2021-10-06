@@ -20,7 +20,6 @@
  * published by the Free Software Foundation.
  */
 
-
 #include <linux/clk.h>
 #include <linux/dma-mapping.h>
 #include <linux/interrupt.h>
@@ -35,7 +34,6 @@
 #include <media/videobuf-dma-sg.h>
 
 #include <linux/omap-dma.h>
-
 
 #define DRIVER_NAME		"omap1-camera"
 #define DRIVER_VERSION		"0.0.2"
@@ -103,12 +101,10 @@
 
 /* end of OMAP1 Camera Interface registers */
 
-
 #define SOCAM_BUS_FLAGS	(V4L2_MBUS_MASTER | \
 			V4L2_MBUS_HSYNC_ACTIVE_HIGH | V4L2_MBUS_VSYNC_ACTIVE_HIGH | \
 			V4L2_MBUS_PCLK_SAMPLE_RISING | V4L2_MBUS_PCLK_SAMPLE_FALLING | \
 			V4L2_MBUS_DATA_ACTIVE_HIGH)
-
 
 #define FIFO_SIZE		((THRESHOLD_MASK >> THRESHOLD_SHIFT) + 1)
 #define FIFO_SHIFT		__fls(FIFO_SIZE)
@@ -129,9 +125,7 @@
 #define DMA_SYNC		OMAP_DMA_SYNC_FRAME
 #define THRESHOLD_LEVEL		DMA_FRAME_SIZE
 
-
 #define MAX_VIDEO_MEM		4	/* arbitrary video memory limit in MB */
-
 
 /*
  * Structures
@@ -178,7 +172,6 @@ struct omap1_cam_dev {
 
 	u32				reg_cache[0];
 };
-
 
 static void cam_write(struct omap1_cam_dev *pcdev, u16 reg, u32 val)
 {
@@ -878,7 +871,6 @@ static struct videobuf_queue_ops omap1_videobuf_ops = {
 	.buf_queue	= omap1_videobuf_queue,
 	.buf_release	= omap1_videobuf_release,
 };
-
 
 /*
  * SOC Camera host operations

@@ -89,7 +89,6 @@ static void iwlagn_tx_cmd_build_basic(struct iwl_priv *priv,
 		 info->control.flags & IEEE80211_TX_CTRL_PORT_CTRL_PROTO))
 		tx_flags |= TX_CMD_FLG_IGNORE_BT;
 
-
 	tx_cmd->sta_id = sta_id;
 	if (ieee80211_has_morefrags(fc))
 		tx_flags |= TX_CMD_FLG_MORE_FRAG_MSK;

@@ -83,7 +83,6 @@ enum {
 	ISCSI_DIGEST_SIZE = sizeof(__u32),
 };
 
-
 enum {
 	ISCSI_TASK_FREE,
 	ISCSI_TASK_COMPLETED,

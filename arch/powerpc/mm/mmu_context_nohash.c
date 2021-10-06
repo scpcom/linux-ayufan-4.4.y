@@ -65,7 +65,6 @@ static bool no_selective_tlbil;
 #define CTX_MAP_SIZE	\
 	(sizeof(unsigned long) * (last_context / BITS_PER_LONG + 1))
 
-
 /* Steal a context from a task that has one at the moment.
  *
  * This is used when we are running out of available PID numbers
@@ -487,4 +486,3 @@ void __init mmu_context_init(void)
 	next_context = first_context;
 	nr_free_contexts = last_context - first_context + 1;
 }
-

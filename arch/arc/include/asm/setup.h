@@ -8,7 +8,6 @@
 #ifndef __ASMARC_SETUP_H
 #define __ASMARC_SETUP_H
 
-
 #include <linux/types.h>
 #include <uapi/asm/setup.h>
 

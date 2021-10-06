@@ -850,8 +850,6 @@ struct vme_dma_attr *vme_dma_pci_attribute(dma_addr_t address)
 		goto err_pci;
 	}
 
-
-
 	attributes->type = VME_DMA_PCI;
 	attributes->private = (void *)pci_attr;
 

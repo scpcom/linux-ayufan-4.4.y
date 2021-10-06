@@ -77,5 +77,4 @@ struct e820map {
 
 #endif /* __ASSEMBLY__ */
 
-
 #endif /* _UAPI_ASM_X86_E820_H */

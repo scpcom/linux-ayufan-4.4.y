@@ -3249,7 +3249,6 @@ void ex_btc8723b2ant_display_coex_info(struct btc_coexist *btcoexist)
 		   ((BTC_WIFI_TRAFFIC_TX == wifi_traffic_dir) ?
 		   "uplink" : "downlink")));
 
-
 	RT_TRACE(rtlpriv, COMP_INIT, DBG_DMESG, "\r\n %-35s = %d / %d / %d / %d",
 		   "SCO/HID/PAN/A2DP",
 		   bt_link_info->sco_exist, bt_link_info->hid_exist,

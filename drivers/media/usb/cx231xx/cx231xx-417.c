@@ -296,7 +296,6 @@ enum cx231xx_mute_video_shift {
 #define MC417_MIADDR	0x0F00
 #define MC417_MIDATA	0x00FF
 
-
 /* Bit definitions for MC417_CTL register ****
  *bits 31-6   bits 5-4   bit 3    bits 2-1       Bit 0
  *+--------+-------------+--------+--------------+------------+
@@ -317,7 +316,6 @@ enum cx231xx_mute_video_shift {
 #define MC417_GPIO_SEL_GPIO2	0x2
 #define MC417_GPIO_SEL_GPIO1	0x1
 #define MC417_GPIO_SEL_GPIO0	0x0
-
 
 #define CX23417_GPIO_MASK 0xFC0003FF
 
@@ -595,7 +593,6 @@ static int mc417_memory_read(struct cx231xx *dev, u32 address, u32 *value)
 	/*Wait for MIRDY line*/
 	ret = wait_for_mci_complete(dev);
 
-
 	/*Read data byte 3;*/
 	temp = (0x82 | MCI_MEMORY_DATA_BYTE3) << 10;
 	set_itvc_reg(dev, ITVC_READ_DIR, temp);
@@ -829,7 +826,6 @@ static int cx231xx_api_cmd(struct cx231xx *dev, u32 command,
 	return err;
 }
 
-
 static int cx231xx_find_mailbox(struct cx231xx *dev)
 {
 	u32 signature[4] = {
@@ -933,7 +929,6 @@ static void mci_write_memory_to_gpio(struct cx231xx *dev, u32 address, u32 value
 		p_fw_image++;
 	}
 }
-
 
 static int cx231xx_load_firmware(struct cx231xx *dev)
 {
@@ -1627,7 +1622,6 @@ static int vidioc_dqbuf(struct file *file, void *priv, struct v4l2_buffer *b)
 	return videobuf_dqbuf(&fh->vidq, b, file->f_flags & O_NONBLOCK);
 }
 
-
 static int vidioc_streamon(struct file *file, void *priv,
 				enum v4l2_buf_type i)
 {
@@ -1689,7 +1683,6 @@ static int mpeg_open(struct file *file)
 	file->private_data = fh;
 	v4l2_fh_init(&fh->fh, vdev);
 	fh->dev = dev;
-
 
 	videobuf_queue_vmalloc_init(&fh->vidq, &cx231xx_qops,
 			    NULL, &dev->video_mode.slock,

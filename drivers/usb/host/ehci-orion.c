@@ -1,12 +1,4 @@
-/*
- * drivers/usb/host/ehci-orion.c
- *
- * Tzachi Perelstein <tzachi@marvell.com>
- *
- * This file is licensed under  the terms of the GNU General Public
- * License version 2. This program is licensed "as is" without any
- * warranty of any kind, whether express or implied.
- */
+
 
 #include <linux/kernel.h>
 #include <linux/module.h>
@@ -60,73 +52,31 @@ static const char hcd_name[] = "ehci-orion";
 
 static struct hc_driver __read_mostly ehci_orion_hc_driver;
 
-/*
- * Implement Orion USB controller specification guidelines
- */
 static void orion_usb_phy_v1_setup(struct usb_hcd *hcd)
 {
-	/* The below GLs are according to the Orion Errata document */
-	/*
-	 * Clear interrupt cause and mask
-	 */
+	 
 	wrl(USB_CAUSE, 0);
 	wrl(USB_MASK, 0);
 
-	/*
-	 * Reset controller
-	 */
 	wrl(USB_CMD, rdl(USB_CMD) | USB_CMD_RESET);
 	while (rdl(USB_CMD) & USB_CMD_RESET);
 
-	/*
-	 * GL# USB-10: Set IPG for non start of frame packets
-	 * Bits[14:8]=0xc
-	 */
 	wrl(USB_IPG, (rdl(USB_IPG) & ~0x7f00) | 0xc00);
 
-	/*
-	 * GL# USB-9: USB 2.0 Power Control
-	 * BG_VSEL[7:6]=0x1
-	 */
 	wrl(USB_PHY_PWR_CTRL, (rdl(USB_PHY_PWR_CTRL) & ~0xc0)| 0x40);
 
-	/*
-	 * GL# USB-1: USB PHY Tx Control - force calibration to '8'
-	 * TXDATA_BLOCK_EN[21]=0x1, EXT_RCAL_EN[13]=0x1, IMP_CAL[6:3]=0x8
-	 */
 	wrl(USB_PHY_TX_CTRL, (rdl(USB_PHY_TX_CTRL) & ~0x78) | 0x202040);
 
-	/*
-	 * GL# USB-3 GL# USB-9: USB PHY Rx Control
-	 * RXDATA_BLOCK_LENGHT[31:30]=0x3, EDGE_DET_SEL[27:26]=0,
-	 * CDR_FASTLOCK_EN[21]=0, DISCON_THRESHOLD[9:8]=0, SQ_THRESH[7:4]=0x1
-	 */
 	wrl(USB_PHY_RX_CTRL, (rdl(USB_PHY_RX_CTRL) & ~0xc2003f0) | 0xc0000010);
 
-	/*
-	 * GL# USB-3 GL# USB-9: USB PHY IVREF Control
-	 * PLLVDD12[1:0]=0x2, RXVDD[5:4]=0x3, Reserved[19]=0
-	 */
 	wrl(USB_PHY_IVREF_CTRL, (rdl(USB_PHY_IVREF_CTRL) & ~0x80003 ) | 0x32);
 
-	/*
-	 * GL# USB-3 GL# USB-9: USB PHY Test Group Control
-	 * REG_FIFO_SQ_RST[15]=0
-	 */
 	wrl(USB_PHY_TST_GRP_CTRL, rdl(USB_PHY_TST_GRP_CTRL) & ~0x8000);
 
-	/*
-	 * Stop and reset controller
-	 */
 	wrl(USB_CMD, rdl(USB_CMD) & ~USB_CMD_RUN);
 	wrl(USB_CMD, rdl(USB_CMD) | USB_CMD_RESET);
 	while (rdl(USB_CMD) & USB_CMD_RESET);
 
-	/*
-	 * GL# USB-5 Streaming disable REG_USB_MODE[4]=1
-	 * TBD: This need to be done after each reset!
-	 * GL# USB-4 Setup USB Host mode
-	 */
 	wrl(USB_MODE, USB_MODE_SDIS | USB_MODE_HOST);
 }
 
@@ -181,11 +131,6 @@ static int ehci_orion_drv_probe(struct platform_device *pdev)
 		goto err;
 	}
 
-	/*
-	 * Right now device-tree probed devices don't get dma_mask
-	 * set. Since shared usb code relies on it, set it here for
-	 * now. Once we have dma capability bindings this can go away.
-	 */
 	err = dma_coerce_mask_and_coherent(&pdev->dev, DMA_BIT_MASK(32));
 	if (err)
 		goto err;
@@ -213,10 +158,7 @@ static int ehci_orion_drv_probe(struct platform_device *pdev)
 	hcd->has_tt = 1;
 
 	priv = hcd_to_orion_priv(hcd);
-	/*
-	 * Not all platforms can gate the clock, so it is not an error if
-	 * the clock does not exists.
-	 */
+	 
 	priv->clk = devm_clk_get(&pdev->dev, NULL);
 	if (!IS_ERR(priv->clk))
 		clk_prepare_enable(priv->clk);
@@ -236,23 +178,17 @@ static int ehci_orion_drv_probe(struct platform_device *pdev)
 			goto err_phy_power_on;
 	}
 
-	/*
-	 * (Re-)program MBUS remapping windows if we are asked to.
-	 */
 	dram = mv_mbus_dram_info();
 	if (dram)
 		ehci_orion_conf_mbus_windows(hcd, dram);
 
-	/*
-	 * setup Orion USB controller.
-	 */
 	if (pdev->dev.of_node)
 		phy_version = EHCI_PHY_NA;
 	else
 		phy_version = pd->phy_version;
 
 	switch (phy_version) {
-	case EHCI_PHY_NA:	/* dont change USB phy settings */
+	case EHCI_PHY_NA:	 
 		break;
 	case EHCI_PHY_ORION:
 		orion_usb_phy_v1_setup(hcd);

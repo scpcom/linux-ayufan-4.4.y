@@ -35,7 +35,6 @@ extern struct mutex of_mutex;
 extern struct list_head aliases_lookup;
 extern struct kset *of_kset;
 
-
 static inline struct device_node *kobj_to_device_node(struct kobject *kobj)
 {
 	return container_of(kobj, struct device_node, kobj);

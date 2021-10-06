@@ -55,7 +55,6 @@ static long jfs_map_ext2(unsigned long flags, int from)
 	return mapped;
 }
 
-
 long jfs_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 {
 	struct inode *inode = file_inode(filp);

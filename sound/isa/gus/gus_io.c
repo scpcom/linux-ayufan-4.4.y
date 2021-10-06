@@ -132,7 +132,6 @@ static inline unsigned int __snd_gf1_read_addr(struct snd_gus_card * gus,
 	return res;
 }
 
-
 /*
  *  =======================================================================
  */

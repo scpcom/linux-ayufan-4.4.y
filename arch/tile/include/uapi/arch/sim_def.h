@@ -21,14 +21,12 @@
 #ifndef __ARCH_SIM_DEF_H__
 #define __ARCH_SIM_DEF_H__
 
-
 /**
  * Internal: the low bits of the SIM_CONTROL_* SPR values specify
  * the operation to perform, and the remaining bits are
  * an operation-specific parameter (often unused).
  */
 #define _SIM_CONTROL_OPERATOR_BITS 8
-
 
 /*
  * Values which can be written to SPR_SIM_CONTROL.
@@ -221,7 +219,6 @@
  */
 #define SIM_CONTROL_ENABLE_MPIPE_LINK_MAGIC_BYTE 36
 
-
 /*
  * Syscall numbers for use with "sim_syscall()".
  */
@@ -245,7 +242,6 @@
 
 /** Syscall number for sim_query_cpu_speed(). */
 #define SIM_SYSCALL_QUERY_CPU_SPEED 6
-
 
 /*
  * Bit masks which can be shifted by 8, combined with
@@ -292,7 +288,6 @@
 /** Computes the value to write to SPR_SIM_CONTROL to set tracing flags. */
 #define SIM_TRACE_SPR_ARG(mask) \
   (SIM_CONTROL_SET_TRACING | ((mask) << _SIM_CONTROL_OPERATOR_BITS))
-
 
 /*
  * Bit masks which can be shifted by 8, combined with
@@ -349,7 +344,6 @@
 #define SIM_DUMP_SPR_ARG(mask) \
   (SIM_CONTROL_DUMP | ((mask) << _SIM_CONTROL_OPERATOR_BITS))
 
-
 /*
  * Bit masks which can be shifted by 8, combined with
  * SIM_CONTROL_PROFILER_CHIP_xxx, and written to SPR_SIM_CONTROL.
@@ -391,8 +385,6 @@
 /** Computes the value to write to SPR_SIM_CONTROL to enable chip statistics. */
 #define SIM_PROFILER_CHIP_ENABLE_SPR_ARG(mask) \
   (SIM_CONTROL_PROFILER_CHIP_ENABLE | ((mask) << _SIM_CONTROL_OPERATOR_BITS))
-
-
 
 /* Shim bitrate controls. */
 
@@ -469,7 +461,6 @@
                SIM_CONTROL_SHAPING_TYPE_BITS + \
                SIM_CONTROL_SHAPING_UNITS_BITS))) << _SIM_CONTROL_OPERATOR_BITS)
 
-
 /*
  * Values returned when reading SPR_SIM_CONTROL.
  * ISSUE: These names should share a longer common prefix.
@@ -483,7 +474,6 @@
 
 /** When reading SPR_SIM_CONTROL, the mask for whether profiling is enabled. */
 #define SIM_PROFILER_ENABLED_MASK 0x10000
-
 
 /*
  * Special arguments for "SIM_CONTROL_PUTC".
@@ -500,6 +490,5 @@
  * prefix and does not append a newline.
  */
 #define SIM_PUTC_FLUSH_BINARY 0x101
-
 
 #endif /* __ARCH_SIM_DEF_H__ */

@@ -451,7 +451,6 @@ int gsc_try_fmt_mplane(struct gsc_ctx *ctx, struct v4l2_format *f)
 	else /* SD */
 		pix_mp->colorspace = V4L2_COLORSPACE_SMPTE170M;
 
-
 	for (i = 0; i < pix_mp->num_planes; ++i) {
 		int bpl = (pix_mp->width * fmt->depth[i]) >> 3;
 		pix_mp->plane_fmt[i].bytesperline = bpl;
@@ -586,7 +585,6 @@ int gsc_try_crop(struct gsc_ctx *ctx, struct v4l2_crop *cr)
 	else
 		gsc_check_crop_change(tmp_w, tmp_h,
 					&cr->c.width, &cr->c.height);
-
 
 	/* adjust left/top if cropping rectangle is out of bounds */
 	/* Need to add code to algin left value with 2's multiple */

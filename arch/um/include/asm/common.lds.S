@@ -104,4 +104,3 @@
   .init.ramfs : {
 	INIT_RAM_FS
   }
-

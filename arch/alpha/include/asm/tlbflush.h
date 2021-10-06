@@ -13,7 +13,6 @@
 
 extern void __load_new_mm_context(struct mm_struct *);
 
-
 /* Use a few helper functions to hide the ugly broken ASN
    numbers on early Alphas (ev4 and ev45).  */
 
@@ -57,7 +56,6 @@ ev5_flush_tlb_current_page(struct mm_struct * mm,
 	else
 		tbi(2, addr);
 }
-
 
 #ifdef CONFIG_ALPHA_GENERIC
 # define flush_tlb_current		alpha_mv.mv_flush_tlb_current

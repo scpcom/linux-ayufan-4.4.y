@@ -72,7 +72,6 @@
 #include <linux/ieee80211.h>
 #include <linux/types.h>
 
-
 enum {
 	REPLY_ALIVE = 0x1,
 	REPLY_ERROR = 0x2,
@@ -515,7 +514,6 @@ enum {
 	RXON_DEV_TYPE_P2P = 9,
 };
 
-
 #define RXON_RX_CHAIN_DRIVER_FORCE_MSK		cpu_to_le16(0x1 << 0)
 #define RXON_RX_CHAIN_DRIVER_FORCE_POS		(0)
 #define RXON_RX_CHAIN_VALID_MSK			cpu_to_le16(0x7 << 1)
@@ -553,7 +551,6 @@ enum {
 /* rx response to host with 8-byte TSF
 * (according to ON_AIR deassertion) */
 #define RXON_FLG_TSF2HOST_MSK           cpu_to_le32(1 << 15)
-
 
 /* HT flags */
 #define RXON_FLG_CTRL_CHANNEL_LOC_POS		(22)
@@ -934,7 +931,6 @@ struct iwl_addsta_cmd {
 	__le16 reserved2;
 } __packed;
 
-
 #define ADD_STA_SUCCESS_MSK		0x1
 #define ADD_STA_NO_ROOM_IN_TABLE	0x2
 #define ADD_STA_NO_BLOCK_ACK_RESOURCE	0x4
@@ -963,7 +959,6 @@ struct iwl_rem_sta_cmd {
 	u8 addr[ETH_ALEN]; /* MAC addr of the first station */
 	u8 reserved2[2];
 } __packed;
-
 
 /* WiFi queues mask */
 #define IWL_SCD_BK_MSK			BIT(0)
@@ -1080,7 +1075,6 @@ struct iwl_wep_cmd {
 #define RX_MPDU_RES_STATUS_TTAK_OK	(1 << 7)
 #define RX_MPDU_RES_STATUS_DEC_DONE_MSK	(0x800)
 
-
 #define IWLAGN_RX_RES_PHY_CNT 8
 #define IWLAGN_RX_RES_AGC_IDX     1
 #define IWLAGN_RX_RES_RSSI_AB_IDX 2
@@ -1100,7 +1094,6 @@ struct iwl_wep_cmd {
 struct iwlagn_non_cfg_phy {
 	__le32 non_cfg_phy[IWLAGN_RX_RES_PHY_CNT];  /* up to 8 phy entries */
 } __packed;
-
 
 /*
  * REPLY_RX = 0xc3 (response only, not a command)
@@ -1125,7 +1118,6 @@ struct iwl_rx_mpdu_res_start {
 	__le16 byte_count;
 	__le16 reserved;
 } __packed;
-
 
 /******************************************************************************
  * (5)
@@ -1213,7 +1205,6 @@ struct iwl_rx_mpdu_res_start {
 
 /* HCCA-AP - disable duration overwriting. */
 #define TX_CMD_FLG_DUR_MSK cpu_to_le32(1 << 25)
-
 
 /*
  * TX command security control
@@ -1540,7 +1531,6 @@ struct iwl_compressed_ba_resp {
 #define  LINK_QUAL_ANT_A_MSK (1 << 0)
 #define  LINK_QUAL_ANT_B_MSK (1 << 1)
 #define  LINK_QUAL_ANT_MSK   (LINK_QUAL_ANT_A_MSK|LINK_QUAL_ANT_B_MSK)
-
 
 /**
  * struct iwl_link_qual_general_params
@@ -2470,7 +2460,6 @@ struct iwl_scancomplete_notification {
 	__le32 tsf_high;
 } __packed;
 
-
 /******************************************************************************
  * (9)
  * IBSS/AP Commands and Notifications:
@@ -2684,7 +2673,6 @@ struct statistics_tx {
 	__le32 reserved1;
 } __packed;
 
-
 struct statistics_div {
 	__le32 tx_on_a;
 	__le32 tx_on_b;
@@ -2825,7 +2813,6 @@ struct iwl_missed_beacon_notif {
 	__le32 num_expected_beacons;
 	__le32 num_recvd_beacons;
 } __packed;
-
 
 /******************************************************************************
  * (11)
@@ -3058,7 +3045,6 @@ struct iwl_missed_beacon_notif {
 #define HD_CCK_NON_SQUARE_DET_SLOPE_DATA_V2		cpu_to_le16(476)
 #define HD_CCK_NON_SQUARE_DET_INTERCEPT_DATA_V2		cpu_to_le16(99)
 
-
 /* Control field in struct iwl_sensitivity_cmd */
 #define SENSITIVITY_CMD_CONTROL_DEFAULT_TABLE	cpu_to_le16(0)
 #define SENSITIVITY_CMD_CONTROL_WORK_TABLE	cpu_to_le16(1)
@@ -3082,7 +3068,6 @@ struct iwl_enhance_sensitivity_cmd {
 	__le16 control;			/* always use "1" */
 	__le16 enhance_table[ENHANCE_HD_TABLE_SIZE];	/* use HD_* as index */
 } __packed;
-
 
 /**
  * REPLY_PHY_CALIBRATION_CMD = 0xb0 (command, has simple generic response)
@@ -3373,7 +3358,6 @@ struct iwl_led_cmd {
 	 COEX_EVT_FLAG_MEDIUM_ACTV_NTFY_FLG |	\
 	 COEX_EVT_FLAG_DELAY_MEDIUM_FREE_NTFY_FLG)
 
-
 enum {
 	/* un-association part */
 	COEX_UNASSOC_IDLE		= 0,
@@ -3477,7 +3461,6 @@ struct iwl_coex_event_cmd {
 struct iwl_coex_event_resp {
 	__le32 status;
 } __packed;
-
 
 /******************************************************************************
  * Bluetooth Coexistence commands
@@ -3676,7 +3659,6 @@ enum iwl_bt_coex_profile_traffic_load {
 #define BT_UART_MSG_2_FRAME7RESERVED_POS	(6)
 #define BT_UART_MSG_2_FRAME7RESERVED_MSK	\
 		(0x3<<BT_UART_MSG_2_FRAME7RESERVED_POS)
-
 
 #define BT_ENABLE_REDUCED_TXPOWER_THRESHOLD	(-62)
 #define BT_DISABLE_REDUCED_TXPOWER_THRESHOLD	(-65)

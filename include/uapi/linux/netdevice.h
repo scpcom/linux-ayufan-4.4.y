@@ -30,12 +30,10 @@
 #include <linux/if_packet.h>
 #include <linux/if_link.h>
 
-
 #define MAX_ADDR_LEN	32		/* Largest hardware address length */
 
 /* Initial net device group. All devices belong to group 0 by default. */
 #define INIT_NETDEV_GROUP	0
-
 
 /* interface name assignment types (sysfs name_assign_type attribute) */
 #define NET_NAME_UNKNOWN	0	/* unknown origin (not exposed to userspace) */

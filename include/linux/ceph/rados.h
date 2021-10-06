@@ -34,7 +34,6 @@ struct ceph_timespec {
 	__le32 tv_nsec;
 } __attribute__ ((packed));
 
-
 /*
  * object layout - how objects are mapped into PGs
  */
@@ -137,7 +136,6 @@ extern const char *ceph_osd_state_name(int s);
 /* osd primary-affinity.  fixed point value: 0x10000 == baseline */
 #define CEPH_OSD_MAX_PRIMARY_AFFINITY 0x10000
 #define CEPH_OSD_DEFAULT_PRIMARY_AFFINITY 0x10000
-
 
 /*
  * osd map flag bits
@@ -464,6 +462,5 @@ struct ceph_osd_op {
 	};
 	__le32 payload_len;
 } __attribute__ ((packed));
-
 
 #endif

@@ -250,7 +250,6 @@ static DEFINE_MUTEX(tile_net_devs_for_channel_mutex);
 /* The per-cpu info. */
 static DEFINE_PER_CPU(struct tile_net_info, per_cpu_info);
 
-
 /* The buffer size enums for each buffer stack.
  * See arch/tile/include/gxio/mpipe.h for the set of possible values.
  * We avoid the "10384" size because it can induce "false chaining"

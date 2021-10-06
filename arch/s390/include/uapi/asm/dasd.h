@@ -187,7 +187,6 @@ typedef struct format_data_t {
 #define DASD_FMT_INT_INVAL  4 /* invalidate tracks */
 #define DASD_FMT_INT_COMPAT 8 /* use OS/390 compatible disk layout */
 
-
 /* 
  * struct attrib_data_t
  * represents the operation (cache) bits for the device.
@@ -237,7 +236,6 @@ struct dasd_snid_ioctl_data {
 	__u8 path_mask;
 } __attribute__ ((packed));
 
-
 /********************************************************************************
  * SECTION: Definition of IOCTLs
  *
@@ -266,7 +264,6 @@ struct dasd_snid_ioctl_data {
 /* Allow I/O on a device */
 #define BIODASDALLOWIO _IO(DASD_IOCTL_LETTER, 241)
 
-
 /* retrieve API version number */
 #define DASDAPIVER     _IOR(DASD_IOCTL_LETTER,0,int)
 /* Get information on a dasd device */
@@ -280,7 +277,6 @@ struct dasd_snid_ioctl_data {
 /* Get Attributes (cache operations) */
 #define BIODASDGATTR   _IOR(DASD_IOCTL_LETTER,5,attrib_data_t) 
 
-
 /* #define BIODASDFORMAT  _IOW(IOCTL_LETTER,0,format_data_t) , deprecated */
 #define BIODASDFMT     _IOW(DASD_IOCTL_LETTER,1,format_data_t) 
 /* Set Attributes (cache operations) */
@@ -292,4 +288,3 @@ struct dasd_snid_ioctl_data {
 #define BIODASDSYMMIO  _IOWR(DASD_IOCTL_LETTER, 240, dasd_symmio_parms_t)
 
 #endif				/* DASD_H */
-

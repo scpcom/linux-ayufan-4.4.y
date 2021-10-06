@@ -200,7 +200,6 @@ union hv_timer_config {
 	};
 };
 
-
 /* Define timer message payload structure. */
 struct hv_timer_message_payload {
 	u32 timer_index;
@@ -402,7 +401,6 @@ union hv_x64_msr_hypercall_contents {
 	};
 };
 
-
 enum {
 	VMBUS_MESSAGE_CONNECTION_ID	= 1,
 	VMBUS_MESSAGE_PORT_ID		= 1,
@@ -460,16 +458,13 @@ static inline  __u64 generate_guest_id(__u8 d_info1, __u32 kernel_version,
 	return guest_id;
 }
 
-
 #define HV_CPU_POWER_MANAGEMENT		(1 << 0)
 #define HV_RECOMMENDATIONS_MAX		4
 
 #define HV_X64_MAX			5
 #define HV_CAPS_MAX			8
 
-
 #define HV_HYPERCALL_PARAM_ALIGN	sizeof(u64)
-
 
 /* Service definitions */
 
@@ -502,8 +497,6 @@ static const uuid_le VMBUS_SERVICE_ID = {
 		0xb7, 0xdb, 0x1b, 0xeb, 0x62, 0xe6, 0x2e, 0xf4
 	},
 };
-
-
 
 struct hv_context {
 	/* We only support running on top of Hyper-V
@@ -604,7 +597,6 @@ extern unsigned int host_info_edx;
 
 /* Interface */
 
-
 int hv_ringbuffer_init(struct hv_ring_buffer_info *ring_info, void *buffer,
 		   u32 buflen);
 
@@ -621,7 +613,6 @@ int hv_ringbuffer_read(struct hv_ring_buffer_info *ring_info,
 		   void *buffer,
 		   u32 buflen,
 		   u32 offset, bool *signal);
-
 
 void hv_ringbuffer_get_debuginfo(struct hv_ring_buffer_info *ring_info,
 			    struct hv_ring_buffer_debug_info *debug_info);
@@ -640,7 +631,6 @@ u32 hv_end_read(struct hv_ring_buffer_info *rbi);
 /* The value here must be in multiple of 32 */
 /* TODO: Need to make this configurable */
 #define MAX_NUM_CHANNELS_SUPPORTED	256
-
 
 enum vmbus_connect_state {
 	DISCONNECTED,
@@ -683,7 +673,6 @@ struct vmbus_connection {
 	struct workqueue_struct *work_queue;
 };
 
-
 struct vmbus_msginfo {
 	/* Bookkeeping stuff */
 	struct list_head msglist_entry;
@@ -691,7 +680,6 @@ struct vmbus_msginfo {
 	/* The message itself */
 	unsigned char msg[0];
 };
-
 
 extern struct vmbus_connection vmbus_connection;
 

@@ -97,7 +97,6 @@
 			(BNX2FC_MAX_PAYLOAD + sizeof(struct fc_frame_header))
 #define BNX2FC_MINI_JUMBO_MTU		2500
 
-
 #define BNX2FC_RQ_BUF_SZ		256
 #define BNX2FC_RQ_BUF_LOG_SZ		(ilog2(BNX2FC_RQ_BUF_SZ))
 
@@ -484,8 +483,6 @@ struct bnx2fc_unsol_els {
 	struct work_struct unsol_els_work;
 };
 
-
-
 struct bnx2fc_cmd *bnx2fc_cmd_alloc(struct bnx2fc_rport *tgt);
 struct bnx2fc_cmd *bnx2fc_elstm_alloc(struct bnx2fc_rport *tgt, int type);
 void bnx2fc_cmd_release(struct kref *ref);
@@ -560,8 +557,6 @@ void bnx2fc_process_els_compl(struct bnx2fc_cmd *els_req,
 void bnx2fc_build_fcp_cmnd(struct bnx2fc_cmd *io_req,
 			   struct fcp_cmnd *fcp_cmnd);
 
-
-
 void bnx2fc_flush_active_ios(struct bnx2fc_rport *tgt);
 struct fc_seq *bnx2fc_elsct_send(struct fc_lport *lport, u32 did,
 				      struct fc_frame *fp, unsigned int op,
@@ -586,7 +581,6 @@ void bnx2fc_process_seq_cleanup_compl(struct bnx2fc_cmd *seq_clnup_req,
 				      u8 rx_state);
 int bnx2fc_initiate_seq_cleanup(struct bnx2fc_cmd *orig_io_req, u32 offset,
 				enum fc_rctl r_ctl);
-
 
 #include "bnx2fc_debug.h"
 

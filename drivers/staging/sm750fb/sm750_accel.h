@@ -226,8 +226,6 @@
 #define DE_STATUS_2D_NOT_ACTIVE                         0
 #define DE_STATUS_2D_ACTIVE                             1
 
-
-
 /* blt direction */
 #define TOP_TO_BOTTOM 0
 #define LEFT_TO_RIGHT 0

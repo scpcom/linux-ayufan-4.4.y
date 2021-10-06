@@ -335,7 +335,6 @@ static void ft_send_resp_code(struct ft_cmd *cmd,
 			    cmd->req_frame, SAM_STAT_GOOD, code);
 }
 
-
 /*
  * Send error or task management response.
  * Always frees the cmd and associated state.
@@ -467,7 +466,6 @@ busy:
 	fc_frame_free(fp);
 	ft_sess_put(sess);		/* undo get from lookup */
 }
-
 
 /*
  * Handle incoming FCP frame.

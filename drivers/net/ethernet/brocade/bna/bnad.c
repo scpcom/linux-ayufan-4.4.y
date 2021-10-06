@@ -110,7 +110,6 @@ bnad_cq_cleanup(struct bnad *bnad, struct bna_ccb *ccb)
 
 /* Tx Datapath functions */
 
-
 /* Caller should ensure that the entry at unmap_q[index] is valid */
 static u32
 bnad_tx_buff_unmap(struct bnad *bnad,

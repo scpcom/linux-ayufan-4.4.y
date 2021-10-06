@@ -19,7 +19,6 @@
 #include <crypto/aes.h>
 #include <crypto/sha.h>
 
-
 struct ccp_device;
 struct ccp_cmd;
 
@@ -71,7 +70,6 @@ static inline int ccp_enqueue_cmd(struct ccp_cmd *cmd)
 }
 
 #endif /* CONFIG_CRYPTO_DEV_CCP_DD */
-
 
 /***** AES engine *****/
 /**
@@ -478,7 +476,6 @@ struct ccp_ecc_engine {
 
 	u16 ecc_result;
 };
-
 
 /**
  * ccp_engine - CCP operation identifiers

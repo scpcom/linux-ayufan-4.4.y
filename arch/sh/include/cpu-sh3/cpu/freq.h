@@ -24,4 +24,3 @@
 #define FRQCR_PSTBY	0x0040
 
 #endif /* __ASM_CPU_SH3_FREQ_H */
-

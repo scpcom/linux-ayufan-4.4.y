@@ -140,8 +140,6 @@ struct uac2_output_terminal_descriptor {
 	__u8 iTerminal;
 } __attribute__((packed));
 
-
-
 /* 4.7.2.8 Feature Unit Descriptor */
 
 struct uac2_feature_unit_descriptor {
@@ -458,4 +456,3 @@ struct uac2_interrupt_data_msg {
 #define UAC2_EP_CS_DATA_UNDERRUN	0x03
 
 #endif /* __LINUX_USB_AUDIO_V2_H */
-

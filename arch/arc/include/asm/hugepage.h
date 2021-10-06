@@ -6,7 +6,6 @@
  * published by the Free Software Foundation.
  */
 
-
 #ifndef _ASM_ARC_HUGEPAGE_H
 #define _ASM_ARC_HUGEPAGE_H
 

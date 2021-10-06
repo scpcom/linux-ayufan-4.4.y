@@ -2327,7 +2327,6 @@ static int sci_request_stpsata_completion_status_is_tx_suspend(
 	return 0;
 }
 
-
 static int sci_request_stpsata_completion_status_is_tx_rx_suspend(
 	unsigned int completion_status)
 {
@@ -2607,7 +2606,6 @@ static void isci_request_handle_controller_specific_errors(
 		set_bit(IREQ_COMPLETE_IN_TARGET, &request->flags);
 		break;
 
-
 	/* Note that the only open reject completion codes seen here will be
 	 * abandon-class codes; all others are automatically retried in the SCU.
 	 */
@@ -2876,7 +2874,6 @@ static void isci_request_io_request_complete(struct isci_host *ihost,
 
 		set_bit(IREQ_COMPLETE_IN_TARGET, &request->flags);
 		break;
-
 
 	default:
 		/* Catch any otherwise unhandled error codes here. */

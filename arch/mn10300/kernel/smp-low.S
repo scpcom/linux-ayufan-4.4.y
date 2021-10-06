@@ -92,6 +92,5 @@ mn10300_smp_boot_ipi:
 	mov	a0,sp
 	jmp	initialize_secondary
 
-
 # Jump here after RTI to suppress the icache lookahead
 end:

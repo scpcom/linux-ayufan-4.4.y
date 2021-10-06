@@ -1542,7 +1542,6 @@ qla82xx_pci_mem_read_2M(struct qla_hw_data *ha,
 	return 0;
 }
 
-
 static struct qla82xx_uri_table_desc *
 qla82xx_get_table_desc(const u8 *unirom, int section)
 {
@@ -1648,7 +1647,6 @@ int qla82xx_pci_region_offset(struct pci_dev *pdev, int region)
 	}
 	return val;
 }
-
 
 int
 qla82xx_iospace_config(struct qla_hw_data *ha)
@@ -3155,7 +3153,6 @@ qla82xx_check_md_needed(scsi_qla_host_t *vha)
 	}
 	return rval;
 }
-
 
 static int
 qla82xx_check_fw_alive(scsi_qla_host_t *vha)

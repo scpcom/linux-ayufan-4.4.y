@@ -13,7 +13,6 @@
 
 #include "ebb.h"
 
-
 /*
  * Tests a pinned per-task event vs an EBB - in that order. The pinned per-task
  * event should prevent the EBB event from being enabled.

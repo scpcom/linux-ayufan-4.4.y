@@ -1837,7 +1837,6 @@ static ssize_t abx500_chargalg_curr_step_store(struct abx500_chargalg *di,
 	return strlen(buf);
 }
 
-
 static ssize_t abx500_chargalg_en_show(struct abx500_chargalg *di,
 				       char *buf)
 {

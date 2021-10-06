@@ -64,7 +64,6 @@ struct vmw_cmdbuf_res_manager {
 	struct vmw_private *dev_priv;
 };
 
-
 /**
  * vmw_cmdbuf_res_lookup - Look up a command buffer resource
  *

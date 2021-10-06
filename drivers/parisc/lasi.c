@@ -28,7 +28,6 @@
 
 #include "gsc.h"
 
-
 #define LASI_VER	0xC008	/* LASI Version */
 
 #define LASI_IO_CONF	0x7FFFE	/* LASI primary configuration register */
@@ -89,7 +88,6 @@ lasi_init_irq(struct gsc_asic *this_lasi)
 	 * `ammer.  -- willy
 	 */
 }
-
 
 /*
    ** lasi_led_init()

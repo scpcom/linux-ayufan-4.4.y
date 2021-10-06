@@ -35,7 +35,6 @@ EXPORT_SYMBOL(amiga_audio_min_period);
 
 #define MAX_PERIOD	(65535)
 
-
     /*
      *	Current period (set by dmasound.c)
      */
@@ -105,7 +104,6 @@ void amiga_mksound( unsigned int hz, unsigned int ticks )
 
 	local_irq_restore(flags);
 }
-
 
 static void nosound( unsigned long ignored )
 {

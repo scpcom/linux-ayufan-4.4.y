@@ -25,7 +25,6 @@
 #define TMJC1IRQ TMJCIRQ
 #endif
 
-
 static int next_event(unsigned long delta,
 		      struct clock_event_device *evt)
 {

@@ -37,7 +37,6 @@
 #define DECAY 8
 #define MAX_INTERESTING 50000
 
-
 /*
  * Concepts and ideas behind the menu governor
  *
@@ -129,7 +128,6 @@ struct menu_device {
 	unsigned int	intervals[INTERVALS];
 	int		interval_ptr;
 };
-
 
 #define LOAD_INT(x) ((x) >> FSHIFT)
 #define LOAD_FRAC(x) LOAD_INT(((x) & (FIXED_1-1)) * 100)

@@ -1314,7 +1314,6 @@ static int hists__browser_title(struct hists *hists,
 			   "Samples: %lu%c of event '%s',%sEvent count (approx.): %" PRIu64,
 			   nr_samples, unit, ev_name, enable_ref ? ref : " ", nr_events);
 
-
 	if (hists->uid_filter_str)
 		printed += snprintf(bf + printed, size - printed,
 				    ", UID: %s", hists->uid_filter_str);

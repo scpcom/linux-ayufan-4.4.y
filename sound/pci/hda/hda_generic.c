@@ -39,7 +39,6 @@
 #include "hda_beep.h"
 #include "hda_generic.h"
 
-
 /**
  * snd_hda_gen_spec_init - initialize hda_gen_spec struct
  * @spec: hda_gen_spec object to initialize
@@ -954,7 +953,6 @@ static void resume_path_from_idx(struct hda_codec *codec, int path_idx)
 	if (path)
 		snd_hda_activate_path(codec, path, path->active, false);
 }
-
 
 /*
  * Helper functions for creating mixer ctl elements
@@ -2255,7 +2253,6 @@ static const struct snd_kcontrol_new indep_hp_ctl = {
 	.put = indep_hp_put,
 };
 
-
 static int create_indep_hp_ctls(struct hda_codec *codec)
 {
 	struct hda_gen_spec *spec = codec->spec;
@@ -3353,7 +3350,6 @@ static int create_input_ctls(struct hda_codec *codec)
 	return 0;
 }
 
-
 /*
  * input source mux
  */
@@ -3928,7 +3924,6 @@ static void parse_digital(struct hda_codec *codec)
 		}
 	}
 }
-
 
 /*
  * input MUX handling
@@ -4927,7 +4922,6 @@ int snd_hda_gen_parse_auto_config(struct hda_codec *codec,
 			return err;
 	}
 
-
 	err = create_capture_mixers(codec);
 	if (err < 0)
 		return err;
@@ -4994,7 +4988,6 @@ int snd_hda_gen_parse_auto_config(struct hda_codec *codec,
 	return 1;
 }
 EXPORT_SYMBOL_GPL(snd_hda_gen_parse_auto_config);
-
 
 /*
  * Build control elements
@@ -5082,7 +5075,6 @@ int snd_hda_gen_build_controls(struct hda_codec *codec)
 	return 0;
 }
 EXPORT_SYMBOL_GPL(snd_hda_gen_build_controls);
-
 
 /*
  * PCM definitions
@@ -5635,7 +5627,6 @@ int snd_hda_gen_build_pcms(struct hda_codec *codec)
 }
 EXPORT_SYMBOL_GPL(snd_hda_gen_build_pcms);
 
-
 /*
  * Standard auto-parser initializations
  */
@@ -5665,7 +5656,6 @@ static void init_multi_out(struct hda_codec *codec)
 	for (i = 0; i < spec->autocfg.line_outs; i++)
 		set_output_and_unmute(codec, spec->out_paths[i]);
 }
-
 
 static void __init_extra_out(struct hda_codec *codec, int num_outs, int *paths)
 {
@@ -5880,7 +5870,6 @@ int snd_hda_gen_check_power_status(struct hda_codec *codec, hda_nid_t nid)
 }
 EXPORT_SYMBOL_GPL(snd_hda_gen_check_power_status);
 #endif
-
 
 /*
  * the generic codec support

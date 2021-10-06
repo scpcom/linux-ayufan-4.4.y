@@ -42,4 +42,3 @@
 #endif
 
 #endif /* __ASM_CPU_SH3_MMU_CONTEXT_H */
-

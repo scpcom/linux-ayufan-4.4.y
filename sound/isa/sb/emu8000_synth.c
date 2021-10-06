@@ -90,7 +90,6 @@ static int snd_emu8000_probe(struct device *_dev)
 	return 0;
 }
 
-
 /*
  * free all resources
  */

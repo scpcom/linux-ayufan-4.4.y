@@ -472,7 +472,6 @@ static void au0828_copy_vbi(struct au0828_dev *dev,
 	dma_q->pos += len;
 }
 
-
 /*
  * video-buf generic routine to get the next available VBI buffer
  */
@@ -1491,7 +1490,6 @@ static int vidioc_s_frequency(struct file *file, void *priv,
 	return 0;
 }
 
-
 /* RAW VBI ioctls */
 
 static int vidioc_g_fmt_vbi_cap(struct file *file, void *priv,
@@ -1865,4 +1863,3 @@ err_reg_vdev:
 	vb2_queue_release(&dev->vb_vbiq);
 	return ret;
 }
-

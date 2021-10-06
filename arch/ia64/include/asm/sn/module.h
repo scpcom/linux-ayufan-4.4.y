@@ -94,7 +94,6 @@
 #define RACK_ADD_NUM(_r, _n)    \
         ((_r) |= ((_n) - 1) << RACK_NUM_SHFT(_r) & RACK_NUM_MASK(_r))
 
-
 /*
  * Brick type definitions
  */

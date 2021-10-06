@@ -48,7 +48,6 @@ typedef struct __user_cap_data_struct {
         __u32 inheritable;
 } __user *cap_user_data_t;
 
-
 #define VFS_CAP_REVISION_MASK	0xFF000000
 #define VFS_CAP_REVISION_SHIFT	24
 #define VFS_CAP_FLAGS_MASK	~VFS_CAP_REVISION_MASK
@@ -85,7 +84,6 @@ struct vfs_cap_data {
 #define _LINUX_CAPABILITY_U32S     _LINUX_CAPABILITY_U32S_1
 
 #endif
-
 
 /**
  ** POSIX-draft defined capabilities.
@@ -140,7 +138,6 @@ struct vfs_cap_data {
 /* Allows forged pids on socket credentials passing. */
 
 #define CAP_SETUID           7
-
 
 /**
  ** Linux-specific capabilities
@@ -351,7 +348,6 @@ struct vfs_cap_data {
 
 #define CAP_AUDIT_READ		37
 
-
 #define CAP_LAST_CAP         CAP_AUDIT_READ
 
 #define cap_valid(x) ((x) >= 0 && (x) <= CAP_LAST_CAP)
@@ -362,6 +358,5 @@ struct vfs_cap_data {
 
 #define CAP_TO_INDEX(x)     ((x) >> 5)        /* 1 << 5 == bits in __u32 */
 #define CAP_TO_MASK(x)      (1 << ((x) & 31)) /* mask for indexed __u32 */
-
 
 #endif /* _UAPI_LINUX_CAPABILITY_H */

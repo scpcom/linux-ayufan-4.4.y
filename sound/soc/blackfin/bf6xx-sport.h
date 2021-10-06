@@ -77,6 +77,4 @@ int sport_config_rx_dma(struct sport_device *sport, void *buf,
 unsigned long sport_curr_offset_tx(struct sport_device *sport);
 unsigned long sport_curr_offset_rx(struct sport_device *sport);
 
-
-
 #endif

@@ -145,7 +145,6 @@ ssize_t uwb_rc_get_ie(struct uwb_rc *uwb_rc, struct uwb_rc_evt_get_ie **pget_ie)
 	return result;
 }
 
-
 /**
  * Replace all IEs currently being transmitted by a device
  *
@@ -186,7 +185,6 @@ void uwb_rc_ie_init(struct uwb_rc *uwb_rc)
 	mutex_init(&uwb_rc->ies_mutex);
 }
 
-
 /**
  * uwb_rc_ie_setup - setup a radio controller's IE manager
  * @uwb_rc: the radio controller.
@@ -218,7 +216,6 @@ int uwb_rc_ie_setup(struct uwb_rc *uwb_rc)
 	return 0;
 }
 
-
 /* Cleanup the whole IE management subsystem */
 void uwb_rc_ie_release(struct uwb_rc *uwb_rc)
 {
@@ -226,7 +223,6 @@ void uwb_rc_ie_release(struct uwb_rc *uwb_rc)
 	uwb_rc->ies = NULL;
 	uwb_rc->ies_capacity = 0;
 }
-
 
 static int uwb_rc_ie_add_one(struct uwb_rc *rc, const struct uwb_ie_hdr *new_ie)
 {
@@ -315,7 +311,6 @@ int uwb_rc_ie_add(struct uwb_rc *uwb_rc,
 }
 EXPORT_SYMBOL_GPL(uwb_rc_ie_add);
 
-
 /*
  * Remove an IE from internal cache
  *
@@ -350,7 +345,6 @@ void uwb_rc_ie_cache_rm(struct uwb_rc *uwb_rc, enum uwb_ie to_remove)
 	}
 	uwb_rc->ies->wIELength = cpu_to_le16(len);
 }
-
 
 /**
  * uwb_rc_ie_rm - remove an IE from the radio controller's beacon

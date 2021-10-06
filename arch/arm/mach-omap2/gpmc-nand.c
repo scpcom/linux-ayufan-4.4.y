@@ -129,7 +129,6 @@ int gpmc_nand_init(struct omap_nand_platform_data *gpmc_nand_data,
 		goto out_free_cs;
 	}
 
-
 	pdev = platform_device_alloc("omap2-nand", gpmc_nand_data->cs);
 	if (pdev) {
 		err = platform_device_add_resources(pdev, gpmc_nand_res,

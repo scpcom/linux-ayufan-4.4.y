@@ -100,7 +100,6 @@ static void deinit_mregion(struct hfi1_mregion *mr)
 		kfree(mr->map[--i]);
 }
 
-
 /**
  * hfi1_get_dma_mr - get a DMA memory region
  * @pd: protection domain for this memory region
@@ -132,7 +131,6 @@ struct ib_mr *hfi1_get_dma_mr(struct ib_pd *pd, int acc)
 		ret = ERR_PTR(rval);
 		goto bail;
 	}
-
 
 	rval = hfi1_alloc_lkey(&mr->mr, 1);
 	if (rval) {

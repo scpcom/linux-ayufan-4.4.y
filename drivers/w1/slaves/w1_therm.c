@@ -220,7 +220,6 @@ static inline int w1_convert_temp(u8 rom[9], u8 fid)
 	return 0;
 }
 
-
 static ssize_t w1_slave_show(struct device *device,
 	struct device_attribute *attr, char *buf)
 {

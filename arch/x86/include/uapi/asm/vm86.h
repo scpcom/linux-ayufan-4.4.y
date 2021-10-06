@@ -125,5 +125,4 @@ struct vm86plus_struct {
 	struct vm86plus_info_struct vm86plus;
 };
 
-
 #endif /* _UAPI_ASM_X86_VM86_H */

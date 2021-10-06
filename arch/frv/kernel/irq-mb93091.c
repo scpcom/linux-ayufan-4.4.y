@@ -31,7 +31,6 @@
 #define __get_IFR()	({ __reg16(0xffc0000c); })
 #define __clr_IFR(M)	do { __reg16(0xffc0000c) = ~(M); wmb(); } while(0)
 
-
 /*
  * on-motherboard FPGA PIC operations
  */

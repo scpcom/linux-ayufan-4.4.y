@@ -74,4 +74,3 @@ void threefish_decrypt_block_words(struct threefish_key *key_ctx, u64 *in,
 		break;
 	}
 }
-

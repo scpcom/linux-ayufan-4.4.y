@@ -1403,7 +1403,6 @@
 #define ERR_DET			0x4000	/* Error Detected Indicator                     */
 #define ERR_NCOR		0x8000	/* Error Not Corrected Indicator        */
 
-
 /*  *******************  PIN CONTROL REGISTER MASKS  ************************/
 /* PORT_MUX Masks															*/
 #define	PJSE			0x0001	/* Port J SPI/SPORT Enable                      */

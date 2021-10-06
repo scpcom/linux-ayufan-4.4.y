@@ -351,7 +351,6 @@ static struct cea_channel_speaker_allocation channel_allocations[] = {
 { .ca_index = 0x31,  .speakers = { FRW,  FLW,  RR,  RL,  FC,  LFE,  FR,  FL } },
 };
 
-
 /*
  * HDMI routines
  */
@@ -1227,7 +1226,6 @@ static void hdmi_non_intrinsic_event(struct hda_codec *codec, unsigned int res)
 	if (cp_ready)
 		;
 }
-
 
 static void hdmi_unsol_event(struct hda_codec *codec, unsigned int res)
 {
@@ -2272,7 +2270,6 @@ static const struct hdmi_ops generic_standard_hdmi_ops = {
 	.chmap_cea_alloc_validate_get_type	= hdmi_chmap_cea_alloc_validate_get_type,
 	.cea_alloc_to_tlv_chmap			= hdmi_cea_alloc_to_tlv_chmap,
 };
-
 
 static void intel_haswell_fixup_connect_list(struct hda_codec *codec,
 					     hda_nid_t nid)
@@ -3438,7 +3435,6 @@ static int atihdmi_setup_stream(struct hda_codec *codec, hda_nid_t cvt_nid,
 
 	return hdmi_setup_stream(codec, cvt_nid, pin_nid, stream_tag, format);
 }
-
 
 static int atihdmi_init(struct hda_codec *codec)
 {

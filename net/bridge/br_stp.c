@@ -395,7 +395,6 @@ void br_become_designated_port(struct net_bridge_port *p)
 	p->designated_port = p->port_id;
 }
 
-
 /* called under bridge lock */
 static void br_make_blocking(struct net_bridge_port *p)
 {

@@ -29,7 +29,6 @@
 #include <linux/of.h>
 #include "cyapa.h"
 
-
 #define CYAPA_ADAPTER_FUNC_NONE   0
 #define CYAPA_ADAPTER_FUNC_I2C    1
 #define CYAPA_ADAPTER_FUNC_SMBUS  2
@@ -338,7 +337,6 @@ static int cyapa_check_is_operational(struct cyapa *cyapa)
 
 	return error;
 }
-
 
 /*
  * Returns 0 on device detected, negative errno on no device detected.

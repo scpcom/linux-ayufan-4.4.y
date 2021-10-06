@@ -51,5 +51,4 @@ void mv78xx0_restart(enum reboot_mode, const char *);
 
 extern void mv78xx0_timer_init(void);
 
-
 #endif

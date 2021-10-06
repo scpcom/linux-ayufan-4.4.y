@@ -86,4 +86,3 @@ ENTRY(__cpu_flush_kern_tlb_range)
 	nop8
 #endif
 	mov	pc, lr
-

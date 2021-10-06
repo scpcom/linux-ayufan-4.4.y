@@ -10,7 +10,6 @@ enum pt_level {
 	PT_PTE
 };
 
-
 bool __set_phys_to_machine(unsigned long pfn, unsigned long mfn);
 
 void set_pte_mfn(unsigned long vaddr, unsigned long pfn, pgprot_t flags);

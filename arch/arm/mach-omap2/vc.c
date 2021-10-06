@@ -672,8 +672,6 @@ static void __init omap4_vc_i2c_timing_init(struct voltagedomain *voltdm)
 	voltdm->write(val, OMAP4_PRM_VC_CFG_I2C_CLK_OFFSET);
 }
 
-
-
 /**
  * omap_vc_i2c_init - initialize I2C interface to PMIC
  * @voltdm: voltage domain containing VC data
@@ -840,4 +838,3 @@ void __init omap_vc_init_channel(struct voltagedomain *voltdm)
 	else if (cpu_is_omap44xx())
 		omap4_vc_init_channel(voltdm);
 }
-

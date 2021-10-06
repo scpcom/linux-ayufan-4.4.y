@@ -248,7 +248,6 @@ int __init ibmphp_access_ebda (void)
 	u16 ebda_seg, num_entries, next_offset, offset, blk_id, sub_addr, re, rc_id, re_id, base;
 	int rc = 0;
 
-
 	rio_complete = 0;
 	hs_complete = 0;
 
@@ -531,7 +530,6 @@ static int combine_wpg_for_expansion (void)
 	}
 	return 0;
 }
-
 
 /* Since we don't know the max slot number per each chassis, hence go
  * through the list of all chassis to find out the range
@@ -936,7 +934,6 @@ static int __init ebda_rsrc_controller (void)
 				tmp_slot->supported_bus_mode = 1;
 			else
 				tmp_slot->supported_bus_mode = 0;
-
 
 			tmp_slot->bus = hpc_ptr->slots[index].slot_bus_num;
 

@@ -44,4 +44,3 @@ prom_cif_callback:
 	 mov	1, %o0
 	ret
 	 restore %l1, 0, %o0
-

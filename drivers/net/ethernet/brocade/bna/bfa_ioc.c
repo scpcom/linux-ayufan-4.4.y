@@ -1148,7 +1148,6 @@ bfa_ioc_fwver_clear(struct bfa_ioc *ioc)
 	}
 }
 
-
 static void
 bfa_ioc_hw_sem_init(struct bfa_ioc *ioc)
 {

@@ -70,5 +70,4 @@ struct inotify_event {
 #define IN_CLOEXEC O_CLOEXEC
 #define IN_NONBLOCK O_NONBLOCK
 
-
 #endif /* _UAPI_LINUX_INOTIFY_H */

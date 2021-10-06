@@ -151,7 +151,6 @@ static u32 _rtl92e_phy_rf_read(struct net_device *dev,
 		rtl92e_set_bb_reg(dev, rFPGA0_AnalogParameter4, 0x300, 0x3);
 	}
 
-
 	return ret;
 
 }
@@ -316,7 +315,6 @@ static void _rtl92e_phy_rf_fw_write(struct net_device *dev,
 	rtl92e_writel(dev, QPNR, Data);
 
 }
-
 
 void rtl92e_config_mac(struct net_device *dev)
 {
@@ -526,7 +524,6 @@ bool rtl92e_check_bb_and_rf(struct net_device *dev, enum hw90_block CheckBlock,
 			break;
 		}
 
-
 		if (dwRegRead != WriteData[i]) {
 			netdev_warn(dev, "%s(): Check failed.\n", __func__);
 			ret = false;
@@ -579,7 +576,6 @@ static bool _rtl92e_bb_config_para_file(struct net_device *dev)
 			dwRegValue = 0x0;
 		rtl92e_set_bb_reg(dev, rFPGA0_TxGainStage,
 				  (bXBTxAGC|bXCTxAGC|bXDTxAGC), dwRegValue);
-
 
 		dwRegValue = priv->CrystalCap;
 		rtl92e_set_bb_reg(dev, rFPGA0_AnalogParameter1, bXtalCap92x,
@@ -906,7 +902,6 @@ static u8 _rtl92e_phy_switch_channel_step(struct net_device *dev, u8 channel,
 			return false;
 		}
 
-
 		do {
 			switch (*stage) {
 			case 0:
@@ -1010,7 +1005,6 @@ u8 rtl92e_set_channel(struct net_device *dev, u8 channel)
 	}
 	if (priv->SwChnlInProgress)
 		return false;
-
 
 	switch (priv->rtllib->mode) {
 	case WIRELESS_MODE_A:
@@ -1172,7 +1166,6 @@ static void _rtl92e_set_bw_mode_work_item(struct net_device *dev)
 		 priv->CurrentChannelBW == HT_CHANNEL_WIDTH_20 ?
 			 "20MHz" : "40MHz");
 
-
 	if (priv->rf_chip == RF_PSEUDO_11N) {
 		priv->SetBWModeInProgress = false;
 		return;
@@ -1272,7 +1265,6 @@ void rtl92e_set_bw_mode(struct net_device *dev, enum ht_channel_width Bandwidth,
 			enum ht_extchnl_offset Offset)
 {
 	struct r8192_priv *priv = rtllib_priv(dev);
-
 
 	if (priv->SetBWModeInProgress)
 		return;
@@ -1486,7 +1478,6 @@ static bool _rtl92e_set_rf_power_state(struct net_device *dev,
 		case eRfSleep:
 			if (priv->rtllib->eRFPowerState == eRfOff)
 				break;
-
 
 			for (QueueID = 0, i = 0; QueueID < MAX_TX_QUEUE; ) {
 				ring = &priv->tx_ring[QueueID];

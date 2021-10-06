@@ -252,7 +252,6 @@ struct iio_chan_spec {
 	unsigned		differential:1;
 };
 
-
 /**
  * iio_channel_has_info() - Checks whether a channel supports a info attribute
  * @chan: The channel to be queried
@@ -561,7 +560,6 @@ static inline struct iio_dev *iio_device_get(struct iio_dev *indio_dev)
 {
 	return indio_dev ? dev_to_iio_dev(get_device(&indio_dev->dev)) : NULL;
 }
-
 
 /**
  * iio_device_set_drvdata() - Set device driver data

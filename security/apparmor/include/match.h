@@ -20,7 +20,6 @@
 #define DFA_NOMATCH			0
 #define DFA_START			1
 
-
 /**
  * The format used for transition tables is based on the GNU flex table
  * file format (--tables-file option; see Table File Format in the flex

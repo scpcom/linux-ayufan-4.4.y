@@ -98,7 +98,6 @@
  * J-TLB entry got evicted/replaced.
  */
 
-
 /* A copy of the ASID from the PID reg is kept in asid_cache */
 DEFINE_PER_CPU(unsigned int, asid_cache) = MM_CTXT_FIRST_CYCLE;
 

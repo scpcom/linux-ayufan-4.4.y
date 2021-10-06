@@ -12,5 +12,4 @@
 /* all these functions expect an NVRAM offset, not an absolute */
 #define NVRAM_OFFSET(x)   ((x)-NVRAM_FIRST_BYTE)
 
-
 #endif /* _UAPI_LINUX_NVRAM_H */

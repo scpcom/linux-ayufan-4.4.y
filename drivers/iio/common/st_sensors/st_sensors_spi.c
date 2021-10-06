@@ -15,7 +15,6 @@
 
 #include <linux/iio/common/st_sensors_spi.h>
 
-
 #define ST_SENSORS_SPI_MULTIREAD	0xc0
 #define ST_SENSORS_SPI_READ		0x80
 

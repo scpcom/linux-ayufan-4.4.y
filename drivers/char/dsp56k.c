@@ -486,7 +486,6 @@ static const struct file_operations dsp56k_fops = {
 	.llseek		= noop_llseek,
 };
 
-
 /****** Init and module functions ******/
 
 static char banner[] __initdata = KERN_INFO "DSP56k driver installed\n";

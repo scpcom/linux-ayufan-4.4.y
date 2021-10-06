@@ -1895,7 +1895,6 @@ static int ab8540_charger_power_path_enable(struct ux500_charger *charger,
 	return ret;
 }
 
-
 /**
  * ab8540_charger_usb_pre_chg_enable() - enable usb pre change
  * @charger:	pointer to the ux500_charger structure
@@ -3614,7 +3613,6 @@ static int ab8500_charger_probe(struct platform_device *pdev)
 		dev_err(di->dev, "failed to get vddadc regulator\n");
 		goto free_charger_wq;
 	}
-
 
 	/* Initialize OVV, and other registers */
 	ret = ab8500_charger_init_hw_registers(di);

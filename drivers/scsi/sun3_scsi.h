@@ -99,4 +99,3 @@ struct sun3_udc_regs {
 #define VME_DATA24 0x3d00
 
 #endif /* SUN3_SCSI_H */
-

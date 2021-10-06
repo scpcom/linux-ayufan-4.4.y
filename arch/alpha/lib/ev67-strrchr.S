@@ -18,7 +18,6 @@
  *	L	- lower subcluster; L0 - subcluster L0; L1 - subcluster L1
  */
 
-
 #include <asm/regdef.h>
 
 	.set noreorder

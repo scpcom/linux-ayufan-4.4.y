@@ -12,7 +12,6 @@
 #ifndef __ASM_OPENRISC___FLS_H
 #define __ASM_OPENRISC___FLS_H
 
-
 #ifdef CONFIG_OPENRISC_HAVE_INST_FL1
 
 static inline unsigned long __fls(unsigned long x)

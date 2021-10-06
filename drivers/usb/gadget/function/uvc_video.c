@@ -395,4 +395,3 @@ int uvcg_video_init(struct uvc_video *video)
 			&video->mutex);
 	return 0;
 }
-

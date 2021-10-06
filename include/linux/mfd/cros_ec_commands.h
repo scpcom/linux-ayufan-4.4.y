@@ -109,7 +109,6 @@
 #define EC_MEMMAP_GYRO_DATA        0xa0 /* Gyroscope data 0xa0 - 0xa5 */
 /* Unused 0xa6 - 0xfe (remember, 0xff is NOT part of the memmap region) */
 
-
 /* Define the format of the accelerometer mapped memory status byte. */
 #define EC_MEMMAP_ACC_STATUS_SAMPLE_ID_MASK  0x0f
 #define EC_MEMMAP_ACC_STATUS_BUSY_BIT        (1 << 4)
@@ -689,7 +688,6 @@ struct ec_response_get_protocol_info {
 	uint32_t flags;
 } __packed;
 
-
 /*****************************************************************************/
 /* Get/Set miscellaneous values */
 
@@ -712,7 +710,6 @@ struct ec_response_get_set_value {
 
 /* More than one command can use these structs to get/set paramters. */
 #define EC_CMD_GSV_PAUSE_IN_S5	0x0c
-
 
 /*****************************************************************************/
 /* Flash commands */
@@ -1551,7 +1548,6 @@ struct ec_response_thermal_get_threshold {
 	uint16_t value;
 } __packed;
 
-
 /* The version 1 structs are visible. */
 enum ec_temp_thresholds {
 	EC_TEMP_THRESH_WARN = 0,
@@ -2220,7 +2216,6 @@ struct ec_response_charge_state {
 	};
 } __packed;
 
-
 /*
  * Set maximum battery charging current.
  */
@@ -2451,7 +2446,6 @@ struct ec_params_reboot_ec {
 
 /* Current version of ACPI memory address space */
 #define EC_ACPI_MEM_VERSION_CURRENT 1
-
 
 /*****************************************************************************/
 /*

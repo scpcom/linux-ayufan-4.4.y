@@ -45,7 +45,6 @@
 #define IMG_IR_CORE_DES1	0xf8
 #define IMG_IR_CORE_DES2	0xfc
 
-
 /* field masks */
 
 /* IMG_IR_CONTROL */

@@ -121,7 +121,6 @@ void __init trap_init(void)
 	_ramvec[vba+CPMVEC_SCC1]        = inthandler;  /* scc 1 */
 	_ramvec[vba+CPMVEC_PIO_PC0]     = inthandler;  /* pio - pc0 */
 
-
 	/* turn off all CPM interrupts */
 	pquicc->intr_cimr = 0x00000000;
 }
@@ -135,4 +134,3 @@ void init_IRQ(void)
 		irq_set_handler(i, handle_level_irq);
 	}
 }
-

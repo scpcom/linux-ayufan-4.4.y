@@ -35,7 +35,6 @@ static const char * const cw1200_debug_preamble[] = {
 	"long on 1 and 2 Mbps",
 };
 
-
 static const char * const cw1200_debug_link_id[] = {
 	"OFF",
 	"REQ",

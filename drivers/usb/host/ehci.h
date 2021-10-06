@@ -177,7 +177,6 @@ struct ehci_hcd {			/* one per controller */
 	unsigned		periodic_count;	/* periodic activity count */
 	unsigned		uframe_periodic_max; /* max periodic time per uframe */
 
-
 	/* list of itds & sitds completed while now_frame was still active */
 	struct list_head	cached_itd_list;
 	struct ehci_itd		*last_itd_to_free;
@@ -858,7 +857,6 @@ static inline u32 hc32_to_cpup (const struct ehci_hcd *ehci, const __hc32 *x)
 	dev_info(ehci_to_hcd(ehci)->self.controller , fmt , ## args)
 #define ehci_warn(ehci, fmt, args...) \
 	dev_warn(ehci_to_hcd(ehci)->self.controller , fmt , ## args)
-
 
 #ifndef CONFIG_DYNAMIC_DEBUG
 #define STUB_DEBUG_FILES

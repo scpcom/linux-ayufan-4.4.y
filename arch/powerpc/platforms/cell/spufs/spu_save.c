@@ -24,7 +24,6 @@
  *
  */
 
-
 #ifndef LS_SIZE
 #define LS_SIZE                 0x40000	/* 256K (in bytes) */
 #endif

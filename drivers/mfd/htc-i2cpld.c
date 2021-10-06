@@ -516,7 +516,6 @@ static int htcpld_setup_chips(struct platform_device *pdev)
 		if (ret)
 			continue;
 
-
 		/* Register the chips with the GPIO subsystem */
 		ret = htcpld_register_chip_gpio(pdev, i);
 		if (ret) {
@@ -621,7 +620,6 @@ static const struct i2c_device_id htcpld_chip_id[] = {
 };
 MODULE_DEVICE_TABLE(i2c, htcpld_chip_id);
 
-
 static struct i2c_driver htcpld_chip_driver = {
 	.driver = {
 		.name	= "htcpld-chip",
@@ -661,4 +659,3 @@ module_exit(htcpld_core_exit);
 MODULE_AUTHOR("Cory Maccarrone <darkstar6262@gmail.com>");
 MODULE_DESCRIPTION("I2C HTC PLD Driver");
 MODULE_LICENSE("GPL");
-

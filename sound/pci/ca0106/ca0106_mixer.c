@@ -319,7 +319,6 @@ static struct snd_kcontrol_new snd_ca0106_capture_line_in_side_out =
 	.put =		snd_ca0106_capture_mic_line_in_put
 };
 
-
 static int snd_ca0106_spdif_info(struct snd_kcontrol *kcontrol,
 				 struct snd_ctl_elem_info *uinfo)
 {

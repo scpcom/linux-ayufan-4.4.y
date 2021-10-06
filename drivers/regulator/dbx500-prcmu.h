@@ -36,7 +36,6 @@ struct dbx500_regulator_info {
 void power_state_active_enable(void);
 int power_state_active_disable(void);
 
-
 #ifdef CONFIG_REGULATOR_DEBUG
 int ux500_regulator_debug_init(struct platform_device *pdev,
 			       struct dbx500_regulator_info *regulator_info,

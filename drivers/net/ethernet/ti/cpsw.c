@@ -253,7 +253,6 @@ struct cpsw_ss_regs {
 #define CTRL_V2_TX_TS_BITS  (CTRL_V2_TS_BITS | TS_TX_EN)
 #define CTRL_V2_RX_TS_BITS  (CTRL_V2_TS_BITS | TS_RX_EN)
 
-
 #define CTRL_V3_TS_BITS \
 	(TS_320 | TS_319 | TS_132 | TS_131 | TS_130 | TS_129 |\
 	 TS_TTL_NONZERO | TS_ANNEX_F_EN | TS_ANNEX_D_EN |\

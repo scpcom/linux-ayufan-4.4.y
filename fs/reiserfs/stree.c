@@ -191,7 +191,6 @@ static inline int bin_search(const void *key,	/* Key to search for. */
 	return ITEM_NOT_FOUND;
 }
 
-
 /* Minimal possible key. It is never in the tree. */
 const struct reiserfs_key MIN_KEY = { 0, 0, {{0, 0},} };
 

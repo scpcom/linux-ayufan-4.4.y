@@ -18,7 +18,6 @@
  *    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-
 #include "cxd2820r_priv.h"
 
 int cxd2820r_set_frontend_t2(struct dvb_frontend *fe)

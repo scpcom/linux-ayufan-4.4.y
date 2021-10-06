@@ -30,4 +30,3 @@
 #define LLC_HEADER_SIZE			6	/*!< LLC Header Length*/
 
 #endif /* #ifndef __INC_ETHERNET_H */
-

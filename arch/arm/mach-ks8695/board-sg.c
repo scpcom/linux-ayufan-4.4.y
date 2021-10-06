@@ -56,7 +56,6 @@ static struct physmap_flash_data sg_mtd_pdata = {
 	.parts		= sg_mtd_partitions,
 };
 
-
 static struct resource sg_mtd_resource[] = {
 	[0] = {
 		.start = FL_BASE,

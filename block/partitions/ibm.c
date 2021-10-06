@@ -16,7 +16,6 @@
 #include "check.h"
 #include "ibm.h"
 
-
 union label_t {
 	struct vtoc_volume_label_cdl vol;
 	struct vtoc_volume_label_ldl lnx;
@@ -281,7 +280,6 @@ static int find_cms1_partitions(struct parsed_partitions *state,
 	strlcat(state->pp_buf, "\n", PAGE_SIZE);
 	return 1;
 }
-
 
 /*
  * This is the main function, called by check.c

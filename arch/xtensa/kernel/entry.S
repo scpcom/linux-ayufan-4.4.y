@@ -74,7 +74,6 @@
 #endif
 	.endm
 
-
 	.macro	irq_save flags tmp
 #if XTENSA_FAKE_NMI
 #if defined(CONFIG_DEBUG_KERNEL) && (LOCKLEVEL | TOPLEVEL) >= XCHAL_DEBUGLEVEL
@@ -1128,7 +1127,6 @@ ENDPROC(fast_syscall_xtensa)
 
 #endif /* CONFIG_FAST_SYSCALL_XTENSA */
 
-
 /* fast_syscall_spill_registers.
  *
  * Entry condition:
@@ -1220,7 +1218,6 @@ ENTRY(fast_syscall_spill_registers)
 	/* Save frames. Depending what call was used (call4, call8, call12),
 	 * we have to save 4,8. or 12 registers.
 	 */
-
 
 .Lloop: _bbsi.l	a3, 1, .Lc4
 	_bbci.l	a3, 2, .Lc12
@@ -1354,7 +1351,6 @@ ENTRY(fast_syscall_spill_registers)
 	movi	a0, unrecoverable_exception
 	callx0	a0		# should not return
 1:	j	1b
-
 
 ENDPROC(fast_syscall_spill_registers)
 
@@ -1698,9 +1694,7 @@ ENTRY(fast_second_level_miss)
 	isync
 	j	4b
 
-
 #endif	// DCACHE_WAY_SIZE > PAGE_SIZE
-
 
 2:	/* Invalid PGD, default exception handling */
 

@@ -1820,7 +1820,6 @@ out:
 EXPORT_SYMBOL_GPL(genpd_dev_pm_attach);
 #endif /* CONFIG_PM_GENERIC_DOMAINS_OF */
 
-
 /***        debugfs support        ***/
 
 #ifdef CONFIG_PM_ADVANCED_DEBUG

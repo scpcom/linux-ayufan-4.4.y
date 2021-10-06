@@ -88,5 +88,4 @@ cris_sdram_freq_notifier(struct notifier_block *nb, unsigned long val,
 	return 0;
 }
 
-
 module_init(cris_freq_init);

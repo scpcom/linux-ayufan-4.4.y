@@ -85,7 +85,6 @@ static char *serial_version = "4.30";
 
 #include <asm/setup.h>
 
-
 #include <asm/irq.h>
 
 #include <asm/amigahw.h>
@@ -123,7 +122,6 @@ static void change_speed(struct tty_struct *tty, struct serial_state *info,
 		struct ktermios *old);
 static void rs_wait_until_sent(struct tty_struct *tty, int timeout);
 
-
 static struct serial_state rs_table[1];
 
 #define NR_PORTS ARRAY_SIZE(rs_table)
@@ -131,7 +129,6 @@ static struct serial_state rs_table[1];
 #include <asm/uaccess.h>
 
 #define serial_isroot()	(capable(CAP_SYS_ADMIN))
-
 
 static inline int serial_paranoia_check(struct serial_state *info,
 					char *name, const char *routine)
@@ -650,7 +647,6 @@ static void shutdown(struct tty_struct *tty, struct serial_state *info)
 	local_irq_restore(flags);
 }
 
-
 /*
  * This routine is called to set the UART divisor registers to match
  * the specified baud rate for a serial port.
@@ -1110,7 +1106,6 @@ check_and_exit:
 	return retval;
 }
 
-
 /*
  * get_lsr_info - get line status register info
  *
@@ -1136,7 +1131,6 @@ static int get_lsr_info(struct serial_state *info, unsigned int __user *value)
 		return -EFAULT;
 	return 0;
 }
-
 
 static int rs_tiocmget(struct tty_struct *tty)
 {
@@ -1629,7 +1623,6 @@ static void show_serial_version(void)
  	printk(KERN_INFO "%s version %s\n", serial_name, serial_version);
 }
 
-
 static const struct tty_operations serial_ops = {
 	.open = rs_open,
 	.close = rs_close,
@@ -1803,7 +1796,6 @@ static struct platform_driver amiga_serial_driver = {
 };
 
 module_platform_driver_probe(amiga_serial_driver, amiga_serial_probe);
-
 
 #if defined(CONFIG_SERIAL_CONSOLE) && !defined(MODULE)
 

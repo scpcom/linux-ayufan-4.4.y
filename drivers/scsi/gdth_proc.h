@@ -17,4 +17,3 @@ static void gdth_ioctl_free(gdth_ha_str *ha, int size, char *buf, u64 paddr);
 static void gdth_wait_completion(gdth_ha_str *ha, int busnum, int id);
 
 #endif
-

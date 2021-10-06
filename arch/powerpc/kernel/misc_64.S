@@ -198,7 +198,6 @@ _GLOBAL(flush_inval_dcache_range)
 	isync
 	blr
 
-
 /*
  * Flush a particular page from the data cache to RAM.
  * Note: this is necessary because the instruction cache does *not*
@@ -252,7 +251,6 @@ _GLOBAL(__bswapdi2)
 	sldi	r7,r7,32
 	or	r3,r7,r9
 	blr
-
 
 #ifdef CONFIG_PPC_EARLY_DEBUG_BOOTX
 _GLOBAL(rmci_on)
@@ -385,7 +383,6 @@ _GLOBAL(real_205_writeb)
 
 #endif /* CONFIG_PPC_PASEMI */
 
-
 #if defined(CONFIG_CPU_FREQ_PMAC64) || defined(CONFIG_CPU_FREQ_MAPLE)
 /*
  * SCOM access functions for 970 (FX only for now)
@@ -429,7 +426,6 @@ _GLOBAL(scom970_read)
 	/* restore interrupts */
 	mtmsrd	r4,1
 	blr
-
 
 _GLOBAL(scom970_write)
 	/* interrupts off */
@@ -496,7 +492,6 @@ _GLOBAL(kexec_wait)
  */
 kexec_flag:
 	.long	0
-
 
 #ifdef CONFIG_KEXEC
 #ifdef CONFIG_PPC_BOOK3E

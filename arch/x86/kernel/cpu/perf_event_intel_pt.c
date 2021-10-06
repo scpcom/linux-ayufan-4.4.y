@@ -687,7 +687,6 @@ static int pt_buffer_reset_markers(struct pt_buffer *buf,
 	    sizes(TOPA_ENTRY(buf->cur, buf->cur_idx)->size))
 		return -EINVAL;
 
-
 	/* single entry ToPA is handled by marking all regions STOP=1 INT=1 */
 	if (!pt_cap_get(PT_CAP_topa_multiple_entries))
 		return 0;

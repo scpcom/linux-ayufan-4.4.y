@@ -60,7 +60,6 @@
 #define EN_IP_DISP				0x0b00
 #define EN_IP_DISP_BUS				0x0b04
 
-
 /*
 *Registers for CMU_EGL
 */
@@ -456,4 +455,3 @@
 #define CLKOUT_CMU_TOP_DIV_STAT			0x0c04
 
 #endif /*__CLK_EXYNOS5260_H */
-

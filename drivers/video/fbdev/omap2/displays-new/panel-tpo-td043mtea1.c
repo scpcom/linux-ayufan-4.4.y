@@ -464,7 +464,6 @@ static struct omap_dss_driver tpo_td043_ops = {
 	.get_resolution	= omapdss_default_get_resolution,
 };
 
-
 static int tpo_td043_probe_pdata(struct spi_device *spi)
 {
 	const struct panel_tpo_td043mtea1_platform_data *pdata;

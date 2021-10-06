@@ -599,7 +599,6 @@ int free_memtype(u64 start, u64 end)
 	return 0;
 }
 
-
 /**
  * lookup_memtype - Looksup the memory type for a physical address
  * @paddr: physical address of which memory type needs to be looked up

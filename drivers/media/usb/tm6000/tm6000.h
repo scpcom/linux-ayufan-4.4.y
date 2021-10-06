@@ -209,7 +209,6 @@ struct tm6000_core {
 	struct i2c_adapter		i2c_adap;
 	struct i2c_client		i2c_client;
 
-
 	/* extension */
 	struct list_head		devlist;
 
@@ -348,7 +347,6 @@ void tm6000_init_extension(struct tm6000_core *dev);
 void tm6000_close_extension(struct tm6000_core *dev);
 int tm6000_call_fillbuf(struct tm6000_core *dev, enum tm6000_ops_type type,
 			char *buf, int size);
-
 
 /* In tm6000-stds.c */
 void tm6000_get_std_res(struct tm6000_core *dev);

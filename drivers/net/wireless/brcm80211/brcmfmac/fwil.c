@@ -29,7 +29,6 @@
 #include "fwil.h"
 #include "proto.h"
 
-
 #define MAX_HEX_DUMP_LEN	64
 
 #ifdef DEBUG
@@ -163,7 +162,6 @@ brcmf_fil_cmd_data_get(struct brcmf_if *ifp, u32 cmd, void *data, u32 len)
 	return err;
 }
 
-
 s32
 brcmf_fil_cmd_int_set(struct brcmf_if *ifp, u32 cmd, u32 data)
 {
@@ -212,7 +210,6 @@ brcmf_create_iovar(char *name, const char *data, u32 datalen,
 
 	return len + datalen;
 }
-
 
 s32
 brcmf_fil_iovar_data_set(struct brcmf_if *ifp, char *name, const void *data,

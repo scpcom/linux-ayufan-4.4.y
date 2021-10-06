@@ -105,7 +105,6 @@ static inline struct kvmppc_vcpu_e500 *to_e500(struct kvm_vcpu *vcpu)
 	return container_of(vcpu, struct kvmppc_vcpu_e500, vcpu);
 }
 
-
 /* This geometry is the legacy default -- can be overridden by userspace */
 #define KVM_E500_TLB0_WAY_SIZE		128
 #define KVM_E500_TLB0_WAY_NUM		2

@@ -976,7 +976,6 @@ static void brcmf_chip_disable_arm(struct brcmf_chip_priv *chip, u16 id)
 	struct brcmf_core_priv *cpu;
 	u32 val;
 
-
 	core = brcmf_chip_get_core(&chip->pub, id);
 	if (!core)
 		return;

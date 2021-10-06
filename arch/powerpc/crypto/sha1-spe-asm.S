@@ -71,7 +71,6 @@
 	evstdw		r22,72(r1);					   \
 	evstdw		r23,80(r1);
 
-
 #define FINALIZE \
 	evldw		r14,8(r1);	/* restore SPE registers	*/ \
 	evldw		r15,16(r1);					   \

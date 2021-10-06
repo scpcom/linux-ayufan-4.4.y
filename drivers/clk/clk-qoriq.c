@@ -203,7 +203,6 @@ static const struct clockgen_muxinfo t1040_cmux = {
 	}
 };
 
-
 static const struct clockgen_muxinfo clockgen2_cmux_cga = {
 	{
 		{ CLKSEL_VALID, CGA_PLL1, PLL_DIV1 },

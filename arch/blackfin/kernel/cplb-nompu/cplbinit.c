@@ -58,7 +58,6 @@ void __init generate_cplb_tables_cpu(unsigned int cpu)
 	cplb_pagesize = SIZE_4M;
 #endif
 
-
 	for (; addr < memory_start; addr += cplb_pagesize) {
 		d_tbl[i_d].addr = addr;
 		d_tbl[i_d++].data = SDRAM_DGENERIC | cplb_pageflags;

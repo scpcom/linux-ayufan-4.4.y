@@ -197,7 +197,6 @@ static void udbg_uart_out_mmio(unsigned int reg, u8 data)
 	out_8(udbg_uart.mmio_base + (reg * udbg_uart_stride), data);
 }
 
-
 void udbg_uart_init_mmio(void __iomem *addr, unsigned int stride)
 {
 	if (!addr)

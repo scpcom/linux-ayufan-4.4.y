@@ -7,11 +7,9 @@
 #ifndef _DEF_BF60X_H
 #define _DEF_BF60X_H
 
-
 /* ************************************************************** */
 /*   SYSTEM & MMR ADDRESS DEFINITIONS COMMON TO ALL ADSP-BF60x    */
 /* ************************************************************** */
-
 
 /* =========================
         CNT Registers
@@ -28,7 +26,6 @@
 #define CNT_COUNTER                0xFFC00414         /* CNT0 Counter Register */
 #define CNT_MAX                    0xFFC00418         /* CNT0 Maximum Count Register */
 #define CNT_MIN                    0xFFC0041C         /* CNT0 Minimum Count Register */
-
 
 /* =========================
         RSI Registers
@@ -630,7 +627,6 @@
 #define TWI1_RCV_DATA8                0xFFC01F88         /* TWI1 FIFO Transmit Data Single-Byte Register */
 #define TWI1_RCV_DATA16               0xFFC01F8C         /* TWI1 FIFO Transmit Data Double-Byte Register */
 
-
 /* =========================
         UART Registers
    ========================= */
@@ -672,7 +668,6 @@
 #define UART1_RSR                   0xFFC02430         /* UART1 Receive Shift Register */
 #define UART1_TXDIV                 0xFFC02434         /* UART1 Transmit Clock Devider Register */
 #define UART1_RXDIV                 0xFFC02438         /* UART1 Receive Clock Devider Register */
-
 
 /* =========================
         PORT Registers
@@ -938,7 +933,6 @@
 #define PINT5_PINSTATE              0xFFC04520         /* PINT5 Pint Pinstate Register */
 #define PINT5_LATCH                 0xFFC04524         /* PINT5 Pint Latch Register */
 
-
 /* =========================
         SMC Registers
    ========================= */
@@ -961,7 +955,6 @@
 #define SMC_B3TIM                  0xFFC16040         /* SMC0 SMC BANK3 Timing Register */
 #define SMC_B3ETIM                 0xFFC16044         /* SMC0 SMC BANK3 Extended Timing Register */
 
-
 /* =========================
         WDOG Registers
    ========================= */
@@ -983,7 +976,6 @@
 #define WDOG1_CNT                   0xFFC17804         /* WDOG1 Count Register */
 #define WDOG1_STAT                  0xFFC17808         /* WDOG1 Watchdog Timer Status Register */
 
-
 /* =========================
         SDU Registers
    ========================= */
@@ -1003,7 +995,6 @@
 #define SDU0_MSG_SET                0xFFC1F084         /* SDU0 Message Set Register */
 #define SDU0_MSG_CLR                0xFFC1F088         /* SDU0 Message Clear Register */
 #define SDU0_GHLT                   0xFFC1F08C         /* SDU0 Group Halt Register */
-
 
 /* =========================
         EMAC Registers
@@ -1278,7 +1269,6 @@
 #define EMAC1_DMA_RXBUF_CUR         0xFFC23054         /* EMAC1 RX current buffer pointer register */
 #define EMAC1_HWFEAT                0xFFC23058         /* EMAC1 Hardware Feature Register */
 
-
 /* =========================
         SPI Registers
    ========================= */
@@ -1507,8 +1497,6 @@
 #define EPPI2_FS1_DLY               0xFFC18844         /* EPPI2 Frame Sync 1 Delay Value */
 #define EPPI2_FS2_DLY               0xFFC18848         /* EPPI2 Frame Sync 2 Delay Value */
 #define EPPI2_CTL2                  0xFFC1884C         /* EPPI2 Control Register 2 */
-
-
 
 /* =========================
         DDE Registers
@@ -2501,7 +2489,6 @@
 #define DMA46_BWM_COUNT                0xFFC14248         /* DMA46 Bandwidth Monitor Count */
 #define DMA46_CURR_BWM_COUNT            0xFFC1424C         /* DMA46 Bandwidth Monitor Count Current */
 
-
 /********************************************************************************
     DMA Alias Definitions
  ********************************************************************************/
@@ -2642,7 +2629,6 @@
 #define MDMA3_SRC_BWM_COUNT                (DMA27_BWM_COUNT)
 #define MDMA3_SRC_CURR_BWM_COUNT            (DMA27_CURR_BWM_COUNT)
 
-
 /* =========================
         DMC Registers
    ========================= */
@@ -2702,7 +2688,6 @@
 #define L2CTL0_EADDR0               0xFFCA3084         /* L2CTL0 L2 AXI Error 0 Address Register */
 #define L2CTL0_ET1                  0xFFCA3088         /* L2CTL0 L2 AXI Error 1 Type Register */
 #define L2CTL0_EADDR1               0xFFCA308C         /* L2CTL0 L2 AXI Error 1 Address Register */
-
 
 /* =========================
         SEC Registers
@@ -3089,7 +3074,6 @@
    ------------------------------------------------------------------------------------------------------------------------ */
 #define SEC_CSID_SID                    0x000000FF    /* Source ID */
 
-
 /* ------------------------------------------------------------------------------------------------------------------------
         SEC_FCTL                             Pos/Masks     Description
    ------------------------------------------------------------------------------------------------------------------------ */
@@ -3125,7 +3109,6 @@
 #define SEC_FEND_END_EXTFLT             0x00010000    /* FEXT: Fault External */
 #define SEC_FEND_SID                    0x000000FF    /* Source ID */
 
-
 /* ------------------------------------------------------------------------------------------------------------------------
         SEC_GCTL                             Pos/Masks     Description
    ------------------------------------------------------------------------------------------------------------------------ */
@@ -3155,7 +3138,6 @@
    ------------------------------------------------------------------------------------------------------------------------ */
 #define SEC_END_SID                     0x000000FF    /* Source ID IRQ to End */
 
-
 /* ------------------------------------------------------------------------------------------------------------------------
         SEC_SCTL                             Pos/Masks     Description
    ------------------------------------------------------------------------------------------------------------------------ */
@@ -3179,7 +3161,6 @@
 #define SEC_SSTAT_ENDERR                0x00000020    /* ERRC: End Error */
 #define SEC_SSTAT_ERR                   0x00000002    /* Error */
 
-
 /* =========================
         RCU Registers
    ========================= */
@@ -3198,7 +3179,6 @@
 #define RCU0_SVECT0                 0xFFCA6020         /* RCU0 Software Vector Register n */
 #define RCU0_SVECT1                 0xFFCA6024         /* RCU0 Software Vector Register n */
 
-
 /* =========================
         CGU0
    ========================= */
@@ -3206,7 +3186,6 @@
 #define CGU0_STAT                   0xFFCA8004         /* CGU0 Status Register */
 #define CGU0_DIV                    0xFFCA8008         /* CGU0 Divisor Register */
 #define CGU0_CLKOUTSEL              0xFFCA800C         /* CGU0 CLKOUT Select Register */
-
 
 /* =========================
         DPM Registers
@@ -3243,7 +3222,6 @@
 #define DPM0_RESTORE13              0xFFCA9064         /* DPM0 Restore Register */
 #define DPM0_RESTORE14              0xFFCA9068         /* DPM0 Restore Register */
 #define DPM0_RESTORE15              0xFFCA906C         /* DPM0 Restore Register */
-
 
 /* =========================
         DBG Registers
@@ -3580,8 +3558,6 @@
 #define USB_TESTCTL                0xFFCC1397         /* USB Test Control */
 #define USB_PLL_OSC                0xFFCC1398         /* USB PLL and Oscillator Control */
 
-
-
 /* =========================
         CHIPID
    ========================= */
@@ -3591,6 +3567,5 @@
 #define                   CHIPID_VERSION  0xF0000000
 #define                    CHIPID_FAMILY  0x0FFFF000
 #define               CHIPID_MANUFACTURE  0x00000FFE
-
 
 #endif /* _DEF_BF60X_H */

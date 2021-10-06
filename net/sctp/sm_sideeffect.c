@@ -435,7 +435,6 @@ out_unlock:
 	sctp_association_put(asoc);
 }
 
-
 /* Inject a SACK Timeout event into the state machine.  */
 static void sctp_generate_sack_event(unsigned long data)
 {
@@ -455,7 +454,6 @@ sctp_timer_event_t *sctp_timer_events[SCTP_NUM_TIMEOUT_TYPES] = {
 	sctp_generate_sack_event,
 	sctp_generate_autoclose_event,
 };
-
 
 /* RFC 2960 8.2 Path Failure Detection
  *
@@ -673,7 +671,6 @@ static void sctp_cmd_t3_rtx_timers_stop(sctp_cmd_seq_t *cmds,
 	}
 }
 
-
 /* Helper function to update the heartbeat timer. */
 static void sctp_cmd_hb_timer_update(sctp_cmd_seq_t *cmds,
 				     struct sctp_transport *t)
@@ -753,7 +750,6 @@ static void sctp_cmd_transport_on(sctp_cmd_seq_t *cmds,
 	if (was_unconfirmed && asoc->peer.transport_count == 1)
 		sctp_transport_immediate_rtx(t);
 }
-
 
 /* Helper function to process the process SACK command.  */
 static int sctp_cmd_process_sack(sctp_cmd_seq_t *cmds,
@@ -999,7 +995,6 @@ static void sctp_cmd_adaptation_ind(sctp_cmd_seq_t *commands,
 		sctp_ulpq_tail_event(&asoc->ulpq, ev);
 }
 
-
 static void sctp_cmd_t1_timer_update(struct sctp_association *asoc,
 				    sctp_event_timeout_t timer,
 				    char *name)
@@ -1043,7 +1038,6 @@ static int sctp_cmd_send_msg(struct sctp_association *asoc,
 	return error;
 }
 
-
 /* Sent the next ASCONF packet currently stored in the association.
  * This happens after the ASCONF_ACK was succeffully processed.
  */
@@ -1068,7 +1062,6 @@ static void sctp_cmd_send_asconf(struct sctp_association *asoc)
 			asoc->addip_last_asconf = asconf;
 	}
 }
-
 
 /* These three macros allow us to pull the debugging code out of the
  * main flow of sctp_do_sm() to keep attention focused on the real
@@ -1752,4 +1745,3 @@ nomem:
 	error = -ENOMEM;
 	goto out;
 }
-

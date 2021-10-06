@@ -2261,7 +2261,6 @@ static int dpcm_run_update_startup(struct snd_soc_pcm_runtime *fe, int stream)
 	if (fe->dpcm[stream].state == SND_SOC_DPCM_STATE_HW_PARAMS)
 		return 0;
 
-
 	ret = dpcm_be_dai_prepare(fe, stream);
 	if (ret < 0)
 		goto hw_free;

@@ -362,7 +362,6 @@ static irqreturn_t mcp23s08_irq(int irq, void *data)
 	mcp->cache[MCP_INTCAP] = intcap;
 	mutex_unlock(&mcp->lock);
 
-
 	for (i = 0; i < mcp->chip.ngpio; i++) {
 		if ((BIT(i) & mcp->cache[MCP_INTF]) &&
 		    ((BIT(i) & intcap & mcp->irq_rise) ||
@@ -771,7 +770,6 @@ static const struct of_device_id mcp23s08_i2c_of_match[] = {
 MODULE_DEVICE_TABLE(of, mcp23s08_i2c_of_match);
 #endif
 #endif /* CONFIG_OF */
-
 
 #if IS_ENABLED(CONFIG_I2C)
 

@@ -95,4 +95,3 @@ static inline struct msm_dsi_pll *msm_dsi_pll_28nm_init(
 #endif
 
 #endif /* __DSI_PLL_H__ */
-

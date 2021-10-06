@@ -40,4 +40,3 @@ struct shminfo64 {
 };
 
 #endif /* _ASM_SHMBUF_H */
-

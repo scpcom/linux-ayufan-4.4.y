@@ -269,4 +269,3 @@ void msm_edp_aux_ctrl(struct edp_aux *aux, int enable)
 		edp_write(aux->base + REG_EDP_AUX_CTRL, data);
 	}
 }
-

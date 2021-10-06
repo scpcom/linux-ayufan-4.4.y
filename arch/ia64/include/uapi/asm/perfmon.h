@@ -165,13 +165,11 @@ typedef union {
 #define PFM_VERSION_MAJOR(x)	 (((x)>>16) & 0xffff)
 #define PFM_VERSION_MINOR(x)	 ((x) & 0xffff)
 
-
 /*
  * miscellaneous architected definitions
  */
 #define PMU_FIRST_COUNTER	4	/* first counting monitor (PMC/PMD) */
 #define PMU_MAX_PMCS		256	/* maximum architected number of PMC registers */
 #define PMU_MAX_PMDS		256	/* maximum architected number of PMD registers */
-
 
 #endif /* _UAPI_ASM_IA64_PERFMON_H */

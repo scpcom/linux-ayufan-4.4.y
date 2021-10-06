@@ -24,7 +24,6 @@
 
 #include <asm/lv1call.h>
 
-
 #define L1GPU_CONTEXT_ATTRIBUTE_DISPLAY_SYNC	0x101
 #define L1GPU_CONTEXT_ATTRIBUTE_DISPLAY_FLIP	0x102
 
@@ -38,10 +37,8 @@
 #define L1GPU_DISPLAY_SYNC_HSYNC		1
 #define L1GPU_DISPLAY_SYNC_VSYNC		2
 
-
 /* mutex synchronizing GPU accesses and video mode changes */
 extern struct mutex ps3_gpu_mutex;
-
 
 static inline int lv1_gpu_display_sync(u64 context_handle, u64 head,
 				       u64 ddr_offset)

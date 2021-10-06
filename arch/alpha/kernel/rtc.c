@@ -19,7 +19,6 @@
 
 #include "proto.h"
 
-
 /*
  * Support for the RTC device.
  *

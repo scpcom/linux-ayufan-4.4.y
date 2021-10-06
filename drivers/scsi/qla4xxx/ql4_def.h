@@ -118,7 +118,6 @@
 #define ql4_printk(level, ha, format, arg...) \
 	dev_printk(level , &((ha)->pdev->dev) , format , ## arg)
 
-
 /*
  * Host adapter default definitions
  ***********************************/

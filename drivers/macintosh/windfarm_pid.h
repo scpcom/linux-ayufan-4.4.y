@@ -45,7 +45,6 @@ struct wf_pid_state {
 extern void wf_pid_init(struct wf_pid_state *st, struct wf_pid_param *param);
 extern s32 wf_pid_run(struct wf_pid_state *st, s32 sample);
 
-
 /*
  * *** CPU PID ***
  */

@@ -21,7 +21,6 @@
 #include "bfa_cs.h"
 #include "bfi_ms.h"
 
-
 /*
  * Scatter-gather DMA related defines
  */
@@ -79,7 +78,6 @@ void bfa_sgpg_winit(struct bfa_sgpg_wqe_s *wqe,
 void bfa_sgpg_wait(struct bfa_s *bfa, struct bfa_sgpg_wqe_s *wqe, int nsgpgs);
 void bfa_sgpg_wcancel(struct bfa_s *bfa, struct bfa_sgpg_wqe_s *wqe);
 
-
 /*
  * FCXP related defines
  */
@@ -126,8 +124,6 @@ typedef void (*bfa_cb_fcxp_send_t) (void *bfad_fcxp, struct bfa_fcxp_s *fcxp,
 				    u32 rsp_len, u32 resid_len,
 				    struct fchs_s *rsp_fchs);
 typedef void (*bfa_fcxp_alloc_cbfn_t) (void *cbarg, struct bfa_fcxp_s *fcxp);
-
-
 
 /*
  * Information needed for a FCXP request
@@ -233,7 +229,6 @@ struct bfa_fcxp_wqe_s {
 
 void	bfa_fcxp_isr(struct bfa_s *bfa, struct bfi_msg_s *msg);
 
-
 /*
  * RPORT related defines
  */
@@ -313,7 +308,6 @@ struct bfa_rport_s {
 	} event_arg;
 };
 #define BFA_RPORT_FC_COS(_rport)	((_rport)->rport_info.fc_class)
-
 
 /*
  * UF - unsolicited receive related defines
@@ -438,7 +432,6 @@ struct bfa_lps_mod_s {
  * external functions
  */
 void	bfa_lps_isr(struct bfa_s *bfa, struct bfi_msg_s *msg);
-
 
 /*
  * FCPORT related defines

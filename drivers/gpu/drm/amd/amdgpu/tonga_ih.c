@@ -470,4 +470,3 @@ static void tonga_ih_set_interrupt_funcs(struct amdgpu_device *adev)
 	if (adev->irq.ih_funcs == NULL)
 		adev->irq.ih_funcs = &tonga_ih_funcs;
 }
-

@@ -170,7 +170,6 @@ static int jffs2_zlib_decompress(unsigned char *data_in,
 		jffs2_dbg(1, "inflate not skipping adler32\n");
 	}
 
-
 	if (Z_OK != zlib_inflateInit2(&inf_strm, wbits)) {
 		pr_warn("inflateInit failed\n");
 		mutex_unlock(&inflate_mutex);

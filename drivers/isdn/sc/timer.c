@@ -20,7 +20,6 @@
 #include "message.h"
 #include "card.h"
 
-
 /*
  * Write the proper values into the I/O ports following a reset
  */

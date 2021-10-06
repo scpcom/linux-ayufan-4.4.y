@@ -364,7 +364,6 @@ static const char *sctp_state_name_table[IP_VS_SCTP_S_LAST + 1] = {
 	[IP_VS_SCTP_S_LAST]			= "BUG!",
 };
 
-
 static const char *sctp_state_name(int state)
 {
 	if (state >= IP_VS_SCTP_S_LAST)

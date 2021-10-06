@@ -244,7 +244,6 @@ static inline int cache_valid(struct ceph_inode_info *ci)
 		(ci->i_fscache_gen == ci->i_rdcache_gen));
 }
 
-
 /* Atempt to read from the fscache,
  *
  * This function is called from the readpage_nounlock context. DO NOT attempt to

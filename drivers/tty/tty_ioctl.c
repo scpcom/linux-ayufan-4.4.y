@@ -42,7 +42,6 @@
 #define TERMIOS_TERMIO	4
 #define TERMIOS_OLD	8
 
-
 /**
  *	tty_chars_in_buffer	-	characters pending
  *	@tty: terminal
@@ -233,7 +232,6 @@ void tty_wait_until_sent(struct tty_struct *tty, long timeout)
 		tty->ops->wait_until_sent(tty, timeout);
 }
 EXPORT_SYMBOL(tty_wait_until_sent);
-
 
 /*
  *		Termios Helper Methods
@@ -550,7 +548,6 @@ int tty_set_termios(struct tty_struct *tty, struct ktermios *new_termios)
 	 *	Perform the actual termios internal changes under lock.
 	 */
 
-
 	/* FIXME: we need to decide on some locking/ordering semantics
 	   for the set_termios notification eventually */
 	down_write(&tty->termios_rwsem);
@@ -671,7 +668,6 @@ static int get_termio(struct tty_struct *tty, struct termio __user *termio)
 	return 0;
 }
 
-
 #ifdef TCGETX
 
 /**
@@ -714,7 +710,6 @@ static int set_termiox(struct tty_struct *tty, void __user *arg, int opt)
 }
 
 #endif
-
 
 #ifdef TIOCGETP
 /*
@@ -1076,7 +1071,6 @@ int tty_mode_ioctl(struct tty_struct *tty, struct file *file,
 }
 EXPORT_SYMBOL_GPL(tty_mode_ioctl);
 
-
 /* Caller guarantees ldisc reference is held */
 static int __tty_perform_flush(struct tty_struct *tty, unsigned long arg)
 {
@@ -1184,4 +1178,3 @@ long n_tty_compat_ioctl_helper(struct tty_struct *tty, struct file *file,
 }
 EXPORT_SYMBOL(n_tty_compat_ioctl_helper);
 #endif
-

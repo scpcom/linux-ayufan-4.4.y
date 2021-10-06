@@ -495,7 +495,6 @@ static struct thermal_zone_device_ops acerhdf_dev_ops = {
 	.get_crit_temp = acerhdf_get_crit_temp,
 };
 
-
 /*
  * cooling device callback functions
  * get maximal fan cooling state

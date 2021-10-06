@@ -307,7 +307,6 @@ static int maps_open(struct inode *inode, struct file *file,
 	return 0;
 }
 
-
 static int map_release(struct inode *inode, struct file *file)
 {
 	struct seq_file *seq = file->private_data;
@@ -342,4 +341,3 @@ const struct file_operations proc_tid_maps_operations = {
 	.llseek		= seq_lseek,
 	.release	= map_release,
 };
-

@@ -63,7 +63,6 @@ extern void ttm_pool_unpopulate(struct ttm_tt *ttm);
  */
 extern int ttm_page_alloc_debugfs(struct seq_file *m, void *data);
 
-
 #if defined(CONFIG_SWIOTLB) || defined(CONFIG_INTEL_IOMMU)
 /**
  * Initialize pool allocator.

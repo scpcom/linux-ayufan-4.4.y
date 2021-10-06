@@ -43,7 +43,6 @@
             (value), (reg), DTC_address(reg));     \
     writeb(value, DTC_address(reg));} while(0)
 
-
 #if !(DTCDEBUG & DTCDEBUG_TRANSFER) 
 #define NCR5380_read(reg) (readb(DTC_address(reg)))
 #define NCR5380_write(reg, value) (writeb(value, DTC_address(reg)))
@@ -71,6 +70,5 @@
    1001 1100 0000 0000 */
 
 #define DTC_IRQS 0x9c00
-
 
 #endif /* DTC3280_H */

@@ -146,7 +146,6 @@ struct nv17_tv_norm_params nv17_tv_norms[NUM_TV_NORMS] = {
 					0xbd, 0x15, 0x5, 0x15, 0x3e, 0x3, 0x0, 0x0
 				} } } },
 
-
 	[TV_NORM_HD480P] = { CTV_ENC_MODE, {
 			.ctv_enc_mode = {
 				.mode = { DRM_MODE("720x480", DRM_MODE_TYPE_DRIVER, 27000,

@@ -35,7 +35,6 @@
 #include "dvb_frontend.h"
 #include "cx24117.h"
 
-
 #define CX24117_DEFAULT_FIRMWARE "dvb-fe-cx24117.fw"
 #define CX24117_SEARCH_RANGE_KHZ 5000
 
@@ -68,7 +67,6 @@
 #define CX24117_REG_CLKDIV0      (0xe6)
 #define CX24117_REG_RATEDIV0     (0xf0)
 
-
 #define CX24117_REG_FREQ3_1      (0x55)      /* frequency */
 #define CX24117_REG_FREQ2_1      (0x56)
 #define CX24117_REG_FREQ1_1      (0x57)
@@ -93,7 +91,6 @@
 #define CX24117_REG_CLKDIV1      (0xe7)
 #define CX24117_REG_RATEDIV1     (0xf1)
 
-
 /* arg buffer size */
 #define CX24117_ARGLEN       (0x1e)
 
@@ -115,7 +112,6 @@
 #define CX24117_STATUS_MASK  (0x0f)
 #define CX24117_SIGNAL_MASK  (0xc0)
 
-
 /* arg offset for DiSEqC */
 #define CX24117_DISEQC_DEMOD  (1)
 #define CX24117_DISEQC_BURST  (2)
@@ -129,10 +125,8 @@
 #define CX24117_DISEQC_MINI_A (0)
 #define CX24117_DISEQC_MINI_B (1)
 
-
 #define CX24117_PNE	(0) /* 0 disabled / 2 enabled */
 #define CX24117_OCC	(1) /* 0 disabled / 1 enabled */
-
 
 enum cmds {
 	CMD_SET_VCOFREQ    = 0x10,
@@ -264,7 +258,6 @@ static struct cx24117_modfec {
 	 * FECSTATUS will give the actual FEC in use if tuning was successful.
 	 */
 };
-
 
 static int cx24117_writereg(struct cx24117_state *state, u8 reg, u8 data)
 {
@@ -1656,10 +1649,8 @@ static struct dvb_frontend_ops cx24117_ops = {
 	.get_frontend = cx24117_get_frontend,
 };
 
-
 MODULE_DESCRIPTION("DVB Frontend module for Conexant cx24117/cx24132 hardware");
 MODULE_AUTHOR("Luis Alves (ljalvs@gmail.com)");
 MODULE_LICENSE("GPL");
 MODULE_VERSION("1.1");
 MODULE_FIRMWARE(CX24117_DEFAULT_FIRMWARE);
-

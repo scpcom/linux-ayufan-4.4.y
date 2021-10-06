@@ -696,7 +696,6 @@ void oaktrail_hdmi_setup(struct drm_device *dev)
 		goto out;
 	}
 
-
 	ret = pci_enable_device(pdev);
 	if (ret) {
 		dev_err(dev->dev, "failed to enable hdmi controller\n");

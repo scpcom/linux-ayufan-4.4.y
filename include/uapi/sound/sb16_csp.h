@@ -22,7 +22,6 @@
 #ifndef _UAPI__SOUND_SB16_CSP_H
 #define _UAPI__SOUND_SB16_CSP_H
 
-
 /* CSP modes */
 #define SNDRV_SB_CSP_MODE_NONE		0x00
 #define SNDRV_SB_CSP_MODE_DSP_READ	0x01	/* Record from DSP */
@@ -117,6 +116,5 @@ struct snd_sb_csp_info {
 #define SNDRV_SB_CSP_IOCTL_PAUSE		_IO('H', 0x15)
 /* restart CSP and DMA transfer */
 #define SNDRV_SB_CSP_IOCTL_RESTART	_IO('H', 0x16)
-
 
 #endif /* _UAPI__SOUND_SB16_CSP_H */

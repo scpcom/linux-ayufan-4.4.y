@@ -73,7 +73,6 @@ static struct notifier_block pvpanic_panic_nb = {
 	.priority = 1, /* let this called before broken drm_fb_helper */
 };
 
-
 static acpi_status
 pvpanic_walk_resources(struct acpi_resource *res, void *context)
 {

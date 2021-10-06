@@ -287,7 +287,6 @@ static void unmap_puds(struct kvm *kvm, pgd_t *pgd,
 		clear_pgd_entry(kvm, pgd, start_addr);
 }
 
-
 static void unmap_range(struct kvm *kvm, pgd_t *pgdp,
 			phys_addr_t start, u64 size)
 {
@@ -1546,7 +1545,6 @@ static int kvm_set_spte_handler(struct kvm *kvm, gpa_t gpa, void *data)
 	stage2_set_pte(kvm, NULL, gpa, pte, 0);
 	return 0;
 }
-
 
 void kvm_set_spte_hva(struct kvm *kvm, unsigned long hva, pte_t pte)
 {

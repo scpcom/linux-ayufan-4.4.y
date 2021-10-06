@@ -18,7 +18,6 @@
 #ifndef _LINUX_IN_H
 #define _LINUX_IN_H
 
-
 #include <linux/errno.h>
 #include <uapi/linux/in.h>
 

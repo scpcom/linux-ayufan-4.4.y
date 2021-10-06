@@ -1084,7 +1084,6 @@ void bdc_xsf_ep0_setup_recv(struct bdc *bdc, struct bdc_sr *sreport)
 	else
 		bdc->ep0_state = WAIT_FOR_DATA_START;
 
-
 	dev_dbg(bdc->dev,
 		"%s exit ep0_state:%s\n",
 		__func__, ep0_state_string[bdc->ep0_state]);

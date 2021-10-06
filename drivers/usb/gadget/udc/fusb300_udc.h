@@ -10,7 +10,6 @@
  * the Free Software Foundation; version 2 of the License.
  */
 
-
 #ifndef __FUSB300_UDC_H__
 #define __FUSB300_UDC_H__
 
@@ -77,7 +76,6 @@
 #define FUSB300_GCR_DEVEN_SS		0x1
 #define FUSB300_GCR_DEVDIS		0x0
 #define FUSB300_GCR_DEVEN_MSK		0x3
-
 
 /*
  * *Global Test Mode (offset = 004H)
@@ -637,7 +635,6 @@ struct fusb300_request {
 	struct usb_request	req;
 	struct list_head	queue;
 };
-
 
 struct fusb300_ep {
 	struct usb_ep		ep;

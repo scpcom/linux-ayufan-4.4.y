@@ -297,13 +297,11 @@ iframe_error(struct PStack *st, struct sk_buff *skb)
 	if (rsp)
 		return 'L';
 
-
 	if (skb->len < i)
 		return 'N';
 
 	if ((skb->len - i) > st->l2.maxlen)
 		return 'O';
-
 
 	return 0;
 }
@@ -626,7 +624,6 @@ l2_got_ui(struct FsmInst *fi, int event, void *arg)
  *		in states 1-3 for broadcast
  */
 
-
 }
 
 static void
@@ -918,7 +915,6 @@ transmit_enquiry(struct PStack *st)
 	test_and_clear_bit(FLG_ACK_PEND, &st->l2.flag);
 	start_t200(st, 9);
 }
-
 
 static void
 nrerrorrecovery(struct FsmInst *fi)

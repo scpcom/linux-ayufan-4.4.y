@@ -5,7 +5,6 @@
  * Originally from swsusp.
  */
 
-
 #undef DEBUG
 
 #include <linux/interrupt.h>

@@ -179,7 +179,6 @@ __after_mmu_off:
 	bl	init_idle_6xx
 #endif /* CONFIG_6xx */
 
-
 /*
  * We need to run with _start at physical address 0.
  * On CHRP, we are loaded at 0x10000 since OF on CHRP uses
@@ -263,7 +262,6 @@ __secondary_hold_acknowledge:
 	addi	r11,r11,THREAD_SIZE;	\
 	tophys(r11,r11);	\
 1:	subi	r11,r11,INT_FRAME_SIZE	/* alloc exc. frame */
-
 
 #define EXCEPTION_PROLOG_2	\
 	CLR_TOP32(r11);		\
@@ -396,7 +394,6 @@ DataAccess:
 1:	lwz	r5,_DSISR(r11)		/* get DSISR value */
 	mfspr	r4,SPRN_DAR
 	EXC_XFER_LITE(0x300, handle_page_fault)
-
 
 /* Instruction access exception. */
 	. = 0x400
@@ -757,7 +754,6 @@ PerformanceMonitor:
 	addi	r3,r1,STACK_FRAME_OVERHEAD
 	EXC_XFER_STD(0xf00, performance_monitor_exception)
 
-
 /*
  * This code is jumped to from the startup code to copy
  * the kernel image to physical address PHYSICAL_START.
@@ -892,7 +888,6 @@ _ENTRY(__save_cpu_setup)
 _ENTRY(__restore_cpu_setup)
 	blr
 #endif /* !defined(CONFIG_6xx) */
-
 
 /*
  * Load stuff into the MMU.  Intended to be called with
@@ -1166,7 +1161,6 @@ initial_bats:
 	isync
 	blr
 
-
 #ifdef CONFIG_BOOTX_TEXT
 setup_disp_bat:
 	/*
@@ -1262,7 +1256,6 @@ m8260_gorom:
 	mtlr	r4
 	blr
 #endif
-
 
 /*
  * We put a few things here that have to be page-aligned.

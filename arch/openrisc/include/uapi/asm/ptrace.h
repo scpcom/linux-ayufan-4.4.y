@@ -31,5 +31,4 @@ struct user_regs_struct {
 };
 #endif
 
-
 #endif /* _UAPI__ASM_OPENRISC_PTRACE_H */

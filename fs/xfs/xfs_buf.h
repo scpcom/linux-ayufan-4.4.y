@@ -83,7 +83,6 @@ typedef unsigned int xfs_buf_flags_t;
 	{ _XBF_DELWRI_Q,	"DELWRI_Q" }, \
 	{ _XBF_COMPOUND,	"COMPOUND" }
 
-
 /*
  * Internal state flags.
  */
@@ -119,7 +118,6 @@ typedef struct xfs_buftarg {
 
 struct xfs_buf;
 typedef void (*xfs_buf_iodone_t)(struct xfs_buf *);
-
 
 #define XB_PAGES	2
 

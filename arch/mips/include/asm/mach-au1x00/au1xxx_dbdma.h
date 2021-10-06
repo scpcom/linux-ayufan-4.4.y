@@ -314,7 +314,6 @@ typedef struct dbdma_device_table {
 	u32	dev_intpolarity;
 } dbdev_tab_t;
 
-
 typedef struct dbdma_chan_config {
 	spinlock_t	lock;
 

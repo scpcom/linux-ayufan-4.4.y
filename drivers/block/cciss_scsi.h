@@ -36,7 +36,6 @@
 		   addressible natively, and may in fact turn
 		   out to be not scsi at all. */
 
-
 /* 
 
 If the upper scsi layer tries to track how many commands we have 

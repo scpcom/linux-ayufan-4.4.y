@@ -294,7 +294,6 @@ enum atl1c_dma_req_block {
 	atl1c_dma_req_4096 = 5
 };
 
-
 enum atl1c_nic_type {
 	athr_l1c = 0,
 	athr_l2c = 1,

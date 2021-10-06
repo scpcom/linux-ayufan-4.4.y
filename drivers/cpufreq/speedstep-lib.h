@@ -8,8 +8,6 @@
  *  BIG FAT DISCLAIMER: Work in progress code. Possibly *dangerous*
  */
 
-
-
 /* processors */
 enum speedstep_processor {
 	SPEEDSTEP_CPU_PIII_C_EARLY = 0x00000001,  /* Coppermine core */
@@ -29,13 +27,11 @@ enum speedstep_processor {
 #define SPEEDSTEP_HIGH	0x00000000
 #define SPEEDSTEP_LOW	0x00000001
 
-
 /* detect a speedstep-capable processor */
 extern enum speedstep_processor speedstep_detect_processor(void);
 
 /* detect the current speed (in khz) of the processor */
 extern unsigned int speedstep_get_frequency(enum speedstep_processor processor);
-
 
 /* detect the low and high speeds of the processor. The callback
  * set_state"'s first argument is either SPEEDSTEP_HIGH or

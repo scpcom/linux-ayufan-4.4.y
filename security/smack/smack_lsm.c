@@ -524,7 +524,6 @@ static int smack_syslog(int typefrom_file)
 	return rc;
 }
 
-
 /*
  * Superblock Hooks.
  */
@@ -1511,7 +1510,6 @@ static int smack_inode_getsecurity(const struct inode *inode,
 	return rc;
 }
 
-
 /**
  * smack_inode_listsecurity - list the Smack attributes
  * @inode: the object
@@ -1933,7 +1931,6 @@ static int smack_cred_alloc_blank(struct cred *cred, gfp_t gfp)
 	return 0;
 }
 
-
 /**
  * smack_cred_free - "free" task-level security credentials
  * @cred: the credentials in question
@@ -2008,7 +2005,6 @@ static void smack_cred_transfer(struct cred *new, const struct cred *old)
 	new_tsp->smk_forked = old_tsp->smk_task;
 	mutex_init(&new_tsp->smk_rules_lock);
 	INIT_LIST_HEAD(&new_tsp->smk_rules);
-
 
 	/* cbs copy rule list */
 }
@@ -4045,7 +4041,6 @@ static int smack_socket_getpeersec_stream(struct socket *sock,
 	return rc;
 }
 
-
 /**
  * smack_socket_getpeersec_dgram - pull in packet label
  * @sock: the peer socket
@@ -4505,7 +4500,6 @@ static int smack_ismaclabel(const char *name)
 	return (strcmp(name, XATTR_SMACK_SUFFIX) == 0);
 }
 
-
 /**
  * smack_secid_to_secctx - return the smack label for a secid
  * @secid: incoming integer
@@ -4717,7 +4711,6 @@ static struct security_hook_list smack_hooks[] = {
 	LSM_HOOK_INIT(inode_setsecctx, smack_inode_setsecctx),
 	LSM_HOOK_INIT(inode_getsecctx, smack_inode_getsecctx),
 };
-
 
 static __init void init_smack_known_list(void)
 {

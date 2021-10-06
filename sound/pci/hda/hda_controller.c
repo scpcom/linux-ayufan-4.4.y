@@ -633,7 +633,6 @@ static int azx_rirb_get_response(struct hdac_bus *bus, unsigned int addr,
 		goto again;
 	}
 
-
 	if (!chip->polling_mode) {
 		dev_warn(chip->card->dev,
 			 "azx_get_response timeout, switching to polling mode: last cmd=0x%08x\n",

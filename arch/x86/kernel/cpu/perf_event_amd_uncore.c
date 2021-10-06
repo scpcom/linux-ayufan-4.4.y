@@ -572,7 +572,6 @@ static int __init amd_uncore_init(void)
 
 	return 0;
 
-
 fail_online:
 	for_each_online_cpu(cpu2) {
 		if (cpu2 == cpu)

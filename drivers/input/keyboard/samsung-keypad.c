@@ -303,7 +303,6 @@ samsung_keypad_parse_dt(struct device *dev)
 			/* legacy name */
 			of_property_read_bool(np, "linux,input-wakeup");
 
-
 	return pdata;
 }
 #else

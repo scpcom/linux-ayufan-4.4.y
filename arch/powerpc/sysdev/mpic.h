@@ -50,7 +50,6 @@ static inline int mpic_map_error_int(struct mpic *mpic, unsigned int virq, irq_h
 	return 0;
 }
 
-
 static inline void mpic_err_int_init(struct mpic *mpic, irq_hw_number_t irqnum)
 {
 	return;

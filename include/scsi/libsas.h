@@ -26,7 +26,6 @@
 #ifndef _LIBSAS_H_
 #define _LIBSAS_H_
 
-
 #include <linux/timer.h>
 #include <linux/pci.h>
 #include <scsi/sas.h>

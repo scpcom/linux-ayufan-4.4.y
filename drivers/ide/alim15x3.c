@@ -567,7 +567,6 @@ static int alim15x3_init_one(struct pci_dev *dev,
 	return ide_pci_init_one(dev, &d, NULL);
 }
 
-
 static const struct pci_device_id alim15x3_pci_tbl[] = {
 	{ PCI_VDEVICE(AL, PCI_DEVICE_ID_AL_M5229), 0 },
 	{ PCI_VDEVICE(AL, PCI_DEVICE_ID_AL_M5228), 1 },

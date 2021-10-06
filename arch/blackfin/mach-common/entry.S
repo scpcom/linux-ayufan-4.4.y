@@ -25,7 +25,6 @@
 
 #include <asm/context.S>
 
-
 #ifdef CONFIG_EXCPT_IRQ_SYSC_L1
 .section .l1.text
 #else
@@ -80,7 +79,6 @@ ENDPROC(_ex_workaround_261)
 #define _ex_dmiss _ex_dcplb_miss
 #define _ex_dmult _ex_trap_c
 #endif
-
 
 ENTRY(_ex_dcplb_viol)
 ENTRY(_ex_dcplb_miss)

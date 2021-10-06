@@ -9,5 +9,4 @@
  * 2 of the License, or (at your option) any later version.
  */
 
-
 extern const struct inode_operations ramfs_file_inode_operations;

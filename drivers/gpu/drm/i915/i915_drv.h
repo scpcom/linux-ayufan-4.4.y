@@ -2007,6 +2007,7 @@ struct drm_i915_gem_object_ops {
 	 */
 	int (*get_pages)(struct drm_i915_gem_object *);
 	void (*put_pages)(struct drm_i915_gem_object *);
+
 	int (*dmabuf_export)(struct drm_i915_gem_object *);
 	void (*release)(struct drm_i915_gem_object *);
 };

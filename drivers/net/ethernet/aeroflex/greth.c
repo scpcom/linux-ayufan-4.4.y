@@ -212,7 +212,6 @@ static void greth_clean_rings(struct greth_private *greth)
 			dev_kfree_skb(skb);
 		}
 
-
 	} else { /* 10/100 Mbps MAC */
 
 		for (i = 0; i < GRETH_RXBD_NUM; i++, rx_bdp++) {
@@ -418,7 +417,6 @@ greth_start_xmit(struct sk_buff *skb, struct net_device *dev)
 	if (netif_msg_pktdata(greth))
 		greth_print_tx_packet(skb);
 
-
 	if (unlikely(skb->len > MAX_FRAME_SIZE)) {
 		dev->stats.tx_errors++;
 		goto out;
@@ -503,7 +501,6 @@ greth_start_xmit_gbit(struct sk_buff *skb, struct net_device *dev)
 	status |= skb_headlen(skb) & GRETH_BD_LEN;
 	if (greth->tx_next == GRETH_TXBD_NUM_MASK)
 		status |= GRETH_BD_WR;
-
 
 	bdp = greth->tx_bd_base + greth->tx_next;
 	greth_write_bd(&bdp->stat, status);

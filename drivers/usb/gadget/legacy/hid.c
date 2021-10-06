@@ -11,7 +11,6 @@
  * (at your option) any later version.
  */
 
-
 #include <linux/kernel.h>
 #include <linux/platform_device.h>
 #include <linux/list.h>
@@ -87,8 +86,6 @@ static struct usb_gadget_strings *dev_strings[] = {
 	NULL,
 };
 
-
-
 /****************************** Configurations ******************************/
 
 static int do_config(struct usb_configuration *c)
@@ -159,7 +156,6 @@ static int hid_bind(struct usb_composite_dev *cdev)
 		hid_opts->report_desc_length = n->func->report_desc_length;
 		hid_opts->report_desc = n->func->report_desc;
 	}
-
 
 	/* Allocate string descriptor numbers ... note that string
 	 * contents can be overridden by the composite_dev glue.
@@ -251,9 +247,7 @@ static int hidg_plat_driver_remove(struct platform_device *pdev)
 	return 0;
 }
 
-
 /****************************** Some noise ******************************/
-
 
 static struct usb_composite_driver hidg_driver = {
 	.name		= "g_hid",
@@ -270,7 +264,6 @@ static struct platform_driver hidg_plat_driver = {
 		.name	= "hidg",
 	},
 };
-
 
 MODULE_DESCRIPTION(DRIVER_DESC);
 MODULE_AUTHOR("Fabien Chouteau, Peter Korsgaard");

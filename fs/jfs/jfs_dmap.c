@@ -222,7 +222,6 @@ int dbMount(struct inode *ipbmap)
 	return (0);
 }
 
-
 /*
  * NAME:	dbUnmount()
  *
@@ -397,7 +396,6 @@ int dbFree(struct inode *ip, s64 blkno, s64 nblocks)
 
 	return (0);
 }
-
 
 /*
  * NAME:	dbUpdatePMap()
@@ -574,7 +572,6 @@ dbUpdatePMap(struct inode *ipbmap,
 
 	return (0);
 }
-
 
 /*
  * NAME:	dbNextAG()
@@ -849,7 +846,6 @@ int dbAlloc(struct inode *ip, s64 hint, s64 nblocks, s64 * results)
 
 	IWRITE_UNLOCK(ipbmap);
 
-
       pref_ag:
 	/*
 	 * Let dbNextAG recommend a preferred allocation group
@@ -999,7 +995,6 @@ dbReAlloc(struct inode *ip,
 		(ip, blkno + nblocks - 1, addnblocks + nblocks, results));
 }
 
-
 /*
  * NAME:	dbExtend()
  *
@@ -1101,7 +1096,6 @@ static int dbExtend(struct inode *ip, s64 blkno, s64 nblocks, s64 addnblocks)
 
 	return (rc);
 }
-
 
 /*
  * NAME:	dbAllocNext()
@@ -1225,7 +1219,6 @@ static int dbAllocNext(struct bmap * bmp, struct dmap * dp, s64 blkno,
 	return (dbAllocDmap(bmp, dp, blkno, nblocks));
 }
 
-
 /*
  * NAME:	dbAllocNear()
  *
@@ -1306,7 +1299,6 @@ dbAllocNear(struct bmap * bmp,
 
 	return -ENOSPC;
 }
-
 
 /*
  * NAME:	dbAllocAG()
@@ -1534,7 +1526,6 @@ dbAllocAG(struct bmap * bmp, int agno, s64 nblocks, int l2nb, s64 * results)
 	return -ENOSPC;
 }
 
-
 /*
  * NAME:	dbAllocAny()
  *
@@ -1584,7 +1575,6 @@ static int dbAllocAny(struct bmap * bmp, s64 nblocks, int l2nb, s64 * results)
 	}
 	return (rc);
 }
-
 
 /*
  * NAME:	dbDiscardAG()
@@ -1796,7 +1786,6 @@ static int dbFindCtl(struct bmap * bmp, int l2nb, int level, s64 * blkno)
 	return (0);
 }
 
-
 /*
  * NAME:	dbAllocCtl()
  *
@@ -1966,7 +1955,6 @@ dbAllocCtl(struct bmap * bmp, s64 nblocks, int l2nb, s64 blkno, s64 * results)
 	return (rc);
 }
 
-
 /*
  * NAME:	dbAllocDmapLev()
  *
@@ -2029,7 +2017,6 @@ dbAllocDmapLev(struct bmap * bmp,
 	return (rc);
 }
 
-
 /*
  * NAME:	dbAllocDmap()
  *
@@ -2084,7 +2071,6 @@ static int dbAllocDmap(struct bmap * bmp, struct dmap * dp, s64 blkno,
 
 	return (rc);
 }
-
 
 /*
  * NAME:	dbFreeDmap()
@@ -2150,7 +2136,6 @@ static int dbFreeDmap(struct bmap * bmp, struct dmap * dp, s64 blkno,
 
 	return (rc);
 }
-
 
 /*
  * NAME:	dbAllocBits()
@@ -2297,7 +2282,6 @@ static void dbAllocBits(struct bmap * bmp, struct dmap * dp, s64 blkno,
 
 	BMAP_UNLOCK(bmp);
 }
-
 
 /*
  * NAME:	dbFreeBits()
@@ -2461,7 +2445,6 @@ static int dbFreeBits(struct bmap * bmp, struct dmap * dp, s64 blkno,
 
 	return 0;
 }
-
 
 /*
  * NAME:	dbAdjCtl()
@@ -2638,7 +2621,6 @@ dbAdjCtl(struct bmap * bmp, s64 blkno, int newval, int alloc, int level)
 	return (0);
 }
 
-
 /*
  * NAME:	dbSplit()
  *
@@ -2693,7 +2675,6 @@ static void dbSplit(dmtree_t * tp, int leafno, int splitsz, int newval)
 	 */
 	dbAdjTree(tp, leafno, newval);
 }
-
 
 /*
  * NAME:	dbBackSplit()
@@ -2785,7 +2766,6 @@ static int dbBackSplit(dmtree_t * tp, int leafno)
 	}
 	return 0;
 }
-
 
 /*
  * NAME:	dbJoin()
@@ -2879,7 +2859,6 @@ static int dbJoin(dmtree_t * tp, int leafno, int newval)
 	return 0;
 }
 
-
 /*
  * NAME:	dbAdjTree()
  *
@@ -2946,7 +2925,6 @@ static void dbAdjTree(dmtree_t * tp, int leafno, int newval)
 	}
 }
 
-
 /*
  * NAME:	dbFindLeaf()
  *
@@ -3010,7 +2988,6 @@ static int dbFindLeaf(dmtree_t * tp, int l2nb, int *leafidx)
 	return (0);
 }
 
-
 /*
  * NAME:	dbFindBits()
  *
@@ -3057,7 +3034,6 @@ static int dbFindBits(u32 word, int l2nb)
 	return (bitno);
 }
 
-
 /*
  * NAME:	dbMaxBud(u8 *cp)
  *
@@ -3094,7 +3070,6 @@ static int dbMaxBud(u8 * cp)
 	return (max(tmp1, tmp2));
 }
 
-
 /*
  * NAME:	cnttz(uint word)
  *
@@ -3119,7 +3094,6 @@ static int cnttz(u32 word)
 	return (n);
 }
 
-
 /*
  * NAME:	cntlz(u32 value)
  *
@@ -3142,7 +3116,6 @@ static int cntlz(u32 value)
 	}
 	return (n);
 }
-
 
 /*
  * NAME:	blkstol2(s64 nb)
@@ -3185,7 +3158,6 @@ static int blkstol2(s64 nb)
 	assert(0);
 	return 0;		/* fix compiler warning */
 }
-
 
 /*
  * NAME:	dbAllocBottomUp()
@@ -3258,7 +3230,6 @@ int dbAllocBottomUp(struct inode *ip, s64 blkno, s64 nblocks)
 
 	return (0);
 }
-
 
 static int dbAllocDmapBU(struct bmap * bmp, struct dmap * dp, s64 blkno,
 			 int nblocks)
@@ -3362,7 +3333,6 @@ static int dbAllocDmapBU(struct bmap * bmp, struct dmap * dp, s64 blkno,
 
 	return (rc);
 }
-
 
 /*
  * NAME:	dbExtendFS()
@@ -3649,7 +3619,6 @@ finalize:
 	return 0;
 }
 
-
 /*
  *	dbFinalizeBmap()
  */
@@ -3725,7 +3694,6 @@ void dbFinalizeBmap(struct inode *ipbmap)
 	}
 
 }
-
 
 /*
  * NAME:	dbInitDmap()/ujfs_idmap_page()
@@ -3831,7 +3799,6 @@ static int dbInitDmap(struct dmap * dp, s64 Blkno, int nblocks)
 	return (dbInitDmapTree(dp));
 }
 
-
 /*
  * NAME:	dbInitDmapTree()/ujfs_complete_dmap()
  *
@@ -3871,7 +3838,6 @@ static int dbInitDmapTree(struct dmap * dp)
 	/* build the dmap's binary buddy summary tree */
 	return (dbInitTree(tp));
 }
-
 
 /*
  * NAME:	dbInitTree()/ujfs_adjtree()
@@ -3961,7 +3927,6 @@ static int dbInitTree(struct dmaptree * dtp)
 	return (*tp);
 }
 
-
 /*
  *	dbInitDmapCtl()
  *
@@ -3989,7 +3954,6 @@ static int dbInitDmapCtl(struct dmapctl * dcp, int level, int i)
 	/* build the dmap's binary buddy summary tree */
 	return (dbInitTree((struct dmaptree *) dcp));
 }
-
 
 /*
  * NAME:	dbGetL2AGSize()/ujfs_getagl2size()
@@ -4024,7 +3988,6 @@ static int dbGetL2AGSize(s64 nblocks)
 	/* agsize = roundupSize/max_number_of_ag */
 	return (l2sz - L2MAXAG);
 }
-
 
 /*
  * NAME:	dbMapFileSizeToMapSize()

@@ -33,7 +33,6 @@ extern ssize_t cpumf_events_sysfs_show(struct device *dev,
 	PMU_EVENT_ATTR(name, EVENT_VAR(cat, name), id, cpumf_events_sysfs_show)
 #define CPUMF_EVENT_PTR(cat, name)	EVENT_PTR(cat, name)
 
-
 /* Perf callbacks */
 struct pt_regs;
 extern unsigned long perf_instruction_pointer(struct pt_regs *regs);

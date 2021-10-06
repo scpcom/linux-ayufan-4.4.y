@@ -59,7 +59,6 @@ enum {
 	STMPE_IDX_MAX,
 };
 
-
 struct stmpe_variant_info;
 struct stmpe_client_info;
 

@@ -1444,7 +1444,6 @@ static void dwc2_hsotg_rx_data(struct dwc2_hsotg *hsotg, int ep_idx, int size)
 	int max_req;
 	int read_ptr;
 
-
 	if (!hs_req) {
 		u32 epctl = dwc2_readl(hsotg->regs + DOEPCTL(ep_idx));
 		int ptr;

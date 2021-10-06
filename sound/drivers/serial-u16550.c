@@ -796,7 +796,6 @@ static int snd_uart16550_create(struct snd_card *card,
 	struct snd_uart16550 *uart;
 	int err;
 
-
 	if ((uart = kzalloc(sizeof(*uart), GFP_KERNEL)) == NULL)
 		return -ENOMEM;
 	uart->adaptor = adaptor;

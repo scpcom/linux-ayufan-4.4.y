@@ -87,7 +87,6 @@ out:
 	return pd;
 }
 
-
 static void *l2tp_dfs_seq_next(struct seq_file *m, void *v, loff_t *pos)
 {
 	(*pos)++;

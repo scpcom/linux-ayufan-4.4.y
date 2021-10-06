@@ -202,4 +202,3 @@ enum {
 int rt286_mic_detect(struct snd_soc_codec *codec, struct snd_soc_jack *jack);
 
 #endif /* __RT286_H__ */
-

@@ -170,7 +170,6 @@ struct net2280 {
 	int n_ep;
 	kernel_ulong_t			quirks;
 
-
 	/* pci state used to access those endpoints */
 	struct pci_dev			*pdev;
 	struct net2280_regs		__iomem *regs;
@@ -361,7 +360,6 @@ static inline void stop_out_naking(struct net2280_ep *ep)
 	if ((tmp & BIT(NAK_OUT_PACKETS)) != 0)
 		writel(BIT(CLEAR_NAK_OUT_PACKETS), &ep->regs->ep_rsp);
 }
-
 
 static inline void set_max_speed(struct net2280_ep *ep, u32 max)
 {

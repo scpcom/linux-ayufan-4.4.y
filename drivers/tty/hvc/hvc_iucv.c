@@ -26,7 +26,6 @@
 
 #include "hvc_console.h"
 
-
 /* General device driver settings */
 #define HVC_IUCV_MAGIC		0xc9e4c3e5
 #define MAX_HVC_IUCV_LINES	HVC_ALLOC_TTY_ADAPTERS
@@ -93,7 +92,6 @@ static void hvc_iucv_path_severed(struct iucv_path *, u8 *);
 static void hvc_iucv_msg_pending(struct iucv_path *, struct iucv_message *);
 static void hvc_iucv_msg_complete(struct iucv_path *, struct iucv_message *);
 
-
 /* Kernel module parameter: use one terminal device as default */
 static unsigned long hvc_iucv_devices = 1;
 
@@ -119,7 +117,6 @@ static struct iucv_handler hvc_iucv_handler = {
 	.message_complete = hvc_iucv_msg_complete,
 	.message_pending  = hvc_iucv_msg_pending,
 };
-
 
 /**
  * hvc_iucv_get_private() - Return a struct hvc_iucv_private instance.
@@ -1039,7 +1036,6 @@ static ssize_t hvc_iucv_dev_peer_show(struct device *dev,
 	return sprintf(buf, "%s:%s\n", vmid, ipuser);
 }
 
-
 /* HVC operations */
 static const struct hv_ops hvc_iucv_ops = {
 	.get_chars = hvc_iucv_get_chars,
@@ -1081,7 +1077,6 @@ static const struct attribute_group *hvc_iucv_dev_attr_groups[] = {
 	&hvc_iucv_dev_attr_group,
 	NULL,
 };
-
 
 /**
  * hvc_iucv_alloc() - Allocates a new struct hvc_iucv_private instance
@@ -1471,7 +1466,6 @@ static	int __init hvc_iucv_config(char *val)
 {
 	 return kstrtoul(val, 10, &hvc_iucv_devices);
 }
-
 
 device_initcall(hvc_iucv_init);
 __setup("hvc_iucv=", hvc_iucv_config);

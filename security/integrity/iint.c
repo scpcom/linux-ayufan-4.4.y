@@ -170,7 +170,6 @@ static int __init integrity_iintcache_init(void)
 }
 security_initcall(integrity_iintcache_init);
 
-
 /*
  * integrity_kernel_read - read data from the file
  *

@@ -36,7 +36,6 @@ extern long long __atomic64_fetch_##op(long long i, long long *v);
 #endif /* OUTOFLINE */
 #endif /* __ATOMIC_LIB__ */
 
-
 /*
  * Note on the 64 bit inline asm variants...
  *

@@ -64,7 +64,6 @@ extern void set_normalized_timespec(struct timespec *ts, time_t sec, s64 nsec);
 extern struct timespec timespec_add_safe(const struct timespec lhs,
 					 const struct timespec rhs);
 
-
 static inline struct timespec timespec_add(struct timespec lhs,
 						struct timespec rhs)
 {

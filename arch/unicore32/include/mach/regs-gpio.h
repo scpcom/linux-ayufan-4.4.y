@@ -67,4 +67,3 @@
 #define GPIO_GPIO25	GPIO_GPIO(25)	/* GPIO [25] */
 #define GPIO_GPIO26	GPIO_GPIO(26)	/* GPIO [26] */
 #define GPIO_GPIO27	GPIO_GPIO(27)	/* GPIO [27] */
-

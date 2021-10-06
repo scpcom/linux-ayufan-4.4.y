@@ -40,8 +40,6 @@ MODULE_DESCRIPTION("wm8775 driver");
 MODULE_AUTHOR("Ulf Eklund, Hans Verkuil");
 MODULE_LICENSE("GPL");
 
-
-
 /* ----------------------------------------------------------------------- */
 
 enum {

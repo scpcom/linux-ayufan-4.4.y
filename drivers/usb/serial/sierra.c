@@ -303,7 +303,6 @@ static const struct usb_device_id id_table[] = {
 };
 MODULE_DEVICE_TABLE(usb, id_table);
 
-
 struct sierra_port_private {
 	spinlock_t lock;	/* lock the structure */
 	int outstanding_urbs;	/* number of out urbs in flight */
@@ -851,7 +850,6 @@ err_submit:
 
 	return err;
 }
-
 
 static void sierra_dtr_rts(struct usb_serial_port *port, int on)
 {

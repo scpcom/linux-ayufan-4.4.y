@@ -984,7 +984,6 @@ struct nfs4_link_res {
 	struct nfs_fattr *		dir_attr;
 };
 
-
 struct nfs4_lookup_arg {
 	struct nfs4_sequence_args	seq_args;
 	const struct nfs_fh *		dir_fh;

@@ -308,7 +308,6 @@ extern int dump_task_fpu (struct task_struct *, elf_fpregset_t *);
 
 struct pt_regs;	/* forward declaration... */
 
-
 #define elf_check_arch(x) ((x)->e_machine == EM_PARISC && (x)->e_ident[EI_CLASS] == ELF_CLASS)
 
 /*

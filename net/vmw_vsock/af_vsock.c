@@ -971,7 +971,6 @@ static int vsock_dgram_sendmsg(struct socket *sock, struct msghdr *msg,
 	if (err)
 		goto out;
 
-
 	/* If the provided message contains an address, use that.  Otherwise
 	 * fall back on the socket's remote handle (if it has been connected).
 	 */
@@ -1640,7 +1639,6 @@ out:
 	release_sock(sk);
 	return err;
 }
-
 
 static int
 vsock_stream_recvmsg(struct socket *sock, struct msghdr *msg, size_t len,

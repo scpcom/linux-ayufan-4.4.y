@@ -81,7 +81,6 @@ typedef struct {
 	pad_F[3], test;
 } RtcRegs_t, *RtcPtr_t;
 
-
 #define BVME_I596_BASE	0xff100000
 
 #define BVME_ETHIRQ_REG	0xff20000b
@@ -105,7 +104,6 @@ typedef struct {
 #define BVME_CONFIG_SW2	0x04
 #define BVME_CONFIG_SW3	0x02
 #define BVME_CONFIG_SW4	0x01
-
 
 #define BVME_IRQ_TYPE_PRIO	0
 

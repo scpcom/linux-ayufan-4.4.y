@@ -108,7 +108,6 @@ struct se_spec {
  *
  */
 
-
 /****************************************************************************/
 /*  WM8740 interface                                                        */
 /****************************************************************************/
@@ -118,13 +117,11 @@ static void se200pci_WM8740_init(struct snd_ice1712 *ice)
 	/* nothing to do */
 }
 
-
 static void se200pci_WM8740_set_pro_rate(struct snd_ice1712 *ice,
 						unsigned int rate)
 {
 	/* nothing to do */
 }
-
 
 /****************************************************************************/
 /*  WM8766 interface                                                        */
@@ -223,7 +220,6 @@ static void se200pci_WM8766_set_pro_rate(struct snd_ice1712 *ice,
 		se200pci_WM8766_write(ice, 0x0a, 0x080); /* MCLK=256fs */
 }
 
-
 /****************************************************************************/
 /*  WM8776 interface                                                        */
 /****************************************************************************/
@@ -236,7 +232,6 @@ static void se200pci_WM8776_write(struct snd_ice1712 *ice,
 	val = (addr << 9) | data;
 	snd_vt1724_write_i2c(ice, 0x34, val >> 8, val & 0xff);
 }
-
 
 static void se200pci_WM8776_set_output_volume(struct snd_ice1712 *ice,
 					unsigned int vol1, unsigned int vol2)
@@ -337,7 +332,6 @@ static void se200pci_WM8776_set_pro_rate(struct snd_ice1712 *ice,
 {
 	/* nothing to do */
 }
-
 
 /****************************************************************************/
 /*  runtime interface                                                       */
@@ -639,7 +633,6 @@ static int se200pci_add_controls(struct snd_ice1712 *ice)
 	return 0;
 }
 
-
 /****************************************************************************/
 /*  ONKYO WAVIO SE-90PCI                                                    */
 /****************************************************************************/
@@ -664,7 +657,6 @@ static int se200pci_add_controls(struct snd_ice1712 *ice)
  */
 
  /* Nothing to do for this chip. */
-
 
 /****************************************************************************/
 /*  probe/initialize/setup                                                  */
@@ -709,7 +701,6 @@ static int se_add_controls(struct snd_ice1712 *ice)
 
 	return err;
 }
-
 
 /****************************************************************************/
 /*  entry point                                                             */

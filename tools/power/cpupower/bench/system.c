@@ -188,4 +188,3 @@ void prepare_system(const struct config *config)
 		set_process_priority(PRIORITY_DEFAULT);
 	}
 }
-

@@ -65,7 +65,6 @@ union ieee754sp ieee754sp_sub(union ieee754sp x, union ieee754sp y)
 	case CLPAIR(IEEE754_CLASS_QNAN, IEEE754_CLASS_INF):
 		return x;
 
-
 	/*
 	 * Infinity handling
 	 */
@@ -123,7 +122,6 @@ union ieee754sp ieee754sp_sub(union ieee754sp x, union ieee754sp y)
 
 	assert(xm & SP_HIDDEN_BIT);
 	assert(ym & SP_HIDDEN_BIT);
-
 
 	/* provide guard,round and stick bit space */
 	xm <<= 3;

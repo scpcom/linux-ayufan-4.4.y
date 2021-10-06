@@ -22,7 +22,6 @@
  * Domenico Andreoli : cavokz@gmail.com
  */
 
-
 /*
  * Set this to zero to disable DMA code
  *

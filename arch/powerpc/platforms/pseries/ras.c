@@ -43,7 +43,6 @@ static int ras_check_exception_token;
 static irqreturn_t ras_epow_interrupt(int irq, void *dev_id);
 static irqreturn_t ras_error_interrupt(int irq, void *dev_id);
 
-
 /*
  * Initialize handlers for the set of interrupts caused by hardware errors
  * and power system events.

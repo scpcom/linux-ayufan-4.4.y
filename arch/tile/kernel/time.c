@@ -31,7 +31,6 @@
 #include <arch/interrupts.h>
 #include <arch/spr_def.h>
 
-
 /*
  * Define the cycle counter clock source.
  */

@@ -83,7 +83,6 @@ struct kvm_debug_guest {
 
 /* *** End of deprecated interfaces *** */
 
-
 /* for KVM_CREATE_MEMORY_REGION */
 struct kvm_memory_region {
 	__u32 slot;
@@ -123,7 +122,6 @@ struct kvm_irq_level {
 	};
 	__u32 level;
 };
-
 
 struct kvm_irqchip {
 	__u32 chip_id;
@@ -491,7 +489,6 @@ struct kvm_s390_psw {
 #define KVM_S390_INT_IO_MIN		0x00000000u
 #define KVM_S390_INT_IO_MAX		0xfffdffffu
 #define KVM_S390_INT_IO_AI_MASK		0x04000000u
-
 
 struct kvm_s390_interrupt {
 	__u32 type;

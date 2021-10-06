@@ -94,7 +94,6 @@
 #define DRV_NAME	"sata_sx4"
 #define DRV_VERSION	"0.12"
 
-
 enum {
 	PDC_MMIO_BAR		= 3,
 	PDC_DIMM_BAR		= 4,
@@ -212,7 +211,6 @@ struct pdc_host_priv {
 	} hdma[32];
 };
 
-
 static int pdc_sata_init_one(struct pci_dev *pdev, const struct pci_device_id *ent);
 static void pdc_error_handler(struct ata_port *ap);
 static void pdc_freeze(struct ata_port *ap);
@@ -239,7 +237,6 @@ static int pdc_softreset(struct ata_link *link, unsigned int *class,
 			 unsigned long deadline);
 static void pdc_post_internal_cmd(struct ata_queued_cmd *qc);
 static int pdc_check_atapi_dma(struct ata_queued_cmd *qc);
-
 
 static struct scsi_host_template pdc_sata_sht = {
 	ATA_BASE_SHT(DRV_NAME),
@@ -294,7 +291,6 @@ static struct pci_driver pdc_sata_pci_driver = {
 	.probe			= pdc_sata_init_one,
 	.remove			= ata_pci_remove_one,
 };
-
 
 static int pdc_port_start(struct ata_port *ap)
 {
@@ -966,14 +962,12 @@ static void pdc_tf_load_mmio(struct ata_port *ap, const struct ata_taskfile *tf)
 	ata_sff_tf_load(ap, tf);
 }
 
-
 static void pdc_exec_command_mmio(struct ata_port *ap, const struct ata_taskfile *tf)
 {
 	WARN_ON(tf->protocol == ATA_PROT_DMA ||
 		tf->protocol == ATAPI_PROT_DMA);
 	ata_sff_exec_command(ap, tf);
 }
-
 
 static void pdc_sata_setup_port(struct ata_ioports *port, void __iomem *base)
 {
@@ -991,7 +985,6 @@ static void pdc_sata_setup_port(struct ata_ioports *port, void __iomem *base)
 	port->altstatus_addr	=
 	port->ctl_addr		= base + 0x38;
 }
-
 
 #ifdef ATA_VERBOSE_DEBUG
 static void pdc20621_get_from_dimm(struct ata_host *host, void *psource,
@@ -1045,7 +1038,6 @@ static void pdc20621_get_from_dimm(struct ata_host *host, void *psource,
 }
 #endif
 
-
 static void pdc20621_put_to_dimm(struct ata_host *host, void *psource,
 				 u32 offset, u32 size)
 {
@@ -1095,7 +1087,6 @@ static void pdc20621_put_to_dimm(struct ata_host *host, void *psource,
 	}
 }
 
-
 static unsigned int pdc20621_i2c_read(struct ata_host *host, u32 device,
 				      u32 subaddr, u32 *pdata)
 {
@@ -1131,7 +1122,6 @@ static unsigned int pdc20621_i2c_read(struct ata_host *host, u32 device,
 	return 1;
 }
 
-
 static int pdc20621_detect_dimm(struct ata_host *host)
 {
 	u32 data = 0;
@@ -1150,7 +1140,6 @@ static int pdc20621_detect_dimm(struct ata_host *host)
 
 	return 0;
 }
-
 
 static int pdc20621_prog_dimm0(struct ata_host *host)
 {
@@ -1216,7 +1205,6 @@ static int pdc20621_prog_dimm0(struct ata_host *host)
 	return size;
 }
 
-
 static unsigned int pdc20621_prog_dimm_global(struct ata_host *host)
 {
 	u32 data, spd0;
@@ -1267,7 +1255,6 @@ static unsigned int pdc20621_prog_dimm_global(struct ata_host *host)
 	}
 	return error;
 }
-
 
 static unsigned int pdc20621_dimm_init(struct ata_host *host)
 {
@@ -1406,7 +1393,6 @@ static unsigned int pdc20621_dimm_init(struct ata_host *host)
 	}
 	return 0;
 }
-
 
 static void pdc_20621_init(struct ata_host *host)
 {

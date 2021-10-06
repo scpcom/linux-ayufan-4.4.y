@@ -44,7 +44,6 @@
 #define GINT	0x04
 #define IQOV	0x08
 
-
 /* Timer commands */
 #define SET_TIMER               0x0800
 
@@ -120,12 +119,10 @@
 #define TCRC_CRC16              0x1
 #define TCRC_CCITT32            0x2
 
-
 /*****************************************************************
         TODR (Transmit on demand) Register
 *****************************************************************/
 #define TODR_TOD        0x8000  /* Transmit on demand */
-
 
 /*****************************************************************
         CICR register settings
@@ -142,7 +139,6 @@
 #define CICR_HP_MASK            ((uint)0x00001f00)      /* Hi-pri int. */
 #define CICR_VBA_MASK           ((uint)0x000000e0)      /* Vector Base Address */
 #define CICR_SPS                ((uint)0x00000001)      /* SCC Spread */
-
 
 /*****************************************************************
        Interrupt bits for CIPR and CIMR (MC68360UM p. 7-379)
@@ -177,7 +173,6 @@
 #define INTR_PIO_PC10   0x00000004      /* parallel i/o C bit 10 */
 #define INTR_PIO_PC11   0x00000002      /* parallel i/o C bit 11 */
 #define INTR_ERR        0x00000001      /* error */
-
 
 /*****************************************************************
         CPM Interrupt vector encodings (MC68360UM p. 7-376)
@@ -248,7 +243,6 @@
 /* #define CPMVEC_PIO_PC11		((ushort)0x01) */
 /* #define CPMVEC_ERROR		((ushort)0x00) */
 
-
 /*****************************************************************
  *        PIO control registers
  *****************************************************************/
@@ -257,7 +251,6 @@
  * 
  *  Note that most of these pins have alternate functions
  */
-
 
 /* The macros are nice, but there are all sorts of references to 1-indexed
  * facilities on the 68360... */
@@ -282,10 +275,8 @@
 #define PA_CLK7		((ushort)0x4000)
 #define PA_CLK8		((ushort)0x8000)
 
-
 /* Port B - See 360UM p. 7-362
  */
-
 
 /* Port C - See 360UM p. 7-365
  */
@@ -303,8 +294,6 @@
 #define PC_CD3		((ushort)0x0200)
 #define PC_CTS4		((ushort)0x0400)
 #define PC_CD4		((ushort)0x0800)
-
-
 
 /*****************************************************************
         chip select option register

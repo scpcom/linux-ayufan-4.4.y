@@ -34,8 +34,6 @@ extern int rodata_test_data;
  * (otherwise we'd have to sort and that's just too messy)
  */
 
-
-
 /*
  * We want to set up an exception handling point on our stack,
  * which means a variable value. This function is rather dirty
@@ -61,7 +59,6 @@ static void fudze_exception_table(void *marker, void *new)
 	extable = (struct exception_table_entry *)mod->extable;
 	extable[0].insn = (unsigned long)new;
 }
-
 
 /*
  * exception tables get their symbols translated so we need
@@ -122,7 +119,6 @@ static int test_NX(void)
 		printk(KERN_ERR "test_nx: stack was executable\n");
 		ret = -ENODEV;
 	}
-
 
 	/* Test 2: Check if the heap is executable */
 	heap = kmalloc(64, GFP_KERNEL);

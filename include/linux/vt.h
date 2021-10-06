@@ -3,7 +3,6 @@
 
 #include <uapi/linux/vt.h>
 
-
 /* Virtual Terminal events. */
 #define VT_ALLOCATE		0x0001 /* Console got allocated */
 #define VT_DEALLOCATE		0x0002 /* Console will be deallocated */

@@ -203,7 +203,6 @@
 #define PM2XXX_CH_150MV_DROP_300MV	(0<<4)
 #define PM2XXX_CH_150MV_DROP_150MV	(1<<4)
 
-
 /* charger status register */
 #define PM2XXX_CHG_STATUS_OFF		0x0
 #define PM2XXX_CHG_STATUS_ON		0x1
@@ -273,7 +272,6 @@
 /* SW CTRL */
 #define PM2XXX_SWCTRL_HW		0x0
 #define PM2XXX_SWCTRL_SW		0x1
-
 
 /* LED Driver Control */
 #define PM2XXX_LED_CURRENT_MASK		0x0C

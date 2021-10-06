@@ -12,7 +12,6 @@
 #include <asm/machvec.h>
 #include <linux/dma-mapping.h>
 
-
 #ifdef CONFIG_INTEL_IOMMU
 
 #include <linux/kernel.h>

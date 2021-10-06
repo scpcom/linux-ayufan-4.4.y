@@ -147,7 +147,6 @@ static bool enable_pll_rejection(struct sti_hdmi *hdmi)
 
 	DRM_DEBUG_DRIVER("hdmi rejection pll input clock = %dHz\n", inputclock);
 
-
 	/* Power up the HDMI rejection PLL
 	 * Note: On this SoC (stiH416) we are forced to have the input clock
 	 * be equal to the HDMI pixel clock.

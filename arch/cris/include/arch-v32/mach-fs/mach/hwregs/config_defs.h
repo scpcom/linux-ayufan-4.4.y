@@ -121,7 +121,6 @@ typedef struct {
 #define REG_RD_ADDR_config_rw_pad_ctrl 8
 #define REG_WR_ADDR_config_rw_pad_ctrl 8
 
-
 /* Constants */
 enum {
   regk_config_bw16                         = 0x00000000,

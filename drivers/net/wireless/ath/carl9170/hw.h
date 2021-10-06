@@ -716,7 +716,6 @@
 /* Protocol Controller Module */
 #define	AR9170_MAC_REG_PC_REG_BASE		(AR9170_MAC_REG_BASE + 0xe00)
 
-
 #define	AR9170_NUM_LEDS				2
 
 /* CAM */

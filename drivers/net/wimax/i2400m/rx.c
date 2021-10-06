@@ -153,7 +153,6 @@
 #include <linux/moduleparam.h>
 #include "i2400m.h"
 
-
 #define D_SUBMODULE rx
 #include "debug-levels.h"
 
@@ -168,7 +167,6 @@ struct i2400m_report_hook_args {
 	size_t size;
 	struct list_head list_node;
 };
-
 
 /*
  * Execute i2400m_report_hook in a workqueue
@@ -206,7 +204,6 @@ void i2400m_report_hook_work(struct work_struct *ws)
 	}
 }
 
-
 /*
  * Flush the list of queued reports
  */
@@ -229,7 +226,6 @@ void i2400m_report_hook_flush(struct i2400m *i2400m)
 		kfree(args);
 	}
 }
-
 
 /*
  * Queue a report for later processing
@@ -265,7 +261,6 @@ void i2400m_report_hook_queue(struct i2400m *i2400m, struct sk_buff *skb_rx,
 				__func__, __LINE__, sizeof(*args));
 	}
 }
-
 
 /*
  * Process an ack to a command
@@ -320,7 +315,6 @@ error_waiter_cancelled:
 error_no_waiter:
 	spin_unlock_irqrestore(&i2400m->rx_lock, flags);
 }
-
 
 /*
  * Receive and process a control payload
@@ -412,7 +406,6 @@ error_check:
 	return;
 }
 
-
 /*
  * Receive and send up a trace
  *
@@ -459,7 +452,6 @@ error_check:
 	return;
 }
 
-
 /*
  * Reorder queue data stored on skb->cb while the skb is queued in the
  * reorder queues.
@@ -468,7 +460,6 @@ struct i2400m_roq_data {
 	unsigned sn;		/* Serial number for the skb */
 	enum i2400m_cs cs;	/* packet type for the skb */
 };
-
 
 /*
  * ReOrder Queue
@@ -492,7 +483,6 @@ struct i2400m_roq
 	struct i2400m_roq_log *log;
 };
 
-
 static
 void __i2400m_roq_init(struct i2400m_roq *roq)
 {
@@ -500,14 +490,12 @@ void __i2400m_roq_init(struct i2400m_roq *roq)
 	skb_queue_head_init(&roq->queue);
 }
 
-
 static
 unsigned __i2400m_roq_index(struct i2400m *i2400m, struct i2400m_roq *roq)
 {
 	return ((unsigned long) roq - (unsigned long) i2400m->rx_roq)
 		/ sizeof(*roq);
 }
-
 
 /*
  * Normalize a sequence number based on the queue's window start
@@ -528,7 +516,6 @@ unsigned __i2400m_roq_nsn(struct i2400m_roq *roq, unsigned sn)
 	return r;
 }
 
-
 /*
  * Circular buffer to keep the last N reorder operations
  *
@@ -546,7 +533,6 @@ struct i2400m_roq_log {
 	} entry[I2400M_ROQ_LOG_LENGTH];
 	unsigned in, out;
 };
-
 
 /* Print a log entry */
 static
@@ -583,7 +569,6 @@ void i2400m_roq_log_entry_print(struct i2400m *i2400m, unsigned index,
 	}
 }
 
-
 static
 void i2400m_roq_log_add(struct i2400m *i2400m,
 			struct i2400m_roq *roq, enum i2400m_ro_type type,
@@ -611,7 +596,6 @@ void i2400m_roq_log_add(struct i2400m *i2400m,
 		i2400m_roq_log_entry_print(i2400m, index, cnt_idx, e);
 }
 
-
 /* Dump all the entries in the FIFO and reinitialize it */
 static
 void i2400m_roq_log_dump(struct i2400m *i2400m, struct i2400m_roq *roq)
@@ -629,7 +613,6 @@ void i2400m_roq_log_dump(struct i2400m *i2400m, struct i2400m_roq *roq)
 	}
 	roq->log->in = roq->log->out = 0;
 }
-
 
 /*
  * Backbone for the queuing of an skb (by normalized sequence number)
@@ -725,7 +708,6 @@ out:
 		i2400m, roq, skb, sn, nsn);
 }
 
-
 /*
  * Backbone for the update window start operation
  *
@@ -772,7 +754,6 @@ unsigned __i2400m_roq_update_ws(struct i2400m *i2400m, struct i2400m_roq *roq,
 	return new_nws;
 }
 
-
 /*
  * Reset a queue
  *
@@ -803,7 +784,6 @@ void i2400m_roq_reset(struct i2400m *i2400m, struct i2400m_roq *roq)
 	roq->ws = 0;
 	d_fnend(2, dev, "(i2400m %p roq %p) = void\n", i2400m, roq);
 }
-
 
 /*
  * Queue a packet
@@ -842,7 +822,6 @@ void i2400m_roq_queue(struct i2400m *i2400m, struct i2400m_roq *roq,
 		i2400m, roq, skb, lbn);
 }
 
-
 /*
  * Update the window start in a reorder queue and deliver all skbs
  * with a lower window start
@@ -866,7 +845,6 @@ void i2400m_roq_update_ws(struct i2400m *i2400m, struct i2400m_roq *roq,
 			     old_ws, len, sn, nsn, roq->ws);
 	d_fnstart(2, dev, "(i2400m %p roq %p sn %u) = void\n", i2400m, roq, sn);
 }
-
 
 /*
  * Queue a packet and update the window start
@@ -915,7 +893,6 @@ void i2400m_roq_queue_update_ws(struct i2400m *i2400m, struct i2400m_roq *roq,
 	d_fnend(2, dev, "(i2400m %p roq %p skb %p sn %u) = void\n",
 		i2400m, roq, skb, sn);
 }
-
 
 /*
  * This routine destroys the memory allocated for rx_roq, when no
@@ -1077,7 +1054,6 @@ error:
 		"size %zu) = void\n", i2400m, skb_rx, single_last, payload, size);
 }
 
-
 /*
  * Act on a received payload
  *
@@ -1128,7 +1104,6 @@ void i2400m_rx_payload(struct i2400m *i2400m, struct sk_buff *skb_rx,
 	}
 }
 
-
 /*
  * Check a received transaction's message header
  *
@@ -1170,7 +1145,6 @@ int i2400m_rx_msg_hdr_check(struct i2400m *i2400m,
 error:
 	return result;
 }
-
 
 /*
  * Check a payload descriptor against the received data
@@ -1216,7 +1190,6 @@ int i2400m_rx_pl_descr_check(struct i2400m *i2400m,
 error:
 	return result;
 }
-
 
 /**
  * i2400m_rx - Receive a buffer of data from the device
@@ -1307,7 +1280,6 @@ error_msg_hdr_check:
 }
 EXPORT_SYMBOL_GPL(i2400m_rx);
 
-
 void i2400m_unknown_barker(struct i2400m *i2400m,
 			   const void *buf, size_t size)
 {
@@ -1328,7 +1300,6 @@ void i2400m_unknown_barker(struct i2400m *i2400m,
 			       8, 4, buf, size, 0);
 }
 EXPORT_SYMBOL(i2400m_unknown_barker);
-
 
 /*
  * Initialize the RX queue and infrastructure
@@ -1379,7 +1350,6 @@ error_roq_log_alloc:
 error_roq_alloc:
 	return result;
 }
-
 
 /* Tear down the RX queue and infrastructure */
 void i2400m_rx_release(struct i2400m *i2400m)

@@ -19,7 +19,6 @@
 #define WM1250_EV1_GPIO_OSR      3
 #define WM1250_EV1_GPIO_MASTER   4
 
-
 struct wm1250_ev1_pdata {
 	int gpios[WM1250_EV1_NUM_GPIOS];
 };

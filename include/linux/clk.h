@@ -300,7 +300,6 @@ void devm_clk_put(struct device *dev, struct clk *clk);
  * The remaining APIs are optional for machine class support.
  */
 
-
 /**
  * clk_round_rate - adjust a rate to the exact rate a clock can provide
  * @clk: clock source

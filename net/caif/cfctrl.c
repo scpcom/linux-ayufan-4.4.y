@@ -31,7 +31,6 @@ static int cfctrl_recv(struct cflayer *layr, struct cfpkt *pkt);
 static void cfctrl_ctrlcmd(struct cflayer *layr, enum caif_ctrlcmd ctrl,
 			   int phyid);
 
-
 struct cflayer *cfctrl_create(void)
 {
 	struct dev_info dev_info;
@@ -358,7 +357,6 @@ static int cfctrl_recv(struct cflayer *layer, struct cfpkt *pkt)
 	u8 linkid;
 	struct cfctrl *cfctrl = container_obj(layer);
 	struct cfctrl_request_info rsp, *req;
-
 
 	cfpkt_extr_head(pkt, &cmdrsp, 1);
 	cmd = cmdrsp & CFCTRL_CMD_MASK;

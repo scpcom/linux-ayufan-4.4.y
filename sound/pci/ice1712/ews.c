@@ -42,7 +42,6 @@ enum {
 	EWS_I2C_6FIRE = 0
 };
 	
-
 /* additional i2c devices for EWS boards */
 struct ews_spec {
 	struct snd_i2c_device *i2cdevs[3];
@@ -136,7 +135,6 @@ static struct snd_i2c_bit_ops snd_ice1712_ewx_cs8427_bit_ops = {
 	.getclock = ewx_i2c_getclock,
 	.getdata = ewx_i2c_getdata,
 };
-
 
 /*
  * AK4524 access
@@ -309,7 +307,6 @@ static int ews88_spdif_stream_put(struct snd_ice1712 *ice, struct snd_ctl_elem_v
 	return change;
 }
 
-
 /* open callback */
 static void ews88_open_spdif(struct snd_ice1712 *ice, struct snd_pcm_substream *substream)
 {
@@ -340,7 +337,6 @@ static void ews88_setup_spdif(struct snd_ice1712 *ice, int rate)
 		snd_ctl_notify(ice->card, SNDRV_CTL_EVENT_MASK_VALUE, &ice->spdif.stream_ctl->id);
 	snd_ice1712_ews_cs8404_spdif_write(ice, tmp);
 }
-
 
 /*
  */
@@ -630,7 +626,6 @@ static struct snd_kcontrol_new snd_ice1712_ewx2496_controls[] = {
 	},
 };
 
-
 /*
  * EWS88MT specific controls
  */
@@ -736,7 +731,6 @@ static struct snd_kcontrol_new snd_ice1712_ews88mt_output_sense = {
 	.put = snd_ice1712_ews88mt_output_sense_put,
 };
 
-
 /*
  * EWS88D specific controls
  */
@@ -813,7 +807,6 @@ static struct snd_kcontrol_new snd_ice1712_ews88d_controls[] = {
 	EWS88D_CONTROL(SNDRV_CTL_ELEM_IFACE_MIXER, "Enable ADAT", 3, 0, 0),
 	EWS88D_CONTROL(SNDRV_CTL_ELEM_IFACE_MIXER, "ADAT Through", 4, 1, 0),
 };
-
 
 /*
  * DMX 6Fire specific controls
@@ -927,7 +920,6 @@ static int snd_ice1712_6fire_select_input_put(struct snd_kcontrol *kcontrol, str
 	return 0;
 }
 
-
 #define DMX6FIRE_CONTROL(xname, xshift, xinvert) \
 { .iface = SNDRV_CTL_ELEM_IFACE_MIXER,\
   .name = xname,\
@@ -951,7 +943,6 @@ static struct snd_kcontrol_new snd_ice1712_6fire_controls[] = {
 	DMX6FIRE_CONTROL("Phono Analog Input Switch", 5, 0),
 	DMX6FIRE_CONTROL("Breakbox LED", 6, 0),
 };
-
 
 static int snd_ice1712_ews_add_controls(struct snd_ice1712 *ice)
 {
@@ -1016,7 +1007,6 @@ static int snd_ice1712_ews_add_controls(struct snd_ice1712 *ice)
 	}
 	return 0;
 }
-
 
 /* entry point */
 struct snd_ice1712_card_info snd_ice1712_ews_cards[] = {

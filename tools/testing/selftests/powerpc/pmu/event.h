@@ -11,7 +11,6 @@
 
 #include "utils.h"
 
-
 struct event {
 	struct perf_event_attr attr;
 	char *name;

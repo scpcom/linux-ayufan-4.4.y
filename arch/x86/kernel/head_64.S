@@ -8,7 +8,6 @@
  *  Copyright (C) 2005 Eric Biederman <ebiederm@xmission.com>
  */
 
-
 #include <linux/linkage.h>
 #include <linux/threads.h>
 #include <linux/init.h>
@@ -529,4 +528,3 @@ ENTRY(phys_base)
 	__PAGE_ALIGNED_BSS
 NEXT_PAGE(empty_zero_page)
 	.skip PAGE_SIZE
-

@@ -416,7 +416,6 @@ struct be_cmd_reopen_session_resp {
 	u32 session_handle;
 } __packed;
 
-
 struct be_cmd_mac_query_req {
 	struct be_cmd_req_hdr hdr;
 	u8 type;
@@ -469,7 +468,6 @@ struct be_cmd_set_ip_addr_req {
 	struct be_cmd_req_hdr hdr;
 	struct be_ip_addr_record_params ip_params;
 } __packed;
-
 
 struct be_cmd_set_dhcp_req {
 	struct be_cmd_req_hdr hdr;
@@ -981,7 +979,6 @@ struct amap_it_dmsg_cqe_v2 {
 	u8 rsvd2[2];    /* DWORD 3 */
 	u8 valid;   /* DWORD 3 */
 } __packed;
-
 
 /**
  * Post WRB Queue Doorbell Register used by the host Storage

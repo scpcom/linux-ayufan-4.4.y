@@ -1237,7 +1237,6 @@ static int gfs2_xattr_set(const struct xattr_handler *handler,
 				size, flags, handler->flags);
 }
 
-
 static int ea_acl_chmod_unstuffed(struct gfs2_inode *ip,
 				  struct gfs2_ea_header *ea, char *data)
 {
@@ -1508,4 +1507,3 @@ const struct xattr_handler *gfs2_xattr_handlers[] = {
 	&posix_acl_default_xattr_handler,
 	NULL,
 };
-

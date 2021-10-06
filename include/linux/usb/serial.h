@@ -352,7 +352,6 @@ extern void usb_serial_handle_dcd_change(struct usb_serial_port *usb_port,
 					 struct tty_struct *tty,
 					 unsigned int status);
 
-
 extern int usb_serial_bus_register(struct usb_serial_driver *device);
 extern void usb_serial_bus_deregister(struct usb_serial_driver *device);
 
@@ -411,4 +410,3 @@ module_exit(usb_serial_module_exit);
 	usb_serial_module_driver(KBUILD_MODNAME, __serial_drivers, __ids)
 
 #endif /* __LINUX_USB_SERIAL_H */
-

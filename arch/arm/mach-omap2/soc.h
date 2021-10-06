@@ -506,7 +506,6 @@ extern u32 omap_features;
 #define OMAP3_HAS_IO_CHAIN_CTRL		BIT(8)
 #define OMAP4_HAS_PERF_SILICON		BIT(9)
 
-
 #define OMAP3_HAS_FEATURE(feat,flag)			\
 static inline unsigned int omap3_has_ ##feat(void)	\
 {							\

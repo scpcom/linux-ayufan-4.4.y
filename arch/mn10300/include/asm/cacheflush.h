@@ -146,7 +146,6 @@ extern void flush_icache_range(unsigned long start, unsigned long end);
 #define flush_icache_page(vma, pg)		do {} while (0)
 #endif
 
-
 #define flush_icache_user_range(vma, pg, adr, len) \
 	flush_icache_range(adr, adr + len)
 

@@ -592,7 +592,6 @@ struct ip_vs_service_user_kern {
 	__be32			netmask;	/* persistent netmask or plen */
 };
 
-
 struct ip_vs_dest_user_kern {
 	/* destination server address */
 	union nf_inet_addr	addr;
@@ -609,7 +608,6 @@ struct ip_vs_dest_user_kern {
 	/* Address family of addr */
 	u16			af;
 };
-
 
 /*
  * The information about the virtual service offered to the net and the
@@ -768,7 +766,6 @@ struct ip_vs_app {
 
 	/* ip_vs_app finish */
 	int (*done_conn)(struct ip_vs_app *, struct ip_vs_conn *);
-
 
 	/* not used now */
 	int (*bind_conn)(struct ip_vs_app *, struct ip_vs_conn *,

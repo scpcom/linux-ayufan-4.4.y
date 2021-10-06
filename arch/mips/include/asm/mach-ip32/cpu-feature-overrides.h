@@ -9,7 +9,6 @@
 #ifndef __ASM_MACH_IP32_CPU_FEATURE_OVERRIDES_H
 #define __ASM_MACH_IP32_CPU_FEATURE_OVERRIDES_H
 
-
 /*
  * R5000 has an interesting "restriction":  ll(d)/sc(d)
  * instructions to XKPHYS region simply do uncached bus
@@ -40,7 +39,6 @@
 #define cpu_has_4k_cache	1
 #define cpu_has_mipsmt		0
 #define cpu_has_userlocal	0
-
 
 #define cpu_has_mips32r1	0
 #define cpu_has_mips32r2	0

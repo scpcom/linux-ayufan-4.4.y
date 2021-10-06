@@ -51,7 +51,6 @@ static inline struct iblock_dev *IBLOCK_DEV(struct se_device *dev)
 	return container_of(dev, struct iblock_dev, dev);
 }
 
-
 static int iblock_attach_hba(struct se_hba *hba, u32 host_id)
 {
 	pr_debug("CORE_HBA[%d] - TCM iBlock HBA Driver %s on"

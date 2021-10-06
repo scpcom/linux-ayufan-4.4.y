@@ -6,7 +6,6 @@
 #include <linux/slab.h>
 #include <linux/perf_event.h>
 
-
 /* BEGIN: CPUM_CF COUNTER DEFINITIONS =================================== */
 
 CPUMF_EVENT_ATTR(cf, CPU_CYCLES, 0x0000);
@@ -260,7 +259,6 @@ static const struct attribute_group *cpumsf_pmu_attr_groups[] = {
 	&cpumsf_pmu_format_group,
 	NULL,
 };
-
 
 static __init struct attribute **merge_attr(struct attribute **a,
 					    struct attribute **b)

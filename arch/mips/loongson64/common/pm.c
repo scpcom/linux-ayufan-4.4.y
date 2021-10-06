@@ -92,7 +92,6 @@ static inline void stop_perf_counters(void)
 	__write_64bit_c0_register($24, 0, 0);
 }
 
-
 static void loongson_suspend_enter(void)
 {
 	static unsigned int cached_cpu_freq;

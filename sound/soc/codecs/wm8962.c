@@ -1662,7 +1662,6 @@ static const char *cap_hpf_mode_text[] = {
 static SOC_ENUM_SINGLE_DECL(cap_hpf_mode,
 			    WM8962_ADC_DAC_CONTROL_2, 10, cap_hpf_mode_text);
 
-
 static const char *cap_lhpf_mode_text[] = {
 	"LPF", "HPF"
 };
@@ -1761,7 +1760,6 @@ SOC_DOUBLE_R_TLV("EQ5 Volume", WM8962_EQ3, WM8962_EQ23,
 		 WM8962_EQL_B5_GAIN_SHIFT, 31, 0, eq_tlv),
 SND_SOC_BYTES("EQL Coefficients", WM8962_EQ4, 18),
 SND_SOC_BYTES("EQR Coefficients", WM8962_EQ24, 18),
-
 
 SOC_SINGLE("3D Switch", WM8962_THREED1, 0, 1, 0),
 SND_SOC_BYTES_MASK("3D Coefficients", WM8962_THREED1, 4, WM8962_THREED_ENA),
@@ -2370,7 +2368,6 @@ static int wm8962_add_widgets(struct snd_soc_codec *codec)
 		snd_soc_add_codec_controls(codec, wm8962_spk_stereo_controls,
 				     ARRAY_SIZE(wm8962_spk_stereo_controls));
 
-
 	snd_soc_dapm_new_controls(dapm, wm8962_dapm_widgets,
 				  ARRAY_SIZE(wm8962_dapm_widgets));
 	if (pdata->spk_mono)
@@ -2388,7 +2385,6 @@ static int wm8962_add_widgets(struct snd_soc_codec *codec)
 	else
 		snd_soc_dapm_add_routes(dapm, wm8962_spk_stereo_intercon,
 					ARRAY_SIZE(wm8962_spk_stereo_intercon));
-
 
 	snd_soc_dapm_disable_pin(dapm, "Beep");
 
@@ -3664,7 +3660,6 @@ static int wm8962_i2c_probe(struct i2c_client *i2c,
 			regmap_write(wm8962->regmap, 0x200 + i,
 				     wm8962->pdata.gpio_init[i] & 0xffff);
 		}
-
 
 	/* Put the speakers into mono mode? */
 	if (wm8962->pdata.spk_mono)

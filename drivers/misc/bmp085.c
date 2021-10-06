@@ -332,7 +332,6 @@ static ssize_t show_oversampling(struct device *dev,
 static DEVICE_ATTR(oversampling, S_IWUSR | S_IRUGO,
 					show_oversampling, set_oversampling);
 
-
 static ssize_t show_temperature(struct device *dev,
 				struct device_attribute *attr, char *buf)
 {
@@ -348,7 +347,6 @@ static ssize_t show_temperature(struct device *dev,
 }
 static DEVICE_ATTR(temp0_input, S_IRUGO, show_temperature, NULL);
 
-
 static ssize_t show_pressure(struct device *dev,
 			     struct device_attribute *attr, char *buf)
 {
@@ -363,7 +361,6 @@ static ssize_t show_pressure(struct device *dev,
 		return sprintf(buf, "%d\n", pressure);
 }
 static DEVICE_ATTR(pressure0_input, S_IRUGO, show_pressure, NULL);
-
 
 static struct attribute *bmp085_attributes[] = {
 	&dev_attr_temp0_input.attr,

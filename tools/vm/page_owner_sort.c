@@ -21,7 +21,6 @@ struct block_list {
 	int num;
 };
 
-
 static struct block_list *list;
 static int list_size;
 static int max_size;

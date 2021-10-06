@@ -108,7 +108,6 @@ static inline void arch_local_irq_enable(void)
 	: "cc", "memory");
 }
 
-
 /*
  * Unconditionally Disable IRQs
  */

@@ -1,20 +1,4 @@
-/*
- * Copyright (C) 2014 Facebook.  All rights reserved.
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public
- * License v2 as published by the Free Software Foundation.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * General Public License for more details.
- *
- * You should have received a copy of the GNU General Public
- * License along with this program; if not, write to the
- * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
- * Boston, MA 021110-1307, USA.
- */
+
 
 #ifndef __BTRFS_QGROUP__
 #define __BTRFS_QGROUP__
@@ -22,10 +6,7 @@
 #include "ulist.h"
 #include "delayed-ref.h"
 
-/*
- * Record a dirty extent, and info qgroup to update quota on it
- * TODO: Use kmem cache to alloc it.
- */
+
 struct btrfs_qgroup_extent_record {
 	struct rb_node node;
 	u64 bytenr;
@@ -33,9 +14,6 @@ struct btrfs_qgroup_extent_record {
 	struct ulist *old_roots;
 };
 
-/*
- * For qgroup event trace points only
- */
 #define QGROUP_RESERVE		(1<<0)
 #define QGROUP_RELEASE		(1<<1)
 #define QGROUP_FREE		(1<<2)
@@ -80,10 +58,7 @@ int btrfs_qgroup_inherit(struct btrfs_trans_handle *trans,
 			 struct btrfs_qgroup_inherit *inherit);
 void btrfs_qgroup_free_refroot(struct btrfs_fs_info *fs_info,
 			       u64 ref_root, u64 num_bytes);
-/*
- * TODO: Add proper trace point for it, as btrfs_qgroup_free() is
- * called by everywhere, can't provide good trace for delayed ref case.
- */
+ 
 static inline void btrfs_qgroup_free_delayed_ref(struct btrfs_fs_info *fs_info,
 						 u64 ref_root, u64 num_bytes)
 {
@@ -97,7 +72,7 @@ int btrfs_verify_qgroup_counts(struct btrfs_fs_info *fs_info, u64 qgroupid,
 			       u64 rfer, u64 excl);
 #endif
 
-/* New io_tree based accurate qgroup reserve API */
+
 int btrfs_qgroup_reserve_data(struct inode *inode, u64 start, u64 len);
 int btrfs_qgroup_release_data(struct inode *inode, u64 start, u64 len);
 int btrfs_qgroup_free_data(struct inode *inode, u64 start, u64 len);
@@ -106,4 +81,4 @@ int btrfs_qgroup_reserve_meta(struct btrfs_root *root, int num_bytes);
 void btrfs_qgroup_free_meta_all(struct btrfs_root *root);
 void btrfs_qgroup_free_meta(struct btrfs_root *root, int num_bytes);
 void btrfs_qgroup_check_reserved_leak(struct inode *inode);
-#endif /* __BTRFS_QGROUP__ */
+#endif 

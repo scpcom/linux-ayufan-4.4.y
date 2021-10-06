@@ -184,4 +184,3 @@ MODULE_AUTHOR("David Borowski");
 MODULE_DESCRIPTION("Speakup support for Audapter synthesizer");
 MODULE_LICENSE("GPL");
 MODULE_VERSION(DRV_VERSION);
-

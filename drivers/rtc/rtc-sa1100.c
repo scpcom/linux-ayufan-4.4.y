@@ -46,7 +46,6 @@
 #define RTC_DEF_TRIM		0
 #define RTC_FREQ		1024
 
-
 static irqreturn_t sa1100_rtc_interrupt(int irq, void *dev_id)
 {
 	struct sa1100_rtc *info = dev_get_drvdata(dev_id);

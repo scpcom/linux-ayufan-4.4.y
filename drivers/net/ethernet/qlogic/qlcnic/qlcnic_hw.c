@@ -889,7 +889,6 @@ int qlcnic_config_bridged_mode(struct qlcnic_adapter *adapter, u32 enable)
 	return rv;
 }
 
-
 #define QLCNIC_RSS_HASHTYPE_IP_TCP	0x3
 #define QLCNIC_ENABLE_TYPE_C_RSS	BIT_10
 #define QLCNIC_RSS_FEATURE_FLAG	(1ULL << 63)
@@ -1096,7 +1095,6 @@ netdev_features_t qlcnic_fix_features(struct net_device *netdev,
 
 	return features;
 }
-
 
 int qlcnic_set_features(struct net_device *netdev, netdev_features_t features)
 {
@@ -1308,8 +1306,6 @@ qlcnic_pci_camqm_write_2M(struct qlcnic_adapter *adapter, u64 off, u64 data)
 	writeq(data, addr);
 	mutex_unlock(&adapter->ahw->mem_lock);
 }
-
-
 
 /* Set MS memory control data for different adapters */
 static void qlcnic_set_ms_controls(struct qlcnic_adapter *adapter, u64 off,

@@ -830,7 +830,6 @@ out:
 	return irq;
 }
 
-
 int xen_pirq_from_irq(unsigned irq)
 {
 	return pirq_from_irq(irq);

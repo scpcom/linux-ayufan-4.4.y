@@ -22,7 +22,6 @@
  *
  */
 
-
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/platform_device.h>
@@ -120,7 +119,6 @@ struct tmio_nand {
 };
 
 #define mtd_to_tmio(m)			container_of(m, struct tmio_nand, mtd)
-
 
 /*--------------------------------------------------------------------------*/
 

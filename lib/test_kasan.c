@@ -170,7 +170,6 @@ static noinline void __init kmalloc_oob_memset_4(void)
 	kfree(ptr);
 }
 
-
 static noinline void __init kmalloc_oob_memset_8(void)
 {
 	char *ptr;

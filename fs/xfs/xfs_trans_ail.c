@@ -54,7 +54,6 @@ xfs_ail_check(
 	if (&prev_lip->li_ail != &ailp->xa_ail)
 		ASSERT(XFS_LSN_CMP(prev_lip->li_lsn, lip->li_lsn) >= 0);
 
-
 }
 #else /* !DEBUG */
 #define	xfs_ail_check(a,l)

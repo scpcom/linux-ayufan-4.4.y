@@ -215,7 +215,6 @@ enum sum_check_flags {
 	SUM_CHECK_Q_RESULT = (1 << SUM_CHECK_Q),
 };
 
-
 /**
  * dma_cap_mask_t - capabilities bitmap modeled after cpumask_t.
  * See linux/cpumask.h

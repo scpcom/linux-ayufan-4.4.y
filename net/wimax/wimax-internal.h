@@ -39,7 +39,6 @@
 #include <linux/device.h>
 #include <net/wimax.h>
 
-
 /*
  * Decide if a (locked) device is ready for use
  *
@@ -62,7 +61,6 @@ int wimax_dev_is_ready(struct wimax_dev *wimax_dev)
 		return -ESHUTDOWN;
 	return 0;
 }
-
 
 static inline
 void __wimax_state_set(struct wimax_dev *wimax_dev, enum wimax_st state)

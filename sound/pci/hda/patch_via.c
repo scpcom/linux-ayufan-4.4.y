@@ -45,7 +45,6 @@
 /*									     */
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-
 #include <linux/init.h>
 #include <linux/delay.h>
 #include <linux/slab.h>
@@ -493,7 +492,6 @@ static const struct hda_codec_ops via_patch_ops = {
 #endif
 };
 
-
 static const struct hda_verb vt1708_init_verbs[] = {
 	/* power down jack detect function */
 	{0x1, 0xf81, 0x1},
@@ -888,7 +886,6 @@ static int add_secret_dac_path(struct hda_codec *codec)
 	return 0;
 }
 
-
 static int patch_vt1718S(struct hda_codec *codec)
 {
 	struct via_spec *spec;
@@ -968,7 +965,6 @@ static const struct snd_kcontrol_new vt1716s_dmic_mixer[] = {
 	 },
 	{}			/* end */
 };
-
 
 /* mono-out mixer elements */
 static const struct snd_kcontrol_new vt1716S_mono_out_mixer[] = {

@@ -298,7 +298,6 @@ static int pci_bios_write(unsigned int seg, unsigned int bus,
 	return (int)((result & 0xff00) >> 8);
 }
 
-
 /*
  * Function table for BIOS32 access
  */
@@ -452,4 +451,3 @@ void __init pci_pcbios_init(void)
 		pci_bios_present = 1;
 	}
 }
-

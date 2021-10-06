@@ -204,7 +204,6 @@ static int pm2xxx_charger_batt_therm_mngt(struct pm2xxx_charger *pm2, int val)
 	return 0;
 }
 
-
 static int pm2xxx_charger_die_therm_mngt(struct pm2xxx_charger *pm2, int val)
 {
 	queue_work(pm2->charger_wq, &pm2->check_main_thermal_prot_work);
@@ -310,7 +309,6 @@ static int pm2xxx_charger_itv_pwr_plug_mngt(struct pm2xxx_charger *pm2, int val)
 		pm2->ac_conn = true;
 		queue_work(pm2->charger_wq, &pm2->ac_work);
 	}
-
 
 	return ret;
 }
@@ -843,7 +841,6 @@ static void pm2xxx_charger_ac_work(struct work_struct *work)
 {
 	struct pm2xxx_charger *pm2 = container_of(work,
 		struct pm2xxx_charger, ac_work);
-
 
 	power_supply_changed(pm2->ac_chg.psy);
 	sysfs_notify(&pm2->ac_chg.psy->dev.kobj, NULL, "present");

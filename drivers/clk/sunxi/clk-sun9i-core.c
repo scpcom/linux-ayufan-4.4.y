@@ -22,7 +22,6 @@
 
 #include "clk-factors.h"
 
-
 /**
  * sun9i_a80_get_pll4_factors() - calculates n, p, m factors for PLL4
  * PLL4 rate is calculated as follows
@@ -104,7 +103,6 @@ static void __init sun9i_a80_pll4_setup(struct device_node *node)
 }
 CLK_OF_DECLARE(sun9i_a80_pll4, "allwinner,sun9i-a80-pll4-clk", sun9i_a80_pll4_setup);
 
-
 /**
  * sun9i_a80_get_gt_factors() - calculates m factor for GT
  * GT rate is calculated as follows
@@ -169,7 +167,6 @@ static void __init sun9i_a80_gt_setup(struct device_node *node)
 }
 CLK_OF_DECLARE(sun9i_a80_gt, "allwinner,sun9i-a80-gt-clk", sun9i_a80_gt_setup);
 
-
 /**
  * sun9i_a80_get_ahb_factors() - calculates p factor for AHB0/1/2
  * AHB rate is calculated as follows
@@ -229,7 +226,6 @@ static void __init sun9i_a80_ahb_setup(struct device_node *node)
 }
 CLK_OF_DECLARE(sun9i_a80_ahb, "allwinner,sun9i-a80-ahb-clk", sun9i_a80_ahb_setup);
 
-
 static const struct factors_data sun9i_a80_apb0_data __initconst = {
 	.mux = 24,
 	.muxmask = BIT(0),
@@ -254,7 +250,6 @@ static void __init sun9i_a80_apb0_setup(struct device_node *node)
 			       &sun9i_a80_apb0_lock, reg);
 }
 CLK_OF_DECLARE(sun9i_a80_apb0, "allwinner,sun9i-a80-apb0-clk", sun9i_a80_apb0_setup);
-
 
 /**
  * sun9i_a80_get_apb1_factors() - calculates m, p factors for APB1

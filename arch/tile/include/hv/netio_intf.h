@@ -91,11 +91,9 @@ typedef int _netio_percpu_mutex_t;
  *  @ingroup setup */
 #define NETIO_MAX_TILES_PER_QUEUE  64
 
-
 /** Largest permissible queue identifier.
  *  @ingroup setup  */
 #define NETIO_MAX_QUEUE_ID        255
-
 
 #ifndef __DOXYGEN__
 
@@ -181,7 +179,6 @@ typedef int _netio_percpu_mutex_t;
 #define _NETIO_PKT_L2_LEN_MASK \
           (_NETIO_PKT_L2_LEN_RMASK << _NETIO_PKT_L2_LEN_SHIFT)
 
-
 /* Flags in minimal packet metadata. */
 
 /** We need an eDMA checksum on this packet. */
@@ -205,7 +202,6 @@ typedef int _netio_percpu_mutex_t;
 
 #endif
 
-
 /** The size of a memory buffer representing a small packet.
  *  @ingroup egress */
 #define SMALL_PACKET_SIZE 256
@@ -217,7 +213,6 @@ typedef int _netio_percpu_mutex_t;
 /** The size of a memory buffer representing a jumbo packet.
  *  @ingroup egress */
 #define JUMBO_PACKET_SIZE (12 * 1024)
-
 
 /* Common ethertypes.
  * @ingroup ingress */
@@ -235,7 +230,6 @@ typedef int _netio_percpu_mutex_t;
 /** The ethertype of MPLS. */
 #define ETHERTYPE_MPLS (0x8847)
 /** @} */
-
 
 /** The possible return values of NETIO_PKT_STATUS.
  * @ingroup ingress
@@ -258,14 +252,12 @@ typedef enum
   NETIO_PKT_STATUS_BAD
 } netio_pkt_status_t;
 
-
 /** Log2 of how many buckets we have. */
 #define NETIO_LOG2_NUM_BUCKETS (10)
 
 /** How many buckets we have.
  * @ingroup ingress */
 #define NETIO_NUM_BUCKETS (1 << NETIO_LOG2_NUM_BUCKETS)
-
 
 /**
  * @brief A group-to-bucket identifier.
@@ -299,7 +291,6 @@ typedef union {
 }
 netio_group_t;
 
-
 /**
  * @brief A VLAN-to-bucket identifier.
  *
@@ -309,20 +300,17 @@ netio_group_t;
  */
 typedef netio_group_t netio_vlan_t;
 
-
 /**
  * A bucket-to-queue mapping.
  * @ingroup setup
  */
 typedef unsigned char netio_bucket_t;
 
-
 /**
  * A packet size can always fit in a netio_size_t.
  * @ingroup setup
  */
 typedef unsigned int netio_size_t;
-
 
 /**
  * @brief Ethernet standard (ingress) packet metadata.
@@ -358,15 +346,12 @@ typedef struct
 }
 netio_pkt_metadata_t;
 
-
 /** To ensure that the L3 header is aligned mod 4, the L2 header should be
  * aligned mod 4 plus 2, since every supported L2 header is 4n + 2 bytes
  * long.  The standard way to do this is to simply add 2 bytes of padding
  * before the L2 header.
  */
 #define NETIO_PACKET_PADDING 2
-
-
 
 /**
  * @brief Ethernet minimal (egress) packet metadata.
@@ -407,7 +392,6 @@ typedef struct
 }
 netio_pkt_minimal_metadata_t;
 
-
 #ifndef __DOXYGEN__
 
 /**
@@ -433,7 +417,6 @@ typedef union
   } bits;
 }
 __netio_pkt_notif_t;
-
 
 /**
  * Returns the base address of the packet.
@@ -495,7 +478,6 @@ typedef union
 __netio_pkt_handle_t;
 
 #endif /* !__DOXYGEN__ */
-
 
 /**
  * @brief A handle for an I/O packet's storage.
@@ -571,7 +553,6 @@ typedef struct
 }
 netio_pkt_t;
 
-
 #ifndef __DOXYGEN__
 
 #define __NETIO_PKT_NOTIF_HEADER(pkt) ((pkt)->__notif_header)
@@ -588,7 +569,6 @@ extern const uint16_t _netio_pkt_info[];
 
 #endif /* __DOXYGEN__ */
 
-
 #ifndef __DOXYGEN__
 /* These macros are deprecated and will disappear in a future MDE release. */
 #define NETIO_PKT_GOOD_CHECKSUM(pkt) \
@@ -596,7 +576,6 @@ extern const uint16_t _netio_pkt_info[];
 #define NETIO_PKT_GOOD_CHECKSUM_M(mda, pkt) \
   NETIO_PKT_L4_CSUM_CORRECT_M(mda, pkt)
 #endif /* __DOXYGEN__ */
-
 
 /* Packet attribute access functions. */
 
@@ -620,7 +599,6 @@ NETIO_PKT_METADATA(netio_pkt_t* pkt)
   return &pkt->__metadata;
 }
 
-
 /** Return a pointer to the minimal metadata for a packet.
  * @ingroup egress
  *
@@ -641,7 +619,6 @@ NETIO_PKT_MINIMAL_METADATA(netio_pkt_t* pkt)
   return (netio_pkt_minimal_metadata_t*) &pkt->__metadata;
 }
 
-
 /** Determine whether a packet has 'minimal' metadata.
  * @ingroup pktfuncs
  *
@@ -661,7 +638,6 @@ NETIO_PKT_IS_MINIMAL(netio_pkt_t* pkt)
   return pkt->__packet.bits.__minimal;
 }
 
-
 /** Return a handle for a packet's storage.
  * @ingroup pktfuncs
  *
@@ -676,13 +652,11 @@ NETIO_PKT_HANDLE(netio_pkt_t* pkt)
   return h;
 }
 
-
 /** A special reserved value indicating the absence of a packet handle.
  *
  * @ingroup pktfuncs
  */
 #define NETIO_PKT_HANDLE_NONE ((netio_pkt_handle_t) { 0 })
-
 
 /** Test whether a packet handle is valid.
  *
@@ -701,8 +675,6 @@ NETIO_PKT_HANDLE_IS_VALID(netio_pkt_handle_t handle)
   return handle.word != 0;
 }
 
-
-
 /** Return a pointer to the start of the packet's custom header.
  *  A custom header may or may not be present, depending upon the IPP; its
  *  contents and alignment are also IPP-dependent.  Currently, none of the
@@ -718,7 +690,6 @@ NETIO_PKT_CUSTOM_DATA_H(netio_pkt_handle_t handle)
 {
   return _NETIO_PKT_HANDLE_BASE(handle) + NETIO_PACKET_PADDING;
 }
-
 
 /** Return the length of the packet's custom header.
  *  A custom header may or may not be present, depending upon the IPP; its
@@ -745,7 +716,6 @@ NETIO_PKT_CUSTOM_HEADER_LENGTH_M(netio_pkt_metadata_t* mda, netio_pkt_t* pkt)
           (_NETIO_PKT_CUSTOM_LEN_RMASK << 2));
 }
 
-
 /** Return the length of the packet, starting with the custom header.
  *  A custom header may or may not be present, depending upon the IPP; its
  *  contents and alignment are also IPP-dependent.  Currently, none of the
@@ -764,7 +734,6 @@ NETIO_PKT_CUSTOM_LENGTH_M(netio_pkt_metadata_t* mda, netio_pkt_t* pkt)
           NETIO_PACKET_PADDING);
 }
 
-
 /** Return a pointer to the start of the packet's custom header.
  *  A custom header may or may not be present, depending upon the IPP; its
  *  contents and alignment are also IPP-dependent.  Currently, none of the
@@ -781,7 +750,6 @@ NETIO_PKT_CUSTOM_DATA_M(netio_pkt_metadata_t* mda, netio_pkt_t* pkt)
 {
   return NETIO_PKT_CUSTOM_DATA_H(NETIO_PKT_HANDLE(pkt));
 }
-
 
 /** Return the length of the packet's L2 (Ethernet plus VLAN or SNAP) header.
  * @ingroup ingress
@@ -803,7 +771,6 @@ NETIO_PKT_L2_HEADER_LENGTH_M(netio_pkt_metadata_t* mda, netio_pkt_t* pkt)
           (_NETIO_PKT_L2_LEN_RMASK << 2)) + 2;
 }
 
-
 /** Return the length of the packet, starting with the L2 (Ethernet) header.
  * @ingroup ingress
  *
@@ -818,7 +785,6 @@ NETIO_PKT_L2_LENGTH_M(netio_pkt_metadata_t* mda, netio_pkt_t* pkt)
           NETIO_PKT_CUSTOM_HEADER_LENGTH_M(mda,pkt));
 }
 
-
 /** Return a pointer to the start of the packet's L2 (Ethernet) header.
  * @ingroup ingress
  *
@@ -832,7 +798,6 @@ NETIO_PKT_L2_DATA_M(netio_pkt_metadata_t* mda, netio_pkt_t* pkt)
   return (NETIO_PKT_CUSTOM_DATA_M(mda, pkt) +
           NETIO_PKT_CUSTOM_HEADER_LENGTH_M(mda, pkt));
 }
-
 
 /** Retrieve the length of the packet, starting with the L3 (generally,
  *  the IP) header.
@@ -849,7 +814,6 @@ NETIO_PKT_L3_LENGTH_M(netio_pkt_metadata_t* mda, netio_pkt_t* pkt)
           NETIO_PKT_L2_HEADER_LENGTH_M(mda,pkt));
 }
 
-
 /** Return a pointer to the packet's L3 (generally, the IP) header.
  * @ingroup ingress
  *
@@ -865,7 +829,6 @@ NETIO_PKT_L3_DATA_M(netio_pkt_metadata_t* mda, netio_pkt_t* pkt)
   return (NETIO_PKT_L2_DATA_M(mda, pkt) +
           NETIO_PKT_L2_HEADER_LENGTH_M(mda, pkt));
 }
-
 
 /** Return the ordinal of the packet.
  * @ingroup ingress
@@ -889,7 +852,6 @@ NETIO_PKT_ORDINAL_M(netio_pkt_metadata_t* mda, netio_pkt_t* pkt)
 {
   return mda->__packet_ordinal;
 }
-
 
 /** Return the per-group ordinal of the packet.
  * @ingroup ingress
@@ -917,7 +879,6 @@ NETIO_PKT_GROUP_ORDINAL_M(netio_pkt_metadata_t* mda, netio_pkt_t* pkt)
 {
   return mda->__group_ordinal;
 }
-
 
 /** Return the VLAN ID assigned to the packet.
  * @ingroup ingress
@@ -955,7 +916,6 @@ NETIO_PKT_VLAN_ID_M(netio_pkt_metadata_t* mda, netio_pkt_t* pkt)
 #endif
 }
 
-
 /** Return the ethertype of the packet.
  * @ingroup ingress
  *
@@ -980,7 +940,6 @@ NETIO_PKT_ETHERTYPE_M(netio_pkt_metadata_t* mda, netio_pkt_t* pkt)
 
   return __builtin_bswap32(val) >> 16;
 }
-
 
 /** Return the flow hash computed on the packet.
  * @ingroup ingress
@@ -1017,7 +976,6 @@ NETIO_PKT_FLOW_HASH_M(netio_pkt_metadata_t* mda, netio_pkt_t* pkt)
   return mda->__flow_hash;
 }
 
-
 /** Return the first word of "user data" for the packet.
  *
  * The contents of the user data words depend on the IPP.
@@ -1039,7 +997,6 @@ NETIO_PKT_USER_DATA_0_M(netio_pkt_metadata_t* mda, netio_pkt_t* pkt)
 {
   return mda->__user_data_0;
 }
-
 
 /** Return the second word of "user data" for the packet.
  *
@@ -1063,7 +1020,6 @@ NETIO_PKT_USER_DATA_1_M(netio_pkt_metadata_t* mda, netio_pkt_t* pkt)
   return mda->__user_data_1;
 }
 
-
 /** Determine whether the L4 (TCP/UDP) checksum was calculated.
  * @ingroup ingress
  *
@@ -1076,7 +1032,6 @@ NETIO_PKT_L4_CSUM_CALCULATED_M(netio_pkt_metadata_t* mda, netio_pkt_t* pkt)
 {
   return !(mda->__flags & _NETIO_PKT_NO_L4_CSUM_MASK);
 }
-
 
 /** Determine whether the L4 (TCP/UDP) checksum was calculated and found to
  *  be correct.
@@ -1093,7 +1048,6 @@ NETIO_PKT_L4_CSUM_CORRECT_M(netio_pkt_metadata_t* mda, netio_pkt_t* pkt)
            (_NETIO_PKT_BAD_L4_CSUM_MASK | _NETIO_PKT_NO_L4_CSUM_MASK));
 }
 
-
 /** Determine whether the L3 (IP) checksum was calculated.
  * @ingroup ingress
  *
@@ -1106,7 +1060,6 @@ NETIO_PKT_L3_CSUM_CALCULATED_M(netio_pkt_metadata_t* mda, netio_pkt_t* pkt)
 {
   return !(mda->__flags & _NETIO_PKT_NO_L3_CSUM_MASK);
 }
-
 
 /** Determine whether the L3 (IP) checksum was calculated and found to be
  *  correct.
@@ -1123,7 +1076,6 @@ NETIO_PKT_L3_CSUM_CORRECT_M(netio_pkt_metadata_t* mda, netio_pkt_t* pkt)
            (_NETIO_PKT_BAD_L3_CSUM_MASK | _NETIO_PKT_NO_L3_CSUM_MASK));
 }
 
-
 /** Determine whether the ethertype was recognized and L3 packet data was
  *  processed.
  * @ingroup ingress
@@ -1138,7 +1090,6 @@ NETIO_PKT_ETHERTYPE_RECOGNIZED_M(netio_pkt_metadata_t* mda, netio_pkt_t* pkt)
 {
   return !(mda->__flags & _NETIO_PKT_TYPE_UNRECOGNIZED_MASK);
 }
-
 
 /** Retrieve the status of a packet and any errors that may have occurred
  * during ingress processing (length mismatches, CRC errors, etc.).
@@ -1160,7 +1111,6 @@ NETIO_PKT_STATUS_M(netio_pkt_metadata_t* mda, netio_pkt_t* pkt)
   return (netio_pkt_status_t) __NETIO_PKT_NOTIF_HEADER(pkt).bits.__status;
 }
 
-
 /** Report whether a packet is bad (i.e., was shorter than expected based on
  *  its headers, or had a bad CRC).
  * @ingroup ingress
@@ -1179,7 +1129,6 @@ NETIO_PKT_BAD_M(netio_pkt_metadata_t* mda, netio_pkt_t* pkt)
            NETIO_PKT_STATUS_M(mda, pkt) == NETIO_PKT_STATUS_BAD));
 }
 
-
 /** Return the length of the packet, starting with the L2 (Ethernet) header.
  * @ingroup egress
  *
@@ -1192,7 +1141,6 @@ NETIO_PKT_L2_LENGTH_MM(netio_pkt_minimal_metadata_t* mmd, netio_pkt_t* pkt)
 {
   return mmd->l2_length;
 }
-
 
 /** Return the length of the L2 (Ethernet) header.
  * @ingroup egress
@@ -1208,7 +1156,6 @@ NETIO_PKT_L2_HEADER_LENGTH_MM(netio_pkt_minimal_metadata_t* mmd,
   return mmd->l3_offset - mmd->l2_offset;
 }
 
-
 /** Return the length of the packet, starting with the L3 (IP) header.
  * @ingroup egress
  *
@@ -1222,7 +1169,6 @@ NETIO_PKT_L3_LENGTH_MM(netio_pkt_minimal_metadata_t* mmd, netio_pkt_t* pkt)
   return (NETIO_PKT_L2_LENGTH_MM(mmd, pkt) -
           NETIO_PKT_L2_HEADER_LENGTH_MM(mmd, pkt));
 }
-
 
 /** Return a pointer to the packet's L3 (generally, the IP) header.
  * @ingroup egress
@@ -1239,7 +1185,6 @@ NETIO_PKT_L3_DATA_MM(netio_pkt_minimal_metadata_t* mmd, netio_pkt_t* pkt)
   return _NETIO_PKT_BASE(pkt) + mmd->l3_offset;
 }
 
-
 /** Return a pointer to the packet's L2 (Ethernet) header.
  * @ingroup egress
  *
@@ -1252,7 +1197,6 @@ NETIO_PKT_L2_DATA_MM(netio_pkt_minimal_metadata_t* mmd, netio_pkt_t* pkt)
 {
   return _NETIO_PKT_BASE(pkt) + mmd->l2_offset;
 }
-
 
 /** Retrieve the status of a packet and any errors that may have occurred
  * during ingress processing (length mismatches, CRC errors, etc.).
@@ -1275,7 +1219,6 @@ NETIO_PKT_STATUS(netio_pkt_t* pkt)
   return (netio_pkt_status_t) __NETIO_PKT_NOTIF_HEADER(pkt).bits.__status;
 }
 
-
 /** Report whether a packet is bad (i.e., was shorter than expected based on
  *  its headers, or had a bad CRC).
  * @ingroup ingress
@@ -1292,7 +1235,6 @@ NETIO_PKT_BAD(netio_pkt_t* pkt)
 
   return NETIO_PKT_BAD_M(mda, pkt);
 }
-
 
 /** Return the length of the packet's custom header.
  *  A custom header may or may not be present, depending upon the IPP; its
@@ -1312,7 +1254,6 @@ NETIO_PKT_CUSTOM_HEADER_LENGTH(netio_pkt_t* pkt)
   return NETIO_PKT_CUSTOM_HEADER_LENGTH_M(mda, pkt);
 }
 
-
 /** Return the length of the packet, starting with the custom header.
  *  A custom header may or may not be present, depending upon the IPP; its
  *  contents and alignment are also IPP-dependent.  Currently, none of the
@@ -1331,7 +1272,6 @@ NETIO_PKT_CUSTOM_LENGTH(netio_pkt_t* pkt)
   return NETIO_PKT_CUSTOM_LENGTH_M(mda, pkt);
 }
 
-
 /** Return a pointer to the packet's custom header.
  *  A custom header may or may not be present, depending upon the IPP; its
  *  contents and alignment are also IPP-dependent.  Currently, none of the
@@ -1349,7 +1289,6 @@ NETIO_PKT_CUSTOM_DATA(netio_pkt_t* pkt)
 
   return NETIO_PKT_CUSTOM_DATA_M(mda, pkt);
 }
-
 
 /** Return the length of the packet's L2 (Ethernet plus VLAN or SNAP) header.
  * @ingroup pktfuncs
@@ -1374,7 +1313,6 @@ NETIO_PKT_L2_HEADER_LENGTH(netio_pkt_t* pkt)
   }
 }
 
-
 /** Return the length of the packet, starting with the L2 (Ethernet) header.
  * @ingroup pktfuncs
  *
@@ -1397,7 +1335,6 @@ NETIO_PKT_L2_LENGTH(netio_pkt_t* pkt)
     return NETIO_PKT_L2_LENGTH_M(mda, pkt);
   }
 }
-
 
 /** Return a pointer to the packet's L2 (Ethernet) header.
  * @ingroup pktfuncs
@@ -1422,7 +1359,6 @@ NETIO_PKT_L2_DATA(netio_pkt_t* pkt)
   }
 }
 
-
 /** Retrieve the length of the packet, starting with the L3 (generally, the IP)
  * header.
  * @ingroup pktfuncs
@@ -1446,7 +1382,6 @@ NETIO_PKT_L3_LENGTH(netio_pkt_t* pkt)
     return NETIO_PKT_L3_LENGTH_M(mda, pkt);
   }
 }
-
 
 /** Return a pointer to the packet's L3 (generally, the IP) header.
  * @ingroup pktfuncs
@@ -1473,7 +1408,6 @@ NETIO_PKT_L3_DATA(netio_pkt_t* pkt)
   }
 }
 
-
 /** Return the ordinal of the packet.
  * @ingroup ingress
  *
@@ -1498,7 +1432,6 @@ NETIO_PKT_ORDINAL(netio_pkt_t* pkt)
 
   return NETIO_PKT_ORDINAL_M(mda, pkt);
 }
-
 
 /** Return the per-group ordinal of the packet.
  * @ingroup ingress
@@ -1528,7 +1461,6 @@ NETIO_PKT_GROUP_ORDINAL(netio_pkt_t* pkt)
   return NETIO_PKT_GROUP_ORDINAL_M(mda, pkt);
 }
 
-
 /** Return the VLAN ID assigned to the packet.
  * @ingroup ingress
  *
@@ -1546,7 +1478,6 @@ NETIO_PKT_VLAN_ID(netio_pkt_t* pkt)
   return NETIO_PKT_VLAN_ID_M(mda, pkt);
 }
 
-
 /** Return the ethertype of the packet.
  * @ingroup ingress
  *
@@ -1563,7 +1494,6 @@ NETIO_PKT_ETHERTYPE(netio_pkt_t* pkt)
 
   return NETIO_PKT_ETHERTYPE_M(mda, pkt);
 }
-
 
 /** Return the flow hash computed on the packet.
  * @ingroup ingress
@@ -1601,7 +1531,6 @@ NETIO_PKT_FLOW_HASH(netio_pkt_t* pkt)
   return NETIO_PKT_FLOW_HASH_M(mda, pkt);
 }
 
-
 /** Return the first word of "user data" for the packet.
  *
  * The contents of the user data words depend on the IPP.
@@ -1624,7 +1553,6 @@ NETIO_PKT_USER_DATA_0(netio_pkt_t* pkt)
 
   return NETIO_PKT_USER_DATA_0_M(mda, pkt);
 }
-
 
 /** Return the second word of "user data" for the packet.
  *
@@ -1649,7 +1577,6 @@ NETIO_PKT_USER_DATA_1(netio_pkt_t* pkt)
   return NETIO_PKT_USER_DATA_1_M(mda, pkt);
 }
 
-
 /** Determine whether the L4 (TCP/UDP) checksum was calculated.
  * @ingroup ingress
  *
@@ -1663,7 +1590,6 @@ NETIO_PKT_L4_CSUM_CALCULATED(netio_pkt_t* pkt)
 
   return NETIO_PKT_L4_CSUM_CALCULATED_M(mda, pkt);
 }
-
 
 /** Determine whether the L4 (TCP/UDP) checksum was calculated and found to
  *  be correct.
@@ -1680,7 +1606,6 @@ NETIO_PKT_L4_CSUM_CORRECT(netio_pkt_t* pkt)
   return NETIO_PKT_L4_CSUM_CORRECT_M(mda, pkt);
 }
 
-
 /** Determine whether the L3 (IP) checksum was calculated.
  * @ingroup ingress
  *
@@ -1694,7 +1619,6 @@ NETIO_PKT_L3_CSUM_CALCULATED(netio_pkt_t* pkt)
 
   return NETIO_PKT_L3_CSUM_CALCULATED_M(mda, pkt);
 }
-
 
 /** Determine whether the L3 (IP) checksum was calculated and found to be
  *  correct.
@@ -1710,7 +1634,6 @@ NETIO_PKT_L3_CSUM_CORRECT(netio_pkt_t* pkt)
 
   return NETIO_PKT_L3_CSUM_CORRECT_M(mda, pkt);
 }
-
 
 /** Determine whether the Ethertype was recognized and L3 packet data was
  *  processed.
@@ -1728,7 +1651,6 @@ NETIO_PKT_ETHERTYPE_RECOGNIZED(netio_pkt_t* pkt)
   return NETIO_PKT_ETHERTYPE_RECOGNIZED_M(mda, pkt);
 }
 
-
 /** Set an egress packet's L2 length, using a metadata pointer to speed the
  * computation.
  * @ingroup egress
@@ -1744,7 +1666,6 @@ NETIO_PKT_SET_L2_LENGTH_MM(netio_pkt_minimal_metadata_t* mmd, netio_pkt_t* pkt,
   mmd->l2_length = len;
 }
 
-
 /** Set an egress packet's L2 length.
  * @ingroup egress
  *
@@ -1758,7 +1679,6 @@ NETIO_PKT_SET_L2_LENGTH(netio_pkt_t* pkt, int len)
 
   NETIO_PKT_SET_L2_LENGTH_MM(mmd, pkt, len);
 }
-
 
 /** Set an egress packet's L2 header length, using a metadata pointer to
  *  speed the computation.
@@ -1780,7 +1700,6 @@ NETIO_PKT_SET_L2_HEADER_LENGTH_MM(netio_pkt_minimal_metadata_t* mmd,
   mmd->l3_offset = mmd->l2_offset + len;
 }
 
-
 /** Set an egress packet's L2 header length.
  * @ingroup egress
  *
@@ -1799,7 +1718,6 @@ NETIO_PKT_SET_L2_HEADER_LENGTH(netio_pkt_t* pkt, int len)
 
   NETIO_PKT_SET_L2_HEADER_LENGTH_MM(mmd, pkt, len);
 }
-
 
 /** Set up an egress packet for hardware checksum computation, using a
  *  metadata pointer to speed the operation.
@@ -1850,7 +1768,6 @@ NETIO_PKT_DO_EGRESS_CSUM_MM(netio_pkt_minimal_metadata_t* mmd,
   mmd->flags |= _NETIO_PKT_NEED_EDMA_CSUM_MASK;
 }
 
-
 /** Set up an egress packet for hardware checksum computation.
  * @ingroup egress
  *
@@ -1895,7 +1812,6 @@ NETIO_PKT_DO_EGRESS_CSUM(netio_pkt_t* pkt, int start, int length,
   NETIO_PKT_DO_EGRESS_CSUM_MM(mmd, pkt, start, length, location, seed);
 }
 
-
 /** Return the number of bytes which could be prepended to a packet, using a
  *  metadata pointer to speed the operation.
  *  See @ref netio_populate_prepend_buffer() to get a full description of
@@ -1911,7 +1827,6 @@ NETIO_PKT_PREPEND_AVAIL_M(netio_pkt_metadata_t* mda, netio_pkt_t* pkt)
          NETIO_PKT_CUSTOM_HEADER_LENGTH_M(mda, pkt);
 }
 
-
 /** Return the number of bytes which could be prepended to a packet, using a
  *  metadata pointer to speed the operation.
  *  See @ref netio_populate_prepend_buffer() to get a full description of
@@ -1926,7 +1841,6 @@ NETIO_PKT_PREPEND_AVAIL_MM(netio_pkt_minimal_metadata_t* mmd, netio_pkt_t* pkt)
 {
   return (pkt->__packet.bits.__offset << 6) + mmd->l2_offset;
 }
-
 
 /** Return the number of bytes which could be prepended to a packet.
  *  See @ref netio_populate_prepend_buffer() to get a full description of
@@ -1952,7 +1866,6 @@ NETIO_PKT_PREPEND_AVAIL(netio_pkt_t* pkt)
   }
 }
 
-
 /** Flush a packet's minimal metadata from the cache, using a metadata pointer
  *  to speed the operation.
  * @ingroup egress
@@ -1965,7 +1878,6 @@ NETIO_PKT_FLUSH_MINIMAL_METADATA_MM(netio_pkt_minimal_metadata_t* mmd,
                                     netio_pkt_t* pkt)
 {
 }
-
 
 /** Invalidate a packet's minimal metadata from the cache, using a metadata
  *  pointer to speed the operation.
@@ -1980,7 +1892,6 @@ NETIO_PKT_INV_MINIMAL_METADATA_MM(netio_pkt_minimal_metadata_t* mmd,
 {
 }
 
-
 /** Flush and then invalidate a packet's minimal metadata from the cache,
  *  using a metadata pointer to speed the operation.
  * @ingroup egress
@@ -1994,7 +1905,6 @@ NETIO_PKT_FLUSH_INV_MINIMAL_METADATA_MM(netio_pkt_minimal_metadata_t* mmd,
 {
 }
 
-
 /** Flush a packet's metadata from the cache, using a metadata pointer
  *  to speed the operation.
  * @ingroup ingress
@@ -2006,7 +1916,6 @@ static __inline void
 NETIO_PKT_FLUSH_METADATA_M(netio_pkt_metadata_t* mda, netio_pkt_t* pkt)
 {
 }
-
 
 /** Invalidate a packet's metadata from the cache, using a metadata
  *  pointer to speed the operation.
@@ -2020,7 +1929,6 @@ NETIO_PKT_INV_METADATA_M(netio_pkt_metadata_t* mda, netio_pkt_t* pkt)
 {
 }
 
-
 /** Flush and then invalidate a packet's metadata from the cache,
  *  using a metadata pointer to speed the operation.
  * @ingroup ingress
@@ -2033,7 +1941,6 @@ NETIO_PKT_FLUSH_INV_METADATA_M(netio_pkt_metadata_t* mda, netio_pkt_t* pkt)
 {
 }
 
-
 /** Flush a packet's minimal metadata from the cache.
  * @ingroup egress
  *
@@ -2043,7 +1950,6 @@ static __inline void
 NETIO_PKT_FLUSH_MINIMAL_METADATA(netio_pkt_t* pkt)
 {
 }
-
 
 /** Invalidate a packet's minimal metadata from the cache.
  * @ingroup egress
@@ -2055,7 +1961,6 @@ NETIO_PKT_INV_MINIMAL_METADATA(netio_pkt_t* pkt)
 {
 }
 
-
 /** Flush and then invalidate a packet's minimal metadata from the cache.
  * @ingroup egress
  *
@@ -2065,7 +1970,6 @@ static __inline void
 NETIO_PKT_FLUSH_INV_MINIMAL_METADATA(netio_pkt_t* pkt)
 {
 }
-
 
 /** Flush a packet's metadata from the cache.
  * @ingroup ingress
@@ -2077,7 +1981,6 @@ NETIO_PKT_FLUSH_METADATA(netio_pkt_t* pkt)
 {
 }
 
-
 /** Invalidate a packet's metadata from the cache.
  * @ingroup ingress
  *
@@ -2087,7 +1990,6 @@ static __inline void
 NETIO_PKT_INV_METADATA(netio_pkt_t* pkt)
 {
 }
-
 
 /** Flush and then invalidate a packet's metadata from the cache.
  * @ingroup ingress
@@ -2428,7 +2330,6 @@ typedef struct
       of packet queue slots which are available for all tiles for each EPP
       is subject to change, but is currently ::NETIO_TOTAL_SENDS_OUTSTANDING.
 
-
       This value is ignored if ::NETIO_XMIT is not specified in flags.
       If you want to specify a large value here for a specific tile, you are
       advised to specify NETIO_NO_XMIT on other, non-transmitting tiles so
@@ -2440,7 +2341,6 @@ typedef struct
   int num_sends_outstanding;
 }
 netio_input_config_t;
-
 
 /** Registration flags; used in the @ref netio_input_config_t structure.
  * @addtogroup setup
@@ -2574,7 +2474,6 @@ netio_input_config_t;
   */
 #define NETIO_AUTO_LINK_NONE   _NETIO_AUTO_PRESENT
 
-
 /** Minimum number of receive packets. */
 #define NETIO_MIN_RECEIVE_PKTS            16
 
@@ -2592,7 +2491,6 @@ netio_input_config_t;
  *  transmitting tile. */
 #define NETIO_MIN_SENDS_OUTSTANDING       16
 
-
 /**@}*/
 
 #ifndef __DOXYGEN__
@@ -2608,7 +2506,6 @@ struct __netio_queue_impl_t;
 struct __netio_queue_user_impl_t;
 
 #endif /* !__DOXYGEN__ */
-
 
 /** A netio_queue_t describes a NetIO communications endpoint.
  * @ingroup setup
@@ -2626,7 +2523,6 @@ typedef struct
 #endif
 }
 netio_queue_t;
-
 
 /**
  * @brief Packet send context.
@@ -2650,7 +2546,6 @@ typedef struct
 #endif
 }
 netio_send_pkt_context_t;
-
 
 #ifndef __DOXYGEN__
 #define SEND_PKT_CTX_USE_EPP   1  /**< We're sending to an EPP. */
@@ -2697,7 +2592,6 @@ __attribute__((aligned(8)))
   netio_pkt_handle_t handle;
 }
 netio_pkt_vector_entry_t;
-
 
 /**
  * @brief Initialize fields in a packet vector entry.
@@ -2748,7 +2642,6 @@ netio_pkt_vector_set(volatile netio_pkt_vector_entry_t* v, netio_pkt_t* pkt,
 
   v->user_data = user_data;
 }
-
 
 /**
  * Flags and structures for @ref netio_get() and @ref netio_set().
@@ -2910,7 +2803,6 @@ typedef struct
 }
 netio_stat_t;
 
-
 /** Link can run, should run, or is running at 10 Mbps. */
 #define NETIO_LINK_10M         0x01
 
@@ -2935,7 +2827,6 @@ netio_stat_t;
                            NETIO_LINK_1G   | \
                            NETIO_LINK_10G  | \
                            NETIO_LINK_ANYSPEED)
-
 
 /** MAC register class.  Addr is a register offset within the MAC.
  *  Registers within the XGbE and GbE MACs are documented in the Tile

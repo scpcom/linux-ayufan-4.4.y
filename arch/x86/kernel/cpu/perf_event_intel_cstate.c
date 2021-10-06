@@ -112,7 +112,6 @@ struct perf_cstate_msr {
 	bool	(*test)(int idx);
 };
 
-
 /* cstate_core PMU */
 
 static struct pmu cstate_core_pmu;
@@ -235,7 +234,6 @@ static const struct attribute_group *core_attr_groups[] = {
 };
 
 /* cstate_core PMU end */
-
 
 /* cstate_pkg PMU */
 

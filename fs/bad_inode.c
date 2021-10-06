@@ -148,7 +148,6 @@ static const struct inode_operations bad_inode_ops =
 	.removexattr	= bad_inode_removexattr,
 };
 
-
 /*
  * When a filesystem is unable to read an inode due to an I/O error in
  * its read_inode() function, it can call make_bad_inode() to return a

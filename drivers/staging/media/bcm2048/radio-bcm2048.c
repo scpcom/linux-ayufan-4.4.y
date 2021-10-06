@@ -179,7 +179,6 @@
 #define BCM2048_DEFAULT_TIMEOUT		1500
 #define BCM2048_AUTO_SEARCH_TIMEOUT	3000
 
-
 #define BCM2048_FREQDEV_UNIT		10000
 #define BCM2048_FREQV4L2_MULTI		625
 #define dev_to_v4l2(f)	((f * BCM2048_FREQDEV_UNIT) / BCM2048_FREQV4L2_MULTI)
@@ -2174,7 +2173,6 @@ static int bcm2048_sysfs_register_properties(struct bcm2048_device *bdev)
 
 	return err;
 }
-
 
 static int bcm2048_fops_open(struct file *file)
 {

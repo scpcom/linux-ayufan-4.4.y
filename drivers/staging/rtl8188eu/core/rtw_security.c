@@ -154,7 +154,6 @@ void rtw_wep_encrypt(struct adapter *padapter, u8 *pxmitframe)
 	struct	security_priv	*psecuritypriv = &padapter->securitypriv;
 	struct	xmit_priv		*pxmitpriv = &padapter->xmitpriv;
 
-
 	if (((struct xmit_frame *)pxmitframe)->buf_addr == NULL)
 		return;
 
@@ -207,7 +206,6 @@ void rtw_wep_decrypt(struct adapter  *padapter, u8 *precvframe)
 	u8	 keyindex;
 	struct	rx_pkt_attrib	 *prxattrib = &(((struct recv_frame *)precvframe)->attrib);
 	struct	security_priv	*psecuritypriv = &padapter->securitypriv;
-
 
 	pframe = (unsigned char *)((struct recv_frame *)precvframe)->rx_data;
 
@@ -357,8 +355,6 @@ void rtw_seccalctkipmic(u8 *key, u8 *header, u8 *data, u32 data_len, u8 *mic_cod
 
 	rtw_secgetmic(&micdata, mic_code);
 }
-
-
 
 /* macros for extraction/creation of unsigned char/unsigned short values  */
 #define RotR1(v16)   ((((v16) >> 1) & 0x7FFF) ^ (((v16) & 1) << 15))
@@ -657,7 +653,6 @@ u32 rtw_tkip_decrypt(struct adapter *padapter, u8 *precvframe)
 	struct	security_priv	*psecuritypriv = &padapter->securitypriv;
 	u32		res = _SUCCESS;
 
-
 	pframe = (unsigned char *)((struct recv_frame *)precvframe)->rx_data;
 
 	/* 4 start to decrypt recvframe */
@@ -714,7 +709,6 @@ exit:
 }
 
 /* 3			===== AES related ===== */
-
 
 #define MAX_MSG_SIZE	2048
 /*****************************/
@@ -1250,7 +1244,6 @@ u32	rtw_aes_encrypt(struct adapter *padapter, u8 *pxmitframe)
 			res = _FAIL;
 		}
 	}
-
 
 		return res;
 }

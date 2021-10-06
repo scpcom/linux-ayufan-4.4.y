@@ -286,7 +286,6 @@ out:
 	return err;
 }
 
-
 /*
  * Do a lookup + open with a single request.  If we get a non-existent
  * file or symlink, return 1 so the VFS can retry.
@@ -611,7 +610,6 @@ static void ceph_sync_write_unsafe(struct ceph_osd_request *req, bool unsafe)
 	}
 }
 
-
 /*
  * Synchronous write, straight from __user pointer or user pages.
  *
@@ -726,7 +724,6 @@ ceph_sync_direct_write(struct kiocb *iocb, struct iov_iter *from, loff_t pos,
 	}
 	return ret;
 }
-
 
 /*
  * Synchronous write, straight from __user pointer or user pages.
@@ -1439,4 +1436,3 @@ const struct file_operations ceph_file_fops = {
 	.compat_ioctl	= ceph_ioctl,
 	.fallocate	= ceph_fallocate,
 };
-

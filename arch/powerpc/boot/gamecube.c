@@ -32,4 +32,3 @@ void platform_init(unsigned long r3, unsigned long r4, unsigned long r5)
 	if (ug_probe())
 		console_ops.write = ug_console_write;
 }
-

@@ -85,7 +85,6 @@
 /* Register r_computed_crc, scope iop_scrc_out, type r */
 #define reg_iop_scrc_out_r_computed_crc_offset 20
 
-
 /* Constants */
 #define regk_iop_scrc_out_crc                     0x00000001
 #define regk_iop_scrc_out_data                    0x00000000

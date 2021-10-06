@@ -103,7 +103,6 @@ enum korg1212_dbcnst {
    K1212_DB_StartDSPDownload      = 0xAF  // tells the card to download its DSP firmware.
 };
 
-
 // ----------------------------------------------------------------------------
 // The following enumeration defines return codes 
 // to the Korg 1212 I/O driver.
@@ -1399,7 +1398,6 @@ static int snd_korg1212_playback_open(struct snd_pcm_substream *substream)
 
         return 0;
 }
-
 
 static int snd_korg1212_capture_open(struct snd_pcm_substream *substream)
 {

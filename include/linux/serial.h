@@ -12,7 +12,6 @@
 #include <asm/page.h>
 #include <uapi/linux/serial.h>
 
-
 /*
  * Counters of the input lines (CTS, DSR, RI, CD) interrupts
  */

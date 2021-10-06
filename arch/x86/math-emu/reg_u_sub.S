@@ -227,7 +227,6 @@ L_shift_1:
 L_round:
 	jmp	fpu_reg_round	/* Round the result */
 
-
 #ifdef PARANOID
 L_bugged_1:
 	pushl	EX_INTERNAL|0x206

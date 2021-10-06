@@ -10,7 +10,6 @@
  *
  */
 
-
 #include <linux/time.h>
 #include <linux/errno.h>
 #include <linux/stat.h>
@@ -204,11 +203,9 @@ static inline int ncp_is_server_root(struct inode *inode)
 		is_root_inode(inode);
 }
 
-
 /*
  * This is the callback when the dcache has a lookup hit.
  */
-
 
 #ifdef CONFIG_NCPFS_STRONG
 /* try to delete a readonly file (NW R bit set) */
@@ -305,7 +302,6 @@ leave_me:;
         return(res);
 }
 #endif	/* CONFIG_NCPFS_STRONG */
-
 
 static int
 ncp_lookup_validate(struct dentry *dentry, unsigned int flags)
@@ -1207,7 +1203,6 @@ ncp_date_dos2unix(__le16 t, __le16 d)
 	/* days since 1.1.70 plus 80's leap day */
 	return local2utc(secs);
 }
-
 
 /* Convert linear UNIX date to a MS-DOS time/date pair. */
 void

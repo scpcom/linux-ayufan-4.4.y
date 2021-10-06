@@ -281,4 +281,3 @@ int v4l2_m2m_fop_mmap(struct file *file, struct vm_area_struct *vma);
 unsigned int v4l2_m2m_fop_poll(struct file *file, poll_table *wait);
 
 #endif /* _MEDIA_V4L2_MEM2MEM_H */
-

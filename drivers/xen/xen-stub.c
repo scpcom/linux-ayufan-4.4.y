@@ -62,7 +62,6 @@ void xen_stub_memory_device_exit(void)
 }
 EXPORT_SYMBOL_GPL(xen_stub_memory_device_exit);
 
-
 /*--------------------------------------------
 	stub driver for Xen cpu hotplug
 --------------------------------------------*/

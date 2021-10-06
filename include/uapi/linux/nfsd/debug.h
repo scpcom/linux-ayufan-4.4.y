@@ -28,6 +28,4 @@
 #define NFSDDBG_ALL		0x7FFF
 #define NFSDDBG_NOCHANGE	0xFFFF
 
-
-
 #endif /* _UAPILINUX_NFSD_DEBUG_H */

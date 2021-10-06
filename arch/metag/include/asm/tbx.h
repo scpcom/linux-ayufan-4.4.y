@@ -33,7 +33,6 @@
 #endif
 #endif
 
-
 /* Id values in the TBI system describe a segment using an arbitrary
    integer value and flags in the bottom 8 bits, the SIGPOLL value is
    used in cases where control over blocking or polling behaviour is
@@ -1152,8 +1151,6 @@ const TBISTR *__TBIFindStr( const TBISTR *pStart,
    located with this routine. */ 
 const void *__TBITransStr( const char *pStr, int Len );
 
-
-
 /* Arbitrary physical memory access windows, use different Channels to avoid
    conflict/thrashing within a single piece of code. */
 void *__TBIPhysAccess( int Channel, int PhysAddr, int Bytes );
@@ -1245,8 +1242,6 @@ void __TBICont( const char *pMsg, ... ); /* TBIAssert -> 'wait for continue' */
 /* Array of signal name data for debug messages */
 extern const char __TBISigNames[];
 #endif /* ifndef __ASSEMBLY__ */
-
-
 
 /* Scale of sub-strings in the __TBISigNames string list */
 #define TBI_SIGNAME_SCALE   4

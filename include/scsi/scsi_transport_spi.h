@@ -101,8 +101,6 @@ struct spi_host_attrs {
 #define spi_flags(x)	(((struct spi_transport_attrs *)&(x)->starget_data)->flags)
 #define spi_signalling(h)	(((struct spi_host_attrs *)(h)->shost_data)->signalling)
 
-
-
 /* The functions by which the transport class and the driver communicate */
 struct spi_function_template {
 	void	(*get_period)(struct scsi_target *);

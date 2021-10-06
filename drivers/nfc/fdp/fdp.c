@@ -224,7 +224,6 @@ static int fdp_nci_send_patch(struct nci_dev *ndev, u8 conn_id, u8 type)
 			return -ENOMEM;
 		}
 
-
 		skb_reserve(skb, NCI_CTRL_HDR_SIZE);
 
 		memcpy(skb_put(skb, payload_size), fw->data + (fw->size - len),
@@ -310,7 +309,6 @@ static int fdp_nci_request_firmware(struct nci_dev *ndev)
 
 	dev_dbg(dev, "RAM patch version: %d, size: %d\n",
 		  info->ram_patch_version, (int) info->ram_patch->size);
-
 
 	r = request_firmware(&info->otp_patch, FDP_OTP_PATCH_NAME, dev);
 	if (r < 0) {

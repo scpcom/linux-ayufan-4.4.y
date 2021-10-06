@@ -31,7 +31,6 @@ struct eeprom_header
 	u_int8_t  pad[10];
 } __attribute__ ((packed));
 
-
 struct eeprom_eisa_slot_info
 {
 	u_int32_t eisa_slot_id;
@@ -76,7 +75,6 @@ struct eeprom_eisa_slot_info
 	u_int8_t  pad[24];
 } __attribute__ ((packed));
 
-
 #define HPEE_MEMORY_MAX_ENT   9
 /* memory descriptor: byte 0 */
 #define HPEE_MEMORY_WRITABLE  0x01
@@ -102,7 +100,6 @@ struct eeprom_eisa_slot_info
  * containging the memory size in kilobytes */
 /* byte 4,5,6 are a 24bit LE value
  * containing the memory base address */
-
 
 #define HPEE_IRQ_MAX_ENT      7
 /* Interrupt entry: byte 0 */

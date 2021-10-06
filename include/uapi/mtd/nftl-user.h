@@ -86,5 +86,4 @@ struct NFTLMediaHeader {
 #define ZONE_BAD_ORIGINAL 0
 #define ZONE_BAD_MARKED 7
 
-
 #endif /* __MTD_NFTL_USER_H__ */

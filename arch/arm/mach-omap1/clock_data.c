@@ -824,7 +824,6 @@ int __init omap1_clk_init(void)
 	/* We want to be in syncronous scalable mode */
 	omap_writew(0x1000, ARM_SYSST);
 
-
 	/*
 	 * Initially use the values set by bootloader. Determine PLL rate and
 	 * recalculate dependent clocks as if kernel had changed PLL or

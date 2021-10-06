@@ -501,7 +501,6 @@ single_step_panic:
 	synco
 	rte
 
-
 	.balign	256
 debug_exception:
 	synco	/* TAKum03020 (but probably a good idea anyway.) */
@@ -835,7 +834,6 @@ no_underflow:
 	movi	SR_UNBLOCK_EXC, r7
 	and	r6, r7, r6
 	putcon	r6, SR
-
 
 	/* Now call the appropriate 3rd level handler */
 	or	r3, ZERO, LINK
@@ -1207,7 +1205,6 @@ syscall_ret:
 	st.q	SP, FRAME_S(FSPC), r2
 	pta	ret_from_syscall, tr0
 	blink	tr0, ZERO
-
 
 /*  A different return path for ret_from_fork, because we now need
  *  to call schedule_tail with the later kernels. Because prev is
@@ -1612,7 +1609,6 @@ ___get_user_asm_b_exit:
 	ptabs	LINK, tr0
 	blink	tr0, ZERO
 
-
 	.global	__get_user_asm_w
 __get_user_asm_w:
 	or	r2, ZERO, r4
@@ -1627,7 +1623,6 @@ ___get_user_asm_w_exit:
 	ptabs	LINK, tr0
 	blink	tr0, ZERO
 
-
 	.global	__get_user_asm_l
 __get_user_asm_l:
 	or	r2, ZERO, r4
@@ -1641,7 +1636,6 @@ ___get_user_asm_l1:
 ___get_user_asm_l_exit:
 	ptabs	LINK, tr0
 	blink	tr0, ZERO
-
 
 	.global	__get_user_asm_q
 __get_user_asm_q:
@@ -1681,7 +1675,6 @@ ___put_user_asm_b_exit:
 	ptabs	LINK, tr0
 	blink	tr0, ZERO
 
-
 	.global	__put_user_asm_w
 __put_user_asm_w:
 	ld.w	r2, 0, r4		/* r4 = data */
@@ -1695,7 +1688,6 @@ ___put_user_asm_w_exit:
 	ptabs	LINK, tr0
 	blink	tr0, ZERO
 
-
 	.global	__put_user_asm_l
 __put_user_asm_l:
 	ld.l	r2, 0, r4		/* r4 = data */
@@ -1708,7 +1700,6 @@ ___put_user_asm_l1:
 ___put_user_asm_l_exit:
 	ptabs	LINK, tr0
 	blink	tr0, ZERO
-
 
 	.global	__put_user_asm_q
 __put_user_asm_q:
@@ -1867,9 +1858,6 @@ panic_stash_regs:
 	nop
 	nop
 
-
-
-
 /*
  * --- Signal Handling Section
  */
@@ -1932,9 +1920,6 @@ asm_uaccess_start:
 
 	.global asm_uaccess_end		/* Just a marker */
 asm_uaccess_end:
-
-
-
 
 /*
  * --- .init.text Section
@@ -2000,4 +1985,3 @@ trap_init_loop:
 	addi	SP, 24, SP
 	ptabs	LINK, tr0
 	blink	tr0, ZERO
-

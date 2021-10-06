@@ -4,7 +4,6 @@
 #ifndef _UAPI__LINUX_IP_NETFILTER_H
 #define _UAPI__LINUX_IP_NETFILTER_H
 
-
 #include <linux/netfilter.h>
 
 /* only for userspace compatibility */
@@ -76,6 +75,5 @@ enum nf_ip_hook_priorities {
 /* 2.2 firewalling (+ masq) went from 64 through 76 */
 /* 2.4 firewalling went 64 through 67. */
 #define SO_ORIGINAL_DST 80
-
 
 #endif /* _UAPI__LINUX_IP_NETFILTER_H */

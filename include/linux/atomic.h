@@ -257,7 +257,6 @@
 #endif
 #endif /* atomic64_inc_return_relaxed */
 
-
 /* atomic64_sub_return_relaxed */
 #ifndef atomic64_sub_return_relaxed
 #define  atomic64_sub_return_relaxed	atomic64_sub_return

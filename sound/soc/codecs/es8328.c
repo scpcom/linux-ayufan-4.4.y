@@ -153,8 +153,6 @@ static int es8328_put_deemph(struct snd_kcontrol *kcontrol,
 	return 0;
 }
 
-
-
 static const struct snd_kcontrol_new es8328_snd_controls[] = {
 	SOC_DOUBLE_R_TLV("Capture Digital Volume",
 		ES8328_ADCCONTROL8, ES8328_ADCCONTROL9,

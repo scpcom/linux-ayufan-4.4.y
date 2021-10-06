@@ -42,7 +42,6 @@
 #include "ixgbe.h"
 #include "ixgbe_phy.h"
 
-
 #define IXGBE_ALL_RAR_ENTRIES 16
 
 enum {NETDEV_STATS, IXGBE_STATS};
@@ -1738,7 +1737,6 @@ static int ixgbe_setup_loopback_test(struct ixgbe_adapter *adapter)
 {
 	struct ixgbe_hw *hw = &adapter->hw;
 	u32 reg_data;
-
 
 	/* Setup MAC loopback */
 	reg_data = IXGBE_READ_REG(hw, IXGBE_HLREG0);

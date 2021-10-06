@@ -45,7 +45,6 @@
 #include "atmel-pcm.h"
 #include "atmel_ssc_dai.h"
 
-
 #define NUM_SSC_DEVICES		3
 
 /*
@@ -88,7 +87,6 @@ static struct atmel_ssc_mask ssc_rx_mask = {
 	.pdc_disable	= ATMEL_PDC_RXTDIS,
 };
 
-
 /*
  * DMA parameters.
  */
@@ -125,7 +123,6 @@ static struct atmel_pcm_dma_params ssc_dma_params[NUM_SSC_DEVICES][2] = {
 	} },
 };
 
-
 static struct atmel_ssc_info ssc_info[NUM_SSC_DEVICES] = {
 	{
 	.name		= "ssc0",
@@ -146,7 +143,6 @@ static struct atmel_ssc_info ssc_info[NUM_SSC_DEVICES] = {
 	.initialized	= 0,
 	},
 };
-
 
 /*
  * SSC interrupt handler.  Passes PDC interrupts to the DMA
@@ -384,7 +380,6 @@ static void atmel_ssc_shutdown(struct snd_pcm_substream *substream,
 	pr_debug("atmel_ssc_dai: Stopping clock\n");
 	clk_disable(ssc_p->ssc->clk);
 }
-
 
 /*
  * Record the DAI format for use in hw_params().
@@ -768,7 +763,6 @@ static int atmel_ssc_hw_params(struct snd_pcm_substream *substream,
 	return 0;
 }
 
-
 static int atmel_ssc_prepare(struct snd_pcm_substream *substream,
 			     struct snd_soc_dai *dai)
 {
@@ -846,8 +840,6 @@ static int atmel_ssc_suspend(struct snd_soc_dai *cpu_dai)
 
 	return 0;
 }
-
-
 
 static int atmel_ssc_resume(struct snd_soc_dai *cpu_dai)
 {

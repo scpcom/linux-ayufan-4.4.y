@@ -23,7 +23,6 @@
     PA header file -- do not include this header file for non-PA builds.
 #endif
 
-
 /* amount is assumed to be a constant between 0 and 32 (non-inclusive) */
 #define Shiftdouble(left,right,amount,dest)			\
     /* int left, right, amount, dest; */			\

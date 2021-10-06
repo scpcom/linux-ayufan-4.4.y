@@ -466,7 +466,6 @@ static void set_sock_callbacks(struct socket *sock,
 	sk->sk_state_change = ceph_sock_state_change;
 }
 
-
 /*
  * socket helpers
  */
@@ -753,7 +752,6 @@ void ceph_con_init(struct ceph_connection *con, void *private,
 	con->state = CON_STATE_CLOSED;
 }
 EXPORT_SYMBOL(ceph_con_init);
-
 
 /*
  * We maintain a global counter to order connection attempts.  Get
@@ -1682,7 +1680,6 @@ static int prepare_read_message(struct ceph_connection *con)
 	return 0;
 }
 
-
 static int read_partial(struct ceph_connection *con,
 			int end, int size, void *object)
 {
@@ -1696,7 +1693,6 @@ static int read_partial(struct ceph_connection *con,
 	}
 	return 1;
 }
-
 
 /*
  * Read all or part of the connect-side handshake on a new connection
@@ -2198,7 +2194,6 @@ static int process_connect(struct ceph_connection *con)
 	return 0;
 }
 
-
 /*
  * read (part of) an ack
  */
@@ -2232,7 +2227,6 @@ static void process_ack(struct ceph_connection *con)
 	}
 	prepare_read_tag(con);
 }
-
 
 static int read_partial_message_section(struct ceph_connection *con,
 					struct kvec *section,
@@ -2595,8 +2589,6 @@ out:
 	return ret;
 }
 
-
-
 /*
  * Read what we can from the socket.
  */
@@ -2749,7 +2741,6 @@ bad_tag:
 	ret = -1;
 	goto out;
 }
-
 
 /*
  * Atomically queue work on a connection after the specified delay.
@@ -2968,8 +2959,6 @@ static void con_fault(struct ceph_connection *con)
 		queue_con(con);
 	}
 }
-
-
 
 /*
  * initialize a new messenger instance
@@ -3393,7 +3382,6 @@ static int ceph_con_in_msg_alloc(struct ceph_connection *con, int *skip)
 
 	return ret;
 }
-
 
 /*
  * Free a generically kmalloc'd message.

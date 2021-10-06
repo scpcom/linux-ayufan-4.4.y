@@ -41,7 +41,6 @@ struct cw1200_platform_data_sdio {
 	const char *sdd_file;  /* if NULL, will use default for detected hw type */
 };
 
-
 /* An example of SPI support in your board setup file:
 
    static struct cw1200_platform_data_spi cw1200_platform_data = {

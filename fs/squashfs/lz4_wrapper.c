@@ -30,7 +30,6 @@ struct squashfs_lz4 {
 	void *output;
 };
 
-
 static void *lz4_comp_opts(struct squashfs_sb_info *msblk,
 	void *buff, int len)
 {
@@ -49,7 +48,6 @@ static void *lz4_comp_opts(struct squashfs_sb_info *msblk,
 
 	return NULL;
 }
-
 
 static void *lz4_init(struct squashfs_sb_info *msblk, void *buff)
 {
@@ -77,7 +75,6 @@ failed:
 	return ERR_PTR(-ENOMEM);
 }
 
-
 static void lz4_free(void *strm)
 {
 	struct squashfs_lz4 *stream = strm;
@@ -88,7 +85,6 @@ static void lz4_free(void *strm)
 	}
 	kfree(stream);
 }
-
 
 static int lz4_uncompress(struct squashfs_sb_info *msblk, void *strm,
 	struct buffer_head **bh, int b, int offset, int length,

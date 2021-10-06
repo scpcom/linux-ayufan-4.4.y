@@ -93,7 +93,6 @@ static const struct ata_port_info uli_port_info = {
 	.port_ops       = &uli_ops,
 };
 
-
 MODULE_AUTHOR("Peer Chen");
 MODULE_DESCRIPTION("low-level driver for ULi Electronics SATA controller");
 MODULE_LICENSE("GPL");

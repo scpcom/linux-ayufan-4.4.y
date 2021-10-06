@@ -11,7 +11,6 @@
 #ifndef _UAPI_LINUX_IF_TEAM_H_
 #define _UAPI_LINUX_IF_TEAM_H_
 
-
 #define TEAM_STRING_MAX_LEN 32
 
 /**********************************

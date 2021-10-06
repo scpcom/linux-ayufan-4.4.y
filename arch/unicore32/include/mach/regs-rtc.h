@@ -34,4 +34,3 @@
  * 1 Hz clock interrupt Enable RTC_RTSR_HZE
  */
 #define RTC_RTSR_HZE		FIELD(1, 1, 3)
-

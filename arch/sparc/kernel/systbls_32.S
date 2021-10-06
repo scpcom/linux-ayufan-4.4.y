@@ -8,7 +8,6 @@
  * Copyright (C) 1995 Adrian M. Rodriguez (adrian@remus.rutgers.edu)
  */
 
-
 	.data
 	.align 4
 

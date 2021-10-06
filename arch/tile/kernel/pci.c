@@ -31,7 +31,6 @@
 #include <asm/hv_driver.h>
 #include <hv/drv_pcie_rc_intf.h>
 
-
 /*
  * Initialization flow and process
  * -------------------------------
@@ -65,7 +64,6 @@ static int pci_scan_flags[TILE_NUM_PCIE];
 
 static struct pci_ops tile_cfg_ops;
 
-
 /*
  * We don't need to worry about the alignment of resources.
  */
@@ -93,7 +91,6 @@ static int tile_pcie_open(int controller_id, int config_type)
 
 	return fd;
 }
-
 
 /*
  * Get the IRQ numbers from the HV and set up the handlers for them.
@@ -240,7 +237,6 @@ static int tile_map_irq(const struct pci_dev *dev, u8 slot, u8 pin)
 	return (pin - 1) + controller->irq_base;
 }
 
-
 static void fixup_read_and_payload_sizes(void)
 {
 	struct pci_dev *dev = NULL;
@@ -264,7 +260,6 @@ static void fixup_read_and_payload_sizes(void)
 				PCI_EXP_DEVCTL_PAYLOAD | PCI_EXP_DEVCTL_READRQ,
 				new_values);
 }
-
 
 /*
  * Second PCI initialization entry point, called by subsys_initcall.
@@ -498,7 +493,6 @@ static int tile_cfg_read(struct pci_bus *bus, unsigned int devfn, int offset,
 			    (HV_VirtAddr)(val), size, addr);
 }
 
-
 /*
  * See tile_cfg_read() for relevant comments.
  * Note that "val" is the value to write, not a pointer to that value.
@@ -541,12 +535,10 @@ static int tile_cfg_write(struct pci_bus *bus, unsigned int devfn, int offset,
 			     valp, size, addr);
 }
 
-
 static struct pci_ops tile_cfg_ops = {
 	.read =         tile_cfg_read,
 	.write =        tile_cfg_write,
 };
-
 
 /*
  * In the following, each PCI controller's mem_resources[1]

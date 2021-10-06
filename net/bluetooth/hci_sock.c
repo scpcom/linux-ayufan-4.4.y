@@ -914,7 +914,6 @@ static int hci_sock_bind(struct socket *sock, struct sockaddr *addr,
 		break;
 	}
 
-
 	hci_pi(sk)->channel = haddr.hci_channel;
 	sk->sk_state = BT_BOUND;
 

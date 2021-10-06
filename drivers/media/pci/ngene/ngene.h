@@ -322,7 +322,6 @@ enum FSC_MODE_BITS {
 	_SMODE_VIDEO_CAPTURE    = 0x01
 };
 
-
 /* Meaning of FW_STREAM_CONTROL::Stream bits:
  * Bit 3: Audio sample count:  0 = relative, 1 = absolute
  * Bit 2: color bar select; 1=color bars, 0=CV3 decoder
@@ -434,7 +433,6 @@ struct FW_WRITE_UART {
 	u8 Data[252];
 } __attribute__ ((__packed__));
 
-
 struct ngene_command {
 	u32 in_len;
 	u32 out_len;
@@ -542,7 +540,6 @@ enum STREAMMODEFLAGS {
 				  (only stream 0) */
 	StreamMode_TSOUT  = 8, /* Transport stream output (only stream 3) */
 };
-
 
 enum BufferExchangeFlags {
 	BEF_EVEN_FIELD   = 0x00000001,
@@ -720,7 +717,6 @@ struct ngene_channel {
 	int running;
 };
 
-
 struct ngene_ci {
 	struct device         device;
 	struct i2c_adapter    i2c_adapter;
@@ -803,7 +799,6 @@ struct ngene {
 #define AIN_BUF_SIZE (128*1024)
 	struct dvb_ringbuffer ain_rbuf;
 
-
 	u8                   *vin_buf;
 #define VIN_BUF_SIZE (4*1920*1080)
 	struct dvb_ringbuffer vin_rbuf;
@@ -884,7 +879,6 @@ struct ngene_buffer {
 	int                        btswap;
 };
 #endif
-
 
 /* Provided by ngene-core.c */
 int ngene_probe(struct pci_dev *pci_dev, const struct pci_device_id *id);

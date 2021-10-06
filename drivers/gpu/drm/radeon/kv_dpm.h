@@ -183,7 +183,6 @@ struct kv_power_info {
 	struct kv_ps requested_ps;
 };
 
-
 /* kv_smc.c */
 int kv_notify_message_to_smu(struct radeon_device *rdev, u32 id);
 int kv_dpm_get_enable_mask(struct radeon_device *rdev, u32 *enable_mask);

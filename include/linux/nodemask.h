@@ -523,5 +523,4 @@ struct nodemask_scratch {
 					GFP_KERNEL | __GFP_NORETRY)
 #define NODEMASK_SCRATCH_FREE(x)	NODEMASK_FREE(x)
 
-
 #endif /* __LINUX_NODEMASK_H */

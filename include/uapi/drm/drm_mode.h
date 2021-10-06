@@ -73,7 +73,6 @@
 #define  DRM_MODE_FLAG_3D_TOP_AND_BOTTOM	(7<<14)
 #define  DRM_MODE_FLAG_3D_SIDE_BY_SIDE_HALF	(8<<14)
 
-
 /* DPMS flags */
 /* bit compatible with the xorg definitions. */
 #define DRM_MODE_DPMS_ON	0

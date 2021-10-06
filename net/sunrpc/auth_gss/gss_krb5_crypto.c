@@ -784,7 +784,6 @@ gss_krb5_aes_decrypt(struct krb5_ctx *kctx, u32 offset, struct xdr_buf *buf,
 	}
 	blocksize = crypto_blkcipher_blocksize(cipher);
 
-
 	/* create a segment skipping the header and leaving out the checksum */
 	xdr_buf_subsegment(buf, &subbuf, offset + GSS_KRB5_TOK_HDR_LEN,
 				    (buf->len - offset - GSS_KRB5_TOK_HDR_LEN -
@@ -816,7 +815,6 @@ gss_krb5_aes_decrypt(struct krb5_ctx *kctx, u32 offset, struct xdr_buf *buf,
 	ret = gss_krb5_cts_crypt(cipher, &subbuf, cbcbytes, desc.iv, NULL, 0);
 	if (ret)
 		goto out_err;
-
 
 	/* Calculate our hmac over the plaintext data */
 	our_hmac_obj.len = sizeof(our_hmac);
@@ -981,4 +979,3 @@ out_err:
 	dprintk("%s: returning %d\n", __func__, err);
 	return err;
 }
-

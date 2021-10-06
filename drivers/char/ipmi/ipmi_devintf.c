@@ -119,7 +119,6 @@ static int ipmi_open(struct inode *inode, struct file *file)
 	int                      rv;
 	struct ipmi_file_private *priv;
 
-
 	priv = kmalloc(sizeof(*priv), GFP_KERNEL);
 	if (!priv)
 		return -ENOMEM;
@@ -165,7 +164,6 @@ static int ipmi_release(struct inode *inode, struct file *file)
 
 	list_for_each_entry_safe(msg, next, &priv->recv_msgs, link)
 		ipmi_free_recv_msg(msg);
-
 
 	kfree(priv);
 
@@ -282,7 +280,6 @@ static int ipmi_ioctl(struct file   *file,
 		struct ipmi_recv_msg  *msg;
 		unsigned long    flags;
 		
-
 		rv = 0;
 		if (copy_from_user(&rsp, arg, sizeof(rsp))) {
 			rv = -EFAULT;

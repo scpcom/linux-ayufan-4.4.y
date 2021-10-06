@@ -27,7 +27,6 @@ static char version[] =
 		"QLogic NetXtreme II iSCSI Driver " DRV_MODULE_NAME \
 		" v" DRV_MODULE_VERSION " (" DRV_MODULE_RELDATE ")\n";
 
-
 MODULE_AUTHOR("Anil Veerabhadrappa <anilgv@broadcom.com> and "
 	      "Eddie Wai <eddie.wai@broadcom.com>");
 
@@ -77,7 +76,6 @@ static struct notifier_block bnx2i_cpu_notifier = {
 	.notifier_call = bnx2i_cpu_callback,
 };
 
-
 /**
  * bnx2i_identify_device - identifies NetXtreme II device type
  * @hba: 		Adapter structure pointer
@@ -110,7 +108,6 @@ void bnx2i_identify_device(struct bnx2i_hba *hba, struct cnic_dev *dev)
 	}
 }
 
-
 /**
  * get_adapter_list_head - returns head of adapter list
  */
@@ -134,7 +131,6 @@ hba_not_found:
 	return hba;
 }
 
-
 /**
  * bnx2i_find_hba_for_cnic - maps cnic device instance to bnx2i adapter instance
  * @cnic:	pointer to cnic device instance
@@ -154,7 +150,6 @@ struct bnx2i_hba *bnx2i_find_hba_for_cnic(struct cnic_dev *cnic)
 	mutex_unlock(&bnx2i_dev_lock);
 	return NULL;
 }
-
 
 /**
  * bnx2i_start - cnic callback to initialize & start adapter instance
@@ -184,7 +179,6 @@ void bnx2i_start(void *handle)
 	       !test_bit(ADAPTER_STATE_INIT_FAILED, &hba->adapter_state) && i--)
 		msleep(BNX2I_INIT_POLL_TIME);
 }
-
 
 /**
  * bnx2i_chip_cleanup - local routine to handle chip cleanup
@@ -216,7 +210,6 @@ static void bnx2i_chip_cleanup(struct bnx2i_hba *hba)
 		mutex_unlock(&hba->net_dev_lock);
 	}
 }
-
 
 /**
  * bnx2i_stop - cnic callback to shutdown adapter instance
@@ -268,7 +261,6 @@ void bnx2i_stop(void *handle)
 	clear_bit(ADAPTER_STATE_UP, &hba->adapter_state);
 }
 
-
 /**
  * bnx2i_init_one - initialize an adapter instance and allocate memory resources
  * @hba:	bnx2i adapter instance
@@ -313,7 +305,6 @@ out:
 	return rc;
 }
 
-
 /**
  * bnx2i_ulp_init - initialize an adapter instance
  * @dev:	cnic device handle
@@ -340,7 +331,6 @@ void bnx2i_ulp_init(struct cnic_dev *dev)
 		bnx2i_free_hba(hba);
 	}
 }
-
 
 /**
  * bnx2i_ulp_exit - shuts down adapter instance and frees all resources
@@ -369,7 +359,6 @@ void bnx2i_ulp_exit(struct cnic_dev *dev)
 
 	bnx2i_free_hba(hba);
 }
-
 
 /**
  * bnx2i_get_stats - Retrieve various statistic from iSCSI offload
@@ -410,7 +399,6 @@ int bnx2i_get_stats(void *handle)
 	return 0;
 }
 
-
 /**
  * bnx2i_percpu_thread_create - Create a receive thread for an
  *				online CPU
@@ -434,7 +422,6 @@ static void bnx2i_percpu_thread_create(unsigned int cpu)
 		wake_up_process(thread);
 	}
 }
-
 
 static void bnx2i_percpu_thread_destroy(unsigned int cpu)
 {
@@ -460,7 +447,6 @@ static void bnx2i_percpu_thread_destroy(unsigned int cpu)
 	if (thread)
 		kthread_stop(thread);
 }
-
 
 /**
  * bnx2i_cpu_callback - Handler for CPU hotplug events
@@ -495,7 +481,6 @@ static int bnx2i_cpu_callback(struct notifier_block *nfb,
 	}
 	return NOTIFY_OK;
 }
-
 
 /**
  * bnx2i_mod_init - module init entry point
@@ -556,7 +541,6 @@ unreg_xport:
 out:
 	return err;
 }
-
 
 /**
  * bnx2i_mod_exit - module cleanup/exit entry point

@@ -315,7 +315,6 @@ static void emit_bpf_tail_call(u8 **pprog)
 	*pprog = prog;
 }
 
-
 static void emit_load_skb_data_hlen(u8 **pprog)
 {
 	u8 *prog = *pprog;

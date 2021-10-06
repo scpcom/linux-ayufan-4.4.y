@@ -203,7 +203,6 @@ struct SMC_NISLANDS_MC_TPP_CAC_TABLE
 
 typedef struct SMC_NISLANDS_MC_TPP_CAC_TABLE SMC_NISLANDS_MC_TPP_CAC_TABLE;
 
-
 struct PP_NIslands_CACTABLES
 {
     uint32_t                cac_bif_lut[SMC_NISLANDS_BIF_LUT_NUM_OF_ENTRIES];
@@ -256,7 +255,6 @@ struct SMC_NIslands_MCRegisterAddress
 };
 
 typedef struct SMC_NIslands_MCRegisterAddress SMC_NIslands_MCRegisterAddress;
-
 
 struct SMC_NIslands_MCRegisterSet
 {
@@ -326,4 +324,3 @@ typedef struct SMC_NISLANDS_SPLL_DIV_TABLE SMC_NISLANDS_SPLL_DIV_TABLE;
 #pragma pack(pop)
 
 #endif
-

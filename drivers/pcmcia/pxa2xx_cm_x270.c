@@ -42,14 +42,12 @@ static void cmx270_pcmcia_shutdown(struct soc_pcmcia_socket *skt)
 	gpio_free(GPIO_PCMCIA_RESET);
 }
 
-
 static void cmx270_pcmcia_socket_state(struct soc_pcmcia_socket *skt,
 				       struct pcmcia_state *state)
 {
 	state->vs_3v  = 0;
 	state->vs_Xv  = 0;
 }
-
 
 static int cmx270_pcmcia_configure_socket(struct soc_pcmcia_socket *skt,
 					  const socket_state_t *state)

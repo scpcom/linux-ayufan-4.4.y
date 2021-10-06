@@ -53,7 +53,6 @@ static inline u32 sms_read_reg(u16 reg)
 
 extern void omap2_set_globals_sdrc(void __iomem *sdrc, void __iomem *sms);
 
-
 /**
  * struct omap_sdrc_params - SDRC parameters for a given SDRC clock rate
  * @rate: SDRC clock rate (in Hz)
@@ -102,7 +101,6 @@ struct omap_sdrc_params *rx51_get_sdram_timings(void);
 
 u32 omap2xxx_sdrc_dll_is_unlocked(void);
 u32 omap2xxx_sdrc_reprogram(u32 level, u32 force);
-
 
 #else
 #define OMAP242X_SDRC_REGADDR(reg)					\
@@ -191,7 +189,6 @@ u32 omap2xxx_sdrc_reprogram(u32 level, u32 force);
 #define SDRC_RFR_CTRL_110MHz	(0x0002da01 | 1) /* Need to calc */
 #define SDRC_RFR_CTRL_BYPASS	(0x00005000 | 1) /* Need to calc */
 
-
 /*
  * SMS register access
  */
@@ -207,7 +204,5 @@ u32 omap2xxx_sdrc_reprogram(u32 level, u32 force);
 
 #define SMS_SYSCONFIG			0x010
 /* REVISIT: fill in other SMS registers here */
-
-
 
 #endif

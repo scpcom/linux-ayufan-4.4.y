@@ -206,7 +206,6 @@ static int ariadne_rx(struct net_device *dev)
 				break;
 			}
 
-
 			skb_reserve(skb, 2);	/* 16 byte align */
 			skb_put(skb, pkt_len);	/* Make room */
 			skb_copy_to_linear_data(skb,
@@ -680,7 +679,6 @@ static void set_multicast_list(struct net_device *dev)
 
 	netif_wake_queue(dev);
 }
-
 
 static void ariadne_remove_one(struct zorro_dev *z)
 {

@@ -11,7 +11,6 @@
 
 #include "ebb.h"
 
-
 /*
  * Test that the kernel properly handles PMAE across context switches.
  *

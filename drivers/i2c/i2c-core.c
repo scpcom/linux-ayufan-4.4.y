@@ -411,7 +411,6 @@ acpi_i2c_space_handler(u32 function, acpi_physical_address command,
 	return ret;
 }
 
-
 static int acpi_i2c_install_space_handler(struct i2c_adapter *adapter)
 {
 	acpi_handle handle;
@@ -522,7 +521,6 @@ static int i2c_device_match(struct device *dev, struct device_driver *drv)
 
 	return 0;
 }
-
 
 /* uevent helps with hotplug: modprobe -q $(MODALIAS) */
 static int i2c_device_uevent(struct device *dev, struct kobj_uevent_env *env)
@@ -832,7 +830,6 @@ static struct device_type i2c_client_type = {
 	.release	= i2c_client_dev_release,
 };
 
-
 /**
  * i2c_verify_client - return parameter as i2c_client, or NULL
  * @dev: device, probably from some driver model iterator
@@ -849,7 +846,6 @@ struct i2c_client *i2c_verify_client(struct device *dev)
 			: NULL;
 }
 EXPORT_SYMBOL(i2c_verify_client);
-
 
 /* Return a unique address which takes the flags of the client into account */
 static unsigned short i2c_encode_flags_to_addr(struct i2c_client *client)
@@ -1091,7 +1087,6 @@ out_err_silent:
 }
 EXPORT_SYMBOL_GPL(i2c_new_device);
 
-
 /**
  * i2c_unregister_device - reverse effect of i2c_new_device()
  * @client: value returned from i2c_new_device()
@@ -1104,7 +1099,6 @@ void i2c_unregister_device(struct i2c_client *client)
 	device_unregister(&client->dev);
 }
 EXPORT_SYMBOL_GPL(i2c_unregister_device);
-
 
 static const struct i2c_device_id dummy_id[] = {
 	{ "dummy", 0 },

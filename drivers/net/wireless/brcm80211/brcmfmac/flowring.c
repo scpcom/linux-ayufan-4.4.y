@@ -13,7 +13,6 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-
 #include <linux/types.h>
 #include <linux/netdevice.h>
 #include <linux/etherdevice.h>
@@ -26,7 +25,6 @@
 #include "flowring.h"
 #include "msgbuf.h"
 #include "common.h"
-
 
 #define BRCMF_FLOWRING_HIGH		1024
 #define BRCMF_FLOWRING_LOW		(BRCMF_FLOWRING_HIGH - 256)
@@ -46,7 +44,6 @@ static const u8 brcmf_flowring_prio2fifo[] = {
 	3
 };
 
-
 static bool
 brcmf_flowring_is_tdls_mac(struct brcmf_flowring *flow, u8 mac[ETH_ALEN])
 {
@@ -62,7 +59,6 @@ brcmf_flowring_is_tdls_mac(struct brcmf_flowring *flow, u8 mac[ETH_ALEN])
 
 	return false;
 }
-
 
 u32 brcmf_flowring_lookup(struct brcmf_flowring *flow, u8 da[ETH_ALEN],
 			  u8 prio, u8 ifidx)
@@ -104,7 +100,6 @@ u32 brcmf_flowring_lookup(struct brcmf_flowring *flow, u8 da[ETH_ALEN],
 
 	return BRCMF_FLOWRING_INVALID_ID;
 }
-
 
 u32 brcmf_flowring_create(struct brcmf_flowring *flow, u8 da[ETH_ALEN],
 			  u8 prio, u8 ifidx)
@@ -168,7 +163,6 @@ u32 brcmf_flowring_create(struct brcmf_flowring *flow, u8 da[ETH_ALEN],
 	return BRCMF_FLOWRING_INVALID_ID;
 }
 
-
 u8 brcmf_flowring_tid(struct brcmf_flowring *flow, u8 flowid)
 {
 	struct brcmf_flowring_ring *ring;
@@ -177,7 +171,6 @@ u8 brcmf_flowring_tid(struct brcmf_flowring *flow, u8 flowid)
 
 	return flow->hash[ring->hash_id].fifo;
 }
-
 
 static void brcmf_flowring_block(struct brcmf_flowring *flow, u8 flowid,
 				 bool blocked)
@@ -227,7 +220,6 @@ static void brcmf_flowring_block(struct brcmf_flowring *flow, u8 flowid,
 	spin_unlock_irqrestore(&flow->block_lock, flags);
 }
 
-
 void brcmf_flowring_delete(struct brcmf_flowring *flow, u8 flowid)
 {
 	struct brcmf_flowring_ring *ring;
@@ -251,7 +243,6 @@ void brcmf_flowring_delete(struct brcmf_flowring *flow, u8 flowid)
 
 	kfree(ring);
 }
-
 
 u32 brcmf_flowring_enqueue(struct brcmf_flowring *flow, u8 flowid,
 			   struct sk_buff *skb)
@@ -278,7 +269,6 @@ u32 brcmf_flowring_enqueue(struct brcmf_flowring *flow, u8 flowid,
 	return skb_queue_len(&ring->skblist);
 }
 
-
 struct sk_buff *brcmf_flowring_dequeue(struct brcmf_flowring *flow, u8 flowid)
 {
 	struct brcmf_flowring_ring *ring;
@@ -299,7 +289,6 @@ struct sk_buff *brcmf_flowring_dequeue(struct brcmf_flowring *flow, u8 flowid)
 	return skb;
 }
 
-
 void brcmf_flowring_reinsert(struct brcmf_flowring *flow, u8 flowid,
 			     struct sk_buff *skb)
 {
@@ -309,7 +298,6 @@ void brcmf_flowring_reinsert(struct brcmf_flowring *flow, u8 flowid,
 
 	skb_queue_head(&ring->skblist, skb);
 }
-
 
 u32 brcmf_flowring_qlen(struct brcmf_flowring *flow, u8 flowid)
 {
@@ -325,7 +313,6 @@ u32 brcmf_flowring_qlen(struct brcmf_flowring *flow, u8 flowid)
 	return skb_queue_len(&ring->skblist);
 }
 
-
 void brcmf_flowring_open(struct brcmf_flowring *flow, u8 flowid)
 {
 	struct brcmf_flowring_ring *ring;
@@ -339,7 +326,6 @@ void brcmf_flowring_open(struct brcmf_flowring *flow, u8 flowid)
 	ring->status = RING_OPEN;
 }
 
-
 u8 brcmf_flowring_ifidx_get(struct brcmf_flowring *flow, u8 flowid)
 {
 	struct brcmf_flowring_ring *ring;
@@ -350,7 +336,6 @@ u8 brcmf_flowring_ifidx_get(struct brcmf_flowring *flow, u8 flowid)
 
 	return flow->hash[hash_idx].ifidx;
 }
-
 
 struct brcmf_flowring *brcmf_flowring_attach(struct device *dev, u16 nrofrings)
 {
@@ -377,7 +362,6 @@ struct brcmf_flowring *brcmf_flowring_attach(struct device *dev, u16 nrofrings)
 	return flow;
 }
 
-
 void brcmf_flowring_detach(struct brcmf_flowring *flow)
 {
 	struct brcmf_bus *bus_if = dev_get_drvdata(flow->dev);
@@ -401,7 +385,6 @@ void brcmf_flowring_detach(struct brcmf_flowring *flow)
 	kfree(flow);
 }
 
-
 void brcmf_flowring_configure_addr_mode(struct brcmf_flowring *flow, int ifidx,
 					enum proto_addr_mode addr_mode)
 {
@@ -423,7 +406,6 @@ void brcmf_flowring_configure_addr_mode(struct brcmf_flowring *flow, int ifidx,
 		flow->addr_mode[ifidx] = addr_mode;
 	}
 }
-
 
 void brcmf_flowring_delete_peer(struct brcmf_flowring *flow, int ifidx,
 				u8 peer[ETH_ALEN])
@@ -472,7 +454,6 @@ void brcmf_flowring_delete_peer(struct brcmf_flowring *flow, int ifidx,
 			flow->tdls_active = false;
 	}
 }
-
 
 void brcmf_flowring_add_tdls_peer(struct brcmf_flowring *flow, int ifidx,
 				  u8 peer[ETH_ALEN])

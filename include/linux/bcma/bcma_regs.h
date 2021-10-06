@@ -76,7 +76,6 @@
 #define BCMA_SOC_SDRAM_SWAPPED		0x10000000U	/* Byteswapped Physical SDRAM */
 #define BCMA_SOC_SDRAM_R2		0x80000000U	/* Region 2 for sdram (512 MB) */
 
-
 #define BCMA_SOC_PCI_DMA		0x40000000U	/* Client Mode sb2pcitranslation2 (1 GB) */
 #define BCMA_SOC_PCI_DMA2		0x80000000U	/* Client Mode sb2pcitranslation2 (1 GB) */
 #define BCMA_SOC_PCI_DMA_SZ		0x40000000U	/* Client Mode sb2pcitranslation2 size in bytes */

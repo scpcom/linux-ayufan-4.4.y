@@ -112,7 +112,6 @@ struct SMU8_Fusion_AclkBreakdownTable {
 	uint32_t    MaxAclkIndex;
 };
 
-
 struct SMU8_Fusion_ClkTable {
 	struct SMU8_Fusion_SclkBreakdownTable SclkBreakdownTable;
 	struct SMU8_Fusion_LclkBreakdownTable LclkBreakdownTable;

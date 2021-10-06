@@ -130,7 +130,6 @@ static struct net_device *baycom_device[NR_PORTS];
 #define LPTDATA_TMS           (1<<LPTDATA_SHIFT_TMS)
 #define LPTDATA_INITBIAS      0x80
 
-
 /* EPP modem config/status bits */
 #define EPP_DCDBIT            0x80
 #define EPP_PTTBIT            0x08
@@ -239,7 +238,6 @@ struct baycom_state {
  * the CRC routines are stolen from WAMPES
  * by Dieter Deyke
  */
-
 
 /*---------------------------------------------------------------------------*/
 

@@ -210,7 +210,6 @@ extern int b1_irq_table[16];
 #define B1_REVISION		0x05
 #define B1_RESET		0x10
 
-
 #define B1_STAT0(cardtype)  ((cardtype) == avm_m1 ? 0x81200000l : 0x80A00000l)
 #define B1_STAT1(cardtype)  (0x80E00000l)
 
@@ -223,7 +222,6 @@ static inline unsigned char b1outp(unsigned int base,
 	outb(value, base + offset);
 	return inb(base + B1_ANALYSE);
 }
-
 
 static inline int b1_rx_full(unsigned int base)
 {

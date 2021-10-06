@@ -449,7 +449,6 @@ static int iommu_load_old_irte(struct intel_iommu *iommu)
 	return 0;
 }
 
-
 static void iommu_set_irq_remapping(struct intel_iommu *iommu, int mode)
 {
 	unsigned long flags;

@@ -247,8 +247,6 @@ module_param(wake_rc6mode, uint, 0644);
 MODULE_PARM_DESC(wake_rc6mode, "RC6 mode for the power-on command "
 		 "(0 = 0, 6 = 6A, default)");
 
-
-
 /*****************************************************************************
  *
  * UTILITY FUNCTIONS

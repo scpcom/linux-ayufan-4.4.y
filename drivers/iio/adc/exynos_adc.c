@@ -597,7 +597,6 @@ static int exynos_adc_probe(struct platform_device *pdev)
 	if (IS_ERR(info->regs))
 		return PTR_ERR(info->regs);
 
-
 	if (info->data->needs_adc_phy) {
 		info->pmu_map = syscon_regmap_lookup_by_phandle(
 					pdev->dev.of_node,

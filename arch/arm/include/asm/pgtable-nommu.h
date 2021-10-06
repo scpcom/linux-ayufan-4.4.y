@@ -51,7 +51,6 @@
 #define __pte_to_swp_entry(pte)	((swp_entry_t) { pte_val(pte) })
 #define __swp_entry_to_pte(x)	((pte_t) { (x).val })
 
-
 typedef pte_t *pte_addr_t;
 
 /*
@@ -66,7 +65,6 @@ typedef pte_t *pte_addr_t;
 #define pgprot_noncached(prot)	__pgprot(0)
 #define pgprot_writecombine(prot) __pgprot(0)
 #define pgprot_dmacoherent(prot) __pgprot(0)
-
 
 /*
  * These would be in other places but having them here reduces the diffs.

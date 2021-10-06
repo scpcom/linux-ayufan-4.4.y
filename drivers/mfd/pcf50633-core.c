@@ -239,7 +239,6 @@ static int pcf50633_probe(struct i2c_client *client,
 	pcf50633_client_dev_register(pcf, "pcf50633-adc", &pcf->adc_pdev);
 	pcf50633_client_dev_register(pcf, "pcf50633-backlight", &pcf->bl_pdev);
 
-
 	for (i = 0; i < PCF50633_NUM_REGULATORS; i++) {
 		pdev = platform_device_alloc("pcf50633-regulator", i);
 		if (!pdev)

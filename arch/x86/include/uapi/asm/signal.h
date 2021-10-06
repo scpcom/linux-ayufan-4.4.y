@@ -18,7 +18,6 @@ typedef unsigned long sigset_t;
 #endif /* __KERNEL__ */
 #endif /* __ASSEMBLY__ */
 
-
 #define SIGHUP		 1
 #define SIGINT		 2
 #define SIGQUIT		 3
@@ -93,7 +92,6 @@ typedef unsigned long sigset_t;
 #include <asm-generic/signal-defs.h>
 
 #ifndef __ASSEMBLY__
-
 
 # ifndef __KERNEL__
 /* Here we must cater to libcs that poke about in kernel headers.  */

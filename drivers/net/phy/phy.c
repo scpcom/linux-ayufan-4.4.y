@@ -82,7 +82,6 @@ static const char *phy_state_to_str(enum phy_state st)
 	return NULL;
 }
 
-
 /**
  * phy_print_status - Convenience function to print out the current phy status
  * @phydev: the phy_device struct
@@ -133,7 +132,6 @@ static int phy_config_interrupt(struct phy_device *phydev, u32 interrupts)
 
 	return 0;
 }
-
 
 /**
  * phy_aneg_done - return auto-negotiation status

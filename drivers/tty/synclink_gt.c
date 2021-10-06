@@ -43,7 +43,6 @@
 /*#define DBGTBUF(info) dump_tbufs(info)*/
 /*#define DBGRBUF(info) dump_rbufs(info)*/
 
-
 #include <linux/module.h>
 #include <linux/errno.h>
 #include <linux/signal.h>
@@ -169,7 +168,6 @@ static void hdlcdev_rx(struct slgt_info *info, char *buf, int size);
 static int  hdlcdev_init(struct slgt_info *info);
 static void hdlcdev_exit(struct slgt_info *info);
 #endif
-
 
 /*
  * device specific structures, macros and functions
@@ -369,7 +367,6 @@ static MGSL_PARAMS default_params = {
 	.stop_bits       = 1,
 	.parity          = ASYNC_PARITY_NONE
 };
-
 
 #define BH_RECEIVE  1
 #define BH_TRANSMIT 2
@@ -2850,7 +2847,6 @@ static int wait_mgsl_event(struct slgt_info *info, int __user *mask_ptr)
 	remove_wait_queue(&info->event_wait_q, &wait);
 	set_current_state(TASK_RUNNING);
 
-
 	if (mask & (MgslEvent_ExitHuntMode + MgslEvent_IdleReceived)) {
 		spin_lock_irqsave(&info->lock,flags);
 		if (!waitqueue_active(&info->event_wait_q)) {
@@ -3257,7 +3253,6 @@ static void dtr_rts(struct tty_port *port, int on)
  	set_signals(info);
 	spin_unlock_irqrestore(&info->lock,flags);
 }
-
 
 /*
  *  block current process until the device is ready to open
@@ -5161,4 +5156,3 @@ static void rx_timeout(unsigned long context)
 	spin_unlock_irqrestore(&info->lock, flags);
 	bh_handler(&info->task);
 }
-

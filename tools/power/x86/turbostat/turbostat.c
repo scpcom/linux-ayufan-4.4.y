@@ -200,7 +200,6 @@ struct system_summary {
 	struct pkg_data packages;
 } sum, average;
 
-
 struct topo_params {
 	int num_packages;
 	int num_cpus;
@@ -760,7 +759,6 @@ delta_thread(struct thread_data *new, struct thread_data *old,
 		}
 	}
 
-
 	if (use_c1_residency_msr) {
 		/*
 		 * Some models have a dedicated C1 residency MSR,
@@ -970,7 +968,6 @@ static unsigned long long rdtsc(void)
 	return low | ((unsigned long long)high) << 32;
 }
 
-
 /*
  * get_counters(...)
  * migrate to cpu
@@ -1053,7 +1050,6 @@ int get_counters(struct thread_data *t, struct core_data *c, struct pkg_data *p)
 			return -9;
 		c->core_temp_c = tcc_activation_temp - ((msr >> 16) & 0x7F);
 	}
-
 
 	/* collect package counters only for 1st core in package */
 	if (!(t->flags & CPU_IS_FIRST_CORE_IN_PACKAGE))
@@ -1159,7 +1155,6 @@ int hsw_pkg_cstate_limits[16] = {PCL__0, PCL__2, PCL__3, PCL__6, PCL__7, PCL_7S,
 int slv_pkg_cstate_limits[16] = {PCL__0, PCL__1, PCLRSV, PCLRSV, PCL__4, PCLRSV, PCL__6, PCL__7, PCLRSV, PCLRSV, PCLRSV, PCLRSV, PCLRSV, PCLRSV, PCLRSV, PCLRSV};
 int amt_pkg_cstate_limits[16] = {PCL__0, PCL__1, PCL__2, PCLRSV, PCLRSV, PCLRSV, PCL__6, PCL__7, PCLRSV, PCLRSV, PCLRSV, PCLRSV, PCLRSV, PCLRSV, PCLRSV, PCLRSV};
 int phi_pkg_cstate_limits[16] = {PCL__0, PCL__2, PCL_6N, PCL_6R, PCLRSV, PCLRSV, PCLRSV, PCLUNL, PCLRSV, PCLRSV, PCLRSV, PCLRSV, PCLRSV, PCLRSV, PCLRSV, PCLRSV};
-
 
 static void
 calculate_tsc_tweak()
@@ -1677,7 +1672,6 @@ void re_initialize(void)
 	printf("turbostat: re-initialized with num_cpus %d\n", topo.num_cpus);
 }
 
-
 /*
  * count_cpus()
  * remember the last one seen, it will be the max
@@ -1995,7 +1989,6 @@ dump_cstate_pstate_config_info(family, model)
 	dump_nhm_cst_cfg();
 }
 
-
 /*
  * print_epb()
  * Decode the ENERGY_PERF_BIAS MSR
@@ -2179,7 +2172,6 @@ rapl_dram_energy_units_probe(int  model, double rapl_energy_units)
 	}
 }
 
-
 /*
  * rapl_probe()
  *
@@ -2316,7 +2308,6 @@ int print_thermal(struct thread_data *t, struct core_data *c, struct pkg_data *p
 #endif
 	}
 
-
 	if (do_dts) {
 		unsigned int resolution;
 
@@ -2384,7 +2375,6 @@ int print_rapl(struct thread_data *t, struct core_data *c, struct pkg_data *p)
 
 		if (get_msr(cpu, MSR_PKG_POWER_INFO, &msr))
                 	return -5;
-
 
 		fprintf(stderr, "cpu%d: MSR_PKG_POWER_INFO: 0x%08llx (%.0f W TDP, RAPL %.0f - %.0f W, %f sec.)\n",
 			cpu, msr,
@@ -2540,8 +2530,6 @@ int has_skl_msrs(unsigned int family, unsigned int model)
 	}
 	return 0;
 }
-
-
 
 int is_slm(unsigned int family, unsigned int model)
 {
@@ -2821,7 +2809,6 @@ void help()
 	"For more help, run \"man turbostat\"\n");
 }
 
-
 /*
  * in /dev/cpu/ return success for names that are numbers
  * ie. filter out ".", "..", "microcode".
@@ -2882,7 +2869,6 @@ void topology_probe()
 		err(3, "CPU_ALLOC");
 	cpu_affinity_setsize = CPU_ALLOC_SIZE((topo.max_cpu_num + 1));
 	CPU_ZERO_S(cpu_affinity_setsize, cpu_affinity_set);
-
 
 	/*
 	 * For online cpus
@@ -2996,7 +2982,6 @@ void init_counter(struct thread_data *thread_base, struct core_data *core_base,
 	p->package_id = pkg_num;
 }
 
-
 int initialize_counters(int cpu_id)
 {
 	int my_thread_id, my_core_id, my_package_id;
@@ -3046,7 +3031,6 @@ void turbostat_init()
 	check_dev_msr();
 	check_permissions();
 	process_cpuid();
-
 
 	if (debug)
 		for_all_cpus(print_epb, ODD_COUNTERS);

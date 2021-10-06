@@ -145,7 +145,6 @@ at25_bin_read(struct file *filp, struct kobject *kobj,
 	return at25_ee_read(at25, buf, off, count);
 }
 
-
 static ssize_t
 at25_ee_write(struct at25_data *at25, const char *buf, loff_t off,
 	      size_t count)

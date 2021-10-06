@@ -88,4 +88,3 @@ void wm831x_otp_exit(struct wm831x *wm831x)
 {
 	device_remove_file(wm831x->dev, &dev_attr_unique_id);
 }
-

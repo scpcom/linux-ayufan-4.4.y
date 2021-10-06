@@ -261,7 +261,6 @@ nop (struct irq_data *data)
 	/* do nothing... */
 }
 
-
 #ifdef CONFIG_KEXEC
 void
 kexec_disable_iosapic(void)
@@ -321,7 +320,6 @@ unmask_irq (struct irq_data *data)
 		iosapic_write(rte->iosapic, IOSAPIC_RTE_LOW(rte_index), low32);
 	}
 }
-
 
 static int
 iosapic_set_affinity(struct irq_data *data, const struct cpumask *mask,

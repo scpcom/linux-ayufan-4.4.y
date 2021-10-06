@@ -32,7 +32,6 @@
 #include <sound/tlv.h>
 #include "cs4349.h"
 
-
 static const struct reg_default cs4349_reg_defaults[] = {
 	{ 2, 0x00 },	/* r02	- Mode Control */
 	{ 3, 0x09 },	/* r03	- Volume, Mixing and Inversion Control */

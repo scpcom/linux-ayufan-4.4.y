@@ -175,7 +175,6 @@ typedef struct {
 #define REG_RD_ADDR_iop_mpu_rw_intr 196
 #define REG_WR_ADDR_iop_mpu_rw_intr 196
 
-
 /* Constants */
 enum {
   regk_iop_mpu_no                          = 0x00000000,

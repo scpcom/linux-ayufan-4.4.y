@@ -31,9 +31,7 @@ struct external_filehdr {
 #define	FILHDR	struct external_filehdr
 #define	FILHSZ	20
 
-
 /********************** AOUT "OPTIONAL HEADER" **********************/
-
 
 typedef struct
 {
@@ -70,9 +68,7 @@ AOUTHDR;
 #define	RS6K_AOUTHDR_NMAGIC	0x0108	/* new: text r/o, data r/w */
 #define	RS6K_AOUTHDR_ZMAGIC	0x010B	/* paged: text r/o, both page-aligned */
 
-
 /********************** SECTION HEADER **********************/
-
 
 struct external_scnhdr {
 	char		s_name[8];	/* section name			*/
@@ -124,10 +120,8 @@ struct external_lineno {
 	char l_lnno[2];	/* line number		*/
 };
 
-
 #define	LINENO	struct external_lineno
 #define	LINESZ	6
-
 
 /********************** SYMBOLS **********************/
 
@@ -151,13 +145,10 @@ struct external_syment
   char e_numaux[1];
 };
 
-
-
 #define N_BTMASK	(017)
 #define N_TMASK		(060)
 #define N_BTSHFT	(4)
 #define N_TSHIFT	(2)
-
 
 union external_auxent {
 	struct {
@@ -220,10 +211,7 @@ union external_auxent {
 #define DBXMASK 0x80		/* for dbx storage mask */
 #define SYMNAME_IN_DEBUG(symptr) ((symptr)->n_sclass & DBXMASK)
 
-
-
 /********************** RELOCATION DIRECTIVES **********************/
-
 
 struct external_reloc {
   char r_vaddr[4];
@@ -231,7 +219,6 @@ struct external_reloc {
   char r_size[1];
   char r_type[1];
 };
-
 
 #define RELOC struct external_reloc
 #define RELSZ 10

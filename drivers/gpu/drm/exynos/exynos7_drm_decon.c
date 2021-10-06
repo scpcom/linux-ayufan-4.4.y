@@ -636,7 +636,6 @@ static const struct exynos_drm_crtc_ops decon_crtc_ops = {
 	.atomic_flush = decon_atomic_flush,
 };
 
-
 static irqreturn_t decon_irq_handler(int irq, void *dev_id)
 {
 	struct decon_context *ctx = (struct decon_context *)dev_id;

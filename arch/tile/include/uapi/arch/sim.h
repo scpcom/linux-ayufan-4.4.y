@@ -48,7 +48,6 @@
 
 #include <arch/spr_def.h>
 
-
 /**
  * Return true if the current program is running under a simulator,
  * rather than on real hardware.  If running on hardware, other "sim_xxx()"
@@ -59,7 +58,6 @@ sim_is_simulator(void)
 {
   return __insn_mfspr(SPR_SIM_CONTROL) != 0;
 }
-
 
 /**
  * Checkpoint the simulator state to a checkpoint file.
@@ -72,7 +70,6 @@ sim_checkpoint(void)
 {
   __insn_mtspr(SPR_SIM_CONTROL, SIM_CONTROL_CHECKPOINT);
 }
-
 
 /**
  * Report whether or not various kinds of simulator tracing are enabled.
@@ -93,7 +90,6 @@ sim_get_tracing(void)
 {
   return __insn_mfspr(SPR_SIM_CONTROL) & SIM_TRACE_FLAG_MASK;
 }
-
 
 /**
  * Turn on or off different kinds of simulator tracing.
@@ -119,7 +115,6 @@ sim_set_tracing(unsigned int mask)
 {
   __insn_mtspr(SPR_SIM_CONTROL, SIM_TRACE_SPR_ARG(mask));
 }
-
 
 /**
  * Request dumping of different kinds of simulator state.
@@ -148,7 +143,6 @@ sim_dump(unsigned int mask)
   __insn_mtspr(SPR_SIM_CONTROL, SIM_DUMP_SPR_ARG(mask));
 }
 
-
 /**
  * Print a string to the simulator stdout.
  *
@@ -166,7 +160,6 @@ sim_print(const char* str)
                (SIM_PUTC_FLUSH_BINARY << _SIM_CONTROL_OPERATOR_BITS));
 }
 
-
 /**
  * Print a string to the simulator stdout.
  *
@@ -183,7 +176,6 @@ sim_print_string(const char* str)
   __insn_mtspr(SPR_SIM_CONTROL, SIM_CONTROL_PUTC |
                (SIM_PUTC_FLUSH_STRING << _SIM_CONTROL_OPERATOR_BITS));
 }
-
 
 /**
  * Execute a simulator command string.
@@ -208,8 +200,6 @@ sim_command(const char* str)
   }
   while (c);
 }
-
-
 
 #ifndef __DOXYGEN__
 
@@ -300,12 +290,10 @@ static __inline long _sim_syscall5(int val, long arg1, long arg2, long arg3,
     ((syscall_num) << _SIM_CONTROL_OPERATOR_BITS) | SIM_CONTROL_SYSCALL, \
     ##args)
 
-
 /* Values for the "access_mask" parameters below. */
 #define SIM_WATCHPOINT_READ    1
 #define SIM_WATCHPOINT_WRITE   2
 #define SIM_WATCHPOINT_EXECUTE 4
-
 
 static __inline int
 sim_add_watchpoint(unsigned int process_id,
@@ -318,7 +306,6 @@ sim_add_watchpoint(unsigned int process_id,
                      address, size, access_mask, user_data);
 }
 
-
 static __inline int
 sim_remove_watchpoint(unsigned int process_id,
                       unsigned long address,
@@ -329,7 +316,6 @@ sim_remove_watchpoint(unsigned int process_id,
   return _sim_syscall(SIM_SYSCALL_REMOVE_WATCHPOINT, 5, process_id,
                      address, size, access_mask, user_data);
 }
-
 
 /**
  * Return value from sim_query_watchpoint.
@@ -353,7 +339,6 @@ struct SimQueryWatchpointStatus
   unsigned long user_data;
 };
 
-
 static __inline struct SimQueryWatchpointStatus
 sim_query_watchpoint(unsigned int process_id)
 {
@@ -368,7 +353,6 @@ sim_query_watchpoint(unsigned int process_id)
   return status;
 }
 
-
 /* On the simulator, confirm lines have been evicted everywhere. */
 static __inline void
 sim_validate_lines_evicted(unsigned long long pa, unsigned long length)
@@ -381,7 +365,6 @@ sim_validate_lines_evicted(unsigned long long pa, unsigned long length)
 #endif
 }
 
-
 /* Return the current CPU speed in cycles per second. */
 static __inline long
 sim_query_cpu_speed(void)
@@ -390,9 +373,6 @@ sim_query_cpu_speed(void)
 }
 
 #endif /* !__DOXYGEN__ */
-
-
-
 
 /**
  * Modify the shaping parameters of a shim.
@@ -459,7 +439,6 @@ sim_disable_mpipe_links(unsigned mpipe, unsigned long link_mask)
 
 #endif /* __tilegx__ */
 
-
 /*
  * An API for changing "functional" mode.
  */
@@ -473,7 +452,6 @@ sim_disable_mpipe_links(unsigned mpipe, unsigned long link_mask)
   __insn_mtspr(SPR_SIM_CONTROL, SIM_CONTROL_DISABLE_FUNCTIONAL)
 
 #endif /* __DOXYGEN__ */
-
 
 /*
  * Profiler support.
@@ -492,14 +470,12 @@ sim_profiler_enable(void)
   __insn_mtspr(SPR_SIM_CONTROL, SIM_CONTROL_PROFILER_ENABLE);
 }
 
-
 /** Turn profiling off for the current task. */
 static __inline void
 sim_profiler_disable(void)
 {
   __insn_mtspr(SPR_SIM_CONTROL, SIM_CONTROL_PROFILER_DISABLE);
 }
-
 
 /**
  * Turn profiling on or off for the current task.
@@ -518,7 +494,6 @@ sim_profiler_set_enabled(int enabled)
   __insn_mtspr(SPR_SIM_CONTROL, val);
 }
 
-
 /**
  * Return true if and only if profiling is currently enabled
  * for the current task.
@@ -532,7 +507,6 @@ sim_profiler_is_enabled(void)
   return ((__insn_mfspr(SPR_SIM_CONTROL) & SIM_PROFILER_ENABLED_MASK) != 0);
 }
 
-
 /**
  * Reset profiling counters to zero for the current task.
  *
@@ -544,7 +518,6 @@ sim_profiler_clear(void)
 {
   __insn_mtspr(SPR_SIM_CONTROL, SIM_CONTROL_PROFILER_CLEAR);
 }
-
 
 /**
  * Enable specified chip-level profiling counters.
@@ -567,7 +540,6 @@ sim_profiler_chip_enable(unsigned int mask)
   __insn_mtspr(SPR_SIM_CONTROL, SIM_PROFILER_CHIP_ENABLE_SPR_ARG(mask));
 }
 
-
 /**
  * Disable specified chip-level profiling counters.
  *
@@ -589,7 +561,6 @@ sim_profiler_chip_disable(unsigned int mask)
   __insn_mtspr(SPR_SIM_CONTROL, SIM_PROFILER_CHIP_DISABLE_SPR_ARG(mask));
 }
 
-
 /**
  * Reset specified chip-level profiling counters to zero.
  *
@@ -610,7 +581,6 @@ sim_profiler_chip_clear(unsigned int mask)
 {
   __insn_mtspr(SPR_SIM_CONTROL, SIM_PROFILER_CHIP_CLEAR_SPR_ARG(mask));
 }
-
 
 /*
  * Event support.

@@ -70,7 +70,6 @@
 /* The max number of bytes that a byte channel can send or receive per call */
 #define EV_BYTE_CHANNEL_MAX_BYTES	16
 
-
 #define _EV_HCALL_TOKEN(id, num) (((id) << 16) | (num))
 #define EV_HCALL_TOKEN(hcall_num) _EV_HCALL_TOKEN(EV_EPAPR_VENDOR_ID, hcall_num)
 

@@ -86,7 +86,6 @@ static int riscix_partition(struct parsed_partitions *state,
 
 	strlcat(state->pp_buf, " [RISCiX]", PAGE_SIZE);
 
-
 	if (rr->magic == RISCIX_MAGIC) {
 		unsigned long size = nr_sects > 2 ? 2 : nr_sects;
 		int part;
