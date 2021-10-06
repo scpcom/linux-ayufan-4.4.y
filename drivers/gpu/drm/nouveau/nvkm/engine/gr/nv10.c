@@ -406,6 +406,7 @@ struct nv10_gr_chan {
 	u32 lma_window[4];
 };
 
+
 /*******************************************************************************
  * Graphics object classes
  ******************************************************************************/
@@ -605,6 +606,7 @@ nv10_gr_load_pipe(struct nv10_gr_chan *chan)
 
 	nvkm_wr32(device, NV10_PGRAPH_PIPE_ADDRESS, 0x00000040);
 	nvkm_wr32(device, NV10_PGRAPH_PIPE_DATA, 0x00000008);
+
 
 	PIPE_RESTORE(gr, pipe->pipe_0x0200, 0x0200);
 	nv04_gr_idle(&gr->base);

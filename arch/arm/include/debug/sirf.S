@@ -17,6 +17,7 @@
 #define SIRF_LLUART_TXFIFO_EMPTY			(1 << 6)
 #endif
 
+
 	.macro	addruart, rp, rv, tmp
 	ldr	\rp, =CONFIG_DEBUG_UART_PHYS		@ physical
 	ldr	\rv, =CONFIG_DEBUG_UART_VIRT		@ virtual
@@ -34,3 +35,4 @@
 	tst	\rd, #SIRF_LLUART_TXFIFO_EMPTY
 	beq	1001b
 	.endm
+

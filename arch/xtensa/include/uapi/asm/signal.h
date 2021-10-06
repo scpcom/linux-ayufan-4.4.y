@@ -13,6 +13,7 @@
 #ifndef _UAPI_XTENSA_SIGNAL_H
 #define _UAPI_XTENSA_SIGNAL_H
 
+
 #define _NSIG		64
 #define _NSIG_BPW	32
 #define _NSIG_WORDS	(_NSIG / _NSIG_BPW)

@@ -13,6 +13,7 @@
  *
  ******************************************************************************/
 
+
 #ifndef	__HALHWOUTSRC_H__
 #define __HALHWOUTSRC_H__
 
@@ -58,6 +59,7 @@
 #define DESC92C_RATEMCS15				0x1b
 #define DESC92C_RATEMCS15_SG			0x1c
 #define DESC92C_RATEMCS32				0x20
+
 
 /*  */
 /*  structure and define */
@@ -109,6 +111,7 @@ struct phy_status_rpt {
 #endif
 };
 
+
 struct phy_status_rpt_8195 {
 	struct phy_rx_agc_info path_agc[2];
 	u8	ch_num[2];
@@ -137,6 +140,7 @@ struct phy_status_rpt_8195 {
 	u8	antidx_anta:3;
 #endif
 };
+
 
 void odm_Init_RSSIForDM23a(struct dm_odm_t *pDM_Odm);
 

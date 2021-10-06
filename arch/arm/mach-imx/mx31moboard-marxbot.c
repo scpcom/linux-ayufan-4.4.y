@@ -290,6 +290,7 @@ static int marxbot_isp1105_init(struct usb_phy *otg)
 	return 0;
 }
 
+
 static int marxbot_isp1105_set_vbus(struct usb_otg *otg, bool on)
 {
 	if (on)

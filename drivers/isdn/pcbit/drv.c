@@ -19,6 +19,7 @@
 
 #include <linux/module.h>
 
+
 #include <linux/kernel.h>
 
 #include <linux/types.h>
@@ -38,6 +39,7 @@
 #include "edss1.h"
 #include "layer2.h"
 #include "capi.h"
+
 
 extern ushort last_ref_num;
 
@@ -64,6 +66,7 @@ static int set_protocol_running(struct pcbit_dev *dev);
 static void pcbit_clear_msn(struct pcbit_dev *dev);
 static void pcbit_set_msn(struct pcbit_dev *dev, char *list);
 static int pcbit_check_msn(struct pcbit_dev *dev, char *msn);
+
 
 int pcbit_init_dev(int board, int mem_base, int irq)
 {
@@ -178,6 +181,7 @@ int pcbit_init_dev(int board, int mem_base, int irq)
 	dev_if->writecmd = pcbit_writecmd;
 	dev_if->readstat = pcbit_stat;
 
+
 	strcpy(dev_if->id, pcbit_devname[board]);
 
 	if (!register_isdn(dev_if)) {
@@ -192,6 +196,7 @@ int pcbit_init_dev(int board, int mem_base, int irq)
 	}
 
 	dev->id = dev_if->channels;
+
 
 	dev->l2_state = L2_DOWN;
 	dev->free = 511;
@@ -243,6 +248,7 @@ static int pcbit_command(isdn_ctrl *ctl)
 	}
 
 	chan = (ctl->arg & 0x0F) ? dev->b2 : dev->b1;
+
 
 	switch (ctl->command) {
 	case ISDN_CMD_IOCTL:
@@ -335,6 +341,7 @@ static int pcbit_xmit(int driver, int chnum, int ack, struct sk_buff *skb)
 
 	chan = chnum ? dev->b2 : dev->b1;
 
+
 	if (chan->fsm_state != ST_ACTIVE)
 		return -1;
 
@@ -361,6 +368,7 @@ static int pcbit_xmit(int driver, int chnum, int ack, struct sk_buff *skb)
 #endif
 		return 0;
 	}
+
 
 	chan->queued++;
 

@@ -134,6 +134,7 @@ struct pch_dev_ops {
 	int (*get_temp)(struct pch_thermal_device *ptd, int *temp);
 };
 
+
 /* dev ops for Wildcat Point */
 static struct pch_dev_ops pch_dev_ops_wpt = {
 	.hw_init = pch_wpt_init,
@@ -181,6 +182,7 @@ static struct thermal_zone_device_ops tzd_ops = {
 	.get_trip_type = pch_get_trip_type,
 	.get_trip_temp = pch_get_trip_temp,
 };
+
 
 static int intel_pch_thermal_probe(struct pci_dev *pdev,
 				   const struct pci_device_id *id)

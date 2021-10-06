@@ -252,6 +252,7 @@ int snd_hdac_exec_verb(struct hdac_device *codec, unsigned int cmd,
 }
 EXPORT_SYMBOL_GPL(snd_hdac_exec_verb);
 
+
 /**
  * snd_hdac_read - execute a verb
  * @codec: the codec object

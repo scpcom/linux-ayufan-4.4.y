@@ -31,6 +31,7 @@ typedef int (*decompress_fn) (unsigned char *inbuf, long len,
  *dependent).
  */
 
+
 /* Utility routine to detect the decompression method */
 decompress_fn decompress_method(const unsigned char *inbuf, long len,
 				const char **name);

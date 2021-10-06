@@ -101,6 +101,8 @@ static int init_hw(struct echoaudio *chip, u16 device_id, u16 subdevice_id)
 	return err;
 }
 
+
+
 static int set_mixer_defaults(struct echoaudio *chip)
 {
 	chip->digital_mode = DIGITAL_MODE_SPDIF_RCA;
@@ -110,6 +112,8 @@ static int set_mixer_defaults(struct echoaudio *chip)
 	chip->phantom_power = false;
 	return init_line_levels(chip);
 }
+
+
 
 static int set_phantom_power(struct echoaudio *chip, char on)
 {

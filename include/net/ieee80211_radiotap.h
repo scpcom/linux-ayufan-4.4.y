@@ -266,6 +266,7 @@ enum ieee80211_radiotap_type {
 #define IEEE80211_RADIOTAP_F_TX_RTS	0x0004	/* used rts/cts handshake */
 #define IEEE80211_RADIOTAP_F_TX_NOACK	0x0008	/* don't expect an ack */
 
+
 /* For IEEE80211_RADIOTAP_MCS */
 #define IEEE80211_RADIOTAP_MCS_HAVE_BW		0x01
 #define IEEE80211_RADIOTAP_MCS_HAVE_MCS		0x02

@@ -22,6 +22,7 @@ struct zc_device {
 	unsigned short		last_key[4];
 };
 
+
 /*
 * Zydacron remote control has an invalid HID report descriptor,
 * that needs fixing before we can parse it.

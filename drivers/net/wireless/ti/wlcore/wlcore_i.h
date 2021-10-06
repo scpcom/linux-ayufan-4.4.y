@@ -48,6 +48,7 @@
 /* Use smaller padding for GEM, as some  APs have issues when it's too big */
 #define WL1271_TX_SQN_POST_RECOVERY_PADDING_GEM 0x20
 
+
 #define WL1271_CIPHER_SUITE_GEM 0x00147201
 
 #define WL1271_BUSY_WORD_CNT 1

@@ -61,6 +61,7 @@
 #define _FW_LINKED		WIFI_ASOC_STATE
 #define _FW_UNDER_SURVEY	WIFI_SITE_MONITOR
 
+
 enum dot11AuthAlgrthmNum {
 	dot11AuthAlgrthm_Open = 0,
 	dot11AuthAlgrthm_Shared,
@@ -87,6 +88,7 @@ enum {
 there are several "locks" in mlme_priv,
 since mlme_priv is a shared resource between many threads,
 like ISR/Call-Back functions, the OID handlers, and even timer functions.
+
 
 Each _queue has its own locks, already.
 Other items are protected by mlme_priv.lock.

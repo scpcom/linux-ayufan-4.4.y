@@ -12,6 +12,7 @@
 #include <pwd.h>
 #include <string.h>
 
+
 enum target_errno target__validate(struct target *target)
 {
 	enum target_errno ret = TARGET_ERRNO__SUCCESS;

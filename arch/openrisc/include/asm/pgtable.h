@@ -337,6 +337,7 @@ static inline pte_t pte_modify(pte_t pte, pgprot_t newprot)
 	return pte;
 }
 
+
 /*
  * pte_val refers to a page in the 0x0xxxxxxx physical DRAM interval
  * __pte_page(pte_val) refers to the "virtual" DRAM interval

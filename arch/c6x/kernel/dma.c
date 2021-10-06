@@ -50,6 +50,7 @@ dma_addr_t dma_map_single(struct device *dev, void *ptr, size_t size,
 }
 EXPORT_SYMBOL(dma_map_single);
 
+
 void dma_unmap_single(struct device *dev, dma_addr_t handle,
 		      size_t size, enum dma_data_direction dir)
 {
@@ -58,6 +59,7 @@ void dma_unmap_single(struct device *dev, dma_addr_t handle,
 	debug_dma_unmap_page(dev, handle, size, dir, true);
 }
 EXPORT_SYMBOL(dma_unmap_single);
+
 
 int dma_map_sg(struct device *dev, struct scatterlist *sglist,
 	       int nents, enum dma_data_direction dir)
@@ -74,6 +76,7 @@ int dma_map_sg(struct device *dev, struct scatterlist *sglist,
 	return nents;
 }
 EXPORT_SYMBOL(dma_map_sg);
+
 
 void dma_unmap_sg(struct device *dev, struct scatterlist *sglist,
 		  int nents, enum dma_data_direction dir)
@@ -97,6 +100,7 @@ void dma_sync_single_for_cpu(struct device *dev, dma_addr_t handle,
 }
 EXPORT_SYMBOL(dma_sync_single_for_cpu);
 
+
 void dma_sync_single_for_device(struct device *dev, dma_addr_t handle,
 				size_t size, enum dma_data_direction dir)
 {
@@ -105,6 +109,7 @@ void dma_sync_single_for_device(struct device *dev, dma_addr_t handle,
 	debug_dma_sync_single_for_device(dev, handle, size, dir);
 }
 EXPORT_SYMBOL(dma_sync_single_for_device);
+
 
 void dma_sync_sg_for_cpu(struct device *dev, struct scatterlist *sglist,
 			 int nents, enum dma_data_direction dir)
@@ -120,6 +125,7 @@ void dma_sync_sg_for_cpu(struct device *dev, struct scatterlist *sglist,
 }
 EXPORT_SYMBOL(dma_sync_sg_for_cpu);
 
+
 void dma_sync_sg_for_device(struct device *dev, struct scatterlist *sglist,
 			    int nents, enum dma_data_direction dir)
 {
@@ -133,6 +139,7 @@ void dma_sync_sg_for_device(struct device *dev, struct scatterlist *sglist,
 	debug_dma_sync_sg_for_device(dev, sglist, nents, dir);
 }
 EXPORT_SYMBOL(dma_sync_sg_for_device);
+
 
 /* Number of entries preallocated for DMA-API debugging */
 #define PREALLOC_DMA_DEBUG_ENTRIES (1 << 16)

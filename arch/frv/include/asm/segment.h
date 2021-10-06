@@ -12,6 +12,7 @@
 #ifndef _ASM_SEGMENT_H
 #define _ASM_SEGMENT_H
 
+
 #ifndef __ASSEMBLY__
 
 typedef struct {
@@ -38,6 +39,7 @@ typedef struct {
 do {							\
 	__current_thread_info->addr_limit = (_x);	\
 } while(0)
+
 
 #endif /* __ASSEMBLY__ */
 #endif /* _ASM_SEGMENT_H */

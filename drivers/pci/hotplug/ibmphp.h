@@ -45,6 +45,7 @@ extern int ibmphp_debug;
 #define info(format, arg...) printk(KERN_INFO "%s: " format , MY_NAME , ## arg)
 #define warn(format, arg...) printk(KERN_WARNING "%s: " format , MY_NAME , ## arg)
 
+
 /* EBDA stuff */
 
 /***********************************************************
@@ -56,6 +57,7 @@ extern int ibmphp_debug;
 #define EBDA_SLOT_66_MAX		0x02
 #define EBDA_SLOT_PCIX_CAP		0x08
 
+
 /************************************************************
 *  RESOURCE TYPE                                             *
 ************************************************************/
@@ -65,6 +67,7 @@ extern int ibmphp_debug;
 #define EBDA_MEM_RSRC_TYPE		0x01
 #define EBDA_PFM_RSRC_TYPE		0x03
 #define EBDA_RES_RSRC_TYPE		0x02
+
 
 /*************************************************************
 *  IO RESTRICTION TYPE                                       *
@@ -76,6 +79,7 @@ extern int ibmphp_debug;
 #define EBDA_AVO_VGA_ADDR_AND_ALIA	0x08
 #define EBDA_AVO_ISA_ADDR		0x0c
 
+
 /**************************************************************
 *  DEVICE TYPE DEF                                            *
 **************************************************************/
@@ -84,6 +88,7 @@ extern int ibmphp_debug;
 #define EBDA_PCI_DEV			0x10
 #define EBDA_NON_PCI_DEV		0x00
 
+
 /***************************************************************
 *  PRIMARY DEF DEFINITION                                      *
 ***************************************************************/
@@ -91,6 +96,7 @@ extern int ibmphp_debug;
 #define EBDA_PRI_DEF_MASK		0x20
 #define EBDA_PRI_PCI_BUS_INFO		0x20
 #define EBDA_NORM_DEV_RSRC_INFO		0x00
+
 
 //--------------------------------------------------------------
 // RIO TABLE DATA STRUCTURE
@@ -188,6 +194,7 @@ struct ebda_hpc_bus {
 	u8 slots_at_133_pcix;
 };
 
+
 /********************************************************************
 *   THREE TYPE OF HOT PLUG CONTROLLER                                *
 ********************************************************************/
@@ -221,6 +228,7 @@ struct ebda_rsrc_list {
 	struct ebda_rsrc_list *next;
 };
 
+
 /***************************************************************************
 *   PCI RSRC NODE                                                          *
 ***************************************************************************/
@@ -234,6 +242,7 @@ struct ebda_pci_rsrc {
 	u8 marked;	/* for NVRAM */
 	struct list_head ebda_pci_rsrc_list;
 };
+
 
 /***********************************************************
 * BUS_INFO DATE STRUCTURE                                  *
@@ -255,6 +264,7 @@ struct bus_info {
 	u8 slots_at_133_pcix;
 	struct list_head bus_info_list;
 };
+
 
 /***********************************************************
 * GLOBAL VARIABLES                                         *
@@ -317,6 +327,7 @@ int ibmphp_register_pci(void);
  *                     - 1 - Primary PCI Bus Information (0 if Normal device)
  * the IO restrictions [2:3] are only for primary buses
  */
+
 
 /* we need this struct because there could be several resource blocks
  * allocated per primary bus in the EBDA
@@ -390,6 +401,7 @@ int ibmphp_hpc_start_poll_thread(void);
 void ibmphp_hpc_stop_poll_thread(void);
 
 //----------------------------------------------------------------------------
+
 
 //----------------------------------------------------------------------------
 // HPC return codes
@@ -511,6 +523,7 @@ void ibmphp_hpc_stop_poll_thread(void);
 #define HPC_SLOT_LATCH_OPEN	0x01	// NOTE : in PCI spec bit off = open
 #define HPC_SLOT_LATCH_CLOSED	0x00	// NOTE : in PCI spec bit on  = closed
 
+
 //----------------------------------------------------------------------------
 // extended slot status
 //----------------------------------------------------------------------------
@@ -579,6 +592,7 @@ void ibmphp_hpc_stop_poll_thread(void);
 #define HPC_CTLR_RESULT_FAILED	0x01
 #define HPC_CTLR_RESULT_RSVD	0x02
 #define HPC_CTLR_RESULT_NORESP	0x03
+
 
 //----------------------------------------------------------------------------
 // macro for slot info
@@ -658,6 +672,7 @@ void ibmphp_hpc_stop_poll_thread(void);
 				  (c == HPC_BUS_133PCIXMODE) || \
 				  (c == HPC_ALLSLOT_OFF)     || \
 				  (c == HPC_ALLSLOT_ON))
+
 
 /* Core part of the driver */
 
@@ -742,3 +757,4 @@ int ibmphp_unconfigure_card(struct slot **, int);
 extern struct hotplug_slot_ops ibmphp_hotplug_slot_ops;
 
 #endif				//__IBMPHP_H
+

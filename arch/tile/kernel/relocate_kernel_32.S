@@ -246,6 +246,7 @@ STD_ENTRY(relocate_new_kernel)
 	addi	r30, r30, 4
 	j	.Lloop
 
+
 .Lerr:	moveli	r0, 'e'
 	jalr	r40
 	moveli	r0, 'r'

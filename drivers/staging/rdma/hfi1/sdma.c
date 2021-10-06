@@ -475,6 +475,7 @@ static void sdma_start_err_halt_wait(struct sdma_engine *sde)
 	schedule_work(&sde->err_halt_worker);
 }
 
+
 static void sdma_err_progress_check_schedule(struct sdma_engine *sde)
 {
 	if (!is_bx(sde->dd) && HFI1_CAP_IS_KSET(SDMA_AHG)) {
@@ -632,6 +633,7 @@ static void sdma_sw_clean_up_task(unsigned long opaque)
 	 *   running again until we say so.  So, the active list and
 	 *   descq are ours to play with.
 	 */
+
 
 	/*
 	 * In the error clean up sequence, software clean must be called
@@ -1715,6 +1717,7 @@ static void set_sdma_integrity(struct sdma_engine *sde)
 
 	write_sde_csr(sde, SD(CHECK_ENABLE), reg);
 }
+
 
 static void init_sdma_regs(
 	struct sdma_engine *sde,

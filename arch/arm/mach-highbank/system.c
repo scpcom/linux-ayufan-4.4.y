@@ -30,3 +30,4 @@ void highbank_restart(enum reboot_mode mode, const char *cmd)
 	while (1)
 		cpu_do_idle();
 }
+

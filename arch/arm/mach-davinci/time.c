@@ -341,6 +341,7 @@ static struct clock_event_device clockevent_davinci = {
 	.set_state_oneshot	= davinci_set_oneshot,
 };
 
+
 void __init davinci_timer_init(void)
 {
 	struct clk *timer_clk;

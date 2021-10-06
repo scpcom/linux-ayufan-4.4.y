@@ -538,6 +538,7 @@ int clkdm_for_each(int (*fn)(struct clockdomain *clkdm, void *user),
 	return ret;
 }
 
+
 /**
  * clkdm_get_pwrdm - return a ptr to the pwrdm that this clkdm resides in
  * @clkdm: struct clockdomain *
@@ -552,6 +553,7 @@ struct powerdomain *clkdm_get_pwrdm(struct clockdomain *clkdm)
 
 	return clkdm->pwrdm.ptr;
 }
+
 
 /* Hardware clockdomain control */
 
@@ -1292,3 +1294,4 @@ int clkdm_hwmod_disable(struct clockdomain *clkdm, struct omap_hwmod *oh)
 
 	return 0;
 }
+

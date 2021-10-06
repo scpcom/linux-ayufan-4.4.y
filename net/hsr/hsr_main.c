@@ -19,6 +19,7 @@
 #include "hsr_framereg.h"
 #include "hsr_slave.h"
 
+
 static int hsr_netdev_notify(struct notifier_block *nb, unsigned long event,
 			     void *ptr)
 {
@@ -96,6 +97,7 @@ static int hsr_netdev_notify(struct notifier_block *nb, unsigned long event,
 	return NOTIFY_DONE;
 }
 
+
 struct hsr_port *hsr_port_get_hsr(struct hsr_priv *hsr, enum hsr_port_type pt)
 {
 	struct hsr_port *port;
@@ -109,6 +111,7 @@ struct hsr_port *hsr_port_get_hsr(struct hsr_priv *hsr, enum hsr_port_type pt)
 static struct notifier_block hsr_nb = {
 	.notifier_call = hsr_netdev_notify,	/* Slave event notifications */
 };
+
 
 static int __init hsr_init(void)
 {

@@ -316,6 +316,7 @@ static struct platform_device db1550_ac97_dev = {
 	.resource	= au1550_psc1_res,
 };
 
+
 static struct resource au1550_psc2_res[] = {
 	[0] = {
 		.start	= AU1550_PSC2_PHYS_ADDR,

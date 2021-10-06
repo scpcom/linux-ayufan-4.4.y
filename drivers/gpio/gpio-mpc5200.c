@@ -385,3 +385,4 @@ module_exit(mpc52xx_gpio_exit);
 MODULE_DESCRIPTION("Freescale MPC52xx gpio driver");
 MODULE_AUTHOR("Sascha Hauer <s.hauer@pengutronix.de");
 MODULE_LICENSE("GPL v2");
+

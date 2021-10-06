@@ -855,6 +855,7 @@ int netxen_config_bridged_mode(struct netxen_adapter *adapter, int enable)
 	return rv;
 }
 
+
 #define RSS_HASHTYPE_IP_TCP	0x3
 
 int netxen_config_rss(struct netxen_adapter *adapter, int enable)
@@ -868,6 +869,7 @@ int netxen_config_rss(struct netxen_adapter *adapter, int enable)
 		0xae7b30b4d0ca2bcbULL, 0x43a38fb04167253dULL,
 		0x255b0ec26d5a56daULL
 	};
+
 
 	memset(&req, 0, sizeof(nx_nic_req_t));
 	req.qhdr = cpu_to_le64(NX_HOST_REQUEST << 23);
@@ -892,6 +894,7 @@ int netxen_config_rss(struct netxen_adapter *adapter, int enable)
 	req.words[0] = cpu_to_le64(word);
 	for (i = 0; i < ARRAY_SIZE(key); i++)
 		req.words[i+1] = cpu_to_le64(key[i]);
+
 
 	rv = netxen_send_cmd_descs(adapter, (struct cmd_desc_type0 *)&req, 1);
 	if (rv != 0) {
@@ -1123,6 +1126,7 @@ netxen_nic_pci_get_crb_addr_2M(struct netxen_adapter *adapter,
 		ulong off, void __iomem **addr)
 {
 	crb_128M_2M_sub_block_map_t *m;
+
 
 	if ((off >= NETXEN_CRB_MAX) || (off < NETXEN_PCI_CRBSPACE))
 		return -EINVAL;
@@ -2233,6 +2237,7 @@ netxen_md_L2Cache(struct netxen_adapter *adapter,
 	return read_cnt * loop_cnt * sizeof(read_value);
 }
 
+
 /* Handle L1 Cache */
 static u32 netxen_md_L1Cache(struct netxen_adapter *adapter,
 				struct netxen_minidump_entry_cache
@@ -2337,6 +2342,7 @@ netxen_md_rdqueue(struct netxen_adapter *adapter,
 	}
 	return loop_cnt * (read_cnt * sizeof(read_value));
 }
+
 
 /*
 * We catch an error where driver does not read
@@ -2531,6 +2537,7 @@ netxen_collect_minidump(struct netxen_adapter *adapter)
 
 	return ret;
 }
+
 
 void
 netxen_dump_fw(struct netxen_adapter *adapter)

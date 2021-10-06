@@ -56,6 +56,7 @@ struct samsung_usb2_common_phy {
 	char *label;
 };
 
+
 struct samsung_usb2_phy_config {
 	const struct samsung_usb2_common_phy *phys;
 	int (*rate_to_clk)(unsigned long, u32 *);

@@ -479,3 +479,4 @@ static struct usbmix_ctl_map usbmix_ctl_maps[] = {
 	},
 	{ 0 } /* terminator */
 };
+

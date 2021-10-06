@@ -23,6 +23,7 @@
 #include <linux/mutex.h>
 #include "isdn_divert.h"
 
+
 /*********************************/
 /* Variables for interface queue */
 /*********************************/
@@ -113,6 +114,7 @@ isdn_divert_write(struct file *file, const char __user *buf, size_t count, loff_
 {
 	return (-ENODEV);
 }				/* isdn_divert_write */
+
 
 /***************************************/
 /* select routines for various kernels */

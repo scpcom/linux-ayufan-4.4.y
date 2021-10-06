@@ -198,6 +198,7 @@ static void put_target_map(struct map *map, bool user)
 	}
 }
 
+
 static int convert_exec_to_group(const char *exec, char **result)
 {
 	char *ptr1, *ptr2, *exec_copy;
@@ -471,6 +472,7 @@ static void debuginfo_cache__exit(void)
 	debuginfo_cache = NULL;
 	zfree(&debuginfo_cache_path);
 }
+
 
 static int get_text_start_address(const char *exec, unsigned long *address)
 {

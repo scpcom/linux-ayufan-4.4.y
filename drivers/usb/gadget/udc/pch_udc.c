@@ -2463,6 +2463,7 @@ static void pch_udc_svc_control_out(struct pch_udc_dev *dev)
 	pch_udc_ep_set_rrdy(ep);
 }
 
+
 /**
  * pch_udc_postsvc_epinters() - This function enables end point interrupts
  *				and clears NAK status
@@ -2554,6 +2555,7 @@ static void pch_udc_activate_control_ep(struct pch_udc_dev *dev)
 
 	pch_udc_ep_clear_nak(ep);
 }
+
 
 /**
  * pch_udc_svc_ur_interrupt() - This function handles a USB reset interrupt

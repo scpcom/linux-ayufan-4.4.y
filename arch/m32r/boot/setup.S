@@ -181,3 +181,4 @@ dcache_dummy:
 #endif	/* CONFIG_SMP */
 
 	.end
+

@@ -657,6 +657,8 @@ static void mtrr_restore(void)
 	}
 }
 
+
+
 static struct syscore_ops mtrr_syscore_ops = {
 	.suspend	= mtrr_save,
 	.resume		= mtrr_restore,

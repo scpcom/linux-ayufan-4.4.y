@@ -19,6 +19,7 @@
 #include <linux/string.h>
 #include <linux/mfd/mcp.h>
 
+
 #define to_mcp(d)		container_of(d, struct mcp, attached_device)
 #define to_mcp_driver(d)	container_of(d, struct mcp_driver, drv)
 

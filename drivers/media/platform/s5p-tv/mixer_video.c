@@ -1136,3 +1136,4 @@ static const struct mxr_format *find_format_by_index(
 		return NULL;
 	return layer->fmt_array[index];
 }
+

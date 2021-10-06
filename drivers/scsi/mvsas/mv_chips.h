@@ -23,6 +23,7 @@
  * USA
 */
 
+
 #ifndef _MV_CHIPS_H_
 #define _MV_CHIPS_H_
 
@@ -266,3 +267,4 @@ static inline u32 mvs_hw_max_link_rate(void)
 }
 
 #endif  /* _MV_CHIPS_H_ */
+

@@ -41,6 +41,7 @@ struct iio_trigger_ops {
 			       struct iio_dev *indio_dev);
 };
 
+
 /**
  * struct iio_trigger - industrial I/O trigger device
  * @ops:		[DRIVER] operations structure
@@ -73,6 +74,7 @@ struct iio_trigger {
 	unsigned long pool[BITS_TO_LONGS(CONFIG_IIO_CONSUMERS_PER_TRIGGER)];
 	struct mutex			pool_lock;
 };
+
 
 static inline struct iio_trigger *to_iio_trigger(struct device *d)
 {

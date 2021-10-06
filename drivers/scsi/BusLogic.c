@@ -70,6 +70,7 @@ static struct scsi_host_template blogic_template;
 
 static int blogic_drvr_options_count;
 
+
 /*
   blogic_drvr_options is an array of Driver Options structures representing
   BusLogic Driver Options specifications provided via the Linux Kernel Command
@@ -77,6 +78,7 @@ static int blogic_drvr_options_count;
 */
 
 static struct blogic_drvr_options blogic_drvr_options[BLOGIC_MAX_ADAPTERS];
+
 
 /*
   BusLogic can be assigned a string by insmod.
@@ -88,12 +90,14 @@ static char *BusLogic;
 module_param(BusLogic, charp, 0);
 #endif
 
+
 /*
   blogic_probe_options is a set of Probe Options to be applied across
   all BusLogic Host Adapters.
 */
 
 static struct blogic_probe_options blogic_probe_options;
+
 
 /*
   blogic_global_options is a set of Global Options to be applied across
@@ -110,6 +114,7 @@ static LIST_HEAD(blogic_host_list);
 
 static int blogic_probeinfo_count;
 
+
 /*
   blogic_probeinfo_list is the list of I/O Addresses and Bus Probe Information
   to be checked for potential BusLogic Host Adapters.  It is initialized by
@@ -118,6 +123,7 @@ static int blogic_probeinfo_count;
 */
 
 static struct blogic_probeinfo *blogic_probeinfo_list;
+
 
 /*
   blogic_cmd_failure_reason holds a string identifying the reason why a
@@ -137,6 +143,7 @@ static void blogic_announce_drvr(struct blogic_adapter *adapter)
 	blogic_announce("***** BusLogic SCSI Driver Version " blogic_drvr_version " of " blogic_drvr_date " *****\n", adapter);
 	blogic_announce("Copyright 1995-1998 by Leonard N. Zubkoff " "<lnz@dandelion.com>\n", adapter);
 }
+
 
 /*
   blogic_drvr_info returns the Host Adapter Name to identify this SCSI
@@ -182,6 +189,7 @@ static void blogic_init_ccbs(struct blogic_adapter *adapter, void *blk_pointer,
 	}
 }
 
+
 /*
   blogic_create_initccbs allocates the initial CCBs for Host Adapter.
 */
@@ -204,6 +212,7 @@ static bool __init blogic_create_initccbs(struct blogic_adapter *adapter)
 	}
 	return true;
 }
+
 
 /*
   blogic_destroy_ccbs deallocates the CCBs for Host Adapter.
@@ -228,6 +237,7 @@ static void blogic_destroy_ccbs(struct blogic_adapter *adapter)
 		pci_free_consistent(adapter->pci_device, lastccb->allocgrp_size,
 					lastccb, lastccb->allocgrp_head);
 }
+
 
 /*
   blogic_create_addlccbs allocates Additional CCBs for Host Adapter.  If
@@ -294,6 +304,7 @@ static struct blogic_ccb *blogic_alloc_ccb(struct blogic_adapter *adapter)
 	return ccb;
 }
 
+
 /*
   blogic_dealloc_ccb deallocates a CCB, returning it to the Host Adapter's
   free list.  The Host Adapter's Lock should already have been acquired by the
@@ -315,6 +326,7 @@ static void blogic_dealloc_ccb(struct blogic_ccb *ccb, int dma_unmap)
 	ccb->next = adapter->free_ccbs;
 	adapter->free_ccbs = ccb;
 }
+
 
 /*
   blogic_cmd sends the command opcode to adapter, optionally
@@ -553,6 +565,7 @@ done:
 	return result;
 }
 
+
 /*
   blogic_add_probeaddr_isa appends a single ISA I/O Address to the list
   of I/O Address and Bus Probe Information to be checked for potential BusLogic
@@ -570,6 +583,7 @@ static void __init blogic_add_probeaddr_isa(unsigned long io_addr)
 	probeinfo->io_addr = io_addr;
 	probeinfo->pci_device = NULL;
 }
+
 
 /*
   blogic_init_probeinfo_isa initializes the list of I/O Address and
@@ -602,7 +616,9 @@ static void __init blogic_init_probeinfo_isa(struct blogic_adapter *adapter)
 		blogic_add_probeaddr_isa(0x134);
 }
 
+
 #ifdef CONFIG_PCI
+
 
 /*
   blogic_sort_probeinfo sorts a section of blogic_probeinfo_list in order
@@ -638,6 +654,7 @@ static void __init blogic_sort_probeinfo(struct blogic_probeinfo
 		}
 	}
 }
+
 
 /*
   blogic_init_mm_probeinfo initializes the list of I/O Address
@@ -906,6 +923,7 @@ static int __init blogic_init_mm_probeinfo(struct blogic_adapter *adapter)
 	return mmcount;
 }
 
+
 /*
   blogic_init_fp_probeinfo initializes the list of I/O Address
   and Bus Probe Information to be checked for potential BusLogic FlashPoint
@@ -991,6 +1009,7 @@ static int __init blogic_init_fp_probeinfo(struct blogic_adapter *adapter)
 	return fpcount;
 }
 
+
 /*
   blogic_init_probeinfo_list initializes the list of I/O Address and Bus
   Probe Information to be checked for potential BusLogic SCSI Host Adapters by
@@ -1069,10 +1088,12 @@ static void __init blogic_init_probeinfo_list(struct blogic_adapter *adapter)
 	}
 }
 
+
 #else
 #define blogic_init_probeinfo_list(adapter) \
 		blogic_init_probeinfo_isa(adapter)
 #endif				/* CONFIG_PCI */
+
 
 /*
   blogic_failure prints a standardized error message, and then returns false.
@@ -1093,6 +1114,7 @@ static bool blogic_failure(struct blogic_adapter *adapter, char *msg)
 				blogic_cmd_failure_reason);
 	return false;
 }
+
 
 /*
   blogic_probe probes for a BusLogic Host Adapter.
@@ -1164,6 +1186,7 @@ static bool __init blogic_probe(struct blogic_adapter *adapter)
 	 */
 	return true;
 }
+
 
 /*
   blogic_hwreset issues a Hardware Reset to the Host Adapter
@@ -1275,6 +1298,7 @@ static bool blogic_hwreset(struct blogic_adapter *adapter, bool hard_reset)
 	return true;
 }
 
+
 /*
   blogic_checkadapter checks to be sure this really is a BusLogic
   Host Adapter.
@@ -1310,6 +1334,7 @@ static bool __init blogic_checkadapter(struct blogic_adapter *adapter)
 				(result ? "Found" : "Not Found"));
 	return result;
 }
+
 
 /*
   blogic_rdconfig reads the Configuration Information
@@ -1794,6 +1819,7 @@ common:
 	return true;
 }
 
+
 /*
   blogic_reportconfig reports the configuration of Host Adapter.
 */
@@ -1951,6 +1977,7 @@ static bool __init blogic_reportconfig(struct blogic_adapter *adapter)
 	return true;
 }
 
+
 /*
   blogic_getres acquires the system resources necessary to use
   Host Adapter.
@@ -1991,6 +2018,7 @@ static bool __init blogic_getres(struct blogic_adapter *adapter)
 	return true;
 }
 
+
 /*
   blogic_relres releases any system resources previously acquired
   by blogic_getres.
@@ -2019,6 +2047,7 @@ static void blogic_relres(struct blogic_adapter *adapter)
 	adapter->mbox_space_handle = 0;
 	adapter->mbox_sz = 0;
 }
+
 
 /*
   blogic_initadapter initializes Host Adapter.  This is the only
@@ -2136,6 +2165,7 @@ done:
 	 */
 	return true;
 }
+
 
 /*
   blogic_inquiry inquires about the Target Devices accessible
@@ -2523,6 +2553,7 @@ static int __init blogic_init(void)
 	return ret;
 }
 
+
 /*
   blogic_deladapter releases all resources previously acquired to
   support a specific Host Adapter, including the I/O Address range, and
@@ -2561,6 +2592,7 @@ static int __exit blogic_deladapter(struct blogic_adapter *adapter)
 	return 0;
 }
 
+
 /*
   blogic_qcompleted_ccb queues CCB for completion processing.
 */
@@ -2580,6 +2612,7 @@ static void blogic_qcompleted_ccb(struct blogic_ccb *ccb)
 	}
 	adapter->active_cmds[ccb->tgt_id]--;
 }
+
 
 /*
   blogic_resultcode computes a SCSI Subsystem Result Code from
@@ -2636,6 +2669,7 @@ static int blogic_resultcode(struct blogic_adapter *adapter,
 	}
 	return (hoststatus << 16) | tgt_status;
 }
+
 
 /*
   blogic_scan_inbox scans the Incoming Mailboxes saving any
@@ -2696,6 +2730,7 @@ static void blogic_scan_inbox(struct blogic_adapter *adapter)
 	}
 	adapter->next_inbox = next_inbox;
 }
+
 
 /*
   blogic_process_ccbs iterates over the completed CCBs for Host
@@ -2839,6 +2874,7 @@ static void blogic_process_ccbs(struct blogic_adapter *adapter)
 	adapter->processing_ccbs = false;
 }
 
+
 /*
   blogic_inthandler handles hardware interrupts from BusLogic Host
   Adapters.
@@ -2922,6 +2958,7 @@ static irqreturn_t blogic_inthandler(int irq_ch, void *devid)
 	spin_unlock_irqrestore(adapter->scsi_host->host_lock, processor_flag);
 	return IRQ_HANDLED;
 }
+
 
 /*
   blogic_write_outbox places CCB and Action Code into an Outgoing
@@ -3418,6 +3455,7 @@ static int blogic_diskparam(struct scsi_device *sdev, struct block_device *dev,
 	return 0;
 }
 
+
 /*
   BugLogic_ProcDirectoryInfo implements /proc/scsi/BusLogic/<N>.
 */
@@ -3530,6 +3568,7 @@ Target	Requested Completed  Requested Completed  Requested Completed\n\
 	return 0;
 }
 
+
 /*
   blogic_msg prints Driver Messages.
 */
@@ -3571,6 +3610,7 @@ static void blogic_msg(enum blogic_msglevel msglevel, char *fmt,
 	begin = (buf[len - 1] == '\n');
 }
 
+
 /*
   blogic_parse parses an individual option keyword.  It returns true
   and updates the pointer if the keyword is recognized and false otherwise.
@@ -3592,6 +3632,7 @@ static bool __init blogic_parse(char **str, char *keyword)
 	*str = pointer;
 	return true;
 }
+
 
 /*
   blogic_parseopts handles processing of BusLogic Driver Options

@@ -531,6 +531,7 @@ static int __wa_xfer_abort(struct wa_xfer *xfer)
 		goto error_submit;
 	return result;				/* callback frees! */
 
+
 error_submit:
 	wa_put(xfer->wa);
 	if (printk_ratelimit())
@@ -685,6 +686,7 @@ static void __wa_setup_isoc_packet_descr(
 			cpu_to_le16(iso_frame_desc[offset_index].length);
 	}
 }
+
 
 /* Fill in the common request header and xfer-type specific data. */
 static void __wa_xfer_setup_hdr0(struct wa_xfer *xfer,

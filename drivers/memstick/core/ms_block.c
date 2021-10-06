@@ -127,6 +127,7 @@ static int msb_sg_compare_to_buffer(struct scatterlist *sg,
 	return retval;
 }
 
+
 /* Get zone at which block with logical address 'lba' lives
  * Flash is broken into zones.
  * Each zone consists of 512 eraseblocks, out of which in first
@@ -510,6 +511,7 @@ again:
 		msb->state = MSB_WB_SEND_WRITE_COMMAND;
 		return 0;
 
+
 	case MSB_WB_SEND_WRITE_COMMAND:
 		command = MS_CMD_BLOCK_WRITE;
 		memstick_init_req(mrq, MS_TPC_SET_CMD, &command, 1);
@@ -532,6 +534,7 @@ again:
 
 		if (intreg & MEMSTICK_INT_ERR)
 			return msb_exit_state_machine(msb, -EBADMSG);
+
 
 		/* for last page we need to poll CED */
 		if (msb->current_page == msb->pages_in_block) {
@@ -834,6 +837,7 @@ static int msb_erase_block(struct msb_data *msb, u16 pba)
 		msb->command_value = MS_CMD_BLOCK_ERASE;
 		msb->command_need_oob = false;
 
+
 		error = msb_run_state_machine(msb, h_msb_send_command);
 		if (!error || msb_reset(msb, true))
 			break;
@@ -907,6 +911,7 @@ static int msb_read_page(struct msb_data *msb,
 		msb->current_sg = sg;
 		msb->current_sg_offset = offset;
 		error = msb_run_state_machine(msb, h_msb_read_page);
+
 
 		if (error == -EUCLEAN) {
 			pr_notice("correctable error on pba %d, page %d",
@@ -1494,6 +1499,7 @@ static void msb_cache_flush_timer(unsigned long data)
 	queue_work(msb->io_queue, &msb->io_work);
 }
 
+
 static void msb_cache_discard(struct msb_data *msb)
 {
 	if (msb->cache_block_lba == MS_BLOCK_INVALID)
@@ -1772,6 +1778,7 @@ static int msb_init_card(struct memstick_dev *card)
 	error = msb_ftl_initialize(msb);
 	if (error)
 		return error;
+
 
 	/* Read the bad block table */
 	error = msb_read_bad_block_table(msb, 0);
@@ -2319,6 +2326,7 @@ static struct memstick_device_id msb_id_tbl[] = {
 	{}
 };
 MODULE_DEVICE_TABLE(memstick, msb_id_tbl);
+
 
 static struct memstick_driver msb_driver = {
 	.driver = {

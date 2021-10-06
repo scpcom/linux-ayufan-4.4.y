@@ -43,6 +43,7 @@
  * Register below are grouped by domain (not necessarily in offset order)
  */
 
+
 /* DRA752.common register offsets */
 #define DRA752_BANDGAP_CTRL_1_OFFSET		0x1a0
 #define DRA752_BANDGAP_STATUS_1_OFFSET		0x1c8

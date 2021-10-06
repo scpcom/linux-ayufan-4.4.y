@@ -32,6 +32,7 @@
 #define ARMDIV			9
 #define ARMCLK			10
 
+
 /* Special clocks */
 #define SCLK_CAM		16
 #define SCLK_UART		17

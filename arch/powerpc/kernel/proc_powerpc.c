@@ -58,6 +58,7 @@ static const struct file_operations page_map_fops = {
 	.mmap	= page_map_mmap
 };
 
+
 static int __init proc_ppc64_init(void)
 {
 	struct proc_dir_entry *pde;

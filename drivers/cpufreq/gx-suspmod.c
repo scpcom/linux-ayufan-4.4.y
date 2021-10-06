@@ -142,6 +142,7 @@ module_param(max_duration, int, 0444);
  */
 #define POLICY_MIN_DIV 20
 
+
 /**
  * we can detect a core multiplier from dir0_lsb
  * from GX1 datasheet p.56,
@@ -160,6 +161,7 @@ static int gx_freq_mult[16] = {
 		4, 10, 4, 6, 9, 5, 7, 8,
 		0, 0, 0, 0, 0, 0, 0, 0
 };
+
 
 /****************************************************************
  *	Low Level chipset interface				*
@@ -242,6 +244,7 @@ static unsigned int gx_validate_speed(unsigned int khz, u8 *on_duration,
 
 	return old_tmp_freq;
 }
+
 
 /**
  * gx_set_cpuspeed:
@@ -496,3 +499,4 @@ MODULE_LICENSE("GPL");
 
 module_init(cpufreq_gx_init);
 module_exit(cpufreq_gx_exit);
+

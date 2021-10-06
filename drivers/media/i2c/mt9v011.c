@@ -109,6 +109,7 @@ static void mt9v011_write(struct v4l2_subdev *sd, unsigned char addr,
 			 "i2c i/o error: rc == %d (should be 3)\n", rc);
 }
 
+
 struct i2c_reg_value {
 	unsigned char reg;
 	u16           value;
@@ -130,6 +131,7 @@ static const struct i2c_reg_value mt9v011_init_default[] = {
 
 		{ R07_MT9V011_OUT_CTRL, 0x0002 },	/* chip enable */
 };
+
 
 static u16 calc_mt9v011_gain(s16 lineargain)
 {
@@ -479,6 +481,7 @@ static const struct v4l2_subdev_ops mt9v011_ops = {
 	.video = &mt9v011_video_ops,
 	.pad   = &mt9v011_pad_ops,
 };
+
 
 /****************************************************************************
 			I2C Client & Driver

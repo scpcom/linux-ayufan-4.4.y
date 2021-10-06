@@ -62,6 +62,7 @@
 #define	FDCSTAT_DRQ		(0x02)   /* DRQ status (Type II+III) */
 #define	FDCSTAT_BUSY	(0x01)   /* FDC is busy */
 
+
 /* PSG Port A Bit Nr 0 .. Side Sel .. 0 -> Side 1  1 -> Side 2 */
 #define DSKSIDE     (0x01)
 

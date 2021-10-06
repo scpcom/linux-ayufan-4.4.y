@@ -28,6 +28,7 @@ static struct resource chipram_res = {
 };
 static atomic_t chipavail;
 
+
 void __init amiga_chip_init(void)
 {
 	if (!AMIGAHW_PRESENT(CHIP_RAM))
@@ -38,6 +39,7 @@ void __init amiga_chip_init(void)
 
 	atomic_set(&chipavail, amiga_chip_size);
 }
+
 
 void *amiga_chip_alloc(unsigned long size, const char *name)
 {
@@ -58,6 +60,7 @@ void *amiga_chip_alloc(unsigned long size, const char *name)
 	return p;
 }
 EXPORT_SYMBOL(amiga_chip_alloc);
+
 
 	/*
 	 *  Warning:
@@ -108,6 +111,7 @@ void amiga_chip_free(void *ptr)
 }
 EXPORT_SYMBOL(amiga_chip_free);
 
+
 unsigned long amiga_chip_avail(void)
 {
 	unsigned long n = atomic_read(&chipavail);
@@ -116,3 +120,4 @@ unsigned long amiga_chip_avail(void)
 	return n;
 }
 EXPORT_SYMBOL(amiga_chip_avail);
+

@@ -112,6 +112,7 @@ static const struct _cache_table cache_table[] =
 	{ 0x00, 0, 0}
 };
 
+
 enum _cache_type {
 	CTYPE_NULL = 0,
 	CTYPE_DATA = 1,
@@ -279,6 +280,7 @@ amd_cpuid4(int leaf, union _cpuid4_leaf_eax *eax,
 	eax->split.level = levels[leaf];
 	eax->split.num_threads_sharing = 0;
 	eax->split.num_cores_on_die = __this_cpu_read(cpu_info.x86_max_cores) - 1;
+
 
 	if (assoc == 0xffff)
 		eax->split.is_fully_associative = 1;

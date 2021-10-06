@@ -713,6 +713,7 @@ pnfs_layoutcommit_outstanding(struct inode *inode)
 	return false;
 }
 
+
 static inline struct nfs4_threshold *pnfs_mdsthreshold_alloc(void)
 {
 	return NULL;

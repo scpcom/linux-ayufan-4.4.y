@@ -66,6 +66,7 @@ struct nfs_dns_ent {
 	size_t addrlen;
 };
 
+
 static void nfs_dns_ent_update(struct cache_head *cnew,
 		struct cache_head *ckey)
 {
@@ -366,6 +367,7 @@ static struct cache_detail nfs_dns_resolve_template = {
 	.update		= nfs_dns_ent_update,
 	.alloc		= nfs_dns_ent_alloc,
 };
+
 
 int nfs_dns_resolver_cache_init(struct net *net)
 {

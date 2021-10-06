@@ -105,6 +105,7 @@ static void tmon_cleanup(void)
 	exit(1);
 }
 
+
 static void tmon_sig_handler(int sig)
 {
 	syslog(LOG_INFO, "TMON caught signal %d\n", sig);
@@ -127,6 +128,7 @@ static void tmon_sig_handler(int sig)
 	}
 	tmon_exit = true;
 }
+
 
 static void start_syslog(void)
 {
@@ -173,6 +175,7 @@ static void prepare_logging(void)
 		tmon_log = NULL;
 		return;
 	}
+
 
 	fprintf(tmon_log, "#----------- THERMAL SYSTEM CONFIG -------------\n");
 	for (i = 0; i < ptdata.nr_tz_sensor; i++) {
@@ -224,6 +227,7 @@ static struct option opts[] = {
 	{ "debug", 0, NULL, 'g' },
 	{ 0, 0, NULL, 0 }
 };
+
 
 int main(int argc, char **argv)
 {
@@ -371,6 +375,7 @@ static void start_daemon_mode()
 	/* change working directory */
 	if ((chdir("/")) < 0)
 		exit(EXIT_FAILURE);
+
 
 	sleep(10);
 

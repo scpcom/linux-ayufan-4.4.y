@@ -159,6 +159,7 @@ static unsigned long read_obj(const char *name)
 	return strlen(buffer);
 }
 
+
 /*
  * Get the contents of an attribute
  */
@@ -221,6 +222,7 @@ static unsigned long read_slab_obj(struct slabinfo *s, const char *name)
 	}
 	return l;
 }
+
 
 /*
  * Put a size string together
@@ -813,6 +815,7 @@ static void totals(void)
 	unsigned long min_ppartobj = 100, max_ppartobj = 0,
 				avg_ppartobj, total_ppartobj = 0;
 
+
 	for (s = slabinfo; s < slabinfo + slabs; s++) {
 		unsigned long long size;
 		unsigned long used;
@@ -1123,6 +1126,7 @@ static void alias(void)
 	if (active)
 		printf("\n");
 }
+
 
 static void rename_slabs(void)
 {

@@ -211,6 +211,7 @@ static void __init sio_init(void)
 	of_node_put(root);
 }
 
+
 static void __init pegasos_set_l2cr(void)
 {
 	struct device_node *np;

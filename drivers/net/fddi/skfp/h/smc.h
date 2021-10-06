@@ -99,6 +99,7 @@ struct s_ecm {
 	struct smt_timer ecm_timer ;	/* timer */
 } ;
 
+
 /*
  * RMT - Ring Management
  * rmt.c
@@ -174,6 +175,7 @@ struct mib_path_config {
 #define SNMP_PATH_CONCATENATED	5	/* Current path is concatenated */
 #define SNMP_PATH_THRU		6	/* Current path is thru */
 };
+
 
 #endif
 
@@ -483,3 +485,4 @@ void read_address(struct s_smc *smc, u_char *mac_addr);
 void timer_irq(struct s_smc *smc);
 
 #endif	/* _SCMECM_ */
+

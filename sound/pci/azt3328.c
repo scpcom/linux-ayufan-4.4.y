@@ -329,6 +329,7 @@ static const struct pci_device_id snd_azf3328_ids[] = {
 
 MODULE_DEVICE_TABLE(pci, snd_azf3328_ids);
 
+
 static int
 snd_azf3328_io_reg_setb(unsigned reg, u8 mask, bool do_set)
 {
@@ -2012,6 +2013,7 @@ static const struct snd_pcm_hardware snd_azf3328_hardware =
 	.fifo_size =		0,
 };
 
+
 static unsigned int snd_azf3328_fixed_rates[] = {
 	AZF_FREQ_4000,
 	AZF_FREQ_4800,
@@ -2225,6 +2227,7 @@ snd_azf3328_timer_stop(struct snd_timer *timer)
 	spin_unlock_irqrestore(&chip->reg_lock, flags);
 	return 0;
 }
+
 
 static int
 snd_azf3328_timer_precise_resolution(struct snd_timer *timer,

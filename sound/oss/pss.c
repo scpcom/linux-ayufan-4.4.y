@@ -56,6 +56,7 @@
  *          Specify that this module owns the coprocessor
  */
 
+
 #include <linux/init.h>
 #include <linux/module.h>
 #include <linux/spinlock.h>
@@ -120,6 +121,7 @@ static bool pss_mixer = 1;
 #else
 static bool pss_mixer;
 #endif
+
 
 struct pss_mixerdata {
 	unsigned int volume_l;
@@ -1122,6 +1124,7 @@ static inline void __exit unload_pss_mss(struct address_info *hw_config)
 	unload_ms_sound(hw_config);
 }
 
+
 static struct address_info cfg;
 static struct address_info cfg2;
 static struct address_info cfg_mpu;
@@ -1163,6 +1166,7 @@ MODULE_PARM_DESC(pss_mixer, "Enable (1) or disable (0) PSS mixer (controlling of
 MODULE_AUTHOR("Hannu Savolainen, Vladimir Michl");
 MODULE_DESCRIPTION("Module for PSS sound cards (based on AD1848, ADSP-2115 and ESC614). This module includes control of output amplifier and synth volume of the Beethoven ADSP-16 card (this may work with other PSS cards).");
 MODULE_LICENSE("GPL");
+
 
 static int fw_load = 0;
 static int pssmpu = 0, pssmss = 0;

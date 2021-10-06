@@ -757,6 +757,8 @@ static int ssi_release(struct hsi_client *cl)
 	return 0;
 }
 
+
+
 static void ssi_error(struct hsi_port *port)
 {
 	struct omap_ssi_port *omap_port = hsi_port_drvdata(port);
@@ -1366,6 +1368,7 @@ static const struct dev_pm_ops omap_ssi_port_pm_ops = {
 #else
 #define DEV_PM_OPS     NULL
 #endif
+
 
 #ifdef CONFIG_OF
 static const struct of_device_id omap_ssi_port_of_match[] = {

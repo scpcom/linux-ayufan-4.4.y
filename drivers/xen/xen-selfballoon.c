@@ -332,6 +332,7 @@ static ssize_t store_selfballoon_downhys(struct device *dev,
 static DEVICE_ATTR(selfballoon_downhysteresis, S_IRUGO | S_IWUSR,
 		   show_selfballoon_downhys, store_selfballoon_downhys);
 
+
 SELFBALLOON_SHOW(selfballoon_uphys, "%d\n", selfballoon_uphysteresis);
 
 static ssize_t store_selfballoon_uphys(struct device *dev,
@@ -407,6 +408,7 @@ static ssize_t store_selfballoon_reserved_mb(struct device *dev,
 static DEVICE_ATTR(selfballoon_reserved_mb, S_IRUGO | S_IWUSR,
 		   show_selfballoon_reserved_mb,
 		   store_selfballoon_reserved_mb);
+
 
 #ifdef CONFIG_FRONTSWAP
 SELFBALLOON_SHOW(frontswap_selfshrinking, "%d\n", frontswap_selfshrinking);

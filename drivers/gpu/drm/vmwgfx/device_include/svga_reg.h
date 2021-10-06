@@ -59,6 +59,7 @@ typedef uint32 SVGAMobId;
 #define SVGA_MAX_WIDTH                  2560
 #define SVGA_MAX_HEIGHT                 1600
 
+
 #define SVGA_MAX_BITS_PER_PIXEL         32
 #define SVGA_MAX_DEPTH                  24
 #define SVGA_MAX_DISPLAYS               10
@@ -384,6 +385,7 @@ typedef enum {
    SVGA_CB_CONTEXT_MAX    = 0x1,
 } SVGACBContext;
 
+
 typedef enum {
    /*
     * The guest is supposed to write SVGA_CB_STATUS_NONE to the status
@@ -578,6 +580,7 @@ typedef struct SVGAColorBGRX {
    };
 } SVGAColorBGRX;
 
+
 /*
  * SVGASignedRect --
  * SVGASignedPoint --
@@ -610,6 +613,7 @@ struct {
 }
 #include "vmware_pack_end.h"
 SVGASignedPoint;
+
 
 /*
  * SVGA Device Capabilities
@@ -688,6 +692,7 @@ SVGASignedPoint;
 
 #define SVGA_CAP_CMD_RESERVED       0x80000000
 
+
 /*
  * The Guest can optionally read some SVGA device capabilities through
  * the backdoor with command BDOOR_CMD_GET_SVGA_CAPABILITIES before
@@ -709,6 +714,7 @@ typedef enum {
    SVGABackdoorCap3dHWVersion = 2,
    SVGABackdoorCapMax = 3,
 } SVGABackdoorCapType;
+
 
 /*
  * FIFO register indices.
@@ -857,6 +863,7 @@ enum {
     SVGA_FIFO_NUM_REGS
 };
 
+
 /*
  * Definition of registers included in extended FIFO support.
  *
@@ -880,6 +887,7 @@ enum {
  * affecting driver compatibility; keep it that way?
  */
 #define SVGA_FIFO_EXTENDED_MANDATORY_REGS  (SVGA_FIFO_3D_CAPS_LAST + 1)
+
 
 /*
  * FIFO Synchronization Registers
@@ -982,6 +990,7 @@ enum {
  *         3. Write a reason to SVGA_REG_SYNC. This will send an
  *            asynchronous wakeup to the MKS thread.
  */
+
 
 /*
  * FIFO Capabilities
@@ -1088,6 +1097,7 @@ enum {
 #define SVGA_FIFO_CAP_SCREEN_OBJECT_2   (1<<9)
 #define SVGA_FIFO_CAP_DEAD              (1<<10)
 
+
 /*
  * FIFO Flags
  *
@@ -1104,17 +1114,20 @@ enum {
 
 #define SVGA_FIFO_RESERVED_UNKNOWN      0xffffffff
 
+
 /*
  * Video overlay support
  */
 
 #define SVGA_NUM_OVERLAY_UNITS 32
 
+
 /*
  * Video capabilities that the guest is currently using
  */
 
 #define SVGA_VIDEO_FLAG_COLORKEY        0x0001
+
 
 /*
  * Offsets for the video overlay registers
@@ -1145,6 +1158,7 @@ enum {
                              /* (SVGA_ID_INVALID) */
    SVGA_VIDEO_NUM_REGS
 };
+
 
 /*
  * SVGA Overlay Units
@@ -1180,6 +1194,7 @@ struct SVGAOverlayUnit {
 #include "vmware_pack_end.h"
 SVGAOverlayUnit;
 
+
 /*
  * Guest display topology
  *
@@ -1196,6 +1211,7 @@ typedef struct SVGADisplayTopology {
    uint32 positionX;
    uint32 positionY;
 } SVGADisplayTopology;
+
 
 /*
  * SVGAScreenObject --
@@ -1286,6 +1302,7 @@ struct {
 #include "vmware_pack_end.h"
 SVGAScreenObject;
 
+
 /*
  *  Commands in the command FIFO:
  *
@@ -1333,6 +1350,7 @@ typedef enum {
 #define SVGA_CMD_MAX_DATASIZE       (256 * 1024)
 #define SVGA_CMD_MAX_ARGS           64
 
+
 /*
  * SVGA_CMD_UPDATE --
  *
@@ -1372,6 +1390,7 @@ struct {
 #include "vmware_pack_end.h"
 SVGAFifoCmdUpdate;
 
+
 /*
  * SVGA_CMD_RECT_COPY --
  *
@@ -1394,6 +1413,7 @@ struct {
 }
 #include "vmware_pack_end.h"
 SVGAFifoCmdRectCopy;
+
 
 /*
  * SVGA_CMD_RECT_ROP_COPY --
@@ -1420,6 +1440,7 @@ struct {
 }
 #include "vmware_pack_end.h"
 SVGAFifoCmdRectRopCopy;
+
 
 /*
  * SVGA_CMD_DEFINE_CURSOR --
@@ -1452,6 +1473,7 @@ struct {
 #include "vmware_pack_end.h"
 SVGAFifoCmdDefineCursor;
 
+
 /*
  * SVGA_CMD_DEFINE_ALPHA_CURSOR --
  *
@@ -1478,6 +1500,7 @@ struct {
 #include "vmware_pack_end.h"
 SVGAFifoCmdDefineAlphaCursor;
 
+
 /*
  * SVGA_CMD_UPDATE_VERBOSE --
  *
@@ -1501,6 +1524,7 @@ struct {
 }
 #include "vmware_pack_end.h"
 SVGAFifoCmdUpdateVerbose;
+
 
 /*
  * SVGA_CMD_FRONT_ROP_FILL --
@@ -1530,6 +1554,7 @@ struct {
 #include "vmware_pack_end.h"
 SVGAFifoCmdFrontRopFill;
 
+
 /*
  * SVGA_CMD_FENCE --
  *
@@ -1553,6 +1578,7 @@ struct {
 #include "vmware_pack_end.h"
 SVGAFifoCmdFence;
 
+
 /*
  * SVGA_CMD_ESCAPE --
  *
@@ -1573,6 +1599,7 @@ struct {
 }
 #include "vmware_pack_end.h"
 SVGAFifoCmdEscape;
+
 
 /*
  * SVGA_CMD_DEFINE_SCREEN --
@@ -1608,6 +1635,7 @@ struct {
 #include "vmware_pack_end.h"
 SVGAFifoCmdDefineScreen;
 
+
 /*
  * SVGA_CMD_DESTROY_SCREEN --
  *
@@ -1625,6 +1653,7 @@ struct {
 }
 #include "vmware_pack_end.h"
 SVGAFifoCmdDestroyScreen;
+
 
 /*
  * SVGA_CMD_DEFINE_GMRFB --
@@ -1683,6 +1712,7 @@ struct {
 #include "vmware_pack_end.h"
 SVGAFifoCmdDefineGMRFB;
 
+
 /*
  * SVGA_CMD_BLIT_GMRFB_TO_SCREEN --
  *
@@ -1713,6 +1743,7 @@ struct {
 #include "vmware_pack_end.h"
 SVGAFifoCmdBlitGMRFBToScreen;
 
+
 /*
  * SVGA_CMD_BLIT_SCREEN_TO_GMRFB --
  *
@@ -1741,6 +1772,7 @@ struct {
 #include "vmware_pack_end.h"
 SVGAFifoCmdBlitScreenToGMRFB;
 
+
 /*
  * SVGA_CMD_ANNOTATION_FILL --
  *
@@ -1760,6 +1792,7 @@ struct {
 }
 #include "vmware_pack_end.h"
 SVGAFifoCmdAnnotationFill;
+
 
 /*
  * SVGA_CMD_ANNOTATION_COPY --
@@ -1782,6 +1815,7 @@ struct {
 #include "vmware_pack_end.h"
 SVGAFifoCmdAnnotationCopy;
 
+
 /*
  * SVGA_CMD_DEFINE_GMR2 --
  *
@@ -1799,6 +1833,7 @@ struct {
 }
 #include "vmware_pack_end.h"
 SVGAFifoCmdDefineGMR2;
+
 
 /*
  * SVGA_CMD_REMAP_GMR2 --
@@ -1853,6 +1888,7 @@ struct {
 }
 #include "vmware_pack_end.h"
 SVGAFifoCmdRemapGMR2;
+
 
 /*
  * Size of SVGA device memory such as frame buffer and FIFO.

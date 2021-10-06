@@ -85,6 +85,7 @@ static struct i2c_board_info __initdata ls_hgl_i2c_rtc = {
 #define LS_HGL_GPIO_LED_FUNC    17
 #define LS_HGL_GPIO_LED_PWR     0
 
+
 static struct gpio_led ls_hgl_led_pins[] = {
 	{
 		.name	   = "alarm:red",
@@ -162,12 +163,14 @@ static struct platform_device ls_hgl_button_device = {
 	},
 };
 
+
 /*****************************************************************************
  * SATA
  ****************************************************************************/
 static struct mv_sata_platform_data ls_hgl_sata_data = {
 	.n_ports	= 2,
 };
+
 
 /*****************************************************************************
  * Linkstation LS-HGL specific power off method: reboot
@@ -184,6 +187,7 @@ static void ls_hgl_power_off(void)
 {
 	orion5x_restart(REBOOT_HARD, NULL);
 }
+
 
 /*****************************************************************************
  * General Setup

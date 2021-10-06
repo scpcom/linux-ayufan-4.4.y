@@ -726,3 +726,4 @@ static const struct file_operations sync_fence_fops = {
 	.unlocked_ioctl = sync_fence_ioctl,
 	.compat_ioctl = sync_fence_ioctl,
 };
+

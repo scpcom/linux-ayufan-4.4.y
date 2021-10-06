@@ -289,6 +289,7 @@ HiX_0:
      lea	X(%a6),%a0
      bras	LOGBGN			| ...begin regular log(X)
 
+
 HiX_not0:
      clrl	%d6
      bfffo	%d4{#0:#32},%d6		| ...find first 1
@@ -310,6 +311,7 @@ HiX_not0:
      moveml	(%a7)+,%d2-%d7		| ...restore registers
      lea	X(%a6),%a0
      bras	LOGBGN			| ...begin regular log(X)
+
 
 	.global	slogn
 slogn:
@@ -415,6 +417,7 @@ LP1CONT1:
 	fmovel	%d1,%fpcr
 	faddx	KLOG2(%a6),%fp0	| ...FINAL ADD
 	bra	t_frcinx
+
 
 LOGNEAR1:
 |--REGISTERS SAVED: FPCR, FP1. FP0 CONTAINS THE INPUT.

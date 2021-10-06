@@ -397,6 +397,7 @@ void rtl8723e_dm_bt_balance(struct ieee80211_hw *hw,
 	rtl8723e_fill_h2c_cmd(hw, 0xc, 3, h2c_parameter);
 }
 
+
 void rtl8723e_dm_bt_agc_table(struct ieee80211_hw *hw, u8 type)
 {
 	struct rtl_priv *rtlpriv = rtl_priv(hw);

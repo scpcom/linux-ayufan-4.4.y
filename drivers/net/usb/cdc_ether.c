@@ -30,6 +30,7 @@
 #include <linux/usb/cdc.h>
 #include <linux/usb/usbnet.h>
 
+
 #if IS_ENABLED(CONFIG_USB_NET_RNDIS_HOST)
 
 static int is_rndis(struct usb_interface_descriptor *desc)
@@ -239,6 +240,8 @@ skip:
 		dev_dbg(&intf->dev, "Descriptor too short\n");
 		goto bad_desc;
 	}
+
+
 
 	/* Microsoft ActiveSync based and some regular RNDIS devices lack the
 	 * CDC descriptors, so we'll hard-wire the interfaces and not check

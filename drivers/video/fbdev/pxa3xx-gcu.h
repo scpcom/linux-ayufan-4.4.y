@@ -35,3 +35,4 @@ struct pxa3xx_gcu_shared {
 #define PXA3XX_GCU_IOCTL_WAIT_IDLE	_IO('G', 2)
 
 #endif /* __PXA3XX_GCU_H__ */
+

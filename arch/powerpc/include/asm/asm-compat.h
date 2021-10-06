@@ -15,6 +15,7 @@
 #  define ASM_CONST(x)		__ASM_CONST(x)
 #endif
 
+
 #ifdef __powerpc64__
 
 /* operations for longs and pointers */

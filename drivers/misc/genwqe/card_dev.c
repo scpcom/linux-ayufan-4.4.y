@@ -144,6 +144,7 @@ static void __genwqe_del_mapping(struct genwqe_file *cfile,
 	spin_unlock_irqrestore(&cfile->map_lock, flags);
 }
 
+
 /**
  * __genwqe_search_mapping() - Search for the mapping for a userspace address
  * @cfile:	descriptor of opened file
@@ -348,6 +349,7 @@ static int genwqe_fasync(int fd, struct file *filp, int mode)
 
 	return fasync_helper(fd, filp, mode, &cdev->async_queue);
 }
+
 
 /**
  * genwqe_release() - file close

@@ -548,6 +548,7 @@ static SENSOR_DEVICE_ATTR(in##offset##_min, S_IRUGO | S_IWUSR,	\
 static SENSOR_DEVICE_ATTR(in##offset##_max, S_IRUGO | S_IWUSR,	\
 		show_in_max, set_in_max, offset);
 
+
 in_reg(0);
 in_reg(1);
 in_reg(2);
@@ -628,6 +629,7 @@ static SENSOR_DEVICE_ATTR(in16_min, S_IRUGO | S_IWUSR, show_in16_min,
 			  set_in16_min, 16);
 static SENSOR_DEVICE_ATTR(in16_max, S_IRUGO | S_IWUSR, show_in16_max,
 			  set_in16_max, 16);
+
 
 /* Now add fan read/write functions */
 
@@ -843,6 +845,7 @@ static SENSOR_DEVICE_ATTR(temp##offset##_min, S_IRUGO | S_IWUSR,	\
 		show_temp_min, set_temp_min, offset - 1);		\
 static SENSOR_DEVICE_ATTR(temp##offset##_max, S_IRUGO | S_IWUSR,	\
 		show_temp_max, set_temp_max, offset - 1);
+
 
 temp_reg(1);
 temp_reg(2);
@@ -1177,6 +1180,7 @@ static ssize_t set_alarm_mask(struct device *dev, struct device_attribute *attr,
 
 static DEVICE_ATTR(alarm_mask, S_IRUGO | S_IWUSR, show_alarm_mask,
 	set_alarm_mask);
+
 
 static ssize_t show_gpio(struct device *dev, struct device_attribute *attr,
 			 char *buf)

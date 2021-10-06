@@ -89,6 +89,7 @@
 #define	PWR_CUT_G_MSK			BIT(7)
 #define	PWR_CUT_ALL_MSK			0xFF
 
+
 enum pwrseq_delay_unit {
 	PWRSEQ_DELAY_US,
 	PWRSEQ_DELAY_MS,
@@ -105,6 +106,7 @@ struct wlan_pwr_cfg {
 	u8 value;
 };
 
+
 #define GET_PWR_CFG_OFFSET(__PWR_CMD)		__PWR_CMD.offset
 #define GET_PWR_CFG_CUT_MASK(__PWR_CMD)		__PWR_CMD.cut_msk
 #define GET_PWR_CFG_FAB_MASK(__PWR_CMD)		__PWR_CMD.fab_msk
@@ -113,6 +115,7 @@ struct wlan_pwr_cfg {
 #define GET_PWR_CFG_CMD(__PWR_CMD)			__PWR_CMD.cmd
 #define GET_PWR_CFG_MASK(__PWR_CMD)			__PWR_CMD.msk
 #define GET_PWR_CFG_VALUE(__PWR_CMD)		__PWR_CMD.value
+
 
 /*  */
 /*	Prototype of protected function. */

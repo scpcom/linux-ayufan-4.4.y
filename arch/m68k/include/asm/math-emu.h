@@ -32,6 +32,7 @@
 #define FPSR_CC_Z	26
 #define FPSR_CC_NEG	27
 
+
 /* Control register bits */
 
 /* rounding mode */
@@ -44,6 +45,7 @@
 #define FPCR_PRECISION_X	0	/* long double */
 #define FPCR_PRECISION_S	1	/* double */
 #define FPCR_PRECISION_D	2	/* float */
+
 
 /* Flags to select the debugging output */
 #define PDECODE		0
@@ -306,6 +308,7 @@ old_gas=old_gas+1
 	\instr	\args
 #endif
 .endm
+
 
 #endif	/* __ASSEMBLY__ */
 

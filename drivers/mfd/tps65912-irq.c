@@ -45,6 +45,7 @@ static irqreturn_t tps65912_irq(int irq, void *irq_data)
 	u8 reg;
 	int i;
 
+
 	tps65912->read(tps65912, TPS65912_INT_STS, 1, &reg);
 	irq_sts = reg;
 	tps65912->read(tps65912, TPS65912_INT_STS2, 1, &reg);

@@ -418,12 +418,15 @@ get_UnaryOpcodeExtension_Y1(tilegx_bundle_bits n)
   return (((unsigned int)(n >> 43)) & 0x3f);
 }
 
+
 static __inline int
 sign_extend(int n, int num_bits)
 {
   int shift = (int)(sizeof(int) * 8 - num_bits);
   return (n << shift) >> shift;
 }
+
+
 
 static __inline tilegx_bundle_bits
 create_BFEnd_X0(int num)
@@ -806,6 +809,7 @@ create_UnaryOpcodeExtension_Y1(int num)
   const unsigned int n = (unsigned int)num;
   return (((tilegx_bundle_bits)(n & 0x3f)) << 43);
 }
+
 
 enum
 {
@@ -1395,6 +1399,7 @@ enum
   XOR_RRR_5_OPCODE_Y0 = 3,
   XOR_RRR_5_OPCODE_Y1 = 3
 };
+
 
 #endif /* __ASSEMBLER__ */
 

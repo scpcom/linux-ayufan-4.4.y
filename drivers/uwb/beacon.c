@@ -39,6 +39,7 @@ struct uwb_rc_cmd_start_beacon {
 	u8 bChannelNumber;
 } __attribute__((packed));
 
+
 static int uwb_rc_start_beacon(struct uwb_rc *rc, u16 bpst_offset, u8 channel)
 {
 	int result;
@@ -167,6 +168,7 @@ void uwb_bce_kfree(struct kref *_bce)
 	kfree(bce->be);
 	kfree(bce);
 }
+
 
 /* Find a beacon by dev addr in the cache */
 static

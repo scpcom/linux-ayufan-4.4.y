@@ -283,6 +283,7 @@ static int ali_release(struct inode *inode, struct file *file)
  *	Notifier for system down
  */
 
+
 static int ali_notify_sys(struct notifier_block *this,
 					unsigned long code, void *unused)
 {

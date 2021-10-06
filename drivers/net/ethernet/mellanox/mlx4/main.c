@@ -1261,6 +1261,7 @@ int mlx4_unbond(struct mlx4_dev *dev)
 }
 EXPORT_SYMBOL_GPL(mlx4_unbond);
 
+
 int mlx4_port_map_set(struct mlx4_dev *dev, struct mlx4_port_map *v2p)
 {
 	u8 port1 = v2p->port1;
@@ -1434,6 +1435,7 @@ static int mlx4_init_icm(struct mlx4_dev *dev, struct mlx4_dev_cap *dev_cap,
 		mlx4_err(dev, "Failed to map cMPT context memory, aborting\n");
 		goto err_unmap_aux;
 	}
+
 
 	num_eqs = dev->phys_caps.num_phys_eqs;
 	err = mlx4_init_icm_table(dev, &priv->eq_table.table,
@@ -1682,6 +1684,7 @@ cycle_t mlx4_read_clock(struct mlx4_dev *dev)
 	return cycles;
 }
 EXPORT_SYMBOL_GPL(mlx4_read_clock);
+
 
 static int map_internal_clock(struct mlx4_dev *dev)
 {
@@ -3954,6 +3957,7 @@ static int __init mlx4_init(void)
 
 	if (mlx4_verify_params())
 		return -EINVAL;
+
 
 	mlx4_wq = create_singlethread_workqueue("mlx4");
 	if (!mlx4_wq)

@@ -204,6 +204,7 @@ SINMAIN:
 |--HIDE THE NEXT THREE INSTRUCTIONS
 	lea		PITBL+0x200,%a1 | ...TABLE OF N*PI/2, N = -32,...,32
 
+
 |--FP1 IS NOW READY
 	fmovel		%fp1,N(%a6)		| ...CONVERT TO INTEGER
 
@@ -272,12 +273,14 @@ SINPOLY:
 |--FP3 RELEASED, RESTORE NOW AND TAKE SOME ADVANTAGE OF HIDING
 |--FP2 RELEASED, RESTORE NOW AND TAKE FULL ADVANTAGE OF HIDING
 
+
 	fmulx		%fp1,%fp0		| ...SIN(R')-R'
 |--FP1 RELEASED.
 
 	fmovel		%d1,%FPCR		|restore users exceptions
 	faddx		X(%a6),%fp0		|last inst - possible exception set
 	bra		t_frcinx
+
 
 COSPOLY:
 |--LET J BE THE LEAST SIG. BIT OF D0, LET SGN := (-1)**J.
@@ -332,6 +335,7 @@ COSPOLY:
 |--FP3 RELEASED, RESTORE NOW AND TAKE SOME ADVANTAGE OF HIDING
 |--FP2 RELEASED.
 
+
 	faddx		%fp1,%fp0
 |--FP1 RELEASED
 
@@ -341,11 +345,13 @@ COSPOLY:
 	fadds		POSNEG1(%a6),%fp0	|last inst - possible exception set
 	bra		t_frcinx
 
+
 SINBORS:
 |--IF |X| > 15PI, WE USE THE GENERAL ARGUMENT REDUCTION.
 |--IF |X| < 2**(-40), RETURN X OR 1.
 	cmpil		#0x3FFF8000,%d0
 	bgts		REDUCEX
+
 
 SINSM:
 	movel		ADJN(%a6),%d0
@@ -358,12 +364,14 @@ SINTINY:
 	fmovex		X(%a6),%fp0		|last inst - possible exception set
 	bra		t_frcinx
 
+
 COSTINY:
 	fmoves		#0x3F800000,%fp0
 
 	fmovel		%d1,%FPCR		|restore users exceptions
 	fsubs		#0x00800000,%fp0	|last inst - possible exception set
 	bra		t_frcinx
+
 
 REDUCEX:
 |--WHEN REDUCEX IS USED, THE CODE WILL INEVITABLY BE SLOW.
@@ -505,6 +513,7 @@ RESTORE:
 	movel		(%a7)+,%d2
 	fmovemx	(%a7)+,%fp2-%fp5
 
+
 	movel		ADJN(%a6),%d0
 	cmpil		#4,%d0
 
@@ -540,6 +549,7 @@ SCOK1:
 	blts		SCMAIN
 	bra		REDUCEX
 
+
 SCMAIN:
 |--THIS IS THE USUAL CASE, |X| <= 15 PI.
 |--THE ARGUMENT REDUCTION IS DONE BY TABLE LOOK UP.
@@ -548,6 +558,7 @@ SCMAIN:
 
 |--HIDE THE NEXT THREE INSTRUCTIONS
 	lea		PITBL+0x200,%a1 | ...TABLE OF N*PI/2, N = -32,...,32
+
 
 |--FP1 IS NOW READY
 	fmovel		%fp1,N(%a6)		| ...CONVERT TO INTEGER
@@ -629,6 +640,8 @@ NODD:
 	fmulx		%fp0,%fp1	 | ...S(A1+...)
 	fmulx		%fp2,%fp0	 | ...S(B2+...)
 
+
+
 	fmulx		RPRIME(%a6),%fp1	| ...R'S(A1+...)
 	fadds		COSB1,%fp0	| ...B1+S(B2...)
 	fmulx		SPRIME(%a6),%fp0	| ...S'(B1+S(B2+...))
@@ -642,6 +655,7 @@ NODD:
 	fadds		POSNEG1(%a6),%fp0	| ...SIN(X)
 
 	bra		t_frcinx
+
 
 NEVEN:
 |--REGISTERS SAVED SO FAR: FP2.
@@ -694,6 +708,8 @@ NEVEN:
 	fmulx		%fp0,%fp1	 | ...S(B2+...)
 	fmulx		%fp2,%fp0	 | ...s(a1+...)
 
+
+
 	fadds		COSB1,%fp1	| ...B1+S(B2...)
 	fmulx		RPRIME(%a6),%fp0	| ...R'S(A1+...)
 	fmulx		SPRIME(%a6),%fp1	| ...S'(B1+S(B2+...))
@@ -711,6 +727,7 @@ NEVEN:
 SCBORS:
 	cmpil		#0x3FFF8000,%d0
 	bgt		REDUCEX
+
 
 SCSM:
 	movew		#0x0000,XDCARE(%a6)

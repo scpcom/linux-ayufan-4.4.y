@@ -27,6 +27,7 @@
 #include <sound/da7213.h>
 #include "da7213.h"
 
+
 /* Gain and Volume */
 static const DECLARE_TLV_DB_RANGE(aux_vol_tlv,
 	/* -54dB */
@@ -184,6 +185,7 @@ static SOC_ENUM_SINGLE_DECL(da7213_alc_integ_release_rate,
 			    DA7213_ALC_CTRL3,
 			    DA7213_ALC_INTEG_RELEASE_SHIFT,
 			    da7213_alc_integ_rate_txt);
+
 
 /*
  * Control Functions
@@ -373,6 +375,7 @@ static int da7213_put_alc_sw(struct snd_kcontrol *kcontrol,
 
 	return snd_soc_put_volsw(kcontrol, ucontrol);
 }
+
 
 /*
  * KControls
@@ -568,6 +571,7 @@ static const struct snd_kcontrol_new da7213_snd_controls[] = {
 		   DA7213_ALC_ANTICLIP_LEVEL_MAX, DA7213_NO_INVERT),
 };
 
+
 /*
  * DAPM
  */
@@ -720,6 +724,7 @@ static const struct snd_kcontrol_new da7213_dapm_mixoutr_controls[] = {
 			DA7213_MIXOUT_R_MIX_SELECT_MAX, DA7213_NO_INVERT),
 };
 
+
 /*
  * DAPM widgets
  */
@@ -840,6 +845,7 @@ static const struct snd_soc_dapm_widget da7213_dapm_widgets[] = {
 	SND_SOC_DAPM_OUTPUT("HPR"),
 	SND_SOC_DAPM_OUTPUT("LINE"),
 };
+
 
 /*
  * DAPM audio route definition
@@ -1527,6 +1533,7 @@ static struct da7213_platform_data
 
 	return pdata;
 }
+
 
 static int da7213_probe(struct snd_soc_codec *codec)
 {

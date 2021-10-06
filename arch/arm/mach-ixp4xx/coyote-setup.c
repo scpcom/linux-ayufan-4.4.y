@@ -138,3 +138,4 @@ MACHINE_START(IXDPG425, "Intel IXDPG425")
 	.restart	= ixp4xx_restart,
 MACHINE_END
 #endif
+

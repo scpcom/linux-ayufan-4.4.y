@@ -34,11 +34,13 @@
 
 #include <net/netlink.h>
 
+
 struct zlib_ctx {
 	struct z_stream_s comp_stream;
 	struct z_stream_s decomp_stream;
 	int decomp_windowBits;
 };
+
 
 static void zlib_comp_exit(struct zlib_ctx *ctx)
 {
@@ -74,6 +76,7 @@ static void zlib_exit(struct crypto_tfm *tfm)
 	zlib_comp_exit(ctx);
 	zlib_decomp_exit(ctx);
 }
+
 
 static int zlib_compress_setup(struct crypto_pcomp *tfm, const void *params,
 			       unsigned int len)
@@ -204,6 +207,7 @@ static int zlib_compress_final(struct crypto_pcomp *tfm,
 	req->avail_out = stream->avail_out;
 	return ret;
 }
+
 
 static int zlib_decompress_setup(struct crypto_pcomp *tfm, const void *params,
 				 unsigned int len)
@@ -336,6 +340,7 @@ static int zlib_decompress_final(struct crypto_pcomp *tfm,
 	req->avail_out = stream->avail_out;
 	return ret;
 }
+
 
 static struct pcomp_alg zlib_alg = {
 	.compress_setup		= zlib_compress_setup,

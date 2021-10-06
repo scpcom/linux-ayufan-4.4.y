@@ -205,6 +205,7 @@ bail0:
 	return NULL;
 }
 	
+
 void hpfs_brelse4(struct quad_buffer_head *qbh)
 {
 	if (unlikely(qbh->data != qbh->bh[0]->b_data))

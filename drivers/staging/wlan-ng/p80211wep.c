@@ -53,6 +53,7 @@
 #include <linux/random.h>
 #include <linux/kernel.h>
 
+
 #include "p80211hdr.h"
 #include "p80211types.h"
 #include "p80211msg.h"
@@ -131,6 +132,7 @@ int wep_change_key(wlandevice_t *wlandev, int keynum, u8 *key, int keylen)
 	if (keynum >= NUM_WEPKEYS)
 		return -1;
 
+
 	wlandev->wep_keylens[keynum] = keylen;
 	memcpy(wlandev->wep_keys[keynum], key, keylen);
 
@@ -173,6 +175,7 @@ int wep_decrypt(wlandevice_t *wlandev, u8 *buf, u32 len, int key_override,
 	memcpy(key + 3, wlandev->wep_keys[keyidx], keylen);
 
 	keylen += 3;		/* add in IV bytes */
+
 
 	/* set up the RC4 state */
 	for (i = 0; i < 256; i++)

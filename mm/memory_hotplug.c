@@ -970,6 +970,7 @@ static void node_states_set_node(int node, struct memory_notify *arg)
 	node_set_state(node, N_MEMORY);
 }
 
+
 /* Must be protected by mem_hotplug_begin() */
 int __ref online_pages(unsigned long pfn, unsigned long nr_pages, int online_type)
 {
@@ -1143,6 +1144,7 @@ static void rollback_node_hotadd(int nid, pg_data_t *pgdat)
 	arch_free_nodedata(pgdat);
 	return;
 }
+
 
 /**
  * try_online_node - online a node if offlined

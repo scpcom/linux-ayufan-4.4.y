@@ -14,6 +14,7 @@
 
 #include <arch/chip.h>
 
+
 /*
  * This file shares the implementation of the userspace memcpy and
  * the kernel's memcpy, copy_to_user and copy_from_user.
@@ -39,6 +40,7 @@
 	.word 9f, memcpy_common_fixup; \
 	.popsection; \
 	9
+
 
 /* __copy_from_user_inatomic takes the kernel target address in r0,
  * the user source in r1, and the bytes to copy in r2.
@@ -81,6 +83,7 @@ ENTRY(memcpy)
 	.type memcpy_common, @function
 memcpy_common:
 	/* On entry, r29 holds one of the IS_* macro values from above. */
+
 
 	/* r0 is the dest, r1 is the source, r2 is the size. */
 
@@ -130,6 +133,7 @@ EX:	{ sw r0, r3; addi r0, r0, 4; addi r2, r2, -4 }
 .Ldone:
 	/* For memcpy return original dest address, else zero. */
 	{ mz r0, r29, r23; jrp lr }
+
 
 /*
  *
@@ -201,6 +205,7 @@ EX:	{ lw r7, r3; addi r3, r3, 64 }
 	 * loop. Might as well get it out of the way now.
 	 */
 	{ j .Lbig_loop }
+
 
 	/* On entry:
 	 * - r0 points to the destination line.

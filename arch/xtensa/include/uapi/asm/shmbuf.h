@@ -55,6 +55,7 @@ struct shmid64_ds {
 # error endian order not defined
 #endif
 
+
 struct shminfo64 {
 	unsigned long	shmmax;
 	unsigned long	shmmin;

@@ -65,12 +65,14 @@
 /* Activated features set selector - Write Only */
 #define VIRTIO_MMIO_DRIVER_FEATURES_SEL	0x024
 
+
 #ifndef VIRTIO_MMIO_NO_LEGACY /* LEGACY DEVICES ONLY! */
 
 /* Guest's memory page size in bytes - Write Only */
 #define VIRTIO_MMIO_GUEST_PAGE_SIZE	0x028
 
 #endif
+
 
 /* Queue selector - Write Only */
 #define VIRTIO_MMIO_QUEUE_SEL		0x030
@@ -81,6 +83,7 @@
 /* Queue size for the currently selected queue - Write Only */
 #define VIRTIO_MMIO_QUEUE_NUM		0x038
 
+
 #ifndef VIRTIO_MMIO_NO_LEGACY /* LEGACY DEVICES ONLY! */
 
 /* Used Ring alignment for the currently selected queue - Write Only */
@@ -90,6 +93,7 @@
 #define VIRTIO_MMIO_QUEUE_PFN		0x040
 
 #endif
+
 
 /* Ready bit for the currently selected queue - Read Write */
 #define VIRTIO_MMIO_QUEUE_READY		0x044
@@ -124,6 +128,8 @@
 /* The config space is defined by each driver as
  * the per-driver configuration space - Read Write */
 #define VIRTIO_MMIO_CONFIG		0x100
+
+
 
 /*
  * Interrupt flags (re: interrupt status & acknowledge registers)

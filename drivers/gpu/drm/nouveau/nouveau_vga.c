@@ -122,6 +122,7 @@ nouveau_vga_fini(struct nouveau_drm *drm)
 	vga_client_register(dev->pdev, NULL, NULL, NULL);
 }
 
+
 void
 nouveau_vga_lastclose(struct drm_device *dev)
 {

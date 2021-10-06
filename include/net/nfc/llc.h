@@ -40,6 +40,7 @@ void nfc_llc_free(struct nfc_llc *llc);
 void nfc_llc_get_rx_head_tail_room(struct nfc_llc *llc, int *rx_headroom,
 				   int *rx_tailroom);
 
+
 int nfc_llc_start(struct nfc_llc *llc);
 int nfc_llc_stop(struct nfc_llc *llc);
 void nfc_llc_rcv_from_drv(struct nfc_llc *llc, struct sk_buff *skb);

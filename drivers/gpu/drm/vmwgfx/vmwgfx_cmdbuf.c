@@ -186,6 +186,7 @@ struct vmw_cmdbuf_alloc_info {
 
 static int vmw_cmdbuf_startstop(struct vmw_cmdbuf_man *man, bool enable);
 
+
 /**
  * vmw_cmdbuf_cur_lock - Helper to lock the cur_mutex.
  *
@@ -280,6 +281,7 @@ void vmw_cmdbuf_header_free(struct vmw_cmdbuf_header *header)
 	__vmw_cmdbuf_header_free(header);
 	spin_unlock_bh(&man->lock);
 }
+
 
 /**
  * vmw_cmbuf_header_submit: Submit a command buffer to hardware.

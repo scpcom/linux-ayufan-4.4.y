@@ -36,6 +36,7 @@ struct s5p_mfc_reserved_mem {
 
 static struct s5p_mfc_reserved_mem s5p_mfc_mem[2] __initdata;
 
+
 static void __init s5p_mfc_reserve_mem(phys_addr_t rbase, unsigned int rsize,
 				phys_addr_t lbase, unsigned int lsize)
 {

@@ -12,6 +12,7 @@
 #include "ieee80211_i.h"
 #include "rate.h"
 
+
 static void __check_vhtcap_disable(struct ieee80211_sub_if_data *sdata,
 				   struct ieee80211_sta_vht_cap *vht_cap,
 				   u32 flag)

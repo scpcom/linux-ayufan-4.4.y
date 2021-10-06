@@ -26,6 +26,7 @@
 #define PDO_FORCE_ADISC		BIT_1
 #define PDO_FORCE_PLOGI		BIT_0
 
+
 #define	PORT_DATABASE_24XX_SIZE		64
 struct port_database_24xx {
 	uint16_t flags;
@@ -543,6 +544,7 @@ struct cmd_type_crc_2 {
 	uint16_t reserved_1;			/* MUST be set to 0. */
 };
 
+
 /*
  * ISP queue - status entry structure definition.
  */
@@ -587,6 +589,7 @@ struct sts_entry_24xx {
 	 * &data[20] : uint8_t expected_dif[8];		- DIF Data computed
 	*/
 };
+
 
 /*
  * Status entry completion status
@@ -762,6 +765,7 @@ struct mbx_entry_24xx {
 
 	uint16_t mbx[28];
 };
+
 
 #define LOGINOUT_PORT_IOCB_TYPE	0x52	/* Login/Logout Port entry. */
 struct logio_entry_24xx {
@@ -1161,6 +1165,7 @@ struct mid_init_cb_24xx {
 
 	struct mid_conf_entry_24xx entries[MAX_MULTI_ID_FABRIC];
 };
+
 
 struct mid_db_entry_24xx {
 	uint16_t status;

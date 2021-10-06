@@ -693,6 +693,7 @@ static int _ep_set_halt(struct usb_ep *ep, int value, bool check_transfer)
 	return retval;
 }
 
+
 /**
  * _gadget_stop_activity: stops all USB activity, flushes & disables all endpts
  * @gadget: gadget
@@ -1712,6 +1713,7 @@ static int ci_udc_start(struct usb_gadget *gadget,
 
 	if (driver->disconnect == NULL)
 		return -EINVAL;
+
 
 	ci->ep0out->ep.desc = &ctrl_endpt_out_desc;
 	retval = usb_ep_enable(&ci->ep0out->ep);

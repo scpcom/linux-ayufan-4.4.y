@@ -27,6 +27,7 @@ int ceph_file_layout_is_valid(const struct ceph_file_layout *layout)
 	return 1;
 }
 
+
 int ceph_flags_to_mode(int flags)
 {
 	int mode;

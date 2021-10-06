@@ -37,6 +37,7 @@
 #define MAX_EDS		32
 #define MAX_TDS		32
 
+
 /* CRC16 field size */
 #define CRC_SIZE 2
 

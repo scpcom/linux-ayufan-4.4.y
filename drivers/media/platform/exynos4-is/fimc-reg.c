@@ -502,6 +502,7 @@ void fimc_hw_set_in_dma(struct fimc_ctx *ctx)
 	writel(cfg, dev->regs + FIMC_REG_CIDMAPARAM);
 }
 
+
 void fimc_hw_set_input_path(struct fimc_ctx *ctx)
 {
 	struct fimc_dev *dev = ctx->fimc_dev;

@@ -22,6 +22,7 @@
 
 #include "ssb_private.h"
 
+
 const char *ssb_core_name(u16 coreid)
 {
 	switch (coreid) {

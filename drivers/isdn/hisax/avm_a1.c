@@ -37,6 +37,7 @@ writereg(unsigned int adr, u_char off, u_char data)
 	byteout(adr + off, data);
 }
 
+
 static inline void
 read_fifo(unsigned int adr, u_char *data, int size)
 {

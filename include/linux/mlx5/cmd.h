@@ -42,6 +42,7 @@ struct manage_pages_layout {
 	u16	func_id;
 };
 
+
 struct mlx5_cmd_alloc_uar_imm_out {
 	u32	rsvd[3];
 	u32	uarn;

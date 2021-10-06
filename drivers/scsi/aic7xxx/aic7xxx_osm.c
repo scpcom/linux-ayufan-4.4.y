@@ -131,6 +131,7 @@ static struct scsi_transport_template *ahc_linux_transport_template = NULL;
 #include <linux/delay.h>	/* For ssleep/msleep */
 #include <linux/slab.h>
 
+
 /*
  * Set this to the delay in seconds after SCSI bus reset.
  * Note, we honor this only for the initial bus reset.
@@ -376,6 +377,7 @@ static void ahc_linux_setup_tag_info_global(char *p);
 static int  aic7xxx_setup(char *s);
 
 static int ahc_linux_unit;
+
 
 /************************** OS Utility Wrappers *******************************/
 void
@@ -2559,6 +2561,8 @@ static struct spi_function_template ahc_linux_transport_functions = {
 #endif
 	.get_signalling	= ahc_linux_get_signalling,
 };
+
+
 
 static int __init
 ahc_linux_init(void)

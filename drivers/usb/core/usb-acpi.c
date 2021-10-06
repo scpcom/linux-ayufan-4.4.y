@@ -120,6 +120,7 @@ out:
 	return connect_type;
 }
 
+
 /*
  * Private to usb-acpi, all the core needs to know is that
  * port_dev->location is non-zero when it has been set by the firmware.

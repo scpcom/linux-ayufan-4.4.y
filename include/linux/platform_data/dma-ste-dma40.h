@@ -5,6 +5,7 @@
  * License terms: GNU General Public License (GPL) version 2
  */
 
+
 #ifndef STE_DMA40_H
 #define STE_DMA40_H
 

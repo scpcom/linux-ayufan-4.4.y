@@ -106,6 +106,7 @@ struct ceph_fs_client {
 #endif
 };
 
+
 /*
  * File i/o capability.  This tracks shared state with the metadata
  * server that allows us to cache or writeback attributes or to read
@@ -428,6 +429,7 @@ static inline ino_t ceph_translate_ino(struct super_block *sb, ino_t ino)
 }
 #endif
 
+
 /* for printf-style formatting */
 #define ceph_vinop(i) ceph_inode(i)->i_vino.ino, ceph_inode(i)->i_vino.snap
 
@@ -455,6 +457,7 @@ static inline struct inode *ceph_find_inode(struct super_block *sb,
 	return ilookup5(sb, t, ceph_ino_compare, &vino);
 }
 
+
 /*
  * Ceph inode.
  */
@@ -465,6 +468,7 @@ static inline struct inode *ceph_find_inode(struct super_block *sb,
 #define CEPH_I_POOL_PERM	(1 << 4)  /* pool rd/wr bits are valid */
 #define CEPH_I_POOL_RD		(1 << 5)  /* can read from pool */
 #define CEPH_I_POOL_WR		(1 << 6)  /* can write to pool */
+
 
 static inline void __ceph_dir_set_complete(struct ceph_inode_info *ci,
 					   long long release_count,
@@ -611,6 +615,8 @@ extern void ceph_reservation_status(struct ceph_fs_client *client,
 				    int *total, int *avail, int *used,
 				    int *reserved, int *min);
 
+
+
 /*
  * we keep buffered readdir results attached to file->private_data
  */
@@ -710,6 +716,8 @@ static inline int default_congestion_kb(void)
 
 	return congestion_kb;
 }
+
+
 
 /* snap.c */
 extern struct ceph_snap_context *ceph_empty_snapc;
@@ -946,6 +954,7 @@ extern void ceph_readdir_cache_release(struct ceph_readdir_cache_control *ctl);
  * snapshotted (read-only), or a virtual ".snap" directory.
  */
 int ceph_init_dentry(struct dentry *dentry);
+
 
 /* ioctl.c */
 extern long ceph_ioctl(struct file *file, unsigned int cmd, unsigned long arg);

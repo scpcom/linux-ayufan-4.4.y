@@ -35,6 +35,7 @@
 #include "dat.h"
 #include "segbuf.h"
 
+
 static int nilfs_valid_sb(struct nilfs_super_block *sbp);
 
 void nilfs_set_last_segment(struct the_nilfs *nilfs,

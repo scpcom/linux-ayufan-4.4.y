@@ -68,6 +68,7 @@ typedef char PRIInfo;
 typedef char BRIInfo;
 typedef char POTInfo;
 
+
 typedef struct {
 	char acfa_nos;
 	char acfa_ais;

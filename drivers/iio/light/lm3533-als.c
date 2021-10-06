@@ -26,6 +26,7 @@
 
 #include <linux/mfd/lm3533.h>
 
+
 #define LM3533_ALS_RESISTOR_MIN			1
 #define LM3533_ALS_RESISTOR_MAX			127
 #define LM3533_ALS_CHANNEL_CURRENT_MAX		2
@@ -49,6 +50,7 @@
 
 #define LM3533_ALS_FLAG_INT_ENABLED		1
 
+
 struct lm3533_als {
 	struct lm3533 *lm3533;
 	struct platform_device *pdev;
@@ -59,6 +61,7 @@ struct lm3533_als {
 	atomic_t zone;
 	struct mutex thresh_mutex;
 };
+
 
 static int lm3533_als_get_adc(struct iio_dev *indio_dev, bool average,
 								int *adc)

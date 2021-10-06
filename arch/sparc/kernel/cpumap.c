@@ -11,6 +11,7 @@
 #include <asm/cpudata.h>
 #include "cpumap.h"
 
+
 enum {
 	CPUINFO_LVL_ROOT = 0,
 	CPUINFO_LVL_NODE,
@@ -51,10 +52,12 @@ struct cpuinfo_tree {
 	struct cpuinfo_node  nodes[0];
 };
 
+
 static struct cpuinfo_tree *cpuinfo_tree;
 
 static u16 cpu_distribution_map[NR_CPUS];
 static DEFINE_SPINLOCK(cpu_map_lock);
+
 
 /* Niagara optimized cpuinfo tree traversal. */
 static const int niagara_iterate_method[] = {
@@ -87,6 +90,7 @@ static const int generic_iterate_method[] = {
 	[CPUINFO_LVL_CORE] = ROVER_INC_PARENT_ON_LOOP,
 	[CPUINFO_LVL_PROC] = ROVER_INC_ON_VISIT|ROVER_INC_PARENT_ON_LOOP,
 };
+
 
 static int cpuinfo_id(int cpu, int level)
 {

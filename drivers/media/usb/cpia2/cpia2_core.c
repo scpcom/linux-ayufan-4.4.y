@@ -54,6 +54,7 @@ static const char *block_name[] = {
 
 static unsigned int debugs_on;	/* default 0 - DEBUG_REG */
 
+
 /******************************************************************************
  *
  *  Forward Declarations
@@ -1319,6 +1320,7 @@ static int config_sensor_410(struct camera_data *cam,
 	return i;
 }
 
+
 /******************************************************************************
  *
  *  config_sensor_500(cam)
@@ -1524,6 +1526,7 @@ static int config_sensor_500(struct camera_data *cam,
 	return i;
 }
 
+
 /******************************************************************************
  *
  *  setallproperties
@@ -1568,6 +1571,7 @@ void cpia2_save_camera_state(struct camera_data *cam)
 	cpia2_do_command(cam, CPIA2_CMD_GET_VC_MP_GPIO_DATA, TRANSFER_READ, 0);
 	/* Don't get framerate or target_kb. Trust the values we already have */
 }
+
 
 /******************************************************************************
  *

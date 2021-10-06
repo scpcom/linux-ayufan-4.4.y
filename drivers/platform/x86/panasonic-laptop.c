@@ -361,6 +361,7 @@ static const struct backlight_ops pcc_backlight_ops = {
 	.update_status	= bl_set_status,
 };
 
+
 /* sysfs user interface functions */
 
 static ssize_t show_numbatt(struct device *dev, struct device_attribute *attr,
@@ -444,6 +445,7 @@ static struct attribute_group pcc_attr_group = {
 	.name	= NULL,		/* put in device directory */
 	.attrs	= pcc_sysfs_entries,
 };
+
 
 /* hotkey input device driver */
 

@@ -21,6 +21,7 @@
  * xz_wrapper.c
  */
 
+
 #include <linux/mutex.h>
 #include <linux/buffer_head.h>
 #include <linux/slab.h>
@@ -89,6 +90,7 @@ out2:
 	return ERR_PTR(err);
 }
 
+
 static void *squashfs_xz_init(struct squashfs_sb_info *msblk, void *buff)
 {
 	struct comp_opts *comp_opts = buff;
@@ -115,6 +117,7 @@ failed:
 	return ERR_PTR(err);
 }
 
+
 static void squashfs_xz_free(void *strm)
 {
 	struct squashfs_xz *stream = strm;
@@ -124,6 +127,7 @@ static void squashfs_xz_free(void *strm)
 		kfree(stream);
 	}
 }
+
 
 static int squashfs_xz_uncompress(struct squashfs_sb_info *msblk, void *strm,
 	struct buffer_head **bh, int b, int offset, int length,

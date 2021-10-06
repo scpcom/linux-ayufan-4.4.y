@@ -168,6 +168,7 @@ xt_unregister_matches(struct xt_match *match, unsigned int n)
 }
 EXPORT_SYMBOL(xt_unregister_matches);
 
+
 /*
  * These are weird, but module loading must not be done with mutex
  * held (since they will register), and we have to have a single
@@ -1469,6 +1470,7 @@ int xt_proto_init(struct net *net, u_int8_t af)
 	if (af >= ARRAY_SIZE(xt_prefix))
 		return -EINVAL;
 
+
 #ifdef CONFIG_PROC_FS
 	strlcpy(buf, xt_prefix[af], sizeof(buf));
 	strlcat(buf, FORMAT_TABLES, sizeof(buf));
@@ -1579,3 +1581,4 @@ static void __exit xt_fini(void)
 
 module_init(xt_init);
 module_exit(xt_fini);
+

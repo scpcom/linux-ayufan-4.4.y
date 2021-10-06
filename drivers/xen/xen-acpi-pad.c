@@ -85,6 +85,7 @@ static void acpi_pad_handle_notify(acpi_handle handle)
 		.pointer = (void *)&idle_nums,
 	};
 
+
 	mutex_lock(&xen_cpu_lock);
 	idle_nums = acpi_pad_pur(handle);
 	if (idle_nums < 0) {

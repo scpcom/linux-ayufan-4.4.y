@@ -24,3 +24,5 @@
 #define NCR_Q720_SIOP_SHIFT		0x080
 
 #endif
+
+

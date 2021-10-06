@@ -64,6 +64,7 @@ static const char version[] =
 #define SMC_DEBUG		0
 #endif
 
+
 #include <linux/module.h>
 #include <linux/kernel.h>
 #include <linux/sched.h>
@@ -200,6 +201,7 @@ static void PRINT_PKT(u_char *buf, int length)
 static inline void PRINT_PKT(u_char *buf, int length) { }
 #endif
 
+
 /* this enables an interrupt in the interrupt mask register */
 #define SMC_ENABLE_INT(lp, x) do {					\
 	unsigned char mask;						\
@@ -240,6 +242,7 @@ static inline void PRINT_PKT(u_char *buf, int length) { }
 		}							\
 	}								\
 } while (0)
+
 
 /*
  * this does a soft reset on the device
@@ -761,6 +764,7 @@ static void smc_tx(struct net_device *dev)
 	SMC_SET_TCR(lp, lp->tcr_cur_mode);
 	SMC_SELECT_BANK(lp, 2);
 }
+
 
 /*---PHY CONTROL AND CONFIGURATION-----------------------------------------*/
 
@@ -1459,6 +1463,7 @@ static void smc_set_multicast_list(struct net_device *dev)
 	spin_unlock_irq(&lp->lock);
 }
 
+
 /*
  * Open and Initialize the board
  *
@@ -1735,6 +1740,7 @@ static int smc_ethtool_seteeprom(struct net_device *dev,
 	}
 	return 0;
 }
+
 
 static const struct ethtool_ops smc_ethtool_ops = {
 	.get_settings	= smc_ethtool_getsettings,
@@ -2328,6 +2334,7 @@ static int smc_drv_probe(struct platform_device *pdev)
 		ret = -ENODEV;
 		goto out_free_netdev;
 	}
+
 
 	if (!request_mem_region(res->start, SMC_IO_EXTENT, CARDNAME)) {
 		ret = -EBUSY;

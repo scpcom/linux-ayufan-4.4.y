@@ -10,6 +10,7 @@ extern const void __memset_end, __memset_user_error_lr, __memset_user_error_hand
 extern const void __memcpy_end, __memcpy_user_error_lr, __memcpy_user_error_handler;
 extern spinlock_t modlist_lock;
 
+
 /*****************************************************************************/
 /*
  * see if there's a fixup handler available to deal with a kernel fault

@@ -330,6 +330,7 @@ void hfi1_diag_remove(struct hfi1_devdata *dd)
 	hfi1_cdev_cleanup(&dd->diag_cdev, &dd->diag_device);
 }
 
+
 /*
  * Allocated structure shared between the credit return mechanism and
  * diagpkt_send().
@@ -1484,6 +1485,7 @@ static struct snoop_packet *allocate_snoop_packet(u32 hdr_len,
 	if (likely(packet))
 		INIT_LIST_HEAD(&packet->list);
 
+
 	return packet;
 }
 
@@ -1539,6 +1541,7 @@ int snoop_recv_handler(struct hfi1_packet *packet)
 		if ((snoop_mode == 0) ||
 		    unlikely(snoop_flags & SNOOP_USE_METADATA))
 			md_len = sizeof(struct capture_md);
+
 
 		s_packet = allocate_snoop_packet(header_size,
 						 tlen - header_size,

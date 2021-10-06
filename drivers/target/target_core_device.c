@@ -1018,6 +1018,7 @@ out_free_hba:
 	return ret;
 }
 
+
 void core_dev_release_virtual_lun0(void)
 {
 	struct se_hba *hba = lun0_hba;

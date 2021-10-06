@@ -92,6 +92,7 @@ static inline unsigned int meta_l2c_revision(void)
 			>> METAC_CORECFG3_L2C_REV_ID_S;
 }
 
+
 /*
  * Start an initialisation of the L2 cachelines and wait for completion.
  * This should only be done in a LOCK1 or LOCK2 critical section while the L2
@@ -152,6 +153,7 @@ static inline int _meta_l2c_pf_is_enabled(void)
 {
 	return metag_in32(SYSC_L2C_ENABLE) & SYSC_L2C_ENABLE_PFENABLE_BIT;
 }
+
 
 /* Return whether the L2 cache is enabled */
 static inline int meta_l2c_is_enabled(void)

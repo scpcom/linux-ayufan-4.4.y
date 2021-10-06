@@ -13,3 +13,5 @@ void ddk750_set_mmio(void __iomem *addr, unsigned short devId, char revId)
 	if (revId == 0xfe)
 		printk("found sm750le\n");
 }
+
+

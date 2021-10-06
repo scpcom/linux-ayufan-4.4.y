@@ -29,6 +29,7 @@
 #include <time.h>
 #endif
 
+
 #define DMX_FILTER_SIZE 16
 
 enum dmx_output
@@ -49,6 +50,7 @@ typedef enum dmx_input
 	DMX_IN_FRONTEND, /* Input from a front-end device.  */
 	DMX_IN_DVR       /* Input from the logical DVR device.  */
 } dmx_input_t;
+
 
 typedef enum dmx_ts_pes
 {
@@ -85,12 +87,14 @@ typedef enum dmx_ts_pes
 #define DMX_PES_SUBTITLE DMX_PES_SUBTITLE0
 #define DMX_PES_PCR      DMX_PES_PCR0
 
+
 typedef struct dmx_filter
 {
 	__u8  filter[DMX_FILTER_SIZE];
 	__u8  mask[DMX_FILTER_SIZE];
 	__u8  mode[DMX_FILTER_SIZE];
 } dmx_filter_t;
+
 
 struct dmx_sct_filter_params
 {
@@ -103,6 +107,7 @@ struct dmx_sct_filter_params
 #define DMX_IMMEDIATE_START 4
 #define DMX_KERNEL_CLIENT   0x8000
 };
+
 
 struct dmx_pes_filter_params
 {

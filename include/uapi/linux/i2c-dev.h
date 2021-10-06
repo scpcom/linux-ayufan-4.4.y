@@ -51,6 +51,7 @@
 #define I2C_PEC		0x0708	/* != 0 to use PEC with SMBus */
 #define I2C_SMBUS	0x0720	/* SMBus transfer */
 
+
 /* This is the structure as used in the I2C_SMBUS ioctl call */
 struct i2c_smbus_ioctl_data {
 	__u8 read_write;
@@ -68,5 +69,6 @@ struct i2c_rdwr_ioctl_data {
 #define  I2C_RDWR_IOCTL_MAX_MSGS	42
 /* Originally defined with a typo, keep it for compatibility */
 #define  I2C_RDRW_IOCTL_MAX_MSGS	I2C_RDWR_IOCTL_MAX_MSGS
+
 
 #endif /* _UAPI_LINUX_I2C_DEV_H */

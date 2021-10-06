@@ -232,6 +232,7 @@ int ddk750_initHw(initchip_param_t *pInitParam)
 	/* Set up master clock */
 	setMasterClock(MHz(pInitParam->masterClock));
 
+
 	/* Reset the memory controller. If the memory controller is not reset in SM750,
 	   the system might hang when sw accesses the memory.
 	   The memory should be resetted after changing the MXCLK.
@@ -374,3 +375,5 @@ unsigned int formatPllReg(pll_value_t *pPLL)
 
 	return ulPllReg;
 }
+
+

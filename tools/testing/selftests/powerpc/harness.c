@@ -22,6 +22,7 @@
 #define TIMEOUT		120
 #define KILL_TIMEOUT	5
 
+
 int run_test(int (test_function)(void), char *name)
 {
 	bool terminated;

@@ -140,3 +140,4 @@ int mxc_iomux_v3_setup_multiple_pads(const iomux_v3_cfg_t *pad_list,
 void mxc_iomux_v3_init(void __iomem *iomux_v3_base);
 
 #endif /* __MACH_IOMUX_V3_H__*/
+

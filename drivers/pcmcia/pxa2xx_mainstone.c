@@ -29,6 +29,7 @@
 
 #include "soc_common.h"
 
+
 static int mst_pcmcia_hw_init(struct soc_pcmcia_socket *skt)
 {
 	/*

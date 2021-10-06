@@ -70,6 +70,7 @@ static u8	WIFI_OFDMRATES[] = {
 	 IEEE80211_OFDM_RATE_54MB
 	};
 
+
 int rtw_get_bit_value_from_ieee_value(u8 val)
 {
 	unsigned char dot11_rate_table[] = {
@@ -257,6 +258,7 @@ u8 *rtw_get_ie_ex(u8 *in_ie, uint in_len, u8 eid, u8 *oui, u8 oui_len, u8 *ie, u
 	uint cnt;
 	u8 *target_ie = NULL;
 
+
 	if (ielen)
 		*ielen = 0;
 
@@ -374,6 +376,7 @@ int rtw_generate_ie(struct registry_priv *pregistrypriv)
 	int	sz = 0, rateLen;
 	struct wlan_bssid_ex *pdev_network = &pregistrypriv->dev_network;
 	u8 *ie = pdev_network->IEs;
+
 
 	/* timestamp will be inserted by hardware */
 	sz += 8;
@@ -513,6 +516,7 @@ int rtw_get_wpa2_cipher_suite(u8 *s)
 	return 0;
 }
 
+
 int rtw_parse_wpa_ie(u8 *wpa_ie, int wpa_ie_len, int *group_cipher, int *pairwise_cipher, int *is_8021x)
 {
 	int i, ret = _SUCCESS;
@@ -525,6 +529,7 @@ int rtw_parse_wpa_ie(u8 *wpa_ie, int wpa_ie_len, int *group_cipher, int *pairwis
 		return _FAIL;
 	}
 
+
 	if ((*wpa_ie != _WPA_IE_ID_) || (*(wpa_ie+1) != (u8)(wpa_ie_len - 2)) ||
 	    (memcmp(wpa_ie+2, RTW_WPA_OUI_TYPE, WPA_SELECTOR_LEN)))
 		return _FAIL;
@@ -533,6 +538,7 @@ int rtw_parse_wpa_ie(u8 *wpa_ie, int wpa_ie_len, int *group_cipher, int *pairwis
 
 	pos += 8;
 	left = wpa_ie_len - 8;
+
 
 	/* group_cipher */
 	if (left >= WPA_SELECTOR_LEN) {
@@ -591,6 +597,7 @@ int rtw_parse_wpa2_ie(u8 *rsn_ie, int rsn_ie_len, int *group_cipher, int *pairwi
 		/* No RSN IE - fail silently */
 		return _FAIL;
 	}
+
 
 	if ((*rsn_ie != _WPA2_IE_ID_) || (*(rsn_ie+1) != (u8)(rsn_ie_len - 2)))
 		return _FAIL;
@@ -654,6 +661,7 @@ int rtw_get_sec_ie(u8 *in_ie, uint in_len, u8 *rsn_ie, u16 *rsn_len, u8 *wpa_ie,
 	u8 wpa_oui[4] = {0x0, 0x50, 0xf2, 0x01};
 	uint	cnt;
 
+
 	/* Search required WPA or WPA2 IE and copy to sec_ie[] */
 
 	cnt = _TIMESTAMP_ + _BEACON_ITERVAL_ + _CAPABILITY_;
@@ -705,6 +713,7 @@ int rtw_get_sec_ie(u8 *in_ie, uint in_len, u8 *rsn_ie, u16 *rsn_len, u8 *wpa_ie,
 			}
 		}
 	}
+
 
 	return *rsn_len + *wpa_len;
 }

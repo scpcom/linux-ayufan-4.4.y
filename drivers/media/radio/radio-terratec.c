@@ -74,6 +74,7 @@ static int terratec_s_mute_volume(struct radio_isa_card *isa, bool mute, int vol
 	return 0;
 }
 
+
 /* this is the worst part in this driver */
 /* many more or less strange things are going on here, but hey, it works :) */
 
@@ -166,3 +167,4 @@ static void __exit terratec_exit(void)
 
 module_init(terratec_init);
 module_exit(terratec_exit);
+

@@ -78,3 +78,4 @@ void aica_time_init(void)
 	rtc_sh_get_time = aica_rtc_gettimeofday;
 	rtc_sh_set_time = aica_rtc_settimeofday;
 }
+

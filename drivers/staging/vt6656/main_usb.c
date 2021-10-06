@@ -699,6 +699,7 @@ static void vnt_bss_info_changed(struct ieee80211_hw *hw,
 	if (changed & BSS_CHANGED_BSSID && conf->bssid)
 		vnt_mac_set_bssid_addr(priv, (u8 *)conf->bssid);
 
+
 	if (changed & BSS_CHANGED_BASIC_RATES) {
 		priv->basic_rates = conf->basic_rates;
 

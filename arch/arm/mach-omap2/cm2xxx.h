@@ -41,6 +41,7 @@
 
 #define OMAP24XX_CM_IDLEST_VAL				0
 
+
 /* Clock management domain register get/set */
 
 #ifndef __ASSEMBLER__

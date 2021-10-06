@@ -203,6 +203,7 @@
     X##_s  = _flo->bits.sign;				\
   } while (0)
 
+
 /*
  * Repack the raw bits of a native fp value.
  */
@@ -229,6 +230,7 @@
     _flo->bits.exp   = X##_e;				\
     _flo->bits.sign  = X##_s;				\
   } while (0)
+
 
 /*
  * Multiplication algorithms:
@@ -490,6 +492,7 @@
       }									\
   } while (0)
 
+
 #define _FP_DIV_MEAT_2_gmp(fs, R, X, Y)					\
   do {									\
     _FP_W_TYPE _x[4], _y[2], _z[4];					\
@@ -515,6 +518,7 @@
     R##_f1 = _z[1];							\
     R##_f0 = _z[0] | ((_x[0] | _x[1]) != 0);				\
   } while (0)
+
 
 /*
  * Square root algorithms:
@@ -560,6 +564,7 @@
 	R##_f0 |= _FP_WORK_STICKY;			\
       }							\
   } while (0)
+
 
 /*
  * Assembly/disassembly for converting to/from integral types.  

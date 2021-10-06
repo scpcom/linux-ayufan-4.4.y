@@ -669,6 +669,7 @@ struct mwifiex_private {
 	struct mwifiex_user_scan_chan hidden_chan[MWIFIEX_USER_SCAN_CHAN_MAX];
 };
 
+
 struct mwifiex_tx_ba_stream_tbl {
 	struct list_head list;
 	int tid;

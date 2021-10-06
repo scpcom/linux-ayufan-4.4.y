@@ -135,3 +135,5 @@ int s5p_mfc_power_off(void)
 	return 0;
 #endif
 }
+
+

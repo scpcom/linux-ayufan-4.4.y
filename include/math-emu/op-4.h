@@ -75,6 +75,7 @@
       X##_f[_i] = 0;							\
   } while (0)
 
+
 /* Right shift with sticky-lsb. 
  * What this actually means is that we do a standard right-shift,
  * but that if any of the bits that fall off the right hand side
@@ -155,6 +156,7 @@
   ))							\
  )
 
+
 #define _FP_FRAC_CLZ_4(R,X)		\
   do {					\
     if (X##_f[3])			\
@@ -177,6 +179,7 @@
 	R += _FP_W_TYPE_SIZE*3;		\
     }					\
   } while(0)
+
 
 #define _FP_UNPACK_RAW_4(fs, X, val)				\
   do {								\
@@ -416,6 +419,7 @@
       }									    \
   } while (0)
 
+
 /*
  * Square root algorithms:
  * We have just one right now, maybe Newton approximation
@@ -499,6 +503,7 @@
 	R##_f[0] |= _FP_WORK_STICKY;				\
       }								\
   } while (0)
+
 
 /*
  * Internals 

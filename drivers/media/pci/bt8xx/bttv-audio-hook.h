@@ -20,3 +20,4 @@ void pvbt878p9b_audio(struct bttv *btv, struct v4l2_tuner *tuner, int set);
 void fv2000s_audio(struct bttv *btv, struct v4l2_tuner *tuner, int set);
 void windvr_audio(struct bttv *btv, struct v4l2_tuner *tuner, int set);
 void adtvk503_audio(struct bttv *btv, struct v4l2_tuner *tuner, int set);
+

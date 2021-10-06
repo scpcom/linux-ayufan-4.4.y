@@ -130,6 +130,7 @@ static inline uint xlog_get_cycle(char *ptr)
 #define XLOG_END_TRANS		0x10	/* End a continued transaction */
 #define XLOG_UNMOUNT_TRANS	0x20	/* Unmount a filesystem transaction */
 
+
 typedef struct xlog_op_header {
 	__be32	   oh_tid;	/* transaction id of operation	:  4 b */
 	__be32	   oh_len;	/* bytes in data region		:  4 b */
@@ -188,6 +189,7 @@ typedef struct xfs_log_iovec {
 	int		i_len;		/* length in bytes of region */
 	uint		i_type;		/* type of region */
 } xfs_log_iovec_t;
+
 
 /*
  * Transaction Header definitions.
@@ -302,6 +304,7 @@ typedef struct xfs_inode_log_format_64 {
 #define	XFS_ILOG_ABROOT	0x100	/* log i_af.i_broot */
 #define XFS_ILOG_DOWNER	0x200	/* change the data fork owner on replay */
 #define XFS_ILOG_AOWNER	0x400	/* change the attr fork owner on replay */
+
 
 /*
  * The timestamps are dirty, but not necessarily anything else in the inode

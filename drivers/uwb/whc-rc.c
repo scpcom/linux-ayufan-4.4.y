@@ -210,6 +210,7 @@ out:
 	return IRQ_HANDLED;
 }
 
+
 /**
  * Initialize a UMC RC interface: map regions, get (shared) IRQ
  */
@@ -273,6 +274,7 @@ error_request_region:
 	return result;
 }
 
+
 /**
  * Release RC's UMC resources
  */
@@ -289,6 +291,7 @@ void whcrc_release_rc_umc(struct whcrc *whcrc)
 	iounmap(whcrc->rc_base);
 	release_mem_region(whcrc->area, whcrc->rc_len);
 }
+
 
 /**
  * whcrc_start_rc - start a WHCI radio controller
@@ -318,6 +321,7 @@ static int whcrc_start_rc(struct uwb_rc *rc)
 	le_writel(URCINTR_EN_ALL, whcrc->rc_base + URCINTR);
 	return 0;
 }
+
 
 /**
  * whcrc_stop_rc - stop a WHCI radio controller

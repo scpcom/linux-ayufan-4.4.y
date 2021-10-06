@@ -154,6 +154,7 @@ static void ath9k_multi_ioread32(void *hw_priv, u32 *addr,
 		val[i] = ath9k_ioread32(hw_priv, addr[i]);
 }
 
+
 static unsigned int __ath9k_reg_rmw(struct ath_softc *sc, u32 reg_offset,
 				    u32 set, u32 clr)
 {

@@ -136,6 +136,7 @@ static int cfrfml_receive(struct cflayer *layr, struct cfpkt *pkt)
 
 			rfml->incomplete_frm = tmppkt;
 
+
 			if (cfpkt_erroneous(tmppkt))
 				goto out;
 		}
@@ -190,6 +191,7 @@ out:
 
 	return err;
 }
+
 
 static int cfrfml_transmit_segment(struct cfrfml *rfml, struct cfpkt *pkt)
 {

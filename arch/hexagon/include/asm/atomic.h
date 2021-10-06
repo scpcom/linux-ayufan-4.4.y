@@ -57,6 +57,7 @@ static inline void atomic_set(atomic_t *v, int new)
  */
 #define atomic_xchg(v, new)	(xchg(&((v)->counter), (new)))
 
+
 /**
  * atomic_cmpxchg - atomic compare-and-exchange values
  * @v: pointer to value to change

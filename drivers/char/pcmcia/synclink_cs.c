@@ -129,6 +129,7 @@ struct _input_signal_events {
 	int	cts_down;
 };
 
+
 /*
  * Device instance data structure
  */
@@ -233,6 +234,7 @@ typedef struct _mgslpc_info {
  * The size of the serial xmit buffer is 1 page, or 4096 bytes
  */
 #define TXBUFSIZE 4096
+
 
 #define CHA     0x00   /* channel A offset */
 #define CHB     0x40   /* channel B offset */
@@ -647,6 +649,7 @@ static int mgslpc_resume(struct pcmcia_device *link)
 	return 0;
 }
 
+
 static inline bool mgslpc_paranoia_check(MGSLPC_INFO *info,
 					char *name, const char *routine)
 {
@@ -670,6 +673,7 @@ static inline bool mgslpc_paranoia_check(MGSLPC_INFO *info,
 #endif
 	return false;
 }
+
 
 #define CMD_RXFIFO      BIT7	// release current rx FIFO
 #define CMD_RXRESET     BIT6	// receiver reset
@@ -952,6 +956,7 @@ static void rx_ready_async(MGSLPC_INFO *info, int tcd)
 	if (work)
 		tty_flip_buffer_push(port);
 }
+
 
 static void tx_done(MGSLPC_INFO *info, struct tty_struct *tty)
 {
@@ -1998,6 +2003,7 @@ static int wait_events(MGSLPC_INFO * info, int __user *mask_ptr)
 
 	spin_unlock_irqrestore(&info->lock, flags);
 
+
 	for(;;) {
 		schedule();
 		if (signal_pending(current)) {
@@ -2469,6 +2475,7 @@ static void dtr_rts(struct tty_port *port, int onoff)
 	set_signals(info);
 	spin_unlock_irqrestore(&info->lock, flags);
 }
+
 
 static int mgslpc_open(struct tty_struct *tty, struct file * filp)
 {
@@ -4321,3 +4328,4 @@ static void hdlcdev_exit(MGSLPC_INFO *info)
 }
 
 #endif /* CONFIG_HDLC */
+

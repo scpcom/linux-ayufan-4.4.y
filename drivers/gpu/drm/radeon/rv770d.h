@@ -673,6 +673,7 @@
 #define	DMA_PACKET_CONSTANT_FILL			  0xd
 #define	DMA_PACKET_NOP					  0xf
 
+
 #define	SRBM_STATUS				        0x0E50
 
 /* DCE 3.2 HDMI */
@@ -912,6 +913,7 @@
 #       define PIN2_AUDIO_ENABLED                         (1 << 26)
 #       define PIN3_AUDIO_ENABLED                         (1 << 27)
 #       define AUDIO_ENABLED                              (1 << 31)
+
 
 #define D1GRPH_PRIMARY_SURFACE_ADDRESS                    0x6110
 #define D1GRPH_PRIMARY_SURFACE_ADDRESS_HIGH               0x6914

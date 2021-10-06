@@ -346,6 +346,7 @@ heavyweight_exit:
 	/* r3 still contains the return code from kvmppc_handle_exit(). */
 	blr
 
+
 /* Registers:
  *  r3: kvm_run pointer
  *  r4: vcpu pointer

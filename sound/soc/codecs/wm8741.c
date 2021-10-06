@@ -344,6 +344,7 @@ static int wm8741_set_dai_fmt(struct snd_soc_dai *codec_dai,
 		return -EINVAL;
 	}
 
+
 	dev_dbg(codec->dev, "wm8741_set_dai_fmt:    Format=%x, Clock Inv=%x\n",
 				fmt & SND_SOC_DAIFMT_FORMAT_MASK,
 				((fmt & SND_SOC_DAIFMT_INV_MASK)));

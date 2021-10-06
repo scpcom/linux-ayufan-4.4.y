@@ -210,3 +210,4 @@ MODULE_DESCRIPTION("MT8173 MAX98090 ALSA SoC machine driver");
 MODULE_AUTHOR("Koro Chen <koro.chen@mediatek.com>");
 MODULE_LICENSE("GPL v2");
 MODULE_ALIAS("platform:mt8173-max98090");
+

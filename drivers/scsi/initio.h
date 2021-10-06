@@ -34,6 +34,7 @@
  *
  **************************************************************************/
 
+
 #include <linux/types.h>
 
 #define TOTAL_SG_ENTRY		32
@@ -227,6 +228,7 @@ typedef struct {
 #define TSC_CDI         0x02	/* C/D signal                           */
 #define TSC_IOI         0x01	/* I/O signal                           */
 
+
 /*----------------------------------------------------------------------*/
 /* bit definition for Tulip SCSI Status 0 Register                      */
 /*----------------------------------------------------------------------*/
@@ -283,6 +285,8 @@ typedef struct {
 #define MSG_OUT         6	/* 3                            */
 #define MSG_IN          7
 
+
+
 /*----------------------------------------------------------------------*/
 /* Command Codes of Tulip xfer Command register                         */
 /*----------------------------------------------------------------------*/
@@ -311,6 +315,8 @@ typedef struct {
 #define XPEND           0x01	/* Transfer pending             */
 #define FEMPTY          0x02	/* FIFO empty                   */
 
+
+
 /*----------------------------------------------------------------------*/
 /* bit definition for TUL_GCTRL                                         */
 /*----------------------------------------------------------------------*/
@@ -327,6 +333,7 @@ typedef struct {
 #define SE2CLK          0x04
 #define SE2DO           0x02
 #define SE2DI           0x01
+
 
 /************************************************************************/
 /*              Scatter-Gather Element Structure                        */
@@ -387,13 +394,16 @@ struct scsi_ctrl_blk {
 #define SCB_BUSY        0x10
 #define SCB_DONE        0x20
 
+
 /* Opcodes for opcode */
 #define ExecSCSI        0x1
 #define BusDevRst       0x2
 #define AbortCmd        0x3
 
+
 /* Bit Definition for mode */
 #define SCM_RSENS       0x01	/* request sense mode */
+
 
 /* Bit Definition for flags */
 #define SCF_DONE        0x01
@@ -475,6 +485,7 @@ struct target_control {
 #define TCF_WDTR_DONE           0x0100
 #define TCF_SYNC_DONE           0x0200
 #define TCF_BUSY                0x0400
+
 
 /* Bit Definition for TCF_DrvFlags */
 #define TCF_DRV_BUSY            0x01	/* Indicate target busy(driver) */
@@ -653,3 +664,4 @@ typedef struct _NVRAM {
 #define SCSI_RESET_BUS_RESET 0x100
 #define SCSI_RESET_HOST_RESET 0x200
 #define SCSI_RESET_ACTION   0xff
+

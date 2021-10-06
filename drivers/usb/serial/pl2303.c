@@ -30,6 +30,7 @@
 #include <asm/unaligned.h>
 #include "pl2303.h"
 
+
 #define PL2303_QUIRK_UART_STATE_IDX0		BIT(0)
 #define PL2303_QUIRK_LEGACY			BIT(1)
 

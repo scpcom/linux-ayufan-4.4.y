@@ -514,6 +514,7 @@ static int serial_txx9_get_poll_char(struct uart_port *port)
 	return c;
 }
 
+
 static void serial_txx9_put_poll_char(struct uart_port *port, unsigned char c)
 {
 	unsigned int ier;

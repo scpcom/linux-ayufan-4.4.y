@@ -112,6 +112,7 @@ static ssize_t mode_store(struct device *dev,
 					struct hid_device, dev);
 	struct gt683r_led *led = hid_get_drvdata(hdev);
 
+
 	if (kstrtou8(buf, 10, &sysfs_mode) || sysfs_mode > 2)
 		return -EINVAL;
 

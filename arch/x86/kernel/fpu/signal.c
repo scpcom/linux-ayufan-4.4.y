@@ -400,3 +400,4 @@ void fpu__init_prepare_fx_sw_frame(void)
 		fx_sw_reserved_ia32.extended_size = size + fsave_header_size;
 	}
 }
+

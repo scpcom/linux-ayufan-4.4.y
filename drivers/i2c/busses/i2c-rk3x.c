@@ -26,6 +26,7 @@
 #include <linux/regmap.h>
 #include <linux/math64.h>
 
+
 /* Register Map */
 #define REG_CON        0x00 /* control register */
 #define REG_CLKDIV     0x04 /* clock divisor register */
@@ -262,6 +263,7 @@ static void rk3x_i2c_fill_transmit_buf(struct rk3x_i2c *i2c)
 
 	i2c_writel(i2c, cnt, REG_MTXCNT);
 }
+
 
 /* IRQ handlers for individual states */
 

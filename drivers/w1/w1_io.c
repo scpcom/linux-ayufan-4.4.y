@@ -165,6 +165,7 @@ void w1_write_8(struct w1_master *dev, u8 byte)
 }
 EXPORT_SYMBOL_GPL(w1_write_8);
 
+
 /**
  * w1_read_bit() - Generates a write-1 cycle and samples the level.
  * @dev:	the master device

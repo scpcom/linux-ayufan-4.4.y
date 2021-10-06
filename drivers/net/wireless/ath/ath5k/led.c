@@ -200,3 +200,4 @@ int ath5k_init_leds(struct ath5k_hw *ah)
 out:
 	return ret;
 }
+

@@ -1335,6 +1335,7 @@ lpfc_config_port(struct lpfc_hba *phba, LPFC_MBOXQ_t *pmb)
 	 * for ioremap/iomap.
 	 */
 
+
 	pci_read_config_dword(phba->pcidev, PCI_BASE_ADDRESS_0, &bar_low);
 	pci_read_config_dword(phba->pcidev, PCI_BASE_ADDRESS_1, &bar_high);
 
@@ -2362,6 +2363,7 @@ error:
 	lpfc_sli4_mbox_cmd_free(phba, mbox);
 	rdp_context->cmpl(phba, rdp_context, FAILURE);
 }
+
 
 /*
  * lpfc_sli4_dump_sfp_pagea0 - Dump sli4 read SFP Diagnostic.

@@ -173,6 +173,7 @@ long arch_ptrace(struct task_struct *child, long request,
 	return ret;
 }
 
+
 #ifdef CONFIG_COMPAT
 
 /* This function is needed to translate 32 bit pt_regs offsets in to

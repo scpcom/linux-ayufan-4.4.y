@@ -128,6 +128,7 @@ fp_fsub(struct fp_ext *dest, struct fp_ext *src)
 	return fp_fadd(dest, src);
 }
 
+
 struct fp_ext *
 fp_fcmp(struct fp_ext *dest, struct fp_ext *src)
 {
@@ -697,3 +698,4 @@ fp_fscale(struct fp_ext *dest, struct fp_ext *src)
 
 	return dest;
 }
+

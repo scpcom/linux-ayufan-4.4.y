@@ -1084,6 +1084,7 @@ svga3dsurface_get_serialized_size(SVGA3dSurfaceFormat format,
 	return total_size * num_layers;
 }
 
+
 /**
  * svga3dsurface_get_pixel_offset - Compute the offset (in bytes) to a pixel
  * in an image (or volume).
@@ -1106,6 +1107,7 @@ svga3dsurface_get_pixel_offset(SVGA3dSurfaceFormat format,
 			    x / bw * desc->bytes_per_block);
 	return offset;
 }
+
 
 static inline u32
 svga3dsurface_get_image_offset(SVGA3dSurfaceFormat format,
@@ -1140,6 +1142,7 @@ svga3dsurface_get_image_offset(SVGA3dSurfaceFormat format,
 	return offset;
 }
 
+
 /**
  * svga3dsurface_is_gb_screen_target_format - Is the specified format usable as
  *                                            a ScreenTarget?
@@ -1161,6 +1164,7 @@ svga3dsurface_is_gb_screen_target_format(SVGA3dSurfaceFormat format)
 		format == SVGA3D_P8);
 }
 
+
 /**
  * svga3dsurface_is_dx_screen_target_format - Is the specified format usable as
  *                                            a ScreenTarget?
@@ -1178,6 +1182,7 @@ svga3dsurface_is_dx_screen_target_format(SVGA3dSurfaceFormat format)
 		format == SVGA3D_B8G8R8A8_UNORM ||
 		format == SVGA3D_B8G8R8X8_UNORM);
 }
+
 
 /**
  * svga3dsurface_is_screen_target_format - Is the specified format usable as a

@@ -120,6 +120,7 @@
 /* multipier to convert to mV */
 #define SN95031_ADC_ONE_LSB_MULTIPLIER 2346
 
+
 struct mfld_jack_data {
 	int intr_id;
 	int micbias_vol;

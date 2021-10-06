@@ -666,6 +666,7 @@ static void ieee80211_verify_alignment(struct ieee80211_rx_data *rx)
 #endif
 }
 
+
 /* rx handlers */
 
 static int ieee80211_is_unicast_robust_mgmt_frame(struct sk_buff *skb)
@@ -678,6 +679,7 @@ static int ieee80211_is_unicast_robust_mgmt_frame(struct sk_buff *skb)
 	return ieee80211_is_robust_mgmt_frame(skb);
 }
 
+
 static int ieee80211_is_multicast_robust_mgmt_frame(struct sk_buff *skb)
 {
 	struct ieee80211_hdr *hdr = (struct ieee80211_hdr *) skb->data;
@@ -687,6 +689,7 @@ static int ieee80211_is_multicast_robust_mgmt_frame(struct sk_buff *skb)
 
 	return ieee80211_is_robust_mgmt_frame(skb);
 }
+
 
 /* Get the BIP key index from MMIE; return -1 if this is not a BIP frame */
 static int ieee80211_get_mmie_keyidx(struct sk_buff *skb)
@@ -1179,6 +1182,7 @@ ieee80211_rx_h_check(struct ieee80211_rx_data *rx)
 
 	return RX_CONTINUE;
 }
+
 
 static ieee80211_rx_result debug_noinline
 ieee80211_rx_h_check_more_data(struct ieee80211_rx_data *rx)

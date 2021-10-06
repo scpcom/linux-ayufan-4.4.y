@@ -324,6 +324,7 @@ static int hdpvr_start_streaming(struct hdpvr_device *dev)
 	return 0;
 }
 
+
 /* function expects dev->io_mutex to be hold by caller */
 static int hdpvr_stop_streaming(struct hdpvr_device *dev)
 {
@@ -374,6 +375,7 @@ static int hdpvr_stop_streaming(struct hdpvr_device *dev)
 
 	return 0;
 }
+
 
 /*=======================================================================*/
 /*
@@ -546,6 +548,7 @@ static unsigned int hdpvr_poll(struct file *filp, poll_table *wait)
 
 	return mask;
 }
+
 
 static const struct v4l2_file_operations hdpvr_fops = {
 	.owner		= THIS_MODULE,
@@ -810,6 +813,7 @@ static int vidioc_g_input(struct file *file, void *private_data,
 	*index = dev->options.video_input;
 	return 0;
 }
+
 
 static const char *audio_iname[] = {
 	[HDPVR_RCA_FRONT] = "RCA front",

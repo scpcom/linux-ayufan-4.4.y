@@ -78,4 +78,5 @@ void lmc_trace(struct net_device *dev, char *msg){
 #endif
 }
 
+
 /* --------------------------- end if_lmc_linux.c ------------------------ */

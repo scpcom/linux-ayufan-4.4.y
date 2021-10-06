@@ -4,6 +4,7 @@
 
 #include <uapi/linux/scc.h>
 
+
 enum {TX_OFF, TX_ON};	/* command for scc_key_trx() */
 
 /* Vector masks in RR2B */
@@ -40,6 +41,7 @@ struct scc_kiss {
 	unsigned char mode;		/* 'normal' or 'hwctrl' mode (unused) */
 	unsigned char softdcd;		/* Use DPLL instead of DCD pin for carrier detect */
 };
+
 
 /* SCC channel structure */
 

@@ -285,6 +285,7 @@ static int register_write(struct cx88_core *core, u32 address, u32 value)
 	return wait_ready_gpio0_bit1(core,1);
 }
 
+
 static int register_read(struct cx88_core *core, u32 address, u32 *value)
 {
 	int retval;
@@ -441,6 +442,7 @@ static int blackbird_load_firmware(struct cx8802_dev *dev)
 
 	retval = request_firmware(&firmware, CX2341X_FIRM_ENC_FILENAME,
 				  &dev->pci->dev);
+
 
 	if (retval != 0) {
 		pr_err("Hotplug firmware request failed (%s).\n",

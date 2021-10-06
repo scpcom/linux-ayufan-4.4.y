@@ -19,6 +19,7 @@
 
 #include "dvb_frontend.h"
 
+
 struct qm1d1c0042_config {
 	struct dvb_frontend *fe;
 

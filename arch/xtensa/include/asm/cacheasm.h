@@ -44,6 +44,7 @@
 
 	.endm
 
+
 	.macro	__loop_cache_range ar as at insn line_width
 
 	extui	\at, \ar, 0, \line_width
@@ -55,6 +56,7 @@
 
 	.endm
 
+
 	.macro	__loop_cache_page ar at insn line_width
 
 	__loopi	\ar, \at, PAGE_SIZE, 4 << (\line_width)
@@ -65,6 +67,7 @@
 	__endla	\ar, \at, 4 << (\line_width)
 
 	.endm
+
 
 #if XCHAL_DCACHE_LINE_LOCKABLE
 
@@ -95,6 +98,7 @@
 
 	.endm
 
+
 	.macro	___flush_dcache_all ar at
 
 #if XCHAL_DCACHE_SIZE
@@ -102,6 +106,7 @@
 #endif
 
 	.endm
+
 
 	.macro	___invalidate_dcache_all ar at
 
@@ -112,6 +117,7 @@
 
 	.endm
 
+
 	.macro	___invalidate_icache_all ar at
 
 #if XCHAL_ICACHE_SIZE
@@ -121,6 +127,8 @@
 
 	.endm
 
+
+
 	.macro	___flush_invalidate_dcache_range ar as at
 
 #if XCHAL_DCACHE_SIZE
@@ -128,6 +136,7 @@
 #endif
 
 	.endm
+
 
 	.macro	___flush_dcache_range ar as at
 
@@ -137,6 +146,7 @@
 
 	.endm
 
+
 	.macro	___invalidate_dcache_range ar as at
 
 #if XCHAL_DCACHE_SIZE
@@ -144,6 +154,7 @@
 #endif
 
 	.endm
+
 
 	.macro	___invalidate_icache_range ar as at
 
@@ -153,6 +164,8 @@
 
 	.endm
 
+
+
 	.macro	___flush_invalidate_dcache_page ar as
 
 #if XCHAL_DCACHE_SIZE
@@ -160,6 +173,7 @@
 #endif
 
 	.endm
+
 
 	.macro ___flush_dcache_page ar as
 
@@ -169,6 +183,7 @@
 
 	.endm
 
+
 	.macro	___invalidate_dcache_page ar as
 
 #if XCHAL_DCACHE_SIZE
@@ -176,6 +191,7 @@
 #endif
 
 	.endm
+
 
 	.macro	___invalidate_icache_page ar as
 

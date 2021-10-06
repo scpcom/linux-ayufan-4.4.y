@@ -19,6 +19,7 @@
 
 #include "decode.h"
 
+
 #ifndef find_str_pc_offset
 
 /*
@@ -46,6 +47,7 @@ void __init find_str_pc_offset(void)
 
 #endif /* !find_str_pc_offset */
 
+
 #ifndef test_load_write_pc_interworking
 
 bool load_write_pc_interworks;
@@ -58,6 +60,7 @@ void __init test_load_write_pc_interworking(void)
 }
 
 #endif /* !test_load_write_pc_interworking */
+
 
 #ifndef test_alu_write_pc_interworking
 
@@ -72,12 +75,14 @@ void __init test_alu_write_pc_interworking(void)
 
 #endif /* !test_alu_write_pc_interworking */
 
+
 void __init arm_probes_decode_init(void)
 {
 	find_str_pc_offset();
 	test_load_write_pc_interworking();
 	test_alu_write_pc_interworking();
 }
+
 
 static unsigned long __kprobes __check_eq(unsigned long cpsr)
 {
@@ -168,6 +173,7 @@ probes_check_cc * const probes_condition_checks[16] = {
 	&__check_hi, &__check_ls, &__check_ge, &__check_lt,
 	&__check_gt, &__check_le, &__check_al, &__check_al
 };
+
 
 void __kprobes probes_simulate_nop(probes_opcode_t opcode,
 	struct arch_probes_insn *asi,

@@ -19,3 +19,4 @@ void dlm_rcom_out(struct dlm_rcom *rc);
 void dlm_rcom_in(struct dlm_rcom *rc);
 
 #endif
+

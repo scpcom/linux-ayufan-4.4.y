@@ -11,7 +11,9 @@
 #ifndef _UAPI_ASM_M68K_BOOTINFO_H
 #define _UAPI_ASM_M68K_BOOTINFO_H
 
+
 #include <linux/types.h>
+
 
 #ifndef __ASSEMBLY__
 
@@ -34,12 +36,14 @@ struct bi_record {
 	__be32 data[0];			/* data */
 };
 
+
 struct mem_info {
 	__be32 addr;			/* physical address of memory chunk */
 	__be32 size;			/* length of memory chunk (in bytes) */
 };
 
 #endif /* __ASSEMBLY__ */
+
 
     /*
      *  Tag Definitions
@@ -60,6 +64,7 @@ struct mem_info {
 #define BI_COMMAND_LINE		0x0007	/* kernel command line parameters */
 					/* (string) */
 
+
     /*
      *  Linux/m68k Architectures (BI_MACHTYPE)
      */
@@ -76,6 +81,7 @@ struct mem_info {
 #define MACH_Q40		10
 #define MACH_SUN3X		11
 #define MACH_M54XX		12
+
 
     /*
      *  CPU, FPU and MMU types (BI_CPUTYPE, BI_FPUTYPE, BI_MMUTYPE)
@@ -130,6 +136,7 @@ struct mem_info {
 #define MMU_APOLLO		(1 << MMUB_APOLLO)
 #define MMU_COLDFIRE		(1 << MMUB_COLDFIRE)
 
+
     /*
      * Stuff for bootinfo interface versioning
      *
@@ -162,5 +169,6 @@ struct bootversion {
 } __packed;
 
 #endif /* __ASSEMBLY__ */
+
 
 #endif /* _UAPI_ASM_M68K_BOOTINFO_H */

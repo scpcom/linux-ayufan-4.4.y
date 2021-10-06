@@ -57,6 +57,7 @@ struct wm8731_priv {
 	struct mutex lock;
 };
 
+
 /*
  * wm8731 register cache
  */
@@ -420,6 +421,7 @@ static int wm8731_set_dai_sysclk(struct snd_soc_dai *codec_dai,
 
 	return 0;
 }
+
 
 static int wm8731_set_dai_fmt(struct snd_soc_dai *codec_dai,
 		unsigned int fmt)

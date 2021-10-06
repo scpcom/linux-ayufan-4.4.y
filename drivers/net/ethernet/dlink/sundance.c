@@ -26,6 +26,7 @@
 #define DRV_VERSION	"1.2"
 #define DRV_RELDATE	"11-Sep-2006"
 
+
 /* The user-configurable values.
    These may be modified when a driver module is loaded.*/
 static int debug = 1;			/* 1 normal messages, 0 quiet .. 7 verbose. */
@@ -54,6 +55,7 @@ static int flowctrl=1;
 */
 #define MAX_UNITS 8
 static char *media[MAX_UNITS];
+
 
 /* Operational parameters that are set at compile time. */
 
@@ -1018,6 +1020,7 @@ static void tx_timeout(struct net_device *dev)
 	tasklet_enable(&np->tx_tasklet);
 }
 
+
 /* Initialize the Rx and Tx rings, along with various 'dev' bits. */
 static void init_ring(struct net_device *dev)
 {
@@ -1189,6 +1192,7 @@ static irqreturn_t intr_handler(int irq, void *dev_instance)
 	int tx_status;
 	int handled = 0;
 	int i;
+
 
 	do {
 		int intr_status = ioread16(ioaddr + IntrStatus);
@@ -2019,3 +2023,5 @@ static void __exit sundance_exit(void)
 
 module_init(sundance_init);
 module_exit(sundance_exit);
+
+

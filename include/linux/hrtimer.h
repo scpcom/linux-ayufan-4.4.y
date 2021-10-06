@@ -354,6 +354,7 @@ extern void hrtimers_resume(void);
 
 DECLARE_PER_CPU(struct tick_device, tick_cpu_device);
 
+
 /* Exported timer functions: */
 
 /* Initialize timers: */

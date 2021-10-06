@@ -31,6 +31,7 @@
 #include "hda_jack.h"
 #include "hda_generic.h"
 
+
 struct ad198x_spec {
 	struct hda_gen_spec gen;
 
@@ -41,6 +42,7 @@ struct ad198x_spec {
 
 	unsigned int beep_amp;	/* beep amp value, set via set_beep_amp() */
 };
+
 
 #ifdef CONFIG_SND_HDA_INPUT_BEEP
 /* additional beep mixers; the actual parameters are overwritten at build */
@@ -81,6 +83,7 @@ static int create_beep_ctls(struct hda_codec *codec)
 #else
 #define create_beep_ctls(codec)		0
 #endif
+
 
 static void ad198x_power_eapd_write(struct hda_codec *codec, hda_nid_t front,
 				hda_nid_t hp)
@@ -179,6 +182,7 @@ static const struct hda_codec_ops ad198x_auto_patch_ops = {
 #endif
 	.reboot_notify = ad198x_shutup,
 };
+
 
 static int ad198x_parse_auto_config(struct hda_codec *codec, bool indep_hp)
 {
@@ -446,6 +450,7 @@ static int patch_ad1986a(struct hda_codec *codec)
 	return 0;
 }
 
+
 /*
  * AD1983 specific
  */
@@ -557,6 +562,7 @@ static int patch_ad1983(struct hda_codec *codec)
 	return err;
 }
 
+
 /*
  * AD1981 HD specific
  */
@@ -645,6 +651,7 @@ static int patch_ad1981(struct hda_codec *codec)
 	snd_hda_gen_free(codec);
 	return err;
 }
+
 
 /*
  * AD1988
@@ -935,6 +942,7 @@ static int patch_ad1988(struct hda_codec *codec)
 	return err;
 }
 
+
 /*
  * AD1884 / AD1984
  *
@@ -1079,6 +1087,7 @@ static const struct snd_pci_quirk ad1884_fixup_tbl[] = {
 	{}
 };
 
+
 static int patch_ad1884(struct hda_codec *codec)
 {
 	struct ad198x_spec *spec;
@@ -1151,6 +1160,7 @@ static int patch_ad1882(struct hda_codec *codec)
 	snd_hda_gen_free(codec);
 	return err;
 }
+
 
 /*
  * patch entries

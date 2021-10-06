@@ -685,6 +685,7 @@ qla24xx_calc_dsd_lists(uint16_t dsds)
 	return dsd_lists;
 }
 
+
 /**
  * qla24xx_build_scsi_iocbs() - Build IOCB command utilizing Command Type 7
  * IOCB types.
@@ -985,6 +986,7 @@ alloc_and_fill:
 				tc->ctx_dsd_alloced = 1;
 			}
 
+
 			/* add new list to cmd iocb or last list */
 			*cur_dsd++ = cpu_to_le32(LSD(dsd_ptr->dsd_list_dma));
 			*cur_dsd++ = cpu_to_le32(MSD(dsd_ptr->dsd_list_dma));
@@ -1041,6 +1043,7 @@ qla24xx_walk_and_build_sglist(struct qla_hw_data *ha, srb_t *sp, uint32_t *dsd,
 		BUG();
 		return 1;
 	}
+
 
 	for_each_sg(sgl, sg, tot_dsds, i) {
 		dma_addr_t	sle_dma;
@@ -1760,6 +1763,7 @@ queuing_error:
 	spin_unlock_irqrestore(&ha->hardware_lock, flags);
 	return QLA_FUNCTION_FAILED;
 }
+
 
 static void qla25xx_set_que(srb_t *sp, struct rsp_que **rsp)
 {

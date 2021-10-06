@@ -1852,6 +1852,7 @@ int c4iw_ib_modify_qp(struct ib_qp *ibqp, struct ib_qp_attr *attr,
 				IB_ACCESS_REMOTE_WRITE) ? 1 : 0;
 	attrs.enable_bind = (attr->qp_access_flags & IB_ACCESS_MW_BIND) ? 1 : 0;
 
+
 	mask |= (attr_mask & IB_QP_STATE) ? C4IW_QP_ATTR_NEXT_STATE : 0;
 	mask |= (attr_mask & IB_QP_ACCESS_FLAGS) ?
 			(C4IW_QP_ATTR_ENABLE_RDMA_READ |

@@ -65,3 +65,4 @@ enum {
 };
 
 #endif /*_RTL8711_RF_H_*/
+

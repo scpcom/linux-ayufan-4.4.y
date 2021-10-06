@@ -11,6 +11,7 @@
  * for more info.
  */
 
+
 #ifndef _DEV_TABLE_H_
 #define _DEV_TABLE_H_
 
@@ -61,6 +62,7 @@ struct card_info
 	int enabled;
 	void *for_driver_use;
 };
+
 
 /*
  * Device specific parameters (used only by dmabuf.c)
@@ -385,3 +387,4 @@ int sound_alloc_timerdev(void);
 int sound_alloc_synthdev(void);
 int sound_alloc_mididev(void);
 #endif	/* _DEV_TABLE_H_ */
+

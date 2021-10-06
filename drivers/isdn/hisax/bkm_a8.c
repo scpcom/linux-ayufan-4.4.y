@@ -10,6 +10,7 @@
  *
  */
 
+
 #include <linux/init.h>
 #include "hisax.h"
 #include "isac.h"
@@ -32,6 +33,7 @@ static const char *sct_quadro_subtypes[] =
 	"#4"
 };
 
+
 #define wordout(addr, val) outw(val, addr)
 #define wordin(addr) inw(addr)
 
@@ -52,6 +54,7 @@ readfifo(unsigned int ale, unsigned int adr, u_char off, u_char *data, int size)
 	for (i = 0; i < size; i++)
 		data[i] = wordin(adr) & 0xFF;
 }
+
 
 static inline void
 writereg(unsigned int ale, unsigned int adr, u_char off, u_char data)
@@ -94,6 +97,7 @@ WriteISACfifo(struct IsdnCardState *cs, u_char *data, int size)
 {
 	writefifo(cs->hw.ax.base, cs->hw.ax.data_adr, 0x80, data, size);
 }
+
 
 static u_char
 ReadHSCX(struct IsdnCardState *cs, int hscx, u_char offset)

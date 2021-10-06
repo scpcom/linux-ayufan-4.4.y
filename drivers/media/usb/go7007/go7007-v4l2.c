@@ -658,6 +658,7 @@ static int vidioc_enum_input(struct file *file, void *priv,
 	return 0;
 }
 
+
 static int vidioc_g_input(struct file *file, void *priv, unsigned int *input)
 {
 	struct go7007 *go = video_drvdata(file);
@@ -801,6 +802,7 @@ static int vidioc_subscribe_event(struct v4l2_fh *fh,
 	}
 	return -EINVAL;
 }
+
 
 static int go7007_s_ctrl(struct v4l2_ctrl *ctrl)
 {

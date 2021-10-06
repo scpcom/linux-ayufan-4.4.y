@@ -25,6 +25,7 @@
 #define CEPH_MDSC_PROTOCOL   32 /* server/client */
 #define CEPH_MONC_PROTOCOL   15 /* server/client */
 
+
 #define CEPH_INO_ROOT   1
 #define CEPH_INO_CEPH   2       /* hidden .ceph dir */
 #define CEPH_INO_DOTDOT 3	/* used by ceph fuse for parent (..) */
@@ -99,6 +100,7 @@ struct ceph_dir_layout {
 
 #define CEPH_AUTH_UID_DEFAULT ((__u64) -1)
 
+
 /*********************************************
  * message layer
  */
@@ -141,17 +143,20 @@ struct ceph_dir_layout {
 #define CEPH_MSG_POOLOP_REPLY           48
 #define CEPH_MSG_POOLOP                 49
 
+
 /* osd */
 #define CEPH_MSG_OSD_MAP                41
 #define CEPH_MSG_OSD_OP                 42
 #define CEPH_MSG_OSD_OPREPLY            43
 #define CEPH_MSG_WATCH_NOTIFY           44
 
+
 /* watch-notify operations */
 enum {
   WATCH_NOTIFY				= 1, /* notifying watcher */
   WATCH_NOTIFY_COMPLETE			= 2, /* notifier notified when done */
 };
+
 
 struct ceph_mon_request_header {
 	__le64 have_version;
@@ -232,6 +237,7 @@ struct ceph_mon_subscribe_ack {
 #define CEPH_MDS_STATE_STOPPING     14 /* up, but exporting metadata */
 
 extern const char *ceph_mds_state_name(int s);
+
 
 /*
  * metadata lock types.
@@ -321,6 +327,7 @@ enum {
 };
 
 extern const char *ceph_mds_op_name(int op);
+
 
 #define CEPH_SETATTR_MODE   1
 #define CEPH_SETATTR_UID    2
@@ -486,6 +493,7 @@ struct ceph_mds_reply_dirfrag {
 #define CEPH_LOCK_FCNTL_INTR    3
 #define CEPH_LOCK_FLOCK_INTR    4
 
+
 #define CEPH_LOCK_SHARED   1
 #define CEPH_LOCK_EXCL     2
 #define CEPH_LOCK_UNLOCK   4
@@ -498,6 +506,7 @@ struct ceph_filelock {
 	__le64 pid; /* process id holding the lock on the client */
 	__u8 type; /* shared lock, exclusive lock, or unlock */
 } __attribute__ ((packed));
+
 
 /* file access modes */
 #define CEPH_FILE_MODE_PIN        0
@@ -554,6 +563,7 @@ int ceph_flags_to_mode(int flags);
 #define CEPH_CAP_FILE_LAZYIO   (CEPH_CAP_GLAZYIO   << CEPH_CAP_SFILE)
 #define CEPH_CAP_FLOCK_SHARED  (CEPH_CAP_GSHARED   << CEPH_CAP_SFLOCK)
 #define CEPH_CAP_FLOCK_EXCL    (CEPH_CAP_GEXCL     << CEPH_CAP_SFLOCK)
+
 
 /* cap masks (for getattr) */
 #define CEPH_STAT_CAP_INODE    CEPH_CAP_PIN

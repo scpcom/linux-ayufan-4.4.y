@@ -129,6 +129,7 @@ struct fotg210_hcd {			/* one per controller */
 	/* max periodic time per uframe */
 	unsigned		uframe_periodic_max;
 
+
 	/* list of itds completed while now_frame was still active */
 	struct list_head	cached_itd_list;
 	struct fotg210_itd	*last_itd_to_free;
@@ -219,6 +220,7 @@ struct fotg210_caps {
 #define HCC_PGM_FRAMELISTLEN(p) ((p)&(1 << 1))  /* true: periodic_size changes*/
 	u8		portroute[8];	 /* nibbles for routing - offset 0xC */
 };
+
 
 /* Section 2.3 Host Controller Operational Registers */
 struct fotg210_regs {

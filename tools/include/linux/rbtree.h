@@ -43,6 +43,7 @@ struct rb_root {
 	struct rb_node *rb_node;
 };
 
+
 #define rb_parent(r)   ((struct rb_node *)((r)->__rb_parent_color & ~3))
 
 #define RB_ROOT	(struct rb_root) { NULL, }
@@ -56,8 +57,10 @@ struct rb_root {
 #define RB_CLEAR_NODE(node)  \
 	((node)->__rb_parent_color = (unsigned long)(node))
 
+
 extern void rb_insert_color(struct rb_node *, struct rb_root *);
 extern void rb_erase(struct rb_node *, struct rb_root *);
+
 
 /* Find logical next and previous nodes in a tree */
 extern struct rb_node *rb_next(const struct rb_node *);
@@ -86,6 +89,7 @@ static inline void rb_link_node(struct rb_node *node, struct rb_node *parent,
 	({ typeof(ptr) ____ptr = (ptr); \
 	   ____ptr ? rb_entry(____ptr, type, member) : NULL; \
 	})
+
 
 /*
  * Handy for checking that we are not deleting an entry that is

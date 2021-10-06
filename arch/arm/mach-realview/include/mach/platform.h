@@ -42,6 +42,7 @@
  * 
  */
 
+
 /* ------------------------------------------------------------------------
  *  RealView Registers
  * ------------------------------------------------------------------------
@@ -240,6 +241,7 @@
 #define REALVIEW_TIMER2_EnSel	17
 #define REALVIEW_TIMER3_EnSel	19
 #define REALVIEW_TIMER4_EnSel	21
+
 
 #define REALVIEW_CSR_BASE             0x10000000
 #define REALVIEW_CSR_SIZE             0x10000000

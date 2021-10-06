@@ -519,12 +519,15 @@ get_UnShOpcodeExtension_Y1(tilepro_bundle_bits n)
   return (((unsigned int)(n >> 48)) & 0x7);
 }
 
+
 static __inline int
 sign_extend(int n, int num_bits)
 {
   int shift = (int)(sizeof(int) * 8 - num_bits);
   return (n << shift) >> shift;
 }
+
+
 
 static __inline tilepro_bundle_bits
 create_BrOff_SN(int num)
@@ -1002,6 +1005,7 @@ create_UnShOpcodeExtension_Y1(int num)
   return (((tilepro_bundle_bits)(n & 0x7)) << 48);
 }
 
+
 enum
 {
   ADDBS_U_SPECIAL_0_OPCODE_X0 = 98,
@@ -1461,6 +1465,7 @@ enum
   XOR_SPECIAL_2_OPCODE_Y0 = 3,
   XOR_SPECIAL_2_OPCODE_Y1 = 3
 };
+
 
 #endif /* __ASSEMBLER__ */
 

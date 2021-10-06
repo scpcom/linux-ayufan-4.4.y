@@ -29,6 +29,7 @@
 				| (((reg_id_ofs) & 0x1F) << 0))
 #define MAX_RETRY		3
 
+
 static int __cw1200_reg_read(struct cw1200_common *priv, u16 addr,
 			     void *buf, size_t buf_len, int buf_id)
 {

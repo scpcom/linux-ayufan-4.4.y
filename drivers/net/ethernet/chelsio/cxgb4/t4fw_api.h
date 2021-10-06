@@ -643,6 +643,7 @@ struct fw_eth_tx_pkt_vm_wr {
 #define FW_CMD_HELLO_TIMEOUT	(3 * FW_CMD_MAX_TIMEOUT)
 #define FW_CMD_HELLO_RETRIES	3
 
+
 enum fw_cmd_opcodes {
 	FW_LDST_CMD                    = 0x01,
 	FW_RESET_CMD                   = 0x03,

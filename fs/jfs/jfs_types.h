@@ -102,6 +102,7 @@ struct pxdlist {
 	pxd_t pxd[MAXTREEHEIGHT];
 };
 
+
 /*
  *	data extent descriptor (dxd)
  */
@@ -135,6 +136,7 @@ struct component_name {
 	int namlen;
 	wchar_t *name;
 };
+
 
 /*
  *	DASD limit information - stored in directory inode

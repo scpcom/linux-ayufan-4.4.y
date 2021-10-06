@@ -80,6 +80,7 @@ static int __kprobes branch_taken(unsigned int instr, struct pt_regs *regs)
 	return 1;
 }
 
+
 static long __kprobes address_ok(struct pt_regs *regs, unsigned long ea, int nb)
 {
 	if (!user_mode(regs))
@@ -148,6 +149,7 @@ static inline unsigned long max_align(unsigned long x)
 	x |= sizeof(unsigned long);
 	return x & -x;		/* isolates rightmost bit */
 }
+
 
 static inline unsigned long byterev_2(unsigned long x)
 {
@@ -1152,6 +1154,7 @@ int __kprobes analyse_instr(struct instruction_op *op, struct pt_regs *regs,
 			regs->gpr[rd] = (int) regs->gpr[ra] /
 				(int) regs->gpr[rb];
 			goto arith_done;
+
 
 /*
  * Logical instructions

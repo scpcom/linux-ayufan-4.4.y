@@ -493,6 +493,7 @@ static int drv260x_parse_dt(struct device *dev,
 	if (!error)
 		haptics->rated_voltage = drv260x_calculate_voltage(voltage);
 
+
 	error = of_property_read_u32(np, "vib-overdrive-mv", &voltage);
 	if (!error)
 		haptics->overdrive_voltage = drv260x_calculate_voltage(voltage);
@@ -538,6 +539,7 @@ static int drv260x_probe(struct i2c_client *client,
 		dev_err(&client->dev, "Platform data not set\n");
 		return -ENODEV;
 	}
+
 
 	if (haptics->mode < DRV260X_LRA_MODE ||
 	    haptics->mode > DRV260X_ERM_MODE) {

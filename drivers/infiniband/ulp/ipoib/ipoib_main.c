@@ -1225,6 +1225,7 @@ static void ipoib_reap_neigh(struct work_struct *work)
 				   arp_tbl.gc_interval);
 }
 
+
 static struct ipoib_neigh *ipoib_neigh_ctor(u8 *daddr,
 				      struct net_device *dev)
 {
@@ -1522,6 +1523,7 @@ static void ipoib_neigh_hash_uninit(struct net_device *dev)
 
 	wait_for_completion(&priv->ntbl.deleted);
 }
+
 
 int ipoib_dev_init(struct net_device *dev, struct ib_device *ca, int port)
 {

@@ -747,6 +747,7 @@ static int uart_set_info(struct tty_struct *tty, struct tty_port *port,
 			ASYNC_CLOSING_WAIT_NONE :
 			msecs_to_jiffies(new_info->closing_wait * 10);
 
+
 	change_irq  = !(uport->flags & UPF_FIXED_PORT)
 		&& new_info->irq != uport->irq;
 
@@ -1216,6 +1217,7 @@ uart_ioctl(struct tty_struct *tty, unsigned int cmd,
 	struct tty_port *port = &state->port;
 	void __user *uarg = (void __user *)arg;
 	int ret = -ENOIOCTLCMD;
+
 
 	/*
 	 * These ioctls don't rely on the hardware to be present.
@@ -2551,6 +2553,7 @@ static ssize_t uart_get_attr_xmit_fifo_size(struct device *dev,
 	return snprintf(buf, PAGE_SIZE, "%d\n", tmp.xmit_fifo_size);
 }
 
+
 static ssize_t uart_get_attr_close_delay(struct device *dev,
 	struct device_attribute *attr, char *buf)
 {
@@ -2560,6 +2563,7 @@ static ssize_t uart_get_attr_close_delay(struct device *dev,
 	uart_get_info(port, &tmp);
 	return snprintf(buf, PAGE_SIZE, "%d\n", tmp.close_delay);
 }
+
 
 static ssize_t uart_get_attr_closing_wait(struct device *dev,
 	struct device_attribute *attr, char *buf)

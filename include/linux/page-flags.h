@@ -448,6 +448,7 @@ static inline bool page_huge_active(struct page *page)
 }
 #endif
 
+
 #ifdef CONFIG_TRANSPARENT_HUGEPAGE
 /*
  * PageHuge() only returns true for hugetlbfs pages, but not for

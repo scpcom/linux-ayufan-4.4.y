@@ -94,6 +94,7 @@ void __init sun3x_sched_init(irq_handler_t vector)
 
 	sun3_disable_interrupts();
 
+
     /* Pulse enable low to get the clock started */
 	sun3_disable_irq(5);
 	sun3_enable_irq(5);

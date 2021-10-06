@@ -53,6 +53,7 @@ enum snic_io_type {
 	SNIC_MSG_ASYNC_EVNOTIFY,	/* Asynchronous Event Notification */
 }; /* end of enum snic_io_type */
 
+
 /*
  * Header status codes from firmware
  */
@@ -183,6 +184,7 @@ struct snic_exch_ver_rsp {
 	u16	rsvd;
 };
 
+
 /*
  * snic_report_tgts : host -> firmware request
  *
@@ -201,6 +203,7 @@ enum snic_type {
 	SNIC_DAS,
 	SNIC_SAN,
 };
+
 
 /* Report Target Response */
 enum snic_tgt_type {
@@ -275,6 +278,7 @@ struct snic_icmnd {
 	__le64	sg_addr;	/* Points to SG List */
 	__le64	sense_addr;	/* Sense buffer address */
 };
+
 
 /* Response flags */
 /* Bit 0: Under run
@@ -375,6 +379,7 @@ struct snic_notify_msg {
 	u8	_resvd[4];
 };
 
+
 #define SNIC_EVDATA_LEN		24	/* in bytes */
 /* snic_async_evnotify: firmware -> host notification
  *
@@ -403,6 +408,7 @@ enum snic_ev_type {
 
 	SNIC_EV_DISC_CMPL = 0x10, /* Discovery Completed Event */
 };
+
 
 #define SNIC_HOST_REQ_LEN	128	/*Exp length of host req, wq desc sz*/
 /* Payload 88 bytes = 128 - 24 - 16 */
@@ -443,6 +449,7 @@ struct snic_host_req {
 		struct snic_hba_reset		reset;
 	} u;
 }; /* end of snic_host_req structure */
+
 
 #define SNIC_FW_REQ_LEN		64 /* Expected length of fw req */
 struct snic_fw_req {

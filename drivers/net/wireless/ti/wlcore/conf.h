@@ -539,6 +539,7 @@ struct conf_tx_rate_class {
  * DCF access */
 #define CONF_TX_AIFS_DIFS 2
 
+
 enum conf_tx_ac {
 	CONF_TX_AC_BE = 0,         /* best effort / legacy */
 	CONF_TX_AC_BK = 1,         /* background */
@@ -610,6 +611,7 @@ enum {
 	CONF_ACK_POLICY_NO_ACK = 1,
 	CONF_ACK_POLICY_BLOCK = 2,
 };
+
 
 struct conf_tx_tid {
 	u8 queue_id;

@@ -25,8 +25,10 @@
 #include "wmm.h"
 #include "11n.h"
 
+
 /* Maximum value FW can accept for driver delay in packet transmission */
 #define DRV_PKT_DELAY_TO_FW_MAX   512
+
 
 #define WMM_QUEUED_PACKET_LOWER_LIMIT   180
 
@@ -137,6 +139,7 @@ void mwifiex_ralist_add(struct mwifiex_private *priv, const u8 *ra)
 	struct mwifiex_adapter *adapter = priv->adapter;
 	struct mwifiex_sta_node *node;
 	unsigned long flags;
+
 
 	for (i = 0; i < MAX_NUM_TID; ++i) {
 		ra_list = mwifiex_wmm_allocate_ralist_node(adapter, ra);

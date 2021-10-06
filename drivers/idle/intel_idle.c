@@ -884,6 +884,7 @@ static const struct idle_cpu idle_cpu_skl = {
 	.disable_promotion_to_c1e = true,
 };
 
+
 static const struct idle_cpu idle_cpu_avn = {
 	.state_table = avn_cstates,
 	.disable_promotion_to_c1e = true,
@@ -1031,6 +1032,7 @@ static void sklh_idle_state_table_update(void)
 	unsigned long long msr;
 	unsigned int eax, ebx, ecx, edx;
 
+
 	/* if PC10 disabled via cmdline intel_idle.max_cstate=7 or shallower */
 	if (max_cstate <= 7)
 		return;
@@ -1124,6 +1126,7 @@ static int __init intel_idle_cpuidle_driver_init(void)
 			continue;
 		}
 
+
 		if (((mwait_cstate + 1) > 2) &&
 			!boot_cpu_has(X86_FEATURE_NONSTOP_TSC))
 			mark_tsc_unstable("TSC halts in idle"
@@ -1148,6 +1151,7 @@ static int __init intel_idle_cpuidle_driver_init(void)
 
 	return 0;
 }
+
 
 /*
  * intel_idle_cpu_init()

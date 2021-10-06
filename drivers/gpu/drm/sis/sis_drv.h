@@ -48,6 +48,7 @@ enum sis_family {
 
 #include <drm/drm_mm.h>
 
+
 #define SIS_BASE (dev_priv->mmio)
 #define SIS_READ(reg)         DRM_READ32(SIS_BASE, reg)
 #define SIS_WRITE(reg, val)   DRM_WRITE32(SIS_BASE, reg, val)

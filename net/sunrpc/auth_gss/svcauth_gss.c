@@ -50,6 +50,7 @@
 #include <linux/sunrpc/cache.h>
 #include "gss_rpc_upcall.h"
 
+
 #if IS_ENABLED(CONFIG_SUNRPC_DEBUG)
 # define RPCDBG_FACILITY	RPCDBG_AUTH
 #endif
@@ -300,6 +301,7 @@ static struct rsi *rsi_update(struct cache_detail *cd, struct rsi *new, struct r
 	else
 		return NULL;
 }
+
 
 /*
  * The rpcsec_context cache is used to store a context that is
@@ -558,6 +560,7 @@ static struct rsc *rsc_update(struct cache_detail *cd, struct rsc *new, struct r
 	else
 		return NULL;
 }
+
 
 static struct rsc *
 gss_svc_searchbyctx(struct cache_detail *cd, struct xdr_netobj *handle)

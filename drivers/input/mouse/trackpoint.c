@@ -179,6 +179,7 @@ static ssize_t trackpoint_set_bit_attr(struct psmouse *psmouse, void *data,
 	return count;
 }
 
+
 #define TRACKPOINT_BIT_ATTR(_name, _command, _mask, _inv, _default)	\
 static struct trackpoint_attr_data trackpoint_attr_##_name = {		\
 	.field_offset		= offsetof(struct trackpoint_data,	\
@@ -424,3 +425,4 @@ int trackpoint_detect(struct psmouse *psmouse, bool set_properties)
 
 	return 0;
 }
+

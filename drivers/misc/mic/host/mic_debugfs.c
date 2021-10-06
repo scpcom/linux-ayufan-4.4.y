@@ -126,6 +126,7 @@ static int mic_dp_show(struct seq_file *s, void *pos)
 	seq_printf(s, "Bootparam: scif_card_dma_addr 0x%llx\n",
 		   bootparam->scif_card_dma_addr);
 
+
 	for (i = sizeof(*bootparam); i < MIC_DP_SIZE;
 	     i += mic_total_desc_size(d)) {
 		d = mdev->dp + i;
@@ -311,6 +312,7 @@ static int mic_msi_irq_info_show(struct seq_file *s, void *pos)
 			for (j = (MIC_NUM_OFFSETS - 1); j >= 0; j--)
 				seq_printf(s, "%4d ", j);
 			seq_puts(s, "\n");
+
 
 			seq_printf(s, "%-10s", "count:");
 			for (j = (MIC_NUM_OFFSETS - 1); j >= 0; j--)

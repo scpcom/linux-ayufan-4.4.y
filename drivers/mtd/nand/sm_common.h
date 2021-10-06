@@ -20,6 +20,7 @@ struct sm_oob {
 	uint8_t ecc1[3];
 } __packed;
 
+
 /* one sector is always 512 bytes, but it can consist of two nand pages */
 #define SM_SECTOR_SIZE		512
 
@@ -34,7 +35,9 @@ struct sm_oob {
 #define SM_SMALL_PAGE 		256
 #define SM_SMALL_OOB_SIZE	8
 
+
 extern int sm_register_device(struct mtd_info *mtd, int smartmedia);
+
 
 static inline int sm_sector_valid(struct sm_oob *oob)
 {

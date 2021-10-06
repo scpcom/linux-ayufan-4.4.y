@@ -316,6 +316,7 @@ int test__hists_filter(void)
 				hists->stats.total_non_filtered_period == 200);
 	}
 
+
 	err = TEST_OK;
 
 out:

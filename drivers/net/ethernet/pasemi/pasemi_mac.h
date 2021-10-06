@@ -30,6 +30,7 @@
 #define TX_RING_SIZE 4096
 #define CS_RING_SIZE (TX_RING_SIZE*2)
 
+
 #define MAX_LRO_DESCRIPTORS 8
 #define MAX_CS	2
 
@@ -118,6 +119,7 @@ struct pasemi_mac_buffer {
 #define RING_AVAIL(ring)	((ring->size) - RING_USED(ring))
 
 /* PCI register offsets and formats */
+
 
 /* MAC CFG register offsets */
 enum {
@@ -208,5 +210,6 @@ enum {
 #define PAS_MAC_IPC_CHNL_BCH_S		0
 #define PAS_MAC_IPC_CHNL_BCH(x)		(((x) << PAS_MAC_IPC_CHNL_BCH_S) & \
 					 PAS_MAC_IPC_CHNL_BCH_M)
+
 
 #endif /* PASEMI_MAC_H */

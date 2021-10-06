@@ -33,8 +33,10 @@
 #include <asm/setup.h>
 #include <asm/pgtable.h>
 
+
 asmlinkage void ret_from_fork(void);
 asmlinkage void ret_from_kernel_thread(void);
+
 
 /*
  * Return saved PC from a blocked thread

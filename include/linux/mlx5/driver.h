@@ -386,6 +386,7 @@ struct mlx5_uar {
 	void __iomem	       *map;
 };
 
+
 struct mlx5_core_health {
 	struct health_buffer __iomem   *health;
 	__be32 __iomem		       *health_counter;

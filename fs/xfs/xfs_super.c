@@ -136,6 +136,7 @@ static const match_table_t tokens = {
 	{Opt_err, NULL}
 };
 
+
 STATIC unsigned long
 suffix_kstrtoint(char *s, unsigned int base, int *res)
 {
@@ -1090,6 +1091,7 @@ xfs_fs_statfs(
 	/* make sure statp->f_ffree does not underflow */
 	ffree = statp->f_files - (icount - ifree);
 	statp->f_ffree = max_t(__int64_t, ffree, 0);
+
 
 	if ((ip->i_d.di_flags & XFS_DIFLAG_PROJINHERIT) &&
 	    ((mp->m_qflags & (XFS_PQUOTA_ACCT|XFS_PQUOTA_ENFD))) ==

@@ -20,6 +20,7 @@ static struct option info_opts[] = {
      { },
 };
 
+
 int cmd_idle_set(int argc, char **argv)
 {
 	extern char *optarg;

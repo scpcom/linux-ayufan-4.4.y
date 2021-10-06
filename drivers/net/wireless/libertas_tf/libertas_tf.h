@@ -127,6 +127,7 @@ enum lbtf_mode {
 
 #define MRVDRV_RXPD_STATUS_OK                0x0001
 
+
 /* This is for firmware specific length */
 #define EXTRA_LEN	36
 
@@ -191,6 +192,7 @@ struct lbtf_private {
 	int (*hw_host_to_card) (struct lbtf_private *priv, u8 type, u8 *payload, u16 nb);
 	int (*hw_prog_firmware) (struct if_usb_card *cardp);
 	int (*hw_reset_device) (struct if_usb_card *cardp);
+
 
 	/** Wlan adapter data structure*/
 	/** STATUS variables */
@@ -413,6 +415,7 @@ struct cmd_ds_802_11_radio_control {
 	__le16 control;
 };
 
+
 struct cmd_ds_802_11_rf_channel {
 	struct cmd_header hdr;
 
@@ -473,6 +476,7 @@ int lbtf_set_channel(struct lbtf_private *priv, u8 channel);
 int lbtf_beacon_set(struct lbtf_private *priv, struct sk_buff *beacon);
 int lbtf_beacon_ctrl(struct lbtf_private *priv, bool beacon_enable,
 		     int beacon_int);
+
 
 int lbtf_process_rx_command(struct lbtf_private *priv);
 void lbtf_complete_command(struct lbtf_private *priv, struct cmd_ctrl_node *cmd,

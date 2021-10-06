@@ -169,6 +169,7 @@
 #define BAT_STOP_CHRG1_OVERVOLTAGE	(1 << 6)
 #define BAT_STOP_CHRG1_OVERTEMPERATURE	(1 << 7)
 
+
 /* ======= */
 /* Structs */
 /* ======= */
@@ -184,6 +185,7 @@ struct compal_data{
 	char bat_manufacturer_name[BAT_MANUFACTURER_NAME_LEN + 1];
 	char bat_serial_number[BAT_SERIAL_NUMBER_LEN + 1];
 };
+
 
 /* =============== */
 /* General globals */
@@ -228,6 +230,9 @@ static const unsigned char pwm_lookup_table[256] = {
 	187, 187, 193, 50
 };
 
+
+
+
 /* ========================= */
 /* Hardware access functions */
 /* ========================= */
@@ -264,6 +269,7 @@ static void ec_read_sequence(u8 addr, u8 *buf, int len)
 		ec_read(addr + i, buf + i);
 }
 
+
 /* Backlight access */
 static int set_backlight_level(int level)
 {
@@ -285,6 +291,7 @@ static void set_backlight_state(bool on)
 	u8 data = on ? BACKLIGHT_STATE_ON_DATA : BACKLIGHT_STATE_OFF_DATA;
 	ec_transaction(BACKLIGHT_STATE_ADDR, &data, 1, NULL, 0);
 }
+
 
 /* Fan control access */
 static void pwm_enable_control(void)
@@ -310,6 +317,9 @@ static int get_fan_rpm(void)
 	ec_transaction(FAN_ADDRESS, &data, 1, &value, 1);
 	return 100 * (int)value;
 }
+
+
+
 
 /* =================== */
 /* Interface functions */
@@ -338,6 +348,7 @@ static const struct backlight_ops compalbl_ops = {
 	.update_status	= bl_update_status,
 };
 
+
 /* Wireless interface */
 static int compal_rfkill_set(void *data, bool blocked)
 {
@@ -365,6 +376,7 @@ static const struct rfkill_ops compal_rfkill_ops = {
 	.poll = compal_rfkill_poll,
 	.set_block = compal_rfkill_set,
 };
+
 
 /* Wake_up interface */
 #define SIMPLE_MASKED_STORE_SHOW(NAME, ADDR, MASK)			\
@@ -466,6 +478,7 @@ static ssize_t fan_show(struct device *dev, struct device_attribute *attr,
 	return sprintf(buf, "%d\n", get_fan_rpm());
 }
 
+
 /* Temperature interface */
 #define TEMPERATURE_SHOW_TEMP_AND_LABEL(POSTFIX, ADDRESS, LABEL)	\
 static ssize_t temp_##POSTFIX(struct device *dev,			\
@@ -486,6 +499,7 @@ TEMPERATURE_SHOW_TEMP_AND_LABEL(cpu_DTS,    TEMP_CPU_DTS,    "CPU_DTS");
 TEMPERATURE_SHOW_TEMP_AND_LABEL(northbridge,TEMP_NORTHBRIDGE,"NorthBridge");
 TEMPERATURE_SHOW_TEMP_AND_LABEL(vga,        TEMP_VGA,        "VGA_TEMP");
 TEMPERATURE_SHOW_TEMP_AND_LABEL(SKIN,       TEMP_SKIN,       "SKIN_TEMP90");
+
 
 /* Power supply interface */
 static int bat_status(void)
@@ -659,6 +673,9 @@ static int bat_writeable_property(struct power_supply *psy,
 	}
 }
 
+
+
+
 /* ============== */
 /* Driver Globals */
 /* ============== */
@@ -764,6 +781,10 @@ static struct platform_device *compal_device;
 
 static struct rfkill *wifi_rfkill;
 static struct rfkill *bt_rfkill;
+
+
+
+
 
 /* =================================== */
 /* Initialization & clean-up functions */
@@ -1106,6 +1127,7 @@ static int compal_remove(struct platform_device *pdev)
 
 	return 0;
 }
+
 
 module_init(compal_init);
 module_exit(compal_cleanup);

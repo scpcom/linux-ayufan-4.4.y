@@ -289,6 +289,7 @@ static struct usb_driver sd_driver = {
 };
 module_usb_driver(sd_driver);
 
+
 /* ---------------------------------------------------------
  USB requests to start/stop the camera [USB 2.0 spec Ch.9].
 

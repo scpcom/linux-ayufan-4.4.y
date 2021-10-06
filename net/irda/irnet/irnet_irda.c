@@ -488,6 +488,7 @@ irnet_dname_to_daddr(irnet_socket *	self)
   return -EADDRNOTAVAIL;
 }
 
+
 /************************* SOCKET ROUTINES *************************/
 /*
  * This are the main operations on IrNET sockets, basically to create
@@ -678,6 +679,7 @@ irda_irnet_destroy(irnet_socket *	self)
 
   DEXIT(IRDA_SOCK_TRACE, "\n");
 }
+
 
 /************************** SERVER SOCKET **************************/
 /*
@@ -1010,6 +1012,7 @@ irnet_destroy_server(void)
 
   DEXIT(IRDA_SERV_TRACE, "\n");
 }
+
 
 /************************ IRDA-TTP CALLBACKS ************************/
 /*
@@ -1457,6 +1460,7 @@ irnet_connect_indication(void *		instance,
   DEXIT(IRDA_TCB_TRACE, "\n");
 }
 
+
 /********************** IRDA-IAS/LMP CALLBACKS **********************/
 /*
  * These are the callbacks called by other layers of the IrDA stack,
@@ -1706,6 +1710,7 @@ irnet_expiry_indication(discinfo_t *	expiry,
 }
 #endif /* DISCOVERY_EVENTS */
 
+
 /*********************** PROC ENTRY CALLBACKS ***********************/
 /*
  * We create a instance in the /proc filesystem, and here we take care
@@ -1802,6 +1807,7 @@ static const struct file_operations irnet_proc_fops = {
 	.release	= single_release,
 };
 #endif /* PROC_FS */
+
 
 /********************** CONFIGURATION/CLEANUP **********************/
 /*

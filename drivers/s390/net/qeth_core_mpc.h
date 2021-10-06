@@ -131,6 +131,7 @@ enum qeth_arp_process_subcmds {
 	IPA_CMD_ASS_ARP_QUERY_STATS	= 0x0204,
 };
 
+
 /* Return Codes for IPA Commands
  * according to OSA card Specs */
 
@@ -325,6 +326,7 @@ struct qeth_ipacmd_layer2setdelvlan {
 	__u16 vlan_id;
 } __attribute__ ((packed));
 
+
 struct qeth_ipacmd_setassparms_hdr {
 	__u32 assist_no;
 	__u16 length;
@@ -361,6 +363,7 @@ struct qeth_ipacmd_setassparms {
 	} data;
 } __attribute__ ((packed));
 
+
 /* SETRTG IPA Command:    ****************************************************/
 struct qeth_set_routing {
 	__u8 type;
@@ -381,6 +384,7 @@ struct qeth_change_addr {
 	__u32 no_macs;
 	__u8 addr[OSA_ADDR_LEN];
 } __attribute__ ((packed));
+
 
 struct qeth_snmp_cmd {
 	__u8  token[16];
@@ -703,6 +707,7 @@ extern char *qeth_get_ipa_cmd_name(enum qeth_ipa_cmds cmd);
 /* END OF   IP Assist related definitions                                    */
 /*****************************************************************************/
 
+
 extern unsigned char WRITE_CCW[];
 extern unsigned char READ_CCW[];
 
@@ -714,6 +719,7 @@ extern unsigned char CM_ENABLE[];
 
 #define QETH_CM_ENABLE_RESP_FILTER_TOKEN(buffer) \
 		(PDU_ENCAPSULATION(buffer) + 0x13)
+
 
 extern unsigned char CM_SETUP[];
 #define CM_SETUP_SIZE 0x64
@@ -756,10 +762,13 @@ extern unsigned char ULP_SETUP[];
 #define QETH_ULP_SETUP_RESP_CONNECTION_TOKEN(buffer) \
 		(PDU_ENCAPSULATION(buffer) + 0x1a)
 
+
 extern unsigned char DM_ACT[];
 #define DM_ACT_SIZE 0x55
 #define QETH_DM_ACT_DEST_ADDR(buffer) (buffer + 0x2c)
 #define QETH_DM_ACT_CONNECTION_TOKEN(buffer) (buffer + 0x51)
+
+
 
 #define QETH_TRANSPORT_HEADER_SEQ_NO(buffer) (buffer + 4)
 #define QETH_PDU_HEADER_SEQ_NO(buffer) (buffer + 0x1c)

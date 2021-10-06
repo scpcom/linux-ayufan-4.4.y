@@ -31,9 +31,11 @@
 #include <asm/hwtest.h>
 #endif
 
+
 MODULE_AUTHOR("Philip Blundell, Matthew Wilcox, Helge Deller");
 MODULE_DESCRIPTION("HIL keyboard driver (basic functionality)");
 MODULE_LICENSE("GPL v2");
+
 
 #if defined(CONFIG_PARISC)
 
@@ -61,6 +63,8 @@ MODULE_LICENSE("GPL v2");
 #else
 #error "HIL is not supported on this platform"
 #endif
+
+
 
 /* HIL helper functions */
 
@@ -106,6 +110,7 @@ static struct {
 	void *dev_id;	/* native bus device */
 } hil_dev;
 
+
 static void poll_finished(void)
 {
 	int down;
@@ -123,6 +128,7 @@ static void poll_finished(void)
 	hil_dev.curdev = 0;
 }
 
+
 static inline void handle_status(unsigned char s, unsigned char c)
 {
 	if (c & 0x8) {
@@ -139,6 +145,7 @@ static inline void handle_status(unsigned char s, unsigned char c)
 	}
 }
 
+
 static inline void handle_data(unsigned char s, unsigned char c)
 {
 	if (hil_dev.curdev) {
@@ -146,6 +153,7 @@ static inline void handle_data(unsigned char s, unsigned char c)
 		hil_dev.ptr &= 15;
 	}
 }
+
 
 /* handle HIL interrupts */
 static irqreturn_t hil_interrupt(int irq, void *handle)
@@ -172,6 +180,7 @@ static irqreturn_t hil_interrupt(int irq, void *handle)
 	return IRQ_HANDLED;
 }
 
+
 /* send a command to the HIL */
 static void hil_do(unsigned char cmd, unsigned char *data, unsigned int len)
 {
@@ -188,6 +197,7 @@ static void hil_do(unsigned char cmd, unsigned char *data, unsigned int len)
 	}
 	spin_unlock_irqrestore(&hil_dev.lock, flags);
 }
+
 
 /* initialize HIL */
 static int hil_keyb_init(void)

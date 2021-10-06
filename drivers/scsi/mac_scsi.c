@@ -263,6 +263,7 @@ static int macscsi_pread(struct Scsi_Host *instance,
 	return 0;
 }
 
+
 #define CP_MEM_TO_IO(s,d,len)				\
 __asm__ __volatile__					\
     ("    cmp.w  #4,%2\n"				\

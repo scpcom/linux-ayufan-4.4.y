@@ -44,6 +44,7 @@
 #define POST_STAGE_BE_RESET		0x3 /* Host wants to reset chip */
 #define POST_STAGE_ARMFW_RDY		0xc000	/* FW is done with POST */
 
+
 /* Lancer SLIPORT registers */
 #define SLIPORT_STATUS_OFFSET		0x404
 #define SLIPORT_CONTROL_OFFSET		0x408

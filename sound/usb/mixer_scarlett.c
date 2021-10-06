@@ -843,6 +843,7 @@ static struct scarlett_device_info s18i20_info = {
 	}
 };
 
+
 static int scarlett_controls_create_generic(struct usb_mixer_interface *mixer,
 	struct scarlett_device_info *info)
 {

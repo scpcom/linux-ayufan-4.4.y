@@ -99,6 +99,7 @@ struct sta_info {
 #endif /* PRISM2_NO_KERNEL_IEEE80211_MGMT */
 };
 
+
 #define MAX_STA_COUNT 1024
 
 /* Maximum number of AIDs to use for STAs; must be 2007 or lower
@@ -107,6 +108,7 @@ struct sta_info {
 
 #define STA_HASH_SIZE 256
 #define STA_HASH(sta) (sta[5])
+
 
 /* Default value for maximum station inactivity. After AP_MAX_INACTIVITY_SEC
  * has passed since last received frame from the station, a nullfunc data
@@ -130,6 +132,7 @@ typedef enum {
 #define PRISM2_AUTH_OPEN BIT(0)
 #define PRISM2_AUTH_SHARED_KEY BIT(1)
 
+
 /* MAC address-based restrictions */
 struct mac_entry {
 	struct list_head list;
@@ -143,10 +146,12 @@ struct mac_restrictions {
 	spinlock_t lock;
 };
 
+
 struct add_sta_proc_data {
 	u8 addr[ETH_ALEN];
 	struct add_sta_proc_data *next;
 };
+
 
 typedef enum { WDS_ADD, WDS_DEL } wds_oper_type;
 struct wds_oper_data {
@@ -154,6 +159,7 @@ struct wds_oper_data {
 	u8 addr[ETH_ALEN];
 	struct wds_oper_data *next;
 };
+
 
 struct ap_data {
 	int initialized; /* whether ap_data has been initialized */
@@ -207,6 +213,7 @@ struct ap_data {
 	void *crypt_priv;
 #endif /* PRISM2_NO_KERNEL_IEEE80211_MGMT */
 };
+
 
 void hostap_rx(struct net_device *dev, struct sk_buff *skb,
 	       struct hostap_80211_rx_status *rx_stats);

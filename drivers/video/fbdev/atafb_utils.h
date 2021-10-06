@@ -31,6 +31,7 @@
  * Sorry!
  */
 
+
 /* ++roman: I've optimized Robert's original versions in some minor
  * aspects, e.g. moveq instead of movel, let gcc choose the registers,
  * use movem in some places...
@@ -72,6 +73,7 @@ static inline void *fb_memclear_small(void *s, size_t count)
 	return 0;
 }
 
+
 static inline void *fb_memclear(void *s, size_t count)
 {
 	if (!count)
@@ -111,6 +113,7 @@ static inline void *fb_memclear(void *s, size_t count)
 	return 0;
 }
 
+
 static inline void *fb_memset255(void *s, size_t count)
 {
 	if (!count)
@@ -136,6 +139,7 @@ static inline void *fb_memset255(void *s, size_t count)
 
 	return 0;
 }
+
 
 static inline void *fb_memmove(void *d, const void *s, size_t count)
 {
@@ -208,6 +212,7 @@ static inline void *fb_memmove(void *d, const void *s, size_t count)
 
 	return 0;
 }
+
 
 /* ++andreas: Simple and fast version of memmove, assumes size is
    divisible by 16, suitable for moving the whole screen bitplane */

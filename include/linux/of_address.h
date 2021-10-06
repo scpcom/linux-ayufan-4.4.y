@@ -165,3 +165,4 @@ static inline int of_pci_range_to_resource(struct of_pci_range *range,
 #endif /* CONFIG_OF_ADDRESS && CONFIG_PCI */
 
 #endif /* __OF_ADDRESS_H */
+

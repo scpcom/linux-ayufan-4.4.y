@@ -25,6 +25,7 @@ pkunity_cpu_save_cp:
 	movc	r4, p0.c2, #0			@ translation table base addr
 	movc	r5, p0.c1, #0			@ control reg
 
+
 	@ store them plus current virtual stack ptr on stack
 	mov	r6, sp
 	stm.w	(r3 - r6), [sp-]
@@ -71,6 +72,8 @@ ENTRY(puv3_cpu_suspend)
 	nop
 	nop
 	nop
+
+
 
 	@ DDR2 BaseAddr
 	ldw	r0, =(PKUNITY_DDR2CTRL_BASE)
@@ -137,6 +140,9 @@ pkunity_cpu_do_suspend:
 	@ enter sleep mode
 	stw	r8, [r1]
 3:	b	3b
+
+
+
 
 /*
  * puv3_cpu_resume()

@@ -13,6 +13,7 @@
 
 #include "ctl.h"
 
+
 struct ctl_pkg {
 	struct tb_ctl *ctl;
 	void *buffer;
@@ -38,6 +39,7 @@ struct tb_ctl {
 	void *callback_data;
 };
 
+
 #define tb_ctl_WARN(ctl, format, arg...) \
 	dev_WARN(&(ctl)->nhi->pdev->dev, format, ## arg)
 
@@ -49,6 +51,7 @@ struct tb_ctl {
 
 #define tb_ctl_info(ctl, format, arg...) \
 	dev_info(&(ctl)->nhi->pdev->dev, format, ## arg)
+
 
 /* configuration packets definitions */
 
@@ -123,6 +126,7 @@ struct cfg_pts_pkg {
 	struct tb_cfg_header header;
 	u32 data;
 } __packed;
+
 
 /* utility functions */
 
@@ -312,6 +316,7 @@ static struct ctl_pkg *tb_ctl_pkg_alloc(struct tb_ctl *ctl)
 	return pkg;
 }
 
+
 /* RX/TX handling */
 
 static void tb_ctl_tx_callback(struct tb_ring *ring, struct ring_frame *frame,
@@ -456,6 +461,7 @@ static struct tb_cfg_result tb_ctl_rx(struct tb_ctl *ctl, void *buffer,
 	return res;
 }
 
+
 /* public interface, alloc/start/stop/free */
 
 /**
@@ -522,6 +528,7 @@ void tb_ctl_free(struct tb_ctl *ctl)
 	/* free RX packets */
 	for (i = 0; i < TB_CTL_RX_PKG_COUNT; i++)
 		tb_ctl_pkg_free(ctl->rx_packets[i]);
+
 
 	if (ctl->frame_pool)
 		dma_pool_destroy(ctl->frame_pool);

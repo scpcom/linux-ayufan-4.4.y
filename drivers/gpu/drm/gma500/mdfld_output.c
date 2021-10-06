@@ -58,6 +58,7 @@ static void mdfld_init_panel(struct drm_device *dev, int mipi_pipe,
 	}
 }
 
+
 int mdfld_output_init(struct drm_device *dev)
 {
 	struct drm_psb_private *dev_priv = dev->dev_private;
@@ -70,3 +71,4 @@ int mdfld_output_init(struct drm_device *dev)
 	mdfld_init_panel(dev, 1, HDMI);
 	return 0;
 }
+

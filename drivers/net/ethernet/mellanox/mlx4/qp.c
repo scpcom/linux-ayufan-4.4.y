@@ -840,6 +840,7 @@ int mlx4_init_qp_table(struct mlx4_dev *dev)
 		}
 	}
 
+
 	err = mlx4_CONF_SPECIAL_QP(dev, dev->phys_caps.base_sqpn);
 	if (err)
 		goto err_mem;

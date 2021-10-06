@@ -447,6 +447,7 @@ static netdev_tx_t cc770_start_xmit(struct sk_buff *skb, struct net_device *dev)
 
 	stats->tx_bytes += dlc;
 
+
 	/*
 	 * HM: We had some cases of repeated IRQs so make sure the
 	 * INT is acknowledged I know it's already further up, but
@@ -582,6 +583,7 @@ static int cc770_err(struct net_device *dev, u8 status)
 			}
 		}
 	}
+
 
 	stats->rx_packets++;
 	stats->rx_bytes += cf->can_dlc;

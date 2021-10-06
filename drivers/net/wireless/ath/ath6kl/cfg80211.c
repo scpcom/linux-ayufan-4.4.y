@@ -3559,6 +3559,7 @@ static void ath6kl_cfg80211_reg_notify(struct wiphy *wiphy,
 		if (wiphy->bands[i])
 			rates[i] = (1 << wiphy->bands[i]->n_bitrates) - 1;
 
+
 	ret = ath6kl_wmi_beginscan_cmd(ar->wmi, 0, WMI_LONG_SCAN, false,
 				       false, 0, ATH6KL_FG_SCAN_INTERVAL,
 				       0, NULL, false, rates);
@@ -4021,3 +4022,4 @@ void ath6kl_cfg80211_destroy(struct ath6kl *ar)
 
 	wiphy_free(ar->wiphy);
 }
+

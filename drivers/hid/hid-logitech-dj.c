@@ -21,6 +21,7 @@
  *
  */
 
+
 #include <linux/device.h>
 #include <linux/hid.h>
 #include <linux/module.h>
@@ -72,6 +73,7 @@
 
 /* Device Un-Paired Notification */
 #define REPORT_TYPE_NOTIF_DEVICE_UNPAIRED	0x40
+
 
 /* Connection Status Notification */
 #define REPORT_TYPE_NOTIF_CONNECTION_STATUS	0x42
@@ -332,6 +334,7 @@ static const u8 hid_reportid_size_map[NUMBER_OF_HID_REPORTS] = {
 	[4] = 2,		/* System control */
 	[8] = 2,		/* Media Center */
 };
+
 
 #define LOGITECH_DJ_INTERFACE_NUMBER 0x02
 
@@ -623,6 +626,7 @@ static int logi_dj_recv_query_paired_devices(struct dj_receiver_dev *djrcv_dev)
 	return retval;
 }
 
+
 static int logi_dj_recv_switch_to_dj_mode(struct dj_receiver_dev *djrcv_dev,
 					  unsigned timeout)
 {
@@ -674,6 +678,7 @@ static int logi_dj_recv_switch_to_dj_mode(struct dj_receiver_dev *djrcv_dev,
 	kfree(dj_report);
 	return retval;
 }
+
 
 static int logi_dj_ll_open(struct hid_device *hid)
 {
@@ -812,6 +817,7 @@ static void logi_dj_ll_stop(struct hid_device *hid)
 {
 	dbg_hid("%s\n", __func__);
 }
+
 
 static struct hid_ll_driver logi_dj_ll_driver = {
 	.parse = logi_dj_ll_parse,

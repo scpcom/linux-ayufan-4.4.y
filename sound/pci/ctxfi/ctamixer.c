@@ -487,3 +487,4 @@ int sum_mgr_destroy(struct sum_mgr *sum_mgr)
 	kfree(sum_mgr);
 	return 0;
 }
+

@@ -136,6 +136,7 @@ void free_alternatives_memory(void);
 #define _ALTERNATIVE_CFG(insn1, insn2, cap, cfg, ...)	\
 	alternative_insn insn1, insn2, cap, IS_ENABLED(cfg)
 
+
 #endif  /*  __ASSEMBLY__  */
 
 /*

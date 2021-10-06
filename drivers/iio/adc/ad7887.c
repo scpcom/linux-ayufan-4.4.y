@@ -185,6 +185,7 @@ static int ad7887_read_raw(struct iio_dev *indio_dev,
 	return -EINVAL;
 }
 
+
 static const struct ad7887_chip_info ad7887_chip_info_tbl[] = {
 	/*
 	 * More devices added in future

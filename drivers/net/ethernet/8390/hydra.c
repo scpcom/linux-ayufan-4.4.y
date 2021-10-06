@@ -52,6 +52,7 @@ static const char version[] =
 
 #define WORDSWAP(a)     ((((a)>>8)&0xff) | ((a)<<8))
 
+
 static int hydra_init_one(struct zorro_dev *z,
 				    const struct zorro_device_id *ent);
 static int hydra_init(struct zorro_dev *z);

@@ -2,6 +2,7 @@
 #define _ACENIC_H_
 #include <linux/interrupt.h>
 
+
 /*
  * Generate TX index update each time, when TX ring is closed.
  * Normally, this is not useful, because results in more dma (and irqs
@@ -156,10 +157,12 @@ struct ace_regs {
 	u32	Window[0x200];
 };
 
+
 typedef struct {
 	u32 addrhi;
 	u32 addrlo;
 } aceaddr;
+
 
 #define ACE_WINDOW_SIZE	0x800
 
@@ -195,17 +198,20 @@ typedef struct {
 
 #define SRAM_BANK_512K		0x200
 
+
 /*
  * udelay() values for when clocking the eeprom
  */
 #define ACE_SHORT_DELAY		2
 #define ACE_LONG_DELAY		4
 
+
 /*
  * Misc Config bits
  */
 
 #define SYNC_SRAM_TIMING	0x100000
+
 
 /*
  * CPU state bits.
@@ -216,6 +222,7 @@ typedef struct {
 #define CPU_PROM_FAILED		0x10
 #define CPU_HALT		0x00010000
 #define CPU_HALTED		0xffff0000
+
 
 /*
  * PCI State bits.
@@ -243,6 +250,7 @@ typedef struct {
 #define READ_CMD_MEM		0x06000000
 #define WRITE_CMD_MEM		0x70000000
 
+
 /*
  * Mode status
  */
@@ -253,6 +261,7 @@ typedef struct {
 #define ACE_BYTE_SWAP_DMA	0x10
 #define ACE_NO_JUMBO_FRAG	0x200
 #define ACE_FATAL		0x40000000
+
 
 /*
  * DMA config
@@ -265,11 +274,13 @@ typedef struct {
 #define DMA_THRESH_16W		0x100
 #define DMA_THRESH_32W		0x0	/* not described in doc, but exists. */
 
+
 /*
  * Tuning parameters
  */
 
 #define TICKS_PER_SEC		1000000
+
 
 /*
  * Link bits
@@ -293,6 +304,7 @@ typedef struct {
 #define LNK_ENABLE		0x40000000
 #define LNK_UP			0x80000000
 
+
 /*
  * Event definitions
  */
@@ -312,6 +324,7 @@ struct event {
 #endif
 	u32     pad;
 };
+
 
 /*
  * Events
@@ -338,6 +351,7 @@ struct event {
 
 #define E_RESET_JUMBO_RNG	0x09
 
+
 /*
  * Commands
  */
@@ -355,6 +369,7 @@ struct cmd {
 	u32	idx:12;
 #endif
 };
+
 
 #define C_HOST_STATE		0x01
 #define C_C_STACK_UP		0x01
@@ -390,6 +405,7 @@ struct cmd {
 #define C_SET_RX_JUMBO_PRD_IDX	0x10
 #define C_REFRESH_STATS		0x11
 
+
 /*
  * Descriptor flags
  */
@@ -409,6 +425,7 @@ struct cmd {
 #define BD_FLG_COAL_NOW		0x800
 #define BD_FLG_MINI		0x1000
 
+
 /*
  * Ring Control block flags
  */
@@ -421,6 +438,7 @@ struct cmd {
 #define RCB_FLG_IEEE_SNAP_SUM	0x80
 #define RCB_FLG_EXT_RX_BD	0x100
 #define RCB_FLG_RNG_DISABLE	0x200
+
 
 /*
  * TX ring - maximum TX ring entries for Tigon I's is 128
@@ -452,6 +470,7 @@ struct tx_desc{
 #endif
 	u32	vlanres;
 };
+
 
 #define RX_STD_RING_ENTRIES	512
 #define RX_STD_RING_SIZE	(RX_STD_RING_ENTRIES * sizeof(struct rx_desc))
@@ -500,6 +519,7 @@ struct rx_desc{
 	u32	opague;
 };
 
+
 /*
  * This struct is shared with the NIC firmware.
  */
@@ -514,6 +534,7 @@ struct ring_ctrl {
 #endif
 	u32	pad;
 };
+
 
 struct ace_mac_stats {
 	u32 excess_colls;
@@ -548,6 +569,7 @@ struct ace_mac_stats {
 	u32 kept_uc;
 };
 
+
 struct ace_info {
 	union {
 		u32 stats[256];
@@ -565,10 +587,12 @@ struct ace_info {
 	aceaddr	stats2_ptr;
 };
 
+
 struct ring_info {
 	struct sk_buff		*skb;
 	DEFINE_DMA_UNMAP_ADDR(mapping);
 };
+
 
 /*
  * Funny... As soon as we add maplen on alpha, it starts to work
@@ -580,6 +604,7 @@ struct tx_ring_info {
 	DEFINE_DMA_UNMAP_ADDR(mapping);
 	DEFINE_DMA_UNMAP_LEN(maplen);
 };
+
 
 /*
  * struct ace_skb holding the rings of skb's. This is an awful lot of
@@ -593,6 +618,7 @@ struct ace_skb
 	struct ring_info	rx_mini_skbuff[RX_MINI_RING_ENTRIES];
 	struct ring_info	rx_jumbo_skbuff[RX_JUMBO_RING_ENTRIES];
 };
+
 
 /*
  * Struct private for the AceNIC.
@@ -671,6 +697,7 @@ struct ace_private
 	u32			firmware_start;
 };
 
+
 #define TX_RESERVED	MAX_SKB_FRAGS
 
 static inline int tx_space (struct ace_private *ap, u32 csm, u32 prd)
@@ -688,6 +715,7 @@ static inline void set_aceaddr(aceaddr *aa, dma_addr_t addr)
 	aa->addrhi = baddr >> 32;
 	wmb();
 }
+
 
 static inline void ace_set_txprd(struct ace_regs __iomem *regs,
 				 struct ace_private *ap, u32 value)
@@ -707,6 +735,7 @@ static inline void ace_set_txprd(struct ace_regs __iomem *regs,
 	wmb();
 }
 
+
 static inline void ace_mask_irq(struct net_device *dev)
 {
 	struct ace_private *ap = netdev_priv(dev);
@@ -720,6 +749,7 @@ static inline void ace_mask_irq(struct net_device *dev)
 	ace_sync_irq(dev->irq);
 }
 
+
 static inline void ace_unmask_irq(struct net_device *dev)
 {
 	struct ace_private *ap = netdev_priv(dev);
@@ -730,6 +760,7 @@ static inline void ace_unmask_irq(struct net_device *dev)
 	else
 		writel(readl(&regs->HostCtrl) & ~MASK_INTS, &regs->HostCtrl);
 }
+
 
 /*
  * Prototypes

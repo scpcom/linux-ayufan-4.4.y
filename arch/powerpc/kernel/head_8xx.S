@@ -60,6 +60,7 @@
 #define BRANCH_UNLESS_KERNEL(label)	blt	label
 #endif
 
+
 /*
  * Value for the bits that have fixed value in RPN entries.
  * Also used for tagging DAR for DTLBerror.
@@ -146,6 +147,7 @@ turn_on_mmu:
 	addi	r11,r11,THREAD_SIZE;	\
 	tophys(r11,r11);	\
 1:	subi	r11,r11,INT_FRAME_SIZE	/* alloc exc. frame */
+
 
 #define EXCEPTION_PROLOG_2	\
 	CLR_TOP32(r11);		\
@@ -853,6 +855,7 @@ initial_mmu:
 #endif
 	blr
 
+
 /*
  * Set up to use a given MMU context.
  * r3 is context number, r4 is PGD pointer.
@@ -943,3 +946,4 @@ abatron_pteptrs:
 cpu6_errata_word:
 	.space	16
 #endif
+

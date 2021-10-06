@@ -96,6 +96,7 @@ rbstatic const struct rb_augment_callbacks rbname = {			\
 	rbname ## _propagate, rbname ## _copy, rbname ## _rotate	\
 };
 
+
 #define	RB_RED		0
 #define	RB_BLACK	1
 

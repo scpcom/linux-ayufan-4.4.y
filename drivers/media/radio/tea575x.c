@@ -509,6 +509,7 @@ static const struct v4l2_ctrl_ops tea575x_ctrl_ops = {
 	.s_ctrl = tea575x_s_ctrl,
 };
 
+
 int snd_tea575x_hw_init(struct snd_tea575x *tea)
 {
 	tea->mute = true;

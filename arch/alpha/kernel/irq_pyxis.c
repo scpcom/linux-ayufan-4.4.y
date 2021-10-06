@@ -16,6 +16,7 @@
 #include "proto.h"
 #include "irq_impl.h"
 
+
 /* Note mask bit is true for ENABLED irqs.  */
 static unsigned long cached_irq_mask;
 

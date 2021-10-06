@@ -1144,3 +1144,4 @@ static void __exit nx842_pseries_exit(void)
 }
 
 module_exit(nx842_pseries_exit);
+

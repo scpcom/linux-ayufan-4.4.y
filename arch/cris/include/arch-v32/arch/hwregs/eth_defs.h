@@ -345,6 +345,7 @@ typedef struct {
 } reg_eth_r_masked_intr;
 #define REG_RD_ADDR_eth_r_masked_intr 88
 
+
 /* Constants */
 enum {
   regk_eth_discard                         = 0x00000000,

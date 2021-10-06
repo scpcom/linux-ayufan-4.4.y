@@ -11,6 +11,7 @@
 #ifndef _ASM_C6X_SIGCONTEXT_H
 #define _ASM_C6X_SIGCONTEXT_H
 
+
 struct sigcontext {
 	unsigned long  sc_mask;		/* old sigmask */
 	unsigned long  sc_sp;		/* old user stack pointer */

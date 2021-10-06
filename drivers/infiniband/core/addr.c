@@ -470,6 +470,7 @@ int rdma_addr_find_dmac_by_grh(const union ib_gid *sgid, const union ib_gid *dgi
 		struct sockaddr_in6 _sockaddr_in6;
 	} sgid_addr, dgid_addr;
 
+
 	rdma_gid2ip(&sgid_addr._sockaddr, sgid);
 	rdma_gid2ip(&dgid_addr._sockaddr, dgid);
 

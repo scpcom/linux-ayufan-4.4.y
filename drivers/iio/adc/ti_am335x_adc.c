@@ -100,6 +100,7 @@ static void tiadc_step_config(struct iio_dev *indio_dev)
 	 * needs to be given to ADC to digitalize data.
 	 */
 
+
 	for (i = 0; i < adc_dev->channels; i++) {
 		int chan;
 
@@ -304,6 +305,7 @@ static void tiadc_iio_buffered_hardware_remove(struct iio_dev *indio_dev)
 	free_irq(adc_dev->mfd_tscadc->irq, indio_dev);
 	iio_kfifo_free(indio_dev->buffer);
 }
+
 
 static const char * const chan_name_ain[] = {
 	"AIN0",

@@ -7,3 +7,4 @@ struct eeti_ts_platform_data {
 };
 
 #endif /* LINUX_INPUT_EETI_TS_H */
+

@@ -59,6 +59,7 @@ struct rt_sigframe {
 	unsigned char retcode[8];  /* trampoline code */
 };
 
+
 static int
 restore_sigcontext(struct pt_regs *regs, struct sigcontext __user *sc)
 {

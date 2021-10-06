@@ -79,6 +79,7 @@
 #define BUF_CNT_INT_15			(FIQ_CNT_INT_15 * 4)
 #define BUF_CIRC_BUFF			(FIQ_CIRC_BUFF * 4)
 
+
 /*
  * Register usage
  * r8  - temporary
@@ -119,6 +120,7 @@ exit:
 	subs	pc, lr, #4			@ return from FIQ
 	@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
+
 	@@@@@@@@@@@@@@@@@@@@@@@@@@@
 gpio:	@ GPIO bank interrupt handler
 	ldr r12, omap1510_gpio_base		@ set base pointer to GPIO bank
@@ -134,6 +136,7 @@ restart:
 
 	ands r10, r13, #KEYBRD_CLK_MASK		@ extract keyboard status - set?
 	beq hksw				@ no - try next source
+
 
 	@@@@@@@@@@@@@@@@@@@@@@
 	@ Keyboard clock FIQ mode interrupt handler
@@ -214,9 +217,11 @@ data:	ldr r10, [r9, #BUF_MASK]		@ fetch current input bit mask
 	str r10, [r9, #BUF_CNT_INT_KEY]
 	@@@@@@@@@@@@@@@@@@@@@@@@
 
+
 hksw:	@Is hook switch interrupt requested?
 	tst r13, #HOOK_SWITCH_MASK 		@ is hook switch status bit set?
 	beq mdm					@ no - try next source
+
 
 	@@@@@@@@@@@@@@@@@@@@@@@@
 	@ Hook switch interrupt FIQ mode simple handler
@@ -229,9 +234,11 @@ hksw:	@Is hook switch interrupt requested?
 	str r10, [r9, #BUF_CNT_INT_HSW]
 	@@@@@@@@@@@@@@@@@@@@@@@@
 
+
 mdm:	@Is it a modem interrupt?
 	tst r13, #MODEM_IRQ_MASK 		@ is modem status bit set?
 	beq irq					@ no - check for next interrupt
+
 
 	@@@@@@@@@@@@@@@@@@@@@@@@
 	@ Modem FIQ mode interrupt handler stub
@@ -242,6 +249,7 @@ mdm:	@Is it a modem interrupt?
 	str r10, [r9, #BUF_CNT_INT_MDM]
 	@@@@@@@@@@@@@@@@@@@@@@@@
 
+
 irq:	@ Place deferred_fiq interrupt request
 	ldr r12, deferred_fiq_ih_base		@ set pointer to IRQ handler
 	mov r10, #DEFERRED_FIQ_MASK		@ set deferred_fiq bit
@@ -250,6 +258,7 @@ irq:	@ Place deferred_fiq interrupt request
 	ldr r12, omap1510_gpio_base		@ set pointer back to GPIO bank
 	b restart				@ check for next GPIO interrupt
 	@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
 
 /*
  * Virtual addresses for IO

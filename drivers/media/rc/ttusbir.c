@@ -446,3 +446,4 @@ MODULE_DESCRIPTION(DRIVER_DESC);
 MODULE_AUTHOR("Sean Young <sean@mess.org>");
 MODULE_LICENSE("GPL");
 MODULE_DEVICE_TABLE(usb, ttusbir_table);
+

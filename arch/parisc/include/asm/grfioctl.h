@@ -110,3 +110,4 @@ struct	grf_fbinfo {
 #define GCFASTLOCK	_IO('G', 26)
 
 #endif /* __ASM_PARISC_GRFIOCTL_H */
+

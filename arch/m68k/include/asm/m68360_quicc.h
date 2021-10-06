@@ -17,12 +17,15 @@
 #include <asm/m68360_regs.h>
 #include <asm/m68360_pram.h>
 
+
+
 /* Buffer Descriptors */
 typedef struct quicc_bd {
     volatile unsigned short     status;
     volatile unsigned short     length;
     volatile unsigned char      *buf;     /* WARNING: This is only true if *char is 32 bits */
 } QUICC_BD;
+
 
 #ifdef MOTOROLA_ORIGINAL
 struct user_data {
@@ -42,6 +45,7 @@ struct user_data {
     volatile unsigned char      RESERVED1[0x400];      /* Reserved area      */
 };
 #endif
+
 
 /*
  * internal ram

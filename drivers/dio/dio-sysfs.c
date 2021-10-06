@@ -10,6 +10,7 @@
  *  for more details.
  */
 
+
 #include <linux/kernel.h>
 #include <linux/dio.h>
 #include <linux/stat.h>
@@ -78,3 +79,4 @@ int dio_create_sysfs_dev_files(struct dio_dev *d)
 
 	return 0;
 }
+

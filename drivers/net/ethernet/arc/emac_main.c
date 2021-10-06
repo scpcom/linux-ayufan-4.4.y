@@ -26,6 +26,7 @@
 
 #include "emac.h"
 
+
 /**
  * arc_emac_tx_avail - Return the number of available slots in the tx ring.
  * @priv: Pointer to ARC EMAC private data structure.
@@ -703,6 +704,7 @@ int arc_emac_probe(struct net_device *ndev, int interface)
 	unsigned int id, clock_frequency, irq;
 	int err;
 
+
 	/* Get PHY from device tree */
 	phy_node = of_parse_phandle(dev->of_node, "phy", 0);
 	if (!phy_node) {
@@ -723,6 +725,7 @@ int arc_emac_probe(struct net_device *ndev, int interface)
 		dev_err(dev, "failed to retrieve <irq> value from device tree\n");
 		return -ENODEV;
 	}
+
 
 	ndev->netdev_ops = &arc_emac_netdev_ops;
 	ndev->ethtool_ops = &arc_emac_ethtool_ops;
@@ -860,6 +863,7 @@ int arc_emac_remove(struct net_device *ndev)
 	if (!IS_ERR(priv->clk)) {
 		clk_disable_unprepare(priv->clk);
 	}
+
 
 	return 0;
 }

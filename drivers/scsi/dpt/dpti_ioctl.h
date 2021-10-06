@@ -78,6 +78,7 @@
 /* See if the target is mounted */
 #define DPT_TARGET_BUSY	_IOR('D',79, TARGET_BUSY_T)
 
+
   /* Structure Returned From Get Controller Info                             */
 
 typedef struct {
@@ -135,3 +136,4 @@ typedef struct TARGET_BUSY
 } TARGET_BUSY_T;
 
 #endif
+

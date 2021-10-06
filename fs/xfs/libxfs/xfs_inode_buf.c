@@ -113,6 +113,7 @@ xfs_inode_buf_verify(
 	xfs_inobp_check(mp, bp);
 }
 
+
 static void
 xfs_inode_buf_read_verify(
 	struct xfs_buf	*bp)
@@ -145,6 +146,7 @@ const struct xfs_buf_ops xfs_inode_buf_ra_ops = {
 	.verify_read = xfs_inode_buf_readahead_verify,
 	.verify_write = xfs_inode_buf_write_verify,
 };
+
 
 /*
  * This routine is called to map an inode to the buffer containing the on-disk

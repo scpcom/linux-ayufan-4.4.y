@@ -1269,6 +1269,7 @@ static void drbd_suspend_al(struct drbd_device *device)
 		drbd_info(device, "Suspended AL updates\n");
 }
 
+
 static bool should_set_defaults(struct genl_info *info)
 {
 	unsigned flags = ((struct drbd_genlmsghdr*)info->userhdr)->flags;
@@ -3317,6 +3318,7 @@ out:
 	drbd_adm_finish(&adm_ctx, info, retcode);
 	return 0;
 }
+
 
 int drbd_adm_new_c_uuid(struct sk_buff *skb, struct genl_info *info)
 {

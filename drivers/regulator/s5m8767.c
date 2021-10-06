@@ -491,6 +491,7 @@ static int s5m8767_enable_ext_control(struct s5m8767_info *s5m8767,
 			S5M8767_ENCTRL_USE_GPIO << S5M8767_ENCTRL_SHIFT);
 }
 
+
 #ifdef CONFIG_OF
 static int s5m8767_pmic_dt_parse_dvs_gpio(struct sec_pmic_dev *iodev,
 			struct sec_platform_data *pdata,

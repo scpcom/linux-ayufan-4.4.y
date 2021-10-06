@@ -17,14 +17,17 @@
 #include <linux/of_device.h>
 #include <linux/vexpress.h>
 
+
 struct vexpress_config_bridge {
 	struct vexpress_config_bridge_ops *ops;
 	void *context;
 };
 
+
 static DEFINE_MUTEX(vexpress_config_mutex);
 static struct class *vexpress_config_class;
 static u32 vexpress_config_site_master = VEXPRESS_SITE_MASTER;
+
 
 void vexpress_config_set_master(u32 site)
 {
@@ -45,6 +48,7 @@ void vexpress_config_unlock(void *arg)
 {
 	mutex_unlock(&vexpress_config_mutex);
 }
+
 
 static void vexpress_config_find_prop(struct device_node *node,
 		const char *name, u32 *val)
@@ -75,6 +79,7 @@ int vexpress_config_get_topo(struct device_node *node, u32 *site,
 
 	return 0;
 }
+
 
 static void vexpress_config_devres_release(struct device *dev, void *res)
 {
@@ -151,6 +156,7 @@ struct device *vexpress_config_bridge_register(struct device *parent,
 	return dev;
 }
 
+
 static int vexpress_config_node_match(struct device *dev, const void *data)
 {
 	const struct device_node *node = data;
@@ -193,3 +199,4 @@ static int __init vexpress_config_init(void)
 	return err;
 }
 postcore_initcall(vexpress_config_init);
+

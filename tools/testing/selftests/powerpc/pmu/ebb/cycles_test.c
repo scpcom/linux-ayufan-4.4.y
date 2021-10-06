@@ -8,6 +8,7 @@
 
 #include "ebb.h"
 
+
 /*
  * Basic test that counts user cycles and takes EBBs.
  */

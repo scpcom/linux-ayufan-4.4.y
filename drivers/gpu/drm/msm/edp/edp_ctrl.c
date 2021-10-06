@@ -1357,3 +1357,4 @@ bool msm_edp_ctrl_pixel_clock_valid(struct edp_ctrl *ctrl,
 
 	return false;
 }
+

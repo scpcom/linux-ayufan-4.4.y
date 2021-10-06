@@ -352,6 +352,7 @@ static u32 amdgpu_atombios_crtc_adjust_pll(struct drm_crtc *crtc,
 	if (amdgpu_encoder->devices & (ATOM_DEVICE_LCD_SUPPORT))
 		amdgpu_crtc->pll_flags |= AMDGPU_PLL_IS_LCD;
 
+
 	/* adjust pll for deep color modes */
 	if (encoder_mode == ATOM_ENCODER_MODE_HDMI) {
 		switch (bpc) {
@@ -803,3 +804,4 @@ void amdgpu_atombios_crtc_set_pll(struct drm_crtc *crtc, struct drm_display_mode
 					 amdgpu_crtc->crtc_id, &amdgpu_crtc->ss);
 	}
 }
+

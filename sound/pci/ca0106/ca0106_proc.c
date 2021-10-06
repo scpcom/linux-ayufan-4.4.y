@@ -74,6 +74,7 @@
 
 #include "ca0106.h"
 
+
 struct snd_ca0106_category_str {
 	int val;
 	const char *name;
@@ -92,6 +93,7 @@ static struct snd_ca0106_category_str snd_ca0106_con_category[] = {
 	{ IEC958_AES1_CON_NON_IEC908_CD, "non-IEC908 CD" },
 	{ IEC958_AES1_CON_GENERAL, "general" },
 };
+
 
 static void snd_ca0106_proc_dump_iec958( struct snd_info_buffer *buffer, u32 value)
 {

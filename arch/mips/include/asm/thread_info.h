@@ -9,6 +9,7 @@
 
 #ifdef __KERNEL__
 
+
 #ifndef __ASSEMBLY__
 
 #include <asm/processor.h>

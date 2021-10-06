@@ -1094,6 +1094,7 @@ static int bcm281xx_pinctrl_pin_config_get(struct pinctrl_dev *pctldev,
 	return -ENOTSUPP;
 }
 
+
 /* Goes through the configs and update register val/mask */
 static int bcm281xx_std_pin_update(struct pinctrl_dev *pctldev,
 				   unsigned pin,

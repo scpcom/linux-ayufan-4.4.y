@@ -108,6 +108,8 @@ MODULE_LICENSE("GPL");
 #define MATCH_PACKET_TYPE(data, type)	\
 	(((data) & VSXXXAA_PACKET_MASK) == (type))
 
+
+
 struct vsxxxaa {
 	struct input_dev *dev;
 	struct serio *serio;

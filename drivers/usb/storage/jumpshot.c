@@ -102,6 +102,7 @@ static struct us_unusual_dev jumpshot_unusual_dev_list[] = {
 
 #undef UNUSUAL_DEV
 
+
 struct jumpshot_info {
    unsigned long   sectors;     /* total sector count */
    unsigned long   ssize;       /* sector size in bytes */
@@ -124,6 +125,7 @@ static inline int jumpshot_bulk_read(struct us_data *us,
 			data, len, NULL);
 }
 
+
 static inline int jumpshot_bulk_write(struct us_data *us,
 				      unsigned char *data, 
 				      unsigned int len)
@@ -135,6 +137,7 @@ static inline int jumpshot_bulk_write(struct us_data *us,
 	return usb_stor_bulk_transfer_buf(us, us->send_bulk_pipe,
 			data, len, NULL);
 }
+
 
 static int jumpshot_get_status(struct us_data  *us)
 {
@@ -233,6 +236,7 @@ static int jumpshot_read_data(struct us_data *us,
 	kfree(buffer);
 	return USB_STOR_TRANSPORT_ERROR;
 }
+
 
 static int jumpshot_write_data(struct us_data *us,
 			       struct jumpshot_info *info,
@@ -467,11 +471,14 @@ static int jumpshot_handle_mode_sense(struct us_data *us,
 	return USB_STOR_TRANSPORT_GOOD;
 }
 
+
 static void jumpshot_info_destructor(void *extra)
 {
 	// this routine is a placeholder...
 	// currently, we don't allocate any extra blocks so we're okay
 }
+
+
 
 // Transport for the Lexar 'Jumpshot'
 //
@@ -579,6 +586,7 @@ static int jumpshot_transport(struct scsi_cmnd *srb, struct us_data *us)
 			     block, blocks);
 		return jumpshot_write_data(us, info, block, blocks);
 	}
+
 
 	if (srb->cmnd[0] == TEST_UNIT_READY) {
 		usb_stor_dbg(us, "TEST_UNIT_READY\n");

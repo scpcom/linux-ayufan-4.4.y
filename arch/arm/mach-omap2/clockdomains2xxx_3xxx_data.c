@@ -73,6 +73,7 @@ struct clkdm_dep dsp_24xx_wkdeps[] = {
 	{ NULL },
 };
 
+
 /*
  * OMAP2/3-common clockdomains
  *

@@ -58,6 +58,7 @@
 #define mcg_error_group(group, format, arg...) \
 	pr_err("  %16s: " format, (group)->name, ## arg)
 
+
 static union ib_gid mgid0;
 
 static struct workqueue_struct *clean_wq;
@@ -135,6 +136,7 @@ struct mcast_req {
 	struct mcast_group	*group;
 	int			clean;
 };
+
 
 #define safe_atomic_dec(ref) \
 	do {\
@@ -1160,6 +1162,7 @@ static void build_leave_mad(struct mcast_req *req)
 	mad->mad_hdr.method = IB_SA_METHOD_DELETE;
 }
 
+
 static void clear_pending_reqs(struct mcast_group *group, int vf)
 {
 	struct mcast_req *req, *tmp, *group_first = NULL;
@@ -1242,6 +1245,7 @@ void clean_vf_mcast(struct mlx4_ib_demux_ctx *ctx, int slave)
 	}
 	mutex_unlock(&ctx->mcg_table_lock);
 }
+
 
 int mlx4_ib_mcg_init(void)
 {

@@ -572,3 +572,4 @@ struct snd_rawmidi_ops snd_wavefront_midi_input =
 	.close =	snd_wavefront_midi_input_close,
 	.trigger =	snd_wavefront_midi_input_trigger,
 };
+

@@ -61,10 +61,12 @@
 			return ret;					\
 	} while (0)
 
+
 /* Flags for trace_probe */
 #define TP_FLAG_TRACE		1
 #define TP_FLAG_PROFILE		2
 #define TP_FLAG_REGISTERED	4
+
 
 /* data_rloc: data relative location, compatible with u32 */
 #define make_data_rloc(len, roffs)	\

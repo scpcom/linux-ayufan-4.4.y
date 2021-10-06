@@ -41,6 +41,7 @@ struct cpsw_phy_sel_priv {
 			     phy_interface_t phy_mode, int slave);
 };
 
+
 static void cpsw_gmii_sel_am3352(struct cpsw_phy_sel_priv *priv,
 				 phy_interface_t phy_mode, int slave)
 {

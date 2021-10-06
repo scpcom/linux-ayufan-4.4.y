@@ -84,6 +84,7 @@ bool ath9k_cmn_rx_accept(struct ath_common *common,
 			mic_error = false;
 		}
 
+
 		/*
 		 * Reject error frames with the exception of
 		 * decryption and MIC failures. For monitor mode,

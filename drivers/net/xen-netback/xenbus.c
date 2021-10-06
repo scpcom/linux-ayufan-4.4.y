@@ -246,6 +246,7 @@ static int netback_remove(struct xenbus_device *dev)
 	return 0;
 }
 
+
 /**
  * Entry point to this code when a new device is created.  Allocate the basic
  * structures and switch to InitWait.
@@ -389,6 +390,7 @@ fail:
 	return err;
 }
 
+
 /*
  * Handle the creation of the hotplug script environment.  We add the script
  * and vif variables to the environment, for the benefit of the vif-* hotplug
@@ -410,6 +412,7 @@ static int netback_uevent(struct xenbus_device *xdev,
 
 	return add_uevent_var(env, "vif=%s", be->vif->dev->name);
 }
+
 
 static int backend_create_xenvif(struct backend_info *be)
 {
@@ -598,6 +601,7 @@ static void frontend_changed(struct xenbus_device *dev,
 		break;
 	}
 }
+
 
 static void xen_net_read_rate(struct xenbus_device *dev,
 			      unsigned long *bytes, unsigned long *usec)
@@ -861,6 +865,7 @@ err:
 	be->vif->num_queues = 0;
 	return;
 }
+
 
 static int connect_rings(struct backend_info *be, struct xenvif_queue *queue)
 {

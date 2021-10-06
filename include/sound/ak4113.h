@@ -327,3 +327,4 @@ static inline void snd_ak4113_resume(struct ak4113 *chip) {}
 #endif
 
 #endif /* __SOUND_AK4113_H */
+

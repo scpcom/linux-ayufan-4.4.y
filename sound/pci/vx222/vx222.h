@@ -110,4 +110,5 @@ extern struct snd_vx_ops vx222_old_ops;
 
 #define MICRO_SELECT_PHANTOM_ALIM      0x80
 
+
 #endif /* __VX222_H */

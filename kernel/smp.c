@@ -158,6 +158,7 @@ static int generic_exec_single(int cpu, struct call_single_data *csd,
 		return 0;
 	}
 
+
 	if ((unsigned)cpu >= nr_cpu_ids || !cpu_online(cpu)) {
 		csd_unlock(csd);
 		return -ENXIO;
@@ -497,6 +498,7 @@ EXPORT_SYMBOL(smp_call_function);
 /* Setup configured maximum number of CPUs to activate */
 unsigned int setup_max_cpus = NR_CPUS;
 EXPORT_SYMBOL(setup_max_cpus);
+
 
 /*
  * Setup routine for controlling SMP activation

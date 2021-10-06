@@ -27,6 +27,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+
 #include <linux/module.h>
 #include <linux/init.h>
 #include <linux/usb.h>
@@ -42,10 +43,12 @@
 #include <media/v4l2-event.h>
 #include <media/videobuf-vmalloc.h>
 
+
 /* Version Information */
 #define DRIVER_VERSION "0.7.4"
 #define DRIVER_AUTHOR "Antoine Jacquet, http://royale.zerezo.com/"
 #define DRIVER_DESC "Zoran 364xx"
+
 
 /* Camera */
 #define FRAMES 1
@@ -79,15 +82,18 @@
 #define METHOD2 2
 #define METHOD3 3
 
+
 /* Module parameters */
 static int debug;
 static int mode;
+
 
 /* Module parameters interface */
 module_param(debug, int, 0644);
 MODULE_PARM_DESC(debug, "Debug level");
 module_param(mode, int, 0644);
 MODULE_PARM_DESC(mode, "0 = 320x240, 1 = 160x120, 2 = 640x480");
+
 
 /* Devices supported by this driver
  * .driver_info contains the init method used by the camera */
@@ -225,6 +231,7 @@ static int send_control_msg(struct usb_device *udev, u8 request, u16 value,
 	return status;
 }
 
+
 /* Control messages sent to the camera to initialize it
  * and launch the capture */
 typedef struct {
@@ -288,6 +295,7 @@ static message m2[] = {
 
 /* init table */
 static message *init[4] = { m0, m1, m2, m2 };
+
 
 /* JPEG static data in header (Huffman table, etc) */
 static unsigned char header1[] = {
@@ -1172,6 +1180,7 @@ static int zr364xx_vidioc_streamoff(struct file *file, void *priv,
 	return videobuf_streamoff(&cam->vb_vidq);
 }
 
+
 /* open the camera */
 static int zr364xx_open(struct file *file)
 {
@@ -1259,6 +1268,7 @@ static int zr364xx_close(struct file *file)
 	return v4l2_fh_release(file);
 }
 
+
 static int zr364xx_mmap(struct file *file, struct vm_area_struct *vma)
 {
 	struct zr364xx_camera *cam = video_drvdata(file);
@@ -1330,6 +1340,8 @@ static struct video_device zr364xx_template = {
 	.ioctl_ops = &zr364xx_ioctl_ops,
 	.release = video_device_release_empty,
 };
+
+
 
 /*******************/
 /* USB integration */
@@ -1547,6 +1559,7 @@ fail:
 	return err;
 }
 
+
 static void zr364xx_disconnect(struct usb_interface *intf)
 {
 	struct zr364xx_camera *cam = usb_get_intfdata(intf);
@@ -1565,6 +1578,7 @@ static void zr364xx_disconnect(struct usb_interface *intf)
 	mutex_unlock(&cam->lock);
 	v4l2_device_put(&cam->v4l2_dev);
 }
+
 
 #ifdef CONFIG_PM
 static int zr364xx_suspend(struct usb_interface *intf, pm_message_t message)

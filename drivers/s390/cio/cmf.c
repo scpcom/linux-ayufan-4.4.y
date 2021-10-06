@@ -890,6 +890,7 @@ static int set_cmbe(struct ccw_device *cdev, u32 mme)
 	return set_schib_wait(cdev, mme, 1, mba);
 }
 
+
 static u64 read_cmbe(struct ccw_device *cdev, int index)
 {
 	struct cmbe *cmb;
@@ -1375,6 +1376,7 @@ static int __init init_cmf(void)
 	return 0;
 }
 module_init(init_cmf);
+
 
 MODULE_AUTHOR("Arnd Bergmann <arndb@de.ibm.com>");
 MODULE_LICENSE("GPL");

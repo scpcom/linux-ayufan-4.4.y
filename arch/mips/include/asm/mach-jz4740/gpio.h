@@ -212,6 +212,7 @@ uint32_t jz_gpio_port_get_value(int port, uint32_t mask);
 #define JZ_GPIO_FUNC_MEM_WR		JZ_GPIO_FUNC1
 #define JZ_GPIO_FUNC_MEM_WE0		JZ_GPIO_FUNC1
 
+
 #define JZ_GPIO_MEM_ADDR21		JZ_GPIO_PORTB(17)
 #define JZ_GPIO_MEM_ADDR22		JZ_GPIO_PORTB(18)
 
@@ -280,6 +281,7 @@ uint32_t jz_gpio_port_get_value(int port, uint32_t mask);
 #define JZ_GPIO_FUNC_MEM_WAIT		JZ_GPIO_FUNC1
 #define JZ_GPIO_FUNC_MEM_FRE		JZ_GPIO_FUNC1
 #define JZ_GPIO_FUNC_MEM_FWE		JZ_GPIO_FUNC1
+
 
 #define JZ_GPIO_MEM_ADDR19		JZ_GPIO_PORTB(22)
 #define JZ_GPIO_MEM_ADDR20		JZ_GPIO_PORTB(23)

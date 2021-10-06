@@ -24,6 +24,7 @@
 #include <sound/gus.h>
 #include <sound/info.h>
 
+
 static int snd_gus_dram_poke(struct snd_gus_card *gus, char __user *_buffer,
 			     unsigned int address, unsigned int size)
 {
@@ -53,6 +54,7 @@ static int snd_gus_dram_poke(struct snd_gus_card *gus, char __user *_buffer,
 	}
 	return 0;
 }
+
 
 int snd_gus_dram_write(struct snd_gus_card *gus, char __user *buffer,
 		       unsigned int address, unsigned int size)

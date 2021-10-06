@@ -15,6 +15,7 @@
 #include <inttypes.h>
 #include <wait.h>
 
+
 #include <sys/prctl.h>
 #include <linux/prctl.h>
 
@@ -53,6 +54,7 @@ static void segvtask(void)
 	exit(0);
 }
 
+
 static void sigsegv_fail(int sig)
 {
 	fprintf(stderr, "FATAL ERROR, rdtsc() failed while enabled\n");
@@ -70,6 +72,7 @@ static void rdtsctask(void)
 	alarm(10);
 	for(;;) rdtsc();
 }
+
 
 int main(int argc, char **argv)
 {
@@ -91,3 +94,4 @@ int main(int argc, char **argv)
 
 	exit(0);
 }
+

@@ -131,6 +131,7 @@ crc32_body(u32 crc, unsigned char const *buf, size_t len, const u32 (*tab)[256])
 }
 #endif
 
+
 /**
  * crc32_le_generic() - Calculate bitwise little-endian Ethernet AUTODIN II
  *			CRC32/CRC32C

@@ -398,4 +398,5 @@
 					       ___PPC_RA(a) |		\
 					       ___PPC_RB(b))
 
+
 #endif /* _ASM_POWERPC_PPC_OPCODE_H */

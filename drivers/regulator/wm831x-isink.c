@@ -147,6 +147,7 @@ static irqreturn_t wm831x_isink_irq(int irq, void *data)
 	return IRQ_HANDLED;
 }
 
+
 static int wm831x_isink_probe(struct platform_device *pdev)
 {
 	struct wm831x *wm831x = dev_get_drvdata(pdev->dev.parent);

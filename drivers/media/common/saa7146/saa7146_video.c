@@ -321,6 +321,7 @@ static int saa7146_pgtable_build(struct saa7146_dev *dev, struct saa7146_buf *bu
 	return 0;
 }
 
+
 /********************************************************************************/
 /* file operations */
 
@@ -690,6 +691,7 @@ static int vidioc_try_fmt_vid_cap(struct file *file, void *fh, struct v4l2_forma
 
 	return 0;
 }
+
 
 static int vidioc_try_fmt_vid_overlay(struct file *file, void *fh, struct v4l2_format *f)
 {
@@ -1208,6 +1210,7 @@ static void video_init(struct saa7146_dev *dev, struct saa7146_vv *vv)
 	vv->current_hps_sync = SAA7146_HPS_SYNC_PORT_A;
 }
 
+
 static int video_open(struct saa7146_dev *dev, struct file *file)
 {
 	struct saa7146_fh *fh = file->private_data;
@@ -1221,6 +1224,7 @@ static int video_open(struct saa7146_dev *dev, struct file *file)
 
 	return 0;
 }
+
 
 static void video_close(struct saa7146_dev *dev, struct file *file)
 {
@@ -1236,6 +1240,7 @@ static void video_close(struct saa7146_dev *dev, struct file *file)
 	videobuf_stop(q);
 	/* hmm, why is this function declared void? */
 }
+
 
 static void video_irq_done(struct saa7146_dev *dev, unsigned long st)
 {

@@ -34,6 +34,7 @@
 
 static bd_t bd;
 
+
 static void sequoia_fixups(void)
 {
 	unsigned long sysclk = 33333333;

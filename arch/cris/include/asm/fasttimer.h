@@ -38,7 +38,9 @@ void start_one_shot_timer(struct fast_timer *t,
 int del_fast_timer(struct fast_timer * t);
 /* return 1 if deleted */
 
+
 void schedule_usleep(unsigned long us);
+
 
 int fast_timer_init(void);
 

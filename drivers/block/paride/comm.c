@@ -172,6 +172,7 @@ static void comm_write_block( PIA *pi, char * buf, int count )
                 for (k=0;k<count/4;k++) w4l(pi_swab32(buf,k));
                 break;
 
+
         }
 }
 

@@ -211,6 +211,7 @@ virt_efi_set_variable_nonblocking(efi_char16_t *name, efi_guid_t *vendor,
 	return status;
 }
 
+
 static efi_status_t virt_efi_query_variable_info(u32 attr,
 						 u64 *storage_space,
 						 u64 *remaining_space,

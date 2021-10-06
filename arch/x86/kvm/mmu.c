@@ -88,6 +88,7 @@ module_param(dbg, bool, 0644);
 #define PT64_INDEX(address, level)\
 	(((address) >> PT64_LEVEL_SHIFT(level)) & ((1 << PT64_LEVEL_BITS) - 1))
 
+
 #define PT32_LEVEL_BITS 10
 
 #define PT32_LEVEL_SHIFT(level) \
@@ -99,6 +100,7 @@ module_param(dbg, bool, 0644);
 
 #define PT32_INDEX(address, level)\
 	(((address) >> PT32_LEVEL_SHIFT(level)) & ((1 << PT32_LEVEL_BITS) - 1))
+
 
 #define PT64_BASE_ADDR_MASK (((1ULL << 52) - 1) & ~(u64)(PAGE_SIZE-1))
 #define PT64_DIR_BASE_ADDR_MASK \
@@ -1155,6 +1157,7 @@ static void drop_spte(struct kvm *kvm, u64 *sptep)
 		rmap_remove(kvm, sptep);
 }
 
+
 static bool __drop_large_spte(struct kvm *kvm, u64 *sptep)
 {
 	if (is_large_pte(*sptep)) {
@@ -1842,6 +1845,7 @@ clear_child_bitmap:
 		sp->unsync_children--;
 		WARN_ON((int)sp->unsync_children < 0);
 	}
+
 
 	return nr_unsync_leaf;
 }
@@ -3018,6 +3022,7 @@ static int nonpaging_map(struct kvm_vcpu *vcpu, gva_t v, u32 error_code,
 			 prefault);
 	spin_unlock(&vcpu->kvm->mmu_lock);
 
+
 	return r;
 
 out_unlock:
@@ -3025,6 +3030,7 @@ out_unlock:
 	kvm_release_pfn_clean(pfn);
 	return 0;
 }
+
 
 static void mmu_free_roots(struct kvm_vcpu *vcpu)
 {

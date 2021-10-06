@@ -919,6 +919,7 @@ static int b1dmactl_proc_show(struct seq_file *m, void *v)
 	}
 	seq_printf(m, "%-16s %s\n", "cardname", cinfo->cardname);
 
+
 	spin_lock_irqsave(&card->lock, flags);
 
 	txoff = (dma_addr_t)b1dma_readl(card, AMCC_TXPTR)-card->dma->sendbuf.dmaaddr;

@@ -42,6 +42,7 @@ union intel_x86_pebs_dse {
 	};
 };
 
+
 /*
  * Map PEBS Load Latency Data Source encodings to generic
  * memory data source information

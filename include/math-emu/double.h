@@ -201,4 +201,5 @@ union _FP_UNION_D
 
 #endif /* W_TYPE_SIZE < 64 */
 
+
 #endif /* __MATH_EMU_DOUBLE_H__ */

@@ -162,6 +162,7 @@ out:
 	if (r)
 		radeon_driver_unload_kms(dev);
 
+
 	return r;
 }
 
@@ -593,6 +594,7 @@ static int radeon_info_ioctl(struct drm_device *dev, void *data, struct drm_file
 	}
 	return 0;
 }
+
 
 /*
  * Outdated mess for old drm with Xorg being in charge (void function now).

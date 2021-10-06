@@ -78,6 +78,7 @@ static void intel_tlbflush(struct agp_memory *mem)
 	pci_write_config_dword(agp_bridge->dev, INTEL_AGPCTRL, 0x2280);
 }
 
+
 static void intel_8xx_tlbflush(struct agp_memory *mem)
 {
 	u32 temp;
@@ -86,6 +87,7 @@ static void intel_8xx_tlbflush(struct agp_memory *mem)
 	pci_read_config_dword(agp_bridge->dev, INTEL_AGPCTRL, &temp);
 	pci_write_config_dword(agp_bridge->dev, INTEL_AGPCTRL, temp | (1 << 7));
 }
+
 
 static void intel_cleanup(void)
 {
@@ -98,6 +100,7 @@ static void intel_cleanup(void)
 	pci_write_config_word(agp_bridge->dev, INTEL_APSIZE, previous_size->size_value);
 }
 
+
 static void intel_8xx_cleanup(void)
 {
 	u16 temp;
@@ -108,6 +111,7 @@ static void intel_8xx_cleanup(void)
 	pci_write_config_word(agp_bridge->dev, INTEL_NBXCFG, temp & ~(1 << 9));
 	pci_write_config_byte(agp_bridge->dev, INTEL_APSIZE, previous_size->size_value);
 }
+
 
 static int intel_configure(void)
 {
@@ -196,6 +200,7 @@ static void intel_820_cleanup(void)
 	pci_write_config_byte(agp_bridge->dev, INTEL_APSIZE,
 			previous_size->size_value);
 }
+
 
 static int intel_820_configure(void)
 {

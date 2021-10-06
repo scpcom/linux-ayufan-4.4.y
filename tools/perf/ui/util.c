@@ -1,6 +1,7 @@
 #include "util.h"
 #include "../debug.h"
 
+
 /*
  * Default error logging functions
  */
@@ -25,6 +26,7 @@ static struct perf_error_ops default_eops =
 };
 
 static struct perf_error_ops *perf_eops = &default_eops;
+
 
 int ui__error(const char *format, ...)
 {

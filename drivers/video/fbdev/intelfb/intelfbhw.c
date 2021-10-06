@@ -307,6 +307,7 @@ const char * intelfbhw_dvo_to_string(int dvo)
 		return NULL;
 }
 
+
 int intelfbhw_validate_mode(struct intelfb_info *dinfo,
 			    struct fb_var_screeninfo *var)
 {
@@ -466,6 +467,7 @@ void intelfbhw_do_blank(int blank, struct fb_info *info)
 	return;
 }
 
+
 /* Check which pipe is connected to an active display plane. */
 int intelfbhw_active_pipe(const struct intelfb_hwstate *hw)
 {
@@ -509,6 +511,7 @@ void intelfbhw_setcolreg(struct intelfb_info *dinfo, unsigned regno,
 	       (green << PALETTE_8_GREEN_SHIFT) |
 	       (blue << PALETTE_8_BLUE_SHIFT));
 }
+
 
 int intelfbhw_read_hw_state(struct intelfb_info *dinfo,
 			    struct intelfb_hwstate *hw, int flag)
@@ -650,6 +653,7 @@ int intelfbhw_read_hw_state(struct intelfb_info *dinfo,
 	return 0;
 }
 
+
 static int calc_vclock3(int index, int m, int n, int p)
 {
 	if (p == 0 || n == 0)
@@ -701,6 +705,7 @@ static void intelfbhw_get_p1p2(struct intelfb_info *dinfo, int dpll,
 	*o_p2 = p2;
 }
 #endif
+
 
 void intelfbhw_print_hw_state(struct intelfb_info *dinfo,
 			      struct intelfb_hwstate *hw)
@@ -866,6 +871,8 @@ void intelfbhw_print_hw_state(struct intelfb_info *dinfo,
 	printk("hw state dump end\n");
 #endif
 }
+
+
 
 /* Split the M parameter into M1 and M2. */
 static int splitm(int index, unsigned int m, unsigned int *retm1,

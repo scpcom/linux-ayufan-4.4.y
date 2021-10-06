@@ -71,6 +71,7 @@ struct cm_req_msg {
 	union ib_gid primary_path_sgid;
 };
 
+
 static void set_local_comm_id(struct ib_mad *mad, u32 cm_id)
 {
 	if (mad->mad_hdr.attr_id == CM_SIDR_REQ_ATTR_ID) {

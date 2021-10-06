@@ -132,6 +132,7 @@ static int pseries_eeh_cap_start(struct pci_dn *pdn)
 	return PCI_CAPABILITY_LIST;
 }
 
+
 static int pseries_eeh_find_cap(struct pci_dn *pdn, int cap)
 {
 	int pos = pseries_eeh_cap_start(pdn);

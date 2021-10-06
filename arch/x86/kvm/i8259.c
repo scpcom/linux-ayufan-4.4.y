@@ -298,6 +298,7 @@ void kvm_pic_reset(struct kvm_kpic_state *s)
 			break;
 		}
 
+
 	if (!found)
 		return;
 

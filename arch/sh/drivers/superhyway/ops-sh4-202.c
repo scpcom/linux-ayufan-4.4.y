@@ -168,3 +168,4 @@ int __init superhyway_scan_bus(struct superhyway_bus *bus)
 	return superhyway_add_devices(bus, sh4202_devices,
 				      ARRAY_SIZE(sh4202_devices));
 }
+

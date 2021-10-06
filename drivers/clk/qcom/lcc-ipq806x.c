@@ -198,6 +198,7 @@ static struct clk_branch mi2s_bit_div_clk = {
 	},
 };
 
+
 static struct clk_regmap_mux mi2s_bit_clk = {
 	.reg = 0x48,
 	.shift = 14,

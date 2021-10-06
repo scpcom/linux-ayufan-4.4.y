@@ -46,6 +46,7 @@
 #include "xfs_attr_leaf.h"
 #include "xfs_filestream.h"
 
+
 kmem_zone_t		*xfs_bmap_free_item_zone;
 
 /*
@@ -415,6 +416,7 @@ xfs_bmap_check_leaf_extents(
 	for (;;) {
 		xfs_fsblock_t	nextbno;
 		xfs_extnum_t	num_recs;
+
 
 		num_recs = xfs_btree_get_numrecs(block);
 
@@ -878,6 +880,7 @@ xfs_bmap_local_to_extents_empty(
 	ifp->if_flags |= XFS_IFEXTENTS;
 	XFS_IFORK_FMT_SET(ip, whichfork, XFS_DINODE_FMT_EXTENTS);
 }
+
 
 STATIC int				/* error */
 xfs_bmap_local_to_extents(
@@ -1365,6 +1368,7 @@ error0:
 	xfs_trans_brelse(tp, bp);
 	return -EFSCORRUPTED;
 }
+
 
 /*
  * Search the extent records for the entry containing block bno.
@@ -3670,6 +3674,7 @@ xfs_bmap_btalloc(
 		ASSERT(ap->length);
 	}
 
+
 	nullfb = *ap->firstblock == NULLFSBLOCK;
 	fb_agno = nullfb ? NULLAGNUMBER : XFS_FSB_TO_AGNO(mp, *ap->firstblock);
 	if (nullfb) {
@@ -4151,6 +4156,7 @@ xfs_bmapi_reserve_delalloc(
 	if (error)
 		goto out_unreserve_blocks;
 
+
 	ip->i_delayed_blks += alen;
 
 	got->br_startoff = aoff;
@@ -4266,6 +4272,7 @@ xfs_bmapi_delay(
 	*nmap = n;
 	return 0;
 }
+
 
 static int
 xfs_bmapi_allocate(

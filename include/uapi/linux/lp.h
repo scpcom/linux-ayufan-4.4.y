@@ -7,6 +7,7 @@
 #ifndef _UAPI_LINUX_LP_H
 #define _UAPI_LINUX_LP_H
 
+
 /*
  * Per POSIX guidelines, this module reserves the LP and lp prefixes
  * These are the lp_table[minor].flags flags...
@@ -94,5 +95,6 @@
 
 #define LP_TIMEOUT_INTERRUPT	(60 * HZ)
 #define LP_TIMEOUT_POLLED	(10 * HZ)
+
 
 #endif /* _UAPI_LINUX_LP_H */

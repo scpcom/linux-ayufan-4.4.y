@@ -455,6 +455,7 @@ int ubi_leb_read(struct ubi_volume_desc *desc, int lnum, char *buf, int offset,
 }
 EXPORT_SYMBOL_GPL(ubi_leb_read);
 
+
 /**
  * ubi_leb_read_sg - read data into a scatter gather list.
  * @desc: volume descriptor

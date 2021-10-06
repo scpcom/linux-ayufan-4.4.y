@@ -240,6 +240,7 @@ static int omfs_remove(struct inode *dir, struct dentry *dentry)
 	struct inode *inode = d_inode(dentry);
 	int ret;
 
+
 	if (S_ISDIR(inode->i_mode) &&
 	    !omfs_dir_is_empty(inode))
 		return -ENOTEMPTY;

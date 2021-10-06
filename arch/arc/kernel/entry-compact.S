@@ -131,6 +131,7 @@ VECTOR   EV_Extension            ; 0x130, Extn Intruction Excp  (0x26)
 VECTOR   reserved                ; Reserved Exceptions
 .endr
 
+
 ;##################### Scratch Mem for IRQ stack switching #############
 
 ARCFP_DATA int1_saved_reg
@@ -149,6 +150,7 @@ int2_saved_reg:
 
 ; ---------------------------------------------
 	.section .text, "ax",@progbits
+
 
 reserved:
 	flag 1		; Unexpected event, halt

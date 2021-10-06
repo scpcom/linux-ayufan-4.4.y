@@ -557,6 +557,7 @@ static struct fib6_node *fib6_add_1(struct fib6_node *root,
 
 	return ln;
 
+
 insert_above:
 	/*
 	 * split since we don't have a common prefix anymore or
@@ -1192,6 +1193,7 @@ struct fib6_node *fib6_lookup(struct fib6_node *root, const struct in6_addr *dad
  *	if subtrees are used)
  */
 
+
 static struct fib6_node *fib6_locate_1(struct fib6_node *root,
 				       const struct in6_addr *addr,
 				       int plen, int offset)
@@ -1245,6 +1247,7 @@ struct fib6_node *fib6_locate(struct fib6_node *root,
 
 	return NULL;
 }
+
 
 /*
  *	Deletion

@@ -27,6 +27,7 @@
 #ifndef __iwl_leds_h__
 #define __iwl_leds_h__
 
+
 struct iwl_priv;
 
 #define IWL_LED_SOLID 11

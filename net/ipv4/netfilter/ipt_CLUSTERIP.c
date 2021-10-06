@@ -80,6 +80,7 @@ clusterip_config_get(struct clusterip_config *c)
 	atomic_inc(&c->refcount);
 }
 
+
 static void clusterip_config_rcu_free(struct rcu_head *head)
 {
 	kfree(container_of(head, struct clusterip_config, rcu));
@@ -472,6 +473,7 @@ static struct xt_target clusterip_tg_reg __read_mostly = {
 #endif /* CONFIG_COMPAT */
 	.me		= THIS_MODULE
 };
+
 
 /***********************************************************************
  * ARP MANGLING CODE

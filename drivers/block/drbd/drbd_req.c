@@ -30,6 +30,7 @@
 #include "drbd_int.h"
 #include "drbd_req.h"
 
+
 static bool drbd_may_do_local_read(struct drbd_device *device, sector_t sector, int size);
 
 /* Update disk stats at start of I/O request */
@@ -204,6 +205,7 @@ void complete_master_bio(struct drbd_device *device,
 	bio_endio(m->bio);
 	dec_ap_bio(device);
 }
+
 
 /* Helper for __req_mod().
  * Set m->bio to the master bio, if it is fit to be completed,
@@ -1238,6 +1240,7 @@ static void drbd_send_and_submit(struct drbd_device *device, struct drbd_request
 		 * full data updates, but start sending "dirty bits" only. */
 		maybe_pull_ahead(device);
 	}
+
 
 	if (drbd_suspended(device)) {
 		/* push back and retry: */

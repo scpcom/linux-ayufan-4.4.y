@@ -178,3 +178,4 @@ int __init davinci_cpufreq_init(void)
 	return platform_driver_probe(&davinci_cpufreq_driver,
 							davinci_cpufreq_probe);
 }
+

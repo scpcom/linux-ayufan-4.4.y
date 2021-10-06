@@ -371,6 +371,7 @@ static struct task_desc *register_pid(struct perf_sched *sched,
 	return task;
 }
 
+
 static void print_task_traces(struct perf_sched *sched)
 {
 	struct task_desc *task;

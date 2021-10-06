@@ -1122,6 +1122,7 @@ static int e1000_probe(struct pci_dev *pdev, const struct pci_device_id *ent)
 	if (!is_valid_ether_addr(netdev->dev_addr))
 		e_err(probe, "Invalid MAC Address\n");
 
+
 	INIT_DELAYED_WORK(&adapter->watchdog_task, e1000_watchdog);
 	INIT_DELAYED_WORK(&adapter->fifo_stall_task,
 			  e1000_82547_tx_fifo_stall_task);

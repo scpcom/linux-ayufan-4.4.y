@@ -321,6 +321,7 @@ int st5481_setup_b(struct st5481_bcs *bcs)
 	if (retval)
 		goto err_b_out;
 
+
 	return 0;
 
 err_b_out:

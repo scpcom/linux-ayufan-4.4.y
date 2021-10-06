@@ -136,6 +136,7 @@ static void smsusb_onresponse(struct urb *urb)
 		pr_err("error, urb status %d, %d bytes\n",
 			urb->status, urb->actual_length);
 
+
 exit_and_resubmit:
 	smsusb_submit_urb(dev, surb);
 }

@@ -688,6 +688,7 @@ static u32 rtl8188eu_hal_init(struct adapter *Adapter)
 
 	#define HAL_INIT_PROFILE_TAG(stage) do {} while (0)
 
+
 	HAL_INIT_PROFILE_TAG(HAL_INIT_STAGES_BEGIN);
 
 	if (Adapter->pwrctrlpriv.bkeepfwalive) {
@@ -904,6 +905,7 @@ HAL_INIT_PROFILE_TAG(HAL_INIT_STAGES_END);
 
 	DBG_88E("%s in %dms\n", __func__, rtw_get_passing_time_ms(init_start_time));
 
+
 	return status;
 }
 
@@ -1031,6 +1033,7 @@ static unsigned int rtl8188eu_inirp_init(struct adapter *Adapter)
 exit:
 
 	RT_TRACE(_module_hci_hal_init_c_, _drv_info_, ("<=== usb_inirp_init\n"));
+
 
 	return status;
 }
@@ -2078,6 +2081,7 @@ static void rtl8188eu_init_default_value(struct adapter *adapt)
 void rtl8188eu_set_hal_ops(struct adapter *adapt)
 {
 	struct hal_ops	*halfunc = &adapt->HalFunc;
+
 
 	adapt->HalData = kzalloc(sizeof(struct hal_data_8188e), GFP_KERNEL);
 	if (adapt->HalData == NULL)

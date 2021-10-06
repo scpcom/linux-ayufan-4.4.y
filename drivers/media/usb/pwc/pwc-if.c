@@ -1157,6 +1157,7 @@ static void usb_pwc_disconnect(struct usb_interface *intf)
 	v4l2_device_put(&pdev->v4l2_dev);
 }
 
+
 /*
  * Initialization code & module stuff
  */

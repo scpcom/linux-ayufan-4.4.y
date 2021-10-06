@@ -20,6 +20,7 @@
 #ifndef _LINUX_SISFB_H_
 #define _LINUX_SISFB_H_
 
+
 #include <linux/pci.h>
 #include <uapi/video/sisfb.h>
 

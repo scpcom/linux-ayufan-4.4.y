@@ -56,4 +56,5 @@ int iw_handler_get_private(struct net_device *		dev,
 #define compat_private_call NULL
 #endif
 
+
 #endif /* __NET_WEXT_H */

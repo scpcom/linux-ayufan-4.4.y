@@ -33,6 +33,7 @@
 #include <linux/iio/triggered_buffer.h>
 #include <linux/of_gpio.h>
 
+
 #define AS3935_AFE_GAIN		0x00
 #define AS3935_AFE_MASK		0x3F
 #define AS3935_AFE_GAIN_MAX	0x1F
@@ -146,6 +147,7 @@ static ssize_t as3935_sensor_sensitivity_store(struct device *dev,
 static IIO_DEVICE_ATTR(sensor_sensitivity, S_IRUGO | S_IWUSR,
 	as3935_sensor_sensitivity_show, as3935_sensor_sensitivity_store, 0);
 
+
 static struct attribute *as3935_attributes[] = {
 	&iio_dev_attr_sensor_sensitivity.dev_attr.attr,
 	NULL,
@@ -163,6 +165,7 @@ static int as3935_read_raw(struct iio_dev *indio_dev,
 {
 	struct as3935_state *st = iio_priv(indio_dev);
 	int ret;
+
 
 	switch (m) {
 	case IIO_CHAN_INFO_PROCESSED:

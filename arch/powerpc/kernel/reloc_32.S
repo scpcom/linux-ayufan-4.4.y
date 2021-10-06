@@ -82,6 +82,7 @@ eodyn:				/* End of Dyn Table scan */
 	cmpwi	r6, 0
 	beq	done
 
+
 	/*
 	 * Work out the current offset from the link time address of .rela
 	 * section.

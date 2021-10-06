@@ -61,4 +61,5 @@ struct idmap_msg {
 	__u8  im_status;
 };
 
+
 #endif /* _UAPINFS_IDMAP_H */

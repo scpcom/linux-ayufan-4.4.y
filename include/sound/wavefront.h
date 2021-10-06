@@ -391,6 +391,7 @@ typedef struct wf_sample_offset wavefront_sample_offset;
 
 #define WF_SAMPLE_IS_8BIT(smpl) ((smpl)->SampleResolution&2)
 
+
 /* 
 
   Because most/all of the sample data we pass in via pointers has
@@ -413,6 +414,7 @@ typedef struct wf_sample_offset wavefront_sample_offset;
   4        use fourth channel, skip three
   5        use fifth channel, skip four
   6        use six channel, skip five
+
 
   This can handle up to 4 channels, and anyone downloading >4 channels
   of sample data just to select one of them needs to find some tools

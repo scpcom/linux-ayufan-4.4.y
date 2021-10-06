@@ -212,6 +212,7 @@ struct isif_color_space_conv {
 	struct isif_float_8 coeff[ISIF_CSC_NUM_COEFF];
 };
 
+
 /*************************************************************************
 **  Black  Compensation parameters
 *************************************************************************/

@@ -164,4 +164,6 @@ struct kfd_system_properties {
 	struct attribute	attr_props;
 };
 
+
+
 #endif /* __KFD_TOPOLOGY_H__ */

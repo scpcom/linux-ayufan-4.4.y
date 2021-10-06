@@ -6,6 +6,7 @@
 
 #include <asm/bootinfo-mac.h>
 
+
 /*
  *	Apple Macintoshisms
  */
@@ -81,6 +82,7 @@ struct mac_model
 #define MAC_FLOPPY_AV		4
 
 extern struct mac_model *macintosh_config;
+
 
     /*
      * Internal representation of the Mac hardware, filled in from bootinfo

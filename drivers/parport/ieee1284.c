@@ -545,6 +545,7 @@ int parport_negotiate (struct parport *port, int mode)
 		port->ieee1284.phase = IEEE1284_PH_FWD_IDLE;
 	}
 
+
 	return 0;
 #endif /* IEEE1284 support */
 }

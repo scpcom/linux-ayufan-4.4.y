@@ -2863,6 +2863,7 @@ static int fw4_ack(struct c4iw_dev *dev, struct sk_buff *skb)
 	unsigned int tid = GET_TID(hdr);
 	struct tid_info *t = dev->rdev.lldi.tids;
 
+
 	ep = lookup_tid(t, tid);
 	PDBG("%s ep %p tid %u credits %u\n", __func__, ep, ep->hwtid, credits);
 	if (credits == 0) {

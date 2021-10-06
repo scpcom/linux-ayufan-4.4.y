@@ -30,6 +30,7 @@
 #include <linux/platform_device.h>
 #include <linux/reset.h>
 
+
 /* P2WI registers */
 #define P2WI_CTRL		0x0
 #define P2WI_CCR		0x4

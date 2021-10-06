@@ -61,6 +61,8 @@ unsigned short sii164GetDeviceID(void)
 	return deviceID;
 }
 
+
+
 /* DVI.C will handle all SiI164 chip stuffs and try it best to make code minimal and useful */
 
 /*
@@ -237,6 +239,10 @@ long sii164InitChip(
 	return (-1);
 }
 
+
+
+
+
 /* below sii164 function is not necessary */
 
 #ifdef SII164_FULL_FUNCTIONS
@@ -252,6 +258,7 @@ void sii164ResetChip(void)
 	sii164SetPower(1);
 }
 
+
 /*
  * sii164GetChipString
  *      This function returns a char string name of the current DVI Controller chip.
@@ -261,6 +268,7 @@ char *sii164GetChipString(void)
 {
 	return gDviCtrlChipName;
 }
+
 
 /*
  *  sii164SetPower
@@ -288,6 +296,7 @@ void sii164SetPower(
 		i2cWriteReg(SII164_I2C_ADDRESS, SII164_CONFIGURATION, config);
 	}
 }
+
 
 /*
  *  sii164SelectHotPlugDetectionMode
@@ -396,3 +405,5 @@ void sii164ClearInterrupt(void)
 #endif
 
 #endif
+
+

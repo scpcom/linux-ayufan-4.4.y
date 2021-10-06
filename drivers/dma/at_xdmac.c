@@ -213,6 +213,7 @@ struct at_xdmac_chan {
 	struct list_head		free_descs_list;
 };
 
+
 /* ----- Controller ----- */
 struct at_xdmac {
 	struct dma_device	dma;
@@ -224,6 +225,7 @@ struct at_xdmac {
 	struct dma_pool		*at_xdmac_desc_pool;
 	struct at_xdmac_chan	chan[0];
 };
+
 
 /* ----- Descriptors ----- */
 
@@ -239,6 +241,7 @@ struct at_xdmac_lld {
 	u32		mbr_sus;	/* Source Microblock Stride Register */
 	u32		mbr_dus;	/* Destination Microblock Stride Register */
 };
+
 
 struct at_xdmac_desc {
 	struct at_xdmac_lld		lld;
@@ -314,6 +317,7 @@ static unsigned int init_nr_desc_per_channel = 64;
 module_param(init_nr_desc_per_channel, uint, 0644);
 MODULE_PARM_DESC(init_nr_desc_per_channel,
 		 "initial descriptors per channel (default: 64)");
+
 
 static bool at_xdmac_chan_is_enabled(struct at_xdmac_chan *atchan)
 {
@@ -715,6 +719,7 @@ at_xdmac_prep_slave_sg(struct dma_chan *chan, struct scatterlist *sgl,
 		list_add_tail(&desc->desc_node, &first->descs_list);
 		xfer_size += len;
 	}
+
 
 	first->tx_dma_desc.flags = flags;
 	first->xfer_size = xfer_size;

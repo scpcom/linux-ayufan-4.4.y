@@ -24,6 +24,7 @@
 #include <mach/time.h>
 #include <linux/platform_data/edma.h>
 
+
 #include "davinci.h"
 #include "clock.h"
 
@@ -201,6 +202,7 @@ static struct platform_device davinci_mmcsd1_device = {
 	.resource = mmcsd1_resources,
 };
 
+
 void __init davinci_setup_mmc(int module, struct davinci_mmc_config *config)
 {
 	struct platform_device	*pdev = NULL;
@@ -345,3 +347,4 @@ struct davinci_timer_instance davinci_timer_instance[2] = {
 		.top_irq	= IRQ_TINT1_TINT34,
 	},
 };
+

@@ -16,6 +16,7 @@
 #include "c2p.h"
 #include "c2p_core.h"
 
+
     /*
      *  Perform a full C2P step on 32 8-bit pixels, stored in 8 32-bit words
      *  containing
@@ -32,11 +33,13 @@ static void c2p_32x8(u32 d[8])
 	transp8(d, 1, 2);
 }
 
+
     /*
      *  Array containing the permutation indices of the planar data after c2p
      */
 
 static const int perm_c2p_32x8[8] = { 7, 5, 3, 1, 6, 4, 2, 0 };
+
 
     /*
      *  Store a full block of planar data after c2p conversion
@@ -49,6 +52,7 @@ static inline void store_planar(void *dst, u32 dst_inc, u32 bpp, u32 d[8])
 	for (i = 0; i < bpp; i++, dst += dst_inc)
 		put_unaligned_be32(d[perm_c2p_32x8[i]], dst);
 }
+
 
     /*
      *  Store a partial block of planar data after c2p conversion
@@ -64,6 +68,7 @@ static inline void store_planar_masked(void *dst, u32 dst_inc, u32 bpp,
 					get_unaligned_be32(dst), mask),
 				   dst);
 }
+
 
     /*
      *  c2p_planar - Copy 8-bit chunky image data to a planar frame buffer

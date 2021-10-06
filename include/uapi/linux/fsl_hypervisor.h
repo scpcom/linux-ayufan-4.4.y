@@ -216,4 +216,5 @@ struct fsl_hv_ioctl_prop {
 #define FSL_HV_IOCTL_SETPROP \
 	_IOWR(FSL_HV_IOCTL_TYPE, 8, struct fsl_hv_ioctl_prop)
 
+
 #endif /* _UAPIFSL_HYPERVISOR_H */

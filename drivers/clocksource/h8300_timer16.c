@@ -85,6 +85,7 @@ static unsigned long timer16_get_counter(struct timer16_priv *p)
 	return v2;
 }
 
+
 static irqreturn_t timer16_interrupt(int irq, void *dev_id)
 {
 	struct timer16_priv *p = (struct timer16_priv *)dev_id;

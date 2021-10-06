@@ -693,6 +693,7 @@ static void check_location(struct seq_file *m, const char *c)
 	}
 }
 
+
 /* ****************************************************************** */
 /* 
  * Format: 
@@ -709,6 +710,7 @@ static void check_location_string(struct seq_file *m, const char *c)
 		c++;
 	}
 }
+
 
 /* ****************************************************************** */
 

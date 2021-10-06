@@ -123,6 +123,7 @@ void xics_mask_unknown_vec(unsigned int vec)
 		ics->mask_unknown(ics, vec);
 }
 
+
 #ifdef CONFIG_SMP
 
 static void xics_request_ipi(void)
@@ -176,6 +177,7 @@ void xics_kexec_teardown_cpu(int secondary)
 	if (secondary)
 		xics_set_cpu_giq(xics_default_distrib_server, 0);
 }
+
 
 #ifdef CONFIG_HOTPLUG_CPU
 

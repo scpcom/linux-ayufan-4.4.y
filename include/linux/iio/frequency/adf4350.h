@@ -89,6 +89,7 @@
 #define ADF4350_MAX_MODULUS		4095
 #define ADF4350_MAX_R_CNT		1023
 
+
 /**
  * struct adf4350_platform_data - platform specific information
  * @name:		Optional device name.

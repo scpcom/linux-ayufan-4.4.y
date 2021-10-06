@@ -85,6 +85,7 @@ enum {
 #define	IWL_RATE_5M_MASK   (1 << IWL_RATE_5M_INDEX)
 #define	IWL_RATE_11M_MASK  (1 << IWL_RATE_11M_INDEX)
 
+
 /* uCode API values for HT/VHT bit rates */
 enum {
 	IWL_RATE_HT_SISO_MCS_0_PLCP = 0,
@@ -172,6 +173,7 @@ struct rs_rate {
 	bool stbc;
 	bool bfer;
 };
+
 
 #define is_type_legacy(type) (((type) == LQ_LEGACY_G) || \
 			      ((type) == LQ_LEGACY_A))

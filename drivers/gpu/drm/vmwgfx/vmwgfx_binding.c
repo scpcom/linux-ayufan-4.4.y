@@ -428,6 +428,7 @@ void vmw_binding_res_list_scrub(struct list_head *head)
 	}
 }
 
+
 /**
  * vmw_binding_state_commit - Commit staged binding info
  *

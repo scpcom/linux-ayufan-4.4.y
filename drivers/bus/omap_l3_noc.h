@@ -94,6 +94,7 @@ struct l3_flagmux_data {
 	u32 mask_dbg_bits;
 };
 
+
 /**
  * struct omap_l3 - Description of data relevant for L3 bus.
  * @dev:	device representing the bus (populated runtime)
@@ -142,6 +143,7 @@ static struct l3_flagmux_data omap_l3_flagmux_clk1 = {
 	.num_targ_data = ARRAY_SIZE(omap_l3_target_data_clk1),
 };
 
+
 static struct l3_target_data omap_l3_target_data_clk2[] = {
 	{0x500,	"CORTEXM3",},
 	{0x300,	"DSS",},
@@ -171,6 +173,7 @@ static struct l3_flagmux_data omap_l3_flagmux_clk2 = {
 	.l3_targ = omap_l3_target_data_clk2,
 	.num_targ_data = ARRAY_SIZE(omap_l3_target_data_clk2),
 };
+
 
 static struct l3_target_data omap4_l3_target_data_clk3[] = {
 	{0x0100, "DEBUGSS",},

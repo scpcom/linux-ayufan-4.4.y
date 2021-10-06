@@ -9,6 +9,7 @@
  *
  */
 
+
 #if CONFIG_UX500_DEBUG_UART > 2
 #error Invalid Ux500 debug UART
 #endif

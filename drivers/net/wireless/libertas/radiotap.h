@@ -41,3 +41,4 @@ struct rx_radiotap_hdr {
 	(1 << IEEE80211_RADIOTAP_RATE) |	\
 	(1 << IEEE80211_RADIOTAP_DB_ANTSIGNAL) |\
 	0)
+

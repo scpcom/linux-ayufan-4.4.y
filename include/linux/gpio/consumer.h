@@ -267,6 +267,7 @@ static inline void devm_gpiod_put_array(struct device *dev,
 	WARN_ON(1);
 }
 
+
 static inline int gpiod_get_direction(const struct gpio_desc *desc)
 {
 	/* GPIO can never have been requested */
@@ -291,6 +292,7 @@ static inline int gpiod_direction_output_raw(struct gpio_desc *desc, int value)
 	WARN_ON(1);
 	return -ENOSYS;
 }
+
 
 static inline int gpiod_get_value(const struct gpio_desc *desc)
 {

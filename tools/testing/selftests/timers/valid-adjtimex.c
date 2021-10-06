@@ -22,6 +22,8 @@
  *   GNU General Public License for more details.
  */
 
+
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -164,6 +166,7 @@ int validate_freq(void)
 		}
 	}
 
+
 	if (sizeof(long) == 8) { /* this case only applies to 64bit systems */
 		for (i = 0; i < NUM_FREQ_INVALID; i++) {
 			tx.modes = ADJ_FREQUENCY;
@@ -188,6 +191,7 @@ out:
 
 	return pass;
 }
+
 
 int main(int argc, char **argv)
 {

@@ -36,6 +36,7 @@ struct mn88472_config {
 	 */
 	u16 i2c_wr_max;
 
+
 	/* Everything after that is returned by the driver. */
 
 	/*

@@ -176,6 +176,7 @@ typedef struct {
 	unsigned long   pad:23; /* [41:63] */
 } load_store_t;
 
+
 typedef enum {
 	UPD_IMMEDIATE,	/* ldXZ r1=[r3],imm(9) */
 	UPD_REG		/* ldXZ r1=[r3],r2     */
@@ -372,6 +373,7 @@ set_rse_reg (struct pt_regs *regs, unsigned long r1, unsigned long val, int nat)
 	DPRINT("rnat changed to @%p = 0x%lx\n", (void *) rnat_addr, rnats);
 }
 
+
 static void
 get_rse_reg (struct pt_regs *regs, unsigned long r1, unsigned long *val, int *nat)
 {
@@ -443,6 +445,7 @@ get_rse_reg (struct pt_regs *regs, unsigned long r1, unsigned long *val, int *na
 		*nat = 0;
 	return;
 }
+
 
 static void
 setreg (unsigned long regnum, unsigned long val, int nat, struct pt_regs *regs)
@@ -617,6 +620,7 @@ getfpreg (unsigned long regnum, struct ia64_fpreg *fpval, struct pt_regs *regs)
 	}
 }
 
+
 static void
 getreg (unsigned long regnum, unsigned long *val, int *nat, struct pt_regs *regs)
 {
@@ -677,6 +681,7 @@ emulate_load_updates (update_t type, load_store_t ld, struct pt_regs *regs, unsi
 				  regs, 30))
 			return;
 	}
+
 
 	/*
 	 * at this point, we know that the base register to update is valid i.e.,
@@ -740,6 +745,7 @@ emulate_load_updates (update_t type, load_store_t ld, struct pt_regs *regs, unsi
 		DPRINT("imm=%d r2=%ld r3=0x%lx nat_r2=%d\n",ld.imm, r2, ifa, nat_r2);
 	}
 }
+
 
 static int
 emulate_load_int (unsigned long ifa, load_store_t ld, struct pt_regs *regs)
@@ -1115,6 +1121,7 @@ emulate_load_floatpair (unsigned long ifa, load_store_t ld, struct pt_regs *regs
 	return 0;
 }
 
+
 static int
 emulate_load_float (unsigned long ifa, load_store_t ld, struct pt_regs *regs)
 {
@@ -1189,6 +1196,7 @@ emulate_load_float (unsigned long ifa, load_store_t ld, struct pt_regs *regs)
 
 	return 0;
 }
+
 
 static int
 emulate_store_float (unsigned long ifa, load_store_t ld, struct pt_regs *regs)

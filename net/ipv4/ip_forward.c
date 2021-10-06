@@ -60,6 +60,7 @@ static bool ip_exceeds_mtu(const struct sk_buff *skb, unsigned int mtu)
 	return true;
 }
 
+
 static int ip_forward_finish(struct net *net, struct sock *sk, struct sk_buff *skb)
 {
 	struct ip_options *opt	= &(IPCB(skb)->opt);

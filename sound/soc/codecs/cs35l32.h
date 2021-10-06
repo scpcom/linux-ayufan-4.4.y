@@ -89,4 +89,5 @@ struct cs35l32_platform_data {
 			SNDRV_PCM_FMTBIT_S24_LE | \
 			SNDRV_PCM_FMTBIT_S32_LE)
 
+
 #endif

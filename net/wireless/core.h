@@ -16,6 +16,7 @@
 #include <net/cfg80211.h>
 #include "reg.h"
 
+
 #define WIPHY_IDX_INVALID	-1
 
 struct cfg80211_registered_device {
@@ -160,6 +161,7 @@ static inline void cfg80211_unhold_bss(struct cfg80211_internal_bss *bss)
 	int r = atomic_dec_return(&bss->hold);
 	WARN_ON(r < 0);
 }
+
 
 struct cfg80211_registered_device *cfg80211_rdev_by_wiphy_idx(int wiphy_idx);
 int get_wiphy_idx(struct wiphy *wiphy);

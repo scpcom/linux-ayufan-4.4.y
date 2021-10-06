@@ -458,6 +458,7 @@
 #define ALX_MIB_TX_MCCNT				(ALX_MIB_BASE + 192)
 #define ALX_MIB_UPDATE					(ALX_MIB_BASE + 196)
 
+
 #define ALX_ISR						0x1600
 #define ALX_ISR_DIS					BIT(31)
 #define ALX_ISR_RX_Q7					BIT(30)

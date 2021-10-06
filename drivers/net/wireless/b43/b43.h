@@ -17,6 +17,7 @@
 #include "lo.h"
 #include "phy_common.h"
 
+
 #ifdef CONFIG_B43_DEBUG
 # define B43_DEBUG	1
 #else
@@ -652,6 +653,7 @@ struct b43_iv {
 	} data __packed;
 } __packed;
 
+
 /* Data structures for DMA transmission, per 80211 core. */
 struct b43_dma {
 	struct b43_dmaring *tx_ring_AC_BK; /* Background */
@@ -1084,6 +1086,7 @@ __printf(2, 3) void b43info(struct b43_wl *wl, const char *fmt, ...);
 __printf(2, 3) void b43err(struct b43_wl *wl, const char *fmt, ...);
 __printf(2, 3) void b43warn(struct b43_wl *wl, const char *fmt, ...);
 __printf(2, 3) void b43dbg(struct b43_wl *wl, const char *fmt, ...);
+
 
 /* A WARN_ON variant that vanishes when b43 debugging is disabled.
  * This _also_ evaluates the arg with debugging disabled. */

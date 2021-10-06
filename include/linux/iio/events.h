@@ -31,6 +31,7 @@
 	 ((u64)chan_type << 32) | (((u16)chan2) << 16) | ((u16)chan1) | \
 	 ((u16)chan))
 
+
 /**
  * IIO_MOD_EVENT_CODE() - create event identifier for modified channels
  * @chan_type:	Type of the channel. Should be one of enum iio_chan_type.

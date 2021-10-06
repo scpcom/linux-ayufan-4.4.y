@@ -9,6 +9,7 @@
  * option) any later version.
  */
 
+
 #ifndef __ASM_MACH_LOONGSON32_LOONGSON1_H
 #define __ASM_MACH_LOONGSON32_LOONGSON1_H
 

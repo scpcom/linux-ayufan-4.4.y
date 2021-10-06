@@ -67,6 +67,7 @@ __async_tx_find_channel(struct async_submit_ctl *submit,
 EXPORT_SYMBOL_GPL(__async_tx_find_channel);
 #endif
 
+
 /**
  * async_tx_channel_switch - queue an interrupt descriptor with a dependency
  * 	pre-attached.
@@ -133,6 +134,7 @@ async_tx_channel_switch(struct dma_async_tx_descriptor *depend_tx,
 		tx->tx_submit(tx);
 	}
 }
+
 
 /**
  * submit_disposition - flags for routing an incoming operation

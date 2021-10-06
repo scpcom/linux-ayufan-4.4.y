@@ -108,6 +108,7 @@ static ssize_t show_name(struct device *dev, struct device_attribute
 	return sprintf(buf, "%s\n", data->name);
 }
 
+
 static ssize_t show_temp(struct device *dev,
 			 struct device_attribute *devattr, char *buf)
 {

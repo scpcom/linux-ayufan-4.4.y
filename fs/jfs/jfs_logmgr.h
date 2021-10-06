@@ -92,6 +92,7 @@ struct logsuper {
 #define LOGWRAP		2	/* log wrapped */
 #define LOGREADERR	3	/* log read error detected in logredo() */
 
+
 /*
  *	log logical page
  *
@@ -136,6 +137,7 @@ struct logpage {
 
 #define LOGPHDRSIZE	8	/* log page header size */
 #define LOGPTLRSIZE	8	/* log page trailer size */
+
 
 /*
  *	log record
@@ -194,6 +196,7 @@ struct logpage {
 #define	LOG_FREEPXDLIST		0x0004
 #define	LOG_FREEXAD		0x0002
 #define	LOG_FREEPXD		0x0001
+
 
 struct lrd {
 	/*
@@ -355,6 +358,7 @@ struct lvd {
 	__le16 offset;
 	__le16 length;
 };
+
 
 /*
  *	log logical volume

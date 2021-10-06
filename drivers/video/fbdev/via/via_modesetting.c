@@ -29,6 +29,7 @@
 #include "share.h"
 #include "debug.h"
 
+
 void via_set_primary_timing(const struct via_display_timing *timing)
 {
 	struct via_display_timing raw;

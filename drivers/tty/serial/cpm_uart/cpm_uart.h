@@ -141,4 +141,5 @@ static inline void *cpm2cpu_addr(unsigned long addr,
 	return NULL;
 }
 
+
 #endif /* CPM_UART_H */

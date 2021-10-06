@@ -24,6 +24,8 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+
+
 #include <linux/errno.h>
 #include <linux/kernel.h>
 #include <linux/module.h>
@@ -35,6 +37,7 @@
 
 #define PKT_READY 0
 #define PKT_DISPOSED 1
+
 
 void dvb_ringbuffer_init(struct dvb_ringbuffer *rbuf, void *data, size_t len)
 {
@@ -48,10 +51,14 @@ void dvb_ringbuffer_init(struct dvb_ringbuffer *rbuf, void *data, size_t len)
 	spin_lock_init(&(rbuf->lock));
 }
 
+
+
 int dvb_ringbuffer_empty(struct dvb_ringbuffer *rbuf)
 {
 	return (rbuf->pread==rbuf->pwrite);
 }
+
+
 
 ssize_t dvb_ringbuffer_free(struct dvb_ringbuffer *rbuf)
 {
@@ -63,6 +70,8 @@ ssize_t dvb_ringbuffer_free(struct dvb_ringbuffer *rbuf)
 	return free-1;
 }
 
+
+
 ssize_t dvb_ringbuffer_avail(struct dvb_ringbuffer *rbuf)
 {
 	ssize_t avail;
@@ -72,6 +81,8 @@ ssize_t dvb_ringbuffer_avail(struct dvb_ringbuffer *rbuf)
 		avail += rbuf->size;
 	return avail;
 }
+
+
 
 void dvb_ringbuffer_flush(struct dvb_ringbuffer *rbuf)
 {
@@ -134,6 +145,7 @@ void dvb_ringbuffer_read(struct dvb_ringbuffer *rbuf, u8 *buf, size_t len)
 
 	rbuf->pread = (rbuf->pread + todo) % rbuf->size;
 }
+
 
 ssize_t dvb_ringbuffer_write(struct dvb_ringbuffer *rbuf, const u8 *buf, size_t len)
 {
@@ -299,6 +311,8 @@ ssize_t dvb_ringbuffer_pkt_next(struct dvb_ringbuffer *rbuf, size_t idx, size_t*
 	// no packets available
 	return -1;
 }
+
+
 
 EXPORT_SYMBOL(dvb_ringbuffer_init);
 EXPORT_SYMBOL(dvb_ringbuffer_empty);

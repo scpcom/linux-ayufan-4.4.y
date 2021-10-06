@@ -236,6 +236,7 @@ static u64 __calc_delta(u64 delta_exec, unsigned long weight, struct load_weight
 	return mul_u64_u32_shr(delta_exec, fact, shift);
 }
 
+
 const struct sched_class fair_sched_class;
 
 /**************************************************************
@@ -2207,6 +2208,7 @@ void task_numa_work(struct callback_head *work)
 	if (!pages)
 		return;
 
+
 	down_read(&mm->mmap_sem);
 	vma = find_vma(mm, start);
 	if (!vma) {
@@ -3311,6 +3313,7 @@ entity_tick(struct cfs_rq *cfs_rq, struct sched_entity *curr, int queued)
 	if (cfs_rq->nr_running > 1)
 		check_preempt_tick(cfs_rq, curr);
 }
+
 
 /**************************************************
  * CFS bandwidth control machinery
@@ -8246,6 +8249,7 @@ int alloc_fair_sched_group(struct task_group *tg, struct task_group *parent)
 void unregister_fair_sched_group(struct task_group *tg, int cpu) { }
 
 #endif /* CONFIG_FAIR_GROUP_SCHED */
+
 
 static unsigned int get_rr_interval_fair(struct rq *rq, struct task_struct *task)
 {

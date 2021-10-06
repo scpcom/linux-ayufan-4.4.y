@@ -50,6 +50,7 @@ static int rio_mport_phys_table[] = {
 	-1,
 };
 
+
 /**
  * rio_destid_alloc - Allocate next available destID for given network
  * @net: RIO network

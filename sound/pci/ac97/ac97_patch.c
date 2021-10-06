@@ -1759,6 +1759,7 @@ static int patch_ad1886(struct snd_ac97 * ac97)
 #define AC97_AD1986_OMS_MLC	0x0700  /* MIX of MIC, LINE_IN, C/LFE pins */
 					/*   are MIC sources */
 
+
 static int snd_ac97_ad198x_spdif_source_info(struct snd_kcontrol *kcontrol, struct snd_ctl_elem_info *uinfo)
 {
 	static const char * const texts[2] = { "AC-Link", "A/D Converter" };
@@ -2816,6 +2817,7 @@ static int patch_alc655(struct snd_ac97 * ac97)
 
 	return 0;
 }
+
 
 #define AC97_ALC850_JACK_SELECT	0x76
 #define AC97_ALC850_MISC1	0x7a

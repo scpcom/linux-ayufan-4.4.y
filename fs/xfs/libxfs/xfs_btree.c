@@ -51,6 +51,7 @@ static const __uint32_t xfs_magics[2][XFS_BTNUM_MAX] = {
 #define xfs_btree_magic(cur) \
 	xfs_magics[!!((cur)->bc_flags & XFS_BTREE_CRC_BLOCKS)][cur->bc_btnum]
 
+
 STATIC int				/* error (0 or EFSCORRUPTED) */
 xfs_btree_check_lblock(
 	struct xfs_btree_cur	*cur,	/* btree cursor */
@@ -810,6 +811,7 @@ xfs_btree_readahead_sblock(
 	int			rval = 0;
 	xfs_agblock_t		left = be32_to_cpu(block->bb_u.s.bb_leftsib);
 	xfs_agblock_t		right = be32_to_cpu(block->bb_u.s.bb_rightsib);
+
 
 	if ((lr & XFS_BTCUR_LEFTRA) && left != NULLAGBLOCK) {
 		xfs_btree_reada_bufs(cur->bc_mp, cur->bc_private.a.agno,
@@ -2453,6 +2455,7 @@ __xfs_btree_split(
 			xfs_btree_rec_addr(cur, 1, right));
 	}
 
+
 	/*
 	 * Find the left block number by looking in the buffer.
 	 * Adjust numrecs, sibling pointers.
@@ -2591,6 +2594,7 @@ xfs_btree_split(
 	destroy_work_on_stack(&args.work);
 	return args.result;
 }
+
 
 /*
  * Copy the old inode root contents into a real block and make the
@@ -2890,6 +2894,7 @@ xfs_btree_make_block_unfull(
 	error = xfs_btree_split(cur, level, nptr, &key, ncur, stat);
 	if (error || *stat == 0)
 		return error;
+
 
 	*index = cur->bc_ptrs[level];
 	cur->bc_ops->init_rec_from_key(&key, nrec);

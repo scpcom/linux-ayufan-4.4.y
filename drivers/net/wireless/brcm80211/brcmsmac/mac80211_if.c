@@ -1179,6 +1179,8 @@ fail:
 	return NULL;
 }
 
+
+
 /**
  * determines if a device is a WL device, and if so, attaches it.
  *

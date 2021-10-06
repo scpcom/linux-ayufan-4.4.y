@@ -371,6 +371,7 @@ struct cyapa {
 	union cyapa_cmd_states cmd_states;
 };
 
+
 ssize_t cyapa_i2c_reg_read_block(struct cyapa *cyapa, u8 reg, size_t len,
 				 u8 *values);
 ssize_t cyapa_smbus_read_block(struct cyapa *cyapa, u8 cmd, size_t len,
@@ -401,6 +402,7 @@ bool cyapa_sort_tsg_pip_app_resp_data(struct cyapa *cyapa, u8 *data, int len);
 int cyapa_pip_bl_exit(struct cyapa *cyapa);
 int cyapa_pip_bl_enter(struct cyapa *cyapa);
 
+
 bool cyapa_is_pip_bl_mode(struct cyapa *cyapa);
 bool cyapa_is_pip_app_mode(struct cyapa *cyapa);
 int cyapa_pip_cmd_state_initialize(struct cyapa *cyapa);
@@ -420,6 +422,7 @@ int cyapa_pip_set_proximity(struct cyapa *cyapa, bool enable);
 
 bool cyapa_pip_irq_cmd_handler(struct cyapa *cyapa);
 int cyapa_pip_irq_handler(struct cyapa *cyapa);
+
 
 extern u8 pip_read_sys_info[];
 extern u8 pip_bl_read_app_info[];

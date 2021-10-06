@@ -66,6 +66,7 @@ int pt3_start_dma(struct pt3_adapter *adap)
 	return 0;
 }
 
+
 static u8 *next_unit(struct pt3_adapter *adap, int *idx, int *ofs)
 {
 	*ofs += PT3_ACCESS_UNIT;
@@ -148,6 +149,7 @@ void pt3_free_dmabuf(struct pt3_adapter *adap)
 			adap->desc_buf[i].descs, adap->desc_buf[i].b_addr);
 	adap->num_desc_bufs = 0;
 }
+
 
 int pt3_alloc_dmabuf(struct pt3_adapter *adap)
 {

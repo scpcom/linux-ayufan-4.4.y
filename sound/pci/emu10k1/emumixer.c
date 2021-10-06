@@ -193,6 +193,7 @@ static const char * const emu1616_src_texts[] = {
 	"DSP 31",
 };
 
+
 /*
  * List of data sources available for each destination
  */
@@ -524,6 +525,7 @@ static struct snd_kcontrol_new snd_emu1010_output_enum_ctls[] = {
 	EMU1010_SOURCE_OUTPUT("1010 ADAT 7 Playback Enum", 0x17),
 };
 
+
 /* 1616(m) cardbus */
 static struct snd_kcontrol_new snd_emu1616_output_enum_ctls[] = {
 	EMU1010_SOURCE_OUTPUT("Dock DAC1 Left Playback Enum", 0),
@@ -545,6 +547,7 @@ static struct snd_kcontrol_new snd_emu1616_output_enum_ctls[] = {
 	EMU1010_SOURCE_OUTPUT("Mana DAC Left Playback Enum", 0x10),
 	EMU1010_SOURCE_OUTPUT("Mana DAC Right Playback Enum", 0x11),
 };
+
 
 #define EMU1010_SOURCE_INPUT(xname,chid) \
 {								\
@@ -581,6 +584,8 @@ static struct snd_kcontrol_new snd_emu1010_input_enum_ctls[] = {
 	EMU1010_SOURCE_INPUT("DSP 15 Capture Enum", 0x15),
 };
 
+
+
 #define snd_emu1010_adc_pads_info	snd_ctl_boolean_mono_info
 
 static int snd_emu1010_adc_pads_get(struct snd_kcontrol *kcontrol, struct snd_ctl_elem_value *ucontrol)
@@ -609,6 +614,8 @@ static int snd_emu1010_adc_pads_put(struct snd_kcontrol *kcontrol, struct snd_ct
 
 	return 0;
 }
+
+
 
 #define EMU1010_ADC_PADS(xname,chid) \
 {								\
@@ -656,6 +663,8 @@ static int snd_emu1010_dac_pads_put(struct snd_kcontrol *kcontrol, struct snd_ct
 	return 0;
 }
 
+
+
 #define EMU1010_DAC_PADS(xname,chid) \
 {								\
 	.iface = SNDRV_CTL_ELEM_IFACE_MIXER, .name = xname,	\
@@ -673,6 +682,7 @@ static struct snd_kcontrol_new snd_emu1010_dac_pads[] = {
 	EMU1010_DAC_PADS("DAC4 Audio Dock 14dB PAD Playback Switch", EMU_HANA_DOCK_DAC_PAD4),
 	EMU1010_DAC_PADS("DAC1 0202 14dB PAD Playback Switch", EMU_HANA_0202_DAC_PAD1),
 };
+
 
 static int snd_emu1010_internal_clock_info(struct snd_kcontrol *kcontrol,
 					  struct snd_ctl_elem_info *uinfo)
@@ -778,6 +788,7 @@ static int snd_emu1010_internal_clock_put(struct snd_kcontrol *kcontrol,
 			/*   Unmute all */
 			snd_emu1010_fpga_write(emu, EMU_HANA_UNMUTE, EMU_UNMUTE );
 			 
+			
 			break;		
 		}
 	}
@@ -1053,6 +1064,7 @@ static int snd_audigy_i2c_volume_put(struct snd_kcontrol *kcontrol,
 	.private_value = chid					\
 }
 
+
 static struct snd_kcontrol_new snd_audigy_i2c_volume_ctls[] = {
 	I2C_VOLUME("Mic Capture Volume", 0),
 	I2C_VOLUME("Line Capture Volume", 0)
@@ -1073,6 +1085,7 @@ static int snd_audigy_spdif_output_rate_get(struct snd_kcontrol *kcontrol,
 	unsigned int tmp;
 	unsigned long flags;
 	
+
 	spin_lock_irqsave(&emu->reg_lock, flags);
 	tmp = snd_emu10k1_ptr_read(emu, A_SPDIF_SAMPLERATE, 0);
 	switch (tmp & A_SPDIF_RATE_MASK) {
@@ -1115,6 +1128,7 @@ static int snd_audigy_spdif_output_rate_put(struct snd_kcontrol *kcontrol,
 		break;
 	}
 
+	
 	spin_lock_irqsave(&emu->reg_lock, flags);
 	reg = snd_emu10k1_ptr_read(emu, A_SPDIF_SAMPLERATE, 0);
 	tmp = reg & ~A_SPDIF_RATE_MASK;
@@ -1182,6 +1196,7 @@ static struct snd_kcontrol_new snd_emu10k1_spdif_control =
 	.get =          snd_emu10k1_spdif_get,
 	.put =          snd_emu10k1_spdif_put
 };
+
 
 static void update_emu10k1_fxrt(struct snd_emu10k1 *emu, int voice, unsigned char *route)
 {
@@ -1552,6 +1567,7 @@ static int snd_emu10k1_efx_send_volume_put(struct snd_kcontrol *kcontrol,
 	return change;
 }
 
+
 static struct snd_kcontrol_new snd_emu10k1_efx_send_volume_control =
 {
 	.access =	SNDRV_CTL_ELEM_ACCESS_READWRITE | SNDRV_CTL_ELEM_ACCESS_INACTIVE,
@@ -1730,6 +1746,7 @@ static struct snd_kcontrol_new snd_audigy_capture_boost =
 	.get =		snd_audigy_capture_boost_get,
 	.put =		snd_audigy_capture_boost_put
 };
+
 
 /*
  */

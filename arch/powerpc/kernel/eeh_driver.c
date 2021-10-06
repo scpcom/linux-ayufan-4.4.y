@@ -840,6 +840,7 @@ static void eeh_handle_special_event(void)
 	unsigned long flags;
 	int rc;
 
+
 	do {
 		rc = eeh_ops->next_error(&pe);
 

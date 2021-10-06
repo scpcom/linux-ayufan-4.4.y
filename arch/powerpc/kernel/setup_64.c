@@ -461,6 +461,7 @@ static void __init initialize_cache_info(void)
 	DBG(" <- initialize_cache_info()\n");
 }
 
+
 /*
  * Do some initial setup of the system.  The parameters are those which 
  * were passed in from the bootloader.

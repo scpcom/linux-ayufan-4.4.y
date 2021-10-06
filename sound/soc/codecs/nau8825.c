@@ -27,6 +27,7 @@
 #include <sound/soc.h>
 #include <sound/jack.h>
 
+
 #include "nau8825.h"
 
 #define NAU_FREF_MAX 13500000
@@ -295,6 +296,7 @@ static const struct snd_kcontrol_new nau8825_dacl_mux =
 static const struct snd_kcontrol_new nau8825_dacr_mux =
 	SOC_DAPM_ENUM("DACR Source", nau8825_dacr_enum);
 
+
 static const struct snd_soc_dapm_widget nau8825_dapm_widgets[] = {
 	SND_SOC_DAPM_AIF_OUT("AIFTX", "Capture", 0, NAU8825_REG_I2S_PCM_CTRL2,
 		15, 1),
@@ -540,6 +542,7 @@ int nau8825_enable_jack_detect(struct snd_soc_codec *codec,
 	return 0;
 }
 EXPORT_SYMBOL_GPL(nau8825_enable_jack_detect);
+
 
 static bool nau8825_is_jack_inserted(struct regmap *regmap)
 {

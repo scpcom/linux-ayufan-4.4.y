@@ -29,10 +29,12 @@
 #include "seq_oss_timer.h"
 #include "../seq_clientmgr.h"
 
+
 /*
  * protoypes
  */
 static int insert_queue(struct seq_oss_devinfo *dp, union evrec *rec, struct file *opt);
+
 
 /*
  * read interface
@@ -84,6 +86,7 @@ snd_seq_oss_read(struct seq_oss_devinfo *dp, char __user *buf, int count)
 	}
 	return result > 0 ? result : err;
 }
+
 
 /*
  * write interface
@@ -152,6 +155,7 @@ snd_seq_oss_write(struct seq_oss_devinfo *dp, const char __user *buf, int count,
 	return result > 0 ? result : err;
 }
 
+
 /*
  * insert event record to write queue
  * return: 0 = OK, non-zero = NG
@@ -187,6 +191,7 @@ insert_queue(struct seq_oss_devinfo *dp, union evrec *rec, struct file *opt)
 	return rc;
 }
 		
+
 /*
  * select / poll
  */

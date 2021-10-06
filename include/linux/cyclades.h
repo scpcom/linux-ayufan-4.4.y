@@ -68,6 +68,7 @@
 
 #include <uapi/linux/cyclades.h>
 
+
 /* Per card data structure */
 struct cyclades_card {
 	void __iomem *base_addr;
@@ -160,6 +161,7 @@ struct cyclades_port {
 #define	CLOSING_WAIT_DELAY	30*HZ
 #define CY_CLOSING_WAIT_NONE	ASYNC_CLOSING_WAIT_NONE
 #define CY_CLOSING_WAIT_INF	ASYNC_CLOSING_WAIT_INF
+
 
 #define CyMAX_CHIPS_PER_CARD	8
 #define CyMAX_CHAR_FIFO		12

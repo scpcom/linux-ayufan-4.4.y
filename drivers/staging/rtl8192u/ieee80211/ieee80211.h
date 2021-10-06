@@ -40,6 +40,7 @@
 #include "rtl819x_BA.h"
 #include "rtl819x_TS.h"
 
+
 #ifndef IW_MODE_MONITOR
 #define IW_MODE_MONITOR 6
 #endif
@@ -212,12 +213,14 @@ typedef struct cb_desc {
 #define IEEE_MLME_STA_DEAUTH			1
 #define IEEE_MLME_STA_DISASSOC			2
 
+
 #define IEEE_CRYPT_ERR_UNKNOWN_ALG		2
 #define IEEE_CRYPT_ERR_UNKNOWN_ADDR		3
 #define IEEE_CRYPT_ERR_CRYPT_INIT_FAILED	4
 #define IEEE_CRYPT_ERR_KEY_SET_FAILED		5
 #define IEEE_CRYPT_ERR_TX_KEY_SET_FAILED	6
 #define IEEE_CRYPT_ERR_CARD_CONF_FAILED		7
+
 
 #define	IEEE_CRYPT_ALG_NAME_LEN			16
 
@@ -294,6 +297,7 @@ typedef struct cb_desc {
 #define ieee80211_wx_set_encode_ext	ieee80211_wx_set_encode_ext_rsl
 #define ieee80211_wx_get_encode_ext	ieee80211_wx_get_encode_ext_rsl
 
+
 typedef struct ieee_param {
 	u32 cmd;
 	u8 sta_addr[ETH_ALEN];
@@ -323,6 +327,7 @@ typedef struct ieee_param {
 	} u;
 }ieee_param;
 
+
 // linux under 2.6.9 release may not support it, so modify it for common use
 #define MSECS(t) msecs_to_jiffies(t)
 #define msleep_interruptible_rsl  msleep_interruptible
@@ -348,6 +353,7 @@ typedef struct ieee_param {
 
 #define MIN_FRAG_THRESHOLD     256U
 #define MAX_FRAG_THRESHOLD     2346U
+
 
 /* Frame control field constants */
 #define IEEE80211_FCTL_VERS		0x0003
@@ -661,6 +667,7 @@ struct ieee80211_snap_hdr {
 #define IEEE80211_NUM_CCK_RATES		    4
 #define IEEE80211_OFDM_SHIFT_MASK_A         4
 
+
 /* this is stolen and modified from the madwifi driver*/
 #define IEEE80211_FC0_TYPE_MASK		0x0c
 #define IEEE80211_FC0_TYPE_DATA		0x08
@@ -831,6 +838,7 @@ struct ieee80211_security {
 	u8 level;
 	u16 flags;
 } __packed;
+
 
 /*
  802.11 data frame from AP
@@ -1317,6 +1325,7 @@ typedef enum _erp_t{
 	ERP_BarkerPreambleMode = 0x04,
 } erp_t;
 
+
 struct ieee80211_network {
 	/* These entries are used to identify a unique network */
 	u8 bssid[ETH_ALEN];
@@ -1444,6 +1453,8 @@ enum ieee80211_state {
 #define IEEE80211_52GHZ_CHANNELS (IEEE80211_52GHZ_MAX_CHANNEL - \
 				  IEEE80211_52GHZ_MIN_CHANNEL + 1)
 
+
+
 typedef struct tx_pending_t{
 	int frag;
 	struct ieee80211_txb *txb;
@@ -1455,6 +1466,7 @@ typedef struct _bandwidth_autoswitch {
 	bool bforced_tx20Mhz;
 	bool bautoswitch_enable;
 } bandwidth_autoswitch, *pbandwidth_autoswitch;
+
 
 //added by amy for order
 
@@ -1590,6 +1602,7 @@ typedef struct _RT_LINK_DETECT_T{
 	bool				bBusyTraffic;
 }RT_LINK_DETECT_T, *PRT_LINK_DETECT_T;
 
+
 struct ieee80211_device {
 	struct net_device *dev;
 	struct ieee80211_security sec;
@@ -1648,6 +1661,7 @@ struct ieee80211_device {
 	// Qos related. Added by Annie, 2005-11-01.
 //	PSTA_QOS			pStaQos;
 	u8				ForcedPriority;		// Force per-packet priority 1~7. (default: 0, not to force it.)
+
 
 	/* Bookkeeping structures */
 	struct net_device_stats stats;
@@ -1885,6 +1899,7 @@ struct ieee80211_device {
 	//u32 STA_EDCA_PARAM[4];
 	//CHANNEL_ACCESS_SETTING ChannelAccessSetting;
 
+
 	/* Callback functions */
 	void (*set_security)(struct net_device *dev,
 			     struct ieee80211_security *sec);
@@ -1979,6 +1994,7 @@ struct ieee80211_device {
 	short (*ps_is_queue_empty) (struct net_device *dev);
 	int (*handle_beacon) (struct net_device *dev, struct ieee80211_beacon *beacon, struct ieee80211_network *network);
 	int (*handle_assoc_response) (struct net_device *dev, struct ieee80211_assoc_response_frame *resp, struct ieee80211_network *network);
+
 
 	/* check whether Tx hw resource available */
 	short (*check_nic_enough_desc)(struct net_device *dev, int queue_index);
@@ -2151,6 +2167,7 @@ static inline int ieee80211_is_cck_rate(u8 rate)
 	return 0;
 }
 
+
 /* ieee80211.c */
 void free_ieee80211(struct net_device *dev);
 struct net_device *alloc_ieee80211(int sizeof_priv);
@@ -2164,6 +2181,7 @@ int ieee80211_encrypt_fragment(struct ieee80211_device *ieee,
 
 int ieee80211_xmit(struct sk_buff *skb, struct net_device *dev);
 void ieee80211_txb_free(struct ieee80211_txb *);
+
 
 /* ieee80211_rx.c */
 int ieee80211_rx(struct ieee80211_device *ieee, struct sk_buff *skb,
@@ -2307,6 +2325,7 @@ void ieee80211_debug_exit(void);
 
 //extern void ieee80211_wx_sync_scan_wq(struct ieee80211_device *ieee);
 void ieee80211_wx_sync_scan_wq(struct work_struct *work);
+
 
 int ieee80211_wx_set_rawtx(struct ieee80211_device *ieee,
 			   struct iw_request_info *info,

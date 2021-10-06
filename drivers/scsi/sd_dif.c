@@ -207,3 +207,4 @@ void sd_dif_complete(struct scsi_cmnd *scmd, unsigned int good_bytes)
 		}
 	}
 }
+

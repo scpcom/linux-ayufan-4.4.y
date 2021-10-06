@@ -159,6 +159,7 @@ int rt2x00usb_regbusy_read(struct rt2x00_dev *rt2x00dev,
 }
 EXPORT_SYMBOL_GPL(rt2x00usb_regbusy_read);
 
+
 struct rt2x00_async_read_data {
 	__le32 reg;
 	struct usb_ctrlrequest cr;

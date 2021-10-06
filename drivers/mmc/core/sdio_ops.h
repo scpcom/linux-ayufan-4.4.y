@@ -27,3 +27,4 @@ static inline bool mmc_is_io_op(u32 opcode)
 }
 
 #endif
+

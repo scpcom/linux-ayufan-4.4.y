@@ -75,6 +75,8 @@ static int snd_seq_call_port_info_ioctl(struct snd_seq_client *client, unsigned 
 	return err;
 }
 
+
+
 /*
  */
 

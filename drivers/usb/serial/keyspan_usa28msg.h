@@ -90,6 +90,7 @@
 #ifndef	__USA28MSG__
 #define	__USA28MSG__
 
+
 struct keyspan_usa28_portControlMessage
 {
 	/*
@@ -197,3 +198,4 @@ struct keyspan_usa28_globalDebugMessage
 #define	STATUS_UPDATE_INTERVAL	16
 
 #endif
+

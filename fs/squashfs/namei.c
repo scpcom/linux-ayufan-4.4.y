@@ -102,6 +102,7 @@ static int get_dir_index_using_name(struct super_block *sb,
 		if (err < 0)
 			break;
 
+
 		size = le32_to_cpu(index->size) + 1;
 		if (size > SQUASHFS_NAME_LEN)
 			break;
@@ -133,6 +134,7 @@ out:
 	 */
 	return length + 3;
 }
+
 
 static struct dentry *squashfs_lookup(struct inode *dir, struct dentry *dentry,
 				 unsigned int flags)
@@ -241,6 +243,7 @@ failed:
 	kfree(dire);
 	return ERR_PTR(err);
 }
+
 
 const struct inode_operations squashfs_dir_inode_ops = {
 	.lookup = squashfs_lookup,

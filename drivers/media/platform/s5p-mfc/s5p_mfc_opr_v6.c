@@ -1373,6 +1373,7 @@ static int s5p_mfc_init_decode_v6(struct s5p_mfc_ctx *ctx)
 	else
 		writel(0x0, mfc_regs->pixel_format);
 
+
 	/* sei parse */
 	writel(ctx->sei_fp_parse & 0x1, mfc_regs->d_sei_enable);
 
@@ -1844,6 +1845,7 @@ static void s5p_mfc_try_run_v6(struct s5p_mfc_dev *dev)
 		s5p_mfc_clock_off();
 	}
 }
+
 
 static void s5p_mfc_cleanup_queue_v6(struct list_head *lh, struct vb2_queue *vq)
 {

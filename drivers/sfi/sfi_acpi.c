@@ -197,6 +197,7 @@ static ssize_t sfi_acpi_table_show(struct file *filp, struct kobject *kobj,
 	return cnt;
 }
 
+
 void __init sfi_acpi_sysfs_init(void)
 {
 	u32 tbl_cnt, i;

@@ -505,6 +505,7 @@ config_done:
 		regmap_update_bits(regs, CCSR_SSI_SCR, vals->scr, vals->scr);
 }
 
+
 static void fsl_ssi_rx_config(struct fsl_ssi_private *ssi_private, bool enable)
 {
 	fsl_ssi_config(ssi_private, enable, &ssi_private->rxtx_reg_val.rx);
@@ -1186,6 +1187,7 @@ static struct snd_soc_dai_driver fsl_ssi_ac97_dai = {
 	},
 	.ops = &fsl_ssi_dai_ops,
 };
+
 
 static struct fsl_ssi_private *fsl_ac97_data;
 

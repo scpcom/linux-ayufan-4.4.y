@@ -9,6 +9,7 @@
  * 2 of the License, or (at your option) any later version.
  */
 
+
         .text
         .p2align	4
 

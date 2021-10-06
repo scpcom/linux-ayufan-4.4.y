@@ -295,6 +295,7 @@ typedef struct {
 #define REG_RD_ADDR_pinmux_rw_iop_usb 28
 #define REG_WR_ADDR_pinmux_rw_iop_usb 28
 
+
 /* Constants */
 enum {
   regk_pinmux_no                           = 0x00000000,

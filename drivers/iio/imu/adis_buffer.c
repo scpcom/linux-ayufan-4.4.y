@@ -96,6 +96,7 @@ static irqreturn_t adis_trigger_handler(int irq, void *p)
 	if (ret)
 		dev_err(&adis->spi->dev, "Failed to read data: %d", ret);
 
+
 	if (adis->data->has_paging) {
 		adis->current_page = 0;
 		mutex_unlock(&adis->txrx_lock);

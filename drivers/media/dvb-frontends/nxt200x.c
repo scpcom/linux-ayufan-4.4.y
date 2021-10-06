@@ -1248,3 +1248,4 @@ MODULE_AUTHOR("Kirk Lapray, Michael Krufky, Jean-Francois Thibert, and Taylor Ja
 MODULE_LICENSE("GPL");
 
 EXPORT_SYMBOL(nxt200x_attach);
+

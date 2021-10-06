@@ -43,6 +43,7 @@
 #define CREATE_TRACE_POINTS
 #include <trace/events/power_cpu_migrate.h>
 
+
 /*
  * Use our own MPIDR accessors as the generic ones in asm/cputype.h have
  * __attribute_const__ and we don't want the compiler to assume any

@@ -667,6 +667,7 @@ static int media_bay_resume(struct macio_dev *mdev)
 	return 0;
 }
 
+
 /* Definitions of "ops" structures.
  */
 static const struct mb_ops ohare_mb_ops = {

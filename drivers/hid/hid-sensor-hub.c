@@ -278,6 +278,7 @@ done_proc:
 }
 EXPORT_SYMBOL_GPL(sensor_hub_get_feature);
 
+
 int sensor_hub_input_attr_get_raw_value(struct hid_sensor_hub_device *hsdev,
 					u32 usage_id,
 					u32 attr_usage_id, u32 report_id,

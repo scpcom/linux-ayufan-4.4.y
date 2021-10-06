@@ -419,6 +419,7 @@ static int klp_enable_func(struct klp_func *func)
 			goto err;
 		}
 
+
 	} else {
 		list_add_rcu(&func->stack_node, &ops->func_stack);
 	}

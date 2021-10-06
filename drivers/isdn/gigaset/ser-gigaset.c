@@ -225,6 +225,7 @@ static void flush_send_queue(struct cardstate *cs)
 		dev_kfree_skb_any(skb);
 }
 
+
 /* Gigaset Driver Interface */
 /* ======================== */
 
@@ -468,6 +469,7 @@ static const struct gigaset_ops ops = {
 	gigaset_m10x_send_skb,	/* asyncdata.c */
 	gigaset_m10x_input,	/* asyncdata.c */
 };
+
 
 /* Line Discipline Interface */
 /* ========================= */
@@ -740,6 +742,7 @@ static struct tty_ldisc_ops gigaset_ldisc = {
 	.receive_buf	= gigaset_tty_receive,
 	.write_wakeup	= gigaset_tty_wakeup,
 };
+
 
 /* Initialization / Shutdown */
 /* ========================= */

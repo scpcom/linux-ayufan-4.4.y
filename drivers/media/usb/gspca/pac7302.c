@@ -266,6 +266,7 @@ static void reg_w_buf(struct gspca_dev *gspca_dev,
 	}
 }
 
+
 static void reg_w(struct gspca_dev *gspca_dev,
 		u8 index,
 		u8 value)

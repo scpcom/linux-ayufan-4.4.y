@@ -197,6 +197,7 @@ static int __init bcm2836_armctrl_of_init(struct device_node *node,
 	return armctrl_of_init(node, parent, true);
 }
 
+
 /*
  * Handle each interrupt across the entire interrupt controller.  This reads the
  * status register before handling each interrupt, which is necessary given that

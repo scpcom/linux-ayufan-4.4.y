@@ -41,6 +41,7 @@ enum ps3_lpar_vas_id {
 	PS3_LPAR_VAS_ID_CURRENT = 0,
 };
 
+
 static DEFINE_SPINLOCK(ps3_htab_lock);
 
 static long ps3_hpte_insert(unsigned long hpte_group, unsigned long vpn,
@@ -203,3 +204,4 @@ void __init ps3_hpte_init(unsigned long htab_size)
 
 	ppc64_pft_size = __ilog2(htab_size);
 }
+

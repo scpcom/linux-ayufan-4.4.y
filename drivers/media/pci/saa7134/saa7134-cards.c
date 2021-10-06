@@ -7237,6 +7237,7 @@ MODULE_DEVICE_TABLE(pci, saa7134_pci_tbl);
 /* ----------------------------------------------------------- */
 /* flyvideo tweaks                                             */
 
+
 static void board_flyvideo(struct saa7134_dev *dev)
 {
 	pr_warn("%s: there are different flyvideo cards with different tuners\n"

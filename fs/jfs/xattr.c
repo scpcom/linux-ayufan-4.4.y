@@ -85,6 +85,7 @@ struct ea_buffer {
 #define EA_NEW		0x0004
 #define EA_MALLOC	0x0008
 
+
 static int is_known_namespace(const char *name)
 {
 	if (strncmp(name, XATTR_SYSTEM_PREFIX, XATTR_SYSTEM_PREFIX_LEN) &&
@@ -1066,6 +1067,7 @@ const struct xattr_handler *jfs_xattr_handlers[] = {
 #endif
 	NULL,
 };
+
 
 #ifdef CONFIG_JFS_SECURITY
 static int jfs_initxattrs(struct inode *inode, const struct xattr *xattr_array,

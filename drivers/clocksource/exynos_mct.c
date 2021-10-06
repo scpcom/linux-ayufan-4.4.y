@@ -603,6 +603,7 @@ static void __init mct_init_dt(struct device_node *np, unsigned int int_type)
 	exynos4_clockevent_init();
 }
 
+
 static void __init mct_init_spi(struct device_node *np)
 {
 	return mct_init_dt(np, MCT_INT_SPI);

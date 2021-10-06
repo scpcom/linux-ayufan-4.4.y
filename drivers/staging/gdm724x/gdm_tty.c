@@ -348,3 +348,4 @@ void unregister_lte_tty_driver(void)
 		}
 	}
 }
+

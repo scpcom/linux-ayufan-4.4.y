@@ -82,6 +82,7 @@
 #define OP_WRITE_SECURITY_REVC	0x9A
 #define OP_WRITE_SECURITY	0x9B	/* revision D */
 
+
 struct dataflash {
 	uint8_t			command[4];
 	char			name[24];
@@ -386,6 +387,7 @@ static int dataflash_write(struct mtd_info *mtd, loff_t to, size_t len,
 				dev_name(&spi->dev), addr, writelen, status);
 
 		(void) dataflash_waitready(priv->spi);
+
 
 #ifdef CONFIG_MTD_DATAFLASH_WRITE_VERIFY
 

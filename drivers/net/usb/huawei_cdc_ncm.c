@@ -65,6 +65,7 @@ static int huawei_cdc_ncm_wdm_manage_power(struct usb_interface *intf,
 	return huawei_cdc_ncm_manage_power(usbnet_dev, status);
 }
 
+
 static int huawei_cdc_ncm_bind(struct usbnet *usbnet_dev,
 			       struct usb_interface *intf)
 {

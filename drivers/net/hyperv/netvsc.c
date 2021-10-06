@@ -33,6 +33,7 @@
 
 #include "hyperv_net.h"
 
+
 static struct netvsc_device *alloc_net_device(struct hv_device *device)
 {
 	struct netvsc_device *net_device;
@@ -97,6 +98,7 @@ static struct netvsc_device *get_inbound_net_device(struct hv_device *device)
 get_in_err:
 	return net_device;
 }
+
 
 static int netvsc_destroy_buf(struct netvsc_device *net_device)
 {
@@ -259,6 +261,7 @@ static int netvsc_init_buf(struct hv_device *device)
 		goto cleanup;
 	}
 
+
 	/* Notify the NetVsp of the gpadl handle */
 	init_packet = &net_device->channel_init_pkt;
 
@@ -284,6 +287,7 @@ static int netvsc_init_buf(struct hv_device *device)
 
 	t = wait_for_completion_timeout(&net_device->channel_init_wait, 5*HZ);
 	BUG_ON(t == 0);
+
 
 	/* Check the response */
 	if (init_packet->msg.v1_msg.
@@ -411,6 +415,7 @@ cleanup:
 exit:
 	return ret;
 }
+
 
 /* Negotiate NVSP protocol version */
 static int negotiate_nvsp_ver(struct hv_device *device,
@@ -579,6 +584,7 @@ int netvsc_device_remove(struct hv_device *device)
 	free_netvsc_device(net_device);
 	return 0;
 }
+
 
 #define RING_AVAIL_PERCENT_HIWATER 20
 #define RING_AVAIL_PERCENT_LOWATER 10
@@ -1058,6 +1064,7 @@ static void netvsc_receive(struct netvsc_device *net_device,
 	netvsc_send_recv_completion(device, channel, net_device,
 				    vmxferpage_packet->d.trans_id, status);
 }
+
 
 static void netvsc_send_table(struct hv_device *hdev,
 			      struct nvsp_message *nvmsg)

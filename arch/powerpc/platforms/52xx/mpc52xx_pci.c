@@ -18,6 +18,7 @@
 #include <asm/machdep.h>
 #include <linux/kernel.h>
 
+
 /* ======================================================================== */
 /* Structures mapping & Defines for PCI Unit                                */
 /* ======================================================================== */
@@ -33,6 +34,7 @@
 #define MPC52xx_PCI_GSCR_PEE		0x00002000
 #define MPC52xx_PCI_GSCR_SEE		0x00001000
 #define MPC52xx_PCI_GSCR_PR		0x00000001
+
 
 #define MPC52xx_PCI_IWBTAR_TRANSLATION(proc_ad,pci_ad,size)	  \
 		( ( (proc_ad) & 0xff000000 )			| \
@@ -226,6 +228,7 @@ static struct pci_ops mpc52xx_pci_ops = {
 	.read  = mpc52xx_pci_read_config,
 	.write = mpc52xx_pci_write_config
 };
+
 
 /* ======================================================================== */
 /* PCI setup                                                                */

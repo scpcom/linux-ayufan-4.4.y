@@ -2957,6 +2957,7 @@ unsigned long sun4v_t5_set_perfreg(unsigned long reg_num,
 				   unsigned long reg_val);
 #endif
 
+
 #define HV_FAST_M7_GET_PERFREG	0x43
 #define HV_FAST_M7_SET_PERFREG	0x44
 

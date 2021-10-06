@@ -725,6 +725,7 @@ static const struct v4l2_subdev_video_ops adv7180_video_ops = {
 	.g_mbus_config = adv7180_g_mbus_config,
 };
 
+
 static const struct v4l2_subdev_core_ops adv7180_core_ops = {
 	.s_power = adv7180_s_power,
 };

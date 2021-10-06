@@ -7,6 +7,7 @@
 #ifndef _LINUX_LP_H
 #define _LINUX_LP_H
 
+
 #include <linux/wait.h>
 #include <linux/mutex.h>
 #include <uapi/linux/lp.h>
@@ -70,6 +71,7 @@ struct lp_struct {
  * with 1 for being active and 0 for being inactive, because the strobe signal
  * gets inverted, but it is also active low.
  */
+
 
 /* 
  * defines for 8255 control port

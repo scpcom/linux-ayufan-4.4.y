@@ -74,6 +74,7 @@ int uwb_ie_dump_hex(const struct uwb_ie_hdr *ies, size_t len,
 		    char *buf, size_t size);
 int uwb_rc_set_ie(struct uwb_rc *, struct uwb_rc_cmd_set_ie *);
 
+
 extern const char *uwb_rc_strerror(unsigned code);
 
 /*
@@ -95,6 +96,7 @@ extern int uwb_rc_cmd_async(struct uwb_rc *rc, const char *cmd_name,
 			    struct uwb_rccb *cmd, size_t cmd_size,
 			    u8 expected_type, u16 expected_event,
 			    uwb_rc_cmd_cb_f cb, void *arg);
+
 
 void uwb_rc_neh_create(struct uwb_rc *rc);
 void uwb_rc_neh_destroy(struct uwb_rc *rc);
@@ -243,6 +245,7 @@ extern int uwbd_evt_handle_rc_drp(struct uwb_event *);
 extern int uwbd_evt_handle_rc_drp_avail(struct uwb_event *);
 
 int uwbd_msg_handle_reset(struct uwb_event *evt);
+
 
 /*
  * Address management

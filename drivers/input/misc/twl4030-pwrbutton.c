@@ -113,3 +113,4 @@ MODULE_DESCRIPTION("Triton2 Power Button");
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Peter De Schrijver <peter.de-schrijver@nokia.com>");
 MODULE_AUTHOR("Felipe Balbi <felipe.balbi@nokia.com>");
+

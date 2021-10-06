@@ -160,6 +160,7 @@ int avc_has_perm_flags(u32 ssid, u32 tsid,
 int avc_has_extended_perms(u32 ssid, u32 tsid, u16 tclass, u32 requested,
 		u8 driver, u8 perm, struct common_audit_data *ad);
 
+
 u32 avc_policy_seqno(void);
 
 #define AVC_CALLBACK_GRANT		1
@@ -186,3 +187,4 @@ DECLARE_PER_CPU(struct avc_cache_stats, avc_cache_stats);
 #endif
 
 #endif /* _SELINUX_AVC_H_ */
+

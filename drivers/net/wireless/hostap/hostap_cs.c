@@ -19,6 +19,7 @@
 
 #include "hostap_wlan.h"
 
+
 static char *dev_info = "hostap_cs";
 
 MODULE_AUTHOR("Jouni Malinen");
@@ -27,15 +28,18 @@ MODULE_DESCRIPTION("Support for Intersil Prism2-based 802.11 wireless LAN "
 MODULE_SUPPORTED_DEVICE("Intersil Prism2-based WLAN cards (PC Card)");
 MODULE_LICENSE("GPL");
 
+
 static int ignore_cis_vcc;
 module_param(ignore_cis_vcc, int, 0444);
 MODULE_PARM_DESC(ignore_cis_vcc, "Ignore broken CIS VCC entry");
+
 
 /* struct local_info::hw_priv */
 struct hostap_cs_priv {
 	struct pcmcia_device *link;
 	int sandisk_connectplus;
 };
+
 
 #ifdef PRISM2_IO_DEBUG
 
@@ -147,6 +151,7 @@ static inline void hfa384x_insw_debug(struct net_device *dev, int a,
 
 #endif /* PRISM2_IO_DEBUG */
 
+
 static int hfa384x_from_bap(struct net_device *dev, u16 bap, void *buf,
 			    int len)
 {
@@ -166,6 +171,7 @@ static int hfa384x_from_bap(struct net_device *dev, u16 bap, void *buf,
 	return 0;
 }
 
+
 static int hfa384x_to_bap(struct net_device *dev, u16 bap, void *buf, int len)
 {
 	u16 d_off;
@@ -184,12 +190,16 @@ static int hfa384x_to_bap(struct net_device *dev, u16 bap, void *buf, int len)
 	return 0;
 }
 
+
 /* FIX: This might change at some point.. */
 #include "hostap_hw.c"
+
+
 
 static void prism2_detach(struct pcmcia_device *p_dev);
 static void prism2_release(u_long arg);
 static int prism2_config(struct pcmcia_device *link);
+
 
 static int prism2_pccard_card_present(local_info_t *local)
 {
@@ -199,6 +209,7 @@ static int prism2_pccard_card_present(local_info_t *local)
 	return 0;
 }
 
+
 /*
  * SanDisk CompactFlash WLAN Flashcard - Product Manual v1.0
  * Document No. 20-10-00058, January 2004
@@ -206,6 +217,7 @@ static int prism2_pccard_card_present(local_info_t *local)
  */
 #define SANDISK_WLAN_ACTIVATION_OFF 0x40
 #define SANDISK_HCR_OFF 0x42
+
 
 static void sandisk_set_iobase(local_info_t *local)
 {
@@ -228,6 +240,7 @@ static void sandisk_set_iobase(local_info_t *local)
 	}
 }
 
+
 static void sandisk_write_hcr(local_info_t *local, int hcr)
 {
 	struct net_device *dev = local->dev;
@@ -241,6 +254,7 @@ static void sandisk_write_hcr(local_info_t *local, int hcr)
 	udelay(55);
 	HFA384X_OUTB(0x45, SANDISK_WLAN_ACTIVATION_OFF);
 }
+
 
 static int sandisk_enable_wireless(struct net_device *dev)
 {
@@ -305,6 +319,7 @@ done:
 	return ret;
 }
 
+
 static void prism2_pccard_cor_sreset(local_info_t *local)
 {
 	int res;
@@ -348,6 +363,7 @@ static void prism2_pccard_cor_sreset(local_info_t *local)
 	if (hw_priv->sandisk_connectplus)
 		sandisk_set_iobase(local);
 }
+
 
 static void prism2_pccard_genesis_reset(local_info_t *local, int hcr)
 {
@@ -397,6 +413,7 @@ static void prism2_pccard_genesis_reset(local_info_t *local, int hcr)
 	mdelay(10);
 }
 
+
 static struct prism2_helper_functions prism2_pccard_funcs =
 {
 	.card_present	= prism2_pccard_card_present,
@@ -404,6 +421,7 @@ static struct prism2_helper_functions prism2_pccard_funcs =
 	.genesis_reset	= prism2_pccard_genesis_reset,
 	.hw_type	= HOSTAP_HW_PCCARD,
 };
+
 
 /* allocate local data and register with CardServices
  * initialize dev_link structure, but do not configure the card yet */
@@ -420,6 +438,7 @@ static int hostap_cs_probe(struct pcmcia_device *p_dev)
 
 	return ret;
 }
+
 
 static void prism2_detach(struct pcmcia_device *link)
 {
@@ -439,6 +458,7 @@ static void prism2_detach(struct pcmcia_device *link)
 		kfree(hw_priv);
 	}
 }
+
 
 static int prism2_config_check(struct pcmcia_device *p_dev, void *priv_data)
 {
@@ -524,6 +544,7 @@ static int prism2_config(struct pcmcia_device *link)
 	prism2_release((u_long)link);
 	return ret;
 }
+
 
 static void prism2_release(u_long arg)
 {
@@ -673,6 +694,7 @@ static const struct pcmcia_device_id hostap_cs_ids[] = {
 	PCMCIA_DEVICE_NULL
 };
 MODULE_DEVICE_TABLE(pcmcia, hostap_cs_ids);
+
 
 static struct pcmcia_driver hostap_driver = {
 	.name		= "hostap_cs",

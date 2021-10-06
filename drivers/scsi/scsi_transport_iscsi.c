@@ -282,6 +282,7 @@ static void iscsi_iface_release(struct device *dev)
 	put_device(parent);
 }
 
+
 static struct class iscsi_iface_class = {
 	.name = "iscsi_iface",
 	.dev_release = iscsi_iface_release,
@@ -814,6 +815,7 @@ show_##type##_##name(struct device *dev, struct device_attribute *attr,	\
 	return t->get_flashnode_param(fnode_sess, param, buf);		\
 }									\
 
+
 #define iscsi_flashnode_sess_attr(type, name, param)			\
 	iscsi_flashnode_sess_attr_show(type, name, param)		\
 static ISCSI_FLASHNODE_ATTR(type, name, S_IRUGO,			\
@@ -1025,6 +1027,7 @@ show_##type##_##name(struct device *dev, struct device_attribute *attr,	\
 	struct iscsi_transport *t = fnode_conn->transport;		\
 	return t->get_flashnode_param(fnode_sess, param, buf);		\
 }									\
+
 
 #define iscsi_flashnode_conn_attr(type, name, param)			\
 	iscsi_flashnode_conn_attr_show(type, name, param)		\
@@ -2904,6 +2907,7 @@ iscsi_tgt_dscvr(struct iscsi_transport *transport,
 		return -ENODEV;
 	}
 
+
 	dst_addr = (struct sockaddr *)((char*)ev + sizeof(*ev));
 	err = transport->tgt_dscvr(shost, ev->u.tgt_dscvr.type,
 				   ev->u.tgt_dscvr.enable, dst_addr);
@@ -3485,6 +3489,7 @@ exit_host_stats:
 	return err;
 }
 
+
 static int
 iscsi_if_recv_msg(struct sk_buff *skb, struct nlmsghdr *nlh, uint32_t *group)
 {
@@ -3776,6 +3781,7 @@ iscsi_conn_attr(is_fw_assigned_ipv6, ISCSI_PARAM_IS_FW_ASSIGNED_IPV6);
 iscsi_conn_attr(tcp_xmit_wsf, ISCSI_PARAM_TCP_XMIT_WSF);
 iscsi_conn_attr(tcp_recv_wsf, ISCSI_PARAM_TCP_RECV_WSF);
 iscsi_conn_attr(local_ipaddr, ISCSI_PARAM_LOCAL_IPADDR);
+
 
 #define iscsi_conn_ep_attr_show(param)					\
 static ssize_t show_conn_ep_param_##param(struct device *dev,		\

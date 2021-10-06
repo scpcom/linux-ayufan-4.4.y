@@ -77,6 +77,7 @@
 
 #define BRCMF_MAX_DEFAULT_KEYS		4
 
+
 /**
  * enum brcmf_scan_status - scan engine status
  *

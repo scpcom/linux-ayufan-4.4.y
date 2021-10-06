@@ -50,6 +50,7 @@ static void __init highbank_scu_map_io(void)
 	scu_base_addr = ioremap(base, SZ_4K);
 }
 
+
 static void highbank_l2c310_write_sec(unsigned long val, unsigned reg)
 {
 	if (reg == L2X0_CTRL)

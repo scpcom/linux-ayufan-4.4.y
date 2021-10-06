@@ -105,6 +105,7 @@ temp_crit_show(struct device *dev, struct device_attribute *attr, char *buf)
 	return sprintf(buf, "%d\n", temperature);
 }
 
+
 static struct thermal_hwmon_device *
 thermal_hwmon_lookup_by_type(const struct thermal_zone_device *tz)
 {

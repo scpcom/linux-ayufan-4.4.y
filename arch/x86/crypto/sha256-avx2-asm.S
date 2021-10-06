@@ -98,6 +98,7 @@ d	= %r8d
 e       = %edx	# clobbers NUM_BLKS
 y3	= %esi	# clobbers INP
 
+
 TBL	= %rbp
 SRND	= CTX	# SRND is same register as CTX
 
@@ -112,6 +113,7 @@ T1 = %r12d
 y0 = %r13d
 y1 = %r14d
 y2 = %r15d
+
 
 _XFER_SIZE	= 2*64*4	# 2 blocks, 64 rounds, 4 bytes/round
 _XMM_SAVE_SIZE	= 0
@@ -199,6 +201,7 @@ STACK_SIZE	= _RSP      + _RSP_SIZE
 	add	y2, h		# h = k + w + h + S0 + S1 + CH = t1 + S0# --
 	add	y3, h		# h = t1 + S0 + MAJ                     # --
 
+
 	ROTATE_ARGS
 
 ################################### RND N + 1 ############################
@@ -210,11 +213,13 @@ STACK_SIZE	= _RSP      + _RSP_SIZE
 	addl	offset(%rsp, SRND), h	# h = k + w + h         # --
 	or	c, y3		# y3 = a|c                              # MAJA
 
+
 	vpsrld	$3, XTMP1, XTMP4 # XTMP4 = W[-15] >> 3
 	mov	f, y2		# y2 = f                                # CH
 	rorx	$13, a, T1	# T1 = a >> 13				# S0B
 	xor	y1, y0		# y0 = (e>>25) ^ (e>>11)		# S1
 	xor	g, y2		# y2 = f^g                              # CH
+
 
 	rorx	$6, e, y1	# y1 = (e >> 6)				# S1
 	xor	y1, y0		# y0 = (e>>25) ^ (e>>11) ^ (e>>6)	# S1
@@ -247,6 +252,7 @@ STACK_SIZE	= _RSP      + _RSP_SIZE
 	add	y3, h		# h = t1 + S0 + MAJ                     # --
 
 	vpsrld	$10, XTMP2, XTMP4 # XTMP4 = W[-2] >> 10 {BBAA}
+
 
 	ROTATE_ARGS
 
@@ -296,6 +302,7 @@ STACK_SIZE	= _RSP      + _RSP_SIZE
 
 	add	y3,h		# h = t1 + S0 + MAJ                     # --
 
+
 	ROTATE_ARGS
 
 ################################### RND N + 3 ############################
@@ -307,11 +314,13 @@ STACK_SIZE	= _RSP      + _RSP_SIZE
 	addl	offset(%rsp, SRND), h	# h = k + w + h         # --
 	or	c, y3		# y3 = a|c                              # MAJA
 
+
 	vpsrld	$10, XTMP2, XTMP5	# XTMP5 = W[-2] >> 10 {DDCC}
 	mov	f, y2		# y2 = f                                # CH
 	rorx	$13, a, T1	# T1 = a >> 13				# S0B
 	xor	y1, y0		# y0 = (e>>25) ^ (e>>11)		# S1
 	xor	g, y2		# y2 = f^g                              # CH
+
 
 	vpsrlq	$19, XTMP2, XTMP3	# XTMP3 = W[-2] ror 19 {xDxC}
 	rorx	$6, e, y1	# y1 = (e >> 6)				# S1
@@ -377,6 +386,7 @@ STACK_SIZE	= _RSP      + _RSP_SIZE
 	and	c, T1		# T1 = a&c                              # MAJB
 	add	y0, y2		# y2 = S1 + CH                          # --
 
+
 	add	h, d		# d = k + w + h + d                     # --
 	or	T1, y3		# y3 = MAJ = (a|c)&b)|(a&c)             # MAJ
 	add	y1, h		# h = k + w + h + S0                    # --
@@ -414,6 +424,7 @@ STACK_SIZE	= _RSP      + _RSP_SIZE
 	and	b, y3		# y3 = (a|c)&b                          # MAJA
 	and	c, T1		# T1 = a&c                              # MAJB
 	add	y0, y2		# y2 = S1 + CH                          # --
+
 
 	add	h, d		# d = k + w + h + d                     # --
 	or	T1, y3		# y3 = MAJ = (a|c)&b)|(a&c)             # MAJ
@@ -454,6 +465,7 @@ STACK_SIZE	= _RSP      + _RSP_SIZE
 	and	c, T1		# T1 = a&c                              # MAJB
 	add	y0, y2		# y2 = S1 + CH                          # --
 
+
 	add	h, d		# d = k + w + h + d                     # --
 	or	T1, y3		# y3 = MAJ = (a|c)&b)|(a&c)             # MAJ
 	add	y1, h		# h = k + w + h + S0                    # --
@@ -493,11 +505,13 @@ STACK_SIZE	= _RSP      + _RSP_SIZE
 	and	c, T1		# T1 = a&c                              # MAJB
 	add	y0, y2		# y2 = S1 + CH                          # --
 
+
 	add	h, d		# d = k + w + h + d                     # --
 	or	T1, y3		# y3 = MAJ = (a|c)&b)|(a&c)             # MAJ
 	add	y1, h		# h = k + w + h + S0                    # --
 
 	add	y2, d		# d = k + w + h + d + S1 + CH = d + t1  # --
+
 
 	add	y2, h		# h = k + w + h + S0 + S1 + CH = t1 + S0# --
 
@@ -527,6 +541,7 @@ ENTRY(sha256_transform_rorx)
 	subq	$STACK_SIZE, %rsp
 	and	$-32, %rsp	# align rsp to 32 byte boundary
 	mov	%rax, _RSP(%rsp)
+
 
 	shl	$6, NUM_BLKS	# convert to bytes
 	jz	done_hash

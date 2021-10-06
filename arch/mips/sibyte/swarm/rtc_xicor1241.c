@@ -21,6 +21,7 @@
 #include <asm/sibyte/sb1250_regs.h>
 #include <asm/sibyte/sb1250_smbus.h>
 
+
 /* Xicor 1241 definitions */
 
 /*

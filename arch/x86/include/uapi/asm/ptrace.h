@@ -5,6 +5,7 @@
 #include <asm/ptrace-abi.h>
 #include <asm/processor-flags.h>
 
+
 #ifndef __ASSEMBLY__
 
 #ifdef __i386__
@@ -76,6 +77,8 @@ struct pt_regs {
 
 #endif /* __KERNEL__ */
 #endif /* !__i386__ */
+
+
 
 #endif /* !__ASSEMBLY__ */
 

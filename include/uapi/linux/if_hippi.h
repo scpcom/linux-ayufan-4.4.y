@@ -42,6 +42,7 @@
 #define HIPPI_EXTENDED_SAP	0xAA
 #define HIPPI_UI_CMD		0x03
 
+
 /*
  *	Do we need to list some sort of ID's here?
  */
@@ -73,6 +74,7 @@ struct hipnet_statistics {
 	int	tx_heartbeat_errors;
 	int	tx_window_errors;
 };
+
 
 struct hippi_fp_hdr {
 #if 0

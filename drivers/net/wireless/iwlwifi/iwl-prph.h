@@ -151,6 +151,7 @@
 #define DTSC_CFG_MODE_PERIODIC	(0x2)
 #define DTSC_PTAT_AVG		(0x00a10650)
 
+
 /**
  * Tx Scheduler
  *

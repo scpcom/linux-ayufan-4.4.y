@@ -946,6 +946,7 @@ struct RTV_RSP {		/* Structure is in Big Endian format */
 #define qtov_rsvd2_WORD		qtov		/* reserved */
 };
 
+
 typedef struct  _RPL {		/* Structure is in Big Endian format */
 	uint32_t maxsize;
 	uint32_t index;
@@ -1073,6 +1074,7 @@ struct fc_rdp_port_name_info {
 	uint8_t wwpn[8];
 };
 
+
 /*
  * Link Error Status Block Structure (FC-FS-3) for RDP
  * This similar to RPS ELS
@@ -1093,6 +1095,7 @@ struct fc_rdp_port_name_desc {
 	uint32_t	length;  /* set to size of payload struct */
 	struct fc_rdp_port_name_info  port_names;
 };
+
 
 struct fc_rdp_link_error_status_payload_info {
 	struct fc_link_status link_status; /* 24 bytes */
@@ -1148,6 +1151,7 @@ struct fc_rdp_nport_desc {
 	uint32_t         reserved : 8;
 };
 
+
 struct fc_rdp_link_service_info {
 	uint32_t         els_req;    /* Request payload word 0 value.*/
 };
@@ -1182,6 +1186,7 @@ struct fc_rdp_req_frame {
 	struct fc_rdp_nport_desc nport_id_desc; /* RDP Payload Word 2 - 4 */
 };
 
+
 struct fc_rdp_res_frame {
 	uint32_t	reply_sequence;		/* FC word0 LS_ACC or LS_RJT */
 	uint32_t	length;			/* FC Word 1      */
@@ -1193,11 +1198,13 @@ struct fc_rdp_res_frame {
 	struct fc_rdp_port_name_desc attached_port_names_desc;/* Word 28-33 */
 };
 
+
 #define RDP_DESC_PAYLOAD_SIZE (sizeof(struct fc_rdp_link_service_desc) \
 			+ sizeof(struct fc_rdp_sfp_desc) \
 			+ sizeof(struct fc_rdp_port_speed_desc) \
 			+ sizeof(struct fc_rdp_link_error_status_desc) \
 			+ (sizeof(struct fc_rdp_port_name_desc) * 2))
+
 
 /******** FDMI ********/
 
@@ -1212,6 +1219,7 @@ struct lpfc_fdmi_reg_port_list {
 	uint32_t pe;		/* Variable-length array */
 };
 
+
 /* Definitions for HBA / Port attribute entries */
 
 struct lpfc_fdmi_attr_def { /* Defined in TLV format */
@@ -1220,6 +1228,7 @@ struct lpfc_fdmi_attr_def { /* Defined in TLV format */
 	uint32_t AttrLen:16;
 	uint32_t AttrValue;  /* Marks start of Value (ATTRIBUTE_ENTRY) */
 };
+
 
 /* Attribute Entry */
 struct lpfc_fdmi_attr_entry {
@@ -2858,6 +2867,7 @@ struct hbq_mask {
 #endif
 };
 
+
 /* Structure for MB Command CONFIG_HBQ (7c) */
 
 struct config_hbq_var {
@@ -2911,6 +2921,7 @@ struct config_hbq_var {
 	uint32_t rsvd8;    /* w9 */
 
 	struct hbq_mask hbqMasks[6];
+
 
 	union {
 		uint32_t allprofiles[12];
@@ -2980,6 +2991,8 @@ struct config_hbq_var {
 	} profiles;
 
 };
+
+
 
 /* Structure for MB Command CONFIG_PORT (0x88) */
 typedef struct {
@@ -3950,6 +3963,7 @@ typedef struct _IOCB {	/* IOCB structure */
 #define IOSTAT_CNT             0x11
 
 } IOCB_t;
+
 
 #define SLI1_SLIM_SIZE   (4 * 1024)
 

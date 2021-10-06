@@ -101,6 +101,7 @@ static int ohci_jz4740_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 	return ohci_hub_control(hcd, typeReq, wValue, wIndex, buf, wLength);
 }
 
+
 static const struct hc_driver ohci_jz4740_hc_driver = {
 	.description =		hcd_name,
 	.product_desc =		"JZ4740 OHCI",
@@ -143,6 +144,7 @@ static const struct hc_driver ohci_jz4740_hc_driver = {
 	.start_port_reset =	ohci_start_port_reset,
 };
 
+
 static int jz4740_ohci_probe(struct platform_device *pdev)
 {
 	int ret;
@@ -184,6 +186,7 @@ static int jz4740_ohci_probe(struct platform_device *pdev)
 	jz4740_ohci->vbus = devm_regulator_get(&pdev->dev, "vbus");
 	if (IS_ERR(jz4740_ohci->vbus))
 		jz4740_ohci->vbus = NULL;
+
 
 	clk_set_rate(jz4740_ohci->clk, 48000000);
 	clk_enable(jz4740_ohci->clk);

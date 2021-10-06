@@ -518,6 +518,7 @@ err_unreach:
 }
 #endif
 
+
 /* return NF_ACCEPT to allow forwarding or other NF_xxx on error */
 static inline int ip_vs_tunnel_xmit_prepare(struct sk_buff *skb,
 					    struct ip_vs_conn *cp)
@@ -603,6 +604,7 @@ static inline int ip_vs_send_or_cont(int pf, struct sk_buff *skb,
 	return ret;
 }
 
+
 /*
  *      NULL transmitter (do nothing except return NF_ACCEPT)
  */
@@ -613,6 +615,7 @@ ip_vs_null_xmit(struct sk_buff *skb, struct ip_vs_conn *cp,
 	/* we do not touch skb and do not need pskb ptr */
 	return ip_vs_send_or_cont(NFPROTO_IPV4, skb, cp, 1);
 }
+
 
 /*
  *      Bypass transmitter
@@ -1156,6 +1159,7 @@ tx_error:
 }
 #endif
 
+
 /*
  *      Direct Routing transmitter
  *      Used for ANY protocol
@@ -1237,6 +1241,7 @@ tx_error:
 	return NF_STOLEN;
 }
 #endif
+
 
 /*
  *	ICMP packet transmitter

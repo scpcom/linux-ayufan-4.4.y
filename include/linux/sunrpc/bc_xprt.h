@@ -69,3 +69,4 @@ static inline void xprt_free_bc_request(struct rpc_rqst *req)
 }
 #endif /* CONFIG_SUNRPC_BACKCHANNEL */
 #endif /* _LINUX_SUNRPC_BC_XPRT_H */
+

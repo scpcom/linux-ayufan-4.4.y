@@ -10,6 +10,7 @@
  *
  * ----------------------------------------------------------------------- */
 
+
 #ifndef _UAPI_LINUX_AUTO_FS_H
 #define _UAPI_LINUX_AUTO_FS_H
 
@@ -17,6 +18,7 @@
 #ifndef __KERNEL__
 #include <sys/ioctl.h>
 #endif /* __KERNEL__ */
+
 
 /* This file describes autofs v3 */
 #define AUTOFS_PROTO_VERSION	3

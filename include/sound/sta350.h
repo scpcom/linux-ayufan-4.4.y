@@ -29,6 +29,7 @@
 #define STA350_FFX_PM_FULL_POWER		2
 #define STA350_FFX_PM_VARIABLE_DROP_COMP	3
 
+
 struct sta350_platform_data {
 	u8 output_conf;
 	u8 ch1_output_mapping;

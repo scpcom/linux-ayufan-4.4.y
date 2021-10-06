@@ -273,6 +273,7 @@ static u8 ch_id_to_ch_index(u16 ch_id)
 	return (ch_id - 13) / 4;
 }
 
+
 static u16 channel_id_to_papd(u16 ch_id)
 {
 	if (WARN_ON(!is_valid_channel(ch_id)))

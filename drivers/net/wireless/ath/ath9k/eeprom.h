@@ -316,6 +316,7 @@ struct base_eep_header_4k {
 	u8 txGainType;
 } __packed;
 
+
 struct spur_chan {
 	u16 spurChan;
 	u8 spurRangeLow;

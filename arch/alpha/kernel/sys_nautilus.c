@@ -50,6 +50,7 @@
 #include "pci_impl.h"
 #include "machvec_impl.h"
 
+
 static void __init
 nautilus_init_irq(void)
 {

@@ -443,6 +443,7 @@ void gigaset_m10x_input(struct inbuf_t *inbuf)
 }
 EXPORT_SYMBOL_GPL(gigaset_m10x_input);
 
+
 /* == data output ========================================================== */
 
 /*

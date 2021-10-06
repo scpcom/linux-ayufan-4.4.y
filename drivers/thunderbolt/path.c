@@ -9,6 +9,7 @@
 
 #include "tb.h"
 
+
 static void tb_dump_hop(struct tb_port *port, struct tb_regs_hop *hop)
 {
 	tb_port_info(port, " Hop through port %d to hop %d (%s)\n",

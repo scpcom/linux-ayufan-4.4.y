@@ -36,6 +36,7 @@ struct vbt_header {
 	u32 aim_offset[4];		/**< from beginning of VBT */
 } __attribute__((packed));
 
+
 struct bdb_header {
 	u8 signature[16];		/**< Always 'BIOS_DATA_BLOCK' */
 	u16 version;			/**< decimal */
@@ -213,6 +214,7 @@ struct child_device_config {
 	u16 extended_type;
 	u8  dvo_function;
 } __attribute__((packed));
+
 
 struct bdb_general_definitions {
 	/* DDC GPIO */

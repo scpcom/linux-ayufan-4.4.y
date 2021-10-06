@@ -42,6 +42,7 @@
 #define INTERFACE_C		3
 #define INTERFACE_D		4
 
+
 /*
  *   BmRequestType:  1100 0000b
  *   bRequest:       FTDI_E2_READ
@@ -218,6 +219,8 @@ enum ftdi_sio_baudrate {
  *
  */
 
+
+
 /* FTDI_SIO_MODEM_CTRL */
 #define FTDI_SIO_SET_MODEM_CTRL_REQUEST_TYPE 0x40
 #define FTDI_SIO_SET_MODEM_CTRL_REQUEST FTDI_SIO_MODEM_CTRL
@@ -350,8 +353,10 @@ enum ftdi_sio_baudrate {
  * which is what normally happens.
  */
 
+
 #define  FTDI_SIO_SET_EVENT_CHAR_REQUEST FTDI_SIO_SET_EVENT_CHAR
 #define  FTDI_SIO_SET_EVENT_CHAR_REQUEST_TYPE 0x40
+
 
 /*
  *  BmRequestType:   0100 0000b
@@ -426,6 +431,8 @@ enum ftdi_sio_baudrate {
  *         0 = inactive
  *         1 = active
  */
+
+
 
 /* Descriptors returned by the device
  *

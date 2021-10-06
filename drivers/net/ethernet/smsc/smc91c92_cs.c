@@ -77,6 +77,7 @@ MODULE_FIRMWARE(FIRMWARE_NAME);
 */
 INT_MODULE_PARM(if_port, 0);
 
+
 #define DRV_NAME	"smc91c92_cs"
 #define DRV_VERSION	"1.123"
 
@@ -590,6 +591,7 @@ static int smc_config(struct pcmcia_device *link)
     return i;
 }
 
+
 static int smc_setup(struct pcmcia_device *link)
 {
     struct net_device *dev = link->priv;
@@ -675,6 +677,7 @@ static int pcmcia_osi_mac(struct pcmcia_device *p_dev,
 	return 0;
 };
 
+
 static int osi_setup(struct pcmcia_device *link, u_short manfid, u_short cardid)
 {
     struct net_device *dev = link->priv;
@@ -747,6 +750,7 @@ static int smc91c92_resume(struct pcmcia_device *link)
 
 	return 0;
 }
+
 
 /*======================================================================
 

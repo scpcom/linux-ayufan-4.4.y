@@ -35,6 +35,7 @@ struct ec_host_request_i2c {
 	struct ec_host_request ec_request;
 } __packed;
 
+
 /*
  * Response format for protocol v3
  * byte 0	result code

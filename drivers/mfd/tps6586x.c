@@ -544,6 +544,7 @@ static int tps6586x_i2c_probe(struct i2c_client *client,
 		return ret;
 	}
 
+
 	if (client->irq) {
 		ret = tps6586x_irq_init(tps6586x, client->irq,
 					pdata->irq_base);

@@ -1560,6 +1560,7 @@ static void __init exynos4_clk_init(struct device_node *np,
 		_get_rate("div_core2"));
 }
 
+
 static void __init exynos4210_clk_init(struct device_node *np)
 {
 	exynos4_clk_init(np, EXYNOS4210);

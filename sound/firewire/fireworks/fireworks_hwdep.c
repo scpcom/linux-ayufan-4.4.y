@@ -295,3 +295,4 @@ int snd_efw_create_hwdep_device(struct snd_efw *efw)
 end:
 	return err;
 }
+

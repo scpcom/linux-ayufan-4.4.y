@@ -54,6 +54,7 @@
 
 #include "signal.h"
 
+
 #ifdef CONFIG_PPC64
 #define sys_rt_sigreturn	compat_sys_rt_sigreturn
 #define sys_swapcontext	compat_sys_swapcontext

@@ -283,6 +283,8 @@ static inline u8 snd_als4_cr_read(struct snd_sb *chip,
 	return snd_sbmixer_read(chip, reg | 0xc0);
 }
 
+
+
 static void snd_als4000_set_rate(struct snd_sb *chip, unsigned int rate)
 {
 	if (!(chip->mode & SB_RATE_LOCK)) {

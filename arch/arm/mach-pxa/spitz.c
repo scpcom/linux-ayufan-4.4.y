@@ -132,6 +132,7 @@ static unsigned long spitz_pin_config[] __initdata = {
 	GPIO1_GPIO | WAKEUP_ON_EDGE_FALL,	/* SPITZ_GPIO_RESET */
 };
 
+
 /******************************************************************************
  * Scoop GPIO expander
  ******************************************************************************/

@@ -29,6 +29,7 @@ struct nft_rbtree_elem {
 	struct nft_set_ext	ext;
 };
 
+
 static bool nft_rbtree_lookup(const struct nft_set *set, const u32 *key,
 			      const struct nft_set_ext **ext)
 {

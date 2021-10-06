@@ -99,6 +99,7 @@ static DEFINE_MUTEX(acpi_ioapic_lock);
  */
 enum acpi_irq_model_id acpi_irq_model = ACPI_IRQ_MODEL_PIC;
 
+
 /*
  * ISA irqs by default are the first 16 gsis but can be
  * any gsi as specified by an interrupt source override.

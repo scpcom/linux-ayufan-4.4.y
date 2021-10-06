@@ -11,6 +11,7 @@
 #include "wilc_wlan_if.h"
 #include "wilc_wlan.h"
 
+
 struct wilc_wfi_radiotap_hdr {
 	struct ieee80211_radiotap_header hdr;
 	u8 rate;
@@ -26,6 +27,7 @@ struct wilc_wfi_radiotap_cb_hdr {
 static struct net_device *wilc_wfi_mon; /* global monitor netdev */
 
 extern int  mac_xmit(struct sk_buff *skb, struct net_device *dev);
+
 
 u8 srcAdd[6];
 u8 bssid[6];
@@ -125,6 +127,8 @@ void WILC_WFI_monitor_rx(u8 *buff, u32 size)
 
 	}
 
+
+
 	skb->dev = wilc_wfi_mon;
 	skb_set_mac_header(skb, 0);
 	skb->ip_summed = CHECKSUM_UNNECESSARY;
@@ -133,6 +137,7 @@ void WILC_WFI_monitor_rx(u8 *buff, u32 size)
 	memset(skb->cb, 0, sizeof(skb->cb));
 
 	netif_rx(skb);
+
 
 }
 
@@ -147,12 +152,16 @@ static void mgmt_tx_complete(void *priv, int status)
 	struct tx_complete_mon_data *pv_data = (struct tx_complete_mon_data *)priv;
 	u8 *buf =  pv_data->buff;
 
+
+
 	if (status == 1) {
 		if (INFO || buf[0] == 0x10 || buf[0] == 0xb0)
 			PRINT_INFO(HOSTAPD_DBG, "Packet sent successfully - Size = %d - Address = %p.\n", pv_data->size, pv_data->buff);
 	} else {
 		PRINT_INFO(HOSTAPD_DBG, "Couldn't send packet - Size = %d - Address = %p.\n", pv_data->size, pv_data->buff);
 	}
+
+
 
 	/* incase of fully hosting mode, the freeing will be done in response to the cfg packet */
 	kfree(pv_data->buff);
@@ -221,6 +230,7 @@ static netdev_tx_t WILC_WFI_mon_xmit(struct sk_buff *skb,
 		return -EFAULT;
 	}
 
+
 	rtap_len = ieee80211_get_radiotap_len(skb->data);
 	if (skb->len < rtap_len) {
 		PRINT_ER("Error in radiotap header\n");
@@ -273,6 +283,8 @@ static netdev_tx_t WILC_WFI_mon_xmit(struct sk_buff *skb,
 
 	PRINT_INFO(HOSTAPD_DBG, "Skipping the radiotap header\n");
 
+
+
 	/* actual deliver of data is device-specific, and not shown here */
 	PRINT_INFO(HOSTAPD_DBG, "SKB netdevice name = %s\n", skb->dev->name);
 	PRINT_INFO(HOSTAPD_DBG, "MONITOR real dev name = %s\n", mon_priv->real_ndev->name);
@@ -307,6 +319,7 @@ static const struct net_device_ops wilc_wfi_netdev_ops = {
  */
 struct net_device *WILC_WFI_init_mon_interface(const char *name, struct net_device *real_dev)
 {
+
 
 	u32 ret = 0;
 	struct WILC_WFI_mon_priv *priv;

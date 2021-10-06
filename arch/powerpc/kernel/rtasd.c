@@ -31,6 +31,7 @@
 #include <asm/machdep.h>
 #include <asm/topology.h>
 
+
 static DEFINE_SPINLOCK(rtasd_log_lock);
 
 static DECLARE_WAIT_QUEUE_HEAD(rtas_log_wait);

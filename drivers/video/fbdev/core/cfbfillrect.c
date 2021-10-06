@@ -80,6 +80,7 @@ bitfill_aligned(struct fb_info *p, unsigned long __iomem *dst, int dst_idx,
 	}
 }
 
+
     /*
      *  Unaligned generic pattern fill using 32/64-bit memory accesses
      *  The pattern must have been expanded to a full 32/64-bit value
@@ -203,6 +204,7 @@ bitfill_aligned_rev(struct fb_info *p, unsigned long __iomem *dst,
 		}
 	}
 }
+
 
     /*
      *  Unaligned generic pattern invert using 32/64-bit memory accesses

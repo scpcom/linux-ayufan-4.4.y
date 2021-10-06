@@ -52,6 +52,7 @@ struct tb_cfg_result {
 	enum tb_cfg_error tb_error; /* valid if err == 1 */
 };
 
+
 int tb_cfg_error(struct tb_ctl *ctl, u64 route, u32 port,
 		 enum tb_cfg_error error);
 struct tb_cfg_result tb_cfg_reset(struct tb_ctl *ctl, u64 route,
@@ -69,5 +70,6 @@ int tb_cfg_read(struct tb_ctl *ctl, void *buffer, u64 route, u32 port,
 int tb_cfg_write(struct tb_ctl *ctl, void *buffer, u64 route, u32 port,
 		 enum tb_cfg_space space, u32 offset, u32 length);
 int tb_cfg_get_upstream_port(struct tb_ctl *ctl, u64 route);
+
 
 #endif

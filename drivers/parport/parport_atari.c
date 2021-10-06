@@ -168,6 +168,7 @@ static struct parport_operations parport_atari_ops = {
 	.owner		= THIS_MODULE,
 };
 
+
 static int __init parport_atari_init(void)
 {
 	struct parport *p;

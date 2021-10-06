@@ -54,6 +54,7 @@
 				+ RATE_TLV_MAX_SIZE                 \
 				+ WILDCARD_SSID_TLV_MAX_SIZE)
 
+
 union mwifiex_scan_cmd_config_tlv {
 	/* Scan configuration (variable length) */
 	struct mwifiex_scan_cmd_config config;
@@ -1165,6 +1166,7 @@ mwifiex_ret_802_11_scan_get_tlv_ptrs(struct mwifiex_adapter *adapter,
 		if (*tlv_data)
 			break;
 
+
 		tlv_buf_left -= (sizeof(tlv->header) + tlv_len);
 		current_tlv =
 			(struct mwifiex_ie_types_data *) (current_tlv->data +
@@ -2042,6 +2044,7 @@ int mwifiex_ret_802_11_scan(struct mwifiex_private *priv,
 		scan_rsp = &resp->params.bg_scan_query_resp.scan_resp;
 	else
 		scan_rsp = &resp->params.scan_resp;
+
 
 	if (scan_rsp->number_of_sets > MWIFIEX_MAX_AP) {
 		mwifiex_dbg(adapter, ERROR,

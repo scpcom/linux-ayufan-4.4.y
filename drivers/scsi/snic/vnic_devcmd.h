@@ -232,6 +232,7 @@ struct vnic_devcmd {
 	u64 args[VNIC_DEVCMD_NARGS];	/* RW cmd args (little-endian) */
 };
 
+
 /*
  * Version 2 of the interface.
  *

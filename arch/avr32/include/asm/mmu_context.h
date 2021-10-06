@@ -126,6 +126,7 @@ enter_lazy_tlb(struct mm_struct *mm, struct task_struct *tsk)
 {
 }
 
+
 static inline void enable_mmu(void)
 {
 	sysreg_write(MMUCR, (SYSREG_BIT(MMUCR_S)

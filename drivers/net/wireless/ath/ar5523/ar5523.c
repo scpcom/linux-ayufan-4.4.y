@@ -1592,6 +1592,7 @@ static int ar5523_probe(struct usb_interface *intf,
 	if (id->driver_info & AR5523_FLAG_PRE_FIRMWARE)
 		return ar5523_load_firmware(dev);
 
+
 	hw = ieee80211_alloc_hw(sizeof(*ar), &ar5523_ops);
 	if (!hw)
 		goto out;

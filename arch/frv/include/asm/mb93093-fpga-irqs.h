@@ -23,6 +23,7 @@ enum {
 	IRQ_FPGA_ROCKER_C_SW9			= IRQ_BASE_FPGA + 10,
 };
 
+
 #endif /* !__ASSEMBLY__ */
 
 #endif /* _ASM_MB93093_FPGA_IRQS_H */

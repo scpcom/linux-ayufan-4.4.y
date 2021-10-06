@@ -25,6 +25,7 @@
 
 #include "u_ether.h"
 
+
 /*
  * Ethernet gadget driver -- with CDC and non-CDC options
  * Builds on hardware support for a full duplex link.

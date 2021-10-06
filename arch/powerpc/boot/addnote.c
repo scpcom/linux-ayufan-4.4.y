@@ -112,6 +112,7 @@ static int e_class = ELFCLASS32;
 
 #define PT_NOTE		4	/* Program header type = note */
 
+
 unsigned char elf_magic[4] = { 0x7f, 'E', 'L', 'F' };
 
 int

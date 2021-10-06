@@ -93,6 +93,7 @@ L_more_than_95:
 	leave
 	ret
 
+
 /*---------------------------------------------------------------------------+
  |   unsigned FPU_shrxs(void *arg1, unsigned arg2)                           |
  |                                                                           |

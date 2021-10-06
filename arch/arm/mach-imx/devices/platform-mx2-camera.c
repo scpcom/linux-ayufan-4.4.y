@@ -59,3 +59,4 @@ struct platform_device *__init imx_add_mx2_camera(
 			res, data->iobaseemmaprp ? 4 : 2,
 			pdata, sizeof(*pdata), DMA_BIT_MASK(32));
 }
+

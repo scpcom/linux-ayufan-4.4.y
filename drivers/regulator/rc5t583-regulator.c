@@ -137,6 +137,7 @@ static int rc5t583_regulator_probe(struct platform_device *pdev)
 	if (!regs)
 		return -ENOMEM;
 
+
 	for (id = 0; id < RC5T583_REGULATOR_MAX; ++id) {
 		reg = &regs[id];
 		ri = &rc5t583_reg_info[id];

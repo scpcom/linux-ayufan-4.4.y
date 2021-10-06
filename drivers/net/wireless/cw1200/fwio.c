@@ -264,6 +264,7 @@ exit:
 #undef REG_READ
 }
 
+
 static int config_reg_read(struct cw1200_common *priv, u32 *val)
 {
 	switch (priv->hw_type) {

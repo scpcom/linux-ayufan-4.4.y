@@ -3,6 +3,7 @@
 
 #include "main.h"
 
+
 #define _b43legacy_declare_plcp_hdr(size)	\
 	struct b43legacy_plcp_hdr##size {	\
 		union {				\
@@ -17,6 +18,7 @@ _b43legacy_declare_plcp_hdr(4);
 _b43legacy_declare_plcp_hdr(6);
 
 #undef _b43legacy_declare_plcp_hdr
+
 
 /* TX header for v3 firmware */
 struct b43legacy_txhdr_fw3 {
@@ -74,12 +76,15 @@ struct b43legacy_txhdr_fw3 {
 #define  B43legacy_TX4_PHY_ANT1		0x0100 /* Use antenna 1 */
 #define  B43legacy_TX4_PHY_ANTLAST	0x0300 /* Use last used antenna */
 
+
+
 int b43legacy_generate_txhdr(struct b43legacy_wldev *dev,
 			      u8 *txhdr,
 			      const unsigned char *fragment_data,
 			      unsigned int fragment_len,
 			      struct ieee80211_tx_info *info,
 			      u16 cookie);
+
 
 /* Transmit Status */
 struct b43legacy_txstatus {
@@ -120,6 +125,7 @@ struct b43legacy_hwtxstatus {
 	PAD_BYTES(1);
 } __packed;
 
+
 /* Receive header for v3 firmware. */
 struct b43legacy_rxhdr_fw3 {
 	__le16 frame_len;	/* Frame length */
@@ -133,6 +139,7 @@ struct b43legacy_rxhdr_fw3 {
 	__le16 mac_time;
 	__le16 channel;
 } __packed;
+
 
 /* PHY RX Status 0 */
 #define B43legacy_RX_PHYST0_GAINCTL	0x4000 /* Gain Control */
@@ -179,6 +186,8 @@ struct b43legacy_rxhdr_fw3 {
 #define B43legacy_RX_CHAN_ID_SHIFT	2
 #define B43legacy_RX_CHAN_PHYTYPE	0x0003 /* PHY type */
 
+
+
 u8 b43legacy_plcp_get_ratecode_cck(const u8 bitrate);
 u8 b43legacy_plcp_get_ratecode_ofdm(const u8 bitrate);
 
@@ -198,6 +207,7 @@ void b43legacy_handle_hwtxstatus(struct b43legacy_wldev *dev,
 void b43legacy_tx_suspend(struct b43legacy_wldev *dev);
 void b43legacy_tx_resume(struct b43legacy_wldev *dev);
 
+
 #define B43legacy_NR_QOSPARMS	22
 enum {
 	B43legacy_QOSPARM_TXOP = 0,
@@ -211,6 +221,7 @@ enum {
 };
 
 void b43legacy_qos_init(struct b43legacy_wldev *dev);
+
 
 /* Helper functions for converting the key-table index from "firmware-format"
  * to "raw-format" and back. The firmware API changed for this at some revision.

@@ -186,6 +186,7 @@ void make_lowmem_page_readwrite(void *vaddr)
 		BUG();
 }
 
+
 static bool xen_page_pinned(void *ptr)
 {
 	struct page *page = virt_to_page(ptr);
@@ -995,6 +996,7 @@ static void xen_dup_mmap(struct mm_struct *oldmm, struct mm_struct *mm)
 	xen_pgd_pin(mm);
 	spin_unlock(&mm->page_table_lock);
 }
+
 
 #ifdef CONFIG_SMP
 /* Another cpu may still have their %cr3 pointing at the pagetable, so
@@ -2914,6 +2916,7 @@ int xen_remap_domain_gfn_array(struct vm_area_struct *vma,
 	return do_remap_gfn(vma, addr, gfn, nr, err_ptr, prot, domid, pages);
 }
 EXPORT_SYMBOL_GPL(xen_remap_domain_gfn_array);
+
 
 /* Returns: 0 success */
 int xen_unmap_domain_gfn_range(struct vm_area_struct *vma,

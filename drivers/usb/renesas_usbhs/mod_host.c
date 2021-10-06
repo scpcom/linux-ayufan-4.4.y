@@ -35,6 +35,7 @@
  *    so, software should control DATA0/1 sequence of each devices.
  */
 
+
 /*
  *		image of mod_host
  *
@@ -64,6 +65,7 @@
  * @ :	uep requested free pipe, but all have been used.
  *	now it is waiting for free pipe
  */
+
 
 /*
  *		struct
@@ -98,6 +100,7 @@ struct usbhsh_hpriv {
 
 	struct completion	setup_ack_done;
 };
+
 
 static const char usbhsh_hcd_name[] = "renesas_usbhs host";
 

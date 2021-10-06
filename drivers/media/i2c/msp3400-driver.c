@@ -46,6 +46,7 @@
  * 02110-1301, USA.
  */
 
+
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/slab.h>
@@ -105,6 +106,7 @@ MODULE_PARM_DESC(dolby, "Activates Dolby processing");
 #define I2C_MSP_DEM     0x10
 /* DSP unit subaddress */
 #define I2C_MSP_DSP     0x12
+
 
 /* ----------------------------------------------------------------------- */
 /* functions for talking to the MSP3400C Sound processor                   */

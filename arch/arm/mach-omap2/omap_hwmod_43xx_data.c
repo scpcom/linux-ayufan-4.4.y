@@ -22,6 +22,7 @@
 #include "omap_hwmod_common_data.h"
 #include "hdq1w.h"
 
+
 /* IP blocks */
 static struct omap_hwmod am43xx_emif_hwmod = {
 	.name		= "emif",

@@ -12,6 +12,7 @@
 #ifndef __LINUX_USB_ASSOCIATION_H
 #define __LINUX_USB_ASSOCIATION_H
 
+
 /*
  * Association attributes
  *

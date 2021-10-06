@@ -10,6 +10,7 @@
 
 #include "ebb.h"
 
+
 /*
  * Test that closing the EBB event clears MMCR0_PMCC, preventing further access
  * by userspace to the PMU hardware.

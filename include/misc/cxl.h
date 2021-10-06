@@ -33,6 +33,7 @@ unsigned int cxl_pci_to_cfg_record(struct pci_dev *dev);
 /* Get the physical device (ie. the PCIe card) which the AFU is attached */
 struct device *cxl_get_phys_dev(struct pci_dev *dev);
 
+
 /*
  * Context lifetime overview:
  *
@@ -137,6 +138,7 @@ void cxl_psa_unmap(void __iomem *addr);
 
 /*  Get the process element for this context */
 int cxl_process_element(struct cxl_context *ctx);
+
 
 /*
  * These calls allow drivers to create their own file descriptors and make them

@@ -27,6 +27,7 @@
 
 #include <asm/dec/kn01.h>
 
+
 /* CP0 hazard avoidance. */
 #define BARRIER				\
 	__asm__ __volatile__(		\
@@ -45,6 +46,7 @@
  */
 u16 cached_kn01_csr;
 static DEFINE_RAW_SPINLOCK(kn01_lock);
+
 
 static inline void dec_kn01_be_ack(void)
 {
@@ -172,6 +174,7 @@ irqreturn_t dec_kn01_be_interrupt(int irq, void *dev_id)
 	       regs->cp0_epc, regs->regs[31]);
 	die("Unrecoverable bus error", regs);
 }
+
 
 void __init dec_kn01_be_init(void)
 {

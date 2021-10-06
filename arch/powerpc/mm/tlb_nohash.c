@@ -145,6 +145,7 @@ int mmu_vmemmap_psize;		/* Page size used for the virtual mem map */
 int book3e_htw_mode;		/* HW tablewalk?  Value is PPC_HTW_* */
 unsigned long linear_map_top;	/* Top of linear mapping */
 
+
 /*
  * Number of bytes to add to SPRN_SPRG_TLB_EXFRAME on crit/mcheck/debug
  * exceptions.  This is used for bolted and e6500 TLB miss handlers which
@@ -240,6 +241,7 @@ static void do_flush_tlb_page_ipi(void *param)
 
 	_tlbil_va(p->addr, p->pid, p->tsize, p->ind);
 }
+
 
 /* Note on invalidations and PID:
  *

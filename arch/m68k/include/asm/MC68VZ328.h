@@ -886,6 +886,7 @@
 #define NIPR_SELECT_SHIFT	8
 #define NIPR_PRE_SEL		0x8000	/* Non-integer prescaler select */
 
+
 /* generalization of uart control registers to support multiple ports: */
 typedef struct {
   volatile unsigned short int ustcnt;
@@ -909,6 +910,9 @@ typedef struct {
   volatile unsigned short int hmark;
   volatile unsigned short int unused;
 } __attribute__((packed)) m68328_uart;
+
+
+
 
 /**********
  *
@@ -1281,6 +1285,7 @@ typedef struct {
 #define DRAMC_BC_SHIFT	   12
 #define DRAMC_RM	   0x4000	/* Refresh Mode */
 #define DRAMC_EN	   0x8000	/* DRAM Controller enable */
+
 
 /**********
  *

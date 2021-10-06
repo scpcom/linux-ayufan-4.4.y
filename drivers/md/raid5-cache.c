@@ -704,6 +704,7 @@ static void r5l_write_super_and_discard_space(struct r5l_log *log,
 	}
 }
 
+
 static void r5l_do_reclaim(struct r5l_log *log)
 {
 	sector_t reclaim_target = xchg(&log->reclaim_target, 0);

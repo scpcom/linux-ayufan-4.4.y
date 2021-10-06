@@ -316,6 +316,7 @@ static const struct xfs_buf_ops xfs_dir3_data_reada_buf_ops = {
 	.verify_write = xfs_dir3_data_write_verify,
 };
 
+
 int
 xfs_dir3_data_read(
 	struct xfs_trans	*tp,

@@ -270,6 +270,7 @@ static int blacklist_parse_proc_parameters(char *buf)
 	else
 		return -EINVAL;
 
+
 	return rc;
 }
 

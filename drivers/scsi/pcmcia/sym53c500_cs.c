@@ -75,6 +75,7 @@
 #include <pcmcia/ds.h>
 #include <pcmcia/ciscode.h>
 
+
 /* ================================================================== */
 
 #define SYNC_MODE 0 		/* Synchronous transfer mode */

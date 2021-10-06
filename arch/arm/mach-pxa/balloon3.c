@@ -183,6 +183,7 @@ static struct ucb1400_pdata vpac270_ucb1400_pdata = {
 	.irq		= PXA_GPIO_TO_IRQ(BALLOON3_GPIO_CODEC_IRQ),
 };
 
+
 static struct platform_device balloon3_ucb1400_device = {
 	.name		= "ucb1400_core",
 	.id		= -1,

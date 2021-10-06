@@ -43,6 +43,7 @@
 	Made it fit for running in Linux Kernel by Alain Knaff (alain@knaff.lu)
 */
 
+
 #ifdef STATIC
 #define PREBOOT
 #else
@@ -107,6 +108,7 @@ struct bunzip_data {
 	int byteCount[256];
 	unsigned char symToByte[256], mtfSymbol[256];
 };
+
 
 /* Return the next nnn bits of input.  All reads from the compressed input
    are done through this function.  All reads are big endian */

@@ -145,6 +145,7 @@
 #define VIDCON1_VCLK_HOLD		(0x0 << 9)
 #define VIDCON1_VCLK_RUN		(0x1 << 9)
 
+
 /* DECON_VIDTCON00 */
 #define VIDTCON00_VBPD_F(x)		(((x) & 0xfff) << 16)
 #define VIDTCON00_VFPD_F(x)		((x) & 0xfff)

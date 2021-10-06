@@ -23,6 +23,7 @@
 #define NUM_STA 32
 #define NUM_ACL 16
 
+
 /* if mode ==0, then the sta is allowed once the addr is hit. */
 /* if mode ==1, then the sta is rejected once the addr is non-hit. */
 struct rtw_wlan_acl_node {
@@ -102,6 +103,7 @@ struct sta_info {
 	union Keytype	dot118021x_UncstKey;
 	union pn48		dot11txpn;			/*  PN48 used for Unicast xmit. */
 	union pn48		dot11rxpn;			/*  PN48 used for Unicast recv. */
+
 
 	u8	bssrateset[16];
 	u32	bssratelen;

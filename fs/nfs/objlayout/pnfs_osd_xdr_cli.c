@@ -285,6 +285,7 @@ __read_targetaddr(__be32 *p, struct pnfs_osd_targetaddr *targetaddr)
 	if (ota_available)
 		p = __read_net_addr(p, &targetaddr->ota_netaddr);
 
+
 	return p;
 }
 

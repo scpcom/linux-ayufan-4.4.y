@@ -37,6 +37,7 @@
 #define CVMX_L2_SET_BITS  cvmx_l2c_get_set_bits()    /* Deprecated macro, use function */
 #define CVMX_L2_SETS	  cvmx_l2c_get_num_sets()    /* Deprecated macro, use function */
 
+
 #define CVMX_L2C_IDX_ADDR_SHIFT 7  /* based on 128 byte cache line size */
 #define CVMX_L2C_IDX_MASK	(cvmx_l2c_get_num_sets() - 1)
 
@@ -241,6 +242,7 @@ int cvmx_l2c_get_hw_way_partition(void);
  */
 int cvmx_l2c_set_hw_way_partition(uint32_t mask);
 
+
 /**
  * Locks a line in the L2 cache at the specified physical address
  *
@@ -310,6 +312,7 @@ static inline union cvmx_l2c_tag cvmx_get_l2c_tag(uint32_t association, uint32_t
 {
 	return cvmx_l2c_get_tag(association, index);
 }
+
 
 /**
  * Returns the cache index for a given physical address

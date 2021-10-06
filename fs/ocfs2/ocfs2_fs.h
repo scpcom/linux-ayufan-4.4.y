@@ -205,6 +205,7 @@
 #define OCFS2_FEATURE_RO_COMPAT_USRQUOTA	0x0002
 #define OCFS2_FEATURE_RO_COMPAT_GRPQUOTA	0x0004
 
+
 /* The byte offset of the first backup block will be 1G.
  * The following will be 4G, 16G, 64G, 256G and 1T.
  */
@@ -434,6 +435,7 @@ static unsigned char ocfs2_type_by_mode[S_IFMT >> S_SHIFT] = {
 	[S_IFSOCK >> S_SHIFT] = OCFS2_FT_SOCK,
 	[S_IFLNK >> S_SHIFT]  = OCFS2_FT_SYMLINK,
 };
+
 
 /*
  * Convenience casts
@@ -976,6 +978,7 @@ struct ocfs2_refcount_list {
 /*10*/	struct ocfs2_refcount_rec rl_recs[0];	/* Refcount records */
 };
 
+
 struct ocfs2_refcount_block {
 /*00*/	__u8 rf_signature[8];		/* Signature for verification */
 	__le16 rf_suballoc_slot;	/* Slot suballocator this block
@@ -1167,6 +1170,7 @@ static inline int ocfs2_xattr_get_type(struct ocfs2_xattr_entry *xe)
 	0, \
 }
 
+
 /* Each block of each quota file has a certain fixed number of bytes reserved
  * for OCFS2 internal use at its end. OCFS2 can use it for things like
  * checksums, etc. */
@@ -1253,6 +1257,7 @@ struct ocfs2_local_disk_dqblk {
 	__le64 dqb_spacemod;	/* Change in the amount of used space */
 /*10*/	__le64 dqb_inodemod;	/* Change in the amount of used inodes */
 };
+
 
 /*
  * The quota trailer lives at the end of each quota block.
@@ -1594,6 +1599,7 @@ static inline int ocfs2_xattr_recs_per_xb(int blocksize)
 }
 #endif  /* __KERNEL__ */
 
+
 static inline int ocfs2_system_inode_is_global(int type)
 {
 	return ((type >= 0) &&
@@ -1642,3 +1648,4 @@ static inline int ocfs2_gd_is_discontig(struct ocfs2_group_desc *gd)
 	return 1;
 }
 #endif  /* _OCFS2_FS_H */
+

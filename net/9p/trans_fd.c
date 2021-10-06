@@ -483,6 +483,7 @@ static void p9_write_work(struct work_struct *work)
 	if (err == -EAGAIN)
 		goto end_clear;
 
+
 	if (err < 0)
 		goto error;
 	else if (err == 0) {
@@ -918,6 +919,7 @@ static int p9_bind_privport(struct socket *sock)
 	}
 	return err;
 }
+
 
 static int
 p9_fd_create_tcp(struct p9_client *client, const char *addr, char *args)

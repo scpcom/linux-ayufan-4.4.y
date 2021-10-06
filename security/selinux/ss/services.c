@@ -1035,6 +1035,7 @@ void security_compute_xperms_decision(u32 ssid,
 		goto out;
 	}
 
+
 	if (unlikely(!tclass || tclass > policydb.p_classes.nprim)) {
 		pr_warn_ratelimited("SELinux:  Invalid class %hu\n", tclass);
 		goto out;
@@ -2624,6 +2625,7 @@ err:
 	kfree(*values);
 	goto out;
 }
+
 
 int security_set_bools(int len, int *values)
 {

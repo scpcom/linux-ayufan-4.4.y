@@ -39,6 +39,7 @@
 #define SCANLOG_HWERROR -1
 #define SCANLOG_CONTINUE 1
 
+
 static unsigned int ibm_scan_log_dump;			/* RTAS token */
 static unsigned int *scanlog_buffer;			/* The data buffer */
 

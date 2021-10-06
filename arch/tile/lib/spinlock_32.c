@@ -100,6 +100,7 @@ EXPORT_SYMBOL(arch_spin_unlock_wait);
 #define RD_COUNT_WIDTH  _RD_COUNT_WIDTH
 #define RD_COUNT_MASK   ((1 << RD_COUNT_WIDTH) - 1)
 
+
 /*
  * We can get the read lock if everything but the reader bits (which
  * are in the high part of the word) is zero, i.e. no active or

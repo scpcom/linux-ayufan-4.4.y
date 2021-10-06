@@ -11,6 +11,7 @@
 
 #include "ebb.h"
 
+
 /*
  * Test that tries to trigger CPU_FTR_PMAO_BUG. Which is a hardware defect
  * where an exception triggers but we context switch before it is delivered and

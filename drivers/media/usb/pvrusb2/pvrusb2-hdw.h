@@ -26,6 +26,7 @@
 #include "pvrusb2-io.h"
 #include "pvrusb2-ctrl.h"
 
+
 /* Private internal control ids, look these up with
    pvr2_hdw_get_ctrl_by_id() - these are NOT visible in V4L */
 #define PVR2_CID_STDCUR 2

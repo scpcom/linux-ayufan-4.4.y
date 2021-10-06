@@ -523,6 +523,7 @@ static void print_graph_proc(struct trace_seq *s, pid_t pid)
 		trace_seq_putc(s, ' ');
 }
 
+
 static void print_graph_lat_fmt(struct trace_seq *s, struct trace_entry *entry)
 {
 	trace_seq_putc(s, ' ');
@@ -1153,6 +1154,7 @@ print_graph_comment(struct trace_seq *s, struct trace_entry *ent,
 	return trace_handle_return(s);
 }
 
+
 enum print_line_t
 print_graph_function_flags(struct trace_iterator *iter, u32 flags)
 {
@@ -1407,6 +1409,7 @@ static struct tracer graph_trace __tracer_data = {
 	.selftest	= trace_selftest_startup_function_graph,
 #endif
 };
+
 
 static ssize_t
 graph_depth_write(struct file *filp, const char __user *ubuf, size_t cnt,

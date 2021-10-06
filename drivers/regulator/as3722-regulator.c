@@ -314,6 +314,7 @@ static const struct as3722_register_mapping as3722_reg_lookup[] = {
 	},
 };
 
+
 static const int as3722_ldo_current[] = { 150000, 300000 };
 static const int as3722_sd016_current[] = { 2500000, 3000000, 3500000 };
 

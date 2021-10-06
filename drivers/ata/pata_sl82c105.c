@@ -62,6 +62,7 @@ static int sl82c105_pre_reset(struct ata_link *link, unsigned long deadline)
 	return ata_sff_prereset(link, deadline);
 }
 
+
 /**
  *	sl82c105_configure_piomode	-	set chip PIO timing
  *	@ap: ATA interface

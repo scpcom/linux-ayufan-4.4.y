@@ -553,6 +553,7 @@ static struct ui_browser_colorset {
 	}
 };
 
+
 static int ui_browser__color_config(const char *var, const char *value,
 				    void *data __maybe_unused)
 {

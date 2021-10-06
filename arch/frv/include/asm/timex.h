@@ -17,3 +17,4 @@ static inline cycles_t get_cycles(void)
 #define vxtime_unlock()		do {} while (0)
 
 #endif
+

@@ -4,10 +4,12 @@
 #include <linux/compiler.h>
 #include <asm/irq.h>
 
+
 /* Some GPIO chips can manage IRQs; some can't.  The exact numbers can
  * be changed if needed, but for the moment they're not configurable.
  */
 #define ARCH_NR_GPIOS	(NR_GPIO_IRQS + 2 * 32)
+
 
 /* Arch-neutral GPIO API, supporting both "native" and external GPIOs. */
 #include <asm-generic/gpio.h>
@@ -26,6 +28,7 @@ static inline int gpio_cansleep(unsigned int gpio)
 {
 	return __gpio_cansleep(gpio);
 }
+
 
 static inline int gpio_to_irq(unsigned int gpio)
 {

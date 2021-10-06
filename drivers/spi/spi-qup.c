@@ -154,6 +154,7 @@ struct spi_qup {
 	struct dma_slave_config	tx_conf;
 };
 
+
 static inline bool spi_qup_is_valid_state(struct spi_qup *controller)
 {
 	u32 opstate = readl_relaxed(controller->base + QUP_STATE);

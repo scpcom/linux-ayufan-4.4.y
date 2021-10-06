@@ -429,6 +429,7 @@ static inline unsigned int fh_dma_disable(unsigned int liodn)
 	return r3;
 }
 
+
 /**
  * fh_vmpic_get_msir - returns the MPIC-MSI register value
  * @interrupt: the interrupt number
@@ -476,6 +477,7 @@ static inline unsigned int fh_system_reset(void)
 	return r3;
 }
 
+
 /**
  * fh_err_get_info - get platform error information
  * @queue id:
@@ -514,6 +516,7 @@ static inline unsigned int fh_err_get_info(int queue, uint32_t *bufsize,
 
 	return r3;
 }
+
 
 #define FH_VCPU_RUN	0
 #define FH_VCPU_IDLE	1

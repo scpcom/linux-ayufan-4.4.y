@@ -14,6 +14,7 @@ struct scsi_host_template;
 struct Scsi_Host;
 struct scsi_nl_hdr;
 
+
 /*
  * Scsi Error Handler Flags
  */

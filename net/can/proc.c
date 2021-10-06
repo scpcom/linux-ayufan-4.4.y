@@ -455,6 +455,7 @@ static const struct file_operations can_rcvlist_sff_proc_fops = {
 	.release	= single_release,
 };
 
+
 static int can_rcvlist_eff_proc_show(struct seq_file *m, void *v)
 {
 	struct net_device *dev;

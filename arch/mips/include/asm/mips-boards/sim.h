@@ -26,6 +26,7 @@
 #define TRACE_ON		5
 #define TRACE_OFF	6
 
+
 #define simcfg(code)						\
 ({					   \
 	__asm__	 __volatile__( \
@@ -33,5 +34,7 @@
 		::"i"(code)					\
 		); \
 })
+
+
 
 #endif

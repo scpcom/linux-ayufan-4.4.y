@@ -590,6 +590,7 @@ struct saa7134_dev {
 	unsigned int               nclips;
 	struct v4l2_fh		   *overlay_owner;
 
+
 	/* video+ts+vbi capture */
 	void			   *alloc_ctx;
 	struct saa7134_dmaqueue    video_q;
@@ -754,6 +755,7 @@ int saa7134_set_dmabits(struct saa7134_dev *dev);
 extern int (*saa7134_dmasound_init)(struct saa7134_dev *dev);
 extern int (*saa7134_dmasound_exit)(struct saa7134_dev *dev);
 
+
 /* ----------------------------------------------------------- */
 /* saa7134-cards.c                                             */
 
@@ -765,11 +767,13 @@ extern int saa7134_board_init1(struct saa7134_dev *dev);
 extern int saa7134_board_init2(struct saa7134_dev *dev);
 int saa7134_tuner_callback(void *priv, int component, int command, int arg);
 
+
 /* ----------------------------------------------------------- */
 /* saa7134-i2c.c                                               */
 
 int saa7134_i2c_register(struct saa7134_dev *dev);
 int saa7134_i2c_unregister(struct saa7134_dev *dev);
+
 
 /* ----------------------------------------------------------- */
 /* saa7134-video.c                                             */
@@ -808,6 +812,7 @@ void saa7134_irq_video_signalchange(struct saa7134_dev *dev);
 void saa7134_irq_video_done(struct saa7134_dev *dev, unsigned long status);
 void saa7134_video_fini(struct saa7134_dev *dev);
 
+
 /* ----------------------------------------------------------- */
 /* saa7134-ts.c                                                */
 
@@ -844,6 +849,7 @@ extern struct video_device saa7134_vbi_template;
 int saa7134_vbi_init1(struct saa7134_dev *dev);
 int saa7134_vbi_fini(struct saa7134_dev *dev);
 void saa7134_irq_vbi_done(struct saa7134_dev *dev, unsigned long status);
+
 
 /* ----------------------------------------------------------- */
 /* saa7134-tvaudio.c                                           */

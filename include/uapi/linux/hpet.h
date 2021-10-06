@@ -3,6 +3,7 @@
 
 #include <linux/compiler.h>
 
+
 struct hpet_info {
 	unsigned long hi_ireqfreq;	/* Hz */
 	unsigned long hi_flags;	/* information */

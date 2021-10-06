@@ -2034,6 +2034,7 @@ void udc_handle_eps(struct lpc32xx_udc *udc, struct lpc32xx_ep *ep)
 	}
 }
 
+
 /* DMA end of transfer completion */
 static void udc_handle_dma_ep(struct lpc32xx_udc *udc, struct lpc32xx_ep *ep)
 {
@@ -2311,6 +2312,7 @@ static void udc_handle_ep0_setup(struct lpc32xx_udc *udc)
 			break;
 		}
 
+
 	case USB_REQ_SET_ADDRESS:
 		if (reqtype == (USB_TYPE_STANDARD | USB_RECIP_DEVICE)) {
 			udc_set_address(udc, wValue);
@@ -2418,6 +2420,7 @@ static void udc_handle_ep0_out(struct lpc32xx_udc *udc)
 
 	/* Clear EP interrupt */
 	epstatus = udc_clearep_getsts(udc, EP_OUT);
+
 
 #ifdef CONFIG_USB_GADGET_DEBUG_FILES
 	ep0->totalints++;
@@ -3043,6 +3046,7 @@ struct lpc32xx_usbd_cfg lpc32xx_usbddata = {
 	.susp_chgb = &lpc32xx_usbd_susp_chg,
 	.rmwk_chgb = &lpc32xx_rmwkup_chg,
 };
+
 
 static u64 lpc32xx_usbd_dmamask = ~(u32) 0x7F;
 

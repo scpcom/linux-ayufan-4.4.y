@@ -444,6 +444,7 @@ static int cypress_get_finger_count(unsigned char header_byte)
 	return finger_count;
 }
 
+
 static int cypress_parse_packet(struct psmouse *psmouse,
 				struct cytp_data *cytp, struct cytp_report_data *report_data)
 {

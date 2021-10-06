@@ -36,6 +36,7 @@ struct plock_xop {
 	struct file_lock flc;
 };
 
+
 static inline void set_version(struct dlm_plock_info *info)
 {
 	info->version[0] = DLM_PLOCK_VERSION_MAJOR;
@@ -510,3 +511,4 @@ void dlm_plock_exit(void)
 {
 	misc_deregister(&plock_dev_misc);
 }
+

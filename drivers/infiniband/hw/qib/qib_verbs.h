@@ -465,6 +465,7 @@ struct qib_qp {
 	atomic_t refcount ____cacheline_aligned_in_smp;
 	wait_queue_head_t wait;
 
+
 	struct qib_ack_entry s_ack_queue[QIB_MAX_RDMA_ATOMIC + 1]
 		____cacheline_aligned_in_smp;
 	struct qib_sge_state s_rdma_read_sge;
@@ -748,6 +749,7 @@ struct qib_ibport {
 	u8 sl_to_vl[16];
 
 };
+
 
 struct qib_ibdev {
 	struct ib_device ibdev;
@@ -1081,6 +1083,7 @@ static inline void qib_put_ss(struct qib_sge_state *ss)
 			ss->sge = *ss->sg_list++;
 	}
 }
+
 
 void qib_release_mmap_info(struct kref *ref);
 

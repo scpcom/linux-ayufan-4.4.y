@@ -44,6 +44,7 @@ struct isl6423_config {
 
 #if IS_REACHABLE(CONFIG_DVB_ISL6423)
 
+
 extern struct dvb_frontend *isl6423_attach(struct dvb_frontend *fe,
 					   struct i2c_adapter *i2c,
 					   const struct isl6423_config *config);

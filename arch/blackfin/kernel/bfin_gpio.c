@@ -370,6 +370,7 @@ SET_GPIO(polar) /* set_gpio_polar() */
 SET_GPIO(edge)  /* set_gpio_edge() */
 SET_GPIO(both)  /* set_gpio_both() */
 
+
 #define SET_GPIO_SC(name) \
 void set_gpio_ ## name(unsigned gpio, unsigned short arg) \
 { \
@@ -403,6 +404,7 @@ void set_gpio_toggle(unsigned gpio)
 	}
 }
 EXPORT_SYMBOL(set_gpio_toggle);
+
 
 /*Set current PORT date (16-bit word)*/
 
@@ -481,6 +483,7 @@ GET_GPIO_P(edge)
 GET_GPIO_P(both)
 GET_GPIO_P(maska)
 GET_GPIO_P(maskb)
+
 
 #ifdef CONFIG_PM
 DECLARE_RESERVED_MAP(wakeup, GPIO_BANK_NUM);
@@ -627,6 +630,7 @@ void bfin_gpio_pm_hibernate_restore(void)
 
 	AWA_DUMMY_READ(maska);
 }
+
 
 #endif
 
@@ -944,6 +948,7 @@ void bfin_special_gpio_free(unsigned gpio)
 }
 EXPORT_SYMBOL(bfin_special_gpio_free);
 #endif
+
 
 int bfin_gpio_irq_request(unsigned gpio, const char *label)
 {

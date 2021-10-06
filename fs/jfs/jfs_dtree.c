@@ -600,6 +600,7 @@ int dtSearch(struct inode *ip, struct component_name * key, ino_t * data,
 		goto dtSearch_Exit2;
 	}
 
+
 	/* uppercase search key for c-i directory */
 	UniStrcpy(ciKey.name, key->name);
 	ciKey.namlen = key->namlen;
@@ -653,6 +654,7 @@ int dtSearch(struct inode *ip, struct component_name * key, ino_t * data,
 				/* router key is in uppercase */
 
 				cmp = dtCompare(&ciKey, p, stbl[index]);
+
 
 			}
 			if (cmp == 0) {
@@ -805,6 +807,7 @@ int dtSearch(struct inode *ip, struct component_name * key, ino_t * data,
 	return rc;
 }
 
+
 /*
  *	dtInsert()
  *
@@ -911,6 +914,7 @@ int dtInsert(tid_t tid, struct inode *ip,
 
 	return 0;
 }
+
 
 /*
  *	dtSplitUp()
@@ -1053,6 +1057,7 @@ static int dtSplitUp(tid_t tid,
 			}
 		} else if (!DO_INDEX(ip))
 			ip->i_size = lengthPXD(pxd) << sbi->l2bsize;
+
 
 	      extendOut:
 		DT_PUTPAGE(smp);
@@ -1309,6 +1314,7 @@ static int dtSplitUp(tid_t tid,
 
 	return rc;
 }
+
 
 /*
  *	dtSplitPage()
@@ -1621,6 +1627,7 @@ static int dtSplitPage(tid_t tid, struct inode *ip, struct dtsplit * split,
 	return rc;
 }
 
+
 /*
  *	dtExtendPage()
  *
@@ -1846,6 +1853,7 @@ static int dtExtendPage(tid_t tid,
 	return 0;
 }
 
+
 /*
  *	dtSplitRoot()
  *
@@ -2061,6 +2069,7 @@ static int dtSplitRoot(tid_t tid,
 	return 0;
 }
 
+
 /*
  *	dtDelete()
  *
@@ -2213,6 +2222,7 @@ int dtDelete(tid_t tid,
 
 	return rc;
 }
+
 
 /*
  *	dtDeleteUp()
@@ -2807,6 +2817,7 @@ static int dtRelink(tid_t tid, struct inode *ip, dtpage_t * p)
 	return 0;
 }
 
+
 /*
  *	dtInitRoot()
  *
@@ -3324,6 +3335,7 @@ skip_one:
 	return rc;
 }
 
+
 /*
  *	dtReadFirst()
  *
@@ -3389,6 +3401,7 @@ static int dtReadFirst(struct inode *ip, struct btstack * btstack)
 		DT_PUTPAGE(mp);
 	}
 }
+
 
 /*
  *	dtReadNext()
@@ -3565,6 +3578,7 @@ static int dtReadNext(struct inode *ip, loff_t * offset,
 	return 0;
 }
 
+
 /*
  *	dtCompare()
  *
@@ -3637,6 +3651,9 @@ static int dtCompare(struct component_name * key,	/* search key */
 
 	return (klen - namlen);
 }
+
+
+
 
 /*
  *	ciCompare()
@@ -3745,6 +3762,7 @@ static int ciCompare(struct component_name * key,	/* search key */
 	return (klen - namlen);
 }
 
+
 /*
  *	ciGetLeafPrefixKey()
  *
@@ -3785,6 +3803,7 @@ static int ciGetLeafPrefixKey(dtpage_t * lp, int li, dtpage_t * rp,
 	dtGetKey(rp, ri, &rkey, flag);
 	rkey.name[rkey.namlen] = 0;
 
+
 	if ((flag & JFS_OS2) == JFS_OS2)
 		ciToUpper(&rkey);
 
@@ -3813,6 +3832,8 @@ free_names:
 	kfree(rkey.name);
 	return 0;
 }
+
+
 
 /*
  *	dtGetKey()
@@ -3873,6 +3894,7 @@ static void dtGetKey(dtpage_t * p, int i,	/* entry index */
 		si = t->next;
 	}
 }
+
 
 /*
  *	dtInsertEntry()
@@ -4030,6 +4052,7 @@ static void dtInsertEntry(dtpage_t * p, int index, struct component_name * key,
 	/* advance next available entry index of stbl */
 	++p->header.nextindex;
 }
+
 
 /*
  *	dtMoveEntry()
@@ -4228,6 +4251,7 @@ static void dtMoveEntry(dtpage_t * sp, int si, dtpage_t * dp,
 	dp->header.freecnt -= nd;
 }
 
+
 /*
  *	dtDeleteEntry()
  *
@@ -4322,6 +4346,7 @@ static void dtDeleteEntry(dtpage_t * p, int fi, struct dt_lock ** dtlock)
 	p->header.nextindex--;
 }
 
+
 /*
  *	dtTruncateEntry()
  *
@@ -4409,6 +4434,7 @@ static void dtTruncateEntry(dtpage_t * p, int ti, struct dt_lock ** dtlock)
 	p->header.freecnt += freecnt;
 }
 
+
 /*
  *	dtLinelockFreelist()
  */
@@ -4472,6 +4498,7 @@ static void dtLinelockFreelist(dtpage_t * p,	/* directory page */
 
 	*dtlock = dtlck;
 }
+
 
 /*
  * NAME: dtModify

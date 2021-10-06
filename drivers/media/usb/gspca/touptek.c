@@ -141,6 +141,7 @@ MODULE_LICENSE("GPL");
 #define REG_Y_ADDR_START		0x0346
 #define REG_Y_OUTPUT_SIZE		0x034E
 
+
 /* specific webcam descriptor */
 struct sd {
 	struct gspca_dev gspca_dev;	/* !! must be the first item */

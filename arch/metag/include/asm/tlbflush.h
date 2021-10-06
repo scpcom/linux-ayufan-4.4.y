@@ -74,3 +74,4 @@ static inline void flush_tlb_kernel_range(unsigned long start,
 }
 
 #endif /* __ASM_METAG_TLBFLUSH_H */
+

@@ -46,6 +46,7 @@ static int system_port = -1;
 static int num_clients;
 static struct seq_oss_devinfo *client_table[SNDRV_SEQ_OSS_MAX_CLIENTS];
 
+
 /*
  * prototypes
  */
@@ -58,6 +59,7 @@ static int delete_seq_queue(int queue);
 static void free_devinfo(void *private);
 
 #define call_ctl(type,rec) snd_seq_kernel_client_ctl(system_client, type, rec)
+
 
 /* call snd_seq_oss_midi_lookup_ports() asynchronously */
 static void async_call_lookup_ports(struct work_struct *work)
@@ -126,6 +128,7 @@ snd_seq_oss_create_client(void)
 	return rc;
 }
 
+
 /*
  * receive annoucement from system port, and check the midi device
  */
@@ -158,6 +161,7 @@ receive_announce(struct snd_seq_event *ev, int direct, void *private, int atomic
 	return 0;
 }
 
+
 /*
  * delete OSS sequencer client
  */
@@ -172,6 +176,7 @@ snd_seq_oss_delete_client(void)
 
 	return 0;
 }
+
 
 /*
  * open sequencer device
@@ -300,6 +305,7 @@ translate_mode(struct file *file)
 	return file_mode;
 }
 
+
 /*
  * create sequencer port
  */
@@ -386,6 +392,7 @@ delete_seq_queue(int queue)
 	return rc;
 }
 
+
 /*
  * free device informations - private_free callback of port
  */
@@ -402,6 +409,7 @@ free_devinfo(void *private)
 	
 	kfree(dp);
 }
+
 
 /*
  * close sequencer device
@@ -425,6 +433,7 @@ snd_seq_oss_release(struct seq_oss_devinfo *dp)
 		delete_port(dp);
 	delete_seq_queue(queue);
 }
+
 
 /*
  * reset sequencer devices
@@ -472,6 +481,7 @@ filemode_str(int val)
 	};
 	return str[val & SNDRV_SEQ_OSS_FILE_ACMODE];
 }
+
 
 /*
  * proc interface

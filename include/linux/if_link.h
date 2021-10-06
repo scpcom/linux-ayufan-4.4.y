@@ -3,6 +3,7 @@
 
 #include <uapi/linux/if_link.h>
 
+
 /* We don't want this structure exposed to user space */
 struct ifla_vf_stats {
 	__u64 rx_packets;

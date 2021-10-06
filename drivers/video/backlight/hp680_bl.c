@@ -63,6 +63,7 @@ static void hp680bl_send_intensity(struct backlight_device *bd)
 	current_intensity = intensity;
 }
 
+
 #ifdef CONFIG_PM_SLEEP
 static int hp680bl_suspend(struct device *dev)
 {

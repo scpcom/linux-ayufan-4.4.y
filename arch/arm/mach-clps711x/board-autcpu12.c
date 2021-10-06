@@ -272,3 +272,4 @@ MACHINE_START(AUTCPU12, "autronix autcpu12")
 	.init_late	= autcpu12_init_late,
 	.restart	= clps711x_restart,
 MACHINE_END
+

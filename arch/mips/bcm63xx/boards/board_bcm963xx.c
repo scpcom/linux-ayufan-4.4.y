@@ -33,6 +33,7 @@
 
 #include <uapi/linux/bcm933xx_hcs.h>
 
+
 #define HCS_OFFSET_128K			0x20000
 
 static struct board_info board;
@@ -345,6 +346,7 @@ static struct board_info __initdata board_96348gw_11 = {
 		.force_duplex_full	= 1,
 	},
 
+
 	.has_ohci0 = 1,
 	.has_pccard = 1,
 	.has_ehci0 = 1,
@@ -479,6 +481,7 @@ static struct board_info __initdata board_rta1025w_16 = {
 	},
 };
 
+
 static struct board_info __initdata board_DV201AMR = {
 	.name				= "DV201AMR",
 	.expected_cpu_id		= 0x6348,
@@ -544,6 +547,7 @@ static struct board_info __initdata board_96358vw = {
 		.force_duplex_full	= 1,
 	},
 
+
 	.has_ohci0 = 1,
 	.has_pccard = 1,
 	.has_ehci0 = 1,
@@ -594,6 +598,7 @@ static struct board_info __initdata board_96358vw2 = {
 		.force_speed_100	= 1,
 		.force_duplex_full	= 1,
 	},
+
 
 	.has_ohci0 = 1,
 	.has_pccard = 1,

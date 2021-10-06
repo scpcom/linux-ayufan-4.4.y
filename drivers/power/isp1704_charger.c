@@ -431,6 +431,7 @@ static int isp1704_charger_probe(struct platform_device *pdev)
 		return -ENODEV;
 	}
 
+
 	isp = devm_kzalloc(&pdev->dev, sizeof(*isp), GFP_KERNEL);
 	if (!isp)
 		return -ENOMEM;

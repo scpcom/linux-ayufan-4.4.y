@@ -1,6 +1,7 @@
 #ifndef __ALPHA_SWITCH_TO_H
 #define __ALPHA_SWITCH_TO_H
 
+
 struct task_struct;
 extern struct task_struct *alpha_switch_to(unsigned long, struct task_struct *);
 

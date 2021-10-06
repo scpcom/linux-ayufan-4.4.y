@@ -102,6 +102,7 @@
  */
 #define PSYREG_BITS	0xfffffffb
 
+
 extern char _heap_start[];
 
 #ifdef CONFIG_DA_CONSOLE
@@ -270,6 +271,7 @@ void __init setup_arch(char **cmdline_p)
 	 * Make sure we don't alias in dcache or icache
 	 */
 	check_for_cache_aliasing(cpu);
+
 
 #ifdef CONFIG_METAG_HALT_ON_PANIC
 	atomic_notifier_chain_register(&panic_notifier_list,

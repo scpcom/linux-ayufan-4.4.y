@@ -433,6 +433,7 @@ void rtl92se_tx_fill_desc(struct ieee80211_hw *hw,
 		       (ptcb_desc->rts_use_shortpreamble ? 1 : 0)
 		       : (ptcb_desc->rts_use_shortgi ? 1 : 0)));
 
+
 		/* Set Bandwidth and sub-channel settings. */
 		if (bw_40) {
 			if (ptcb_desc->packet_bw) {

@@ -205,6 +205,7 @@ static const __le32 iwlagn_def_3w_lookup[IWLAGN_BT_DECISION_LUT_SIZE] = {
 	cpu_to_le32(0xf0005000),
 };
 
+
 /* Loose Coex */
 static const __le32 iwlagn_loose_lookup[IWLAGN_BT_DECISION_LUT_SIZE] = {
 	cpu_to_le32(0xaaaaaaaa),
@@ -708,6 +709,7 @@ static void iwlagn_bt_coex_profile_notif(struct iwl_priv *priv,
 	    iwlagn_set_kill_msk(priv, uart_msg))
 		queue_work(priv->workqueue, &priv->bt_runtime_config);
 
+
 	/* FIXME: based on notification, adjust the prio_boost */
 
 	priv->bt_ci_compliance = coex->bt_ci_compliance;
@@ -842,6 +844,7 @@ void iwlagn_set_rxon_chain(struct iwl_priv *priv, struct iwl_rxon_context *ctx)
 	active_rx_cnt = iwl_get_active_rx_chain_count(priv);
 	idle_rx_cnt = iwl_get_idle_rx_chain_count(priv, active_rx_cnt);
 
+
 	/* correct rx chain count according hw settings
 	 * and chain noise calibration
 	 */
@@ -903,6 +906,7 @@ struct wowlan_key_data {
 	const u8 *bssid;
 	bool error, use_rsc_tsc, use_tkip;
 };
+
 
 static void iwlagn_wowlan_program_keys(struct ieee80211_hw *hw,
 			       struct ieee80211_vif *vif,

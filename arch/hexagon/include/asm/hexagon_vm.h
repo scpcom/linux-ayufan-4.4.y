@@ -217,6 +217,7 @@ static inline long __vmintop_clear(long i)
 #define VM_NEWMAP_TYPE_LINEAR	0
 #define VM_NEWMAP_TYPE_PGTABLES	1
 
+
 /*
  * Event Record definitions useful to both C and Assembler
  */

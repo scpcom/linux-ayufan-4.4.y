@@ -3,6 +3,7 @@
 
 #include <uapi/asm/setup.h>
 
+
 #define PARAM			((unsigned char *)empty_zero_page)
 
 #define MOUNT_ROOT_RDONLY	(*(unsigned long *) (PARAM+0x000))

@@ -247,6 +247,7 @@ void musb_root_disconnect(struct musb *musb)
 	}
 }
 
+
 /*---------------------------------------------------------------------*/
 
 /* Caller may or may not hold musb->lock */

@@ -411,3 +411,4 @@ int au0828_i2c_unregister(struct au0828_dev *dev)
 	i2c_del_adapter(&dev->i2c_adap);
 	return 0;
 }
+

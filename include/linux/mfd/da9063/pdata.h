@@ -62,6 +62,7 @@ struct da9063_regulators_pdata {
 	struct da9063_regulator_data	*regulator_data;
 };
 
+
 /*
  * RGB LED configuration
  */
@@ -78,6 +79,7 @@ enum {
 /* LED polarity for flags in struct led_info. */
 #define DA9063_LED_HIGH_LEVEL_ACTIVE	0x0
 #define DA9063_LED_LOW_LEVEL_ACTIVE	0x4
+
 
 /*
  * General PMIC configuration

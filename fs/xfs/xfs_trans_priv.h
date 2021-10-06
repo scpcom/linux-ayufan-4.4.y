@@ -25,6 +25,7 @@ struct xfs_trans;
 struct xfs_ail;
 struct xfs_log_vec;
 
+
 void	xfs_trans_init(struct xfs_mount *);
 void	xfs_trans_add_item(struct xfs_trans *, struct xfs_log_item *);
 void	xfs_trans_del_item(struct xfs_log_item *);

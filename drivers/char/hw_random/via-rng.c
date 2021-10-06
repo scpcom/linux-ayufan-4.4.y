@@ -35,6 +35,9 @@
 #include <asm/cpufeature.h>
 #include <asm/fpu/api.h>
 
+
+
+
 enum {
 	VIA_STRFILT_CNT_SHIFT	= 16,
 	VIA_STRFILT_FAIL	= (1 << 15),
@@ -184,12 +187,14 @@ static int via_rng_init(struct hwrng *rng)
 	return 0;
 }
 
+
 static struct hwrng via_rng = {
 	.name		= "via",
 	.init		= via_rng_init,
 	.data_present	= via_rng_data_present,
 	.data_read	= via_rng_data_read,
 };
+
 
 static int __init mod_init(void)
 {

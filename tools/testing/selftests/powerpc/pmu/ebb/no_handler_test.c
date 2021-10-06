@@ -10,6 +10,7 @@
 
 #include "ebb.h"
 
+
 /* Test that things work sanely if we have no handler */
 
 static int no_handler_test(void)

@@ -87,6 +87,7 @@ module_param(shuffle_freq, int, 0);
 #define FTL_MAJOR	44
 #endif
 
+
 /*====================================================================*/
 
 /* Maximum number of separate memory devices we'll allow */
@@ -103,6 +104,7 @@ module_param(shuffle_freq, int, 0);
 
 /* Sector size -- shouldn't need to change */
 #define SECTOR_SIZE	512
+
 
 /* Each memory region corresponds to a minor device */
 typedef struct partition_t {
@@ -140,7 +142,9 @@ typedef struct partition_t {
 
 /*====================================================================*/
 
+
 static void ftl_erase_callback(struct erase_info *done);
+
 
 /*======================================================================
 
@@ -339,6 +343,7 @@ static int erase_xfer(partition_t *part,
 
     /* Is there a free erase slot? Always in MTD. */
 
+
     erase=kmalloc(sizeof(struct erase_info), GFP_KERNEL);
     if (!erase)
             return -ENOMEM;
@@ -473,6 +478,7 @@ static int copy_erase_unit(partition_t *part, uint16_t srcunit,
     pr_debug("ftl_cs: copying block 0x%x to 0x%x\n",
 	  eun->Offset, xfer->Offset);
 
+
     /* Read current BAM */
     if (part->bam_index != srcunit) {
 
@@ -523,6 +529,7 @@ static int copy_erase_unit(partition_t *part, uint16_t srcunit,
 		return ret;
             }
 
+
 	    ret = mtd_write(part->mbd.mtd, dest, SECTOR_SIZE, &retlen,
                             (u_char *)buf);
 	    if (ret)  {
@@ -552,6 +559,7 @@ static int copy_erase_unit(partition_t *part, uint16_t srcunit,
 	return ret;
     }
 
+
     /* All clear? Then update the LogicalEUN again */
     ret = mtd_write(part->mbd.mtd, xfer->Offset + 20, sizeof(uint16_t),
                     &retlen, (u_char *)&srcunitswap);
@@ -560,6 +568,7 @@ static int copy_erase_unit(partition_t *part, uint16_t srcunit,
 	printk(KERN_WARNING "ftl: Error writing new LogicalEUN in copy_erase_unit\n");
 	return ret;
     }
+
 
     /* Update the maps and usage stats*/
     i = xfer->EraseCount;
@@ -767,6 +776,7 @@ static uint32_t find_free(partition_t *part)
     return blk;
 
 } /* find_free */
+
 
 /*======================================================================
 
@@ -1097,6 +1107,7 @@ static void __exit cleanup_ftl(void)
 
 module_init(init_ftl);
 module_exit(cleanup_ftl);
+
 
 MODULE_LICENSE("Dual MPL/GPL");
 MODULE_AUTHOR("David Hinds <dahinds@users.sourceforge.net>");

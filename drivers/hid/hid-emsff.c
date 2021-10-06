@@ -20,6 +20,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
+
 #include <linux/hid.h>
 #include <linux/input.h>
 #include <linux/module.h>
@@ -150,3 +151,4 @@ static struct hid_driver ems_driver = {
 module_hid_driver(ems_driver);
 
 MODULE_LICENSE("GPL");
+

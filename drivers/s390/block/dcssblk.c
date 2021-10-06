@@ -1023,6 +1023,7 @@ static struct platform_driver dcssblk_pdrv = {
 
 static struct platform_device *dcssblk_pdev;
 
+
 /*
  * The init/exit functions.
  */

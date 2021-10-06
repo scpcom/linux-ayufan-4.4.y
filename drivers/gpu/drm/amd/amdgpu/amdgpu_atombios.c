@@ -1298,6 +1298,7 @@ union voltage_object {
 	union _ATOM_VOLTAGE_OBJECT_V3 v3;
 };
 
+
 static ATOM_VOLTAGE_OBJECT_V3 *amdgpu_atombios_lookup_voltage_object_v3(ATOM_VOLTAGE_OBJECT_INFO_V3_1 *v3,
 									u8 voltage_type, u8 voltage_mode)
 {

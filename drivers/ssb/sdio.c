@@ -23,6 +23,7 @@
 /* Define the following to 1 to enable a printk on each coreswitch. */
 #define SSB_VERBOSE_SDIOCORESWITCH_DEBUG		0
 
+
 /* Hardware invariants CIS tuples */
 #define SSB_SDIO_CIS			0x80
 #define  SSB_SDIO_CIS_SROMREV		0x00
@@ -46,6 +47,7 @@
 
 #define CISTPL_FUNCE_LAN_NODE_ID        0x04	/* same as in PCMCIA */
 
+
 /*
  * Function 1 miscellaneous registers.
  *
@@ -67,6 +69,7 @@
 
 /* REVISIT: this flag doesn't seem to matter */
 #define SBSDIO_SB_ACCESS_2_4B_FLAG	0x8000	/* forces 32-bit SB access */
+
 
 /*
  * Address map within the SDIO function address space (128K).
@@ -90,6 +93,7 @@
  *                 OOOOOOOOOOOOOOOO  Offset within SB Address Window
  *                 a                 32-bit access flag
  */
+
 
 /*
  * SSB I/O via SDIO.

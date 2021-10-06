@@ -250,6 +250,7 @@ static bool ath_complete_reset(struct ath_softc *sc, bool start)
 			ath9k_hw_settsf64(ah, sc->cur_chan->tsf_val + offset);
 		}
 
+
 		if (!test_bit(ATH_OP_BEACONS, &common->op_flags))
 			goto work;
 
@@ -2406,6 +2407,7 @@ static int ath9k_add_chanctx(struct ieee80211_hw *hw,
 	mutex_unlock(&sc->mutex);
 	return -ENOSPC;
 }
+
 
 static void ath9k_remove_chanctx(struct ieee80211_hw *hw,
 				 struct ieee80211_chanctx_conf *conf)

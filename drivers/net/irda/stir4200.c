@@ -180,6 +180,7 @@ struct stir_cb {
 	struct urb	 *rx_urb;
 };
 
+
 /* These are the currently known USB ids */
 static struct usb_device_id dongles[] = {
     /* SigmaTel, Inc,  STIr4200 IrDA/USB Bridge */
@@ -487,6 +488,7 @@ static const struct {
         { 4000000, PDCLK_4000000 },
 };
 
+
 /*
  * Setup chip for speed.
  *  Called at startup to initialize the chip
@@ -644,6 +646,7 @@ static int fifo_txwait(struct stir_cb *stir, int space)
 	return 0;
 }
 
+
 /* Wait for turnaround delay before starting transmit.  */
 static void turnaround_delay(const struct stir_cb *stir, long us)
 {
@@ -794,6 +797,7 @@ static int stir_transmit_thread(void *arg)
 	}
         return 0;
 }
+
 
 /*
  * USB bulk receive completion callback.

@@ -74,6 +74,7 @@ static struct us_unusual_dev cypress_unusual_dev_list[] = {
 
 #undef UNUSUAL_DEV
 
+
 /*
  * ATACB is a protocol used on cypress usb<->ata bridge to
  * send raw ATA command over mass storage
@@ -150,6 +151,7 @@ static void cypress_atacb_passthrough(struct scsi_cmnd *srb, struct us_data *us)
 
 	if (srb->cmnd[12] == ATA_CMD_ID_ATA || srb->cmnd[12] == ATA_CMD_ID_ATAPI)
 		srb->cmnd[2] |= (1<<7); /* set  IdentifyPacketDevice for these cmds */
+
 
 	usb_stor_transparent_scsi_command(srb, us);
 

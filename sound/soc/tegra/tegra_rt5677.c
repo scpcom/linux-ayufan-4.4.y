@@ -153,6 +153,7 @@ static int tegra_rt5677_asoc_init(struct snd_soc_pcm_runtime *rtd)
 				&tegra_rt5677_hp_jack_gpio);
 	}
 
+
 	snd_soc_card_jack_new(rtd->card, "Mic Jack", SND_JACK_MICROPHONE,
 			      &tegra_rt5677_mic_jack,
 			      &tegra_rt5677_mic_jack_pins, 1);

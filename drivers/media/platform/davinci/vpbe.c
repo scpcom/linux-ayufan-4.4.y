@@ -338,6 +338,7 @@ static int vpbe_s_dv_timings(struct vpbe_device *vpbe_dev,
 	int sd_index = vpbe_dev->current_sd_index;
 	int ret, i;
 
+
 	if (!(cfg->outputs[out_index].output.capabilities &
 	    V4L2_OUT_CAP_DV_TIMINGS))
 		return -ENODATA;

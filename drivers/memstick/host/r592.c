@@ -53,6 +53,7 @@ const char *memstick_debug_get_tpc_name(int tpc)
 }
 EXPORT_SYMBOL(memstick_debug_get_tpc_name);
 
+
 /* Read a register*/
 static inline u32 r592_read_reg(struct r592_device *dev, int address)
 {
@@ -104,6 +105,7 @@ static inline void r592_clear_reg_mask(struct r592_device *dev,
 	writel(reg & ~mask, dev->mmio + address);
 }
 
+
 /* Wait for status bits while checking for errors */
 static int r592_wait_status(struct r592_device *dev, u32 mask, u32 wanted_mask)
 {
@@ -127,6 +129,7 @@ static int r592_wait_status(struct r592_device *dev, u32 mask, u32 wanted_mask)
 	}
 	return -ETIME;
 }
+
 
 /* Enable/disable device */
 static int r592_enable_device(struct r592_device *dev, bool enable)
@@ -313,6 +316,7 @@ static int r592_transfer_fifo_dma(struct r592_device *dev)
 	dma_unmap_sg(&dev->pci_dev->dev, &dev->req->sg, 1, is_write ?
 		PCI_DMA_TODEVICE : PCI_DMA_FROMDEVICE);
 
+
 	return dev->dma_error;
 }
 
@@ -439,6 +443,7 @@ static int r592_transfer_fifo_pio(struct r592_device *dev)
 		else
 			r592_read_fifo_pio(dev, miter.addr, miter.length);
 
+
 	/* Write last few non aligned bytes*/
 	if (is_write)
 		r592_flush_fifo_write(dev);
@@ -485,6 +490,7 @@ static void r592_execute_tpc(struct r592_device *dev)
 		r592_set_reg_mask(dev, R592_IO, R592_IO_DIRECTION);
 	else
 		r592_clear_reg_mask(dev, R592_IO, R592_IO_DIRECTION);
+
 
 	error = r592_test_fifo_empty(dev);
 	if (error)

@@ -26,7 +26,9 @@
 #include "via_aux.h"
 #include "../edid.h"
 
+
 static const char *name = "EDID";
+
 
 static void query_edid(struct via_aux_drv *drv)
 {

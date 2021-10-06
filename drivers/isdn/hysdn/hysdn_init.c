@@ -40,6 +40,7 @@ static int cardmax;		/* number of found cards */
 hysdn_card *card_root = NULL;	/* pointer to first card */
 static hysdn_card *card_last = NULL;	/* pointer to first card */
 
+
 /****************************************************************************/
 /* The module startup and shutdown code. Only compiled when used as module. */
 /* Using the driver as module is always advisable, because the booting      */
@@ -183,6 +184,7 @@ hysdn_init(void)
 
 	return 0;		/* no error */
 }				/* init_module */
+
 
 /***********************************************************************/
 /* cleanup_module is called when the module is released by the kernel. */

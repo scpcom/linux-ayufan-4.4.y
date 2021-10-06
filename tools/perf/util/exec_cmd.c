@@ -50,6 +50,7 @@ void perf_set_argv_exec_path(const char *exec_path)
 	setenv(EXEC_PATH_ENVIRONMENT, exec_path, 1);
 }
 
+
 /* Returns the highest-priority, location to look for perf programs. */
 const char *perf_exec_path(void)
 {
@@ -121,6 +122,7 @@ int execv_perf_cmd(const char **argv) {
 	free(nargv);
 	return -1;
 }
+
 
 int execl_perf_cmd(const char *cmd,...)
 {

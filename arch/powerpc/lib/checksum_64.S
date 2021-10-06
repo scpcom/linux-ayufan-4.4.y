@@ -134,6 +134,7 @@ _GLOBAL(csum_partial)
 	ld	r11,24(r3)
 	bdnz	2b
 
+
 	adde	r0,r0,r6
 	ld	r12,32(r3)
 	ld	r14,40(r3)
@@ -202,6 +203,7 @@ _GLOBAL(csum_partial)
 	add	r3,r4,r0
 	srdi	r3,r3,32
 	blr
+
 
 	.macro srcnr
 100:
@@ -341,6 +343,7 @@ source;	ld	r9,8(r3)
 source;	ld	r10,16(r3)
 source;	ld	r11,24(r3)
 	bdnz	2b
+
 
 	adde	r0,r0,r6
 source;	ld	r12,32(r3)

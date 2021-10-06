@@ -42,3 +42,4 @@ static pmu_config_t pmu_conf_gen={
 	.pmd_desc   = pfm_gen_pmd_desc,
 	.pmc_desc   = pfm_gen_pmc_desc
 };
+

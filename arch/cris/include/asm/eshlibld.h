@@ -52,6 +52,7 @@
 # endif /* __KERNEL__ etc */
 #endif /* SHARE_LIB_CORE */
 
+
 /* Main exported function; supposed to be called when the program a.out
    has been read in. */
 extern int
@@ -75,6 +76,7 @@ perform_cris_aout_relocations(unsigned long text, unsigned long tlength,
 			       information is present. */
 			      char **env, int envc,
 			      int euid, int is_suid);
+
 
 #ifdef RELOC_DEBUG
 /* Task-specific debug stuff. */
@@ -107,3 +109,4 @@ shlibmod_fork(struct shlibdep **deps);
 
 #endif _cris_relocate_h
 /********************** END OF FILE eshlibld.h *****************************/
+

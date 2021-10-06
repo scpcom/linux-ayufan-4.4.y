@@ -22,6 +22,7 @@
 #include <arch/mpipe.h>
 #include <arch/mpipe_constants.h>
 
+
 /** Number of mPIPE instances supported */
 #define HV_MPIPE_INSTANCE_MAX   (2)
 
@@ -49,6 +50,9 @@
 #define HV_MPIPE_NUM_EDMA_RINGS \
   (MPIPE_MMIO_INIT_DAT_GX36_1__EDMA_POST_MASK_WIDTH)
 
+
+
+
 /** A flag bit indicating a fixed resource allocation. */
 #define HV_MPIPE_ALLOC_FIXED 0x01
 
@@ -67,6 +71,7 @@
 #define HV_MPIPE_FAST_MMIO_SIZE \
   ((MPIPE_MMIO_ADDR__REGION_VAL_BSM + 1 - MPIPE_MMIO_ADDR__REGION_VAL_IDMA) \
    << MPIPE_MMIO_ADDR__REGION_SHIFT)
+
 
 /*
  * Each type of resource allocation comes in quantized chunks, where
@@ -122,6 +127,9 @@
 #define HV_MPIPE_ALLOC_EDMA_RINGS_RES_PER_BIT \
   (HV_MPIPE_NUM_EDMA_RINGS / HV_MPIPE_ALLOC_EDMA_RINGS_BITS)
 
+
+
+
 /** Bit vector encoding which NotifRings are in a NotifGroup. */
 typedef struct
 {
@@ -130,8 +138,11 @@ typedef struct
 
 } gxio_mpipe_notif_group_bits_t;
 
+
 /** Another name for MPIPE_LBL_INIT_DAT_BSTS_TBL_t. */
 typedef MPIPE_LBL_INIT_DAT_BSTS_TBL_t gxio_mpipe_bucket_info_t;
+
+
 
 /** Eight buffer stack ids. */
 typedef struct
@@ -141,6 +152,7 @@ typedef struct
 
 } gxio_mpipe_rules_stacks_t;
 
+
 /** A destination mac address. */
 typedef struct
 {
@@ -149,11 +161,15 @@ typedef struct
 
 } gxio_mpipe_rules_dmac_t;
 
+
 /** A vlan. */
 typedef uint16_t gxio_mpipe_rules_vlan_t;
 
+
+
 /** Maximum number of characters in a link name. */
 #define GXIO_MPIPE_LINK_NAME_LEN  32
+
 
 /** Structure holding a link name.  Only needed, and only typedef'ed,
  *  because the IORPC stub generator only handles types which are single
@@ -168,6 +184,7 @@ _gxio_mpipe_link_name_t;
 /** Maximum number of characters in a symbol name. */
 #define GXIO_MPIPE_SYMBOL_NAME_LEN  128
 
+
 /** Structure holding a symbol name.  Only needed, and only typedef'ed,
  *  because the IORPC stub generator only handles types which are single
  *  words coming before the parameter name. */
@@ -178,6 +195,7 @@ typedef struct
 }
 _gxio_mpipe_symbol_name_t;
 
+
 /** Structure holding a MAC address. */
 typedef struct
 {
@@ -185,6 +203,8 @@ typedef struct
   uint8_t mac[6];
 }
 _gxio_mpipe_link_mac_t;
+
+
 
 /** Request shared data permission -- that is, the ability to send and
  *  receive packets -- on the specified link.  Other processes may also
@@ -340,6 +360,7 @@ _gxio_mpipe_link_mac_t;
  */
 #define GXIO_MPIPE_LINK_WAIT               0x00002000UL
 
+
 /*
  * Note: link attributes must fit in 24 bits, since we use the top 8 bits
  * of the IORPC offset word for the channel number.
@@ -430,6 +451,8 @@ _gxio_mpipe_link_mac_t;
  */
 #define GXIO_MPIPE_LINK_DESIRED_STATE      0x080000
 
+
+
 /** Link can run, should run, or is running at 10 Mbps. */
 #define GXIO_MPIPE_LINK_10M        0x0000000000000001UL
 
@@ -494,6 +517,7 @@ _gxio_mpipe_link_mac_t;
  *  specified in a set of desired state flags, both are assumed. */
 #define GXIO_MPIPE_LINK_HDX        0x0000000000020000UL
 
+
 /** An individual rule. */
 typedef struct
 {
@@ -535,6 +559,7 @@ typedef struct
 
 } gxio_mpipe_rules_rule_t;
 
+
 /** A list of classifier rules. */
 typedef struct
 {
@@ -548,6 +573,9 @@ typedef struct
   uint8_t rules[4096 - 4];
 
 } gxio_mpipe_rules_list_t;
+
+
+
 
 /** mPIPE statistics structure. These counters include all relevant
  *  events occurring on all links within the mPIPE shim. */
@@ -572,5 +600,6 @@ typedef struct
   uint64_t egress_bytes;
 }
 gxio_mpipe_stats_t;
+
 
 #endif /* _SYS_HV_DRV_MPIPE_INTF_H */

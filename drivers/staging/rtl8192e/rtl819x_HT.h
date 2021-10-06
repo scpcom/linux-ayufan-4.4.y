@@ -54,6 +54,7 @@ struct ht_capab_ele {
 
 	u8	MCS[16];
 
+
 	u16	ExtHTCapInfo;
 
 	u8	TxBFCap[4];
@@ -61,6 +62,7 @@ struct ht_capab_ele {
 	u8	ASCap;
 
 } __packed;
+
 
 struct ht_info_ele {
 	u8	ControlChl;
@@ -100,6 +102,7 @@ enum ht_aggre_mode {
 	HT_AGG_FORCE_DISABLE = 2,
 };
 
+
 struct rt_hi_throughput {
 	u8				bEnableHT;
 	u8				bCurrentHTSupport;
@@ -118,11 +121,13 @@ struct rt_hi_throughput {
 
 	enum ht_spec_ver ePeerHTSpecVer;
 
+
 	struct ht_capab_ele SelfHTCap;
 	struct ht_info_ele SelfHTInfo;
 
 	u8				PeerHTCapBuf[32];
 	u8				PeerHTInfoBuf[32];
+
 
 	u8				bAMSDU_Support;
 	u16				nAMSDU_MaxSize;

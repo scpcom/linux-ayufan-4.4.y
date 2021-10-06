@@ -169,6 +169,7 @@ struct ocfs2_lock_res {
 	void                    *l_priv;
 	struct ocfs2_lock_res_ops *l_ops;
 
+
 	struct list_head         l_blocked_list;
 	struct list_head         l_mask_waiters;
 
@@ -508,6 +509,7 @@ static inline int ocfs2_supports_append_dio(struct ocfs2_super *osb)
 	return 0;
 }
 
+
 static inline int ocfs2_supports_inline_data(struct ocfs2_super *osb)
 {
 	if (osb->s_feature_incompat & OCFS2_FEATURE_INCOMPAT_INLINE_DATA)
@@ -676,6 +678,7 @@ static inline int ocfs2_uses_extended_slot_map(struct ocfs2_super *osb)
 		OCFS2_FEATURE_INCOMPAT_EXTENDED_SLOT_MAP);
 }
 
+
 #define OCFS2_IS_VALID_DINODE(ptr)					\
 	(!strcmp((ptr)->i_signature, OCFS2_INODE_SIGNATURE))
 
@@ -684,6 +687,7 @@ static inline int ocfs2_uses_extended_slot_map(struct ocfs2_super *osb)
 
 #define OCFS2_IS_VALID_GROUP_DESC(ptr)					\
 	(!strcmp((ptr)->bg_signature, OCFS2_GROUP_DESC_SIGNATURE))
+
 
 #define OCFS2_IS_VALID_XATTR_BLOCK(ptr)					\
 	(!strcmp((ptr)->xb_signature, OCFS2_XATTR_BLOCK_SIGNATURE))
@@ -924,3 +928,4 @@ static inline int ocfs2_find_next_zero_bit_unaligned(void *bitmap, int max,
 }
 
 #endif  /* OCFS2_H */
+

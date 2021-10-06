@@ -17,6 +17,7 @@
  * General Public License for more details.
  */
 
+
 #ifndef STACKGLUE_H
 #define STACKGLUE_H
 
@@ -46,6 +47,7 @@ struct file_lock;
 
 /* This shadows  OCFS2_CLUSTER_NAME_LEN */
 #define CLUSTER_NAME_MAX	16
+
 
 /*
  * ocfs2_protocol_version changes when ocfs2 does something different in
@@ -90,6 +92,7 @@ struct ocfs2_locking_protocol {
 	void (*lp_blocking_ast)(struct ocfs2_dlm_lksb *lksb, int level);
 	void (*lp_unlock_ast)(struct ocfs2_dlm_lksb *lksb, int error);
 };
+
 
 /*
  * A cluster connection.  Mostly opaque to ocfs2, the connection holds
@@ -239,6 +242,7 @@ struct ocfs2_stack_plugin {
 	struct ocfs2_protocol_version sp_max_proto;
 };
 
+
 /* Used by the filesystem */
 int ocfs2_cluster_connect(const char *stack_name,
 			  const char *cluster_name,
@@ -288,6 +292,7 @@ int ocfs2_plock(struct ocfs2_cluster_connection *conn, u64 ino,
 		struct file *file, int cmd, struct file_lock *fl);
 
 void ocfs2_stack_glue_set_max_proto_version(struct ocfs2_protocol_version *max_proto);
+
 
 /* Used by stack plugins */
 int ocfs2_stack_glue_register(struct ocfs2_stack_plugin *plugin);

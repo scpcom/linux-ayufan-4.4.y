@@ -22,4 +22,5 @@
 #define sync_test_bit(nr, addr)		test_bit(nr, addr)
 #define sync_cmpxchg			cmpxchg
 
+
 #endif

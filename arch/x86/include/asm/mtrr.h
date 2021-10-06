@@ -25,6 +25,7 @@
 
 #include <uapi/asm/mtrr.h>
 
+
 /*
  * The following functions are for use by other drivers that cannot use
  * arch_phys_wc_add and arch_phys_wc_del.

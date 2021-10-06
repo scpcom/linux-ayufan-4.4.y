@@ -17,6 +17,7 @@
 
 #include "wilc_wlan_if.h"
 
+
 static struct dentry *wilc_dir;
 
 /*
@@ -31,6 +32,7 @@ atomic_t DEBUG_LEVEL = ATOMIC_INIT(ERR);
 /*
  * --------------------------------------------------------------------------------
  */
+
 
 static ssize_t wilc_debug_level_read(struct file *file, char __user *userbuf, size_t count, loff_t *ppos)
 {
@@ -176,3 +178,4 @@ void wilc_debugfs_remove(void)
 }
 
 #endif
+

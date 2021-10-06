@@ -26,8 +26,10 @@
 
 #define CROSS_64KB(a, s) _CROSS_64KB(a, s, use_virtual_dma & 1)
 
+
 #define SW fd_routine[use_virtual_dma & 1]
 #define CSW fd_routine[can_use_virtual_dma & 1]
+
 
 #define fd_inb(port)		inb_p(port)
 #define fd_outb(value, port)	outb_p(value, port)
@@ -132,10 +134,12 @@ static void vdma_nop(unsigned int dummy)
 {
 }
 
+
 static int vdma_get_dma_residue(unsigned int dummy)
 {
 	return virtual_dma_count + virtual_dma_residue;
 }
+
 
 static int fd_request_irq(void)
 {
@@ -151,6 +155,7 @@ static unsigned long dma_mem_alloc(unsigned long size)
 {
 	return __get_dma_pages(GFP_KERNEL|__GFP_NORETRY, get_order(size));
 }
+
 
 static unsigned long vdma_mem_alloc(unsigned long size)
 {
@@ -185,6 +190,7 @@ static void _fd_chose_dma_mode(char *addr, unsigned long size)
 }
 
 #define fd_chose_dma_mode(addr, size) _fd_chose_dma_mode(addr, size)
+
 
 static int vdma_dma_setup(char *addr, unsigned long size, int mode, int io)
 {
@@ -237,6 +243,7 @@ static struct fd_routine_l {
 		vdma_dma_setup
 	}
 };
+
 
 static int FDC1 = 0x3f0;
 static int FDC2 = -1;

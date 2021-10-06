@@ -50,6 +50,7 @@ struct crc_info {
 #define CRC_IOC_VERIFY_VAL	_IOWR('C', 0x03, unsigned int)
 #define CRC_IOC_FILL_VAL	_IOWR('C', 0x04, unsigned int)
 
+
 #ifdef __KERNEL__
 
 #include <linux/types.h>

@@ -132,6 +132,7 @@
 
 #include "in2000.h"
 
+
 /*
  * 'setup_strings' is a single string used to pass operating parameters and
  * settings from the kernel/module command-line to the driver. 'setup_args[]'
@@ -192,13 +193,16 @@ static inline uchar read_3393(struct IN2000_hostdata *hostdata, uchar reg_num)
 	return read1_io(IO_WD_DATA);
 }
 
+
 #define READ_AUX_STAT() read1_io(IO_WD_ASR)
+
 
 static inline void write_3393(struct IN2000_hostdata *hostdata, uchar reg_num, uchar value)
 {
 	write1_io(reg_num, IO_WD_ADDR);
 	write1_io(value, IO_WD_DATA);
 }
+
 
 static inline void write_3393_cmd(struct IN2000_hostdata *hostdata, uchar cmd)
 {
@@ -207,6 +211,7 @@ static inline void write_3393_cmd(struct IN2000_hostdata *hostdata, uchar cmd)
 	write1_io(WD_COMMAND, IO_WD_ADDR);
 	write1_io(cmd, IO_WD_DATA);
 }
+
 
 static uchar read_1_byte(struct IN2000_hostdata *hostdata)
 {
@@ -222,6 +227,7 @@ static uchar read_1_byte(struct IN2000_hostdata *hostdata)
 	return x;
 }
 
+
 static void write_3393_count(struct IN2000_hostdata *hostdata, unsigned long value)
 {
 	write1_io(WD_TRANSFER_COUNT_MSB, IO_WD_ADDR);
@@ -229,6 +235,7 @@ static void write_3393_count(struct IN2000_hostdata *hostdata, unsigned long val
 	write1_io((value >> 8), IO_WD_DATA);
 	write1_io(value, IO_WD_DATA);
 }
+
 
 static unsigned long read_3393_count(struct IN2000_hostdata *hostdata)
 {
@@ -240,6 +247,7 @@ static unsigned long read_3393_count(struct IN2000_hostdata *hostdata)
 	value |= read1_io(IO_WD_DATA);
 	return value;
 }
+
 
 /* The 33c93 needs to be told which direction a command transfers its
  * data; we use this function to figure it out. Returns true if there
@@ -285,6 +293,8 @@ static int is_dir_out(Scsi_Cmnd * cmd)
 	}
 }
 
+
+
 static struct sx_period sx_table[] = {
 	{1, 0x20},
 	{252, 0x20},
@@ -318,6 +328,8 @@ static uchar calc_sync_xfer(unsigned int period, unsigned int offset)
 	result |= (offset < OPTIMUM_SX_OFF) ? offset : OPTIMUM_SX_OFF;
 	return result;
 }
+
+
 
 static void in2000_execute(struct Scsi_Host *instance);
 
@@ -420,6 +432,8 @@ static int in2000_queuecommand_lck(Scsi_Cmnd * cmd, void (*done) (Scsi_Cmnd *))
 
 static DEF_SCSI_QCMD(in2000_queuecommand)
 
+
+
 /*
  * This routine attempts to start a scsi command. If the host_card is
  * already connected, we give up immediately. Otherwise, look through
@@ -436,6 +450,7 @@ static void in2000_execute(struct Scsi_Host *instance)
 	unsigned short *sp;
 	unsigned short f;
 	unsigned short flushbuf[16];
+
 
 	hostdata = (struct IN2000_hostdata *) instance->hostdata;
 
@@ -693,6 +708,8 @@ static void in2000_execute(struct Scsi_Host *instance)
 
 }
 
+
+
 static void transfer_pio(uchar * buf, int cnt, int data_in_dir, struct IN2000_hostdata *hostdata)
 {
 	uchar asr;
@@ -724,6 +741,8 @@ static void transfer_pio(uchar * buf, int cnt, int data_in_dir, struct IN2000_ho
 	 */
 
 }
+
+
 
 static void transfer_bytes(Scsi_Cmnd * cmd, int data_in_dir)
 {
@@ -803,6 +822,7 @@ static void transfer_bytes(Scsi_Cmnd * cmd, int data_in_dir)
 #endif
 
 }
+
 
 /* We need to use spin_lock_irqsave() & spin_unlock_irqrestore() in this
  * function in order to work in an SMP environment. (I'd be surprised
@@ -1066,6 +1086,7 @@ static irqreturn_t in2000_intr(int irqnum, void *dev_id)
 		in2000_execute(instance);
 		break;
 
+
 /* Note: this interrupt should not occur in a LEVEL2 command */
 
 	case CSR_SELECT:
@@ -1101,6 +1122,7 @@ static irqreturn_t in2000_intr(int irqnum, void *dev_id)
 		hostdata->state = S_CONNECTED;
 		break;
 
+
 	case CSR_XFER_DONE | PHS_DATA_IN:
 	case CSR_UNEXP | PHS_DATA_IN:
 	case CSR_SRV_REQ | PHS_DATA_IN:
@@ -1109,6 +1131,7 @@ static irqreturn_t in2000_intr(int irqnum, void *dev_id)
 		if (hostdata->state != S_RUNNING_LEVEL2)
 			hostdata->state = S_CONNECTED;
 		break;
+
 
 	case CSR_XFER_DONE | PHS_DATA_OUT:
 	case CSR_UNEXP | PHS_DATA_OUT:
@@ -1119,6 +1142,7 @@ static irqreturn_t in2000_intr(int irqnum, void *dev_id)
 			hostdata->state = S_CONNECTED;
 		break;
 
+
 /* Note: this interrupt should not occur in a LEVEL2 command */
 
 	case CSR_XFER_DONE | PHS_COMMAND:
@@ -1128,6 +1152,7 @@ static irqreturn_t in2000_intr(int irqnum, void *dev_id)
 		    transfer_pio(cmd->cmnd, cmd->cmd_len, DATA_OUT_DIR, hostdata);
 		hostdata->state = S_CONNECTED;
 		break;
+
 
 	case CSR_XFER_DONE | PHS_STATUS:
 	case CSR_UNEXP | PHS_STATUS:
@@ -1145,6 +1170,7 @@ static irqreturn_t in2000_intr(int irqnum, void *dev_id)
 			hostdata->state = S_CONNECTED;
 		}
 		break;
+
 
 	case CSR_XFER_DONE | PHS_MESS_IN:
 	case CSR_UNEXP | PHS_MESS_IN:
@@ -1291,6 +1317,7 @@ static irqreturn_t in2000_intr(int irqnum, void *dev_id)
 		}
 		break;
 
+
 /* Note: this interrupt will occur only after a LEVEL2 command */
 
 	case CSR_SEL_XFER_DONE:
@@ -1326,6 +1353,7 @@ static irqreturn_t in2000_intr(int irqnum, void *dev_id)
 		}
 		break;
 
+
 /* Note: this interrupt will occur only after a LEVEL2 command */
 
 	case CSR_SDP:
@@ -1334,6 +1362,7 @@ static irqreturn_t in2000_intr(int irqnum, void *dev_id)
 		write_3393(hostdata, WD_COMMAND_PHASE, 0x41);
 		write_3393_cmd(hostdata, WD_CMD_SEL_ATN_XFER);
 		break;
+
 
 	case CSR_XFER_DONE | PHS_MESS_OUT:
 	case CSR_UNEXP | PHS_MESS_OUT:
@@ -1362,6 +1391,7 @@ static irqreturn_t in2000_intr(int irqnum, void *dev_id)
 		hostdata->state = S_CONNECTED;
 		break;
 
+
 	case CSR_UNEXP_DISC:
 
 /* I think I've seen this after a request-sense that was in response
@@ -1371,6 +1401,7 @@ static irqreturn_t in2000_intr(int irqnum, void *dev_id)
  * in a legal manner (like a command that provokes a request-sense),
  * so we treat it as a normal command-complete-disconnect.
  */
+
 
 /* Make sure that reselection is enabled at this point - it may
  * have been turned off for the command that just completed.
@@ -1401,6 +1432,7 @@ static irqreturn_t in2000_intr(int irqnum, void *dev_id)
 
 		in2000_execute(instance);
 		break;
+
 
 	case CSR_DISC:
 
@@ -1449,6 +1481,7 @@ static irqreturn_t in2000_intr(int irqnum, void *dev_id)
 
 		in2000_execute(instance);
 		break;
+
 
 	case CSR_RESEL_AM:
 		DB(DB_INTR, printk("RESEL"))
@@ -1556,6 +1589,8 @@ static irqreturn_t in2000_intr(int irqnum, void *dev_id)
 	return IRQ_HANDLED;
 }
 
+
+
 #define RESET_CARD         0
 #define RESET_CARD_AND_BUS 1
 #define B_FLAG 0x80
@@ -1601,6 +1636,8 @@ static int reset_hardware(struct Scsi_Host *instance, int type)
 	write1_io(0, IO_LED_OFF);
 	return x;
 }
+
+
 
 static int in2000_bus_reset(Scsi_Cmnd * cmd)
 {
@@ -1770,6 +1807,7 @@ static int in2000_abort(Scsi_Cmnd * cmd)
 	return rc;
 }
 
+
 #define MAX_IN2000_HOSTS 3
 #define MAX_SETUP_ARGS ARRAY_SIZE(setup_args)
 #define SETUP_BUFFER_SIZE 200
@@ -1803,6 +1841,7 @@ static void __init in2000_setup(char *str, int *ints)
 	done_setup = 1;
 }
 
+
 /* check_setup_args() returns index if key found, 0 if not
  */
 
@@ -1830,6 +1869,8 @@ static int __init check_setup_args(char *key, int *val, char *buf)
 	}
 	return ++x;
 }
+
+
 
 /* The "correct" (ie portable) way to access memory-mapped hardware
  * such as the IN2000 EPROM and dip switch is through the use of
@@ -2047,6 +2088,7 @@ static int __init in2000_detect(struct scsi_host_template * tpnt)
 			hostdata->proc = val;
 #endif
 
+
 		/* FIXME: not strictly needed I think but the called code expects
 		   to be locked */
 		spin_lock_irqsave(instance->host_lock, flags);
@@ -2122,6 +2164,7 @@ static int in2000_biosparam(struct scsi_device *sdev, struct block_device *bdev,
 	}
 	return 0;
 }
+
 
 static int in2000_write_info(struct Scsi_Host *instance, char *buf, int len)
 {
@@ -2237,6 +2280,7 @@ static int in2000_show_info(struct seq_file *m, struct Scsi_Host *instance)
 }
 
 MODULE_LICENSE("GPL");
+
 
 static struct scsi_host_template driver_template = {
 	.proc_name       		= "in2000",

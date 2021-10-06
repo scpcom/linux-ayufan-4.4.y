@@ -18,6 +18,7 @@
 static struct kmem_cache *lkb_cache;
 static struct kmem_cache *rsb_cache;
 
+
 int __init dlm_memory_init(void)
 {
 	lkb_cache = kmem_cache_create("dlm_lkb", sizeof(struct dlm_lkb),
@@ -92,3 +93,4 @@ void dlm_free_lkb(struct dlm_lkb *lkb)
 	}
 	kmem_cache_free(lkb_cache, lkb);
 }
+

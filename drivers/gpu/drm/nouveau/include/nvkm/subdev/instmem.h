@@ -22,6 +22,7 @@ void nvkm_instmem_wr32(struct nvkm_instmem *, u32 addr, u32 data);
 int nvkm_instobj_new(struct nvkm_instmem *, u32 size, u32 align, bool zero,
 		     struct nvkm_memory **);
 
+
 int nv04_instmem_new(struct nvkm_device *, int, struct nvkm_instmem **);
 int nv40_instmem_new(struct nvkm_device *, int, struct nvkm_instmem **);
 int nv50_instmem_new(struct nvkm_device *, int, struct nvkm_instmem **);

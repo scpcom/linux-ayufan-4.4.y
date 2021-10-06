@@ -27,6 +27,7 @@
  *  Homepage: http://www.reiner-sct.de/support/treiber_cyberjack.php#linux
  */
 
+
 #include <linux/kernel.h>
 #include <linux/errno.h>
 #include <linux/slab.h>
@@ -43,6 +44,7 @@
 
 #define DRIVER_AUTHOR "Matthias Bruestle"
 #define DRIVER_DESC "REINER SCT cyberJack pinpad/e-com USB Chipcard Reader Driver"
+
 
 #define CYBERJACK_VENDOR_ID	0x0C4B
 #define CYBERJACK_PRODUCT_ID	0x0100

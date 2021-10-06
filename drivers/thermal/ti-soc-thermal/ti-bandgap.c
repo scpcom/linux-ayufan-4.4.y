@@ -1336,6 +1336,7 @@ int ti_bandgap_probe(struct platform_device *pdev)
 	if (TI_BANDGAP_HAS(bgp, CLK_CTRL))
 		clk_prepare_enable(bgp->fclock);
 
+
 	spin_lock_init(&bgp->lock);
 	bgp->dev = &pdev->dev;
 	platform_set_drvdata(pdev, bgp);

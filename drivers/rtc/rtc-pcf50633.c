@@ -160,6 +160,7 @@ static int pcf50633_rtc_set_time(struct device *dev, struct rtc_time *tm)
 		pcf_tm.time[PCF50633_TI_MIN],
 		pcf_tm.time[PCF50633_TI_SEC]);
 
+
 	alarm_masked = pcf50633_irq_mask_get(rtc->pcf, PCF50633_IRQ_ALARM);
 
 	if (!alarm_masked)
@@ -291,3 +292,4 @@ module_platform_driver(pcf50633_rtc_driver);
 MODULE_DESCRIPTION("PCF50633 RTC driver");
 MODULE_AUTHOR("Balaji Rao <balajirrao@openmoko.org>");
 MODULE_LICENSE("GPL");
+

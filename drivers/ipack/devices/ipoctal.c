@@ -315,6 +315,7 @@ static int ipoctal_inst_slot(struct ipoctal *ipoctal, unsigned int bus_nr,
 		return -EADDRNOTAVAIL;
 	}
 
+
 	/* Disable RX and TX before touching anything */
 	for (i = 0; i < NR_CHANNELS ; i++) {
 		struct ipoctal_channel *channel = &ipoctal->channel[i];

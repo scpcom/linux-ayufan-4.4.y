@@ -11,6 +11,7 @@
 
 #include <linux/linkage.h>
 
+
 ENTRY(dcscb_power_up_setup)
 
 	cmp	r0, #0			@ check affinity level

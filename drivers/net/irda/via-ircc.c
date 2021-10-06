@@ -126,12 +126,14 @@ static const struct pci_device_id via_pci_tbl[] = {
 
 MODULE_DEVICE_TABLE(pci,via_pci_tbl);
 
+
 static struct pci_driver via_driver = {
 	.name		= VIA_MODULE_NAME,
 	.id_table	= via_pci_tbl,
 	.probe		= via_init_one,
 	.remove		= via_remove_one,
 };
+
 
 /*
  * Function via_ircc_init ()
@@ -1268,6 +1270,8 @@ static int RxTimerHandler(struct via_ircc_cb *self, int iobase)
 
 }
 
+
+
 /*
  * Function via_ircc_interrupt (irq, dev_id)
  *
@@ -1431,6 +1435,7 @@ static int via_ircc_is_receiving(struct via_ircc_cb *self)
 	return status;
 }
 
+
 /*
  * Function via_ircc_net_open (dev)
  *
@@ -1472,6 +1477,7 @@ static int via_ircc_net_open(struct net_device *dev)
 			return -EAGAIN;
 		}
 	}
+
 
 	/* turn on interrupts */
 	EnAllInt(iobase, ON);

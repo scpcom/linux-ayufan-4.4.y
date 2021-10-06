@@ -103,6 +103,7 @@ notrace unsigned long __init early_init(unsigned long dt_ptr)
 	return KERNELBASE + offset;
 }
 
+
 /*
  * Find out what kind of machine we're on and save any data we need
  * from the early boot process (devtree is copied on pmac by prom_init()).

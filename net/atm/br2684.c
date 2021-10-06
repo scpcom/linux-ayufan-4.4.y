@@ -858,6 +858,7 @@ static void __exit br2684_exit(void)
 	remove_proc_entry("br2684", atm_proc_root);
 #endif
 
+
 	unregister_atmdevice_notifier(&atm_dev_notifier);
 
 	while (!list_empty(&br2684_devs)) {

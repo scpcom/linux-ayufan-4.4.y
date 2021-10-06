@@ -232,6 +232,7 @@ struct meta_index {
 	struct meta_entry	meta_entry[SQUASHFS_META_ENTRIES];
 };
 
+
 /*
  * definitions for structures on disk
  */

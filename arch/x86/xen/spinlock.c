@@ -76,6 +76,7 @@ enum xen_contention_stat {
 	NR_CONTENTION_STATS
 };
 
+
 #ifdef CONFIG_XEN_DEBUG_FS
 #define HISTO_BUCKETS	30
 static struct xen_spinlock_stats
@@ -309,6 +310,7 @@ void xen_uninit_lock_cpu(int cpu)
 	kfree(per_cpu(irq_name, cpu));
 	per_cpu(irq_name, cpu) = NULL;
 }
+
 
 /*
  * Our init of PV spinlocks is split in two init functions due to us

@@ -207,6 +207,7 @@ static void s3c24xx_serial_tx_dma_complete(void *args)
 	unsigned long flags;
 	int count;
 
+
 	dmaengine_tx_status(dma->tx_chan, dma->tx_cookie, &state);
 	count = dma->tx_bytes_requested - state.residue;
 	async_tx_ack(dma->tx_desc);
@@ -288,6 +289,7 @@ static int s3c24xx_serial_start_tx_dma(struct s3c24xx_uart_port *ourport,
 	struct uart_port *port = &ourport->port;
 	struct circ_buf *xmit = &port->state->xmit;
 	struct s3c24xx_uart_dma *dma = ourport->dma;
+
 
 	if (ourport->tx_mode != S3C24XX_TX_DMA)
 		enable_tx_dma(ourport);
@@ -685,6 +687,7 @@ static irqreturn_t s3c24xx_serial_rx_chars_pio(void *dev_id)
 
 	return IRQ_HANDLED;
 }
+
 
 static irqreturn_t s3c24xx_serial_rx_chars(int irq, void *dev_id)
 {
@@ -1428,6 +1431,7 @@ s3c24xx_serial_verify_port(struct uart_port *port, struct serial_struct *ser)
 	return 0;
 }
 
+
 #ifdef CONFIG_SERIAL_SAMSUNG_CONSOLE
 
 static struct console s3c24xx_serial_console;
@@ -1565,6 +1569,7 @@ static void s3c24xx_serial_resetport(struct uart_port *port,
 	/* some delay is required after fifo reset */
 	udelay(1);
 }
+
 
 #ifdef CONFIG_CPU_FREQ
 

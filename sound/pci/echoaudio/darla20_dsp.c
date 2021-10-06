@@ -28,6 +28,7 @@
 
 ****************************************************************************/
 
+
 static int init_hw(struct echoaudio *chip, u16 device_id, u16 subdevice_id)
 {
 	int err;
@@ -59,10 +60,14 @@ static int init_hw(struct echoaudio *chip, u16 device_id, u16 subdevice_id)
 	return err;
 }
 
+
+
 static int set_mixer_defaults(struct echoaudio *chip)
 {
 	return init_line_levels(chip);
 }
+
+
 
 /* The Darla20 has no external clock sources */
 static u32 detect_input_clocks(const struct echoaudio *chip)
@@ -70,11 +75,15 @@ static u32 detect_input_clocks(const struct echoaudio *chip)
 	return ECHO_CLOCK_BIT_INTERNAL;
 }
 
+
+
 /* The Darla20 has no ASIC. Just do nothing */
 static int load_asic(struct echoaudio *chip)
 {
 	return 0;
 }
+
+
 
 static int set_sample_rate(struct echoaudio *chip, u32 rate)
 {

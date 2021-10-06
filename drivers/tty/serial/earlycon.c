@@ -216,6 +216,7 @@ int __init of_setup_earlycon(unsigned long addr,
 	if (!early_console_dev.con->write)
 		return -ENODEV;
 
+
 	register_console(early_console_dev.con);
 	return 0;
 }

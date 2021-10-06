@@ -192,6 +192,7 @@ static irqreturn_t snd_msnd_interrupt(int irq, void *dev_id)
 	return IRQ_HANDLED;
 }
 
+
 static int snd_msnd_reset_dsp(long io, unsigned char *info)
 {
 	int timeout = 100;
@@ -377,6 +378,7 @@ static int snd_msnd_init_sma(struct snd_msnd *chip)
 
 	return 0;
 }
+
 
 static int upload_dsp_code(struct snd_card *card)
 {
@@ -592,6 +594,7 @@ static int snd_msnd_attach(struct snd_card *card)
 		goto err_release_region;
 	}
 
+
 	if (mpu_io[0] != SNDRV_AUTO_PORT) {
 		struct snd_mpu401 *mpu;
 
@@ -630,6 +633,7 @@ err_release_region:
 	free_irq(chip->irq, chip);
 	return err;
 }
+
 
 static void snd_msnd_unload(struct snd_card *card)
 {
@@ -813,6 +817,7 @@ module_param_array(ide_io1, long, NULL, S_IRUGO);
 module_param_array(ide_irq, int, NULL, S_IRUGO);
 module_param_array(joystick_io, long, NULL, S_IRUGO);
 #endif
+
 
 static int snd_msnd_isa_match(struct device *pdev, unsigned int i)
 {
@@ -1234,3 +1239,4 @@ static void __exit snd_msnd_exit(void)
 
 module_init(snd_msnd_init);
 module_exit(snd_msnd_exit);
+

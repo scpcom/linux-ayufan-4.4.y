@@ -538,6 +538,7 @@ static void mtdswap_store_eb(struct mtdswap_dev *d, struct swap_eb *eb)
 		mtdswap_rb_add(d, eb, MTDSWAP_HIFRAG);
 }
 
+
 static void mtdswap_erase_callback(struct erase_info *done)
 {
 	wait_queue_head_t *wait_q = (wait_queue_head_t *)done->priv;
@@ -1582,6 +1583,7 @@ static void __exit mtdswap_modexit(void)
 
 module_init(mtdswap_modinit);
 module_exit(mtdswap_modexit);
+
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Jarkko Lavinen <jarkko.lavinen@nokia.com>");

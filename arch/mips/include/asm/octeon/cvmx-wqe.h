@@ -42,6 +42,7 @@
 
 #include <asm/octeon/cvmx-packet.h>
 
+
 #define OCT_TAG_TYPE_STRING(x)						\
 	(((x) == CVMX_POW_TAG_TYPE_ORDERED) ?  "ORDERED" :		\
 		(((x) == CVMX_POW_TAG_TYPE_ATOMIC) ?  "ATOMIC" :	\

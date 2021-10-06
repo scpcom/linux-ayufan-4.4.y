@@ -50,6 +50,7 @@
 #define DRIVER_AUTHOR "Greg Kroah-Hartman <greg@kroah.com>, Bill Ryder <bryder@sgi.com>, Kuba Ober <kuba@mareimbrium.org>, Andreas Mohr, Johan Hovold <jhovold@gmail.com>"
 #define DRIVER_DESC "USB FTDI Serial Converters Driver"
 
+
 struct ftdi_private {
 	enum ftdi_chip_type chip_type;
 				/* type of device, either SIO or FT8U232AM */
@@ -131,6 +132,8 @@ static struct ftdi_sio_quirk ftdi_8u2232c_quirk = {
  * FIXME: perhaps bcdDevice can also identify 12MHz FT8U232AM devices,
  * but I don't know if those ever went into mass production. [Ian Abbott]
  */
+
+
 
 /*
  * Device ID not listed? Test it using
@@ -1022,6 +1025,7 @@ static const char *ftdi_chip_name[] = {
 	[FTX]     = "FT-X"
 };
 
+
 /* Used for TIOCMIWAIT */
 #define FTDI_STATUS_B0_MASK	(FTDI_RS0_CTS | FTDI_RS0_DSR | FTDI_RS0_RI | FTDI_RS0_RLSD)
 #define FTDI_STATUS_B1_MASK	(FTDI_RS_BI)
@@ -1088,6 +1092,7 @@ static struct usb_serial_driver ftdi_sio_device = {
 static struct usb_serial_driver * const serial_drivers[] = {
 	&ftdi_sio_device, NULL
 };
+
 
 #define WDR_TIMEOUT 5000 /* default urb timeout */
 #define WDR_SHORT_TIMEOUT 1000	/* shorter urb timeout */
@@ -1221,6 +1226,7 @@ static int update_mctrl(struct usb_serial_port *port, unsigned int set,
 	}
 	return rv;
 }
+
 
 static __u32 get_ftdi_divisor(struct tty_struct *tty,
 						struct usb_serial_port *port)
@@ -1537,6 +1543,7 @@ static int get_lsr_info(struct usb_serial_port *port,
 	return 0;
 }
 
+
 /* Determine type of FTDI chip based on USB config and descriptor. */
 static void ftdi_determine_type(struct usb_serial_port *port)
 {
@@ -1612,6 +1619,7 @@ static void ftdi_determine_type(struct usb_serial_port *port)
 	dev_info(&udev->dev, "Detected %s\n", ftdi_chip_name[priv->chip_type]);
 }
 
+
 /*
  * Determine the maximum packet size for the device. This depends on the chip
  * type and the USB host capabilities. The value should be obtained from the
@@ -1647,6 +1655,7 @@ static void ftdi_set_max_packet_size(struct usb_serial_port *port)
 	/* Set max packet size based on last descriptor. */
 	priv->max_packet_size = usb_endpoint_maxp(ep_desc);
 }
+
 
 /*
  * ***************************************************************************
@@ -1784,6 +1793,7 @@ static int ftdi_sio_port_probe(struct usb_serial_port *port)
 {
 	struct ftdi_private *priv;
 	struct ftdi_sio_quirk *quirk = usb_get_serial_data(port->serial);
+
 
 	priv = kzalloc(sizeof(struct ftdi_private), GFP_KERNEL);
 	if (!priv)

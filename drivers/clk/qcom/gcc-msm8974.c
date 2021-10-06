@@ -783,6 +783,7 @@ static const struct freq_tbl ftbl_gcc_gp_clk[] = {
 	{ }
 };
 
+
 static struct clk_rcg2 gp1_clk_src = {
 	.cmd_rcgr = 0x1904,
 	.mnd_width = 8,

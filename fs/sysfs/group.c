@@ -17,6 +17,7 @@
 #include <linux/err.h>
 #include "sysfs.h"
 
+
 static void remove_files(struct kernfs_node *parent,
 			 const struct attribute_group *grp)
 {
@@ -101,6 +102,7 @@ static int create_files(struct kernfs_node *parent, struct kobject *kobj,
 exit:
 	return error;
 }
+
 
 static int internal_create_group(struct kobject *kobj, int update,
 				 const struct attribute_group *grp)

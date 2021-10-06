@@ -289,6 +289,7 @@ static void clear_lockup (struct atm_vcc *vcc, IADEV *dev) {
 
   } /* if an ABR VC */
 
+
 }
  
 /*
@@ -969,6 +970,7 @@ static void ia_suni_pm7345_init(struct iadev_priv *iadev)
    return;
 }
 
+
 /***************************** IA_LIB END *****************************/
     
 #ifdef CONFIG_ATM_IA_DEBUG
@@ -1006,6 +1008,7 @@ static void xdump( u_char*  cp, int  length, char*  prefix )
 }  /* close xdump(... */
 #endif /* CONFIG_ATM_IA_DEBUG */
 
+  
 static struct atm_dev *ia_boards = NULL;  
   
 #define ACTUAL_RAM_BASE \
@@ -1014,6 +1017,7 @@ static struct atm_dev *ia_boards = NULL;
 	IPHASE5575_FRAG_CONTROL_RAM_BASE*((iadev->mem)/(128 * 1024))  
 #define ACTUAL_REASS_RAM_BASE \
 	IPHASE5575_REASS_CONTROL_RAM_BASE*((iadev->mem)/(128 * 1024))  
+  
   
 /*-- some utilities and memory allocation stuff will come here -------------*/  
   
@@ -1041,6 +1045,7 @@ static void desc_dbg(IADEV *iadev) {
   for(i=0; i <iadev->num_tx_desc; i++)
       printk("Desc_tbl[%d] = %d \n", i, iadev->desc_tbl[i].timestamp);
 } 
+  
   
 /*----------------------------- Receiving side stuff --------------------------*/  
  
@@ -1083,6 +1088,7 @@ static void free_desc(struct atm_dev *dev, int desc)
 		iadev->rfL.fdq_wr =  iadev->rfL.fdq_st;  
 	writew(iadev->rfL.fdq_wr, iadev->reass_reg+FREEQ_WR_PTR);  
 }  
+  
   
 static int rx_pkt(struct atm_dev *dev)  
 {  
@@ -1135,6 +1141,7 @@ static int rx_pkt(struct atm_dev *dev)
 		return -1;  
 	}  
 	  
+  
 	/* might want to check the status bits for errors */  
 	status = (u_short) (buf_desc_ptr->desc_mode);  
 	if (status & (RX_CER | RX_PTE | RX_OFL))  
@@ -1249,6 +1256,7 @@ printk("Test logic RUN!!!!\n");
 	rx_excp_rcvd(dev);  
   }  
 
+
   if (status & RX_RAW_RCVD)  
   {  
 	/* need to handle the raw incoming cells. This deepnds on   
@@ -1257,6 +1265,7 @@ printk("Test logic RUN!!!!\n");
 	IF_EVENT(printk("Rx intr status:  RX_RAW_RCVD %08x\n", status);)  
   }  
 }  
+  
   
 static void rx_dle_intr(struct atm_dev *dev)  
 {  
@@ -1359,6 +1368,7 @@ INCR_DLE:
      }
   }
 }  
+  
   
 static int open_rx(struct atm_vcc *vcc)  
 {  
@@ -1628,6 +1638,7 @@ err_out:
 	return -ENOMEM;
 }  
   
+
 /*  
 	The memory map suggested in appendix A and the coding for it.   
 	Keeping it around just in case we change our mind later.  
@@ -1882,6 +1893,7 @@ static int open_tx(struct atm_vcc *vcc)
 	IF_EVENT(printk("ia open_tx returning \n");)  
 	return 0;  
 }  
+  
   
 static int tx_init(struct atm_dev *dev)  
 {  
@@ -2246,6 +2258,8 @@ static irqreturn_t ia_int(int irq, void *dev_id)
    return IRQ_RETVAL(handled);
 }  
 	  
+	  
+	  
 /*----------------------------- entries --------------------------------*/  
 static int get_esi(struct atm_dev *dev)  
 {  
@@ -2286,6 +2300,7 @@ static int reset_sar(struct atm_dev *dev)
 	udelay(5);  
 	return 0;  
 }  
+	  
 	  
 static int ia_init(struct atm_dev *dev)
 {  

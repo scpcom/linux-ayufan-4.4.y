@@ -298,6 +298,7 @@ int mei_restart(struct mei_device *dev)
 	if (err)
 		schedule_work(&dev->reset_work);
 
+
 	return 0;
 }
 EXPORT_SYMBOL_GPL(mei_restart);
@@ -425,3 +426,4 @@ void mei_device_init(struct mei_device *dev,
 	dev->dev      = device;
 }
 EXPORT_SYMBOL_GPL(mei_device_init);
+

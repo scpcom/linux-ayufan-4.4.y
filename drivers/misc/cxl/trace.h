@@ -54,6 +54,7 @@
 	{ CXL_PSL_SCNTL_An_Pc,	"PURGE" }, \
 	{ CXL_PSL_SCNTL_An_Sc,	"SUSPEND" }
 
+
 DECLARE_EVENT_CLASS(cxl_pe_class,
 	TP_PROTO(struct cxl_context *ctx),
 
@@ -77,6 +78,7 @@ DECLARE_EVENT_CLASS(cxl_pe_class,
 		__entry->pe
 	)
 );
+
 
 TRACE_EVENT(cxl_attach,
 	TP_PROTO(struct cxl_context *ctx, u64 wed, s16 num_interrupts, u64 amr),

@@ -134,6 +134,7 @@ static u8 KS_DEFAULT_MAC_ADDRESS[] = { 0x00, 0x10, 0xA1, 0x86, 0x95, 0x11 };
 #define TXSR_TXFID_SHIFT		(0)
 #define TXSR_TXFID_GET(_v)		(((_v) >> 0) & 0x3f)
 
+
 #define KS_RXCR1			0x74
 #define RXCR1_FRXQ			(1 << 15)
 #define RXCR1_RXUDPFCC			(1 << 14)
@@ -686,6 +687,7 @@ static void ks_soft_reset(struct ks_net *ks, unsigned op)
 	mdelay(1);	/* wait for condition to clear */
 }
 
+
 static void ks_enable_qmu(struct ks_net *ks)
 {
 	u16 w;
@@ -900,6 +902,7 @@ static irqreturn_t ks_irq(int irq, void *pw)
 	return IRQ_HANDLED;
 }
 
+
 /**
  * ks_net_open - open network device
  * @netdev: The network device being opened.
@@ -972,6 +975,7 @@ static int ks_net_stop(struct net_device *netdev)
 	mutex_unlock(&ks->lock);
 	return 0;
 }
+
 
 /**
  * ks_write_qmu - write 1 pkt data to the QMU.
@@ -1497,6 +1501,7 @@ static void ks_setup(struct ks_net *ks)
 	ks_wrreg16(ks, KS_RXCR1, w);
 }  /*ks_setup */
 
+
 static void ks_setup_int(struct ks_net *ks)
 {
 	ks->rc_ier = 0x00;
@@ -1687,3 +1692,4 @@ MODULE_AUTHOR("David Choi <david.choi@micrel.com>");
 MODULE_LICENSE("GPL");
 module_param_named(message, msg_enable, int, 0);
 MODULE_PARM_DESC(message, "Message verbosity level (0=none, 31=all)");
+

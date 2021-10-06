@@ -31,6 +31,7 @@
 
 #include "iwl-modparams.h"
 
+
 static inline bool iwl_have_debug_level(u32 level)
 {
 #ifdef CONFIG_IWLWIFI_DEBUG

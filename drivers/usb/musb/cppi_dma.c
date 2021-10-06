@@ -15,6 +15,7 @@
 #include "musb_debug.h"
 #include "cppi_dma.h"
 
+
 /* CPPI DMA status 7-mar-2006:
  *
  * - See musb_{host,gadget}.c for more info
@@ -267,6 +268,7 @@ static inline void core_rxirq_enable(void __iomem *tibase, unsigned epnum)
 	musb_writel(tibase, DAVINCI_USB_INT_MASK_SET_REG, 1 << (epnum + 8));
 }
 
+
 /*
  * Allocate a CPPI Channel for DMA.  With CPPI, channels are bound to
  * each transfer direction of a non-control endpoint, so allocating
@@ -444,6 +446,7 @@ static void cppi_dump_rxq(int level, const char *tag, struct cppi_channel *rx)
 		cppi_dump_rxbd("active", bd);
 }
 
+
 /* NOTE:  DaVinci autoreq is ignored except for host side "RNDIS" mode RX;
  * so we won't ever use it (see "CPPI RX Woes" below).
  */
@@ -502,6 +505,7 @@ static inline int cppi_autoreq_update(struct cppi_channel *rx,
 	}
 	return n_bds;
 }
+
 
 /* Buffer enqueuing Logic:
  *
@@ -709,6 +713,7 @@ cppi_next_tx_segment(struct musb *musb, struct cppi_channel *tx)
  * since CPPI penalizes our need for a "true RNDIS" default mode.
  */
 
+
 /* Heuristic, intended to kick in for ethernet/rndis peripheral ONLY
  *
  * IFF
@@ -735,6 +740,7 @@ static bool cppi_rx_rndis = 1;
 
 module_param(cppi_rx_rndis, bool, 0);
 MODULE_PARM_DESC(cppi_rx_rndis, "enable/disable RX RNDIS heuristic");
+
 
 /**
  * cppi_next_rx_segment - dma read for the next chunk of a buffer

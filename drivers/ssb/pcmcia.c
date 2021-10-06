@@ -20,8 +20,10 @@
 
 #include "ssb_private.h"
 
+
 /* Define the following to 1 to enable a printk on each coreswitch. */
 #define SSB_VERBOSE_PCMCIACORESWITCH_DEBUG		0
+
 
 /* PCMCIA configuration registers */
 #define SSB_PCMCIA_ADDRESS0		0x2E
@@ -63,6 +65,7 @@
 /* PCMCIA SPROM size. */
 #define SSB_PCMCIA_SPROM_SIZE		256
 #define SSB_PCMCIA_SPROM_SIZE_BYTES	(SSB_PCMCIA_SPROM_SIZE * sizeof(u16))
+
 
 /* Write to a PCMCIA configuration register. */
 static int ssb_pcmcia_cfg_write(struct ssb_bus *bus, u8 offset, u8 value)
@@ -695,6 +698,7 @@ error:
 		   error_description);
 	return -ENODEV;
 }
+
 
 int ssb_pcmcia_get_invariants(struct ssb_bus *bus,
 			      struct ssb_init_invariants *iv)

@@ -341,6 +341,7 @@ static struct mfd_cell rtc_devs[] = {
 	{"88pm860x-rtc", -1,},
 };
 
+
 struct pm860x_irq_data {
 	int	reg;
 	int	mask_reg;

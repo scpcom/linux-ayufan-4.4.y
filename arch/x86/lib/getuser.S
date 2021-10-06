@@ -98,6 +98,7 @@ ENTRY(__get_user_8)
 #endif
 ENDPROC(__get_user_8)
 
+
 bad_get_user:
 	xor %edx,%edx
 	mov $(-EFAULT),%_ASM_AX

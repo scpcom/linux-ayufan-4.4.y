@@ -41,6 +41,7 @@
 #define FSG		BIT(27)
 #define OWN		BIT(31)
 
+
 /* OFFSET 4 */
 #define PKT_OFFSET_SZ	0
 #define BK		BIT(6)
@@ -219,5 +220,6 @@ s32 rtl8723au_xmit_buf_handler(struct rtw_adapter *padapter);
 bool rtl8723au_hal_xmit(struct rtw_adapter *padapter, struct xmit_frame *pxmitframe);
 int rtl8723au_mgnt_xmit(struct rtw_adapter *padapter, struct xmit_frame *pmgntframe);
 bool rtl8723au_xmitframe_complete(struct rtw_adapter *padapter, struct xmit_priv *pxmitpriv, struct xmit_buf *pxmitbuf);
+
 
 #endif

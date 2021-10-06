@@ -153,3 +153,4 @@ u8 sec_int_priority[] = {
 	0,	/* IRQ_SWU4 */
 	0,	/* IRQ_SWU6 */
 };
+

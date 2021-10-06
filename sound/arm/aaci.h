@@ -197,6 +197,8 @@
 #define MAINFR_TXB	(1 << 1)	/* transmit busy */
 #define MAINFR_RXB	(1 << 0)	/* receive busy */
 
+
+
 struct aaci_runtime {
 	void			__iomem *base;
 	void			__iomem *fifo;

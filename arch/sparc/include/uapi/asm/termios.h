@@ -39,4 +39,5 @@ struct winsize {
 	unsigned short ws_ypixel;
 };
 
+
 #endif /* _UAPI_SPARC_TERMIOS_H */

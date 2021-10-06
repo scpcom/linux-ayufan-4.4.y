@@ -452,6 +452,7 @@ static int da9150_probe(struct i2c_client *client,
 		goto regmap_irq_fail;
 	}
 
+
 	da9150->irq_base = regmap_irq_chip_get_base(da9150->regmap_irq_data);
 
 	enable_irq_wake(da9150->irq);

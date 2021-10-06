@@ -338,6 +338,7 @@ static inline unsigned int get_pci_source(void)
 	return irq;
 }
 
+
 /*
  * Linux descriptor level callbacks
  */

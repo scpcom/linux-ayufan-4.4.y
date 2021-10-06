@@ -875,6 +875,7 @@ static void snd_miro_write(struct snd_miro *chip, unsigned char reg,
 	spin_unlock_irqrestore(&chip->lock, flags);
 }
 
+
 #define snd_miro_write_mask(chip, reg, value, mask)	\
 	snd_miro_write(chip, reg,			\
 		(snd_miro_read(chip, reg) & ~(mask)) | ((value) & (mask)))

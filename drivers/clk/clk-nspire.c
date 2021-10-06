@@ -40,6 +40,7 @@ struct nspire_clk_info {
 	u16 base_ahb_ratio;
 };
 
+
 #define EXTRACT(var, prop) (((var)>>prop##_SHIFT) & prop##_MASK)
 static void nspire_clkinfo_cx(u32 val, struct nspire_clk_info *clk)
 {

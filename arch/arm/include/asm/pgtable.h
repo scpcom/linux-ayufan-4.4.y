@@ -24,6 +24,7 @@
 #include <asm/memory.h>
 #include <asm/pgtable-hwdef.h>
 
+
 #include <asm/tlbflush.h>
 
 #ifdef CONFIG_ARM_LPAE
@@ -168,6 +169,7 @@ extern pgprot_t phys_mem_access_prot(struct file *file, unsigned long pfn,
  */
 extern struct page *empty_zero_page;
 #define ZERO_PAGE(vaddr)	(empty_zero_page)
+
 
 extern pgd_t swapper_pg_dir[PTRS_PER_PGD];
 

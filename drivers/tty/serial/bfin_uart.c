@@ -1545,6 +1545,7 @@ static void __exit bfin_serial_exit(void)
 	uart_unregister_driver(&bfin_serial_reg);
 }
 
+
 module_init(bfin_serial_init);
 module_exit(bfin_serial_exit);
 

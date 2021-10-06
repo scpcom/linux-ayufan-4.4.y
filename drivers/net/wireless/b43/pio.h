@@ -8,6 +8,7 @@
 #include <linux/list.h>
 #include <linux/skbuff.h>
 
+
 /*** Registers for PIO queues up to revision 7. ***/
 /* TX queue. */
 #define B43_PIO_TXCTL			0x00
@@ -49,8 +50,10 @@
 #define  B43_PIO8_RXCTL_DATARDY		0x00000002
 #define B43_PIO8_RXDATA			0x04
 
+
 /* The maximum number of TX-packets the HW can handle. */
 #define B43_PIO_MAX_NR_TXPACKETS	32
+
 
 struct b43_pio_txpacket {
 	/* Pointer to the TX queue we belong to. */
@@ -101,6 +104,7 @@ struct b43_pio_rxqueue {
 	u8 rev;
 };
 
+
 static inline u16 b43_piotx_read16(struct b43_pio_txqueue *q, u16 offset)
 {
 	return b43_read16(q->dev, q->mmio_base + offset);
@@ -123,6 +127,7 @@ static inline void b43_piotx_write32(struct b43_pio_txqueue *q,
 	b43_write32(q->dev, q->mmio_base + offset, value);
 }
 
+
 static inline u16 b43_piorx_read16(struct b43_pio_rxqueue *q, u16 offset)
 {
 	return b43_read16(q->dev, q->mmio_base + offset);
@@ -144,6 +149,7 @@ static inline void b43_piorx_write32(struct b43_pio_rxqueue *q,
 {
 	b43_write32(q->dev, q->mmio_base + offset, value);
 }
+
 
 int b43_pio_init(struct b43_wldev *dev);
 void b43_pio_free(struct b43_wldev *dev);

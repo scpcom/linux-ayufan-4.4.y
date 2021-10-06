@@ -439,6 +439,7 @@ static int tpa6130a2_probe(struct i2c_client *client,
 	if (ret != 0)
 		goto err_gpio;
 
+
 	/* Read version */
 	ret = tpa6130a2_i2c_read(TPA6130A2_REG_VERSION) &
 				 TPA6130A2_VERSION_MASK;

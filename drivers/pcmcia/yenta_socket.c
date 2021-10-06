@@ -52,6 +52,7 @@ MODULE_PARM_DESC(o2_speedup, "Use prefetch/burst for O2-bridges: 'on', 'off' "
  */
 static u32 isa_interrupts = 0x0ef8;
 
+
 #define debug(x, s, args...) dev_dbg(&s->dev->dev, x, ##args)
 
 /* Don't ask.. */
@@ -67,6 +68,7 @@ static int yenta_probe_cb_irq(struct yenta_socket *socket);
 static unsigned int yenta_probe_irq(struct yenta_socket *socket,
 				u32 isa_irq_mask);
 #endif
+
 
 static unsigned int override_bios;
 module_param(override_bios, uint, 0000);
@@ -215,6 +217,7 @@ static int yenta_get_status(struct pcmcia_socket *sock, unsigned int *value)
 	val |= (state & CB_XVCARD) ? SS_XVCARD : 0;
 	val |= (state & (CB_5VCARD | CB_3VCARD | CB_XVCARD | CB_YVCARD)) ? 0 : SS_PENDING;
 	val |= (state & (CB_CDETECT1 | CB_CDETECT2)) ? SS_PENDING : 0;
+
 
 	if (state & CB_CBCARD) {
 		val |= SS_CARDBUS;
@@ -497,6 +500,8 @@ static int yenta_set_mem_map(struct pcmcia_socket *sock, struct pccard_mem_map *
 	return 0;
 }
 
+
+
 static irqreturn_t yenta_interrupt(int irq, void *dev_id)
 {
 	unsigned int events;
@@ -660,6 +665,7 @@ static int yenta_search_one_res(struct resource *root, struct resource *res,
 	return 0;
 }
 
+
 static int yenta_search_res(struct yenta_socket *socket, struct resource *res,
 			    u32 min)
 {
@@ -756,6 +762,7 @@ static void yenta_allocate_resources(struct yenta_socket *socket)
 		pci_setup_cardbus(socket->dev->subordinate);
 }
 
+
 /*
  * Free the bridge mappings for the device..
  */
@@ -770,6 +777,7 @@ static void yenta_free_resources(struct yenta_socket *socket)
 		res->start = res->end = res->flags = 0;
 	}
 }
+
 
 /*
  * Close it down - release our resources and go home..
@@ -802,6 +810,7 @@ static void yenta_close(struct pci_dev *dev)
 	kfree(sock);
 }
 
+
 static struct pccard_operations yenta_socket_operations = {
 	.init			= yenta_sock_init,
 	.suspend		= yenta_sock_suspend,
@@ -810,6 +819,7 @@ static struct pccard_operations yenta_socket_operations = {
 	.set_io_map		= yenta_set_io_map,
 	.set_mem_map		= yenta_set_mem_map,
 };
+
 
 #ifdef CONFIG_YENTA_TI
 #include "ti113x.h"
@@ -897,6 +907,7 @@ static struct cardbus_type cardbus_type[] = {
 #endif
 };
 
+
 static unsigned int yenta_probe_irq(struct yenta_socket *socket, u32 isa_irq_mask)
 {
 	int i;
@@ -928,6 +939,7 @@ static unsigned int yenta_probe_irq(struct yenta_socket *socket, u32 isa_irq_mas
 
 	return mask;
 }
+
 
 /*
  * yenta PCI irq probing.
@@ -993,6 +1005,7 @@ static int yenta_probe_cb_irq(struct yenta_socket *socket)
 }
 
 #endif /* CONFIG_YENTA_TI */
+
 
 /*
  * Set static data that doesn't need re-initializing..
@@ -1418,6 +1431,7 @@ static const struct pci_device_id yenta_table[] = {
 	{ /* all zeroes */ }
 };
 MODULE_DEVICE_TABLE(pci, yenta_table);
+
 
 static struct pci_driver yenta_cardbus_driver = {
 	.name		= "yenta_cardbus",

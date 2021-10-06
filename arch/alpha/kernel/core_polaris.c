@@ -31,6 +31,7 @@
 # define DBG_CFG(args)
 #endif
 
+
 /*
  * Given a bus, device, and function number, compute resulting
  * configuration space address.  This is fairly straightforward
@@ -102,6 +103,7 @@ polaris_read_config(struct pci_bus *bus, unsigned int devfn, int where,
 
 	return PCIBIOS_SUCCESSFUL;
 }
+
 
 static int 
 polaris_write_config(struct pci_bus *bus, unsigned int devfn, int where,

@@ -804,6 +804,7 @@ void dss_debug_dump_clocks(struct seq_file *s)
 }
 #endif
 
+
 static const enum omap_display_type omap2plus_ports[] = {
 	OMAP_DISPLAY_TYPE_DPI,
 };

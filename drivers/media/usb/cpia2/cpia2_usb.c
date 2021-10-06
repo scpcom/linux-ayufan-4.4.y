@@ -82,6 +82,7 @@ static struct usb_driver cpia2_driver = {
 	.id_table	= cpia2_id_table
 };
 
+
 /******************************************************************************
  *
  *  process_frame
@@ -627,6 +628,7 @@ int cpia2_usb_transfer_cmd(struct camera_data *cam,
 	return err;
 }
 
+
 /******************************************************************************
  *
  *  submit_urbs
@@ -684,6 +686,7 @@ static int submit_urbs(struct camera_data *cam)
 			urb->iso_frame_desc[fx].length = FRAME_SIZE_PER_DESC;
 		}
 	}
+
 
 	/* Queue the ISO urbs, and resubmit in the completion handler */
 	for(i=0; i<NUM_SBUF; ++i) {
@@ -831,6 +834,7 @@ static int cpia2_usb_probe(struct usb_interface *intf,
 		kfree(cam);
 		return ret;
 	}
+
 
 	if((ret = cpia2_init_camera(cam)) < 0) {
 		ERR("%s: failed to initialize cpia2 camera (ret = %d)\n", __func__, ret);

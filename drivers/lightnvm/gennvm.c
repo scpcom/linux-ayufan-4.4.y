@@ -476,6 +476,7 @@ static void gennvm_lun_info_print(struct nvm_dev *dev)
 	struct gen_lun *lun;
 	unsigned int i;
 
+
 	gennvm_for_each_lun(gn, lun, i) {
 		spin_lock(&lun->vlun.lock);
 

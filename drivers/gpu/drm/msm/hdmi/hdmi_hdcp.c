@@ -887,6 +887,7 @@ static int hdmi_hdcp_recv_check_bstatus(struct hdmi_hdcp_ctrl *hdcp_ctrl,
 	}
 	*pbstatus = bstatus = (buf[1] << 8) | buf[0];
 
+
 	down_stream_devices = bstatus & 0x7F;
 	repeater_cascade_depth = (bstatus >> 8) & 0x7;
 	max_devs_exceeded = (bstatus & BIT(7)) ? true : false;

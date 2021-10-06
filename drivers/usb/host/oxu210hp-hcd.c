@@ -239,6 +239,7 @@ static bool ignore_oc;
 module_param(ignore_oc, bool, S_IRUGO);
 MODULE_PARM_DESC(ignore_oc, "ignore bogus hardware overcurrent indications");
 
+
 static void ehci_work(struct oxu_hcd *oxu);
 static int oxu_hub_control(struct usb_hcd *hcd,
 				u16 typeReq, u16 wValue, u16 wIndex,
@@ -463,6 +464,7 @@ static void ehci_hub_descriptor(struct oxu_hcd *oxu,
 		temp |= HUB_CHAR_NO_LPSM; /* no power switching */
 	desc->wHubCharacteristics = (__force __u16)cpu_to_le16(temp);
 }
+
 
 /* Allocate an OXU210HP on-chip memory data buffer
  *

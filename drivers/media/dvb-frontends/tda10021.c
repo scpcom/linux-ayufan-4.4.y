@@ -32,6 +32,7 @@
 #include "dvb_frontend.h"
 #include "tda1002x.h"
 
+
 struct tda10021_state {
 	struct i2c_adapter* i2c;
 	/* configuration settings */
@@ -41,6 +42,7 @@ struct tda10021_state {
 	u8 pwm;
 	u8 reg0;
 };
+
 
 #if 0
 #define dprintk(x...) printk(x)

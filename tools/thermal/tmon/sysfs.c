@@ -250,12 +250,15 @@ static int find_tzone_cdev(struct dirent *nl, char *tz_name,
 				tzi->trip_binding[cdev_id],
 				cdev_id);
 
+
 		}
 		return 0;
 	}
 
 	return -ENODEV;
 }
+
+
 
 /*****************************************************************************
  * Before calling scan_tzones, thermal sysfs must be probed to determine
@@ -382,6 +385,7 @@ static int scan_cdevs(void)
 	}
 	return 0;
 }
+
 
 int probe_thermal_sysfs(void)
 {

@@ -54,3 +54,4 @@
 #define CG200_SIZE		0x00010000
 
 #endif  /* __ASM_SH_RENESAS_SH7785LCR_H */
+

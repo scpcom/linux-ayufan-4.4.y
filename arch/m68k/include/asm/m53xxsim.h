@@ -71,6 +71,7 @@
 #define	MCFSIM_DMA2ICR		MCFSIM_ICR8	/* DMA 2 ICR */
 #define	MCFSIM_DMA3ICR		MCFSIM_ICR9	/* DMA 3 ICR */
 
+
 #define	MCFINTC0_SIMR		0xFC04801C
 #define	MCFINTC0_CIMR		0xFC04801D
 #define	MCFINTC0_ICR0		0xFC048040
@@ -132,6 +133,7 @@
 
 #define	MCF_RCR_SWRESET		0x80		/* Software reset bit */
 #define	MCF_RCR_FRCSTOUT	0x40		/* Force external reset */
+
 
 /*
  * Power Management

@@ -117,6 +117,7 @@ __entry_break:
 
 	bra		__break_continue
 
+
 ###############################################################################
 #
 # handle BREAK instruction in kernel-mode exception epilogue
@@ -177,6 +178,7 @@ __break_return_singlestep_tlbmiss:
 
 	bra		__break_return_singlestep
 #endif
+
 
 ###############################################################################
 #

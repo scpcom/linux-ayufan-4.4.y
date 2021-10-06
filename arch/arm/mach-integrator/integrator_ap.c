@@ -57,6 +57,7 @@ void __iomem *ap_syscon_base;
 /* Base address to the external bus interface */
 static void __iomem *ebi_base;
 
+
 /*
  * All IO addresses are mapped onto VA 0xFFFx.xxxx, where x.xxxx
  * is the (PA >> 12).

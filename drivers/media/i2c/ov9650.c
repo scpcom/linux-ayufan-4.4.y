@@ -1120,6 +1120,7 @@ static int __ov965x_set_frame_interval(struct ov965x *ov965x,
 	u64 req_int, err, min_err = ~0ULL;
 	unsigned int i;
 
+
 	if (fi->interval.denominator == 0)
 		return -EINVAL;
 

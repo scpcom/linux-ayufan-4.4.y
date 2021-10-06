@@ -48,4 +48,5 @@ static inline size_t vmci_handle_arr_get_size(
 	return array->size;
 }
 
+
 #endif /* _VMCI_HANDLE_ARRAY_H_ */

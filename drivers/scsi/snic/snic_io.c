@@ -262,6 +262,7 @@ snic_abort_req_init(struct snic *snic, struct snic_req_info *rqi)
 	if (rqi->abort_req)
 		return rqi->abort_req;
 
+
 	req = mempool_alloc(snic->req_pool[SNIC_REQ_TM_CACHE], GFP_ATOMIC);
 	if (!req) {
 		SNIC_HOST_ERR(snic->shost, "abts:Failed to alloc tm req.\n");

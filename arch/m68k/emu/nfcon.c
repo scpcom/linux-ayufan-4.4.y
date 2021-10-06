@@ -60,6 +60,7 @@ static struct console nf_console = {
 	.index	= -1,
 };
 
+
 static int nfcon_tty_open(struct tty_struct *tty, struct file *filp)
 {
 	return 0;

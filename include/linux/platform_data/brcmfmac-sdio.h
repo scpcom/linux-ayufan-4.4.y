@@ -27,6 +27,7 @@
  *
 #include <brcmfmac_platform.h>
 
+
 static void brcmfmac_power_on(void)
 {
 }

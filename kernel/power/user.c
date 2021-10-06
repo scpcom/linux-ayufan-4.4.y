@@ -29,6 +29,7 @@
 
 #include "power.h"
 
+
 #define SNAPSHOT_MINOR	231
 
 static struct snapshot_data {

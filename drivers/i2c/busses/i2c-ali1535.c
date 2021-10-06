@@ -44,6 +44,7 @@
     This driver does not use interrupts.
 */
 
+
 /* Note: we assume there can only be one ALI1535, with one SMBus interface */
 
 #include <linux/module.h>
@@ -55,6 +56,7 @@
 #include <linux/i2c.h>
 #include <linux/acpi.h>
 #include <linux/io.h>
+
 
 /* ALI1535 SMBus address offsets */
 #define SMBHSTSTS	(0 + ali1535_smba)
@@ -468,6 +470,7 @@ static s32 ali1535_access(struct i2c_adapter *adap, u16 addr,
 EXIT:
 	return result;
 }
+
 
 static u32 ali1535_func(struct i2c_adapter *adapter)
 {

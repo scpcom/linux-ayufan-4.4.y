@@ -86,6 +86,7 @@ static inline char *get_timestamp(char *buf)
 #define IBMASM_NUM_EVENTS	10
 #define IBMASM_EVENT_MAX_SIZE	2048u
 
+
 struct command {
 	struct list_head	queue_node;
 	wait_queue_head_t	wait;
@@ -112,6 +113,7 @@ static inline void command_get(struct command *cmd)
 {
 	kref_get(&cmd->kref);
 }
+
 
 struct ibmasm_event {
 	unsigned int	serial_number;

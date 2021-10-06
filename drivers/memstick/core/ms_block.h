@@ -30,6 +30,7 @@
 #define MS_BLOCK_MAP_LINE_SZ   16
 #define MS_BLOCK_PART_SHIFT    3
 
+
 #define MEMSTICK_UNCORR_ERROR (MEMSTICK_STATUS1_UCFG | \
 		MEMSTICK_STATUS1_UCEX | MEMSTICK_STATUS1_UCDT)
 
@@ -58,6 +59,7 @@ struct ms_boot_header {
 	unsigned char  data_entry;
 	unsigned char  reserved1[179];
 } __packed;
+
 
 struct ms_system_item {
 	unsigned int  start_addr;
@@ -137,6 +139,7 @@ struct ms_cis_idi {
 	unsigned char  reserved3[128];
 } __packed;
 
+
 struct ms_boot_page {
 	struct ms_boot_header    header;
 	struct ms_system_entry   entry;
@@ -191,6 +194,7 @@ struct msb_data {
 	/* Preallocated buffers */
 	unsigned char			*block_buffer;
 	struct scatterlist		prealloc_sg[MS_BLOCK_MAX_SEGS+1];
+
 
 	/* handler's local data */
 	struct ms_register_addr		reg_addr;
@@ -278,6 +282,7 @@ static int h_msb_default_bad(struct memstick_dev *card,
 		if (debug >= level) \
 			pr_err(format "\n", ## __VA_ARGS__); \
 	} while (0)
+
 
 #define dbg(format, ...)		__dbg(1, format, ## __VA_ARGS__)
 #define dbg_verbose(format, ...)	__dbg(2, format, ## __VA_ARGS__)

@@ -148,6 +148,7 @@ struct sync_port {
 	wait_queue_head_t in_wait_q;
 };
 
+
 static DEFINE_MUTEX(sync_serial_mutex);
 static int etrax_sync_serial_init(void);
 static void initialize_port(int portnbr);
@@ -438,6 +439,7 @@ static inline int sync_data_avail_to_end(struct sync_port *port)
 	return avail;
 }
 
+
 static int sync_serial_open(struct inode *inode, struct file *file)
 {
 	int dev = MINOR(inode->i_rdev);
@@ -648,6 +650,8 @@ static int sync_serial_release(struct inode *inode, struct file *file)
 
 	return 0;
 }
+
+
 
 static unsigned int sync_serial_poll(struct file *file, poll_table *wait)
 {
@@ -966,6 +970,7 @@ static long sync_serial_ioctl(struct file *file,
 	return ret;
 }
 
+
 static ssize_t sync_serial_write(struct file *file, const char *buf,
 	size_t count, loff_t *ppos)
 {
@@ -1207,6 +1212,7 @@ static void send_word(struct sync_port *port)
 		break;
 	}
 }
+
 
 static void start_dma(struct sync_port *port, const char *data, int count)
 {

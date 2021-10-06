@@ -34,6 +34,7 @@
 
    Modularised 12/94 Mark Evans
 
+
    Modified to support the 82596 ethernet chips on 680x0 VME boards.
    by Richard Hirst <richard@sleepie.demon.co.uk>
    Renamed to be 82596.c
@@ -105,7 +106,9 @@
 #define DEB_STRUCT	0x8000
 #define DEB_ANY		0xffff
 
+
 #define DEB(x, y)	if (i596_debug & (x)) { y; }
+
 
 /*
  * The MPU_PORT command allows direct access to the 82596. With PORT access
@@ -158,6 +161,7 @@ enum commands {
 #define	 RX_ABORT	0x0040
 
 #define TX_TIMEOUT	(HZ/20)
+
 
 struct i596_reg {
 	unsigned short porthi;
@@ -361,6 +365,7 @@ static int max_cmd_backlog = TX_RING_SIZE-1;
 static void i596_poll_controller(struct net_device *dev);
 #endif
 
+
 static inline int wait_istat(struct net_device *dev, struct i596_dma *dma, int delcnt, char *str)
 {
 	DMA_INV(dev, &(dma->iscp), sizeof(struct i596_iscp));
@@ -375,6 +380,7 @@ static inline int wait_istat(struct net_device *dev, struct i596_dma *dma, int d
 	} else
 		return 0;
 }
+
 
 static inline int wait_cmd(struct net_device *dev, struct i596_dma *dma, int delcnt, char *str)
 {
@@ -392,6 +398,7 @@ static inline int wait_cmd(struct net_device *dev, struct i596_dma *dma, int del
 	} else
 		return 0;
 }
+
 
 static void i596_display_data(struct net_device *dev)
 {
@@ -446,6 +453,7 @@ static void i596_display_data(struct net_device *dev)
 	} while (rbd != lp->rbd_head);
 	DMA_INV(dev, dma, sizeof(struct i596_dma));
 }
+
 
 #define virt_to_dma(lp, v) ((lp)->dma_addr + (dma_addr_t)((unsigned long)(v)-(unsigned long)((lp)->dma)))
 
@@ -520,6 +528,7 @@ static inline void remove_rx_bufs(struct net_device *dev)
 	}
 }
 
+
 static void rebuild_rx_bufs(struct net_device *dev)
 {
 	struct i596_private *lp = netdev_priv(dev);
@@ -540,6 +549,7 @@ static void rebuild_rx_bufs(struct net_device *dev)
 
 	DMA_WBACK_INV(dev, dma, sizeof(struct i596_dma));
 }
+
 
 static int init_i596_mem(struct net_device *dev)
 {
@@ -634,6 +644,7 @@ failed:
 	return -1;
 }
 
+
 static inline int i596_rx(struct net_device *dev)
 {
 	struct i596_private *lp = netdev_priv(dev);
@@ -644,6 +655,7 @@ static inline int i596_rx(struct net_device *dev)
 	DEB(DEB_RXFRAME, printk(KERN_DEBUG
 				"i596_rx(), rfd_head %p, rbd_head %p\n",
 				lp->rfd_head, lp->rbd_head));
+
 
 	rfd = lp->rfd_head;		/* Ref next frame to check */
 
@@ -781,6 +793,7 @@ memory_squeeze:
 	return 0;
 }
 
+
 static inline void i596_cleanup_cmd(struct net_device *dev, struct i596_private *lp)
 {
 	struct i596_cmd *ptr;
@@ -821,6 +834,7 @@ static inline void i596_cleanup_cmd(struct net_device *dev, struct i596_private 
 	DMA_WBACK(dev, &(lp->dma->scb), sizeof(struct i596_scb));
 }
 
+
 static inline void i596_reset(struct net_device *dev, struct i596_private *lp)
 {
 	unsigned long flags;
@@ -848,6 +862,7 @@ static inline void i596_reset(struct net_device *dev, struct i596_private *lp)
 	netif_start_queue(dev);
 	init_i596_mem(dev);
 }
+
 
 static void i596_add_cmd(struct net_device *dev, struct i596_cmd *cmd)
 {
@@ -948,6 +963,7 @@ static void i596_tx_timeout (struct net_device *dev)
 	dev->trans_start = jiffies; /* prevent tx timeout */
 	netif_wake_queue (dev);
 }
+
 
 static int i596_start_xmit(struct sk_buff *skb, struct net_device *dev)
 {

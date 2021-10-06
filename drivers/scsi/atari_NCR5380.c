@@ -293,6 +293,7 @@ static void __init init_tags(struct NCR5380_hostdata *hostdata)
 	}
 }
 
+
 /* Check if we can issue a command to this LUN: First see if the LUN is marked
  * busy by an untagged command. If the command should use tagged queuing, also
  * check that there is a free tag and the target's queue won't overflow. This
@@ -319,6 +320,7 @@ static int is_lun_busy(struct scsi_cmnd *cmd, int should_be_tagged)
 	}
 	return 0;
 }
+
 
 /* Allocate a tag for a command (there are no checks anymore, check_lun_busy()
  * must be called before!), or reserve the LUN in 'busy' if the command is
@@ -353,6 +355,7 @@ static void cmd_get_tag(struct scsi_cmnd *cmd, int should_be_tagged)
 	}
 }
 
+
 /* Mark the tag of command 'cmd' as free, or in case of an untagged command,
  * unlock the LUN.
  */
@@ -378,6 +381,7 @@ static void cmd_free_tag(struct scsi_cmnd *cmd)
 	}
 }
 
+
 static void free_all_tags(struct NCR5380_hostdata *hostdata)
 {
 	int target, lun;
@@ -396,6 +400,7 @@ static void free_all_tags(struct NCR5380_hostdata *hostdata)
 }
 
 #endif /* SUPPORT_TAGS */
+
 
 /*
  * Function: void merge_contiguous_buffers( struct scsi_cmnd *cmd )
@@ -1085,6 +1090,7 @@ static void NCR5380_main(struct work_struct *work)
 	local_irq_restore(flags);
 }
 
+
 #ifdef REAL_DMA
 /*
  * Function : void NCR5380_dma_complete (struct Scsi_Host *instance)
@@ -1178,6 +1184,7 @@ static void NCR5380_dma_complete(struct Scsi_Host *instance)
 	}
 }
 #endif /* REAL_DMA */
+
 
 /**
  * NCR5380_intr - generic NCR5380 irq handler
@@ -1807,6 +1814,7 @@ static int do_abort(struct Scsi_Host *instance)
  *	Also, *phase, *count, *data are modified in place.
  *
  */
+
 
 static int NCR5380_transfer_dma(struct Scsi_Host *instance,
 				unsigned char *phase, int *count,
@@ -2457,6 +2465,7 @@ static void NCR5380_information_transfer(struct Scsi_Host *instance)
  *
  */
 
+
 /* it might eventually prove necessary to do a dma setup on
    reselection, but it doesn't seem to be needed now -- sam */
 
@@ -2639,6 +2648,7 @@ static void NCR5380_reselect(struct Scsi_Host *instance)
 	dprintk(NDEBUG_RESELECTION, "scsi%d: nexus established, target = %d, lun = %llu, tag = %d\n",
 		   HOSTNO, tmp->device->id, tmp->device->lun, tmp->tag);
 }
+
 
 /*
  * Function : int NCR5380_abort (struct scsi_cmnd *cmd)
@@ -2849,6 +2859,7 @@ int NCR5380_abort(struct scsi_cmnd *cmd)
 
 	return FAILED;
 }
+
 
 /*
  * Function : int NCR5380_reset (struct scsi_cmnd *cmd)

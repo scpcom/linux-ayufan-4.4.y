@@ -3,6 +3,7 @@
 
 #include "phy_common.h"
 
+
 #define B43_PHY_HT_BBCFG			0x001 /* BB config */
 #define  B43_PHY_HT_BBCFG_RSTCCA		0x4000 /* Reset CCA */
 #define  B43_PHY_HT_BBCFG_RSTRX			0x8000 /* Reset RX */
@@ -110,6 +111,7 @@
 #define  B43_PHY_B_BBCFG_RSTRX			0x8000 /* Reset RX */
 #define B43_PHY_HT_TEST				B43_PHY_N_BMODE(0x00A)
 
+
 /* Values for PHY registers used on channel switching */
 struct b43_phy_ht_channeltab_e_phy {
 	u16 bw1;
@@ -119,6 +121,7 @@ struct b43_phy_ht_channeltab_e_phy {
 	u16 bw5;
 	u16 bw6;
 };
+
 
 struct b43_phy_ht {
 	u16 rf_ctl_int_save[3];
@@ -130,6 +133,7 @@ struct b43_phy_ht {
 
 	u8 idle_tssi[3];
 };
+
 
 struct b43_phy_operations;
 extern const struct b43_phy_operations b43_phyops_ht;

@@ -57,6 +57,7 @@ static int static_find_io(struct pcmcia_socket *s, unsigned int attr,
 	return 0;
 }
 
+
 struct pccard_resource_ops pccard_static_ops = {
 	.validate_mem = NULL,
 	.find_io = static_find_io,
@@ -65,6 +66,7 @@ struct pccard_resource_ops pccard_static_ops = {
 	.exit = NULL,
 };
 EXPORT_SYMBOL(pccard_static_ops);
+
 
 MODULE_AUTHOR("David A. Hinds, Dominik Brodowski");
 MODULE_LICENSE("GPL");

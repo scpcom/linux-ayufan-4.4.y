@@ -8,6 +8,7 @@
  *
  */
 
+
 #include <linux/kernel.h>
 #include <linux/export.h>
 #include <linux/notifier.h>
@@ -41,6 +42,7 @@ void usb_unregister_notify(struct notifier_block *nb)
 	blocking_notifier_chain_unregister(&usb_notifier_list, nb);
 }
 EXPORT_SYMBOL_GPL(usb_unregister_notify);
+
 
 void usb_notify_add_device(struct usb_device *udev)
 {

@@ -91,6 +91,7 @@ static int xg_sense[] =
 	DEF_FX_VIBRATE, DEF_FX_VIBDEPTH, DEF_FX_VIBDELAY
 };
 
+
 /*
  * AWE32 NRPN effects
  */
@@ -177,6 +178,7 @@ static int fx_conv_Q(int val)
 	return (unsigned short)((val / 8) & 0xff);
 }
 
+
 static struct nrpn_conv_table awe_effects[] =
 {
 	{ 0, EMUX_FX_LFO1_DELAY,	fx_lfo1_delay},
@@ -210,6 +212,7 @@ static struct nrpn_conv_table awe_effects[] =
 	{25, EMUX_FX_CHORUS,		fx_chorus},
 	{26, EMUX_FX_REVERB,		fx_reverb},
 };
+
 
 /*
  * GS(SC88) NRPN effects; still experimental
@@ -275,6 +278,7 @@ static struct nrpn_conv_table gs_effects[] =
 	{10, EMUX_FX_LFO1_DELAY, gs_vib_delay},
 };
 
+
 /*
  * NRPN events
  */
@@ -316,6 +320,7 @@ snd_emux_nrpn(void *p, struct snd_midi_channel *chan,
 		return;
 	}
 }
+
 
 /*
  * XG control effects; still experimental
@@ -388,3 +393,4 @@ snd_emux_sysex(void *p, unsigned char *buf, int len, int parsed,
 		break;
 	}
 }
+

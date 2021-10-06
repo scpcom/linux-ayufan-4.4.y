@@ -34,6 +34,7 @@ static ssize_t timeout_read(struct file *file, char __user *buf,
 					buf, count, offset);
 }
 
+
 static ssize_t timeout_write(struct file *file, char const __user *buf,
 		size_t count, loff_t *offset)
 {
@@ -54,6 +55,7 @@ static ssize_t timeout_write(struct file *file, char const __user *buf,
 	return count;
 }
 
+
 static const struct file_operations timeout_fops = {
 	.read		= timeout_read,
 	.write		= timeout_write,
@@ -62,11 +64,13 @@ static const struct file_operations timeout_fops = {
 
 #endif
 
+
 static ssize_t depth_read(struct file *file, char __user *buf, size_t count, loff_t *offset)
 {
 	return oprofilefs_ulong_to_user(oprofile_backtrace_depth, buf, count,
 					offset);
 }
+
 
 static ssize_t depth_write(struct file *file, char const __user *buf, size_t count, loff_t *offset)
 {
@@ -90,36 +94,43 @@ static ssize_t depth_write(struct file *file, char const __user *buf, size_t cou
 	return count;
 }
 
+
 static const struct file_operations depth_fops = {
 	.read		= depth_read,
 	.write		= depth_write,
 	.llseek		= default_llseek,
 };
 
+
 static ssize_t pointer_size_read(struct file *file, char __user *buf, size_t count, loff_t *offset)
 {
 	return oprofilefs_ulong_to_user(sizeof(void *), buf, count, offset);
 }
+
 
 static const struct file_operations pointer_size_fops = {
 	.read		= pointer_size_read,
 	.llseek		= default_llseek,
 };
 
+
 static ssize_t cpu_type_read(struct file *file, char __user *buf, size_t count, loff_t *offset)
 {
 	return oprofilefs_str_to_user(oprofile_ops.cpu_type, buf, count, offset);
 }
+
 
 static const struct file_operations cpu_type_fops = {
 	.read		= cpu_type_read,
 	.llseek		= default_llseek,
 };
 
+
 static ssize_t enable_read(struct file *file, char __user *buf, size_t count, loff_t *offset)
 {
 	return oprofilefs_ulong_to_user(oprofile_started, buf, count, offset);
 }
+
 
 static ssize_t enable_write(struct file *file, char const __user *buf, size_t count, loff_t *offset)
 {
@@ -144,17 +155,20 @@ static ssize_t enable_write(struct file *file, char const __user *buf, size_t co
 	return count;
 }
 
+
 static const struct file_operations enable_fops = {
 	.read		= enable_read,
 	.write		= enable_write,
 	.llseek		= default_llseek,
 };
 
+
 static ssize_t dump_write(struct file *file, char const __user *buf, size_t count, loff_t *offset)
 {
 	wake_up_buffer_waiter();
 	return count;
 }
+
 
 static const struct file_operations dump_fops = {
 	.write		= dump_write,

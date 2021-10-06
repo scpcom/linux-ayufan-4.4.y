@@ -67,6 +67,7 @@
 /* (FW_PS_STATE_RF_OFF)*/
 #define	FW_PS_STATE_RF_OFF_LOW_PWR	(FW_PS_CLOCK_OFF)
 
+
 /* For 8723BE H2C PwrMode Cmd ID 5.*/
 #define	FW_PWR_STATE_ACTIVE	((FW_PS_RF_ON) | (FW_PS_REGISTER_ACTIVE))
 #define	FW_PWR_STATE_RF_OFF	0
@@ -111,6 +112,7 @@ enum rtl8723b_c2h_evt {
 
 #define pagenum_128(_len) (u32)(((_len)>>7) + ((_len)&0x7F ? 1 : 0))
 
+
 #define SET_H2CCMD_PWRMODE_PARM_MODE(__ph2ccmd, __val)			\
 	SET_BITS_TO_LE_1BYTE(__ph2ccmd, 0, 8, __val)
 #define SET_H2CCMD_PWRMODE_PARM_RLBM(__ph2ccmd, __val)			\
@@ -137,6 +139,7 @@ enum rtl8723b_c2h_evt {
 	SET_BITS_TO_LE_1BYTE((__ph2ccmd)+1, 0, 8, __val)
 #define SET_H2CCMD_RSVDPAGE_LOC_NULL_DATA(__ph2ccmd, __val)		\
 	SET_BITS_TO_LE_1BYTE((__ph2ccmd)+2, 0, 8, __val)
+
 
 void rtl8723be_fill_h2c_cmd(struct ieee80211_hw *hw, u8 element_id,
 			    u32 cmd_len, u8 *p_cmdbuffer);

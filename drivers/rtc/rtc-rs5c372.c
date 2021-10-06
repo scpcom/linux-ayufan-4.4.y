@@ -18,6 +18,7 @@
 
 #define DRV_VERSION "0.6"
 
+
 /*
  * Ricoh has a family of I2C based RTCs, which differ only slightly from
  * each other.  Differences center on pinout (e.g. how many interrupts,
@@ -59,8 +60,10 @@
 #	define RS5C_CTRL2_AAFG		(1 << 1)	/* or WAFG */
 #	define RS5C_CTRL2_BAFG		(1 << 0)	/* or DAFG */
 
+
 /* to read (style 1) or write registers starting at R */
 #define RS5C_ADDR(R)		(((R) << 4) | 0)
+
 
 enum rtc_type {
 	rtc_undef = 0,
@@ -285,6 +288,7 @@ static int rs5c372_rtc_set_time(struct device *dev, struct rtc_time *tm)
 	return rs5c372_set_datetime(to_i2c_client(dev), tm);
 }
 
+
 static int rs5c_rtc_alarm_irq_enable(struct device *dev, unsigned int enabled)
 {
 	struct i2c_client	*client = to_i2c_client(dev);
@@ -315,6 +319,7 @@ static int rs5c_rtc_alarm_irq_enable(struct device *dev, unsigned int enabled)
 
 	return status;
 }
+
 
 /* NOTE:  Since RTC_WKALM_{RD,SET} were originally defined for EFI,
  * which only exposes a polled programming interface; and since

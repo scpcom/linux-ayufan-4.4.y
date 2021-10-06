@@ -232,6 +232,7 @@ restore_sigcontext(struct pt_regs *regs, struct rt_sigframe __user *frame)
 	return err;
 }
 
+
 /*
  * Do a signal return; undo the signal stack.
  */
@@ -273,6 +274,8 @@ badframe:
 	force_sig(SIGSEGV, current);
 	return 0;
 }
+
+
 
 /*
  * Set up a signal frame.
@@ -326,6 +329,7 @@ gen_return_code(unsigned char *codemem)
 
 	return err;
 }
+
 
 static int setup_frame(struct ksignal *ksig, sigset_t *set,
 		       struct pt_regs *regs)

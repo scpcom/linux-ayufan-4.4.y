@@ -1931,6 +1931,7 @@ static bool is_gss_cred(struct svc_cred *cr)
 	return (cr->cr_flavor > RPC_AUTH_MAXFLAVOR);
 }
 
+
 static bool
 same_creds(struct svc_cred *cr1, struct svc_cred *cr2)
 {
@@ -3157,6 +3158,7 @@ out:
 		expire_client(unconf);
 	return status;
 }
+
 
 __be32
 nfsd4_setclientid_confirm(struct svc_rqst *rqstp,

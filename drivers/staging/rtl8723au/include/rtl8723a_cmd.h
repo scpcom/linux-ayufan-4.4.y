@@ -15,6 +15,7 @@
 #ifndef __RTL8723A_CMD_H__
 #define __RTL8723A_CMD_H__
 
+
 #define H2C_BT_FW_PATCH_LEN		3
 #define H2C_BT_PWR_FORCE_LEN		3
 
@@ -73,6 +74,7 @@ struct H2C_SS_RFOFF_PARAM{
 	u8 ROFOn; /*  1: on, 0:off */
 	u16 gpio_period; /*  unit: 1024 us */
 }__attribute__ ((packed));
+
 
 struct joinbssrpt_parm {
 	u8 OpMode;	/*  enum rt_media_status */
@@ -137,6 +139,7 @@ struct lowpwr_lps_parm{
 	u8 max_early_period;
 	u8 max_bcn_timeout_period;
 } __packed;
+
 
 /*  host message to firmware cmd */
 void rtl8723a_set_FwPwrMode_cmd(struct rtw_adapter *padapter, u8 Mode);

@@ -14,3 +14,4 @@ nfulnl_log_packet(struct net *net,
 #define NFULNL_COPY_DISABLED    0xff
 
 #endif /* _KER_NFNETLINK_LOG_H */
+

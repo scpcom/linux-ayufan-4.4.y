@@ -131,4 +131,5 @@ struct max8952_platform_data {
 	struct regulator_init_data *reg_data;
 };
 
+
 #endif /* REGULATOR_MAX8952 */

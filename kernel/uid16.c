@@ -80,6 +80,7 @@ SYSCALL_DEFINE3(setresgid16, old_gid_t, rgid, old_gid_t, egid, old_gid_t, sgid)
 				 low2highgid(sgid));
 }
 
+
 SYSCALL_DEFINE3(getresgid16, old_gid_t __user *, rgidp, old_gid_t __user *, egidp, old_gid_t __user *, sgidp)
 {
 	const struct cred *cred = current_cred();

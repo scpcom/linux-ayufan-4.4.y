@@ -84,6 +84,7 @@ static int model_number = -1;
 module_param(model_number, int, S_IRUGO | S_IWUSR);
 MODULE_PARM_DESC(model_number, "Use this model number, don't autodetect");
 
+
 /* HW-independent code functions */
 
 /* check whether carrier frequency is high frequency */
@@ -545,6 +546,7 @@ static void ite_s_idle(struct rc_dev *rcdev, bool enable)
 		spin_unlock_irqrestore(&dev->lock, flags);
 	}
 }
+
 
 /* IT8712F HW-specific functions */
 
@@ -1292,6 +1294,7 @@ static void it8709_init_hardware(struct ite_dev *dev)
 	/* program the carrier parameters */
 	ite_set_carrier_params(dev);
 }
+
 
 /* generic hardware setup/teardown code */
 

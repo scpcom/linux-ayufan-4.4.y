@@ -42,6 +42,7 @@
 #define PON_DBC_CTL			0x71
 #define  PON_DBC_DELAY_MASK		0x7
 
+
 struct pm8941_pwrkey {
 	struct device *dev;
 	int irq;

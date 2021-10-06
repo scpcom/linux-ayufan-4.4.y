@@ -166,6 +166,7 @@ qla8044_ipmdio_rd_reg(struct scsi_qla_host *vha,
 	return ret;
 }
 
+
 static int
 qla8044_poll_wait_ipmdio_bus_idle(struct scsi_qla_host *vha,
 	uint32_t addr1, uint32_t addr2, uint32_t addr3, uint32_t mask)
@@ -467,6 +468,7 @@ qla8044_flash_unlock(scsi_qla_host_t *vha)
 	qla8044_wr_reg(ha, QLA8044_FLASH_LOCK_ID, 0xFF);
 	qla8044_rd_reg(ha, QLA8044_FLASH_UNLOCK);
 }
+
 
 static
 void qla8044_flash_lock_recovery(struct scsi_qla_host *vha)
@@ -3458,6 +3460,7 @@ skip_nxt_entry:
 	ha->fw_dumped = 1;
 	qla2x00_post_uevent_work(vha, QLA_UEVENT_CODE_FW_DUMP);
 
+
 	ql_log(ql_log_info, vha, 0xb106,
 	    "Leaving fn: %s Last entry: 0x%x\n",
 	    __func__, i);
@@ -3584,6 +3587,7 @@ qla8044_protect_flash(scsi_qla_host_t *vha)
 	return ret_val;
 }
 
+
 static int
 qla8044_erase_flash_sector(struct scsi_qla_host *vha,
 			   uint32_t sector_start_addr)
@@ -3624,6 +3628,7 @@ qla8044_erase_flash_sector(struct scsi_qla_host *vha,
 		ql_log(ql_log_warn, vha, 0xb132,
 		    "%s: Poll flash status failed.\n", __func__);
 	}
+
 
 	return ret_val;
 }
@@ -3712,6 +3717,7 @@ qla8044_write_flash_buffer_mode(scsi_qla_host_t *vha, uint32_t *dwptr,
 
 	qla8044_wr_reg_indirect(vha, QLA8044_FLASH_ADDR,
 	    QLA8044_FLASH_SECOND_TEMP_VAL);
+
 
 	/* Second to N-1 DWORDS writes */
 	while (dwords != 1) {

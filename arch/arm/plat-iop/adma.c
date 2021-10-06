@@ -95,6 +95,7 @@ static struct resource iop3xx_dma_1_resources[] = {
 	}
 };
 
+
 static struct resource iop3xx_aau_resources[] = {
 	[0] = {
 		.start = IOP3XX_AAU_PHYS_BASE,

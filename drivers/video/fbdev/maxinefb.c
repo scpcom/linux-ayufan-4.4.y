@@ -174,3 +174,4 @@ MODULE_LICENSE("GPL");
 #endif
 module_init(maxinefb_init);
 module_exit(maxinefb_exit);
+

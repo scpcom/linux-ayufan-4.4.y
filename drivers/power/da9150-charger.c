@@ -617,6 +617,7 @@ static int da9150_charger_probe(struct platform_device *pdev)
 
 	return 0;
 
+
 vbus_irq_fail:
 	da9150_charger_unregister_irq(pdev, "CHG_VFAULT");
 vfault_irq_fail:

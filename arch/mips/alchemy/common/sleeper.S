@@ -22,6 +22,7 @@
 	.set noat
 	.align	5
 
+
 /* preparatory stuff */
 .macro	SETUP_SLEEP
 	subu	sp, PT_SIZE
@@ -224,6 +225,7 @@ LEAF(alchemy_sleep_au1300)
 4:
 
 END(alchemy_sleep_au1300)
+
 
 	/* This is where we return upon wakeup.
 	 * Reload all of the registers and return.

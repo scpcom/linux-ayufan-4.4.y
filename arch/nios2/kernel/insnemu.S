@@ -16,6 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+
 #include <linux/linkage.h>
 #include <asm/entry.h>
 
@@ -116,6 +117,7 @@ ENTRY(instruction_trap)
 	* mulxss        0x3a    0x1f      != 0
 	*/
 
+
 	/*
 	* Save everything on the stack to make it easy for the emulation
 	* routines to retrieve the source register operands.
@@ -155,6 +157,7 @@ ENTRY(instruction_trap)
 	stw fp, 112(sp)
 	stw ea, 116(sp)
 	stw ra, 120(sp)
+
 
 	/*
 	* Split the instruction into its fields.  We need 4*A, 4*B, and 4*C as
@@ -212,12 +215,14 @@ ENTRY(instruction_trap)
 	* r6 = 4*C
 	*/
 
+
 	/*
 	*  Multiply or Divide?
 	*/
 	andi r7, r4, 0x02	/* For R-type multiply instructions,
 				   OPX & 0x02 != 0 */
 	bne r7, zero, multiply
+
 
 	/* DIVISION
 	*
@@ -263,9 +268,11 @@ divide:
 	*/
 	movi r17, 0
 
+
 	/* Which division opcode? */
 	xori r7, r4, 0x25		/* OPX of div */
 	bne r7, zero, unsigned_division
+
 
 	/*
 	*  OPX is div.  Determine and store the sign of the quotient.
@@ -279,6 +286,7 @@ dividend_is_nonnegative:
 	sub r5, zero, r5	/* -r5 */
 divisor_is_nonnegative:
 
+
 unsigned_division:
 	/* Initialize the unsigned-division loop. */
 	movi r13, 0	/* remainder = 0 */
@@ -291,6 +299,7 @@ unsigned_division:
 	* r14 = loop counter (already initialized to 32)
 	* r17 = MSB contains sign of quotient
 	*/
+
 
 	/*
 	*   for (count = 32; count > 0; --count)
@@ -307,6 +316,7 @@ divide_loop:
 	cmplt r7, r3, zero	/* r7 = MSB of r3 */
 	or r13, r13, r7
 	slli r3, r3, 1
+
 
 	/*
 	*       if (remainder >= divisor)
@@ -326,12 +336,14 @@ div_skip:
 	subi r14, r14, 1
 	bne r14, zero, divide_loop
 
+
 	/* Now
 	* r3 = quotient
 	* r4 = 0x25 for div, 0x24 for divu
 	* r6 = 4*C
 	* r17 = MSB contains sign of quotient
 	*/
+
 
 	/*
 	*  Conditionally negate signed quotient.  If quotient is unsigned,
@@ -341,12 +353,16 @@ div_skip:
 	sub r3, zero, r3		/* -r3 */
 	quotient_is_nonnegative:
 
+
 	/*
 	*  Final quotient is in r3.
 	*/
 	add r6, r6, sp
 	stw r3, 0(r6)	/* write quotient to stack */
 	br restore_registers
+
+
+
 
 	/* MULTIPLICATION
 	*
@@ -420,6 +436,7 @@ multiply:
 	* r16 = 1
 	*/
 
+
 	/*
 	*   for (count = 32; count > 0; --count)
 	*   {
@@ -465,11 +482,13 @@ mul_skip:
 	slli r5, r5, 1
 	srli r12, r12, 1
 
+
 	/*
 	*   }
 	*/
 	subi r14, r14, 1
 	bne r14, zero, multiply_loop
+
 
 	/*
 	*  Multiply emulation loop done.
@@ -485,12 +504,15 @@ mul_skip:
 	* r11 = original multiplier
 	*/
 
+
 	/* Calculate address for result from 4 * dest_register */
 	add r6, r6, sp
+
 
 	/*
 	* Select/compute the result based on OPX.
 	*/
+
 
 	/* OPX == mul?  Then store. */
 	xori r7, r4, 0x27
@@ -524,8 +546,10 @@ mulxsu_skip:
 mulxss_skip:
 	/* At this point, assume that OPX is mulxss, so store*/
 
+
 store_product:
 	stw r9, 0(r6)
+
 
 restore_registers:
 			/* No need to restore r0. */

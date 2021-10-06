@@ -211,6 +211,7 @@ static void hdmi_i2c_transaction_done(struct oaktrail_hdmi_dev *hdmi_dev)
 	HDMI_WRITE(HDMI_HISR, temp | HDMI_INTR_I2C_DONE);
 	HDMI_READ(HDMI_HISR);
 
+
 	temp = HDMI_READ(HDMI_HI2CHCR);
 	HDMI_WRITE(HDMI_HI2CHCR, temp & ~HI2C_ENABLE_TRANSACTION);
 	HDMI_READ(HDMI_HI2CHCR);

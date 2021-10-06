@@ -51,6 +51,7 @@ V_FUNCTION_BEGIN(__kernel_gettimeofday)
   .cfi_endproc
 V_FUNCTION_END(__kernel_gettimeofday)
 
+
 /*
  * Exact prototype of clock_gettime()
  *
@@ -128,6 +129,7 @@ V_FUNCTION_BEGIN(__kernel_clock_gettime)
   .cfi_endproc
 V_FUNCTION_END(__kernel_clock_gettime)
 
+
 /*
  * Exact prototype of clock_getres()
  *
@@ -187,6 +189,7 @@ V_FUNCTION_BEGIN(__kernel_time)
 	blr
   .cfi_endproc
 V_FUNCTION_END(__kernel_time)
+
 
 /*
  * This is the core of clock_gettime() and gettimeofday(),

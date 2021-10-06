@@ -1430,6 +1430,7 @@ out_put:
 
 }
 
+
 /* Retrieve NUMA policy */
 SYSCALL_DEFINE5(get_mempolicy, int __user *, policy,
 		unsigned long __user *, nmask, unsigned long, maxnode,
@@ -2630,6 +2631,7 @@ static const char * const policy_modes[] =
 	[MPOL_INTERLEAVE] = "interleave",
 	[MPOL_LOCAL]      = "local",
 };
+
 
 #ifdef CONFIG_TMPFS
 /**

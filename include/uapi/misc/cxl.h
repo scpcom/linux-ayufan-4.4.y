@@ -13,6 +13,7 @@
 #include <linux/types.h>
 #include <linux/ioctl.h>
 
+
 struct cxl_ioctl_start_work {
 	__u64 flags;
 	__u64 work_element_descriptor;
@@ -32,6 +33,7 @@ struct cxl_ioctl_start_work {
 #define CXL_START_WORK_ALL		(CXL_START_WORK_AMR |\
 					 CXL_START_WORK_NUM_IRQS |\
 					 CXL_START_WORK_ERR_FF)
+
 
 /* Possible modes that an afu can be in */
 #define CXL_MODE_DEDICATED   0x1

@@ -629,6 +629,7 @@ extern unsigned int rxrpc_debug;
 #define kproto(FMT,...)	dbgprintk("### "FMT ,##__VA_ARGS__)
 #define knet(FMT,...)	dbgprintk("@@@ "FMT ,##__VA_ARGS__)
 
+
 #if defined(__KDEBUG)
 #define _enter(FMT,...)	kenter(FMT,##__VA_ARGS__)
 #define _leave(FMT,...)	kleave(FMT,##__VA_ARGS__)

@@ -40,6 +40,7 @@
 
 #include "hyperv_net.h"
 
+
 #define RING_SIZE_MIN 64
 static int ring_size = 128;
 module_param(ring_size, int, S_IRUGO);

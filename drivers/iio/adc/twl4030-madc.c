@@ -159,6 +159,7 @@ twl4030_divider_ratios[16] = {
 	{5, 11},	/* CHANNEL 15 */
 };
 
+
 /* Conversion table from -3 to 55 degrees Celcius */
 static int twl4030_therm_tbl[] = {
 	30800,	29500,	28300,	27100,

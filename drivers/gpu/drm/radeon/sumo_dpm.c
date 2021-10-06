@@ -338,6 +338,7 @@ static void sumo_init_bsp(struct radeon_device *rdev)
 	WREG32(CG_BSP_0, pi->psp);
 }
 
+
 static void sumo_program_bsp(struct radeon_device *rdev,
 			     struct radeon_ps *rps)
 {
@@ -947,6 +948,7 @@ static void sumo_program_ttt(struct radeon_device *rdev)
 
 	WREG32(CG_SCLK_DPM_CTRL_3, cg_sclk_dpm_ctrl_3);
 }
+
 
 static void sumo_enable_voltage_scaling(struct radeon_device *rdev, bool enable)
 {

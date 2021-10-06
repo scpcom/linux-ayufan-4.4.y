@@ -45,4 +45,5 @@ struct max77693_dev {
 	int irq;
 };
 
+
 #endif /*  __LINUX_MFD_MAX77693_COMMON_H */

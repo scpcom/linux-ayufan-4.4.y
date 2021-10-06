@@ -139,6 +139,7 @@ EXPORT_SYMBOL_GPL(videobuf_queue_to_vaddr);
 
 /* --------------------------------------------------------------------- */
 
+
 void videobuf_queue_core_init(struct videobuf_queue *q,
 			 const struct videobuf_queue_ops *ops,
 			 struct device *dev,

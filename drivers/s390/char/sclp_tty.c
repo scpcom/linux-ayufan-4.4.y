@@ -457,6 +457,7 @@ static inline void sclp_eval_cpmsu(struct gds_vector *v)
 			sclp_eval_textcmd(v);
 }
 
+
 static inline void sclp_eval_mdsmu(struct gds_vector *v)
 {
 	v = sclp_find_gds_vector(v + 1, (void *) v + v->length, GDS_ID_CPMSU);

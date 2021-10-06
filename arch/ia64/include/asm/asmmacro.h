@@ -6,6 +6,7 @@
  *	David Mosberger-Tang <davidm@hpl.hp.com>
  */
 
+
 #define ENTRY(name)				\
 	.align 32;				\
 	.proc name;				\

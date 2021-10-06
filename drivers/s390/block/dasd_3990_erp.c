@@ -16,6 +16,7 @@
 #include "dasd_int.h"
 #include "dasd_eckd.h"
 
+
 struct DCTL_data {
 	unsigned char subcommand;  /* e.g Inhibit Write, Enable Write,... */
 	unsigned char modifier;	   /* Subcommand modifier */
@@ -1455,6 +1456,7 @@ static struct dasd_ccw_req *dasd_3990_erp_inspect_alias(
 		return NULL;
 }
 
+
 /*
  * DASD_3990_ERP_INSPECT_24
  *
@@ -2761,6 +2763,8 @@ dasd_3990_erp_action(struct dasd_ccw_req * cqr)
 		/* add erp request before the cqr */
 		list_add_tail(&erp->blocklist, &cqr->blocklist);
 	}
+
+
 
 	return erp;
 

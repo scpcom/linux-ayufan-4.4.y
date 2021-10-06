@@ -11,6 +11,7 @@
 #ifndef _ASM_IA64_NUMA_H
 #define _ASM_IA64_NUMA_H
 
+
 #ifdef CONFIG_NUMA
 
 #include <linux/cache.h>

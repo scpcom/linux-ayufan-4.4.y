@@ -259,6 +259,7 @@ struct i2c_adapter *hdmi_i2c_init(struct hdmi *hdmi)
 	hdmi_i2c->hdmi = hdmi;
 	init_waitqueue_head(&hdmi_i2c->ddc_event);
 
+
 	i2c->owner = THIS_MODULE;
 	i2c->class = I2C_CLASS_DDC;
 	snprintf(i2c->name, sizeof(i2c->name), "msm hdmi i2c");

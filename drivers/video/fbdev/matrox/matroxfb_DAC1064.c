@@ -12,6 +12,7 @@
  *
  */
 
+
 #include "matroxfb_DAC1064.h"
 #include "matroxfb_misc.h"
 #include "matroxfb_accel.h"

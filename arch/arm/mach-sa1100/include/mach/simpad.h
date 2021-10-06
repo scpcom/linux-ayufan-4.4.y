@@ -11,6 +11,7 @@
 #ifndef __ASM_ARCH_SIMPAD_H
 #define __ASM_ARCH_SIMPAD_H
 
+
 #define GPIO_UART1_RTS	GPIO_GPIO14
 #define GPIO_UART1_DTR	GPIO_GPIO7
 #define GPIO_UART1_CTS	GPIO_GPIO8
@@ -35,6 +36,7 @@
 
 #define IRQ_GPIO_UCB1300_IRQ IRQ_GPIO22
 #define IRQ_GPIO_POWER_BUTTON IRQ_GPIO0
+
 
 /*---  PCMCIA  ---*/
 #define GPIO_CF_CD              24
@@ -146,3 +148,11 @@ struct simpad_battery {
 extern int simpad_get_battery(struct simpad_battery* );
 
 #endif // __ASM_ARCH_SIMPAD_H
+
+
+
+
+
+
+
+

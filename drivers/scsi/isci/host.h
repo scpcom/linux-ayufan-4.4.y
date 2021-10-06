@@ -67,6 +67,7 @@
 struct isci_request;
 struct scu_task_context;
 
+
 /**
  * struct sci_power_control -
  *

@@ -357,6 +357,7 @@ static struct platform_device tcic_device = {
 	.id = 0,
 };
 
+
 static int __init init_tcic(void)
 {
     int i, sock, ret = 0;

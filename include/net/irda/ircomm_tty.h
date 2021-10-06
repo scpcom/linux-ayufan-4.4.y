@@ -112,3 +112,10 @@ void ircomm_tty_set_termios(struct tty_struct *tty,
 			    struct ktermios *old_termios);
 
 #endif
+
+
+
+
+
+
+

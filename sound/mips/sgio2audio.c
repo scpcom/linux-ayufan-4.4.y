@@ -42,6 +42,7 @@
 #include <sound/initval.h>
 #include <sound/ad1843.h>
 
+
 MODULE_AUTHOR("Vivien Chappelier <vivien.chappelier@linux-mips.org>");
 MODULE_DESCRIPTION("SGI O2 Audio");
 MODULE_LICENSE("GPL");
@@ -54,6 +55,7 @@ module_param(index, int, 0444);
 MODULE_PARM_DESC(index, "Index value for SGI O2 soundcard.");
 module_param(id, charp, 0444);
 MODULE_PARM_DESC(id, "ID string for SGI O2 soundcard.");
+
 
 #define AUDIO_CONTROL_RESET              BIT(0) /* 1: reset audio interface */
 #define AUDIO_CONTROL_CODEC_PRESENT      BIT(1) /* 1: codec detected */
@@ -306,6 +308,7 @@ static struct snd_kcontrol_new sgio2audio_ctrl_mic = {
 	.get            = sgio2audio_gain_get,
 	.put            = sgio2audio_gain_put,
 };
+
 
 static int snd_sgio2audio_new_mixer(struct snd_sgio2audio *chip)
 {
@@ -587,6 +590,7 @@ static int snd_sgio2audio_pcm_close(struct snd_pcm_substream *substream)
 	runtime->private_data = NULL;
 	return 0;
 }
+
 
 /* hw_params callback */
 static int snd_sgio2audio_pcm_hw_params(struct snd_pcm_substream *substream,

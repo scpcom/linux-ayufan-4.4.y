@@ -194,6 +194,7 @@ typedef unsigned int reg_marb_bp_rw_ack;
 #define REG_RD_ADDR_marb_bp_rw_ack 40
 #define REG_WR_ADDR_marb_bp_rw_ack 40
 
+
 /* Constants */
 enum {
   regk_marb_bp_no                          = 0x00000000,

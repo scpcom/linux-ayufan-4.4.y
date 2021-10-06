@@ -372,3 +372,4 @@ asmlinkage void asm_do_IRQ(unsigned int irq, struct pt_regs *regs)
 	irq_exit();
 	set_irq_regs(old_regs);
 }
+

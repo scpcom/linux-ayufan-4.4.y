@@ -355,6 +355,7 @@ void efx_fast_push_rx_descriptors(struct efx_rx_queue *rx_queue, bool atomic)
 		   efx_rx_queue_index(rx_queue), fill_level,
 		   rx_queue->max_fill);
 
+
 	do {
 		rc = efx_init_rx_buffers(rx_queue, atomic);
 		if (unlikely(rc)) {
@@ -828,6 +829,7 @@ void efx_remove_rx_queue(struct efx_rx_queue *rx_queue)
 	kfree(rx_queue->buffer);
 	rx_queue->buffer = NULL;
 }
+
 
 module_param(rx_refill_threshold, uint, 0444);
 MODULE_PARM_DESC(rx_refill_threshold,

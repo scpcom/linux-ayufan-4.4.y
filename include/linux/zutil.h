@@ -47,6 +47,7 @@ typedef unsigned long  ulg;
 typedef uLong (*check_func) (uLong check, const Byte *buf,
 				       uInt len);
 
+
                         /* checksum functions */
 
 #define BASE 65521L /* largest prime smaller than 65536 */

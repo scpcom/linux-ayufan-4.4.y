@@ -22,6 +22,7 @@
 #include <linux/iio/triggered_buffer.h>
 #include <linux/iio/gyro/itg3200.h>
 
+
 static int itg3200_read_all_channels(struct i2c_client *i2c, __be16 *buf)
 {
 	u8 tx = 0x80 | ITG3200_REG_TEMP_OUT_H;
@@ -73,6 +74,7 @@ void itg3200_buffer_unconfigure(struct iio_dev *indio_dev)
 	iio_triggered_buffer_cleanup(indio_dev);
 }
 
+
 static int itg3200_data_rdy_trigger_set_state(struct iio_trigger *trig,
 		bool state)
 {
@@ -120,6 +122,7 @@ int itg3200_probe_trigger(struct iio_dev *indio_dev)
 			  st->trig);
 	if (ret)
 		goto error_free_trig;
+
 
 	st->trig->dev.parent = &st->i2c->dev;
 	st->trig->ops = &itg3200_trigger_ops;

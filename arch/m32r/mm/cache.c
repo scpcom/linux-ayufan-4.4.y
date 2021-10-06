@@ -42,6 +42,7 @@
 #error Unknown cache type.
 #endif
 
+
 /* Copy back and invalidate D-cache and invalidate I-cache all */
 void _flush_cache_all(void)
 {

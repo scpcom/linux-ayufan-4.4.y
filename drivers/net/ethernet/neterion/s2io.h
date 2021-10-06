@@ -157,6 +157,7 @@ struct xpakStat {
 	u32 xpak_timer_count;
 };
 
+
 /* The statistics block of Xena */
 struct stat_block {
 /* Tx MAC statistics counters. */
@@ -353,6 +354,7 @@ struct stat_block {
 #define FIFO_UDP_MAX_NUM			2 /* 0 - even, 1 -odd ports */
 #define FIFO_OTHER_MAX_NUM			1
 
+
 #define MAX_RX_DESC_1  (MAX_RX_RINGS * MAX_RX_BLOCKS_PER_RING * 128)
 #define MAX_RX_DESC_2  (MAX_RX_RINGS * MAX_RX_BLOCKS_PER_RING * 86)
 #define MAX_TX_DESC    (MAX_AVAILABLE_TXDS)
@@ -390,6 +392,7 @@ struct tx_fifo_config {
 #define NO_SNOOP_TXD                0x01
 #define NO_SNOOP_TXD_BUFFER          0x02
 };
+
 
 /* Maintains per Ring related information */
 struct rx_ring_config {
@@ -551,6 +554,7 @@ struct RxD_t {
 #define SET_VLAN_TAG(val)       vBIT(val,48,16)
 #define SET_NUM_TAG(val)       vBIT(val,16,32)
 
+
 };
 /* Rx descriptor structure for 1 buffer mode */
 struct RxD1 {
@@ -586,6 +590,7 @@ struct RxD3 {
 	u64 Buffer1_ptr;
 	u64 Buffer2_ptr;
 };
+
 
 /* Structure that represents the Rx descriptor block which contains
  * 128 Rx descriptors.

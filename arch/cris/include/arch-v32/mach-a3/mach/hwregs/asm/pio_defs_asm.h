@@ -318,6 +318,7 @@
 #define reg_pio_r_masked_intr___rdy___bit 0
 #define reg_pio_r_masked_intr_offset 112
 
+
 /* Constants */
 #define regk_pio_a2                               0x00000003
 #define regk_pio_no                               0x00000000

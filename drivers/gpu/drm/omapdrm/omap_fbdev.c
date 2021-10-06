@@ -213,6 +213,7 @@ static int omap_fbdev_create(struct drm_fb_helper *helper,
 		fbi->fix.ywrapstep = 1;
 	}
 
+
 	DBG("par=%p, %dx%d", fbi->par, fbi->var.xres, fbi->var.yres);
 	DBG("allocated %dx%d fb", fbdev->fb->width, fbdev->fb->height);
 

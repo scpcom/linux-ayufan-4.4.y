@@ -74,6 +74,7 @@
 
 #define EAGLEUSBVERSION "ueagle 1.4"
 
+
 /*
  * Debug macros
  */
@@ -606,6 +607,7 @@ MODULE_PARM_DESC(annex,
 		if (sc->usbatm->atm_dev) \
 			atm_dev_signal_change(sc->usbatm->atm_dev, val); \
 	} while (0)
+
 
 /* Firmware loading */
 #define LOAD_INTERNAL     0xA0
@@ -1798,6 +1800,7 @@ static int uea_send_cmvs_e4(struct uea_softc *sc)
 		return ret;
 	uea_info(INS_TO_USBDEV(sc), "ATU-R firmware version : %x\n",
 			sc->stats.phy.firmid);
+
 
 	/* get options */
 	ret = len = request_cmvs(sc, &cmvs_ptr, &cmvs_fw, &ver);

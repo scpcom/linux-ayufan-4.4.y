@@ -196,6 +196,7 @@
 	msr	cpsr_c, \rtemp			@ switch back to the SVC mode
 	.endm
 
+
 	.macro	svc_exit, rpsr, irq = 0
 	.if	\irq != 0
 	@ IRQs already off
@@ -285,6 +286,7 @@
 	rfeia	r8
 #endif
 	.endm
+
 
 	.macro	restore_user_regs, fast = 0, offset = 0
 	uaccess_enable r1, isb=0

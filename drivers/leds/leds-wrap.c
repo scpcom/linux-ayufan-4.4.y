@@ -130,3 +130,4 @@ module_exit(wrap_led_exit);
 MODULE_AUTHOR("Kristian Kielhofner <kris@krisk.org>");
 MODULE_DESCRIPTION("PCEngines WRAP LED driver");
 MODULE_LICENSE("GPL");
+

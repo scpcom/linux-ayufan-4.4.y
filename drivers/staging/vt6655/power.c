@@ -136,6 +136,7 @@ PSvDisablePowerSaving(
 	pDevice->bPWBitOn = false;
 }
 
+
 /*+
  *
  * Routine Description:

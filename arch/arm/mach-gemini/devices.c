@@ -115,3 +115,4 @@ int __init platform_register_rtc(void)
 {
 	return platform_device_register(&gemini_rtc_device);
 }
+

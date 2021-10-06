@@ -37,6 +37,7 @@
 #include "psb_drv.h"
 #include "psb_intel_reg.h"
 
+
 /*
  * LPC GPIO based I2C bus for LVDS of Atom E6xx
  */

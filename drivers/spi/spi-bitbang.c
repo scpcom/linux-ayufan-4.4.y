@@ -26,6 +26,7 @@
 
 #define SPI_BITBANG_CS_DELAY	100
 
+
 /*----------------------------------------------------------------------*/
 
 /*
@@ -405,3 +406,4 @@ void spi_bitbang_stop(struct spi_bitbang *bitbang)
 EXPORT_SYMBOL_GPL(spi_bitbang_stop);
 
 MODULE_LICENSE("GPL");
+

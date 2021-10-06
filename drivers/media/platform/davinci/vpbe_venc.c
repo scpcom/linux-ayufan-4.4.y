@@ -464,6 +464,7 @@ static int venc_set_1080i30_internal(struct v4l2_subdev *sd)
 	venc_write(sd, VENC_OSDCLK0, 0);
 	venc_write(sd, VENC_OSDCLK1, 1);
 
+
 	venc_write(sd, VENC_VMOD, 0);
 	/* DM365 component HD mode */
 	venc_modify(sd, VENC_VMOD, (1 << VENC_VMOD_VIE_SHIFT),

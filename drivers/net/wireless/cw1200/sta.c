@@ -126,6 +126,7 @@ void cw1200_stop(struct ieee80211_hw *dev)
 	spin_unlock(&priv->event_queue_lock);
 	__cw1200_free_event_queue(&list);
 
+
 	priv->join_status = CW1200_JOIN_STATUS_PASSIVE;
 	priv->join_pending = false;
 
@@ -145,6 +146,7 @@ void cw1200_stop(struct ieee80211_hw *dev)
 static int cw1200_bssloss_mitigation = 1;
 module_param(cw1200_bssloss_mitigation, int, 0644);
 MODULE_PARM_DESC(cw1200_bssloss_mitigation, "BSS Loss mitigation. 0 == disabled, 1 == enabled (default)");
+
 
 void __cw1200_cqm_bssloss_sm(struct cw1200_common *priv,
 			     int init, int good, int bad)
@@ -2251,6 +2253,7 @@ static int cw1200_upload_pspoll(struct cw1200_common *priv)
 		.frame_type = WSM_FRAME_TYPE_PS_POLL,
 		.rate = 0xFF,
 	};
+
 
 	frame.skb = ieee80211_pspoll_get(priv->hw, priv->vif);
 	if (!frame.skb)

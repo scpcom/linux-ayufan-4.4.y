@@ -348,6 +348,7 @@ struct qeth_hdr_tso {
 	struct qeth_hdr_ext_tso ext;
 } __attribute__ ((packed));
 
+
 /* flags for qeth_hdr.flags */
 #define QETH_HDR_PASSTHRU 0x10
 #define QETH_HDR_IPV6     0x80
@@ -643,6 +644,7 @@ struct qeth_reply {
 	struct qeth_card *card;
 	atomic_t refcnt;
 };
+
 
 struct qeth_card_blkt {
 	int time_total;

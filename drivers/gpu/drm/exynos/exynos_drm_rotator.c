@@ -800,6 +800,7 @@ static int rotator_clk_crtl(struct rot_context *rot, bool enable)
 	return 0;
 }
 
+
 #ifdef CONFIG_PM_SLEEP
 static int rotator_suspend(struct device *dev)
 {

@@ -24,6 +24,7 @@
 #include <hv/netio_intf.h>
 #include <hv/drv_xgbe_intf.h>
 
+
 /** How many groups we have (log2). */
 #define LOG2_NUM_GROUPS (12)
 /** How many groups we have. */
@@ -38,6 +39,7 @@
 #define EDMA_WDS_CSUM        10
 /** Total available words in the eDMA command FIFO. */
 #define EDMA_WDS_TOTAL      128
+
 
 /*
  * FIXME: These definitions are internal and should have underscores!
@@ -54,6 +56,7 @@
 /** The number of "SIZE_xxx" values. */
 #define NETIO_NUM_SIZES 3
 
+
 /*
  * Default numbers of packets for IPP drivers.  These values are chosen
  * such that CIPP1 will not overflow its L2 cache.
@@ -66,10 +69,12 @@
 /** The default number of jumbo packets. */
 #define NETIO_DEFAULT_JUMBO_PACKETS 250
 
+
 /** Log2 of the size of a memory arena. */
 #define NETIO_ARENA_SHIFT      24      /* 16 MB */
 /** Size of a memory arena. */
 #define NETIO_ARENA_SIZE       (1 << NETIO_ARENA_SHIFT)
+
 
 /** A queue of packets.
  *
@@ -114,6 +119,7 @@ typedef struct {
   uint32_t __last_packet_plus_one;
 }
 __netio_packet_queue_t;
+
 
 /** A queue of buffers.
  *
@@ -181,6 +187,7 @@ typedef struct
 }
 __netio_buffer_queue_t;
 
+
 /**
  * An object for providing Ethernet packets to a process.
  */
@@ -214,6 +221,7 @@ typedef struct __netio_queue_impl_t
 }
 netio_queue_impl_t;
 
+
 /**
  * An object for managing the user end of a NetIO queue.
  */
@@ -243,8 +251,10 @@ typedef struct __netio_queue_user_impl_t
 }
 netio_queue_user_impl_t;
 
+
 #define NETIO_GROUP_CHUNK_SIZE   64   /**< Max # groups in one IPP request */
 #define NETIO_BUCKET_CHUNK_SIZE  64   /**< Max # buckets in one IPP request */
+
 
 /** Internal structure used to convey packet send information to the
  * hypervisor.  FIXME: Actually, it's not used for that anymore, but
@@ -260,6 +270,7 @@ typedef struct
   uint32_t csum1;              /**< Second checksum word */
 }
 __netio_send_cmd_t;
+
 
 /** Flags used in two contexts:
  *  - As the "flags" member in the __netio_send_cmd_t, above; used only

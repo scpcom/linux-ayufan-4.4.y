@@ -20,6 +20,7 @@
  * (800) 348-7116
  */
 
+
 #ifndef PAS16_H
 #define PAS16_H
 
@@ -36,12 +37,14 @@
 #define PAS16_DEFAULT_BOARD_3_IRQ 14
 #define PAS16_DEFAULT_BOARD_4_IRQ 15
 
+
 /*
  * The Pro Audio Spectrum boards are I/O mapped. They use a Zilog 5380
  * SCSI controller, which is the equivalent of NCR's 5380.  "Pseudo-DMA"
  * architecture is used, where a PAL drives the DMA signals on the 5380
  * allowing fast, blind transfers with proper handshaking. 
  */
+
 
 /* The Time-out Counter register is used to safe-guard against a stuck
  * bus (in the case of RDY driven handshake) or a stuck byte (if 16-Bit
@@ -54,6 +57,7 @@
 #define P_TIMEOUT_COUNTER_REG	0x4000
 #define P_TC_DISABLE	0x80	/* Set to 0 to enable timeout int. */
 				/* Bits D6-D0 contain timeout count */
+
 
 #define P_TIMEOUT_STATUS_REG_OFFSET	0x4001
 #define P_TS_TIM		0x80	/* check timeout status */
@@ -74,6 +78,7 @@
 					 * timeout error int. or status
 					 */
 
+
 /*
  * The data register reads/writes to/from the 5380 in pseudo-DMA mode
  */ 
@@ -92,6 +97,7 @@
 #define WAIT_STATE 0xbc00
 #define OPERATION_MODE_1 0xec03
 #define IO_CONFIG_3 0xf002
+
 
 #ifndef ASM
 
@@ -128,6 +134,7 @@
     outb( (value),PAS16_io_port(reg) ) )
 
 #endif
+
 
 #define NCR5380_intr pas16_intr
 #define do_NCR5380_intr do_pas16_intr

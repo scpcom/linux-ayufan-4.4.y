@@ -60,6 +60,7 @@ static struct amdgpu_device *amdgpu_get_adev(struct ttm_bo_device *bdev)
 	return adev;
 }
 
+
 /*
  * Global memory.
  */

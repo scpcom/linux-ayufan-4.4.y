@@ -58,6 +58,7 @@ static int pcf50633_input_probe(struct platform_device *pdev)
 	struct input_dev *input_dev;
 	int ret;
 
+
 	input = kzalloc(sizeof(*input), GFP_KERNEL);
 	if (!input)
 		return -ENOMEM;

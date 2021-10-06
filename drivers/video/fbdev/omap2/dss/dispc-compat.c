@@ -66,6 +66,7 @@ static struct {
 #endif
 } dispc_compat;
 
+
 #ifdef CONFIG_OMAP2_DSS_COLLECT_IRQ_STATS
 static void dispc_dump_irqs(struct seq_file *s)
 {

@@ -274,6 +274,7 @@ typedef struct xfs_dsb {
 	/* must be padded to 64 bit alignment */
 } xfs_dsb_t;
 
+
 /*
  * Misc. Flags - warning - these will be cleared by xfs_repair unless
  * a feature bit is set when the flag is used.
@@ -1181,6 +1182,7 @@ struct xfs_dsymlink_hdr {
 	((bufsize) - (xfs_sb_version_hascrc(&(mp)->m_sb) ? \
 			sizeof(struct xfs_dsymlink_hdr) : 0))
 
+
 /*
  * Allocation Btree format definitions
  *
@@ -1215,6 +1217,7 @@ typedef __be32 xfs_alloc_ptr_t;
  */
 #define	XFS_BNO_BLOCK(mp)	((xfs_agblock_t)(XFS_AGFL_BLOCK(mp) + 1))
 #define	XFS_CNT_BLOCK(mp)	((xfs_agblock_t)(XFS_BNO_BLOCK(mp) + 1))
+
 
 /*
  * Inode Allocation Btree format definitions
@@ -1306,6 +1309,8 @@ typedef __be32 xfs_inobt_ptr_t;
 	(xfs_sb_version_hasfinobt(&((mp)->m_sb)) ? \
 	 XFS_FIBT_BLOCK(mp) + 1 : \
 	 XFS_IBT_BLOCK(mp) + 1)
+
+
 
 /*
  * BMAP Btree format definitions
@@ -1408,6 +1413,7 @@ typedef struct xfs_bmbt_key {
 /* btree pointer type */
 typedef __be64 xfs_bmbt_ptr_t, xfs_bmdr_ptr_t;
 
+
 /*
  * Generic Btree block format definitions
  *
@@ -1495,6 +1501,7 @@ struct xfs_acl {
 
 #define XFS_ACL_MAX_SIZE(mp) \
 	XFS_ACL_SIZE(XFS_ACL_MAX_ENTRIES((mp)))
+
 
 /* On-disk XFS extended attribute names */
 #define SGI_ACL_FILE		"SGI_ACL_FILE"

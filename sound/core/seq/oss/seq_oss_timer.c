@@ -37,6 +37,7 @@
 static void calc_alsa_tempo(struct seq_oss_timer *timer);
 static int send_timer_event(struct seq_oss_devinfo *dp, int type, int value);
 
+
 /*
  * create and register a new timer.
  * if queue is not started yet, start it.
@@ -61,6 +62,7 @@ snd_seq_oss_timer_new(struct seq_oss_devinfo *dp)
 	return rec;
 }
 
+
 /*
  * delete timer.
  * if no more timer exists, stop the queue.
@@ -73,6 +75,7 @@ snd_seq_oss_timer_delete(struct seq_oss_timer *rec)
 		kfree(rec);
 	}
 }
+
 
 /*
  * process one timing event
@@ -118,6 +121,7 @@ snd_seq_oss_process_timer_event(struct seq_oss_timer *rec, union evrec *ev)
 	return 0;
 }
 
+
 /*
  * convert tempo units
  */
@@ -127,6 +131,7 @@ calc_alsa_tempo(struct seq_oss_timer *timer)
 	timer->tempo = (60 * 1000000) / timer->oss_tempo;
 	timer->ppq = timer->oss_timebase;
 }
+
 
 /*
  * dispatch a timer event
@@ -172,6 +177,7 @@ snd_seq_oss_timer_start(struct seq_oss_timer *timer)
 	return 0;
 }
 
+
 /*
  * stop queue
  */
@@ -185,6 +191,7 @@ snd_seq_oss_timer_stop(struct seq_oss_timer *timer)
 	return 0;
 }
 
+
 /*
  * continue queue
  */
@@ -197,6 +204,7 @@ snd_seq_oss_timer_continue(struct seq_oss_timer *timer)
 	timer->running = 1;
 	return 0;
 }
+
 
 /*
  * change queue tempo
@@ -214,6 +222,7 @@ snd_seq_oss_timer_tempo(struct seq_oss_timer *timer, int value)
 		send_timer_event(timer->dp, SNDRV_SEQ_EVENT_TEMPO, timer->tempo);
 	return 0;
 }
+
 
 /*
  * ioctls

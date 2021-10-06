@@ -129,6 +129,7 @@ static void flushinv_all_dcache(void)
 					if ((status & 0x3) != 0x3)
 						continue;
 
+
 					/* construct the address using the tag */
 					addr = (status & 0xFFFFC800) | (subbank << 12) | (set << 5);
 

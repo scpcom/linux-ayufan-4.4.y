@@ -543,4 +543,5 @@ struct uac1_status_word {
 	__u8 bOriginator;
 } __attribute__((packed));
 
+
 #endif /* _UAPI__LINUX_USB_AUDIO_H */

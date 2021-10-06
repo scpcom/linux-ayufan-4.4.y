@@ -310,6 +310,7 @@
 #define PS3AV_MONITOR_TYPE_HDMI			1	/* HDMI */
 #define PS3AV_MONITOR_TYPE_DVI			2	/* DVI */
 
+
 /* for video mode */
 enum ps3av_mode_num {
 	PS3AV_MODE_AUTO				= 0,
@@ -337,6 +338,7 @@ enum ps3av_mode_num {
 #define PS3AV_MODE_DVI				0x0040
 #define PS3AV_MODE_RGB				0x0020
 
+
 #define PS3AV_DEFAULT_HDMI_MODE_ID_REG_60	PS3AV_MODE_480P
 #define PS3AV_DEFAULT_AVMULTI_MODE_ID_REG_60	PS3AV_MODE_480I
 #define PS3AV_DEFAULT_HDMI_MODE_ID_REG_50	PS3AV_MODE_576P
@@ -348,6 +350,7 @@ enum ps3av_mode_num {
 
 #define get_status(buf)				(((__u32 *)buf)[2])
 #define PS3AV_HDR_SIZE				4	/* version + size */
+
 
 /** command packet structure **/
 struct ps3av_send_hdr {

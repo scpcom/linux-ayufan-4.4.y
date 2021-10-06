@@ -38,6 +38,7 @@ struct cpufreq_available_frequencies {
 	struct cpufreq_available_frequencies *first;
 };
 
+
 struct cpufreq_affected_cpus {
 	unsigned int cpu;
 	struct cpufreq_affected_cpus *next;
@@ -50,6 +51,8 @@ struct cpufreq_stats {
 	struct cpufreq_stats *next;
 	struct cpufreq_stats *first;
 };
+
+
 
 #ifdef __cplusplus
 extern "C" {
@@ -76,11 +79,13 @@ extern unsigned long cpufreq_get_freq_hardware(unsigned int cpu);
 
 #define cpufreq_get(cpu) cpufreq_get_freq_kernel(cpu);
 
+
 /* determine CPU transition latency
  *
  * returns 0 on failure, else transition latency in 10^(-9) s = nanoseconds
  */
 extern unsigned long cpufreq_get_transition_latency(unsigned int cpu);
+
 
 /* determine hardware CPU frequency limits
  *
@@ -92,6 +97,7 @@ extern int cpufreq_get_hardware_limits(unsigned int cpu,
 				unsigned long *min,
 				unsigned long *max);
 
+
 /* determine CPUfreq driver used
  *
  * Remember to call cpufreq_put_driver when no longer needed
@@ -102,15 +108,18 @@ extern char *cpufreq_get_driver(unsigned int cpu);
 
 extern void cpufreq_put_driver(char *ptr);
 
+
 /* determine CPUfreq policy currently used
  *
  * Remember to call cpufreq_put_policy when no longer needed
  * to avoid memory leakage, please.
  */
 
+
 extern struct cpufreq_policy *cpufreq_get_policy(unsigned int cpu);
 
 extern void cpufreq_put_policy(struct cpufreq_policy *policy);
+
 
 /* determine CPUfreq governors currently available
  *
@@ -119,11 +128,13 @@ extern void cpufreq_put_policy(struct cpufreq_policy *policy);
  * after use.
  */
 
+
 extern struct cpufreq_available_governors
 *cpufreq_get_available_governors(unsigned int cpu);
 
 extern void cpufreq_put_available_governors(
 	struct cpufreq_available_governors *first);
+
 
 /* determine CPU frequency states available
  *
@@ -138,6 +149,7 @@ extern struct cpufreq_available_frequencies
 extern void cpufreq_put_available_frequencies(
 		struct cpufreq_available_frequencies *first);
 
+
 /* determine affected CPUs
  *
  * Remember to call cpufreq_put_affected_cpus when no longer needed
@@ -149,6 +161,7 @@ extern struct cpufreq_affected_cpus *cpufreq_get_affected_cpus(unsigned
 
 extern void cpufreq_put_affected_cpus(struct cpufreq_affected_cpus *first);
 
+
 /* determine related CPUs
  *
  * Remember to call cpufreq_put_related_cpus when no longer needed
@@ -159,6 +172,7 @@ extern struct cpufreq_affected_cpus *cpufreq_get_related_cpus(unsigned
 							int cpu);
 
 extern void cpufreq_put_related_cpus(struct cpufreq_affected_cpus *first);
+
 
 /* determine stats for cpufreq subsystem
  *
@@ -172,6 +186,7 @@ extern void cpufreq_put_stats(struct cpufreq_stats *stats);
 
 extern unsigned long cpufreq_get_transitions(unsigned int cpu);
 
+
 /* set new cpufreq policy
  *
  * Tries to set the passed policy as new policy as close as possible,
@@ -179,6 +194,7 @@ extern unsigned long cpufreq_get_transitions(unsigned int cpu);
  */
 
 extern int cpufreq_set_policy(unsigned int cpu, struct cpufreq_policy *policy);
+
 
 /* modify a policy by only changing min/max freq or governor
  *
@@ -188,6 +204,7 @@ extern int cpufreq_set_policy(unsigned int cpu, struct cpufreq_policy *policy);
 extern int cpufreq_modify_policy_min(unsigned int cpu, unsigned long min_freq);
 extern int cpufreq_modify_policy_max(unsigned int cpu, unsigned long max_freq);
 extern int cpufreq_modify_policy_governor(unsigned int cpu, char *governor);
+
 
 /* set a specific frequency
  *

@@ -36,6 +36,7 @@
 
 #include "cm4040_cs.h"
 
+
 #define reader_to_dev(x)	(&x->p_dev->dev)
 
 /* n (debug level) is ignored */
@@ -517,6 +518,7 @@ static int cm4040_config_check(struct pcmcia_device *p_dev, void *priv_data)
 {
 	return pcmcia_request_io(p_dev);
 }
+
 
 static int reader_config(struct pcmcia_device *link, int devno)
 {

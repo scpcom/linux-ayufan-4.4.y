@@ -23,6 +23,7 @@
 #include <osdep_service.h>
 #include <drv_types.h>
 
+
 #ifndef OID_802_11_CAPABILITY
 	#define OID_802_11_CAPABILITY	0x0d010122
 #endif
@@ -30,6 +31,7 @@
 #ifndef OID_802_11_PMKID
 	#define OID_802_11_PMKID	0x0d010123
 #endif
+
 
 /*  For DDK-defined OIDs */
 #define OID_NDIS_SEG1	0x00010100

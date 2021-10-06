@@ -70,6 +70,7 @@ static const u32 mlx5_ib_opcode[] = {
 	[MLX5_IB_WR_UMR]			= MLX5_OPCODE_UMR,
 };
 
+
 static int is_qp0(enum ib_qp_type qp_type)
 {
 	return qp_type == IB_QPT_SMI;
@@ -1175,6 +1176,7 @@ static void destroy_qp_common(struct mlx5_ib_dev *dev, struct mlx5_ib_qp *qp)
 		mlx5_ib_warn(dev, "failed to destroy QP 0x%x\n", qp->mqp.qpn);
 	kfree(in);
 
+
 	if (qp->create_type == MLX5_QP_KERNEL)
 		destroy_qp_kernel(dev, qp);
 	else if (qp->create_type == MLX5_QP_USER)
@@ -1690,6 +1692,7 @@ static int __mlx5_ib_modify_qp(struct ib_qp *ibqp,
 
 	if (!ibqp->uobject && cur_state == IB_QPS_RESET && new_state == IB_QPS_INIT)
 		context->sq_crq_size |= cpu_to_be16(1 << 4);
+
 
 	mlx5_cur = to_mlx5_state(cur_state);
 	mlx5_new = to_mlx5_state(new_state);
@@ -2350,6 +2353,7 @@ static void set_sig_umr_segment(struct mlx5_wqe_umr_ctrl_seg *umr,
 	umr->mkey_mask = sig_mkey_mask();
 }
 
+
 static int set_sig_umr_wr(struct ib_send_wr *send_wr, struct mlx5_ib_qp *qp,
 			  void **seg, int *size)
 {
@@ -2578,6 +2582,7 @@ static void finish_wqe(struct mlx5_ib_qp *qp,
 	qp->sq.cur_post += DIV_ROUND_UP(size * 16, MLX5_SEND_WQE_BB);
 	qp->sq.w_list[idx].next = qp->sq.cur_post;
 }
+
 
 int mlx5_ib_post_send(struct ib_qp *ibqp, struct ib_send_wr *wr,
 		      struct ib_send_wr **bad_wr)

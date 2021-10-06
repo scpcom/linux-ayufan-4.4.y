@@ -25,6 +25,8 @@
 #ifndef _UAPI_HIDDEV_H
 #define _UAPI_HIDDEV_H
 
+
+
 #include <linux/types.h>
 
 /*
@@ -205,5 +207,6 @@ struct hiddev_usage_ref_multi {
  * 	ret = ioctl(fd, HIDIOCGREPORTINFO, &rinfo);
  * }
  */
+
 
 #endif /* _UAPI_HIDDEV_H */

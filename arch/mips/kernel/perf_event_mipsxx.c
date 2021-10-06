@@ -138,6 +138,7 @@ static struct mips_pmu mipspmu;
 #endif
 #define M_PERFCTL_EVENT_MASK		0xfe0
 
+
 #ifdef CONFIG_MIPS_PERF_SHARED_TC_COUNTERS
 static int cpu_has_mipsmt_pertccounters;
 
@@ -750,6 +751,7 @@ static void handle_associated_event(struct cpu_hw_events *cpuc,
 		mipsxx_pmu_disable_event(idx);
 }
 
+
 static int __n_counters(void)
 {
 	if (!(read_c0_config1() & M_CONFIG1_PC))
@@ -1127,6 +1129,7 @@ static const struct mips_perf_event bmips5000_cache_map
 },
 };
 
+
 static const struct mips_perf_event octeon_cache_map
 				[PERF_COUNT_HW_CACHE_MAX]
 				[PERF_COUNT_HW_CACHE_OP_MAX]
@@ -1482,6 +1485,7 @@ static irqreturn_t mipsxx_pmu_handle_irq(int irq, void *dev)
 #define IS_BOTH_COUNTERS_BMIPS5000_EVENT(b)				\
 	((b) == 0 || (b) == 1)
 
+
 /*
  * For most cores the user can use 0-255 raw events, where 0-127 for the events
  * of even counters, and 128-255 for odd counters. Note that bit 7 is used to
@@ -1616,6 +1620,7 @@ static const struct mips_perf_event *octeon_pmu_map_raw_event(u64 config)
 {
 	unsigned int raw_id = config & 0xff;
 	unsigned int base_id = raw_id & 0x7f;
+
 
 	raw_event.cntr_mask = CNTR_ALL;
 	raw_event.event_id = base_id;

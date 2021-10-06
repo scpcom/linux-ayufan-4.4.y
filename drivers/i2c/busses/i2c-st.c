@@ -119,6 +119,7 @@
 /* SSC Clock Prescaler */
 #define SSC_PRSC_VALUE			0x0f
 
+
 #define SSC_TXFIFO_SIZE			0x8
 #define SSC_RXFIFO_SIZE			0x8
 

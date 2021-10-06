@@ -567,6 +567,7 @@ static int iwl_parse_v1_v2_firmware(struct iwl_drv *drv,
 		return -EINVAL;
 	}
 
+
 	set_sec_data(pieces, IWL_UCODE_REGULAR, IWL_UCODE_SECTION_INST, src);
 	src += get_sec_size(pieces, IWL_UCODE_REGULAR, IWL_UCODE_SECTION_INST);
 	set_sec_offset(pieces, IWL_UCODE_REGULAR, IWL_UCODE_SECTION_INST,
@@ -1530,6 +1531,7 @@ void iwl_drv_stop(struct iwl_drv *drv)
 
 	kfree(drv);
 }
+
 
 /* shared module parameters */
 struct iwl_mod_params iwlwifi_mod_params = {

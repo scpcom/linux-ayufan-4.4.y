@@ -50,6 +50,7 @@ static int allocate_ftrace_ops(struct trace_array *tr)
 	return 0;
 }
 
+
 int ftrace_create_function_files(struct trace_array *tr,
 				 struct dentry *parent)
 {

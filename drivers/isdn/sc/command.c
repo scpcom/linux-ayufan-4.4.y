@@ -154,6 +154,7 @@ int startproc(int card)
 	return status;
 }
 
+
 /*
  * Dials the number passed in
  */

@@ -362,6 +362,7 @@ int snd_line6_hw_free(struct snd_pcm_substream *substream)
 	return snd_pcm_lib_free_pages(substream);
 }
 
+
 /* control info callback */
 static int snd_line6_control_playback_info(struct snd_kcontrol *kcontrol,
 					   struct snd_ctl_elem_info *uinfo)

@@ -632,6 +632,7 @@ void snd_hdmi_eld_update_pcm_info(struct parsed_hdmi_eld *e,
 	hinfo->channels_max = min(hinfo->channels_max, channels_max);
 }
 
+
 /* ATI/AMD specific stuff (ELD emulation) */
 
 #define ATI_VERB_SET_AUDIO_DESCRIPTOR	0x776

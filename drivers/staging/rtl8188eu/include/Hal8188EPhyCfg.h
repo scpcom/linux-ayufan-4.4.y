@@ -20,6 +20,7 @@
 #ifndef __INC_HAL8188EPHYCFG_H__
 #define __INC_HAL8188EPHYCFG_H__
 
+
 /*--------------------------Define Parameters-------------------------------*/
 #define LOOP_LIMIT			5
 #define MAX_STALL_TIME			50		/* us */
@@ -34,7 +35,9 @@
 
 #define MAX_AGGR_NUM			0x07
 
+
 /*--------------------------Define Parameters-------------------------------*/
+
 
 /*------------------------------Define structure----------------------------*/
 enum sw_chnl_cmd_id {
@@ -182,11 +185,14 @@ struct ant_sel_cck {
 
 /*------------------------------Define structure----------------------------*/
 
+
 /*------------------------Export global variable----------------------------*/
 /*------------------------Export global variable----------------------------*/
 
+
 /*------------------------Export Marco Definition---------------------------*/
 /*------------------------Export Marco Definition---------------------------*/
+
 
 /*--------------------------Exported Function prototype---------------------*/
 /*  */

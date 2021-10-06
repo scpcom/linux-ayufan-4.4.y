@@ -257,6 +257,7 @@ static int wm8523_set_dai_sysclk(struct snd_soc_dai *codec_dai,
 	return 0;
 }
 
+
 static int wm8523_set_dai_fmt(struct snd_soc_dai *codec_dai,
 		unsigned int fmt)
 {

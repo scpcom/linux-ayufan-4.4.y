@@ -46,4 +46,5 @@ struct termio {
 
 /* ioctl (fd, TIOCSERGETLSR, &result) where result may be as below */
 
+
 #endif /* _UAPI_ASM_GENERIC_TERMIOS_H */

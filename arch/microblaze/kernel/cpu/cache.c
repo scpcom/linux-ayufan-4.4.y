@@ -83,6 +83,7 @@ static inline void __disable_dcache_nomsr(void)
 			: : "i" (MSR_DCE) : "memory", "r12");
 }
 
+
 /* Helper macro for computing the limits of cache range loops
  *
  * End address can be unaligned which is OK for C implementation.

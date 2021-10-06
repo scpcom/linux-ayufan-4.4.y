@@ -117,6 +117,7 @@ static struct snd_kcontrol_new vx_control_mic_boost = {
 	.put =		vx_mic_boost_put,
 };
 
+
 int vxp_add_mic_controls(struct vx_core *_chip)
 {
 	struct snd_vxpocket *chip = (struct snd_vxpocket *)_chip;
@@ -147,3 +148,4 @@ int vxp_add_mic_controls(struct vx_core *_chip)
 
 	return 0;
 }
+

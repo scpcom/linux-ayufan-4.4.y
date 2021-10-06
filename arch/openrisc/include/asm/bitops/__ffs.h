@@ -12,6 +12,7 @@
 #ifndef __ASM_OPENRISC___FFS_H
 #define __ASM_OPENRISC___FFS_H
 
+
 #ifdef CONFIG_OPENRISC_HAVE_INST_FF1
 
 static inline unsigned long __ffs(unsigned long x)

@@ -13,6 +13,7 @@
 typedef unsigned int		tid_t;		/* Unique transaction ID */
 typedef struct transaction_s	transaction_t;	/* Compound transaction type */
 
+
 struct buffer_head;
 
 struct journal_head {

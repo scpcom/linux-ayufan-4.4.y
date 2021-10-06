@@ -215,6 +215,7 @@ generic_key_timeout(struct rpc_auth *auth, struct rpc_cred *cred)
 	struct rpc_cred *tcred;
 	int ret = 0;
 
+
 	/* Fast track for non crkey_timeout (no key) underlying credentials */
 	if (test_bit(RPC_CRED_NO_CRKEY_TIMEOUT, &acred->ac_flags))
 		return 0;

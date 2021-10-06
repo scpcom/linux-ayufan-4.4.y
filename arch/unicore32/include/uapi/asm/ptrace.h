@@ -84,6 +84,7 @@ struct pt_regs {
 #define UCreg_00		uregs[0]
 #define UCreg_ORIG_00		uregs[33]
 
+
 #endif /* __ASSEMBLY__ */
 
 #endif /* _UAPI__UNICORE_PTRACE_H__ */

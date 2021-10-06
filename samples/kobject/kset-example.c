@@ -23,6 +23,7 @@
  * read out of it.
  */
 
+
 /*
  * This is our "object" that we will create a few of and register them with
  * sysfs.

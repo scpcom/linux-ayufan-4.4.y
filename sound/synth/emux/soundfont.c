@@ -85,6 +85,7 @@ lock_preset(struct snd_sf_list *sflist)
 	spin_unlock_irqrestore(&sflist->lock, flags);
 }
 
+
 /*
  * remove lock
  */
@@ -97,6 +98,7 @@ unlock_preset(struct snd_sf_list *sflist)
 	spin_unlock_irqrestore(&sflist->lock, flags);
 	mutex_unlock(&sflist->presets_mutex);
 }
+
 
 /*
  * close the patch if the patch was opened by this client.
@@ -113,6 +115,7 @@ snd_soundfont_close_check(struct snd_sf_list *sflist, int client)
 	spin_unlock_irqrestore(&sflist->lock, flags);
 	return 0;
 }
+
 
 /*
  * Deal with a soundfont patch.  Any driver could use these routines
@@ -213,6 +216,7 @@ snd_soundfont_load(struct snd_sf_list *sflist, const void __user *data,
 	return rc;
 }
 
+
 /* check if specified type is special font (GUS or preset-alias) */
 static inline int
 is_special_type(int type)
@@ -221,6 +225,7 @@ is_special_type(int type)
 	return (type == SNDRV_SFNT_PAT_TYPE_GUS ||
 		type == SNDRV_SFNT_PAT_TYPE_MAP);
 }
+
 
 /* open patch; create sf list */
 static int
@@ -368,6 +373,7 @@ sf_zone_new(struct snd_sf_list *sflist, struct snd_soundfont *sf)
 	return zp;
 }
 
+
 /*
  * increment sample counter
  */
@@ -412,6 +418,7 @@ sf_sample_delete(struct snd_sf_list *sflist, struct snd_soundfont *sf,
 		kfree(sp);
 	}
 }
+
 
 /* load voice map */
 static int
@@ -477,6 +484,7 @@ load_map(struct snd_sf_list *sflist, const void __user *data, int count)
 	return 0;
 }
 
+
 /* remove the present instrument layers */
 static int
 remove_info(struct snd_sf_list *sflist, struct snd_soundfont *sf,
@@ -504,6 +512,7 @@ remove_info(struct snd_sf_list *sflist, struct snd_soundfont *sf,
 		rebuild_presets(sflist);
 	return removed;
 }
+
 
 /*
  * Read an info record from the user buffer and save it on the current
@@ -599,6 +608,7 @@ load_info(struct snd_sf_list *sflist, const void __user *data, long count)
 	return 0;
 }
 
+
 /* initialize voice_info record */
 static void
 init_voice_info(struct soundfont_voice_info *avp)
@@ -687,6 +697,7 @@ find_sample(struct snd_soundfont *sf, int sample_id)
 	return NULL;
 }
 
+
 /*
  * Load sample information, this can include data to be loaded onto
  * the soundcard.  It can also just be a pointer into soundcard ROM.
@@ -751,6 +762,7 @@ load_data(struct snd_sf_list *sflist, const void __user *data, long count)
 	return count;
 }
 
+
 /* log2_tbl[i] = log2(i+128) * 0x10000 */
 static int log_tbl[129] = {
 	0x70000, 0x702df, 0x705b9, 0x7088e, 0x70b5d, 0x70e26, 0x710eb, 0x713aa,
@@ -804,6 +816,7 @@ snd_sf_linear_to_log(unsigned int amount, int offset, int ratio)
 
 EXPORT_SYMBOL(snd_sf_linear_to_log);
 
+
 #define OFFSET_MSEC		653117		/* base = 1000 */
 #define OFFSET_ABSCENT		851781		/* base = 8176 */
 #define OFFSET_SAMPLERATE	1011119		/* base = 44100 */
@@ -834,6 +847,7 @@ calc_rate_offset(int hz)
 {
 	return snd_sf_linear_to_log(hz, OFFSET_SAMPLERATE, SAMPLERATE_RATIO);
 }
+
 
 /* calculate GUS envelope time */
 static int
@@ -925,6 +939,7 @@ int snd_sf_vol_table[128] = {
 	6,6,5,5,5,5,5,4,4,4,4,3,3,3,3,3,
 	2,2,2,2,2,1,1,1,1,1,0,0,0,0,0,0,
 };
+
 
 #define calc_gus_sustain(val)  (0x7f - snd_sf_vol_table[(val)/2])
 #define calc_gus_attenuation(val)	snd_sf_vol_table[(val)/2]
@@ -1119,6 +1134,7 @@ snd_soundfont_load_guspatch(struct snd_sf_list *sflist, const char __user *data,
 	return rc;
 }
 
+
 /*
  * Rebuild the preset table.  This is like a hash table in that it allows
  * quick access to the zone information.  For each preset there are zone
@@ -1149,6 +1165,7 @@ rebuild_presets(struct snd_sf_list *sflist)
 		}
 	}
 }
+
 
 /*
  * add the given zone to preset table
@@ -1203,6 +1220,7 @@ delete_preset(struct snd_sf_list *sflist, struct snd_sf_zone *zp)
 	}
 }
 
+
 /*
  * Search matching zones from preset table.
  * The note can be rewritten by preset mapping (alias).
@@ -1240,6 +1258,7 @@ snd_soundfont_search_zone(struct snd_sf_list *sflist, int *notep, int vel,
 	return nvoices;
 }
 
+
 /*
  * search the first matching zone
  */
@@ -1257,6 +1276,7 @@ search_first_zone(struct snd_sf_list *sflist, int bank, int preset, int key)
 	}
 	return NULL;
 }
+
 
 /*
  * search matching zones from sflist.  can be called recursively.
@@ -1299,6 +1319,7 @@ search_zones(struct snd_sf_list *sflist, int *notep, int vel,
 
 	return nvoices;
 }
+
 
 /* calculate the index of preset table:
  * drums are mapped from 128 to 255 according to its note key.
@@ -1367,6 +1388,7 @@ snd_sf_clear(struct snd_sf_list *sflist)
 	snd_sf_init(sflist);
 }
 
+
 /*
  * Create a new sflist structure
  */
@@ -1388,6 +1410,7 @@ snd_sf_new(struct snd_sf_callback *callback, struct snd_util_memhdr *hdr)
 	snd_sf_init(sflist);
 	return sflist;
 }
+
 
 /*
  * Free everything allocated off the sflist structure.

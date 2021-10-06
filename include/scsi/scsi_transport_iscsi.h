@@ -305,6 +305,7 @@ struct iscsi_iface {
 #define iscsi_iface_to_shost(_iface) \
 	dev_to_shost(_iface->dev.parent)
 
+
 struct iscsi_bus_flash_conn {
 	struct list_head conn_list;	/* item in connlist */
 	void *dd_data;			/* LLD private data */

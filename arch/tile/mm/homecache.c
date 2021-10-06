@@ -42,6 +42,7 @@
 
 #include "migrate.h"
 
+
 /*
  * The noallocl2 option suppresses all use of the L2 cache to cache
  * locally from a remote home.
@@ -53,6 +54,7 @@ static int __init set_noallocl2(char *str)
 	return 0;
 }
 early_param("noallocl2", set_noallocl2);
+
 
 /*
  * Update the irq_stat for cpus that we are going to interrupt
@@ -264,6 +266,7 @@ pte_t pte_set_home(pte_t pte, int home)
 	if (hv_pte_get_mode(pte) == HV_PTE_MODE_MMIO)
 		return pte;
 #endif
+
 
 	/*
 	 * Only immutable pages get NC mappings.  If we have a

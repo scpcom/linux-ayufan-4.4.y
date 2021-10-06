@@ -1237,6 +1237,7 @@ out:
 	mutex_unlock(&wl->mutex);
 }
 
+
 /* can't be const, mac80211 writes to this */
 static struct ieee80211_rate wl1251_rates[] = {
 	{ .bitrate = 10,

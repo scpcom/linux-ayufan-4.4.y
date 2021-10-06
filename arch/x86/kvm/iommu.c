@@ -91,6 +91,7 @@ int kvm_iommu_map_pages(struct kvm *kvm, struct kvm_memory_slot *slot)
 	if (!kvm->arch.iommu_noncoherent)
 		flags |= IOMMU_CACHE;
 
+
 	while (gfn < end_gfn) {
 		unsigned long page_size;
 

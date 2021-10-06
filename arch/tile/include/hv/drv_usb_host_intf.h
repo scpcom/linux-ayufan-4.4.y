@@ -21,6 +21,7 @@
 
 #include <arch/usb_host.h>
 
+
 /** Offset for the EHCI register MMIO region. */
 #define HV_USB_HOST_MMIO_OFFSET_EHCI ((uint64_t) USB_HOST_HCCAPBASE_REG)
 
@@ -33,5 +34,6 @@
 
 /** The number of service domains supported by the USB host shim. */
 #define HV_USB_HOST_NUM_SVC_DOM 1
+
 
 #endif /* _SYS_HV_DRV_USB_HOST_INTF_H */

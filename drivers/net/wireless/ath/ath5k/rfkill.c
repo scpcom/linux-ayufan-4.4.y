@@ -35,6 +35,7 @@
 
 #include "ath5k.h"
 
+
 static inline void ath5k_rfkill_disable(struct ath5k_hw *ah)
 {
 	ATH5K_DBG(ah, ATH5K_DEBUG_ANY, "rfkill disable (gpio:%d polarity:%d)\n",
@@ -42,6 +43,7 @@ static inline void ath5k_rfkill_disable(struct ath5k_hw *ah)
 	ath5k_hw_set_gpio_output(ah, ah->rf_kill.gpio);
 	ath5k_hw_set_gpio(ah, ah->rf_kill.gpio, !ah->rf_kill.polarity);
 }
+
 
 static inline void ath5k_rfkill_enable(struct ath5k_hw *ah)
 {
@@ -80,6 +82,7 @@ ath5k_tasklet_rfkill_toggle(unsigned long data)
 	wiphy_rfkill_set_hw_state(ah->hw->wiphy, blocked);
 }
 
+
 void
 ath5k_rfkill_hw_start(struct ath5k_hw *ah)
 {
@@ -97,6 +100,7 @@ ath5k_rfkill_hw_start(struct ath5k_hw *ah)
 		ath5k_rfkill_set_intr(ah, true);
 }
 
+
 void
 ath5k_rfkill_hw_stop(struct ath5k_hw *ah)
 {
@@ -109,3 +113,4 @@ ath5k_rfkill_hw_stop(struct ath5k_hw *ah)
 	/* enable RFKILL when stopping HW so Wifi LED is turned off */
 	ath5k_rfkill_enable(ah);
 }
+

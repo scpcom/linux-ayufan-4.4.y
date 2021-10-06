@@ -18,4 +18,5 @@ struct chp_id {
 	__u8 id;
 } __attribute__((packed));
 
+
 #endif /* _UAPI_ASM_S390_CHPID_H */

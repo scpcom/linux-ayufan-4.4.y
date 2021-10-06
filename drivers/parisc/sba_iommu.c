@@ -82,6 +82,7 @@
 #define DBG_RUN_SG(x...)
 #endif
 
+
 #ifdef DEBUG_SBA_RESOURCE
 #define DBG_RES(x...)	printk(x)
 #else
@@ -115,6 +116,7 @@ static int sba_reserve_agpgart = 1;
 module_param(sba_reserve_agpgart, int, 0444);
 MODULE_PARM_DESC(sba_reserve_agpgart, "Reserve half of IO pdir as AGPGART");
 #endif
+
 
 /************************************
 ** SBA register read and write support
@@ -181,6 +183,7 @@ static void sba_dump_tlb(void __iomem *hpa)
 #define sba_dump_tlb(x)
 #endif	/* DEBUG_SBA_INIT */
 
+
 #ifdef ASSERT_PDIR_SANITY
 
 /**
@@ -214,6 +217,7 @@ sba_dump_pdir_entry(struct ioc *ioc, char *msg, uint pide)
 	}
 	printk(KERN_DEBUG "%s", msg);
 }
+
 
 /**
  * sba_check_pdir - debugging only - consistency checker
@@ -257,6 +261,7 @@ sba_check_pdir(struct ioc *ioc, char *msg)
 	return 0;
 }
 
+
 /**
  * sba_dump_sg - debugging only - print Scatter-Gather list
  * @ioc: IO MMU structure which owns the pdir we are interested in.
@@ -279,6 +284,9 @@ sba_dump_sg( struct ioc *ioc, struct scatterlist *startsg, int nents)
 }
 
 #endif /* ASSERT_PDIR_SANITY */
+
+
+
 
 /**************************************************************
 *
@@ -414,6 +422,7 @@ sba_search_bitmap(struct ioc *ioc, struct device *dev,
 	return (pide);
 }
 
+
 /**
  * sba_alloc_range - find free bits and mark them in IO PDIR resource bitmap
  * @ioc: IO MMU structure which owns the pdir we are interested in.
@@ -467,6 +476,7 @@ sba_alloc_range(struct ioc *ioc, struct device *dev, size_t size)
 	return (pide);
 }
 
+
 /**
  * sba_free_range - unmark bits in IO PDIR resource bitmap
  * @ioc: IO MMU structure which owns the pdir we are interested in.
@@ -498,6 +508,7 @@ sba_free_range(struct ioc *ioc, dma_addr_t iova, size_t size)
 
 	*res_ptr &= ~m;
 }
+
 
 /**************************************************************
 *
@@ -577,6 +588,7 @@ sba_io_pdir_entry(u64 *pdir_ptr, space_t sid, unsigned long vba,
 	if (ioc_needs_fdc)
 		asm volatile("fdc %%r0(%0)" : : "r" (pdir_ptr));
 }
+
 
 /**
  * sba_mark_invalid - invalidate one or more IO PDIR entries
@@ -688,6 +700,7 @@ static int sba_dma_supported( struct device *dev, u64 mask)
 			(ioc->pdir_size / sizeof(u64) * IOVP_SIZE) )));
 }
 
+
 /**
  * sba_map_single - map one buffer and return IOVA for DMA
  * @dev: instance of PCI owned by the driver that's asking.
@@ -766,6 +779,7 @@ sba_map_single(struct device *dev, void *addr, size_t size,
 	return SBA_IOVA(ioc, iovp, offset, DEFAULT_DMA_HINT_REG);
 }
 
+
 /**
  * sba_unmap_single - unmap one IOVA and free resources
  * @dev: instance of PCI owned by the driver that's asking.
@@ -842,6 +856,7 @@ sba_unmap_single(struct device *dev, dma_addr_t iova, size_t size,
 	*/
 }
 
+
 /**
  * sba_alloc_consistent - allocate/map shared mem for DMA
  * @hwdev: instance of PCI owned by the driver that's asking.
@@ -871,6 +886,7 @@ static void *sba_alloc_consistent(struct device *hwdev, size_t size,
 	return ret;
 }
 
+
 /**
  * sba_free_consistent - free/unmap shared mem for DMA
  * @hwdev: instance of PCI owned by the driver that's asking.
@@ -888,6 +904,7 @@ sba_free_consistent(struct device *hwdev, size_t size, void *vaddr,
 	free_pages((unsigned long) vaddr, get_order(size));
 }
 
+
 /*
 ** Since 0 is a valid pdir_base index value, can't use that
 ** to determine if a value is valid or not. Use a flag to indicate
@@ -903,6 +920,7 @@ sba_free_consistent(struct device *hwdev, size_t size, void *vaddr,
 #ifdef DEBUG_LARGE_SG_ENTRIES
 int dump_run_sg = 0;
 #endif
+
 
 /**
  * sba_map_sg - map Scatter/Gather list
@@ -986,6 +1004,7 @@ sba_map_sg(struct device *dev, struct scatterlist *sglist, int nents,
 	return filled;
 }
 
+
 /**
  * sba_unmap_sg - unmap Scatter/Gather list
  * @dev: instance of PCI owned by the driver that's asking.
@@ -1054,6 +1073,7 @@ static struct hppa_dma_ops sba_ops = {
 	.dma_sync_sg_for_device =	NULL,
 };
 
+
 /**************************************************************************
 **
 **   SBA PAT PDC support
@@ -1081,6 +1101,7 @@ PAT_MOD(mod)->mod_info.ioc         = PAT_GET_IOC(temp);
 	FIXME : ???
 #endif
 }
+
 
 /**************************************************************
 *
@@ -1471,6 +1492,8 @@ sba_ioc_init(struct parisc_device *sba, struct ioc *ioc, int ioc_num)
 	DBG_INIT("%s() DONE\n", __func__);
 }
 
+
+
 /**************************************************************************
 **
 **   SBA initialization code (HW and SW)
@@ -1516,6 +1539,7 @@ static void sba_hw_init(struct sba_device *sba_dev)
 		}
 
 	}
+
 
 #if 0
 printk("sba_hw_init(): mem_boot 0x%x 0x%x 0x%x 0x%x\n", PAGE0->mem_boot.hpa,
@@ -1980,6 +2004,7 @@ void __init sba_init(void)
 	register_parisc_driver(&sba_driver);
 }
 
+
 /**
  * sba_get_iommu - Assign the iommu pointer for the pci bus controller.
  * @dev: The parisc device.
@@ -1998,6 +2023,7 @@ void * sba_get_iommu(struct parisc_device *pci_hba)
 
 	return &(sba->ioc[iocnum]);
 }
+
 
 /**
  * sba_directed_lmmio - return first directed LMMIO range routed to rope
@@ -2039,6 +2065,7 @@ void sba_directed_lmmio(struct parisc_device *pci_hba, struct resource *r)
 		r->flags = IORESOURCE_MEM;
 	}
 }
+
 
 /**
  * sba_distributed_lmmio - return portion of distributed LMMIO range

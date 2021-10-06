@@ -180,6 +180,7 @@ s32 igb_acquire_nvm(struct e1000_hw *hw)
 	s32 timeout = E1000_NVM_GRANT_ATTEMPTS;
 	s32 ret_val = 0;
 
+
 	wr32(E1000_EECD, eecd | E1000_EECD_REQ);
 	eecd = rd32(E1000_EECD);
 
@@ -273,6 +274,7 @@ static s32 igb_ready_nvm_eeprom(struct e1000_hw *hw)
 	s32 ret_val = 0;
 	u16 timeout = 0;
 	u8 spi_stat_reg;
+
 
 	if (nvm->type == e1000_nvm_eeprom_spi) {
 		/* Clear SK and CS */

@@ -51,6 +51,7 @@ struct i2c_device_addr {
 	void *user_data;		/* User data pointer */
 };
 
+
 /**
 * \def IS_I2C_10BIT( addr )
 * \brief Determine if I2C address 'addr' is a 10 bits address or not.

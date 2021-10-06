@@ -288,6 +288,7 @@ static int __init ath79_misc_intc_of_init(
 	__raw_writel(0, base + AR71XX_RESET_REG_MISC_INT_ENABLE);
 	__raw_writel(0, base + AR71XX_RESET_REG_MISC_INT_STATUS);
 
+
 	irq_set_chained_handler(irq, ath79_misc_irq_handler);
 
 	return 0;

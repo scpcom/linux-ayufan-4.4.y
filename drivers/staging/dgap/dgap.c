@@ -315,6 +315,7 @@ static char *dgap_getword(char **in)
 	return ret_ptr;
 }
 
+
 /*
  * Get a token from the input file; return 0 if end of file is reached
  */
@@ -2732,6 +2733,7 @@ static int dgap_param(struct channel_t *ch, struct board_t *bd, u32 un_type)
 		/*
 		 * Set baud rate, character size, and parity.
 		 */
+
 
 		int iindex = 0;
 		int jindex = 0;
@@ -5890,6 +5892,7 @@ static struct attribute *dgap_sysfs_tty_entries[] = {
 	NULL
 };
 
+
 /* this function creates the sys files that will export each signal status
  * to sysfs each value will be put in a separate filename
  */
@@ -6278,11 +6281,13 @@ static void dgap_get_vpd(struct board_t *brd)
 	pci_write_config_dword(brd->pdev, PCI_ROM_ADDRESS, magic);
 }
 
+
 static ssize_t dgap_driver_version_show(struct device_driver *ddp, char *buf)
 {
 	return snprintf(buf, PAGE_SIZE, "%s\n", DG_PART);
 }
 static DRIVER_ATTR(version, S_IRUSR, dgap_driver_version_show, NULL);
+
 
 static ssize_t dgap_driver_boards_show(struct device_driver *ddp, char *buf)
 {
@@ -6290,11 +6295,13 @@ static ssize_t dgap_driver_boards_show(struct device_driver *ddp, char *buf)
 }
 static DRIVER_ATTR(boards, S_IRUSR, dgap_driver_boards_show, NULL);
 
+
 static ssize_t dgap_driver_maxboards_show(struct device_driver *ddp, char *buf)
 {
 	return snprintf(buf, PAGE_SIZE, "%d\n", MAXBOARDS);
 }
 static DRIVER_ATTR(maxboards, S_IRUSR, dgap_driver_maxboards_show, NULL);
+
 
 static ssize_t dgap_driver_pollcounter_show(struct device_driver *ddp,
 					    char *buf)
@@ -6317,6 +6324,7 @@ static ssize_t dgap_driver_pollrate_store(struct device_driver *ddp,
 }
 static DRIVER_ATTR(pollrate, (S_IRUSR | S_IWUSR), dgap_driver_pollrate_show,
 		   dgap_driver_pollrate_store);
+
 
 static int dgap_create_driver_sysfiles(struct pci_driver *dgap_driver)
 {

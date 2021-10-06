@@ -126,6 +126,7 @@ error_not_ready:
 }
 EXPORT_SYMBOL_GPL(wimax_report_rfkill_hw);
 
+
 /**
  * wimax_report_rfkill_sw - Reports changes in the software RF switch
  *
@@ -176,6 +177,7 @@ error_not_ready:
 		wimax_dev, state, result);
 }
 EXPORT_SYMBOL_GPL(wimax_report_rfkill_sw);
+
 
 /*
  * Callback for the RF Kill toggle operation
@@ -229,6 +231,7 @@ out_no_change:
 		wimax_dev, state, result);
 	return result;
 }
+
 
 /*
  * Translate from rfkill state to wimax state
@@ -335,6 +338,7 @@ error_not_ready:
 }
 EXPORT_SYMBOL(wimax_rfkill);
 
+
 /*
  * Register a new WiMAX device's RF Kill support
  *
@@ -377,6 +381,7 @@ error_rfkill_allocate:
 	return result;
 }
 
+
 /*
  * Deregister a WiMAX device's RF Kill support
  *
@@ -393,6 +398,7 @@ void wimax_rfkill_rm(struct wimax_dev *wimax_dev)
 	rfkill_destroy(wimax_dev->rfkill);
 	d_fnend(3, dev, "(wimax_dev %p)\n", wimax_dev);
 }
+
 
 /*
  * Exporting to user space over generic netlink

@@ -79,6 +79,7 @@ static void ip_cmsg_recv_opts(struct msghdr *msg, struct sk_buff *skb)
 		 ip_hdr(skb) + 1);
 }
 
+
 static void ip_cmsg_recv_retopts(struct msghdr *msg, struct sk_buff *skb)
 {
 	unsigned char optbuf[sizeof(struct ip_options) + 40];
@@ -290,6 +291,7 @@ int ip_cmsg_send(struct net *net, struct msghdr *msg, struct ipcm_cookie *ipc,
 	return 0;
 }
 
+
 /* Special input handler for packets caught by router alert option.
    They are selected only by protocol field, and then processed likely
    local ones; but only if someone wants them! Otherwise, router
@@ -302,6 +304,7 @@ int ip_cmsg_send(struct net *net, struct msghdr *msg, struct ipcm_cookie *ipc,
  */
 struct ip_ra_chain __rcu *ip_ra_chain;
 static DEFINE_SPINLOCK(ip_ra_lock);
+
 
 static void ip_ra_destroy_rcu(struct rcu_head *head)
 {
@@ -538,6 +541,7 @@ out_free_skb:
 out:
 	return err;
 }
+
 
 /*
  *	Socket option code for IP. This is the end of the line after any
@@ -841,6 +845,7 @@ static int do_ip_setsockopt(struct sock *sk, int level,
 				mreq.imr_ifindex = dev->ifindex;
 		} else
 			dev = dev_get_by_index(sock_net(sk), mreq.imr_ifindex);
+
 
 		err = -EADDRNOTAVAIL;
 		if (!dev)

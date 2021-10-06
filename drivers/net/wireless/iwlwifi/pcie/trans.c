@@ -1161,6 +1161,7 @@ static void _iwl_trans_pcie_stop_device(struct iwl_trans *trans, bool low_power)
 	iwl_disable_interrupts(trans);
 	spin_unlock(&trans_pcie->irq_lock);
 
+
 	/* clear all status bits */
 	clear_bit(STATUS_SYNC_HCMD_ACTIVE, &trans->status);
 	clear_bit(STATUS_INT_ENABLED, &trans->status);

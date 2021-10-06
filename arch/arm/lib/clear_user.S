@@ -55,3 +55,4 @@ ENDPROC(__clear_user_std)
 		.align	0
 9001:		ldmfd	sp!, {r0, pc}
 		.popsection
+

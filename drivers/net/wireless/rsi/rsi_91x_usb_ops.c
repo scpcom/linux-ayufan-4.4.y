@@ -119,6 +119,7 @@ out:
 	complete_and_exit(&dev->rx_thread.completion, 0);
 }
 
+
 /**
  * rsi_load_ta_instructions() - This function includes the actual funtionality
  *				of loading the TA firmware.This function also

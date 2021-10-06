@@ -83,6 +83,7 @@ find_syscall_meta(unsigned long syscall)
 	struct syscall_metadata **stop;
 	char str[KSYM_SYMBOL_LEN];
 
+
 	start = __start_syscalls_metadata;
 	stop = __stop_syscalls_metadata;
 	kallsyms_lookup(syscall, NULL, NULL, NULL, str);

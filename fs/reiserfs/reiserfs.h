@@ -610,6 +610,7 @@ struct reiserfs_sb_info {
 	/* amount of blocks reserved for further allocations */
 	int reserved_blocks;
 
+
 	/* this lock on now only used to protect reserved_blocks variable */
 	spinlock_t bitmap_lock;
 	struct dentry *priv_root;	/* root of /.reiserfs_priv */
@@ -2489,6 +2490,7 @@ struct tree_balance {
 	 * if -1 then nothing will be partially shifted
 	 */
 	int rbytes;
+
 
 	/*
 	 * index into the array of item headers in

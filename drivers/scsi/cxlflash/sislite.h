@@ -466,6 +466,7 @@ struct sisl_rht_entry_f1 {
 #define TMF_LUN_RESET  0x1U
 #define TMF_CLEAR_ACA  0x2U
 
+
 #define SISLITE_MAX_WS_BLOCKS 512
 
 #endif /* _SISLITE_H */

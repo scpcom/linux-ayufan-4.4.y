@@ -221,6 +221,7 @@ static irqreturn_t tmiofb_irq(int irq, void *__info)
 	struct tmiofb_par *par = info->par;
 	unsigned int bbisc = tmio_ioread16(par->lcr + LCR_BBISC);
 
+
 	tmio_iowrite16(bbisc, par->lcr + LCR_BBISC);
 
 #ifdef CONFIG_FB_TMIO_ACCELL
@@ -240,7 +241,9 @@ static irqreturn_t tmiofb_irq(int irq, void *__info)
 	return IRQ_HANDLED;
 }
 
+
 /*--------------------------------------------------------------------------*/
+
 
 /*
  * Turns off the LCD controller and LCD host controller.
@@ -504,6 +507,7 @@ static int tmiofb_vblank(struct fb_info *fbi, struct fb_vblank *vblank)
 
 	return 0;
 }
+
 
 static int tmiofb_ioctl(struct fb_info *fbi,
 		unsigned int cmd, unsigned long arg)
@@ -940,6 +944,7 @@ static int tmiofb_suspend(struct platform_device *dev, pm_message_t state)
 
 	if (info->fbops->fb_sync)
 		info->fbops->fb_sync(info);
+
 
 #ifdef CONFIG_FB_TMIO_ACCELL
 	/*

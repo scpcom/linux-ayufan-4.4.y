@@ -89,6 +89,7 @@ scsi_dh_find_driver(struct scsi_device *sdev)
 	return NULL;
 }
 
+
 static struct scsi_device_handler *__scsi_dh_lookup(const char *name)
 {
 	struct scsi_device_handler *tmp, *found = NULL;

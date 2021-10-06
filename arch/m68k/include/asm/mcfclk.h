@@ -2,6 +2,7 @@
  * mcfclk.h -- coldfire specific clock structure
  */
 
+
 #ifndef mcfclk_h
 #define mcfclk_h
 

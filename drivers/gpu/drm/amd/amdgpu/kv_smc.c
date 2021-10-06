@@ -216,3 +216,4 @@ int amdgpu_kv_copy_bytes_to_smc(struct amdgpu_device *adev,
 	}
 	return 0;
 }
+

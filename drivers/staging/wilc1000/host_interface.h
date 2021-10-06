@@ -20,6 +20,7 @@
 #define GO_MODE		0x03
 #define CLIENT_MODE	0x04
 
+
 #define MAX_NUM_STA				9
 #define ACTIVE_SCAN_TIME			10
 #define PASSIVE_SCAN_TIME			1200
@@ -172,6 +173,7 @@ enum KEY_TYPE {
 	PMKSA,
 };
 
+
 /*Scan callBack function definition*/
 typedef void (*wilc_scan_result)(enum scan_event, tstrNetworkInfo *,
 				  void *, void *);
@@ -275,11 +277,13 @@ struct reg_frame {
 	u8 u8Regid;
 };
 
+
 #define ACTION			0xD0
 #define PROBE_REQ		0x40
 #define PROBE_RESP		0x50
 #define ACTION_FRM_IDX		0
 #define PROBE_REQ_IDX		1
+
 
 enum p2p_listen_state {
 	P2P_IDLE,
@@ -471,6 +475,7 @@ s32 host_int_get_inactive_time(struct host_if_drv *hWFIDrv, const u8 *mac, u32 *
 s32 host_int_add_rx_gtk(struct host_if_drv *hWFIDrv, const u8 *pu8RxGtk, u8 u8GtkKeylen,
 				u8 u8KeyIdx, u32 u32KeyRSClen, const u8 *KeyRSC,
 				const u8 *pu8RxMic, const u8 *pu8TxMic, u8 mode, u8 u8Ciphermode);
+
 
 /**
  *  @brief              adds Tx GTk Key
@@ -677,6 +682,7 @@ s32 host_int_set_join_req(struct host_if_drv *hWFIDrv, u8 *pu8bssid,
  */
 
 s32 host_int_flush_join_req(struct host_if_drv *hWFIDrv);
+
 
 /**
  *  @brief              disconnects from the currently associated network
@@ -885,6 +891,7 @@ s32 host_int_init(struct net_device *dev, struct host_if_drv **phWFIDrv);
  */
 s32 host_int_deinit(struct host_if_drv *hWFIDrv);
 
+
 /*!
  *  @fn		s32 host_int_add_beacon(WILC_WFIDrvHandle hWFIDrv,u8 u8Index)
  *  @brief		Sends a beacon to the firmware to be transmitted over the air
@@ -911,6 +918,7 @@ s32 host_int_add_beacon(struct host_if_drv *hWFIDrv, u32 u32Interval,
 				u32 u32DTIMPeriod,
 				u32 u32HeadLen, u8 *pu8Head,
 				u32 u32TailLen, u8 *pu8tail);
+
 
 /*!
  *  @fn		s32 host_int_del_beacon(WILC_WFIDrvHandle hWFIDrv)
@@ -1029,6 +1037,7 @@ s32 host_int_setup_multicast_filter(struct host_if_drv *hWFIDrv, bool bIsEnabled
  */
 s32 host_int_setup_ipaddress(struct host_if_drv *hWFIDrv, u8 *pu8IPAddr, u8 idx);
 
+
 /**
  *  @brief           host_int_delBASession
  *  @details       Delete single Rx BA session
@@ -1050,6 +1059,7 @@ s32 host_int_delBASession(struct host_if_drv *hWFIDrv, char *pBSSID, char TID);
  *  @version	1.0
  */
 s32 host_int_del_All_Rx_BASession(struct host_if_drv *hWFIDrv, char *pBSSID, char TID);
+
 
 /**
  *  @brief           host_int_get_ipaddress

@@ -6,6 +6,7 @@
 
 #include "cciss_cmd.h"
 
+
 #define NWD_SHIFT	4
 #define MAX_PART	(1 << NWD_SHIFT)
 
@@ -185,10 +186,12 @@ struct ctlr_info
 #define SA5_OUTDB_CLEAR_PERF_BIT        0x01
 #define SA5_OUTDB_STATUS        0x9C
 
+
 #define  CISS_ERROR_BIT		0x02
 
 #define CCISS_INTR_ON 	1 
 #define CCISS_INTR_OFF	0
+
 
 /* CCISS_BOARD_READY_WAIT_SECS is how long to wait for a board
  * to become ready, in seconds, before giving up on it.

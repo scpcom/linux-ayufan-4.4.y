@@ -177,6 +177,7 @@ typedef struct {
     gdth_evt_data   event_data;
 } __attribute__((packed)) gdth_evt_str;
 
+
 #ifdef GDTH_IOCTL_PROC
 /* IOCTL structure (write) */
 typedef struct {

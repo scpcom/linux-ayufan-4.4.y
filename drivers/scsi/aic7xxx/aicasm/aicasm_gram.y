@@ -2001,3 +2001,4 @@ is_location_address(symbol_t *sym)
 		return (TRUE);
 	return (FALSE);
 }
+

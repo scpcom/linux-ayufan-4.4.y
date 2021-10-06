@@ -7,6 +7,7 @@
 #include "cmd.h"
 #include "mesh.h"
 
+
 static void lbs_ethtool_get_drvinfo(struct net_device *dev,
 					 struct ethtool_drvinfo *info)
 {
@@ -116,3 +117,4 @@ const struct ethtool_ops lbs_ethtool_ops = {
 	.get_wol = lbs_ethtool_get_wol,
 	.set_wol = lbs_ethtool_set_wol,
 };
+

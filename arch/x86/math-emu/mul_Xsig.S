@@ -20,6 +20,7 @@
  +---------------------------------------------------------------------------*/
 	.file	"mul_Xsig.S"
 
+
 #include "fpu_emu.h"
 
 .text
@@ -61,6 +62,7 @@ ENTRY(mul32_Xsig)
 	popl %esi
 	leave
 	ret
+
 
 ENTRY(mul64_Xsig)
 	pushl %ebp
@@ -112,6 +114,8 @@ ENTRY(mul64_Xsig)
 	popl %esi
 	leave
 	ret
+
+
 
 ENTRY(mul_Xsig_Xsig)
 	pushl %ebp
@@ -169,3 +173,4 @@ ENTRY(mul_Xsig_Xsig)
 	popl %esi
 	leave
 	ret
+

@@ -222,6 +222,7 @@ static void __init nmdk_timer_init(void __iomem *base, int irq,
 	/* Cycles for periodic mode */
 	nmdk_cycle = DIV_ROUND_CLOSEST(rate, HZ);
 
+
 	/* Timer 0 is the free running clocksource */
 	nmdk_clksrc_reset();
 

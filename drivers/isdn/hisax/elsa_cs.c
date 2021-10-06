@@ -4,6 +4,7 @@
 
   This driver is for the Elsa PCM ISDN Cards, i.e. the MicroLink
 
+
   The contents of this file are subject to the Mozilla Public
   License Version 1.1 (the "License"); you may not use this file
   except in compliance with the License. You may obtain a copy of
@@ -52,6 +53,7 @@
 MODULE_DESCRIPTION("ISDN4Linux: PCMCIA client driver for Elsa PCM cards");
 MODULE_AUTHOR("Klaus Lichtenwalder");
 MODULE_LICENSE("Dual MPL/GPL");
+
 
 /*====================================================================*/
 

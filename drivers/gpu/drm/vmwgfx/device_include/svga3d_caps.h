@@ -51,6 +51,7 @@
 #define SVGA_FIFO_3D_CAPS_SIZE   (SVGA_FIFO_3D_CAPS_LAST - \
                                   SVGA_FIFO_3D_CAPS + 1)
 
+
 /*
  * SVGA3dCapsRecordType
  *
@@ -66,6 +67,7 @@ typedef enum {
    SVGA3DCAPS_RECORD_DEVCAPS        = 0x100,
    SVGA3DCAPS_RECORD_DEVCAPS_MAX    = 0x1ff,
 } SVGA3dCapsRecordType;
+
 
 /*
  * SVGA3dCapsRecordHeader
@@ -85,6 +87,7 @@ struct SVGA3dCapsRecordHeader {
 #include "vmware_pack_end.h"
 SVGA3dCapsRecordHeader;
 
+
 /*
  * SVGA3dCapsRecord
  *
@@ -100,6 +103,7 @@ struct SVGA3dCapsRecord {
 }
 #include "vmware_pack_end.h"
 SVGA3dCapsRecord;
+
 
 typedef uint32 SVGA3dCapPair[2];
 

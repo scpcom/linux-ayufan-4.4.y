@@ -677,6 +677,7 @@ static int svm_hardware_enable(void)
 		__this_cpu_write(current_tsc_ratio, TSC_RATIO_DEFAULT);
 	}
 
+
 	/*
 	 * Get OSVW bits.
 	 *

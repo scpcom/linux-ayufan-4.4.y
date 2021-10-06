@@ -40,6 +40,7 @@
 	{ XFS_BLI_INODE_BUF,	"INODE_BUF" }, \
 	{ XFS_BLI_ORDERED,	"ORDERED" }
 
+
 struct xfs_buf;
 struct xfs_mount;
 struct xfs_buf_log_item;

@@ -155,6 +155,7 @@ void __iomem *pci_ioremap_wc_bar(struct pci_dev *pdev, int bar)
 EXPORT_SYMBOL_GPL(pci_ioremap_wc_bar);
 #endif
 
+
 static int __pci_find_next_cap_ttl(struct pci_bus *bus, unsigned int devfn,
 				   u8 pos, int cap, int *ttl)
 {
@@ -1004,6 +1005,7 @@ static void pci_restore_pcie_state(struct pci_dev *dev)
 	pcie_capability_write_word(dev, PCI_EXP_SLTCTL2, cap[i++]);
 }
 
+
 static int pci_save_pcix_state(struct pci_dev *dev)
 {
 	int pos;
@@ -1039,6 +1041,7 @@ static void pci_restore_pcix_state(struct pci_dev *dev)
 
 	pci_write_config_word(dev, pos + PCI_X_CMD, cap[i++]);
 }
+
 
 /**
  * pci_save_state - save the PCI configuration space of a device before suspending
@@ -1693,6 +1696,7 @@ void pci_pme_wakeup_bus(struct pci_bus *bus)
 	if (bus)
 		pci_walk_bus(bus, pci_pme_wakeup, (void *)true);
 }
+
 
 /**
  * pci_pme_capable - check the capability of PCI device to generate PME#
@@ -2938,6 +2942,7 @@ err_out:
 
 	return -EBUSY;
 }
+
 
 /**
  * pci_request_selected_regions - Reserve selected PCI I/O and memory resources

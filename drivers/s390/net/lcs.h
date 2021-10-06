@@ -293,6 +293,7 @@ struct lcs_channel {
 	int buf_idx;
 };
 
+
 /**
  * definition of the lcs card
  */
@@ -335,3 +336,4 @@ struct lcs_card {
 	u8 hint_port_no;
 	s16 port_protocol_no;
 }  __attribute__ ((aligned(8)));
+

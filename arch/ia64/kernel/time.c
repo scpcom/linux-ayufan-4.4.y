@@ -216,6 +216,7 @@ static int __init nojitter_setup(char *str)
 
 __setup("nojitter", nojitter_setup);
 
+
 void ia64_init_itm(void)
 {
 	unsigned long platform_base_freq, itc_freq;
@@ -347,6 +348,7 @@ static cycle_t itc_get_cycles(struct clocksource *cs)
 	return now;
 }
 
+
 static struct irqaction timer_irqaction = {
 	.handler =	timer_interrupt,
 	.flags =	IRQF_IRQPOLL,
@@ -422,3 +424,4 @@ void update_vsyscall_old(struct timespec *wall, struct timespec *wtm,
 
 	write_seqcount_end(&fsyscall_gtod_data.seq);
 }
+

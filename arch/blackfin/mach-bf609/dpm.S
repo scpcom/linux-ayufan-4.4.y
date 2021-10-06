@@ -154,3 +154,4 @@ ENTRY(_bf609_hibernate)
 	RTS;
 
 ENDPROC(_bf609_hibernate)
+

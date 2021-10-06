@@ -23,6 +23,7 @@
 
 #include "rtc-core.h"
 
+
 static DEFINE_IDA(rtc_ida);
 struct class *rtc_class;
 
@@ -46,6 +47,7 @@ int rtc_hctosys_ret = -ENODEV;
 
 static struct timespec64 old_rtc, old_system, old_delta;
 
+
 static int rtc_suspend(struct device *dev)
 {
 	struct rtc_device	*rtc = to_rtc_device(dev);
@@ -68,6 +70,7 @@ static int rtc_suspend(struct device *dev)
 
 	getnstimeofday64(&old_system);
 	old_rtc.tv_sec = rtc_tm_to_time64(&tm);
+
 
 	/*
 	 * To avoid drift caused by repeated suspend/resumes,
@@ -146,6 +149,7 @@ static SIMPLE_DEV_PM_OPS(rtc_class_dev_pm_ops, rtc_suspend, rtc_resume);
 #else
 #define RTC_CLASS_DEV_PM_OPS	NULL
 #endif
+
 
 /**
  * rtc_device_register - register w/ RTC class
@@ -253,6 +257,7 @@ exit:
 	return ERR_PTR(err);
 }
 EXPORT_SYMBOL_GPL(rtc_device_register);
+
 
 /**
  * rtc_device_unregister - removes the previously registered RTC class device

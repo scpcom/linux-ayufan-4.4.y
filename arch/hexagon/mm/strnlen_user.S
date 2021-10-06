@@ -73,6 +73,8 @@ fail_1:	{
 		if (!P0) jump alignment_loop;
 	}
 
+
+
 dw_loop:
 fail_2:	{
 		dbuf = memd(start);
@@ -99,6 +101,7 @@ fail_2:	{
 		start = add(start,#8);
 		jump dw_loop;
 	}	/*  might be nice to combine these jumps...   */
+
 
 end_check:
 	{
@@ -128,6 +131,7 @@ fix_1:
 	}
 
 	.size fname,.-fname
+
 
 .section __ex_table,"a"
 .long fail_1,fix_1

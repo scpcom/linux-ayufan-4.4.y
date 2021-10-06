@@ -94,6 +94,7 @@
 #define debug(format, arg...)
 #endif
 
+
 static struct list_head hash_list;
 
 /* ahash per-session context */

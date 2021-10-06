@@ -15,6 +15,7 @@
 #ifndef _UAPI_LINUX_APM_H
 #define _UAPI_LINUX_APM_H
 
+
 #include <linux/types.h>
 
 typedef unsigned short	apm_event_t;
@@ -31,6 +32,7 @@ struct apm_bios_info {
 	__u16	cseg_16_len;
 	__u16	dseg_len;
 };
+
 
 /*
  * Power states
@@ -105,6 +107,7 @@ struct apm_bios_info {
 #define APM_DEVICE_OLD_ALL	0xffff
 #define APM_DEVICE_CLASS	0x00ff
 #define APM_DEVICE_MASK		0xff00
+
 
 /*
  * Battery status

@@ -601,6 +601,7 @@ static int rmi_suspend(struct hid_device *hdev, pm_message_t message)
 	else
 		memcpy(data->f11_ctrl_regs, buf, RMI_F11_CTRL_REG_COUNT);
 
+
 	if (!device_may_wakeup(hdev->dev.parent))
 		return rmi_set_sleep_mode(hdev, RMI_SLEEP_DEEP_SLEEP);
 
@@ -1029,6 +1030,7 @@ static int rmi_populate_f11(struct hid_device *hdev)
 
 		has_data40 = !!(buf[0] & BIT(5));
 	}
+
 
 	if (has_data40)
 		data->f11.report_size += data->max_fingers * 2;

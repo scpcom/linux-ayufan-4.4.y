@@ -445,6 +445,7 @@ static inline int __vringh_complete(struct vringh *vrh,
 	return 0;
 }
 
+
 static inline int __vringh_need_notify(struct vringh *vrh,
 				       int (*getu16)(const struct vringh *vrh,
 						     u16 *val,

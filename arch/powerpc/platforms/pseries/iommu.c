@@ -179,6 +179,7 @@ static int tce_build_pSeries(struct iommu_table *tbl, long index,
 	return 0;
 }
 
+
 static void tce_free_pSeries(struct iommu_table *tbl, long index, long npages)
 {
 	__be64 *tcep, *tces;
@@ -347,6 +348,7 @@ static void tce_free_pSeriesLP(struct iommu_table *tbl, long tcenum, long npages
 		tcenum++;
 	}
 }
+
 
 static void tce_freemulti_pSeriesLP(struct iommu_table *tbl, long tcenum, long npages)
 {
@@ -746,6 +748,7 @@ static void pci_dma_bus_setup_pSeriesLP(struct pci_bus *bus)
 		pr_debug("  created table: %p\n", ppci->table_group);
 	}
 }
+
 
 static void pci_dma_dev_setup_pSeries(struct pci_dev *dev)
 {
@@ -1386,6 +1389,7 @@ void iommu_init_early_pSeries(void)
 		pseries_pci_controller_ops.dma_bus_setup = pci_dma_bus_setup_pSeries;
 		pseries_pci_controller_ops.dma_dev_setup = pci_dma_dev_setup_pSeries;
 	}
+
 
 	of_reconfig_notifier_register(&iommu_reconfig_nb);
 	register_memory_notifier(&iommu_mem_nb);

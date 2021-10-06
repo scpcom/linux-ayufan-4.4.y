@@ -40,4 +40,5 @@ struct adfs_discrecord {
 #define ADFS_DR_SIZE		 60
 #define ADFS_DR_SIZE_BITS	(ADFS_DR_SIZE << 3)
 
+
 #endif /* _UAPI_ADFS_FS_H */

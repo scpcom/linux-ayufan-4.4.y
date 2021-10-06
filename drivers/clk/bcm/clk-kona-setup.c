@@ -387,6 +387,7 @@ static bool kona_dividers_valid(struct kona_clk *bcm_clk)
 	return div->u.s.frac_width + pre_div->u.s.frac_width <= limit;
 }
 
+
 /* A trigger just needs to represent a valid bit position */
 static bool trig_valid(struct bcm_clk_trig *trig, const char *field_name,
 			const char *clock_name)

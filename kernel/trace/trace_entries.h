@@ -300,6 +300,7 @@ FTRACE_ENTRY(mmiotrace_map, trace_mmiotrace_map,
 	FILTER_OTHER
 );
 
+
 #define TRACE_FUNC_SIZE 30
 #define TRACE_FILE_SIZE 20
 
@@ -320,3 +321,4 @@ FTRACE_ENTRY(branch, trace_branch,
 
 	FILTER_OTHER
 );
+

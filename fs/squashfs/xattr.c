@@ -95,6 +95,7 @@ ssize_t squashfs_listxattr(struct dentry *d, char *buffer,
 				goto failed;
 		}
 
+
 		/* skip remaining xattr entry */
 		err = squashfs_read_metadata(sb, &val, &start, &offset,
 						sizeof(val));
@@ -111,6 +112,7 @@ ssize_t squashfs_listxattr(struct dentry *d, char *buffer,
 failed:
 	return err;
 }
+
 
 static int squashfs_xattr_get(struct inode *inode, int name_index,
 	const char *name, void *buffer, size_t buffer_size)
@@ -209,6 +211,7 @@ failed:
 	return err;
 }
 
+
 static size_t squashfs_xattr_handler_list(const struct xattr_handler *handler,
 					  struct dentry *d, char *list,
 					  size_t list_size, const char *name,
@@ -298,3 +301,4 @@ const struct xattr_handler *squashfs_xattr_handlers[] = {
 	&squashfs_xattr_security_handler,
 	NULL
 };
+

@@ -17,6 +17,7 @@
 #include <linux/nmi.h>
 #include "kdb_private.h"
 
+
 static void kdb_show_stack(struct task_struct *p, void *addr)
 {
 	int old_lvl = console_loglevel;

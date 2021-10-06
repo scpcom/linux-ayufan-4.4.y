@@ -74,4 +74,5 @@
 
 #define NR_IRQS				(NR_EP93XX_IRQS + EP93XX_BOARD_IRQS)
 
+
 #endif

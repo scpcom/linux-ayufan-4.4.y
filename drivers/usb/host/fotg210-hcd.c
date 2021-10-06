@@ -1092,6 +1092,7 @@ static void fotg210_enable_event(struct fotg210_hcd *fotg210, unsigned event,
 	}
 }
 
+
 /* Poll the STS_ASS status bit; see when it agrees with CMD_ASE */
 static void fotg210_poll_ASS(struct fotg210_hcd *fotg210)
 {
@@ -1138,6 +1139,7 @@ static void fotg210_disable_ASE(struct fotg210_hcd *fotg210)
 {
 	fotg210_clear_command_bit(fotg210, CMD_ASE);
 }
+
 
 /* Poll the STS_PSS status bit; see when it agrees with CMD_PSE */
 static void fotg210_poll_PSS(struct fotg210_hcd *fotg210)
@@ -1186,6 +1188,7 @@ static void fotg210_disable_PSE(struct fotg210_hcd *fotg210)
 	fotg210_clear_command_bit(fotg210, CMD_PSE);
 }
 
+
 /* Poll the STS_HALT status bit; see when a dead controller stops */
 static void fotg210_handle_controller_death(struct fotg210_hcd *fotg210)
 {
@@ -1209,6 +1212,7 @@ static void fotg210_handle_controller_death(struct fotg210_hcd *fotg210)
 
 	/* Not in process context, so don't try to reset the controller */
 }
+
 
 /* Handle unlinked interrupt QHs once they are gone from the hardware */
 static void fotg210_handle_intr_unlinks(struct fotg210_hcd *fotg210)
@@ -1242,6 +1246,7 @@ static void fotg210_handle_intr_unlinks(struct fotg210_hcd *fotg210)
 	fotg210->intr_unlinking = false;
 }
 
+
 /* Start another free-iTDs/siTDs cycle */
 static void start_free_itds(struct fotg210_hcd *fotg210)
 {
@@ -1272,6 +1277,7 @@ static void end_free_itds(struct fotg210_hcd *fotg210)
 	if (!list_empty(&fotg210->cached_itd_list))
 		start_free_itds(fotg210);
 }
+
 
 /* Handle lost (or very late) IAA interrupts */
 static void fotg210_iaa_watchdog(struct fotg210_hcd *fotg210)
@@ -1316,6 +1322,7 @@ static void fotg210_iaa_watchdog(struct fotg210_hcd *fotg210)
 	}
 }
 
+
 /* Enable the I/O watchdog, if appropriate */
 static void turn_on_io_watchdog(struct fotg210_hcd *fotg210)
 {
@@ -1334,6 +1341,7 @@ static void turn_on_io_watchdog(struct fotg210_hcd *fotg210)
 		fotg210_enable_event(fotg210, FOTG210_HRTIMER_IO_WATCHDOG,
 				true);
 }
+
 
 /* Handler functions for the hrtimer event types.
  * Keep this array in the same order as the event types indexed by
@@ -1403,6 +1411,7 @@ static int check_reset_complete(struct fotg210_hcd *fotg210, int index,
 
 	return port_status;
 }
+
 
 /* build "status change" packet (one or two bytes) from HC registers */
 
@@ -1846,6 +1855,7 @@ static inline void fotg210_qtd_free(struct fotg210_hcd *fotg210,
 {
 	dma_pool_free(fotg210->qtd_pool, qtd, qtd->qtd_dma);
 }
+
 
 static void qh_destroy(struct fotg210_hcd *fotg210, struct fotg210_qh *qh)
 {
@@ -2719,6 +2729,7 @@ cleanup:
  * implicitly reset then (data toggle too).
  * That'd mean updating how usbcore talks to HCDs. (2.7?)
 */
+
 
 /* Each QH holds a qtd list; a QH is used for everything except iso.
  *
@@ -4714,6 +4725,7 @@ static ssize_t show_uframe_periodic_max(struct device *dev,
 	n = scnprintf(buf, PAGE_SIZE, "%d\n", fotg210->uframe_periodic_max);
 	return n;
 }
+
 
 static ssize_t store_uframe_periodic_max(struct device *dev,
 		struct device_attribute *attr, const char *buf, size_t count)

@@ -21,6 +21,7 @@
 #include "err_impl.h"
 #include "proto.h"
 
+
 static int
 titan_parse_c_misc(u64 c_misc, int print)
 {
@@ -460,6 +461,7 @@ titan_machine_check(unsigned long vector, unsigned long la_ptr)
 		titan_dispatch_irqs(irqmask);
 	}	
 
+
 	/* 
 	 * Release the logout frame 
 	 */
@@ -557,6 +559,7 @@ el_process_regatta_subpacket(struct el_subpacket *header)
 		break;
 	}
 
+
 	return (struct el_subpacket *)((unsigned long)header + header->length);
 } 
 
@@ -577,6 +580,7 @@ titan_register_error_handlers(void)
 	ev6_register_error_handlers();
 }
 
+
 /*
  * Privateer
  */

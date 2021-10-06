@@ -231,6 +231,7 @@ static inline void __psmouse_set_state(struct psmouse *psmouse, enum psmouse_sta
 	psmouse->last = jiffies;
 }
 
+
 /*
  * psmouse_set_state() sets new psmouse state and resets all flags and
  * counters while holding serio lock so fighting with interrupt handler
@@ -379,6 +380,7 @@ static irqreturn_t psmouse_interrupt(struct serio *serio,
 	return IRQ_HANDLED;
 }
 
+
 /*
  * psmouse_sliced_command() sends an extended PS/2 command to the mouse
  * using sliced syntax, understood by advanced devices, such as Logitech
@@ -401,6 +403,7 @@ int psmouse_sliced_command(struct psmouse *psmouse, unsigned char command)
 
 	return 0;
 }
+
 
 /*
  * psmouse_reset() resets the mouse into power-on state.
@@ -1163,6 +1166,7 @@ static const struct psmouse_protocol *psmouse_protocol_by_name(const char *name,
 	return NULL;
 }
 
+
 /*
  * psmouse_probe() probes for a PS/2 mouse.
  */
@@ -1247,6 +1251,7 @@ int psmouse_deactivate(struct psmouse *psmouse)
 	psmouse_set_state(psmouse, PSMOUSE_CMD_MODE);
 	return 0;
 }
+
 
 /*
  * psmouse_resync() attempts to re-validate current protocol.
@@ -1597,6 +1602,7 @@ static int psmouse_connect(struct serio *serio, struct serio_driver *drv)
 	goto out;
 }
 
+
 static int psmouse_reconnect(struct serio *serio)
 {
 	struct psmouse *psmouse = serio_get_drvdata(serio);
@@ -1882,6 +1888,7 @@ static ssize_t psmouse_attr_set_resolution(struct psmouse *psmouse, void *data, 
 	psmouse->set_resolution(psmouse, value);
 	return count;
 }
+
 
 static int psmouse_set_maxproto(const char *val, const struct kernel_param *kp)
 {

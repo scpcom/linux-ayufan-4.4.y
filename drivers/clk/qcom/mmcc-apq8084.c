@@ -2628,6 +2628,7 @@ static struct clk_branch mmss_spdm_rm_ocmemnoc_clk = {
 	},
 };
 
+
 static struct clk_branch mmss_misc_ahb_clk = {
 	.halt_reg = 0x502c,
 	.clkr = {

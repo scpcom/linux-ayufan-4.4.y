@@ -177,6 +177,7 @@ static u32 ath9k_hw_4k_dump_eeprom(struct ath_hw *ah, bool dump_base_hdr,
 }
 #endif
 
+
 #undef SIZE_EEPROM_4K
 
 static int ath9k_hw_4k_check_eeprom(struct ath_hw *ah)
@@ -188,6 +189,7 @@ static int ath9k_hw_4k_check_eeprom(struct ath_hw *ah)
 	u32 sum = 0, el;
 	bool need_swap = false;
 	int i, addr;
+
 
 	if (!ath9k_hw_use_flash(ah)) {
 		if (!ath9k_hw_nvram_read(ah, AR5416_EEPROM_MAGIC_OFFSET,
@@ -862,6 +864,7 @@ static void ath9k_hw_4k_set_board_values(struct ath_hw *ah,
 			     AR_PHY_9285_ANT_DIV_ALT_GAINTB);
 		regVal |= SM((ant_div_control1 >> 2),
 			     AR_PHY_9285_ANT_DIV_MAIN_GAINTB);
+
 
 		REG_WRITE(ah, AR_PHY_MULTICHAIN_GAIN_CTL, regVal);
 		regVal = REG_READ(ah, AR_PHY_MULTICHAIN_GAIN_CTL);

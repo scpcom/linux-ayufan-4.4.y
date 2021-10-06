@@ -579,6 +579,7 @@ static inline int security_dentry_init_security(struct dentry *dentry,
 	return -EOPNOTSUPP;
 }
 
+
 static inline int security_inode_init_security(struct inode *inode,
 						struct inode *dir,
 						const struct qstr *qstr,
@@ -1637,3 +1638,4 @@ static inline void free_secdata(void *secdata)
 #endif /* CONFIG_SECURITY */
 
 #endif /* ! __LINUX_SECURITY_H */
+

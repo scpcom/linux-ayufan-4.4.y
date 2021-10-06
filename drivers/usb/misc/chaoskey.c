@@ -529,3 +529,4 @@ static struct usb_driver chaoskey_driver = {
 };
 
 module_usb_driver(chaoskey_driver);
+

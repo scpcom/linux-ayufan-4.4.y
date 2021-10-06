@@ -19,6 +19,7 @@ static inline void fd_cacheflush(char * addr, long size)
 
 #define MAX_BUFFER_SECTORS 24
 
+
 /*
  * And on Mips's the CMOS info fails also ...
  *

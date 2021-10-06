@@ -31,6 +31,7 @@
 #include <asm/atari_stram.h>
 #include <asm/io.h>
 
+
 /*
  * The ST-RAM allocator allocates memory from a pool of reserved ST-RAM of
  * configurable size, set aside on ST-RAM init.
@@ -60,6 +61,7 @@ static int __init atari_stram_setup(char *arg)
 
 early_param("stram_pool", atari_stram_setup);
 
+
 /*
  * This init function is called very early by atari/config.c
  * It initializes some internal variables needed for stram_alloc()
@@ -84,6 +86,7 @@ void __init atari_stram_init(void)
 	panic("atari_stram_init: no ST-RAM found!");
 }
 
+
 /*
  * This function is called from setup_arch() to reserve the pages needed for
  * ST-RAM management, if the kernel resides in ST-RAM.
@@ -102,6 +105,7 @@ void __init atari_stram_reserve_pages(void *start_mem)
 			stram_virt_offset);
 	}
 }
+
 
 /*
  * This function is called as arch initcall to reserve the pages needed for
@@ -128,17 +132,20 @@ int __init atari_stram_map_pages(void)
 }
 arch_initcall(atari_stram_map_pages);
 
+
 void *atari_stram_to_virt(unsigned long phys)
 {
 	return (void *)(phys + stram_virt_offset);
 }
 EXPORT_SYMBOL(atari_stram_to_virt);
 
+
 unsigned long atari_stram_to_phys(void *virt)
 {
 	return (unsigned long)(virt - stram_virt_offset);
 }
 EXPORT_SYMBOL(atari_stram_to_phys);
+
 
 void *atari_stram_alloc(unsigned long size, const char *owner)
 {
@@ -168,6 +175,7 @@ void *atari_stram_alloc(unsigned long size, const char *owner)
 	return atari_stram_to_virt(res->start);
 }
 EXPORT_SYMBOL(atari_stram_alloc);
+
 
 void atari_stram_free(void *addr)
 {

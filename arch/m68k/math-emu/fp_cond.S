@@ -167,6 +167,7 @@ fp_do_scc:
 	printf	PDECODE,"\n"
 	jra	fp_end
 
+
 #define tst_NAN	btst #24,%d1
 #define tst_Z	btst #26,%d1
 #define tst_N	btst #27,%d1

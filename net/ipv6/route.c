@@ -1072,6 +1072,7 @@ redo_rt6_select:
 		}
 	}
 
+
 	if (rt == net->ipv6.ip6_null_entry || (rt->rt6i_flags & RTF_CACHE)) {
 		dst_use(&rt->dst, jiffies);
 		read_unlock_bh(&table->tb6_lock);

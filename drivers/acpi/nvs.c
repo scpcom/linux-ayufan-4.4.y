@@ -63,6 +63,7 @@ int acpi_nvs_for_each_region(int (*func)(__u64 start, __u64 size, void *data),
 	return 0;
 }
 
+
 #ifdef CONFIG_ACPI_SLEEP
 /*
  * Platforms, like ACPI, may want us to save some memory used by them during

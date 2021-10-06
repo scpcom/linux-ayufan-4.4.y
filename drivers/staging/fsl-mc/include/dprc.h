@@ -536,3 +536,4 @@ int dprc_get_connection(struct fsl_mc_io		*mc_io,
 			int				*state);
 
 #endif /* _FSL_DPRC_H */
+

@@ -274,6 +274,7 @@ static int v9fs_write_begin(struct file *filp, struct address_space *mapping,
 	pgoff_t index = pos >> PAGE_CACHE_SHIFT;
 	struct inode *inode = mapping->host;
 
+
 	p9_debug(P9_DEBUG_VFS, "filp %p, mapping %p\n", filp, mapping);
 
 	v9inode = V9FS_I(inode);
@@ -334,6 +335,7 @@ static int v9fs_write_end(struct file *filp, struct address_space *mapping,
 
 	return copied;
 }
+
 
 const struct address_space_operations v9fs_addr_operations = {
 	.readpage = v9fs_vfs_readpage,

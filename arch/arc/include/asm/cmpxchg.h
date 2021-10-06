@@ -80,6 +80,7 @@ __cmpxchg(volatile void *ptr, unsigned long expected, unsigned long new)
  */
 #define atomic_cmpxchg(v, o, n) ((int)cmpxchg(&((v)->counter), (o), (n)))
 
+
 /*
  * xchg (reg with memory) based on "Native atomic" EX insn
  */

@@ -25,6 +25,7 @@
 #define NVRAM_SIG_OS	0xa0	/* OS defined */
 #define NVRAM_SIG_PANIC	0xa1	/* Apple OSX "panic" */
 
+
 /* PowerMac specific nvram stuffs */
 
 enum {
@@ -32,6 +33,7 @@ enum {
 	pmac_nvram_XPRAM,	/* MacOS XPRAM partition */
 	pmac_nvram_NR		/* MacOS Name Registry partition */
 };
+
 
 /* Some offsets in XPRAM */
 #define PMAC_XPRAM_MACHINE_LOC	0xe4

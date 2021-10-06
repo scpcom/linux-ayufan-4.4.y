@@ -561,6 +561,7 @@ static const struct imc_uncore_pci_dev desktop_imc_pci_ids[] = {
 	{  /* end marker */ }
 };
 
+
 #define for_each_imc_pci_id(x, t) \
 	for (x = (t); (x)->pci_id; x++)
 

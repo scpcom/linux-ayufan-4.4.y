@@ -190,6 +190,7 @@
 #define WM8350_GP1_EINT                         0x0002
 #define WM8350_GP0_EINT                         0x0001
 
+
 /*
  * R128 (0x80) - GPIO Debounce
  */

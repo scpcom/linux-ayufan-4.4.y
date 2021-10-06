@@ -127,6 +127,7 @@ struct nfc_llcp_sock {
 	u8 rw;
 	__be16 miux;
 
+
 	/* Remote link parameters */
 	u8 remote_rw;
 	u16 remote_miu;
@@ -207,6 +208,7 @@ struct nfc_llcp_ui_cb {
 #define LLCP_DM_NOCONN  0x01
 #define LLCP_DM_NOBOUND 0x02
 #define LLCP_DM_REJ     0x03
+
 
 void nfc_llcp_sock_link(struct llcp_sock_list *l, struct sock *s);
 void nfc_llcp_sock_unlink(struct llcp_sock_list *l, struct sock *s);

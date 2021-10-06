@@ -182,3 +182,4 @@
 #define IRQ_I2S0	IRQ_S3C6410_IIS
 
 #endif /* __ASM_MACH_S3C64XX_IRQS_H */
+

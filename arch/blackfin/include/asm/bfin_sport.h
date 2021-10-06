@@ -8,6 +8,7 @@
 #ifndef __BFIN_SPORT_H__
 #define __BFIN_SPORT_H__
 
+
 #include <linux/types.h>
 #include <uapi/asm/bfin_sport.h>
 

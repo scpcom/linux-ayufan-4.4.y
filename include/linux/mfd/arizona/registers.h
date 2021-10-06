@@ -1202,6 +1202,7 @@
 #define ARIZONA_V2_DAC_COMP_1                    0x1704
 #define ARIZONA_V2_DAC_COMP_2                    0x1705
 
+
 /*
  * Field Definitions.
  */
@@ -4197,6 +4198,7 @@
 #define ARIZONA_AIF2TX4_SLOT_MASK                0x003F  /* AIF2TX4_SLOT - [5:0] */
 #define ARIZONA_AIF2TX4_SLOT_SHIFT                    0  /* AIF2TX4_SLOT - [5:0] */
 #define ARIZONA_AIF2TX4_SLOT_WIDTH                    6  /* AIF2TX4_SLOT - [5:0] */
+
 
 /*
  * R1357 (0x54D) - AIF2 Frame Ctrl 7

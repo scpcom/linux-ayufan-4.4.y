@@ -936,6 +936,7 @@ void radeon_fence_driver_force_completion(struct radeon_device *rdev, int ring)
 	}
 }
 
+
 /*
  * Fence debugfs
  */

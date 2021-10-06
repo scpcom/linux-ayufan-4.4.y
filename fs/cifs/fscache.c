@@ -239,3 +239,4 @@ void __cifs_fscache_invalidate_page(struct page *page, struct inode *inode)
 	fscache_wait_on_page_write(cookie, page);
 	fscache_uncache_page(cookie, page);
 }
+

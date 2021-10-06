@@ -283,6 +283,7 @@ intc_get_sense_handle(struct intc_desc *desc, struct intc_desc_int *d,
 	return 0;
 }
 
+
 void intc_set_ack_handle(unsigned int irq, struct intc_desc *desc,
 			 struct intc_desc_int *d, intc_enum id)
 {

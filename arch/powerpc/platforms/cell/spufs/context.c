@@ -30,6 +30,7 @@
 #include "spufs.h"
 #include "sputrace.h"
 
+
 atomic_t nr_spu_contexts = ATOMIC_INIT(0);
 
 struct spu_context *alloc_spu_context(struct spu_gang *gang)
@@ -182,3 +183,4 @@ void spu_release_saved(struct spu_context *ctx)
 
 	spu_release(ctx);
 }
+

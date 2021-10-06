@@ -258,6 +258,7 @@ static void ep93xx_gpio_init_irq(void)
 				ep93xx_gpio_f_irq_handler);
 }
 
+
 /*************************************************************************
  * gpiolib interface for EP93xx on-chip GPIOs
  *************************************************************************/

@@ -88,6 +88,7 @@
 
 #define IWL_NUM_SCAN_RATES         (2)
 
+
 #define IEEE80211_DATA_LEN              2304
 #define IEEE80211_4ADDR_LEN             30
 #define IEEE80211_HLEN                  (IEEE80211_4ADDR_LEN)
@@ -251,8 +252,10 @@ struct iwl_sensitivity_ranges {
 	u16 nrg_th_cca;
 };
 
+
 #define KELVIN_TO_CELSIUS(x) ((x)-273)
 #define CELSIUS_TO_KELVIN(x) ((x)+273)
+
 
 /******************************************************************************
  *
@@ -455,6 +458,7 @@ struct iwl_event_log {
 /* Firmware reload counter and Timestamp */
 #define IWL_MIN_RELOAD_DURATION		1000 /* 1000 ms */
 #define IWL_MAX_CONTINUE_RELOAD_CNT	4
+
 
 struct iwl_rf_reset {
 	int reset_request_count;

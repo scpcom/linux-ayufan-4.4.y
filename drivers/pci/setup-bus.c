@@ -139,6 +139,7 @@ static resource_size_t get_res_add_align(struct list_head *head,
 	return dev_res ? dev_res->min_align : 0;
 }
 
+
 /* Sort resources by alignment */
 static void pdev_sort_resources(struct pci_dev *dev, struct list_head *head)
 {
@@ -702,6 +703,7 @@ void pci_setup_bridge(struct pci_bus *bus)
 
 	__pci_setup_bridge(bus, type);
 }
+
 
 int pci_claim_bridge_resource(struct pci_dev *bridge, int i)
 {
@@ -1575,6 +1577,7 @@ static void pci_bus_dump_resources(struct pci_bus *bus)
 {
 	struct pci_bus *b;
 	struct pci_dev *dev;
+
 
 	pci_bus_dump_res(bus);
 

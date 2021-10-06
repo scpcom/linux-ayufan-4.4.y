@@ -76,6 +76,7 @@ static void radeon_legacy_rmx_mode_set(struct drm_crtc *crtc,
 		crtc_more_cntl |= RADEON_CRTC_H_CUTOFF_ACTIVE_EN;
 	}
 
+
 	fp_crtc_h_total_disp = ((((mode->crtc_htotal / 8) - 1) & 0x3ff)
 				| ((((mode->crtc_hdisplay / 8) - 1) & 0x1ff) << 16));
 
@@ -235,6 +236,7 @@ static void radeon_pll2_wait_for_read_update_complete(struct drm_device *dev)
 {
 	struct radeon_device *rdev = dev->dev_private;
 	int i = 0;
+
 
 	/* FIXME: Certain revisions of R300 can't recover here.  Not sure of
 	   the cause yet, but this workaround will mask the problem for now.
@@ -915,6 +917,7 @@ static void radeon_set_pll(struct drm_crtc *crtc, struct drm_display_mode *mode)
 	} else {
 		uint32_t pixclks_cntl;
 
+
 		if (is_tv) {
 			pixclks_cntl = RREG32_PLL(RADEON_PIXCLKS_CNTL);
 			radeon_legacy_tv_adjust_pll1(encoder, &htotal_cntl, &pll_ref_div,
@@ -1113,6 +1116,7 @@ static const struct drm_crtc_helper_funcs legacy_helper_funcs = {
 	.load_lut = radeon_crtc_load_lut,
 	.disable = radeon_crtc_disable
 };
+
 
 void radeon_legacy_init_crtc(struct drm_device *dev,
 			       struct radeon_crtc *radeon_crtc)

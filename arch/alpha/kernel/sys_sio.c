@@ -43,6 +43,7 @@ struct
 } saved_config __attribute((common));
 #endif
 
+
 static void __init
 sio_init_irq(void)
 {
@@ -64,6 +65,7 @@ alphabook1_init_arch(void)
 
 	lca_init_arch();
 }
+
 
 /*
  * sio_route_tab selects irq routing in PCI/ISA bridge so that:
@@ -297,6 +299,7 @@ sio_kill_arch(int mode)
 				   saved_config.orig_route_tab);
 #endif
 }
+
 
 /*
  * The System Vectors

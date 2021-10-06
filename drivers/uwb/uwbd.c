@@ -134,6 +134,8 @@ static struct uwbd_event uwbd_urc_events[] = {
 	},
 };
 
+
+
 struct uwbd_evt_type_handler {
 	const char *name;
 	struct uwbd_event *uwbd_events;
@@ -296,6 +298,7 @@ static int uwbd(void *param)
 	}
 	return 0;
 }
+
 
 /** Start the UWB daemon */
 void uwbd_start(struct uwb_rc *rc)

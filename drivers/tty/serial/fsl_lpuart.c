@@ -1091,6 +1091,7 @@ static int lpuart_startup(struct uart_port *port)
 	} else
 		sport->lpuart_dma_rx_use = false;
 
+
 	if (sport->dma_tx_chan && !lpuart_dma_tx_request(port)) {
 		sport->lpuart_dma_tx_use = true;
 		temp = readb(port->membase + UARTCR5);

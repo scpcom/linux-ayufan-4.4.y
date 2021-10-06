@@ -21,6 +21,7 @@
 
 #define UNSET (-1U)
 
+
 struct videobuf_buffer;
 struct videobuf_queue;
 

@@ -55,6 +55,7 @@
 
 #include <scsi/scsi_host.h>
 
+
 /*
 **	If you want a driver as small as possible, donnot define the 
 **	following options.
@@ -324,6 +325,7 @@
 
 #define MEMORY_BARRIER()	mb()
 
+
 /*
  *  If the NCR uses big endian addressing mode over the 
  *  PCI, actual io register addresses for byte and word 
@@ -461,6 +463,7 @@
 		OUTONB (nc_dcntl, (STD|NOCOM));	\
 	} while (0)
 
+
 /*
 **   NCR53C8XX devices features table.
 */
@@ -503,6 +506,7 @@ struct ncr_chip {
 #define FE_SCSI_SET	(FE_WIDE|FE_ULTRA|FE_DBLR|FE_QUAD|F_CLK80)
 #define FE_SPECIAL_SET	(FE_CACHE_SET|FE_BOF|FE_DFS|FE_LDSTR|FE_PFEN|FE_RAM)
 };
+
 
 /*
 **	Driver setup structure.
@@ -800,6 +804,7 @@ struct ncr_reg {
 	#define   DBLEN   0x08	/* clock doubler running		*/
 	#define   DBLSEL  0x04	/* clock doubler selected		*/
   
+
 /*4e*/  u8	nc_stest2;
 	#define   ROF     0x40	/* reset scsi offset (after gross error!) */
 	#define   DIF     0x20  /* 720 SCSI differential mode             */
@@ -981,6 +986,7 @@ struct scr_tblmove {
 #define	SCR_SEL_TBL	0x42000000
 #define	SCR_SEL_TBL_ATN	0x43000000
 
+
 #ifdef SCSI_NCR_BIG_ENDIAN
 struct scr_tblsel {
         u8	sel_scntl3;
@@ -1039,6 +1045,9 @@ struct scr_tblsel {
 #define	SCR_ACK		0x00000040
 #define	SCR_ATN		0x00000008
 
+
+
+
 /*-----------------------------------------------------------
 **
 **	Memory to memory move
@@ -1096,6 +1105,7 @@ struct scr_tblsel {
 
 #define SCR_REG_REG(reg,op,data) \
         (0x78000000 | (SCR_REG_OFS(REG(reg))) | (op) | (((data)&0xff)<<8ul))
+
 
 #define      SCR_LOAD   0x00000000
 #define      SCR_SHL    0x01000000
@@ -1174,6 +1184,7 @@ struct scr_tblsel {
 #define SCR_STORE_REL(reg, n)	SCR_STORE_R(reg, SCR_NO_FLUSH2|SCR_DSA_REL2,n)
 #define SCR_STORE_ABS_F(reg, n)	SCR_STORE_R(reg, 0, n)
 #define SCR_STORE_REL_F(reg, n)	SCR_STORE_R(reg, SCR_DSA_REL2, n)
+
 
 /*-----------------------------------------------------------
 **

@@ -408,6 +408,7 @@ static int acpi_battery_set_alarm(struct acpi_battery *battery)
 
 	int ret;
 
+
 	if (sbs->manager_present) {
 		ret = acpi_smbus_read(sbs->hc, SMBUS_READ_WORD, ACPI_SBS_MANAGER,
 				0x01, (u8 *)&value);

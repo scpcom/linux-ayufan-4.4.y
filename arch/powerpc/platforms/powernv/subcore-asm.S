@@ -13,6 +13,7 @@
 
 #include "subcore.h"
 
+
 _GLOBAL(split_core_secondary_loop)
 	/*
 	 * r3 = u8 *state, used throughout the routine

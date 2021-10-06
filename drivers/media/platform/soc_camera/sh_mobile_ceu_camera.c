@@ -278,6 +278,7 @@ static int sh_mobile_ceu_videobuf_setup(struct vb2_queue *vq,
 #define CEU_CAPCR_CTNCP (1 << 16) /* continuous capture mode (if set) */
 #define CEU_CEIER_MASK (CEU_CEIER_CPEIE | CEU_CEIER_VBP)
 
+
 /*
  * return value doesn't reflex the success/failure to queue the new buffer,
  * but rather the status of the previous buffer.

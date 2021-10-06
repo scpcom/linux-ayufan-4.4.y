@@ -55,3 +55,4 @@ typedef struct {
 int gct6_find_nodes(gct6_node *, gct6_search_struct *);
 
 #endif /* __ALPHA_GCT_H */
+

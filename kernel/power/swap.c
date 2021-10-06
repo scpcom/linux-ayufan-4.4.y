@@ -505,6 +505,7 @@ static int swap_writer_finish(struct swap_map_handle *handle,
 #define LZO_MIN_RD_PAGES	1024
 #define LZO_MAX_RD_PAGES	8192
 
+
 /**
  *	save_image - save the suspend image data
  */

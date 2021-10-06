@@ -54,6 +54,7 @@ struct conexant_spec {
 	struct nid_path *dc_mode_path;
 };
 
+
 #ifdef CONFIG_SND_HDA_INPUT_BEEP
 static inline void set_beep_amp(struct conexant_spec *spec, hda_nid_t nid,
 				int idx, int dir)

@@ -37,6 +37,7 @@
 #include "ds1603.h"
 #endif
 
+
 /* And the same for proc */
 int proc_dolasatstring(struct ctl_table *table, int write,
 		       void *buffer, size_t *lenp, loff_t *ppos)

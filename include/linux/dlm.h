@@ -15,6 +15,7 @@
 
 #include <uapi/linux/dlm.h>
 
+
 struct dlm_slot {
 	int nodeid; /* 1 to MAX_INT */
 	int slot;   /* 1 to MAX_INT */

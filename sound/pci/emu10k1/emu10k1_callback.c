@@ -57,6 +57,7 @@ static void set_filterQ(struct snd_emu10k1 *hw, struct snd_emux_voice *vp);
 #define LIMITVALUE(x, a, b) do { if ((x) < (a)) (x) = (a); else if ((x) > (b)) (x) = (b); } while (0)
 #define LIMITMAX(x, a) do {if ((x) > (a)) (x) = (a); } while (0)
 
+
 /*
  * set up operators
  */
@@ -78,6 +79,7 @@ snd_emu10k1_ops_setup(struct snd_emux *emux)
 {
 	emux->ops = emu10k1_ops;
 }
+
 
 /*
  * get more voice for pcm
@@ -119,6 +121,7 @@ snd_emu10k1_synth_get_voice(struct snd_emu10k1 *hw)
 	return -ENOMEM;
 }
 
+
 /*
  * turn off the voice (not terminated)
  */
@@ -134,6 +137,7 @@ release_voice(struct snd_emux_voice *vp)
 	dcysusv = 0x8000 | (unsigned char)vp->reg.parm.volrelease | DCYSUSV_CHANNELENABLE_MASK;
 	snd_emu10k1_ptr_write(hw, DCYSUSV, vp->ch, dcysusv);
 }
+
 
 /*
  * terminate the voice
@@ -180,6 +184,7 @@ free_voice(struct snd_emux_voice *vp)
 	}
 }
 
+
 /*
  * update registers
  */
@@ -206,6 +211,7 @@ update_voice(struct snd_emux_voice *vp, int update)
 	if (update & SNDRV_EMUX_UPDATE_Q)
 		set_filterQ(hw, vp);
 }
+
 
 /*
  * look up voice table - get the best voice in order of preference

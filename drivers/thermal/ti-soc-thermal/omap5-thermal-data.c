@@ -44,6 +44,7 @@ omap5430_mpu_temp_sensor_registers = {
 	.mask_clear_mask = OMAP5430_MASK_CLEAR_MPU_MASK,
 	.mask_clear_accum_mask = OMAP5430_MASK_CLEAR_ACCUM_MPU_MASK,
 
+
 	.bgap_counter = OMAP5430_BGAP_CTRL_OFFSET,
 	.counter_mask = OMAP5430_COUNTER_MASK,
 

@@ -444,6 +444,7 @@ int mlx5_eq_init(struct mlx5_core_dev *dev)
 	return err;
 }
 
+
 void mlx5_eq_cleanup(struct mlx5_core_dev *dev)
 {
 	mlx5_eq_debugfs_cleanup(dev);

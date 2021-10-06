@@ -21,6 +21,7 @@
 #include <asm/oplib.h>
 #include <asm/cpu_type.h>
 
+
 struct vm_area_struct;
 struct page;
 

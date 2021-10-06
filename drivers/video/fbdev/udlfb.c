@@ -1152,6 +1152,7 @@ static struct fb_ops dlfb_ops = {
 	.fb_set_par = dlfb_ops_set_par,
 };
 
+
 /*
  * Assumes &info->lock held by caller
  * Assumes no active clients have framebuffer open
@@ -1622,6 +1623,7 @@ static int dlfb_usb_probe(struct usb_interface *interface,
 		dev->sku_pixel_limit = pixel_limit;
 	}
 
+
 	if (!dlfb_alloc_urb_list(dev, WRITES_IN_FLIGHT, MAX_TRANSFER)) {
 		retval = -ENOMEM;
 		pr_err("dlfb_alloc_urb_list failed\n");
@@ -1972,3 +1974,4 @@ MODULE_AUTHOR("Roberto De Ioris <roberto@unbit.it>, "
 	      "Bernie Thompson <bernie@plugable.com>");
 MODULE_DESCRIPTION("DisplayLink kernel framebuffer driver");
 MODULE_LICENSE("GPL");
+

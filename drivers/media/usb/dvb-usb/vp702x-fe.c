@@ -344,6 +344,7 @@ error:
 	return NULL;
 }
 
+
 static struct dvb_frontend_ops vp702x_fe_ops = {
 	.delsys = { SYS_DVBS },
 	.info = {

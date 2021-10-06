@@ -41,3 +41,4 @@
 #define PA_AREA6_IO	0xb8000000	/* Area 6 IO Memory */
 
 #endif /* __ASM_CPU_SH4_ADDRSPACE_H */
+

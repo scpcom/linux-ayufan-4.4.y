@@ -64,6 +64,7 @@ struct ufs_qcom_phy_stored_attributes {
 	u32 value;
 };
 
+
 struct ufs_qcom_phy_calibration {
 	u32 reg_offset;
 	u32 cfg_value;

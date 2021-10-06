@@ -62,6 +62,7 @@
 
 #define FIRMWARE_READY				0xfedc
 
+
 struct btmrvl_sdio_card_reg {
 	u8 cfg;
 	u8 host_int_mask;
@@ -106,6 +107,7 @@ struct btmrvl_sdio_device {
 	u16 sd_blksz_fw_dl;
 	bool supports_fw_dump;
 };
+
 
 /* Platform specific DMA alignment */
 #define BTSDIO_DMA_ALIGN		8

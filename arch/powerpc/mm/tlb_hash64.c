@@ -78,6 +78,7 @@ void hpte_need_flush(struct mm_struct *mm, unsigned long addr,
 		addr &= PAGE_MASK;
 	}
 
+
 	/* Build full vaddr */
 	if (!is_kernel_addr(addr)) {
 		ssize = user_segment_size(addr);

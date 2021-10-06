@@ -97,6 +97,7 @@ static inline void __finv_buffer(void *buffer, size_t size)
 	}
 }
 
+
 /*
  * Flush a locally-homecached VA range and wait for the evicted
  * cachelines to hit memory.

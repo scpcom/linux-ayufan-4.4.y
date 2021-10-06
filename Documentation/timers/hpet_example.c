@@ -14,6 +14,7 @@
 #include <sys/time.h>
 #include <linux/hpet.h>
 
+
 extern void hpet_open_close(int, const char **);
 extern void hpet_info(int, const char **);
 extern void hpet_poll(int, const char **);
@@ -57,6 +58,7 @@ main(int argc, const char ** argv)
 		fprintf(stderr, "-hpet: requires command\n");
 		return -1;
 	}
+
 
 	for (i = 0; i < (sizeof (hpet_command) / sizeof (hpet_command[0])); i++)
 		if (!strcmp(argv[0], hpet_command[i].command)) {
@@ -243,6 +245,7 @@ hpet_fasync(int argc, const char **argv)
 		fprintf(stderr, "hpet_fasync: failed to open %s\n", argv[0]);
 		return;
 	}
+
 
 	if ((fcntl(fd, F_SETOWN, getpid()) == 1) ||
 		((value = fcntl(fd, F_GETFL)) == 1) ||

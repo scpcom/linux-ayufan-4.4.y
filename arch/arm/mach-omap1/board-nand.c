@@ -34,3 +34,4 @@ void omap1_nand_cmd_ctl(struct mtd_info *mtd, int cmd, unsigned int ctrl)
 
 	writeb(cmd, this->IO_ADDR_W + mask);
 }
+

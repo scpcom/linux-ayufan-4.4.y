@@ -438,6 +438,7 @@ static int __init roccat_init(void)
 	}
 	return 0;
 
+
  cleanup_alloc_chrdev_region:
 	unregister_chrdev_region(dev_id, ROCCAT_MAX_DEVICES);
  error:

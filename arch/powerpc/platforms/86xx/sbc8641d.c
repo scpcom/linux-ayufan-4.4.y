@@ -50,6 +50,7 @@ sbc8641_setup_arch(void)
 	fsl_pci_assign_primary();
 }
 
+
 static void
 sbc8641_show_cpuinfo(struct seq_file *m)
 {
@@ -59,6 +60,7 @@ sbc8641_show_cpuinfo(struct seq_file *m)
 
 	seq_printf(m, "SVR\t\t: 0x%x\n", svid);
 }
+
 
 /*
  * Called very early, device-tree isn't unflattened

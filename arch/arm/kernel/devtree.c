@@ -27,11 +27,13 @@
 #include <asm/mach/arch.h>
 #include <asm/mach-types.h>
 
+
 #ifdef CONFIG_SMP
 extern struct of_cpu_method __cpu_method_of_table[];
 
 static const struct of_cpu_method __cpu_method_of_table_sentinel
 	__used __section(__cpu_method_of_table_end);
+
 
 static int __init set_smp_ops_by_method(struct device_node *node)
 {
@@ -55,6 +57,7 @@ static inline int set_smp_ops_by_method(struct device_node *node)
 	return 1;
 }
 #endif
+
 
 /*
  * arm_dt_init_cpu_maps - Function retrieves cpu nodes from the device tree

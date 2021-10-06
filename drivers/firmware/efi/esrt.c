@@ -160,6 +160,7 @@ static struct kobj_type esre1_ktype = {
 	.default_attrs = esre1_attrs,
 };
 
+
 static struct kobject *esrt_kobj;
 static struct kset *esrt_kset;
 

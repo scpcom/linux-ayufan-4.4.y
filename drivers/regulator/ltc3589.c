@@ -195,6 +195,7 @@ static struct regulator_ops ltc3589_table_regulator_ops = {
 	.get_voltage_sel = regulator_get_voltage_sel_regmap,
 };
 
+
 #define LTC3589_REG(_name, _ops, en_bit, dtv1_reg, dtv_mask, go_bit)	\
 	[LTC3589_ ## _name] = {						\
 		.desc = {						\
@@ -405,6 +406,7 @@ static const struct regmap_config ltc3589_regmap_config = {
 	.use_single_rw = true,
 	.cache_type = REGCACHE_RBTREE,
 };
+
 
 static irqreturn_t ltc3589_isr(int irq, void *dev_id)
 {

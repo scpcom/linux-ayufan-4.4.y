@@ -247,6 +247,9 @@ void t4vf_os_portmod_changed(struct adapter *adapter, int pidx)
  * ======================
  */
 
+
+
+
 /*
  * Perform the MAC and PHY actions needed to enable a "port" (Virtual
  * Interface).

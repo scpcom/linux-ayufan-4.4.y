@@ -57,6 +57,7 @@
 #define RX4581_REG_FLAG		0x0E /* Flag Register */
 #define RX4581_REG_CTRL		0x0F /* Control Register */
 
+
 /* Flag Register bit definitions */
 #define RX4581_FLAG_UF		0x20 /* Update */
 #define RX4581_FLAG_TF		0x10 /* Timer */
@@ -163,6 +164,7 @@ static int rx4581_get_datetime(struct device *dev, struct rtc_time *tm)
 	tm->tm_year = bcd2bin(date[RX4581_REG_YR]);
 	if (tm->tm_year < 70)
 		tm->tm_year += 100;	/* assume we are in 1970...2069 */
+
 
 	dev_dbg(dev, "%s: tm is secs=%d, mins=%d, hours=%d, "
 		"mday=%d, mon=%d, year=%d, wday=%d\n",

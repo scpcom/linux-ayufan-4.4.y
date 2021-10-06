@@ -42,6 +42,7 @@
 
 #define ISL12022_INT_WRTC	(1 << 6)
 
+
 static struct i2c_driver isl12022_driver;
 
 struct isl12022 {
@@ -49,6 +50,7 @@ struct isl12022 {
 
 	bool write_enabled;	/* true if write enable is set */
 };
+
 
 static int isl12022_read_regs(struct i2c_client *client, uint8_t reg,
 			      uint8_t *data, size_t n)
@@ -81,6 +83,7 @@ static int isl12022_read_regs(struct i2c_client *client, uint8_t reg,
 	return 0;
 }
 
+
 static int isl12022_write_reg(struct i2c_client *client,
 			      uint8_t reg, uint8_t val)
 {
@@ -97,6 +100,7 @@ static int isl12022_write_reg(struct i2c_client *client,
 
 	return 0;
 }
+
 
 /*
  * In the routines that deal directly with the isl12022 hardware, we use

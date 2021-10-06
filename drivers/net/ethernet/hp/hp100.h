@@ -32,6 +32,7 @@
 #define HP100_PAGE_ID_MAC_ADDR	0x6	/* Page 6 */
 #define HP100_PAGE_MMU_POINTER	0x7	/* Page 7 */
 
+
 /* Registers that are present on all pages  */
 
 #define HP100_REG_HW_ID		0x00	/* R:  (16) Unique card ID           */
@@ -141,6 +142,7 @@
 #define HP100_REG_PTR_MEMDEBUG  0x1a
 /* ------------------------------------------------------------------------ */
 
+
 /*
  * Hardware ID Register I (Always available, HW_ID, Offset 0x00)
  */
@@ -249,6 +251,7 @@
 #define HP100_BM_PAGE_CK        0x08	/* This bit should be set whenever in */
 					/* an EISA system */
 #define HP100_BM_PCI_8CLK       0x40	/* ... cycles 8 clocks apart */
+
 
 /*
  * Mode Control Register I
@@ -392,6 +395,7 @@
 					/* when training has completed. */
 #define HP100_LINK_GOOD_ST	0x02	/* 0:No, 1:Yes cable passed training */
 #define HP100_VG_RESET		0x01	/* 0:Yes, 1:No reset the 100VG MAC */
+
 
 /*
  *  MAC Configuration Register I
@@ -544,8 +548,11 @@ typedef struct hp100_ring {
 	struct hp100_ring *next;
 } hp100_ring_t;
 
+
+
 /* Mask for Header Descriptor */
 #define HP100_PKT_LEN_MASK	0x1FFF	/* AND with RxLength to get length */
+
 
 /* Receive Packet Status.  Note, the error bits are only valid if ACC_ERRORED
    bit in the MAC Configuration Register 1 is set. */

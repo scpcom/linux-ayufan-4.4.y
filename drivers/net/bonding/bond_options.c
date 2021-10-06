@@ -77,6 +77,7 @@ static int bond_option_ad_actor_system_set(struct bonding *bond,
 static int bond_option_ad_user_port_key_set(struct bonding *bond,
 					    const struct bond_opt_value *newval);
 
+
 static const struct bond_opt_value bond_mode_tbl[] = {
 	{ "balance-rr",    BOND_MODE_ROUNDROBIN,   BOND_VALFLAG_DEFAULT},
 	{ "active-backup", BOND_MODE_ACTIVEBACKUP, 0},

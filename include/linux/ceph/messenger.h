@@ -250,10 +250,12 @@ struct ceph_connection {
 	unsigned long       delay;          /* current delay interval */
 };
 
+
 extern const char *ceph_pr_addr(const struct sockaddr_storage *ss);
 extern int ceph_parse_ips(const char *c, const char *end,
 			  struct ceph_entity_addr *addr,
 			  int max_count, int *count);
+
 
 extern int ceph_msgr_init(void);
 extern void ceph_msgr_exit(void);

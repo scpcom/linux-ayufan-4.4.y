@@ -7,6 +7,7 @@
 #define usb_packetid(pipe)	(usb_pipein(pipe) ? USB_PID_IN : USB_PID_OUT)
 #define PIPE_DEVEP_MASK		0x0007ff00
 
+
 /*
  * Universal Host Controller Interface data structures and defines
  */
@@ -95,6 +96,7 @@
 
 /* If a queue hasn't advanced after this much time, assume it is stuck */
 #define QH_WAIT_TIMEOUT		msecs_to_jiffies(200)
+
 
 /*
  * __hc32 and __hc16 are "Host Controller" types, they may be equivalent to
@@ -187,6 +189,7 @@ struct uhci_qh {
 #define LINK_TO_QH(uhci, qh)	(UHCI_PTR_QH((uhci)) | \
 				cpu_to_hc32((uhci), (qh)->dma_handle))
 
+
 /*
  *	Transfer Descriptors
  */
@@ -272,6 +275,7 @@ struct uhci_td {
 						ACCESS_ONCE((td)->status))
 
 #define LINK_TO_TD(uhci, td)		(cpu_to_hc32((uhci), (td)->dma_handle))
+
 
 /*
  *	Skeleton Queue Headers
@@ -465,6 +469,7 @@ static inline struct usb_hcd *uhci_to_hcd(struct uhci_hcd *uhci)
 /* Utility macro for comparing frame numbers */
 #define uhci_frame_before_eq(f1, f2)	(0 <= (int) ((f2) - (f1)))
 
+
 /*
  *	Private per-URB data
  */
@@ -478,6 +483,7 @@ struct urb_priv {
 
 	unsigned fsbr:1;		/* URB wants FSBR */
 };
+
 
 /* Some special IDs */
 

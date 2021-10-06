@@ -350,6 +350,7 @@ static int __init tegra_ictlr_init(struct device_node *node,
 	     "%s: Found %u interrupt controllers in DT; expected %u.\n",
 	     node->full_name, num_ictlrs, soc->num_ictlrs);
 
+
 	domain = irq_domain_add_hierarchy(parent_domain, 0, num_ictlrs * 32,
 					  node, &tegra_ictlr_domain_ops,
 					  lic);

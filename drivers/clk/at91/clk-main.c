@@ -364,6 +364,7 @@ void __init of_at91sam9x5_clk_main_rc_osc_setup(struct device_node *np,
 	of_clk_add_provider(np, of_clk_src_simple_get, clk);
 }
 
+
 static int clk_main_probe_frequency(struct at91_pmc *pmc)
 {
 	unsigned long prep_time, timeout;

@@ -23,6 +23,7 @@
 #include "dvb_math.h"
 #include "lgdt3306a.h"
 
+
 static int debug;
 module_param(debug, int, 0644);
 MODULE_PARM_DESC(debug, "set debug level (info=1, reg=2 (or-able))");
@@ -106,10 +107,12 @@ enum lgdt3306a_lock_check {
 	LG3306_AGC_LOCK,
 };
 
+
 #ifdef DBG_DUMP
 static void lgdt3306a_DumpAllRegs(struct lgdt3306a_state *state);
 static void lgdt3306a_DumpRegs(struct lgdt3306a_state *state);
 #endif
+
 
 static int lgdt3306a_write_reg(struct lgdt3306a_state *state, u16 reg, u8 val)
 {
@@ -367,6 +370,7 @@ static int lgdt3306a_power(struct lgdt3306a_state *state,
 fail:
 	return ret;
 }
+
 
 static int lgdt3306a_set_vsb(struct lgdt3306a_state *state)
 {
@@ -1601,6 +1605,7 @@ static int lgdt3306a_read_status(struct dvb_frontend *fe,
 	return ret;
 }
 
+
 static int lgdt3306a_read_snr(struct dvb_frontend *fe, u16 *snr)
 {
 	struct lgdt3306a_state *state = fe->demodulator_priv;
@@ -2103,6 +2108,8 @@ static void lgdt3306a_DumpRegs(struct lgdt3306a_state *state)
 	debug = sav_debug;
 }
 #endif /* DBG_DUMP */
+
+
 
 static struct dvb_frontend_ops lgdt3306a_ops = {
 	.delsys = { SYS_ATSC, SYS_DVBC_ANNEX_B },

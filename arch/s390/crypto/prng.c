@@ -30,6 +30,7 @@ MODULE_LICENSE("GPL");
 MODULE_AUTHOR("IBM Corporation");
 MODULE_DESCRIPTION("s390 PRNG interface");
 
+
 #define PRNG_MODE_AUTO	  0
 #define PRNG_MODE_TDES	  1
 #define PRNG_MODE_SHA512  2
@@ -37,6 +38,7 @@ MODULE_DESCRIPTION("s390 PRNG interface");
 static unsigned int prng_mode = PRNG_MODE_AUTO;
 module_param_named(mode, prng_mode, int, 0);
 MODULE_PARM_DESC(prng_mode, "PRNG mode: 0 - auto, 1 - TDES, 2 - SHA512");
+
 
 #define PRNG_CHUNKSIZE_TDES_MIN   8
 #define PRNG_CHUNKSIZE_TDES_MAX   (64*1024)
@@ -47,6 +49,7 @@ static unsigned int prng_chunk_size = 256;
 module_param_named(chunksize, prng_chunk_size, int, 0);
 MODULE_PARM_DESC(prng_chunk_size, "PRNG read chunk size in bytes");
 
+
 #define PRNG_RESEED_LIMIT_TDES		 4096
 #define PRNG_RESEED_LIMIT_TDES_LOWER	 4096
 #define PRNG_RESEED_LIMIT_SHA512       100000
@@ -55,6 +58,7 @@ MODULE_PARM_DESC(prng_chunk_size, "PRNG read chunk size in bytes");
 static unsigned int prng_reseed_limit;
 module_param_named(reseed_limit, prng_reseed_limit, int, 0);
 MODULE_PARM_DESC(prng_reseed_limit, "PRNG reseed limit");
+
 
 /*
  * Any one who considers arithmetical methods of producing random digits is,
@@ -104,6 +108,7 @@ static const u8 initial_parm_block[32] __initconst = {
 	0x75, 0x5F, 0xD2, 0xA6, 0x8D, 0x97, 0x11, 0xFF,
 	0x49, 0xD8, 0x23, 0xF3, 0x7E, 0x21, 0xEC, 0xA0 };
 
+
 /*** helper functions ***/
 
 static int generate_entropy(u8 *ebuf, size_t nbytes)
@@ -149,6 +154,7 @@ out:
 	return ret;
 }
 
+
 /*** tdes functions ***/
 
 static void prng_tdes_add_entropy(void)
@@ -165,6 +171,7 @@ static void prng_tdes_add_entropy(void)
 		memcpy(prng_data->prngws.parm_block, entropy, sizeof(entropy));
 	}
 }
+
 
 static void prng_tdes_seed(int nbytes)
 {
@@ -185,6 +192,7 @@ static void prng_tdes_seed(int nbytes)
 	prng_tdes_add_entropy();
 	prng_data->prngws.reseed_counter = 0;
 }
+
 
 static int __init prng_tdes_instantiate(void)
 {
@@ -211,12 +219,14 @@ static int __init prng_tdes_instantiate(void)
 	return 0;
 }
 
+
 static void prng_tdes_deinstantiate(void)
 {
 	pr_debug("The prng module stopped "
 		 "after running in triple DES mode\n");
 	kzfree(prng_data);
 }
+
 
 /*** sha512 functions ***/
 
@@ -351,6 +361,7 @@ static int __init prng_sha512_selftest(void)
 	return 0;
 }
 
+
 static int __init prng_sha512_instantiate(void)
 {
 	int ret, datalen;
@@ -417,11 +428,13 @@ outfree:
 	return ret;
 }
 
+
 static void prng_sha512_deinstantiate(void)
 {
 	pr_debug("The prng module stopped after running in SHA-512 mode\n");
 	kzfree(prng_data);
 }
+
 
 static int prng_sha512_reseed(void)
 {
@@ -444,6 +457,7 @@ static int prng_sha512_reseed(void)
 
 	return 0;
 }
+
 
 static int prng_sha512_generate(u8 *buf, size_t nbytes)
 {
@@ -477,12 +491,14 @@ static int prng_sha512_generate(u8 *buf, size_t nbytes)
 	return ret;
 }
 
+
 /*** file io functions ***/
 
 static int prng_open(struct inode *inode, struct file *file)
 {
 	return nonseekable_open(inode, file);
 }
+
 
 static ssize_t prng_tdes_read(struct file *file, char __user *ubuf,
 			      size_t nbytes, loff_t *ppos)
@@ -563,6 +579,7 @@ static ssize_t prng_tdes_read(struct file *file, char __user *ubuf,
 	return ret;
 }
 
+
 static ssize_t prng_sha512_read(struct file *file, char __user *ubuf,
 				size_t nbytes, loff_t *ppos)
 {
@@ -631,6 +648,7 @@ static ssize_t prng_sha512_read(struct file *file, char __user *ubuf,
 	return ret;
 }
 
+
 /*** sysfs stuff ***/
 
 static const struct file_operations prng_sha512_fops = {
@@ -658,6 +676,7 @@ static struct miscdevice prng_tdes_dev = {
 	.minor	= MISC_DYNAMIC_MINOR,
 	.fops	= &prng_tdes_fops,
 };
+
 
 /* chunksize attribute (ro) */
 static ssize_t prng_chunksize_show(struct device *dev,
@@ -786,6 +805,7 @@ static struct attribute_group prng_tdes_dev_attr_group = {
 	.attrs = prng_tdes_dev_attrs
 };
 
+
 /*** module init and exit ***/
 
 static int __init prng_init(void)
@@ -878,6 +898,7 @@ static int __init prng_init(void)
 out:
 	return ret;
 }
+
 
 static void __exit prng_exit(void)
 {

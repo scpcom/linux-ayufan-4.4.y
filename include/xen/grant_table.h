@@ -204,6 +204,7 @@ int gnttab_unmap_refs(struct gnttab_unmap_grant_ref *unmap_ops,
 void gnttab_unmap_refs_async(struct gntab_unmap_queue_data* item);
 int gnttab_unmap_refs_sync(struct gntab_unmap_queue_data *item);
 
+
 /* Perform a batch of grant map/copy operations. Retry every batch slot
  * for which the hypervisor returns GNTST_eagain. This is typically due
  * to paged out target frames.
@@ -215,6 +216,7 @@ int gnttab_unmap_refs_sync(struct gntab_unmap_queue_data *item);
  */
 void gnttab_batch_map(struct gnttab_map_grant_ref *batch, unsigned count);
 void gnttab_batch_copy(struct gnttab_copy *batch, unsigned count);
+
 
 struct xen_page_foreign {
 	domid_t domid;

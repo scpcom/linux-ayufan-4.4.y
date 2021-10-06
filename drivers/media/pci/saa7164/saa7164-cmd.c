@@ -586,3 +586,4 @@ int saa7164_cmd_send(struct saa7164_dev *dev, u8 id, enum tmComResCmd command,
 out:
 	return ret;
 }
+

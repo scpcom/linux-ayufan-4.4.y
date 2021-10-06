@@ -204,6 +204,7 @@
 #define STA350_CFUD_R1		0x04
 #define STA350_CFUD_RA		0x08
 
+
 /* biquad filter coefficient table offsets */
 #define STA350_C1_BQ_BASE	0
 #define STA350_C2_BQ_BASE	20

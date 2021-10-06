@@ -448,6 +448,7 @@ static int jffs2_scan_eraseblock (struct jffs2_sb_info *c, struct jffs2_eraseblo
 	int err;
 	int noise = 0;
 
+
 #ifdef CONFIG_JFFS2_FS_WRITEBUFFER
 	int cleanmarkerfound = 0;
 #endif

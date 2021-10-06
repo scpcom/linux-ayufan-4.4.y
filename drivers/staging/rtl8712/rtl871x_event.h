@@ -117,3 +117,4 @@ struct ADDBA_Req_Report_parm {
 #include "rtl8712_event.h"
 
 #endif /* _WLANEVENT_H_ */
+

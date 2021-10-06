@@ -495,6 +495,7 @@ extern int irq_chip_set_type_parent(struct irq_data *data, unsigned int type);
 /* Handling of unhandled and spurious interrupts: */
 extern void note_interrupt(struct irq_desc *desc, irqreturn_t action_ret);
 
+
 /* Enable/disable irq debugging output: */
 extern int noirqdebug_setup(char *str);
 
@@ -891,6 +892,7 @@ int irq_alloc_domain_generic_chips(struct irq_domain *d, int irqs_per_chip,
 				   irq_flow_handler_t handler,
 				   unsigned int clr, unsigned int set,
 				   enum irq_gc_flags flags);
+
 
 static inline struct irq_chip_type *irq_data_get_chip_type(struct irq_data *d)
 {

@@ -1265,6 +1265,7 @@ static void __iomem *__nfit_spa_map(struct acpi_nfit_desc *acpi_desc,
 	else
 		spa_map->addr.base = ioremap_nocache(start, n);
 
+
 	if (!spa_map->addr.base)
 		goto err_map;
 

@@ -53,6 +53,7 @@
  * console).
  */
 
+
 /*
  * increase ref count for the realm
  *
@@ -284,6 +285,7 @@ static int adjust_snap_realm_parent(struct ceph_mds_client *mdsc,
 	return 1;
 }
 
+
 static int cmpu64_rev(const void *a, const void *b)
 {
 	if (*(u64 *)a < *(u64 *)b)
@@ -292,6 +294,7 @@ static int cmpu64_rev(const void *a, const void *b)
 		return -1;
 	return 0;
 }
+
 
 struct ceph_snap_context *ceph_empty_snapc;
 
@@ -403,6 +406,7 @@ static void rebuild_snap_realms(struct ceph_snap_realm *realm)
 	list_for_each_entry(child, &realm->children, child_item)
 		rebuild_snap_realms(child);
 }
+
 
 /*
  * helper to allocate and decode an array of snapids.  free prior
@@ -776,6 +780,7 @@ fail:
 	return err;
 }
 
+
 /*
  * Send any cap_snaps that are queued for flush.  Try to carry
  * s_mutex across multiple snap flushes to avoid locking overhead.
@@ -810,6 +815,7 @@ static void flush_snaps(struct ceph_mds_client *mdsc)
 	}
 	dout("flush_snaps done\n");
 }
+
 
 /*
  * Handle a snap notification from the MDS.

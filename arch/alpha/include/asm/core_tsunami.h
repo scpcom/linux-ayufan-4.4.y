@@ -262,6 +262,7 @@ union TPchipPERRMASK {
 
 #define TSUNAMI_IACK_SC		_TSUNAMI_IACK_SC(0) /* hack! */
 
+
 /* 
  * The canonical non-remaped I/O and MEM addresses have these values
  * subtracted out.  This is arranged so that folks manipulating ISA
@@ -282,6 +283,7 @@ union TPchipPERRMASK {
  */
 struct el_TSUNAMI_sysdata_mcheck {
 };
+
 
 #ifdef __KERNEL__
 

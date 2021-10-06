@@ -672,6 +672,7 @@ static int iwlagn_mac_set_key(struct ieee80211_hw *hw, enum set_key_cmd cmd,
 				key->hw_key_idx == IWLAGN_HW_KEY_DEFAULT;
 	}
 
+
 	switch (cmd) {
 	case SET_KEY:
 		if (is_default_wep_key) {

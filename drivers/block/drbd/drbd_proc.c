@@ -36,6 +36,7 @@
 static int drbd_proc_open(struct inode *inode, struct file *file);
 static int drbd_proc_release(struct inode *inode, struct file *file);
 
+
 struct proc_dir_entry *drbd_proc;
 const struct file_operations drbd_proc_fops = {
 	.owner		= THIS_MODULE,
@@ -101,6 +102,7 @@ static void drbd_get_syncer_progress(struct drbd_device *device,
 		*per_mil_done = tmp;
 	}
 }
+
 
 /*lge
  * progress bars shamelessly adapted from driver/md/md.c

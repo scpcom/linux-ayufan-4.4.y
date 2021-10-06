@@ -98,6 +98,7 @@
 #define I40E_IEEE_APP_PRIO_SHIFT	5
 #define I40E_IEEE_APP_PRIO_MASK		(0x7 << I40E_IEEE_APP_PRIO_SHIFT)
 
+
 #pragma pack(1)
 
 /* IEEE 802.1AB LLDP Organization specific TLV */

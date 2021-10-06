@@ -284,6 +284,7 @@ void zfcp_dbf_rec_trig(char *tag, struct zfcp_adapter *adapter,
 	spin_unlock_irqrestore(&dbf->rec_lock, flags);
 }
 
+
 /**
  * zfcp_dbf_rec_run - trace event related to running recovery
  * @tag: identifier for event
@@ -541,3 +542,4 @@ void zfcp_dbf_adapter_unregister(struct zfcp_adapter *adapter)
 	adapter->dbf = NULL;
 	zfcp_dbf_unregister(dbf);
 }
+

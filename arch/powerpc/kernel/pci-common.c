@@ -50,6 +50,7 @@ static int global_phb_number;		/* Global phb counter */
 /* ISA Memory physical address */
 resource_size_t isa_mem_base;
 
+
 static struct dma_map_ops *pci_dma_ops = &dma_direct_ops;
 
 void set_pci_dma_ops(struct dma_map_ops *dma_ops)
@@ -432,6 +433,7 @@ pgprot_t pci_phys_mem_access_prot(struct file *file,
 
 	return prot;
 }
+
 
 /*
  * Perform the actual remap of the pages for a PCI device mapping, as
@@ -1051,6 +1053,7 @@ void pci_fixup_cardbus(struct pci_bus *bus)
 	pcibios_setup_bus_devices(bus);
 }
 
+
 static int skip_isa_ioresource_align(struct pci_dev *dev)
 {
 	if (pci_has_flag(PCI_CAN_SKIP_ISA_ALIGN) &&
@@ -1418,6 +1421,7 @@ void pcibios_claim_one_bus(struct pci_bus *bus)
 }
 EXPORT_SYMBOL_GPL(pcibios_claim_one_bus);
 
+
 /* pcibios_finish_adding_to_bus
  *
  * This is to be called by the hotplug code after devices have been
@@ -1503,6 +1507,7 @@ static void pcibios_setup_phb_resources(struct pci_controller *hose,
 			continue;
 		}
 		offset = hose->mem_offset[i];
+
 
 		pr_debug("PCI: PHB MEM resource %d = %pR off 0x%08llx\n", i,
 			 res, (unsigned long long)offset);

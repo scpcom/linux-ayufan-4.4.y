@@ -26,6 +26,7 @@
 #include <asm/ftrace.h>
 #include <asm/syscall.h>
 
+
 #ifdef CONFIG_DYNAMIC_FTRACE
 static unsigned int
 ftrace_call_replace(unsigned long ip, unsigned long addr, int link)

@@ -697,6 +697,7 @@ static int vpif_s_std(struct file *file, void *priv, v4l2_std_id std_id)
 	if (vb2_is_busy(&common->buffer_queue))
 		return -EBUSY;
 
+
 	if (!(std_id & VPIF_V4L2_STD))
 		return -EINVAL;
 

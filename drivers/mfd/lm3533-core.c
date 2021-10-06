@@ -25,6 +25,7 @@
 
 #include <linux/mfd/lm3533.h>
 
+
 #define LM3533_BOOST_OVP_MASK		0x06
 #define LM3533_BOOST_OVP_SHIFT		1
 
@@ -44,6 +45,7 @@
 #define LM3533_REG_BOOST_PWM		0x2c
 
 #define LM3533_REG_MAX			0xb2
+
 
 static struct mfd_cell lm3533_als_devs[] = {
 	{
@@ -147,6 +149,7 @@ static int lm3533_set_boost_freq(struct lm3533 *lm3533,
 
 	return ret;
 }
+
 
 static int lm3533_set_boost_ovp(struct lm3533 *lm3533,
 						enum lm3533_boost_ovp ovp)

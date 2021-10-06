@@ -29,6 +29,7 @@
  */
 #define WHCI_PAGE_SIZE 4096
 
+
 /**
  * QTD_MAX_TXFER_SIZE - max number of bytes to transfer with a single
  * qtd.
@@ -36,6 +37,7 @@
  * This is 2^20 - 1.
  */
 #define QTD_MAX_XFER_SIZE 1048575
+
 
 /**
  * struct whc_qtd - Queue Element Transfer Descriptors (qTD)

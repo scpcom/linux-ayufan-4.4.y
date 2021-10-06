@@ -497,6 +497,7 @@ err_free:
 	return NULL;
 }
 
+
 /**
  * gcov_iter_get_info - return profiling data set for given file iterator
  * @iter: file iterator

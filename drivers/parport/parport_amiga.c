@@ -33,6 +33,7 @@
 #define DPRINTK(x...)	do { } while (0)
 #endif
 
+
 static void amiga_write_data(struct parport *p, unsigned char data)
 {
 	DPRINTK(KERN_DEBUG "write_data %c\n",data);

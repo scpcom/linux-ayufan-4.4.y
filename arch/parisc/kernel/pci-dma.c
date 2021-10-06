@@ -52,6 +52,7 @@ static int     pcxl_res_size;
 #define DBG_RES(x...)
 #endif
 
+
 /*
 ** Dump a hex representation of the resource map.
 */

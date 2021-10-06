@@ -1981,6 +1981,7 @@ static void ci_program_display_gap(struct radeon_device *rdev)
 	ci_write_smc_soft_register(rdev, offsetof(SMU7_SoftRegisters, PreVBlankGap), 0x64);
 	ci_write_smc_soft_register(rdev, offsetof(SMU7_SoftRegisters, VBlankTimeout), (frame_time_in_us - pre_vbi_time_in_us));
 
+
 	ci_notify_smc_display_change(rdev, (rdev->pm.dpm.new_active_crtc_count == 1));
 
 }
@@ -2486,6 +2487,7 @@ static void ci_register_patching_mc_arb(struct radeon_device *rdev,
 		}
 	}
 }
+
 
 static int ci_populate_memory_timing_parameters(struct radeon_device *rdev,
 						u32 sclk,
@@ -3068,6 +3070,7 @@ static int ci_populate_smc_acpi_level(struct radeon_device *rdev,
 
 	return 0;
 }
+
 
 static int ci_enable_ulv(struct radeon_device *rdev, bool enable)
 {
@@ -4166,6 +4169,7 @@ static u32 ci_get_lowest_enabled_level(struct radeon_device *rdev,
 	return level;
 }
 
+
 int ci_dpm_force_performance_level(struct radeon_device *rdev,
 				   enum radeon_dpm_forced_level level)
 {
@@ -5108,6 +5112,7 @@ void ci_dpm_post_set_power_state(struct radeon_device *rdev)
 
 	ci_update_current_ps(rdev, new_ps);
 }
+
 
 void ci_dpm_setup_asic(struct radeon_device *rdev)
 {

@@ -161,6 +161,7 @@ static int __skey_check_enable(struct kvm_vcpu *vcpu)
 	return rc;
 }
 
+
 static int handle_skey(struct kvm_vcpu *vcpu)
 {
 	int rc = __skey_check_enable(vcpu);

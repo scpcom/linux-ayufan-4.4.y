@@ -779,6 +779,7 @@ atomic_t *bch_journal(struct cache_set *c,
 		spin_unlock(&c->journal.lock);
 	}
 
+
 	return ret;
 }
 

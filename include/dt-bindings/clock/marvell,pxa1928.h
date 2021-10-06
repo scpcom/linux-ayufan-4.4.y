@@ -37,6 +37,7 @@
 #define PXA1928_CLK_THSENS_GC		0x28
 #define PXA1928_APBC_NR_CLKS		0x30
 
+
 /* axi peripherals */
 #define PXA1928_CLK_SDH0		0x15
 #define PXA1928_CLK_SDH1		0x16

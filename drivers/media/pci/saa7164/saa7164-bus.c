@@ -489,3 +489,4 @@ out:
 	saa7164_bus_verify(dev);
 	return ret;
 }
+

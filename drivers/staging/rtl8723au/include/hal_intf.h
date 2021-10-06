@@ -59,6 +59,8 @@ enum rt_eeprom_type {
 	EEPROM_BOOT_EFUSE,
 };
 
+
+
 #define RF_CHANGE_BY_INIT	0
 #define RF_CHANGE_BY_IPS	BIT(28)
 #define RF_CHANGE_BY_PS		BIT(29)

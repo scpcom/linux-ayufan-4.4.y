@@ -156,6 +156,7 @@
 #define DRAM_BASE_HI			0x140
 #define DRAM_LIMIT_HI			0x144
 
+
 /*
  * Function 2 - DRAM controller
  */
@@ -235,6 +236,7 @@
 #define SET_NB_DRAM_INJECTION_READ(inj)  \
 					(BIT(((inj.word) & 0xF) + 20) | \
 					BIT(16) |  inj.bit_map)
+
 
 #define NBCAP				0xE8
 #define NBCAP_CHIPKILL			BIT(4)

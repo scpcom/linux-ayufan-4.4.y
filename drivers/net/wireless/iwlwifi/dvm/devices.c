@@ -35,6 +35,7 @@
 #include "dev.h"
 #include "commands.h"
 
+
 /*
  * 1000 series
  * ===========
@@ -181,6 +182,7 @@ const struct iwl_dvm_cfg iwl_dvm_1000_cfg = {
 	.plcp_delta_threshold = IWL_MAX_PLCP_ERR_EXT_LONG_THRESHOLD_DEF,
 	.chain_noise_scale = 1000,
 };
+
 
 /*
  * 2000 series
@@ -478,6 +480,8 @@ const struct iwl_dvm_cfg iwl_dvm_5150_cfg = {
 	.no_idle_support = true,
 	.no_xtal_calib = true,
 };
+
+
 
 /*
  * 6000 series

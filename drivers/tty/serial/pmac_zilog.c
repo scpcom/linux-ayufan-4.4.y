@@ -120,6 +120,7 @@ static struct uart_driver pmz_uart_reg = {
 	.minor		=	PMACZILOG_MINOR,
 };
 
+
 /* 
  * Load all registers to reprogram the port
  * This function must only be called when the TX is not busy.  The UART
@@ -1110,6 +1111,7 @@ static void pmz_convert_to_zs(struct uart_pmac_port *uap, unsigned int cflag,
 		uap->port.ignore_status_mask = 0xff;
 }
 
+
 /*
  * Set the irda codec on the imac to the specified baud rate.
  */
@@ -1241,6 +1243,7 @@ static void pmz_irda_setup(struct uart_pmac_port *uap, unsigned long *baud)
 	(void)read_zsdata(uap);
 	(void)read_zsdata(uap);
 }
+
 
 static void __pmz_set_termios(struct uart_port *port, struct ktermios *termios,
 			      struct ktermios *old)
@@ -1566,6 +1569,7 @@ static int pmz_attach(struct macio_dev *mdev, const struct of_device_id *match)
 	if (i >= MAX_ZS_PORTS)
 		return -ENODEV;
 
+
 	uap = &pmz_ports[i];
 	uap->dev = mdev;
 	uap->port.dev = &mdev->ofdev.dev;
@@ -1608,6 +1612,7 @@ static int pmz_detach(struct macio_dev *mdev)
 	return 0;
 }
 
+
 static int pmz_suspend(struct macio_dev *mdev, pm_message_t pm_state)
 {
 	struct uart_pmac_port *uap = dev_get_drvdata(&mdev->ofdev.dev);
@@ -1621,6 +1626,7 @@ static int pmz_suspend(struct macio_dev *mdev, pm_message_t pm_state)
 
 	return 0;
 }
+
 
 static int pmz_resume(struct macio_dev *mdev)
 {

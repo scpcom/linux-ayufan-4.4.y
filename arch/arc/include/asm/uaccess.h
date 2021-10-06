@@ -28,6 +28,7 @@
 #include <asm/errno.h>
 #include <linux/string.h>	/* for generic string functions */
 
+
 #define __kernel_ok		(segment_eq(get_fs(), KERNEL_DS))
 
 /*
@@ -159,6 +160,7 @@
 						\
 	: "+r" (ret)				\
 	: "r" (src), "r" (dst), "ir" (-EFAULT))
+
 
 static inline unsigned long
 __arc_copy_from_user(void *to, const void __user *from, unsigned long n)

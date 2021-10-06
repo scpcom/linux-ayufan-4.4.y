@@ -594,6 +594,7 @@ static int ieee80211_assign_beacon(struct ieee80211_sub_if_data *sdata,
 
 	old = sdata_dereference(sdata->u.ap.beacon, sdata);
 
+
 	/* Need to have a beacon head if we don't have one yet */
 	if (!params->head && !old)
 		return -EINVAL;

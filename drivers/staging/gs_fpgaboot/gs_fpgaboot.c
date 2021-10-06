@@ -93,6 +93,7 @@ static int readlength_bitstream(char *bitdata, int *lendata, int *offset)
 	return 0;
 }
 
+
 /*
  * read first 13 bytes to check bitstream magic number
  */

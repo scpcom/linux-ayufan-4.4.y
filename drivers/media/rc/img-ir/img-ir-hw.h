@@ -22,6 +22,7 @@
 #define IMG_IR_CODETYPE_BIPHASE		0x2	/* RC-5/6 */
 #define IMG_IR_CODETYPE_2BITPULSEPOS	0x3	/* RC-MM */
 
+
 /* Timing information */
 
 /**

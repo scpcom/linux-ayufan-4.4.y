@@ -20,4 +20,5 @@ struct orion_ehci_data {
 	enum orion_ehci_phy_ver phy_version;
 };
 
+
 #endif

@@ -823,6 +823,7 @@ static int adau1701_i2c_probe(struct i2c_client *client,
 		goto exit_regulators_disable;
 	}
 
+
 	if (dev->of_node) {
 		gpio_nreset = of_get_named_gpio(dev->of_node, "reset-gpio", 0);
 		if (gpio_nreset < 0 && gpio_nreset != -ENOENT) {

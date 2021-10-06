@@ -74,6 +74,7 @@ struct eg_cache_ops{
 	void            (*destroy_cache)(struct mpoa_client *mpc);
 };
 
+
 /* Ingress cache entry states */
 
 #define INGRESS_REFRESHING 3

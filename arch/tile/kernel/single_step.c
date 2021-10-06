@@ -32,6 +32,7 @@
 #include <arch/spr_def.h>
 #include <arch/opcode.h>
 
+
 #ifndef __tilegx__   /* Hardware support for single step unavailable. */
 
 #define signExtend17(val) sign_extend((val), 17)
@@ -710,6 +711,7 @@ void single_step_once(struct pt_regs *regs)
 
 static DEFINE_PER_CPU(unsigned long, ss_saved_pc);
 
+
 /*
  * Called directly on the occasion of an interrupt.
  *
@@ -756,6 +758,7 @@ void gx_singlestep_handle(struct pt_regs *regs, int fault_num)
 	}
 	exception_exit(prev_state);
 }
+
 
 /*
  * Called from need_singlestep.  Set up the control registers and the enable

@@ -162,6 +162,7 @@ struct sparc_stackf {
 
 #ifndef __ASSEMBLY__
 
+
 #else /* __ASSEMBLY__ */
 /* For assembly code. */
 #define TRACEREG_SZ		0xa0
@@ -177,6 +178,7 @@ struct sparc_stackf {
 
 #ifndef __ASSEMBLY__
 
+
 #else /* (!__ASSEMBLY__) */
 /* For assembly code. */
 #define TRACEREG_SZ       0x50
@@ -184,6 +186,7 @@ struct sparc_stackf {
 #endif /* (!__ASSEMBLY__) */
 
 #endif /* (defined(__sparc__) && defined(__arch64__)) */
+
 
 /* These are for pt_regs. */
 #define PT_V9_G0     0x00
@@ -321,6 +324,7 @@ struct sparc_stackf {
 #define SF_XARG4  0x54
 #define SF_XARG5  0x58
 #define SF_XXARG  0x5c
+
 
 /* Stuff for the ptrace system call */
 #define PTRACE_SPARC_DETACH       11

@@ -529,6 +529,7 @@ static int __init pmac_pic_probe_mpic(void)
 	return 0;
 }
 
+
 void __init pmac_pic_init(void)
 {
 	/* We configure the OF parsing based on our oldworld vs. newworld

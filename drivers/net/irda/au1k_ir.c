@@ -245,6 +245,7 @@ static void dma_free(void *vaddr, size_t size)
 	free_pages((unsigned long) vaddr, get_order(size));
 }
 
+
 static void setup_hw_rings(struct au1k_private *aup, u32 rx_base, u32 tx_base)
 {
 	int i;

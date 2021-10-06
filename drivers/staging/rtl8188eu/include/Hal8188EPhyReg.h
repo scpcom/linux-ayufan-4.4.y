@@ -29,6 +29,7 @@
 /*  5. Other definition for BB/RF R/W */
 /*  */
 
+
 /*  */
 /*  1. PMAC duplicate register due to connection: RF_Mode, TRxRN, NumOf L-STF */
 /*  1. Page1(0x100) */
@@ -236,6 +237,7 @@
 #define	rOFDM0_FrameSync		0xcf0
 #define	rOFDM0_DFSReport		0xcf4
 
+
 /*  */
 /*  7. PageD(0xD00) */
 /*  */
@@ -270,6 +272,7 @@
 #define	rOFDM_RxSNR			0xdd4
 #define	rOFDM_RxEVMCSI			0xdd8
 #define	rOFDM_SIGReport			0xddc
+
 
 /*  */
 /*  8. PageE(0xE00) */
@@ -445,6 +448,7 @@
 #define	RF_TXPA_A4		0x4B
 #define	RF_0x52			0x52
 #define	RF_WE_LUT		0xEF
+
 
 /*  */
 /* Bit Mask */
@@ -1024,6 +1028,7 @@
 #define	bRTL8258_RxLPFBW	0xc00
 #define	bRTL8258_RSSILPFBW	0xc0
 
+
 /*  */
 /*  Other Definition */
 /*  */
@@ -1084,5 +1089,6 @@
 #define	PathD			0x3
 
 /*--------------------------Define Parameters-------------------------------*/
+
 
 #endif

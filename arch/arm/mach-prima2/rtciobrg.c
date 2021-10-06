@@ -105,6 +105,7 @@ void sirfsoc_rtc_iobrg_writel(u32 val, u32 addr)
 }
 EXPORT_SYMBOL_GPL(sirfsoc_rtc_iobrg_writel);
 
+
 static int regmap_iobg_regwrite(void *context, unsigned int reg,
 				   unsigned int val)
 {

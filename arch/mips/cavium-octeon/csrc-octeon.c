@@ -175,6 +175,7 @@ void __delay(unsigned long loops)
 }
 EXPORT_SYMBOL(__delay);
 
+
 /**
  * octeon_io_clk_delay - wait for a given number of io clock cycles to pass.
  *

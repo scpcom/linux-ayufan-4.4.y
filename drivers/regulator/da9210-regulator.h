@@ -71,6 +71,7 @@ struct da9210_pdata {
 #define	DA9210_REG_CONFIG_D			0x146
 #define	DA9210_REG_CONFIG_E			0x147
 
+
 /*
  * Registers bits
  */
@@ -284,3 +285,4 @@ struct da9210_pdata {
 #define DA9210_STAND_ALONE			0x01
 
 #endif	/* __DA9210_REGISTERS_H__ */
+

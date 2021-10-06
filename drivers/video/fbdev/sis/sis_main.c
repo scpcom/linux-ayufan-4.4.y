@@ -1175,6 +1175,7 @@ sisfb_set_mode(struct sis_video_info *ivideo, int clrscrn)
 	return 0;
 }
 
+
 static int
 sisfb_do_set_var(struct fb_var_screeninfo *var, int isactive, struct fb_info *info)
 {
@@ -6144,6 +6145,7 @@ static int sisfb_probe(struct pci_dev *pdev, const struct pci_device_id *ent)
 		goto error_3;
 	}
 
+
 	/* Enable PCI addressing and MMIO */
 	if((ivideo->sisfb_mode_idx < 0) ||
 	   ((sisbios_mode[ivideo->sisfb_mode_idx].mode_no[ivideo->mni]) != 0xFF)) {
@@ -6215,6 +6217,7 @@ error_3:	vfree(ivideo->bios_abase);
 
 	printk(KERN_INFO "sisfb: MMIO at 0x%lx, mapped to 0x%lx, size %ldk\n",
 		ivideo->mmio_base, (unsigned long)ivideo->mmio_vbase, ivideo->mmio_size / 1024);
+
 
 	/* Determine the size of the command queue */
 	if(ivideo->sisvga_engine == SIS_300_VGA) {
@@ -6456,6 +6459,7 @@ error_3:	vfree(ivideo->bios_abase);
 				(ivideo->sisfb_max ? "enabled (auto-max)" :
 						"enabled (no auto-max)") :
 									"disabled");
+
 
 		fb_info(sis_fb_info, "%s frame buffer device version %d.%d.%d\n",
 			ivideo->myid, VER_MAJOR, VER_MINOR, VER_LEVEL);
@@ -6812,3 +6816,6 @@ EXPORT_SYMBOL(sis_malloc);
 EXPORT_SYMBOL(sis_free);
 EXPORT_SYMBOL_GPL(sis_malloc_new);
 EXPORT_SYMBOL_GPL(sis_free_new);
+
+
+

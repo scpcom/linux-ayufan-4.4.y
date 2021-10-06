@@ -70,6 +70,7 @@
 #define IOAT_VER_3_2            0x32    /* Version 3.2 */
 #define IOAT_VER_3_3            0x33    /* Version 3.3 */
 
+
 int system_has_dca_enabled(struct pci_dev *pdev);
 
 struct ioat_dma_descriptor {

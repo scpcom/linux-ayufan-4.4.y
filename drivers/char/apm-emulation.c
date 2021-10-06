@@ -31,6 +31,7 @@
 #include <linux/kthread.h>
 #include <linux/delay.h>
 
+
 /*
  * The apm_bios device is one of the misc char devices.
  * This is its minor number.
@@ -148,6 +149,8 @@ static DEFINE_MUTEX(state_lock);
 
 static const char driver_version[] = "1.13";	/* no spaces */
 
+
+
 /*
  * Compatibility cruft until the IPAQ people move over to the new
  * interface.
@@ -161,6 +164,7 @@ static void __apm_get_power_status(struct apm_power_info *info)
  */
 void (*apm_get_power_status)(struct apm_power_info *) = __apm_get_power_status;
 EXPORT_SYMBOL(apm_get_power_status);
+
 
 /*
  * APM event queue management.
@@ -394,6 +398,7 @@ static struct miscdevice apm_device = {
 	.name		= "apm_bios",
 	.fops		= &apm_bios_fops
 };
+
 
 #ifdef CONFIG_PROC_FS
 /*

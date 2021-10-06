@@ -27,6 +27,7 @@
 
 #include "spider_net.h"
 
+
 static struct {
 	const char str[ETH_GSTRING_LEN];
 } ethtool_stats_keys[] = {
@@ -177,3 +178,4 @@ const struct ethtool_ops spider_net_ethtool_ops = {
 	.get_sset_count		= spider_net_get_sset_count,
 	.get_ethtool_stats	= spider_net_get_ethtool_stats,
 };
+

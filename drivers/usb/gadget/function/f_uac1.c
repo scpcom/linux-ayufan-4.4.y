@@ -694,6 +694,7 @@ f_audio_bind(struct usb_configuration *c, struct usb_function *f)
 	as_interface_alt_0_desc.iInterface = us[STR_AS_IF_ALT0].id;
 	as_interface_alt_1_desc.iInterface = us[STR_AS_IF_ALT1].id;
 
+
 	f_audio_build_desc(audio);
 
 	/* allocate instance-specific interface IDs, and patch descriptors */

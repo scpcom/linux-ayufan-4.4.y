@@ -54,6 +54,7 @@ enum lx_stream_status {
 /* 	LX_STREAM_STATUS_PAUSED */
 };
 
+
 struct lx_stream {
 	struct snd_pcm_substream  *stream;
 	snd_pcm_uframes_t          frame_pos;
@@ -61,6 +62,7 @@ struct lx_stream {
 					    * pause */
 	unsigned int               is_capture:1;
 };
+
 
 struct lx6464es {
 	struct snd_card        *card;
@@ -104,5 +106,6 @@ struct lx6464es {
 	struct lx_stream        capture_stream;
 	struct lx_stream        playback_stream;
 };
+
 
 #endif /* LX6464ES_H */

@@ -133,6 +133,7 @@ struct rapl_domain_data {
 	unsigned long timestamp;
 };
 
+
 #define	DOMAIN_STATE_INACTIVE           BIT(0)
 #define	DOMAIN_STATE_POWER_LIMIT_SET    BIT(1)
 #define DOMAIN_STATE_BIOS_LOCKED        BIT(2)
@@ -162,6 +163,7 @@ struct rapl_domain {
 };
 #define power_zone_to_rapl_domain(_zone) \
 	container_of(_zone, struct rapl_domain, power_zone)
+
 
 /* Each physical package contains multiple domains, these are the common
  * data across RAPL domains within a package.
@@ -550,6 +552,7 @@ static const char *get_constraint_name(struct powercap_zone *power_zone, int id)
 	return rpl->name;
 }
 
+
 static int get_max_power(struct powercap_zone *power_zone, int id,
 					u64 *data)
 {
@@ -889,6 +892,7 @@ static int rapl_check_unit_atom(struct rapl_package *rp, int cpu)
 
 	return 0;
 }
+
 
 /* REVISIT:
  * When package power limit is set artificially low by RAPL, LVT
@@ -1346,6 +1350,7 @@ static int rapl_detect_domains(struct rapl_package *rp, int cpu)
 			rd->state |= DOMAIN_STATE_BIOS_LOCKED;
 		}
 	}
+
 
 done:
 	return ret;

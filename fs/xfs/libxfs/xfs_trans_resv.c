@@ -164,6 +164,7 @@ xfs_calc_finobt_res(
  * register overflow from temporaries in the calculations.
  */
 
+
 /*
  * In a write transaction we can allocate a maximum of 2
  * extents.  This gives:
@@ -444,6 +445,7 @@ xfs_calc_mkdir_reservation(
 {
 	return xfs_calc_create_reservation(mp);
 }
+
 
 /*
  * Making a new symplink is the same as creating a new file, but

@@ -82,6 +82,7 @@ int __init pcibios_map_irq(const struct pci_dev *dev, u8 slot, u8 pin)
 		panic("octeon_pcibios_map_irq not set.");
 }
 
+
 /*
  * Called to perform platform specific PCI setup
  */
@@ -252,6 +253,7 @@ int __init octeon_pci_pcibios_map_irq(const struct pci_dev *dev,
 	return irq_num;
 }
 
+
 /*
  * Read a value from configuration space
  */
@@ -284,6 +286,7 @@ static int octeon_read_config(struct pci_bus *bus, unsigned int devfn,
 	}
 	return PCIBIOS_FUNC_NOT_SUPPORTED;
 }
+
 
 /*
  * Write a value to PCI configuration space
@@ -318,6 +321,7 @@ static int octeon_write_config(struct pci_bus *bus, unsigned int devfn,
 	return PCIBIOS_FUNC_NOT_SUPPORTED;
 }
 
+
 static struct pci_ops octeon_pci_ops = {
 	.read	= octeon_read_config,
 	.write	= octeon_write_config,
@@ -349,6 +353,7 @@ static struct pci_controller octeon_pci_controller = {
 	.io_offset = 0,
 	.io_map_base = OCTEON_PCI_IOSPACE_BASE,
 };
+
 
 /*
  * Low level initialize the Octeon PCI controller
@@ -472,6 +477,7 @@ static void octeon_pci_initialize(void)
 		octeon_npi_write32(CVMX_NPI_PCI_CFG19, cfg19.u32);
 	}
 
+
 	cfg01.u32 = 0;
 	cfg01.s.msae = 1;	/* Memory Space Access Enable */
 	cfg01.s.me = 1;		/* Master Enable */
@@ -551,6 +557,7 @@ static void octeon_pci_initialize(void)
 	octeon_npi_write32(CVMX_NPI_PCI_READ_CMD_C, 0x31);
 	octeon_npi_write32(CVMX_NPI_PCI_READ_CMD_E, 0x31);
 }
+
 
 /*
  * Initialize the Octeon PCI controller

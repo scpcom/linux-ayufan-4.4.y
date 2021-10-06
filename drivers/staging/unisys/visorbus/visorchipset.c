@@ -47,6 +47,7 @@
 
 #define VISORCHIPSET_MMAP_CONTROLCHANOFFSET	0x00000000
 
+
 #define UNISYS_SPAR_LEAF_ID 0x40000000
 
 /* The s-Par leaf ID returns "UnisysSpar64" encoded across ebx, ecx, edx */
@@ -351,6 +352,7 @@ static void controlvm_respond_physdev_changestate(
 		struct controlvm_message_header *msg_hdr, int response,
 		struct spar_segment_state state);
 
+
 static void parser_done(struct parser_context *ctx);
 
 static struct parser_context *
@@ -526,6 +528,7 @@ parser_string_get(struct parser_context *ctx)
 	((u8 *) (value))[value_length] = '\0';
 	return value;
 }
+
 
 static ssize_t toolaction_show(struct device *dev,
 			       struct device_attribute *attr,

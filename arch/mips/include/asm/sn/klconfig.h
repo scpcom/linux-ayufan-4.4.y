@@ -122,6 +122,7 @@ typedef s32 klconf_off_t;
 #define KLMALLOC_TYPE_MAX	(ERRINFO_STRUCT + 1)
 #define DEVICE_STRUCT		3
 
+
 typedef struct console_s {
 	unsigned long	uart_base;
 	unsigned long	config_base;
@@ -154,6 +155,7 @@ typedef struct kl_config_hdr {
 	confidence_t	ch_sw_belief;	/* confidence that software is bad*/
 	confidence_t	ch_sn0net_belief; /* confidence that sn0net is bad */
 } kl_config_hdr_t;
+
 
 #define KL_CONFIG_HDR(_nasid)	((kl_config_hdr_t *)(KLCONFIG_ADDR(_nasid)))
 #define KL_CONFIG_INFO_OFFSET(_nasid)					\
@@ -247,6 +249,7 @@ typedef struct kl_config_hdr {
  +------------+	 |   +------------+  |	 +------------+	 |   +------------+
  | offset     |--+   |	offset	  |--+	 |  offset    |--+   |offset=NULL |
  +------------+	     +------------+	 +------------+	     +------------+
+
 
  +------------+
  | board info |
@@ -443,6 +446,7 @@ typedef struct lboard_s {
 	char		brd_name[32];
 } lboard_t;
 
+
 /*
  *	Make sure we pass back the calias space address for local boards.
  *	klconfig board traversal and error structure extraction defines.
@@ -469,6 +473,8 @@ typedef struct lboard_s {
 
 #define KLCF_COMP_TYPE(_comp)	((_comp)->struct_type)
 #define KLCF_BRIDGE_W_ID(_comp) ((_comp)->physid)	/* Widget ID */
+
+
 
 /*
  * Generic info structure. This stores common info about a
@@ -623,6 +629,7 @@ typedef struct klmembnk_s {			/* MEMORY BANK */
 
 #define KLCONFIG_MEMBNK_SIZE(_info, _bank)	\
 			    ((_info)->membnk_bnksz[(_bank)])
+
 
 #define MEMBNK_PREMIUM 1
 #define KLCONFIG_MEMBNK_PREMIUM(_info, _bank)	\
@@ -805,6 +812,7 @@ typedef struct klmio_s {			  /* MIO */
 	mio_t		mio_specific   ;
 } klmio_t ;
 
+
 typedef union klcomp_s {
 	klcpu_t		kc_cpu;
 	klhub_t		kc_hub;
@@ -857,9 +865,11 @@ typedef union {
 	lboard_t *lbinfo ;
 } biptr_t ;
 
+
 #define BRI_PER_XBOW 6
 #define PCI_PER_BRI  8
 #define DEV_PER_PCI  16
+
 
 /* Virtual dipswitch values (starting from switch "7"): */
 
@@ -881,6 +891,7 @@ extern klinfo_t *find_component(lboard_t *brd, klinfo_t *kli, unsigned char type
 extern klinfo_t *find_first_component(lboard_t *brd, unsigned char type);
 extern klcpu_t *nasid_slice_to_cpuinfo(nasid_t, int);
 extern lboard_t *find_lboard_class(lboard_t *start, unsigned char brd_class);
+
 
 extern klcpu_t *sn_get_cpuinfo(cpuid_t cpu);
 

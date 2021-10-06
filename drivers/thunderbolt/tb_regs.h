@@ -13,7 +13,9 @@
 
 #include <linux/types.h>
 
+
 #define TB_ROUTE_SHIFT 8  /* number of bits in a port entry of a route */
+
 
 /*
  * TODO: should be 63? But we do not know how to receive frames larger than 256
@@ -206,5 +208,6 @@ struct tb_regs_hop {
 	bool egress_shared_buffer:1;
 	u32 unknown3:4; /* set to zero */
 } __packed;
+
 
 #endif

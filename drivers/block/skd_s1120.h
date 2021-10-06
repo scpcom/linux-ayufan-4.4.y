@@ -8,6 +8,7 @@
  * or distributed except in accordance with those terms.
  */
 
+
 #ifndef SKD_S1120_H
 #define SKD_S1120_H
 
@@ -222,6 +223,7 @@ struct fit_msg_hdr {
 #define FIT_PROTOCOL_ID_SSDI	2
 #define FIT_PROTOCOL_ID_SOFIT	3
 
+
 #define FIT_PROTOCOL_MINOR_VER(mtd_val) ((mtd_val >> 16) & 0xF)
 #define FIT_PROTOCOL_MAJOR_VER(mtd_val) ((mtd_val >> 20) & 0xF)
 
@@ -279,6 +281,7 @@ struct fit_comp_error_info {
 	uint64_t	per; /* 16: Additional Sense Bytes */
 	uint8_t		reserved4[2]; /* 1E: Additional Sense Bytes (unused) */
 };
+
 
 /* Task management constants */
 #define SOFT_TASK_SIMPLE		0x00

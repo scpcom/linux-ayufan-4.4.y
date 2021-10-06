@@ -220,6 +220,7 @@ static struct lpc18xx_pin_caps lpc18xx_pin_##pname = {		\
 	.type = TYPE_##t,					\
 }
 
+
 /* Pinmuxing table taken from data sheet */
 /*    Pin    FUNC0  FUNC1  FUNC2  FUNC3   FUNC4   FUNC5   FUNC6    FUNC7 ANALOG TYPE */
 LPC_P(0,0,   GPIO,  SSP1,  ENET,  SGPIO,      R,      R, I2S0_TX_WS,I2S1,     0, ND);

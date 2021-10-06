@@ -1283,3 +1283,4 @@ void __init rx51_peripherals_init(void)
 	rx51_init_twl4030_hwmon();
 	rx51_init_omap3_rom_rng();
 }
+

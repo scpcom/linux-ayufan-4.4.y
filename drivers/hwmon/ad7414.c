@@ -29,6 +29,7 @@
 #include <linux/sysfs.h>
 #include <linux/slab.h>
 
+
 /* AD7414 registers */
 #define AD7414_REG_TEMP		0x00
 #define AD7414_REG_CONF		0x01

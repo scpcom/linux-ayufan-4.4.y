@@ -305,6 +305,7 @@ enum ipmi_stat_indexes {
 	IPMI_NUM_STATS
 };
 
+
 #define IPMI_IPMB_NUM_SEQ	64
 #define IPMI_MAX_CHANNELS       16
 struct ipmi_smi {
@@ -850,6 +851,7 @@ static int intf_find_seq(ipmi_smi_t           intf,
 	return rv;
 }
 
+
 /* Start the timer for a specific sequence table entry. */
 static int intf_start_seq_timer(ipmi_smi_t intf,
 				long       msgid)
@@ -858,6 +860,7 @@ static int intf_start_seq_timer(ipmi_smi_t intf,
 	unsigned long flags;
 	unsigned char seq;
 	unsigned long seqid;
+
 
 	GET_SEQ_FROM_MSGID(msgid, seq, seqid);
 
@@ -888,6 +891,7 @@ static int intf_err_seq(ipmi_smi_t   intf,
 	unsigned long        seqid;
 	struct ipmi_recv_msg *msg = NULL;
 
+
 	GET_SEQ_FROM_MSGID(msgid, seq, seqid);
 
 	spin_lock_irqsave(&(intf->seq_lock), flags);
@@ -910,6 +914,7 @@ static int intf_err_seq(ipmi_smi_t   intf,
 
 	return rv;
 }
+
 
 int ipmi_create_user(unsigned int          if_num,
 		     struct ipmi_user_hndl *handler,
@@ -1321,6 +1326,7 @@ int ipmi_register_for_cmd(ipmi_user_t   user,
 	struct cmd_rcvr *rcvr;
 	int             rv = 0;
 
+
 	rcvr = kmalloc(sizeof(*rcvr), GFP_KERNEL);
 	if (!rcvr)
 		return -ENOMEM;
@@ -1500,6 +1506,7 @@ static struct ipmi_smi_msg *smi_add_send_msg(ipmi_smi_t intf,
 	return smi_msg;
 }
 
+
 static void smi_send(ipmi_smi_t intf, const struct ipmi_smi_handlers *handlers,
 		     struct ipmi_smi_msg *smi_msg, int priority)
 {
@@ -1543,6 +1550,7 @@ static int i_ipmi_request(ipmi_user_t          user,
 	struct ipmi_smi_msg      *smi_msg;
 	struct ipmi_recv_msg     *recv_msg;
 	unsigned long            flags;
+
 
 	if (supplied_recv)
 		recv_msg = supplied_recv;
@@ -1674,6 +1682,7 @@ static int i_ipmi_request(ipmi_user_t          user,
 		    addr->addr_type = IPMI_IPMB_ADDR_TYPE;
 		    broadcast = 1;
 		}
+
 
 		/* Default to 1 second retries. */
 		if (retry_time_ms == 0)
@@ -3200,6 +3209,7 @@ static int handle_lan_get_msg_rsp(ipmi_smi_t          intf,
 {
 	struct ipmi_lan_addr  lan_addr;
 	struct ipmi_recv_msg  *recv_msg;
+
 
 	/*
 	 * This is 13, not 12, because the response must contain a

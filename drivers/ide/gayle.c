@@ -23,6 +23,7 @@
 #include <asm/amigaints.h>
 #include <asm/amigayle.h>
 
+
     /*
      *  Offsets from one of the above bases
      */
@@ -35,6 +36,7 @@
 
 #define GAYLE_IRQ_4000	0xdd3020	/* MSB = 1, Harddisk is source of */
 #define GAYLE_IRQ_1200	0xda9000	/* interrupt */
+
 
     /*
      *  Offset of the secondary port for IDE doublers

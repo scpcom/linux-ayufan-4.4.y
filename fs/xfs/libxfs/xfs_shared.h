@@ -170,6 +170,7 @@ struct xfs_log_item_desc {
 int	xfs_log_calc_unit_res(struct xfs_mount *mp, int unit_bytes);
 int	xfs_log_calc_minimum_size(struct xfs_mount *);
 
+
 /*
  * Values for t_flags.
  */
@@ -221,6 +222,7 @@ int	xfs_log_calc_minimum_size(struct xfs_mount *);
 #define	XFS_ICHGTIME_MOD	0x1	/* data fork modification timestamp */
 #define	XFS_ICHGTIME_CHG	0x2	/* inode field change timestamp */
 #define	XFS_ICHGTIME_CREATE	0x4	/* inode create timestamp */
+
 
 /*
  * Symlink decoding/encoding functions

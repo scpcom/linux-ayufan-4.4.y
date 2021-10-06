@@ -392,3 +392,4 @@
 #define PMIC_PMIC_INT		MFP_CFG(PMIC_INT, AF0)
 
 #endif /* __ASM_MACH_MFP_MMP2_H */
+

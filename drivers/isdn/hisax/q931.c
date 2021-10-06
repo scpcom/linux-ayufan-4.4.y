@@ -16,6 +16,7 @@
  *
  */
 
+
 #include "hisax.h"
 #include "l3_1tr6.h"
 
@@ -194,6 +195,7 @@ struct MessageType mt_n1[] =
 };
 
 #define MT_N1_LEN ARRAY_SIZE(mt_n1)
+
 
 static int
 prbits(char *dest, u_char b, int start, int len)
@@ -653,6 +655,7 @@ prbearer(char *dest, u_char *p)
 	return (dp - dest);
 }
 
+
 static
 int
 prbearer_ni1(char *dest, u_char *p)
@@ -1070,6 +1073,7 @@ struct InformationElement {
 	},
 };
 
+
 #define IESIZE ARRAY_SIZE(ielist)
 
 static
@@ -1096,6 +1100,7 @@ struct InformationElement ielist_ni1[] = {
 	{ 0x7c, "Low Layer Compatibility", general_ni1 },
 	{ 0x7d, "High Layer Compatibility", general_ni1 },
 };
+
 
 #define IESIZE_NI1 ARRAY_SIZE(ielist_ni1)
 

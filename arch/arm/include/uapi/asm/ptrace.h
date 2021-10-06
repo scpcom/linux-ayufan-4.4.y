@@ -151,6 +151,7 @@ struct pt_regs {
  */
 #define ARM_VFPREGS_SIZE ( 32 * 8 /*fpregs*/ + 4 /*fpscr*/ )
 
+
 #endif /* __ASSEMBLY__ */
 
 #endif /* _UAPI__ASM_ARM_PTRACE_H */

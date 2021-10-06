@@ -2933,6 +2933,7 @@ il_queue_space(const struct il_queue *q)
 }
 EXPORT_SYMBOL(il_queue_space);
 
+
 /**
  * il_queue_init - Initialize queue's high/low-water and read/write idxes
  */

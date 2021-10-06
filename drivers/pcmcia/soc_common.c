@@ -30,6 +30,7 @@
 
 ======================================================================*/
 
+
 #include <linux/cpufreq.h>
 #include <linux/gpio.h>
 #include <linux/init.h>
@@ -300,6 +301,7 @@ static int soc_common_pcmcia_sock_init(struct pcmcia_socket *sock)
 	return 0;
 }
 
+
 /*
  * soc_common_pcmcia_suspend()
  * ^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -365,6 +367,7 @@ static void soc_common_pcmcia_poll_event(unsigned long dummy)
 	soc_common_check_status(skt);
 }
 
+
 /*
  * Service routine for socket driver interrupts (requested by the
  * low-level PCMCIA init() operation via soc_common_pcmcia_thread()).
@@ -383,6 +386,7 @@ static irqreturn_t soc_common_pcmcia_interrupt(int irq, void *dev)
 
 	return IRQ_HANDLED;
 }
+
 
 /*
  *  Implements the get_status() operation for the in-kernel PCMCIA
@@ -409,6 +413,7 @@ soc_common_pcmcia_get_status(struct pcmcia_socket *sock, unsigned int *status)
 
 	return 0;
 }
+
 
 /*
  * Implements the set_socket() operation for the in-kernel PCMCIA
@@ -439,6 +444,7 @@ static int soc_common_pcmcia_set_socket(
 
 	return soc_common_pcmcia_config_skt(skt, state);
 }
+
 
 /*
  * Implements the set_io_map() operation for the in-kernel PCMCIA
@@ -492,6 +498,7 @@ static int soc_common_pcmcia_set_io_map(
 
 	return 0;
 }
+
 
 /*
  * Implements the set_mem_map() operation for the in-kernel PCMCIA
@@ -619,6 +626,7 @@ static ssize_t show_status(
 }
 static DEVICE_ATTR(status, S_IRUGO, show_status, NULL);
 
+
 static struct pccard_operations soc_common_pcmcia_operations = {
 	.init			= soc_common_pcmcia_sock_init,
 	.suspend		= soc_common_pcmcia_suspend,
@@ -627,6 +635,7 @@ static struct pccard_operations soc_common_pcmcia_operations = {
 	.set_io_map		= soc_common_pcmcia_set_io_map,
 	.set_mem_map		= soc_common_pcmcia_set_mem_map,
 };
+
 
 static LIST_HEAD(soc_pcmcia_sockets);
 static DEFINE_MUTEX(soc_pcmcia_sockets_lock);

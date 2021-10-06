@@ -62,6 +62,7 @@ struct mpc52xx_ata_priv {
 	int				waiting_for_dma;
 };
 
+
 /* ATAPI-4 PIO specs (in ns) */
 static const u16 ataspec_t0[5]		= {600, 383, 240, 180, 120};
 static const u16 ataspec_t1[5]		= { 70,  50,  30,  30,  25};
@@ -257,9 +258,11 @@ struct mpc52xx_ata {
 	u8  reserved21[2];
 };
 
+
 /* ======================================================================== */
 /* Aux fns                                                                  */
 /* ======================================================================== */
+
 
 /* MPC52xx low level hw control */
 static int
@@ -377,6 +380,7 @@ mpc52xx_ata_hw_init(struct mpc52xx_ata_priv *priv)
 
 	return 0;
 }
+
 
 /* ======================================================================== */
 /* libata driver                                                            */
@@ -849,6 +853,7 @@ static struct of_device_id mpc52xx_ata_of_match[] = {
 	{},
 };
 
+
 static struct platform_driver mpc52xx_ata_of_platform_driver = {
 	.probe		= mpc52xx_ata_probe,
 	.remove		= mpc52xx_ata_remove,
@@ -868,3 +873,4 @@ MODULE_AUTHOR("Sylvain Munaut <tnt@246tNt.com>");
 MODULE_DESCRIPTION("Freescale MPC52xx IDE/ATA libata driver");
 MODULE_LICENSE("GPL");
 MODULE_DEVICE_TABLE(of, mpc52xx_ata_of_match);
+

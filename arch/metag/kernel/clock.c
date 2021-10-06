@@ -107,3 +107,4 @@ void __init setup_meta_clocks(struct meta_clock_desc *desc)
 	if (!_meta_clock.get_core_freq)
 		_meta_clock.get_core_freq = get_core_freq_default;
 }
+

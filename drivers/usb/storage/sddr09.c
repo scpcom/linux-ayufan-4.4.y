@@ -64,6 +64,7 @@ static int usb_stor_sddr09_dpcm_init(struct us_data *us);
 static int sddr09_transport(struct scsi_cmnd *srb, struct us_data *us);
 static int usb_stor_sddr09_init(struct us_data *us);
 
+
 /*
  * The table of devices
  */
@@ -101,6 +102,7 @@ static struct us_unusual_dev sddr09_unusual_dev_list[] = {
 };
 
 #undef UNUSUAL_DEV
+
 
 #define short_pack(lsb,msb) ( ((u16)(lsb)) | ( ((u16)(msb))<<8 ) )
 #define LSB_of(s) ((s)&0xFF)
@@ -1438,6 +1440,7 @@ sddr09_common_init(struct us_data *us) {
 	return 0;
 }
 
+
 /*
  * This is needed at a very early stage. If this is not listed in the
  * unusual devices list but called from here then LUN 0 of the combo reader
@@ -1529,6 +1532,7 @@ static int dpcm_transport(struct scsi_cmnd *srb, struct us_data *us)
 	}
 	return ret;
 }
+
 
 /*
  * Transport for the Sandisk SDDR-09

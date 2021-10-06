@@ -29,3 +29,4 @@ struct msqid64_ds {
 };
 
 #endif /* _ASM_MSGBUF_H */
+

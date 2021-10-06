@@ -64,9 +64,11 @@
 #define	DMA_BUS_SIZE		16
 #define U_LINE			4	/* Blanking Lines */
 
+
 /* Interface 16/18-bit TFT over an 8-bit wide PPI using a small Programmable Logic Device (CPLD)
  * http://blackfin.uclinux.org/gf/project/stamp/frs/?action=FrsReleaseBrowse&frs_package_id=165
  */
+
 
 #define BFIN_LCD_NBR_PALETTE_ENTRIES	256
 
@@ -324,6 +326,7 @@ static void bfin_lq035q1_init_timers(struct bfin_lq035q1fb_info *fbi)
 static void bfin_lq035q1_config_dma(struct bfin_lq035q1fb_info *fbi)
 {
 
+
 	set_dma_config(CH_PPI,
 		       set_bfin_dma_config(DIR_READ, DMA_FLOW_AUTO,
 					   INTR_DISABLE, DIMENSION_2D,
@@ -479,6 +482,7 @@ static int bfin_lq035q1_fb_check_var(struct fb_var_screeninfo *var,
 			 __func__, var->yres_virtual);
 		return -ENOMEM;
 	}
+
 
 	return 0;
 }
@@ -658,6 +662,7 @@ static int bfin_lq035q1_probe(struct platform_device *pdev)
 
 	fbinfo->fix.line_length = fbinfo->var.xres_virtual *
 	    fbinfo->var.bits_per_pixel / 8;
+
 
 	fbinfo->fbops = &bfin_lq035q1_fb_ops;
 	fbinfo->flags = FBINFO_FLAG_DEFAULT;

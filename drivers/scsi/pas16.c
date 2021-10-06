@@ -86,9 +86,11 @@
 #define AUTOPROBE_IRQ
 #include "NCR5380.h"
 
+
 static unsigned short pas16_addr = 0;
 static int pas16_irq = 0;
  
+
 static const int scsi_irq_translate[] =
 	{ 0,  0,  1,  2,  3,  4,  5,  6, 0,  0,  7,  8,  9,  0, 10, 11 };
 
@@ -161,6 +163,7 @@ static const unsigned short  pas16_offset[ 8 ] =
 #define rtrc(i) {}
 #endif
 
+
 /*
  * Function : enable_board( int  board_num, unsigned short port )
  *
@@ -176,6 +179,8 @@ static void __init
     outb( 0xbc + board_num, MASTER_ADDRESS_PTR );
     outb( port >> 2, MASTER_ADDRESS_PTR );
 }
+
+
 
 /*
  * Function : init_board( unsigned short port, int irq )
@@ -225,6 +230,7 @@ static void __init
 	    outb( 0x6d, io_port + SYS_CONFIG_4 );
 	}
 }
+
 
 /*
  * Function : pas16_hw_detect( unsigned short board_num )
@@ -284,6 +290,7 @@ static int __init
 
     return 1;
 }
+
 
 #ifndef MODULE
 /*
@@ -382,6 +389,7 @@ static int __init pas16_detect(struct scsi_host_template *tpnt)
 #endif
 		}
     }
+
 
 #if defined(PDEBUG) && (PDEBUG & PDEBUG_INIT)
 	printk("scsi-pas16 : io_port = %04x\n", (unsigned int) io_port);

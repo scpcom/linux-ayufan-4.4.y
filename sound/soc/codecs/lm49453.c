@@ -643,6 +643,7 @@ static const struct snd_soc_dapm_widget lm49453_dapm_widgets[] = {
 	SND_SOC_DAPM_DAC("LOL DAC", "Lineout", SND_SOC_NOPM, 0, 0),
 	SND_SOC_DAPM_DAC("LOR DAC", "Lineout", SND_SOC_NOPM, 0, 0),
 
+
 	SND_SOC_DAPM_PGA("AUXL Input",
 			LM49453_P0_ANALOG_MIXER_ADC_REG, 2, 0, NULL, 0),
 	SND_SOC_DAPM_PGA("AUXR Input",
@@ -1165,6 +1166,7 @@ static int lm49453_set_dai_fmt(struct snd_soc_dai *codec_dai, unsigned int fmt)
 	default:
 		return -EINVAL;
 	}
+
 
 	switch (fmt & SND_SOC_DAIFMT_FORMAT_MASK) {
 	case SND_SOC_DAIFMT_I2S:

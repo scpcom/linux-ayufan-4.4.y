@@ -159,6 +159,7 @@ ioat_dma_prep_memcpy_lock(struct dma_chan *c, dma_addr_t dma_dest,
 	return &desc->txd;
 }
 
+
 static struct dma_async_tx_descriptor *
 __ioat_prep_xor_lock(struct dma_chan *c, enum sum_check_flags *result,
 		      dma_addr_t dest, dma_addr_t *src, unsigned int src_cnt,
@@ -465,6 +466,7 @@ __ioat_prep_pq_lock(struct dma_chan *c, enum sum_check_flags *result,
 		dump_desc_dbg(ioat_chan, compl_desc);
 	}
 
+
 	/* we leave the channel locked to ensure in order submission */
 	return &compl_desc->txd;
 }
@@ -744,3 +746,4 @@ ioat_prep_interrupt_lock(struct dma_chan *c, unsigned long flags)
 	/* we leave the channel locked to ensure in order submission */
 	return &desc->txd;
 }
+

@@ -161,6 +161,7 @@ void iriap_do_r_connect_event(struct iriap_cb *self, IRIAP_EVENT event,
 	(*iriap_state[ self->r_connect_state]) (self, event, skb);
 }
 
+
 /*
  * Function state_s_disconnect (event, skb)
  *
@@ -333,6 +334,7 @@ static void state_s_wait_for_call(struct iriap_cb *self, IRIAP_EVENT event,
 {
 	pr_debug("%s(), Not implemented\n", __func__);
 }
+
 
 /*
  * Function state_s_wait_active (event, skb)

@@ -41,6 +41,7 @@
 #include "defs.h"
 #include "dev.h"
 
+
 /********************************************************************/
 /* Module stuff                                                     */
 /********************************************************************/
@@ -48,6 +49,8 @@
 MODULE_AUTHOR("Holger Schurig <hs4233@mail.mn-solutions.de>");
 MODULE_DESCRIPTION("Driver for Marvell 83xx compact flash WLAN cards");
 MODULE_LICENSE("GPL");
+
+
 
 /********************************************************************/
 /* Data structures                                                  */
@@ -60,6 +63,7 @@ struct if_cs_card {
 	bool align_regs;
 	u32 model;
 };
+
 
 enum {
 	MODEL_UNKNOWN = 0x00,
@@ -84,6 +88,7 @@ MODULE_FIRMWARE("libertas/cf8385_helper.bin");
 MODULE_FIRMWARE("libertas/cf8385.bin");
 MODULE_FIRMWARE("libertas_cs_helper.fw");
 MODULE_FIRMWARE("libertas_cs.fw");
+
 
 /********************************************************************/
 /* Hardware access                                                  */
@@ -153,6 +158,7 @@ static inline void if_cs_write16_rep(
 	iowrite16_rep(card->iobase + reg, buf, count);
 }
 
+
 /*
  * I know that polling/delaying is frowned upon. However, this procedure
  * with polling is needed while downloading the firmware. At this stage,
@@ -178,6 +184,8 @@ static int if_cs_poll_while_fw_download(struct if_cs_card *card, uint addr, u8 r
 	return -ETIME;
 }
 
+
+
 /*
  * First the bitmasks for the host/card interrupt/status registers:
  */
@@ -187,6 +195,8 @@ static int if_cs_poll_while_fw_download(struct if_cs_card *card, uint addr, u8 r
 #define IF_CS_BIT_RESP			0x0008
 #define IF_CS_BIT_EVENT			0x0010
 #define	IF_CS_BIT_MASK			0x001f
+
+
 
 /*
  * It's not really clear to me what the host status register is for. It
@@ -563,6 +573,9 @@ static irqreturn_t if_cs_interrupt(int irq, void *data)
 	return IRQ_HANDLED;
 }
 
+
+
+
 /********************************************************************/
 /* Firmware                                                         */
 /********************************************************************/
@@ -662,6 +675,7 @@ done:
 	return ret;
 }
 
+
 static int if_cs_prog_real(struct if_cs_card *card, const struct firmware *fw)
 {
 	int ret = 0;
@@ -697,6 +711,7 @@ static int if_cs_prog_real(struct if_cs_card *card, const struct firmware *fw)
 		if (retry) {
 			sent -= len;
 		}
+
 
 		if_cs_write16(card, IF_CS_CMD_LEN, len);
 
@@ -764,6 +779,7 @@ static void if_cs_prog_firmware(struct lbs_private *priv, int ret,
 	}
 }
 
+
 /********************************************************************/
 /* Callback functions for libertas.ko                               */
 /********************************************************************/
@@ -797,6 +813,7 @@ static int if_cs_host_to_card(struct lbs_private *priv,
 	return ret;
 }
 
+
 static void if_cs_release(struct pcmcia_device *p_dev)
 {
 	struct if_cs_card *card = p_dev->priv;
@@ -810,6 +827,7 @@ static void if_cs_release(struct pcmcia_device *p_dev)
 
 	lbs_deb_leave(LBS_DEB_CS);
 }
+
 
 static int if_cs_ioprobe(struct pcmcia_device *p_dev, void *priv_data)
 {
@@ -947,6 +965,7 @@ out:
 	return ret;
 }
 
+
 static void if_cs_detach(struct pcmcia_device *p_dev)
 {
 	struct if_cs_card *card = p_dev->priv;
@@ -961,6 +980,8 @@ static void if_cs_detach(struct pcmcia_device *p_dev)
 
 	lbs_deb_leave(LBS_DEB_CS);
 }
+
+
 
 /********************************************************************/
 /* Module initialization                                            */

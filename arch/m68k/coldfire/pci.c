@@ -56,6 +56,7 @@ static unsigned char mcf_host_irq[] = {
 	0, 69, 69, 71, 71,
 };
 
+
 static inline void syncio(void)
 {
 	/* The ColdFire "nop" instruction waits for all bus IO to complete */

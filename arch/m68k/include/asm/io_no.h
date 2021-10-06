@@ -136,6 +136,7 @@ static inline void io_insl(unsigned int addr, void *buf, int len)
 
 #define IO_SPACE_LIMIT 0xffffffff
 
+
 /* Values for nocacheflag and cmode */
 #define IOMAP_FULL_CACHING		0
 #define IOMAP_NOCACHE_SER		1

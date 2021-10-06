@@ -42,6 +42,7 @@ HERE:
 	}
 }
 
+
 /*
  * Save stack-backtrace addresses into a stack_trace buffer.
  */

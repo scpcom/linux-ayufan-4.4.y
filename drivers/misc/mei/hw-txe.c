@@ -174,6 +174,7 @@ static bool mei_txe_aliveness_set(struct mei_device *dev, u32 req)
 	return do_req;
 }
 
+
 /**
  * mei_txe_aliveness_req_get - get aliveness requested register value
  *
@@ -544,6 +545,7 @@ static u32 mei_txe_readiness_get(struct mei_device *dev)
 	return mei_txe_br_reg_read(hw, HICR_SEC_IPC_READINESS_REG);
 }
 
+
 /**
  * mei_txe_readiness_is_sec_rdy - check readiness
  *  for HICR_SEC_IPC_READINESS_SEC_RDY
@@ -669,6 +671,7 @@ static void mei_txe_hw_config(struct mei_device *dev)
 	dev_dbg(dev->dev, "aliveness_resp = 0x%08x, readiness = 0x%08x.\n",
 		hw->aliveness, hw->readiness);
 }
+
 
 /**
  * mei_txe_write - writes a message to device.
@@ -931,6 +934,7 @@ static int mei_txe_hw_start(struct mei_device *dev)
 	 */
 	mei_txe_input_ready_interrupt_enable(dev);
 
+
 	/*  Set the SICR_SEC_IPC_OUTPUT_STATUS.IPC_OUTPUT_READY bit */
 	mei_txe_output_ready_set(hw);
 
@@ -984,6 +988,7 @@ static bool mei_txe_check_and_ack_intrs(struct mei_device *dev, bool do_ack)
 		if (ipc_isr & SEC_IPC_HOST_INT_STATUS_IN_RDY)
 			hw->intr_cause |= TXE_INTR_IN_READY;
 
+
 		mei_txe_intr_disable(dev);
 		/* Clear the interrupts in hierarchy:
 		 * IPC and Bridge, than the High Level */
@@ -1015,6 +1020,7 @@ irqreturn_t mei_txe_irq_quick_handler(int irq, void *dev_id)
 	return IRQ_NONE;
 }
 
+
 /**
  * mei_txe_irq_thread_handler - txe interrupt thread
  *
@@ -1035,6 +1041,7 @@ irqreturn_t mei_txe_irq_thread_handler(int irq, void *dev_id)
 		mei_txe_br_reg_read(hw, HHISR_REG),
 		mei_txe_br_reg_read(hw, HISR_REG),
 		mei_txe_sec_reg_read_silent(hw, SEC_IPC_HOST_INT_STATUS_REG));
+
 
 	/* initialize our complete list */
 	mutex_lock(&dev->device_lock);
@@ -1087,6 +1094,7 @@ irqreturn_t mei_txe_irq_thread_handler(int irq, void *dev_id)
 		if (waitqueue_active(&hw->wait_aliveness_resp))
 			wake_up(&hw->wait_aliveness_resp);
 	}
+
 
 	/* Output Doorbell:
 	 * Detection of SeC having sent output to host

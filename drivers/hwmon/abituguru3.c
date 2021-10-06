@@ -128,6 +128,7 @@
 #define ABIT_UGURU3_STATUS_READY_FOR_READ	0x01
 #define ABIT_UGURU3_STATUS_BUSY			0x02
 
+
 /* Structures */
 struct abituguru3_sensor_info {
 	const char *name;
@@ -192,6 +193,7 @@ struct abituguru3_data {
 	 */
 	u8 settings[48][3];
 };
+
 
 /* Constants */
 static const struct abituguru3_motherboard_info abituguru3_motherboards[] = {
@@ -625,6 +627,7 @@ static const struct abituguru3_motherboard_info abituguru3_motherboards[] = {
 	},
 	{ 0x0000, { NULL }, { { NULL, 0, 0, 0, 0, 0 } } }
 };
+
 
 /* Insmod parameters */
 static bool force;

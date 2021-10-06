@@ -258,6 +258,7 @@ static inline int exynos_dpi_bind(struct drm_device *dev,
 int exynos_atomic_commit(struct drm_device *dev, struct drm_atomic_state *state,
 			 bool async);
 
+
 extern struct platform_driver fimd_driver;
 extern struct platform_driver exynos5433_decon_driver;
 extern struct platform_driver decon_driver;

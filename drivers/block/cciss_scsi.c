@@ -469,6 +469,7 @@ cciss_scsi_remove_entry(ctlr_info_t *h, int hostno, int entry,
 			sd.bus, sd.target, sd.lun);
 }
 
+
 #define SCSI3ADDR_EQ(a,b) ( \
 	(a)[7] == (b)[7] && \
 	(a)[6] == (b)[6] && \
@@ -1204,6 +1205,7 @@ cciss_update_non_disk_devices(ctlr_info_t *h, int hostno)
 		goto out;
 	}
 
+
 	/* adjust our table of devices */	
 	for (i = 0; i < num_luns; i++) {
 		/* for each physical lun, do an inquiry */
@@ -1401,6 +1403,7 @@ static void cciss_scatter_gather(ctlr_info_t *h, CommandList_struct *c,
 		c->Header.SGList = c->Header.SGTotal;
 	return;
 }
+
 
 static int
 cciss_scsi_queue_command_lck(struct scsi_cmnd *cmd, void (*done)(struct scsi_cmnd *))

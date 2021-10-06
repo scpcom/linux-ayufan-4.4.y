@@ -686,6 +686,7 @@ static void dispc_ovl_set_scale_coef(enum omap_plane plane, int fir_hinc,
 	}
 }
 
+
 static void dispc_ovl_write_color_conv_coef(enum omap_plane plane,
 		const struct color_conv_coef *ct)
 {
@@ -2889,6 +2890,7 @@ static void dispc_mgr_enable_fifohandcheck(enum omap_channel channel, bool enabl
 	mgr_fld_write(channel, DISPC_MGR_FLD_FIFOHANDCHECK, enable);
 }
 
+
 static void dispc_mgr_set_lcd_type_tft(enum omap_channel channel)
 {
 	mgr_fld_write(channel, DISPC_MGR_FLD_STNTFT, 1);
@@ -2898,6 +2900,7 @@ void dispc_set_loadmode(enum omap_dss_load_mode mode)
 {
 	REG_FLD_MOD(DISPC_CONFIG, mode, 2, 1);
 }
+
 
 static void dispc_mgr_set_default_color(enum omap_channel channel, u32 color)
 {

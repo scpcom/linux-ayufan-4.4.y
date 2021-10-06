@@ -74,4 +74,5 @@ struct virtio_console_control {
 #define VIRTIO_CONSOLE_PORT_OPEN	6
 #define VIRTIO_CONSOLE_PORT_NAME	7
 
+
 #endif /* _UAPI_LINUX_VIRTIO_CONSOLE_H */

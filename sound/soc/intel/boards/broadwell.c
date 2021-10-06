@@ -90,6 +90,7 @@ static int broadwell_rt286_codec_init(struct snd_soc_pcm_runtime *rtd)
 	return 0;
 }
 
+
 static int broadwell_ssp0_fixup(struct snd_soc_pcm_runtime *rtd,
 			struct snd_pcm_hw_params *params)
 {

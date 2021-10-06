@@ -31,6 +31,7 @@
 #include "../codecs/wm8731.h"
 #include "atmel_ssc_dai.h"
 
+
 #define MCLK_RATE 12288000
 
 #define DRV_NAME "sam9x5-snd-wm8731"

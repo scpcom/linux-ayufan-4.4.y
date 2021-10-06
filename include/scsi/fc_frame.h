@@ -90,6 +90,7 @@ struct fcoe_rcv_info {
 	u8		granted_mac[ETH_ALEN]; /* FCoE MAC address */
 };
 
+
 /*
  * Get fc_frame pointer for an skb that's already been imported.
  */

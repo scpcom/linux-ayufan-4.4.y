@@ -31,8 +31,10 @@
     *  MA 02111-1307 USA
     ********************************************************************* */
 
+
 #ifndef _SB1250_DMA_H
 #define _SB1250_DMA_H
+
 
 #include <asm/sibyte/sb1250_defs.h>
 
@@ -47,6 +49,7 @@
  * Registers: DMA_CONFIG0_SER_x_RX
  * Registers: DMA_CONFIG0_SER_x_TX
  */
+
 
 #define M_DMA_DROP		    _SB_MAKEMASK1(0)
 
@@ -138,6 +141,7 @@
 
 #define M_DMA_DSCRBASE_MBZ	    _SB_MAKEMASK(4, 0)
 
+
 /*
  * ASIC Mode Base Address (Table 7-7)
  */
@@ -149,6 +153,7 @@
  */
 
 /* No bitfields */
+
 
 /*
  * Current Descriptor Address Register (Table 7-11)
@@ -222,6 +227,7 @@
 /*
  * Descriptor doubleword "B"  (Table 7-13)
  */
+
 
 #define S_DMA_DSCRB_OPTIONS	    _SB_MAKE64(0)
 #define M_DMA_DSCRB_OPTIONS	    _SB_MAKEMASK(4, S_DMA_DSCRB_OPTIONS)
@@ -366,6 +372,7 @@
 #define K_DMA_SERTX_APPENDPAD	    _SB_MAKEMASK1(2)
 #define K_DMA_SERTX_ABORT	    _SB_MAKEMASK1(3)
 
+
 /*  *********************************************************************
     *  Data Mover Registers
     ********************************************************************* */
@@ -430,6 +437,7 @@
 #define G_DM_CUR_DSCR_DSCR_COUNT(r) _SB_GETVALUE(r, S_DM_CUR_DSCR_DSCR_COUNT,\
 				     M_DM_CUR_DSCR_DSCR_COUNT)
 
+
 #if SIBYTE_HDR_FEATURE(1250, PASS3) || SIBYTE_HDR_FEATURE(112x, PASS1) || SIBYTE_HDR_FEATURE_CHIP(1480)
 /*
  * Data Mover Channel Partial Result Registers
@@ -453,6 +461,7 @@
 #define M_DM_PARTIAL_ODD_BYTE	      _SB_MAKEMASK1(48)
 #endif /* 1250 PASS3 || 112x PASS1 || 1480 */
 
+
 #if SIBYTE_HDR_FEATURE(1250, PASS3) || SIBYTE_HDR_FEATURE(112x, PASS1) || SIBYTE_HDR_FEATURE_CHIP(1480)
 /*
  * Data Mover CRC Definition Registers
@@ -471,6 +480,7 @@
 #define G_CRC_DEF_CRC_POLY(r)	      _SB_GETVALUE(r, S_CRC_DEF_CRC_POLY,\
 				       M_CRC_DEF_CRC_POLY)
 #endif /* 1250 PASS3 || 112x PASS1 || 1480 */
+
 
 #if SIBYTE_HDR_FEATURE(1250, PASS3) || SIBYTE_HDR_FEATURE(112x, PASS1) || SIBYTE_HDR_FEATURE_CHIP(1480)
 /*
@@ -502,6 +512,7 @@
 
 #define M_CTCP_DEF_CRC_BIT_ORDER      _SB_MAKEMASK1(50)
 #endif /* 1250 PASS3 || 112x PASS1 || 1480 */
+
 
 /*
  * Data Mover Descriptor Doubleword "A"	 (Table 7-26)
@@ -543,6 +554,7 @@
 #define V_DM_DSCRA_DIR_SRC_DECR	    _SB_MAKEVALUE(K_DM_DSCRA_DIR_SRC_DECR, S_DM_DSCRA_DIR_SRC)
 #define V_DM_DSCRA_DIR_SRC_CONST    _SB_MAKEVALUE(K_DM_DSCRA_DIR_SRC_CONST, S_DM_DSCRA_DIR_SRC)
 
+
 #define M_DM_DSCRA_ZERO_MEM	    _SB_MAKEMASK1(48)
 #define M_DM_DSCRA_PREFETCH	    _SB_MAKEMASK1(49)
 #define M_DM_DSCRA_L2C_DEST	    _SB_MAKEMASK1(50)
@@ -577,5 +589,6 @@
 #define M_DM_DSCRB_SRC_LENGTH	    _SB_MAKEMASK(20, S_DM_DSCRB_SRC_LENGTH)
 #define V_DM_DSCRB_SRC_LENGTH(x)    _SB_MAKEVALUE(x, S_DM_DSCRB_SRC_LENGTH)
 #define G_DM_DSCRB_SRC_LENGTH(x)    _SB_GETVALUE(x, S_DM_DSCRB_SRC_LENGTH, M_DM_DSCRB_SRC_LENGTH)
+
 
 #endif

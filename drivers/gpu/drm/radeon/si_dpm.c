@@ -1637,6 +1637,7 @@ static const struct si_dte_data dte_data_sun_xt =
 	true
 };
 
+
 static const struct si_cac_config_reg cac_weights_hainan[] =
 {
 	{ 0x0, 0x0000ffff, 0, 0x2d9, SISLANDS_CACCONFIG_CGIND },
@@ -1830,6 +1831,7 @@ static void si_calculate_leakage_for_v(struct radeon_device *rdev,
 {
 	si_calculate_leakage_for_v_formula(coeff, fixed_kt, v, i_leakage, leakage);
 }
+
 
 static void si_update_dte_from_pl2(struct radeon_device *rdev,
 				   struct si_dte_data *dte_data)
@@ -2535,6 +2537,7 @@ static int si_get_cac_std_voltage_max_min(struct radeon_device *rdev,
 	u32 i;
 	u32 v0_loadline;
 
+
 	if (table == NULL)
 		return -EINVAL;
 
@@ -2894,6 +2897,7 @@ static int si_init_smc_spll_table(struct radeon_device *rdev)
 
 		sclk += 512;
 	}
+
 
 	if (!ret)
 		ret = si_copy_bytes_to_smc(rdev, si_pi->spll_table_start,
@@ -3762,6 +3766,7 @@ static void si_setup_bsp(struct radeon_device *rdev)
 			       &pi->pbsp,
 			       &pi->pbsu);
 
+
         pi->dsp = BSP(pi->bsp) | BSU(pi->bsu);
 	pi->psp = BSP(pi->pbsp) | BSU(pi->pbsu);
 
@@ -4087,6 +4092,7 @@ static int si_populate_smc_voltage_tables(struct radeon_device *rdev,
 			table->voltageMaskTable.lowMask[SISLANDS_SMC_VOLTAGEMASK_VDDCI] =
 				cpu_to_be32(eg_pi->vddci_voltage_table.mask_low);
 		}
+
 
 		if (si_pi->mvdd_voltage_table.count) {
 			si_populate_smc_voltage_table(rdev, &si_pi->mvdd_voltage_table, table);
@@ -5054,6 +5060,7 @@ static int si_convert_power_level_to_smc(struct radeon_device *rdev,
 	if (ret)
 		return ret;
 
+
 	ret = si_get_std_voltage_value(rdev, &level->vddc, &std_vddc);
 	if (ret)
 		return ret;
@@ -5704,6 +5711,7 @@ static int si_upload_mc_reg_table(struct radeon_device *rdev,
 	memset(smc_mc_reg_table, 0, sizeof(SMC_SIslands_MCRegisters));
 
 	si_convert_mc_reg_table_to_smc(rdev, radeon_new_state, smc_mc_reg_table);
+
 
 	return si_copy_bytes_to_smc(rdev, address,
 				    (u8 *)&smc_mc_reg_table->data[SISLANDS_MCREGISTERTABLE_FIRST_DRIVERSTATE_SLOT],

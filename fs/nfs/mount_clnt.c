@@ -502,6 +502,7 @@ static struct rpc_procinfo mnt3_procedures[] = {
 	},
 };
 
+
 static const struct rpc_version mnt_version1 = {
 	.number		= 1,
 	.nrprocs	= ARRAY_SIZE(mnt_procedures),

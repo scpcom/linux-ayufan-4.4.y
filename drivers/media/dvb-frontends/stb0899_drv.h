@@ -157,4 +157,5 @@ static inline struct dvb_frontend *stb0899_attach(struct stb0899_config *config,
 
 #endif //CONFIG_DVB_STB0899
 
+
 #endif

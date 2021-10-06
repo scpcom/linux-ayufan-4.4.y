@@ -15,3 +15,4 @@ struct rs485_write {
         unsigned short outc_size;
         unsigned char *outc;
 };
+

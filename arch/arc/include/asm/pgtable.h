@@ -228,6 +228,7 @@
  */
 #define FIRST_USER_ADDRESS      0UL
 
+
 /****************************************************************
  * Bucket load of VM Helpers
  */

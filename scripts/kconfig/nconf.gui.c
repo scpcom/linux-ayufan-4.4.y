@@ -142,6 +142,7 @@ void set_colors()
 	}
 }
 
+
 /* this changes the windows attributes !!! */
 void print_in_middle(WINDOW *win,
 		int starty,
@@ -151,6 +152,7 @@ void print_in_middle(WINDOW *win,
 		chtype color)
 {      int length, x, y;
 	float temp;
+
 
 	if (win == NULL)
 		win = stdscr;
@@ -253,6 +255,7 @@ int btn_dialog(WINDOW *main_window, const char *msg, int btn_num, ...)
 	int i, x, y;
 	int res = -1;
 
+
 	va_start(ap, btn_num);
 	for (i = 0; i < btn_num; i++) {
 		btn = va_arg(ap, char *);
@@ -275,6 +278,7 @@ int btn_dialog(WINDOW *main_window, const char *msg, int btn_num, ...)
 	/* place dialog in middle of screen */
 	y = (getmaxy(stdscr)-(msg_lines+4))/2;
 	x = (getmaxx(stdscr)-(total_width+4))/2;
+
 
 	/* create the windows */
 	if (btn_num > 0)
@@ -309,6 +313,7 @@ int btn_dialog(WINDOW *main_window, const char *msg, int btn_num, ...)
 	menu_opts_on(menu, O_NONCYCLIC);
 	set_menu_mark(menu, "");
 	post_menu(menu);
+
 
 	touchwin(win);
 	refresh_all_windows(main_window);

@@ -415,6 +415,7 @@ static void exynos5420_pm_prepare(void)
 	pmu_raw_writel(tmp, EXYNOS5420_PSGEN_OPTION);
 }
 
+
 static int exynos_pm_suspend(void)
 {
 	exynos_pm_central_suspend();

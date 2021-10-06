@@ -161,6 +161,7 @@ static void solo_vout_config(struct solo_dev *solo_dev)
 		       SOLO_VO_DISP_ERASE_COUNT(8) |
 		       SOLO_VO_DISP_BASE(SOLO_DISP_EXT_ADDR));
 
+
 	solo_vout_config_cursor(solo_dev);
 
 	/* Enable channels we support */

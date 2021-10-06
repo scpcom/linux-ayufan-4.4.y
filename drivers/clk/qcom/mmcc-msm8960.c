@@ -590,6 +590,7 @@ static u8 pix_rdi_get_parent(struct clk_hw *hw)
 	u32 val;
 	struct clk_pix_rdi *rdi = to_clk_pix_rdi(hw);
 
+
 	regmap_read(rdi->clkr.regmap, rdi->s2_reg, &val);
 	if (val & rdi->s2_mask)
 		return 2;

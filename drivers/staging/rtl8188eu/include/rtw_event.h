@@ -38,6 +38,7 @@ Used to report that the requested site survey has been done.
 
 bss_cnt indicates the number of bss that has been reported.
 
+
 */
 struct surveydone_event {
 	unsigned int	bss_cnt;
@@ -46,6 +47,7 @@ struct surveydone_event {
 
 /*
 Used to report the link result of joinning the given bss
+
 
 join_res:
 -1: authentication fail

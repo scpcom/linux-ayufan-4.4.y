@@ -14,6 +14,7 @@ typedef unsigned long sigset_t;
 
 #endif /* __KERNEL__ */
 
+
 /*
  * Linux/AXP has different signal numbers that Linux/i386: I'm trying
  * to make it OSF/1 binary compatible, at least for normal binaries.
@@ -123,5 +124,6 @@ struct sigstack {
 	void __user *ss_sp;
 	int ss_onstack;
 };
+
 
 #endif /* _UAPI_ASMAXP_SIGNAL_H */

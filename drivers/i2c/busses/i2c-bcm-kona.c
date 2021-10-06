@@ -446,6 +446,7 @@ static int bcm_kona_i2c_write_fifo_single(struct bcm_kona_i2c_dev *dev,
 	return 0;
 }
 
+
 /* Write any amount of data using TX FIFO to the i2c bus */
 static int bcm_kona_i2c_write_fifo(struct bcm_kona_i2c_dev *dev,
 				   struct i2c_msg *msg)

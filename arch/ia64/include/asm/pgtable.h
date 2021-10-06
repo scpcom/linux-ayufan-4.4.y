@@ -12,6 +12,7 @@
  *	David Mosberger-Tang <davidm@hpl.hp.com>
  */
 
+
 #include <asm/mman.h>
 #include <asm/page.h>
 #include <asm/processor.h>
@@ -185,9 +186,11 @@
 #define pmd_ERROR(e)	printk("%s:%d: bad pmd %016lx.\n", __FILE__, __LINE__, pmd_val(e))
 #define pte_ERROR(e)	printk("%s:%d: bad pte %016lx.\n", __FILE__, __LINE__, pte_val(e))
 
+
 /*
  * Some definitions to translate between mem_map, PTEs, and page addresses:
  */
+
 
 /* Quick test to see if ADDR is a (potentially) valid physical address. */
 static inline long
@@ -211,10 +214,12 @@ ia64_phys_addr_valid (unsigned long addr)
  */
 #define kern_addr_valid(addr)	(1)
 
+
 /*
  * Now come the defines and routines to manage and access the three-level
  * page table.
  */
+
 
 #define VMALLOC_START		(RGN_BASE(RGN_GATE) + 0x200000000UL)
 #ifdef CONFIG_VIRTUAL_MEM_MAP
@@ -490,6 +495,7 @@ extern struct page *zero_page_memmap_ptr;
 #define HUGETLB_PGDIR_MASK	(~(HUGETLB_PGDIR_SIZE-1))
 #endif
 
+
 #define __HAVE_ARCH_PTEP_SET_ACCESS_FLAGS
 /*
  * Update PTEP with ENTRY, which is guaranteed to be a less
@@ -578,6 +584,7 @@ extern struct page *zero_page_memmap_ptr;
 #define __HAVE_ARCH_PTEP_SET_WRPROTECT
 #define __HAVE_ARCH_PTE_SAME
 #define __HAVE_ARCH_PGD_OFFSET_GATE
+
 
 #if CONFIG_PGTABLE_LEVELS == 3
 #include <asm-generic/pgtable-nopud.h>

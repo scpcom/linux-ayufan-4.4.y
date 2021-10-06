@@ -616,6 +616,7 @@ int tm6000_init(struct tm6000_core *dev)
 	return rc;
 }
 
+
 int tm6000_set_audio_bitrate(struct tm6000_core *dev, int bitrate)
 {
 	int val = 0;
@@ -636,6 +637,7 @@ int tm6000_set_audio_bitrate(struct tm6000_core *dev, int bitrate)
 	default:
 		return -EINVAL;
 	}
+
 
 	/* enable I2S, if we use sif or external I2S device */
 	if (dev->dev_type == TM6010) {

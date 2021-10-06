@@ -278,6 +278,7 @@
 #define RSV_BITMASK(x)		(1 << ((x) - 16))
 #define RSV_GETBIT(x, y)	(((x) & RSV_BITMASK(y)) ? 1 : 0)
 
+
 /* SPI operation codes */
 #define ENC28J60_READ_CTRL_REG	0x00
 #define ENC28J60_READ_BUF_MEM	0x3A
@@ -286,6 +287,7 @@
 #define ENC28J60_BIT_FIELD_SET	0x80
 #define ENC28J60_BIT_FIELD_CLR	0xA0
 #define ENC28J60_SOFT_RESET	0xFF
+
 
 /* buffer boundaries applied to internal 8K ram
  * entire available packet buffer space is allocated.

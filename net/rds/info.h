@@ -26,4 +26,5 @@ void rds_info_copy(struct rds_info_iterator *iter, void *data,
 		   unsigned long bytes);
 void rds_info_iter_unmap(struct rds_info_iterator *iter);
 
+
 #endif

@@ -311,6 +311,7 @@ static void iriap_disconnect_indication(void *instance, void *sap,
 	if (self->mode == IAS_CLIENT) {
 		pr_debug("%s(), disconnect as client\n", __func__);
 
+
 		iriap_do_client_event(self, IAP_LM_DISCONNECT_INDICATION,
 				      NULL);
 		/*

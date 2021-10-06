@@ -108,6 +108,7 @@ static int ledtrig_cpu_notify(struct notifier_block *self,
 	return NOTIFY_OK;
 }
 
+
 static struct notifier_block ledtrig_cpu_nb = {
 	.notifier_call = ledtrig_cpu_notify,
 };

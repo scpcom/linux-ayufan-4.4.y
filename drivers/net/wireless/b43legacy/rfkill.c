@@ -25,6 +25,7 @@
 #include "radio.h"
 #include "b43legacy.h"
 
+
 /* Returns TRUE, if the radio is enabled in hardware. */
 bool b43legacy_is_hw_radio_enabled(struct b43legacy_wldev *dev)
 {

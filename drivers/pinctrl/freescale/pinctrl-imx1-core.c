@@ -52,6 +52,7 @@ struct imx1_pinctrl {
 
 #define MX1_PORT_STRIDE 0x100
 
+
 /*
  * MUX_ID format defines
  */
@@ -61,6 +62,7 @@ struct imx1_pinctrl {
 #define MX1_MUX_OCONF(val) (((BIT(4) | BIT(5)) & val) >> 4)
 #define MX1_MUX_ICONFA(val) (((BIT(8) | BIT(9)) & val) >> 8)
 #define MX1_MUX_ICONFB(val) (((BIT(10) | BIT(11)) & val) >> 10)
+
 
 /*
  * IMX1 IOMUXC manages the pins based on ports. Each port has 32 pins. IOMUX
@@ -575,6 +577,7 @@ static int imx1_pinctrl_parse_dt(struct platform_device *pdev,
 	info->ngroups = ngroups;
 	info->groups = devm_kzalloc(&pdev->dev,
 			ngroups * sizeof(struct imx1_pin_group), GFP_KERNEL);
+
 
 	if (!info->functions || !info->groups)
 		return -ENOMEM;

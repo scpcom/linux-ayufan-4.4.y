@@ -115,6 +115,7 @@ u32 rtl88e_phy_query_rf_reg(struct ieee80211_hw *hw,
 
 	spin_lock_irqsave(&rtlpriv->locks.rf_lock, flags);
 
+
 	original_value = _rtl88e_phy_rf_serial_read(hw, rfpath, regaddr);
 	bitshift = _rtl88e_phy_calculate_bit_shift(bitmask);
 	readback_value = (original_value & bitmask) >> bitshift;
@@ -152,6 +153,7 @@ void rtl88e_phy_set_rf_reg(struct ieee80211_hw *hw,
 		}
 
 	_rtl88e_phy_rf_serial_write(hw, rfpath, regaddr, data);
+
 
 	spin_unlock_irqrestore(&rtlpriv->locks.rf_lock, flags);
 
@@ -1469,6 +1471,7 @@ static u8 _rtl88e_phy_path_a_rx_iqk(struct ieee80211_hw *hw, bool config_pathb)
 	reg_eac = rtl_get_bbreg(hw, RRX_POWER_AFTER_IQK_A_2, MASKDWORD);
 	reg_e94 = rtl_get_bbreg(hw, RTX_POWER_BEFORE_IQK_A, MASKDWORD);
 	reg_e9c = rtl_get_bbreg(hw, RTX_POWER_AFTER_IQK_A, MASKDWORD);
+
 
 	if (!(reg_eac & BIT(28)) &&
 	    (((reg_e94 & 0x03FF0000) >> 16) != 0x142) &&

@@ -957,6 +957,7 @@ static int hw_rule_rate(struct snd_pcm_hw_params *params,
 	return changed;
 }
 
+
 static int hw_rule_channels(struct snd_pcm_hw_params *params,
 			    struct snd_pcm_hw_rule *rule)
 {
@@ -1120,6 +1121,7 @@ static int snd_usb_pcm_check_knot(struct snd_pcm_runtime *runtime,
 
 	return 0;
 }
+
 
 /*
  * set up the runtime hardware information.

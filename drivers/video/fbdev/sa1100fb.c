@@ -214,6 +214,8 @@ static const struct sa1100fb_rgb def_rgb_16 = {
 	.transp	= { .offset = 0,  .length = 0, },
 };
 
+
+
 static int sa1100fb_activate_var(struct fb_var_screeninfo *var, struct sa1100fb_info *);
 static void set_ctrlr_state(struct sa1100fb_info *fbi, u_int state);
 
@@ -1122,6 +1124,7 @@ static struct fb_monspecs monspecs = {
 	.vfmin	= 50,
 	.vfmax	= 65,
 };
+
 
 static struct sa1100fb_info *sa1100fb_init_fbinfo(struct device *dev)
 {

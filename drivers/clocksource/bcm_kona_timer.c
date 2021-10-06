@@ -26,6 +26,7 @@
 #include <linux/of_address.h>
 #include <linux/of_irq.h>
 
+
 #define KONA_GPTIMER_STCS_OFFSET			0x00000000
 #define KONA_GPTIMER_STCLO_OFFSET			0x00000004
 #define KONA_GPTIMER_STCHI_OFFSET			0x00000008

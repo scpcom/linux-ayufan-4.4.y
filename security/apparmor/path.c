@@ -25,6 +25,7 @@
 #include "include/path.h"
 #include "include/policy.h"
 
+
 /* modified from dcache.c */
 static int prepend(char **buffer, int buflen, const char *str, int namelen)
 {

@@ -147,6 +147,7 @@
 	 SH_EVENT_OCCURRED_II_INT1_MASK | SH2_EVENT_OCCURRED_EXTIO_INT2_MASK | \
 	 SH2_EVENT_OCCURRED_EXTIO_INT3_MASK)
 
+
 /* ==================================================================== */
 /*                         LEDS                                         */
 /* ==================================================================== */

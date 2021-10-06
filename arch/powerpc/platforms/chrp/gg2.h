@@ -29,6 +29,7 @@
 #define GG2_ROM_BASE0		0xff000000	/* ROM bank 0 */
 #define GG2_ROM_BASE1		0xff800000	/* ROM bank 1 */
 
+
     /*
      *  GG2 specific PCI Registers
      */

@@ -144,6 +144,7 @@ static inline void bfin_pm_standby_restore(void)
 	bfin_gpio_pm_standby_ctrl(0);
 }
 
+
 struct gpio_port_s {
 	unsigned short data;
 	unsigned short maska;

@@ -49,6 +49,7 @@
 
 /* line disciplines for r3964 protocol */
 
+
 /*
  * Ioctl-commands
  */
@@ -91,5 +92,7 @@ struct r3964_client_message {
 };
 
 #define R3964_MTU      256
+
+
 
 #endif /* _UAPI__LINUX_N_R3964_H__ */

@@ -75,8 +75,10 @@ struct thread_struct {
 
 #define INIT_THREAD  { }
 
+
 #define KSTK_EIP(tsk)   (task_pt_regs(tsk)->pc)
 #define KSTK_ESP(tsk)   (task_pt_regs(tsk)->sp)
+
 
 void start_thread(struct pt_regs *regs, unsigned long nip, unsigned long sp);
 void release_thread(struct task_struct *);

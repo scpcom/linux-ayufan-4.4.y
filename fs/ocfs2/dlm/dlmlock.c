@@ -24,6 +24,7 @@
  *
  */
 
+
 #include <linux/module.h>
 #include <linux/fs.h>
 #include <linux/types.h>
@@ -37,6 +38,7 @@
 #include <linux/inet.h>
 #include <linux/spinlock.h>
 #include <linux/delay.h>
+
 
 #include "cluster/heartbeat.h"
 #include "cluster/nodemanager.h"
@@ -202,6 +204,7 @@ void dlm_revert_pending_lock(struct dlm_lock_resource *res,
 	lock->lksb->flags &= ~DLM_LKSB_GET_LVB;
 }
 
+
 /*
  * locking:
  *   caller needs:  none
@@ -286,6 +289,7 @@ static enum dlm_status dlmlock_remote(struct dlm_ctxt *dlm,
 	wake_up(&res->wq);
 	return status;
 }
+
 
 /* for remote lock creation.
  * locking:
@@ -532,6 +536,7 @@ leave:
 
 	return status;
 }
+
 
 /* fetch next node-local (u8 nodenum + u56 cookie) into u64 */
 static inline void dlm_get_next_cookie(u8 node_num, u64 *cookie)

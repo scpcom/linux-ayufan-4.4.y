@@ -9,6 +9,7 @@
 #include "ebb.h"
 #include "reg.h"
 
+
 /*
  * Test basic access to the EBB regs, they should be user accessible with no
  * kernel interaction required.

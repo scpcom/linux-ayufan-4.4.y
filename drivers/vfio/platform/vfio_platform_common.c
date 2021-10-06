@@ -364,6 +364,7 @@ static ssize_t vfio_platform_read_mmio(struct vfio_platform_region *reg,
 			filled = 1;
 		}
 
+
 		count -= filled;
 		done += filled;
 		off += filled;

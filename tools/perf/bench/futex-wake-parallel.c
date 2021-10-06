@@ -173,6 +173,7 @@ static void print_summary(void)
 	       rel_stddev_stats(waketime_stddev, waketime_avg));
 }
 
+
 static void do_run_stats(struct thread_data *waking_worker)
 {
 	unsigned int i;

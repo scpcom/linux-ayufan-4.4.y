@@ -399,6 +399,7 @@ __entry_uspace_handle_mmu_fault_sstep:
 	bra		__entry_uspace_softprog_interrupt_reentry
 #endif
 
+
 ###############################################################################
 #
 # entry point for Software and Progam interrupts generated whilst executing kernel code
@@ -474,6 +475,7 @@ __entry_kernel_handle_mmu_fault_sstep:
 	sti		gr30,@(sp,#REG__STATUS)
 	bra		__entry_kernel_softprog_interrupt_reentry
 #endif
+
 
 ###############################################################################
 #
@@ -577,6 +579,7 @@ __entry_common:
 	LEDS		0x6009
 	jmpl		@(gr5,gr0)
 
+
 	.size		__entry_common,.-__entry_common
 
 ###############################################################################
@@ -601,6 +604,7 @@ __entry_insn_mmu_fault:
 	setlo		%lo(do_page_fault),gr5
 	jmpl		@(gr5,gr0)	; call do_page_fault(0,esr0,ear0)
 #endif
+
 
 ###############################################################################
 #
@@ -900,6 +904,7 @@ __syscall_call:
 	ld		@(gr5,gr7),gr4
 	calll		@(gr4,gr0)
 
+
 ###############################################################################
 #
 # return to interrupted process
@@ -1043,6 +1048,7 @@ __entry_return_singlestep:
 __entry_return_singlestep_breaks_here:
 	nop
 
+
 ###############################################################################
 #
 # return to a process interrupted in kernel space
@@ -1073,6 +1079,7 @@ __entry_return_from_kernel_interrupt:
 	call		preempt_schedule_irq
 #endif
 	bra		__entry_return_direct
+
 
 ###############################################################################
 #
@@ -1159,6 +1166,7 @@ __syscall_badsys:
 	setlos		#-ENOSYS,gr8
 	sti		gr8,@(gr28,#REG_GR(8))	; save return value
 	bra		__entry_resume_userspace
+
 
 ###############################################################################
 #

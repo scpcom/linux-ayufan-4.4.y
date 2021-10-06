@@ -737,6 +737,7 @@ static const struct snd_soc_component_driver ux500_msp_component = {
 	.name		= "ux500-msp",
 };
 
+
 static int ux500_msp_drv_probe(struct platform_device *pdev)
 {
 	struct ux500_msp_i2s_drvdata *drvdata;

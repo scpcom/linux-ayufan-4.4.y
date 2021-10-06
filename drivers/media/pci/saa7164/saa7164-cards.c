@@ -956,3 +956,4 @@ char *saa7164_unitid_name(struct saa7164_dev *dev, u8 unitid)
 
 	return undefed;
 }
+

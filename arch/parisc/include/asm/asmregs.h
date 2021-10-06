@@ -42,6 +42,7 @@ gp:	.reg	r27
 ap:	.reg	r29
 #endif
 
+
 r0:	.reg	%r0
 r1:	.reg	%r1
 r2:	.reg	%r2
@@ -75,6 +76,7 @@ r29:	.reg	%r29
 r30:	.reg	%r30
 r31:	.reg	%r31
 
+
 ;! Space Registers
 
 sr0:	.reg	%sr0
@@ -85,6 +87,7 @@ sr4:	.reg	%sr4
 sr5:	.reg	%sr5
 sr6:	.reg	%sr6
 sr7:	.reg	%sr7
+
 
 ;! Floating Point Registers
 
@@ -121,6 +124,7 @@ fr29:	.reg	%fr29
 fr30:	.reg	%fr30
 fr31:	.reg	%fr31
 
+
 ;! Control Registers
 
 rctr:	.reg	%cr0
@@ -148,6 +152,7 @@ tr4:	.reg	%cr28
 tr5:	.reg	%cr29
 tr6:	.reg	%cr30
 tr7:	.reg	%cr31
+
 
 cr0:	.reg	%cr0
 cr8:	.reg	%cr8

@@ -13,9 +13,11 @@ enum {
 	IPT_TTL_GT,		/* greater than */
 };
 
+
 struct ipt_ttl_info {
 	__u8	mode;
 	__u8	ttl;
 };
+
 
 #endif

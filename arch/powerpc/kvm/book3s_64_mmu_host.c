@@ -53,6 +53,7 @@ static u16 kvmppc_sid_hash(struct kvm_vcpu *vcpu, u64 gvsid)
 		     ((gvsid >> (SID_MAP_BITS * 0)) & SID_MAP_MASK));
 }
 
+
 static struct kvmppc_sid_map *find_sid_vsid(struct kvm_vcpu *vcpu, u64 gvsid)
 {
 	struct kvmppc_sid_map *map;

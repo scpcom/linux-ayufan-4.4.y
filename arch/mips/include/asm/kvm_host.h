@@ -54,6 +54,7 @@
 #define KVM_REG_MIPS_CP0_XCONTEXT	MIPS_CP0_64(20, 0)
 #define KVM_REG_MIPS_CP0_ERROREPC	MIPS_CP0_64(30, 0)
 
+
 #define KVM_MAX_VCPUS		1
 #define KVM_USER_MEM_SLOTS	8
 /* memory slots that does not exposed to userspace */
@@ -61,6 +62,8 @@
 
 #define KVM_COALESCED_MMIO_PAGE_OFFSET 1
 #define KVM_HALT_POLL_NS_DEFAULT 500000
+
+
 
 /* Special address that contains the comm page, used for reducing # of traps */
 #define KVM_GUEST_COMMPAGE_ADDR		0x0
@@ -439,6 +442,7 @@ struct kvm_vcpu_arch {
 	u8 fpu_enabled;
 	u8 msa_enabled;
 };
+
 
 #define kvm_read_c0_guest_index(cop0)		(cop0->reg[MIPS_CP0_TLB_INDEX][0])
 #define kvm_write_c0_guest_index(cop0, val)	(cop0->reg[MIPS_CP0_TLB_INDEX][0] = val)

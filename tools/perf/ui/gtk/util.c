@@ -4,6 +4,7 @@
 
 #include <string.h>
 
+
 struct perf_gtk_context *pgctx;
 
 struct perf_gtk_context *perf_gtk__activate_context(GtkWidget *window)

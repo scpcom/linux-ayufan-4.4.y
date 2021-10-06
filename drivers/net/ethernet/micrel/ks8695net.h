@@ -65,6 +65,7 @@
 							 * (0..15) High
 							 */
 
+
 /* DMA Transmit Control Register */
 #define DTXC_TRST		(1    << 31)	/* Soft Reset */
 #define DTXC_TBS		(0x3f << 24)	/* Transmit Burst Size */

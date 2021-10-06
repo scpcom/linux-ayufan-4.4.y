@@ -17,6 +17,7 @@
 
 static bd_t bd;
 
+
 static void platform_fixups(void)
 {
 	void *soc;

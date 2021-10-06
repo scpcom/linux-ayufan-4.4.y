@@ -28,6 +28,7 @@
 #include "dvb_frontend.h"
 #include "lgs8gl5.h"
 
+
 #define REG_RESET		0x02
 #define REG_RESET_OFF			0x01
 #define REG_03			0x03
@@ -50,11 +51,13 @@
 #define REG_STATUS_SYNC		0x04
 #define REG_STATUS_LOCK		0x01
 
+
 struct lgs8gl5_state {
 	struct i2c_adapter *i2c;
 	const struct lgs8gl5_config *config;
 	struct dvb_frontend frontend;
 };
+
 
 static int debug;
 #define dprintk(args...) \
@@ -62,6 +65,7 @@ static int debug;
 		if (debug) \
 			printk(KERN_DEBUG "lgs8gl5: " args); \
 	} while (0)
+
 
 /* Writes into demod's register */
 static int
@@ -82,6 +86,7 @@ lgs8gl5_write_reg(struct lgs8gl5_state *state, u8 reg, u8 data)
 			__func__, reg, data, ret);
 	return (ret != 1) ? -1 : 0;
 }
+
 
 /* Reads from demod's register */
 static int
@@ -112,6 +117,7 @@ lgs8gl5_read_reg(struct lgs8gl5_state *state, u8 reg)
 	return b1[0];
 }
 
+
 static int
 lgs8gl5_update_reg(struct lgs8gl5_state *state, u8 reg, u8 data)
 {
@@ -119,6 +125,7 @@ lgs8gl5_update_reg(struct lgs8gl5_state *state, u8 reg, u8 data)
 	lgs8gl5_write_reg(state, reg, data);
 	return 0;
 }
+
 
 /* Writes into alternate device's register */
 /* TODO:  Find out what that device is for! */
@@ -154,6 +161,7 @@ lgs8gl5_update_alt_reg(struct lgs8gl5_state *state, u8 reg, u8 data)
 	return (ret != 3) ? -1 : 0;
 }
 
+
 static void
 lgs8gl5_soft_reset(struct lgs8gl5_state *state)
 {
@@ -166,6 +174,7 @@ lgs8gl5_soft_reset(struct lgs8gl5_state *state)
 	lgs8gl5_write_reg(state, REG_RESET, val | REG_RESET_OFF);
 	msleep(5);
 }
+
 
 /* Starts demodulation */
 static void
@@ -218,6 +227,7 @@ lgs8gl5_start_demod(struct lgs8gl5_state *state)
 	lgs8gl5_soft_reset(state);
 }
 
+
 static int
 lgs8gl5_init(struct dvb_frontend *fe)
 {
@@ -236,6 +246,7 @@ lgs8gl5_init(struct dvb_frontend *fe)
 
 	return 0;
 }
+
 
 static int
 lgs8gl5_read_status(struct dvb_frontend *fe, enum fe_status *status)
@@ -258,6 +269,7 @@ lgs8gl5_read_status(struct dvb_frontend *fe, enum fe_status *status)
 	return 0;
 }
 
+
 static int
 lgs8gl5_read_ber(struct dvb_frontend *fe, u32 *ber)
 {
@@ -265,6 +277,7 @@ lgs8gl5_read_ber(struct dvb_frontend *fe, u32 *ber)
 
 	return 0;
 }
+
 
 static int
 lgs8gl5_read_signal_strength(struct dvb_frontend *fe, u16 *signal_strength)
@@ -276,6 +289,7 @@ lgs8gl5_read_signal_strength(struct dvb_frontend *fe, u16 *signal_strength)
 	return 0;
 }
 
+
 static int
 lgs8gl5_read_snr(struct dvb_frontend *fe, u16 *snr)
 {
@@ -286,6 +300,7 @@ lgs8gl5_read_snr(struct dvb_frontend *fe, u16 *snr)
 	return 0;
 }
 
+
 static int
 lgs8gl5_read_ucblocks(struct dvb_frontend *fe, u32 *ucblocks)
 {
@@ -293,6 +308,7 @@ lgs8gl5_read_ucblocks(struct dvb_frontend *fe, u32 *ucblocks)
 
 	return 0;
 }
+
 
 static int
 lgs8gl5_set_frontend(struct dvb_frontend *fe)
@@ -318,6 +334,7 @@ lgs8gl5_set_frontend(struct dvb_frontend *fe)
 	return 0;
 }
 
+
 static int
 lgs8gl5_get_frontend(struct dvb_frontend *fe)
 {
@@ -338,6 +355,7 @@ lgs8gl5_get_frontend(struct dvb_frontend *fe)
 	return 0;
 }
 
+
 static int
 lgs8gl5_get_tune_settings(struct dvb_frontend *fe,
 		struct dvb_frontend_tune_settings *fesettings)
@@ -348,6 +366,7 @@ lgs8gl5_get_tune_settings(struct dvb_frontend *fe,
 	return 0;
 }
 
+
 static void
 lgs8gl5_release(struct dvb_frontend *fe)
 {
@@ -355,7 +374,9 @@ lgs8gl5_release(struct dvb_frontend *fe)
 	kfree(state);
 }
 
+
 static struct dvb_frontend_ops lgs8gl5_ops;
+
 
 struct dvb_frontend*
 lgs8gl5_attach(const struct lgs8gl5_config *config, struct i2c_adapter *i2c)
@@ -389,6 +410,7 @@ error:
 }
 EXPORT_SYMBOL(lgs8gl5_attach);
 
+
 static struct dvb_frontend_ops lgs8gl5_ops = {
 	.delsys = { SYS_DTMB },
 	.info = {
@@ -421,6 +443,7 @@ static struct dvb_frontend_ops lgs8gl5_ops = {
 	.read_snr = lgs8gl5_read_snr,
 	.read_ucblocks = lgs8gl5_read_ucblocks,
 };
+
 
 module_param(debug, int, 0644);
 MODULE_PARM_DESC(debug, "Turn on/off frontend debugging (default:off).");

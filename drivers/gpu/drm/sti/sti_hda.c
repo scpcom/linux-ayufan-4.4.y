@@ -68,6 +68,7 @@
 #define VIDEO_DACS_CONTROL_SYSCFG5072   0x0120 /* for stih407 */
 #define DAC_CFG_HD_HZUVW_OFF_MASK       BIT(1)
 
+
 /* Upsampler values for the alternative 2X Filter */
 #define SAMPLER_COEF_NB                 8
 #define HDA_ANA_SRC_Y_CFG_ALT_2X        0x01130000

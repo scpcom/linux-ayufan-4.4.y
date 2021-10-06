@@ -57,6 +57,7 @@ void nfs_pgheader_init(struct nfs_pageio_descriptor *desc,
 {
 	struct nfs_pgio_mirror *mirror = nfs_pgio_current_mirror(desc);
 
+
 	hdr->req = nfs_list_entry(mirror->pg_list.next);
 	hdr->inode = desc->pg_inode;
 	hdr->cred = hdr->req->wb_context->cred;
@@ -494,6 +495,7 @@ size_t nfs_generic_pg_test(struct nfs_pageio_descriptor *desc,
 			   struct nfs_page *prev, struct nfs_page *req)
 {
 	struct nfs_pgio_mirror *mirror = nfs_pgio_current_mirror(desc);
+
 
 	if (mirror->pg_count > mirror->pg_bsize) {
 		/* should never happen */
@@ -996,6 +998,7 @@ static int nfs_pageio_do_add_request(struct nfs_pageio_descriptor *desc,
 static void nfs_pageio_doio(struct nfs_pageio_descriptor *desc)
 {
 	struct nfs_pgio_mirror *mirror = nfs_pgio_current_mirror(desc);
+
 
 	if (!list_empty(&mirror->pg_list)) {
 		int error = desc->pg_ops->pg_doio(desc);

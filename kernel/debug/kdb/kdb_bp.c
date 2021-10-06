@@ -73,6 +73,7 @@ static int kdb_parsebp(int argc, const char **argv, int *nextargp, kdb_bp_t *bp)
 			if (diag)
 				return diag;
 
+
 			if (len > 8)
 				return KDB_BADLENGTH;
 
@@ -218,6 +219,7 @@ void kdb_bp_remove(void)
 			_kdb_bp_remove(bp);
 	}
 }
+
 
 /*
  * kdb_printbp

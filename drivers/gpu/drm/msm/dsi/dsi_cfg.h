@@ -41,3 +41,4 @@ struct msm_dsi_cfg_handler {
 const struct msm_dsi_cfg_handler *msm_dsi_cfg_get(u32 major, u32 minor);
 
 #endif /* __MSM_DSI_CFG_H__ */
+

@@ -1337,6 +1337,7 @@ static int init_vpbe_layer(int i, struct vpbe_display *disp_dev,
 	vpbe_display_layer->layer_info.id =
 		((i == VPBE_DISPLAY_DEVICE_0) ? WIN_VID0 : WIN_VID1);
 
+
 	return 0;
 }
 
@@ -1368,6 +1369,8 @@ static int register_device(struct vpbe_layer *vpbe_display_layer,
 
 	return 0;
 }
+
+
 
 /*
  * vpbe_display_probe()

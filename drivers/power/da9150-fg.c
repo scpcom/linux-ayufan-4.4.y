@@ -499,6 +499,7 @@ static int da9150_fg_probe(struct platform_device *pdev)
 		else
 			fg->crit_soc = fg_pdata->crit_soc_lvl;
 
+
 	}
 
 	/* Configure initial SOC level events */

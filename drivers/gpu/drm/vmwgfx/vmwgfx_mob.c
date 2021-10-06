@@ -233,6 +233,7 @@ static void vmw_takedown_otable_base(struct vmw_private *dev_priv,
 	otable->page_table = NULL;
 }
 
+
 static int vmw_otable_batch_setup(struct vmw_private *dev_priv,
 				  struct vmw_otable_batch *batch)
 {

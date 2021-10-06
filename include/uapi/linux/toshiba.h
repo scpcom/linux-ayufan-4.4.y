@@ -59,4 +59,5 @@ typedef struct {
  */
 #define TOSHIBA_ACPI_SCI	_IOWR('t', 0x91, SMMRegisters)
 
+
 #endif /* _UAPI_LINUX_TOSHIBA_H */

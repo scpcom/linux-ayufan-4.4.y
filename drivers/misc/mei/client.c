@@ -236,6 +236,7 @@ static struct mei_me_client *__mei_me_cl_by_uuid_id(struct mei_device *dev,
 	return NULL;
 }
 
+
 /**
  * mei_me_cl_by_uuid_id - locate me client by client id and uuid
  *	increases ref count
@@ -505,6 +506,7 @@ void mei_cl_read_cb_flush(const struct mei_cl *cl, const struct file *fp)
 		if (!fp || fp == cb->file_object)
 			mei_io_cb_free(cb);
 
+
 	list_for_each_entry_safe(cb, next, &cl->rd_pending, list)
 		if (!fp || fp == cb->file_object)
 			mei_io_cb_free(cb);
@@ -539,6 +541,7 @@ int mei_cl_flush_queues(struct mei_cl *cl, const struct file *fp)
 
 	return 0;
 }
+
 
 /**
  * mei_cl_init - initializes cl.
@@ -667,6 +670,7 @@ int mei_cl_unlink(struct mei_cl *cl)
 	return 0;
 }
 
+
 void mei_host_client_init(struct work_struct *work)
 {
 	struct mei_device *dev =
@@ -674,6 +678,7 @@ void mei_host_client_init(struct work_struct *work)
 	struct mei_me_client *me_cl;
 
 	mutex_lock(&dev->device_lock);
+
 
 	me_cl = mei_me_cl_by_uuid(dev, &mei_amthif_guid);
 	if (me_cl)
@@ -932,6 +937,7 @@ int mei_cl_disconnect(struct mei_cl *cl)
 	return rets;
 }
 
+
 /**
  * mei_cl_is_other_connecting - checks if other
  *    client with the same me client id is connecting
@@ -1137,6 +1143,8 @@ err:
 	kfree(cl);
 	return ERR_PTR(ret);
 }
+
+
 
 /**
  * mei_cl_flow_ctrl_creds - checks flow_control credits for cl.
@@ -1592,6 +1600,7 @@ int mei_cl_write(struct mei_cl *cl, struct mei_cl_cb *cb, bool blocking)
 	int size;
 	int rets;
 
+
 	if (WARN_ON(!cl || !cl->dev))
 		return -ENODEV;
 
@@ -1687,6 +1696,7 @@ err:
 	return rets;
 }
 
+
 /**
  * mei_cl_complete - processes completed operation for a client
  *
@@ -1734,6 +1744,7 @@ void mei_cl_complete(struct mei_cl *cl, struct mei_cl_cb *cb)
 	}
 }
 
+
 /**
  * mei_cl_all_disconnect - disconnect forcefully all connected clients
  *
@@ -1746,6 +1757,7 @@ void mei_cl_all_disconnect(struct mei_device *dev)
 	list_for_each_entry(cl, &dev->file_list, link)
 		mei_cl_set_disconnected(cl);
 }
+
 
 /**
  * mei_cl_all_wakeup  - wake up all readers and writers they can be interrupted
@@ -1784,3 +1796,5 @@ void mei_cl_all_write_clear(struct mei_device *dev)
 	mei_io_list_free(&dev->write_list, NULL);
 	mei_io_list_free(&dev->write_waiting_list, NULL);
 }
+
+

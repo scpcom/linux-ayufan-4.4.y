@@ -274,6 +274,7 @@ static struct snd_platform_data dm644x_evm_snd_data;
 
 #define PCF_Uxx_BASE(x)	(DAVINCI_N_GPIO + ((x) * 8))
 
+
 /* U2 -- LEDs */
 
 static struct gpio_led evm_leds[] = {
@@ -340,6 +341,7 @@ static struct pcf857x_platform_data pcf_data_u2 = {
 	.teardown	= evm_led_teardown,
 };
 
+
 /* U18 - A/V clock generator and user switch */
 
 static int sw_gpio;
@@ -405,6 +407,7 @@ static struct pcf857x_platform_data pcf_data_u18 = {
 	.setup		= evm_u18_setup,
 	.teardown	= evm_u18_teardown,
 };
+
 
 /* U35 - various I/O signals used to manage USB, CF, ATA, etc */
 

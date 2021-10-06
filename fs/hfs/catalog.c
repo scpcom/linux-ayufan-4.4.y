@@ -203,6 +203,7 @@ int hfs_cat_find_brec(struct super_block *sb, u32 cnid,
 	return hfs_brec_find(fd);
 }
 
+
 /*
  * hfs_cat_delete()
  *

@@ -84,6 +84,7 @@ static inline void *kmap_atomic(struct page *page)
 	return kmap_atomic_prot(page, kmap_prot);
 }
 
+
 #define flush_cache_kmaps()	flush_cache_all()
 
 #endif /* __KERNEL__ */

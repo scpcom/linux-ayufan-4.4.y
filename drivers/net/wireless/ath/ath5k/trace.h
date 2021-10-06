@@ -3,6 +3,7 @@
 
 #include <linux/tracepoint.h>
 
+
 #if !defined(CONFIG_ATH5K_TRACER) || defined(__CHECKER__)
 #undef TRACE_EVENT
 #define TRACE_EVENT(name, proto, ...) \

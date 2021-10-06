@@ -56,6 +56,8 @@
 */
 #define REPROGRAM_PAR
 
+
+
 #ifdef REPROGRAM_PAR
 
 /* These are the addresses we want.. */
@@ -79,6 +81,7 @@
 #define WINDOW_SIZE_0	0x00800000
 #define WINDOW_SIZE_1	0x00800000
 #define WINDOW_SIZE_2	0x00080000
+
 
 static struct map_info sc520cdp_map[] = {
 	{
@@ -136,6 +139,7 @@ static struct mtd_info *merged_mtd;
 #define SC520_PAR_NOCACHE	(1<<27)	/* non-cacheable         */
 #define SC520_PAR_NOEXEC	(1<<28)	/* code execution denied */
 
+
 /*
 ** Bit 25 determines the granularity: 4K or 64K
 */
@@ -175,6 +179,7 @@ static const struct sc520_par_table par_table[NUM_FLASH_BANKS] =
 		WINDOW_ADDR_2_BIOS
 	}
 };
+
 
 static void sc520cdp_setup_par(void)
 {
@@ -218,6 +223,7 @@ static void sc520cdp_setup_par(void)
 	iounmap(mmcr);
 }
 #endif
+
 
 static int __init init_sc520cdp(void)
 {

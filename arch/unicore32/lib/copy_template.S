@@ -57,6 +57,7 @@
  *	'preserv' macro. Called upon code termination.
  */
 
+
 		enter
 
 		sub.a	r2, r2, #4
@@ -132,6 +133,7 @@
 		beq	17f
 		bsg	18f
 
+
 		.macro	forward_copy_shift a b
 
 		sub.a	r2, r2, #28
@@ -179,11 +181,13 @@
 
 		.endm
 
+
 		forward_copy_shift	a=8	b=24
 
 17:		forward_copy_shift	a=16	b=16
 
 18:		forward_copy_shift	a=24	b=8
+
 
 /*
  * Abort preamble and completion macros.
@@ -207,3 +211,4 @@
 	adr	lr, 299b
 	ldw	pc, [lr]
 	.endm
+

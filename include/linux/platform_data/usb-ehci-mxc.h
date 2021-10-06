@@ -10,3 +10,4 @@ struct mxc_usbh_platform_data {
 };
 
 #endif /* __INCLUDE_ASM_ARCH_MXC_EHCI_H */
+

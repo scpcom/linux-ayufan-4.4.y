@@ -184,6 +184,7 @@ int arch_setup_additional_pages(struct linux_binprm *bprm,
 	if (IS_ERR(ret))
 		goto up_fail;
 
+
 	up_write(&mm->mmap_sem);
 	return 0;
 

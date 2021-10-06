@@ -144,6 +144,7 @@ V_FUNCTION_BEGIN(__kernel_clock_gettime)
   .cfi_endproc
 V_FUNCTION_END(__kernel_clock_gettime)
 
+
 /*
  * Exact prototype of clock_getres()
  *
@@ -177,6 +178,7 @@ V_FUNCTION_BEGIN(__kernel_clock_getres)
 	blr
   .cfi_endproc
 V_FUNCTION_END(__kernel_clock_getres)
+
 
 /*
  * Exact prototype of time()

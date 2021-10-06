@@ -149,6 +149,7 @@ static int snd_pdacf_probe(struct pcmcia_device *link)
 	return pdacf_config(link);
 }
 
+
 /**
  * snd_pdacf_assign_resources - initialize the hardware and card instance.
  * @port: i/o port for the card
@@ -187,6 +188,7 @@ static int snd_pdacf_assign_resources(struct snd_pdacf *pdacf, int port, int irq
 
 	return 0;
 }
+
 
 /*
  * snd_pdacf_detach - detach callback for cs

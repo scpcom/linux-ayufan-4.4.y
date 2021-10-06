@@ -960,6 +960,7 @@ static int configure_predefined_video_timings(struct v4l2_subdev *sd,
 		err = -1;
 	}
 
+
 	return err;
 }
 
@@ -1361,6 +1362,7 @@ static int stdi2dv_timings(struct v4l2_subdev *sd,
 		stdi->hs_pol, stdi->vs_pol);
 	return -1;
 }
+
 
 static int read_stdi(struct v4l2_subdev *sd, struct stdi_readback *stdi)
 {

@@ -1204,6 +1204,7 @@ static int mpls_rtm_delroute(struct sk_buff *skb, struct nlmsghdr *nlh)
 	return mpls_route_del(&cfg);
 }
 
+
 static int mpls_rtm_newroute(struct sk_buff *skb, struct nlmsghdr *nlh)
 {
 	struct mpls_route_config cfg;

@@ -10,6 +10,7 @@
  *
  ******************************************************************************/
 
+
 #ifndef LINUX_ATM_NICSTAR_H
 #define LINUX_ATM_NICSTAR_H
 
@@ -34,6 +35,7 @@ typedef struct buf_nr
    unsigned max;
 }buf_nr;
 
+
 typedef struct pool_levels
 {
    int buftype;
@@ -46,5 +48,6 @@ typedef struct pool_levels
 #define NS_BUFTYPE_LARGE 2
 #define NS_BUFTYPE_HUGE 3
 #define NS_BUFTYPE_IOVEC 4
+
 
 #endif /* LINUX_ATM_NICSTAR_H */

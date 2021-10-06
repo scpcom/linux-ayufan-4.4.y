@@ -40,6 +40,7 @@
 #include <linux/workqueue.h>
 #include <scsi/fc/fc_els.h>
 
+
 #include "csio_defs.h"
 #include "csio_hw.h"
 
@@ -63,6 +64,7 @@ enum csio_ln_ev {
 	CSIO_LNE_CLOSE,
 	CSIO_LNE_MAX_EVENT,
 };
+
 
 struct csio_fcf_info {
 	struct list_head	list;
@@ -209,6 +211,7 @@ struct csio_lnode {
 #define csio_is_root_ln(ln)	(((ln) == csio_root_lnode((ln))) ? 1 : 0)
 #define csio_is_phys_ln(ln)	(((ln)->pln == NULL) ? 1 : 0)
 #define csio_is_npiv_ln(ln)	(((ln)->pln != NULL) ? 1 : 0)
+
 
 #define csio_ln_dbg(_ln, _fmt, ...)	\
 	csio_dbg(_ln->hwp, "%x:%x "_fmt, CSIO_DEVID_HI(_ln), \

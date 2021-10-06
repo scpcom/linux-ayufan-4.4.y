@@ -423,6 +423,7 @@ struct ehea_qp *ehea_create_qp(struct ehea_adapter *adapter,
 	u32 wqe_size_in_bytes_sq, wqe_size_in_bytes_rq1;
 	u32 wqe_size_in_bytes_rq2, wqe_size_in_bytes_rq3;
 
+
 	qp = kzalloc(sizeof(*qp), GFP_KERNEL);
 	if (!qp)
 		return NULL;
@@ -510,6 +511,7 @@ static u64 ehea_destroy_qp_res(struct ehea_qp *qp, u64 force)
 {
 	u64 hret;
 	struct ehea_qp_init_attr *qp_attr = &qp->init_attr;
+
 
 	ehea_h_disable_and_get_hea(qp->adapter->handle, qp->fw_handle);
 	hret = ehea_h_free_resource(qp->adapter->handle, qp->fw_handle, force);

@@ -52,6 +52,7 @@
 #include <asm/entry.h>
 #include <asm/io.h>
 
+
 /*
  * Atari interrupt handling scheme:
  * --------------------------------
@@ -156,6 +157,7 @@ static irqreturn_t mfptimer_handler(int irq, void *dev_id)
 	return IRQ_HANDLED;
 }
 
+
 static void atari_mfptimer_enable(struct irq_data *data)
 {
 	int mfp_num = data->irq - IRQ_MFP_TIMER1;
@@ -176,6 +178,7 @@ static struct irq_chip atari_mfptimer_chip = {
 	.irq_enable	= atari_mfptimer_enable,
 	.irq_disable	= atari_mfptimer_disable,
 };
+
 
 /*
  * EtherNAT CPLD interrupt handling
@@ -353,6 +356,7 @@ void __init atari_init_IRQ(void)
 				  139, 2);
 }
 
+
 /*
  * atari_register_vme_int() returns the number of a free interrupt vector for
  * hardware with a programmable int vector (probably a VME board).
@@ -374,6 +378,7 @@ unsigned int atari_register_vme_int(void)
 }
 EXPORT_SYMBOL(atari_register_vme_int);
 
+
 void atari_unregister_vme_int(unsigned int irq)
 {
 	if (irq >= VME_SOURCE_BASE && irq < VME_SOURCE_BASE + VME_MAX_SOURCES) {
@@ -382,3 +387,5 @@ void atari_unregister_vme_int(unsigned int irq)
 	}
 }
 EXPORT_SYMBOL(atari_unregister_vme_int);
+
+

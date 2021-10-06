@@ -39,6 +39,7 @@ static int num_bufs = 4;
 module_param(num_bufs, int, 0444);
 MODULE_PARM_DESC(num_bufs, "Number of DMA buffer (188KiB) per FE.");
 
+
 static const struct i2c_algorithm pt3_i2c_algo = {
 	.master_xfer   = &pt3_i2c_master_xfer,
 	.functionality = &pt3_i2c_functionality,
@@ -88,6 +89,7 @@ static const struct pt3_adap_config adap_conf[PT3_NUM_FE] = {
 		.init_freq = 521142857,
 	},
 };
+
 
 struct reg_val {
 	u8 reg;
@@ -370,6 +372,7 @@ static int pt3_fe_init(struct pt3_board *pt3)
 	return 0;
 }
 
+
 static int pt3_attach_fe(struct pt3_board *pt3, int i)
 {
 	struct i2c_board_info info;
@@ -435,6 +438,7 @@ err_demod_i2c_unregister_device:
 
 	return ret;
 }
+
 
 static int pt3_fetch_thread(void *data)
 {
@@ -540,6 +544,7 @@ static int pt3_stop_feed(struct dvb_demux_feed *feed)
 
 	return pt3_stop_streaming(adap);
 }
+
 
 static int pt3_alloc_adapter(struct pt3_board *pt3, int index)
 {
@@ -700,6 +705,7 @@ static int pt3_resume(struct device *dev)
 }
 
 #endif /* CONFIG_PM_SLEEP */
+
 
 static void pt3_remove(struct pci_dev *pdev)
 {

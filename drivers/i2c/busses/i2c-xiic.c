@@ -79,6 +79,7 @@ struct xiic_i2c {
 	enum xiic_endian	endianness;
 };
 
+
 #define XIIC_MSB_OFFSET 0
 #define XIIC_REG_OFFSET (0x100+XIIC_MSB_OFFSET)
 
@@ -378,6 +379,7 @@ static irqreturn_t xiic_process(int irq, void *dev_id)
 	dev_dbg(i2c->adap.dev.parent, "%s: SR: 0x%x, msg: %p, nmsgs: %d\n",
 		__func__, xiic_getreg8(i2c, XIIC_SR_REG_OFFSET),
 		i2c->tx_msg, i2c->nmsgs);
+
 
 	/* Service requesting interrupt */
 	if ((pend & XIIC_INTR_ARB_LOST_MASK) ||
@@ -710,6 +712,7 @@ static struct i2c_adapter xiic_adapter = {
 	.class = I2C_CLASS_DEPRECATED,
 	.algo = &xiic_algorithm,
 };
+
 
 static int xiic_i2c_probe(struct platform_device *pdev)
 {

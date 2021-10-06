@@ -32,6 +32,7 @@
 #include "layer2.h"
 #include "callbacks.h"
 
+
 const char * const isdn_state_table[] = {
 	"Closed",
 	"Call initiated",
@@ -240,6 +241,7 @@ static struct fsm_entry fsm_table[] = {
 	{0xff, 0, 0, NULL}
 };
 
+
 static void pcbit_fsm_timer(unsigned long data)
 {
 	struct pcbit_dev *dev;
@@ -259,6 +261,7 @@ static void pcbit_fsm_timer(unsigned long data)
 
 	pcbit_fsm_event(dev, chan, EV_TIMER, NULL);
 }
+
 
 void pcbit_fsm_event(struct pcbit_dev *dev, struct pcbit_chan *chan,
 		     unsigned short event, struct callb_data *data)

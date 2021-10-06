@@ -551,6 +551,7 @@ static void alsa_uac2_exit(struct audio_dev *agdev)
 	platform_device_unregister(&uac2->pdev);
 }
 
+
 /* --------- USB Function Interface ------------- */
 
 enum {
@@ -1027,6 +1028,7 @@ afunc_bind(struct usb_configuration *cfg, struct usb_function *fn)
 	std_as_out_if1_desc.iInterface = us[STR_AS_OUT_ALT1].id;
 	std_as_in_if0_desc.iInterface = us[STR_AS_IN_ALT0].id;
 	std_as_in_if1_desc.iInterface = us[STR_AS_IN_ALT1].id;
+
 
 	/* Initialize the configurable parameters */
 	usb_out_it_desc.bNrChannels = num_channels(uac2_opts->c_chmask);

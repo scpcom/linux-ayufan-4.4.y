@@ -137,6 +137,7 @@ void pgtable_cache_add(unsigned shift, void (*ctor)(void *))
 	pr_debug("Allocated pgtable cache for order %d\n", shift);
 }
 
+
 void pgtable_cache_init(void)
 {
 	pgtable_cache_add(PGD_INDEX_SIZE, pgd_ctor);

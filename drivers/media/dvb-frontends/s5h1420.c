@@ -33,6 +33,7 @@
 
 #include <linux/i2c.h>
 
+
 #include "dvb_frontend.h"
 #include "s5h1420.h"
 #include "s5h1420_priv.h"
@@ -64,6 +65,7 @@ struct s5h1420_state {
 static u32 s5h1420_getsymbolrate(struct s5h1420_state* state);
 static int s5h1420_get_tune_settings(struct dvb_frontend* fe,
 				     struct dvb_frontend_tune_settings* fesettings);
+
 
 static int debug;
 module_param(debug, int, 0644);
@@ -378,6 +380,7 @@ static int s5h1420_read_status(struct dvb_frontend *fe,
 			tmp = 1;
 		}
 		tmp = state->fclk / tmp;
+
 
 		/* set the MPEG_CLK_INTL for the calculated data rate */
 		if (tmp < 2)

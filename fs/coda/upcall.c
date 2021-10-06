@@ -69,6 +69,7 @@ do {\
 #define OUTSIZE(tag) sizeof(struct coda_ ## tag ## _out)
 #define SIZE(tag)  max_t(unsigned int, INSIZE(tag), OUTSIZE(tag))
 
+
 /* the upcalls */
 int venus_rootfid(struct super_block *sb, struct CodaFid *fidp)
 {
@@ -226,6 +227,7 @@ int venus_mkdir(struct super_block *sb, struct CodaFid *dirfid,
 	return error;        
 }
 
+
 int venus_rename(struct super_block *sb, struct CodaFid *old_fid, 
 		 struct CodaFid *new_fid, size_t old_length, 
 		 size_t new_length, const char *old_name, 
@@ -371,6 +373,8 @@ int venus_readlink(struct super_block *sb, struct CodaFid *fid,
         return error;
 }
 
+
+
 int venus_link(struct super_block *sb, struct CodaFid *fid, 
 		  struct CodaFid *dirfid, const char *name, int len )
 {
@@ -466,6 +470,7 @@ int venus_access(struct super_block *sb, struct CodaFid *fid, int mask)
 	CODA_FREE(inp, insize);
 	return error;
 }
+
 
 int venus_pioctl(struct super_block *sb, struct CodaFid *fid,
 		 unsigned int cmd, struct PioctlData *data)
@@ -648,6 +653,7 @@ static inline void coda_waitfor_upcall(struct venus_comm *vcp,
 	set_current_state(TASK_RUNNING);
 }
 
+
 /*
  * coda_upcall will return an error in the case of
  * failed communication with Venus _or_ will peek at Venus
@@ -772,6 +778,7 @@ exit:
     When will be have time to find out what exactly is going on?  (pjb)
 */
 
+
 /* 
  * There are 7 cases where cache invalidations occur.  The semantics
  *  of each is listed here:
@@ -872,3 +879,4 @@ unlock_out:
 	iput(inode);
 	return 0;
 }
+

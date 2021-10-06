@@ -20,6 +20,7 @@
 #include <linux/clk-provider.h>
 #include <linux/clocksource.h>
 
+
 #define GPT6_CON_MT65xx 0x10008060
 #define GPT_ENABLE      0x31
 

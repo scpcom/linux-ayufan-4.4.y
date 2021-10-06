@@ -84,6 +84,7 @@ static char irq_tab_rm300e[5][5] __initdata = {
 #undef INTC
 #undef INTD
 
+
 /*
  * PCIT Shortcuts ...
  */

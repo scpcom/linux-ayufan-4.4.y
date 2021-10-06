@@ -85,6 +85,7 @@ enum batt_event {
 	BATT_EVENT_EXCPT
 };
 
+
 /*********************************************************************
  *		Battery properties
  *********************************************************************/
@@ -134,6 +135,7 @@ static enum power_supply_property pmic_battery_props[] = {
 	POWER_SUPPLY_PROP_CHARGE_NOW,
 	POWER_SUPPLY_PROP_CHARGE_FULL,
 };
+
 
 /*
  * Glue functions for talking to the IPC

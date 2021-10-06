@@ -39,6 +39,7 @@ MODULE_LICENSE("GPL");
 MODULE_DESCRIPTION("digigram lx6464es");
 MODULE_SUPPORTED_DEVICE("{digigram lx6464es{}}");
 
+
 static int index[SNDRV_CARDS] = SNDRV_DEFAULT_IDX;
 static char *id[SNDRV_CARDS] = SNDRV_DEFAULT_STR;
 static bool enable[SNDRV_CARDS] = SNDRV_DEFAULT_ENABLE_PNP;
@@ -51,6 +52,7 @@ module_param_array(enable, bool, NULL, 0444);
 MODULE_PARM_DESC(enable, "Enable/disable specific Digigram LX6464ES soundcards.");
 
 static const char card_name[] = "LX6464ES";
+
 
 #define PCI_DEVICE_ID_PLX_LX6464ES		PCI_DEVICE_ID_PLX_9056
 
@@ -68,8 +70,11 @@ static const struct pci_device_id snd_lx6464es_ids[] = {
 
 MODULE_DEVICE_TABLE(pci, snd_lx6464es_ids);
 
+
+
 /* PGO pour USERo dans le registre pci_0x06/loc_0xEC */
 #define CHIPSC_RESET_XILINX (1L<<16)
+
 
 /* alsa callbacks */
 static struct snd_pcm_hardware lx_caps = {
@@ -95,6 +100,7 @@ static struct snd_pcm_hardware lx_caps = {
 };
 
 static int lx_set_granularity(struct lx6464es *chip, u32 gran);
+
 
 static int lx_hardware_open(struct lx6464es *chip,
 			    struct snd_pcm_substream *substream)
@@ -154,6 +160,7 @@ static int lx_hardware_start(struct lx6464es *chip,
 	return err;
 }
 
+
 static int lx_hardware_stop(struct lx6464es *chip,
 			    struct snd_pcm_substream *substream)
 {
@@ -184,6 +191,7 @@ static int lx_hardware_stop(struct lx6464es *chip,
 	return err;
 }
 
+
 static int lx_hardware_close(struct lx6464es *chip,
 			     struct snd_pcm_substream *substream)
 {
@@ -199,6 +207,7 @@ static int lx_hardware_close(struct lx6464es *chip,
 
 	return err;
 }
+
 
 static int lx_pcm_open(struct snd_pcm_substream *substream)
 {
@@ -519,6 +528,7 @@ exit:
 	mutex_unlock(&chip->lock);
 	return err;
 }
+
 
 static int lx_pcm_trigger(struct snd_pcm_substream *substream, int cmd)
 {
@@ -900,6 +910,8 @@ static struct snd_kcontrol_new lx_control_playback_switch = {
 	.put = lx_control_playback_put
 };
 
+
+
 static void lx_proc_levels_read(struct snd_info_entry *entry,
 				struct snd_info_buffer *buffer)
 {
@@ -944,6 +956,7 @@ static int lx_proc_create(struct snd_card *card, struct lx6464es *chip)
 	snd_info_set_text_ops(entry, chip, lx_proc_levels_read);
 	return 0;
 }
+
 
 static int snd_lx6464es_create(struct snd_card *card,
 			       struct pci_dev *pci,
@@ -1112,6 +1125,7 @@ static void snd_lx6464es_remove(struct pci_dev *pci)
 {
 	snd_card_free(pci_get_drvdata(pci));
 }
+
 
 static struct pci_driver lx6464es_driver = {
 	.name =     KBUILD_MODNAME,

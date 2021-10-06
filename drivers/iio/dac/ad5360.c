@@ -46,6 +46,7 @@
 #define AD5360_READBACK_GAIN			0x3
 #define AD5360_READBACK_SF			0x4
 
+
 /**
  * struct ad5360_chip_info - chip specific information
  * @channel_template:	channel specification template
@@ -186,6 +187,7 @@ static int ad5360_get_channel_vref(struct ad5360_state *st,
 
 	return regulator_get_voltage(st->vref_reg[i].consumer);
 }
+
 
 static int ad5360_write_unlocked(struct iio_dev *indio_dev,
 	unsigned int cmd, unsigned int addr, unsigned int val,

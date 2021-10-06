@@ -27,6 +27,7 @@
  *
  */
 
+
 #include <linux/module.h>
 #include <linux/kernel.h>
 #include <linux/errno.h>
@@ -72,6 +73,7 @@
 #define NE1SM_STOP_PG 	0x40	/* Last page +1 of RX ring */
 #define NESM_START_PG	0x40	/* First page of TX buffer */
 #define NESM_STOP_PG	0x80	/* Last page +1 of RX ring */
+
 
 struct net_device * __init apne_probe(int unit);
 static int apne_probe1(struct net_device *dev, int ioaddr);

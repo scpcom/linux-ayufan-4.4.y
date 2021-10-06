@@ -59,6 +59,7 @@ struct cros_ec_keyb {
 	struct cros_ec_device *ec;
 };
 
+
 /*
  * Returns true when there is at least one combination of pressed keys that
  * results in ghosting.
@@ -96,6 +97,7 @@ static bool cros_ec_keyb_has_ghosting(struct cros_ec_keyb *ckdev, uint8_t *buf)
 
 	return false;
 }
+
 
 /*
  * Compares the new keyboard state to the old one and produces key

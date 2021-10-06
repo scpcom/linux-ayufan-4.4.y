@@ -21,6 +21,7 @@
 #include <linux/iio/events.h>
 #include <linux/iio/dac/ad5421.h>
 
+
 #define AD5421_REG_DAC_DATA		0x1
 #define AD5421_REG_CTRL			0x2
 #define AD5421_REG_OFFSET		0x3
@@ -216,6 +217,7 @@ static irqreturn_t ad5421_fault_handler(int irq, void *data)
 	 * DAC unusable. */
 	ad5421_update_ctrl(indio_dev, 0, 0);
 
+
 	/* The fault pin stays high as long as a fault condition is present and
 	 * it is not possible to mask fault conditions. For certain fault
 	 * conditions for example like over-temperature it takes some time
@@ -269,6 +271,7 @@ static irqreturn_t ad5421_fault_handler(int irq, void *data)
 			msleep(1000);
 
 	} while (fault & AD5421_FAULT_TRIGGER_IRQ);
+
 
 	return IRQ_HANDLED;
 }

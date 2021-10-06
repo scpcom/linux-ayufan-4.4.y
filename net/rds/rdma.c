@@ -478,6 +478,7 @@ void rds_atomic_free_op(struct rm_atomic_op *ao)
 	ao->op_active = 0;
 }
 
+
 /*
  * Count the number of pages needed to describe an incoming iovec array.
  */

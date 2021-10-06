@@ -22,6 +22,7 @@ struct ieee_ie_cf_param_set {
 	__le16 cfpdurationremaining;
 } __packed;
 
+
 struct ieee_ie_ibss_param_set {
 	struct ieee_ie_header header;
 
@@ -227,6 +228,7 @@ struct led_bhv {
 	uint8_t	ledstate;
 	uint8_t	ledarg;
 } __packed;
+
 
 struct mrvl_ie_ledbhv {
 	struct mrvl_ie_header header;

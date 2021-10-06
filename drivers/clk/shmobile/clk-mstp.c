@@ -243,6 +243,7 @@ static void __init cpg_mstp_clocks_init(struct device_node *np)
 }
 CLK_OF_DECLARE(cpg_mstp_clks, "renesas,cpg-mstp-clocks", cpg_mstp_clocks_init);
 
+
 #ifdef CONFIG_PM_GENERIC_DOMAINS_OF
 int cpg_mstp_attach_dev(struct generic_pm_domain *domain, struct device *dev)
 {

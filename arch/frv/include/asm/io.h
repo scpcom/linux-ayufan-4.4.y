@@ -386,6 +386,7 @@ static inline void pci_iounmap(struct pci_dev *dev, void __iomem *p)
 {
 }
 
+
 /*
  * Convert a physical pointer to a virtual kernel pointer for /dev/mem
  * access

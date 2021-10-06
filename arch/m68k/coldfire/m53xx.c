@@ -151,6 +151,7 @@ static struct clk * const disable_clks[] __initconst = {
 	&__clk_1_34,	/* rng.0 */
 };
 
+
 static void __init m53xx_clk_init(void)
 {
 	unsigned i;
@@ -239,6 +240,7 @@ void __init config_BSP(char *commandp, int size)
 #define MIN_FSYS	58333 	/* KHz */
 #define FREF		16000   /* KHz */
 
+
 #define MAX_MFD		135     /* Multiplier */
 #define MIN_MFD		88      /* Multiplier */
 #define BUSDIV		6       /* Divider */
@@ -321,6 +323,7 @@ void scm_init(void)
 	writel(MCF_SCM_BCR_GBR | MCF_SCM_BCR_GBW, MCF_SCM_BCR);
 }
 
+
 void fbcs_init(void)
 {
 	writeb(0x3E, MCFGPIO_PAR_CS);
@@ -385,6 +388,7 @@ void sdramc_init(void)
 		MCF_SDRAMC_SDCFG2_BL(SDRAM_BL - 1),
 		MCF_SDRAMC_SDCFG2);
 
+            
 	/*
 	 * Precharge and enable write to SDMR
 	 */

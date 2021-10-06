@@ -26,6 +26,7 @@
 #include <linux/usb.h>
 #include <linux/usb_usual.h>
 
+
 /*
  * The table of devices
  */

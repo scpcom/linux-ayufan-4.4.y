@@ -105,6 +105,7 @@ static int gic_clk_notifier(struct notifier_block *nb, unsigned long action,
 	return NOTIFY_OK;
 }
 
+
 static struct notifier_block gic_cpu_nb = {
 	.notifier_call = gic_cpu_notifier,
 };

@@ -69,6 +69,7 @@ struct mei_nfc_connect_resp {
 	u16 me_build;
 } __packed;
 
+
 #define MEI_NFC_CMD_MAINTENANCE 0x00
 #define MEI_NFC_CMD_HCI_SEND 0x01
 #define MEI_NFC_CMD_HCI_RECV 0x02
@@ -294,6 +295,7 @@ static int mei_nfc_recv(struct nfc_mei_phy *phy, u8 *buf, size_t length)
 
 	return received_length;
 }
+
 
 static void nfc_mei_event_cb(struct mei_cl_device *cldev, u32 events,
 			     void *context)

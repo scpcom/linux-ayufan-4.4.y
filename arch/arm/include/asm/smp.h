@@ -42,6 +42,7 @@ void handle_IPI(int ipinr, struct pt_regs *regs);
  */
 extern void smp_init_cpus(void);
 
+
 /*
  * Provide a function to raise an IPI cross call on CPUs in callmap.
  */
@@ -52,6 +53,7 @@ extern void set_smp_cross_call(void (*)(const struct cpumask *, unsigned int));
  * secondary CPU entry point.
  */
 asmlinkage void secondary_start_kernel(void);
+
 
 /*
  * Initial data for bringing up a secondary CPU.

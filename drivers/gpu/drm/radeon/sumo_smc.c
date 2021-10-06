@@ -218,3 +218,4 @@ u32 sumo_get_running_fw_version(struct radeon_device *rdev)
 {
 	return RREG32_RCU(RCU_FW_VERSION);
 }
+

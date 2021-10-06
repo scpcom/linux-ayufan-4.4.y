@@ -143,6 +143,7 @@ extern void *__alloc_bootmem_low_node(pg_data_t *pgdat,
 #define alloc_bootmem_low_pages_node(pgdat, x) \
 	__alloc_bootmem_low_node(pgdat, x, PAGE_SIZE, 0)
 
+
 #if defined(CONFIG_HAVE_MEMBLOCK) && defined(CONFIG_NO_BOOTMEM)
 
 /* FIXME: use MEMBLOCK_ALLOC_* variants here */
@@ -240,6 +241,7 @@ static inline void __init memblock_free_late(
 #else
 
 #define BOOTMEM_ALLOC_ACCESSIBLE	0
+
 
 /* Fall back to all the existing bootmem APIs */
 static inline void * __init memblock_virt_alloc(
@@ -361,5 +363,6 @@ extern int hashdist;		/* Distribute hashes across NUMA nodes? */
 #else
 #define hashdist (0)
 #endif
+
 
 #endif /* _LINUX_BOOTMEM_H */

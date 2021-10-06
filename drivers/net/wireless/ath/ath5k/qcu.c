@@ -49,6 +49,7 @@ Queue Control Unit, DCF Control Unit Functions
  * the actual transmission.
  */
 
+
 /******************\
 * Helper functions *
 \******************/
@@ -263,6 +264,7 @@ ath5k_hw_setup_tx_queue(struct ath5k_hw *ah, enum ath5k_tx_queue queue_type,
 	return queue;
 }
 
+
 /*******************************\
 * Single QCU/DCU initialization *
 \*******************************/
@@ -347,6 +349,7 @@ ath5k_hw_reset_tx_queue(struct ath5k_hw *ah, unsigned int queue)
 	 * Set tx retry limits for this queue
 	 */
 	ath5k_hw_set_tx_retry_limits(ah, queue);
+
 
 	/*
 	 * Set misc registers
@@ -540,6 +543,7 @@ ath5k_hw_reset_tx_queue(struct ath5k_hw *ah, unsigned int queue)
 	return 0;
 }
 
+
 /**************************\
 * Global QCU/DCU functions *
 \**************************/
@@ -673,6 +677,7 @@ int ath5k_hw_set_ifs_intervals(struct ath5k_hw *ah, unsigned int slot_time)
 
 	return 0;
 }
+
 
 /**
  * ath5k_hw_init_queues() - Initialize tx queues

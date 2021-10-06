@@ -33,6 +33,7 @@
 #include <linux/slab.h>
 #include <asm/io.h>
 
+
 #define PFX	KBUILD_MODNAME ": "
 
 /*
@@ -218,6 +219,7 @@ static void intel_rng_cleanup(struct hwrng *rng)
 		pr_warn(PFX "unusual: RNG already disabled\n");
 }
 
+
 static struct hwrng intel_rng = {
 	.name		= "intel",
 	.init		= intel_rng_init,
@@ -321,6 +323,7 @@ PFX "RNG, try using the 'no_fwh_detect' option.\n";
 
 	return 0;
 }
+
 
 static int __init mod_init(void)
 {

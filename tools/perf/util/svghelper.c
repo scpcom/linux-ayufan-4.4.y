@@ -27,6 +27,7 @@
 static u64 first_time, last_time;
 static u64 turbo_frequency, max_freq;
 
+
 #define SLOT_MULT 30.0
 #define SLOT_HEIGHT 25.0
 #define SLOT_HALF (SLOT_HEIGHT / 2)
@@ -421,6 +422,7 @@ void svg_cstate(int cpu, u64 start, u64 end, int type)
 	if (!svgfile)
 		return;
 
+
 	fprintf(svgfile, "<g>\n");
 
 	if (type > 6)
@@ -489,12 +491,14 @@ void svg_pstate(int cpu, u64 start, u64 end, u64 freq)
 	fprintf(svgfile, "</g>\n");
 }
 
+
 void svg_partial_wakeline(u64 start, int row1, char *desc1, int row2, char *desc2, const char *backtrace)
 {
 	double height;
 
 	if (!svgfile)
 		return;
+
 
 	fprintf(svgfile, "<g>\n");
 
@@ -552,6 +556,7 @@ void svg_wakeline(u64 start, int row1, int row2, const char *backtrace)
 
 	if (!svgfile)
 		return;
+
 
 	fprintf(svgfile, "<g>\n");
 

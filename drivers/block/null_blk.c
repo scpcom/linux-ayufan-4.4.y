@@ -708,6 +708,7 @@ static int null_add_dev(void)
 	queue_flag_set_unlocked(QUEUE_FLAG_NONROT, nullb->q);
 	queue_flag_clear_unlocked(QUEUE_FLAG_ADD_RANDOM, nullb->q);
 
+
 	mutex_lock(&lock);
 	list_add_tail(&nullb->list, &nullb_list);
 	nullb->index = nullb_indexes++;

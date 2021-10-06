@@ -315,6 +315,7 @@ err:
 	ccwreq_stop(cdev, rc);
 }
 
+
 /**
  * ccw_request_timeout - timeout handler for I/O request procedure
  * @cdev: ccw device

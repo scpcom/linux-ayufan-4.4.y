@@ -50,6 +50,7 @@
  *
  *****************************************************************************/
 
+
 /*Definitions - Defines & Constants ----------------------------------------- */
 
 /*----------------------------- */
@@ -169,6 +170,7 @@
    #endif  /* solaris */
 #endif  /* DPTSQO */
 
+
 /*---------------------- */
 /* OS dependent typedefs */
 /*---------------------- */
@@ -196,6 +198,7 @@
    #define      NULL    0
 #endif
 
+
 /*Prototypes - function ----------------------------------------------------- */
 
 #ifdef  __cplusplus
@@ -215,6 +218,7 @@
 #if (!defined(osdSwap3))
  uLONG        osdSwap3(DPT_UNALIGNED uLONG *);
 #endif  // !osdSwap3
+
 
 #ifdef  _DPT_NETWARE
    #include "novpass.h" /* For DPT_Bswapl() prototype */
@@ -239,6 +243,7 @@
    uLONG        trueSwap4(DPT_UNALIGNED uLONG *);
 
 #endif  // netware
+
 
 /*-------------------------------------*
  * Network order swap functions        *
@@ -280,6 +285,8 @@ uLONG	netSwap4(uLONG val);
 #endif  // NET_SWAP_4
 
 #endif  // big endian
+
+
 
 /*----------------------------------- */
 /* Run-time loadable module functions */

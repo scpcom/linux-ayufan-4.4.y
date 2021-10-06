@@ -313,6 +313,7 @@ static int bcm_kp_matrix_key_parse_dt(struct bcm_kp *kp)
 	return 0;
 }
 
+
 static int bcm_kp_probe(struct platform_device *pdev)
 {
 	struct bcm_kp *kp;

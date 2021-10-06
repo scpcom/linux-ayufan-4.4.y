@@ -124,6 +124,7 @@ struct dm_priv {
 	u8	INIDATA_RATE[32];
 };
 
+
 /*  */
 /*  function prototype */
 /*  */

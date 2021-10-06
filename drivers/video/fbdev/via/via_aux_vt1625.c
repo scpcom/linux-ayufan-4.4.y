@@ -24,7 +24,9 @@
 #include <linux/slab.h>
 #include "via_aux.h"
 
+
 static const char *name = "VT1625(M) HDTV Encoder";
+
 
 static void probe(struct via_aux_bus *bus, u8 addr)
 {

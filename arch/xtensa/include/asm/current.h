@@ -34,4 +34,5 @@ static inline struct task_struct *get_current(void)
 
 #endif
 
+
 #endif /* XTENSA_CURRENT_H */

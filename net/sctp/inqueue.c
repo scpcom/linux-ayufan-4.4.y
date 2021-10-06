@@ -113,6 +113,7 @@ struct sctp_chunkhdr *sctp_inq_peek(struct sctp_inq *queue)
 	return ch;
 }
 
+
 /* Extract a chunk from an SCTP inqueue.
  *
  * WARNING:  If you need to put the chunk on another queue, you need to

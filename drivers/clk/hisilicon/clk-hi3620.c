@@ -75,6 +75,7 @@ static const char *const rclk_hsic_p[] __initconst = { "armpll3", "armpll2", };
 static const char *const mmc2_mux_p[] __initconst = { "armpll2", "armpll3", };
 static const char *const mmc3_mux_p[] __initconst = { "armpll2", "armpll3", };
 
+
 /* fixed rate clocks */
 static struct hisi_fixed_rate_clock hi3620_fixed_rate_clks[] __initdata = {
 	{ HI3620_OSC32K,   "osc32k",   NULL, CLK_IS_ROOT, 32768, },

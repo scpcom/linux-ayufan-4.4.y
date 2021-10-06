@@ -5344,6 +5344,7 @@ static int rocker_port_bridge_leave(struct rocker_port *rocker_port)
 	return err;
 }
 
+
 static int rocker_port_ovs_changed(struct rocker_port *rocker_port,
 				   struct net_device *master)
 {

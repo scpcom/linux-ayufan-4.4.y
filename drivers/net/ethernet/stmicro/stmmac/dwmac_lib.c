@@ -264,3 +264,4 @@ void stmmac_get_mac_addr(void __iomem *ioaddr, unsigned char *addr,
 	addr[4] = hi_addr & 0xff;
 	addr[5] = (hi_addr >> 8) & 0xff;
 }
+

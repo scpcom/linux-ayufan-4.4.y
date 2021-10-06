@@ -217,6 +217,8 @@ int vt_waitactive(int n)
 #define GPLAST 0x3df
 #define GPNUM (GPLAST - GPFIRST + 1)
 
+
+
 static inline int 
 do_fontx_ioctl(int cmd, struct consolefontdesc __user *user_cfd, int perm, struct console_font_op *op)
 {
@@ -324,6 +326,7 @@ static void vt_disallocate_all(void)
 	}
 }
 
+
 /*
  * We handle the console-specific ioctl's here.  We allow the
  * capability to modify any console, not just the fg_console. 
@@ -342,10 +345,12 @@ int vt_ioctl(struct tty_struct *tty,
 
 	console = vc->vc_num;
 
+
 	if (!vc_cons_allocated(console)) { 	/* impossible? */
 		ret = -ENOIOCTLCMD;
 		goto out;
 	}
+
 
 	/*
 	 * To have permissions to do most of the vt ioctls, we either have
@@ -1271,7 +1276,9 @@ fallback:
 	return vt_ioctl(tty, cmd, arg);
 }
 
+
 #endif /* CONFIG_COMPAT */
+
 
 /*
  * Performs the back end of a vt switch. Called under the console

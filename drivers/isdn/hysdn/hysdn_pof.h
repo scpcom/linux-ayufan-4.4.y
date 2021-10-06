@@ -44,6 +44,7 @@
 /* =0x3800= 14336U */
 #define POF_BOOT_LOADER_OFF_IN_PAGE (POF_BOOT_LOADER_PAGE_SIZE-POF_BOOT_LOADER_CODE_SIZE)
 
+
 /*--------------------------------------POF file record structs------------*/
 typedef struct PofFileHdr_tag {	/* Pof file header */
 	/*00 */ unsigned long Magic __attribute__((packed));

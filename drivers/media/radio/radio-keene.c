@@ -416,3 +416,4 @@ static struct usb_driver usb_keene_driver = {
 };
 
 module_usb_driver(usb_keene_driver);
+

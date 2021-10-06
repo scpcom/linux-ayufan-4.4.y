@@ -85,6 +85,7 @@ void rtlx_stopping(int vpe)
 		wake_up_interruptible(&channel_wqs[i].lx_queue);
 }
 
+
 int rtlx_open(int index, int can_sleep)
 {
 	struct rtlx_info **p;
@@ -321,6 +322,7 @@ out:
 
 	return count;
 }
+
 
 static int file_open(struct inode *inode, struct file *filp)
 {

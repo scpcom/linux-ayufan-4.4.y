@@ -364,8 +364,10 @@
 
 #define __NR_Linux_syscalls	(__NR_mlock2 + 1)
 
+
 #define __IGNORE_select		/* newselect */
 #define __IGNORE_fadvise64	/* fadvise64_64 */
+
 
 #define LINUX_GATEWAY_ADDR      0x100
 

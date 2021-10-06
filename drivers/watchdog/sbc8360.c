@@ -53,6 +53,7 @@
 #include <linux/io.h>
 #include <linux/uaccess.h>
 
+
 static unsigned long sbc8360_is_open;
 static char expect_close;
 

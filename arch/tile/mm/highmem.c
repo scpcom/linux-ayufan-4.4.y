@@ -21,6 +21,7 @@
 	pte_offset_kernel(pmd_offset(pud_offset(pgd_offset_k(vaddr), (vaddr)),\
 		(vaddr)), (vaddr))
 
+
 void *kmap(struct page *page)
 {
 	void *kva;

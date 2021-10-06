@@ -246,6 +246,7 @@ static struct snd_soc_jack_pin ams_delta_hook_switch_pins[] = {
 	},
 };
 
+
 /*
  * Modem line discipline, required for making above controls functional.
  * Activated from userspace with ldattach, possibly invoked from udev rule.
@@ -403,6 +404,7 @@ static struct tty_ldisc_ops cx81801_ops = {
 	.write_wakeup = cx81801_wakeup,
 };
 
+
 /*
  * Even if not very useful, the sound card can still work without any of the
  * above functonality activated.  You can still control its audio input/output
@@ -411,6 +413,7 @@ static struct tty_ldisc_ops cx81801_ops = {
  */
 
 static struct snd_soc_ops ams_delta_ops;
+
 
 /* Digital mute implemented using modem/CPU multiplexer.
  * Shares hardware with codec config pulse generation */
@@ -449,6 +452,7 @@ static void ams_delta_shutdown(struct snd_pcm_substream *substream)
 {
 	ams_delta_digital_mute(NULL, 1);
 }
+
 
 /*
  * Card initialization

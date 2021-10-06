@@ -362,6 +362,7 @@ static bool is_neigh_solicit(u8 *buf, size_t len)
 		msg->icmph.icmp6_type == NDISC_NEIGHBOUR_SOLICITATION);
 }
 
+
 static struct sk_buff *cdc_mbim_process_dgram(struct usbnet *dev, u8 *buf, size_t len, u16 tci)
 {
 	__be16 proto = htons(ETH_P_802_3);

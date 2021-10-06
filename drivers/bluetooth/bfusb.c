@@ -212,6 +212,7 @@ static void bfusb_tx_complete(struct urb *urb)
 	read_unlock(&data->lock);
 }
 
+
 static int bfusb_rx_submit(struct bfusb_data *data, struct urb *urb)
 {
 	struct bfusb_data_scb *scb;

@@ -83,6 +83,8 @@ int64_t opal_pci_err_inject(uint64_t phb_id, uint32_t pe_no, uint32_t type,
 			    uint32_t func, uint64_t addr, uint64_t mask);
 int64_t opal_pci_shpc(uint64_t phb_id, uint64_t shpc_action, uint8_t *state);
 
+
+
 int64_t opal_pci_phb_mmio_enable(uint64_t phb_id, uint16_t window_type,
 				 uint16_t window_num, uint16_t enable);
 int64_t opal_pci_set_phb_mem_window(uint64_t phb_id, uint16_t window_type,

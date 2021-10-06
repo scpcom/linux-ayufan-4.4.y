@@ -236,6 +236,7 @@ STD_ENTRY(relocate_new_kernel)
 	addi	r30, r30, 8
 	j	.Lloop
 
+
 .Lerr:
 #ifdef RELOCATE_NEW_KERNEL_VERBOSE
 	moveli	r0, 'e'

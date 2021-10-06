@@ -102,6 +102,7 @@ void sr_vendor_init(Scsi_CD *cd)
 #endif
 }
 
+
 /* small handy function for switching block length using MODE SELECT,
  * used by sr_read_sector() */
 

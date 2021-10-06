@@ -171,6 +171,7 @@ devicetree:
 			else
 				ERROR(&@3, "Label or path %s not found", $3);
 
+
 			$$ = $1;
 		}
 	;

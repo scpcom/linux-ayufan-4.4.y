@@ -209,6 +209,7 @@ struct snd_pcm_status32 {
 	unsigned char reserved[52-2*sizeof(struct compat_timespec)];
 } __attribute__((packed));
 
+
 static int snd_pcm_status_user_compat(struct snd_pcm_substream *substream,
 				      struct snd_pcm_status32 __user *src,
 				      bool ext)
@@ -359,6 +360,7 @@ static int snd_pcm_ioctl_hw_params_compat(struct snd_pcm_substream *substream,
 	return err;
 }
 
+
 /*
  */
 struct snd_xferi32 {
@@ -396,6 +398,7 @@ static int snd_pcm_ioctl_xferi_compat(struct snd_pcm_substream *substream,
 		return -EFAULT;
 	return 0;
 }
+
 
 /* snd_xfern needs remapping of bufs */
 struct snd_xfern32 {
@@ -453,6 +456,7 @@ static int snd_pcm_ioctl_xfern_compat(struct snd_pcm_substream *substream,
 	kfree(bufs);
 	return err;
 }
+
 
 struct snd_pcm_mmap_status32 {
 	s32 state;

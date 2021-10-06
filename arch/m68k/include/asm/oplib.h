@@ -287,4 +287,5 @@ extern void prom_apply_obio_ranges(struct linux_prom_registers *obioregs, int nr
 extern void prom_apply_generic_ranges(int node, int parent,
 				      struct linux_prom_registers *sbusregs, int nregs);
 
+
 #endif /* !(__SPARC_OPLIB_H) */

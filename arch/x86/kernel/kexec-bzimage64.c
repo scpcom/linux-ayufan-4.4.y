@@ -389,6 +389,7 @@ static void *bzImage64_load(struct kimage *image, char *kernel,
 
 	pr_debug("Loaded purgatory at 0x%lx\n", purgatory_load_addr);
 
+
 	/*
 	 * Load Bootparams and cmdline and space for efi stuff.
 	 *

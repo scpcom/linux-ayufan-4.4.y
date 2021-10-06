@@ -35,6 +35,7 @@
 #include <asm/io.h>
 #include "hd64570.h"
 
+
 static const char* version = "SDL RISCom/N2 driver version: 1.15";
 static const char* devname = "RISCom/N2";
 
@@ -66,8 +67,10 @@ static char *hw;	/* pointer to hw=xxx command line string */
 #define PCR_ENWIN  4     /* Open window */
 #define PCR_BUS16  8     /* 16-bit bus */
 
+
 /* Memory Base Address Register */
 #define N2_BAR 2
+
 
 /* Page Scan Register  */
 #define N2_PSR 4
@@ -77,6 +80,7 @@ static char *hw;	/* pointer to hw=xxx command line string */
 #define PSR_WINBITS  0x60
 #define PSR_DMAEN    0x80
 #define PSR_PAGEBITS 0x0F
+
 
 /* Modem Control Reg */
 #define N2_MCR 6
@@ -88,6 +92,7 @@ static char *hw;	/* pointer to hw=xxx command line string */
 #define DSR_PORT0       0x04
 #define DTR_PORT1       0x02
 #define DTR_PORT0       0x01
+
 
 typedef struct port_s {
 	struct net_device *dev;
@@ -106,6 +111,8 @@ typedef struct port_s {
 	u8 log_node;		/* logical port # */
 }port_t;
 
+
+
 typedef struct card_s {
 	u8 __iomem *winbase;		/* ISA window base address */
 	u32 phy_winbase;	/* ISA physical base address */
@@ -120,8 +127,10 @@ typedef struct card_s {
 	struct card_s *next_card;
 }card_t;
 
+
 static card_t *first_card;
 static card_t **new_card = &first_card;
+
 
 #define sca_reg(reg, card) (0x8000 | (card)->io | \
 			    ((reg) & 0x0F) | (((reg) & 0xF0) << 6))
@@ -138,10 +147,12 @@ static card_t **new_card = &first_card;
 #define get_port(card, port)		((card)->ports[port].valid ? \
 					 &(card)->ports[port] : NULL)
 
+
 static __inline__ u8 sca_get_page(card_t *card)
 {
 	return inb(card->io + N2_PSR) & PSR_PAGEBITS;
 }
+
 
 static __inline__ void openwin(card_t *card, u8 page)
 {
@@ -149,7 +160,9 @@ static __inline__ void openwin(card_t *card, u8 page)
 	outb((psr & ~PSR_PAGEBITS) | page, card->io + N2_PSR);
 }
 
+
 #include "hd64570.c"
+
 
 static void n2_set_iface(port_t *port)
 {
@@ -193,6 +206,8 @@ static void n2_set_iface(port_t *port)
 	sca_set_port(port);
 }
 
+
+
 static int n2_open(struct net_device *dev)
 {
 	port_t *port = dev_to_port(dev);
@@ -214,6 +229,8 @@ static int n2_open(struct net_device *dev)
 	return 0;
 }
 
+
+
 static int n2_close(struct net_device *dev)
 {
 	port_t *port = dev_to_port(dev);
@@ -226,6 +243,8 @@ static int n2_close(struct net_device *dev)
 	hdlc_close(dev);
 	return 0;
 }
+
+
 
 static int n2_ioctl(struct net_device *dev, struct ifreq *ifr, int cmd)
 {
@@ -278,6 +297,8 @@ static int n2_ioctl(struct net_device *dev, struct ifreq *ifr, int cmd)
 		return hdlc_ioctl(dev, ifr, cmd);
 	}
 }
+
+
 
 static void n2_destroy_card(card_t *card)
 {
@@ -469,6 +490,8 @@ static int __init n2_run(unsigned long io, unsigned long irq,
 	return 0;
 }
 
+
+
 static int __init n2_init(void)
 {
 	if (hw==NULL) {
@@ -520,6 +543,7 @@ static int __init n2_init(void)
 	return first_card ? 0 : -EINVAL;
 }
 
+
 static void __exit n2_cleanup(void)
 {
 	card_t *card = first_card;
@@ -530,6 +554,7 @@ static void __exit n2_cleanup(void)
 		n2_destroy_card(ptr);
 	}
 }
+
 
 module_init(n2_init);
 module_exit(n2_cleanup);

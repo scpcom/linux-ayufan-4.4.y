@@ -765,6 +765,7 @@ end:
 
 }
 
+
 /*xen_pcibk_mmio_enabled: it will send the mmio_enabled request to  pcifront
 * in case of the device driver could provide this service, and then wait
 * for pcifront ack

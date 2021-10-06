@@ -22,6 +22,7 @@
  * GNU General Public License for more details.
  ****************************************************************************/
 
+
 #include <linux/module.h>
 #include <linux/moduleparam.h>
 #include <generated/utsrelease.h>
@@ -1426,6 +1427,7 @@ static void tcm_qla2xxx_update_sess(struct qla_tgt_sess *sess, port_id_t s_id,
 			struct tcm_qla2xxx_nacl, se_node_acl);
 	u32 key;
 
+
 	if (sess->loop_id != loop_id || sess->s_id.b24 != s_id.b24)
 		pr_info("Updating session %p from port %8phC loop_id %d -> %d s_id %x:%x:%x -> %x:%x:%x\n",
 		    sess, sess->port_name,
@@ -1659,6 +1661,7 @@ static int tcm_qla2xxx_lport_register_npiv_cb(struct scsi_qla_host *base_vha,
 	return 0;
 }
 
+
 static struct se_wwn *tcm_qla2xxx_npiv_make_lport(
 	struct target_fabric_configfs *tf,
 	struct config_group *group,
@@ -1728,6 +1731,7 @@ static void tcm_qla2xxx_npiv_drop_lport(struct se_wwn *wwn)
 	scsi_host_put(base_vha->host);
 	kfree(lport);
 }
+
 
 static ssize_t tcm_qla2xxx_wwn_version_show(struct config_item *item,
 		char *page)

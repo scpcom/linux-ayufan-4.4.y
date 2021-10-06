@@ -29,6 +29,7 @@
 **          they pack nicely for 64-bit compilation. (ie sizeof(long) == 8)
 */
 
+
 /*
 ** Interrupt Routing Stuff
 ** -----------------------
@@ -140,6 +141,7 @@ struct vector_info {
 	u8	irqline;		/* INTINn(IRQ) */
 };
 
+
 struct iosapic_info {
 	struct iosapic_info *	isi_next;	/* list of I/O SAPIC */
 	void __iomem *		addr;		/* remapped address */
@@ -149,6 +151,8 @@ struct iosapic_info {
 	int			isi_status;	/* status/flags */
 	unsigned int		isi_version;	/* DEBUG: data fr version reg */
 };
+
+
 
 #ifdef __IA64__
 /*
@@ -181,3 +185,4 @@ struct sapic_info {
 	extint_info_t           *si_extint_info;/* External Intr info      */
 };
 #endif
+

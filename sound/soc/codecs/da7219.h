@@ -119,6 +119,7 @@
 #define DA7219_SYSTEM_STATUS		0xE0
 #define DA7219_SYSTEM_ACTIVE		0xFD
 
+
 /*
  * Bit Fields
  */
@@ -749,6 +750,7 @@
 /* DA7219_SYSTEM_ACTIVE = 0xFD */
 #define DA7219_SYSTEM_ACTIVE_SHIFT	0
 #define DA7219_SYSTEM_ACTIVE_MASK	(0x1 << 0)
+
 
 /*
  * General defines & data

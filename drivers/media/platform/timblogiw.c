@@ -43,6 +43,7 @@
 
 #define TIMBLOGIW_HAS_DECODER(lw)	(lw->pdata.encoder.module_name)
 
+
 struct timblogiw {
 	struct video_device		video_dev;
 	struct v4l2_device		v4l2_dev; /* mutual exclusion */
@@ -96,6 +97,7 @@ static int timblogiw_bytes_per_line(const struct timblogiw_tvnorm *norm)
 {
 	return norm->width * 2;
 }
+
 
 static int timblogiw_frame_size(const struct timblogiw_tvnorm *norm)
 {

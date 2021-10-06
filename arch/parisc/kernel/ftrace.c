@@ -16,6 +16,8 @@
 #include <asm/sections.h>
 #include <asm/ftrace.h>
 
+
+
 #ifdef CONFIG_FUNCTION_GRAPH_TRACER
 
 /* Add a function return address to the trace stack on thread info.*/
@@ -146,6 +148,7 @@ void prepare_ftrace_return(unsigned long *parent, unsigned long self_addr)
 
 #endif /* CONFIG_FUNCTION_GRAPH_TRACER */
 
+
 void ftrace_function_trampoline(unsigned long parent,
 				unsigned long self_addr,
 				unsigned long org_sp_gr3)
@@ -179,3 +182,4 @@ void ftrace_function_trampoline(unsigned long parent,
 	}
 #endif
 }
+

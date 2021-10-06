@@ -42,6 +42,7 @@ void omap4_cpu_die(unsigned int cpu)
 		writel_relaxed(0, base + OMAP_AUX_CORE_BOOT_0);
 	}
 
+
 	for (;;) {
 		/*
 		 * Enter into low power state

@@ -227,6 +227,7 @@ static void wake_up_all_devices(struct drbd_connection *connection)
 
 }
 
+
 /**
  * cl_wide_st_chg() - true if the state change is a cluster wide one
  * @device:	DRBD device.
@@ -538,6 +539,7 @@ static void conn_pr_state_change(struct drbd_connection *connection, union drbd_
 		drbd_info(connection, "%s\n", pb);
 }
 
+
 /**
  * is_valid_state() - Returns an SS_ error code if ns is not valid
  * @device:	DRBD device.
@@ -714,6 +716,7 @@ is_valid_conn_transition(enum drbd_conns oc, enum drbd_conns nc)
 
 	return SS_SUCCESS;
 }
+
 
 /**
  * is_valid_transition() - Returns an SS_ error code if the state transition is not possible

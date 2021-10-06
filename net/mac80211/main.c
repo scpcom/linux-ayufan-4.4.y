@@ -547,6 +547,7 @@ struct ieee80211_hw *ieee80211_alloc_hw_nm(size_t priv_data_len,
 		wiphy->features |= NL80211_FEATURE_LOW_PRIORITY_SCAN |
 				   NL80211_FEATURE_AP_SCAN;
 
+
 	if (!ops->set_key)
 		wiphy->flags |= WIPHY_FLAG_IBSS_RSN;
 
@@ -1240,6 +1241,7 @@ static void __exit ieee80211_exit(void)
 
 	rcu_barrier();
 }
+
 
 subsys_initcall(ieee80211_init);
 module_exit(ieee80211_exit);

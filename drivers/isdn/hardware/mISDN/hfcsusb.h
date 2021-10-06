@@ -5,6 +5,7 @@
 #ifndef __HFCSUSB_H__
 #define __HFCSUSB_H__
 
+
 #define DRIVER_NAME "HFC-S_USB"
 
 #define DBG_HFC_CALL_TRACE	0x00010000
@@ -64,6 +65,7 @@
 #define HFCUSB_B2_RSL		0x25
 #define HFCUSB_STATES		0x30
 
+
 #define HFCUSB_CHIPID		0x40	/* ID value of HFC-S USB */
 
 /* fifo registers */
@@ -76,6 +78,7 @@
 #define HFCUSB_D_RX		5
 #define HFCUSB_PCM_TX		6
 #define HFCUSB_PCM_RX		7
+
 
 #define USB_INT		0
 #define USB_BULK	1
@@ -90,6 +93,7 @@ static int iso_packets[8] =
 { ISOC_PACKETS_B, ISOC_PACKETS_B, ISOC_PACKETS_B, ISOC_PACKETS_B,
   ISOC_PACKETS_D, ISOC_PACKETS_D, ISOC_PACKETS_D, ISOC_PACKETS_D
 };
+
 
 /* Fifo flow Control for TX ISO */
 #define SINK_MAX	68
@@ -166,6 +170,7 @@ symbolic(struct hfcusb_symbolic_list list[], const int num)
 #define HFC_CHAN_D	2
 #define HFC_CHAN_E	3
 
+
 /*
  * List of all supported enpoints configiration sets, used to find the
  * best matching endpoint configuration within a devices' USB descriptor.
@@ -200,6 +205,7 @@ static char *conf_str[] = {
 	"3 Isochron IN + 3 Isochron OUT"
 };
 
+
 #define LED_OFF		0	/* no LED support */
 #define LED_SCHEME1	1	/* LED standard scheme */
 #define LED_SCHEME2	2	/* not used yet... */
@@ -220,6 +226,8 @@ static char *conf_str[] = {
 
 /* time in ms to perform a Flashing LED when B-Channel has traffic */
 #define LED_TIME      250
+
+
 
 struct hfcsusb;
 struct usb_fifo;
@@ -303,6 +311,7 @@ struct hfcsusb_vdata {
 	signed short	led_bits[8]; /* array of 8 possible LED bitmask */
 	char		*vend_name;  /* device name */
 };
+
 
 #define HFC_MAX_TE_LAYER1_STATE 8
 #define HFC_MAX_NT_LAYER1_STATE 4

@@ -5257,6 +5257,7 @@ static int cciss_enter_simple_mode(struct ctlr_info *h)
 	return 0;
 }
 
+
 static void cciss_remove_one(struct pci_dev *pdev)
 {
 	ctlr_info_t *h;

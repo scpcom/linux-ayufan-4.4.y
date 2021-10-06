@@ -124,6 +124,7 @@ static struct hvc_struct *hvc_get_by_index(int index)
 	return hp;
 }
 
+
 /*
  * Initial console vtermnos for console API usage prior to full console
  * initialization.  Any vty adapter outside this range will not have usable

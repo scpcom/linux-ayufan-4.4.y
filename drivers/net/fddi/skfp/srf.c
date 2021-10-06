@@ -34,6 +34,7 @@
 static const char ID_sccs[] = "@(#)srf.c	1.18 97/08/04 (C) SK " ;
 #endif
 
+
 /*
  * function declarations
  */
@@ -425,3 +426,4 @@ static void smt_send_srf(struct s_smc *smc)
 
 #endif	/* no BOOT */
 #endif	/* no SLIM_SMT */
+

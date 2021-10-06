@@ -679,3 +679,4 @@ machine_power_off (void)
 		pm_power_off();
 	machine_halt();
 }
+

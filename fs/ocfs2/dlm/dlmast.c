@@ -24,6 +24,7 @@
  *
  */
 
+
 #include <linux/module.h>
 #include <linux/fs.h>
 #include <linux/types.h>
@@ -35,6 +36,7 @@
 #include <linux/socket.h>
 #include <linux/inet.h>
 #include <linux/spinlock.h>
+
 
 #include "cluster/heartbeat.h"
 #include "cluster/nodemanager.h"
@@ -151,6 +153,7 @@ void dlm_queue_ast(struct dlm_ctxt *dlm, struct dlm_lock *lock)
 	spin_unlock(&dlm->ast_lock);
 }
 
+
 void __dlm_queue_bast(struct dlm_ctxt *dlm, struct dlm_lock *lock)
 {
 	struct dlm_lock_resource *res;
@@ -236,6 +239,7 @@ void dlm_do_local_ast(struct dlm_ctxt *dlm, struct dlm_lock_resource *res,
 	(*fn)(lock->astdata);
 }
 
+
 int dlm_do_remote_ast(struct dlm_ctxt *dlm, struct dlm_lock_resource *res,
 		      struct dlm_lock *lock)
 {
@@ -275,6 +279,8 @@ void dlm_do_local_bast(struct dlm_ctxt *dlm, struct dlm_lock_resource *res,
 
 	(*fn)(lock->astdata, blocked_type);
 }
+
+
 
 int dlm_proxy_ast_handler(struct o2net_msg *msg, u32 len, void *data,
 			  void **ret_data)
@@ -438,6 +444,8 @@ leave:
 	dlm_put(dlm);
 	return ret;
 }
+
+
 
 int dlm_send_proxy_ast_msg(struct dlm_ctxt *dlm, struct dlm_lock_resource *res,
 			   struct dlm_lock *lock, int msg_type,

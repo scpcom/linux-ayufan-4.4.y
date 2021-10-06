@@ -60,6 +60,7 @@
 #include <linux/io.h>
 #include <linux/uaccess.h>
 
+
 /* enable support for minutes as units? */
 /* (does not always work correctly, so disabled by default!) */
 #define SMSC_SUPPORT_MINUTES
@@ -343,6 +344,7 @@ static int wb_smsc_wdt_status(void)
 {
 	return (wb_smsc_wdt_get_timeout() == 0) ? 0 : WDIOF_KEEPALIVEPING;
 }
+
 
 /* -- File operations -------------------------------------------*/
 

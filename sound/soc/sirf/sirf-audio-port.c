@@ -15,6 +15,7 @@ struct sirf_audio_port {
 	struct snd_dmaengine_dai_dma_data capture_dma_data;
 };
 
+
 static int sirf_audio_port_dai_probe(struct snd_soc_dai *dai)
 {
 	struct sirf_audio_port *port = snd_soc_dai_get_drvdata(dai);

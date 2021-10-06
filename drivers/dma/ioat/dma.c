@@ -879,6 +879,7 @@ void ioat_timer_event(unsigned long data)
 		mod_timer(&ioat_chan->timer, jiffies + COMPLETION_TIMEOUT);
 	}
 
+
 	if (ioat_ring_active(ioat_chan))
 		mod_timer(&ioat_chan->timer, jiffies + COMPLETION_TIMEOUT);
 	else {

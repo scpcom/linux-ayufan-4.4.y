@@ -301,6 +301,7 @@ static void __init irq_pci_init(void)
 	num_bits = __raw_readl(mips_irq_chip + MIPS_IRQ_CHIP_NUM_BITS);
 	stride = 8 * (1 + ((num_bits - 1) / 64));
 
+
 	pr_notice("mips_irq_chip: %u bits, reg stride: %d\n", num_bits, stride);
 	mips_irq_chip_reg_raw		= MIPS_IRQ_CHIP_REGS + 0 * stride;
 	mips_irq_chip_reg_raw_w1s	= MIPS_IRQ_CHIP_REGS + 1 * stride;
@@ -316,6 +317,7 @@ static void __init irq_pci_init(void)
 
 	for (i = 0; i < 2; i++)
 		irq_set_chip_and_handler(i + MIPS_IRQ_MBOX0, &irq_chip_mbox, handle_percpu_irq);
+
 
 	set_c0_status(STATUSF_IP2);
 }
@@ -340,6 +342,7 @@ static void irq_pci_dispatch(void)
 		do_IRQ(__ffs(en));
 	}
 }
+
 
 void __init arch_init_irq(void)
 {

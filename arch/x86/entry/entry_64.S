@@ -355,6 +355,7 @@ opportunistic_sysret_failed:
 	jmp	restore_c_regs_and_iret
 END(entry_SYSCALL_64)
 
+
 	.macro FORK_LIKE func
 ENTRY(stub_\func)
 	SAVE_EXTRA_REGS 8
@@ -793,6 +794,7 @@ ENTRY(\sym)
 1:
 	call	error_entry
 
+
 	movq	%rsp, %rdi			/* pt_regs pointer */
 	call	sync_regs
 	movq	%rax, %rsp			/* switch stack */
@@ -837,6 +839,7 @@ idtentry spurious_interrupt_bug		do_spurious_interrupt_bug	has_error_code=0
 idtentry coprocessor_error		do_coprocessor_error		has_error_code=0
 idtentry alignment_check		do_alignment_check		has_error_code=1
 idtentry simd_coprocessor_error		do_simd_coprocessor_error	has_error_code=0
+
 
 	/*
 	 * Reload gs selector with exception handling
@@ -1119,6 +1122,7 @@ ENTRY(error_entry)
 	decl	%ebx
 	jmp	.Lerror_entry_from_usermode_after_swapgs
 END(error_entry)
+
 
 /*
  * On entry, EBS is a "return to kernel mode" flag:

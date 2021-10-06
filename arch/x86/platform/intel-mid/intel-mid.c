@@ -222,3 +222,4 @@ static inline int __init setup_x86_intel_mid_timer(char *arg)
 	return 0;
 }
 __setup("x86_intel_mid_timer=", setup_x86_intel_mid_timer);
+

@@ -417,6 +417,7 @@ static void __init imote2_stargate2_init(void)
 	pxa2xx_set_spi_info(3, &pxa_ssp_master_2_info);
 	spi_register_board_info(spi_board_info, ARRAY_SIZE(spi_board_info));
 
+
 	pxa27x_set_i2c_power_info(&i2c_pwr_pdata);
 	pxa_set_i2c_info(&i2c_pdata);
 }
@@ -684,6 +685,7 @@ static struct platform_device smc91x_device = {
 	},
 };
 
+
 /*
  * The card detect interrupt isn't debounced so we delay it by 250ms
  * to give the card a chance to fully insert / eject.
@@ -752,6 +754,7 @@ static struct pxamci_platform_data stargate2_mci_platform_data = {
 	.setpower = stargate2_mci_setpower,
 	.exit = stargate2_mci_exit,
 };
+
 
 /*
  * SRAM - The Stargate 2 has 32MB of SRAM.

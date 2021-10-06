@@ -60,6 +60,7 @@
 #define TIMER_3_INT_OVERFLOW	(1 << 8)
 #define TIMER_INT_ALL_MASK	0x1ff
 
+
 static unsigned int tick_rate;
 
 static u64 notrace gemini_read_sched_clock(void)

@@ -33,6 +33,7 @@ static u32 edca_setting_UL[HT_IOT_PEER_MAX] = {
 #define RTK_DL_EDCA 0x5e4322
 /*---------------------------Define Local Constant---------------------------*/
 
+
 /*------------------------Define global variable-----------------------------*/
 /* Debug variable ? */
 struct dig dm_digtable;
@@ -43,13 +44,16 @@ struct dynamic_rx_path_sel DM_RxPathSelTable;
 
 /*------------------------Define global variable-----------------------------*/
 
+
 /*------------------------Define local variable------------------------------*/
 /*------------------------Define local variable------------------------------*/
+
 
 /*--------------------Define export function prototype-----------------------*/
 extern	void dm_check_fsync(struct net_device *dev);
 
 /*--------------------Define export function prototype-----------------------*/
+
 
 /*---------------------Define local function prototype-----------------------*/
 /* DM --> Rate Adaptive */

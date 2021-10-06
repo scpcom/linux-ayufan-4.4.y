@@ -57,6 +57,7 @@
 #define RTL8188E_TRANS_LPS_TO_ACT_STEPS		15
 #define RTL8188E_TRANS_END_STEPS		1
 
+
 #define RTL8188E_TRANS_CARDEMU_TO_ACT					\
 	/* format
 	 * { offset, cut_msk, fab_msk|interface_msk, base|cmd, msk, value
@@ -263,6 +264,7 @@
 	PWR_BASEADDR_MAC, PWR_CMD_WRITE, BIT(5), BIT(5)},		\
 	/*Respond TxOK to scheduler*/
 
+
 #define RTL8188E_TRANS_LPS_TO_ACT					\
 	/* format
 	 * { offset, cut_msk, fab_msk|interface_msk, base|cmd, msk,
@@ -306,6 +308,7 @@
 	 */								\
 	{0xFFFF, PWR_CUT_ALL_MSK, PWR_FAB_ALL_MSK, PWR_INTF_ALL_MSK, 0,	\
 	PWR_CMD_END, 0, 0},
+
 
 extern struct wl_pwr_cfg rtl8188E_power_on_flow
 		[RTL8188E_TRANS_CARDEMU_TO_ACT_STEPS + RTL8188E_TRANS_END_STEPS];

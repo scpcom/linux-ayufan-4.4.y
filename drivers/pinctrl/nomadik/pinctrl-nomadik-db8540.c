@@ -897,6 +897,7 @@ DB8540_FUNC_GROUPS(u3, "u3ctsrts_b_1", "u3rxtx_c_1", "u3txrxa_b_1");
 DB8540_FUNC_GROUPS(u4, "u4ctsrts_b_1", "u4ctsrts_c_1", "u4txrx_b_1");
 DB8540_FUNC_GROUPS(usb, "usb_a_1");
 
+
 #define FUNCTION(fname)					\
 	{						\
 		.name = #fname,				\

@@ -101,6 +101,7 @@ struct btpage {
 		release_metapage(MP); \
 }
 
+
 /*
  *	btree traversal stack
  *

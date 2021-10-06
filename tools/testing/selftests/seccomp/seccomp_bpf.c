@@ -280,6 +280,7 @@ TEST(mode_filter_cannot_move_to_strict)
 	EXPECT_EQ(EINVAL, errno);
 }
 
+
 TEST(mode_filter_get_seccomp)
 {
 	struct sock_filter filter[] = {
@@ -303,6 +304,7 @@ TEST(mode_filter_get_seccomp)
 	ret = prctl(PR_GET_SECCOMP, 0, 0, 0, 0);
 	EXPECT_EQ(2, ret);
 }
+
 
 TEST(ALLOW_all)
 {

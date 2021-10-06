@@ -44,6 +44,7 @@
 	_ASM_EXTABLE(30b, \L)
 	.endm
 
+
 ENTRY(csum_partial_copy_generic)
 	cmpl	$3*64, %edx
 	jle	.Lignore

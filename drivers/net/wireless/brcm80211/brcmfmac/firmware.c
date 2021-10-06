@@ -539,3 +539,4 @@ int brcmf_fw_get_firmwares(struct device *dev, u16 flags,
 	return brcmf_fw_get_firmwares_pcie(dev, flags, code, nvram, fw_cb, 0,
 					   0);
 }
+

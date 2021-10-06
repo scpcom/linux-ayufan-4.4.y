@@ -221,6 +221,7 @@ static u8 HTIOTActIsDisableMCS14(struct rtllib_device *ieee, u8 *PeerMacAddr)
 	return 0;
 }
 
+
 static bool HTIOTActIsDisableMCS15(struct rtllib_device *ieee)
 {
 	return false;
@@ -241,6 +242,7 @@ static u8 HTIOTActIsMgntUseCCK6M(struct rtllib_device *ieee,
 				 struct rtllib_network *network)
 {
 	u8	retValue = 0;
+
 
 	if (ieee->pHTInfo->IOTPeer == HT_IOT_PEER_BROADCOM)
 		retValue = 1;
@@ -321,6 +323,7 @@ void HTConstructCapabilityElement(struct rtllib_device *ieee, u8 *posHTCap,
 	pCapELE->PSMP = 0;
 	pCapELE->LSigTxopProtect = 0;
 
+
 	netdev_dbg(ieee->dev,
 		   "TX HT cap/info ele BW=%d MaxAMSDUSize:%d DssCCk:%d\n",
 		   pCapELE->ChlWidth, pCapELE->MaxAMSDUSize, pCapELE->DssCCk);
@@ -394,6 +397,7 @@ void HTConstructInfoElement(struct rtllib_device *ieee, u8 *posHTInfo,
 		pHTInfoEle->PcoPhase			= 0;
 
 		memset(pHTInfoEle->BasicMSC, 0, 16);
+
 
 		*len = 22 + 2;
 
@@ -547,6 +551,7 @@ void HTOnAssocRsp(struct rtllib_device *ieee)
 	else
 		pPeerHTInfo = (struct ht_info_ele *)(pHTInfo->PeerHTInfoBuf);
 
+
 #ifdef VERBOSE_DEBUG
 	print_hex_dump_bytes("HTOnAssocRsp(): ", DUMP_PREFIX_NONE,
 			     pPeerHTCap, sizeof(struct ht_capab_ele));
@@ -566,6 +571,7 @@ void HTOnAssocRsp(struct rtllib_device *ieee)
 	pHTInfo->bCurSuppCCK = ((pHTInfo->bRegSuppCCK) ?
 			       ((pPeerHTCap->DssCCk == 1) ? true :
 			       false) : false);
+
 
 	pHTInfo->bCurrent_AMSDU_Support = pHTInfo->bAMSDU_Support;
 
@@ -756,6 +762,7 @@ void HTResetSelfAndSavePeerSetting(struct rtllib_device *ieee,
 		bIOTAction = HTIOTActIsDisableMCSTwoSpatialStream(ieee);
 		if (bIOTAction)
 			pHTInfo->IOTAction |= HT_IOT_ACT_DISABLE_ALL_2SS;
+
 
 		bIOTAction = HTIOTActIsDisableEDCATurbo(ieee, pNetwork->bssid);
 		if (bIOTAction)

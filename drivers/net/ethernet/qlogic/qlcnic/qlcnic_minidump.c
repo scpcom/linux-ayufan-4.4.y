@@ -1272,6 +1272,7 @@ flash_temp:
 			fw_dump->dma_buffer = temp_buffer;
 	}
 
+
 	dev_info(&adapter->pdev->dev,
 		 "Default minidump capture mask 0x%x\n",
 		 fw_dump->cap_mask);

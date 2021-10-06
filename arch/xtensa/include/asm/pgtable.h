@@ -374,6 +374,7 @@ ptep_set_wrprotect(struct mm_struct *mm, unsigned long addr, pte_t *ptep)
 #define pte_offset_map(dir,addr)	pte_offset_kernel((dir),(addr))
 #define pte_unmap(pte)		do { } while (0)
 
+
 /*
  * Encode and decode a swap and file entry.
  */
@@ -389,6 +390,7 @@ ptep_set_wrprotect(struct mm_struct *mm, unsigned long addr, pte_t *ptep)
 #define __swp_entry_to_pte(x)	((pte_t) { (x).val })
 
 #endif /*  !defined (__ASSEMBLY__) */
+
 
 #ifdef __ASSEMBLY__
 

@@ -77,4 +77,5 @@ struct rbd_image_header_ondisk {
 	struct rbd_image_snap_ondisk snaps[0];
 } __attribute__((packed));
 
+
 #endif

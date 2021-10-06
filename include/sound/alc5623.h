@@ -12,3 +12,4 @@ struct alc5623_platform_data {
 	unsigned int jack_det_ctrl;
 };
 #endif
+

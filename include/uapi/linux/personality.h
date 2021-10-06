@@ -1,6 +1,7 @@
 #ifndef _UAPI_LINUX_PERSONALITY_H
 #define _UAPI_LINUX_PERSONALITY_H
 
+
 /*
  * Flags for bug emulation.
  *
@@ -63,5 +64,6 @@ enum {
 	PER_HPUX =		0x0010,
 	PER_MASK =		0x00ff,
 };
+
 
 #endif /* _UAPI_LINUX_PERSONALITY_H */

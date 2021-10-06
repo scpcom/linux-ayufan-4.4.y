@@ -33,6 +33,7 @@
 
 #include "qeth_l3.h"
 
+
 static int qeth_l3_set_offline(struct ccwgroup_device *);
 static int qeth_l3_recover(void *);
 static int qeth_l3_stop(struct net_device *);
@@ -303,6 +304,7 @@ int qeth_l3_add_ip(struct qeth_card *card, struct qeth_ipaddr *addr)
 	spin_unlock_irqrestore(&card->ip_lock, flags);
 	return rc;
 }
+
 
 struct qeth_ipaddr *qeth_l3_get_addr_buffer(
 				enum qeth_prot_versions prot)

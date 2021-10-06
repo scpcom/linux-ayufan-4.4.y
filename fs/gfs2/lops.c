@@ -305,6 +305,7 @@ static struct bio *gfs2_log_get_bio(struct gfs2_sbd *sdp, u64 blkno)
 	return gfs2_log_alloc_bio(sdp, blkno);
 }
 
+
 /**
  * gfs2_log_write - write to log
  * @sdp: the filesystem
@@ -842,6 +843,7 @@ static void databuf_lo_after_commit(struct gfs2_sbd *sdp, struct gfs2_trans *tr)
 	}
 }
 
+
 const struct gfs2_log_operations gfs2_buf_lops = {
 	.lo_before_commit = buf_lo_before_commit,
 	.lo_after_commit = buf_lo_after_commit,
@@ -874,3 +876,4 @@ const struct gfs2_log_operations *gfs2_log_ops[] = {
 	&gfs2_revoke_lops,
 	NULL,
 };
+

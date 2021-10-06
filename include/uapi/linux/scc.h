@@ -3,6 +3,7 @@
 #ifndef _UAPI_SCC_H
 #define _UAPI_SCC_H
 
+
 /* selection of hardware types */
 
 #define PA0HZP		0x00	/* hardware type for PA0HZP SCC card and compatible */
@@ -156,6 +157,7 @@ struct scc_hw_config {
 };
 
 /* (#) only one INTACK latch allowed. */
+
 
 struct scc_mem_config {
 	unsigned int dummy;

@@ -82,6 +82,7 @@ extern unsigned int vced_count, vcei_count;
  */
 #define TASK_UNMAPPED_BASE PAGE_ALIGN(TASK_SIZE / 3)
 
+
 #define NUM_FPU_REGS	32
 
 #ifdef CONFIG_CPU_HAS_MSA

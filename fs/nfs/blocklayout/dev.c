@@ -188,6 +188,7 @@ static int
 bl_parse_deviceid(struct nfs_server *server, struct pnfs_block_dev *d,
 		struct pnfs_block_volume *volumes, int idx, gfp_t gfp_mask);
 
+
 static int
 bl_parse_simple(struct nfs_server *server, struct pnfs_block_dev *d,
 		struct pnfs_block_volume *volumes, int idx, gfp_t gfp_mask)
@@ -205,6 +206,7 @@ bl_parse_simple(struct nfs_server *server, struct pnfs_block_dev *d,
 			MAJOR(dev), MINOR(dev), PTR_ERR(d->bdev));
 		return PTR_ERR(d->bdev);
 	}
+
 
 	d->len = i_size_read(d->bdev->bd_inode);
 	d->map = bl_map_simple;

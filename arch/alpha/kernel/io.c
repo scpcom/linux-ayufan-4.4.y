@@ -206,6 +206,7 @@ EXPORT_SYMBOL(writew);
 EXPORT_SYMBOL(writel);
 EXPORT_SYMBOL(writeq);
 
+
 /*
  * Read COUNT 8-bit bytes from port PORT into memory starting at SRC.
  */
@@ -285,6 +286,7 @@ void insw(unsigned long port, void *dst, unsigned long count)
 EXPORT_SYMBOL(ioread16_rep);
 EXPORT_SYMBOL(insw);
 
+
 /*
  * Read COUNT 32-bit words from port PORT into memory starting at
  * SRC. Now works with any alignment in SRC. Performance is important,
@@ -316,6 +318,7 @@ void insl(unsigned long port, void *dst, unsigned long count)
 EXPORT_SYMBOL(ioread32_rep);
 EXPORT_SYMBOL(insl);
 
+
 /*
  * Like insb but in the opposite direction.
  * Don't worry as much about doing aligned memory transfers:
@@ -336,6 +339,7 @@ void outsb(unsigned long port, const void *src, unsigned long count)
 
 EXPORT_SYMBOL(iowrite8_rep);
 EXPORT_SYMBOL(outsb);
+
 
 /*
  * Like insw but in the opposite direction.  This is used by the IDE
@@ -376,6 +380,7 @@ void outsw(unsigned long port, const void *src, unsigned long count)
 EXPORT_SYMBOL(iowrite16_rep);
 EXPORT_SYMBOL(outsw);
 
+
 /*
  * Like insl but in the opposite direction.  This is used by the IDE
  * driver to write disk sectors.  Works with any alignment in SRC.
@@ -406,6 +411,7 @@ void outsl(unsigned long port, const void *src, unsigned long count)
 
 EXPORT_SYMBOL(iowrite32_rep);
 EXPORT_SYMBOL(outsl);
+
 
 /*
  * Copy data from IO memory space to "real" memory space.
@@ -460,6 +466,7 @@ void memcpy_fromio(void *to, const volatile void __iomem *from, long count)
 
 EXPORT_SYMBOL(memcpy_fromio);
 
+
 /*
  * Copy data from "real" memory space to IO memory space.
  * This needs to be optimized.
@@ -513,6 +520,7 @@ void memcpy_toio(volatile void __iomem *to, const void *from, long count)
 }
 
 EXPORT_SYMBOL(memcpy_toio);
+
 
 /*
  * "memset" on IO memory space.

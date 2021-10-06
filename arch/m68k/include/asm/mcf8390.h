@@ -18,6 +18,7 @@
 #define	mcf8390_h
 /****************************************************************************/
 
+
 /*
  *	Support for NE2000 clones devices in ColdFire based boards.
  *	Not all boards address these parts the same way, some use a
@@ -27,6 +28,7 @@
  */
 #define	BSWAP(w)	(((w) << 8) | ((w) >> 8))
 #define	RSWAP(w)	(w)
+
 
 /*
  *	Define the basic hardware resources of NE2000 boards.

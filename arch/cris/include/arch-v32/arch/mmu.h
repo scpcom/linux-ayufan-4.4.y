@@ -47,6 +47,7 @@ typedef struct
 #define _PAGE_GLOBAL        (1 << 4)	/* Global page. */
 #define _PAGE_NO_CACHE	    (1 << 31)	/* part of the uncached memory map */
 
+
 /*
  * The hardware doesn't care about these bits, but the kernel uses them in
  * software.

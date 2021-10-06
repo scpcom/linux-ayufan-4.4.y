@@ -22,6 +22,7 @@ struct sst_byt_stream;
 struct sst_pdata;
 extern struct sst_ops sst_byt_ops;
 
+
 #define SST_BYT_MAILBOX_OFFSET		0x144000
 #define SST_BYT_TIMESTAMP_OFFSET	(SST_BYT_MAILBOX_OFFSET + 0x800)
 

@@ -64,6 +64,7 @@ ph_command(struct IsdnCardState *cs, unsigned int command)
 	cs->writeisac(cs, W_CIX, command);
 }
 
+
 static void
 W6692_new_ph(struct IsdnCardState *cs)
 {

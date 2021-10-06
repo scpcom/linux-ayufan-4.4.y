@@ -29,6 +29,7 @@
  * and hooked into this driver.
  */
 
+
 #if defined(CONFIG_SERIAL_AMBA_PL011_CONSOLE) && defined(CONFIG_MAGIC_SYSRQ)
 #define SUPPORT_SYSRQ
 #endif
@@ -237,6 +238,7 @@ static int pl011_fifo_to_tty(struct uart_amba_port *uap)
 
 	return fifotaken;
 }
+
 
 /*
  * All the DMA operation mode stuff goes inside this ifdef.

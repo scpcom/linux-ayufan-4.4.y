@@ -26,6 +26,7 @@ extern struct platform_device iop33x_uart0_device;
 extern struct platform_device iop33x_uart1_device;
 #endif
 
+
 /*
  * Generic chipset bits
  *
@@ -37,5 +38,6 @@ extern struct platform_device iop33x_uart1_device;
  */
 #include "iq80331.h"
 #include "iq80332.h"
+
 
 #endif

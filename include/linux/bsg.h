@@ -3,6 +3,7 @@
 
 #include <uapi/linux/bsg.h>
 
+
 #if defined(CONFIG_BLK_DEV_BSG)
 struct bsg_class_device {
 	struct device *class_dev;

@@ -59,6 +59,7 @@
  *
  */
 
+
 #include "hisax.h"
 #include "isac.h"
 #include "isdnl1.h"
@@ -69,12 +70,16 @@
 #include <linux/init.h>
 #include "netjet.h"
 
+
+
 static const char *enternow_pci_rev = "$Revision: 1.1.4.5 $";
+
 
 /* for PowerISDN PCI */
 #define TJ_AMD_IRQ                                              0x20
 #define TJ_LED1                                                 0x40
 #define TJ_LED2                                                 0x80
+
 
 /* The window to [the] AMD [chip]...
  * From address hw.njet.base + TJ_AMD_PORT onwards, the AMD
@@ -82,7 +87,10 @@ static const char *enternow_pci_rev = "$Revision: 1.1.4.5 $";
  * -> 0x01 of the AMD at hw.njet.base + 0C4 */
 #define TJ_AMD_PORT                                             0xC0
 
+
+
 /* *************************** I/O-Interface functions ************************************* */
+
 
 /* cs->readisac, macro rByteAMD */
 static unsigned char
@@ -114,6 +122,7 @@ WriteByteAmd7930(struct IsdnCardState *cs, unsigned char offset, unsigned char v
 	}
 }
 
+
 static void
 enpci_setIrqMask(struct IsdnCardState *cs, unsigned char val) {
 	if (!val)
@@ -121,6 +130,7 @@ enpci_setIrqMask(struct IsdnCardState *cs, unsigned char val) {
 	else
 		outb(TJ_AMD_IRQ, cs->hw.njet.base + NETJET_IRQMASK1);
 }
+
 
 static unsigned char dummyrr(struct IsdnCardState *cs, int chan, unsigned char off)
 {
@@ -132,7 +142,9 @@ static void dummywr(struct IsdnCardState *cs, int chan, unsigned char off, unsig
 
 }
 
+
 /* ******************************************************************************** */
+
 
 static void
 reset_enpci(struct IsdnCardState *cs)
@@ -155,6 +167,7 @@ reset_enpci(struct IsdnCardState *cs)
 	outb(TJ_AMD_IRQ, cs->hw.njet.base + NETJET_IRQMASK1);
 	outb(cs->hw.njet.auxd, cs->hw.njet.auxa); // LED off
 }
+
 
 static int
 enpci_card_msg(struct IsdnCardState *cs, int mt, void *arg)

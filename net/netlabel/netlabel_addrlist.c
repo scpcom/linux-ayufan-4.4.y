@@ -94,6 +94,7 @@ struct netlbl_af4list *netlbl_af4list_search_exact(__be32 addr,
 	return NULL;
 }
 
+
 #if IS_ENABLED(CONFIG_IPV6)
 /**
  * netlbl_af6list_search - Search for a matching IPv6 address entry

@@ -596,9 +596,13 @@ static struct notifier_block clip_dev_notifier = {
 	.notifier_call = clip_device_event,
 };
 
+
+
 static struct notifier_block clip_inet_notifier = {
 	.notifier_call = clip_inet_event,
 };
+
+
 
 static void atmarpd_close(struct atm_vcc *vcc)
 {
@@ -617,12 +621,14 @@ static struct atmdev_ops atmarpd_dev_ops = {
 	.close = atmarpd_close
 };
 
+
 static struct atm_dev atmarpd_dev = {
 	.ops =			&atmarpd_dev_ops,
 	.type =			"arpd",
 	.number = 		999,
 	.lock =			__SPIN_LOCK_UNLOCKED(atmarpd_dev.lock)
 };
+
 
 static int atm_init_atmarp(struct atm_vcc *vcc)
 {

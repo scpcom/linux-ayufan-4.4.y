@@ -155,6 +155,7 @@ static const struct file_operations fops_wcn36xx_dump = {
 		}						\
 	} while (0)
 
+
 void wcn36xx_debugfs_init(struct wcn36xx *wcn)
 {
 	struct wcn36xx_dfs_entry *dfs = &wcn->dfs;

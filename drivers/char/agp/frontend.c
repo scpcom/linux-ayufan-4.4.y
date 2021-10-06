@@ -209,6 +209,7 @@ static void agp_insert_into_pool(struct agp_memory * temp)
 	agp_fe.current_controller->pool = temp;
 }
 
+
 /* File private list routines */
 
 struct agp_file_private *agp_find_private(pid_t pid)

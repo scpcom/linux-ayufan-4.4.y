@@ -106,6 +106,7 @@
 #define BE_ADAPTER_STATE_SHUTDOWN	0x008
 #define BE_ADAPTER_CHECK_BOOT	0x010
 
+
 #define BEISCSI_CLEAN_UNLOAD	0x01
 #define BEISCSI_EEH_UNLOAD	0x02
 
@@ -832,6 +833,7 @@ struct amap_iscsi_wrb_v2 {
 	u8 rsvd6[15];   /* DWORD 15 */
 } __packed;
 
+
 struct wrb_handle *alloc_wrb_handle(struct beiscsi_hba *phba, unsigned int cid,
 				     struct hwi_wrb_context **pcontext);
 void
@@ -998,6 +1000,7 @@ struct amap_iscsi_target_context_update_wrb_v2 {
 	u8 rsvd16[32]; /* DWORD 14 */
 	u8 rsvd17[32]; /* DWORD 15 */
 } __packed;
+
 
 struct be_ring {
 	u32 pages;		/* queue size in pages */

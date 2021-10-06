@@ -50,6 +50,7 @@ typedef struct {
 	struct proc_dir_entry	*entry;		/* registered entry (removal) */
 } palinfo_entry_t;
 
+
 /*
  *  A bunch of string array to get pretty printing
  */
@@ -284,6 +285,7 @@ static int cache_info(struct seq_file *m)
 	return 0;
 }
 
+
 static int vm_info(struct seq_file *m)
 {
 	u64 tr_pages =0, vw_pages=0, tc_pages;
@@ -412,6 +414,7 @@ static int vm_info(struct seq_file *m)
 	seq_putc(m, '\n');
 	return 0;
 }
+
 
 static int register_info(struct seq_file *m)
 {
@@ -592,6 +595,7 @@ static const char *const bus_features[]={
 	"Disable Bus Address Error Signalling",
 	"Disable Bus Data Error Checking"
 };
+
 
 static int bus_info(struct seq_file *m)
 {
@@ -799,6 +803,8 @@ static int tr_info(struct seq_file *m)
 	return 0;
 }
 
+
+
 /*
  * List {name,function} pairs for every entry in /proc/palinfo/cpu*
  */
@@ -848,6 +854,7 @@ typedef struct {
 	int		ret;	/* return value from call */
 } palinfo_smp_data_t;
 
+
 /*
  * this function does the actual final call and he called
  * from the smp code, i.e., this is the palinfo callback routine
@@ -874,6 +881,7 @@ int palinfo_handle_smp(struct seq_file *m, pal_func_cpu_u_t *f)
 	ptr.func = palinfo_entries[f->func_id].proc_read;
 	ptr.m = m;
 	ptr.ret  = 0; /* just in case */
+
 
 	/* will send IPI to other CPU and wait for completion of remote call */
 	if ((ret=smp_call_function_single(f->req_cpu, palinfo_smp_call, &ptr, 1))) {

@@ -228,6 +228,7 @@ extern int qla24xx_walk_and_build_sglist(struct qla_hw_data *, srb_t *,
 extern int qla24xx_walk_and_build_prot_sglist(struct qla_hw_data *, srb_t *,
 	uint32_t *, uint16_t, struct qla_tgt_cmd *);
 
+
 /*
  * Global Function Prototypes in qla_mbx.c source file.
  */

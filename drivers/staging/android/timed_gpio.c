@@ -25,6 +25,7 @@
 #include "timed_output.h"
 #include "timed_gpio.h"
 
+
 struct timed_gpio_data {
 	struct timed_output_dev dev;
 	struct hrtimer timer;

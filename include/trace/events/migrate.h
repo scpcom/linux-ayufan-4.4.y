@@ -11,6 +11,7 @@
 	EM( MIGRATE_SYNC_LIGHT,	"MIGRATE_SYNC_LIGHT")		\
 	EMe(MIGRATE_SYNC,	"MIGRATE_SYNC")
 
+
 #define MIGRATE_REASON						\
 	EM( MR_COMPACTION,	"compaction")			\
 	EM( MR_MEMORY_FAILURE,	"memory_failure")		\

@@ -29,6 +29,7 @@
  *		Decoder and Digitizer , Rev. 0, January 2011
  */
 
+
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/slab.h>
@@ -278,6 +279,7 @@ static inline unsigned vtotal(const struct v4l2_bt_timings *t)
 {
 	return V4L2_DV_BT_FRAME_HEIGHT(t);
 }
+
 
 /* ----------------------------------------------------------------------- */
 
@@ -1066,6 +1068,7 @@ static int configure_predefined_video_timings(struct v4l2_subdev *sd,
 		break;
 	}
 
+
 	return err;
 }
 
@@ -1682,6 +1685,7 @@ static int adv7842_s_dv_timings(struct v4l2_subdev *sd,
 	}
 
 	set_rgb_quantization_range(sd);
+
 
 	if (debug > 1)
 		v4l2_print_dv_timings(sd->name, "adv7842_s_dv_timings: ",
@@ -3090,6 +3094,7 @@ static const struct v4l2_ctrl_config adv7842_ctrl_free_run_color = {
 	.max = 0xffffff,
 	.step = 0x1,
 };
+
 
 static void adv7842_unregister_clients(struct v4l2_subdev *sd)
 {

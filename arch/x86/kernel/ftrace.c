@@ -331,6 +331,7 @@ static int add_brk_on_call(struct dyn_ftrace *rec, unsigned long addr)
 	return add_break(rec->ip, old);
 }
 
+
 static int add_brk_on_nop(struct dyn_ftrace *rec)
 {
 	unsigned const char *old;

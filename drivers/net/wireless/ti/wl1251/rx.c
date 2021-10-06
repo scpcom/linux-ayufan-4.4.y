@@ -214,6 +214,7 @@ static void wl1251_rx_ack(struct wl1251 *wl)
 	wl->rx_current_buffer = !wl->rx_current_buffer;
 }
 
+
 void wl1251_rx(struct wl1251 *wl)
 {
 	struct wl1251_rx_descriptor *rx_desc;

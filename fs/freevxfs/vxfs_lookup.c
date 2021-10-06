@@ -47,6 +47,7 @@
  */
 #define VXFS_BLOCK_PER_PAGE(sbp)  ((PAGE_CACHE_SIZE / (sbp)->s_blocksize))
 
+
 static struct dentry *	vxfs_lookup(struct inode *, struct dentry *, unsigned int);
 static int		vxfs_readdir(struct file *, struct dir_context *);
 

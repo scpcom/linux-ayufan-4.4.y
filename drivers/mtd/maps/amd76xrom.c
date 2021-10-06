@@ -18,6 +18,7 @@
 #include <linux/pci_ids.h>
 #include <linux/list.h>
 
+
 #define xstr(s) str(s)
 #define str(s) #s
 #define MOD_NAME xstr(KBUILD_BASENAME)
@@ -98,6 +99,7 @@ static void amd76xrom_cleanup(struct amd76xrom_window *window)
 	}
 }
 
+
 static int amd76xrom_init_one(struct pci_dev *pdev,
 			      const struct pci_device_id *ent)
 {
@@ -151,6 +153,7 @@ static int amd76xrom_init_one(struct pci_dev *pdev,
 		       __func__, &window->rsrc);
 		return -EBUSY;
 	}
+
 
 	/* Enable writes through the rom window */
 	pci_read_config_byte(pdev, 0x40, &byte);
@@ -265,6 +268,7 @@ static int amd76xrom_init_one(struct pci_dev *pdev,
 			goto out;
 		}
 
+
 		/* Calculate the new value of map_top */
 		map_top += map->mtd->size;
 
@@ -283,6 +287,7 @@ static int amd76xrom_init_one(struct pci_dev *pdev,
 	}
 	return 0;
 }
+
 
 static void amd76xrom_remove_one(struct pci_dev *pdev)
 {

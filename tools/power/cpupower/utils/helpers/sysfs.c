@@ -89,6 +89,7 @@ int sysfs_is_cpu_online(unsigned int cpu)
 
 /* CPUidle idlestate specific /sys/devices/system/cpu/cpuX/cpuidle/ access */
 
+
 /* CPUidle idlestate specific /sys/devices/system/cpu/cpuX/cpuidle/ access */
 
 /*
@@ -106,6 +107,7 @@ unsigned int sysfs_idlestate_file_exists(unsigned int cpu,
 {
 	char path[SYSFS_PATH_MAX];
 	struct stat statbuf;
+
 
 	snprintf(path, sizeof(path), PATH_TO_CPU "cpu%u/cpuidle/state%u/%s",
 		 cpu, idlestate, fname);
@@ -238,6 +240,7 @@ static const char *idlestate_string_files[MAX_IDLESTATE_STRING_FILES] = {
 	[IDLESTATE_NAME] = "name",
 };
 
+
 static char *sysfs_idlestate_get_one_string(unsigned int cpu,
 					unsigned int idlestate,
 					enum idlestate_string which)
@@ -355,6 +358,7 @@ unsigned int sysfs_get_idlestate_count(unsigned int cpu)
 	struct stat statbuf;
 	int idlestates = 1;
 
+
 	snprintf(file, SYSFS_PATH_MAX, PATH_TO_CPU "cpuidle");
 	if (stat(file, &statbuf) != 0 || !S_ISDIR(statbuf.st_mode))
 		return 0;
@@ -388,6 +392,8 @@ static unsigned int sysfs_cpuidle_read_file(const char *fname, char *buf,
 	return sysfs_read_file(path, buf, buflen);
 }
 
+
+
 /* read access to files which contain one string */
 
 enum cpuidle_string {
@@ -402,6 +408,7 @@ static const char *cpuidle_string_files[MAX_CPUIDLE_STRING_FILES] = {
 	[CPUIDLE_GOVERNOR_RO]	= "current_governor_ro",
 	[CPUIDLE_DRIVER]	= "current_driver",
 };
+
 
 static char *sysfs_cpuidle_get_one_string(enum cpuidle_string which)
 {

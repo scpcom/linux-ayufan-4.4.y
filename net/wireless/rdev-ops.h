@@ -338,6 +338,7 @@ static inline int rdev_join_mesh(struct cfg80211_registered_device *rdev,
 	return ret;
 }
 
+
 static inline int rdev_leave_mesh(struct cfg80211_registered_device *rdev,
 				  struct net_device *dev)
 {
@@ -559,6 +560,7 @@ static inline void rdev_rfkill_poll(struct cfg80211_registered_device *rdev)
 	rdev->ops->rfkill_poll(&rdev->wiphy);
 	trace_rdev_return_void(&rdev->wiphy);
 }
+
 
 #ifdef CONFIG_NL80211_TESTMODE
 static inline int rdev_testmode_cmd(struct cfg80211_registered_device *rdev,

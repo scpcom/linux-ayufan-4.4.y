@@ -138,6 +138,7 @@ hysdn_sched_tx(hysdn_card *card, unsigned char *buf,
 	return (0);		/* nothing to send */
 }				/* hysdn_sched_tx */
 
+
 /*****************************************************************************/
 /* send one config line to the card and return 0 if successful, otherwise a */
 /* negative error code.                                                      */

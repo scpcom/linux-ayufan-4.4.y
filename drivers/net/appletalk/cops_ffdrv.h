@@ -17,11 +17,13 @@
  *	Chief Scientist
  */
 
+
 /*      cops_ffdrv.h: LocalTalk driver firmware dump for Linux.
  *
  *      Authors:
  *      - Jay Schulist <jschlst@samba.org>
  */
+
 
 #ifdef CONFIG_COPS_DAYNA
 

@@ -7,6 +7,7 @@
 #define APBC_NO_BUS_CTRL	BIT(0)
 #define APBC_POWER_CTRL		BIT(1)
 
+
 /* Clock type "factor" */
 struct mmp_clk_factor_masks {
 	unsigned int factor;
@@ -101,6 +102,7 @@ extern struct clk *mmp_clk_register_mix(struct device *dev,
 					struct mmp_clk_mix_config *config,
 					spinlock_t *lock);
 
+
 /* Clock type "gate". MMP private gate */
 #define MMP_CLK_GATE_NEED_DELAY		BIT(0)
 
@@ -120,6 +122,7 @@ extern struct clk *mmp_clk_register_gate(struct device *dev, const char *name,
 			void __iomem *reg, u32 mask, u32 val_enable,
 			u32 val_disable, unsigned int gate_flags,
 			spinlock_t *lock);
+
 
 extern struct clk *mmp_clk_register_pll2(const char *name,
 		const char *parent_name, unsigned long flags);

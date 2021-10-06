@@ -105,6 +105,7 @@ void kvm_arch_check_processor_compat(void *rtn)
 	*(int *)rtn = 0;
 }
 
+
 /**
  * kvm_arch_init_vm - initializes a VM data structure
  * @kvm:	pointer to the KVM struct
@@ -144,6 +145,7 @@ int kvm_arch_vcpu_fault(struct kvm_vcpu *vcpu, struct vm_fault *vmf)
 {
 	return VM_FAULT_SIGBUS;
 }
+
 
 /**
  * kvm_arch_destroy_vm - destroy the VM data structure
@@ -206,6 +208,7 @@ long kvm_arch_dev_ioctl(struct file *filp,
 {
 	return -EINVAL;
 }
+
 
 struct kvm_vcpu *kvm_arch_vcpu_create(struct kvm *kvm, unsigned int id)
 {
@@ -780,6 +783,7 @@ static int kvm_vcpu_set_target(struct kvm_vcpu *vcpu,
 	/* Now we know what it is, we can reset it. */
 	return kvm_reset_vcpu(vcpu);
 }
+
 
 static int kvm_arch_vcpu_ioctl_vcpu_init(struct kvm_vcpu *vcpu,
 					 struct kvm_vcpu_init *init)

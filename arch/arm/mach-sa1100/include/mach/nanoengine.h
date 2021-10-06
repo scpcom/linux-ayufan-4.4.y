@@ -49,3 +49,4 @@
 #define NANO_PCI_CONFIG_SPACE_SIZE	SZ_64K
 
 #endif
+

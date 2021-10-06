@@ -278,3 +278,4 @@ MACHINE_START(FSG, "Freecom FSG-3")
 #endif
 	.restart	= ixp4xx_restart,
 MACHINE_END
+

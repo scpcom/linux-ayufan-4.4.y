@@ -1106,6 +1106,7 @@ static int vpfe_g_input(struct file *file, void *priv, unsigned int *index)
 	return vpfe_get_app_input_index(vpfe_dev, index);
 }
 
+
 static int vpfe_s_input(struct file *file, void *priv, unsigned int index)
 {
 	struct vpfe_device *vpfe_dev = video_drvdata(file);
@@ -1515,6 +1516,7 @@ static int vpfe_streamon(struct file *file, void *priv,
 	if (ret)
 		return ret;
 
+
 	ret = mutex_lock_interruptible(&vpfe_dev->lock);
 	if (ret)
 		goto streamoff;
@@ -1685,6 +1687,7 @@ unlock_out:
 	return ret;
 }
 
+
 static long vpfe_param_handler(struct file *file, void *priv,
 		bool valid_prio, unsigned int cmd, void *param)
 {
@@ -1735,6 +1738,7 @@ unlock_out:
 	mutex_unlock(&vpfe_dev->lock);
 	return ret;
 }
+
 
 /* vpfe capture ioctl operations */
 static const struct v4l2_ioctl_ops vpfe_ioctl_ops = {

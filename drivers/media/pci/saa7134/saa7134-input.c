@@ -317,6 +317,7 @@ static int get_key_hvr1110(struct IR_i2c *ir, enum rc_type *protocol,
 	return 1;
 }
 
+
 static int get_key_beholdm6xx(struct IR_i2c *ir, enum rc_type *protocol,
 			      u32 *scancode, u8 *toggle)
 {
@@ -413,6 +414,7 @@ static int get_key_pinnacle_grey(struct IR_i2c *ir, enum rc_type *protocol,
 
 	return get_key_pinnacle(ir, protocol, scancode, toggle, 1, 0xfe, 0xff);
 }
+
 
 /* The new pinnacle PCTV remote (with the colored buttons)
  *

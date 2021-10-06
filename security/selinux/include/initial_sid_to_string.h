@@ -30,3 +30,4 @@ static const char *initial_sid_to_string[] =
     "scmp_packet",
     "devnull",
 };
+

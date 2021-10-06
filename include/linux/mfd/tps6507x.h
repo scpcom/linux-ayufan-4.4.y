@@ -17,6 +17,7 @@
  * ----------------------------------------------------------------------------
  */
 
+
 /* Register definitions */
 #define	TPS6507X_REG_PPATH1			0X01
 #define	TPS6507X_CHG_USB			BIT(7)

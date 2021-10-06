@@ -57,6 +57,7 @@
 #include <linux/bottom_half.h>
 #include <asm/barrier.h>
 
+
 /*
  * Must define these before including other files, inline functions need them
  */

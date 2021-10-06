@@ -42,6 +42,7 @@
 #define VTAC_TX_PHY_RST_N_DLL_SWITCH    BIT(4)
 #define VTAC_TX_PHY_PROG_N3             BIT(9)
 
+
 /**
  * VTAC mode structure
  *
@@ -176,6 +177,7 @@ static int sti_vtac_probe(struct platform_device *pdev)
 	vtac->regs = devm_ioremap_resource(dev, res);
 	if (IS_ERR(vtac->regs))
 		return PTR_ERR(vtac->regs);
+
 
 	vtac->clk = devm_clk_get(dev, "vtac");
 	if (IS_ERR(vtac->clk)) {

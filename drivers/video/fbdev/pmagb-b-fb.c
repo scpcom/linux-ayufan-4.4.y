@@ -32,6 +32,7 @@
 
 #include <video/pmagb-b-fb.h>
 
+
 struct pmagbbfb_par {
 	volatile void __iomem *mmio;
 	volatile void __iomem *smem;
@@ -41,6 +42,7 @@ struct pmagbbfb_par {
 	unsigned int osc1;
 	int slot;
 };
+
 
 static struct fb_var_screeninfo pmagbbfb_defined = {
 	.bits_per_pixel	= 8,
@@ -62,6 +64,7 @@ static struct fb_fix_screeninfo pmagbbfb_fix = {
 	.visual		= FB_VISUAL_PSEUDOCOLOR,
 	.mmio_len	= PMAGB_B_FBMEM,
 };
+
 
 static inline void sfb_write(struct pmagbbfb_par *par, unsigned int reg, u32 v)
 {
@@ -87,6 +90,7 @@ static inline void gp0_write(struct pmagbbfb_par *par, u32 v)
 {
 	writel(v, par->mmio + PMAGB_B_GP0);
 }
+
 
 /*
  * Set the palette.
@@ -124,6 +128,7 @@ static struct fb_ops pmagbbfb_ops = {
 	.fb_copyarea	= cfb_copyarea,
 	.fb_imageblit	= cfb_imageblit,
 };
+
 
 /*
  * Turn the hardware cursor off.
@@ -240,6 +245,7 @@ static void pmagbbfb_osc_setup(struct fb_info *info)
 			     (1000000000 + par->osc0 / 2) / par->osc0;
 };
 
+
 static int pmagbbfb_probe(struct device *dev)
 {
 	struct tc_dev *tdev = to_tc_dev(dev);
@@ -329,6 +335,7 @@ static int pmagbbfb_probe(struct device *dev)
 
 	return 0;
 
+
 err_smem_map:
 	iounmap(par->smem);
 
@@ -365,6 +372,7 @@ static int __exit pmagbbfb_remove(struct device *dev)
 	return 0;
 }
 
+
 /*
  * Initialize the framebuffer.
  */
@@ -397,6 +405,7 @@ static void __exit pmagbbfb_exit(void)
 {
 	tc_unregister_driver(&pmagbbfb_driver);
 }
+
 
 module_init(pmagbbfb_init);
 module_exit(pmagbbfb_exit);

@@ -23,6 +23,7 @@
 
 #include <arch/opcode.h>
 
+
 enum
 {
   TILEGX_MAX_OPERANDS = 4 /* bfexts */
@@ -366,6 +367,8 @@ typedef enum
   TILEGX_OPC_NONE
 } tilegx_mnemonic;
 
+
+
 typedef enum
 {
   TILEGX_PIPELINE_X0,
@@ -418,11 +421,13 @@ struct tilegx_operand
   unsigned int (*extract) (tilegx_bundle_bits bundle);
 };
 
+
 extern const struct tilegx_operand tilegx_operands[];
 
 /* One finite-state machine per pipe for rapid instruction decoding. */
 extern const unsigned short * const
 tilegx_bundle_decoder_fsms[TILEGX_NUM_PIPELINE_ENCODINGS];
+
 
 struct tilegx_opcode
 {
@@ -466,10 +471,13 @@ struct tilegx_decoded_instruction
   long long operand_values[TILEGX_MAX_OPERANDS];
 };
 
+
 /* Disassemble a bundle into a struct for machine processing. */
 extern int parse_insn_tilegx(tilegx_bundle_bits bits,
                              unsigned long long pc,
                              struct tilegx_decoded_instruction
                              decoded[TILEGX_MAX_INSTRUCTIONS_PER_BUNDLE]);
+
+
 
 #endif /* opcode_tilegx_h */

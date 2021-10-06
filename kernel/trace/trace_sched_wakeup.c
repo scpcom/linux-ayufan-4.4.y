@@ -48,6 +48,7 @@ static inline int wakeup_display_graph(struct trace_array *tr, int set)
 # define is_graph(tr) false
 #endif
 
+
 #ifdef CONFIG_FUNCTION_TRACER
 
 static int wakeup_graph_entry(struct ftrace_graph_ent *trace);

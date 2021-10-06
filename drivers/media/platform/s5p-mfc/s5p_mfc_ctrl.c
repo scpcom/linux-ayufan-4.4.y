@@ -312,6 +312,7 @@ int s5p_mfc_init_hw(struct s5p_mfc_dev *dev)
 	return 0;
 }
 
+
 /* Deinitialize hardware */
 void s5p_mfc_deinit_hw(struct s5p_mfc_dev *dev)
 {

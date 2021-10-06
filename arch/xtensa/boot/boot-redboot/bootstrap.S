@@ -106,6 +106,7 @@ _start:
 	addi	a7, a7, 16
 	blt	a8, a5, 1b
 
+
 	/* We have to flush and invalidate the caches here before we jump. */
 
 #if XCHAL_DCACHE_IS_WRITEBACK
@@ -192,6 +193,7 @@ _reloc:
 
 	j	2f
 
+
 	# a6 destination start
 	# a7 maximum size of destination
 	# a8 source start
@@ -210,6 +212,7 @@ _reloc:
         addi    a6, a6, 16
         addi    a8, a8, 16
         blt     a6, a10, 1b
+
 
 	/* jump to the kernel */
 2:

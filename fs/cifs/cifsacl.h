@@ -22,6 +22,7 @@
 #ifndef _CIFSACL_H
 #define _CIFSACL_H
 
+
 #define NUM_AUTHS (6)	/* number of authority fields */
 #define SID_MAX_SUB_AUTHORITIES (15) /* max number of sub authority fields */
 

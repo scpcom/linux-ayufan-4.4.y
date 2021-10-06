@@ -54,6 +54,7 @@
 #include <net/irda/irlan_eth.h>
 #include <net/irda/irlan_filter.h>
 
+
 /* extern char sysctl_devname[]; */
 
 /*
@@ -1106,6 +1107,7 @@ static void irlan_seq_stop(struct seq_file *seq, void *v)
 	rcu_read_unlock();
 }
 
+
 /*
  * Show one entry in /proc file.
  */
@@ -1171,3 +1173,4 @@ MODULE_PARM_DESC(access, "Access type DIRECT=1, PEER=2, HOSTED=3");
 
 module_init(irlan_init);
 module_exit(irlan_cleanup);
+

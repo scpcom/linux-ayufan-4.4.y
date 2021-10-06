@@ -22,6 +22,7 @@
 #ifndef __HISAX_DEBUG_H__
 #define __HISAX_DEBUG_H__
 
+
 #ifdef CONFIG_HISAX_DEBUG
 
 #define DBG(level, format, arg...) do {					\
@@ -34,6 +35,7 @@
 
 #define DBG_SKB(level, skb)						\
 	if ((level & __debug_variable) && skb) dump_packet(__func__, skb->data, skb->len)
+
 
 static void __attribute__((unused))
 dump_packet(const char *name, const u_char *data, int pkt_len)

@@ -61,6 +61,7 @@ static void __iomem * atmel_get_base_addr(unsigned long *base, int *region_size)
 
 	of_node_put(dn);
 
+
 	if (naddrc == 2)
 		address = ((unsigned long) reg[0] << 32) | reg[1];
 	else

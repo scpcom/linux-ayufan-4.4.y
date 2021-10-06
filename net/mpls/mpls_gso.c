@@ -47,6 +47,7 @@ static struct sk_buff *mpls_gso_segment(struct sk_buff *skb,
 	mpls_features = skb->dev->mpls_features & features;
 	segs = skb_mac_gso_segment(skb, mpls_features);
 
+
 	/* Restore outer protocol. */
 	skb->protocol = mpls_protocol;
 

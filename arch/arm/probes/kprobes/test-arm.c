@@ -16,6 +16,7 @@
 
 #include "test-core.h"
 
+
 #define TEST_ISA "32"
 
 #define TEST_ARM_TO_THUMB_INTERWORK_R(code1, reg, val, code2)	\
@@ -48,6 +49,7 @@
 	".arm				\n\t"			\
 	"2:	nop			\n\t"			\
 	TESTCASE_END
+
 
 void kprobe_arm_test_cases(void)
 {
@@ -1361,3 +1363,4 @@ void kprobe_arm_test_cases(void)
 
 	verbose("\n");
 }
+

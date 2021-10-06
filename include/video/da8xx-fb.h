@@ -92,3 +92,4 @@ struct lcd_sync_arg {
 #define FB_SYNC_CLK_INVERT 0x40000000
 
 #endif  /* ifndef DA8XX_FB_H */
+

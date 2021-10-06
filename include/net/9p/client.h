@@ -43,6 +43,7 @@ enum p9_proto_versions{
 	p9_proto_2000L,
 };
 
+
 /**
  * enum p9_trans_status - different states of underlying transports
  * @Connected: transport is connected and healthy

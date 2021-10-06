@@ -649,3 +649,4 @@ MODULE_DESCRIPTION("Measurement-Specialties common i2c driver");
 MODULE_AUTHOR("William Markezana <william.markezana@meas-spec.com>");
 MODULE_AUTHOR("Ludovic Tancerel <ludovic.tancerel@maplehightech.com>");
 MODULE_LICENSE("GPL v2");
+

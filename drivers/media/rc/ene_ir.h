@@ -20,6 +20,7 @@
  */
 #include <linux/spinlock.h>
 
+
 /* hardware address */
 #define ENE_STATUS		0	/* hardware status - unused */
 #define ENE_ADDR_HI		1	/* hi byte of register address */
@@ -121,6 +122,7 @@
 /* Actual register which contains RLC RX data - read by firmware */
 #define ENE_CIRDAT_IN		0xFEC7
 
+
 /* RLC configuration - sample period (1us resulution) + idle mode */
 #define ENE_CIRRLC_CFG		0xFEC8
 #define ENE_CIRRLC_CFG_OVERFLOW	0x80	/* interrupt on overflows if set */
@@ -131,6 +133,7 @@
 #define ENE_CIRRLC_OUT1		0xFECA
 #define ENE_CIRRLC_OUT_PULSE	0x80	/* Transmitted sample is pulse */
 #define ENE_CIRRLC_OUT_MASK	0x7F
+
 
 /* Carrier detect setting
  * Low nibble  - number of carrier pulses to average

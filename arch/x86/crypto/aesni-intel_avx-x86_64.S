@@ -141,6 +141,7 @@ ONEf:            .octa     0x01000000000000000000000000000000
 
 .text
 
+
 ##define the fields of the gcm aes context
 #{
 #        u8 expanded_keys[16*11] store expanded keys
@@ -290,6 +291,7 @@ VARIABLE_OFFSET = 16*8
         vpxor   \T2, \GH, \GH
         vpxor   \T1, \GH, \GH                   # the result is in GH
 
+
 .endm
 
 .macro PRECOMPUTE_AVX HK T1 T2 T3 T4 T5 T6
@@ -359,6 +361,7 @@ VARIABLE_OFFSET = 16*8
         mov     arg6, %r10                      # r10 = AAD
         mov     arg7, %r12                      # r12 = aadLen
 
+
         mov     %r12, %r11
 
         vpxor   reg_i, reg_i, reg_i
@@ -371,6 +374,7 @@ _get_AAD_loop\@:
         add     $4, %r10
         sub     $4, %r12
         jg      _get_AAD_loop\@
+
 
         cmp     $16, %r11
         je      _get_AAD_loop2_done\@
@@ -394,6 +398,7 @@ _get_AAD_loop2_done\@:
 	mov     arg5, %rax                     # rax = *Y0
 	vmovdqu (%rax), \CTR                   # CTR = Y0
 	vpshufb SHUF_MASK(%rip), \CTR, \CTR
+
 
 	i = (9-\num_initial_blocks)
 	setreg
@@ -430,6 +435,7 @@ _get_AAD_loop2_done\@:
 	setreg
 .endr
 
+
 	vmovdqa  16*10(arg1), \T_key
 	i = (9-\num_initial_blocks)
 	setreg
@@ -453,6 +459,7 @@ _get_AAD_loop2_done\@:
 	i = (i+1)
 	setreg
 .endr
+
 
 	i = (8-\num_initial_blocks)
 	j = (9-\num_initial_blocks)
@@ -533,6 +540,7 @@ _get_AAD_loop2_done\@:
 		i = (i+1)
 		setreg
 .endr
+
 
                 vmovdqa  16*i(arg1), \T_key
                 vaesenclast  \T_key, \XMM1, \XMM1
@@ -664,6 +672,7 @@ _initial_blocks_done\@:
                 vmovdqa \XMM8, \CTR
 .endif
 
+
         #######################################################################
 
                 vmovdqu (arg1), \T1
@@ -677,6 +686,10 @@ _initial_blocks_done\@:
                 vpxor   \T1, \XMM8, \XMM8
 
         #######################################################################
+
+
+
+
 
                 vmovdqu 16*1(arg1), \T1
                 vaesenc \T1, \XMM1, \XMM1
@@ -697,6 +710,7 @@ _initial_blocks_done\@:
                 vaesenc \T1, \XMM6, \XMM6
                 vaesenc \T1, \XMM7, \XMM7
                 vaesenc \T1, \XMM8, \XMM8
+
 
         #######################################################################
 
@@ -791,6 +805,7 @@ _initial_blocks_done\@:
                 vaesenc \T1, \XMM7, \XMM7
                 vaesenc \T1, \XMM8, \XMM8
 
+
         vmovdqa         TMP5(%rsp), \T1
         vmovdqa         HashKey_4(arg1), \T5
         vpclmulqdq      $0x11, \T5, \T1, \T3
@@ -826,6 +841,7 @@ _initial_blocks_done\@:
         vmovdqa         HashKey_3_k(arg1), \T5
         vpclmulqdq      $0x10, \T5, \T3, \T3
         vpxor           \T3, \T6, \T6
+
 
                 vmovdqu 16*8(arg1), \T1
                 vaesenc \T1, \XMM1, \XMM1
@@ -898,10 +914,13 @@ _initial_blocks_done\@:
 .endr
 	#######################################################################
 
+
 	vpslldq	$8, \T6, \T3				# shift-L T3 2 DWs
 	vpsrldq	$8, \T6, \T6				# shift-R T2 2 DWs
 	vpxor	\T3, \T7, \T7
 	vpxor	\T4, \T6, \T6				# accumulate the results in T6:T7
+
+
 
 	#######################################################################
 	#first phase of the reduction
@@ -951,14 +970,19 @@ _initial_blocks_done\@:
 		vpshufb	SHUF_MASK(%rip), \XMM7, \XMM7	# perform a 16Byte swap
 		vpshufb	SHUF_MASK(%rip), \XMM8, \XMM8	# perform a 16Byte swap
 
+
 	vpxor	\T6, \XMM1, \XMM1
 
+
+
 .endm
+
 
 # GHASH the last 4 ciphertext blocks.
 .macro  GHASH_LAST_8_AVX T1 T2 T3 T4 T5 T6 T7 XMM1 XMM2 XMM3 XMM4 XMM5 XMM6 XMM7 XMM8
 
         ## Karatsuba Method
+
 
         vpshufd         $0b01001110, \XMM1, \T2
         vpxor           \XMM1, \T2, \T2
@@ -1077,6 +1101,9 @@ _initial_blocks_done\@:
         vpxor           \T6, \XMM1, \XMM1
         vpxor           \T7, \XMM1, \T2
 
+
+
+
         vpslldq $8, \T2, \T4
         vpsrldq $8, \T2, \T2
 
@@ -1099,6 +1126,7 @@ _initial_blocks_done\@:
         vpxor   \T2, \T7, \T7   # first phase of the reduction complete
         #######################################################################
 
+
         #second phase of the reduction
         vpsrld  $1, \T7, \T2    # packed left shifting >> 1
         vpsrld  $2, \T7, \T3    # packed left shifting >> 2
@@ -1111,6 +1139,7 @@ _initial_blocks_done\@:
         vpxor   \T7, \T6, \T6   # the result is in T6
 
 .endm
+
 
 # combined for GCM encrypt and decrypt functions
 # clobbering all xmm registers
@@ -1125,8 +1154,12 @@ _initial_blocks_done\@:
 
         mov     %rsp, %r14
 
+
+
+
         sub     $VARIABLE_OFFSET, %rsp
         and     $~63, %rsp                  # align rsp to 64 bytes
+
 
         vmovdqu  HashKey(arg1), %xmm13      # xmm13 = HashKey
 
@@ -1191,6 +1224,7 @@ _initial_num_blocks_is_1\@:
 _initial_num_blocks_is_0\@:
         INITIAL_BLOCKS_AVX  0, %xmm12, %xmm13, %xmm14, %xmm15, %xmm11, %xmm9, %xmm1, %xmm2, %xmm3, %xmm4, %xmm5, %xmm6, %xmm7, %xmm8, %xmm10, %xmm0, \ENC_DEC
 
+
 _initial_blocks_encrypted\@:
         cmp     $0, %r13
         je      _zero_cipher_left\@
@@ -1198,13 +1232,19 @@ _initial_blocks_encrypted\@:
         sub     $128, %r13
         je      _eight_cipher_left\@
 
+
+
+
         vmovd   %xmm9, %r15d
         and     $255, %r15d
         vpshufb SHUF_MASK(%rip), %xmm9, %xmm9
 
+
 _encrypt_by_8_new\@:
         cmp     $(255-8), %r15d
         jg      _encrypt_by_8\@
+
+
 
         add     $8, %r15b
         GHASH_8_ENCRYPT_8_PARALLEL_AVX      %xmm0, %xmm10, %xmm11, %xmm12, %xmm13, %xmm14, %xmm9, %xmm1, %xmm2, %xmm3, %xmm4, %xmm5, %xmm6, %xmm7, %xmm8, %xmm15, out_order, \ENC_DEC
@@ -1226,8 +1266,12 @@ _encrypt_by_8\@:
 
         vpshufb SHUF_MASK(%rip), %xmm9, %xmm9
 
+
+
+
 _eight_cipher_left\@:
         GHASH_LAST_8_AVX    %xmm0, %xmm10, %xmm11, %xmm12, %xmm13, %xmm14, %xmm15, %xmm1, %xmm2, %xmm3, %xmm4, %xmm5, %xmm6, %xmm7, %xmm8
+
 
 _zero_cipher_left\@:
         cmp     $16, arg4
@@ -1239,6 +1283,7 @@ _zero_cipher_left\@:
         je      _multiple_of_16_bytes\@
 
         # handle the last <16 Byte block seperately
+
 
         vpaddd   ONE(%rip), %xmm9, %xmm9             # INCR CNT to get Yn
         vpshufb SHUF_MASK(%rip), %xmm9, %xmm9
@@ -1265,9 +1310,11 @@ _only_less_than_16\@:
 
         # handle the last <16 Byte block seperately
 
+
         vpaddd  ONE(%rip), %xmm9, %xmm9              # INCR CNT to get Yn
         vpshufb SHUF_MASK(%rip), %xmm9, %xmm9
         ENCRYPT_SINGLE_BLOCK    %xmm9                # E(K, Yn)
+
 
         lea     SHIFT_MASK+16(%rip), %r12
         sub     %r13, %r12                           # adjust the shuffle mask pointer to be
@@ -1313,6 +1360,7 @@ _final_ghash_mul\@:
         vpshufb SHUF_MASK(%rip), %xmm9, %xmm9        # shuffle xmm9 back to output as ciphertext
         .endif
 
+
         #############################
         # output r13 Bytes
         vmovq   %xmm9, %rax
@@ -1354,6 +1402,8 @@ _multiple_of_16_bytes\@:
 
         vpxor   %xmm14, %xmm9, %xmm9
 
+
+
 _return_T\@:
         mov     arg8, %r10              # r10 = authTag
         mov     arg9, %r11              # r11 = auth_tag_len
@@ -1388,6 +1438,7 @@ _return_T_done\@:
         pop     %r12
 .endm
 
+
 #############################################################
 #void   aesni_gcm_precomp_avx_gen2
 #        (gcm_data     *my_ctx_data,
@@ -1401,6 +1452,8 @@ ENTRY(aesni_gcm_precomp_avx_gen2)
         push    %r15
 
         mov     %rsp, %r14
+
+
 
         sub     $VARIABLE_OFFSET, %rsp
         and     $~63, %rsp                  # align rsp to 64 bytes
@@ -1423,6 +1476,7 @@ ENTRY(aesni_gcm_precomp_avx_gen2)
         vpxor    %xmm2, %xmm6, %xmm6        # xmm6 holds the HashKey<<1 mod poly
         #######################################################################
         vmovdqa  %xmm6, HashKey(arg1)       # store HashKey<<1 mod poly
+
 
         PRECOMPUTE_AVX  %xmm6, %xmm0, %xmm1, %xmm2, %xmm3, %xmm4, %xmm5
 
@@ -1494,6 +1548,7 @@ ENDPROC(aesni_gcm_dec_avx_gen2)
         vpclmulqdq      $0x10,\HK,\GH,\GH      # GH = a0*b1
         vpxor           \T3, \GH, \GH
 
+
         vpsrldq         $8 , \GH, \T3          # shift-R GH 2 DWs
         vpslldq         $8 , \GH, \GH          # shift-L GH 2 DWs
 
@@ -1519,6 +1574,7 @@ ENDPROC(aesni_gcm_dec_avx_gen2)
         vpxor           \T2, \GH, \GH          # second phase of the reduction complete
         #######################################################################
         vpxor           \T1, \GH, \GH          # the result is in GH
+
 
 .endm
 
@@ -1549,6 +1605,7 @@ ENDPROC(aesni_gcm_dec_avx_gen2)
 
 .endm
 
+
 ## if a = number of total plaintext bytes
 ## b = floor(a/16)
 ## num_initial_blocks = b mod 4#
@@ -1563,6 +1620,7 @@ ENDPROC(aesni_gcm_dec_avx_gen2)
         mov     arg6, %r10                       # r10 = AAD
         mov     arg7, %r12                       # r12 = aadLen
 
+
         mov     %r12, %r11
 
         vpxor   reg_i, reg_i, reg_i
@@ -1575,6 +1633,7 @@ _get_AAD_loop\@:
         add     $4, %r10
         sub     $4, %r12
         jg      _get_AAD_loop\@
+
 
         cmp     $16, %r11
         je      _get_AAD_loop2_done\@
@@ -1598,6 +1657,7 @@ _get_AAD_loop2_done\@:
 	mov     arg5, %rax                     # rax = *Y0
 	vmovdqu (%rax), \CTR                   # CTR = Y0
 	vpshufb SHUF_MASK(%rip), \CTR, \CTR
+
 
 	i = (9-\num_initial_blocks)
 	setreg
@@ -1634,6 +1694,7 @@ _get_AAD_loop2_done\@:
 	setreg
 .endr
 
+
 	vmovdqa  16*10(arg1), \T_key
 	i = (9-\num_initial_blocks)
 	setreg
@@ -1658,6 +1719,7 @@ _get_AAD_loop2_done\@:
 	i = (i+1)
 	setreg
 .endr
+
 
 	i = (8-\num_initial_blocks)
 	j = (9-\num_initial_blocks)
@@ -1738,6 +1800,7 @@ _get_AAD_loop2_done\@:
 		i = (i+1)
 		setreg
 .endr
+
 
                 vmovdqa  16*i(arg1), \T_key
                 vaesenclast  \T_key, \XMM1, \XMM1
@@ -1822,7 +1885,10 @@ _get_AAD_loop2_done\@:
 
 _initial_blocks_done\@:
 
+
 .endm
+
+
 
 # encrypt 8 blocks at a time
 # ghash the 8 previously encrypted ciphertext blocks
@@ -1870,6 +1936,7 @@ _initial_blocks_done\@:
                 vmovdqa \XMM8, \CTR
 .endif
 
+
         #######################################################################
 
                 vmovdqu (arg1), \T1
@@ -1883,6 +1950,10 @@ _initial_blocks_done\@:
                 vpxor   \T1, \XMM8, \XMM8
 
         #######################################################################
+
+
+
+
 
                 vmovdqu 16*1(arg1), \T1
                 vaesenc \T1, \XMM1, \XMM1
@@ -1903,6 +1974,7 @@ _initial_blocks_done\@:
                 vaesenc \T1, \XMM6, \XMM6
                 vaesenc \T1, \XMM7, \XMM7
                 vaesenc \T1, \XMM8, \XMM8
+
 
         #######################################################################
 
@@ -1997,6 +2069,7 @@ _initial_blocks_done\@:
                 vaesenc \T1, \XMM7, \XMM7
                 vaesenc \T1, \XMM8, \XMM8
 
+
         vmovdqa         TMP5(%rsp), \T1
         vmovdqa         HashKey_4(arg1), \T5
         vpclmulqdq      $0x11, \T5, \T1, \T3
@@ -2059,6 +2132,7 @@ _initial_blocks_done\@:
         vpclmulqdq      $0x10, \T5, \T1, \T3
         vpxor           \T3, \T6, \T6
 
+
         #######################################################################
 
                 vmovdqu 16*9(arg1), \T5
@@ -2086,6 +2160,7 @@ _initial_blocks_done\@:
         vpclmulqdq      $0x11, \T5, \T1, \T3
         vpxor           \T3, \T4, \T1
 
+
                 vmovdqu 16*10(arg1), \T5
 
 	i = 0
@@ -2106,10 +2181,13 @@ _initial_blocks_done\@:
 .endr
 	#######################################################################
 
+
 	vpslldq	$8, \T6, \T3				# shift-L T3 2 DWs
 	vpsrldq	$8, \T6, \T6				# shift-R T2 2 DWs
 	vpxor	\T3, \T7, \T7
 	vpxor	\T6, \T1, \T1				# accumulate the results in T1:T7
+
+
 
 	#######################################################################
 	#first phase of the reduction
@@ -2152,9 +2230,13 @@ _initial_blocks_done\@:
 		vpshufb	SHUF_MASK(%rip), \XMM7, \XMM7	# perform a 16Byte swap
 		vpshufb	SHUF_MASK(%rip), \XMM8, \XMM8	# perform a 16Byte swap
 
+
 	vpxor	\T1, \XMM1, \XMM1
 
+
+
 .endm
+
 
 # GHASH the last 4 ciphertext blocks.
 .macro  GHASH_LAST_8_AVX2 T1 T2 T3 T4 T5 T6 T7 XMM1 XMM2 XMM3 XMM4 XMM5 XMM6 XMM7 XMM8
@@ -2301,6 +2383,9 @@ _initial_blocks_done\@:
         vpxor           \T6, \XMM1, \XMM1
         vpxor           \T7, \XMM1, \T2
 
+
+
+
         vpslldq $8, \T2, \T4
         vpsrldq $8, \T2, \T2
 
@@ -2318,6 +2403,7 @@ _initial_blocks_done\@:
         vpxor           \T2, \T7, \T7              # first phase of the reduction complete
         #######################################################################
 
+
         #second phase of the reduction
         vpclmulqdq      $0x00, \T7, \T3, \T2
         vpsrldq         $4, \T2, \T2               # shift-R T2 1 DW (Shift-R only 1-DW to obtain 2-DWs shift-R)
@@ -2329,6 +2415,8 @@ _initial_blocks_done\@:
         #######################################################################
         vpxor           \T4, \T6, \T6              # the result is in T6
 .endm
+
+
 
 # combined for GCM encrypt and decrypt functions
 # clobbering all xmm registers
@@ -2343,8 +2431,12 @@ _initial_blocks_done\@:
 
         mov     %rsp, %r14
 
+
+
+
         sub     $VARIABLE_OFFSET, %rsp
         and     $~63, %rsp                         # align rsp to 64 bytes
+
 
         vmovdqu  HashKey(arg1), %xmm13             # xmm13 = HashKey
 
@@ -2409,6 +2501,7 @@ _initial_num_blocks_is_1\@:
 _initial_num_blocks_is_0\@:
         INITIAL_BLOCKS_AVX2  0, %xmm12, %xmm13, %xmm14, %xmm15, %xmm11, %xmm9, %xmm1, %xmm2, %xmm3, %xmm4, %xmm5, %xmm6, %xmm7, %xmm8, %xmm10, %xmm0, \ENC_DEC
 
+
 _initial_blocks_encrypted\@:
         cmp     $0, %r13
         je      _zero_cipher_left\@
@@ -2416,13 +2509,19 @@ _initial_blocks_encrypted\@:
         sub     $128, %r13
         je      _eight_cipher_left\@
 
+
+
+
         vmovd   %xmm9, %r15d
         and     $255, %r15d
         vpshufb SHUF_MASK(%rip), %xmm9, %xmm9
 
+
 _encrypt_by_8_new\@:
         cmp     $(255-8), %r15d
         jg      _encrypt_by_8\@
+
+
 
         add     $8, %r15b
         GHASH_8_ENCRYPT_8_PARALLEL_AVX2      %xmm0, %xmm10, %xmm11, %xmm12, %xmm13, %xmm14, %xmm9, %xmm1, %xmm2, %xmm3, %xmm4, %xmm5, %xmm6, %xmm7, %xmm8, %xmm15, out_order, \ENC_DEC
@@ -2444,8 +2543,12 @@ _encrypt_by_8\@:
 
         vpshufb SHUF_MASK(%rip), %xmm9, %xmm9
 
+
+
+
 _eight_cipher_left\@:
         GHASH_LAST_8_AVX2    %xmm0, %xmm10, %xmm11, %xmm12, %xmm13, %xmm14, %xmm15, %xmm1, %xmm2, %xmm3, %xmm4, %xmm5, %xmm6, %xmm7, %xmm8
+
 
 _zero_cipher_left\@:
         cmp     $16, arg4
@@ -2457,6 +2560,7 @@ _zero_cipher_left\@:
         je      _multiple_of_16_bytes\@
 
         # handle the last <16 Byte block seperately
+
 
         vpaddd   ONE(%rip), %xmm9, %xmm9             # INCR CNT to get Yn
         vpshufb SHUF_MASK(%rip), %xmm9, %xmm9
@@ -2483,9 +2587,11 @@ _only_less_than_16\@:
 
         # handle the last <16 Byte block seperately
 
+
         vpaddd  ONE(%rip), %xmm9, %xmm9              # INCR CNT to get Yn
         vpshufb SHUF_MASK(%rip), %xmm9, %xmm9
         ENCRYPT_SINGLE_BLOCK    %xmm9                # E(K, Yn)
+
 
         lea     SHIFT_MASK+16(%rip), %r12
         sub     %r13, %r12                           # adjust the shuffle mask pointer to be
@@ -2529,6 +2635,7 @@ _final_ghash_mul\@:
         vpshufb SHUF_MASK(%rip), %xmm9, %xmm9        # shuffle xmm9 back to output as ciphertext
         .endif
 
+
         #############################
         # output r13 Bytes
         vmovq   %xmm9, %rax
@@ -2570,6 +2677,8 @@ _multiple_of_16_bytes\@:
 
         vpxor   %xmm14, %xmm9, %xmm9
 
+
+
 _return_T\@:
         mov     arg8, %r10              # r10 = authTag
         mov     arg9, %r11              # r11 = auth_tag_len
@@ -2604,6 +2713,7 @@ _return_T_done\@:
         pop     %r12
 .endm
 
+
 #############################################################
 #void   aesni_gcm_precomp_avx_gen4
 #        (gcm_data     *my_ctx_data,
@@ -2618,6 +2728,8 @@ ENTRY(aesni_gcm_precomp_avx_gen4)
         push    %r15
 
         mov     %rsp, %r14
+
+
 
         sub     $VARIABLE_OFFSET, %rsp
         and     $~63, %rsp                    # align rsp to 64 bytes
@@ -2641,6 +2753,7 @@ ENTRY(aesni_gcm_precomp_avx_gen4)
         #######################################################################
         vmovdqa  %xmm6, HashKey(arg1)         # store HashKey<<1 mod poly
 
+
         PRECOMPUTE_AVX2  %xmm6, %xmm0, %xmm1, %xmm2, %xmm3, %xmm4, %xmm5
 
         mov     %r14, %rsp
@@ -2651,6 +2764,7 @@ ENTRY(aesni_gcm_precomp_avx_gen4)
         pop     %r12
         ret
 ENDPROC(aesni_gcm_precomp_avx_gen4)
+
 
 ###############################################################################
 #void   aesni_gcm_enc_avx_gen4(

@@ -31,4 +31,5 @@ do {								\
 			      &next->thread);			\
 } while (0)
 
+
 #endif /* __ASM_SH_SWITCH_TO_64_H */

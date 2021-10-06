@@ -25,6 +25,7 @@
  *        module options to "modprobe scsi_debug num_tgts=2" [20021221]
  */
 
+
 #define pr_fmt(fmt) KBUILD_MODNAME ":%s: " fmt, __func__
 
 #include <linux/module.h>
@@ -100,6 +101,7 @@ static const char *scsi_debug_version_date = "20141022";
 
 /* Additional Sense Code Qualifier (ASCQ) */
 #define ACK_NAK_TO 0x3
+
 
 /* Default values for driver parameters */
 #define DEF_NUM_HOST   1
@@ -416,6 +418,7 @@ static const struct opcode_info_t release_iarr[1] = {
 	    {6,  0x1f, 0xff, 0, 0, 0xc7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0} },
 };
 
+
 /* This array is accessed via SDEB_I_* values. Make sure all are mapped,
  * plus the terminating elements for logic that scans this table such as
  * REPORT SUPPORTED OPERATION CODES. */
@@ -606,6 +609,7 @@ struct sdebug_host_info {
 static LIST_HEAD(sdebug_host_list);
 static DEFINE_SPINLOCK(sdebug_host_list_lock);
 
+
 struct sdebug_hrtimer {		/* ... is derived from hrtimer */
 	struct hrtimer hrt;	/* must be first element */
 	int qa_indx;
@@ -620,6 +624,7 @@ struct sdebug_queued_cmd {
 };
 static struct sdebug_queued_cmd queued_arr[SCSI_DEBUG_CANQUEUE];
 static unsigned long queued_in_use_bm[SCSI_DEBUG_CANQUEUE_WORDS];
+
 
 static unsigned char * fake_storep;	/* ramdisk storage */
 static struct sd_dif_tuple *dif_storep;	/* protection info */
@@ -927,6 +932,7 @@ static int fetch_to_dev_buffer(struct scsi_cmnd *scp, unsigned char *arr,
 	return scsi_sg_copy_to_buffer(scp, arr, arr_len);
 }
 
+
 static const char * inq_vendor_id = "Linux   ";
 static const char * inq_product_id = "scsi_debug      ";
 static const char *inq_product_rev = "0184";	/* version less '.' */
@@ -1024,6 +1030,7 @@ static int inquiry_evpd_83(unsigned char * arr, int port_group_id,
 	num += 4;
 	return num;
 }
+
 
 static unsigned char vpd84_data[] = {
 /* from 4th byte */ 0x22,0x22,0x22,0x0,0xbb,0x0,
@@ -1128,6 +1135,7 @@ static int inquiry_evpd_88(unsigned char * arr, int target_dev_id)
 	return num;
 }
 
+
 static unsigned char vpd89_data[] = {
 /* from 4th byte */ 0,0,0,0,
 'l','i','n','u','x',' ',' ',' ',
@@ -1178,6 +1186,7 @@ static int inquiry_evpd_89(unsigned char * arr)
 	memcpy(arr, vpd89_data, sizeof(vpd89_data));
 	return sizeof(vpd89_data);
 }
+
 
 static unsigned char vpdb0_data[] = {
 	/* from 4th byte */ 0,0,0,4, 0,0,0x4,0, 0,0,0,64,
@@ -1913,6 +1922,7 @@ static int resp_ctrl_m_pg(unsigned char * p, int pcontrol, int target)
 	return sizeof(ctrl_m_pg);
 }
 
+
 static int resp_iec_m_pg(unsigned char * p, int pcontrol, int target)
 {	/* Informational Exceptions control mode page for mode_sense */
 	unsigned char ch_iec_m_pg[] = {/* 0x1c, 0xa, */ 0x4, 0xf, 0, 0, 0, 0,
@@ -1938,6 +1948,7 @@ static int resp_sas_sf_m_pg(unsigned char * p, int pcontrol, int target)
 		memset(p + 2, 0, sizeof(sas_sf_m_pg) - 2);
 	return sizeof(sas_sf_m_pg);
 }
+
 
 static int resp_sas_pcd_m_spg(unsigned char * p, int pcontrol, int target,
 			      int target_dev_id)
@@ -3214,6 +3225,7 @@ resp_unmap(struct scsi_cmnd *scp, struct sdebug_dev_info *devip)
 	unsigned int i, payload_len, descriptors;
 	int ret;
 	unsigned long iflags;
+
 
 	if (!scsi_debug_lbp())
 		return 0;	/* fib and say its done */
@@ -4721,6 +4733,7 @@ static ssize_t strict_store(struct device_driver *ddp, const char *buf,
 	return -EINVAL;
 }
 static DRIVER_ATTR_RW(strict);
+
 
 /* Note: The following array creates attribute files in the
    /sys/bus/pseudo/drivers/scsi_debug directory. The advantage of these

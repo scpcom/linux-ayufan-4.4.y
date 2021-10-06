@@ -333,6 +333,7 @@ static int test__checkevent_breakpoint_modifier(struct perf_evlist *evlist)
 {
 	struct perf_evsel *evsel = perf_evlist__first(evlist);
 
+
 	TEST_ASSERT_VAL("wrong exclude_user", !evsel->attr.exclude_user);
 	TEST_ASSERT_VAL("wrong exclude_kernel", evsel->attr.exclude_kernel);
 	TEST_ASSERT_VAL("wrong exclude_hv", evsel->attr.exclude_hv);
@@ -527,6 +528,7 @@ static int test__checkevent_pmu_events(struct perf_evlist *evlist)
 
 	return 0;
 }
+
 
 static int test__checkevent_pmu_events_mix(struct perf_evlist *evlist)
 {

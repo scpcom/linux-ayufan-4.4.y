@@ -102,6 +102,7 @@ struct solos_skb_cb {
 	uint32_t dma_addr;
 };
 
+
 #define SKB_CB(skb)		((struct solos_skb_cb *)skb->cb)
 
 #define PKT_DATA	0
@@ -136,6 +137,7 @@ struct solos_card {
 	int buffer_size;
 	int atmel_flash;
 };
+
 
 struct solos_param {
 	struct list_head list;
@@ -578,6 +580,7 @@ static ssize_t hardware_show(struct device *dev, struct device_attribute *attr,
 
 static DEVICE_ATTR(console, 0644, console_show, console_store);
 
+
 #define SOLOS_ATTR_RO(x) static DEVICE_ATTR(x, 0444, solos_param_show, NULL);
 #define SOLOS_ATTR_RW(x) static DEVICE_ATTR(x, 0644, solos_param_show, solos_param_store);
 
@@ -699,6 +702,7 @@ static int flash_upgrade(struct solos_card *card, int chip)
 	if(chip == 1 || chip == 3)
 		dev_info(&card->dev->dev, "Set FPGA Flash mode to Solos Chip Erase\n");
 	iowrite32((chip * 2), card->config_regs + FLASH_MODE);
+
 
 	iowrite32(1, card->config_regs + WRITE_FLASH);
 	wait_event(card->fw_wq, !ioread32(card->config_regs + FLASH_BUSY));
@@ -1479,6 +1483,7 @@ static struct pci_driver fpga_driver = {
 	.probe =	fpga_probe,
 	.remove =	fpga_remove,
 };
+
 
 static int __init solos_pci_init(void)
 {

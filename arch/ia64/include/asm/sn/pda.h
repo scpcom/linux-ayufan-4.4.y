@@ -11,6 +11,7 @@
 #include <linux/cache.h>
 #include <asm/percpu.h>
 
+
 /*
  * CPU-specific data structure.
  *
@@ -42,6 +43,7 @@ typedef struct pda_s {
 	int		sn_last_irq;
 	int		sn_first_irq;
 } pda_t;
+
 
 #define CACHE_ALIGN(x)	(((x) + SMP_CACHE_BYTES-1) & ~(SMP_CACHE_BYTES-1))
 

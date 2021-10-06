@@ -10,6 +10,7 @@
  * the Free Software Foundation.
  */
 
+
 #define PS2_CMD_GETID		0x02f2
 #define PS2_CMD_RESET_BAT	0x02ff
 

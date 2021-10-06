@@ -14,6 +14,8 @@
  *
  */
 
+
+
 #ifndef _MEI_INTERFACE_H_
 #define _MEI_INTERFACE_H_
 
@@ -35,10 +37,12 @@ struct mei_cfg {
 	bool (*quirk_probe)(struct pci_dev *pdev);
 };
 
+
 #define MEI_PCI_DEVICE(dev, cfg) \
 	.vendor = PCI_VENDOR_ID_INTEL, .device = (dev), \
 	.subvendor = PCI_ANY_ID, .subdevice = PCI_ANY_ID, \
 	.driver_data = (kernel_ulong_t)&(cfg)
+
 
 #define MEI_ME_RPM_TIMEOUT    500 /* ms */
 

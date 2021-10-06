@@ -26,6 +26,7 @@
 #ifndef __DIVA_XDI_OS_DEPENDENT_PACK_MAIN_ON_BYTE_INC__
 #define __DIVA_XDI_OS_DEPENDENT_PACK_MAIN_ON_BYTE_INC__
 
+
 /*
   Only one purpose of this compiler dependent file to pack
   structures, described in pc_maint.h so that no padding
@@ -35,6 +36,8 @@
   after is restored by "poppack.h"
 */
 
+
 #include "pc_maint.h"
+
 
 #endif

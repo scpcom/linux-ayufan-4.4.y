@@ -24,6 +24,7 @@
 
 STO_RES:	|idnt	2,1 | Motorola 040 Floating Point Software Package
 
+
 	|section	8
 
 #include "fpsp.h"
@@ -59,6 +60,7 @@ c_is_fp1:
 c_is_fp0:
 	fmovemx	%fp1-%fp1,USER_FP0(%a6)
 	rts
+
 
 	.global	sto_res
 sto_res:

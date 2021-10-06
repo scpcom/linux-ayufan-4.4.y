@@ -20,6 +20,7 @@ struct perf_counts {
 	struct xyarray		  *values;
 };
 
+
 static inline struct perf_counts_values*
 perf_counts(struct perf_counts *counts, int cpu, int thread)
 {

@@ -760,3 +760,4 @@ frontend_detach:
 	printk(KERN_ERR "%s() Frontend/I2C initialization failed\n", __func__);
 	return -1;
 }
+

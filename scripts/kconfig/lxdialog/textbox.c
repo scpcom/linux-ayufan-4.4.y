@@ -46,6 +46,7 @@ static void refresh_text_box(WINDOW *dialog, WINDOW *box, int boxh, int boxw,
 	wrefresh(dialog);
 }
 
+
 /*
  * Display text from a file in a dialog box.
  *

@@ -227,6 +227,7 @@ int __init TAU_init(void)
 		return 1;
 	}
 
+
 	/* first, set up the window shrinking timer */
 	init_timer(&tau_timer);
 	tau_timer.function = tau_timeout_smp;

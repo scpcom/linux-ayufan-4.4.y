@@ -138,3 +138,4 @@ struct saa7115_platform_data {
 };
 
 #endif
+

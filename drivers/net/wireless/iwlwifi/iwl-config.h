@@ -66,6 +66,7 @@
 #include <linux/types.h>
 #include <net/mac80211.h>
 
+
 enum iwl_device_family {
 	IWL_DEVICE_FAMILY_UNDEFINED,
 	IWL_DEVICE_FAMILY_1000,

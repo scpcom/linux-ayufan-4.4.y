@@ -19,6 +19,7 @@
 /* de code autre que le texte V2.6.1 en V2.8.0                               */
 /*****************************************************************************/
 
+
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/interrupt.h>
@@ -37,11 +38,13 @@
 
 #include "applicom.h"
 
+
 /* NOTE: We use for loops with {write,read}b() instead of 
    memcpy_{from,to}io throughout this driver. This is because
    the board doesn't correctly handle word accesses - only
    bytes. 
 */
+
 
 #undef DEBUG
 
@@ -78,6 +81,7 @@ MODULE_LICENSE("GPL");
 MODULE_ALIAS_MISCDEV(AC_MINOR);
 
 MODULE_SUPPORTED_DEVICE("ac");
+
 
 static struct applicom_board {
 	unsigned long PhysIO;
@@ -312,6 +316,7 @@ static int __init applicom_init(void)
 
 			boardname[serial] = 0;
 
+
 			printk(KERN_INFO "Applicom board %d: %s, PROM V%d.%d",
 			       i+1, boardname,
 			       (int)(readb(apbs[i].RamIO + VERS) >> 4),
@@ -345,6 +350,7 @@ out:
 
 module_init(applicom_init);
 module_exit(applicom_exit);
+
 
 static ssize_t ac_write(struct file *file, const char __user *buf, size_t count, loff_t * ppos)
 {
@@ -481,6 +487,7 @@ static int do_ac_read(int IndexCard, char __user *buf,
 
 	st_loc->tic_owner_to_pc = readb(apbs[IndexCard].RamIO + TIC_OWNER_TO_PC);
 	st_loc->numcard_owner_to_pc = readb(apbs[IndexCard].RamIO + NUMCARD_OWNER_TO_PC);
+
 
 	{
 		int c;
@@ -681,6 +688,8 @@ static irqreturn_t ac_interrupt(int vec, void *dev_instance)
 	return IRQ_RETVAL(handled);
 }
 
+
+
 static long ac_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
      
 {				/* @ ADG ou ATO selon le cas */
@@ -798,6 +807,7 @@ static long ac_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 			       (int)(readb(apbs[i].RamIO + VERS) & 0xF),
 			       boardname);
 
+
 			serial = (readb(apbs[i].RamIO + SERIAL_NUMBER) << 16) + 
 				(readb(apbs[i].RamIO + SERIAL_NUMBER + 1) << 8) + 
 				(readb(apbs[i].RamIO + SERIAL_NUMBER + 2) );
@@ -829,3 +839,4 @@ static long ac_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 	mutex_unlock(&ac_mutex);
 	return 0;
 }
+

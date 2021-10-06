@@ -11,6 +11,7 @@
 #ifndef _LINUX_RTC_H_
 #define _LINUX_RTC_H_
 
+
 #include <linux/types.h>
 #include <linux/interrupt.h>
 #include <uapi/linux/rtc.h>
@@ -96,12 +97,14 @@ typedef struct rtc_task {
 	void *private_data;
 } rtc_task_t;
 
+
 struct rtc_timer {
 	struct rtc_task	task;
 	struct timerqueue_node node;
 	ktime_t period;
 	int enabled;
 };
+
 
 /* flags */
 #define RTC_DEV_BUSY 0

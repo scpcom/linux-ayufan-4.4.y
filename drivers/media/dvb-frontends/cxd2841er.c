@@ -1143,6 +1143,7 @@ static u32 cxd2841er_mon_read_ber_s(struct cxd2841er_priv *priv)
 	return 0;
 }
 
+
 static u32 cxd2841er_mon_read_ber_s2(struct cxd2841er_priv *priv)
 {
 	u8 data[5];

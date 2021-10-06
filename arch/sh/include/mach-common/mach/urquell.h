@@ -65,3 +65,4 @@
 #define CHARLED_OFS	0x2000 /* Character LED */
 
 #endif  /* __MACH_URQUELL_H */
+

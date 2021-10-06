@@ -63,6 +63,7 @@
 
 #include "cpm_uart.h"
 
+
 /**************************************************************/
 
 static int  cpm_uart_tx_pump(struct uart_port *port);
@@ -1289,6 +1290,7 @@ static void cpm_uart_console_write(struct console *co, const char *s,
 		spin_unlock_irqrestore(&pinfo->port.lock, flags);
 	}
 }
+
 
 static int __init cpm_uart_console_setup(struct console *co, char *options)
 {

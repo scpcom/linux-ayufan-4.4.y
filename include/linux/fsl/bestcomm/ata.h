@@ -13,6 +13,7 @@
 #ifndef __BESTCOMM_ATA_H__
 #define __BESTCOMM_ATA_H__
 
+
 struct bcom_ata_bd {
 	u32	status;
 	u32	src_pa;
@@ -26,3 +27,4 @@ extern void bcom_ata_reset_bd(struct bcom_task *tsk);
 extern void bcom_ata_release(struct bcom_task *tsk);
 
 #endif /* __BESTCOMM_ATA_H__ */
+

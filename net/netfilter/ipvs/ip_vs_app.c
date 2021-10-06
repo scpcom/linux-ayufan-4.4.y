@@ -52,6 +52,7 @@ static inline int ip_vs_app_get(struct ip_vs_app *app)
 	return try_module_get(app->module);
 }
 
+
 static inline void ip_vs_app_put(struct ip_vs_app *app)
 {
 	module_put(app->module);
@@ -121,6 +122,7 @@ ip_vs_app_inc_new(struct netns_ipvs *ipvs, struct ip_vs_app *app, __u16 proto,
 	return ret;
 }
 
+
 /*
  *	Release app incarnation
  */
@@ -143,6 +145,7 @@ ip_vs_app_inc_release(struct netns_ipvs *ipvs, struct ip_vs_app *inc)
 	call_rcu(&inc->rcu_head, ip_vs_app_inc_rcu_free);
 }
 
+
 /*
  *	Get reference to app inc (only called from softirq)
  *
@@ -157,6 +160,7 @@ int ip_vs_app_inc_get(struct ip_vs_app *inc)
 	return result;
 }
 
+
 /*
  *	Put the app inc (only called from timer or net softirq)
  */
@@ -165,6 +169,7 @@ void ip_vs_app_inc_put(struct ip_vs_app *inc)
 	atomic_dec(&inc->usecnt);
 	ip_vs_app_put(inc->app);
 }
+
 
 /*
  *	Register an application incarnation in protocol applications
@@ -183,6 +188,7 @@ register_ip_vs_app_inc(struct netns_ipvs *ipvs, struct ip_vs_app *app, __u16 pro
 
 	return result;
 }
+
 
 /* Register application for netns */
 struct ip_vs_app *register_ip_vs_app(struct netns_ipvs *ipvs, struct ip_vs_app *app)
@@ -214,6 +220,7 @@ out_unlock:
 	return err ? ERR_PTR(err) : a;
 }
 
+
 /*
  *	ip_vs_app unregistration routine
  *	We are sure there are no app incarnations attached to services
@@ -242,6 +249,7 @@ void unregister_ip_vs_app(struct netns_ipvs *ipvs, struct ip_vs_app *app)
 	mutex_unlock(&__ip_vs_app_mutex);
 }
 
+
 /*
  *	Bind ip_vs_conn to its ip_vs_app (called by cp constructor)
  */
@@ -250,6 +258,7 @@ int ip_vs_bind_app(struct ip_vs_conn *cp,
 {
 	return pp->app_conn_bind(cp);
 }
+
 
 /*
  *	Unbind cp from application incarnation (called by cp destructor)
@@ -268,6 +277,7 @@ void ip_vs_unbind_app(struct ip_vs_conn *cp)
 	ip_vs_app_inc_put(inc);
 	cp->app = NULL;
 }
+
 
 /*
  *	Fixes th->seq based on ip_vs_seq info.
@@ -293,6 +303,7 @@ static inline void vs_fix_seq(const struct ip_vs_seq *vseq, struct tcphdr *th)
 		}
 	}
 }
+
 
 /*
  *	Fixes th->ack_seq based on ip_vs_seq info.
@@ -323,6 +334,7 @@ vs_fix_ack_seq(const struct ip_vs_seq *vseq, struct tcphdr *th)
 		}
 	}
 }
+
 
 /*
  *	Updates ip_vs_seq if pkt has been resized
@@ -416,6 +428,7 @@ int ip_vs_app_pkt_out(struct ip_vs_conn *cp, struct sk_buff *skb)
 	return app->pkt_out(app, cp, skb, NULL);
 }
 
+
 static inline int app_tcp_pkt_in(struct ip_vs_conn *cp, struct sk_buff *skb,
 				 struct ip_vs_app *app)
 {
@@ -489,6 +502,7 @@ int ip_vs_app_pkt_in(struct ip_vs_conn *cp, struct sk_buff *skb)
 
 	return app->pkt_in(app, cp, skb, NULL);
 }
+
 
 #ifdef CONFIG_PROC_FS
 /*

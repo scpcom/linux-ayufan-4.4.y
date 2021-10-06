@@ -10,6 +10,7 @@
  * option) any later version.
  */
 
+
 #include <linux/stddef.h>
 #include <linux/kernel.h>
 #include <linux/errno.h>
@@ -20,6 +21,7 @@
 #include <sysdev/fsl_soc.h>
 
 #include "mpc83xx.h"
+
 
 #ifdef CONFIG_PPC_MPC834x
 int mpc834x_usb_cfg(void)

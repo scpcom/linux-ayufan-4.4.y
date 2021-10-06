@@ -1,6 +1,7 @@
 #ifndef __ASM_POWERPC_CPUTABLE_H
 #define __ASM_POWERPC_CPUTABLE_H
 
+
 #include <asm/asm-compat.h>
 #include <asm/feature-fixups.h>
 #include <uapi/asm/cputable.h>

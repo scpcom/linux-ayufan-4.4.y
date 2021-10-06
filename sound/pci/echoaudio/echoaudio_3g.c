@@ -28,7 +28,10 @@
 
 ****************************************************************************/
 
+
+
 /* These functions are common for all "3G" cards */
+
 
 static int check_asic_status(struct echoaudio *chip)
 {
@@ -56,10 +59,14 @@ static int check_asic_status(struct echoaudio *chip)
 	return box_status & E3G_BOX_TYPE_MASK;
 }
 
+
+
 static inline u32 get_frq_reg(struct echoaudio *chip)
 {
 	return le32_to_cpu(chip->comm_page->e3g_frq_register);
 }
+
+
 
 /* Most configuration of 3G cards is accomplished by writing the control
 register. write_control_reg sends the new control register value to the DSP. */
@@ -86,6 +93,8 @@ static int write_control_reg(struct echoaudio *chip, u32 ctl, u32 frq,
 	dev_dbg(chip->card->dev, "WriteControlReg: not written, no change\n");
 	return 0;
 }
+
+
 
 /* Set the digital mode - currently for Gina24, Layla24, Mona, 3G */
 static int set_digital_mode(struct echoaudio *chip, u8 mode)
@@ -129,6 +138,8 @@ static int set_digital_mode(struct echoaudio *chip, u8 mode)
 	return err;
 }
 
+
+
 static u32 set_spdif_bits(struct echoaudio *chip, u32 control_reg, u32 rate)
 {
 	control_reg &= E3G_SPDIF_FORMAT_CLEAR_MASK;
@@ -158,6 +169,8 @@ static u32 set_spdif_bits(struct echoaudio *chip, u32 control_reg, u32 rate)
 	return control_reg;
 }
 
+
+
 /* Set the S/PDIF output format */
 static int set_professional_spdif(struct echoaudio *chip, char prof)
 {
@@ -168,6 +181,8 @@ static int set_professional_spdif(struct echoaudio *chip, char prof)
 	control_reg = set_spdif_bits(chip, control_reg, chip->sample_rate);
 	return write_control_reg(chip, control_reg, get_frq_reg(chip), 0);
 }
+
+
 
 /* detect_input_clocks() returns a bitmask consisting of all the input clocks
 currently connected to the hardware; this changes as the user connects and
@@ -201,6 +216,8 @@ static u32 detect_input_clocks(const struct echoaudio *chip)
 	return clock_bits;
 }
 
+
+
 static int load_asic(struct echoaudio *chip)
 {
 	int box_type, err;
@@ -233,6 +250,8 @@ static int load_asic(struct echoaudio *chip)
 
 	return box_type;
 }
+
+
 
 static int set_sample_rate(struct echoaudio *chip, u32 rate)
 {
@@ -302,10 +321,13 @@ static int set_sample_rate(struct echoaudio *chip, u32 rate)
 	return write_control_reg(chip, control_reg, frq_reg, 0);
 }
 
+
+
 /* Set the sample clock source to internal, S/PDIF, ADAT */
 static int set_input_clock(struct echoaudio *chip, u16 clock)
 {
 	u32 control_reg, clocks_from_dsp;
+
 
 	/* Mask off the clock select bits */
 	control_reg = le32_to_cpu(chip->comm_page->control_register) &
@@ -347,6 +369,8 @@ static int set_input_clock(struct echoaudio *chip, u16 clock)
 	chip->input_clock = clock;
 	return write_control_reg(chip, control_reg, get_frq_reg(chip), 1);
 }
+
+
 
 static int dsp_set_digital_mode(struct echoaudio *chip, u8 mode)
 {

@@ -31,6 +31,7 @@
 
 #include "hid-picolcd.h"
 
+
 /* Input device
  *
  * The PicoLCD has an IR receiver header, a built-in keypad with 5 keys
@@ -55,6 +56,7 @@ static const unsigned short def_keymap[PICOLCD_KEYS] = {
 	KEY_RESERVED,	/* col 2 + row 4 */
 	KEY_RESERVED,	/* col 1 + row 4 */
 };
+
 
 /* Find a given report */
 struct hid_report *picolcd_report(int id, struct hid_device *hdev, int dir)

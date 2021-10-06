@@ -112,6 +112,7 @@ void vivid_raw_vbi_cap_process(struct vivid_dev *dev, struct vivid_buffer *buf)
 	buf->vb.timestamp.tv_sec += dev->time_wrap_offset;
 }
 
+
 void vivid_sliced_vbi_cap_process(struct vivid_dev *dev,
 			struct vivid_buffer *buf)
 {

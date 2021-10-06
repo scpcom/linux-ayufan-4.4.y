@@ -2,6 +2,7 @@
  
 /* Written 1995-2000 by Werner Almesberger, EPFL LRC/ICA */
  
+
 #ifndef _UAPILINUX_SONET_H
 #define _UAPILINUX_SONET_H
 
@@ -21,6 +22,7 @@ struct sonet_stats {
 	__SONET_ITEMS
 #undef __HANDLE_ITEM
 } __attribute__ ((packed));
+
 
 #define SONET_GETSTAT	_IOR('a',ATMIOC_PHYTYP,struct sonet_stats)
 					/* get statistics */
@@ -52,5 +54,7 @@ struct sonet_stats {
 #define SONET_FRAME_SDH   1		/* SDH STM-1 framing */
 
 #define SONET_FRSENSE_SIZE 6		/* C1[3],H1[3] (0xff for unknown) */
+
+
 
 #endif /* _UAPILINUX_SONET_H */

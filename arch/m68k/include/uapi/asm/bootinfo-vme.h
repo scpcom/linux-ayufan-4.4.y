@@ -5,7 +5,9 @@
 #ifndef _UAPI_ASM_M68K_BOOTINFO_VME_H
 #define _UAPI_ASM_M68K_BOOTINFO_VME_H
 
+
 #include <linux/types.h>
+
 
     /*
      *  VME-specific tags
@@ -13,6 +15,7 @@
 
 #define BI_VME_TYPE		0x8000	/* VME sub-architecture (__be32) */
 #define BI_VME_BRDINFO		0x8001	/* VME board information (struct) */
+
 
     /*
      *  VME models (BI_VME_TYPE)
@@ -27,6 +30,7 @@
 #define VME_TYPE_MVME177	0x0177	/* Motorola MVME177 */
 #define VME_TYPE_BVME4000	0x4000	/* BVM Ltd. BVME4000 */
 #define VME_TYPE_BVME6000	0x6000	/* BVM Ltd. BVME6000 */
+
 
 #ifndef __ASSEMBLY__
 
@@ -53,6 +57,7 @@ typedef struct {
 
 #endif /* __ASSEMBLY__ */
 
+
     /*
      *  Latest VME bootinfo versions
      */
@@ -60,5 +65,6 @@ typedef struct {
 #define MVME147_BOOTI_VERSION	MK_BI_VERSION(2, 0)
 #define MVME16x_BOOTI_VERSION	MK_BI_VERSION(2, 0)
 #define BVME6000_BOOTI_VERSION	MK_BI_VERSION(2, 0)
+
 
 #endif /* _UAPI_ASM_M68K_BOOTINFO_VME_H */

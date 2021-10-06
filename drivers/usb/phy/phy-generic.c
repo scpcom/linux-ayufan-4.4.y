@@ -102,6 +102,7 @@ static void nop_set_vbus_draw(struct usb_phy_generic *nop, unsigned mA)
 	nop->mA = mA;
 }
 
+
 static irqreturn_t nop_gpio_vbus_thread(int irq, void *data)
 {
 	struct usb_phy_generic *nop = data;

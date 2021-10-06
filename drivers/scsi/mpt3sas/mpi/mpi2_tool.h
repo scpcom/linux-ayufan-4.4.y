@@ -335,6 +335,7 @@ typedef struct _MPI2_TOOLBOX_DIAGNOSTIC_CLI_REPLY {
 	Mpi2ToolboxDiagnosticCliReply_t,
 	*pMpi2ToolboxDiagnosticCliReply_t;
 
+
 /****************************************************************************
 *  Toolbox Console Text Display Tool
 ****************************************************************************/
@@ -370,6 +371,8 @@ Mpi2ToolboxTextDisplayRequest_t,
 
 /* defines for the Flags field */
 #define MPI2_TOOLBOX_CONSOLE_FLAG_TIMESTAMP     (0x01)
+
+
 
 /*****************************************************************************
 *

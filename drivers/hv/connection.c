@@ -34,6 +34,7 @@
 #include <asm/hyperv.h>
 #include "hyperv_vmbus.h"
 
+
 struct vmbus_connection vmbus_connection = {
 	.conn_state		= DISCONNECTED,
 	.next_gpadl_handle	= ATOMIC_INIT(0xE1E10),
@@ -393,6 +394,8 @@ void vmbus_on_event(unsigned long data)
 						 VMBUS_MESSAGE_SINT;
 		recv_int_page = event->flags32;
 	}
+
+
 
 	/* Check events */
 	if (!recv_int_page)

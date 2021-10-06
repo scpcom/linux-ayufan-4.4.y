@@ -290,6 +290,7 @@ _GLOBAL(__giveup_vsx)
 
 #endif /* CONFIG_VSX */
 
+
 /*
  * The routines below are in assembler so we can closely control the
  * usage of floating-point registers.  These routines must be called

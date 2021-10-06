@@ -718,6 +718,7 @@ smb2_read_data_length(char *buf)
 	return le32_to_cpu(rsp->DataLength);
 }
 
+
 static int
 smb2_sync_read(const unsigned int xid, struct cifs_fid *pfid,
 	       struct cifs_io_parms *parms, unsigned int *bytes_read,
@@ -1225,9 +1226,11 @@ static long smb3_simple_falloc(struct file *file, struct cifs_tcon *tcon,
 	}
 	/* BB: else ... in future add code to extend file and set sparse */
 
+
 	free_xid(xid);
 	return rc;
 }
+
 
 static long smb3_fallocate(struct file *file, struct cifs_tcon *tcon, int mode,
 			   loff_t off, loff_t len)

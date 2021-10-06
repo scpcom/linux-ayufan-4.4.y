@@ -358,6 +358,7 @@ gt215_ram_timing_calc(struct gt215_ram *ram, u32 *timing)
 	cur7 = nvkm_rd32(device, 0x10023c);
 	cur8 = nvkm_rd32(device, 0x100240);
 
+
 	switch ((!T(CWL)) * ram->base.type) {
 	case NVKM_RAM_TYPE_DDR2:
 		T(CWL) = T(CL) - 1;

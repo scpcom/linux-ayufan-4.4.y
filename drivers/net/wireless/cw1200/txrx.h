@@ -102,4 +102,5 @@ int cw1200_alloc_link_id(struct cw1200_common *priv, const u8 *mac);
 void cw1200_link_id_work(struct work_struct *work);
 void cw1200_link_id_gc_work(struct work_struct *work);
 
+
 #endif /* CW1200_TXRX_H */

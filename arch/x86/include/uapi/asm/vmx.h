@@ -24,6 +24,7 @@
 #ifndef _UAPIVMX_H
 #define _UAPIVMX_H
 
+
 #define VMX_EXIT_REASONS_FAILED_VMENTRY         0x80000000
 
 #define EXIT_REASON_EXCEPTION_NMI       0

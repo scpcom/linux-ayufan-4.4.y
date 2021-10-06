@@ -31,6 +31,7 @@
 
 #define kmap_prot		PAGE_KERNEL
 
+
 #include <asm/cacheflush.h>
 
 extern void *kmap(struct page *page);
@@ -53,6 +54,7 @@ static inline void kunmap(struct page *page)
 		return;
 	kunmap_high(page);
 }
+
 
 #endif
 

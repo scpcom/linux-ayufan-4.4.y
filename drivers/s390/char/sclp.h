@@ -106,6 +106,7 @@ struct init_sccb {
 #define SCLP_HAS_CPU_RECONFIG	(sclp.facilities & 0x0400000000000000ULL)
 #define SCLP_HAS_PCI_RECONFIG	(sclp.facilities & 0x0000000040000000ULL)
 
+
 struct gds_subvector {
 	u8	length;
 	u8	key;

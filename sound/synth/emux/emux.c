@@ -164,6 +164,7 @@ int snd_emux_free(struct snd_emux *emu)
 
 EXPORT_SYMBOL(snd_emux_free);
 
+
 /*
  *  INIT part
  */

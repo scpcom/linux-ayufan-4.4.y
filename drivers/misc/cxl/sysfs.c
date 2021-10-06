@@ -147,6 +147,7 @@ static struct device_attribute adapter_attrs[] = {
 	__ATTR(reset, S_IWUSR, NULL, reset_adapter_store),
 };
 
+
 /*********  AFU master specific attributes  **********************************/
 
 static ssize_t mmio_size_show_master(struct device *device,
@@ -181,6 +182,7 @@ static struct device_attribute afu_master_attrs[] = {
 	__ATTR_RO(pp_mmio_off),
 	__ATTR_RO(pp_mmio_len),
 };
+
 
 /*********  AFU attributes  **************************************************/
 

@@ -22,6 +22,7 @@
 #include <linux/regulator/of_regulator.h>
 #include <linux/i2c/twl.h>
 
+
 /*
  * The TWL4030/TW5030/TPS659x0/TWL6030 family chips include power management, a
  * USB OTG transceiver, an RTC, ADC, PWM, and lots more.  Some versions
@@ -69,6 +70,7 @@ struct twlreg_info {
 	/* data passed from board for external get/set voltage */
 	void			*data;
 };
+
 
 /* LDO control registers ... offset is from the base of its register bank.
  * The first three registers of all power resource banks help hardware to
@@ -385,6 +387,7 @@ static int twl6030reg_set_mode(struct regulator_dev *rdev, unsigned mode)
 	((UNSUP_MASK & (x)) &&			\
 	 !((info)->features & TWL4030_ALLOW_UNSUPPORTED))
 #define LDO_MV(x)	(~UNSUP_MASK & (x))
+
 
 static const u16 VAUX1_VSEL_table[] = {
 	UNSUP(1500), UNSUP(1800), 2500, 2800,

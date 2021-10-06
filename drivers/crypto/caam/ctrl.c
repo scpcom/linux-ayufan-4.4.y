@@ -104,6 +104,7 @@ static inline int run_descriptor_deco0(struct device *ctrldev, u32 *desc,
 	u32 deco_dbg_reg, flags;
 	int i;
 
+
 	if (ctrlpriv->virt_en == 1) {
 		setbits32(&ctrl->deco_rsr, DECORSR_JR0);
 

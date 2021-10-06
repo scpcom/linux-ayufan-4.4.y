@@ -162,6 +162,7 @@ static void hangcheck_fire(unsigned long data)
 	hangcheck_tsc = ktime_get_ns();
 }
 
+
 static int __init hangcheck_init(void)
 {
 	printk("Hangcheck: starting hangcheck timer %s (tick is %d seconds, margin is %d seconds).\n",
@@ -175,6 +176,7 @@ static int __init hangcheck_init(void)
 
 	return 0;
 }
+
 
 static void __exit hangcheck_exit(void)
 {

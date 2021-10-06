@@ -31,6 +31,7 @@
 
 static void siena_init_wol(struct efx_nic *efx);
 
+
 static void siena_push_irq_moderation(struct efx_channel *channel)
 {
 	efx_dword_t timer_cmd;
@@ -634,6 +635,7 @@ static void siena_get_wol(struct efx_nic *efx, struct ethtool_wolinfo *wol)
 	memset(&wol->sopass, 0, sizeof(wol->sopass));
 }
 
+
 static int siena_set_wol(struct efx_nic *efx, u32 type)
 {
 	struct siena_nic_data *nic_data = efx->nic_data;
@@ -666,6 +668,7 @@ static int siena_set_wol(struct efx_nic *efx, u32 type)
 		  __func__, type, rc);
 	return rc;
 }
+
 
 static void siena_init_wol(struct efx_nic *efx)
 {

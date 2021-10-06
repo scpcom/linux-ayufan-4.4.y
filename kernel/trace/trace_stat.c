@@ -8,12 +8,14 @@
  *
  */
 
+
 #include <linux/list.h>
 #include <linux/slab.h>
 #include <linux/rbtree.h>
 #include <linux/tracefs.h>
 #include "trace_stat.h"
 #include "trace.h"
+
 
 /*
  * List of stat red-black nodes from a tracer
@@ -165,6 +167,7 @@ exit_free_rbtree:
 	mutex_unlock(&session->stat_mutex);
 	return ret;
 }
+
 
 static void *stat_seq_start(struct seq_file *s, loff_t *pos)
 {

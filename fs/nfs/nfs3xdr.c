@@ -127,6 +127,7 @@ static void print_overflow_msg(const char *func, const struct xdr_stream *xdr)
 		func, xdr->end - xdr->p);
 }
 
+
 /*
  * Encode/decode NFSv3 basic data types
  *
@@ -827,6 +828,7 @@ static void encode_diropargs3(struct xdr_stream *xdr, const struct nfs_fh *fh,
 	encode_nfs_fh3(xdr, fh);
 	encode_filename3(xdr, name, length);
 }
+
 
 /*
  * NFSv3 XDR encode functions
@@ -2425,6 +2427,7 @@ out_default:
 
 #endif  /* CONFIG_NFS_V3_ACL */
 
+
 /*
  * We need to translate between nfs status return values and
  * the local errno values which may not be the same.
@@ -2487,6 +2490,7 @@ static int nfs3_stat_to_errno(enum nfs_stat status)
 	dprintk("NFS: Unrecognized nfs status value: %u\n", status);
 	return nfs_errtbl[i].errno;
 }
+
 
 #define PROC(proc, argtype, restype, timer)				\
 [NFS3PROC_##proc] = {							\

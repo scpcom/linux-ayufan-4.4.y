@@ -1026,6 +1026,7 @@ static int rrpc_map_init(struct rrpc *rrpc)
 	return 0;
 }
 
+
 /* Minimum pages needed within a lun */
 #define PAGE_POOL_SIZE 16
 #define ADDR_POOL_SIZE 64

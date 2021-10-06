@@ -212,3 +212,4 @@ int kv_copy_bytes_to_smc(struct radeon_device *rdev,
 	}
 	return 0;
 }
+

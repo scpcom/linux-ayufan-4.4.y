@@ -1132,6 +1132,7 @@ int usbhs_mod_gadget_probe(struct usbhs_priv *priv)
 	if (ret)
 		goto err_add_udc;
 
+
 	dev_info(dev, "gadget probed\n");
 
 	return 0;

@@ -37,6 +37,7 @@
 #include "amdgpu.h"
 #include "amdgpu_trace.h"
 
+
 int amdgpu_ttm_init(struct amdgpu_device *adev);
 void amdgpu_ttm_fini(struct amdgpu_device *adev);
 

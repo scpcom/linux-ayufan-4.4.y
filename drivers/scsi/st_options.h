@@ -51,6 +51,7 @@
    to try to allocate the buffer as one chunk. */
 #define ST_FIRST_ORDER  5
 
+
 /* The following lines define defaults for properties that can be set
    separately for each drive using the MTSTOPTIONS ioctl. */
 

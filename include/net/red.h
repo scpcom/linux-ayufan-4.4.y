@@ -42,6 +42,7 @@
 	is a negative power of two in order arithmetics to contain
 	only shifts.
 
+
 	Parameters, settable by user:
 	-----------------------------
 
@@ -61,6 +62,7 @@
 	Stab
 
 	Lookup table for log((1-W)^(t/t_ave).
+
 
 	NOTES:
 
@@ -298,6 +300,7 @@ static inline unsigned long red_calc_qavg(const struct red_parms *p,
 	else
 		return red_calc_qavg_from_idle_time(p, v);
 }
+
 
 static inline u32 red_random(const struct red_parms *p)
 {

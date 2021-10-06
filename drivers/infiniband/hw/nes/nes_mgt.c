@@ -1068,6 +1068,7 @@ int nes_init_mgt_qp(struct nes_device *nesdev, struct net_device *netdev, struct
 	return 0;
 }
 
+
 void nes_destroy_mgt(struct nes_vnic *nesvnic)
 {
 	struct nes_device *nesdev = nesvnic->nesdev;

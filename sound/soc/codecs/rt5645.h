@@ -171,6 +171,7 @@
 #define RT5645_GEN_CTRL2			0xfb
 #define RT5645_GEN_CTRL3			0xfc
 
+
 /* Index of Codec Private Register definition */
 #define RT5645_DIG_VOL				0x00
 #define RT5645_PR_ALC_CTRL_1			0x01
@@ -215,6 +216,7 @@
 #define RT5645_EQ_GN_HIP2			0xb2
 #define RT5645_EQ_PRE_VOL			0xb3
 #define RT5645_EQ_PST_VOL			0xb4
+
 
 /* global definition */
 #define RT5645_L_MUTE				(0x1 << 15)
@@ -2014,6 +2016,7 @@
 #define RT5645_ZCD_HP_DIS			(0x0 << 15)
 #define RT5645_ZCD_HP_EN			(0x1 << 15)
 
+
 /* Codec Private Register definition */
 /* 3D Speaker Control (0x63) */
 #define RT5645_3D_SPK_MASK			(0x1 << 15)
@@ -2130,11 +2133,13 @@ enum {
 #define RT5645_VER_C				0x2
 #define RT5645_VER_D				0x3
 
+
 /* Volume Rescale */
 #define RT5645_VOL_RSCL_MAX 0x27
 #define RT5645_VOL_RSCL_RANGE 0x1F
 /* Debug String Length */
 #define RT5645_REG_DISP_LEN 23
+
 
 /* System Clock Source */
 enum {

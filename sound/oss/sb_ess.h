@@ -31,3 +31,4 @@ extern void ess_mixer_reload
 		(sb_devc * devc, int dev);
 extern int ess_set_recmask
 		(sb_devc *devc, int *mask);
+

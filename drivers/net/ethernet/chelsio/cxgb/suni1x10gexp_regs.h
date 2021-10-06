@@ -54,12 +54,14 @@
 
 #define mSUNI1x10GEXP_MSTAT_COUNT_OFFSET(countId)       ( (countId) * SUNI1x10GEXP_REG_SIZEOF_MSTAT_COUNT )
 
+
 /******************************************************************************/
 /** S/UNI-1x10GE-XP REGISTER ADDRESS MAP                                     **/
 /******************************************************************************/
 /* Refer to the Register Bit Masks bellow for the naming of each register and */
 /* to the S/UNI-1x10GE-XP Data Sheet for the signification of each bit        */
 /******************************************************************************/
+
 
 #define SUNI1x10GEXP_REG_IDENTIFICATION                                  0x0000
 #define SUNI1x10GEXP_REG_PRODUCT_REVISION                                0x0001
@@ -482,6 +484,7 @@
 #define SUNI1x10GEXP_REG_TXOAM_STATIC_VALUE_MINI_COUNT_LSB               0x30D2
 #define SUNI1x10GEXP_REG_TXOAM_STATIC_VALUE_MINI_COUNT_MSB               0x30D3
 
+
 #define SUNI1x10GEXP_REG_EFLX_GLOBAL_CONFIG                              0x3200
 #define SUNI1x10GEXP_REG_EFLX_ERCU_GLOBAL_STATUS                         0x3201
 #define SUNI1x10GEXP_REG_EFLX_INDIR_CHANNEL_ADDRESS                      0x3202
@@ -497,6 +500,7 @@
 #define SUNI1x10GEXP_REG_PL4IDU_CONFIG                                   0x3280
 #define SUNI1x10GEXP_REG_PL4IDU_INTERRUPT_MASK                           0x3282
 #define SUNI1x10GEXP_REG_PL4IDU_INTERRUPT                                0x3283
+
 
 /*----------------------------------------*/
 #define SUNI1x10GEXP_REG_MAX_OFFSET                                      0x3480
@@ -543,6 +547,8 @@
 #define mSUNI1x10GEXP_CLR_MSBITS_15(v) ((v) & SUNI1x10GEXP_BITMSK_BITS_1)
 
 #define mSUNI1x10GEXP_GET_BIT(val, bitMsk) (((val)&(bitMsk)) ? 1:0)
+
+
 
 /*----------------------------------------------------------------------------
  * Register 0x0001: S/UNI-1x10GE-XP Product Revision
@@ -1242,17 +1248,22 @@
  *----------------------------------------------------------------------------*/
 #define SUNI1x10GEXP_BITMSK_PL4ODP_OUT_DISE     0x0001
 
+
+
 #define SUNI1x10GEXP_BITMSK_PL4ODP_PPE_EOPEOBE  0x0080
 #define SUNI1x10GEXP_BITMSK_PL4ODP_PPE_ERREOPE  0x0040
 #define SUNI1x10GEXP_BITMSK_PL4ODP_PPE_MEOPE    0x0008
 #define SUNI1x10GEXP_BITMSK_PL4ODP_PPE_MSOPE    0x0004
 #define SUNI1x10GEXP_BITMSK_PL4ODP_ES_OVRE      0x0002
 
+
 /*----------------------------------------------------------------------------
  * Register 0x2283: PL4ODP Interrupt
  *    Bit 0 PL4ODP_OUT_DISI
  *----------------------------------------------------------------------------*/
 #define SUNI1x10GEXP_BITMSK_PL4ODP_OUT_DISI     0x0001
+
+
 
 #define SUNI1x10GEXP_BITMSK_PL4ODP_PPE_EOPEOBI  0x0080
 #define SUNI1x10GEXP_BITMSK_PL4ODP_PPE_ERREOPI  0x0040
@@ -1628,3 +1639,4 @@
 #define SUNI1x10GEXP_BITMSK_PL4IDU_DIP4I       0x0002
 
 #endif /* _CXGB_SUNI1x10GEXP_REGS_H_ */
+

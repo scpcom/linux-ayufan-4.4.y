@@ -81,6 +81,7 @@ static struct pcm20 pcm20_card = {
 	.audmode = V4L2_TUNER_MODE_STEREO,
 };
 
+
 static int rds_waitread(struct snd_miro_aci *aci)
 {
 	u8 byte;
@@ -278,6 +279,7 @@ static int vidioc_g_frequency(struct file *file, void *priv,
 	f->frequency = dev->freq;
 	return 0;
 }
+
 
 static int vidioc_s_frequency(struct file *file, void *priv,
 				const struct v4l2_frequency *f)

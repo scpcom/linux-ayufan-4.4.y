@@ -18,6 +18,7 @@
  *   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
  */
 
+
 #include <linux/init.h>
 #include <linux/i2c.h>
 #include <linux/kmod.h>
@@ -36,12 +37,14 @@
 /* maximum volume value */
 #define DACA_VOL_MAX	0x38
 
+
 struct pmac_daca {
 	struct pmac_keywest i2c;
 	int left_vol, right_vol;
 	unsigned int deemphasis : 1;
 	unsigned int amp_on : 1;
 };
+
 
 /*
  * initialize / detect DACA
@@ -84,6 +87,7 @@ static int daca_set_volume(struct pmac_daca *mix)
 	}
 	return 0;
 }
+
 
 /* deemphasis switch */
 #define daca_info_deemphasis		snd_ctl_boolean_mono_info
@@ -216,6 +220,7 @@ static struct snd_kcontrol_new daca_mixers[] = {
 	},
 };
 
+
 #ifdef CONFIG_PM
 static void daca_resume(struct snd_pmac *chip)
 {
@@ -226,6 +231,7 @@ static void daca_resume(struct snd_pmac *chip)
 	daca_set_volume(mix);
 }
 #endif /* CONFIG_PM */
+
 
 static void daca_cleanup(struct snd_pmac *chip)
 {

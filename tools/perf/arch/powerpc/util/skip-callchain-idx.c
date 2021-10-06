@@ -38,6 +38,7 @@ static const Dwfl_Callbacks offline_callbacks = {
 	.section_address = dwfl_offline_section_address,
 };
 
+
 /*
  * Use the DWARF expression for the Call-frame-address and determine
  * if return address is in LR and if a new frame was allocated.

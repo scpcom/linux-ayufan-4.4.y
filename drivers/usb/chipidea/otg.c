@@ -150,6 +150,7 @@ static void ci_otg_work(struct work_struct *work)
 	enable_irq(ci->irq);
 }
 
+
 /**
  * ci_hdrc_otg_init - initialize otg struct
  * ci: the controller

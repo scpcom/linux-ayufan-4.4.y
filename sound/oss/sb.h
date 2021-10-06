@@ -26,6 +26,7 @@
 #define NORMAL_MIDI	0
 #define UART_MIDI	1
 
+
 /*
  * Device models
  */

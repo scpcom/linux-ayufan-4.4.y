@@ -45,3 +45,4 @@ struct pca9532_platform_data {
 };
 
 #endif /* __LINUX_PCA9532_H */
+

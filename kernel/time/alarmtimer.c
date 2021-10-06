@@ -162,6 +162,7 @@ static void alarmtimer_dequeue(struct alarm_base *base, struct alarm *alarm)
 	alarm->state &= ~ALARMTIMER_STATE_ENQUEUED;
 }
 
+
 /**
  * alarmtimer_fired - Handles alarm hrtimer being fired.
  * @timer: pointer to hrtimer being run
@@ -291,6 +292,7 @@ static void alarmtimer_freezerset(ktime_t absexp, enum alarmtimer_type type)
 	spin_unlock_irqrestore(&freezer_delta_lock, flags);
 }
 
+
 /**
  * alarm_init - Initialize an alarm structure
  * @alarm: ptr to alarm to be initialized
@@ -377,6 +379,7 @@ int alarm_try_to_cancel(struct alarm *alarm)
 }
 EXPORT_SYMBOL_GPL(alarm_try_to_cancel);
 
+
 /**
  * alarm_cancel - Spins trying to cancel an alarm timer until it is done
  * @alarm: ptr to alarm to be canceled
@@ -393,6 +396,7 @@ int alarm_cancel(struct alarm *alarm)
 	}
 }
 EXPORT_SYMBOL_GPL(alarm_cancel);
+
 
 u64 alarm_forward(struct alarm *alarm, ktime_t now, ktime_t interval)
 {
@@ -433,6 +437,7 @@ u64 alarm_forward_now(struct alarm *alarm, ktime_t interval)
 	return alarm_forward(alarm, base->gettime(), interval);
 }
 EXPORT_SYMBOL_GPL(alarm_forward_now);
+
 
 /**
  * clock2alarm - helper that converts from clockid to alarmtypes
@@ -660,6 +665,7 @@ static int alarmtimer_do_nsleep(struct alarm *alarm, ktime_t absexp)
 	return (alarm->data == NULL);
 }
 
+
 /**
  * update_rmtp - Update remaining timespec value
  * @exp: expiration time
@@ -717,6 +723,7 @@ static long __sched alarm_timer_nsleep_restart(struct restart_block *restart)
 		if (ret <= 0)
 			goto out;
 	}
+
 
 	/* The other values in restart are already filled in */
 	ret = -ERESTART_RESTARTBLOCK;
@@ -788,6 +795,7 @@ static int alarm_timer_nsleep(const clockid_t which_clock, int flags,
 out:
 	return ret;
 }
+
 
 /* Suspend hook structures */
 static const struct dev_pm_ops alarmtimer_pm_ops = {

@@ -175,6 +175,7 @@ int prom_map(int mode, unsigned long size,
 	     unsigned long vaddr, unsigned long paddr);
 void prom_unmap(unsigned long size, unsigned long vaddr);
 
+
 /* PROM device tree traversal functions... */
 
 /* Get the child node of the given node, or zero if no child exists. */

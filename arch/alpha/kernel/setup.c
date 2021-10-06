@@ -63,6 +63,7 @@ static struct notifier_block alpha_panic_block = {
 #include "proto.h"
 #include "pci_impl.h"
 
+
 struct hwrpb_struct *hwrpb;
 EXPORT_SYMBOL(hwrpb);
 unsigned long srm_hae;
@@ -1498,6 +1499,7 @@ const struct seq_operations cpuinfo_op = {
 	.stop	= c_stop,
 	.show	= show_cpuinfo,
 };
+
 
 static int
 alpha_panic_event(struct notifier_block *this, unsigned long event, void *ptr)

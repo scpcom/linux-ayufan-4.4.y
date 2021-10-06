@@ -14,6 +14,7 @@
  *
  */
 
+
 /**************************************************************************/
 /*                                                                        */
 /* Notes for Falcon SCSI:                                                 */
@@ -61,6 +62,7 @@
 /* have not produced any deadlock possibilities!                          */
 /*                                                                        */
 /**************************************************************************/
+
 
 #include <linux/module.h>
 #include <linux/types.h>
@@ -113,6 +115,7 @@
 
 #include "NCR5380.h"
 
+
 #define	IS_A_TT()	ATARIHW_PRESENT(TT_SCSI)
 
 #define	SCSI_DMA_WRITE_P(elt,val)				\
@@ -132,6 +135,7 @@
 	     (unsigned long)tt_scsi_dma.elt##_hmd) << 8) |	\
 	   (unsigned long)tt_scsi_dma.elt##_lmd) << 8) |	\
 	 (unsigned long)tt_scsi_dma.elt##_lo)
+
 
 static inline void SCSI_DMA_SETADR(unsigned long adr)
 {
@@ -211,6 +215,7 @@ module_param(setup_use_tagged_queuing, int, 0);
 static int setup_hostid = -1;
 module_param(setup_hostid, int, 0);
 
+
 #if defined(REAL_DMA)
 
 static int scsi_dma_is_ignored_buserr(unsigned char dma_stat)
@@ -233,6 +238,7 @@ static int scsi_dma_is_ignored_buserr(unsigned char dma_stat)
 	}
 	return 0;
 }
+
 
 #if 0
 /* Dead code... wasn't called anyway :-) and causes some trouble, because at
@@ -265,6 +271,7 @@ static void scsi_dma_buserr(int irq, void *dummy)
 #endif
 
 #endif
+
 
 static irqreturn_t scsi_tt_intr(int irq, void *dummy)
 {
@@ -354,6 +361,7 @@ static irqreturn_t scsi_tt_intr(int irq, void *dummy)
 	return IRQ_HANDLED;
 }
 
+
 static irqreturn_t scsi_falcon_intr(int irq, void *dummy)
 {
 #ifdef REAL_DMA
@@ -413,6 +421,7 @@ static irqreturn_t scsi_falcon_intr(int irq, void *dummy)
 	return IRQ_HANDLED;
 }
 
+
 #ifdef REAL_DMA
 static void atari_scsi_fetch_restbytes(void)
 {
@@ -437,6 +446,7 @@ static void atari_scsi_fetch_restbytes(void)
 	}
 }
 #endif /* REAL_DMA */
+
 
 /* This function releases the lock on the DMA chip if there is no
  * connected command and the disconnected queue is empty.
@@ -504,6 +514,7 @@ static int __init atari_scsi_setup(char *str)
 
 __setup("atascsi=", atari_scsi_setup);
 #endif /* !MODULE */
+
 
 #ifdef CONFIG_ATARI_SCSI_RESET_BOOT
 static void __init atari_scsi_reset_boot(void)
@@ -606,10 +617,12 @@ static unsigned long atari_scsi_dma_setup(struct Scsi_Host *instance,
 	return count;
 }
 
+
 static long atari_scsi_dma_residual(struct Scsi_Host *instance)
 {
 	return atari_dma_residual;
 }
+
 
 #define	CMD_SURELY_BLOCK_MODE	0
 #define	CMD_SURELY_BYTE_MODE	1
@@ -635,6 +648,7 @@ static int falcon_classify_cmd(struct scsi_cmnd *cmd)
 	} else
 		return CMD_MODE_UNKNOWN;
 }
+
 
 /* This function calculates the number of bytes that can be transferred via
  * DMA. On the TT, this is arbitrary, but on the Falcon we have to use the
@@ -728,7 +742,9 @@ static unsigned long atari_dma_xfer_len(unsigned long wanted_len,
 	return possible_len;
 }
 
+
 #endif	/* REAL_DMA */
+
 
 /* NCR5380 register access functions
  *
@@ -758,6 +774,7 @@ static void atari_scsi_falcon_reg_write(unsigned char reg, unsigned char value)
 	dma_wd.dma_mode_status = (u_short)(0x88 + reg);
 	dma_wd.fdc_acces_seccount = (u_short)value;
 }
+
 
 #include "atari_NCR5380.c"
 
@@ -872,6 +889,7 @@ static int __init atari_scsi_probe(struct platform_device *pdev)
 				atari_scsi_template.this_id = b & 7;
 		}
 	}
+
 
 #ifdef REAL_DMA
 	/* If running on a Falcon and if there's TT-Ram (i.e., more than one

@@ -37,6 +37,7 @@ struct pppcallinfo
 #define PPPIOCSCOMPRESSOR _IOW('t',135,int)
 #define PPPIOCGIFNAME      _IOR('t',136, char [IFNAMSIZ] )
 
+
 #define SC_MP_PROT       0x00000200
 #define SC_REJ_MP_PROT   0x00000400
 #define SC_OUT_SHORT_SEQ 0x00000800

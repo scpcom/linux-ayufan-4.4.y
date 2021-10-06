@@ -307,6 +307,7 @@ static int tb_plug_events_active(struct tb_switch *sw, bool active)
 			   sw->cap_plug_events + 1, 1);
 }
 
+
 /**
  * tb_switch_free() - free a tb_switch and all downstream switches
  */

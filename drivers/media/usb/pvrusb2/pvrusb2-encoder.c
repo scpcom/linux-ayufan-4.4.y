@@ -27,12 +27,15 @@
 #include "pvrusb2-debug.h"
 #include "pvrusb2-fx2-cmd.h"
 
+
+
 /* Firmware mailbox flags - definitions found from ivtv */
 #define IVTV_MBOX_FIRMWARE_DONE 0x00000004
 #define IVTV_MBOX_DRIVER_DONE 0x00000002
 #define IVTV_MBOX_DRIVER_BUSY 0x00000001
 
 #define MBOX_BASE 0x44
+
 
 static int pvr2_encoder_write_words(struct pvr2_hdw *hdw,
 				    unsigned int offs,
@@ -78,6 +81,7 @@ static int pvr2_encoder_write_words(struct pvr2_hdw *hdw,
 
 	return 0;
 }
+
 
 static int pvr2_encoder_read_words(struct pvr2_hdw *hdw,
 				   unsigned int offs,
@@ -128,6 +132,7 @@ static int pvr2_encoder_read_words(struct pvr2_hdw *hdw,
 	return 0;
 }
 
+
 /* This prototype is set up to be compatible with the
    cx2341x_mbox_func prototype in cx2341x.h, which should be in
    kernels 2.6.18 or later.  We do this so that we can enable
@@ -148,6 +153,7 @@ static int pvr2_encoder_cmd(void *ctxt,
 	u32 wrData[16];
 	u32 rdData[16];
 	struct pvr2_hdw *hdw = (struct pvr2_hdw *)ctxt;
+
 
 	/*
 
@@ -198,6 +204,7 @@ static int pvr2_encoder_cmd(void *ctxt,
 			arg_cnt_recv, (long unsigned) ARRAY_SIZE(rdData) - 4);
 		return -EINVAL;
 	}
+
 
 	LOCK_TAKE(hdw->ctl_lock); do {
 
@@ -307,6 +314,7 @@ static int pvr2_encoder_cmd(void *ctxt,
 	return ret;
 }
 
+
 static int pvr2_encoder_vcmd(struct pvr2_hdw *hdw, int cmd,
 			     int args, ...)
 {
@@ -332,6 +340,7 @@ static int pvr2_encoder_vcmd(struct pvr2_hdw *hdw, int cmd,
 
 	return pvr2_encoder_cmd(hdw,cmd,args,0,data);
 }
+
 
 /* This implements some extra setup for the encoder that seems to be
    specific to the PVR USB2 hardware. */
@@ -360,6 +369,7 @@ static int pvr2_encoder_prep_config(struct pvr2_hdw *hdw)
 	   however without the ENC_MISC(3,1) command then we risk
 	   random perpetual video corruption whenever the video input
 	   breaks up for a moment (like when switching channels). */
+
 
 #if 0
 	/* This ENC_MISC(5,0) command seems to hurt 29xxx sync
@@ -418,6 +428,7 @@ int pvr2_encoder_adjust(struct pvr2_hdw *hdw)
 	return ret;
 }
 
+
 int pvr2_encoder_configure(struct pvr2_hdw *hdw)
 {
 	int ret;
@@ -474,6 +485,7 @@ int pvr2_encoder_configure(struct pvr2_hdw *hdw)
 
 	return 0;
 }
+
 
 int pvr2_encoder_start(struct pvr2_hdw *hdw)
 {

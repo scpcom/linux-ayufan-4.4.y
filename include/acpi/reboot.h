@@ -8,3 +8,4 @@ static inline void acpi_reboot(void) { }
 #endif
 
 #endif
+

@@ -567,3 +567,4 @@ MODULE_AUTHOR("Kirk Lapray");
 MODULE_LICENSE("GPL");
 
 EXPORT_SYMBOL(or51211_attach);
+

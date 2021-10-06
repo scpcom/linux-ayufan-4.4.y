@@ -562,6 +562,7 @@ void radeon_dp_set_rx_power_state(struct drm_connector *connector,
 	}
 }
 
+
 struct radeon_dp_link_train_info {
 	struct radeon_device *rdev;
 	struct drm_encoder *encoder;

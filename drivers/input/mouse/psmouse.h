@@ -189,4 +189,5 @@ static struct psmouse_attribute psmouse_attr_##_name = {			\
 		   &(psmouse)->ps2dev.serio->dev,	\
 		   psmouse_fmt(format), ##__VA_ARGS__)
 
+
 #endif /* _PSMOUSE_H */

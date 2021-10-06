@@ -58,3 +58,4 @@ struct ads7846_platform_data {
 	bool	wakeup;
 	unsigned long irq_flags;
 };
+

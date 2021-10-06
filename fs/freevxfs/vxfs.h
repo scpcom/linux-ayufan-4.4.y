@@ -38,6 +38,7 @@
  */
 #include <linux/types.h>
 
+
 /*
  * Data types for use with the VxFS ondisk format.
  */
@@ -58,6 +59,7 @@ typedef int32_t		vx_ino_t;
  * Num of entries in free extent array
  */
 #define VXFS_NEFREE		32
+
 
 /*
  * VxFS superblock (disk).
@@ -152,6 +154,7 @@ struct vxfs_sb {
 	 */
 };
 
+
 /*
  * In core superblock filesystem private data for VxFS.
  */
@@ -166,6 +169,7 @@ struct vxfs_sb_info {
 	daddr_t			vsi_oltext;	/* OLT extent */
 	daddr_t			vsi_oltsize;	/* OLT size */
 };
+
 
 /*
  * File modes.  File types above 0xf000 are vxfs internal only, they should
@@ -242,6 +246,7 @@ enum {
 #define VXFS_ISEXT4(ip)		VXFS_IS_ORG((ip), VXFS_ORG_EXT4)
 #define VXFS_ISIMMED(ip)	VXFS_IS_ORG((ip), VXFS_ORG_IMMED)
 #define VXFS_ISTYPED(ip)	VXFS_IS_ORG((ip), VXFS_ORG_TYPED)
+
 
 /*
  * Get filesystem private data from VFS inode.

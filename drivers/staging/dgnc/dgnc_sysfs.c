@@ -701,3 +701,4 @@ void dgnc_remove_tty_sysfs(struct device *c)
 {
 	sysfs_remove_group(&c->kobj, &dgnc_tty_attribute_group);
 }
+

@@ -50,6 +50,7 @@ static const struct address_space_operations cramfs_aops;
 
 static DEFINE_MUTEX(read_mutex);
 
+
 /* These macros may change in future, to provide better st_ino semantics. */
 #define OFFSET(x)	((x)->i_ino)
 

@@ -434,6 +434,7 @@ TRACE_EVENT(xen_mmu_write_cr3,
 		      __entry->kernel ? "kernel" : "user", __entry->cr3)
 	);
 
+
 /* CPU */
 TRACE_EVENT(xen_cpu_write_ldt_entry,
 	    TP_PROTO(struct desc_struct *dt, int entrynum, u64 desc),
@@ -507,6 +508,7 @@ TRACE_EVENT(xen_cpu_set_ldt,
 	    TP_printk("addr %p  entries %u",
 		      __entry->addr, __entry->entries)
 	);
+
 
 #endif /*  _TRACE_XEN_H */
 

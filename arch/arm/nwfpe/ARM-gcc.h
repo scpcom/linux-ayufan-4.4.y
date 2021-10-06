@@ -70,6 +70,7 @@ to be `static'.
 */
 #define INLINE static inline
 
+
 /* For use as a GCC soft-float library we need some special function names. */
 
 #ifdef __LIBFLOAT__

@@ -163,6 +163,7 @@ static struct usb_driver mts_usb_driver = {
 	.id_table =	mts_usb_ids,
 };
 
+
 /* Internal driver stuff */
 
 #define MTS_VERSION	"0.4.3"
@@ -200,6 +201,8 @@ static struct usb_driver mts_usb_driver = {
 
 #endif
 
+
+
 #define MTS_INT_INIT()\
 	struct mts_transfer_context* context = (struct mts_transfer_context*)transfer->context; \
 	MTS_DEBUG_INT();\
@@ -217,6 +220,7 @@ static inline void mts_debug_dump(struct mts_desc* desc) {
 		  usb_rcvbulkpipe(desc->usb_dev,desc->ep_image)
 		);
 }
+
 
 static inline void mts_show_command(struct scsi_cmnd *srb)
 {
@@ -393,6 +397,7 @@ void mts_int_submit_urb (struct urb* transfer,
 	}
 }
 
+
 static void mts_transfer_cleanup( struct urb *transfer )
 /* Interrupt context! */
 {
@@ -411,6 +416,7 @@ static void mts_transfer_done( struct urb *transfer )
 
 	mts_transfer_cleanup(transfer);
 }
+
 
 static void mts_get_status( struct urb *transfer )
 /* Interrupt context! */
@@ -440,6 +446,7 @@ static void mts_data_done( struct urb* transfer )
 
 	mts_get_status(transfer);
 }
+
 
 static void mts_command_done( struct urb *transfer )
 /* Interrupt context! */
@@ -515,6 +522,7 @@ static const unsigned char mts_direction[256/8] = {
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 };
 
+
 #define MTS_DIRECTION_IS_IN(x) ((mts_direction[x>>3] >> (x & 7)) & 1)
 
 static void
@@ -539,6 +547,7 @@ mts_build_transfer_context(struct scsi_cmnd *srb, struct mts_desc* desc)
 		desc->context.data_length = sg[0].length;
 	}
 
+
 	/* can't rely on srb->sc_data_direction */
 
 	/* Brutally ripped from usb-storage */
@@ -558,6 +567,7 @@ mts_build_transfer_context(struct scsi_cmnd *srb, struct mts_desc* desc)
 	}
 	desc->context.data_pipe = pipe;
 }
+
 
 static int
 mts_scsi_queuecommand_lck(struct scsi_cmnd *srb, mts_scsi_cmnd_callback callback)
@@ -584,6 +594,7 @@ mts_scsi_queuecommand_lck(struct scsi_cmnd *srb, mts_scsi_cmnd_callback callback
 		goto out;
 	}
 
+	
 	usb_fill_bulk_urb(desc->urb,
 		      desc->usb_dev,
 		      usb_sndbulkpipe(desc->usb_dev,desc->ep_out),
@@ -592,6 +603,7 @@ mts_scsi_queuecommand_lck(struct scsi_cmnd *srb, mts_scsi_cmnd_callback callback
 		      mts_command_done,
 		      &desc->context
 		      );
+
 
 	mts_build_transfer_context( srb, desc );
 	desc->context.final_callback = callback;
@@ -649,6 +661,7 @@ static const struct usb_device_id mts_usb_ids[] =
 
 MODULE_DEVICE_TABLE (usb, mts_usb_ids);
 
+
 static int mts_usb_probe(struct usb_interface *intf,
 			 const struct usb_device_id *id)
 {
@@ -676,6 +689,7 @@ static int mts_usb_probe(struct usb_interface *intf,
 
 	/* the current altsetting on the interface we're probing */
 	altsetting = intf->cur_altsetting;
+
 
 	/* Check if the config is sane */
 
@@ -710,10 +724,12 @@ static int mts_usb_probe(struct usb_interface *intf,
 
 	}
 
+
 	if ( ep_out == -1 ) {
 		MTS_WARNING( "couldn't find an output bulk endpoint. Bailing out.\n" );
 		return -ENODEV;
 	}
+
 
 	new_desc = kzalloc(sizeof(struct mts_desc), GFP_KERNEL);
 	if (!new_desc)

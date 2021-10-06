@@ -478,6 +478,7 @@ err:
 	return -EINVAL;
 }
 
+
 static int adp1653_probe(struct i2c_client *client,
 			 const struct i2c_device_id *devid)
 {

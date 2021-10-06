@@ -2135,6 +2135,7 @@ static void hpsa_unmap_sg_chain_block(struct ctlr_info *h,
 			le32_to_cpu(chain_sg->Len), PCI_DMA_TODEVICE);
 }
 
+
 /* Decode the various types of errors on ioaccel2 path.
  * Return 1 for any error that should generate a RAID path retry.
  * Return 0 for errors that don't require a RAID path retry.
@@ -2823,6 +2824,7 @@ static int hpsa_send_reset(struct ctlr_info *h, unsigned char *scsi3addr,
 	struct ErrorInfo *ei;
 
 	c = cmd_alloc(h);
+
 
 	/* fill_cmd can't fail here, no data buffer to map. */
 	(void) fill_cmd(c, reset_type, h, NULL, 0, 0,
@@ -3730,6 +3732,7 @@ static void figure_bus_target_lun(struct ctlr_info *h,
 				0, lunid & 0x3fff);
 }
 
+
 /*
  * Get address of physical disk used for an ioaccel2 mode command:
  *	1. Extract ioaccel2 handle from the command.
@@ -3927,6 +3930,7 @@ static int hpsa_set_local_logical_count(struct ctlr_info *h,
 	return rc;
 }
 
+
 static void hpsa_update_scsi_devices(struct ctlr_info *h)
 {
 	/* the idea here is we could get notified
@@ -4066,6 +4070,7 @@ static void hpsa_update_scsi_devices(struct ctlr_info *h)
 			}
 		}
 
+
 		*this_device = *tmpdevice;
 		this_device->physical_device = physical_device;
 
@@ -4077,6 +4082,7 @@ static void hpsa_update_scsi_devices(struct ctlr_info *h)
 			this_device->expose_device = 0;
 		else
 			this_device->expose_device = 1;
+
 
 		/*
 		 * Get the SAS address for physical devices that are exposed.
@@ -4829,6 +4835,7 @@ static int hpsa_scsi_ioaccel_raid_map(struct ctlr_info *h,
 #endif
 		if (r5or6_first_row != r5or6_last_row)
 			return IO_ACCEL_INELIGIBLE;
+
 
 		/* Verify request is in a single column */
 #if BITS_PER_LONG == 32
@@ -8262,6 +8269,7 @@ static void hpsa_rescan_ctlr_worker(struct work_struct *work)
 	struct ctlr_info *h = container_of(to_delayed_work(work),
 					struct ctlr_info, rescan_ctlr_work);
 
+
 	if (h->remove_in_progress)
 		return;
 
@@ -8525,6 +8533,7 @@ reinit_after_soft_reset:
 	h->acciopath_status = 1;
 	/* Disable discovery polling.*/
 	h->discovery_polling = 0;
+
 
 	/* Turn the interrupts on so we can service requests */
 	h->access.set_intr_mask(h, HPSA_INTR_ON);

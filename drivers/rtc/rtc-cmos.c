@@ -1260,6 +1260,7 @@ static void __exit cmos_exit(void)
 }
 module_exit(cmos_exit);
 
+
 MODULE_AUTHOR("David Brownell");
 MODULE_DESCRIPTION("Driver for PC-style 'CMOS' RTCs");
 MODULE_LICENSE("GPL");

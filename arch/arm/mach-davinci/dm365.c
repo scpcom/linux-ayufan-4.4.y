@@ -490,6 +490,7 @@ static struct clk_lookup dm365_clks[] = {
 #define INTMUX		0x18
 #define EVTMUX		0x1c
 
+
 static const struct mux_config dm365_pins[] = {
 #ifdef CONFIG_DAVINCI_MUX
 MUX_CFG(DM365,	MMCSD0,		0,   24,     1,	  0,	 false)

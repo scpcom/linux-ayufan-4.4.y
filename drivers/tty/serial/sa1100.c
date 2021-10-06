@@ -701,6 +701,7 @@ void __init sa1100_register_uart(int idx, int port)
 	}
 }
 
+
 #ifdef CONFIG_SERIAL_SA1100_CONSOLE
 static void sa1100_console_putchar(struct uart_port *port, int ch)
 {

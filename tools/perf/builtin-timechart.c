@@ -100,6 +100,7 @@ struct per_pid {
 	struct per_pidcomm *current;
 };
 
+
 struct per_pidcomm {
 	struct per_pidcomm *next;
 
@@ -191,6 +192,7 @@ struct process_filter {
 };
 
 static struct process_filter *process_filter;
+
 
 static struct per_pid *find_create_pid(struct timechart *tchart, int pid)
 {
@@ -1006,6 +1008,7 @@ static void sort_pids(struct timechart *tchart)
 	tchart->all_data = new_list;
 }
 
+
 static void draw_c_p_states(struct timechart *tchart)
 {
 	struct power_event *pwr;
@@ -1229,6 +1232,7 @@ static void draw_io_bars(struct timechart *tchart)
 				bytes = bytes / 1024;
 				suf = "G";
 			}
+
 
 			sprintf(comm, "%s:%i (%3.1f %sbytes)", c->comm ?: "", p->pid, bytes, suf);
 			svg_text(Y, c->start_time, comm);
@@ -1770,6 +1774,7 @@ static int timechart__io_record(int argc, const char **argv)
 
 	return cmd_record(rec_argc, rec_argv, NULL);
 }
+
 
 static int timechart__record(struct timechart *tchart, int argc, const char **argv)
 {

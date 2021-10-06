@@ -33,6 +33,7 @@ enum {
 };
 #define HSR_A_MAX (__HSR_A_MAX - 1)
 
+
 /* commands */
 enum {
 	HSR_C_UNSPEC,

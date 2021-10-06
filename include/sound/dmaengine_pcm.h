@@ -79,6 +79,7 @@ void snd_dmaengine_pcm_set_config_from_dai_data(
 	const struct snd_dmaengine_dai_dma_data *dma_data,
 	struct dma_slave_config *config);
 
+
 /*
  * Try to request the DMA channel using compat_request_channel or
  * compat_filter_fn if it couldn't be requested through devicetree.

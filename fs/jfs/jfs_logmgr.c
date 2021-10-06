@@ -79,11 +79,13 @@
 #include "jfs_txnmgr.h"
 #include "jfs_debug.h"
 
+
 /*
  * lbuf's ready to be redriven.  Protected by log_redrive_lock (jfsIO thread)
  */
 static struct lbuf *log_redrive_list;
 static DEFINE_SPINLOCK(log_redrive_lock);
+
 
 /*
  *	log read/write serialization (per log)
@@ -91,6 +93,7 @@ static DEFINE_SPINLOCK(log_redrive_lock);
 #define LOG_LOCK_INIT(log)	mutex_init(&(log)->loglock)
 #define LOG_LOCK(log)		mutex_lock(&((log)->loglock))
 #define LOG_UNLOCK(log)		mutex_unlock(&((log)->loglock))
+
 
 /*
  *	log group commit serialization (per log)
@@ -111,6 +114,7 @@ static DEFINE_SPINLOCK(log_redrive_lock);
 #define	LOGSYNC_BARRIER(logsize)	((logsize)/2)
 */
 
+
 /*
  *	log buffer cache synchronization
  */
@@ -130,6 +134,7 @@ do {						\
 } while (0)
 
 #define	LCACHE_WAKEUP(event)	wake_up(event)
+
 
 /*
  *	lbuf buffer cache (lCache) control
@@ -190,6 +195,8 @@ static bio_end_io_t lbmIODone;
 static void lbmStartIO(struct lbuf * bp);
 static void lmGCwrite(struct jfs_log * log, int cant_block);
 static int lmLogSync(struct jfs_log * log, int hard_sync);
+
+
 
 /*
  *	statistics
@@ -551,6 +558,7 @@ lmWriteRecord(struct jfs_log * log, struct tblock * tblk, struct lrd * lrd,
 	return lsn;
 }
 
+
 /*
  * NAME:	lmNextPage()
  *
@@ -651,6 +659,7 @@ static int lmNextPage(struct jfs_log * log)
 
 	return 0;
 }
+
 
 /*
  * NAME:	lmGroupCommit()
@@ -1433,6 +1442,7 @@ int lmLogInit(struct jfs_log * log)
 	return rc;
 }
 
+
 /*
  * NAME:	lmLogClose()
  *
@@ -1507,6 +1517,7 @@ int lmLogClose(struct super_block *sb)
 	jfs_info("lmLogClose: exit(%d)", rc);
 	return rc;
 }
+
 
 /*
  * NAME:	jfs_flush_journal()
@@ -1701,6 +1712,7 @@ int lmLogShutdown(struct jfs_log * log)
 	return rc;
 }
 
+
 /*
  * NAME:	lmLogFileSystem()
  *
@@ -1857,6 +1869,7 @@ static int lbmLogInit(struct jfs_log * log)
 	return -ENOMEM;
 }
 
+
 /*
  *	lbmLogShutdown()
  *
@@ -1876,6 +1889,7 @@ static void lbmLogShutdown(struct jfs_log * log)
 		lbuf = next;
 	}
 }
+
 
 /*
  *	lbmAllocate()
@@ -1906,6 +1920,7 @@ static struct lbuf *lbmAllocate(struct jfs_log * log, int pn)
 
 	return bp;
 }
+
 
 /*
  *	lbmFree()
@@ -1939,6 +1954,7 @@ static void lbmfree(struct lbuf * bp)
 	return;
 }
 
+
 /*
  * NAME:	lbmRedrive
  *
@@ -1961,6 +1977,7 @@ static inline void lbmRedrive(struct lbuf *bp)
 
 	wake_up_process(jfsIOthread);
 }
+
 
 /*
  *	lbmRead()
@@ -2000,6 +2017,7 @@ static int lbmRead(struct jfs_log * log, int pn, struct lbuf ** bpp)
 
 	return 0;
 }
+
 
 /*
  *	lbmWrite()
@@ -2077,6 +2095,7 @@ static void lbmWrite(struct jfs_log * log, struct lbuf * bp, int flag,
 	}
 }
 
+
 /*
  *	lbmDirectWrite()
  *
@@ -2102,6 +2121,7 @@ static void lbmDirectWrite(struct jfs_log * log, struct lbuf * bp, int flag)
 	 */
 	lbmStartIO(bp);
 }
+
 
 /*
  * NAME:	lbmStartIO()
@@ -2138,6 +2158,7 @@ static void lbmStartIO(struct lbuf * bp)
 		INCREMENT(lmStat.submitted);
 	}
 }
+
 
 /*
  *	lbmIOWait()

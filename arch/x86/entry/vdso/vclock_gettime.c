@@ -85,6 +85,7 @@ static notrace cycle_t vread_pvclock(int *mode)
 	u8 flags;
 	unsigned cpu, cpu1;
 
+
 	/*
 	 * Note: hypervisor must guarantee that:
 	 * 1. cpu ID number maps 1:1 to per-CPU pvclock time info.

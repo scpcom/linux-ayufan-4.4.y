@@ -76,6 +76,7 @@ struct genericstrtable {
 	char name[1];
 };
 
+
 #define HASH1  0x10
 #define HASH2  0x02
 #define HASHSZ 16
@@ -89,6 +90,7 @@ static unsigned int hashnum(unsigned int num)
 			num ^= mask2;
 	return num & (HASHSZ-1);
 }
+
 
 static struct vendor *vendors[HASHSZ] = { NULL, };
 static struct product *products[HASHSZ] = { NULL, };
@@ -486,6 +488,7 @@ static void parse(FILE *f)
 		err("Unknown line at line %u", linectr);
 	}
 }
+
 
 int names_init(char *n)
 {

@@ -77,6 +77,7 @@ enum sst_path_index {
 	SST_PATH_INDEX_MEDIA0_OUT               = (0x12 << SST_PATH_ID_SHIFT),
 	SST_PATH_INDEX_MEDIA1_OUT               = (0x13 << SST_PATH_ID_SHIFT),
 
+
 	/* Start of input paths */
 	SST_PATH_INDEX_CODEC_IN0                = (0x82 << SST_PATH_ID_SHIFT),
 	SST_PATH_INDEX_CODEC_IN1                = (0x83 << SST_PATH_ID_SHIFT),
@@ -414,6 +415,7 @@ struct sst_cmd_set_params {
 	char params[0];
 } __packed;
 
+
 struct sst_cmd_sba_vb_start {
 	struct sst_dsp_header header;
 } __packed;
@@ -584,6 +586,7 @@ struct sst_ids {
 	const struct sst_pcm_format *pcm_fmt;
 };
 
+
 #define SST_AIF_IN(wname, wevent)							\
 {	.id = snd_soc_dapm_aif_in, .name = wname, .sname = NULL,			\
 	.reg = SND_SOC_NOPM, .shift = 0,					\
@@ -667,6 +670,7 @@ struct sst_ids {
 
 #define SST_PATH_MEDIA_LOOP_OUTPUT(name, task_id, loc_id, format, event)		\
 	SST_PATH_MEDIA_LOOP(name, task_id, loc_id, format, event, SND_SOC_DAPM_PRE_PMU | SND_SOC_DAPM_POST_PMD)
+
 
 #define SST_SWM_MIXER(wname, wreg, wtask, wloc_id, wcontrols, wevent)			\
 {	.id = snd_soc_dapm_mixer, .name = wname, .reg = SND_SOC_NOPM, .shift = 0,	\
@@ -830,6 +834,7 @@ struct sst_algo_control {
 			  xcount, xmod, xpipe, xtask, xcmd, SST_ALGO_PARAMS,		\
 			  sst_algo_bytes_ctl_info,					\
 			  sst_algo_control_get, sst_algo_control_set)
+
 
 struct sst_enum {
 	bool tx;

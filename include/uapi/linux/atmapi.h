@@ -2,6 +2,7 @@
  
 /* Written 1999,2000 by Werner Almesberger, EPFL ICA */
  
+
 #ifndef _LINUX_ATMAPI_H
 #define _LINUX_ATMAPI_H
 
@@ -12,6 +13,7 @@
 #else
 #define __ATM_API_ALIGN
 #endif
+
 
 /*
  * Opaque type for kernel pointers. Note that _ is never accessed. We need

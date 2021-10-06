@@ -182,6 +182,7 @@ struct mfc_dma_command {
 	uint16_t cmd;	/* command opcode */
 };
 
+
 /* SPU context query/set operations. */
 struct spu_context_ops {
 	int (*mbox_read) (struct spu_context * ctx, u32 * data);

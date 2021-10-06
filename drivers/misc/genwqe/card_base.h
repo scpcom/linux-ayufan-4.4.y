@@ -152,6 +152,7 @@ enum genwqe_dbg_type {
  *   sudo sh -c 'echo 0xfffff > /sys/class/genwqe/genwqe0_card/err_inject'
  */
 
+
 /**
  * struct dma_mapping_type - Mapping type definition
  *

@@ -52,6 +52,7 @@
 #include <linux/zutil.h>
 #include "defutil.h"
 
+
 /* ===========================================================================
  *  Function prototypes.
  */
@@ -139,6 +140,7 @@ static const config configuration_table[10] = {
  *    previous key instead of complete recalculation each time.
  */
 #define UPDATE_HASH(s,h,c) (h = (((h)<<s->hash_shift) ^ (c)) & s->hash_mask)
+
 
 /* ===========================================================================
  * Insert string str in the dictionary and set match_head to the previous head

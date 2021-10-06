@@ -32,6 +32,7 @@
  *	c) add new fields after version comment; maintain 64-bit alignment
  */
 
+
 #define TASKSTATS_VERSION	8
 #define TS_COMM_LEN		32	/* should be >= TASK_COMM_LEN
 					 * in linux/sched.h */
@@ -163,6 +164,7 @@ struct taskstats {
 	__u64	freepages_count;
 	__u64	freepages_delay_total;
 };
+
 
 /*
  * Commands sent from userspace

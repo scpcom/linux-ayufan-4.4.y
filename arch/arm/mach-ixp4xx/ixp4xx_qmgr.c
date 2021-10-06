@@ -48,6 +48,7 @@ void qmgr_set_irq(unsigned int queue, int src,
 	spin_unlock_irqrestore(&qmgr_lock, flags);
 }
 
+
 static irqreturn_t qmgr_irq1_a0(int irq, void *pdev)
 {
 	int i, ret = 0;
@@ -72,6 +73,7 @@ static irqreturn_t qmgr_irq1_a0(int irq, void *pdev)
 	return ret;
 }
 
+
 static irqreturn_t qmgr_irq2_a0(int irq, void *pdev)
 {
 	int i, ret = 0;
@@ -90,6 +92,7 @@ static irqreturn_t qmgr_irq2_a0(int irq, void *pdev)
 	return ret;
 }
 
+
 static irqreturn_t qmgr_irq(int irq, void *pdev)
 {
 	int i, half = (irq == IRQ_IXP4XX_QM1 ? 0 : 1);
@@ -107,6 +110,7 @@ static irqreturn_t qmgr_irq(int irq, void *pdev)
 	}
 	return IRQ_HANDLED;
 }
+
 
 void qmgr_enable_irq(unsigned int queue)
 {

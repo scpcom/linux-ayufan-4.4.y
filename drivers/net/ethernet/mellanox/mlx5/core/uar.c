@@ -42,6 +42,7 @@ enum {
 	NUM_LOW_LAT_UUARS	= 4,
 };
 
+
 struct mlx5_alloc_uar_mbox_in {
 	struct mlx5_inbox_hdr	hdr;
 	u8			rsvd[8];

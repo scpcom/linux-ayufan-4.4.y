@@ -39,6 +39,7 @@
  * to communicate between kernel and user code.
  */
 
+
 /* This is the IEEE-assigned OUI for QLogic Inc. InfiniPath */
 #define IPATH_SRC_OUI_1 0x00
 #define IPATH_SRC_OUI_2 0x11
@@ -342,6 +343,7 @@ struct ipath_base_info {
 	__u64 spi_port_rcvhdr_tailaddr;
 
 } __attribute__ ((aligned(8)));
+
 
 /*
  * This version number is given to the driver by the user code during
@@ -765,6 +767,7 @@ struct ether_header {
 	__u8 unused[2];		/* currently unused */
 };
 
+
 /* IB - LRH header consts */
 #define IPATH_LRH_GRH 0x0003	/* 1. word of IB LRH - next header: GRH */
 #define IPATH_LRH_BTH 0x0002	/* 1. word of IB LRH - next header: BTH */
@@ -789,6 +792,7 @@ struct ether_header {
 #define RCVHQ_RCV_TYPE_EAGER     1
 #define RCVHQ_RCV_TYPE_NON_KD    2
 #define RCVHQ_RCV_TYPE_ERROR     3
+
 
 /* sub OpCodes - ith4x  */
 #define IPATH_ITH4X_OPCODE_ENCAP 0x81

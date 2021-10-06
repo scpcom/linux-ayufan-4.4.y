@@ -60,6 +60,7 @@
 
 #include <linux/delay.h>
 
+
 #define VERSION_STRING DRIVER_DESC " 2.1d"
 
 /*    Macros definitions */
@@ -133,6 +134,7 @@ static int debug;
 /* Size of tmp send buffer to card */
 #define SEND_BUF_MAX		1024
 #define RECEIVE_BUF_MAX		4
+
 
 #define R_IIR		0x0000	/* Interrupt Identity Register */
 #define R_FCR		0x0000	/* Flow Control Register */
@@ -1175,6 +1177,7 @@ static irqreturn_t interrupt_handler(int irq, void *dev_id)
 
 	if (read_iir == 0)
 		goto none;
+
 
 	DBG4("%s irq:0x%04X, prev:0x%04X", interrupt2str(read_iir), read_iir,
 		dc->last_ier);

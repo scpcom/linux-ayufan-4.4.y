@@ -33,4 +33,5 @@
 #undef insl
 #define insl(a,b,l)	__insl(a,b,l,0) /* don't byte-swap */
 
+
 #endif /* _ASM_DM9000_H */

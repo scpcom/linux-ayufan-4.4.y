@@ -21,6 +21,7 @@
  */
 #undef PCI_FDC_SWAP_DRIVES
 
+
 /* References:
  * 1) Netbsd Sun floppy driver.
  * 2) NCR 82077 controller manual

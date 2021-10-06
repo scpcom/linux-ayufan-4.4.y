@@ -771,6 +771,7 @@ static struct net_device *ep93xx_dev_alloc(struct ep93xx_eth_data *data)
 	return dev;
 }
 
+
 static int ep93xx_eth_remove(struct platform_device *pdev)
 {
 	struct net_device *dev;
@@ -871,6 +872,7 @@ err_out:
 	ep93xx_eth_remove(pdev);
 	return err;
 }
+
 
 static struct platform_driver ep93xx_eth_driver = {
 	.probe		= ep93xx_eth_probe,

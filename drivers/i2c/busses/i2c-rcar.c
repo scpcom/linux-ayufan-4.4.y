@@ -81,6 +81,7 @@
 #define MDR	(1 << 1)
 #define MAT	(1 << 0)	/* slave addr xfer done */
 
+
 #define RCAR_BUS_PHASE_START	(MDBS | MIE | ESG)
 #define RCAR_BUS_PHASE_DATA	(MDBS | MIE)
 #define RCAR_BUS_PHASE_STOP	(MDBS | MIE | FSB)
@@ -127,6 +128,7 @@ struct rcar_i2c_priv {
 #define rcar_i2c_flags_has(p, f)	((p)->flags & (f))
 
 #define LOOP_TIMEOUT	1024
+
 
 static void rcar_i2c_write(struct rcar_i2c_priv *priv, int reg, u32 val)
 {

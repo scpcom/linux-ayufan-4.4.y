@@ -44,6 +44,7 @@ MODULE_LICENSE("GPL");
 #define   TEA6330T_GMU			0x80	/* mute control, general mute */
 #define   TEA6330T_EQN			0x40	/* equalizer switchover (0=equalizer-on) */
 
+
 struct tea6330t {
 	struct snd_i2c_device *device;
 	struct snd_i2c_bus *bus;
@@ -54,6 +55,7 @@ struct tea6330t {
 	unsigned char bass, treble;
 	unsigned char max_bass, max_treble;
 };
+
 
 int snd_tea6330t_detect(struct snd_i2c_bus *bus, int equalizer)
 {

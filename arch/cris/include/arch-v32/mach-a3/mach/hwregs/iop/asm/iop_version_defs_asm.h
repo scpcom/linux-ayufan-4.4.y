@@ -55,6 +55,7 @@
 #define reg_iop_version_r_version___nr___width 8
 #define reg_iop_version_r_version_offset 0
 
+
 /* Constants */
 #define regk_iop_version_v2_0                     0x00000002
 #endif /* __iop_version_defs_asm_h */

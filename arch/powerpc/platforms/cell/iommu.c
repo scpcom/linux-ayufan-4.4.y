@@ -56,6 +56,7 @@
  */
 #define CELL_IOMMU_STRICT_PROTECTION
 
+
 #define NR_IOMMUS			2
 
 /* IOC mmap registers */
@@ -89,6 +90,7 @@
 #define IOC_IOCmd_Cfg			0xc00
 #define IOC_IOCmd_Cfg_TE		0x0000800000000000ul
 
+
 /* Segment table entries */
 #define IOSTE_V			0x8000000000000000ul /* valid */
 #define IOSTE_H			0x4000000000000000ul /* cache hint */
@@ -99,6 +101,7 @@
 #define IOSTE_PS_64K		0x0000000000000003ul /*   - 64kB */
 #define IOSTE_PS_1M		0x0000000000000005ul /*   - 1MB  */
 #define IOSTE_PS_16M		0x0000000000000007ul /*   - 16MB */
+
 
 /* IOMMU sizing */
 #define IO_SEGMENT_SHIFT	28

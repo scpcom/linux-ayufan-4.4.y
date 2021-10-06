@@ -403,3 +403,4 @@ void of_rescan_bus(struct device_node *node, struct pci_bus *bus)
 	__of_scan_bus(node, bus, 1);
 }
 EXPORT_SYMBOL_GPL(of_rescan_bus);
+

@@ -142,6 +142,7 @@ static const u8 fan_reg_low[] = {AMC6821_REG_TDATA_LOW,
 			AMC6821_REG_TACH_LLIMITL,
 			AMC6821_REG_TACH_HLIMITL, };
 
+
 static const u8 fan_reg_hi[] = {AMC6821_REG_TDATA_HI,
 			AMC6821_REG_TACH_LLIMITH,
 			AMC6821_REG_TACH_HLIMITH, };

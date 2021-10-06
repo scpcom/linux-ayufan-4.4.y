@@ -178,6 +178,7 @@ void mlx4_gen_slave_eqe(struct work_struct *work)
 	}
 }
 
+
 static void slave_event(struct mlx4_dev *dev, u8 slave, struct mlx4_eqe *eqe)
 {
 	struct mlx4_priv *priv = mlx4_priv(dev);
@@ -1445,6 +1446,7 @@ int mlx4_assign_eq(struct mlx4_dev *dev, u8 port, int *vector)
 	int requested_vector = MLX4_CQ_TO_EQ_VECTOR(*vector);
 	int *prequested_vector = NULL;
 
+
 	mutex_lock(&priv->msix_ctl.pool_lock);
 	if (requested_vector < (dev->caps.num_comp_vectors + 1) &&
 	    (requested_vector >= 0) &&
@@ -1550,3 +1552,4 @@ void mlx4_release_eq(struct mlx4_dev *dev, int vec)
 	mutex_unlock(&priv->msix_ctl.pool_lock);
 }
 EXPORT_SYMBOL(mlx4_release_eq);
+

@@ -68,6 +68,7 @@
  */
 #define EISA_IO			(IDENT_ADDR + 0x300000000UL)
 
+
 #ifdef __KERNEL__
 
 #ifndef __EXTERN_INLINE

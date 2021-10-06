@@ -18,6 +18,7 @@
 #include <drv_types.h>
 #include "odm_precomp.h"
 
+
 /*  HEADER/PlatformDef.h */
 enum rt_media_status {
 	RT_MEDIA_DISCONNECT	= 0,
@@ -32,6 +33,7 @@ void BT_SignalCompensation(struct rtw_adapter *padapter,
 			   u8 *rssi_wifi, u8 *rssi_bt);
 void BT_HaltProcess(struct rtw_adapter *padapter);
 void BT_LpsLeave(struct rtw_adapter *padapter);
+
 
 #define	BT_HsConnectionEstablished(Adapter)		false
 /*  ===== End of sync from SD7 driver COMMON/BT.h ===== */
@@ -48,6 +50,7 @@ struct octet_string {
 	u8		*Octet;
 	u16		Length;
 };
+
 
 /*  AES_CCMP specific */
 enum {
@@ -73,12 +76,14 @@ enum {
 #define GTK_LEN				32
 #define KEY_NONCE_LEN			32
 
+
 /*  COMMON/Dot11d.h */
 struct chnl_txpower_triple {
 	u8 FirstChnl;
 	u8 NumChnls;
 	s8 MaxTxPowerInDbm;
 };
+
 
 /*  ===== Below this line is sync from SD7 driver COMMON/bt_hci.h ===== */
 /*  The following is for BT 3.0 + HS HCI COMMAND ERRORS CODES */
@@ -391,6 +396,7 @@ enum hci_extension_commands {
 	HCI_LINK_STATUS_NOTIFY				= 0x0101,
 	HCI_BT_OPERATION_NOTIFY				= 0x0102,
 	HCI_ENABLE_WIFI_SCAN_NOTIFY			= 0x0103,
+
 
 	/* The following is for IVT */
 	HCI_WIFI_CURRENT_CHANNEL			= 0x0300,
@@ -1283,6 +1289,8 @@ void BTDM_2AntBtCoexist8723A(struct rtw_adapter *padapter);
 #define BT_INFO_A2DP		BIT(6)
 #define BT_INFO_FTP			BIT(7)
 
+
+
 struct bt_coexist_8723a {
 	u32					highPriorityTx;
 	u32					highPriorityRx;
@@ -1336,6 +1344,7 @@ enum BT_A2DP_INDEX{
 #define BTDM_ANT_BT_IDLE				0
 #define BTDM_ANT_WIFI					1
 #define BTDM_ANT_BT						2
+
 
 void BTDM_SingleAnt(struct rtw_adapter *padapter, u8 bSingleAntOn,
 		    u8 bInterruptOn, u8 bMultiNAVOn);
@@ -1436,6 +1445,7 @@ void BTDM_DiminishWiFi(struct rtw_adapter *Adapter, u8 bDACOn, u8 bInterruptOn,
 #define BT_COEX_STATE_WIFI_RSSI_BEACON_LOW	BIT(27)
 #define BT_COEX_STATE_WIFI_RSSI_BEACON_MEDIUM	BIT(28)
 #define BT_COEX_STATE_WIFI_RSSI_BEACON_HIGH	BIT(29)
+
 
 #define BT_COEX_STATE_BTINFO_COMMON		BIT(30)
 #define BT_COEX_STATE_BTINFO_B_HID_SCOESCO	BIT(31)
@@ -1611,5 +1621,7 @@ void HALBT_SetRtsCtsNoLenLimit(struct rtw_adapter *padapter);
 #define _bt_dbg_on_		1
 
 extern u32 BTCoexDbgLevel;
+
+
 
 #endif /*  __RTL8723A_BT_COEXIST_H__ */

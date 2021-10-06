@@ -44,6 +44,7 @@
 #define PCLK_RTC		26
 #define PCLK_GPIO		27
 
+
 /* hclk-gates */
 #define HCLK_LCD		32
 #define HCLK_USBH		33
@@ -51,7 +52,9 @@
 #define HCLK_NAND		35
 #define HCLK_CAM		36
 
+
 #define CAMIF			40
+
 
 /* Total number of clocks. */
 #define NR_CLKS			(CAMIF + 1)

@@ -49,6 +49,8 @@ extern int dvb_usb_cinergyt2_debug;
 #define deb_mem(args...)   dprintk(dvb_usb_cinergyt2_debug,  0x080, args)
 #define deb_uxfer(args...) dprintk(dvb_usb_cinergyt2_debug,  0x100, args)
 
+
+
 enum cinergyt2_ep1_cmd {
 	CINERGYT2_EP1_PID_TABLE_RESET		= 0x01,
 	CINERGYT2_EP1_PID_SETUP			= 0x02,
@@ -61,6 +63,7 @@ enum cinergyt2_ep1_cmd {
 	CINERGYT2_EP1_SLEEP_MODE		= 0x09,
 	CINERGYT2_EP1_GET_FIRMWARE_VERSION	= 0x0A
 };
+
 
 struct dvbt_get_status_msg {
 	uint32_t freq;
@@ -76,6 +79,7 @@ struct dvbt_get_status_msg {
 	uint8_t prev_lock_bits;
 } __attribute__((packed));
 
+
 struct dvbt_set_parameters_msg {
 	uint8_t cmd;
 	__le32 freq;
@@ -84,6 +88,8 @@ struct dvbt_set_parameters_msg {
 	uint8_t flags;
 } __attribute__((packed));
 
+
 extern struct dvb_frontend *cinergyt2_fe_attach(struct dvb_usb_device *d);
 
 #endif /* _DVB_USB_CINERGYT2_H_ */
+

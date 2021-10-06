@@ -18,6 +18,7 @@
 #include <osdep_service.h>
 #include <drv_types.h>
 
+
 #define NR_XMITFRAME	256
 
 int rtw_xmit23a_entry23a(struct sk_buff *pkt, struct net_device *pnetdev);

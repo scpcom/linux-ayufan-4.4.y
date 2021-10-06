@@ -193,6 +193,7 @@
 #define TPS65217_PROTECT_L1		1
 #define TPS65217_PROTECT_L2		2
 
+
 enum tps65217_regulator_id {
 	/* DCDC's */
 	TPS65217_DCDC_1,

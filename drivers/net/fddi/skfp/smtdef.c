@@ -85,6 +85,7 @@ void smt_reset_defaults(struct s_smc *smc, int level)
 	int			i ;
 	u_long			smt_boot_time;
 
+
 	smt_init_mib(smc,level) ;
 
 	smc->os.smc_version = SMC_VERSION ;
@@ -245,6 +246,7 @@ static void smt_init_mib(struct s_smc *smc, int level)
 		}
 	}
 
+
 	/*
 	 * Port attributes
 	 */
@@ -350,3 +352,4 @@ static int set_min_max(int maxflag, u_long mib, u_long limit, u_long *oper)
 		*oper = mib ;
 	return old != *oper;
 }
+

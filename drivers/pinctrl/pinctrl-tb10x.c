@@ -217,6 +217,7 @@ static const struct pinctrl_pin_desc tb10x_pins[] = {
 	PINCTRL_PIN(MAX_PIN,  "GPION4"),
 };
 
+
 /* Port 1 */
 static const unsigned mis0_pins[]  = {	TB10X_PORT1 + 0, TB10X_PORT1 + 1,
 					TB10X_PORT1 + 2, TB10X_PORT1 + 3};
@@ -828,6 +829,7 @@ static int tb10x_pinctrl_remove(struct platform_device *pdev)
 
 	return 0;
 }
+
 
 static const struct of_device_id tb10x_pinctrl_dt_ids[] = {
 	{ .compatible = "abilis,tb10x-iomux" },

@@ -48,13 +48,19 @@
 #include <net/bluetooth/bluetooth.h>
 #include <net/bluetooth/hci_core.h>
 
+
+
 /* ======================== Module parameters ======================== */
+
 
 MODULE_AUTHOR("Marcel Holtmann <marcel@holtmann.org>");
 MODULE_DESCRIPTION("Bluetooth driver for Nokia Connectivity Card DTL-1");
 MODULE_LICENSE("GPL");
 
+
+
 /* ======================== Local structures ======================== */
+
 
 struct dtl1_info {
 	struct pcmcia_device *p_dev;
@@ -74,7 +80,9 @@ struct dtl1_info {
 	struct sk_buff *rx_skb;
 };
 
+
 static int dtl1_config(struct pcmcia_device *link);
+
 
 /* Transmit states  */
 #define XMIT_SENDING  1
@@ -85,6 +93,7 @@ static int dtl1_config(struct pcmcia_device *link);
 #define RECV_WAIT_NSH   0
 #define RECV_WAIT_DATA  1
 
+
 struct nsh {
 	u8 type;
 	u8 zero;
@@ -93,7 +102,10 @@ struct nsh {
 
 #define NSHL  4				/* Nokia Specific Header Length */
 
+
+
 /* ======================== Interrupt handling ======================== */
+
 
 static int dtl1_write(unsigned int iobase, int fifo_size, __u8 *buf, int len)
 {
@@ -112,6 +124,7 @@ static int dtl1_write(unsigned int iobase, int fifo_size, __u8 *buf, int len)
 
 	return actual;
 }
+
 
 static void dtl1_write_wakeup(struct dtl1_info *info)
 {
@@ -162,6 +175,7 @@ static void dtl1_write_wakeup(struct dtl1_info *info)
 	clear_bit(XMIT_SENDING, &(info->tx_state));
 }
 
+
 static void dtl1_control(struct dtl1_info *info, struct sk_buff *skb)
 {
 	u8 flowmask = *(u8 *)skb->data;
@@ -183,6 +197,7 @@ static void dtl1_control(struct dtl1_info *info, struct sk_buff *skb)
 
 	kfree_skb(skb);
 }
+
 
 static void dtl1_receive(struct dtl1_info *info)
 {
@@ -269,6 +284,7 @@ static void dtl1_receive(struct dtl1_info *info)
 	} while (inb(iobase + UART_LSR) & UART_LSR_DR);
 }
 
+
 static irqreturn_t dtl1_interrupt(int irq, void *dev_inst)
 {
 	struct dtl1_info *info = dev_inst;
@@ -334,12 +350,16 @@ static irqreturn_t dtl1_interrupt(int irq, void *dev_inst)
 	return r;
 }
 
+
+
 /* ======================== HCI interface ======================== */
+
 
 static int dtl1_hci_open(struct hci_dev *hdev)
 {
 	return 0;
 }
+
 
 static int dtl1_hci_flush(struct hci_dev *hdev)
 {
@@ -351,12 +371,14 @@ static int dtl1_hci_flush(struct hci_dev *hdev)
 	return 0;
 }
 
+
 static int dtl1_hci_close(struct hci_dev *hdev)
 {
 	dtl1_hci_flush(hdev);
 
 	return 0;
 }
+
 
 static int dtl1_hci_send_frame(struct hci_dev *hdev, struct sk_buff *skb)
 {
@@ -404,7 +426,10 @@ static int dtl1_hci_send_frame(struct hci_dev *hdev, struct sk_buff *skb)
 	return 0;
 }
 
+
+
 /* ======================== Card services HCI interaction ======================== */
+
 
 static int dtl1_open(struct dtl1_info *info)
 {
@@ -474,6 +499,7 @@ static int dtl1_open(struct dtl1_info *info)
 	return 0;
 }
 
+
 static int dtl1_close(struct dtl1_info *info)
 {
 	unsigned long flags;
@@ -517,6 +543,7 @@ static int dtl1_probe(struct pcmcia_device *link)
 
 	return dtl1_config(link);
 }
+
 
 static void dtl1_detach(struct pcmcia_device *link)
 {

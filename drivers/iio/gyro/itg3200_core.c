@@ -31,6 +31,7 @@
 
 #include <linux/iio/gyro/itg3200.h>
 
+
 int itg3200_write_reg_8(struct iio_dev *indio_dev,
 		u8 reg_address, u8 val)
 {

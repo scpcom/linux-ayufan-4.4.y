@@ -319,6 +319,7 @@ static ssize_t sta_vht_capa_read(struct file *file, char __user *userbuf,
 }
 STA_OPS(vht_capa);
 
+
 #define DEBUGFS_ADD(name) \
 	debugfs_create_file(#name, 0400, \
 		sta->debugfs.dir, sta, &sta_ ##name## _ops);

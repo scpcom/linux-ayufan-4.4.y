@@ -32,6 +32,7 @@
 #include "pci_impl.h"
 #include "machvec_impl.h"
 
+
 static void __init
 sx164_init_irq(void)
 {

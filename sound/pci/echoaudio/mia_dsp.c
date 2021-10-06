@@ -28,12 +28,14 @@
 
 ****************************************************************************/
 
+
 static int set_input_clock(struct echoaudio *chip, u16 clock);
 static int set_professional_spdif(struct echoaudio *chip, char prof);
 static int update_flags(struct echoaudio *chip);
 static int set_vmixer_gain(struct echoaudio *chip, u16 output, u16 pipe,
 			   int gain);
 static int update_vmixer_level(struct echoaudio *chip);
+
 
 static int init_hw(struct echoaudio *chip, u16 device_id, u16 subdevice_id)
 {
@@ -67,10 +69,14 @@ static int init_hw(struct echoaudio *chip, u16 device_id, u16 subdevice_id)
 	return err;
 }
 
+
+
 static int set_mixer_defaults(struct echoaudio *chip)
 {
 	return init_line_levels(chip);
 }
+
+
 
 static u32 detect_input_clocks(const struct echoaudio *chip)
 {
@@ -88,11 +94,15 @@ static u32 detect_input_clocks(const struct echoaudio *chip)
 	return clock_bits;
 }
 
+
+
 /* The Mia has no ASIC. Just do nothing */
 static int load_asic(struct echoaudio *chip)
 {
 	return 0;
 }
+
+
 
 static int set_sample_rate(struct echoaudio *chip, u32 rate)
 {
@@ -139,6 +149,8 @@ static int set_sample_rate(struct echoaudio *chip, u32 rate)
 	return 0;
 }
 
+
+
 static int set_input_clock(struct echoaudio *chip, u16 clock)
 {
 	dev_dbg(chip->card->dev, "set_input_clock(%d)\n", clock);
@@ -149,6 +161,8 @@ static int set_input_clock(struct echoaudio *chip, u16 clock)
 	chip->input_clock = clock;
 	return set_sample_rate(chip, chip->sample_rate);
 }
+
+
 
 /* This function routes the sound from a virtual channel to a real output */
 static int set_vmixer_gain(struct echoaudio *chip, u16 output, u16 pipe,
@@ -172,6 +186,8 @@ static int set_vmixer_gain(struct echoaudio *chip, u16 output, u16 pipe,
 	return 0;
 }
 
+
+
 /* Tell the DSP to read and update virtual mixer levels in comm page. */
 static int update_vmixer_level(struct echoaudio *chip)
 {
@@ -181,6 +197,8 @@ static int update_vmixer_level(struct echoaudio *chip)
 	return send_vector(chip, DSP_VC_SET_VMIXER_GAIN);
 }
 
+
+
 /* Tell the DSP to reread the flags from the comm page */
 static int update_flags(struct echoaudio *chip)
 {
@@ -189,6 +207,8 @@ static int update_flags(struct echoaudio *chip)
 	clear_handshake(chip);
 	return send_vector(chip, DSP_VC_UPDATE_FLAGS);
 }
+
+
 
 static int set_professional_spdif(struct echoaudio *chip, char prof)
 {
@@ -202,3 +222,4 @@ static int set_professional_spdif(struct echoaudio *chip, char prof)
 	chip->professional_spdif = prof;
 	return update_flags(chip);
 }
+

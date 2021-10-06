@@ -177,6 +177,7 @@ nvkm_ioctl_mthd(struct nvkm_object *object, void *data, u32 size)
 	return ret;
 }
 
+
 static int
 nvkm_ioctl_rd(struct nvkm_object *object, void *data, u32 size)
 {

@@ -1058,6 +1058,7 @@ tape_34xx_cleanup_device(struct tape_device *device)
 	}
 }
 
+
 /*
  * MTTELL: Tell block. Return the number of block relative to current file.
  */

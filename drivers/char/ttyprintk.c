@@ -125,6 +125,7 @@ static int tpk_write(struct tty_struct *tty,
 	struct ttyprintk_port *tpkp = tty->driver_data;
 	int ret;
 
+
 	/* exclusive use of tpk_printk within this tty */
 	mutex_lock(&tpkp->port_write_mutex);
 	ret = tpk_printk(buf, count);

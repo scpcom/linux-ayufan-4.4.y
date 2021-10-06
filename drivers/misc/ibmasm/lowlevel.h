@@ -37,6 +37,7 @@
 
 #define NO_MFAS_AVAILABLE     0xFFFFFFFF
 
+
 #define INBOUND_QUEUE_PORT   0x40  /* contains address of next free MFA */
 #define OUTBOUND_QUEUE_PORT  0x44  /* contains address of posted MFA    */
 

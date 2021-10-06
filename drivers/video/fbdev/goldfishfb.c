@@ -132,6 +132,7 @@ static int goldfish_fb_set_par(struct fb_info *info)
 	return 0;
 }
 
+
 static int goldfish_fb_pan_display(struct fb_var_screeninfo *var,
 							struct fb_info *info)
 {
@@ -176,6 +177,7 @@ static struct fb_ops goldfish_fb_ops = {
 	.fb_copyarea    = cfb_copyarea,
 	.fb_imageblit   = cfb_imageblit,
 };
+
 
 static int goldfish_fb_probe(struct platform_device *pdev)
 {
@@ -301,6 +303,7 @@ static int goldfish_fb_remove(struct platform_device *pdev)
 	iounmap(fb->reg_base);
 	return 0;
 }
+
 
 static struct platform_driver goldfish_fb_driver = {
 	.probe		= goldfish_fb_probe,

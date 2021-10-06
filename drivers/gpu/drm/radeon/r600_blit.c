@@ -566,6 +566,7 @@ r600_prepare_blit_copy(struct drm_device *dev, struct drm_file *file_priv)
 	return 0;
 }
 
+
 void
 r600_done_blit_copy(struct drm_device *dev)
 {

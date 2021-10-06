@@ -62,5 +62,6 @@ static inline void enable_single_step(struct pt_regs *regs)
 #endif
 }
 
+
 #endif /* __KERNEL__ */
 #endif	/* _ASM_POWERPC_PROBES_H */

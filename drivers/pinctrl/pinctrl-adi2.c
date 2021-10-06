@@ -705,6 +705,7 @@ static struct pinmux_ops adi_pinmux_ops = {
 	.strict = true,
 };
 
+
 static struct pinctrl_desc adi_pinmux_desc = {
 	.name = DRIVER_NAME,
 	.pctlops = &adi_pctrl_ops,

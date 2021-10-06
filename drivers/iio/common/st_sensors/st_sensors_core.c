@@ -18,6 +18,7 @@
 #include <asm/unaligned.h>
 #include <linux/iio/common/st_sensors.h>
 
+
 #define ST_SENSORS_WAI_ADDRESS		0x0f
 
 static inline u32 st_sensors_get_unaligned_le24(const u8 *p)

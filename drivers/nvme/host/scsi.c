@@ -224,7 +224,9 @@ struct nvme_trans_io_cdb {
 	u32 xfer_len;
 };
 
+
 /* Internal Helper Functions */
+
 
 /* Copy data to userspace memory */
 
@@ -1712,6 +1714,7 @@ static int nvme_trans_do_nvme_io(struct nvme_ns *ns, struct sg_io_hdr *hdr,
 
 	return nvme_trans_status_code(hdr, nvme_sc);
 }
+
 
 /* SCSI Command Translation Functions */
 

@@ -128,6 +128,7 @@ static bool rt286_volatile_register(struct device *dev, unsigned int reg)
 		return false;
 	}
 
+
 }
 
 static bool rt286_readable_register(struct device *dev, unsigned int reg)
@@ -890,6 +891,7 @@ static int rt286_set_bclk_ratio(struct snd_soc_dai *dai, unsigned int ratio)
 		snd_soc_update_bits(codec,
 			RT286_I2S_CTRL1, 0x1000, 0x0);
 
+
 	return 0;
 }
 
@@ -1255,6 +1257,7 @@ static int rt286_i2c_remove(struct i2c_client *i2c)
 
 	return 0;
 }
+
 
 static struct i2c_driver rt286_i2c_driver = {
 	.driver = {

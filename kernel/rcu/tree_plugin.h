@@ -1800,6 +1800,7 @@ static void increment_cpu_stall_ticks(void)
  * queued are more aggressive about entering dyntick-idle mode.
  */
 
+
 /* Parse the boot-time rcu_nocb_mask CPU list from the kernel parameters. */
 static int __init rcu_nocb_setup(char *str)
 {
@@ -2582,6 +2583,7 @@ static void __maybe_unused rcu_kick_nohz_cpu(int cpu)
 		smp_send_reschedule(cpu);
 #endif /* #ifdef CONFIG_NO_HZ_FULL */
 }
+
 
 #ifdef CONFIG_NO_HZ_FULL_SYSIDLE
 

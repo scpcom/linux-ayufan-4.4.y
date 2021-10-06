@@ -66,6 +66,7 @@
 #define BIOS_PVT_DATA		0x40
 #define GET_BIOS_PVT_DATA	0x00
 
+
 /*
  * Commands to support clustering
  */
@@ -79,6 +80,7 @@
 #define RESERVATION_STATUS	0x04
 #define RESERVE_PD		0x05
 #define RELEASE_PD		0x06
+
 
 /*
  * Module battery status
@@ -101,6 +103,7 @@
 #define PDRV_FAILED	4
 #define PDRV_RBLD	5
 #define PDRV_HOTSPARE	6
+
 
 /*
  * Raid logical drive states.
@@ -132,6 +135,8 @@
 #define SPAN_DEPTH_8_SPANS		8
 #define SPAN_DEPTH_4_SPANS		4
 #define MAX_REQ_SENSE_LEN		0x20
+
+
 
 /**
  * struct mbox_t - Driver and f/w handshake structure.
@@ -170,6 +175,7 @@ typedef struct {
 	uint8_t		poll;
 	uint8_t		ack;
 } __attribute__ ((packed)) mbox_t;
+
 
 /**
  * mbox64_t - 64-bit extension for the mailbox
@@ -298,6 +304,7 @@ typedef struct {
 	uint32_t	dataxferlen;
 } __attribute__ ((packed)) mraid_epassthru_t;
 
+
 /**
  * mraid_pinfo_t - product info, static information about the controller
  * @data_size		: current size in bytes (not including resvd)
@@ -341,6 +348,7 @@ typedef struct {
 	uint8_t		notify_counters;
 	uint8_t		pad1k[889];
 } __attribute__ ((packed)) mraid_pinfo_t;
+
 
 /**
  * mraid_notify_t - the notification structure
@@ -416,6 +424,7 @@ typedef struct {
 	uint8_t		fcloop_state_rsvd;
 } __attribute__ ((packed)) mraid_notify_t;
 
+
 /**
  * mraid_inquiry3_t - enquiry for device information
  *
@@ -468,6 +477,7 @@ typedef struct {
 	uint8_t		pad1k[263];
 } __attribute__ ((packed)) mraid_inquiry3_t;
 
+
 /**
  * mraid_adapinfo_t - information about the adapter
  * @max_commands		: max concurrent commands supported
@@ -516,6 +526,7 @@ typedef struct {
 	uint8_t		dec_fault_bus_info;
 } __attribute__ ((packed)) mraid_adapinfo_t;
 
+
 /**
  * mraid_ldrv_info_t - information about the logical drives
  * @nldrv	: Number of logical drives configured
@@ -532,6 +543,7 @@ typedef struct {
 	uint8_t		state[MAX_LOGICAL_DRIVES_8LD];
 } __attribute__ ((packed)) mraid_ldrv_info_t;
 
+
 /**
  * mraid_pdrv_info_t - information about the physical drives
  * @pdrv_state	: state of each physical drive
@@ -540,6 +552,7 @@ typedef struct {
 	uint8_t		pdrv_state[MBOX_MAX_PHYSICAL_DRIVES];
 	uint8_t		rsvd;
 } __attribute__ ((packed)) mraid_pdrv_info_t;
+
 
 /**
  * mraid_inquiry_t - RAID inquiry, mailbox command 0x05
@@ -552,6 +565,7 @@ typedef struct {
 	mraid_ldrv_info_t	logdrv_info;
 	mraid_pdrv_info_t	pdrv_info;
 } __attribute__ ((packed)) mraid_inquiry_t;
+
 
 /**
  * mraid_extinq_t - RAID extended inquiry, mailbox command 0x04
@@ -570,6 +584,7 @@ typedef struct {
 	uint8_t		rsvd[2];
 } __attribute__ ((packed)) mraid_extinq_t;
 
+
 /**
  * adap_device_t - device information
  * @channel	: channel fpor the device
@@ -579,6 +594,7 @@ typedef struct {
 	uint8_t		channel;
 	uint8_t		target;
 }__attribute__ ((packed)) adap_device_t;
+
 
 /**
  * adap_span_40ld_t - 40LD span
@@ -591,6 +607,7 @@ typedef struct {
 	adap_device_t	device[MAX_ROW_SIZE_40LD];
 }__attribute__ ((packed)) adap_span_40ld_t;
 
+
 /**
  * adap_span_8ld_t - 8LD span
  * @start_blk	: starting block
@@ -601,6 +618,7 @@ typedef struct {
 	uint32_t	num_blks;
 	adap_device_t	device[MAX_ROW_SIZE_8LD];
 }__attribute__ ((packed)) adap_span_8ld_t;
+
 
 /**
  * logdrv_param_t - logical drives parameters
@@ -625,6 +643,7 @@ typedef struct {
 	uint8_t		row_size;
 } __attribute__ ((packed)) logdrv_param_t;
 
+
 /**
  * logdrv_40ld_t - logical drive definition for 40LD controllers
  * @lparam	: logical drives parameters
@@ -634,6 +653,7 @@ typedef struct {
 	logdrv_param_t		lparam;
 	adap_span_40ld_t	span[SPAN_DEPTH_8_SPANS];
 }__attribute__ ((packed)) logdrv_40ld_t;
+
 
 /**
  * logdrv_8ld_span8_t - logical drive definition for 8LD controllers
@@ -647,6 +667,7 @@ typedef struct {
 	adap_span_8ld_t	span[SPAN_DEPTH_8_SPANS];
 }__attribute__ ((packed)) logdrv_8ld_span8_t;
 
+
 /**
  * logdrv_8ld_span4_t - logical drive definition for 8LD controllers
  * @lparam	: logical drives parameters
@@ -658,6 +679,7 @@ typedef struct {
 	logdrv_param_t	lparam;
 	adap_span_8ld_t	span[SPAN_DEPTH_4_SPANS];
 }__attribute__ ((packed)) logdrv_8ld_span4_t;
+
 
 /**
  * phys_drive_t - physical device information
@@ -675,6 +697,7 @@ typedef struct {
 	uint32_t	size;
 }__attribute__ ((packed)) phys_drive_t;
 
+
 /**
  * disk_array_40ld_t - disk array for 40LD controllers
  * @numldrv	: number of logical drives
@@ -688,6 +711,7 @@ typedef struct {
 	logdrv_40ld_t	ldrv[MAX_LOGICAL_DRIVES_40LD];
 	phys_drive_t	pdrv[MBOX_MAX_PHYSICAL_DRIVES];
 }__attribute__ ((packed)) disk_array_40ld_t;
+
 
 /**
  * disk_array_8ld_span8_t - disk array for 8LD controllers
@@ -705,6 +729,7 @@ typedef struct {
 	phys_drive_t		pdrv[MBOX_MAX_PHYSICAL_DRIVES];
 }__attribute__ ((packed)) disk_array_8ld_span8_t;
 
+
 /**
  * disk_array_8ld_span4_t - disk array for 8LD controllers
  * @numldrv	: number of logical drives
@@ -720,6 +745,7 @@ typedef struct {
 	logdrv_8ld_span4_t	ldrv[MAX_LOGICAL_DRIVES_8LD];
 	phys_drive_t		pdrv[MBOX_MAX_PHYSICAL_DRIVES];
 }__attribute__ ((packed)) disk_array_8ld_span4_t;
+
 
 /**
  * struct private_bios_data - bios private data for boot devices
@@ -737,6 +763,7 @@ struct private_bios_data {
 	uint8_t		rsvd[12];
 	uint16_t	cksum;
 } __attribute__ ((packed));
+
 
 /**
  * mbox_sgl64 - 64-bit scatter list for mailbox based controllers

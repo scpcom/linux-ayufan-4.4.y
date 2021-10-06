@@ -110,6 +110,7 @@ static const struct v4l2_frequency_band bands[] = {
 	},
 };
 
+
 static int cadet_getstereo(struct cadet *dev)
 {
 	int ret = V4L2_TUNER_SUB_MONO;
@@ -279,6 +280,7 @@ static bool cadet_has_rds_data(struct cadet *dev)
 	return result;
 }
 
+
 static void cadet_handler(unsigned long data)
 {
 	struct cadet *dev = (void *)data;
@@ -352,6 +354,7 @@ static ssize_t cadet_read(struct file *file, char __user *data, size_t count, lo
 	return i;
 }
 
+
 static int vidioc_querycap(struct file *file, void *priv,
 				struct v4l2_capability *v)
 {
@@ -422,6 +425,7 @@ static int vidioc_g_frequency(struct file *file, void *priv,
 	f->frequency = dev->curfreq;
 	return 0;
 }
+
 
 static int vidioc_s_frequency(struct file *file, void *priv,
 				const struct v4l2_frequency *f)
@@ -499,6 +503,7 @@ static unsigned int cadet_poll(struct file *file, struct poll_table_struct *wait
 		res |= POLLIN | POLLRDNORM;
 	return res;
 }
+
 
 static const struct v4l2_file_operations cadet_fops = {
 	.owner		= THIS_MODULE,
@@ -676,3 +681,4 @@ static void __exit cadet_exit(void)
 
 module_init(cadet_init);
 module_exit(cadet_exit);
+

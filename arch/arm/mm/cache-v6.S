@@ -190,6 +190,7 @@ ENTRY(v6_flush_kern_dcache_area)
 #endif
 	ret	lr
 
+
 /*
  *	v6_dma_inv_range(start,end)
  *

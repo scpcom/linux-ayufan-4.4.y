@@ -469,6 +469,7 @@ static void mlx4_en_u64_to_mac(unsigned char dst_mac[ETH_ALEN + 2], u64 src_mac)
 	memset(&dst_mac[ETH_ALEN], 0, 2);
 }
 
+
 static int mlx4_en_tunnel_steer_add(struct mlx4_en_priv *priv, unsigned char *addr,
 				    int qpn, u64 *reg_id)
 {
@@ -487,6 +488,7 @@ static int mlx4_en_tunnel_steer_add(struct mlx4_en_priv *priv, unsigned char *ad
 	en_dbg(DRV, priv, "added vxlan steering rule, mac %pM reg_id %llx\n", addr, *reg_id);
 	return 0;
 }
+
 
 static int mlx4_en_uc_steer_add(struct mlx4_en_priv *priv,
 				unsigned char *mac, int *qpn, u64 *reg_id)
@@ -1311,6 +1313,7 @@ static void mlx4_en_tx_timeout(struct net_device *dev)
 	queue_work(mdev->workqueue, &priv->watchdog_task);
 }
 
+
 static struct net_device_stats *mlx4_en_get_stats(struct net_device *dev)
 {
 	struct mlx4_en_priv *priv = netdev_priv(dev);
@@ -1739,6 +1742,7 @@ cq_err:
 	return err; /* need to close devices */
 }
 
+
 void mlx4_en_stop_port(struct net_device *dev, int detach)
 {
 	struct mlx4_en_priv *priv = netdev_priv(dev);
@@ -1949,6 +1953,7 @@ out:
 	return err;
 }
 
+
 static int mlx4_en_close(struct net_device *dev)
 {
 	struct mlx4_en_priv *priv = netdev_priv(dev);
@@ -2046,6 +2051,7 @@ err:
 	}
 	return -ENOMEM;
 }
+
 
 void mlx4_en_destroy_netdev(struct net_device *dev)
 {

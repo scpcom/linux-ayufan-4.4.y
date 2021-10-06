@@ -202,6 +202,7 @@ void mpc8xx_restart(char *cmd)
 {
 	car8xx_t __iomem *clk_r = immr_map(im_clkrst);
 
+
 	local_irq_disable();
 
 	setbits32(&clk_r->car_plprcr, 0x00000080);

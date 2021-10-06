@@ -46,6 +46,7 @@
 #define GEF_PIC_CPU0_MCP_MASK	GEF_PIC_MCP_MASK(0)
 #define GEF_PIC_CPU1_MCP_MASK	GEF_PIC_MCP_MASK(1)
 
+
 static DEFINE_RAW_SPINLOCK(gef_pic_lock);
 
 static void __iomem *gef_pic_irq_reg_base;
@@ -148,6 +149,7 @@ static struct irq_chip gef_pic_chip = {
 	.irq_unmask	= gef_pic_unmask,
 };
 
+
 /* When an interrupt is being configured, this call allows some flexibilty
  * in deciding which irq_chip structure is used
  */
@@ -179,6 +181,7 @@ static const struct irq_domain_ops gef_pic_host_ops = {
 	.map	= gef_pic_host_map,
 	.xlate	= gef_pic_host_xlate,
 };
+
 
 /*
  * Initialisation of PIC, this should be called in BSP
@@ -245,3 +248,4 @@ unsigned int gef_pic_get_irq(void)
 
 	return virq;
 }
+

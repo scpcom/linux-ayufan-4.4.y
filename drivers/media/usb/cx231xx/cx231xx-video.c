@@ -99,6 +99,7 @@ static struct cx231xx_fmt format[] = {
 	 },
 };
 
+
 static int cx231xx_enable_analog_tuner(struct cx231xx *dev)
 {
 #ifdef CONFIG_MEDIA_CONTROLLER
@@ -448,6 +449,7 @@ static inline int cx231xx_bulk_copy(struct cx231xx *dev, struct urb *urb)
 	return 1;
 }
 
+
 u8 cx231xx_find_boundary_SAV_EAV(u8 *p_buffer, u8 *partial_buf,
 				 u32 *p_bytes_used)
 {
@@ -733,6 +735,7 @@ buffer_setup(struct videobuf_queue *vq, unsigned int *count, unsigned int *size)
 
 	if (*count < CX231XX_MIN_BUF)
 		*count = CX231XX_MIN_BUF;
+
 
 	cx231xx_enable_analog_tuner(dev);
 

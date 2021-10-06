@@ -33,6 +33,7 @@ struct sun4d_handler_data {
 	unsigned int real_irq; /* interrupt level */
 };
 
+
 static unsigned int sun4d_encode_irq(int board, int lvl, int slot)
 {
 	return (board + 1) << 5 | (lvl << 2) | slot;
@@ -184,6 +185,7 @@ void sun4d_handler_irq(unsigned int pil, struct pt_regs *regs)
 	set_irq_regs(old_regs);
 }
 
+
 static void sun4d_mask_irq(struct irq_data *data)
 {
 	struct sun4d_handler_data *handler_data = irq_data_get_irq_handler_data(data);
@@ -316,6 +318,8 @@ err_out:
 	return irq;
 }
 
+
+
 static unsigned int sun4d_build_device_irq(struct platform_device *op,
                                            unsigned int real_irq)
 {
@@ -384,6 +388,7 @@ static unsigned int sun4d_build_timer_irq(unsigned int board,
 {
 	return _sun4d_build_device_irq(real_irq, real_irq, board);
 }
+
 
 static void __init sun4d_fixup_trap_table(void)
 {

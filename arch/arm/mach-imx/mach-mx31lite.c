@@ -200,6 +200,8 @@ static struct platform_device physmap_flash_device = {
 	.num_resources = 1,
 };
 
+
+
 /*
  * This structure defines the MX31 memory map.
  */

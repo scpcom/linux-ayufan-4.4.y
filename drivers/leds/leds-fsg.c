@@ -32,6 +32,7 @@
 static short __iomem *latch_address;
 static unsigned short latch_value;
 
+
 static void fsg_led_wlan_set(struct led_classdev *led_cdev,
 			     enum led_brightness value)
 {
@@ -104,6 +105,7 @@ static void fsg_led_ring_set(struct led_classdev *led_cdev,
 	}
 }
 
+
 static struct led_classdev fsg_wlan_led = {
 	.name			= "fsg:blue:wlan",
 	.brightness_set		= fsg_led_wlan_set,
@@ -139,6 +141,7 @@ static struct led_classdev fsg_ring_led = {
 	.brightness_set		= fsg_led_ring_set,
 	.flags			= LED_CORE_SUSPENDRESUME,
 };
+
 
 static int fsg_led_probe(struct platform_device *pdev)
 {

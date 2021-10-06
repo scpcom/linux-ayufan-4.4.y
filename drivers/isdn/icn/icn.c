@@ -433,6 +433,7 @@ static icn_stat icn_stat_table[] =
 };
 /* *INDENT-ON* */
 
+
 /*
  * Check Statusqueue-Pointer from isdn-cards.
  * If there are new status-replies from the interface, check

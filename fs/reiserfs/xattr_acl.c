@@ -15,6 +15,7 @@ static int __reiserfs_set_acl(struct reiserfs_transaction_handle *th,
 			    struct inode *inode, int type,
 			    struct posix_acl *acl);
 
+
 int
 reiserfs_set_acl(struct inode *inode, struct posix_acl *acl, int type)
 {
@@ -22,6 +23,7 @@ reiserfs_set_acl(struct inode *inode, struct posix_acl *acl, int type)
 	struct reiserfs_transaction_handle th;
 	size_t jcreate_blocks;
 	int size = acl ? posix_acl_xattr_size(acl->a_count) : 0;
+
 
 	/*
 	 * Pessimism: We can't assume that anything from the xattr root up

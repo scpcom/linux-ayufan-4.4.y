@@ -35,6 +35,7 @@ MODULE_DESCRIPTION("ISDN4Linux: PCMCIA client driver for Teles PCMCIA cards");
 MODULE_AUTHOR("Christof Petig, christof.petig@wtal.de, Karsten Keil, kkeil@suse.de");
 MODULE_LICENSE("GPL");
 
+
 /*====================================================================*/
 
 /* Parameters that can be set with 'insmod' */
@@ -179,6 +180,7 @@ static int teles_resume(struct pcmcia_device *link)
 
 	return 0;
 }
+
 
 static const struct pcmcia_device_id teles_ids[] = {
 	PCMCIA_DEVICE_PROD_ID12("TELES", "S0/PC", 0x67b50eae, 0xe9e70119),

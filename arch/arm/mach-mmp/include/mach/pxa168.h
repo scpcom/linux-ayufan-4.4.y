@@ -41,6 +41,7 @@ extern struct pxa_device_desc pxa168_device_eth;
 /* pdata can be NULL */
 extern int __init pxa168_add_usb_host(struct mv_usb_platform_data *pdata);
 
+
 extern struct platform_device pxa168_device_gpio;
 
 static inline int pxa168_add_uart(int id)

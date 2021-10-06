@@ -133,6 +133,7 @@ struct ccdc_config_params_raw {
 	struct ccdc_fault_pixel fault_pxl;
 };
 
+
 #ifdef __KERNEL__
 #include <linux/io.h>
 /* Define to enable/disable video port */

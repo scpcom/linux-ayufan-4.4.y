@@ -11,6 +11,7 @@
 #define PNL_2_PRI	((0 << PNL_2_OFFSET)|PNL_2_USAGE)
 #define PNL_2_SEC	((2 << PNL_2_OFFSET)|PNL_2_USAGE)
 
+
 /* primary timing & plane enable bit
 	1: 80000[8] & 80000[2] on
 	0: both off
@@ -20,6 +21,7 @@
 #define PRI_TP_USAGE (PRI_TP_MASK << 16)
 #define PRI_TP_ON ((0x1 << PRI_TP_OFFSET)|PRI_TP_USAGE)
 #define PRI_TP_OFF ((0x0 << PRI_TP_OFFSET)|PRI_TP_USAGE)
+
 
 /* panel sequency status
 	80000[27:24]
@@ -58,6 +60,7 @@
 #define CRT_2_PRI ((0x0 << CRT_2_OFFSET)|CRT_2_USAGE)
 #define CRT_2_SEC ((0x2 << CRT_2_OFFSET)|CRT_2_USAGE)
 
+
 /* DAC affect both DVI and DSUB
 	4[20]
 */
@@ -75,6 +78,8 @@
 #define DPMS_USAGE (DPMS_MASK << 16)
 #define DPMS_OFF ((3 << DPMS_OFFSET)|DPMS_USAGE)
 #define DPMS_ON ((0 << DPMS_OFFSET)|DPMS_USAGE)
+
+
 
 /*
 	LCD1 means panel path TFT1  & panel path DVI (so enable DAC)

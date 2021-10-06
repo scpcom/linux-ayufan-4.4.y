@@ -318,6 +318,7 @@ static void ps2pp_set_model_properties(struct psmouse *psmouse,
 	}
 }
 
+
 /*
  * Logitech magic init. Detect whether the mouse is a Logitech one
  * and its exact model and try turning on extended protocol for ones
@@ -421,3 +422,4 @@ int ps2pp_init(struct psmouse *psmouse, bool set_properties)
 
 	return use_ps2pp ? 0 : -1;
 }
+

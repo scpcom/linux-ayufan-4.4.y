@@ -150,6 +150,7 @@
 /*--- Debugging Commands -----------------------------*/
 #define		HERMES_CMD_TEST			(0x0038)
 
+
 /* Test command arguments */
 #define		HERMES_TEST_SET_CHANNEL		0x0800
 #define		HERMES_TEST_MONITOR		0x0b00

@@ -971,6 +971,7 @@ static const u32 turks_mgcg_enable[] =
 #ifndef BTC_SYSLS_SEQUENCE
 #define BTC_SYSLS_SEQUENCE  100
 
+
 //********* BARTS **************//
 static const u32 barts_sysls_default[] =
 {
@@ -1761,6 +1762,7 @@ void btc_read_arb_registers(struct radeon_device *rdev)
 	arb_registers->mc_arb_burst_time = RREG32(MC_ARB_BURST_TIME);
 }
 
+
 static void btc_set_arb0_registers(struct radeon_device *rdev,
 				   struct evergreen_arb_registers *arb_registers)
 {
@@ -1803,6 +1805,7 @@ static bool btc_is_state_ulv_compatible(struct radeon_device *rdev,
 
 	return true;
 }
+
 
 static int btc_set_ulv_dram_timing(struct radeon_device *rdev)
 {

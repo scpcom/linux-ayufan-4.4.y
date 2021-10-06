@@ -176,6 +176,7 @@ error:
 	exit(EXIT_FAILURE);
 }
 
+
 pthread_t rw_thread_run(struct rw_thread_info *rw_ti)
 {
 	int ret;

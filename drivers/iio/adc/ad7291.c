@@ -49,6 +49,7 @@
 #define AD7291_BITS			12
 #define AD7291_VOLTAGE_LIMIT_COUNT	8
 
+
 /*
  * AD7291 command
  */
@@ -76,6 +77,7 @@
 #define AD7291_T_AVG_HIGH		BIT(3)
 #define AD7291_V_LOW(x)			BIT((x) * 2)
 #define AD7291_V_HIGH(x)		BIT((x) * 2 + 1)
+
 
 struct ad7291_chip_info {
 	struct i2c_client	*client;

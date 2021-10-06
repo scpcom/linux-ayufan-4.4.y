@@ -37,6 +37,7 @@ int btrfs_try_tree_read_lock(struct extent_buffer *eb);
 int btrfs_try_tree_write_lock(struct extent_buffer *eb);
 int btrfs_tree_read_lock_atomic(struct extent_buffer *eb);
 
+
 static inline void btrfs_tree_unlock_rw(struct extent_buffer *eb, int rw)
 {
 	if (rw == BTRFS_WRITE_LOCK || rw == BTRFS_WRITE_LOCK_BLOCKING)

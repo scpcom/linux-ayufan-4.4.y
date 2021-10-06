@@ -41,6 +41,7 @@ struct mtd_info_wrapper {
 /* Bitmask for mtd nand control bits */
 #define CTRL_BITMASK (NAND_NCE | NAND_CLE | NAND_ALE)
 
+
 static struct mtd_info *crisv32_mtd;
 /*
  *	hardware specific access to control-lines
@@ -170,3 +171,4 @@ out_mtd:
 	kfree(wrapper);
 	return NULL;
 }
+

@@ -37,6 +37,7 @@
 #define NEUTRAL8	0x80
 #define NEUTRAL16	0x00
 
+
 static int             dma_ioctl(int dev, unsigned int cmd, void __user *arg);
 
 static int set_format(int dev, int fmt)

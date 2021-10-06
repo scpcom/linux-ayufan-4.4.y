@@ -82,6 +82,7 @@ struct snd_card_virmidi {
 
 static struct platform_device *devices[SNDRV_CARDS];
 
+
 static int snd_virmidi_probe(struct platform_device *devptr)
 {
 	struct snd_card *card;

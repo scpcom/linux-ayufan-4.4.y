@@ -1212,6 +1212,7 @@ static int type_set_read(struct type_set *t, void *fp)
 	return 0;
 }
 
+
 static int read_cons_helper(struct policydb *p,
 				struct constraint_node **nodep,
 				int ncons, int allowxtarget, void *fp)
@@ -1506,6 +1507,7 @@ bad:
 	type_destroy(key, typdatum, NULL);
 	return rc;
 }
+
 
 /*
  * Read a MLS level structure from a policydb binary

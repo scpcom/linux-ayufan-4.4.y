@@ -23,6 +23,7 @@
 	.set	noreorder
 	.set	noat
 
+
 	/* due to an errata we need to read the COP0 CacheErr (Dcache)
 	 * before any cache/DRAM access	 */
 

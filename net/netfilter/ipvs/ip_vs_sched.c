@@ -38,6 +38,7 @@ static LIST_HEAD(ip_vs_schedulers);
 /* semaphore for schedulers */
 static DEFINE_MUTEX(ip_vs_sched_mutex);
 
+
 /*
  *  Bind a service with a scheduler
  */
@@ -57,6 +58,7 @@ int ip_vs_bind_scheduler(struct ip_vs_service *svc,
 	return 0;
 }
 
+
 /*
  *  Unbind a service with its scheduler
  */
@@ -74,6 +76,7 @@ void ip_vs_unbind_scheduler(struct ip_vs_service *svc,
 		sched->done_service(svc);
 	/* svc->scheduler can be set to NULL only by caller */
 }
+
 
 /*
  *  Get scheduler in the scheduler list by name
@@ -107,6 +110,7 @@ static struct ip_vs_scheduler *ip_vs_sched_getbyname(const char *sched_name)
 	mutex_unlock(&ip_vs_sched_mutex);
 	return NULL;
 }
+
 
 /*
  *  Lookup scheduler and try to load it if it doesn't exist
@@ -215,6 +219,7 @@ int register_ip_vs_scheduler(struct ip_vs_scheduler *scheduler)
 
 	return 0;
 }
+
 
 /*
  *  Unregister a scheduler from the scheduler list

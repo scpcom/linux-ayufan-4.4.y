@@ -2193,6 +2193,7 @@ static void arcmsr_iop_parking(struct AdapterControlBlock *acb)
 	}
 }
 
+
 void arcmsr_clear_iop2drv_rqueue_buffer(struct AdapterControlBlock *acb)
 {
 	uint32_t	i;

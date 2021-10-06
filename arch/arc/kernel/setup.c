@@ -160,6 +160,7 @@ static const struct cpuinfo_data arc_cpu_tbl[] = {
 	{ {0x00, NULL		} }
 };
 
+
 static char *arc_cpu_mumbojumbo(int cpu_id, char *buf, int len)
 {
 	struct cpuinfo_arc *cpu = &cpuinfo_arc700[cpu_id];

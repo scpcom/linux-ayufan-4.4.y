@@ -75,6 +75,7 @@ static inline struct musb_qh *first_qh(struct list_head *q)
 	return list_entry(q->next, struct musb_qh, ring);
 }
 
+
 #if IS_ENABLED(CONFIG_USB_MUSB_HOST) || IS_ENABLED(CONFIG_USB_MUSB_DUAL_ROLE)
 extern struct musb *hcd_to_musb(struct usb_hcd *);
 extern irqreturn_t musb_h_ep0_irq(struct musb *);

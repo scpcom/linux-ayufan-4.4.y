@@ -103,6 +103,7 @@ static int script_browser__run(struct perf_script_browser *browser)
 	return key;
 }
 
+
 int script_browse(const char *script_opt)
 {
 	char cmd[SCRIPT_FULLPATH_LEN*2], script_name[SCRIPT_FULLPATH_LEN];

@@ -24,7 +24,9 @@
 #include <linux/slab.h>
 #include "via_aux.h"
 
+
 static const char *name = "VT1621(M) TV Encoder";
+
 
 void via_aux_vt1621_probe(struct via_aux_bus *bus)
 {

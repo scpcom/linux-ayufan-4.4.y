@@ -21,6 +21,7 @@
 #define SCSCR_CKE1	BIT(1)	/* Clock Enable 1 */
 #define SCSCR_CKE0	BIT(0)	/* Clock Enable 0 */
 
+
 enum {
 	SCIx_PROBE_REGTYPE,
 

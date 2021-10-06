@@ -57,6 +57,7 @@ static void ks8695_gpio_mode(unsigned int pin, short gpio)
 	local_irq_restore(flags);
 }
 
+
 static unsigned short gpio_irq[] = { KS8695_IRQ_EXTERN0, KS8695_IRQ_EXTERN1, KS8695_IRQ_EXTERN2, KS8695_IRQ_EXTERN3 };
 
 /*
@@ -88,6 +89,8 @@ int ks8695_gpio_interrupt(unsigned int pin, unsigned int type)
 }
 EXPORT_SYMBOL(ks8695_gpio_interrupt);
 
+
+
 /* .... Generic GPIO interface .............................................. */
 
 /*
@@ -114,6 +117,7 @@ static int ks8695_gpio_direction_input(struct gpio_chip *gc, unsigned int pin)
 
 	return 0;
 }
+
 
 /*
  * Configure the GPIO line as an output, with default state.
@@ -149,6 +153,7 @@ static int ks8695_gpio_direction_output(struct gpio_chip *gc,
 	return 0;
 }
 
+
 /*
  * Set the state of an output GPIO line.
  */
@@ -173,6 +178,7 @@ static void ks8695_gpio_set_value(struct gpio_chip *gc,
 	local_irq_restore(flags);
 }
 
+
 /*
  * Read the state of a GPIO line.
  */
@@ -186,6 +192,7 @@ static int ks8695_gpio_get_value(struct gpio_chip *gc, unsigned int pin)
 	x = __raw_readl(KS8695_GPIO_VA + KS8695_IOPD);
 	return (x & IOPD(pin)) != 0;
 }
+
 
 /*
  * Map GPIO line to IRQ number.

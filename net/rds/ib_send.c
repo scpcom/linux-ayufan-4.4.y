@@ -247,6 +247,7 @@ void rds_ib_send_cqe_handler(struct rds_ib_connection *ic, struct ib_wc *wc)
 	u32 i = 0;
 	int nr_sig = 0;
 
+
 	rdsdebug("wc wr_id 0x%llx status %u (%s) byte_len %u imm_data %u\n",
 		 (unsigned long long)wc->wr_id, wc->status,
 		 ib_wc_status_msg(wc->status), wc->byte_len,
@@ -974,6 +975,7 @@ int rds_ib_xmit_rdma(struct rds_connection *conn, struct rm_rdma_op *op)
 		printk(KERN_WARNING "RDS/IB: ib_post_send() rc=%d, but failed_wqe updated!\n", ret);
 		BUG_ON(failed_wr != &first->s_rdma_wr.wr);
 	}
+
 
 out:
 	return ret;

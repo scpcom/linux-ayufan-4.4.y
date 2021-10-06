@@ -20,6 +20,7 @@
 #include <linux/regmap.h>
 #include <dt-bindings/clock/lsi,axm5516-clks.h>
 
+
 /**
  * struct axxia_clk - Common struct to all Axxia clocks.
  * @hw: clk_hw for the common clk framework
@@ -135,6 +136,7 @@ static u8 axxia_clkmux_get_parent(struct clk_hw *hw)
 static const struct clk_ops axxia_clkmux_ops = {
 	.get_parent = axxia_clkmux_get_parent,
 };
+
 
 /*
  * PLLs

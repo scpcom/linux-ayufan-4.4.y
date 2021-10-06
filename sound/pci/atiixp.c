@@ -63,6 +63,7 @@ MODULE_PARM_DESC(spdif_aclink, "S/PDIF over AC-link.");
 static bool enable;
 module_param(enable, bool, 0444);
 
+
 /*
  */
 
@@ -195,7 +196,9 @@ module_param(enable, bool, 0444);
 #define  ATI_REG_DMA_FIFO_FREE		(0x1fU<<21)
 #define  ATI_REG_DMA_STATE		(7U<<26)
 
+
 #define ATI_MAX_DESCRIPTORS	256	/* max number of descriptor packets */
+
 
 struct atiixp;
 
@@ -218,6 +221,7 @@ enum { ATI_PCM_OUT, ATI_PCM_IN, ATI_PCM_SPDIF, NUM_ATI_PCMS }; /* AC97 pcm slots
 enum { ATI_PCMDEV_ANALOG, ATI_PCMDEV_DIGITAL, NUM_ATI_PCMDEVS }; /* pcm devices */
 
 #define NUM_ATI_CODECS	3
+
 
 /*
  * constants and callbacks for each DMA type
@@ -278,6 +282,7 @@ struct atiixp {
 	int spdif_over_aclink;		/* passed from the module option */
 	struct mutex open_mutex;	/* playback open mutex */
 };
+
 
 /*
  */
@@ -462,6 +467,7 @@ static unsigned short snd_atiixp_codec_read(struct atiixp *chip, unsigned short 
 	return 0xffff;
 }
 
+
 static void snd_atiixp_codec_write(struct atiixp *chip, unsigned short codec,
 				   unsigned short reg, unsigned short val)
 {
@@ -474,6 +480,7 @@ static void snd_atiixp_codec_write(struct atiixp *chip, unsigned short codec,
 		ATI_REG_PHYS_OUT_ADDR_EN | codec;
 	atiixp_write(chip, PHYS_OUT_ADDR, data);
 }
+
 
 static unsigned short snd_atiixp_ac97_read(struct snd_ac97 *ac97,
 					   unsigned short reg)
@@ -598,6 +605,7 @@ static int snd_atiixp_codec_detect(struct atiixp *chip)
 	return 0;
 }
 
+
 /*
  * enable DMA and irqs
  */
@@ -627,6 +635,7 @@ static int snd_atiixp_chip_start(struct atiixp *chip)
 	return 0;
 }
 
+
 /*
  * disable DMA and IRQs
  */
@@ -638,6 +647,7 @@ static int snd_atiixp_chip_stop(struct atiixp *chip)
 	atiixp_write(chip, IER, 0);
 	return 0;
 }
+
 
 /*
  * PCM section
@@ -748,6 +758,7 @@ static int snd_atiixp_pcm_trigger(struct snd_pcm_substream *substream, int cmd)
 	spin_unlock(&chip->reg_lock);
 	return err;
 }
+
 
 /*
  * lowlevel callbacks for each DMA type
@@ -994,6 +1005,7 @@ static int snd_atiixp_pcm_hw_free(struct snd_pcm_substream *substream)
 	return 0;
 }
 
+
 /*
  * pcm hardware definition, identical for all DMA types
  */
@@ -1234,6 +1246,7 @@ static struct atiixp_dma_ops snd_atiixp_spdif_dma_ops = {
 	.flush_dma = atiixp_spdif_flush_dma,
 };
 	
+
 static int snd_atiixp_pcm_new(struct atiixp *chip)
 {
 	struct snd_pcm *pcm;
@@ -1325,6 +1338,8 @@ static int snd_atiixp_pcm_new(struct atiixp *chip)
 	return 0;
 }
 
+
+
 /*
  * interrupt handler
  */
@@ -1369,6 +1384,7 @@ static irqreturn_t snd_atiixp_interrupt(int irq, void *dev_id)
 
 	return IRQ_HANDLED;
 }
+
 
 /*
  * ac97 mixer section
@@ -1451,6 +1467,7 @@ static int snd_atiixp_mixer_new(struct atiixp *chip, int clock,
 	return 0;
 }
 
+
 #ifdef CONFIG_PM_SLEEP
 /*
  * power management
@@ -1512,6 +1529,7 @@ static SIMPLE_DEV_PM_OPS(snd_atiixp_pm, snd_atiixp_suspend, snd_atiixp_resume);
 #define SND_ATIIXP_PM_OPS	NULL
 #endif /* CONFIG_PM_SLEEP */
 
+
 /*
  * proc interface for register dump
  */
@@ -1533,6 +1551,7 @@ static void snd_atiixp_proc_init(struct atiixp *chip)
 	if (! snd_card_proc_new(chip->card, "atiixp", &entry))
 		snd_info_set_text_ops(entry, chip, snd_atiixp_proc_read);
 }
+
 
 /*
  * destructor
@@ -1618,6 +1637,7 @@ static int snd_atiixp_create(struct snd_card *card,
 	*r_chip = chip;
 	return 0;
 }
+
 
 static int snd_atiixp_probe(struct pci_dev *pci,
 			    const struct pci_device_id *pci_id)

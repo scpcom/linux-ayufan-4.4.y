@@ -1855,6 +1855,7 @@ qla24xx_process_bidir_cmd(struct fc_bsg_job *bsg_job)
 	req_data_len = bsg_job->request_payload.payload_len;
 	rsp_data_len = bsg_job->reply_payload.payload_len;
 
+
 	/* Alloc SRB structure */
 	sp = qla2x00_get_sp(vha, &(vha->bidir_fcport), GFP_KERNEL);
 	if (!sp) {

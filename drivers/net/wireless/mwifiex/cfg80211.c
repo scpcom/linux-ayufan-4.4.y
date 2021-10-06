@@ -1183,6 +1183,7 @@ mwifiex_cfg80211_change_virtual_intf(struct wiphy *wiphy,
 		return -EOPNOTSUPP;
 	}
 
+
 	return 0;
 }
 
@@ -1524,6 +1525,7 @@ static struct ieee80211_supported_band mwifiex_band_5ghz = {
 	.bitrates = mwifiex_rates + 4,
 	.n_bitrates = ARRAY_SIZE(mwifiex_rates) - 4,
 };
+
 
 /* Supported crypto cipher suits to be advertised to cfg80211 */
 static const u32 mwifiex_cipher_suites[] = {

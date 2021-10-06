@@ -92,3 +92,4 @@ is_medusa:
         .long 0
 m68k_pgtable_cachemode:
         .long 0
+

@@ -1376,6 +1376,7 @@ void ath9k_chanctx_stop_queues(struct ath_softc *sc, struct ath_chanctx *ctx)
 		ieee80211_stop_queue(sc->hw, sc->hw->queues - 2);
 }
 
+
 void ath9k_chanctx_wake_queues(struct ath_softc *sc, struct ath_chanctx *ctx)
 {
 	struct ath_hw *ah = sc->sc_ah;

@@ -244,6 +244,7 @@ out:
 	return ret;
 }
 
+
 /*
  * lookup extent at @fofs, if hit, return the extent
  * if not, return NULL and
@@ -695,6 +696,7 @@ void f2fs_update_extent_cache(struct dnode_of_data *dn)
 		return;
 
 	f2fs_bug_on(F2FS_I_SB(dn->inode), dn->data_blkaddr == NEW_ADDR);
+
 
 	fofs = start_bidx_of_node(ofs_of_node(dn->node_page), fi) +
 							dn->ofs_in_node;

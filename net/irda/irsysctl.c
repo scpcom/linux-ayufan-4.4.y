@@ -89,6 +89,7 @@ static int do_devname(struct ctl_table *table, int write,
 	return ret;
 }
 
+
 static int do_discovery(struct ctl_table *table, int write,
                     void __user *buffer, size_t *lenp, loff_t *ppos)
 {
@@ -252,3 +253,6 @@ void irda_sysctl_unregister(void)
 {
 	unregister_net_sysctl_table(irda_table_header);
 }
+
+
+

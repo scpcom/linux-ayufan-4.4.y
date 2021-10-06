@@ -381,6 +381,7 @@ void drm_mm_remove_node(struct drm_mm_node *node)
 		BUG_ON(__drm_mm_hole_node_start(node) !=
 		       __drm_mm_hole_node_end(node));
 
+
 	if (!prev_node->hole_follows) {
 		prev_node->hole_follows = 1;
 		list_add(&prev_node->hole_stack, &mm->hole_stack);

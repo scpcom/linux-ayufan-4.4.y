@@ -24,6 +24,7 @@
 #include <linux/slab.h>
 #include "via_aux.h"
 
+
 struct via_aux_bus *via_aux_probe(struct i2c_adapter *adap)
 {
 	struct via_aux_bus *bus;

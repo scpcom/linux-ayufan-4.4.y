@@ -1172,6 +1172,7 @@ static int ni_process_firmware_header(struct radeon_device *rdev)
 
 	ni_pi->spll_table_start = (u16)tmp;
 
+
 	return ret;
 }
 
@@ -1619,6 +1620,7 @@ static int ni_populate_memory_timing_parameters(struct radeon_device *rdev,
 	arb_regs->mc_arb_rfsh_rate =
 		(u8)rv770_calculate_memory_refresh_rate(rdev, pl->sclk);
 
+
 	radeon_atom_set_engine_dram_timings(rdev,
                                             pl->sclk,
                                             pl->mclk);
@@ -1860,6 +1862,7 @@ static int ni_populate_smc_acpi_state(struct radeon_device *rdev,
 						  &table->ACPIState.levels[0].vddci);
 	}
 
+
 	mpll_ad_func_cntl &= ~PDNB;
 
 	mpll_ad_func_cntl_2 |= BIAS_GEN_PDNB | RESET_EN;
@@ -1867,6 +1870,7 @@ static int ni_populate_smc_acpi_state(struct radeon_device *rdev,
         if (pi->mem_gddr5)
                 mpll_dq_func_cntl &= ~PDNB;
         mpll_dq_func_cntl_2 |= BIAS_GEN_PDNB | RESET_EN | BYPASS;
+
 
 	mclk_pwrmgt_cntl |= (MRDCKA0_RESET |
 			     MRDCKA1_RESET |
@@ -2016,6 +2020,7 @@ static int ni_calculate_sclk_params(struct radeon_device *rdev,
 		return ret;
 
 	reference_divider = 1 + dividers.ref_div;
+
 
 	tmp = (u64) engine_clock * reference_divider * dividers.post_div * 16834;
 	do_div(tmp, reference_clock);
@@ -2271,6 +2276,7 @@ static int ni_populate_mclk_value(struct radeon_device *rdev,
 				      MRDCKC1_PDNB |
 				      MRDCKD0_PDNB |
 				      MRDCKD1_PDNB);
+
 
 	mclk->mclk_value = cpu_to_be32(memory_clock);
 	mclk->vMPLL_AD_FUNC_CNTL = cpu_to_be32(mpll_ad_func_cntl);
@@ -2932,6 +2938,7 @@ static void ni_populate_mc_reg_addresses(struct radeon_device *rdev,
 	}
 	mc_reg_table->last = (u8)i;
 }
+
 
 static void ni_convert_mc_registers(struct ni_mc_reg_entry *entry,
 				    SMC_NIslands_MCRegisterSet *data,
@@ -4369,3 +4376,4 @@ u32 ni_dpm_get_mclk(struct radeon_device *rdev, bool low)
 	else
 		return requested_state->performance_levels[requested_state->performance_level_count - 1].mclk;
 }
+

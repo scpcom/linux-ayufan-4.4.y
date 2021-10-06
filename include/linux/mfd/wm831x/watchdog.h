@@ -15,6 +15,7 @@
 #ifndef __MFD_WM831X_WATCHDOG_H__
 #define __MFD_WM831X_WATCHDOG_H__
 
+
 /*
  * R16388 (0x4004) - Watchdog
  */

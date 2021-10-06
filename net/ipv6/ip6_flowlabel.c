@@ -94,6 +94,7 @@ static struct ip6_flowlabel *fl_lookup(struct net *net, __be32 label)
 	return fl;
 }
 
+
 static void fl_free(struct ip6_flowlabel *fl)
 {
 	if (fl) {
@@ -233,6 +234,8 @@ static struct ip6_flowlabel *fl_intern(struct net *net,
 	return NULL;
 }
 
+
+
 /* Socket flowlabel lists */
 
 struct ip6_flowlabel *fl6_sock_lookup(struct sock *sk, __be32 label)
@@ -280,6 +283,7 @@ void fl6_free_socklist(struct sock *sk)
 }
 
 /* Service routines */
+
 
 /*
    It is the only difficult place. flowlabel enforces equal headers
@@ -515,6 +519,7 @@ int ipv6_flowlabel_opt(struct sock *sk, char __user *optval, int optlen)
 	struct ipv6_fl_socklist *sfl;
 	struct ipv6_fl_socklist __rcu **sflp;
 	struct ip6_flowlabel *fl, *fl1 = NULL;
+
 
 	if (optlen < sizeof(freq))
 		return -EINVAL;

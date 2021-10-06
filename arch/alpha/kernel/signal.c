@@ -28,6 +28,7 @@
 
 #include "proto.h"
 
+
 #define DEBUG_SIG 0
 
 #define _BLOCKABLE (~(sigmask(SIGKILL) | sigmask(SIGSTOP)))
@@ -265,6 +266,7 @@ give_sigsegv:
 	force_sig(SIGSEGV, current);
 }
 
+
 /*
  * Set up a signal frame.
  */
@@ -432,6 +434,7 @@ setup_rt_frame(struct ksignal *ksig, sigset_t *set, struct pt_regs *regs)
 	return 0;
 }
 
+
 /*
  * OK, we're invoking a handler.
  */
@@ -471,6 +474,7 @@ syscall_restart(unsigned long r0, unsigned long r19,
 		break;
 	}
 }
+
 
 /*
  * Note that 'init' is a special process: it doesn't get signals it doesn't

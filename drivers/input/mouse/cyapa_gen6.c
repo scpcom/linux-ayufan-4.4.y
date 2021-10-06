@@ -21,6 +21,7 @@
 #include <linux/crc-itu-t.h>
 #include "cyapa.h"
 
+
 #define GEN6_ENABLE_CMD_IRQ	0x41
 #define GEN6_DISABLE_CMD_IRQ	0x42
 #define GEN6_ENABLE_DEV_IRQ	0x43
@@ -37,6 +38,7 @@
 #define GEN6_MAX_RX_NUM 14
 #define GEN6_RETRIEVE_DATA_ID_RX_ATTENURATOR_IDAC	0x00
 #define GEN6_RETRIEVE_DATA_ID_ATTENURATOR_TRIM		0x12
+
 
 struct pip_app_cmd_head {
 	__le16 addr;

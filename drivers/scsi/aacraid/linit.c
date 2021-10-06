@@ -28,6 +28,7 @@
  * Abstract: Linux Driver entry module for Adaptec RAID Array Controller
  */
 
+
 #include <linux/compat.h>
 #include <linux/blkdev.h>
 #include <linux/completion.h>
@@ -1359,6 +1360,7 @@ static int aac_acquire_resources(struct aac_dev *dev)
 
 	aac_adapter_disable_int(dev);
 	aac_adapter_enable_int(dev);
+
 
 	if ((dev->pdev->device == PMC_DEVICE_S7 ||
 	     dev->pdev->device == PMC_DEVICE_S8 ||

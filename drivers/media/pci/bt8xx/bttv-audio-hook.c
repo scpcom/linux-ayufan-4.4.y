@@ -184,6 +184,7 @@ void avermedia_tvphone_audio(struct bttv *btv, struct v4l2_tuner *t, int set)
 		bttv_gpio_tracking(btv, "avermedia");
 }
 
+
 void avermedia_tv_stereo_audio(struct bttv *btv, struct v4l2_tuner *t, int set)
 {
 	int val = 0;
@@ -286,6 +287,7 @@ void terratv_audio(struct bttv *btv,  struct v4l2_tuner *t, int set)
 	if (bttv_gpio)
 		bttv_gpio_tracking(btv, "terratv");
 }
+
 
 void winfast2000_audio(struct bttv *btv, struct v4l2_tuner *t, int set)
 {

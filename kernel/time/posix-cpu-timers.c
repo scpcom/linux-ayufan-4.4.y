@@ -173,6 +173,7 @@ posix_cpu_clock_set(const clockid_t which_clock, const struct timespec *tp)
 	return error;
 }
 
+
 /*
  * Sample a per-thread clock for the given task.
  */
@@ -304,6 +305,7 @@ static int posix_cpu_clock_get_task(struct task_struct *tsk,
 	return err;
 }
 
+
 static int posix_cpu_clock_get(const clockid_t which_clock, struct timespec *tp)
 {
 	const pid_t pid = CPUCLOCK_PID(which_clock);
@@ -330,6 +332,7 @@ static int posix_cpu_clock_get(const clockid_t which_clock, struct timespec *tp)
 
 	return err;
 }
+
 
 /*
  * Validate the clockid_t for a new CPU-clock timer, and initialize the timer.

@@ -75,6 +75,7 @@
 #define OPEN 8
 #define OPT 16
 
+
 /* ASN.1 Field Structure */
 typedef struct field_t {
 #if H323_TRACE
@@ -692,6 +693,7 @@ static int decode_seqof(bitstr_t *bs, const struct field_t *f,
 
 	return H323_ERROR_NONE;
 }
+
 
 /****************************************************************************/
 static int decode_choice(bitstr_t *bs, const struct field_t *f,

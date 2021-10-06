@@ -4,6 +4,7 @@
 #ifndef _UAPI_PARISC_PTRACE_H
 #define _UAPI_PARISC_PTRACE_H
 
+
 #include <linux/types.h>
 
 /* This struct defines the way the registers are stored on the 
@@ -41,5 +42,6 @@ struct pt_regs {
  * since we have taken branch traps too)
  */
 #define PTRACE_SINGLEBLOCK	12	/* resume execution until next branch */
+
 
 #endif /* _UAPI_PARISC_PTRACE_H */

@@ -123,6 +123,7 @@ enum mei_stop_reason_types {
 	SYSTEM_S5_ENTRY = 0x08
 };
 
+
 /**
  * enum mei_hbm_status  - mei host bus messages return values
  *
@@ -149,6 +150,7 @@ enum mei_hbm_status {
 
 	MEI_HBMS_MAX
 };
+
 
 /*
  * Client Connect Status
@@ -181,6 +183,7 @@ struct mei_msg_hdr {
 	u32 internal:1;
 	u32 msg_complete:1;
 } __packed;
+
 
 struct mei_bus_message {
 	u8 hbm_cmd;
@@ -351,6 +354,7 @@ struct hbm_client_connect_response {
 	u8 host_addr;
 	u8 status;
 } __packed;
+
 
 #define MEI_FC_MESSAGE_RESERVED_LENGTH           5
 

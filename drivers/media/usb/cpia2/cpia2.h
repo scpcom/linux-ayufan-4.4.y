@@ -153,6 +153,7 @@ enum {
 #define HI_POWER_MODE CPIA2_SYSTEM_CONTROL_HIGH_POWER
 #define LO_POWER_MODE CPIA2_SYSTEM_CONTROL_LOW_POWER
 
+
 /********
  * Commands
  *******/
@@ -228,6 +229,7 @@ enum user_cmd {
 #define CAMACC_VGA      0x02
 #define CAMACC_QCIF     0x04
 #define CAMACC_QVGA     0x08
+
 
 struct cpia2_register {
 	u8 index;
@@ -465,6 +467,7 @@ int cpia2_usb_stream_pause(struct camera_data *cam);
 int cpia2_usb_stream_resume(struct camera_data *cam);
 int cpia2_usb_change_streaming_alternate(struct camera_data *cam,
 					 unsigned int alt);
+
 
 /* ----------------------- debug functions ---------------------- */
 #ifdef _CPIA2_DEBUG_

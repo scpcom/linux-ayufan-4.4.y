@@ -43,6 +43,7 @@
 #define QLC_83XX_MAC_PRESENT		0xC
 #define QLC_83XX_MAC_ABSENT		0xD
 
+
 #define QLC_83XX_FLASH_SECTOR_SIZE		(64 * 1024)
 
 /* PEG status definitions */

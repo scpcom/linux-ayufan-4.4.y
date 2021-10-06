@@ -159,6 +159,7 @@ static void mts64_write_command(struct parport *p, u8 c);
 static void mts64_write_data(struct parport *p, u8 c);
 static void mts64_write_midi(struct mts64 *mts, u8 c, int midiport);
 
+
 /*  Enables the readout procedure
  *
  *  Before we can read a midi byte from the device, we have to set
@@ -280,6 +281,7 @@ static u8 mts64_map_midi_input(u8 c)
 
 	return map[c];
 }
+
 
 /*  Probe parport for device
  *
@@ -649,6 +651,7 @@ static struct snd_kcontrol_new mts64_ctl_smpte_fps = {
 	.get   = snd_mts64_ctl_smpte_fps_get,
 	.put   = snd_mts64_ctl_smpte_fps_put
 };
+
 
 static int snd_mts64_ctl_create(struct snd_card *card,
 				struct mts64 *mts)
@@ -1020,6 +1023,7 @@ static int snd_mts64_remove(struct platform_device *pdev)
 
 	return 0;
 }
+
 
 static struct platform_driver snd_mts64_driver = {
 	.probe  = snd_mts64_probe,

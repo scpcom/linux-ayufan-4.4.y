@@ -27,6 +27,7 @@
 #include <asm/portmux.h>
 #include <asm/dpmc.h>
 
+
 /*
  * Name the Board for the /proc/cpuinfo
  */
@@ -238,6 +239,7 @@ static struct platform_device bfin_mac_device = {
 	}
 };
 #endif
+
 
 #if IS_ENABLED(CONFIG_MTD_M25P80)
 static struct mtd_partition bfin_spi_flash_partitions[] = {

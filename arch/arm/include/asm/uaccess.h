@@ -186,6 +186,7 @@ extern int __get_user_64t_4(void *);
 #define __get_user_x_64t __get_user_x
 #endif
 
+
 #define __get_user_check(x, p)						\
 	({								\
 		unsigned long __limit = current_thread_info()->addr_limit - 1; \
@@ -486,6 +487,7 @@ do {									\
 	: "+r" (err), "+r" (__pu_addr)				\
 	: "r" (x), "i" (-EFAULT)				\
 	: "cc")
+
 
 #ifdef CONFIG_MMU
 extern unsigned long __must_check

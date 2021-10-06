@@ -66,6 +66,7 @@ xfs_validate_extents(
 #define xfs_validate_extents(ifp, nrecs, fmt)
 #endif /* DEBUG */
 
+
 /*
  * Move inode type and inode format specific information from the
  * on-disk inode to the in-core inode.  For fifos, devs, and sockets
@@ -580,6 +581,7 @@ xfs_iroot_realloc(
 			XFS_IFORK_SIZE(ip, whichfork));
 	return;
 }
+
 
 /*
  * This is called when the amount of space needed for if_data

@@ -31,6 +31,7 @@
 #define FINTEK_DESCRIPTION	"Fintek LPC SuperIO Consumer IR Transceiver"
 #define VENDOR_ID_FINTEK	0x1934
 
+
 /* debugging module parameter */
 static int debug;
 
@@ -51,6 +52,7 @@ static int debug;
 	if (debug > 2) \
 		printk(KERN_DEBUG \
 			KBUILD_MODNAME ": " text "\n" , ## __VA_ARGS__)
+
 
 #define TX_BUF_LEN 256
 #define RX_BUF_LEN 32
@@ -240,3 +242,4 @@ struct fintek_dev {
  */
 #define CIR_TX_CONTROL_TX_START	0x80
 #define CIR_TX_CONTROL_TX_END	0x40
+

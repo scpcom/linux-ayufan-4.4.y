@@ -126,6 +126,7 @@ void beiscsi_ue_detect(struct beiscsi_hba *phba)
 	ue_lo = (ue_lo & ~ue_mask_lo);
 	ue_hi = (ue_hi & ~ue_mask_hi);
 
+
 	if (ue_lo || ue_hi) {
 		phba->ue_detected = true;
 		beiscsi_log(phba, KERN_ERR,
@@ -297,6 +298,7 @@ unsigned int mgmt_get_session_info(struct beiscsi_hba *phba,
 	wrb = wrb_from_mccq(phba);
 	sge = nonembedded_sgl(wrb);
 	wrb->tag0 |= tag;
+
 
 	wrb->tag0 |= tag;
 	be_wrb_hdr_prepare(wrb, sizeof(*req), false, 1);
@@ -971,6 +973,7 @@ static int mgmt_modify_gateway(struct beiscsi_hba *phba, uint8_t *gt_addr,
 	struct be_dma_mem nonemb_cmd;
 	int rt_val;
 
+
 	rt_val = mgmt_alloc_cmd_data(phba, &nonemb_cmd,
 				OPCODE_COMMON_ISCSI_NTWK_MODIFY_DEFAULT_GATEWAY,
 				sizeof(*req));
@@ -1237,6 +1240,8 @@ int mgmt_get_nic_conf(struct beiscsi_hba *phba,
 
 	return mgmt_exec_nonemb_cmd(phba, &nonemb_cmd, nic, sizeof(*nic));
 }
+
+
 
 unsigned int be_cmd_get_initname(struct beiscsi_hba *phba)
 {

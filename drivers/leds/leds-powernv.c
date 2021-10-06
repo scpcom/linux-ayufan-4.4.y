@@ -59,6 +59,7 @@ struct powernv_led_data {
 	struct powernv_led_common *common;
 };
 
+
 /* Returns OPAL_SLOT_LED_TYPE_* for given led type string */
 static int powernv_get_led_type(const char *led_type_desc)
 {

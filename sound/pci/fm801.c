@@ -64,6 +64,7 @@ MODULE_PARM_DESC(tea575x_tuner, "TEA575x tuner access method (0 = auto, 1 = SF25
 module_param_array(radio_nr, int, NULL, 0444);
 MODULE_PARM_DESC(radio_nr, "Radio device numbers");
 
+
 #define TUNER_DISABLED		(1<<3)
 #define TUNER_ONLY		(1<<4)
 #define TUNER_TYPE_MASK		(~TUNER_ONLY & 0xFFFF)
@@ -1150,6 +1151,7 @@ static int snd_fm801_chip_init(struct fm801 *chip, int resume)
 
 	return 0;
 }
+
 
 static int snd_fm801_free(struct fm801 *chip)
 {

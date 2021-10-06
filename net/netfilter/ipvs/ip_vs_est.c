@@ -53,6 +53,7 @@
   * A lot of code is taken from net/core/gen_estimator.c
  */
 
+
 /*
  * Make a summary from each cpu
  */
@@ -94,6 +95,7 @@ static void ip_vs_read_cpu_stats(struct ip_vs_kstats *sum,
 		}
 	}
 }
+
 
 static void estimation_timer(unsigned long arg)
 {

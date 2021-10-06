@@ -91,6 +91,7 @@ static struct pm_qos_object network_lat_pm_qos = {
 	.name = "network_latency",
 };
 
+
 static BLOCKING_NOTIFIER_HEAD(network_throughput_notifier);
 static struct pm_qos_constraints network_tput_constraints = {
 	.list = PLIST_HEAD_INIT(network_tput_constraints.list),
@@ -105,6 +106,7 @@ static struct pm_qos_object network_throughput_pm_qos = {
 	.name = "network_throughput",
 };
 
+
 static BLOCKING_NOTIFIER_HEAD(memory_bandwidth_notifier);
 static struct pm_qos_constraints memory_bw_constraints = {
 	.list = PLIST_HEAD_INIT(memory_bw_constraints.list),
@@ -118,6 +120,7 @@ static struct pm_qos_object memory_bandwidth_pm_qos = {
 	.constraints = &memory_bw_constraints,
 	.name = "memory_bandwidth",
 };
+
 
 static struct pm_qos_object *pm_qos_array[] = {
 	&null_pm_qos,
@@ -639,6 +642,7 @@ static int pm_qos_power_release(struct inode *inode, struct file *filp)
 	return 0;
 }
 
+
 static ssize_t pm_qos_power_read(struct file *filp, char __user *buf,
 		size_t count, loff_t *f_pos)
 {
@@ -680,6 +684,7 @@ static ssize_t pm_qos_power_write(struct file *filp, const char __user *buf,
 
 	return count;
 }
+
 
 static int __init pm_qos_power_init(void)
 {

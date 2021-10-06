@@ -428,6 +428,7 @@ static int clean_journal(struct gfs2_jdesc *jd, struct gfs2_log_header_host *hea
 	return error;
 }
 
+
 static void gfs2_recovery_done(struct gfs2_sbd *sdp, unsigned int jid,
                                unsigned int message)
 {
@@ -607,3 +608,4 @@ int gfs2_recover_journal(struct gfs2_jdesc *jd, bool wait)
 
 	return wait ? jd->jd_recover_error : 0;
 }
+

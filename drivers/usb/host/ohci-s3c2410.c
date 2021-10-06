@@ -30,9 +30,11 @@
 
 #include "ohci.h"
 
+
 #define valid_port(idx) ((idx) == 1 || (idx) == 2)
 
 /* clock device associated with the hcd */
+
 
 #define DRIVER_DESC "OHCI S3C2410 driver"
 

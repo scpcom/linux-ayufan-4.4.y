@@ -83,4 +83,5 @@ static inline bool of_phy_is_fixed_link(struct device_node *np)
 }
 #endif
 
+
 #endif /* __LINUX_OF_MDIO_H */

@@ -102,6 +102,7 @@ void arc_platform_smp_wait_to_boot(int cpu)
 	__asm__ __volatile__("j @first_lines_of_secondary	\n");
 }
 
+
 const char *arc_platform_smp_cpuinfo(void)
 {
 	return plat_smp_ops.info ? : "";

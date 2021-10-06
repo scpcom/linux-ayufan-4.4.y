@@ -47,3 +47,4 @@ void dma_free_coherent(struct device *dev, size_t size,
 	if (!dma_release_from_coherent(dev, order, vaddr))
 		free_pages((unsigned long)vaddr, order);
 }
+

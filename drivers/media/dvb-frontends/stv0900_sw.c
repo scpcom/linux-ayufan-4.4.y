@@ -415,11 +415,13 @@ static s32 stv0900_get_timing_offst(struct stv0900_internal *intp,
 {
 	s32 timingoffset;
 
+
 	timingoffset = (stv0900_read_reg(intp, TMGREG2) << 16) +
 		       (stv0900_read_reg(intp, TMGREG2 + 1) << 8) +
 		       (stv0900_read_reg(intp, TMGREG2 + 2));
 
 	timingoffset = ge2comp(timingoffset, 24);
+
 
 	if (timingoffset == 0)
 		timingoffset = 1;
@@ -2025,3 +2027,4 @@ enum fe_stv0900_signal_type stv0900_algo(struct dvb_frontend *fe)
 
 	return signal_type;
 }
+

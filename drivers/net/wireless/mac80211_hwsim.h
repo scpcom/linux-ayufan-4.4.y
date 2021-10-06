@@ -126,6 +126,7 @@ enum {
  * @__HWSIM_ATTR_MAX: enum limit
  */
 
+
 enum {
 	HWSIM_ATTR_UNSPEC,
 	HWSIM_ATTR_ADDR_RECEIVER,

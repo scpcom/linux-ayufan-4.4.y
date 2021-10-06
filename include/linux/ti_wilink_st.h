@@ -86,6 +86,7 @@ struct st_proto_s {
 extern long st_register(struct st_proto_s *);
 extern long st_unregister(struct st_proto_s *);
 
+
 /*
  * header information used by st_core.c
  */
@@ -284,6 +285,7 @@ long st_kim_stop(void *);
 void st_kim_complete(void *);
 void kim_st_list_protocols(struct st_data_s *, void *);
 void st_kim_recv(void *, const unsigned char *, long);
+
 
 /*
  * BTS headers

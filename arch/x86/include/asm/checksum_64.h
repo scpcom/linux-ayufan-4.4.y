@@ -97,6 +97,7 @@ csum_tcpudp_nofold(__be32 saddr, __be32 daddr, unsigned short len,
 	return sum;
 }
 
+
 /**
  * csum_tcpup_magic - Compute an IPv4 pseudo header checksum.
  * @saddr: source address
@@ -130,10 +131,12 @@ extern __wsum csum_partial(const void *buff, int len, __wsum sum);
 #define  _HAVE_ARCH_COPY_AND_CSUM_FROM_USER 1
 #define HAVE_CSUM_COPY_USER 1
 
+
 /* Do not call this directly. Use the wrappers below */
 extern __visible __wsum csum_partial_copy_generic(const void *src, const void *dst,
 					int len, __wsum sum,
 					int *src_err_ptr, int *dst_err_ptr);
+
 
 extern __wsum csum_partial_copy_from_user(const void __user *src, void *dst,
 					  int len, __wsum isum, int *errp);

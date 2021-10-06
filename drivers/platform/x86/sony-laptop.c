@@ -1022,6 +1022,7 @@ static ssize_t sony_nc_sysfs_store(struct device *dev,
 	return count;
 }
 
+
 /*
  * Backlight device
  */
@@ -3474,6 +3475,7 @@ static struct sonypi_event sonypi_helpev[] = {
 	{ 0, 0 }
 };
 
+
 /* The set of possible lid events */
 static struct sonypi_event sonypi_lidev[] = {
 	{ 0x51, SONYPI_EVENT_LID_CLOSED },
@@ -4452,6 +4454,7 @@ static int sony_pic_disable(struct acpi_device *device)
 	dprintk("Device disabled\n");
 	return 0;
 }
+
 
 /*
  *  Based on drivers/acpi/pci_link.c:acpi_pci_link_set

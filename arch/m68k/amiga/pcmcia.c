@@ -34,6 +34,7 @@ void pcmcia_reset(void)
 }
 EXPORT_SYMBOL(pcmcia_reset);
 
+
 /* copy a tuple, including tuple header. return nb bytes copied */
 /* be careful as this may trigger a GAYLE_IRQ_WR interrupt ! */
 
@@ -118,3 +119,4 @@ void pcmcia_write_disable(void)
 	gayle.cardstatus = 0;
 }
 EXPORT_SYMBOL(pcmcia_write_disable);
+

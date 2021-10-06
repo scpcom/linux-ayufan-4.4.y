@@ -80,6 +80,7 @@ static int octeon_rng_probe(struct platform_device *pdev)
 	if (!res_result)
 		return -ENOENT;
 
+
 	rng->control_status = devm_ioremap_nocache(&pdev->dev,
 						   res_ports->start,
 						   sizeof(u64));

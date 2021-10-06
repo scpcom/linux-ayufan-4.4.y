@@ -20,6 +20,7 @@
  * 02110-1301 USA
  */
 
+
 #ifndef __HSI_CHAR_H
 #define __HSI_CHAR_H
 

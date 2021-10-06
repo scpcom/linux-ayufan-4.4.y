@@ -5,6 +5,7 @@
 #include "core.h"
 #include "rdev-ops.h"
 
+
 int __cfg80211_stop_ap(struct cfg80211_registered_device *rdev,
 		       struct net_device *dev, bool notify)
 {

@@ -406,6 +406,7 @@ static irqreturn_t vpif_channel_isr(int irq, void *dev_id)
 
 			vpif_schedule_next_buffer(common);
 
+
 			channel_first_int[i][channel_id] = 0;
 		} else {
 			/**
@@ -961,6 +962,7 @@ static int vpif_try_fmt_vid_cap(struct file *file, void *priv,
 
 	return 0;
 }
+
 
 /**
  * vpif_g_fmt_vid_cap() - Set INPUT handler

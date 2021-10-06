@@ -12,4 +12,5 @@
 #define PHONET_MAX_MTU		65541	/* pn_length = 0xffff */
 #define PHONET_DEV_MTU		PHONET_MAX_MTU
 
+
 #endif /* _UAPILINUX_IF_PHONET_H */

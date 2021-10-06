@@ -142,12 +142,14 @@ struct goldfish_pipe {
 	wait_queue_head_t wake_queue;
 };
 
+
 /* Bit flags for the 'flags' field */
 enum {
 	BIT_CLOSED_ON_HOST = 0,  /* pipe closed by host */
 	BIT_WAKE_ON_WRITE  = 1,  /* want to be woken on writes */
 	BIT_WAKE_ON_READ   = 2,  /* want to be woken on reads */
 };
+
 
 static u32 goldfish_cmd_status(struct goldfish_pipe *pipe, u32 cmd)
 {
@@ -407,6 +409,7 @@ static ssize_t goldfish_pipe_write(struct file *filp,
 	return goldfish_pipe_read_write(filp, (char __user *)buffer,
 								bufflen, 1);
 }
+
 
 static unsigned int goldfish_pipe_poll(struct file *filp, poll_table *wait)
 {

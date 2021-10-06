@@ -45,3 +45,4 @@
 #define MEM_ALIGNMENT_PADDING	(sizeof(SIZE_T) - 1)
 
 #endif /*__BASIC_TYPES_H__*/
+

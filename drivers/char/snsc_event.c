@@ -53,6 +53,7 @@ scdrv_event_interrupt(int irq, void *subch_data)
 	return IRQ_HANDLED;
 }
 
+
 /*
  * scdrv_parse_event
  *
@@ -104,6 +105,7 @@ scdrv_parse_event(char *event, int *src, int *code, int *esp_code, char *desc)
 
 	return 0;
 }
+
 
 /*
  * scdrv_event_severity
@@ -171,6 +173,7 @@ scdrv_event_severity(int code)
 	return pk_severity;
 }
 
+
 /*
  * scdrv_dispatch_event
  *
@@ -219,6 +222,7 @@ scdrv_dispatch_event(char *event, int len)
 	}
 }
 
+
 /*
  * scdrv_event
  *
@@ -251,6 +255,7 @@ scdrv_event(unsigned long dummy)
 	}
 	spin_unlock_irqrestore(&sd->sd_rlock, flags);
 }
+
 
 /*
  * scdrv_event_init

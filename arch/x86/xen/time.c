@@ -261,6 +261,7 @@ static struct clocksource xen_clocksource __read_mostly = {
    This interface is used when available.
 */
 
+
 /*
   Get a hypervisor absolute time.  In theory we could maintain an
   offset between the kernel's time and the hypervisor's time, and
@@ -429,6 +430,7 @@ void xen_setup_timer(int cpu)
 	evt->cpumask = cpumask_of(cpu);
 	evt->irq = irq;
 }
+
 
 void xen_setup_cpu_clockevents(void)
 {

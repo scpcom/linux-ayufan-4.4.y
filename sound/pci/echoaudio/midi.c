@@ -28,6 +28,7 @@
 
 ****************************************************************************/
 
+
 /******************************************************************************
 	MIDI lowlevel code
 ******************************************************************************/
@@ -52,6 +53,8 @@ static int enable_midi_input(struct echoaudio *chip, char enable)
 	return send_vector(chip, DSP_VC_UPDATE_FLAGS);
 }
 
+
+
 /* Send a buffer full of MIDI data to the DSP
 Returns how many actually written or < 0 on error */
 static int write_midi(struct echoaudio *chip, u8 *data, int bytes)
@@ -74,6 +77,8 @@ static int write_midi(struct echoaudio *chip, u8 *data, int bytes)
 	dev_dbg(chip->card->dev, "write_midi: %d\n", bytes);
 	return bytes;
 }
+
+
 
 /* Run the state machine for MIDI input data
 MIDI time code sync isn't supported by this code right now, but you still need
@@ -103,6 +108,8 @@ static inline int mtc_process_data(struct echoaudio *chip, short midi_byte)
 	}
 	return 0;
 }
+
+
 
 /* This function is called from the IRQ handler and it reads the midi data
 from the DSP's buffer.  It returns the number of bytes received. */
@@ -138,6 +145,9 @@ static int midi_service_irq(struct echoaudio *chip)
 	return received;
 }
 
+
+
+
 /******************************************************************************
 	MIDI interface
 ******************************************************************************/
@@ -149,6 +159,8 @@ static int snd_echo_midi_input_open(struct snd_rawmidi_substream *substream)
 	chip->midi_in = substream;
 	return 0;
 }
+
+
 
 static void snd_echo_midi_input_trigger(struct snd_rawmidi_substream *substream,
 					int up)
@@ -163,6 +175,8 @@ static void snd_echo_midi_input_trigger(struct snd_rawmidi_substream *substream,
 	}
 }
 
+
+
 static int snd_echo_midi_input_close(struct snd_rawmidi_substream *substream)
 {
 	struct echoaudio *chip = substream->rmidi->private_data;
@@ -170,6 +184,8 @@ static int snd_echo_midi_input_close(struct snd_rawmidi_substream *substream)
 	chip->midi_in = NULL;
 	return 0;
 }
+
+
 
 static int snd_echo_midi_output_open(struct snd_rawmidi_substream *substream)
 {
@@ -180,6 +196,8 @@ static int snd_echo_midi_output_open(struct snd_rawmidi_substream *substream)
 	chip->midi_out = substream;
 	return 0;
 }
+
+
 
 static void snd_echo_midi_output_write(unsigned long data)
 {
@@ -228,6 +246,8 @@ static void snd_echo_midi_output_write(unsigned long data)
 	spin_unlock_irqrestore(&chip->lock, flags);
 }
 
+
+
 static void snd_echo_midi_output_trigger(struct snd_rawmidi_substream *substream,
 					 int up)
 {
@@ -256,6 +276,8 @@ static void snd_echo_midi_output_trigger(struct snd_rawmidi_substream *substream
 		snd_echo_midi_output_write((unsigned long)chip);
 }
 
+
+
 static int snd_echo_midi_output_close(struct snd_rawmidi_substream *substream)
 {
 	struct echoaudio *chip = substream->rmidi->private_data;
@@ -263,6 +285,8 @@ static int snd_echo_midi_output_close(struct snd_rawmidi_substream *substream)
 	chip->midi_out = NULL;
 	return 0;
 }
+
+
 
 static struct snd_rawmidi_ops snd_echo_midi_input = {
 	.open = snd_echo_midi_input_open,
@@ -275,6 +299,8 @@ static struct snd_rawmidi_ops snd_echo_midi_output = {
 	.close = snd_echo_midi_output_close,
 	.trigger = snd_echo_midi_output_trigger,
 };
+
+
 
 /* <--snd_echo_probe() */
 static int snd_echo_midi_create(struct snd_card *card,

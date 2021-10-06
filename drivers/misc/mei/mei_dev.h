@@ -43,6 +43,7 @@
 
 #define MEI_RD_MSG_BUF_SIZE           (128 * sizeof(u32))
 
+
 /*
  * AMTHI Client UUID
  */
@@ -79,6 +80,7 @@ extern const uuid_le mei_wd_guid;
 #define MEI_HBM_HOST_CLIENT_ID         0 /* not used, just for documentation */
 #define MEI_WD_HOST_CLIENT_ID          1
 #define MEI_IAMTHIF_HOST_CLIENT_ID     2
+
 
 /* File state */
 enum file_state {
@@ -160,6 +162,7 @@ struct mei_msg_data {
 /* Minimal  buffer for FW status string (8 bytes in dw + space or '\0') */
 #define MEI_FW_STATUS_STR_SZ (MEI_FW_STATUS_MAX * (8 + 1))
 
+
 /*
  * struct mei_fw_status - storage of FW status data
  *
@@ -191,6 +194,7 @@ struct mei_me_client {
 	u8 connect_count;
 	u8 bus_added;
 };
+
 
 struct mei_cl;
 
@@ -309,6 +313,7 @@ struct mei_hw_ops {
 	int (*hw_reset)(struct mei_device *dev, bool enable);
 	int (*hw_start)(struct mei_device *dev);
 	void (*hw_config)(struct mei_device *dev);
+
 
 	int (*fw_status)(struct mei_device *dev, struct mei_fw_status *fw_sts);
 	enum mei_pg_state (*pg_state)(struct mei_device *dev);
@@ -532,6 +537,7 @@ struct mei_device {
 	u16 wd_timeout;
 	unsigned char wd_data[MEI_WD_START_MSG_SIZE];
 
+
 	/* amthif list for cmd waiting */
 	struct mei_cl_cb amthif_cmd_list;
 	/* driver managed amthif list for reading completed amthif cmd data */
@@ -555,6 +561,7 @@ struct mei_device {
 #if IS_ENABLED(CONFIG_DEBUG_FS)
 	struct dentry *dbgfs_dir;
 #endif /* CONFIG_DEBUG_FS */
+
 
 	const struct mei_hw_ops *ops;
 	char hw[0] __aligned(sizeof(void *));
@@ -671,6 +678,7 @@ void mei_watchdog_unregister(struct mei_device *dev);
 /*
  * Register Access Function
  */
+
 
 static inline void mei_hw_config(struct mei_device *dev)
 {
@@ -821,5 +829,6 @@ static inline ssize_t mei_fw_status_str(struct mei_device *dev,
 
 	return ret;
 }
+
 
 #endif

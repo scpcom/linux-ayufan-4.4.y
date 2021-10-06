@@ -31,6 +31,7 @@
 #ifndef _XTENSA_CORE_CONFIGURATION_H
 #define _XTENSA_CORE_CONFIGURATION_H
 
+
 /****************************************************************************
 	    Parameters Useful for Any Code, USER or PRIVILEGED
  ****************************************************************************/
@@ -39,6 +40,7 @@
  *  Note:  Macros of the form XCHAL_HAVE_*** have a value of 1 if the option is
  *  configured, and a value of 0 otherwise.  These macros are always defined.
  */
+
 
 /*----------------------------------------------------------------------
 				ISA
@@ -111,6 +113,7 @@
 #define XCHAL_HAVE_HIFI2EP		0	/* HiFi2EP */
 #define XCHAL_HAVE_HIFI_MINI		0	
 
+
 #define XCHAL_HAVE_VECTORFPU2005	0	/* vector or user floating-point pkg */
 #define XCHAL_HAVE_USER_DPFPU         0       /* user DP floating-point pkg */
 #define XCHAL_HAVE_USER_SPFPU         0       /* user DP floating-point pkg */
@@ -148,6 +151,7 @@
 #define XCHAL_HAVE_FLIX3		0	/* basic 3-way FLIX option */
 #define XCHAL_HAVE_GRIVPEP              0   /*  GRIVPEP is General Release of IVPEP */
 #define XCHAL_HAVE_GRIVPEP_HISTOGRAM    0   /* Histogram option on GRIVPEP */
+
 
 /*----------------------------------------------------------------------
 				MISC
@@ -196,6 +200,7 @@
 #define XCHAL_HW_MAX_VERSION_MINOR	2	/* minor v of latest tgt hw */
 #define XCHAL_HW_MAX_VERSION		260002	/* latest targeted hw */
 
+
 /*----------------------------------------------------------------------
 				CACHE
   ----------------------------------------------------------------------*/
@@ -222,9 +227,13 @@
 #define XCHAL_HAVE_ICACHE_DYN_WAYS	0	/* Icache dynamic way support */
 #define XCHAL_HAVE_DCACHE_DYN_WAYS	0	/* Dcache dynamic way support */
 
+
+
+
 /****************************************************************************
     Parameters Useful for PRIVILEGED (Supervisory or Non-Virtualized) Code
  ****************************************************************************/
+
 
 #ifndef XTENSA_HAL_NON_PRIVILEGED_ONLY
 
@@ -266,6 +275,7 @@
 					   XCHAL_HAVE_DCACHE_DYN_WAYS)	&&	\
 					   (XCHAL_HW_MIN_VERSION >= XTENSA_HWVERSION_RE_2012_0))
 
+
 /*----------------------------------------------------------------------
 			INTERNAL I/D RAM/ROMs and XLMI
   ----------------------------------------------------------------------*/
@@ -297,6 +307,7 @@
 #define XCHAL_XLMI0_ECC_PARITY	0	/* ECC/parity type, 0=none */
 
 #define XCHAL_HAVE_IMEM_LOADSTORE	1	/* can load/store to IROM/IRAM*/
+
 
 /*----------------------------------------------------------------------
 			INTERRUPTS and TIMERS
@@ -409,6 +420,7 @@
 #define XCHAL_INTLEVEL7_NUM		14
 /*  (There are many interrupts each at level(s) 1, 3.)  */
 
+
 /*
  *  External interrupt mapping.
  *  These macros describe how Xtensa processor interrupt numbers
@@ -454,6 +466,7 @@
 #define XCHAL_INT19_EXTNUM		14	/* (intlevel 1) */
 #define XCHAL_INT20_EXTNUM		15	/* (intlevel 1) */
 #define XCHAL_INT21_EXTNUM		16	/* (intlevel 3) */
+
 
 /*----------------------------------------------------------------------
 			EXCEPTIONS and VECTORS
@@ -524,6 +537,7 @@
 #define XCHAL_INTLEVEL7_VECTOR_VADDR	XCHAL_NMI_VECTOR_VADDR
 #define XCHAL_INTLEVEL7_VECTOR_PADDR	XCHAL_NMI_VECTOR_PADDR
 
+
 /*----------------------------------------------------------------------
 				DEBUG MODULE
   ----------------------------------------------------------------------*/
@@ -550,6 +564,7 @@
 /*  Perf counters  */
 #define XCHAL_NUM_PERF_COUNTERS		0	/* performance counters */
 
+
 /*----------------------------------------------------------------------
 				MMU
   ----------------------------------------------------------------------*/
@@ -574,4 +589,6 @@
 
 #endif /* !XTENSA_HAL_NON_PRIVILEGED_ONLY */
 
+
 #endif /* _XTENSA_CORE_CONFIGURATION_H */
+

@@ -56,6 +56,7 @@ static int shutdown_thread_fn(void *data)
 			pr_err("MCU status reg read failed.\n");
 		mcu->reg_ctrl = ret;
 
+
 		if (mcu->reg_ctrl & MCU_CTRL_BTN) {
 			i2c_smbus_write_byte_data(mcu->client, MCU_REG_CTRL,
 						  mcu->reg_ctrl & ~MCU_CTRL_BTN);

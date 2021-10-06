@@ -904,6 +904,7 @@ static void irq_thread_dtor(struct callback_head *unused)
 	pr_err("exiting task \"%s\" (%d) is an active IRQ thread (irq %d)\n",
 	       tsk->comm, tsk->pid, action->irq);
 
+
 	desc = irq_to_desc(action->irq);
 	/*
 	 * If IRQTF_RUNTHREAD is set, we need to decrement

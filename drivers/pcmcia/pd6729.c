@@ -19,6 +19,7 @@
 
 #include <pcmcia/ss.h>
 
+
 #include "pd6729.h"
 #include "i82365.h"
 #include "cirrus.h"
@@ -289,6 +290,7 @@ static int pd6729_get_status(struct pcmcia_socket *sock, u_int *value)
 	return 0;
 }
 
+
 static int pd6729_set_socket(struct pcmcia_socket *sock, socket_state_t *state)
 {
 	struct pd6729_socket *socket
@@ -557,6 +559,7 @@ static int pd6729_init(struct pcmcia_socket *sock)
 
 	return 0;
 }
+
 
 /* the pccard structure and its functions */
 static struct pccard_operations pd6729_operations = {

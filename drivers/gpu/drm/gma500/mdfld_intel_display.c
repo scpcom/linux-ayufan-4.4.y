@@ -243,6 +243,7 @@ void mdfld_disable_crtc(struct drm_device *dev, int pipe)
 
 	dev_dbg(dev->dev, "pipe = %d\n", pipe);
 
+
 	if (pipe != 1)
 		mdfld_dsi_gen_fifo_ready(dev, MIPI_GEN_FIFO_STAT_REG(pipe),
 				HS_CTRL_FIFO_EMPTY | HS_DATA_FIFO_EMPTY);
@@ -474,6 +475,7 @@ static void mdfld_crtc_dpms(struct drm_crtc *crtc, int mode)
 	}
 	gma_power_end(dev);
 }
+
 
 #define MDFLD_LIMT_DPLL_19	    0
 #define MDFLD_LIMT_DPLL_25	    1
@@ -1030,3 +1032,4 @@ const struct drm_crtc_helper_funcs mdfld_helper_funcs = {
 	.prepare = gma_crtc_prepare,
 	.commit = gma_crtc_commit,
 };
+

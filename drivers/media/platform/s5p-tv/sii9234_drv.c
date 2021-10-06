@@ -387,6 +387,7 @@ static int sii9234_remove(struct i2c_client *client)
 	return 0;
 }
 
+
 static const struct i2c_device_id sii9234_id[] = {
 	{ "SII9234", 0 },
 	{ },

@@ -27,6 +27,7 @@
  *
  */
 
+
 #ifndef __CYTTSP_CORE_H__
 #define __CYTTSP_CORE_H__
 
@@ -61,6 +62,7 @@ struct cyttsp_xydata {
 	u8 act_dist;
 	u8 tt_reserved;
 } __packed;
+
 
 /* TTSP System Information interface definition */
 struct cyttsp_sysinfo_data {

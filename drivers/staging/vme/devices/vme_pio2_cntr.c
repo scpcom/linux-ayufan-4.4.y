@@ -68,3 +68,4 @@ int pio2_cntr_reset(struct pio2_card *card)
 
 	return retval;
 }
+

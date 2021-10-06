@@ -204,6 +204,7 @@ struct ip_vs_sync_thread_data {
 #define FULL_CONN_SIZE  \
 (sizeof(struct ip_vs_sync_conn_v0) + sizeof(struct ip_vs_sync_conn_options))
 
+
 /*
   The master mulitcasts messages (Datagrams) to the backup load balancers
   in the following format.
@@ -1268,6 +1269,7 @@ static void ip_vs_process_message(struct netns_ipvs *ipvs, __u8 *buffer,
 	}
 }
 
+
 /*
  *      Setup sndbuf (mode=1) or rcvbuf (mode=0)
  */
@@ -1382,6 +1384,7 @@ static int set_mcast_if(struct sock *sk, char *ifname)
 
 	return 0;
 }
+
 
 /*
  *      Join a multicast group.
@@ -1538,6 +1541,7 @@ error:
 	return ERR_PTR(result);
 }
 
+
 /*
  *      Set up receiving multicast socket over UDP
  */
@@ -1588,6 +1592,7 @@ error:
 	sock_release(sock);
 	return ERR_PTR(result);
 }
+
 
 static int
 ip_vs_send_async(struct socket *sock, const char *buffer, const size_t length)
@@ -1728,6 +1733,7 @@ done:
 	return 0;
 }
 
+
 static int sync_thread_backup(void *data)
 {
 	struct ip_vs_sync_thread_data *tinfo = data;
@@ -1764,6 +1770,7 @@ static int sync_thread_backup(void *data)
 
 	return 0;
 }
+
 
 int start_sync_thread(struct netns_ipvs *ipvs, struct ipvs_sync_daemon_cfg *c,
 		      int state)
@@ -1931,6 +1938,7 @@ out:
 	}
 	return result;
 }
+
 
 int stop_sync_thread(struct netns_ipvs *ipvs, int state)
 {

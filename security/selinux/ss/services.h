@@ -18,3 +18,4 @@ void services_compute_xperms_decision(struct extended_perms_decision *xpermd,
 					struct avtab_node *node);
 
 #endif	/* _SS_SERVICES_H_ */
+

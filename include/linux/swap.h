@@ -294,6 +294,7 @@ extern unsigned long nr_free_pagecache_pages(void);
 /* Definition of global_page_state not available yet */
 #define nr_free_pages() global_page_state(NR_FREE_PAGES)
 
+
 /* linux/mm/swap.c */
 extern void lru_cache_add(struct page *);
 extern void lru_cache_add_anon(struct page *page);

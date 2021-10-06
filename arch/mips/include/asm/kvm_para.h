@@ -105,4 +105,5 @@ static inline bool kvm_para_available(void)
 }
 #endif
 
+
 #endif /* _ASM_MIPS_KVM_PARA_H */

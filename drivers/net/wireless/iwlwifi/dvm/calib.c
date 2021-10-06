@@ -362,6 +362,7 @@ static int iwl_sens_energy_cck(struct iwl_priv *priv,
 	return 0;
 }
 
+
 static int iwl_sens_auto_corr_ofdm(struct iwl_priv *priv,
 				       u32 norm_fa,
 				       u32 rx_enable_time)

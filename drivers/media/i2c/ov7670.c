@@ -148,6 +148,7 @@ MODULE_PARM_DESC(debug, "Debug level (0-1)");
 #define   CMATRIX_LEN 6
 #define REG_CMATRIX_SIGN 0x58
 
+
 #define REG_BRIGHT	0x55	/* Brightness */
 #define REG_CONTRAS	0x56	/* Contrast control */
 
@@ -245,6 +246,8 @@ static inline struct v4l2_subdev *to_sd(struct v4l2_ctrl *ctrl)
 {
 	return &container_of(ctrl->handler, struct ov7670_info, hdl)->sd;
 }
+
+
 
 /*
  * The default register settings, as obtained from OmniVision.  There
@@ -376,6 +379,7 @@ static struct regval_list ov7670_default_regs[] = {
 	{ 0xff, 0xff },	/* END MARKER */
 };
 
+
 /*
  * Here we'll try to encapsulate the changes for just the output
  * video format.
@@ -384,6 +388,7 @@ static struct regval_list ov7670_default_regs[] = {
  *
  * IMPORTANT RULE: the first entry must be for COM7, see ov7670_s_fmt for why.
  */
+
 
 static struct regval_list ov7670_fmt_yuv422[] = {
 	{ REG_COM7, 0x0 },  /* Selects YUV mode */
@@ -441,6 +446,8 @@ static struct regval_list ov7670_fmt_raw[] = {
 	{ 0xff, 0xff },
 };
 
+
+
 /*
  * Low-level register I/O.
  *
@@ -462,6 +469,7 @@ static int ov7670_read_smbus(struct v4l2_subdev *sd, unsigned char reg,
 	}
 	return ret;
 }
+
 
 static int ov7670_write_smbus(struct v4l2_subdev *sd, unsigned char reg,
 		unsigned char value)
@@ -508,6 +516,7 @@ static int ov7670_read_i2c(struct v4l2_subdev *sd, unsigned char reg,
 	}
 	return ret;
 }
+
 
 static int ov7670_write_i2c(struct v4l2_subdev *sd, unsigned char reg,
 		unsigned char value)
@@ -563,6 +572,7 @@ static int ov7670_write_array(struct v4l2_subdev *sd, struct regval_list *vals)
 	return 0;
 }
 
+
 /*
  * Stuff that knows about the sensor.
  */
@@ -573,10 +583,13 @@ static int ov7670_reset(struct v4l2_subdev *sd, u32 val)
 	return 0;
 }
 
+
 static int ov7670_init(struct v4l2_subdev *sd, u32 val)
 {
 	return ov7670_write_array(sd, ov7670_default_regs);
 }
+
+
 
 static int ov7670_detect(struct v4l2_subdev *sd)
 {
@@ -611,6 +624,7 @@ static int ov7670_detect(struct v4l2_subdev *sd)
 		return -ENODEV;
 	return 0;
 }
+
 
 /*
  * Store information about the video data format.  The color matrix
@@ -649,6 +663,7 @@ static struct ov7670_format_struct {
 	},
 };
 #define N_OV7670_FMTS ARRAY_SIZE(ov7670_formats)
+
 
 /*
  * Then there is the issue of window sizes.  Try to capture the info here.
@@ -883,6 +898,7 @@ static int ov7670_set_hw(struct v4l2_subdev *sd, int hstart, int hstop,
 	return ret;
 }
 
+
 static int ov7670_enum_mbus_code(struct v4l2_subdev *sd,
 		struct v4l2_subdev_pad_config *cfg,
 		struct v4l2_subdev_mbus_code_enum *code)
@@ -1051,6 +1067,7 @@ static int ov7670_s_parm(struct v4l2_subdev *sd, struct v4l2_streamparm *parms)
 	return info->devtype->set_framerate(sd, tpf);
 }
 
+
 /*
  * Frame intervals.  Since frame rates are controlled with the clock
  * divider, we can only do 30/n for integer n values.  So no continuous
@@ -1170,6 +1187,7 @@ static int ov7670_store_cmatrix(struct v4l2_subdev *sd,
 	return ret;
 }
 
+
 /*
  * Hue also requires messing with the color matrix.  It also requires
  * trig functions, which tend not to be well supported in the kernel.
@@ -1215,6 +1233,9 @@ static int ov7670_cosine(int theta)
 	return ov7670_sine(theta);
 }
 
+
+
+
 static void ov7670_calc_cmatrix(struct ov7670_info *info,
 		int matrix[CMATRIX_LEN], int sat, int hue)
 {
@@ -1243,6 +1264,8 @@ static void ov7670_calc_cmatrix(struct ov7670_info *info,
 	}
 }
 
+
+
 static int ov7670_s_sat_hue(struct v4l2_subdev *sd, int sat, int hue)
 {
 	struct ov7670_info *info = to_state(sd);
@@ -1253,6 +1276,7 @@ static int ov7670_s_sat_hue(struct v4l2_subdev *sd, int sat, int hue)
 	ret = ov7670_store_cmatrix(sd, matrix);
 	return ret;
 }
+
 
 /*
  * Some weird registers seem to store values in a sign/magnitude format!
@@ -1404,6 +1428,7 @@ static int ov7670_s_autoexp(struct v4l2_subdev *sd,
 	}
 	return ret;
 }
+
 
 static int ov7670_g_volatile_ctrl(struct v4l2_ctrl *ctrl)
 {
@@ -1628,6 +1653,7 @@ static int ov7670_probe(struct i2c_client *client,
 
 	return 0;
 }
+
 
 static int ov7670_remove(struct i2c_client *client)
 {

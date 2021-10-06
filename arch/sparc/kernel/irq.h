@@ -21,6 +21,7 @@ struct irq_bucket {
  */
 extern struct irq_bucket *irq_map[SUN4D_MAX_IRQ];
 
+
 /* sun4m specific type definitions */
 
 /* This maps direct to CPU specific interrupt registers */

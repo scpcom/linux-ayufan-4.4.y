@@ -25,6 +25,7 @@
 #define USB_VENDOR_ID_DIOLAN		0x0abf
 #define USB_DEVICE_ID_DIOLAN_U2C	0x3370
 
+
 /* commands via USB, must match command ids in the firmware */
 #define CMD_I2C_READ		0x01
 #define CMD_I2C_WRITE		0x02

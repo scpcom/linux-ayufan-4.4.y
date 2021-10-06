@@ -18,6 +18,7 @@
 #include "proto.h"
 #include "irq_impl.h"
 
+
 /* Note mask bit is true for DISABLED irqs.  */
 static unsigned int cached_irq_mask = 0xffff;
 static DEFINE_SPINLOCK(i8259_irq_lock);
@@ -96,6 +97,7 @@ init_i8259a_irqs(void)
 
 	setup_irq(2, &cascade);
 }
+
 
 #if defined(CONFIG_ALPHA_GENERIC)
 # define IACK_SC	alpha_mv.iack_sc

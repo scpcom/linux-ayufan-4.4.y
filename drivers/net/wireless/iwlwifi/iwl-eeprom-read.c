@@ -83,6 +83,7 @@
 #define IWL_EEPROM_SEM_TIMEOUT		10   /* microseconds */
 #define IWL_EEPROM_SEM_RETRY_LIMIT	1000 /* number of attempts (not time) */
 
+
 /*
  * The device's EEPROM semaphore prevents conflicts between driver and uCode
  * when accessing the EEPROM; each access is a series of pulses to/from the
@@ -286,6 +287,7 @@ static bool iwl_is_otp_empty(struct iwl_trans *trans)
 
 	return is_empty;
 }
+
 
 /*
  * iwl_find_otp_image: find EEPROM image in OTP

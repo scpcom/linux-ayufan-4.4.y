@@ -290,6 +290,7 @@ out:
 	return ret;
 }
 
+
 /* Device model stuff */
 
 static int hdaps_probe(struct platform_device *dev)
@@ -346,6 +347,7 @@ static void hdaps_mousedev_poll(struct input_polled_dev *dev)
 out:
 	mutex_unlock(&hdaps_mtx);
 }
+
 
 /* Sysfs Files */
 
@@ -476,6 +478,7 @@ static struct attribute *hdaps_attributes[] = {
 static struct attribute_group hdaps_attribute_group = {
 	.attrs = hdaps_attributes,
 };
+
 
 /* Module stuff */
 

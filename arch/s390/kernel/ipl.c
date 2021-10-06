@@ -412,6 +412,7 @@ size_t append_ipl_scpdata(char *dest, size_t len)
 	return rc;
 }
 
+
 static struct kobj_attribute sys_ipl_vm_parm_attr =
 	__ATTR(parm, S_IRUGO, ipl_vm_parm_show, NULL);
 
@@ -717,6 +718,7 @@ static ssize_t reipl_fcp_scpdata_write(struct file *filp, struct kobject *kobj,
 	size_t scpdata_len = count;
 	size_t padding;
 
+
 	if (off)
 		return -EINVAL;
 
@@ -889,6 +891,7 @@ static struct attribute_group reipl_ccw_attr_group_lpar = {
 	.name  = IPL_CCW_STR,
 	.attrs = reipl_ccw_attrs_lpar,
 };
+
 
 /* NSS reipl device attributes */
 static void reipl_get_ascii_nss_name(char *dst,

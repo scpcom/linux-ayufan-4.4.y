@@ -9,6 +9,7 @@
 #ifndef _LINUX_NFS_PAGE_H
 #define _LINUX_NFS_PAGE_H
 
+
 #include <linux/list.h>
 #include <linux/pagemap.h>
 #include <linux/wait.h>
@@ -116,6 +117,7 @@ extern	struct nfs_page *nfs_create_request(struct nfs_open_context *ctx,
 					    unsigned int count);
 extern	void nfs_release_request(struct nfs_page *);
 
+
 extern	void nfs_pageio_init(struct nfs_pageio_descriptor *desc,
 			     struct inode *inode,
 			     const struct nfs_pageio_ops *pg_ops,
@@ -159,6 +161,7 @@ nfs_list_add_request(struct nfs_page *req, struct list_head *head)
 {
 	list_add_tail(&req->wb_list, head);
 }
+
 
 /**
  * nfs_list_remove_request - Remove a request from its wb_list

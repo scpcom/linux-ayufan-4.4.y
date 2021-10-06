@@ -278,6 +278,7 @@ struct ath_tx_control {
 	bool force_channel;
 };
 
+
 /**
  * @txq_map:  Index is mac80211 queue number.  This is
  *  not necessarily the same as the hardware queue number

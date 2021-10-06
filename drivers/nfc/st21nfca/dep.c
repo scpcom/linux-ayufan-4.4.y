@@ -64,6 +64,7 @@
 
 #define ST21NFCA_DEFAULT_TIMEOUT 0x0a
 
+
 #define PROTOCOL_ERR(req) pr_err("%d: ST21NFCA Protocol error: %s\n", \
 				 __LINE__, req)
 

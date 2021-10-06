@@ -8,6 +8,7 @@
 
 #include "ebb.h"
 
+
 /*
  * Test that PMC5 & 6 are frozen (ie. don't overflow) when they are not being
  * used. Tests the MMCR0_FC56 logic in the kernel.

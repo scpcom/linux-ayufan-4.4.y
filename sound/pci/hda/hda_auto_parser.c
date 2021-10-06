@@ -55,6 +55,7 @@ static void sort_pins_by_sequence(hda_nid_t *pins, struct auto_out_pin *list,
 		pins[i] = list[i].pin;
 }
 
+
 /* add the found input-pin to the cfg->inputs[] table */
 static void add_auto_cfg_input_pin(struct hda_codec *codec, struct auto_pin_cfg *cfg,
 				   hda_nid_t nid, int type)

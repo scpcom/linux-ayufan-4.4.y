@@ -248,6 +248,7 @@ static struct regulator_ops pfuze100_swb_regulator_ops = {
 	.stby_mask = 0x20,	\
 }
 
+
 #define PFUZE3000_SW2_REG(_chip, _name, base, min, max, step)	{	\
 	.desc = {	\
 		.name = #_name,\

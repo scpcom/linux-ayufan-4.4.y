@@ -23,6 +23,7 @@
  *      	- handle timestamps
  */
  
+
 #ifndef _PARISC_PDC_CHASSIS_H
 #define _PARISC_PDC_CHASSIS_H
 
@@ -34,6 +35,7 @@
 
 int pdc_chassis_send_status(int message);
 void parisc_pdc_chassis_init(void);
+
 
 /*
  * -----------------
@@ -50,6 +52,7 @@ void parisc_pdc_chassis_init(void);
 #define PDC_CHASSIS_DIRECT_LPMC		5
 #define PDC_CHASSIS_DIRECT_DUMP		6	/* not yet implemented */
 #define PDC_CHASSIS_DIRECT_OOPS		7	/* not yet implemented */
+
 
 /*
  * ------------
@@ -153,6 +156,7 @@ void parisc_pdc_chassis_init(void);
 					 PDC_CHASSIS_LED_FAULT_ON	| \
 					 PDC_CHASSIS_LED_VALID		)
 /* All other states are invalid */
+
 
 /*
  * --------------

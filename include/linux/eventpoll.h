@@ -15,8 +15,10 @@
 
 #include <uapi/linux/eventpoll.h>
 
+
 /* Forward declarations to avoid compiler errors */
 struct file;
+
 
 #ifdef CONFIG_EPOLL
 
@@ -26,6 +28,7 @@ static inline void eventpoll_init_file(struct file *file)
 	INIT_LIST_HEAD(&file->f_ep_links);
 	INIT_LIST_HEAD(&file->f_tfile_llink);
 }
+
 
 /* Used to release the epoll bits inside the "struct file" */
 void eventpoll_release_file(struct file *file);

@@ -16,3 +16,4 @@ size_t befs_read_lsymlink(struct super_block *sb, befs_data_stream * data,
 befs_blocknr_t befs_count_blocks(struct super_block *sb, befs_data_stream * ds);
 
 extern const befs_inode_addr BAD_IADDR;
+

@@ -1263,6 +1263,7 @@ err:
 	return -EREMOTEIO;
 }
 
+
 static inline void CONVERT32(u32 x, char *str)
 {
 	*str++	= (x >> 24) & 0xff;
@@ -1612,6 +1613,7 @@ static struct dvb_frontend_ops stb0899_ops = {
 	.get_frontend_algo		= stb0899_frontend_algo,
 	.search				= stb0899_search,
 	.get_frontend                   = stb0899_get_frontend,
+
 
 	.read_status			= stb0899_read_status,
 	.read_snr			= stb0899_read_snr,

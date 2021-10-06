@@ -1,6 +1,7 @@
 #ifndef _LINUX_REBOOT_H
 #define _LINUX_REBOOT_H
 
+
 #include <linux/notifier.h>
 #include <uapi/linux/reboot.h>
 
@@ -32,6 +33,7 @@ extern enum reboot_type reboot_type;
 extern int reboot_default;
 extern int reboot_cpu;
 extern int reboot_force;
+
 
 extern int register_reboot_notifier(struct notifier_block *);
 extern int unregister_reboot_notifier(struct notifier_block *);

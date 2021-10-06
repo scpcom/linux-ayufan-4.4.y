@@ -101,6 +101,7 @@ void rc_map_unregister(struct rc_map_list *map)
 }
 EXPORT_SYMBOL_GPL(rc_map_unregister);
 
+
 static struct rc_map_table empty[] = {
 	{ 0x2a, KEY_COFFEE },
 };

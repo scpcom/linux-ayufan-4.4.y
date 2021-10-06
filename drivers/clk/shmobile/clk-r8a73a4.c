@@ -69,6 +69,7 @@ r8a73a4_cpg_register_clock(struct device_node *np, struct r8a73a4_cpg *cpg,
 	unsigned int mult = 1;
 	unsigned int div = 1;
 
+
 	if (!strcmp(name, "main")) {
 		u32 ckscr = clk_readl(cpg->reg + CPG_CKSCR);
 

@@ -30,6 +30,7 @@
  * Blackfin Cache setup
  */
 
+
 #define BFIN_ISUBBANKS	4
 #define BFIN_IWAYS		4
 #define BFIN_ILINES		32

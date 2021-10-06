@@ -221,6 +221,7 @@ static const struct tw68_format *format_by_fourcc(unsigned int fourcc)
 	return NULL;
 }
 
+
 /* ------------------------------------------------------------------ */
 /*
  * Note that the cropping rectangles are described in terms of a single

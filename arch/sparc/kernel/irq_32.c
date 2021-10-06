@@ -107,6 +107,7 @@ EXPORT_SYMBOL(arch_local_irq_restore);
  * the generic IRQ layer during request_irq().
  */
 
+
 /* Table of allocated irqs. Unused entries has irq == 0 */
 static struct irq_bucket irq_table[NR_IRQS];
 /* Protect access to irq_table */
@@ -190,6 +191,7 @@ void irq_unlink(unsigned int irq)
 	spin_unlock_irqrestore(&irq_map_lock, flags);
 }
 
+
 /* /proc/interrupts printing */
 int arch_show_interrupts(struct seq_file *p, int prec)
 {
@@ -239,6 +241,7 @@ int sparc_floppy_request_irq(unsigned int irq, irq_handler_t irq_handler)
 {
 	unsigned int cpu_irq;
 	int err;
+
 
 	err = request_irq(irq, irq_handler, 0, "floppy", NULL);
 	if (err)
@@ -356,3 +359,4 @@ void __init init_IRQ(void)
 		break;
 	}
 }
+

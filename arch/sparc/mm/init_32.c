@@ -65,6 +65,7 @@ void show_mem(unsigned int filter)
 	printk("%ld free pages\n", nr_free_pages());
 }
 
+
 unsigned long last_valid_pfn;
 
 unsigned long calc_highpages(void)
@@ -297,6 +298,7 @@ void __init mem_init(void)
 		prom_printf("Please mail sparclinux@vger.kernel.org.\n");
 		prom_halt();
 	}
+
 
 	/* Saves us work later. */
 	memset((void *)&empty_zero_page, 0, PAGE_SIZE);

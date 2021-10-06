@@ -72,6 +72,7 @@ static int pvr2_dvb_feed_func(struct pvr2_dvb_adapter *adap)
 			continue;
 		}
 
+
 		/* Wait until more buffers become available or we're
 		   told not to wait any longer. */
 		ret = wait_event_interruptible(
@@ -431,3 +432,4 @@ fail1:
 	pvr2_channel_done(&adap->channel);
 	return NULL;
 }
+

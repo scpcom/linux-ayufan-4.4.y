@@ -467,6 +467,7 @@ static inline int kvmppc_e500_shadow_map(struct kvmppc_vcpu_e500 *vcpu_e500,
 		goto out;
 	}
 
+
 	pgdir = vcpu_e500->vcpu.arch.pgdir;
 	/*
 	 * We are just looking at the wimg bits, so we don't

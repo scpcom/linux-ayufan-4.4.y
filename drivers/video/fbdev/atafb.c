@@ -77,6 +77,7 @@
 #define SWITCH_SND7 0x80
 #define SWITCH_NONE 0x00
 
+
 #define up(x, r) (((x) + (r) - 1) & ~((r)-1))
 
 	/*
@@ -98,6 +99,7 @@ static void atafb_copyarea(struct fb_info *info,
 static void atafb_imageblit(struct fb_info *info, const struct fb_image *image);
 static int atafb_ioctl(struct fb_info *info, unsigned int cmd,
 		       unsigned long arg);
+
 
 static int default_par;		/* default resolution (0=none) */
 
@@ -197,6 +199,7 @@ static int current_par_valid;
 
 static int mono_moni;
 
+
 #ifdef ATAFB_EXT
 
 /* external video handling */
@@ -255,6 +258,7 @@ static int MV300_reg_8bit[256] = {
 
 static int *MV300_reg = MV300_reg_8bit;
 #endif /* ATAFB_EXT */
+
 
 static int inverse;
 
@@ -327,6 +331,7 @@ extern unsigned char fontdata_8x16[];
  *	int (*fb_mmap)(struct fb_info *info, struct vm_area_struct *vma);
  * } ;
  */
+
 
 /* ++roman: This structure abstracts from the underlying hardware (ST(e),
  * TT, or Falcon.
@@ -556,6 +561,7 @@ static char *mode_option __initdata = NULL;
 #define DEFMODE_STE	2		/* "st-high" for ST/E */
 #define DEFMODE_EXT	6		/* "vga" for external */
 
+
 static int get_video_mode(char *vname)
 {
 	char ***name_list;
@@ -575,6 +581,8 @@ static int get_video_mode(char *vname)
 	}
 	return 0;
 }
+
+
 
 /* ------------------- TT specific functions ---------------------- */
 
@@ -2369,6 +2377,7 @@ static void ata_set_par(struct atafb_par *par)
 	current_par_valid = 1;
 }
 
+
 /* =========================================================== */
 /* ============== Hardware Independent Functions ============= */
 /* =========================================================== */
@@ -2487,6 +2496,7 @@ atafb_pan_display(struct fb_var_screeninfo *var, struct fb_info *info)
 #else
 #define Please update me
 #endif
+
 
 static void atafb_fillrect(struct fb_info *info, const struct fb_fillrect *rect)
 {
@@ -2743,6 +2753,7 @@ static int atafb_set_par(struct fb_info *info)
 
 	return 0;
 }
+
 
 static struct fb_ops atafb_ops = {
 	.owner =	THIS_MODULE,
@@ -3213,6 +3224,7 @@ int __init atafb_init(void)
 	atafb_set_disp(&fb_info);
 
 	fb_alloc_cmap(&(fb_info.cmap), 1 << fb_info.var.bits_per_pixel, 0);
+
 
 	printk("Determined %dx%d, depth %d\n",
 	       fb_info.var.xres, fb_info.var.yres, fb_info.var.bits_per_pixel);

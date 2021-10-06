@@ -147,6 +147,7 @@ static int microread_i2c_write(void *phy_id, struct sk_buff *skb)
 	return r;
 }
 
+
 static int microread_i2c_read(struct microread_i2c_phy *phy,
 			      struct sk_buff **skb)
 {

@@ -36,6 +36,7 @@ static const struct of_device_id mpc52xx_sram_ids[] = {
 	{}
 };
 
+
 struct bcom_engine *bcom_eng = NULL;
 EXPORT_SYMBOL_GPL(bcom_eng);	/* needed for inline functions */
 
@@ -228,6 +229,7 @@ bcom_set_initiator(int task, int initiator)
 }
 EXPORT_SYMBOL_GPL(bcom_set_initiator);
 
+
 /* Public API */
 
 void
@@ -243,6 +245,7 @@ bcom_disable(struct bcom_task *tsk)
 	bcom_disable_task(tsk->tasknum);
 }
 EXPORT_SYMBOL_GPL(bcom_disable);
+
 
 /* ======================================================================== */
 /* Engine init/cleanup                                                      */
@@ -268,6 +271,7 @@ static u32 fdt_ops[] = {
 	0xa0076540,	/* FDT[62] - endian32()   */
 	0xa0000760,	/* FDT[63] - endian16()   */
 };
+
 
 static int bcom_engine_init(void)
 {
@@ -354,6 +358,7 @@ bcom_engine_cleanup(void)
 	bcom_sram_free(bcom_eng->var);
 	bcom_sram_free(bcom_eng->fdt);
 }
+
 
 /* ======================================================================== */
 /* OF platform driver                                                       */
@@ -453,6 +458,7 @@ error_ofput:
 	return rv;
 }
 
+
 static int mpc52xx_bcom_remove(struct platform_device *op)
 {
 	/* Clean up the engine */
@@ -483,6 +489,7 @@ static const struct of_device_id mpc52xx_bcom_of_match[] = {
 
 MODULE_DEVICE_TABLE(of, mpc52xx_bcom_of_match);
 
+
 static struct platform_driver mpc52xx_bcom_of_platform_driver = {
 	.probe		= mpc52xx_bcom_probe,
 	.remove		= mpc52xx_bcom_remove,
@@ -491,6 +498,7 @@ static struct platform_driver mpc52xx_bcom_of_platform_driver = {
 		.of_match_table = mpc52xx_bcom_of_match,
 	},
 };
+
 
 /* ======================================================================== */
 /* Module                                                                   */
@@ -519,3 +527,4 @@ MODULE_AUTHOR("Sylvain Munaut <tnt@246tNt.com>");
 MODULE_AUTHOR("Andrey Volkov <avolkov@varma-el.com>");
 MODULE_AUTHOR("Dale Farnsworth <dfarnsworth@mvista.com>");
 MODULE_LICENSE("GPL v2");
+

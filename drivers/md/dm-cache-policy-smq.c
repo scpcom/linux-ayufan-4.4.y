@@ -1459,6 +1459,7 @@ static int smq_remove_cblock(struct dm_cache_policy *p, dm_cblock_t cblock)
 	return r;
 }
 
+
 #define CLEAN_TARGET_CRITICAL 5u /* percent */
 
 static bool clean_target_met(struct smq_policy *mq, bool critical)

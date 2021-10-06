@@ -124,6 +124,7 @@ static int debug;
 #define TDA10046H_CODE_CPT	 0x57
 #define TDA10046H_CODE_IN	 0x58
 
+
 static int tda1004x_write_byteI(struct tda1004x_state *state, int reg, int data)
 {
 	int ret;

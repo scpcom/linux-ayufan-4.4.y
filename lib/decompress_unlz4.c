@@ -49,6 +49,7 @@ STATIC inline int INIT unlz4(u8 *input, long in_len,
 #endif
 	size_t dest_len;
 
+
 	if (output) {
 		outp = output;
 	} else if (!flush) {
@@ -126,6 +127,7 @@ STATIC inline int INIT unlz4(u8 *input, long in_len,
 				*posp += 4;
 			continue;
 		}
+
 
 		if (posp)
 			*posp += 4;

@@ -42,6 +42,7 @@
 
 #include <linux/zorro.h>
 
+
 #define Z2MINOR_COMBINED      (0)
 #define Z2MINOR_Z2ONLY        (1)
 #define Z2MINOR_CHIPONLY      (2)

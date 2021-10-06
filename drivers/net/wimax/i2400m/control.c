@@ -81,6 +81,7 @@
 #include <linux/export.h>
 #include <linux/moduleparam.h>
 
+
 #define D_SUBMODULE control
 #include "debug-levels.h"
 
@@ -105,6 +106,7 @@ MODULE_PARM_DESC(passive_mode,
 		 "If true, the driver will not do any device setup "
 		 "and leave it up to user space, who must be properly "
 		 "setup.");
+
 
 /*
  * Return if a TLV is of a give type and size
@@ -134,6 +136,7 @@ ssize_t i2400m_tlv_match(const struct i2400m_tlv_hdr *tlv,
 	}
 	return 0;
 }
+
 
 /*
  * Given a buffer of TLVs, iterate over them
@@ -201,6 +204,7 @@ error_beyond_end:
 	return tlv_pos;
 }
 
+
 /*
  * Find a TLV in a buffer of sequential TLVs
  *
@@ -237,6 +241,7 @@ const struct i2400m_tlv_hdr *i2400m_tlv_find(
 	return tlv;
 }
 
+
 static const struct
 {
 	char *msg;
@@ -260,6 +265,7 @@ static const struct
 		{ "not ready for powersave", -EACCES },
 	[I2400M_MS_THERMAL_CRITICAL] = { "thermal critical", -EL3HLT },
 };
+
 
 /*
  * i2400m_msg_check_status - translate a message's status code
@@ -293,6 +299,7 @@ int i2400m_msg_check_status(const struct i2400m_l3l4_hdr *l3l4_hdr,
 		snprintf(strbuf, strbuf_size, "%s (%d)", str, status);
 	return result;
 }
+
 
 /*
  * Act on a TLV System State reported by the device
@@ -361,6 +368,7 @@ void i2400m_report_tlv_system_state(struct i2400m *i2400m,
 		i2400m, ss, i2400m_state);
 }
 
+
 /*
  * Parse and act on a TLV Media Status sent by the device
  *
@@ -409,6 +417,7 @@ void i2400m_report_tlv_media_status(struct i2400m *i2400m,
 		i2400m, ms, status);
 }
 
+
 /*
  * Process a TLV from a 'state report'
  *
@@ -454,6 +463,7 @@ void i2400m_report_state_parse_tlv(struct i2400m *i2400m,
 	}
 }
 
+
 /*
  * Parse a 'state report' and extract information
  *
@@ -485,6 +495,7 @@ void i2400m_report_state_hook(struct i2400m *i2400m,
 	d_fnend(4, dev, "(i2400m %p, l3l4_hdr %p, size %zu, %s) = void\n",
 		i2400m, l3l4_hdr, size, tag);
 }
+
 
 /*
  * i2400m_report_hook - (maybe) act on a report
@@ -535,6 +546,7 @@ void i2400m_report_hook(struct i2400m *i2400m,
 		i2400m, l3l4_hdr, size);
 }
 
+
 /*
  * i2400m_msg_ack_hook - process cmd/set/get ack for internal status
  *
@@ -576,6 +588,7 @@ static void i2400m_msg_ack_hook(struct i2400m *i2400m,
 	}
 }
 
+
 /*
  * i2400m_msg_size_check() - verify message size and header are congruent
  *
@@ -613,6 +626,8 @@ error_hdr_size:
 	return result;
 }
 
+
+
 /*
  * Cancel a wait for a command ACK
  *
@@ -634,6 +649,7 @@ void i2400m_msg_to_dev_cancel_wait(struct i2400m *i2400m, int code)
 	i2400m->ack_skb = ERR_PTR(code);
 	spin_unlock_irqrestore(&i2400m->rx_lock, flags);
 }
+
 
 /**
  * i2400m_msg_to_dev - Send a control message to the device and get a response
@@ -813,6 +829,7 @@ error_bad_msg:
 	return ERR_PTR(result);
 }
 
+
 /*
  * Definitions for the Enter Power Save command
  *
@@ -835,6 +852,7 @@ struct i2400m_cmd_enter_power_save {
 	struct i2400m_tlv_hdr tlv;
 	__le32 val;
 } __packed;
+
 
 /*
  * Request entering power save
@@ -885,6 +903,7 @@ error_alloc:
 	return result;
 }
 EXPORT_SYMBOL_GPL(i2400m_cmd_enter_powersave);
+
 
 /*
  * Definitions for getting device information
@@ -961,12 +980,14 @@ error_cmd_failed:
 	return ERR_PTR(result);
 }
 
+
 /* Firmware interface versions we support */
 enum {
 	I2400M_HDIv_MAJOR = 9,
 	I2400M_HDIv_MINOR = 1,
 	I2400M_HDIv_MINOR_2 = 2,
 };
+
 
 /**
  * i2400m_firmware_check - check firmware versions are compatible with
@@ -1057,6 +1078,7 @@ error_alloc:
 	return result;
 }
 
+
 /*
  * Send an DoExitIdle command to the device to ask it to go out of
  * basestation-idle mode.
@@ -1100,6 +1122,7 @@ error_alloc:
 	return result;
 
 }
+
 
 /*
  * Query the device for its state, update the WiMAX stack's idea of it
@@ -1308,6 +1331,7 @@ error_alloc:
 	return result;
 }
 
+
 /**
  * i2400m_dev_initialize - Initialize the device once communications are ready
  *
@@ -1391,6 +1415,7 @@ error:
 	d_fnend(3, dev, "(i2400m %p) = %d\n", i2400m, result);
 	return result;
 }
+
 
 /**
  * i2400m_dev_shutdown - Shutdown a running device

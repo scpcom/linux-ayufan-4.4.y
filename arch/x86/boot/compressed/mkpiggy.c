@@ -54,6 +54,7 @@ int main(int argc, char *argv[])
 		goto bail;
 	}
 
+
 	if (fseek(f, -4L, SEEK_END)) {
 		perror(argv[1]);
 	}

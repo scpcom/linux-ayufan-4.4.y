@@ -294,6 +294,7 @@ static int xen_acpi_memory_device_add(struct acpi_device *device)
 	int result;
 	struct acpi_memory_device *mem_device = NULL;
 
+
 	if (!device)
 		return -EINVAL;
 

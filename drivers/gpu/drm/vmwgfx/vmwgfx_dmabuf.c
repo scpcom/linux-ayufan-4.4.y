@@ -30,6 +30,7 @@
 #include <drm/drmP.h>
 #include "vmwgfx_drv.h"
 
+
 /**
  * vmw_dmabuf_pin_in_placement - Validate a buffer to placement.
  *
@@ -255,6 +256,7 @@ void vmw_bo_get_guest_ptr(const struct ttm_buffer_object *bo,
 		ptr->offset = 0;
 	}
 }
+
 
 /**
  * vmw_bo_pin_reserved - Pin or unpin a buffer object without moving it.

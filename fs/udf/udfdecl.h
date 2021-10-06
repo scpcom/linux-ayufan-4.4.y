@@ -113,6 +113,7 @@ struct ustr {
 	uint8_t u_len;
 };
 
+
 /* super.c */
 
 static inline void udf_updated_lvid(struct super_block *sb)

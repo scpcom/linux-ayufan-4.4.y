@@ -47,6 +47,7 @@ struct creg_cmd {
 
 static struct kmem_cache *creg_cmd_pool;
 
+
 /*------------ Private Functions --------------*/
 
 #if defined(__LITTLE_ENDIAN)
@@ -81,6 +82,7 @@ static int copy_to_creg_data(struct rsxx_cardinfo *card,
 
 	return 0;
 }
+
 
 static int copy_from_creg_data(struct rsxx_cardinfo *card,
 				int cnt8,
@@ -223,11 +225,13 @@ static void creg_cmd_timed_out(unsigned long data)
 
 	kmem_cache_free(creg_cmd_pool, cmd);
 
+
 	spin_lock(&card->creg_ctrl.lock);
 	card->creg_ctrl.active = 0;
 	creg_kick_queue(card);
 	spin_unlock(&card->creg_ctrl.lock);
 }
+
 
 static void creg_cmd_done(struct work_struct *work)
 {
@@ -534,6 +538,7 @@ int rsxx_issue_card_cmd(struct rsxx_cardinfo *card, u32 cmd)
 				   sizeof(cmd), &cmd, 0);
 }
 
+
 /*----------------- HW Log Functions -------------------*/
 static void hw_log_msg(struct rsxx_cardinfo *card, const char *str, int len)
 {
@@ -599,6 +604,7 @@ static int substrncpy(char *dest, const char *src, int count)
 	}
 	return max_cnt - count;
 }
+
 
 static void read_hw_log_done(struct rsxx_cardinfo *card,
 			     struct creg_cmd *cmd,
@@ -781,6 +787,7 @@ void rsxx_creg_destroy(struct rsxx_cardinfo *card)
 
 	cancel_work_sync(&card->creg_ctrl.done_work);
 }
+
 
 int rsxx_creg_init(void)
 {

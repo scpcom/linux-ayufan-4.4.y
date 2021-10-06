@@ -82,6 +82,7 @@ FlipBits(unsigned char c, int keylen)
 	return c;
 }
 
+
 /* isdn_v110_open allocates and initializes private V.110 data
  * structures and returns a pointer to these.
  */
@@ -141,6 +142,7 @@ isdn_v110_close(isdn_v110_stream *v)
 	kfree(v->encodebuf);
 	kfree(v);
 }
+
 
 /*
  * ValidHeaderBytes return the number of valid bytes in v->decodebuf

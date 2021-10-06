@@ -48,6 +48,7 @@ static int q40ide_default_irq(unsigned long base)
 	   }
 }
 
+
 /*
  * Addresses are pretranslated for Q40 ISA access.
  */

@@ -811,6 +811,7 @@ struct dvb_frontend *hd29l2_attach(const struct hd29l2_config *config,
 	priv->i2c = i2c;
 	memcpy(&priv->cfg, config, sizeof(struct hd29l2_config));
 
+
 	/* check if the demod is there */
 	ret = hd29l2_rd_reg(priv, 0x00, &tmp);
 	if (ret)

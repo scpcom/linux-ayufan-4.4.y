@@ -247,6 +247,7 @@ static struct platform_device tmu0_device = {
 	.num_resources	= ARRAY_SIZE(tmu0_resources),
 };
 
+
 static struct platform_device *sh7760_devices[] __initdata = {
 	&scif0_device,
 	&scif1_device,

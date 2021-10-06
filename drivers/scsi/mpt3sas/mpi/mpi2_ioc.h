@@ -191,6 +191,7 @@ typedef struct _MPI2_IOC_INIT_REQUEST {
 /* MsgFlags */
 #define MPI2_IOCINIT_MSGFLAG_RDPQ_ARRAY_MODE    (0x01)
 
+
 /*MsgVersion */
 #define MPI2_IOCINIT_MSGVERSION_MAJOR_MASK      (0xFF00)
 #define MPI2_IOCINIT_MSGVERSION_MAJOR_SHIFT     (8)
@@ -214,6 +215,7 @@ typedef struct _MPI2_IOC_INIT_RDPQ_ARRAY_ENTRY {
 } MPI2_IOC_INIT_RDPQ_ARRAY_ENTRY,
 *PTR_MPI2_IOC_INIT_RDPQ_ARRAY_ENTRY,
 Mpi2IOCInitRDPQArrayEntry, *pMpi2IOCInitRDPQArrayEntry;
+
 
 /*IOCInit Reply message */
 typedef struct _MPI2_IOC_INIT_REPLY {
@@ -1581,6 +1583,7 @@ typedef struct _MPI2_INIT_IMAGE_FOOTER {
 /*defines for the ResetVector field */
 #define MPI2_INIT_IMAGE_RESETVECTOR_OFFSET      (0x14)
 
+
 /* Encrypted Hash Extended Image Data */
 
 typedef struct _MPI25_ENCRYPTED_HASH_ENTRY {
@@ -1614,6 +1617,8 @@ typedef struct _MPI25_ENCRYPTED_HASH_DATA {
 	MPI25_ENCRYPTED_HASH_ENTRY	EncryptedHashEntry[1];  /* 0x08 */
 } MPI25_ENCRYPTED_HASH_DATA, *PTR_MPI25_ENCRYPTED_HASH_DATA,
 Mpi25EncryptedHashData_t, *pMpi25EncryptedHashData_t;
+
+
 
 /****************************************************************************
 * PowerManagementControl message

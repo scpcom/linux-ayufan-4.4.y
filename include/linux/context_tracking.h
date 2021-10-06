@@ -6,6 +6,7 @@
 #include <linux/context_tracking_state.h>
 #include <asm/ptrace.h>
 
+
 #ifdef CONFIG_CONTEXT_TRACKING
 extern void context_tracking_cpu_set(int cpu);
 
@@ -52,6 +53,7 @@ static inline void exception_exit(enum ctx_state prev_ctx)
 	}
 }
 
+
 /**
  * ct_state() - return the current context tracking state if known
  *
@@ -79,6 +81,7 @@ extern void context_tracking_init(void);
 #else
 static inline void context_tracking_init(void) { }
 #endif /* CONFIG_CONTEXT_TRACKING_FORCE */
+
 
 #ifdef CONFIG_VIRT_CPU_ACCOUNTING_GEN
 static inline void guest_enter(void)

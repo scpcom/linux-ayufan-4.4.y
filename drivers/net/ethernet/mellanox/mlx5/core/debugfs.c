@@ -168,6 +168,7 @@ static ssize_t average_read(struct file *filp, char __user *buf, size_t count,
 	return ret;
 }
 
+
 static ssize_t average_write(struct file *filp, const char __user *buf,
 			     size_t count, loff_t *pos)
 {
@@ -461,6 +462,7 @@ static ssize_t dbg_read(struct file *filp, char __user *buf, size_t count,
 		return -EINVAL;
 	}
 
+
 	if (is_str)
 		ret = snprintf(tbuf, sizeof(tbuf), "%s\n", (const char *)(unsigned long)field);
 	else
@@ -555,6 +557,7 @@ void mlx5_debug_qp_remove(struct mlx5_core_dev *dev, struct mlx5_core_qp *qp)
 	if (qp->dbg)
 		rem_res_tree(qp->dbg);
 }
+
 
 int mlx5_debug_eq_add(struct mlx5_core_dev *dev, struct mlx5_eq *eq)
 {

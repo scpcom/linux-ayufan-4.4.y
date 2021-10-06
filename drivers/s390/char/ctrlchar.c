@@ -31,6 +31,7 @@ void schedule_sysrq_work(struct sysrq_work *sw)
 }
 #endif
 
+
 /**
  * Check for special chars at start of input.
  *

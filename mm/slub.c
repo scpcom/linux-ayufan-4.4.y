@@ -2968,6 +2968,7 @@ error:
 }
 EXPORT_SYMBOL(kmem_cache_alloc_bulk);
 
+
 /*
  * Object placement in a slab is made very easy because we always start at
  * offset 0. If we tune the size of the object to the alignment then we can
@@ -3243,6 +3244,7 @@ static int calculate_sizes(struct kmem_cache *s, int forced_order)
 		s->flags |= __OBJECT_POISON;
 	else
 		s->flags &= ~__OBJECT_POISON;
+
 
 	/*
 	 * If we are Redzoning then check if there is some space between the

@@ -40,6 +40,7 @@ bad:
 }
 early_param("numcpus", set_numcpus);
 
+
 static void paravirt_smp_setup(void)
 {
 	int id;

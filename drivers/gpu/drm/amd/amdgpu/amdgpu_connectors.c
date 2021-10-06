@@ -813,6 +813,7 @@ static int amdgpu_connector_set_lcd_property(struct drm_connector *connector,
 	return 0;
 }
 
+
 static const struct drm_connector_helper_funcs amdgpu_connector_lvds_helper_funcs = {
 	.get_modes = amdgpu_connector_lvds_get_modes,
 	.mode_valid = amdgpu_connector_lvds_mode_valid,

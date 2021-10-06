@@ -13,6 +13,8 @@
  *	$ gcc leapcrash.c -o leapcrash -lrt
  */
 
+
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -32,6 +34,8 @@ static inline int ksft_exit_fail(void)
 	exit(1);
 }
 #endif
+
+
 
 /* clear NTP time_status & time_state */
 int clear_time_state(void)
@@ -63,6 +67,7 @@ void handler(int unused)
 	exit(0);
 }
 
+
 int main(void)
 {
 	struct timex tx;
@@ -78,6 +83,7 @@ int main(void)
 
 	clear_time_state();
 
+
 	/* Get the current time */
 	clock_gettime(CLOCK_REALTIME, &ts);
 
@@ -87,6 +93,7 @@ int main(void)
 
 	for (count = 0; count < 20; count++) {
 		struct timeval tv;
+
 
 		/* set the time to 2 seconds before the leap */
 		tv.tv_sec = next_leap - 2;

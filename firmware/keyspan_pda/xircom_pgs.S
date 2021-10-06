@@ -213,6 +213,7 @@ USB_Jump_Table:
 	ljmp	ISR_Ep2out
 	.byte	0
 
+
 	.org 0x200
 		
 start:	mov SP,STACK-1 ; set stack
@@ -275,6 +276,7 @@ clear_rx_ring_loop:
 	mov a, #0x82
 	mov dptr,OEC
 	movx @dptr,a
+
 
 	;; set PORTCCFG.[01] to route TxD0,RxD0 to serial port
 	mov dptr, PORTCCFG
@@ -382,7 +384,10 @@ renum_wait3:
 	movx @dptr, a
 	;; we are back online. the host device will now re-query us
 	
+	
 main:	sjmp main
+
+	
 
 ISR_Sudav:
 	push dps
@@ -497,6 +502,7 @@ setup_ctrl_not_07:
 	
 setup_bmreq_type_not_vendor:
 	ljmp setup_stall
+
 
 setup_bmreq_is_standard:	
 	cjne r2, #0x00, setup_breq_not_00
@@ -652,6 +658,7 @@ setup_breq_not_0a:
 setup_breq_not_0b:
 	ljmp setup_stall
 
+		
 setup_done_ack:	
 	;; now clear HSNAK
 	mov dptr, EP0CS
@@ -751,6 +758,7 @@ ISR_Ep2in:
         mov dptr,OEA
         movx @dptr, a
 
+
 	;; do stuff
 	lcall start_in
 
@@ -758,6 +766,8 @@ ISR_Ep2in:
         mov dptr,OEA
         movx @dptr, a
 
+
+	
 	pop acc
 	pop dph1
 	pop dpl1
@@ -777,6 +787,8 @@ ISR_Ep2out:
         mov a, #0x10             ; Turn the green LED
         mov dptr,OEA
         movx @dptr, a
+
+
 
 	mov a,EXIF
 	clr acc.4
@@ -950,6 +962,7 @@ start_tx__maybe_unthrottle_tx:
 	;; prod rx, which will actually send the message when in2 becomes free
 	ljmp start_in
 	
+
 serial_int:
 	push dps
 	push dpl
@@ -1071,6 +1084,7 @@ putchar_wait:
 	clr TI
 	ret
 
+	
 baud_table:			; baud_high, then baud_low
 	;; baud[0]: 110
 	.byte BAUD_HIGH(110)
@@ -1172,6 +1186,7 @@ tx_ring:
 	.skip 0x100		; 256 bytes
 rx_ring:
 	.skip 0x100		; 256 bytes
+	
 	
 	.END
 	

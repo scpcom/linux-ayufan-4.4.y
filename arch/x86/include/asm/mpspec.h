@@ -1,6 +1,7 @@
 #ifndef _ASM_X86_MPSPEC_H
 #define _ASM_X86_MPSPEC_H
 
+
 #include <asm/mpspec_def.h>
 #include <asm/x86_init.h>
 #include <asm/apicdef.h>

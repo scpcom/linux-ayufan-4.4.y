@@ -309,6 +309,8 @@ int ps3_repository_read_dev_reg(unsigned int bus_index,
 		reg_index, bus_addr, len);
 }
 
+
+
 int ps3_repository_find_device(struct ps3_repository_device *repo)
 {
 	int result;
@@ -797,6 +799,7 @@ int ps3_repository_read_highmem_region_count(unsigned int *region_count)
 	*region_count = v1;
 	return result;
 }
+
 
 int ps3_repository_read_highmem_base(unsigned int region_index,
 	u64 *highmem_base)

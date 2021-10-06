@@ -672,6 +672,7 @@ nouveau_bo_evict_flags(struct ttm_buffer_object *bo, struct ttm_placement *pl)
 	*pl = nvbo->placement;
 }
 
+
 static int
 nve0_bo_move_init(struct nouveau_channel *chan, u32 handle)
 {

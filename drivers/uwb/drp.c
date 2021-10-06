@@ -24,6 +24,7 @@
 #include <linux/delay.h>
 #include "uwb-internal.h"
 
+
 /* DRP Conflict Actions ([ECMA-368 2nd Edition] 17.4.6) */
 enum uwb_drp_conflict_action {
 	/* Reservation is maintained, no action needed */
@@ -52,6 +53,7 @@ enum uwb_drp_conflict_action {
 	 */
 	UWB_DRP_CONFLICT_ACT3,
 };
+
 
 static void uwb_rc_set_drp_cmd_done(struct uwb_rc *rc, void *arg,
 				    struct uwb_rceb *reply, ssize_t reply_size)
@@ -177,6 +179,7 @@ static int evaluate_conflict_action(struct uwb_ie_drp *ext_drp_ie, int ext_beaco
 	int ext_tie_breaker = uwb_ie_drp_tiebreaker(ext_drp_ie);
 	int ext_status      = uwb_ie_drp_status(ext_drp_ie);
 	int ext_type        = uwb_ie_drp_type(ext_drp_ie);
+
 
 	/* [ECMA-368 2nd Edition] 17.4.6 */
 	if (ext_type == UWB_DRP_TYPE_PCA && our_type == UWB_DRP_TYPE_PCA) {
@@ -698,6 +701,7 @@ static void uwb_drp_process_involved(struct uwb_rc *rc, struct uwb_dev *src,
 		uwb_drp_process_owner(rc, rsv, src, drp_ie, drp_evt);
 
 }
+
 
 static bool uwb_drp_involves_us(struct uwb_rc *rc, struct uwb_ie_drp *drp_ie)
 {

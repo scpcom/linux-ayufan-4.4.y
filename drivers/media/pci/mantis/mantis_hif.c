@@ -38,6 +38,7 @@
 
 #include "mantis_reg.h"
 
+
 static int mantis_hif_sbuf_opdone_wait(struct mantis_ca *ca)
 {
 	struct mantis_pci *mantis = ca->ca_priv;
@@ -83,6 +84,7 @@ static int mantis_hif_write_wait(struct mantis_ca *ca)
 	dprintk(MANTIS_DEBUG, 1, "HIF Write success");
 	return rc;
 }
+
 
 int mantis_hif_read_mem(struct mantis_ca *ca, u32 addr)
 {

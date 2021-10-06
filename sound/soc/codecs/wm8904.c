@@ -760,6 +760,7 @@ static int out_pga_event(struct snd_soc_dapm_widget *w,
 				    WM8904_HPL_ENA | WM8904_HPR_ENA,
 				    WM8904_HPL_ENA | WM8904_HPR_ENA);
 
+
 		/* Enable the first stage */
 		snd_soc_update_bits(codec, reg,
 				    WM8904_HPL_ENA_DLY | WM8904_HPR_ENA_DLY,
@@ -1272,6 +1273,7 @@ static struct {
 	{ 480, 20 },
 };
 
+
 static int wm8904_hw_params(struct snd_pcm_substream *substream,
 			    struct snd_pcm_hw_params *params,
 			    struct snd_soc_dai *dai)
@@ -1312,6 +1314,7 @@ static int wm8904_hw_params(struct snd_pcm_substream *substream,
 	default:
 		return -EINVAL;
 	}
+
 
 	dev_dbg(codec->dev, "Target BCLK is %dHz\n", wm8904->bclk);
 
@@ -1397,6 +1400,7 @@ static int wm8904_hw_params(struct snd_pcm_substream *substream,
 
 	return 0;
 }
+
 
 static int wm8904_set_sysclk(struct snd_soc_dai *dai, int clk_id,
 			     unsigned int freq, int dir)
@@ -1513,6 +1517,7 @@ static int wm8904_set_fmt(struct snd_soc_dai *dai, unsigned int fmt)
 	return 0;
 }
 
+
 static int wm8904_set_tdm_slot(struct snd_soc_dai *dai, unsigned int tx_mask,
 			       unsigned int rx_mask, int slots, int slot_width)
 {
@@ -1539,6 +1544,7 @@ static int wm8904_set_tdm_slot(struct snd_soc_dai *dai, unsigned int tx_mask,
 	default:
 		return -EINVAL;
 	}
+
 
 	switch (tx_mask) {
 	case 3:
@@ -2045,6 +2051,7 @@ static void wm8904_handle_pdata(struct snd_soc_codec *codec)
 		snd_soc_add_codec_controls(codec, wm8904_eq_controls,
 				     ARRAY_SIZE(wm8904_eq_controls));
 }
+
 
 static int wm8904_probe(struct snd_soc_codec *codec)
 {

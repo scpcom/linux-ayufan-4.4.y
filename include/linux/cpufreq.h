@@ -219,6 +219,7 @@ __ATTR(_name, 0444, show_##_name, NULL)
 static struct global_attr _name =		\
 __ATTR(_name, 0644, show_##_name, store_##_name)
 
+
 struct cpufreq_driver {
 	char		name[CPUFREQ_NAME_LEN];
 	u8		flags;

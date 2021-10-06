@@ -503,6 +503,7 @@ static inline int miphy28lp_wait_compensation(struct miphy28lp_phy *miphy_phy)
 	return 0;
 }
 
+
 static inline int miphy28lp_compensation(struct miphy28lp_phy *miphy_phy,
 		struct pll_ratio *pll_ratio)
 {
@@ -723,6 +724,7 @@ static inline int miphy28lp_configure_pcie(struct miphy28lp_phy *miphy_phy)
 
 	return 0;
 }
+
 
 static inline void miphy28lp_configure_usb3(struct miphy28lp_phy *miphy_phy)
 {

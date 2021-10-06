@@ -124,6 +124,7 @@ struct sta2x11_instance *sta2x11_get_instance(struct pci_dev *pdev)
 }
 EXPORT_SYMBOL(sta2x11_get_instance);
 
+
 /**
  * p2a - Translate physical address to STA2x11 AMBA address,
  *       used for DMA transfers to STA2x11
@@ -263,6 +264,7 @@ phys_addr_t dma_to_phys(struct device *dev, dma_addr_t daddr)
 	return a2p(daddr, to_pci_dev(dev));
 }
 
+
 /*
  * At boot we must set up the mappings for the pcie-to-amba bridge.
  * It involves device access, and the same happens at suspend/resume time
@@ -339,6 +341,7 @@ static void resume_mapping(struct pci_dev *pdev)
 
 	if (!map)
 		return;
+
 
 	if (!map->is_suspended)
 		goto out;

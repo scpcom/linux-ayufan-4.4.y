@@ -410,6 +410,7 @@ int jbd2_cleanup_journal_tail(journal_t *journal)
 	return __jbd2_update_log_tail(journal, first_tid, blocknr);
 }
 
+
 /* Checkpoint list management */
 
 /*

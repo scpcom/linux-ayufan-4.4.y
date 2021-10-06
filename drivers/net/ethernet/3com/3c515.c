@@ -11,6 +11,7 @@
 	410 Severn Ave., Suite 210
 	Annapolis MD 21403
 
+
 	2000/2/2- Added support for kernel-level ISAPnP
 		by Stephen Frost <sfrost@snowman.net> and Alessandro Zummo
 	Cleaned up for 2.3.x/softnet by Jeff Garzik and Alan Cox.
@@ -142,6 +143,7 @@ buffers.  The value RX_COPYBREAK is used as the copying breakpoint: it is
 chosen to trade-off the memory wasted by passing the full-sized skbuff to
 the queue layer for all frames vs. the copying cost of copying a frame to a
 correctly-sized skbuff.
+
 
 IIIC. Synchronization
 The driver runs as two independent, single-threaded flows of control.  One
@@ -378,6 +380,7 @@ static struct net_device_stats *corkscrew_get_stats(struct net_device *dev);
 static void set_rx_mode(struct net_device *dev);
 static const struct ethtool_ops netdev_ethtool_ops;
 
+
 /*
    Unfortunately maximizing the shared code between the integrated and
    module version of the driver results in a complicated set of initialization
@@ -559,6 +562,7 @@ no_pnp:
 	return NULL;
 }
 
+
 static const struct net_device_ops netdev_ops = {
 	.ndo_open		= corkscrew_open,
 	.ndo_stop		= corkscrew_close,
@@ -570,6 +574,7 @@ static const struct net_device_ops netdev_ops = {
 	.ndo_set_mac_address 	= eth_mac_addr,
 	.ndo_validate_addr	= eth_validate_addr,
 };
+
 
 static int corkscrew_setup(struct net_device *dev, int ioaddr,
 			    struct pnp_dev *idev, int card_number)
@@ -697,6 +702,7 @@ static int corkscrew_setup(struct net_device *dev, int ioaddr,
 
 	return register_netdev(dev);
 }
+
 
 static int corkscrew_open(struct net_device *dev)
 {
@@ -1083,6 +1089,7 @@ static netdev_tx_t corkscrew_start_xmit(struct sk_buff *skb,
 		/* Interrupt us when the FIFO has room for max-sized packet. */
 		outw(SetTxThreshold + (1536 >> 2), ioaddr + EL3_CMD);
 #endif				/* bus master */
+
 
 	/* Clear the Tx status stack. */
 	{
@@ -1553,6 +1560,7 @@ static const struct ethtool_ops netdev_ethtool_ops = {
 	.get_msglevel		= netdev_get_msglevel,
 	.set_msglevel		= netdev_set_msglevel,
 };
+
 
 #ifdef MODULE
 void cleanup_module(void)

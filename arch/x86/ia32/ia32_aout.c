@@ -401,6 +401,7 @@ static int load_aout_library(struct file *file)
 	int retval;
 	struct exec ex;
 
+
 	retval = -ENOEXEC;
 	error = kernel_read(file, 0, (char *) &ex, sizeof(ex));
 	if (error != sizeof(ex))

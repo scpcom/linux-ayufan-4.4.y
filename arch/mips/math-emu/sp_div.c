@@ -67,6 +67,7 @@ union ieee754sp ieee754sp_div(union ieee754sp x, union ieee754sp y)
 	case CLPAIR(IEEE754_CLASS_QNAN, IEEE754_CLASS_INF):
 		return x;
 
+
 	/*
 	 * Infinity handling
 	 */

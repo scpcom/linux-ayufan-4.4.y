@@ -114,6 +114,7 @@ static void sa11x0_register_device(struct platform_device *dev, void *data)
 			dev->name, err);
 }
 
+
 static struct resource sa11x0udc_resources[] = {
 	[0] = DEFINE_RES_MEM(__PREG(Ser0UDCCR), SZ_64K),
 	[1] = DEFINE_RES_IRQ(IRQ_Ser0UDC),

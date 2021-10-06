@@ -16,6 +16,7 @@
 #include <asm/asm.h>
 #include <asm/smap.h>
 
+
 /*
  * __put_user_X
  *

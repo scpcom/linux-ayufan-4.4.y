@@ -354,6 +354,8 @@ int rtllib_wx_set_encode(struct rtllib_device *ieee,
 		goto done;
 	}
 
+
+
 	sec.enabled = 1;
 	sec.flags |= SEC_ENABLED;
 

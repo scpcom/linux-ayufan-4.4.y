@@ -18,6 +18,7 @@
 #include "header.h"
 #include "vdso.h"
 
+
 static bool no_buildid_cache;
 
 int build_id__mark_dso_hit(struct perf_tool *tool __maybe_unused,

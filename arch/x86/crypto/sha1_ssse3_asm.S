@@ -433,6 +433,7 @@
 
 .endm		// W_PRECALC_SSSE3
 
+
 #define K1	0x5a827999
 #define K2	0x6ed9eba1
 #define K3	0x8f1bbcdc
@@ -452,6 +453,7 @@ BSWAP_SHUFB_CTL:
 	.long 0x04050607
 	.long 0x08090a0b
 	.long 0x0c0d0e0f
+
 
 .section .text
 
@@ -545,6 +547,7 @@ W_PRECALC_AVX
 .macro xmm_mov a, b
 	vmovdqu	\a,\b
 .endm
+
 
 /* AVX optimized implementation:
  *  extern "C" void sha1_transform_avx(u32 *digest, const char *data, u32 *ws,

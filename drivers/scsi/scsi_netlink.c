@@ -141,6 +141,7 @@ scsi_netlink_init(void)
 	return;
 }
 
+
 /**
  * scsi_netlink_exit - Called by SCSI subsystem to disable the SCSI transport netlink interface
  *
@@ -154,3 +155,4 @@ scsi_netlink_exit(void)
 
 	return;
 }
+

@@ -403,6 +403,7 @@ static void fimc_handle_lastend(struct fimc_context *ctx, bool enable)
 	fimc_write(ctx, cfg, EXYNOS_CIOCTRL);
 }
 
+
 static int fimc_src_set_fmt_order(struct fimc_context *ctx, u32 fmt)
 {
 	struct exynos_drm_ippdrv *ippdrv = &ctx->ippdrv;
@@ -1847,3 +1848,4 @@ struct platform_driver fimc_driver = {
 		.pm	= &fimc_pm_ops,
 	},
 };
+

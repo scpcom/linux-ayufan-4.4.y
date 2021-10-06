@@ -23,6 +23,7 @@
 #include <asm/unaligned.h>
 #include "cyapa.h"
 
+
 #define GEN3_MAX_FINGERS 5
 #define GEN3_FINGER_NUM(x) (((x) >> 4) & 0x07)
 
@@ -80,6 +81,7 @@
 #define GEN3_BL_IDLE_FW_MAJ_VER_OFFSET 0x0b
 #define GEN3_BL_IDLE_FW_MIN_VER_OFFSET (GEN3_BL_IDLE_FW_MAJ_VER_OFFSET + 1)
 
+
 struct cyapa_touch {
 	/*
 	 * high bits or x/y position value
@@ -132,6 +134,7 @@ static const u8 bl_deactivate[] = { 0x00, 0xff, 0x3b, 0x00, 0x01, 0x02, 0x03,
 		0x04, 0x05, 0x06, 0x07 };
 static const u8 bl_exit[] = { 0x00, 0xff, 0xa5, 0x00, 0x01, 0x02, 0x03, 0x04,
 		0x05, 0x06, 0x07 };
+
 
  /* for byte read/write command */
 #define CMD_RESET      0
@@ -265,6 +268,7 @@ static const struct cyapa_cmd_len cyapa_smbus_cmds[] = {
 	{ CYAPA_SMBUS_MAX_BASELINE, 1 },	/* CYAPA_CMD_MAX_BASELINE */
 	{ CYAPA_SMBUS_MIN_BASELINE, 1 },	/* CYAPA_CMD_MIN_BASELINE */
 };
+
 
 /*
  * cyapa_smbus_read_block - perform smbus block read command

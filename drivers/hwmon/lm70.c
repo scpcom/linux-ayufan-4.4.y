@@ -39,6 +39,7 @@
 #include <linux/slab.h>
 #include <linux/of_device.h>
 
+
 #define DRVNAME		"lm70"
 
 #define LM70_CHIP_LM70		0	/* original NS LM70 */

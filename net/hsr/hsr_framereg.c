@@ -22,6 +22,7 @@
 #include "hsr_framereg.h"
 #include "hsr_netlink.h"
 
+
 struct hsr_node {
 	struct list_head	mac_list;
 	unsigned char		MacAddressA[ETH_ALEN];
@@ -34,7 +35,9 @@ struct hsr_node {
 	struct rcu_head		rcu_head;
 };
 
+
 /*	TODO: use hash lists for mac addresses (linux/jhash.h)?    */
+
 
 /* seq_nr_after(a, b) - return true if a is after (higher in sequence than) b,
  * false otherwise.
@@ -52,6 +55,7 @@ static bool seq_nr_after(u16 a, u16 b)
 #define seq_nr_before(a, b)		seq_nr_after((b), (a))
 #define seq_nr_after_or_eq(a, b)	(!seq_nr_before((a), (b)))
 #define seq_nr_before_or_eq(a, b)	(!seq_nr_after((a), (b)))
+
 
 bool hsr_addr_is_self(struct hsr_priv *hsr, unsigned char *addr)
 {
@@ -87,6 +91,7 @@ static struct hsr_node *find_node_by_AddrA(struct list_head *node_db,
 	return NULL;
 }
 
+
 /* Helper for device init; the self_node_db is used in hsr_rcv() to recognize
  * frames from self that's been looped over the HSR ring.
  */
@@ -118,6 +123,7 @@ int hsr_create_self_node(struct list_head *self_node_db,
 
 	return 0;
 }
+
 
 /* Allocate an hsr_node and add it to node_db. 'addr' is the node's AddressA;
  * seq_out is used to initialize filtering of outgoing duplicate frames
@@ -238,6 +244,7 @@ done:
 	skb_push(skb, sizeof(struct hsr_ethhdr_sp));
 }
 
+
 /* 'skb' is a frame meant for this host, that is to be passed to upper layers.
  *
  * If the frame was sent by a node's B interface, replace the source
@@ -287,6 +294,7 @@ void hsr_addr_subst_dest(struct hsr_node *node_src, struct sk_buff *skb,
 	ether_addr_copy(eth_hdr(skb)->h_dest, node_dst->MacAddressB);
 }
 
+
 void hsr_register_frame_in(struct hsr_node *node, struct hsr_port *port,
 			   u16 sequence_nr)
 {
@@ -319,6 +327,7 @@ int hsr_register_frame_out(struct hsr_port *port, struct hsr_node *node,
 	return 0;
 }
 
+
 static struct hsr_port *get_late_port(struct hsr_priv *hsr,
 				      struct hsr_node *node)
 {
@@ -338,6 +347,7 @@ static struct hsr_port *get_late_port(struct hsr_priv *hsr,
 
 	return NULL;
 }
+
 
 /* Remove stale sequence_nr records. Called by timer every
  * HSR_LIFE_CHECK_INTERVAL (two seconds or so).
@@ -396,6 +406,7 @@ void hsr_prune_nodes(unsigned long data)
 	rcu_read_unlock();
 }
 
+
 void *hsr_get_next_node(struct hsr_priv *hsr, void *_pos,
 			unsigned char addr[ETH_ALEN])
 {
@@ -418,6 +429,7 @@ void *hsr_get_next_node(struct hsr_priv *hsr, void *_pos,
 	return NULL;
 }
 
+
 int hsr_get_node_data(struct hsr_priv *hsr,
 		      const unsigned char *addr,
 		      unsigned char addr_b[ETH_ALEN],
@@ -430,6 +442,7 @@ int hsr_get_node_data(struct hsr_priv *hsr,
 	struct hsr_node *node;
 	struct hsr_port *port;
 	unsigned long tdiff;
+
 
 	rcu_read_lock();
 	node = find_node_by_AddrA(&hsr->node_db, addr);

@@ -837,6 +837,7 @@ struct qlcnic_cardrsp_tx_ctx {
 #define QLCNIC_HOST_INT_CRB_MODE_NOTX	3
 #define QLCNIC_HOST_INT_CRB_MODE_NORXTX	4
 
+
 /* MAC */
 
 #define MC_COUNT_P3P	38
@@ -1324,6 +1325,7 @@ struct qlcnic_eswitch {
 #define QLCNIC_SWITCH_PROMISC_MODE	BIT_3
 #define QLCNIC_SWITCH_PORT_MIRRORING	BIT_4
 };
+
 
 #define MAX_BW			100	/* % of link speed */
 #define MIN_BW			1	/* % of link speed */

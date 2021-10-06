@@ -38,6 +38,8 @@ static void dma_reset_output(int dev);
 static void dma_reset_input(int dev);
 static int local_start_dma(struct audio_operations *adev, unsigned long physaddr, int count, int dma_mode);
 
+
+
 static int debugmem;    	/* switched off by default */
 static int dma_buffsize = DSP_BUFFSIZE;
 
@@ -143,6 +145,7 @@ static void sound_free_dmap(struct dma_buffparms *dmap)
 	dmap->raw_buf = NULL;
 }
 
+
 /* Intel version !!!!!!!!! */
 
 static int sound_start_dma(struct dma_buffparms *dmap, unsigned long physaddr, int count, int dma_mode)
@@ -230,6 +233,7 @@ static void close_dmap(struct audio_operations *adev, struct dma_buffparms *dmap
 	if (sound_dmap_flag == DMAP_FREE_ON_CLOSE)
 		sound_free_dmap(dmap);
 }
+
 
 static unsigned int default_set_bits(int dev, unsigned int bits)
 {

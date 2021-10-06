@@ -1106,6 +1106,7 @@ out:
 	return err;
 }
 
+
 static int mxuport_port_probe(struct usb_serial_port *port)
 {
 	struct usb_serial *serial = port->serial;
@@ -1166,6 +1167,7 @@ static int mxuport_alloc_write_urb(struct usb_serial *serial,
 	return 0;
 }
 
+
 static int mxuport_alloc_write_urbs(struct usb_serial *serial,
 				    struct usb_serial_port *port,
 				    struct usb_serial_port *port0)
@@ -1180,6 +1182,7 @@ static int mxuport_alloc_write_urbs(struct usb_serial *serial,
 	}
 	return 0;
 }
+
 
 static int mxuport_attach(struct usb_serial *serial)
 {

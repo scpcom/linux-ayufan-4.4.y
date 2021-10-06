@@ -1187,6 +1187,7 @@ static int nr_recvmsg(struct socket *sock, struct msghdr *msg, size_t size,
 	return copied;
 }
 
+
 static int nr_ioctl(struct socket *sock, unsigned int cmd, unsigned long arg)
 {
 	struct sock *sk = sock->sk;

@@ -172,6 +172,7 @@ static void samsung_gpio_pm_2bit_resume(struct samsung_gpio_chip *chip)
 		change_mask |= mask;
 	}
 
+
 	/* Write the new CON settings */
 
 	gpcon = old_gpcon & ~change_mask;

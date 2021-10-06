@@ -771,6 +771,7 @@ static void vmu_file_error(struct maple_device *mdev, void *recvbuf)
 	}
 }
 
+
 static int probe_maple_vmu(struct device *dev)
 {
 	int error;

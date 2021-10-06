@@ -101,6 +101,7 @@ static void process_shutdown(void)
 	}
 }
 
+
 /* main power switch task struct */
 static struct task_struct *power_task;
 
@@ -153,10 +154,12 @@ static int kpowerswd(void *param)
 		} else
 			process_shutdown();
 
+
 	} while (!kthread_should_stop());
 
 	return 0;
 }
+
 
 /*
  * powerfail interruption handler (irq IRQ_FROM_REGION(CPU_IRQ_REGION)+2) 
@@ -168,6 +171,9 @@ static void powerfail_interrupt(int code, void *x)
 	poweroff();
 }
 #endif
+
+
+
 
 /* parisc_panic_event() is called by the panic handler.
  * As soon as a panic occurs, our tasklets above will not be
@@ -186,6 +192,7 @@ static struct notifier_block parisc_panic_block = {
 	.notifier_call	= parisc_panic_event,
 	.priority	= INT_MAX,
 };
+
 
 static int __init power_init(void)
 {
@@ -241,6 +248,7 @@ static void __exit power_exit(void)
 
 arch_initcall(power_init);
 module_exit(power_exit);
+
 
 MODULE_AUTHOR("Helge Deller <deller@gmx.de>");
 MODULE_DESCRIPTION("Soft power switch driver");

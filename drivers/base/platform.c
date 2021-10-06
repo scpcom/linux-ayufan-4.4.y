@@ -841,6 +841,7 @@ static ssize_t driver_override_show(struct device *dev,
 }
 static DEVICE_ATTR_RW(driver_override);
 
+
 static struct attribute *platform_dev_attrs[] = {
 	&dev_attr_modalias.attr,
 	&dev_attr_driver_override.attr,
@@ -1400,3 +1401,4 @@ void __init early_platform_cleanup(void)
 		memset(&pd->dev.devres_head, 0, sizeof(pd->dev.devres_head));
 	}
 }
+

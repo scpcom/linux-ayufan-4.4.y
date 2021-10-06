@@ -157,6 +157,7 @@
     R##_c = FP_CLS_NAN;						\
   } while (0)
 
+
 #include <linux/kernel.h>
 #include <linux/sched.h>
 

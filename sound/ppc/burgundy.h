@@ -18,6 +18,7 @@
  *   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
  */
 
+
 #ifndef __BURGUNDY_H
 #define __BURGUNDY_H
 
@@ -62,6 +63,7 @@
 #define MASK_ADDR_BURGUNDY_GAINLINE (MASK_ADDR_BURGUNDY_GAINCH2)
 #define MASK_ADDR_BURGUNDY_GAINMIC (MASK_ADDR_BURGUNDY_GAINCH3)
 #define MASK_ADDR_BURGUNDY_GAINMODEM (MASK_ADDR_BURGUNDY_VOLCH4)
+
 
 /* These are all default values for the burgundy */
 #define DEF_BURGUNDY_INPSEL21 (0xAA)

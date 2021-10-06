@@ -27,6 +27,7 @@
 #include "resources.h"
 #include "addr.h"
 
+
 LIST_HEAD(atm_devs);
 DEFINE_MUTEX(atm_dev_mutex);
 

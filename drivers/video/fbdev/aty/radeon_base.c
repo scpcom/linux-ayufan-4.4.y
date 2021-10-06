@@ -49,6 +49,7 @@
  *
  */
 
+
 #define RADEON_VERSION	"0.2.0"
 
 #include "radeonfb.h"
@@ -229,10 +230,12 @@ static struct pci_device_id radeonfb_pci_table[] = {
 };
 MODULE_DEVICE_TABLE(pci, radeonfb_pci_table);
 
+
 typedef struct {
 	u16 reg;
 	u32 val;
 } reg_val;
+
 
 /* these common regs are cleared before mode setting so they do not
  * interfere with anything
@@ -403,6 +406,8 @@ void _radeon_engine_idle(struct radeonfb_info *rinfo)
 	}
 	printk(KERN_ERR "radeonfb: Idle Timeout !\n");
 }
+
+
 
 static void radeon_unmap_ROM(struct radeonfb_info *rinfo, struct pci_dev *dev)
 {
@@ -770,6 +775,7 @@ static void radeon_get_pllinfo(struct radeonfb_info *rinfo)
 	}
 	rinfo->pll.ref_div = INPLL(PPLL_REF_DIV) & PPLL_REF_DIV_MASK;
 
+
 #if defined(CONFIG_PPC) || defined(CONFIG_SPARC)
 	/*
 	 * Retrieve PLL infos from Open Firmware first
@@ -918,6 +924,7 @@ static int radeonfb_check_var (struct fb_var_screeninfo *var, struct fb_info *in
 	if (v.xres_virtual < v.xres)
 		v.xres_virtual = v.xres;
                 
+
 	/* XXX I'm adjusting xres_virtual to the pitch, that may help XFree
 	 * with some panels, though I don't quite like this solution
 	 */
@@ -950,6 +957,7 @@ static int radeonfb_check_var (struct fb_var_screeninfo *var, struct fb_info *in
         return 0;
 }
 
+
 static int radeonfb_pan_display (struct fb_var_screeninfo *var,
                                  struct fb_info *info)
 {
@@ -967,6 +975,7 @@ static int radeonfb_pan_display (struct fb_var_screeninfo *var,
 			     var->xoffset * info->var.bits_per_pixel / 8) & ~7);
         return 0;
 }
+
 
 static int radeonfb_ioctl (struct fb_info *info, unsigned int cmd,
                            unsigned long arg)
@@ -1039,6 +1048,7 @@ static int radeonfb_ioctl (struct fb_info *info, unsigned int cmd,
 	return -EINVAL;
 }
 
+
 int radeon_screen_blank(struct radeonfb_info *rinfo, int blank, int mode_switch)
 {
         u32 val;
@@ -1072,6 +1082,7 @@ int radeon_screen_blank(struct radeonfb_info *rinfo, int blank, int mode_switch)
 		unblank = 1;
         }
 	OUTREG(CRTC_EXT_CNTL, val);
+
 
 	switch (rinfo->mon1_type) {
 	case MT_DFP:
@@ -1165,6 +1176,7 @@ static int radeon_setcolreg (unsigned regno, unsigned red, unsigned green,
 {
 	u32 pindex;
 	unsigned int i;
+
 
 	if (regno > 255)
 		return -EINVAL;
@@ -1344,6 +1356,7 @@ static void radeon_save_state (struct radeonfb_info *rinfo,
 	save->ppll_div_3 = INPLL(PPLL_DIV_3);
 	save->ppll_ref_div = INPLL(PPLL_REF_DIV);
 }
+
 
 static void radeon_write_pll_regs(struct radeonfb_info *rinfo, struct radeon_regs *mode)
 {
@@ -1956,6 +1969,7 @@ static int radeonfb_set_par(struct fb_info *info)
 	return 0;
 }
 
+
 static struct fb_ops radeonfb_ops = {
 	.owner			= THIS_MODULE,
 	.fb_check_var		= radeonfb_check_var,
@@ -1970,6 +1984,7 @@ static struct fb_ops radeonfb_ops = {
 	.fb_copyarea		= radeonfb_copyarea,
 	.fb_imageblit		= radeonfb_imageblit,
 };
+
 
 static int radeon_set_fbinfo(struct radeonfb_info *rinfo)
 {
@@ -2094,6 +2109,7 @@ static void fixup_memory_mappings(struct radeonfb_info *rinfo)
 }
 #endif /* CONFIG_PPC */
 
+
 static void radeon_identify_vram(struct radeonfb_info *rinfo)
 {
 	u32 tmp;
@@ -2147,6 +2163,7 @@ static void radeon_identify_vram(struct radeonfb_info *rinfo)
 		}
 	}
 
+
 	/*
 	 * Now try to identify VRAM type
 	 */
@@ -2199,6 +2216,7 @@ static ssize_t radeon_show_one_edid(char *buf, loff_t off, size_t count, const u
 	return memory_read_from_buffer(buf, count, &off, edid, EDID_LENGTH);
 }
 
+
 static ssize_t radeon_show_edid1(struct file *filp, struct kobject *kobj,
 				 struct bin_attribute *bin_attr,
 				 char *buf, loff_t off, size_t count)
@@ -2210,6 +2228,7 @@ static ssize_t radeon_show_edid1(struct file *filp, struct kobject *kobj,
 
 	return radeon_show_one_edid(buf, off, count, rinfo->mon1_EDID);
 }
+
 
 static ssize_t radeon_show_edid2(struct file *filp, struct kobject *kobj,
 				 struct bin_attribute *bin_attr,
@@ -2240,6 +2259,7 @@ static struct bin_attribute edid2_attr = {
 	.size	= EDID_LENGTH,
 	.read	= radeon_show_edid2,
 };
+
 
 static int radeonfb_pci_register(struct pci_dev *pdev,
 				 const struct pci_device_id *ent)
@@ -2501,6 +2521,8 @@ err_out:
 	return ret;
 }
 
+
+
 static void radeonfb_pci_unregister(struct pci_dev *pdev)
 {
         struct fb_info *info = pci_get_drvdata(pdev);
@@ -2548,6 +2570,7 @@ static void radeonfb_pci_unregister(struct pci_dev *pdev)
 	fb_dealloc_cmap(&info->cmap);
         framebuffer_release(info);
 }
+
 
 static struct pci_driver radeonfb_driver = {
 	.name		= "radeonfb",
@@ -2614,6 +2637,7 @@ static int __init radeonfb_init (void)
 #endif
 	return pci_register_driver (&radeonfb_driver);
 }
+
 
 static void __exit radeonfb_exit (void)
 {

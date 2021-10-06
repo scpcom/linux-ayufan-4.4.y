@@ -650,6 +650,7 @@ static struct uart_ops pnx8xxx_pops = {
 	.verify_port	= pnx8xxx_verify_port,
 };
 
+
 /*
  * Setup the PNX8XXX serial ports.
  *

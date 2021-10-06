@@ -56,6 +56,7 @@ struct sdhci_bcm_kona_dev {
 	struct mutex	write_lock; /* protect back to back writes */
 };
 
+
 static int sdhci_bcm_kona_sd_reset(struct sdhci_host *host)
 {
 	unsigned int val;

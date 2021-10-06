@@ -15,6 +15,7 @@ struct elf_siginfo
 	int	si_errno;			/* errno */
 };
 
+
 #ifndef __KERNEL__
 typedef elf_greg_t greg_t;
 typedef elf_gregset_t gregset_t;
@@ -94,5 +95,6 @@ typedef struct elf_prstatus prstatus_t;
 typedef struct elf_prpsinfo prpsinfo_t;
 #define PRARGSZ ELF_PRARGSZ 
 #endif
+
 
 #endif /* _UAPI_LINUX_ELFCORE_H */

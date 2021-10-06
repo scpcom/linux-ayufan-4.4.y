@@ -100,6 +100,7 @@ struct ttm_bus_placement {
 	uint64_t        io_reserved_count;
 };
 
+
 /**
  * struct ttm_mem_reg
  *
@@ -345,6 +346,7 @@ extern int ttm_bo_validate(struct ttm_buffer_object *bo,
  */
 extern void ttm_bo_unref(struct ttm_buffer_object **bo);
 
+
 /**
  * ttm_bo_list_ref_sub
  *
@@ -380,6 +382,7 @@ extern void ttm_bo_add_to_lru(struct ttm_buffer_object *bo);
  * avoid recursive reservation from lru lists.
  */
 extern int ttm_bo_del_from_lru(struct ttm_buffer_object *bo);
+
 
 /**
  * ttm_bo_lock_delayed_workqueue

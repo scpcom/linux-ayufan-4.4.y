@@ -55,3 +55,4 @@
 #define TIMBUART_MINOR 192
 
 #endif /* _TIMBUART_H */
+

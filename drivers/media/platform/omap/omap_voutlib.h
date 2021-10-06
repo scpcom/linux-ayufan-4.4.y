@@ -36,3 +36,4 @@ void omap_vout_free_buffer(unsigned long virtaddr, u32 buf_size);
 bool omap_vout_dss_omap24xx(void);
 bool omap_vout_dss_omap34xx(void);
 #endif	/* #ifndef OMAP_VOUTLIB_H */
+

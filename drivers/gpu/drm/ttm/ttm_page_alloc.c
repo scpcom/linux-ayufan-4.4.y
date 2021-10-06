@@ -419,6 +419,7 @@ ttm_pool_shrink_scan(struct shrinker *shrink, struct shrink_control *sc)
 	return freed;
 }
 
+
 static unsigned long
 ttm_pool_shrink_count(struct shrinker *shrink, struct shrink_control *sc)
 {

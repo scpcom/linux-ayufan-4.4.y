@@ -491,6 +491,7 @@ static void nbd_clear_que(struct nbd_device *nbd)
 	dev_dbg(disk_to_dev(nbd->disk), "queue cleared\n");
 }
 
+
 static void nbd_handle_req(struct nbd_device *nbd, struct request *req)
 {
 	if (req->cmd_type != REQ_TYPE_FS)

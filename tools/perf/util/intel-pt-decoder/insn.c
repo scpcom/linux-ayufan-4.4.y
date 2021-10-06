@@ -281,6 +281,7 @@ err_out:
 	return;
 }
 
+
 /**
  * insn_rip_relative() - Does instruction use RIP-relative addressing mode?
  * @insn:	&struct insn containing instruction
@@ -331,6 +332,7 @@ void insn_get_sib(struct insn *insn)
 err_out:
 	return;
 }
+
 
 /**
  * insn_get_displacement() - Get the displacement of instruction

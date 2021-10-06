@@ -65,6 +65,7 @@ enum {
 	WIMAX_GNL_ATTR_MAX = 10,
 };
 
+
 /*
  * Generic NetLink operations
  *
@@ -80,12 +81,14 @@ enum {
 	WIMAX_GNL_OP_STATE_GET,		/* Request for current state */
 };
 
+
 /* Message from user / to user */
 enum {
 	WIMAX_GNL_MSG_IFIDX = 1,
 	WIMAX_GNL_MSG_PIPE_NAME,
 	WIMAX_GNL_MSG_DATA,
 };
+
 
 /*
  * wimax_rfkill()
@@ -104,6 +107,7 @@ enum {
 	WIMAX_GNL_RFKILL_IFIDX = 1,
 	WIMAX_GNL_RFKILL_STATE,
 };
+
 
 /* Attributes for wimax_reset() */
 enum {
@@ -126,6 +130,7 @@ enum {
 	WIMAX_GNL_STCH_STATE_OLD,
 	WIMAX_GNL_STCH_STATE_NEW,
 };
+
 
 /**
  * enum wimax_st - The different states of a WiMAX device
@@ -229,5 +234,6 @@ enum {
 	WIMAX_ST_CONNECTED,
 	__WIMAX_ST_INVALID			/* Always keep last */
 };
+
 
 #endif /* #ifndef __LINUX__WIMAX_H__ */

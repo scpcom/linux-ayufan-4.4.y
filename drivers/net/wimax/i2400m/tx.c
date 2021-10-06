@@ -248,6 +248,7 @@
 #include <linux/export.h>
 #include "i2400m.h"
 
+
 #define D_SUBMODULE tx
 #include "debug-levels.h"
 
@@ -331,6 +332,7 @@ size_t __i2400m_tx_tail_room(struct i2400m *i2400m)
 	tail_room %= I2400M_TX_BUF_SIZE;
 	return tail_room;
 }
+
 
 /*
  * Allocate @size bytes in the TX fifo, return a pointer to it
@@ -476,6 +478,7 @@ void *i2400m_tx_fifo_push(struct i2400m *i2400m, size_t size,
 	return ptr;
 }
 
+
 /*
  * Mark the tail of the FIFO buffer as 'to-skip'
  *
@@ -514,6 +517,7 @@ void i2400m_tx_skip_tail(struct i2400m *i2400m)
 	i2400m->tx_in += tail_room;
 }
 
+
 /*
  * Check if a skb will fit in the TX queue's current active TX
  * message (if there are still descriptors left unused).
@@ -534,6 +538,7 @@ unsigned i2400m_tx_fits(struct i2400m *i2400m)
 	return le16_to_cpu(msg_hdr->num_pls) < I2400M_TX_PLD_MAX;
 
 }
+
 
 /*
  * Start a new TX message header in the queue.
@@ -585,6 +590,7 @@ out:
 	d_printf(2, dev, "new TX message: %p @%zu\n",
 		 tx_msg, (void *) tx_msg - i2400m->tx_buf);
 }
+
 
 /*
  * Finalize the current TX message header
@@ -672,6 +678,7 @@ void i2400m_tx_close(struct i2400m *i2400m)
 out:
 	i2400m->tx_msg = NULL;
 }
+
 
 /**
  * i2400m_tx - send the data in a buffer to the device
@@ -802,6 +809,7 @@ error_tx_new:
 }
 EXPORT_SYMBOL_GPL(i2400m_tx);
 
+
 /**
  * i2400m_tx_msg_get - Get the first TX message in the FIFO to start sending it
  *
@@ -908,6 +916,7 @@ out_unlock:
 }
 EXPORT_SYMBOL_GPL(i2400m_tx_msg_get);
 
+
 /**
  * i2400m_tx_msg_sent - indicate the transmission of a TX message
  *
@@ -943,6 +952,7 @@ out_unlock:
 	d_fnend(3, dev, "(i2400m %p) = void\n", i2400m);
 }
 EXPORT_SYMBOL_GPL(i2400m_tx_msg_sent);
+
 
 /**
  * i2400m_tx_setup - Initialize the TX queue and infrastructure
@@ -988,6 +998,7 @@ error_kmalloc:
 	return result;
 
 }
+
 
 /**
  * i2400m_tx_release - Tear down the TX queue and infrastructure

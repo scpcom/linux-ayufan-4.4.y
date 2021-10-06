@@ -143,6 +143,7 @@
 #define RT5640_DUMMY2				0xfb
 #define RT5640_DUMMY3				0xfc
 
+
 /* Index of Codec Private Register definition */
 #define RT5640_CHPUMP_INT_REG1			0x24
 #define RT5640_MAMP_INT_REG2			0x37
@@ -196,6 +197,7 @@
 #define RT5640_ID_5639				(0x0 << 1)
 #define RT5640_ID_5640				(0x2 << 1)
 #define RT5640_ID_5642				(0x3 << 1)
+
 
 /* IN1 and IN2 Control (0x0d) */
 /* IN3 and IN4 Control (0x0e) */
@@ -1962,6 +1964,7 @@
 #define RT5640_ZCD_HP_DIS			(0x0 << 15)
 #define RT5640_ZCD_HP_EN			(0x1 << 15)
 
+
 /* Codec Private Register definition */
 /* 3D Speaker Control (0x63) */
 #define RT5640_3D_SPK_MASK			(0x1 << 15)
@@ -2043,6 +2046,7 @@ enum {
 #define RT5640_PLL1_S_BCLK1	1
 #define RT5640_PLL1_S_BCLK2	2
 #define RT5640_PLL1_S_BCLK3	3
+
 
 enum {
 	RT5640_AIF1,

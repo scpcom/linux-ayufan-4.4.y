@@ -257,6 +257,7 @@ static int sxgbe_get_rx_ld_status(struct sxgbe_rx_norm_desc *p)
 	return p->rdes23.rx_wb_des23.last_desc;
 }
 
+
 /* Return the RX status looking at the WB fields */
 static int sxgbe_rx_wbstatus(struct sxgbe_rx_norm_desc *p,
 			     struct sxgbe_extra_stats *x, int *checksum)
@@ -415,6 +416,7 @@ static void sxgbe_set_ctxt_rx_owner(struct sxgbe_rx_ctxt_desc *p)
 	p->own_bit = 1;
 }
 
+
 /* Return the reception status looking at Context control information */
 static void sxgbe_rx_ctxt_wbstatus(struct sxgbe_rx_ctxt_desc *p,
 				   struct sxgbe_extra_stats *x)
@@ -459,6 +461,7 @@ static int sxgbe_get_rx_ctxt_tstamp_status(struct sxgbe_rx_ctxt_desc *p)
 
 	return p->tstamp_available;
 }
+
 
 static u64 sxgbe_get_rx_timestamp(struct sxgbe_rx_ctxt_desc *p)
 {

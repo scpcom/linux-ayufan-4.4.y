@@ -173,6 +173,7 @@ enum {
 #endif
 };
 
+
 struct i1480_evt_confirm {
 	struct uwb_rceb rceb;
 #ifdef i1480_RCEB_EXTENDED
@@ -181,12 +182,14 @@ struct i1480_evt_confirm {
 	u8 bResultCode;
 } __attribute__((packed));
 
+
 struct i1480_rceb {
 	struct uwb_rceb rceb;
 #ifdef i1480_RCEB_EXTENDED
 	__le16 wParamLength;
 #endif
 } __attribute__((packed));
+
 
 /**
  * Get MAC & PHY Information confirm event structure
@@ -224,11 +227,13 @@ struct i1480_evt_confirm_GMPI {
 #endif
 } __attribute__((packed));
 
+
 struct i1480_cmd_mpi_write {
 	struct uwb_rccb rccb;
 	__le16 size;
 	u8 data[];
 };
+
 
 struct i1480_cmd_mpi_read {
 	struct uwb_rccb rccb;
@@ -237,6 +242,7 @@ struct i1480_cmd_mpi_read {
 		u8 page, offset;
 	} __attribute__((packed)) data[];
 } __attribute__((packed));
+
 
 struct i1480_evt_mpi_read {
 	struct uwb_rceb rceb;
@@ -249,5 +255,6 @@ struct i1480_evt_mpi_read {
 		u8 page, offset, value;
 	} __attribute__((packed)) data[];
 } __attribute__((packed));
+
 
 #endif /* #ifndef __i1480_DFU_H__ */

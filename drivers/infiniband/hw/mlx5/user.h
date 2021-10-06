@@ -44,6 +44,7 @@ enum {
 	MLX5_SRQ_FLAG_SIGNATURE		= 1 << 0,
 };
 
+
 /* Increment this value if any changes that break userspace ABI
  * compatibility are made.
  */

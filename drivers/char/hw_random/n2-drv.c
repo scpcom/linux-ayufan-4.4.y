@@ -244,6 +244,7 @@ static int n2rng_generic_read_diag_data(struct n2rng *np,
 	}
 }
 
+
 static int n2rng_generic_write_control(struct n2rng *np,
 				       unsigned long control_ra,
 				       unsigned long unit,
@@ -518,6 +519,7 @@ static int n2rng_control_selftest(struct n2rng *np, unsigned long unit)
 	np->test_control[3] = ((0x2 << RNG_CTL_ASEL_SHIFT) |
 			       RNG_CTL_LFSR |
 			       ((SELFTEST_TICKS - 2) << RNG_CTL_WAIT_SHIFT));
+
 
 	err = n2rng_entropy_diag_read(np, unit, np->test_control,
 				      HV_RNG_STATE_HEALTHCHECK,

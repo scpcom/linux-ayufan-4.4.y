@@ -33,6 +33,7 @@ extern void percpu_free_rwsem(struct percpu_rw_semaphore *);
 	__percpu_init_rwsem(brw, #brw, &rwsem_key);		\
 })
 
+
 #define percpu_rwsem_is_held(sem) lockdep_is_held(&(sem)->rw_sem)
 
 static inline void percpu_rwsem_release(struct percpu_rw_semaphore *sem,

@@ -65,6 +65,7 @@ static inline pte_t *pte_alloc_one_kernel(struct mm_struct *mm,
 	return srmmu_get_nocache(PTE_SIZE, PTE_SIZE);
 }
 
+
 static inline void free_pte_fast(pte_t *pte)
 {
 	srmmu_free_nocache(pte, PTE_SIZE);

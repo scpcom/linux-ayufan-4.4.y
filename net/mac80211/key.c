@@ -27,6 +27,7 @@
 #include "aes_gmac.h"
 #include "aes_gcm.h"
 
+
 /**
  * DOC: Key handling basics
  *
@@ -303,6 +304,7 @@ void ieee80211_set_default_mgmt_key(struct ieee80211_sub_if_data *sdata,
 	__ieee80211_set_default_mgmt_key(sdata, idx);
 	mutex_unlock(&sdata->local->key_mtx);
 }
+
 
 static void ieee80211_key_replace(struct ieee80211_sub_if_data *sdata,
 				  struct sta_info *sta,

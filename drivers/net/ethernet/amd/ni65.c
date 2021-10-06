@@ -717,6 +717,7 @@ static void ni65_free_buffer(struct priv *p)
 	kfree(p->self);
 }
 
+
 /*
  * stop and (re)start lance .. e.g after an error
  */

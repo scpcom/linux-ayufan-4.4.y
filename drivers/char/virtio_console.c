@@ -595,6 +595,7 @@ static ssize_t send_control_msg(struct port *port, unsigned int event,
 	return 0;
 }
 
+
 /* Callers must take the port->outvq_lock */
 static void reclaim_consumed_buffers(struct port *port)
 {

@@ -9,6 +9,7 @@
 
 #include "ebb.h"
 
+
 /*
  * Test of counting cycles while using MMCR0_FC (freeze counters) to only count
  * parts of the code. This is complicated by the fact that FC is set by the

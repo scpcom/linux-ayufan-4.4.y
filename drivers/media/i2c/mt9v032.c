@@ -1009,6 +1009,7 @@ static int mt9v032_probe(struct i2c_client *client,
 		v4l2_ctrl_cluster(2, &mt9v032->link_freq);
 	}
 
+
 	mt9v032->subdev.ctrl_handler = &mt9v032->ctrls;
 
 	if (mt9v032->ctrls.error) {

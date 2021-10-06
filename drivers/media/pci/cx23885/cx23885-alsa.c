@@ -35,6 +35,7 @@
 
 #include <sound/tlv.h>
 
+
 #include "cx23885.h"
 #include "cx23885-reg.h"
 
@@ -362,6 +363,7 @@ static int snd_cx23885_close(struct snd_pcm_substream *substream)
 {
 	return 0;
 }
+
 
 /*
  * hw_params callback

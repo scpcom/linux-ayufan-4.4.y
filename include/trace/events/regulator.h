@@ -103,6 +103,7 @@ DEFINE_EVENT(regulator_range, regulator_set_voltage,
 
 );
 
+
 /*
  * Events that take a single value, mostly for readback and refcounts.
  */

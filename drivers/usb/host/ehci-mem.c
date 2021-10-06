@@ -63,6 +63,7 @@ static inline void ehci_qtd_free (struct ehci_hcd *ehci, struct ehci_qtd *qtd)
 	dma_pool_free (ehci->qtd_pool, qtd, qtd->qtd_dma);
 }
 
+
 static void qh_destroy(struct ehci_hcd *ehci, struct ehci_qh *qh)
 {
 	/* clean qtds first, and know this is not linked */

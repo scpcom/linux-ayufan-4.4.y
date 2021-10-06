@@ -249,6 +249,7 @@ tsi721_pw_handler(struct rio_mport *mport)
 	u32 pw_stat;
 	u32 pw_buf[TSI721_RIO_PW_MSG_SIZE/sizeof(u32)];
 
+
 	pw_stat = ioread32(priv->regs + TSI721_RIO_PW_RX_STAT);
 
 	if (pw_stat & TSI721_RIO_PW_RX_STAT_PW_VAL) {

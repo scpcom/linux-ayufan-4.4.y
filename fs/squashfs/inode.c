@@ -80,6 +80,7 @@ static int squashfs_new_inode(struct super_block *sb, struct inode *inode,
 	return err;
 }
 
+
 struct inode *squashfs_iget(struct super_block *sb, long long ino,
 				unsigned int ino_number)
 {
@@ -102,6 +103,7 @@ struct inode *squashfs_iget(struct super_block *sb, long long ino,
 	unlock_new_inode(inode);
 	return inode;
 }
+
 
 /*
  * Initialise VFS inode by reading inode from inode table (compressed
@@ -419,7 +421,9 @@ failed_read:
 	return err;
 }
 
+
 const struct inode_operations squashfs_inode_ops = {
 	.getxattr = generic_getxattr,
 	.listxattr = squashfs_listxattr
 };
+

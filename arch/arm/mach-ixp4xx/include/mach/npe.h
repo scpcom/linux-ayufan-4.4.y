@@ -22,6 +22,7 @@ struct npe {
 	int valid;
 };
 
+
 static inline const char *npe_name(struct npe *npe)
 {
 	return npe_names[npe->id];

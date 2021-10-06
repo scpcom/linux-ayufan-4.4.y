@@ -238,6 +238,7 @@ static int exynos5250_power_on(struct samsung_usb2_phy_instance *inst)
 			EXYNOS_5250_USBOTGSYS_OTGDISABLE);
 		writel(otg, drv->reg_phy + EXYNOS_5250_USBOTGSYS);
 
+
 		break;
 	case EXYNOS5250_HOST:
 	case EXYNOS5250_HSIC0:
@@ -363,6 +364,7 @@ static int exynos5250_power_off(struct samsung_usb2_phy_instance *inst)
 
 	return 0;
 }
+
 
 static const struct samsung_usb2_common_phy exynos5250_phys[] = {
 	{

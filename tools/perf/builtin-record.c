@@ -37,6 +37,7 @@
 #include <sched.h>
 #include <sys/mman.h>
 
+
 struct record {
 	struct perf_tool	tool;
 	struct record_opts	opts;
@@ -851,6 +852,7 @@ struct clockid_map {
 	{ .name = n, .clockid = (c), }
 
 #define CLOCKID_END	{ .name = NULL, }
+
 
 /*
  * Add the missing ones, we need to build on many distros...

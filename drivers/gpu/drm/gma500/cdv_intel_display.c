@@ -33,6 +33,7 @@ static bool cdv_intel_find_dp_pll(const struct gma_limit_t *limit,
 				  struct drm_crtc *crtc, int target,
 				  int refclk, struct gma_clock_t *best_clock);
 
+
 #define CDV_LIMIT_SINGLE_LVDS_96	0
 #define CDV_LIMIT_SINGLE_LVDS_100	1
 #define CDV_LIMIT_DAC_HDMI_27		2
@@ -133,6 +134,7 @@ static const struct gma_limit_t cdv_intel_limits[] = {
 })
 
 #define wait_for(COND, MS) _wait_for(COND, MS, 1)
+
 
 int cdv_sb_read(struct drm_device *dev, u32 reg, u32 *val)
 {
@@ -737,6 +739,7 @@ static int cdv_intel_crtc_mode_set(struct drm_crtc *crtc,
 	cdv_dpll_set_clock_cdv(dev, crtc, &clock, is_lvds, ddi_select);
 
 	udelay(150);
+
 
 	/* The LVDS pin pair needs to be on before the DPLLs are enabled.
 	 * This is an exception to the general rule that mode_set doesn't turn

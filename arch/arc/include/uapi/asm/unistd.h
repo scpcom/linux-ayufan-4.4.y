@@ -35,6 +35,7 @@ __SYSCALL(__NR_cacheflush, sys_cacheflush)
 __SYSCALL(__NR_arc_settls, sys_arc_settls)
 __SYSCALL(__NR_arc_gettls, sys_arc_gettls)
 
+
 /* Generic syscall (fs/filesystems.c - lost in asm-generic/unistd.h */
 #define __NR_sysfs		(__NR_arch_specific_syscall + 3)
 __SYSCALL(__NR_sysfs, sys_sysfs)

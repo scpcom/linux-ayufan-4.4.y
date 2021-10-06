@@ -266,6 +266,7 @@ struct qdio_outbuf_state {
 
 #define CHSC_AC1_INITIATE_INPUTQ	0x80
 
+
 /* qdio adapter-characteristics-1 flag */
 #define AC1_SIGA_INPUT_NEEDED		0x40	/* process input queues */
 #define AC1_SIGA_OUTPUT_NEEDED		0x20	/* process output queues */

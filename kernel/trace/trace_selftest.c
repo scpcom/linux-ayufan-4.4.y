@@ -465,6 +465,7 @@ trace_selftest_function_recursion(void)
 	pr_cont("PASSED\n");
 	pr_info("Testing ftrace recursion: ");
 
+
 	/* enable tracing, and record the filter function */
 	ftrace_enabled = 1;
 
@@ -609,6 +610,7 @@ trace_selftest_function_regs(void)
 		goto out;
 	}
 
+
 	DYN_FTRACE_TEST_NAME();
 
 	unregister_ftrace_function(&test_regs_probe);
@@ -711,6 +713,7 @@ trace_selftest_startup_function(struct tracer *trace, struct trace_array *tr)
 }
 #endif /* CONFIG_FUNCTION_TRACER */
 
+
 #ifdef CONFIG_FUNCTION_GRAPH_TRACER
 
 /* Maximum number of functions to trace before diagnosing a hang */
@@ -802,6 +805,7 @@ out:
 	return ret;
 }
 #endif /* CONFIG_FUNCTION_GRAPH_TRACER */
+
 
 #ifdef CONFIG_IRQSOFF_TRACER
 int
@@ -1127,6 +1131,7 @@ trace_selftest_startup_wakeup(struct tracer *trace, struct trace_array *tr)
 	if (!ret)
 		ret = trace_test_buffer(&tr->max_buffer, &count);
 
+
 	trace->reset(tr);
 	tracing_start();
 
@@ -1207,3 +1212,4 @@ trace_selftest_startup_branch(struct tracer *trace, struct trace_array *tr)
 	return ret;
 }
 #endif /* CONFIG_BRANCH_TRACER */
+

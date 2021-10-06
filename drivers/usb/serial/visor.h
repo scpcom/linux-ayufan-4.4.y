@@ -17,6 +17,7 @@
 #ifndef __LINUX_USB_SERIAL_VISOR_H
 #define __LINUX_USB_SERIAL_VISOR_H
 
+
 #define HANDSPRING_VENDOR_ID		0x082d
 #define HANDSPRING_VISOR_ID		0x0100
 #define HANDSPRING_TREO_ID		0x0200
@@ -96,6 +97,7 @@
  ****************************************************************************/
 #define VISOR_GET_CONNECTION_INFORMATION	0x03
 
+
 /****************************************************************************
  * VISOR_GET_CONNECTION_INFORMATION returns data in the following format
  ****************************************************************************/
@@ -107,6 +109,7 @@ struct visor_connection_info {
 	} connections[2];
 };
 
+
 /* struct visor_connection_info.connection[x].port defines: */
 #define VISOR_ENDPOINT_1		0x01
 #define VISOR_ENDPOINT_2		0x02
@@ -117,6 +120,7 @@ struct visor_connection_info {
 #define VISOR_FUNCTION_HOTSYNC		0x02
 #define VISOR_FUNCTION_CONSOLE		0x03
 #define VISOR_FUNCTION_REMOTE_FILE_SYS	0x04
+
 
 /****************************************************************************
  * PALM_GET_SOME_UNKNOWN_INFORMATION is sent by the host during enumeration to
@@ -154,3 +158,4 @@ struct palm_ext_connection_info {
 };
 
 #endif
+

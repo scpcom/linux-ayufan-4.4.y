@@ -63,6 +63,7 @@ static int serport_serio_open(struct serio *serio)
 	return 0;
 }
 
+
 static void serport_serio_close(struct serio *serio)
 {
 	struct serport *serport = serio->port_data;

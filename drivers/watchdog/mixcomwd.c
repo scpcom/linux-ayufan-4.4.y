@@ -170,6 +170,7 @@ static int mixcomwd_release(struct inode *inode, struct file *file)
 	return 0;
 }
 
+
 static ssize_t mixcomwd_write(struct file *file, const char __user *data,
 						size_t len, loff_t *ppos)
 {

@@ -178,6 +178,7 @@ struct shared_phy_params {
 	u32 boardflags2;
 };
 
+
 struct shared_phy *wlc_phy_shared_attach(struct shared_phy_params *shp);
 struct brcms_phy_pub *wlc_phy_attach(struct shared_phy *sh,
 				     struct bcma_device *d11core, int bandtype,
@@ -213,6 +214,7 @@ void wlc_phy_set_deaf(struct brcms_phy_pub *ppi, bool user_flag);
 
 void wlc_phy_switch_radio(struct brcms_phy_pub *ppi, bool on);
 void wlc_phy_anacore(struct brcms_phy_pub *ppi, bool on);
+
 
 void wlc_phy_BSSinit(struct brcms_phy_pub *ppi, bool bonlyap, int rssi);
 

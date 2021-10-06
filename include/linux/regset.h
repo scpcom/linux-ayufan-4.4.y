@@ -20,6 +20,7 @@
 struct task_struct;
 struct user_regset;
 
+
 /**
  * user_regset_active_fn - type of @active function in &struct user_regset
  * @target:	thread being examined
@@ -203,6 +204,7 @@ struct user_regset_view {
  */
 const struct user_regset_view *task_user_regset_view(struct task_struct *tsk);
 
+
 /*
  * These are helpers for writing regset get/set functions in arch code.
  * Because @start_pos and @end_pos are always compile-time constants,
@@ -368,5 +370,6 @@ static inline int copy_regset_from_user(struct task_struct *target,
 
 	return regset->set(target, regset, offset, size, NULL, data);
 }
+
 
 #endif	/* <linux/regset.h> */

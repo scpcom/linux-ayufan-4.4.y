@@ -216,6 +216,7 @@ static void free_cmd(struct mlx5_cmd_work_ent *ent)
 	kfree(ent);
 }
 
+
 static int verify_signature(struct mlx5_cmd_work_ent *ent)
 {
 	struct mlx5_cmd_mailbox *next = ent->out->next;
@@ -835,6 +836,7 @@ static ssize_t dbg_write(struct file *filp, const char __user *buf,
 
 	return err ? err : count;
 }
+
 
 static const struct file_operations fops = {
 	.owner	= THIS_MODULE,

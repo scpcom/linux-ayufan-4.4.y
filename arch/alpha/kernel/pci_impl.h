@@ -111,6 +111,7 @@ struct pci_iommu_arena;
  *   couple boards that do strange things.
  */
 
+
 /* The following macro is used to implement the table-based irq mapping
    function for all single-bus Alphas.  */
 
@@ -119,6 +120,7 @@ struct pci_iommu_arena;
    if (slot >= min_idsel && slot <= max_idsel && pin < irqs_per_slot)	\
      _ctl_ = irq_tab[slot - min_idsel][pin];				\
    _ctl_; })
+
 
 /* A PCI IOMMU allocation arena.  There are typically two of these
    regions per bus.  */
@@ -195,3 +197,5 @@ extern int iommu_reserve(struct pci_iommu_arena *, long, long);
 extern int iommu_release(struct pci_iommu_arena *, long, long);
 extern int iommu_bind(struct pci_iommu_arena *, long, long, struct page **);
 extern int iommu_unbind(struct pci_iommu_arena *, long, long);
+
+

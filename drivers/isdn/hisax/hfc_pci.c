@@ -65,6 +65,7 @@ static const PCI_ENTRY id_list[] =
 	{0, 0, NULL, NULL},
 };
 
+
 /******************************************/
 /* free hardware resources used by driver */
 /******************************************/
@@ -172,6 +173,7 @@ hfcpci_Timer(struct IsdnCardState *cs)
 	add_timer(&cs->hw.hfcpci.timer);
 */
 }
+
 
 /*********************************/
 /* schedule a new D-channel task */
@@ -454,6 +456,7 @@ main_rec_hfcpci(struct BCState *bcs)
 	bzfifo_type *bz;
 	u_char *bdata;
 	z_type *zp;
+
 
 	if ((bcs->channel) && (!cs->hw.hfcpci.bswapped)) {
 		bz = &((fifo_area *) (cs->hw.hfcpci.fifos))->b_chans.rxbz_b2;
@@ -756,6 +759,8 @@ dch_nt_l2l1(struct PStack *st, int pr, void *arg)
 		break;
 	}
 }
+
+
 
 /***********************/
 /* set/reset echo mode */
@@ -1566,6 +1571,7 @@ hfcpci_bh(struct work_struct *work)
 		DChannel_proc_xmt(cs);
 }
 
+
 /********************************/
 /* called for card init message */
 /********************************/
@@ -1582,6 +1588,8 @@ inithfcpci(struct IsdnCardState *cs)
 	mode_hfcpci(cs->bcs, 0, 0);
 	mode_hfcpci(cs->bcs + 1, 0, 1);
 }
+
+
 
 /*******************************************/
 /* handle card messages from control layer */
@@ -1621,6 +1629,7 @@ hfcpci_card_msg(struct IsdnCardState *cs, int mt, void *arg)
 	}
 	return (0);
 }
+
 
 /* this variable is used as card index when more than one cards are present */
 static struct pci_dev *dev_hfcpci = NULL;

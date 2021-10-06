@@ -33,6 +33,7 @@
 #ifndef __LINUX_USB_SERIAL_KEYSPAN_H
 #define __LINUX_USB_SERIAL_KEYSPAN_H
 
+
 /* Function prototypes for Keyspan serial converter */
 static int  keyspan_open		(struct tty_struct *tty,
 					 struct usb_serial_port *port);
@@ -52,6 +53,7 @@ static int  keyspan_write		(struct tty_struct *tty,
 
 static void keyspan_send_setup		(struct usb_serial_port *port,
 					 int reset_port);
+
 
 static void keyspan_set_termios		(struct tty_struct *tty,
 					 struct usb_serial_port *port,

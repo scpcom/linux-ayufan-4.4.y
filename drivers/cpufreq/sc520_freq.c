@@ -87,6 +87,7 @@ static int sc520_freq_cpu_init(struct cpufreq_policy *policy)
 	return cpufreq_table_validate_and_show(policy, sc520_freq_table);
 }
 
+
 static struct cpufreq_driver sc520_freq_driver = {
 	.get	= sc520_freq_get_cpu_frequency,
 	.verify	= cpufreq_generic_frequency_table_verify,
@@ -122,11 +123,13 @@ static int __init sc520_freq_init(void)
 	return err;
 }
 
+
 static void __exit sc520_freq_exit(void)
 {
 	cpufreq_unregister_driver(&sc520_freq_driver);
 	iounmap(cpuctl);
 }
+
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Sean Young <sean@mess.org>");
@@ -134,3 +137,4 @@ MODULE_DESCRIPTION("cpufreq driver for AMD's Elan sc520 CPU");
 
 module_init(sc520_freq_init);
 module_exit(sc520_freq_exit);
+

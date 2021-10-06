@@ -34,6 +34,7 @@
 #include "pcxhr_core.h"
 #include "pcxhr_mix22.h"
 
+
 static int pcxhr_sub_init(struct pcxhr_mgr *mgr);
 /*
  * get basic information and init pcxhr card
@@ -158,6 +159,7 @@ void pcxhr_reset_board(struct pcxhr_mgr *mgr)
 	return;
 }
 
+
 /*
  *  allocate a playback/capture pipe (pcmp0/pcmc0)
  */
@@ -236,6 +238,7 @@ static int pcxhr_dsp_free_pipe( struct pcxhr_mgr *mgr, struct pcxhr_pipe *pipe)
 }
 #endif
 
+
 static int pcxhr_config_pipes(struct pcxhr_mgr *mgr)
 {
 	int err, i, j;
@@ -281,6 +284,7 @@ static int pcxhr_start_pipes(struct pcxhr_mgr *mgr)
 	}
 	return pcxhr_set_pipe_state(mgr, playback_mask, capture_mask, 1);
 }
+
 
 static int pcxhr_dsp_load(struct pcxhr_mgr *mgr, int index,
 			  const struct firmware *dsp)

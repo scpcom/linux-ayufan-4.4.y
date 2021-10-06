@@ -209,6 +209,7 @@ static int g450_set_ctrl(void* md, struct v4l2_control *p) {
 			break;
 	}
 	
+
 	return 0;
 }
 

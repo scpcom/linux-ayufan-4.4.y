@@ -78,6 +78,7 @@ typedef struct _drm_via_blitq {
 	struct timer_list poll_timer;
 } drm_via_blitq_t;
 
+
 /*
  *  PCI DMA Registers
  *  Channels 2 & 3 don't seem to be implemented in hardware.
@@ -133,5 +134,7 @@ typedef struct _drm_via_blitq {
 #define VIA_DMA_CSR_TD		(1<<3)	/* transfer done */
 #define VIA_DMA_CSR_DD		(1<<4)	/* descriptor done */
 #define VIA_DMA_DPR_EC          (1<<1)  /* end of chain */
+
+
 
 #endif

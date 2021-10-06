@@ -10,6 +10,7 @@
  *	Copyright (C) 2013 Helge Deller <deller@gmx.de>
  */
 
+
 #include <linux/module.h>
 #include <linux/preempt.h>
 #include <linux/init.h>
@@ -63,6 +64,7 @@ static void __cr16_delay(unsigned long __loops)
 	}
 	preempt_enable();
 }
+
 
 void __udelay(unsigned long usecs)
 {

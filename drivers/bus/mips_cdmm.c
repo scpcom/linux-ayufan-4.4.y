@@ -206,6 +206,7 @@ BUILD_PERCPU_HELPER(int, probe)     /* int mips_cdmm_probe(struct device) */
 BUILD_PERCPU_HELPER(int, remove)    /* int mips_cdmm_remove(struct device) */
 BUILD_PERCPU_HELPER(void, shutdown) /* void mips_cdmm_shutdown(struct device) */
 
+
 /* Driver registration */
 
 /**
@@ -243,6 +244,7 @@ void mips_cdmm_driver_unregister(struct mips_cdmm_driver *drv)
 	driver_unregister(&drv->drv);
 }
 EXPORT_SYMBOL_GPL(mips_cdmm_driver_unregister);
+
 
 /* CDMM initialisation and bus discovery */
 
@@ -548,6 +550,7 @@ static void mips_cdmm_bus_discover(struct mips_cdmm_bus *bus)
 		}
 	}
 }
+
 
 /*
  * CPU hotplug and initialisation

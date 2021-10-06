@@ -334,6 +334,7 @@ static inline int coda_alloc_context_buf(struct coda_ctx *ctx,
 	return coda_alloc_aux_buf(ctx->dev, buf, size, name, ctx->debugfs_entry);
 }
 
+
 static void coda_free_framebuffers(struct coda_ctx *ctx)
 {
 	int i;
@@ -989,6 +990,7 @@ static int coda_start_encoding(struct coda_ctx *ctx)
 
 	coda_write(dev, bitstream_buf, CODA_CMD_ENC_SEQ_BB_START);
 	coda_write(dev, bitstream_size / 1024, CODA_CMD_ENC_SEQ_BB_SIZE);
+
 
 	value = 0;
 	if (dev->devtype->product == CODA_960)

@@ -76,6 +76,7 @@ sint r8712_endofpktfile(struct pkt_file *pfile)
 		return false;
 }
 
+
 void r8712_set_qos(struct pkt_file *ppktfile, struct pkt_attrib *pattrib)
 {
 	struct ethhdr etherhdr;

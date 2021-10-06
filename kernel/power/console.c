@@ -26,6 +26,7 @@ struct pm_vt_switch {
 
 static LIST_HEAD(pm_vt_switch_list);
 
+
 /**
  * pm_vt_switch_required - indicate VT switch at suspend requirements
  * @dev: device

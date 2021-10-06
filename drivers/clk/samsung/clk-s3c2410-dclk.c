@@ -271,6 +271,7 @@ static int s3c24xx_dclk_probe(struct platform_device *pdev)
 	dclk_variant = (struct s3c24xx_dclk_drv_data *)
 				platform_get_device_id(pdev)->driver_data;
 
+
 	clk_table[MUX_DCLK0] = clk_register_mux(&pdev->dev, "mux_dclk0",
 				dclk_variant->mux_parent_names,
 				dclk_variant->mux_num_parents, 0,

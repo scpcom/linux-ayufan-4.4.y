@@ -22,6 +22,7 @@
  *   GNU General Public License for more details.
  */
 
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -55,6 +56,7 @@ int main(int argv, char **argc)
 	int ret, ppm;
 	pid_t pid;
 
+
 	printf("Running Asyncrhonous Frequency Changing Tests...\n");
 
 	pid = fork();
@@ -76,6 +78,7 @@ int main(int argv, char **argc)
 	tx.modes = ADJ_FREQUENCY;
 	tx.offset = 0;
 	adjtimex(&tx);
+
 
 	if (ret) {
 		printf("[FAILED]\n");

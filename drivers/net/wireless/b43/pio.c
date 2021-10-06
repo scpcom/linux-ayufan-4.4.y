@@ -33,6 +33,7 @@
 #include <linux/sched.h>
 #include <linux/slab.h>
 
+
 static u16 generate_cookie(struct b43_pio_txqueue *q,
 			   struct b43_pio_txpacket *pack)
 {

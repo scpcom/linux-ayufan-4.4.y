@@ -929,6 +929,7 @@ static void s5k5baf_hw_set_config(struct s5k5baf *state)
 	s5k5baf_hw_validate_cfg(state);
 }
 
+
 static void s5k5baf_hw_set_test_pattern(struct s5k5baf *state, int id)
 {
 	s5k5baf_i2c_write(state, REG_PATTERN_WIDTH, 800);

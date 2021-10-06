@@ -229,6 +229,7 @@ struct tb_drom_entry_port {
 	u8 unknown4:2;
 } __packed;
 
+
 /**
  * tb_eeprom_get_drom_offset - get drom offset within eeprom
  */

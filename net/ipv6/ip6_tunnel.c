@@ -1591,6 +1591,7 @@ static const struct net_device_ops ip6_tnl_netdev_ops = {
 	.ndo_get_iflink = ip6_tnl_get_iflink,
 };
 
+
 /**
  * ip6_tnl_dev_setup - setup virtual tunnel device
  *   @dev: virtual device associated with tunnel
@@ -1619,6 +1620,7 @@ static void ip6_tnl_dev_setup(struct net_device *dev)
 	dev->addr_assign_type = NET_ADDR_RANDOM;
 	eth_random_addr(dev->perm_addr);
 }
+
 
 /**
  * ip6_tnl_dev_init_gen - general initializer for all tunnel devices

@@ -339,6 +339,7 @@ static inline int siar_valid(struct pt_regs *regs)
 	return 1;
 }
 
+
 /* Reset all possible BHRB entries */
 static void power_pmu_bhrb_reset(void)
 {

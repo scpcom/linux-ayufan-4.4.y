@@ -283,6 +283,7 @@ module_param_call(trace_state, param_set_trace_state, param_get_trace_state,
 		  NULL, 0644);
 #endif /* CONFIG_ACPI_DEBUG */
 
+
 /* /sys/modules/acpi/parameters/aml_debug_output */
 
 module_param_named(aml_debug_output, acpi_gbl_enable_aml_debug_object,

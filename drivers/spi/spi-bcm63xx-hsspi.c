@@ -75,6 +75,7 @@
 
 #define HSSPI_FIFO_REG(x)			(0x200 + (x) * 0x200)
 
+
 #define HSSPI_OP_MULTIBIT			BIT(11)
 #define HSSPI_OP_CODE_SHIFT			13
 #define HSSPI_OP_SLEEP				(0 << HSSPI_OP_CODE_SHIFT)
@@ -415,6 +416,7 @@ out_disable_clk:
 	clk_disable_unprepare(clk);
 	return ret;
 }
+
 
 static int bcm63xx_hsspi_remove(struct platform_device *pdev)
 {

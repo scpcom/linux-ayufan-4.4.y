@@ -115,6 +115,7 @@ static struct ata_port_operations jmicron_ops = {
 	.prereset		= jmicron_pre_reset,
 };
 
+
 /**
  *	jmicron_init_one - Register Jmicron ATA PCI device with kernel services
  *	@pdev: PCI device to register
@@ -169,3 +170,4 @@ MODULE_DESCRIPTION("SCSI low-level driver for Jmicron PATA ports");
 MODULE_LICENSE("GPL");
 MODULE_DEVICE_TABLE(pci, jmicron_pci_tbl);
 MODULE_VERSION(DRV_VERSION);
+

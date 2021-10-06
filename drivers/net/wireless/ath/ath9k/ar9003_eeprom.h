@@ -152,6 +152,7 @@ enum ar9300_Rates {
 	ar9300RateSize,
 };
 
+
 struct eepFlags {
 	u8 opFlags;
 	u8 eepMisc;

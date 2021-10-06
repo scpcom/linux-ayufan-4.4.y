@@ -36,6 +36,7 @@
 	.word	9b, handler;			\
 	.previous
 
+
 .text
 .align	4
 .global	memset
@@ -147,6 +148,7 @@ memset:
 #endif /* !XCHAL_HAVE_LOOPS */
 .Lbytesetdone:
 	retw
+
 
 	.section .fixup, "ax"
 	.align	4

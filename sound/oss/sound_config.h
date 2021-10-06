@@ -10,6 +10,7 @@
  * for more info.
  */
 
+
 #ifndef  _SOUND_CONFIG_H_
 #define  _SOUND_CONFIG_H_
 
@@ -18,6 +19,7 @@
 
 #include "os.h"
 #include "soundvers.h"
+
 
 #ifndef SND_DEFAULT_ENABLE
 #define SND_DEFAULT_ENABLE	1

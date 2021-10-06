@@ -511,6 +511,7 @@ out:
 	return ret;
 }
 
+
 static struct platform_driver iop3xx_i2c_driver = {
 	.probe		= iop3xx_i2c_probe,
 	.remove		= iop3xx_i2c_remove,

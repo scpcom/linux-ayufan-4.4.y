@@ -62,6 +62,7 @@ RESET:
 	   NOP
 	   NOP
 
+
 	   IRQVEC NMI,_nmi_handler		; NMI interrupt
 	   IRQVEC AINT,_bad_interrupt		; reserved
 	   IRQVEC MSGINT,_bad_interrupt		; reserved

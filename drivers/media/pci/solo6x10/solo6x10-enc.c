@@ -270,6 +270,7 @@ static void solo_mp4e_config(struct solo_dev *solo_dev)
 		       SOLO_VE_BLOCK_SIZE(SOLO_MP4E_EXT_SIZE(solo_dev) >> 16) |
 		       SOLO_VE_BLOCK_BASE(SOLO_MP4E_EXT_ADDR(solo_dev) >> 16));
 
+
 	cfg = SOLO_VE_BYTE_ALIGN(2) | SOLO_VE_INSERT_INDEX
 		| SOLO_VE_MOTION_MODE(0);
 	if (solo_dev->type != SOLO_DEV_6010) {

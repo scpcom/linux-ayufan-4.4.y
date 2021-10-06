@@ -31,6 +31,7 @@
 	dst[60] = (elf_greg_t) mfctl(12); dst[61] = (elf_greg_t) mfctl(13); \
 	dst[62] = (elf_greg_t) mfctl(10); dst[63] = (elf_greg_t) mfctl(15);
 
+
 typedef unsigned int elf_greg_t;
 
 #include <linux/spinlock.h>

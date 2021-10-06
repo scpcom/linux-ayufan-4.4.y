@@ -12,6 +12,7 @@
 #include <linux/irq.h>
 #include <linux/profile.h>
 
+
 #define RTC_IRQ    8
 
 extern void isa_device_interrupt(unsigned long);

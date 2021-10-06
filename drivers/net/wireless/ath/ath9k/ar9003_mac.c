@@ -200,6 +200,7 @@ static bool ar9003_hw_get_isr(struct ath_hw *ah, enum ath9k_int *masked,
 			isr = REG_READ(ah, AR_ISR);
 	}
 
+
 	sync_cause = REG_READ(ah, AR_INTR_SYNC_CAUSE) & AR_INTR_SYNC_DEFAULT;
 
 	*masked = 0;

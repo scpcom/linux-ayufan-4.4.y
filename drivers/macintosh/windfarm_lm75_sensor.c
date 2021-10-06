@@ -125,6 +125,7 @@ static int wf_lm75_probe(struct i2c_client *client,
 	else
 		return -ENXIO;
  	
+
 	lm = kzalloc(sizeof(struct wf_lm75_sensor), GFP_KERNEL);
 	if (lm == NULL)
 		return -ENODEV;
@@ -178,3 +179,4 @@ module_i2c_driver(wf_lm75_driver);
 MODULE_AUTHOR("Benjamin Herrenschmidt <benh@kernel.crashing.org>");
 MODULE_DESCRIPTION("LM75 sensor objects for PowerMacs thermal control");
 MODULE_LICENSE("GPL");
+

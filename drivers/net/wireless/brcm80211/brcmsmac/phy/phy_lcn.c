@@ -1074,6 +1074,7 @@ wlc_lcnphy_get_tx_gain(struct brcms_phy *pi, struct lcnphy_txgains *gains)
 	gains->pad_gain = rfgain1 & 0xff;
 }
 
+
 static void wlc_lcnphy_set_dac_gain(struct brcms_phy *pi, u16 dac_gain)
 {
 	u16 dac_ctrl;

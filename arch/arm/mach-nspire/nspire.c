@@ -48,6 +48,7 @@ static struct clcd_board nspire_clcd_data = {
 	.remove		= nspire_clcd_remove,
 };
 
+
 static struct of_dev_auxdata nspire_auxdata[] __initdata = {
 	OF_DEV_AUXDATA("arm,pl111", NSPIRE_LCD_PHYS_BASE,
 			NULL, &nspire_clcd_data),

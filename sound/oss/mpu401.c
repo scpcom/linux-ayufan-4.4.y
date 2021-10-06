@@ -78,6 +78,7 @@ struct mpu_config
 #define	COMDPORT(base)   (base+1)
 #define	STATPORT(base)   (base+1)
 
+
 static void mpu401_close(int dev);
 
 static inline int mpu401_status(struct mpu_config *devc)
@@ -1011,6 +1012,7 @@ int attach_mpu401(struct address_info *hw_config, struct module *owner)
 			if (mpu_cmd(m, 0xE0, 120) >= 0)		/* Set tempo OK */
 				devc->capabilities |= MPU_CAP_INTLG;	/* Supports intelligent mode */
 
+
 	mpu401_synth_operations[m] = kmalloc(sizeof(struct synth_operations), GFP_KERNEL);
 
 	if (mpu401_synth_operations[m] == NULL)
@@ -1726,6 +1728,7 @@ static int mpu_timer_init(int midi_dev)
 
 		if (devc->revision & 0x02)
 			timer_caps |= TMR_MODE_CLS;
+
 
 		if (devc->revision & 0x40)
 			max_timebase = 10;	/* Has the 216 and 240 ppqn modes */

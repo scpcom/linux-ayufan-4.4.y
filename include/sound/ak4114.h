@@ -209,3 +209,4 @@ static inline void snd_ak4114_resume(struct ak4114 *chip) {}
 #endif
 
 #endif /* __SOUND_AK4114_H */
+

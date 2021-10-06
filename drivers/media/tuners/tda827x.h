@@ -41,6 +41,7 @@ struct tda827x_config
 	void (*agcf)(struct dvb_frontend *fe);
 };
 
+
 /**
  * Attach a tda827x tuner to the supplied frontend structure.
  *

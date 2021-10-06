@@ -35,6 +35,7 @@
 #define PLT_BT300_MIN		0x0413
 #define PLT_BT300_MAX		0x0418
 
+
 #define PLT_ALLOW_CONSUMER (field->application == HID_CP_CONSUMERCONTROL && \
 			    (usage->hid & HID_USAGE_PAGE) == HID_UP_CONSUMER)
 

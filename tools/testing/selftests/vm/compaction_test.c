@@ -151,6 +151,7 @@ int check_compaction(unsigned long mem_free, unsigned int hugepage_size)
 	return -1;
 }
 
+
 int main(int argc, char **argv)
 {
 	struct rlimit lim;

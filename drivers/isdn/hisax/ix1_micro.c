@@ -55,6 +55,7 @@ readfifo(unsigned int ale, unsigned int adr, u_char off, u_char *data, int size)
 	insb(adr, data, size);
 }
 
+
 static inline void
 writereg(unsigned int ale, unsigned int adr, u_char off, u_char data)
 {
@@ -221,6 +222,7 @@ static struct isapnp_device_id itk_ids[] = {
 static struct isapnp_device_id *ipid = &itk_ids[0];
 static struct pnp_card *pnp_c = NULL;
 #endif
+
 
 int setup_ix1micro(struct IsdnCard *card)
 {

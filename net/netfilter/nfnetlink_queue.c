@@ -61,6 +61,7 @@ struct nfqnl_instance {
 	unsigned int queue_dropped;
 	unsigned int queue_user_dropped;
 
+
 	u_int16_t queue_num;			/* number of this queue */
 	u_int8_t copy_mode;
 	u_int32_t flags;			/* Set using NFQA_CFG_FLAGS */

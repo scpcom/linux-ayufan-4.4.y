@@ -189,3 +189,4 @@ void usb_serial_bus_deregister(struct usb_serial_driver *driver)
 	free_dynids(driver);
 	driver_unregister(&driver->driver);
 }
+

@@ -25,6 +25,7 @@ typedef union {
 #define PGDIR_SHIFT	22
 #define PTRS_PER_PGD	1024
 
+
 /*
  * the i386 is two-level, so we don't really have any
  * PMD directory physically.

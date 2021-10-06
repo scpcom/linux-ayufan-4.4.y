@@ -141,6 +141,7 @@ ENTRY(memmove)
 		blt	18f
 	UNWIND(	.fnend				)
 
+
 		.macro	backward_copy_shift push pull
 
 	UNWIND(	.fnstart			)
@@ -215,6 +216,7 @@ ENTRY(memmove)
 	UNWIND(	.fnend				)
 
 		.endm
+
 
 		backward_copy_shift	push=8	pull=24
 

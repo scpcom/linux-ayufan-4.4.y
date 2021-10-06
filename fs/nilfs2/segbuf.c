@@ -29,6 +29,7 @@
 #include "page.h"
 #include "segbuf.h"
 
+
 struct nilfs_write_info {
 	struct the_nilfs       *nilfs;
 	struct bio	       *bio;

@@ -527,6 +527,7 @@ int cx23885_start_dma(struct cx23885_tsport *port,
 			     struct cx23885_buffer   *buf);
 void cx23885_cancel_buffers(struct cx23885_tsport *port);
 
+
 extern void cx23885_gpio_set(struct cx23885_dev *dev, u32 mask);
 extern void cx23885_gpio_clear(struct cx23885_dev *dev, u32 mask);
 extern u32 cx23885_gpio_get(struct cx23885_dev *dev, u32 mask);

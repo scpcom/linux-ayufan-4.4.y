@@ -155,3 +155,4 @@ u32 amdgpu_atombios_i2c_func(struct i2c_adapter *adap)
 {
 	return I2C_FUNC_I2C | I2C_FUNC_SMBUS_EMUL;
 }
+

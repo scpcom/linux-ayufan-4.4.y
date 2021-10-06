@@ -25,6 +25,7 @@ static struct cpufreq_driver	longrun_driver;
  */
 static unsigned int longrun_low_freq, longrun_high_freq;
 
+
 /**
  * longrun_get_policy - get the current LongRun policy
  * @policy: struct cpufreq_policy where current policy is written into
@@ -59,6 +60,7 @@ static void longrun_get_policy(struct cpufreq_policy *policy)
 	}
 	policy->cpu = 0;
 }
+
 
 /**
  * longrun_set_policy - sets a new CPUFreq policy
@@ -112,6 +114,7 @@ static int longrun_set_policy(struct cpufreq_policy *policy)
 
 	return 0;
 }
+
 
 /**
  * longrun_verify_poliy - verifies a new CPUFreq policy
@@ -250,6 +253,7 @@ static int longrun_determine_freqs(unsigned int *low_freq,
 	return 0;
 }
 
+
 static int longrun_cpu_init(struct cpufreq_policy *policy)
 {
 	int result = 0;
@@ -271,6 +275,7 @@ static int longrun_cpu_init(struct cpufreq_policy *policy)
 
 	return 0;
 }
+
 
 static struct cpufreq_driver longrun_driver = {
 	.flags		= CPUFREQ_CONST_LOOPS,
@@ -300,6 +305,7 @@ static int __init longrun_init(void)
 	return cpufreq_register_driver(&longrun_driver);
 }
 
+
 /**
  * longrun_exit - unregisters LongRun support
  */
@@ -307,6 +313,7 @@ static void __exit longrun_exit(void)
 {
 	cpufreq_unregister_driver(&longrun_driver);
 }
+
 
 MODULE_AUTHOR("Dominik Brodowski <linux@brodo.de>");
 MODULE_DESCRIPTION("LongRun driver for Transmeta Crusoe and "

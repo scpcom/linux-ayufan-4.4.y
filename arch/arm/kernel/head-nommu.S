@@ -165,6 +165,7 @@ ENDPROC(__after_proc_init)
 
 #ifdef CONFIG_ARM_MPU
 
+
 /* Set which MPU region should be programmed */
 .macro set_region_nr tmp, rgnr
 	mov	\tmp, \rgnr			@ Use static region numbers

@@ -651,6 +651,7 @@ int rio_enable_rx_tx_port(struct rio_mport *port,
 }
 EXPORT_SYMBOL_GPL(rio_enable_rx_tx_port);
 
+
 /**
  * rio_chk_dev_route - Validate route to the specified device.
  * @rdev:  RIO device failed to respond

@@ -1609,6 +1609,7 @@ static int mmci_probe(struct amba_device *dev,
 		mmc->f_max = variant->explicit_mclk_control ?
 				fmax : min(host->mclk, fmax);
 
+
 	dev_dbg(mmc_dev(mmc), "clocking block at %u Hz\n", mmc->f_max);
 
 	/* Get regulators and the supported OCR mask */

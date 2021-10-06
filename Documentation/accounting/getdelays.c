@@ -114,6 +114,7 @@ error:
 	return -1;
 }
 
+
 static int send_cmd(int sd, __u16 nlmsg_type, __u32 nlmsg_pid,
 	     __u8 genl_cmd, __u16 nla_type,
 	     void *nla_data, int nla_len)
@@ -152,6 +153,7 @@ static int send_cmd(int sd, __u16 nlmsg_type, __u32 nlmsg_pid,
 	}
 	return 0;
 }
+
 
 /*
  * Probe the controller in genetlink to find the family id
@@ -239,6 +241,7 @@ static void print_cgroupstats(struct cgroupstats *c)
 		(unsigned long long)c->nr_stopped,
 		(unsigned long long)c->nr_uninterruptible);
 }
+
 
 static void print_ioacct(struct taskstats *t)
 {
@@ -375,6 +378,7 @@ int main(int argc, char *argv[])
 	if ((nl_sd = create_nl_socket(NETLINK_GENERIC)) < 0)
 		err(1, "error creating Netlink socket\n");
 
+
 	mypid = getpid();
 	id = get_family_id(nl_sd);
 	if (!id) {
@@ -455,6 +459,7 @@ int main(int argc, char *argv[])
 
 		PRINTF("nlmsghdr size=%zu, nlmsg_len=%d, rep_len=%d\n",
 		       sizeof(struct nlmsghdr), msg.n.nlmsg_len, rep_len);
+
 
 		rep_len = GENLMSG_PAYLOAD(&msg.n);
 

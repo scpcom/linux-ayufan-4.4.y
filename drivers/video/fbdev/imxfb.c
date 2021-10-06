@@ -939,6 +939,7 @@ static int imxfb_probe(struct platform_device *pdev)
 			goto failed_platform_init;
 	}
 
+
 	INIT_LIST_HEAD(&info->modelist);
 	for (i = 0; i < fbi->num_modes; i++)
 		fb_add_videomode(&fbi->mode[i].mode, &info->modelist);

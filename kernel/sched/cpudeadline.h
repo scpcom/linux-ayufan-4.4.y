@@ -19,6 +19,7 @@ struct cpudl {
 	struct cpudl_item *elements;
 };
 
+
 #ifdef CONFIG_SMP
 int cpudl_find(struct cpudl *cp, struct task_struct *p,
 	       struct cpumask *later_mask);

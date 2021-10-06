@@ -88,6 +88,7 @@ u32 fib_multipath_secret __read_mostly;
 
 #define endfor_nexthops(fi) }
 
+
 const struct fib_prop fib_props[RTN_MAX + 1] = {
 	[RTN_UNSPEC] = {
 		.error	= 0,
@@ -675,6 +676,7 @@ int fib_nh_match(struct fib_config *cfg, struct fib_info *fi)
 #endif
 	return 0;
 }
+
 
 /*
  * Picture

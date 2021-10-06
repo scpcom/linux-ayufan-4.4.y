@@ -1011,3 +1011,4 @@ wilc_hif_func_t hif_sdio = {
 	sdio_set_max_speed,
 	sdio_set_default_speed,
 };
+

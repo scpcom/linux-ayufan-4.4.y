@@ -44,6 +44,7 @@
 #include <linux/hid.h>		/* For HID_REQ_SET_REPORT & HID_DT_REPORT */
 #include <linux/uaccess.h>	/* For copy_to_user/put_user/... */
 
+
 /* Module and Version Information */
 #define DRIVER_VERSION "1.02"
 #define DRIVER_AUTHOR "Wim Van Sebroeck <wim@iguana.be>"
@@ -164,6 +165,7 @@ static struct usb_driver usb_pcwd_driver = {
 	.disconnect =	usb_pcwd_disconnect,
 	.id_table =	usb_pcwd_table,
 };
+
 
 static void usb_pcwd_intr_done(struct urb *urb)
 {
@@ -759,6 +761,7 @@ error:
 	usb_pcwd_device = NULL;
 	return retval;
 }
+
 
 /**
  *	usb_pcwd_disconnect

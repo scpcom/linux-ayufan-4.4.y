@@ -194,6 +194,7 @@ static int macvlan_addr_busy(const struct macvlan_port *port,
 	return 0;
 }
 
+
 static int macvlan_broadcast_one(struct sk_buff *skb,
 				 const struct macvlan_dev *vlan,
 				 const struct ethhdr *eth, bool local)
@@ -216,6 +217,7 @@ static u32 macvlan_hash_mix(const struct macvlan_dev *vlan)
 {
 	return (u32)(((unsigned long)vlan) >> L1_CACHE_SHIFT);
 }
+
 
 static unsigned int mc_hash(const struct macvlan_dev *vlan,
 			    const unsigned char *addr)

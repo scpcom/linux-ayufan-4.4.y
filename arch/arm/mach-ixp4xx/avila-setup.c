@@ -196,3 +196,4 @@ MACHINE_START(LOFT, "Giant Shoulder Inc Loft board")
 	.restart	= ixp4xx_restart,
 MACHINE_END
 #endif
+

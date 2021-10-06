@@ -269,6 +269,7 @@ static void mm_start_io(struct cardinfo *card)
 	desc->control_bits &= ~cpu_to_le32(DMASCR_CHAIN_EN);
 	desc->sem_control_bits = desc->control_bits;
 
+
 	if (debug & DEBUG_LED_ON_TRANSFER)
 		set_led(card, LED_REMOVE, LED_ON);
 
@@ -400,6 +401,7 @@ static int add_bio(struct cardinfo *card)
 	if (rw == WRITE)
 		desc->control_bits |= cpu_to_le32(DMASCR_TRANSFER_READ);
 	desc->sem_control_bits = desc->control_bits;
+
 
 	bio_advance_iter(bio, &card->current_iter, vec.bv_len);
 	if (!card->current_iter.bi_size)

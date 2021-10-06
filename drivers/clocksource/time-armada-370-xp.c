@@ -314,6 +314,7 @@ static void __init armada_370_xp_timer_common_init(struct device_node *np)
 
 	armada_370_xp_evt = alloc_percpu(struct clock_event_device);
 
+
 	/*
 	 * Setup clockevent timer (interrupt-driven).
 	 */

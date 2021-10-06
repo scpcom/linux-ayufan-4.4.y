@@ -90,6 +90,7 @@ int nft_reject_icmp_code(u8 code)
 
 EXPORT_SYMBOL_GPL(nft_reject_icmp_code);
 
+
 static u8 icmp_code_v6[NFT_REJECT_ICMPX_MAX + 1] = {
 	[NFT_REJECT_ICMPX_NO_ROUTE]		= ICMPV6_NOROUTE,
 	[NFT_REJECT_ICMPX_PORT_UNREACH]		= ICMPV6_PORT_UNREACH,

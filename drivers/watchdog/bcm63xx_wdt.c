@@ -165,6 +165,7 @@ static struct watchdog_info bcm63xx_wdt_info = {
 				WDIOF_MAGICCLOSE,
 };
 
+
 static long bcm63xx_wdt_ioctl(struct file *file, unsigned int cmd,
 				unsigned long arg)
 {
@@ -232,6 +233,7 @@ static struct miscdevice bcm63xx_wdt_miscdev = {
 	.name	= "watchdog",
 	.fops	= &bcm63xx_wdt_fops,
 };
+
 
 static int bcm63xx_wdt_probe(struct platform_device *pdev)
 {

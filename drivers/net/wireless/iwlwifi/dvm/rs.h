@@ -218,6 +218,7 @@ enum {
 #define IWL_SISO_SWITCH_GI              5
 #define IWL_SISO_SWITCH_MIMO3_ABC       6
 
+
 /* possible actions when in mimo mode */
 #define IWL_MIMO2_SWITCH_ANTENNA1       0
 #define IWL_MIMO2_SWITCH_ANTENNA2       1
@@ -226,6 +227,7 @@ enum {
 #define IWL_MIMO2_SWITCH_SISO_C         4
 #define IWL_MIMO2_SWITCH_GI             5
 #define IWL_MIMO2_SWITCH_MIMO3_ABC      6
+
 
 /* possible actions when in mimo3 mode */
 #define IWL_MIMO3_SWITCH_ANTENNA1       0
@@ -237,6 +239,7 @@ enum {
 #define IWL_MIMO3_SWITCH_MIMO2_AC       6
 #define IWL_MIMO3_SWITCH_MIMO2_BC       7
 #define IWL_MIMO3_SWITCH_GI             8
+
 
 #define IWL_MAX_11N_MIMO3_SEARCH IWL_MIMO3_SWITCH_GI
 #define IWL_MAX_SEARCH IWL_MIMO2_SWITCH_MIMO3_ABC
@@ -394,6 +397,7 @@ static inline u8 first_antenna(u8 mask)
 		return ANT_B;
 	return ANT_C;
 }
+
 
 /* Initialize station's rate scaling information after adding station */
 void iwl_rs_rate_init(struct iwl_priv *priv, struct ieee80211_sta *sta,

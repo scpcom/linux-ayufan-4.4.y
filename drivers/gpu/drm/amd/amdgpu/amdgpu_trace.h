@@ -98,6 +98,7 @@ TRACE_EVENT(amdgpu_sched_run_job,
 		      __entry->fence, __entry->ring_name, __entry->num_ibs)
 );
 
+
 TRACE_EVENT(amdgpu_vm_grab_id,
 	    TP_PROTO(unsigned vmid, int ring),
 	    TP_ARGS(vmid, ring),

@@ -408,6 +408,7 @@ static int dn_dev_set_ifa(struct net_device *dev, struct dn_ifaddr *ifa)
 	return rv;
 }
 
+
 int dn_dev_ioctl(unsigned int cmd, void __user *arg)
 {
 	char buffer[DN_IFREQ_SIZE];
@@ -870,6 +871,7 @@ static void dn_send_endnode_hello(struct net_device *dev, struct dn_ifaddr *ifa)
 	dn_rt_finish_output(skb, dn_rt_all_rt_mcast, msg->id);
 }
 
+
 #define DRDELAY (5 * HZ)
 
 static int dn_am_i_a_router(struct dn_neigh *dn, struct dn_dev *dn_db, struct dn_ifaddr *ifa)
@@ -1121,6 +1123,7 @@ static struct dn_dev *dn_dev_create(struct net_device *dev, int *err)
 	*err = 0;
 	return dn_db;
 }
+
 
 /*
  * This processes a device up event. We only start up

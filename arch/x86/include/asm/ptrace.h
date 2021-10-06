@@ -82,6 +82,7 @@ convert_ip_to_linear(struct task_struct *child, struct pt_regs *regs);
 extern void send_sigtrap(struct task_struct *tsk, struct pt_regs *regs,
 			 int error_code, int si_code);
 
+
 extern unsigned long syscall_trace_enter_phase1(struct pt_regs *, u32 arch);
 extern long syscall_trace_enter_phase2(struct pt_regs *, u32 arch,
 				       unsigned long phase1_result);

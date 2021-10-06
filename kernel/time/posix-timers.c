@@ -240,6 +240,7 @@ static int posix_get_monotonic_raw(clockid_t which_clock, struct timespec *tp)
 	return 0;
 }
 
+
 static int posix_get_realtime_coarse(clockid_t which_clock, struct timespec *tp)
 {
 	*tp = current_kernel_time();

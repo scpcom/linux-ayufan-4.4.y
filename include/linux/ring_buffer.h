@@ -101,6 +101,7 @@ int ring_buffer_wait(struct ring_buffer *buffer, int cpu, bool full);
 int ring_buffer_poll_wait(struct ring_buffer *buffer, int cpu,
 			  struct file *filp, poll_table *poll_table);
 
+
 #define RING_BUFFER_ALL_CPUS -1
 
 void ring_buffer_free(struct ring_buffer *buffer);
@@ -181,6 +182,7 @@ void ring_buffer_set_clock(struct ring_buffer *buffer,
 			   u64 (*clock)(void));
 
 size_t ring_buffer_page_len(void *page);
+
 
 void *ring_buffer_alloc_read_page(struct ring_buffer *buffer, int cpu);
 void ring_buffer_free_read_page(struct ring_buffer *buffer, void *data);

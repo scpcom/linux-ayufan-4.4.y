@@ -104,6 +104,7 @@ int bnx2fc_send_fw_fcoe_init_msg(struct bnx2fc_hba *hba)
 	fcoe_init2.hsi_major_version = FCOE_HSI_MAJOR_VERSION;
 	fcoe_init2.hsi_minor_version = FCOE_HSI_MINOR_VERSION;
 
+
 	fcoe_init2.hash_tbl_pbl_addr_lo = (u32) hba->hash_tbl_pbl_dma;
 	fcoe_init2.hash_tbl_pbl_addr_hi = (u32)
 					   ((u64) hba->hash_tbl_pbl_dma >> 32);
@@ -192,8 +193,10 @@ int bnx2fc_send_session_ofld_req(struct fcoe_port *port,
 	ofld_req1.hdr.flags =
 		(FCOE_KWQE_LAYER_CODE << FCOE_KWQE_HEADER_LAYER_CODE_SHIFT);
 
+
 	conn_id = (u16)tgt->fcoe_conn_id;
 	ofld_req1.fcoe_conn_id = conn_id;
+
 
 	ofld_req1.sq_addr_lo = (u32) tgt->sq_dma;
 	ofld_req1.sq_addr_hi = (u32)((u64) tgt->sq_dma >> 32);
@@ -300,6 +303,7 @@ int bnx2fc_send_session_ofld_req(struct fcoe_port *port,
 
 	/* C2_VALID and ACK flags are not set as they are not supported */
 
+
 	/* Initialize offload request 4 structure */
 	memset(&ofld_req4, 0x00, sizeof(struct fcoe_kwqe_conn_offload4));
 	ofld_req4.hdr.op_code = FCOE_KWQE_OPCODE_OFFLOAD_CONN4;
@@ -307,6 +311,7 @@ int bnx2fc_send_session_ofld_req(struct fcoe_port *port,
 		(FCOE_KWQE_LAYER_CODE << FCOE_KWQE_HEADER_LAYER_CODE_SHIFT);
 
 	ofld_req4.e_d_tov_timer_val = lport->e_d_tov / 20;
+
 
 	ofld_req4.src_mac_addr_lo[0] =  port->data_src_addr[5];
 							/* local mac */
@@ -455,6 +460,7 @@ int bnx2fc_send_session_disable_req(struct fcoe_port *port,
 	disable_req.s_id[1] = (port_id & 0x0000FF00) >> 8;
 	disable_req.s_id[2] = (port_id & 0x00FF0000) >> 16;
 
+
 	port_id = rport->port_id;
 	disable_req.d_id[0] = (port_id & 0x000000FF);
 	disable_req.d_id[1] = (port_id & 0x0000FF00) >> 8;
@@ -521,6 +527,7 @@ static bool is_valid_lport(struct bnx2fc_hba *hba, struct fc_lport *lport)
 
 }
 
+
 static void bnx2fc_unsol_els_work(struct work_struct *work)
 {
 	struct bnx2fc_unsol_els *unsol_els;
@@ -551,6 +558,7 @@ void bnx2fc_process_l2_frame_compl(struct bnx2fc_rport *tgt,
 	u32 payload_len;
 	u32 crc;
 	u8 op;
+
 
 	unsol_els = kzalloc(sizeof(*unsol_els), GFP_ATOMIC);
 	if (!unsol_els) {
@@ -632,6 +640,7 @@ static void bnx2fc_process_unsol_compl(struct bnx2fc_rport *tgt, u16 wqe)
 	u64 err_warn_bit_map;
 	u8 err_warn = 0xff;
 
+
 	BNX2FC_TGT_DBG(tgt, "Entered UNSOL COMPLETION wqe = 0x%x\n", wqe);
 	switch (wqe & FCOE_UNSOLICITED_CQE_SUBTYPE) {
 	case FCOE_UNSOLICITED_FRAME_CQE_TYPE:
@@ -691,6 +700,7 @@ static void bnx2fc_process_unsol_compl(struct bnx2fc_rport *tgt, u16 wqe)
 			err_entry->data.err_warn_bitmap_lo);
 		BNX2FC_TGT_DBG(tgt, "buf_offsets - tx = 0x%x, rx = 0x%x\n",
 			err_entry->data.tx_buf_off, err_entry->data.rx_buf_off);
+
 
 		if (xid > hba->max_xid) {
 			BNX2FC_TGT_DBG(tgt, "xid(0x%x) out of FW range\n",
@@ -1585,6 +1595,7 @@ void bnx2fc_init_mp_task(struct bnx2fc_cmd *io_req,
 	u64 *hdr;
 	u64 temp_hdr[3];
 	u32 context_id;
+
 
 	/* Obtain task_type */
 	if ((io_req->cmd_type == BNX2FC_TASK_MGMT_CMD) ||

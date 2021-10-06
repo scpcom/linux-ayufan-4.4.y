@@ -470,6 +470,7 @@ static void rv6xx_calculate_memory_clock_stepping_parameters(struct radeon_devic
 	else
 		pi->hw.medium_mclk_index = R600_POWER_LEVEL_MEDIUM;
 
+
 	if (state->medium.mclk == state->low.mclk)
 		pi->hw.low_mclk_index =
 			pi->hw.medium_mclk_index;
@@ -601,6 +602,7 @@ static int rv6xx_program_mclk_stepping_entry(struct radeon_device *rdev,
 
 	if (radeon_atom_get_clock_dividers(rdev, COMPUTE_MEMORY_PLL_PARAM, clock, false, &dividers))
 	    return -EINVAL;
+
 
 	rv6xx_memory_clock_entry_set_reference_divider(rdev, entry, dividers.ref_div);
 	rv6xx_memory_clock_entry_set_feedback_divider(rdev, entry, dividers.fb_div);
@@ -1402,6 +1404,7 @@ static void rv6xx_enable_auto_throttle_source(struct radeon_device *rdev,
 		}
 	}
 }
+
 
 static void rv6xx_enable_thermal_protection(struct radeon_device *rdev,
 					    bool enable)

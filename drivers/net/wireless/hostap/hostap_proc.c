@@ -10,6 +10,7 @@
 
 #define PROC_LIMIT (PAGE_SIZE - 80)
 
+
 #ifndef PRISM2_NO_PROCFS_DEBUG
 static int prism2_debug_proc_show(struct seq_file *m, void *v)
 {
@@ -54,6 +55,7 @@ static const struct file_operations prism2_debug_proc_fops = {
 	.release	= single_release,
 };
 #endif /* PRISM2_NO_PROCFS_DEBUG */
+
 
 static int prism2_stats_proc_show(struct seq_file *m, void *v)
 {
@@ -103,6 +105,7 @@ static const struct file_operations prism2_stats_proc_fops = {
 	.llseek		= seq_lseek,
 	.release	= single_release,
 };
+
 
 static int prism2_wds_proc_show(struct seq_file *m, void *v)
 {
@@ -158,6 +161,7 @@ static const struct file_operations prism2_wds_proc_fops = {
 	.llseek		= seq_lseek,
 	.release	= seq_release,
 };
+
 
 static int prism2_bss_list_proc_show(struct seq_file *m, void *v)
 {
@@ -229,6 +233,7 @@ static const struct file_operations prism2_bss_list_proc_fops = {
 	.release	= seq_release,
 };
 
+
 static int prism2_crypt_proc_show(struct seq_file *m, void *v)
 {
 	local_info_t *local = m->private;
@@ -258,6 +263,7 @@ static const struct file_operations prism2_crypt_proc_fops = {
 	.release	= single_release,
 };
 
+
 static ssize_t prism2_pda_proc_read(struct file *file, char __user *buf,
 				    size_t count, loff_t *_pos)
 {
@@ -281,6 +287,7 @@ static const struct file_operations prism2_pda_proc_fops = {
 	.llseek		= generic_file_llseek,
 };
 
+
 static ssize_t prism2_aux_dump_proc_no_read(struct file *file, char __user *buf,
 					    size_t bufsize, loff_t *_pos)
 {
@@ -290,6 +297,7 @@ static ssize_t prism2_aux_dump_proc_no_read(struct file *file, char __user *buf,
 static const struct file_operations prism2_aux_dump_proc_fops = {
 	.read		= prism2_aux_dump_proc_no_read,
 };
+
 
 #ifdef PRISM2_IO_DEBUG
 static int prism2_io_debug_proc_read(char *page, char **start, off_t off,
@@ -328,6 +336,7 @@ static int prism2_io_debug_proc_read(char *page, char **start, off_t off,
 	return count;
 }
 #endif /* PRISM2_IO_DEBUG */
+
 
 #ifndef PRISM2_NO_STATION_MODES
 static int prism2_scan_results_proc_show(struct seq_file *m, void *v)
@@ -431,7 +440,9 @@ static const struct file_operations prism2_scan_results_proc_fops = {
 	.release	= seq_release,
 };
 
+
 #endif /* PRISM2_NO_STATION_MODES */
+
 
 void hostap_init_proc(local_info_t *local)
 {
@@ -477,10 +488,12 @@ void hostap_init_proc(local_info_t *local)
 #endif /* PRISM2_NO_STATION_MODES */
 }
 
+
 void hostap_remove_proc(local_info_t *local)
 {
 	proc_remove(local->proc);
 }
+
 
 EXPORT_SYMBOL(hostap_init_proc);
 EXPORT_SYMBOL(hostap_remove_proc);

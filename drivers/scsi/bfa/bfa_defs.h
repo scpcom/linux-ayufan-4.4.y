@@ -801,6 +801,7 @@ struct bfa_ablk_cfg_s {
 	struct bfa_ablk_cfg_inst_s	inst[BFA_ABLK_MAX];
 };
 
+
 /*
  *	SFP module specific
  */

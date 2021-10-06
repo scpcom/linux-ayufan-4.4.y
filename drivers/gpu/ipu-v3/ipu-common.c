@@ -1095,6 +1095,7 @@ err_register:
 	return ret;
 }
 
+
 static int ipu_irq_init(struct ipu_soc *ipu)
 {
 	struct irq_chip_generic *gc;

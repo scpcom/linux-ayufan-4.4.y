@@ -55,6 +55,7 @@ static u32 sms_to_code_rate_table[] = {
 	[4] = FEC_7_8,
 };
 
+
 static u32 sms_to_hierarchy_table[] = {
 	[0] = HIERARCHY_NONE,
 	[1] = HIERARCHY_1,
@@ -68,6 +69,7 @@ static u32 sms_to_modulation_table[] = {
 	[2] = QAM_64,
 	[3] = DQPSK,
 };
+
 
 /* Events that may come from DVB v3 adapter */
 static void sms_board_dvb3_event(struct smsdvb_client_t *client,

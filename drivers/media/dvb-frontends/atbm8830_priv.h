@@ -72,3 +72,4 @@ struct atbm_state {
 #define REG_AGC_HOLD_LOOP	0x1031
 
 #endif
+

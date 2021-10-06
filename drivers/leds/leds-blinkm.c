@@ -808,3 +808,4 @@ module_i2c_driver(blinkm_driver);
 MODULE_AUTHOR("Jan-Simon Moeller <dl9pf@gmx.de>");
 MODULE_DESCRIPTION("BlinkM RGB LED driver");
 MODULE_LICENSE("GPL");
+

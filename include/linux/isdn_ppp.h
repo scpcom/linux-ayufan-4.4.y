@@ -12,6 +12,9 @@
 #ifndef _LINUX_ISDN_PPP_H
 #define _LINUX_ISDN_PPP_H
 
+
+
+
 #ifdef CONFIG_IPPP_FILTER
 #include <linux/filter.h>
 #endif

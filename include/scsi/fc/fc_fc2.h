@@ -27,6 +27,7 @@
 #define PACKED  __attribute__ ((__packed__))
 #endif /* PACKED */
 
+
 /*
  * Sequence Status Block.
  * This format is set by the FC-FS standard and is sent over the wire.

@@ -29,6 +29,7 @@
 
 #include "hid-picolcd.h"
 
+
 static int picolcd_debug_reset_show(struct seq_file *f, void *p)
 {
 	if (picolcd_fbinfo((struct picolcd_data *)f->private))
@@ -363,6 +364,7 @@ static const struct file_operations picolcd_debug_flash_fops = {
 	.write    = picolcd_debug_flash_write,
 	.llseek   = generic_file_llseek,
 };
+
 
 /*
  * Helper code for HID report level dumping/debugging
@@ -890,3 +892,4 @@ void picolcd_exit_devfs(struct picolcd_data *data)
 	debugfs_remove(dent);
 	mutex_destroy(&data->mutex_flash);
 }
+

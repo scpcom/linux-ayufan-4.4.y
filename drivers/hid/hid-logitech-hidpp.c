@@ -120,6 +120,7 @@ struct hidpp_device {
 	unsigned long quirks;
 };
 
+
 /* HID++ 1.0 error codes */
 #define HIDPP_ERROR				0x8f
 #define HIDPP_ERROR_SUCCESS			0x00

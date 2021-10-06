@@ -37,6 +37,7 @@ static inline uint32_t armada_pitch(uint32_t width, uint32_t bpp)
 	return ALIGN(pitch, 128);
 }
 
+
 struct armada_private;
 
 struct armada_variant {

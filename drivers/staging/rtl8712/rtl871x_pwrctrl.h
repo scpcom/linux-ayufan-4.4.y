@@ -29,6 +29,7 @@
 #include "osdep_service.h"
 #include "drv_types.h"
 
+
 #define CMD_ALIVE	BIT(2)
 
 enum Power_Mgnt {
@@ -74,9 +75,11 @@ enum Power_Mgnt {
 #define		PS_STATE_S3		(PS_ALL_ON)
 #define	PS_STATE_S4		((PS_ST_ACTIVE) | (PS_ALL_ON))
 
+
 #define		PS_IS_RF_ON(x)		((x) & (PS_ALL_ON))
 #define		PS_IS_ACTIVE(x)		((x) & (PS_ST_ACTIVE))
 #define		CLR_PS_STATE(x)	((x) = ((x) & (0xF0)))
+
 
 struct reportpwrstate_parm {
 	unsigned char mode;

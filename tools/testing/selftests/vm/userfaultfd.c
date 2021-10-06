@@ -155,6 +155,7 @@ static void *locking_thread(void *arg)
 					page_nr, count,
 					count_verify[page_nr]), exit(1);
 
+
 			/*
 			 * We can't use bcmp (or memcmp) because that
 			 * returns 0 erroneously if the memory is

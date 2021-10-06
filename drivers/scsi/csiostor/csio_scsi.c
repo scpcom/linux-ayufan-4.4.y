@@ -863,6 +863,7 @@ csio_scsis_tm_active(struct csio_ioreq *req, enum csio_scsi_ev evt)
 		}
 		break;
 
+
 	case CSIO_SCSIE_CLOSE:
 		csio_scsi_abrt_cls(req, SCSI_CLOSE);
 		if (req->drv_status == 0) {
@@ -1565,6 +1566,7 @@ csio_scsi_err_handler(struct csio_hw *hw, struct csio_ioreq *req)
 	uint32_t host_status = DID_OK;
 	uint32_t rsp_len = 0, sns_len = 0;
 	struct csio_rnode *rn = (struct csio_rnode *)(cmnd->device->hostdata);
+
 
 	switch (req->wr_status) {
 	case FW_HOSTERROR:

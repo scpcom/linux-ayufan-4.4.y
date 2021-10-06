@@ -122,6 +122,7 @@ enum mlx4_vlan_transition {
 	MLX4_VLAN_TRANSITION_VGT_VGT = 3,
 };
 
+
 struct mlx4_cmd_context {
 	struct completion	done;
 	int			result;
@@ -800,6 +801,7 @@ int __mlx4_cmd(struct mlx4_dev *dev, u64 in_param, u64 *out_param,
 			      in_modifier, op_modifier, op, timeout);
 }
 EXPORT_SYMBOL_GPL(__mlx4_cmd);
+
 
 int mlx4_ARM_COMM_CHANNEL(struct mlx4_dev *dev)
 {
@@ -1787,6 +1789,7 @@ static int mlx4_master_process_vhcr(struct mlx4_dev *dev, int slave,
 		goto out_status;
 	}
 
+
 	/* Write outbox if command completed successfully */
 	if (cmd->has_outbox && !vhcr_cmd->status) {
 		ret = mlx4_ACCESS_MEM(dev, outbox->dma, slave,
@@ -2041,6 +2044,7 @@ static void mlx4_master_deactivate_admin_state(struct mlx4_priv *priv, int slave
 				      priv->dev.caps.num_ports) + 1;
 	int max_port = min_port - 1 +
 		bitmap_weight(actv_ports.ports, priv->dev.caps.num_ports);
+
 
 	for (port = min_port; port <= max_port; port++) {
 		if (!test_bit(port - 1, actv_ports.ports))
@@ -2932,6 +2936,7 @@ int mlx4_set_vf_mac(struct mlx4_dev *dev, int port, int vf, u64 mac)
 	return 0;
 }
 EXPORT_SYMBOL_GPL(mlx4_set_vf_mac);
+
 
 int mlx4_set_vf_vlan(struct mlx4_dev *dev, int port, int vf, u16 vlan, u8 qos)
 {

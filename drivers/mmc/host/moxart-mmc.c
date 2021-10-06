@@ -200,6 +200,7 @@ static int moxart_wait_for_status(struct moxart_host *host,
 	return ret;
 }
 
+
 static void moxart_send_command(struct moxart_host *host,
 	struct mmc_command *cmd)
 {
@@ -302,6 +303,7 @@ static void moxart_transfer_dma(struct mmc_data *data, struct moxart_host *host)
 		     data->sg, data->sg_len,
 		     dir_data);
 }
+
 
 static void moxart_transfer_pio(struct moxart_host *host)
 {
@@ -536,6 +538,7 @@ static void moxart_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
 
 	spin_unlock_irqrestore(&host->lock, flags);
 }
+
 
 static int moxart_get_ro(struct mmc_host *mmc)
 {

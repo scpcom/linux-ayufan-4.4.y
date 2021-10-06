@@ -194,6 +194,7 @@ _inflash:
 #error Only ETRAXFS and ARTPEC-3 supported!
 #endif
 
+
 _dram_initialized:
 	;; Copy the text and data section to DRAM. This depends on that the
 	;; variables used below are correctly set up by the linker script.

@@ -36,6 +36,7 @@
 #include <rdma/ib_verbs.h>
 #include <linux/mlx5/driver.h>
 
+
 struct mlx5_core_cq {
 	u32			cqn;
 	int			cqe_sz;
@@ -53,6 +54,7 @@ struct mlx5_core_cq {
 	struct mlx5_rsc_debug	*dbg;
 	int			pid;
 };
+
 
 enum {
 	MLX5_CQE_SYNDROME_LOCAL_LENGTH_ERR		= 0x01,

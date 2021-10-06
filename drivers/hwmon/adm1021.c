@@ -29,6 +29,7 @@
 #include <linux/err.h>
 #include <linux/mutex.h>
 
+
 /* Addresses to scan */
 static const unsigned short normal_i2c[] = {
 	0x18, 0x19, 0x1a, 0x29, 0x2a, 0x2b, 0x4c, 0x4d, 0x4e, I2C_CLIENT_END };
@@ -284,6 +285,7 @@ static ssize_t set_low_power(struct device *dev,
 
 	return count;
 }
+
 
 static SENSOR_DEVICE_ATTR(temp1_input, S_IRUGO, show_temp, NULL, 0);
 static SENSOR_DEVICE_ATTR(temp1_max, S_IWUSR | S_IRUGO, show_temp_max,

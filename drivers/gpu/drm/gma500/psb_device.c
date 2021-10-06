@@ -64,6 +64,7 @@ static int psb_get_brightness(struct backlight_device *bd)
 	return psb_brightness;
 }
 
+
 static int psb_backlight_setup(struct drm_device *dev)
 {
 	struct drm_psb_private *dev_priv = dev->dev_private;
@@ -356,3 +357,4 @@ const struct psb_ops psb_chip_ops = {
 	.power_down = psb_power_down,
 	.power_up = psb_power_up,
 };
+

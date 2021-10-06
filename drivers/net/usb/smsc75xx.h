@@ -374,6 +374,7 @@
 
 #define IPV4_ADDRX			(0x590)
 
+
 /* Vendor-specific PHY Definitions */
 
 /* Mode Control/Status Register */

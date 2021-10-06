@@ -3,6 +3,7 @@
 
 #include <uapi/asm/ptrace.h>
 
+
 #define arch_has_single_step()		(1)
 #define user_mode(regs) (((regs)->ps & 8) != 0)
 #define instruction_pointer(regs) ((regs)->pc)

@@ -426,6 +426,7 @@ projid_t from_kprojid_munged(struct user_namespace *targ, kprojid_t kprojid)
 }
 EXPORT_SYMBOL(from_kprojid_munged);
 
+
 static int uid_m_show(struct seq_file *seq, void *v)
 {
 	struct user_namespace *ns = seq->private;

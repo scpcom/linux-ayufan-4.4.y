@@ -16,12 +16,14 @@
  *	Chief Scientist
  */
 
+
 /*      cops_ltdrv.h: LocalTalk driver firmware dump for Linux.
  *
  *      Authors:
  *      - Jay Schulist <jschlst@samba.org>
  */
  
+
 #ifdef CONFIG_COPS_TANGENT
 
 static const unsigned char ltdrv_code[] = {

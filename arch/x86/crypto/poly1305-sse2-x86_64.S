@@ -276,6 +276,7 @@ ENTRY(poly1305_block_sse2)
 	ret
 ENDPROC(poly1305_block_sse2)
 
+
 #define u0 0x00(%r8)
 #define u1 0x04(%r8)
 #define u2 0x08(%r8)

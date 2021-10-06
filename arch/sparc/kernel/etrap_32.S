@@ -277,3 +277,4 @@ SUN_PI_(lda	[%glob_tmp] ASI_M_MMUREGS, %glob_tmp)	! save away status of winstore
 
 	jmpl	%t_retpc + 0x8, %g0
 	 mov	%t_kstack, %sp
+

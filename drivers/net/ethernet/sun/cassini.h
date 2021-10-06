@@ -425,6 +425,7 @@
 						    1 = mac core led ctrl
 						    polarity active low. */
 
+
 /** transmit dma registers **/
 #define MAX_TX_RINGS_SHIFT            2
 #define MAX_TX_RINGS                  (1 << MAX_TX_RINGS_SHIFT)
@@ -647,6 +648,7 @@
 							 RX free desc ring 2.
 							 def: 0x8 = 8k */
 #define    RX_CFG_DESC_RING1_SHIFT      16
+
 
 /* the page size register allows cassini chips to do the following with
  * received data:
@@ -1230,6 +1232,7 @@
 							 RAM */
 #define    HP_RAM_BIST_SUMMARY             0x00000002 /* all BIST tests */
 #define    HP_RAM_BIST_START               0x00000001 /* start/stop BIST */
+
 
 /** MAC registers.  **/
 /* reset bits are set using a PIO write and self-cleared after the command
@@ -2709,6 +2712,7 @@ typedef struct cas_page {
 	dma_addr_t dma_addr;
 	int used;
 } cas_page_t;
+
 
 /* some alignment constraints:
  * TX DESC, RX DESC, and RX COMP must each be 8K aligned.

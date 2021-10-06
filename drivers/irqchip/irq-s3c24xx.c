@@ -1090,6 +1090,7 @@ static struct s3c_irq_data init_s3c2443base[32] = {
 	{ .type = S3C_IRQTYPE_LEVEL, }, /* ADCPARENT */
 };
 
+
 static struct s3c_irq_data init_s3c2443subint[32] = {
 	{ .type = S3C_IRQTYPE_LEVEL, .parent_irq = 28 }, /* UART0-RX */
 	{ .type = S3C_IRQTYPE_LEVEL, .parent_irq = 28 }, /* UART0-TX */

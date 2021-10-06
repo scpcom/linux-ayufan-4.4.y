@@ -99,3 +99,4 @@ void mach_reboot_fixups(void)
 		pci_dev_put(dev);
 	}
 }
+

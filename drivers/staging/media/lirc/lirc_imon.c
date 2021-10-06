@@ -32,6 +32,7 @@
 #include <media/lirc.h>
 #include <media/lirc_dev.h>
 
+
 #define MOD_AUTHOR	"Venky Raju <dev@venky.ws>"
 #define MOD_DESC	"Driver for SoundGraph iMON MultiMedia IR/Display"
 #define MOD_NAME	"lirc_imon"

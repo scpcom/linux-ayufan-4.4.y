@@ -36,6 +36,7 @@
  */
 #define HWCAP_MN10300_ATOMIC_OP_UNIT	1	/* Has AM34 Atomic Operations */
 
+
 /*
  * ELF register definitions..
  */

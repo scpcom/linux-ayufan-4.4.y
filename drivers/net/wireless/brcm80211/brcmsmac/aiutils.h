@@ -170,6 +170,7 @@ struct si_info {
  * Use si_setcore() or si_setcoreidx() to change the association to another core
  */
 
+
 /* AMBA Interconnect exported externs */
 u32 ai_core_cflags(struct bcma_device *core, u32 mask, u32 val);
 

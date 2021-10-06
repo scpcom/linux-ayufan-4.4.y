@@ -1316,6 +1316,7 @@ static int aic3x_set_dai_tdm_slot(struct snd_soc_dai *codec_dai,
 		return -EINVAL;
 	}
 
+
 	aic3x->tdm_delay = lsb;
 	aic3x->slot_width = slot_width;
 

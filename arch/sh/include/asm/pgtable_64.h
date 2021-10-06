@@ -253,6 +253,7 @@ static __inline__ void set_pte(pte_t *pteptr, pte_t pteval)
  */
 #define pages_to_mb(x) ((x) >> (20-PAGE_SHIFT))
 
+
 /*
  * The following have defined behavior only work if pte_present() is true.
  */

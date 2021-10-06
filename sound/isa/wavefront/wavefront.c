@@ -596,6 +596,7 @@ static struct isa_driver snd_wavefront_driver = {
 	},
 };
 
+
 #ifdef CONFIG_PNP
 static int snd_wavefront_pnp_detect(struct pnp_card_link *pcard,
 				    const struct pnp_card_device_id *pid)

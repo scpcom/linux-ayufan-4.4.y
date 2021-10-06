@@ -46,6 +46,7 @@ struct opticon_private {
 	int outstanding_urbs;
 };
 
+
 static void opticon_process_data_packet(struct usb_serial_port *port,
 					const unsigned char *buf, size_t len)
 {

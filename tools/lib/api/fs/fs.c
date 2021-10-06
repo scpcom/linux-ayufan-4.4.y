@@ -53,6 +53,7 @@ static const char * const debugfs__known_mountpoints[] = {
 	0,
 };
 
+
 #ifndef TRACEFS_DEFAULT_PATH
 #define TRACEFS_DEFAULT_PATH "/sys/kernel/tracing"
 #endif

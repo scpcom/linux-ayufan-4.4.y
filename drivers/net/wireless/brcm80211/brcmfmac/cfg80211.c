@@ -236,6 +236,7 @@ static int brcmf_roamoff;
 module_param_named(roamoff, brcmf_roamoff, int, S_IRUSR);
 MODULE_PARM_DESC(roamoff, "do not use internal roaming engine");
 
+
 static u16 chandef_to_chanspec(struct brcmu_d11inf *d11inf,
 			       struct cfg80211_chan_def *ch)
 {
@@ -1413,6 +1414,7 @@ brcmf_cfg80211_join_ibss(struct wiphy *wiphy, struct net_device *ndev,
 		cfg->channel = 0;
 
 	cfg->ibss_starter = false;
+
 
 	err = brcmf_fil_cmd_data_set(ifp, BRCMF_C_SET_SSID,
 				     &join_params, join_params_size);
@@ -4410,6 +4412,7 @@ brcmf_cfg80211_mgmt_frame_register(struct wiphy *wiphy,
 		vif->mgmt_rx_reg &= ~BIT(mgmt_type);
 }
 
+
 static int
 brcmf_cfg80211_mgmt_tx(struct wiphy *wiphy, struct wireless_dev *wdev,
 		       struct cfg80211_mgmt_tx_params *params, u64 *cookie)
@@ -4511,6 +4514,7 @@ brcmf_cfg80211_mgmt_tx(struct wiphy *wiphy, struct wireless_dev *wdev,
 exit:
 	return err;
 }
+
 
 static int
 brcmf_cfg80211_cancel_remain_on_channel(struct wiphy *wiphy,

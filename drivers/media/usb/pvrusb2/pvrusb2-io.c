@@ -31,6 +31,7 @@ static const char *pvr2_buffer_state_decode(enum pvr2_buffer_state);
 
 // #define SANITY_CHECK_BUFFERS
 
+
 #ifdef SANITY_CHECK_BUFFERS
 #define BUFFER_CHECK(bp) do { \
 	if ((bp)->signature != BUFFER_SIG) { \

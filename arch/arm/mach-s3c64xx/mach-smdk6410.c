@@ -198,6 +198,7 @@ static struct smsc911x_platform_config smdk6410_smsc911x_pdata = {
 	.phy_interface = PHY_INTERFACE_MODE_MII,
 };
 
+
 static struct platform_device smdk6410_smsc911x = {
 	.name          = "smsc911x",
 	.id            = -1,

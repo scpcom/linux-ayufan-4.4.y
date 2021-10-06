@@ -120,6 +120,7 @@ static struct s3c2410_uartcfg tct_hammer_uartcfgs[] = {
 	}
 };
 
+
 static struct platform_device *tct_hammer_devices[] __initdata = {
 	&s3c_device_adc,
 	&s3c_device_wdt,

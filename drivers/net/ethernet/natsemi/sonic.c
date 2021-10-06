@@ -33,6 +33,8 @@
  * the NetBSD file "sys/arch/mac68k/dev/if_sn.c".
  */
 
+
+
 /*
  * Open/initialize the SONIC controller.
  *
@@ -98,6 +100,7 @@ static int sonic_open(struct net_device *dev)
 
 	return 0;
 }
+
 
 /*
  * Close the SONIC device
@@ -497,6 +500,7 @@ static void sonic_rx(struct net_device *dev)
 	 */
 }
 
+
 /*
  * Get the current statistics.
  * This may be called with the device open or closed.
@@ -515,6 +519,7 @@ static struct net_device_stats *sonic_get_stats(struct net_device *dev)
 
 	return &lp->stats;
 }
+
 
 /*
  * Set or clear the multicast filter for this adaptor.
@@ -562,6 +567,7 @@ static void sonic_multicast_list(struct net_device *dev)
 
 	SONIC_WRITE(SONIC_RCR, rcr);
 }
+
 
 /*
  * Initialize the SONIC ethernet controller.

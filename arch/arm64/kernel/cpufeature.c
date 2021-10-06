@@ -176,6 +176,7 @@ static struct arm64_ftr_bits ftr_dczid[] = {
 	ARM64_FTR_END,
 };
 
+
 static struct arm64_ftr_bits ftr_id_isar5[] = {
 	ARM64_FTR_BITS(FTR_STRICT, FTR_EXACT, ID_ISAR5_RDM_SHIFT, 4, 0),
 	ARM64_FTR_BITS(FTR_STRICT, FTR_EXACT, 20, 4, 0),	/* RAZ */

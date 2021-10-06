@@ -50,6 +50,7 @@ struct bfi_iocfc_cfg_s {
 	__be16	num_ioim_reqs;
 	__be16	num_fwtio_reqs;
 
+
 	/*
 	 * Request and response circular queue base addresses, size and
 	 * shadow index pointers.
@@ -107,6 +108,7 @@ struct bfi_iocfc_cfg_req_s {
 	union bfi_addr_u      ioc_cfg_dma_addr;
 };
 
+
 /*
  * BFI_IOCFC_I2H_CFG_REPLY message
  */
@@ -116,6 +118,7 @@ struct bfi_iocfc_cfg_reply_s {
 	u8	 lpu_bm;		/*  LPUs assigned for this IOC */
 	u8	 rsvd[2];
 };
+
 
 /*
  * BFI_IOCFC_H2I_SET_INTR_REQ message
@@ -128,6 +131,7 @@ struct bfi_iocfc_set_intr_req_s {
 	__be16	latency;	/*  latency timer 0..225us	*/
 };
 
+
 /*
  * BFI_IOCFC_H2I_UPDATEQ_REQ message
  */
@@ -139,6 +143,7 @@ struct bfi_iocfc_updateq_req_s {
 	u32 rspq_spi;		/*  rspq shadow pi		*/
 };
 
+
 /*
  * BFI_IOCFC_I2H_UPDATEQ_RSP message
  */
@@ -147,6 +152,7 @@ struct bfi_iocfc_updateq_rsp_s {
 	u8	status;			/*  updateq  status	*/
 	u8	rsvd[3];
 };
+
 
 /*
  * H2I Messages
@@ -157,6 +163,7 @@ union bfi_iocfc_h2i_msg_u {
 	struct bfi_iocfc_updateq_req_s updateq_req;
 	u32 mboxmsg[BFI_IOC_MSGSZ];
 };
+
 
 /*
  * I2H Messages
@@ -215,6 +222,7 @@ enum bfi_fcport_h2i {
 	BFI_FCPORT_H2I_STATS_CLEAR_REQ		= (5),
 };
 
+
 enum bfi_fcport_i2h {
 	BFI_FCPORT_I2H_ENABLE_RSP		= BFA_I2HM(1),
 	BFI_FCPORT_I2H_DISABLE_RSP		= BFA_I2HM(2),
@@ -226,6 +234,7 @@ enum bfi_fcport_i2h {
 	BFI_FCPORT_I2H_ENABLE_AEN		= BFA_I2HM(8),
 	BFI_FCPORT_I2H_DISABLE_AEN		= BFA_I2HM(9),
 };
+
 
 /*
  * Generic REQ type

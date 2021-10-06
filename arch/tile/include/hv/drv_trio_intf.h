@@ -84,6 +84,7 @@ typedef enum pcie_stream_intr_config_sel_e
 }
 pcie_stream_intr_config_sel_t;
 
+
 /** The mmap file offset (PA) of the TRIO config region. */
 #define HV_TRIO_CONFIG_OFFSET                                        \
   ((unsigned long long)TRIO_MMIO_ADDRESS_SPACE__REGION_VAL_CFG <<   \
@@ -112,6 +113,7 @@ pcie_stream_intr_config_sel_t;
 #define HV_TRIO_SQ_SIZE                                 \
   (1ULL << TRIO_MAP_SQ_REGION_ADDR__SQ_SEL_SHIFT)
 
+
 /** The "hardware MMIO region" of the first PIO region. */
 #define HV_TRIO_FIRST_PIO_REGION 8
 
@@ -122,6 +124,7 @@ pcie_stream_intr_config_sel_t;
 
 /** The maximum size of a PIO region. */
 #define HV_TRIO_PIO_SIZE (1ULL << TRIO_PIO_REGIONS_ADDR__ADDR_WIDTH)
+
 
 /** The mmap file offset (PA) of a push DMA region. */
 #define HV_TRIO_PUSH_DMA_OFFSET(ring)                                   \
@@ -139,6 +142,7 @@ pcie_stream_intr_config_sel_t;
 #define HV_TRIO_DMA_REGION_SIZE                         \
   (1ULL << TRIO_PUSH_DMA_REGION_ADDR__RING_SEL_SHIFT)
 
+
 /** The mmap file offset (PA) of a Mem-Map interrupt region. */
 #define HV_TRIO_MEM_MAP_INTR_OFFSET(map)                                 \
   (((unsigned long long)TRIO_MMIO_ADDRESS_SPACE__REGION_VAL_MAP_MEM <<   \
@@ -149,6 +153,7 @@ pcie_stream_intr_config_sel_t;
 #define HV_TRIO_MEM_MAP_INTR_SIZE                                 \
   (1ULL << TRIO_MAP_MEM_REGION_ADDR__MAP_SEL_SHIFT)
 
+
 /** A flag bit indicating a fixed resource allocation. */
 #define HV_TRIO_ALLOC_FIXED 0x01
 
@@ -157,6 +162,7 @@ pcie_stream_intr_config_sel_t;
 
 /** TRIO requires that all mappings have 4kB aligned start addresses. */
 #define HV_TRIO_PAGE_SIZE (1ull << HV_TRIO_PAGE_SHIFT)
+
 
 /* Specify all PCIe port properties for a TRIO. */
 struct pcie_trio_ports_property
@@ -179,6 +185,7 @@ struct pcie_trio_ports_property
 #define HV_TRIO_FLAG_VFUNC(N) \
   ((((N) & HV_TRIO_FLAG_VFUNC_RMASK) + 1) << HV_TRIO_FLAG_VFUNC_SHIFT)
 
+
 /* Flag indicating an ordered PIO region. */
 #define HV_TRIO_PIO_FLAG_ORDERED (1 << 16)
 
@@ -187,5 +194,6 @@ struct pcie_trio_ports_property
 #define HV_TRIO_PIO_FLAG_SPACE_MASK (0x3 << HV_TRIO_PIO_FLAG_SPACE_SHIFT)
 #define HV_TRIO_PIO_FLAG_CONFIG_SPACE (0x1 << HV_TRIO_PIO_FLAG_SPACE_SHIFT)
 #define HV_TRIO_PIO_FLAG_IO_SPACE (0x2 << HV_TRIO_PIO_FLAG_SPACE_SHIFT)
+
 
 #endif /* _SYS_HV_DRV_TRIO_INTF_H */

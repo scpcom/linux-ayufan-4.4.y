@@ -93,6 +93,7 @@ static void __init invoke_init_callbacks(void)
 
 #if !defined(CONFIG_SPARSEMEM)
 
+
 void __meminit pgdat_page_ext_init(struct pglist_data *pgdat)
 {
 	pgdat->node_page_ext = NULL;

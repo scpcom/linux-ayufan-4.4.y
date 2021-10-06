@@ -23,6 +23,7 @@
 
 #include "clk.h"
 
+
 /* clocks in AO (always on) controller */
 static struct hisi_fixed_rate_clock hi6220_fixed_rate_clks[] __initdata = {
 	{ HI6220_REF32K,	"ref32k",	NULL, CLK_IS_ROOT, 32764,     },
@@ -87,6 +88,7 @@ static void __init hi6220_clk_ao_init(struct device_node *np)
 				ARRAY_SIZE(hi6220_separated_gate_clks_ao), clk_data_ao);
 }
 CLK_OF_DECLARE(hi6220_clk_ao, "hisilicon,hi6220-aoctrl", hi6220_clk_ao_init);
+
 
 /* clocks in sysctrl */
 static const char *mmc0_mux0_p[] __initdata = { "pll_ddr_gate", "syspll", };
@@ -193,6 +195,7 @@ static void __init hi6220_clk_sys_init(struct device_node *np)
 }
 CLK_OF_DECLARE(hi6220_clk_sys, "hisilicon,hi6220-sysctrl", hi6220_clk_sys_init);
 
+
 /* clocks in media controller */
 static const char *clk_1000_1200_src[] __initdata = { "pll_gpu_gate", "media_syspll_src", };
 static const char *clk_1440_1200_src[] __initdata = { "media_syspll_src", "media_pll_src", };
@@ -248,6 +251,7 @@ static void __init hi6220_clk_media_init(struct device_node *np)
 				ARRAY_SIZE(hi6220_div_clks_media), clk_data);
 }
 CLK_OF_DECLARE(hi6220_clk_media, "hisilicon,hi6220-mediactrl", hi6220_clk_media_init);
+
 
 /* clocks in pmctrl */
 static struct hisi_gate_clock hi6220_gate_clks_power[] __initdata = {

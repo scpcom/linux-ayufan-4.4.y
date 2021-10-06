@@ -273,6 +273,7 @@ void __init early_iounmap(void __iomem *addr, unsigned long size)
 
 #endif /* CONFIG_MMU */
 
+
 void __init early_memunmap(void *addr, unsigned long size)
 {
 	early_iounmap((__force void __iomem *)addr, size);

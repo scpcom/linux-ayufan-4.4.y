@@ -122,6 +122,7 @@ static void trigger_event(struct work_struct *work);
 static void activate_path(struct work_struct *work);
 static int __pgpath_busy(struct pgpath *pgpath);
 
+
 /*-----------------------------------------------
  * Allocation routines
  *-----------------------------------------------*/

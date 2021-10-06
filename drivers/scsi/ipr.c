@@ -714,6 +714,7 @@ struct ipr_cmnd *__ipr_get_free_ipr_cmnd(struct ipr_hrr_queue *hrrq)
 		list_del(&ipr_cmd->queue);
 	}
 
+
 	return ipr_cmd;
 }
 

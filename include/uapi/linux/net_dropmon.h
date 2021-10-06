@@ -43,6 +43,7 @@ struct net_dm_user_msg {
 	} u;
 };
 
+
 /* These are the netlink message types for this protocol */
 
 enum {

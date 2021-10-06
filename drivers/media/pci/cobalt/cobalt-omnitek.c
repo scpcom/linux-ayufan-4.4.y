@@ -63,6 +63,7 @@
 #define CS_REG(c)		(BASE + 0x60 + ((c) * 0x40))
 #define BYTES_TRANSFERRED(c)	(BASE + 0x64 + ((c) * 0x40))
 
+
 static char *get_dma_direction(u32 status)
 {
 	switch (status & DIRECTIONAL_MSK) {

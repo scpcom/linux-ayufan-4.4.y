@@ -13,6 +13,7 @@
 #include <asm/sn/sn0/hubio.h>
 #endif
 
+
 #define IIO_ITTE_BASE		0x400160 /* base of translation table entries */
 #define IIO_ITTE(bigwin)	(IIO_ITTE_BASE + 8*(bigwin))
 

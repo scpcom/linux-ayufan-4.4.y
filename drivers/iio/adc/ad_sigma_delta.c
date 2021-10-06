@@ -25,6 +25,7 @@
 
 #include <asm/unaligned.h>
 
+
 #define AD_SD_COMM_CHAN_MASK	0x3
 
 #define AD_SD_REG_COMM		0x00

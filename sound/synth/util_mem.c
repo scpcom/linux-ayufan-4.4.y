@@ -101,6 +101,7 @@ __found:
 	return __snd_util_memblk_new(hdr, units, p->prev);
 }
 
+
 /*
  * create a new memory block with the given size
  * the block is linked next to prev
@@ -129,6 +130,7 @@ __snd_util_memblk_new(struct snd_util_memhdr *hdr, unsigned int units,
 	return blk;
 }
 
+
 /*
  * allocate a memory block (with mutex)
  */
@@ -141,6 +143,7 @@ snd_util_mem_alloc(struct snd_util_memhdr *hdr, int size)
 	mutex_unlock(&hdr->block_mutex);
 	return blk;
 }
+
 
 /*
  * remove the block from linked-list and free resource
@@ -180,6 +183,7 @@ int snd_util_mem_avail(struct snd_util_memhdr *hdr)
 	mutex_unlock(&hdr->block_mutex);
 	return size;
 }
+
 
 EXPORT_SYMBOL(snd_util_memhdr_new);
 EXPORT_SYMBOL(snd_util_memhdr_free);

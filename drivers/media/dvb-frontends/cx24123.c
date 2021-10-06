@@ -481,6 +481,7 @@ static int cx24123_set_symbolrate(struct cx24123_state *state, u32 srate)
 	else
 		pll_mult = 9;
 
+
 	sample_rate = pll_mult * XTAL;
 
 	/* SYSSymbolRate[21:0] = (srate << 23) / sample_rate */
@@ -674,6 +675,7 @@ static int cx24123_pll_tune(struct dvb_frontend *fe)
 
 	return 0;
 }
+
 
 /*
  * 0x23:
@@ -1147,3 +1149,4 @@ MODULE_DESCRIPTION("DVB Frontend module for Conexant " \
 	"CX24123/CX24109/CX24113 hardware");
 MODULE_AUTHOR("Steven Toth");
 MODULE_LICENSE("GPL");
+

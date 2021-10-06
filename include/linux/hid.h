@@ -25,6 +25,7 @@
 #ifndef __HID_H
 #define __HID_H
 
+
 #include <linux/types.h>
 #include <linux/slab.h>
 #include <linux/list.h>
@@ -1000,6 +1001,7 @@ static inline int hid_hw_power(struct hid_device *hdev, int level)
 {
 	return hdev->ll_driver->power ? hdev->ll_driver->power(hdev, level) : 0;
 }
+
 
 /**
  * hid_hw_request - send report request to device

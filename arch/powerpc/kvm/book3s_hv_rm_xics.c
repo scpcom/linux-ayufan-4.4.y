@@ -380,6 +380,7 @@ static void icp_rm_down_cppr(struct kvmppc_xics *xics, struct kvmppc_icp *icp,
 	}
 }
 
+
 unsigned long kvmppc_rm_h_xirr(struct kvm_vcpu *vcpu)
 {
 	union kvmppc_icp_state old_state, new_state;

@@ -11,6 +11,7 @@
  * Copyright (C) 2012 ARM Limited
  */
 
+
 #ifndef __SPC_H_
 #define __SPC_H_
 

@@ -102,6 +102,7 @@ int of_workarounds;
 #define prom_debug(x...)
 #endif
 
+
 typedef u32 prom_arg_t;
 
 struct prom_args {
@@ -196,6 +197,7 @@ static cell_t __initdata regbuf[1024];
 
 static bool rtas_has_query_cpu_stopped;
 
+
 /*
  * Error results ... some OF calls will return "-1" on error, some
  * will return 0, some will return either. To simplify, here are
@@ -206,6 +208,7 @@ static bool rtas_has_query_cpu_stopped;
 #define PROM_ERROR		(-1u)
 #define PHANDLE_VALID(p)	((p) != 0 && (p) != PROM_ERROR)
 #define IHANDLE_VALID(i)	((i) != 0 && (i) != PROM_ERROR)
+
 
 /* This is the one and *ONLY* place where we actually call open
  * firmware.
@@ -264,6 +267,7 @@ static int __init call_prom_ret(const char *service, int nargs, int nret,
 	return (nret > 0) ? be32_to_cpu(args.args[nargs]) : 0;
 }
 
+
 static void __init prom_print(const char *msg)
 {
 	const char *p, *q;
@@ -282,6 +286,7 @@ static void __init prom_print(const char *msg)
 		call_prom("write", 3, 1, prom.stdout, ADDR("\r\n"), 2);
 	}
 }
+
 
 static void __init prom_print_hex(unsigned long val)
 {
@@ -386,6 +391,7 @@ static void __init prom_printf(const char *format, ...)
 	}
 }
 
+
 static unsigned int __init prom_claim(unsigned long virt, unsigned long size,
 				unsigned long align)
 {
@@ -434,6 +440,7 @@ static void __init __attribute__((noreturn)) prom_panic(const char *reason)
 	for (;;)			/* should never get here */
 		;
 }
+
 
 static int __init prom_next_node(phandle *nodep)
 {
@@ -855,6 +862,7 @@ static int __init prom_count_smt_threads(void)
 
 }
 
+
 static void __init prom_send_capabilities(void)
 {
 	ihandle root;
@@ -957,6 +965,7 @@ static void __init prom_send_capabilities(void)
  *  allocated with either alloc_up or alloc_down isn't automatically
  *  reserved.
  */
+
 
 /*
  * Allocates memory in the RMO upward from the kernel/initrd
@@ -1735,6 +1744,7 @@ static void __init prom_hold_cpus(void)
 	prom_debug("prom_hold_cpus: end...\n");
 }
 
+
 static void __init prom_init_client_services(unsigned long pp)
 {
 	/* Get a handle to the prom entry point before anything else */
@@ -1993,6 +2003,7 @@ static void __init prom_check_displays(void)
 #endif /* CONFIG_PPC_EARLY_DEBUG_BOOTX */
 	}
 }
+
 
 /* Return (relocated) pointer to this much memory: moves initrd if reqd. */
 static void __init *make_room(unsigned long *mem_start, unsigned long *mem_end,

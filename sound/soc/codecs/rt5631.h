@@ -1,6 +1,7 @@
 #ifndef __RTCODEC5631_H__
 #define __RTCODEC5631_H__
 
+
 #define RT5631_RESET				0x00
 #define RT5631_SPK_OUT_VOL			0x02
 #define RT5631_HP_OUT_VOL			0x04
@@ -75,6 +76,7 @@
 #define RT5631_CP_INTL_REG2			0x45
 #define RT5631_ADDA_MIXER_INTL_REG3		0x52
 #define RT5631_SPK_INTL_CTRL			0x56
+
 
 /* global definition */
 #define RT5631_L_MUTE					(0x1 << 15)
@@ -255,6 +257,7 @@
 #define RT5631_MICBIAS2_SHORT_CURR_DET_600UA	(0x0)
 #define RT5631_MICBIAS2_SHORT_CURR_DET_1500UA	(0x1)
 #define RT5631_MICBIAS2_SHORT_CURR_DET_2000UA	(0x2)
+
 
 /* Digital Microphone Control(0x24) */
 #define RT5631_DMIC_ENA_MASK				(0x1 << 15)
@@ -693,5 +696,6 @@
 #define RT5631_EN_HW_EQ_BP2				(0x1 << 2)
 #define RT5631_EN_HW_EQ_BP1				(0x1 << 1)
 #define RT5631_EN_HW_EQ_LPF				(0x1 << 0)
+
 
 #endif /* __RTCODEC5631_H__ */

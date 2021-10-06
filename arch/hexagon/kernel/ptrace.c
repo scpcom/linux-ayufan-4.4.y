@@ -56,6 +56,7 @@ static int genregs_get(struct task_struct *target,
 	unsigned int dummy;
 	struct pt_regs *regs = task_pt_regs(target);
 
+
 	if (!regs)
 		return -EIO;
 

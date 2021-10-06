@@ -1519,6 +1519,7 @@ static void qlcnic_83xx_dump_pause_control_regs(struct qlcnic_adapter *adapter)
 		 val, val1);
 }
 
+
 static void qlcnic_83xx_disable_pause_frames(struct qlcnic_adapter *adapter)
 {
 	u32 reg = 0, i, j;
@@ -2534,6 +2535,7 @@ int qlcnic_83xx_init(struct qlcnic_adapter *adapter, int pci_using_dac)
 	err = qlcnic_83xx_configure_opmode(adapter);
 	if (err)
 		goto disable_mbx_intr;
+
 
 	/* Perform operating mode specific initialization */
 	err = adapter->nic_ops->init_driver(adapter);

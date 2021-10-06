@@ -548,6 +548,7 @@ xfs_qm_dqtobp(
 	return 0;
 }
 
+
 /*
  * Read in the ondisk dquot using dqtobp() then copy it to an incore version,
  * and release the buffer immediately.

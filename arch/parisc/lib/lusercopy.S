@@ -32,6 +32,7 @@
  * the space id associated with the current users address space.
  */
 
+
 	.text
 	
 #include <asm/assembly.h>

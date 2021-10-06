@@ -45,3 +45,4 @@ codepage_convert(const __u8 *codepage, volatile __u8 * addr, unsigned long nr)
 #define EBC_TOUPPER(addr,nr) codepage_convert(_ebc_toupper, addr, nr)
 
 #endif
+

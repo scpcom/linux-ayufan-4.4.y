@@ -34,6 +34,7 @@
 
 #define MC_ARGS		(MC_BATCH * 16)
 
+
 struct mc_buffer {
 	unsigned mcidx, argidx, cbidx;
 	struct multicall_entry entries[MC_BATCH];

@@ -48,6 +48,7 @@ void ast_enable_mmio(struct drm_device *dev)
 	ast_set_index_reg_mask(ast, AST_IO_CRTC_PORT, 0xa1, 0xff, 0x04);
 }
 
+
 bool ast_is_vga_enabled(struct drm_device *dev)
 {
 	struct ast_private *ast = dev->dev_private;
@@ -238,6 +239,7 @@ static int cbrscan_ast2150(struct ast_private *ast, int busw)
 	return 1;
 }
 
+
 static void cbrdlli_ast2150(struct ast_private *ast, int busw)
 {
 	u32 dll_min[4], dll_max[4], dlli, data, passcnt;
@@ -267,6 +269,8 @@ cbr_start:
 	dlli = dll_min[0] + (((dll_max[0] - dll_min[0]) * 7) >> 4);
 	ast_moutdwm(ast, 0x1e6e0068, dlli | (dlli << 8) | (dlli << 16) | (dlli << 24));
 }
+
+
 
 static void ast_init_dram_reg(struct drm_device *dev)
 {
@@ -1224,6 +1228,7 @@ ddr3_init_start:
 	ast_moutdwm(ast, 0x1E6E0050, 0x00000000);
 #endif
 
+
 }
 
 static void get_ddr2_info(struct ast_private *ast, struct ast2300_dram_param *param)
@@ -1237,6 +1242,7 @@ static void get_ddr2_info(struct ast_private *ast, struct ast2300_dram_param *pa
 	trap_AC2  = (trap << 20) | (trap << 16);
 	trap_AC2 += 0x00110000;
 	trap_MRS  = 0x00000040 | (trap << 4);
+
 
 	param->reg_MADJ       = 0x00034C4C;
 	param->reg_SADJ       = 0x00001800;
@@ -1648,3 +1654,4 @@ static void ast_init_dram_2300(struct drm_device *dev)
 		reg = ast_get_index_reg_mask(ast, AST_IO_CRTC_PORT, 0xd0, 0xff);
 	} while ((reg & 0x40) == 0);
 }
+

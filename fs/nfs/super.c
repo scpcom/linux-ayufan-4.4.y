@@ -1990,6 +1990,7 @@ static int nfs23_validate_mount_data(void *options,
 			args->version = 2;
 		}
 
+
 		memcpy(mntfh->data, data->root.data, mntfh->size);
 		if (mntfh->size < sizeof(mntfh->data))
 			memset(mntfh->data + mntfh->size, 0,
@@ -2872,5 +2873,6 @@ module_param(recover_lost_locks, bool, 0644);
 MODULE_PARM_DESC(recover_lost_locks,
 		 "If the server reports that a lock might be lost, "
 		 "try to recover it risking data corruption.");
+
 
 #endif /* CONFIG_NFS_V4 */

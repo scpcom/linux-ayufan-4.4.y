@@ -598,6 +598,7 @@ static int nvm_configure_create(const char *val)
 	return __nvm_configure_create(&create);
 }
 
+
 /* Exposes administrative interface through /sys/module/lnvm/configure_by_str */
 static int nvm_configure_by_str_event(const char *val,
 					const struct kernel_param *kp)

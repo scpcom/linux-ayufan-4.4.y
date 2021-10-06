@@ -9,6 +9,7 @@
  * 2 of the License, or (at your option) any later version.
  */
 
+
         .text
         .p2align	4
 
@@ -24,3 +25,4 @@ __negdi2:
 	subx		gr0,gr8,gr8,icc0
 	bralr
 	.size		__negdi2, .-__negdi2
+

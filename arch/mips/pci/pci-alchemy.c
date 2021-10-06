@@ -50,6 +50,7 @@ struct alchemy_pci_context {
  */
 static struct alchemy_pci_context *__alchemy_pci_ctx;
 
+
 /* IO/MEM resources for PCI. Keep the memres in sync with __fixup_bigphys_addr
  * in arch/mips/alchemy/common/setup.c
  */
@@ -518,6 +519,7 @@ static int __init alchemy_pci_init(void)
 	return 0;
 }
 arch_initcall(alchemy_pci_init);
+
 
 int __init pcibios_map_irq(const struct pci_dev *dev, u8 slot, u8 pin)
 {

@@ -53,6 +53,7 @@ static inline void ca(struct net_device *dev)
 	writel(0, lp->ca);
 }
 
+
 static void mpu_port(struct net_device *dev, int c, dma_addr_t x)
 {
 	struct i596_private *lp = netdev_priv(dev);
@@ -71,6 +72,7 @@ static void mpu_port(struct net_device *dev, int c, dma_addr_t x)
 		writel(v, lp->mpu_port);
 	}
 }
+
 
 static int sni_82596_probe(struct platform_device *dev)
 {
@@ -171,6 +173,7 @@ static int sni_82596_init(void)
 	printk(KERN_INFO SNI_82596_DRIVER_VERSION "\n");
 	return platform_driver_register(&sni_82596_driver);
 }
+
 
 static void __exit sni_82596_exit(void)
 {

@@ -187,6 +187,7 @@ static inline int qt2_setdevice(struct usb_device *dev, u8 *data)
 	return qt2_control_msg(dev, QT_SET_GET_DEVICE, x, 0);
 }
 
+
 static inline int qt2_getdevice(struct usb_device *dev, u8 *data)
 {
 	return usb_control_msg(dev, usb_rcvctrlpipe(dev, 0),
@@ -847,6 +848,8 @@ static void qt2_break_ctl(struct tty_struct *tty, int break_state)
 			 status);
 }
 
+
+
 static void qt2_dtr_rts(struct usb_serial_port *port, int on)
 {
 	struct usb_device *dev = port->serial->dev;
@@ -995,6 +998,7 @@ write_out:
 	spin_unlock_irqrestore(&port_priv->urb_lock, flags);
 	return bytes_out;
 }
+
 
 static struct usb_serial_driver qt2_device = {
 	.driver = {

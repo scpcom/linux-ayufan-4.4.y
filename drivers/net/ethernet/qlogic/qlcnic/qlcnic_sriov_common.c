@@ -1447,6 +1447,7 @@ free_cmd:
 	return rsp;
 }
 
+
 static int qlcnic_sriov_issue_cmd(struct qlcnic_adapter *adapter,
 				  struct qlcnic_cmd_args *cmd)
 {
@@ -2091,6 +2092,7 @@ static void qlcnic_sriov_vf_free_mac_list(struct qlcnic_adapter *adapter)
 		kfree(cur);
 	}
 }
+
 
 static int qlcnic_sriov_vf_shutdown(struct pci_dev *pdev)
 {

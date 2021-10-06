@@ -6,6 +6,7 @@
 #include <linux/context_tracking.h>
 #include "sched.h"
 
+
 #ifdef CONFIG_IRQ_TIME_ACCOUNTING
 
 /*
@@ -436,6 +437,7 @@ EXPORT_SYMBOL_GPL(vtime_common_account_irq_enter);
 #endif /* __ARCH_HAS_VTIME_ACCOUNT */
 #endif /* CONFIG_VIRT_CPU_ACCOUNTING */
 
+
 #ifdef CONFIG_VIRT_CPU_ACCOUNTING_NATIVE
 void task_cputime_adjusted(struct task_struct *p, cputime_t *ut, cputime_t *st)
 {
@@ -845,6 +847,7 @@ fetch_task_cputime(struct task_struct *t,
 		}
 	} while (read_seqretry(&t->vtime_seqlock, seq));
 }
+
 
 void task_cputime(struct task_struct *t, cputime_t *utime, cputime_t *stime)
 {

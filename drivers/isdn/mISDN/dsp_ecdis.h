@@ -39,6 +39,7 @@ struct ec_disable_detector_state {
 	int hit;
 };
 
+
 #define FALSE 0
 #define TRUE (!FALSE)
 

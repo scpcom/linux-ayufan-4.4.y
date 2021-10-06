@@ -11,6 +11,7 @@
 #include <linux/platform_device.h>
 #include <linux/atmel_tc.h>
 
+
 /*
  * We're configured to use a specific TC block, one that's not hooked
  * up to external hardware, to provide a time solution:
@@ -327,6 +328,7 @@ static int __init tcb_clksrc_init(void)
 		divided_rate = tmp;
 		best_divisor_idx = i;
 	}
+
 
 	printk(bootinfo, clksrc.name, CONFIG_ATMEL_TCB_CLKSRC_BLOCK,
 			divided_rate / 1000000,

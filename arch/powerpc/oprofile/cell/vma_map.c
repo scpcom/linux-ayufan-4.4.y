@@ -23,6 +23,7 @@
 #include <linux/slab.h>
 #include "pr_util.h"
 
+
 void vma_map_free(struct vma_to_fileoffset_map *map)
 {
 	while (map) {
@@ -86,6 +87,7 @@ vma_map_add(struct vma_to_fileoffset_map *map, unsigned int vma,
 
 	return new;
 }
+
 
 /* Parse SPE ELF header and generate a list of vma_maps.
  * A pointer to the first vma_map in the generated list

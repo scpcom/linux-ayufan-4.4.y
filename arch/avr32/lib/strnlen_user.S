@@ -38,6 +38,7 @@ __strnlen_user:
 2:	sub	r12, r10
 	retal	r12
 
+
 	.type	adjust_length, "function"
 adjust_length:
 	cp.w	r12, 0		/* addr must always be < TASK_SIZE */

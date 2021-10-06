@@ -741,6 +741,7 @@ static void sas_eh_handle_resets(struct Scsi_Host *shost)
 	spin_unlock_irq(&ha->lock);
 }
 
+
 void sas_scsi_recover_host(struct Scsi_Host *shost)
 {
 	struct sas_ha_struct *ha = SHOST_TO_SAS_HA(shost);

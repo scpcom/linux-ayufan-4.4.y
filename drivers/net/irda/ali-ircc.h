@@ -49,6 +49,7 @@
 #define FIR_LSR		0x05	/* Alias 5, FIR Line Status Register (R/W) */
 #define FIR_BSR		0x06	/* Alias 6, FIR Bus Status Register (Read only) */
 
+
 	/* Alias 1 */
 	#define	IER_FIFO	0x10	/* FIR FIFO Interrupt Enable */	
 	#define	IER_TIMER	0x20 	/* Timer Interrupt Enable */ 
@@ -141,6 +142,7 @@ struct ali_chip {
 	int (*init)(struct ali_chip *chip, chipio_t *info); 
 };
 typedef struct ali_chip ali_chip_t;
+
 
 /* DMA modes needed */
 #define DMA_TX_MODE     0x08    /* Mem to I/O, ++, demand. */

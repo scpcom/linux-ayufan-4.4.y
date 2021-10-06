@@ -99,6 +99,7 @@ lpfc_debug_save_data(struct lpfc_hba *phba, struct scsi_cmnd *cmnd)
 		return;
 	}
 
+
 	if (!sgde) {
 		lpfc_printf_log(phba, KERN_ERR, LOG_BG,
 			"9051 BLKGRD: ERROR: data scatterlist is null\n");
@@ -839,6 +840,7 @@ lpfc_new_scsi_buf_s4(struct lpfc_vport *vport, int num_to_alloc)
 			kfree(psb);
 			break;
 		}
+
 
 		lxri = lpfc_sli4_next_xritag(phba);
 		if (lxri == NO_XRI) {
@@ -1591,6 +1593,7 @@ lpfc_bg_err_inject(struct lpfc_hba *phba, struct scsi_cmnd *sc,
 			}
 		}
 	}
+
 
 	/* Should we change the Guard Tag */
 	if (new_guard) {
@@ -2469,6 +2472,7 @@ lpfc_bg_setup_sgl_prot(struct lpfc_hba *phba, struct scsi_cmnd *sc,
 			}
 		}
 
+
 		if (lpfc_cmd_protect(sc, LPFC_CHECK_PROTECT_REF))
 			bf_set(lpfc_sli4_sge_dif_re, diseed, checking);
 		else
@@ -3034,6 +3038,7 @@ out:
 				app_tag, start_app_tag);
 	}
 }
+
 
 /*
  * This function checks for BlockGuard errors detected by
@@ -3682,6 +3687,7 @@ lpfc_handle_fcp_err(struct lpfc_vport *vport, struct lpfc_scsi_buf *lpfc_cmd,
 	uint32_t rsplen = 0;
 	uint32_t logit = LOG_FCP | LOG_FCP_ERROR;
 
+
 	/*
 	 *  If this is a task management command, there is no
 	 *  scsi packet associated with this lpfc_cmd.  The driver
@@ -3873,6 +3879,7 @@ int lpfc_sli4_scmd_to_wqidx_distr(struct lpfc_hba *phba,
 	chann = (chann % phba->cfg_fcp_io_channel);
 	return chann;
 }
+
 
 /**
  * lpfc_scsi_cmd_iocb_cmpl - Scsi cmnd IOCB completion routine
@@ -4631,6 +4638,7 @@ lpfc_queuecommand(struct Scsi_Host *shost, struct scsi_cmnd *cmnd)
 				 (uint32_t)
 				 (cmnd->request->timeout / 1000));
 
+
 		goto out_host_busy_free_buf;
 	}
 	if (phba->cfg_poll & ENABLE_FCP_RING_POLLING) {
@@ -4656,6 +4664,7 @@ lpfc_queuecommand(struct Scsi_Host *shost, struct scsi_cmnd *cmnd)
 	cmnd->scsi_done(cmnd);
 	return 0;
 }
+
 
 /**
  * lpfc_abort_handler - scsi_host_template eh_abort_handler entry point
@@ -4794,6 +4803,7 @@ lpfc_abort_handler(struct scsi_cmnd *cmnd)
 	/* no longer need the lock after this point */
 	spin_unlock_irqrestore(&phba->hbalock, flags);
 
+
 	if (ret_val == IOCB_ERROR) {
 		lpfc_sli_release_iocbq(phba, abtsiocb);
 		ret = FAILED;
@@ -4859,6 +4869,7 @@ lpfc_taskmgmt_name(uint8_t task_mgmt_cmd)
 	}
 }
 
+
 /**
  * lpfc_check_fcp_rsp - check the returned fcp_rsp to see if task failed
  * @vport: The virtual port for which this call is being executed.
@@ -4879,6 +4890,7 @@ lpfc_check_fcp_rsp(struct lpfc_vport *vport, struct lpfc_scsi_buf *lpfc_cmd)
 	uint8_t  rsp_info_code;
 	int ret = FAILED;
 
+
 	if (fcprsp == NULL)
 		lpfc_printf_vlog(vport, KERN_INFO, LOG_FCP,
 				 "0703 fcp_rsp is missing\n");
@@ -4886,6 +4898,7 @@ lpfc_check_fcp_rsp(struct lpfc_vport *vport, struct lpfc_scsi_buf *lpfc_cmd)
 		rsp_info = fcprsp->rspStatus2;
 		rsp_len = be32_to_cpu(fcprsp->rspRspLen);
 		rsp_info_code = fcprsp->rspInfo3;
+
 
 		lpfc_printf_vlog(vport, KERN_INFO,
 				 LOG_FCP,
@@ -4921,6 +4934,7 @@ lpfc_check_fcp_rsp(struct lpfc_vport *vport, struct lpfc_scsi_buf *lpfc_cmd)
 	}
 	return ret;
 }
+
 
 /**
  * lpfc_send_taskmgmt - Generic SCSI Task Mgmt Handler

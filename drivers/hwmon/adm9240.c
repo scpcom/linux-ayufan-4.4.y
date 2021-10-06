@@ -629,6 +629,7 @@ static struct attribute *adm9240_attrs[] = {
 
 ATTRIBUTE_GROUPS(adm9240);
 
+
 /*** sensor chip detect and driver install ***/
 
 /* Return 0 if detection is successful, -ENODEV otherwise */

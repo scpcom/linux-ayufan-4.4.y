@@ -114,6 +114,7 @@ int libbpf_strerror(int err, char *buf, size_t size)
 		goto out;		\
 } while(0)
 
+
 /* Copied from tools/perf/util/util.h */
 #ifndef zfree
 # define zfree(ptr) ({ free(*ptr); *ptr = NULL; })
@@ -747,6 +748,7 @@ bpf_program__relocate(struct bpf_program *prog, int *map_fds)
 	prog->nr_reloc = 0;
 	return 0;
 }
+
 
 static int
 bpf_object__relocate(struct bpf_object *obj)

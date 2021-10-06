@@ -49,11 +49,13 @@
 #define HW_GPIO_SLOT_LED	(1<<5)
 #define HW_GPIO_SENSOR_BAR	(1<<8)
 
+
 static void __iomem *hw_ctrl;
 static void __iomem *hw_gpio;
 
 unsigned long wii_hole_start;
 unsigned long wii_hole_size;
+
 
 static int __init page_aligned(unsigned long x)
 {
@@ -248,3 +250,4 @@ static int __init wii_device_probe(void)
 	return 0;
 }
 device_initcall(wii_device_probe);
+

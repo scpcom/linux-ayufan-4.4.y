@@ -7,6 +7,7 @@
 
 #define CCISS_IOC_MAGIC 'B'
 
+
 typedef struct _cciss_pci_info_struct
 {
 	unsigned char 	bus;

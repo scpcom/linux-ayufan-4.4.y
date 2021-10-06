@@ -88,6 +88,7 @@ struct mei_cl_cb *mei_io_cb_init(struct mei_cl *cl, enum mei_cb_file_ops type,
 void mei_io_cb_free(struct mei_cl_cb *priv_cb);
 int mei_io_cb_alloc_buf(struct mei_cl_cb *cb, size_t length);
 
+
 /**
  * mei_io_list_init - Sets up a queue list.
  *
@@ -105,6 +106,7 @@ void mei_io_list_flush(struct mei_cl_cb *list, struct mei_cl *cl);
 
 struct mei_cl *mei_cl_allocate(struct mei_device *dev);
 void mei_cl_init(struct mei_cl *cl, struct mei_device *dev);
+
 
 int mei_cl_link(struct mei_cl *cl, int id);
 int mei_cl_unlink(struct mei_cl *cl);

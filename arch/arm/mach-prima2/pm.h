@@ -26,3 +26,4 @@ extern int sirfsoc_finish_suspend(unsigned long);
 #endif
 
 #endif
+

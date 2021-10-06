@@ -459,6 +459,7 @@ static int fw_add_devm_name(struct device *dev, const char *name)
 }
 #endif
 
+
 /*
  * user-mode helper code
  */
@@ -1009,6 +1010,7 @@ static inline void kill_requests_without_uevent(void) { }
 #endif
 
 #endif /* CONFIG_FW_LOADER_USER_HELPER */
+
 
 /* wait until the shared firmware_buf becomes ready (or error) */
 static int sync_cached_firmware_buf(struct firmware_buf *buf)

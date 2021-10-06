@@ -141,6 +141,7 @@ static int write_tracing_data(int fd, struct perf_header *h __maybe_unused,
 	return read_tracing_data(fd, &evlist->entries);
 }
 
+
 static int write_build_id(int fd, struct perf_header *h,
 			  struct perf_evlist *evlist __maybe_unused)
 {
@@ -281,6 +282,7 @@ static int write_cpudesc(int fd, struct perf_header *h __maybe_unused,
 	}
 	return -1;
 }
+
 
 static int write_nrcpus(int fd, struct perf_header *h __maybe_unused,
 			struct perf_evlist *evlist __maybe_unused)
@@ -585,6 +587,8 @@ done:
 	free_cpu_topo(tp);
 	return ret;
 }
+
+
 
 static int write_total_mem(int fd, struct perf_header *h __maybe_unused,
 			  struct perf_evlist *evlist __maybe_unused)

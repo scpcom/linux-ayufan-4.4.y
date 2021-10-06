@@ -57,6 +57,7 @@
 
 #define RPCDBG_FACILITY	RPCDBG_SVCXPRT
 
+
 static struct svc_sock *svc_setup_socket(struct svc_serv *, struct socket *,
 					 int flags);
 static void		svc_udp_data_ready(struct sock *);
@@ -225,6 +226,7 @@ int svc_send_common(struct socket *sock, struct xdr_buf *xdr,
 out:
 	return len;
 }
+
 
 /*
  * Generic sendto routine

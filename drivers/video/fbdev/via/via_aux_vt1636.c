@@ -24,7 +24,9 @@
 #include <linux/slab.h>
 #include "via_aux.h"
 
+
 static const char *name = "VT1636 LVDS Transmitter";
+
 
 void via_aux_vt1636_probe(struct via_aux_bus *bus)
 {

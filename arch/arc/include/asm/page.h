@@ -10,6 +10,7 @@
 
 #include <uapi/asm/page.h>
 
+
 #ifndef __ASSEMBLY__
 
 #define get_user_page(vaddr)		__get_free_page(GFP_KERNEL)

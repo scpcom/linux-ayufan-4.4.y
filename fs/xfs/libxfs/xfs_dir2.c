@@ -104,6 +104,7 @@ xfs_da_mount(
 	struct xfs_da_geometry	*dageo;
 	int			nodehdr_size;
 
+
 	ASSERT(mp->m_sb.sb_versionnum & XFS_SB_VERSION_DIRV2BIT);
 	ASSERT((1 << (mp->m_sb.sb_blocklog + mp->m_sb.sb_dirblklog)) <=
 	       XFS_MAX_BLOCKSIZE);

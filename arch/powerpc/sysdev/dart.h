@@ -19,6 +19,7 @@
 #ifndef _POWERPC_SYSDEV_DART_H
 #define _POWERPC_SYSDEV_DART_H
 
+
 /* Offset from base to control register */
 #define DART_CNTL	0
 
@@ -59,14 +60,18 @@
 #define DART_IN(r)	(in_be32(DART_REG(r)))
 #define DART_OUT(r,v)	(out_be32(DART_REG(r), (v)))
 
+
 /* size of table in pages */
+
 
 /* DART table fields */
 
 #define DARTMAP_VALID   0x80000000
 #define DARTMAP_RPNMASK 0x00ffffff
 
+
 #define DART_PAGE_SHIFT		12
 #define DART_PAGE_SIZE		(1 << DART_PAGE_SHIFT)
+
 
 #endif /* _POWERPC_SYSDEV_DART_H */

@@ -182,6 +182,7 @@ static struct clocksource hyperv_cs_tsc = {
 };
 #endif
 
+
 /*
  * hv_init - Main initialization routine.
  *
@@ -335,6 +336,7 @@ int hv_post_message(union hv_connection_id connection_id,
 	return status;
 }
 
+
 /*
  * hv_signal_event -
  * Signal an event on the specified connection using the hypervisor event IPC.
@@ -399,6 +401,7 @@ static void hv_init_clockevent_device(struct clock_event_device *dev, int cpu)
 	dev->set_state_oneshot = hv_ce_set_oneshot;
 	dev->set_next_event = hv_ce_set_next_event;
 }
+
 
 int hv_synic_alloc(void)
 {

@@ -21,6 +21,7 @@
 
 /* $(CROSS_COMPILE)cc -Wall -Wextra -g -o ffs-test ffs-test.c -lpthread */
 
+
 #define _BSD_SOURCE /* for endian.h */
 
 #include <endian.h>
@@ -40,12 +41,14 @@
 
 #include "../../include/uapi/linux/usb/functionfs.h"
 
+
 /******************** Little Endian Handling ********************************/
 
 #define cpu_to_le16(x)  htole16(x)
 #define cpu_to_le32(x)  htole32(x)
 #define le32_to_cpu(x)  le32toh(x)
 #define le16_to_cpu(x)  le16toh(x)
+
 
 /******************** Messages and Errors ***********************************/
 
@@ -99,6 +102,7 @@ static void _msg(unsigned level, const char *fmt, ...)
 	if (cond) \
 		die(__VA_ARGS__); \
 	} while (0)
+
 
 /******************** Descriptors and Strings *******************************/
 
@@ -252,6 +256,7 @@ static size_t descs_to_legacy(void **legacy, const void *descriptors_v2)
 	return length;
 }
 
+
 #define STR_INTERFACE_ "Source/Sink"
 
 static const struct {
@@ -275,6 +280,7 @@ static const struct {
 
 #define STR_INTERFACE strings.lang0.str1
 
+
 /******************** Files and Threads Handling ****************************/
 
 struct thread;
@@ -284,6 +290,7 @@ static ssize_t write_wrap(struct thread *t, const void *buf, size_t nbytes);
 static ssize_t ep0_consume(struct thread *t, const void *buf, size_t nbytes);
 static ssize_t fill_in_buf(struct thread *t, void *buf, size_t nbytes);
 static ssize_t empty_out_buf(struct thread *t, const void *buf, size_t nbytes);
+
 
 static struct thread {
 	const char *const filename;
@@ -319,6 +326,7 @@ static struct thread {
 		0, 0, NULL, 0
 	},
 };
+
 
 static void init_thread(struct thread *t)
 {
@@ -423,6 +431,7 @@ static void join_thread(struct thread *t)
 		debug("%s: joined\n", t->filename);
 }
 
+
 static ssize_t read_wrap(struct thread *t, void *buf, size_t nbytes)
 {
 	return read(t->fd, buf, nbytes);
@@ -432,6 +441,7 @@ static ssize_t write_wrap(struct thread *t, const void *buf, size_t nbytes)
 {
 	return write(t->fd, buf, nbytes);
 }
+
 
 /******************** Empty/Fill buffer routines ****************************/
 
@@ -514,6 +524,7 @@ invalid:
 	return len;
 }
 
+
 /******************** Endpoints routines ************************************/
 
 static void handle_setup(const struct usb_ctrlrequest *setup)
@@ -593,6 +604,7 @@ legacy:
 	ret = write(t->fd, &strings, sizeof strings);
 	die_on(ret < 0, "%s: write: strings", t->filename);
 }
+
 
 /******************** Main **************************************************/
 

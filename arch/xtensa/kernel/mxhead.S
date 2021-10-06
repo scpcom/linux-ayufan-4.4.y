@@ -20,7 +20,9 @@
 #include <asm/mxregs.h>
 #include <asm/regs.h>
 
+
 	.section .SecondaryResetVector.text, "ax"
+
 
 ENTRY(_SecondaryResetVector)
 	_j _SetupOCD

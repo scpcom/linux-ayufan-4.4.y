@@ -45,6 +45,7 @@ EXPORT_SYMBOL_GPL(kvmppc_hv_ops);
 struct kvmppc_ops *kvmppc_pr_ops;
 EXPORT_SYMBOL_GPL(kvmppc_pr_ops);
 
+
 int kvm_arch_vcpu_runnable(struct kvm_vcpu *v)
 {
 	return !!(v->arch.pending_exceptions) ||
@@ -1264,6 +1265,7 @@ int kvm_vm_ioctl_irq_line(struct kvm *kvm, struct kvm_irq_level *irq_event,
 					line_status);
 	return 0;
 }
+
 
 static int kvm_vm_ioctl_enable_cap(struct kvm *kvm,
 				   struct kvm_enable_cap *cap)

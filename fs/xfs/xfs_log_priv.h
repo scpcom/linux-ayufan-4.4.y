@@ -442,6 +442,7 @@ xlog_ticket_alloc(
 	bool		permanent,
 	xfs_km_flags_t	alloc_flags);
 
+
 static inline void
 xlog_write_adv_cnt(void **ptr, int *len, int *off, size_t bytes)
 {

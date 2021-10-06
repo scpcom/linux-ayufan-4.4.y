@@ -392,6 +392,7 @@ void st_nci_hci_event_received(struct nci_dev *ndev, u8 pipe,
 }
 EXPORT_SYMBOL_GPL(st_nci_hci_event_received);
 
+
 void st_nci_hci_cmd_received(struct nci_dev *ndev, u8 pipe, u8 cmd,
 			       struct sk_buff *skb)
 {
@@ -770,3 +771,4 @@ void st_nci_se_deinit(struct nci_dev *ndev)
 	info->se_info.bwi_active = false;
 }
 EXPORT_SYMBOL(st_nci_se_deinit);
+

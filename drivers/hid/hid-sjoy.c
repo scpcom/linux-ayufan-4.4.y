@@ -182,3 +182,4 @@ module_hid_driver(sjoy_driver);
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Jussi Kivilinna");
+

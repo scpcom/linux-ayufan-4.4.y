@@ -156,6 +156,7 @@ static void set_idt(void *newidt, u16 limit)
 		);
 };
 
+
 static void set_gdt(void *newgdt, u16 limit)
 {
 	struct desc_ptr curgdt;

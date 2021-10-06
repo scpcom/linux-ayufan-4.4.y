@@ -299,3 +299,4 @@ void xmitframe_xmitbuf_attach(struct xmit_frame *pxmitframe,
 #include "rtl8712_xmit.h"
 
 #endif	/*_RTL871X_XMIT_H_*/
+

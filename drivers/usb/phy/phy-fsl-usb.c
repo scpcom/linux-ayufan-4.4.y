@@ -1059,6 +1059,7 @@ static int show_fsl_usb2_otg_state(struct device *dev,
 
 static DEVICE_ATTR(fsl_usb2_otg_state, S_IRUGO, show_fsl_usb2_otg_state, NULL);
 
+
 /* Char driver interface to control some OTG input */
 
 /*

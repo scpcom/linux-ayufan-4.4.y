@@ -27,6 +27,7 @@ static u32 RF_CHANNEL_TABLE_ZEBRA[] = {
 	0x0f72, /* 2484    */
 };
 
+
 #define rtl819XPHY_REG_1T2RArray Rtl8192UsbPHY_REG_1T2RArray
 #define rtl819XMACPHY_Array_PG Rtl8192UsbMACPHY_Array_PG
 #define rtl819XMACPHY_Array Rtl8192UsbMACPHY_Array
@@ -188,11 +189,13 @@ static u32 rtl8192_phy_RFSerialRead(struct net_device *dev,
 	rtl8192_setBBreg(dev, pPhyReg->rfHSSIPara2,  bLSSIReadEdge, 0x0);
 	rtl8192_setBBreg(dev, pPhyReg->rfHSSIPara2,  bLSSIReadEdge, 0x1);
 
+
 	/* TODO: we should not delay such a long time. Ask for help from SD3 */
 	usleep_range(1000, 1000);
 
 	ret = rtl8192_QueryBBReg(dev, pPhyReg->rfLSSIReadBack,
 				 bLSSIReadBackData);
+
 
 	/* Switch back to Reg_Mode0 */
 	if (priv->rf_chip == RF_8256) {
@@ -263,6 +266,7 @@ static void rtl8192_phy_RFSerialWrite(struct net_device *dev,
 
 	/* Write operation */
 	rtl8192_setBBreg(dev, pPhyReg->rf3wireOffset, bMaskDWord, DataAndAddr);
+
 
 	if (offset == 0x0)
 		priv->RfReg0Value[eRFPath] = data;
@@ -342,6 +346,7 @@ u32 rtl8192_phy_QueryRFReg(struct net_device *dev, RF90_RADIO_PATH_E eRFPath,
 {
 	u32 reg, bitshift;
 	struct r8192_priv *priv = ieee80211_priv(dev);
+
 
 	if (!rtl8192_phy_CheckIsLegalRFPath(dev, eRFPath))
 		return 0;
@@ -746,6 +751,7 @@ u8 rtl8192_phy_checkBBAndRF(struct net_device *dev, HW90_BLOCK_E CheckBlock,
 			break;
 		}
 
+
 		/* Check whether readback data is correct */
 		if (reg != WriteData[i]) {
 			RT_TRACE((COMP_PHY|COMP_ERR),
@@ -851,6 +857,7 @@ void rtl8192_BBConfig(struct net_device *dev)
 	 * FIXME: should implement it for hardcode? */
 	rtl8192_BB_Config_ParaFile(dev);
 }
+
 
 /******************************************************************************
  * function:  This function obtains the initialization value of Tx power Level
@@ -1276,6 +1283,7 @@ static u8 rtl8192_phy_SwChnlStepByStep(struct net_device *dev, u8 channel,
 	}
 	/* FIXME: need to check whether channel is legal or not here */
 
+
 	/* <1> Fill up pre common command. */
 	PreCommonCmdCnt = 0;
 	rtl8192_phy_SetSwChnlCmdArray(PreCommonCmd, PreCommonCmdCnt++,
@@ -1335,6 +1343,7 @@ static u8 rtl8192_phy_SwChnlStepByStep(struct net_device *dev, u8 channel,
 		RT_TRACE(COMP_ERR, "Unknown RFChipID: %d\n", priv->rf_chip);
 		return true;
 	}
+
 
 	do {
 		switch (*stage) {
@@ -1433,6 +1442,7 @@ void rtl8192_SwChnl_WorkItem(struct net_device *dev)
 	RT_TRACE(COMP_CH, "==> SwChnlCallback819xUsbWorkItem(), chan:%d\n",
 		 priv->chan);
 
+
 	rtl8192_phy_FinishSwChnlNow(dev, priv->chan);
 
 	RT_TRACE(COMP_CH, "<== SwChnlCallback819xUsbWorkItem()\n");
@@ -1513,6 +1523,7 @@ void rtl8192_SetBWModeWorkItem(struct net_device *dev)
 
 	RT_TRACE(COMP_SWBW, "%s()  Switch to %s bandwidth\n", __func__,
 		 priv->CurrentChannelBW == HT_CHANNEL_WIDTH_20?"20MHz":"40MHz");
+
 
 	if (priv->rf_chip == RF_PSEUDO_11N) {
 		priv->SetBWModeInProgress = false;

@@ -11,6 +11,7 @@
         Please submit bugs to http://bugzilla.kernel.org/ .
 */
 
+
 /* Understanding the PNIC_II - everything is this file is based
  * on the PNIC_II_PDF datasheet which is sorely lacking in detail
  *
@@ -69,8 +70,11 @@
  *
  */
 
+
+
 #include "tulip.h"
 #include <linux/delay.h>
+
 
 void pnic2_timer(unsigned long data)
 {
@@ -87,6 +91,7 @@ void pnic2_timer(unsigned long data)
 		mod_timer(&tp->timer, RUN_AT(next_tick));
 	}
 }
+
 
 void pnic2_start_nway(struct net_device *dev)
 {
@@ -159,6 +164,8 @@ void pnic2_start_nway(struct net_device *dev)
         csr12 |= 0x1000;
 	iowrite32(csr12, ioaddr + CSR12);
 }
+
+
 
 void pnic2_lnk_change(struct net_device *dev, int csr5)
 {
@@ -233,6 +240,7 @@ void pnic2_lnk_change(struct net_device *dev, int csr5)
                          */
 	                csr14 = (ioread32(ioaddr + CSR14) & 0xffffff7f);
                         iowrite32(csr14,ioaddr + CSR14);
+
 
                         /* now set the data port and operating mode
 			 * (see the Data Port Selection comments at
@@ -323,6 +331,7 @@ void pnic2_lnk_change(struct net_device *dev, int csr5)
                 return;
 	}
 
+
         if (dev->if_port == 3  ||  dev->if_port == 5) {
 
 	        /* we are at 100mb and a potential link change occurred */
@@ -357,6 +366,7 @@ void pnic2_lnk_change(struct net_device *dev, int csr5)
 				 medianame[dev->if_port],
 				 (csr12 & 4) ? "failed" : "good");
 
+
                 tp->nway = 0;
                 tp->nwayset = 1;
 
@@ -370,6 +380,7 @@ void pnic2_lnk_change(struct net_device *dev, int csr5)
 
                 return;
         }
+
 
 	if (tulip_debug > 1)
 		dev_info(&dev->dev, "PNIC2 Link Change Default?\n");
@@ -389,3 +400,4 @@ void pnic2_lnk_change(struct net_device *dev, int csr5)
 
 	tulip_restart_rxtx(tp);
 }
+

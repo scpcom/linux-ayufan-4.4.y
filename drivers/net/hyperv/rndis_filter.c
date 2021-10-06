@@ -31,6 +31,7 @@
 
 #include "hyperv_net.h"
 
+
 #define RNDIS_EXT_LEN PAGE_SIZE
 struct rndis_request {
 	struct list_head list_ent;
@@ -752,6 +753,7 @@ static int rndis_filter_set_rss_param(struct rndis_device *rdev, int num_queue)
 	for (i = 0; i < HASH_KEYLEN; i++)
 		keyp[i] = netvsc_hash_key[i];
 
+
 	ret = rndis_filter_send_request(rdev, request);
 	if (ret != 0)
 		goto cleanup;
@@ -776,6 +778,7 @@ cleanup:
 	put_rndis_request(rdev, request);
 	return ret;
 }
+
 
 static int rndis_filter_query_device_link_status(struct rndis_device *dev)
 {
@@ -846,6 +849,7 @@ exit:
 	return ret;
 }
 
+
 static int rndis_filter_init_device(struct rndis_device *dev)
 {
 	struct rndis_request *request;
@@ -876,6 +880,7 @@ static int rndis_filter_init_device(struct rndis_device *dev)
 		dev->state = RNDIS_DEV_UNINITIALIZED;
 		goto cleanup;
 	}
+
 
 	t = wait_for_completion_timeout(&request->wait_event, 5*HZ);
 
@@ -1037,6 +1042,7 @@ int rndis_filter_device_add(struct hv_device *dev,
 		return ret;
 	}
 
+
 	/* Initialize the rndis device */
 	net_device = hv_get_drvdata(dev);
 	net_device->max_chn = 1;
@@ -1084,6 +1090,7 @@ int rndis_filter_device_add(struct hv_device *dev,
 	offloads.tcp_ip_v6_csum = NDIS_OFFLOAD_PARAMETERS_TX_RX_ENABLED;
 	offloads.udp_ip_v6_csum = NDIS_OFFLOAD_PARAMETERS_TX_RX_ENABLED;
 	offloads.lso_v2_ipv4 = NDIS_OFFLOAD_PARAMETERS_LSOV2_ENABLED;
+
 
 	ret = rndis_filter_set_offload_params(dev, &offloads);
 	if (ret)
@@ -1208,6 +1215,7 @@ void rndis_filter_device_remove(struct hv_device *dev)
 
 	netvsc_device_remove(dev);
 }
+
 
 int rndis_filter_open(struct hv_device *dev)
 {

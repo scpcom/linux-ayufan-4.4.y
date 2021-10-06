@@ -190,6 +190,7 @@ static int get_clock(void *i2c_priv)
 	return (val != 0);
 }
 
+
 static int get_data(void *i2c_priv)
 {
 	struct radeon_i2c_chan *i2c = i2c_priv;
@@ -317,6 +318,7 @@ static u32 radeon_get_i2c_prescale(struct radeon_device *rdev)
 	}
 	return prescale;
 }
+
 
 /* hw i2c engine for r1xx-4xx hardware
  * hw can buffer up to 15 bytes
@@ -1156,3 +1158,4 @@ void radeon_router_select_cd_port(struct radeon_connector *radeon_connector)
 			    radeon_connector->router.i2c_addr,
 			    0x1, val);
 }
+

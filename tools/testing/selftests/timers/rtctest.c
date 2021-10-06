@@ -21,12 +21,14 @@
 #include <stdlib.h>
 #include <errno.h>
 
+
 /*
  * This expects the new RTC class driver framework, working with
  * clocks that will often not be clones of what the PC-AT had.
  * Use the command line to specify another RTC if you need one.
  */
 static const char default_rtc[] = "/dev/rtc0";
+
 
 int main(int argc, char **argv)
 {

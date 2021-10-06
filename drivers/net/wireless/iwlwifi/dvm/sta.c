@@ -846,6 +846,7 @@ int iwl_send_lq_cmd(struct iwl_priv *priv, struct iwl_rxon_context *ctx,
 	if (WARN_ON(lq->sta_id == IWL_INVALID_STATION))
 		return -EINVAL;
 
+
 	spin_lock_bh(&priv->sta_lock);
 	if (!(priv->stations[lq->sta_id].used & IWL_STA_DRIVER_ACTIVE)) {
 		spin_unlock_bh(&priv->sta_lock);
@@ -875,6 +876,7 @@ int iwl_send_lq_cmd(struct iwl_priv *priv, struct iwl_rxon_context *ctx,
 	}
 	return ret;
 }
+
 
 static struct iwl_link_quality_cmd *
 iwl_sta_alloc_lq(struct iwl_priv *priv, struct iwl_rxon_context *ctx,
@@ -1422,6 +1424,8 @@ int iwl_sta_rx_agg_stop(struct iwl_priv *priv, struct ieee80211_sta *sta,
 
 	return iwl_send_add_sta(priv, &sta_cmd, 0);
 }
+
+
 
 void iwl_sta_modify_sleep_tx_count(struct iwl_priv *priv, int sta_id, int cnt)
 {

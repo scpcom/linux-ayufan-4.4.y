@@ -322,6 +322,7 @@ static void __init axs101_early_init(void)
 #define CREG_CPU_GPIO_UART_MUX	(AXC003_CREG + 0x480)
 #define CREG_CPU_TUN_IO_CTRL	(AXC003_CREG + 0x494)
 
+
 union pll_reg {
 	struct {
 #ifdef CONFIG_CPU_BIG_ENDIAN

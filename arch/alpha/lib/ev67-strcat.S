@@ -19,6 +19,7 @@
  * string once.
  */
 
+
 	.text
 
 	.align 4

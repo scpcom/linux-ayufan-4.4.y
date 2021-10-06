@@ -18,6 +18,7 @@
 
 #include <asm/dec/prom.h>
 
+
 int (*__rex_bootinit)(void);
 int (*__rex_bootread)(void);
 int (*__rex_getbitmap)(memmap *);
@@ -34,6 +35,7 @@ int (*__pmax_open)(char*, int);
 int (*__pmax_lseek)(int, long, int);
 int (*__pmax_read)(int, void *, int);
 int (*__pmax_close)(int);
+
 
 /*
  * Detect which PROM the DECSTATION has, and set the callback vectors

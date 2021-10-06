@@ -20,6 +20,7 @@
 #include <linux/fsl/bestcomm/bestcomm_priv.h>
 #include <linux/fsl/bestcomm/fec.h>
 
+
 /* ======================================================================== */
 /* Task image/var/inc                                                       */
 /* ======================================================================== */
@@ -74,6 +75,7 @@ struct bcom_fec_priv {
 	phys_addr_t	fifo;
 	int		maxbufsize;
 };
+
 
 /* ======================================================================== */
 /* Task support code                                                        */
@@ -159,6 +161,8 @@ bcom_fec_rx_release(struct bcom_task *tsk)
 	bcom_task_free(tsk);
 }
 EXPORT_SYMBOL_GPL(bcom_fec_rx_release);
+
+
 
 	/* Return 2nd to last DRD */
 	/* This is an ugly hack, but at least it's only done
@@ -259,6 +263,8 @@ bcom_fec_tx_release(struct bcom_task *tsk)
 }
 EXPORT_SYMBOL_GPL(bcom_fec_tx_release);
 
+
 MODULE_DESCRIPTION("BestComm FEC tasks driver");
 MODULE_AUTHOR("Dale Farnsworth <dfarnsworth@mvista.com>");
 MODULE_LICENSE("GPL v2");
+

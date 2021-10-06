@@ -3,6 +3,7 @@
 
 #include <uapi/video/uvesafb.h>
 
+
 /* VBE CRTC Info Block */
 struct vbe_crtc_ib {
 	u16 horiz_total;

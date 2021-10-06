@@ -22,6 +22,7 @@
  based tunable parameters such as whether the tray should auto-close for
  that drive. Suggestions (or patches) for this welcome!
 
+
  Revision History
  ----------------------------------
  1.00  Date Unknown -- David van Leeuwen <david@tm.tno.nl>
@@ -727,6 +728,7 @@ static int cdrom_has_defect_mgt(struct cdrom_device_info *cdi)
 	return 1;
 }
 
+
 static int cdrom_is_random_writable(struct cdrom_device_info *cdi, int *write)
 {
 	struct rwrt_feature_desc rfd;
@@ -1369,6 +1371,7 @@ int cdrom_number_of_slots(struct cdrom_device_info *cdi)
 	kfree(info);
 	return nslots;
 }
+
 
 /* If SLOT < 0, unload the current slot.  Otherwise, try to load SLOT. */
 static int cdrom_load_unload(struct cdrom_device_info *cdi, int slot) 

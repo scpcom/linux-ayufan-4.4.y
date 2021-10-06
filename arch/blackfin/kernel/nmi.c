@@ -89,6 +89,7 @@ static inline void restore_corelock(void)
 	corelock = saved_corelock;
 }
 
+
 static inline void nmi_wdt_keepalive(void)
 {
 	bfin_write_WDOGB_STAT(0);
@@ -222,6 +223,7 @@ static int __init init_nmi_wdt_syscore(void)
 late_initcall(init_nmi_wdt_syscore);
 
 #endif	/* CONFIG_PM */
+
 
 asmlinkage notrace void do_nmi(struct pt_regs *fp)
 {

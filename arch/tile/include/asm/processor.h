@@ -214,6 +214,7 @@ static inline void release_thread(struct task_struct *dead_task)
 
 extern int do_work_pending(struct pt_regs *regs, u32 flags);
 
+
 /*
  * Return saved (kernel) PC of a blocked thread.
  * Only used in a printk() in kernel/sched/core.c, so don't work too hard.
@@ -283,6 +284,7 @@ extern int kstack_hash;
 
 /* Does MAP_ANONYMOUS return hash-for-home pages by default? */
 #define uheap_hash hash_default
+
 
 /* Are we using huge pages in the TLB for kernel data? */
 extern int kdata_huge;

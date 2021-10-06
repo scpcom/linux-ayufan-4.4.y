@@ -22,6 +22,7 @@
  *   GNU General Public License for more details.
  */
 
+
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
@@ -45,6 +46,7 @@ static inline int ksft_exit_fail(void)
 	exit(1);
 }
 #endif
+
 
 int get_clocksources(char list[][30])
 {
@@ -111,6 +113,7 @@ int change_clocksource(char *clocksource)
 	return 0;
 }
 
+
 int run_tests(int secs)
 {
 	int ret;
@@ -123,6 +126,7 @@ int run_tests(int secs)
 	ret = system("./nanosleep");
 	return ret;
 }
+
 
 char clocksource_list[10][30];
 
@@ -153,6 +157,7 @@ int main(int argv, char **argc)
 			goto out;
 		}
 	}
+
 
 	printf("Running Asyncrhonous Switching Tests...\n");
 	pid = fork();

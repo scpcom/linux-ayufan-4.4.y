@@ -14,6 +14,7 @@
 
 #include "rtc-core.h"
 
+
 /* device attributes */
 
 /*

@@ -604,6 +604,7 @@ static int stm32_serial_remove(struct platform_device *pdev)
 	return uart_remove_one_port(&stm32_usart_driver, port);
 }
 
+
 #ifdef CONFIG_SERIAL_STM32_CONSOLE
 static void stm32_console_putchar(struct uart_port *port, int ch)
 {

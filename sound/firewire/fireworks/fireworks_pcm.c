@@ -412,3 +412,4 @@ int snd_efw_create_pcm_devices(struct snd_efw *efw)
 end:
 	return err;
 }
+

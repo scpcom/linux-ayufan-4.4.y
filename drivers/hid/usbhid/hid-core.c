@@ -1502,6 +1502,7 @@ void usbhid_put_power(struct hid_device *hid)
 	usb_autopm_put_interface(usbhid->intf);
 }
 
+
 #ifdef CONFIG_PM
 static int hid_resume_common(struct hid_device *hid, bool driver_suspended)
 {

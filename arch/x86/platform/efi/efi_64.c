@@ -462,6 +462,7 @@ efi_thunk_set_wakeup_time(efi_bool_t enabled, efi_time_t *tm)
 	return status;
 }
 
+
 static efi_status_t
 efi_thunk_get_variable(efi_char16_t *name, efi_guid_t *vendor,
 		       u32 *attr, unsigned long *data_size, void *data)

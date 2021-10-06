@@ -475,6 +475,7 @@ struct hfi1_qp {
 	atomic_t refcount ____cacheline_aligned_in_smp;
 	wait_queue_head_t wait;
 
+
 	struct hfi1_ack_entry s_ack_queue[HFI1_MAX_RDMA_ATOMIC + 1]
 		____cacheline_aligned_in_smp;
 	struct hfi1_sge_state s_rdma_read_sge;
@@ -730,6 +731,7 @@ struct hfi1_ibport {
 	u8 sl_to_sc[32];
 	u8 sc_to_sl[32];
 };
+
 
 struct hfi1_qp_ibdev;
 struct hfi1_ibdev {

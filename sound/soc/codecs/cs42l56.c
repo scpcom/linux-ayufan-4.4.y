@@ -940,6 +940,7 @@ static int cs42l56_set_bias_level(struct snd_soc_codec *codec,
 			SNDRV_PCM_FMTBIT_S20_3LE | SNDRV_PCM_FMTBIT_S24_LE | \
 			SNDRV_PCM_FMTBIT_S32_LE)
 
+
 static const struct snd_soc_dai_ops cs42l56_ops = {
 	.hw_params	= cs42l56_pcm_hw_params,
 	.digital_mute	= cs42l56_digital_mute,
@@ -1237,6 +1238,7 @@ static int cs42l56_i2c_probe(struct i2c_client *i2c_client,
 		gpio_set_value_cansleep(cs42l56->pdata.gpio_nreset, 1);
 	}
 
+
 	i2c_set_clientdata(i2c_client, cs42l56);
 
 	for (i = 0; i < ARRAY_SIZE(cs42l56->supplies); i++)
@@ -1347,6 +1349,7 @@ static const struct of_device_id cs42l56_of_match[] = {
 	{ }
 };
 MODULE_DEVICE_TABLE(of, cs42l56_of_match);
+
 
 static const struct i2c_device_id cs42l56_id[] = {
 	{ "cs42l56", 0 },

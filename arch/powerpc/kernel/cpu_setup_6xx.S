@@ -292,6 +292,7 @@ _GLOBAL(__init_fpu_registers)
 	isync
 	blr
 
+
 /* Definitions for the table use to save CPU states */
 #define CS_HID0		0
 #define CS_HID1		4
@@ -485,3 +486,4 @@ _GLOBAL(__restore_cpu_setup)
 1:
 	mtcr	r7
 	blr
+

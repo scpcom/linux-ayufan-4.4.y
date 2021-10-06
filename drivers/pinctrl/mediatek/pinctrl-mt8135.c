@@ -167,6 +167,7 @@ static const struct mtk_pin_drv_grp mt8135_pin_drv[] = {
 	MTK_PIN_DRV_GRP(102, DRV_BASE2+0x50, 24, 1),
 	MTK_PIN_DRV_GRP(103, DRV_BASE2+0x50, 28, 1),
 
+
 	MTK_PIN_DRV_GRP(104, DRV_BASE2+0x60, 0, 1),
 	MTK_PIN_DRV_GRP(105, DRV_BASE2+0x60, 4, 1),
 	MTK_PIN_DRV_GRP(106, DRV_BASE2+0x60, 4, 1),

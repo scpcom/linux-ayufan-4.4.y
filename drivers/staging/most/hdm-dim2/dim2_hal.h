@@ -17,6 +17,7 @@
 
 #include <linux/types.h>
 
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -65,6 +66,7 @@ struct dim_channel {
 	u16 done_sw_buffers_number; /*< Done software buffers number. */
 };
 
+
 u8 DIM_Startup(void *dim_base_address, u32 mlb_clock);
 
 void DIM_Shutdown(void);
@@ -108,6 +110,7 @@ u32 DIMCB_IoRead(u32 *ptr32);
 void DIMCB_IoWrite(u32 *ptr32, u32 value);
 
 void DIMCB_OnError(u8 error_id, const char *error_message);
+
 
 #ifdef __cplusplus
 }

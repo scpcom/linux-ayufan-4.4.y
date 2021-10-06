@@ -180,6 +180,7 @@ enum {
 
 #define TCA_TBF_MAX (__TCA_TBF_MAX - 1)
 
+
 /* TEQL section */
 
 /* TEQL does not require any parameters */
@@ -219,6 +220,7 @@ struct tc_sfq_qopt_v1 {
 /* SFQRED stats */
 	struct tc_sfqred_stats stats;
 };
+
 
 struct tc_sfq_xstats {
 	__s32		allot;
@@ -403,6 +405,7 @@ enum {
 };
 
 #define TCA_HFSC_MAX (__TCA_HFSC_MAX - 1)
+
 
 /* CBQ section */
 

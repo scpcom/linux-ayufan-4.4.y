@@ -11,11 +11,13 @@
 #include "musb_dma.h"
 #include "musb_core.h"
 
+
 /* FIXME fully isolate CPPI from DaVinci ... the "CPPI generic" registers
  * would seem to be shared with the TUSB6020 (over VLYNQ).
  */
 
 #include "davinci.h"
+
 
 /* CPPI RX/TX state RAM */
 
@@ -69,6 +71,7 @@ struct cppi_descriptor {
 	dma_addr_t	dma;		/* address of this descriptor */
 	u32		buflen;		/* for RX: original buffer length */
 } __attribute__ ((aligned(CPPI_DESCRIPTOR_ALIGN)));
+
 
 struct cppi;
 

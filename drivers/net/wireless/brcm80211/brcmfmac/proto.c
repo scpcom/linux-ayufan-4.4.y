@@ -14,6 +14,7 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+
  #include <linux/types.h>
 #include <linux/slab.h>
 #include <linux/netdevice.h>
@@ -25,6 +26,7 @@
 #include "proto.h"
 #include "bcdc.h"
 #include "msgbuf.h"
+
 
 int brcmf_proto_attach(struct brcmf_pub *drvr)
 {

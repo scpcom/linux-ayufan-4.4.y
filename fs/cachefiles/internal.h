@@ -15,6 +15,7 @@
 
 #define pr_fmt(fmt) "CacheFiles: " fmt
 
+
 #include <linux/fscache-cache.h>
 #include <linux/timer.h>
 #include <linux/wait.h>
@@ -246,6 +247,7 @@ extern int cachefiles_check_object_xattr(struct cachefiles_object *object,
 extern int cachefiles_remove_object_xattr(struct cachefiles_cache *cache,
 					  struct dentry *dentry);
 
+
 /*
  * error handling
  */
@@ -266,6 +268,7 @@ do {									\
 	cachefiles_io_error(___cache, FMT, ##__VA_ARGS__);		\
 } while (0)
 
+
 /*
  * debug tracing
  */
@@ -275,6 +278,7 @@ do {									\
 #define kenter(FMT, ...) dbgprintk("==> %s("FMT")", __func__, ##__VA_ARGS__)
 #define kleave(FMT, ...) dbgprintk("<== %s()"FMT"", __func__, ##__VA_ARGS__)
 #define kdebug(FMT, ...) dbgprintk(FMT, ##__VA_ARGS__)
+
 
 #if defined(__KDEBUG)
 #define _enter(FMT, ...) kenter(FMT, ##__VA_ARGS__)

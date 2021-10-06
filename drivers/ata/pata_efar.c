@@ -245,6 +245,7 @@ static struct ata_port_operations efar_ops = {
 	.prereset		= efar_pre_reset,
 };
 
+
 /**
  *	efar_init_one - Register EFAR ATA PCI device with kernel services
  *	@pdev: PCI device to register

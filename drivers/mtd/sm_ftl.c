@@ -20,6 +20,8 @@
 #include "nand/sm_common.h"
 #include "sm_ftl.h"
 
+
+
 static struct workqueue_struct *cache_flush_workqueue;
 
 static int cache_timeout = 1000;
@@ -30,6 +32,7 @@ MODULE_PARM_DESC(cache_timeout,
 static int debug;
 module_param(debug, int, S_IRUGO | S_IWUSR);
 MODULE_PARM_DESC(debug, "Debug level (0-2)");
+
 
 /* ------------------- sysfs attributes ---------------------------------- */
 struct sm_sysfs_attribute {
@@ -47,6 +50,7 @@ static ssize_t sm_attr_show(struct device *dev, struct device_attribute *attr,
 	strncpy(buf, sm_attr->data, sm_attr->len);
 	return sm_attr->len;
 }
+
 
 #define NUM_ATTRIBUTES 1
 #define SM_CIS_VENDOR_OFFSET 0x59
@@ -75,6 +79,7 @@ static struct attribute_group *sm_create_sysfs_attributes(struct sm_ftl *ftl)
 	vendor_attribute->dev_attr.attr.name = "vendor";
 	vendor_attribute->dev_attr.attr.mode = S_IRUGO;
 	vendor_attribute->dev_attr.show = sm_attr_show;
+
 
 	/* Create array of pointers to the attributes */
 	attributes = kzalloc(sizeof(struct attribute *) * (NUM_ATTRIBUTES + 1),
@@ -121,6 +126,7 @@ static void sm_delete_sysfs_attributes(struct sm_ftl *ftl)
 	kfree(ftl->disk_attributes);
 }
 
+
 /* ----------------------- oob helpers -------------------------------------- */
 
 static int sm_get_lba(uint8_t *lba)
@@ -135,6 +141,7 @@ static int sm_get_lba(uint8_t *lba)
 
 	return (lba[1] >> 1) | ((lba[0] & 0x07) << 7);
 }
+
 
 /*
  * Read LBA associated with block
@@ -182,6 +189,7 @@ static void sm_write_lba(struct sm_oob *oob, uint16_t lba)
 	oob->lba_copy1[0] = oob->lba_copy2[0] = tmp[0];
 	oob->lba_copy1[1] = oob->lba_copy2[1] = tmp[1];
 }
+
 
 /* Make offset from parts */
 static loff_t sm_mkoffset(struct sm_ftl *ftl, int zone, int block, int boffset)
@@ -415,6 +423,7 @@ restart:
 	return 0;
 }
 
+
 /* Mark whole block at offset 'offs' as bad. */
 static void sm_mark_block_bad(struct sm_ftl *ftl, int zone, int block)
 {
@@ -506,6 +515,7 @@ static int sm_check_block(struct sm_ftl *ftl, int zone, int block)
 	int i = 0;
 	int test_lba;
 
+
 	/* First just check that block doesn't look fishy */
 	/* Only blocks that are valid or are sliced in two parts, are
 		accepted */
@@ -551,6 +561,7 @@ static const struct chs_entry chs_table[] = {
 	{ 2048, 985,  33, 63 },
 	{ 0 },
 };
+
 
 static const uint8_t cis_signature[] = {
 	0x01, 0x03, 0xD9, 0x01, 0xFF, 0x18, 0x02, 0xDF, 0x01, 0x20
@@ -762,6 +773,7 @@ static int sm_init_zone(struct sm_ftl *ftl, int zone_num)
 		return -ENOMEM;
 	memset(zone->lba_to_phys_table, -1, ftl->max_lba * 2);
 
+
 	/* Allocate memory for free sectors FIFO */
 	if (kfifo_alloc(&zone->free_sectors, ftl->zone_size * 2, GFP_KERNEL)) {
 		kfree(zone->lba_to_phys_table);
@@ -796,6 +808,7 @@ static int sm_init_zone(struct sm_ftl *ftl, int zone_num)
 			continue;
 		}
 
+
 		lba = sm_read_lba(&oob);
 
 		/* Invalid LBA means that block is damaged. */
@@ -805,6 +818,7 @@ static int sm_init_zone(struct sm_ftl *ftl, int zone_num)
 			dbg("PH %04d <-> LBA %04d(bad)", block, lba);
 			continue;
 		}
+
 
 		/* If there is no collision,
 			just put the sector in the FTL table */
@@ -878,6 +892,7 @@ static struct ftl_zone *sm_get_zone(struct sm_ftl *ftl, int zone_num)
 	return zone;
 }
 
+
 /* ----------------- cache handling ------------------------------------------*/
 
 /* Initialize the one block cache */
@@ -929,6 +944,7 @@ static int sm_cache_flush(struct sm_ftl *ftl)
 	zone = &ftl->zones[zone_num];
 	block_num = zone->lba_to_phys_table[ftl->cache_block];
 
+
 	/* Try to read all unread areas of the cache block*/
 	for_each_set_bit(sector_num, &ftl->cache_data_invalid_bitmap,
 		ftl->block_size / SM_SECTOR_SIZE) {
@@ -954,6 +970,7 @@ restart:
 		return -EIO;
 	}
 
+
 	if (sm_write_block(ftl, ftl->cache_data, zone_num, write_sector,
 		ftl->cache_block, ftl->cache_data_invalid_bitmap))
 			goto restart;
@@ -968,6 +985,7 @@ restart:
 	sm_cache_init(ftl);
 	return 0;
 }
+
 
 /* flush timer, runs a second after last write */
 static void sm_cache_flush_timer(unsigned long data)
@@ -999,6 +1017,7 @@ static int sm_read(struct mtd_blktrans_dev *dev,
 
 	sm_break_offset(ftl, sect_no << 9, &zone_num, &block, &boffset);
 	mutex_lock(&ftl->mutex);
+
 
 	zone = sm_get_zone(ftl, zone_num);
 	if (IS_ERR(zone)) {
@@ -1117,6 +1136,7 @@ static void sm_add_mtd(struct mtd_blktrans_ops *tr, struct mtd_info *mtd)
 	if (!ftl)
 		goto error1;
 
+
 	mutex_init(&ftl->mutex);
 	setup_timer(&ftl->timer, sm_cache_flush_timer, (unsigned long)ftl);
 	INIT_WORK(&ftl->flush_work, sm_cache_flush_work);
@@ -1127,6 +1147,7 @@ static void sm_add_mtd(struct mtd_blktrans_ops *tr, struct mtd_info *mtd)
 		dbg("found unsupported mtd device, aborting");
 		goto error2;
 	}
+
 
 	/* Allocate temporary CIS buffer for read retry support */
 	ftl->cis_buffer = kzalloc(SM_SECTOR_SIZE, GFP_KERNEL);
@@ -1146,6 +1167,7 @@ static void sm_add_mtd(struct mtd_blktrans_ops *tr, struct mtd_info *mtd)
 		goto error4;
 
 	sm_cache_init(ftl);
+
 
 	/* Allocate upper layer structure and initialize it */
 	trans = kzalloc(sizeof(struct mtd_blktrans_dev), GFP_KERNEL);
@@ -1180,6 +1202,7 @@ static void sm_add_mtd(struct mtd_blktrans_ops *tr, struct mtd_info *mtd)
 		ftl->zone_size - ftl->max_lba);
 	dbg("each block consists of %d bytes",
 		ftl->block_size);
+
 
 	/* Register device*/
 	if (add_mtd_blktrans_dev(trans)) {

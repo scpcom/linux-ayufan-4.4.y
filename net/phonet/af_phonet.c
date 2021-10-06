@@ -361,6 +361,7 @@ static int send_reset_indications(struct sk_buff *rskb)
 				PN_COMMGR);
 }
 
+
 /* packet type functions */
 
 /*

@@ -80,8 +80,10 @@
 #include <linux/export.h>
 #include "wimax-internal.h"
 
+
 #define D_SUBMODULE op_msg
 #include "debug-levels.h"
+
 
 /**
  * wimax_msg_alloc - Create a new skb for sending a message to userspace
@@ -170,6 +172,7 @@ error_new:
 }
 EXPORT_SYMBOL_GPL(wimax_msg_alloc);
 
+
 /**
  * wimax_msg_data_len - Return a pointer and size of a message's payload
  *
@@ -194,6 +197,7 @@ const void *wimax_msg_data_len(struct sk_buff *msg, size_t *size)
 }
 EXPORT_SYMBOL_GPL(wimax_msg_data_len);
 
+
 /**
  * wimax_msg_data - Return a pointer to a message's payload
  *
@@ -214,6 +218,7 @@ const void *wimax_msg_data(struct sk_buff *msg)
 }
 EXPORT_SYMBOL_GPL(wimax_msg_data);
 
+
 /**
  * wimax_msg_len - Return a message's payload length
  *
@@ -233,6 +238,7 @@ ssize_t wimax_msg_len(struct sk_buff *msg)
 	return nla_len(nla);
 }
 EXPORT_SYMBOL_GPL(wimax_msg_len);
+
 
 /**
  * wimax_msg_send - Send a pre-allocated message to user space
@@ -278,6 +284,7 @@ int wimax_msg_send(struct wimax_dev *wimax_dev, struct sk_buff *skb)
 	return 0;
 }
 EXPORT_SYMBOL_GPL(wimax_msg_send);
+
 
 /**
  * wimax_msg - Send a message to user space
@@ -397,3 +404,4 @@ error_no_wimax_dev:
 	d_fnend(3, NULL, "(skb %p info %p) = %d\n", skb, info, result);
 	return result;
 }
+

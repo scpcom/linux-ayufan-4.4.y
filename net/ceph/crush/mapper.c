@@ -52,6 +52,7 @@ int crush_find_rule(const struct crush_map *map, int ruleset, int type, int size
 	return -1;
 }
 
+
 /*
  * bucket choose methods
  *
@@ -160,6 +161,7 @@ static int bucket_list_choose(struct crush_bucket_list *bucket,
 	return bucket->h.items[0];
 }
 
+
 /* (binary) tree */
 static int height(int n)
 {
@@ -216,6 +218,7 @@ static int bucket_tree_choose(struct crush_bucket_tree *bucket,
 
 	return bucket->h.items[n >> 1];
 }
+
 
 /* straw */
 
@@ -281,6 +284,7 @@ static __u64 crush_ln(unsigned int xin)
 	return result;
 }
 
+
 /*
  * straw2
  *
@@ -336,6 +340,7 @@ static int bucket_straw2_choose(struct crush_bucket_straw2 *bucket,
 	return bucket->h.items[high];
 }
 
+
 static int crush_bucket_choose(struct crush_bucket *in, int x, int r)
 {
 	dprintk(" crush_bucket_choose %d x=%d r=%d\n", in->id, x, r);
@@ -361,6 +366,7 @@ static int crush_bucket_choose(struct crush_bucket *in, int x, int r)
 		return in->items[0];
 	}
 }
+
 
 /*
  * true if device is marked "out" (failed, fully offloaded)
@@ -577,6 +583,7 @@ reject:
 	dprintk("CHOOSE returns %d\n", outpos);
 	return outpos;
 }
+
 
 /**
  * crush_choose_indep: alternative breadth-first positionally stable mapping
@@ -948,6 +955,7 @@ int crush_do_rule(const struct crush_map *map,
 			w = tmp;
 			wsize = osize;
 			break;
+
 
 		case CRUSH_RULE_EMIT:
 			for (i = 0; i < wsize && result_len < result_max; i++) {

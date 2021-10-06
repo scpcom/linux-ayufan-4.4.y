@@ -434,6 +434,7 @@ l2frames(u_char *ptr)
 			return "invalid command";
 	}
 
+
 	return tmpdeb;
 }
 

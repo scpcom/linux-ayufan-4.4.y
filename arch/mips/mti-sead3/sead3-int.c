@@ -39,3 +39,4 @@ void __init arch_init_irq(void)
 		gic_init(GIC_BASE_ADDR, GIC_ADDRSPACE_SZ, CPU_INT_GIC,
 			 MIPS_GIC_IRQ_BASE);
 }
+

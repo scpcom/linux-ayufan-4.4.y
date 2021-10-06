@@ -879,6 +879,7 @@ static struct platform_device fsi_da7210_device = {
 	},
 };
 
+
 /* IrDA */
 static struct resource irda_resources[] = {
 	[0] = {

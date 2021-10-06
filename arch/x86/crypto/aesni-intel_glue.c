@@ -43,6 +43,7 @@
 #include <asm/crypto/glue_helper.h>
 #endif
 
+
 #define AESNI_ALIGN	16
 #define AES_BLOCK_MASK	(~(AES_BLOCK_SIZE - 1))
 #define RFC4106_HASH_SUBKEY_SIZE 16
@@ -151,6 +152,7 @@ asmlinkage void aesni_gcm_dec(void *ctx, u8 *out,
 			const u8 *in, unsigned long ciphertext_len, u8 *iv,
 			u8 *hash_subkey, const u8 *aad, unsigned long aad_len,
 			u8 *auth_tag, unsigned long auth_tag_len);
+
 
 #ifdef CONFIG_AS_AVX
 asmlinkage void aes_ctr_enc_128_avx_by8(const u8 *in, u8 *iv,
@@ -657,6 +659,7 @@ static int xts_aesni_setkey(struct crypto_tfm *tfm, const u8 *key,
 	return aes_set_key_common(tfm, ctx->raw_tweak_ctx, key + keylen / 2,
 				  keylen / 2);
 }
+
 
 static void aesni_xts_tweak(void *ctx, u8 *out, const u8 *in)
 {
@@ -1443,6 +1446,7 @@ static struct aead_alg aesni_aead_algs[] = { {
 #else
 static struct aead_alg aesni_aead_algs[0];
 #endif
+
 
 static const struct x86_cpu_id aesni_cpu_id[] = {
 	X86_FEATURE_MATCH(X86_FEATURE_AES),

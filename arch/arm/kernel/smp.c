@@ -137,6 +137,7 @@ int __cpu_up(unsigned int cpu, struct task_struct *idle)
 		pr_err("CPU%u: failed to boot: %d\n", cpu, ret);
 	}
 
+
 	memset(&secondary_data, 0, sizeof(secondary_data));
 	return ret;
 }

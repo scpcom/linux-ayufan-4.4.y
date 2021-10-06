@@ -33,6 +33,7 @@
 #include "trace.h"
 #include "coproc.h"
 
+
 /******************************************************************************
  * Co-processor emulation
  *****************************************************************************/
@@ -291,6 +292,7 @@ static const struct coproc_reg cp15_regs[] = {
 	{ CRn( 2), CRm( 0), Op1( 0), Op2( 2), is32,
 			access_vm_reg, reset_val, c2_TTBCR, 0x00000000 },
 	{ CRm64( 2), Op1( 1), is64, access_vm_reg, reset_unknown64, c2_TTBR1 },
+
 
 	/* DACR: swapped by interrupt.S. */
 	{ CRn( 3), CRm( 0), Op1( 0), Op2( 0), is32,

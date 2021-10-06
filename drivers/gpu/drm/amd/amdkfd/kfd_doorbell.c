@@ -157,6 +157,7 @@ int kfd_doorbell_mmap(struct kfd_process *process, struct vm_area_struct *vma)
 				vma->vm_page_prot);
 }
 
+
 /* get kernel iomem pointer for a doorbell */
 u32 __iomem *kfd_get_kernel_doorbell(struct kfd_dev *kfd,
 					unsigned int *doorbell_off)

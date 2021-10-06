@@ -16,6 +16,7 @@
  *  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+
 #include <linux/init.h>
 #include <linux/module.h>
 #include <linux/slab.h>
@@ -464,6 +465,7 @@ static struct acpi_driver cmpc_accel_acpi_driver_v4 = {
 	.drv.pm = &cmpc_accel_pm,
 };
 
+
 /*
  * Accelerometer code for Classmate versions prior to V4
  */
@@ -694,6 +696,7 @@ static struct acpi_driver cmpc_accel_acpi_driver = {
 	}
 };
 
+
 /*
  * Tablet mode code.
  */
@@ -787,6 +790,7 @@ static struct acpi_driver cmpc_tablet_acpi_driver = {
 	},
 	.drv.pm = &cmpc_tablet_pm,
 };
+
 
 /*
  * Backlight code.
@@ -1029,6 +1033,7 @@ static struct acpi_driver cmpc_ipml_acpi_driver = {
 	}
 };
 
+
 /*
  * Extra keys code.
  */
@@ -1094,6 +1099,7 @@ static struct acpi_driver cmpc_keys_acpi_driver = {
 		.notify = cmpc_keys_handler,
 	}
 };
+
 
 /*
  * General init/exit code.

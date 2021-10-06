@@ -86,6 +86,8 @@ static struct us_unusual_dev ene_ub6250_unusual_dev_list[] = {
 
 #undef UNUSUAL_DEV
 
+
+
 /* ENE bin code len */
 #define ENE_BIN_CODE_LEN    0x800
 /* EnE HW Register */
@@ -157,6 +159,7 @@ static struct us_unusual_dev ene_ub6250_unusual_dev_list[] = {
 #define MS_REG_MNG_SYSFLG_BOOT	0x00	/* system block */
 #define MS_REG_MNG_RESERVED	0xc3
 #define MS_REG_MNG_DEFAULT	(MS_REG_MNG_SCMS_COPY_OK | MS_REG_MNG_ATFLG_OTHER | MS_REG_MNG_SYSFLG_USER | MS_REG_MNG_RESERVED)
+
 
 #define MS_MAX_PAGES_PER_BLOCK		32
 #define MS_MAX_INITIAL_ERROR_BLOCKS 	10
@@ -246,6 +249,7 @@ static struct us_unusual_dev ene_ub6250_unusual_dev_list[] = {
 #define ms_lib_iswritable(pdx) ((ms_lib_ctrl_check((pdx), MS_LIB_CTRL_RDONLY) == 0) && (ms_lib_ctrl_check(pdx, MS_LIB_CTRL_WRPROTECT) == 0))
 #define ms_lib_clear_pagemap(pdx) memset((pdx)->MS_Lib.pagemap, 0, sizeof((pdx)->MS_Lib.pagemap))
 #define memstick_logaddr(logadr1, logadr0) ((((u16)(logadr1)) << 8) | (logadr0))
+
 
 struct SD_STATUS {
 	u8    Insert:1;
@@ -436,6 +440,7 @@ struct ms_lib_ctrl {
 	unsigned char copybuf[512];
 };
 
+
 /* SD Block Length */
 /* 2^9 = 512 Bytes, The HW maximum read/write data length */
 #define SD_BLOCK_LEN  9
@@ -610,6 +615,7 @@ static int sd_scsi_mode_sense(struct us_data *us, struct scsi_cmnd *srb)
 		usb_stor_set_xfer_buf(mediaWP, 12, srb);
 	else
 		usb_stor_set_xfer_buf(mediaNoWP, 12, srb);
+
 
 	return USB_STOR_TRANSPORT_GOOD;
 }
@@ -881,6 +887,7 @@ static int ms_read_readpage(struct us_data *us, u32 PhyBlockAddr,
 	if (result != USB_STOR_XFER_GOOD)
 		return USB_STOR_TRANSPORT_ERROR;
 
+
 	/* Read Extra Data */
 	memset(bcb, 0, sizeof(struct bulk_cb_wrap));
 	bcb->Signature = cpu_to_le32(US_BULK_CB_SIGN);
@@ -1070,6 +1077,7 @@ static void ms_lib_free_writebuf(struct us_data *us)
 	}
 }
 
+
 static void ms_lib_free_allocatedarea(struct us_data *us)
 {
 	struct ene_ub6250_info *info = (struct ene_ub6250_info *) us->extra;
@@ -1089,6 +1097,7 @@ static void ms_lib_free_allocatedarea(struct us_data *us)
 	info->MS_Lib.NumberOfPhyBlock = 0;
 	info->MS_Lib.NumberOfLogBlock = 0;
 }
+
 
 static int ms_lib_alloc_writebuf(struct us_data *us)
 {
@@ -1368,6 +1377,7 @@ static int ms_libsearch_block_from_physical(struct us_data *us, u16 phyblk)
 	struct ms_lib_type_extdat extdat; /* need check */
 	struct ene_ub6250_info *info = (struct ene_ub6250_info *) us->extra;
 
+
 	if (phyblk >= info->MS_Lib.NumberOfPhyBlock)
 		return MS_LB_ERROR;
 
@@ -1627,6 +1637,7 @@ static int ms_lib_scan_logicalblocknumber(struct us_data *us, u16 btBlk1st)
 
 	return MS_STATUS_SUCCESS;
 }
+
 
 static int ms_scsi_read(struct us_data *us, struct scsi_cmnd *srb)
 {
@@ -2178,6 +2189,7 @@ static int ene_sd_init(struct us_data *us)
 	return USB_STOR_TRANSPORT_GOOD;
 }
 
+
 static int ene_init(struct us_data *us)
 {
 	int result;
@@ -2343,6 +2355,7 @@ static int ene_ub6250_probe(struct usb_interface *intf,
 
 	return result;
 }
+
 
 #ifdef CONFIG_PM
 

@@ -47,6 +47,7 @@ struct stv0297_state {
 
 #define STV0297_CLOCK_KHZ   28900
 
+
 static int stv0297_writereg(struct stv0297_state *state, u8 reg, u8 data)
 {
 	int ret;
@@ -355,6 +356,7 @@ static int stv0297_read_ber(struct dvb_frontend *fe, u32 * ber)
 
 	return 0;
 }
+
 
 static int stv0297_read_signal_strength(struct dvb_frontend *fe, u16 * strength)
 {

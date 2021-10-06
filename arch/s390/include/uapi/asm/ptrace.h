@@ -177,6 +177,7 @@
 #define FPC_PAD_SIZE	4 /* gcc insists on aligning the fpregs */
 #define ACR_SIZE	4
 
+
 #define PTRACE_OLDSETOPTIONS         21
 
 #ifndef __ASSEMBLY__
@@ -275,6 +276,7 @@ typedef struct
 #define PSW_ASC_HOME		0x0000C00000000000UL
 
 #endif /* __s390x__ */
+
 
 /*
  * The s390_regs structure is used to define the elf_gregset_t.

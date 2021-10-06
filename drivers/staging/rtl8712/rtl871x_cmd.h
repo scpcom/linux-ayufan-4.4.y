@@ -326,6 +326,7 @@ enum _RT_CHANNEL_DOMAIN {
 	RT_CHANNEL_DOMAIN_MAX,
 };
 
+
 struct SetChannelPlan_param {
 	enum _RT_CHANNEL_DOMAIN ChannelPlan;
 };
@@ -346,12 +347,14 @@ struct getdatarate_rsp {
 	u8 datarates[NumRates];
 };
 
+
 /*
 Caller Mode: Any
 AP: AP can use the info for the contents of beacon frame
 Infra: STA can use the info when sitesurveying
 Ad-HoC(M): Like AP
 Ad-HoC(C): Like STA
+
 
 Notes: To set the phy capability of the NIC
 
@@ -472,6 +475,7 @@ struct getrfintfs_parm {
 	w1		=	swap32(w1) - event.mac[2];
 
 	parm->mac[3] is the total event counts that host requested.
+
 
 	event will be the same with the cmd's param.
 
@@ -765,3 +769,4 @@ struct _cmd_callback {
 #include "rtl8712_cmd.h"
 
 #endif /* _CMD_H_ */
+

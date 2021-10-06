@@ -761,6 +761,7 @@ static int s5p_mfc_dec_g_v_ctrl(struct v4l2_ctrl *ctrl)
 	return 0;
 }
 
+
 static const struct v4l2_ctrl_ops s5p_mfc_dec_ctrl_ops = {
 	.s_ctrl = s5p_mfc_dec_s_ctrl,
 	.g_volatile_ctrl = s5p_mfc_dec_g_v_ctrl,
@@ -860,6 +861,7 @@ static int vidioc_subscribe_event(struct v4l2_fh *fh,
 		return -EINVAL;
 	}
 }
+
 
 /* v4l2_ioctl_ops */
 static const struct v4l2_ioctl_ops s5p_mfc_dec_ioctl_ops = {
@@ -1059,6 +1061,7 @@ static void s5p_mfc_stop_streaming(struct vb2_queue *q)
 		ctx->state = MFCINST_RUNNING;
 }
 
+
 static void s5p_mfc_buf_queue(struct vb2_buffer *vb)
 {
 	struct vb2_queue *vq = vb->vb2_queue;
@@ -1187,3 +1190,4 @@ void s5p_mfc_dec_init(struct s5p_mfc_ctx *ctx)
 	mfc_debug(2, "Default src_fmt is %p, dest_fmt is %p\n",
 			ctx->src_fmt, ctx->dst_fmt);
 }
+

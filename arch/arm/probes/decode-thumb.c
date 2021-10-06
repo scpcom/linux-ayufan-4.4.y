@@ -15,6 +15,7 @@
 #include "decode.h"
 #include "decode-thumb.h"
 
+
 static const union decode_item t32_table_1110_100x_x0xx[] = {
 	/* Load/store multiple instructions */
 
@@ -401,6 +402,7 @@ static const union decode_item t32_table_1111_1010___1111[] = {
 	/* UXTB			1111 1010 0101 1111 1111 xxxx 1xxx xxxx */
 	DECODE_EMULATEX	(0xff8ff080, 0xfa0ff080, PROBES_T32_SIGN_EXTEND,
 						 REGS(0, 0, NOSPPC, 0, NOSPPC)),
+
 
 	/* ???			1111 1010 1xxx xxxx 1111 xxxx 0x11 xxxx */
 	DECODE_REJECT	(0xff80f0b0, 0xfa80f030),

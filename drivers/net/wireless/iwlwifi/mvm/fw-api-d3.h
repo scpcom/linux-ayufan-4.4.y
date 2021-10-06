@@ -87,6 +87,7 @@ struct iwl_d3_manager_config {
 	__le32 wakeup_host_timer;
 } __packed; /* D3_MANAGER_CONFIG_CMD_S_VER_4 */
 
+
 /* TODO: OFFLOADS_QUERY_API_S_VER_1 */
 
 /**

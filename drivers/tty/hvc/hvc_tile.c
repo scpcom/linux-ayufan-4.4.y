@@ -126,6 +126,7 @@ static const struct hv_ops hvc_tile_get_put_ops = {
 #endif
 };
 
+
 #ifdef __tilegx__
 static int hvc_tile_probe(struct platform_device *pdev)
 {

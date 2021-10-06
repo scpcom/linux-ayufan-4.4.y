@@ -245,6 +245,7 @@ do {									\
 	__pu_err;							\
 })
 
+
 #define __put_user_check(val, ptr, size)				\
 ({									\
 	__typeof__(*(ptr)) __user *__pu_addr = (ptr);			\
@@ -425,3 +426,4 @@ struct exception_table_entry {
 extern int fixup_exception(struct pt_regs *regs);
 
 #endif /* __SCORE_UACCESS_H */
+

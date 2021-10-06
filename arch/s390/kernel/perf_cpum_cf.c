@@ -220,6 +220,7 @@ static void cpumf_pmu_disable(struct pmu *pmu)
 	cpuhw->flags &= ~PMU_F_ENABLED;
 }
 
+
 /* Number of perf events counting hardware events */
 static atomic_t num_events = ATOMIC_INIT(0);
 /* Used to avoid races in calling reserve/release_cpumf_hardware */

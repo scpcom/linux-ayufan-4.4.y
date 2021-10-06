@@ -449,6 +449,7 @@ void cvmx_l2c_flush(void)
 	}
 }
 
+
 int cvmx_l2c_unlock_line(uint64_t address)
 {
 
@@ -606,6 +607,7 @@ union __cvmx_l2c_tag {
 	struct cvmx_l2c_tag_cn31xx cn52xx;	/* 512 sets */
 };
 
+
 /**
  * @INTERNAL
  * Function to read a L2C tag.  This code make the current core
@@ -676,6 +678,7 @@ static union __cvmx_l2c_tag __read_l2_tag(uint64_t assoc, uint64_t index)
 
 	return tag_val;
 }
+
 
 union cvmx_l2c_tag cvmx_l2c_get_tag(uint32_t association, uint32_t index)
 {

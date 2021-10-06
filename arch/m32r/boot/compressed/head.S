@@ -173,3 +173,4 @@ fake_headers_as_bzImage:
 	.byte	0x00, 0x80
 	.long	0
 	.long	0
+

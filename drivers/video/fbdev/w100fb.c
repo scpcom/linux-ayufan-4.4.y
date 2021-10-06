@@ -76,6 +76,7 @@ static void *remapped_fbuf;
    we can remap internal memory to there if external isn't present. */
 #define W100_FB_BASE MEM_EXT_BASE_VALUE
 
+
 /*
  * Sysfs functions
  */
@@ -137,6 +138,7 @@ static ssize_t w100fb_reg_write(struct device *dev, struct device_attribute *att
 
 static DEVICE_ATTR(reg_write, 0200, NULL, w100fb_reg_write);
 
+
 static ssize_t fastpllclk_show(struct device *dev, struct device_attribute *attr, char *buf)
 {
 	struct fb_info *info = dev_get_drvdata(dev);
@@ -188,6 +190,7 @@ static void w100fb_clear_screen(struct w100fb_par *par)
 	memset_io(remapped_fbuf + (W100_FB_BASE-MEM_WINDOW_BASE), 0, (par->xres * par->yres * BITS_PER_PIXEL/8));
 }
 
+
 /*
  * Set a palette value from rgb components
  */
@@ -217,6 +220,7 @@ static int w100fb_setcolreg(u_int regno, u_int red, u_int green, u_int blue,
 	}
 	return ret;
 }
+
 
 /*
  * Blank the display based on value in blank_mode
@@ -250,6 +254,7 @@ static int w100fb_blank(int blank_mode, struct fb_info *info)
 	return 0;
 }
 
+
 static void w100_fifo_wait(int entries)
 {
 	union rbbm_status_u status;
@@ -263,6 +268,7 @@ static void w100_fifo_wait(int entries)
 	}
 	printk(KERN_ERR "w100fb: FIFO Timeout!\n");
 }
+
 
 static int w100fb_sync(struct fb_info *info)
 {
@@ -278,6 +284,7 @@ static int w100fb_sync(struct fb_info *info)
 	printk(KERN_ERR "w100fb: Graphic engine timeout!\n");
 	return -EBUSY;
 }
+
 
 static void w100_init_graphic_engine(struct w100fb_par *par)
 {
@@ -340,6 +347,7 @@ static void w100_init_graphic_engine(struct w100fb_par *par)
 	writel(dp_mix.val, remapped_regs + mmDP_MIX);
 }
 
+
 static void w100fb_fillrect(struct fb_info *info,
                             const struct fb_fillrect *rect)
 {
@@ -364,6 +372,7 @@ static void w100fb_fillrect(struct fb_info *info,
 	writel((rect->width << 16) | (rect->height & 0xffff),
 	       remapped_regs + mmDST_WIDTH_HEIGHT);
 }
+
 
 static void w100fb_copyarea(struct fb_info *info,
                             const struct fb_copyarea *area)
@@ -391,6 +400,7 @@ static void w100fb_copyarea(struct fb_info *info,
 	writel((w << 16) | (h & 0xffff), remapped_regs + mmDST_WIDTH_HEIGHT);
 }
 
+
 /*
  *  Change the resolution by calling the appropriate hardware functions
  */
@@ -415,6 +425,7 @@ static void w100fb_activate_var(struct w100fb_par *par)
 	if (!par->blanked && tg && tg->change)
 		tg->change(par);
 }
+
 
 /* Select the smallest mode that allows the desired resolution to be
  * displayed. If desired, the x and y parameters can be rounded up to
@@ -448,6 +459,7 @@ static struct w100_mode *w100fb_get_mode(struct w100fb_par *par, unsigned int *x
 
 	return mode;
 }
+
 
 /*
  *  w100fb_check_var():
@@ -493,6 +505,7 @@ static int w100fb_check_var(struct fb_var_screeninfo *var, struct fb_info *info)
 	return 0;
 }
 
+
 /*
  * w100fb_set_par():
  *	Set the user defined part of the display for the specified console
@@ -526,6 +539,7 @@ static int w100fb_set_par(struct fb_info *info)
 	}
 	return 0;
 }
+
 
 /*
  *  Frame buffer operations
@@ -614,6 +628,7 @@ static int w100fb_resume(struct platform_device *dev)
 #define w100fb_suspend  NULL
 #define w100fb_resume   NULL
 #endif
+
 
 int w100fb_probe(struct platform_device *pdev)
 {
@@ -766,6 +781,7 @@ out:
 	return err;
 }
 
+
 static int w100fb_remove(struct platform_device *pdev)
 {
 	struct fb_info *info = platform_get_drvdata(pdev);
@@ -792,7 +808,9 @@ static int w100fb_remove(struct platform_device *pdev)
 	return 0;
 }
 
+
 /* ------------------- chipset specific functions -------------------------- */
+
 
 static void w100_soft_reset(void)
 {
@@ -944,6 +962,7 @@ static void w100_hw_init(struct w100fb_par *par)
 	}
 }
 
+
 struct power_state {
 	union clk_pin_cntl_u clk_pin_cntl;
 	union pll_ref_fb_div_u pll_ref_fb_div;
@@ -953,6 +972,7 @@ struct power_state {
 	union pwrmgt_cntl_u pwrmgt_cntl;
 	int auto_mode;  /* system clock auto changing? */
 };
+
 
 static struct power_state w100_pwr_state;
 
@@ -1012,6 +1032,7 @@ struct w100_pll_info *w100_get_xtal_table(unsigned int freq)
 	return 0;
 }
 
+
 static unsigned int w100_get_testcount(unsigned int testclk_sel)
 {
 	union clk_test_cntl_u clk_test_cntl;
@@ -1041,6 +1062,7 @@ static unsigned int w100_get_testcount(unsigned int testclk_sel)
 
 	return clk_test_cntl.f.test_count;
 }
+
 
 static int w100_pll_adjust(struct w100_pll_info *pll)
 {
@@ -1096,6 +1118,7 @@ static int w100_pll_adjust(struct w100_pll_info *pll)
 	} while(1);
 }
 
+
 /*
  * w100_pll_calibration
  */
@@ -1126,6 +1149,7 @@ static int w100_pll_calibration(struct w100_pll_info *pll)
 
 	return status;
 }
+
 
 static int w100_pll_set_clk(struct w100_pll_info *pll)
 {
@@ -1254,6 +1278,7 @@ static void w100_pwm_setup(struct w100fb_par *par)
 	w100_pwr_state.auto_mode = 0;  /* manual mode */
 }
 
+
 /*
  * Setup the w100 clocks for the specified mode
  */
@@ -1335,6 +1360,7 @@ static void w100_init_lcd(struct w100fb_par *par)
 	temp32 |= 0xc0000000;
 	writel(temp32, remapped_regs + mmDISP_DEBUG2);
 }
+
 
 static void w100_setup_memory(struct w100fb_par *par)
 {
@@ -1475,6 +1501,7 @@ static void w100_set_dispregs(struct w100fb_par *par)
 	writel(W100_FB_BASE + ((offset * BITS_PER_PIXEL/8)&~0x03UL), remapped_regs + mmGRAPHIC_OFFSET);
 	writel((par->xres*BITS_PER_PIXEL/8), remapped_regs + mmGRAPHIC_PITCH);
 }
+
 
 /*
  * Work out how long the sync pulse lasts

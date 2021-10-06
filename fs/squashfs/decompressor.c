@@ -78,6 +78,7 @@ static const struct squashfs_decompressor *decompressor[] = {
 	&squashfs_unknown_comp_ops
 };
 
+
 const struct squashfs_decompressor *squashfs_lookup_decompressor(int id)
 {
 	int i;
@@ -88,6 +89,7 @@ const struct squashfs_decompressor *squashfs_lookup_decompressor(int id)
 
 	return decompressor[i];
 }
+
 
 static void *get_comp_opts(struct super_block *sb, unsigned short flags)
 {
@@ -128,6 +130,7 @@ out:
 	kfree(buffer);
 	return comp_opts;
 }
+
 
 void *squashfs_decompressor_setup(struct super_block *sb, unsigned short flags)
 {

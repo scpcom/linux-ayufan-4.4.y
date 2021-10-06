@@ -667,3 +667,4 @@ static uint16_t get_fw_version(struct kgd_dev *kgd, enum kgd_engine_type type)
 	/* Only 12 bit in use*/
 	return hdr->common.ucode_version;
 }
+

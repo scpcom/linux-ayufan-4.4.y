@@ -219,6 +219,7 @@ struct SMU7_Discrete_LinkLevel
 
 typedef struct SMU7_Discrete_LinkLevel SMU7_Discrete_LinkLevel;
 
+
 struct SMU7_Discrete_MCArbDramTimingTableEntry
 {
     uint32_t McArbDramTiming;
@@ -283,6 +284,7 @@ struct SMU7_Discrete_StateInfo
 
 typedef struct SMU7_Discrete_StateInfo SMU7_Discrete_StateInfo;
 
+
 struct SMU7_Discrete_DpmTable
 {
     SMU7_PIDController                  GraphicsPIDController;
@@ -290,6 +292,7 @@ struct SMU7_Discrete_DpmTable
     SMU7_PIDController                  LinkPIDController;
 
     uint32_t                            SystemFlags;
+
 
     uint32_t                            SmioMaskVddcVid;
     uint32_t                            SmioMaskVddcPhase;
@@ -452,6 +455,7 @@ struct SMU7_Discrete_FanTable
 
 typedef struct SMU7_Discrete_FanTable SMU7_Discrete_FanTable;
 
+
 struct SMU7_Discrete_PmFuses {
   // dw0-dw1
   uint8_t BapmVddCVidHiSidd[8];
@@ -503,6 +507,8 @@ struct SMU7_Discrete_PmFuses {
 
 typedef struct SMU7_Discrete_PmFuses SMU7_Discrete_PmFuses;
 
+
 #pragma pack(pop)
 
 #endif
+

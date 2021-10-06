@@ -388,6 +388,7 @@ static struct pci_driver rdc_pci_driver = {
 #endif
 };
 
+
 module_pci_driver(rdc_pci_driver);
 
 MODULE_AUTHOR("Alan Cox (based on ata_piix)");

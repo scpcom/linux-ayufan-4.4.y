@@ -511,6 +511,7 @@ static void rx1950_backlight_exit(struct device *dev)
 	gpio_free(S3C2410_GPB(0));
 }
 
+
 static int rx1950_backlight_notify(struct device *dev, int brightness)
 {
 	if (!brightness) {

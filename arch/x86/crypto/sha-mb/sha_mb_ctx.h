@@ -79,6 +79,7 @@ enum hash_ctx_error {
 #endif
 };
 
+
 #define hash_ctx_user_data(ctx)  ((ctx)->user_data)
 #define hash_ctx_digest(ctx)     ((ctx)->job.result_digest)
 #define hash_ctx_processing(ctx) ((ctx)->status & HASH_CTX_STS_PROCESSING)
@@ -90,6 +91,7 @@ enum hash_ctx_error {
 		(ctx)->error = HASH_CTX_ERROR_NONE; \
 		(ctx)->status = HASH_CTX_STS_COMPLETE; \
 	} while (0)
+
 
 /* Hash Constants and Typedefs */
 #define SHA1_DIGEST_LENGTH          5

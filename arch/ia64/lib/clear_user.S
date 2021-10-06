@@ -89,6 +89,7 @@ GLOBAL_ENTRY(__do_clear_user)
 	mov ar.lc=saved_lc
 	br.ret.sptk.many rp		// end of short clear_user
 
+
 	//
 	// At this point we know we have more than 16 bytes to copy
 	// so we focus on alignment (no branches required)

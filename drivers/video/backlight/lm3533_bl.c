@@ -20,10 +20,12 @@
 
 #include <linux/mfd/lm3533.h>
 
+
 #define LM3533_HVCTRLBANK_COUNT		2
 #define LM3533_BL_MAX_BRIGHTNESS	255
 
 #define LM3533_REG_CTRLBANK_AB_BCONF	0x1a
+
 
 struct lm3533_bl {
 	struct lm3533 *lm3533;
@@ -31,6 +33,7 @@ struct lm3533_bl {
 	struct backlight_device *bd;
 	int id;
 };
+
 
 static inline int lm3533_bl_get_ctrlbank_id(struct lm3533_bl *bl)
 {

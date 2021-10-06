@@ -84,6 +84,7 @@ static const u32 volume_map[] = {
 #define HSW_PCM_DAI_ID_OFFLOAD1	2
 #define HSW_PCM_DAI_ID_LOOPBACK	3
 
+
 static const struct snd_pcm_hardware hsw_pcm_hardware = {
 	.info			= SNDRV_PCM_INFO_MMAP |
 				  SNDRV_PCM_INFO_MMAP_VALID |
@@ -144,6 +145,7 @@ struct hsw_priv_data {
 	/* DAI data */
 	struct hsw_pcm_data pcm[HSW_PCM_COUNT][2];
 };
+
 
 /* static mappings between PCMs and modules - may be dynamic in future */
 static struct hsw_pcm_module_map mod_map[] = {

@@ -160,6 +160,7 @@ static const int FSCHMD_NO_FAN_SENSORS[7] = { 3, 3, 6, 4, 5, 5, 7 };
 #define FSCHMD_FAN_NOT_PRESENT	0x08
 #define FSCHMD_FAN_DISABLED	0x80
 
+
 /* actual temperature registers */
 static const u8 FSCHMD_REG_TEMP_ACT[7][11] = {
 	{ 0x64, 0x32, 0x35 },				/* pos */
@@ -345,6 +346,7 @@ static ssize_t show_in_value(struct device *dev,
 			max_reading[index] + 128) / 255);
 }
 
+
 #define TEMP_FROM_REG(val)	(((val) - 128) * 1000)
 
 static ssize_t show_temp_value(struct device *dev,
@@ -413,6 +415,7 @@ static ssize_t show_temp_alarm(struct device *dev,
 	else
 		return sprintf(buf, "0\n");
 }
+
 
 #define RPM_FROM_REG(val)	((val) * 60)
 
@@ -509,6 +512,7 @@ static ssize_t show_fan_fault(struct device *dev,
 		return sprintf(buf, "0\n");
 }
 
+
 static ssize_t show_pwm_auto_point1_pwm(struct device *dev,
 	struct device_attribute *devattr, char *buf)
 {
@@ -551,6 +555,7 @@ static ssize_t store_pwm_auto_point1_pwm(struct device *dev,
 
 	return count;
 }
+
 
 /*
  * The FSC hwmon family has the ability to force an attached alert led to flash
@@ -699,6 +704,7 @@ static struct sensor_device_attribute fschmd_fan_attr[] = {
 	SENSOR_ATTR(pwm7_auto_point1_pwm, 0644, show_pwm_auto_point1_pwm,
 		store_pwm_auto_point1_pwm, 6),
 };
+
 
 /*
  * Watchdog routines
@@ -965,6 +971,7 @@ static const struct file_operations watchdog_fops = {
 	.write = watchdog_write,
 	.unlocked_ioctl = watchdog_ioctl,
 };
+
 
 /*
  * Detect, register, unregister and update device functions

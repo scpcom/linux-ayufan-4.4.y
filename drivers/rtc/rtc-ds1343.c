@@ -172,6 +172,7 @@ static ssize_t ds1343_nvram_write(struct file *filp, struct kobject *kobj,
 	return (ret < 0) ? ret : count;
 }
 
+
 static ssize_t ds1343_nvram_read(struct file *filp, struct kobject *kobj,
 				struct bin_attribute *attr,
 				char *buf, loff_t off, size_t count)
@@ -189,6 +190,7 @@ static ssize_t ds1343_nvram_read(struct file *filp, struct kobject *kobj,
 
 	return (ret < 0) ? ret : count;
 }
+
 
 static struct bin_attribute nvram_attr = {
 	.attr.name	= "nvram",

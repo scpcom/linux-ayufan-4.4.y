@@ -763,6 +763,7 @@ static int if_usb_issue_boot_command(struct if_usb_card *cardp, int ivalue)
 	return 0;
 }
 
+
 /**
  *  check_fwfile_format - Check the validity of Boot2/FW image.
  *
@@ -810,6 +811,7 @@ static int check_fwfile_format(const u8 *data, u32 totlen)
 
 	return ret;
 }
+
 
 static int if_usb_prog_firmware(struct if_usb_card *cardp)
 {
@@ -904,6 +906,7 @@ restart:
 	lbtf_deb_leave_args(LBTF_DEB_USB, "ret %d", ret);
 	return ret;
 }
+
 
 #define if_usb_suspend NULL
 #define if_usb_resume NULL

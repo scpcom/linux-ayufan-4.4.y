@@ -219,6 +219,7 @@ static struct ata_port_operations pacpi_ops = {
 	.port_start		= pacpi_port_start,
 };
 
+
 /**
  *	pacpi_init_one - Register ACPI ATA PCI device with kernel services
  *	@pdev: PCI device to register

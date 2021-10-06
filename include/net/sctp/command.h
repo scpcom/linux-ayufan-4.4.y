@@ -39,6 +39,7 @@
 #include <net/sctp/constants.h>
 #include <net/sctp/structs.h>
 
+
 typedef enum {
 	SCTP_CMD_NOP = 0,	/* Do nothing. */
 	SCTP_CMD_NEW_ASOC,	/* Register a new association.  */
@@ -206,6 +207,7 @@ typedef struct {
 	sctp_cmd_t *next_cmd;
 } sctp_cmd_seq_t;
 
+
 /* Initialize a block of memory as a command sequence.
  * Return 0 if the initialization fails.
  */
@@ -216,6 +218,7 @@ static inline int sctp_init_cmd_seq(sctp_cmd_seq_t *seq)
 	seq->next_cmd = seq->last_used_slot;
 	return 1;		/* We always succeed.  */
 }
+
 
 /* Add a command to an sctp_cmd_seq_t.
  *

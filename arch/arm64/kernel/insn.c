@@ -860,6 +860,7 @@ u32 aarch64_insn_gen_add_sub_shifted_reg(enum aarch64_insn_register dst,
 		return AARCH64_BREAK_FAULT;
 	}
 
+
 	insn = aarch64_insn_encode_register(AARCH64_INSN_REGTYPE_RD, insn, dst);
 
 	insn = aarch64_insn_encode_register(AARCH64_INSN_REGTYPE_RN, insn, src);
@@ -1052,6 +1053,7 @@ u32 aarch64_insn_gen_logical_shifted_reg(enum aarch64_insn_register dst,
 		BUG_ON(1);
 		return AARCH64_BREAK_FAULT;
 	}
+
 
 	insn = aarch64_insn_encode_register(AARCH64_INSN_REGTYPE_RD, insn, dst);
 

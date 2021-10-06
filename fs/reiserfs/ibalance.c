@@ -786,6 +786,7 @@ static void replace_rkey(struct tree_balance *tb, int h, struct item_head *key)
 	do_balance_mark_internal_dirty(tb, tb->CFR[h], 0);
 }
 
+
 /*
  * if inserting/pasting {
  *   child_pos is the position of the node-pointer in S[h] that

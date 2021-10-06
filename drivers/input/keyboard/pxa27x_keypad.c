@@ -15,6 +15,7 @@
  * published by the Free Software Foundation.
  */
 
+
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/interrupt.h>
@@ -707,6 +708,7 @@ static int pxa27x_keypad_resume(struct device *dev)
 
 static SIMPLE_DEV_PM_OPS(pxa27x_keypad_pm_ops,
 			 pxa27x_keypad_suspend, pxa27x_keypad_resume);
+
 
 static int pxa27x_keypad_probe(struct platform_device *pdev)
 {

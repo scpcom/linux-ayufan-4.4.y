@@ -9,6 +9,7 @@ typedef enum _spolarity_t {
 }
 spolarity_t;
 
+
 typedef struct _mode_parameter_t {
 	/* Horizontal timing. */
 	unsigned long horizontal_total;
@@ -35,5 +36,6 @@ typedef struct _mode_parameter_t {
 mode_parameter_t;
 
 int ddk750_setModeTiming(mode_parameter_t *, clock_type_t);
+
 
 #endif

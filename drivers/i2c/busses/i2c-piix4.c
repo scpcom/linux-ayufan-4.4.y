@@ -38,6 +38,7 @@
 #include <linux/acpi.h>
 #include <linux/io.h>
 
+
 /* PIIX4 SMBus address offsets */
 #define SMBHSTSTS	(0 + piix4_smba)
 #define SMBHSLVSTS	(1 + piix4_smba)
@@ -501,6 +502,7 @@ static s32 piix4_access(struct i2c_adapter * adap, u16 addr,
 
 	if ((read_write == I2C_SMBUS_WRITE) || (size == PIIX4_QUICK))
 		return 0;
+
 
 	switch (size) {
 	case PIIX4_BYTE:

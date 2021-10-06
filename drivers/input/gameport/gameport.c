@@ -73,6 +73,8 @@ static unsigned int get_time_pit(void)
 
 #endif
 
+
+
 /*
  * gameport_measure_speed() measures the gameport i/o speed.
  */
@@ -248,6 +250,7 @@ static void gameport_find_driver(struct gameport *gameport)
 			 gameport->phys, gameport->name, error);
 }
 
+
 /*
  * Gameport event processing.
  */
@@ -314,6 +317,7 @@ static void gameport_remove_duplicate_events(struct gameport_event *event)
 
 	spin_unlock_irqrestore(&gameport_event_lock, flags);
 }
+
 
 static void gameport_handle_events(struct work_struct *work)
 {
@@ -672,6 +676,7 @@ void gameport_unregister_port(struct gameport *gameport)
 }
 EXPORT_SYMBOL(gameport_unregister_port);
 
+
 /*
  * Gameport driver operations
  */
@@ -837,6 +842,7 @@ static int __init gameport_init(void)
 		pr_err("failed to register gameport bus, error: %d\n", error);
 		return error;
 	}
+
 
 	return 0;
 }

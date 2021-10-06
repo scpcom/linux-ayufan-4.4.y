@@ -49,6 +49,7 @@ void release_pmc_hardware(void)
 }
 EXPORT_SYMBOL(release_pmc_hardware);
 
+
 /*
  * Get current overflow status of each performance counter,
  * and auxiliary performance counter.

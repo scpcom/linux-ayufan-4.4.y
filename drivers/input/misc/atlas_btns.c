@@ -155,3 +155,4 @@ module_acpi_driver(atlas_acpi_driver);
 MODULE_AUTHOR("Jaya Kumar");
 MODULE_LICENSE("GPL");
 MODULE_DESCRIPTION("Atlas button driver");
+

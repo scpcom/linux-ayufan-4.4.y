@@ -91,6 +91,7 @@ static void die_if_kernel(char *str, struct pt_regs *fp, int nr)
 	die(str, fp, nr);
 }
 
+
 /* Internal exceptions */
 static struct exception_info iexcept_table[10] = {
 	{ "Oops - instruction fetch", SIGBUS, BUS_ADRERR },

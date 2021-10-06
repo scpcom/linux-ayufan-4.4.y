@@ -86,3 +86,4 @@ void msm_dsi_phy_set_src_pll(struct msm_dsi_phy *phy, int pll_id, u32 reg,
 				u32 bit_mask);
 
 #endif /* __DSI_PHY_H__ */
+

@@ -36,6 +36,7 @@ module_param(debug, bool, 0644);
 			printk(KERN_DEBUG "%s: " fmt, __func__, ## arg);\
 	} while (0)
 
+
 /* Instance is already queued on the job_queue */
 #define TRANS_QUEUED		(1 << 0)
 /* Instance is currently running in hardware */
@@ -43,10 +44,12 @@ module_param(debug, bool, 0644);
 /* Instance is currently aborting */
 #define TRANS_ABORT		(1 << 2)
 
+
 /* Offset base for buffers on the destination queue - used to distinguish
  * between source and destination buffers when mmapping - they receive the same
  * offsets but for different queues */
 #define DST_QUEUE_OFF_BASE	(1 << 30)
+
 
 /**
  * struct v4l2_m2m_dev - per-device context
@@ -895,3 +898,4 @@ unsigned int v4l2_m2m_fop_poll(struct file *file, poll_table *wait)
 	return ret;
 }
 EXPORT_SYMBOL_GPL(v4l2_m2m_fop_poll);
+

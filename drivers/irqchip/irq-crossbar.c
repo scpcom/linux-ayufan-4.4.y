@@ -270,6 +270,7 @@ static int __init crossbar_of_init(struct device_node *node)
 		}
 	}
 
+
 	cb->register_offsets = kcalloc(max, sizeof(int), GFP_KERNEL);
 	if (!cb->register_offsets)
 		goto err_irq_map;

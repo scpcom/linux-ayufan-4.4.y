@@ -100,6 +100,7 @@ const struct inode_operations ceph_file_iops = {
 	.set_acl = ceph_set_acl,
 };
 
+
 /*
  * We use a 'frag tree' to keep track of the MDS's directory fragments
  * for a given inode (usually there is just a single fragment).  We
@@ -273,6 +274,7 @@ static int ceph_fill_dirfrag(struct inode *inode,
 		}
 		goto out;
 	}
+
 
 	/* find/add this frag to store mds delegation info */
 	frag = __get_or_create_frag(ci, id);
@@ -1651,6 +1653,7 @@ out:
 	iput(inode);
 }
 
+
 /*
  * called by trunc_wq;
  *
@@ -2041,6 +2044,7 @@ int __ceph_do_getattr(struct inode *inode, struct page *locked_page,
 	dout("do_getattr result=%d\n", err);
 	return err;
 }
+
 
 /*
  * Check inode permissions.  We verify we have a valid value for

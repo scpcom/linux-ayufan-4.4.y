@@ -415,6 +415,7 @@ static struct omap_hwmod_ocp_if omap2420_l4_core__hdq1w = {
 	.flags		= OMAP_FIREWALL_L4 | OCPIF_SWSUP_IDLE,
 };
 
+
 /* l4_wkup -> 32ksync_counter */
 static struct omap_hwmod_ocp_if omap2420_l4_wkup__counter_32k = {
 	.master		= &omap2xxx_l4_wkup_hwmod,

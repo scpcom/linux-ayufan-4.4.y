@@ -85,6 +85,7 @@ static const int wdt_timeout_map[] = {
 	[16] = 0xB, /* 16s */
 };
 
+
 static int sunxi_restart_handle(struct notifier_block *this, unsigned long mode,
 				void *cmd)
 {

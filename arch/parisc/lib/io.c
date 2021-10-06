@@ -155,6 +155,7 @@ void insb (unsigned long port, void *dst, unsigned long count)
 	}
 }
 
+
 /*
  * Read COUNT 16-bit words from port PORT into memory starting at
  * SRC.  SRC must be at least short aligned.  This is used by the
@@ -225,6 +226,8 @@ void insw (unsigned long port, void *dst, unsigned long count)
 		break;
 	}
 }
+
+
 
 /*
  * Read COUNT 32-bit words from port PORT into memory starting at
@@ -304,6 +307,7 @@ void insl (unsigned long port, void *dst, unsigned long count)
 		break;
 	}
 }
+
 
 /*
  * Like insb but in the opposite direction.
@@ -393,6 +397,7 @@ void outsw (unsigned long port, const void *src, unsigned long count)
 	
 	}
 }
+
 
 /*
  * Like insl but in the opposite direction.  This is used by the IDE

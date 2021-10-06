@@ -777,3 +777,5 @@ extern void		SiS_Chrontel701xBLOff(struct SiS_Private *SiS_Pr);
 extern void		SiS_SiS30xBLOn(struct SiS_Private *SiS_Pr);
 extern void		SiS_SiS30xBLOff(struct SiS_Private *SiS_Pr);
 #endif
+
+

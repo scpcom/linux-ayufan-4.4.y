@@ -309,6 +309,7 @@ static inline void efx_farch_push_tx_desc(struct efx_tx_queue *tx_queue,
 			FR_BZ_TX_DESC_UPD_P0, tx_queue->queue);
 }
 
+
 /* For each entry inserted into the software descriptor ring, create a
  * descriptor in the hardware TX descriptor ring (in host memory), and
  * write a doorbell.
@@ -767,6 +768,7 @@ void efx_farch_finish_flr(struct efx_nic *efx)
 	atomic_set(&efx->rxq_flush_outstanding, 0);
 	atomic_set(&efx->active_queues, 0);
 }
+
 
 /**************************************************************************
  *
@@ -1422,6 +1424,7 @@ void efx_farch_ev_remove(struct efx_channel *channel)
 {
 	efx_free_special_buffer(channel->efx, &channel->eventq);
 }
+
 
 void efx_farch_ev_test_generate(struct efx_channel *channel)
 {

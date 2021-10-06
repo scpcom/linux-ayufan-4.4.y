@@ -1151,6 +1151,7 @@ static int wcn36xx_smd_config_bss_v1(struct wcn36xx *wcn,
 	return wcn36xx_smd_send_and_wait(wcn, msg_body.header.len);
 }
 
+
 static int wcn36xx_smd_config_bss_rsp(struct wcn36xx *wcn,
 				      struct ieee80211_vif *vif,
 				      void *buf,

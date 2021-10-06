@@ -140,4 +140,5 @@ static inline struct kvmppc_ics *kvmppc_xics_find_ics(struct kvmppc_xics *xics,
 	return ics;
 }
 
+
 #endif /* _KVM_PPC_BOOK3S_XICS_H */

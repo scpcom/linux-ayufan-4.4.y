@@ -32,6 +32,7 @@
 #include <linux/slab.h>
 #include <linux/platform_data/mmc-omap.h>
 
+
 #define	OMAP_MMC_REG_CMD	0x00
 #define	OMAP_MMC_REG_ARGL	0x01
 #define	OMAP_MMC_REG_ARGH	0x02
@@ -169,6 +170,7 @@ struct mmc_omap_host {
 
 	struct omap_mmc_platform_data *pdata;
 };
+
 
 static void mmc_omap_fclk_offdelay(struct mmc_omap_slot *slot)
 {
@@ -715,6 +717,7 @@ static void mmc_omap_report_irq(struct mmc_omap_host *host, u16 status)
 {
 }
 #endif
+
 
 static irqreturn_t mmc_omap_irq(int irq, void *dev_id)
 {

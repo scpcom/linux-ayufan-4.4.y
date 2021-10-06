@@ -72,6 +72,7 @@ struct sd {
 	int expo_change_state;
 };
 
+
 static void se401_write_req(struct gspca_dev *gspca_dev, u16 req, u16 value,
 			    int silent)
 {

@@ -181,6 +181,7 @@ skip_limit:
 	spin_unlock_irqrestore(&throttle_spinlock, flags);
 }
 
+
 static void wake(struct dm_kcopyd_client *kc)
 {
 	queue_work(kc->kcopyd_wq, &kc->kcopyd_work);
@@ -411,6 +412,7 @@ static void push(struct list_head *jobs, struct kcopyd_job *job)
 	list_add_tail(&job->list, jobs);
 	spin_unlock_irqrestore(&kc->job_lock, flags);
 }
+
 
 static void push_head(struct list_head *jobs, struct kcopyd_job *job)
 {

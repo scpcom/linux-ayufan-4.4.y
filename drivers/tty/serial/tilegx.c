@@ -58,6 +58,7 @@ struct tile_uart_port {
 static struct tile_uart_port tile_uart_ports[TILEGX_UART_NR];
 static struct uart_driver tilegx_uart_driver;
 
+
 /*
  * Read UART rx fifo, and insert the chars into tty buffer.
  */
@@ -76,6 +77,7 @@ static void receive_chars(struct tile_uart_port *tile_uart,
 		tty_insert_flip_char(port, c, TTY_NORMAL);
 	}
 }
+
 
 /*
  * Drain the Rx FIFO, called by interrupt handler.
@@ -107,6 +109,7 @@ static void handle_receive(struct tile_uart_port *tile_uart)
 	tty_kref_put(tty);
 }
 
+
 /*
  * Push one char to UART Write FIFO.
  * Return 0 on success, -1 if write filo is full.
@@ -121,6 +124,7 @@ static int tilegx_putchar(gxio_uart_context_t *context, char c)
 	gxio_uart_write(context, UART_TRANSMIT_DATA, (unsigned long)c);
 	return 0;
 }
+
 
 /*
  * Send chars to UART Write FIFO; called by interrupt handler.
@@ -164,6 +168,7 @@ static void handle_transmit(struct tile_uart_port *tile_uart)
 		uart_write_wakeup(port);
 }
 
+
 /*
  * UART Interrupt handler.
  */
@@ -195,6 +200,7 @@ static irqreturn_t tilegx_interrupt(int irq, void *dev_id)
 	return ret;
 }
 
+
 /*
  * Return TIOCSER_TEMT when transmitter FIFO is empty.
  */
@@ -217,6 +223,7 @@ static u_int tilegx_tx_empty(struct uart_port *port)
 	return ret;
 }
 
+
 /*
  * Set state of the modem control output lines.
  */
@@ -224,6 +231,7 @@ static void tilegx_set_mctrl(struct uart_port *port, u_int mctrl)
 {
 	/* N/A */
 }
+
 
 /*
  * Get state of the modem control input lines.
@@ -233,6 +241,7 @@ static u_int tilegx_get_mctrl(struct uart_port *port)
 	return TIOCM_CTS | TIOCM_DSR | TIOCM_CAR;
 }
 
+
 /*
  * Stop transmitting.
  */
@@ -240,6 +249,7 @@ static void tilegx_stop_tx(struct uart_port *port)
 {
 	/* N/A */
 }
+
 
 /*
  * Start transmitting.
@@ -282,6 +292,7 @@ static void tilegx_start_tx(struct uart_port *port)
 	mutex_unlock(&tile_uart->mutex);
 }
 
+
 /*
  * Stop receiving - port is in process of being closed.
  */
@@ -310,6 +321,7 @@ static void tilegx_break_ctl(struct uart_port *port, int break_state)
 {
 	/* N/A */
 }
+
 
 /*
  * Perform initialization and enable port for reception.
@@ -383,6 +395,7 @@ err:
 	return ret;
 }
 
+
 /*
  * Release kernel resources if it is the last close, disable the port,
  * free IRQ and close the port.
@@ -422,6 +435,7 @@ static void tilegx_shutdown(struct uart_port *port)
 	mutex_unlock(&tile_uart->mutex);
 }
 
+
 /*
  * Flush the buffer.
  */
@@ -429,6 +443,7 @@ static void tilegx_flush_buffer(struct uart_port *port)
 {
 	/* N/A */
 }
+
 
 /*
  * Change the port parameters.
@@ -498,6 +513,7 @@ static void tilegx_set_termios(struct uart_port *port,
 	mutex_unlock(&tile_uart->mutex);
 }
 
+
 /*
  * Return string describing the specified port.
  */
@@ -506,6 +522,7 @@ static const char *tilegx_type(struct uart_port *port)
 	return port->type == PORT_TILEGX ? DRIVER_NAME_STRING : NULL;
 }
 
+
 /*
  * Release the resources being used by 'port'.
  */
@@ -513,6 +530,7 @@ static void tilegx_release_port(struct uart_port *port)
 {
 	/* Nothing to release. */
 }
+
 
 /*
  * Request the resources being used by 'port'.
@@ -523,6 +541,7 @@ static int tilegx_request_port(struct uart_port *port)
 	return 0;
 }
 
+
 /*
  * Configure/autoconfigure the port.
  */
@@ -531,6 +550,7 @@ static void tilegx_config_port(struct uart_port *port, int flags)
 	if (flags & UART_CONFIG_TYPE)
 		port->type = PORT_TILEGX;
 }
+
 
 /*
  * Verify the new serial_struct (for TIOCSSERIAL).
@@ -577,6 +597,7 @@ static void tilegx_poll_put_char(struct uart_port *port, unsigned char c)
 
 #endif /* CONFIG_CONSOLE_POLL */
 
+
 static const struct uart_ops tilegx_ops = {
 	.tx_empty	= tilegx_tx_empty,
 	.set_mctrl	= tilegx_set_mctrl,
@@ -600,6 +621,7 @@ static const struct uart_ops tilegx_ops = {
 #endif
 };
 
+
 static void tilegx_init_ports(void)
 {
 	int i;
@@ -618,6 +640,7 @@ static void tilegx_init_ports(void)
 	}
 }
 
+
 static struct uart_driver tilegx_uart_driver = {
 	.owner		= THIS_MODULE,
 	.driver_name	= DRIVER_NAME_STRING,
@@ -626,6 +649,7 @@ static struct uart_driver tilegx_uart_driver = {
 	.minor		= TILEGX_UART_MINOR,
 	.nr		= TILEGX_UART_NR,
 };
+
 
 static int __init tilegx_init(void)
 {
@@ -651,6 +675,7 @@ static int __init tilegx_init(void)
 	return 0;
 }
 
+
 static void __exit tilegx_exit(void)
 {
 	int i;
@@ -663,6 +688,7 @@ static void __exit tilegx_exit(void)
 
 	uart_unregister_driver(&tilegx_uart_driver);
 }
+
 
 module_init(tilegx_init);
 module_exit(tilegx_exit);

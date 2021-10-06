@@ -196,6 +196,7 @@ static SOC_ENUM_SINGLE_DECL(linsel_enum,
 static const struct snd_kcontrol_new linsel_mux =
 	SOC_DAPM_ENUM("LINSEL", linsel_enum);
 
+
 static const char *rinsel_text[] = {
 	"RINPUT1", "RINPUT2", "RINPUT3", "RINPUT1 DC",
 };
@@ -215,6 +216,7 @@ static SOC_ENUM_SINGLE_DECL(lbypass_enum,
 
 static const struct snd_kcontrol_new lbypass_mux =
 	SOC_DAPM_ENUM("Left Bypass", lbypass_enum);
+
 
 static SOC_ENUM_SINGLE_DECL(rbypass_enum,
 			    WM8737_MIC_PREAMP_CONTROL, 3, bypass_text);
@@ -396,6 +398,7 @@ static int wm8737_set_dai_sysclk(struct snd_soc_dai *codec_dai,
 
 	return -EINVAL;
 }
+
 
 static int wm8737_set_dai_fmt(struct snd_soc_dai *codec_dai,
 		unsigned int fmt)

@@ -49,6 +49,7 @@ enum mes_set_resources_queue_type_enum {
 	queue_type__mes_set_resources__hsa_debug_interface_queue = 4
 };
 
+
 struct pm4_mes_set_resources {
 	union {
 		union PM4_MES_TYPE_3_HEADER	header;		/* header */
@@ -210,6 +211,7 @@ enum mes_map_queues_engine_sel_vi_enum {
 	engine_sel__mes_map_queues__sdma0_vi = 2,
 	engine_sel__mes_map_queues__sdma1_vi = 3
 };
+
 
 struct pm4_mes_map_queues {
 	union {

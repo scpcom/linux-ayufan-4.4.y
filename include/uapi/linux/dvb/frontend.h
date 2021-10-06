@@ -83,6 +83,7 @@ struct dvb_frontend_info {
 	enum fe_caps caps;
 };
 
+
 /**
  *  Check out the DiSEqC bus spec available on http://www.eutelsat.org/ for
  *  the meaning of this struct...
@@ -450,6 +451,7 @@ struct dtv_stats {
 		__s64 svalue;	/* for 0.001 dB measures */
 	};
 } __attribute__ ((packed));
+
 
 #define MAX_DTV_STATS   4
 

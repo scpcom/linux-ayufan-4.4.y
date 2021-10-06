@@ -14,6 +14,7 @@
  * Functions for accessing Amiga-FFS structures.
  */
 
+
 /* Insert a header block bh into the directory dir
  * caller must hold AFFS_DIR->i_hash_lock!
  */
@@ -131,6 +132,7 @@ affs_fix_dcache(struct inode *inode, u32 entry_ino)
 	spin_unlock(&inode->i_lock);
 }
 
+
 /* Remove header from link chain */
 
 static int
@@ -224,6 +226,7 @@ done:
 	return retval;
 }
 
+
 static int
 affs_empty_dir(struct inode *inode)
 {
@@ -246,6 +249,7 @@ not_empty:
 done:
 	return retval;
 }
+
 
 /* Remove a filesystem object. If the object to be removed has
  * links to it, one of the links must be changed to inherit

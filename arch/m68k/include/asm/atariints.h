@@ -102,6 +102,7 @@
 #define INT_CLK   24576	    /* CLK while int_clk =2.456MHz and divide = 100 */
 #define INT_TICKS 246	    /* to make sched_time = 99.902... HZ */
 
+
 #define MFP_ENABLE	0
 #define MFP_PENDING	1
 #define MFP_SERVICE	2

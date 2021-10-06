@@ -127,6 +127,7 @@ do {                                                            \
 	__kunmap_atomic(addr);                                  \
 } while (0)
 
+
 /* when CONFIG_HIGHMEM is not set these will be plain clear/copy_page */
 #ifndef clear_user_highpage
 static inline void clear_user_highpage(struct page *page, unsigned long vaddr)

@@ -130,6 +130,7 @@ void stop_watchdog(void)
 #endif
 }
 
+
 extern void cris_do_profile(struct pt_regs *regs);
 
 /*

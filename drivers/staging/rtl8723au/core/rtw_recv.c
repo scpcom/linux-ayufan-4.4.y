@@ -30,12 +30,15 @@ void rtw_signal_stat_timer_hdl23a(unsigned long data);
 void _rtw_init_sta_recv_priv23a(struct sta_recv_priv *psta_recvpriv)
 {
 
+
+
 	spin_lock_init(&psta_recvpriv->lock);
 
 	/* for (i = 0; i<MAX_RX_NUMBLKS; i++) */
 	/*	_rtw_init_queue23a(&psta_recvpriv->blk_strms[i]); */
 
 	_rtw_init_queue23a(&psta_recvpriv->defrag_q);
+
 
 }
 
@@ -155,6 +158,8 @@ int rtw_free_recvframe23a(struct recv_frame *precvframe)
 	}
 
 	spin_unlock_bh(&pfree_recv_queue->lock);
+
+
 
 	return _SUCCESS;
 }
@@ -288,6 +293,7 @@ int recvframe_chkmic(struct rtw_adapter *adapter,
 
 	struct mlme_ext_priv *pmlmeext = &adapter->mlmeextpriv;
 	struct mlme_ext_info *pmlmeinfo = &pmlmeext->mlmext_info;
+
 
 	stainfo = rtw_get_stainfo23a(&adapter->stapriv, &prxattrib->ta[0]);
 
@@ -443,6 +449,8 @@ int recvframe_chkmic(struct rtw_adapter *adapter,
 
 exit:
 
+
+
 	return res;
 }
 
@@ -513,6 +521,8 @@ struct recv_frame *decryptor(struct rtw_adapter *padapter,
 		return_packet = NULL;
 	}
 
+
+
 	return return_packet;
 }
 
@@ -578,6 +588,8 @@ int recv_decache(struct recv_frame *precv_frame, u8 bretry,
 	u16 seq_ctrl = ((precv_frame->attrib.seq_num & 0xffff) << 4) |
 		(precv_frame->attrib.frag_num & 0xf);
 
+
+
 	if (tid > 15) {
 		RT_TRACE(_module_rtl871x_recv_c_, _drv_notice_,
 			 "recv_decache, (tid>15)! seq_ctrl = 0x%x, tid = 0x%x\n",
@@ -597,6 +609,8 @@ int recv_decache(struct recv_frame *precv_frame, u8 bretry,
 	}
 
 	prxcache->tid_rxseq[tid] = seq_ctrl;
+
+
 
 	return _SUCCESS;
 }
@@ -645,6 +659,7 @@ void process_wmmps_data(struct rtw_adapter *padapter,
 
 	if (!psta)
 		return;
+
 
 	if (!psta->qos_option)
 		return;
@@ -736,6 +751,8 @@ static int sta2sta_data_frame(struct rtw_adapter *adapter,
 	u8 *myhwaddr = myid(&adapter->eeprompriv);
 	u8 *sta_addr = NULL;
 	int bmcast = is_multicast_ether_addr(pattrib->dst);
+
+
 
 	if (check_fwstate(pmlmepriv, WIFI_ADHOC_STATE) ||
 	    check_fwstate(pmlmepriv, WIFI_ADHOC_MASTER_STATE)) {
@@ -835,6 +852,8 @@ int ap2sta_data_frame(struct rtw_adapter *adapter,
 	u8 *mybssid  = get_bssid(pmlmepriv);
 	u8 *myhwaddr = myid(&adapter->eeprompriv);
 	int bmcast = is_multicast_ether_addr(pattrib->dst);
+
+
 
 	if (check_fwstate(pmlmepriv, WIFI_STATION_STATE) &&
 	    (check_fwstate(pmlmepriv, _FW_LINKED) ||
@@ -939,6 +958,8 @@ int ap2sta_data_frame(struct rtw_adapter *adapter,
 
 exit:
 
+
+
 	return ret;
 }
 
@@ -956,6 +977,8 @@ int sta2ap_data_frame(struct rtw_adapter *adapter,
 	struct mlme_priv *pmlmepriv = &adapter->mlmepriv;
 	unsigned char *mybssid = get_bssid(pmlmepriv);
 	int ret = _SUCCESS;
+
+
 
 	if (check_fwstate(pmlmepriv, WIFI_AP_STATE)) {
 		/* For AP mode, RA = BSSID, TX = STA(SRC_ADDR), A3 = DST_ADDR */
@@ -1008,6 +1031,8 @@ int sta2ap_data_frame(struct rtw_adapter *adapter,
 	}
 
 exit:
+
+
 
 	return ret;
 }
@@ -1218,6 +1243,8 @@ static int validate_recv_data_frame(struct rtw_adapter *adapter,
 	struct sk_buff *skb = precv_frame->pkt;
 	struct ieee80211_hdr *hdr = (struct ieee80211_hdr *) skb->data;
 
+
+
 	bretry = ieee80211_has_retry(hdr->frame_control);
 	pda = ieee80211_get_DA(hdr);
 	psa = ieee80211_get_SA(hdr);
@@ -1356,6 +1383,8 @@ static int validate_recv_data_frame(struct rtw_adapter *adapter,
 
 exit:
 
+
+
 	return ret;
 }
 
@@ -1477,6 +1506,8 @@ static int wlanhdr_to_ethhdr (struct recv_frame *precvframe)
 	u8 *ptr;
 	struct rx_pkt_attrib *pattrib = &precvframe->attrib;
 
+
+
 	ptr = skb->data;
 	hdrlen = pattrib->hdrlen;
 	psnap = ptr + hdrlen;
@@ -1526,6 +1557,7 @@ static int wlanhdr_to_ethhdr (struct recv_frame *precvframe)
 		put_unaligned_be16(len, ptr + 12);
 	}
 
+
 	return _SUCCESS;
 }
 
@@ -1542,6 +1574,8 @@ struct recv_frame *recvframe_defrag(struct rtw_adapter *adapter,
 	struct recv_frame *prframe, *pnextrframe;
 	struct rtw_queue	*pfree_recv_queue;
 	struct sk_buff *skb;
+
+
 
 	curfragnum = 0;
 	pfree_recv_queue = &adapter->recvpriv.free_recv_queue;
@@ -1610,6 +1644,8 @@ struct recv_frame *recvframe_defrag(struct rtw_adapter *adapter,
 	RT_TRACE(_module_rtl871x_recv_c_, _drv_info_,
 		 "Performance defrag!!!!!\n");
 
+
+
 	return prframe;
 }
 
@@ -1626,6 +1662,8 @@ struct recv_frame *recvframe_chk_defrag23a(struct rtw_adapter *padapter,
 	struct list_head *phead;
 	struct recv_frame *prtnframe = NULL;
 	struct rtw_queue *pfree_recv_queue, *pdefrag_q;
+
+
 
 	pstapriv = &padapter->stapriv;
 
@@ -1727,6 +1765,8 @@ struct recv_frame *recvframe_chk_defrag23a(struct rtw_adapter *padapter,
 			prtnframe = NULL;
 		}
 	}
+
+
 
 	return prtnframe;
 }

@@ -14,6 +14,7 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+
 #ifndef FWEH_H_
 #define FWEH_H_
 
@@ -183,6 +184,7 @@ enum brcmf_fweh_event_code {
 #define BRCM_OUI			"\x00\x10\x18"
 #define DOT11_OUI_LEN			3
 #define BCMILCP_BCM_SUBTYPE_EVENT	1
+
 
 /**
  * struct brcmf_event_msg - firmware event message.

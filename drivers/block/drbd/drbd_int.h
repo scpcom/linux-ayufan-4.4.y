@@ -76,6 +76,7 @@ extern int fault_devs;
 
 extern char usermode_helper[];
 
+
 /* I don't remember why XCPU ...
  * This is used to wake the asender,
  * and to interrupt sending the sending task
@@ -371,6 +372,7 @@ struct drbd_request {
 	 *  local_completion_jif
 	 *      how long did it take the lower level device to complete this request
 	 */
+
 
 	/* once it hits 0, we may complete the master_bio */
 	atomic_t completion_ref;
@@ -1271,6 +1273,7 @@ struct bm_extent {
 
 #define BM_BLOCKS_PER_BM_EXT_MASK  (BM_BITS_PER_EXT - 1)
 
+
 /* in one sector of the bitmap, we have this many activity_log extents. */
 #define AL_EXT_PER_BM_SECT  (1 << (BM_EXT_SHIFT - AL_EXTENT_SHIFT))
 
@@ -1449,6 +1452,7 @@ extern blk_qc_t drbd_make_request(struct request_queue *q, struct bio *bio);
 extern int drbd_read_remote(struct drbd_device *device, struct drbd_request *req);
 extern int is_valid_ar_handle(struct drbd_request *, sector_t);
 
+
 /* drbd_nl.c */
 extern void drbd_suspend_io(struct drbd_device *device);
 extern void drbd_resume_io(struct drbd_device *device);
@@ -1505,6 +1509,7 @@ static inline void ov_out_of_sync_print(struct drbd_device *device)
 	}
 	device->ov_last_oos_size = 0;
 }
+
 
 extern void drbd_csum_bio(struct crypto_hash *, struct bio *, void *);
 extern void drbd_csum_ee(struct crypto_hash *, struct drbd_peer_request *, void *);
@@ -1678,6 +1683,7 @@ static inline struct page *page_chain_next(struct page *page)
 #define page_chain_for_each_safe(page, n) \
 	for (; page && ({ n = page_chain_next(page); 1; }); page = n)
 
+
 static inline int drbd_peer_req_has_active_page(struct drbd_peer_request *peer_req)
 {
 	struct page *page = peer_req->pages;
@@ -1796,6 +1802,7 @@ static inline void drbd_chk_io_error_(struct drbd_device *device,
 		spin_unlock_irqrestore(&device->resource->req_lock, flags);
 	}
 }
+
 
 /**
  * drbd_md_first_sector() - Returns the first sector number of the meta data area

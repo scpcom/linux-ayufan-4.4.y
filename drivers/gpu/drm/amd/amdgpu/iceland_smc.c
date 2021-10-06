@@ -546,6 +546,7 @@ static int iceland_smu_request_load_fw(struct amdgpu_device *adev)
 			UCODE_ID_CP_MEC_MASK |
 			UCODE_ID_CP_MEC_JT1_MASK;
 
+
 	if (iceland_send_msg_to_smc_with_parameter_without_waiting(adev, PPSMC_MSG_LoadUcodes, fw_to_load)) {
 		DRM_ERROR("Fail to request SMU load ucode\n");
 		return -EINVAL;

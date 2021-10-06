@@ -210,6 +210,7 @@ static int elan_i2c_set_mode(struct i2c_client *client, u8 mode)
 	return elan_i2c_write_cmd(client, ETP_I2C_SET_CMD, mode);
 }
 
+
 static int elan_i2c_calibrate(struct i2c_client *client)
 {
 	return elan_i2c_write_cmd(client, ETP_I2C_CALIBRATE_CMD, 1);

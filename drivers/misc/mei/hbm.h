@@ -59,3 +59,4 @@ int mei_hbm_cl_notify_req(struct mei_device *dev,
 			  struct mei_cl *cl, u8 request);
 
 #endif /* _MEI_HBM_H_ */
+

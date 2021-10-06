@@ -862,6 +862,7 @@ struct device_node *of_find_matching_node_by_address(struct device_node *from,
 	return NULL;
 }
 
+
 /**
  * of_iomap - Maps the memory mapped IO for a given device_node
  * @device:	the device whose io range will be mapped

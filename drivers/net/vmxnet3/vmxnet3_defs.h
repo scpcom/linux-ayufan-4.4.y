@@ -164,6 +164,7 @@ struct Vmxnet3_TxDesc {
 
 #define VMXNET3_HDR_COPY_SIZE   128
 
+
 struct Vmxnet3_TxDataDesc {
 	u8		data[VMXNET3_HDR_COPY_SIZE];
 };
@@ -248,6 +249,7 @@ struct Vmxnet3_RxCompDesc {
 	u32		tci:16;       /* Tag stripped */
 #endif  /* __BIG_ENDIAN_BITFIELD */
 
+
 #ifdef __BIG_ENDIAN_BITFIELD
 	u32		gen:1;        /* generation bit */
 	u32		type:7;       /* completion type */
@@ -308,6 +310,7 @@ struct Vmxnet3_RxCompDescExt {
 #endif  /* __BIG_ENDIAN_BITFIELD */
 };
 
+
 /* fields in RxCompDesc we access via Vmxnet3_GenericDesc.dword[3] */
 #define VMXNET3_RCD_TUC_SHIFT	16
 #define VMXNET3_RCD_IPC_SHIFT	19
@@ -330,6 +333,7 @@ enum {
 	VMXNET3_RCD_RSS_TYPE_IPV6     = 3,
 	VMXNET3_RCD_RSS_TYPE_TCPIPV6  = 4,
 };
+
 
 /* a union for accessing all cmd/completion descriptors */
 union Vmxnet3_GenericDesc {
@@ -402,6 +406,7 @@ enum {
 
 #define VMXNET3_GOS_TYPE_LINUX	1
 
+
 struct Vmxnet3_GOSInfo {
 #ifdef __BIG_ENDIAN_BITFIELD
 	u32		gosMisc:10;    /* other info about gos */
@@ -423,6 +428,7 @@ struct Vmxnet3_DriverInfo {
 	__le32				uptVerSpt;
 };
 
+
 #define VMXNET3_REV1_MAGIC  3133079265u
 
 /*
@@ -432,6 +438,7 @@ struct Vmxnet3_DriverInfo {
  * Vmxnet3_MiscConf.numTxQueues/numRxQueues, respectively.
  */
 #define VMXNET3_QUEUE_DESC_ALIGN  128
+
 
 struct Vmxnet3_MiscConf {
 	struct Vmxnet3_DriverInfo driverInfo;
@@ -447,6 +454,7 @@ struct Vmxnet3_MiscConf {
 	__le32		reserved[4];
 };
 
+
 struct Vmxnet3_TxQueueConf {
 	__le64		txRingBasePA;
 	__le64		dataRingBasePA;
@@ -461,6 +469,7 @@ struct Vmxnet3_TxQueueConf {
 	u8		_pad[7];
 };
 
+
 struct Vmxnet3_RxQueueConf {
 	__le64		rxRingBasePA[2];
 	__le64		compRingBasePA;
@@ -472,6 +481,7 @@ struct Vmxnet3_RxQueueConf {
 	u8		intrIdx;
 	u8		_pad[7];
 };
+
 
 enum vmxnet3_intr_mask_mode {
 	VMXNET3_IMM_AUTO   = 0,
@@ -494,6 +504,7 @@ enum vmxnet3_intr_type {
 /* value of intrCtrl */
 #define VMXNET3_IC_DISABLE_ALL  0x1   /* bit 0 */
 
+
 struct Vmxnet3_IntrConf {
 	bool		autoMask;
 	u8		numIntrs;      /* # of interrupts */
@@ -507,17 +518,20 @@ struct Vmxnet3_IntrConf {
 /* one bit per VLAN ID, the size is in the units of u32	*/
 #define VMXNET3_VFT_SIZE  (4096 / (sizeof(u32) * 8))
 
+
 struct Vmxnet3_QueueStatus {
 	bool		stopped;
 	u8		_pad[3];
 	__le32		error;
 };
 
+
 struct Vmxnet3_TxQueueCtrl {
 	__le32		txNumDeferred;
 	__le32		txThreshold;
 	__le64		reserved;
 };
+
 
 struct Vmxnet3_RxQueueCtrl {
 	bool		updateRxProd;
@@ -541,6 +555,7 @@ struct Vmxnet3_RxFilterConf {
 	__le32		vfTable[VMXNET3_VFT_SIZE]; /* vlan filter */
 };
 
+
 #define VMXNET3_PM_MAX_FILTERS        6
 #define VMXNET3_PM_MAX_PATTERN_SIZE   128
 #define VMXNET3_PM_MAX_MASK_SIZE      (VMXNET3_PM_MAX_PATTERN_SIZE / 8)
@@ -548,6 +563,7 @@ struct Vmxnet3_RxFilterConf {
 #define VMXNET3_PM_WAKEUP_MAGIC       cpu_to_le16(0x01)  /* wake up on magic pkts */
 #define VMXNET3_PM_WAKEUP_FILTER      cpu_to_le16(0x02)  /* wake up on pkts matching
 							  * filters */
+
 
 struct Vmxnet3_PM_PktFilter {
 	u8		maskSize;
@@ -557,6 +573,7 @@ struct Vmxnet3_PM_PktFilter {
 	u8		pad[6];
 };
 
+
 struct Vmxnet3_PMConf {
 	__le16		wakeUpEvents;  /* VMXNET3_PM_WAKEUP_xxx */
 	u8		numFilters;
@@ -564,11 +581,13 @@ struct Vmxnet3_PMConf {
 	struct Vmxnet3_PM_PktFilter filters[VMXNET3_PM_MAX_FILTERS];
 };
 
+
 struct Vmxnet3_VariableLenConfDesc {
 	__le32		confVer;
 	__le32		confLen;
 	__le64		confPA;
 };
+
 
 struct Vmxnet3_TxQueueDesc {
 	struct Vmxnet3_TxQueueCtrl		ctrl;
@@ -580,6 +599,7 @@ struct Vmxnet3_TxQueueDesc {
 	u8					_pad[88]; /* 128 aligned */
 };
 
+
 struct Vmxnet3_RxQueueDesc {
 	struct Vmxnet3_RxQueueCtrl		ctrl;
 	struct Vmxnet3_RxQueueConf		conf;
@@ -588,6 +608,7 @@ struct Vmxnet3_RxQueueDesc {
 	struct UPT1_RxStats			stats;
 	u8				      __pad[88]; /* 128 aligned */
 };
+
 
 struct Vmxnet3_DSDevRead {
 	/* read-only region for device, read by dev in response to a SET cmd */
@@ -608,6 +629,7 @@ struct Vmxnet3_DriverShared {
 	__le32				ecr;
 	__le32				reserved[5];
 };
+
 
 #define VMXNET3_ECR_RQERR       (1 << 0)
 #define VMXNET3_ECR_TQERR       (1 << 1)

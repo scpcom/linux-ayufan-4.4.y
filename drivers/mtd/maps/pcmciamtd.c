@@ -39,6 +39,7 @@ struct pcmciamtd_dev {
 	char		mtd_name[sizeof(struct cistpl_vers_1_t)];
 };
 
+
 /* Module parameters */
 
 /* 2 = do 16-bit transfers, 1 = do 8-bit transfers */
@@ -75,6 +76,7 @@ MODULE_PARM_DESC(vpp, "Vpp value in 1/10ths eg 33=3.3V 120=12V (Dangerous)");
 module_param(mem_type, int, 0);
 MODULE_PARM_DESC(mem_type, "Set Memory type (0=Flash, 1=RAM, 2=ROM, default=0)");
 
+
 /* read/write{8,16} copy_{from,to} routines with window remapping
  * to access whole card
  */
@@ -102,6 +104,7 @@ static caddr_t remap_window(struct map_info *map, unsigned long to)
 	return dev->win_base + (to & (dev->win_size-1));
 }
 
+
 static map_word pcmcia_read8_remap(struct map_info *map, unsigned long ofs)
 {
 	caddr_t addr;
@@ -116,6 +119,7 @@ static map_word pcmcia_read8_remap(struct map_info *map, unsigned long ofs)
 	return d;
 }
 
+
 static map_word pcmcia_read16_remap(struct map_info *map, unsigned long ofs)
 {
 	caddr_t addr;
@@ -129,6 +133,7 @@ static map_word pcmcia_read16_remap(struct map_info *map, unsigned long ofs)
 	pr_debug("ofs = 0x%08lx (%p) data = 0x%04lx\n", ofs, addr, d.x[0]);
 	return d;
 }
+
 
 static void pcmcia_copy_from_remap(struct map_info *map, void *to, unsigned long from, ssize_t len)
 {
@@ -155,6 +160,7 @@ static void pcmcia_copy_from_remap(struct map_info *map, void *to, unsigned long
 	}
 }
 
+
 static void pcmcia_write8_remap(struct map_info *map, map_word d, unsigned long adr)
 {
 	caddr_t addr = remap_window(map, adr);
@@ -166,6 +172,7 @@ static void pcmcia_write8_remap(struct map_info *map, map_word d, unsigned long 
 	writeb(d.x[0], addr);
 }
 
+
 static void pcmcia_write16_remap(struct map_info *map, map_word d, unsigned long adr)
 {
 	caddr_t addr = remap_window(map, adr);
@@ -175,6 +182,7 @@ static void pcmcia_write16_remap(struct map_info *map, map_word d, unsigned long
 	pr_debug("adr = 0x%08lx (%p)  data = 0x%04lx\n", adr, addr, d.x[0]);
 	writew(d.x[0], addr);
 }
+
 
 static void pcmcia_copy_to_remap(struct map_info *map, unsigned long to, const void *from, ssize_t len)
 {
@@ -201,6 +209,7 @@ static void pcmcia_copy_to_remap(struct map_info *map, unsigned long to, const v
 	}
 }
 
+
 /* read/write{8,16} copy_{from,to} routines with direct access */
 
 #define DEV_REMOVED(x)  (!(pcmcia_dev_present(((struct pcmciamtd_dev *)map->map_priv_1)->p_dev)))
@@ -219,6 +228,7 @@ static map_word pcmcia_read8(struct map_info *map, unsigned long ofs)
 	return d;
 }
 
+
 static map_word pcmcia_read16(struct map_info *map, unsigned long ofs)
 {
 	caddr_t win_base = (caddr_t)map->map_priv_2;
@@ -233,6 +243,7 @@ static map_word pcmcia_read16(struct map_info *map, unsigned long ofs)
 	return d;
 }
 
+
 static void pcmcia_copy_from(struct map_info *map, void *to, unsigned long from, ssize_t len)
 {
 	caddr_t win_base = (caddr_t)map->map_priv_2;
@@ -243,6 +254,7 @@ static void pcmcia_copy_from(struct map_info *map, void *to, unsigned long from,
 	pr_debug("to = %p from = %lu len = %zd\n", to, from, len);
 	memcpy_fromio(to, win_base + from, len);
 }
+
 
 static void pcmcia_write8(struct map_info *map, map_word d, unsigned long adr)
 {
@@ -256,6 +268,7 @@ static void pcmcia_write8(struct map_info *map, map_word d, unsigned long adr)
 	writeb(d.x[0], win_base + adr);
 }
 
+
 static void pcmcia_write16(struct map_info *map, map_word d, unsigned long adr)
 {
 	caddr_t win_base = (caddr_t)map->map_priv_2;
@@ -268,6 +281,7 @@ static void pcmcia_write16(struct map_info *map, map_word d, unsigned long adr)
 	writew(d.x[0], win_base + adr);
 }
 
+
 static void pcmcia_copy_to(struct map_info *map, unsigned long to, const void *from, ssize_t len)
 {
 	caddr_t win_base = (caddr_t)map->map_priv_2;
@@ -278,6 +292,7 @@ static void pcmcia_copy_to(struct map_info *map, unsigned long to, const void *f
 	pr_debug("to = %lu from = %p len = %zd\n", to, from, len);
 	memcpy_toio(win_base + to, from, len);
 }
+
 
 static DEFINE_SPINLOCK(pcmcia_vpp_lock);
 static int pcmcia_vpp_refcnt;
@@ -299,6 +314,7 @@ static void pcmciamtd_set_vpp(struct map_info *map, int on)
 	spin_unlock_irqrestore(&pcmcia_vpp_lock, flags);
 }
 
+
 static void pcmciamtd_release(struct pcmcia_device *link)
 {
 	struct pcmciamtd_dev *dev = link->priv;
@@ -313,6 +329,7 @@ static void pcmciamtd_release(struct pcmcia_device *link)
 	}
 	pcmcia_disable_device(link);
 }
+
 
 static int pcmciamtd_cistpl_format(struct pcmcia_device *p_dev,
 				tuple_t *tuple,
@@ -394,6 +411,7 @@ static int pcmciamtd_cistpl_geo(struct pcmcia_device *p_dev,
 	return 0;
 }
 
+
 static void card_settings(struct pcmciamtd_dev *dev, struct pcmcia_device *p_dev, int *new_name)
 {
 	int i;
@@ -440,6 +458,7 @@ static void card_settings(struct pcmciamtd_dev *dev, struct pcmcia_device *p_dev
 	      dev->pcmcia_map.size,
 	      dev->pcmcia_map.bankwidth << 3, dev->mtd_name);
 }
+
 
 static int pcmciamtd_config(struct pcmcia_device *link)
 {
@@ -613,6 +632,7 @@ static int pcmciamtd_config(struct pcmcia_device *link)
 	return 0;
 }
 
+
 static int pcmciamtd_suspend(struct pcmcia_device *dev)
 {
 	pr_debug("EVENT_PM_RESUME\n");
@@ -631,6 +651,7 @@ static int pcmciamtd_resume(struct pcmcia_device *dev)
 	return 0;
 }
 
+
 static void pcmciamtd_detach(struct pcmcia_device *link)
 {
 	struct pcmciamtd_dev *dev = link->priv;
@@ -646,6 +667,7 @@ static void pcmciamtd_detach(struct pcmcia_device *link)
 
 	pcmciamtd_release(link);
 }
+
 
 static int pcmciamtd_probe(struct pcmcia_device *link)
 {
@@ -703,6 +725,7 @@ static struct pcmcia_driver pcmciamtd_driver = {
 	.resume		= pcmciamtd_resume,
 };
 
+
 static int __init init_pcmciamtd(void)
 {
 	if(bankwidth && bankwidth != 1 && bankwidth != 2) {
@@ -719,6 +742,7 @@ static int __init init_pcmciamtd(void)
 	}
 	return pcmcia_register_driver(&pcmciamtd_driver);
 }
+
 
 static void __exit exit_pcmciamtd(void)
 {

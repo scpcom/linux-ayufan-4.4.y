@@ -444,6 +444,7 @@ TRAP_return:		/* Make global symbol for debugging */
 	rtbd	r14, 0;	/* Instructions to return from an IRQ */
 	nop;
 
+
 /* This the initial entry point for a new child thread, with an appropriate
    stack in place that makes it look the the child is in the middle of an
    syscall.  This function is actually `returned to' from switch_thread
@@ -865,6 +866,7 @@ DBTRAP_return_user: /* MS: Make global symbol for debugging */
 DBTRAP_return_kernel: /* MS: Make global symbol for debugging */
 	rtbd	r16, 0; /* MS: Instructions to return from a debug trap */
 	nop;
+
 
 ENTRY(_switch_to)
 	/* prepare return value */

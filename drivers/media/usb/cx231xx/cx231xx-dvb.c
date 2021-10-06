@@ -468,6 +468,7 @@ static int register_dvb(struct cx231xx_dvb *dvb,
 
 	mutex_init(&dvb->lock);
 
+
 	/* register adapter */
 	result = dvb_register_adapter(&dvb->adapter, dev->name, module, device,
 				      adapter_nr);
@@ -924,6 +925,7 @@ static int dvb_init(struct cx231xx *dev)
 
 	if (result < 0)
 		goto out_free;
+
 
 	dev_info(dev->dev, "Successfully loaded cx231xx-dvb\n");
 

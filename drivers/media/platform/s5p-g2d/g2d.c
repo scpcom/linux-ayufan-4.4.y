@@ -87,6 +87,7 @@ static struct g2d_fmt *find_fmt(struct v4l2_format *f)
 	return NULL;
 }
 
+
 static struct g2d_frame *get_frame(struct g2d_ctx *ctx,
 							enum v4l2_buf_type type)
 {
@@ -288,6 +289,7 @@ static int g2d_release(struct file *file)
 	v4l2_info(&dev->v4l2_dev, "instance closed\n");
 	return 0;
 }
+
 
 static int vidioc_querycap(struct file *file, void *priv,
 				struct v4l2_capability *cap)

@@ -368,6 +368,8 @@ static const struct consw sti_con = {
 	.con_getxy		= sticon_getxy,
 };
 
+
+
 static int __init sticonsole_init(void)
 {
     int err;

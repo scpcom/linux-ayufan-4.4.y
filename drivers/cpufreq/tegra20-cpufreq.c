@@ -208,6 +208,7 @@ static void __exit tegra_cpufreq_exit(void)
 	clk_put(cpu_clk);
 }
 
+
 MODULE_AUTHOR("Colin Cross <ccross@android.com>");
 MODULE_DESCRIPTION("cpufreq driver for Nvidia Tegra2");
 MODULE_LICENSE("GPL");

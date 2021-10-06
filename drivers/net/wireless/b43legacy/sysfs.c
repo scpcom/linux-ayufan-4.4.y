@@ -31,7 +31,9 @@
 
 #include <linux/capability.h>
 
+
 #define GENERIC_FILESIZE	64
+
 
 static int get_integer(const char *buf, size_t count)
 {

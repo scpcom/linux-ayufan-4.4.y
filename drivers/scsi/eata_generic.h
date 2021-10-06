@@ -8,8 +8,11 @@
 * last change: 96/08/14                                 *
 ********************************************************/
 
+
 #ifndef _EATA_GENERIC_H
 #define _EATA_GENERIC_H
+
+
 
 /*********************************************
  * Misc. definitions			     *
@@ -46,6 +49,7 @@
 #define NEC_ID2         0xa3
 #define NEC_ID3         0x82
 
+ 
 #define EATA_CP_SIZE	 44
 
 #define MAX_PCI_DEVICES  32	       /* Maximum # Of Devices Per Bus	 */
@@ -91,6 +95,7 @@
 #define PCI_REG_PumpModeData	 0x48	 
 #define PCI_REG_ConfigParam1	 0x50	 
 #define PCI_REG_ConfigParam2	 0x54	 
+
 
 #define EATA_CMD_PIO_SETUPTEST	 0xc6
 #define EATA_CMD_PIO_READ_CONFIG 0xf0
@@ -308,6 +313,7 @@ struct eata_ccb {	      /* Send Command Packet structure	    */
     struct scsi_cmnd *cmd;    /* address of cmd				*/
     struct eata_sg_list *sg_list;
 };
+
 
 struct eata_sp {
     __u8 hba_stat:7,	      /* HBA status				*/

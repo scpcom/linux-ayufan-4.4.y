@@ -16,6 +16,7 @@
 #define ACLPROC3_GETACL		1
 #define ACLPROC3_SETACL		2
 
+
 /* Flags for the getacl/setacl mode */
 #define NFS_ACL			0x0001
 #define NFS_ACLCNT		0x0002

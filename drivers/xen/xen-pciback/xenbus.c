@@ -146,6 +146,7 @@ static int xen_pcibk_attach(struct xen_pcibk_device *pdev)
 	int gnt_ref, remote_evtchn;
 	char *magic = NULL;
 
+
 	mutex_lock(&pdev->dev_lock);
 	/* Make sure we only do this setup once */
 	if (xenbus_read_driver_state(pdev->xdev->nodename) !=
@@ -367,6 +368,7 @@ static int xen_pcibk_reconfigure(struct xen_pcibk_device *pdev)
 	int i, len;
 	char state_str[64];
 	char dev_str[64];
+
 
 	dev_dbg(&pdev->xdev->dev, "Reconfiguring device ...\n");
 

@@ -286,6 +286,7 @@ typedef volatile struct _MPI2_SYSTEM_INTERFACE_REGS {
 #define MPI2_RPHI_MSIX_INDEX_SHIFT              (24)
 #define MPI25_SUP_REPLY_POST_HOST_INDEX_OFFSET  (0x0000030C) /*MPI v2.5 only*/
 
+
 /*
  *Defines for the HCBSize and address
  */

@@ -719,6 +719,7 @@ static u32 mixart_digital_level[256] = {
 #define MIXART_DIGITAL_LEVEL_MAX   255    /*  18.0 dB */
 #define MIXART_DIGITAL_ZERO_LEVEL  219    /*  0.0 dB */
 
+
 int mixart_update_playback_stream_level(struct snd_mixart* chip, int is_aes, int idx)
 {
 	int err, i;
@@ -816,6 +817,7 @@ int mixart_update_capture_stream_level(struct snd_mixart* chip, int is_aes)
 	return 0;
 }
 
+
 /* shared */
 static int mixart_digital_vol_info(struct snd_kcontrol *kcontrol, struct snd_ctl_elem_info *uinfo)
 {
@@ -907,6 +909,7 @@ static struct snd_kcontrol_new snd_mixart_pcm_vol =
 	.put =          mixart_pcm_vol_put,
 	.tlv = { .p = db_scale_digital },
 };
+
 
 static int mixart_pcm_sw_get(struct snd_kcontrol *kcontrol, struct snd_ctl_elem_value *ucontrol)
 {
@@ -1096,6 +1099,7 @@ static struct snd_kcontrol_new mixart_control_monitor_sw = {
 	.put =          mixart_monitor_sw_put
 };
 
+
 static void mixart_reset_audio_levels(struct snd_mixart *chip)
 {
 	/* analog volumes can be set even if there is no pipe */
@@ -1106,6 +1110,7 @@ static void mixart_reset_audio_levels(struct snd_mixart *chip)
 	}
 	return;
 }
+
 
 int snd_mixart_create_mixer(struct mixart_mgr *mgr)
 {

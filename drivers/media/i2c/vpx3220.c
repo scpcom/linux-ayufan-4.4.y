@@ -37,6 +37,7 @@ static int debug;
 module_param(debug, int, 0);
 MODULE_PARM_DESC(debug, "Debug level (0-1)");
 
+
 #define VPX_TIMEOUT_COUNT  10
 
 /* ----------------------------------------------------------------------- */
@@ -272,6 +273,7 @@ static const unsigned short init_fp[] = {
 	0x26, 0,
 	0x4b, 0x298,		/* PLL gain */
 };
+
 
 static int vpx3220_init(struct v4l2_subdev *sd, u32 val)
 {

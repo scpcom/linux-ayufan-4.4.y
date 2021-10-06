@@ -51,6 +51,7 @@
 
 #define LEON_TCNT0_MASK	0x7fffff
 
+
 #define ASI_LEON3_SYSCTRL		0x02
 #define ASI_LEON3_SYSCTRL_ICFG		0x08
 #define ASI_LEON3_SYSCTRL_DCFG		0x0c

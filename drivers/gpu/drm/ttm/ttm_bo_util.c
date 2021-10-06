@@ -115,6 +115,7 @@ static int ttm_mem_io_evict(struct ttm_mem_type_manager *man)
 	return 0;
 }
 
+
 int ttm_mem_io_reserve(struct ttm_bo_device *bdev,
 		       struct ttm_mem_reg *mem)
 {

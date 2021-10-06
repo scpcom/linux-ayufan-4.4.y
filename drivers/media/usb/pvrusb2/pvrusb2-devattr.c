@@ -43,6 +43,7 @@ pvr2_device_desc structures.
 #include "tuner-simple.h"
 #endif
 
+
 /*------------------------------------------------------------------------*/
 /* Hauppauge PVR-USB2 Model 29xxx */
 
@@ -74,6 +75,8 @@ static const struct pvr2_device_desc pvr2_device_29xxx = {
 		.led_scheme = PVR2_LED_SCHEME_HAUPPAUGE,
 		.ir_scheme = PVR2_IR_SCHEME_29XXX,
 };
+
+
 
 /*------------------------------------------------------------------------*/
 /* Hauppauge PVR-USB2 Model 24xxx */
@@ -109,6 +112,8 @@ static const struct pvr2_device_desc pvr2_device_24xxx = {
 		.ir_scheme = PVR2_IR_SCHEME_24XXX,
 };
 
+
+
 /*------------------------------------------------------------------------*/
 /* GOTVIEW USB2.0 DVD2 */
 
@@ -132,6 +137,8 @@ static const struct pvr2_device_desc pvr2_device_gotview_2 = {
 		.signal_routing_scheme = PVR2_ROUTING_SCHEME_GOTVIEW,
 };
 
+
+
 /*------------------------------------------------------------------------*/
 /* GOTVIEW USB2.0 DVD Deluxe */
 
@@ -149,6 +156,8 @@ static const struct pvr2_device_desc pvr2_device_gotview_2d = {
 		.flag_has_svideo = !0,
 		.signal_routing_scheme = PVR2_ROUTING_SCHEME_GOTVIEW,
 };
+
+
 
 /*------------------------------------------------------------------------*/
 /* Terratec Grabster AV400 */
@@ -169,6 +178,8 @@ static const struct pvr2_device_desc pvr2_device_av400 = {
 		.flag_has_svideo = !0,
 		.signal_routing_scheme = PVR2_ROUTING_SCHEME_AV400,
 };
+
+
 
 /*------------------------------------------------------------------------*/
 /* OnAir Creator */
@@ -229,6 +240,8 @@ static const struct pvr2_device_desc pvr2_device_onair_creator = {
 #endif
 };
 
+
+
 /*------------------------------------------------------------------------*/
 /* OnAir USB 2.0 */
 
@@ -286,6 +299,8 @@ static const struct pvr2_device_desc pvr2_device_onair_usb2 = {
 		.dvb_props = &pvr2_onair_usb2_fe_props,
 #endif
 };
+
+
 
 /*------------------------------------------------------------------------*/
 /* Hauppauge PVR-USB2 Model 73xxx */
@@ -382,6 +397,8 @@ static const struct pvr2_device_desc pvr2_device_73xxx = {
 		.dvb_props = &pvr2_73xxx_dvb_props,
 #endif
 };
+
+
 
 /*------------------------------------------------------------------------*/
 /* Hauppauge PVR-USB2 Model 75xxx */
@@ -511,6 +528,8 @@ static const struct pvr2_device_desc pvr2_device_751xx = {
 		.dvb_props = &pvr2_751xx_dvb_props,
 #endif
 };
+
+
 
 /*------------------------------------------------------------------------*/
 

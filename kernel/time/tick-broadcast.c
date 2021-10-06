@@ -134,6 +134,7 @@ int tick_broadcast_update_freq(struct clock_event_device *dev, u32 freq)
 	return ret;
 }
 
+
 static void err_broadcast(const struct cpumask *mask)
 {
 	pr_crit_once("Failed to broadcast timer tick. Some CPUs may be unresponsive.\n");

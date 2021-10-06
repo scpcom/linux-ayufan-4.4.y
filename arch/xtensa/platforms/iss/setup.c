@@ -32,6 +32,7 @@
 #include <asm/platform.h>
 #include <asm/bootparam.h>
 
+
 void __init platform_init(bp_tag_t* bootparam)
 {
 
@@ -91,6 +92,8 @@ void platform_heartbeat(void)
 	}
 #endif
 }
+
+
 
 static int
 iss_panic_event(struct notifier_block *this, unsigned long event, void *ptr)

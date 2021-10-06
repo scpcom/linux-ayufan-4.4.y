@@ -428,6 +428,7 @@ struct mlx5_cmd_layout {
 	u8		status_own;
 };
 
+
 struct health_buffer {
 	__be32		assert_var[5];
 	__be32		rsvd0[3];

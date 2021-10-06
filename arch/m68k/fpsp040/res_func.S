@@ -736,6 +736,8 @@ nan_or_inf:
 	moveql	#-1,%d0
 	rts
 
+
+
 div_srcd:
 	bsrl	ckinf_nd
 	bne	fix_stk
@@ -1418,6 +1420,7 @@ opclass3:
 	beq	pack_out	|else it is norm or denorm
 	bra	mv_out
 
+
 |
 |	MOVE OUT
 |
@@ -1506,6 +1509,7 @@ li:
 	fmovel %fpsr,%d1
 	orl	%d1,USER_FPSR(%a6)	|capture inex2/ainex if set
 	bra	int_wrt
+
 
 lo_plrg:
 	movel	#0x7fffffff,L_SCR1(%a6)	|answer is largest positive int

@@ -17,6 +17,7 @@
 # define PADDING(x) unsigned int x;
 #endif
 
+
 struct msqid64_ds {
 	struct ipc64_perm msg_perm;
 	PADDING(__pad1)

@@ -279,6 +279,7 @@ static const struct v4l2_ctrl_config vivid_ctrl_clear_fb = {
 	.type = V4L2_CTRL_TYPE_BUTTON,
 };
 
+
 /* Video User Controls */
 
 static int vivid_user_vid_g_volatile_ctrl(struct v4l2_ctrl *ctrl)
@@ -330,6 +331,7 @@ static const struct v4l2_ctrl_ops vivid_user_vid_ctrl_ops = {
 	.g_volatile_ctrl = vivid_user_vid_g_volatile_ctrl,
 	.s_ctrl = vivid_user_vid_s_ctrl,
 };
+
 
 /* Video Capture Controls */
 
@@ -795,6 +797,7 @@ static const struct v4l2_ctrl_config vivid_ctrl_limited_rgb_range = {
 	.step = 1,
 };
 
+
 /* Video Loop Control */
 
 static int vivid_loop_cap_s_ctrl(struct v4l2_ctrl *ctrl)
@@ -825,6 +828,7 @@ static const struct v4l2_ctrl_config vivid_ctrl_loop_video = {
 	.step = 1,
 };
 
+
 /* VBI Capture Control */
 
 static int vivid_vbi_cap_s_ctrl(struct v4l2_ctrl *ctrl)
@@ -851,6 +855,7 @@ static const struct v4l2_ctrl_config vivid_ctrl_vbi_cap_interlaced = {
 	.max = 1,
 	.step = 1,
 };
+
 
 /* Video Output Controls */
 
@@ -928,6 +933,7 @@ static const struct v4l2_ctrl_config vivid_ctrl_has_scaler_out = {
 	.def = 1,
 	.step = 1,
 };
+
 
 /* Streaming Controls */
 
@@ -1047,6 +1053,7 @@ static const struct v4l2_ctrl_config vivid_ctrl_time_wrap = {
 	.step = 1,
 };
 
+
 /* SDTV Capture Controls */
 
 static int vivid_sdtv_cap_s_ctrl(struct v4l2_ctrl *ctrl)
@@ -1099,6 +1106,8 @@ static const struct v4l2_ctrl_config vivid_ctrl_standard = {
 	.max = 14,
 	.qmenu = vivid_ctrl_standard_strings,
 };
+
+
 
 /* Radio Receiver Controls */
 
@@ -1196,6 +1205,7 @@ static const struct v4l2_ctrl_config vivid_ctrl_radio_hw_seek_prog_lim = {
 	.step = 1,
 };
 
+
 /* Radio Transmitter Controls */
 
 static int vivid_radio_tx_s_ctrl(struct v4l2_ctrl *ctrl)
@@ -1251,6 +1261,7 @@ static const struct v4l2_ctrl_config vivid_ctrl_radio_tx_rds_blockio = {
 	.def = 1,
 };
 
+
 /* SDR Capture Controls */
 
 static int vivid_sdr_cap_s_ctrl(struct v4l2_ctrl *ctrl)
@@ -1279,6 +1290,7 @@ static const struct v4l2_ctrl_config vivid_ctrl_sdr_cap_fm_deviation = {
 	.def =  75000,
 	.step =     1,
 };
+
 
 static const struct v4l2_ctrl_config vivid_ctrl_class = {
 	.ops = &vivid_user_gen_ctrl_ops,

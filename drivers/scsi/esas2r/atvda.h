@@ -41,6 +41,7 @@
  */
 /*=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
 
+
 #ifndef ATVDA_H
 #define ATVDA_H
 
@@ -71,6 +72,7 @@ struct __packed atto_vda_sge {
 	u64 address;
 };
 
+
 /* VDA request function codes */
 
 #define VDA_FUNC_SCSI     0x00
@@ -82,6 +84,7 @@ struct __packed atto_vda_sge {
 #define VDA_FUNC_CFG      0x06
 #define VDA_FUNC_MGT      0x07
 #define VDA_FUNC_GSV      0x08
+
 
 /* VDA request status values.  for host driver considerations, values for
  * SCSI requests start at zero.  other requests may use these values as well. */
@@ -160,6 +163,7 @@ struct __packed atto_vda_sge {
 #define RS_PENDING          0xFE        /*! pending, not started             */
 #define RS_STARTED          0xFF        /*! started                          */
 
+
 /* flash request subfunctions.  these are used in both the IOCTL and the
  * driver-firmware interface (VDA_FUNC_FLASH). */
 
@@ -172,6 +176,7 @@ struct __packed atto_vda_sge {
 #define VDA_FLASH_FREAD   0x06
 #define VDA_FLASH_FWRITE  0x07
 #define VDA_FLASH_FINFO   0x08
+
 
 /* IOCTL request subfunctions.  these identify the payload type for
  * VDA_FUNC_IOCTL.
@@ -271,6 +276,7 @@ struct __packed atto_vda_devinfo {
 	u8 reserved[2];
 };
 
+
 /*! struct atto_vda_devinfo2 is a replacement for atto_vda_devinfo.  it
  * extends beyond the 0x70 bytes allowed in atto_vda_mgmt_req; therefore,
  * the entire structure is DMaed between the firmware and host buffer and
@@ -338,6 +344,7 @@ struct __packed atto_vda_devinfo2 {
 	u8 num_dev_addr;
 	struct atto_dev_addr2 dev_addr_list[8];
 };
+
 
 struct __packed atto_vda_grp_info {
 	u8 grp_index;
@@ -451,6 +458,7 @@ struct __packed atto_vda_grp_info {
 
 };
 
+
 struct __packed atto_vdapart_info {
 	u8 part_no;
 	#define VDA_MAX_PARTITIONS   128
@@ -467,6 +475,7 @@ struct __packed atto_vdapart_info {
 
 	u8 reserved[7];
 };
+
 
 struct __packed atto_vda_dh_info {
 	u8 req_type;
@@ -495,6 +504,7 @@ struct __packed atto_vda_dh_info {
 	struct atto_vda_sge sge[1];
 };
 
+
 struct __packed atto_vda_dh_smart {
 	u8 attrib_id;
 	u8 current_val;
@@ -517,6 +527,7 @@ struct __packed atto_vda_dh_smart {
 
 	u8 reserved[4];
 };
+
 
 struct __packed atto_vda_metrics_info {
 	u8 data_version;
@@ -545,6 +556,7 @@ struct __packed atto_vda_metrics_info {
 	u8 reserved[12];
 	struct atto_vda_sge sge[1];
 };
+
 
 struct __packed atto_vda_metrics_data {
 	u16 dev_index;
@@ -582,6 +594,7 @@ struct __packed atto_vda_metrics_data {
 	u64 miscompares;
 };
 
+
 struct __packed atto_vda_schedule_info {
 	u8 schedule_type;
 	#define VDASI_SCHTYPE_ONETIME   0x01
@@ -616,6 +629,7 @@ struct __packed atto_vda_schedule_info {
 	u8 reserved[85];
 };
 
+
 struct __packed atto_vda_n_vcache_info {
 	u8 super_cap_status;
 	#define VDANVCI_SUPERCAP_NOT_PRESENT       0x00
@@ -633,6 +647,7 @@ struct __packed atto_vda_n_vcache_info {
 	u8 reserved[109];
 };
 
+
 struct __packed atto_vda_buzzer_info {
 	u8 status;
 	#define VDABUZZI_BUZZER_OFF           0x00
@@ -645,6 +660,7 @@ struct __packed atto_vda_buzzer_info {
 
 	u8 reserved2[104];
 };
+
 
 struct  __packed atto_vda_adapter_info {
 	u8 version;
@@ -666,6 +682,7 @@ struct  __packed atto_vda_adapter_info {
 	u8 reserved3[61];
 };
 
+
 struct __packed atto_vda_temp_info {
 	u8 temp_index;
 	u8 max_op_temp;
@@ -677,6 +694,7 @@ struct __packed atto_vda_temp_info {
 
 	u8 reserved[106];
 };
+
 
 struct __packed atto_vda_fan_info {
 	u8 fan_index;
@@ -690,6 +708,7 @@ struct __packed atto_vda_fan_info {
 	u16 speed;
 	u8 reserved[104];
 };
+
 
 /* VDA management commands */
 
@@ -742,6 +761,7 @@ struct __packed atto_vda_fan_info {
 #define VDAMGT_BUZZER_INFO      0x70
 #define VDAMGT_BUZZER_SET       0x71
 
+
 struct __packed atto_vda_ae_hdr {
 	u8 bylength;
 	u8 byflags;
@@ -767,6 +787,7 @@ struct __packed atto_vda_ae_hdr {
 	#define VDAAE_HDR_TYPE_MUTE     14
 	#define VDAAE_HDR_TYPE_DEV      15
 };
+
 
 struct  __packed atto_vda_ae_raid {
 	struct atto_vda_ae_hdr hdr;
@@ -822,11 +843,13 @@ struct  __packed atto_vda_ae_raid {
 	u8 byreserved2[0x80 - 0x1C];
 };
 
+
 struct __packed atto_vda_ae_lu_tgt_lun {
 	u16 wtarget_id;
 	u8 bylun;
 	u8 byreserved;
 };
+
 
 struct __packed atto_vda_ae_lu_tgt_lun_raid {
 	u16 wtarget_id;
@@ -835,6 +858,7 @@ struct __packed atto_vda_ae_lu_tgt_lun_raid {
 	u32 dwinterleave;
 	u32 dwblock_size;
 };
+
 
 struct __packed atto_vda_ae_lu {
 	struct atto_vda_ae_hdr hdr;
@@ -865,9 +889,11 @@ struct __packed atto_vda_ae_lu {
 	} id;
 };
 
+
 struct __packed atto_vda_ae_disk {
 	struct atto_vda_ae_hdr hdr;
 };
+
 
 #define VDAAE_LOG_STRSZ 64
 
@@ -875,6 +901,7 @@ struct __packed atto_vda_ae_log {
 	struct atto_vda_ae_hdr hdr;
 	char aclog_ascii[VDAAE_LOG_STRSZ];
 };
+
 
 #define VDAAE_TLG_STRSZ 56
 
@@ -884,14 +911,17 @@ struct __packed atto_vda_ae_timestamp_log {
 	char aclog_ascii[VDAAE_TLG_STRSZ];
 };
 
+
 struct __packed atto_vda_ae_nvc {
 	struct atto_vda_ae_hdr hdr;
 };
+
 
 struct __packed atto_vda_ae_dev {
 	struct atto_vda_ae_hdr hdr;
 	struct atto_dev_addr devaddr;
 };
+
 
 union atto_vda_ae {
 	struct atto_vda_ae_hdr hdr;
@@ -903,6 +933,7 @@ union atto_vda_ae {
 	struct atto_vda_ae_nvc nvcache;
 	struct atto_vda_ae_dev dev;
 };
+
 
 struct __packed atto_vda_date_and_time {
 	u8 flags;
@@ -934,6 +965,7 @@ struct __packed atto_vda_date_and_time {
 #define SGE_CHAIN_LEN   0x0000FFFF      /*! mask of length in chain entries   */
 #define SGE_CHAIN_SZ    0x00FF0000      /*! mask of size of chained buffer    */
 
+
 struct __packed atto_vda_cfg_init {
 	struct atto_vda_date_and_time date_time;
 	u32 sgl_page_size;
@@ -955,11 +987,13 @@ struct __packed atto_vda_cfg_init {
 	u8 reserved[0x48];
 };
 
+
 /* configuration commands */
 
 #define VDA_CFG_INIT          0x00
 #define VDA_CFG_GET_INIT      0x01
 #define VDA_CFG_GET_INIT2     0x02
+
 
 /*! physical region descriptor (PRD) aka scatter/gather entry */
 
@@ -992,6 +1026,7 @@ struct __packed atto_vda_req_header {
 	u8 sg_list_offset;
 	u32 handle;
 };
+
 
 #define FCP_CDB_SIZE    16
 
@@ -1042,6 +1077,7 @@ struct __packed atto_vda_scsi_req {
 	} u;
 };
 
+
 struct __packed atto_vda_flash_req {
 	u32 length;
 	u8 function; /* VDA_FUNC_FLASH */
@@ -1064,6 +1100,7 @@ struct __packed atto_vda_flash_req {
 	} data;
 };
 
+
 struct __packed atto_vda_diag_req {
 	u32 length;
 	u8 function; /* VDA_FUNC_DIAG */
@@ -1083,6 +1120,7 @@ struct __packed atto_vda_diag_req {
 	struct atto_vda_sge sge[1];
 };
 
+
 struct __packed atto_vda_ae_req {
 	u32 length;
 	u8 function; /* VDA_FUNC_AE */
@@ -1097,6 +1135,7 @@ struct __packed atto_vda_ae_req {
 	};
 };
 
+
 struct __packed atto_vda_cli_req {
 	u32 length;
 	u8 function; /* VDA_FUNC_CLI */
@@ -1107,6 +1146,7 @@ struct __packed atto_vda_cli_req {
 	u32 cmd_rsp_len;
 	struct atto_vda_sge sge[1];
 };
+
 
 struct __packed atto_vda_ioctl_req {
 	u32 length;
@@ -1136,6 +1176,7 @@ struct __packed atto_vda_ioctl_req {
 	};
 };
 
+
 struct __packed atto_vda_cfg_req {
 	u32 length;
 	u8 function; /* VDA_FUNC_CFG */
@@ -1151,6 +1192,7 @@ struct __packed atto_vda_cfg_req {
 		struct atto_physical_region_description prde;
 	} data;
 };
+
 
 struct __packed atto_vda_mgmt_req {
 	u32 length;
@@ -1170,6 +1212,7 @@ struct __packed atto_vda_mgmt_req {
 	};
 	struct atto_vda_sge payld_sge[1];
 };
+
 
 union atto_vda_req {
 	struct atto_vda_scsi_req scsi;

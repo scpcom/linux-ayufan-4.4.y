@@ -44,6 +44,7 @@ static const size_t max_zpage_size = PAGE_SIZE / 4 * 3;
 #define ZRAM_SECTOR_PER_LOGICAL_BLOCK	\
 	(1 << (ZRAM_LOGICAL_BLOCK_SHIFT - SECTOR_SHIFT))
 
+
 /*
  * The lower ZRAM_FLAG_SHIFT bits of table.value is for
  * object size (excluding header), the higher bits is for

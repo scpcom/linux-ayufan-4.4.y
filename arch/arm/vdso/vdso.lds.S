@@ -44,6 +44,7 @@ SECTIONS
 
 	.note		: { *(.note.*) }		:text	:note
 
+
 	.eh_frame_hdr	: { *(.eh_frame_hdr) }		:text	:eh_frame_hdr
 	.eh_frame	: { KEEP (*(.eh_frame)) }	:text
 

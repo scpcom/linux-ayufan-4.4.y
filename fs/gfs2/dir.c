@@ -141,6 +141,8 @@ static int gfs2_dir_write_stuffed(struct gfs2_inode *ip, const char *buf,
 	return size;
 }
 
+
+
 /**
  * gfs2_dir_write_data - Write directory information to the inode
  * @ip: The GFS2 inode
@@ -256,6 +258,7 @@ static int gfs2_dir_read_stuffed(struct gfs2_inode *ip, __be64 *buf,
 
 	return (error) ? error : size;
 }
+
 
 /**
  * gfs2_dir_read_data - Read a data from a directory inode
@@ -803,6 +806,7 @@ static struct gfs2_dirent *gfs2_dirent_search(struct inode *inode,
 
 		return error ? ERR_PTR(error) : NULL;
 	}
+
 
 	error = gfs2_meta_inode_buffer(ip, &bh);
 	if (error)
@@ -1761,6 +1765,7 @@ int gfs2_dir_add(struct inode *inode, const struct qstr *name,
 	return error;
 }
 
+
 /**
  * gfs2_dir_del - Delete a directory entry
  * @dip: The GFS2 inode
@@ -2087,3 +2092,4 @@ int gfs2_diradd_alloc_required(struct inode *inode, const struct qstr *name,
 	}
 	return 0;
 }
+

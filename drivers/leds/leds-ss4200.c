@@ -256,6 +256,7 @@ static int nasgpio_led_set_blink(struct led_classdev *led_cdev,
 	return 0;
 }
 
+
 /*
  * Initialize the ICH7 GPIO registers for NAS usage.  The BIOS should have
  * already taken care of this, but we will do so in a non destructive manner
@@ -421,6 +422,7 @@ static struct led_classdev *get_classdev_for_led_nr(int nr)
 	struct led_classdev *led = &nas_led->led_cdev;
 	return led;
 }
+
 
 static void set_power_light_amber_noblink(void)
 {

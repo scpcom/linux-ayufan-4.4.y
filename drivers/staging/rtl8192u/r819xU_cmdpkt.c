@@ -136,6 +136,8 @@ static void cmpk_count_txstatistic(struct net_device *dev, cmpk_txfb_t *pstx_fb)
 
 }
 
+
+
 /*-----------------------------------------------------------------------------
  * Function:    cmpk_handle_tx_feedback()
  *
@@ -197,7 +199,11 @@ static void cmdpkt_beacontimerinterrupt_819xusb(struct net_device *dev)
 
 		rtl819xusb_beacon_tx(dev, tx_rate); /* HW Beacon */
 
+
 }
+
+
+
 
 /*-----------------------------------------------------------------------------
  * Function:    cmpk_handle_interrupt_status()
@@ -236,6 +242,7 @@ static void cmpk_handle_interrupt_status(struct net_device *dev, u8 *pmsg)
 		return;
 	}
 
+
 	/* Statistics of beacon for ad-hoc mode. */
 	if (priv->ieee80211->iw_mode == IW_MODE_ADHOC) {
 		/* 2 maybe need endian transform? */
@@ -259,9 +266,11 @@ static void cmpk_handle_interrupt_status(struct net_device *dev, u8 *pmsg)
 
 	/* Other informations in interrupt status we need? */
 
+
 	DMESG("<---- cmpk_handle_interrupt_status()\n");
 
 }
+
 
 /*-----------------------------------------------------------------------------
  * Function:    cmpk_handle_query_config_rx()
@@ -286,6 +295,7 @@ static void cmpk_handle_query_config_rx(struct net_device *dev, u8 *pmsg)
 {
 	cmpk_query_cfg_t	rx_query_cfg;
 
+
 	/* 1. Extract TX feedback info from RFD to temp structure buffer. */
 	/* It seems that FW use big endian(MIPS) and DRV use little endian in
 	   windows OS. So we have to read the content byte by byte or transfer
@@ -301,6 +311,7 @@ static void cmpk_handle_query_config_rx(struct net_device *dev, u8 *pmsg)
 					  (pmsg[14] <<  8) | (pmsg[15] <<  0);
 
 }
+
 
 /*-----------------------------------------------------------------------------
  * Function:	cmpk_count_tx_status()
@@ -347,6 +358,7 @@ static void cmpk_count_tx_status(struct net_device *dev,
 	priv->stats.txretrycount	+= pstx_status->txretry;
 	priv->stats.txfeedbackretry	+= pstx_status->txretry;
 
+
 	priv->stats.txmulticast		+= pstx_status->txmcok;
 	priv->stats.txbroadcast		+= pstx_status->txbcok;
 	priv->stats.txunicast		+= pstx_status->txucok;
@@ -361,6 +373,8 @@ static void cmpk_count_tx_status(struct net_device *dev,
 
 	priv->stats.last_packet_rate	= pstx_status->rate;
 }
+
+
 
 /*-----------------------------------------------------------------------------
  * Function:	cmpk_handle_tx_status()
@@ -389,6 +403,7 @@ static void cmpk_handle_tx_status(struct net_device *dev, u8 *pmsg)
 
 }
 
+
 /*-----------------------------------------------------------------------------
  * Function:	cmpk_handle_tx_rate_history()
  *
@@ -412,6 +427,7 @@ static void cmpk_handle_tx_rate_history(struct net_device *dev, u8 *pmsg)
 	u16		length = sizeof(cmpk_tx_rahis_t);
 	u32		*ptemp;
 	struct r8192_priv *priv = ieee80211_priv(dev);
+
 
 #ifdef ENABLE_PS
 	pAdapter->HalFunc.GetHwRegHandler(pAdapter, HW_VAR_RF_STATE,
@@ -455,6 +471,7 @@ static void cmpk_handle_tx_rate_history(struct net_device *dev, u8 *pmsg)
 	}
 
 }
+
 
 /*-----------------------------------------------------------------------------
  * Function:    cmpk_message_handle_rx()

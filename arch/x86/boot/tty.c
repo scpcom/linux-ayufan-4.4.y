@@ -136,3 +136,4 @@ int getchar_timeout(void)
 
 	return 0;		/* Timeout! */
 }
+

@@ -176,6 +176,7 @@ static int coresight_timeout_etm(struct etm_drvdata *drvdata, u32 offset,
 	return -EAGAIN;
 }
 
+
 static void etm_set_prog(struct etm_drvdata *drvdata)
 {
 	u32 etmcr;
@@ -1628,6 +1629,7 @@ static struct attribute *coresight_etm_mgmt_attrs[] = {
 static const struct attribute_group coresight_etm_group = {
 	.attrs = coresight_etm_attrs,
 };
+
 
 static const struct attribute_group coresight_etm_mgmt_group = {
 	.attrs = coresight_etm_mgmt_attrs,

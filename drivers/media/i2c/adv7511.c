@@ -17,6 +17,7 @@
  * SOFTWARE.
  */
 
+
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/slab.h>
@@ -122,6 +123,7 @@ static bool adv7511_check_edid_status(struct v4l2_subdev *sd);
 static void adv7511_setup(struct v4l2_subdev *sd);
 static int adv7511_s_i2s_clock_freq(struct v4l2_subdev *sd, u32 freq);
 static int adv7511_s_clock_freq(struct v4l2_subdev *sd, u32 freq);
+
 
 static const struct v4l2_dv_timings_cap adv7511_timings_cap = {
 	.type = V4L2_DV_BT_656_1120,

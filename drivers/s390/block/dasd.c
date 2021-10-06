@@ -2898,6 +2898,7 @@ void dasd_schedule_block_bh(struct dasd_block *block)
 }
 EXPORT_SYMBOL(dasd_schedule_block_bh);
 
+
 /*
  * SECTION: external block device operations
  * (request queue handling, open, release, etc.)
@@ -3635,6 +3636,7 @@ int dasd_generic_verify_path(struct dasd_device *device, __u8 lpm)
 }
 EXPORT_SYMBOL_GPL(dasd_generic_verify_path);
 
+
 int dasd_generic_pm_freeze(struct ccw_device *cdev)
 {
 	struct dasd_device *device = dasd_device_from_cdev(cdev);
@@ -3795,6 +3797,7 @@ static struct dasd_ccw_req *dasd_generic_build_rdc(struct dasd_device *device,
 	cqr->status = DASD_CQR_FILLED;
 	return cqr;
 }
+
 
 int dasd_generic_read_dev_chars(struct dasd_device *device, int magic,
 				void *rdc_buffer, int rdc_buffer_size)

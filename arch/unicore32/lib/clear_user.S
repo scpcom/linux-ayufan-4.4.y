@@ -54,3 +54,4 @@ ENDPROC(__clear_user)
 9001:		ldm.w	(r0), [sp]+
 		ldm.w	(pc), [sp]+
 		.popsection
+

@@ -69,6 +69,7 @@
 #define CMD_I2C_DA_RD    0x0600
 #define CMD_I2C_DA_WR    0x0610
 
+
 struct rtl28xxu_dev {
 	u8 buf[128];
 	u8 chip_id;

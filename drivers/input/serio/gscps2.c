@@ -80,6 +80,7 @@ MODULE_LICENSE("GPL");
 #define GSC_ID_KEYBOARD		0	/* device ID values */
 #define GSC_ID_MOUSE		1
 
+
 static irqreturn_t gscps2_interrupt(int irq, void *dev);
 
 #define BUFFER_SIZE 0x0f
@@ -108,6 +109,7 @@ struct gscps2port {
 #define gscps2_readb_status(x)		readb((x)+GSC_STATUS)
 #define gscps2_writeb_control(x, y)	writeb((x), (y)+GSC_CONTROL)
 
+
 /*
  * wait_TBE() - wait for Transmit Buffer Empty
  */
@@ -122,6 +124,7 @@ static int wait_TBE(char *addr)
 	}
 	return 1;
 }
+
 
 /*
  * gscps2_flush() - flush the receive buffer
@@ -166,6 +169,7 @@ static inline int gscps2_writeb_output(struct gscps2port *ps2port, u8 data)
 
 	return 1;
 }
+
 
 /*
  * gscps2_enable() - enables or disables the port
@@ -270,6 +274,7 @@ static irqreturn_t gscps2_interrupt(int irq, void *dev)
 
 	return IRQ_HANDLED;
 }
+
 
 /*
  * gscps2_write() - send a byte out through the aux interface.
@@ -424,6 +429,7 @@ static int gscps2_remove(struct parisc_device *dev)
 	return 0;
 }
 
+
 static struct parisc_device_id gscps2_device_tbl[] = {
 	{ HPHW_FIO, HVERSION_REV_ANY_ID, HVERSION_ANY_ID, 0x00084 }, /* LASI PS/2 */
 #ifdef DINO_TESTED
@@ -451,5 +457,7 @@ static void __exit gscps2_exit(void)
 	unregister_parisc_driver(&parisc_ps2_driver);
 }
 
+
 module_init(gscps2_init);
 module_exit(gscps2_exit);
+

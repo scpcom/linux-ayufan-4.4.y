@@ -513,3 +513,4 @@ module_platform_driver(timbuart_platform_driver);
 MODULE_DESCRIPTION("Timberdale UART driver");
 MODULE_LICENSE("GPL v2");
 MODULE_ALIAS("platform:timb-uart");
+

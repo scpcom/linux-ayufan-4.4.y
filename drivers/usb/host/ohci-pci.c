@@ -28,6 +28,7 @@
 
 static const char hcd_name[] = "ohci-pci";
 
+
 /*-------------------------------------------------------------------------*/
 
 static int broken_suspend(struct usb_hcd *hcd)

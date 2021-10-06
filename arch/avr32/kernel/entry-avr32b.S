@@ -184,6 +184,7 @@ sync_with_swapper_pg_dir:
 	 * Don't worry, the assembler will let us know.
 	 */
 
+
 	/* ---                    System Call                    --- */
 
 	.org	0x100

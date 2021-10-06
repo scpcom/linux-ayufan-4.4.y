@@ -32,6 +32,7 @@
 #include <asm/hardwall.h>
 #include <arch/chip.h>
 
+
 /*
  * Support /proc/cpuinfo
  */

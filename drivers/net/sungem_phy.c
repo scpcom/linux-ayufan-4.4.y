@@ -18,6 +18,7 @@
  *    of darwin, still need to reverse engineer that
  */
 
+
 #include <linux/module.h>
 
 #include <linux/kernel.h>

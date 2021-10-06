@@ -15,6 +15,7 @@
 #ifndef _M32R_SIO_REG_H
 #define _M32R_SIO_REG_H
 
+
 #ifdef CONFIG_SERIAL_M32R_PLDSIO
 
 #define SIOCR		0x000

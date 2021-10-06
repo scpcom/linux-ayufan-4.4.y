@@ -30,6 +30,7 @@
 #ifndef _LINUX_TI113X_H
 #define _LINUX_TI113X_H
 
+
 /* Register definitions for TI 113X PCI-to-CardBus bridges */
 
 /* System Control Register */
@@ -91,6 +92,7 @@
 #define TI125X_MFUNC0_INTB		0x00000001
 #define TI122X_MFUNC1_INTB		0x00000020
 #define TI122X_MFUNC3_IRQSER		0x00001000
+
 
 /* Retry Status Register */
 #define TI113X_RETRY_STATUS		0x0090	/* 8 bit */
@@ -276,6 +278,7 @@ static void ti_set_zv(struct yenta_socket *socket)
 	}
 }
 
+
 /*
  * Generic TI init - TI has an extension for the
  * INTCTL register that sets the PCI CSC interrupt.
@@ -342,6 +345,7 @@ static void ti113x_use_isa_irq(struct yenta_socket *socket)
 		"Yenta TI113x: using isa irq %d for CardBus\n", isa_irq);
 }
 
+
 static int ti113x_override(struct yenta_socket *socket)
 {
 	u8 cardctl;
@@ -357,6 +361,7 @@ static int ti113x_override(struct yenta_socket *socket)
 
 	return ti_override(socket);
 }
+
 
 /* irqrouting for func0, probes PCI interrupt and ISA interrupts */
 static void ti12xx_irqroute_func0(struct yenta_socket *socket)
@@ -471,6 +476,7 @@ out:
 			 "Yenta TI: no PCI interrupts. Fish. Please report.\n");
 	}
 }
+
 
 /* changes the irq of func1 to match that of func0 */
 static int ti12xx_align_irqs(struct yenta_socket *socket, int *old_irq)
@@ -639,6 +645,7 @@ out:
 			 "TI: no PCI interrupts. Fish. Please report.\n");
 	}
 }
+
 
 /* Returns true value if the second slot of a two-slot controller is empty */
 static int ti12xx_2nd_slot_empty(struct yenta_socket *socket)
@@ -872,6 +879,7 @@ static int ti12xx_override(struct yenta_socket *socket)
 	return ti_override(socket);
 }
 
+
 static int ti1250_override(struct yenta_socket *socket)
 {
 	u8 old, diag;
@@ -890,6 +898,7 @@ static int ti1250_override(struct yenta_socket *socket)
 
 	return ti12xx_override(socket);
 }
+
 
 /**
  * EnE specific part. EnE bridges are register compatible with TI bridges but
@@ -966,3 +975,4 @@ static int ene_override(struct yenta_socket *socket)
 #endif /* !CONFIG_YENTA_ENE_TUNE */
 
 #endif /* _LINUX_TI113X_H */
+

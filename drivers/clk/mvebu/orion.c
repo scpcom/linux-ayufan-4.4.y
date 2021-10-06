@@ -201,6 +201,7 @@ static const struct coreclk_soc_desc mv88f6183_coreclks = {
 	.num_ratios = ARRAY_SIZE(orion_coreclk_ratios),
 };
 
+
 static void __init mv88f6183_clk_init(struct device_node *np)
 {
 	return mvebu_coreclk_setup(np, &mv88f6183_coreclks);

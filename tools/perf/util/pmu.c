@@ -812,6 +812,7 @@ static struct perf_pmu_alias *pmu_find_alias(struct perf_pmu *pmu,
 	return NULL;
 }
 
+
 static int check_info_data(struct perf_pmu_alias *alias,
 			   struct perf_pmu_info *info)
 {

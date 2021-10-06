@@ -1,6 +1,7 @@
 #ifndef _ASM_X86_BOOT_H
 #define _ASM_X86_BOOT_H
 
+
 #include <asm/pgtable_types.h>
 #include <uapi/asm/boot.h>
 

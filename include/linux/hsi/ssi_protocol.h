@@ -39,3 +39,4 @@ void ssip_reset_event(struct hsi_client *master);
 int ssip_slave_running(struct hsi_client *master);
 
 #endif /* __LINUX_SSIP_SLAVE_H__ */
+

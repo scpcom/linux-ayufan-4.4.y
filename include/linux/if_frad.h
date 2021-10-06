@@ -25,6 +25,7 @@
 
 #include <uapi/linux/if_frad.h>
 
+
 #if defined(CONFIG_DLCI) || defined(CONFIG_DLCI_MODULE)
 
 /* these are the fields of an RFC 1490 header */

@@ -320,6 +320,7 @@ init_card(struct sfax_hw *sf)
 	return -EIO;
 }
 
+
 static int
 setup_speedfax(struct sfax_hw *sf)
 {

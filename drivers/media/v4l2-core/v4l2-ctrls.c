@@ -470,6 +470,7 @@ const char * const *v4l2_ctrl_get_menu(u32 id)
 		NULL,
 	};
 
+
 	switch (id) {
 	case V4L2_CID_MPEG_AUDIO_SAMPLING_FREQ:
 		return mpeg_audio_sampling_freq;
@@ -2649,6 +2650,8 @@ int v4l2_subdev_querymenu(struct v4l2_subdev *sd, struct v4l2_querymenu *qm)
 }
 EXPORT_SYMBOL(v4l2_subdev_querymenu);
 
+
+
 /* Some general notes on the atomic requirements of VIDIOC_G/TRY/S_EXT_CTRLS:
 
    It is not a fully atomic operation, just best-effort only. After all, if
@@ -2790,6 +2793,8 @@ static int class_check(struct v4l2_ctrl_handler *hdl, u32 ctrl_class)
 		return list_empty(&hdl->ctrl_refs) ? -EINVAL : 0;
 	return find_ref_lock(hdl, ctrl_class | 1) ? 0 : -EINVAL;
 }
+
+
 
 /* Get extended controls. Allocates the helpers array if needed. */
 int v4l2_g_ext_ctrls(struct v4l2_ctrl_handler *hdl, struct v4l2_ext_controls *cs)
@@ -2944,6 +2949,7 @@ s64 v4l2_ctrl_g_ctrl_int64(struct v4l2_ctrl *ctrl)
 	return c.value64;
 }
 EXPORT_SYMBOL(v4l2_ctrl_g_ctrl_int64);
+
 
 /* Core function that calls try/s_ctrl and ensures that the new value is
    copied to the current value on a set.

@@ -272,6 +272,7 @@ static struct fb_ops vivid_fb_ops = {
 
 /* Initialization */
 
+
 /* Setup our initial video mode */
 static int vivid_fb_init_vidmode(struct vivid_dev *dev)
 {

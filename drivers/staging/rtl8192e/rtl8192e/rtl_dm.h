@@ -15,6 +15,7 @@
 #ifndef	__R8192UDM_H__
 #define __R8192UDM_H__
 
+
 /*--------------------------Define Parameters-------------------------------*/
 #define			OFDM_Table_Length	19
 #define		CCK_Table_length	12
@@ -58,6 +59,7 @@
 
 /*--------------------------Define Parameters-------------------------------*/
 
+
 /*------------------------------Define structure----------------------------*/
 struct dig_t {
 	u8		dig_enable_flag;
@@ -95,6 +97,7 @@ enum dm_dig_sta {
 	DM_STA_DIG_ON,
 	DM_STA_DIG_MAX
 };
+
 
 enum dm_ratr_sta {
 	DM_RATR_STA_HIGH = 0,
@@ -155,12 +158,14 @@ enum dm_cck_rx_path_method {
 	CCK_Rx_Version_MAX
 };
 
+
 struct dcmd_txcmd {
 	u32	Op;
 	u32	Length;
 	u32	Value;
 };
 /*------------------------------Define structure----------------------------*/
+
 
 /*------------------------Export global variable----------------------------*/
 extern	struct dig_t dm_digtable;
@@ -175,6 +180,7 @@ extern const u8 dm_cck_tx_bb_gain_ch14[CCKTxBBGainTableLength][8];
 
 /*------------------------Export global variable----------------------------*/
 
+
 /*--------------------------Exported Function prototype---------------------*/
 /*--------------------------Exported Function prototype---------------------*/
 
@@ -182,6 +188,7 @@ void rtl92e_dm_init(struct net_device *dev);
 void rtl92e_dm_deinit(struct net_device *dev);
 
 void rtl92e_dm_watchdog(struct net_device *dev);
+
 
 void    rtl92e_init_adaptive_rate(struct net_device *dev);
 void    rtl92e_dm_txpower_tracking_wq(void *data);

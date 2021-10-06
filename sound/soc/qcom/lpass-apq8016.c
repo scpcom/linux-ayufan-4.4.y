@@ -14,6 +14,7 @@
  *
  */
 
+
 #include <linux/clk.h>
 #include <linux/device.h>
 #include <linux/err.h>
@@ -200,6 +201,7 @@ static int apq8016_lpass_exit(struct platform_device *pdev)
 	return 0;
 }
 
+
 static struct lpass_variant apq8016_data = {
 	.i2sctrl_reg_base	= 0x1000,
 	.i2sctrl_reg_stride	= 0x1000,
@@ -237,3 +239,4 @@ module_platform_driver(apq8016_lpass_cpu_platform_driver);
 
 MODULE_DESCRIPTION("APQ8016 LPASS CPU Driver");
 MODULE_LICENSE("GPL v2");
+

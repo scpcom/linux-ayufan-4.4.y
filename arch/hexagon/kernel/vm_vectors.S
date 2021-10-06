@@ -34,6 +34,7 @@ _K_provisional_vec:
 	jump 1f;
 	jump 1f;
 
+
 .global _K_VM_event_vector
 _K_VM_event_vector:
 1:

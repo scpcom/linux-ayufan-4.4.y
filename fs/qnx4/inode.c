@@ -423,3 +423,4 @@ static void __exit exit_qnx4_fs(void)
 module_init(init_qnx4_fs)
 module_exit(exit_qnx4_fs)
 MODULE_LICENSE("GPL");
+

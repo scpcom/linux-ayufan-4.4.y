@@ -16,6 +16,7 @@
 #define UNCAC_BASE		_AC(0x8000000000000000, UL)
 #define IO_BASE			_AC(0x8000000000000000, UL)
 
+
 #endif /* CONFIG_64BIT */
 
 #include <asm/mach-generic/spaces.h>

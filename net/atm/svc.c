@@ -36,6 +36,7 @@ static int svc_create(struct net *net, struct socket *sock, int protocol,
  *       moved into the kernel, that would change.
  */
 
+
 static int svc_shutdown(struct socket *sock, int how)
 {
 	return 0;
@@ -649,6 +650,7 @@ static const struct proto_ops svc_proto_ops = {
 	.sendpage =	sock_no_sendpage,
 };
 
+
 static int svc_create(struct net *net, struct socket *sock, int protocol,
 		      int kern)
 {
@@ -671,6 +673,7 @@ static const struct net_proto_family svc_family_ops = {
 	.create = svc_create,
 	.owner = THIS_MODULE,
 };
+
 
 /*
  *	Initialize the ATM SVC protocol family

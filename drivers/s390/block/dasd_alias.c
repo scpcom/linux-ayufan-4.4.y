@@ -18,6 +18,7 @@
 #endif				/* PRINTK_HEADER */
 #define PRINTK_HEADER "dasd(eckd):"
 
+
 /*
  * General concept of alias management:
  * - PAV and DASD alias management is specific to the eckd discipline.
@@ -37,6 +38,7 @@
  *   something, this function should get faster or better, the rest has just
  *   to be correct.
  */
+
 
 static void summary_unit_check_handling_work(struct work_struct *);
 static void lcu_update_work(struct work_struct *);

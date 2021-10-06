@@ -318,6 +318,7 @@ struct alx_rrd {
 #define RRD_UPDATED_MASK	0x0001
 #define RRD_UPDATED_SHIFT	31
 
+
 #define ALX_MAX_SETUP_LNK_CYCLE	50
 
 /* for FlowControl */
@@ -445,6 +446,7 @@ struct alx_hw_stats {
 	u64 tx_mc_byte_cnt;	/* multicast bytes transmitted, excluding FCS */
 	u64 update;
 };
+
 
 /* maximum interrupt vectors for msix */
 #define ALX_MAX_MSIX_INTRS	16

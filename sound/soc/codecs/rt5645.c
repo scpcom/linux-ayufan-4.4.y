@@ -1106,6 +1106,7 @@ static SOC_ENUM_SINGLE_DECL(
 static const struct snd_kcontrol_new rt5645_dac_r2_mux =
 	SOC_DAPM_ENUM("DAC2 R source", rt5645_dac2r_enum);
 
+
 /* INL/R source */
 static const char * const rt5645_inl_src[] = {
 	"IN2P", "MonoP"
@@ -3429,6 +3430,7 @@ static struct dmi_system_id dmi_platform_intel_broadwell[] = {
 	},
 	{ }
 };
+
 
 static int rt5645_parse_dt(struct rt5645_priv *rt5645, struct device *dev)
 {

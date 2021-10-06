@@ -20,6 +20,7 @@
 #include <asm/traps.h>
 #include <asm/machdep.h>
 
+
 /* ++andreas: {get,free}_pointer_table rewritten to use unused fields from
    struct page instead of separately kmalloced struct.  Stolen from
    arch/sparc/mm/srmmu.c ... */
@@ -191,6 +192,7 @@ static inline void pushcl040(unsigned long paddr)
  * this?). So we have to push first and then additionally to invalidate.
  */
 
+
 /*
  * cache_clear() semantics: Clear any cache entries for the area in question,
  * without writing back dirty entries first. This is useful if the data will
@@ -238,6 +240,7 @@ void cache_clear (unsigned long paddr, int len)
 #endif
 }
 EXPORT_SYMBOL(cache_clear);
+
 
 /*
  * cache_push() semantics: Write back any dirty cache data in the given area,
@@ -292,3 +295,4 @@ void cache_push (unsigned long paddr, int len)
 #endif
 }
 EXPORT_SYMBOL(cache_push);
+

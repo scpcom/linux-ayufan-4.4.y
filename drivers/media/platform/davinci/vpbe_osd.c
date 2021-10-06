@@ -1556,6 +1556,7 @@ static int osd_probe(struct platform_device *pdev)
 	if (osd == NULL)
 		return -ENOMEM;
 
+
 	osd->dev = &pdev->dev;
 	osd->vpbe_type = pdev_id->driver_data;
 

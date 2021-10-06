@@ -16,6 +16,7 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
+
 /*
  * The "faulty" personality causes some requests to fail.
  *
@@ -68,6 +69,7 @@
 #include "md.h"
 #include <linux/seq_file.h>
 
+
 static void faulty_fail(struct bio *bio)
 {
 	struct bio *b = bio->bi_private;
@@ -94,6 +96,7 @@ static int check_mode(struct faulty_conf *conf, int mode)
 	if (conf->period[mode] == 0 &&
 	    atomic_read(&conf->counters[mode]) <= 0)
 		return 0; /* no failure, no decrement */
+
 
 	if (atomic_dec_and_test(&conf->counters[mode])) {
 		if (conf->period[mode])
@@ -244,6 +247,7 @@ static void status(struct seq_file *seq, struct mddev *mddev)
 		seq_printf(seq, " ReadPersistent=%d(%d)",
 			   n, conf->period[ReadPersistent]);
 
+
 	if ((n=atomic_read(&conf->counters[ReadFixable])) != 0)
 		seq_printf(seq, " ReadFixable=%d(%d)",
 			   n, conf->period[ReadFixable]);
@@ -253,6 +257,7 @@ static void status(struct seq_file *seq, struct mddev *mddev)
 
 	seq_printf(seq, " nfaults=%d", conf->nfaults);
 }
+
 
 static int reshape(struct mddev *mddev)
 {

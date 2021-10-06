@@ -440,6 +440,7 @@ struct aac_dev *aac_init_adapter(struct aac_dev *dev)
 	dev->comm_interface = AAC_COMM_PRODUCER;
 	dev->raw_io_interface = dev->raw_io_64 = 0;
 
+
 	/*
 	 * Enable INTX mode, if not done already Enabled
 	 */
@@ -597,3 +598,4 @@ struct aac_dev *aac_init_adapter(struct aac_dev *dev)
 
 	return dev;
 }
+

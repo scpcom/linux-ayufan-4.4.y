@@ -72,6 +72,7 @@ static struct iw_statistics *hostap_get_wireless_stats(struct net_device *dev)
 	return wstats;
 }
 
+
 static int prism2_get_datarates(struct net_device *dev, u8 *rates)
 {
 	struct hostap_interface *iface;
@@ -97,6 +98,7 @@ static int prism2_get_datarates(struct net_device *dev, u8 *rates)
 	return val;
 }
 
+
 static int prism2_get_name(struct net_device *dev,
 			   struct iw_request_info *info,
 			   char *name, char *extra)
@@ -117,6 +119,7 @@ static int prism2_get_name(struct net_device *dev,
 
 	return 0;
 }
+
 
 static int prism2_ioctl_siwencode(struct net_device *dev,
 				  struct iw_request_info *info,
@@ -219,6 +222,7 @@ static int prism2_ioctl_siwencode(struct net_device *dev,
 	return 0;
 }
 
+
 static int prism2_ioctl_giwencode(struct net_device *dev,
 				  struct iw_request_info *info,
 				  struct iw_point *erq, char *key)
@@ -280,6 +284,7 @@ static int prism2_ioctl_giwencode(struct net_device *dev,
 	return 0;
 }
 
+
 static int hostap_set_rate(struct net_device *dev)
 {
 	struct hostap_interface *iface;
@@ -322,6 +327,7 @@ static int hostap_set_rate(struct net_device *dev)
 
 	return ret;
 }
+
 
 static int prism2_ioctl_siwrate(struct net_device *dev,
 				struct iw_request_info *info,
@@ -382,6 +388,7 @@ static int prism2_ioctl_siwrate(struct net_device *dev,
 	return hostap_set_rate(dev);
 }
 
+
 static int prism2_ioctl_giwrate(struct net_device *dev,
 				struct iw_request_info *info,
 				struct iw_param *rrq, char *extra)
@@ -440,6 +447,7 @@ static int prism2_ioctl_giwrate(struct net_device *dev,
 	return ret;
 }
 
+
 static int prism2_ioctl_siwsens(struct net_device *dev,
 				struct iw_request_info *info,
 				struct iw_param *sens, char *extra)
@@ -483,6 +491,7 @@ static int prism2_ioctl_giwsens(struct net_device *dev,
 	return 0;
 }
 
+
 /* Deprecated in new wireless extension API */
 static int prism2_ioctl_giwaplist(struct net_device *dev,
 				  struct iw_request_info *info,
@@ -523,6 +532,7 @@ static int prism2_ioctl_giwaplist(struct net_device *dev,
 	kfree(qual);
 	return 0;
 }
+
 
 static int prism2_ioctl_siwrts(struct net_device *dev,
 			       struct iw_request_info *info,
@@ -573,6 +583,7 @@ static int prism2_ioctl_giwrts(struct net_device *dev,
 	return 0;
 }
 
+
 static int prism2_ioctl_siwfrag(struct net_device *dev,
 				struct iw_request_info *info,
 				struct iw_param *rts, char *extra)
@@ -622,6 +633,7 @@ static int prism2_ioctl_giwfrag(struct net_device *dev,
 	return 0;
 }
 
+
 #ifndef PRISM2_NO_STATION_MODES
 static int hostap_join_ap(struct net_device *dev)
 {
@@ -663,6 +675,7 @@ static int hostap_join_ap(struct net_device *dev)
 	return 0;
 }
 #endif /* PRISM2_NO_STATION_MODES */
+
 
 static int prism2_ioctl_siwap(struct net_device *dev,
 			      struct iw_request_info *info,
@@ -739,6 +752,7 @@ static int prism2_ioctl_giwap(struct net_device *dev,
 	return 0;
 }
 
+
 static int prism2_ioctl_siwnickn(struct net_device *dev,
 				 struct iw_request_info *info,
 				 struct iw_point *data, char *nickname)
@@ -785,6 +799,7 @@ static int prism2_ioctl_giwnickn(struct net_device *dev,
 
 	return 0;
 }
+
 
 static int prism2_ioctl_siwfreq(struct net_device *dev,
 				struct iw_request_info *info,
@@ -848,6 +863,7 @@ static int prism2_ioctl_giwfreq(struct net_device *dev,
 	return 0;
 }
 
+
 static void hostap_monitor_set_type(local_info_t *local)
 {
 	struct net_device *dev = local->ddev;
@@ -864,6 +880,7 @@ static void hostap_monitor_set_type(local_info_t *local)
 		dev->type = ARPHRD_IEEE80211;
 	}
 }
+
 
 static int prism2_ioctl_siwessid(struct net_device *dev,
 				 struct iw_request_info *info,
@@ -935,6 +952,7 @@ static int prism2_ioctl_giwessid(struct net_device *dev,
 
 	return 0;
 }
+
 
 static int prism2_ioctl_giwrange(struct net_device *dev,
 				 struct iw_request_info *info,
@@ -1056,6 +1074,7 @@ static int prism2_ioctl_giwrange(struct net_device *dev,
 	return 0;
 }
 
+
 static int hostap_monitor_mode_enable(local_info_t *local)
 {
 	struct net_device *dev = local->dev;
@@ -1091,6 +1110,7 @@ static int hostap_monitor_mode_enable(local_info_t *local)
 	return 0;
 }
 
+
 static int hostap_monitor_mode_disable(local_info_t *local)
 {
 	struct net_device *dev = local->ddev;
@@ -1107,6 +1127,7 @@ static int hostap_monitor_mode_disable(local_info_t *local)
 		return -1;
 	return hostap_set_encryption(local);
 }
+
 
 static int prism2_ioctl_siwmode(struct net_device *dev,
 				struct iw_request_info *info,
@@ -1183,6 +1204,7 @@ static int prism2_ioctl_siwmode(struct net_device *dev,
 	return 0;
 }
 
+
 static int prism2_ioctl_giwmode(struct net_device *dev,
 				struct iw_request_info *info,
 				__u32 *mode, char *extra)
@@ -1206,6 +1228,7 @@ static int prism2_ioctl_giwmode(struct net_device *dev,
 	}
 	return 0;
 }
+
 
 static int prism2_ioctl_siwpower(struct net_device *dev,
 				 struct iw_request_info *info,
@@ -1265,6 +1288,7 @@ static int prism2_ioctl_siwpower(struct net_device *dev,
 #endif /* PRISM2_NO_STATION_MODES */
 }
 
+
 static int prism2_ioctl_giwpower(struct net_device *dev,
 				 struct iw_request_info *info,
 				 struct iw_param *rrq, char *extra)
@@ -1321,6 +1345,7 @@ static int prism2_ioctl_giwpower(struct net_device *dev,
 	return 0;
 #endif /* PRISM2_NO_STATION_MODES */
 }
+
 
 static int prism2_ioctl_siwretry(struct net_device *dev,
 				 struct iw_request_info *info,
@@ -1429,6 +1454,7 @@ static int prism2_ioctl_giwretry(struct net_device *dev,
 	return 0;
 }
 
+
 /* Note! This TX power controlling is experimental and should not be used in
  * production use. It just sets raw power register and does not use any kind of
  * feedback information from the measured TX power (CR58). This is now
@@ -1474,6 +1500,7 @@ static u16 prism2_txpower_dBm_to_hfa386x(int val)
 	return (unsigned char) tmp;
 }
 #endif /* RAW_TXPOWER_SETTING */
+
 
 static int prism2_ioctl_siwtxpow(struct net_device *dev,
 				 struct iw_request_info *info,
@@ -1597,6 +1624,7 @@ static int prism2_ioctl_giwtxpow(struct net_device *dev,
 #endif /* RAW_TXPOWER_SETTING */
 }
 
+
 #ifndef PRISM2_NO_STATION_MODES
 
 /* HostScan request works with and without host_roaming mode. In addition, it
@@ -1630,6 +1658,7 @@ static int prism2_request_hostscan(struct net_device *dev,
 	}
 	return 0;
 }
+
 
 static int prism2_request_scan(struct net_device *dev)
 {
@@ -1680,12 +1709,14 @@ static inline int prism2_request_hostscan(struct net_device *dev,
 	return -EOPNOTSUPP;
 }
 
+
 static inline int prism2_request_scan(struct net_device *dev)
 {
 	return -EOPNOTSUPP;
 }
 
 #endif /* !PRISM2_NO_STATION_MODES */
+
 
 static int prism2_ioctl_siwscan(struct net_device *dev,
 				struct iw_request_info *info,
@@ -1737,6 +1768,7 @@ static int prism2_ioctl_siwscan(struct net_device *dev,
 
 	return ret;
 }
+
 
 #ifndef PRISM2_NO_STATION_MODES
 static char * __prism2_translate_scan(local_info_t *local,
@@ -1914,6 +1946,7 @@ static char * __prism2_translate_scan(local_info_t *local,
 	return current_ev;
 }
 
+
 /* Translate scan data returned from the card to a card independent
  * format that the Wireless Tools will understand - Jean II */
 static inline int prism2_translate_scan(local_info_t *local,
@@ -1989,6 +2022,7 @@ static inline int prism2_translate_scan(local_info_t *local,
 }
 #endif /* PRISM2_NO_STATION_MODES */
 
+
 static inline int prism2_ioctl_giwscan_sta(struct net_device *dev,
 					   struct iw_request_info *info,
 					   struct iw_point *data, char *extra)
@@ -2031,6 +2065,7 @@ static inline int prism2_ioctl_giwscan_sta(struct net_device *dev,
 #endif /* PRISM2_NO_STATION_MODES */
 }
 
+
 static int prism2_ioctl_giwscan(struct net_device *dev,
 				struct iw_request_info *info,
 				struct iw_point *data, char *extra)
@@ -2069,6 +2104,7 @@ static int prism2_ioctl_giwscan(struct net_device *dev,
 		return prism2_ioctl_giwscan_sta(dev, info, data, extra);
 	}
 }
+
 
 static const struct iw_priv_args prism2_priv[] = {
 	{ PRISM2_IOCTL_MONITOR,
@@ -2260,6 +2296,7 @@ static const struct iw_priv_args prism2_priv[] = {
 	  0, IW_PRIV_TYPE_INT | IW_PRIV_SIZE_FIXED | 1, "getscan_channel" },
 };
 
+
 static int prism2_ioctl_priv_inquire(struct net_device *dev, int *i)
 {
 	struct hostap_interface *iface;
@@ -2273,6 +2310,7 @@ static int prism2_ioctl_priv_inquire(struct net_device *dev, int *i)
 
 	return 0;
 }
+
 
 static int prism2_ioctl_priv_prism2_param(struct net_device *dev,
 					  struct iw_request_info *info,
@@ -2624,6 +2662,7 @@ static int prism2_ioctl_priv_prism2_param(struct net_device *dev,
 	return ret;
 }
 
+
 static int prism2_ioctl_priv_get_prism2_param(struct net_device *dev,
 					      struct iw_request_info *info,
 					      void *wrqu, char *extra)
@@ -2810,6 +2849,7 @@ static int prism2_ioctl_priv_get_prism2_param(struct net_device *dev,
 	return ret;
 }
 
+
 static int prism2_ioctl_priv_readmif(struct net_device *dev,
 				     struct iw_request_info *info,
 				     void *wrqu, char *extra)
@@ -2830,6 +2870,7 @@ static int prism2_ioctl_priv_readmif(struct net_device *dev,
 	return 0;
 }
 
+
 static int prism2_ioctl_priv_writemif(struct net_device *dev,
 				      struct iw_request_info *info,
 				      void *wrqu, char *extra)
@@ -2848,6 +2889,7 @@ static int prism2_ioctl_priv_writemif(struct net_device *dev,
 
 	return 0;
 }
+
 
 static int prism2_ioctl_priv_monitor(struct net_device *dev, int *i)
 {
@@ -2893,6 +2935,7 @@ static int prism2_ioctl_priv_monitor(struct net_device *dev, int *i)
 
 	return ret;
 }
+
 
 static int prism2_ioctl_priv_reset(struct net_device *dev, int *i)
 {
@@ -2941,6 +2984,7 @@ static int prism2_ioctl_priv_reset(struct net_device *dev, int *i)
 	return 0;
 }
 
+
 static int prism2_ioctl_priv_set_rid_word(struct net_device *dev, int *i)
 {
 	int rid = *i;
@@ -2953,6 +2997,7 @@ static int prism2_ioctl_priv_set_rid_word(struct net_device *dev, int *i)
 
 	return 0;
 }
+
 
 #ifndef PRISM2_NO_KERNEL_IEEE80211_MGMT
 static int ap_mac_cmd_ioctl(local_info_t *local, int *cmd)
@@ -2984,6 +3029,7 @@ static int ap_mac_cmd_ioctl(local_info_t *local, int *cmd)
 	return ret;
 }
 #endif /* PRISM2_NO_KERNEL_IEEE80211_MGMT */
+
 
 #ifdef PRISM2_DOWNLOAD_SUPPORT
 static int prism2_ioctl_priv_download(local_info_t *local, struct iw_point *p)
@@ -3018,6 +3064,7 @@ static int prism2_ioctl_priv_download(local_info_t *local, struct iw_point *p)
 }
 #endif /* PRISM2_DOWNLOAD_SUPPORT */
 
+
 static int prism2_set_genericelement(struct net_device *dev, u8 *elem,
 				     size_t len)
 {
@@ -3043,6 +3090,7 @@ static int prism2_set_genericelement(struct net_device *dev, u8 *elem,
 	return local->func->set_rid(local->dev, HFA384X_RID_GENERICELEMENT,
 				    buf, len + 2);
 }
+
 
 static int prism2_ioctl_siwauth(struct net_device *dev,
 				struct iw_request_info *info,
@@ -3109,6 +3157,7 @@ static int prism2_ioctl_siwauth(struct net_device *dev,
 	return 0;
 }
 
+
 static int prism2_ioctl_giwauth(struct net_device *dev,
 				struct iw_request_info *info,
 				struct iw_param *data, char *extra)
@@ -3146,6 +3195,7 @@ static int prism2_ioctl_giwauth(struct net_device *dev,
 	}
 	return 0;
 }
+
 
 static int prism2_ioctl_siwencodeext(struct net_device *dev,
 				     struct iw_request_info *info,
@@ -3285,6 +3335,7 @@ static int prism2_ioctl_siwencodeext(struct net_device *dev,
 			local->crypt_info.tx_keyidx = i;
 	}
 
+
 	if (sta_ptr == NULL && ext->key_len > 0) {
 		int first = 1, j;
 		for (j = 0; j < WEP_KEYS; j++) {
@@ -3318,6 +3369,7 @@ static int prism2_ioctl_siwencodeext(struct net_device *dev,
 
 	return ret;
 }
+
 
 static int prism2_ioctl_giwencodeext(struct net_device *dev,
 				     struct iw_request_info *info,
@@ -3386,6 +3438,7 @@ static int prism2_ioctl_giwencodeext(struct net_device *dev,
 
 	return 0;
 }
+
 
 static int prism2_ioctl_set_encryption(local_info_t *local,
 				       struct prism2_hostapd_param *param,
@@ -3521,6 +3574,7 @@ static int prism2_ioctl_set_encryption(local_info_t *local,
 	return ret;
 }
 
+
 static int prism2_ioctl_get_encryption(local_info_t *local,
 				       struct prism2_hostapd_param *param,
 				       int param_len)
@@ -3577,6 +3631,7 @@ static int prism2_ioctl_get_encryption(local_info_t *local,
 	return 0;
 }
 
+
 static int prism2_ioctl_get_rid(local_info_t *local,
 				struct prism2_hostapd_param *param,
 				int param_len)
@@ -3597,6 +3652,7 @@ static int prism2_ioctl_get_rid(local_info_t *local,
 	return res;
 }
 
+
 static int prism2_ioctl_set_rid(local_info_t *local,
 				struct prism2_hostapd_param *param,
 				int param_len)
@@ -3611,6 +3667,7 @@ static int prism2_ioctl_set_rid(local_info_t *local,
 				    param->u.rid.data, param->u.rid.len);
 }
 
+
 static int prism2_ioctl_set_assoc_ap_addr(local_info_t *local,
 					  struct prism2_hostapd_param *param,
 					  int param_len)
@@ -3621,12 +3678,14 @@ static int prism2_ioctl_set_assoc_ap_addr(local_info_t *local,
 	return 0;
 }
 
+
 static int prism2_ioctl_siwgenie(struct net_device *dev,
 				 struct iw_request_info *info,
 				 struct iw_point *data, char *extra)
 {
 	return prism2_set_genericelement(dev, extra, data->length);
 }
+
 
 static int prism2_ioctl_giwgenie(struct net_device *dev,
 				 struct iw_request_info *info,
@@ -3650,6 +3709,7 @@ static int prism2_ioctl_giwgenie(struct net_device *dev,
 	return 0;
 }
 
+
 static int prism2_ioctl_set_generic_element(local_info_t *local,
 					    struct prism2_hostapd_param *param,
 					    int param_len)
@@ -3664,6 +3724,7 @@ static int prism2_ioctl_set_generic_element(local_info_t *local,
 	return prism2_set_genericelement(local->dev,
 					 param->u.generic_elem.data, len);
 }
+
 
 static int prism2_ioctl_siwmlme(struct net_device *dev,
 				struct iw_request_info *info,
@@ -3690,6 +3751,7 @@ static int prism2_ioctl_siwmlme(struct net_device *dev,
 	}
 }
 
+
 static int prism2_ioctl_mlme(local_info_t *local,
 			     struct prism2_hostapd_param *param)
 {
@@ -3710,6 +3772,7 @@ static int prism2_ioctl_mlme(local_info_t *local,
 	}
 }
 
+
 static int prism2_ioctl_scan_req(local_info_t *local,
 				 struct prism2_hostapd_param *param)
 {
@@ -3728,6 +3791,7 @@ static int prism2_ioctl_scan_req(local_info_t *local,
 	return -EOPNOTSUPP;
 #endif /* PRISM2_NO_STATION_MODES */
 }
+
 
 static int prism2_ioctl_priv_hostapd(local_info_t *local, struct iw_point *p)
 {
@@ -3793,6 +3857,7 @@ static int prism2_ioctl_priv_hostapd(local_info_t *local, struct iw_point *p)
 	return ret;
 }
 
+
 static void prism2_get_drvinfo(struct net_device *dev,
 			       struct ethtool_drvinfo *info)
 {
@@ -3812,6 +3877,7 @@ static void prism2_get_drvinfo(struct net_device *dev,
 const struct ethtool_ops prism2_ethtool_ops = {
 	.get_drvinfo = prism2_get_drvinfo
 };
+
 
 /* Structures to export the Wireless Handlers */
 
@@ -3894,6 +3960,7 @@ const struct iw_handler_def hostap_iw_handler_def =
 	.get_wireless_stats = hostap_get_wireless_stats,
 };
 
+
 int hostap_ioctl(struct net_device *dev, struct ifreq *ifr, int cmd)
 {
 	struct iwreq *wrq = (struct iwreq *) ifr;
@@ -3961,6 +4028,7 @@ int hostap_ioctl(struct net_device *dev, struct ifreq *ifr, int cmd)
 					       wrq->u.ap_addr.sa_data);
 		break;
 #endif /* PRISM2_NO_KERNEL_IEEE80211_MGMT */
+
 
 		/* Private ioctls that are not used with iwpriv;
 		 * in SIOCDEVPRIVATE range */

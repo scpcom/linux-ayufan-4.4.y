@@ -170,6 +170,7 @@ static void __init mvme5100_setup_arch(void)
 	restart = ioremap(BOARD_MODRST_REG, 4);
 }
 
+
 static void mvme5100_show_cpuinfo(struct seq_file *m)
 {
 	seq_puts(m, "Vendor\t\t: Motorola/Emerson\n");

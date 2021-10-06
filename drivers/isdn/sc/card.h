@@ -100,6 +100,7 @@ typedef struct {
 	spinlock_t lock;		/* local lock */
 } board;
 
+
 extern board *sc_adapter[];
 extern int cinst;
 

@@ -103,6 +103,7 @@ static struct tc90522_state *cfg_to_state(struct tc90522_config *c)
 	return container_of(c, struct tc90522_state, cfg);
 }
 
+
 static int tc90522s_set_tsid(struct dvb_frontend *fe)
 {
 	struct reg_val set_tsid[] = {
@@ -319,6 +320,7 @@ static int tc90522s_get_frontend(struct dvb_frontend *fe)
 
 	return 0;
 }
+
 
 static const enum fe_transmit_mode tm_conv[] = {
 	TRANSMISSION_MODE_2K,
@@ -634,6 +636,7 @@ static int tc90522_init(struct dvb_frontend *fe)
 	return tc90522_set_if_agc(fe, true);
 }
 
+
 /*
  * tuner I2C adapter functions
  */
@@ -713,6 +716,7 @@ static const struct i2c_algorithm tc90522_tuner_i2c_algo = {
 	.functionality = &tc90522_functionality,
 };
 
+
 /*
  * I2C driver functions
  */
@@ -761,6 +765,7 @@ static const struct dvb_frontend_ops tc90522_ops_ter = {
 	.get_frontend = tc90522t_get_frontend,
 	.read_status = tc90522t_read_status,
 };
+
 
 static int tc90522_probe(struct i2c_client *client,
 			 const struct i2c_device_id *id)
@@ -812,6 +817,7 @@ static int tc90522_remove(struct i2c_client *client)
 	kfree(state);
 	return 0;
 }
+
 
 static const struct i2c_device_id tc90522_id[] = {
 	{ TC90522_I2C_DEV_SAT, 0 },

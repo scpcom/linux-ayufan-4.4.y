@@ -154,6 +154,7 @@ enum {
 #define RATE_MCS_VHT_POS 26
 #define RATE_MCS_VHT_MSK (1 << RATE_MCS_VHT_POS)
 
+
 /*
  * High-throughput (HT) rate format for bits 7:0
  *
@@ -226,6 +227,7 @@ enum {
  */
 #define RATE_LEGACY_RATE_MSK 0xff
 
+
 /*
  * Bit 11-12: (0) 20MHz, (1) 40MHz, (2) 80MHz, (3) 160MHz
  * 0 and 1 are valid for HT and VHT, 2 and 3 only for VHT
@@ -273,6 +275,7 @@ enum {
 /* Bit 27: (1) LDPC enabled, (0) LDPC disabled */
 #define RATE_MCS_LDPC_POS		27
 #define RATE_MCS_LDPC_MSK		(1 << RATE_MCS_LDPC_POS)
+
 
 /* Link Quality definitions */
 

@@ -57,6 +57,7 @@ int hw_sm750_map(struct sm750_dev *sm750_dev, struct pci_dev *pdev)
 		pr_info("mmio virtual addr = %p\n", sm750_dev->pvReg);
 	}
 
+
 	sm750_dev->accel.dprBase = sm750_dev->pvReg + DE_BASE_ADDR_TYPE1;
 	sm750_dev->accel.dpPortBase = sm750_dev->pvReg + DE_PORT_ADDR_TYPE1;
 
@@ -85,6 +86,8 @@ int hw_sm750_map(struct sm750_dev *sm750_dev, struct pci_dev *pdev)
 exit:
 	return ret;
 }
+
+
 
 int hw_sm750_inithw(struct sm750_dev *sm750_dev, struct pci_dev *pdev)
 {
@@ -150,6 +153,7 @@ int hw_sm750_inithw(struct sm750_dev *sm750_dev, struct pci_dev *pdev)
 		 */
 	sm750_sw_i2c_init(0, 1);
 
+
 	/* Customer may NOT use CH7301 DVI chip, which has to be
 	   initialized differently.
 	*/
@@ -182,6 +186,7 @@ int hw_sm750_output_setMode(struct lynxfb_output *output,
 	ret = 0;
 	dispSet = 0;
 	channel = *output->channel;
+
 
 	if (getChipType() != SM750LE) {
 		if (channel == sm750_primary) {
@@ -238,6 +243,7 @@ int hw_sm750_crtc_checkMode(struct lynxfb_crtc *crtc, struct fb_var_screeninfo *
 	return 0;
 }
 
+
 /*
 	set the controller's mode for @crtc charged with @var and @fix parameters
 */
@@ -251,6 +257,7 @@ int hw_sm750_crtc_setMode(struct lynxfb_crtc *crtc,
 	clock_type_t clock;
 	struct sm750_dev *sm750_dev;
 	struct lynxfb_par *par;
+
 
 	ret = 0;
 	par = container_of(crtc, struct lynxfb_par, crtc);
@@ -354,6 +361,7 @@ int hw_sm750_crtc_setMode(struct lynxfb_crtc *crtc,
 
 	}
 
+
 exit:
 	return ret;
 }
@@ -451,6 +459,7 @@ int hw_sm750_setBLANK(struct lynxfb_output *output, int blank)
 	return 0;
 }
 
+
 void hw_sm750_initAccel(struct sm750_dev *sm750_dev)
 {
 	u32 reg;
@@ -497,6 +506,7 @@ int hw_sm750le_deWait(void)
 	/* timeout error */
 	return -1;
 }
+
 
 int hw_sm750_deWait(void)
 {

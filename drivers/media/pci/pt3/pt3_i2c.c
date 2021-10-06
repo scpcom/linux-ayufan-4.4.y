@@ -50,6 +50,7 @@ enum ctl_cmd {
 	I_DATA_H_ACK1 = 0x0f,
 };
 
+
 static void cmdbuf_add(struct pt3_i2cbuf *cbuf, enum ctl_cmd cmd)
 {
 	int buf_idx;
@@ -107,6 +108,7 @@ static void put_stop(struct pt3_i2cbuf *cbuf)
 	cmdbuf_add(cbuf, I_CLOCK_H);
 	cmdbuf_add(cbuf, I_DATA_H);
 }
+
 
 /* translates msgs to internal commands for bit-banging */
 static void translate(struct pt3_i2cbuf *cbuf, struct i2c_msg *msgs, int num)
@@ -170,6 +172,7 @@ static int send_i2c_cmd(struct pt3_board *pt3, u32 addr)
 	}
 	return 0;
 }
+
 
 /* init commands for each demod are combined into one transaction
  *  and hidden in ROM with the address PT3_CMD_ADDR_INIT_DEMOD.

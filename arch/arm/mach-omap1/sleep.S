@@ -43,6 +43,7 @@
 
 		.text
 
+
 /*
  * Forces OMAP into deep sleep state
  *

@@ -97,6 +97,7 @@ struct pt_regs {
 
 #define PS_S  (0x0002)
 
+
 #endif				/* __ASSEMBLY__ */
 
 /*

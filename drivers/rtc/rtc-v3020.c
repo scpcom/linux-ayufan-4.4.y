@@ -62,6 +62,7 @@ struct v3020 {
 	struct rtc_device *rtc;
 };
 
+
 static int v3020_mmio_map(struct v3020 *chip, struct platform_device *pdev,
 			  struct v3020_platform_data *pdata)
 {
@@ -243,6 +244,7 @@ static int v3020_read_time(struct device *dev, struct rtc_time *dt)
 
 	return 0;
 }
+
 
 static int v3020_set_time(struct device *dev, struct rtc_time *dt)
 {

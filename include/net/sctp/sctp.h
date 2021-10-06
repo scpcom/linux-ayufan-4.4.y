@@ -156,6 +156,7 @@ void sctp_assocs_proc_exit(struct net *net);
 int sctp_remaddr_proc_init(struct net *net);
 void sctp_remaddr_proc_exit(struct net *net);
 
+
 /*
  * Module global variables
  */
@@ -314,6 +315,7 @@ static inline int sctp_v6_add_protocol(void) { return 0; }
 static inline void sctp_v6_del_protocol(void) { return; }
 
 #endif /* #if defined(CONFIG_IPV6) */
+
 
 /* Map an association to an assoc_id. */
 static inline sctp_assoc_t sctp_assoc2id(const struct sctp_association *asoc)

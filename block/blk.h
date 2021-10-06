@@ -98,6 +98,7 @@ unsigned long blk_rq_timeout(unsigned long timeout);
 void blk_add_timer(struct request *req);
 void blk_delete_timer(struct request *);
 
+
 bool bio_attempt_front_merge(struct request_queue *q, struct request *req,
 			     struct bio *bio);
 bool bio_attempt_back_merge(struct request_queue *q, struct request *req,
@@ -221,6 +222,7 @@ int blk_try_merge(struct request *rq, struct bio *bio);
 void blk_queue_congestion_threshold(struct request_queue *q);
 
 int blk_dev_init(void);
+
 
 /*
  * Return the threshold (number of used requests) at which the queue is

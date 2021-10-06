@@ -264,6 +264,7 @@ static void dma_hw_enable_all(struct knav_dma_device *dma)
 	}
 }
 
+
 static void knav_dma_hw_init(struct knav_dma_device *dma)
 {
 	unsigned v;

@@ -28,6 +28,7 @@
 #define MALLOC_AREA_SIZE 0x200000 /* 2MB for now */
 /* FIXME FIXME FIXME */
 
+
 /*
   WARNING NOTE
 
@@ -206,6 +207,7 @@ extern char _end;
    These are used in the local defines below.
 */
   
+
 /* Virtual addresses for the BOOTP image. Note that this includes the
    bootstrapper code as well as the compressed kernel image, and
    possibly the INITRD image.

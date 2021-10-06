@@ -12,6 +12,7 @@
  * for more info.
  */
 
+
 /*
  * The AD1848 codec has generic input lines called Line, Aux1 and Aux2.
  * Sound card manufacturers have connected actual inputs (CD, synth, line,

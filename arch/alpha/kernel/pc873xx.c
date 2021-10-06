@@ -11,6 +11,7 @@ static char *pc873xx_names[] = {
 
 static unsigned int base, model;
 
+
 unsigned int __init pc873xx_get_base()
 {
 	return base;

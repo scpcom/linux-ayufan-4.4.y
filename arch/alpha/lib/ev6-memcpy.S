@@ -234,6 +234,7 @@ $misalign_byte:
 	bgt	$18, $misalign_byte	# U : more to go?
 	nop
 
+
 $nomoredata:
 	ret	$31, ($26), 1		# L0 :
 	nop				# E :

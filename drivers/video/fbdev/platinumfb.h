@@ -365,3 +365,4 @@ struct vmode_attr vmode_attrs[VMODE_MAX] = {
 	{1280, 960, 75},
 	{1280, 1024, 75}
 };
+

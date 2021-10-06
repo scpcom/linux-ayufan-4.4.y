@@ -520,6 +520,7 @@ void atmel_hlcdc_layer_update_commit(struct atmel_hlcdc_layer *layer)
 
 	spin_unlock_irqrestore(&layer->lock, flags);
 
+
 	upd->next = -1;
 }
 

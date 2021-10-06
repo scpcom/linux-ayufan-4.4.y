@@ -96,6 +96,7 @@ static void __init h8s2678_pll_clk_setup(struct device_node *node)
 		return;
 	}
 
+
 	pll_clock = kzalloc(sizeof(*pll_clock), GFP_KERNEL);
 	if (!pll_clock)
 		return;

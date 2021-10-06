@@ -9,6 +9,7 @@
 #ifndef _UAPI_ASM_POWERPC_UNISTD_H_
 #define _UAPI_ASM_POWERPC_UNISTD_H_
 
+
 #define __NR_restart_syscall	  0
 #define __NR_exit		  1
 #define __NR_fork		  2

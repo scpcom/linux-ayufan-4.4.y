@@ -252,6 +252,7 @@ static bool fgraph_graph_time = true;
 static inline void update_function_graph_func(void) { }
 #endif
 
+
 static ftrace_func_t ftrace_ops_get_list_func(struct ftrace_ops *ops)
 {
 	/*
@@ -1548,6 +1549,7 @@ ftrace_ops_test(struct ftrace_ops *ops, unsigned long ip, void *regs)
 		}				\
 	}
 
+
 static int ftrace_cmp_recs(const void *a, const void *b)
 {
 	const struct dyn_ftrace *key = a;
@@ -2188,6 +2190,7 @@ ftrace_find_tramp_ops_curr(struct dyn_ftrace *rec)
 		 */
 		if (op->flags & FTRACE_OPS_FL_ADDING)
 			continue;
+
 
 		/*
 		 * If the ops is being modified and is in the old
@@ -3573,6 +3576,7 @@ ftrace_match_records(struct ftrace_hash *hash, char *buff, int len)
 	return match_records(hash, buff, len, NULL);
 }
 
+
 /*
  * We register the module command as a template to show others how
  * to register the a command as well.
@@ -3691,6 +3695,7 @@ static void __disable_ftrace_function_probe(void)
 
 	ftrace_probe_registered = 0;
 }
+
 
 static void ftrace_free_entry(struct ftrace_func_probe *entry)
 {

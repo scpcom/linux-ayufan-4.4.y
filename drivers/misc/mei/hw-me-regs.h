@@ -195,6 +195,7 @@ access to ME_CBD */
 /* ME Interrupt Enable HRA - host read only access to ME_IE */
 #define ME_IE_HRA         0x00000001
 
+
 /* H_HPG_CSR register bits */
 #define H_HPG_CSR_PGIHEXR 0x00000001
 #define H_HPG_CSR_PGI     0x00000002

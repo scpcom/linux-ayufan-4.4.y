@@ -21,6 +21,7 @@
 #include <asm/eisa_bus.h>
 #include <asm/eisa_eeprom.h>
 
+
 /*
  * Todo:
  * 
@@ -33,6 +34,7 @@
 #define EPI 0xc80
 #define NUM_SLOT 16
 #define SLOT2PORT(x) (x<<12)
+
 
 /* macros to handle unaligned accesses and 
  * byte swapping. The data in the EEPROM is
@@ -114,6 +116,7 @@ static int configure_memory(const unsigned char *buf,
 	return len;
 }
 
+
 static int configure_irq(const unsigned char *buf)
 {
 	int len;
@@ -143,6 +146,7 @@ static int configure_irq(const unsigned char *buf)
 	
 	return len;
 }
+
 
 static int configure_dma(const unsigned char *buf)
 {
@@ -200,6 +204,7 @@ static int configure_port(const unsigned char *buf, struct resource *io_parent,
 	
 	return len;
 }
+
 
 /* byte 1 and 2 is the port number to write
  * and at byte 3 the value to write starts.
@@ -476,6 +481,7 @@ static int init_slot(int slot, struct eeprom_eisa_slot_info *es)
 	return 0;
 }
 
+
 int eisa_enumerator(unsigned long eeprom_addr,
 		    struct resource *io_parent, struct resource *mem_parent) 
 {
@@ -512,3 +518,4 @@ int eisa_enumerator(unsigned long eeprom_addr,
 	}
 	return eh->num_slots;
 }
+

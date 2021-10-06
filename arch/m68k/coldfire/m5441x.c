@@ -133,6 +133,7 @@ struct clk *mcf_clks[] = {
 	NULL,
 };
 
+
 static struct clk * const enable_clks[] __initconst = {
 	/* make sure these clocks are enabled */
 	&__clk_0_18, /* intc0 */
@@ -221,6 +222,7 @@ void __init config_BSP(char *commandp, int size)
 	m5441x_uarts_init();
 	m5441x_fec_init();
 }
+
 
 #if IS_ENABLED(CONFIG_RTC_DRV_M5441x)
 static struct resource m5441x_rtc_resources[] = {

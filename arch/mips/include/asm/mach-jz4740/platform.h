@@ -13,6 +13,7 @@
  *
  */
 
+
 #ifndef __JZ4740_PLATFORM_H
 #define __JZ4740_PLATFORM_H
 

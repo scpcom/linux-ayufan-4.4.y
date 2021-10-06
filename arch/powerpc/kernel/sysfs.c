@@ -462,6 +462,7 @@ static ssize_t __used \
 #define HAS_PPC_PMC_G4		1
 #endif
 
+
 #ifdef HAS_PPC_PMC_CLASSIC
 SYSFS_PMCSETUP(mmcr0, SPRN_MMCR0);
 SYSFS_PMCSETUP(mmcr1, SPRN_MMCR1);
@@ -514,6 +515,7 @@ static void read_dscr(void *val)
 {
 	*(unsigned long *)val = get_paca()->dscr_default;
 }
+
 
 /**
  * write_dscr() - Update the cpu specific DSCR default
@@ -943,6 +945,7 @@ int cpu_add_dev_attr_group(struct attribute_group *attrs)
 }
 EXPORT_SYMBOL_GPL(cpu_add_dev_attr_group);
 
+
 void cpu_remove_dev_attr(struct device_attribute *attr)
 {
 	int cpu;
@@ -972,6 +975,7 @@ void cpu_remove_dev_attr_group(struct attribute_group *attrs)
 	mutex_unlock(&cpu_mutex);
 }
 EXPORT_SYMBOL_GPL(cpu_remove_dev_attr_group);
+
 
 /* NUMA stuff */
 

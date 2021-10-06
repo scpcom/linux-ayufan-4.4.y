@@ -65,6 +65,7 @@ TRACE_MAKE_SYSTEM_STR();
 			     PARAMS(print));		       \
 	DEFINE_EVENT(name, name, PARAMS(proto), PARAMS(args));
 
+
 #undef __field
 #define __field(type, item)		type	item;
 

@@ -50,3 +50,4 @@ FILE *prepare_output(const char *dir);
 
 int prepare_config(const char *path, struct config *config);
 struct config *prepare_default_config();
+

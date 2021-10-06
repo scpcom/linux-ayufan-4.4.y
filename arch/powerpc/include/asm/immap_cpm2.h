@@ -62,6 +62,8 @@ typedef union sys_conf {
 	sysconf_85xx_cpm2_t	siu_85xx;
 } sysconf_cpm2_t;
 
+
+
 /* Memory controller registers.
 */
 typedef struct	mem_ctlr {
@@ -435,6 +437,7 @@ typedef struct tclayer {
 	u16	tc_ecc;
 	u8	res1[12];
 } tclayer_t;
+
 
 /* I2C
 */

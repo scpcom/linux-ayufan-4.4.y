@@ -2216,6 +2216,7 @@ static void efx_watchdog(struct net_device *net_dev)
 	efx_schedule_reset(efx, RESET_TYPE_TX_WATCHDOG);
 }
 
+
 /* Context: process, rtnl_lock() held. */
 static int efx_change_mtu(struct net_device *net_dev, int new_mtu)
 {
@@ -3044,6 +3045,7 @@ static void efx_probe_vpd_strings(struct efx_nic *efx)
 
 	snprintf(efx->vpd_sn, j + 1, "%s", &vpd_data[i]);
 }
+
 
 /* Main body of NIC initialisation
  * This is called at module load (or hotplug insertion, theoretically).

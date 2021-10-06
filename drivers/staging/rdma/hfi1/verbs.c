@@ -414,6 +414,7 @@ static int post_one_send(struct hfi1_qp *qp, struct ib_send_wr *wr)
 	pd = to_ipd(qp->ibqp.pd);
 	wqe = get_swqe_ptr(qp, qp->s_head);
 
+
 	if (qp->ibqp.qp_type != IB_QPT_UC &&
 	    qp->ibqp.qp_type != IB_QPT_RC)
 		memcpy(&wqe->ud_wr, ud_wr(wr), sizeof(wqe->ud_wr));
@@ -594,6 +595,7 @@ dropit:
 	ibp->n_pkt_drops++;
 	return 0;
 }
+
 
 /**
  * hfi1_ib_rcv - process an incoming packet
@@ -1268,6 +1270,7 @@ static inline int egress_pkey_check(struct hfi1_pportdata *ppd,
 	if ((sc5 == 0xf) && ((pkey & PKEY_LOW_15_MASK) != PKEY_LOW_15_MASK))
 		goto bad;
 
+
 	/* Is the pkey = 0x0, or 0x8000? */
 	if ((pkey & PKEY_LOW_15_MASK) == 0)
 		goto bad;
@@ -1922,6 +1925,7 @@ int hfi1_register_ib_device(struct hfi1_devdata *dd)
 	ret = hfi1_qp_init(dev);
 	if (ret)
 		goto err_qp_init;
+
 
 	for (i = 0; i < dd->num_pports; i++)
 		init_ibport(ppd + i);

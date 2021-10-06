@@ -27,6 +27,7 @@
 #include <asm/ebcdic.h>
 #include <asm/extmem.h>
 
+
 #define MON_COLLECT_SAMPLE 0x80
 #define MON_COLLECT_EVENT  0x40
 #define MON_SERVICE	   "*MONITOR"
@@ -223,6 +224,7 @@ static struct mon_msg *mon_next_message(struct mon_private *monpriv)
 	}
 	return monmsg;
 }
+
 
 /******************************************************************************
  *                               IUCV handler                                 *
@@ -453,6 +455,7 @@ static struct miscdevice mon_dev = {
 	.minor      = MISC_DYNAMIC_MINOR,
 };
 
+
 /******************************************************************************
  *				suspend / resume			      *
  *****************************************************************************/
@@ -538,6 +541,7 @@ static struct device_driver monreader_driver = {
 	.bus  = &iucv_bus,
 	.pm   = &monreader_pm_ops,
 };
+
 
 /******************************************************************************
  *                              module init/exit                              *
@@ -632,6 +636,7 @@ static void __exit mon_exit(void)
 	iucv_unregister(&monreader_iucv_handler, 1);
 	return;
 }
+
 
 module_init(mon_init);
 module_exit(mon_exit);

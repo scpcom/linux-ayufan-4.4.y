@@ -211,6 +211,7 @@ static void __init at2440evb_init(void)
 	platform_add_devices(at2440evb_devices, ARRAY_SIZE(at2440evb_devices));
 }
 
+
 MACHINE_START(AT2440EVB, "AT2440EVB")
 	.atag_offset	= 0x100,
 	.map_io		= at2440evb_map_io,

@@ -72,6 +72,7 @@ struct ap_queue_status {
 	unsigned int pad2		: 16;
 } __packed;
 
+
 static inline int ap_test_bit(unsigned int *ptr, unsigned int nr)
 {
 	return (*ptr & (0x80000000u >> nr)) != 0;

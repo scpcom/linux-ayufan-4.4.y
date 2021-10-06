@@ -11,6 +11,7 @@
 #ifndef _LINUX_ZORRO_H
 #define _LINUX_ZORRO_H
 
+
 #include <uapi/linux/zorro.h>
 
 #include <linux/device.h>
@@ -19,6 +20,7 @@
 #include <linux/mod_devicetable.h>
 
 #include <asm/zorro.h>
+
 
     /*
      *  Zorro devices
@@ -37,11 +39,13 @@ struct zorro_dev {
 
 #define	to_zorro_dev(n)	container_of(n, struct zorro_dev, dev)
 
+
     /*
      *  Zorro bus
      */
 
 extern struct bus_type zorro_bus_type;
+
 
     /*
      *  Zorro device drivers
@@ -58,8 +62,10 @@ struct zorro_driver {
 
 #define	to_zorro_driver(drv)	container_of(drv, struct zorro_driver, driver)
 
+
 #define zorro_for_each_dev(dev)	\
 	for (dev = &zorro_autocon[0]; dev < zorro_autocon+zorro_num_autocon; dev++)
+
 
 /* New-style probing */
 extern int zorro_register_driver(struct zorro_driver *);
@@ -70,8 +76,10 @@ static inline struct zorro_driver *zorro_dev_driver(const struct zorro_dev *z)
     return z->driver;
 }
 
+
 extern unsigned int zorro_num_autocon;	/* # of autoconfig devices found */
 extern struct zorro_dev *zorro_autocon;
+
 
     /*
      * Minimal information about a Zorro device, passed from bootinfo
@@ -87,6 +95,7 @@ struct zorro_dev_init {
 };
 
 extern struct zorro_dev_init zorro_autocon_init[ZORRO_NUM_AUTO] __initdata;
+
 
     /*
      *  Zorro Functions
@@ -119,6 +128,7 @@ static inline void zorro_set_drvdata (struct zorro_dev *z, void *data)
 	dev_set_drvdata(&z->dev, data);
 }
 
+
     /*
      *  Bitmask indicating portions of available Zorro II RAM that are unused
      *  by the system. Every bit represents a 64K chunk, for a maximum of 8MB
@@ -136,5 +146,6 @@ extern DECLARE_BITMAP(zorro_unused_z2ram, 128);
 #define Z2RAM_CHUNKSIZE		(0x00010000)
 #define Z2RAM_CHUNKMASK		(0x0000ffff)
 #define Z2RAM_CHUNKSHIFT	(16)
+
 
 #endif /* _LINUX_ZORRO_H */

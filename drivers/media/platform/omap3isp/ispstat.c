@@ -471,6 +471,7 @@ static void isp_stat_queue_event(struct ispstat *stat, int err)
 	v4l2_event_queue(vdev, &event);
 }
 
+
 /*
  * omap3isp_stat_request_statistics - Request statistics.
  * @data: Pointer to return statistics data.

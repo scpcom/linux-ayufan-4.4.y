@@ -183,6 +183,7 @@
 #define BA1_FRSC                                0x00030038
 #define BA1_OMNI_MEM                            0x000E0000
 
+
 /*
  *  The following defines are for the flags in the host interrupt status
  *  register.
@@ -1630,6 +1631,7 @@
 #define CS46XX_MIXER_SPDIF_INPUT_ELEMENT    1
 #define CS46XX_MIXER_SPDIF_OUTPUT_ELEMENT   2
 
+
 struct snd_cs46xx_pcm {
 	struct snd_dma_buffer hw_buf;
   
@@ -1676,6 +1678,7 @@ struct snd_cs46xx {
 		struct snd_pcm_indirect pcm_rec;
 		struct snd_pcm_substream *substream;
 	} capt;
+
 
 	int nr_ac97_codecs;
 	struct snd_ac97_bus *ac97_bus;

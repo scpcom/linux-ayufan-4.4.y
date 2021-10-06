@@ -207,6 +207,7 @@ struct edac_device_instance {
 	struct kobject kobj;
 };
 
+
 /*
  * Abstract edac_device control info structure
  *

@@ -1298,6 +1298,7 @@ int cypress_populate_smc_initial_state(struct radeon_device *rdev,
 
 	table->initialState.levels[0].bSP = cpu_to_be32(pi->dsp);
 
+
 	if (pi->boot_in_gen2)
 		table->initialState.levels[0].gen2PCIE = 1;
 	else

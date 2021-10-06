@@ -44,6 +44,7 @@ static int acpi_processor_errata_piix4(struct pci_dev *dev)
 	u8 value1 = 0;
 	u8 value2 = 0;
 
+
 	if (!dev)
 		return -EINVAL;
 

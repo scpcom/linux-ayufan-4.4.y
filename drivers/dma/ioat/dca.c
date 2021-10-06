@@ -322,6 +322,7 @@ struct dca_provider *ioat_dca_init(struct pci_dev *pdev, void __iomem *iobase)
 		       ioatdca->dca_base + IOAT3_PCI_CONTROL_OFFSET);
 	}
 
+
 	/* TODO version, compatibility and configuration checks */
 
 	/* copy out the APIC to DCA tag map */

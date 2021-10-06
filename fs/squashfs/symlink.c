@@ -112,6 +112,7 @@ error_out:
 	return 0;
 }
 
+
 const struct address_space_operations squashfs_symlink_aops = {
 	.readpage = squashfs_symlink_readpage
 };
@@ -123,3 +124,4 @@ const struct inode_operations squashfs_symlink_inode_ops = {
 	.getxattr = generic_getxattr,
 	.listxattr = squashfs_listxattr
 };
+

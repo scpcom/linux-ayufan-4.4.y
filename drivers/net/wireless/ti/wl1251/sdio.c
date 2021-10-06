@@ -67,6 +67,7 @@ static const struct sdio_device_id wl1251_devices[] = {
 };
 MODULE_DEVICE_TABLE(sdio, wl1251_devices);
 
+
 static void wl1251_sdio_read(struct wl1251 *wl, int addr,
 			     void *buf, size_t len)
 {
@@ -184,6 +185,7 @@ static int wl1251_sdio_set_power(struct wl1251 *wl, bool enable)
 		 */
 		if (gpio_is_valid(wl->power_gpio))
 			gpio_set_value(wl->power_gpio, true);
+
 
 		ret = pm_runtime_get_sync(&func->dev);
 		if (ret < 0) {

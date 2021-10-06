@@ -33,6 +33,7 @@ enum {
 	LDISC_SEM_OTHER,
 };
 
+
 /*
  *	This guards the refcounted line discipline lists. The lock
  *	must be taken with irqs off because there are hangup path
@@ -301,6 +302,7 @@ void tty_ldisc_deref(struct tty_ldisc *ld)
 	ldsem_up_read(&ld->tty->ldisc_sem);
 }
 EXPORT_SYMBOL_GPL(tty_ldisc_deref);
+
 
 static inline int __lockfunc
 __tty_ldisc_lock(struct tty_struct *tty, unsigned long timeout)
@@ -611,6 +613,7 @@ static void tty_reset_termios(struct tty_struct *tty)
 	tty->termios.c_ospeed = tty_termios_baud_rate(&tty->termios);
 	up_write(&tty->termios_rwsem);
 }
+
 
 /**
  *	tty_ldisc_reinit	-	reinitialise the tty ldisc

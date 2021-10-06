@@ -624,6 +624,7 @@ irqreturn_t fhci_irq(struct usb_hcd *hcd)
 	return IRQ_HANDLED;
 }
 
+
 /*
  * Process normal completions(error or success) and clean the schedule.
  *

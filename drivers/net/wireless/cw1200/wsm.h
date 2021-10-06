@@ -1098,6 +1098,7 @@ struct wsm_tx_queue_params {
 	struct wsm_set_tx_queue_params params[4];
 };
 
+
 #define WSM_TX_QUEUE_SET(queue_params, queue, ack_policy, allowed_time,\
 		max_life_time)	\
 do {							\
@@ -1477,6 +1478,7 @@ static inline int wsm_set_template_frame(struct cw1200_common *priv,
 	return ret;
 }
 
+
 struct wsm_protected_mgmt_policy {
 	bool protectedMgmtEnable;
 	bool unprotectedMgmtFramesAllowed;
@@ -1766,6 +1768,7 @@ static inline int wsm_use_multi_tx_conf(struct cw1200_common *priv,
 	return wsm_write_mib(priv, WSM_MIB_USE_MULTI_TX_CONF,
 			&arg, sizeof(arg));
 }
+
 
 /* 4.26 SetUpasdInformation */
 struct wsm_uapsd_info {

@@ -41,6 +41,7 @@
  */
 #include <linux/ioport.h>
 
+
 #define IFORCE_MAX_LENGTH	16
 
 /* iforce::bus */
@@ -141,6 +142,7 @@ struct iforce {
 
 /* Encode a time value */
 #define TIME_SCALE(a)	(a)
+
 
 /* Public functions */
 /* iforce-serio.c */

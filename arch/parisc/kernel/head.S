@@ -103,6 +103,7 @@ $bss_loop:
 	ldo             ASM_PGD_ENTRY_SIZE(%r4),%r4
 #endif
 
+
 	/* Now initialize the PTEs themselves.  We use RWX for
 	 * everything ... it will get remapped correctly later */
 	ldo		0+_PAGE_KERNEL_RWX(%r0),%r3 /* Hardwired 0 phys addr start */

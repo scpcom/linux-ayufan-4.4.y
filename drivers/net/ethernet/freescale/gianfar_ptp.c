@@ -126,6 +126,7 @@ struct gianfar_ptp_registers {
 #define PRSC_OCK_SHIFT        (0) /* Output clock division/prescale factor. */
 #define PRSC_OCK_MASK         (0xffff)
 
+
 #define DRIVER		"gianfar_ptp"
 #define DEFAULT_CKSEL	1
 #define N_EXT_TS	2

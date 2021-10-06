@@ -32,12 +32,14 @@
 #ifndef _SVGA_ESCAPE_H_
 #define _SVGA_ESCAPE_H_
 
+
 /*
  * Namespace IDs for the escape command
  */
 
 #define SVGA_ESCAPE_NSID_VMWARE 0x00000000
 #define SVGA_ESCAPE_NSID_DEVEL  0xFFFFFFFF
+
 
 /*
  * Within SVGA_ESCAPE_NSID_VMWARE, we multiplex commands according to
@@ -54,6 +56,7 @@
  */
 
 #define SVGA_ESCAPE_VMWARE_MAJOR_MASK  0xFFFF0000
+
 
 /*
  * SVGA Hint commands.

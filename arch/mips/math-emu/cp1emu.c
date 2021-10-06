@@ -1404,6 +1404,7 @@ static const unsigned char negative_cmptab[8] = {
 	/* Reserved */
 };
 
+
 /*
  * Additional MIPS4 instructions
  */
@@ -1642,6 +1643,8 @@ static int fpux_emu(struct pt_regs *xcp, struct mips_fpu_struct *ctx,
 
 	return 0;
 }
+
+
 
 /*
  * Emulate a single COP1 arithmetic instruction.

@@ -23,6 +23,7 @@
 
 #include "ak4671.h"
 
+
 /* ak4671 register cache & default register settings */
 static const struct reg_default ak4671_reg_defaults[] = {
 	{ 0x00, 0x00 },	/* AK4671_AD_DA_POWER_MANAGEMENT	(0x00)	*/

@@ -308,6 +308,7 @@ static struct fwevent wlanevents[] =
 	{0, NULL},
 };
 
+
 static void rtw_correct_TSF(struct rtw_adapter *padapter)
 {
 	hw_var_set_correct_tsf(padapter);
@@ -4284,6 +4285,7 @@ static struct wlan_bssid_ex *collect_bss_info(struct rtw_adapter *padapter,
 		} else
 			pmlmepriv->num_sta_no_ht++;
 	}
+
 
 	/*  mark bss info receiving from nearby channel as SignalQuality 101 */
 	if (bssid->DSConfig != rtw_get_oper_ch23a(padapter))

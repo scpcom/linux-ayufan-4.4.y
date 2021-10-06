@@ -401,6 +401,7 @@ MODULE_AUTHOR				("Andrew Veliath <andrewtv@usa.net>");
 MODULE_DESCRIPTION			("Turtle Beach MultiSound Driver Base");
 MODULE_LICENSE("GPL");
 
+
 int init_module(void)
 {
 	return 0;

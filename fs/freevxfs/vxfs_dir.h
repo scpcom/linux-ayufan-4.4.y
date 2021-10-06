@@ -36,6 +36,7 @@
  * This file contains the definition of the vxfs directory format.
  */
 
+
 /*
  * VxFS directory block header.
  *

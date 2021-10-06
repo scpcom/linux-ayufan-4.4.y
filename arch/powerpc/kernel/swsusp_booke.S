@@ -42,6 +42,7 @@
 _GLOBAL(swsusp_save_area)
 	.space	SL_SIZE
 
+
 	.section .text
 	.align	5
 

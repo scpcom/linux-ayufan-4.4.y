@@ -282,6 +282,7 @@ enum hdmi_3d_structure {
 	HDMI_3D_STRUCTURE_SIDE_BY_SIDE_HALF = 8,
 };
 
+
 struct hdmi_vendor_infoframe {
 	enum hdmi_infoframe_type type;
 	unsigned char version;

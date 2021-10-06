@@ -1588,6 +1588,7 @@ adc_input_select_SB055x(struct hw *hw, enum ADCSRC type, unsigned char boost)
 	return 0;
 }
 
+
 static int
 adc_input_select_SBx(struct hw *hw, enum ADCSRC type, unsigned char boost)
 {

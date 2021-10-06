@@ -187,6 +187,7 @@
 #define FEC_RXIC2		0xfff
 #endif /* CONFIG_M5272 */
 
+
 /*
  *	Define the buffer descriptor structure.
  */
@@ -271,6 +272,7 @@ struct bufdesc_ex {
 #define BD_ENET_TX_TS		0x20000000
 #define BD_ENET_TX_PINS		0x10000000
 #define BD_ENET_TX_IINS		0x08000000
+
 
 /* This device has up to three irqs on some platforms */
 #define FEC_IRQ_NUM		3

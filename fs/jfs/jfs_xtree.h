@@ -24,6 +24,7 @@
 
 #include "jfs_btree.h"
 
+
 /*
  *	extent allocation descriptor (xad)
  */
@@ -68,6 +69,7 @@ struct xadlist {
 #define XAD_COMPRESSED	0x04	/* compressed with recorded length */
 #define XAD_NOTRECORDED 0x08	/* allocated but not recorded */
 #define XAD_COW		0x10	/* copy-on-write */
+
 
 /* possible values for maxentry */
 #define XTROOTINITSLOT_DIR 6

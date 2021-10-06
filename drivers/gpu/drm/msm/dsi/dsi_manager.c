@@ -837,3 +837,4 @@ void msm_dsi_manager_unregister(struct msm_dsi *msm_dsi)
 		msm_dsi_host_unregister(msm_dsi->host);
 	msm_dsim->dsi[msm_dsi->id] = NULL;
 }
+

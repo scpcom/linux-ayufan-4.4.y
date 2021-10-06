@@ -34,6 +34,7 @@
 
 #define DRV_NAME "team"
 
+
 /**********
  * Helpers
  **********/
@@ -95,6 +96,7 @@ static void team_refresh_port_linkup(struct team_port *port)
 	port->linkup = port->user.linkup_enabled ? port->user.linkup :
 						   port->state.linkup;
 }
+
 
 /*******************
  * Options handling
@@ -384,6 +386,7 @@ void team_options_change_check(struct team *team)
 }
 EXPORT_SYMBOL(team_options_change_check);
 
+
 /****************
  * Mode handling
  ****************/
@@ -610,6 +613,7 @@ static int team_change_mode(struct team *team, const char *kind)
 	return 0;
 }
 
+
 /*********************
  * Peers notification
  *********************/
@@ -654,6 +658,7 @@ static void team_notify_peers_fini(struct team *team)
 {
 	cancel_delayed_work_sync(&team->notify_peers.dw);
 }
+
 
 /*******************************
  * Send multicast group rejoins
@@ -700,6 +705,7 @@ static void team_mcast_rejoin_fini(struct team *team)
 	cancel_delayed_work_sync(&team->mcast_rejoin.dw);
 }
 
+
 /************************
  * Rx path frame handler
  ************************/
@@ -744,6 +750,7 @@ static rx_handler_result_t team_handle_frame(struct sk_buff **pskb)
 
 	return res;
 }
+
 
 /*************************************
  * Multiqueue Tx port select override
@@ -888,6 +895,7 @@ static void team_queue_override_port_del(struct team *team,
 	__team_queue_override_port_del(team, port);
 	__team_queue_override_enabled_check(team);
 }
+
 
 /****************
  * Port handling
@@ -1283,6 +1291,7 @@ static int team_port_del(struct team *team, struct net_device *port_dev)
 
 	return 0;
 }
+
 
 /*****************
  * Net device ops
@@ -2113,6 +2122,7 @@ static struct rtnl_link_ops team_link_ops __read_mostly = {
 	.get_num_rx_queues	= team_get_num_rx_queues,
 };
 
+
 /***********************************
  * Generic netlink custom interface
  ***********************************/
@@ -2740,6 +2750,7 @@ static void team_nl_fini(void)
 	genl_unregister_family(&team_nl_family);
 }
 
+
 /******************
  * Change checkers
  ******************/
@@ -2841,6 +2852,7 @@ static void team_port_change_check(struct team_port *port, bool linkup)
 	mutex_unlock(&team->lock);
 }
 
+
 /************************************
  * Net device notifier event handler
  ************************************/
@@ -2893,6 +2905,7 @@ static int team_device_event(struct notifier_block *unused,
 static struct notifier_block team_notifier_block __read_mostly = {
 	.notifier_call = team_device_event,
 };
+
 
 /***********************
  * Module init and exit

@@ -191,6 +191,8 @@ aaci_chan_wait_ready(struct aaci_runtime *aacirun, unsigned long mask)
 	} while (val & mask && timeout--);
 }
 
+
+
 /*
  * Interrupt support.
  */
@@ -341,6 +343,8 @@ static irqreturn_t aaci_irq(int irq, void *devid)
 	return mask ? IRQ_HANDLED : IRQ_NONE;
 }
 
+
+
 /*
  * ALSA support.
  */
@@ -447,6 +451,7 @@ static int aaci_pcm_open(struct snd_pcm_substream *substream)
 
 	return ret;
 }
+
 
 /*
  * Common ALSA stuff
@@ -560,6 +565,7 @@ static snd_pcm_uframes_t aaci_pcm_pointer(struct snd_pcm_substream *substream)
 
 	return bytes_to_frames(runtime, bytes);
 }
+
 
 /*
  * Playback specific ALSA stuff
@@ -778,6 +784,7 @@ static SIMPLE_DEV_PM_OPS(aaci_dev_pm_ops, aaci_suspend, aaci_resume);
 #else
 #define AACI_DEV_PM_OPS NULL
 #endif
+
 
 static struct ac97_pcm ac97_defs[] = {
 	[0] = {	/* Front PCM */

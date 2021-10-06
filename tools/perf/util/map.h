@@ -101,6 +101,7 @@ static inline u64 identity__map_ip(struct map *map __maybe_unused, u64 ip)
 	return ip;
 }
 
+
 /* rip/ip <-> addr suitable for passing to `objdump --start-address=` */
 u64 map__rip_2objdump(struct map *map, u64 rip);
 

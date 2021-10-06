@@ -124,6 +124,7 @@ static void legacy_dvb_usb_read_remote_control(struct work_struct *work)
 		goto schedule;
 	}
 
+
 	switch (state) {
 		case REMOTE_NO_KEY_PRESSED:
 			break;

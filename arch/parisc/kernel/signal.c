@@ -150,6 +150,8 @@ sys_rt_sigreturn(struct pt_regs *regs, int in_syscall)
 			goto give_sigsegv;
 	}
 		
+
+
 	/* If we are on the syscall path IAOQ will not be restored, and
 	 * if we are on the interrupt path we must not corrupt gr31.
 	 */
@@ -243,6 +245,7 @@ setup_rt_frame(struct ksignal *ksig, sigset_t *set, struct pt_regs *regs,
 	DBG(1,"SETUP_RT_FRAME: START\n");
 	DBG(1,"setup_rt_frame: frame %p info %p\n", frame, ksig->info);
 
+	
 #ifdef CONFIG_64BIT
 
 	compat_frame = (struct compat_rt_sigframe __user *)frame;
@@ -400,6 +403,7 @@ setup_rt_frame(struct ksignal *ksig, sigset_t *set, struct pt_regs *regs,
 	       regs->gr[30] + sigframe_size);
 	/* Raise the user stack pointer to make a proper call frame. */
 	regs->gr[30] = (A(frame) + sigframe_size);
+
 
 	DBG(1,"setup_rt_frame: sig deliver (%s,%d) frame=0x%p sp=%#lx iaoq=%#lx/%#lx rp=%#lx\n",
 	       current->comm, current->pid, frame, regs->gr[30],

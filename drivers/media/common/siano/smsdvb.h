@@ -28,6 +28,7 @@ typedef void (*sms_prt_isdb_stats_ex_t)
 			(struct smsdvb_debugfs *debug_data,
 			 struct sms_isdbt_stats_ex *p);
 
+
 struct smsdvb_client_t {
 	struct list_head entry;
 
@@ -126,3 +127,4 @@ static inline int smsdvb_debugfs_register(void)
 static inline void smsdvb_debugfs_unregister(void) {};
 
 #endif
+

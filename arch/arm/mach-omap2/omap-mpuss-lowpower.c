@@ -338,6 +338,7 @@ int omap4_hotplug_cpu(unsigned int cpu, unsigned int power_state)
 	return 0;
 }
 
+
 /*
  * Enable Mercury Fast HG retention mode by default.
  */

@@ -180,6 +180,7 @@ static void ldisc_receive(struct tty_struct *tty, const u8 *data,
 	 * This is not yet handled.
 	 */
 
+
 	/*
 	 * Workaround for garbage at start of transmission,
 	 * only enable if STX handling is not enabled.
@@ -294,6 +295,7 @@ static int caif_xmit(struct sk_buff *skb, struct net_device *dev)
 	return handle_tx(ser);
 }
 
+
 static void ldisc_tx_wakeup(struct tty_struct *tty)
 {
 	struct ser_device *ser;
@@ -303,6 +305,7 @@ static void ldisc_tx_wakeup(struct tty_struct *tty)
 	WARN_ON(ser->tty != tty);
 	handle_tx(ser);
 }
+
 
 static void ser_release(struct work_struct *work)
 {
@@ -433,6 +436,7 @@ static void caifdev_setup(struct net_device *dev)
 	serdev->common.use_fcs = ser_use_fcs;
 	serdev->dev = dev;
 }
+
 
 static int caif_net_open(struct net_device *dev)
 {

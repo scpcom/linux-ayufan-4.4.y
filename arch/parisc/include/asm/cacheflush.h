@@ -158,3 +158,4 @@ static inline void __kunmap_atomic(void *addr)
 #define kmap_atomic_pfn(pfn)	kmap_atomic(pfn_to_page(pfn))
 
 #endif /* _PARISC_CACHEFLUSH_H */
+

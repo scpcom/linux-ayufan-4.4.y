@@ -136,6 +136,7 @@ static int mei_me_probe(struct pci_dev *pdev, const struct pci_device_id *ent)
 	unsigned int irqflags;
 	int err;
 
+
 	if (!mei_me_quirk_probe(pdev, cfg))
 		return -ENODEV;
 
@@ -166,6 +167,7 @@ static int mei_me_probe(struct pci_dev *pdev, const struct pci_device_id *ent)
 		dev_err(&pdev->dev, "No usable DMA configuration, aborting\n");
 		goto release_regions;
 	}
+
 
 	/* allocates and initializes the mei dev structure */
 	dev = mei_me_dev_init(pdev, cfg);
@@ -268,6 +270,7 @@ static void mei_me_remove(struct pci_dev *pdev)
 
 	hw = to_me_hw(dev);
 
+
 	dev_dbg(&pdev->dev, "stop\n");
 	mei_stop(dev);
 
@@ -289,6 +292,7 @@ static void mei_me_remove(struct pci_dev *pdev)
 
 	pci_release_regions(pdev);
 	pci_disable_device(pdev);
+
 
 }
 #ifdef CONFIG_PM_SLEEP

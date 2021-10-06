@@ -122,3 +122,4 @@ int init_smt(struct s_smc *smc, u_char *mac_addr)
 
 	return 0;
 }
+

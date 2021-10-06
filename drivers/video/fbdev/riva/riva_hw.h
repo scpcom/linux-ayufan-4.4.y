@@ -560,3 +560,4 @@ int RivaGetConfig(RIVA_HW_INST *, unsigned int);
     (hwinst).FifoFreeCount -= (cnt);                                \
 }
 #endif /* __RIVA_HW_H__ */
+

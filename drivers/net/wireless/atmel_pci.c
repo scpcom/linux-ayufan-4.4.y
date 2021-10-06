@@ -47,6 +47,7 @@ static struct pci_driver atmel_driver = {
 	.remove   = atmel_pci_remove,
 };
 
+
 static int atmel_pci_probe(struct pci_dev *pdev,
 				     const struct pci_device_id *pent)
 {

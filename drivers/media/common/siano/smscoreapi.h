@@ -243,6 +243,7 @@ enum sms_bandwidth_mode {
 	BW_UNKNOWN = 0xffff
 };
 
+
 #define MSG_HDR_FLAG_SPLIT_MSG				4
 
 #define MAX_GPIO_PIN_NUMBER					31
@@ -899,6 +900,7 @@ struct sms_isdbt_stats_ex {
 	u32 reserved4[4];
 };
 
+
 struct sms_pid_stats_data {
 	struct PID_BURST_S {
 		u32 size;
@@ -1065,6 +1067,7 @@ struct sms_i2c_res {
 	u8	Data[1];
 };
 
+
 struct smscore_config_gpio {
 #define SMS_GPIO_DIRECTION_INPUT  0
 #define SMS_GPIO_DIRECTION_OUTPUT 1
@@ -1169,6 +1172,7 @@ void smscore_set_board_id(struct smscore_device_t *core, int id);
 int smscore_get_board_id(struct smscore_device_t *core);
 
 int smscore_led_state(struct smscore_device_t *core, int led);
+
 
 /* ------------------------------------------------------------------------ */
 

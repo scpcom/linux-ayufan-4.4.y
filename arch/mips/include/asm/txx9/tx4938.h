@@ -259,6 +259,7 @@ struct tx4938_ccfg_reg {
 #define tx4938_sramcptr \
 		((struct tx4938_sramc_reg __iomem *)TX4938_SRAMC_REG)
 
+
 #define TX4938_REV_PCODE()	\
 	((__u32)__raw_readq(&tx4938_ccfgptr->crir) >> 16)
 

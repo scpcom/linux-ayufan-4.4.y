@@ -65,6 +65,7 @@ const char *usbip_speed_string(int num)
 	return "Unknown Speed";
 }
 
+
 #define DBG_UDEV_INTEGER(name)\
 	dbg("%-20s = %x", to_string(name), (int) udev->name)
 
@@ -112,6 +113,7 @@ void dump_usb_device(struct usbip_usb_device *udev)
 	DBG_UDEV_INTEGER(devnum);
 }
 
+
 int read_attr_value(struct udev_device *dev, const char *name,
 		    const char *format)
 {
@@ -149,6 +151,7 @@ err:
 	return num;
 }
 
+
 int read_attr_speed(struct udev_device *dev)
 {
 	const char *speed;
@@ -174,6 +177,7 @@ err:
 		(object)->name = (type) read_attr_value(dev, to_string(name), \
 							format);	      \
 	} while (0)
+
 
 int read_usb_device(struct udev_device *sdev, struct usbip_usb_device *udev)
 {
@@ -246,6 +250,7 @@ void usbip_names_get_product(char *buff, size_t size, uint16_t vendor,
 	prod = names_product(vendor, product);
 	if (!prod)
 		prod = "unknown product";
+
 
 	vend = names_vendor(vendor);
 	if (!vend)

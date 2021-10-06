@@ -405,6 +405,7 @@ struct knav_range_ops knav_gp_range_ops = {
 	.close_queue	= knav_gp_close_queue,
 };
 
+
 static int knav_queue_get_count(void *qhandle)
 {
 	struct knav_queue *qh = qhandle;
@@ -487,6 +488,7 @@ static inline int knav_queue_pdsp_wait(u32 * __iomem addr, unsigned timeout,
 	}
 	return val ? -ETIMEDOUT : 0;
 }
+
 
 static int knav_queue_flush(struct knav_queue *qh)
 {
@@ -607,6 +609,8 @@ int knav_queue_device_control(void *qhandle, enum knav_queue_ctrl_cmd cmd,
 }
 EXPORT_SYMBOL_GPL(knav_queue_device_control);
 
+
+
 /**
  * knav_queue_push()	- push data (or descriptor) to the tail of a queue
  * @qh			- hardware queue handle
@@ -713,6 +717,7 @@ static void kdesc_empty_pool(struct knav_pool *pool)
 	WARN_ON(i != pool->num_desc);
 	knav_queue_close(pool->queue);
 }
+
 
 /* Get the DMA address of a descriptor */
 dma_addr_t knav_pool_desc_virt_to_dma(void *ph, void *virt)
@@ -862,6 +867,7 @@ void knav_pool_destroy(void *ph)
 	devm_kfree(kdev->dev, pool);
 }
 EXPORT_SYMBOL_GPL(knav_pool_destroy);
+
 
 /**
  * knav_pool_desc_get()	- Get a descriptor from the pool

@@ -229,3 +229,4 @@ static struct usb_serial_driver * const serial_drivers[] = {
 };
 
 #endif
+

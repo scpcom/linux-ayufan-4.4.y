@@ -2354,6 +2354,7 @@ static void ip6_mc_clear_src(struct ifmcaddr6 *pmc)
 	pmc->mca_sfcount[MCAST_EXCLUDE] = 1;
 }
 
+
 static void igmp6_join_group(struct ifmcaddr6 *ma)
 {
 	unsigned long delay;
@@ -2437,6 +2438,7 @@ static void mld_ifc_event(struct inet6_dev *idev)
 	idev->mc_ifc_count = idev->mc_qrv;
 	mld_ifc_start_timer(idev, 1);
 }
+
 
 static void igmp6_timer_handler(unsigned long data)
 {

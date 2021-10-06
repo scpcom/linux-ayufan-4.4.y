@@ -101,3 +101,4 @@ int picolcd_resume_lcd(struct picolcd_data *data)
 		return 0;
 	return picolcd_set_contrast(data->lcd, data->lcd_contrast);
 }
+

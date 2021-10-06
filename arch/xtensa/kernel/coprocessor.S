@@ -11,6 +11,7 @@
  * Copyright (C) 2003 - 2007 Tensilica Inc.
  */
 
+
 #include <linux/linkage.h>
 #include <asm/asm-offsets.h>
 #include <asm/processor.h>
@@ -70,6 +71,7 @@ ENDPROC(fast_io_protect)
 		.long 0;						\
 	.endif;								\
 	.long THREAD_XTREGS_CP##x
+
 
 #define LOAD_CP_REGS(x)							\
 	.align 4;							\
@@ -182,6 +184,7 @@ ENDPROC(coprocessor_load)
  * Note that these functions don't update the coprocessor_owner information!
  *
  */
+
 
 ENTRY(coprocessor_flush)
 

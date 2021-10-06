@@ -49,6 +49,7 @@ static u64 MIC_Slow_Next_Timer_table[] = {
 	0x00003FC000000000ull,
 };
 
+
 int cbe_cpufreq_set_pmode(int cpu, unsigned int pmode)
 {
 	struct cbe_pmd_regs __iomem *pmd_regs;
@@ -100,6 +101,7 @@ int cbe_cpufreq_set_pmode(int cpu, unsigned int pmode)
 	return 0;
 }
 
+
 int cbe_cpufreq_get_pmode(int cpu)
 {
 	int ret;
@@ -110,3 +112,4 @@ int cbe_cpufreq_get_pmode(int cpu)
 
 	return ret;
 }
+

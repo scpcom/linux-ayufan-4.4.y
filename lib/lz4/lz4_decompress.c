@@ -177,6 +177,7 @@ static int lz4_uncompress_unknownoutputsize(const char *source, char *dest,
 	const BYTE *const iend = ip + isize;
 	const BYTE *ref;
 
+
 	BYTE *op = (BYTE *) dest;
 	BYTE * const oend = op + maxoutputsize;
 	BYTE *cpy;

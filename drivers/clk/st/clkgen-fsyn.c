@@ -443,6 +443,7 @@ static int quadfs_pll_enable(struct clk_hw *hw)
 	if (pll->data->bwfilter_present)
 		CLKGEN_WRITE(pll, ref_bw, PLL_BW_GOODREF);
 
+
 	CLKGEN_WRITE(pll, ndiv, pll->ndiv);
 
 	/*
@@ -922,6 +923,7 @@ static long quadfs_find_best_rate(struct clk_hw *hw, unsigned long drate,
 			return rate;
 	}
 
+
 	if (index == fs->data->rtbl_cnt)
 		*params = prev_params;
 
@@ -967,6 +969,7 @@ static long quadfs_round_rate(struct clk_hw *hw, unsigned long rate,
 	return rate;
 }
 
+
 static void quadfs_program_and_enable(struct st_clk_quadfs_fsynth *fs,
 		struct stm_fs *params)
 {
@@ -1004,6 +1007,8 @@ static int quadfs_set_rate(struct clk_hw *hw, unsigned long rate,
 
 	return 0;
 }
+
+
 
 static const struct clk_ops st_quadfs_ops = {
 	.enable		= quadfs_fsynth_enable,

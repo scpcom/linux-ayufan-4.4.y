@@ -12,6 +12,7 @@
 #define DP( A )
 #endif
 
+
 /* We don't have official vendor id yet... */
 #define SBNI_PCI_VENDOR 	0x55 
 #define SBNI_PCI_DEVICE 	0x9f
@@ -38,6 +39,7 @@ enum {
 	RC_RDY = 0x80
 };
 
+
 /* CSR1 mapping */
 #define PR_RES 0x80
 
@@ -62,6 +64,7 @@ struct sbni_csr1 {
 #define FRAME_SENT_BAD  (unsigned short)0x4000
 #define FRAME_SENT_OK   (unsigned short)0x3000
 
+
 /* state flags */
 enum {
 	FL_WAIT_ACK    = 0x01,
@@ -74,6 +77,7 @@ enum {
 #endif
 	FL_LINE_DOWN   = 0x40
 };
+
 
 enum {
 	DEFAULT_IOBASEADDR = 0x210,
@@ -115,6 +119,7 @@ struct sbni_in_stats {
 #define SIOCDEVENSLAVE  	SIOCDEVPRIVATE+4
 #define SIOCDEVEMANSIPATE  	SIOCDEVPRIVATE+5
 
+
 /* data packet for SIOCDEVGHWSTATE/SIOCDEVSHWSTATE ioctl requests */
 struct sbni_flags {
 	u32	rxl		: 4;
@@ -139,3 +144,4 @@ struct sbni_flags {
 #endif
 
 #endif
+

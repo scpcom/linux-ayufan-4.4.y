@@ -1092,6 +1092,7 @@ static int mwifiex_pcie_send_data_complete(struct mwifiex_adapter *adapter)
 			break;
 		}
 
+
 		if ((card->txbd_rdptr & reg->tx_mask) == num_tx_buffs)
 			card->txbd_rdptr = ((card->txbd_rdptr &
 					     reg->tx_rollover_ind) ^

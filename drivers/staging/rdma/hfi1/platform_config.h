@@ -199,6 +199,7 @@ enum platform_config_qsfp_power_class_encoding {
 	QSFP_POWER_CLASS_7
 };
 
+
 /*=====================================================
  *  Port table encodings
  *==================================================== */

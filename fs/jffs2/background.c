@@ -21,6 +21,7 @@
 #include <linux/kthread.h>
 #include "nodelist.h"
 
+
 static int jffs2_garbage_collect_thread(void *);
 
 void jffs2_garbage_collect_trigger(struct jffs2_sb_info *c)

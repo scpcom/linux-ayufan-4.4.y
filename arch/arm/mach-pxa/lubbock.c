@@ -334,6 +334,7 @@ static struct platform_device lubbock_cplds_device = {
 	.num_resources	= 3,
 };
 
+
 static struct platform_device *devices[] __initdata = {
 	&sa1111_device,
 	&smc91x_device,

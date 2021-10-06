@@ -447,3 +447,4 @@ static void iceland_ih_set_interrupt_funcs(struct amdgpu_device *adev)
 	if (adev->irq.ih_funcs == NULL)
 		adev->irq.ih_funcs = &iceland_ih_funcs;
 }
+

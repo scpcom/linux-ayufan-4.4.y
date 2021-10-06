@@ -4588,6 +4588,7 @@ enum wcn36xx_hal_thermal_mitigation_mode_type {
 	HAL_THERMAL_MITIGATION_MODE_MAX = WCN36XX_HAL_MAX_ENUM_SIZE,
 };
 
+
 /*
  *   Thermal Mitigation level.
  * Note the levels are incremental i.e WCN36XX_HAL_THERMAL_MITIGATION_LEVEL_2 =
@@ -4614,6 +4615,7 @@ enum wcn36xx_hal_thermal_mitigation_level_type {
 	HAL_THERMAL_MITIGATION_LEVEL_4,
 	HAL_THERMAL_MITIGATION_LEVEL_MAX = WCN36XX_HAL_MAX_ENUM_SIZE,
 };
+
 
 /* WCN36XX_HAL_SET_THERMAL_MITIGATION_REQ */
 struct set_thermal_mitigation_req_msg {

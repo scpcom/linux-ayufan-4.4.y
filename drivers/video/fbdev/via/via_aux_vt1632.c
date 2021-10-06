@@ -24,7 +24,9 @@
 #include <linux/slab.h>
 #include "via_aux.h"
 
+
 static const char *name = "VT1632 DVI Transmitter";
+
 
 static void probe(struct via_aux_bus *bus, u8 addr)
 {

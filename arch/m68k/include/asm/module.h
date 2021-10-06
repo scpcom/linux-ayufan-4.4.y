@@ -24,6 +24,7 @@ struct mod_arch_specific {
 	.fixup_end		= __stop_fixup,		\
 }
 
+
 #define m68k_fixup(type, addr)			\
 	"	.section \".m68k_fixup\",\"aw\"\n"	\
 	"	.long " #type "," #addr "\n"	\

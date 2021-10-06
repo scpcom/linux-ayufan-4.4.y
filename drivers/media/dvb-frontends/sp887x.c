@@ -20,6 +20,7 @@
 #include "dvb_frontend.h"
 #include "sp887x.h"
 
+
 struct sp887x_state {
 	struct i2c_adapter* i2c;
 	const struct sp887x_config* config;

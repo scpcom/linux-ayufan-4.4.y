@@ -17,6 +17,7 @@
 #include "hsr_forward.h"
 #include "hsr_framereg.h"
 
+
 static rx_handler_result_t hsr_handle_frame(struct sk_buff **pskb)
 {
 	struct sk_buff *skb = *pskb;
@@ -57,6 +58,7 @@ bool hsr_port_exists(const struct net_device *dev)
 	return rcu_access_pointer(dev->rx_handler) == hsr_handle_frame;
 }
 
+
 static int hsr_check_dev_ok(struct net_device *dev)
 {
 	/* Don't allow HSR on non-ethernet like devices */
@@ -93,6 +95,7 @@ static int hsr_check_dev_ok(struct net_device *dev)
 
 	return 0;
 }
+
 
 /* Setup device to be added to the HSR bridge. */
 static int hsr_portdev_setup(struct net_device *dev, struct hsr_port *port)

@@ -44,6 +44,7 @@ static int full_eeprom; /* default is only top 64B */
 module_param(full_eeprom, uint, 0644);
 MODULE_PARM_DESC(full_eeprom, "Allow access to full 128B EEPROM (dangerous)");
 
+
 static void solo_set_time(struct solo_dev *solo_dev)
 {
 	struct timespec ts;

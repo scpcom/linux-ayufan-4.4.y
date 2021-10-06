@@ -7,6 +7,7 @@
 #ifndef _UAPI_ASM_IA64_TERMIOS_H
 #define _UAPI_ASM_IA64_TERMIOS_H
 
+
 #include <asm/termbits.h>
 #include <asm/ioctls.h>
 
@@ -44,5 +45,6 @@ struct termio {
 #define TIOCM_LOOP	0x8000
 
 /* ioctl (fd, TIOCSERGETLSR, &result) where result may be as below */
+
 
 #endif /* _UAPI_ASM_IA64_TERMIOS_H */

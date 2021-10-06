@@ -22,3 +22,4 @@ void gfs2_sys_uninit(void);
 int gfs2_recover_set(struct gfs2_sbd *sdp, unsigned jid);
 
 #endif /* __SYS_DOT_H__ */
+

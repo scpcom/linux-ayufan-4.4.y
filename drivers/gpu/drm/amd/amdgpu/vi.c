@@ -1544,3 +1544,4 @@ const struct amd_ip_funcs vi_common_ip_funcs = {
 	.set_clockgating_state = vi_common_set_clockgating_state,
 	.set_powergating_state = vi_common_set_powergating_state,
 };
+

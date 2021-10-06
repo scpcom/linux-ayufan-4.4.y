@@ -20,8 +20,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
+
 /* driver definitions */
 #define DRIVER_NAME "radio-si470x"
+
 
 /* kernel includes */
 #include <linux/kernel.h>
@@ -38,6 +40,8 @@
 #include <media/v4l2-event.h>
 #include <media/v4l2-device.h>
 #include <asm/unaligned.h>
+
+
 
 /**************************************************************************
  * Register Definitions
@@ -130,6 +134,8 @@
 #define RDSD			15	/* RDSD */
 #define RDSD_RDSD		0xffff	/* bits 15..00: RDS Block D Data (Si4701 only) */
 
+
+
 /**************************************************************************
  * General Driver Definitions
  **************************************************************************/
@@ -179,11 +185,15 @@ struct si470x_device {
 #endif
 };
 
+
+
 /**************************************************************************
  * Firmware Versions
  **************************************************************************/
 
 #define RADIO_FW_VERSION	12
+
+
 
 /**************************************************************************
  * Frequency Multiplicator
@@ -197,6 +207,8 @@ struct si470x_device {
  * The FREQ_MUL is then: 1 MHz / 62.5 Hz = 16000
  */
 #define FREQ_MUL (1000000 / 62.5)
+
+
 
 /**************************************************************************
  * Common Functions

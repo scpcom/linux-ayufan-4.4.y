@@ -39,6 +39,7 @@
 #include "nx_csbcpb.h"
 #include "nx.h"
 
+
 /**
  * nx_hcall_sync - make an H_COP_OP hcall for the passed in op structure
  *
@@ -820,6 +821,7 @@ static int nx_remove(struct vio_dev *viodev)
 
 	return 0;
 }
+
 
 /* module wide initialization/cleanup */
 static int __init nx_init(void)

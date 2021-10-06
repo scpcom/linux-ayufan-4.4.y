@@ -1395,6 +1395,7 @@ static int omap_hsmmc_pre_dma_transfer(struct omap_hsmmc_host *host,
 		host->next_data.dma_len = 0;
 	}
 
+
 	if (dma_len == 0)
 		return -EINVAL;
 

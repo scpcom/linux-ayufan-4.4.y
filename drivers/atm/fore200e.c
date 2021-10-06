@@ -22,6 +22,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
+
 #include <linux/kernel.h>
 #include <linux/slab.h>
 #include <linux/init.h>
@@ -83,6 +84,7 @@
 #define DPRINTK(level, format, args...)  do {} while (0)
 #endif
 
+
 #define FORE200E_ALIGN(addr, alignment) \
         ((((unsigned long)(addr) + (alignment - 1)) & ~(alignment - 1)) - (unsigned long)(addr))
 
@@ -102,14 +104,17 @@
 #define ASSERT(expr)     do {} while (0)
 #endif
 
+
 static const struct atmdev_ops   fore200e_ops;
 static const struct fore200e_bus fore200e_bus[];
 
 static LIST_HEAD(fore200e_boards);
 
+
 MODULE_AUTHOR("Christophe Lizzi - credits to Uwe Dannowski and Heikki Vatiainen");
 MODULE_DESCRIPTION("FORE Systems 200E-series ATM driver - version " FORE200E_VERSION);
 MODULE_SUPPORTED_DEVICE("PCA-200E, SBA-200E");
+
 
 static const int fore200e_rx_buf_nbr[ BUFFER_SCHEME_NBR ][ BUFFER_MAGN_NBR ] = {
     { BUFFER_S1_NBR, BUFFER_L1_NBR },
@@ -121,9 +126,11 @@ static const int fore200e_rx_buf_size[ BUFFER_SCHEME_NBR ][ BUFFER_MAGN_NBR ] = 
     { BUFFER_S2_SIZE, BUFFER_L2_SIZE }
 };
 
+
 #if defined(CONFIG_ATM_FORE200E_DEBUG) && (CONFIG_ATM_FORE200E_DEBUG > 0)
 static const char* fore200e_traffic_class[] = { "NONE", "UBR", "CBR", "VBR", "ABR", "ANY" };
 #endif
+
 
 #if 0 /* currently unused */
 static int 
@@ -139,6 +146,7 @@ fore200e_fore2atm_aal(enum fore200e_aal aal)
 }
 #endif
 
+
 static enum fore200e_aal
 fore200e_atm2fore_aal(int aal)
 {
@@ -153,6 +161,7 @@ fore200e_atm2fore_aal(int aal)
     return -EINVAL;
 }
 
+
 static char*
 fore200e_irq_itoa(int irq)
 {
@@ -160,6 +169,7 @@ fore200e_irq_itoa(int irq)
     sprintf(str, "%d", irq);
     return str;
 }
+
 
 /* allocate and align a chunk of memory intended to hold the data behing exchanged
    between the driver and the adapter (using streaming DVMA) */
@@ -190,6 +200,7 @@ fore200e_chunk_alloc(struct fore200e* fore200e, struct chunk* chunk, int size, i
     return 0;
 }
 
+
 /* free a chunk of memory */
 
 static void
@@ -200,12 +211,14 @@ fore200e_chunk_free(struct fore200e* fore200e, struct chunk* chunk)
     kfree(chunk->alloc_addr);
 }
 
+
 static void
 fore200e_spin(int msecs)
 {
     unsigned long timeout = jiffies + msecs_to_jiffies(msecs);
     while (time_before(jiffies, timeout));
 }
+
 
 static int
 fore200e_poll(struct fore200e* fore200e, volatile u32* addr, u32 val, int msecs)
@@ -230,6 +243,7 @@ fore200e_poll(struct fore200e* fore200e, volatile u32* addr, u32 val, int msecs)
     return ok;
 }
 
+
 static int
 fore200e_io_poll(struct fore200e* fore200e, volatile u32 __iomem *addr, u32 val, int msecs)
 {
@@ -251,6 +265,7 @@ fore200e_io_poll(struct fore200e* fore200e, volatile u32 __iomem *addr, u32 val,
 
     return ok;
 }
+
 
 static void
 fore200e_free_rx_buf(struct fore200e* fore200e)
@@ -275,6 +290,7 @@ fore200e_free_rx_buf(struct fore200e* fore200e)
     }
 }
 
+
 static void
 fore200e_uninit_bs_queue(struct fore200e* fore200e)
 {
@@ -294,6 +310,7 @@ fore200e_uninit_bs_queue(struct fore200e* fore200e)
 	}
     }
 }
+
 
 static int
 fore200e_reset(struct fore200e* fore200e, int diag)
@@ -321,6 +338,7 @@ fore200e_reset(struct fore200e* fore200e, int diag)
 
     return 0;
 }
+
 
 static void
 fore200e_shutdown(struct fore200e* fore200e)
@@ -385,6 +403,7 @@ fore200e_shutdown(struct fore200e* fore200e)
     }
 }
 
+
 #ifdef CONFIG_PCI
 
 static u32 fore200e_pca_read(volatile u32 __iomem *addr)
@@ -394,12 +413,14 @@ static u32 fore200e_pca_read(volatile u32 __iomem *addr)
     return le32_to_cpu(readl(addr));
 }
 
+
 static void fore200e_pca_write(u32 val, volatile u32 __iomem *addr)
 {
     /* on big-endian hosts, the board is configured to convert
        the endianess of slave RAM accesses  */
     writel(cpu_to_le32(val), addr);
 }
+
 
 static u32
 fore200e_pca_dma_map(struct fore200e* fore200e, void* virt_addr, int size, int direction)
@@ -412,6 +433,7 @@ fore200e_pca_dma_map(struct fore200e* fore200e, void* virt_addr, int size, int d
     return dma_addr;
 }
 
+
 static void
 fore200e_pca_dma_unmap(struct fore200e* fore200e, u32 dma_addr, int size, int direction)
 {
@@ -420,6 +442,7 @@ fore200e_pca_dma_unmap(struct fore200e* fore200e, u32 dma_addr, int size, int di
 
     dma_unmap_single(&((struct pci_dev *) fore200e->bus_dev)->dev, dma_addr, size, direction);
 }
+
 
 static void
 fore200e_pca_dma_sync_for_cpu(struct fore200e* fore200e, u32 dma_addr, int size, int direction)
@@ -436,6 +459,7 @@ fore200e_pca_dma_sync_for_device(struct fore200e* fore200e, u32 dma_addr, int si
 
     dma_sync_single_for_device(&((struct pci_dev *) fore200e->bus_dev)->dev, dma_addr, size, direction);
 }
+
 
 /* allocate a DMA consistent chunk of memory intended to act as a communication mechanism
    (to hold descriptors, status, queues, etc.) shared by the driver and the adapter */
@@ -459,6 +483,7 @@ fore200e_pca_dma_chunk_alloc(struct fore200e* fore200e, struct chunk* chunk,
     return 0;
 }
 
+
 /* free a DMA consistent chunk of memory */
 
 static void
@@ -469,6 +494,7 @@ fore200e_pca_dma_chunk_free(struct fore200e* fore200e, struct chunk* chunk)
 			chunk->alloc_addr,
 			chunk->dma_addr);
 }
+
 
 static int
 fore200e_pca_irq_check(struct fore200e* fore200e)
@@ -485,11 +511,13 @@ fore200e_pca_irq_check(struct fore200e* fore200e)
     return irq_posted;
 }
 
+
 static void
 fore200e_pca_irq_ack(struct fore200e* fore200e)
 {
     writel(PCA200E_HCR_CLRINTR, fore200e->regs.pca.hcr);
 }
+
 
 static void
 fore200e_pca_reset(struct fore200e* fore200e)
@@ -498,6 +526,7 @@ fore200e_pca_reset(struct fore200e* fore200e)
     fore200e_spin(10);
     writel(0, fore200e->regs.pca.hcr);
 }
+
 
 static int fore200e_pca_map(struct fore200e* fore200e)
 {
@@ -521,6 +550,7 @@ static int fore200e_pca_map(struct fore200e* fore200e)
     return 0;
 }
 
+
 static void
 fore200e_pca_unmap(struct fore200e* fore200e)
 {
@@ -529,6 +559,7 @@ fore200e_pca_unmap(struct fore200e* fore200e)
     if (fore200e->virt_base != NULL)
 	iounmap(fore200e->virt_base);
 }
+
 
 static int fore200e_pca_configure(struct fore200e *fore200e)
 {
@@ -568,6 +599,7 @@ static int fore200e_pca_configure(struct fore200e *fore200e)
     fore200e->state = FORE200E_STATE_CONFIGURE;
     return 0;
 }
+
 
 static int __init
 fore200e_pca_prom_read(struct fore200e* fore200e, struct prom_data* prom)
@@ -614,6 +646,7 @@ fore200e_pca_prom_read(struct fore200e* fore200e, struct prom_data* prom)
     return 0;
 }
 
+
 static int
 fore200e_pca_proc_read(struct fore200e* fore200e, char *page)
 {
@@ -624,6 +657,7 @@ fore200e_pca_proc_read(struct fore200e* fore200e, char *page)
 }
 
 #endif /* CONFIG_PCI */
+
 
 #ifdef CONFIG_SBUS
 
@@ -815,6 +849,7 @@ static int fore200e_sba_proc_read(struct fore200e *fore200e, char *page)
 }
 #endif /* CONFIG_SBUS */
 
+
 static void
 fore200e_tx_irq(struct fore200e* fore200e)
 {
@@ -911,6 +946,7 @@ fore200e_tx_irq(struct fore200e* fore200e)
     }
 }
 
+
 #ifdef FORE200E_BSQ_DEBUG
 int bsq_audit(int where, struct host_bsq* bsq, int scheme, int magn)
 {
@@ -951,6 +987,7 @@ int bsq_audit(int where, struct host_bsq* bsq, int scheme, int magn)
     return 0;
 }
 #endif
+
 
 static void
 fore200e_supply(struct fore200e* fore200e)
@@ -1008,6 +1045,7 @@ fore200e_supply(struct fore200e* fore200e)
 	}
     }
 }
+
 
 static int
 fore200e_push_rpd(struct fore200e* fore200e, struct atm_vcc* vcc, struct rpd* rpd)
@@ -1102,6 +1140,7 @@ fore200e_push_rpd(struct fore200e* fore200e, struct atm_vcc* vcc, struct rpd* rp
     return 0;
 }
 
+
 static void
 fore200e_collect_rpd(struct fore200e* fore200e, struct rpd* rpd)
 {
@@ -1133,6 +1172,7 @@ fore200e_collect_rpd(struct fore200e* fore200e, struct rpd* rpd)
 	bsq->freebuf_count++;
     }
 }
+
 
 static void
 fore200e_rx_irq(struct fore200e* fore200e)
@@ -1187,6 +1227,7 @@ fore200e_rx_irq(struct fore200e* fore200e)
     }
 }
 
+
 #ifndef FORE200E_USE_TASKLET
 static void
 fore200e_irq(struct fore200e* fore200e)
@@ -1202,6 +1243,7 @@ fore200e_irq(struct fore200e* fore200e)
     spin_unlock_irqrestore(&fore200e->q_lock, flags);
 }
 #endif
+
 
 static irqreturn_t
 fore200e_interrupt(int irq, void* dev)
@@ -1226,6 +1268,7 @@ fore200e_interrupt(int irq, void* dev)
     return IRQ_HANDLED;
 }
 
+
 #ifdef FORE200E_USE_TASKLET
 static void
 fore200e_tx_tasklet(unsigned long data)
@@ -1239,6 +1282,7 @@ fore200e_tx_tasklet(unsigned long data)
     fore200e_tx_irq(fore200e);
     spin_unlock_irqrestore(&fore200e->q_lock, flags);
 }
+
 
 static void
 fore200e_rx_tasklet(unsigned long data)
@@ -1254,6 +1298,7 @@ fore200e_rx_tasklet(unsigned long data)
 }
 #endif
 
+
 static int
 fore200e_select_scheme(struct atm_vcc* vcc)
 {
@@ -1265,6 +1310,7 @@ fore200e_select_scheme(struct atm_vcc* vcc)
 
     return scheme;
 }
+
 
 static int 
 fore200e_activate_vcin(struct fore200e* fore200e, int activate, struct atm_vcc* vcc, int mtu)
@@ -1328,6 +1374,7 @@ fore200e_activate_vcin(struct fore200e* fore200e, int activate, struct atm_vcc* 
     return 0;
 }
 
+
 #define FORE200E_MAX_BACK2BACK_CELLS 255    /* XXX depends on CDVT */
 
 static void
@@ -1344,6 +1391,7 @@ fore200e_rate_ctrl(struct atm_qos* qos, struct tpd_rate* rate)
 	rate->data_cells = rate->idle_cells = 0;
     }
 }
+
 
 static int
 fore200e_open(struct atm_vcc *vcc)
@@ -1453,6 +1501,7 @@ fore200e_open(struct atm_vcc *vcc)
     return 0;
 }
 
+
 static void
 fore200e_close(struct atm_vcc* vcc)
 {
@@ -1501,6 +1550,7 @@ fore200e_close(struct atm_vcc* vcc)
     ASSERT(fore200e_vcc);
     kfree(fore200e_vcc);
 }
+
 
 static int
 fore200e_send(struct atm_vcc *vcc, struct sk_buff *skb)
@@ -1688,6 +1738,7 @@ fore200e_send(struct atm_vcc *vcc, struct sk_buff *skb)
     return 0;
 }
 
+
 static int
 fore200e_getstats(struct fore200e* fore200e)
 {
@@ -1731,6 +1782,7 @@ fore200e_getstats(struct fore200e* fore200e)
     return 0;
 }
 
+
 static int
 fore200e_getsockopt(struct atm_vcc* vcc, int level, int optname, void __user *optval, int optlen)
 {
@@ -1742,6 +1794,7 @@ fore200e_getsockopt(struct atm_vcc* vcc, int level, int optname, void __user *op
     return -EINVAL;
 }
 
+
 static int
 fore200e_setsockopt(struct atm_vcc* vcc, int level, int optname, void __user *optval, unsigned int optlen)
 {
@@ -1752,6 +1805,7 @@ fore200e_setsockopt(struct atm_vcc* vcc, int level, int optname, void __user *op
     
     return -EINVAL;
 }
+
 
 #if 0 /* currently unused */
 static int
@@ -1793,6 +1847,7 @@ fore200e_get_oc3(struct fore200e* fore200e, struct oc3_regs* regs)
 }
 #endif
 
+
 static int
 fore200e_set_oc3(struct fore200e* fore200e, u32 reg, u32 value, u32 mask)
 {
@@ -1827,6 +1882,7 @@ fore200e_set_oc3(struct fore200e* fore200e, u32 reg, u32 value, u32 mask)
 
     return 0;
 }
+
 
 static int
 fore200e_setloop(struct fore200e* fore200e, int loop_mode)
@@ -1863,6 +1919,7 @@ fore200e_setloop(struct fore200e* fore200e, int loop_mode)
     return error;
 }
 
+
 static int
 fore200e_fetch_stats(struct fore200e* fore200e, struct sonet_stats __user *arg)
 {
@@ -1891,6 +1948,7 @@ fore200e_fetch_stats(struct fore200e* fore200e, struct sonet_stats __user *arg)
     return 0;
 }
 
+
 static int
 fore200e_ioctl(struct atm_dev* dev, unsigned int cmd, void __user * arg)
 {
@@ -1918,6 +1976,7 @@ fore200e_ioctl(struct atm_dev* dev, unsigned int cmd, void __user * arg)
 
     return -ENOSYS; /* not implemented */
 }
+
 
 static int
 fore200e_change_qos(struct atm_vcc* vcc,struct atm_qos* qos, int flags)
@@ -1967,6 +2026,7 @@ fore200e_change_qos(struct atm_vcc* vcc,struct atm_qos* qos, int flags)
     return -EINVAL;
 }
     
+
 static int fore200e_irq_request(struct fore200e *fore200e)
 {
     if (request_irq(fore200e->irq, fore200e_interrupt, IRQF_SHARED, fore200e->name, fore200e->atm_dev) < 0) {
@@ -1987,6 +2047,7 @@ static int fore200e_irq_request(struct fore200e *fore200e)
     fore200e->state = FORE200E_STATE_IRQ;
     return 0;
 }
+
 
 static int fore200e_get_esi(struct fore200e *fore200e)
 {
@@ -2015,6 +2076,7 @@ static int fore200e_get_esi(struct fore200e *fore200e)
 
     return 0;
 }
+
 
 static int fore200e_alloc_rx_buf(struct fore200e *fore200e)
 {
@@ -2079,6 +2141,7 @@ static int fore200e_alloc_rx_buf(struct fore200e *fore200e)
     return 0;
 }
 
+
 static int fore200e_init_bs_queue(struct fore200e *fore200e)
 {
     int scheme, magn, i;
@@ -2140,6 +2203,7 @@ static int fore200e_init_bs_queue(struct fore200e *fore200e)
     return 0;
 }
 
+
 static int fore200e_init_rx_queue(struct fore200e *fore200e)
 {
     struct host_rxq*     rxq =  &fore200e->host_rxq;
@@ -2197,6 +2261,7 @@ static int fore200e_init_rx_queue(struct fore200e *fore200e)
     fore200e->state = FORE200E_STATE_INIT_RXQ;
     return 0;
 }
+
 
 static int fore200e_init_tx_queue(struct fore200e *fore200e)
 {
@@ -2259,6 +2324,7 @@ static int fore200e_init_tx_queue(struct fore200e *fore200e)
     return 0;
 }
 
+
 static int fore200e_init_cmd_queue(struct fore200e *fore200e)
 {
     struct host_cmdq*     cmdq =  &fore200e->host_cmdq;
@@ -2299,6 +2365,7 @@ static int fore200e_init_cmd_queue(struct fore200e *fore200e)
     return 0;
 }
 
+
 static void fore200e_param_bs_queue(struct fore200e *fore200e,
 				    enum buffer_scheme scheme,
 				    enum buffer_magn magn, int queue_length,
@@ -2311,6 +2378,7 @@ static void fore200e_param_bs_queue(struct fore200e *fore200e,
     fore200e->bus->write(pool_size,                              &bs_spec->pool_size);
     fore200e->bus->write(supply_blksize,                         &bs_spec->supply_blksize);
 }
+
 
 static int fore200e_initialize(struct fore200e *fore200e)
 {
@@ -2362,6 +2430,7 @@ static int fore200e_initialize(struct fore200e *fore200e)
     return 0;
 }
 
+
 static void fore200e_monitor_putc(struct fore200e *fore200e, char c)
 {
     struct cp_monitor __iomem * monitor = fore200e->cp_monitor;
@@ -2371,6 +2440,7 @@ static void fore200e_monitor_putc(struct fore200e *fore200e, char c)
 #endif
     fore200e->bus->write(((u32) c) | FORE200E_CP_MONITOR_UART_AVAIL, &monitor->soft_uart.send);
 }
+
 
 static int fore200e_monitor_getc(struct fore200e *fore200e)
 {
@@ -2394,6 +2464,7 @@ static int fore200e_monitor_getc(struct fore200e *fore200e)
 
     return -1;
 }
+
 
 static void fore200e_monitor_puts(struct fore200e *fore200e, char *str)
 {
@@ -2481,6 +2552,7 @@ release:
     return err;
 }
 
+
 static int fore200e_register(struct fore200e *fore200e, struct device *parent)
 {
     struct atm_dev* atm_dev;
@@ -2505,6 +2577,7 @@ static int fore200e_register(struct fore200e *fore200e, struct device *parent)
     fore200e->state = FORE200E_STATE_REGISTER;
     return 0;
 }
+
 
 static int fore200e_init(struct fore200e *fore200e, struct device *parent)
 {
@@ -2681,6 +2754,7 @@ out_disable:
     goto out;
 }
 
+
 static void fore200e_pca_remove_one(struct pci_dev *pci_dev)
 {
     struct fore200e *fore200e;
@@ -2691,6 +2765,7 @@ static void fore200e_pca_remove_one(struct pci_dev *pci_dev)
     kfree(fore200e);
     pci_disable_device(pci_dev);
 }
+
 
 static struct pci_device_id fore200e_pca_tbl[] = {
     { PCI_VENDOR_ID_FORE, PCI_DEVICE_ID_FORE_PCA200E, PCI_ANY_ID, PCI_ANY_ID,
@@ -3033,6 +3108,7 @@ fore200e_proc_read(struct atm_dev *dev, loff_t* pos, char* page)
 module_init(fore200e_module_init);
 module_exit(fore200e_module_cleanup);
 
+
 static const struct atmdev_ops fore200e_ops =
 {
 	.open       = fore200e_open,
@@ -3045,6 +3121,7 @@ static const struct atmdev_ops fore200e_ops =
 	.proc_read  = fore200e_proc_read,
 	.owner      = THIS_MODULE
 };
+
 
 static const struct fore200e_bus fore200e_bus[] = {
 #ifdef CONFIG_PCI

@@ -22,4 +22,5 @@ static inline void gf_write_dma_addr(const dma_addr_t addr,
 #endif
 }
 
+
 #endif /* __LINUX_GOLDFISH_H */

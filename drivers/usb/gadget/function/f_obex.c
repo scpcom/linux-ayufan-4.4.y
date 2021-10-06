@@ -21,6 +21,7 @@
 
 #include "u_serial.h"
 
+
 /*
  * This CDC OBEX function support just packages a TTY-ish byte stream.
  * A user mode server will put it into "raw" mode and handle all the

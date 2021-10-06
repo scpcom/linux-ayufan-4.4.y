@@ -2,6 +2,7 @@
 
 /* Written 1995-2000 by Werner Almesberger, EPFL LRC/ICA */
 
+
 #ifndef NET_ATM_SIGNALING_H
 #define NET_ATM_SIGNALING_H
 
@@ -9,7 +10,9 @@
 #include <linux/atmdev.h>
 #include <linux/atmsvc.h>
 
+
 extern struct atm_vcc *sigd; /* needed in svc_release */
+
 
 /*
  * sigd_enq is a wrapper for sigd_enq2, covering the more common cases, and

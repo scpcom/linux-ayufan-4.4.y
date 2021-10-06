@@ -62,6 +62,7 @@ typedef struct _ATOM_PPLIB_THERMALCONTROLLER
 #define ATOM_PP_THERMALCONTROLLER_CISLANDS  18
 #define ATOM_PP_THERMALCONTROLLER_KAVERI    19
 
+
 // Thermal controller 'combo type' to use an external controller for Fan control and an internal controller for thermal.
 // We probably should reserve the bit 0x80 for this use.
 // To keep the number of these types low we should also use the same code for all ASICs (i.e. do not distinguish RV6xx and RV7xx Internal here).
@@ -75,6 +76,7 @@ typedef struct _ATOM_PPLIB_STATE
     UCHAR ucNonClockStateIndex;
     UCHAR ucClockStateIndices[1]; // variable-sized
 } ATOM_PPLIB_STATE;
+
 
 typedef struct _ATOM_PPLIB_FANTABLE
 {
@@ -440,6 +442,7 @@ typedef struct _StateArray{
     ATOM_PPLIB_STATE_V2 states[1];
 }StateArray;
 
+
 typedef struct _ClockInfoArray{
     //how many clock levels we have
     UCHAR ucNumEntries;
@@ -564,6 +567,7 @@ typedef struct _ATOM_PPLIB_VCE_State_Table
     ATOM_PPLIB_VCE_State_Record entries[1];
 }ATOM_PPLIB_VCE_State_Table;
 
+
 typedef struct _ATOM_PPLIB_VCE_Table
 {
       UCHAR revid;
@@ -571,6 +575,7 @@ typedef struct _ATOM_PPLIB_VCE_Table
 //    ATOM_PPLIB_VCE_Clock_Voltage_Limit_Table limits;
 //    ATOM_PPLIB_VCE_State_Table states;
 }ATOM_PPLIB_VCE_Table;
+
 
 typedef struct _UVDClockInfo{
     USHORT usVClkLow;

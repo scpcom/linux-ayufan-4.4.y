@@ -31,6 +31,7 @@ __generic_copy_from_user(void *to, const void __user *from, unsigned long n)
 	return n;
 }
 
+
 /*
  * Copy a null terminated string from userspace.
  */
@@ -124,6 +125,7 @@ strncpy_from_user(char *dst, const char __user *src, long count)
 		__do_strncpy_from_user(dst, src, count, res);
 	return res;
 }
+
 
 /*
  * Zero Userspace
@@ -385,3 +387,4 @@ long strnlen_user(const char __user *s, long n)
 }
 
 #endif /* CONFIG_ISA_DUAL_ISSUE */
+

@@ -54,6 +54,7 @@ MODULE_DESCRIPTION("virtual CAN interface");
 MODULE_LICENSE("Dual BSD/GPL");
 MODULE_AUTHOR("Urs Thuermann <urs.thuermann@volkswagen.de>");
 
+
 /*
  * CAN test feature:
  * Enable the echo on driver level for testing the CAN core echo modes.
@@ -63,6 +64,7 @@ MODULE_AUTHOR("Urs Thuermann <urs.thuermann@volkswagen.de>");
 static bool echo; /* echo testing. Default: 0 (Off) */
 module_param(echo, bool, S_IRUGO);
 MODULE_PARM_DESC(echo, "Echo sent frames (for testing). Default: 0 (Off)");
+
 
 static void vcan_rx(struct sk_buff *skb, struct net_device *dev)
 {

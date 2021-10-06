@@ -31,6 +31,7 @@
 
 #include <linux/mei.h>
 
+
 #include "mei_dev.h"
 #include "hw-txe.h"
 
@@ -117,6 +118,7 @@ static int mei_txe_probe(struct pci_dev *pdev, const struct pci_device_id *ent)
 			goto free_device;
 		}
 	}
+
 
 	pci_enable_msi(pdev);
 
@@ -234,6 +236,7 @@ static void mei_txe_remove(struct pci_dev *pdev)
 	pci_release_regions(pdev);
 	pci_disable_device(pdev);
 }
+
 
 #ifdef CONFIG_PM_SLEEP
 static int mei_txe_pci_suspend(struct device *device)

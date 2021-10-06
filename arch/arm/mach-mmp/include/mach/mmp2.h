@@ -99,3 +99,4 @@ static inline int mmp2_add_isram(struct sram_platdata *data)
 }
 
 #endif /* __ASM_MACH_MMP2_H */
+

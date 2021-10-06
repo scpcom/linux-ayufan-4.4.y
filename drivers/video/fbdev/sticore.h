@@ -57,6 +57,7 @@
 #define STI_LOWMEM	(GFP_KERNEL)
 #endif
 
+
 /* STI function configuration structs */
 
 typedef union region {
@@ -98,6 +99,7 @@ struct sti_glob_cfg {
 	u32 ext_ptr;			/* pointer to extended glob_cfg data structure */
 };
 
+
 /* STI init function structs */
 
 struct sti_init_flags {
@@ -135,11 +137,14 @@ struct sti_init_inptr {
 	u32 ext_ptr;		/* pointer to extended init_graph inptr data structure*/
 };
 
+
 struct sti_init_outptr {
 	s32 errno;		/* error number on failure */
 	s32 text_planes;	/* number of planes used for text */
 	u32 future_ptr; 	/* pointer to future data */
 };
+
+
 
 /* STI configuration function structs */
 
@@ -301,6 +306,7 @@ struct sti_blkmv_outptr {
 	u32 future_ptr; 	/* pointer to future data */
 };
 
+
 /* sti_all_data is an internal struct which needs to be allocated in
  * low memory (< 4GB) if STI is used with 32bit STI on a 64bit kernel */
 
@@ -369,15 +375,18 @@ struct sti_struct {
 	struct sti_all_data *sti_data;
 };
 
+
 /* sticore interface functions */
 
 struct sti_struct *sti_get_rom(unsigned int index); /* 0: default sti */
+
 
 /* sticore main function to call STI firmware */
 
 int sti_call(const struct sti_struct *sti, unsigned long func,
 		const void *flags, void *inptr, void *outptr,
 		struct sti_glob_cfg *glob_cfg);
+
 
 /* functions to call the STI ROM directly */
 

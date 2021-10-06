@@ -234,4 +234,5 @@ struct si_power_info {
 #define SISLANDS_CGULVPARAMETER_DFLT                    0x00040035
 #define SISLANDS_CGULVCONTROL_DFLT                      0x1f007550
 
+
 #endif

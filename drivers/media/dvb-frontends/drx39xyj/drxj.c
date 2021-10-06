@@ -535,6 +535,7 @@ static int drxdap_fasi_read_block(struct i2c_device_addr *dev_addr,
 				      u16 datasize,
 				      u8 *data, u32 flags);
 
+
 static int drxj_dap_read_modify_write_reg16(struct i2c_device_addr *dev_addr,
 						 u32 waddr,
 						 u32 raddr,
@@ -1040,6 +1041,7 @@ ctrl_set_cfg_afe_gain(struct drx_demod_instance *demod, struct drxj_cfg_afe_gain
 /*============================================================================*/
 /*============================================================================*/
 
+
 /*============================================================================*/
 
 /*
@@ -1231,6 +1233,7 @@ static u32 frac_times1e6(u32 N, u32 D)
 }
 
 /*============================================================================*/
+
 
 /**
 * \brief Values for NICAM prescaler gain. Computed from dB to integer
@@ -1490,6 +1493,7 @@ static int drxdap_fasi_read_block(struct i2c_device_addr *dev_addr,
 
 	return rc;
 }
+
 
 /******************************
 *
@@ -1879,6 +1883,7 @@ static int drxj_dap_read_modify_write_reg16(struct i2c_device_addr *dev_addr,
 	return drxj_dap_rm_write_reg16short(dev_addr, waddr, raddr, wdata, rdata);
 #endif
 }
+
 
 /*============================================================================*/
 
@@ -2998,6 +3003,7 @@ ctrl_set_cfg_mpeg_output(struct drx_demod_instance *demod, struct drx_cfg_mpeg_o
 		else
 			fec_oc_reg_ipr_invert &= (~(FEC_OC_IPR_INVERT_MCLK__M));
 
+
 		if (cfg_data->static_clk == true) {	/* Static mode */
 			u32 dto_rate = 0;
 			u32 bit_rate = 0;
@@ -3336,6 +3342,7 @@ rw_error:
 }
 
 /*----------------------------------------------------------------------------*/
+
 
 /*----------------------------------------------------------------------------*/
 /* MPEG Output Configuration Functions - end                                  */
@@ -4876,6 +4883,7 @@ rw_error:
 }
 #endif
 
+
 /*============================================================================*/
 
 /**
@@ -6315,6 +6323,7 @@ static int get_vsbmer(struct i2c_device_addr *dev_addr, u16 *mer)
 rw_error:
 	return rc;
 }
+
 
 /*============================================================================*/
 /*==                     END 8VSB DATAPATH FUNCTIONS                        ==*/
@@ -11298,6 +11307,7 @@ rw_error:
 }
 
 /*============================================================================*/
+
 
 /*=============================================================================
 ===== EXPORTED FUNCTIONS ====================================================*/

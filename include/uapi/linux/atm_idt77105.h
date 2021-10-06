@@ -3,6 +3,7 @@
 
 /* Written 1999 by Greg Banks <gnb@linuxfan.com>. Copied from atm_suni.h. */
 
+
 #ifndef LINUX_ATM_IDT77105_H
 #define LINUX_ATM_IDT77105_H
 

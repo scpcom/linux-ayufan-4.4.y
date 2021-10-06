@@ -509,6 +509,7 @@ void input_set_abs_params(struct input_dev *dev, unsigned int axis,
 }
 EXPORT_SYMBOL(input_set_abs_params);
 
+
 /**
  * input_grab_device - grabs device for exclusive use
  * @handle: input handle that wants to own the device

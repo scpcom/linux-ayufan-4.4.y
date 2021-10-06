@@ -345,3 +345,4 @@ const struct ixgbe_mbx_operations ixgbevf_mbx_ops = {
 	.check_for_ack	= ixgbevf_check_for_ack_vf,
 	.check_for_rst	= ixgbevf_check_for_rst_vf,
 };
+

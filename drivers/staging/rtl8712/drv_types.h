@@ -191,3 +191,4 @@ static inline u8 *myid(struct eeprom_priv *peepriv)
 u8 r8712_usb_hal_bus_init(struct _adapter *adapter);
 
 #endif /*__DRV_TYPES_H__*/
+

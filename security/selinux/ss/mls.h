@@ -88,3 +88,4 @@ static inline int mls_import_netlbl_cat(struct context *context,
 #endif
 
 #endif	/* _SS_MLS_H */
+

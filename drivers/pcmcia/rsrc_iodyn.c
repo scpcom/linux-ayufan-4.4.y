@@ -20,6 +20,7 @@
 #include <pcmcia/cistpl.h>
 #include "cs_internal.h"
 
+
 struct pcmcia_align_data {
 	unsigned long	mask;
 	unsigned long	offset;
@@ -52,6 +53,7 @@ static resource_size_t pcmcia_align(void *align_data,
 
 	return start;
 }
+
 
 static struct resource *__iodyn_find_io_region(struct pcmcia_socket *s,
 					unsigned long base, int num,
@@ -157,6 +159,7 @@ static int iodyn_find_io(struct pcmcia_socket *s, unsigned int attr,
 
 	return -EINVAL;
 }
+
 
 struct pccard_resource_ops pccard_iodyn_ops = {
 	.validate_mem = NULL,

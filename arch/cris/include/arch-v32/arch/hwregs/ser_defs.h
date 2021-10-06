@@ -264,6 +264,7 @@ typedef struct {
 } reg_ser_r_masked_intr;
 #define REG_RD_ADDR_ser_r_masked_intr 56
 
+
 /* Constants */
 enum {
   regk_ser_active                          = 0x00000000,

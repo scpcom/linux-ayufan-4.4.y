@@ -196,6 +196,7 @@ static int try_set_cmode(int new_cmode)
 	return 0;
 }
 
+
 static int cmode_procctl(struct ctl_table *ctl, int write,
 			 void __user *buffer, size_t *lenp, loff_t *fpos)
 {

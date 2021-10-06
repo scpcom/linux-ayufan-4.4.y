@@ -46,6 +46,7 @@
 
 #include "tlan.h"
 
+
 /* For removing EISA devices */
 static	struct net_device	*tlan_eisa_devices;
 
@@ -208,6 +209,7 @@ static int	tlan_ee_send_byte(u16, u8, int);
 static void	tlan_ee_receive_byte(u16, u8 *, int);
 static int	tlan_ee_read_byte(struct net_device *, u8, u8 *);
 
+
 static inline void
 tlan_store_skb(struct tlan_list *tag, struct sk_buff *skb)
 {
@@ -263,6 +265,7 @@ tlan_set_timer(struct net_device *dev, u32 ticks, u32 type)
 
 }
 
+
 /*****************************************************************************
 ******************************************************************************
 
@@ -272,6 +275,10 @@ these functions are more or less common to all linux network drivers.
 
 ******************************************************************************
 *****************************************************************************/
+
+
+
+
 
 /***************************************************************
  *	tlan_remove_one
@@ -287,6 +294,7 @@ these functions are more or less common to all linux network drivers.
  *	associated with this device.
  *
  **************************************************************/
+
 
 static void tlan_remove_one(struct pci_dev *pdev)
 {
@@ -378,6 +386,7 @@ static int tlan_resume(struct pci_dev *pdev)
 
 #endif /* CONFIG_PM */
 
+
 static struct pci_driver tlan_driver = {
 	.name		= "tlan",
 	.id_table	= tlan_pci_tbl,
@@ -423,11 +432,13 @@ err_out_pci_free:
 	return rc;
 }
 
+
 static int tlan_init_one(struct pci_dev *pdev,
 				   const struct pci_device_id *ent)
 {
 	return tlan_probe1(pdev, -1, -1, 0, ent);
 }
+
 
 /*
 ***************************************************************
@@ -570,6 +581,7 @@ static int tlan_probe1(struct pci_dev *pdev, long ioaddr, int irq, int rev,
 		goto err_out_uninit;
 	}
 
+
 	tlan_devices_installed++;
 	boards_found++;
 
@@ -605,6 +617,7 @@ err_out:
 	return rc;
 }
 
+
 static void tlan_eisa_cleanup(void)
 {
 	struct net_device *dev;
@@ -626,6 +639,7 @@ static void tlan_eisa_cleanup(void)
 	}
 }
 
+
 static void __exit tlan_exit(void)
 {
 	pci_unregister_driver(&tlan_driver);
@@ -635,9 +649,12 @@ static void __exit tlan_exit(void)
 
 }
 
+
 /* Module loading/unloading */
 module_init(tlan_probe);
 module_exit(tlan_exit);
+
+
 
 /**************************************************************
  *	tlan_eisa_probe
@@ -672,6 +689,7 @@ static void  __init tlan_eisa_probe(void)
 		TLAN_DBG(TLAN_DEBUG_PROBE, "EISA_ID 0x%4x: 0x%4x\n",
 			 (int) ioaddr + 0xc82, inw(ioaddr + EISA_ID2));
 
+
 		TLAN_DBG(TLAN_DEBUG_PROBE,
 			 "Probing for EISA adapter at IO: 0x%4x : ",
 			 (int) ioaddr);
@@ -698,6 +716,7 @@ static void  __init tlan_eisa_probe(void)
 		if (debug == 0x10)
 			pr_info("Found one\n");
 
+
 		/* Get irq from board */
 		switch (inb(ioaddr + 0xcc0)) {
 		case(0x10):
@@ -715,6 +734,7 @@ static void  __init tlan_eisa_probe(void)
 		default:
 			goto out;
 		}
+
 
 		/* Setup the newly found eisa adapter */
 		rc = tlan_probe1(NULL, ioaddr, irq,
@@ -872,6 +892,9 @@ static int tlan_init(struct net_device *dev)
 
 }
 
+
+
+
 /***************************************************************
  *	tlan_open
  *
@@ -916,6 +939,8 @@ static int tlan_open(struct net_device *dev)
 
 }
 
+
+
 /**************************************************************
  *	tlan_ioctl
  *
@@ -944,10 +969,12 @@ static int tlan_ioctl(struct net_device *dev, struct ifreq *rq, int cmd)
 	case SIOCGMIIPHY:		/* get address of MII PHY in use. */
 		data->phy_id = phy;
 
+
 	case SIOCGMIIREG:		/* read MII PHY register. */
 		tlan_mii_read_reg(dev, data->phy_id & 0x1f,
 				  data->reg_num & 0x1f, &data->val_out);
 		return 0;
+
 
 	case SIOCSMIIREG:		/* write MII PHY register. */
 		tlan_mii_write_reg(dev, data->phy_id & 0x1f,
@@ -957,6 +984,7 @@ static int tlan_ioctl(struct net_device *dev, struct ifreq *rq, int cmd)
 		return -EOPNOTSUPP;
 	}
 }
+
 
 /***************************************************************
  *	tlan_tx_timeout
@@ -984,6 +1012,7 @@ static void tlan_tx_timeout(struct net_device *dev)
 
 }
 
+
 /***************************************************************
  *	tlan_tx_timeout_work
  *
@@ -1001,6 +1030,8 @@ static void tlan_tx_timeout_work(struct work_struct *work)
 
 	tlan_tx_timeout(priv->dev);
 }
+
+
 
 /***************************************************************
  *	tlan_start_tx
@@ -1096,6 +1127,9 @@ static netdev_tx_t tlan_start_tx(struct sk_buff *skb, struct net_device *dev)
 
 }
 
+
+
+
 /***************************************************************
  *	tlan_handle_interrupt
  *
@@ -1145,6 +1179,9 @@ static irqreturn_t tlan_handle_interrupt(int irq, void *dev_id)
 	return IRQ_RETVAL(type);
 }
 
+
+
+
 /***************************************************************
  *	tlan_close
  *
@@ -1171,6 +1208,9 @@ static int tlan_close(struct net_device *dev)
 	return 0;
 
 }
+
+
+
 
 /***************************************************************
  *	tlan_get_stats
@@ -1213,6 +1253,9 @@ static struct net_device_stats *tlan_get_stats(struct net_device *dev)
 	return &dev->stats;
 
 }
+
+
+
 
 /***************************************************************
  *	tlan_set_multicast_list
@@ -1283,6 +1326,8 @@ static void tlan_set_multicast_list(struct net_device *dev)
 
 }
 
+
+
 /*****************************************************************************
 ******************************************************************************
 
@@ -1294,6 +1339,9 @@ generated by TLAN based adapters.
 
 ******************************************************************************
 *****************************************************************************/
+
+
+
 
 /***************************************************************
  *	tlan_handle_tx_eof
@@ -1394,6 +1442,9 @@ static u32 tlan_handle_tx_eof(struct net_device *dev, u16 host_int)
 
 }
 
+
+
+
 /***************************************************************
  *	TLan_HandleStatOverflow
  *
@@ -1418,6 +1469,9 @@ static u32 tlan_handle_stat_overflow(struct net_device *dev, u16 host_int)
 	return 1;
 
 }
+
+
+
 
 /***************************************************************
  *	TLan_HandleRxEOF
@@ -1508,6 +1562,7 @@ drop_and_reuse:
 		netdev_info(dev,
 			    "Received interrupt for uncompleted RX frame\n");
 
+
 	if (eoc) {
 		TLAN_DBG(TLAN_DEBUG_RX,
 			 "RECEIVE:  handling RX EOC (Head=%d Tail=%d)\n",
@@ -1539,6 +1594,9 @@ drop_and_reuse:
 
 }
 
+
+
+
 /***************************************************************
  *	tlan_handle_dummy
  *
@@ -1562,6 +1620,9 @@ static u32 tlan_handle_dummy(struct net_device *dev, u16 host_int)
 	return 1;
 
 }
+
+
+
 
 /***************************************************************
  *	tlan_handle_tx_eoc
@@ -1611,6 +1672,9 @@ static u32 tlan_handle_tx_eoc(struct net_device *dev, u16 host_int)
 	return ack;
 
 }
+
+
+
 
 /***************************************************************
  *	tlan_handle_status_check
@@ -1688,6 +1752,9 @@ static u32 tlan_handle_status_check(struct net_device *dev, u16 host_int)
 
 }
 
+
+
+
 /***************************************************************
  *	tlan_handle_rx_eoc
  *
@@ -1729,6 +1796,9 @@ static u32 tlan_handle_rx_eoc(struct net_device *dev, u16 host_int)
 
 }
 
+
+
+
 /*****************************************************************************
 ******************************************************************************
 
@@ -1736,6 +1806,7 @@ ThunderLAN driver timer function
 
 ******************************************************************************
 *****************************************************************************/
+
 
 /***************************************************************
  *	tlan_timer
@@ -1819,6 +1890,7 @@ static void tlan_timer(unsigned long data)
 
 }
 
+
 /*****************************************************************************
 ******************************************************************************
 
@@ -1826,6 +1898,7 @@ ThunderLAN driver adapter related routines
 
 ******************************************************************************
 *****************************************************************************/
+
 
 /***************************************************************
  *	tlan_reset_lists
@@ -1892,6 +1965,7 @@ static void tlan_reset_lists(struct net_device *dev)
 
 }
 
+
 static void tlan_free_lists(struct net_device *dev)
 {
 	struct tlan_priv *priv = netdev_priv(dev);
@@ -1930,6 +2004,9 @@ static void tlan_free_lists(struct net_device *dev)
 	}
 }
 
+
+
+
 /***************************************************************
  *	tlan_print_dio
  *
@@ -1959,6 +2036,9 @@ static void tlan_print_dio(u16 io_base)
 	}
 
 }
+
+
+
 
 /***************************************************************
  *	TLan_PrintList
@@ -1992,6 +2072,9 @@ static void tlan_print_list(struct tlan_list *list, char *type, int num)
 	}
 
 }
+
+
+
 
 /***************************************************************
  *	tlan_read_and_clear_stats
@@ -2065,6 +2148,9 @@ static void tlan_read_and_clear_stats(struct net_device *dev, int record)
 	}
 
 }
+
+
+
 
 /***************************************************************
  *	TLan_Reset
@@ -2164,6 +2250,9 @@ tlan_reset_adapter(struct net_device *dev)
 		tlan_phy_power_down(dev);
 
 }
+
+
+
 
 static void
 tlan_finish_reset(struct net_device *dev)
@@ -2266,6 +2355,9 @@ tlan_finish_reset(struct net_device *dev)
 
 }
 
+
+
+
 /***************************************************************
  *	tlan_set_mac
  *
@@ -2305,6 +2397,9 @@ static void tlan_set_mac(struct net_device *dev, int areg, char *mac)
 
 }
 
+
+
+
 /*****************************************************************************
 ******************************************************************************
 
@@ -2312,6 +2407,8 @@ ThunderLAN driver PHY layer routines
 
 ******************************************************************************
 *****************************************************************************/
+
+
 
 /*********************************************************************
  *	tlan_phy_print
@@ -2351,6 +2448,9 @@ static void tlan_phy_print(struct net_device *dev)
 	}
 
 }
+
+
+
 
 /*********************************************************************
  *	tlan_phy_detect
@@ -2415,6 +2515,9 @@ static void tlan_phy_detect(struct net_device *dev)
 
 }
 
+
+
+
 static void tlan_phy_power_down(struct net_device *dev)
 {
 	struct tlan_priv	*priv = netdev_priv(dev);
@@ -2440,6 +2543,9 @@ static void tlan_phy_power_down(struct net_device *dev)
 
 }
 
+
+
+
 static void tlan_phy_power_up(struct net_device *dev)
 {
 	struct tlan_priv	*priv = netdev_priv(dev);
@@ -2457,6 +2563,9 @@ static void tlan_phy_power_up(struct net_device *dev)
 	tlan_set_timer(dev, msecs_to_jiffies(500), TLAN_TIMER_PHY_RESET);
 
 }
+
+
+
 
 static void tlan_phy_reset(struct net_device *dev)
 {
@@ -2486,6 +2595,9 @@ static void tlan_phy_reset(struct net_device *dev)
 	tlan_set_timer(dev, msecs_to_jiffies(50), TLAN_TIMER_PHY_START_LINK);
 
 }
+
+
+
 
 static void tlan_phy_start_link(struct net_device *dev)
 {
@@ -2572,6 +2684,9 @@ static void tlan_phy_start_link(struct net_device *dev)
 
 }
 
+
+
+
 static void tlan_phy_finish_auto_neg(struct net_device *dev)
 {
 	struct tlan_priv	*priv = netdev_priv(dev);
@@ -2631,6 +2746,7 @@ static void tlan_phy_finish_auto_neg(struct net_device *dev)
 	tlan_set_timer(dev, msecs_to_jiffies(100), TLAN_TIMER_FINISH_RESET);
 
 }
+
 
 /*********************************************************************
  *
@@ -2697,6 +2813,7 @@ static void tlan_phy_monitor(unsigned long data)
 	add_timer(&priv->media_timer);
 }
 
+
 /*****************************************************************************
 ******************************************************************************
 
@@ -2707,6 +2824,7 @@ these routines are based on the information in chap. 2 of the
 
 ******************************************************************************
 *****************************************************************************/
+
 
 /***************************************************************
  *	tlan_mii_read_reg
@@ -2761,6 +2879,7 @@ tlan_mii_read_reg(struct net_device *dev, u16 phy, u16 reg, u16 *val)
 	tlan_mii_send_data(dev->base_addr, phy, 5);	/* device #      */
 	tlan_mii_send_data(dev->base_addr, reg, 5);	/* register #    */
 
+
 	tlan_clear_bit(TLAN_NET_SIO_MTXEN, sio);	/* change direction */
 
 	tlan_clear_bit(TLAN_NET_SIO_MCLK, sio);		/* clock idle bit */
@@ -2785,6 +2904,7 @@ tlan_mii_read_reg(struct net_device *dev, u16 phy, u16 reg, u16 *val)
 		}
 	}
 
+
 	tlan_clear_bit(TLAN_NET_SIO_MCLK, sio);		/* idle cycle */
 	tlan_set_bit(TLAN_NET_SIO_MCLK, sio);
 
@@ -2799,6 +2919,9 @@ tlan_mii_read_reg(struct net_device *dev, u16 phy, u16 reg, u16 *val)
 	return err;
 
 }
+
+
+
 
 /***************************************************************
  *	tlan_mii_send_data
@@ -2843,6 +2966,9 @@ static void tlan_mii_send_data(u16 base_port, u32 data, unsigned num_bits)
 
 }
 
+
+
+
 /***************************************************************
  *	TLan_MiiSync
  *
@@ -2872,6 +2998,9 @@ static void tlan_mii_sync(u16 base_port)
 	}
 
 }
+
+
+
 
 /***************************************************************
  *	tlan_mii_write_reg
@@ -2932,6 +3061,9 @@ tlan_mii_write_reg(struct net_device *dev, u16 phy, u16 reg, u16 val)
 
 }
 
+
+
+
 /*****************************************************************************
 ******************************************************************************
 
@@ -2944,6 +3076,7 @@ other Eeproms.
 
 ******************************************************************************
 *****************************************************************************/
+
 
 /***************************************************************
  *	tlan_ee_send_start
@@ -2974,6 +3107,9 @@ static void tlan_ee_send_start(u16 io_base)
 	tlan_clear_bit(TLAN_NET_SIO_ECLOK, sio);
 
 }
+
+
+
 
 /***************************************************************
  *	tlan_ee_send_byte
@@ -3031,6 +3167,9 @@ static int tlan_ee_send_byte(u16 io_base, u8 data, int stop)
 	return err;
 
 }
+
+
+
 
 /***************************************************************
  *	tlan_ee_receive_byte
@@ -3091,6 +3230,9 @@ static void tlan_ee_receive_byte(u16 io_base, u8 *data, int stop)
 
 }
 
+
+
+
 /***************************************************************
  *	tlan_ee_read_byte
  *
@@ -3145,3 +3287,6 @@ fail:
 	return ret;
 
 }
+
+
+

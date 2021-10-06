@@ -35,6 +35,7 @@
 /* A bit ugly, can we get this from the pci_dev somehow? */
 static struct mpic *msi_mpic;
 
+
 static void mpic_pasemi_msi_mask_irq(struct irq_data *data)
 {
 	pr_debug("mpic_pasemi_msi_mask_irq %d\n", data->irq);

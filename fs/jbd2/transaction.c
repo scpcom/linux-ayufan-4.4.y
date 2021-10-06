@@ -471,6 +471,7 @@ handle_t *jbd2__journal_start(journal_t *journal, int nblocks, int rsv_blocks,
 }
 EXPORT_SYMBOL(jbd2__journal_start);
 
+
 handle_t *jbd2_journal_start(journal_t *journal, int nblocks)
 {
 	return jbd2__journal_start(journal, nblocks, 0, GFP_NOFS, 0, 0);
@@ -614,6 +615,7 @@ error_out:
 	return result;
 }
 
+
 /**
  * int jbd2_journal_restart() - restart a handle .
  * @handle:  handle to restart
@@ -676,6 +678,7 @@ int jbd2__journal_restart(handle_t *handle, int nblocks, gfp_t gfp_mask)
 	return ret;
 }
 EXPORT_SYMBOL(jbd2__journal_restart);
+
 
 int jbd2_journal_restart(handle_t *handle, int nblocks)
 {
@@ -1085,6 +1088,7 @@ int jbd2_journal_get_write_access(handle_t *handle, struct buffer_head *bh)
 	jbd2_journal_put_journal_head(jh);
 	return rc;
 }
+
 
 /*
  * When the user wants to journal a newly created buffer_head

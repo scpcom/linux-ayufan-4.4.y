@@ -39,6 +39,7 @@ static struct ata_port_operations netcell_ops = {
 	.read_id	= netcell_read_id,
 };
 
+
 /**
  *	netcell_init_one - Register Netcell ATA PCI device with kernel services
  *	@pdev: PCI device to register

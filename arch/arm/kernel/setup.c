@@ -63,6 +63,7 @@
 
 #include "atags.h"
 
+
 #if defined(CONFIG_FPE_NWFPE) || defined(CONFIG_FPE_FASTFPE)
 char fpe_type[8];
 
@@ -108,6 +109,7 @@ EXPORT_SYMBOL(elf_hwcap);
 
 unsigned int elf_hwcap2 __read_mostly;
 EXPORT_SYMBOL(elf_hwcap2);
+
 
 #ifdef MULTI_CPU
 struct processor processor __read_mostly;
@@ -1010,6 +1012,7 @@ void __init setup_arch(char **cmdline_p)
 	if (mdesc->init_early)
 		mdesc->init_early();
 }
+
 
 static int __init topology_init(void)
 {

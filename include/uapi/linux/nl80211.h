@@ -1878,6 +1878,7 @@ enum nl80211_attrs {
 
 	NL80211_ATTR_FREQ_FIXED,
 
+
 	NL80211_ATTR_WIPHY_RETRY_SHORT,
 	NL80211_ATTR_WIPHY_RETRY_LONG,
 	NL80211_ATTR_WIPHY_FRAG_THRESHOLD,
@@ -3673,6 +3674,7 @@ enum nl80211_cqm_rssi_threshold_event {
 	NL80211_CQM_RSSI_BEACON_LOSS_EVENT,
 };
 
+
 /**
  * enum nl80211_tx_power_setting - TX power adjustment
  * @NL80211_TX_POWER_AUTOMATIC: automatically determine transmit power
@@ -4100,6 +4102,7 @@ enum nl80211_if_combination_attrs {
 	MAX_NL80211_IFACE_COMB = NUM_NL80211_IFACE_COMB - 1
 };
 
+
 /**
  * enum nl80211_plink_state - state of a mesh peer link finite state machine
  *
@@ -4147,6 +4150,7 @@ enum plink_actions {
 
 	NUM_NL80211_PLINK_ACTIONS,
 };
+
 
 #define NL80211_KCK_LEN			16
 #define NL80211_KEK_LEN			16

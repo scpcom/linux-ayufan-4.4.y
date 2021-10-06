@@ -119,6 +119,7 @@ static void __exit snap_exit(void)
 
 module_exit(snap_exit);
 
+
 /*
  *	Register SNAP clients. We don't yet use this for IP.
  */

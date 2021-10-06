@@ -88,6 +88,7 @@ out:
 	return r ? r : count;
 }
 
+
 static ssize_t show_mirror(struct device *dev,
 		struct device_attribute *attr, char *buf)
 {
@@ -601,3 +602,4 @@ void omapfb_remove_sysfs(struct omapfb2_device *fbdev)
 					&omapfb_attrs[t]);
 	}
 }
+

@@ -65,6 +65,7 @@ static struct mtd_info *map_rom_probe(struct map_info *map)
 	return mtd;
 }
 
+
 /*
  * Allow NOMMU mmap() to directly map the device (if not NULL)
  * - return the address to which the offset maps

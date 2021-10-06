@@ -115,6 +115,7 @@ struct spi_ioc_transfer {
 		? ((N)*(sizeof (struct spi_ioc_transfer))) : 0)
 #define SPI_IOC_MESSAGE(N) _IOW(SPI_IOC_MAGIC, 0, char[SPI_MSGSIZE(N)])
 
+
 /* Read / Write of SPI mode (SPI_MODE_0..SPI_MODE_3) (limited to 8 bits) */
 #define SPI_IOC_RD_MODE			_IOR(SPI_IOC_MAGIC, 1, __u8)
 #define SPI_IOC_WR_MODE			_IOW(SPI_IOC_MAGIC, 1, __u8)
@@ -134,5 +135,7 @@ struct spi_ioc_transfer {
 /* Read / Write of the SPI mode field */
 #define SPI_IOC_RD_MODE32		_IOR(SPI_IOC_MAGIC, 5, __u32)
 #define SPI_IOC_WR_MODE32		_IOW(SPI_IOC_MAGIC, 5, __u32)
+
+
 
 #endif /* SPIDEV_H */

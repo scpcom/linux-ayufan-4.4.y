@@ -97,3 +97,4 @@ static inline int bit_spin_is_locked(int bitnum, unsigned long *addr)
 }
 
 #endif /* __LINUX_BIT_SPINLOCK_H */
+

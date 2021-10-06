@@ -112,6 +112,7 @@
 #  define CIA_CACK_EN_SET_DIRTY_EN	(1 << 2)
 #  define CIA_CACK_EN_BC_VICTIM_EN	(1 << 3)
 
+
 /*
  * 21171-CA Diagnostic Registers
  */
@@ -286,6 +287,7 @@ struct el_CIA_sysdata_mcheck {
 	unsigned long	pci_err1;
 	unsigned long	pci_err2;
 };
+
 
 #ifdef __KERNEL__
 

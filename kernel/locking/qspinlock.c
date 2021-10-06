@@ -231,6 +231,7 @@ static __always_inline void set_locked(struct qspinlock *lock)
 	WRITE_ONCE(l->locked, _Q_LOCKED_VAL);
 }
 
+
 /*
  * Generate the native code for queued_spin_unlock_slowpath(); provide NOPs for
  * all the PV callbacks.

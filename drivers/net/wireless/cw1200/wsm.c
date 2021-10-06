@@ -351,6 +351,7 @@ int wsm_stop_scan(struct cw1200_common *priv)
 	return ret;
 }
 
+
 static int wsm_tx_confirm(struct cw1200_common *priv,
 			  struct wsm_buf *buf,
 			  int link_id)
@@ -1070,6 +1071,7 @@ static int wsm_suspend_resume_indication(struct cw1200_common *priv,
 underflow:
 	return -EINVAL;
 }
+
 
 /* ******************************************************************** */
 /* WSM TX								*/

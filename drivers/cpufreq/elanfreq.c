@@ -67,6 +67,7 @@ static struct cpufreq_frequency_table elanfreq_table[] = {
 	{0, 0,	CPUFREQ_TABLE_END},
 };
 
+
 /**
  *	elanfreq_get_cpu_frequency: determine current cpu speed
  *
@@ -102,6 +103,7 @@ static unsigned int elanfreq_get_cpu_frequency(unsigned int cpu)
 
 	return (1<<((clockspeed_reg & 0xE0) >> 5)) * 1000;
 }
+
 
 static int elanfreq_target(struct cpufreq_policy *policy,
 			    unsigned int state)
@@ -167,6 +169,7 @@ static int elanfreq_cpu_init(struct cpufreq_policy *policy)
 	return cpufreq_table_validate_and_show(policy, elanfreq_table);
 }
 
+
 #ifndef MODULE
 /**
  * elanfreq_setup - elanfreq command line parameter parsing
@@ -187,6 +190,7 @@ static int __init elanfreq_setup(char *str)
 }
 __setup("elanfreq=", elanfreq_setup);
 #endif
+
 
 static struct cpufreq_driver elanfreq_driver = {
 	.get		= elanfreq_get_cpu_frequency,
@@ -210,10 +214,12 @@ static int __init elanfreq_init(void)
 	return cpufreq_register_driver(&elanfreq_driver);
 }
 
+
 static void __exit elanfreq_exit(void)
 {
 	cpufreq_unregister_driver(&elanfreq_driver);
 }
+
 
 module_param(max_freq, int, 0444);
 

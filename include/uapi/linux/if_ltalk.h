@@ -5,4 +5,5 @@
 #define LTALK_MTU		600
 #define LTALK_ALEN		1
 
+
 #endif /* _UAPI__LINUX_LTALK_H */

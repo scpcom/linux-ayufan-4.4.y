@@ -18,6 +18,7 @@
 #include <asm/types.h>
 #include <asm/io.h>
 
+
 /* Write a CRT register value spread across multiple registers */
 void svga_wcrt_multi(void __iomem *regbase, const struct vga_regset *regset, u32 value)
 {
@@ -69,7 +70,9 @@ static unsigned int svga_regset_size(const struct vga_regset *regset)
 	return 1 << count;
 }
 
+
 /* ------------------------------------------------------------------------- */
+
 
 /* Set graphics controller registers to sane values */
 void svga_set_default_gfx_regs(void __iomem *regbase)
@@ -183,7 +186,9 @@ void svga_dump_var(struct fb_var_screeninfo *var, int node)
 }
 #endif  /*  0  */
 
+
 /* ------------------------------------------------------------------------- */
+
 
 void svga_settile(struct fb_info *info, struct fb_tilemap *map)
 {
@@ -361,6 +366,7 @@ EXPORT_SYMBOL(svga_get_caps);
 
 /* ------------------------------------------------------------------------- */
 
+
 /*
  *  Compute PLL settings (M, N, R)
  *  F_VCO = (F_BASE * M) / N
@@ -429,7 +435,9 @@ int svga_compute_pll(const struct svga_pll *pll, u32 f_wanted, u16 *m, u16 *n, u
 	return 0;
 }
 
+
 /* ------------------------------------------------------------------------- */
+
 
 /* Check CRT timing values */
 int svga_check_timings(const struct svga_timing_regs *tm, struct fb_var_screeninfo *var, int node)
@@ -586,7 +594,9 @@ void svga_set_timings(void __iomem *regbase, const struct svga_timing_regs *tm,
 	vga_w(regbase, VGA_MIS_W, regval);
 }
 
+
 /* ------------------------------------------------------------------------- */
+
 
 static inline int match_format(const struct svga_fb_format *frm,
 			       struct fb_var_screeninfo *var)
@@ -634,6 +644,7 @@ int svga_match_format(const struct svga_fb_format *frm,
 
 	return i;
 }
+
 
 EXPORT_SYMBOL(svga_wcrt_multi);
 EXPORT_SYMBOL(svga_wseq_multi);

@@ -317,6 +317,7 @@ static void __rate_control_send_low(struct ieee80211_hw *hw,
 	info->control.skip_table = 1;
 }
 
+
 bool rate_control_send_low(struct ieee80211_sta *pubsta,
 			   void *priv_sta,
 			   struct ieee80211_tx_rate_control *txrc)
@@ -641,6 +642,7 @@ static void rate_fixup_ratelist(struct ieee80211_vif *vif,
 	}
 }
 
+
 static void rate_control_fill_sta_table(struct ieee80211_sta *sta,
 					struct ieee80211_tx_info *info,
 					struct ieee80211_tx_rate *rates,
@@ -936,3 +938,4 @@ void rate_control_deinitialize(struct ieee80211_local *local)
 	local->rate_ctrl = NULL;
 	rate_control_free(ref);
 }
+

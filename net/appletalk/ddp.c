@@ -290,6 +290,7 @@ static int atif_probe_device(struct atalk_iface *atif)
 	return -EADDRINUSE;	/* Network is full... */
 }
 
+
 /* Perform AARP probing for a proxy address */
 static int atif_proxy_probe_device(struct atalk_iface *atif,
 				   struct atalk_addr *proxy_addr)
@@ -334,6 +335,7 @@ static int atif_proxy_probe_device(struct atalk_iface *atif,
 
 	return -EADDRINUSE;	/* Network is full... */
 }
+
 
 struct atalk_addr *atalk_find_dev_addr(struct net_device *dev)
 {
@@ -418,6 +420,7 @@ static struct atalk_iface *atalk_find_interface(__be16 net, int node)
 	return iface;
 }
 
+
 /*
  * Find a route for an AppleTalk packet. This ought to get cached in
  * the socket (later on...). We know about host routes and the fact
@@ -469,6 +472,7 @@ out:
 	read_unlock_bh(&atalk_routes_lock);
 	return r;
 }
+
 
 /*
  * Given an AppleTalk network, find the device to use. This can be
@@ -1771,6 +1775,7 @@ out:
 	return err ? : copied;
 }
 
+
 /*
  * AppleTalk ioctl calls.
  */
@@ -1833,6 +1838,7 @@ static int atalk_ioctl(struct socket *sock, unsigned int cmd, unsigned long arg)
 	return rc;
 }
 
+
 #ifdef CONFIG_COMPAT
 static int atalk_compat_ioctl(struct socket *sock, unsigned int cmd, unsigned long arg)
 {
@@ -1848,6 +1854,7 @@ static int atalk_compat_ioctl(struct socket *sock, unsigned int cmd, unsigned lo
 	return -ENOIOCTLCMD;
 }
 #endif
+
 
 static const struct net_proto_family atalk_family_ops = {
 	.family		= PF_APPLETALK,

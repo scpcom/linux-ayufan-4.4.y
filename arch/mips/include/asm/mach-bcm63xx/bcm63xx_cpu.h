@@ -442,6 +442,7 @@ enum bcm63xx_regs_set {
 #define BCM_6358_RNG_BASE		(0xdeadbeef)
 #define BCM_6358_MISC_BASE		(0xdeadbeef)
 
+
 /*
  * 6362 register sets base address
  */
@@ -544,6 +545,7 @@ enum bcm63xx_regs_set {
 #define BCM_6368_RNG_BASE		(0xb0004180)
 #define BCM_6368_MISC_BASE		(0xdeadbeef)
 
+
 extern const unsigned long *bcm63xx_regs_base;
 
 #define __GEN_CPU_REGS_TABLE(__cpu)					\
@@ -588,6 +590,7 @@ extern const unsigned long *bcm63xx_regs_base;
 	[RSET_PCMDMAS]		= BCM_## __cpu ##_PCMDMAS_BASE,		\
 	[RSET_RNG]		= BCM_## __cpu ##_RNG_BASE,		\
 	[RSET_MISC]		= BCM_## __cpu ##_MISC_BASE,		\
+
 
 static inline unsigned long bcm63xx_regset_address(enum bcm63xx_regs_set set)
 {
@@ -679,6 +682,7 @@ enum bcm63xx_irq {
 #define BCM_3368_EXT_IRQ1		(IRQ_INTERNAL_BASE + 26)
 #define BCM_3368_EXT_IRQ2		(IRQ_INTERNAL_BASE + 27)
 #define BCM_3368_EXT_IRQ3		(IRQ_INTERNAL_BASE + 28)
+
 
 /*
  * 6328 irqs

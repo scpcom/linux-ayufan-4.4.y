@@ -17,6 +17,7 @@
 #include <linux/notifier.h>
 #include <linux/reboot.h>
 
+
 #include "exynos-pmu.h"
 #include "regs-pmu.h"
 
@@ -709,6 +710,7 @@ static void exynos5420_powerdown_conf(enum sys_powerdown mode)
 	 */
 	pmu_raw_writel(this_cluster, EXYNOS_IROM_DATA2);
 }
+
 
 static void exynos5_powerdown_conf(enum sys_powerdown mode)
 {

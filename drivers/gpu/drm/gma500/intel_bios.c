@@ -254,6 +254,7 @@ static void parse_lfp_panel_data(struct drm_psb_private *dev_priv,
 	if (!lvds_lfp_data)
 		return;
 
+
 	entry = &lvds_lfp_data->data[lvds_options->panel_type];
 	dvo_timing = &entry->dvo_timing;
 
@@ -421,6 +422,7 @@ parse_sdvo_device_mapping(struct drm_psb_private *dev_priv,
 	return;
 }
 
+
 static void
 parse_driver_features(struct drm_psb_private *dev_priv,
 		      struct bdb_header *bdb)
@@ -506,6 +508,7 @@ parse_device_mapping(struct drm_psb_private *dev_priv,
 	return;
 }
 
+
 /**
  * psb_intel_init_bios - initialize VBIOS settings & find VBT
  * @dev: DRM device
@@ -529,6 +532,7 @@ int psb_intel_init_bios(struct drm_device *dev)
 	u8 __iomem *bios = NULL;
 	size_t size;
 	int i;
+
 
 	dev_priv->panel_type = 0xff;
 

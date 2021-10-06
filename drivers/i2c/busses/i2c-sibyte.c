@@ -22,6 +22,7 @@
 #include <asm/sibyte/sb1250_regs.h>
 #include <asm/sibyte/sb1250_smbus.h>
 
+
 struct i2c_algo_sibyte_data {
 	void *data;		/* private data */
 	int   bus;		/* which bus */
@@ -30,6 +31,7 @@ struct i2c_algo_sibyte_data {
 
 /* ----- global defines ----------------------------------------------- */
 #define SMB_CSR(a,r) ((long)(a->reg_base + r))
+
 
 static int smbus_xfer(struct i2c_adapter *i2c_adap, u16 addr,
 		      unsigned short flags, char read_write,
@@ -115,6 +117,7 @@ static u32 bit_func(struct i2c_adapter *adap)
 		I2C_FUNC_SMBUS_BYTE_DATA | I2C_FUNC_SMBUS_WORD_DATA);
 }
 
+
 /* -----exported algorithm data: -------------------------------------	*/
 
 static const struct i2c_algorithm i2c_sibyte_algo = {
@@ -138,6 +141,7 @@ static int __init i2c_sibyte_add_bus(struct i2c_adapter *i2c_adap, int speed)
 
 	return i2c_add_numbered_adapter(i2c_adap);
 }
+
 
 static struct i2c_algo_sibyte_data sibyte_board_data[2] = {
 	{ NULL, 0, (void *) (CKSEG1+A_SMB_BASE(0)) },

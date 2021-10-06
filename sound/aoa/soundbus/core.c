@@ -55,6 +55,7 @@ static int soundbus_probe(struct device *dev)
 	return error;
 }
 
+
 static int soundbus_uevent(struct device *dev, struct kobj_uevent_env *env)
 {
 	struct soundbus_dev * soundbus_dev;

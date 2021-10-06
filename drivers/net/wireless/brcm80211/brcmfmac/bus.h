@@ -85,6 +85,7 @@ struct brcmf_bus_ops {
 	int (*get_memdump)(struct device *dev, void *data, size_t len);
 };
 
+
 /**
  * struct brcmf_bus_msgbuf - bus ringbuf if in case of msgbuf.
  *
@@ -101,6 +102,7 @@ struct brcmf_bus_msgbuf {
 	u32 max_rxbufpost;
 	u32 nrof_flowrings;
 };
+
 
 /**
  * struct brcmf_bus - interface structure between common and bus layer

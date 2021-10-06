@@ -53,6 +53,7 @@
 #define XFRM_INC_STATS_USER(net, field)	((void)(net))
 #endif
 
+
 /* Organization of SPD aka "XFRM rules"
    ------------------------------------
 
@@ -82,6 +83,7 @@
                                       |---. child .-> NULL
 
    Bundles are cached at xrfm_policy struct (field ->bundles).
+
 
    Resolution of xrfm_tmpl
    -----------------------
@@ -1742,6 +1744,7 @@ static inline struct xfrm_algo_aead *xfrm_algo_aead_clone(struct xfrm_algo_aead 
 {
 	return kmemdup(orig, aead_len(orig), GFP_KERNEL);
 }
+
 
 static inline struct xfrm_algo *xfrm_algo_clone(struct xfrm_algo *orig)
 {

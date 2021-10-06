@@ -18,6 +18,7 @@
 
 #include "u_serial.h"
 
+
 /* Defines */
 
 #define GS_VERSION_STR			"v2.4"

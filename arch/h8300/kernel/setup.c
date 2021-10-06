@@ -249,6 +249,7 @@ void __init calibrate_delay(void)
 		(loops_per_jiffy / (5000 / HZ)) % 100, loops_per_jiffy);
 }
 
+
 void __init time_init(void)
 {
 	of_clk_init(NULL);

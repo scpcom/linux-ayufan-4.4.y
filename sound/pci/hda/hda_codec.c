@@ -311,6 +311,7 @@ int snd_hda_get_conn_index(struct hda_codec *codec, hda_nid_t mux,
 }
 EXPORT_SYMBOL_GPL(snd_hda_get_conn_index);
 
+
 /* return DEVLIST_LEN parameter of the given widget */
 static unsigned int get_num_devices(struct hda_codec *codec, hda_nid_t nid)
 {
@@ -1319,6 +1320,7 @@ int snd_hda_mixer_amp_volume_info(struct snd_kcontrol *kcontrol,
 }
 EXPORT_SYMBOL_GPL(snd_hda_mixer_amp_volume_info);
 
+
 static inline unsigned int
 read_amp_value(struct hda_codec *codec, hda_nid_t nid,
 	       int ch, int dir, int idx, unsigned int ofs)
@@ -1962,6 +1964,7 @@ void snd_hda_sync_vmaster_hook(struct hda_vmaster_mute_hook *hook)
 	snd_ctl_sync_vmaster_hook(hook->sw_kctl);
 }
 EXPORT_SYMBOL_GPL(snd_hda_sync_vmaster_hook);
+
 
 /**
  * snd_hda_mixer_amp_switch_info - Info callback for a standard AMP mixer switch
@@ -3539,6 +3542,7 @@ int snd_hda_input_mux_put(struct hda_codec *codec,
 	return 1;
 }
 EXPORT_SYMBOL_GPL(snd_hda_input_mux_put);
+
 
 /**
  * snd_hda_enum_helper_info - Helper for simple enum ctls

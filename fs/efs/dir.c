@@ -100,3 +100,4 @@ static int efs_readdir(struct file *file, struct dir_context *ctx)
 	ctx->pos = (block << EFS_DIRBSIZE_BITS) | slot;
 	return 0;
 }
+

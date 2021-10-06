@@ -208,6 +208,7 @@ static int ql_wait_cfg(struct ql_adapter *qdev, u32 bit)
 	return -ETIMEDOUT;
 }
 
+
 /* Used to issue init control blocks to hw. Maps control block,
  * sets address, triggers download, waits for completion.
  */
@@ -2721,6 +2722,7 @@ static netdev_tx_t qlge_send(struct sk_buff *skb, struct net_device *ndev)
 	}
 	return NETDEV_TX_OK;
 }
+
 
 static void ql_free_shadow_space(struct ql_adapter *qdev)
 {

@@ -288,4 +288,6 @@ struct cik_sdma_rlc_registers {
 	uint32_t sdma_queue_id;
 };
 
+
+
 #endif /* CIK_STRUCTS_H_ */

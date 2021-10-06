@@ -404,6 +404,7 @@ static void line6_toneport_disconnect(struct usb_line6 *line6)
 		toneport_remove_leds(toneport);
 }
 
+
 /*
 	 Try to init Toneport device.
 */

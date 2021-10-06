@@ -472,6 +472,7 @@ ddq_add_8:
 	jz	.Ldo_return2\key_len
 	jmp	.Lmain_loop2\key_len
 
+
 .Leq3\key_len:
 	do_aes_load	3, \key_len
 	add	$(3*16), p_out

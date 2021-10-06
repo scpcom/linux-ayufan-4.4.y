@@ -31,6 +31,7 @@ idal_is_needed(void *vaddr, unsigned int length)
 	return ((__pa(vaddr) + length - 1) >> 31) != 0;
 }
 
+
 /*
  * Return the number of idal words needed for an address/length pair.
  */

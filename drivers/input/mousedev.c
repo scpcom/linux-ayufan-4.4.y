@@ -502,6 +502,7 @@ static void mixdev_close_devices(struct mousedev *mixdev)
 	mutex_unlock(&mixdev->mutex);
 }
 
+
 static void mousedev_attach_client(struct mousedev *mousedev,
 				   struct mousedev_client *client)
 {

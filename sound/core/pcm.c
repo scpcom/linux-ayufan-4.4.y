@@ -1229,6 +1229,7 @@ static void snd_pcm_proc_done(void)
 #define snd_pcm_proc_done()
 #endif /* CONFIG_SND_PROC_FS */
 
+
 /*
  *  ENTRY functions
  */

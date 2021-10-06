@@ -705,6 +705,7 @@ static int tpm_tis_init(struct device *dev, struct tpm_info *tpm_info,
 	if (itpm)
 		dev_info(dev, "Intel iTPM workaround enabled\n");
 
+
 	/* Figure out the capabilities */
 	intfcaps =
 	    ioread32(chip->vendor.iobase +

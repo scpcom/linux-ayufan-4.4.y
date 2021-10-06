@@ -1,6 +1,7 @@
 #ifndef __ASM_SMP_H
 #define __ASM_SMP_H
 
+
 #if defined(CONFIG_SMP)
 
 /* Page Zero Location PDC will look for the address to branch to when we poke
@@ -14,6 +15,7 @@
 #include <linux/threads.h>	/* for NR_CPUS */
 #include <linux/cpumask.h>
 typedef unsigned long address_t;
+
 
 /*
  *	Private routines/data

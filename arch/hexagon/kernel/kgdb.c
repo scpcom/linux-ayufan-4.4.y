@@ -146,6 +146,7 @@ void kgdb_roundup_cpus(unsigned long flags)
 }
 #endif
 
+
 /*  Not yet working  */
 void sleeping_thread_to_gdb_regs(unsigned long *gdb_regs,
 				 struct task_struct *task)

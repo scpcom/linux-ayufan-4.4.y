@@ -550,6 +550,7 @@ static void extend_sampling_buffer(struct sf_buffer *sfb,
 				    sfb_pending_allocs(sfb, hwc));
 }
 
+
 /* Number of perf events counting hardware events */
 static atomic_t num_events;
 /* Used to avoid races in calling reserve/release_cpumf_hardware */

@@ -29,6 +29,7 @@
 
 #include <linux/usb.h>
 
+
 static const struct usb_device_id vprbrd_table[] = {
 	{ USB_DEVICE(0x2058, 0x1005) },   /* Nano River Technologies */
 	{ }                               /* Terminating entry */

@@ -21,6 +21,7 @@
   Jean-loup Gailly        Mark Adler
   jloup@gzip.org          madler@alumni.caltech.edu
 
+
   The data format used by the zlib library is described by RFCs (Request for
   Comments) 1950 to 1952 in the files http://www.ietf.org/rfc/rfc1950.txt
   (zlib format), rfc1951.txt (deflate format) and rfc1952.txt (gzip format).
@@ -212,6 +213,7 @@ extern int deflateInit (z_streamp strm, int level);
    perform any compression: this will be done by deflate().
 */
 
+
 extern int zlib_deflate (z_streamp strm, int flush);
 /*
     deflate compresses as much data as possible, and stops when the input
@@ -289,6 +291,7 @@ extern int zlib_deflate (z_streamp strm, int flush);
   (for example avail_in or avail_out was zero).
 */
 
+
 extern int zlib_deflateEnd (z_streamp strm);
 /*
      All dynamically allocated data structures for this stream are freed.
@@ -301,6 +304,7 @@ extern int zlib_deflateEnd (z_streamp strm);
    msg may be set but then points to a static string (which must not be
    deallocated).
 */
+
 
 extern int zlib_inflate_workspacesize (void);
 /*
@@ -328,6 +332,7 @@ extern int zlib_inflateInit (z_streamp strm);
    the zlib header if present: this will be done by inflate().  (So next_in and
    avail_in may be modified, but next_out and avail_out are unchanged.)
 */
+
 
 extern int zlib_inflate (z_streamp strm, int flush);
 /*
@@ -426,6 +431,7 @@ extern int zlib_inflate (z_streamp strm, int flush);
   call inflateSync() to look for a good compression block if a partial recovery
   of the data is desired.
 */
+
 
 extern int zlib_inflateEnd (z_streamp strm);
 /*

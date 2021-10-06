@@ -47,6 +47,7 @@
 /* Bits to mask out from a PGD to get to the PUD page */
 #define PGD_MASKED_BITS		0
 
+
 /*
  * 4-level page tables related bits
  */

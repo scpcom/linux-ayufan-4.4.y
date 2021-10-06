@@ -64,6 +64,7 @@ static unsigned short s_ausThinkpadDmaToField[8] =
 	{ 0x0001, 0x0002, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0x0003, 0x0004 };
 static unsigned short s_numIrqs = 16, s_numDmas = 8;
 
+
 static void EnableSRAM(THINKPAD_BD_DATA * pBDData)
 {
 	DSP_3780I_CONFIG_SETTINGS *pSettings = &pBDData->rDspSettings;
@@ -90,6 +91,7 @@ static void EnableSRAM(THINKPAD_BD_DATA * pBDData)
 
 	PRINTK_1(TRACE_TP3780I, "tp3780i::EnableSRAM exit\n");
 }
+
 
 static irqreturn_t UartInterrupt(int irq, void *dev_id)
 {
@@ -149,10 +151,12 @@ static irqreturn_t DspInterrupt(int irq, void *dev_id)
 	return IRQ_HANDLED;
 }
 
+
 int tp3780I_InitializeBoardData(THINKPAD_BD_DATA * pBDData)
 {
 	int retval = 0;
 	DSP_3780I_CONFIG_SETTINGS *pSettings = &pBDData->rDspSettings;
+
 
 	PRINTK_2(TRACE_TP3780I, "tp3780i::tp3780I_InitializeBoardData entry pBDData %p\n", pBDData);
 
@@ -230,6 +234,7 @@ int tp3780I_CalcResources(THINKPAD_BD_DATA * pBDData)
 	return 0;
 }
 
+
 int tp3780I_ClaimResources(THINKPAD_BD_DATA * pBDData)
 {
 	int retval = 0;
@@ -272,6 +277,8 @@ int tp3780I_ReleaseResources(THINKPAD_BD_DATA * pBDData)
 
 	return retval;
 }
+
+
 
 int tp3780I_EnableDSP(THINKPAD_BD_DATA * pBDData)
 {
@@ -402,6 +409,7 @@ exit_cleanup:
 	return -EIO;
 }
 
+
 int tp3780I_DisableDSP(THINKPAD_BD_DATA * pBDData)
 {
 	int retval = 0;
@@ -424,6 +432,7 @@ int tp3780I_DisableDSP(THINKPAD_BD_DATA * pBDData)
 	return retval;
 }
 
+
 int tp3780I_ResetDSP(THINKPAD_BD_DATA * pBDData)
 {
 	int retval = 0;
@@ -443,6 +452,7 @@ int tp3780I_ResetDSP(THINKPAD_BD_DATA * pBDData)
 	return retval;
 }
 
+
 int tp3780I_StartDSP(THINKPAD_BD_DATA * pBDData)
 {
 	int retval = 0;
@@ -460,6 +470,7 @@ int tp3780I_StartDSP(THINKPAD_BD_DATA * pBDData)
 
 	return retval;
 }
+
 
 int tp3780I_QueryAbilities(THINKPAD_BD_DATA * pBDData, MW_ABILITIES * pAbilities)
 {
@@ -533,6 +544,7 @@ int tp3780I_ReadWriteDspDStore(THINKPAD_BD_DATA * pBDData, unsigned int uOpcode,
 	return retval;
 }
 
+
 int tp3780I_ReadWriteDspIStore(THINKPAD_BD_DATA * pBDData, unsigned int uOpcode,
                                void __user *pvBuffer, unsigned int uCount,
                                unsigned long ulDSPAddr)
@@ -565,3 +577,4 @@ int tp3780I_ReadWriteDspIStore(THINKPAD_BD_DATA * pBDData, unsigned int uOpcode,
 
 	return retval;
 }
+

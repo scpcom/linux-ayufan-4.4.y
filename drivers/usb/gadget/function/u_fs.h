@@ -283,6 +283,7 @@ struct ffs_data {
 	struct ffs_epfile		*epfiles;
 };
 
+
 struct f_fs_opts {
 	struct usb_function_instance	func_inst;
 	struct ffs_dev			*dev;

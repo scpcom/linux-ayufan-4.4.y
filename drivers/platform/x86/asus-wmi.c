@@ -640,6 +640,7 @@ error:
 	return rv;
 }
 
+
 /*
  * PCI hotplug (for wlan rfkill)
  */
@@ -1358,6 +1359,7 @@ static umode_t asus_hwmon_sysfs_is_visible(struct kobject *kobj,
 		dev_id = ASUS_WMI_DEVID_FAN_CTRL;
 	else if (attr == &dev_attr_temp1_input.attr)
 		dev_id = ASUS_WMI_DEVID_THERMAL_CTRL;
+
 
 	if (attr == &dev_attr_fan1_input.attr
 	    || attr == &dev_attr_fan1_label.attr

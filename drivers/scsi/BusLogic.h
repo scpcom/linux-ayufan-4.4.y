@@ -28,6 +28,7 @@
 #ifndef _BUSLOGIC_H
 #define _BUSLOGIC_H
 
+
 #ifndef PACKED
 #define PACKED __attribute__((packed))
 #endif
@@ -38,11 +39,13 @@
 
 #define BLOGIC_MAX_ADAPTERS		16
 
+
 /*
   Define the maximum number of Target Devices supported by this driver.
 */
 
 #define BLOGIC_MAXDEV			16
+
 
 /*
   Define the maximum number of Scatter/Gather Segments used by this driver.
@@ -51,6 +54,7 @@
 */
 
 #define BLOGIC_SG_LIMIT		128
+
 
 /*
   Define the maximum, maximum automatic, minimum automatic, and default Queue
@@ -65,6 +69,7 @@
 #define BLOGIC_UNTAG_DEPTH		3
 #define BLOGIC_UNTAG_DEPTH_BB		2
 
+
 /*
   Define the default amount of time in seconds to wait between a Host Adapter
   Hard Reset which initiates a SCSI Bus Reset and issuing any SCSI commands.
@@ -73,6 +78,7 @@
 */
 
 #define BLOGIC_BUS_SETTLE_TIME		2
+
 
 /*
   Define the maximum number of Mailboxes that should be used for MultiMaster
@@ -83,6 +89,7 @@
 
 #define BLOGIC_MAX_MAILBOX		211
 
+
 /*
   Define the number of CCBs that should be allocated as a group to optimize
   Kernel memory allocation.
@@ -90,12 +97,14 @@
 
 #define BLOGIC_CCB_GRP_ALLOCSIZE	7
 
+
 /*
   Define the Host Adapter Line and Message Buffer Sizes.
 */
 
 #define BLOGIC_LINEBUF_SIZE		100
 #define BLOGIC_MSGBUF_SIZE		9700
+
 
 /*
   Define the Driver Message Levels.
@@ -110,6 +119,7 @@ enum blogic_msglevel {
 };
 
 static char *blogic_msglevelmap[] = { KERN_NOTICE, KERN_NOTICE, KERN_NOTICE, KERN_WARNING, KERN_ERR };
+
 
 /*
   Define Driver Message macros.
@@ -130,6 +140,7 @@ static char *blogic_msglevelmap[] = { KERN_NOTICE, KERN_NOTICE, KERN_NOTICE, KER
 #define blogic_err(format, args...) \
 	blogic_msg(BLOGIC_ERR_LEVEL, format, ##args)
 
+
 /*
   Define the types of BusLogic Host Adapters that are supported and the number
   of I/O Addresses required by each type.
@@ -144,6 +155,7 @@ enum blogic_adapter_type {
 #define BLOGIC_FLASHPOINT_ADDR_COUNT	256
 
 static int blogic_adapter_addr_count[3] = { 0, BLOGIC_MULTIMASTER_ADDR_COUNT, BLOGIC_FLASHPOINT_ADDR_COUNT };
+
 
 /*
   Define macros for testing the Host Adapter Type.
@@ -163,6 +175,7 @@ static int blogic_adapter_addr_count[3] = { 0, BLOGIC_MULTIMASTER_ADDR_COUNT, BL
 #define blogic_flashpoint_type(adapter)		(false)
 
 #endif
+
 
 /*
   Define the possible Host Adapter Bus Types.
@@ -199,6 +212,7 @@ enum blogic_bios_diskgeometry {
 	BLOGIC_BIOS_DISK255x63 = 3
 } PACKED;
 
+
 /*
   Define a 10^18 Statistics Byte Counter data type.
 */
@@ -207,6 +221,7 @@ struct blogic_byte_count {
 	unsigned int units;
 	unsigned int billions;
 };
+
 
 /*
   Define the structure for I/O Address and Bus Probing Information.
@@ -453,6 +468,7 @@ struct blogic_extmbox_req {
 	u32 base_mbox_addr;		/* Bytes 1-4 */
 } PACKED;
 
+
 /*
   Define the Inquire PCI Host Adapter Information reply type.  The ISA
   Compatible I/O Port values are defined here and are also used with
@@ -517,6 +533,7 @@ enum blogic_rr_req {
 	BLOGIC_AGGRESSIVE_RR = 0,
 	BLOGIC_STRICT_RR_MODE = 1
 } PACKED;
+
 
 /*
   Define the Fetch Host Adapter Local RAM request type.
@@ -647,6 +664,7 @@ enum blogic_action {
 	BLOGIC_MBOX_ABORT = 0x02
 } PACKED;
 
+
 /*
   Define the Incoming Mailbox Completion Codes.  The MultiMaster Firmware
   only uses codes 0 - 4.  The FlashPoint SCCB Manager has no mailboxes, so
@@ -675,6 +693,7 @@ enum blogic_ccb_opcode {
 	BLOGIC_BDR = 0x81
 } PACKED;
 
+
 /*
   Define the CCB Data Direction Codes.
 */
@@ -685,6 +704,7 @@ enum blogic_datadir {
 	BLOGIC_DATAOUT_CHECKED = 2,
 	BLOGIC_NOTX = 3
 };
+
 
 /*
   Define the Host Adapter Status Codes.  The MultiMaster Firmware does not
@@ -719,6 +739,7 @@ enum blogic_adapter_status {
 	BLOGIC_PARITY_ERR = 0x34
 } PACKED;
 
+
 /*
   Define the SCSI Target Device Status Codes.
 */
@@ -746,6 +767,7 @@ enum blogic_queuetag {
 
 #define BLOGIC_CDB_MAXLEN			12
 
+
 /*
   Define the Scatter/Gather Segment structure required by the MultiMaster
   Firmware Interface and the FlashPoint SCCB Manager.
@@ -766,6 +788,7 @@ enum blogic_ccb_status {
 	BLOGIC_CCB_COMPLETE = 2,
 	BLOGIC_CCB_RESET = 3
 } PACKED;
+
 
 /*
   Define the 32 Bit Mode Command Control Block (CCB) structure.  The first 40
@@ -863,6 +886,7 @@ struct blogic_inbox {
 	enum blogic_cmplt_code comp_code;		/* Byte 7 */
 };
 
+
 /*
   Define the BusLogic Driver Options structure.
 */
@@ -921,6 +945,7 @@ struct blogic_tgt_stats {
 */
 
 #define FPOINT_BADCARD_HANDLE		0xFFFFFFFFL
+
 
 /*
   Define the FlashPoint Information structure.  This structure is defined
@@ -1101,6 +1126,7 @@ struct scsi_inquiry {
 	unsigned char product[16];	/* Bytes 16-31 */
 	unsigned char product_rev[4];	/* Bytes 32-35 */
 };
+
 
 /*
   Define functions to provide an abstraction for reading and writing the

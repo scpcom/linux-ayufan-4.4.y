@@ -270,6 +270,7 @@ void map_destroy(struct mtd_info *mtd);
 #define INVALIDATE_CACHED_RANGE(map, from, size) \
 	do { if (map->inval_cache) map->inval_cache(map, from, size); } while (0)
 
+
 static inline int map_word_equal(struct map_info *map, map_word val1, map_word val2)
 {
 	int i;
@@ -475,6 +476,7 @@ extern void simple_map_init(struct map_info *);
 #define map_copy_from(map, to, from, len) inline_map_copy_from(map, to, from, len)
 #define map_write(map, datum, ofs) inline_map_write(map, datum, ofs)
 #define map_copy_to(map, to, from, len) inline_map_copy_to(map, to, from, len)
+
 
 #define simple_map_init(map) BUG_ON(!map_bankwidth_supported((map)->bankwidth))
 #define map_is_linear(map) ({ (void)(map); 1; })

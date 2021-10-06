@@ -302,6 +302,7 @@ static irqreturn_t lola_interrupt(int irq, void *dev_id)
 	return IRQ_RETVAL(handled);
 }
 
+
 /*
  * controller
  */

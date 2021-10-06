@@ -60,6 +60,7 @@ u64 op_x86_get_ctrl(struct op_x86_model_spec const *model,
 	return val;
 }
 
+
 static int profile_exceptions_notify(unsigned int val, struct pt_regs *regs)
 {
 	if (ctr_running)
@@ -243,6 +244,7 @@ static void nmi_cpu_switch(void *dummy)
 
 	nmi_cpu_start(NULL);
 }
+
 
 /*
  * Quick check to see if multiplexing is necessary.

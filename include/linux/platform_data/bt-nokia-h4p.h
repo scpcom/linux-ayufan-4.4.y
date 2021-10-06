@@ -19,6 +19,7 @@
  *
  */
 
+
 /**
  * struct hci_h4p_platform data - hci_h4p Platform data structure
  */

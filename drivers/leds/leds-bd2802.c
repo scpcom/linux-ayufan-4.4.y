@@ -104,6 +104,7 @@ struct bd2802_led {
 	int				rgb_current;
 };
 
+
 /*--------------------------------------------------------------*/
 /*	BD2802GU helper functions					*/
 /*--------------------------------------------------------------*/
@@ -153,6 +154,7 @@ static inline u8 bd2802_get_reg_addr(enum led_ids id, enum led_colors color,
 {
 	return reg_offset + bd2802_get_base_offset(id, color);
 }
+
 
 /*--------------------------------------------------------------*/
 /*	BD2802GU core functions					*/

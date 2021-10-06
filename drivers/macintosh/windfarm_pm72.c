@@ -102,6 +102,7 @@ static int failure_state;
 #define HIGH_OVER_AVERAGE	(10 << 16)
 #define HIGH_OVER_IMMEDIATE	(14 << 16)
 
+
 static void cpu_max_all_fans(void)
 {
 	int i;
@@ -710,6 +711,7 @@ static void pm72_new_control(struct wf_control *ct)
 		cpu_pid_combined = true;
 	}
 }
+
 
 static void pm72_new_sensor(struct wf_sensor *sr)
 {

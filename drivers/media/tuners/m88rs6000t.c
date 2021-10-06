@@ -490,6 +490,7 @@ static int m88rs6000t_get_if_frequency(struct dvb_frontend *fe, u32 *frequency)
 	return 0;
 }
 
+
 static int m88rs6000t_get_rf_strength(struct dvb_frontend *fe, u16 *strength)
 {
 	struct m88rs6000t_dev *dev = fe->tuner_priv;

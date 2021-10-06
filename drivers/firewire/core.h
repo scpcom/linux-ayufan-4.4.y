@@ -23,6 +23,7 @@ struct fw_iso_packet;
 struct fw_node;
 struct fw_packet;
 
+
 /* -card */
 
 extern __printf(2, 3)
@@ -127,6 +128,7 @@ void fw_device_cdev_update(struct fw_device *device);
 void fw_device_cdev_remove(struct fw_device *device);
 void fw_cdev_handle_phy_packet(struct fw_card *card, struct fw_packet *p);
 
+
 /* -device */
 
 extern struct rw_semaphore fw_device_rwsem;
@@ -149,6 +151,7 @@ struct fw_device *fw_device_get_by_devt(dev_t devt);
 int fw_device_set_broadcast_channel(struct device *dev, void *gen);
 void fw_node_event(struct fw_card *card, struct fw_node *node, int event);
 
+
 /* -iso */
 
 int fw_iso_buffer_alloc(struct fw_iso_buffer *buffer, int page_count);
@@ -156,6 +159,7 @@ int fw_iso_buffer_map_dma(struct fw_iso_buffer *buffer, struct fw_card *card,
 			  enum dma_data_direction direction);
 int fw_iso_buffer_map_vma(struct fw_iso_buffer *buffer,
 			  struct vm_area_struct *vma);
+
 
 /* -topology */
 
@@ -216,6 +220,7 @@ static inline bool is_next_generation(int new_generation, int old_generation)
 {
 	return (new_generation & 0xff) == ((old_generation + 1) & 0xff);
 }
+
 
 /* -transaction */
 

@@ -86,6 +86,7 @@ static inline void ctr_write(unsigned int i, u64 val)
 	}
 }
 
+
 /* precompute the values to stuff in the hardware registers */
 static int pa6t_reg_setup(struct op_counter_config *ctr,
 			   struct op_system_config *sys,

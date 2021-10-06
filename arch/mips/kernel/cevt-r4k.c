@@ -91,6 +91,7 @@ struct irqaction c0_compare_irqaction = {
 	.name = "timer",
 };
 
+
 void mips_event_handler(struct clock_event_device *dev)
 {
 }
@@ -221,3 +222,4 @@ int r4k_clockevent_init(void)
 
 	return 0;
 }
+

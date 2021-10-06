@@ -32,6 +32,7 @@
 #include "atom.h"
 #include "amdgpu_ucode.h"
 
+
 struct amdgpu_cgs_device {
 	struct cgs_device base;
 	struct amdgpu_device *adev;
@@ -141,6 +142,7 @@ static int amdgpu_cgs_alloc_gpu_mem(void *cgs_device,
 	    || size == 0 || align == 0)
 		return -EINVAL;
 
+
 	switch(type) {
 	case CGS_GPU_MEM_TYPE__VISIBLE_CONTIG_FB:
 	case CGS_GPU_MEM_TYPE__VISIBLE_FB:
@@ -184,6 +186,7 @@ static int amdgpu_cgs_alloc_gpu_mem(void *cgs_device,
 	default:
 		return -EINVAL;
 	}
+
 
 	*handle = 0;
 
@@ -466,6 +469,8 @@ static int amdgpu_cgs_pm_request_engine(void *cgs_device, cgs_handle_t request,
 	return 0;
 }
 
+
+
 static int amdgpu_cgs_pm_query_clock_limits(void *cgs_device,
 					    enum cgs_clock clock,
 					    struct cgs_clock_limits *limits)
@@ -613,6 +618,7 @@ int amdgpu_cgs_set_powergating_state(void *cgs_device,
 	}
 	return r;
 }
+
 
 static uint32_t fw_type_convert(void *cgs_device, uint32_t fw_type)
 {

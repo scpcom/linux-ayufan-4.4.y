@@ -20,6 +20,7 @@ static int one = 1;
 static int auto_flowlabels_min;
 static int auto_flowlabels_max = IP6_AUTO_FLOW_LABEL_MAX;
 
+
 static struct ctl_table ipv6_table_template[] = {
 	{
 		.procname	= "bindv6only",

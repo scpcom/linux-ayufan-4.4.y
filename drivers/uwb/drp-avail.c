@@ -216,6 +216,7 @@ void buffer_to_bmp(unsigned long *bmp_itr, void *_buffer,
 	}
 }
 
+
 /**
  * Extract DRP Availability bitmap from the notification.
  *
@@ -242,6 +243,7 @@ int uwbd_evt_get_drp_avail(struct uwb_event *evt, unsigned long *bmp)
 error:
 	return result;
 }
+
 
 /**
  * Process an incoming DRP Availability notification.

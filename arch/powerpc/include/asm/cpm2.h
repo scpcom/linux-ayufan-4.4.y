@@ -160,6 +160,7 @@ static inline void cpm2_fastbrg(uint brg, uint rate, int div16)
 #define PROFF_SMC1	(0)
 #define PROFF_SMC2	(64)
 
+
 /* Define enough so I can at least use the serial port as a UART.
  */
 typedef struct smc_uart {
@@ -384,6 +385,7 @@ typedef struct scc_enet {
 	ushort	sen_taddrl;	/* temp address (LSB) */
 } scc_enet_t;
 
+
 /* SCC Event register as used by Ethernet.
 */
 #define SCCE_ENET_GRA	((ushort)0x0080)	/* Graceful stop complete */
@@ -532,6 +534,7 @@ typedef struct fcc_param {
 	uint	fcc_res2;
 	uint	fcc_tcrc;	/* Tx temp CRC */
 } fccp_t;
+
 
 /* Ethernet controller through FCC.
 */
@@ -1032,6 +1035,7 @@ typedef struct im_idma {
 #define PA1_DIRA0	(PA1_RXDAT | PA1_CRS | PA1_COL | PA1_RXER | PA1_RXDV)
 #define PA1_DIRA1	(PA1_TXDAT | PA1_TXEN | PA1_TXER)
 
+
 /* I/O Pin assignment for FCC2.  I don't yet know the best way to do this,
  * but there is little variation among the choices.
  */
@@ -1048,6 +1052,7 @@ typedef struct im_idma {
 #define PB2_PSORB1	(PB2_TXEN)
 #define PB2_DIRB0	(PB2_RXDAT | PB2_CRS | PB2_COL | PB2_RXER | PB2_RXDV)
 #define PB2_DIRB1	(PB2_TXDAT | PB2_TXEN | PB2_TXER)
+
 
 /* I/O Pin assignment for FCC3.  I don't yet know the best way to do this,
  * but there is little variation among the choices.

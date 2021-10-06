@@ -16,10 +16,12 @@
 #ifndef BRCMFMAC_PROTO_H
 #define BRCMFMAC_PROTO_H
 
+
 enum proto_addr_mode {
 	ADDR_INDIRECT	= 0,
 	ADDR_DIRECT
 };
+
 
 struct brcmf_proto {
 	int (*hdrpull)(struct brcmf_pub *drvr, bool do_fws,
@@ -38,6 +40,7 @@ struct brcmf_proto {
 			      u8 peer[ETH_ALEN]);
 	void *pd;
 };
+
 
 int brcmf_proto_attach(struct brcmf_pub *drvr);
 void brcmf_proto_detach(struct brcmf_pub *drvr);
@@ -88,5 +91,6 @@ brcmf_proto_add_tdls_peer(struct brcmf_pub *drvr, int ifidx, u8 peer[ETH_ALEN])
 {
 	drvr->proto->add_tdls_peer(drvr, ifidx, peer);
 }
+
 
 #endif /* BRCMFMAC_PROTO_H */

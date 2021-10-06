@@ -42,6 +42,7 @@ struct coprocessor_completion_block {
 	__be64 address;
 } __packed __aligned(CCB_ALIGN);
 
+
 /* Chapter 6.5.7 Coprocessor-Status Block (CSB) */
 
 #define CSB_V			(0x80)
@@ -90,6 +91,7 @@ struct coprocessor_status_block {
 	__be64 address;
 } __packed __aligned(CSB_ALIGN);
 
+
 /* Chapter 6.5.10 Data-Descriptor List (DDL)
  * each list contains one or more Data-Descriptor Entries (DDE)
  */
@@ -106,6 +108,7 @@ struct data_descriptor_entry {
 	__be32 length;
 	__be64 address;
 } __packed __aligned(DDE_ALIGN);
+
 
 /* Chapter 6.5.2 Coprocessor-Request Block (CRB) */
 
@@ -138,6 +141,7 @@ struct coprocessor_request_block {
 	struct coprocessor_status_block csb;
 } __packed __aligned(CRB_ALIGN);
 
+
 /* RFC02167 Initiate Coprocessor Instructions document
  * Chapter 8.2.1.1.1 RS
  * Chapter 8.2.3 Coprocessor Directive
@@ -150,6 +154,7 @@ struct coprocessor_request_block {
 #define CCW_CT			(0x00ff0000)
 #define CCW_CD			(0x0000ffff)
 #define CCW_CL			(0x0000c000)
+
 
 /* RFC02167 Initiate Coprocessor Instructions document
  * Chapter 8.2.1 Initiate Coprocessor Store Word Indexed (ICSWX)
@@ -174,5 +179,6 @@ static inline int icswx(__be32 ccw, struct coprocessor_request_block *crb)
 
 	return (int)((cr >> 28) & 0xf);
 }
+
 
 #endif /* _ARCH_POWERPC_INCLUDE_ASM_ICSWX_H_ */

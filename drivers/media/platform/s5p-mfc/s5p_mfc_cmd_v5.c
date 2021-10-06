@@ -71,6 +71,7 @@ static int s5p_mfc_wakeup_cmd_v5(struct s5p_mfc_dev *dev)
 			&h2r_args);
 }
 
+
 static int s5p_mfc_open_inst_cmd_v5(struct s5p_mfc_ctx *ctx)
 {
 	struct s5p_mfc_dev *dev = ctx->dev;

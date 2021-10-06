@@ -110,6 +110,7 @@ enum {
 #define OMAP_MMC_CMDTYPE_AC	2
 #define OMAP_MMC_CMDTYPE_ADTC	3
 
+
 struct goldfish_mmc_host {
 	struct mmc_request	*mrq;
 	struct mmc_command	*cmd;

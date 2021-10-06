@@ -75,6 +75,7 @@ int jffs2_read_dnode(struct jffs2_sb_info *c, struct jffs2_inode_info *f,
 		goto out_ri;
 	});
 
+
 	if (ri->compr == JFFS2_COMPR_ZERO) {
 		memset(buf, 0, len);
 		goto out_ri;
@@ -224,3 +225,4 @@ int jffs2_read_inode_range(struct jffs2_sb_info *c, struct jffs2_inode_info *f,
 	}
 	return 0;
 }
+

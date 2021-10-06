@@ -243,6 +243,7 @@ static inline void purge_tlb_entries(struct mm_struct *mm, unsigned long addr)
 #define PAGE_KERNEL_UNC	__pgprot(_PAGE_KERNEL | _PAGE_NO_CACHE)
 #define PAGE_GATEWAY    __pgprot(_PAGE_PRESENT | _PAGE_USER | _PAGE_ACCESSED | _PAGE_GATEWAY| _PAGE_READ)
 
+
 /*
  * We could have an execute only page using "gateway - promote to priv
  * level 3", but that is kind of silly. So, the way things are defined
@@ -269,6 +270,7 @@ static inline void purge_tlb_entries(struct mm_struct *mm, unsigned long addr)
 #define __S101  PAGE_EXECREAD
 #define __S110  PAGE_RWX
 #define __S111  PAGE_RWX
+
 
 extern pgd_t swapper_pg_dir[]; /* declared in init_task.c */
 
@@ -315,6 +317,8 @@ static inline void pmd_clear(pmd_t *pmd) {
 #endif
 		__pmd_val_set(*pmd,  0);
 }
+
+
 
 #if CONFIG_PGTABLE_LEVELS == 3
 #define pgd_page_vaddr(pgd) ((unsigned long) __va(pgd_address(pgd)))
@@ -374,6 +378,7 @@ static inline pte_t pte_mkspecial(pte_t pte)	{ return pte; }
 #define pte_huge(pte)           (0)
 #define pte_mkhuge(pte)         (pte)
 #endif
+
 
 /*
  * Conversion functions: convert a page and protection to a page entry,
@@ -508,6 +513,7 @@ static inline void ptep_set_wrprotect(struct mm_struct *mm, unsigned long addr, 
 
 #endif /* !__ASSEMBLY__ */
 
+
 /* TLB page size encoding - see table 3-1 in parisc20.pdf */
 #define _PAGE_SIZE_ENCODING_4K		0
 #define _PAGE_SIZE_ENCODING_16K		1
@@ -525,6 +531,7 @@ static inline void ptep_set_wrprotect(struct mm_struct *mm, unsigned long addr, 
 #elif defined(CONFIG_PARISC_PAGE_SIZE_64KB)
 # define _PAGE_SIZE_ENCODING_DEFAULT _PAGE_SIZE_ENCODING_64K
 #endif
+
 
 #define pgprot_noncached(prot) __pgprot(pgprot_val(prot) | _PAGE_NO_CACHE)
 

@@ -771,6 +771,7 @@ static int can_use_asrc(struct snd_soc_dapm_widget *source,
 	return 0;
 }
 
+
 /**
  * rt5670_sel_asrc_clk_src - select ASRC clock source for a set of filters
  * @codec: SoC audio codec device.

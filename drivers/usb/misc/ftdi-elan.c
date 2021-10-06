@@ -288,6 +288,7 @@ void ftdi_elan_gone_away(struct platform_device *pdev)
 	ftdi_elan_put_kref(ftdi);
 }
 
+
 EXPORT_SYMBOL_GPL(ftdi_elan_gone_away);
 static void ftdi_release_platform_dev(struct device *dev)
 {
@@ -515,6 +516,7 @@ static void ftdi_elan_respond_work(struct work_struct *work)
 	}
 }
 
+
 /*
  * the sw_lock is initially held and will be freed
  * after the FTDI has been synchronized
@@ -608,6 +610,7 @@ static void ftdi_elan_status_work(struct work_struct *work)
 	}
 }
 
+
 /*
  * file_operations for the jtag interface
  *
@@ -650,6 +653,7 @@ static int ftdi_elan_release(struct inode *inode, struct file *file)
 	ftdi_elan_put_kref(ftdi);
 	return 0;
 }
+
 
 /*
  *
@@ -931,6 +935,7 @@ static char *have_ed_get_response(struct usb_ftdi *ftdi,
 	return ftdi->response;
 }
 
+
 /*
  * The engine tries to empty the FTDI fifo
  *
@@ -1125,6 +1130,7 @@ have:if (ftdi->bulk_in_left > 0) {
 	} else
 		goto more;
 }
+
 
 /*
  * create a urb, and a buffer for it, and copy the data to the urb
@@ -1335,6 +1341,7 @@ int usb_ftdi_elan_write_pcimem(struct platform_device *pdev, int mem_offset,
 	return ftdi_elan_write_pcimem(ftdi, mem_offset, width, data);
 }
 
+
 EXPORT_SYMBOL_GPL(usb_ftdi_elan_write_pcimem);
 static int ftdi_elan_read_reg(struct usb_ftdi *ftdi, u32 *data)
 {
@@ -1475,6 +1482,7 @@ int usb_ftdi_elan_read_pcimem(struct platform_device *pdev, int mem_offset,
 		return ftdi_elan_read_pcimem(ftdi, mem_offset, width, data);
 }
 
+
 EXPORT_SYMBOL_GPL(usb_ftdi_elan_read_pcimem);
 static int ftdi_elan_edset_setup(struct usb_ftdi *ftdi, u8 ed_number,
 				 void *endp, struct urb *urb, u8 address, u8 ep_number, u8 toggle_bits,
@@ -1530,6 +1538,7 @@ int usb_ftdi_elan_edset_setup(struct platform_device *pdev, u8 ed_number,
 	return ftdi_elan_edset_setup(ftdi, ed_number, endp, urb, address,
 				     ep_number, toggle_bits, callback);
 }
+
 
 EXPORT_SYMBOL_GPL(usb_ftdi_elan_edset_setup);
 static int ftdi_elan_edset_input(struct usb_ftdi *ftdi, u8 ed_number,
@@ -1595,6 +1604,7 @@ int usb_ftdi_elan_edset_input(struct platform_device *pdev, u8 ed_number,
 				     ep_number, toggle_bits, callback);
 }
 
+
 EXPORT_SYMBOL_GPL(usb_ftdi_elan_edset_input);
 static int ftdi_elan_edset_empty(struct usb_ftdi *ftdi, u8 ed_number,
 				 void *endp, struct urb *urb, u8 address, u8 ep_number, u8 toggle_bits,
@@ -1650,6 +1660,7 @@ int usb_ftdi_elan_edset_empty(struct platform_device *pdev, u8 ed_number,
 	return ftdi_elan_edset_empty(ftdi, ed_number, endp, urb, address,
 				     ep_number, toggle_bits, callback);
 }
+
 
 EXPORT_SYMBOL_GPL(usb_ftdi_elan_edset_empty);
 static int ftdi_elan_edset_output(struct usb_ftdi *ftdi, u8 ed_number,
@@ -1729,6 +1740,7 @@ int usb_ftdi_elan_edset_output(struct platform_device *pdev, u8 ed_number,
 				      ep_number, toggle_bits, callback);
 }
 
+
 EXPORT_SYMBOL_GPL(usb_ftdi_elan_edset_output);
 static int ftdi_elan_edset_single(struct usb_ftdi *ftdi, u8 ed_number,
 				  void *endp, struct urb *urb, u8 address, u8 ep_number, u8 toggle_bits,
@@ -1793,6 +1805,7 @@ int usb_ftdi_elan_edset_single(struct platform_device *pdev, u8 ed_number,
 				      ep_number, toggle_bits, callback);
 }
 
+
 EXPORT_SYMBOL_GPL(usb_ftdi_elan_edset_single);
 static int ftdi_elan_edset_flush(struct usb_ftdi *ftdi, u8 ed_number,
 				 void *endp)
@@ -1846,6 +1859,7 @@ int usb_ftdi_elan_edset_flush(struct platform_device *pdev, u8 ed_number,
 	struct usb_ftdi *ftdi = platform_device_to_usb_ftdi(pdev);
 	return ftdi_elan_edset_flush(ftdi, ed_number, endp);
 }
+
 
 EXPORT_SYMBOL_GPL(usb_ftdi_elan_edset_flush);
 static int ftdi_elan_flush_input_fifo(struct usb_ftdi *ftdi)
@@ -1921,6 +1935,7 @@ more:{
 	return -1;
 }
 
+
 /*
  * send the long flush sequence
  *
@@ -1959,6 +1974,7 @@ static int ftdi_elan_synchronize_flush(struct usb_ftdi *ftdi)
 	usb_free_urb(urb);
 	return 0;
 }
+
 
 /*
  * send the reset sequence
@@ -2234,6 +2250,7 @@ static int ftdi_elan_checkingPCI(struct usb_ftdi *ftdi)
 		}
 	}
 }
+
 
 #define ftdi_read_pcimem(ftdi, member, data) ftdi_elan_read_pcimem(ftdi, \
 								   offsetof(struct ohci_regs, member), 0, data);
@@ -2685,6 +2702,7 @@ static int ftdi_elan_setupOHCI(struct usb_ftdi *ftdi)
 	}
 }
 
+
 /*
  * we use only the first bulk-in and bulk-out endpoints
  */
@@ -2874,6 +2892,7 @@ static void __exit ftdi_elan_exit(void)
 	destroy_workqueue(respond_queue);
 	respond_queue = NULL;
 }
+
 
 module_init(ftdi_elan_init);
 module_exit(ftdi_elan_exit);

@@ -11,6 +11,7 @@
 
 #include <linux/module.h>
 
+
 #include <linux/kernel.h>
 #include <linux/init.h>
 #include <linux/ptrace.h>
@@ -25,6 +26,7 @@
 MODULE_DESCRIPTION("ISDN4Linux: PCMCIA client driver for AVM A1/Fritz!PCMCIA cards");
 MODULE_AUTHOR("Carsten Paeth");
 MODULE_LICENSE("GPL");
+
 
 /*====================================================================*/
 
@@ -68,6 +70,7 @@ static int avma1cs_configcheck(struct pcmcia_device *p_dev, void *priv_data)
 
 	return pcmcia_request_io(p_dev);
 }
+
 
 static int avma1cs_config(struct pcmcia_device *link)
 {

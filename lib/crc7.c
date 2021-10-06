@@ -9,6 +9,7 @@
 #include <linux/module.h>
 #include <linux/crc7.h>
 
+
 /*
  * Table for CRC-7 (polynomial x^7 + x^3 + 1).
  * This is a big-endian CRC (msbit is highest power of x),

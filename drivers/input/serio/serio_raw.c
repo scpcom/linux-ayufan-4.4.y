@@ -265,6 +265,7 @@ static const struct file_operations serio_raw_fops = {
 	.llseek		= noop_llseek,
 };
 
+
 /*********************************************************************
  *                   Interface with serio port                       *
  *********************************************************************/
@@ -388,6 +389,7 @@ static void serio_raw_hangup(struct serio_raw *serio_raw)
 
 	wake_up_interruptible(&serio_raw->wait);
 }
+
 
 static void serio_raw_disconnect(struct serio *serio)
 {

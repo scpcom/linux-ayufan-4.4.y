@@ -107,6 +107,7 @@ static unsigned long cxl_pcie_cfg_addr(struct pci_controller* phb,
 	return (unsigned long)phb->cfg_addr + ((unsigned long)phb->cfg_data * record) + offset;
 }
 
+
 static int cxl_pcie_config_info(struct pci_bus *bus, unsigned int devfn,
 				int offset, int len,
 				volatile void __iomem **ioaddr,
@@ -142,6 +143,7 @@ static int cxl_pcie_config_info(struct pci_bus *bus, unsigned int devfn,
 	}
 	return 0;
 }
+
 
 static inline bool cxl_config_link_ok(struct pci_bus *bus)
 {
@@ -212,6 +214,7 @@ static struct pci_ops cxl_pcie_pci_ops =
 	.read = cxl_pcie_read_config,
 	.write = cxl_pcie_write_config,
 };
+
 
 static struct pci_controller_ops cxl_pci_controller_ops =
 {

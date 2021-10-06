@@ -13,6 +13,7 @@
 #ifndef _XTENSA_TERMBITS_H
 #define _XTENSA_TERMBITS_H
 
+
 #include <linux/posix_types.h>
 
 typedef unsigned char	cc_t;

@@ -158,6 +158,7 @@ static inline int __atomic_add_unless(atomic_t *v, int a, int u)
 	return c;
 }
 
+
 #undef __ATOMIC_LOOP
 
 #define ATOMIC64_INIT(i)  { (i) }

@@ -260,6 +260,7 @@ static int acpi_setter_handle(struct eeepc_laptop *eeepc, int cm,
 	return 0;
 }
 
+
 /*
  * Sys helpers
  */
@@ -427,6 +428,7 @@ static ssize_t cpufv_disabled_store(struct device *dev,
 	}
 }
 
+
 static DEVICE_ATTR_RW(cpufv);
 static DEVICE_ATTR_RO(available_cpufv);
 static DEVICE_ATTR_RW(cpufv_disabled);
@@ -551,6 +553,7 @@ static void eeepc_led_exit(struct eeepc_laptop *eeepc)
 	if (eeepc->led_workqueue)
 		destroy_workqueue(eeepc->led_workqueue);
 }
+
 
 /*
  * PCI hotplug (for wlan rfkill)
@@ -1175,6 +1178,7 @@ static void eeepc_backlight_exit(struct eeepc_laptop *eeepc)
 	eeepc->backlight_device = NULL;
 }
 
+
 /*
  * Input device (i.e. hotkeys)
  */
@@ -1484,6 +1488,7 @@ static int eeepc_acpi_remove(struct acpi_device *device)
 	return 0;
 }
 
+
 static const struct acpi_device_id eeepc_device_ids[] = {
 	{EEEPC_ACPI_HID, 0},
 	{"", 0},
@@ -1502,6 +1507,7 @@ static struct acpi_driver eeepc_acpi_driver = {
 		.notify = eeepc_acpi_notify,
 	},
 };
+
 
 static int __init eeepc_laptop_init(void)
 {

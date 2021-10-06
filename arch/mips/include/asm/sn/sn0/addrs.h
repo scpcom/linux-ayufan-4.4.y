@@ -11,6 +11,7 @@
 #ifndef _ASM_SN_SN0_ADDRS_H
 #define _ASM_SN_SN0_ADDRS_H
 
+
 /*
  * SN0 (on a T5) Address map
  *
@@ -132,6 +133,8 @@
  */
 
 #define CALIAS_BASE		CAC_BASE
+
+
 
 #define BRIDGE_REG_PTR(_base, _off)	((volatile bridgereg_t *) \
 	((__psunsigned_t)(_base) + (__psunsigned_t)(_off)))

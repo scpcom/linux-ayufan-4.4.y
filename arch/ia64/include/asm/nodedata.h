@@ -29,6 +29,7 @@ struct ia64_node_data {
 	struct pglist_data	*pg_data_ptrs[MAX_NUMNODES];
 };
 
+
 /*
  * Return a pointer to the node_data structure for the executing cpu.
  */

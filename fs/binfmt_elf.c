@@ -283,6 +283,7 @@ create_elf_tables(struct linux_binprm *bprm, struct elfhdr *exec,
 	sp = (elf_addr_t __user *)bprm->p;
 #endif
 
+
 	/*
 	 * Grow the stack manually; some architectures have a limit on how
 	 * far ahead a user-space access may be in order to grow the stack.

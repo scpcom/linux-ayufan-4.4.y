@@ -35,6 +35,7 @@ static inline void hugetlb_free_pgd_range(struct mmu_gather *tlb,
 	free_pgd_range(tlb, addr, end, floor, ceiling);
 }
 
+
 static inline int is_hugepage_only_range(struct mm_struct *mm,
 					 unsigned long addr, unsigned long len)
 {

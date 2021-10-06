@@ -46,6 +46,7 @@ typedef struct {
 
 } BacktraceIterator;
 
+
 typedef enum {
 
 	/* We have no idea what the caller's pc is. */
@@ -58,6 +59,7 @@ typedef enum {
 	PC_LOC_ON_STACK
 
 } CallerPCLocation;
+
 
 typedef enum {
 
@@ -73,6 +75,7 @@ typedef enum {
 	SP_LOC_OFFSET
 
 } CallerSPLocation;
+
 
 /* Bit values ORed into CALLER_* values for info ops. */
 enum {
@@ -95,6 +98,7 @@ enum {
 	MAX_INFO_OPS_PER_BUNDLE = 2
 };
 
+
 /* Internal constants used to define 'info' operands. */
 enum {
 	/* 0 and 1 are reserved, as are all negative numbers. */
@@ -105,6 +109,7 @@ enum {
 
 	CALLER_SP_OFFSET_BASE = 8,
 };
+
 
 /* Current backtracer state describing where it thinks the caller is. */
 typedef struct {
@@ -150,6 +155,7 @@ extern void backtrace_init(BacktraceIterator *state,
                           void *read_memory_func_extra,
                           unsigned long pc, unsigned long lr,
                           unsigned long sp, unsigned long r52);
+
 
 extern bool backtrace_next(BacktraceIterator *state);
 

@@ -91,6 +91,7 @@ mgag200_ttm_global_release(struct mga_device *ast)
 	ast->ttm.mem_global_ref.release = NULL;
 }
 
+
 static void mgag200_bo_ttm_destroy(struct ttm_buffer_object *tbo)
 {
 	struct mgag200_bo *bo;
@@ -195,6 +196,7 @@ static int mgag200_bo_move(struct ttm_buffer_object *bo,
 	return r;
 }
 
+
 static void mgag200_ttm_backend_destroy(struct ttm_tt *tt)
 {
 	ttm_tt_fini(tt);
@@ -204,6 +206,7 @@ static void mgag200_ttm_backend_destroy(struct ttm_tt *tt)
 static struct ttm_backend_func mgag200_tt_backend_func = {
 	.destroy = &mgag200_ttm_backend_destroy,
 };
+
 
 static struct ttm_tt *mgag200_ttm_tt_create(struct ttm_bo_device *bdev,
 				 unsigned long size, uint32_t page_flags,

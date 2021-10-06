@@ -120,6 +120,7 @@ int snd_seq_dump_var_event(const struct snd_seq_event *event,
 
 EXPORT_SYMBOL(snd_seq_dump_var_event);
 
+
 /*
  * exported:
  * expand the variable length event to linear buffer space.
@@ -214,6 +215,7 @@ void snd_seq_cell_free(struct snd_seq_event_cell * cell)
 	spin_unlock_irqrestore(&pool->lock, flags);
 }
 
+
 /*
  * allocate an event cell.
  */
@@ -277,6 +279,7 @@ __error:
 	spin_unlock_irqrestore(&pool->lock, flags);
 	return err;
 }
+
 
 /*
  * duplicate the event to a cell.
@@ -361,6 +364,7 @@ __error:
 	return err;
 }
   
+
 /* poll wait */
 int snd_seq_pool_poll_wait(struct snd_seq_pool *pool, struct file *file,
 			   poll_table *wait)
@@ -368,6 +372,7 @@ int snd_seq_pool_poll_wait(struct snd_seq_pool *pool, struct file *file,
 	poll_wait(file, &pool->output_sleep, wait);
 	return snd_seq_output_ok(pool);
 }
+
 
 /* allocate room specified number of events */
 int snd_seq_pool_init(struct snd_seq_pool *pool)
@@ -453,6 +458,7 @@ int snd_seq_pool_done(struct snd_seq_pool *pool)
 	return 0;
 }
 
+
 /* init new memory pool */
 struct snd_seq_pool *snd_seq_pool_new(int poolsize)
 {
@@ -500,6 +506,7 @@ int __init snd_sequencer_memory_init(void)
 void __exit snd_sequencer_memory_done(void)
 {
 }
+
 
 /* exported to seq_clientmgr.c */
 void snd_seq_info_pool(struct snd_info_buffer *buffer,

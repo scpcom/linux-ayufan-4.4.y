@@ -195,6 +195,7 @@ static void rs780_start_dpm(struct radeon_device *rdev)
 	r600_enable_sclk_control(rdev, true);
 }
 
+
 static void rs780_preset_ranges_slow_clk_fbdiv_en(struct radeon_device *rdev)
 {
 	WREG32_P(FVTHROT_SLOW_CLK_FEEDBACK_DIV_REG1, RANGE_SLOW_CLK_FEEDBACK_DIV_EN,

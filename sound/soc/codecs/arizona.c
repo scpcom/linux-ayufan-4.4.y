@@ -565,6 +565,7 @@ const int arizona_rate_val[ARIZONA_RATE_ENUM_SIZE] = {
 };
 EXPORT_SYMBOL_GPL(arizona_rate_val);
 
+
 const struct soc_enum arizona_isrc_fsh[] = {
 	SOC_VALUE_ENUM_SINGLE(ARIZONA_ISRC_1_CTRL_1,
 			      ARIZONA_ISRC1_FSH_SHIFT, 0xf,

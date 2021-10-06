@@ -51,3 +51,4 @@ struct rt5670_dsp_param {
 };
 
 #endif /* __RT5670_DSP_H__ */
+

@@ -88,6 +88,7 @@
 9:	rts
 	 nop
 
+
 	!
 	!	GHIJ KLMN OPQR -->  .GHI JKLM NOPQ R...
 	!
@@ -297,6 +298,7 @@ ENTRY(memcpy)
 	bra	.Lcase3
 	 nop
 
+
 	!
 	!	GHIJ KLMN OPQR -->  GHIJ KLMN OPQR
 	!
@@ -339,6 +341,7 @@ ENTRY(memcpy)
 
 5:	rts
 	 nop
+
 
 	! Size is 16 or greater and less than 64, but may have trailing bytes
 
@@ -588,6 +591,7 @@ ENTRY(memcpy)
 	bra	10f
 	 nop
 
+
 	.balign	32
 .Lcase2b:
 	! Size is at least 64 bytes, so will be going round the big loop at least once.
@@ -792,3 +796,4 @@ ENTRY(memcpy)
 	mov.b	@(r0,r5),r1
 	rts
 	 mov.b	r1,@-r0
+

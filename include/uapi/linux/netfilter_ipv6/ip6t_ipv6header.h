@@ -4,6 +4,7 @@ on whether they contain certain headers */
 /* Original idea: Brad Chapman 
  * Rewritten by: Andras Kis-Szabo <kisza@sch.bme.hu> */
 
+
 #ifndef __IPV6HEADER_H
 #define __IPV6HEADER_H
 

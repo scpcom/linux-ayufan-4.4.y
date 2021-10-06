@@ -1147,6 +1147,7 @@ static void qat_alg_ablkcipher_exit(struct crypto_tfm *tfm)
 	qat_crypto_put_instance(inst);
 }
 
+
 static struct aead_alg qat_aeads[] = { {
 	.base = {
 		.cra_name = "authenc(hmac(sha1),cbc(aes))",

@@ -123,6 +123,7 @@ skl_tplg_free_pipe_mem(struct skl *skl, struct skl_module_cfg *mconfig)
 	skl->resource.mem -= mconfig->pipe->memory_pages;
 }
 
+
 static void skl_dump_mconfig(struct skl_sst *ctx,
 					struct skl_module_cfg *mcfg)
 {
@@ -1175,6 +1176,7 @@ static int skl_tplg_widget_load(struct snd_soc_component *cmpnt,
 	skl_fill_module_pin_info(dfw_config->out_pin, mconfig->m_out_pin,
 						 dfw_config->is_dynamic_out_pin,
 							mconfig->max_out_queue);
+
 
 	if (mconfig->formats_config.caps_size == 0)
 		goto bind_event;

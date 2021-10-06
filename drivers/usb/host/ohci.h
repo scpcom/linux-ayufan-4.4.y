@@ -78,6 +78,7 @@ struct ed {
 
 #define ED_MASK	((u32)~0x0f)		/* strip hw status in low addr bits */
 
+
 /*
  * OHCI Transfer Descriptor (TD) ... one per transfer segment
  * See OHCI spec, sections 4.3.1 (general = control/bulk/interrupt)
@@ -158,6 +159,7 @@ struct td {
     /* 0x0E, 0x0F reserved for HCD */
 #define TD_NOTACCESSED     0x0F
 
+
 /* map OHCI TD status codes (CC) to errno values */
 static const int cc_to_error [16] = {
 	/* No  Error  */               0,
@@ -177,6 +179,7 @@ static const int cc_to_error [16] = {
 	/* (for HCD)  */               -EALREADY,
 	/* (for HCD)  */               -EALREADY
 };
+
 
 /*
  * The HCCA (Host Controller Communications Area) is a 256 byte
@@ -241,6 +244,7 @@ struct ohci_regs {
 
 } __attribute__ ((aligned(32)));
 
+
 /* OHCI CONTROL AND STATUS REGISTER MASKS */
 
 /*
@@ -287,6 +291,7 @@ struct ohci_regs {
 #define OHCI_INTR_OC	(1 << 30)	/* ownership change */
 #define OHCI_INTR_MIE	(1 << 31)	/* master interrupt enable */
 
+
 /* OHCI ROOT HUB REGISTER MASKS */
 
 /* roothub.portstatus [i] bits */
@@ -324,6 +329,7 @@ struct ohci_regs {
 #define	RH_A_NOCP	(1 << 12)		/* no over current protection */
 #define	RH_A_POTPGT	(0xff << 24)		/* power on to power good time */
 
+
 /* hcd-private per-urb state */
 typedef struct urb_priv {
 	struct ed		*ed;
@@ -337,6 +343,7 @@ typedef struct urb_priv {
 #define TD_HASH_SIZE    64    /* power'o'two */
 // sizeof (struct td) ~= 64 == 2^6 ...
 #define TD_HASH_FUNC(td_dma) ((td_dma ^ (td_dma >> 6)) % TD_HASH_SIZE)
+
 
 /*
  * This is the full ohci controller description
@@ -576,6 +583,7 @@ static inline void _ohci_writel (const struct ohci_hcd *ohci,
 
 #define ohci_readl(o,r)		_ohci_readl(o,r)
 #define ohci_writel(o,v,r)	_ohci_writel(o,v,r)
+
 
 /*-------------------------------------------------------------------------*/
 

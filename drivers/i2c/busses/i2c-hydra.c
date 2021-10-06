@@ -26,6 +26,7 @@
 #include <linux/io.h>
 #include <asm/hydra.h>
 
+
 #define HYDRA_CPD_PD0	0x00000001	/* CachePD lines */
 #define HYDRA_CPD_PD1	0x00000002
 #define HYDRA_CPD_PD2	0x00000004
@@ -141,6 +142,7 @@ static void hydra_remove(struct pci_dev *dev)
 	release_mem_region(pci_resource_start(dev, 0)+
 			   offsetof(struct Hydra, CachePD), 4);
 }
+
 
 static struct pci_driver hydra_driver = {
 	.name		= "hydra_smbus",

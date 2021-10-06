@@ -16,6 +16,7 @@
 # endif
 #endif
 
+
 static unsigned long long
 process___le16_to_cpup(struct trace_seq *s, unsigned long long *args)
 {

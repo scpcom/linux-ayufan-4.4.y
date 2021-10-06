@@ -1421,6 +1421,7 @@ static inline void s3cmci_cpufreq_deregister(struct s3cmci_host *host)
 }
 #endif
 
+
 #ifdef CONFIG_DEBUG_FS
 
 static int s3cmci_state_show(struct seq_file *seq, void *v)
@@ -1846,6 +1847,7 @@ static int s3cmci_remove(struct platform_device *pdev)
 
 	for (i = S3C2410_GPE(5); i <= S3C2410_GPE(10); i++)
 		gpio_free(i);
+
 
 	iounmap(host->base);
 	release_mem_region(host->mem->start, resource_size(host->mem));

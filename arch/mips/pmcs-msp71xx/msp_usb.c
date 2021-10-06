@@ -36,6 +36,7 @@
 #include <msp_prom.h>
 #include <msp_usb.h>
 
+
 #if defined(CONFIG_USB_EHCI_HCD)
 static struct resource msp_usbhost0_resources[] = {
 	[0] = { /* EHCI-HS operational and capabilities registers */

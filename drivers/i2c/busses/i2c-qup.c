@@ -383,6 +383,7 @@ static void qup_i2c_issue_read(struct qup_i2c_dev *qup, struct i2c_msg *msg)
 	writel(val, qup->base + QUP_OUT_FIFO_BASE);
 }
 
+
 static void qup_i2c_read_fifo(struct qup_i2c_dev *qup, struct i2c_msg *msg)
 {
 	u32 opflags;

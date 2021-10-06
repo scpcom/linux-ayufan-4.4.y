@@ -31,6 +31,7 @@
 #include "generic.h"
 #include "devices.h"
 
+
 #ifdef CONFIG_MACH_COLIBRI_EVALBOARD
 static mfp_cfg_t colibri_pxa300_evalboard_pin_config[] __initdata = {
 	/* MMC */
@@ -191,3 +192,4 @@ MACHINE_START(COLIBRI300, "Toradex Colibri PXA300")
 	.init_time	= pxa_timer_init,
 	.restart	= pxa_restart,
 MACHINE_END
+

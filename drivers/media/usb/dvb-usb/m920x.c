@@ -556,6 +556,7 @@ static struct mt2060_config m920x_mt2060_config = {
 	.clock_out = 0,
 };
 
+
 /* Callbacks for DVB USB */
 static int m920x_mt352_frontend_attach(struct dvb_usb_adapter *adap)
 {
@@ -675,6 +676,7 @@ static int m920x_mt2060_tuner_attach(struct dvb_usb_adapter *adap)
 
 	return 0;
 }
+
 
 /* device-specific initialization */
 static struct m920x_inits megasky_rc_init [] = {

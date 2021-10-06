@@ -47,6 +47,7 @@ readfifo(unsigned int ale, unsigned int adr, u_char off, u_char *data, int size)
 	insb(adr, data, size);
 }
 
+
 static inline void
 writereg(unsigned int ale, unsigned int adr, u_char off, u_char data)
 {
@@ -237,6 +238,7 @@ saphir_card_msg(struct IsdnCardState *cs, int mt, void *arg)
 	}
 	return (0);
 }
+
 
 int setup_saphir(struct IsdnCard *card)
 {

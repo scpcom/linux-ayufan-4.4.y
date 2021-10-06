@@ -21,6 +21,7 @@
 #include <media/rc-map.h>
 #include <linux/module.h>
 
+
 static struct rc_map_table total_media_in_hand_02[] = {
 	{ 0x0000, KEY_0 },
 	{ 0x0001, KEY_1 },

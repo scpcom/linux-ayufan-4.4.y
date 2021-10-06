@@ -248,6 +248,7 @@ struct lpfc_fcf {
 	unsigned long *fcf_rr_bmask; /* Eligible FCF indexes for RR failover */
 };
 
+
 #define LPFC_REGION23_SIGNATURE "RG23"
 #define LPFC_REGION23_VERSION	1
 #define LPFC_REGION23_LAST_REC  0xff
@@ -342,6 +343,7 @@ struct lpfc_bmbx {
 
 #define LPFC_QUEUE_NOARM	false
 #define LPFC_QUEUE_REARM	true
+
 
 /*
  * SLI4 CT field defines
@@ -667,6 +669,7 @@ struct lpfc_lcb_context {
 	uint16_t rx_id;
 	struct lpfc_nodelist *ndlp;
 };
+
 
 /*
  * SLI4 specific function prototypes

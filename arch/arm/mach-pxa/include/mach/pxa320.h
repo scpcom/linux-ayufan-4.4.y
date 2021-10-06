@@ -5,3 +5,4 @@
 #include <mach/mfp-pxa320.h>
 
 #endif /* __MACH_PXA320_H */
+

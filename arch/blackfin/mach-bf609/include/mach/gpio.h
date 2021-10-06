@@ -121,9 +121,11 @@
 #define GPIO_PG14	110
 #define GPIO_PG15	111
 
+
 #define BFIN_GPIO_PINT 1
 #define NR_PINT_SYS_IRQS        6
 #define NR_PINTS                112
+
 
 #ifndef __ASSEMBLY__
 

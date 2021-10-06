@@ -325,6 +325,7 @@ static const struct file_operations inotify_fops = {
 	.llseek		= noop_llseek,
 };
 
+
 /*
  * find_inode - resolve a user-given path to a specific inode
  */
@@ -662,6 +663,7 @@ static struct fsnotify_group *inotify_new_group(unsigned int max_events)
 
 	return group;
 }
+
 
 /* inotify syscalls */
 SYSCALL_DEFINE1(inotify_init1, int, flags)

@@ -154,3 +154,4 @@ L2:	subql	IMM (1),d4
 	unlk	a6		| and return
 	rts
 #endif /* __mcf5200__ || __mcoldfire__ */
+

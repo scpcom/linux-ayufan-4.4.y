@@ -154,6 +154,7 @@ __break_kerneltrap_fixup_table:
 #endif
 .endm
 
+
 ###############################################################################
 #
 # specification of the vectors

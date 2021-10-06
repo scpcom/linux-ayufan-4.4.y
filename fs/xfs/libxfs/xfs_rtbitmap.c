@@ -36,6 +36,7 @@
 #include "xfs_icache.h"
 #include "xfs_rtalloc.h"
 
+
 /*
  * Realtime allocator bitmap functions shared with userspace.
  */
@@ -987,3 +988,4 @@ xfs_rtfree_extent(
 	}
 	return 0;
 }
+

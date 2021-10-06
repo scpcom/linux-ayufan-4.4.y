@@ -283,3 +283,4 @@ asmlinkage void do_notify_resume(struct pt_regs *regs)
 		tracehook_notify_resume(regs);
 	}
 }
+

@@ -730,6 +730,7 @@ static int serial_hs_lpc32xx_remove(struct platform_device *pdev)
 	return 0;
 }
 
+
 #ifdef CONFIG_PM
 static int serial_hs_lpc32xx_suspend(struct platform_device *pdev,
 				     pm_message_t state)

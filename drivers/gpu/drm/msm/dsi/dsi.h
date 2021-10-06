@@ -174,3 +174,4 @@ void msm_dsi_phy_get_clk_pre_post(struct msm_dsi_phy *phy,
 struct msm_dsi_pll *msm_dsi_phy_get_pll(struct msm_dsi_phy *phy);
 
 #endif /* __DSI_CONNECTOR_H__ */
+

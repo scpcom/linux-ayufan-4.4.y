@@ -1199,6 +1199,7 @@ static const struct ar9300_eeprom ar9300_x113 = {
 	 }
 };
 
+
 static const struct ar9300_eeprom ar9300_h112 = {
 	.eepromVersion = 2,
 	.templateVersion = 3,
@@ -1776,6 +1777,7 @@ static const struct ar9300_eeprom ar9300_h112 = {
 		},
 	}
 };
+
 
 static const struct ar9300_eeprom ar9300_x112 = {
 	.eepromVersion = 2,
@@ -2933,6 +2935,7 @@ static const struct ar9300_eeprom ar9300_h116 = {
 	 }
 };
 
+
 static const struct ar9300_eeprom *ar9300_eep_templates[] = {
 	&ar9300_default,
 	&ar9300_x112,
@@ -3108,6 +3111,7 @@ static bool ar9300_read_otp(struct ath_hw *ah, int address, u8 *buffer,
 
 	return true;
 }
+
 
 static void ar9300_comp_hdr_unpack(u8 *best, int *code, int *reference,
 				   int *length, int *major, int *minor)
@@ -3602,6 +3606,7 @@ static void ar9003_hw_ant_ctrl_apply(struct ath_hw *ah, bool is2ghz)
 		REG_RMW_FIELD(ah, AR_PHY_SWITCH_COM,
 			      AR_SWITCH_TABLE_COM_ALL, value);
 
+
 	/*
 	 *   AR9462 defines new switch table for BT/WLAN,
 	 *       here's new field name in XXX.ref for both 2G and 5G.
@@ -3786,6 +3791,7 @@ static u16 ar9003_hw_atten_chain_get(struct ath_hw *ah, int chain,
 
 	return 0;
 }
+
 
 static u16 ar9003_hw_atten_chain_get_margin(struct ath_hw *ah, int chain,
 					    struct ath9k_channel *chan)
@@ -4869,6 +4875,7 @@ tempslope:
 	if (AR_SREV_9462_20_OR_LATER(ah))
 		REG_RMW_FIELD(ah, AR_PHY_TPC_19_B1,
 			      AR_PHY_TPC_19_B1_ALPHA_THERM, temp_slope);
+
 
 	REG_RMW_FIELD(ah, AR_PHY_TPC_18, AR_PHY_TPC_18_THERM_CAL_VALUE,
 		      temperature[0]);

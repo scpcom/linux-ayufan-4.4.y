@@ -1081,6 +1081,7 @@ static void vio_cmo_sysfs_init(void) { }
 EXPORT_SYMBOL(vio_cmo_entitlement_update);
 EXPORT_SYMBOL(vio_cmo_set_dev_desired);
 
+
 /*
  * Platform Facilities Option (PFO) support
  */

@@ -23,6 +23,7 @@
 void iop32x_init_irq(void);
 #endif
 
+
 /*
  * Generic chipset bits
  */
@@ -35,5 +36,6 @@ void iop32x_init_irq(void);
 #include "iq80321.h"
 #include "iq31244.h"
 #include "n2100.h"
+
 
 #endif

@@ -298,6 +298,7 @@ int cmd_mem(int argc, const char **argv, const char *prefix __maybe_unused)
 		NULL
 	};
 
+
 	argc = parse_options_subcommand(argc, argv, mem_options, mem_subcommands,
 					mem_usage, PARSE_OPT_STOP_AT_NON_OPTION);
 

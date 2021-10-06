@@ -483,6 +483,7 @@ static int kfd_parse_crat_table(void *crat_image)
 	return 0;
 }
 
+
 #define sysfs_show_gen_prop(buffer, fmt, ...) \
 		snprintf(buffer, PAGE_SIZE, "%s"fmt, buffer, __VA_ARGS__)
 #define sysfs_show_32bit_prop(buffer, name, value) \

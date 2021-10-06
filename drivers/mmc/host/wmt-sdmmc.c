@@ -32,7 +32,9 @@
 
 #include <asm/byteorder.h>
 
+
 #define DRIVER_NAME "wmt-sdhc"
+
 
 /* MMC/SD controller registers */
 #define SDMMC_CTLR			0x00
@@ -55,6 +57,7 @@
 #define SDMMC_EXTCTRL			0x34
 #define SDMMC_SBLKLEN			0x38
 #define SDMMC_DMATIMEOUT		0x3C
+
 
 /* SDMMC_CTLR bit fields */
 #define CTLR_CMD_START			0x01
@@ -129,6 +132,7 @@
 #define SDDMA_BAR			0x118
 #define SDDMA_CPR			0x11C
 #define SDDMA_CCR			0x120
+
 
 /* SDDMA_GCR bit fields */
 #define DMA_GCR_DMA_EN			0x00000001

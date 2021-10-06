@@ -64,6 +64,7 @@ void msgqueue_initialise(MsgQueue_t *msgq)
 	msgq->entries[NR_MESSAGES - 1].next = NULL;
 }
 
+
 /*
  * Function: void msgqueue_free(MsgQueue_t *msgq)
  * Purpose : free a queue

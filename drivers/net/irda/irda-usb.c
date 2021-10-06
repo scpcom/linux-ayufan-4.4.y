@@ -291,6 +291,7 @@ static __u8 get_turnaround_time(struct sk_buff *skb)
 		return 7;
 }
 
+
 /*------------------------------------------------------------------*/
 /*
  * Send a command to change the speed of the dongle
@@ -1138,6 +1139,7 @@ static int stir421x_patch_device(struct irda_usb_cb *self)
         return ret;
 }
 
+
 /********************** IRDA DEVICE CALLBACKS **********************/
 /*
  * Main calls from the IrDA/Network subsystem.
@@ -1145,6 +1147,7 @@ static int stir421x_patch_device(struct irda_usb_cb *self)
  * We only deal with the IrDA side of the business, the USB side will
  * be dealt with below...
  */
+
 
 /*------------------------------------------------------------------*/
 /*
@@ -1342,6 +1345,7 @@ static inline void irda_usb_init_qos(struct irda_usb_cb *self)
 {
 	struct irda_class_desc *desc;
 
+	
 	desc = self->irda_desc;
 	
 	/* Initialize QoS for this device */

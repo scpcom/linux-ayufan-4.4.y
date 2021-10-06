@@ -216,6 +216,7 @@ have_busfreq:
 	return cpufreq_table_validate_and_show(policy, clock_ratio);
 }
 
+
 static int powernow_k6_cpu_exit(struct cpufreq_policy *policy)
 {
 	unsigned int i;
@@ -286,6 +287,7 @@ static int __init powernow_k6_init(void)
 	return 0;
 }
 
+
 /**
  * powernow_k6_exit - unregisters AMD K6-2+/3+ PowerNow! support
  *
@@ -296,6 +298,7 @@ static void __exit powernow_k6_exit(void)
 	cpufreq_unregister_driver(&powernow_k6_driver);
 	release_region(POWERNOW_IOPORT, 16);
 }
+
 
 MODULE_AUTHOR("Arjan van de Ven, Dave Jones, "
 		"Dominik Brodowski <linux@brodo.de>");

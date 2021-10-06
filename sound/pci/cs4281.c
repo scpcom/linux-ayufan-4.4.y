@@ -36,6 +36,7 @@
 #include <sound/opl3.h>
 #include <sound/initval.h>
 
+
 MODULE_AUTHOR("Jaroslav Kysela <perex@perex.cz>");
 MODULE_DESCRIPTION("Cirrus Logic CS4281");
 MODULE_LICENSE("GPL");
@@ -607,6 +608,7 @@ static unsigned short snd_cs4281_ac97_read(struct snd_ac97 *ac97,
 					    BA0_ACCTL_VFRM | BA0_ACCTL_ESYN |
 			   (ac97_num ? BA0_ACCTL_TC : 0));
 
+
 	/*
 	 *  Wait for the read to occur.
 	 */
@@ -1120,6 +1122,7 @@ static int snd_cs4281_mixer(struct cs4281 *chip)
 		return err;
 	return 0;
 }
+
 
 /*
  * proc interface
@@ -1867,6 +1870,7 @@ static irqreturn_t snd_cs4281_interrupt(int irq, void *dev_id)
 
 	return IRQ_HANDLED;
 }
+
 
 /*
  * OPL3 command

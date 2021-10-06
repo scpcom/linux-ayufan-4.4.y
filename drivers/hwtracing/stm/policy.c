@@ -430,6 +430,7 @@ out:
 	return ret;
 }
 
+
 struct stp_policy_node *
 stp_policy_node_lookup(struct stm_device *stm, char *s)
 {

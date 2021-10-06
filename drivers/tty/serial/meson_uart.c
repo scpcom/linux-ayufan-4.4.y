@@ -81,6 +81,7 @@
 #define AML_UART_PORT_NUM		6
 #define AML_UART_DEV_NAME		"ttyAML"
 
+
 static struct uart_driver meson_uart_driver;
 
 static struct uart_port *meson_ports[AML_UART_PORT_NUM];
@@ -586,6 +587,7 @@ static int meson_uart_remove(struct platform_device *pdev)
 
 	return 0;
 }
+
 
 static const struct of_device_id meson_uart_dt_match[] = {
 	{ .compatible = "amlogic,meson-uart" },

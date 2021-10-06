@@ -49,6 +49,7 @@
 #define SND_SOC_TPLG_CTL_RANGE		7
 #define SND_SOC_TPLG_CTL_STROBE		8
 
+
 /* individual widget kcontrol info types - can be mixed with other types */
 #define SND_SOC_TPLG_DAPM_CTL_VOLSW		64
 #define SND_SOC_TPLG_DAPM_CTL_ENUM_DOUBLE	65
@@ -367,6 +368,7 @@ struct snd_soc_tplg_dapm_widget {
 	 */
 } __attribute__((packed));
 
+
 /*
  * Describes SW/FW specific features of PCM (FE DAI & DAI link).
  *
@@ -390,6 +392,7 @@ struct snd_soc_tplg_pcm {
 	__le32 num_streams;	/* number of streams */
 	struct snd_soc_tplg_stream_caps caps[2]; /* playback and capture for DAI */
 } __attribute__((packed));
+
 
 /*
  * Describes the BE or CC link runtime supported configs or params

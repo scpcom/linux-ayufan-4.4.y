@@ -220,6 +220,7 @@
  */
 extern u8 MR_ValidateMapInfo(struct megasas_instance *instance);
 
+
 /*
  * MFI command completion codes
  */
@@ -387,6 +388,7 @@ enum MR_EVT_ARGS {
 	MR_EVT_ARGS_GENERIC,
 };
 
+
 #define SGE_BUFFER_SIZE	4096
 /*
  * define constants for device list query options
@@ -407,6 +409,7 @@ enum MR_LD_QUERY_TYPE {
 	MR_LD_QUERY_TYPE_CLUSTER_ACCESS  = 3,
 	MR_LD_QUERY_TYPE_CLUSTER_LOCALE  = 4,
 };
+
 
 #define MR_EVT_CFG_CLEARED                              0x0004
 #define MR_EVT_LD_STATE_CHANGE                          0x0051
@@ -430,6 +433,7 @@ enum MR_PD_STATE {
 	MR_PD_STATE_COPYBACK            = 0x20,
 	MR_PD_STATE_SYSTEM              = 0x40,
  };
+
 
  /*
  * defines the physical drive address structure
@@ -503,6 +507,7 @@ struct MR_LD_TARGETID_LIST {
 	u8	pad[3];
 	u8	targetId[MAX_LOGICAL_DRIVES_EXT];
 };
+
 
 /*
  * SAS controller properties
@@ -823,6 +828,7 @@ struct megasas_ctrl_info {
 	 */
 	char package_version[0x60];
 
+
 	/*
 	* If adapterOperations.supportMoreThan8Phys is set,
 	* and deviceInterface.portCount is greater than 8,
@@ -940,6 +946,7 @@ struct megasas_ctrl_info {
 		u32     headlessMode:1;
 		u32     dedicatedHotSparesLimited:1;
 
+
 		u32     supportUnevenSpans:1;
 		u32	supportPointInTimeProgress:1;
 		u32	supportDataLDonSSCArray:1;
@@ -956,6 +963,7 @@ struct megasas_ctrl_info {
 	u8  temperatureCtrl;                    /*7CAh */
 	u8  reserved4;                          /*7CBh */
 	__le16 maxConfigurablePds;              /*7CCh */
+
 
 	u8  reserved5[2];                       /*0x7CDh */
 
@@ -1074,6 +1082,7 @@ struct megasas_ctrl_info {
 #define MEGASAS_FW_BUSY				1
 
 #define VD_EXT_DEBUG 0
+
 
 enum MR_SCSI_CMD_TYPE {
 	READ_WRITE_LDIO = 0,
@@ -1934,6 +1943,7 @@ struct megasas_cmd {
 	u8 cmd_status_drv;
 	u8 abort_aen;
 	u8 retry_for_fw_reset;
+
 
 	struct list_head list;
 	struct scsi_cmnd *scmd;

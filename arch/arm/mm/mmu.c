@@ -1126,6 +1126,7 @@ void __init sanity_check_meminfo(void)
 		else
 			size_limit = vmalloc_limit - reg->base;
 
+
 		if (!IS_ENABLED(CONFIG_HIGHMEM) || cache_is_vipt_aliasing()) {
 
 			if (highmem) {

@@ -140,6 +140,7 @@ void __init setup_arch(char **cmdline_p)
 #endif
 	printk(KERN_CONT ".\n");
 
+
 	pdc_console_init();
 
 #ifdef CONFIG_64BIT

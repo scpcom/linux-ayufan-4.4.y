@@ -97,6 +97,7 @@ void print_disabled_cpus(void);
 
 #endif /* !CONFIG_SMP */
 
+
 /* Which cpus may be used as the lotar in a page table entry. */
 extern struct cpumask cpu_lotar_map;
 #define cpu_is_valid_lotar(cpu) cpumask_test_cpu((cpu), &cpu_lotar_map)

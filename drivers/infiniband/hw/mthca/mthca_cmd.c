@@ -302,6 +302,7 @@ static int mthca_cmd_post(struct mthca_dev *dev,
 	return err;
 }
 
+
 static int mthca_status_to_errno(u8 status)
 {
 	static const int trans_table[] = {
@@ -331,6 +332,7 @@ static int mthca_status_to_errno(u8 status)
 
 	return trans_table[status];
 }
+
 
 static int mthca_cmd_poll(struct mthca_dev *dev,
 			  u64 in_param,

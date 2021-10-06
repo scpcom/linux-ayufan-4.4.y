@@ -327,6 +327,7 @@ enum rt_op_mode {
 	RT_OP_MODE_NO_LINK,
 };
 
+
 #define aSifsTime						\
 	 (((priv->rtllib->current_network.mode == IEEE_A)	\
 	|| (priv->rtllib->current_network.mode == IEEE_N_24G)	\
@@ -349,6 +350,7 @@ enum rt_op_mode {
 
 #define IEEE_MLME_STA_DEAUTH			1
 #define IEEE_MLME_STA_DISASSOC			2
+
 
 #define IEEE_CRYPT_ERR_UNKNOWN_ALG		2
 #define IEEE_CRYPT_ERR_CRYPT_INIT_FAILED	4
@@ -723,6 +725,7 @@ struct rtllib_security {
 	u16 flags;
 } __packed;
 
+
 /* 802.11 data frame from AP
  *       ,-------------------------------------------------------------------.
  * Bytes |  2   |  2   |    6    |    6    |    6    |  2   | 0..2312 |   4  |
@@ -1053,6 +1056,7 @@ static inline u8 Frame_QoSTID(u8 *buf)
 		    (fc & RTLLIB_FCTL_FROMDS)) ? 30 : 24)))->field.tid;
 }
 
+
 struct eapol {
 	u8 snap[6];
 	u16 ethertype;
@@ -1266,6 +1270,8 @@ struct bandwidth_autoswitch {
 	bool bautoswitch_enable;
 };
 
+
+
 #define REORDER_WIN_SIZE	128
 #define REORDER_ENTRY_NUM	128
 struct rx_reorder_entry {
@@ -1443,6 +1449,7 @@ struct rt_intel_promisc_mode {
 	bool bFilterSourceStationFrame;
 };
 
+
 /*************** DRIVER STATUS   *****/
 #define STATUS_SCANNING			0
 /*************** DRIVER STATUS   *****/
@@ -1510,6 +1517,7 @@ struct rtllib_device {
 	struct rx_ts_record RxTsRecord[TOTAL_TS_NUM];
 	struct rx_reorder_entry RxReorderEntry[128];
 	struct list_head		RxReorder_Unused_List;
+
 
 	/* Bookkeeping structures */
 	struct net_device_stats stats;
@@ -1809,6 +1817,7 @@ struct rtllib_device {
 				     struct rtllib_assoc_response_frame *resp,
 				     struct rtllib_network *network);
 
+
 	/* check whether Tx hw resource available */
 	short (*check_nic_enough_desc)(struct net_device *dev, int queue_index);
 	void (*SetBWModeHandler)(struct net_device *dev,
@@ -1880,6 +1889,7 @@ struct rtllib_device {
  * to the card
  */
 #define IEEE_SOFTMAC_BEACONS (1<<6)
+
 
 static inline void *rtllib_priv(struct net_device *dev)
 {
@@ -1971,6 +1981,7 @@ static inline int rtllib_is_cck_rate(u8 rate)
 	}
 	return 0;
 }
+
 
 /* rtllib.c */
 void free_rtllib(struct net_device *dev);
@@ -2184,6 +2195,7 @@ static inline const char *escape_essid(const char *essid, u8 essid_len)
 
 /* fun with the built-in rtllib stack... */
 bool rtllib_MgntDisconnect(struct rtllib_device *rtllib, u8 asRsn);
+
 
 /* For the function is more related to hardware setting, it's better to use the
  * ieee handler to refer to it.

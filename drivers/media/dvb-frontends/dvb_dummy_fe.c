@@ -27,9 +27,11 @@
 #include "dvb_frontend.h"
 #include "dvb_dummy_fe.h"
 
+
 struct dvb_dummy_fe_state {
 	struct dvb_frontend frontend;
 };
+
 
 static int dvb_dummy_fe_read_status(struct dvb_frontend *fe,
 				    enum fe_status *status)

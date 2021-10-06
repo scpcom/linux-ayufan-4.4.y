@@ -246,6 +246,7 @@ error:
 	ene_clear_reg_mask(dev, ENE_FW1, ENE_FW1_EXTRA_BUF_HND);
 }
 
+
 /* Restore the pointers to extra buffers - to make module reload work*/
 static void ene_rx_restore_hw_buffer(struct ene_device *dev)
 {
@@ -397,6 +398,7 @@ static void ene_rx_setup(struct ene_device *dev)
 	int sample_period_adjust = 0;
 
 	dbg("RX: setup receiver, learning mode = %d", learning_mode);
+
 
 	/* This selects RLC input and clears CFG2 settings */
 	ene_write_reg(dev, ENE_CIRCFG2, 0x00);
@@ -616,6 +618,7 @@ static void ene_tx_disable(struct ene_device *dev)
 	dev->tx_buffer = NULL;
 }
 
+
 /* TX one sample - must be called with dev->hw_lock*/
 static void ene_tx_sample(struct ene_device *dev)
 {
@@ -681,6 +684,7 @@ static void ene_tx_irqsim(unsigned long data)
 	ene_tx_sample(dev);
 	spin_unlock_irqrestore(&dev->hw_lock, flags);
 }
+
 
 /* read irq status and ack it */
 static int ene_irq_status(struct ene_device *dev)
@@ -1030,6 +1034,7 @@ static int ene_probe(struct pnp_dev *pnp_dev, const struct pnp_device_id *id)
 
 	dev->hw_io = pnp_port_start(pnp_dev, 0);
 	dev->irq = pnp_irq(pnp_dev, 0);
+
 
 	pnp_set_drvdata(pnp_dev, dev);
 	dev->pnp_dev = pnp_dev;

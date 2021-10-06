@@ -262,11 +262,13 @@ static int balance_leaf_when_delete(struct tree_balance *tb, int flag)
 	else /* M_CUT */
 		balance_leaf_when_delete_cut(tb);
 
+
 	/*
 	 * the rule is that no shifting occurs unless by shifting
 	 * a node can be freed
 	 */
 	n = B_NR_ITEMS(tbS0);
+
 
 	/* L[0] takes part in balancing */
 	if (tb->lnum[0])
@@ -531,6 +533,7 @@ static unsigned int balance_leaf_paste_left_shift(struct tree_balance *tb,
 	return body_shift_bytes;
 }
 
+
 /* appended item will be in L[0] in whole */
 static void balance_leaf_paste_left_whole(struct tree_balance *tb,
 					  struct item_head * const ih,
@@ -620,6 +623,7 @@ static unsigned int balance_leaf_left(struct tree_balance *tb,
 	return 0;
 }
 
+
 static void balance_leaf_insert_right(struct tree_balance *tb,
 				      struct item_head * const ih,
 				      const char * const body)
@@ -707,6 +711,7 @@ static void balance_leaf_insert_right(struct tree_balance *tb,
 		tb->zeroes_num = tb->insert_size[0] = 0;
 	}
 }
+
 
 static void balance_leaf_paste_right_shift_dirent(struct tree_balance *tb,
 				     struct item_head * const ih,
@@ -1090,6 +1095,7 @@ static void balance_leaf_new_nodes_paste_shift(struct tree_balance *tb,
 	}
 
 	/* regular object */
+
 
 	RFALSE(tb->pos_in_item != ih_item_len(item_head(tbS0, tb->item_pos)) ||
 	       tb->insert_size[0] <= 0,

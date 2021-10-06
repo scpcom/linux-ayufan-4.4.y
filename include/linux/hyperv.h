@@ -37,6 +37,7 @@
 #include <linux/device.h>
 #include <linux/mod_devicetable.h>
 
+
 #define MAX_PAGE_BUFFER_COUNT				32
 #define MAX_MULTIPAGE_BUFFER_COUNT			32 /* 128K */
 
@@ -75,6 +76,7 @@ struct hv_mpb_array {
 					 MAX_PAGE_BUFFER_COUNT))
 #define MAX_MULTIPAGE_BUFFER_PACKET	(0x18 +			\
 					 sizeof(struct hv_multipage_buffer))
+
 
 #pragma pack(pop)
 
@@ -369,6 +371,7 @@ enum vmbus_packet_type {
 };
 
 #define VMBUS_DATA_PACKET_FLAG_COMPLETION_REQUESTED	1
+
 
 /* Version 1 messages */
 enum vmbus_channel_message_type {
@@ -857,6 +860,7 @@ struct vmbus_packet_mpb_array {
 	struct hv_mpb_array range;
 } __packed;
 
+
 extern int vmbus_open(struct vmbus_channel *channel,
 			    u32 send_ringbuffersize,
 			    u32 recv_ringbuffersize,
@@ -931,6 +935,7 @@ extern int vmbus_recvpacket_raw(struct vmbus_channel *channel,
 				     u32 *buffer_actual_len,
 				     u64 *requestid);
 
+
 extern void vmbus_ontimer(unsigned long data);
 
 /* Base driver object */
@@ -961,6 +966,7 @@ struct hv_device {
 
 	struct vmbus_channel *channel;
 };
+
 
 static inline struct hv_device *device_to_hv_device(struct device *d)
 {
@@ -1163,6 +1169,7 @@ int vmbus_allocate_mmio(struct resource **new, struct hv_device *device_obj,
 #define ICMSGHDRFLAG_TRANSACTION	1
 #define ICMSGHDRFLAG_REQUEST		2
 #define ICMSGHDRFLAG_RESPONSE		4
+
 
 /*
  * While we want to handle util services as regular devices,

@@ -68,6 +68,7 @@ static void wusbhc_rsv_complete_cb(struct uwb_rsv *rsv)
 	}
 }
 
+
 /**
  * wusbhc_rsv_establish - establish a reservation for the cluster
  * @wusbhc: the WUSB HC requesting a bandwidth reservation
@@ -104,6 +105,7 @@ int wusbhc_rsv_establish(struct wusbhc *wusbhc)
 		uwb_rsv_destroy(rsv);
 	return ret;
 }
+
 
 /**
  * wusbhc_rsv_terminate - terminate the cluster reservation

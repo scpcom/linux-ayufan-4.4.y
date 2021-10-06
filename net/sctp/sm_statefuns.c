@@ -727,6 +727,7 @@ sctp_disposition_t sctp_sf_do_5_1D_ce(struct net *net,
 		}
 	}
 
+
 	/* Delay state machine commands until later.
 	 *
 	 * Re-build the bind address for the association is done in
@@ -1663,6 +1664,7 @@ sctp_disposition_t sctp_sf_do_5_2_2_dupinit(struct net *net,
 	 */
 	return sctp_sf_do_unexpected_init(net, ep, asoc, type, arg, commands);
 }
+
 
 /*
  * Unexpected INIT-ACK handler.
@@ -4014,6 +4016,7 @@ static sctp_ierror_t sctp_sf_authenticate(struct net *net,
 	if (key_id != asoc->active_key_id && !sctp_auth_get_shkey(asoc, key_id))
 		return SCTP_IERROR_AUTH_BAD_KEYID;
 
+
 	/* Make sure that the length of the signature matches what
 	 * we expect.
 	 */
@@ -4285,6 +4288,7 @@ sctp_disposition_t sctp_sf_pdiscard(struct net *net,
 
 	return SCTP_DISPOSITION_CONSUME;
 }
+
 
 /*
  * The other end is violating protocol.
@@ -6085,6 +6089,7 @@ static void sctp_send_stale_cookie_err(struct net *net,
 			sctp_chunk_free (err_chunk);
 	}
 }
+
 
 /* Process a data chunk */
 static int sctp_eat_data(const struct sctp_association *asoc,

@@ -30,6 +30,7 @@
 
 #include <asm/opal.h>
 
+
 /*
  * This driver creates the a Linux MTD abstraction for platform PNOR flash
  * backed by OPAL calls

@@ -400,6 +400,7 @@ static inline void add_to_ctx_list(struct ctx_list *head, struct ctx_list *entry
 #define add_to_free_ctxlist(entry) add_to_ctx_list(&ctx_free, entry)
 #define add_to_used_ctxlist(entry) add_to_ctx_list(&ctx_used, entry)
 
+
 static inline void alloc_context(struct mm_struct *old_mm, struct mm_struct *mm)
 {
 	struct ctx_list *ctxp;
@@ -1290,6 +1291,7 @@ static void turbosparc_flush_tlb_page(struct vm_area_struct *vma, unsigned long 
 	srmmu_flush_whole_tlb();
 	FLUSH_END
 }
+
 
 static void poke_turbosparc(void)
 {

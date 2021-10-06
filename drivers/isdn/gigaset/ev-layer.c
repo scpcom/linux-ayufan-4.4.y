@@ -144,6 +144,7 @@
 #define SEQ_CIDMODE	10
 #define SEQ_UMMODE	11
 
+
 /* 100: init, 200: dle0, 250:dle1, 300: get cid (dial), 350: "hup" (no cid),
  * 400: hup, 500: reset, 600: dial, 700: ring */
 struct reply_t gigaset_tab_nocid[] =
@@ -347,6 +348,7 @@ struct reply_t gigaset_tab_cid[] =
 	{RSP_ANY,	 -1,  -1, -1,		 -1, -1, {ACT_WARN} },
 	{RSP_LAST}
 };
+
 
 static const struct resp_type_t {
 	char	*response;
@@ -1508,6 +1510,7 @@ static void do_action(int action, struct cardstate *cs,
 	case ACT_SHUTDOWN:
 		do_shutdown(cs);
 		break;
+
 
 	default:
 		if (action >= ACT_CMD && action < ACT_CMD + AT_NUM) {

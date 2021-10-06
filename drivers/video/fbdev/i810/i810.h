@@ -102,6 +102,7 @@
 #define VERSION_TEENIE           0
 #define BRANCH_VERSION           ""
 
+
 /* mvo: intel i815 */
 #ifndef PCI_DEVICE_ID_INTEL_82815_100
   #define PCI_DEVICE_ID_INTEL_82815_100           0x1102

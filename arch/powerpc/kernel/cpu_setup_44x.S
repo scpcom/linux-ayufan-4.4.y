@@ -71,3 +71,4 @@ _GLOBAL(__plb_disable_wrp)
 	mtdcr	DCRN_PLB4A0_ACR,r3
 	isync
 	blr
+

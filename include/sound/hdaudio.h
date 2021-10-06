@@ -526,6 +526,7 @@ static inline void snd_hdac_dsp_cleanup(struct hdac_stream *azx_dev,
 }
 #endif /* CONFIG_SND_HDA_DSP_LOADER */
 
+
 /*
  * generic array helpers
  */

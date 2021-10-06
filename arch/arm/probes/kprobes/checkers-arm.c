@@ -121,6 +121,7 @@ static enum probes_insn arm_check_regs_normal(probes_opcode_t insn,
 	return INSN_GOOD;
 }
 
+
 static enum probes_insn arm_check_regs_ldmstm(probes_opcode_t insn,
 		struct arch_probes_insn *asi,
 		const struct decode_header *h)
@@ -161,6 +162,7 @@ static enum probes_insn arm_check_regs_ldrdstrd(probes_opcode_t insn,
 	asi->register_usage_flags |= 1 << (rdt + 1);
 	return INSN_GOOD;
 }
+
 
 const struct decode_checker arm_regs_checker[NUM_PROBES_ARM_ACTIONS] = {
 	[PROBES_MRS] = {.checker = arm_check_regs_normal},

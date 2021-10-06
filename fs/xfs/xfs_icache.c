@@ -164,6 +164,7 @@ xfs_iget_cache_hit(
 		goto out_error;
 	}
 
+
 	/*
 	 * If we are racing with another cache hit that is currently
 	 * instantiating this inode or currently recycling it out of
@@ -267,6 +268,7 @@ out_error:
 	rcu_read_unlock();
 	return error;
 }
+
 
 static int
 xfs_iget_cache_miss(
@@ -1415,3 +1417,4 @@ xfs_inode_clear_eofblocks_tag(
 	spin_unlock(&pag->pag_ici_lock);
 	xfs_perag_put(pag);
 }
+

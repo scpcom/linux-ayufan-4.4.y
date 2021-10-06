@@ -44,6 +44,7 @@
 
 #include <linux/telephony.h>
 
+
 /******************************************************************************
 *
 * IOCTL's used for the Quicknet Telephony Cards

@@ -108,6 +108,7 @@ static ktime_t tick_init_jiffy_update(void)
 	return period;
 }
 
+
 static void tick_sched_do_timer(ktime_t now)
 {
 	int cpu = smp_processor_id();

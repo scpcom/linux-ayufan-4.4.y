@@ -448,6 +448,7 @@ bfad_iocmd_port_get_bbcr_attr(struct bfad_s *bfad, void *pcmd)
 	return 0;
 }
 
+
 static int
 bfad_iocmd_lport_get_attr(struct bfad_s *bfad, void *cmd)
 {
@@ -1873,6 +1874,7 @@ bfad_iocmd_diag_dport_show(struct bfad_s *bfad, void *pcmd)
 
 	return 0;
 }
+
 
 int
 bfad_iocmd_phy_get_attr(struct bfad_s *bfad, void *cmd)

@@ -13,6 +13,7 @@
  * released under the GPL
  */
 
+
 #include <linux/etherdevice.h>
 
 #include "ieee80211.h"
@@ -406,6 +407,7 @@ int ieee80211_wx_set_essid(struct ieee80211_device *ieee,
 
 	if (proto_started)
 		ieee80211_stop_protocol(ieee);
+
 
 	/* this is just to be sure that the GET wx callback
 	 * has consisten infos. not needed otherwise

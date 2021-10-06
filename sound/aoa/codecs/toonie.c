@@ -19,6 +19,7 @@ MODULE_DESCRIPTION("toonie codec driver for snd-aoa");
 #include "../aoa.h"
 #include "../soundbus/soundbus.h"
 
+
 #define PFX "snd-aoa-codec-toonie: "
 
 struct toonie {

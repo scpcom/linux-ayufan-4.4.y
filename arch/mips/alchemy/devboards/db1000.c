@@ -474,6 +474,7 @@ static struct platform_device db1100_spi_dev = {
 	},
 };
 
+
 static struct platform_device *db1x00_devs[] = {
 	&db1x00_codec_dev,
 	&alchemy_ac97c_dma_dev,

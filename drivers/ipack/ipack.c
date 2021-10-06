@@ -117,6 +117,7 @@ static ssize_t id_show(struct device *dev,
 	unsigned int i, c, l, s;
 	struct ipack_device *idev = to_ipack_dev(dev);
 
+
 	switch (idev->id_format) {
 	case IPACK_ID_VERSION_1:
 		l = 0x7; s = 1; break;

@@ -68,6 +68,7 @@ static const struct pci_device_id snd_vx222_ids[] = {
 
 MODULE_DEVICE_TABLE(pci, snd_vx222_ids);
 
+
 /*
  */
 
@@ -110,6 +111,7 @@ static struct snd_vx_hardware vx222_mic_hw = {
 	.output_level_db_scale = db_scale_akm,
 };
 
+
 /*
  */
 static int snd_vx222_free(struct vx_core *chip)
@@ -130,6 +132,7 @@ static int snd_vx222_dev_free(struct snd_device *device)
 	struct vx_core *chip = device->device_data;
 	return snd_vx222_free(chip);
 }
+
 
 static int snd_vx222_create(struct snd_card *card, struct pci_dev *pci,
 			    struct snd_vx_hardware *hw,
@@ -182,6 +185,7 @@ static int snd_vx222_create(struct snd_card *card, struct pci_dev *pci,
 	*rchip = vx;
 	return 0;
 }
+
 
 static int snd_vx222_probe(struct pci_dev *pci,
 			   const struct pci_device_id *pci_id)

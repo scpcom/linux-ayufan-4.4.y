@@ -1,6 +1,7 @@
 #ifndef __ASM_CRIS_ARCH_SYSTEM_H
 #define __ASM_CRIS_ARCH_SYSTEM_H
 
+
 /* read the CPU version register */
 
 static inline unsigned long rdvr(void) {

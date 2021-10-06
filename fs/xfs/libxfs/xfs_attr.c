@@ -72,6 +72,7 @@ STATIC int xfs_attr_node_removename(xfs_da_args_t *args);
 STATIC int xfs_attr_fillstate(xfs_da_state_t *state);
 STATIC int xfs_attr_refillstate(xfs_da_state_t *state);
 
+
 STATIC int
 xfs_attr_args_init(
 	struct xfs_da_args	*args,
@@ -550,6 +551,7 @@ xfs_attr_shortform_addname(xfs_da_args_t *args)
 	xfs_attr_shortform_add(args, forkoff);
 	return 0;
 }
+
 
 /*========================================================================
  * External routines when attribute list is one block

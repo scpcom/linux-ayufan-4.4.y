@@ -147,3 +147,4 @@
 #define TVP7002_YUV_V_B_COEF_MSBS       0x59
 #define TVP7002_YUV_V_R_COEF_LSBS       0x5a
 #define TVP7002_YUV_V_R_COEF_MSBS       0x5b
+

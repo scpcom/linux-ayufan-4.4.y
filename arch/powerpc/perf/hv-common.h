@@ -15,6 +15,7 @@ struct hv_perf_caps {
 
 unsigned long hv_perf_caps_get(struct hv_perf_caps *caps);
 
+
 #define EVENT_DEFINE_RANGE_FORMAT(name, attr_var, bit_start, bit_end)	\
 PMU_FORMAT_ATTR(name, #attr_var ":" #bit_start "-" #bit_end);		\
 EVENT_DEFINE_RANGE(name, attr_var, bit_start, bit_end)

@@ -153,6 +153,7 @@ int map_kernel_page(unsigned long ea, unsigned long pa, int flags)
 	return 0;
 }
 
+
 /**
  * __ioremap_at - Low level function to establish the page tables
  *                for an IO mapping
@@ -294,6 +295,7 @@ void __iomem * ioremap_prot(phys_addr_t addr, unsigned long size,
 		return ppc_md.ioremap(addr, size, flags, caller);
 	return __ioremap_caller(addr, size, flags, caller);
 }
+
 
 /*  
  * Unmap an IO region and remove it from imalloc'd list.

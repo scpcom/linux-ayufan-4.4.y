@@ -14,6 +14,7 @@
 #include "utils.h"
 #include "lib.h"
 
+
 int pick_online_cpu(void)
 {
 	cpu_set_t mask;
@@ -249,3 +250,4 @@ out_close:
 out:
 	return rc;
 }
+

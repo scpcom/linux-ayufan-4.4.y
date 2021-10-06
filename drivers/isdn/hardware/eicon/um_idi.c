@@ -201,6 +201,7 @@ static void cleanup_entity(divas_um_idi_entity_t *e)
 	diva_data_q_finit(&e->rc);
 }
 
+
 /* ------------------------------------------------------------------------
    Create ENTITY, link it to the adapter and remove pointer to entity
    ------------------------------------------------------------------------ */
@@ -368,12 +369,14 @@ int diva_um_idi_read(void *entity,
 		}
 	}
 
+
 	DBG_TRC(("A(%d) E(%08x) read=%d", a->adapter_nr, e, ret));
 
 	diva_os_leave_spin_lock(&adapter_lock, &old_irql, "read");
 
 	return (ret);
 }
+
 
 int diva_um_idi_write(void *entity,
 		      void *os_handle,
@@ -806,6 +809,7 @@ int divas_um_idi_entity_assigned(void *entity)
 	diva_os_spin_lock_magic_t old_irql;
 
 	diva_os_enter_spin_lock(&adapter_lock, &old_irql, "assigned?");
+
 
 	e = (divas_um_idi_entity_t *) entity;
 	if (!e || (!(a = e->adapter)) ||

@@ -528,6 +528,7 @@ static netdev_tx_t gs_can_start_xmit(struct sk_buff *skb, struct net_device *net
 				  hf,
 				  urb->transfer_dma);
 
+
 		if (rc == -ENODEV) {
 			netif_device_detach(netdev);
 		} else {

@@ -371,3 +371,4 @@ __visible void __pv_queued_spin_unlock(struct qspinlock *lock)
  * to each other sharing consecutive instruction cachelines.
  */
 #include <asm/qspinlock_paravirt.h>
+

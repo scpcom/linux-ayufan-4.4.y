@@ -22,6 +22,7 @@
 #define OMAP_MPU_WD_RST_SRC_ID_SHIFT			3
 #define OMAP_EXTWARM_RST_SRC_ID_SHIFT			5
 
+
 void omap1_restart(enum reboot_mode mode, const char *cmd)
 {
 	/*

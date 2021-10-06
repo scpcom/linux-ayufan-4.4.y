@@ -70,6 +70,7 @@ MODULE_LICENSE("GPL");
 /* 0:4KB*2 TX buffer   else:8KB*2 TX buffer */
 INT_MODULE_PARM(sram_config, 0);
 
+
 /*====================================================================*/
 /*
     PCMCIA event handlers

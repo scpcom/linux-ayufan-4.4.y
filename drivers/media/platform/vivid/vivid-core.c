@@ -1341,6 +1341,7 @@ static int vivid_remove(struct platform_device *pdev)
 	struct vivid_dev *dev;
 	unsigned i;
 
+
 	for (i = 0; i < n_devs; i++) {
 		dev = vivid_devs[i];
 		if (!dev)

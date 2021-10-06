@@ -1224,6 +1224,7 @@ static void tegra30_cpu_out_of_reset(u32 cpu)
 	wmb();
 }
 
+
 static void tegra30_enable_cpu_clock(u32 cpu)
 {
 	unsigned int reg;
@@ -1439,6 +1440,7 @@ static void __init tegra30_clock_init(struct device_node *np)
 			       ARRAY_SIZE(tegra30_input_freq), 1, &input_freq,
 			       NULL) < 0)
 		return;
+
 
 	tegra_fixed_clk_init(tegra30_clks);
 	tegra30_pll_init();

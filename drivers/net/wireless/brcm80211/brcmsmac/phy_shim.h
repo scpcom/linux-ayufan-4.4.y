@@ -73,6 +73,7 @@
 #define WL_TX_POWER_MCS40_FIRST	        28
 #define WL_TX_POWER_MCS40_NUM	        17
 
+
 #define WL_TX_POWER_RATES	       101
 #define WL_TX_POWER_CCK_FIRST	       0
 #define WL_TX_POWER_CCK_NUM	       4

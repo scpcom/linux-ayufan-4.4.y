@@ -49,6 +49,7 @@ static void mid_get_fuse_settings(struct drm_device *dev)
 		return;
 	}
 
+
 	pci_write_config_dword(pci_root, 0xD0, FB_REG06);
 	pci_read_config_dword(pci_root, 0xD4, &fuse_value);
 

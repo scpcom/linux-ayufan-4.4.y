@@ -381,6 +381,7 @@ static int lm92_probe(struct i2c_client *new_client,
 	return PTR_ERR_OR_ZERO(hwmon_dev);
 }
 
+
 /*
  * Module and driver stuff
  */

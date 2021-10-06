@@ -116,6 +116,7 @@
 #define IEEE80211_CTL_EXT_SSW_FBACK	0x9000
 #define IEEE80211_CTL_EXT_SSW_ACK	0xa000
 
+
 #define IEEE80211_SN_MASK		((IEEE80211_SCTL_SEQ) >> 4)
 #define IEEE80211_MAX_SN		IEEE80211_SN_MASK
 #define IEEE80211_SN_MODULO		(IEEE80211_MAX_SN + 1)
@@ -1006,6 +1007,7 @@ struct ieee80211_mgmt {
 /* mgmt header + 1 byte category code */
 #define IEEE80211_MIN_ACTION_SIZE offsetof(struct ieee80211_mgmt, u.action.u)
 
+
 /* Management MIC information element (IEEE 802.11w) */
 struct ieee80211_mmie {
 	u8 element_id;
@@ -1375,6 +1377,7 @@ struct ieee80211_ht_operation {
 #define IEEE80211_HT_STBC_PARAM_PCO_ACTIVE		0x0400
 #define IEEE80211_HT_STBC_PARAM_PCO_PHASE		0x0800
 
+
 /* block-ack parameters */
 #define IEEE80211_ADDBA_PARAM_AMSDU_MASK 0x0001
 #define IEEE80211_ADDBA_PARAM_POLICY_MASK 0x0002
@@ -1389,6 +1392,7 @@ struct ieee80211_ht_operation {
  */
 #define IEEE80211_MIN_AMPDU_BUF 0x8
 #define IEEE80211_MAX_AMPDU_BUF 0x40
+
 
 /* Spatial Multiplexing Power Save Modes (for capability) */
 #define WLAN_HT_CAP_SM_PS_STATIC	0
@@ -1488,6 +1492,7 @@ struct ieee80211_vht_operation {
 	u8 center_freq_seg2_idx;
 	__le16 basic_mcs_set;
 } __packed;
+
 
 /* 802.11ac VHT Capabilities */
 #define IEEE80211_VHT_CAP_MAX_MPDU_LENGTH_3895			0x00000000
@@ -1671,6 +1676,7 @@ enum ieee80211_statuscode {
 	WLAN_STATUS_DENIED_DUE_TO_SPECTRUM_MANAGEMENT = 103,
 };
 
+
 /* Reason codes */
 enum ieee80211_reasoncode {
 	WLAN_REASON_UNSPECIFIED = 1,
@@ -1728,6 +1734,7 @@ enum ieee80211_reasoncode {
 	WLAN_REASON_MESH_CHAN_REGULATORY = 65,
 	WLAN_REASON_MESH_CHAN = 66,
 };
+
 
 /* Information Element IDs */
 enum ieee80211_eid {
@@ -2236,6 +2243,7 @@ enum ieee80211_sa_query_action {
 	WLAN_ACTION_SA_QUERY_REQUEST = 0,
 	WLAN_ACTION_SA_QUERY_RESPONSE = 1,
 };
+
 
 /* cipher suite selectors */
 #define WLAN_CIPHER_SUITE_USE_GROUP	0x000FAC00

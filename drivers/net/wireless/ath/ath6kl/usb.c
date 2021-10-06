@@ -1116,6 +1116,7 @@ static int ath6kl_usb_probe(struct usb_interface *interface,
 		ath6kl_dbg(ATH6KL_DBG_USB, "USB Interface %d\n",
 			   interface->cur_altsetting->desc.bInterfaceNumber);
 
+
 	if (dev->speed == USB_SPEED_HIGH)
 		ath6kl_dbg(ATH6KL_DBG_USB, "USB 2.0 Host\n");
 	else

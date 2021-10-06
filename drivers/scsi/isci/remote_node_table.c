@@ -339,6 +339,7 @@ void sci_remote_node_table_initialize(
 							(remote_node_entries / SCIC_SDS_REMOTE_NODES_PER_DWORD)
 							+ ((remote_node_entries % SCIC_SDS_REMOTE_NODES_PER_DWORD) != 0);
 
+
 	/* Initialize each full DWORD to a FULL SET of remote nodes */
 	for (index = 0; index < remote_node_entries; index++) {
 		sci_remote_node_table_set_node_index(remote_node_table, index);
@@ -594,3 +595,4 @@ void sci_remote_node_table_release_remote_node_index(
 			remote_node_table, remote_node_index);
 	}
 }
+

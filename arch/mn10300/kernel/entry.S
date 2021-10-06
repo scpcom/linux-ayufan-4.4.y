@@ -193,6 +193,7 @@ need_resched:
 	jmp	resume_kernel
 #endif
 
+
 ###############################################################################
 #
 # IRQ handler entry point
@@ -766,5 +767,6 @@ ENTRY(sys_call_table)
 	.long sys_perf_event_open
 	.long sys_recvmmsg
 	.long sys_setns
+
 
 nr_syscalls=(.-sys_call_table)/4

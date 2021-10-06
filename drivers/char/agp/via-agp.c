@@ -40,6 +40,7 @@ static int via_fetch_size(void)
 	return 0;
 }
 
+
 static int via_configure(void)
 {
 	struct aper_size_info_8 *current_size;
@@ -61,6 +62,7 @@ static int via_configure(void)
 	return 0;
 }
 
+
 static void via_cleanup(void)
 {
 	struct aper_size_info_8 *previous_size;
@@ -73,6 +75,7 @@ static void via_cleanup(void)
 	 */
 }
 
+
 static void via_tlbflush(struct agp_memory *mem)
 {
 	u32 temp;
@@ -83,6 +86,7 @@ static void via_tlbflush(struct agp_memory *mem)
 	temp &= ~(1<<7);
 	pci_write_config_dword(agp_bridge->dev, VIA_GARTCTRL, temp);
 }
+
 
 static const struct aper_size_info_8 via_generic_sizes[9] =
 {
@@ -96,6 +100,7 @@ static const struct aper_size_info_8 via_generic_sizes[9] =
 	{2, 512, 0, 254},
 	{1, 256, 0, 255}
 };
+
 
 static int via_fetch_size_agp3(void)
 {
@@ -117,6 +122,7 @@ static int via_fetch_size_agp3(void)
 	}
 	return 0;
 }
+
 
 static int via_configure_agp3(void)
 {
@@ -143,6 +149,7 @@ static int via_configure_agp3(void)
 	return 0;
 }
 
+
 static void via_cleanup_agp3(void)
 {
 	struct aper_size_info_16 *previous_size;
@@ -150,6 +157,7 @@ static void via_cleanup_agp3(void)
 	previous_size = A_SIZE_16(agp_bridge->previous_size);
 	pci_write_config_byte(agp_bridge->dev, VIA_APSIZE, previous_size->size_value);
 }
+
 
 static void via_tlbflush_agp3(struct agp_memory *mem)
 {
@@ -159,6 +167,7 @@ static void via_tlbflush_agp3(struct agp_memory *mem)
 	pci_write_config_dword(agp_bridge->dev, VIA_AGP3_GARTCTRL, temp & ~(1<<7));
 	pci_write_config_dword(agp_bridge->dev, VIA_AGP3_GARTCTRL, temp);
 }
+
 
 static const struct agp_bridge_driver via_agp3_driver = {
 	.owner			= THIS_MODULE,
@@ -412,6 +421,7 @@ static struct agp_device_ids via_agp_device_ids[] =
 	{ }, /* dummy final entry, always present */
 };
 
+
 /*
  * VIA's AGP3 chipsets do magick to put the AGP bridge compliant
  * with the same standards version as the graphics card.
@@ -425,6 +435,7 @@ static void check_via_agp3 (struct agp_bridge_data *bridge)
 	if ((reg & (1<<1))==0)
 		bridge->driver = &via_agp3_driver;
 }
+
 
 static int agp_via_probe(struct pci_dev *pdev, const struct pci_device_id *ent)
 {
@@ -555,6 +566,7 @@ static const struct pci_device_id agp_via_pci_table[] = {
 
 MODULE_DEVICE_TABLE(pci, agp_via_pci_table);
 
+
 static struct pci_driver agp_via_pci_driver = {
 	.name		= "agpgart-via",
 	.id_table	= agp_via_pci_table,
@@ -565,6 +577,7 @@ static struct pci_driver agp_via_pci_driver = {
 	.resume		= agp_via_resume,
 #endif
 };
+
 
 static int __init agp_via_init(void)
 {

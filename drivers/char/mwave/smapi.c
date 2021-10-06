@@ -53,6 +53,7 @@
 
 static unsigned short g_usSmapiPort = 0;
 
+
 static int smapi_request(unsigned short inBX, unsigned short inCX,
 			 unsigned short inDI, unsigned short inSI,
 			 unsigned short *outAX, unsigned short *outBX,
@@ -121,6 +122,7 @@ static int smapi_request(unsigned short inBX, unsigned short inCX,
 	PRINTK_2(TRACE_SMAPI, "smapi::smapi_request exit retval %x\n", retval);
 	return retval;
 }
+
 
 int smapi_query_DSP_cfg(SMAPI_DSP_SETTINGS * pSettings)
 {
@@ -197,6 +199,7 @@ int smapi_query_DSP_cfg(SMAPI_DSP_SETTINGS * pSettings)
 	return bRC;
 }
 
+
 int smapi_set_DSP_cfg(void)
 {
 	int bRC = -EIO;
@@ -251,6 +254,7 @@ int smapi_set_DSP_cfg(void)
 		}
 		uartio_index = i;
 	}
+
 
 	if (mwave_uart_irq) {
 		for (i = 0; i < numUartIrqs; i++) {
@@ -487,6 +491,7 @@ exit_smapi_request_error:
 	PRINTK_ERROR(KERN_ERR_MWAVE "smapi::smapi_set_DSP_cfg exit on smapi_request error bRC %x\n", bRC);
 	return bRC;
 }
+
 
 int smapi_set_DSP_power_state(BOOLEAN bOn)
 {

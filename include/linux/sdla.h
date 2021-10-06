@@ -24,6 +24,7 @@
 
 #include <uapi/linux/sdla.h>
 
+
 /* important Z80 window addresses */
 #define SDLA_CONTROL_WND		0xE000
 

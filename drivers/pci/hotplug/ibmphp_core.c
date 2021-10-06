@@ -244,6 +244,7 @@ static int set_attention_status(struct hotplug_slot *hotplug_slot, u8 value)
 			(ulong) hotplug_slot, value);
 	ibmphp_lock_operations();
 
+
 	if (hotplug_slot) {
 		switch (value) {
 		case HPC_SLOT_ATTN_OFF:
@@ -333,6 +334,7 @@ static int get_latch_status(struct hotplug_slot *hotplug_slot, u8 *value)
 			rc, rc, *value);
 	return rc;
 }
+
 
 static int get_power_status(struct hotplug_slot *hotplug_slot, u8 *value)
 {
@@ -656,6 +658,7 @@ int ibmphp_update_slot_info(struct slot *slot_cur)
 	kfree(info);
 	return rc;
 }
+
 
 /******************************************************************************
  * This function will return the pci_func, given bus and devfunc, or NULL.  It

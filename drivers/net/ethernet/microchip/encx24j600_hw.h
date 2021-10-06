@@ -156,6 +156,7 @@ void devm_regmap_init_encx24j600(struct device *dev,
 #define EUDARDPT (0x0E | 0x80)
 #define EUDAWRPT (0x10 | 0x80)
 
+
 /* Register bit definitions */
 /* ESTAT */
 #define INT (1 << 15)
@@ -431,5 +432,6 @@ struct rsv {
 int regmap_encx24j600_spi_write(void *context, u8 reg, const u8 *data,
 				size_t count);
 int regmap_encx24j600_spi_read(void *context, u8 reg, u8 *data, size_t count);
+
 
 #endif

@@ -226,6 +226,7 @@
 #define GEM_SGMIIEN_OFFSET	27
 #define GEM_SGMIIEN_SIZE	1
 
+
 /* Constants for data bus width. */
 #define GEM_DBW32		0 /* 32 bit AMBA AHB data bus width */
 #define GEM_DBW64		1 /* 64 bit AMBA AHB data bus width */
@@ -248,6 +249,7 @@
 #define GEM_RXBS_SIZE		8
 #define GEM_DDRP_OFFSET		24 /* disc_when_no_ahb */
 #define GEM_DDRP_SIZE		1
+
 
 /* Bitfields in NSR */
 #define MACB_NSR_LINK_OFFSET	0 /* pcs_link_state */

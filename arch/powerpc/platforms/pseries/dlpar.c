@@ -636,3 +636,4 @@ static int __init pseries_dlpar_init(void)
 	return rc;
 }
 machine_device_initcall(pseries, pseries_dlpar_init);
+

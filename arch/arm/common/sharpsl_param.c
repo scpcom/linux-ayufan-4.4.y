@@ -61,3 +61,5 @@ void sharpsl_save_param(void)
 	if (sharpsl_param.adadj_keyword != AD_MAGIC)
 		sharpsl_param.adadj=-1;
 }
+
+

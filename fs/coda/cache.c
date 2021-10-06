@@ -56,6 +56,7 @@ void coda_cache_clear_all(struct super_block *sb)
 	atomic_inc(&permission_epoch);
 }
 
+
 /* check if the mask has been matched against the acl already */
 int coda_cache_check(struct inode *inode, int mask)
 {
@@ -70,6 +71,7 @@ int coda_cache_check(struct inode *inode, int mask)
 
 	return hit;
 }
+
 
 /* Purging dentries and children */
 /* The following routines drop dentries which are not
@@ -113,3 +115,4 @@ void coda_flag_inode_children(struct inode *inode, int flag)
 	shrink_dcache_parent(alias_de);
 	dput(alias_de);
 }
+

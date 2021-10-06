@@ -149,6 +149,8 @@ static struct fb_var_screeninfo vesafb_defined = {
 	FB_VMODE_NONINTERLACED,
 };
 
+
+
 /* --------------------------------------------------------------------- */
 static void update_crtc2(struct matrox_fb_info *minfo, unsigned int pos)
 {
@@ -2147,6 +2149,7 @@ static struct pci_device_id matroxfb_devices[] = {
 
 MODULE_DEVICE_TABLE(pci, matroxfb_devices);
 
+
 static struct pci_driver matroxfb_driver = {
 	.name =		"matroxfb",
 	.id_table =	matroxfb_devices,
@@ -2602,3 +2605,4 @@ EXPORT_SYMBOL(matroxfb_enable_irq);
  * c-basic-offset: 8
  * End:
  */
+

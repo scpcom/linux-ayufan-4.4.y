@@ -209,3 +209,4 @@ module_exit(bf5xx_ad73311_exit);
 MODULE_AUTHOR("Cliff Cai");
 MODULE_DESCRIPTION("ALSA SoC AD73311 Blackfin");
 MODULE_LICENSE("GPL");
+

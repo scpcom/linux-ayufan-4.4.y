@@ -162,6 +162,7 @@
  *
  */
 
+
 #include <linux/string.h>
 #include <linux/signal.h>
 #include <linux/kernel.h>
@@ -1232,6 +1233,8 @@ static void remove_watchpoint(char type, int addr, int len)
 	gdb_cris_strcpy(output_buffer, "OK");
 }
 
+
+
 /* All expected commands are sent from remote.c. Send a response according
    to the description in remote.c. */
 void
@@ -1455,6 +1458,7 @@ handle_exception(int sigval)
                                        remove_watchpoint(type, addr, len);
                                        break;
                                }
+
 
 			case '?':
 				/* The last signal which caused a stop. ?

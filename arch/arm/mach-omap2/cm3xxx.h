@@ -22,6 +22,7 @@
 #define OMAP34XX_CM_REGADDR(module, reg)				\
 			OMAP2_L4_IO_ADDRESS(OMAP3430_CM_BASE + (module) + (reg))
 
+
 /*
  * OMAP3-specific global CM registers
  * Use cm_{read,write}_reg() with these registers.
@@ -59,9 +60,11 @@
 #define OMAP3430_CM_CLKSEL2_EMU				0x0050
 #define OMAP3430_CM_CLKSEL3_EMU				0x0054
 
+
 /* CM_IDLEST bit field values to indicate deasserted IdleReq */
 
 #define OMAP34XX_CM_IDLEST_VAL				1
+
 
 #ifndef __ASSEMBLER__
 

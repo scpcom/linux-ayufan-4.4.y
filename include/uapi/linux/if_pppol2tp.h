@@ -17,6 +17,7 @@
 
 #include <linux/types.h>
 
+
 /* Structure used to connect() the socket to a particular tunnel UDP
  * socket over IPv4.
  */
@@ -97,5 +98,7 @@ enum {
 	PPPOL2TP_MSG_SEQ	= (1 << 2),	/* sequence numbers */
 	PPPOL2TP_MSG_DATA	= (1 << 3),	/* data packets */
 };
+
+
 
 #endif /* _UAPI__LINUX_IF_PPPOL2TP_H */

@@ -85,6 +85,7 @@ error:
 	return err;
 }
 
+
 static int __init mv64x60_mpsc_device_setup(struct device_node *np, int id)
 {
 	struct resource r[5];

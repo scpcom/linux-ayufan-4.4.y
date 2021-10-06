@@ -5,6 +5,7 @@
 #ifndef _UAPI_ASM_M68K_BOOTINFO_AMIGA_H
 #define _UAPI_ASM_M68K_BOOTINFO_AMIGA_H
 
+
     /*
      *  Amiga-specific tags
      */
@@ -18,6 +19,7 @@
 #define BI_AMIGA_ECLOCK		0x8005	/* EClock frequency (__be32) */
 #define BI_AMIGA_CHIPSET	0x8006	/* native chipset present (__be32) */
 #define BI_AMIGA_SERPER		0x8007	/* serial port period (__be16) */
+
 
     /*
      *  Amiga models (BI_AMIGA_MODEL)
@@ -40,6 +42,7 @@
 #define AMI_CD32		14
 #define AMI_DRACO		15
 
+
     /*
      *  Amiga chipsets (BI_AMIGA_CHIPSET)
      */
@@ -49,10 +52,12 @@
 #define CS_ECS			2
 #define CS_AGA			3
 
+
     /*
      *  Latest Amiga bootinfo version
      */
 
 #define AMIGA_BOOTI_VERSION	MK_BI_VERSION(2, 0)
+
 
 #endif /* _UAPI_ASM_M68K_BOOTINFO_AMIGA_H */

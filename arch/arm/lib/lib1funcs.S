@@ -32,6 +32,7 @@ along with this program; see the file COPYING.  If not, write to
 the Free Software Foundation, 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
+
 #include <linux/linkage.h>
 #include <asm/assembler.h>
 #include <asm/unwind.h>
@@ -101,6 +102,7 @@ Boston, MA 02111-1307, USA.  */
 
 .endm
 
+
 .macro ARM_DIV2_ORDER divisor, order
 
 #if __LINUX_ARM_ARCH__ >= 5
@@ -130,6 +132,7 @@ Boston, MA 02111-1307, USA.  */
 #endif
 
 .endm
+
 
 .macro ARM_MOD_BODY dividend, divisor, order, spare
 
@@ -200,6 +203,7 @@ Boston, MA 02111-1307, USA.  */
 	subhs	\dividend, \dividend, \divisor
 5:
 .endm
+
 
 ENTRY(__udivsi3)
 ENTRY(__aeabi_uidiv)

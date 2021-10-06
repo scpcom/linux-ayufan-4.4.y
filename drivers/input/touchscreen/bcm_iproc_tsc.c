@@ -59,6 +59,7 @@
 #define SOFT_BYPASS_CONTROL 0x38
 #define SOFT_BYPASS_DATA    0x3c
 
+
 /* Bit values for INTERRUPT_MASK and INTERRUPT_STATUS regs */
 #define TS_PEN_INTR_MASK        BIT(0)
 #define TS_FIFO_INTR_MASK       BIT(2)

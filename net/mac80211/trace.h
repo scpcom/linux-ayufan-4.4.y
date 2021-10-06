@@ -80,6 +80,8 @@
 #define KEY_PR_FMT	" cipher:0x%x, flags=%#x, keyidx=%d, hw_key_idx=%d"
 #define KEY_PR_ARG	__entry->cipher, __entry->flags, __entry->keyidx, __entry->hw_key_idx
 
+
+
 /*
  * Tracing for driver callbacks.
  */

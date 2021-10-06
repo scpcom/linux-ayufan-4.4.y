@@ -8,6 +8,7 @@
 
 #define SCSI_NO_TAG	(-1)    /* identify no tag in use */
 
+
 #ifdef CONFIG_BLOCK
 /**
  * scsi_host_find_tag - find the tagged command by host

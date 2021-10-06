@@ -46,6 +46,7 @@
 
 #include <linux/hyperv.h>
 
+
 /* Hyper-V Synthetic Video Protocol definitions and structures */
 #define MAX_VMBUS_PKT_SIZE 0x4000
 
@@ -65,6 +66,7 @@
 #define PCI_VENDOR_ID_MICROSOFT 0x1414
 #define PCI_DEVICE_ID_HYPERV_VIDEO 0x5353
 
+
 enum pipe_msg_type {
 	PIPE_MSG_INVALID,
 	PIPE_MSG_DATA,
@@ -75,6 +77,7 @@ struct pipe_msg_hdr {
 	u32 type;
 	u32 size; /* size of message after this field */
 } __packed;
+
 
 enum synthvid_msg_type {
 	SYNTHVID_ERROR			= 0,
@@ -96,6 +99,7 @@ struct synthvid_msg_hdr {
 	u32 type;
 	u32 size;  /* size of this header + payload after this field*/
 } __packed;
+
 
 struct synthvid_version_req {
 	u32 version;
@@ -142,6 +146,7 @@ struct synthvid_pointer_position {
 	s32 image_x;
 	s32 image_y;
 } __packed;
+
 
 #define CURSOR_MAX_X 96
 #define CURSOR_MAX_Y 96
@@ -193,6 +198,8 @@ struct synthvid_msg {
 		struct synthvid_dirt dirt;
 	};
 } __packed;
+
+
 
 /* FB driver definitions and structures */
 #define HVFB_WIDTH 1152 /* default screen width */
@@ -249,6 +256,7 @@ static inline int synthvid_send(struct hv_device *hdev,
 
 	return ret;
 }
+
 
 /* Send screen resolution info to host */
 static int synthvid_send_situ(struct hv_device *hdev)
@@ -334,6 +342,7 @@ static int synthvid_update(struct fb_info *info)
 
 	return 0;
 }
+
 
 /*
  * Actions on received messages from host:
@@ -512,6 +521,7 @@ out:
 	return ret;
 }
 
+
 /*
  * Delayed work callback:
  * It is called at HVFB_UPDATE_DELAY or longer time interval to process
@@ -564,6 +574,7 @@ static int hvfb_set_par(struct fb_info *info)
 
 	return synthvid_send_situ(hdev);
 }
+
 
 static inline u32 chan_to_field(u32 chan, struct fb_bitfield *bf)
 {
@@ -632,6 +643,7 @@ static struct fb_ops hvfb_ops = {
 	.fb_blank = hvfb_blank,
 };
 
+
 /* Get options from kernel paramenter "video=" */
 static void hvfb_get_option(struct fb_info *info)
 {
@@ -662,6 +674,7 @@ static void hvfb_get_option(struct fb_info *info)
 	screen_height = y;
 	return;
 }
+
 
 /* Get framebuffer memory from Hyper-V video pci space */
 static int hvfb_getmem(struct hv_device *hdev, struct fb_info *info)
@@ -749,6 +762,7 @@ static void hvfb_putmem(struct fb_info *info)
 	par->mem = NULL;
 }
 
+
 static int hvfb_probe(struct hv_device *hdev,
 		      const struct hv_vmbus_device_id *dev_id)
 {
@@ -785,6 +799,7 @@ static int hvfb_probe(struct hv_device *hdev,
 	hvfb_get_option(info);
 	pr_info("Screen resolution: %dx%d, Color depth: %d\n",
 		screen_width, screen_height, screen_depth);
+
 
 	/* Set up fb_info */
 	info->flags = FBINFO_DEFAULT;
@@ -850,6 +865,7 @@ error1:
 	return ret;
 }
 
+
 static int hvfb_remove(struct hv_device *hdev)
 {
 	struct fb_info *info = hv_get_drvdata(hdev);
@@ -872,6 +888,7 @@ static int hvfb_remove(struct hv_device *hdev)
 
 	return 0;
 }
+
 
 static const struct pci_device_id pci_stub_id_table[] = {
 	{

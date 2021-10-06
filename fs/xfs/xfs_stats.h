@@ -18,6 +18,7 @@
 #ifndef __XFS_STATS_H__
 #define __XFS_STATS_H__
 
+
 #include <linux/percpu.h>
 
 /*
@@ -238,6 +239,7 @@ do {									\
 
 extern int xfs_init_procfs(void);
 extern void xfs_cleanup_procfs(void);
+
 
 #else	/* !CONFIG_PROC_FS */
 

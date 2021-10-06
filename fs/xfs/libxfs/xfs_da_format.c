@@ -71,6 +71,7 @@ xfs_dir3_sf_nextentry(
 		((char *)sfep + xfs_dir3_sf_entsize(hdr, sfep->namelen));
 }
 
+
 /*
  * For filetype enabled shortform directories, the file type field is stored at
  * the end of the name.  Because it's only a single byte, endian conversion is
@@ -204,6 +205,7 @@ xfs_dir3_sfe_put_ino(
 	xfs_dir2_sf_put_ino(hdr,
 			(xfs_dir2_inou_t *)&sfep->name[sfep->namelen + 1], ino);
 }
+
 
 /*
  * Directory data block operations
@@ -417,6 +419,7 @@ xfs_dir3_data_unused_p(struct xfs_dir2_data_hdr *hdr)
 		((char *)hdr + sizeof(struct xfs_dir3_data_hdr));
 }
 
+
 /*
  * Directory Leaf block operations
  */
@@ -510,6 +513,7 @@ xfs_dir3_leaf_hdr_to_disk(
 	hdr3->stale = cpu_to_be16(from->stale);
 }
 
+
 /*
  * Directory/Attribute Node block operations
  */
@@ -580,6 +584,7 @@ xfs_da3_node_hdr_to_disk(
 	hdr3->__count = cpu_to_be16(from->count);
 	hdr3->__level = cpu_to_be16(from->level);
 }
+
 
 /*
  * Directory free space block operations

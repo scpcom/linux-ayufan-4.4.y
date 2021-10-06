@@ -103,6 +103,7 @@ hycapi_remove_ctr(struct capi_ctr *ctrl)
 	ctrl->driverdata = NULL;
 	kfree(card->hyctrlinfo);
 
+
 	card->hyctrlinfo = NULL;
 }
 
@@ -314,6 +315,7 @@ hycapi_release_appl(struct capi_ctr *ctrl, __u16 appl)
 	}
 }
 
+
 /**************************************************************
 Kill a single controller.
 **************************************************************/
@@ -494,6 +496,7 @@ static int hycapi_load_firmware(struct capi_ctr *ctrl, capiloaddata *data)
 	return 0;
 }
 
+
 static char *hycapi_procinfo(struct capi_ctr *ctrl)
 {
 	hycapictrl_info *cinfo = (hycapictrl_info *)(ctrl->driverdata);
@@ -666,6 +669,7 @@ hycapi_tx_capiget(hysdn_card *card)
 
 	return (cinfo->skbs[cinfo->out_idx]);		/* next packet to send */
 }
+
 
 /**********************************************************
 int hycapi_init()

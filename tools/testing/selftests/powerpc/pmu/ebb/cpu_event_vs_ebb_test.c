@@ -13,6 +13,7 @@
 
 #include "ebb.h"
 
+
 /*
  * Tests a cpu event vs an EBB - in that order. The EBB should force the cpu
  * event off the PMU.

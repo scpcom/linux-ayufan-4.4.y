@@ -40,4 +40,5 @@
  */
 #define ADB_QUERY_GETDEVINFO	1
 
+
 #endif /* _UAPI__ADB_H */

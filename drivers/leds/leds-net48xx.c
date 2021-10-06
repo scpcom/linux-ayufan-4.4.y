@@ -86,3 +86,4 @@ module_exit(net48xx_led_exit);
 MODULE_AUTHOR("Chris Boot <bootc@bootc.net>");
 MODULE_DESCRIPTION("Soekris net48xx LED driver");
 MODULE_LICENSE("GPL");
+

@@ -17,6 +17,7 @@
 #include <asm/firmware.h>
 #include <asm/cputable.h>
 
+
 /*
  * Some power8 event codes.
  */
@@ -57,6 +58,7 @@
 #define PM_DTLB_MISS			0x300fc
 /* ITLB Reloaded */
 #define PM_ITLB_MISS			0x400fc
+
 
 /*
  * Raw event encoding for POWER8:
@@ -247,6 +249,7 @@
 	CNST_PMC_VAL(1) | CNST_PMC_VAL(2) | CNST_PMC_VAL(3) | \
 	CNST_PMC_VAL(4) | CNST_PMC_VAL(5) | CNST_PMC_VAL(6) | CNST_NC_VAL
 
+
 /* Bits in MMCR1 for POWER8 */
 #define MMCR1_UNIT_SHIFT(pmc)		(60 - (4 * ((pmc) - 1)))
 #define MMCR1_COMBINE_SHIFT(pmc)	(35 - ((pmc) - 1))
@@ -268,6 +271,7 @@
 #define MMCR2_FCS(pmc)			(1ull << (63 - (((pmc) - 1) * 9)))
 #define MMCR2_FCP(pmc)			(1ull << (62 - (((pmc) - 1) * 9)))
 #define MMCR2_FCH(pmc)			(1ull << (57 - (((pmc) - 1) * 9)))
+
 
 static inline bool event_is_fab_match(u64 event)
 {

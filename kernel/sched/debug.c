@@ -507,6 +507,7 @@ __initcall(init_sched_debug_procfs);
 #define PN(F) \
 	SEQ_printf(m, "%-45s:%14Ld.%06ld\n", #F, SPLIT_NS((long long)p->F))
 
+
 #ifdef CONFIG_NUMA_BALANCING
 void print_numa_stats(struct seq_file *m, int node, unsigned long tsf,
 		unsigned long tpf, unsigned long gsf, unsigned long gpf)
@@ -516,6 +517,7 @@ void print_numa_stats(struct seq_file *m, int node, unsigned long tsf,
 	SEQ_printf(m, "group_private=%lu group_shared=%lu\n", gsf, gpf);
 }
 #endif
+
 
 static void sched_show_numa(struct task_struct *p, struct seq_file *m)
 {

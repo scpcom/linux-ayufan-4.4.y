@@ -1190,6 +1190,7 @@ static int twa_initialize_device_extension(TW_Device_Extension *tw_dev)
 		goto out;
 	}
 
+
 	for (i = 0; i < TW_Q_LENGTH; i++) {
 		tw_dev->event_queue[i] = (TW_Event *)((unsigned char *)tw_dev->event_queue[0] + (i * sizeof(TW_Event)));
 		tw_dev->free_queue[i] = i;
@@ -2318,3 +2319,4 @@ static void __exit twa_exit(void)
 
 module_init(twa_init);
 module_exit(twa_exit);
+

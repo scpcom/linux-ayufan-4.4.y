@@ -12,6 +12,7 @@
  * option) any later version.
  */
 
+
 #ifndef _VMIVME_7805_H
 #define _VMIVME_7805_H
 
@@ -33,3 +34,4 @@
 #define BM_VME_CONTROL_VBENA		0x0800
 
 #endif /* _VMIVME_7805_H */
+

@@ -795,6 +795,7 @@ void peripheral_free_list(const unsigned short per[]);
 #define P_SPI1_SSEL3 P_UNDEF
 #endif
 
+
 #ifndef P_SPI1_SSEL4
 #define P_SPI1_SSEL4 P_UNDEF
 #endif

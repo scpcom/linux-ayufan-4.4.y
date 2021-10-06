@@ -117,6 +117,7 @@ static const struct reg_default ssm4567_reg_defaults[] = {
 	{ SSM4567_REG_SOFT_RESET, 0x00 },
 };
 
+
 static bool ssm4567_readable_reg(struct device *dev, unsigned int reg)
 {
 	switch (reg) {

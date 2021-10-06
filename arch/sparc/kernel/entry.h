@@ -33,6 +33,8 @@ void handle_cp_disabled(struct pt_regs *regs, unsigned long pc,
 void handle_cp_exception(struct pt_regs *regs, unsigned long pc,
                          unsigned long npc, unsigned long psr);
 
+
+
 /* entry.S */
 void fpsave(unsigned long *fpregs, unsigned long *fsr,
             void *fpqueue, unsigned long *fpqdepth);

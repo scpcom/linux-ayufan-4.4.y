@@ -26,8 +26,10 @@
 #include "signaling.h"		/* for WAITING and sigd_attach */
 #include "common.h"
 
+
 static DEFINE_MUTEX(ioctl_mutex);
 static LIST_HEAD(ioctl_list);
+
 
 void register_atm_ioctl(struct atm_ioctl *ioctl)
 {

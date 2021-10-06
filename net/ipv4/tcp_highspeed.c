@@ -156,6 +156,7 @@ static u32 hstcp_ssthresh(struct sock *sk)
 	return max(tp->snd_cwnd - ((tp->snd_cwnd * hstcp_aimd_vals[ca->ai].md) >> 8), 2U);
 }
 
+
 static struct tcp_congestion_ops tcp_highspeed __read_mostly = {
 	.init		= hstcp_init,
 	.ssthresh	= hstcp_ssthresh,

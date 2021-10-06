@@ -542,6 +542,7 @@ static int vsr_set(struct task_struct *target, const struct user_regset *regset,
 	for (i = 0; i < 32 ; i++)
 		target->thread.fp_state.fpr[i][TS_VSRLOWOFFSET] = buf[i];
 
+
 	return ret;
 }
 #endif /* CONFIG_VSX */
@@ -611,6 +612,7 @@ static int evr_set(struct task_struct *target, const struct user_regset *regset,
 	return ret;
 }
 #endif /* CONFIG_SPE */
+
 
 /*
  * These are our native regset flavors.
@@ -756,6 +758,7 @@ static int gpr32_set(struct task_struct *target,
 			regs[pos++] = reg;
 		}
 
+
 	if (count > 0 && pos == PT_MSR) {
 		if (kbuf)
 			reg = *k++;
@@ -844,6 +847,7 @@ const struct user_regset_view *task_user_regset_view(struct task_struct *task)
 #endif
 	return &user_ppc_native_view;
 }
+
 
 void user_enable_single_step(struct task_struct *task)
 {

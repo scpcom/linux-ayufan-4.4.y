@@ -34,6 +34,7 @@
 
 static int restore_dsp_rettings(struct echoaudio *chip);
 
+
 /* Some vector commands involve the DSP reading or writing data to and from the
 comm page; if you send one of these commands to the DSP, it will complete the
 command and then write a non-zero value to the Handshake field in the
@@ -55,6 +56,8 @@ static int wait_handshake(struct echoaudio *chip)
 	dev_err(chip->card->dev, "wait_handshake(): Timeout waiting for DSP\n");
 	return -EBUSY;
 }
+
+
 
 /* Much of the interaction between the DSP and the driver is done via vector
 commands; send_vector writes a vector command to the DSP.  Typically, this
@@ -81,6 +84,8 @@ static int send_vector(struct echoaudio *chip, u32 command)
 	return -EBUSY;
 }
 
+
+
 /* write_dsp writes a 32-bit value to the DSP; this is used almost
 exclusively for loading the DSP. */
 static int write_dsp(struct echoaudio *chip, u32 data)
@@ -103,6 +108,8 @@ static int write_dsp(struct echoaudio *chip, u32 data)
 	return -EIO;
 }
 
+
+
 /* read_dsp reads a 32-bit value from the DSP; this is used almost
 exclusively for loading the DSP and checking the status of the ASIC. */
 static int read_dsp(struct echoaudio *chip, u32 *data)
@@ -123,6 +130,8 @@ static int read_dsp(struct echoaudio *chip, u32 *data)
 	dev_err(chip->card->dev, "read_dsp: Set bad_board to true\n");
 	return -EIO;
 }
+
+
 
 /****************************************************************************
 	Firmware loading functions
@@ -151,6 +160,8 @@ static int read_sn(struct echoaudio *chip)
 	return 0;
 }
 
+
+
 #ifndef ECHOCARD_HAS_ASIC
 /* This card has no ASIC, just return ok */
 static inline int check_asic_status(struct echoaudio *chip)
@@ -160,6 +171,8 @@ static inline int check_asic_status(struct echoaudio *chip)
 }
 
 #endif /* !ECHOCARD_HAS_ASIC */
+
+
 
 #ifdef ECHOCARD_HAS_ASIC
 
@@ -203,6 +216,8 @@ la_error:
 }
 
 #endif /* ECHOCARD_HAS_ASIC */
+
+
 
 #ifdef DSP_56361
 
@@ -315,6 +330,7 @@ irl_error:
 }
 
 #endif /* DSP_56361 */
+
 
 static int load_dsp(struct echoaudio *chip, u16 *code)
 {
@@ -466,6 +482,8 @@ static int load_dsp(struct echoaudio *chip, u16 *code)
 	return -EIO;
 }
 
+
+
 /* load_firmware takes care of loading the DSP and any ASIC code. */
 static int load_firmware(struct echoaudio *chip)
 {
@@ -497,6 +515,8 @@ static int load_firmware(struct echoaudio *chip)
 	return box_type;
 }
 
+
+
 /****************************************************************************
 	Mixer functions
  ****************************************************************************/
@@ -526,6 +546,8 @@ static int set_nominal_level(struct echoaudio *chip, u16 index, char consumer)
 
 #endif /* ECHOCARD_HAS_*_NOMINAL_LEVEL */
 
+
+
 /* Set the gain for a single physical output channel (dB). */
 static int set_output_gain(struct echoaudio *chip, u16 channel, s8 gain)
 {
@@ -540,6 +562,8 @@ static int set_output_gain(struct echoaudio *chip, u16 channel, s8 gain)
 	chip->comm_page->line_out_level[channel] = gain;
 	return 0;
 }
+
+
 
 #ifdef ECHOCARD_HAS_MONITOR
 /* Set the monitor level from an input bus to an output bus. */
@@ -559,6 +583,7 @@ static int set_monitor_gain(struct echoaudio *chip, u16 output, u16 input,
 }
 #endif /* ECHOCARD_HAS_MONITOR */
 
+
 /* Tell the DSP to read and update output, nominal & monitor levels in comm page. */
 static int update_output_line_level(struct echoaudio *chip)
 {
@@ -568,6 +593,8 @@ static int update_output_line_level(struct echoaudio *chip)
 	return send_vector(chip, DSP_VC_UPDATE_OUTVOL);
 }
 
+
+
 /* Tell the DSP to read and update input levels in comm page */
 static int update_input_line_level(struct echoaudio *chip)
 {
@@ -576,6 +603,8 @@ static int update_input_line_level(struct echoaudio *chip)
 	clear_handshake(chip);
 	return send_vector(chip, DSP_VC_UPDATE_INGAIN);
 }
+
+
 
 /* set_meters_on turns the meters on or off.  If meters are turned on, the DSP
 will write the meter and clock detect values to the comm page at about 30Hz */
@@ -593,6 +622,8 @@ static void set_meters_on(struct echoaudio *chip, char on)
 		       DSP_MAXPIPES);
 	}
 }
+
+
 
 /* Fill out an the given array using the current values in the comm page.
 Meters are written in the comm page by the DSP in this order:
@@ -635,6 +666,8 @@ static void get_audio_meters(struct echoaudio *chip, long *meters)
 	for (; n < 96; n++)
 		meters[n] = 0;
 }
+
+
 
 static int restore_dsp_rettings(struct echoaudio *chip)
 {
@@ -738,6 +771,8 @@ static int restore_dsp_rettings(struct echoaudio *chip)
 	return 0;
 }
 
+
+
 /****************************************************************************
 	Transport functions
  ****************************************************************************/
@@ -817,6 +852,8 @@ static void set_audio_format(struct echoaudio *chip, u16 pipe_index,
 	chip->comm_page->audio_format[pipe_index] = cpu_to_le16(dsp_format);
 }
 
+
+
 /* start_transport starts transport for a set of pipes.
 The bits 1 in channel_mask specify what pipes to start. Only the bit of the
 first channel must be set, regardless its interleave.
@@ -845,6 +882,8 @@ static int start_transport(struct echoaudio *chip, u32 channel_mask,
 	return -EINVAL;
 }
 
+
+
 static int pause_transport(struct echoaudio *chip, u32 channel_mask)
 {
 
@@ -868,6 +907,8 @@ static int pause_transport(struct echoaudio *chip, u32 channel_mask)
 	dev_warn(chip->card->dev, "pause_transport: No pipes to stop!\n");
 	return 0;
 }
+
+
 
 static int stop_transport(struct echoaudio *chip, u32 channel_mask)
 {
@@ -893,10 +934,14 @@ static int stop_transport(struct echoaudio *chip, u32 channel_mask)
 	return 0;
 }
 
+
+
 static inline int is_pipe_allocated(struct echoaudio *chip, u16 pipe_index)
 {
 	return (chip->pipe_alloc_mask & (1 << pipe_index));
 }
+
+
 
 /* Stops everything and turns off the DSP. All pipes should be already
 stopped and unallocated. */
@@ -921,6 +966,8 @@ static int rest_in_peace(struct echoaudio *chip)
 	}
 	return 0;
 }
+
+
 
 /* Fills the comm page with default values */
 static int init_dsp_comm_page(struct echoaudio *chip)
@@ -954,6 +1001,8 @@ static int init_dsp_comm_page(struct echoaudio *chip)
 	return 0;
 }
 
+
+
 /* This function initializes the chip structure with default values, ie. all
  * muted and internal clock source. Then it copies the settings to the DSP.
  * This MUST be called after the DSP is up and running !
@@ -969,6 +1018,8 @@ static int init_line_levels(struct echoaudio *chip)
 	chip->sample_rate = 44100;
 	return restore_dsp_rettings(chip);
 }
+
+
 
 /* This is low level part of the interrupt handler.
 It returns -1 if the IRQ is not ours, or N>=0 if it is, where N is the number
@@ -992,6 +1043,9 @@ static int service_irq(struct echoaudio *chip)
 	}
 	return -1;
 }
+
+
+
 
 /******************************************************************************
 	Functions for opening and closing pipes
@@ -1038,6 +1092,8 @@ static int allocate_pipes(struct echoaudio *chip, struct audiopipe *pipe,
 	return pipe_index;
 }
 
+
+
 static int free_pipes(struct echoaudio *chip, struct audiopipe *pipe)
 {
 	u32 channel_mask;
@@ -1056,6 +1112,8 @@ static int free_pipes(struct echoaudio *chip, struct audiopipe *pipe)
 	return 0;
 }
 
+
+
 /******************************************************************************
 	Functions for managing the scatter-gather list
 ******************************************************************************/
@@ -1068,6 +1126,8 @@ static int sglist_init(struct echoaudio *chip, struct audiopipe *pipe)
 		cpu_to_le32(pipe->sgpage.addr);
 	return 0;
 }
+
+
 
 static int sglist_add_mapping(struct echoaudio *chip, struct audiopipe *pipe,
 				dma_addr_t address, size_t length)
@@ -1086,10 +1146,14 @@ static int sglist_add_mapping(struct echoaudio *chip, struct audiopipe *pipe,
 	return 0;
 }
 
+
+
 static inline int sglist_add_irq(struct echoaudio *chip, struct audiopipe *pipe)
 {
 	return sglist_add_mapping(chip, pipe, 0, 0);
 }
+
+
 
 static inline int sglist_wrap(struct echoaudio *chip, struct audiopipe *pipe)
 {

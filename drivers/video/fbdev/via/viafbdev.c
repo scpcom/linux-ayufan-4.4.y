@@ -1694,6 +1694,7 @@ static int parse_mode(const char *str, u32 devices, u32 *xres, u32 *yres)
 	return 0;
 }
 
+
 #ifdef CONFIG_PM
 static int viafb_suspend(void *unused)
 {
@@ -2094,6 +2095,7 @@ static struct fb_ops viafb_ops = {
 	.fb_ioctl = viafb_ioctl,
 	.fb_sync = viafb_sync,
 };
+
 
 #ifdef MODULE
 module_param(viafb_mode, charp, S_IRUSR);

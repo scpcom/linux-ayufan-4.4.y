@@ -18,6 +18,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+
 /**
  * DOC: Wireless regulatory infrastructure
  *
@@ -2037,6 +2038,7 @@ reg_process_hint_driver(struct wiphy *wiphy,
 		rcu_free_regdom(tmp);
 	}
 
+
 	driver_request->intersect = treatment == REG_REQ_INTERSECT;
 	driver_request->processed = false;
 
@@ -2781,6 +2783,7 @@ static void print_rd_rules(const struct ieee80211_regdomain *rd)
 				  reg_rule->dfs_cac_ms/1000);
 		else
 			scnprintf(cac_time, sizeof(cac_time), "N/A");
+
 
 		/*
 		 * There may not be documentation for max antenna gain

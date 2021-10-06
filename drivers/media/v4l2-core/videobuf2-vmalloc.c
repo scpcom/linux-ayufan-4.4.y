@@ -371,6 +371,7 @@ static struct dma_buf *vb2_vmalloc_get_dmabuf(void *buf_priv, unsigned long flag
 }
 #endif /* CONFIG_HAS_DMA */
 
+
 /*********************************************/
 /*       callbacks for DMABUF buffers        */
 /*********************************************/
@@ -420,6 +421,7 @@ static void *vb2_vmalloc_attach_dmabuf(void *alloc_ctx, struct dma_buf *dbuf,
 
 	return buf;
 }
+
 
 const struct vb2_mem_ops vb2_vmalloc_memops = {
 	.alloc		= vb2_vmalloc_alloc,

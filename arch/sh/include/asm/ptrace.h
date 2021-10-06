@@ -4,6 +4,7 @@
 #ifndef __ASM_SH_PTRACE_H
 #define __ASM_SH_PTRACE_H
 
+
 #include <linux/stringify.h>
 #include <linux/stddef.h>
 #include <linux/thread_info.h>

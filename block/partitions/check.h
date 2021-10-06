@@ -51,3 +51,4 @@ put_partition(struct parsed_partitions *p, int n, sector_t from, sector_t size)
 }
 
 extern int warn_no_part;
+

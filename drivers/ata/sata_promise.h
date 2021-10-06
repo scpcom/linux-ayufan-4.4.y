@@ -153,4 +153,5 @@ static inline unsigned int pdc_prep_lba48(struct ata_taskfile *tf, u8 *buf, unsi
 	return i;
 }
 
+
 #endif /* __SATA_PROMISE_H__ */

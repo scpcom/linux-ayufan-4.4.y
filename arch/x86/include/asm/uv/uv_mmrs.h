@@ -459,6 +459,7 @@ union uvh_event_occurred0_u {
 #define UVH_EVENT_OCCURRED0_ALIAS 0x70008UL
 #define UVH_EVENT_OCCURRED0_ALIAS_32 0x5f0
 
+
 /* ========================================================================= */
 /*                         UVH_EXTIO_INT0_BROADCAST                          */
 /* ========================================================================= */
@@ -1570,6 +1571,7 @@ union uvh_lb_bau_intd_software_acknowledge_u {
 #define UVH_LB_BAU_INTD_SOFTWARE_ACKNOWLEDGE_ALIAS 0x320088UL
 #define UVH_LB_BAU_INTD_SOFTWARE_ACKNOWLEDGE_ALIAS_32 0xa70
 
+
 /* ========================================================================= */
 /*                         UVH_LB_BAU_MISC_CONTROL                           */
 /* ========================================================================= */
@@ -2626,11 +2628,13 @@ union uvh_scratch5_u {
 #define UVH_SCRATCH5_ALIAS 0x2d0208UL
 #define UVH_SCRATCH5_ALIAS_32 0x780
 
+
 /* ========================================================================= */
 /*                           UVH_SCRATCH5_ALIAS_2                            */
 /* ========================================================================= */
 #define UVH_SCRATCH5_ALIAS_2 0x2d0210UL
 #define UVH_SCRATCH5_ALIAS_2_32 0x788
+
 
 /* ========================================================================= */
 /*                          UVXH_EVENT_OCCURRED2                             */
@@ -2747,6 +2751,7 @@ union uvxh_event_occurred2_u {
 /* ========================================================================= */
 #define UVXH_EVENT_OCCURRED2_ALIAS 0x70108UL
 #define UVXH_EVENT_OCCURRED2_ALIAS_32 0xb70
+
 
 /* ========================================================================= */
 /*                   UVXH_LB_BAU_SB_ACTIVATION_STATUS_2                      */
@@ -2918,5 +2923,6 @@ union uv3h_rh_gam_mmioh_redirect_config1_mmr_u {
 		unsigned long	rsvd_15_63:49;
 	} s3;
 };
+
 
 #endif /* _ASM_X86_UV_UV_MMRS_H */

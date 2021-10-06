@@ -730,6 +730,7 @@ static int clcdfb_of_vram_mmap(struct clcd_fb *fb, struct vm_area_struct *vma)
 {
 	unsigned long off, user_size, kernel_size;
 
+
 	off = vma->vm_pgoff << PAGE_SHIFT;
 	user_size = vma->vm_end - vma->vm_start;
 	kernel_size = fb->fb.fix.smem_len;

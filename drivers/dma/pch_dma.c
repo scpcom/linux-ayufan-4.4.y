@@ -317,6 +317,7 @@ static bool pdc_is_idle(struct pch_dma_chan *pd_chan)
 	else
 		sts = pdc_get_status2(pd_chan);
 
+
 	if (sts == DMA_STATUS_IDLE)
 		return true;
 	else

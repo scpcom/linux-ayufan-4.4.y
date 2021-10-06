@@ -5,6 +5,7 @@
  *
  */
 
+
 #ifdef CONFIG_NCPFS_PACKET_SIGNING
 
 #include <linux/string.h>
@@ -123,3 +124,4 @@ int sign_verify_reply(struct ncp_server *server, const char *packet, size_t size
 }
 
 #endif	/* CONFIG_NCPFS_PACKET_SIGNING */
+

@@ -620,6 +620,7 @@ out_unlock:
 	return ret;
 }
 
+
 static struct fb_ops vmw_fb_ops = {
 	.owner = THIS_MODULE,
 	.fb_check_var = vmw_fb_check_var,

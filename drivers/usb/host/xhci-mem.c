@@ -567,6 +567,7 @@ struct xhci_ep_ctx *xhci_get_ep_ctx(struct xhci_hcd *xhci,
 		(ctx->bytes + (ep_index * CTX_SIZE(xhci->hcc_params)));
 }
 
+
 /***************** Streams structures manipulation *************************/
 
 static void xhci_free_stream_ctx(struct xhci_hcd *xhci,
@@ -825,6 +826,7 @@ void xhci_free_stream_info(struct xhci_hcd *xhci,
 	kfree(stream_info);
 }
 
+
 /***************** Device context manipulation *************************/
 
 static void xhci_init_endpoint_timer(struct xhci_hcd *xhci,
@@ -901,6 +903,7 @@ free_tts:
 	xhci_free_tt_info(xhci, virt_dev, virt_dev->udev->slot_id);
 	return -ENOMEM;
 }
+
 
 /* All the xhci_tds in the ring's TD list should be freed at this point.
  * Should be called with xhci->lock held if there is any chance the TT lists
@@ -1259,6 +1262,7 @@ static unsigned int xhci_parse_microframe_interval(struct usb_device *udev,
 	return xhci_microframes_to_exponent(udev, ep,
 			ep->desc.bInterval, 0, 15);
 }
+
 
 static unsigned int xhci_parse_frame_interval(struct usb_device *udev,
 		struct usb_host_endpoint *ep)

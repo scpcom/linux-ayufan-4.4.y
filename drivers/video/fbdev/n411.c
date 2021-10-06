@@ -117,6 +117,7 @@ static int n411_init_control(struct hecubafb_par *par)
 	return 0;
 }
 
+
 static int n411_init_board(struct hecubafb_par *par)
 {
 	int retval;
@@ -198,3 +199,4 @@ MODULE_PARM_DESC(splashval, "Splash pattern: 0x00 is black, 0x01 is white");
 MODULE_DESCRIPTION("board driver for n411 hecuba/apollo epd kit");
 MODULE_AUTHOR("Jaya Kumar");
 MODULE_LICENSE("GPL");
+

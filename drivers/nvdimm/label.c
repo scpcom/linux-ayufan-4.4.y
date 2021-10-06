@@ -672,6 +672,7 @@ static int __blk_label_update(struct nd_region *nd_region,
 	}
 	/* from here on we need to abort on error */
 
+
 	/* assign all resources to the namespace before writing the labels */
 	nsblk->res = NULL;
 	nsblk->num_resources = 0;

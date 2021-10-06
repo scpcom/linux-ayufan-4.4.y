@@ -41,7 +41,9 @@
 #include "vxfs_inode.h"
 #include "vxfs_extern.h"
 
+
 struct kmem_cache		*vxfs_inode_cachep;
+
 
 #ifdef DIAGNOSTIC
 /*
@@ -65,6 +67,7 @@ vxfs_dumpi(struct vxfs_inode_info *vip, ino_t ino)
 	printk(KERN_DEBUG "orgtype:%u\n", vip->vii_orgtype);
 }
 #endif
+
 
 /**
  * vxfs_blkiget - find inode based on extent #

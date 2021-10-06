@@ -45,6 +45,7 @@
 	}										\
 } while (0)
 
+
 #define STV6110x_SETFIELD(mask, bitf, val)				\
 	(mask = (mask & (~(((1 << STV6110x_WIDTH_##bitf) - 1) <<	\
 				  STV6110x_OFFST_##bitf))) | 		\

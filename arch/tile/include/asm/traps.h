@@ -71,6 +71,7 @@ void do_hardwall_trap(struct pt_regs *, int fault_num);
 /* kernel/ptrace.c */
 void do_breakpoint(struct pt_regs *, int fault_num);
 
+
 #ifdef __tilegx__
 /* kernel/single_step.c */
 void gx_singlestep_handle(struct pt_regs *, int fault_num);

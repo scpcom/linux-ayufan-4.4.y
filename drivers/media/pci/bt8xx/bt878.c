@@ -45,6 +45,7 @@
 #include "bt878.h"
 #include "dst_priv.h"
 
+
 /**************************************/
 /* Miscellaneous utility  definitions */
 /**************************************/
@@ -155,6 +156,7 @@ static int bt878_make_risc(struct bt878 *bt)
 	return 0;
 }
 
+
 static void bt878_risc_program(struct bt878 *bt, u32 op_sync_orin)
 {
 	u32 buf_pos = 0;
@@ -223,6 +225,7 @@ void bt878_start(struct bt878 *bt, u32 controlreg, u32 op_sync_orin,
 		BT878_ARIPERR | BT878_APPERR | BT878_AFDSR | BT878_AFTRGT |
 		BT878_AFBUS | BT878_ARISCI;
 
+
 	/* ignore pesky bits */
 	int_mask &= ~irq_err_ignore;
 
@@ -274,6 +277,7 @@ static irqreturn_t bt878_irq(int irq, void *dev_id)
 			return IRQ_NONE;	/* this interrupt is not for me */
 /*		dprintk("bt878(%d) debug: irq count %d, stat 0x%8.8x, mask 0x%8.8x\n",bt->nr,count,stat,mask); */
 		btwrite(astat, BT878_AINT_STAT);	/* try to clear interrupt condition */
+
 
 		if (astat & (BT878_ASCERR | BT878_AOCERR)) {
 			if (bt878_verbose) {
@@ -446,6 +450,7 @@ static int bt878_probe(struct pci_dev *dev, const struct pci_device_id *pci_id)
 
 	bt->revision = dev->revision;
 	pci_read_config_byte(dev, PCI_LATENCY_TIMER, &lat);
+
 
 	printk(KERN_INFO "bt878(%d): Bt%x (rev %d) at %02x:%02x.%x, ",
 	       bt878_num, bt->id, bt->revision, dev->bus->number,

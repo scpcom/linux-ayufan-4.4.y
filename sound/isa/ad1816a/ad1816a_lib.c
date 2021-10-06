@@ -83,6 +83,7 @@ static void snd_ad1816a_write_mask(struct snd_ad1816a *chip, unsigned char reg,
 		(value & mask) | (snd_ad1816a_read(chip, reg) & ~mask));
 }
 
+
 static unsigned char snd_ad1816a_get_format(struct snd_ad1816a *chip,
 					    unsigned int format, int channels)
 {
@@ -170,6 +171,7 @@ static void snd_ad1816a_close(struct snd_ad1816a *chip, unsigned int mode)
 
 	spin_unlock_irqrestore(&chip->lock, flags);
 }
+
 
 static int snd_ad1816a_trigger(struct snd_ad1816a *chip, unsigned char what,
 			       int channel, int cmd, int iscapture)
@@ -290,6 +292,7 @@ static int snd_ad1816a_capture_prepare(struct snd_pcm_substream *substream)
 	return 0;
 }
 
+
 static snd_pcm_uframes_t snd_ad1816a_playback_pointer(struct snd_pcm_substream *substream)
 {
 	struct snd_ad1816a *chip = snd_pcm_substream_chip(substream);
@@ -309,6 +312,7 @@ static snd_pcm_uframes_t snd_ad1816a_capture_pointer(struct snd_pcm_substream *s
 	ptr = snd_dma_pointer(chip->dma2, chip->c_dma_size);
 	return bytes_to_frames(substream->runtime, ptr);
 }
+
 
 static irqreturn_t snd_ad1816a_interrupt(int irq, void *dev_id)
 {
@@ -333,6 +337,7 @@ static irqreturn_t snd_ad1816a_interrupt(int irq, void *dev_id)
 	spin_unlock(&chip->lock);
 	return IRQ_HANDLED;
 }
+
 
 static struct snd_pcm_hardware snd_ad1816a_playback = {
 	.info =			(SNDRV_PCM_INFO_MMAP | SNDRV_PCM_INFO_INTERLEAVED |
@@ -484,6 +489,7 @@ static int snd_ad1816a_capture_close(struct snd_pcm_substream *substream)
 	snd_ad1816a_close(chip, AD1816A_MODE_CAPTURE);
 	return 0;
 }
+
 
 static void snd_ad1816a_init(struct snd_ad1816a *chip)
 {

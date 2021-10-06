@@ -21,6 +21,7 @@
 #include <linux/i2c.h>
 #include "dvb_frontend.h"
 
+
 enum lgdt3306a_mpeg_mode {
 	LGDT3306A_MPEG_PARALLEL = 0,
 	LGDT3306A_MPEG_SERIAL = 1,

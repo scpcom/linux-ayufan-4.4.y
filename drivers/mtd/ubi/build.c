@@ -1237,6 +1237,7 @@ static int __init ubi_init(void)
 	if (err)
 		goto out_slab;
 
+
 	/* Attach MTD devices */
 	for (i = 0; i < mtd_devs; i++) {
 		struct mtd_dev_param *p = &mtd_dev_param[i];

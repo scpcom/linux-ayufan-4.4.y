@@ -26,6 +26,7 @@
 #include "cxl.h"
 #include <misc/cxl.h>
 
+
 #define CXL_PCI_VSEC_ID	0x1280
 #define CXL_VSEC_MIN_SIZE 0x80
 
@@ -86,6 +87,7 @@
 #define CXL_READ_VSEC_PS_SIZE(dev, vsec, dest) \
 	pci_read_config_dword(dev, vsec + 0x2c, dest)
 
+
 /* This works a little different than the p1/p2 register accesses to make it
  * easier to pull out individual fields */
 #define AFUD_READ(afu, off)		in_be64(afu->afu_desc_mmio + off)
@@ -141,6 +143,7 @@ static const struct pci_device_id cxl_pci_tbl[] = {
 	{ }
 };
 MODULE_DEVICE_TABLE(pci, cxl_pci_tbl);
+
 
 /*
  * Mostly using these wrappers to avoid confusion:
@@ -660,6 +663,7 @@ static int cxl_read_afu_descriptor(struct cxl_afu *afu)
 	val = AFUD_READ_CR(afu);
 	afu->crs_len = AFUD_CR_LEN(val) * 256;
 	afu->crs_offset = AFUD_READ_CR_OFF(afu);
+
 
 	/* eb_len is in multiple of 4K */
 	afu->eb_len = AFUD_EB_LEN(AFUD_READ_EB(afu)) * 4096;

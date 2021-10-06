@@ -14,6 +14,7 @@
 #include <linux/clk.h>
 #include <linux/list.h>
 
+
 void at32_clk_register(struct clk *clk);
 
 struct clk {

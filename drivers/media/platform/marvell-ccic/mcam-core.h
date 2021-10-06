@@ -33,6 +33,7 @@
 #error One of the videobuf buffer modes must be selected in the config
 #endif
 
+
 enum mcam_state {
 	S_NOTREADY,	/* Not yet initialized */
 	S_IDLE,		/* Just hanging around */
@@ -190,6 +191,7 @@ struct mcam_camera {
 	struct mutex s_mutex; /* Access to this structure */
 };
 
+
 /*
  * Register I/O functions.  These are here because the platform code
  * may legitimately need to mess with the register space.
@@ -208,6 +210,7 @@ static inline unsigned int mcam_reg_read(struct mcam_camera *cam,
 {
 	return ioread32(cam->regs + reg);
 }
+
 
 static inline void mcam_reg_write_mask(struct mcam_camera *cam, unsigned int reg,
 		unsigned int val, unsigned int mask)

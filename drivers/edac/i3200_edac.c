@@ -65,6 +65,7 @@
 #define I3200_ERRSTS_CE		0x0001
 #define I3200_ERRSTS_BITS	(I3200_ERRSTS_UE | I3200_ERRSTS_CE)
 
+
 /* Intel  MMIO register space - device 0 function 0 - MMR space */
 
 #define I3200_C0DRB	0x200	/* Channel 0 DRAM Rank Boundary (16b x 4)
@@ -162,6 +163,7 @@ static const struct i3200_dev_info i3200_devs[] = {
 
 static struct pci_dev *mci_pdev;
 static int i3200_registered = 1;
+
 
 static void i3200_clear_error_info(struct mem_ctl_info *mci)
 {
@@ -287,6 +289,7 @@ static void __iomem *i3200_map_mchbar(struct pci_dev *pdev)
 
 	return window;
 }
+
 
 static void i3200_get_drbs(void __iomem *window,
 	u16 drbs[I3200_CHANNELS][I3200_RANKS_PER_CHANNEL])

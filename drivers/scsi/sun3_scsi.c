@@ -70,6 +70,7 @@
 
 #include "NCR5380.h"
 
+
 extern int sun3_map_test(unsigned long, char *);
 
 static int setup_can_queue = -1;
@@ -231,6 +232,7 @@ void sun3_sun3_debug (void)
 	}
 }
 #endif
+
 
 /* sun3scsi_dma_setup() -- initialize the dma controller for a read/write */
 static unsigned long sun3scsi_dma_setup(void *data, unsigned long count, int write_flag)

@@ -72,6 +72,7 @@ __HPP_COLOR_ACC_PERCENT_FN(overhead_acc, period)
 
 #undef __HPP_COLOR_PERCENT_FN
 
+
 void perf_gtk__init_hpp(void)
 {
 	perf_hpp__format[PERF_HPP__OVERHEAD].color =

@@ -20,6 +20,7 @@
 #ifndef __LINUX_USB_SERIAL_WHITEHEAT_H
 #define __LINUX_USB_SERIAL_WHITEHEAT_H
 
+
 /* WhiteHEAT commands */
 #define WHITEHEAT_OPEN			1	/* open the port */
 #define WHITEHEAT_CLOSE			2	/* close the port */
@@ -42,9 +43,11 @@
 #define WHITEHEAT_CMD_COMPLETE		16	/* reply for some commands */
 #define WHITEHEAT_CMD_FAILURE		17	/* reply for failed commands */
 
+
 /*
  * Commands to the firmware
  */
+
 
 /*
  * WHITEHEAT_OPEN
@@ -56,6 +59,7 @@
 struct whiteheat_simple {
 	__u8	port;	/* port number (1 to N) */
 };
+
 
 /*
  * WHITEHEAT_SETUP_PORT
@@ -99,6 +103,7 @@ struct whiteheat_port_settings {
 	__u8	lloop;		/* 0/1 turns local loopback mode off/on */
 } __attribute__ ((packed));
 
+
 /*
  * WHITEHEAT_SET_RTS
  * WHITEHEAT_SET_DTR
@@ -115,6 +120,7 @@ struct whiteheat_set_rdb {
 	__u8	port;		/* port number (1 to N) */
 	__u8	state;		/* 0/1 turns signal off/on */
 };
+
 
 /*
  * WHITEHEAT_DUMP
@@ -145,6 +151,7 @@ struct whiteheat_dump {
 	__u16	length;		/* number of bytes to dump, max 63 bytes */
 };
 
+
 /*
  * WHITEHEAT_PURGE
  */
@@ -156,6 +163,7 @@ struct whiteheat_purge {
 	__u8	what;		/* bit pattern of what to purge */
 };
 
+
 /*
  * WHITEHEAT_ECHO
  */
@@ -164,6 +172,7 @@ struct whiteheat_echo {
 	__u8	length;		/* length of message to echo, max 61 bytes */
 	__u8	echo_data[61];	/* data to echo */
 };
+
 
 /*
  * WHITEHEAT_DO_TEST
@@ -188,9 +197,11 @@ struct whiteheat_test {
 	__u8	info[32];	/* additional info */
 };
 
+
 /*
  * Replies from the firmware
  */
+
 
 /*
  * WHITEHEAT_STATUS
@@ -224,12 +235,14 @@ struct whiteheat_status_info {
 					connected */
 };
 
+
 /*
  * WHITEHEAT_GET_DTR_RTS
  */
 struct whiteheat_dr_info {
 	__u8	mcr;		/* copy of uart's MCR register */
 };
+
 
 /*
  * WHITEHEAT_GET_HW_INFO
@@ -258,6 +271,7 @@ struct whiteheat_hw_info {
 	} hw_eeprom_info;	/* EEPROM contents */
 };
 
+
 /*
  * WHITEHEAT_EVENT
  */
@@ -267,6 +281,7 @@ struct whiteheat_event_info {
 	__u8	info;		/* see whiteheat_status_info.modem, .error,
 					.flow, .connect */
 };
+
 
 /*
  * WHITEHEAT_DO_TEST
@@ -282,5 +297,6 @@ struct whiteheat_test_info {
 	__u8	status;		/* see WHITEHEAT_TEST_* above */
 	__u8	results[32];	/* test-dependent results */
 };
+
 
 #endif

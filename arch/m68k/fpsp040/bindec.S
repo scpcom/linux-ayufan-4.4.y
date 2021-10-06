@@ -258,17 +258,20 @@ pos_res:
 	fmulx	LOG2,%fp0	|if pos, mul by LOG2
 	fmovel	%fp0,%d6		|put ILOG in d6 as a lword
 
+
 | A4. Clr INEX bit.
 |     The operation in A3 above may have set INEX2.
 
 A4_str:
 	fmovel	#0,%FPSR		|zero all of fpsr - nothing needed
 
+
 | A5. Set ICTR = 0;
 |     ICTR is a flag used in A13.  It must be set before the
 |     loop entry A6. The lower word of d5 is used for ICTR.
 
 	clrw	%d5		|clear ICTR
+
 
 | A6. Calculate LEN.
 |     LEN is the number of digits to be displayed.  The k-factor
@@ -320,6 +323,7 @@ len_ck:
 	bras	A7_str		|finished here
 LEN_ng:
 	moveql	#1,%d4		|min LEN is 1
+
 
 | A7. Calculate SCALE.
 |     SCALE is equal to 10^ISCALE, where ISCALE is the number
@@ -429,6 +433,7 @@ e_next:
 	tstl	%d0		|test if ISCALE is zero
 	bnes	e_loop		|if not, loop
 
+
 | A8. Clr INEX; Force RZ.
 |     The operation in A3 above may have set INEX2.
 |     RZ mode is forced for the scaling operation to insure
@@ -440,6 +445,7 @@ e_next:
 
 	fmovel	#0,%FPSR		|clr INEX
 	fmovel	#rz_mode,%FPCR	|set RZ rounding mode
+
 
 | A9. Scale X -> Y.
 |     The mantissa is scaled to the desired number of significant
@@ -509,6 +515,7 @@ A9_norm:
 A9_con:
 	fmulx	%fp1,%fp0		|calculate X * SCALE -> Y to fp0
 
+
 | A10. Or in INEX.
 |      If INEX is set, round error occurred.  This is compensated
 |      for by 'or-ing' in the INEX2 flag to the lsb of Y.
@@ -538,6 +545,7 @@ A10_st:
 	oril	#1,8(%a2)	|or in 1 to lsb of mantissa
 	fmovex	FP_SCR2(%a6),%fp0	|write adjusted Y back to fpu
 
+
 | A11. Restore original FPCR; set size ext.
 |      Perform FINT operation in the user's rounding mode.  Keep
 |      the size to extended.  The sintdo entry point in the sint
@@ -548,6 +556,7 @@ A11_st:
 	movel	USER_FPCR(%a6),L_SCR1(%a6) |save it for later
 	andil	#0x00000030,USER_FPCR(%a6) |set size to ext,
 |					;block exceptions
+
 
 | A12. Calculate YINT = FINT(Y) according to user's rounding mode.
 |      The FPSP routine sintd0 is used.  The output is in fp0.
@@ -592,6 +601,7 @@ do_fint:
 	moveml	(%a7)+,%d0-%d1/%a0-%a1	|restore regs used by sint
 	movel	L_SCR2(%a6),FP_SCR2(%a6)	|restore original exponent
 	movel	L_SCR1(%a6),USER_FPCR(%a6) |restore user's FPCR
+
 
 | A13. Check for LEN digits.
 |      If the int operation results in more than LEN digits,
@@ -702,6 +712,7 @@ z_next:
 	addql	#1,%d4		| and inc LEN
 	fmuls	FTEN,%fp2	| if LEN++, the get 10^^LEN
 
+
 | A14. Convert the mantissa to bcd.
 |      The binstr routine is used to convert the LEN digit
 |      mantissa to bcd in memory.  The input to binstr is
@@ -767,6 +778,7 @@ zer_m:
 	movel	%d4,%d0		|put LEN in d0 for binstr call
 	addql	#3,%a0		|a0 points to M16 byte in result
 	bsr	binstr		|call binstr to convert mant
+
 
 | A15. Convert the exponent to bcd.
 |      As in A14 above, the exp is converted to bcd and the
@@ -859,6 +871,7 @@ x_loop_fin:
 	tstb	%d0		|check if e4 is zero
 	beqs	A16_st		|if zero, skip rest
 	orl	#opaop_mask,USER_FPSR(%a6) |set OPERR & AIOP in USER_FPSR
+
 
 | A16. Write sign bits to final string.
 |	   Sigma is bit 31 of initial value; RHO is bit 31 of d6 (ILOG).

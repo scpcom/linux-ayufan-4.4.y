@@ -12,6 +12,7 @@
 
 #include <uapi/linux/ppp-comp.h>
 
+
 struct module;
 
 /*

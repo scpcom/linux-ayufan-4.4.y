@@ -39,6 +39,7 @@ struct trace_kprobe {
 	(offsetof(struct trace_kprobe, tp.args) +	\
 	(sizeof(struct probe_arg) * (n)))
 
+
 static nokprobe_inline bool trace_kprobe_is_return(struct trace_kprobe *tk)
 {
 	return tk->rp.handler != NULL;
@@ -1067,6 +1068,7 @@ print_kretprobe_event(struct trace_iterator *iter, int flags,
 	return trace_handle_return(s);
 }
 
+
 static int kprobe_event_define_fields(struct trace_event_call *event_call)
 {
 	int ret, i;
@@ -1336,6 +1338,7 @@ static __init int init_kprobe_trace(void)
 	return 0;
 }
 fs_initcall(init_kprobe_trace);
+
 
 #ifdef CONFIG_FTRACE_STARTUP_TEST
 

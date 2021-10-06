@@ -757,6 +757,7 @@ out:
 	return retval;
 }
 
+
 static DEVICE_ATTR_WO(acquire);
 static DEVICE_ATTR_RO(min);
 static DEVICE_ATTR_RO(max);

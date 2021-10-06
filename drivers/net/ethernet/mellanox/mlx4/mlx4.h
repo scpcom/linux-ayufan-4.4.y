@@ -113,6 +113,7 @@ enum mlx4_mpt_state {
 #define MLX4_COMM_OFFLINE_TIME_OUT 30000
 #define MLX4_COMM_CMD_NA_OP    0x0
 
+
 enum {
 	MLX4_COMM_CMD_RESET,
 	MLX4_COMM_CMD_VHCR0,
@@ -653,6 +654,7 @@ struct mlx4_vf_immed_vlan_work {
 	u16			orig_vlan_id;
 };
 
+
 struct mlx4_uar_table {
 	struct mlx4_bitmap	bitmap;
 };
@@ -770,6 +772,7 @@ enum {
 	MCAST_DIRECT		= 1,
 	MCAST_DEFAULT		= 2
 };
+
 
 struct mlx4_set_port_general_context {
 	u16 reserved1;

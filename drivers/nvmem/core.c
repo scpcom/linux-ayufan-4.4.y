@@ -1059,6 +1059,7 @@ int nvmem_device_write(struct nvmem_device *nvmem,
 	if (IS_ERR_VALUE(rc))
 		return rc;
 
+
 	return bytes;
 }
 EXPORT_SYMBOL_GPL(nvmem_device_write);

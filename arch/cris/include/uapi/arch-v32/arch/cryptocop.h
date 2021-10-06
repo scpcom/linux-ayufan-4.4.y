@@ -8,6 +8,7 @@
 
 #include <linux/uio.h>
 
+
 #define CRYPTOCOP_SESSION_ID_NONE (0)
 
 typedef unsigned long long int cryptocop_session_id;
@@ -114,5 +115,8 @@ struct strcop_crypto_op{
 	/* Outdata. */
 	unsigned char            csum[CRYPTOCOP_CSUM_LENGTH];
 };
+
+
+
 
 #endif /* _UAPICRYPTOCOP_H */

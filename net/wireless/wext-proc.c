@@ -25,6 +25,7 @@
 #include <net/iw_handler.h>
 #include <net/wext.h>
 
+
 static void wireless_seq_printf_stats(struct seq_file *seq,
 				      struct net_device *dev)
 {

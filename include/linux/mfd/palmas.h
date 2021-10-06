@@ -3771,6 +3771,7 @@ static inline int palmas_irq_get_virq(struct palmas *palmas, int irq)
 	return regmap_irq_get_virq(palmas->irq_data, irq);
 }
 
+
 int palmas_ext_control_req_config(struct palmas *palmas,
 	enum palmas_external_requestor_id ext_control_req_id,
 	int ext_ctrl, bool enable);

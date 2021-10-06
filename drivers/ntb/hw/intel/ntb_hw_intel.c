@@ -2296,3 +2296,4 @@ static void __exit intel_ntb_pci_driver_exit(void)
 	debugfs_remove_recursive(debugfs_dir);
 }
 module_exit(intel_ntb_pci_driver_exit);
+

@@ -10,6 +10,8 @@
  *	Purpose 	Definition of macros to operate on bit fields.
  */
 
+
+
 #ifndef __BITFIELD_H
 #define __BITFIELD_H
 
@@ -18,6 +20,7 @@
 #else
 #define UData(Data)	(Data)
 #endif
+
 
 /*
  * MACRO: Fld
@@ -41,6 +44,7 @@
  */
 
 #define Fld(Size, Shft)	(((Size) << 16) + (Shft))
+
 
 /*
  * MACROS: FSize, FShft, FMsk, FAlnMsk, F1stBit
@@ -67,6 +71,7 @@
 #define FAlnMsk(Field)	((UData (1) << FSize (Field)) - 1)
 #define F1stBit(Field)	(UData (1) << FShft (Field))
 
+
 /*
  * MACRO: FInsrt
  *
@@ -85,6 +90,7 @@
 #define FInsrt(Value, Field) \
                 	(UData (Value) << FShft (Field))
 
+
 /*
  * MACRO: FExtr
  *
@@ -102,5 +108,6 @@
 
 #define FExtr(Data, Field) \
                 	((UData (Data) >> FShft (Field)) & FAlnMsk (Field))
+
 
 #endif /* __BITFIELD_H */

@@ -555,6 +555,7 @@ ultra_close_card(struct net_device *dev)
 	return 0;
 }
 
+
 #ifdef MODULE
 #define MAX_ULTRA_CARDS	4	/* Max number of Ultra cards per module */
 static struct net_device *dev_ultra[MAX_ULTRA_CARDS];

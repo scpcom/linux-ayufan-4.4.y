@@ -17,6 +17,8 @@
 #include <linux/completion.h>
 #include <linux/mtd/mtd.h>
 
+
+
 struct ftl_zone {
 	bool initialized;
 	int16_t *lba_to_phys_table;		/* LBA to physical table */
@@ -69,6 +71,7 @@ struct chs_entry {
 	unsigned char sec;
 };
 
+
 #define SM_FTL_PARTN_BITS	3
 
 #define sm_printk(format, ...) \
@@ -81,6 +84,7 @@ struct chs_entry {
 #define dbg_verbose(format, ...) \
 	if (debug > 1) \
 		printk(KERN_DEBUG "sm_ftl" ": " format "\n", ## __VA_ARGS__)
+
 
 static void sm_erase_callback(struct erase_info *self);
 static int sm_erase_block(struct sm_ftl *ftl, int zone_num, uint16_t block,

@@ -117,6 +117,7 @@ xfs_mount_validate_sb(
 		return -EWRONGFS;
 	}
 
+
 	if (!xfs_sb_good_version(sbp)) {
 		xfs_warn(mp, "bad version");
 		return -EWRONGFS;

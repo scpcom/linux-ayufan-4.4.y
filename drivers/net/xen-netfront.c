@@ -226,6 +226,7 @@ static bool xennet_can_sg(struct net_device *dev)
 	return dev->features & NETIF_F_SG;
 }
 
+
 static void rx_refill_timeout(unsigned long data)
 {
 	struct netfront_queue *queue = (struct netfront_queue *)data;
@@ -248,6 +249,7 @@ static void xennet_maybe_wake_tx(struct netfront_queue *queue)
 	    likely(netif_running(dev)))
 		netif_tx_wake_queue(netdev_get_tx_queue(dev, queue->id));
 }
+
 
 static struct sk_buff *xennet_alloc_one_rx_buffer(struct netfront_queue *queue)
 {
@@ -273,6 +275,7 @@ static struct sk_buff *xennet_alloc_one_rx_buffer(struct netfront_queue *queue)
 
 	return skb;
 }
+
 
 static void xennet_alloc_rx_buffers(struct netfront_queue *queue)
 {
@@ -2193,6 +2196,7 @@ static int __init netif_init(void)
 	return xenbus_register_frontend(&netfront_driver);
 }
 module_init(netif_init);
+
 
 static void __exit netif_exit(void)
 {

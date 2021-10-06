@@ -10,6 +10,7 @@
  *  for more details.
  */
 
+
 #include <linux/kernel.h>
 #include <linux/zorro.h>
 #include <linux/stat.h>
@@ -18,6 +19,7 @@
 #include <asm/byteorder.h>
 
 #include "zorro.h"
+
 
 /* show configuration fields */
 #define zorro_config_attr(name, field, format_string)			\
@@ -115,3 +117,4 @@ int zorro_create_sysfs_dev_files(struct zorro_dev *z)
 
 	return 0;
 }
+

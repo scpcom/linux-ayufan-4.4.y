@@ -905,6 +905,7 @@ void mei_cl_bus_remove_devices(struct mei_device *bus)
 	mutex_unlock(&bus->cl_bus_lock);
 }
 
+
 /**
  * mei_cl_bus_dev_init - allocate and initializes an mei client devices
  *     based on me client
@@ -1001,6 +1002,7 @@ void mei_cldev_driver_unregister(struct mei_cl_driver *cldrv)
 	pr_debug("mei: driver [%s] unregistered\n", cldrv->driver.name);
 }
 EXPORT_SYMBOL_GPL(mei_cldev_driver_unregister);
+
 
 int __init mei_cl_bus_init(void)
 {

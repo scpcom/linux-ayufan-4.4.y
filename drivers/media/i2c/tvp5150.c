@@ -28,6 +28,7 @@ MODULE_DESCRIPTION("Texas Instruments TVP5150A video decoder driver");
 MODULE_AUTHOR("Mauro Carvalho Chehab");
 MODULE_LICENSE("GPL");
 
+
 static int debug;
 module_param(debug, int, 0644);
 MODULE_PARM_DESC(debug, "Debug level (0-2)");
@@ -747,6 +748,7 @@ static int tvp5150_s_std(struct v4l2_subdev *sd, v4l2_std_id std)
 	else
 		decoder->rect.height = TVP5150_V_MAX_OTHERS;
 
+
 	return tvp5150_set_std(sd, std);
 }
 
@@ -1097,6 +1099,7 @@ static const struct v4l2_subdev_ops tvp5150_ops = {
 	.vbi = &tvp5150_vbi_ops,
 	.pad = &tvp5150_pad_ops,
 };
+
 
 /****************************************************************************
 			I2C Client & Driver

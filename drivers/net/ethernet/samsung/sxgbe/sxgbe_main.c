@@ -633,6 +633,7 @@ static void tx_free_ring_skbufs(struct sxgbe_tx_queue *txqueue)
 	}
 }
 
+
 static void dma_free_tx_skbufs(struct sxgbe_priv_data *priv)
 {
 	int queue_num;
@@ -1005,6 +1006,7 @@ static void sxgbe_disable_mtl_engine(struct sxgbe_priv_data *priv)
 	SXGBE_FOR_EACH_QUEUE(SXGBE_TX_QUEUES, queue_num)
 		priv->hw->mtl->mtl_disable_txqueue(priv->ioaddr, queue_num);
 }
+
 
 /**
  * sxgbe_tx_timer: mitigation sw timer for tx.
@@ -1712,6 +1714,7 @@ static inline u64 sxgbe_get_stat64(void __iomem *ioaddr, int reg_lo, int reg_hi)
 	return val;
 }
 
+
 /*  sxgbe_get_stats64 - entry point to see statistical information of device
  *  @dev : device pointer.
  *  @stats : pointer to hold all the statistical information of device.
@@ -2326,6 +2329,8 @@ err:
 
 __setup("sxgbeeth=", sxgbe_cmdline_opt);
 #endif /* MODULE */
+
+
 
 MODULE_DESCRIPTION("SAMSUNG 10G/2.5G/1G Ethernet PLATFORM driver");
 

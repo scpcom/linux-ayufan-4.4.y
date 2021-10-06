@@ -171,4 +171,5 @@ ib_get_smp_direction(struct ib_smp *smp)
 #define IB_NOTICE_TRAP_DR_NOTICE	0x80
 #define IB_NOTICE_TRAP_DR_TRUNC		0x40
 
+
 #endif /* IB_SMI_H */

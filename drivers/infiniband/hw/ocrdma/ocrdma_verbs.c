@@ -313,6 +313,7 @@ static bool ocrdma_search_mmap(struct ocrdma_ucontext *uctx, u64 phy_addr,
 	return found;
 }
 
+
 static u16 _ocrdma_pd_mgr_get_bitmap(struct ocrdma_dev *dev, bool dpp_pool)
 {
 	u16 pd_bitmap_idx = 0;
@@ -2035,6 +2036,7 @@ static inline uint32_t ocrdma_sglist_len(struct ib_sge *sg_list, int num_sge)
 	return total_len;
 }
 
+
 static int ocrdma_build_inline_sges(struct ocrdma_qp *qp,
 				    struct ocrdma_hdr_wqe *hdr,
 				    struct ocrdma_sge *sge,
@@ -2628,6 +2630,7 @@ static int ocrdma_update_err_scqe(struct ib_wc *ibwc, struct ocrdma_cqe *cqe,
 
 	return ocrdma_update_err_cqe(ibwc, cqe, qp, status);
 }
+
 
 static bool ocrdma_poll_err_scqe(struct ocrdma_qp *qp,
 				 struct ocrdma_cqe *cqe, struct ib_wc *ibwc,

@@ -72,3 +72,4 @@ int query_apm_bios(void)
 	boot_params.apm_bios_info.flags   = oreg.cx;
 	return 0;
 }
+

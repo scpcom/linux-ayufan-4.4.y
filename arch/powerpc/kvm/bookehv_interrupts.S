@@ -587,6 +587,7 @@ _GLOBAL(__kvmppc_vcpu_run)
 	PPC_LL	r30, VCPU_GPR(R30)(r4)
 	PPC_LL	r31, VCPU_GPR(R31)(r4)
 
+
 lightweight_exit:
 	PPC_STL	r2, HOST_R2(r1)
 

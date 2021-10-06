@@ -113,6 +113,7 @@ int bench_sched_pipe(int argc, const char **argv, const char *prefix __maybe_unu
 		}
 	}
 
+
 	if (threaded) {
 
 		for (t = 0; t < nr_threads; t++) {

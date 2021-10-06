@@ -23,6 +23,7 @@
 
 #include "mpc10x.h"
 
+
 static const struct of_device_id storcenter_of_bus[] __initconst = {
 	{ .name = "soc", },
 	{},
@@ -34,6 +35,7 @@ static int __init storcenter_device_probe(void)
 	return 0;
 }
 machine_device_initcall(storcenter, storcenter_device_probe);
+
 
 static int __init storcenter_add_bridge(struct device_node *dev)
 {

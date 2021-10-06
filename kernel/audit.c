@@ -157,6 +157,7 @@ static char *audit_feature_names[2] = {
 	"loginuid_immutable",
 };
 
+
 /* Serialize requests from userspace. */
 DEFINE_MUTEX(audit_cmd_mutex);
 
@@ -722,6 +723,7 @@ int is_audit_feature_set(int i)
 {
 	return af.features & AUDIT_FEATURE_TO_MASK(i);
 }
+
 
 static int audit_get_feature(struct sk_buff *skb)
 {

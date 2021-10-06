@@ -1379,6 +1379,7 @@ static int wm8993_set_tdm_slot(struct snd_soc_dai *dai, unsigned int tx_mask,
 		return -EINVAL;
 	}
 
+
 	switch (tx_mask) {
 	case 3:
 		break;

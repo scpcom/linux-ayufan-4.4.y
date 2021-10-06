@@ -23,6 +23,7 @@
 #include <osdep_service.h>
 #include <ieee80211.h> /*  <ieee80211/ieee80211.h> */
 
+
 #define MAX_CMDSZ	1024
 #define MAX_RSPSZ	512
 #define MAX_EVTSZ	1024
@@ -349,12 +350,14 @@ struct getdatarate_rsp {
 	u8 datarates[NumRates];
 };
 
+
 /*
 Caller Mode: Any
 AP: AP can use the info for the contents of beacon frame
 Infra: STA can use the info when sitesurveying
 Ad-HoC(M): Like AP
 Ad-HoC(C): Like STA
+
 
 Notes: To set the phy capability of the NIC
 
@@ -648,6 +651,7 @@ struct TDLSoption_param {
 };
 
 #define GEN_CMD_CODE(cmd)	cmd ## _CMD_
+
 
 /*
 

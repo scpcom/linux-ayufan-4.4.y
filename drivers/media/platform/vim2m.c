@@ -70,6 +70,7 @@ MODULE_PARM_DESC(debug, "activates debug info");
 #define dprintk(dev, fmt, arg...) \
 	v4l2_dbg(1, debug, &dev->v4l2_dev, "%s: " fmt, __func__, ## arg)
 
+
 static void vim2m_dev_release(struct device *dev)
 {}
 
@@ -193,6 +194,7 @@ static struct vim2m_q_data *get_q_data(struct vim2m_ctx *ctx,
 	}
 	return NULL;
 }
+
 
 static int device_process(struct vim2m_ctx *ctx,
 			  struct vb2_v4l2_buffer *in_vb,
@@ -673,6 +675,7 @@ static const struct v4l2_ctrl_ops vim2m_ctrl_ops = {
 	.s_ctrl = vim2m_s_ctrl,
 };
 
+
 static const struct v4l2_ioctl_ops vim2m_ioctl_ops = {
 	.vidioc_querycap	= vidioc_querycap,
 
@@ -700,6 +703,7 @@ static const struct v4l2_ioctl_ops vim2m_ioctl_ops = {
 	.vidioc_subscribe_event = v4l2_ctrl_subscribe_event,
 	.vidioc_unsubscribe_event = v4l2_event_unsubscribe,
 };
+
 
 /*
  * Queue operations

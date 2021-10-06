@@ -12,3 +12,6 @@ void i2c_outbyte(unsigned char x);
 unsigned char i2c_inbyte(void);
 int i2c_getack(void);
 void i2c_sendack(void);
+
+
+

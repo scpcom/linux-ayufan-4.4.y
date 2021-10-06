@@ -327,6 +327,7 @@ struct task_struct *__sched __switch_to(struct task_struct *prev,
 		prev->thread.fpu_context->needs_restore = true;
 #endif
 
+
 	from = __TBISwitch(to, &prev->thread.kernel_context);
 
 	/* Restore TLS pointer for this process. */

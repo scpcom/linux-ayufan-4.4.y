@@ -43,6 +43,7 @@ struct drm_buffer {
 	char *data[];
 };
 
+
 /**
  * Return the index of page that buffer is currently pointing at.
  */

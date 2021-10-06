@@ -41,6 +41,7 @@
 #define FLT_LOAD        0
 #define FLT_STORE       1
 
+
 /*
  * Canonical page fault handler
  */
@@ -177,6 +178,7 @@ no_context:
 		"virtual address 0x%08lx, regs %p\n", address, regs);
 	die("Bad Kernel VA", regs, SIGKILL);
 }
+
 
 void read_protection_fault(struct pt_regs *regs)
 {

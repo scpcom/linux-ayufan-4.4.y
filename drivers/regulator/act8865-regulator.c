@@ -123,6 +123,7 @@
 #define	ACT8865_ENA		0x80	/* ON - [7] */
 #define	ACT8865_VSEL_MASK	0x3F	/* VSET - [5:0] */
 
+
 #define ACT8600_LDO10_ENA		0x40	/* ON - [6] */
 #define ACT8600_SUDCDC_VSEL_MASK	0xFF	/* SUDCDC VSET - [7:0] */
 

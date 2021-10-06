@@ -73,6 +73,7 @@ struct pci_controller {
 	void *platform_data;
 };
 
+
 #define PCI_CONTROLLER(busdev) ((struct pci_controller *) busdev->sysdata)
 #define pci_domain_nr(busdev)    (PCI_CONTROLLER(busdev)->segment)
 

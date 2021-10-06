@@ -132,3 +132,4 @@ extern int ixp4xx_setup(int nr, struct pci_sys_data *sys);
 extern struct pci_ops ixp4xx_ops;
 
 #endif // __ASSEMBLY__
+

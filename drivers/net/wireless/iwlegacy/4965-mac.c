@@ -1427,6 +1427,7 @@ il4965_hdl_c_stats(struct il_priv *il, struct il_rx_buf *rxb)
 	il4965_hdl_stats(il, rxb);
 }
 
+
 /*
  * mac80211 queues, ACs, hardware queues, FIFOs.
  *
@@ -5481,6 +5482,7 @@ il4965_down(struct il_priv *il)
 
 	il4965_cancel_deferred_work(il);
 }
+
 
 static void
 il4965_set_hw_ready(struct il_priv *il)

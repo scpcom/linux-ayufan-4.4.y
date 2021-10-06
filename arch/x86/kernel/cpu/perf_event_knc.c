@@ -115,6 +115,7 @@ static const u64 __initconst knc_hw_cache_event_ids
  },
 };
 
+
 static u64 knc_pmu_event_map(int hw_event)
 {
 	return knc_perfmon_event_map[hw_event];
@@ -268,6 +269,7 @@ done:
 
 	return handled;
 }
+
 
 PMU_FORMAT_ATTR(event,	"config:0-7"	);
 PMU_FORMAT_ATTR(umask,	"config:8-15"	);

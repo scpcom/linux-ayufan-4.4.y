@@ -185,6 +185,7 @@ static void capiminor_del_all_ack(struct capiminor *mp)
 	}
 }
 
+
 /* -------- struct capiminor ---------------------------------------- */
 
 static void capiminor_destroy(struct tty_port *port)
@@ -1398,6 +1399,7 @@ static void __exit proc_exit(void)
 }
 
 /* -------- init function and module interface ---------------------- */
+
 
 static int __init capi_init(void)
 {

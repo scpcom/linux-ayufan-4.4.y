@@ -20,6 +20,7 @@
 
 #include "fpu_emu.h"
 
+
 .text
 ENTRY(round_Xsig)
 	pushl	%ebp
@@ -78,6 +79,9 @@ L_exit:
 	leave
 	ret
 
+
+
+
 ENTRY(norm_Xsig)
 	pushl	%ebp
 	movl	%esp,%ebp
@@ -134,3 +138,4 @@ L_n_exit:
 	popl	%ebx
 	leave
 	ret
+

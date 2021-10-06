@@ -2326,6 +2326,7 @@ static s32 igb_check_polarity_82580(struct e1000_hw *hw)
 	s32 ret_val;
 	u16 data;
 
+
 	ret_val = phy->ops.read_reg(hw, I82580_PHY_STATUS_2, &data);
 
 	if (!ret_val)

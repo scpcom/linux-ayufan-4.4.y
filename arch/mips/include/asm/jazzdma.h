@@ -52,6 +52,7 @@ typedef volatile struct VDMA_PGTBL_ENTRY {
 	unsigned int owner;		/* owner of this entry (0=free) */
 } VDMA_PGTBL_ENTRY;
 
+
 /*
  * DMA channel control registers
  * in the R4030 MCT_ADR chip

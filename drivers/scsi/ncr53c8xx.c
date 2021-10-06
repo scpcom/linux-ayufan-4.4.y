@@ -575,6 +575,7 @@ static struct ncr_driver_setup
 #define initverbose (driver_setup.verbose)
 #define bootverbose (np->verbose)
 
+
 /*===================================================================
 **
 **	Driver setup from the boot command line
@@ -838,6 +839,7 @@ static int device_queue_depth(int unit, int target, int lun)
 	}
 	return DEF_DEPTH;
 }
+
 
 /*==========================================================
 **
@@ -1500,6 +1502,7 @@ struct dsb {
 	struct scr_tblmove data[MAX_SCATTER];
 };
 
+
 /*========================================================================
 **
 **      Declaration of structs:     Command control block.
@@ -1583,6 +1586,7 @@ struct ccb {
 };
 
 #define CCB_PHYS(cp,lbl)	(cp->p_ccb + offsetof(struct ccb, lbl))
+
 
 /*========================================================================
 **
@@ -1961,6 +1965,7 @@ static inline char *ncr_name (struct ncb *np)
 {
 	return np->inst_name;
 }
+
 
 /*==========================================================
 **
@@ -3692,6 +3697,7 @@ static void ncr_print_msg(struct ccb *cp, char *label, u_char *msg)
 static u_long div_10M[] =
 	{2*_5M, 3*_5M, 4*_5M, 6*_5M, 8*_5M, 12*_5M, 16*_5M};
 
+
 /*===============================================================
 **
 **	Prepare io register values used by ncr_init() according 
@@ -4050,6 +4056,7 @@ static inline void ncr_flush_done_cmds(struct scsi_cmnd *lcmd)
 **==========================================================
 */
 
+
 static int ncr_prepare_nego(struct ncb *np, struct ccb *cp, u_char *msgptr)
 {
 	struct tcb *tp = &np->target[cp->target];
@@ -4097,6 +4104,8 @@ static int ncr_prepare_nego(struct ncb *np, struct ccb *cp, u_char *msgptr)
 
 	return msglen;
 }
+
+
 
 /*==========================================================
 **
@@ -4405,6 +4414,7 @@ static int ncr_queue_command (struct ncb *np, struct scsi_cmnd *cmd)
 	return DID_OK;
 }
 
+
 /*==========================================================
 **
 **
@@ -4465,6 +4475,7 @@ static void ncr_put_start_queue(struct ncb *np, struct ccb *cp)
 	MEMORY_BARRIER();
 	OUTB (nc_istat, SIGP);
 }
+
 
 static int ncr_reset_scsi_bus(struct ncb *np, int enab_int, int settle_delay)
 {
@@ -5181,6 +5192,7 @@ static void ncr_chip_reset(struct ncb *np, int delay)
 		OUTB (nc_ctest4, MUX);
 }
 
+
 /*==========================================================
 **
 **
@@ -5470,6 +5482,7 @@ static void ncr_getsync(struct ncb *np, u_char sfac, u_char *fakp, u_char *scntl
 	*fakp		= fak - 4;
 	*scntl3p	= ((div+1) << 4) + (sfac < 25 ? 0x80 : 0);
 }
+
 
 /*==========================================================
 **
@@ -6125,6 +6138,7 @@ static int ncr_int_sbmc (struct ncb *np)
 
 		np->scsi_mode = scsi_mode;
 
+
 		/*
 		**	Suspend command processing for 1 second and 
 		**	reinitialize all except the chip.
@@ -6187,6 +6201,7 @@ static int ncr_int_par (struct ncb *np)
 		msg = MSG_PARITY_ERROR;
 	else
 		msg = INITIATOR_ERROR;
+
 
 	/*
 	 *	If the NCR stopped on a MOVE ^ DATA_IN, we jump to a 
@@ -6522,6 +6537,7 @@ reset_all:
 	ncr_start_reset(np);
 }
 
+
 static void ncr_sir_to_redo(struct ncb *np, int num, struct ccb *cp)
 {
 	struct scsi_cmnd *cmd	= cp->cmd;
@@ -6662,6 +6678,7 @@ out:
 	OUTONB_STD ();
 	return;
 }
+
 
 /*==========================================================
 **
@@ -7288,6 +7305,7 @@ static void ncr_free_ccb (struct ncb *np, struct ccb *cp)
 #endif
 }
 
+
 #define ncr_reg_bus_addr(r) (np->paddr + offsetof (struct ncr_reg, r))
 
 /*------------------------------------------------------------------------
@@ -7327,6 +7345,7 @@ static void ncr_init_ccb(struct ncb *np, struct ccb *cp)
 	cp->start.schedule.l_paddr   = cpu_to_scr(NCB_SCRIPT_PHYS (np, idle));
 	cp->restart.schedule.l_paddr = cpu_to_scr(NCB_SCRIPTH_PHYS (np, abort));
 }
+
 
 /*------------------------------------------------------------------------
 **	Allocate a CCB and initialize its fixed part.
@@ -7372,6 +7391,7 @@ static void ncr_alloc_ccb(struct ncb *np, u_char tn, u_char ln)
 **
 **==========================================================
 */
+
 
 /*------------------------------------------------------------------------
 **	Target control block initialisation.
@@ -7459,6 +7479,7 @@ static void ncr_init_tcb (struct ncb *np, u_char tn)
 		 offsetof(struct tcb    , wval    )) &3) != 0);
 #endif
 }
+
 
 /*------------------------------------------------------------------------
 **	Lun control block allocation and initialization.
@@ -7548,6 +7569,7 @@ fail:
 	return lp;
 }
 
+
 /*------------------------------------------------------------------------
 **	Lun control block setup on INQUIRY data received.
 **------------------------------------------------------------------------
@@ -7587,6 +7609,7 @@ static struct lcb *ncr_setup_lcb (struct ncb *np, struct scsi_device *sdev)
 		lp->tags_stime = jiffies + 3*HZ;
 		ncr_setup_tags (np, sdev);
 	}
+
 
 fail:
 	return lp;
@@ -7818,6 +7841,7 @@ static void ncr_selectclock(struct ncb *np, u_char scntl3)
 	OUTB(nc_stest1, (DBLEN|DBLSEL));/* Select clock multiplier	*/
 	OUTB(nc_stest3, 0x00);		/* Restart scsi clock 		*/
 }
+
 
 /*
  *	calculate NCR SCSI clock frequency (in KHz)
@@ -8135,6 +8159,7 @@ out:
 }
 #endif
 
+
 /*
 **	Scsi command waiting list management.
 **
@@ -8255,6 +8280,7 @@ static int __init ncr53c8xx_setup(char *str)
 
 __setup("ncr53c8xx=", ncr53c8xx_setup);
 #endif
+
 
 /*
  *	Host attach and initialisations.
@@ -8496,6 +8522,7 @@ struct Scsi_Host * __init ncr_attach(struct scsi_host_template *tpnt,
 
 	return NULL;
 }
+
 
 void ncr53c8xx_release(struct Scsi_Host *host)
 {

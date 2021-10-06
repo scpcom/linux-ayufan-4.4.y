@@ -703,6 +703,7 @@ static int ipgre_tunnel_ioctl(struct net_device *dev,
    It allows to construct virtual multiprotocol broadcast "LAN"
    over the Internet, provided multicast routing is tuned.
 
+
    I have no idea was this bicycle invented before me,
    so that I had to set ARPHRD_IPGRE to a random value.
    I have an impression, that Cisco could make something similar,

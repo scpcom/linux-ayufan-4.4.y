@@ -1,7 +1,10 @@
 #ifndef WILC_WLAN_H
 #define WILC_WLAN_H
 
+
+
 #define ISWILC1000(id)   (((id & 0xfffff000) == 0x100000) ? 1 : 0)
+
 
 /********************************************
  *
@@ -112,6 +115,7 @@
 #define rHAVE_XTAL_24_BIT            (6)
 #define rHAVE_DISABLE_WILC_UART_BIT   (7)
 
+
 #define WILC_HAVE_SDIO_IRQ_GPIO       (1 << rHAVE_SDIO_IRQ_GPIO_BIT)
 #define WILC_HAVE_USE_PMU             (1 << rHAVE_USE_PMU_BIT)
 #define WILC_HAVE_SLEEP_CLK_SRC_RTC   (1 << rHAVE_SLEEP_CLK_SRC_RTC_BIT)
@@ -120,6 +124,7 @@
 #define WILC_HAVE_LEGACY_RF_SETTINGS  (1 << rHAVE_LEGACY_RF_SETTINGS_BIT)
 #define WILC_HAVE_XTAL_24             (1 << rHAVE_XTAL_24_BIT)
 #define WILC_HAVE_DISABLE_WILC_UART    (1 << rHAVE_DISABLE_WILC_UART_BIT)
+
 
 /********************************************
  *
@@ -142,6 +147,7 @@
 #else
 #define WILC_PLL_TO	2
 #endif
+
 
 #define ABORT_INT   BIT(31)
 
@@ -204,6 +210,7 @@
 
 #define ENABLE_RX_VMM   (SEL_VMM_TBL1 | EN_VMM)
 #define ENABLE_TX_VMM   (SEL_VMM_TBL0 | EN_VMM)
+
 
 /*time for expiring the semaphores of cfg packets*/
 #define CFG_PKTS_TIMEOUT	2000

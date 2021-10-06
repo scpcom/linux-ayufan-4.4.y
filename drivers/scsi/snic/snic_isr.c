@@ -26,6 +26,7 @@
 #include "snic_io.h"
 #include "snic.h"
 
+
 /*
  * snic_isr_msix_wq : MSIx ISR for work queue.
  */
@@ -82,6 +83,7 @@ snic_isr_msix_err_notify(int irq, void *data)
 
 	return IRQ_HANDLED;
 } /* end of snic_isr_msix_err_notify */
+
 
 void
 snic_free_intr(struct snic *snic)

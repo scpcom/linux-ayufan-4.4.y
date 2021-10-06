@@ -1001,6 +1001,7 @@ int vivid_vid_out_s_fbuf(struct file *file, void *fh,
 				     V4L2_FBUF_FLAG_LOCAL_ALPHA |
 				     V4L2_FBUF_FLAG_LOCAL_INV_ALPHA;
 
+
 	if ((a->flags & chroma_flags) == chroma_flags)
 		return -EINVAL;
 	switch (a->flags & alpha_flags) {

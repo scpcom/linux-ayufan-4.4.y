@@ -45,6 +45,7 @@
 #define KN02CA_IO_INR_AB_XMIT	1	/* ACCESS.bus transmit */
 #define KN02CA_IO_INR_AB_RECV	0	/* ACCESS.bus receive */
 
+
 /*
  * Memory Error Register bits.
  */

@@ -303,6 +303,7 @@ static PyObject *get_field_numeric_entry(struct event_format *event,
 	return obj;
 }
 
+
 static PyObject *python_process_callchain(struct perf_sample *sample,
 					 struct perf_evsel *evsel,
 					 struct addr_location *al)
@@ -324,6 +325,7 @@ static PyObject *python_process_callchain(struct perf_sample *sample,
 	}
 	callchain_cursor_commit(&callchain_cursor);
 
+
 	while (1) {
 		PyObject *pyelem;
 		struct callchain_cursor_node *node;
@@ -334,6 +336,7 @@ static PyObject *python_process_callchain(struct perf_sample *sample,
 		pyelem = PyDict_New();
 		if (!pyelem)
 			Py_FatalError("couldn't create Python dictionary");
+
 
 		pydict_set_item_string_decref(pyelem, "ip",
 				PyLong_FromUnsignedLongLong(node->ip));
@@ -375,6 +378,7 @@ static PyObject *python_process_callchain(struct perf_sample *sample,
 exit:
 	return pylist;
 }
+
 
 static void python_process_tracepoint(struct perf_sample *sample,
 				      struct perf_evsel *evsel,

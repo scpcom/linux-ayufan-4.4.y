@@ -224,6 +224,7 @@ static void __init misaligned_calc_reg_offsets(void)
 	}
 }
 
+
 static int __init misaligned_init(void)
 {
 	/* default mode - silent fix */

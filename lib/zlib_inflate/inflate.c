@@ -84,6 +84,7 @@ static void zlib_fixedtables(struct inflate_state *state)
     state->distbits = 5;
 }
 
+
 /*
    Update the window with the last wsize (normally 32K) bytes written before
    returning. This is only called when a window is already in use, or when
@@ -128,6 +129,7 @@ static void zlib_updatewindow(z_streamp strm, unsigned out)
         }
     }
 }
+
 
 /*
  * At the end of a Deflate-compressed PPP packet, we expect to have seen

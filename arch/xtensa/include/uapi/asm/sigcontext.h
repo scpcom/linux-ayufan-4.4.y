@@ -11,6 +11,7 @@
 #ifndef _XTENSA_SIGCONTEXT_H
 #define _XTENSA_SIGCONTEXT_H
 
+
 struct sigcontext {
 	unsigned long sc_pc;
 	unsigned long sc_ps;

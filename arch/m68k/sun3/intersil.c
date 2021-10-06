@@ -17,6 +17,7 @@
 #include <asm/rtc.h>
 #include <asm/intersil.h>
 
+
 /* bits to set for start/run of the intersil */
 #define STOP_VAL (INTERSIL_STOP | INTERSIL_INT_ENABLE | INTERSIL_24H_MODE)
 #define START_VAL (INTERSIL_RUN | INTERSIL_INT_ENABLE | INTERSIL_24H_MODE)
@@ -26,6 +27,7 @@ u32 sun3_gettimeoffset(void)
 {
   return 1000;
 }
+
 
 /* get/set hwclock */
 
@@ -69,3 +71,4 @@ int sun3_hwclk(int set, struct rtc_time *t)
 	return 0;
 
 }
+

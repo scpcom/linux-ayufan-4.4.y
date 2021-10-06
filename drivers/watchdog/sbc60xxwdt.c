@@ -65,6 +65,7 @@
 #include <linux/io.h>
 #include <linux/uaccess.h>
 
+
 #define OUR_NAME "sbc60xxwdt"
 #define PFX OUR_NAME ": "
 

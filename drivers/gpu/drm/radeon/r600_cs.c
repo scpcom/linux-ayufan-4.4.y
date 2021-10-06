@@ -34,6 +34,7 @@
 static int r600_nomm;
 extern void r600_cs_legacy_get_tiling_conf(struct drm_device *dev, u32 *npipes, u32 *nbanks, u32 *group_size);
 
+
 struct r600_cs_track {
 	/* configuration we miror so that we use same code btw kms/ums */
 	u32			group_size;
@@ -523,6 +524,7 @@ static int r600_cs_track_validate_db(struct radeon_cs_parser *p)
 	struct array_mode_checker array_check;
 	int array_mode;
 	volatile u32 *ib = p->ib.ptr;
+
 
 	if (track->db_bo == NULL) {
 		dev_warn(p->dev, "z/stencil with no depth buffer\n");

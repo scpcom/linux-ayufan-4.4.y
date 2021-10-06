@@ -35,6 +35,7 @@
 #include "clearstate_si.h"
 #include "radeon_ucode.h"
 
+
 MODULE_FIRMWARE("radeon/TAHITI_pfp.bin");
 MODULE_FIRMWARE("radeon/TAHITI_me.bin");
 MODULE_FIRMWARE("radeon/TAHITI_ce.bin");

@@ -626,6 +626,7 @@ static void disconnect_work(struct work_struct *work)
 
 static DECLARE_WORK(cfg80211_disconnect_work, disconnect_work);
 
+
 /*
  * API calls for drivers implementing connect/disconnect and
  * SME event handling

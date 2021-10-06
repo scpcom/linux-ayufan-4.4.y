@@ -21,6 +21,7 @@
  * Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
+
  /*
   * The i.MX21 USB hardware contains
   *    * 32 transfer descriptors (called ETDs)
@@ -78,6 +79,7 @@ static inline struct imx21 *hcd_to_imx21(struct usb_hcd *hcd)
 {
 	return (struct imx21 *)hcd->hcd_priv;
 }
+
 
 /* =========================================== */
 /* Hardware access helpers			*/
@@ -220,6 +222,7 @@ static void free_etd(struct imx21 *imx21, int num)
 	reset_etd(imx21, num);
 	memset(&imx21->etd[num], 0, sizeof(imx21->etd[0]));
 }
+
 
 static void setup_etd_dword0(struct imx21 *imx21,
 	int etd_num, struct urb *urb,  u8 dir, u16 maxpacket)
@@ -470,6 +473,7 @@ static void free_epdmem(struct imx21 *imx21, struct usb_host_endpoint *ep)
 	}
 }
 
+
 /* ===========================================	*/
 /* End handling 				*/
 /* ===========================================	*/
@@ -551,6 +555,7 @@ static void nonisoc_urb_completed_for_etd(
 		schedule_nonisoc_etd(imx21, urb);
 	}
 }
+
 
 /* ===========================================	*/
 /* ISOC Handling ... 				*/
@@ -1140,6 +1145,7 @@ static void nonisoc_etd_done(struct usb_hcd *hcd, int etd_num)
 	}
 }
 
+
 static struct ep_priv *alloc_ep(void)
 {
 	int i;
@@ -1318,6 +1324,7 @@ static void process_etds(struct usb_hcd *hcd, struct imx21 *imx21, int sof)
 		u32 done = readl(imx21->regs + USBH_ETDDONESTAT) & etd_mask;
 		struct etd_priv *etd = &imx21->etd[etd_num];
 
+
 		if (done) {
 			DEBUG_LOG_FRAME(imx21, etd, last_int);
 		} else {
@@ -1395,6 +1402,7 @@ static void process_etds(struct usb_hcd *hcd, struct imx21 *imx21, int sof)
 		set_register_bits(imx21, USBH_SYSIEN, USBH_SYSIEN_SOFINT);
 	else
 		clear_register_bits(imx21, USBH_SYSIEN, USBH_SYSIEN_SOFINT);
+
 
 	spin_unlock_irqrestore(&imx21->lock, flags);
 }
@@ -1707,6 +1715,7 @@ static int imx21_hc_start(struct usb_hcd *hcd)
 	if (imx21->pdata->otg_ext_xcvr)
 		usb_control |= USBCTRL_OTC_RCV_RXDP;
 
+
 	spin_lock_irqsave(&imx21->lock, flags);
 
 	writel((USBOTG_CLK_CTRL_HST | USBOTG_CLK_CTRL_MAIN),
@@ -1737,6 +1746,7 @@ static int imx21_hc_start(struct usb_hcd *hcd)
 	if (imx21->pdata->enable_host2)
 		writel(USBH_PORTSTAT_PRTPWRST | USBH_PORTSTAT_PRTENABST,
 			imx21->regs + USBH_PORTSTAT(2));
+
 
 	hcd->state = HC_STATE_RUNNING;
 
@@ -1823,6 +1833,7 @@ static int imx21_remove(struct platform_device *pdev)
 	kfree(hcd);
 	return 0;
 }
+
 
 static int imx21_probe(struct platform_device *pdev)
 {

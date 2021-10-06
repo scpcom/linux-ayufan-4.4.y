@@ -440,6 +440,7 @@
 #define		FEAT_NEON		0
 #define		FEAT_NEON_NONE		1
 
+
 #ifndef __ASSEMBLY__
 #ifdef CONFIG_ARCH_OMAP2PLUS
 extern u8 omap_ctrl_readb(u16 offset);
@@ -480,3 +481,4 @@ void __init omap3_control_legacy_iomap_init(void);
 #endif	/* __ASSEMBLY__ */
 
 #endif /* __ARCH_ARM_MACH_OMAP2_CONTROL_H */
+

@@ -212,6 +212,7 @@ SMbuf* smt_get_mbuf(struct s_smc *smc);
 	-------------------------------------------------------------
 */
 
+
 /*
  *	BEGIN_MANUAL_ENTRY(mac_drv_check_space)
  *	u_int mac_drv_check_space()
@@ -481,6 +482,7 @@ void init_fddi_driver(struct s_smc *smc, u_char *mac_addr)
 	init_plc(smc) ;
 }
 
+
 SMbuf *smt_get_mbuf(struct s_smc *smc)
 {
 	register SMbuf	*mb ;
@@ -528,6 +530,7 @@ void smt_free_mbuf(struct s_smc *smc, SMbuf *mb)
 	else
 		SMT_PANIC(smc,HWM_E0003,HWM_E0003_MSG) ;
 }
+
 
 /*
  *	BEGIN_MANUAL_ENTRY(mac_drv_repair_descr)
@@ -672,6 +675,7 @@ static u_long repair_rxd_ring(struct s_smc *smc, struct s_smt_rx_queue *queue)
 	}
 	return phys;
 }
+
 
 /*
 	-------------------------------------------------------------
@@ -884,6 +888,7 @@ void fddi_isr(struct s_smc *smc)
 	smc->os.hwm.isr_flag = FALSE ;
 	NDD_TRACE("CH0E",0,0,0) ;
 }
+
 
 /*
 	-------------------------------------------------------------
@@ -1511,6 +1516,7 @@ void mac_drv_clear_rx_queue(struct s_smc *smc)
 	}
 }
 
+
 /*
 	-------------------------------------------------------------
 	SEND FUNCTIONS:
@@ -1720,6 +1726,7 @@ void hwm_tx_frag(struct s_smc *smc, char far *virt, u_long phys, int len,
 	}
 	NDD_TRACE("THfE",t,queue->tx_free,0) ;
 }
+
 
 /*
  * queues a receive for later send
@@ -2078,6 +2085,7 @@ void mac_drv_clear_tx_queue(struct s_smc *smc)
 		queue->tx_curr_get = queue->tx_curr_put ;
 	}
 }
+
 
 /*
 	-------------------------------------------------------------

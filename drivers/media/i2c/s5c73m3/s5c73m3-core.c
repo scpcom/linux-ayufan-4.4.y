@@ -501,6 +501,7 @@ static int s5c73m3_read_fw_version(struct s5c73m3 *state)
 	}
 	state->sensor_fw[S5C73M3_SENSOR_FW_LEN] = '\0';
 
+
 	for (i = 0; i < S5C73M3_SENSOR_TYPE_LEN / 2; i++) {
 		ret = s5c73m3_read(state, offset + 6 + i * 2, data);
 		if (ret < 0)

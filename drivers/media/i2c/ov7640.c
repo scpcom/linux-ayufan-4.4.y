@@ -76,6 +76,7 @@ static int ov7640_probe(struct i2c_client *client,
 	return 0;
 }
 
+
 static int ov7640_remove(struct i2c_client *client)
 {
 	struct v4l2_subdev *sd = i2c_get_clientdata(client);

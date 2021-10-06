@@ -442,6 +442,7 @@
 	ENTRY_SAME(userfaultfd)
 	ENTRY_SAME(mlock2)		/* 345 */
 
+
 .ifne (. - 90b) - (__NR_Linux_syscalls * (91b - 90b))
 .error "size of syscall table does not fit value of __NR_Linux_syscalls"
 .endif

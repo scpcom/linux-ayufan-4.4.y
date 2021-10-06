@@ -130,6 +130,7 @@ static inline void ctr_write(unsigned int i, unsigned int val)
 	}
 }
 
+
 static void init_pmc_stop(int ctr)
 {
 	u32 pmlca = (PMLCA_FC | PMLCA_FCS | PMLCA_FCU |
@@ -338,6 +339,7 @@ static void fsl_emb_stop(void)
 
 	mb();
 }
+
 
 static void fsl_emb_handle_interrupt(struct pt_regs *regs,
 				    struct op_counter_config *ctr)

@@ -18,6 +18,7 @@
  *   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
  */
 
+
 #ifndef __AWACS_H
 #define __AWACS_H
 
@@ -199,5 +200,6 @@ struct awacs_regs {
 #define RATE_7350	(0x7 << 8)	/* 7.35 kHz */
 
 #define RATE_LOW	1	/* HIGH = 48kHz, etc;  LOW = 44.1kHz, etc. */
+
 
 #endif /* __AWACS_H */

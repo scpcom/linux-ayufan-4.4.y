@@ -150,6 +150,7 @@ static int octeon_l2c_probe(struct platform_device *pdev)
 	l2c->mod_name = "octeon-l2c";
 	l2c->ctl_name = "octeon_l2c_err";
 
+
 	if (OCTEON_IS_OCTEON1PLUS()) {
 		union cvmx_l2t_err l2t_err;
 		union cvmx_l2d_err l2d_err;
@@ -174,6 +175,7 @@ static int octeon_l2c_probe(struct platform_device *pdev)
 		pr_err("%s: edac_device_add_device() failed\n", __func__);
 		goto err;
 	}
+
 
 	return 0;
 

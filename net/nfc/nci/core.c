@@ -907,6 +907,7 @@ static int nci_dep_link_down(struct nfc_dev *nfc_dev)
 	return 0;
 }
 
+
 static int nci_transceive(struct nfc_dev *nfc_dev, struct nfc_target *target,
 			  struct sk_buff *skb,
 			  data_exchange_cb_t cb, void *cb_context)

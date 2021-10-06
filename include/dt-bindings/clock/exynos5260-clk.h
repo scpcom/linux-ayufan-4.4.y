@@ -142,6 +142,7 @@
 #define PHYCLK_USBDRD30_UDRD30_PHYCLOCK			124
 #define TOP_NR_CLK					125
 
+
 /* List Of Clocks For CMU_EGL */
 
 #define EGL_FOUT_EGL_PLL				1
@@ -157,6 +158,7 @@
 #define EGL_DOUT_EGL1					11
 #define EGL_NR_CLK					12
 
+
 /* List Of Clocks For CMU_KFC */
 
 #define KFC_FOUT_KFC_PLL				1
@@ -170,6 +172,7 @@
 #define KFC_DOUT_KFC2					9
 #define KFC_DOUT_KFC1					10
 #define KFC_NR_CLK					11
+
 
 /* List Of Clocks For CMU_MIF */
 
@@ -202,6 +205,7 @@
 #define MIF_SCLK_LPDDR3PHY_WRAP_U0			27
 #define MIF_NR_CLK					28
 
+
 /* List Of Clocks For CMU_G3D */
 
 #define G3D_FOUT_G3D_PLL				1
@@ -211,6 +215,7 @@
 #define G3D_CLK_G3D_HPM					5
 #define G3D_CLK_G3D					6
 #define G3D_NR_CLK					7
+
 
 /* List Of Clocks For CMU_AUD */
 
@@ -231,6 +236,7 @@
 #define AUD_SCLK_I2S					15
 #define AUD_NR_CLK					16
 
+
 /* List Of Clocks For CMU_MFC */
 
 #define MFC_MOUT_ACLK_MFC_333_USER			1
@@ -239,6 +245,7 @@
 #define MFC_CLK_SMMU2_MFCM1				4
 #define MFC_CLK_SMMU2_MFCM0				5
 #define MFC_NR_CLK					6
+
 
 /* List Of Clocks For CMU_GSCL */
 
@@ -270,6 +277,7 @@
 #define GSCL_SCLK_CSIS0_WRAP				26
 #define GSCL_NR_CLK					27
 
+
 /* List Of Clocks For CMU_FSYS */
 
 #define FSYS_MOUT_PHYCLK_USBHOST20_PHYCLK_USER		1
@@ -291,6 +299,7 @@
 #define FSYS_PHYCLK_USBDRD30				17
 #define FSYS_PHYCLK_USBHOST20				18
 #define FSYS_NR_CLK					19
+
 
 /* List Of Clocks For CMU_PERI */
 
@@ -362,6 +371,7 @@
 #define PERI_SCLK_PCM1					66
 #define PERI_NR_CLK					67
 
+
 /* List Of Clocks For CMU_DISP */
 
 #define DISP_MOUT_SCLK_HDMI_SPDIF			1
@@ -401,6 +411,7 @@
 #define DISP_MOUT_HDMI_PHY_PIXEL_USER			35
 #define DISP_NR_CLK					36
 
+
 /* List Of Clocks For CMU_G2D */
 
 #define G2D_MOUT_ACLK_G2D_333_USER			1
@@ -416,6 +427,7 @@
 #define G2D_CLK_SMMU_MDMA				11
 #define G2D_CLK_SMMU3_G2D				12
 #define G2D_NR_CLK					13
+
 
 /* List Of Clocks For CMU_ISP */
 

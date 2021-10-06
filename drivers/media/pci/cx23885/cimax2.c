@@ -87,6 +87,7 @@ struct netup_ci_state {
 	unsigned long next_status_checked_time;
 };
 
+
 static int netup_read_i2c(struct i2c_adapter *i2c_adap, u8 addr, u8 reg,
 						u8 *buf, int len)
 {
@@ -369,6 +370,7 @@ static void netup_read_ci_status(struct work_struct *work)
 				"TS config = %02x\n", __func__,
 				state->ci_i2c_addr, 0, buf[0],
 				buf[0]);
+
 
 		if (buf[0] & 1)
 			state->status = DVB_CA_EN50221_POLL_CAM_PRESENT |

@@ -130,6 +130,8 @@ static struct platform_driver pcm030_fabric_driver = {
 
 module_platform_driver(pcm030_fabric_driver);
 
+
 MODULE_AUTHOR("Jon Smirl <jonsmirl@gmail.com>");
 MODULE_DESCRIPTION(DRV_NAME ": mpc5200 pcm030 fabric driver");
 MODULE_LICENSE("GPL");
+

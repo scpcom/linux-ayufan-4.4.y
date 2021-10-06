@@ -949,6 +949,7 @@ static enum event_type __read_token(char **tok)
 
 	*tok = NULL;
 
+
 	ch = __read_char();
 	if (ch < 0)
 		return EVENT_NONE;
@@ -2826,6 +2827,7 @@ process_paren(struct event_format *event, struct print_arg *arg, char **tok)
 	return EVENT_ERROR;
 }
 
+
 static enum event_type
 process_str(struct event_format *event __maybe_unused, struct print_arg *arg,
 	    char **tok)
@@ -4665,6 +4667,7 @@ static int print_ipsa_arg(struct trace_seq *s, const char *ptr, char i,
 		print_ip4_addr(s, i, (unsigned char *) &sa4->sin_addr);
 		if (have_p)
 			trace_seq_printf(s, ":%d", ntohs(sa4->sin_port));
+
 
 	} else if (sa->ss_family == AF_INET6) {
 		struct sockaddr_in6 *sa6 = (struct sockaddr_in6 *) sa;

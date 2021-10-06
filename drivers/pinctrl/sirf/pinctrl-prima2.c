@@ -1129,3 +1129,4 @@ struct sirfsoc_pinctrl_data prima2_pinctrl_data = {
 	(struct sirfsoc_pmx_func *)sirfsoc_pmx_functions,
 	ARRAY_SIZE(sirfsoc_pmx_functions),
 };
+

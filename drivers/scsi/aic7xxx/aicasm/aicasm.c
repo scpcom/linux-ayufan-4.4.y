@@ -563,6 +563,7 @@ output_listing(char *ifilename)
 		 * the rest of the functions.
 		 */
 		
+		
 		for (cur_func = SLIST_FIRST(&patch_functions);
 		     cur_func != NULL && SLIST_NEXT(cur_func, links) != NULL;
 		     cur_func = SLIST_NEXT(cur_func, links), func_count--) {

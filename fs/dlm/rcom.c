@@ -653,3 +653,4 @@ Eshort:
 	log_error(ls, "recovery message %d from %d is too short",
 		  rc->rc_type, nodeid);
 }
+

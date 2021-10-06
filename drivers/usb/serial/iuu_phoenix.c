@@ -173,6 +173,7 @@ static void iuu_rxcmd(struct urb *urb)
 		return;
 	}
 
+
 	memset(port->write_urb->transfer_buffer, IUU_UART_RX, 1);
 	usb_fill_bulk_urb(port->write_urb, port->serial->dev,
 			  usb_sndbulkpipe(port->serial->dev,
@@ -393,6 +394,8 @@ static void iuu_led_activity_off(struct urb *urb)
 			  iuu_rxcmd, port);
 	result = usb_submit_urb(port->write_urb, GFP_ATOMIC);
 }
+
+
 
 static int iuu_clk(struct usb_serial_port *port, int dwFrq)
 {

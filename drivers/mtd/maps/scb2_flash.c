@@ -58,6 +58,7 @@
 #define SCB2_ADDR	0xfff00000
 #define SCB2_WINDOW	0x00100000
 
+
 static void __iomem *scb2_ioaddr;
 static struct mtd_info *scb2_mtd;
 static struct map_info scb2_map = {

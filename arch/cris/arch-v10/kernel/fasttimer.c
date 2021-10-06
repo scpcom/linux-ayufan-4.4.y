@@ -27,6 +27,7 @@
 #include <linux/proc_fs.h>
 #include <linux/seq_file.h>
 
+
 #define DEBUG_LOG_INCLUDED
 #define FAST_TIMER_LOG
 /* #define FAST_TIMER_TEST */
@@ -74,6 +75,7 @@ static unsigned int debug_log_cnt_wrapped;
 #else
 #define DEBUG_LOG(string, value)
 #endif
+
 
 /* The frequencies for index = clkselx number in R_TIMER_CTRL */
 #define NUM_TIMER_FREQ 15
@@ -323,6 +325,7 @@ int del_fast_timer(struct fast_timer * t)
   return ret;
 } /* del_fast_timer */
 
+
 /* Interrupt routines or functions called in interrupt context */
 
 /* Timer 1 interrupt handler */
@@ -466,6 +469,7 @@ static void wake_up_func(unsigned long data)
   wait_queue_head_t *sleep_wait_p = (wait_queue_head_t *)data;
   wake_up(sleep_wait_p);
 }
+
 
 /* Useful API */
 
@@ -791,6 +795,7 @@ static void fast_timer_test(void)
   printk("fast_timer_test() done\n");
 }
 #endif
+
 
 int fast_timer_init(void)
 {

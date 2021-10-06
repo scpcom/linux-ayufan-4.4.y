@@ -166,6 +166,7 @@ out:
 	return pos;
 }
 
+
 /*
  * hfs_clear_vbm_bits()
  *

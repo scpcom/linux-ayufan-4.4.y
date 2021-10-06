@@ -130,6 +130,7 @@ static int is_processor_present(acpi_handle handle)
 	acpi_status status;
 	unsigned long long sta = 0;
 
+
 	status = acpi_evaluate_integer(handle, "_STA", NULL, &sta);
 
 	if (ACPI_SUCCESS(status) && (sta & ACPI_STA_DEVICE_PRESENT))

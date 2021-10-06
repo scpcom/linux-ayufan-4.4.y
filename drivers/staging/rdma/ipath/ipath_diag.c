@@ -335,6 +335,7 @@ static ssize_t ipath_diagpkt_write(struct file *fp,
 	u64 val;
 	u32 l_state, lt_state; /* LinkState, LinkTrainingState */
 
+
 	if (count == sizeof(dp)) {
 		if (copy_from_user(&dp, data, sizeof(dp))) {
 			ret = -EFAULT;

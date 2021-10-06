@@ -69,6 +69,7 @@
 #include <linux/io.h>
 #include <linux/uaccess.h>
 
+
 /*
  * The AMD Elan SC520 timeout value is 492us times a power of 2 (0-7)
  *

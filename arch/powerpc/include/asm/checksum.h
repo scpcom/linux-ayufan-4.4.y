@@ -66,6 +66,7 @@ extern __wsum csum_and_copy_to_user(const void *src, void __user *dst,
 #define csum_partial_copy_nocheck(src, dst, len, sum)   \
         csum_partial_copy_generic((src), (dst), (len), (sum), NULL, NULL)
 
+
 /*
  * turns a 32-bit partial checksum (e.g. from csum_partial) into a
  * 1's complement 16-bit checksum.

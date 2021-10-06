@@ -23,10 +23,12 @@
 #include <sound/pcm_params.h>
 #include "xonar.h"
 
+
 #define GPIO_CS53x1_M_MASK	0x000c
 #define GPIO_CS53x1_M_SINGLE	0x0000
 #define GPIO_CS53x1_M_DOUBLE	0x0004
 #define GPIO_CS53x1_M_QUAD	0x0008
+
 
 void xonar_enable_output(struct oxygen *chip)
 {

@@ -89,6 +89,7 @@ static const struct vmw_user_resource_conv user_shader_conv = {
 const struct vmw_user_resource_conv *user_shader_converter =
 	&user_shader_conv;
 
+
 static const struct vmw_res_func vmw_gb_shader_func = {
 	.res_type = vmw_res_shader,
 	.needs_backup = true,
@@ -148,6 +149,7 @@ static void vmw_hw_shader_destroy(struct vmw_resource *res)
 	else
 		res->id = -1;
 }
+
 
 static int vmw_gb_shader_init(struct vmw_private *dev_priv,
 			      struct vmw_resource *res,
@@ -657,6 +659,8 @@ out_resource_init:
 	return ret;
 }
 
+
+
 /**
  * User-space shader management:
  */
@@ -786,6 +790,7 @@ out:
 	return ret;
 }
 
+
 static struct vmw_resource *vmw_shader_alloc(struct vmw_private *dev_priv,
 					     struct vmw_dma_buffer *buffer,
 					     size_t shader_size,
@@ -834,6 +839,7 @@ static struct vmw_resource *vmw_shader_alloc(struct vmw_private *dev_priv,
 out_err:
 	return ret ? ERR_PTR(ret) : res;
 }
+
 
 static int vmw_shader_define(struct drm_device *dev, struct drm_file *file_priv,
 			     enum drm_vmw_shader_type shader_type_drm,

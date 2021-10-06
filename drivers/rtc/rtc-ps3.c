@@ -25,6 +25,7 @@
 #include <asm/lv1call.h>
 #include <asm/ps3.h>
 
+
 static u64 read_rtc(void)
 {
 	int result;

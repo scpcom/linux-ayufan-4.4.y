@@ -102,3 +102,5 @@ ENTRY(__raw_readsw)
 		strneb	r3, [r1]
 
 		ldmfd	sp!, {r4, r5, r6, pc}
+
+

@@ -146,6 +146,7 @@ void read_persistent_clock(struct timespec *ts)
 	x86_platform.get_wallclock(ts);
 }
 
+
 static struct resource rtc_resources[] = {
 	[0] = {
 		.start	= RTC_PORT(0),

@@ -57,6 +57,7 @@ static u16 llcp_tlv16(u8 *tlv, u8 type)
 	return be16_to_cpu(*((__be16 *)(tlv + 2)));
 }
 
+
 static u8 llcp_tlv_version(u8 *tlv)
 {
 	return llcp_tlv8(tlv, LLCP_TLV_VERSION);

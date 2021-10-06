@@ -64,6 +64,7 @@
 		((hst_mode) & 0x01 || (reset_detect) != 0)
 #define IS_TMO(t)			((t) == 0)
 
+
 enum cyttsp_cmd_bits {
 	CY_CMD_COMPLETE = (1 << 6),
 };

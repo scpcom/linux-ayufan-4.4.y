@@ -86,6 +86,7 @@ static const struct {
 	{MXC4005_RANGE_8G, 38329},
 };
 
+
 static IIO_CONST_ATTR(in_accel_scale_available, "0.009582 0.019164 0.038329");
 
 static struct attribute *mxc4005_attributes[] = {

@@ -276,6 +276,7 @@ static int gigaset_set_line_ctrl(struct cardstate *cs, unsigned cflag)
 	return set_value(cs, 3, val);
 }
 
+
 /*============================================================================*/
 static int gigaset_init_bchannel(struct bc_state *bcs)
 {
@@ -293,6 +294,7 @@ static int gigaset_close_bchannel(struct bc_state *bcs)
 
 static int write_modem(struct cardstate *cs);
 static int send_cb(struct cardstate *cs);
+
 
 /* Write tasklet handler: Continue sending current skb, or send command, or
  * start sending an skb from the send queue.
@@ -388,6 +390,7 @@ static void gigaset_read_int_callback(struct urb *urb)
 	if (r)
 		dev_err(cs->dev, "error %d resubmitting URB\n", -r);
 }
+
 
 /* This callback routine is called when data was transmitted to the device. */
 static void gigaset_write_bulk_callback(struct urb *urb)
@@ -935,6 +938,7 @@ static void __exit usb_gigaset_exit(void)
 	gigaset_freedriver(driver);
 	driver = NULL;
 }
+
 
 module_init(usb_gigaset_init);
 module_exit(usb_gigaset_exit);

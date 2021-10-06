@@ -719,6 +719,7 @@ void rtl92c_set_fw_rsvdpagepkt(struct ieee80211_hw *hw,
 		      "rtl92c_set_fw_rsvdpagepkt(): HW_VAR_SET_TX_CMD: ALL\n",
 		      u1rsvdpageloc, 3);
 
+
 	skb = dev_alloc_skb(totalpacketlen);
 	memcpy((u8 *)skb_put(skb, totalpacketlen),
 	       &reserved_page_packet, totalpacketlen);

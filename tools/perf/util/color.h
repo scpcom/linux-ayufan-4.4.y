@@ -23,6 +23,7 @@
  */
 extern int perf_use_color_default;
 
+
 /*
  * Use this instead of perf_default_config if you need the value of color.ui.
  */

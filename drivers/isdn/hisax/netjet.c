@@ -393,6 +393,8 @@ static void got_frame(struct BCState *bcs, int count) {
 		printframe(bcs->cs, bcs->hw.tiger.rcvbuf, count, "rec");
 }
 
+
+
 static void read_raw(struct BCState *bcs, u_int *buf, int cnt) {
 	int i;
 	register u_char j;
@@ -847,6 +849,7 @@ tiger_l2l1(struct PStack *st, int pr, void *arg)
 	}
 }
 
+
 static void
 close_tigerstate(struct BCState *bcs)
 {
@@ -904,6 +907,7 @@ setstack_tiger(struct PStack *st, struct BCState *bcs)
 	setstack_l1_B(st);
 	return (0);
 }
+
 
 void
 inittiger(struct IsdnCardState *cs)

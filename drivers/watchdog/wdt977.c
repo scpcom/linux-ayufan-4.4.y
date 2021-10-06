@@ -51,6 +51,7 @@
 #define LOCK_DATA	0xAA
 #define DEVICE_REGISTER	0x07
 
+
 #define	DEFAULT_TIMEOUT	60			/* default timeout in seconds */
 
 static	int timeout = DEFAULT_TIMEOUT;
@@ -257,6 +258,7 @@ static int wdt977_get_status(int *status)
 	return 0;
 }
 
+
 /*
  *	/dev/watchdog handling
  */
@@ -290,6 +292,7 @@ static int wdt977_release(struct inode *inode, struct file *file)
 	expect_close = 0;
 	return 0;
 }
+
 
 /*
  *      wdt977_write:

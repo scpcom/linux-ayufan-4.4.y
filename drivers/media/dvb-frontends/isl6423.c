@@ -143,6 +143,7 @@ exit:
 	return err;
 }
 
+
 static int isl6423_set_voltage(struct dvb_frontend *fe,
 			       enum fe_sec_voltage voltage)
 {

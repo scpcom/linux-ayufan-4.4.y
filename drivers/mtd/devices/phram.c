@@ -110,6 +110,7 @@ static int register_device(char *name, phys_addr_t start, size_t len)
 		goto out1;
 	}
 
+
 	new->mtd.name = name;
 	new->mtd.size = len;
 	new->mtd.flags = MTD_CAP_RAM;
@@ -188,6 +189,7 @@ static int parse_name(char **pname, const char *token)
 	return 0;
 }
 
+
 static inline void kill_final_newline(char *str)
 {
 	char *newline = strrchr(str, '\n');
@@ -195,6 +197,7 @@ static inline void kill_final_newline(char *str)
 	if (newline && !newline[1])
 		*newline = 0;
 }
+
 
 #define parse_err(fmt, args...) do {	\
 	pr_err(fmt , ## args);	\
@@ -297,6 +300,7 @@ static int phram_param_call(const char *val, struct kernel_param *kp)
 
 module_param_call(phram, phram_param_call, NULL, NULL, 000);
 MODULE_PARM_DESC(phram, "Memory region to map. \"phram=<name>,<start>,<length>\"");
+
 
 static int __init init_phram(void)
 {

@@ -151,6 +151,7 @@
 #define WK(t)	((((t) % 80) / 4)*32 + ( (t) % 4)*4 + ((t)/80)*16 )(WK_BUF)
 #define PRECALC_WK(t)	((t)*2*2)(PRECALC_BUF)
 
+
 .macro UPDATE_HASH  hash, val
 	add	\hash, \val
 	mov	\val, \hash

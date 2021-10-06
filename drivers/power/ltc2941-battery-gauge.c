@@ -489,6 +489,7 @@ static SIMPLE_DEV_PM_OPS(ltc294x_pm_ops, ltc294x_suspend, ltc294x_resume);
 #define LTC294X_PM_OPS NULL
 #endif /* CONFIG_PM_SLEEP */
 
+
 static const struct i2c_device_id ltc294x_i2c_id[] = {
 	{"ltc2941", LTC2941_NUM_REGS},
 	{"ltc2943", LTC2943_NUM_REGS},

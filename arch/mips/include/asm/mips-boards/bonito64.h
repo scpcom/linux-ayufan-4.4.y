@@ -38,6 +38,7 @@ extern unsigned long _pcictrl_bonito_pcicfg;
 
 #endif /* __ASSEMBLY__ */
 
+
 #define BONITO_BOOT_BASE		0x1fc00000
 #define BONITO_BOOT_SIZE		0x00100000
 #define BONITO_BOOT_TOP			(BONITO_BOOT_BASE+BONITO_BOOT_SIZE-1)
@@ -69,10 +70,12 @@ extern unsigned long _pcictrl_bonito_pcicfg;
 #define BONITO_PCICFG_SIZE		0x00080000
 #define BONITO_PCICFG_TOP		(BONITO_PCICFG_BASE+BONITO_PCICFG_SIZE-1)
 
+
 /* Bonito Register Bases */
 
 #define BONITO_PCICONFIGBASE		0x00
 #define BONITO_REGBASE			0x100
+
 
 /* PCI Configuration  Registers */
 
@@ -98,6 +101,9 @@ extern unsigned long _pcictrl_bonito_pcicfg;
 #define BONITO_PCICMD_SERREN		0x00000100
 #define BONITO_PCILTIMER_BUSLATENCY	0x0000ff00
 #define BONITO_PCILTIMER_BUSLATENCY_SHIFT	8
+
+
+
 
 /* 1. Bonito h/w Configuration */
 /* Power on register */
@@ -129,6 +135,7 @@ extern unsigned long _pcictrl_bonito_pcicfg;
 #define BONITO_BONPONCFG_ROMCS0FAST	0x00000400
 #define BONITO_BONPONCFG_ROMCS1FAST	0x00000800
 #define BONITO_BONPONCFG_CONFIG_DIS	0x00000020
+
 
 /* Other Bonito configuration */
 
@@ -202,6 +209,7 @@ extern unsigned long _pcictrl_bonito_pcicfg;
 #define BONITO_PCIMAIL2			BONITO(BONITO_REGBASE + 0x48)
 #define BONITO_PCIMAIL3			BONITO(BONITO_REGBASE + 0x4c)
 
+
 /* 6. PCI cache */
 
 #define BONITO_PCICACHECTRL		BONITO(BONITO_REGBASE + 0x50)
@@ -209,6 +217,7 @@ extern unsigned long _pcictrl_bonito_pcicfg;
 
 #define BONITO_PCIBADADDR		BONITO(BONITO_REGBASE + 0x58)
 #define BONITO_PCIMSTAT			BONITO(BONITO_REGBASE + 0x5c)
+
 
 /*
 #define BONITO_PCIRDPOST		BONITO(BONITO_REGBASE + 0x60)
@@ -234,6 +243,7 @@ extern unsigned long _pcictrl_bonito_pcicfg;
 #define BONITO_COPPADDR			BONITO(BONITO_COPBASE + 0x4)
 #define BONITO_COPDADDR			BONITO(BONITO_COPBASE + 0x8)
 #define BONITO_COPGO			BONITO(BONITO_COPBASE + 0xc)
+
 
 /* ###### Bit Definitions for individual Registers #### */
 
@@ -402,6 +412,7 @@ extern unsigned long _pcictrl_bonito_pcicfg;
 
 #define BONITO_PCIMEMBASECFG_SIZE(WIN, CFG)  (((((~(CFG)) & BONITO_PCIMEMBASECFG_MEMBASE##WIN##_MASK)) << (BONITO_PCIMEMBASECFG_ASHIFT - BONITO_PCIMEMBASECFG_MEMBASE##WIN##_MASK_SHIFT)) | BONITO_PCIMEMBASECFG_AMASK)
 
+
 #define BONITO_PCIMEMBASECFG_ADDRMASK(WIN, CFG)	 ((((CFG) & BONITO_PCIMEMBASECFG_MEMBASE##WIN##_MASK) >> BONITO_PCIMEMBASECFG_MEMBASE##WIN##_MASK_SHIFT) << BONITO_PCIMEMBASECFG_ASHIFT)
 #define BONITO_PCIMEMBASECFG_ADDRTRANS(WIN, CFG) ((((CFG) & BONITO_PCIMEMBASECFG_MEMBASE##WIN##_TRANS) >> BONITO_PCIMEMBASECFG_MEMBASE##WIN##_TRANS_SHIFT) << BONITO_PCIMEMBASECFG_ASHIFT)
 
@@ -414,5 +425,6 @@ extern unsigned long _pcictrl_bonito_pcicfg;
 
 #define BONITO_PCICMD_MEMEN		0x00000002
 #define BONITO_PCICMD_MSTREN		0x00000004
+
 
 #endif /* _ASM_MIPS_BOARDS_BONITO64_H */

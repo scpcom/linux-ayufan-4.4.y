@@ -250,6 +250,7 @@ struct adp5589_kpad {
  *  ADP5589 / ADP5585 derivative / variant handling
  */
 
+
 /* ADP5589 */
 
 static unsigned char adp5589_bank(unsigned char offset)

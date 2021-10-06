@@ -37,6 +37,7 @@ DEFINE_EVENT_FN(x86_irq_vector, name##_exit,	\
 	trace_irq_vector_regfunc,		\
 	trace_irq_vector_unregfunc);
 
+
 /*
  * local_timer - called when entering/exiting a local timer interrupt
  * vector handler

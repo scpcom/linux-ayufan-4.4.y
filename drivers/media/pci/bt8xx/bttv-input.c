@@ -30,6 +30,7 @@
 #include "bttv.h"
 #include "bttvp.h"
 
+
 static int ir_debug;
 module_param(ir_debug, int, 0644);
 

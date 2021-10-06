@@ -49,9 +49,11 @@
 int gxio_trio_alloc_asids(gxio_trio_context_t *context, unsigned int count,
 			  unsigned int first, unsigned int flags);
 
+
 int gxio_trio_alloc_memory_maps(gxio_trio_context_t *context,
 				unsigned int count, unsigned int first,
 				unsigned int flags);
+
 
 int gxio_trio_alloc_scatter_queues(gxio_trio_context_t *context,
 				   unsigned int count, unsigned int first,
@@ -64,6 +66,7 @@ int gxio_trio_alloc_pio_regions(gxio_trio_context_t *context,
 int gxio_trio_init_pio_region_aux(gxio_trio_context_t *context,
 				  unsigned int pio_region, unsigned int mac,
 				  uint32_t bus_address_hi, unsigned int flags);
+
 
 int gxio_trio_init_memory_map_mmu_aux(gxio_trio_context_t *context,
 				      unsigned int map, unsigned long va,
@@ -84,6 +87,7 @@ int gxio_trio_config_msi_intr(gxio_trio_context_t *context, int inter_x,
 			      unsigned int mac, unsigned int mem_map,
 			      uint64_t mem_map_base, uint64_t mem_map_limit,
 			      unsigned int asid);
+
 
 int gxio_trio_set_mps_mrs(gxio_trio_context_t *context, uint16_t mps,
 			  uint16_t mrs, unsigned int mac);

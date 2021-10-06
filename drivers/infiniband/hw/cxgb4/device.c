@@ -1020,6 +1020,7 @@ static struct c4iw_dev *c4iw_alloc(const struct cxgb4_lld_info *infop)
 		setup_debugfs(devp);
 	}
 
+
 	return devp;
 }
 

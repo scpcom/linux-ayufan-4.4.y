@@ -43,6 +43,7 @@
 #ifndef __RTW_MP_PHY_REGDEF_H_
 #define __RTW_MP_PHY_REGDEF_H_
 
+
 /*--------------------------Define Parameters-------------------------------*/
 
 /*  */
@@ -57,6 +58,7 @@
 /*  4. Bit Mask for BB/RF register */
 /*  5. Other definition for BB/RF R/W */
 /*  */
+
 
 /*  */
 /*  1. PMAC duplicate register due to connection: RF_Mode, TRxRN, NumOf L-STF */
@@ -286,6 +288,7 @@
 #define	rOFDM_RxSNR			0xdd4
 #define	rOFDM_RxEVMCSI			0xdd8
 #define	rOFDM_SIGReport			0xddc
+
 
 /*  */
 /*  8. PageE(0xE00) */
@@ -990,6 +993,7 @@
 #define	bRTL8258_RxLPFBW	  0xc00
 #define	bRTL8258_RSSILPFBW	0xc0
 
+
 /*  */
 /*  Other Definition */
 /*  */
@@ -1075,5 +1079,6 @@
 					 *  packet size greater than 1536 */
 
 /*--------------------------Define Parameters-------------------------------*/
+
 
 #endif	/* __INC_HAL8192SPHYREG_H */

@@ -768,6 +768,7 @@ net2272_kick_dma(struct net2272_ep *ep, struct net2272_request *req)
 		else
 			ep->not_empty = 0;
 
+
 		/* allow the endpoint's buffer to fill */
 		net2272_ep_write(ep, EP_RSPCLR, 1 << ALT_NAK_OUT_PACKETS);
 

@@ -365,6 +365,7 @@ static int rsi_load_radio_caps(struct rsi_common *common)
 						FRAME_DESC_SZ) |
 					       (RSI_WIFI_MGMT_Q << 12));
 
+
 	skb_put(skb, (sizeof(struct rsi_radio_caps)));
 
 	return rsi_send_internal_mgmt_frame(common, skb);
@@ -1239,6 +1240,7 @@ int rsi_send_block_unblock_frame(struct rsi_common *common, bool block_event)
 	return rsi_send_internal_mgmt_frame(common, skb);
 
 }
+
 
 /**
  * rsi_handle_ta_confirm_type() - This function handles the confirm frames.

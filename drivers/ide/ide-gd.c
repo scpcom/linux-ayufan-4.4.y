@@ -249,6 +249,7 @@ static int ide_gd_unlocked_open(struct block_device *bdev, fmode_t mode)
 	return ret;
 }
 
+
 static void ide_gd_release(struct gendisk *disk, fmode_t mode)
 {
 	struct ide_disk_obj *idkp = ide_drv_g(disk, ide_disk_obj);

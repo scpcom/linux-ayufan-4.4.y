@@ -70,6 +70,7 @@ static const struct {
 	[TILFMT_PAGE]  = GEOM(SLOT_WIDTH_BITS, SLOT_HEIGHT_BITS, 1),
 };
 
+
 /* lookup table for registers w/ per-engine instances */
 static const uint32_t reg[][4] = {
 	[PAT_STATUS] = {DMM_PAT_STATUS__0, DMM_PAT_STATUS__1,
@@ -168,6 +169,7 @@ static struct dmm_txn *dmm_txn_init(struct dmm *dmm, struct tcm *tcm)
 	struct refill_engine *engine = NULL;
 	int ret;
 	unsigned long flags;
+
 
 	/* wait until an engine is available */
 	ret = wait_event_interruptible(omap_dmm->engine_queue,
@@ -880,6 +882,7 @@ int tiler_map_show(struct seq_file *s, void *arg)
 	int w_adj;
 	unsigned long flags;
 	int lut_idx;
+
 
 	if (!omap_dmm) {
 		/* early return if dmm/tiler device is not initialized */

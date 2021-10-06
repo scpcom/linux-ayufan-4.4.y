@@ -65,6 +65,7 @@ static struct ivg_slice {
 	struct ivgx *istop;
 } ivg7_13[IVG13 - IVG7 + 1];
 
+
 /*
  * Search SIC_IAR and fill tables with the irqvalues
  * and their positions in the SIC_ISR register.
@@ -478,6 +479,7 @@ void handle_sec_fault(uint32_t sec_gstat)
 			handle_sec_ssi_fault(sec_gstat);
 			break;
 		}
+
 
 	}
 }
@@ -1087,6 +1089,7 @@ int __init init_arch_irq(void)
 		IMASK_IVG14 | IMASK_IVG13 | IMASK_IVG12 | IMASK_IVG11 |
 		IMASK_IVG10 | IMASK_IVG9 | IMASK_IVG8 | IMASK_IVG7 | IMASK_IVGHW;
 
+
 	/* This implicitly covers ANOMALY_05000171
 	 * Boot-ROM code modifies SICA_IWRx wakeup registers
 	 */
@@ -1201,6 +1204,7 @@ int __init init_arch_irq(void)
 	bfin_irq_flags |= IMASK_IVG15 |
 	    IMASK_IVG14 | IMASK_IVG13 | IMASK_IVG12 | IMASK_IVG11 |
 	    IMASK_IVG10 | IMASK_IVG9 | IMASK_IVG8 | IMASK_IVG7 | IMASK_IVGHW;
+
 
 	bfin_write_SEC_FCTL(SEC_FCTL_EN | SEC_FCTL_SYSRST_EN | SEC_FCTL_FLTIN_EN);
 	bfin_sec_enable_sci(BFIN_SYSIRQ(IRQ_WATCH0));

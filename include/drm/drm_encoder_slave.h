@@ -106,6 +106,7 @@ int drm_i2c_encoder_init(struct drm_device *dev,
 			 struct i2c_adapter *adap,
 			 const struct i2c_board_info *info);
 
+
 /**
  * struct drm_i2c_encoder_driver
  *
@@ -158,6 +159,7 @@ static inline void drm_i2c_encoder_unregister(struct drm_i2c_encoder_driver *dri
 
 void drm_i2c_encoder_destroy(struct drm_encoder *encoder);
 
+
 /*
  * Wrapper fxns which can be plugged in to drm_encoder_helper_funcs:
  */
@@ -175,5 +177,6 @@ enum drm_connector_status drm_i2c_encoder_detect(struct drm_encoder *encoder,
 	    struct drm_connector *connector);
 void drm_i2c_encoder_save(struct drm_encoder *encoder);
 void drm_i2c_encoder_restore(struct drm_encoder *encoder);
+
 
 #endif

@@ -193,6 +193,7 @@ static void raid6_2data_recov_ssse3(int disks, size_t bytes, int faila,
 	kernel_fpu_end();
 }
 
+
 static void raid6_datap_recov_ssse3(int disks, size_t bytes, int faila,
 		void **ptrs)
 {

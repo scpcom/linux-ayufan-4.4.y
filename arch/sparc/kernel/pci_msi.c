@@ -90,6 +90,7 @@ static u32 pick_msiq(struct pci_pbm_info *pbm)
 	return ret;
 }
 
+
 static int alloc_msi(struct pci_pbm_info *pbm)
 {
 	int i;

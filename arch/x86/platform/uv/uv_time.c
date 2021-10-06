@@ -284,6 +284,7 @@ static int uv_rtc_unset_timer(int cpu, int force)
 	return rc;
 }
 
+
 /*
  * Kernel interface routines.
  */

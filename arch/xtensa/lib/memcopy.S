@@ -288,6 +288,7 @@ memcpy:
 	s8i	a6, a5,  0
 	retw
 
+
 /*
  * void bcopy(const void *src, void *dest, size_t n);
  */
@@ -565,6 +566,7 @@ memmove:
 	s8i	a6, a5,  0
 	retw
 
+
 /*
  * Local Variables:
  * mode:fundamental

@@ -56,6 +56,7 @@ static int koneplus_send_control(struct usb_device *usb_dev, uint value,
 			&control, sizeof(struct roccat_common2_control));
 }
 
+
 /* retval is 0-4 on success, < 0 on error */
 static int koneplus_get_actual_profile(struct usb_device *usb_dev)
 {

@@ -10,9 +10,11 @@
  *
  */
 
+
 #define DLE 0x10
 #define ETX 0x03
 #define DC4 0x14
+
 
 /*
  * Definition of some special Registers of AT-Emulator

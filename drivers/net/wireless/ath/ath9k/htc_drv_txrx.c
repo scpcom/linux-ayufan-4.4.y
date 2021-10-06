@@ -380,6 +380,7 @@ int ath9k_htc_tx_start(struct ath9k_htc_priv *priv,
 		ath9k_htc_tx_mgmt(priv, avp, skb,
 				  sta_idx, vif_idx, slot);
 
+
 	return htc_send(priv->htc, skb);
 }
 

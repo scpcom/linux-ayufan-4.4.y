@@ -36,6 +36,7 @@
 #define FLUSH_COND_STABLE	32	/* conditional stable write - only stable
 					 * if everything fits in one RPC */
 
+
 /*
  * NFS debug flags
  */
@@ -55,5 +56,6 @@
 #define NFSDBG_PNFS_LD		0x2000
 #define NFSDBG_STATE		0x4000
 #define NFSDBG_ALL		0xFFFF
+
 
 #endif /* _UAPI_LINUX_NFS_FS_H */

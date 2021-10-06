@@ -219,6 +219,7 @@ int setup_avm_a1_pcmcia(struct IsdnCard *card)
 	struct IsdnCardState *cs = card->cs;
 	char tmp[64];
 
+
 	strcpy(tmp, avm_revision);
 	printk(KERN_INFO "HiSax: AVM A1 PCMCIA driver Rev. %s\n",
 	       HiSax_getrev(tmp));
@@ -227,6 +228,7 @@ int setup_avm_a1_pcmcia(struct IsdnCard *card)
 
 	cs->hw.avm.cfg_reg = card->para[1];
 	cs->irq = card->para[0];
+
 
 	byteout(cs->hw.avm.cfg_reg + ASL1_OFFSET, ASL1_W_ENABLE_S0);
 	byteout(cs->hw.avm.cfg_reg + ASL0_OFFSET, 0x00);

@@ -467,3 +467,4 @@ unsigned long from_irq_stack(int nested)
 	mask = xchg(&pending_mask, 0);
 	return mask & ~1;
 }
+

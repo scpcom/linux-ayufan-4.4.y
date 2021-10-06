@@ -17,6 +17,7 @@ enum rt5677_dmic2_clk {
 	RT5677_DMIC_CLK2 = 1,
 };
 
+
 struct rt5677_platform_data {
 	/* IN1/IN2/LOUT1/LOUT2/LOUT3 can optionally be differential */
 	bool in1_diff;

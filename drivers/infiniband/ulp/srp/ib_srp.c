@@ -2193,6 +2193,7 @@ err:
 		srp_free_iu(target->srp_host, ch->tx_ring[i]);
 	}
 
+
 err_no_ring:
 	kfree(ch->tx_ring);
 	ch->tx_ring = NULL;

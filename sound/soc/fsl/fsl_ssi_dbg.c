@@ -92,6 +92,7 @@ void fsl_ssi_dbg_isr(struct fsl_ssi_dbg *dbg, u32 sisr)
 			seq_printf(s, #name "=%u\n", ssi_dbg->stats.name); \
 	} while (0)
 
+
 /**
  * fsl_sysfs_ssi_show: display SSI statistics
  *

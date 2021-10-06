@@ -198,6 +198,7 @@
 #define CRC_SIG			0x00E8	/* Dword offset 0_3A */
 #define CRC2_SIG		0x00E8	/* Dword offset 0_3A */
 
+
 /* GUI MEMORY MAPPED Registers */
 
 /* Draw Engine Destination Trajectory */
@@ -574,6 +575,7 @@
 #define VERTEX_2_SECONDARY_T	0x0738	/* Dword offset 1_CE */
 #define VERTEX_2_SECONDARY_W	0x073C	/* Dword offset 1_CF */
 
+
 #define GTC_3D_RESET_DELAY	3	/* 3D engine reset delay in ms */
 
 /* CRTC control values (mostly CRTC_GEN_CNTL) */
@@ -722,6 +724,8 @@
 #define DAC_FEA_CON_EN          0x00004000
 #define DAC_PDWN                0x00008000
 #define DAC_TYPE_MASK           0x00070000 /* read only */
+
+
 
 /* Mix control values */
 
@@ -937,6 +941,7 @@
 /* ATI PCI constants */
 #define PCI_ATI_VENDOR_ID	0x1002
 
+
 /* CNFG_CHIP_ID register constants */
 #define CFG_CHIP_TYPE		0x0000FFFF
 #define CFG_CHIP_CLASS		0x00FF0000
@@ -944,6 +949,7 @@
 #define CFG_CHIP_MAJOR		0x07000000
 #define CFG_CHIP_FND_ID		0x38000000
 #define CFG_CHIP_MINOR		0xC0000000
+
 
 /* Chip IDs read from CNFG_CHIP_ID */
 

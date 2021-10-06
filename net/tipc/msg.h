@@ -57,6 +57,7 @@ struct plist;
  */
 #define TIPC_SYSTEM_IMPORTANCE	4
 
+
 /*
  * Payload message types
  */
@@ -322,6 +323,7 @@ static inline void msg_set_bcast_ack(struct tipc_msg *m, u16 n)
 {
 	msg_set_bits(m, 1, 0, 0xffff, n);
 }
+
 
 /*
  * Word 2
@@ -590,6 +592,7 @@ static inline void msg_set_bcgap_to(struct tipc_msg *m, u32 n)
 	msg_set_bits(m, 2, 0, 0xffff, n);
 }
 
+
 /*
  * Word 4
  */
@@ -612,6 +615,7 @@ static inline void msg_set_fragm_no(struct tipc_msg *m, u32 n)
 {
 	msg_set_bits(m, 4, 16, 0xffff, n);
 }
+
 
 static inline u16 msg_next_sent(struct tipc_msg *m)
 {

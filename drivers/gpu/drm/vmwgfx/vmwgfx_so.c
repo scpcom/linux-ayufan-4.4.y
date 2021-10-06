@@ -513,8 +513,10 @@ const SVGACOTableType vmw_so_cotables[] = {
 	[vmw_so_so] = SVGA_COTABLE_STREAMOUTPUT
 };
 
+
 /* To remove unused function warning */
 static void vmw_so_build_asserts(void) __attribute__((used));
+
 
 /*
  * This function is unused at run-time, and only used to dump various build

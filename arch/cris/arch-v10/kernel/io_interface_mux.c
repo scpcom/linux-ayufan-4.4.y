@@ -2,6 +2,7 @@
  * Copyright 2004-2007, Axis Communications AB
  */
 
+
 /* C.f. ETRAX100LX Designer's Reference chapter 19.9 */
 
 #include <linux/kernel.h>
@@ -14,6 +15,7 @@
 #include <asm/io.h>
 #include <arch/io_interface_mux.h>
 #include <arch/system.h>
+
 
 #define DBG(s)
 
@@ -39,6 +41,7 @@ struct watcher
 	struct watcher *next;
 };
 
+
 struct if_group
 {
 	enum io_if_group        group;
@@ -49,6 +52,7 @@ struct if_group
 	 * distinction is made between in, out and in/out pins. */
 	unsigned int            used;
 };
+
 
 struct interface
 {
@@ -557,6 +561,7 @@ static unsigned char clear_group_from_set(const unsigned char groups, struct if_
 	return (groups & ~group->group);
 }
 
+
 static struct if_group *get_group(const unsigned char groups)
 {
 	int i;
@@ -567,6 +572,7 @@ static struct if_group *get_group(const unsigned char groups)
 	}
 	return NULL;
 }
+
 
 static void notify_watchers(void)
 {
@@ -582,6 +588,7 @@ static void notify_watchers(void)
 		w = w->next;
 	}
 }
+
 
 int cris_request_io_interface(enum cris_io_interface ioif, const char *device_id)
 {
@@ -840,6 +847,7 @@ exit:
 	return res;
 }
 
+
 void cris_free_io_interface(enum cris_io_interface ioif)
 {
 	struct if_group *grp;
@@ -926,6 +934,7 @@ static inline unsigned int create_mask(const unsigned stop_bit)
 	return (1<<stop_bit)-1;
 }
 
+
 /* port can be 'a', 'b' or 'g' */
 int cris_io_interface_allocate_pins(const enum cris_io_interface ioif,
 				    const char port,
@@ -998,6 +1007,7 @@ int cris_io_interface_allocate_pins(const enum cris_io_interface ioif,
 	notify_watchers();
 	return 0;
 }
+
 
 /* port can be 'a', 'b' or 'g' */
 int cris_io_interface_free_pins(const enum cris_io_interface ioif,
@@ -1084,6 +1094,7 @@ int cris_io_interface_free_pins(const enum cris_io_interface ioif,
         return 0;
 }
 
+
 int cris_io_interface_register_watcher(void (*notify)(const unsigned int gpio_in_available,
                                                       const unsigned int gpio_out_available,
                                                       const unsigned char pa_available,
@@ -1137,6 +1148,7 @@ void cris_io_interface_delete_watcher(void (*notify)(const unsigned int gpio_in_
 	printk(KERN_WARNING "cris_io_interface_delete_watcher: Deleting unknown watcher 0x%p\n", notify);
 }
 
+
 static int cris_io_interface_init(void)
 {
 	static int first = 1;
@@ -1158,7 +1170,9 @@ static int cris_io_interface_init(void)
 	return 0;
 }
 
+
 module_init(cris_io_interface_init);
+
 
 EXPORT_SYMBOL(cris_request_io_interface);
 EXPORT_SYMBOL(cris_free_io_interface);

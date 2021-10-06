@@ -265,6 +265,7 @@ void exynos_mipi_dsi_enable_lane(struct mipi_dsim_device *dsim, unsigned int lan
 	writel(reg, dsim->reg_base + EXYNOS_DSIM_CONFIG);
 }
 
+
 void exynos_mipi_dsi_set_data_lane_number(struct mipi_dsim_device *dsim,
 	unsigned int count)
 {

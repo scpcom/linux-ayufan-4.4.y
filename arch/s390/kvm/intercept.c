@@ -24,6 +24,7 @@
 #include "trace.h"
 #include "trace-s390.h"
 
+
 static const intercept_handler_t instruction_handlers[256] = {
 	[0x01] = kvm_s390_handle_01,
 	[0x82] = kvm_s390_handle_lpsw,

@@ -21,6 +21,7 @@
 #include <linux/atomic.h>
 #include <linux/perf_event.h>
 
+
 #ifdef CONFIG_PPC_EMULATED_STATS
 
 struct ppc_emulated_entry {

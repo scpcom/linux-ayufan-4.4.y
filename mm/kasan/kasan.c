@@ -60,6 +60,7 @@ void kasan_unpoison_shadow(const void *address, size_t size)
 	}
 }
 
+
 /*
  * All functions below always inlined so compiler could
  * perform better optimizations in each of __asan_loadX/__assn_storeX
@@ -250,6 +251,7 @@ static __always_inline bool memory_is_poisoned(unsigned long addr, size_t size)
 
 	return memory_is_poisoned_n(addr, size);
 }
+
 
 static __always_inline void check_memory_region(unsigned long addr,
 						size_t size, bool write)

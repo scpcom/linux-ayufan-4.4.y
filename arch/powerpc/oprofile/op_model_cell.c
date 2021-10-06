@@ -598,6 +598,7 @@ static void spu_evnt_swap(unsigned long data)
 	int ret;
 	u32 interrupt_mask;
 
+
 	/* enable interrupts on cntr 0 */
 	interrupt_mask = CBE_PM_CTR_OVERFLOW_INTR(0);
 
@@ -836,6 +837,7 @@ static int cell_reg_setup_ppu(struct op_counter_config *ctr,
 	return 0;
 }
 
+
 /* This function is called once for all cpus combined */
 static int cell_reg_setup(struct op_counter_config *ctr,
 			struct op_system_config *sys, int num_ctrs)
@@ -891,6 +893,8 @@ static int cell_reg_setup(struct op_counter_config *ctr,
 
 	return ret;
 }
+
+
 
 /* This function is called once for each cpu */
 static int cell_cpu_setup(struct op_counter_config *cntr)
@@ -1303,6 +1307,7 @@ static int cell_global_start_spu_cycles(struct op_counter_config *ctr)
 			goto out;
 		}
 
+
 		subfunc = 2;	/* 2 - activate SPU tracing, 3 - deactivate */
 
 		/* start profiling */
@@ -1449,6 +1454,7 @@ static int cell_global_start(struct op_counter_config *ctr)
 	else
 		return cell_global_start_ppu(ctr);
 }
+
 
 /* The SPU interrupt handler
  *

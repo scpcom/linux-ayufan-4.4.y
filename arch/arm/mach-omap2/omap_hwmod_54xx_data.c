@@ -42,6 +42,7 @@
 /* Base offset for all OMAP5 dma requests */
 #define OMAP54XX_DMA_REQ_START	1
 
+
 /*
  * IP blocks
  */

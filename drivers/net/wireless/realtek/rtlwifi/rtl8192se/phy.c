@@ -176,6 +176,7 @@ static void _rtl92s_phy_rf_serial_write(struct ieee80211_hw *hw,
 		 rfpath, pphyreg->rf3wire_offset, data_and_addr);
 }
 
+
 u32 rtl92s_phy_query_rf_reg(struct ieee80211_hw *hw, enum radio_path rfpath,
 			    u32 regaddr, u32 bitmask)
 {
@@ -819,6 +820,7 @@ static void _rtl92s_phy_init_register_definition(struct ieee80211_hw *hw)
 	rtlphy->phyreg_def[RF90_PATH_B].rf_rbpi = TRANSCEIVERB_HSPI_READBACK;
 }
 
+
 static bool _rtl92s_phy_config_bb(struct ieee80211_hw *hw, u8 configtype)
 {
 	int i;
@@ -1029,6 +1031,7 @@ u8 rtl92s_phy_config_rf(struct ieee80211_hw *hw, enum radio_path rfpath)
 	return rtstatus;
 }
 
+
 bool rtl92s_phy_mac_config(struct ieee80211_hw *hw)
 {
 	struct rtl_priv *rtlpriv = rtl_priv(hw);
@@ -1045,6 +1048,7 @@ bool rtl92s_phy_mac_config(struct ieee80211_hw *hw)
 	return true;
 }
 
+
 bool rtl92s_phy_bb_config(struct ieee80211_hw *hw)
 {
 	struct rtl_priv *rtlpriv = rtl_priv(hw);
@@ -1057,6 +1061,7 @@ bool rtl92s_phy_bb_config(struct ieee80211_hw *hw)
 
 	/* Config BB and AGC */
 	rtstatus = _rtl92s_phy_bb_config_parafile(hw);
+
 
 	/* Check BB/RF confiuration setting. */
 	/* We only need to configure RF which is turned on. */
@@ -1221,6 +1226,7 @@ void rtl92s_phy_chk_fwcmd_iodone(struct ieee80211_hw *hw)
 	if (pollingcnt == 0)
 		RT_TRACE(rtlpriv, COMP_ERR, DBG_EMERG, "Set FW Cmd fail!!\n");
 }
+
 
 static void _rtl92s_phy_set_fwcmd_io(struct ieee80211_hw *hw)
 {
@@ -1403,6 +1409,7 @@ bool rtl92s_phy_set_fw_cmd(struct ieee80211_hw *hw, enum fwcmd_iotype fw_cmdio)
 			if (fw_cmdio == FW_CMD_CTRL_DM_BY_DRIVER)
 				fw_cmdio = FW_CMD_CTRL_DM_BY_DRIVER_NEW;
 		}
+
 
 		/* We shall revise all FW Cmd IO into Reg0x364
 		 * DM map table in the future. */

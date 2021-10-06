@@ -19,6 +19,7 @@
 #include <linux/smp.h>
 #include <asm/processor.h>
 
+
 static DEFINE_PER_CPU(struct llist_head, raised_list);
 static DEFINE_PER_CPU(struct llist_head, lazy_list);
 

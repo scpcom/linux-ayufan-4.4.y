@@ -81,6 +81,7 @@ struct SVGAEscapeVideoFlush {
    uint32 streamId;
 } SVGAEscapeVideoFlush;
 
+
 /*
  * Struct definitions for the video overlay commands built on
  * SVGAFifoCmdEscape.
@@ -113,6 +114,7 @@ struct {
       uint32 value;
    } items[SVGA_VIDEO_NUM_REGS];
 } SVGAFifoEscapeCmdVideoSetAllRegs;
+
 
 /*
  *----------------------------------------------------------------------

@@ -212,6 +212,7 @@ void intel_sst_clear_intr_mrfld(struct intel_sst_drv *sst_drv_ctx)
 	spin_unlock_irqrestore(&sst_drv_ctx->ipc_spin_lock, irq_flags);
 }
 
+
 /*
  * process_fw_init - process the FW init msg
  *

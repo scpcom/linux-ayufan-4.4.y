@@ -38,6 +38,7 @@
 #include "dvb_frontend.h"
 #include "sp8870.h"
 
+
 struct sp8870_state {
 
 	struct i2c_adapter* i2c;
@@ -310,6 +311,7 @@ static int sp8870_init (struct dvb_frontend* fe)
 	state->initialised = 1;
 
 	dprintk ("%s\n", __func__);
+
 
 	/* request the firmware, this will block until someone uploads it */
 	printk("sp8870: waiting for firmware upload (%s)...\n", SP8870_DEFAULT_FIRMWARE);

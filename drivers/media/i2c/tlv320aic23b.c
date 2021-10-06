@@ -37,6 +37,7 @@ MODULE_DESCRIPTION("tlv320aic23b driver");
 MODULE_AUTHOR("Scott Alfter, Ulf Eklund, Hans Verkuil");
 MODULE_LICENSE("GPL");
 
+
 /* ----------------------------------------------------------------------- */
 
 struct tlv320aic23b_state {

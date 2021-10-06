@@ -81,6 +81,7 @@ static const struct hc_driver ehci_grlib_hc_driver = {
 	.clear_tt_buffer_complete	= ehci_clear_tt_buffer_complete,
 };
 
+
 static int ehci_hcd_grlib_probe(struct platform_device *op)
 {
 	struct device_node *dn = op->dev.of_node;
@@ -151,6 +152,7 @@ err_irq:
 	return rv;
 }
 
+
 static int ehci_hcd_grlib_remove(struct platform_device *op)
 {
 	struct usb_hcd *hcd = platform_get_drvdata(op);
@@ -166,6 +168,7 @@ static int ehci_hcd_grlib_remove(struct platform_device *op)
 	return 0;
 }
 
+
 static const struct of_device_id ehci_hcd_grlib_of_match[] = {
 	{
 		.name = "GAISLER_EHCI",
@@ -176,6 +179,7 @@ static const struct of_device_id ehci_hcd_grlib_of_match[] = {
 	{},
 };
 MODULE_DEVICE_TABLE(of, ehci_hcd_grlib_of_match);
+
 
 static struct platform_driver ehci_grlib_driver = {
 	.probe		= ehci_hcd_grlib_probe,

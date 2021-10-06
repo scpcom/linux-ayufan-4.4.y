@@ -96,6 +96,7 @@ static DEFINE_SPINLOCK(map_entries_lock);
 static LIST_HEAD(map_entries_bootmem);
 static DEFINE_SPINLOCK(map_entries_bootmem_lock);
 
+
 static inline struct firmware_map_entry *
 to_memmap_entry(struct kobject *kobj)
 {
@@ -422,3 +423,4 @@ static int __init firmware_memmap_init(void)
 	return 0;
 }
 late_initcall(firmware_memmap_init);
+

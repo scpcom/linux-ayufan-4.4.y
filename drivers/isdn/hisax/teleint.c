@@ -59,6 +59,7 @@ readfifo(unsigned int ale, unsigned int adr, u_char off, u_char *data, int size)
 	}
 }
 
+
 static inline void
 writereg(unsigned int ale, unsigned int adr, u_char off, u_char data)
 {

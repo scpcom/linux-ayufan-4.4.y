@@ -47,6 +47,7 @@
 
 static void ipath_setup_ht_setextled(struct ipath_devdata *, u64, u64);
 
+
 /*
  * This lists the InfiniPath registers, in the actual chip layout.
  * This structure should never be directly accessed.
@@ -340,6 +341,7 @@ static const struct ipath_cregs ipath_ht_cregs = {
 #define INFINIPATH_EXTS_MEMBIST_ENDTEST     0x0000000000004000
 #define INFINIPATH_EXTS_MEMBIST_CORRECT     0x0000000000008000
 
+
 /* TID entries (memory), HT-only */
 #define INFINIPATH_RT_ADDR_MASK 0xFFFFFFFFFFULL	/* 40 bits valid */
 #define INFINIPATH_RT_VALID 0x8000000000000000ULL
@@ -483,6 +485,7 @@ static void ipath_ht_txe_recover(struct ipath_devdata *dd)
 	dev_info(&dd->pcidev->dev,
 		"Recovering from TXE PIO parity error\n");
 }
+
 
 /**
  * ipath_ht_handle_hwerrors - display hardware errors.
@@ -1339,6 +1342,9 @@ static void ipath_ht_init_hwerrors(struct ipath_devdata *dd)
 	dd->ipath_hwerrmask = val;
 }
 
+
+
+
 /**
  * ipath_ht_bringup_serdes - bring up the serdes
  * @dd: the infinipath device
@@ -1501,6 +1507,7 @@ static void ipath_ht_put_tid(struct ipath_devdata *dd,
 	writeq(pa, tidptr);
 }
 
+
 /**
  * ipath_ht_clear_tid - clear all TID entries for a port, expected and eager
  * @dd: the infinipath device
@@ -1656,6 +1663,7 @@ static int ipath_ht_early_init(struct ipath_devdata *dd)
 	return 0;
 }
 
+
 /**
  * ipath_init_ht_get_base_info - set chip-specific flags for user code
  * @dd: the infinipath device
@@ -1805,11 +1813,13 @@ static void ipath_ht_read_counters(struct ipath_devdata *dd,
 	cntrs->RxDlidFltrCnt = 0;
 }
 
+
 /* no interrupt fallback for these chips */
 static int ipath_ht_nointr_fallback(struct ipath_devdata *dd)
 {
 	return 0;
 }
+
 
 /*
  * reset the XGXS (between serdes and IBC).  Slightly less intrusive
@@ -1832,6 +1842,7 @@ static void ipath_ht_xgxs_reset(struct ipath_devdata *dd)
 	ipath_write_kreg(dd, dd->ipath_kregs->kr_control,
 			 dd->ipath_control);
 }
+
 
 static int ipath_ht_get_ib_cfg(struct ipath_devdata *dd, int which)
 {
@@ -1857,6 +1868,7 @@ static int ipath_ht_get_ib_cfg(struct ipath_devdata *dd, int which)
 	return ret;
 }
 
+
 /* we assume range checking is already done, if needed */
 static int ipath_ht_set_ib_cfg(struct ipath_devdata *dd, int which, u32 val)
 {
@@ -1871,9 +1883,11 @@ static int ipath_ht_set_ib_cfg(struct ipath_devdata *dd, int which, u32 val)
 	return ret;
 }
 
+
 static void ipath_ht_config_jint(struct ipath_devdata *dd, u16 a, u16 b)
 {
 }
+
 
 static int ipath_ht_ib_updown(struct ipath_devdata *dd, int ibup, u64 ibcs)
 {
@@ -1881,6 +1895,7 @@ static int ipath_ht_ib_updown(struct ipath_devdata *dd, int ibup, u64 ibcs)
 		ipath_ib_linktrstate(dd, ibcs));
 	return 0;
 }
+
 
 /**
  * ipath_init_iba6110_funcs - set up the chip-specific function pointers

@@ -370,6 +370,7 @@ struct mlx5_cache_ent {
 	 */
 	spinlock_t		lock;
 
+
 	struct dentry	       *dir;
 	char                    name[4];
 	u32                     order;

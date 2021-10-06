@@ -563,6 +563,7 @@ disable_hwirq(struct hfc_multi *hc)
 #define	NUM_EC 2
 #define	MAX_TDM_CHAN 32
 
+
 inline void
 enablepcibridge(struct hfc_multi *c)
 {
@@ -740,6 +741,7 @@ vpm_out(struct hfc_multi *c, int which, unsigned short addr,
 
 }
 
+
 static void
 vpm_init(struct hfc_multi *wc)
 {
@@ -836,6 +838,7 @@ vpm_check(struct hfc_multi *hctmp)
 }
 #endif /* UNUSED */
 
+
 /*
  * Interface to enable/disable the HW Echocan
  *
@@ -911,6 +914,7 @@ vpm_echocan_off(struct hfc_multi *hc, int ch)
 	/* FILLME */
 	vpm_out(hc, unit, timeslot, 0x01);
 }
+
 
 /*
  * Speech Design resync feature
@@ -1041,6 +1045,7 @@ plxsd_checksync(struct hfc_multi *hc, int rm)
 		}
 	}
 }
+
 
 /*
  * free hardware resources used by driver
@@ -1543,6 +1548,8 @@ init_chip(struct hfc_multi *hc)
 		HFC_outb(hc, R_ST_SYNC, hc->hw.r_st_sync);
 	}
 
+
+
 	/* setting misc irq */
 	HFC_outb(hc, R_IRQMSK_MISC, hc->hw.r_irqmsk_misc);
 	if (debug & DEBUG_HFCMULTI_INIT)
@@ -1581,6 +1588,7 @@ out:
 	return err;
 }
 
+
 /*
  * control the watchdog
  */
@@ -1599,6 +1607,8 @@ hfcmulti_watchdog(struct hfc_multi *hc)
 		HFC_outb(hc, R_GPIO_OUT0, hc->wdbyte);
 	}
 }
+
+
 
 /*
  * output leds
@@ -1927,6 +1937,7 @@ hfcmulti_dtmf(struct hfc_multi *hc)
 		HFC_outb_nodebug(hc, R_DTMF, hc->hw.r_dtmf | V_RST_DTMF);
 }
 
+
 /*
  * fill fifo as much as possible
  */
@@ -2175,6 +2186,7 @@ next_frame:
 		HFC_outb_nodebug(hc, A_FIFO_DATA0_NOINC, hc->silence);
 }
 
+
 /* NOTE: only called if E1 card is in active state */
 static void
 hfcmulti_rx(struct hfc_multi *hc, int ch)
@@ -2361,6 +2373,7 @@ next_frame:
 		recv_Bchannel(bch, hc->chan[ch].Zfill, false);
 	}
 }
+
 
 /*
  * Interrupt handler
@@ -2837,6 +2850,7 @@ irq_notforus:
 	return IRQ_NONE;
 }
 
+
 /*
  * timer callback for D-chan busy resolution. Currently no function
  */
@@ -2845,6 +2859,7 @@ static void
 hfcmulti_dbusy_timer(struct hfc_multi *hc)
 {
 }
+
 
 /*
  * activate/deactivate hardware for selected channels and mode
@@ -3169,6 +3184,7 @@ mode_hfcmulti(struct hfc_multi *hc, int ch, int protocol, int slot_tx,
 	return 0;
 }
 
+
 /*
  * connect/disconnect PCM
  */
@@ -3203,6 +3219,7 @@ hfcmulti_conf(struct hfc_multi *hc, int ch, int num)
 		      hc->chan[ch].bank_tx, hc->chan[ch].slot_rx,
 		      hc->chan[ch].bank_rx);
 }
+
 
 /*
  * set/disable sample loop
@@ -4038,6 +4055,7 @@ hfcmulti_initmode(struct dchannel *dch)
 		printk("%s: done\n", __func__);
 }
 
+
 static int
 open_dchannel(struct hfc_multi *hc, struct dchannel *dch,
 	      struct channel_req *rq)
@@ -4503,6 +4521,7 @@ setup_pci(struct hfc_multi *hc, struct pci_dev *pdev,
 	/* fifos are still not enabled */
 	return 0;
 }
+
 
 /*
  * remove port
@@ -5388,6 +5407,7 @@ static struct pci_device_id hfmultipci_ids[] = {
 	{ PCI_VENDOR_ID_CCD, PCI_DEVICE_ID_CCD_HFC8S, PCI_VENDOR_ID_CCD,
 	  PCI_SUBDEVICE_ID_CCD_JH8S, 0, 0, H(32)}, /* Junganns 8S  */
 
+
 	/* Cards with HFC-E1 Chip */
 	{ PCI_VENDOR_ID_CCD, PCI_DEVICE_ID_CCD_HFCE1, PCI_VENDOR_ID_CCD,
 	  PCI_SUBDEVICE_ID_CCD_BNE1, 0, 0, H(19)}, /* BNE1 */
@@ -5559,6 +5579,7 @@ HFCmulti_init(void)
 
 	return 0;
 }
+
 
 module_init(HFCmulti_init);
 module_exit(HFCmulti_cleanup);

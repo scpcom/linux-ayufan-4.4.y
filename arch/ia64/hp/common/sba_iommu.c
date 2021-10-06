@@ -128,6 +128,7 @@ extern int swiotlb_late_init_with_default_size (size_t size);
 #define DBG_RUN_SG(x...)
 #endif
 
+
 #ifdef DEBUG_SBA_RESOURCE
 #define DBG_RES(x...)	printk(x)
 #else
@@ -179,6 +180,7 @@ extern int swiotlb_late_init_with_default_size (size_t size);
 
 #define IOC_ROPE0_CFG	0x500
 #define   IOC_ROPE_AO	  0x10	/* Allow "Relaxed Ordering" */
+
 
 /* AGP GART driver looks for this */
 #define ZX1_SBA_IOMMU_COOKIE	0x0000badbadc0ffeeUL
@@ -300,6 +302,7 @@ sba_dump_tlb(char *hpa)
 }
 #endif
 
+
 #ifdef ASSERT_PDIR_SANITY
 
 /**
@@ -332,6 +335,7 @@ sba_dump_pdir_entry(struct ioc *ioc, char *msg, uint pide)
 	}
 	printk(KERN_DEBUG "%s", msg);
 }
+
 
 /**
  * sba_check_pdir - debugging only - consistency checker
@@ -378,6 +382,7 @@ sba_check_pdir(struct ioc *ioc, char *msg)
 	return 0;
 }
 
+
 /**
  * sba_dump_sg - debugging only - print Scatter-Gather list
  * @ioc: IO MMU structure which owns the pdir we are interested in.
@@ -412,6 +417,9 @@ sba_check_sg( struct ioc *ioc, struct scatterlist *startsg, int nents)
 
 #endif /* ASSERT_PDIR_SANITY */
 
+
+
+
 /**************************************************************
 *
 *   I/O Pdir Resource Management
@@ -433,6 +441,7 @@ sba_check_sg( struct ioc *ioc, struct scatterlist *startsg, int nents)
 
 #define RESMAP_MASK(n)    ~(~0UL << (n))
 #define RESMAP_IDX_MASK   (sizeof(unsigned long) - 1)
+
 
 /**
  * For most cases the normal get_order is sufficient, however it limits us
@@ -609,6 +618,7 @@ found_it:
 	return (pide);
 }
 
+
 /**
  * sba_alloc_range - find free bits and mark them in IO PDIR resource bitmap
  * @ioc: IO MMU structure which owns the pdir we are interested in.
@@ -706,6 +716,7 @@ sba_alloc_range(struct ioc *ioc, struct device *dev, size_t size)
 	return (pide);
 }
 
+
 /**
  * sba_free_range - unmark bits in IO PDIR resource bitmap
  * @ioc: IO MMU structure which owns the pdir we are interested in.
@@ -751,6 +762,7 @@ sba_free_range(struct ioc *ioc, dma_addr_t iova, size_t size)
 		}
 	}
 }
+
 
 /**************************************************************
 *
@@ -1168,6 +1180,7 @@ sba_alloc_coherent(struct device *dev, size_t size, dma_addr_t *dma_handle,
 	return addr;
 }
 
+
 /**
  * sba_free_coherent - free/unmap shared mem for DMA
  * @dev: instance of PCI owned by the driver that's asking.
@@ -1184,6 +1197,7 @@ static void sba_free_coherent(struct device *dev, size_t size, void *vaddr,
 	free_pages((unsigned long) vaddr, get_order(size));
 }
 
+
 /*
 ** Since 0 is a valid pdir_base index value, can't use that
 ** to determine if a value is valid or not. Use a flag to indicate
@@ -1194,6 +1208,7 @@ static void sba_free_coherent(struct device *dev, size_t size, void *vaddr,
 #ifdef DEBUG_LARGE_SG_ENTRIES
 int dump_run_sg = 0;
 #endif
+
 
 /**
  * sba_fill_pdir - write allocated SG entries into IO PDIR
@@ -1276,6 +1291,7 @@ sba_fill_pdir(
 	return(n_mappings);
 }
 
+
 /*
 ** Two address ranges are DMA contiguous *iff* "end of prev" and
 ** "start of next" are both on an IOV page boundary.
@@ -1284,6 +1300,7 @@ sba_fill_pdir(
 */
 #define DMA_CONTIG(__X, __Y) \
 	(((((unsigned long) __X) | ((unsigned long) __Y)) << (BITS_PER_LONG - iovp_shift)) == 0UL)
+
 
 /**
  * sba_coalesce_chunks - preprocess the SG list
@@ -1837,6 +1854,8 @@ static void ioc_init(unsigned long hpa, struct ioc *ioc)
 		hpa, ioc->iov_size >> 20, ioc->ibase);
 }
 
+
+
 /**************************************************************************
 **
 **   SBA initialization code (HW and SW)
@@ -2063,6 +2082,7 @@ static int acpi_sba_ioc_attach(struct acpi_device *device,
 	ioc->handle = device->handle;
 	return 1;
 }
+
 
 static struct acpi_scan_handler acpi_sba_ioc_handler = {
 	.ids	= hp_ioc_iommu_device_ids,

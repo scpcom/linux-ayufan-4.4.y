@@ -29,6 +29,7 @@
 #ifndef __ASM_RC32434_ETH_H
 #define __ASM_RC32434_ETH_H
 
+
 #define ETH0_BASE_ADDR		0x18060000
 
 struct eth_regs {

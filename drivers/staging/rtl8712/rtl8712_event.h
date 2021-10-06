@@ -60,6 +60,7 @@ enum rtl8712_c2h_event {
 	MAX_C2HEVT
 };
 
+
 #ifdef _RTL8712_CMD_C_
 
 static struct fwevent wlanevents[] = {

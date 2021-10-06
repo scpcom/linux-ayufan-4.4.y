@@ -54,6 +54,7 @@ error_ret:
 }
 EXPORT_SYMBOL_GPL(iio_map_array_register);
 
+
 /*
  * Remove all map entries associated with the given iio device
  */

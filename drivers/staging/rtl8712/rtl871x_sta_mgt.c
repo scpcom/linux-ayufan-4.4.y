@@ -89,6 +89,7 @@ static void mfree_all_stainfo(struct sta_priv *pstapriv)
 	spin_unlock_irqrestore(&pstapriv->sta_hash_lock, irqL);
 }
 
+
 static void mfree_sta_priv_lock(struct	sta_priv *pstapriv)
 {
 	 mfree_all_stainfo(pstapriv); /* be done before free sta_hash_lock */
@@ -274,6 +275,7 @@ struct sta_info *r8712_get_bcmc_stainfo(struct _adapter *padapter)
 
 	return r8712_get_stainfo(pstapriv, bc_addr);
 }
+
 
 u8 r8712_access_ctrl(struct wlan_acl_pool *pacl_list, u8 *mac_addr)
 {

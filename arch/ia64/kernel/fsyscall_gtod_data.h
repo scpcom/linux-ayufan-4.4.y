@@ -20,3 +20,4 @@ struct itc_jitter_data_t {
 	int		itc_jitter;
 	cycle_t		itc_lastcycle;
 } ____cacheline_aligned;
+

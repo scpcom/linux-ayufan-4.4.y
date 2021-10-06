@@ -18,6 +18,7 @@
 #include <linux/hdmi.h>
 #include "hdmi.h"
 
+
 /* Supported HDMI Audio channels */
 #define MSM_HDMI_AUDIO_CHANNEL_2		0
 #define MSM_HDMI_AUDIO_CHANNEL_4		1
@@ -36,6 +37,7 @@ static int nchannels[] = { 2, 4, 6, 8 };
 #define MSM_HDMI_SAMPLE_RATE_176_4KHZ		5
 #define MSM_HDMI_SAMPLE_RATE_192KHZ		6
 #define MSM_HDMI_SAMPLE_RATE_MAX		7
+
 
 struct hdmi_msm_audio_acr {
 	uint32_t n;	/* N parameter for clock regeneration */
@@ -223,6 +225,7 @@ int hdmi_audio_update(struct hdmi *hdmi)
 			COND(enabled, HDMI_AUD_INT_AUD_SAM_DROP_INT));
 
 	hdmi_write(hdmi, REG_HDMI_AUDIO_CFG, audio_config);
+
 
 	DBG("audio %sabled", enabled ? "en" : "dis");
 

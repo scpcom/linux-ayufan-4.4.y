@@ -30,6 +30,7 @@
 #include <mach/regs-switch.h>
 #include <mach/regs-misc.h>
 
+
 /* --------------------------------------------------------------------
  *  Ethernet
  * -------------------------------------------------------------------- */
@@ -79,6 +80,7 @@ static struct platform_device ks8695_wan_device = {
 	.num_resources	= ARRAY_SIZE(ks8695_wan_resources),
 };
 
+
 static struct resource ks8695_lan_resources[] = {
 	[0] = {
 		.start	= KS8695_LAN_PA,
@@ -115,6 +117,7 @@ static struct platform_device ks8695_lan_device = {
 	.resource	= ks8695_lan_resources,
 	.num_resources	= ARRAY_SIZE(ks8695_lan_resources),
 };
+
 
 static struct resource ks8695_hpna_resources[] = {
 	[0] = {
@@ -162,6 +165,7 @@ void __init ks8696_add_device_hpna(void)
 	platform_device_register(&ks8695_hpna_device);
 }
 
+
 /* --------------------------------------------------------------------
  *  Watchdog
  * -------------------------------------------------------------------- */
@@ -176,6 +180,7 @@ static void __init ks8695_add_device_watchdog(void)
 {
 	platform_device_register(&ks8695_wdt_device);
 }
+
 
 /* -------------------------------------------------------------------- */
 

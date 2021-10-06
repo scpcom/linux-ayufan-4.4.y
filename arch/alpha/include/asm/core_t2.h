@@ -136,6 +136,7 @@
 #define T2_MEM2_BASE            (IDENT_ADDR + GAMMA_BIAS + 0x38a000000L)
 #define T2_MEM3_BASE            (IDENT_ADDR + GAMMA_BIAS + 0x38b000000L)
 
+
 /*
  * Sable CPU Module CSRS
  *
@@ -246,6 +247,7 @@ struct el_t2_data_memory {
 	unsigned long elcm_filter;	/* CSR9: CRD Filter Control. */
 };
 
+
 /*
  * Sable other CPU error frame - sable pfms section 3.43
  */
@@ -326,6 +328,7 @@ struct el_t2_frame_mcheck {
 	struct el_t2_frame_header elfmc_footer;	/* empty */
 };
 
+
 /*
  * Sable error log data structures on memory errors
  */
@@ -337,6 +340,7 @@ struct el_t2_frame_corrected {
 /*	struct el_t2_data_memory elfcc_memdata[4];	*/
 	struct el_t2_frame_header elfcc_footer;	/* empty */
 };
+
 
 #ifdef __KERNEL__
 
@@ -396,6 +400,7 @@ extern inline void t2_outl(u32 b, unsigned long addr)
 	*(vuip) ((addr << 5) + T2_IO + 0x18) = b;
 	mb();
 }
+
 
 /*
  * Memory functions.

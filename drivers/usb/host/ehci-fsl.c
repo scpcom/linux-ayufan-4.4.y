@@ -695,6 +695,7 @@ static int __init ehci_fsl_init(void)
 			"Freescale On-Chip EHCI Host Controller";
 	fsl_ehci_hc_driver.start_port_reset = ehci_start_port_reset;
 
+
 	return platform_driver_register(&ehci_fsl_driver);
 }
 module_init(ehci_fsl_init);

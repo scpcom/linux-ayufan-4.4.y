@@ -183,6 +183,7 @@ void __init config_mac(void)
 		mach_l2_flush = mac_cache_card_flush;
 }
 
+
 /*
  * Macintosh Table: hardcoded model configuration data.
  *

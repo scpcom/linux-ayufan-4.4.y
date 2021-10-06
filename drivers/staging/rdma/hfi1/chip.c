@@ -977,6 +977,7 @@ static struct flag_table dc8051_info_host_msg_flags[] = {
 	FLAG_ENTRY0("Link going down", 0x0100),
 };
 
+
 static u32 encoded_size(u32 size);
 static u32 chip_to_opa_lstate(struct hfi1_devdata *dd, u32 chip_lstate);
 static int set_physical_link_state(struct hfi1_devdata *dd, u64 state);
@@ -1274,6 +1275,7 @@ static inline u64 read_write_csr(const struct hfi1_devdata *dd, u32 csr,
 				 int mode, u64 value)
 {
 	u64 ret;
+
 
 	if (mode == CNTR_MODE_R) {
 		ret = read_csr(dd, csr);
@@ -7218,6 +7220,7 @@ static int set_buffer_control(struct hfi1_devdata *dd,
 #define valid_vl(idx) ((idx) < TXE_NUM_DATA_VL || (idx) == 15)
 #define NUM_USABLE_VLS 16	/* look at VL15 and less */
 
+
 	/* find the new total credits, do sanity check on unused VLs */
 	for (i = 0; i < OPA_MAX_VLS; i++) {
 		if (valid_vl(i)) {
@@ -8297,6 +8300,7 @@ static int init_cntrs(struct hfi1_devdata *dd)
 	if (!dd->scntrs)
 		goto bail;
 
+
 	/* allocate space for the counter names */
 	dd->cntrnameslen = sz;
 	dd->cntrnames = kmalloc(sz, GFP_KERNEL);
@@ -8426,6 +8430,7 @@ bail:
 	free_cntrs(dd);
 	return -ENOMEM;
 }
+
 
 static u32 chip_to_opa_lstate(struct hfi1_devdata *dd, u32 chip_lstate)
 {
@@ -10736,6 +10741,7 @@ static u16 delay_cycles(struct hfi1_pportdata *ppd, u32 desired_egress_rate,
 
 	return (u16)delta_cycles;
 }
+
 
 /**
  * create_pbc - build a pbc for transmission

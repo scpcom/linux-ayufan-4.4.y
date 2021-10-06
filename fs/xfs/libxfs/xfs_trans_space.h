@@ -88,4 +88,5 @@
 #define XFS_IFREE_SPACE_RES(mp)		\
 	(xfs_sb_version_hasfinobt(&mp->m_sb) ? (mp)->m_in_maxlevels : 0)
 
+
 #endif	/* __XFS_TRANS_SPACE_H__ */

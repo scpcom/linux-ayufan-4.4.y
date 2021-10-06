@@ -412,6 +412,7 @@ efi_get_pal_addr (void)
 	return NULL;
 }
 
+
 static u8 __init palo_checksum(u8 *buffer, u32 length)
 {
 	u8 sum = 0;

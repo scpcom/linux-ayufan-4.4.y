@@ -81,6 +81,7 @@ struct datafab_info {
 static int datafab_determine_lun(struct us_data *us,
 				 struct datafab_info *info);
 
+
 /*
  * The table of devices
  */
@@ -119,6 +120,7 @@ static struct us_unusual_dev datafab_unusual_dev_list[] = {
 
 #undef UNUSUAL_DEV
 
+
 static inline int
 datafab_bulk_read(struct us_data *us, unsigned char *data, unsigned int len) {
 	if (len == 0)
@@ -129,6 +131,7 @@ datafab_bulk_read(struct us_data *us, unsigned char *data, unsigned int len) {
 			data, len, NULL);
 }
 
+
 static inline int
 datafab_bulk_write(struct us_data *us, unsigned char *data, unsigned int len) {
 	if (len == 0)
@@ -138,6 +141,7 @@ datafab_bulk_write(struct us_data *us, unsigned char *data, unsigned int len) {
 	return usb_stor_bulk_transfer_buf(us, us->send_bulk_pipe,
 			data, len, NULL);
 }
+
 
 static int datafab_read_data(struct us_data *us,
 			     struct datafab_info *info,
@@ -220,6 +224,7 @@ static int datafab_read_data(struct us_data *us,
 	kfree(buffer);
 	return USB_STOR_TRANSPORT_ERROR;
 }
+
 
 static int datafab_write_data(struct us_data *us,
 			      struct datafab_info *info,
@@ -315,6 +320,7 @@ static int datafab_write_data(struct us_data *us,
 	kfree(buffer);
 	return USB_STOR_TRANSPORT_ERROR;
 }
+
 
 static int datafab_determine_lun(struct us_data *us,
 				 struct datafab_info *info)
@@ -438,6 +444,7 @@ static int datafab_id_device(struct us_data *us,
 	return rc;
 }
 
+
 static int datafab_handle_mode_sense(struct us_data *us,
 				     struct scsi_cmnd * srb, 
 				     int sense_6)
@@ -545,6 +552,7 @@ static void datafab_info_destructor(void *extra)
 	// this routine is a placeholder...
 	// currently, we don't allocate any extra memory so we're okay
 }
+
 
 // Transport for the Datafab MDCFE-B
 //

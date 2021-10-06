@@ -40,6 +40,7 @@
  * for implementation details
  */
 
+
 struct prng_context {
 	spinlock_t prng_lock;
 	unsigned char rand_data[DEFAULT_BLK_SZ];
@@ -87,6 +88,7 @@ static int _get_more_prng_bytes(struct prng_context *ctx, int cont_test)
 	int i;
 	unsigned char tmp[DEFAULT_BLK_SZ];
 	unsigned char *output = NULL;
+
 
 	dbgprint(KERN_CRIT "Calling _get_more_prng_bytes for context %p\n",
 		ctx);
@@ -154,6 +156,7 @@ static int _get_more_prng_bytes(struct prng_context *ctx, int cont_test)
 			break;
 		}
 
+
 		/* do the encryption */
 		crypto_cipher_encrypt_one(ctx->tfm, output, tmp);
 
@@ -187,6 +190,7 @@ static int get_prng_bytes(char *buf, size_t nbytes, struct prng_context *ctx,
 	unsigned int byte_count = (unsigned int)nbytes;
 	int err;
 
+
 	spin_lock_bh(&ctx->prng_lock);
 
 	err = -EINVAL;
@@ -212,6 +216,7 @@ static int get_prng_bytes(char *buf, size_t nbytes, struct prng_context *ctx,
 
 	dbgprint(KERN_CRIT "getting %d random bytes for context %p\n",
 		byte_count, ctx);
+
 
 remainder:
 	if (ctx->rand_data_valid == DEFAULT_BLK_SZ) {

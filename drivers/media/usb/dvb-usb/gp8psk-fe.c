@@ -327,6 +327,7 @@ success:
 	return &s->fe;
 }
 
+
 static struct dvb_frontend_ops gp8psk_fe_ops = {
 	.delsys = { SYS_DVBS },
 	.info = {

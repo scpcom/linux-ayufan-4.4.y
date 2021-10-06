@@ -203,6 +203,7 @@ struct i2400m_poke_table{
 	.data = cpu_to_le32(d)		\
 }
 
+
 /**
  * i2400m_reset_type - methods to reset a device
  *
@@ -655,6 +656,7 @@ struct i2400m {
 
 };
 
+
 /*
  * Bus-generic internal APIs
  * -------------------------
@@ -783,6 +785,7 @@ unsigned i2400m_brh_get_signature(const struct i2400m_bootrom_header *hdr)
 		>> I2400M_BRH_SIGNATURE_SHIFT;
 }
 
+
 /*
  * Driver / device setup and internal functions
  */
@@ -825,6 +828,7 @@ void i2400m_dev_shutdown(struct i2400m *);
 
 extern struct attribute_group i2400m_dev_attr_group;
 
+
 /* HDI message's payload description handling */
 
 static inline
@@ -848,6 +852,7 @@ void i2400m_pld_set(struct i2400m_pld *pld, size_t size,
 		((type << I2400M_PLD_TYPE_SHIFT) & I2400M_PLD_TYPE_MASK)
 		|  (size & I2400M_PLD_SIZE_MASK));
 }
+
 
 /*
  * API for the bus-specific drivers
@@ -882,6 +887,7 @@ void i2400m_release(struct i2400m *);
 int i2400m_rx(struct i2400m *, struct sk_buff *);
 struct i2400m_msg_hdr *i2400m_tx_msg_get(struct i2400m *, size_t *);
 void i2400m_tx_msg_sent(struct i2400m *);
+
 
 /*
  * Utility functions
@@ -943,6 +949,7 @@ unsigned i2400m_ge_v1_4(struct i2400m *i2400m)
 	return i2400m->fw_version >= 0x00090002;
 }
 
+
 /*
  * Do a millisecond-sleep for allowing wireshark to dump all the data
  * packets. Used only for debugging.
@@ -956,8 +963,11 @@ void __i2400m_msleep(unsigned ms)
 #endif
 }
 
+
 /* module initialization helpers */
 int i2400m_barker_db_init(const char *);
 void i2400m_barker_db_exit(void);
+
+
 
 #endif /* #ifndef __I2400M_H__ */

@@ -54,6 +54,7 @@ int mpp_paths_generation;
  */
 static DEFINE_RWLOCK(pathtbl_resize_lock);
 
+
 static inline struct mesh_table *resize_dereference_mesh_paths(void)
 {
 	return rcu_dereference_protected(mesh_paths,
@@ -75,6 +76,7 @@ static inline struct mesh_table *resize_dereference_mpp_paths(void)
 #define for_each_mesh_entry(tbl, node, i) \
 	for (i = 0; i <= tbl->hash_mask; i++) \
 		hlist_for_each_entry_rcu(node, &tbl->hash_buckets[i], list)
+
 
 static struct mesh_table *mesh_table_alloc(int size_order)
 {
@@ -190,6 +192,7 @@ static u32 mesh_table_hash(const u8 *addr, struct ieee80211_sub_if_data *sdata,
 	return jhash_2words(*(u32 *)(addr+2), sdata->dev->ifindex,
 			    tbl->hash_rnd) & tbl->hash_mask;
 }
+
 
 /**
  *
@@ -328,6 +331,7 @@ static void mesh_path_move_to_queue(struct mesh_path *gate_mpath,
 	spin_unlock_irqrestore(&from_mpath->frame_queue.lock, flags);
 }
 
+
 static struct mesh_path *mpath_lookup(struct mesh_table *tbl, const u8 *dst,
 				      struct ieee80211_sub_if_data *sdata)
 {
@@ -371,6 +375,7 @@ mpp_path_lookup(struct ieee80211_sub_if_data *sdata, const u8 *dst)
 {
 	return mpath_lookup(rcu_dereference(mpp_paths), dst, sdata);
 }
+
 
 /**
  * mesh_path_lookup_by_idx - look up a path in the mesh path table by its index
@@ -733,6 +738,7 @@ err_path_alloc:
 	return err;
 }
 
+
 /**
  * mesh_plink_broken - deactivates paths and sends perr when a link breaks
  *
@@ -1077,6 +1083,7 @@ int mesh_pathtbl_init(void)
 		goto free_path;
 	}
 	INIT_HLIST_HEAD(tbl_path->known_gates);
+
 
 	tbl_mpp = mesh_table_alloc(INIT_PATHS_SIZE_ORDER);
 	if (!tbl_mpp) {

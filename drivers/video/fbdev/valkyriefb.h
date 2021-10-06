@@ -64,6 +64,7 @@ struct vpreg {			/* padded register */
 	char pad[VALKYRIE_REG_PADSIZE];
 };
 
+
 struct valkyrie_regs {
 	struct vpreg mode;
 	struct vpreg depth;

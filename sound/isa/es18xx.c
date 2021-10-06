@@ -348,6 +348,7 @@ static inline int snd_es18xx_mixer_writable(struct snd_es18xx *chip, unsigned ch
 	return expected == new;
 }
 
+
 static int snd_es18xx_reset(struct snd_es18xx *chip)
 {
 	int i;
@@ -407,6 +408,7 @@ static struct snd_pcm_hw_constraint_ratnums old_hw_constraints_clocks  = {
 	.nrats = 2,
 	.rats = old_clocks,
 };
+
 
 static void snd_es18xx_rate_set(struct snd_es18xx *chip, 
 				struct snd_pcm_substream *substream,
@@ -1955,6 +1957,7 @@ static int snd_es18xx_mixer(struct snd_card *card)
 	return 0;
 }
        
+
 /* Card level */
 
 MODULE_AUTHOR("Christian Fischbach <fishbach@pool.informatik.rwth-aachen.de>, Abramo Bagnara <abramo@alsa-project.org>");  
@@ -2272,6 +2275,7 @@ static struct isa_driver snd_es18xx_isa_driver = {
 		.name	= DEV_NAME
 	},
 };
+
 
 #ifdef CONFIG_PNP
 static int snd_audiodrive_pnp_detect(struct pnp_dev *pdev,

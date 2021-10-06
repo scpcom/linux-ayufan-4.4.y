@@ -159,6 +159,7 @@ MODULE_FIRMWARE("orinoco_ezusb_fw");
 #define USB_2WIRE_VENDOR_ID      0x1630
 #define USB_2WIRE_WIRELESS_ID    0xff81 /* 2Wire Wireless USB adapter */
 
+
 #define EZUSB_REQUEST_FW_TRANS		0xA0
 #define EZUSB_REQUEST_TRIGER		0xAA
 #define EZUSB_REQUEST_TRIG_AC		0xAC
@@ -281,6 +282,7 @@ struct request_context {
 	u16 in_rid;
 };
 
+
 /* Forward declarations */
 static void ezusb_ctx_complete(struct request_context *ctx);
 static void ezusb_req_queue_run(struct ezusb_priv *upriv);
@@ -365,6 +367,7 @@ static struct request_context *ezusb_alloc_ctx(struct ezusb_priv *upriv,
 	setup_timer(&ctx->timer, ezusb_request_timerfn, (u_long)ctx);
 	return ctx;
 }
+
 
 /* Hopefully the real complete_all will soon be exported, in the mean
  * while this should work. */
@@ -676,6 +679,7 @@ static void ezusb_request_in_callback(struct ezusb_priv *upriv,
 		break;
 	}			/* switch */
 }
+
 
 static void ezusb_req_ctx_wait(struct ezusb_priv *upriv,
 			       struct request_context *ctx)
@@ -1295,6 +1299,7 @@ static int ezusb_allocate(struct hermes *hw, u16 size, u16 *fid)
 	return 0;
 }
 
+
 static int ezusb_hard_reset(struct orinoco_private *priv)
 {
 	struct ezusb_priv *upriv = priv->card;
@@ -1338,6 +1343,7 @@ static int ezusb_hard_reset(struct orinoco_private *priv)
 
 	return 0;
 }
+
 
 static int ezusb_init(struct hermes *hw)
 {
@@ -1716,6 +1722,7 @@ static int ezusb_probe(struct usb_interface *interface,
 	return retval;
 }
 
+
 static void ezusb_disconnect(struct usb_interface *intf)
 {
 	struct ezusb_priv *upriv = usb_get_intfdata(intf);
@@ -1723,6 +1730,7 @@ static void ezusb_disconnect(struct usb_interface *intf)
 	ezusb_delete(upriv);
 	printk(KERN_INFO PFX "Disconnected\n");
 }
+
 
 /* usb specific object needed to register this driver with the usb subsystem */
 static struct usb_driver orinoco_driver = {

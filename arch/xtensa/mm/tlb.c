@@ -20,6 +20,7 @@
 #include <asm/tlbflush.h>
 #include <asm/cacheflush.h>
 
+
 static inline void __flush_itlb_all (void)
 {
 	int w, i;
@@ -45,6 +46,7 @@ static inline void __flush_dtlb_all (void)
 	}
 	asm volatile ("isync\n");
 }
+
 
 void local_flush_tlb_all(void)
 {
@@ -73,6 +75,7 @@ void local_flush_tlb_mm(struct mm_struct *mm)
 		mm->context.cpu = -1;
 	}
 }
+
 
 #define _ITLB_ENTRIES (ITLB_ARF_WAYS << XCHAL_ITLB_ARF_ENTRIES_LOG2)
 #define _DTLB_ENTRIES (DTLB_ARF_WAYS << XCHAL_DTLB_ARF_ENTRIES_LOG2)

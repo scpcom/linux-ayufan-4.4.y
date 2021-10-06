@@ -78,6 +78,7 @@ struct llc_snap_hdr {
 #define MPC         2
 #define MPS_AND_MPC 3
 
+
 /* MPC parameter defaults */
 
 #define MPC_P1 10  /* Shortcut-Setup Frame Count  */ 

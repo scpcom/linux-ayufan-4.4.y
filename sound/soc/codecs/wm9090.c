@@ -569,6 +569,7 @@ static const struct regmap_config wm9090_regmap = {
 	.num_reg_defaults = ARRAY_SIZE(wm9090_reg_defaults),
 };
 
+
 static int wm9090_i2c_probe(struct i2c_client *i2c,
 			    const struct i2c_device_id *id)
 {

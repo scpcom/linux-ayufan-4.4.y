@@ -1474,6 +1474,7 @@ static void ieee80211_sta_find_ibss(struct ieee80211_sub_if_data *sdata)
 		return;
 	}
 
+
 	ibss_dbg(sdata, "sta_find_ibss: did not try to join ibss\n");
 
 	/* Selected IBSS not found in current scan results - try to scan */

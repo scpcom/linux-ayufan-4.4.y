@@ -86,6 +86,7 @@
 #define AUX_COUNT 3
 #define IRQ_COUNT 1
 
+
 struct vip_buffer {
 	struct vb2_v4l2_buffer vb;
 	struct list_head	list;
@@ -132,6 +133,7 @@ struct sta2x11_vip {
 	unsigned int register_save_area[IRQ_COUNT + SAVE_COUNT + AUX_COUNT];
 	struct v4l2_subdev *decoder;
 	struct v4l2_ctrl_handler ctrl_hdl;
+
 
 	struct v4l2_pix_format format;
 	v4l2_std_id std;
@@ -261,6 +263,7 @@ static void vip_active_buf_next(struct sta2x11_vip *vip)
 	}
 }
 
+
 /* Videobuf2 Operations */
 static int queue_setup(struct vb2_queue *vq, const void *parg,
 		       unsigned int *nbuffers, unsigned int *nplanes,
@@ -387,6 +390,7 @@ static struct vb2_ops vip_video_qops = {
 	.stop_streaming		= stop_streaming,
 };
 
+
 /* File Operations */
 static const struct v4l2_file_operations vip_fops = {
 	.owner = THIS_MODULE,
@@ -397,6 +401,7 @@ static const struct v4l2_file_operations vip_fops = {
 	.mmap = vb2_fop_mmap,
 	.poll = vb2_fop_poll
 };
+
 
 /**
  * vidioc_querycap - return capabilities of device
@@ -869,6 +874,7 @@ static int sta2x11_vip_init_buffer(struct sta2x11_vip *vip)
 		return err;
 	INIT_LIST_HEAD(&vip->buffer_list);
 	spin_lock_init(&vip->lock);
+
 
 	vip->alloc_ctx = vb2_dma_contig_init_ctx(&vip->pdev->dev);
 	if (IS_ERR(vip->alloc_ctx)) {

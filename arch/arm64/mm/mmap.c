@@ -93,6 +93,7 @@ void arch_pick_mmap_layout(struct mm_struct *mm)
 }
 EXPORT_SYMBOL_GPL(arch_pick_mmap_layout);
 
+
 /*
  * You really shouldn't be using read() or write() on /dev/mem.  This might go
  * away in the future.

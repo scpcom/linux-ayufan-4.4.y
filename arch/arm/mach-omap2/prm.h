@@ -62,6 +62,7 @@ int omap2_prcm_base_init(void);
  */
 #define OMAP_INTRANSITION_MASK				(1 << 20)
 
+
 /*
  * 24XX: PM_PWSTST_GFX, PM_PWSTST_DSP
  *
@@ -181,5 +182,6 @@ u32 omap_prm_vp_check_txdone(u8 vp_id);
 void omap_prm_vp_clear_txdone(u8 vp_id);
 
 #endif
+
 
 #endif

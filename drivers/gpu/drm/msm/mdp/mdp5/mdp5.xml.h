@@ -44,6 +44,7 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
+
 enum mdp5_intf_type {
 	INTF_DISABLED = 0,
 	INTF_DSI = 1,
@@ -1960,5 +1961,6 @@ static inline uint32_t REG_MDP5_AD_STR_OUT(uint32_t i0) { return 0x0000014c + __
 static inline uint32_t REG_MDP5_AD_BL_OUT(uint32_t i0) { return 0x00000154 + __offset_AD(i0); }
 
 static inline uint32_t REG_MDP5_AD_CALC_DONE(uint32_t i0) { return 0x00000158 + __offset_AD(i0); }
+
 
 #endif /* MDP5_XML */

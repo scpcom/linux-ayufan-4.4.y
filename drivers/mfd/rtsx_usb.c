@@ -745,6 +745,7 @@ static int rtsx_usb_reset_resume(struct usb_interface *intf)
 
 #endif /* CONFIG_PM */
 
+
 static int rtsx_usb_pre_reset(struct usb_interface *intf)
 {
 	struct rtsx_ucr *ucr = (struct rtsx_ucr *)usb_get_intfdata(intf);

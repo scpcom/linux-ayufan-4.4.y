@@ -31,6 +31,7 @@
 #include <asm/dcr-mmio.h>
 #endif
 
+
 /* Indirection layer for providing both NATIVE and MMIO support. */
 
 #if defined(CONFIG_PPC_DCR_NATIVE) && defined(CONFIG_PPC_DCR_MMIO)

@@ -560,6 +560,7 @@ static int vidioc_s_std(struct file *file, void *priv, v4l2_std_id norm)
 	return 0;
 }
 
+
 static int vidioc_enum_input(struct file *file, void *priv,
 				struct v4l2_input *i)
 {

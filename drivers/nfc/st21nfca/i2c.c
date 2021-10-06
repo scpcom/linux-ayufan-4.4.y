@@ -210,6 +210,7 @@ static int st21nfca_hci_i2c_write(void *phy_id, struct sk_buff *skb)
 
 	I2C_DUMP_SKB("st21nfca_hci_i2c_write", skb);
 
+
 	if (phy->hard_fault != 0)
 		return phy->hard_fault;
 

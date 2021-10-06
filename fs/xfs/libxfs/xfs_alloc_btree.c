@@ -32,6 +32,7 @@
 #include "xfs_cksum.h"
 #include "xfs_trans.h"
 
+
 STATIC struct xfs_btree_cur *
 xfs_allocbt_dup_cursor(
 	struct xfs_btree_cur	*cur)
@@ -382,6 +383,7 @@ const struct xfs_buf_ops xfs_allocbt_buf_ops = {
 	.verify_read = xfs_allocbt_read_verify,
 	.verify_write = xfs_allocbt_write_verify,
 };
+
 
 #if defined(DEBUG) || defined(XFS_WARN)
 STATIC int

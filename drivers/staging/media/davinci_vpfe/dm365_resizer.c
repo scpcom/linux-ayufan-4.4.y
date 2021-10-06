@@ -1031,6 +1031,7 @@ static void resizer_enable(struct vpfe_resizer_device *resizer, int en)
 		rsz_enable(resizer->base_addr, RSZ_B, en);
 }
 
+
 /*
  * resizer_ss_isr() - resizer module single-shot buffer scheduling isr
  * @resizer: vpfe resizer device pointer.

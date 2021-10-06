@@ -189,6 +189,7 @@
 
 /**********************************************************************/
 
+
 /*
  * Au1300 GPIO+INT controller (GPIC) register offsets and bits
  * Registers are 128bits (0x10 bytes), divided into 4 "banks".
@@ -343,6 +344,7 @@
 #define MEM_STNAND_ADDR		0x4
 #define MEM_STNAND_DATA		0x20
 
+
 /* Programmable Counters 0 and 1 */
 #define AU1000_SYS_CNTRCTRL	0x14
 #  define SYS_CNTRL_E1S		(1 << 23)
@@ -380,6 +382,7 @@
 #define AU1000_SYS_RTCMATCH1	0x50
 #define AU1000_SYS_RTCMATCH2	0x54
 #define AU1000_SYS_RTCREAD	0x58
+
 
 /* GPIO */
 #define AU1000_SYS_PINFUNC	0x2C
@@ -473,7 +476,9 @@
 #define AU1000_SYS_AUXPLL	0x64
 #define AU1300_SYS_AUXPLL2	0x68
 
+
 /**********************************************************************/
+
 
 /* The PCI chip selects are outside the 32bit space, and since we can't
  * just program the 36bit addresses into BARs, we have to take a chunk
@@ -578,7 +583,9 @@
 #define PCI_TIMEOUT_RETRIES(x)	(((x) & 0xff) << 8)	/* max retries */
 #define PCI_TIMEOUT_TO(x)	((x) & 0xff)	/* target ready timeout */
 
+
 /**********************************************************************/
+
 
 #ifndef _LANGUAGE_ASSEMBLY
 
@@ -807,6 +814,7 @@ struct alchemy_pci_platdata {
 struct au1k_irda_platform_data {
 	void (*set_phy_mode)(int mode);
 };
+
 
 /* Multifunction pins: Each of these pins can either be assigned to the
  * GPIO controller or a on-chip peripheral.

@@ -43,6 +43,7 @@ static char reg_name[][4] = {
 	"pv ", "at ", "gp ", "sp ", "0"
 };
 
+
 static instr *
 display_stored_regs(instr * pro_pc, unsigned char * sp)
 {

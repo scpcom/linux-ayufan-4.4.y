@@ -929,6 +929,7 @@ static int mxs_dcp_probe(struct platform_device *pdev)
 	if (IS_ERR(sdcp->base))
 		return PTR_ERR(sdcp->base);
 
+
 	ret = devm_request_irq(dev, dcp_vmi_irq, mxs_dcp_irq, 0,
 			       "dcp-vmi-irq", sdcp);
 	if (ret) {

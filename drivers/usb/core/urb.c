@@ -10,6 +10,7 @@
 
 #define to_urb(d) container_of(d, struct urb, kref)
 
+
 static void urb_destroy(struct kref *kref)
 {
 	struct urb *urb = to_urb(kref);
@@ -771,6 +772,7 @@ void usb_kill_anchored_urbs(struct usb_anchor *anchor)
 }
 EXPORT_SYMBOL_GPL(usb_kill_anchored_urbs);
 
+
 /**
  * usb_poison_anchored_urbs - cease all traffic from an anchor
  * @anchor: anchor the requests are bound to
@@ -963,3 +965,4 @@ int usb_anchor_empty(struct usb_anchor *anchor)
 }
 
 EXPORT_SYMBOL_GPL(usb_anchor_empty);
+

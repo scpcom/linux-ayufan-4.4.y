@@ -538,6 +538,7 @@ i40e_status i40evf_aq_set_rss_key(struct i40e_hw *hw,
 	return i40e_aq_get_set_rss_key(hw, vsi_id, key, true);
 }
 
+
 /* The i40evf_ptype_lookup table is used to convert from the 8-bit ptype in the
  * hardware to a bit-field that can be used by SW to more easily determine the
  * packet type.

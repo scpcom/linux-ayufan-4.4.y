@@ -51,6 +51,7 @@
 #define TDES_ISR_URAT_MR		(0x2 << 12)
 #define TDES_ISR_URAT_WO		(0x3 << 12)
 
+
 #define	TDES_KEY1W1R	0x20
 #define	TDES_KEY1W2R	0x24
 #define	TDES_KEY2W1R	0x28

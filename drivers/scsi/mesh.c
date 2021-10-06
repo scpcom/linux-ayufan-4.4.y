@@ -189,6 +189,7 @@ static void set_dma_cmds(struct mesh_state *ms, struct scsi_cmnd *cmd);
 static void halt_dma(struct mesh_state *ms);
 static void phase_mismatch(struct mesh_state *ms);
 
+
 /*
  * Some debugging & logging routines
  */
@@ -330,6 +331,7 @@ mesh_dump_regs(struct mesh_state *ms)
 	}
 }
 
+
 /*
  * Flush write buffers on the bus path to the mesh
  */
@@ -338,6 +340,7 @@ static inline void mesh_flush_io(volatile struct mesh_regs __iomem *mr)
 	(void)in_8(&mr->mesh_id);
 }
 
+
 /*
  * Complete a SCSI command
  */
@@ -345,6 +348,7 @@ static void mesh_completed(struct mesh_state *ms, struct scsi_cmnd *cmd)
 {
 	(*cmd->scsi_done)(cmd);
 }
+
 
 /* Called with  meshinterrupt disabled, initialize the chipset
  * and eventually do the initial bus reset. The lock must not be
@@ -395,6 +399,7 @@ static void mesh_init(struct mesh_state *ms)
 	ms->phase = idle;
 	ms->msgphase = msg_none;
 }
+
 
 static void mesh_start_cmd(struct mesh_state *ms, struct scsi_cmnd *cmd)
 {
@@ -936,6 +941,7 @@ static void reselected(struct mesh_state *ms)
 		ms->conn_tgt = ms->host->this_id;
 		goto bogus;
 	}
+
 
 	/*
 	 * Set up to continue with that target's transfer.
@@ -1614,6 +1620,7 @@ static void cmd_complete(struct mesh_state *ms)
 	}
 }
 
+
 /*
  * Called by midlayer with host locked to queue a new
  * request
@@ -1741,6 +1748,7 @@ static void set_mesh_power(struct mesh_state *ms, int state)
 		msleep(10);
 	}
 }
+
 
 #ifdef CONFIG_PM
 static int mesh_suspend(struct macio_dev *mdev, pm_message_t mesg)
@@ -2010,6 +2018,7 @@ static int mesh_remove(struct macio_dev *mdev)
 	return 0;
 }
 
+
 static struct of_device_id mesh_match[] = 
 {
 	{
@@ -2038,6 +2047,7 @@ static struct macio_driver mesh_driver =
 	.resume		= mesh_resume,
 #endif
 };
+
 
 static int __init init_mesh(void)
 {

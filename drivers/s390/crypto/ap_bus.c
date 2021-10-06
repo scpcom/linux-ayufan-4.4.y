@@ -432,6 +432,7 @@ __ap_recv(ap_qid_t qid, unsigned long long *psmid, void *msg, size_t length)
 	register unsigned long reg6 asm("6") = 0UL;
 	register unsigned long reg7 asm("7") = 0UL;
 
+
 	asm volatile(
 		"0: .long 0xb2ae0064\n"		/* DQAP */
 		"   brc   6,0b\n"

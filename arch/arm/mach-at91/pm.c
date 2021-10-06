@@ -66,6 +66,7 @@ static int at91_pm_valid_state(suspend_state_t state)
 	}
 }
 
+
 static suspend_state_t target_state;
 
 /*
@@ -207,6 +208,7 @@ static void at91_pm_end(void)
 {
 	target_state = PM_SUSPEND_ON;
 }
+
 
 static const struct platform_suspend_ops at91_pm_ops = {
 	.valid	= at91_pm_valid_state,

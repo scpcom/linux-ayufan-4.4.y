@@ -67,6 +67,7 @@
  */
 #define alt_max_short(a, b)	((a) ^ (((a) ^ (b)) & -(-((a) < (b)))))
 
+
 /*
  * Same as ALTERNATIVE macro above but for two alternatives. If CPU
  * has @feature1, it replaces @oldinstr with @newinstr1. If CPU has

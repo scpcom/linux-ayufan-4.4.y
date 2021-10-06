@@ -46,3 +46,4 @@ struct platform_device *__init imx_add_pata_imx(
 	return imx_add_platform_device("pata_imx", -1,
 			res, ARRAY_SIZE(res), NULL, 0);
 }
+

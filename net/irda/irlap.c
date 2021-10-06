@@ -317,6 +317,7 @@ void irlap_data_indication(struct irlap_cb *self, struct sk_buff *skb,
 	irlmp_link_data_indication(self->notify.instance, skb, unreliable);
 }
 
+
 /*
  * Function irlap_data_request (self, skb)
  *
@@ -1000,6 +1001,7 @@ void irlap_apply_connection_parameters(struct irlap_cb *self, int now)
 					self->qos_tx.max_turn_time.value);
 	self->bytes_left = self->line_capacity;
 #endif /* CONFIG_IRDA_DYNAMIC_WINDOW */
+
 
 	/*
 	 *  Initialize timeout values, some of the rules are listed on

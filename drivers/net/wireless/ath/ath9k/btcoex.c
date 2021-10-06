@@ -257,6 +257,7 @@ void ath9k_hw_btcoex_set_weight(struct ath_hw *ah,
 }
 EXPORT_SYMBOL(ath9k_hw_btcoex_set_weight);
 
+
 static void ath9k_hw_btcoex_enable_3wire(struct ath_hw *ah)
 {
 	struct ath_btcoex_hw *btcoex = &ah->btcoex_hw;
@@ -270,6 +271,7 @@ static void ath9k_hw_btcoex_enable_3wire(struct ath_hw *ah)
 	REG_WRITE(ah, AR_BT_COEX_MODE, btcoex->bt_coex_mode);
 	REG_WRITE(ah, AR_BT_COEX_MODE2, btcoex->bt_coex_mode2);
 
+
 	if (AR_SREV_9300_20_OR_LATER(ah)) {
 		REG_WRITE(ah, AR_BT_COEX_WL_WEIGHTS0, btcoex->wlan_weight[0]);
 		REG_WRITE(ah, AR_BT_COEX_WL_WEIGHTS1, btcoex->wlan_weight[1]);
@@ -278,6 +280,8 @@ static void ath9k_hw_btcoex_enable_3wire(struct ath_hw *ah)
 				  btcoex->bt_weight[i]);
 	} else
 		REG_WRITE(ah, AR_BT_COEX_WEIGHT, btcoex->bt_coex_weights);
+
+
 
 	if (AR_SREV_9271(ah)) {
 		val = REG_READ(ah, 0x50040);

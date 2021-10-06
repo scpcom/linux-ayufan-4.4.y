@@ -280,5 +280,6 @@ struct ethtool_ops {
 	int	(*set_tunable)(struct net_device *,
 			       const struct ethtool_tunable *, const void *);
 
+
 };
 #endif /* _LINUX_ETHTOOL_H */

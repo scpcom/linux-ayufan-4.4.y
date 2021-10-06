@@ -903,3 +903,4 @@ int snd_gf1_pcm_new(struct snd_gus_card *gus, int pcm_dev, int control_index)
 
 	return 0;
 }
+

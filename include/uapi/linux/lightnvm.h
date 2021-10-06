@@ -100,6 +100,7 @@ struct nvm_ioctl_remove {
 	__u32 flags;
 };
 
+
 /* The ioctl type, 'L', 0x20 - 0x2F documented in ioctl-number.txt */
 enum {
 	/* top level cmds */

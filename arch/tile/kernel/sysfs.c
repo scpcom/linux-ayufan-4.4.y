@@ -64,6 +64,7 @@ static ssize_t chip_revision_show(struct device *dev,
 }
 static DEVICE_ATTR(chip_revision, 0444, chip_revision_show, NULL);
 
+
 static ssize_t type_show(struct device *dev,
 			    struct device_attribute *attr,
 			    char *page)
@@ -119,6 +120,7 @@ static struct attribute_group board_attr_group = {
 	.name   = "board",
 	.attrs  = board_attrs,
 };
+
 
 static struct bin_attribute hvconfig_bin;
 
@@ -204,6 +206,7 @@ static void hv_stats_device_remove(struct device *dev,
 	if (cpu_online(cpu))
 		sysfs_remove_file(&dev->kobj, &dev_attr_hv_stats.attr);
 }
+
 
 static struct subsys_interface hv_stats_interface = {
 	.name			= "hv_stats",

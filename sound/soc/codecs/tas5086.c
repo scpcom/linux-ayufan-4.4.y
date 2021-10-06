@@ -301,6 +301,7 @@ static int tas5086_put_deemph(struct snd_kcontrol *kcontrol,
 	return tas5086_set_deemph(codec);
 }
 
+
 static int tas5086_set_dai_sysclk(struct snd_soc_dai *codec_dai,
 				  int clk_id, unsigned int freq, int dir)
 {
@@ -395,6 +396,7 @@ static int tas5086_hw_params(struct snd_pcm_substream *substream,
 				 TAS5086_CLOCK_RATIO(val));
 	if (ret < 0)
 		return ret;
+
 
 	ret = regmap_update_bits(priv->regmap, TAS5086_CLOCK_CONTROL,
 				 TAS5086_CLOCK_SCLK_RATIO_48,

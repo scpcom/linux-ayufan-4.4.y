@@ -214,6 +214,7 @@ static struct XC_TV_STANDARD xc5000_standard[MAX_TV_STANDARD] = {
 	{"FM Radio-INPUT1_MONO", 0x0278, 0x9002}
 };
 
+
 struct xc5000_fw_cfg {
 	char *name;
 	u16 size;
@@ -475,6 +476,7 @@ static int xc_set_rf_frequency(struct xc5000_priv *priv, u32 freq_hz)
 	return xc_write_reg(priv, XREG_FINERFREQ, freq_code);
 }
 
+
 static int xc_set_IF_frequency(struct xc5000_priv *priv, u32 freq_khz)
 {
 	u32 freq_code = (freq_khz * 1024)/1000;
@@ -483,6 +485,7 @@ static int xc_set_IF_frequency(struct xc5000_priv *priv, u32 freq_khz)
 
 	return xc_write_reg(priv, XREG_IF_OUT, freq_code);
 }
+
 
 static int xc_get_adc_envelope(struct xc5000_priv *priv, u16 *adc_envelope)
 {
@@ -640,6 +643,7 @@ static int xc5000_fwupload(struct dvb_frontend *fe,
 	priv->pll_register_no = desired_fw->pll_reg;
 	priv->init_status_supported = desired_fw->init_status_supported;
 	priv->fw_checksum_supported = desired_fw->fw_checksum_supported;
+
 
 	dprintk(1, "firmware uploading...\n");
 	ret = xc_load_i2c_sequence(fe,  fw->data);
@@ -1364,6 +1368,7 @@ static int xc5000_set_config(struct dvb_frontend *fe, void *priv_cfg)
 
 	return 0;
 }
+
 
 static const struct dvb_tuner_ops xc5000_tuner_ops = {
 	.info = {

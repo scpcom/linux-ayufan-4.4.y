@@ -806,3 +806,4 @@ MACHINE_START(DAVINCI_DM6467TEVM, "DaVinci DM6467T EVM")
 	.dma_zone_size	= SZ_128M,
 	.restart	= davinci_restart,
 MACHINE_END
+

@@ -103,3 +103,4 @@ void *msm_edp_phy_init(struct device *dev, void __iomem *regbase)
 	phy->base = regbase;
 	return phy;
 }
+

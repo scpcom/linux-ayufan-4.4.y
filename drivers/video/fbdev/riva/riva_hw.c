@@ -1006,6 +1006,7 @@ static void nv10CalcArbitration
           }
       }
 
+
       /*
         Overfill check:
 
@@ -2263,3 +2264,4 @@ int RivaGetConfig
     chip->Tri03  = (RivaTexturedTriangle03 __iomem *)&(chip->FIFO[0x0000E000/4]);
     return (0);
 }
+

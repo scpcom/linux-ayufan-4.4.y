@@ -49,6 +49,7 @@ struct grvga_par {
 	int fb_alloced;         /* = 1 if framebuffer is allocated in main memory */
 };
 
+
 static const struct fb_videomode grvga_modedb[] = {
     {
 	/* 640x480 @ 60 Hz */
@@ -202,6 +203,8 @@ static int grvga_setcolreg(unsigned regno, unsigned red, unsigned green, unsigne
 		red = green = blue = (red * 77 + green * 151 + blue * 28) >> 8;
 	}
 
+
+
 #define CNVT_TOHW(val, width) ((((val)<<(width))+0x7FFF-(val))>>16)
 
 	red    = CNVT_TOHW(red,   info->var.red.length);
@@ -221,6 +224,7 @@ static int grvga_setcolreg(unsigned regno, unsigned red, unsigned green, unsigne
 		u32 v;
 		if (regno >= 16)
 			return -EINVAL;
+
 
 		v =     (red    << info->var.red.offset)   |
 			(green  << info->var.green.offset) |

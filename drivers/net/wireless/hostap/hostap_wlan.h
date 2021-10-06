@@ -18,6 +18,7 @@
 #define DEF_INTS -1, -1, -1, -1, -1, -1, -1
 #define GET_INT_PARM(var,idx) var[var[idx] < 0 ? 0 : idx]
 
+
 /* Specific skb->protocol value that indicates that the packet already contains
  * txdesc header.
  * FIX: This might need own value that would be allocated especially for Prism2
@@ -100,6 +101,7 @@ struct hfa384x_rx_frame {
 	/* followed by frame data; max 2304 bytes */
 } __packed;
 
+
 struct hfa384x_tx_frame {
 	/* HFA384X TX frame descriptor */
 	__le16 status; /* HFA384X_TX_STATUS_ flags */
@@ -128,11 +130,13 @@ struct hfa384x_tx_frame {
 	/* followed by frame data; max 2304 bytes */
 } __packed;
 
+
 struct hfa384x_rid_hdr
 {
 	__le16 len;
 	__le16 rid;
 } __packed;
+
 
 /* Macro for converting signal levels (range 27 .. 154) to wireless ext
  * dBm value with some accuracy */
@@ -272,6 +276,7 @@ struct comm_tallies_sums {
 	unsigned int rx_message_in_bad_msg_fragments;
 };
 
+
 struct hfa384x_regs {
 	u16 cmd;
 	u16 evstat;
@@ -279,6 +284,7 @@ struct hfa384x_regs {
 	u16 offset1;
 	u16 swsupport0;
 };
+
 
 #if defined(PRISM2_PCCARD) || defined(PRISM2_PLX)
 /* I/O ports for HFA384X Controller access */
@@ -361,6 +367,7 @@ struct hfa384x_regs {
 
 #endif /* PRISM2_PCI */
 
+
 /* Command codes for CMD reg. */
 #define HFA384X_CMDCODE_INIT 0x00
 #define HFA384X_CMDCODE_ENABLE 0x01
@@ -391,6 +398,7 @@ struct hfa384x_regs {
 #define HFA384X_OFFSET_ERR BIT(14)
 #define HFA384X_OFFSET_BUSY BIT(15)
 
+
 /* ProgMode for download command */
 #define HFA384X_PROGMODE_DISABLE 0
 #define HFA384X_PROGMODE_ENABLE_VOLATILE 1
@@ -409,6 +417,7 @@ struct hfa384x_regs {
 
 #define PRISM2_PDA_SIZE 1024
 
+
 /* Events; EvStat, Interrupt mask (IntEn), and acknowledge bits (EvAck) */
 #define HFA384X_EV_TICK BIT(15)
 #define HFA384X_EV_WTERR BIT(14)
@@ -424,6 +433,7 @@ struct hfa384x_regs {
 #define HFA384X_EV_TXEXC BIT(2)
 #define HFA384X_EV_TX BIT(1)
 #define HFA384X_EV_RX BIT(0)
+
 
 /* HFA384X Information frames */
 #define HFA384X_INFO_HANDOVERADDR 0xF000 /* AP f/w ? */
@@ -477,6 +487,7 @@ enum { HFA384X_PORTTYPE_BSS = 1, HFA384X_PORTTYPE_WDS = 2,
 enum { HFA384X_RX_MSGTYPE_NORMAL = 0, HFA384X_RX_MSGTYPE_RFC1042 = 1,
        HFA384X_RX_MSGTYPE_BRIDGETUNNEL = 2, HFA384X_RX_MSGTYPE_MGMT = 4 };
 
+
 #define HFA384X_TX_CTRL_ALT_RTRY BIT(5)
 #define HFA384X_TX_CTRL_802_11 BIT(3)
 #define HFA384X_TX_CTRL_802_3 0
@@ -494,6 +505,7 @@ enum { HFA384X_RX_MSGTYPE_NORMAL = 0, HFA384X_RX_MSGTYPE_RFC1042 = 1,
 #define HFA386X_CR_A_D_TEST_MODES2 0x1A /* CR13 */
 #define HFA386X_CR_MANUAL_TX_POWER 0x3E /* CR31 */
 #define HFA386X_CR_MEASURED_TX_POWER 0x74 /* CR58 */
+
 
 #ifdef __KERNEL__
 
@@ -517,6 +529,7 @@ struct hostap_tx_callback_info {
 	struct hostap_tx_callback_info *next;
 };
 
+
 /* IEEE 802.11 requires that STA supports concurrent reception of at least
  * three fragmented frames. This define can be increased to support more
  * concurrent frames, but it should be noted that each entry can consume about
@@ -531,6 +544,7 @@ struct prism2_frag_entry {
 	u8 src_addr[ETH_ALEN];
 	u8 dst_addr[ETH_ALEN];
 };
+
 
 struct hostap_cmd_queue {
 	struct list_head list;
@@ -590,6 +604,7 @@ struct prism2_helper_functions {
 	enum { HOSTAP_HW_PCCARD, HOSTAP_HW_PLX, HOSTAP_HW_PCI } hw_type;
 };
 
+
 struct prism2_download_data {
 	u32 dl_cmd;
 	u32 start_addr;
@@ -600,6 +615,7 @@ struct prism2_download_data {
 		u8 *data; /* allocated data */
 	} data[0];
 };
+
 
 #define HOSTAP_MAX_BSS_COUNT 64
 #define MAX_WPA_IE_LEN 64
@@ -619,6 +635,7 @@ struct hostap_bss_info {
 	int chan;
 	int included;
 };
+
 
 /* Per radio private Host AP data - shared by all net devices interfaces used
  * by each radio (wlan#, wlan#ap, wlan#sta, WDS).
@@ -867,6 +884,7 @@ struct local_info {
 	void *hw_priv;
 };
 
+
 /* Per interface private Host AP data
  * Allocated for each net device that Host AP uses (wlan#, wlan#ap, wlan#sta,
  * WDS) and netdev_priv(dev) points to this structure. */
@@ -893,6 +911,7 @@ struct hostap_interface {
 	} u;
 };
 
+
 #define HOSTAP_SKB_TX_DATA_MAGIC 0xf08a36a2
 
 /*
@@ -914,6 +933,7 @@ struct hostap_skb_tx_data {
 	unsigned long jiffies; /* queueing timestamp */
 	unsigned short ethertype;
 };
+
 
 #ifndef PRISM2_NO_DEBUG
 
@@ -972,6 +992,7 @@ static inline void prism2_io_debug_add(struct net_device *dev, int cmd,
 		local->io_debug_head = 0;
 }
 
+
 static inline void prism2_io_debug_error(struct net_device *dev, int err)
 {
 	struct hostap_interface *iface = netdev_priv(dev);
@@ -1002,6 +1023,7 @@ static inline void prism2_io_debug_error(struct net_device *dev, int err)
 }
 
 #endif /* PRISM2_IO_DEBUG */
+
 
 #ifdef PRISM2_CALLBACK
 enum {

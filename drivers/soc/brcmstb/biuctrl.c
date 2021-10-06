@@ -97,6 +97,7 @@ static struct syscore_ops brcmstb_cpu_credit_syscore_ops = {
 };
 #endif
 
+
 void __init brcmstb_biuctrl_init(void)
 {
 	int ret;

@@ -197,3 +197,4 @@ extern void uvc_function_disconnect(struct uvc_device *uvc);
 #endif /* __KERNEL__ */
 
 #endif /* _UVC_GADGET_H_ */
+

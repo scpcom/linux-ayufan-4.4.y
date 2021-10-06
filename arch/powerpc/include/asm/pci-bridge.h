@@ -263,6 +263,7 @@ extern void pcibios_remove_pci_devices(struct pci_bus *bus);
 /** Discover new pci devices under this bus, and add them */
 extern void pcibios_add_pci_devices(struct pci_bus *bus);
 
+
 extern void isa_bridge_find_early(struct pci_controller *hose);
 
 static inline int isa_vaddr_is_ioport(void __iomem *address)

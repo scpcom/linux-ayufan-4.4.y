@@ -744,3 +744,4 @@ void rh_dump_blk(rh_info_t * info, rh_block_t * blk)
 	       blk, blk->start, blk->start + blk->size, blk->size);
 }
 EXPORT_SYMBOL_GPL(rh_dump_blk);
+

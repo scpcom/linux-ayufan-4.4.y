@@ -101,6 +101,7 @@ xfs_find_handle(
 	    !S_ISLNK(inode->i_mode))
 		goto out_put;
 
+
 	memcpy(&handle.ha_fsid, ip->i_mount->m_fixedfsid, sizeof(xfs_fsid_t));
 
 	if (cmd == XFS_IOC_PATH_TO_FSHANDLE) {
@@ -1213,6 +1214,7 @@ xfs_ioctl_setattr(
 		code = PTR_ERR(tp);
 		goto error_free_dquots;
 	}
+
 
 	if (XFS_IS_QUOTA_RUNNING(mp) && XFS_IS_PQUOTA_ON(mp) &&
 	    xfs_get_projid(ip) != fa->fsx_projid) {

@@ -661,6 +661,7 @@ struct osd_continuation_descriptor_header {
 	__be32	length;
 } __packed;
 
+
 /* osd2r05a sec 5.4.2: Scatter/gather list */
 struct osd_sg_list_entry {
 	__be64 offset;

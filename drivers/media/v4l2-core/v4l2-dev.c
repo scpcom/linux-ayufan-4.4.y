@@ -230,6 +230,7 @@ struct video_device *video_devdata(struct file *file)
 }
 EXPORT_SYMBOL(video_devdata);
 
+
 /* Priority handling */
 
 static inline bool prio_is_valid(enum v4l2_priority prio)
@@ -291,6 +292,7 @@ int v4l2_prio_check(struct v4l2_prio_state *global, enum v4l2_priority local)
 	return (local < v4l2_prio_max(global)) ? -EBUSY : 0;
 }
 EXPORT_SYMBOL(v4l2_prio_check);
+
 
 static ssize_t v4l2_read(struct file *filp, char __user *buf,
 		size_t sz, loff_t *off)

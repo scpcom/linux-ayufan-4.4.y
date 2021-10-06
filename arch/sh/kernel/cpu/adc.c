@@ -8,6 +8,7 @@
 #include <asm/adc.h>
 #include <asm/io.h>
 
+
 int adc_single(unsigned int channel)
 {
 	int off;

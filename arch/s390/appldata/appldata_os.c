@@ -22,6 +22,7 @@
 
 #include "appldata.h"
 
+
 #define LOAD_INT(x) ((x) >> FSHIFT)
 #define LOAD_FRAC(x) LOAD_INT(((x) & (FIXED_1-1)) * 100)
 
@@ -86,6 +87,7 @@ static struct appldata_ops ops = {
 	.owner	   = THIS_MODULE,
 	.mod_lvl   = {0xF0, 0xF1},		/* EBCDIC "01" */
 };
+
 
 /*
  * appldata_get_os_data()
@@ -158,6 +160,7 @@ static void appldata_get_os_data(void *data)
 	os_data->sync_count_2++;
 }
 
+
 /*
  * appldata_os_init()
  *
@@ -205,6 +208,7 @@ static void __exit appldata_os_exit(void)
 	appldata_unregister_ops(&ops);
 	kfree(appldata_os_data);
 }
+
 
 module_init(appldata_os_init);
 module_exit(appldata_os_exit);

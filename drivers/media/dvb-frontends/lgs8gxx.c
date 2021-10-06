@@ -584,6 +584,7 @@ static int lgs8913_init(struct lgs8gxx_state *priv)
 	lgs8gxx_read_reg(priv, 0xc3, &t);
 	lgs8gxx_write_reg(priv, 0xc3, t&0x10);
 
+
 	return 0;
 }
 
@@ -657,6 +658,7 @@ static void lgs8gxx_release(struct dvb_frontend *fe)
 
 	kfree(state);
 }
+
 
 static int lgs8gxx_write(struct dvb_frontend *fe, const u8 buf[], int len)
 {

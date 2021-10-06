@@ -18,6 +18,7 @@
 	} temp;})
 #define pipestring(pipe) edstring(usb_pipetype(pipe))
 
+
 #define ohci_dbg_sw(ohci, next, size, format, arg...) \
 	do { \
 	if (next != NULL) { \
@@ -35,6 +36,7 @@
 		s_len = scnprintf(*next, *size, format, ## arg); \
 		*size -= s_len; *next += s_len; \
 	} while (0);
+
 
 static void ohci_dump_intr_mask (
 	struct ohci_hcd *ohci,
@@ -182,6 +184,7 @@ ohci_dump_status (struct ohci_hcd *controller, char **next, unsigned *size)
 		(temp & RH_PS_PES) ? " PES" : "", \
 		(temp & RH_PS_CCS) ? " CCS" : "" \
 		);
+
 
 static void
 ohci_dump_roothub (
@@ -805,3 +808,4 @@ static inline void remove_debug_files (struct ohci_hcd *ohci)
 }
 
 /*-------------------------------------------------------------------------*/
+

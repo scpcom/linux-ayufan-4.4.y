@@ -340,3 +340,4 @@ module_exit(omap_dss_exit);
 MODULE_AUTHOR("Tomi Valkeinen <tomi.valkeinen@nokia.com>");
 MODULE_DESCRIPTION("OMAP2/3 Display Subsystem");
 MODULE_LICENSE("GPL v2");
+

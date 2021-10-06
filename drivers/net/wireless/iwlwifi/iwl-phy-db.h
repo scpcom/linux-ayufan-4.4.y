@@ -76,6 +76,7 @@ void iwl_phy_db_free(struct iwl_phy_db *phy_db);
 int iwl_phy_db_set_section(struct iwl_phy_db *phy_db, struct iwl_rx_packet *pkt,
 			   gfp_t alloc_ctx);
 
+
 int iwl_send_phy_db_data(struct iwl_phy_db *phy_db);
 
 #endif /* __IWL_PHYDB_H__ */

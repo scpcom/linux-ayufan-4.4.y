@@ -16,6 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+
 #ifndef __RFKILL_GPIO_H
 #define __RFKILL_GPIO_H
 

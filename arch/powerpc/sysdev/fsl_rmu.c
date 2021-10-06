@@ -149,6 +149,7 @@ struct rio_pw_regs {
 	u32 pwqbar;
 };
 
+
 struct rio_tx_desc {
 	u32 pad1;
 	u32 saddr;
@@ -573,6 +574,7 @@ int fsl_rio_port_write_init(struct fsl_rio_pw *pw)
 	   clear queue full */
 	out_be32(&pw->pw_regs->pwmr,
 		 RIO_IPWMR_SEN | RIO_IPWMR_QFIE | RIO_IPWMR_EIE | RIO_IPWMR_CQ);
+
 
 	/* Hook up port-write handler */
 	rc = request_irq(IRQ_RIO_PW(pw), fsl_rio_port_write_handler,

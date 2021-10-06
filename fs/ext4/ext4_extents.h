@@ -48,6 +48,7 @@
  */
 #define EXT_STATS_
 
+
 /*
  * ext4_inode has i_block array (60 bytes total).
  * The first 12 bytes store ext4_extent_header;
@@ -152,6 +153,7 @@ struct ext4_ext_path {
  */
 #define EXT_INIT_MAX_LEN	(1UL << 15)
 #define EXT_UNWRITTEN_MAX_LEN	(EXT_INIT_MAX_LEN - 1)
+
 
 #define EXT_FIRST_EXTENT(__hdr__) \
 	((struct ext4_extent *) (((char *) (__hdr__)) +		\
@@ -269,3 +271,4 @@ int __ext4_ext_dirty(const char *where, unsigned int line, handle_t *handle,
 		     struct inode *inode, struct ext4_ext_path *path);
 
 #endif /* _EXT4_EXTENTS */
+

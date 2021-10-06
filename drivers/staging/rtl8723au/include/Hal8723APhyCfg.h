@@ -94,11 +94,14 @@ struct r_antenna_sel_cck {
 
 /*------------------------------Define structure----------------------------*/
 
+
 /*------------------------Export global variable----------------------------*/
 /*------------------------Export global variable----------------------------*/
 
+
 /*------------------------Export Macro Definition---------------------------*/
 /*------------------------Export Macro Definition---------------------------*/
+
 
 /*--------------------------Exported Function prototype---------------------*/
 /*  */
@@ -139,6 +142,7 @@ void ChkFwCmdIoDone(struct rtw_adapter *Adapter);
 /*  */
 void
 rtl8192c_PHY_SetBeaconHwReg(struct rtw_adapter *Adapter, u16 BeaconInterval);
+
 
 void PHY_SwitchEphyParameter(struct rtw_adapter *Adapter);
 

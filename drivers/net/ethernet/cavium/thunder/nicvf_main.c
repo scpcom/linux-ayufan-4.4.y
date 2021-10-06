@@ -833,6 +833,7 @@ static irqreturn_t nicvf_rbdr_intr_handler(int irq, void *nicvf_irq)
 	struct nicvf *nic = (struct nicvf *)nicvf_irq;
 	u8 qidx;
 
+
 	nicvf_dump_intr_status(nic);
 
 	/* Disable RBDR interrupt and schedule softirq */

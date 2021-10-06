@@ -39,6 +39,7 @@
 #include <asm/mach/pci.h>
 #include "mm.h"
 
+
 LIST_HEAD(static_vmlist);
 
 static struct static_vm *find_static_vm_paddr(phys_addr_t paddr,

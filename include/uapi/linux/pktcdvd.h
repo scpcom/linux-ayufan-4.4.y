@@ -107,4 +107,5 @@ struct pkt_ctrl_command {
 #define PACKET_IOCTL_MAGIC	('X')
 #define PACKET_CTRL_CMD		_IOWR(PACKET_IOCTL_MAGIC, 1, struct pkt_ctrl_command)
 
+
 #endif /* _UAPI__PKTCDVD_H */

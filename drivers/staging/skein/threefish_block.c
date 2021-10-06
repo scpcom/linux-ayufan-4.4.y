@@ -63,6 +63,7 @@ void threefish_encrypt_256(struct threefish_key *key_ctx, u64 *input,
 	b2 += b1;
 	b1 = ((b1 << 32) | (b1 >> (64 - 32))) ^ b2;
 
+
 	b1 += k3 + t2;
 	b0 += b1 + k2;
 	b1 = ((b1 << 14) | (b1 >> (64 - 14))) ^ b0;
@@ -114,6 +115,7 @@ void threefish_encrypt_256(struct threefish_key *key_ctx, u64 *input,
 
 	b2 += b1;
 	b1 = ((b1 << 32) | (b1 >> (64 - 32))) ^ b2;
+
 
 	b1 += k0 + t1;
 	b0 += b1 + k4;
@@ -167,6 +169,7 @@ void threefish_encrypt_256(struct threefish_key *key_ctx, u64 *input,
 	b2 += b1;
 	b1 = ((b1 << 32) | (b1 >> (64 - 32))) ^ b2;
 
+
 	b1 += k2 + t0;
 	b0 += b1 + k1;
 	b1 = ((b1 << 14) | (b1 >> (64 - 14))) ^ b0;
@@ -218,6 +221,7 @@ void threefish_encrypt_256(struct threefish_key *key_ctx, u64 *input,
 
 	b2 += b1;
 	b1 = ((b1 << 32) | (b1 >> (64 - 32))) ^ b2;
+
 
 	b1 += k4 + t2;
 	b0 += b1 + k3;
@@ -271,6 +275,7 @@ void threefish_encrypt_256(struct threefish_key *key_ctx, u64 *input,
 	b2 += b1;
 	b1 = ((b1 << 32) | (b1 >> (64 - 32))) ^ b2;
 
+
 	b1 += k1 + t1;
 	b0 += b1 + k0;
 	b1 = ((b1 << 14) | (b1 >> (64 - 14))) ^ b0;
@@ -322,6 +327,7 @@ void threefish_encrypt_256(struct threefish_key *key_ctx, u64 *input,
 
 	b2 += b1;
 	b1 = ((b1 << 32) | (b1 >> (64 - 32))) ^ b2;
+
 
 	b1 += k3 + t0;
 	b0 += b1 + k2;
@@ -375,6 +381,7 @@ void threefish_encrypt_256(struct threefish_key *key_ctx, u64 *input,
 	b2 += b1;
 	b1 = ((b1 << 32) | (b1 >> (64 - 32))) ^ b2;
 
+
 	b1 += k0 + t2;
 	b0 += b1 + k4;
 	b1 = ((b1 << 14) | (b1 >> (64 - 14))) ^ b0;
@@ -426,6 +433,7 @@ void threefish_encrypt_256(struct threefish_key *key_ctx, u64 *input,
 
 	b2 += b1;
 	b1 = ((b1 << 32) | (b1 >> (64 - 32))) ^ b2;
+
 
 	b1 += k2 + t1;
 	b0 += b1 + k1;
@@ -570,6 +578,7 @@ void threefish_decrypt_256(struct threefish_key *key_ctx, u64 *input,
 	b2 -= b3 + k3 + t2;
 	b3 -= k4 + 16;
 
+
 	tmp = b3 ^ b0;
 	b3 = (tmp >> 32) | (tmp << (64 - 32));
 	b0 -= b3;
@@ -637,6 +646,7 @@ void threefish_decrypt_256(struct threefish_key *key_ctx, u64 *input,
 	b3 = (tmp >> 16) | (tmp << (64 - 16));
 	b2 -= b3 + k1 + t0;
 	b3 -= k2 + 14;
+
 
 	tmp = b3 ^ b0;
 	b3 = (tmp >> 32) | (tmp << (64 - 32));
@@ -706,6 +716,7 @@ void threefish_decrypt_256(struct threefish_key *key_ctx, u64 *input,
 	b2 -= b3 + k4 + t1;
 	b3 -= k0 + 12;
 
+
 	tmp = b3 ^ b0;
 	b3 = (tmp >> 32) | (tmp << (64 - 32));
 	b0 -= b3;
@@ -773,6 +784,7 @@ void threefish_decrypt_256(struct threefish_key *key_ctx, u64 *input,
 	b3 = (tmp >> 16) | (tmp << (64 - 16));
 	b2 -= b3 + k2 + t2;
 	b3 -= k3 + 10;
+
 
 	tmp = b3 ^ b0;
 	b3 = (tmp >> 32) | (tmp << (64 - 32));
@@ -842,6 +854,7 @@ void threefish_decrypt_256(struct threefish_key *key_ctx, u64 *input,
 	b2 -= b3 + k0 + t0;
 	b3 -= k1 + 8;
 
+
 	tmp = b3 ^ b0;
 	b3 = (tmp >> 32) | (tmp << (64 - 32));
 	b0 -= b3;
@@ -909,6 +922,7 @@ void threefish_decrypt_256(struct threefish_key *key_ctx, u64 *input,
 	b3 = (tmp >> 16) | (tmp << (64 - 16));
 	b2 -= b3 + k3 + t1;
 	b3 -= k4 + 6;
+
 
 	tmp = b3 ^ b0;
 	b3 = (tmp >> 32) | (tmp << (64 - 32));
@@ -978,6 +992,7 @@ void threefish_decrypt_256(struct threefish_key *key_ctx, u64 *input,
 	b2 -= b3 + k1 + t2;
 	b3 -= k2 + 4;
 
+
 	tmp = b3 ^ b0;
 	b3 = (tmp >> 32) | (tmp << (64 - 32));
 	b0 -= b3;
@@ -1045,6 +1060,7 @@ void threefish_decrypt_256(struct threefish_key *key_ctx, u64 *input,
 	b3 = (tmp >> 16) | (tmp << (64 - 16));
 	b2 -= b3 + k4 + t0;
 	b3 -= k0 + 2;
+
 
 	tmp = b3 ^ b0;
 	b3 = (tmp >> 32) | (tmp << (64 - 32));

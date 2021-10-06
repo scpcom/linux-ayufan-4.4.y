@@ -432,6 +432,7 @@ static int irq = -1;
 module_param(io, int, 0444);
 module_param(irq, int, 0444);
 
+
 static int __init init_uart401(void)
 {
 	cfg_mpu.irq = irq;

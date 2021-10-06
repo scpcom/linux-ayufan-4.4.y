@@ -170,6 +170,7 @@ static struct mtd_partition axis_partitions[MAX_PARTITIONS] = {
 	},
 };
 
+
 /* If no partition-table was found, we use this default-set.
  * Default flash size is 8MB (NOR). CONFIG_ETRAX_PTABLE_SECTOR is most
  * likely the size of one flash block and "filesystem"-partition needs
@@ -377,6 +378,7 @@ static int __init init_axis_flash(void)
 		loff_t ptable_sector = CONFIG_ETRAX_PTABLE_SECTOR;
 		main_mtd->owner = THIS_MODULE;
 		axisflash_mtd = main_mtd;
+
 
 		/* First partition (rescue) is always set to the default. */
 		pidx++;

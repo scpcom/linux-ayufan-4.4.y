@@ -22,6 +22,7 @@
 #include <linux/hwmon-sysfs.h>
 #include <linux/err.h>
 
+
 /* Addresses scanned */
 static const unsigned short normal_i2c[] = { 0x48, 0x49, 0x4a, 0x4c,
 					0x4d, 0x4e, I2C_CLIENT_END };

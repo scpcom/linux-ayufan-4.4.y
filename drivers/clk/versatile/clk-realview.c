@@ -75,6 +75,7 @@ void __init realview_clk_init(void __iomem *sysbase, bool is_pb1176)
 	} else
 		clk_register_clkdev(clk, NULL, "fpga:uart3");
 
+
 	/* 1 MHz clock */
 	clk = clk_register_fixed_rate(NULL, "clk1mhz", NULL, CLK_IS_ROOT,
 				      1000000);

@@ -18,6 +18,7 @@
 
 #include "utils.h"
 
+
 #define DO_TEST(_name, _num)	\
 static int test_##_name(void)			\
 {						\

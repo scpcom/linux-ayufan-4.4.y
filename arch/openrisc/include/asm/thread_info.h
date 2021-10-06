@@ -26,6 +26,7 @@
 #include <asm/processor.h>
 #endif
 
+
 /* THREAD_SIZE is the size of the task_struct/kernel_stack combo.
  * normally, the stack is found by doing something like p + THREAD_SIZE
  * in or32, a page is 8192 bytes, which seems like a sane size
@@ -115,6 +116,7 @@ register struct thread_info *current_thread_info_reg asm("r10");
 #define _TIF_NEED_RESCHED	(1<<TIF_NEED_RESCHED)
 #define _TIF_SINGLESTEP		(1<<TIF_SINGLESTEP)
 #define _TIF_POLLING_NRFLAG	(1<<TIF_POLLING_NRFLAG)
+
 
 /* Work to do when returning from interrupt/exception */
 /* For OpenRISC, this is anything in the LSW other than syscall trace */

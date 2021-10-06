@@ -33,6 +33,7 @@
 #include <msp_int.h>
 #include <msp_gpio_macros.h>
 
+
 #define MSP_ETHERNET_GPIO0	14
 #define MSP_ETHERNET_GPIO1	15
 #define MSP_ETHERNET_GPIO2	16
@@ -64,6 +65,8 @@ static struct resource msp_eth1_resources[] = {
 		.flags	= IORESOURCE_IRQ,
 	},
 };
+
+
 
 static struct platform_device mspeth_device[] = {
 	[0] = {

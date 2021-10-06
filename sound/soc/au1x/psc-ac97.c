@@ -501,3 +501,4 @@ module_platform_driver(au1xpsc_ac97_driver);
 MODULE_LICENSE("GPL");
 MODULE_DESCRIPTION("Au12x0/Au1550 PSC AC97 ALSA ASoC audio driver");
 MODULE_AUTHOR("Manuel Lauss");
+

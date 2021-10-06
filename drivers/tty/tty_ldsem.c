@@ -33,6 +33,7 @@
 #include <linux/tty.h>
 #include <linux/sched.h>
 
+
 #ifdef CONFIG_DEBUG_LOCK_ALLOC
 # define __acq(l, s, t, r, c, n, i)		\
 				lock_acquire(&(l)->dep_map, s, t, r, c, n, i)
@@ -54,6 +55,7 @@
 #else
 # define lock_stat(_lock, stat)		do { } while (0)
 #endif
+
 
 #if BITS_PER_LONG == 64
 # define LDSEM_ACTIVE_MASK	0xffffffffL
@@ -315,6 +317,8 @@ down_write_failed(struct ld_semaphore *sem, long count, long timeout)
 	return sem;
 }
 
+
+
 static inline int __ldsem_down_read_nested(struct ld_semaphore *sem,
 					   int subclass, long timeout)
 {
@@ -352,6 +356,7 @@ static inline int __ldsem_down_write_nested(struct ld_semaphore *sem,
 	lock_stat(sem, acquired);
 	return 1;
 }
+
 
 /*
  * lock for reading -- returns 1 if successful, 0 if timed out
@@ -432,6 +437,7 @@ void ldsem_up_write(struct ld_semaphore *sem)
 	if (count < 0)
 		ldsem_wake(sem);
 }
+
 
 #ifdef CONFIG_DEBUG_LOCK_ALLOC
 

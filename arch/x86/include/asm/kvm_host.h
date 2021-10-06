@@ -61,6 +61,8 @@
 
 #define CR8_RESERVED_BITS (~(unsigned long)X86_CR8_TPR)
 
+
+
 #define INVALID_PAGE (~(hpa_t)0)
 #define VALID_PAGE(x) ((x) != INVALID_PAGE)
 

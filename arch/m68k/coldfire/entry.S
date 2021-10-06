@@ -200,3 +200,4 @@ ENTRY(resume)
 	movew	%d7,%sr
 	RESTORE_SWITCH_STACK
 	rts
+

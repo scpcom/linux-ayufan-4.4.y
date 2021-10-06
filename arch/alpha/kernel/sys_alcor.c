@@ -31,6 +31,7 @@
 #include "pci_impl.h"
 #include "machvec_impl.h"
 
+
 /* Note mask bit is true for ENABLED irqs.  */
 static unsigned long cached_irq_mask;
 
@@ -133,6 +134,7 @@ alcor_init_irq(void)
 
 	setup_irq(16+31, &isa_cascade_irqaction);
 }
+
 
 /*
  * PCI Fixup configuration.
@@ -243,6 +245,7 @@ alcor_init_pci(void)
 	}
 	pci_dev_put(dev);
 }
+
 
 /*
  * The System Vectors

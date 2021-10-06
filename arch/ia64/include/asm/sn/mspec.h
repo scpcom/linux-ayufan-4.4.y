@@ -53,6 +53,7 @@ struct amo {
         u64 unused[7];
 };
 
+
 #endif /* __KERNEL__ */
 
 #endif /* _ASM_IA64_SN_MSPEC_H */

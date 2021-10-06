@@ -220,6 +220,7 @@ int c2_llp_service_create(struct iw_cm_id *cm_id, int backlog)
 	return err;
 }
 
+
 int c2_llp_service_destroy(struct iw_cm_id *cm_id)
 {
 

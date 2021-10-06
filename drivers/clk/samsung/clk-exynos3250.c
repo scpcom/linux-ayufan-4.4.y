@@ -921,6 +921,7 @@ static void __init exynos3250_cmu_dmc_init(struct device_node *np)
 CLK_OF_DECLARE(exynos3250_cmu_dmc, "samsung,exynos3250-cmu-dmc",
 		exynos3250_cmu_dmc_init);
 
+
 /*
  * CMU ISP
  */
@@ -1081,3 +1082,4 @@ static int __init exynos3250_cmu_platform_init(void)
 					exynos3250_cmu_isp_probe);
 }
 subsys_initcall(exynos3250_cmu_platform_init);
+

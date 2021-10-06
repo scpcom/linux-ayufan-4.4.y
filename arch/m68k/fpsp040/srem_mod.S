@@ -89,6 +89,7 @@ SREM_MOD:    |idnt    2,1 | Motorola 040 Floating Point Software Package
 	.set	R_Hi,R+4
 	.set	R_Lo,R+8
 
+
 Scale:     .long	0x00010000,0x80000000,0x00000000,0x00000000
 
 	|xref	t_avoid_unsupp
@@ -217,6 +218,7 @@ Init:
 
 |..At this point  R = 2^(-L)X; Q = 0; k = 0; and  k+j = L
 
+
 Mod_Loop:
    tstl                %d6              | ...test carry bit
    bgts                R_GT_Y
@@ -322,6 +324,7 @@ No_Scale:
    movel		#0,Sc_Flag(%a6)
 
 |
+
 
 ModOrRem:
    movel               Mod_Flag(%a6),%d6

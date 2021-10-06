@@ -16,6 +16,7 @@
  * (C) Copyright 2004-2007 Alan Stern, stern@rowland.harvard.edu
  */
 
+
 /*
  * Technically, updating td->status here is a race, but it's not really a
  * problem. The worst that can happen is that we set the IOC bit again
@@ -35,6 +36,7 @@ static inline void uhci_clear_next_interrupt(struct uhci_hcd *uhci)
 {
 	uhci->term_td->status &= ~cpu_to_hc32(uhci, TD_CTRL_IOC);
 }
+
 
 /*
  * Full-Speed Bandwidth Reclamation (FSBR).
@@ -99,6 +101,7 @@ static void uhci_fsbr_timeout(unsigned long _uhci)
 	}
 	spin_unlock_irqrestore(&uhci->lock, flags);
 }
+
 
 static struct uhci_td *uhci_alloc_td(struct uhci_hcd *uhci)
 {

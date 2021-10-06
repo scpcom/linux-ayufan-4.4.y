@@ -182,8 +182,10 @@ union ULARGE_INTEGER {
 	unsigned long long quad_part;
 };
 
+
 #define KFD_CIK_VMID_START_OFFSET (8)
 #define KFD_CIK_VMID_END_OFFSET (KFD_CIK_VMID_START_OFFSET + (8))
+
 
 void kfd_dbgdev_init(struct kfd_dbgdev *pdbgdev, struct kfd_dev *pdev,
 			enum DBGDEV_TYPE type);

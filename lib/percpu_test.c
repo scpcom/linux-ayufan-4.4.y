@@ -69,6 +69,7 @@ static int __init percpu_test_init(void)
 	__this_cpu_add(long_counter, ui_one);
 	CHECK(l, long_counter, (long)0x100000000LL);
 
+
 	l = 0;
 	__this_cpu_write(long_counter, 0);
 

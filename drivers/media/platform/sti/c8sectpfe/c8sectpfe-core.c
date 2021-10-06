@@ -222,6 +222,7 @@ static int c8sectpfe_start_feed(struct dvb_demux_feed *dvbdmxfeed)
 		writel(channel->fifo,
 			fei->io + C8SECTPFE_IB_WRT_PNT(channel->tsin_id));
 
+
 		/* reset read / write memdma ptrs for this channel */
 		writel(channel->back_buffer_busaddr, channel->irec +
 			DMA_PRDS_BUSBASE_TP(0));
@@ -419,6 +420,7 @@ static irqreturn_t c8sectpfe_idle_irq_handler(int irq, void *priv)
 
 	return IRQ_HANDLED;
 }
+
 
 static void free_input_block(struct c8sectpfei *fei, struct channel_info *tsin)
 {
@@ -935,6 +937,7 @@ static int c8sectpfe_remove(struct platform_device *pdev)
 	return 0;
 }
 
+
 static int configure_channels(struct c8sectpfei *fei)
 {
 	int index = 0, ret;
@@ -1029,6 +1032,7 @@ c8sectpfe_elf_sanity_check(struct c8sectpfei *fei, const struct firmware *fw)
 
 	return 0;
 }
+
 
 static void load_imem_segment(struct c8sectpfei *fei, Elf32_Phdr *phdr,
 			const struct firmware *fw, u8 __iomem *dest,

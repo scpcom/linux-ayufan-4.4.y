@@ -518,6 +518,7 @@ int ohci_hub_status_data(struct usb_hcd *hcd, char *buf)
 	else
 		clear_bit(HCD_FLAG_POLL_RH, &hcd->flags);
 
+
 done:
 	spin_unlock_irqrestore (&ohci->lock, flags);
 
@@ -596,6 +597,7 @@ static int ohci_start_port_reset (struct usb_hcd *hcd, unsigned port)
 #endif
 
 /*-------------------------------------------------------------------------*/
+
 
 /* See usb 7.1.7.5:  root hubs must issue at least 50 msec reset signaling,
  * not necessarily continuous ... to guard against resume signaling.

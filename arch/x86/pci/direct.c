@@ -84,6 +84,7 @@ const struct pci_raw_ops pci_direct_conf1 = {
 	.write =	pci_conf1_write,
 };
 
+
 /*
  * Functions for accessing PCI configuration space with type 2 accesses
  */
@@ -178,6 +179,7 @@ static const struct pci_raw_ops pci_direct_conf2 = {
 	.read =		pci_conf2_read,
 	.write =	pci_conf2_write,
 };
+
 
 /*
  * Before we decide to use direct hardware access mechanisms, we try to do some

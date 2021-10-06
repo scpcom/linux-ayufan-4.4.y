@@ -1,6 +1,7 @@
 #ifndef NET_COMPAT_H
 #define NET_COMPAT_H
 
+
 struct sock;
 
 #if defined(CONFIG_COMPAT)

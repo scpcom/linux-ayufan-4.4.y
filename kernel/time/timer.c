@@ -94,6 +94,7 @@ struct tvec_base {
 	struct tvec tv5;
 } ____cacheline_aligned;
 
+
 static DEFINE_PER_CPU(struct tvec_base, tvec_bases);
 
 #if defined(CONFIG_SMP) && defined(CONFIG_NO_HZ_COMMON)

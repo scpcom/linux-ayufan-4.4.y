@@ -87,3 +87,4 @@ GLOBAL_ENTRY(flush_register_stack)
 	;;
 	br.ret.sptk.many rp
 END(flush_register_stack)
+

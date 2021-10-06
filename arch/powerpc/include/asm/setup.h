@@ -29,3 +29,4 @@ void setup_panic(void);
 #endif /* !__ASSEMBLY__ */
 
 #endif	/* _ASM_POWERPC_SETUP_H */
+

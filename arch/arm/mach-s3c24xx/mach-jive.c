@@ -403,6 +403,7 @@ static struct platform_device jive_device_lcdspi = {
 	.dev.platform_data = &jive_lcd_spi,
 };
 
+
 /* WM8750 audio code SPI definition */
 
 static struct spi_gpio_platform_data jive_wm8750_spi = {

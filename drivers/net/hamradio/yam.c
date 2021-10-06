@@ -244,6 +244,7 @@ static DEFINE_TIMER(yam_timer, NULL, 0, 0);
 #define ENABLE_TXINT	IER_MSR			/* enable uart ms interrupt during tx */
 #define ENABLE_RTXINT	(IER_RX|IER_MSR)	/* full duplex operations */
 
+
 /*************************************************************************
 * CRC Tables
 ************************************************************************/
@@ -466,6 +467,7 @@ static int fpga_download(int iobase, int bitrate)
 	return (rc & MSR_DSR) ? 0 : -1;
 }
 
+
 /************************************************************************
 * Serial port init 
 ************************************************************************/
@@ -492,6 +494,7 @@ static void yam_set_uart(struct net_device *dev)
 
 	outb(ENABLE_RTXINT, IER(dev->base_addr));
 }
+
 
 /* --------------------------------------------------------------------- */
 
@@ -854,6 +857,7 @@ static const struct file_operations yam_info_fops = {
 
 #endif
 
+
 /* --------------------------------------------------------------------- */
 
 static int yam_open(struct net_device *dev)
@@ -1213,3 +1217,4 @@ module_init(yam_init_driver);
 module_exit(yam_cleanup_driver);
 
 /* --------------------------------------------------------------------- */
+

@@ -41,6 +41,7 @@
 /* NFSv2 is limited by the protocol specification, see RFC 1094 */
 #define NFSSVC_MAXBLKSIZE_V2    (8*1024)
 
+
 /*
  * Largest number of bytes we need to allocate for an NFS
  * call or reply.  Used to control buffer sizes.  We use
@@ -56,6 +57,7 @@
 struct readdir_cd {
 	__be32			err;	/* 0, nfserr, or nfserr_eof */
 };
+
 
 extern struct svc_program	nfsd_program;
 extern struct svc_version	nfsd_version2, nfsd_version3,
@@ -139,6 +141,7 @@ static inline char * nfs4_recoverydir(void) {return NULL; }
  */
 void		nfsd_lockd_init(void);
 void		nfsd_lockd_shutdown(void);
+
 
 /*
  * These macros provide pre-xdr'ed values for faster operation.

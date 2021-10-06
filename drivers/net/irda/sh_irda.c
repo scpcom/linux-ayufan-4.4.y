@@ -118,7 +118,9 @@
 
 /************************************************************************
 
+
 			enum / structure
+
 
 ************************************************************************/
 enum sh_irda_mode {
@@ -158,7 +160,9 @@ struct sh_irda_self {
 
 /************************************************************************
 
+
 			common function
+
 
 ************************************************************************/
 static void sh_irda_write(struct sh_irda_self *self, u32 offset, u16 data)
@@ -198,7 +202,9 @@ static void sh_irda_update_bits(struct sh_irda_self *self, u32 offset,
 
 /************************************************************************
 
+
 			mode function
+
 
 ************************************************************************/
 /*=====================================
@@ -440,7 +446,9 @@ static void sh_irda_set_mode(struct sh_irda_self *self, enum sh_irda_mode mode)
 
 /************************************************************************
 
+
 			irq function
+
 
 ************************************************************************/
 static void sh_irda_set_irq_mask(struct sh_irda_self *self)
@@ -505,7 +513,9 @@ static irqreturn_t sh_irda_irq(int irq, void *dev_id)
 
 /************************************************************************
 
+
 			CRC function
+
 
 ************************************************************************/
 static void sh_irda_crc_reset(struct sh_irda_self *self)
@@ -563,7 +573,9 @@ crc_init_out:
 
 /************************************************************************
 
+
 			iobuf function
+
 
 ************************************************************************/
 static void sh_irda_remove_iobuf(struct sh_irda_self *self)
@@ -603,7 +615,9 @@ static int sh_irda_init_iobuf(struct sh_irda_self *self, int rxsize, int txsize)
 
 /************************************************************************
 
+
 			net_device_ops function
+
 
 ************************************************************************/
 static int sh_irda_hard_xmit(struct sk_buff *skb, struct net_device *ndev)
@@ -734,7 +748,9 @@ static const struct net_device_ops sh_irda_ndo = {
 
 /************************************************************************
 
+
 			platform_driver function
+
 
 ************************************************************************/
 static int sh_irda_probe(struct platform_device *pdev)

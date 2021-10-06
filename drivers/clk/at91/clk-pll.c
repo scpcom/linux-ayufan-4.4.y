@@ -360,6 +360,7 @@ at91_clk_register_pll(struct at91_pmc *pmc, unsigned int irq, const char *name,
 	return clk;
 }
 
+
 static const struct clk_pll_layout at91rm9200_pll_layout = {
 	.pllr_mask = 0x7FFFFFF,
 	.mul_shift = 16,
@@ -383,6 +384,7 @@ static const struct clk_pll_layout sama5d3_pll_layout = {
 	.mul_shift = 18,
 	.mul_mask = 0x7F,
 };
+
 
 static struct clk_pll_characteristics * __init
 of_at91_clk_pll_get_characteristics(struct device_node *np)

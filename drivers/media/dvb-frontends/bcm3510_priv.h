@@ -31,6 +31,7 @@
 #undef warn
 #define warn(format, arg...) printk(KERN_WARNING "bcm3510: " format "\n" , ## arg)
 
+
 #define PANASONIC_FIRST_IF_BASE_IN_KHz  1407500
 #define BCM3510_SYMBOL_RATE             5381000
 
@@ -297,6 +298,7 @@ struct bcm3510_hab_cmd_auto_inversion {
 	u8 unused :7;
 } PACKED;
 
+
 /* bert control */
 #define CMD_STATE_CONTROL  0x12
 #define MSGID_BERT_CONTROL 0x0e
@@ -314,6 +316,7 @@ struct bcm3510_hab_cmd_tri_state {
 	u8 BE :1; /* baud clock pin */
 	u8 unused :4;
 } PACKED;
+
 
 /* tune */
 #define CMD_TUNE   0x38

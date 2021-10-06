@@ -48,3 +48,4 @@ static inline int nr_legacy_irqs(void)
 #endif
 
 #endif
+

@@ -538,6 +538,7 @@ out:
 	return result;
 }
 
+
 /**
  * ldm_validate_partition_table - Determine whether bdev might be a dynamic disk
  * @state: Partition check state including device holding the LDM Database
@@ -668,6 +669,7 @@ static bool ldm_create_data_partitions (struct parsed_partitions *pp,
 	return true;
 }
 
+
 /**
  * ldm_relative - Calculate the next relative offset
  * @buffer:  Block of data being worked on
@@ -768,6 +770,7 @@ static int ldm_get_vstr (const u8 *block, u8 *buffer, int buflen)
 	buffer[length] = 0;
 	return length;
 }
+
 
 /**
  * ldm_parse_cmp3 - Read a raw VBLK Component object into a vblk structure
@@ -1214,6 +1217,7 @@ static bool ldm_parse_vblk (const u8 *buf, int len, struct vblk *vb)
 	return result;
 }
 
+
 /**
  * ldm_ldmdb_add - Adds a raw VBLK entry to the ldmdb database
  * @data:  Raw VBLK to add to the database
@@ -1483,6 +1487,7 @@ static void ldm_free_vblks (struct list_head *lh)
 	list_for_each_safe (item, tmp, lh)
 		kfree (list_entry (item, struct vblk, list));
 }
+
 
 /**
  * ldm_partition - Find out whether a device is a dynamic disk and handle it

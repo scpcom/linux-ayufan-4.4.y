@@ -2516,6 +2516,9 @@ const struct tilepro_operand tilepro_operands[43] =
   }
 };
 
+
+
+
 /* Given a set of bundle bits and a specific pipe, returns which
  * instruction the bundle contains in that pipe.
  */
@@ -2538,6 +2541,7 @@ find_opcode(tilepro_bundle_bits bits, tilepro_pipeline pipe)
     index = next - TILEPRO_OPC_NONE;
   }
 }
+
 
 int
 parse_insn_tilepro(tilepro_bundle_bits bits,

@@ -2597,6 +2597,7 @@ static int lpfcdiag_loop_get_xri(struct lpfc_hba *phba, uint16_t rpi,
 	ctreq->CommandResponse.bits.CmdRsp = ELX_LOOPBACK_XRI_SETUP;
 	ctreq->CommandResponse.bits.Size = 0;
 
+
 	cmd->un.xseq64.bdl.addrHigh = putPaddrHigh(dmabuf->phys);
 	cmd->un.xseq64.bdl.addrLow = putPaddrLow(dmabuf->phys);
 	cmd->un.xseq64.bdl.bdeFlags = BUFF_TYPE_BLP_64;
@@ -3583,6 +3584,7 @@ lpfc_bsg_issue_mbox_ext_handle_job(struct lpfc_hba *phba, LPFC_MBOXQ_t *pmboxq)
 				phba->mbox_ext_buf_ctx.nembType,
 				phba->mbox_ext_buf_ctx.mboxType, rc);
 	}
+
 
 	/* state change */
 	phba->mbox_ext_buf_ctx.state = LPFC_BSG_MBOX_DONE;

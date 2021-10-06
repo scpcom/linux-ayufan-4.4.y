@@ -114,6 +114,7 @@ SYSCALL_DEFINE2(getitimer, int, which, struct itimerval __user *, value)
 	return error;
 }
 
+
 /*
  * The timer is automagically restarted, when interval != 0
  */

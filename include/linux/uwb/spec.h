@@ -134,6 +134,7 @@ struct uwb_mac_addr {
 	u8 data[ETH_ALEN];
 } __attribute__((packed));
 
+
 /**
  * UWB device address
  *
@@ -143,6 +144,7 @@ struct uwb_mac_addr {
 struct uwb_dev_addr {
 	u8 data[2];
 } __attribute__((packed));
+
 
 /**
  * Types of UWB addresses
@@ -154,8 +156,10 @@ enum uwb_addr_type {
 	UWB_ADDR_MAC = 1,
 };
 
+
 /** Size of a char buffer for printing a MAC/device address */
 enum { UWB_ADDR_STRSIZE = 32 };
+
 
 /** UWB WiMedia protocol IDs. */
 enum uwb_prid {
@@ -165,6 +169,7 @@ enum uwb_prid {
 	UWB_PRID_WUSB		= 0x0010,
 	UWB_PRID_WUSB_TOP	= 0x001F,
 };
+
 
 /** PHY Rate (MBOA MAC[7.8.12, Table 61]) */
 enum uwb_phy_rate {
@@ -179,6 +184,7 @@ enum uwb_phy_rate {
 	UWB_PHY_RATE_INVALID
 };
 
+
 /**
  * Different ways to scan (MBOA MAC[6.2.2, Table 8], WUSB[Table 8-78])
  */
@@ -191,6 +197,7 @@ enum uwb_scan_type {
 	UWB_SCAN_TOP
 };
 
+
 /** ACK Policy types (MBOA MAC[7.2.1.3]) */
 enum uwb_ack_pol {
 	UWB_ACK_NO = 0,
@@ -198,6 +205,7 @@ enum uwb_ack_pol {
 	UWB_ACK_B = 2,
 	UWB_ACK_B_REQ = 3,
 };
+
 
 /** DRP reservation types ([ECMA-368 table 106) */
 enum uwb_drp_type {
@@ -207,6 +215,7 @@ enum uwb_drp_type {
 	UWB_DRP_TYPE_PRIVATE,
 	UWB_DRP_TYPE_PCA,
 };
+
 
 /** DRP Reason Codes ([ECMA-368] table 107) */
 enum uwb_drp_reason {
@@ -232,11 +241,13 @@ enum uwb_drp_notif_reason {
 	UWB_DRP_NOTIF_TERMINATE,
 };
 
+
 /** Allocation of MAS slots in a DRP request MBOA MAC[7.8.7] */
 struct uwb_drp_alloc {
 	__le16 zone_bm;
 	__le16 mas_bm;
 } __attribute__((packed));
+
 
 /** General MAC Header format (ECMA-368[16.2]) */
 struct uwb_mac_frame_hdr {
@@ -246,6 +257,7 @@ struct uwb_mac_frame_hdr {
 	__le16 Sequence_Control;
 	__le16 Access_Information;
 } __attribute__((packed));
+
 
 /**
  * uwb_beacon_frame - a beacon frame including MAC headers
@@ -259,6 +271,7 @@ struct uwb_beacon_frame {
 	u8 Device_Control;
 	u8 IEData[];
 } __attribute__((packed));
+
 
 /** Information Element codes (MBOA MAC[T54]) */
 enum uwb_ie {
@@ -276,6 +289,7 @@ enum uwb_ie {
 	UWB_APP_SPEC_IE = 255,
 };
 
+
 /**
  * Header common to all Information Elements (IEs)
  */
@@ -283,6 +297,7 @@ struct uwb_ie_hdr {
 	u8 element_id;	/* enum uwb_ie */
 	u8 length;
 } __attribute__((packed));
+
 
 /** Dynamic Reservation Protocol IE (MBOA MAC[7.8.6]) */
 struct uwb_ie_drp {
@@ -421,6 +436,7 @@ struct uwb_device_type_id {
 	u8 data[3];
 } __attribute__((packed));
 
+
 /**
  * UWB device information types
  * ECMA-368 [16.8.10]
@@ -464,12 +480,14 @@ struct uwb_rccb {
 	u8 bCommandContext;		/* Context ID */
 } __attribute__((packed));
 
+
 /** Radio Control Event Block (WUSB[table 8-66], WHCI 0.95) */
 struct uwb_rceb {
 	u8 bEventType;			/* enum hwa_cet */
 	__le16 wEvent;			/* Event code */
 	u8 bEventContext;		/* Context ID */
 } __attribute__((packed));
+
 
 enum {
 	UWB_RC_CET_GENERAL = 0,		/* General Command/Event type */
@@ -554,6 +572,7 @@ struct uwb_rc_evt_dev_addr_mgmt {
 	u8 baAddr[ETH_ALEN];
 	u8 bResultCode;
 } __attribute__((packed));
+
 
 /* Get IE Event. [WHCI] section 3.1.3.3. */
 struct uwb_rc_evt_get_ie {
@@ -640,11 +659,13 @@ struct uwb_rc_evt_beacon {
 	u8	BeaconInfo[];
 } __attribute__((packed));
 
+
 /* Beacon Size Change notification. [WHCI] section 3.1.4.3 */
 struct uwb_rc_evt_beacon_size {
 	struct uwb_rceb rceb;
 	__le16 wNewBeaconSize;
 } __attribute__((packed));
+
 
 /* BPOIE Change notification. [WHCI] section 3.1.4.4. */
 struct uwb_rc_evt_bpoie_change {
@@ -652,6 +673,7 @@ struct uwb_rc_evt_bpoie_change {
 	__le16 wBPOIELength;
 	u8 BPOIE[];
 } __attribute__((packed));
+
 
 /* Beacon Slot Change notification. [WHCI] section 3.1.4.5. */
 struct uwb_rc_evt_bp_slot_change {
@@ -699,6 +721,7 @@ static inline enum uwb_drp_notif_reason uwb_rc_evt_drp_reason(struct uwb_rc_evt_
 	return evt->reason & 0x0f;
 }
 
+
 /* DRP Availability Change notification. [WHCI] section 3.1.4.8. */
 struct uwb_rc_evt_drp_avail {
 	struct uwb_rceb rceb;
@@ -742,6 +765,7 @@ struct uwb_rc_evt_daa_energy_detected {
 	u8 reserved;
 	u8 toneBmp[16];
 } __attribute__((packed));
+
 
 /**
  * Radio Control Interface Class Descriptor

@@ -26,3 +26,4 @@ int __init l2cache_init(void)
 
 	return 0;
 }
+

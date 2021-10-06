@@ -801,6 +801,7 @@ static int genwqe_pci_fundamental_reset(struct pci_dev *pci_dev)
 	return rc;
 }
 
+
 static int genwqe_platform_recovery(struct genwqe_dev *cd)
 {
 	struct pci_dev *pci_dev = cd->pci_dev;
@@ -885,6 +886,7 @@ static int genwqe_reload_bistream(struct genwqe_dev *cd)
 		 "[%s] card reloaded\n", __func__);
 	return 0;
 }
+
 
 /**
  * genwqe_health_thread() - Health checking thread

@@ -514,6 +514,7 @@ static void ar9271_hw_pa_cal(struct ath_hw *ah, bool is_reset)
 		ah->pacal_info.prev_offset = regVal;
 	}
 
+
 	ENABLE_REG_RMW_BUFFER(ah);
 	/* 7834, b1=1 */
 	REG_SET_BIT(ah, AR9285_AN_RF2G6, 1 << 0);

@@ -111,6 +111,7 @@ static int amdgpu_i2c_get_clock(void *i2c_priv)
 	return (val != 0);
 }
 
+
 static int amdgpu_i2c_get_data(void *i2c_priv)
 {
 	struct amdgpu_i2c_chan *i2c = i2c_priv;

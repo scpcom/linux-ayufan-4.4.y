@@ -47,6 +47,7 @@
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
+
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/slab.h>
@@ -65,6 +66,7 @@ module_param(debug, int, 0644);
 module_param(test_image, int, 0644);
 MODULE_PARM_DESC(debug, "debug level (0-2)");
 MODULE_PARM_DESC(test_image, "test_image (0-1)");
+
 
 /*
  * SAA7127 registers

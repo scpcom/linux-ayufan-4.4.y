@@ -53,6 +53,7 @@ static const char* version = "wanXL serial card driver version: 0.48";
 /* MAILBOX #2 - DRAM SIZE */
 #define MBX2_MEMSZ_MASK 0xFFFF0000 /* PUTS Memory Size Register mask */
 
+
 struct port {
 	struct net_device *dev;
 	struct card *card;
@@ -63,10 +64,12 @@ struct port {
 	struct sk_buff *tx_skbs[TX_BUFFERS];
 };
 
+
 struct card_status {
 	desc_t rx_descs[RX_QUEUE_LENGTH];
 	port_status_t port_status[4];
 };
+
 
 struct card {
 	int n_ports;		/* 1, 2 or 4 ports */
@@ -81,15 +84,19 @@ struct card {
 	struct port ports[0];	/* 1 - 4 port structures follow */
 };
 
+
+
 static inline struct port *dev_to_port(struct net_device *dev)
 {
 	return (struct port *)dev_to_hdlc(dev)->priv;
 }
 
+
 static inline port_status_t *get_status(struct port *port)
 {
 	return &port->card->status->port_status[port->node];
 }
+
 
 #ifdef DEBUG_PCI
 static inline dma_addr_t pci_map_single_debug(struct pci_dev *pdev, void *ptr,
@@ -105,6 +112,7 @@ static inline dma_addr_t pci_map_single_debug(struct pci_dev *pdev, void *ptr,
 #undef pci_map_single
 #define pci_map_single pci_map_single_debug
 #endif
+
 
 /* Cable and/or personality module change interrupt service */
 static inline void wanxl_cable_intr(struct port *port)
@@ -149,6 +157,8 @@ static inline void wanxl_cable_intr(struct port *port)
 		netif_carrier_off(port->dev);
 }
 
+
+
 /* Transmit complete interrupt service */
 static inline void wanxl_tx_intr(struct port *port)
 {
@@ -179,6 +189,8 @@ static inline void wanxl_tx_intr(struct port *port)
                 port->tx_in = (port->tx_in + 1) % TX_BUFFERS;
         }
 }
+
+
 
 /* Receive complete interrupt service */
 static inline void wanxl_rx_intr(struct card *card)
@@ -229,12 +241,15 @@ static inline void wanxl_rx_intr(struct card *card)
 	}
 }
 
+
+
 static irqreturn_t wanxl_intr(int irq, void* dev_id)
 {
 	struct card *card = dev_id;
         int i;
         u32 stat;
         int handled = 0;
+
 
         while((stat = readl(card->plx + PLX_DOORBELL_FROM_CARD)) != 0) {
                 handled = 1;
@@ -252,6 +267,8 @@ static irqreturn_t wanxl_intr(int irq, void* dev_id)
 
         return IRQ_RETVAL(handled);
 }
+
+
 
 static netdev_tx_t wanxl_xmit(struct sk_buff *skb, struct net_device *dev)
 {
@@ -297,6 +314,8 @@ static netdev_tx_t wanxl_xmit(struct sk_buff *skb, struct net_device *dev)
 	return NETDEV_TX_OK;
 }
 
+
+
 static int wanxl_attach(struct net_device *dev, unsigned short encoding,
 			unsigned short parity)
 {
@@ -317,6 +336,8 @@ static int wanxl_attach(struct net_device *dev, unsigned short encoding,
 	get_status(port)->parity = parity;
 	return 0;
 }
+
+
 
 static int wanxl_ioctl(struct net_device *dev, struct ifreq *ifr, int cmd)
 {
@@ -368,6 +389,8 @@ static int wanxl_ioctl(struct net_device *dev, struct ifreq *ifr, int cmd)
         }
 }
 
+
+
 static int wanxl_open(struct net_device *dev)
 {
 	struct port *port = dev_to_port(dev);
@@ -401,6 +424,8 @@ static int wanxl_open(struct net_device *dev)
 	writel(1 << (DOORBELL_TO_CARD_CLOSE_0 + port->node), dbr);
 	return -EFAULT;
 }
+
+
 
 static int wanxl_close(struct net_device *dev)
 {
@@ -438,6 +463,8 @@ static int wanxl_close(struct net_device *dev)
 	return 0;
 }
 
+
+
 static struct net_device_stats *wanxl_get_stats(struct net_device *dev)
 {
 	struct port *port = dev_to_port(dev);
@@ -448,6 +475,8 @@ static struct net_device_stats *wanxl_get_stats(struct net_device *dev)
 		dev->stats.rx_frame_errors;
 	return &dev->stats;
 }
+
+
 
 static int wanxl_puts_command(struct card *card, u32 cmd)
 {
@@ -464,6 +493,8 @@ static int wanxl_puts_command(struct card *card, u32 cmd)
 	return -1;
 }
 
+
+
 static void wanxl_reset(struct card *card)
 {
 	u32 old_value = readl(card->plx + PLX_CONTROL) & ~PLX_CTL_RESET;
@@ -475,6 +506,8 @@ static void wanxl_reset(struct card *card)
 	writel(old_value, card->plx + PLX_CONTROL);
 	readl(card->plx + PLX_CONTROL); /* wait for posted write */
 }
+
+
 
 static void wanxl_pci_remove_one(struct pci_dev *pdev)
 {
@@ -511,6 +544,7 @@ static void wanxl_pci_remove_one(struct pci_dev *pdev)
 	pci_disable_device(pdev);
 	kfree(card);
 }
+
 
 #include "wanxlfw.inc"
 
@@ -645,6 +679,7 @@ static int wanxl_pci_init_one(struct pci_dev *pdev,
 
 	/* set up on-board RAM mapping */
 	mem_phy = pci_resource_start(pdev, 2);
+
 
 	/* sanity check the board's reported memory size */
 	if (ramsize < BUFFERS_ADDR +
@@ -783,12 +818,14 @@ static const struct pci_device_id wanxl_pci_tbl[] = {
 	{ 0, }
 };
 
+
 static struct pci_driver wanxl_pci_driver = {
 	.name		= "wanXL",
 	.id_table	= wanxl_pci_tbl,
 	.probe		= wanxl_pci_init_one,
 	.remove		= wanxl_pci_remove_one,
 };
+
 
 static int __init wanxl_init_module(void)
 {
@@ -802,6 +839,7 @@ static void __exit wanxl_cleanup_module(void)
 {
 	pci_unregister_driver(&wanxl_pci_driver);
 }
+
 
 MODULE_AUTHOR("Krzysztof Halasa <khc@pm.waw.pl>");
 MODULE_DESCRIPTION("SBE Inc. wanXL serial port driver");

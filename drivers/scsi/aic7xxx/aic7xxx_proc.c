@@ -301,6 +301,7 @@ ahc_linux_show_info(struct seq_file *m, struct Scsi_Host *shost)
 	seq_printf(m, "Allocated SCBs: %d, SG List Length: %d\n\n",
 		  ahc->scb_data->numscbs, AHC_NSEG);
 
+
 	if (ahc->seep_config == NULL)
 		seq_puts(m, "No Serial EEPROM\n");
 	else {

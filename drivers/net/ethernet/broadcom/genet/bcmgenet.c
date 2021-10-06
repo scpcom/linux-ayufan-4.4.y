@@ -691,6 +691,7 @@ struct bcmgenet_stats {
 	.reg_offset = offset, \
 }
 
+
 /* There is a 0xC gap between the end of RX and beginning of TX stats and then
  * between the end of TX stats and the beginning of the RX RUNT
  */

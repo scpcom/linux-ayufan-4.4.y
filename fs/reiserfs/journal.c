@@ -51,6 +51,7 @@
 #include <linux/uaccess.h>
 #include <linux/slab.h>
 
+
 /* gets a struct reiserfs_journal_list * from a list head */
 #define JOURNAL_LIST_ENTRY(h) (list_entry((h), struct reiserfs_journal_list, \
                                j_list))
@@ -1947,6 +1948,7 @@ static int do_journal_release(struct reiserfs_transaction_handle *th,
 			do_journal_end(&myth, FLUSH_ALL);
 		}
 	}
+
 
 	/*
 	 * We must release the write lock here because

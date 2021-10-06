@@ -470,3 +470,4 @@ int twl6030_exit_irq(void)
 	}
 	return 0;
 }
+

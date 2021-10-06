@@ -241,6 +241,7 @@ sn2_global_tlb_purge(struct mm_struct *mm, unsigned long start,
 		ptc1 = NULL;
 	}
 	
+
 	mynasid = get_nasid();
 	use_cpu_ptcga = local_node_uses_ptc_ga(shub1);
 	max_active = max_active_pio(shub1);
@@ -337,6 +338,7 @@ sn2_ptc_deadlock_recovery(short *nasids, short ib, short ie, int mynasid,
 
 	piows = (unsigned long *) pda->pio_write_status_addr;
 	zeroval = pda->pio_write_status_val;
+
 
 	for (i=ib; i <= ie; i++) {
 		nasid = nasids[i];
@@ -567,3 +569,4 @@ static void __exit sn2_ptc_exit(void)
 module_init(sn2_ptc_init);
 module_exit(sn2_ptc_exit);
 #endif /* CONFIG_PROC_FS */
+

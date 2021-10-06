@@ -148,3 +148,4 @@ struct usb_irda_outbound_header {
 };
 
 #endif /* __LINUX_USB_IRDA_H */
+

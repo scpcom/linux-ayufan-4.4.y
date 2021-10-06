@@ -83,6 +83,7 @@ static char *errbuf;
 
 #endif
 
+
 #define ERRBUF_LEN    (32 * 1024)
 
 static struct kmem_cache *uhci_up_cachep;	/* urb_priv */
@@ -517,6 +518,7 @@ static void uhci_get_current_frame_number(struct uhci_hcd *uhci)
 static void release_uhci(struct uhci_hcd *uhci)
 {
 	int i;
+
 
 	spin_lock_irq(&uhci->lock);
 	uhci->is_initialized = 0;

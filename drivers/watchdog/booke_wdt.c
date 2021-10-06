@@ -30,6 +30,7 @@
  * occur, and the final time the board will reset.
  */
 
+
 #ifdef	CONFIG_PPC_FSL_BOOK3E
 #define WDTP(x)		((((x)&0x3)<<30)|(((x)&0x3c)<<15))
 #define WDTP_MASK	(WDTP(0x3f))

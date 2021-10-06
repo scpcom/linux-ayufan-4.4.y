@@ -45,6 +45,7 @@
 #include "cpqphp.h"
 #include "cpqphp_nvram.h"
 
+
 /* Global variables */
 int cpqhp_debug;
 int cpqhp_legacy_mode;
@@ -191,6 +192,7 @@ static void pci_print_IRQ_route(void)
 	return;
 }
 
+
 /**
  * get_subsequent_smbios_entry: get the next entry from bios table.
  * @smbios_start: where to start in the SMBIOS table
@@ -238,6 +240,7 @@ static void __iomem *get_subsequent_smbios_entry(void __iomem *smbios_start,
 	else
 		return NULL;
 }
+
 
 /**
  * get_SMBIOS_entry - return the requested SMBIOS entry or %NULL
@@ -315,6 +318,7 @@ static int ctrl_slot_cleanup (struct controller *ctrl)
 	return 0;
 }
 
+
 /**
  * get_slot_mapping - determine logical slot mapping for PCI device
  *
@@ -387,6 +391,7 @@ get_slot_mapping(struct pci_bus *bus, u8 bus_num, u8 dev_num, u8 *slot)
 	return -1;
 }
 
+
 /**
  * cpqhp_set_attention_status - Turns the Amber LED for a slot on or off
  * @ctrl: struct controller to use
@@ -428,6 +433,7 @@ cpqhp_set_attention_status(struct controller *ctrl, struct pci_func *func,
 	return 0;
 }
 
+
 /**
  * set_attention_status - Turns the Amber LED for a slot on or off
  * @hotplug_slot: slot to change LED on
@@ -458,6 +464,7 @@ static int set_attention_status (struct hotplug_slot *hotplug_slot, u8 status)
 
 	return cpqhp_set_attention_status(ctrl, slot_func, status);
 }
+
 
 static int process_SI(struct hotplug_slot *hotplug_slot)
 {
@@ -490,6 +497,7 @@ static int process_SI(struct hotplug_slot *hotplug_slot)
 	return cpqhp_process_SI(ctrl, slot_func);
 }
 
+
 static int process_SS(struct hotplug_slot *hotplug_slot)
 {
 	struct pci_func *slot_func;
@@ -517,6 +525,7 @@ static int process_SS(struct hotplug_slot *hotplug_slot)
 	return cpqhp_process_SS(ctrl, slot_func);
 }
 
+
 static int hardware_test(struct hotplug_slot *hotplug_slot, u32 value)
 {
 	struct slot *slot = hotplug_slot->private;
@@ -526,6 +535,7 @@ static int hardware_test(struct hotplug_slot *hotplug_slot, u32 value)
 
 	return cpqhp_hardware_test(ctrl, value);
 }
+
 
 static int get_power_status(struct hotplug_slot *hotplug_slot, u8 *value)
 {
@@ -1112,6 +1122,7 @@ static int cpqhpc_probe(struct pci_dev *pdev, const struct pci_device_id *ent)
 
 	/* Check for 66Mhz operation */
 	bus->cur_bus_speed = get_controller_speed(ctrl);
+
 
 	/********************************************************
 	 *

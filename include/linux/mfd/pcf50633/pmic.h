@@ -64,3 +64,4 @@ enum pcf50633_regulator_id {
 	PCF50633_REGULATOR_MEMLDO,
 };
 #endif
+

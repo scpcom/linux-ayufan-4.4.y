@@ -24,6 +24,7 @@ MODULE_AUTHOR("Jean-Francois Dagenais <dagenaisj@sonatest.com>");
 MODULE_DESCRIPTION("w1 family 29 driver for DS2408 8 Pin IO");
 MODULE_ALIAS("w1-family-" __stringify(W1_FAMILY_DS2408));
 
+
 #define W1_F29_RETRIES		3
 
 #define W1_F29_REG_LOGIG_STATE             0x88 /* R */
@@ -209,6 +210,7 @@ error:
 
 	return -EIO;
 }
+
 
 /**
  * Writing to the activity file resets the activity latches.

@@ -16,3 +16,4 @@ static inline struct usb_phy *imx_otg_ulpi_create(unsigned int flags)
 #endif
 
 #endif /* __MACH_ULPI_H */
+

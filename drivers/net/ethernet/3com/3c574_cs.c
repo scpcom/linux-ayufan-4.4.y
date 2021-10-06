@@ -13,6 +13,7 @@
 	Copyright 1993 United States Government as represented by the
 	Director, National Security Agency.
 	
+
 */
 
 /*
@@ -112,6 +113,7 @@ INT_MODULE_PARM(full_duplex, 0);
 
 /* Autodetect link polarity reversal? */
 INT_MODULE_PARM(auto_polarity, 1);
+
 
 /*====================================================================*/
 

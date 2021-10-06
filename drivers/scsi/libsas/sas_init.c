@@ -106,6 +106,7 @@ void sas_hash_addr(u8 *hashed, const u8 *sas_addr)
         hashed[2] = r & 0xFF;
 }
 
+
 /* ---------- HA events ---------- */
 
 void sas_hae_reset(struct work_struct *work)
@@ -565,6 +566,7 @@ sas_domain_attach_transport(struct sas_domain_function_template *dft)
 	return stt;
 }
 EXPORT_SYMBOL_GPL(sas_domain_attach_transport);
+
 
 void sas_domain_release_transport(struct scsi_transport_template *stt)
 {

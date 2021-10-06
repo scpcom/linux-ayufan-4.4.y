@@ -192,6 +192,7 @@ static inline int register_sha1_avx(void) { return 0; }
 static inline void unregister_sha1_avx(void) { }
 #endif /* CONFIG_AS_AVX */
 
+
 #if defined(CONFIG_AS_AVX2) && (CONFIG_AS_AVX)
 #define SHA1_AVX2_BLOCK_OPTSIZE	4	/* optimal 4*64 bytes of SHA1 blocks */
 

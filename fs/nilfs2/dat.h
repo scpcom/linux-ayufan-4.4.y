@@ -27,6 +27,7 @@
 #include <linux/buffer_head.h>
 #include <linux/fs.h>
 
+
 struct nilfs_palloc_req;
 
 int nilfs_dat_translate(struct inode *, __u64, sector_t *);

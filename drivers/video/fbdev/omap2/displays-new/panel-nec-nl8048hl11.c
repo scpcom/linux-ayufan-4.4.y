@@ -232,6 +232,7 @@ static struct omap_dss_driver nec_8048_ops = {
 	.get_resolution	= omapdss_default_get_resolution,
 };
 
+
 static int nec_8048_probe_pdata(struct spi_device *spi)
 {
 	const struct panel_nec_nl8048hl11_platform_data *pdata;

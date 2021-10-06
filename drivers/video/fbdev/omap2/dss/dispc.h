@@ -664,6 +664,7 @@ static inline u16 DISPC_PIC_SIZE_OFFSET(enum omap_plane plane)
 	}
 }
 
+
 static inline u16 DISPC_ACCU0_OFFSET(enum omap_plane plane)
 {
 	switch (plane) {

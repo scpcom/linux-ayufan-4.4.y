@@ -652,6 +652,7 @@ sctp_timeout_nla_policy[CTA_TIMEOUT_SCTP_MAX+1] = {
 };
 #endif /* CONFIG_NF_CT_NETLINK_TIMEOUT */
 
+
 #ifdef CONFIG_SYSCTL
 static struct ctl_table sctp_sysctl_table[] = {
 	{

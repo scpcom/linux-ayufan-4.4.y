@@ -296,6 +296,7 @@ do {									\
 #define __put_user(x, ptr) \
 	__put_user_nocheck((__typeof__(*(ptr)))(x), (ptr), sizeof(*(ptr)))
 
+
 #define __put_user_nocheck(x, ptr, size)				\
 ({									\
 	long __pu_err;							\
@@ -303,6 +304,7 @@ do {									\
 	__put_user_size((x), (ptr), (size), __pu_err);			\
 	__pu_err;							\
 })
+
 
 #define __put_user_check(x, ptr, size)					\
 ({									\
@@ -543,6 +545,7 @@ do {									\
 		: "0" (to), "1" (from), "2" (size), "3" (size / 4)	\
 		: "r14", "memory");					\
 } while (0)
+
 
 /* We let the __ versions of copy_from/to_user inline, because they're often
  * used in fast paths and have only a small space overhead.

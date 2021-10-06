@@ -140,6 +140,7 @@ struct ceph_client {
 
 #define from_msgr(ms)	container_of(ms, struct ceph_client, msgr)
 
+
 /*
  * snapshots
  */
@@ -225,5 +226,6 @@ extern void ceph_copy_from_page_vector(struct page **pages,
 				    void *data,
 				    loff_t off, size_t len);
 extern void ceph_zero_page_vector_range(int off, int len, struct page **pages);
+
 
 #endif /* _FS_CEPH_SUPER_H */

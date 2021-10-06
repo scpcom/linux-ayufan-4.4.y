@@ -97,6 +97,7 @@ static const struct watchdog_info ident = {
 	.identity	= "IXP4xx Watchdog",
 };
 
+
 static long ixp4xx_wdt_ioctl(struct file *file, unsigned int cmd,
 							unsigned long arg)
 {
@@ -155,6 +156,7 @@ static int ixp4xx_wdt_release(struct inode *inode, struct file *file)
 	return 0;
 }
 
+
 static const struct file_operations ixp4xx_wdt_fops = {
 	.owner		= THIS_MODULE,
 	.llseek		= no_llseek,
@@ -191,6 +193,7 @@ static void __exit ixp4xx_wdt_exit(void)
 {
 	misc_deregister(&ixp4xx_wdt_miscdev);
 }
+
 
 module_init(ixp4xx_wdt_init);
 module_exit(ixp4xx_wdt_exit);

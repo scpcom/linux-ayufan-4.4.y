@@ -20,6 +20,7 @@
 #include <media/v4l2-subdev.h>
 #include "m5mols_reg.h"
 
+
 /* An amount of data transmitted in addition to the value
  * determined by CAPP_JPEG_SIZE_MAX register.
  */

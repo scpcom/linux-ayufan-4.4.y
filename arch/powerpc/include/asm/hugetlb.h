@@ -47,6 +47,7 @@ static inline unsigned int hugepd_shift(hugepd_t hpd)
 
 #endif /* CONFIG_PPC_BOOK3S_64 */
 
+
 static inline pte_t *hugepte_offset(hugepd_t hpd, unsigned long addr,
 				    unsigned pdshift)
 {

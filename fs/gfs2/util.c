@@ -262,3 +262,4 @@ int gfs2_io_error_bh_i(struct gfs2_sbd *sdp, struct buffer_head *bh,
 			      function, file, line);
 	return rv;
 }
+

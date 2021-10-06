@@ -48,3 +48,4 @@
 #define KS_STD_PAL_M            113       /* 60 Hz PAL  */
 
 #endif /* KS0127_H */
+

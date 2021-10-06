@@ -444,6 +444,7 @@ static void sdma_v3_0_ring_emit_fence(struct amdgpu_ring *ring, u64 addr, u64 se
 	amdgpu_ring_write(ring, SDMA_PKT_TRAP_INT_CONTEXT_INT_CONTEXT(0));
 }
 
+
 /**
  * sdma_v3_0_ring_emit_semaphore - emit a semaphore on the dma ring
  *

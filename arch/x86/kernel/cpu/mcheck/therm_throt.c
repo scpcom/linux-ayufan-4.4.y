@@ -72,6 +72,7 @@ EXPORT_SYMBOL_GPL(platform_thermal_package_notify);
 bool (*platform_thermal_package_rate_control)(void);
 EXPORT_SYMBOL_GPL(platform_thermal_package_rate_control);
 
+
 static DEFINE_PER_CPU(struct thermal_state, thermal_state);
 
 static atomic_t therm_throt_en	= ATOMIC_INIT(0);
@@ -497,6 +498,7 @@ void intel_init_thermal(struct cpuinfo_x86 *c)
 	 */
 	if ((h & APIC_DM_FIXED_MASK) != APIC_DM_FIXED)
 		apic_write(APIC_LVTTHMR, lvtthmr_init);
+
 
 	if ((l & MSR_IA32_MISC_ENABLE_TM1) && (h & APIC_DM_SMI)) {
 		if (system_state == SYSTEM_BOOTING)

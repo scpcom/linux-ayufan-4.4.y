@@ -759,3 +759,4 @@ void autofs_dev_ioctl_exit(void)
 	misc_deregister(&_autofs_dev_ioctl_misc);
 	return;
 }
+

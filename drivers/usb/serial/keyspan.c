@@ -27,6 +27,7 @@
   staff in their work on open source projects.
 */
 
+
 #include <linux/kernel.h>
 #include <linux/jiffies.h>
 #include <linux/errno.h>
@@ -124,6 +125,7 @@ struct keyspan_port_private {
 #include "keyspan_usa90msg.h"
 #include "keyspan_usa67msg.h"
 
+
 module_usb_serial_driver(serial_drivers, keyspan_ids_combined);
 
 static void keyspan_break_ctl(struct tty_struct *tty, int break_state)
@@ -140,6 +142,7 @@ static void keyspan_break_ctl(struct tty_struct *tty, int break_state)
 
 	keyspan_send_setup(port, 0);
 }
+
 
 static void keyspan_set_termios(struct tty_struct *tty,
 		struct usb_serial_port *port, struct ktermios *old_termios)
@@ -431,6 +434,7 @@ static void	usa26_glocont_callback(struct urb *urb)
 {
 }
 
+
 static void usa28_indat_callback(struct urb *urb)
 {
 	int                     err;
@@ -548,6 +552,7 @@ exit: ;
 static void	usa28_glocont_callback(struct urb *urb)
 {
 }
+
 
 static void	usa49_glocont_callback(struct urb *urb)
 {
@@ -828,6 +833,7 @@ static void usa90_indat_callback(struct urb *urb)
 		dev_dbg(&port->dev, "%s - resubmit read urb failed. (%d)\n", __func__, err);
 }
 
+
 static void	usa90_instat_callback(struct urb *urb)
 {
 	unsigned char 				*data = urb->transfer_buffer;
@@ -916,6 +922,7 @@ static void	usa67_instat_callback(struct urb *urb)
 		return;
 	}
 
+
 	/* Now do something useful with the data */
 	msg = (struct keyspan_usa67_portStatusMessage *)data;
 
@@ -999,6 +1006,7 @@ static int keyspan_write_room(struct tty_struct *tty)
 	}
 	return 0;
 }
+
 
 static int keyspan_open(struct tty_struct *tty, struct usb_serial_port *port)
 {
@@ -2280,6 +2288,7 @@ static void keyspan_send_setup(struct usb_serial_port *port, int reset_port)
 		break;
 	}
 }
+
 
 /* Gets called by the "real" driver (ie once firmware is loaded
    and renumeration has taken place. */

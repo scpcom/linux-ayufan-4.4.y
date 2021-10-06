@@ -263,6 +263,7 @@ static int cs5536_init_one(struct pci_dev *dev, const struct pci_device_id *id)
 		.port_ops = &cs5536_port_ops,
 	};
 
+
 	const struct ata_port_info *ppi[2];
 	u32 cfg;
 

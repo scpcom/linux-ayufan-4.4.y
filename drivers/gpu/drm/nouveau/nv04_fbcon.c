@@ -277,3 +277,4 @@ nv04_fbcon_accel_init(struct fb_info *info)
 
 	return 0;
 }
+

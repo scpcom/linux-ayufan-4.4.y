@@ -29,6 +29,7 @@
 
 #include "cinergyT2.h"
 
+
 /* debug */
 int dvb_usb_cinergyt2_debug;
 
@@ -183,6 +184,7 @@ static int cinergyt2_usb_probe(struct usb_interface *intf,
 					THIS_MODULE, NULL, adapter_nr);
 }
 
+
 static struct usb_device_id cinergyt2_usb_table[] = {
 	{ USB_DEVICE(USB_VID_TERRATEC, 0x0038) },
 	{ 0 }
@@ -235,6 +237,7 @@ static struct dvb_usb_device_properties cinergyt2_properties = {
 		{ NULL },
 	}
 };
+
 
 static struct usb_driver cinergyt2_driver = {
 	.name		= "cinergyT2",

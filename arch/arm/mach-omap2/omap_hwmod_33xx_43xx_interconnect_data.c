@@ -197,6 +197,7 @@ struct omap_hwmod_ocp_if am33xx_epwmss0__ehrpwm0 = {
 	.user		= OCP_USER_MPU,
 };
 
+
 static struct omap_hwmod_addr_space am33xx_epwmss1_addr_space[] = {
 	{
 		.pa_start	= 0x48302000,

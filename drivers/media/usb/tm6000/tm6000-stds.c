@@ -32,6 +32,7 @@ struct tm6000_reg_settings {
 	unsigned char value;
 };
 
+
 struct tm6000_std_settings {
 	v4l2_std_id id;
 	struct tm6000_reg_settings *common;

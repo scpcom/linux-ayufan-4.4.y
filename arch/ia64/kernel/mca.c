@@ -850,6 +850,7 @@ ia64_unreg_MCA_extension(void)
 EXPORT_SYMBOL(ia64_reg_MCA_extension);
 EXPORT_SYMBOL(ia64_unreg_MCA_extension);
 
+
 static inline void
 copy_reg(const u64 *fr, u64 fnat, unsigned long *tr, unsigned long *tnat)
 {
@@ -2066,6 +2067,7 @@ ia64_mca_init(void)
 	mca_init = 1;
 	printk(KERN_INFO "MCA related initialization done\n");
 }
+
 
 /*
  * These pieces cannot be done in ia64_mca_init() because it is called before

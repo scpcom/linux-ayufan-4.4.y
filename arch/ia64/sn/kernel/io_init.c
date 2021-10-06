@@ -27,6 +27,7 @@
 static int max_segment_number;		 /* Default highest segment number */
 static int max_pcibus_number = 255;	/* Default highest pci bus number */
 
+
 /*
  * Retrieve the hub device info structure for the given nasid.
  */
@@ -75,6 +76,7 @@ sal_get_pcidev_info(u64 segment, u64 bus_number, u64 devfn, u64 pci_dev,
 			sn_irq_info, 0, 0);
 	return ret_stuff.v0;
 }
+
 
 /*
  * sn_fixup_ionodes() - This routine initializes the HUB data structure for
@@ -169,6 +171,7 @@ sn_io_slot_fixup(struct pci_dev *dev)
 		(u64) __pa(sn_irq_info));
 
 	BUG_ON(status); /* Cannot get platform pci device information */
+
 
 	/* Copy over PIO Mapped Addresses */
 	for (idx = 0; idx <= PCI_ROM_RESOURCE; idx++) {

@@ -244,3 +244,5 @@ void netup_spi_release(struct netup_unidvb_dev *ndev)
 	spi_unregister_master(spi->master);
 	ndev->spi = NULL;
 }
+
+

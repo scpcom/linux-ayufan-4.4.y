@@ -69,6 +69,7 @@ static const u16 atl1c_pay_load_size[] = {
 	128, 256, 512, 1024, 2048, 4096,
 };
 
+
 static const u32 atl1c_default_msg = NETIF_MSG_DRV | NETIF_MSG_PROBE |
 	NETIF_MSG_LINK | NETIF_MSG_TIMER | NETIF_MSG_IFDOWN | NETIF_MSG_IFUP;
 static void atl1c_pcie_patch(struct atl1c_hw *hw)
@@ -354,10 +355,12 @@ static void atl1c_common_task(struct work_struct *work)
 	}
 }
 
+
 static void atl1c_del_timer(struct atl1c_adapter *adapter)
 {
 	del_timer_sync(&adapter->phy_config_timer);
 }
+
 
 /**
  * atl1c_tx_timeout - Respond to a Tx Hang
@@ -773,6 +776,7 @@ static int atl1c_sw_init(struct atl1c_adapter *adapter)
 	struct pci_dev	*pdev = adapter->pdev;
 	u32 revision;
 
+
 	adapter->wol = 0;
 	device_set_wakeup_enable(&pdev->dev, false);
 	adapter->link_speed = SPEED_0;
@@ -1070,6 +1074,7 @@ static void atl1c_configure_des_ring(struct atl1c_adapter *adapter)
 				AT_DMA_LO_ADDR_MASK));
 	AT_WRITE_REG(hw, REG_TPD_RING_SIZE,
 			(u32)(tpd_ring[0].count & TPD_RING_SIZE_MASK));
+
 
 	/* RFD */
 	AT_WRITE_REG(hw, REG_RX_BASE_ADDR_HI,
@@ -2311,6 +2316,7 @@ static int atl1c_request_irq(struct atl1c_adapter *adapter)
 		dev_dbg(&pdev->dev, "atl1c_request_irq OK\n");
 	return err;
 }
+
 
 static void atl1c_reset_dma_ring(struct atl1c_adapter *adapter)
 {

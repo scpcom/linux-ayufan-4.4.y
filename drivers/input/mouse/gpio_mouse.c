@@ -14,6 +14,7 @@
 #include <linux/gpio.h>
 #include <linux/gpio_mouse.h>
 
+
 /*
  * Timer function which is run every scan_ms ms when the device is opened.
  * The dev input variable is set to the the input_dev pointer.
@@ -178,3 +179,4 @@ MODULE_AUTHOR("Hans-Christian Egtvedt <egtvedt@samfundet.no>");
 MODULE_DESCRIPTION("GPIO mouse driver");
 MODULE_LICENSE("GPL");
 MODULE_ALIAS("platform:gpio_mouse"); /* work with hotplug and coldplug */
+

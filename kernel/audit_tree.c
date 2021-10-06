@@ -871,6 +871,7 @@ int audit_tag_tree(char *old, char *new)
 	return failed;
 }
 
+
 static void audit_schedule_prune(void)
 {
 	wake_up_process(prune_thread);

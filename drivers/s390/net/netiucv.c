@@ -474,6 +474,7 @@ static const char *conn_state_names[] = {
 	"Connect error",
 };
 
+
 /**
  * Debug Facility Stuff
  */
@@ -1028,6 +1029,7 @@ static const fsm_node conn_fsm[] = {
 };
 
 static const int CONN_FSM_LEN = sizeof(conn_fsm) / sizeof(fsm_node);
+
 
 /*
  * Actions for interface - statemachine.

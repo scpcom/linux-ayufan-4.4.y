@@ -320,6 +320,7 @@ int c2_stag_dealloc(struct c2_dev *c2dev, u32 stag_index)
 	struct c2wr_stag_dealloc_rep *reply;	/* WR reply  */
 	int err;
 
+
 	/*
 	 * allocate verbs request object
 	 */

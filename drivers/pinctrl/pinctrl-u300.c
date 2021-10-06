@@ -1094,6 +1094,7 @@ static const struct of_device_id u300_pinctrl_match[] = {
 	{},
 };
 
+
 static struct platform_driver u300_pmx_driver = {
 	.driver = {
 		.name = DRIVER_NAME,

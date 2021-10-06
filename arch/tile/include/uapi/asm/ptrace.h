@@ -39,6 +39,7 @@
 #endif
 #define PTREGS_SIZE             PTREGS_OFFSET_REG(64)
 
+
 #ifndef __ASSEMBLY__
 
 #ifndef __KERNEL__

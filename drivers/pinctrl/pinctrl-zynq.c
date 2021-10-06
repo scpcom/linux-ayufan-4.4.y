@@ -827,6 +827,7 @@ static const struct zynq_pinmux_function zynq_pmux_functions[] = {
 	DEFINE_ZYNQ_PINMUX_FUNCTION(gpio0, 0),
 };
 
+
 /* pinctrl */
 static int zynq_pctrl_get_groups_count(struct pinctrl_dev *pctldev)
 {

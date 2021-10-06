@@ -169,3 +169,4 @@ int flexcop_dma_config_timer(struct flexcop_device *fc,
 	return 0;
 }
 EXPORT_SYMBOL(flexcop_dma_config_timer);
+

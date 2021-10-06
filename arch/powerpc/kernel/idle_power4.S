@@ -70,3 +70,4 @@ END_FTR_SECTION_IFSET(CPU_FTR_ALTIVEC)
 	mtmsrd	r7
 	isync
 	b	1b
+

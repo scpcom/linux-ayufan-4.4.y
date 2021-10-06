@@ -436,6 +436,7 @@ minstrel_ht_set_best_prob_rate(struct minstrel_ht_sta *mi, u16 index)
 	}
 }
 
+
 /*
  * Assign new rate set per sta and use CCK rates only if the fastest
  * rate (max_tp_rate[0]) is from CCK group. This prohibits such sorted
@@ -833,6 +834,7 @@ minstrel_calc_retransmit(struct minstrel_priv *mp, struct minstrel_ht_sta *mi,
 	} while ((tx_time < mp->segment_size) &&
 	         (++mrs->retry_count < mp->max_retry));
 }
+
 
 static void
 minstrel_ht_set_rate(struct minstrel_priv *mp, struct minstrel_ht_sta *mi,
@@ -1354,6 +1356,7 @@ static const struct rate_control_ops mac80211_minstrel_ht = {
 #endif
 	.get_expected_throughput = minstrel_ht_get_expected_throughput,
 };
+
 
 static void __init init_sample_table(void)
 {

@@ -993,3 +993,4 @@ void cik_dma_vm_flush(struct radeon_device *rdev, struct radeon_ring *ring,
 	radeon_ring_write(ring, 0); /* mask */
 	radeon_ring_write(ring, (0xfff << 16) | 10); /* retry count, poll interval */
 }
+

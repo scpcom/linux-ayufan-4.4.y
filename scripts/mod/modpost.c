@@ -242,6 +242,7 @@ static const struct {
 	{ .str = "(unknown)",                .export = export_unknown },
 };
 
+
 static const char *export_str(enum export ex)
 {
 	return export_list[ex].str;
@@ -860,6 +861,8 @@ static void check_section(const char *modname, struct elf_info *elf,
 	}
 }
 
+
+
 #define ALL_INIT_DATA_SECTIONS \
 	".init.setup", ".init.rodata", ".meminit.rodata", \
 	".init.data", ".meminit.data"
@@ -914,6 +917,7 @@ static const char *const text_sections[] = { ALL_TEXT_SECTIONS, NULL };
 
 /* data section */
 static const char *const data_sections[] = { DATA_SECTIONS, NULL };
+
 
 /* symbols in .data that may refer to init/exit sections */
 #define DEFAULT_SYMBOL_WHITE_LIST					\

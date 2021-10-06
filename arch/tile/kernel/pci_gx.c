@@ -343,6 +343,7 @@ static int tile_init_irqs(struct pci_controller *controller)
 
 	cpumask_copy(&intr_cpus_map, cpu_online_mask);
 
+
 	for (i = 0; i < 4; i++) {
 		gxio_trio_context_t *context = controller->trio;
 		int cpu;
@@ -1323,6 +1324,7 @@ invalid_device:
 	return 0;
 }
 
+
 /*
  * See tile_cfg_read() for relevent comments.
  * Note that "val" is the value to write, not a pointer to that value.
@@ -1430,10 +1432,12 @@ invalid_device:
 	return 0;
 }
 
+
 static struct pci_ops tile_cfg_ops = {
 	.read =         tile_cfg_read,
 	.write =        tile_cfg_write,
 };
+
 
 /* MSI support starts here. */
 static unsigned int tilegx_msi_startup(struct irq_data *d)

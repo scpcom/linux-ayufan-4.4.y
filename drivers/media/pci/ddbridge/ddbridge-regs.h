@@ -110,6 +110,7 @@
 #define I2C_SPEED_77    (0x19181919)
 #define I2C_SPEED_50    (0x27262727)
 
+
 /* ------------------------------------------------------------------------- */
 /* DMA  Controller */
 
@@ -147,3 +148,4 @@
 
 #define DMA_BASE_ADDRESS_TABLE  (0x2000)
 #define DMA_BASE_ADDRESS_TABLE_ENTRIES (512)
+

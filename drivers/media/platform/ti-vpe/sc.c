@@ -253,6 +253,7 @@ void sc_config_scaler(struct sc_data *sc, u32 *sc_reg0, u32 *sc_reg8,
 			src_h, dst_h, row_acc_inc);
 	}
 
+
 	sc_reg0[0] = val;
 	sc_reg0[1] = row_acc_inc;
 	sc_reg0[2] = row_acc_offset;

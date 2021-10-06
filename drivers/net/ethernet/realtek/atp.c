@@ -25,6 +25,7 @@
 	Support information and updates available at
 	http://www.scyld.com/network/atp.html
 
+
 	Modular support/softnet added by Alan Cox.
 	_bit abuse fixed up by Alan Cox
 
@@ -203,6 +204,7 @@ static void read_block(long ioaddr, int length, unsigned char *buffer, int data_
 static int net_close(struct net_device *dev);
 static void set_rx_mode(struct net_device *dev);
 static void tx_timeout(struct net_device *dev);
+
 
 /* A list of all installed ATP devices, for removing the driver module. */
 static struct net_device *root_atp_dev;
@@ -412,6 +414,7 @@ static unsigned short __init eeprom_op(long ioaddr, u32 cmd)
 	return eedata_out;
 }
 
+
 /* Open/initialize the board.  This is called (in the current kernel)
    sometime after booting when the 'ifconfig' program is run.
 
@@ -583,6 +586,7 @@ static netdev_tx_t atp_send_packet(struct sk_buff *skb,
 	dev_kfree_skb (skb);
 	return NETDEV_TX_OK;
 }
+
 
 /* The typical workload of the driver:
    Handle the network interface interrupts. */

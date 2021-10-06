@@ -30,6 +30,7 @@
 
 #include "u_serial.h"
 
+
 /*
  * This component encapsulates the TTY layer glue needed to provide basic
  * "serial port" functionality through the USB gadget stack.  Each such
@@ -125,6 +126,8 @@ static struct portmaster {
 } ports[MAX_U_SERIAL_PORTS];
 
 #define GS_CLOSE_TIMEOUT		15		/* seconds */
+
+
 
 #ifdef VERBOSE_DEBUG
 #ifndef pr_vdebug
@@ -551,6 +554,7 @@ static void gs_rx_push(unsigned long _port)
 	 */
 	if (do_push)
 		tty_flip_buffer_push(&port->port);
+
 
 	/* We want our data queue to become empty ASAP, keeping data
 	 * in the tty and ldisc (not here).  If we couldn't push any

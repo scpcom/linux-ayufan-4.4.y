@@ -4170,6 +4170,7 @@ static void mvpp2_aggr_txq_pend_desc_add(struct mvpp2_port *port, int pending)
 	mvpp2_write(port->priv, MVPP2_AGGR_TXQ_UPDATE_REG, pending);
 }
 
+
 /* Check if there are enough free descriptors in aggregated txq.
  * If not, update the number of occupied descriptors and repeat the check.
  */

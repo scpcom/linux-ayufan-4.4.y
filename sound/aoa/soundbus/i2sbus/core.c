@@ -104,6 +104,7 @@ static irqreturn_t i2sbus_bus_intr(int irq, void *devid)
 	return IRQ_HANDLED;
 }
 
+
 /*
  * XXX FIXME: We test the layout_id's here to get the proper way of
  * mapping in various registers, thanks to bugs in Apple device-trees.
@@ -241,6 +242,7 @@ static int i2sbus_add_dev(struct macio_dev *macio,
 			goto err;
 		dev->interrupts[i] = irq;
 	}
+
 
 	/* Resource handling is problematic as some device-trees contain
 	 * useless crap (ugh ugh ugh). We work around that here by calling

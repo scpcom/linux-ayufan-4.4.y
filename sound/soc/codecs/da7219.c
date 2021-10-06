@@ -32,6 +32,7 @@
 #include "da7219.h"
 #include "da7219-aad.h"
 
+
 /*
  * TLVs and Enums
  */
@@ -228,6 +229,7 @@ static const struct soc_enum da7219_dac_ng_rampdown_rate =
 			DA7219_DAC_NG_RAMP_RATE_MAX,
 			da7219_dac_ng_rampdown_txt);
 
+
 static const char * const da7219_cp_track_mode_txt[] = {
 	"Largest Volume", "DAC Volume", "Signal Magnitude"
 };
@@ -242,6 +244,7 @@ static const struct soc_enum da7219_cp_track_mode =
 			      DA7219_CP_MCHANGE_REL_MASK, DA7219_CP_MCHANGE_MAX,
 			      da7219_cp_track_mode_txt,
 			      da7219_cp_track_mode_val);
+
 
 /*
  * Control Functions
@@ -395,6 +398,7 @@ static int da7219_alc_sw_put(struct snd_kcontrol *kcontrol,
 	struct snd_soc_codec *codec = snd_soc_kcontrol_codec(kcontrol);
 	struct da7219_priv *da7219 = snd_soc_codec_get_drvdata(codec);
 
+
 	/* Force ALC offset calibration if enabling ALC */
 	if ((ucontrol->value.integer.value[0]) && (!da7219->alc_en)) {
 		da7219_alc_calib(codec);
@@ -458,6 +462,7 @@ static int da7219_tonegen_freq_put(struct snd_kcontrol *kcontrol,
 
 	return ret;
 }
+
 
 /*
  * KControls
@@ -667,6 +672,7 @@ static const struct snd_kcontrol_new da7219_snd_controls[] = {
 		     DA7219_SWITCH_EN_MAX, DA7219_NO_INVERT),
 };
 
+
 /*
  * DAPM Mux Controls
  */
@@ -711,6 +717,7 @@ static const struct soc_enum da7219_out_dacr_sel =
 static const struct snd_kcontrol_new da7219_out_dacr_sel_mux =
 	SOC_DAPM_ENUM("Out DACR Mux", da7219_out_dacr_sel);
 
+
 /*
  * DAPM Mixer Controls
  */
@@ -751,6 +758,7 @@ static const struct snd_kcontrol_new da7219_st_out_filtl_mix_controls[] = {
 static const struct snd_kcontrol_new da7219_st_out_filtr_mix_controls[] = {
 	DA7219_DMIX_ST_CTRLS(DA7219_DROUTING_ST_OUTFILT_1R),
 };
+
 
 /*
  * DAPM Events
@@ -812,6 +820,7 @@ static int da7219_dai_event(struct snd_soc_dapm_widget *w,
 		return -EINVAL;
 	}
 }
+
 
 /*
  * DAPM Widgets
@@ -921,6 +930,7 @@ static const struct snd_soc_dapm_widget da7219_dapm_widgets[] = {
 	SND_SOC_DAPM_OUTPUT("HPR"),
 };
 
+
 /*
  * DAPM Mux Routes
  */
@@ -945,6 +955,7 @@ static const struct snd_soc_dapm_widget da7219_dapm_widgets[] = {
 	{name, "Out FilterL Switch", "Mixer Out FilterL"},	\
 	{name, "Out FilterR Switch", "Mixer Out FilterR"},	\
 	{name, "Sidetone Switch", "Sidetone Filter"}
+
 
 /*
  * DAPM audio route definition
@@ -997,6 +1008,7 @@ static const struct snd_soc_dapm_route da7219_audio_map[] = {
 	{"HPL", NULL, "Charge Pump"},
 	{"HPR", NULL, "Charge Pump"},
 };
+
 
 /*
  * DAI operations
@@ -1382,6 +1394,7 @@ static struct snd_soc_dai_driver da7219_dai = {
 	.symmetric_samplebits = 1,
 };
 
+
 /*
  * DT
  */
@@ -1471,6 +1484,7 @@ static struct da7219_pdata *da7219_of_to_pdata(struct snd_soc_codec *codec)
 
 	return pdata;
 }
+
 
 /*
  * Codec driver functions
@@ -1740,6 +1754,7 @@ static struct snd_soc_codec_driver soc_codec_dev_da7219 = {
 	.num_dapm_routes	= ARRAY_SIZE(da7219_audio_map),
 };
 
+
 /*
  * Regmap configs
  */
@@ -1876,6 +1891,7 @@ static const struct regmap_config da7219_regmap_config = {
 	.volatile_reg = da7219_volatile_register,
 	.cache_type = REGCACHE_RBTREE,
 };
+
 
 /*
  * I2C layer

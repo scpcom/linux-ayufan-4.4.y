@@ -102,6 +102,7 @@ do { \
 		pr_warn("create of %s failed\n", name); \
 } while (0)
 
+
 #define DEBUGFS_SEQ_FILE_CREATE(name, parent, data) \
 	DEBUGFS_FILE_CREATE(#name, parent, data, &_##name##_file_ops, S_IRUGO)
 
@@ -125,6 +126,7 @@ static void *_opcode_stats_seq_next(struct seq_file *s, void *v, loff_t *pos)
 		return NULL;
 	return pos;
 }
+
 
 static void _opcode_stats_seq_stop(struct seq_file *s, void *v)
 __releases(RCU)
@@ -305,6 +307,7 @@ static void *_sdes_seq_next(struct seq_file *s, void *v, loff_t *pos)
 		return NULL;
 	return pos;
 }
+
 
 static void _sdes_seq_stop(struct seq_file *s, void *v)
 __releases(RCU)

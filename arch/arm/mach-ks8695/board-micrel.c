@@ -35,6 +35,7 @@ static struct ks8695_pci_cfg __initdata micrel_pci = {
 };
 #endif
 
+
 static void __init micrel_init(void)
 {
 	printk(KERN_INFO "Micrel KS8695 Development Board initializing\n");

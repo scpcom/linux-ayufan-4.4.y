@@ -53,6 +53,7 @@ do {								\
 	preempt_enable();					\
 } while(0)
 
+
 #define __flush_tlb_global()			flush_tlb_all()
 #define flush_tlb()				flush_tlb_all()
 #define flush_tlb_kernel_range(start, end)	flush_tlb_all()
@@ -67,5 +68,6 @@ do {								\
 #define flush_tlb_kernel_range(start, end)	BUG()
 
 #endif
+
 
 #endif /* _ASM_TLBFLUSH_H */

@@ -31,6 +31,7 @@
  * SOFTWARE.
  */
 
+
 #include <linux/mlx4/cmd.h>
 #include <linux/mlx4/srq.h>
 #include <linux/export.h>
@@ -96,6 +97,7 @@ int __mlx4_srq_alloc_icm(struct mlx4_dev *dev, int *srqn)
 {
 	struct mlx4_srq_table *srq_table = &mlx4_priv(dev)->srq_table;
 	int err;
+
 
 	*srqn = mlx4_bitmap_alloc(&srq_table->bitmap);
 	if (*srqn == -1)

@@ -186,6 +186,7 @@ struct neigh_hash_table {
 	struct rcu_head		rcu;
 };
 
+
 struct neigh_table {
 	int			family;
 	int			entry_size;
@@ -245,6 +246,7 @@ static inline void *neighbour_priv(const struct neighbour *n)
 #define NEIGH_UPDATE_F_OVERRIDE_ISROUTER	0x00000004
 #define NEIGH_UPDATE_F_ISROUTER			0x40000000
 #define NEIGH_UPDATE_F_ADMIN			0x80000000
+
 
 static inline bool neigh_key_eq16(const struct neighbour *n, const void *pkey)
 {
@@ -509,5 +511,6 @@ static inline void neigh_ha_snapshot(char *dst, const struct neighbour *n,
 		memcpy(dst, n->ha, dev->addr_len);
 	} while (read_seqretry(&n->ha_lock, seq));
 }
+
 
 #endif

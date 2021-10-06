@@ -82,6 +82,7 @@ int brcmf_debug_attach(struct brcmf_pub *drvr)
 	if (IS_ERR(drvr->dbgfs_dir))
 		return PTR_ERR(drvr->dbgfs_dir);
 
+
 	return brcmf_fweh_register(drvr, BRCMF_E_PSM_WATCHDOG,
 				   brcmf_debug_psm_watchdog_notify);
 }

@@ -23,6 +23,7 @@
 #include <linux/io.h>
 #include <linux/of.h>
 
+
 /*
  * SSP Serial Port Registers
  * PXA250, PXA255, PXA26x and PXA27x SSP controllers are all slightly different.
@@ -65,6 +66,7 @@
 #define SSCR0_FPCKE	(1 << 29)	/* FIFO packing enable */
 #define SSCR0_ACS	(1 << 30)	/* Audio clock select */
 #define SSCR0_MOD	(1 << 31)	/* Mode (normal or network) */
+
 
 #define SSCR1_RIE	(1 << 0)	/* Receive FIFO Interrupt Enable */
 #define SSCR1_TIE	(1 << 1)	/* Transmit FIFO Interrupt Enable */
@@ -153,6 +155,7 @@
 #define SSSR_EOC		(1 << 20)	/* End Of Chain */
 #define SSSR_TINT		(1 << 19)	/* Receiver Time-out Interrupt */
 #define SSSR_PINT		(1 << 18)	/* Peripheral Trailing Byte Interrupt */
+
 
 #define SSPSP_SCMODE(x)		((x) << 0)	/* Serial Bit Rate Clock Mode */
 #define SSPSP_SFRMP		(1 << 2)	/* Serial Frame Polarity */

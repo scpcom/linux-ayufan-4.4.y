@@ -19,6 +19,7 @@
 #include "proto.h"
 #include "pci_impl.h"
 
+
 #define DEBUG_ALLOC 0
 #if DEBUG_ALLOC > 0
 # define DBGA(args...)		printk(KERN_DEBUG args)
@@ -68,6 +69,7 @@ iommu_arena_new_node(int nid, struct pci_controller *hose, dma_addr_t base,
 	   particular systems can over-align the arena.  */
 	if (align < mem_size)
 		align = mem_size;
+
 
 #ifdef CONFIG_DISCONTIGMEM
 
@@ -834,6 +836,7 @@ static int alpha_pci_supported(struct device *dev, u64 mask)
 	return 0;
 }
 
+
 /*
  * AGP GART extensions to the IOMMU
  */

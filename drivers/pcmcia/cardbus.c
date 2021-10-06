@@ -19,11 +19,13 @@
  *		Linus, Jan 2000
  */
 
+
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/pci.h>
 
 #include <pcmcia/ss.h>
+
 
 static void cardbus_config_irq_and_cls(struct pci_bus *bus, int irq)
 {

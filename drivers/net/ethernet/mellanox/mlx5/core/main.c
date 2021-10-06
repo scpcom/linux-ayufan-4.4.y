@@ -303,6 +303,7 @@ struct mlx5_reg_host_endianess {
 	u8      rsvd[15];
 };
 
+
 #define CAP_MASK(pos, size) ((u64)((1 << (size)) - 1) << (pos))
 
 enum {
@@ -1180,6 +1181,7 @@ struct mlx5_core_event_handler {
 		      enum mlx5_dev_event event,
 		      void *data);
 };
+
 
 static int init_one(struct pci_dev *pdev,
 		    const struct pci_device_id *id)

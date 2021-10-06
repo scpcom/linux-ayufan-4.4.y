@@ -13,6 +13,7 @@
 
 #include <linux/types.h>
 
+
     /*
      *  Each Zorro board has a 32-bit ID of the form
      *
@@ -26,6 +27,7 @@
      *				for some GVP boards)
      */
 
+
 #define ZORRO_MANUF(id)		((id) >> 16)
 #define ZORRO_PROD(id)		(((id) >> 8) & 0xff)
 #define ZORRO_EPC(id)		((id) & 0xff)
@@ -35,8 +37,10 @@
 
 typedef __u32 zorro_id;
 
+
 /* Include the ID list */
 #include <linux/zorro_ids.h>
+
 
     /*
      *  GVP identifies most of its products through the 'extended product code'
@@ -56,6 +60,7 @@ enum GVP_flags {
 	GVP_NOBANK		= 0x20,
 	GVP_14MHZ		= 0x40,
 };
+
 
 struct Node {
 	__be32 ln_Succ;		/* Pointer to next (successor) */

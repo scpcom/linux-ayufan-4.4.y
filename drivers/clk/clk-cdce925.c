@@ -158,6 +158,7 @@ static int cdce925_pll_set_rate(struct clk_hw *hw, unsigned long rate,
 	return 0;
 }
 
+
 /* calculate p = max(0, 4 - int(log2 (n/m))) */
 static u8 cdce925_pll_calc_p(u16 n, u16 m)
 {
@@ -262,6 +263,7 @@ static const struct clk_ops cdce925_pll_ops = {
 	.round_rate = cdce925_pll_round_rate,
 	.set_rate = cdce925_pll_set_rate,
 };
+
 
 static void cdce925_clk_set_pdiv(struct clk_cdce925_output *data, u16 pdiv)
 {
@@ -427,6 +429,7 @@ static const struct clk_ops cdce925_clk_ops = {
 	.set_rate = cdce925_clk_set_rate,
 };
 
+
 static u16 cdce925_y1_calc_divider(unsigned long rate,
 		unsigned long parent_rate)
 {
@@ -472,6 +475,7 @@ static const struct clk_ops cdce925_clk_y1_ops = {
 	.round_rate = cdce925_clk_y1_round_rate,
 	.set_rate = cdce925_clk_y1_set_rate,
 };
+
 
 static struct regmap_config cdce925_regmap_config = {
 	.name = "configuration0",

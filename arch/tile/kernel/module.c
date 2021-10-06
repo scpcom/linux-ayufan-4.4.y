@@ -72,6 +72,7 @@ error:
 	return NULL;
 }
 
+
 /* Free memory returned from module_alloc */
 void module_memfree(void *module_region)
 {

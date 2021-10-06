@@ -31,6 +31,7 @@
 #include "nx_csbcpb.h"
 #include "nx.h"
 
+
 static int ccm_aes_nx_set_key(struct crypto_aead *tfm,
 			      const u8           *in_key,
 			      unsigned int        key_len)
@@ -305,6 +306,7 @@ static int generate_pat(u8                   *iv,
 				NX_CPB_FDM(nx_ctx->csbcpb_aead) &=
 					~NX_FDM_INTERMEDIATE;
 			}
+
 
 			nx_ctx->op_aead.inlen = (nx_ctx->in_sg - nx_insg) *
 						sizeof(struct nx_sg);

@@ -76,6 +76,7 @@ static inline __u32 iov_crc32( __u32 c, struct kvec *iov, unsigned int cnt )
 	return c;
 }
 
+
 #define DVB_NET_MULTICAST_MAX 10
 
 #undef ULE_DEBUG
@@ -123,6 +124,7 @@ struct dvb_net_priv {
 	unsigned long ts_count;			/* Current ts cell counter. */
 	struct mutex mutex;
 };
+
 
 /**
  *	Determine the packet's protocol ID. The rule here is that we
@@ -288,6 +290,7 @@ static int handle_ule_extensions( struct dvb_net_priv *p )
 
 	return total_ext_len;
 }
+
 
 /** Prepare for a new ULE SNDU: reset the decoder state. */
 static inline void reset_ule( struct dvb_net_priv *p )
@@ -772,6 +775,7 @@ static int dvb_net_ts_callback(const u8 *buffer1, size_t buffer1_len,
 	return 0;
 }
 
+
 static void dvb_net_sec(struct net_device *dev,
 			const u8 *pkt, int pkt_len)
 {
@@ -1081,6 +1085,7 @@ static int dvb_net_feed_stop(struct net_device *dev)
 	return ret;
 }
 
+
 static int dvb_set_mc_filter(struct net_device *dev, unsigned char *addr)
 {
 	struct dvb_net_priv *priv = netdev_priv(dev);
@@ -1093,6 +1098,7 @@ static int dvb_set_mc_filter(struct net_device *dev, unsigned char *addr)
 	priv->multi_num++;
 	return 0;
 }
+
 
 static void wq_set_multicast_list (struct work_struct *work)
 {
@@ -1127,11 +1133,13 @@ static void wq_set_multicast_list (struct work_struct *work)
 	dvb_net_feed_start(dev);
 }
 
+
 static void dvb_net_set_multicast_list (struct net_device *dev)
 {
 	struct dvb_net_priv *priv = netdev_priv(dev);
 	schedule_work(&priv->set_multicast_list_wq);
 }
+
 
 static void wq_restart_net_feed (struct work_struct *work)
 {
@@ -1144,6 +1152,7 @@ static void wq_restart_net_feed (struct work_struct *work)
 		dvb_net_feed_start(dev);
 	}
 }
+
 
 static int dvb_net_set_mac (struct net_device *dev, void *p)
 {
@@ -1158,6 +1167,7 @@ static int dvb_net_set_mac (struct net_device *dev, void *p)
 	return 0;
 }
 
+
 static int dvb_net_open(struct net_device *dev)
 {
 	struct dvb_net_priv *priv = netdev_priv(dev);
@@ -1166,6 +1176,7 @@ static int dvb_net_open(struct net_device *dev)
 	dvb_net_feed_start(dev);
 	return 0;
 }
+
 
 static int dvb_net_stop(struct net_device *dev)
 {
@@ -1179,6 +1190,7 @@ static const struct header_ops dvb_header_ops = {
 	.create		= eth_header,
 	.parse		= eth_header_parse,
 };
+
 
 static const struct net_device_ops dvb_netdev_ops = {
 	.ndo_open		= dvb_net_open,
@@ -1439,6 +1451,7 @@ static int dvb_net_close(struct inode *inode, struct file *file)
 	return 0;
 }
 
+
 static const struct file_operations dvb_net_fops = {
 	.owner = THIS_MODULE,
 	.unlocked_ioctl = dvb_net_ioctl,
@@ -1475,6 +1488,7 @@ void dvb_net_release (struct dvb_net *dvbnet)
 	}
 }
 EXPORT_SYMBOL(dvb_net_release);
+
 
 int dvb_net_init (struct dvb_adapter *adap, struct dvb_net *dvbnet,
 		  struct dmx_demux *dmx)

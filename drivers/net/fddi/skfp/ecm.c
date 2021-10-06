@@ -146,6 +146,7 @@ static void ecm_fsm(struct s_smc *smc, int cmd)
 	int ls_b ;			/* current line state PHY B */
 	int	p ;			/* ports */
 
+
 	smc->mib.fddiSMTBypassPresent = sm_pm_bypass_present(smc) ;
 	if (cmd == EC_CONNECT)
 		smc->mib.fddiSMTRemoteDisconnectFlag = FALSE ;
@@ -513,6 +514,7 @@ static void prop_actions(struct s_smc *smc)
 	}
 }
 #endif
+
 
 /*
  * SMT timer interface

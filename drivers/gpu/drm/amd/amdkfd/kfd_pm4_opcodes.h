@@ -21,6 +21,7 @@
  *
  */
 
+
 #ifndef KFD_PM4_OPCODES_H
 #define KFD_PM4_OPCODES_H
 
@@ -103,3 +104,4 @@ enum it_opcode_type {
 #define PM4_TYPE_3 3
 
 #endif /* KFD_PM4_OPCODES_H */
+

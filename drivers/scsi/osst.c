@@ -198,6 +198,7 @@ static inline char *tape_name(struct osst_tape *tape)
 
 /* Routines that handle the interaction with mid-layer SCSI routines */
 
+
 /* Normalize Sense */
 static void osst_analyze_sense(struct osst_request *SRpnt, struct st_cmdstatus *s)
 {
@@ -316,6 +317,7 @@ static int osst_chk_result(struct osst_tape * STp, struct osst_request * SRpnt)
 	}
 	return (-EIO);
 }
+
 
 /* Wakeup from interrupt */
 static void osst_end_async(struct request *req, int update)
@@ -503,6 +505,7 @@ static	struct osst_request * osst_do_scsi(struct osst_request *SRpnt, struct oss
 	return SRpnt;
 }
 
+
 /* Handle the write-behind checking (downs the semaphore) */
 static void osst_write_behind_check(struct osst_tape *STp)
 {
@@ -539,6 +542,8 @@ static void osst_write_behind_check(struct osst_tape *STp)
 	return;
 }
 
+
+
 /* Onstream specific Routines */
 /*
  * Initialize the OnStream AUX
@@ -2176,6 +2181,7 @@ static void osst_set_retries(struct osst_tape * STp, struct osst_request ** aSRp
 }
 #endif
 
+
 static int osst_write_filemark(struct osst_tape * STp, struct osst_request ** aSRpnt)
 {
 	int	result;
@@ -2842,6 +2848,7 @@ static int osst_configure_onstream(struct osst_tape *STp, struct osst_request **
 	
 }
 
+
 /* Step over EOF if it has been inadvertently crossed (ioctl not used because
    it messes up the block number). */
 static int cross_eof(struct osst_tape *STp, struct osst_request ** aSRpnt, int forward)
@@ -2869,6 +2876,7 @@ static int cross_eof(struct osst_tape *STp, struct osst_request ** aSRpnt, int f
 
 	return result;
 }
+
 
 /* Get the tape position. */
 
@@ -2953,6 +2961,7 @@ static int osst_get_frame_position(struct osst_tape *STp, struct osst_request **
 
 	return (result == 0 ? STp->first_frame_position : result);
 }
+
 
 /* Set the tape block */
 static int osst_set_frame_position(struct osst_tape *STp, struct osst_request ** aSRpnt, int ppos, int skip)
@@ -3167,6 +3176,7 @@ static int osst_flush_write_buffer(struct osst_tape *STp, struct osst_request **
 	return result;
 }
 
+
 /* Flush the tape buffer. The tape will be positioned correctly unless
    seek_next is true. */
 static int osst_flush_buffer(struct osst_tape * STp, struct osst_request ** aSRpnt, int seek_next)
@@ -3350,6 +3360,7 @@ static void reset_state(struct osst_tape *STp)
 	}
 }
 				
+
 /* Entry points to osst */
 
 /* Write command */
@@ -3365,6 +3376,7 @@ static ssize_t osst_write(struct file * filp, const char __user * buf, size_t co
 	struct st_partstat  * STps;
 	struct osst_tape    * STp  = filp->private_data;
 	char		    * name = tape_name(STp);
+
 
 	if (mutex_lock_interruptible(&STp->lock))
 		return (-ERESTARTSYS);
@@ -3673,6 +3685,7 @@ out:
 	return retval;
 }
 
+
 /* Read command */
 static ssize_t osst_read(struct file * filp, char __user * buf, size_t count, loff_t *ppos)
 {
@@ -3684,6 +3697,7 @@ static ssize_t osst_read(struct file * filp, char __user * buf, size_t count, lo
 	struct osst_request * SRpnt = NULL;
 	struct osst_tape    * STp   = filp->private_data;
 	char		    * name  = tape_name(STp);
+
 
 	if (mutex_lock_interruptible(&STp->lock))
 		return (-ERESTARTSYS);
@@ -3856,6 +3870,7 @@ out:
 	return retval;
 }
 
+
 /* Set the driver options */
 static void osst_log_options(struct osst_tape *STp, struct st_modedef *STm, char *name)
 {
@@ -3878,6 +3893,7 @@ static void osst_log_options(struct osst_tape *STp, struct st_modedef *STm, char
 	 name, debugging);
 #endif
 }
+
 
 static int osst_set_options(struct osst_tape *STp, long options)
 {
@@ -4032,6 +4048,7 @@ static int osst_set_options(struct osst_tape *STp, long options)
 
 	return 0;
 }
+
 
 /* Internal ioctl function */
 static int osst_int_ioctl(struct osst_tape * STp, struct osst_request ** aSRpnt,
@@ -4418,6 +4435,7 @@ os_bypass:
 	return ioctl_result;
 }
 
+
 /* Open the device */
 static int __os_scsi_tape_open(struct inode * inode, struct file * filp)
 {
@@ -4798,6 +4816,8 @@ static int os_scsi_tape_open(struct inode * inode, struct file * filp)
 	return ret;
 }
 
+
+
 /* Flush the tape buffer before close */
 static int os_scsi_tape_flush(struct file * filp, fl_owner_t id)
 {
@@ -4890,6 +4910,7 @@ out:
 	return result;
 }
 
+
 /* Close the device and release it */
 static int os_scsi_tape_close(struct inode * inode, struct file * filp)
 {
@@ -4911,6 +4932,7 @@ static int os_scsi_tape_close(struct inode * inode, struct file * filp)
 
 	return result;
 }
+
 
 /* The ioctl command */
 static long osst_ioctl(struct file * file,
@@ -5268,6 +5290,8 @@ static long osst_compat_ioctl(struct file * file, unsigned int cmd_in, unsigned 
 }
 #endif
 
+
+
 /* Memory handling routines */
 
 /* Try to allocate a new tape buffer skeleton. Caller must not hold os_scsi_tapes_lock */
@@ -5375,6 +5399,7 @@ static int enlarge_buffer(struct osst_buffer *STbuffer, int need_dma)
 	return 1;
 }
 
+
 /* Release the segments */
 static void normalize_buffer(struct osst_buffer *STbuffer)
 {
@@ -5396,6 +5421,7 @@ static void normalize_buffer(struct osst_buffer *STbuffer)
 #endif
 	STbuffer->sg_segs = STbuffer->orig_sg_segs = 0;
 }
+
 
 /* Move data from the user buffer to the tape buffer. Returns zero (success) or
    negative error code. */
@@ -5428,6 +5454,7 @@ static int append_to_buffer(const char __user *ubp, struct osst_buffer *st_bp, i
 	}
 	return 0;
 }
+
 
 /* Move data from the tape buffer to the user buffer. Returns zero (success) or
    negative error code. */
@@ -5531,6 +5558,7 @@ static int osst_copy_from_buffer(struct osst_buffer *st_bp, unsigned char *ptr)
 	return 0;
 }
 
+
 /* Module housekeeping */
 
 static void validate_options (void)

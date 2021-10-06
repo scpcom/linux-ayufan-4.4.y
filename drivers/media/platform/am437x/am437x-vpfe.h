@@ -132,6 +132,7 @@ enum ccdc_buftype {
 	CCDC_BUFTYPE_FLD_SEPARATED
 };
 
+
 /* returns the highest bit used for the gamma */
 static inline u8 ccdc_gamma_width_max_bit(enum vpfe_ccdc_gamma_width width)
 {

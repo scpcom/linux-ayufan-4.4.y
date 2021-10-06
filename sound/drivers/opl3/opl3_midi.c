@@ -123,6 +123,7 @@ static void snd_opl3_calc_pitch(unsigned char *fnum, unsigned char *blocknum,
 		((block << 2) & OPL3_BLOCKNUM_MASK);
 }
 
+
 #ifdef DEBUG_ALLOC
 static void debug_alloc(struct snd_opl3 *opl3, char *s, int voice) {
 	int i;
@@ -281,6 +282,7 @@ static void snd_opl3_start_timer(struct snd_opl3 *opl3)
 }
 
 /* ------------------------------ */
+
 
 static int snd_opl3_oss_map[MAX_OPL3_VOICES] = {
 	0, 1, 2, 9, 10, 11, 6, 7, 8, 15, 16, 17, 3, 4 ,5, 12, 13, 14

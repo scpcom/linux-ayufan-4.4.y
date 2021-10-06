@@ -54,6 +54,7 @@ union snd_firewire_event {
 	struct snd_firewire_event_digi00x_message   digi00x_message;
 };
 
+
 #define SNDRV_FIREWIRE_IOCTL_GET_INFO _IOR('H', 0xf8, struct snd_firewire_get_info)
 #define SNDRV_FIREWIRE_IOCTL_LOCK      _IO('H', 0xf9)
 #define SNDRV_FIREWIRE_IOCTL_UNLOCK    _IO('H', 0xfa)

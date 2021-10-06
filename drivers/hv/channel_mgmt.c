@@ -176,6 +176,7 @@ static void percpu_channel_deq(void *arg)
 	list_del(&channel->percpu_list);
 }
 
+
 void hv_process_channel_removal(struct vmbus_channel *channel, u32 relid)
 {
 	struct vmbus_channel_relid_released msg;
@@ -375,6 +376,7 @@ static const struct hv_vmbus_device_id hp_devs[] = {
 	/* NetworkDirect Guest RDMA */
 	{ HV_ND_GUID, },
 };
+
 
 /*
  * We use this state to statically distribute the channel interrupt load.
@@ -857,6 +859,7 @@ int vmbus_request_offers(void)
 	msg = (struct vmbus_channel_message_header *)msginfo->msg;
 
 	msg->msgtype = CHANNELMSG_REQUESTOFFERS;
+
 
 	ret = vmbus_post_msg(msg,
 			       sizeof(struct vmbus_channel_message_header));

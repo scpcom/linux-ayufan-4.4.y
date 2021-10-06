@@ -24,6 +24,7 @@
 #ifndef VMX_H
 #define VMX_H
 
+
 #include <linux/types.h>
 #include <uapi/asm/vmx.h>
 
@@ -357,6 +358,7 @@ enum vmcs_field {
 #define TYPE_MOV_FROM_DR                (1 << 4)
 #define DEBUG_REG_ACCESS_REG(eq)        (((eq) >> 8) & 0xf) /* 11:8, general purpose reg. */
 
+
 /*
  * Exit Qualifications for APIC-Access
  */
@@ -435,6 +437,7 @@ enum vmcs_field {
 #define VMX_EPT_DIRTY_BIT				(1ull << 9)
 
 #define VMX_EPT_IDENTITY_PAGETABLE_ADDR		0xfffbc000ul
+
 
 #define ASM_VMX_VMCLEAR_RAX       ".byte 0x66, 0x0f, 0xc7, 0x30"
 #define ASM_VMX_VMLAUNCH          ".byte 0x0f, 0x01, 0xc2"

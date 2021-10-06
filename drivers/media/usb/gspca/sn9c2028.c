@@ -311,6 +311,7 @@ static const struct v4l2_ctrl_ops sd_ctrl_ops = {
 	.s_ctrl = sd_s_ctrl,
 };
 
+
 static int sd_init_controls(struct gspca_dev *gspca_dev)
 {
 	struct v4l2_ctrl_handler *hdl = &gspca_dev->ctrl_handler;

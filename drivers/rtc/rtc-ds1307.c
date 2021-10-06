@@ -41,6 +41,7 @@ enum ds_type {
 	/* rs5c372 too?  different address... */
 };
 
+
 /* RTC registers don't differ much, except for the century flag */
 #define DS1307_REG_SECS		0x00	/* 00-59 */
 #	define DS1307_BIT_CH		0x80
@@ -100,6 +101,7 @@ enum ds_type {
 #	define RX8025_BIT_PON		0x10
 #	define RX8025_BIT_VDET		0x40
 #	define RX8025_BIT_XST		0x20
+
 
 struct ds1307 {
 	u8			offset; /* register's offset */
@@ -803,6 +805,7 @@ ds1307_nvram_write(struct file *filp, struct kobject *kobj,
 	}
 	return count;
 }
+
 
 /*----------------------------------------------------------------------*/
 

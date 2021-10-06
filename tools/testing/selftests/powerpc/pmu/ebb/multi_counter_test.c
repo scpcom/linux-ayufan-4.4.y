@@ -9,6 +9,7 @@
 
 #include "ebb.h"
 
+
 /*
  * Test counting multiple events using EBBs.
  */

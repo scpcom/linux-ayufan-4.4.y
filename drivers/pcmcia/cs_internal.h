@@ -38,6 +38,7 @@ typedef struct config_t {
 	struct resource mem[MAX_WIN];   /* mem areas */
 } config_t;
 
+
 struct cis_cache_entry {
 	struct list_head	node;
 	unsigned int		addr;
@@ -74,6 +75,7 @@ struct pccard_resource_ops {
 #define SOCKET_CARDBUS		0x8000
 #define SOCKET_CARDBUS_CONFIG	0x10000
 
+
 /*
  * Stuff internal to module "pcmcia_rsrc":
  */
@@ -93,6 +95,8 @@ extern void pccard_sysfs_remove_socket(struct device *dev);
 /* cardbus.c */
 int cb_alloc(struct pcmcia_socket *s);
 void cb_free(struct pcmcia_socket *s);
+
+
 
 /*
  * Stuff exported by module "pcmcia_core" to module "pcmcia"
