@@ -128,7 +128,11 @@ static struct phy_driver aquantia_driver[] = {
 	.config_intr	= aquantia_config_intr,
 	.ack_interrupt	= aquantia_ack_interrupt,
 	.read_status	= aquantia_read_status,
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+//do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	.driver		= { .owner = THIS_MODULE,},
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 },
 {
 	.phy_id		= PHY_ID_AQ2104,
@@ -141,7 +145,11 @@ static struct phy_driver aquantia_driver[] = {
 	.config_intr	= aquantia_config_intr,
 	.ack_interrupt	= aquantia_ack_interrupt,
 	.read_status	= aquantia_read_status,
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+//do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	.driver		= { .owner = THIS_MODULE,},
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 },
 {
 	.phy_id		= PHY_ID_AQR105,
@@ -154,7 +162,11 @@ static struct phy_driver aquantia_driver[] = {
 	.config_intr	= aquantia_config_intr,
 	.ack_interrupt	= aquantia_ack_interrupt,
 	.read_status	= aquantia_read_status,
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+//do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	.driver		= { .owner = THIS_MODULE,},
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 },
 {
 	.phy_id		= PHY_ID_AQR405,
@@ -167,7 +179,11 @@ static struct phy_driver aquantia_driver[] = {
 	.config_intr	= aquantia_config_intr,
 	.ack_interrupt	= aquantia_ack_interrupt,
 	.read_status	= aquantia_read_status,
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+//do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	.driver		= { .owner = THIS_MODULE,},
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 },
 };
 

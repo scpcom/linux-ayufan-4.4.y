@@ -131,7 +131,11 @@ static int pl061_irq_type(struct irq_data *d, unsigned trigger)
 	if ((trigger & (IRQ_TYPE_LEVEL_HIGH | IRQ_TYPE_LEVEL_LOW)) &&
 	    (trigger & (IRQ_TYPE_EDGE_RISING | IRQ_TYPE_EDGE_FALLING)))
 	{
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+		dev_err(gc->parent,
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		dev_err(gc->dev,
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 			"trying to configure line %d for both level and edge "
 			"detection, choose one!\n",
 			offset);
@@ -157,7 +161,11 @@ static int pl061_irq_type(struct irq_data *d, unsigned trigger)
 		else
 			gpioiev &= ~bit;
 		irq_set_handler_locked(d, handle_level_irq);
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+		dev_dbg(gc->parent, "line %d: IRQ on %s level\n",
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		dev_dbg(gc->dev, "line %d: IRQ on %s level\n",
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 			offset,
 			polarity ? "HIGH" : "LOW");
 	} else if ((trigger & IRQ_TYPE_EDGE_BOTH) == IRQ_TYPE_EDGE_BOTH) {
@@ -166,7 +174,11 @@ static int pl061_irq_type(struct irq_data *d, unsigned trigger)
 		/* Select both edges, setting this makes GPIOEV be ignored */
 		gpioibe |= bit;
 		irq_set_handler_locked(d, handle_edge_irq);
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+		dev_dbg(gc->parent, "line %d: IRQ on both edges\n", offset);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		dev_dbg(gc->dev, "line %d: IRQ on both edges\n", offset);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	} else if ((trigger & IRQ_TYPE_EDGE_RISING) ||
 		   (trigger & IRQ_TYPE_EDGE_FALLING)) {
 		bool rising = trigger & IRQ_TYPE_EDGE_RISING;
@@ -181,7 +193,11 @@ static int pl061_irq_type(struct irq_data *d, unsigned trigger)
 		else
 			gpioiev &= ~bit;
 		irq_set_handler_locked(d, handle_edge_irq);
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+		dev_dbg(gc->parent, "line %d: IRQ on %s edge\n",
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		dev_dbg(gc->dev, "line %d: IRQ on %s edge\n",
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 			offset,
 			rising ? "RISING" : "FALLING");
 	} else {
@@ -190,7 +206,11 @@ static int pl061_irq_type(struct irq_data *d, unsigned trigger)
 		gpioibe &= ~bit;
 		gpioiev &= ~bit;
 		irq_set_handler_locked(d, handle_bad_irq);
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+		dev_warn(gc->parent, "no trigger selected for line %d\n",
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		dev_warn(gc->dev, "no trigger selected for line %d\n",
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 			 offset);
 	}
 
@@ -315,7 +335,11 @@ static int pl061_probe(struct amba_device *adev, const struct amba_id *id)
 	chip->gc.set = pl061_set_value;
 	chip->gc.ngpio = PL061_GPIO_NR;
 	chip->gc.label = dev_name(dev);
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	chip->gc.parent = dev;
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	chip->gc.dev = dev;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	chip->gc.owner = THIS_MODULE;
 
 	ret = gpiochip_add(&chip->gc);

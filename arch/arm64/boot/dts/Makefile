@@ -13,9 +13,9 @@ dts-dirs += qcom
 dts-dirs += rockchip
 dts-dirs += sprd
 dts-dirs += xilinx
-ifeq ($(CONFIG_SYNO_RTD1296), y)
+ifeq ($(CONFIG_SYNO_LSP_RTD129X), y)
 dts-dirs += realtek
-endif
+endif # CONFIG_SYNO_LSP_RTD129X
 
 subdir-y	:= $(dts-dirs)
 

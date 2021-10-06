@@ -15,6 +15,9 @@
 #include "xhci.h"
 #include "xhci-mvebu.h"
 #include "xhci-rcar.h"
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#include <linux/usb/otg.h>
+#endif  
 
 static struct hc_driver __read_mostly xhci_plat_hc_driver;
 
@@ -31,6 +34,11 @@ static void xhci_plat_quirks(struct device *dev, struct xhci_hcd *xhci)
 {
 	 
 	xhci->quirks |= XHCI_PLAT;
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+
+	if (of_property_read_bool(dev->of_node, "needs-reset-on-resume"))
+		xhci->quirks |= XHCI_RESET_ON_RESUME;
+#endif  
 }
 
 static int xhci_plat_setup(struct usb_hcd *hcd)
@@ -59,6 +67,36 @@ static int xhci_plat_start(struct usb_hcd *hcd)
 	return xhci_run(hcd);
 }
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+ 
+int xhci_phy_init(struct usb_hcd *hcd, const char *phy_name)
+{
+	struct phy *phy = NULL;
+	int ret = 0;
+
+	phy = phy_get(hcd->self.controller, phy_name);
+
+	if (IS_ERR(phy)) {
+		ret = PTR_ERR(phy);
+	} else {
+		ret = phy_init(phy);
+		if (ret) {
+			phy_put(phy);
+			return ret;
+		}
+		ret = phy_power_on(phy);
+		if (ret) {
+			phy_exit(phy);
+			phy_put(phy);
+			return ret;
+		}
+		hcd->phy = phy;
+	}
+
+	return ret;
+}
+
+#endif  
 static int xhci_plat_probe(struct platform_device *pdev)
 {
 #if defined (MY_DEF_HERE)
@@ -181,6 +219,84 @@ static int xhci_plat_probe(struct platform_device *pdev)
 			"enabled" : "disabled");
 #endif  
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	if (of_device_is_compatible(pdev->dev.of_node,
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+				    "marvell,armada-3700-xhci")) {
+#else  
+				    "marvell,armada-3700-xhci-otg")) {
+#endif  
+		 
+		if (hcd->usb_phy == NULL) {
+			dev_err(&pdev->dev, "unable to find OTG PHY\n");
+			goto disable_usb_phy;
+		}
+
+		hcd->irq = irq;
+
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+		 
+		if (of_property_read_bool(pdev->dev.of_node, "separated-phys-for-usb2-usb3")) {
+			if (xhci_phy_init(hcd, "usb2")) {
+				dev_err(&pdev->dev, "unable to init and power on USB2 PHY\n");
+				goto disable_usb_phy;
+			}
+			if (xhci_phy_init(xhci->shared_hcd, "usb3")) {
+				dev_err(&pdev->dev, "unable to init and power on USB3 PHY\n");
+				goto disable_usb_phy;
+			}
+		}
+
+#endif  
+		ret = otg_set_host(hcd->usb_phy->otg, &hcd->self);
+		if (ret) {
+			dev_err(&pdev->dev, "unable to register with OTG PHY\n");
+			goto disable_usb_phy;
+		}
+	} else {
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+		 
+		if (of_property_read_bool(pdev->dev.of_node, "separated-phys-for-usb2-usb3")) {
+			ret = usb_add_hcd_with_phy_name(hcd, irq, IRQF_SHARED, "usb2");
+			if (ret)
+				goto disable_usb_phy;
+
+			ret = usb_add_hcd_with_phy_name(xhci->shared_hcd, irq, IRQF_SHARED, "usb3");
+			if (ret)
+				goto dealloc_usb2_hcd;
+		} else {
+			ret = usb_add_hcd(hcd, irq, IRQF_SHARED);
+			if (ret)
+				goto disable_usb_phy;
+
+			ret = usb_add_hcd(xhci->shared_hcd, irq, IRQF_SHARED);
+			if (ret)
+				goto dealloc_usb2_hcd;
+		}
+#else  
+		ret = usb_add_hcd(hcd, irq, IRQF_SHARED);
+		if (ret)
+			goto disable_usb_phy;
+#endif  
+
+#if defined (MY_DEF_HERE)
+		xhci->shared_hcd->vbus_gpio_pin = hcd->vbus_gpio_pin;
+		xhci->shared_hcd->power_control_support = hcd->power_control_support;
+		dev_info(&pdev->dev, "USB3 Vbus gpio %d\n",
+				xhci->shared_hcd->vbus_gpio_pin);
+		dev_info(&pdev->dev, "power control %s\n", hcd->power_control_support ?
+				"enabled" : "disabled");
+#endif  
+
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+ 
+#else  
+		ret = usb_add_hcd(xhci->shared_hcd, irq, IRQF_SHARED);
+		if (ret)
+			goto dealloc_usb2_hcd;
+#endif  
+	}
+#else  
 	ret = usb_add_hcd(hcd, irq, IRQF_SHARED);
 	if (ret)
 		goto disable_usb_phy;
@@ -197,6 +313,7 @@ static int xhci_plat_probe(struct platform_device *pdev)
 	ret = usb_add_hcd(xhci->shared_hcd, irq, IRQF_SHARED);
 	if (ret)
 		goto dealloc_usb2_hcd;
+#endif  
 
 	return 0;
 
@@ -225,10 +342,27 @@ static int xhci_plat_remove(struct platform_device *dev)
 	struct xhci_hcd	*xhci = hcd_to_xhci(hcd);
 	struct clk *clk = xhci->clk;
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	if (of_device_is_compatible(dev->dev.of_node,
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+				    "marvell,armada-3700-xhci")) {
+#else  
+				    "marvell,armada-3700-xhci-otg")) {
+#endif  
+		otg_set_host(hcd->usb_phy->otg, NULL);
+	} else {
+		usb_remove_hcd(xhci->shared_hcd);
+		usb_phy_shutdown(hcd->usb_phy);
+
+		usb_remove_hcd(hcd);
+	}
+#else  
 	usb_remove_hcd(xhci->shared_hcd);
 	usb_phy_shutdown(hcd->usb_phy);
 
 	usb_remove_hcd(hcd);
+#endif  
+
 	usb_put_hcd(xhci->shared_hcd);
 
 	if (!IS_ERR(clk))
@@ -238,19 +372,75 @@ static int xhci_plat_remove(struct platform_device *dev)
 	return 0;
 }
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+void xhci_plat_shutdown(struct platform_device *dev)
+{
+	xhci_plat_remove(dev);
+}
+#endif  
+
 #ifdef CONFIG_PM_SLEEP
 static int xhci_plat_suspend(struct device *dev)
 {
 	struct usb_hcd	*hcd = dev_get_drvdata(dev);
 	struct xhci_hcd	*xhci = hcd_to_xhci(hcd);
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+	int ret;
+#endif  
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+	ret = xhci_suspend(xhci, device_may_wakeup(dev));
+	if (ret) {
+		dev_err(dev, "unable to suspend xhci\n");
+		return ret;
+	}
+
+	phy_power_off(hcd->phy);
+	phy_exit(hcd->phy);
+
+	if (of_property_read_bool(dev->of_node, "separated-phys-for-usb2-usb3")) {
+		phy_power_off(xhci->shared_hcd->phy);
+		phy_exit(xhci->shared_hcd->phy);
+	}
+
+	return 0;
+#else  
 	return xhci_suspend(xhci, device_may_wakeup(dev));
+#endif  
 }
 
 static int xhci_plat_resume(struct device *dev)
 {
 	struct usb_hcd	*hcd = dev_get_drvdata(dev);
 	struct xhci_hcd	*xhci = hcd_to_xhci(hcd);
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+	int ret;
+
+	ret = phy_init(hcd->phy);
+	if (ret)
+		return ret;
+
+	ret = phy_power_on(hcd->phy);
+	if (ret) {
+		phy_exit(hcd->phy);
+		return ret;
+	}
+
+	if (of_property_read_bool(dev->of_node, "separated-phys-for-usb2-usb3")) {
+		ret = phy_init(xhci->shared_hcd->phy);
+		if (ret)
+			return ret;
+
+		ret = phy_power_on(xhci->shared_hcd->phy);
+		if (ret) {
+			phy_exit(xhci->shared_hcd->phy);
+			 
+			phy_power_off(hcd->phy);
+			phy_exit(hcd->phy);
+			return ret;
+		}
+	}
+#endif  
 
 	return xhci_resume(xhci, 0);
 }
@@ -271,6 +461,13 @@ static const struct of_device_id usb_xhci_of_match[] = {
 	{ .compatible = "marvell,armada-380-xhci"},
 	{ .compatible = "renesas,xhci-r8a7790"},
 	{ .compatible = "renesas,xhci-r8a7791"},
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+	{ .compatible = "marvell,armada-3700-xhci"},
+#else  
+	{ .compatible = "marvell,armada-3700-xhci-otg"},
+#endif  
+#endif  
 	{ },
 };
 MODULE_DEVICE_TABLE(of, usb_xhci_of_match);
@@ -284,8 +481,14 @@ static const struct acpi_device_id usb_xhci_acpi_match[] = {
 MODULE_DEVICE_TABLE(acpi, usb_xhci_acpi_match);
 
 static struct platform_driver usb_xhci_driver = {
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	.probe		= xhci_plat_probe,
+	.remove		= xhci_plat_remove,
+	.shutdown	= xhci_plat_shutdown,
+#else  
 	.probe	= xhci_plat_probe,
 	.remove	= xhci_plat_remove,
+#endif  
 	.driver	= {
 		.name = "xhci-hcd",
 		.pm = DEV_PM_OPS,

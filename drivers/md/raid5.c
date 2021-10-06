@@ -5292,6 +5292,7 @@ static void make_request(struct mddev *mddev, struct bio * bi)
 		syno_flashcache_return_error(bi);
 #else
 		 
+		bi->bi_error = -EIO;
 		bio_endio(bi);
 #endif  
 		return;
@@ -6625,13 +6626,8 @@ static struct r5conf *setup_conf(struct mddev *mddev)
 	conf = kzalloc(sizeof(struct r5conf), GFP_KERNEL);
 	if (conf == NULL)
 		goto abort;
-#ifdef MY_DEF_HERE
-	 
-	if (!alloc_thread_groups(conf, 4, &group_cnt, &worker_cnt_per_group,
-#else  
 	 
 	if (!alloc_thread_groups(conf, 0, &group_cnt, &worker_cnt_per_group,
-#endif  
 				 &new_group)) {
 		conf->group_cnt = group_cnt;
 		conf->worker_cnt_per_group = worker_cnt_per_group;

@@ -39,6 +39,10 @@
 #include <linux/synolib.h>
 #endif  
 
+#ifdef MY_DEF_HERE
+#include <linux/pci.h>
+#endif  
+
 #ifdef MY_ABC_HERE
 #include <linux/random.h>
 
@@ -735,12 +739,20 @@ syno_trans_host_to_disk_show(struct device *dev, struct device_attribute *attr, 
 		goto END;
 	}
 
-	iStartIdx = syno_libata_index_get(pShost, 0, 0, 0);
+#ifdef MY_DEF_HERE
+	if (pShost->isCacheSSD) {
+		iStartIdx = syno_libata_index_get(pShost, 0, 0, 0);
+		snprintf(szTmp, sizeof(szTmp), "%s%d\n",
+			CONFIG_SYNO_CACHE_DEVICE_PREFIX, (iStartIdx - M2SATA_START_IDX) + 1);
+	} else
+#endif  
+	{
+		iStartIdx = syno_libata_index_get(pShost, 0, 0, 0);
+		DeviceNameGet(iStartIdx, szTmp);
 
-	DeviceNameGet(iStartIdx, szTmp);
-
-	szTmp[SYNO_DISK_TRANS_LEN] = '\n';
-	szTmp[SYNO_DISK_TRANS_LEN + 1] = '\0';
+		szTmp[SYNO_DISK_TRANS_LEN] = '\n';
+		szTmp[SYNO_DISK_TRANS_LEN + 1] = '\0';
+	}
 
 	iLen = snprintf(buf, strlen(szTmp)+1, "%s", szTmp);
 END:
@@ -2573,14 +2585,17 @@ OUT:
 	ata_qc_free(qc);
 }
 
-static int SynoIssueRead(struct ata_device *dev, struct scsi_cmnd *cmd)
+static int SynoIssueWakeUpCmd(struct ata_device *dev, struct scsi_cmnd *cmd)
 {
 	struct ata_queued_cmd *qc;
 	struct ata_port *ap = dev->link->ap;
 	struct scatterlist *psg = NULL;
 	int rc;
 	u16 *buf = (void *)dev->link->ap->sector_buf;
+#ifdef MY_DEF_HERE
+#else
 	u64 block;
+#endif  
 
 	if (test_and_set_bit(CHKPOWER_FIRST_WAIT, &(dev->ulSpinupState))) {
 		printk("%s: there is already read cmd processing print_id %d link->pmp %d\n",
@@ -2600,6 +2615,10 @@ static int SynoIssueRead(struct ata_device *dev, struct scsi_cmnd *cmd)
 	psg = kmalloc(ATA_SECT_SIZE, GFP_ATOMIC); 
 	sg_init_one(psg, buf, ATA_SECT_SIZE);
 	ata_sg_init(qc, psg, 1);
+#ifdef MY_DEF_HERE
+	 
+	qc->tf.command = ATA_CMD_IDLEIMMEDIATE;
+#else  
 	qc->flags |= ATA_QCFLAG_IO;
 	qc->nbytes = ATA_SECT_SIZE;
 	qc->dma_dir = DMA_FROM_DEVICE;
@@ -2608,7 +2627,7 @@ static int SynoIssueRead(struct ata_device *dev, struct scsi_cmnd *cmd)
 		ata_link_printk(dev->link, KERN_ERR, "ata_build_rw_tf out of range\n");
 		goto ERR_MEM;
 	}
-
+#endif  
 	qc->complete_fn = ata_qc_complete_read;
 
 	if (ap->ops->qc_defer) {
@@ -2719,7 +2738,7 @@ PASS_ONCE:
 ISSUE_READ:
 	dev->iCheckPwr = 0;
 	dev->ulSpinupState = 0;
-	return SynoIssueRead(dev, cmd);
+	return SynoIssueWakeUpCmd(dev, cmd);
 WAIT:
 	return SCSI_MLQUEUE_HOST_BUSY;
 }
@@ -3287,7 +3306,11 @@ static unsigned int ata_scsiop_read_cap(struct ata_scsi_args *args, u8 *rbuf)
 			rbuf[14] |= 0x80;  
 
 			if (ata_id_has_zero_after_trim(args->id) &&
+#ifdef MY_ABC_HERE
+				1 ) {
+#else
 			    dev->horkage & ATA_HORKAGE_ZERO_AFTER_TRIM) {
+#endif  
 				ata_dev_info(dev, "Enabling discard_zeroes_data\n");
 				rbuf[14] |= 0x40;  
 			}

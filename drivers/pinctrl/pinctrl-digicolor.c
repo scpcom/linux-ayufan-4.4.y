@@ -244,7 +244,11 @@ static int dc_gpiochip_add(struct dc_pinmap *pmap, struct device_node *np)
 	int ret;
 
 	chip->label		= DRIVER_NAME;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	chip->parent		= pmap->dev;
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	chip->dev		= pmap->dev;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	chip->request		= gpiochip_generic_request;
 	chip->free		= gpiochip_generic_free;
 	chip->direction_input	= dc_gpio_direction_input;

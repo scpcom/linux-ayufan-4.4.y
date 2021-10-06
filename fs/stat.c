@@ -579,7 +579,7 @@ EXPORT_SYMBOL(__SYNOCaselessStat);
 #endif  
 
 #ifdef MY_ABC_HERE
-#if (defined(__ARCH_WANT_STAT64) || defined(__ARCH_WANT_COMPAT_STAT64)) && !defined(MY_DEF_HERE)
+#if (defined(__ARCH_WANT_STAT64) || defined(__ARCH_WANT_COMPAT_STAT64))
 SYSCALL_DEFINE2(SYNOCaselessStat64, char __user *, filename, struct stat64 __user *, statbuf)
 {
 #ifdef MY_ABC_HERE
@@ -614,7 +614,7 @@ SYSCALL_DEFINE2(SYNOCaselessLStat64, char __user *, filename, struct stat64 __us
 #endif  
 }
 
-#else  
+#endif  
 SYSCALL_DEFINE2(SYNOCaselessStat, char __user *, filename, struct stat __user *, statbuf)
 {
 #ifdef MY_ABC_HERE
@@ -649,10 +649,9 @@ SYSCALL_DEFINE2(SYNOCaselessLStat, char __user *, filename, struct stat __user *
 #endif  
 }
 #endif  
-#endif  
 
 #ifdef MY_ABC_HERE
-#if (defined(__ARCH_WANT_STAT64) || defined(__ARCH_WANT_COMPAT_STAT64)) && !defined(MY_DEF_HERE)
+#if (defined(__ARCH_WANT_STAT64) || defined(__ARCH_WANT_COMPAT_STAT64))
 struct SYNOSTAT64 {
 	struct stat64 st;
 	struct SYNOSTAT_EXTRA ext;
@@ -729,7 +728,7 @@ static int do_SYNOStat64(char __user * filename, int no_follow_link, int flags, 
 out:
 	return error;
 }
-#else  
+#endif  
 static int SYNOStatCopyToUser(struct kstat *kst, unsigned int flags, struct SYNOSTAT __user * synostat)
 {
 	int error = -EFAULT;
@@ -804,11 +803,10 @@ out:
 }
 
 #endif  
-#endif  
 
 #ifdef MY_ABC_HERE
-#if (defined(__ARCH_WANT_STAT64) || defined(__ARCH_WANT_COMPAT_STAT64)) && !defined(MY_DEF_HERE)
-SYSCALL_DEFINE3(SYNOStat64, const char __user *, filename, unsigned int, flags, struct SYNOSTAT64 __user *, synostat)
+#if (defined(__ARCH_WANT_STAT64) || defined(__ARCH_WANT_COMPAT_STAT64))
+SYSCALL_DEFINE3(SYNOStat64, char __user *, filename, unsigned int, flags, struct SYNOSTAT64 __user *, synostat)
 {
 #ifdef MY_ABC_HERE
 	return do_SYNOStat64(filename, 0, flags, synostat);
@@ -834,7 +832,7 @@ SYSCALL_DEFINE3(SYNOFStat64, unsigned int, fd, unsigned int, flags, struct SYNOS
 #endif  
 }
 
-SYSCALL_DEFINE3(SYNOLStat64, const char __user *, filename, unsigned int, flags, struct SYNOSTAT64 __user *, synostat)
+SYSCALL_DEFINE3(SYNOLStat64, char __user *, filename, unsigned int, flags, struct SYNOSTAT64 __user *, synostat)
 {
 #ifdef MY_ABC_HERE
 	return do_SYNOStat64(filename, 1, flags, synostat);
@@ -843,7 +841,7 @@ SYSCALL_DEFINE3(SYNOLStat64, const char __user *, filename, unsigned int, flags,
 #endif  
 }
 
-#else  
+#endif  
 
 SYSCALL_DEFINE3(SYNOStat, char __user *, filename, unsigned int, flags, struct SYNOSTAT __user *, synostat)
 
@@ -881,7 +879,6 @@ SYSCALL_DEFINE3(SYNOLStat, char __user *, filename, unsigned int, flags, struct 
 #endif  
 }
 
-#endif  
 #endif  
 
 void __inode_add_bytes(struct inode *inode, loff_t bytes)

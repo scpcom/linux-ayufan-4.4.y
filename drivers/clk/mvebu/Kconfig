@@ -31,6 +31,22 @@ config ARMADA_XP_CLK
 	select MVEBU_CLK_CPU
 	select MVEBU_CLK_COREDIV
 
+config MSYS_CLK
+	bool
+	depends on SYNO_LSP_ARMADA_16_12
+	select MVEBU_CLK_COMMON
+	select MVEBU_CLK_CPU
+	select MVEBU_CLK_COREDIV
+
+config ARMADA_3700_CLK
+	bool
+	depends on SYNO_LSP_ARMADA_16_12
+	select MVEBU_CLK_COMMON
+
+config ARMADA_CP110_SYSCON
+	bool
+	depends on SYNO_LSP_ARMADA_16_12
+
 config DOVE_CLK
 	bool
 	select MVEBU_CLK_COMMON
@@ -42,3 +58,24 @@ config KIRKWOOD_CLK
 config ORION_CLK
 	bool
 	select MVEBU_CLK_COMMON
+
+config ARMADA_AP806_SYSCON
+	bool
+	depends on SYNO_LSP_ARMADA_16_12
+
+config ARMADA_AP806_CORE_CLK
+	bool
+	depends on SYNO_LSP_ARMADA_16_12
+
+config ARMADA_AP806_RING_CLK
+	bool
+	depends on SYNO_LSP_ARMADA_16_12
+
+config ARMADA_AP806_CPU_CLK
+	bool
+	depends on SYNO_LSP_ARMADA_16_12
+
+config ARMADA_37XX_PM_CLK
+	bool
+	select REGULATOR_ARMADA3700
+	depends on SYNO_LSP_ARMADA_17_04_02

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * r8169.c: RealTek 8169/8168/8101 ethernet driver.
  *
@@ -32,6 +35,7 @@
 #include <linux/of_irq.h>
 #include <linux/of_net.h>
 #include <linux/of_address.h>
+#include <linux/of_gpio.h>
 //#include <mach/cpu.h>
 
 #include <asm/io.h>
@@ -46,7 +50,7 @@
 #include <linux/reset-helper.h> // rstc_get
 #include <linux/reset.h>
 
-#define RTL8169_VERSION "2.5LK-NAPI"
+#define RTL8169_VERSION "2.25-LK-NAPI"
 #define MODULENAME "r8169"
 #define PFX MODULENAME ": "
 
@@ -109,15 +113,62 @@ static const int multicast_filter_limit = 32;
 #define R8169_NAPI_WEIGHT	64
 #define NUM_TX_DESC	64	/* Number of Tx descriptor registers */
 #define NUM_RX_DESC	256U	/* Number of Rx descriptor registers */
+#define RX_BUF_SIZE 0x05F3  /* 0x05F3 = 1522bye + 1 */
 #define R8169_TX_RING_BYTES	(NUM_TX_DESC * sizeof(struct TxDesc))
 #define R8169_RX_RING_BYTES	(NUM_RX_DESC * sizeof(struct RxDesc))
 
 #define RTL8169_TX_TIMEOUT	(6*HZ)
-#define RTL8169_PHY_TIMEOUT	(2*HZ)
+#define RTL8169_PHY_TIMEOUT	(1*HZ)
 
 #define RTK_RX_ALIGN        8
 
 #define RTL_PROC 1
+
+#ifndef _LINUX_RTLTOOL_H
+#define _LINUX_RTLTOOL_H
+
+#define SIOCRTLTOOL             SIOCDEVPRIVATE+1
+
+enum rtl_cmd {
+        RTLTOOL_READ_MAC=0,
+        RTLTOOL_WRITE_MAC,
+        RTLTOOL_READ_PHY,
+        RTLTOOL_WRITE_PHY,
+        RTLTOOL_READ_EPHY,
+        RTLTOOL_WRITE_EPHY,
+        RTLTOOL_READ_ERI,
+        RTLTOOL_WRITE_ERI,
+        RTLTOOL_READ_PCI,
+        RTLTOOL_WRITE_PCI,
+        RTLTOOL_READ_EEPROM,
+        RTLTOOL_WRITE_EEPROM,
+
+        RTL_READ_OOB_MAC,
+        RTL_WRITE_OOB_MAC,
+
+        RTL_ENABLE_PCI_DIAG,
+        RTL_DISABLE_PCI_DIAG,
+
+        RTL_READ_MAC_OCP,
+        RTL_WRITE_MAC_OCP,
+
+        RTLTOOL_INVALID
+};
+
+struct rtltool_cmd {
+        __u32   cmd;
+        __u32   offset;
+        __u32   len;
+        __u32   data;
+};
+
+enum mode_access {
+        MODE_NONE=0,
+        MODE_READ,
+        MODE_WRITE
+};
+
+#endif /* _LINUX_RTLTOOL_H */
 
 /* write/read MMIO register */
 #define RTL_W8(reg, val8)	writeb ((val8), ioaddr + (reg))
@@ -320,7 +371,10 @@ static const struct of_device_id rtl8169_dt_ids[] = {
 
 MODULE_DEVICE_TABLE(of, rtl8169_dt_ids);
 
-static int rx_buf_sz = 2048;
+static int rx_buf_sz = 1523;   /* 0x05F3 = 1522bye + 1 */
+static int rx_buf_sz_new = 1523;
+static u32 nic_gpio_iso = 0;
+
 static int use_dac;
 static struct {
 	u32 msg_enable;
@@ -359,6 +413,7 @@ enum rtl_registers {
 					/* Unlimited maximum PCI burst. */
 #define	RX_DMA_BURST			(3 << RXCFG_DMA_SHIFT)	/* 128 bytes */
 
+	TCTR            = 0x48,
 	RxMissed	= 0x4c,
 	Cfg9346		= 0x50,
 	Config0		= 0x51,
@@ -369,6 +424,7 @@ enum rtl_registers {
 	Config3		= 0x54,
 	Config4		= 0x55,
 	Config5		= 0x56,
+	TimeInt0        = 0x58,
 	MultiIntr	= 0x5c,
 	PHYAR		= 0x60,
 	PHYstatus	= 0x6c,
@@ -762,6 +818,11 @@ struct rtl8169_private {
 	u32 cur_tx; /* Index into the Tx descriptor buffer of next Rx pkt. */
 	u32 dirty_tx;
 	u32 dirty_rx;
+	u32 last_dirty_tx;
+	u32 tx_reset_count;
+	u32 last_cur_rx;
+	u32 rx_reset_count;
+	u8 checkRDU;
 	struct rtl8169_stats rx_stats;
 	struct rtl8169_stats tx_stats;
 	struct TxDesc *TxDescArray;	/* 256-aligned Tx descriptor ring */
@@ -836,7 +897,8 @@ struct rtl8169_private {
 #define RTL_FIRMWARE_UNKNOWN	ERR_PTR(-EAGAIN)
 
 	u32 ocp_base;
-
+  u8 rtk_enable_diag;
+	u32 led_cfg;
 	/* For link status change. */
 	struct task_struct *kthr;
 	wait_queue_head_t thr_wait;
@@ -865,6 +927,9 @@ MODULE_FIRMWARE(FIRMWARE_8106E_1);
 MODULE_FIRMWARE(FIRMWARE_8106E_2);
 MODULE_FIRMWARE(FIRMWARE_8168G_2);
 MODULE_FIRMWARE(FIRMWARE_8168G_3);
+
+static void rtl8169_down(struct net_device *dev);
+static int rtl8169_init_ring(struct net_device *dev);
 
 static void rtl_lock_work(struct rtl8169_private *tp)
 {
@@ -1398,11 +1463,12 @@ static void rtl_irq_disable(struct rtl8169_private *tp)
 static void rtl_irq_enable(struct rtl8169_private *tp, u16 bits)
 {
 	void __iomem *ioaddr = tp->mmio_addr;
-
+	RTL_W32(TCTR, 0x2600);
+	RTL_W32(TimeInt0, 0x2600);
 	RTL_W16(IntrMask, bits);
 }
 
-#define RTL_EVENT_NAPI_RX	(RxOK | RxErr)
+#define RTL_EVENT_NAPI_RX	(RxOK | RxErr | RxOverflow | PCSTimeout)
 #define RTL_EVENT_NAPI_TX	(TxOK | TxErr)
 #define RTL_EVENT_NAPI		(RTL_EVENT_NAPI_RX | RTL_EVENT_NAPI_TX)
 
@@ -1541,12 +1607,239 @@ static void rtl8169_check_link_status(struct net_device *dev,
 	__rtl8169_check_link_status(dev, tp, ioaddr, false);
 }
 
+int rtl8169tool_ioctl(struct rtl8169_private *tp, struct ifreq *ifr)
+{
+        struct rtltool_cmd my_cmd;
+        int ret;
+
+        if (copy_from_user(&my_cmd, ifr->ifr_data, sizeof(my_cmd)))
+                return -EFAULT;
+
+        ret = 0;
+        switch (my_cmd.cmd) {
+        case RTLTOOL_READ_MAC:
+                if (!capable(CAP_NET_ADMIN))
+                        return -EPERM;
+
+                if (my_cmd.len==1)
+                        my_cmd.data = readb(tp->mmio_addr+my_cmd.offset);
+                else if (my_cmd.len==2)
+                        my_cmd.data = readw(tp->mmio_addr+(my_cmd.offset&~1));
+                else if (my_cmd.len==4)
+                        my_cmd.data = readl(tp->mmio_addr+(my_cmd.offset&~3));
+                else {
+                        ret = -EOPNOTSUPP;
+                        break;
+                }
+
+                if (copy_to_user(ifr->ifr_data, &my_cmd, sizeof(my_cmd))) {
+                        ret = -EFAULT;
+                        break;
+                }
+
+                break;
+
+        case RTLTOOL_WRITE_MAC:
+                if (!capable(CAP_NET_ADMIN))
+                        return -EPERM;
+
+                if (my_cmd.len==1)
+                        writeb(my_cmd.data, tp->mmio_addr+my_cmd.offset);
+                else if (my_cmd.len==2)
+                        writew(my_cmd.data, tp->mmio_addr+(my_cmd.offset&~1));
+                else if (my_cmd.len==4)
+                        writel(my_cmd.data, tp->mmio_addr+(my_cmd.offset&~3));
+                else {
+                        ret = -EOPNOTSUPP;
+                        break;
+                }
+
+                break;
+
+        case RTLTOOL_READ_PHY:
+                if (!capable(CAP_NET_ADMIN))
+                        return -EPERM;
+
+                rtl_lock_work(tp);
+                my_cmd.data = rtl_readphy(tp, my_cmd.offset);
+                rtl_unlock_work(tp);
+
+                if (copy_to_user(ifr->ifr_data, &my_cmd, sizeof(my_cmd))) {
+                        ret = -EFAULT;
+                        break;
+                }
+
+                break;
+
+        case RTLTOOL_WRITE_PHY:
+                if (!capable(CAP_NET_ADMIN))
+                        return -EPERM;
+
+                rtl_lock_work(tp);
+                rtl_writephy(tp, my_cmd.offset, my_cmd.data);
+                rtl_unlock_work(tp);
+                break;
+
+        case RTLTOOL_READ_EPHY:
+                ret = -EOPNOTSUPP;
+
+                break;
+
+        case RTLTOOL_WRITE_EPHY:
+                ret = -EOPNOTSUPP;
+                break;
+
+        case RTLTOOL_READ_ERI:
+                my_cmd.data = 0;
+                if (my_cmd.len==1 || my_cmd.len==2 || my_cmd.len==4) {
+			rtl_lock_work(tp);
+                        my_cmd.data = rtl_eri_read(tp, my_cmd.offset, ERIAR_EXGMAC);
+			rtl_unlock_work(tp);
+                } else {
+                        ret = -EOPNOTSUPP;
+                        break;
+                }
+
+                if (copy_to_user(ifr->ifr_data, &my_cmd, sizeof(my_cmd))) {
+                        ret = -EFAULT;
+                        break;
+                }
+
+                break;
+
+        case RTLTOOL_WRITE_ERI:
+                if (!capable(CAP_NET_ADMIN))
+                        return -EPERM;
+
+                if (my_cmd.len==1) {
+                        rtl_lock_work(tp);
+                        rtl_eri_write(tp, my_cmd.offset, ERIAR_MASK_0001, my_cmd.data, ERIAR_EXGMAC);
+                        rtl_unlock_work(tp);
+                } else if (my_cmd.len==2) {
+                        rtl_lock_work(tp);
+                        rtl_eri_write(tp, my_cmd.offset, ERIAR_MASK_0011, my_cmd.data, ERIAR_EXGMAC);
+                        rtl_unlock_work(tp);
+                } else if (my_cmd.len==4) {
+                        rtl_lock_work(tp);
+                        rtl_eri_write(tp, my_cmd.offset, ERIAR_MASK_1111, my_cmd.data, ERIAR_EXGMAC);
+                        rtl_unlock_work(tp);
+                } else {
+                        ret = -EOPNOTSUPP;
+                        break;
+                }
+                break;
+
+        case RTLTOOL_READ_PCI:
+                ret = -EOPNOTSUPP;
+                break;
+
+        case RTLTOOL_WRITE_PCI:
+                ret = -EOPNOTSUPP;
+                break;
+
+        case RTLTOOL_READ_EEPROM:
+                ret = -EOPNOTSUPP;
+                break;
+
+        case RTLTOOL_WRITE_EEPROM:
+                ret = -EOPNOTSUPP;
+                break;
+/*
+        case RTL_READ_OOB_MAC:
+                if (!capable(CAP_NET_ADMIN))
+                        return -EPERM;
+
+                spin_lock_irqsave(&tp->phy_lock, flags);
+                OOB_mutex_lock(tp);
+                my_cmd.data = OCP_read(tp, my_cmd.offset, 4);
+                OOB_mutex_unlock(tp);
+                spin_unlock_irqrestore(&tp->phy_lock, flags);
+
+                if (copy_to_user(ifr->ifr_data, &my_cmd, sizeof(my_cmd))) {
+                        ret = -EFAULT;
+                        break;
+                }
+                break;
+
+        case RTL_WRITE_OOB_MAC:
+                if (!capable(CAP_NET_ADMIN))
+                        return -EPERM;
+
+                if (my_cmd.len == 0 || my_cmd.len > 4)
+                        return -EOPNOTSUPP;
+
+                spin_lock_irqsave(&tp->phy_lock, flags);
+                OOB_mutex_lock(tp);
+                OCP_write(tp, my_cmd.offset, my_cmd.len, my_cmd.data);
+                OOB_mutex_unlock(tp);
+                spin_unlock_irqrestore(&tp->phy_lock, flags);
+                break;
+*/
+        case RTL_ENABLE_PCI_DIAG:
+                if (!capable(CAP_NET_ADMIN))
+                        return -EPERM;
+
+		rtl_lock_work(tp);
+                tp->rtk_enable_diag = 1;
+		rtl_unlock_work(tp);
+
+                dprintk("enable rtk diag\n");
+                break;
+
+        case RTL_DISABLE_PCI_DIAG:
+                if (!capable(CAP_NET_ADMIN))
+                        return -EPERM;
+
+		rtl_lock_work(tp);
+                tp->rtk_enable_diag = 0;
+		rtl_unlock_work(tp);
+
+                dprintk("disable rtk diag\n");
+                break;
+/*
+        case RTL_READ_MAC_OCP:
+                if (!capable(CAP_NET_ADMIN))
+                        return -EPERM;
+
+                if (my_cmd.offset % 2)
+                        return -EOPNOTSUPP;
+
+                spin_lock_irqsave(&tp->phy_lock, flags);
+                my_cmd.data = mac_ocp_read(tp, my_cmd.offset);
+                spin_unlock_irqrestore(&tp->phy_lock, flags);
+
+                if (copy_to_user(ifr->ifr_data, &my_cmd, sizeof(my_cmd))) {
+                        ret = -EFAULT;
+                        break;
+                }
+                break;
+
+        case RTL_WRITE_MAC_OCP:
+                if (!capable(CAP_NET_ADMIN))
+                        return -EPERM;
+
+                if ((my_cmd.offset % 2) || (my_cmd.len != 2))
+                        return -EOPNOTSUPP;
+
+                spin_lock_irqsave(&tp->phy_lock, flags);
+                mac_ocp_write(tp, my_cmd.offset, (u16)my_cmd.data);
+                spin_unlock_irqrestore(&tp->phy_lock, flags);
+                break;
+*/
+        default:
+                ret = -EOPNOTSUPP;
+                break;
+        }
+
+        return ret;
+}
+
 #define WAKE_ANY (WAKE_PHY | WAKE_MAGIC | WAKE_UCAST | WAKE_BCAST | WAKE_MCAST)
 
 static u32 __rtl8169_get_wol(struct rtl8169_private *tp)
 {
 	u32 wolopts = 0;
-	
+
 	if(wol_enable)	
 		wolopts |= WAKE_MAGIC;
 
@@ -3917,11 +4210,45 @@ static void rtl_rar_set(struct rtl8169_private *tp, u8 *addr)
 static void rtl_phy_work(struct rtl8169_private *tp)
 {
 	// 1295 remove the patch first
-	return;
-/*	struct timer_list *timer = &tp->timer;
+	struct timer_list *timer = &tp->timer;
 	void __iomem *ioaddr = tp->mmio_addr;
 	unsigned long timeout = RTL8169_PHY_TIMEOUT;
-	u32 i,j;
+        if(tp->cur_tx > tp->dirty_tx)
+                if(tp->last_dirty_tx==tp->dirty_tx){
+                        if (tp->tx_reset_count>3){
+				rtl_schedule_task(tp, RTL_FLAG_TASK_RESET_PENDING);
+				tp->tx_reset_count=0;
+                        }
+                        else
+				tp->tx_reset_count++;
+                }
+                else{
+                        tp->last_dirty_tx=tp->dirty_tx;
+                        tp->tx_reset_count=0;
+                }
+        else{
+                tp->last_dirty_tx=tp->dirty_tx;
+                tp->tx_reset_count=0;
+        }
+
+	if(tp->checkRDU == 1){
+		tp->checkRDU = 0;
+
+		if(tp->last_cur_rx == tp->cur_rx){
+			if(tp->rx_reset_count>3){
+				rtl_schedule_task(tp, RTL_FLAG_TASK_RESET_PENDING);
+				tp->rx_reset_count=0;
+			}
+			else
+				tp->rx_reset_count++;
+		}
+		else{
+			tp->last_cur_rx = tp->cur_rx;
+			tp->rx_reset_count=0;
+		}
+	}
+
+/*	u32 i,j;
 	int gphy_code;
 	int gphy_status;
 	u32  macaddr1;
@@ -3991,9 +4318,9 @@ static void rtl_phy_work(struct rtl8169_private *tp)
 		rtl_schedule_task(tp, RTL_FLAG_TASK_RESET_PENDING);
 	}
 
-out_mod_timer:
+out_mod_timer:*/
 	mod_timer(timer, jiffies + timeout);
-*/
+
 }
 
 static void rtl8169_phy_timer(unsigned long __opaque)
@@ -4037,6 +4364,11 @@ static bool rtl_tbi_enabled(struct rtl8169_private *tp)
 static void rtl8169_init_phy(struct net_device *dev, struct rtl8169_private *tp)
 {
 	void __iomem *ioaddr = tp->mmio_addr;
+	u32 tmp;
+
+	r8168_mac_ocp_write(tp, 0xfc1e, r8168_mac_ocp_read(tp, 0xfc1e) & ~(BIT(1) | BIT(11) | BIT(12)));
+
+	mdelay(1);
 
 	rtl_hw_phy_config(dev);
 
@@ -4069,6 +4401,10 @@ static void rtl8169_init_phy(struct net_device *dev, struct rtl8169_private *tp)
 			   ADVERTISED_1000baseT_Half |
 			   ADVERTISED_1000baseT_Full : 0));
 
+	/* enable interrupt from PHY to MCU */
+	tmp = r8168_mac_ocp_read(tp, 0xfc1e);
+	tmp |= (BIT(1) | BIT(11) | BIT(12));
+	r8168_mac_ocp_write(tp, 0xfc1e, tmp);
 	if (rtl_tbi_enabled(tp))
 		netif_info(tp, link, dev, "TBI auto-negotiating\n");
 }
@@ -4092,8 +4428,16 @@ static int rtl8169_ioctl(struct net_device *dev, struct ifreq *ifr, int cmd)
 {
 	struct rtl8169_private *tp = netdev_priv(dev);
 	struct mii_ioctl_data *data = if_mii(ifr);
+	int ret = 0;
 
-	return netif_running(dev) ? tp->do_ioctl(tp, data, cmd) : -ENODEV;
+	if(netif_running(dev))
+		if(cmd == SIOCRTLTOOL)
+			ret = rtl8169tool_ioctl(tp, ifr);
+		else
+			ret = tp->do_ioctl(tp, data, cmd);
+	else
+		ret = -ENODEV;
+	return ret;
 }
 
 static int rtl_xmii_ioctl(struct rtl8169_private *tp,
@@ -4849,7 +5193,7 @@ static u16 rtl_rw_cpluscmd(void __iomem *ioaddr)
 static void rtl_set_rx_max_size(void __iomem *ioaddr, unsigned int rx_buf_sz)
 {
 	/* Low hurts. Let's disable the filtering. */
-	RTL_W16(RxMaxSize, rx_buf_sz + 1);
+	RTL_W16(RxMaxSize, rx_buf_sz);
 }
 
 static void rtl8169_set_magic_reg(void __iomem *ioaddr, unsigned mac_version)
@@ -5541,6 +5885,9 @@ static void rtl_hw_start_8168g_1(struct rtl8169_private *tp)
 	rtl_w1w0_eri(tp, 0x1b0, ERIAR_MASK_0011, 0x0000, 0x1000, ERIAR_EXGMAC);
 }
 
+#if defined(MY_DEF_HERE)
+static int SYNO_LAN_LED_STATUS = 0xF;
+#endif /* MY_DEF_HERE */
 static void rtl_hw_start_8168g_2(struct rtl8169_private *tp)
 {
 	void __iomem *ioaddr = tp->mmio_addr;
@@ -5554,8 +5901,18 @@ static void rtl_hw_start_8168g_2(struct rtl8169_private *tp)
 	rtl_hw_start_8168g_1(tp);
 
 	// LED setting  add by yukuen
-	//RTL_W32(LEDSEL, 0x000670ca);
-	RTL_W32(LEDSEL, 0x0006000E);
+#if defined(MY_DEF_HERE)
+	if (tp->led_cfg) {
+		u32 val = (0x00060000 | tp->led_cfg) & 0xFFFFFFF0;
+		val += SYNO_LAN_LED_STATUS;
+		RTL_W32(LEDSEL, val);
+	}
+#else /* MY_DEF_HERE */
+	if (tp->led_cfg)
+		RTL_W32(LEDSEL, 0x00060000 | tp->led_cfg);
+#endif /* MY_DEF_HERE */
+	else
+		RTL_W32(LEDSEL, 0x0006000F);
 	RTL_W8(Config2, RTL_R8(Config2) & ~BIT(2));
 
 	/* disable aspm and clock request before access ephy */
@@ -5927,11 +6284,53 @@ static int link_status(void *data)
 static int rtl8169_change_mtu(struct net_device *dev, int new_mtu)
 {
 	struct rtl8169_private *tp = netdev_priv(dev);
+	int ret = 0;
 
 	if (new_mtu < ETH_ZLEN ||
 		new_mtu > rtl_chip_infos[tp->mac_version].jumbo_max)
 		return -EINVAL;
 
+	if (!netif_running(dev)){
+		rx_buf_sz_new = (new_mtu > ETH_DATA_LEN) ? new_mtu + ETH_HLEN + 8 + 1 : RX_BUF_SIZE;
+		rx_buf_sz = rx_buf_sz_new;
+                goto out;
+	}
+
+	rx_buf_sz_new = (new_mtu > ETH_DATA_LEN) ? new_mtu + ETH_HLEN + 8 + 1 : RX_BUF_SIZE;
+
+	rtl_schedule_task(tp, RTL_FLAG_TASK_RESET_PENDING);
+
+/*	rtl8169_down(dev);
+
+	rtl_lock_work(tp);
+	
+	rx_buf_sz = (new_mtu > ETH_DATA_LEN) ? new_mtu + ETH_HLEN + 8 + 1 : 2048;
+
+	//netif_err(tp, drv, tp->dev, "Failed to %d !\n", rx_buf_sz);
+
+        ret = rtl8169_init_ring(dev);
+
+        if (ret < 0) {
+                //spin_unlock_irqrestore(&tp->lock, flags);
+		rtl_unlock_work(tp);
+                goto out;
+        }
+
+	napi_enable(&tp->napi);
+        netif_stop_queue(dev);
+        netif_carrier_off(dev);
+	rtl_hw_start(dev);
+	rtl_unlock_work(tp);
+
+        //rtl8169_set_speed(dev, tp->autoneg, tp->speed, tp->duplex);
+	rtl8169_set_speed(dev, AUTONEG_ENABLE, SPEED_1000, DUPLEX_FULL,
+			  ADVERTISED_10baseT_Half | ADVERTISED_10baseT_Full |
+			  ADVERTISED_100baseT_Half | ADVERTISED_100baseT_Full |
+			  (tp->mii.supports_gmii ?
+			   ADVERTISED_1000baseT_Half |
+			   ADVERTISED_1000baseT_Full : 0));
+*/
+out:
 	if (new_mtu > ETH_DATA_LEN)
 		rtl_hw_jumbo_enable(tp);
 	else
@@ -5940,7 +6339,7 @@ static int rtl8169_change_mtu(struct net_device *dev, int new_mtu)
 	dev->mtu = new_mtu;
 	netdev_update_features(dev);
 
-	return 0;
+	return ret;
 }
 
 static inline void rtl8169_make_unusable_by_asic(struct RxDesc *desc)
@@ -5955,7 +6354,7 @@ static void rtl8169_free_rx_databuff(struct rtl8169_private *tp,
 	dma_unmap_single(&tp->pdev->dev, le64_to_cpu(desc->addr), rx_buf_sz,
 			 DMA_FROM_DEVICE);
 
-	kfree(*data_buff);
+	dev_kfree_skb(*data_buff);
 	*data_buff = NULL;
 	rtl8169_make_unusable_by_asic(desc);
 }
@@ -5995,19 +6394,27 @@ rtl8168_alloc_rx_skb(struct rtl8169_private *tp,
         if (!skb)
                 goto err_out;
 
-        skb_reserve(skb, RTK_RX_ALIGN);
-        *sk_buff = skb;
+	skb_reserve(skb, RTK_RX_ALIGN);
 
         //mapping = dma_map_single(pdev, skb->data, rx_buf_sz,
         //                         PCI_DMA_FROMDEVICE);
-				mapping = dma_map_single(d, skb->data, rx_buf_sz,
-								 DMA_FROM_DEVICE);
-        rtl8169_map_to_asic(desc, mapping, rx_buf_sz);
+	mapping = dma_map_single(d, skb->data, rx_buf_sz,
+				DMA_FROM_DEVICE);
+
+	if (unlikely(dma_mapping_error(d, mapping))) {
+		if (unlikely(net_ratelimit()))
+			netif_err(tp, drv, tp->dev, "Failed to map RX DMA!\n");
+		goto err_out;
+	}
+	*sk_buff = skb;
+	rtl8169_map_to_asic(desc, mapping, rx_buf_sz);
 
 out:
         return ret;
 
 err_out:
+        if (skb)
+                dev_kfree_skb(skb);
         ret = -ENOMEM;
         rtl8169_make_unusable_by_asic(desc);
         goto out;
@@ -6190,12 +6597,25 @@ static void rtl_reset_work(struct rtl8169_private *tp)
 
 	rtl8169_hw_reset(tp);
 
-	for (i = 0; i < NUM_RX_DESC; i++)
-		rtl8169_mark_to_asic(tp->RxDescArray + i, rx_buf_sz);
+	//for (i = 0; i < NUM_RX_DESC; i++)
+	//	rtl8169_mark_to_asic(tp->RxDescArray + i, rx_buf_sz);
 
+	rtl8169_rx_clear(tp);
 	rtl8169_tx_clear(tp);
-	rtl8169_init_ring_indexes(tp);
 
+	if(rx_buf_sz_new != rx_buf_sz)
+			rx_buf_sz = rx_buf_sz_new;
+
+	memset(tp->TxDescArray, 0x0, NUM_TX_DESC * sizeof(struct TxDesc));
+	for (i = 0; i < NUM_TX_DESC; i++) {
+		if (i == (NUM_TX_DESC - 1))
+			tp->TxDescArray[i].opts1 = cpu_to_le32(RingEnd);
+	}
+	memset(tp->RxDescArray, 0x0, NUM_RX_DESC * sizeof(struct RxDesc));
+
+	rtl8169_init_ring(dev);
+
+	//rtl8169_init_ring_indexes(tp);
 	napi_enable(&tp->napi);
 	rtl_hw_start(dev);
 	netif_wake_queue(dev);
@@ -6647,6 +7067,11 @@ process_pkt:
 	//netif_err(tp, drv, tp->dev, "delta =%x \n",delta);
 	tp->dirty_rx += delta;
 
+	if (tp->dirty_rx + NUM_RX_DESC == tp->cur_rx){
+		rtl_schedule_task(tp, RTL_FLAG_TASK_RESET_PENDING);
+		netif_err(tp, drv, tp->dev, "%s: Rx buffers exhausted\n", dev->name);
+	}
+
 	return count;
 }
 
@@ -6738,6 +7163,18 @@ static void rtl_slow_event_work(struct rtl8169_private *tp)
 
 */			mod_timer(&tp->timer, jiffies + RTL8169_PHY_TIMEOUT);
 		}
+
+		if (gpio_is_valid(nic_gpio_iso)) {
+			if (tp->link_ok(ioaddr)){
+				if (RTL_R8(PHYstatus) & _100bps) //link 100M
+					gpio_direction_output(nic_gpio_iso, 0);
+				else
+					gpio_direction_output(nic_gpio_iso, 1);
+			}else
+				gpio_direction_output(nic_gpio_iso, 1);
+			
+			mdelay(100);
+		}
 	}
 
 	rtl_irq_enable_all(tp);
@@ -6800,6 +7237,9 @@ static int rtl8169_poll(struct napi_struct *napi, int budget)
 		rtl_schedule_task(tp, RTL_FLAG_TASK_SLOW_PENDING);
 	}
 
+	if (unlikely(status & RxOverflow)) {
+		tp->checkRDU = 1;
+	}
 	if (work_done < budget) {
 		napi_complete(napi);
 
@@ -6830,6 +7270,9 @@ static void rtl8169_down(struct net_device *dev)
 
 	napi_disable(&tp->napi);
 	netif_stop_queue(dev);
+
+	if (gpio_is_valid(nic_gpio_iso))
+		gpio_direction_output(nic_gpio_iso, 1);
 
 	rtl8169_hw_reset(tp);
 	/*
@@ -7031,6 +7474,9 @@ static int rtl8169_suspend(struct device *dev)
 
 	printk(KERN_ERR "[RTK_ETN] Enter %s\n", __func__);
 
+	if (gpio_is_valid(nic_gpio_iso))
+		gpio_direction_output(nic_gpio_iso, 1);
+
 	rtl8169_net_suspend(ndev);
 
 	//FIXME: disable LED, current solution is switch pad to GPIO input
@@ -7100,6 +7546,7 @@ static int rtl8169_resume(struct device *dev)
 	struct net_device *ndev = dev_get_drvdata(dev);
 	struct rtl8169_private *tp = netdev_priv(ndev);
 	void __iomem *ioaddr = tp->mmio_addr;
+	int ret = 0;
 
 	printk(KERN_ERR "[RTK_ETN] Enter %s\n", __func__);
 
@@ -7112,6 +7559,13 @@ static int rtl8169_resume(struct device *dev)
 	}else{
 		//For suspend mode
 		printk(KERN_ERR "[RTK_ETN] %s Suspend mode\n", __func__);
+
+		if (gpio_is_valid(nic_gpio_iso)) {
+			ret = gpio_request(nic_gpio_iso, "nic_gpio_iso");
+			if (ret < 0)
+				printk(KERN_ERR "%s: can't request gpio %d\n", __func__, nic_gpio_iso);
+		} else
+			printk(KERN_ERR "%s: gpio %d is not valid\n", __func__, nic_gpio_iso);
 	}
 
 	if (netif_running(ndev))
@@ -7249,6 +7703,9 @@ static int rtl_remove_one(struct platform_device *pdev)
 		rtl8168_driver_stop(tp);
 	}
 
+	if (gpio_is_valid(nic_gpio_iso))
+		gpio_free(nic_gpio_iso);
+
 #ifdef RTL_PROC
 	do{
 		if(tp->dir_dev==NULL)
@@ -7293,6 +7750,26 @@ static int rtl_remove_one(struct platform_device *pdev)
 	return 0;
 }
 
+#if defined(MY_DEF_HERE)
+static void rtl8169_lan_led_control(struct net_device *dev, int state)
+{
+	struct rtl8169_private *tp = netdev_priv(dev);
+	void __iomem *ioaddr = tp->mmio_addr;
+	u32 val = 0x00060000;
+
+	if(tp->led_cfg)
+		val = (0x00060000 | tp->led_cfg) & 0xFFFFFFF0;
+
+	if(state == 0)
+		SYNO_LAN_LED_STATUS = 0x0;
+	else
+		SYNO_LAN_LED_STATUS = 0xF;
+
+	val += SYNO_LAN_LED_STATUS;
+	RTL_W32(LEDSEL, val);
+}
+#endif /* MY_DEF_HERE */
+
 static const struct net_device_ops rtl_netdev_ops = {
 	.ndo_open		= rtl_open,
 	.ndo_stop		= rtl8169_close,
@@ -7309,6 +7786,9 @@ static const struct net_device_ops rtl_netdev_ops = {
 #ifdef CONFIG_NET_POLL_CONTROLLER
 	.ndo_poll_controller	= rtl8169_netpoll,
 #endif
+#if defined(MY_DEF_HERE)
+	.ndo_lan_led_control	= rtl8169_lan_led_control,
+#endif /* MY_DEF_HERE */
 
 };
 
@@ -7332,7 +7812,7 @@ static struct rtl_cfg_info {
 		.hw_start	= rtl_hw_start_8168,
 		.region		= 2,
 		.align		= 8,
-		.event_slow	= SYSErr | LinkChg | RxOverflow,
+		.event_slow	= SYSErr | LinkChg ,
 		.features	= RTL_FEATURE_GMII | RTL_FEATURE_MSI,
 		.default_ver	= RTL_GIGA_MAC_VER_11,
 	},
@@ -7489,9 +7969,11 @@ rtl_init_one(struct platform_device *pdev)
 	int rc;
 	int rtl_config;
 	int mac_version;
+	int led_config;
 	u32 tmp;
 	int irq;
 	int retry;
+	int ret = 0;
 	const char *mac_addr;
 #ifdef RTL_PROC
 	struct proc_dir_entry *dir_dev = NULL;
@@ -7514,6 +7996,9 @@ rtl_init_one(struct platform_device *pdev)
 	cfg = rtl_cfg_infos + rtl_config;
 	if (of_property_read_u32(pdev->dev.of_node, "mac-version", &mac_version)) {
 		dprintk("%s canot specified config", __func__);
+	}
+	if (of_property_read_u32(pdev->dev.of_node, "led-cfg", &led_config)) {
+		led_config = 0;
 	}
 	if (soc_is_rtk1195() && (realtek_rev() == RTK1195_REV_A)) {
 		if (of_property_read_u32(pdev->dev.of_node, "rtl-features", &(cfg->features))) {
@@ -7575,6 +8060,21 @@ rtl_init_one(struct platform_device *pdev)
 		clk_prepare_enable(clk_etn_250m);
 
 		msleep(100);
+	}
+
+	nic_gpio_iso = of_get_named_gpio_flags(pdev->dev.of_node, "iso-gpios", 0, NULL);
+	if (nic_gpio_iso) {
+		if (gpio_is_valid(nic_gpio_iso)) {
+			ret = gpio_request(nic_gpio_iso, "nic_gpio_iso");
+			if (ret < 0)
+				printk(KERN_ERR "%s: can't request gpio %d\n", __func__, nic_gpio_iso);
+		} else
+			printk(KERN_ERR "%s: gpio %d is not valid\n", __func__, nic_gpio_iso);
+	}
+
+	if (gpio_is_valid(nic_gpio_iso)) {
+		ret = gpio_direction_output(nic_gpio_iso, 1);
+		mdelay(100);
 	}
 #endif
 
@@ -7705,6 +8205,11 @@ rtl_init_one(struct platform_device *pdev)
 #endif
 	tp->mmio_addr = ioaddr;
 	tp->mmio_clkaddr = clkaddr;
+	tp->led_cfg = led_config;
+#if defined(MY_DEF_HERE)
+	if(tp->led_cfg)
+		SYNO_LAN_LED_STATUS = tp->led_cfg & 0xF;
+#endif /* MY_DEF_HERE */
 
 //	if (!pci_is_pcie(pdev))
 //		netif_info(tp, probe, dev, "not PCI Express\n");

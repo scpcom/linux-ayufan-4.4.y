@@ -190,7 +190,11 @@ static void wait_controller_finished(struct hinfc_host *host)
 static void hisi_nfc_dma_transfer(struct hinfc_host *host, int todev)
 {
 	struct mtd_info	*mtd = &host->mtd;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	struct nand_chip *chip = mtd_to_nand(mtd);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct nand_chip *chip = mtd->priv;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	unsigned long val;
 	int ret;
 
@@ -357,7 +361,11 @@ static int hisi_nfc_send_cmd_reset(struct hinfc_host *host, int chipselect)
 
 static void hisi_nfc_select_chip(struct mtd_info *mtd, int chipselect)
 {
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	struct nand_chip *chip = mtd_to_nand(mtd);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct nand_chip *chip = mtd->priv;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct hinfc_host *host = chip->priv;
 
 	if (chipselect < 0)
@@ -368,7 +376,11 @@ static void hisi_nfc_select_chip(struct mtd_info *mtd, int chipselect)
 
 static uint8_t hisi_nfc_read_byte(struct mtd_info *mtd)
 {
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	struct nand_chip *chip = mtd_to_nand(mtd);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct nand_chip *chip = mtd->priv;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct hinfc_host *host = chip->priv;
 
 	if (host->command == NAND_CMD_STATUS)
@@ -384,7 +396,11 @@ static uint8_t hisi_nfc_read_byte(struct mtd_info *mtd)
 
 static u16 hisi_nfc_read_word(struct mtd_info *mtd)
 {
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	struct nand_chip *chip = mtd_to_nand(mtd);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct nand_chip *chip = mtd->priv;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct hinfc_host *host = chip->priv;
 
 	host->offset += 2;
@@ -394,7 +410,11 @@ static u16 hisi_nfc_read_word(struct mtd_info *mtd)
 static void
 hisi_nfc_write_buf(struct mtd_info *mtd, const uint8_t *buf, int len)
 {
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	struct nand_chip *chip = mtd_to_nand(mtd);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct nand_chip *chip = mtd->priv;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct hinfc_host *host = chip->priv;
 
 	memcpy(host->buffer + host->offset, buf, len);
@@ -403,7 +423,11 @@ hisi_nfc_write_buf(struct mtd_info *mtd, const uint8_t *buf, int len)
 
 static void hisi_nfc_read_buf(struct mtd_info *mtd, uint8_t *buf, int len)
 {
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	struct nand_chip *chip = mtd_to_nand(mtd);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct nand_chip *chip = mtd->priv;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct hinfc_host *host = chip->priv;
 
 	memcpy(buf, host->buffer + host->offset, len);
@@ -412,7 +436,11 @@ static void hisi_nfc_read_buf(struct mtd_info *mtd, uint8_t *buf, int len)
 
 static void set_addr(struct mtd_info *mtd, int column, int page_addr)
 {
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	struct nand_chip *chip = mtd_to_nand(mtd);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct nand_chip *chip = mtd->priv;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct hinfc_host *host = chip->priv;
 	unsigned int command = host->command;
 
@@ -448,7 +476,11 @@ static void set_addr(struct mtd_info *mtd, int column, int page_addr)
 static void hisi_nfc_cmdfunc(struct mtd_info *mtd, unsigned command, int column,
 		int page_addr)
 {
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	struct nand_chip *chip = mtd_to_nand(mtd);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct nand_chip *chip = mtd->priv;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct hinfc_host *host = chip->priv;
 	int is_cache_invalid = 1;
 	unsigned int flag = 0;
@@ -704,7 +736,11 @@ static int hisi_nfc_probe(struct platform_device *pdev)
 	struct mtd_info   *mtd;
 	struct resource	  *res;
 	struct device_node *np = dev->of_node;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+//do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct mtd_part_parser_data ppdata;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	host = devm_kzalloc(dev, sizeof(*host), GFP_KERNEL);
 	if (!host)
@@ -742,6 +778,9 @@ static int hisi_nfc_probe(struct platform_device *pdev)
 	mtd->dev.parent         = &pdev->dev;
 
 	chip->priv		= host;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	nand_set_flash_node(chip, np);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	chip->cmdfunc		= hisi_nfc_cmdfunc;
 	chip->select_chip	= hisi_nfc_select_chip;
 	chip->read_byte		= hisi_nfc_read_byte;
@@ -805,8 +844,12 @@ static int hisi_nfc_probe(struct platform_device *pdev)
 		goto err_res;
 	}
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	ret = mtd_device_register(mtd, NULL, 0);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	ppdata.of_node = np;
 	ret = mtd_device_parse_register(mtd, NULL, &ppdata, NULL, 0);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	if (ret) {
 		dev_err(dev, "Err MTD partition=%d\n", ret);
 		goto err_mtd;

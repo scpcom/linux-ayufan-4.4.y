@@ -1,13 +1,13 @@
 #
 # Makefile for ALSA
 #
-ifdef CONFIG_SYNO_RTD1296
+ifeq ($(CONFIG_SYNO_LSP_RTD129X),y)
 #ccflags-y := -std=gnu99 -Wno-declaration-after-statement
 ccflags-y += -I$(srctree)/drivers/soc/realtek/rtd129x/rpc
 #ccflags-y += -DAO_ON_SCPU
 #ccflags-y += -DRTK_TRACE_ALSA_EN
 ccflags-y += -Werror
-endif # CONFIG_SYNO_RTD1296
+endif # CONFIG_SYNO_LSP_RTD129X
 
 obj-$(CONFIG_SND_ARMAACI)	+= snd-aaci.o
 snd-aaci-objs			:= aaci.o
@@ -22,7 +22,7 @@ snd-pxa2xx-lib-$(CONFIG_SND_PXA2XX_LIB_AC97)	+= pxa2xx-ac97-lib.o
 obj-$(CONFIG_SND_PXA2XX_AC97)	+= snd-pxa2xx-ac97.o
 snd-pxa2xx-ac97-objs		:= pxa2xx-ac97.o
 
-ifdef CONFIG_SYNO_RTD1296
+ifeq ($(CONFIG_SYNO_LSP_RTD129X),y)
 obj-$(CONFIG_SND_REALTEK)      += snd-realtek-driver.o
 snd-realtek-driver-objs     := snd-realtek.o snd-realtek-compress.o snd-realtek_RPC.o
-endif # CONFIG_SYNO_RTD1296
+endif # CONFIG_SYNO_LSP_RTD129X

@@ -14,6 +14,9 @@ obj-$(CONFIG_GENERIC_PHY)	+= phy/
 obj-$(CONFIG_PINCTRL)		+= pinctrl/
 obj-y				+= gpio/
 obj-y				+= pwm/
+ifeq ($(CONFIG_SYNO_LSP_ARMADA_16_12), y)
+obj-y				+= net/
+endif
 obj-$(CONFIG_PCI)		+= pci/
 obj-$(CONFIG_PARISC)		+= parisc/
 obj-$(CONFIG_RAPIDIO)		+= rapidio/
@@ -78,7 +81,9 @@ obj-$(CONFIG_MTD)		+= mtd/
 obj-$(CONFIG_SPI)		+= spi/
 obj-$(CONFIG_SPMI)		+= spmi/
 obj-y				+= hsi/
+ifneq ($(CONFIG_SYNO_LSP_ARMADA_16_12), y)
 obj-y				+= net/
+endif
 obj-$(CONFIG_ATM)		+= atm/
 obj-$(CONFIG_FUSION)		+= message/
 obj-y				+= firewire/
@@ -141,6 +146,9 @@ obj-$(CONFIG_VHOST_RING)	+= vhost/
 obj-$(CONFIG_VLYNQ)		+= vlynq/
 obj-$(CONFIG_STAGING)		+= staging/
 obj-y				+= platform/
+ifeq ($(CONFIG_SYNO_LSP_ARMADA_16_12), y)
+obj-$(CONFIG_PHONE)		+= telephony/
+endif
 #common clk code
 obj-y				+= clk/
 
@@ -172,4 +180,6 @@ obj-$(CONFIG_STM)		+= hwtracing/stm/
 obj-$(CONFIG_ANDROID)		+= android/
 obj-$(CONFIG_NVMEM)		+= nvmem/
 obj-$(CONFIG_FPGA)		+= fpga/
+ifeq ($(CONFIG_SYNO_LSP_RTD129X),y)
 obj-$(CONFIG_POWER_CONTROL)	+= powerctrl/
+endif # CONFIG_SYNO_LSP_RTD129X

@@ -34,7 +34,7 @@ typedef struct {
 extern void paging_init(void);
 #ifdef MY_DEF_HERE
 extern void setup_mm_for_reboot(void);
-#endif
+#endif /* MY_DEF_HERE */
 extern void __iomem *early_io_map(phys_addr_t phys, unsigned long virt);
 extern void init_mem_pgprot(void);
 extern void create_pgd_mapping(struct mm_struct *mm, phys_addr_t phys,

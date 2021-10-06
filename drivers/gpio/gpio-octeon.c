@@ -108,7 +108,11 @@ static int octeon_gpio_probe(struct platform_device *pdev)
 
 	pdev->dev.platform_data = chip;
 	chip->label = "octeon-gpio";
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	chip->parent = &pdev->dev;
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	chip->dev = &pdev->dev;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	chip->owner = THIS_MODULE;
 	chip->base = 0;
 	chip->can_sleep = false;

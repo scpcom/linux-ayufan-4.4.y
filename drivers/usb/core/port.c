@@ -8,10 +8,6 @@
 #include <linux/gpio.h>
 #endif  
 
-#ifdef MY_ABC_HERE
-extern u32 syno_pch_lpc_gpio_pin(int pin, int *pValue, int isWrite);
-#endif  
-
 #include "hub.h"
 
 static int usb_port_block_power_off;
@@ -407,13 +403,13 @@ int usb_hub_create_port_device(struct usb_hub *hub, int port1)
 					}
 				}
 #else  
-				if (0 == gpio_get_value(gSynoUsbVbusGpp[i])) {
-#if defined(MY_DEF_HERE)
-					gpio_request(gSynoUsbVbusGpp[i], NULL);
-					gpio_direction_output(gSynoUsbVbusGpp[i], 1);
-#else
-					gpio_set_value(gSynoUsbVbusGpp[i], 1);
-#endif
+#ifdef CONFIG_SYNO_USB_VBUS_GPIO_POLARITY_INVERT
+				if (1 == SYNO_GPIO_READ(gSynoUsbVbusGpp[i])) {
+					SYNO_GPIO_WRITE(gSynoUsbVbusGpp[i], 0);
+#else   
+				if (0 == SYNO_GPIO_READ(gSynoUsbVbusGpp[i])) {
+					SYNO_GPIO_WRITE(gSynoUsbVbusGpp[i], 1);
+#endif  
 					printk(KERN_INFO " port%d is going to power up Vbus by "
 							"GPIO#%d\n", port1, gSynoUsbVbusGpp[i]);
 					mdelay(100);

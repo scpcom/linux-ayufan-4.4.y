@@ -4,7 +4,7 @@
 skip=0
 
 case "$BUILD_TARGET" in
-	APOLLOLAKE|DENVERTON|KVMX64)
+	APOLLOLAKE|DENVERTON|KVMX64|BROADWELLNK|PURLEY)
 		KERNEL_STRIP=${STRIP64}
 		;;
 	*)
@@ -414,6 +414,12 @@ ModVirtio=" \
 	${KernelDir}/drivers/virtio/virtio_ring.ko \
 	${KernelDir}/net/9p/9pnet_virtio.ko \
 	"
+ModDCA=" \
+	${KernelDir}/drivers/dca/dca.ko \
+	"
+ModADT=" \
+	${KernelDir}/drivers/hwmon/adt7475.ko \
+	"
 ########## Deprecated Module List ##########
 
 ModTalitos=" \
@@ -472,6 +478,7 @@ case "$BUILD_TARGET" in
 		ModuleList="${ModuleList} ${ModNFQ}"
 		ModuleList="${ModuleList} ${ModDVB}"
 		ModuleList="${ModuleList} ${ModDiskPwCtl}"
+		ModuleList="${ModuleList} ${KernelDir}/drivers/net/mdio.ko"
 
 		;;
 	APOLLOLAKE)
@@ -528,7 +535,6 @@ case "$BUILD_TARGET" in
 	REALTEK_RTD1296)
 		ModuleList="${ModuleList} ${KernelDir}/net/ipv4/netfilter/ipt_MASQUERADE.ko"
 		ModuleList="${ModuleList} ${KernelDir}/lib/zlib_deflate/zlib_deflate.ko"
-		ModuleList="${ModuleList} ${KernelDir}/fs/btrfs/btrfs.ko"
 		ModuleList="${ModuleList} ${KernelDir}/crypto/arc4.ko"
 		ModuleList="${ModuleList} ${KernelDir}/crypto/cryptd.ko"
 		ModuleList="${ModuleList} ${KernelDir}/crypto/ocf/cryptodev.ko"
@@ -549,11 +555,9 @@ case "$BUILD_TARGET" in
 		ModuleList="${ModuleList} ${KernelDir}/drivers/usb/class/cdc-acm.ko"
 		ModuleList="${ModuleList} ${KernelDir}/drivers/usb/dwc3/dwc3.ko"
 		ModuleList="${ModuleList} ${KernelDir}/drivers/usb/dwc3/dwc3-rtk.ko"
-		ModuleList="${ModuleList} ${KernelDir}/drivers/usb/dwc3/dwc3-rtk-type_c.ko"
 		ModuleList="${ModuleList} ${KernelDir}/drivers/usb/phy/phy-rtk-rle0599.ko"
 		ModuleList="${ModuleList} ${KernelDir}/drivers/usb/phy/phy-rtk-usb2.ko"
 		ModuleList="${ModuleList} ${KernelDir}/drivers/usb/phy/phy-rtk-usb3.ko"
-		ModuleList="${ModuleList} ${KernelDir}/drivers/usb/gadget/udc/udc-core.ko"
 		ModuleList="${ModuleList} ${KernelDir}/crypto/ablk_helper.ko"
 		ModuleList="${ModuleList} ${KernelDir}/crypto/gf128mul.ko"
 		ModuleList="${ModuleList} ${KernelDir}/crypto/lrw.ko"
@@ -571,6 +575,98 @@ case "$BUILD_TARGET" in
 		ModuleList="${ModuleList} ${ModOpenvswitch}"
 		ModuleList="${ModuleList} ${ModDVB}"
 		ModuleList="${ModuleList} ${KernelDir}/drivers/net/ethernet/realtek/r8168/r8168.ko"
+		ModuleList="${ModuleList} ${ModDiskPwCtl}"
+
+		;;
+	BROADWELLNK)
+		ModuleList="${ModuleList} ${ModBTRFS}"
+		ModuleList="${ModuleList} ${ModCryptoIntel}"
+		ModuleList="${ModuleList} ${ModI2C}"
+		ModuleList="${ModuleList} ${KernelDir}/drivers/i2c/busses/i2c-i801.ko"
+		ModuleList="${ModuleList} ${ModLP3943}"
+		ModuleList="${ModuleList} ${ModCPUFreq}"
+		ModuleList="${ModuleList} ${ModBridge} ${ModTC} ${ModFwSecurity}"
+		ModuleList="${ModuleList} ${ModVlan}"
+		ModuleList="${ModuleList} ${ModUSBserial}"
+		ModuleList="${ModuleList} ${ModIPsec}"
+		ModuleList="${ModuleList} ${ModUSBModem}"
+		ModuleList="${ModuleList} ${ModEtronUSB}"
+		ModuleList="${ModuleList} ${ModWirless}"
+		ModuleList="${ModuleList} ${ModBluetooth}"
+		ModuleList="${ModuleList} ${ModZram}"
+		ModuleList="${ModuleList} ${ModIPv6Tun}"
+		ModuleList="${ModuleList} ${ModVirtualization}"
+		ModuleList="${ModuleList} ${ModOpenvswitch}"
+		ModuleList="${ModuleList} ${ModNFQ}"
+		ModuleList="${ModuleList} ${ModDVB}"
+		ModuleList="${ModuleList} ${ModDiskPwCtl}"
+		ModuleList="${ModuleList} ${ModDCA}"
+		ModuleList="${ModuleList} ${ModADT}"
+		ModuleList="${ModuleList} ${KernelDir}/drivers/net/mdio.ko"
+
+		;;
+	PURLEY)
+		ModuleList="${ModuleList} ${ModBTRFS}"
+		ModuleList="${ModuleList} ${ModCryptoIntel}"
+		ModuleList="${ModuleList} ${ModI2C}"
+		ModuleList="${ModuleList} ${KernelDir}/drivers/i2c/busses/i2c-i801.ko"
+		ModuleList="${ModuleList} ${KernelDir}/drivers/dma/ioat/ioatdma.ko"
+		ModuleList="${ModuleList} ${KernelDir}/drivers/hwmon/adt7475.ko"
+		ModuleList="${ModuleList} ${KernelDir}/drivers/dca/dca.ko"
+		ModuleList="${ModuleList} ${KernelDir}/drivers/net/mdio.ko"
+		ModuleList="${ModuleList} ${KernelDir}/drivers/scsi/mpt3sas/mpt3sas.ko"
+		ModuleList="${ModuleList} ${ModCPUFreq}"
+		ModuleList="${ModuleList} ${KernelDir}/drivers/cpufreq/cpufreq_conservative.ko"
+		ModuleList="${ModuleList} ${ModBridge} ${ModTC} ${ModFwSecurity}"
+		ModuleList="${ModuleList} ${ModVlan}"
+		ModuleList="${ModuleList} ${ModUSBserial}"
+		ModuleList="${ModuleList} ${ModIPsec}"
+		ModuleList="${ModuleList} ${ModUSBModem}"
+		ModuleList="${ModuleList} ${ModWirless}"
+		ModuleList="${ModuleList} ${ModBluetooth}"
+		ModuleList="${ModuleList} ${ModZram}"
+		ModuleList="${ModuleList} ${ModIPv6Tun}"
+		ModuleList="${ModuleList} ${ModIPMI}"
+		ModuleList="${ModuleList} ${ModVirtualization}"
+		ModuleList="${ModuleList} ${ModOpenvswitch}"
+		ModuleList="${ModuleList} ${ModNFQ}"
+		ModuleList="${ModuleList} ${ModDVB}"
+
+		;;
+	MARVELL_ARMADA37XX)
+		ModuleList="${ModuleList} ${KernelDir}/net/ipv4/netfilter/ipt_MASQUERADE.ko"
+		ModuleList="${ModuleList} ${KernelDir}/lib/zlib_deflate/zlib_deflate.ko"
+		ModuleList="${ModuleList} ${KernelDir}/crypto/arc4.ko"
+		ModuleList="${ModuleList} ${KernelDir}/crypto/cryptd.ko"
+		ModuleList="${ModuleList} ${KernelDir}/arch/arm64/crypto/aes-neon-blk.ko"
+		ModuleList="${ModuleList} ${KernelDir}/arch/arm64/crypto/aes-ce-blk.ko"
+		ModuleList="${ModuleList} ${KernelDir}/drivers/i2c/algos/i2c-algo-bit.ko"
+		ModuleList="${ModuleList} ${ModLP3943}"
+		ModuleList="${ModuleList} ${KernelDir}/drivers/usb/host/xhci-hcd.ko"
+		ModuleList="${ModuleList} ${KernelDir}/drivers/usb/host/xhci-pci.ko"
+		ModuleList="${ModuleList} ${KernelDir}/drivers/usb/host/xhci-plat-hcd.ko"
+		ModuleList="${ModuleList} ${KernelDir}/drivers/usb/common/usb-common.ko"
+		ModuleList="${ModuleList} ${KernelDir}/drivers/usb/core/usbcore.ko"
+		ModuleList="${ModuleList} ${KernelDir}/drivers/usb/host/ehci-hcd.ko"
+		ModuleList="${ModuleList} ${KernelDir}/drivers/usb/host/ehci-pci.ko"
+		ModuleList="${ModuleList} ${KernelDir}/drivers/usb/storage/usb-storage.ko"
+		ModuleList="${ModuleList} ${KernelDir}/drivers/usb/class/cdc-acm.ko"
+		ModuleList="${ModuleList} ${KernelDir}/crypto/ablk_helper.ko"
+		ModuleList="${ModuleList} ${KernelDir}/crypto/gf128mul.ko"
+		ModuleList="${ModuleList} ${KernelDir}/crypto/lrw.ko"
+		ModuleList="${ModuleList} ${ModBridge} ${ModTC} ${ModFwSecurity}"
+		ModuleList="${ModuleList} ${ModVlan}"
+		ModuleList="${ModuleList} ${ModUSBserial}"
+		ModuleList="${ModuleList} ${ModIPsec}"
+		ModuleList="${ModuleList} ${ModUSBModem}"
+		ModuleList="${ModuleList} ${ModWirless}"
+		ModuleList="${ModuleList} ${ModBluetooth}"
+		ModuleList="${ModuleList} ${KernelDir}/net/netfilter/xt_mac.ko"
+		ModuleList="${ModuleList} ${ModZram}"
+		ModuleList="${ModuleList} ${ModIPv6Tun}"
+		ModuleList="${ModuleList} ${ModNFQ}"
+		ModuleList="${ModuleList} ${ModOpenvswitch}"
+		ModuleList="${ModuleList} ${ModDVB}"
 		ModuleList="${ModuleList} ${ModDiskPwCtl}"
 
 		;;
@@ -597,7 +693,7 @@ do
 done
 
 case ${BUILD_TARGET} in
-	APOLLOLAKE|DENVERTON|KVMX64)
+	APOLLOLAKE|DENVERTON|KVMX64|BROADWELLNK|PURLEY)
 		ZIMAGE="${KernelDir}/arch/x86_64/boot/bzImage"
 		;;
 	REALTEK_RTD1296)
@@ -606,8 +702,17 @@ case ${BUILD_TARGET} in
 		mkdir -p ${SysRootInclude}/crypto
 		cp -vf crypto/ocf/cryptodev.h ${SysRootInclude}/crypto
 		cp -vf ${KernelDir}/arch/arm64/boot/dts/realtek/rtd-1296-synology-DS418.dtb ${DebDevBuild}/image/dtb_ds418.bin
-		cp -vf ${KernelDir}/arch/arm64/boot/dts/realtek/rtd-1296-synology-DS418j.dtb ${DebDevBuild}/image/dtb_ds418j.bin
+		cp -vf ${KernelDir}/arch/arm64/boot/dts/realtek/rtd-1293-synology-DS418j.dtb ${DebDevBuild}/image/dtb_ds418j.bin
+		cp -vf ${KernelDir}/arch/arm64/boot/dts/realtek/rtd-1296-synology-DS218play.dtb ${DebDevBuild}/image/dtb_ds218play.bin
+		cp -vf ${KernelDir}/arch/arm64/boot/dts/realtek/rtd-1296-synology-DS118.dtb ${DebDevBuild}/image/dtb_ds118.bin
 		;;
+	MARVELL_ARMADA37XX)
+		lzma -z ${KernelDir}/arch/arm64/boot/Image
+		mv ${KernelDir}/arch/arm64/boot/Image.lzma ${KernelDir}/arch/arm64/boot/zImage
+		ZIMAGE="${KernelDir}/arch/arm64/boot/zImage"
+		mkdir -p ${SysRootInclude}/crypto
+		cp -vf crypto/ocf/cryptodev.h ${SysRootInclude}/crypto
+       ;;
 	*)
 		skip=1
 		;;

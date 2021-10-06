@@ -591,7 +591,11 @@ static int zynq_gpio_request(struct gpio_chip *chip, unsigned offset)
 {
 	int ret;
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	ret = pm_runtime_get_sync(chip->parent);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	ret = pm_runtime_get_sync(chip->dev);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	/*
 	 * If the device is already active pm_runtime_get() will return 1 on
@@ -602,7 +606,11 @@ static int zynq_gpio_request(struct gpio_chip *chip, unsigned offset)
 
 static void zynq_gpio_free(struct gpio_chip *chip, unsigned offset)
 {
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	pm_runtime_put(chip->parent);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	pm_runtime_put(chip->dev);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 }
 
 static const struct dev_pm_ops zynq_gpio_dev_pm_ops = {
@@ -697,7 +705,11 @@ static int zynq_gpio_probe(struct platform_device *pdev)
 	chip = &gpio->chip;
 	chip->label = gpio->p_data->label;
 	chip->owner = THIS_MODULE;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	chip->parent = &pdev->dev;
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	chip->dev = &pdev->dev;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	chip->get = zynq_gpio_get_value;
 	chip->set = zynq_gpio_set_value;
 	chip->request = zynq_gpio_request;

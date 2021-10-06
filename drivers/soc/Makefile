@@ -11,4 +11,6 @@ obj-$(CONFIG_ARCH_SUNXI)	+= sunxi/
 obj-$(CONFIG_ARCH_TEGRA)	+= tegra/
 obj-$(CONFIG_SOC_TI)		+= ti/
 obj-$(CONFIG_PLAT_VERSATILE)	+= versatile/
+ifeq ($(CONFIG_SYNO_LSP_RTD129X),y)
 obj-$(CONFIG_ARCH_RTD129X)	+= realtek/
+endif # CONFIG_SYNO_LSP_RTD129X

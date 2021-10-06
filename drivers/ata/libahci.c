@@ -1148,8 +1148,8 @@ static void ahci_init_sw_activity(struct ata_link *link)
 	emp->saved_activity = emp->activity = 0;
 	setup_timer(&emp->timer, ahci_sw_activity_blink, (unsigned long)link);
 
-#ifdef CONFIG_ARCH_RTD129X
-	emp->blink_policy = 1;
+#if defined(CONFIG_ARCH_RTD129X) && defined(MY_DEF_HERE)
+	emp->blink_policy = BLINK_ON;
 #endif
 
 #ifndef MY_DEF_HERE
@@ -1293,6 +1293,59 @@ static ssize_t ahci_activity_show(struct ata_device *dev, char *buf)
 	return sprintf(buf, "%d\n", emp->blink_policy);
 }
 
+#if defined(MY_DEF_HERE)
+int syno_ahci_disk_green_led(const unsigned short hostnum, const int iValue)
+{
+	int ret = -EINVAL;
+
+	struct Scsi_Host *shost = scsi_host_lookup(hostnum);
+	struct ata_port *ap = NULL;
+	struct ahci_port_priv *pp = NULL;
+	struct ahci_em_priv *emp = NULL;
+	struct ata_link *link = NULL;
+	u32 port_led_state = 0;
+	unsigned long flags;
+
+	if (NULL == shost) {
+		goto END;
+	}
+
+	if (NULL == (ap = ata_shost_to_port(shost))) {
+		goto END;
+	}
+
+	pp = ap->private_data;
+	spin_lock_irqsave(ap->lock, flags);
+	ata_for_each_link(link, ap, EDGE) {
+		emp = &pp->em_priv[link->pmp];
+		port_led_state = emp->led_state;
+
+		emp->saved_activity = emp->activity = 0;
+		del_timer(&emp->timer);
+
+		if (!iValue) {
+			link->flags &= ~(ATA_LFLAG_SW_ACTIVITY);
+
+			port_led_state |= EM_MSG_LED_VALUE_ON;
+			port_led_state |= (ap->port_no | (link->pmp << 8));
+		} else {
+			port_led_state &= ~EM_MSG_LED_VALUE_ON;
+			port_led_state |= (ap->port_no | (link->pmp << 8));
+			ahci_init_sw_activity(link);
+		}
+	}
+	spin_unlock_irqrestore(ap->lock, flags);
+
+	ap->ops->transmit_led_message(ap, port_led_state, 4);
+
+	ret = 0;
+
+END:
+	return ret;
+}
+EXPORT_SYMBOL(syno_ahci_disk_green_led);
+#endif  
+
 static void ahci_port_init(struct device *dev, struct ata_port *ap,
 			   int port_no, void __iomem *mmio,
 			   void __iomem *port_mmio)
@@ -1306,6 +1359,29 @@ static void ahci_port_init(struct device *dev, struct ata_port *ap,
 	if (rc)
 		dev_warn(dev, "%s (%d)\n", emsg, rc);
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+	if (hpriv->comreset_u) {
+		u32 reg;
+
+		writel(PORT_OOB_INDIRECT_ADDR, port_mmio + PORT_INDIRECT_ADDR);
+		reg = readl(port_mmio + PORT_INDIRECT_DATA);
+		reg &= ~PORT_OOB_COMRESET_U_MASK;
+		reg |= hpriv->comreset_u;
+		writel(reg, port_mmio + PORT_INDIRECT_DATA);
+	}
+
+	if (hpriv->comwake) {
+		u32 reg;
+
+		writel(PORT_OOB_INDIRECT_ADDR, port_mmio + PORT_INDIRECT_ADDR);
+		reg = readl(port_mmio + PORT_INDIRECT_DATA);
+		reg &= ~PORT_OOB_COMWAKE_MASK;
+		reg |= hpriv->comwake << PORT_OOB_COMWAKE_OFFSET;
+		writel(reg, port_mmio + PORT_INDIRECT_DATA);
+	}
+
+#endif  
+	 
 	tmp = readl(port_mmio + PORT_SCR_ERR);
 	VPRINTK("PORT_SCR_ERR 0x%x\n", tmp);
 	writel(tmp, port_mmio + PORT_SCR_ERR);

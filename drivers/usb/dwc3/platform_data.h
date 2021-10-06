@@ -45,14 +45,16 @@ struct dwc3_platform_data {
 	unsigned rx_detect_poll_quirk:1;
 	unsigned dis_u3_susphy_quirk:1;
 	unsigned dis_u2_susphy_quirk:1;
-#ifndef MY_DEF_HERE
+#ifdef MY_DEF_HERE
+#else /* MY_DEF_HERE */
 	unsigned dis_enblslpm_quirk:1;
 #endif /* MY_DEF_HERE */
 
 	unsigned tx_de_emphasis_quirk:1;
 	unsigned tx_de_emphasis:2;
 
-#ifndef MY_DEF_HERE
+#ifdef MY_DEF_HERE
+#else /* MY_DEF_HERE */
 	u32 fladj_value;
 
 	const char *hsphy_interface;

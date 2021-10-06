@@ -162,6 +162,7 @@ config CRYPTO_GHASH_S390
 config CRYPTO_DEV_MV_CESA
 	tristate "Marvell's Cryptographic Engine"
 	depends on PLAT_ORION
+	depends on (!CRYPTO_DEV_MARVELL_CESA && SYNO_LSP_ARMADA_17_04_02) || !SYNO_LSP_ARMADA_17_04_02
 	select CRYPTO_AES
 	select CRYPTO_BLKCIPHER
 	select CRYPTO_HASH
@@ -498,13 +499,26 @@ config CRYPTO_DEV_SUN4I_SS
 	  To compile this driver as a module, choose M here: the module
 	  will be called sun4i-ss.
 
+if SYNO_LSP_RTD129X
 config CRYPTO_DEV_RTK_MCP
-	depends on SYNO_RTD1296
 	bool "Support for Realtek hw accelerator"
 
 
 config CRYPTO_DEV_RTK_MCP_INTERRUPT
 	bool "Support for Realtek hw accelerator in interrupt mode"
-	depends on CRYPTO_DEV_RTK_MCP && SYNO_RTD1296
+	depends on CRYPTO_DEV_RTK_MCP
+endif # SYNO_LSP_RTD129X
+
+config CRYPTO_DEV_SAFEXCEL
+	tristate "Inside Secure's SafeXcel Cryptographic Engine driver"
+	depends on SYNO_LSP_ARMADA_17_04_02
+	select CRYPTO_BLKCIPHER
+	select CRYPTO_HASH
+	select CRYPTO_AES
+	select CRYPTO_SHA1
+	help
+	  This driver interfaces with the SafeXcel EIP-97/197 cryptographic hardwares
+	  designed by Inside Secure. The driver support only basic initialiazation of the
+	  engine, without interacation with Kernel crypto API.
 
 endif # CRYPTO_HW

@@ -12,6 +12,8 @@ struct btrfs_delayed_ref_node {
 	struct rb_node rb_node;
 
 	struct list_head list;
+	 
+	struct list_head add_list;
 
 	u64 bytenr;
 
@@ -46,6 +48,8 @@ struct btrfs_delayed_ref_head {
 
 	spinlock_t lock;
 	struct list_head ref_list;
+	 
+	struct list_head ref_add_list;
 
 	struct rb_node href_node;
 

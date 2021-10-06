@@ -168,7 +168,7 @@
 #define NAPI_SUFFIX ""
 #endif
 
-#define RTL8168_VERSION "8.043.01" NAPI_SUFFIX
+#define RTL8168_VERSION "8.043.04" NAPI_SUFFIX
 #define MODULENAME "r8168"
 #define PFX MODULENAME ": "
 
@@ -1289,6 +1289,11 @@ struct rtl8168_private {
         u32 cur_tx; /* Index into the Tx descriptor buffer of next Rx pkt. */
         u32 dirty_rx;
         u32 dirty_tx;
+	u32 last_dirty_tx;
+	u32 tx_reset_count;
+	u32 last_cur_rx;
+	u32 rx_reset_count;
+	u8 checkRDU;
         struct TxDesc *TxDescArray; /* 256-aligned Tx descriptor ring */
         struct RxDesc *RxDescArray; /* 256-aligned Rx descriptor ring */
         dma_addr_t TxPhyAddr;

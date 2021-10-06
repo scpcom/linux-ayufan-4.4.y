@@ -47,6 +47,11 @@ config ARM_VIC_NR
 	  The maximum number of VICs available in the system, for
 	  power management.
 
+config ARMADA_370_XP_IRQ
+	bool
+	depends on SYNO_LSP_ARMADA_16_12
+	select GENERIC_IRQ_CHIP
+
 config ATMEL_AIC_IRQ
 	bool
 	select GENERIC_IRQ_CHIP
@@ -193,3 +198,21 @@ config IRQ_MXS
 	def_bool y if MACH_ASM9260 || ARCH_MXS
 	select IRQ_DOMAIN
 	select STMP_DEVICE
+
+config MVEBU_ODMI
+	bool
+	depends on SYNO_LSP_ARMADA_16_12
+	select GENERIC_MSI_IRQ_DOMAIN
+
+config MVEBU_PIC
+	bool
+	depends on SYNO_LSP_ARMADA_16_12
+
+config MVEBU_SEI_IRQ
+	bool
+	depends on SYNO_LSP_ARMADA_16_12
+	default y
+
+config MVEBU_ICU_IRQ
+	bool
+	depends on SYNO_LSP_ARMADA_16_12

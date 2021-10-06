@@ -31,12 +31,36 @@
 #include <linux/of_net.h>
 #include <linux/of_address.h>
 #include <linux/phy.h>
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#include <net/hwbm.h>
+#include "mvneta_bm.h"
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 #include <linux/clk.h>
 #include <linux/cpu.h>
+
+#ifdef CONFIG_SYNO_ARMADA_REFILL_COUNT
+u64 refill_failed = 0;
+#endif /* CONFIG_SYNO_ARMADA_REFILL_COUNT*/
+
+#ifdef CONFIG_SYNO_PHY_INIT_88E151X
+#include <linux/synobios.h>
+#endif /* CONFIG_SYNO_PHY_INIT_88E151X */
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#include <linux/phy/phy.h>
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#include <dt-bindings/phy/phy-comphy-mvebu.h>
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 
 /* Registers */
 #define MVNETA_RXQ_CONFIG_REG(q)                (0x1400 + ((q) << 2))
 #define      MVNETA_RXQ_HW_BUF_ALLOC            BIT(0)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#define      MVNETA_RXQ_SHORT_POOL_ID_SHIFT	4
+#define      MVNETA_RXQ_SHORT_POOL_ID_MASK	0x30
+#define      MVNETA_RXQ_LONG_POOL_ID_SHIFT	6
+#define      MVNETA_RXQ_LONG_POOL_ID_MASK	0xc0
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 #define      MVNETA_RXQ_PKT_OFFSET_ALL_MASK     (0xf    << 8)
 #define      MVNETA_RXQ_PKT_OFFSET_MASK(offs)   ((offs) << 8)
 #define MVNETA_RXQ_THRESHOLD_REG(q)             (0x14c0 + ((q) << 2))
@@ -50,6 +74,11 @@
 #define MVNETA_RXQ_STATUS_UPDATE_REG(q)         (0x1500 + ((q) << 2))
 #define      MVNETA_RXQ_ADD_NON_OCCUPIED_SHIFT  16
 #define      MVNETA_RXQ_ADD_NON_OCCUPIED_MAX    255
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#define MVNETA_PORT_POOL_BUFFER_SZ_REG(pool)	(0x1700 + ((pool) << 2))
+#define      MVNETA_PORT_POOL_BUFFER_SZ_SHIFT	3
+#define      MVNETA_PORT_POOL_BUFFER_SZ_MASK	0xfff8
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 #define MVNETA_PORT_RX_RESET                    0x1cc0
 #define      MVNETA_PORT_RX_DMA_RESET           BIT(0)
 #define MVNETA_PHY_ADDR                         0x2000
@@ -107,12 +136,26 @@
 #define MVNETA_GMAC_CLOCK_DIVIDER                0x24f4
 #define      MVNETA_GMAC_1MS_CLOCK_ENABLE        BIT(31)
 #define MVNETA_ACC_MODE                          0x2500
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#define MVNETA_BM_ADDRESS                        0x2504
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 #define MVNETA_CPU_MAP(cpu)                      (0x2540 + ((cpu) << 2))
 #define      MVNETA_CPU_RXQ_ACCESS_ALL_MASK      0x000000ff
 #define      MVNETA_CPU_TXQ_ACCESS_ALL_MASK      0x0000ff00
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#define      MVNETA_CPU_RXQ_ACCESS(rxq)		 BIT(rxq)
+#define      MVNETA_CPU_TXQ_ACCESS(txq)		 BIT(txq + 8)
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 #define MVNETA_RXQ_TIME_COAL_REG(q)              (0x2580 + ((q) << 2))
 
-/* Exception Interrupt Port/Queue Cause register */
+/* Exception Interrupt Port/Queue Cause register
+ *
+ * for armada37xx 16.12
+ * Their behavior depend of the mapping done using the PCPX2Q
+ * registers. For a given CPU if the bit associated to a queue is not
+ * set, then for the register a read from this CPU will always return
+ * 0 and a write won't do anything
+ */
 
 #define MVNETA_INTR_NEW_CAUSE                    0x25a0
 #define MVNETA_INTR_NEW_MASK                     0x25a4
@@ -170,9 +213,16 @@
 #define MVNETA_GMAC_CTRL_0                       0x2c00
 #define      MVNETA_GMAC_MAX_RX_SIZE_SHIFT       2
 #define      MVNETA_GMAC_MAX_RX_SIZE_MASK        0x7ffc
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#define      MVNETA_GMAC0_PORT_1000BASE_X        BIT(1)
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 #define      MVNETA_GMAC0_PORT_ENABLE            BIT(0)
 #define MVNETA_GMAC_CTRL_2                       0x2c08
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#define      MVNETA_GMAC2_SGMII_INBAND_AN_MODE   BIT(0)
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 #define      MVNETA_GMAC2_INBAND_AN_ENABLE       BIT(0)
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 #define      MVNETA_GMAC2_PCS_ENABLE             BIT(3)
 #define      MVNETA_GMAC2_PORT_RGMII             BIT(4)
 #define      MVNETA_GMAC2_PORT_RESET             BIT(6)
@@ -189,9 +239,18 @@
 #define      MVNETA_GMAC_FORCE_LINK_DOWN         BIT(0)
 #define      MVNETA_GMAC_FORCE_LINK_PASS         BIT(1)
 #define      MVNETA_GMAC_INBAND_AN_ENABLE        BIT(2)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#define      MVNETA_GMAC_INBAND_AN_BYPASS_EN     BIT(3)
+#define      MVNETA_GMAC_INBAND_RESTART_AN       BIT(4)
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 #define      MVNETA_GMAC_CONFIG_MII_SPEED        BIT(5)
 #define      MVNETA_GMAC_CONFIG_GMII_SPEED       BIT(6)
 #define      MVNETA_GMAC_AN_SPEED_EN             BIT(7)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#define      MVNETA_GMAC_CONFIG_FLOW_CTRL        BIT(8)
+#define      MVNETA_GMAC_ADVERT_SYM_FLOW_CTRL    BIT(9)
+#define      MVNETA_GMAC_ADVERT_ASYM_FC_ADV      BIT(10)
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 #define      MVNETA_GMAC_AN_FLOW_CTRL_EN         BIT(11)
 #define      MVNETA_GMAC_CONFIG_FULL_DUPLEX      BIT(12)
 #define      MVNETA_GMAC_AN_DUPLEX_EN            BIT(13)
@@ -219,6 +278,15 @@
 
 #define MVNETA_CAUSE_TXQ_SENT_DESC_ALL_MASK	 0xff
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#define MVNETA_REGS_GMAC_LEN                     0xAC9
+
+enum mvneta_port_type {
+	PORT_TYPE_SGMII,
+	PORT_TYPE_1000BASE_X
+};
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+
 /* Descriptor ring Macros */
 #define MVNETA_QUEUE_NEXT_DESC(q, index)	\
 	(((index) < (q)->last_desc) ? ((index) + 1) : 0)
@@ -226,7 +294,11 @@
 /* Various constants */
 
 /* Coalescing */
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#define MVNETA_TXDONE_COAL_PKTS		0      /* interrupt per packet */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 #define MVNETA_TXDONE_COAL_PKTS		1
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 #define MVNETA_RX_COAL_PKTS		32
 #define MVNETA_RX_COAL_USEC		100
 
@@ -242,10 +314,21 @@
 
 #define MVNETA_VLAN_TAG_LEN             4
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#define MVNETA_CPU_D_CACHE_LINE_SIZE    cache_line_size()
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 #define MVNETA_CPU_D_CACHE_LINE_SIZE    32
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 #define MVNETA_TX_CSUM_DEF_SIZE		1600
 #define MVNETA_TX_CSUM_MAX_SIZE		9800
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#define MVNETA_ACC_MODE_EXT1		1
+#define MVNETA_ACC_MODE_EXT2		2
+
+#define MVNETA_MAX_DECODE_WIN		6
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 #define MVNETA_ACC_MODE_EXT		1
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 
 /* Timeout constants */
 #define MVNETA_TX_DISABLE_TIMEOUT_MSEC	1000
@@ -254,14 +337,37 @@
 
 #define MVNETA_TX_MTU_MAX		0x3ffff
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+/* The RSS lookup table actually has 256 entries but we do not use
+ * them yet
+ */
+#define MVNETA_RSS_LU_TABLE_SIZE	1
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+
 /* TSO header size */
 #define TSO_HEADER_SIZE 128
 
 /* Max number of Rx descriptors */
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#define MVNETA_MAX_RXD 4096
+/* Default number of Rx descriptors */
+#define MVNETA_RXD_NUM 128
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#define MVNETA_MAX_RXD 256
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 #define MVNETA_MAX_RXD 128
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 
 /* Max number of Tx descriptors */
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#define MVNETA_MAX_TXD 4096
+/* Default number of Tx descriptors */
+#define MVNETA_TXD_NUM 532
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 #define MVNETA_MAX_TXD 532
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 
 /* Max number of allowed TCP segments for software TSO */
 #define MVNETA_MAX_TSO_SEGS 100
@@ -270,6 +376,18 @@
 
 /* descriptor aligned size */
 #define MVNETA_DESC_ALIGNED_SIZE	32
+
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+//do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+/* Number of bytes to be taken into account by HW when putting incoming data
+ * to the buffers. It is needed in case NET_SKB_PAD exceeds maximum packet
+ * offset supported in MVNETA_RXQ_CONFIG_REG(q) registers.
+ */
+#define MVNETA_RX_PKT_OFFSET_CORRECTION	64
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 #define MVNETA_RX_PKT_SIZE(mtu) \
 	ALIGN((mtu) + MVNETA_MH_SIZE + MVNETA_VLAN_TAG_LEN + \
@@ -280,7 +398,12 @@
 	((addr >= txq->tso_hdrs_phys) && \
 	 (addr < txq->tso_hdrs_phys + txq->size * TSO_HEADER_SIZE))
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#define MVNETA_RX_GET_BM_POOL_ID(rxd) \
+	(((rxd)->status & MVNETA_RXD_BM_POOL_MASK) >> MVNETA_RXD_BM_POOL_SHIFT)
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 #define MVNETA_RX_BUF_SIZE(pkt_size)   ((pkt_size) + NET_SKB_PAD)
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 
 struct mvneta_statistic {
 	unsigned short offset;
@@ -290,6 +413,9 @@ struct mvneta_statistic {
 
 #define T_REG_32	32
 #define T_REG_64	64
+#ifdef CONFIG_SYNO_ARMADA_REFILL_COUNT
+#define T_DATA		1
+#endif /* CONFIG_SYNO_ARMADA_REFILL_COUNT*/
 
 static const struct mvneta_statistic mvneta_statistics[] = {
 	{ 0x3000, T_REG_64, "good_octets_received", },
@@ -324,6 +450,9 @@ static const struct mvneta_statistic mvneta_statistics[] = {
 	{ 0x304c, T_REG_32, "broadcast_frames_sent", },
 	{ 0x3054, T_REG_32, "fc_sent", },
 	{ 0x300c, T_REG_32, "internal_mac_transmit_err", },
+#ifdef CONFIG_SYNO_ARMADA_REFILL_COUNT
+	{ 0x0,    T_DATA,   "refill fail count", },
+#endif /* CONFIG_SYNO_ARMADA_REFILL_COUNT*/
 };
 
 struct mvneta_pcpu_stats {
@@ -345,7 +474,14 @@ struct mvneta_pcpu_port {
 	u32			cause_rx_tx;
 };
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#define MVNETA_PORT_F_CLEANUP_TIMER_BIT  0
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+
 struct mvneta_port {
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+	u8 id;
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	struct mvneta_pcpu_port __percpu	*ports;
 	struct mvneta_pcpu_stats __percpu	*stats;
 
@@ -356,6 +492,17 @@ struct mvneta_port {
 	struct mvneta_tx_queue *txqs;
 	struct net_device *dev;
 	struct notifier_block cpu_notifier;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	int rxq_def;
+	/* Protect the access to the percpu interrupt registers,
+	 * ensuring that the configuration remains coherent.
+	 */
+	spinlock_t lock;
+	bool is_stopped;
+
+	u32 cause_rx_tx;
+	struct napi_struct napi;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	/* Core clock */
 	struct clk *clk;
@@ -367,14 +514,55 @@ struct mvneta_port {
 	struct phy_device *phy_dev;
 	phy_interface_t phy_interface;
 	struct device_node *phy_node;
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+	/* comphy handler, current it supports a 1:1 relation between the port
+	 * and the phy. The phy here means serdes, which is different from
+	 * phy_dev above.
+	 */
+	struct phy *comphy;
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	unsigned int link;
 	unsigned int duplex;
 	unsigned int speed;
 	unsigned int tx_csum_limit;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	unsigned int use_inband_status:1;
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	int use_inband_status:1;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+	struct mvneta_bm *bm_priv;
+	struct mvneta_bm_pool *pool_long;
+	struct mvneta_bm_pool *pool_short;
+	int bm_win_id;
+
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	u64 ethtool_stats[ARRAY_SIZE(mvneta_statistics)];
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+
+	u32 indir[MVNETA_RSS_LU_TABLE_SIZE];
+
+	/* Flags for special SoC configurations */
+	bool neta_armada3700;
+#ifdef CONFIG_64BIT
+	u64 data_high;
+#endif
+	u16 rx_offset_correction;
+
+	/* Timer to refill missed buffers */
+	struct timer_list   cleanup_timer;
+	unsigned long flags;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#if defined(CONFIG_SYNO_ARMADA37XX_WOL)
+	u32 phy_chip;
+	u32 wol;
+#endif /* CONFIG_SYNO_ARMADA37XX_WOL */
 };
+
+#if defined(CONFIG_SYNO_ARMADA37XX_WOL)
+#define MV_PHY_ID_151X 0x01410DD0
+#endif /* CONFIG_SYNO_ARMADA37XX_WOL */
 
 /* The mvneta_tx_desc and mvneta_rx_desc structures describe the
  * layout of the transmit and reception DMA descriptors, and their
@@ -396,6 +584,10 @@ struct mvneta_port {
 #define MVNETA_TX_L4_CSUM_NOT	BIT(31)
 
 #define MVNETA_RXD_ERR_CRC		0x0
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#define MVNETA_RXD_BM_POOL_SHIFT	13
+#define MVNETA_RXD_BM_POOL_MASK		(BIT(13) | BIT(14))
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 #define MVNETA_RXD_ERR_SUMMARY		BIT(16)
 #define MVNETA_RXD_ERR_OVERRUN		BIT(17)
 #define MVNETA_RXD_ERR_LEN		BIT(18)
@@ -430,7 +622,7 @@ struct mvneta_rx_desc {
 	u32  reserved5;		/* pnc_extra PnC (for future use, PnC)	*/
 	u32  reserved6;		/* hw_cmd (for future use, PnC and HWF)	*/
 };
-#else
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 struct mvneta_tx_desc {
 	u16  data_size;		/* Data size of transmitted packet in bytes */
 	u16  reserverd1;	/* csum_l4 (for future use)		*/
@@ -468,6 +660,9 @@ struct mvneta_tx_queue {
 	 * descriptor ring
 	 */
 	int count;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	int pending;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	int tx_stop_threshold;
 	int tx_wake_threshold;
 
@@ -499,6 +694,11 @@ struct mvneta_tx_queue {
 
 	/* DMA address of TSO headers */
 	dma_addr_t tso_hdrs_phys;
+
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	/* Affinity mask for CPUs*/
+	cpumask_t affinity_mask;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 };
 
 struct mvneta_rx_queue {
@@ -509,7 +709,13 @@ struct mvneta_rx_queue {
 	int size;
 
 	/* counter of times when mvneta_refill() failed */
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	atomic_t missed;
+	atomic_t refill_stop;
+	struct mvneta_rx_desc *missed_desc;
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	int missed;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	u32 pkts_coal;
 	u32 time_coal;
@@ -527,6 +733,21 @@ struct mvneta_rx_queue {
 	int next_desc_to_proc;
 };
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#define MVNETA_TEST_LEN		ARRAY_SIZE(mvneta_gstrings_test)
+#define MVNETA_TEST_MASK1	0xFFFF
+#define MVNETA_TEST_MASK2	0x0FF0
+#define MVNETA_TEST_MASK3	0x0
+#define MVNETA_TEST_PATTERN1	0xFFFF
+#define MVNETA_TEST_PATTERN2	0x0FF0
+#define MVNETA_TEST_PATTERN3	0x0
+
+static const char mvneta_gstrings_test[][ETH_GSTRING_LEN] = {
+	"Link test        (on/offline)",
+	"register test    (on/offline)",
+};
+
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 /* The hardware supports eight (8) rx queues, but we are only allowing
  * the first one to be used. Therefore, let's just allocate one queue.
  */
@@ -535,8 +756,18 @@ static int txq_number = 8;
 
 static int rxq_def;
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#define MV_RX_COPYBREAK_DEF	(256)
+static int rx_copybreak __read_mostly = MV_RX_COPYBREAK_DEF;
+#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 static int rx_copybreak __read_mostly = 256;
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+/* HW BM need that each port be identify by a unique ID */
+static int global_port_id;
+
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 #define MVNETA_DRIVER_NAME "mvneta"
 #define MVNETA_DRIVER_VERSION "1.0"
 
@@ -554,6 +785,20 @@ static u32 mvreg_read(struct mvneta_port *pp, u32 offset)
 	return readl(pp->base + offset);
 }
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+/* Write helper method */
+static inline void mvreg_relaxed_write(struct mvneta_port *pp, u32 offset, u32 data)
+{
+	writel_relaxed(data, pp->base + offset);
+}
+
+/* Read helper method */
+static inline u32 mvreg_relaxed_read(struct mvneta_port *pp, u32 offset)
+{
+	return readl_relaxed(pp->base + offset);
+}
+
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 /* Increment txq get counter */
 static void mvneta_txq_inc_get(struct mvneta_tx_queue *txq)
 {
@@ -679,6 +924,11 @@ static void mvneta_rxq_desc_num_update(struct mvneta_port *pp,
 		return;
 	}
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+	/* do one write barrier and use relaxed write in loop */
+	__iowmb();
+
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	/* Only 255 descriptors can be added at once */
 	while ((rx_done > 0) || (rx_filled > 0)) {
 		if (rx_done <= 0xff) {
@@ -695,9 +945,29 @@ static void mvneta_rxq_desc_num_update(struct mvneta_port *pp,
 			val |= 0xff << MVNETA_RXQ_ADD_NON_OCCUPIED_SHIFT;
 			rx_filled -= 0xff;
 		}
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+		mvreg_relaxed_write(pp, MVNETA_RXQ_STATUS_UPDATE_REG(rxq->id), val);
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 		mvreg_write(pp, MVNETA_RXQ_STATUS_UPDATE_REG(rxq->id), val);
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	}
 }
+
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+/* Return pointer to the following rx desc */
+static inline struct mvneta_rx_desc *
+mvneta_rxq_next_desc_ptr(struct mvneta_rx_queue *rxq, struct mvneta_rx_desc *rx_desc)
+{
+	struct mvneta_rx_desc *next_desc;
+
+	if (rx_desc == (rxq->descs + rxq->last_desc))
+		next_desc = rxq->descs;
+	else
+		next_desc = ++rx_desc;
+
+	return next_desc;
+}
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 /* Get pointer to next RX descriptor to be processed by SW */
 static struct mvneta_rx_desc *
@@ -749,8 +1019,14 @@ static void mvneta_txq_pend_desc_add(struct mvneta_port *pp,
 	/* Only 255 descriptors can be added at once ; Assume caller
 	 * process TX desriptors in quanta less than 256
 	 */
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	val = pend_desc + txq->pending;
+	mvreg_write(pp, MVNETA_TXQ_UPDATE_REG(txq->id), val);
+	txq->pending = 0;
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	val = pend_desc;
 	mvreg_write(pp, MVNETA_TXQ_UPDATE_REG(txq->id), val);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 }
 
 /* Get pointer to next TX descriptor to be processed (send) by HW */
@@ -800,6 +1076,250 @@ static void mvneta_rxq_bm_disable(struct mvneta_port *pp,
 	mvreg_write(pp, MVNETA_RXQ_CONFIG_REG(rxq->id), val);
 }
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+/* Enable buffer management (BM) */
+static void mvneta_rxq_bm_enable(struct mvneta_port *pp,
+				 struct mvneta_rx_queue *rxq)
+{
+	u32 val;
+
+	val = mvreg_read(pp, MVNETA_RXQ_CONFIG_REG(rxq->id));
+	val |= MVNETA_RXQ_HW_BUF_ALLOC;
+	mvreg_write(pp, MVNETA_RXQ_CONFIG_REG(rxq->id), val);
+}
+
+/* Notify HW about port's assignment of pool for bigger packets */
+static void mvneta_rxq_long_pool_set(struct mvneta_port *pp,
+				     struct mvneta_rx_queue *rxq)
+{
+	u32 val;
+
+	val = mvreg_read(pp, MVNETA_RXQ_CONFIG_REG(rxq->id));
+	val &= ~MVNETA_RXQ_LONG_POOL_ID_MASK;
+	val |= (pp->pool_long->id << MVNETA_RXQ_LONG_POOL_ID_SHIFT);
+
+	mvreg_write(pp, MVNETA_RXQ_CONFIG_REG(rxq->id), val);
+}
+
+/* Notify HW about port's assignment of pool for smaller packets */
+static void mvneta_rxq_short_pool_set(struct mvneta_port *pp,
+				      struct mvneta_rx_queue *rxq)
+{
+	u32 val;
+
+	val = mvreg_read(pp, MVNETA_RXQ_CONFIG_REG(rxq->id));
+	val &= ~MVNETA_RXQ_SHORT_POOL_ID_MASK;
+	val |= (pp->pool_short->id << MVNETA_RXQ_SHORT_POOL_ID_SHIFT);
+
+	mvreg_write(pp, MVNETA_RXQ_CONFIG_REG(rxq->id), val);
+}
+
+/* Set port's receive buffer size for assigned BM pool */
+static inline void mvneta_bm_pool_bufsize_set(struct mvneta_port *pp,
+					      int buf_size,
+					      u8 pool_id)
+{
+	u32 val;
+
+	buf_size -= pp->rx_offset_correction;
+	if (!IS_ALIGNED(buf_size, 8)) {
+		dev_warn(pp->dev->dev.parent,
+			 "illegal buf_size value %d, round to %d\n",
+			 buf_size, ALIGN(buf_size, 8));
+		buf_size = ALIGN(buf_size, 8);
+	}
+
+	val = mvreg_read(pp, MVNETA_PORT_POOL_BUFFER_SZ_REG(pool_id));
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+	val &= ~MVNETA_PORT_POOL_BUFFER_SZ_MASK;
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+	val |= buf_size & MVNETA_PORT_POOL_BUFFER_SZ_MASK;
+	mvreg_write(pp, MVNETA_PORT_POOL_BUFFER_SZ_REG(pool_id), val);
+}
+
+#ifndef CONFIG_64BIT
+/* Configure MBUS window in order to enable access BM internal SRAM */
+static int mvneta_mbus_io_win_set(struct mvneta_port *pp, u32 base, u32 wsize,
+				  u8 target, u8 attr)
+{
+	u32 win_enable, win_protect;
+	int i;
+
+	win_enable = mvreg_read(pp, MVNETA_BASE_ADDR_ENABLE);
+
+	if (pp->bm_win_id < 0) {
+		/* Find first not occupied window */
+		for (i = 0; i < MVNETA_MAX_DECODE_WIN; i++) {
+			if (win_enable & (1 << i)) {
+				pp->bm_win_id = i;
+				break;
+			}
+		}
+		if (i == MVNETA_MAX_DECODE_WIN)
+			return -ENOMEM;
+	} else {
+		i = pp->bm_win_id;
+	}
+
+	mvreg_write(pp, MVNETA_WIN_BASE(i), 0);
+	mvreg_write(pp, MVNETA_WIN_SIZE(i), 0);
+
+	if (i < 4)
+		mvreg_write(pp, MVNETA_WIN_REMAP(i), 0);
+
+	mvreg_write(pp, MVNETA_WIN_BASE(i), (base & 0xffff0000) |
+		    (attr << 8) | target);
+
+	mvreg_write(pp, MVNETA_WIN_SIZE(i), (wsize - 1) & 0xffff0000);
+
+	win_protect = mvreg_read(pp, MVNETA_ACCESS_PROTECT_ENABLE);
+	win_protect |= 3 << (2 * i);
+	mvreg_write(pp, MVNETA_ACCESS_PROTECT_ENABLE, win_protect);
+
+	win_enable &= ~(1 << i);
+	mvreg_write(pp, MVNETA_BASE_ADDR_ENABLE, win_enable);
+
+	return 0;
+}
+#endif
+
+/* Assign and initialize pools for port. In case of fail
+ * buffer manager will remain disabled for current port.
+ */
+static int mvneta_bm_port_init(struct platform_device *pdev,
+			       struct mvneta_port *pp)
+{
+	struct device_node *dn = pdev->dev.of_node;
+	u32 long_pool_id, short_pool_id;
+#ifndef CONFIG_64BIT
+	u32 wsize;
+	u8 target, attr;
+	int err;
+
+	/* Get BM window information */
+	err = mvebu_mbus_get_io_win_info(pp->bm_priv->bppi_phys_addr, &wsize,
+					 &target, &attr);
+	if (err < 0)
+		return err;
+
+	pp->bm_win_id = -1;
+
+	/* Open NETA -> BM window */
+	err = mvneta_mbus_io_win_set(pp, pp->bm_priv->bppi_phys_addr, wsize,
+				     target, attr);
+	if (err < 0) {
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+		dev_info(&pdev->dev, "fail to configure mbus window to BM\n");
+#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+		netdev_info(pp->dev, "fail to configure mbus window to BM\n");
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+		return err;
+	}
+#endif
+
+	if (of_property_read_u32(dn, "bm,pool-long", &long_pool_id)) {
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+		dev_info(&pdev->dev, "missing long pool id\n");
+#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+		netdev_info(pp->dev, "missing long pool id\n");
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+		return -EINVAL;
+	}
+
+	/* Create port's long pool depending on mtu */
+	pp->pool_long = mvneta_bm_pool_use(pp->bm_priv, long_pool_id,
+					   MVNETA_BM_LONG, pp->id,
+					   MVNETA_RX_PKT_SIZE(pp->dev->mtu));
+	if (!pp->pool_long) {
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+		dev_info(&pdev->dev, "fail to obtain long pool for port\n");
+#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+		netdev_info(pp->dev, "fail to obtain long pool for port\n");
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+		return -ENOMEM;
+	}
+
+	pp->pool_long->port_map |= 1 << pp->id;
+
+	mvneta_bm_pool_bufsize_set(pp, pp->pool_long->buf_size,
+				   pp->pool_long->id);
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+	dev_info(&pdev->dev, "create long pool N%d, buffer size %d\n",
+		 pp->pool_long->id, pp->pool_long->buf_size);
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+
+	/* If short pool id is not defined, assume using single pool */
+	if (of_property_read_u32(dn, "bm,pool-short", &short_pool_id))
+		short_pool_id = long_pool_id;
+
+	/* Create port's short pool */
+	pp->pool_short = mvneta_bm_pool_use(pp->bm_priv, short_pool_id,
+					    MVNETA_BM_SHORT, pp->id,
+					    MVNETA_BM_SHORT_PKT_SIZE);
+	if (!pp->pool_short) {
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+		dev_info(&pdev->dev, "fail to obtain short pool for port\n");
+#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+		netdev_info(pp->dev, "fail to obtain short pool for port\n");
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+		mvneta_bm_pool_destroy(pp->bm_priv, pp->pool_long, 1 << pp->id);
+		return -ENOMEM;
+	}
+
+	if (short_pool_id != long_pool_id) {
+		pp->pool_short->port_map |= 1 << pp->id;
+		mvneta_bm_pool_bufsize_set(pp, pp->pool_short->buf_size,
+					   pp->pool_short->id);
+	}
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+	dev_info(&pdev->dev, "create short pool N%d, buffer size %d\n",
+		 pp->pool_short->id, pp->pool_short->buf_size);
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+
+	return 0;
+}
+
+/* Update settings of a pool for bigger packets */
+static void mvneta_bm_update_mtu(struct mvneta_port *pp, int mtu)
+{
+	struct mvneta_bm_pool *bm_pool = pp->pool_long;
+	struct hwbm_pool *hwbm_pool = &bm_pool->hwbm_pool;
+	int num;
+
+	/* Release all buffers from long pool */
+	mvneta_bm_bufs_free(pp->bm_priv, bm_pool, 1 << pp->id);
+	if (hwbm_pool->buf_num) {
+		WARN(1, "cannot free all buffers in pool %d\n",
+		     bm_pool->id);
+		goto bm_mtu_err;
+	}
+
+	bm_pool->pkt_size = MVNETA_RX_PKT_SIZE(mtu);
+	bm_pool->buf_size = MVNETA_RX_BUF_SIZE(bm_pool->pkt_size);
+	hwbm_pool->frag_size = SKB_DATA_ALIGN(sizeof(struct skb_shared_info)) +
+			SKB_DATA_ALIGN(MVNETA_RX_BUF_SIZE(bm_pool->pkt_size));
+
+	/* Fill entire long pool */
+	num = hwbm_pool_add(hwbm_pool, hwbm_pool->size, GFP_ATOMIC);
+	if (num != hwbm_pool->size) {
+		WARN(1, "pool %d: %d of %d allocated\n",
+		     bm_pool->id, num, hwbm_pool->size);
+		goto bm_mtu_err;
+	}
+	mvneta_bm_pool_bufsize_set(pp, bm_pool->buf_size, bm_pool->id);
+
+	return;
+
+bm_mtu_err:
+	mvneta_bm_pool_destroy(pp->bm_priv, pp->pool_long, 1 << pp->id);
+	mvneta_bm_pool_destroy(pp->bm_priv, pp->pool_short, 1 << pp->id);
+
+	pp->bm_priv = NULL;
+	mvreg_write(pp, MVNETA_ACC_MODE, MVNETA_ACC_MODE_EXT1);
+	netdev_info(pp->dev, "fail to update MTU, fall back to software BM\n");
+}
+
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 /* Start the Ethernet port RX and TX activity */
 static void mvneta_port_up(struct mvneta_port *pp)
 {
@@ -816,7 +1336,17 @@ static void mvneta_port_up(struct mvneta_port *pp)
 	mvreg_write(pp, MVNETA_TXQ_CMD, q_map);
 
 	/* Enable all initialized RXQs. */
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	for (queue = 0; queue < rxq_number; queue++) {
+		struct mvneta_rx_queue *rxq = &pp->rxqs[queue];
+
+		if (rxq->descs != NULL)
+			q_map |= (1 << queue);
+	}
+	mvreg_write(pp, MVNETA_RXQ_CMD, q_map);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	mvreg_write(pp, MVNETA_RXQ_CMD, BIT(rxq_def));
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 }
 
 /* Stop the Ethernet port activity */
@@ -838,14 +1368,22 @@ static void mvneta_port_down(struct mvneta_port *pp)
 	do {
 		if (count++ >= MVNETA_RX_DISABLE_TIMEOUT_MSEC) {
 			netdev_warn(pp->dev,
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+				    "TIMEOUT for RX stopped ! rx_queue_cmd: 0x%08x\n",
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 				    "TIMEOUT for RX stopped ! rx_queue_cmd: 0x08%x\n",
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 				    val);
 			break;
 		}
 		mdelay(1);
 
 		val = mvreg_read(pp, MVNETA_RXQ_CMD);
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	} while (val & MVNETA_RXQ_ENABLE_MASK);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	} while (val & 0xff);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	/* Stop Tx port activity. Check port Tx activity. Issue stop
 	 * command for active channels only
@@ -870,14 +1408,22 @@ static void mvneta_port_down(struct mvneta_port *pp)
 		/* Check TX Command reg that all Txqs are stopped */
 		val = mvreg_read(pp, MVNETA_TXQ_CMD);
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	} while (val & MVNETA_TXQ_ENABLE_MASK);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	} while (val & 0xff);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	/* Double check to verify that TX FIFO is empty */
 	count = 0;
 	do {
 		if (count++ >= MVNETA_TX_FIFO_EMPTY_TIMEOUT) {
 			netdev_warn(pp->dev,
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+				    "TX FIFO empty timeout status=0x%08x\n",
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 				    "TX FIFO empty timeout status=0x08%x\n",
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 				    val);
 			break;
 		}
@@ -911,6 +1457,12 @@ static void mvneta_port_disable(struct mvneta_port *pp)
 	val &= ~MVNETA_GMAC0_PORT_ENABLE;
 	mvreg_write(pp, MVNETA_GMAC_CTRL_0, val);
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+	pp->link = 0;
+	pp->duplex = -1;
+	pp->speed = 0;
+
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	udelay(200);
 }
 
@@ -970,6 +1522,168 @@ static void mvneta_set_other_mcast_table(struct mvneta_port *pp, int queue)
 		mvreg_write(pp, MVNETA_DA_FILT_OTH_MCAST + offset, val);
 }
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+/* Get the port type, 0 - SGMII, 1 -- 1000BaseX */
+static enum mvneta_port_type mvneta_port_type_get(struct mvneta_port *pp)
+{
+	u32 val;
+
+	val = mvreg_read(pp, MVNETA_GMAC_CTRL_0);
+	if (val & MVNETA_GMAC0_PORT_1000BASE_X)
+		return PORT_TYPE_1000BASE_X;
+	else
+		return PORT_TYPE_SGMII;
+}
+
+static void mvneta_mac_config(struct mvneta_port *pp)
+{
+	enum mvneta_port_type port_type = mvneta_port_type_get(pp);
+	u32 new_ctrl2, gmac_ctrl2 = mvreg_read(pp, MVNETA_GMAC_CTRL_2);
+	u32 new_clk, gmac_clk = mvreg_read(pp, MVNETA_GMAC_CLOCK_DIVIDER);
+	u32 new_an, gmac_an = mvreg_read(pp, MVNETA_GMAC_AUTONEG_CONFIG);
+
+	/* Clear all fields need to config with different work mode */
+	new_ctrl2 = gmac_ctrl2 & ~MVNETA_GMAC2_SGMII_INBAND_AN_MODE;
+	new_clk = gmac_clk & ~MVNETA_GMAC_1MS_CLOCK_ENABLE;
+	new_an = gmac_an & ~(MVNETA_GMAC_INBAND_AN_ENABLE |
+			     MVNETA_GMAC_INBAND_RESTART_AN |
+			     MVNETA_GMAC_CONFIG_MII_SPEED |
+			     MVNETA_GMAC_CONFIG_GMII_SPEED |
+			     MVNETA_GMAC_AN_SPEED_EN |
+			     MVNETA_GMAC_ADVERT_SYM_FLOW_CTRL |
+			     MVNETA_GMAC_CONFIG_FLOW_CTRL |
+			     MVNETA_GMAC_AN_FLOW_CTRL_EN |
+			     MVNETA_GMAC_CONFIG_FULL_DUPLEX |
+			     MVNETA_GMAC_AN_DUPLEX_EN |
+			     MVNETA_GMAC_FORCE_LINK_PASS |
+			     MVNETA_GMAC_FORCE_LINK_DOWN);
+
+	if (pp->use_inband_status) {
+		switch (port_type) {
+		case PORT_TYPE_SGMII:
+			/* SGMII mode receives the state from the PHY */
+			new_ctrl2 |= MVNETA_GMAC2_SGMII_INBAND_AN_MODE;
+			new_clk |= MVNETA_GMAC_1MS_CLOCK_ENABLE;
+			/* SGMII aoto-nego clock */
+			new_an |= MVNETA_GMAC_INBAND_AN_ENABLE |
+				   MVNETA_GMAC_INBAND_AN_BYPASS_EN |
+				   MVNETA_GMAC_AN_SPEED_EN |
+				   MVNETA_GMAC_AN_DUPLEX_EN;
+			break;
+
+		case PORT_TYPE_1000BASE_X:
+			/* A3700 spec: In 1000BASE-X, the port must be set to work
+			 * in full-duplex mode, at 1000 Mbps.
+			 * Duplex and Speed Auto-Negotiation must be disabled
+			 */
+			new_an |= MVNETA_GMAC_INBAND_AN_ENABLE |
+				  MVNETA_GMAC_INBAND_AN_BYPASS_EN |
+				  MVNETA_GMAC_CONFIG_GMII_SPEED |
+				  MVNETA_GMAC_ADVERT_SYM_FLOW_CTRL |
+				  MVNETA_GMAC_AN_FLOW_CTRL_EN |
+				  MVNETA_GMAC_CONFIG_FLOW_CTRL |
+				  MVNETA_GMAC_CONFIG_FULL_DUPLEX;
+
+			break;
+		}
+	} else {
+		/* SMI auto-nego, GMAC will get info from PHY with SMI */
+		if (pp->phy_dev) {
+			if (pp->phy_dev->duplex)
+				new_an |= MVNETA_GMAC_CONFIG_FULL_DUPLEX;
+
+			if (pp->phy_dev->speed == SPEED_1000)
+				new_an |= MVNETA_GMAC_CONFIG_GMII_SPEED;
+			else if (pp->phy_dev->speed == SPEED_100)
+				new_an |= MVNETA_GMAC_CONFIG_MII_SPEED;
+
+			if (pp->phy_dev->pause)
+				new_an |= MVNETA_GMAC_CONFIG_FLOW_CTRL;
+
+			if (pp->phy_dev->asym_pause)
+				new_an |= MVNETA_GMAC_ADVERT_ASYM_FC_ADV;
+
+			/* Fixed link, Force link up */
+			if (phy_is_pseudo_fixed_link(pp->phy_dev)) {
+				new_an |= MVNETA_GMAC_FORCE_LINK_PASS;
+				new_an &= ~MVNETA_GMAC_FORCE_LINK_DOWN;
+			}
+		}
+	}
+
+	/* Armada 370 documentation says we can only change the port mode
+	 * and in-band enable when the link is down, so force it down
+	 * while making these changes. We also do this for GMAC_CTRL2
+	 */
+	if ((new_ctrl2 ^ gmac_ctrl2) & MVNETA_GMAC2_SGMII_INBAND_AN_MODE ||
+	    (new_an  ^ gmac_an) & MVNETA_GMAC_INBAND_AN_ENABLE) {
+		mvreg_write(pp, MVNETA_GMAC_AUTONEG_CONFIG,
+			    (gmac_an & ~MVNETA_GMAC_FORCE_LINK_PASS) |
+			    MVNETA_GMAC_FORCE_LINK_DOWN);
+	}
+
+	if (new_ctrl2 != gmac_ctrl2)
+		mvreg_write(pp, MVNETA_GMAC_CTRL_2, new_ctrl2);
+	if (new_clk != gmac_clk)
+		mvreg_write(pp, MVNETA_GMAC_CLOCK_DIVIDER, new_clk);
+	if (new_an != gmac_an)
+		mvreg_write(pp, MVNETA_GMAC_AUTONEG_CONFIG, new_an);
+}
+
+static void mvneta_percpu_unmask_interrupt(void *arg)
+{
+	struct mvneta_port *pp = arg;
+
+	/* All the queue are unmasked, but actually only the ones
+	 * mapped to this CPU will be unmasked
+	 */
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+	mvreg_relaxed_write(pp, MVNETA_INTR_NEW_MASK,
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+	mvreg_write(pp, MVNETA_INTR_NEW_MASK,
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+		    MVNETA_RX_INTR_MASK_ALL |
+		    MVNETA_TX_INTR_MASK_ALL |
+		    MVNETA_MISCINTR_INTR_MASK);
+}
+
+static void mvneta_percpu_mask_interrupt(void *arg)
+{
+	struct mvneta_port *pp = arg;
+
+	/* All the queue are masked, but actually only the ones
+	 * mapped to this CPU will be masked
+	 */
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+	mvreg_relaxed_write(pp, MVNETA_INTR_NEW_MASK, 0);
+	mvreg_relaxed_write(pp, MVNETA_INTR_OLD_MASK, 0);
+	mvreg_relaxed_write(pp, MVNETA_INTR_MISC_MASK, 0);
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+	mvreg_write(pp, MVNETA_INTR_NEW_MASK, 0);
+	mvreg_write(pp, MVNETA_INTR_OLD_MASK, 0);
+	mvreg_write(pp, MVNETA_INTR_MISC_MASK, 0);
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+}
+
+static void mvneta_percpu_clear_intr_cause(void *arg)
+{
+	struct mvneta_port *pp = arg;
+
+	/* All the queue are cleared, but actually only the ones
+	 * mapped to this CPU will be cleared
+	 */
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+	mvreg_relaxed_write(pp, MVNETA_INTR_NEW_CAUSE, 0);
+	mvreg_relaxed_write(pp, MVNETA_INTR_MISC_CAUSE, 0);
+	mvreg_relaxed_write(pp, MVNETA_INTR_OLD_CAUSE, 0);
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+	mvreg_write(pp, MVNETA_INTR_NEW_CAUSE, 0);
+	mvreg_write(pp, MVNETA_INTR_MISC_CAUSE, 0);
+	mvreg_write(pp, MVNETA_INTR_OLD_CAUSE, 0);
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+}
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+
 /* This method sets defaults to the NETA port:
  *	Clears interrupt Cause and Mask registers.
  *	Clears all MAC tables.
@@ -984,28 +1698,76 @@ static void mvneta_defaults_set(struct mvneta_port *pp)
 	int cpu;
 	int queue;
 	u32 val;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	int max_cpu = num_present_cpus();
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	/* Clear all Cause registers */
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	on_each_cpu(mvneta_percpu_clear_intr_cause, pp, true);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	mvreg_write(pp, MVNETA_INTR_NEW_CAUSE, 0);
 	mvreg_write(pp, MVNETA_INTR_OLD_CAUSE, 0);
 	mvreg_write(pp, MVNETA_INTR_MISC_CAUSE, 0);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	/* Mask all interrupts */
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	on_each_cpu(mvneta_percpu_mask_interrupt, pp, true);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	mvreg_write(pp, MVNETA_INTR_NEW_MASK, 0);
 	mvreg_write(pp, MVNETA_INTR_OLD_MASK, 0);
 	mvreg_write(pp, MVNETA_INTR_MISC_MASK, 0);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	mvreg_write(pp, MVNETA_INTR_ENABLE, 0);
 
 	/* Enable MBUS Retry bit16 */
 	mvreg_write(pp, MVNETA_MBUS_RETRY, 0x20);
 
-	/* Set CPU queue access map - all CPUs have access to all RX
+	/* for armada37xx 16.12
+	 * Set CPU queue access map. CPUs are assigned to the RX and
+	 * TX queues modulo their number. If there is only one TX
+	 * queue then it is assigned to the CPU associated to the
+	 * default RX queue. Without per-CPU processing enable all
+	 * CPUs' access to all TX and RX queues.
+	 * others
+	 * Set CPU queue access map - all CPUs have access to all RX
 	 * queues and to all TX queues
 	 */
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	for_each_present_cpu(cpu) {
+		int rxq_map = 0, txq_map = 0;
+		int rxq, txq;
+
+		if (!pp->neta_armada3700) {
+			for (rxq = 0; rxq < rxq_number; rxq++)
+				if ((rxq % max_cpu) == cpu)
+					rxq_map |= MVNETA_CPU_RXQ_ACCESS(rxq);
+
+			for (txq = 0; txq < txq_number; txq++)
+				if ((txq % max_cpu) == cpu)
+					txq_map |= MVNETA_CPU_TXQ_ACCESS(txq);
+
+			/* With only one TX queue we configure a special case
+			 * which will allow to get all the irq on a single
+			 * CPU.
+			 */
+			if (txq_number == 1)
+				txq_map = (cpu == pp->rxq_def) ?
+					MVNETA_CPU_TXQ_ACCESS(1) : 0;
+		} else {
+			txq_map = MVNETA_CPU_TXQ_ACCESS_ALL_MASK;
+			rxq_map = MVNETA_CPU_RXQ_ACCESS_ALL_MASK;
+		}
+
+		mvreg_write(pp, MVNETA_CPU_MAP(cpu), rxq_map | txq_map);
+	}
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	for_each_present_cpu(cpu)
 		mvreg_write(pp, MVNETA_CPU_MAP(cpu),
 			    (MVNETA_CPU_RXQ_ACCESS_ALL_MASK |
 			     MVNETA_CPU_TXQ_ACCESS_ALL_MASK));
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	/* Reset RX and TX DMAs */
 	mvreg_write(pp, MVNETA_PORT_RX_RESET, MVNETA_PORT_RX_DMA_RESET);
@@ -1022,11 +1784,29 @@ static void mvneta_defaults_set(struct mvneta_port *pp)
 	mvreg_write(pp, MVNETA_PORT_RX_RESET, 0);
 
 	/* Set Port Acceleration Mode */
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+	if (pp->bm_priv)
+		/* HW buffer management + legacy parser */
+		val = MVNETA_ACC_MODE_EXT2;
+	else
+		/* SW buffer management + legacy parser */
+		val = MVNETA_ACC_MODE_EXT1;
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	val = MVNETA_ACC_MODE_EXT;
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	mvreg_write(pp, MVNETA_ACC_MODE, val);
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+	if (pp->bm_priv)
+		mvreg_write(pp, MVNETA_BM_ADDRESS, pp->bm_priv->bppi_phys_addr);
+
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	/* Update val of portCfg register accordingly with all RxQueue types */
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	val = MVNETA_PORT_CONFIG_DEFL_VALUE(pp->rxq_def);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	val = MVNETA_PORT_CONFIG_DEFL_VALUE(rxq_def);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	mvreg_write(pp, MVNETA_PORT_CONFIG, val);
 
 	val = 0;
@@ -1055,6 +1835,9 @@ static void mvneta_defaults_set(struct mvneta_port *pp)
 	val &= ~MVNETA_PHY_POLLING_ENABLE;
 	mvreg_write(pp, MVNETA_UNIT_CONTROL, val);
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	mvneta_mac_config(pp);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	if (pp->use_inband_status) {
 		val = mvreg_read(pp, MVNETA_GMAC_AUTONEG_CONFIG);
 		val &= ~(MVNETA_GMAC_FORCE_LINK_PASS |
@@ -1074,6 +1857,7 @@ static void mvneta_defaults_set(struct mvneta_port *pp)
 		       MVNETA_GMAC_AN_DUPLEX_EN);
 		mvreg_write(pp, MVNETA_GMAC_AUTONEG_CONFIG, val);
 	}
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	mvneta_set_ucast_table(pp, -1);
 	mvneta_set_special_mcast_table(pp, -1);
@@ -1197,7 +1981,18 @@ static void mvneta_rx_time_coal_set(struct mvneta_port *pp,
 	u32 val;
 	unsigned long clk_rate;
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	if (pp->neta_armada3700)
+		/* Since lack of full clock tree support, Tclk rate
+		 * has to be temporarily hardcoded to 200MHz in order to
+		 * enable RX coalescing.
+		 */
+		clk_rate = 200000000;
+	else
+		clk_rate = clk_get_rate(pp->clk);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	clk_rate = clk_get_rate(pp->clk);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	val = (clk_rate / 1000000) * value;
 
 	mvreg_write(pp, MVNETA_RXQ_TIME_COAL_REG(rxq->id), val);
@@ -1221,8 +2016,13 @@ static void mvneta_tx_done_pkts_coal_set(struct mvneta_port *pp,
 }
 
 /* Handle rx descriptor fill by setting buf_cookie and buf_phys_addr */
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+static inline void mvneta_rx_desc_fill(struct mvneta_rx_desc *rx_desc,
+				u32 phys_addr, u32 cookie)
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 static void mvneta_rx_desc_fill(struct mvneta_rx_desc *rx_desc,
 				u32 phys_addr, u32 cookie)
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 {
 	rx_desc->buf_cookie = cookie;
 	rx_desc->buf_phys_addr = phys_addr;
@@ -1238,12 +2038,20 @@ static void mvneta_txq_sent_desc_dec(struct mvneta_port *pp,
 	/* Only 255 TX descriptors can be updated at once */
 	while (sent_desc > 0xff) {
 		val = 0xff << MVNETA_TXQ_DEC_SENT_SHIFT;
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+		mvreg_relaxed_write(pp, MVNETA_TXQ_UPDATE_REG(txq->id), val);
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 		mvreg_write(pp, MVNETA_TXQ_UPDATE_REG(txq->id), val);
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 		sent_desc = sent_desc - 0xff;
 	}
 
 	val = sent_desc << MVNETA_TXQ_DEC_SENT_SHIFT;
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+	mvreg_relaxed_write(pp, MVNETA_TXQ_UPDATE_REG(txq->id), val);
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	mvreg_write(pp, MVNETA_TXQ_UPDATE_REG(txq->id), val);
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 }
 
 /* Get number of TX descriptors already sent by HW */
@@ -1343,12 +2151,23 @@ static void mvneta_rx_error(struct mvneta_port *pp,
 static void mvneta_rx_csum(struct mvneta_port *pp, u32 status,
 			   struct sk_buff *skb)
 {
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	if (pp->dev->features & NETIF_F_RXCSUM) {
+		if ((status & MVNETA_RXD_L3_IP4) &&
+			(status & MVNETA_RXD_L4_CSUM_OK)) {
+			skb->csum = 0;
+			skb->ip_summed = CHECKSUM_UNNECESSARY;
+			return;
+		}
+	}
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	if ((status & MVNETA_RXD_L3_IP4) &&
 	    (status & MVNETA_RXD_L4_CSUM_OK)) {
 		skb->csum = 0;
 		skb->ip_summed = CHECKSUM_UNNECESSARY;
 		return;
 	}
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	skb->ip_summed = CHECKSUM_NONE;
 }
@@ -1409,43 +2228,108 @@ static void mvneta_txq_done(struct mvneta_port *pp,
 	}
 }
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+void *mvneta_frag_alloc(unsigned int frag_size)
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 static void *mvneta_frag_alloc(const struct mvneta_port *pp)
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 {
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+	if (likely(frag_size <= PAGE_SIZE))
+		return netdev_alloc_frag(frag_size);
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	if (likely(pp->frag_size <= PAGE_SIZE))
 		return netdev_alloc_frag(pp->frag_size);
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	else
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+		return kmalloc(frag_size, GFP_ATOMIC);
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 		return kmalloc(pp->frag_size, GFP_ATOMIC);
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 }
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+EXPORT_SYMBOL_GPL(mvneta_frag_alloc);
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+void mvneta_frag_free(unsigned int frag_size, void *data)
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 static void mvneta_frag_free(const struct mvneta_port *pp, void *data)
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 {
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+	if (likely(frag_size <= PAGE_SIZE))
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	if (likely(pp->frag_size <= PAGE_SIZE))
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 		skb_free_frag(data);
 	else
 		kfree(data);
 }
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+EXPORT_SYMBOL_GPL(mvneta_frag_free);
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+/* Refill processing for SW buffer management */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 /* Refill processing */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+static inline int mvneta_rx_refill(struct mvneta_port *pp,
+			    struct mvneta_rx_desc *rx_desc)
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 static int mvneta_rx_refill(struct mvneta_port *pp,
 			    struct mvneta_rx_desc *rx_desc)
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 {
 	dma_addr_t phys_addr;
 	void *data;
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+	data = mvneta_frag_alloc(pp->frag_size);
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	data = mvneta_frag_alloc(pp);
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	if (!data)
 		return -ENOMEM;
+
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#ifdef CONFIG_64BIT
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+	if (unlikely(pp->data_high != ((u64)data & 0xffffffff00000000))) {
+		mvneta_frag_free(pp->frag_size, data);
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+	if (unlikely(pp->data_high != ((u64)data & 0xffffffff00000000)))
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+		return -ENOMEM;
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+	}
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	phys_addr = dma_map_single(pp->dev->dev.parent, data,
 				   MVNETA_RX_BUF_SIZE(pp->pkt_size),
 				   DMA_FROM_DEVICE);
 	if (unlikely(dma_mapping_error(pp->dev->dev.parent, phys_addr))) {
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+		mvneta_frag_free(pp->frag_size, data);
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 		mvneta_frag_free(pp, data);
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 		return -ENOMEM;
 	}
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	phys_addr += pp->rx_offset_correction;
+
+	mvneta_rx_desc_fill(rx_desc, phys_addr, (uintptr_t)data);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	mvneta_rx_desc_fill(rx_desc, phys_addr, (u32)data);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	return 0;
 }
 
@@ -1480,6 +2364,81 @@ static u32 mvneta_skb_tx_csum(struct mvneta_port *pp, struct sk_buff *skb)
 	return MVNETA_TX_L4_CSUM_NOT;
 }
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+/* Add cleanup timer to refill missed buffer */
+static inline void mvneta_add_cleanup_timer(struct mvneta_port *pp)
+{
+	if (test_and_set_bit(MVNETA_PORT_F_CLEANUP_TIMER_BIT, &pp->flags) == 0) {
+		pp->cleanup_timer.expires = jiffies + ((HZ * 10) / 1000); /* ms */
+		add_timer_on(&pp->cleanup_timer, smp_processor_id());
+	}
+}
+
+/***********************************************************
+ * mvneta_cleanup_timer_callback --			   *
+ *   N msec periodic callback for error cleanup            *
+ ***********************************************************/
+static void mvneta_cleanup_timer_callback(unsigned long data)
+{
+	struct mvneta_port *pp = (struct mvneta_port *)data;
+	struct mvneta_rx_desc *rx_desc;
+	int refill_num, queue, err;
+
+	clear_bit(MVNETA_PORT_F_CLEANUP_TIMER_BIT, &pp->flags);
+
+	if (!netif_running(pp->dev))
+		return;
+
+	/* alloc new skb with rxq_ctrl.missed, attach it with rxq_desc and valid the desc again */
+	for (queue = 0; queue < rxq_number; queue++) {
+		struct mvneta_rx_queue *rxq = &pp->rxqs[queue];
+
+		if (!atomic_read(&rxq->missed))
+			continue;
+
+		rx_desc = rxq->missed_desc;
+		refill_num = 0;
+
+		/* Allocate memory, refill */
+		while (atomic_read(&rxq->missed)) {
+			err = mvneta_rx_refill(pp, rx_desc);
+			if (err) {
+				/* update missed_desc and restart timer */
+				rxq->missed_desc = rx_desc;
+				mvneta_add_cleanup_timer(pp);
+				break;
+			}
+			atomic_dec(&rxq->missed);
+			/* Get pointer to next rx desc */
+			rx_desc = mvneta_rxq_next_desc_ptr(rxq, rx_desc);
+			refill_num++;
+		}
+
+		/* Update RxQ management counters */
+		if (refill_num) {
+			mvneta_rxq_desc_num_update(pp, rxq, 0, refill_num);
+
+			/* Update refill stop flag */
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+			if (!atomic_read(&rxq->missed)) {
+#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+			if (!atomic_read(&rxq->missed))
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+				atomic_set(&rxq->refill_stop, 0);
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+				/* enable copy a small frame through RX and not unmap the DMA region */
+				rx_copybreak = MV_RX_COPYBREAK_DEF;
+			}
+#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+			pr_debug("%s: %d buffers refilled to rxq #%d - missed = %d\n",
+				 __func__, refill_num, rxq->id, atomic_read(&rxq->missed));
+		}
+	}
+}
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+
 /* Drop packets received by the RXQ and free buffers */
 static void mvneta_rxq_drop_pkts(struct mvneta_port *pp,
 				 struct mvneta_rx_queue *rxq)
@@ -1487,26 +2446,92 @@ static void mvneta_rxq_drop_pkts(struct mvneta_port *pp,
 	int rx_done, i;
 
 	rx_done = mvneta_rxq_busy_desc_num_get(pp, rxq);
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+	if (rx_done)
+		mvneta_rxq_desc_num_update(pp, rxq, rx_done, rx_done);
+
+	if (pp->bm_priv) {
+		for (i = 0; i < rx_done; i++) {
+			struct mvneta_rx_desc *rx_desc =
+						  mvneta_rxq_next_desc_get(rxq);
+			u8 pool_id = MVNETA_RX_GET_BM_POOL_ID(rx_desc);
+			struct mvneta_bm_pool *bm_pool;
+
+			bm_pool = &pp->bm_priv->bm_pools[pool_id];
+			/* Return dropped buffer to the pool */
+			mvneta_bm_pool_put_bp(pp->bm_priv, bm_pool,
+					      rx_desc->buf_phys_addr);
+		}
+		return;
+	}
+
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	for (i = 0; i < rxq->size; i++) {
 		struct mvneta_rx_desc *rx_desc = rxq->descs + i;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+		void *data = (u8 *)(uintptr_t)rx_desc->buf_cookie;
+
+		if (!data)
+			continue;
+#ifdef CONFIG_64BIT
+		/* In Neta HW only 32 bits data is supported, so in order to
+		 * obtain whole 64 bits address from RX descriptor, we store the
+		 * upper 32 bits when allocating buffer, and put it back
+		 * when using buffer cookie for accessing packet in memory.
+		 */
+		data = (u8 *)(pp->data_high | (u64)data);
+#endif
+		dma_unmap_single(pp->dev->dev.parent, rx_desc->buf_phys_addr - pp->rx_offset_correction,
+				 MVNETA_RX_BUF_SIZE(pp->pkt_size), DMA_FROM_DEVICE);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		void *data = (void *)rx_desc->buf_cookie;
 
 		dma_unmap_single(pp->dev->dev.parent, rx_desc->buf_phys_addr,
 				 MVNETA_RX_BUF_SIZE(pp->pkt_size), DMA_FROM_DEVICE);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+		mvneta_frag_free(pp->frag_size, data);
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 		mvneta_frag_free(pp, data);
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	}
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+//do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 
 	if (rx_done)
 		mvneta_rxq_desc_num_update(pp, rxq, rx_done, rx_done);
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 }
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+/* Main rx processing when using hardware buffer management */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 /* Main rx processing */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+static int mvneta_rx_swbm(struct mvneta_port *pp, int rx_todo,
+			  struct mvneta_rx_queue *rxq,
+			  struct napi_struct *napi)
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+static int mvneta_rx(struct mvneta_port *pp, int rx_todo,
+		     struct mvneta_rx_queue *rxq,
+		     struct napi_struct *napi)
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 static int mvneta_rx(struct mvneta_port *pp, int rx_todo,
 		     struct mvneta_rx_queue *rxq)
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 {
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	struct net_device *dev = pp->dev;
+	int rx_done, rx_filled;
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct mvneta_pcpu_port *port = this_cpu_ptr(pp->ports);
 	struct net_device *dev = pp->dev;
 	int rx_done;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	u32 rcvd_pkts = 0;
 	u32 rcvd_bytes = 0;
 
@@ -1517,6 +2542,9 @@ static int mvneta_rx(struct mvneta_port *pp, int rx_todo,
 		rx_todo = rx_done;
 
 	rx_done = 0;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	rx_filled = 0;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	/* Fairness NAPI loop */
 	while (rx_done < rx_todo) {
@@ -1530,11 +2558,165 @@ static int mvneta_rx(struct mvneta_port *pp, int rx_todo,
 		rx_done++;
 		rx_status = rx_desc->status;
 		rx_bytes = rx_desc->data_size - (ETH_FCS_LEN + MVNETA_MH_SIZE);
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#ifdef CONFIG_64BIT
+		/* In Neta HW only 32 bits data is supported, so in order to
+		 * obtain whole 64 bits address from RX descriptor, we store the
+		 * upper 32 bits when allocating buffer, and put it back
+		 * when using buffer cookie for accessing packet in memory.
+		 */
+		data = (u8 *)(pp->data_high | (u64)rx_desc->buf_cookie);
+#else
+		data = (u8 *)rx_desc->buf_cookie;
+#endif
+		/* Prefetch header */
+		prefetch(data + NET_SKB_PAD);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		data = (unsigned char *)rx_desc->buf_cookie;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+
 		phys_addr = rx_desc->buf_phys_addr;
 
 		if (!mvneta_rxq_desc_is_first_last(rx_status) ||
 		    (rx_status & MVNETA_RXD_ERR_SUMMARY)) {
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+			mvneta_rx_error(pp, rx_desc);
+
+err_drop_frame:
+			dev->stats.rx_errors++;
+			/* leave the descriptor untouched */
+			rx_filled++;
+			continue;
+		}
+
+		if (rx_bytes <= rx_copybreak) {
+			/* better copy a small frame and not unmap the DMA region */
+			skb = napi_alloc_skb(napi, rx_bytes);
+			if (unlikely(!skb)) {
+				netdev_warn(dev, "rxq #%d - Can't allocate skb. rx_bytes = %d bytes\n",
+					    rxq->id, rx_bytes);
+				goto err_drop_frame;
+			}
+
+			/* Copy data from buffer to SKB without Marvell header */
+			memcpy(skb->data,
+			       data + MVNETA_MH_SIZE + NET_SKB_PAD,
+			       rx_bytes);
+
+			skb_put(skb, rx_bytes);
+			dma_sync_single_range_for_cpu(dev->dev.parent,
+						      phys_addr,
+						      NET_SKB_PAD - pp->rx_offset_correction,
+						      rx_bytes + MVNETA_MH_SIZE,
+						      DMA_FROM_DEVICE);
+
+			skb->protocol = eth_type_trans(skb, dev);
+			mvneta_rx_csum(pp, rx_status, skb);
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+			if (dev->features & NETIF_F_GRO)
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+			napi_gro_receive(napi, skb);
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+			else
+				netif_receive_skb(skb);
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+
+			rcvd_pkts++;
+			rcvd_bytes += rx_bytes;
+
+			/* leave the descriptor and buffer untouched */
+			rx_filled++;
+			continue;
+		}
+
+		skb = build_skb(data, pp->frag_size > PAGE_SIZE ? 0 : pp->frag_size);
+		if (unlikely(!skb)) {
+			netdev_warn(dev, "rxq #%d - Can't build skb. frag_size = %d bytes\n",
+				    rxq->id, pp->frag_size);
+			goto err_drop_frame;
+		}
+
+		dma_unmap_single(dev->dev.parent, phys_addr - pp->rx_offset_correction,
+				 MVNETA_RX_BUF_SIZE(pp->pkt_size), DMA_FROM_DEVICE);
+
+		/* Refill processing */
+		if (!atomic_read(&rxq->refill_stop)) {
+			err = mvneta_rx_refill(pp, rx_desc);
+			if (err) {
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+//do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+				netdev_err(dev, "Linux processing - Can't refill\n");
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+				/* set refill stop flag */
+				atomic_set(&rxq->refill_stop, 1);
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#ifdef CONFIG_SYNO_ARMADA_REFILL_COUNT
+				refill_failed++;
+#else /* CONFIG_SYNO_ARMADA_REFILL_COUNT */
+				netdev_err(dev, "Linux processing - Can't refill queue %d\n",
+					   rxq->id);
+#endif /* CONFIG_SYNO_ARMADA_REFILL_COUNT*/
+				/* disable rx_copybreak mode */
+				/* to prevent hidden buffer refill and buffers disorder */
+				rx_copybreak = 0;
+#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+				atomic_inc(&rxq->missed);
+
+				/* record the first rx desc refilled failure */
+				rx_desc->buf_cookie = 0;
+				rxq->missed_desc = rx_desc;
+
+				/* add cleanup timer */
+				mvneta_add_cleanup_timer(pp);
+			} else {
+				/* successful refill */
+				rx_filled++;
+			}
+		} else {
+			/* refill already stopped - only update missed counter */
+			rx_desc->buf_cookie = 0;
+			atomic_inc(&rxq->missed);
+		}
+
+		rcvd_pkts++;
+		rcvd_bytes += rx_bytes;
+
+		/* Linux processing */
+		skb_reserve(skb, MVNETA_MH_SIZE + NET_SKB_PAD);
+		skb_put(skb, rx_bytes);
+
+		skb->protocol = eth_type_trans(skb, dev);
+
+		mvneta_rx_csum(pp, rx_status, skb);
+
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+		if (dev->features & NETIF_F_GRO)
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+		napi_gro_receive(napi, skb);
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+		else
+			netif_receive_skb(skb);
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+	}
+
+	if (rcvd_pkts) {
+		struct mvneta_pcpu_stats *stats = this_cpu_ptr(pp->stats);
+
+		u64_stats_update_begin(&stats->syncp);
+		stats->rx_packets += rcvd_pkts;
+		stats->rx_bytes   += rcvd_bytes;
+		u64_stats_update_end(&stats->syncp);
+	}
+
+	/* Update rxq management counters */
+	mvneta_rxq_desc_num_update(pp, rxq, rx_done, rx_filled);
+
+	return rx_done;
+}
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		err_drop_frame:
 			dev->stats.rx_errors++;
 			mvneta_rx_error(pp, rx_desc);
@@ -1615,7 +2797,157 @@ static int mvneta_rx(struct mvneta_port *pp, int rx_todo,
 
 	return rx_done;
 }
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+/* Main rx processing when using hardware buffer management */
+static int mvneta_rx_hwbm(struct mvneta_port *pp, int rx_todo,
+			  struct mvneta_rx_queue *rxq,
+			  struct napi_struct *napi)
+{
+	struct net_device *dev = pp->dev;
+	int rx_done;
+	u32 rcvd_pkts = 0;
+	u32 rcvd_bytes = 0;
+
+	/* Get number of received packets */
+	rx_done = mvneta_rxq_busy_desc_num_get(pp, rxq);
+
+	if (rx_todo > rx_done)
+		rx_todo = rx_done;
+
+	rx_done = 0;
+
+	/* Fairness NAPI loop */
+	while (rx_done < rx_todo) {
+		struct mvneta_rx_desc *rx_desc = mvneta_rxq_next_desc_get(rxq);
+		struct mvneta_bm_pool *bm_pool = NULL;
+		struct sk_buff *skb;
+		unsigned char *data;
+		dma_addr_t phys_addr;
+		u32 rx_status, frag_size;
+		int rx_bytes, err;
+		u8 pool_id;
+
+		rx_done++;
+		rx_status = rx_desc->status;
+		rx_bytes = rx_desc->data_size - (ETH_FCS_LEN + MVNETA_MH_SIZE);
+#ifdef CONFIG_64BIT
+		/* In Neta HW only 32 bits data is supported, so in order to
+		 * obtain whole 64 bits address from RX descriptor, we store the
+		 * upper 32 bits when allocating buffer, and put it back
+		 * when using buffer cookie for accessing packet in memory.
+		 */
+		data = (u8 *)(pp->data_high | (u64)rx_desc->buf_cookie);
+#else
+		data = (u8 *)rx_desc->buf_cookie;
+#endif
+		phys_addr = rx_desc->buf_phys_addr;
+		pool_id = MVNETA_RX_GET_BM_POOL_ID(rx_desc);
+		bm_pool = &pp->bm_priv->bm_pools[pool_id];
+
+		if (!mvneta_rxq_desc_is_first_last(rx_status) ||
+		    (rx_status & MVNETA_RXD_ERR_SUMMARY)) {
+			mvneta_rx_error(pp, rx_desc);
+err_drop_frame_ret_pool:
+			/* Return the buffer to the pool */
+			mvneta_bm_pool_put_bp(pp->bm_priv, bm_pool,
+					      rx_desc->buf_phys_addr);
+err_drop_frame:
+			dev->stats.rx_errors++;
+			/* leave the descriptor untouched */
+			continue;
+		}
+
+		if (rx_bytes <= rx_copybreak) {
+			/* better copy a small frame and not unmap the DMA region */
+			skb = napi_alloc_skb(napi, rx_bytes);
+			if (unlikely(!skb)) {
+				netdev_warn(dev, "rxq #%d - Can't allocate skb. rx_bytes = %d bytes\n",
+					    rxq->id, rx_bytes);
+				goto err_drop_frame_ret_pool;
+			}
+
+			/* Copy data from buffer to SKB without Marvell header */
+			memcpy(skb->data,
+			       data + MVNETA_MH_SIZE + NET_SKB_PAD,
+			       rx_bytes);
+
+			skb_put(skb, rx_bytes);
+			dma_sync_single_range_for_cpu(dev->dev.parent,
+						      phys_addr,
+						      NET_SKB_PAD - pp->rx_offset_correction,
+						      rx_bytes + MVNETA_MH_SIZE,
+						      DMA_FROM_DEVICE);
+
+			skb->protocol = eth_type_trans(skb, dev);
+			mvneta_rx_csum(pp, rx_status, skb);
+			napi_gro_receive(napi, skb);
+
+			rcvd_pkts++;
+			rcvd_bytes += rx_bytes;
+
+			/* Return the buffer to the pool */
+			mvneta_bm_pool_put_bp(pp->bm_priv, bm_pool,
+					      rx_desc->buf_phys_addr);
+
+			/* leave the descriptor and buffer untouched */
+			continue;
+		}
+
+		/* Refill processing */
+		err = hwbm_pool_refill(&bm_pool->hwbm_pool, GFP_ATOMIC);
+		if (err) {
+#ifdef CONFIG_SYNO_ARMADA_REFILL_COUNT
+			refill_failed++;
+#else /* CONFIG_SYNO_ARMADA_REFILL_COUNT */
+			netdev_err(dev, "Linux processing - Can't refill\n");
+#endif /* CONFIG_SYNO_ARMADA_REFILL_COUNT */
+			goto err_drop_frame_ret_pool;
+		}
+
+		frag_size = bm_pool->hwbm_pool.frag_size;
+
+		skb = build_skb(data, frag_size > PAGE_SIZE ? 0 : frag_size);
+
+		/* After refill old buffer has to be unmapped regardless
+		 * the skb is successfully built or not.
+		 */
+		dma_unmap_single(&pp->bm_priv->pdev->dev, phys_addr - pp->rx_offset_correction,
+				 bm_pool->buf_size, DMA_FROM_DEVICE);
+		if (!skb)
+			goto err_drop_frame;
+
+		rcvd_pkts++;
+		rcvd_bytes += rx_bytes;
+
+		/* Linux processing */
+		skb_reserve(skb, MVNETA_MH_SIZE + NET_SKB_PAD);
+		skb_put(skb, rx_bytes);
+
+		skb->protocol = eth_type_trans(skb, dev);
+
+		mvneta_rx_csum(pp, rx_status, skb);
+
+		napi_gro_receive(napi, skb);
+	}
+
+	if (rcvd_pkts) {
+		struct mvneta_pcpu_stats *stats = this_cpu_ptr(pp->stats);
+
+		u64_stats_update_begin(&stats->syncp);
+		stats->rx_packets += rcvd_pkts;
+		stats->rx_bytes   += rcvd_bytes;
+		u64_stats_update_end(&stats->syncp);
+	}
+
+	/* Update rxq management counters */
+	mvneta_rxq_desc_num_update(pp, rxq, rx_done, rx_done);
+
+	return rx_done;
+}
+
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 static inline void
 mvneta_tso_put_hdr(struct sk_buff *skb,
 		   struct mvneta_port *pp, struct mvneta_tx_queue *txq)
@@ -1858,10 +3190,21 @@ out:
 		struct netdev_queue *nq = netdev_get_tx_queue(dev, txq_id);
 
 		txq->count += frags;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+//do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		mvneta_txq_pend_desc_add(pp, txq, frags);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 		if (txq->count >= txq->tx_stop_threshold)
 			netif_tx_stop_queue(nq);
+
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+		if (!skb->xmit_more || netif_xmit_stopped(nq))
+			mvneta_txq_pend_desc_add(pp, txq, frags);
+		else
+			txq->pending += frags;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 		u64_stats_update_begin(&stats->syncp);
 		stats->tx_packets++;
@@ -2077,19 +3420,34 @@ static void mvneta_set_rx_mode(struct net_device *dev)
 	if (dev->flags & IFF_PROMISC) {
 		/* Accept all: Multicast + Unicast */
 		mvneta_rx_unicast_promisc_set(pp, 1);
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+		mvneta_set_ucast_table(pp, pp->rxq_def);
+		mvneta_set_special_mcast_table(pp, pp->rxq_def);
+		mvneta_set_other_mcast_table(pp, pp->rxq_def);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		mvneta_set_ucast_table(pp, rxq_def);
 		mvneta_set_special_mcast_table(pp, rxq_def);
 		mvneta_set_other_mcast_table(pp, rxq_def);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	} else {
 		/* Accept single Unicast */
 		mvneta_rx_unicast_promisc_set(pp, 0);
 		mvneta_set_ucast_table(pp, -1);
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+		mvneta_mac_addr_set(pp, dev->dev_addr, pp->rxq_def);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		mvneta_mac_addr_set(pp, dev->dev_addr, rxq_def);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 		if (dev->flags & IFF_ALLMULTI) {
 			/* Accept all multicast */
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+			mvneta_set_special_mcast_table(pp, pp->rxq_def);
+			mvneta_set_other_mcast_table(pp, pp->rxq_def);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 			mvneta_set_special_mcast_table(pp, rxq_def);
 			mvneta_set_other_mcast_table(pp, rxq_def);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		} else {
 			/* Accept only initialized multicast */
 			mvneta_set_special_mcast_table(pp, -1);
@@ -2097,8 +3455,13 @@ static void mvneta_set_rx_mode(struct net_device *dev)
 
 			if (!netdev_mc_empty(dev)) {
 				netdev_for_each_mc_addr(ha, dev) {
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+					mvneta_mcast_addr_set(pp, ha->addr,
+							      pp->rxq_def);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 					mvneta_mcast_addr_set(pp, ha->addr,
 							      rxq_def);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 				}
 			}
 		}
@@ -2108,6 +3471,31 @@ static void mvneta_set_rx_mode(struct net_device *dev)
 /* Interrupt handling - the callback for request_irq() */
 static irqreturn_t mvneta_isr(int irq, void *dev_id)
 {
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	struct mvneta_port *pp = (struct mvneta_port *)dev_id;
+
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+	mvreg_relaxed_write(pp, MVNETA_INTR_NEW_MASK, 0);
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+	mvreg_write(pp, MVNETA_INTR_NEW_MASK, 0);
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+	napi_schedule(&pp->napi);
+
+	return IRQ_HANDLED;
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+	struct mvneta_pcpu_port *port = (struct mvneta_pcpu_port *)dev_id;
+
+	disable_percpu_irq(port->pp->dev->irq);
+	napi_schedule(&port->napi);
+
+	return IRQ_HANDLED;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+}
+
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+/* Interrupt handling - the callback for request_percpu_irq() */
+static irqreturn_t mvneta_percpu_isr(int irq, void *dev_id)
+{
 	struct mvneta_pcpu_port *port = (struct mvneta_pcpu_port *)dev_id;
 
 	disable_percpu_irq(port->pp->dev->irq);
@@ -2115,6 +3503,7 @@ static irqreturn_t mvneta_isr(int irq, void *dev_id)
 
 	return IRQ_HANDLED;
 }
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 static int mvneta_fixed_link_update(struct mvneta_port *pp,
 				    struct phy_device *phy)
@@ -2149,20 +3538,40 @@ static int mvneta_poll(struct napi_struct *napi, int budget)
 {
 	int rx_done = 0;
 	u32 cause_rx_tx;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	unsigned long flags;
+	int rx_queue;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct mvneta_port *pp = netdev_priv(napi->dev);
 	struct mvneta_pcpu_port *port = this_cpu_ptr(pp->ports);
 
 	if (!netif_running(pp->dev)) {
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+		napi_complete(napi);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		napi_complete(&port->napi);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		return rx_done;
 	}
 
 	/* Read cause register */
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+	cause_rx_tx = mvreg_relaxed_read(pp, MVNETA_INTR_NEW_CAUSE);
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	cause_rx_tx = mvreg_read(pp, MVNETA_INTR_NEW_CAUSE);
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	if (cause_rx_tx & MVNETA_MISCINTR_INTR_MASK) {
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+		u32 cause_misc = mvreg_relaxed_read(pp, MVNETA_INTR_MISC_CAUSE);
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 		u32 cause_misc = mvreg_read(pp, MVNETA_INTR_MISC_CAUSE);
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+		mvreg_relaxed_write(pp, MVNETA_INTR_MISC_CAUSE, 0);
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 		mvreg_write(pp, MVNETA_INTR_MISC_CAUSE, 0);
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 		if (pp->use_inband_status && (cause_misc &
 				(MVNETA_CAUSE_PHY_STATUS_CHANGE |
 				 MVNETA_CAUSE_LINK_CHANGE |
@@ -2180,17 +3589,65 @@ static int mvneta_poll(struct napi_struct *napi, int budget)
 	/* For the case where the last mvneta_poll did not process all
 	 * RX packets
 	 */
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	rx_queue = fls(((cause_rx_tx >> 8) & 0xff));
+
+	cause_rx_tx |= pp->neta_armada3700 ? pp->cause_rx_tx : port->cause_rx_tx;
+
+	if (rx_queue) {
+		rx_queue = rx_queue - 1;
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+		if (pp->bm_priv)
+			rx_done = mvneta_rx_hwbm(pp, budget,
+						 &pp->rxqs[rx_queue], napi);
+		else
+			rx_done = mvneta_rx_swbm(pp, budget,
+						 &pp->rxqs[rx_queue], napi);
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+		rx_done = mvneta_rx(pp, budget, &pp->rxqs[rx_queue], napi);
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+	}
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	cause_rx_tx |= port->cause_rx_tx;
 	rx_done = mvneta_rx(pp, budget, &pp->rxqs[rxq_def]);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+
 	budget -= rx_done;
 
 	if (budget > 0) {
 		cause_rx_tx = 0;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+		napi_complete(napi);
+
+		if (pp->neta_armada3700) {
+			local_irq_save(flags);
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+			mvreg_relaxed_write(pp, MVNETA_INTR_NEW_MASK,
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+			mvreg_write(pp, MVNETA_INTR_NEW_MASK,
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+				    MVNETA_RX_INTR_MASK(rxq_number) |
+				    MVNETA_TX_INTR_MASK(txq_number) |
+				    MVNETA_MISCINTR_INTR_MASK);
+			local_irq_restore(flags);
+		} else {
+			enable_percpu_irq(pp->dev->irq, 0);
+		}
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		napi_complete(&port->napi);
 		enable_percpu_irq(pp->dev->irq, 0);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	}
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	if (pp->neta_armada3700)
+		pp->cause_rx_tx = cause_rx_tx;
+	else
+		port->cause_rx_tx = cause_rx_tx;
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	port->cause_rx_tx = cause_rx_tx;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+
 	return rx_done;
 }
 
@@ -2262,16 +3719,35 @@ static int mvneta_rxq_init(struct mvneta_port *pp,
 	mvreg_write(pp, MVNETA_RXQ_SIZE_REG(rxq->id), rxq->size);
 
 	/* Set Offset */
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	mvneta_rxq_offset_set(pp, rxq, NET_SKB_PAD - pp->rx_offset_correction);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	mvneta_rxq_offset_set(pp, rxq, NET_SKB_PAD);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	/* Set coalescing pkts and time */
 	mvneta_rx_pkts_coal_set(pp, rxq, rxq->pkts_coal);
 	mvneta_rx_time_coal_set(pp, rxq, rxq->time_coal);
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+	if (!pp->bm_priv) {
+		/* Fill RXQ with buffers from RX pool */
+		mvneta_rxq_buf_size_set(pp, rxq,
+					MVNETA_RX_BUF_SIZE(pp->pkt_size));
+		mvneta_rxq_bm_disable(pp, rxq);
+		mvneta_rxq_fill(pp, rxq, rxq->size);
+	} else {
+		mvneta_rxq_bm_enable(pp, rxq);
+		mvneta_rxq_long_pool_set(pp, rxq);
+		mvneta_rxq_short_pool_set(pp, rxq);
+		mvneta_rxq_non_occup_desc_add(pp, rxq, rxq->size);
+	}
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	/* Fill RXQ with buffers from RX pool */
 	mvneta_rxq_buf_size_set(pp, rxq, MVNETA_RX_BUF_SIZE(pp->pkt_size));
 	mvneta_rxq_bm_disable(pp, rxq);
 	mvneta_rxq_fill(pp, rxq, rxq->size);
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 
 	return 0;
 }
@@ -2292,12 +3768,18 @@ static void mvneta_rxq_deinit(struct mvneta_port *pp,
 	rxq->last_desc         = 0;
 	rxq->next_desc_to_proc = 0;
 	rxq->descs_phys        = 0;
+	rxq->missed_desc       = NULL;
+	atomic_set(&rxq->missed, 0);
 }
 
 /* Create and initialize a tx queue */
 static int mvneta_txq_init(struct mvneta_port *pp,
 			   struct mvneta_tx_queue *txq)
 {
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	int cpu;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+
 	txq->size = pp->tx_ring_size;
 
 	/* A queue must always have room for at least one skb.
@@ -2349,6 +3831,16 @@ static int mvneta_txq_init(struct mvneta_port *pp,
 	}
 	mvneta_tx_done_pkts_coal_set(pp, txq, txq->done_pkts_coal);
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	/* Setup XPS mapping */
+	if (txq_number > 1)
+		cpu = txq->id % num_present_cpus();
+	else
+		cpu = pp->rxq_def % num_present_cpus();
+	cpumask_set_cpu(cpu, &txq->affinity_mask);
+	netif_set_xps_queue(pp->dev, &txq->affinity_mask, txq->id);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+
 	return 0;
 }
 
@@ -2393,12 +3885,61 @@ static void mvneta_cleanup_txqs(struct mvneta_port *pp)
 /* Cleanup all Rx queues */
 static void mvneta_cleanup_rxqs(struct mvneta_port *pp)
 {
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	int queue;
+
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+	for (queue = 0; queue < rxq_number; queue++)
+#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+	for (queue = 0; queue < txq_number; queue++)
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+		mvneta_rxq_deinit(pp, &pp->rxqs[queue]);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	mvneta_rxq_deinit(pp, &pp->rxqs[rxq_def]);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 }
 
 /* Init all Rx queues */
 static int mvneta_setup_rxqs(struct mvneta_port *pp)
 {
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	int queue;
+#ifdef CONFIG_64BIT
+	void *data_tmp;
+
+	/* In Neta HW only 32 bits data is supported, so in order to
+	 * obtain whole 64 bits address from RX descriptor, we store the
+	 * upper 32 bits when allocating buffer, and put it back
+	 * when using buffer cookie for accessing packet in memory.
+	 * Frags should be allocated from single 'memory' region, hence
+	 * common upper address half should be sufficient.
+	 */
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+	data_tmp = mvneta_frag_alloc(pp->frag_size);
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+	data_tmp = mvneta_frag_alloc(pp);
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+	if (data_tmp) {
+		pp->data_high = (u64)data_tmp & 0xffffffff00000000;
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+		mvneta_frag_free(pp->frag_size, data_tmp);
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+		mvneta_frag_free(pp, data_tmp);
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+	}
+#endif
+
+	for (queue = 0; queue < rxq_number; queue++) {
+		int err = mvneta_rxq_init(pp, &pp->rxqs[queue]);
+
+		if (err) {
+			netdev_err(pp->dev, "%s: can't create rxq=%d\n",
+				   __func__, queue);
+			mvneta_cleanup_rxqs(pp);
+			return err;
+		}
+	}
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	int err = mvneta_rxq_init(pp, &pp->rxqs[rxq_def]);
 	if (err) {
 		netdev_err(pp->dev, "%s: can't create rxq=%d\n",
@@ -2406,6 +3947,7 @@ static int mvneta_setup_rxqs(struct mvneta_port *pp)
 		mvneta_cleanup_rxqs(pp);
 		return err;
 	}
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	return 0;
 }
@@ -2430,7 +3972,12 @@ static int mvneta_setup_txqs(struct mvneta_port *pp)
 
 static void mvneta_start_dev(struct mvneta_port *pp)
 {
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	struct mvneta_pcpu_port *port;
+	int cpu;
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	unsigned int cpu;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	mvneta_max_rx_size_set(pp, pp->pkt_size);
 	mvneta_txq_max_tx_size_set(pp, pp->pkt_size);
@@ -2438,37 +3985,78 @@ static void mvneta_start_dev(struct mvneta_port *pp)
 	/* start the Rx/Tx activity */
 	mvneta_port_enable(pp);
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	if (!pp->neta_armada3700) {
+		/* Enable polling on the port */
+		for_each_online_cpu(cpu) {
+			port = per_cpu_ptr(pp->ports, cpu);
+			napi_enable(&port->napi);
+		}
+	} else {
+		napi_enable(&pp->napi);
+	}
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	/* Enable polling on the port */
 	for_each_present_cpu(cpu) {
 		struct mvneta_pcpu_port *port = per_cpu_ptr(pp->ports, cpu);
 
 		napi_enable(&port->napi);
 	}
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	/* Unmask interrupts. It has to be done from each CPU */
+	on_each_cpu(mvneta_percpu_unmask_interrupt, pp, true);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	/* Unmask interrupts */
 	mvreg_write(pp, MVNETA_INTR_NEW_MASK,
 		    MVNETA_RX_INTR_MASK(rxq_number) |
 		    MVNETA_TX_INTR_MASK(txq_number) |
 		    MVNETA_MISCINTR_INTR_MASK);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+
 	mvreg_write(pp, MVNETA_INTR_MISC_MASK,
 		    MVNETA_CAUSE_PHY_STATUS_CHANGE |
 		    MVNETA_CAUSE_LINK_CHANGE |
 		    MVNETA_CAUSE_PSC_SYNC_CHANGE);
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	if (!pp->use_inband_status)
+		phy_start(pp->phy_dev);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	phy_start(pp->phy_dev);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	netif_tx_start_all_queues(pp->dev);
 }
 
 static void mvneta_stop_dev(struct mvneta_port *pp)
 {
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	struct mvneta_pcpu_port *port;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	unsigned int cpu;
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	if (!pp->use_inband_status)
+		phy_stop(pp->phy_dev);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	phy_stop(pp->phy_dev);
 
 	for_each_present_cpu(cpu) {
 		struct mvneta_pcpu_port *port = per_cpu_ptr(pp->ports, cpu);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	if (!pp->neta_armada3700) {
+		for_each_online_cpu(cpu) {
+			port = per_cpu_ptr(pp->ports, cpu);
+			napi_disable(&port->napi);
+		}
+	} else {
+		napi_disable(&pp->napi);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		napi_disable(&port->napi);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	}
 
 	netif_carrier_off(pp->dev);
@@ -2480,13 +4068,21 @@ static void mvneta_stop_dev(struct mvneta_port *pp)
 	mvneta_port_disable(pp);
 
 	/* Clear all ethernet port interrupts */
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	on_each_cpu(mvneta_percpu_clear_intr_cause, pp, true);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	mvreg_write(pp, MVNETA_INTR_MISC_CAUSE, 0);
 	mvreg_write(pp, MVNETA_INTR_OLD_CAUSE, 0);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	/* Mask all ethernet port interrupts */
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	on_each_cpu(mvneta_percpu_mask_interrupt, pp, true);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	mvreg_write(pp, MVNETA_INTR_NEW_MASK, 0);
 	mvreg_write(pp, MVNETA_INTR_OLD_MASK, 0);
 	mvreg_write(pp, MVNETA_INTR_MISC_MASK, 0);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	mvneta_tx_reset(pp);
 	mvneta_rx_reset(pp);
@@ -2515,6 +4111,22 @@ static int mvneta_check_mtu_valid(struct net_device *dev, int mtu)
 	return mtu;
 }
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+static void mvneta_percpu_enable(void *arg)
+{
+	struct mvneta_port *pp = arg;
+
+	enable_percpu_irq(pp->dev->irq, IRQ_TYPE_NONE);
+}
+
+static void mvneta_percpu_disable(void *arg)
+{
+	struct mvneta_port *pp = arg;
+
+	disable_percpu_irq(pp->dev->irq);
+}
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+
 /* Change the device mtu */
 static int mvneta_change_mtu(struct net_device *dev, int mtu)
 {
@@ -2528,6 +4140,11 @@ static int mvneta_change_mtu(struct net_device *dev, int mtu)
 	dev->mtu = mtu;
 
 	if (!netif_running(dev)) {
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+		if (pp->bm_priv)
+			mvneta_bm_update_mtu(pp, mtu);
+
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 		netdev_update_features(dev);
 		return 0;
 	}
@@ -2536,10 +4153,19 @@ static int mvneta_change_mtu(struct net_device *dev, int mtu)
 	 * reallocation of the queues
 	 */
 	mvneta_stop_dev(pp);
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	on_each_cpu(mvneta_percpu_disable, pp, true);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
+	udelay(10);
 	mvneta_cleanup_txqs(pp);
 	mvneta_cleanup_rxqs(pp);
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+	if (pp->bm_priv)
+		mvneta_bm_update_mtu(pp, mtu);
+
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	pp->pkt_size = MVNETA_RX_PKT_SIZE(dev->mtu);
 	pp->frag_size = SKB_DATA_ALIGN(MVNETA_RX_BUF_SIZE(pp->pkt_size)) +
 	                SKB_DATA_ALIGN(sizeof(struct skb_shared_info));
@@ -2556,6 +4182,9 @@ static int mvneta_change_mtu(struct net_device *dev, int mtu)
 		return ret;
 	}
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	on_each_cpu(mvneta_percpu_enable, pp, true);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	mvneta_start_dev(pp);
 	mvneta_port_up(pp);
 
@@ -2608,7 +4237,11 @@ static int mvneta_set_mac_addr(struct net_device *dev, void *addr)
 	mvneta_mac_addr_set(pp, dev->dev_addr, -1);
 
 	/* Set new addr in hw */
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	mvneta_mac_addr_set(pp, sockaddr->sa_data, pp->rxq_def);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	mvneta_mac_addr_set(pp, sockaddr->sa_data, rxq_def);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	eth_commit_mac_addr_change(dev, addr);
 	return 0;
@@ -2643,6 +4276,13 @@ static void mvneta_adjust_link(struct net_device *ndev)
 			pp->duplex = phydev->duplex;
 			pp->speed  = phydev->speed;
 		}
+#ifdef CONFIG_SYNO_PHY_INIT_88E151X
+		if (syno_is_hw_version(HW_DS219j) || syno_is_hw_version(HW_DS218se)) {
+			if (0 > syno_m88e151X_led_init(phydev)) {
+				printk("set phy led failed\n");
+			}
+		}
+#endif /* CONFIG_SYNO_PHY_INIT_88E151X */
 	}
 
 	if (phydev->link != pp->link) {
@@ -2692,7 +4332,12 @@ static int mvneta_mdio_probe(struct mvneta_port *pp)
 		return -ENODEV;
 	}
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	/* Neta does not support 1000baseT_Half */
+	phy_dev->supported &= (PHY_GBIT_FEATURES & (~SUPPORTED_1000baseT_Half));
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	phy_dev->supported &= PHY_GBIT_FEATURES;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	phy_dev->advertising = phy_dev->supported;
 
 	pp->phy_dev = phy_dev;
@@ -2709,6 +4354,65 @@ static void mvneta_mdio_remove(struct mvneta_port *pp)
 	pp->phy_dev = NULL;
 }
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+/* Electing a CPU must be done in an atomic way: it should be done
+ * after or before the removal/insertion of a CPU and this function is
+ * not reentrant.
+ */
+static void mvneta_percpu_elect(struct mvneta_port *pp)
+{
+	int elected_cpu = 0, max_cpu, cpu, i = 0;
+
+	/* Use the cpu associated to the rxq when it is online, in all
+	 * the other cases, use the cpu 0 which can't be offline.
+	 */
+	if (cpu_online(pp->rxq_def))
+		elected_cpu = pp->rxq_def;
+
+	max_cpu = num_present_cpus();
+
+	for_each_online_cpu(cpu) {
+		int rxq_map = 0, txq_map = 0;
+		int rxq;
+
+		for (rxq = 0; rxq < rxq_number; rxq++)
+			if ((rxq % max_cpu) == cpu)
+				rxq_map |= MVNETA_CPU_RXQ_ACCESS(rxq);
+
+		if (cpu == elected_cpu)
+			/* Map the default receive queue queue to the
+			 * elected CPU
+			 */
+			rxq_map |= MVNETA_CPU_RXQ_ACCESS(pp->rxq_def);
+		else
+			/* Unmap the default receive queue queue to the
+			 * unelected CPU
+			 */
+			rxq_map &= ~MVNETA_CPU_RXQ_ACCESS(pp->rxq_def);
+
+		/* We update the TX queue map only if we have one
+		 * queue. In this case we associate the TX queue to
+		 * the CPU bound to the default RX queue
+		 */
+		if (txq_number == 1)
+			txq_map = (cpu == elected_cpu) ?
+				MVNETA_CPU_TXQ_ACCESS(1) : 0;
+		else
+			txq_map = mvreg_read(pp, MVNETA_CPU_MAP(cpu)) &
+				MVNETA_CPU_TXQ_ACCESS_ALL_MASK;
+
+		mvreg_write(pp, MVNETA_CPU_MAP(cpu), rxq_map | txq_map);
+
+		/* Update the interrupt mask on each CPU according the
+		 * new mapping
+		 */
+		smp_call_function_single(cpu, mvneta_percpu_unmask_interrupt,
+					 pp, true);
+		i++;
+
+	}
+};
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 static void mvneta_percpu_enable(void *arg)
 {
 	struct mvneta_port *pp = arg;
@@ -2743,6 +4447,7 @@ static void mvneta_percpu_elect(struct mvneta_port *pp)
 		i++;
 	}
 };
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 static int mvneta_percpu_notifier(struct notifier_block *nfb,
 				  unsigned long action, void *hcpu)
@@ -2755,6 +4460,18 @@ static int mvneta_percpu_notifier(struct notifier_block *nfb,
 	switch (action) {
 	case CPU_ONLINE:
 	case CPU_ONLINE_FROZEN:
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	case CPU_DOWN_FAILED:
+	case CPU_DOWN_FAILED_FROZEN:
+		spin_lock(&pp->lock);
+		/* Configuring the driver for a new CPU while the
+		 * driver is stopping is racy, so just avoid it.
+		 */
+		if (pp->is_stopped) {
+			spin_unlock(&pp->lock);
+			break;
+		}
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		netif_tx_stop_all_queues(pp->dev);
 
 		/* We have to synchronise on tha napi of each CPU
@@ -2770,6 +4487,59 @@ static int mvneta_percpu_notifier(struct notifier_block *nfb,
 		}
 
 		/* Mask all ethernet port interrupts */
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+		on_each_cpu(mvneta_percpu_mask_interrupt, pp, true);
+		napi_enable(&port->napi);
+
+		/* Enable per-CPU interrupts on the CPU that is
+		 * brought up.
+		 */
+		smp_call_function_single(cpu, mvneta_percpu_enable,
+					 pp, true);
+
+		/* Enable per-CPU interrupt on the one CPU we care
+		 * about.
+		 */
+		mvneta_percpu_elect(pp);
+
+		/* Unmask all ethernet port interrupts */
+		on_each_cpu(mvneta_percpu_unmask_interrupt, pp, true);
+		mvreg_write(pp, MVNETA_INTR_MISC_MASK,
+			MVNETA_CAUSE_PHY_STATUS_CHANGE |
+			MVNETA_CAUSE_LINK_CHANGE |
+			MVNETA_CAUSE_PSC_SYNC_CHANGE);
+		netif_tx_start_all_queues(pp->dev);
+		spin_unlock(&pp->lock);
+		break;
+	case CPU_DOWN_PREPARE:
+	case CPU_DOWN_PREPARE_FROZEN:
+		netif_tx_stop_all_queues(pp->dev);
+		/* Thanks to this lock we are sure that any pending
+		 * cpu election is done
+		 */
+		spin_lock(&pp->lock);
+		/* Mask all ethernet port interrupts */
+		on_each_cpu(mvneta_percpu_mask_interrupt, pp, true);
+		spin_unlock(&pp->lock);
+
+		napi_synchronize(&port->napi);
+		napi_disable(&port->napi);
+		/* Disable per-CPU interrupts on the CPU that is
+		 * brought down.
+		 */
+		smp_call_function_single(cpu, mvneta_percpu_disable,
+					 pp, true);
+
+		break;
+	case CPU_DEAD:
+	case CPU_DEAD_FROZEN:
+		/* Check if a new CPU must be elected now this on is down */
+		spin_lock(&pp->lock);
+		mvneta_percpu_elect(pp);
+		spin_unlock(&pp->lock);
+		/* Unmask all ethernet port interrupts */
+		on_each_cpu(mvneta_percpu_unmask_interrupt, pp, true);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		mvreg_write(pp, MVNETA_INTR_NEW_MASK, 0);
 		mvreg_write(pp, MVNETA_INTR_OLD_MASK, 0);
 		mvreg_write(pp, MVNETA_INTR_MISC_MASK, 0);
@@ -2817,6 +4587,7 @@ static int mvneta_percpu_notifier(struct notifier_block *nfb,
 			MVNETA_RX_INTR_MASK(rxq_number) |
 			MVNETA_TX_INTR_MASK(txq_number) |
 			MVNETA_MISCINTR_INTR_MASK);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		mvreg_write(pp, MVNETA_INTR_MISC_MASK,
 			MVNETA_CAUSE_PHY_STATUS_CHANGE |
 			MVNETA_CAUSE_LINK_CHANGE |
@@ -2846,6 +4617,39 @@ static int mvneta_open(struct net_device *dev)
 		goto err_cleanup_rxqs;
 
 	/* Connect to port interrupt line */
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	if (pp->neta_armada3700)
+		ret = request_irq(pp->dev->irq, mvneta_isr, 0,
+				  dev->name, pp);
+	else
+		ret = request_percpu_irq(pp->dev->irq, mvneta_percpu_isr,
+					 dev->name, pp->ports);
+	if (ret) {
+		netdev_err(pp->dev, "cannot request irq %d\n", pp->dev->irq);
+		goto err_cleanup_txqs;
+	}
+
+	if (!pp->neta_armada3700) {
+		/* Enable per-CPU interrupt on all the CPU to handle our RX
+		 * queue interrupts
+		 */
+		on_each_cpu(mvneta_percpu_enable, pp, true);
+
+		pp->is_stopped = false;
+		/* Register a CPU notifier to handle the case where our CPU
+		 * might be taken offline.
+		 */
+		register_cpu_notifier(&pp->cpu_notifier);
+	}
+
+	/* In default link is down */
+	netif_carrier_off(pp->dev);
+
+	mvneta_start_dev(pp);
+
+	return 0;
+
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	ret = request_percpu_irq(pp->dev->irq, mvneta_isr,
 				 MVNETA_DRIVER_NAME, pp->ports);
 	if (ret) {
@@ -2884,6 +4688,7 @@ static int mvneta_open(struct net_device *dev)
 
 err_free_irq:
 	free_percpu_irq(pp->dev->irq, pp->ports);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 err_cleanup_txqs:
 	mvneta_cleanup_txqs(pp);
 err_cleanup_rxqs:
@@ -2895,6 +4700,28 @@ err_cleanup_rxqs:
 static int mvneta_stop(struct net_device *dev)
 {
 	struct mvneta_port *pp = netdev_priv(dev);
+
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	if (!pp->neta_armada3700) {
+		/* Inform that we are stopping so we don't want to setup the
+		 * driver for new CPUs in the notifiers. The code of the
+		 * notifier for CPU online is protected by the same spinlock,
+		 * so when we get the lock, the notifer work is done.
+		 */
+		spin_lock(&pp->lock);
+		pp->is_stopped = true;
+		spin_unlock(&pp->lock);
+
+		mvneta_stop_dev(pp);
+		unregister_cpu_notifier(&pp->cpu_notifier);
+		on_each_cpu(mvneta_percpu_disable, pp, true);
+		free_percpu_irq(dev->irq, pp->ports);
+	} else {
+		mvneta_stop_dev(pp);
+		free_irq(dev->irq, pp);
+	}
+
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	int cpu;
 
 	mvneta_stop_dev(pp);
@@ -2903,6 +4730,7 @@ static int mvneta_stop(struct net_device *dev)
 	for_each_present_cpu(cpu)
 		smp_call_function_single(cpu, mvneta_percpu_disable, pp, true);
 	free_percpu_irq(dev->irq, pp->ports);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	mvneta_cleanup_rxqs(pp);
 	mvneta_cleanup_txqs(pp);
 
@@ -2921,6 +4749,29 @@ static int mvneta_ioctl(struct net_device *dev, struct ifreq *ifr, int cmd)
 
 /* Ethtool methods */
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+/* Check speed and duplex when set auto-nego with ethtool */
+static int mvneta_spd_dplx_valid(struct mvneta_port *pp,
+				 struct ethtool_cmd *cmd)
+{
+	int ret = 0;
+	u32 speed = ethtool_cmd_speed(cmd);
+
+	if ((speed + cmd->duplex) == (SPEED_1000 + DUPLEX_HALF)) {
+		/* When auto-nego disabled, 1000Base-Half is illegal.
+		 * When auto-nego enabled, 1000Base-Half is invalid,
+		 * but no error return for this, ethtool will show results.
+		 */
+		if (cmd->autoneg == AUTONEG_DISABLE) {
+			netdev_err(pp->dev, "Unsupported Speed/Duplex configuration\n");
+			ret = -EINVAL;
+		}
+	}
+
+	return ret;
+}
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+
 /* Get settings (phy address, speed) for ethtools */
 int mvneta_ethtool_get_settings(struct net_device *dev, struct ethtool_cmd *cmd)
 {
@@ -2935,12 +4786,33 @@ int mvneta_ethtool_get_settings(struct net_device *dev, struct ethtool_cmd *cmd)
 /* Set settings (phy address, speed) for ethtools */
 int mvneta_ethtool_set_settings(struct net_device *dev, struct ethtool_cmd *cmd)
 {
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	int ret = 0;
+	struct mvneta_port *pp = netdev_priv(dev);
+	struct phy_device *phydev = pp->phy_dev;
+
+	if (phydev) {
+		/* Fixed link not allowed to update speed/duplex */
+		if (phy_is_pseudo_fixed_link(pp->phy_dev))
+			return -EINVAL;
+		if (mvneta_spd_dplx_valid(pp, cmd))
+			return -EINVAL;
+		ret = phy_ethtool_sset(pp->phy_dev, cmd);
+		if (ret)
+			return ret;
+	}
+	/* Config MAC */
+	mvneta_mac_config(pp);
+
+	return ret;
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct mvneta_port *pp = netdev_priv(dev);
 
 	if (!pp->phy_dev)
 		return -ENODEV;
 
 	return phy_ethtool_sset(pp->phy_dev, cmd);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 }
 
 /* Set interrupt coalescing for ethtools */
@@ -3011,6 +4883,11 @@ static int mvneta_ethtool_set_ringparam(struct net_device *dev,
 		return -EINVAL;
 	pp->rx_ring_size = ring->rx_pending < MVNETA_MAX_RXD ?
 		ring->rx_pending : MVNETA_MAX_RXD;
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+	if (pp->rx_ring_size != ring->rx_pending)
+		netdev_warn(dev, "RX queue size set to %u (requested %u)\n",
+			    pp->rx_ring_size, ring->rx_pending);
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 
 	pp->tx_ring_size = clamp_t(u16, ring->tx_pending,
 				   MVNETA_MAX_SKB_DESCS * 2, MVNETA_MAX_TXD);
@@ -3039,6 +4916,10 @@ static void mvneta_ethtool_get_strings(struct net_device *netdev, u32 sset,
 		for (i = 0; i < ARRAY_SIZE(mvneta_statistics); i++)
 			memcpy(data + i * ETH_GSTRING_LEN,
 			       mvneta_statistics[i].name, ETH_GSTRING_LEN);
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+	} else if (sset == ETH_SS_TEST) {
+		memcpy(data, *mvneta_gstrings_test, sizeof(mvneta_gstrings_test));
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	}
 }
 
@@ -3047,11 +4928,34 @@ static void mvneta_ethtool_update_stats(struct mvneta_port *pp)
 	const struct mvneta_statistic *s;
 	void __iomem *base = pp->base;
 	u32 high, low, val;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	u64 val64;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	int i;
 
 	for (i = 0, s = mvneta_statistics;
 	     s < mvneta_statistics + ARRAY_SIZE(mvneta_statistics);
 	     s++, i++) {
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+		switch (s->type) {
+		case T_REG_32:
+			val = readl_relaxed(base + s->offset);
+			pp->ethtool_stats[i] += val;
+			break;
+		case T_REG_64:
+			/* Docs say to read low 32-bit then high */
+			low = readl_relaxed(base + s->offset);
+			high = readl_relaxed(base + s->offset + 4);
+			val64 = (u64)high << 32 | low;
+			pp->ethtool_stats[i] += val64;
+			break;
+#ifdef CONFIG_SYNO_ARMADA_REFILL_COUNT
+		case T_DATA:
+			pp->ethtool_stats[i] = refill_failed;
+			break;
+#endif /* CONFIG_SYNO_ARMADA_REFILL_COUNT*/
+		}
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		val = 0;
 
 		switch (s->type) {
@@ -3067,6 +4971,7 @@ static void mvneta_ethtool_update_stats(struct mvneta_port *pp)
 		}
 
 		pp->ethtool_stats[i] += val;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	}
 }
 
@@ -3086,9 +4991,397 @@ static int mvneta_ethtool_get_sset_count(struct net_device *dev, int sset)
 {
 	if (sset == ETH_SS_STATS)
 		return ARRAY_SIZE(mvneta_statistics);
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+	else if (sset == ETH_SS_TEST)
+		return MVNETA_TEST_LEN;
+
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	return -EOPNOTSUPP;
 }
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+static u32 mvneta_ethtool_get_rxfh_indir_size(struct net_device *dev)
+{
+	return MVNETA_RSS_LU_TABLE_SIZE;
+}
+
+static int mvneta_ethtool_get_rxnfc(struct net_device *dev,
+				    struct ethtool_rxnfc *info,
+				    u32 *rules __always_unused)
+{
+	switch (info->cmd) {
+	case ETHTOOL_GRXRINGS:
+		info->data =  rxq_number;
+		return 0;
+	case ETHTOOL_GRXFH:
+		return -EOPNOTSUPP;
+	default:
+		return -EOPNOTSUPP;
+	}
+}
+
+static int  mvneta_config_rss(struct mvneta_port *pp)
+{
+	int cpu;
+	u32 val;
+
+	netif_tx_stop_all_queues(pp->dev);
+
+	on_each_cpu(mvneta_percpu_mask_interrupt, pp, true);
+
+	/* We have to synchronise on the napi of each CPU */
+	for_each_online_cpu(cpu) {
+		struct mvneta_pcpu_port *pcpu_port =
+			per_cpu_ptr(pp->ports, cpu);
+
+		napi_synchronize(&pcpu_port->napi);
+		napi_disable(&pcpu_port->napi);
+	}
+
+	pp->rxq_def = pp->indir[0];
+
+	/* Update unicast mapping */
+	mvneta_set_rx_mode(pp->dev);
+
+	/* Update val of portCfg register accordingly with all RxQueue types */
+	val = MVNETA_PORT_CONFIG_DEFL_VALUE(pp->rxq_def);
+	mvreg_write(pp, MVNETA_PORT_CONFIG, val);
+
+	/* Update the elected CPU matching the new rxq_def */
+	spin_lock(&pp->lock);
+	mvneta_percpu_elect(pp);
+	spin_unlock(&pp->lock);
+
+	/* We have to synchronise on the napi of each CPU */
+	for_each_online_cpu(cpu) {
+		struct mvneta_pcpu_port *pcpu_port =
+			per_cpu_ptr(pp->ports, cpu);
+
+		napi_enable(&pcpu_port->napi);
+	}
+
+	netif_tx_start_all_queues(pp->dev);
+
+	return 0;
+}
+
+static int mvneta_ethtool_set_rxfh(struct net_device *dev, const u32 *indir,
+				   const u8 *key, const u8 hfunc)
+{
+	struct mvneta_port *pp = netdev_priv(dev);
+
+	/* Armada 3700 SoC doesn't support RSS features */
+	if (pp->neta_armada3700)
+		return -EOPNOTSUPP;
+
+	/* We require at least one supported parameter to be changed
+	 * and no change in any of the unsupported parameters
+	 */
+	if (key ||
+	    (hfunc != ETH_RSS_HASH_NO_CHANGE && hfunc != ETH_RSS_HASH_TOP))
+		return -EOPNOTSUPP;
+
+	if (!indir)
+		return 0;
+
+	memcpy(pp->indir, indir, MVNETA_RSS_LU_TABLE_SIZE);
+
+	return mvneta_config_rss(pp);
+}
+
+static int mvneta_ethtool_get_rxfh(struct net_device *dev, u32 *indir, u8 *key,
+				   u8 *hfunc)
+{
+	struct mvneta_port *pp = netdev_priv(dev);
+
+	/* Armada 3700 SoC doesn't support RSS features */
+	if (pp->neta_armada3700)
+		return -EOPNOTSUPP;
+
+	if (hfunc)
+		*hfunc = ETH_RSS_HASH_TOP;
+
+	if (!indir)
+		return 0;
+
+	memcpy(indir, pp->indir, MVNETA_RSS_LU_TABLE_SIZE);
+
+	return 0;
+}
+
+static int mvneta_ethtool_get_regs_len(struct net_device *netdev)
+{
+	return MVNETA_REGS_GMAC_LEN * sizeof(u32);
+}
+
+/*ethtool get registers function */
+static void mvneta_ethtool_get_regs(struct net_device *dev,
+				    struct ethtool_regs *regs, void *p)
+{
+	struct mvneta_port *pp = netdev_priv(dev);
+	u32 *regs_buff = p;
+	u32 reg_base = MVNETA_RXQ_CONFIG_REG(0);
+	int i, reg_index;
+
+	memset(p, 0, MVNETA_REGS_GMAC_LEN * sizeof(u32));
+
+	for (i = 0; i < rxq_number; i++) {
+		reg_index = ((MVNETA_RXQ_CONFIG_REG(i) - reg_base) >> 2);
+		regs_buff[reg_index] = mvreg_read(pp, MVNETA_RXQ_CONFIG_REG(i));
+
+		reg_index = ((MVNETA_RXQ_THRESHOLD_REG(i) - reg_base) >> 2);
+		regs_buff[reg_index] = mvreg_read(pp,
+						  MVNETA_RXQ_THRESHOLD_REG(i));
+
+		reg_index = ((MVNETA_RXQ_BASE_ADDR_REG(i) - reg_base) >> 2);
+		regs_buff[reg_index] = mvreg_read(pp,
+						  MVNETA_RXQ_BASE_ADDR_REG(i));
+
+		reg_index = ((MVNETA_RXQ_SIZE_REG(i) - reg_base) >> 2);
+		regs_buff[reg_index] = mvreg_read(pp, MVNETA_RXQ_SIZE_REG(i));
+
+		reg_index = ((MVNETA_RXQ_STATUS_REG(i) - reg_base) >> 2);
+		regs_buff[reg_index] = mvreg_read(pp, MVNETA_RXQ_STATUS_REG(i));
+
+		reg_index = ((MVNETA_RXQ_STATUS_UPDATE_REG(i) - reg_base) >> 2);
+		regs_buff[reg_index] =
+				mvreg_read(pp, MVNETA_RXQ_STATUS_UPDATE_REG(i));
+	}
+
+	reg_index = ((MVNETA_PORT_RX_RESET - reg_base) >> 2);
+	regs_buff[reg_index] = mvreg_read(pp, MVNETA_PORT_RX_RESET);
+
+	reg_index = ((MVNETA_PHY_ADDR - reg_base) >> 2);
+	regs_buff[reg_index] = mvreg_read(pp, MVNETA_PHY_ADDR);
+
+	reg_index = ((MVNETA_MBUS_RETRY - reg_base) >> 2);
+	regs_buff[reg_index] = mvreg_read(pp, MVNETA_MBUS_RETRY);
+
+	reg_index = ((MVNETA_UNIT_INTR_CAUSE - reg_base) >> 2);
+	regs_buff[reg_index] = mvreg_read(pp, MVNETA_UNIT_INTR_CAUSE);
+
+	reg_index = ((MVNETA_UNIT_CONTROL - reg_base) >> 2);
+	regs_buff[reg_index] = mvreg_read(pp, MVNETA_UNIT_CONTROL);
+
+	reg_index = ((MVNETA_UNIT_CONTROL - reg_base) >> 2);
+	regs_buff[reg_index] = mvreg_read(pp, MVNETA_UNIT_CONTROL);
+
+	for (i = 0; i < 6; i++) {
+		reg_index = ((MVNETA_WIN_BASE(i) - reg_base) >> 2);
+		regs_buff[reg_index] = mvreg_read(pp, MVNETA_WIN_BASE(i));
+
+		reg_index = ((MVNETA_WIN_SIZE(i) - reg_base) >> 2);
+		regs_buff[reg_index] = mvreg_read(pp, MVNETA_WIN_SIZE(i));
+
+		reg_index = ((MVNETA_WIN_REMAP(i) - reg_base) >> 2);
+		regs_buff[reg_index] = mvreg_read(pp, MVNETA_WIN_REMAP(i));
+	}
+
+	reg_index = ((MVNETA_BASE_ADDR_ENABLE - reg_base) >> 2);
+	regs_buff[reg_index] = mvreg_read(pp, MVNETA_BASE_ADDR_ENABLE);
+
+	reg_index = ((MVNETA_ACCESS_PROTECT_ENABLE - reg_base) >> 2);
+	regs_buff[reg_index] = mvreg_read(pp, MVNETA_ACCESS_PROTECT_ENABLE);
+
+	reg_index = ((MVNETA_PORT_CONFIG - reg_base) >> 2);
+	regs_buff[reg_index] = mvreg_read(pp, MVNETA_PORT_CONFIG);
+
+	reg_index = ((MVNETA_PORT_CONFIG_EXTEND - reg_base) >> 2);
+	regs_buff[reg_index] = mvreg_read(pp, MVNETA_PORT_CONFIG_EXTEND);
+
+	reg_index = ((MVNETA_MAC_ADDR_LOW - reg_base) >> 2);
+	regs_buff[reg_index] = mvreg_read(pp, MVNETA_MAC_ADDR_LOW);
+
+	reg_index = ((MVNETA_MAC_ADDR_HIGH - reg_base) >> 2);
+	regs_buff[reg_index] = mvreg_read(pp, MVNETA_MAC_ADDR_HIGH);
+
+	reg_index = ((MVNETA_SDMA_CONFIG - reg_base) >> 2);
+	regs_buff[reg_index] = mvreg_read(pp, MVNETA_SDMA_CONFIG);
+
+	reg_index = ((MVNETA_PORT_STATUS - reg_base) >> 2);
+	regs_buff[reg_index] = mvreg_read(pp, MVNETA_PORT_STATUS);
+
+	reg_index = ((MVNETA_RX_MIN_FRAME_SIZE - reg_base) >> 2);
+	regs_buff[reg_index] = mvreg_read(pp, MVNETA_RX_MIN_FRAME_SIZE);
+
+	reg_index = ((MVNETA_SERDES_CFG - reg_base) >> 2);
+	regs_buff[reg_index] = mvreg_read(pp, MVNETA_SERDES_CFG);
+
+	reg_index = ((MVNETA_TYPE_PRIO - reg_base) >> 2);
+	regs_buff[reg_index] = mvreg_read(pp, MVNETA_TYPE_PRIO);
+
+	reg_index = ((MVNETA_ACC_MODE - reg_base) >> 2);
+	regs_buff[reg_index] = mvreg_read(pp, MVNETA_ACC_MODE);
+
+	reg_index = ((MVNETA_GMAC_CTRL_0 - reg_base) >> 2);
+	regs_buff[reg_index] = mvreg_read(pp, MVNETA_GMAC_CTRL_0);
+
+	reg_index = ((MVNETA_GMAC_CTRL_2 - reg_base) >> 2);
+	regs_buff[reg_index] = mvreg_read(pp, MVNETA_GMAC_CTRL_2);
+
+	reg_index = ((MVNETA_GMAC_STATUS - reg_base) >> 2);
+	regs_buff[reg_index] = mvreg_read(pp, MVNETA_GMAC_STATUS);
+
+	reg_index = ((MVNETA_GMAC_AUTONEG_CONFIG - reg_base) >> 2);
+	regs_buff[reg_index] = mvreg_read(pp, MVNETA_GMAC_AUTONEG_CONFIG);
+}
+
+static int mvneta_ethtool_nway_reset(struct net_device *dev)
+{
+	struct mvneta_port *pp = netdev_priv(dev);
+
+	if (!netif_running(dev))
+		return -EAGAIN;
+
+	if (!pp->phy_dev)
+		return -EOPNOTSUPP;
+
+	if (pp->phy_dev->autoneg == AUTONEG_DISABLE)
+		return -EINVAL;
+
+	return phy_start_aneg(pp->phy_dev);
+}
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+
+#if defined(CONFIG_SYNO_ARMADA37XX_WOL)
+u32 syno_wol_support(struct mvneta_port *pp)
+{
+	if (MV_PHY_ID_151X == pp->phy_chip) {
+		return WAKE_MAGIC;
+	}
+
+	return 0;
+}
+
+static void syno_get_wol(struct net_device *dev, struct ethtool_wolinfo *wol)
+{
+	struct mvneta_port *pp = netdev_priv(dev);
+
+	wol->supported = syno_wol_support(pp);
+	wol->wolopts = pp->wol;
+}
+
+static int syno_set_wol(struct net_device *dev, struct ethtool_wolinfo *wol)
+{
+	struct mvneta_port *pp = netdev_priv(dev);
+
+	if ((wol->wolopts & ~syno_wol_support(pp))) {
+		return -EOPNOTSUPP;
+	}
+
+	pp->wol = wol->wolopts;
+	return 0;
+}
+#endif /* CONFIG_SYNO_ARMADA37XX_WOL */
+
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+int mvneta_gmac_link_status(struct mvneta_port *pp, int *link_status)
+{
+	u32 reg_val;
+
+	reg_val = mvreg_read(pp, MVNETA_GMAC_STATUS);
+	if (reg_val & MVNETA_GMAC_LINK_UP)
+		*link_status = 1 /*TRUE*/;
+	else
+		*link_status = 0 /*FALSE*/;
+
+	return 0;
+}
+
+static u64 mvneta_eth_tool_link_test(struct mvneta_port *pp)
+{
+	int link_status;
+
+	netdev_info(pp->dev, "Link testing starting\n");
+
+	mvneta_gmac_link_status(pp, &link_status);
+
+	if (link_status)
+		return 0;
+
+	return 1;
+}
+
+static bool mvneta_reg_pattern_test(struct mvneta_port *pp, u32 offset, u32 mask, u32 write)
+{
+	static const u32 test[] = {0x5A5A5A5A, 0xA5A5A5A5, 0x00000000, 0xFFFFFFFF};
+	u32 read, old;
+	int i;
+
+	if (!mask)
+		return false;
+	old = mvreg_read(pp, offset);
+
+	for (i = 0; i < ARRAY_SIZE(test); i++) {
+		mvreg_write(pp, offset, write & test[i]);
+		read = mvreg_read(pp, offset);
+		if (read != (write & test[i] & mask)) {
+			netdev_err(pp->dev, "test %s offset 0x%x(test 0x%08X write 0x%08X mask 0x%08X) failed: ",
+				   pp->dev->name, offset, test[i], write, mask);
+			netdev_err(pp->dev, "got 0x%08X expected 0x%08X\n", read, (write & test[i] & mask));
+			mvreg_write(pp, offset, old);
+			return true;
+		}
+	}
+
+	mvreg_write(pp, offset, old);
+
+	return false;
+}
+
+static u64 mvneta_eth_tool_reg_test(struct mvneta_port *pp)
+{
+	int ind;
+	int err = 0;
+
+	netdev_info(pp->dev, "Register testing starting\n");
+
+	err += mvneta_reg_pattern_test(pp, MVNETA_GMAC_CTRL_0, MVNETA_TEST_MASK1, MVNETA_TEST_PATTERN1);
+	err += mvneta_reg_pattern_test(pp, MVNETA_GMAC_STATUS, MVNETA_TEST_MASK3, MVNETA_TEST_PATTERN3);
+
+	for (ind = 0; ind < rxq_number; ind++) {
+		err += mvneta_reg_pattern_test(pp, MVNETA_RXQ_CONFIG_REG(ind),
+					       MVNETA_TEST_MASK2, MVNETA_TEST_PATTERN2);
+		err += mvneta_reg_pattern_test(pp, MVNETA_RXQ_THRESHOLD_REG(ind),
+					       MVNETA_TEST_MASK2, MVNETA_TEST_PATTERN2);
+		err += mvneta_reg_pattern_test(pp, MVNETA_RXQ_BASE_ADDR_REG(ind),
+					       MVNETA_TEST_MASK3, MVNETA_TEST_PATTERN3);
+		err += mvneta_reg_pattern_test(pp, MVNETA_RXQ_SIZE_REG(ind),
+					       MVNETA_TEST_MASK2, MVNETA_TEST_PATTERN2);
+		err += mvneta_reg_pattern_test(pp, MVNETA_RXQ_STATUS_REG(ind),
+					       MVNETA_TEST_MASK3, MVNETA_TEST_PATTERN3);
+	}
+
+	for (ind = 0; ind < 6; ind++) {
+		err += mvneta_reg_pattern_test(pp, MVNETA_WIN_BASE(ind),
+					       MVNETA_TEST_MASK1, MVNETA_TEST_PATTERN1);
+		err += mvneta_reg_pattern_test(pp, MVNETA_WIN_SIZE(ind),
+					       MVNETA_TEST_MASK3, MVNETA_TEST_PATTERN3);
+	}
+
+	if (err)
+		return 1;
+
+	return 0;
+}
+
+static void mvneta_ethtool_diag_test(struct net_device *dev,
+				     struct ethtool_test *test, u64 *data)
+{
+	struct mvneta_port *pp = netdev_priv(dev);
+	int i;
+
+	memset(data, 0, MVNETA_TEST_LEN * sizeof(u64));
+
+	data[0] = mvneta_eth_tool_link_test(pp);
+	data[1] = mvneta_eth_tool_reg_test(pp);
+	for (i = 0; i < MVNETA_TEST_LEN; i++)
+		test->flags |= data[i] ? ETH_TEST_FL_FAILED : 0;
+
+	msleep_interruptible(4 * 1000);
+}
+
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 static const struct net_device_ops mvneta_netdev_ops = {
 	.ndo_open            = mvneta_open,
 	.ndo_stop            = mvneta_stop,
@@ -3113,6 +5406,22 @@ const struct ethtool_ops mvneta_eth_tool_ops = {
 	.get_strings	= mvneta_ethtool_get_strings,
 	.get_ethtool_stats = mvneta_ethtool_get_stats,
 	.get_sset_count	= mvneta_ethtool_get_sset_count,
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	.get_rxfh_indir_size = mvneta_ethtool_get_rxfh_indir_size,
+	.get_rxnfc	= mvneta_ethtool_get_rxnfc,
+	.get_rxfh	= mvneta_ethtool_get_rxfh,
+	.set_rxfh	= mvneta_ethtool_set_rxfh,
+	.get_regs_len	= mvneta_ethtool_get_regs_len,
+	.get_regs	= mvneta_ethtool_get_regs,
+	.nway_reset	= mvneta_ethtool_nway_reset,
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#if defined(CONFIG_SYNO_ARMADA37XX_WOL)
+	.get_wol	= syno_get_wol,
+	.set_wol	= syno_set_wol,
+#endif /* CONFIG_SYNO_ARMADA37XX_WOL */
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+	.self_test	= mvneta_ethtool_diag_test,
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 };
 
 /* Initialize hw */
@@ -3151,6 +5460,10 @@ static int mvneta_init(struct device *dev, struct mvneta_port *pp)
 		rxq->size = pp->rx_ring_size;
 		rxq->pkts_coal = MVNETA_RX_COAL_PKTS;
 		rxq->time_coal = MVNETA_RX_COAL_USEC;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+		atomic_set(&rxq->missed, 0);
+		atomic_set(&rxq->refill_stop, 0);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	}
 
 	return 0;
@@ -3175,6 +5488,32 @@ static void mvneta_conf_mbus_windows(struct mvneta_port *pp,
 	win_enable = 0x3f;
 	win_protect = 0;
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	if (dram) {
+		for (i = 0; i < dram->num_cs; i++) {
+			const struct mbus_dram_window *cs = dram->cs + i;
+
+			mvreg_write(pp, MVNETA_WIN_BASE(i),
+				    (cs->base & 0xffff0000) |
+				    (cs->mbus_attr << 8) |
+				    dram->mbus_dram_target_id);
+
+			mvreg_write(pp, MVNETA_WIN_SIZE(i),
+				    (cs->size - 1) & 0xffff0000);
+
+			win_enable &= ~(1 << i);
+			win_protect |= 3 << (2 * i);
+		}
+	} else {
+		/* For Armada3700 open default 4GB Mbus window, leaving
+		 * arbitration of target/attribute to a different layer
+		 * of configuration.
+		 */
+		mvreg_write(pp, MVNETA_WIN_SIZE(0), 0xffff0000);
+		win_enable &= ~BIT(0);
+		win_protect = 3;
+	}
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	for (i = 0; i < dram->num_cs; i++) {
 		const struct mbus_dram_window *cs = dram->cs + i;
 		mvreg_write(pp, MVNETA_WIN_BASE(i), (cs->base & 0xffff0000) |
@@ -3186,6 +5525,7 @@ static void mvneta_conf_mbus_windows(struct mvneta_port *pp,
 		win_enable &= ~(1 << i);
 		win_protect |= 3 << (2 * i);
 	}
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	mvreg_write(pp, MVNETA_BASE_ADDR_ENABLE, win_enable);
 	mvreg_write(pp, MVNETA_ACCESS_PROTECT_ENABLE, win_protect);
@@ -3221,9 +5561,13 @@ static int mvneta_port_power_up(struct mvneta_port *pp, int phy_mode)
 		return -EINVAL;
 	}
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+//do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	if (pp->use_inband_status)
 		ctrl |= MVNETA_GMAC2_INBAND_AN_ENABLE;
 
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	/* Cancel Port Reset */
 	ctrl &= ~MVNETA_GMAC2_PORT_RESET;
 	mvreg_write(pp, MVNETA_GMAC_CTRL_2, ctrl);
@@ -3242,6 +5586,9 @@ static int mvneta_probe(struct platform_device *pdev)
 	struct resource *res;
 	struct device_node *dn = pdev->dev.of_node;
 	struct device_node *phy_node;
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+	struct device_node *bm_node;
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	struct mvneta_port *pp;
 	struct net_device *dev;
 	const char *dt_mac_addr;
@@ -3252,6 +5599,10 @@ static int mvneta_probe(struct platform_device *pdev)
 	int phy_mode;
 	int err;
 	int cpu;
+#if defined(CONFIG_SYNO_ARMADA37XX_WOL)
+	int phy_id_0 = 0;
+	int phy_id_1 = 0;
+#endif /* CONFIG_SYNO_ARMADA37XX_WOL */
 
 	dev = alloc_etherdev_mqs(sizeof(struct mvneta_port), txq_number, rxq_number);
 	if (!dev)
@@ -3290,25 +5641,74 @@ static int mvneta_probe(struct platform_device *pdev)
 		goto err_put_phy_node;
 	}
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+	dev->tx_queue_len = MVNETA_TXD_NUM;
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	dev->tx_queue_len = MVNETA_MAX_TXD;
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	dev->watchdog_timeo = 5 * HZ;
 	dev->netdev_ops = &mvneta_netdev_ops;
 
 	dev->ethtool_ops = &mvneta_eth_tool_ops;
 
 	pp = netdev_priv(dev);
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	spin_lock_init(&pp->lock);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	pp->phy_node = phy_node;
 	pp->phy_interface = phy_mode;
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+	/* Get comphy and init if there is */
+	pp->comphy = devm_of_phy_get(&pdev->dev, dn, "comphy");
+	if (!IS_ERR(pp->comphy)) {
+		err = phy_init(pp->comphy);
+		if (err)
+			goto err_put_phy_node;
+
+		err = phy_power_on(pp->comphy);
+		if (err) {
+			phy_exit(pp->comphy);
+			goto err_exit_phy;
+		}
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+	} else
+		pp->comphy = NULL;
+#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+	}
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	err = of_property_read_string(dn, "managed", &managed);
 	pp->use_inband_status = (err == 0 &&
 				 strcmp(managed, "in-band-status") == 0);
 	pp->cpu_notifier.notifier_call = mvneta_percpu_notifier;
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	pp->rxq_def = rxq_def;
+
+	/* Set RX packet offset correction for platforms, whose NET_SKB_PAD,
+	 * exceeds 64B. It should be 64B for 64-bit platforms and 0B for
+	 * 32-bit ones.
+	 */
+	pp->rx_offset_correction =
+			  max(0, NET_SKB_PAD - MVNETA_RX_PKT_OFFSET_CORRECTION);
+
+	pp->indir[0] = rxq_def;
+
+	/* Get special SoC configurations */
+	if (of_device_is_compatible(dn, "marvell,armada3700-neta"))
+		pp->neta_armada3700 = true;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+
 	pp->clk = devm_clk_get(&pdev->dev, NULL);
 	if (IS_ERR(pp->clk)) {
 		err = PTR_ERR(pp->clk);
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+		goto err_off_phy;
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 		goto err_put_phy_node;
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	}
 
 	clk_prepare_enable(pp->clk);
@@ -3365,23 +5765,89 @@ static int mvneta_probe(struct platform_device *pdev)
 
 	pp->tx_csum_limit = tx_csum_limit;
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+	dram_target_info = mv_mbus_dram_info();
+	/* Armada3700 requires setting default configuration of Mbus
+	 * windows, however without using filled mbus_dram_target_info
+	 * structure.
+	 */
+	if (dram_target_info || pp->neta_armada3700)
+		mvneta_conf_mbus_windows(pp, dram_target_info);
+
+	pp->tx_ring_size = MVNETA_TXD_NUM;
+	pp->rx_ring_size = MVNETA_RXD_NUM;
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	pp->tx_ring_size = MVNETA_MAX_TXD;
 	pp->rx_ring_size = MVNETA_MAX_RXD;
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 
 	pp->dev = dev;
 	SET_NETDEV_DEV(dev, &pdev->dev);
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+	pp->id = global_port_id++;
+
+	/* Obtain access to BM resources if enabled and already initialized */
+	bm_node = of_parse_phandle(dn, "buffer-manager", 0);
+	if (bm_node && bm_node->data) {
+		pp->bm_priv = bm_node->data;
+		err = mvneta_bm_port_init(pdev, pp);
+		if (err < 0) {
+			dev_info(&pdev->dev, "use SW buffer management\n");
+			pp->bm_priv = NULL;
+		}
+	}
+
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	err = mvneta_init(&pdev->dev, pp);
 	if (err < 0)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+		goto err_netdev;
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 		goto err_free_stats;
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 
 	err = mvneta_port_power_up(pp, phy_mode);
 	if (err < 0) {
 		dev_err(&pdev->dev, "can't power up port\n");
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+		goto err_netdev;
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 		goto err_free_stats;
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	}
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+//do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	dram_target_info = mv_mbus_dram_info();
+	/* Armada3700 requires setting default configuration of Mbus
+	 * windows, however without using filled mbus_dram_target_info
+	 * structure.
+	 */
+	if (dram_target_info || pp->neta_armada3700)
+		mvneta_conf_mbus_windows(pp, dram_target_info);
+
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+	/* Armada3700 network controller does not support per-cpu
+	 * operation, so only single NAPI should be initialized.
+	 */
+	if (pp->neta_armada3700) {
+		netif_napi_add(dev, &pp->napi, mvneta_poll, NAPI_POLL_WEIGHT);
+	} else {
+		for_each_present_cpu(cpu) {
+			struct mvneta_pcpu_port *port =
+						    per_cpu_ptr(pp->ports, cpu);
+
+			netif_napi_add(dev, &port->napi, mvneta_poll,
+				       NAPI_POLL_WEIGHT);
+			port->pp = pp;
+		}
+	}
+
+	dev->features = NETIF_F_SG | NETIF_F_IP_CSUM | NETIF_F_RXCSUM | NETIF_F_TSO;
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	if (dram_target_info)
 		mvneta_conf_mbus_windows(pp, dram_target_info);
 
@@ -3393,6 +5859,7 @@ static int mvneta_probe(struct platform_device *pdev)
 	}
 
 	dev->features = NETIF_F_SG | NETIF_F_IP_CSUM | NETIF_F_TSO;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	dev->hw_features |= dev->features;
 	dev->vlan_features |= dev->features;
 	dev->priv_flags |= IFF_UNICAST_FLT | IFF_LIVE_ADDR_CHANGE;
@@ -3414,17 +5881,64 @@ static int mvneta_probe(struct platform_device *pdev)
 
 		mvneta_fixed_link_update(pp, phy);
 
-		put_device(&phy->dev);
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+		put_device(&phy->mdio.dev);
 	}
+	/* Initialize cleanup */
+	init_timer(&pp->cleanup_timer);
+	pp->cleanup_timer.function = mvneta_cleanup_timer_callback;
+	pp->cleanup_timer.data = (unsigned long)pp;
+
+	if (!pp->use_inband_status) {
+		err = mvneta_mdio_probe(pp);
+		if (err < 0) {
+			netdev_err(dev, "cannot probe MDIO bus\n");
+			goto err_netdev;
+		}
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+		put_device(&phy->dev);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+	}
+#if defined(CONFIG_SYNO_ARMADA37XX_WOL)
+	pp->wol = 0;
+	phy_id_0 = phy_read(pp->phy_dev, MII_PHYSID1);
+	phy_id_1 = phy_read(pp->phy_dev, MII_PHYSID2);
+
+	/* For 151X series phy */
+	if (MV_PHY_ID_151X == ((phy_id_0 & 0xffff) << 16 | (phy_id_1 & 0xfff0))) {
+		pp->phy_chip = MV_PHY_ID_151X;
+	} else {
+		pp->phy_chip = 0;
+	}
+#endif /* CONFIG_SYNO_ARMADA37XX_WOL */
 
 	return 0;
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+err_netdev:
+	unregister_netdev(dev);
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+	if (pp->bm_priv) {
+		mvneta_bm_pool_destroy(pp->bm_priv, pp->pool_long, 1 << pp->id);
+		mvneta_bm_pool_destroy(pp->bm_priv, pp->pool_short,
+				       1 << pp->id);
+	}
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 err_free_stats:
 	free_percpu(pp->stats);
 err_free_ports:
 	free_percpu(pp->ports);
 err_clk:
 	clk_disable_unprepare(pp->clk);
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+err_off_phy:
+	if (!IS_ERR(pp->comphy))
+		phy_power_off(pp->comphy);
+err_exit_phy:
+	if (!IS_ERR(pp->comphy))
+		phy_exit(pp->comphy);
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 err_put_phy_node:
 	of_node_put(phy_node);
 err_free_irq:
@@ -3439,7 +5953,10 @@ static int mvneta_remove(struct platform_device *pdev)
 {
 	struct net_device  *dev = platform_get_drvdata(pdev);
 	struct mvneta_port *pp = netdev_priv(dev);
-
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	if (!pp->use_inband_status)
+		mvneta_mdio_remove(pp);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	unregister_netdev(dev);
 	clk_disable_unprepare(pp->clk);
 	free_percpu(pp->ports);
@@ -3448,12 +5965,188 @@ static int mvneta_remove(struct platform_device *pdev)
 	of_node_put(pp->phy_node);
 	free_netdev(dev);
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+	if (pp->bm_priv) {
+		mvneta_bm_pool_destroy(pp->bm_priv, pp->pool_long, 1 << pp->id);
+		mvneta_bm_pool_destroy(pp->bm_priv, pp->pool_short,
+				       1 << pp->id);
+	}
+
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+	if (pp->comphy) {
+#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+	if (!IS_ERR(pp->comphy)) {
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+		phy_power_off(pp->comphy);
+		phy_exit(pp->comphy);
+	}
+
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	return 0;
 }
+
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#ifdef CONFIG_PM_SLEEP
+static int mvneta_suspend(struct platform_device *pdev, pm_message_t state)
+{
+	struct net_device *dev = platform_get_drvdata(pdev);
+	struct mvneta_port *pp = netdev_priv(dev);
+
+	mvneta_ethtool_update_stats(pp);
+
+	if (!netif_running(dev))
+		goto phy_off;
+
+	netif_device_detach(dev);
+
+	mvneta_stop_dev(pp);
+	if (!pp->neta_armada3700)
+		unregister_cpu_notifier(&pp->cpu_notifier);
+	mvneta_cleanup_rxqs(pp);
+	mvneta_cleanup_txqs(pp);
+
+phy_off:
+	if (!pp->use_inband_status)
+		mvneta_mdio_remove(pp);
+	/* trurn off serdes */
+	if (pp->comphy) {
+		phy_power_off(pp->comphy);
+		phy_exit(pp->comphy);
+	}
+
+	/* Reset link status */
+	pp->link = 0;
+	pp->duplex = -1;
+	pp->speed = 0;
+
+	return 0;
+}
+
+static int mvneta_resume(struct platform_device *pdev)
+{
+	const struct mbus_dram_target_info *dram_target_info;
+	struct net_device *dev = platform_get_drvdata(pdev);
+	struct mvneta_port *pp = netdev_priv(dev);
+	int ret;
+
+	/* trurn on serdes */
+	if (pp->comphy) {
+		ret = phy_init(pp->comphy);
+		if (ret)
+			return -1;
+
+		ret = phy_power_on(pp->comphy);
+		if (ret) {
+			pr_err("%s: cannot phy_power_on on port %d\n", __func__, pp->id);
+			phy_exit(pp->comphy);
+			return -1;
+		}
+	}
+	if (!pp->use_inband_status) {
+		ret = mvneta_mdio_probe(pp);
+		if (ret < 0) {
+			netdev_err(dev, "cannot probe MDIO bus\n");
+			return -1;
+		}
+	}
+	mvneta_defaults_set(pp);
+	mvneta_port_power_up(pp, pp->phy_interface);
+
+	dram_target_info = mv_mbus_dram_info();
+	if (dram_target_info || pp->neta_armada3700)
+		mvneta_conf_mbus_windows(pp, dram_target_info);
+
+	if (!netif_running(dev))
+		return 0;
+
+	ret = mvneta_setup_rxqs(pp);
+	if (ret) {
+		netdev_err(dev, "unable to setup rxqs after resume\n");
+		return ret;
+	}
+
+	ret = mvneta_setup_txqs(pp);
+	if (ret) {
+		netdev_err(dev, "unable to setup txqs after resume\n");
+		return ret;
+	}
+
+	mvneta_set_rx_mode(dev);
+	if (!pp->neta_armada3700) {
+		mvneta_percpu_elect(pp);
+		register_cpu_notifier(&pp->cpu_notifier);
+	}
+
+	mvneta_start_dev(pp);
+
+	netif_device_attach(dev);
+
+	return 0;
+}
+#endif /* CONFIG_PM_SLEEP */
+
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+
+#if defined(CONFIG_SYNO_ARMADA37XX_WOL)
+void syno_mv_net_setup_wol(struct platform_device *pdev)
+{
+	int i = 0;
+	u16 macTmp[3] = {0};
+	int phyTmp = 0;
+	struct net_device *dev = platform_get_drvdata(pdev);
+	struct mvneta_port *pp = netdev_priv(dev);
+
+	if (NULL == pp) {
+		goto END;
+	}
+
+	if (!syno_wol_support(pp)) {
+		goto END;
+	}
+
+	if (MV_PHY_ID_151X == pp->phy_chip) {
+		/* Step 1: clear interrupt no matter enable or disable */
+		phy_write(pp->phy_dev, 0x16, 0x11);
+		phy_write(pp->phy_dev, 0x10, 0x1000);
+		phy_write(pp->phy_dev, 0x16, 0x0);
+
+		/* Step 2: enable */
+		if (pp->wol & WAKE_MAGIC) {
+			printk("WOL MAC address: %pM\n", pp->dev->dev_addr);
+			for (i = 0; i < 3; ++i) {
+				macTmp[i] = (pp->dev->dev_addr[i * 2] & 0xff) | (pp->dev->dev_addr[i * 2 + 1] & 0xff) << 8;
+			}
+			phy_write(pp->phy_dev, 0x16, 0x0);
+			phyTmp = phy_read(pp->phy_dev, 0x12);
+			phy_write(pp->phy_dev, 0x12, phyTmp | 0x80);
+			phy_write(pp->phy_dev, 0x16, 0x3);
+			phyTmp = phy_read(pp->phy_dev, 0x12);
+			phy_write(pp->phy_dev, 0x12, (phyTmp & 0x7fff) | 0x4880);
+			phy_write(pp->phy_dev, 0x16, 0x11);
+			phy_write(pp->phy_dev, 0x17, macTmp[2]);
+			phy_write(pp->phy_dev, 0x18, macTmp[1]);
+			phy_write(pp->phy_dev, 0x19, macTmp[0]);
+			phy_write(pp->phy_dev, 0x10, 0x4000);
+			phy_write(pp->phy_dev, 0x16, 0x0);
+		}
+	}
+END:
+	return;
+}
+
+static void syno_shutdown(struct platform_device *pdev)
+{
+	printk(KERN_INFO "Shutting Down Marvell Ethernet Driver\n");
+	syno_mv_net_setup_wol(pdev);
+}
+#endif /* CONFIG_SYNO_ARMADA37XX_WOL */
 
 static const struct of_device_id mvneta_match[] = {
 	{ .compatible = "marvell,armada-370-neta" },
 	{ .compatible = "marvell,armada-xp-neta" },
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	{ .compatible = "marvell,armada3700-neta" },
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	{ }
 };
 MODULE_DEVICE_TABLE(of, mvneta_match);
@@ -3461,6 +6154,15 @@ MODULE_DEVICE_TABLE(of, mvneta_match);
 static struct platform_driver mvneta_driver = {
 	.probe = mvneta_probe,
 	.remove = mvneta_remove,
+#if defined(CONFIG_SYNO_ARMADA37XX_WOL)
+	.shutdown = syno_shutdown,
+#endif /* CONFIG_SYNO_ARMADA37XX_WOL */
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#ifdef CONFIG_PM_SLEEP
+	.suspend = mvneta_suspend,
+	.resume = mvneta_resume,
+#endif
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 	.driver = {
 		.name = MVNETA_DRIVER_NAME,
 		.of_match_table = mvneta_match,

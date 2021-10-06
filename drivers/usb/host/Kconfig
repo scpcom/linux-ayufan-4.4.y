@@ -205,7 +205,7 @@ config USB_EHCI_HCD_OMAP
 
 config USB_EHCI_HCD_ORION
 	tristate  "Support for Marvell EBU on-chip EHCI USB controller"
-	depends on USB_EHCI_HCD && PLAT_ORION
+	depends on USB_EHCI_HCD && (PLAT_ORION || (ARCH_MVEBU && SYNO_LSP_ARMADA_16_12))
 	default y
 	---help---
 	  Enables support for the on-chip EHCI controller on Marvell's

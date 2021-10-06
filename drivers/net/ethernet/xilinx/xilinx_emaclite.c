@@ -112,7 +112,7 @@
  * @phy_dev:		pointer to the PHY device
  * @phy_node:		pointer to the PHY device node
  * @mii_bus:		pointer to the MII bus
- * @mdio_irqs:		IRQs table for MDIO bus
+ * @mdio_irqs(for not armada37xx 16.12):		IRQs table for MDIO bus
  * @last_link:		last link status
  * @has_mdio:		indicates whether MDIO is included in the HW
  */
@@ -133,7 +133,11 @@ struct net_local {
 	struct device_node *phy_node;
 
 	struct mii_bus *mii_bus;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+//do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	int mdio_irqs[PHY_MAX_ADDR];
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	int last_link;
 	bool has_mdio;
@@ -826,7 +830,11 @@ static int xemaclite_mdio_setup(struct net_local *lp, struct device *dev)
 			dev_info(dev,
 				 "MDIO of the phy is not registered yet\n");
 		else
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+			put_device(&phydev->mdio.dev);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 			put_device(&phydev->dev);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		return 0;
 	}
 
@@ -849,7 +857,11 @@ static int xemaclite_mdio_setup(struct net_local *lp, struct device *dev)
 	bus->read = xemaclite_mdio_read;
 	bus->write = xemaclite_mdio_write;
 	bus->parent = dev;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+//do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	bus->irq = lp->mdio_irqs; /* preallocated IRQ table */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	lp->mii_bus = bus;
 
@@ -1193,7 +1205,11 @@ static int xemaclite_of_remove(struct platform_device *of_dev)
 	/* Un-register the mii_bus, if configured */
 	if (lp->has_mdio) {
 		mdiobus_unregister(lp->mii_bus);
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+//do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		kfree(lp->mii_bus->irq);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		mdiobus_free(lp->mii_bus);
 		lp->mii_bus = NULL;
 	}

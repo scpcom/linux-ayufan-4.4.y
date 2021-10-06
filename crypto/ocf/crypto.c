@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*-
  * Linux port done by David McCullough <david_mccullough@mcafee.com>
  * Copyright (C) 2006-2010 David McCullough
@@ -1267,7 +1270,11 @@ crypto_proc(void *arg)
 	struct cryptocap *cap;
 	u_int32_t hid;
 	int result, hint;
+#if defined(MY_DEF_HERE)
+	unsigned long q_flags, wait_flags;
+#else /* MY_DEF_HERE */
 	unsigned long q_flags;
+#endif /* MY_DEF_HERE */
 	int loopcount = 0;
 
 	set_current_state(TASK_INTERRUPTIBLE);
@@ -1424,10 +1431,18 @@ crypto_proc(void *arg)
 					list_empty(&crp_kq), crypto_all_kqblocked);
 			loopcount = 0;
 			CRYPTO_Q_UNLOCK();
+#if defined(MY_DEF_HERE)
+			spin_lock_irqsave(&cryptoproc_wait.lock, wait_flags);
+			wait_event_interruptible_locked_irq(cryptoproc_wait,
+#else /* MY_DEF_HERE */
 			wait_event_interruptible(cryptoproc_wait,
+#endif /* MY_DEF_HERE */
 					!(list_empty(&crp_q) || crypto_all_qblocked) ||
 					!(list_empty(&crp_kq) || crypto_all_kqblocked) ||
 					kthread_should_stop());
+#if defined(MY_DEF_HERE)
+			spin_unlock_irqrestore(&cryptoproc_wait.lock, wait_flags);
+#endif /* MY_DEF_HERE */
 			if (signal_pending (current)) {
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,0)
 				spin_lock_irq(&current->sigmask_lock);
@@ -1468,7 +1483,11 @@ crypto_ret_proc(void *arg)
 {
 	struct cryptop *crpt;
 	struct cryptkop *krpt;
+#if defined(MY_DEF_HERE)
+	unsigned long  r_flags, wait_flags;
+#else /* MY_DEF_HERE */
 	unsigned long  r_flags;
+#endif /* MY_DEF_HERE */
 
 	set_current_state(TASK_INTERRUPTIBLE);
 
@@ -1504,10 +1523,18 @@ crypto_ret_proc(void *arg)
 			 */
 			dprintk("%s - sleeping\n", __FUNCTION__);
 			CRYPTO_RETQ_UNLOCK();
+#if defined(MY_DEF_HERE)
+			spin_lock_irqsave(&cryptoretproc_wait.lock, wait_flags);
+			wait_event_interruptible_locked_irq(cryptoretproc_wait,
+#else /* MY_DEF_HERE */
 			wait_event_interruptible(cryptoretproc_wait,
+#endif /* MY_DEF_HERE */
 					!list_empty(&crp_ret_q) ||
 					!list_empty(&crp_ret_kq) ||
 					kthread_should_stop());
+#if defined(MY_DEF_HERE)
+			spin_unlock_irqrestore(&cryptoretproc_wait.lock, wait_flags);
+#endif /* MY_DEF_HERE */
 			if (signal_pending (current)) {
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,0)
 				spin_lock_irq(&current->sigmask_lock);

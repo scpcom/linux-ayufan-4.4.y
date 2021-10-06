@@ -304,7 +304,11 @@ static int bf5xx_nand_correct_data_256(struct mtd_info *mtd, u_char *dat,
 static int bf5xx_nand_correct_data(struct mtd_info *mtd, u_char *dat,
 					u_char *read_ecc, u_char *calc_ecc)
 {
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	struct nand_chip *chip = mtd_to_nand(mtd);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct nand_chip *chip = mtd->priv;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	int ret;
 
 	ret = bf5xx_nand_correct_data_256(mtd, dat, read_ecc, calc_ecc);
@@ -329,7 +333,11 @@ static int bf5xx_nand_calculate_ecc(struct mtd_info *mtd,
 		const u_char *dat, u_char *ecc_code)
 {
 	struct bf5xx_nand_info *info = mtd_to_nand_info(mtd);
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	struct nand_chip *chip = mtd_to_nand(mtd);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct nand_chip *chip = mtd->priv;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	u16 ecc0, ecc1;
 	u32 code[2];
 	u8 *p;
@@ -466,7 +474,11 @@ static void bf5xx_nand_dma_rw(struct mtd_info *mtd,
 				uint8_t *buf, int is_read)
 {
 	struct bf5xx_nand_info *info = mtd_to_nand_info(mtd);
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	struct nand_chip *chip = mtd_to_nand(mtd);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct nand_chip *chip = mtd->priv;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	unsigned short val;
 
 	dev_dbg(info->device, " mtd->%p, buf->%p, is_read %d\n",
@@ -532,7 +544,11 @@ static void bf5xx_nand_dma_read_buf(struct mtd_info *mtd,
 					uint8_t *buf, int len)
 {
 	struct bf5xx_nand_info *info = mtd_to_nand_info(mtd);
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	struct nand_chip *chip = mtd_to_nand(mtd);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct nand_chip *chip = mtd->priv;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	dev_dbg(info->device, "mtd->%p, buf->%p, int %d\n", mtd, buf, len);
 
@@ -546,7 +562,11 @@ static void bf5xx_nand_dma_write_buf(struct mtd_info *mtd,
 				const uint8_t *buf, int len)
 {
 	struct bf5xx_nand_info *info = mtd_to_nand_info(mtd);
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	struct nand_chip *chip = mtd_to_nand(mtd);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct nand_chip *chip = mtd->priv;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	dev_dbg(info->device, "mtd->%p, buf->%p, len %d\n", mtd, buf, len);
 
@@ -685,7 +705,11 @@ static int bf5xx_nand_remove(struct platform_device *pdev)
 
 static int bf5xx_nand_scan(struct mtd_info *mtd)
 {
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	struct nand_chip *chip = mtd_to_nand(mtd);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct nand_chip *chip = mtd->priv;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	int ret;
 
 	ret = nand_scan_ident(mtd, 1, NULL);

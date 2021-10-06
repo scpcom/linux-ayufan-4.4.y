@@ -10,6 +10,14 @@
 #include <linux/quotaops.h>
 #include <linux/pagevec.h>
 #include <linux/uio.h>
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#ifdef CONFIG_SPLICE_FROM_SOCKET
+#include <linux/backing-dev.h>
+#include <linux/fsnotify.h>
+#include <linux/swap.h>
+#include <net/sock.h>
+#endif
+#endif  
 #include "ext4.h"
 #include "ext4_jbd2.h"
 #include "xattr.h"
@@ -350,6 +358,225 @@ static int ext4_file_open(struct inode * inode, struct file * filp)
 	return dquot_file_open(inode, filp);
 }
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#ifdef CONFIG_SPLICE_FROM_SOCKET
+ssize_t ext4_splice_from_socket(struct file *file, struct socket *sock,
+				loff_t __user *ppos, size_t count_req)
+{
+	struct address_space *mapping = file->f_mapping;
+	const struct address_space_operations *a_ops = mapping->a_ops;
+	struct inode *inode = mapping->host;
+	int err = 0, remaining;
+	struct kvec iov;
+	struct msghdr msg = { 0 };
+	size_t written = 0, verified_sz;
+	struct kiocb iocb;
+	struct iov_iter iter;
+
+	init_sync_kiocb(&iocb, file);
+
+	if (unlikely(iocb.ki_flags & IOCB_DIRECT))
+		return -EINVAL;
+
+	if (copy_from_user(&iocb.ki_pos, ppos, sizeof(loff_t)))
+		return -EFAULT;
+
+	iov_iter_init(&iter, WRITE, NULL, 0, count_req);
+
+	file_start_write(file);
+
+	mutex_lock(&inode->i_mutex);
+	verified_sz = generic_write_checks(&iocb, &iter);
+	if (verified_sz <= 0) {
+		pr_debug("%s: generic_write_checks err, verified_sz %zd\n",
+			 __func__, verified_sz);
+		err = verified_sz;
+		goto cleanup;
+	}
+
+	if (!(ext4_test_inode_flag(inode, EXT4_INODE_EXTENTS))) {
+		struct ext4_sb_info *sbi = EXT4_SB(inode->i_sb);
+
+		if (iocb.ki_pos >= sbi->s_bitmap_maxbytes) {
+			err = -EFBIG;
+			goto cleanup;
+		}
+		iov_iter_truncate(&iter, sbi->s_bitmap_maxbytes - iocb.ki_pos);
+	}
+
+	current->backing_dev_info = inode_to_bdi(inode);
+
+	err = file_remove_privs(file);
+	if (err) {
+		pr_debug("%s: file_remove_privs, err %d\n", __func__, err);
+		goto cleanup;
+	}
+
+	err = file_update_time(file);
+	if (err) {
+		pr_debug("%s: file_update_time, err %d\n", __func__, err);
+		goto cleanup;
+	}
+
+	remaining = iter.count;
+
+	while (remaining > 0) {
+		unsigned long offset;	 
+		unsigned long bytes;	 
+		int copied;		 
+		struct page *page;
+		void *fsdata;
+		long rcvtimeo;
+		char *paddr;
+
+		offset = (iocb.ki_pos & (PAGE_CACHE_SIZE - 1));
+		bytes = min_t(unsigned long, PAGE_CACHE_SIZE - offset,
+			      remaining);
+
+		err = a_ops->write_begin(file, mapping, iocb.ki_pos,
+					 bytes, AOP_FLAG_UNINTERRUPTIBLE,
+					 &page, &fsdata);
+		if (unlikely(err)) {
+			pr_debug("%s: write_begin err %d\n", __func__, err);
+			break;
+		}
+
+		if (mapping_writably_mapped(mapping))
+			flush_dcache_page(page);
+
+		paddr = kmap(page) + offset;
+		iov.iov_base = paddr;
+		iov.iov_len = bytes;
+
+		rcvtimeo = sock->sk->sk_rcvtimeo;
+		sock->sk->sk_rcvtimeo = 5 * HZ;
+
+		copied = kernel_recvmsg(sock, &msg, &iov, 1,
+					bytes, MSG_WAITALL);
+
+		sock->sk->sk_rcvtimeo = rcvtimeo;
+
+		if (unlikely(copied <= 0)) {
+			kunmap(page);
+
+			err = copied;
+
+			pr_debug("%s: kernel_recvmsg err %d\n", __func__, err);
+
+			a_ops->write_end(file, mapping, iocb.ki_pos,
+					 bytes, 0, page, fsdata);
+			break;
+		}
+
+		if (unlikely(copied != bytes)) {
+			char *kaddr;
+			char *buff;
+
+			pr_debug("%s: partial bytes %ld copied %d\n",
+				 __func__, bytes, copied);
+
+			buff = kmalloc(copied, GFP_KERNEL);
+			if (unlikely(!buff)) {
+				err = -ENOMEM;
+				break;
+			}
+			 
+			memcpy(buff, paddr, copied);
+
+			kunmap(page);
+			err = a_ops->write_end(file, mapping, iocb.ki_pos,
+					       bytes, 0, page, fsdata);
+			if (unlikely(err < 0)) {
+				kfree(buff);
+				pr_debug("%s: write_end partial, err %d\n",
+					 __func__, err);
+				break;
+			}
+
+			err = a_ops->write_begin(file, mapping, iocb.ki_pos, copied,
+						 AOP_FLAG_UNINTERRUPTIBLE,
+						 &page, &fsdata);
+			if (unlikely(err)) {
+				kfree(buff);
+				pr_debug("%s: write_begin partial, err %d\n",
+					 __func__, err);
+				break;
+			}
+
+			if (mapping_writably_mapped(mapping))
+				flush_dcache_page(page);
+
+			kaddr = kmap_atomic(page) + offset;
+			memcpy(kaddr, buff, copied);
+
+			kfree(buff);
+			kunmap_atomic(kaddr);
+
+			mark_page_accessed(page);
+			err = a_ops->write_end(file, mapping, iocb.ki_pos,
+					       copied, copied, page, fsdata);
+			if (unlikely(err < 0)) {
+				pr_debug("%s: write_end partial, err %d\n",
+					 __func__, err);
+				break;
+			}
+
+			iocb.ki_pos += copied;
+			written += copied;
+
+			WARN_ON(copied != err);
+
+			break;
+		}
+
+		kunmap(page);
+
+		mark_page_accessed(page);
+		err = a_ops->write_end(file, mapping, iocb.ki_pos, bytes,
+				       copied, page, fsdata);
+
+		if (unlikely(err < 0)) {
+			pr_debug("%s: write_end, err %d\n", __func__, err);
+			break;
+		}
+
+		remaining -= copied;
+		iocb.ki_pos += copied;
+		written += copied;
+
+		if (WARN_ON(copied != err))
+			break;
+	}
+
+	if (written > 0)
+		balance_dirty_pages_ratelimited(mapping);
+
+cleanup:
+	current->backing_dev_info = NULL;
+
+	mutex_unlock(&inode->i_mutex);
+
+	if (written > 0) {
+		err = generic_write_sync(file, iocb.ki_pos - written, written);
+		if (err < 0) {
+			written = 0;
+			goto done;
+		}
+		fsnotify_modify(file);
+
+		if (copy_to_user(ppos, &iocb.ki_pos, sizeof(loff_t))) {
+			written = 0;
+			err = -EFAULT;
+		}
+	}
+done:
+	file_end_write(file);
+
+	return written ? written : err;
+}
+#endif
+#endif  
+
 static int ext4_find_unwritten_pgoff(struct inode *inode,
 				     int whence,
 				     struct ext4_map_blocks *map,
@@ -628,6 +855,11 @@ const struct file_operations ext4_file_operations = {
 #if defined(CONFIG_SENDFILE_PATCH)
 	.splice_from_socket = generic_splice_from_socket,
 #endif
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#ifdef CONFIG_SPLICE_FROM_SOCKET
+	.splice_from_socket = ext4_splice_from_socket,
+#endif
+#endif  
 	.fallocate	= ext4_fallocate,
 };
 

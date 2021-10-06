@@ -53,10 +53,18 @@ head-y		:= arch/arm64/kernel/head.o
 ifeq ($(CONFIG_ARM64_RANDOMIZE_TEXT_OFFSET), y)
 TEXT_OFFSET := $(shell awk 'BEGIN {srand(); printf "0x%03x000\n", int(512 * rand())}')
 else
-ifeq ($(CONFIG_SYNO_RTD1296), y)
+ifeq ($(CONFIG_SYNO_LSP_RTD129X), y)
 TEXT_OFFSET := 0x00280000
 else
+ifeq ($(CONFIG_SYNO_LSP_ARMADA_16_12), y)
+ifeq ($(CONFIG_ARCH_MVEBU_PD), y)
+TEXT_OFFSET := 0x00180000
+else
 TEXT_OFFSET := 0x00080000
+endif
+else
+TEXT_OFFSET := 0x00080000
+endif
 endif
 endif
 
@@ -84,7 +92,7 @@ KBUILD_DTBS	:= dtbs
 all:	$(KBUILD_IMAGE) $(KBUILD_DTBS)
 
 boot := arch/arm64/boot
-ifeq ($(CONFIG_SYNO_RTD1296), y)
+ifeq ($(CONFIG_SYNO_LSP_RTD129X), y)
 DTC_FLAGS ?= -p 8192
 endif
 
@@ -98,7 +106,7 @@ zinstall install: vmlinux
 	$(Q)$(MAKE) $(build)=$(boot) $@
 
 %.dtb: scripts
-ifeq ($(CONFIG_SYNO_RTD1296), y)
+ifeq ($(CONFIG_SYNO_LSP_RTD129X), y)
 	$(Q)$(MAKE) $(build)=$(boot)/dts DTC_FLAGS="$(DTC_FLAGS)" $(boot)/dts/$@
 else
 	$(Q)$(MAKE) $(build)=$(boot)/dts $(boot)/dts/$@
@@ -107,7 +115,7 @@ endif
 PHONY += dtbs dtbs_install
 
 dtbs: prepare scripts
-ifeq ($(CONFIG_SYNO_RTD1296), y)
+ifeq ($(CONFIG_SYNO_LSP_RTD129X), y)
 	$(Q)$(MAKE) $(build)=$(boot)/dts DTC_FLAGS="$(DTC_FLAGS)"
 else
 	$(Q)$(MAKE) $(build)=$(boot)/dts

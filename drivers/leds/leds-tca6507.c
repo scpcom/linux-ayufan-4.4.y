@@ -651,7 +651,11 @@ static int tca6507_probe_gpios(struct i2c_client *client,
 	tca->gpio.owner = THIS_MODULE;
 	tca->gpio.direction_output = tca6507_gpio_direction_output;
 	tca->gpio.set = tca6507_gpio_set_value;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	tca->gpio.parent = &client->dev;
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	tca->gpio.dev = &client->dev;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 #ifdef CONFIG_OF_GPIO
 	tca->gpio.of_node = of_node_get(client->dev.of_node);
 #endif

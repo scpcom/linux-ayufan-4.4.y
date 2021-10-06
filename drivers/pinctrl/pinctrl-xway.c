@@ -648,7 +648,11 @@ static struct ltq_pinmux_info xway_info = {
 /* ---------  gpio_chip related code --------- */
 static void xway_gpio_set(struct gpio_chip *chip, unsigned int pin, int val)
 {
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	struct ltq_pinmux_info *info = dev_get_drvdata(chip->parent);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct ltq_pinmux_info *info = dev_get_drvdata(chip->dev);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	if (val)
 		gpio_setbit(info->membase[0], GPIO_OUT(pin), PORT_PIN(pin));
@@ -658,14 +662,22 @@ static void xway_gpio_set(struct gpio_chip *chip, unsigned int pin, int val)
 
 static int xway_gpio_get(struct gpio_chip *chip, unsigned int pin)
 {
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	struct ltq_pinmux_info *info = dev_get_drvdata(chip->parent);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct ltq_pinmux_info *info = dev_get_drvdata(chip->dev);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	return gpio_getbit(info->membase[0], GPIO_IN(pin), PORT_PIN(pin));
 }
 
 static int xway_gpio_dir_in(struct gpio_chip *chip, unsigned int pin)
 {
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	struct ltq_pinmux_info *info = dev_get_drvdata(chip->parent);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct ltq_pinmux_info *info = dev_get_drvdata(chip->dev);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	gpio_clearbit(info->membase[0], GPIO_DIR(pin), PORT_PIN(pin));
 
@@ -674,7 +686,11 @@ static int xway_gpio_dir_in(struct gpio_chip *chip, unsigned int pin)
 
 static int xway_gpio_dir_out(struct gpio_chip *chip, unsigned int pin, int val)
 {
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	struct ltq_pinmux_info *info = dev_get_drvdata(chip->parent);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct ltq_pinmux_info *info = dev_get_drvdata(chip->dev);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	gpio_setbit(info->membase[0], GPIO_DIR(pin), PORT_PIN(pin));
 	xway_gpio_set(chip, pin, val);
@@ -782,7 +798,11 @@ static int pinmux_xway_probe(struct platform_device *pdev)
 	xway_pctrl_desc.pins = xway_info.pads;
 
 	/* load the gpio chip */
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	xway_chip.parent = &pdev->dev;
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	xway_chip.dev = &pdev->dev;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	ret = gpiochip_add(&xway_chip);
 	if (ret) {
 		dev_err(&pdev->dev, "Failed to register gpio chip\n");

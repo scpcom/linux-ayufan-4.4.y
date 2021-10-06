@@ -93,34 +93,9 @@ struct ohci_rtk {
     struct device *dev;
     struct ohci_hcd *ohci;
     int irq;
-
-    struct work_struct work;
 };
 
 extern void rtk_usb_init_power_on(struct device *dev);
-
-static void ohci_rtk_probe_work(struct work_struct *work) {
-    struct ohci_rtk *rtk = container_of(work, struct ohci_rtk, work);
-    struct device		*dev = rtk->dev;
-    struct usb_hcd *hcd = ohci_to_hcd(rtk->ohci);
-    int irq = rtk->irq;
-    int ret = 0;
-
-    unsigned long probe_time = jiffies;
-
-    dev_info(dev, "%s Start ...\n",__func__);
-
-    ret = usb_add_hcd(hcd, irq, IRQF_SHARED);
-    if (ret) {
-        dev_err(dev, "%s: error add hcd\n", __func__);
-        usb_put_hcd(hcd);
-    }
-
-    rtk_usb_init_power_on(dev);
-
-    dev_info(dev, "%s End ... ok! (take %d ms)\n", __func__, jiffies_to_msecs(jiffies - probe_time));
-    return;
-}
 
 static int ohci_rtk_drv_probe(struct platform_device *pdev)
 {
@@ -192,28 +167,13 @@ static int ohci_rtk_drv_probe(struct platform_device *pdev)
 
     ohci_hcd_init(ohci);
 
-    if (of_property_read_bool(pdev->dev.of_node, "delay_probe_work")) {
-        struct ohci_rtk *rtk;
-        rtk = devm_kzalloc(&pdev->dev, sizeof(*rtk), GFP_KERNEL);
-        if (!rtk) {
-            dev_err(&pdev->dev, "not enough memory\n");
-            ret = -ENOMEM;
-            goto err2;
-        }
-        rtk->dev = &pdev->dev;
-        rtk->ohci = ohci;
-        rtk->irq = irq;
-        INIT_WORK(&rtk->work, ohci_rtk_probe_work);
-        schedule_work(&rtk->work);
-    } else {
-        ret = usb_add_hcd(hcd, irq, IRQF_SHARED);
-        if (ret) {
-            dev_err(&pdev->dev, "failed to add hcd with err %d\n", ret);
-            goto err2;
-        }
-
-	rtk_usb_init_power_on(&pdev->dev);
+    ret = usb_add_hcd(hcd, irq, IRQF_SHARED);
+    if (ret) {
+        dev_err(&pdev->dev, "failed to add hcd with err %d\n", ret);
+        goto err2;
     }
+
+    rtk_usb_init_power_on(&pdev->dev);
 
     platform_set_drvdata(pdev, hcd);
 

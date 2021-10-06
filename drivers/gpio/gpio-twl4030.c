@@ -256,7 +256,11 @@ static int twl_request(struct gpio_chip *chip, unsigned offset)
 		/* optionally have the first two GPIOs switch vMMC1
 		 * and vMMC2 power supplies based on card presence.
 		 */
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+		pdata = dev_get_platdata(chip->parent);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		pdata = dev_get_platdata(chip->dev);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		if (pdata)
 			value |= pdata->mmc_cd & 0x03;
 
@@ -509,7 +513,11 @@ no_irqs:
 	priv->gpio_chip = template_chip;
 	priv->gpio_chip.base = -1;
 	priv->gpio_chip.ngpio = TWL4030_GPIO_MAX;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	priv->gpio_chip.parent = &pdev->dev;
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	priv->gpio_chip.dev = &pdev->dev;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	mutex_init(&priv->mutex);
 

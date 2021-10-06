@@ -13,7 +13,21 @@ obj-$(CONFIG_PHY_EXYNOS_MIPI_VIDEO)	+= phy-exynos-mipi-video.o
 obj-$(CONFIG_PHY_LPC18XX_USB_OTG)	+= phy-lpc18xx-usb-otg.o
 obj-$(CONFIG_PHY_PXA_28NM_USB2)		+= phy-pxa-28nm-usb2.o
 obj-$(CONFIG_PHY_PXA_28NM_HSIC)		+= phy-pxa-28nm-hsic.o
+ifeq ($(CONFIG_SYNO_LSP_ARMADA_16_12), y)
+ifeq ($(CONFIG_SYNO_LSP_ARMADA_17_02_02), y)
+obj-$(CONFIG_PHY_MVEBU_COMPHY)		+= phy-comphy-mvebu.o
+obj-$(CONFIG_PHY_MVEBU_COMPHY_CP110)	+= phy-comphy-cp110.o
+ifeq ($(CONFIG_SYNO_LSP_ARMADA_17_04_02), y)
+obj-$(CONFIG_PHY_MVEBU_COMPHY_A3700)	+= phy-comphy-a3700.o
+endif # CONFIG_SYNO_LSP_ARMADA_17_04_02
+else  # CONFIG_SYNO_LSP_ARMADA_17_02_02
+obj-$(CONFIG_PHY_MVEBU_COMPHY)		+= phy-mvebu-comphy.o
+endif # CONFIG_SYNO_LSP_ARMADA_17_02_02
+endif
 obj-$(CONFIG_PHY_MVEBU_SATA)		+= phy-mvebu-sata.o
+ifeq ($(CONFIG_SYNO_LSP_ARMADA_17_04_02), y)
+obj-$(CONFIG_PHY_ARMADA3700_UTMI)	+= phy-armada3700-utmi.o
+endif # CONFIG_SYNO_LSP_ARMADA_17_04_02
 obj-$(CONFIG_PHY_MIPHY28LP) 		+= phy-miphy28lp.o
 obj-$(CONFIG_PHY_MIPHY365X)		+= phy-miphy365x.o
 obj-$(CONFIG_PHY_RCAR_GEN2)		+= phy-rcar-gen2.o

@@ -222,7 +222,7 @@ static void note_page(struct pg_state *st, unsigned long addr, unsigned level,
 #ifdef MY_DEF_HERE
 			seq_printf(st->seq, "0x%.8lx-0x%.8lx   ",
 				   virt_to_phys(st->start_address), virt_to_phys(addr));
-#endif
+#endif /* MY_DEF_HERE */
 
 			delta = (addr - st->start_address) >> 10;
 			while (!(delta & 1023) && unit[1]) {

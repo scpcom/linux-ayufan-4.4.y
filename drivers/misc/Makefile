@@ -56,3 +56,9 @@ obj-$(CONFIG_GENWQE)		+= genwqe/
 obj-$(CONFIG_ECHO)		+= echo/
 obj-$(CONFIG_VEXPRESS_SYSCFG)	+= vexpress-syscfg.o
 obj-$(CONFIG_CXL_BASE)		+= cxl/
+ifeq ($(CONFIG_SYNO_LSP_ARMADA_16_12), y)
+obj-$(CONFIG_MVEBU_A8K_DEBUGFS)	+= mvebu-a8k-debugfs.o
+endif
+ifeq ($(CONFIG_SYNO_LSP_ARMADA_17_02_02), y)
+obj-$(CONFIG_MVEBU_SOC_INFO)	+= mv_soc_info.o
+endif # CONFIG_SYNO_LSP_ARMADA_17_02_02

@@ -31,7 +31,11 @@ struct clk_gate_exclusive {
 
 static int clk_gate_exclusive_enable(struct clk_hw *hw)
 {
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	struct clk_gate *gate = to_clk_gate(hw);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct clk_gate *gate = container_of(hw, struct clk_gate, hw);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct clk_gate_exclusive *exgate = container_of(gate,
 					struct clk_gate_exclusive, gate);
 	u32 val = readl(gate->reg);

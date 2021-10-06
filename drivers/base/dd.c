@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * drivers/base/dd.c - The core device/driver interactions.
  *
@@ -310,7 +313,10 @@ static int really_probe(struct device *dev, struct device_driver *drv)
 	 * calling .probe, because it could be recursive and parent Dev
 	 * should always go first
 	 */
+#ifdef MY_ABC_HERE
+#else
 	devices_kset_move_last(dev);
+#endif
 
 	if (dev->bus->probe) {
 		ret = dev->bus->probe(dev);

@@ -333,7 +333,11 @@ static int f7188x_gpio_probe(struct platform_device *pdev)
 	for (i = 0; i < data->nr_bank; i++) {
 		struct f7188x_gpio_bank *bank = &data->bank[i];
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+		bank->chip.parent = &pdev->dev;
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		bank->chip.dev = &pdev->dev;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		bank->data = data;
 
 		err = gpiochip_add(&bank->chip);

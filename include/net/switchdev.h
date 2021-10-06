@@ -47,6 +47,9 @@ enum switchdev_attr_id {
 	SWITCHDEV_ATTR_ID_PORT_STP_STATE,
 	SWITCHDEV_ATTR_ID_PORT_BRIDGE_FLAGS,
 	SWITCHDEV_ATTR_ID_BRIDGE_AGEING_TIME,
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	SWITCHDEV_ATTR_ID_BRIDGE_VLAN_FILTERING,
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 };
 
 struct switchdev_attr {
@@ -57,6 +60,9 @@ struct switchdev_attr {
 		u8 stp_state;				/* PORT_STP_STATE */
 		unsigned long brport_flags;		/* PORT_BRIDGE_FLAGS */
 		u32 ageing_time;			/* BRIDGE_AGEING_TIME */
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+		bool vlan_filtering;			/* BRIDGE_VLAN_FILTERING */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	} u;
 };
 

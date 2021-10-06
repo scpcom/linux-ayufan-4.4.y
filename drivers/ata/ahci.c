@@ -628,9 +628,28 @@ void syno_mv_9170_gpio_active_init(struct ata_host *host)
 {
 	 
 	syno_mv_9170_gpio_reg_set(host, MV_9170_GPIO_DATA_OUT_ENABLE, 0x0);
-	syno_mv_9170_gpio_reg_set(host, MV_9170_GPIO_DATA_OUT, 0x0);
+#if defined(CONFIG_SYNO_MV_9170_GPIO_ACTIVE_LOW)
 	 
-	syno_mv_9170_gpio_reg_set(host, MV_9170_GPIO_ACTIVE, 0x00740000);
+	syno_mv_9170_gpio_reg_set(host, MV_9170_GPIO_DATA_OUT, 0x00000021);
+#else
+	 
+	syno_mv_9170_gpio_reg_set(host, MV_9170_GPIO_DATA_OUT, 0x0);
+#endif  
+
+	syno_mv_9170_gpio_reg_set(host, MV_9170_GPIO_ACTIVE, 0x00743217);
+}
+
+static int syno_mv_9170_gpio_disk_map(const unsigned short hostnum)
+{
+	 
+	if (0 == hostnum) {
+		return 0;
+	} else if (1 == hostnum) {
+		return 5;
+	} else {
+		printk("ERROR: There is no definition for disk %d in MV9170\n",hostnum);
+		return -1;
+	}
 }
 
 int syno_mv_9170_disk_led_get(const unsigned short hostnum)
@@ -650,7 +669,9 @@ int syno_mv_9170_disk_led_get(const unsigned short hostnum)
 		goto END;
 	}
 
-	led_idx = 5;
+	if (-1 == (led_idx = syno_mv_9170_gpio_disk_map(hostnum))) {
+		goto END;
+	}
 
 	value = syno_mv_9170_gpio_reg_read(ap->host, MV_9170_GPIO_DATA_OUT);
 
@@ -659,6 +680,9 @@ int syno_mv_9170_disk_led_get(const unsigned short hostnum)
 	} else {
 		ret = 0;
 	}
+#if defined(CONFIG_SYNO_MV_9170_GPIO_ACTIVE_LOW)
+	ret = !ret;
+#endif  
 END:
 	if (NULL != shost) {
 		scsi_host_put(shost);
@@ -666,6 +690,23 @@ END:
 	return ret;
 }
 EXPORT_SYMBOL(syno_mv_9170_disk_led_get);
+
+static u32 syno_mv_9170_prepare_value_by_polarity(u32 orig_reg_value, int iValue, const int led_idx)
+{
+	u32 target_reg_value = orig_reg_value;
+	int new_bit_value;
+#if defined(CONFIG_SYNO_MV_9170_GPIO_ACTIVE_LOW)
+        new_bit_value = !iValue;
+#else  
+        new_bit_value = iValue;
+#endif  
+
+	target_reg_value &= ~(1 << led_idx);
+
+	target_reg_value |= (new_bit_value << led_idx);
+
+	return target_reg_value;
+}
 
 int syno_mv_9170_disk_led_set(const unsigned short hostnum, int iValue)
 {
@@ -684,13 +725,12 @@ int syno_mv_9170_disk_led_set(const unsigned short hostnum, int iValue)
 		goto END;
 	}
 
-	led_idx = 5;
-	value = syno_mv_9170_gpio_reg_read(ap->host, MV_9170_GPIO_DATA_OUT);
-	if (1 == iValue) {
-		value |= (1 << led_idx);
-	} else {
-		value &= ~(1 << led_idx);
+	if (-1 == (led_idx = syno_mv_9170_gpio_disk_map(hostnum))) {
+		goto END;
 	}
+
+	value = syno_mv_9170_gpio_reg_read(ap->host, MV_9170_GPIO_DATA_OUT);
+	value = syno_mv_9170_prepare_value_by_polarity(value, iValue, led_idx);
 	syno_mv_9170_gpio_reg_set(ap->host, MV_9170_GPIO_DATA_OUT, value);
 	ret = 0;
 END:
@@ -702,15 +742,17 @@ END:
 EXPORT_SYMBOL(syno_mv_9170_disk_led_set);
 #endif  
 
-#ifdef MY_ABC_HERE
-
+#if defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
 #define MV_GEN 3
 #define MV_PORT 4
  
 const unsigned int mv_sata_gen[MV_GEN] = {0x8D, 0x8F, 0x91};
 const unsigned mv_port_addr[MV_PORT] = {0x178, 0x1f8, 0x278, 0x2f8};
 const unsigned mv_port_data[MV_PORT] = {0x17c, 0x1fc, 0x27c, 0x2fc};
+#endif  
 
+#ifdef MY_ABC_HERE
+ 
 enum {
 	 
 	MV_9235_GPIO_DATA_OUT			= 0x07071020,
@@ -753,7 +795,10 @@ void syno_mv_9235_gpio_reg_set(struct ata_host *host, const unsigned int gpioadd
 END:
 	return;
 }
+#endif  
 
+#if defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
+ 
 static u32 syno_mv_9xxx_reg_get(struct ata_host *host, const unsigned int reg_addr, unsigned int addr_offset, unsigned int data_offset)
 {
 	void __iomem *host_mmio = NULL;
@@ -784,7 +829,10 @@ static void syno_mv_9xxx_reg_set(struct ata_host *host, const unsigned int reg_a
 END:
 	return;
 }
+#endif  
 
+#ifdef MY_ABC_HERE
+ 
 void syno_mv_9235_gpio_active_init(struct ata_host *host)
 {
 	 
@@ -793,7 +841,9 @@ void syno_mv_9235_gpio_active_init(struct ata_host *host)
 	 
 	syno_mv_9235_gpio_reg_set(host, MV_9235_GPIO_ACTIVE, 0x00B6D8D1);
 }
+#endif  
 
+#if defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
 void syno_mv_9xxx_amp_adjust_by_port(struct ata_host *host, u32 val, unsigned int addr_offset, const unsigned int data_offset, const unsigned int reg_addr)
 {
 	u32 reg_val = 0;
@@ -838,16 +888,17 @@ void syno_mv_9xxx_amp_adjust(struct ata_host *host, struct pci_dev *pdev)
 		syno_mv_9xxx_amp_adjust_by_port(host, 0xE3E, mv_port_addr[port], mv_port_data[port], mv_sata_gen[1]);
 		port = 1;
 		syno_mv_9xxx_amp_adjust_by_port(host, 0xE3E, mv_port_addr[port], mv_port_data[port], mv_sata_gen[1]);
-	} else if (syno_is_hw_version(HW_RS2417p) || syno_is_hw_version(HW_RS2417rpp)) {
+	} else if (syno_is_hw_version(HW_RS2418p) || syno_is_hw_version(HW_RS2418rpp)) {
 		if (0x9215 == pdev->device) {
 			 
 			port = 0;
 			syno_mv_9xxx_amp_adjust_by_port(host, 0xFBE, mv_port_addr[port], mv_port_data[port], mv_sata_gen[2]);
 		}
-	} else if (syno_is_hw_version(HW_DS217p)) {
+	} else if (syno_is_hw_version(HW_DS218p)) {
 		 
 		port = 0;
 		syno_mv_9xxx_amp_adjust_by_port(host, 0xE3E, mv_port_addr[port], mv_port_data[port], mv_sata_gen[2]);
+		syno_mv_9xxx_amp_adjust_by_port(host, 0xA30, mv_port_addr[port], mv_port_data[port], mv_sata_gen[1]);
 	} else if (syno_is_hw_version(HW_DS1517p)) {
 		if (0x02 == PCI_SLOT(pdev->bus->self->devfn)) {
 			 
@@ -899,7 +950,7 @@ void syno_mv_9xxx_amp_adjust(struct ata_host *host, struct pci_dev *pdev)
 			syno_mv_9xxx_amp_adjust_by_port(host, 0xE75, mv_port_addr[port], mv_port_data[port], mv_sata_gen[2]);
 			syno_mv_9xxx_amp_adjust_by_port(host, 0xAE7E, mv_port_addr[port], mv_port_data[port], mv_sata_gen[1]);
 		}
-	} else if (syno_is_hw_version(HW_DS3017xs)) {
+	} else if (syno_is_hw_version(HW_DS3018xs)) {
 		if (0x03 == PCI_SLOT(pdev->bus->self->devfn) && (0x00 == PCI_FUNC(pdev->bus->self->devfn) || 0x01 == PCI_FUNC(pdev->bus->self->devfn))) {
 			 
 			port = 0;
@@ -917,9 +968,62 @@ void syno_mv_9xxx_amp_adjust(struct ata_host *host, struct pci_dev *pdev)
 			port = 1;
 			syno_mv_9xxx_amp_adjust_by_port(host, 0xD7F, mv_port_addr[port], mv_port_data[port], mv_sata_gen[2]);
 		}
+	} else if (syno_is_hw_version(HW_DS918p)) {
+		 
+		port = 0;
+		syno_mv_9xxx_amp_adjust_by_port(host, 0xC962, mv_port_addr[port], mv_port_data[port], mv_sata_gen[0]);
+		syno_mv_9xxx_amp_adjust_by_port(host, 0xAA7E, mv_port_addr[port], mv_port_data[port], mv_sata_gen[1]);
+		syno_mv_9xxx_amp_adjust_by_port(host, 0xE7F, mv_port_addr[port], mv_port_data[port], mv_sata_gen[2]);
+		port = 1;
+		syno_mv_9xxx_amp_adjust_by_port(host, 0xC962, mv_port_addr[port], mv_port_data[port], mv_sata_gen[0]);
+		syno_mv_9xxx_amp_adjust_by_port(host, 0xAA7E, mv_port_addr[port], mv_port_data[port], mv_sata_gen[1]);
+		syno_mv_9xxx_amp_adjust_by_port(host, 0xE7F, mv_port_addr[port], mv_port_data[port], mv_sata_gen[2]);
+		port = 2;
+		syno_mv_9xxx_amp_adjust_by_port(host, 0xC962, mv_port_addr[port], mv_port_data[port], mv_sata_gen[0]);
+		syno_mv_9xxx_amp_adjust_by_port(host, 0xAA7E, mv_port_addr[port], mv_port_data[port], mv_sata_gen[1]);
+		syno_mv_9xxx_amp_adjust_by_port(host, 0xE7F, mv_port_addr[port], mv_port_data[port], mv_sata_gen[2]);
+	} else if (syno_is_hw_version(HW_DS219j)) {
+		port = 0;
+		syno_mv_9xxx_amp_adjust_by_port(host, 0xAA64, mv_port_addr[port], mv_port_data[port], mv_sata_gen[1]);
+		port = 1;
+		syno_mv_9xxx_amp_adjust_by_port(host, 0xD75, mv_port_addr[port], mv_port_data[port], mv_sata_gen[2]);
+	} else if (syno_is_hw_version(HW_DS218se)) {
+		port = 0;
+		syno_mv_9xxx_amp_adjust_by_port(host, 0xAA64, mv_port_addr[port], mv_port_data[port], mv_sata_gen[1]);
+		port = 1;
+		syno_mv_9xxx_amp_adjust_by_port(host, 0xD75, mv_port_addr[port], mv_port_data[port], mv_sata_gen[2]);
+	} else if (syno_is_hw_version(HW_FS1018)) {
+		if (0x03 == PCI_SLOT(pdev->bus->self->devfn) && (0x00 == PCI_FUNC(pdev->bus->self->devfn) || 0x01 == PCI_FUNC(pdev->bus->self->devfn))) {
+			 
+			port = 0;
+			syno_mv_9xxx_amp_adjust_by_port(host, 0xF7B, mv_port_addr[port], mv_port_data[port], mv_sata_gen[2]);
+			port = 1;
+			syno_mv_9xxx_amp_adjust_by_port(host, 0xF7B, mv_port_addr[port], mv_port_data[port], mv_sata_gen[2]);
+			port = 2;
+			syno_mv_9xxx_amp_adjust_by_port(host, 0xFF5, mv_port_addr[port], mv_port_data[port], mv_sata_gen[2]);
+			port = 3;
+			syno_mv_9xxx_amp_adjust_by_port(host, 0xF77, mv_port_addr[port], mv_port_data[port], mv_sata_gen[2]);
+		}
+	} else if (syno_is_hw_version(HW_RS818p) || syno_is_hw_version(HW_RS818rpp)) {
+		if (0x02 == PCI_SLOT(pdev->bus->self->devfn)) {
+			 
+			port = 2;
+			syno_mv_9xxx_amp_adjust_by_port(host, 0xFFF, mv_port_addr[port], mv_port_data[port], mv_sata_gen[2]);
+			syno_mv_9xxx_amp_adjust_by_port(host, 0xAE7E, mv_port_addr[port], mv_port_data[port], mv_sata_gen[1]);
+			port = 3;
+			syno_mv_9xxx_amp_adjust_by_port(host, 0xE75, mv_port_addr[port], mv_port_data[port], mv_sata_gen[2]);
+			syno_mv_9xxx_amp_adjust_by_port(host, 0xAA62, mv_port_addr[port], mv_port_data[port], mv_sata_gen[1]);
+		} else if (0x03 == PCI_SLOT(pdev->bus->self->devfn)) {
+			 
+			port = 1;
+			syno_mv_9xxx_amp_adjust_by_port(host, 0xB75, mv_port_addr[port], mv_port_data[port], mv_sata_gen[2]);
+			syno_mv_9xxx_amp_adjust_by_port(host, 0xAA62, mv_port_addr[port], mv_port_data[port], mv_sata_gen[1]);
+		}
 	}
 }
+#endif  
 
+#ifdef MY_ABC_HERE
 int syno_mv_9235_disk_led_get(const unsigned short hostnum)
 {
 	struct Scsi_Host *shost = scsi_host_lookup(hostnum);
@@ -1752,14 +1856,15 @@ END:
 }
 
 #define SYNO_ASM_PORT_NUM 2
+#define SYNO_ASM_GEN 3
 
-void syno_asmedia_1061_amp_adjust(struct pci_dev *pdev, unsigned int devfn, unsigned int *addr, unsigned int *data, int len)
+void syno_asmedia_1061_amp_adjust(struct pci_dev *pdev, unsigned int devfn, unsigned int *addr, unsigned int *data, int len, unsigned int gen_offset)
 {
 	int port = 0;
 
 	for (port = 0; port < len; ++port) {
-		syno_asmedia_1061_reg_set(pdev, devfn, addr[port], data[port]);
-		dev_info(&pdev->dev, "Asmedia 1061 port=%d, reg_addr=0x%x, reg_data=0x%x\n", port, addr[port], syno_asmedia_1061_reg_get(pdev, devfn, addr[port]));
+		syno_asmedia_1061_reg_set(pdev, devfn, addr[port] | gen_offset, data[port]);
+		dev_info(&pdev->dev, "Asmedia 1061 port=%d, reg_addr=0x%x, reg_data=0x%x\n", port, addr[port] | gen_offset, syno_asmedia_1061_reg_get(pdev, devfn, addr[port] | gen_offset));
 	}
 }
 
@@ -1777,18 +1882,25 @@ void syno_asmedia_1061_init(struct ata_host *host)
 {
 	struct pci_dev *pdev = to_pci_dev(host->dev);
 	unsigned int devfn = 0;
-	unsigned int asmedia_addr[SYNO_ASM_PORT_NUM] = {0xCA6, 0xDA6};
-	unsigned int asmedia_DS418_data[SYNO_ASM_PORT_NUM] = {0xff, 0xd8};
-	unsigned int asmedia_DS418j_data[SYNO_ASM_PORT_NUM] = {0xff, 0xff};
+	unsigned int asmedia_addr[SYNO_ASM_PORT_NUM] = {0xCA0, 0xDA0};
+	unsigned int asmedia_gen[SYNO_ASM_GEN] = {0x4, 0x5, 0x6};
+	unsigned int asmedia_DS418_data[SYNO_ASM_PORT_NUM] = {0x6f, 0x4f};
+	unsigned int asmedia_DS418j_data[SYNO_ASM_PORT_NUM] = {0xaf, 0xaf};
+	unsigned int asmedia_DS418play_data_gen3[SYNO_ASM_PORT_NUM] = {0x65, 0x45};
+	unsigned int asmedia_DS418play_data_gen2[SYNO_ASM_PORT_NUM] = {0x26, 0x26};
 
 	if (syno_is_hw_version(HW_DS418)) {
 		devfn = PCI_DEVFN(0x00, 0x0);
-		syno_asmedia_1061_amp_adjust(pdev, devfn, asmedia_addr, asmedia_DS418_data, SYNO_ASM_PORT_NUM);
+		syno_asmedia_1061_amp_adjust(pdev, devfn, asmedia_addr, asmedia_DS418_data, SYNO_ASM_PORT_NUM, asmedia_gen[2]);
 		syno_asmedia_1061_gpio2_led_mode(pdev, devfn);
 	} else if (syno_is_hw_version(HW_DS418j)) {
 		devfn = PCI_DEVFN(0x00, 0x0);
-		syno_asmedia_1061_amp_adjust(pdev, devfn, asmedia_addr, asmedia_DS418j_data, SYNO_ASM_PORT_NUM);
+		syno_asmedia_1061_amp_adjust(pdev, devfn, asmedia_addr, asmedia_DS418j_data, SYNO_ASM_PORT_NUM, asmedia_gen[2]);
 		syno_asmedia_1061_gpio2_led_mode(pdev, devfn);
+	} else if (syno_is_hw_version(HW_DS418play)) {
+		devfn = PCI_DEVFN(0x00, 0x0);
+		syno_asmedia_1061_amp_adjust(pdev, devfn, asmedia_addr, asmedia_DS418play_data_gen3, SYNO_ASM_PORT_NUM, asmedia_gen[2]);
+		syno_asmedia_1061_amp_adjust(pdev, devfn, asmedia_addr, asmedia_DS418play_data_gen2, SYNO_ASM_PORT_NUM, asmedia_gen[1]);
 	}
 }
 #endif  
@@ -1803,6 +1915,9 @@ static int ahci_init_one(struct pci_dev *pdev, const struct pci_device_id *ent)
 	struct ata_host *host;
 	int n_ports, i, rc;
 	int ahci_pci_bar = AHCI_PCI_BAR_STANDARD;
+#ifdef MY_DEF_HERE
+	struct pci_dev *pdev_cur = NULL;
+#endif  
 
 	VPRINTK("ENTER\n");
 
@@ -1871,16 +1986,7 @@ static int ahci_init_one(struct pci_dev *pdev, const struct pci_device_id *ent)
 	if (ahci_sb600_enable_64bit(pdev))
 		hpriv->flags &= ~AHCI_HFLAG_32BIT_ONLY;
 
-#ifdef CONFIG_ARCH_RTD129X
-	 
-	hpriv->flags |= AHCI_HFLAG_NO_MSI;
-	if (pdev->bus->number == 0)
-		hpriv->mmio = ioremap(0x9804f000, 1024);
-	else
-		hpriv->mmio = ioremap(0x9803C000, 1024);
-#else
 	hpriv->mmio = pcim_iomap_table(pdev)[ahci_pci_bar];
-#endif
 
 	if (ahci_broken_devslp(pdev))
 		hpriv->flags |= AHCI_HFLAG_NO_DEVSLP;
@@ -1979,6 +2085,39 @@ static int ahci_init_one(struct pci_dev *pdev, const struct pci_device_id *ent)
 	}
 #endif  
 
+#ifdef MY_ABC_HERE
+	if (syno_is_hw_version(HW_RS815p) || syno_is_hw_version(HW_RS815rpp)) {
+		if (0x1b4b == pdev->vendor && 0x9170 == pdev->device) {
+			host->ports[0]->flags &= ~ATA_FLAG_NCQ;
+			host->ports[0]->flags &= ~ATA_FLAG_FPDMA_AA;
+			host->ports[1]->flags &= ~ATA_FLAG_NCQ;
+			host->ports[1]->flags &= ~ATA_FLAG_FPDMA_AA;
+		}
+	}
+#ifdef MY_DEF_HERE
+	if (syno_is_hw_version(HW_DS1517p)) {
+		if (0x1b4b == pdev->vendor && 0x9235 == pdev->device && 0x02 == PCI_SLOT(pdev->bus->self->devfn)) {
+			 
+			host->ports[0]->flags &= ~ATA_FLAG_NCQ;
+			host->ports[0]->flags &= ~ATA_FLAG_FPDMA_AA;
+		}
+		if (0x1b4b == pdev->vendor && 0x9170 == pdev->device && 0x03 == PCI_SLOT(pdev->bus->self->devfn)) {
+			host->ports[0]->flags &= ~ATA_FLAG_NCQ;
+			host->ports[0]->flags &= ~ATA_FLAG_FPDMA_AA;
+		}
+	}
+	if (syno_is_hw_version(HW_DS1817p)) {
+		if (0x1b4b == pdev->vendor && 0x9235 == pdev->device) {
+			if (NULL == pdev_cur) {
+				 
+				host->ports[0]->flags &= ~ATA_FLAG_NCQ;
+				host->ports[0]->flags &= ~ATA_FLAG_FPDMA_AA;
+			}
+		}
+	}
+#endif  
+#endif  
+
 #ifdef MY_DEF_HERE
 	if (syno_is_hw_version(HW_DS916p) ||
 			syno_is_hw_version(HW_DS918p) ||
@@ -2010,6 +2149,8 @@ static int ahci_init_one(struct pci_dev *pdev, const struct pci_device_id *ent)
 	if (pdev->vendor == 0x1b4b && (pdev->device == 0x9235 || pdev->device == 0x9215)) {
 		syno_mv_9235_gpio_active_init(host);
 	}
+#endif  
+#if defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
 	if (pdev->vendor == 0x1b4b && (pdev->device == 0x9235 || pdev->device == 0x9215 || pdev->device == 0x9170)) {
 		syno_mv_9xxx_amp_adjust(host, pdev);
 	}

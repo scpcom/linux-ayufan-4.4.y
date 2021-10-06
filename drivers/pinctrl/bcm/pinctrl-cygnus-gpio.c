@@ -719,7 +719,11 @@ static int cygnus_gpio_probe(struct platform_device *pdev)
 	gc->ngpio = ngpios;
 	chip->num_banks = (ngpios + NGPIOS_PER_BANK - 1) / NGPIOS_PER_BANK;
 	gc->label = dev_name(dev);
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	gc->parent = dev;
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	gc->dev = dev;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	gc->of_node = dev->of_node;
 	gc->request = cygnus_gpio_request;
 	gc->free = cygnus_gpio_free;

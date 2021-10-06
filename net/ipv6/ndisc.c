@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *	Neighbour Discovery for IPv6
  *	Linux INET6 implementation
@@ -1221,10 +1224,14 @@ static void ndisc_router_discovery(struct sk_buff *skb)
 
 		rt = rt6_add_dflt_router(&ipv6_hdr(skb)->saddr, skb->dev, pref);
 		if (!rt) {
+#if defined(MY_ABC_HERE)
+			goto skip_defrtr;
+#else /* defined(MY_ABC_HERE) */
 			ND_PRINTK(0, err,
 				  "RA: %s failed to add default route\n",
 				  __func__);
 			return;
+#endif /* defined(MY_ABC_HERE) */
 		}
 
 		neigh = dst_neigh_lookup(&rt->dst, &ipv6_hdr(skb)->saddr);

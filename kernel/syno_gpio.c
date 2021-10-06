@@ -24,6 +24,28 @@ SYNO_GPIO syno_gpio = {
 };
 EXPORT_SYMBOL(syno_gpio);
 
+#if defined(MY_DEF_HERE)
+void syno_rtd_gpio_write(int pin, int pValue)
+{
+	int iErr = 0;
+	iErr = gpio_request(pin, NULL);
+	if (iErr) {
+		printk("%s:%s(%d) gpio_request pin %d fail!\n", __FILE__, __FUNCTION__, __LINE__, pin);
+		goto END;
+	}
+	iErr = gpio_direction_output(pin, pValue);
+	if (iErr) {
+		printk("%s:%s(%d) set gpio pin %d value %d fail!\n", __FILE__, __FUNCTION__, __LINE__, pin, pValue);
+		goto UNLOCK;
+	}
+UNLOCK:
+	gpio_free(pin);
+END:
+	return;
+}
+EXPORT_SYMBOL(syno_rtd_gpio_write);
+#endif  
+
 int SYNO_GPIO_READ(int pin)
 {
 #if defined(MY_DEF_HERE)
@@ -41,8 +63,7 @@ void SYNO_GPIO_WRITE(int pin, int pValue)
 #if defined(MY_DEF_HERE)
 	syno_gpio_value_set(pin, pValue);
 #elif defined(MY_DEF_HERE)
-	gpio_request(pin, NULL);
-	gpio_direction_output(pin, pValue);
+	syno_rtd_gpio_write(pin, pValue);
 #else
 	gpio_set_value(pin, pValue);
 #endif

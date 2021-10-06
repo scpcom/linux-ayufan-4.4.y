@@ -187,7 +187,11 @@ static int orion_mdio_probe(struct platform_device *pdev)
 	struct resource *r;
 	struct mii_bus *bus;
 	struct orion_mdio_dev *dev;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	int ret;
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	int i, ret;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	r = platform_get_resource(pdev, IORESOURCE_MEM, 0);
 	if (!r) {
@@ -207,6 +211,9 @@ static int orion_mdio_probe(struct platform_device *pdev)
 		 dev_name(&pdev->dev));
 	bus->parent = &pdev->dev;
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+//do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	bus->irq = devm_kmalloc_array(&pdev->dev, PHY_MAX_ADDR, sizeof(int),
 				      GFP_KERNEL);
 	if (!bus->irq)
@@ -214,6 +221,7 @@ static int orion_mdio_probe(struct platform_device *pdev)
 
 	for (i = 0; i < PHY_MAX_ADDR; i++)
 		bus->irq[i] = PHY_POLL;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	dev = bus->priv;
 	dev->regs = devm_ioremap(&pdev->dev, r->start, resource_size(r));

@@ -107,9 +107,9 @@
 #include <asm/fbio.h>
 #endif
 
-#if defined(MY_ABC_HERE) || defined(MY_DEF_HERE)
+#if defined(MY_ABC_HERE) || defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 #include <linux/synobios.h>
-#endif
+#endif  
 
 static int w_long(unsigned int fd, unsigned int cmd,
 		compat_ulong_t __user *argp)

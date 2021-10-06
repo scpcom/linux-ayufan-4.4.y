@@ -15,7 +15,11 @@
 #include <linux/slab.h>
 #include "clk.h"
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+//do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 #define to_clk_mux(_hw) container_of(_hw, struct clk_mux, hw)
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 /**
  * struct clk_fixup_mux - imx integer fixup multiplexer clock

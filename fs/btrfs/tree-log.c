@@ -4308,7 +4308,7 @@ process_leaf:
 			}
 
 			ctx->log_new_dentries = false;
-			if (type == BTRFS_FT_DIR)
+			if (type == BTRFS_FT_DIR || type == BTRFS_FT_SYMLINK)
 				log_mode = LOG_INODE_ALL;
 #ifdef MY_ABC_HERE
 #else
@@ -4431,11 +4431,16 @@ static int btrfs_log_all_parents(struct btrfs_trans_handle *trans,
 			if (IS_ERR(dir_inode))
 				continue;
 
+			if (ctx)
+				ctx->log_new_dentries = false;
 			ret = btrfs_log_inode(trans, root, dir_inode,
 					      LOG_INODE_ALL, 0, LLONG_MAX, ctx);
 			if (!ret &&
 			    btrfs_must_commit_transaction(trans, dir_inode))
 				ret = 1;
+			if (!ret && ctx && ctx->log_new_dentries)
+				ret = log_new_dir_dentries(trans, root,
+							   dir_inode, ctx);
 			iput(dir_inode);
 			if (ret)
 				goto out;
@@ -4723,11 +4728,9 @@ void btrfs_record_unlink_dir(struct btrfs_trans_handle *trans,
 			     int for_rename)
 {
 	 
-	if (S_ISREG(inode->i_mode)) {
-		mutex_lock(&BTRFS_I(inode)->log_mutex);
-		BTRFS_I(inode)->last_unlink_trans = trans->transid;
-		mutex_unlock(&BTRFS_I(inode)->log_mutex);
-	}
+	mutex_lock(&BTRFS_I(inode)->log_mutex);
+	BTRFS_I(inode)->last_unlink_trans = trans->transid;
+	mutex_unlock(&BTRFS_I(inode)->log_mutex);
 
 	smp_mb();
 	if (BTRFS_I(dir)->logged_trans == trans->transid)

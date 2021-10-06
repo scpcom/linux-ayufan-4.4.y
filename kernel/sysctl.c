@@ -198,14 +198,21 @@ int g_syno_sata_remap[SATA_REMAP_MAX] = {SATA_REMAP_NOT_INIT};
 EXPORT_SYMBOL(g_syno_sata_remap);
 int g_use_sata_remap = 0;
 EXPORT_SYMBOL(g_use_sata_remap);
+int g_syno_mv14xx_remap[SATA_REMAP_MAX] = {SATA_REMAP_NOT_INIT};
+EXPORT_SYMBOL(g_syno_mv14xx_remap);
+int g_use_mv14xx_remap = 0;
+EXPORT_SYMBOL(g_use_mv14xx_remap);
 #endif  
 
 #ifdef MY_DEF_HERE
 char gszPciAddrList[PCI_ADDR_NUM_MAX][PCI_ADDR_LEN_MAX] = {{0}};
 int gPciAddrNum = 0;
-int gPciDeferStart = M2SATA_START_IDX;
 EXPORT_SYMBOL(gszPciAddrList);
 EXPORT_SYMBOL(gPciAddrNum);
+#endif  
+
+#ifdef MY_DEF_HERE
+int gPciDeferStart = M2SATA_START_IDX;
 EXPORT_SYMBOL(gPciDeferStart);
 #endif  
 
@@ -233,7 +240,11 @@ EXPORT_SYMBOL(g_is_sas_model);
 #ifdef MY_ABC_HERE
 unsigned int gSynoCPUInfoCore = 0;
 EXPORT_SYMBOL(gSynoCPUInfoCore);
-#ifdef MY_DEF_HERE
+#ifdef MY_DEF_HERE 
+unsigned int gSynoMultiCPUInfoCore[CONFIG_SYNO_GRANTLEY_MAX_CPU_NUM];
+EXPORT_SYMBOL(gSynoMultiCPUInfoCore);
+#endif
+#ifdef CONFIG_SYNO_PURLEY
 unsigned int gSynoMultiCPUInfoCore[CONFIG_SYNO_GRANTLEY_MAX_CPU_NUM];
 EXPORT_SYMBOL(gSynoMultiCPUInfoCore);
 #endif
@@ -292,6 +303,11 @@ extern int SynoProcEncPwrCtl(struct ctl_table *table, int write,
 #endif  
 
 #ifdef MY_DEF_HERE
+char gSynoSASHBAAddr[CONFIG_SYNO_SAS_MAX_HBA_SLOT][13] = {{0}};
+EXPORT_SYMBOL(gSynoSASHBAAddr);
+#endif  
+
+#ifdef MY_DEF_HERE
 int (*syno_test_list)(unsigned char, struct tty_struct *);
 EXPORT_SYMBOL(syno_test_list);
 #endif  
@@ -304,6 +320,13 @@ EXPORT_SYMBOL(syno_valid_lsi3008_led);
 #ifdef MY_DEF_HERE
 int (*syno_disk_map_table_gen_mv14xx)(int *iDiskMapTable, int iPortMax);
 EXPORT_SYMBOL(syno_disk_map_table_gen_mv14xx);
+#endif  
+
+#ifdef MY_ABC_HERE
+int giSynoDsikEhFlag = 0;
+EXPORT_SYMBOL(giSynoDsikEhFlag);
+unsigned long guSynoScsiCmdSN = 0;
+EXPORT_SYMBOL(guSynoScsiCmdSN);
 #endif  
 
 extern int suid_dumpable;
@@ -1567,7 +1590,7 @@ static struct ctl_table kern_table[] = {
             .mode           = 0644,
             .proc_handler   = proc_dointvec,
         },
-#ifdef MY_DEF_HERE
+#if defined(MY_DEF_HERE) || defined(CONFIG_SYNO_PURLEY)
         {
             .procname       = "syno_CPU_info_multicore_1",
             .data           = &gSynoMultiCPUInfoCore[0],
@@ -1618,6 +1641,15 @@ static struct ctl_table kern_table[] = {
 		.mode           = 0644,
 		.proc_handler   = SynoProcEncPwrCtl,
 	},
+#endif  
+#ifdef MY_ABC_HERE
+       {
+               .procname       = "syno_disk_eh_flag",
+               .data           = &giSynoDsikEhFlag,
+               .maxlen         = sizeof (int),
+               .mode           = 0444,
+               .proc_handler   = &proc_dointvec,
+       },
 #endif  
 	{ }
 };

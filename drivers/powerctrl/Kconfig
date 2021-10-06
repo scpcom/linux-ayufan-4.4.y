@@ -3,7 +3,6 @@ menu "Power Control"
 
 config POWER_CONTROL
     bool "Power Control Support"
-	depends on SYNO_RTD1296
     default n
 
 

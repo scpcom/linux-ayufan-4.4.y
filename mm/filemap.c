@@ -1777,6 +1777,7 @@ int do_recvfile(struct file *file, struct socket *sock, loff_t pos,
 		pos += bytes;
 		bytes_to_received += bytes;
 		offset = 0;
+		flags |= AOP_FLAG_RECVFILE_ECRYPTFS_NO_TRUNCATE;
 	} while (count);
 
 	err = sock2iov(sock, iov, pages_allocated, 0, bytes_to_received, &bytes_received);

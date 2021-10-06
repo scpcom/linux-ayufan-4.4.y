@@ -28,7 +28,8 @@ static LIST_HEAD(phy_list);
 static LIST_HEAD(phy_bind_list);
 static DEFINE_SPINLOCK(phy_lock);
 
-#ifndef MY_DEF_HERE
+#ifdef MY_DEF_HERE
+#else /* MY_DEF_HERE */
 struct phy_devm {
 	struct usb_phy *phy;
 	struct notifier_block *nb;
@@ -92,7 +93,8 @@ static void devm_usb_phy_release(struct device *dev, void *res)
 	usb_put_phy(phy);
 }
 
-#ifndef MY_DEF_HERE
+#ifdef MY_DEF_HERE
+#else /* MY_DEF_HERE */
 static void devm_usb_phy_release2(struct device *dev, void *_res)
 {
 	struct phy_devm *res = _res;
@@ -176,7 +178,8 @@ err0:
 }
 EXPORT_SYMBOL_GPL(usb_get_phy);
 
-#ifndef MY_DEF_HERE
+#ifdef MY_DEF_HERE
+#else /* MY_DEF_HERE */
 /**
  * devm_usb_get_phy_by_node - find the USB PHY by device_node
  * @dev - device that requests this phy
@@ -253,29 +256,7 @@ EXPORT_SYMBOL_GPL(devm_usb_get_phy_by_node);
  *
  * For use by USB host and peripheral drivers.
  */
-#ifndef MY_DEF_HERE
-struct usb_phy *devm_usb_get_phy_by_phandle(struct device *dev,
-	const char *phandle, u8 index)
-{
-	struct device_node *node;
-	struct usb_phy	*phy;
-
-	if (!dev->of_node) {
-		dev_dbg(dev, "device does not have a device node entry\n");
-		return ERR_PTR(-EINVAL);
-	}
-
-	node = of_parse_phandle(dev->of_node, phandle, index);
-	if (!node) {
-		dev_dbg(dev, "failed to get %s phandle in %s node\n", phandle,
-			dev->of_node->full_name);
-		return ERR_PTR(-ENODEV);
-	}
-	phy = devm_usb_get_phy_by_node(dev, node, NULL);
-	of_node_put(node);
-	return phy;
-}
-#else /* MY_DEF_HERE */
+#ifdef MY_DEF_HERE
 struct usb_phy *devm_usb_get_phy_by_phandle(struct device *dev,
 	const char *phandle, u8 index)
 {
@@ -342,6 +323,28 @@ err1:
 	spin_unlock_irqrestore(&phy_lock, flags);
 
 err0:
+	of_node_put(node);
+	return phy;
+}
+#else /* MY_DEF_HERE */
+struct usb_phy *devm_usb_get_phy_by_phandle(struct device *dev,
+	const char *phandle, u8 index)
+{
+	struct device_node *node;
+	struct usb_phy	*phy;
+
+	if (!dev->of_node) {
+		dev_dbg(dev, "device does not have a device node entry\n");
+		return ERR_PTR(-EINVAL);
+	}
+
+	node = of_parse_phandle(dev->of_node, phandle, index);
+	if (!node) {
+		dev_dbg(dev, "failed to get %s phandle in %s node\n", phandle,
+			dev->of_node->full_name);
+		return ERR_PTR(-ENODEV);
+	}
+	phy = devm_usb_get_phy_by_node(dev, node, NULL);
 	of_node_put(node);
 	return phy;
 }

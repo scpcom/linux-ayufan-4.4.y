@@ -107,11 +107,25 @@ static int dsa_rcv(struct sk_buff *skb, struct net_device *dev,
 	 * Check that the source device exists and that the source
 	 * port is a registered DSA port.
 	 */
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	if (source_device >= DSA_MAX_SWITCHES)
+		goto out_drop;
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	if (source_device >= dst->pd->nr_chips)
 		goto out_drop;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+
 	ds = dst->ds[source_device];
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	if (!ds)
+		goto out_drop;
+
+	if (source_port >= DSA_MAX_PORTS || !ds->ports[source_port].netdev)
+		goto out_drop;
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	if (source_port >= DSA_MAX_PORTS || ds->ports[source_port] == NULL)
 		goto out_drop;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	/*
 	 * Convert the DSA header to an 802.1q header if the 'tagged'
@@ -159,7 +173,11 @@ static int dsa_rcv(struct sk_buff *skb, struct net_device *dev,
 			2 * ETH_ALEN);
 	}
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	skb->dev = ds->ports[source_port].netdev;
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	skb->dev = ds->ports[source_port];
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	skb_push(skb, ETH_HLEN);
 	skb->pkt_type = PACKET_HOST;
 	skb->protocol = eth_type_trans(skb, skb->dev);

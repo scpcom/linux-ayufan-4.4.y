@@ -1458,11 +1458,15 @@ static int lan78xx_mdio_init(struct lan78xx_net *dev)
 	snprintf(dev->mdiobus->id, MII_BUS_ID_SIZE, "usb-%03d:%03d",
 		 dev->udev->bus->busnum, dev->udev->devnum);
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+//do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	dev->mdiobus->irq = kzalloc(sizeof(int) * PHY_MAX_ADDR, GFP_KERNEL);
 	if (!dev->mdiobus->irq) {
 		ret = -ENOMEM;
 		goto exit1;
 	}
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	/* handle our own interrupt */
 	for (i = 0; i < PHY_MAX_ADDR; i++)
@@ -1479,13 +1483,21 @@ static int lan78xx_mdio_init(struct lan78xx_net *dev)
 	ret = mdiobus_register(dev->mdiobus);
 	if (ret) {
 		netdev_err(dev->net, "can't register MDIO bus\n");
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+		goto exit1;
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		goto exit2;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	}
 
 	netdev_dbg(dev->net, "registered mdiobus bus %s\n", dev->mdiobus->id);
 	return 0;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+//do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 exit2:
 	kfree(dev->mdiobus->irq);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 exit1:
 	mdiobus_free(dev->mdiobus);
 	return ret;
@@ -1494,7 +1506,11 @@ exit1:
 static void lan78xx_remove_mdio(struct lan78xx_net *dev)
 {
 	mdiobus_unregister(dev->mdiobus);
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+//do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	kfree(dev->mdiobus->irq);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	mdiobus_free(dev->mdiobus);
 }
 

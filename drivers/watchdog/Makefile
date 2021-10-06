@@ -30,6 +30,9 @@ obj-$(CONFIG_USBPCWATCHDOG) += pcwd_usb.o
 
 # ARM Architecture
 obj-$(CONFIG_ARM_SP805_WATCHDOG) += sp805_wdt.o
+ifeq ($(CONFIG_SYNO_LSP_ARMADA_16_12), y)
+obj-$(CONFIG_ARM_SBSA_WATCHDOG) += sbsa_gwdt.o
+endif
 obj-$(CONFIG_AT91RM9200_WATCHDOG) += at91rm9200_wdt.o
 obj-$(CONFIG_AT91SAM9X_WATCHDOG) += at91sam9_wdt.o
 obj-$(CONFIG_CADENCE_WATCHDOG) += cadence_wdt.o
@@ -70,6 +73,9 @@ obj-$(CONFIG_RTD129X_WATCHDOG) += rtd129x_wdt.o
 obj-$(CONFIG_DIGICOLOR_WATCHDOG) += digicolor_wdt.o
 obj-$(CONFIG_LPC18XX_WATCHDOG) += lpc18xx_wdt.o
 obj-$(CONFIG_BCM7038_WDT) += bcm7038_wdt.o
+ifeq ($(CONFIG_SYNO_LSP_ARMADA_17_04_02), y)
+obj-$(CONFIG_ARMADA3700_WATCHDOG) += armada3700_wdt.o
+endif # CONFIG_SYNO_LSP_ARMADA_17_04_02
 
 # AVR32 Architecture
 obj-$(CONFIG_AT32AP700X_WDT) += at32ap700x_wdt.o

@@ -2090,7 +2090,7 @@ static int get_parent_attributes(struct svc_export *exp, struct kstat *stat)
 #ifdef MY_ABC_HERE
 	if (!err && IS_SYNOACL(path.dentry) && uid_eq(current_fsuid(), GLOBAL_ROOT_UID))
 			stat->mode |= (S_IRWXU|S_IRWXG|S_IRWXO);
-#endif
+#endif  
 	path_put(&path);
 	return err;
 }
@@ -2178,7 +2178,7 @@ nfsd4_encode_fattr(struct xdr_stream *xdr, struct svc_fh *fhp,
 #ifdef MY_ABC_HERE
 	if (IS_SYNOACL(dentry) && uid_eq(current_fsuid(), GLOBAL_ROOT_UID))
 		stat.mode |= (S_IRWXU|S_IRWXG|S_IRWXO);
-#endif
+#endif  
 	if ((bmval0 & (FATTR4_WORD0_FILES_AVAIL | FATTR4_WORD0_FILES_FREE |
 			FATTR4_WORD0_FILES_TOTAL | FATTR4_WORD0_MAXNAME)) ||
 	    (bmval1 & (FATTR4_WORD1_SPACE_AVAIL | FATTR4_WORD1_SPACE_FREE |

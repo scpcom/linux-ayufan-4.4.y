@@ -6,4 +6,6 @@ obj-$(CONFIG_ARCH_SUNXI) += reset-sunxi.o
 obj-$(CONFIG_ARCH_STI) += sti/
 obj-$(CONFIG_ARCH_ZYNQ) += reset-zynq.o
 obj-$(CONFIG_ATH79) += reset-ath79.o
+ifeq ($(CONFIG_SYNO_LSP_RTD129X),y)
 obj-$(CONFIG_ARCH_RTD129X) += reset-rtk.o reset-rtk-helper.o
+endif # CONFIG_SYNO_LSP_RTD129X

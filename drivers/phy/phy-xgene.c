@@ -518,7 +518,11 @@ enum clk_type_t {
 	CLK_INT_SING = 2,	/* Internal single ended */
 };
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+enum xgene_phy_mode {
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 enum phy_mode {
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	MODE_SATA	= 0,	/* List them for simple reference */
 	MODE_SGMII	= 1,
 	MODE_PCIE	= 2,
@@ -542,7 +546,11 @@ struct xgene_sata_override_param {
 struct xgene_phy_ctx {
 	struct device *dev;
 	struct phy *phy;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	enum xgene_phy_mode mode;		/* Mode of operation */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	enum phy_mode mode;		/* Mode of operation */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	enum clk_type_t clk_type;	/* Input clock selection */
 	void __iomem *sds_base;		/* PHY CSR base addr */
 	struct clk *clk;		/* Optional clock */

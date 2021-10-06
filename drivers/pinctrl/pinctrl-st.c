@@ -1521,7 +1521,11 @@ static int st_gpiolib_register_bank(struct st_pinctrl *info,
 	bank->gpio_chip.base = bank_num * ST_GPIO_PINS_PER_BANK;
 	bank->gpio_chip.ngpio = ST_GPIO_PINS_PER_BANK;
 	bank->gpio_chip.of_node = np;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	bank->gpio_chip.parent = dev;
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	bank->gpio_chip.dev = dev;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	spin_lock_init(&bank->lock);
 
 	of_property_read_string(np, "st,bank-name", &range->name);

@@ -49,7 +49,9 @@ config ARCH_NEEDS_CPU_IDLE_COUPLED
 	def_bool n
 endmenu
 
+if SYNO_LSP_RTD129X
 config ARM_CPUIDLE_RTK
 	bool
 	default y
-	depends on HOTPLUG_CPU && SYNO_RTD1296
+	depends on HOTPLUG_CPU
+endif # SYNO_LSP_RTD129X

@@ -1403,7 +1403,11 @@ static void tg3_mdio_config_5785(struct tg3 *tp)
 	u32 val;
 	struct phy_device *phydev;
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	phydev = mdiobus_get_phy(tp->mdio_bus, tp->phy_addr);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	phydev = tp->mdio_bus->phy_map[tp->phy_addr];
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	switch (phydev->drv->phy_id & phydev->drv->phy_id_mask) {
 	case PHY_ID_BCM50610:
 	case PHY_ID_BCM50610M:
@@ -1535,10 +1539,14 @@ static int tg3_mdio_init(struct tg3 *tp)
 	tp->mdio_bus->read     = &tg3_mdio_read;
 	tp->mdio_bus->write    = &tg3_mdio_write;
 	tp->mdio_bus->phy_mask = ~(1 << tp->phy_addr);
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+//do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	tp->mdio_bus->irq      = &tp->mdio_irq[0];
 
 	for (i = 0; i < PHY_MAX_ADDR; i++)
 		tp->mdio_bus->irq[i] = PHY_POLL;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	/* The bus registration will look for all the PHYs on the mdio bus.
 	 * Unfortunately, it does not ensure the PHY is powered up before
@@ -1555,7 +1563,11 @@ static int tg3_mdio_init(struct tg3 *tp)
 		return i;
 	}
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	phydev = mdiobus_get_phy(tp->mdio_bus, tp->phy_addr);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	phydev = tp->mdio_bus->phy_map[tp->phy_addr];
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	if (!phydev || !phydev->drv) {
 		dev_warn(&tp->pdev->dev, "No PHY devices\n");
@@ -1965,7 +1977,11 @@ static void tg3_setup_flow_control(struct tg3 *tp, u32 lcladv, u32 rmtadv)
 	u32 old_tx_mode = tp->tx_mode;
 
 	if (tg3_flag(tp, USE_PHYLIB))
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+		autoneg = mdiobus_get_phy(tp->mdio_bus, tp->phy_addr)->autoneg;
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		autoneg = tp->mdio_bus->phy_map[tp->phy_addr]->autoneg;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	else
 		autoneg = tp->link_config.autoneg;
 
@@ -2001,7 +2017,11 @@ static void tg3_adjust_link(struct net_device *dev)
 	u8 oldflowctrl, linkmesg = 0;
 	u32 mac_mode, lcl_adv, rmt_adv;
 	struct tg3 *tp = netdev_priv(dev);
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	struct phy_device *phydev = mdiobus_get_phy(tp->mdio_bus, tp->phy_addr);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct phy_device *phydev = tp->mdio_bus->phy_map[tp->phy_addr];
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	spin_lock_bh(&tp->lock);
 
@@ -2090,11 +2110,20 @@ static int tg3_phy_init(struct tg3 *tp)
 	/* Bring the PHY back to a known state. */
 	tg3_bmcr_reset(tp);
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	phydev = mdiobus_get_phy(tp->mdio_bus, tp->phy_addr);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	phydev = tp->mdio_bus->phy_map[tp->phy_addr];
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	/* Attach the MAC to the PHY. */
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	phydev = phy_connect(tp->dev, phydev_name(phydev),
+			     tg3_adjust_link, phydev->interface);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	phydev = phy_connect(tp->dev, dev_name(&phydev->dev),
 			     tg3_adjust_link, phydev->interface);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	if (IS_ERR(phydev)) {
 		dev_err(&tp->pdev->dev, "Could not attach to PHY\n");
 		return PTR_ERR(phydev);
@@ -2117,13 +2146,21 @@ static int tg3_phy_init(struct tg3 *tp)
 				      SUPPORTED_Asym_Pause);
 		break;
 	default:
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+		phy_disconnect(mdiobus_get_phy(tp->mdio_bus, tp->phy_addr));
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		phy_disconnect(tp->mdio_bus->phy_map[tp->phy_addr]);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		return -EINVAL;
 	}
 
 	tp->phy_flags |= TG3_PHYFLG_IS_CONNECTED;
 
 	phydev->advertising = phydev->supported;
+
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	phy_attached_info(phydev);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	return 0;
 }
@@ -2135,7 +2172,11 @@ static void tg3_phy_start(struct tg3 *tp)
 	if (!(tp->phy_flags & TG3_PHYFLG_IS_CONNECTED))
 		return;
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	phydev = mdiobus_get_phy(tp->mdio_bus, tp->phy_addr);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	phydev = tp->mdio_bus->phy_map[tp->phy_addr];
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	if (tp->phy_flags & TG3_PHYFLG_IS_LOW_POWER) {
 		tp->phy_flags &= ~TG3_PHYFLG_IS_LOW_POWER;
@@ -2155,13 +2196,21 @@ static void tg3_phy_stop(struct tg3 *tp)
 	if (!(tp->phy_flags & TG3_PHYFLG_IS_CONNECTED))
 		return;
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	phy_stop(mdiobus_get_phy(tp->mdio_bus, tp->phy_addr));
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	phy_stop(tp->mdio_bus->phy_map[tp->phy_addr]);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 }
 
 static void tg3_phy_fini(struct tg3 *tp)
 {
 	if (tp->phy_flags & TG3_PHYFLG_IS_CONNECTED) {
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+		phy_disconnect(mdiobus_get_phy(tp->mdio_bus, tp->phy_addr));
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		phy_disconnect(tp->mdio_bus->phy_map[tp->phy_addr]);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		tp->phy_flags &= ~TG3_PHYFLG_IS_CONNECTED;
 	}
 }
@@ -4044,7 +4093,11 @@ static int tg3_power_down_prepare(struct tg3 *tp)
 			struct phy_device *phydev;
 			u32 phyid, advertising;
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+			phydev = mdiobus_get_phy(tp->mdio_bus, tp->phy_addr);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 			phydev = tp->mdio_bus->phy_map[tp->phy_addr];
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 			tp->phy_flags |= TG3_PHYFLG_IS_LOW_POWER;
 
@@ -12080,7 +12133,11 @@ static int tg3_get_settings(struct net_device *dev, struct ethtool_cmd *cmd)
 		struct phy_device *phydev;
 		if (!(tp->phy_flags & TG3_PHYFLG_IS_CONNECTED))
 			return -EAGAIN;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+		phydev = mdiobus_get_phy(tp->mdio_bus, tp->phy_addr);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		phydev = tp->mdio_bus->phy_map[tp->phy_addr];
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		return phy_ethtool_gset(phydev, cmd);
 	}
 
@@ -12147,7 +12204,11 @@ static int tg3_set_settings(struct net_device *dev, struct ethtool_cmd *cmd)
 		struct phy_device *phydev;
 		if (!(tp->phy_flags & TG3_PHYFLG_IS_CONNECTED))
 			return -EAGAIN;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+		phydev = mdiobus_get_phy(tp->mdio_bus, tp->phy_addr);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		phydev = tp->mdio_bus->phy_map[tp->phy_addr];
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		return phy_ethtool_sset(phydev, cmd);
 	}
 
@@ -12302,7 +12363,11 @@ static int tg3_nway_reset(struct net_device *dev)
 	if (tg3_flag(tp, USE_PHYLIB)) {
 		if (!(tp->phy_flags & TG3_PHYFLG_IS_CONNECTED))
 			return -EAGAIN;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+		r = phy_start_aneg(mdiobus_get_phy(tp->mdio_bus, tp->phy_addr));
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		r = phy_start_aneg(tp->mdio_bus->phy_map[tp->phy_addr]);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	} else {
 		u32 bmcr;
 
@@ -12420,7 +12485,11 @@ static int tg3_set_pauseparam(struct net_device *dev, struct ethtool_pauseparam 
 		u32 newadv;
 		struct phy_device *phydev;
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+		phydev = mdiobus_get_phy(tp->mdio_bus, tp->phy_addr);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		phydev = tp->mdio_bus->phy_map[tp->phy_addr];
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 		if (!(phydev->supported & SUPPORTED_Pause) ||
 		    (!(phydev->supported & SUPPORTED_Asym_Pause) &&
@@ -13930,7 +13999,11 @@ static int tg3_ioctl(struct net_device *dev, struct ifreq *ifr, int cmd)
 		struct phy_device *phydev;
 		if (!(tp->phy_flags & TG3_PHYFLG_IS_CONNECTED))
 			return -EAGAIN;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+		phydev = mdiobus_get_phy(tp->mdio_bus, tp->phy_addr);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		phydev = tp->mdio_bus->phy_map[tp->phy_addr];
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		return phy_mii_ioctl(phydev, ifr, cmd);
 	}
 
@@ -17900,6 +17973,9 @@ static int tg3_init_one(struct pci_dev *pdev,
 		    tg3_bus_string(tp, str),
 		    dev->dev_addr);
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	if (!(tp->phy_flags & TG3_PHYFLG_IS_CONNECTED)) {
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	if (tp->phy_flags & TG3_PHYFLG_IS_CONNECTED) {
 		struct phy_device *phydev;
 		phydev = tp->mdio_bus->phy_map[tp->phy_addr];
@@ -17907,6 +17983,7 @@ static int tg3_init_one(struct pci_dev *pdev,
 			    "attached PHY driver [%s] (mii_bus:phy_addr=%s)\n",
 			    phydev->drv->name, dev_name(&phydev->dev));
 	} else {
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		char *ethtype;
 
 		if (tp->phy_flags & TG3_PHYFLG_10_100_ONLY)

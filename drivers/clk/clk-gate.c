@@ -26,7 +26,11 @@
  * parent - fixed parent.  No clk_set_parent support
  */
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+//do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 #define to_clk_gate(_hw) container_of(_hw, struct clk_gate, hw)
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 /*
  * It works on following logic:

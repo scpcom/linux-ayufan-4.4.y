@@ -246,6 +246,8 @@ static int pu_probe(struct platform_device *pdev)
     struct resource res;
     void __iomem *iobase;
     struct device_node *node = pdev->dev.of_node;
+    if (!of_device_is_available(pdev->dev.of_node))
+        return -ENODEV;
 
     printk(KERN_INFO "[PUWRAP] pu_probe\n");
 

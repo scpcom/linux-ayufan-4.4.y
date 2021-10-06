@@ -39,6 +39,8 @@ extern char gszCustomSerialNum[32];
 #ifdef MY_ABC_HERE
 extern int g_syno_sata_remap[SATA_REMAP_MAX];
 extern int g_use_sata_remap;
+extern int g_syno_mv14xx_remap[SATA_REMAP_MAX];
+extern int g_use_mv14xx_remap;
 #endif  
 
 #ifdef MY_DEF_HERE
@@ -76,6 +78,10 @@ extern int gSynoDualHead;
 
 #ifdef MY_DEF_HERE
 extern int gSynoSASWriteConflictPanic;
+#endif  
+
+#ifdef MY_DEF_HERE
+extern char gSynoSASHBAAddr[CONFIG_SYNO_SAS_MAX_HBA_SLOT][13];
 #endif  
 
 #ifdef MY_ABC_HERE
@@ -316,14 +322,13 @@ __setup("syno_disable_usb3=", early_factory_usb3_disable);
 #endif  
 
 #ifdef MY_ABC_HERE
- 
-static int __init early_sata_remap(char *p)
+static int remap_parser(char *p, int *rgRemapTable)
 {
 	int i;
 	char *ptr = p;
 
-	for (i=0; i<SATA_REMAP_MAX; i++)
-		g_syno_sata_remap[i] = i;
+	for ( i = 0; i < SATA_REMAP_MAX; i++)
+		rgRemapTable[i] = i;
 
 	while (ptr && *ptr) {
 		char *cp = ptr;
@@ -349,7 +354,7 @@ static int __init early_sata_remap(char *p)
 
 		if ((SATA_REMAP_MAX > origin_idx) &&
 		    (SATA_REMAP_MAX > mapped_idx)) {
-			g_syno_sata_remap[origin_idx] = mapped_idx;
+			rgRemapTable[origin_idx] = mapped_idx;
 		} else {
 			goto FMT_ERR;
 		}
@@ -357,27 +362,64 @@ static int __init early_sata_remap(char *p)
 		ptr = cp;
 	}
 
-	printk(KERN_INFO "SYNO: sata remap initialized\n");
-
-	g_use_sata_remap = 1;
 	return 0;
 
 FMT_ERR:
 	 
-	printk(KERN_ERR "SYNO: sata remap format error, ignore.\n");
-	g_syno_sata_remap[0] = SATA_REMAP_NOT_INIT;
-	return 0;
+	printk(KERN_ERR "SYNO: Parsing remap format error, ignore.\n");
+	rgRemapTable[0] = SATA_REMAP_NOT_INIT;
+	return -1;
 }
 
-__setup("sata_remap=", early_sata_remap);
+static int __init early_ahci_remap(char *p)
+{
+	if (0 > remap_parser(p, g_syno_sata_remap)) {
+		printk(KERN_INFO "SYNO: ahci remap initialized failed\n");
+		g_use_sata_remap = 0;
+		return -1;
+	}
+
+	printk(KERN_INFO "SYNO: ahci remap initialized\n");
+	g_use_sata_remap = 1;
+	return 0;
+}
+__setup("ahci_remap=", early_ahci_remap);
+
+static int __init early_mv14xx_remap(char *p)
+{
+	if (0 > remap_parser(p, g_syno_mv14xx_remap)) {
+		printk(KERN_INFO "SYNO: mv14xx remap initialized failed\n");
+		g_use_mv14xx_remap = 0;
+		return -1;
+	}
+
+	printk(KERN_INFO "SYNO: mv14xx remap initialized\n");
+	g_use_mv14xx_remap = 1;
+	return 0;
+}
+__setup("mv14xx_remap=", early_mv14xx_remap);
+
+static int __init early_sata_remap_deprecated(char *p)
+{
+	if (0 > remap_parser(p, g_syno_sata_remap)) {
+		printk(KERN_INFO "SYNO: sata remap initialized failed\n");
+		g_use_sata_remap = 0;
+		return -1;
+	}
+
+	printk(KERN_INFO "SYNO: sata remap initialized\n");
+	g_use_sata_remap = 1;
+	return 0;
+}
+__setup("sata_remap=", early_sata_remap_deprecated);
 #endif  
 
 #ifdef MY_DEF_HERE
-static int __init early_pci_sata_cache(char *p)
+static int __init early_opt_pci_slot(char *p)
 {
 	int index = 0;
 	char *ptr = p;
-
+	gPciAddrNum = 0;
 	while(ptr && *ptr){
 		if (',' ==  *ptr) {
 			index = 0;
@@ -395,17 +437,14 @@ static int __init early_pci_sata_cache(char *p)
 		ptr++;
 	}
 	gPciAddrNum ++;
-
-	printk(KERN_ERR "Syno Bootargs : pci_sata_cache initialized\n");
+	printk(KERN_ERR "Syno Bootargs : opt_pci_slot initialized\n");
 	return 0;
-
 FMT_ERR:
 	gPciAddrNum = 0;
-	printk(KERN_ERR "SYNO: pci_sata_cache format error, ignore.\n" );
+	printk(KERN_ERR "SYNO: opt_pci_slot format error, ignore.\n" );
 	return 0;
-
 }
-__setup("pci_sata_cache=", early_pci_sata_cache);
+__setup("opt_pci_slot=", early_opt_pci_slot);
 #endif  
 
 #ifdef  MY_ABC_HERE
@@ -504,6 +543,29 @@ static int __init early_sas_reservation_write_conflict(char *p)
 	return 1;
 }
 __setup("sas_reservation_write_conflict=", early_sas_reservation_write_conflict);
+#endif  
+
+#ifdef MY_DEF_HERE
+static int __init early_sas_hba_idx(char *p)
+{
+        char iCount = 0;
+        char *pBegin = p;
+        char *pEnd = NULL;
+
+        do {
+                pEnd = strstr(pBegin, ",");
+                if (NULL != pEnd) {
+                        *pEnd = '\0';
+                }
+                snprintf(gSynoSASHBAAddr[iCount],
+                                sizeof(gSynoSASHBAAddr[iCount]), "%s", pBegin);
+                pBegin = (NULL == pEnd) ? NULL : pEnd + 1;
+                iCount ++;
+        } while (NULL != pBegin && iCount < CONFIG_SYNO_SAS_MAX_HBA_SLOT);
+
+        return 1;
+}
+__setup("sas_hba_idx_addr=", early_sas_hba_idx);
 #endif  
 
 #ifdef MY_ABC_HERE

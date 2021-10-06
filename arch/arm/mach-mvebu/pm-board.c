@@ -82,7 +82,12 @@ static int __init mvebu_armada_pm_init(void)
 	struct device_node *gpio_ctrl_np;
 	int ret = 0, i;
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	if (!of_machine_is_compatible("marvell,axp-gp") &&
+	    !of_machine_is_compatible("marvell,a388-gp"))
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	if (!of_machine_is_compatible("marvell,axp-gp"))
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		return -ENODEV;
 
 	np = of_find_node_by_name(NULL, "pm_pic");

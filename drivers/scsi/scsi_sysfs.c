@@ -700,6 +700,52 @@ END:
 static DEVICE_ATTR(syno_standby_syncing, S_IRUGO | S_IWUSR, sdev_show_syno_standby_syncing, sdev_store_syno_standby_syncing);
 #endif  
 
+#ifdef MY_DEF_HERE
+const char *disk_spd_string(unsigned char spd)
+{
+        char *szRet;
+        static const char * const spd_str[] = {
+                "unknown",
+                "1.5 Gbps",
+                "3.0 Gbps",
+                "6.0 Gbps",
+                "12.0 Gbps"
+        };
+
+        if (spd > (ARRAY_SIZE(spd_str) - 1)){
+                szRet = spd_str[0];
+        }else{
+                szRet = spd_str[spd];
+        }
+
+        return szRet;
+}
+
+static ssize_t
+sdev_show_syno_disk_spd(struct device *dev, struct device_attribute *attr, char *buf)
+{
+                struct scsi_device *sdev = to_scsi_device(dev);
+                int iRet = -EFAULT;
+                int iDiskSpd = NULL;
+
+                if (NULL == (sdev = to_scsi_device(dev))){
+                        goto END;
+                }
+
+                if (NULL == sdev->host->hostt->syno_get_disk_speed){
+                        goto END;
+                }else {
+                         
+                        iDiskSpd = sdev->host->hostt->syno_get_disk_speed(sdev->host, sdev->id);
+                        iRet = snprintf (buf, 20, "%s\n", disk_spd_string(iDiskSpd));
+                }
+END:
+                return iRet;
+}
+
+static DEVICE_ATTR(syno_disk_spd, S_IRUGO, sdev_show_syno_disk_spd, NULL);
+#endif  
+
 #ifdef MY_ABC_HERE
  
 static ssize_t
@@ -1139,6 +1185,9 @@ static struct attribute *scsi_sdev_attrs[] = {
 #endif  
 #ifdef MY_ABC_HERE
 	&dev_attr_syno_scmd_min_timeout.attr,
+#endif  
+#ifdef MY_DEF_HERE
+        &dev_attr_syno_disk_spd.attr,
 #endif  
 #ifdef MY_ABC_HERE
 	&dev_attr_syno_disk_serial.attr,

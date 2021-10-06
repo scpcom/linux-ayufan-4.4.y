@@ -2706,6 +2706,13 @@ static struct amba_id etm4_ids[] = {
 		.mask	= 0x000fffff,
 		.data	= "ETM 4.0",
 	},
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	{       /* ETM 4.0 - CA-72 ID */
+		.id	= 0x000bb95a,
+		.mask	= 0x000fffff,
+		.data	= "ETM 4.0",
+	},
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	{ 0, 0},
 };
 

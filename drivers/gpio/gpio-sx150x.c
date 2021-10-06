@@ -473,7 +473,11 @@ static void sx150x_init_chip(struct sx150x_chip *chip,
 
 	chip->client                     = client;
 	chip->dev_cfg                    = &sx150x_devices[driver_data];
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	chip->gpio_chip.parent              = &client->dev;
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	chip->gpio_chip.dev              = &client->dev;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	chip->gpio_chip.label            = client->name;
 	chip->gpio_chip.direction_input  = sx150x_gpio_direction_input;
 	chip->gpio_chip.direction_output = sx150x_gpio_direction_output;

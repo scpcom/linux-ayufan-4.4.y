@@ -31,7 +31,11 @@
  * parent - fixed parent.  No clk_set_parent support
  */
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+//do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 #define to_clk_gpio(_hw) container_of(_hw, struct clk_gpio, hw)
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 static int clk_gpio_gate_enable(struct clk_hw *hw)
 {

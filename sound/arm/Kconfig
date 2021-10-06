@@ -40,9 +40,11 @@ config SND_PXA2XX_AC97
 	  Say Y or M if you want to support any AC97 codec attached to
 	  the PXA2xx AC97 interface.
 
+if SYNO_LSP_RTD129X
 config SND_REALTEK
     tristate "REALTEK ALSA Driver"
     select SND_PCM
     default y
+endif # SYNO_LSP_RTD129X
 endif	# SND_ARM
 

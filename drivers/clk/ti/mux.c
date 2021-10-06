@@ -26,7 +26,11 @@
 #undef pr_fmt
 #define pr_fmt(fmt) "%s: " fmt, __func__
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+//do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 #define to_clk_mux(_hw) container_of(_hw, struct clk_mux, hw)
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 static u8 ti_clk_mux_get_parent(struct clk_hw *hw)
 {

@@ -1,9 +1,12 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #include <linux/errno.h>
 #include <linux/linkage.h>
 #include <asm/asm-offsets.h>
 #include <asm/assembler.h>
 
-#ifdef CONFIG_ARCH_RTD129X
+#if defined(CONFIG_ARCH_RTD129X) && defined(MY_DEF_HERE)
 #define GICD_BASE 0xFF011000
 #define GICC_BASE 0xFF012000
 #endif /* CONFIG_ARCH_RTD129X */
@@ -160,7 +163,7 @@ cpu_resume_after_mmu:
 	ret
 ENDPROC(cpu_resume_after_mmu)
 
-#ifdef CONFIG_ARCH_RTD129X
+#if defined(CONFIG_ARCH_RTD129X) && defined(MY_DEF_HERE)
 ENTRY(gic_init_secure)
 	mov	w9, #0x3            /* EnableGrp0 | EnableGrp1 */
 	str	w9, [x0, 0x000]     /* Secure GICD_CTLR */
@@ -196,7 +199,7 @@ ENDPROC(gic_init_secure_percpu)
 
 ENTRY(cpu_resume)
 
-#ifdef CONFIG_ARCH_RTD129X
+#if defined(CONFIG_ARCH_RTD129X) && defined(MY_DEF_HERE)
 	bl	dcache_disable
 
 	ldr	x0, =GICD_BASE

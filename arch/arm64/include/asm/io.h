@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Based on arch/arm/include/asm/io.h
  *
@@ -33,6 +36,40 @@
 #include <asm/cpufeature.h>
 
 #include <xen/xen.h>
+
+#if defined(CONFIG_PCIE_RTD1295) && defined(MY_DEF_HERE)
+u8 rtk_pcie1_readb(const volatile void __iomem *addr);
+u16 rtk_pcie1_readw(const volatile void __iomem *addr);
+u32 rtk_pcie1_readl(const volatile void __iomem *addr);
+u64 rtk_pcie1_readq(const volatile void __iomem *addr);
+
+void rtk_pcie1_writeb(u8 val, volatile void __iomem *addr);
+void rtk_pcie1_writew(u16 val, volatile void __iomem *addr);
+void rtk_pcie1_writel(u32 val, volatile void __iomem *addr);
+void rtk_pcie1_writeq(u64 val, volatile void __iomem *addr);
+
+static inline int is_pcie1_memory(u64 addr)
+{
+	return ((addr & 0xfffffffff1000000) == 0xc0000000);
+}
+#endif /* CONFIG_PCIE_RTD1295 && MY_DEF_HERE */
+
+#if defined(CONFIG_PCIE2_RTD1295) && defined(MY_DEF_HERE)
+u8 rtk_pcie2_readb(const volatile void __iomem *addr);
+u16 rtk_pcie2_readw(const volatile void __iomem *addr);
+u32 rtk_pcie2_readl(const volatile void __iomem *addr);
+u64 rtk_pcie2_readq(const volatile void __iomem *addr);
+
+void rtk_pcie2_writeb(u8 val, volatile void __iomem *addr);
+void rtk_pcie2_writew(u16 val, volatile void __iomem *addr);
+void rtk_pcie2_writel(u32 val, volatile void __iomem *addr);
+void rtk_pcie2_writeq(u64 val, volatile void __iomem *addr);
+
+static inline int is_pcie2_memory(u64 addr)
+{
+	return ((addr & 0xfffffffff1000000) == 0xc1000000);
+}
+#endif /* CONFIG_PCIE2_RTD1295 && MY_DEF_HERE */
 
 /*
  * Generic IO read/write.  These perform native-endian accesses.
@@ -132,6 +169,164 @@ static inline u64 __raw_readq(const volatile void __iomem *addr)
  * following Normal memory access. Writes are ordered relative to any prior
  * Normal memory access.
  */
+#ifdef MY_DEF_HERE
+
+#define readb_raw(c)		({ u8  __v = readb_relaxed(c); __iormb(); __v; })
+#define readw_raw(c)		({ u16 __v = readw_relaxed(c); __iormb(); __v; })
+#define readl_raw(c)		({ u32 __v = readl_relaxed(c); __iormb(); __v; })
+#define readq_raw(c)		({ u64 __v = readq_relaxed(c); __iormb(); __v; })
+
+#define writeb_raw(v,c)		({ __iowmb(); writeb_relaxed((v),(c)); })
+#define writew_raw(v,c)		({ __iowmb(); writew_relaxed((v),(c)); })
+#define writel_raw(v,c)		({ __iowmb(); writel_relaxed((v),(c)); })
+#define writeq_raw(v,c)		({ __iowmb(); writeq_relaxed((v),(c)); })
+
+#define readb readb
+static inline u8 readb(const volatile void __iomem *addr)
+{
+#ifdef CONFIG_PCIE_RTD1295
+	if (is_pcie1_memory((u64)addr))
+		return rtk_pcie1_readb(addr);
+#endif
+
+#ifdef CONFIG_PCIE2_RTD1295
+	if (is_pcie2_memory((u64)addr))
+		return rtk_pcie2_readb(addr);
+#endif
+
+	return readb_raw(addr);
+}
+
+#define readw readw
+static inline u16 readw(const volatile void __iomem *addr)
+{
+#ifdef CONFIG_PCIE_RTD1295
+	if (is_pcie1_memory((u64)addr))
+		return rtk_pcie1_readw(addr);
+#endif
+
+#ifdef CONFIG_PCIE2_RTD1295
+	if (is_pcie2_memory((u64)addr))
+		return rtk_pcie2_readw(addr);
+#endif
+
+	return readw_raw(addr);
+}
+
+#define readl readl
+static inline u32 readl(const volatile void __iomem *addr)
+{
+#ifdef CONFIG_PCIE_RTD1295
+	if (is_pcie1_memory((u64)addr))
+		return rtk_pcie1_readl(addr);
+#endif
+
+#ifdef CONFIG_PCIE2_RTD1295
+	if (is_pcie2_memory((u64)addr))
+		return rtk_pcie2_readl(addr);
+#endif
+
+	return readl_raw(addr);
+}
+
+#define readq readq
+static inline u64 readq(const volatile void __iomem *addr)
+{
+#ifdef CONFIG_PCIE_RTD1295
+	if (is_pcie1_memory((u64)addr))
+		return rtk_pcie1_readq(addr);
+#endif
+
+#ifdef CONFIG_PCIE2_RTD1295
+	if (is_pcie2_memory((u64)addr))
+		return rtk_pcie2_readq(addr);
+#endif
+
+	return readq_raw(addr);
+}
+
+#define writeb writeb
+static inline void writeb(u8 val, volatile void __iomem *addr)
+{
+#ifdef CONFIG_PCIE_RTD1295
+	if (is_pcie1_memory((u64)addr)) {
+		rtk_pcie1_writeb(val, addr);
+		return;
+	}
+#endif
+
+#ifdef CONFIG_PCIE2_RTD1295
+	if (is_pcie2_memory((u64)addr)) {
+		rtk_pcie2_writeb(val, addr);
+		return;
+	}
+#endif
+
+	writeb_raw(val, addr);
+}
+
+#define writew writew
+static inline void writew(u16 val, volatile void __iomem *addr)
+{
+#ifdef CONFIG_PCIE_RTD1295
+	if (is_pcie1_memory((u64)addr)) {
+		rtk_pcie1_writew(val, addr);
+		return;
+	}
+#endif
+
+#ifdef CONFIG_PCIE2_RTD1295
+	if (is_pcie2_memory((u64)addr)) {
+		rtk_pcie2_writew(val, addr);
+		return;
+	}
+#endif
+
+	writew_raw(val, addr);
+}
+
+#define writel writel
+static inline void writel(u32 val, volatile void __iomem *addr)
+{
+#ifdef CONFIG_PCIE_RTD1295
+	if (is_pcie1_memory((u64)addr)) {
+		rtk_pcie1_writel(val, addr);
+		return;
+	}
+#endif
+
+#ifdef CONFIG_PCIE2_RTD1295
+	if (is_pcie2_memory((u64)addr)) {
+		rtk_pcie2_writel(val, addr);
+		return;
+	}
+#endif
+
+	writel_raw(val, addr);
+}
+
+#define writeq writeq
+static inline void writeq(u64 val, volatile void __iomem *addr)
+{
+#ifdef CONFIG_PCIE_RTD1295
+	if (is_pcie1_memory((u64)addr)) {
+		rtk_pcie1_writeq(val, addr);
+		return;
+	}
+#endif
+
+#ifdef CONFIG_PCIE2_RTD1295
+	if (is_pcie2_memory((u64)addr)) {
+		rtk_pcie2_writeq(val, addr);
+		return;
+	}
+#endif
+
+	writeq_raw(val, addr);
+}
+
+#else /* MY_DEF_HERE */
+
 #define readb(c)		({ u8  __v = readb_relaxed(c); __iormb(); __v; })
 #define readw(c)		({ u16 __v = readw_relaxed(c); __iormb(); __v; })
 #define readl(c)		({ u32 __v = readl_relaxed(c); __iormb(); __v; })
@@ -142,6 +337,7 @@ static inline u64 __raw_readq(const volatile void __iomem *addr)
 #define writel(v,c)		({ __iowmb(); writel_relaxed((v),(c)); })
 #define writeq(v,c)		({ __iowmb(); writeq_relaxed((v),(c)); })
 
+#endif /* MY_DEF_HERE */
 /*
  *  I/O port access primitives.
  */

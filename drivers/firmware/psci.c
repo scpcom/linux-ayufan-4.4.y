@@ -29,6 +29,19 @@
 #include <asm/smp_plat.h>
 #include <asm/suspend.h>
 
+#ifdef CONFIG_SYNO_ARMADA37XX
+#include <linux/delay.h>
+#include <linux/serial_reg.h>
+
+#define PORT1_BASE              0xD0012200
+#define UART1_WRITE(val, base, offset) iowrite32(val, base + offset)
+#define UART1_READ(base, offset) ioread32(base + offset)
+#define SET8N1			0x0
+#define UART_CTL		0x4
+#define UART_1BYTE_TX_HOLDING	0x1C
+#define SOFTWARE_SHUTDOWN	0x31
+#define SOFTWARE_REBOOT		0x43
+#endif /* CONFIG_SYNO_ARMADA37XX */
 /*
  * While a 64-bit OS can make calls with SMC32 calling conventions, for some
  * calls it is necessary to use SMC64 to pass or return 64-bit values.
@@ -208,7 +221,76 @@ static int get_set_conduit_method(struct device_node *np)
 	}
 	return 0;
 }
+#ifdef CONFIG_SYNO_ARMADA37XX
+#define  CTRL_TXFIFO_RST	BIT(15)
+#define  CTRL_RXFIFO_RST	BIT(14)
+#define  CTRL_BRK_DET_INT	BIT(3)
+#define  CTRL_FRM_ERR_INT	BIT(2)
+#define  CTRL_PAR_ERR_INT	BIT(1)
+#define  CTRL_OVR_ERR_INT	BIT(0)
+#define  CTRL_BRK_INT		(CTRL_BRK_DET_INT | CTRL_FRM_ERR_INT\
+				 | CTRL_PAR_ERR_INT | CTRL_OVR_ERR_INT)
+#define UART_EXT_CTRL2		0x20
+#define EXT_CTRL2_RX_RDY_INT_1B	BIT(5)
 
+extern void __iomem *syno_uart1_base;
+
+static void synology_init_uart(void __iomem *uart1_base)
+{
+	u32 val = 0;
+	if (NULL == uart1_base) {
+		printk("NULL uart1 base!!\n");
+		goto END;
+	}
+	UART1_WRITE(CTRL_TXFIFO_RST | CTRL_RXFIFO_RST, uart1_base, UART_CTL);
+	udelay(1);
+	UART1_WRITE(CTRL_BRK_INT, uart1_base, UART_CTL);
+
+	val = UART1_READ(uart1_base, UART_EXT_CTRL2);
+	val |= EXT_CTRL2_RX_RDY_INT_1B;
+	UART1_WRITE(val, uart1_base, UART_EXT_CTRL2);
+
+	UART1_WRITE(SET8N1, uart1_base, UART_CTL);
+
+END:
+	return;
+}
+
+static void synology_restart(enum reboot_mode reboot_mode, const char *cmd)
+{
+	void __iomem *uart1_base;
+
+	printk("Synology_reboot\n");
+	if (NULL != syno_uart1_base) {
+		uart1_base = syno_uart1_base;
+	} else {
+		uart1_base = ioremap(PORT1_BASE, 0x2C);
+	}
+	synology_init_uart(uart1_base);
+	UART1_WRITE(SOFTWARE_REBOOT, uart1_base, UART_1BYTE_TX_HOLDING);
+
+	/* delay for uart1 send the request to uP */
+	mdelay(1000);
+	/* models without microp will go here */
+	printk("Reboot failed -- System halted\n");
+	local_irq_disable();
+	while (1);
+}
+
+static void synology_power_off(void)
+{
+	void __iomem *uart1_base;
+
+	printk("Synology_power_off\n");
+	if (NULL != syno_uart1_base) {
+		uart1_base = syno_uart1_base;
+	} else {
+		uart1_base = ioremap(PORT1_BASE, 0x2C);
+	}
+	synology_init_uart(uart1_base);
+	UART1_WRITE(SOFTWARE_SHUTDOWN, uart1_base, UART_1BYTE_TX_HOLDING);
+}
+#else /* CONFIG_SYNO_ARMADA37XX */
 static void psci_sys_reset(enum reboot_mode reboot_mode, const char *cmd)
 {
 	invoke_psci_fn(PSCI_0_2_FN_SYSTEM_RESET, 0, 0, 0);
@@ -218,6 +300,7 @@ static void psci_sys_poweroff(void)
 {
 	invoke_psci_fn(PSCI_0_2_FN_SYSTEM_OFF, 0, 0, 0);
 }
+#endif /* CONFIG_SYNO_ARMADA37XX */
 
 static int __init psci_features(u32 psci_func_id)
 {
@@ -322,9 +405,14 @@ static void __init psci_0_2_set_functions(void)
 
 	psci_ops.migrate_info_type = psci_migrate_info_type;
 
+#ifdef CONFIG_SYNO_ARMADA37XX
+	arm_pm_restart = synology_restart;
+	pm_power_off = synology_power_off;
+#else /* CONFIG_SYNO_ARMADA37XX */
 	arm_pm_restart = psci_sys_reset;
 
 	pm_power_off = psci_sys_poweroff;
+#endif /* CONFIG_SYNO_ARMADA37XX */
 }
 
 /*

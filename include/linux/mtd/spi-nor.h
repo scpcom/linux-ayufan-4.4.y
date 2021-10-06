@@ -185,6 +185,19 @@ struct spi_nor {
 	void *priv;
 };
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+static inline void spi_nor_set_flash_node(struct spi_nor *nor,
+					  struct device_node *np)
+{
+	nor->flash_node = np;
+}
+
+static inline struct device_node *spi_nor_get_flash_node(struct spi_nor *nor)
+{
+	return nor->flash_node;
+}
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+
 /**
  * spi_nor_scan() - scan the SPI NOR
  * @nor:	the spi_nor structure

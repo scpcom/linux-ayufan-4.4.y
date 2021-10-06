@@ -254,6 +254,20 @@
 
 #define ADDR_TO_DEVICE_NO(addr)         ((addr >> 19) & 0x1F)
 
+#define PCIE_IO_2K_MASK 0xFFFFF800
+#define PCIE_IO_4K_MASK 0xFFFFF000
+
+#define rtk_pci_ctrl_write(addr,val)	writel(val, addr + PCIE_CTRL_BASE)
+#define rtk_pci_ctrl_read(addr)	readl(addr + PCIE_CTRL_BASE)
+
+#define rtk_pci_direct_write(addr, val) writel(val, addr + PCIE_CFG_BASE)
+#define rtk_pci_direct_write_word(addr, val) writew(val, addr + PCIE_CFG_BASE)
+#define rtk_pci_direct_write_byte(addr, val) writeb(val, addr + PCIE_CFG_BASE)
+
+#define rtk_pci_direct_read(addr) ({ u32 __r = readl(addr + PCIE_CFG_BASE); __r; })
+#define rtk_pci_direct_read_word(addr) ({ u16 __r = readw(addr + PCIE_CFG_BASE); __r; })
+#define rtk_pci_direct_read_byte(addr) ({ u8 __r = readb(addr + PCIE_CFG_BASE); __r; })
+
 static unsigned long _pci_bit_mask(unsigned char byte_mask) {
 
 	int i;

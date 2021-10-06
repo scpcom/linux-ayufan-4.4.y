@@ -79,7 +79,11 @@ struct txx9ndfmc_drvdata {
 
 static struct platform_device *mtd_to_platdev(struct mtd_info *mtd)
 {
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	struct nand_chip *chip = mtd_to_nand(mtd);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct nand_chip *chip = mtd->priv;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct txx9ndfmc_priv *txx9_priv = chip->priv;
 	return txx9_priv->dev;
 }
@@ -135,7 +139,11 @@ static void txx9ndfmc_read_buf(struct mtd_info *mtd, uint8_t *buf, int len)
 static void txx9ndfmc_cmd_ctrl(struct mtd_info *mtd, int cmd,
 			       unsigned int ctrl)
 {
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	struct nand_chip *chip = mtd_to_nand(mtd);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct nand_chip *chip = mtd->priv;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct txx9ndfmc_priv *txx9_priv = chip->priv;
 	struct platform_device *dev = txx9_priv->dev;
 	struct txx9ndfmc_platform_data *plat = dev_get_platdata(&dev->dev);
@@ -175,7 +183,11 @@ static int txx9ndfmc_calculate_ecc(struct mtd_info *mtd, const uint8_t *dat,
 				   uint8_t *ecc_code)
 {
 	struct platform_device *dev = mtd_to_platdev(mtd);
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	struct nand_chip *chip = mtd_to_nand(mtd);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct nand_chip *chip = mtd->priv;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	int eccbytes;
 	u32 mcr = txx9ndfmc_read(dev, TXX9_NDFMCR);
 
@@ -195,7 +207,11 @@ static int txx9ndfmc_calculate_ecc(struct mtd_info *mtd, const uint8_t *dat,
 static int txx9ndfmc_correct_data(struct mtd_info *mtd, unsigned char *buf,
 		unsigned char *read_ecc, unsigned char *calc_ecc)
 {
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	struct nand_chip *chip = mtd_to_nand(mtd);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct nand_chip *chip = mtd->priv;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	int eccsize;
 	int corrected = 0;
 	int stat;
@@ -257,7 +273,11 @@ static void txx9ndfmc_initialize(struct platform_device *dev)
 
 static int txx9ndfmc_nand_scan(struct mtd_info *mtd)
 {
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	struct nand_chip *chip = mtd_to_nand(mtd);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct nand_chip *chip = mtd->priv;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	int ret;
 
 	ret = nand_scan_ident(mtd, 1, NULL);
@@ -391,7 +411,11 @@ static int __exit txx9ndfmc_remove(struct platform_device *dev)
 
 		if (!mtd)
 			continue;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+		chip = mtd_to_nand(mtd);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		chip = mtd->priv;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		txx9_priv = chip->priv;
 
 		nand_release(mtd);

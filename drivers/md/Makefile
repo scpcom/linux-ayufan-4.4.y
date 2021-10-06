@@ -16,7 +16,7 @@ dm-cache-mq-y   += dm-cache-policy-mq.o
 dm-cache-smq-y   += dm-cache-policy-smq.o
 dm-cache-cleaner-y += dm-cache-policy-cleaner.o
 dm-era-y	+= dm-era-target.o
-md-mod-y	+= md.o bitmap.o libmd-report.o
+md-mod-y	+= md.o bitmap.o libmd-report.o libmd-sync-report.o
 raid456-y	+= raid5.o raid5-cache.o
 
 # Note: link order is important.  All raid personalities

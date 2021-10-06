@@ -12,14 +12,13 @@ menuconfig UIO
 
 if UIO
 
+if SYNO_LSP_RTD129X
 config UIO_ASSIGN_MINOR
 	bool "UIO supports assigning minor number"
-	depends on SYNO_RTD1296
 	default n
 
 config UIO_RTK_RBUS
 	bool "Memory mapping RBUS area to userspace"
-	depends on SYNO_RTD1296
 	default n
 	select UIO_ASSIGN_MINOR
 	help
@@ -27,7 +26,6 @@ config UIO_RTK_RBUS
 
 config UIO_RTK_REFCLK
 	bool "Memory mapping Reference Clock area to userspace"
-	depends on SYNO_RTD1296
 	default n
 	select UIO_ASSIGN_MINOR
 	help
@@ -35,7 +33,6 @@ config UIO_RTK_REFCLK
 
 config UIO_RTK_SE
 	bool "Streaming Engine driver use UIO mode"
-	depends on SYNO_RTD1296
 	default n
 	select UIO_ASSIGN_MINOR
 	select CONFIG_UIO_PDRV_GENIRQ
@@ -45,13 +42,13 @@ config UIO_RTK_SE
 
 config UIO_RTK_MD
 	bool "Moving Data Engine driver use UIO mode"
-	depends on SYNO_RTD1296
 	default n
 	select UIO_ASSIGN_MINOR
 	select CONFIG_UIO_PDRV_GENIRQ
 	select CONFIG_UIO_DMEM_GENIRQ
 	help
 	  Realtek Moving Data Engine driver using UIO mode
+endif # SYNO_LSP_RTD129X
 
 config UIO_CIF
 	tristate "generic Hilscher CIF Card driver"
@@ -195,18 +192,4 @@ config UIO_MF624
 	    git clone git://rtime.felk.cvut.cz/mf6xx.git
 
 	  If you compile this as a module, it will be called uio_mf624.
-
-config UIO_ASSIGN_MINOR
-	bool "UIO supports assigning minor number"
-	depends on SYNO_RTD1296
-	default n
-
-config UIO_RTK_RBUS
-	bool "Memory mapping RBUS area to userspace"
-	depends on SYNO_RTD1296
-	default n
-	select UIO_ASSIGN_MINOR
-	help
-	  Memory mapping RBUS area to userspace
-
 endif

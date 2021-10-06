@@ -79,7 +79,7 @@ static void syno_active_ledtrig_timerfunc(unsigned long iLedNum)
 	if (pTriggerTimer->DiskLastActivity != pTriggerTimer->DiskActivity) {
 		pTriggerTimer->DiskLastActivity = pTriggerTimer->DiskActivity;
 		led_trigger_event(&syno_led_ledtrig[iLedNum], LED_HALF);
-		mod_timer(&pTriggerTimer->Timer, jiffies + msecs_to_jiffies(100));
+		mod_timer(&pTriggerTimer->Timer, jiffies + msecs_to_jiffies(150));
 	}else if( 1 == pTriggerTimer->DiskFaulty){
 		led_trigger_event(&syno_led_ledtrig[iLedNum], LED_OFF);
 	}else{

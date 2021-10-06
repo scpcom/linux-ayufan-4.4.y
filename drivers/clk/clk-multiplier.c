@@ -14,7 +14,11 @@
 #include <linux/of.h>
 #include <linux/slab.h>
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+//do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 #define to_clk_multiplier(_hw) container_of(_hw, struct clk_multiplier, hw)
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 static unsigned long __get_mult(struct clk_multiplier *mult,
 				unsigned long rate,

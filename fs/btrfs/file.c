@@ -18,6 +18,11 @@
 #include <linux/slab.h>
 #include <linux/btrfs.h>
 #include <linux/uio.h>
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#ifdef CONFIG_SPLICE_FROM_SOCKET
+#include <net/sock.h>
+#endif
+#endif  
 #include "ctree.h"
 #include "disk-io.h"
 #include "transaction.h"
@@ -579,6 +584,7 @@ int __btrfs_drop_extents(struct btrfs_trans_handle *trans,
 	u64 num_bytes = 0;
 	u64 extent_offset = 0;
 	u64 extent_end = 0;
+	u64 last_end = start;
 	int del_nr = 0;
 	int del_slot = 0;
 	int extent_type;
@@ -661,8 +667,10 @@ next_slot:
 			BUG();
 		}
 
-		if (extent_end == key.offset && extent_end >= search_start)
+		if (extent_end == key.offset && extent_end >= search_start) {
+			last_end = extent_end;
 			goto delete_extent_item;
+		}
 
 		if (extent_end <= search_start) {
 			path->slots[0]++;
@@ -721,6 +729,8 @@ next_slot:
 			key.offset = start;
 		}
 		 
+		last_end = extent_end;
+
 		if (start <= key.offset && end < extent_end) {
 			if (extent_type == BTRFS_FILE_EXTENT_INLINE) {
 				ret = -EOPNOTSUPP;
@@ -851,7 +861,7 @@ delete_extent_item:
 	if (!replace_extent || !(*key_inserted))
 		btrfs_release_path(path);
 	if (drop_end)
-		*drop_end = found ? min(end, extent_end) : end;
+		*drop_end = found ? min(end, last_end) : end;
 	return ret;
 }
 
@@ -1813,9 +1823,12 @@ static int fill_holes(struct btrfs_trans_handle *trans, struct inode *inode,
 #else
 	ret = btrfs_search_slot(trans, root, &key, path, 0, 1);
 #endif  
-	if (ret < 0)
+	if (ret <= 0) {
+		 
+		if (ret == 0)
+			ret = -EINVAL;
 		return ret;
-	BUG_ON(!ret);
+	}
 
 	leaf = path->nodes[0];
 #ifdef MY_ABC_HERE
@@ -2138,10 +2151,12 @@ static int btrfs_punch_hole(struct inode *inode, loff_t offset, loff_t len)
 
 		trans->block_rsv = &root->fs_info->trans_block_rsv;
 
-		if (cur_offset < ino_size) {
+		if (cur_offset < drop_end && cur_offset < ino_size) {
 			ret = fill_holes(trans, inode, path, cur_offset,
 					 drop_end);
 			if (ret) {
+				 
+				btrfs_abort_transaction(trans, root, ret);
 				err = ret;
 				break;
 			}
@@ -2192,6 +2207,8 @@ static int btrfs_punch_hole(struct inode *inode, loff_t offset, loff_t len)
 	if (cur_offset < ino_size && cur_offset < drop_end) {
 		ret = fill_holes(trans, inode, path, cur_offset, drop_end);
 		if (ret) {
+			 
+			btrfs_abort_transaction(trans, root, ret);
 			err = ret;
 			goto out_trans;
 		}
@@ -2515,10 +2532,301 @@ out:
 	return offset;
 }
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#ifdef CONFIG_SPLICE_FROM_SOCKET
+static ssize_t btrfs_splice_from_socket(struct file *file, struct socket *sock,
+					loff_t __user *ppos, size_t write_bytes)
+{
+	struct inode *inode = file_inode(file);
+	struct btrfs_root *root = BTRFS_I(inode)->root;
+	struct page **pages = NULL;
+	struct extent_state *cached_state = NULL;
+	u64 release_bytes = 0;
+	u64 lockstart;
+	u64 lockend;
+	struct kvec *iov = NULL;
+	struct msghdr msg = { 0 };
+	size_t offset, offset_tmp, remaining;
+	size_t num_pages, dirty_pages;
+	size_t copied = 0;
+	size_t reserve_bytes;
+	u64 start_pos;
+	ssize_t err = 0;
+	int ret = 0;
+	bool only_release_metadata = false;
+	bool need_unlock;
+	loff_t pos;
+	int i;
+	bool sync = (file->f_flags & O_DSYNC) || IS_SYNC(file->f_mapping->host);
+	struct kiocb iocb;
+	struct iov_iter iter;
+
+	init_sync_kiocb(&iocb, file);
+
+	if (unlikely(iocb.ki_flags & IOCB_DIRECT))
+		return -EINVAL;
+
+	if (copy_from_user(&iocb.ki_pos, ppos, sizeof(loff_t)))
+		return -EFAULT;
+
+	write_bytes = min_t(size_t, write_bytes, SZ_128K);
+
+	iov_iter_init(&iter, WRITE, NULL, 0, write_bytes);
+
+	file_start_write(file);
+
+	mutex_lock(&inode->i_mutex);
+	err = generic_write_checks(&iocb, &iter);
+	if (err <= 0) {
+		pr_debug("%s: generic_write_checks err, write_bytes %zu\n",
+			 __func__, write_bytes);
+		mutex_unlock(&inode->i_mutex);
+		goto out;
+	}
+	pos = iocb.ki_pos;
+	write_bytes = iov_iter_count(&iter);
+
+	if (write_bytes == 0) {
+		mutex_unlock(&inode->i_mutex);
+		goto out;
+	}
+
+	current->backing_dev_info = inode_to_bdi(inode);
+	err = file_remove_privs(file);
+	if (err) {
+		pr_debug("%s: file_remove_privs, err %zu\n", __func__, err);
+		mutex_unlock(&inode->i_mutex);
+		goto out;
+	}
+
+	if (test_bit(BTRFS_FS_STATE_ERROR, &root->fs_info->fs_state)) {
+		mutex_unlock(&inode->i_mutex);
+		err = -EROFS;
+		goto out;
+	}
+
+	update_time_for_write(inode);
+
+	start_pos = round_down(pos, root->sectorsize);
+	if (start_pos > i_size_read(inode)) {
+		u64 end_pos;
+		 
+		end_pos = round_up(pos + write_bytes, root->sectorsize);
+		err = btrfs_cont_expand(inode, i_size_read(inode), end_pos);
+		if (err) {
+			mutex_unlock(&inode->i_mutex);
+			goto out;
+		}
+	}
+
+	if (sync)
+		atomic_inc(&BTRFS_I(inode)->sync_writers);
+
+	offset = pos & (PAGE_CACHE_SIZE - 1);
+	num_pages = DIV_ROUND_UP(write_bytes + offset,
+				 PAGE_CACHE_SIZE);
+
+	pages = kmalloc_array(num_pages, sizeof(*pages), GFP_NOFS);
+	if (!pages) {
+		ret = -ENOMEM;
+		goto out_free;
+	}
+
+	iov = kmalloc_array(num_pages, sizeof(*iov), GFP_NOFS);
+	if (!iov) {
+		ret = -ENOMEM;
+		goto out_free;
+	}
+
+	reserve_bytes = num_pages << PAGE_CACHE_SHIFT;
+
+	if (BTRFS_I(inode)->flags & (BTRFS_INODE_NODATACOW |
+				     BTRFS_INODE_PREALLOC)) {
+		ret = check_can_nocow(inode, pos, &write_bytes);
+		if (ret < 0)
+			goto out_free;
+		if (ret > 0) {
+			 
+			only_release_metadata = true;
+			 
+			num_pages = DIV_ROUND_UP(write_bytes + offset,
+						 PAGE_CACHE_SIZE);
+			reserve_bytes = num_pages << PAGE_CACHE_SHIFT;
+			goto reserve_metadata;
+		}
+	}
+	ret = btrfs_check_data_free_space(inode, pos, write_bytes);
+	if (ret < 0)
+		goto out_free;
+
+reserve_metadata:
+	ret = btrfs_delalloc_reserve_metadata(inode, reserve_bytes);
+	if (ret) {
+		if (!only_release_metadata)
+			btrfs_free_reserved_data_space(inode, pos,
+						       write_bytes);
+		else
+			btrfs_end_write_no_snapshoting(root);
+		goto out_free;
+	}
+
+	release_bytes = reserve_bytes;
+	need_unlock = false;
+again:
+	 
+	ret = prepare_pages(inode, pages, num_pages,
+			    pos, write_bytes,
+			    false);
+
+	if (ret)
+		goto out_free;
+
+	ret = lock_and_cleanup_extent_if_need(inode, pages, num_pages,
+					      pos, &lockstart, &lockend,
+					      &cached_state);
+	if (ret < 0) {
+		if (ret == -EAGAIN)
+			goto again;
+		goto out_free;
+	} else if (ret > 0) {
+		need_unlock = true;
+		ret = 0;
+	}
+
+	remaining = write_bytes;
+	offset_tmp = offset;
+	for (i = 0; i < num_pages; i++) {
+		unsigned int bytes = min_t(unsigned int,
+					   PAGE_CACHE_SIZE - offset_tmp,
+					   remaining);
+
+		iov[i].iov_base = kmap(pages[i]) + offset_tmp;
+		iov[i].iov_len = bytes;
+		offset_tmp = 0;
+		remaining -= bytes;
+	}
+
+	copied = kernel_recvmsg(sock, &msg, iov, num_pages, write_bytes,
+				MSG_WAITALL);
+
+	for (i = 0; i < num_pages; i++)
+		kunmap(pages[i]);
+
+	if (copied == 0)
+		dirty_pages = 0;
+	else
+		dirty_pages = DIV_ROUND_UP(copied + offset,
+					   PAGE_CACHE_SIZE);
+
+	if (num_pages > dirty_pages) {
+		release_bytes = (num_pages - dirty_pages) <<
+			PAGE_CACHE_SHIFT;
+		if (copied > 0) {
+			spin_lock(&BTRFS_I(inode)->lock);
+			BTRFS_I(inode)->outstanding_extents++;
+			spin_unlock(&BTRFS_I(inode)->lock);
+		}
+		if (only_release_metadata) {
+			btrfs_delalloc_release_metadata(inode,
+							release_bytes);
+		} else {
+			u64 __pos;
+
+			__pos = round_down(pos, root->sectorsize) +
+				(dirty_pages << PAGE_CACHE_SHIFT);
+			btrfs_delalloc_release_space(inode, __pos,
+						     release_bytes);
+		}
+	}
+
+	release_bytes = dirty_pages << PAGE_CACHE_SHIFT;
+
+	if (copied > 0)
+		ret = btrfs_dirty_pages(root, inode, pages,
+					dirty_pages, pos, copied,
+					NULL);
+	if (need_unlock)
+		unlock_extent_cached(&BTRFS_I(inode)->io_tree,
+				     lockstart, lockend, &cached_state,
+				     GFP_NOFS);
+	if (ret) {
+		btrfs_drop_pages(pages, num_pages);
+		copied = 0;
+		goto out_free;
+	}
+
+	release_bytes = 0;
+	if (only_release_metadata)
+		btrfs_end_write_no_snapshoting(root);
+
+	if (only_release_metadata && copied > 0) {
+		lockstart = round_down(pos, root->sectorsize);
+		lockend = lockstart +
+			(dirty_pages << PAGE_CACHE_SHIFT) - 1;
+
+		set_extent_bit(&BTRFS_I(inode)->io_tree, lockstart,
+			       lockend, EXTENT_NORESERVE, NULL,
+			       NULL, GFP_NOFS);
+		only_release_metadata = false;
+	}
+
+	btrfs_drop_pages(pages, num_pages);
+
+	cond_resched();
+
+	balance_dirty_pages_ratelimited(inode->i_mapping);
+	if (dirty_pages < (root->nodesize >> PAGE_CACHE_SHIFT) + 1)
+		btrfs_btree_balance_dirty(root);
+
+out_free:
+	kfree(iov);
+	kfree(pages);
+
+	if (release_bytes) {
+		if (only_release_metadata) {
+			btrfs_end_write_no_snapshoting(root);
+			btrfs_delalloc_release_metadata(inode, release_bytes);
+		} else {
+			btrfs_delalloc_release_space(inode, pos,
+						     release_bytes);
+		}
+	}
+
+	mutex_unlock(&inode->i_mutex);
+
+	spin_lock(&BTRFS_I(inode)->lock);
+	BTRFS_I(inode)->last_sub_trans = root->log_transid;
+	spin_unlock(&BTRFS_I(inode)->lock);
+	if (copied > 0)
+		ret = generic_write_sync(file, pos, copied);
+
+	if (sync)
+		atomic_dec(&BTRFS_I(inode)->sync_writers);
+
+	if (!ret) {
+		pos += copied;
+		if (copy_to_user(ppos, &pos, sizeof(*ppos)))
+			ret = -EFAULT;
+	}
+out:
+	current->backing_dev_info = NULL;
+
+	file_end_write(file);
+
+	return ret ? ret : copied;
+}
+#endif
+#endif  
+
 const struct file_operations btrfs_file_operations = {
 	.llseek		= btrfs_file_llseek,
 	.read_iter      = generic_file_read_iter,
 	.splice_read	= generic_file_splice_read,
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#ifdef CONFIG_SPLICE_FROM_SOCKET
+	.splice_from_socket = btrfs_splice_from_socket,
+#endif
+#endif  
 	.write_iter	= btrfs_file_write_iter,
 	.mmap		= btrfs_file_mmap,
 	.open		= generic_file_open,

@@ -16,8 +16,14 @@
 #ifndef __PHY_H
 #define __PHY_H
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#include <linux/compiler.h>
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 #include <linux/spinlock.h>
 #include <linux/ethtool.h>
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#include <linux/mdio.h>
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 #include <linux/mii.h>
 #include <linux/module.h>
 #include <linux/timer.h>
@@ -57,6 +63,9 @@
 #define PHY_HAS_INTERRUPT	0x00000001
 #define PHY_HAS_MAGICANEG	0x00000002
 #define PHY_IS_INTERNAL		0x00000004
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#define MDIO_DEVICE_IS_PHY	0x80000000
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 /* Interface Mode definitions */
 typedef enum {
@@ -76,6 +85,13 @@ typedef enum {
 	PHY_INTERFACE_MODE_XGMII,
 	PHY_INTERFACE_MODE_MOCA,
 	PHY_INTERFACE_MODE_QSGMII,
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	PHY_INTERFACE_MODE_XAUI,
+	PHY_INTERFACE_MODE_RXAUI,
+	PHY_INTERFACE_MODE_SFI,
+	PHY_INTERFACE_MODE_XFI,
+	PHY_INTERFACE_MODE_KR,
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	PHY_INTERFACE_MODE_MAX,
 } phy_interface_t;
 
@@ -119,6 +135,18 @@ static inline const char *phy_modes(phy_interface_t interface)
 		return "moca";
 	case PHY_INTERFACE_MODE_QSGMII:
 		return "qsgmii";
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	case PHY_INTERFACE_MODE_XAUI:
+		return "xaui";
+	case PHY_INTERFACE_MODE_RXAUI:
+		return "rxaui";
+	case PHY_INTERFACE_MODE_SFI:
+		return "sfi";
+	case PHY_INTERFACE_MODE_XFI:
+		return "xfi";
+	case PHY_INTERFACE_MODE_KR:
+		return "kr";
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	default:
 		return "unknown";
 	}
@@ -156,8 +184,13 @@ struct mii_bus {
 	const char *name;
 	char id[MII_BUS_ID_SIZE];
 	void *priv;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	int (*read)(struct mii_bus *bus, int addr, int regnum);
+	int (*write)(struct mii_bus *bus, int addr, int regnum, u16 val);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	int (*read)(struct mii_bus *bus, int phy_id, int regnum);
 	int (*write)(struct mii_bus *bus, int phy_id, int regnum, u16 val);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	int (*reset)(struct mii_bus *bus);
 
 	/*
@@ -176,7 +209,11 @@ struct mii_bus {
 	struct device dev;
 
 	/* list of all PHYs on bus */
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	struct mdio_device *mdio_map[PHY_MAX_ADDR];
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct phy_device *phy_map[PHY_MAX_ADDR];
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	/* PHY addresses to be ignored when probing */
 	u32 phy_mask;
@@ -184,11 +221,19 @@ struct mii_bus {
 	/* PHY addresses to ignore the TA/read failure */
 	u32 phy_ignore_ta_mask;
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	/*
+	 * An array of interrupts, each PHY's interrupt at the index
+	 * matching its address
+	 */
+	int irq[PHY_MAX_ADDR];
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	/*
 	 * Pointer to an array of interrupts, each PHY's
 	 * interrupt at the index matching its address
 	 */
 	int *irq;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 };
 #define to_mii_bus(d) container_of(d, struct mii_bus, dev)
 
@@ -210,10 +255,14 @@ static inline struct mii_bus *devm_mdiobus_alloc(struct device *dev)
 
 void devm_mdiobus_free(struct device *dev, struct mii_bus *bus);
 struct phy_device *mdiobus_scan(struct mii_bus *bus, int addr);
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+//do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 int mdiobus_read(struct mii_bus *bus, int addr, u32 regnum);
 int mdiobus_read_nested(struct mii_bus *bus, int addr, u32 regnum);
 int mdiobus_write(struct mii_bus *bus, int addr, u32 regnum, u16 val);
 int mdiobus_write_nested(struct mii_bus *bus, int addr, u32 regnum, u16 val);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 #define PHY_INTERRUPT_DISABLED	0x0
 #define PHY_INTERRUPT_ENABLED	0x80000000
@@ -326,8 +375,8 @@ struct phy_c45_device_ids {
 /* phy_device: An instance of a PHY
  *
  * drv: Pointer to the driver for this PHY instance
- * bus: Pointer to the bus this PHY is on
- * dev: driver model device structure for this PHY
+ * bus: Pointer to the bus this PHY is on (not armada37xx 16.12)
+ * dev: driver model device structure for this PHY (not armada37xx 16.12)
  * phy_id: UID for this device found during discovery
  * c45_ids: 802.3-c45 Device Identifers if is_c45.
  * is_c45:  Set to true if this phy uses clause 45 addressing.
@@ -337,7 +386,7 @@ struct phy_c45_device_ids {
  * suspended: Set to true if this phy has been suspended successfully.
  * state: state of the PHY for management purposes
  * dev_flags: Device-specific flags used by the PHY driver.
- * addr: Bus address of PHY
+ * addr: Bus address of PHY (not armada37xx 16.12)
  * link_timeout: The number of timer firings to wait before the
  * giving up on the current attempt at acquiring a link
  * irq: IRQ number of the PHY's interrupt (-1 if none)
@@ -358,13 +407,21 @@ struct phy_c45_device_ids {
  * handling, as well as handling shifts in PHY hardware state
  */
 struct phy_device {
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	struct mdio_device mdio;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+
 	/* Information about the PHY type */
 	/* And management functions */
 	struct phy_driver *drv;
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+//do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct mii_bus *bus;
 
 	struct device dev;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	u32 phy_id;
 
@@ -381,8 +438,12 @@ struct phy_device {
 
 	phy_interface_t interface;
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+//do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	/* Bus address of the PHY (0-31) */
 	int addr;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	/*
 	 * forced speed & duplex (no autoneg)
@@ -432,10 +493,16 @@ struct phy_device {
 
 	void (*adjust_link)(struct net_device *dev);
 };
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#define to_phy_device(d) container_of(to_mdio_device(d), \
+				      struct phy_device, mdio)
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 #define to_phy_device(d) container_of(d, struct phy_device, dev)
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 /* struct phy_driver: Driver structure for a particular PHY type
  *
+ * driver_data: static driver data
  * phy_id: The result of reading the UID registers of this PHY
  *   type, and ANDing them with the phy_id_mask.  This driver
  *   only works for PHYs with IDs which match this field
@@ -445,7 +512,6 @@ struct phy_device {
  *   by this PHY
  * flags: A bitfield defining certain other features this PHY
  *   supports (like interrupts)
- * driver_data: static driver data
  *
  * The drivers must implement config_aneg and read_status.  All
  * other functions are optional. Note that none of these
@@ -456,6 +522,9 @@ struct phy_device {
  * supported in the driver).
  */
 struct phy_driver {
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	struct mdio_driver_common mdiodrv;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	u32 phy_id;
 	char *name;
 	unsigned int phy_id_mask;
@@ -586,9 +655,22 @@ struct phy_driver {
 	int (*module_eeprom)(struct phy_device *dev,
 			     struct ethtool_eeprom *ee, u8 *data);
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	/* Get statistics from the phy using ethtool */
+	int (*get_sset_count)(struct phy_device *dev);
+	void (*get_strings)(struct phy_device *dev, u8 *data);
+	void (*get_stats)(struct phy_device *dev,
+			  struct ethtool_stats *stats, u64 *data);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct device_driver driver;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 };
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#define to_phy_driver(d) container_of(to_mdio_common_driver(d),		\
+				      struct phy_driver, mdiodrv)
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 #define to_phy_driver(d) container_of(d, struct phy_driver, driver)
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 #define PHY_ANY_ID "MATCH ANY PHY"
 #define PHY_ANY_UID 0xffffffff
@@ -616,10 +698,27 @@ static inline int phy_read_mmd(struct phy_device *phydev, int devad, u32 regnum)
 	if (!phydev->is_c45)
 		return -EOPNOTSUPP;
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	return mdiobus_read(phydev->mdio.bus, phydev->mdio.addr,
+			    MII_ADDR_C45 | (devad << 16) | (regnum & 0xffff));
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	return mdiobus_read(phydev->bus, phydev->addr,
 			    MII_ADDR_C45 | (devad << 16) | (regnum & 0xffff));
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 }
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+/**
+ * phy_read_mmd_indirect - reads data from the MMD registers
+ * @phydev: The PHY device bus
+ * @prtad: MMD Address
+ * @devad: MMD DEVAD
+ *
+ * Description: it reads data from the MMD registers (clause 22 to access to
+ * clause 45) of the specified phy address.
+ */
+int phy_read_mmd_indirect(struct phy_device *phydev, int prtad, int devad);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 /**
  * phy_read_mmd_indirect - reads data from the MMD registers
  * @phydev: The PHY device bus
@@ -632,6 +731,7 @@ static inline int phy_read_mmd(struct phy_device *phydev, int devad, u32 regnum)
  */
 int phy_read_mmd_indirect(struct phy_device *phydev, int prtad,
 			  int devad, int addr);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 /**
  * phy_read - Convenience function for reading a given PHY register
@@ -644,7 +744,11 @@ int phy_read_mmd_indirect(struct phy_device *phydev, int prtad,
  */
 static inline int phy_read(struct phy_device *phydev, u32 regnum)
 {
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	return mdiobus_read(phydev->mdio.bus, phydev->mdio.addr, regnum);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	return mdiobus_read(phydev->bus, phydev->addr, regnum);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 }
 
 /**
@@ -659,7 +763,11 @@ static inline int phy_read(struct phy_device *phydev, u32 regnum)
  */
 static inline int phy_write(struct phy_device *phydev, u32 regnum, u16 val)
 {
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	return mdiobus_write(phydev->mdio.bus, phydev->mdio.addr, regnum, val);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	return mdiobus_write(phydev->bus, phydev->addr, regnum, val);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 }
 
 /**
@@ -722,9 +830,27 @@ static inline int phy_write_mmd(struct phy_device *phydev, int devad,
 
 	regnum = MII_ADDR_C45 | ((devad & 0x1f) << 16) | (regnum & 0xffff);
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	return mdiobus_write(phydev->mdio.bus, phydev->mdio.addr, regnum, val);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	return mdiobus_write(phydev->bus, phydev->addr, regnum, val);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 }
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+/**
+ * phy_write_mmd_indirect - writes data to the MMD registers
+ * @phydev: The PHY device
+ * @prtad: MMD Address
+ * @devad: MMD DEVAD
+ * @data: data to write in the MMD register
+ *
+ * Description: Write data from the MMD registers of the specified
+ * phy address.
+ */
+void phy_write_mmd_indirect(struct phy_device *phydev, int prtad,
+			    int devad, u32 data);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 /**
  * phy_write_mmd_indirect - writes data to the MMD registers
  * @phydev: The PHY device
@@ -738,6 +864,7 @@ static inline int phy_write_mmd(struct phy_device *phydev, int devad,
  */
 void phy_write_mmd_indirect(struct phy_device *phydev, int prtad,
 			    int devad, int addr, u32 data);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 struct phy_device *phy_device_create(struct mii_bus *bus, int addr, int phy_id,
 				     bool is_c45,
@@ -772,6 +899,22 @@ static inline int phy_read_status(struct phy_device *phydev)
 	return phydev->drv->read_status(phydev);
 }
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#define phydev_err(_phydev, format, args...)	\
+	dev_err(&_phydev->mdio.dev, format, ##args)
+
+#define phydev_dbg(_phydev, format, args...)	\
+	dev_dbg(&_phydev->mdio.dev, format, ##args);
+
+static inline const char *phydev_name(const struct phy_device *phydev)
+{
+	return dev_name(&phydev->mdio.dev);
+}
+
+void phy_attached_print(struct phy_device *phydev, const char *fmt, ...)
+	__printf(2, 3);
+void phy_attached_info(struct phy_device *phydev);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 int genphy_config_init(struct phy_device *phydev);
 int genphy_setup_forced(struct phy_device *phydev);
 int genphy_restart_aneg(struct phy_device *phydev);
@@ -784,8 +927,14 @@ int genphy_resume(struct phy_device *phydev);
 int genphy_soft_reset(struct phy_device *phydev);
 void phy_driver_unregister(struct phy_driver *drv);
 void phy_drivers_unregister(struct phy_driver *drv, int n);
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+int phy_driver_register(struct phy_driver *new_driver, struct module *owner);
+int phy_drivers_register(struct phy_driver *new_driver, int n,
+			 struct module *owner);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 int phy_driver_register(struct phy_driver *new_driver);
 int phy_drivers_register(struct phy_driver *new_driver, int n);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 void phy_state_machine(struct work_struct *work);
 void phy_change(struct work_struct *work);
 void phy_mac_interrupt(struct phy_device *phydev, int new_link);
@@ -819,6 +968,10 @@ void mdio_bus_exit(void);
 
 extern struct bus_type mdio_bus_type;
 
+#ifdef CONFIG_SYNO_PHY_INIT_88E151X
+int syno_m88e151X_led_init(struct phy_device *phydev);
+#endif /* CONFIG_SYNO_PHY_INIT_88E151X */
+
 /**
  * module_phy_driver() - Helper macro for registering PHY drivers
  * @__phy_drivers: array of PHY drivers to register
@@ -827,6 +980,22 @@ extern struct bus_type mdio_bus_type;
  * init/exit. Each module may only use this macro once, and calling it
  * replaces module_init() and module_exit().
  */
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#define phy_module_driver(__phy_drivers, __count)			\
+static int __init phy_module_init(void)					\
+{									\
+	return phy_drivers_register(__phy_drivers, __count, THIS_MODULE); \
+}									\
+module_init(phy_module_init);						\
+static void __exit phy_module_exit(void)				\
+{									\
+	phy_drivers_unregister(__phy_drivers, __count);			\
+}									\
+module_exit(phy_module_exit)
+
+#define module_phy_driver(__phy_drivers)				\
+	phy_module_driver(__phy_drivers, ARRAY_SIZE(__phy_drivers))
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 #define phy_module_driver(__phy_drivers, __count)			\
 static int __init phy_module_init(void)					\
 {									\
@@ -841,5 +1010,6 @@ module_exit(phy_module_exit)
 
 #define module_phy_driver(__phy_drivers)				\
 	phy_module_driver(__phy_drivers, ARRAY_SIZE(__phy_drivers))
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 #endif /* __PHY_H */

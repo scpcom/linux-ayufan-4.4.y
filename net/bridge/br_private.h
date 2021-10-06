@@ -77,6 +77,16 @@ struct bridge_mcast_querier {
 };
 #endif
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+struct br_vlan_stats {
+	u64 rx_bytes;
+	u64 rx_packets;
+	u64 tx_bytes;
+	u64 tx_packets;
+	struct u64_stats_sync syncp;
+};
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+
 /**
  * struct net_bridge_vlan - per-vlan entry
  *
@@ -100,6 +110,12 @@ struct net_bridge_vlan {
 	struct rhash_head		vnode;
 	u16				vid;
 	u16				flags;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+/*
+ * @stats: per-cpu VLAN statistics
+ */
+	struct br_vlan_stats __percpu	*stats;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	union {
 		struct net_bridge	*br;
 		struct net_bridge_port	*port;
@@ -340,6 +356,9 @@ struct net_bridge
 #ifdef CONFIG_BRIDGE_VLAN_FILTERING
 	struct net_bridge_vlan_group	__rcu *vlgrp;
 	u8				vlan_enabled;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	u8				vlan_stats_enabled;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	__be16				vlan_proto;
 	u16				default_pvid;
 #endif
@@ -703,6 +722,9 @@ int __br_vlan_filter_toggle(struct net_bridge *br, unsigned long val);
 int br_vlan_filter_toggle(struct net_bridge *br, unsigned long val);
 int __br_vlan_set_proto(struct net_bridge *br, __be16 proto);
 int br_vlan_set_proto(struct net_bridge *br, unsigned long val);
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+int br_vlan_set_stats(struct net_bridge *br, unsigned long val);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 int br_vlan_init(struct net_bridge *br);
 int br_vlan_set_default_pvid(struct net_bridge *br, unsigned long val);
 int __br_vlan_set_default_pvid(struct net_bridge *br, u16 pvid);
@@ -892,7 +914,6 @@ static inline struct net_bridge_vlan_group *nbp_vlan_group_rcu(
 {
 	return NULL;
 }
-
 #endif
 
 struct nf_br_ops {
@@ -912,7 +933,11 @@ static inline void br_nf_core_fini(void) {}
 #endif
 
 /* br_stp.c */
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+//do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 void br_log_state(const struct net_bridge_port *p);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 void br_set_state(struct net_bridge_port *p, unsigned int state);
 struct net_bridge_port *br_get_port(struct net_bridge *br, u16 port_no);
 void br_init_port(struct net_bridge_port *p);

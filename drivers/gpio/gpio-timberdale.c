@@ -268,7 +268,11 @@ static int timbgpio_probe(struct platform_device *pdev)
 
 	gc->label = dev_name(&pdev->dev);
 	gc->owner = THIS_MODULE;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	gc->parent = &pdev->dev;
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	gc->dev = &pdev->dev;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	gc->direction_input = timbgpio_gpio_direction_input;
 	gc->get = timbgpio_gpio_get;
 	gc->direction_output = timbgpio_gpio_direction_output;

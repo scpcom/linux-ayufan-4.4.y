@@ -105,7 +105,11 @@ static void nand_davinci_hwcontrol(struct mtd_info *mtd, int cmd,
 {
 	struct davinci_nand_info	*info = to_davinci_nand(mtd);
 	uint32_t			addr = info->current_cs;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	struct nand_chip		*nand = mtd_to_nand(mtd);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct nand_chip		*nand = mtd->priv;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	/* Did the control lines change? */
 	if (ctrl & NAND_CTRL_CHANGE) {
@@ -191,7 +195,11 @@ static int nand_davinci_calculate_1bit(struct mtd_info *mtd,
 static int nand_davinci_correct_1bit(struct mtd_info *mtd, u_char *dat,
 				     u_char *read_ecc, u_char *calc_ecc)
 {
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	struct nand_chip *chip = mtd_to_nand(mtd);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct nand_chip *chip = mtd->priv;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	uint32_t eccNand = read_ecc[0] | (read_ecc[1] << 8) |
 					  (read_ecc[2] << 16);
 	uint32_t eccCalc = calc_ecc[0] | (calc_ecc[1] << 8) |
@@ -446,7 +454,11 @@ correct:
  */
 static void nand_davinci_read_buf(struct mtd_info *mtd, uint8_t *buf, int len)
 {
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	struct nand_chip *chip = mtd_to_nand(mtd);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct nand_chip *chip = mtd->priv;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	if ((0x03 & ((unsigned)buf)) == 0 && (0x03 & len) == 0)
 		ioread32_rep(chip->IO_ADDR_R, buf, len >> 2);
@@ -459,7 +471,11 @@ static void nand_davinci_read_buf(struct mtd_info *mtd, uint8_t *buf, int len)
 static void nand_davinci_write_buf(struct mtd_info *mtd,
 		const uint8_t *buf, int len)
 {
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	struct nand_chip *chip = mtd_to_nand(mtd);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct nand_chip *chip = mtd->priv;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	if ((0x03 & ((unsigned)buf)) == 0 && (0x03 & len) == 0)
 		iowrite32_rep(chip->IO_ADDR_R, buf, len >> 2);
@@ -683,6 +699,9 @@ static int nand_davinci_probe(struct platform_device *pdev)
 
 	info->mtd.priv		= &info->chip;
 	info->mtd.dev.parent	= &pdev->dev;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	nand_set_flash_node(&info->chip, pdev->dev.of_node);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	info->chip.IO_ADDR_R	= vaddr;
 	info->chip.IO_ADDR_W	= vaddr;
@@ -838,6 +857,10 @@ syndrome_done:
 	if (pdata->parts)
 		ret = mtd_device_parse_register(&info->mtd, NULL, NULL,
 					pdata->parts, pdata->nr_parts);
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	else
+		ret = mtd_device_register(&info->mtd, NULL, 0);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	else {
 		struct mtd_part_parser_data	ppdata;
 
@@ -845,6 +868,7 @@ syndrome_done:
 		ret = mtd_device_parse_register(&info->mtd, NULL, &ppdata,
 						NULL, 0);
 	}
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	if (ret < 0)
 		goto err;
 

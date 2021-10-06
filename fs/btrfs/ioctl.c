@@ -3404,7 +3404,12 @@ static void clone_update_extent_map(struct inode *inode,
 		fi = btrfs_item_ptr(path->nodes[0], path->slots[0],
 				    struct btrfs_file_extent_item);
 		btrfs_extent_item_to_extent_map(inode, path, fi, false, em);
+#ifdef MY_ABC_HERE
+		 
+		em->generation = trans->transid;
+#else
 		em->generation = -1;
+#endif  
 		if (btrfs_file_extent_type(path->nodes[0], fi) ==
 		    BTRFS_FILE_EXTENT_INLINE)
 			set_bit(BTRFS_INODE_NEEDS_FULL_SYNC,

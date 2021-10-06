@@ -104,14 +104,24 @@ struct arm_pmu {
 	atomic_t	active_events;
 	struct mutex	reserve_mutex;
 	u64		max_period;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	bool		secure_access; /* 32-bit ARM only */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct platform_device	*plat_device;
 	struct pmu_hw_events	__percpu *hw_events;
 	struct notifier_block	hotplug_nb;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	struct notifier_block	cpu_pm_nb;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 };
 
 #define to_arm_pmu(p) (container_of(p, struct arm_pmu, pmu))
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+//do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 int armpmu_register(struct arm_pmu *armpmu, int type);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 u64 armpmu_event_update(struct perf_event *event);
 

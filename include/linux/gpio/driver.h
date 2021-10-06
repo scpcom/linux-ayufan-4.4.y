@@ -20,7 +20,12 @@ struct seq_file;
 /**
  * struct gpio_chip - abstract a GPIO controller
  * @label: for diagnostics
+ *
+ * (for armada37xx 16.12)
+ * @parent: optional parent device providing the GPIOs
+ * (others)
  * @dev: optional device providing the GPIOs
+ *
  * @cdev: class device used by sysfs interface (may be NULL)
  * @owner: helps prevent removal of modules exporting active GPIOs
  * @list: links gpio_chips together for traversal
@@ -89,7 +94,11 @@ struct seq_file;
  */
 struct gpio_chip {
 	const char		*label;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	struct device		*parent;
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct device		*dev;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct device		*cdev;
 	struct module		*owner;
 	struct list_head        list;

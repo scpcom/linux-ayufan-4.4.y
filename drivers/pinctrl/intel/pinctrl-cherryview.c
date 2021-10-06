@@ -1410,7 +1410,11 @@ static int chv_gpio_probe(struct chv_pinctrl *pctrl, int irq)
 
 	chip->ngpio = pctrl->community->ngpios;
 	chip->label = dev_name(pctrl->dev);
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	chip->parent = pctrl->dev;
+#else
 	chip->dev = pctrl->dev;
+#endif  
 #ifdef MY_DEF_HERE
 	chip->base = pctrl->community->base;  
 	printk(KERN_INFO"cherryview-pinctrl: Adding GPIO Controller - Pin ranged %d ~ %d \n", chip->base, (chip->base + chip->ngpio - 1));

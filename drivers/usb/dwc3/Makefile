@@ -1,7 +1,9 @@
 # define_trace.h needs to know how to find our header
 CFLAGS_trace.o				:= -I$(src)
 
+ifeq ($(CONFIG_SYNO_LSP_RTD129X),y)
 ccflags-$(CONFIG_USB_DWC3_DEBUG)	:= -DDEBUG
+endif # CONFIG_SYNO_LSP_RTD129X
 
 obj-$(CONFIG_USB_DWC3)			+= dwc3.o
 
@@ -15,11 +17,12 @@ ifneq ($(filter y,$(CONFIG_USB_DWC3_GADGET) $(CONFIG_USB_DWC3_DUAL_ROLE)),)
 	dwc3-y				+= gadget.o ep0.o
 endif
 
-ifndef CONFIG_SYNO_RTD1296
+ifeq ($(CONFIG_SYNO_LSP_RTD129X),y)
+else # CONFIG_SYNO_LSP_RTD129X
 ifneq ($(CONFIG_USB_DWC3_ULPI),)
 	dwc3-y				+= ulpi.o
 endif
-endif # CONFIG_SYNO_RTD1296
+endif # CONFIG_SYNO_LSP_RTD129X
 
 ifneq ($(CONFIG_DEBUG_FS),)
 	dwc3-y				+= debugfs.o
@@ -43,6 +46,6 @@ obj-$(CONFIG_USB_DWC3_PCI)		+= dwc3-pci.o
 obj-$(CONFIG_USB_DWC3_KEYSTONE)		+= dwc3-keystone.o
 obj-$(CONFIG_USB_DWC3_QCOM)		+= dwc3-qcom.o
 obj-$(CONFIG_USB_DWC3_ST)		+= dwc3-st.o
+ifeq ($(CONFIG_SYNO_LSP_RTD129X),y)
 obj-$(CONFIG_USB_DWC3_RTK)		+= dwc3-rtk.o
-obj-$(CONFIG_USB_DWC3_RTK)		+= dwc3-rtk-type_c.o
-dwc3-$(CONFIG_USB_RTK_DWC3_DRD_MODE)	+= dwc3-rtk-drd.o
+endif # CONFIG_SYNO_LSP_RTD129X

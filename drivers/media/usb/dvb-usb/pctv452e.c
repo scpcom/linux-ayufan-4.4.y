@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * PCTV 452e DVB driver
  *
@@ -435,8 +438,11 @@ static int pctv452e_i2c_msg(struct dvb_usb_device *d, u8 addr,
 
 	/* I2C device didn't respond as expected. */
 	ret = -EREMOTEIO;
+#ifdef MY_ABC_HERE
+#else /* MY_ABC_HERE */
 	if (buf[5] < snd_len || buf[6] < rcv_len)
 		goto failed;
+#endif /* MY_ABC_HERE */
 
 	memcpy(rcv_buf, buf + 7, rcv_len);
 
@@ -505,14 +511,26 @@ static int pctv452e_power_ctrl(struct dvb_usb_device *d, int i)
 	if (!i)
 		return 0;
 
+#ifdef MY_ABC_HERE
+	pr_info("%s: step 1\n", __func__);
+#endif /* MY_ABC_HERE */
+
 	if (state->initialized)
 		return 0;
+
+#ifdef MY_ABC_HERE
+	pr_info("%s: step 2\n", __func__);
+#endif /* MY_ABC_HERE */
 
 	/* hmm where shoud this should go? */
 	ret = usb_set_interface(d->udev, 0, ISOC_INTERFACE_ALTERNATIVE);
 	if (ret != 0)
 		info("%s: Warning set interface returned: %d\n",
 			__func__, ret);
+
+#ifdef MY_ABC_HERE
+	pr_info("%s: step 3\n", __func__);
+#endif /* MY_ABC_HERE */
 
 	/* this is a one-time initialization, dont know where to put */
 	b0[1] = state->c++;
@@ -521,12 +539,20 @@ static int pctv452e_power_ctrl(struct dvb_usb_device *d, int i)
 	if (ret)
 		return ret;
 
+#ifdef MY_ABC_HERE
+	pr_info("%s: step 4\n", __func__);
+#endif /* MY_ABC_HERE */
+
 	b0[1] = state->c++;
 	b0[4] = 1;
 	/* reset board (again?) */
 	ret = dvb_usb_generic_rw(d, b0, sizeof(b0), rx, PCTV_ANSWER_LEN, 0);
 	if (ret)
 		return ret;
+
+#ifdef MY_ABC_HERE
+	pr_info("%s: step 5\n", __func__);
+#endif /* MY_ABC_HERE */
 
 	state->initialized = 1;
 

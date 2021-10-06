@@ -127,7 +127,11 @@ static int lpc18xx_gpio_probe(struct platform_device *pdev)
 
 	spin_lock_init(&gc->lock);
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	gc->gpio.parent = &pdev->dev;
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	gc->gpio.dev = &pdev->dev;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	ret = gpiochip_add(&gc->gpio);
 	if (ret) {

@@ -206,12 +206,7 @@ int SYNO_CTRL_HDD_POWERON(int index, int value)
 		return -EINVAL;
 	}
 
-#if defined(MY_DEF_HERE)
-	gpio_request(HDD_ENABLE_PIN(index), NULL);
-	gpio_direction_output(HDD_ENABLE_PIN(index), value);
-#else
-	gpio_set_value(HDD_ENABLE_PIN(index), value);
-#endif
+	SYNO_GPIO_WRITE(HDD_ENABLE_PIN(index), value);
 
 	return 0;
 }
@@ -224,7 +219,7 @@ int SYNO_CHECK_HDD_DETECT(int index)
 		 
 		return 1;
 	}
-	ret = gpio_get_value(HDD_DETECT_PIN(index));
+	ret = SYNO_GPIO_READ(HDD_DETECT_PIN(index));
 	 
 	if (ACTIVE_LOW == HDD_DETECT_POLARITY()) {
 		return !ret;
@@ -253,7 +248,7 @@ int SYNO_CTRL_HDD_ACT_NOTIFY(int index)
 	}
 	disk_act_value[index] = !disk_act_value[index];
 	value = disk_act_value[index];
-	gpio_set_value(HDD_ACT_LED_PIN(index + 1), value);
+	SYNO_GPIO_WRITE(HDD_ACT_LED_PIN(index + 1), value);
 	return 0;
 }
 EXPORT_SYMBOL(SYNO_CTRL_HDD_ACT_NOTIFY);
@@ -1731,7 +1726,13 @@ static int ata_dev_config_ncq(struct ata_device *dev,
 			dev->flags |= ATA_DFLAG_NCQ_SEND_RECV;
 			memcpy(cmds, ap->sector_buf, ATA_LOG_NCQ_SEND_RECV_SIZE);
 
+#ifdef MY_ABC_HERE
+			if (1) {
+				 
+#else
 			if (dev->horkage & ATA_HORKAGE_NO_NCQ_TRIM) {
+#endif  
+
 				ata_dev_dbg(dev, "disabling queued TRIM support\n");
 				cmds[ATA_LOG_NCQ_SEND_RECV_DSM_OFFSET] &=
 					~ATA_LOG_NCQ_SEND_RECV_DSM_TRIM;

@@ -266,6 +266,9 @@ static int rtk_ion_probe(struct platform_device *pdev)
 
     dbg_info("%s %s",__FILE__, __func__);
     if (pdev->dev.of_node) {
+        if (!of_device_is_available(pdev->dev.of_node))
+            return -ENODEV;
+        
         pdata = rtk_ion_parse_dt(pdev->dev.of_node);
         if (IS_ERR(pdata)) {
             err = PTR_ERR(pdata);

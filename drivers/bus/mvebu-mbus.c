@@ -120,6 +120,9 @@ struct mvebu_mbus_soc_data {
 			       u32 *store_addr);
 	int (*show_cpu_target)(struct mvebu_mbus_state *s,
 			       struct seq_file *seq, void *v);
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	void (*mbus_optimizations)(struct mvebu_mbus_state *s);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 };
 
 /*
@@ -136,6 +139,9 @@ struct mvebu_mbus_state {
 	void __iomem *mbuswins_base;
 	void __iomem *sdramwins_base;
 	void __iomem *mbusbridge_base;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	void __iomem *mbusopt_base;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	phys_addr_t sdramwins_phys_base;
 	struct dentry *debugfs_root;
 	struct dentry *debugfs_sdram;
@@ -196,6 +202,50 @@ static bool mvebu_mbus_window_is_remappable(struct mvebu_mbus_state *mbus,
 /*
  * Functions to manipulate the address decoding windows
  */
+
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#ifdef CONFIG_MVEBU_DEBUG_MBUS
+void mbus_debug_window(void)
+{
+	void __iomem *win_addr = mbus_state.mbuswins_base;
+	int i, j;
+
+	pr_info("----------- mbus window -----------\n");
+
+	/* win 0-7 has 4reg: ctrl, base, remap_l,remap_h */
+	for (i = 0; i <= 7; i++) {
+		pr_info("WIN%d\n", i);
+		for (j = 0; j < 4; j++) {
+			pr_info("\twin(%d,%d): %p\t 0x%x\n",
+				i, j, win_addr, readl(win_addr));
+			win_addr += 4;
+		}
+	}
+
+	pr_info("\nINTERREGS_WIN(%d): %p\t 0x%x\n",
+		i++, win_addr, readl(win_addr));
+	win_addr += 4;
+	pr_info("\nSYNC_BARIER_WIN(%d): %p\t 0x%x\n\n",
+		i++, win_addr, readl(win_addr));
+	win_addr += 4;
+
+	/* hole */
+	win_addr += 8;
+
+	/* win 8-19 has 2reg: ctrl, base */
+	for (i = 8; i <= 19; i++) {
+		pr_info("WIN%d\n", i);
+			for (j = 0; j < 2; j++) {
+				pr_info("\twin(%d,%d): %p\t 0x%x\n",
+					i, j, win_addr, readl(win_addr));
+				win_addr += 4;
+			}
+	}
+
+	pr_info("\n");
+}
+#endif /* CONFIG_MVEBU_DEBUG_MBUS */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 static void mvebu_mbus_read_window(struct mvebu_mbus_state *mbus,
 				   int win, int *enabled, u64 *base,
@@ -349,8 +399,12 @@ static int mvebu_mbus_setup_window(struct mvebu_mbus_state *mbus,
 		(attr << WIN_CTRL_ATTR_SHIFT)    |
 		(target << WIN_CTRL_TGT_SHIFT)   |
 		WIN_CTRL_ENABLE;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+//do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	if (mbus->hw_io_coherency)
 		ctrl |= WIN_CTRL_SYNCBARRIER;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	writel(base & WIN_BASE_LOW, addr + WIN_BASE_OFF);
 	writel(ctrl, addr + WIN_CTRL_OFF);
@@ -801,6 +855,47 @@ int mvebu_mbus_save_cpu_target(u32 *store_addr)
 	return mbus_state.soc->save_cpu_target(&mbus_state, store_addr);
 }
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+static void armada_380_mbus_optimizations(struct mvebu_mbus_state *mbus)
+{
+	/*
+	 * MBUS Units Priority Control Register -
+	 * Prioritize XOR, PCIe and GbEs (ID=4,6,3,7,8) DRAM access
+	 * GbE is High and others are Med
+	 */
+	__raw_writel(0x19180, mbus->mbusopt_base);
+
+	/*
+	 * Fabric Units Priority Control Register -
+	 * Prioritize CPUs requests
+	 */
+	__raw_writel(0x3000A, mbus->mbusopt_base + 0x4);
+
+	/*
+	 * MBUS Units Prefetch Control Register -
+	 * Pre-fetch enable for all IO masters
+	 */
+	__raw_writel(0xFFFF, mbus->mbusopt_base + 0x8);
+
+	/*
+	 * Fabric Units Prefetch Control Register -
+	 * Enable the CPUs Instruction and Data prefetch
+	 */
+	__raw_writel(0x303, mbus->mbusopt_base + 0xC);
+}
+
+static const struct mvebu_mbus_soc_data armada_380_mbus_data = {
+	.num_wins            = 20,
+	.has_mbus_bridge     = true,
+	.win_cfg_offset      = armada_370_xp_mbus_win_cfg_offset,
+	.win_remap_offset    = armada_xp_mbus_win_remap_offset,
+	.setup_cpu_target    = mvebu_mbus_default_setup_cpu_target,
+	.show_cpu_target     = mvebu_sdram_debug_show_orion,
+	.save_cpu_target     = mvebu_mbus_default_save_cpu_target,
+	.mbus_optimizations  = armada_380_mbus_optimizations,
+};
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+
 static const struct mvebu_mbus_soc_data armada_370_mbus_data = {
 	.num_wins            = 20,
 	.has_mbus_bridge     = true,
@@ -876,7 +971,11 @@ static const struct of_device_id of_mvebu_mbus_ids[] = {
 	{ .compatible = "marvell,armada375-mbus",
 	  .data = &armada_xp_mbus_data, },
 	{ .compatible = "marvell,armada380-mbus",
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	  .data = &armada_380_mbus_data, },
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	  .data = &armada_xp_mbus_data, },
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	{ .compatible = "marvell,armadaxp-mbus",
 	  .data = &armada_xp_mbus_data, },
 	{ .compatible = "marvell,kirkwood-mbus",
@@ -947,6 +1046,60 @@ void mvebu_mbus_get_pcie_io_aperture(struct resource *res)
 		return;
 	*res = mbus_state.pcie_io_aperture;
 }
+
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+int mvebu_mbus_get_dram_win_info(phys_addr_t phyaddr, u8 *target, u8 *attr)
+{
+	const struct mbus_dram_target_info *dram;
+	int i;
+
+	/* Get dram info */
+	dram = mv_mbus_dram_info();
+	if (!dram) {
+		pr_err("missing DRAM information\n");
+		return -ENODEV;
+	}
+
+	/* Try to find matching DRAM window for phyaddr */
+	for (i = 0; i < dram->num_cs; i++) {
+		const struct mbus_dram_window *cs = dram->cs + i;
+
+		if (cs->base <= phyaddr &&
+			phyaddr <= (cs->base + cs->size - 1)) {
+			*target = dram->mbus_dram_target_id;
+			*attr = cs->mbus_attr;
+			return 0;
+		}
+	}
+
+	pr_err("invalid dram address 0x%x\n", phyaddr);
+	return -EINVAL;
+}
+EXPORT_SYMBOL_GPL(mvebu_mbus_get_dram_win_info);
+
+int mvebu_mbus_get_io_win_info(phys_addr_t phyaddr, u32 *size, u8 *target,
+			       u8 *attr)
+{
+	int win;
+
+	for (win = 0; win < mbus_state.soc->num_wins; win++) {
+		u64 wbase;
+		int enabled;
+
+		mvebu_mbus_read_window(&mbus_state, win, &enabled, &wbase,
+				       size, target, attr, NULL);
+
+		if (!enabled)
+			continue;
+
+		if (wbase <= phyaddr && phyaddr <= wbase + *size)
+			return win;
+	}
+
+	return -EINVAL;
+}
+EXPORT_SYMBOL_GPL(mvebu_mbus_get_io_win_info);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 static __init int mvebu_mbus_debugfs_init(void)
 {
@@ -1042,6 +1195,17 @@ struct syscore_ops mvebu_mbus_syscore_ops = {
 	.resume		= mvebu_mbus_resume,
 };
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+static int __init mvebu_mbus_common_init(struct mvebu_mbus_state *mbus,
+					 phys_addr_t mbuswins_phys_base,
+					 size_t mbuswins_size,
+					 phys_addr_t sdramwins_phys_base,
+					 size_t sdramwins_size,
+					 phys_addr_t mbusbridge_phys_base,
+					 size_t mbusbridge_size,
+					 phys_addr_t mbusopt_phys_base,
+					 size_t mbusopt_size)
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 static int __init mvebu_mbus_common_init(struct mvebu_mbus_state *mbus,
 					 phys_addr_t mbuswins_phys_base,
 					 size_t mbuswins_size,
@@ -1050,6 +1214,7 @@ static int __init mvebu_mbus_common_init(struct mvebu_mbus_state *mbus,
 					 phys_addr_t mbusbridge_phys_base,
 					 size_t mbusbridge_size,
 					 bool is_coherent)
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 {
 	int win;
 
@@ -1076,15 +1241,26 @@ static int __init mvebu_mbus_common_init(struct mvebu_mbus_state *mbus,
 	} else
 		mbus->mbusbridge_base = NULL;
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	if (mbusopt_phys_base) {
+		mbus->mbusopt_base = ioremap(mbusopt_phys_base, sdramwins_size);
+		mbus->soc->mbus_optimizations(mbus);
+	}
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+
 	for (win = 0; win < mbus->soc->num_wins; win++)
 		mvebu_mbus_disable_window(mbus, win);
 
 	mbus->soc->setup_cpu_target(mbus);
 	mvebu_mbus_setup_cpu_target_nooverlap(mbus);
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+//do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	if (is_coherent)
 		writel(UNIT_SYNC_BARRIER_ALL,
 		       mbus->mbuswins_base + UNIT_SYNC_BARRIER_OFF);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	register_syscore_ops(&mvebu_mbus_syscore_ops);
 
@@ -1109,11 +1285,19 @@ int __init mvebu_mbus_init(const char *soc, phys_addr_t mbuswins_phys_base,
 
 	mbus_state.soc = of_id->data;
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	return mvebu_mbus_common_init(&mbus_state,
+			mbuswins_phys_base,
+			mbuswins_size,
+			sdramwins_phys_base,
+			sdramwins_size, 0, 0, 0, 0);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	return mvebu_mbus_common_init(&mbus_state,
 			mbuswins_phys_base,
 			mbuswins_size,
 			sdramwins_phys_base,
 			sdramwins_size, 0, 0, false);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 }
 
 #ifdef CONFIG_OF
@@ -1147,7 +1331,11 @@ static int __init mbus_dt_setup_win(struct mvebu_mbus_state *mbus,
 	return 0;
 }
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+static int
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 static int __init
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 mbus_parse_ranges(struct device_node *node,
 		  int *addr_cells, int *c_addr_cells, int *c_size_cells,
 		  int *cell_count, const __be32 **ranges_start,
@@ -1218,6 +1406,13 @@ static int __init mbus_dt_setup(struct mvebu_mbus_state *mbus,
 		if (ret < 0)
 			return ret;
 	}
+
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#ifdef CONFIG_MVEBU_DEBUG_MBUS
+	mbus_debug_window();
+#endif /* CONFIG_MVEBU_DEBUG_MBUS */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+
 	return 0;
 }
 
@@ -1254,7 +1449,12 @@ static void __init mvebu_mbus_get_pcie_resources(struct device_node *np,
 
 int __init mvebu_mbus_dt_init(bool is_coherent)
 {
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	struct resource mbuswins_res, sdramwins_res, mbusbridge_res,
+	       mbusopt_res;
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct resource mbuswins_res, sdramwins_res, mbusbridge_res;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct device_node *np, *controller;
 	const struct of_device_id *of_id;
 	const __be32 *prop;
@@ -1297,11 +1497,21 @@ int __init mvebu_mbus_dt_init(bool is_coherent)
 	 * compatibility.
 	 */
 	memset(&mbusbridge_res, 0, sizeof(mbusbridge_res));
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	memset(&mbusopt_res, 0, sizeof(mbusopt_res));
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	if (mbus_state.soc->has_mbus_bridge) {
 		if (of_address_to_resource(controller, 2, &mbusbridge_res))
 			pr_warn(FW_WARN "deprecated mbus-mvebu Device Tree, suspend/resume will not work\n");
 	}
+
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	if (mbus_state.soc->mbus_optimizations) {
+		if (of_address_to_resource(controller, 3, &mbusopt_res))
+			pr_warn(FW_WARN "deprecated mbus-mvebu Device Tree, MBUS performance is not optimized\n");
+	}
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	mbus_state.hw_io_coherency = is_coherent;
 
@@ -1309,6 +1519,17 @@ int __init mvebu_mbus_dt_init(bool is_coherent)
 	mvebu_mbus_get_pcie_resources(np, &mbus_state.pcie_mem_aperture,
 					  &mbus_state.pcie_io_aperture);
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	ret = mvebu_mbus_common_init(&mbus_state,
+				     mbuswins_res.start,
+				     resource_size(&mbuswins_res),
+				     sdramwins_res.start,
+				     resource_size(&sdramwins_res),
+				     mbusbridge_res.start,
+				     resource_size(&mbusbridge_res),
+				     mbusopt_res.start,
+				     resource_size(&mbusopt_res));
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	ret = mvebu_mbus_common_init(&mbus_state,
 				     mbuswins_res.start,
 				     resource_size(&mbuswins_res),
@@ -1317,6 +1538,7 @@ int __init mvebu_mbus_dt_init(bool is_coherent)
 				     mbusbridge_res.start,
 				     resource_size(&mbusbridge_res),
 				     is_coherent);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	if (ret)
 		return ret;
 

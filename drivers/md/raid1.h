@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #ifndef _RAID1_H
 #define _RAID1_H
 
@@ -21,9 +24,13 @@ struct r1conf {
 
 	sector_t		next_resync;
 
+#ifdef MY_ABC_HERE
+#else  
+	 
 	sector_t		start_next_window;
 	int			current_window_requests;
 	int			next_window_requests;
+#endif  
 
 	spinlock_t		device_lock;
 
@@ -63,7 +70,10 @@ struct r1bio {
 	atomic_t		remaining;  
 	atomic_t		behind_remaining;  
 	sector_t		sector;
+#ifdef MY_ABC_HERE
+#else  
 	sector_t		start_next_window;
+#endif  
 	int			sectors;
 	unsigned long		state;
 	struct mddev		*mddev;

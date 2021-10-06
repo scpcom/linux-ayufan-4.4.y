@@ -13,4 +13,6 @@ obj-$(CONFIG_MTD_JEDECPROBE)	+= jedec_probe.o
 obj-$(CONFIG_MTD_RAM)		+= map_ram.o
 obj-$(CONFIG_MTD_ROM)		+= map_rom.o
 obj-$(CONFIG_MTD_ABSENT)	+= map_absent.o
+ifeq ($(CONFIG_SYNO_LSP_RTD129X),y)
 obj-$(CONFIG_MTD_RTK_SFC)	+= rtk_sfc.o
+endif # CONFIG_SYNO_LSP_RTD129X

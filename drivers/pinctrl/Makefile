@@ -44,7 +44,11 @@ obj-$(CONFIG_ARCH_BCM)		+= bcm/
 obj-$(CONFIG_ARCH_BERLIN)	+= berlin/
 obj-y				+= freescale/
 obj-$(CONFIG_X86)		+= intel/
+ifeq ($(CONFIG_SYNO_LSP_ARMADA_16_12), y)
+obj-$(CONFIG_PINCTRL_MVEBU)        += mvebu/
+else
 obj-$(CONFIG_PLAT_ORION)        += mvebu/
+endif
 obj-y				+= nomadik/
 obj-$(CONFIG_ARCH_QCOM)		+= qcom/
 obj-$(CONFIG_PINCTRL_SAMSUNG)	+= samsung/
@@ -54,4 +58,6 @@ obj-$(CONFIG_ARCH_SUNXI)	+= sunxi/
 obj-$(CONFIG_PINCTRL_UNIPHIER)	+= uniphier/
 obj-$(CONFIG_ARCH_VT8500)	+= vt8500/
 obj-$(CONFIG_ARCH_MEDIATEK)	+= mediatek/
+ifeq ($(CONFIG_SYNO_LSP_RTD129X),y)
 obj-$(CONFIG_ARCH_RTD129X)      += realtek/
+endif # CONFIG_SYNO_LSP_RTD129X

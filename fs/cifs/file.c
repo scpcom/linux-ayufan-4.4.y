@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/fs.h>
 #include <linux/backing-dev.h>
@@ -1626,9 +1623,6 @@ refind_writable:
 					&cifs_inode->openFileList);
 			spin_unlock(&cifs_file_list_lock);
 			cifsFileInfo_put(inv_file);
-#ifdef MY_ABC_HERE
-			inv_file = NULL;
-#endif  
 			spin_lock(&cifs_file_list_lock);
 			++refind;
 			inv_file = NULL;

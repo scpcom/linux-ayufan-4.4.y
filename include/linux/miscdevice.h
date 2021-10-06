@@ -26,6 +26,10 @@
 /* for kernel 3.10.x proting */
 #define CRYPTODEV_MINOR     70
 #endif /*MY_DEF_HERE*/
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#define SLICDEV_MINOR           73      /* Marvell SLIC control device */
+#define TALDEV_MINOR            74      /* Marvell TAL device */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 #define WATCHDOG_MINOR		130	/* Watchdog timer     */
 #define TEMP_MINOR		131	/* Temperature Sensor */
 #define RTC_MINOR		135

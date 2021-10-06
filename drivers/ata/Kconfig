@@ -184,14 +184,15 @@ config AHCI_QORIQ
 
 	  If unsure, say N.
 
+if SYNO_LSP_RTD129X
 config AHCI_RTK
 	tristate "Realtek AHCI SATA support"
-	depends on SYNO_RTD1296
 	help
 	  This option enables support for Realtek AHCI Serial ATA
 	  controllers.
 
 	  If unsure, say N.
+endif # SYNO_LSP_RTD129X
 
 config SATA_FSL
 	tristate "Freescale 3.0Gbps SATA support"

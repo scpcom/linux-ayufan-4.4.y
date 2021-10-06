@@ -113,7 +113,11 @@ static int mc33880_probe(struct spi_device *spi)
 	mc->chip.base = pdata->base;
 	mc->chip.ngpio = PIN_NUMBER;
 	mc->chip.can_sleep = true;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	mc->chip.parent = &spi->dev;
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	mc->chip.dev = &spi->dev;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	mc->chip.owner = THIS_MODULE;
 
 	mc->port_config = 0x00;

@@ -108,7 +108,11 @@ static struct phy_driver teranetics_driver[] = {
 	.config_aneg    = teranetics_config_aneg,
 	.read_status	= teranetics_read_status,
 	.match_phy_device = teranetics_match_phy_device,
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+//do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	.driver		= { .owner = THIS_MODULE,},
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 },
 };
 

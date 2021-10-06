@@ -273,7 +273,11 @@ static int bcm_kona_gpio_set_debounce(struct gpio_chip *chip, unsigned gpio,
 	reg_base = kona_gpio->reg_base;
 	/* debounce must be 1-128ms (or 0) */
 	if ((debounce > 0 && debounce < 1000) || debounce > 128000) {
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+		dev_err(chip->parent, "Debounce value %u not in range\n",
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		dev_err(chip->dev, "Debounce value %u not in range\n",
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 			debounce);
 		return -EINVAL;
 	}
@@ -416,7 +420,11 @@ static int bcm_kona_gpio_irq_set_type(struct irq_data *d, unsigned int type)
 	case IRQ_TYPE_LEVEL_LOW:
 		/* BCM GPIO doesn't support level triggering */
 	default:
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+		dev_err(kona_gpio->gpio_chip.parent,
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		dev_err(kona_gpio->gpio_chip.dev,
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 			"Invalid BCM GPIO irq type 0x%x\n", type);
 		return -EINVAL;
 	}
@@ -477,7 +485,11 @@ static int bcm_kona_gpio_irq_reqres(struct irq_data *d)
 	struct bcm_kona_gpio *kona_gpio = irq_data_get_irq_chip_data(d);
 
 	if (gpiochip_lock_as_irq(&kona_gpio->gpio_chip, d->hwirq)) {
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+		dev_err(kona_gpio->gpio_chip.parent,
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		dev_err(kona_gpio->gpio_chip.dev,
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 			"unable to lock HW IRQ %lu for IRQ\n",
 			d->hwirq);
 		return -EINVAL;

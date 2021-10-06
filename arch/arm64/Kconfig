@@ -401,6 +401,17 @@ config CAVIUM_ERRATUM_23154
 
 	  If unsure, say Y.
 
+config CAVIUM_ERRATUM_27456
+	bool "Cavium erratum 27456: Broadcast TLBI instructions may cause icache corruption"
+	default y
+	help
+	  On ThunderX T88 pass 1.x through 2.1 parts, broadcast TLBI
+	  instructions may cause the icache to become corrupted if it
+	  contains data for a non-current ASID.  The fix is to
+	  invalidate the icache when changing the mm context.
+
+	  If unsure, say Y.
+
 endmenu
 
 
@@ -475,6 +486,13 @@ config CPU_BIG_ENDIAN
        bool "Build big-endian kernel"
        help
          Say Y if you plan on running a kernel in big-endian mode.
+
+config MMIO_64BIT
+       bool "64BIT MMIO Access"
+	   depends on SYNO_LSP_ARMADA_16_12
+       default y
+       help
+         Say Y if you your platform supports 64bit MMIO access.
 
 config SCHED_MC
 	bool "Multi-core scheduler support"

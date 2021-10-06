@@ -38,41 +38,16 @@ struct ehci_rtk {
     struct device *dev;
     struct ehci_hcd *ehci;
     int irq;
-
-    struct work_struct work;
 };
 
 extern int rtk_usb_init_power_on(struct device *usb_dev);
-
-static void ehci_rtk_probe_work(struct work_struct *work) {
-    struct ehci_rtk *rtk = container_of(work, struct ehci_rtk, work);
-    struct device		*dev = rtk->dev;
-    struct usb_hcd *hcd = ehci_to_hcd(rtk->ehci);
-    int irq = rtk->irq;
-    int ret = 0;
-
-    unsigned long probe_time = jiffies;
-
-    dev_info(dev, "%s Start ...\n",__func__);
-
-    ret = usb_add_hcd(hcd, irq, IRQF_SHARED);
-    if (ret) {
-        dev_err(dev, "%s: error add hcd\n", __func__);
-        usb_put_hcd(hcd);
-    }
-
-    rtk_usb_init_power_on(dev);
-
-    dev_info(dev, "%s End ... ok! (take %d ms)\n", __func__, jiffies_to_msecs(jiffies - probe_time));
-    return;
-}
 
 static int ehci_rtk_drv_probe(struct platform_device *pdev)
 {
     struct resource res;
     struct usb_hcd *hcd;
     struct ehci_hcd *ehci;
-    void __iomem *regs;
+    void __iomem *regs, *reset_reg;
     int irq, err = 0;
     struct usb_phy *phy;
     unsigned long probe_time = jiffies;
@@ -81,6 +56,26 @@ static int ehci_rtk_drv_probe(struct platform_device *pdev)
         return -ENODEV;
 
     dev_info(&pdev->dev, "Probe Realtek-SoC USB EHCI Host Controller\n");
+
+#ifdef CONFIG_ARCH_RTD119X
+
+    reset_reg = of_iomap(pdev->dev.of_node, 1);
+    if (reset_reg == NULL) {
+        dev_err(&pdev->dev, "error mapping memory for reset_reg\n");
+        err = -EFAULT;
+        goto err1;
+    }
+
+    /* reset usb mac */
+    //writel(readl(IOMEM(0xfe000000)) & ~(BIT(9)), IOMEM(0xfe000000));
+    writel(readl(reset_reg) & ~(BIT(9)), reset_reg);
+    mdelay(1);
+    /* release usb mac */
+    //writel(readl(IOMEM(0xfe000000)) | BIT(9), IOMEM(0xfe000000));
+    writel(readl(reset_reg) | BIT(9), reset_reg);
+    mdelay(10);
+
+#endif
 
     //phy = devm_usb_get_phy(&pdev->dev, USB_PHY_TYPE_USB2);
     phy = devm_usb_get_phy_by_phandle(&pdev->dev, "usb-phy", 0);
@@ -139,28 +134,13 @@ static int ehci_rtk_drv_probe(struct platform_device *pdev)
     ehci = hcd_to_ehci(hcd);
     ehci->caps = hcd->regs;
 
-    if (of_property_read_bool(pdev->dev.of_node, "delay_probe_work")) {
-        struct ehci_rtk *rtk;
-        rtk = devm_kzalloc(&pdev->dev, sizeof(*rtk), GFP_KERNEL);
-        if (!rtk) {
-            dev_err(&pdev->dev, "not enough memory\n");
-            err = -ENOMEM;
-            goto err4;
-        }
-        rtk->dev = &pdev->dev;
-        rtk->ehci = ehci;
-        rtk->irq = irq;
-        INIT_WORK(&rtk->work, ehci_rtk_probe_work);
-        schedule_work(&rtk->work);
-    } else {
-        err = usb_add_hcd(hcd, irq, IRQF_SHARED);
-        if (err) {
-            dev_err(&pdev->dev, "error add hcd\n");
-            goto err4;
-        }
-
-	rtk_usb_init_power_on(&pdev->dev);
+    err = usb_add_hcd(hcd, irq, IRQF_SHARED);
+    if (err) {
+        dev_err(&pdev->dev, "error add hcd\n");
+        goto err4;
     }
+
+    rtk_usb_init_power_on(&pdev->dev);
 
     dev_info(&pdev->dev, "%s OK (take %d ms)\n", __func__, jiffies_to_msecs(jiffies - probe_time));
     return 0;
@@ -184,7 +164,6 @@ static int ehci_rtk_drv_remove(struct platform_device *pdev)
     dev_set_drvdata(&pdev->dev, NULL);
 
     usb_remove_hcd(hcd);
-    irq_dispose_mapping(hcd->irq);
     usb_put_hcd(hcd);
 
     return 0;

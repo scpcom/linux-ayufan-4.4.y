@@ -504,6 +504,7 @@ static void raid0_make_request(struct mddev *mddev, struct bio *bio)
 #ifdef  MY_ABC_HERE
 		syno_flashcache_return_error(bio);
 #else
+			bio->bi_error = -EIO;
 			bio_endio(bio);
 #endif  
 			return;

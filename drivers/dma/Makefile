@@ -45,6 +45,9 @@ obj-$(CONFIG_MMP_TDMA) += mmp_tdma.o
 obj-$(CONFIG_MOXART_DMA) += moxart-dma.o
 obj-$(CONFIG_MPC512X_DMA) += mpc512x_dma.o
 obj-$(CONFIG_MV_XOR) += mv_xor.o
+ifeq ($(CONFIG_SYNO_LSP_ARMADA_16_12), y)
+obj-$(CONFIG_MV_XOR_V2) += mv_xor_v2.o
+endif
 obj-$(CONFIG_MXS_DMA) += mxs-dma.o
 obj-$(CONFIG_MX3_IPU) += ipu/
 obj-$(CONFIG_NBPFAXI_DMA) += nbpfaxi.o

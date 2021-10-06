@@ -255,7 +255,11 @@ static const struct clk_muxing_soc_desc kirkwood_mux_desc[] __initconst = {
 		11, 1, 0 },
 };
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+//do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 #define to_clk_mux(_hw) container_of(_hw, struct clk_mux, hw)
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 static struct clk *clk_muxing_get_src(
 	struct of_phandle_args *clkspec, void *data)

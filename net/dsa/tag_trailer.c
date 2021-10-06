@@ -82,12 +82,20 @@ static int trailer_rcv(struct sk_buff *skb, struct net_device *dev,
 		goto out_drop;
 
 	source_port = trailer[1] & 7;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	if (source_port >= DSA_MAX_PORTS || !ds->ports[source_port].netdev)
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	if (source_port >= DSA_MAX_PORTS || ds->ports[source_port] == NULL)
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		goto out_drop;
 
 	pskb_trim_rcsum(skb, skb->len - 4);
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	skb->dev = ds->ports[source_port].netdev;
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	skb->dev = ds->ports[source_port];
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	skb_push(skb, ETH_HLEN);
 	skb->pkt_type = PACKET_HOST;
 	skb->protocol = eth_type_trans(skb, skb->dev);

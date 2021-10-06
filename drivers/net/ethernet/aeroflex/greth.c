@@ -1334,10 +1334,14 @@ static int greth_mdio_init(struct greth_private *greth)
 	greth->mdio->write = greth_mdio_write;
 	greth->mdio->priv = greth;
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+//do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	greth->mdio->irq = greth->mdio_irqs;
 
 	for (phy = 0; phy < PHY_MAX_ADDR; phy++)
 		greth->mdio->irq[phy] = PHY_POLL;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	ret = mdiobus_register(greth->mdio);
 	if (ret) {

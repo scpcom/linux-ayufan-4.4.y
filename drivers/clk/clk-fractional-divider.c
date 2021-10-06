@@ -16,7 +16,11 @@
 #include <linux/slab.h>
 #include <linux/rational.h>
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+//do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 #define to_clk_fd(_hw) container_of(_hw, struct clk_fractional_divider, hw)
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 static unsigned long clk_fd_recalc_rate(struct clk_hw *hw,
 					unsigned long parent_rate)

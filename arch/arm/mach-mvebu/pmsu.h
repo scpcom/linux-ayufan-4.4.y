@@ -18,7 +18,13 @@ int mvebu_setup_boot_addr_wa(unsigned int crypto_eng_target,
 
 void mvebu_v7_pmsu_idle_exit(void);
 void armada_370_xp_cpu_resume(void);
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+void armada_38x_mem_resume(void);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 int armada_370_xp_pmsu_idle_enter(unsigned long deepidle);
 int armada_38x_do_cpu_suspend(unsigned long deepidle);
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+void mvebu_v7_pmsu_disable_dfs_cpu(int hw_cpu);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 #endif	/* __MACH_370_XP_PMSU_H */

@@ -545,7 +545,11 @@ int bgpio_init(struct bgpio_chip *bgc, struct device *dev,
 		return -EINVAL;
 
 	spin_lock_init(&bgc->lock);
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	bgc->gc.parent = dev;
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	bgc->gc.dev = dev;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	bgc->gc.label = dev_name(dev);
 	bgc->gc.base = -1;
 	bgc->gc.ngpio = bgc->bits;

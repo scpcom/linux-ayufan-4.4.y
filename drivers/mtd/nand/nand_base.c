@@ -3986,6 +3986,11 @@ int nand_scan_ident(struct mtd_info *mtd, int maxchips,
 	int ret;
 
 	if (chip->flash_node) {
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+		/* MTD can automatically handle DT partitions, etc. */
+		mtd_set_of_node(mtd, chip->flash_node);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+
 		ret = nand_dt_init(mtd, chip, chip->flash_node);
 		if (ret)
 			return ret;

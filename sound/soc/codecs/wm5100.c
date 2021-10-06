@@ -2306,7 +2306,11 @@ static void wm5100_init_gpio(struct i2c_client *i2c)
 
 	wm5100->gpio_chip = wm5100_template_chip;
 	wm5100->gpio_chip.ngpio = 6;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	wm5100->gpio_chip.parent = &i2c->dev;
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	wm5100->gpio_chip.dev = &i2c->dev;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	if (wm5100->pdata.gpio_base)
 		wm5100->gpio_chip.base = wm5100->pdata.gpio_base;

@@ -52,18 +52,23 @@ void syno_plugin_handle_put(void *hnd);
 extern int g_syno_sata_remap[SATA_REMAP_MAX];
 extern int g_use_sata_remap;
 int syno_get_remap_idx(int origin_idx);
+extern int g_syno_mv14xx_remap[SATA_REMAP_MAX];
+extern int g_use_mv14xx_remap;
+int syno_get_mv_14xx_remap_idx(int origin_idx);
 #endif  
 
 #ifdef MY_DEF_HERE
-#include <linux/pci.h>
-
 #define PCI_ADDR_LEN_MAX 9
 #define PCI_ADDR_NUM_MAX CONFIG_SYNO_MAX_PCI_SLOT
- 
-#define M2SATA_START_IDX 300
 extern char gszPciAddrList[PCI_ADDR_NUM_MAX][PCI_ADDR_LEN_MAX];
 extern int gPciAddrNum;
+#endif  
+
+#ifdef MY_DEF_HERE
+ 
+#define M2SATA_START_IDX 300
 extern int gPciDeferStart;
 void syno_insert_sata_index_remap(unsigned int idx, unsigned int num, unsigned int id_start);
 #endif  
+
 #endif  

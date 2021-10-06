@@ -72,7 +72,11 @@ static void hns_get_mdix_mode(struct net_device *net_dev,
 	struct hns_nic_priv *priv = netdev_priv(net_dev);
 	struct phy_device *phy_dev = priv->phy;
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	if (!phy_dev || !phy_dev->mdio.bus) {
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	if (!phy_dev || !phy_dev->bus) {
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		cmd->eth_tp_mdix_ctrl = ETH_TP_MDI_INVALID;
 		cmd->eth_tp_mdix = ETH_TP_MDI_INVALID;
 		return;

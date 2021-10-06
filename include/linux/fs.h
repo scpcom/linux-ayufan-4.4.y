@@ -65,6 +65,11 @@ struct iov_iter;
 #ifdef CONFIG_SENDFILE_PATCH
 struct socket;
 #endif
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#ifdef CONFIG_SPLICE_FROM_SOCKET
+struct socket;
+#endif
+#endif  
 
 extern void __init inode_init(void);
 extern void __init inode_init_early(void);
@@ -230,6 +235,7 @@ enum positive_aop_returns {
 #ifdef MY_ABC_HERE
 #define AOP_FLAG_RECVFILE		0x0008
 #define AOP_FLAG_RECVFILE_NONDA		0x0010
+#define AOP_FLAG_RECVFILE_ECRYPTFS_NO_TRUNCATE		0x0020
 #endif  
 
 struct page;
@@ -1368,6 +1374,11 @@ struct file_operations {
 					loff_t *ppos, size_t count, bool ppage);
 					 
 #endif
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#ifdef CONFIG_SPLICE_FROM_SOCKET
+	ssize_t (*splice_from_socket)(struct file *file, struct socket *sock, loff_t __user *ppos, size_t count);
+#endif
+#endif  
 	int (*setlease)(struct file *, long, struct file_lock **, void **);
 	long (*fallocate)(struct file *file, int mode, loff_t offset,
 			  loff_t len);

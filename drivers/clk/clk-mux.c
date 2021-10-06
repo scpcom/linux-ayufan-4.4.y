@@ -26,7 +26,11 @@
  * parent - parent is adjustable through clk_set_parent
  */
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+//do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 #define to_clk_mux(_hw) container_of(_hw, struct clk_mux, hw)
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 static u8 clk_mux_get_parent(struct clk_hw *hw)
 {

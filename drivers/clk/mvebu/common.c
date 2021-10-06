@@ -199,36 +199,68 @@ struct clk_gating_ctrl {
 	u32 saved_reg;
 };
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#define MAX_CLK_GATE_DOMAINS	(4)
+static struct clk_gating_ctrl *ctrl[MAX_CLK_GATE_DOMAINS];
+static int ctrl_cnt;
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 #define to_clk_gate(_hw) container_of(_hw, struct clk_gate, hw)
 
 static struct clk_gating_ctrl *ctrl;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 static struct clk *clk_gating_get_src(
 	struct of_phandle_args *clkspec, void *data)
 {
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	struct clk_gating_ctrl *ctrlp = data;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	int n;
 
 	if (clkspec->args_count < 1)
 		return ERR_PTR(-EINVAL);
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	for (n = 0; n < ctrlp->num_gates; n++) {
+		struct clk_gate *gate =
+			to_clk_gate(__clk_get_hw(ctrlp->gates[n]));
+		if (clkspec->args[0] == gate->bit_idx)
+			return ctrlp->gates[n];
+	}
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	for (n = 0; n < ctrl->num_gates; n++) {
 		struct clk_gate *gate =
 			to_clk_gate(__clk_get_hw(ctrl->gates[n]));
 		if (clkspec->args[0] == gate->bit_idx)
 			return ctrl->gates[n];
 	}
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	return ERR_PTR(-ENODEV);
 }
 
 static int mvebu_clk_gating_suspend(void)
 {
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	int i;
+
+	for (i = 0; i < ctrl_cnt; i++)
+		ctrl[i]->saved_reg = readl(ctrl[i]->base);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	ctrl->saved_reg = readl(ctrl->base);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	return 0;
 }
 
 static void mvebu_clk_gating_resume(void)
 {
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	int i;
+
+	for (i = 0; i < ctrl_cnt; i++)
+		writel(ctrl[i]->saved_reg, ctrl[i]->base);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	writel(ctrl->saved_reg, ctrl->base);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 }
 
 static struct syscore_ops clk_gate_syscore_ops = {
@@ -243,9 +275,15 @@ void __init mvebu_clk_gating_setup(struct device_node *np,
 	void __iomem *base;
 	const char *default_parent = NULL;
 	int n;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	struct clk_gating_ctrl *ctrlp;
 
+	if (ctrl_cnt >= MAX_CLK_GATE_DOMAINS) {
+		pr_err("mvebu-clk-gating: too many gatable clock devices.\n");
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	if (ctrl) {
 		pr_err("mvebu-clk-gating: cannot instantiate more than one gatable clock device\n");
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		return;
 	}
 
@@ -259,6 +297,15 @@ void __init mvebu_clk_gating_setup(struct device_node *np,
 		clk_put(clk);
 	}
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	ctrlp = kzalloc(sizeof(*ctrlp), GFP_KERNEL);
+	if (WARN_ON(!ctrlp))
+		goto ctrl_out;
+
+	ctrl[ctrl_cnt] = ctrlp;
+	ctrlp->lock = &ctrl_gating_lock;
+	ctrlp->base = base;
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	ctrl = kzalloc(sizeof(*ctrl), GFP_KERNEL);
 	if (WARN_ON(!ctrl))
 		goto ctrl_out;
@@ -267,11 +314,40 @@ void __init mvebu_clk_gating_setup(struct device_node *np,
 	ctrl->lock = &ctrl_gating_lock;
 
 	ctrl->base = base;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	/* Count, allocate, and register clock gates */
 	for (n = 0; desc[n].name;)
 		n++;
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	ctrlp->num_gates = n;
+	ctrlp->gates = kcalloc(ctrlp->num_gates, sizeof(struct clk *),
+			      GFP_KERNEL);
+	if (WARN_ON(!ctrlp->gates))
+		goto gates_out;
+
+	for (n = 0; n < ctrlp->num_gates; n++) {
+		const char *parent =
+			(desc[n].parent) ? desc[n].parent : default_parent;
+		ctrlp->gates[n] = clk_register_gate(NULL, desc[n].name, parent,
+					desc[n].flags, base, desc[n].bit_idx,
+					desc[n].clk_gate_flags, ctrlp->lock);
+		WARN_ON(IS_ERR(ctrlp->gates[n]));
+	}
+
+	of_clk_add_provider(np, clk_gating_get_src, ctrlp);
+
+	/* Register ops only for first device. */
+	if (ctrl_cnt == 0)
+		register_syscore_ops(&clk_gate_syscore_ops);
+
+	ctrl_cnt++;
+
+	return;
+gates_out:
+	kfree(ctrlp);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	ctrl->num_gates = n;
 	ctrl->gates = kzalloc(ctrl->num_gates * sizeof(struct clk *),
 			      GFP_KERNEL);
@@ -294,6 +370,7 @@ void __init mvebu_clk_gating_setup(struct device_node *np,
 	return;
 gates_out:
 	kfree(ctrl);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 ctrl_out:
 	iounmap(base);
 }

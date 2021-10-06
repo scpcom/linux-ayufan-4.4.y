@@ -189,7 +189,11 @@ int __max730x_probe(struct max7301 *ts)
 
 	ts->chip.ngpio = PIN_NUMBER;
 	ts->chip.can_sleep = true;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	ts->chip.parent = dev;
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	ts->chip.dev = dev;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	ts->chip.owner = THIS_MODULE;
 
 	/*

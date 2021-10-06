@@ -184,6 +184,10 @@ source "drivers/perf/Kconfig"
 
 source "drivers/ras/Kconfig"
 
+if SYNO_LSP_ARMADA_16_12
+source "drivers/telephony/Kconfig"
+endif
+
 source "drivers/thunderbolt/Kconfig"
 
 source "drivers/android/Kconfig"
@@ -198,6 +202,8 @@ source "drivers/hwtracing/intel_th/Kconfig"
 
 source "drivers/fpga/Kconfig"
 
+if SYNO_LSP_RTD129X
 source "drivers/powerctrl/Kconfig"
+endif # SYNO_LSP_RTD129X
 
 endmenu

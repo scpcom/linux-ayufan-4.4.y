@@ -97,7 +97,11 @@ static int mc9s08dz60_probe(struct i2c_client *client,
 
 	mc9s->chip.label = client->name;
 	mc9s->chip.base = -1;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	mc9s->chip.parent = &client->dev;
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	mc9s->chip.dev = &client->dev;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	mc9s->chip.owner = THIS_MODULE;
 	mc9s->chip.ngpio = GPIO_NUM;
 	mc9s->chip.can_sleep = true;

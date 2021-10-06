@@ -3113,7 +3113,11 @@ static int mv643xx_eth_probe(struct platform_device *pdev)
 		if (!mp->phy)
 			err = -ENODEV;
 		else
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+			phy_addr_set(mp, mp->phy->mdio.addr);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 			phy_addr_set(mp, mp->phy->addr);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	} else if (pd->phy_addr != MV643XX_ETH_PHY_NONE) {
 		mp->phy = phy_scan(mp, pd->phy_addr);
 

@@ -778,7 +778,11 @@ static int amd_gpio_probe(struct platform_device *pdev)
 	gpio_dev->gc.base			= 0;
 	gpio_dev->gc.label			= pdev->name;
 	gpio_dev->gc.owner			= THIS_MODULE;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	gpio_dev->gc.parent			= &pdev->dev;
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	gpio_dev->gc.dev			= &pdev->dev;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	gpio_dev->gc.ngpio			= TOTAL_NUMBER_OF_PINS;
 #if defined(CONFIG_OF_GPIO)
 	gpio_dev->gc.of_node			= pdev->dev.of_node;

@@ -139,6 +139,22 @@ drm_gem_object_reference(struct drm_gem_object *obj)
 	kref_get(&obj->refcount);
 }
 
+/**
+ * __drm_gem_object_unreference - raw function to release a GEM BO reference
+ * @obj: GEM buffer object
+ *
+ * This function is meant to be used by drivers which are not encumbered with
+ * dev->struct_mutex legacy locking and which are using the
+ * gem_free_object_unlocked callback. It avoids all the locking checks and
+ * locking overhead of drm_gem_object_unreference() and
+ * drm_gem_object_unreference_unlocked().
+ *
+ * Drivers should never call this directly in their code. Instead they should
+ * wrap it up into a ``driver_gem_object_unreference(struct driver_gem_object
+ * *obj)`` wrapper function, and use that. Shared code should never call this, to
+ * avoid breaking drivers by accident which still depend upon dev->struct_mutex
+ * locking.
+ */
 static inline void
 drm_gem_object_unreference(struct drm_gem_object *obj)
 {

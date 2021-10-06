@@ -562,7 +562,11 @@ static int meson_gpiolib_register(struct meson_pinctrl *pc)
 		domain = &pc->domains[i];
 
 		domain->chip.label = domain->data->name;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+		domain->chip.parent = pc->dev;
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		domain->chip.dev = pc->dev;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		domain->chip.request = meson_gpio_request;
 		domain->chip.free = meson_gpio_free;
 		domain->chip.direction_input = meson_gpio_direction_input;

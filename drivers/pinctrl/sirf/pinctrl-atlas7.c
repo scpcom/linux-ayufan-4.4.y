@@ -6010,7 +6010,11 @@ static int atlas7_gpio_probe(struct platform_device *pdev)
 	chip->label = kstrdup(np->name, GFP_KERNEL);
 	chip->of_node = np;
 	chip->of_gpio_n_cells = 2;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	chip->parent = &pdev->dev;
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	chip->dev = &pdev->dev;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	/* Add gpio chip to system */
 	ret = gpiochip_add(chip);

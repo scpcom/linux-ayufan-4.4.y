@@ -232,10 +232,10 @@ config MTD_XIP
 	  used for XIP purposes.  If you're not sure what this is all about
 	  then say N.
 
+if SYNO_LSP_RTD129X
 config MTD_RTK_SFC
         tristate "Realtek Serial Flash Controller for SPI Flash"
         default y
-        depends on SYNO_RTD1296
         help
           This is used by SST/SPANSION/MXIC SPI Serial Flash with
           Realtek Serial Flash Controller.
@@ -281,5 +281,6 @@ config NOR_ENTER_4BYTES_MODE
         default n
         help
          Setting this to 'y' will enable 4Bytes mode support for nor flash driver.
+endif # SYNO_LSP_RTD129X
 
 endmenu

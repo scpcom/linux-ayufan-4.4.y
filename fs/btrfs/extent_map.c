@@ -33,6 +33,8 @@ void extent_map_tree_init(struct extent_map_tree *tree)
 {
 #ifdef MY_ABC_HERE
 	atomic_set(&tree->nr_extent_maps, 0);
+	INIT_LIST_HEAD(&tree->not_modified_extents);
+	INIT_LIST_HEAD(&tree->syno_modified_extents);
 #endif  
 	tree->map = RB_ROOT;
 	INIT_LIST_HEAD(&tree->modified_extents);
@@ -51,6 +53,9 @@ struct extent_map *alloc_extent_map(void)
 	em->generation = 0;
 	atomic_set(&em->refs, 1);
 	INIT_LIST_HEAD(&em->list);
+#ifdef MY_ABC_HERE
+	INIT_LIST_HEAD(&em->free_list);
+#endif  
 	return em;
 }
 
@@ -62,6 +67,9 @@ void free_extent_map(struct extent_map *em)
 	if (atomic_dec_and_test(&em->refs)) {
 		WARN_ON(extent_map_in_tree(em));
 		WARN_ON(!list_empty(&em->list));
+#ifdef MY_ABC_HERE
+		WARN_ON(!list_empty(&em->free_list));
+#endif  
 		if (test_bit(EXTENT_FLAG_FS_MAPPING, &em->flags))
 			kfree(em->map_lookup);
 		kmem_cache_free(extent_map_cache, em);
@@ -195,7 +203,7 @@ static int mergable_maps(struct extent_map *prev, struct extent_map *next)
 }
 
 #ifdef MY_ABC_HERE
-static void check_and_insret_extent_map_to_global_extent(struct extent_map_tree *tree, struct extent_map *em)
+static void check_and_insert_extent_map_to_global_extent(struct extent_map_tree *tree, struct extent_map *em, int modified)
 {
 	u64 rootid = 0;
 
@@ -205,6 +213,11 @@ static void check_and_insret_extent_map_to_global_extent(struct extent_map_tree 
 		if (rootid == BTRFS_FS_TREE_OBJECTID ||
 			(rootid >= BTRFS_FIRST_FREE_OBJECTID && rootid <= BTRFS_LAST_FREE_OBJECTID)) {
 			atomic_inc(&tree->inode->root->fs_info->nr_extent_maps);
+			if (!modified) {
+				list_move_tail(&em->free_list, &tree->not_modified_extents);
+			} else {
+				list_move_tail(&em->free_list, &tree->syno_modified_extents);
+			}
 			if (list_empty(&tree->inode->free_extent_map_inode)) {
 				spin_lock(&tree->inode->root->fs_info->extent_map_inode_list_lock);
 				list_move_tail(&tree->inode->free_extent_map_inode, &tree->inode->root->fs_info->extent_map_inode_list);
@@ -213,12 +226,15 @@ static void check_and_insret_extent_map_to_global_extent(struct extent_map_tree 
 		}
 	}
 }
-static void check_and_decrease_global_extent(struct extent_map_tree *tree)
+static void check_and_decrease_global_extent(struct extent_map_tree *tree, struct extent_map *em)
 {
 	u64 rootid = 0;
 
 	WARN_ON(atomic_read(&tree->nr_extent_maps) == 0);
 	atomic_dec(&tree->nr_extent_maps);
+	if (!list_empty(&em->free_list)) {
+		list_del_init(&em->free_list);
+	}
 	if (tree->inode && tree->inode->root && !btrfs_is_free_space_inode(&tree->inode->vfs_inode)) {
 		rootid = tree->inode->root->objectid;
 		if (rootid == BTRFS_FS_TREE_OBJECTID ||
@@ -258,11 +274,10 @@ static void try_merge_map(struct extent_map_tree *tree, struct extent_map *em)
 
 			rb_erase(&merge->rb_node, &tree->map);
 			RB_CLEAR_NODE(&merge->rb_node);
-			free_extent_map(merge);
-
 #ifdef MY_ABC_HERE
-			check_and_decrease_global_extent(tree);
+			check_and_decrease_global_extent(tree, merge);
 #endif  
+			free_extent_map(merge);
 		}
 	}
 
@@ -276,11 +291,10 @@ static void try_merge_map(struct extent_map_tree *tree, struct extent_map *em)
 		RB_CLEAR_NODE(&merge->rb_node);
 		em->mod_len = (merge->mod_start + merge->mod_len) - em->mod_start;
 		em->generation = max(em->generation, merge->generation);
-		free_extent_map(merge);
-
 #ifdef MY_ABC_HERE
-		check_and_decrease_global_extent(tree);
+		check_and_decrease_global_extent(tree, merge);
 #endif  
+		free_extent_map(merge);
 	}
 }
 
@@ -354,7 +368,7 @@ int add_extent_mapping(struct extent_map_tree *tree,
 		goto out;
 
 #ifdef MY_ABC_HERE
-	check_and_insret_extent_map_to_global_extent(tree, em);
+	check_and_insert_extent_map_to_global_extent(tree, em, modified);
 #endif  
 	setup_extent_mapping(tree, em, modified);
 out:
@@ -414,7 +428,7 @@ int remove_extent_mapping(struct extent_map_tree *tree, struct extent_map *em)
 	RB_CLEAR_NODE(&em->rb_node);
 
 #ifdef MY_ABC_HERE
-	check_and_decrease_global_extent(tree);
+	check_and_decrease_global_extent(tree, em);
 #endif  
 	return ret;
 }
@@ -430,6 +444,11 @@ void replace_extent_mapping(struct extent_map_tree *tree,
 		list_del_init(&cur->list);
 	rb_replace_node(&cur->rb_node, &new->rb_node, &tree->map);
 	RB_CLEAR_NODE(&cur->rb_node);
+
+#ifdef MY_ABC_HERE
+	check_and_decrease_global_extent(tree, cur);
+	check_and_insert_extent_map_to_global_extent(tree, new, modified);
+#endif
 
 	setup_extent_mapping(tree, new, modified);
 }

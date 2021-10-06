@@ -166,7 +166,11 @@ static int kempld_gpio_probe(struct platform_device *pdev)
 	chip = &gpio->chip;
 	chip->label = "gpio-kempld";
 	chip->owner = THIS_MODULE;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	chip->parent = dev;
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	chip->dev = dev;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	chip->can_sleep = true;
 	if (pdata && pdata->gpio_base)
 		chip->base = pdata->gpio_base;

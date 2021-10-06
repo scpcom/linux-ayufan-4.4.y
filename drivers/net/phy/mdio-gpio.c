@@ -159,7 +159,11 @@ static struct mii_bus *mdio_gpio_bus_init(struct device *dev,
 
 	new_bus->phy_mask = pdata->phy_mask;
 	new_bus->phy_ignore_ta_mask = pdata->phy_ignore_ta_mask;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	memcpy(new_bus->irq, pdata->irqs, sizeof(new_bus->irq));
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	new_bus->irq = pdata->irqs;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	new_bus->parent = dev;
 
 	if (new_bus->phy_mask == ~0)

@@ -77,6 +77,9 @@ DEFINE_MUTEX(hub_init_mutex);
 
 static void hub_release(struct kref *kref);
 static int usb_reset_and_verify_device(struct usb_device *udev);
+#if defined (CONFIG_SYNO_USB_HAS_EXTERNAL_USB3_HUB) || defined (CONFIG_SYNO_USB_HAS_EXTERNAL_USB2_HUB)
+static int is_syno_ext_hub(struct usb_device *udev);
+#endif  
 
 static inline char *portspeed(struct usb_hub *hub, int portstatus)
 {
@@ -763,7 +766,14 @@ syno_usb_set_power(struct usb_hub *hub, int enable, int port) {
 	int usb_vbus_gpio = get_vbus_gpio(hub, port);
 
 	if (0 <= usb_vbus_gpio) {
-		gpio_set_value(usb_vbus_gpio, enable);
+#ifdef MY_ABC_HERE
+		syno_pch_lpc_gpio_pin(usb_vbus_gpio, &enable, 1);
+#else  
+#ifdef CONFIG_SYNO_USB_VBUS_GPIO_POLARITY_INVERT
+	enable = !enable;
+#endif  
+		SYNO_GPIO_WRITE(usb_vbus_gpio, enable);
+#endif  
 	} else {
 		return -EINVAL;
 	}
@@ -2021,6 +2031,12 @@ static int device_serial_match(struct usb_device *dev, struct usb_device *udev_s
 	usb_hub_for_each_child(dev, child, childdev) {
 		if (childdev && childdev != udev_search && childdev->serial) {
 
+#if defined(CONFIG_SYNO_USB_HAS_EXTERNAL_USB3_HUB) || defined(CONFIG_SYNO_USB_HAS_EXTERNAL_USB2_HUB)
+			if (0 == is_syno_ext_hub(childdev)) {
+				continue;
+			}
+#endif  
+			 
 			if (childdev->serial[0] && strcmp(childdev->serial, udev_search->serial) == 0) {
 				match++;
 			} else {
@@ -2131,6 +2147,13 @@ int usb_new_device(struct usb_device *udev)
 		if (NULL != udev->serial) {
 			const int cProductLen = strlen(udev->product);
 
+#if defined(CONFIG_SYNO_USB_HAS_EXTERNAL_USB3_HUB) || defined(CONFIG_SYNO_USB_HAS_EXTERNAL_USB2_HUB)
+#define SYNO_SERIAL_EXT_HUB "syno.ext.hub"
+			if (0 == is_syno_ext_hub(udev)) {
+				snprintf(udev->serial, SERIAL_LEN, "%s", SYNO_SERIAL_EXT_HUB);
+				printk("Set serial number \"%s\" for Synology External hub.\n",udev->serial);
+			} else {
+#endif  
 			printk("Got empty serial number. "
 					"Generate serial number from product.\n");
 			udev->serial[0] = '\0';
@@ -2140,6 +2163,9 @@ int usb_new_device(struct usb_device *udev)
 					   "%02x", (seed ^= udev->product[cProductLen-i-1]));
 			}
 			udev->serial[SERIAL_LEN-1] = '\0';
+#if defined(CONFIG_SYNO_USB_HAS_EXTERNAL_USB3_HUB) || defined(CONFIG_SYNO_USB_HAS_EXTERNAL_USB2_HUB)
+			}
+#endif  
 		}
 	}
 
@@ -3576,13 +3602,53 @@ static int hub_set_address(struct usb_device *udev, int devnum)
 	return retval;
 }
 
+#if defined (CONFIG_SYNO_USB_HAS_EXTERNAL_USB3_HUB) || defined (CONFIG_SYNO_USB_HAS_EXTERNAL_USB2_HUB)
+static int is_syno_ext_hub(struct usb_device *udev)
+{
+	int ret = -1;
+	if (udev->level == 1) {
+#if defined (CONFIG_SYNO_USB_HAS_EXTERNAL_USB3_HUB)
+		if (USB_SPEED_SUPER == udev->speed) {
+			if ((CONFIG_SYNO_USB_EXTERNAL_USB3_HUB_VID ==
+				udev->descriptor.idVendor) &&
+			    (CONFIG_SYNO_USB_EXTERNAL_USB3_HUB_PID ==
+				udev->descriptor.idProduct)) {
+				ret = 0;
+			}
+		}
+#endif  
+#if defined (CONFIG_SYNO_USB_HAS_EXTERNAL_USB2_HUB)
+		if (USB_SPEED_HIGH == udev->speed) {
+			if ((CONFIG_SYNO_USB_EXTERNAL_USB2_HUB_VID ==
+				udev->descriptor.idVendor) &&
+			    (CONFIG_SYNO_USB_EXTERNAL_USB2_HUB_PID ==
+				udev->descriptor.idProduct)) {
+				ret = 0;
+			}
+		}
+#endif  
+	}
+	return ret;
+}
+
+#endif  
 #if defined (MY_ABC_HERE)
+
 static int check_superspeed(struct usb_hub *hub, struct usb_device *udev)
 {
 	struct usb_device *hdev = hub->hdev;
 	int retval = -EINVAL;
+#if defined (CONFIG_SYNO_USB_HAS_EXTERNAL_USB3_HUB) || defined (CONFIG_SYNO_USB_HAS_EXTERNAL_USB2_HUB)
+	 
+	if (0 == is_syno_ext_hub(udev)) {
+		dev_info(&udev->dev, "This is Synology external hub. Skip %s\n", __func__);
+		return retval;
+	}
 
+	if ((!hdev->parent || 0 == is_syno_ext_hub(hdev)) &&
+#else  
 	if (!hdev->parent &&
+#endif  
 		!hub_is_superspeed(hdev) &&
 		0x0210 <= le16_to_cpu(udev->descriptor.bcdUSB)) {
 		dev_info(&udev->dev, "not running at top speed\n");

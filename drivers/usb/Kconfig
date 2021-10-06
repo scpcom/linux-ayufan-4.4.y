@@ -145,10 +145,11 @@ source "drivers/usb/misc/Kconfig"
 
 source "drivers/usb/atm/Kconfig"
 
+if SYNO_LSP_RTD129X
 config USB_PATCH_ON_RTK
-	depends on SYNO_RTD1296
 	bool
 	default y
+endif # SYNO_LSP_RTD129X
 
 endif # USB
 

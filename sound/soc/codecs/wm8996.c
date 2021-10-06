@@ -2203,7 +2203,11 @@ static void wm8996_init_gpio(struct wm8996_priv *wm8996)
 
 	wm8996->gpio_chip = wm8996_template_chip;
 	wm8996->gpio_chip.ngpio = 5;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	wm8996->gpio_chip.parent = wm8996->dev;
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	wm8996->gpio_chip.dev = wm8996->dev;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	if (wm8996->pdata.gpio_base)
 		wm8996->gpio_chip.base = wm8996->pdata.gpio_base;

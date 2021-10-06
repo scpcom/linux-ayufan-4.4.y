@@ -29,7 +29,11 @@ struct mtk_clk_gate {
 	u8		bit;
 };
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+static inline struct mtk_clk_gate *to_mtk_clk_gate(struct clk_hw *hw)
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 static inline struct mtk_clk_gate *to_clk_gate(struct clk_hw *hw)
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 {
 	return container_of(hw, struct mtk_clk_gate, hw);
 }

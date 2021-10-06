@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /* Copyright (c) 2000-2014 Synology Inc. All rights reserved. */
 #include <linux/sched.h>
 #include <linux/module.h>
@@ -14,9 +11,7 @@
 #include <linux/security.h>
 #include <asm/page.h>
 #include <linux/synolib.h>
-#ifdef MY_DEF_HERE
 #include <asm/uaccess.h>
-#endif /* MY_DEF_HERE */
 
 #define MAX_BUF_SIZE 64
 #define MSG_SIZE 256

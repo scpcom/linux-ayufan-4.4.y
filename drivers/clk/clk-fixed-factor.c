@@ -23,7 +23,11 @@
  * parent - fixed parent.  No clk_set_parent support
  */
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+//do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 #define to_clk_fixed_factor(_hw) container_of(_hw, struct clk_fixed_factor, hw)
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 static unsigned long clk_factor_recalc_rate(struct clk_hw *hw,
 		unsigned long parent_rate)
@@ -101,6 +105,21 @@ struct clk *clk_register_fixed_factor(struct device *dev, const char *name,
 	return clk;
 }
 EXPORT_SYMBOL_GPL(clk_register_fixed_factor);
+
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+void clk_unregister_fixed_factor(struct clk *clk)
+{
+	struct clk_hw *hw;
+
+	hw = __clk_get_hw(clk);
+	if (!hw)
+		return;
+
+	clk_unregister(clk);
+	kfree(to_clk_fixed_factor(hw));
+}
+EXPORT_SYMBOL_GPL(clk_unregister_fixed_factor);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 #ifdef CONFIG_OF
 /**

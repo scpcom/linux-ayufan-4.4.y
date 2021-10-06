@@ -264,7 +264,11 @@ static int ecryptfs_write_begin(struct file *file,
 		}
 	}
 	 
+#ifdef MY_ABC_HERE
+	if (index != 0 && !(AOP_FLAG_RECVFILE_ECRYPTFS_NO_TRUNCATE & flags)) {
+#else
 	if (index != 0) {
+#endif  
 		if (prev_page_end_size > i_size_read(page->mapping->host)) {
 			rc = ecryptfs_truncate(file->f_path.dentry,
 					       prev_page_end_size);
@@ -371,8 +375,9 @@ int ecryptfs_write_inode_size_to_metadata(struct inode *ecryptfs_inode)
 #ifdef MY_ABC_HERE
 	if (mount_crypt_stat->flags & ECRYPTFS_GLOBAL_FAST_LOOKUP_ENABLED) {
 		rc = ecryptfs_write_inode_size_to_xattr(ecryptfs_inode);
-		if (rc) {
-			return rc;
+		if (rc == -EOPNOTSUPP) {
+			printk(KERN_WARNING "%s: user xattr not supported, turn off FAST_LOOKUP", __func__);
+			mount_crypt_stat->flags &= ~ECRYPTFS_GLOBAL_FAST_LOOKUP_ENABLED;
 		}
 		return ecryptfs_write_inode_size_to_header(ecryptfs_inode);
 	}

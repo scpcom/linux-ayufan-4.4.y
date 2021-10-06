@@ -281,7 +281,7 @@ static void config_sata_phy(unsigned int port)
 	}*/
 	writel_delay(0x27710311, base + 0xF60);
 	writel_delay(0x27684311, base + 0xF60);
-	writel_delay(0x27648311, base + 0xF60);
+	writel_delay(0x27688311, base + 0xF60);
 
 	writel_delay(0x29001011, base + 0xF60);
 	writel_delay(0x29005011, base + 0xF60);
@@ -295,22 +295,66 @@ static void config_sata_phy(unsigned int port)
 		writel_delay(0x587a2111, base + 0xF60);
 		writel_delay(0x587a6111, base + 0xF60);
 		writel_delay(0x587aa111, base + 0xF60);
-	} else if(ahci_dev->tx_driving == 8) { //This case is for SYNOLOGY
+	} else if(ahci_dev->tx_driving == 8) { // for DS418j
 		printk("[SATA] set tx-driving to L (level 8)\n");
 		if(port==0) {
-			writel_delay(0x94ac2011, base + 0xF60);
-			writel_delay(0x94ac6011, base + 0xF60);
-			writel_delay(0x94aca011, base + 0xF60);
-			writel_delay(0xe8ca2111, base + 0xF60);
-			writel_delay(0xe8ca6111, base + 0xF60);
-			writel_delay(0xe8caa111, base + 0xF60);
+			writel_delay(0x94a82011, base + 0xF60);
+			writel_delay(0x94a86011, base + 0xF60);
+			writel_delay(0x94a8a011, base + 0xF60);
+			writel_delay(0x588a2111, base + 0xF60);
+			writel_delay(0x588a6111, base + 0xF60);
+			writel_delay(0x588aa111, base + 0xF60);
 		} else if(port==1) {
 			writel_delay(0x94a82011, base + 0xF60);
 			writel_delay(0x94a86011, base + 0xF60);
 			writel_delay(0x94a8a011, base + 0xF60);
-			writel_delay(0xf88a2111, base + 0xF60);
-			writel_delay(0xf88a6111, base + 0xF60);
-			writel_delay(0xf88aa111, base + 0xF60);
+			writel_delay(0x58da2111, base + 0xF60);
+			writel_delay(0x58da6111, base + 0xF60);
+			writel_delay(0x58daa111, base + 0xF60);
+		}
+	} else if(ahci_dev->tx_driving == 6) { // for DS418
+		printk("[SATA] set tx-driving to L (level 6)\n");
+		if(port==0) {
+			writel_delay(0x94aa2011, base + 0xF60);
+			writel_delay(0x94aa6011, base + 0xF60);
+			writel_delay(0x94aaa011, base + 0xF60);
+			writel_delay(0xa86a2111, base + 0xF60);
+			writel_delay(0xa86a6111, base + 0xF60);
+			writel_delay(0xa86aa111, base + 0xF60);
+		} else if(port==1) {
+			writel_delay(0x94a42011, base + 0xF60);
+			writel_delay(0x94a46011, base + 0xF60);
+			writel_delay(0x94a4a011, base + 0xF60);
+			writel_delay(0x68ca2111, base + 0xF60);
+			writel_delay(0x68ca6111, base + 0xF60);
+			writel_delay(0x68caa111, base + 0xF60);
+		}
+	} else if(ahci_dev->tx_driving == 4) { // for DS218play
+		printk("[SATA] set tx-driving to L (level 4)\n");
+		if(port==0) {
+			writel_delay(0x94a72011, base + 0xF60);
+			writel_delay(0x94a76011, base + 0xF60);
+			writel_delay(0x94a7a011, base + 0xF60);
+			writel_delay(0x587a2111, base + 0xF60);
+			writel_delay(0x587a6111, base + 0xF60);
+			writel_delay(0x587aa111, base + 0xF60);
+		} else if(port==1) {
+			writel_delay(0x94a72011, base + 0xF60);
+			writel_delay(0x94a76011, base + 0xF60);
+			writel_delay(0x94a7a011, base + 0xF60);
+			writel_delay(0x587a2111, base + 0xF60);
+			writel_delay(0x587a6111, base + 0xF60);
+			writel_delay(0x587aa111, base + 0xF60);
+		}
+	} else if(ahci_dev->tx_driving == 10) { // for DS118
+		printk("[SATA] set tx-driving to L (level 10)\n");
+		if(port==0) {
+			writel_delay(0x94a72011, base + 0xF60);
+			writel_delay(0x94a76011, base + 0xF60);
+			writel_delay(0x94a7a011, base + 0xF60);
+			writel_delay(0x383a2111, base + 0xF60);
+			writel_delay(0x383a6111, base + 0xF60);
+			writel_delay(0x383aa111, base + 0xF60);
 		}
 	}
 	// RX power saving off

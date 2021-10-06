@@ -77,7 +77,8 @@
 			  MBUS_ID(0x01, 0x1d) 0 0 0xfff00000 0x100000
 			  MBUS_ID(0x01, 0x2f) 0 0 0xf0000000 0x1000000
 			  MBUS_ID(0x09, 0x09) 0 0 0xf1100000 0x10000
-			  MBUS_ID(0x09, 0x05) 0 0 0xf1110000 0x10000>;
+			  MBUS_ID(0x09, 0x05) 0 0 0xf1110000 0x10000
+			  MBUS_ID(0x0c, 0x04) 0 0 0xf1200000 0x100000>;
 
 		devbus-bootcs {
 			status = "okay";
@@ -181,21 +182,46 @@
 				status = "okay";
 				phy = <&phy0>;
 				phy-mode = "rgmii-id";
+				buffer-manager = <&bm>;
+				bm,pool-long = <0>;
 			};
 			ethernet@74000 {
 				status = "okay";
 				phy = <&phy1>;
 				phy-mode = "rgmii-id";
+				buffer-manager = <&bm>;
+				bm,pool-long = <1>;
 			};
 			ethernet@30000 {
 				status = "okay";
 				phy = <&phy2>;
 				phy-mode = "sgmii";
+				buffer-manager = <&bm>;
+				bm,pool-long = <2>;
 			};
 			ethernet@34000 {
 				status = "okay";
 				phy = <&phy3>;
 				phy-mode = "sgmii";
+				buffer-manager = <&bm>;
+				bm,pool-long = <3>;
+			};
+
+			tdm@b0000 {
+				pinctrl-0 = <&tdm_pins>;
+				pinctrl-names = "default";
+				pclk-freq-mhz = <8>;
+				/*
+				 * Node remains disabled, because of
+				 * MPP's overlapping SDIO interface.
+				 * In order to use TDM, disable
+				 * mvsdio@d4000 node, and enable
+				 * tdm@b0000.
+				 */
+			};
+
+			bm@c0000 {
+				status = "okay";
 			};
 
 			mvsdio@d4000 {
@@ -219,6 +245,8 @@
 			};
 
 			spi0: spi@10600 {
+				pinctrl-0 = <&spi0_pins>;
+				pinctrl-names = "default";
 				status = "okay";
 
 				spi-flash@0 {
@@ -228,7 +256,35 @@
 					reg = <0>; /* Chip select 0 */
 					spi-max-frequency = <20000000>;
 				};
+
+				slic@1 {
+					#address-cells = <1>;
+					#size-cells = <0>;
+					compatible = "mv_slic";
+					reg = <1>; /* Chip select 1 */
+					spi-max-frequency = <3000000>;
+					spi-1byte-cs;
+					spi-cpol;
+					spi-cpha;
+					slic-id = <0>;
+				};
+
+				slic@2 {
+					#address-cells = <1>;
+					#size-cells = <0>;
+					compatible = "mv_slic";
+					reg = <2>; /* Chip select 2 */
+					spi-max-frequency = <3000000>;
+					spi-1byte-cs;
+					spi-cpol;
+					spi-cpha;
+					slic-id = <1>;
+				};
 			};
+		};
+
+		bm-bppi {
+			status = "okay";
 		};
 	};
 };

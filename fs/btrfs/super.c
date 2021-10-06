@@ -241,10 +241,11 @@ enum {
 	Opt_nossd, Opt_ssd_spread, Opt_thread_pool, Opt_noacl, Opt_compress,
 	Opt_compress_type, Opt_compress_force, Opt_compress_force_type,
 	Opt_notreelog, Opt_ratio, Opt_flushoncommit, Opt_discard,
-	Opt_space_cache, Opt_clear_cache, Opt_user_subvol_rm_allowed,
-	Opt_enospc_debug, Opt_subvolrootid, Opt_defrag, Opt_inode_cache,
-	Opt_no_space_cache, Opt_recovery, Opt_skip_balance,
-	Opt_check_integrity, Opt_check_integrity_including_extent_data,
+	Opt_space_cache, Opt_space_cache_version, Opt_clear_cache,
+	Opt_user_subvol_rm_allowed, Opt_enospc_debug, Opt_subvolrootid,
+	Opt_defrag, Opt_inode_cache, Opt_no_space_cache, Opt_recovery,
+	Opt_skip_balance, Opt_check_integrity,
+	Opt_check_integrity_including_extent_data,
 	Opt_check_integrity_print_mask, Opt_fatal_errors, Opt_rescan_uuid_tree,
 	Opt_commit_interval, Opt_barrier, Opt_nodefrag, Opt_nodiscard,
 	Opt_noenospc_debug, Opt_noflushoncommit, Opt_acl, Opt_datacow,
@@ -295,6 +296,7 @@ static const match_table_t tokens = {
 	{Opt_discard, "discard"},
 	{Opt_nodiscard, "nodiscard"},
 	{Opt_space_cache, "space_cache"},
+	{Opt_space_cache_version, "space_cache=%s"},
 	{Opt_clear_cache, "clear_cache"},
 	{Opt_user_subvol_rm_allowed, "user_subvol_rm_allowed"},
 	{Opt_enospc_debug, "enospc_debug"},
@@ -339,7 +341,9 @@ int btrfs_parse_options(struct btrfs_root *root, char *options)
 	int no_compress = 0;
 
 	cache_gen = btrfs_super_cache_generation(root->fs_info->super_copy);
-	if (cache_gen)
+	if (btrfs_fs_compat_ro(root->fs_info, FREE_SPACE_TREE))
+		btrfs_set_opt(info->mount_opt, FREE_SPACE_TREE);
+	else if (cache_gen)
 		btrfs_set_opt(info->mount_opt, SPACE_CACHE);
 
 	if (!options)
@@ -586,15 +590,35 @@ int btrfs_parse_options(struct btrfs_root *root, char *options)
 					     "turning off discard");
 			break;
 		case Opt_space_cache:
-			btrfs_set_and_info(root, SPACE_CACHE,
-					   "enabling disk space caching");
+		case Opt_space_cache_version:
+			if (token == Opt_space_cache ||
+			    strcmp(args[0].from, "v1") == 0) {
+				btrfs_clear_opt(root->fs_info->mount_opt,
+						FREE_SPACE_TREE);
+				btrfs_set_and_info(root, SPACE_CACHE,
+						   "enabling disk space caching");
+			} else if (strcmp(args[0].from, "v2") == 0) {
+				btrfs_clear_opt(root->fs_info->mount_opt,
+						SPACE_CACHE);
+				btrfs_set_and_info(root, FREE_SPACE_TREE,
+						   "enabling free space tree");
+			} else {
+				ret = -EINVAL;
+				goto out;
+			}
 			break;
 		case Opt_rescan_uuid_tree:
 			btrfs_set_opt(info->mount_opt, RESCAN_UUID_TREE);
 			break;
 		case Opt_no_space_cache:
-			btrfs_clear_and_info(root, SPACE_CACHE,
-					     "disabling disk space caching");
+			if (btrfs_test_opt(root, SPACE_CACHE)) {
+				btrfs_clear_and_info(root, SPACE_CACHE,
+						     "disabling disk space caching");
+			}
+			if (btrfs_test_opt(root, FREE_SPACE_TREE)) {
+				btrfs_clear_and_info(root, FREE_SPACE_TREE,
+						     "disabling free space tree");
+			}
 			break;
 		case Opt_inode_cache:
 			btrfs_set_pending_and_info(info, INODE_MAP_CACHE,
@@ -728,8 +752,16 @@ int btrfs_parse_options(struct btrfs_root *root, char *options)
 		}
 	}
 out:
+	if (btrfs_fs_compat_ro(root->fs_info, FREE_SPACE_TREE) &&
+	    !btrfs_test_opt(root, FREE_SPACE_TREE) &&
+	    !btrfs_test_opt(root, CLEAR_CACHE)) {
+		 
+		btrfs_set_and_info(root, FREE_SPACE_TREE, "enabling free space tree");
+	}
 	if (!ret && btrfs_test_opt(root, SPACE_CACHE))
 		btrfs_info(root->fs_info, "disk space caching is enabled");
+	if (!ret && btrfs_test_opt(root, FREE_SPACE_TREE))
+		btrfs_info(root->fs_info, "using free space tree");
 	kfree(orig);
 	return ret;
 }
@@ -1120,6 +1152,8 @@ static int btrfs_show_options(struct seq_file *seq, struct dentry *dentry)
 		seq_puts(seq, ",noacl");
 	if (btrfs_test_opt(root, SPACE_CACHE))
 		seq_puts(seq, ",space_cache");
+	else if (btrfs_test_opt(root, FREE_SPACE_TREE))
+		seq_puts(seq, ",space_cache=v2");
 	else
 		seq_puts(seq, ",nospace_cache");
 	if (btrfs_test_opt(root, RESCAN_UUID_TREE))
@@ -2096,25 +2130,79 @@ static long btrfs_nr_cached_objects(struct super_block *sb, struct shrink_contro
 	return (long)atomic_read(&btrfs_sb(sb)->nr_extent_maps);
 }
 
+enum btrfs_free_extent_map_type {
+	LOOP_FREE_EXTENT_NOT_MODIFIED = 1,
+	LOOP_FREE_EXTENT_MODIFIED = 2,
+	LOOP_FREE_EXTENT_END = 3,
+};
 static int btrfs_drop_extent_maps(struct inode *inode, int nr_to_drop)
 {
-	struct extent_map *em;
+	struct extent_map *em, *next_em = NULL;
 	struct extent_map_tree *em_tree = &BTRFS_I(inode)->extent_tree;
+	struct btrfs_root *root = BTRFS_I(inode)->root;
 	int dropped = 0;
-	u64 start = 0;
+	u64 test_gen;
+	struct list_head *head = NULL;
+	int stage = 0;
 
-	while (nr_to_drop--) {
+	while (nr_to_drop) {
 		write_lock(&em_tree->lock);
-		em = lookup_extent_mapping(em_tree, start, (u64)-1);
-		if (!em) {
+		test_gen = root->fs_info->last_trans_committed;
+
+		if (next_em == NULL) {
+			stage++;
+		}
+
+		if (stage >= LOOP_FREE_EXTENT_END) {
 			write_unlock(&em_tree->lock);
 			break;
 		}
-		start = em->start + em->len;
+		if (stage == LOOP_FREE_EXTENT_NOT_MODIFIED) {
+			head = &em_tree->not_modified_extents;
+		} else if (stage == LOOP_FREE_EXTENT_MODIFIED) {
+			head = &em_tree->syno_modified_extents;
+		} else {
+			write_unlock(&em_tree->lock);
+			break;
+		}
+
+		if (next_em != NULL && !extent_map_in_tree(next_em)) {
+			free_extent_map(next_em);
+			next_em = NULL;
+		}
+
+		if (next_em == NULL) {
+			if (list_empty(head)) {
+				write_unlock(&em_tree->lock);
+				continue;
+			}
+			em = list_entry(head->next, struct extent_map, free_list);
+			atomic_inc(&em->refs);
+			next_em = list_entry(em->free_list.next, struct extent_map, free_list);
+		} else {
+			em = next_em;
+			next_em = list_entry(em->free_list.next, struct extent_map, free_list);
+		}
+
+		if (&next_em->free_list == head) {
+			next_em = NULL;
+		}
+		if (next_em) {
+			atomic_inc(&next_em->refs);
+		}
 		if (test_bit(EXTENT_FLAG_PINNED, &em->flags)) {
 			free_extent_map(em);
 			write_unlock(&em_tree->lock);
 			continue;
+		}
+		if (!list_empty(&em->list) && em->generation > test_gen) {
+			free_extent_map(em);
+			write_unlock(&em_tree->lock);
+			if (stage == LOOP_FREE_EXTENT_MODIFIED) {
+				break;
+			} else {
+				continue;
+			}
 		}
 		remove_extent_mapping(em_tree, em);
 		write_unlock(&em_tree->lock);
@@ -2123,6 +2211,11 @@ static int btrfs_drop_extent_maps(struct inode *inode, int nr_to_drop)
 		 
 		free_extent_map(em);
 		dropped++;
+		nr_to_drop--;
+	}
+	if (next_em) {
+		 
+		free_extent_map(next_em);
 	}
 	return dropped;
 }
@@ -2275,6 +2368,9 @@ static int btrfs_run_sanity_tests(void)
 	if (ret)
 		goto out;
 	ret = btrfs_test_qgroups();
+	if (ret)
+		goto out;
+	ret = btrfs_test_free_space_tree();
 out:
 	btrfs_destroy_test_fs();
 	return ret;

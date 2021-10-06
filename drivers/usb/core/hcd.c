@@ -1002,12 +1002,12 @@ static int usb_register_bus(struct usb_bus *bus)
 		break;
 	case HCD_USB3:
 	case HCD_USB31:
-		if (0 == strncmp(bus->bus_name, "xhci-hcd.4.auto", 15)) {
+		if (0 == strncmp(bus->bus_name, "xhci-hcd.2.auto", 15)) {
 			if (usb_hcd_is_primary_hcd(usb_hcd))
 				busnum = 2;
 			else
 				busnum = 3;
-		} else if (0 == strncmp(bus->bus_name, "xhci-hcd.7.auto", 15)) {
+		} else if (0 == strncmp(bus->bus_name, "xhci-hcd.5.auto", 15)) {
 			if (usb_hcd_is_primary_hcd(usb_hcd))
 				busnum = 4;
 			else
@@ -2709,17 +2709,39 @@ static void usb_put_invalidate_rhdev(struct usb_hcd *hcd)
 }
 
 /**
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+ * usb_add_hcd_with_phy_name - finish generic HCD structure initialization
+ * and register with generic phy name
+#else // CONFIG_SYNO_LSP_ARMADA_17_04_02
  * usb_add_hcd - finish generic HCD structure initialization and register
+#endif // CONFIG_SYNO_LSP_ARMADA_17_04_02
  * @hcd: the usb_hcd structure to initialize
  * @irqnum: Interrupt line to allocate
  * @irqflags: Interrupt type flags
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+ * @phy_name: generic phy name
+#endif // CONFIG_SYNO_LSP_ARMADA_17_04_02
  *
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+ * Finish the remaining parts of generic HCD initialization with generic phy
+ * name: allocate the buffers of consistent memory, register the bus,
+ * request the IRQ line, and call the driver's reset() and start() routines.
+#else // CONFIG_SYNO_LSP_ARMADA_17_04_02
  * Finish the remaining parts of generic HCD initialization: allocate the
  * buffers of consistent memory, register the bus, request the IRQ line,
  * and call the driver's reset() and start() routines.
+#endif // CONFIG_SYNO_LSP_ARMADA_17_04_02
  */
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+int usb_add_hcd_with_phy_name(struct usb_hcd *hcd,
+			      unsigned int irqnum,
+			      unsigned long irqflags,
+			      const char *phy_name)
+
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 int usb_add_hcd(struct usb_hcd *hcd,
 		unsigned int irqnum, unsigned long irqflags)
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 {
 	int retval;
 	struct usb_device *rhdev;
@@ -2743,7 +2765,16 @@ int usb_add_hcd(struct usb_hcd *hcd,
 	}
 
 	if (IS_ENABLED(CONFIG_GENERIC_PHY) && !hcd->phy) {
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+		struct phy *phy;
+
+		if (phy_name == NULL)
+			phy = phy_get(hcd->self.controller, "usb");
+		else
+			phy = phy_get(hcd->self.controller, phy_name);
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 		struct phy *phy = phy_get(hcd->self.controller, "usb");
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 
 		if (IS_ERR(phy)) {
 			retval = PTR_ERR(phy);
@@ -2942,6 +2973,25 @@ err_phy:
 	}
 	return retval;
 }
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+EXPORT_SYMBOL_GPL(usb_add_hcd_with_phy_name);
+
+/**
+ * usb_add_hcd - finish generic HCD structure initialization and register
+ * @hcd: the usb_hcd structure to initialize
+ * @irqnum: Interrupt line to allocate
+ * @irqflags: Interrupt type flags
+ *
+ * Finish the remaining parts of generic HCD initialization: allocate the
+ * buffers of consistent memory, register the bus, request the IRQ line,
+ * and call the driver's reset() and start() routines.
+ */
+int usb_add_hcd(struct usb_hcd *hcd,
+		unsigned int irqnum, unsigned long irqflags)
+{
+	return usb_add_hcd_with_phy_name(hcd, irqnum, irqflags, NULL);
+}
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 EXPORT_SYMBOL_GPL(usb_add_hcd);
 
 /**

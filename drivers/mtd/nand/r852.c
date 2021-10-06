@@ -62,7 +62,11 @@ static inline void r852_write_reg_dword(struct r852_device *dev,
 /* returns pointer to our private structure */
 static inline struct r852_device *r852_get_dev(struct mtd_info *mtd)
 {
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	struct nand_chip *chip = mtd_to_nand(mtd);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct nand_chip *chip = mtd->priv;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	return chip->priv;
 }
 

@@ -914,7 +914,11 @@ static int samsung_gpiolib_register(struct platform_device *pdev,
 		gc = &bank->gpio_chip;
 		gc->base = drvdata->pin_base + bank->pin_base;
 		gc->ngpio = bank->nr_pins;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+		gc->parent = &pdev->dev;
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		gc->dev = &pdev->dev;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		gc->of_node = bank->of_node;
 		gc->label = bank->name;
 

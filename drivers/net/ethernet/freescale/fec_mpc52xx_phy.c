@@ -22,7 +22,11 @@
 
 struct mpc52xx_fec_mdio_priv {
 	struct mpc52xx_fec __iomem *regs;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+//do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	int mdio_irqs[PHY_MAX_ADDR];
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 };
 
 static int mpc52xx_fec_mdio_transfer(struct mii_bus *bus, int phy_id,
@@ -83,8 +87,12 @@ static int mpc52xx_fec_mdio_probe(struct platform_device *of)
 	bus->read = mpc52xx_fec_mdio_read;
 	bus->write = mpc52xx_fec_mdio_write;
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+//do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	/* setup irqs */
 	bus->irq = priv->mdio_irqs;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	/* setup registers */
 	err = of_address_to_resource(np, 0, &res);

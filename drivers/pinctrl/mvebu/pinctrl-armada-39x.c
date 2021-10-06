@@ -22,6 +22,12 @@
 
 #include "pinctrl-mvebu.h"
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#define MVEBU_MPPS_PER_REG	8
+#define MVEBU_MPP_BITS		4
+#define MVEBU_MPP_MASK		0xf
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+
 static void __iomem *mpp_base;
 
 static int armada_39x_mpp_ctrl_get(unsigned pid, unsigned long *config)

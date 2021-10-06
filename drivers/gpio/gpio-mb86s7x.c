@@ -187,7 +187,11 @@ static int mb86s70_gpio_probe(struct platform_device *pdev)
 	gchip->gc.label = dev_name(&pdev->dev);
 	gchip->gc.ngpio = 32;
 	gchip->gc.owner = THIS_MODULE;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	gchip->gc.parent = &pdev->dev;
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	gchip->gc.dev = &pdev->dev;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	gchip->gc.base = -1;
 
 	platform_set_drvdata(pdev, gchip);

@@ -258,7 +258,11 @@ static int wm831x_gpio_probe(struct platform_device *pdev)
 	wm831x_gpio->wm831x = wm831x;
 	wm831x_gpio->gpio_chip = template_chip;
 	wm831x_gpio->gpio_chip.ngpio = wm831x->num_gpio;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	wm831x_gpio->gpio_chip.parent = &pdev->dev;
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	wm831x_gpio->gpio_chip.dev = &pdev->dev;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	if (pdata && pdata->gpio_base)
 		wm831x_gpio->gpio_chip.base = pdata->gpio_base;
 	else

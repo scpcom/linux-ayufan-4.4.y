@@ -694,6 +694,10 @@ struct net_device_ops {
 							 bool proto_down);
 	int			(*ndo_fill_metadata_dst)(struct net_device *dev,
 						       struct sk_buff *skb);
+#if defined(MY_DEF_HERE)
+	void		(*ndo_lan_led_control)(struct net_device *dev,
+							int status);
+#endif  
 };
 
 enum netdev_priv_flags {

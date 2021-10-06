@@ -93,11 +93,7 @@ int proc_nr_dentry(struct ctl_table *table, int write, void __user *buffer,
 #include <asm/word-at-a-time.h>
  
 #ifdef MY_ABC_HERE
-#ifdef MY_DEF_HERE
-int dentry_string_cmp(const unsigned char *cs, const unsigned char *ct, unsigned tcount)
-#else
 inline int dentry_string_cmp(const unsigned char *cs, const unsigned char *ct, unsigned tcount)
-#endif  
 #else
 static inline int dentry_string_cmp(const unsigned char *cs, const unsigned char *ct, unsigned tcount)
 #endif  
@@ -124,11 +120,7 @@ static inline int dentry_string_cmp(const unsigned char *cs, const unsigned char
 #else
 
 #ifdef MY_ABC_HERE
-#ifdef MY_DEF_HERE
-int dentry_string_cmp(const unsigned char *cs, const unsigned char *ct, unsigned tcount)
-#else
 inline int dentry_string_cmp(const unsigned char *cs, const unsigned char *ct, unsigned tcount)
-#endif  
 #else
 static inline int dentry_string_cmp(const unsigned char *cs, const unsigned char *ct, unsigned tcount)
 #endif  
@@ -149,11 +141,7 @@ EXPORT_SYMBOL(dentry_string_cmp);
 #endif  
 
 #ifdef MY_ABC_HERE
-#ifdef MY_DEF_HERE
-int dentry_cmp(const struct dentry *dentry, const unsigned char *ct, unsigned tcount)
-#else
 inline int dentry_cmp(const struct dentry *dentry, const unsigned char *ct, unsigned tcount)
-#endif  
 #else
 static inline int dentry_cmp(const struct dentry *dentry, const unsigned char *ct, unsigned tcount)
 #endif  

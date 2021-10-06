@@ -614,6 +614,14 @@ else
 KBUILD_CFLAGS	+= -O2
 endif
 
+ifeq ($(CONFIG_SYNO_LSP_ARMADA_17_02_02), y)
+ifdef BUILD_TAG
+KBUILD_CFLAGS += -DBUILD_TAG='"Build:$(BUILD_TAG)"'
+else
+KBUILD_CFLAGS += -DBUILD_TAG=''
+endif
+endif # CONFIG_SYNO_LSP_ARMADA_17_02_02
+
 # Tell gcc to never replace conditional load with a non-conditional one
 KBUILD_CFLAGS	+= $(call cc-option,--param=allow-store-data-races=0)
 

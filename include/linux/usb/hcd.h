@@ -313,6 +313,10 @@ extern struct usb_hcd *usb_create_shared_hcd(const struct hc_driver *driver,
 extern struct usb_hcd *usb_get_hcd(struct usb_hcd *hcd);
 extern void usb_put_hcd(struct usb_hcd *hcd);
 extern int usb_hcd_is_primary_hcd(struct usb_hcd *hcd);
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+extern int usb_add_hcd_with_phy_name(struct usb_hcd *hcd,
+		unsigned int irqnum, unsigned long irqflags, const char *phy_name);
+#endif  
 extern int usb_add_hcd(struct usb_hcd *hcd,
 		unsigned int irqnum, unsigned long irqflags);
 extern void usb_remove_hcd(struct usb_hcd *hcd);

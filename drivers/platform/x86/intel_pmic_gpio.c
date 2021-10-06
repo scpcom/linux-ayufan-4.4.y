@@ -274,11 +274,19 @@ static int platform_pmic_gpio_probe(struct platform_device *pdev)
 	pg->chip.base = pdata->gpio_base;
 	pg->chip.ngpio = NUM_GPIO;
 	pg->chip.can_sleep = 1;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	pg->chip.parent = dev;
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	pg->chip.dev = dev;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	mutex_init(&pg->buslock);
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	pg->chip.parent = dev;
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	pg->chip.dev = dev;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	retval = gpiochip_add(&pg->chip);
 	if (retval) {
 		pr_err("Can not add pmic gpio chip\n");

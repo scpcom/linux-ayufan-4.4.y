@@ -220,7 +220,11 @@ static void pch_gpio_setup(struct pch_gpio *chip)
 	struct gpio_chip *gpio = &chip->gpio;
 
 	gpio->label = dev_name(chip->dev);
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	gpio->parent = chip->dev;
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	gpio->dev = chip->dev;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	gpio->owner = THIS_MODULE;
 	gpio->direction_input = pch_gpio_direction_input;
 	gpio->get = pch_gpio_get;

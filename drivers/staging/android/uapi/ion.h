@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * drivers/staging/android/uapi/ion.h
  *
@@ -70,7 +73,7 @@ enum ion_heap_type {
 					 * caches must be managed
 					 * manually
 					 */
-#if defined(CONFIG_ION_RTK_PHOENIX)
+#if defined(CONFIG_ION_RTK_PHOENIX) && defined(MY_DEF_HERE)
 #define ION_FLAG_NONCACHED              (1 << 31)
 #define ION_FLAG_SCPUACC                (1 << 30)
 #define ION_FLAG_ACPUACC                (1 << 29)
@@ -85,7 +88,7 @@ enum ion_heap_type {
 #define ION_USAGE_MMAP_WRITECOMBINE     (1 << 20)
 #define ION_USAGE_ALGO_LAST_FIT         (1 << 19) /* 0:first fit(default), 1:last fit */
 #define ION_USAGE_MASK                  (ION_USAGE_PROTECTED | ION_USAGE_MMAP_NONCACHED | ION_USAGE_MMAP_CACHED | ION_USAGE_MMAP_WRITECOMBINE | ION_USAGE_ALGO_LAST_FIT)
-#endif
+#endif /* defined(CONFIG_ION_RTK_PHOENIX) && defined(MY_DEF_HERE) */
 
 /**
  * DOC: Ion Userspace API
@@ -150,7 +153,7 @@ struct ion_custom_data {
 	unsigned long arg;
 };
 
-#if defined(CONFIG_ION_RTK_PHOENIX)
+#if defined(CONFIG_ION_RTK_PHOENIX) && defined(MY_DEF_HERE)
 #if 1 //20130208 charleslin: support getting physical address
 struct ion_phys_data {
 	ion_user_handle_t handle;
@@ -158,7 +161,7 @@ struct ion_phys_data {
 	unsigned int len;
 };
 #endif
-#endif
+#endif /* defined(CONFIG_ION_RTK_PHOENIX) && defined(MY_DEF_HERE) */
 
 #define ION_IOC_MAGIC		'I'
 
@@ -226,10 +229,10 @@ struct ion_phys_data {
  */
 #define ION_IOC_CUSTOM		_IOWR(ION_IOC_MAGIC, 6, struct ion_custom_data)
 
-#if defined(CONFIG_ION_RTK_PHOENIX)
+#if defined(CONFIG_ION_RTK_PHOENIX) && defined(MY_DEF_HERE)
 #if 1 //20130208 charleslin: support getting physical address
 #define ION_IOC_PHYS _IOWR(ION_IOC_MAGIC, 8, struct ion_phys_data)
 #endif
-#endif
+#endif /* defined(CONFIG_ION_RTK_PHOENIX) && defined(MY_DEF_HERE) */
 
 #endif /* _UAPI_LINUX_ION_H */

@@ -17,6 +17,19 @@
 #if defined(MY_ABC_HERE) && defined(MY_ABC_HERE)
 #include <linux/tty.h>
 #endif  
+#ifdef MY_DEF_HERE
+#include <linux/gpio.h>
+#ifdef MY_ABC_HERE
+extern u32 syno_pch_lpc_gpio_pin(int pin, int *pValue, int isWrite);
+#elif defined(MY_DEF_HERE)
+#include <linux/syno_gpio.h>
+extern SYNO_GPIO syno_gpio;
+extern void SYNO_GPIO_WRITE(int pin, int pValue);
+#endif  
+extern char gSynoUsbVbusHostAddr[CONFIG_SYNO_USB_VBUS_NUM_GPIO][13];
+extern int gSynoUsbVbusPort[CONFIG_SYNO_USB_VBUS_NUM_GPIO];
+extern unsigned gSynoUsbVbusGpp[CONFIG_SYNO_USB_VBUS_NUM_GPIO];
+#endif  
 
 int C_A_D = 1;
 struct pid *cad_pid;
@@ -43,12 +56,37 @@ void emergency_restart(void)
 }
 EXPORT_SYMBOL_GPL(emergency_restart);
 
+#ifdef MY_DEF_HERE
+static void syno_turnoff_all_usb_vbus_gpio(void)
+{
+        int gpio_off_value = 0;
+        int i = 0;
+        for (i = 0; i < CONFIG_SYNO_USB_VBUS_NUM_GPIO; i++) {
+                if (0 != gSynoUsbVbusGpp[i]) {
+#ifdef MY_ABC_HERE
+                        syno_pch_lpc_gpio_pin(gSynoUsbVbusGpp[i],
+                                              &gpio_off_value, 1);
+#elif defined(MY_DEF_HERE)
+                        SYNO_GPIO_WRITE(gSynoUsbVbusGpp[i],
+                                gpio_off_value);
+#endif  
+                        printk(KERN_INFO "Turned off USB vbus gpio %u\n",
+                               gSynoUsbVbusGpp[i]);
+                }
+        }
+}
+#endif  
+
 void kernel_restart_prepare(char *cmd)
 {
 	blocking_notifier_call_chain(&reboot_notifier_list, SYS_RESTART, cmd);
 	system_state = SYSTEM_RESTART;
 	usermodehelper_disable();
 	device_shutdown();
+#ifdef MY_DEF_HERE
+	if (SYSTEM_RESTART == system_state)
+		syno_turnoff_all_usb_vbus_gpio();
+#endif  
 }
 
 int register_reboot_notifier(struct notifier_block *nb)
@@ -116,14 +154,29 @@ static void kernel_shutdown_prepare(enum system_states state)
 	blocking_notifier_call_chain(&reboot_notifier_list,
 		(state == SYSTEM_HALT) ? SYS_HALT : SYS_POWER_OFF, NULL);
 	system_state = state;
+#ifdef MY_DEF_HERE
+	if (state != SYSTEM_POWER_OFF)
+		usermodehelper_disable();
+#else  
 	usermodehelper_disable();
+#endif  
 
-#ifdef CONFIG_ARCH_RTD129X
+#if defined(CONFIG_ARCH_RTD129X) && defined(MY_DEF_HERE)
 	if (state != SYSTEM_POWER_OFF)
 		device_shutdown();
 #else
 	device_shutdown();
 #endif
+#ifdef MY_DEF_HERE
+	if (SYSTEM_POWER_OFF == system_state)
+		syno_turnoff_all_usb_vbus_gpio();
+#endif  
+#if defined(MY_DEF_HERE)
+	 
+	if (syno_is_hw_version(HW_DS718p) || syno_is_hw_version(HW_DS218p)) {
+		SYNO_GPIO_WRITE (PHY_LED_CTRL_PIN(), 0);
+	}
+#endif  
 }
  
 void kernel_halt(void)

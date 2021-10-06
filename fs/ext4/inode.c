@@ -1981,13 +1981,21 @@ retry:
 				done = true;
 			}
 		}
-		ext4_journal_stop(handle);
+		 
+		if (!ext4_handle_valid(handle) || handle->h_sync == 0) {
+			ext4_journal_stop(handle);
+			handle = NULL;
+		}
 		 
 		ext4_io_submit(&mpd.io_submit);
 		 
 		mpage_release_unused_pages(&mpd, give_up_on_write);
 		 
-		ext4_put_io_end(mpd.io_submit.io_end);
+		if (handle) {
+			ext4_put_io_end_defer(mpd.io_submit.io_end);
+			ext4_journal_stop(handle);
+		} else
+			ext4_put_io_end(mpd.io_submit.io_end);
 
 		if (ret == -ENOSPC && sbi->s_journal) {
 			 

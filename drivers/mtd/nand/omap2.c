@@ -270,7 +270,11 @@ static void omap_hwcontrol(struct mtd_info *mtd, int cmd, unsigned int ctrl)
  */
 static void omap_read_buf8(struct mtd_info *mtd, u_char *buf, int len)
 {
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	struct nand_chip *nand = mtd_to_nand(mtd);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct nand_chip *nand = mtd->priv;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	ioread8_rep(nand->IO_ADDR_R, buf, len);
 }
@@ -306,7 +310,11 @@ static void omap_write_buf8(struct mtd_info *mtd, const u_char *buf, int len)
  */
 static void omap_read_buf16(struct mtd_info *mtd, u_char *buf, int len)
 {
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	struct nand_chip *nand = mtd_to_nand(mtd);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct nand_chip *nand = mtd->priv;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	ioread16_rep(nand->IO_ADDR_R, buf, len / 2);
 }
@@ -955,7 +963,11 @@ static void omap_enable_hwecc(struct mtd_info *mtd, int mode)
 {
 	struct omap_nand_info *info = container_of(mtd, struct omap_nand_info,
 							mtd);
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	struct nand_chip *chip = mtd_to_nand(mtd);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct nand_chip *chip = mtd->priv;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	unsigned int dev_width = (chip->options & NAND_BUSWIDTH_16) ? 1 : 0;
 	u32 val;
 
@@ -1001,7 +1013,11 @@ static void omap_enable_hwecc(struct mtd_info *mtd, int mode)
  */
 static int omap_wait(struct mtd_info *mtd, struct nand_chip *chip)
 {
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	struct nand_chip *this = mtd_to_nand(mtd);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct nand_chip *this = mtd->priv;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct omap_nand_info *info = container_of(mtd, struct omap_nand_info,
 							mtd);
 	unsigned long timeo = jiffies;
@@ -1061,7 +1077,11 @@ static void __maybe_unused omap_enable_hwecc_bch(struct mtd_info *mtd, int mode)
 	struct omap_nand_info *info = container_of(mtd, struct omap_nand_info,
 						   mtd);
 	enum omap_ecc ecc_opt = info->ecc_opt;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	struct nand_chip *chip = mtd_to_nand(mtd);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct nand_chip *chip = mtd->priv;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	u32 val, wr_mode;
 	unsigned int ecc_size1, ecc_size0;
 
@@ -1663,7 +1683,11 @@ static int omap_nand_probe(struct platform_device *pdev)
 	unsigned			sig;
 	unsigned			oob_index;
 	struct resource			*res;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+//do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct mtd_part_parser_data	ppdata = {};
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	pdata = dev_get_platdata(&pdev->dev);
 	if (pdata == NULL) {
@@ -1688,6 +1712,9 @@ static int omap_nand_probe(struct platform_device *pdev)
 	mtd->dev.parent		= &pdev->dev;
 	nand_chip		= &info->nand;
 	nand_chip->ecc.priv	= NULL;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	nand_set_flash_node(nand_chip, pdata->of_node);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
 	nand_chip->IO_ADDR_R = devm_ioremap_resource(&pdev->dev, res);
@@ -2037,9 +2064,13 @@ scan_tail:
 		goto return_error;
 	}
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	mtd_device_register(mtd, pdata->parts, pdata->nr_parts);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	ppdata.of_node = pdata->of_node;
 	mtd_device_parse_register(mtd, NULL, &ppdata, pdata->parts,
 				  pdata->nr_parts);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	platform_set_drvdata(pdev, mtd);
 
@@ -2058,7 +2089,11 @@ return_error:
 static int omap_nand_remove(struct platform_device *pdev)
 {
 	struct mtd_info *mtd = platform_get_drvdata(pdev);
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	struct nand_chip *nand_chip = mtd_to_nand(mtd);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct nand_chip *nand_chip = mtd->priv;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct omap_nand_info *info = container_of(mtd, struct omap_nand_info,
 							mtd);
 	if (nand_chip->ecc.priv) {

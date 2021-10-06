@@ -34,7 +34,11 @@ struct mdio_mux_child_bus {
 	struct mdio_mux_parent_bus *parent;
 	struct mdio_mux_child_bus *next;
 	int bus_number;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+//do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	int phy_irq[PHY_MAX_ADDR];
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 };
 
 /*
@@ -157,7 +161,11 @@ int mdio_mux_init(struct device *dev,
 			break;
 		}
 		cb->mii_bus->priv = cb;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		cb->mii_bus->irq = cb->phy_irq;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		cb->mii_bus->name = "mdio_mux";
 		snprintf(cb->mii_bus->id, MII_BUS_ID_SIZE, "%x.%x",
 			 pb->parent_id, v);

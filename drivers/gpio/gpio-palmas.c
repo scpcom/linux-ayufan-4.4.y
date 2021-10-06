@@ -54,7 +54,11 @@ static int palmas_gpio_get(struct gpio_chip *gc, unsigned offset)
 
 	ret = palmas_read(palmas, PALMAS_GPIO_BASE, reg, &val);
 	if (ret < 0) {
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+		dev_err(gc->parent, "Reg 0x%02x read failed, %d\n", reg, ret);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		dev_err(gc->dev, "Reg 0x%02x read failed, %d\n", reg, ret);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		return ret;
 	}
 
@@ -65,7 +69,11 @@ static int palmas_gpio_get(struct gpio_chip *gc, unsigned offset)
 
 	ret = palmas_read(palmas, PALMAS_GPIO_BASE, reg, &val);
 	if (ret < 0) {
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+		dev_err(gc->parent, "Reg 0x%02x read failed, %d\n", reg, ret);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		dev_err(gc->dev, "Reg 0x%02x read failed, %d\n", reg, ret);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		return ret;
 	}
 	return !!(val & BIT(offset));
@@ -90,7 +98,11 @@ static void palmas_gpio_set(struct gpio_chip *gc, unsigned offset,
 
 	ret = palmas_write(palmas, PALMAS_GPIO_BASE, reg, BIT(offset));
 	if (ret < 0)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+		dev_err(gc->parent, "Reg 0x%02x write failed, %d\n", reg, ret);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		dev_err(gc->dev, "Reg 0x%02x write failed, %d\n", reg, ret);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 }
 
 static int palmas_gpio_output(struct gpio_chip *gc, unsigned offset,
@@ -111,7 +123,12 @@ static int palmas_gpio_output(struct gpio_chip *gc, unsigned offset,
 	ret = palmas_update_bits(palmas, PALMAS_GPIO_BASE, reg,
 				BIT(offset), BIT(offset));
 	if (ret < 0)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+		dev_err(gc->parent, "Reg 0x%02x update failed, %d\n", reg,
+			ret);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		dev_err(gc->dev, "Reg 0x%02x update failed, %d\n", reg, ret);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	return ret;
 }
 
@@ -128,7 +145,12 @@ static int palmas_gpio_input(struct gpio_chip *gc, unsigned offset)
 
 	ret = palmas_update_bits(palmas, PALMAS_GPIO_BASE, reg, BIT(offset), 0);
 	if (ret < 0)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+		dev_err(gc->parent, "Reg 0x%02x update failed, %d\n", reg,
+			ret);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		dev_err(gc->dev, "Reg 0x%02x update failed, %d\n", reg, ret);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	return ret;
 }
 
@@ -188,7 +210,11 @@ static int palmas_gpio_probe(struct platform_device *pdev)
 	palmas_gpio->gpio_chip.to_irq = palmas_gpio_to_irq;
 	palmas_gpio->gpio_chip.set	= palmas_gpio_set;
 	palmas_gpio->gpio_chip.get	= palmas_gpio_get;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	palmas_gpio->gpio_chip.parent = &pdev->dev;
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	palmas_gpio->gpio_chip.dev = &pdev->dev;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 #ifdef CONFIG_OF_GPIO
 	palmas_gpio->gpio_chip.of_node = pdev->dev.of_node;
 #endif

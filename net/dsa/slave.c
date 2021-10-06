@@ -15,6 +15,9 @@
 #include <linux/phy_fixed.h>
 #include <linux/of_net.h>
 #include <linux/of_mdio.h>
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#include <linux/mdio.h>
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 #include <net/rtnetlink.h>
 #include <net/switchdev.h>
 #include <linux/if_bridge.h>
@@ -48,9 +51,15 @@ void dsa_slave_mii_bus_init(struct dsa_switch *ds)
 	ds->slave_mii_bus->name = "dsa slave smi";
 	ds->slave_mii_bus->read = dsa_slave_phy_read;
 	ds->slave_mii_bus->write = dsa_slave_phy_write;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	snprintf(ds->slave_mii_bus->id, MII_BUS_ID_SIZE, "dsa-%d.%d",
+		 ds->dst->tree, ds->index);
+	ds->slave_mii_bus->parent = ds->dev;
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	snprintf(ds->slave_mii_bus->id, MII_BUS_ID_SIZE, "dsa-%d:%.2x",
 			ds->index, ds->pd->sw_addr);
 	ds->slave_mii_bus->parent = ds->master_dev;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	ds->slave_mii_bus->phy_mask = ~ds->phys_mii_mask;
 }
 
@@ -102,8 +111,13 @@ static int dsa_slave_open(struct net_device *dev)
 			goto clear_promisc;
 	}
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	if (ds->drv->port_stp_state_set)
+		ds->drv->port_stp_state_set(ds, p->port, stp_state);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	if (ds->drv->port_stp_update)
 		ds->drv->port_stp_update(ds, p->port, stp_state);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	if (p->phy)
 		phy_start(p->phy);
@@ -145,8 +159,13 @@ static int dsa_slave_close(struct net_device *dev)
 	if (ds->drv->port_disable)
 		ds->drv->port_disable(ds, p->port, p->phy);
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	if (ds->drv->port_stp_state_set)
+		ds->drv->port_stp_state_set(ds, p->port, BR_STATE_DISABLED);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	if (ds->drv->port_stp_update)
 		ds->drv->port_stp_update(ds, p->port, BR_STATE_DISABLED);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	return 0;
 }
@@ -199,6 +218,9 @@ out:
 	return 0;
 }
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+//do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 static int dsa_bridge_check_vlan_range(struct dsa_switch *ds,
 				       const struct net_device *bridge,
 				       u16 vid_begin, u16 vid_end)
@@ -239,6 +261,7 @@ static int dsa_bridge_check_vlan_range(struct dsa_switch *ds,
 
 	return err == -ENOENT ? 0 : err;
 }
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 static int dsa_slave_port_vlan_add(struct net_device *dev,
 				   const struct switchdev_obj_port_vlan *vlan,
@@ -246,12 +269,19 @@ static int dsa_slave_port_vlan_add(struct net_device *dev,
 {
 	struct dsa_slave_priv *p = netdev_priv(dev);
 	struct dsa_switch *ds = p->parent;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+//do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	int err;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	if (switchdev_trans_ph_prepare(trans)) {
 		if (!ds->drv->port_vlan_prepare || !ds->drv->port_vlan_add)
 			return -EOPNOTSUPP;
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+		return ds->drv->port_vlan_prepare(ds, p->port, vlan, trans);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		/* If the requested port doesn't belong to the same bridge as
 		 * the VLAN members, fallback to software VLAN (hopefully).
 		 */
@@ -268,7 +298,12 @@ static int dsa_slave_port_vlan_add(struct net_device *dev,
 		err = ds->drv->port_vlan_add(ds, p->port, vlan, trans);
 		if (err)
 			return err;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	}
+
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	ds->drv->port_vlan_add(ds, p->port, vlan, trans);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	return 0;
 }
@@ -291,6 +326,13 @@ static int dsa_slave_port_vlan_dump(struct net_device *dev,
 {
 	struct dsa_slave_priv *p = netdev_priv(dev);
 	struct dsa_switch *ds = p->parent;
+
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	if (ds->drv->port_vlan_dump)
+		return ds->drv->port_vlan_dump(ds, p->port, vlan, cb);
+
+	return -EOPNOTSUPP;
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	DECLARE_BITMAP(members, DSA_MAX_PORTS);
 	DECLARE_BITMAP(untagged, DSA_MAX_PORTS);
 	u16 pvid, vid = 0;
@@ -326,6 +368,7 @@ static int dsa_slave_port_vlan_dump(struct net_device *dev,
 	}
 
 	return err == -ENOENT ? 0 : err;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 }
 
 static int dsa_slave_port_fdb_add(struct net_device *dev,
@@ -334,6 +377,19 @@ static int dsa_slave_port_fdb_add(struct net_device *dev,
 {
 	struct dsa_slave_priv *p = netdev_priv(dev);
 	struct dsa_switch *ds = p->parent;
+
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	if (switchdev_trans_ph_prepare(trans)) {
+		if (!ds->drv->port_fdb_prepare || !ds->drv->port_fdb_add)
+			return -EOPNOTSUPP;
+
+		return ds->drv->port_fdb_prepare(ds, p->port, fdb, trans);
+	}
+
+	ds->drv->port_fdb_add(ds, p->port, fdb, trans);
+
+	return 0;
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	int ret;
 
 	if (!ds->drv->port_fdb_prepare || !ds->drv->port_fdb_add)
@@ -345,6 +401,7 @@ static int dsa_slave_port_fdb_add(struct net_device *dev,
 		ret = ds->drv->port_fdb_add(ds, p->port, fdb, trans);
 
 	return ret;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 }
 
 static int dsa_slave_port_fdb_del(struct net_device *dev,
@@ -383,6 +440,22 @@ static int dsa_slave_ioctl(struct net_device *dev, struct ifreq *ifr, int cmd)
 	return -EOPNOTSUPP;
 }
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+static int dsa_slave_stp_state_set(struct net_device *dev,
+				   const struct switchdev_attr *attr,
+				   struct switchdev_trans *trans)
+{
+	struct dsa_slave_priv *p = netdev_priv(dev);
+	struct dsa_switch *ds = p->parent;
+
+	if (switchdev_trans_ph_prepare(trans))
+		return ds->drv->port_stp_state_set ? 0 : -EOPNOTSUPP;
+
+	ds->drv->port_stp_state_set(ds, p->port, attr->u.stp_state);
+
+	return 0;
+}
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 /* Return a bitmask of all ports being currently bridged within a given bridge
  * device. Note that on leave, the mask will still return the bitmask of ports
  * currently bridged, prior to port removal, and this is exactly what we want.
@@ -407,7 +480,27 @@ static u32 dsa_slave_br_port_mask(struct dsa_switch *ds,
 
 	return mask;
 }
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+static int dsa_slave_vlan_filtering(struct net_device *dev,
+				    const struct switchdev_attr *attr,
+				    struct switchdev_trans *trans)
+{
+	struct dsa_slave_priv *p = netdev_priv(dev);
+	struct dsa_switch *ds = p->parent;
+
+	/* bridge skips -EOPNOTSUPP, so skip the prepare phase */
+	if (switchdev_trans_ph_prepare(trans))
+		return 0;
+
+	if (ds->drv->port_vlan_filtering)
+		return ds->drv->port_vlan_filtering(ds, p->port,
+						    attr->u.vlan_filtering);
+
+	return 0;
+}
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 static int dsa_slave_stp_update(struct net_device *dev, u8 state)
 {
 	struct dsa_slave_priv *p = netdev_priv(dev);
@@ -419,16 +512,29 @@ static int dsa_slave_stp_update(struct net_device *dev, u8 state)
 
 	return ret;
 }
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 static int dsa_slave_port_attr_set(struct net_device *dev,
 				   const struct switchdev_attr *attr,
 				   struct switchdev_trans *trans)
 {
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+//do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct dsa_slave_priv *p = netdev_priv(dev);
 	struct dsa_switch *ds = p->parent;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	int ret;
 
 	switch (attr->id) {
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	case SWITCHDEV_ATTR_ID_PORT_STP_STATE:
+		ret = dsa_slave_stp_state_set(dev, attr, trans);
+		break;
+	case SWITCHDEV_ATTR_ID_BRIDGE_VLAN_FILTERING:
+		ret = dsa_slave_vlan_filtering(dev, attr, trans);
+		break;
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	case SWITCHDEV_ATTR_ID_PORT_STP_STATE:
 		if (switchdev_trans_ph_prepare(trans))
 			ret = ds->drv->port_stp_update ? 0 : -EOPNOTSUPP;
@@ -436,6 +542,7 @@ static int dsa_slave_port_attr_set(struct net_device *dev,
 			ret = ds->drv->port_stp_update(ds, p->port,
 						       attr->u.stp_state);
 		break;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	default:
 		ret = -EOPNOTSUPP;
 		break;
@@ -530,13 +637,38 @@ static int dsa_slave_bridge_port_join(struct net_device *dev,
 
 	p->bridge_dev = br;
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	if (ds->drv->port_bridge_join)
+		ret = ds->drv->port_bridge_join(ds, p->port, br);
+
+	return ret == -EOPNOTSUPP ? 0 : ret;
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	if (ds->drv->port_join_bridge)
 		ret = ds->drv->port_join_bridge(ds, p->port,
 						dsa_slave_br_port_mask(ds, br));
 
 	return ret;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 }
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+static void dsa_slave_bridge_port_leave(struct net_device *dev)
+{
+	struct dsa_slave_priv *p = netdev_priv(dev);
+	struct dsa_switch *ds = p->parent;
+
+	if (ds->drv->port_bridge_leave)
+		ds->drv->port_bridge_leave(ds, p->port);
+
+	p->bridge_dev = NULL;
+
+	/* Port left the bridge, put in BR_STATE_DISABLED by the bridge layer,
+	 * so allow it to be in BR_STATE_FORWARDING to be kept functional
+	 */
+	if (ds->drv->port_stp_state_set)
+		ds->drv->port_stp_state_set(ds, p->port, BR_STATE_FORWARDING);
+}
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 static int dsa_slave_bridge_port_leave(struct net_device *dev)
 {
 	struct dsa_slave_priv *p = netdev_priv(dev);
@@ -556,6 +688,7 @@ static int dsa_slave_bridge_port_leave(struct net_device *dev)
 
 	return ret;
 }
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 static int dsa_slave_port_attr_get(struct net_device *dev,
 				   struct switchdev_attr *attr)
@@ -615,12 +748,16 @@ static netdev_tx_t dsa_slave_xmit(struct sk_buff *skb, struct net_device *dev)
 	return NETDEV_TX_OK;
 }
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+//do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 static struct sk_buff *dsa_slave_notag_xmit(struct sk_buff *skb,
 					    struct net_device *dev)
 {
 	/* Just return the original SKB */
 	return skb;
 }
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 /* ethtool operations *******************************************************/
 static int
@@ -707,8 +844,13 @@ static int dsa_slave_get_eeprom_len(struct net_device *dev)
 	struct dsa_slave_priv *p = netdev_priv(dev);
 	struct dsa_switch *ds = p->parent;
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	if (ds->cd && ds->cd->eeprom_len)
+		return ds->cd->eeprom_len;
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	if (ds->pd->eeprom_len)
 		return ds->pd->eeprom_len;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	if (ds->drv->get_eeprom_len)
 		return ds->drv->get_eeprom_len(ds);
@@ -758,6 +900,80 @@ static void dsa_slave_get_strings(struct net_device *dev,
 	}
 }
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+static void dsa_cpu_port_get_ethtool_stats(struct net_device *dev,
+					   struct ethtool_stats *stats,
+					   uint64_t *data)
+{
+	struct dsa_switch_tree *dst = dev->dsa_ptr;
+	struct dsa_switch *ds = dst->ds[0];
+	s8 cpu_port = dst->cpu_port;
+	int count = 0;
+
+	if (dst->master_ethtool_ops.get_sset_count) {
+		count = dst->master_ethtool_ops.get_sset_count(dev,
+							       ETH_SS_STATS);
+		dst->master_ethtool_ops.get_ethtool_stats(dev, stats, data);
+	}
+
+	if (ds->drv->get_ethtool_stats)
+		ds->drv->get_ethtool_stats(ds, cpu_port, data + count);
+}
+
+static int dsa_cpu_port_get_sset_count(struct net_device *dev, int sset)
+{
+	struct dsa_switch_tree *dst = dev->dsa_ptr;
+	struct dsa_switch *ds = dst->ds[0];
+	int count = 0;
+
+	if (dst->master_ethtool_ops.get_sset_count)
+		count += dst->master_ethtool_ops.get_sset_count(dev, sset);
+
+	if (sset == ETH_SS_STATS && ds->drv->get_sset_count)
+		count += ds->drv->get_sset_count(ds);
+
+	return count;
+}
+
+static void dsa_cpu_port_get_strings(struct net_device *dev,
+				     uint32_t stringset, uint8_t *data)
+{
+	struct dsa_switch_tree *dst = dev->dsa_ptr;
+	struct dsa_switch *ds = dst->ds[0];
+	s8 cpu_port = dst->cpu_port;
+	int len = ETH_GSTRING_LEN;
+	int mcount = 0, count;
+	unsigned int i;
+	uint8_t pfx[4];
+	uint8_t *ndata;
+
+	snprintf(pfx, sizeof(pfx), "p%.2d", cpu_port);
+	/* We do not want to be NULL-terminated, since this is a prefix */
+	pfx[sizeof(pfx) - 1] = '_';
+
+	if (dst->master_ethtool_ops.get_sset_count) {
+		mcount = dst->master_ethtool_ops.get_sset_count(dev,
+								ETH_SS_STATS);
+		dst->master_ethtool_ops.get_strings(dev, stringset, data);
+	}
+
+	if (stringset == ETH_SS_STATS && ds->drv->get_strings) {
+		ndata = data + mcount * len;
+		/* This function copies ETH_GSTRINGS_LEN bytes, we will mangle
+		 * the output after to prepend our CPU port prefix we
+		 * constructed earlier
+		 */
+		ds->drv->get_strings(ds, cpu_port, ndata);
+		count = ds->drv->get_sset_count(ds);
+		for (i = 0; i < count; i++) {
+			memmove(ndata + (i * len + sizeof(pfx)),
+				ndata + i * len, len - sizeof(pfx));
+			memcpy(ndata + i * len, pfx, sizeof(pfx));
+		}
+	}
+}
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+
 static void dsa_slave_get_ethtool_stats(struct net_device *dev,
 					struct ethtool_stats *stats,
 					uint64_t *data)
@@ -765,10 +981,17 @@ static void dsa_slave_get_ethtool_stats(struct net_device *dev,
 	struct dsa_slave_priv *p = netdev_priv(dev);
 	struct dsa_switch *ds = p->parent;
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	data[0] = dev->stats.tx_packets;
+	data[1] = dev->stats.tx_bytes;
+	data[2] = dev->stats.rx_packets;
+	data[3] = dev->stats.rx_bytes;
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	data[0] = p->dev->stats.tx_packets;
 	data[1] = p->dev->stats.tx_bytes;
 	data[2] = p->dev->stats.rx_packets;
 	data[3] = p->dev->stats.rx_bytes;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	if (ds->drv->get_ethtool_stats != NULL)
 		ds->drv->get_ethtool_stats(ds, p->port, data + 4);
 }
@@ -893,6 +1116,15 @@ static void dsa_slave_poll_controller(struct net_device *dev)
 }
 #endif
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+void dsa_cpu_port_ethtool_init(struct ethtool_ops *ops)
+{
+	ops->get_sset_count = dsa_cpu_port_get_sset_count;
+	ops->get_ethtool_stats = dsa_cpu_port_get_ethtool_stats;
+	ops->get_strings = dsa_cpu_port_get_strings;
+}
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+
 static const struct ethtool_ops dsa_slave_ethtool_ops = {
 	.get_settings		= dsa_slave_get_settings,
 	.set_settings		= dsa_slave_set_settings,
@@ -978,11 +1210,23 @@ static void dsa_slave_adjust_link(struct net_device *dev)
 static int dsa_slave_fixed_link_update(struct net_device *dev,
 				       struct fixed_phy_status *status)
 {
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	struct dsa_slave_priv *p;
+	struct dsa_switch *ds;
+
+	if (dev) {
+		p = netdev_priv(dev);
+		ds = p->parent;
+		if (ds->drv->fixed_link_update)
+			ds->drv->fixed_link_update(ds, p->port, status);
+	}
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct dsa_slave_priv *p = netdev_priv(dev);
 	struct dsa_switch *ds = p->parent;
 
 	if (ds->drv->fixed_link_update)
 		ds->drv->fixed_link_update(ds, p->port, status);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	return 0;
 }
@@ -994,7 +1238,11 @@ static int dsa_slave_phy_connect(struct dsa_slave_priv *p,
 {
 	struct dsa_switch *ds = p->parent;
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	p->phy = mdiobus_get_phy(ds->slave_mii_bus, addr);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	p->phy = ds->slave_mii_bus->phy_map[addr];
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	if (!p->phy) {
 		netdev_err(slave_dev, "no phy at %d\n", addr);
 		return -ENODEV;
@@ -1013,13 +1261,21 @@ static int dsa_slave_phy_setup(struct dsa_slave_priv *p,
 				struct net_device *slave_dev)
 {
 	struct dsa_switch *ds = p->parent;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+//do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct dsa_chip_data *cd = ds->pd;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct device_node *phy_dn, *port_dn;
 	bool phy_is_fixed = false;
 	u32 phy_flags = 0;
 	int mode, ret;
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	port_dn = ds->ports[p->port].dn;
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	port_dn = cd->port_dn[p->port];
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	mode = of_get_phy_mode(port_dn);
 	if (mode < 0)
 		mode = PHY_INTERFACE_MODE_NA;
@@ -1077,10 +1333,18 @@ static int dsa_slave_phy_setup(struct dsa_slave_priv *p,
 			netdev_err(slave_dev, "failed to connect to port %d: %d\n", p->port, ret);
 			return ret;
 		}
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+//do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	} else {
 		netdev_info(slave_dev, "attached PHY at address %d [%s]\n",
 			    p->phy->addr, p->phy->drv->name);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	}
+
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	phy_attached_info(p->phy);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	return 0;
 }
@@ -1123,6 +1387,72 @@ int dsa_slave_resume(struct net_device *slave_dev)
 	return 0;
 }
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+int dsa_slave_create(struct dsa_switch *ds, struct device *parent,
+		     int port, const char *name)
+{
+	struct dsa_switch_tree *dst = ds->dst;
+	struct net_device *master;
+	struct net_device *slave_dev;
+	struct dsa_slave_priv *p;
+	int ret;
+
+	master = ds->dst->master_netdev;
+	if (ds->master_netdev)
+		master = ds->master_netdev;
+	
+	slave_dev = alloc_netdev(sizeof(struct dsa_slave_priv), name,
+				 NET_NAME_UNKNOWN, ether_setup);
+	if (slave_dev == NULL)
+		return -ENOMEM;
+
+	slave_dev->features = master->vlan_features;
+	slave_dev->ethtool_ops = &dsa_slave_ethtool_ops;
+	eth_hw_addr_inherit(slave_dev, master);
+	slave_dev->priv_flags |= IFF_NO_QUEUE;
+	slave_dev->netdev_ops = &dsa_slave_netdev_ops;
+	slave_dev->switchdev_ops = &dsa_slave_switchdev_ops;
+	SET_NETDEV_DEVTYPE(slave_dev, &dsa_type);
+
+	netdev_for_each_tx_queue(slave_dev, dsa_slave_set_lockdep_class_one,
+				 NULL);
+
+	SET_NETDEV_DEV(slave_dev, parent);
+	slave_dev->dev.of_node = ds->ports[port].dn;
+	slave_dev->vlan_features = master->vlan_features;
+
+	p = netdev_priv(slave_dev);
+	p->parent = ds;
+	p->port = port;
+	p->xmit = dst->tag_ops->xmit;
+
+	p->old_pause = -1;
+	p->old_link = -1;
+	p->old_duplex = -1;
+
+	ds->ports[port].netdev = slave_dev;
+	ret = register_netdev(slave_dev);
+	if (ret) {
+		netdev_err(master, "error %d registering interface %s\n",
+			   ret, slave_dev->name);
+		ds->ports[port].netdev = NULL;
+		free_netdev(slave_dev);
+		return ret;
+	}
+
+	netif_carrier_off(slave_dev);
+
+	ret = dsa_slave_phy_setup(p, slave_dev);
+	if (ret) {
+		netdev_err(master, "error %d setting up slave phy\n", ret);
+		unregister_netdev(slave_dev);
+		free_netdev(slave_dev);
+		return ret;
+	}
+
+	return 0;
+}
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 int dsa_slave_create(struct dsa_switch *ds, struct device *parent,
 		     int port, char *name)
 {
@@ -1208,12 +1538,49 @@ int dsa_slave_create(struct dsa_switch *ds, struct device *parent,
 
 	return 0;
 }
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+void dsa_slave_destroy(struct net_device *slave_dev)
+{
+	struct dsa_slave_priv *p = netdev_priv(slave_dev);
+
+	netif_carrier_off(slave_dev);
+	if (p->phy)
+		phy_disconnect(p->phy);
+	unregister_netdev(slave_dev);
+	free_netdev(slave_dev);
+}
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 static bool dsa_slave_dev_check(struct net_device *dev)
 {
 	return dev->netdev_ops == &dsa_slave_netdev_ops;
 }
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+static int dsa_slave_port_upper_event(struct net_device *dev,
+				      unsigned long event, void *ptr)
+{
+	struct netdev_notifier_changeupper_info *info = ptr;
+	struct net_device *upper = info->upper_dev;
+	int err = 0;
+
+	switch (event) {
+	case NETDEV_CHANGEUPPER:
+		if (netif_is_bridge_master(upper)) {
+			if (info->linking)
+				err = dsa_slave_bridge_port_join(dev, upper);
+			else
+				dsa_slave_bridge_port_leave(dev);
+		}
+
+		break;
+	}
+
+	return notifier_from_errno(err);
+}
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 static int dsa_slave_master_changed(struct net_device *dev)
 {
 	struct net_device *master = netdev_master_upper_dev_get(dev);
@@ -1228,7 +1595,31 @@ static int dsa_slave_master_changed(struct net_device *dev)
 
 	return err;
 }
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+static int dsa_slave_port_event(struct net_device *dev, unsigned long event,
+				void *ptr)
+{
+	switch (event) {
+	case NETDEV_CHANGEUPPER:
+		return dsa_slave_port_upper_event(dev, event, ptr);
+	}
+
+	return NOTIFY_DONE;
+}
+
+int dsa_slave_netdevice_event(struct notifier_block *unused,
+			      unsigned long event, void *ptr)
+{
+	struct net_device *dev = netdev_notifier_info_to_dev(ptr);
+
+	if (dsa_slave_dev_check(dev))
+		return dsa_slave_port_event(dev, event, ptr);
+
+	return NOTIFY_DONE;
+}
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 int dsa_slave_netdevice_event(struct notifier_block *unused,
 			      unsigned long event, void *ptr)
 {
@@ -1251,3 +1642,4 @@ int dsa_slave_netdevice_event(struct notifier_block *unused,
 out:
 	return NOTIFY_DONE;
 }
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */

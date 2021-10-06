@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  step_wise.c - A step-by-step Thermal throttling governor
  *
@@ -126,7 +129,7 @@ static void update_passive_instance(struct thermal_zone_device *tz,
 
 static void thermal_zone_trip_update(struct thermal_zone_device *tz, int trip)
 {
-#ifdef CONFIG_RTK_THERMAL
+#if defined(CONFIG_RTK_THERMAL) && defined(MY_DEF_HERE)
 	int trip_hyst;
 #endif
 	int trip_temp;
@@ -139,13 +142,13 @@ static void thermal_zone_trip_update(struct thermal_zone_device *tz, int trip)
 	if (trip == THERMAL_TRIPS_NONE) {
 		trip_temp = tz->forced_passive;
 		trip_type = THERMAL_TRIPS_NONE;
-#ifdef CONFIG_RTK_THERMAL
+#if defined(CONFIG_RTK_THERMAL) && defined(MY_DEF_HERE)
 		trip_hyst = 0;
 #endif
 	} else {
 		tz->ops->get_trip_temp(tz, trip, &trip_temp);
 		tz->ops->get_trip_type(tz, trip, &trip_type);
-#ifdef CONFIG_RTK_THERMAL
+#if defined(CONFIG_RTK_THERMAL) && defined(MY_DEF_HERE)
 		tz->ops->get_trip_hyst(tz, trip, &trip_hyst);
 #endif
 	}
@@ -169,7 +172,7 @@ static void thermal_zone_trip_update(struct thermal_zone_device *tz, int trip)
 		old_target = instance->target;
 		instance->target = get_target_state(instance, trend, throttle);
 
-#ifdef CONFIG_RTK_THERMAL
+#if defined(CONFIG_RTK_THERMAL) && defined(MY_DEF_HERE)
 		/* for hysteresis */
 		if ((int)instance->target < old_target &&
 			tz->temperature >= (trip_temp - trip_hyst)) {

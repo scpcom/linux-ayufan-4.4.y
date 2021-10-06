@@ -180,7 +180,11 @@ int sxgbe_mdio_register(struct net_device *ndev)
 	}
 
 	for (phy_addr = 0; phy_addr < PHY_MAX_ADDR; phy_addr++) {
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+		struct phy_device *phy = mdiobus_get_phy(mdio_bus, phy_addr);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		struct phy_device *phy = mdio_bus->phy_map[phy_addr];
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 		if (phy) {
 			char irq_num[4];
@@ -216,7 +220,11 @@ int sxgbe_mdio_register(struct net_device *ndev)
 			}
 			netdev_info(ndev, "PHY ID %08x at %d IRQ %s (%s)%s\n",
 				    phy->phy_id, phy_addr, irq_str,
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+				    phydev_name(phy), act ? " active" : "");
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 				    dev_name(&phy->dev), act ? " active" : "");
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 			phy_found = true;
 		}
 	}

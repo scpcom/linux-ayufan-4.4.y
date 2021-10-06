@@ -59,7 +59,11 @@ obj-$(CONFIG_ARCH_MEDIATEK)		+= mediatek/
 ifeq ($(CONFIG_COMMON_CLK), y)
 obj-$(CONFIG_ARCH_MMP)			+= mmp/
 endif
+ifeq ($(CONFIG_SYNO_LSP_ARMADA_16_12), y)
+obj-y					+= mvebu/
+else
 obj-$(CONFIG_PLAT_ORION)		+= mvebu/
+endif
 obj-$(CONFIG_ARCH_MESON)		+= meson/
 obj-$(CONFIG_ARCH_MXS)			+= mxs/
 obj-$(CONFIG_ARCH_LPC18XX)		+= nxp/

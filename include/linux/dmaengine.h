@@ -195,6 +195,15 @@ enum dma_ctrl_flags {
 	DMA_PREP_CONTINUE = (1 << 4),
 	DMA_PREP_FENCE = (1 << 5),
 	DMA_CTRL_REUSE = (1 << 6),
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+/*
+ * @DMA_PREP_PQ_MULT - tell the driver that this is a mult
+ *						request
+ * @DMA_PREP_PQ_SUM_PRODUCT - tell the driver that this is a sum product request
+ */
+	DMA_PREP_PQ_MULT = (1 << 10),
+	DMA_PREP_PQ_SUM_PRODUCT = (1 << 11),
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 };
 
 /**

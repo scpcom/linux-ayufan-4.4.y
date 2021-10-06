@@ -408,7 +408,11 @@ int dw_pcie_host_init(struct pcie_port *pp)
 	struct pci_bus *bus, *child;
 	struct resource *cfg_res;
 	u32 val;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	int i, ret, has_msi = 0;
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	int i, ret;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	LIST_HEAD(res);
 	struct resource_entry *win;
 
@@ -504,13 +508,20 @@ int dw_pcie_host_init(struct pcie_port *pp)
 				dev_err(pp->dev, "irq domain init failed\n");
 				return -ENXIO;
 			}
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+			has_msi = 1;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 			for (i = 0; i < MAX_MSI_IRQS; i++)
 				irq_create_mapping(pp->irq_domain, i);
 		} else {
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+			has_msi = (pp->ops->msi_host_init(pp, &dw_pcie_msi_chip) == 0);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 			ret = pp->ops->msi_host_init(pp, &dw_pcie_msi_chip);
 			if (ret < 0)
 				return ret;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		}
 	}
 
@@ -532,7 +543,11 @@ int dw_pcie_host_init(struct pcie_port *pp)
 	dw_pcie_wr_own_conf(pp, PCIE_LINK_WIDTH_SPEED_CONTROL, 4, val);
 
 	pp->root_bus_nr = pp->busn->start;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	if (IS_ENABLED(CONFIG_PCI_MSI) && has_msi) {
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	if (IS_ENABLED(CONFIG_PCI_MSI)) {
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		bus = pci_scan_root_bus_msi(pp->dev, pp->root_bus_nr,
 					    &dw_pcie_ops, pp, &res,
 					    &dw_pcie_msi_chip);

@@ -906,8 +906,12 @@ static int bcm_enet_open(struct net_device *dev)
 		else
 			phydev->advertising &= ~SUPPORTED_Pause;
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+		phy_attached_info(phydev);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		dev_info(kdev, "attached PHY at address %d [%s]\n",
 			 phydev->addr, phydev->drv->name);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 		priv->old_link = 0;
 		priv->old_duplex = -1;
@@ -1846,6 +1850,9 @@ static int bcm_enet_probe(struct platform_device *pdev)
 		 * if a slave is not present on hw */
 		bus->phy_mask = ~(1 << priv->phy_id);
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+//do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		bus->irq = devm_kzalloc(&pdev->dev, sizeof(int) * PHY_MAX_ADDR,
 					GFP_KERNEL);
 		if (!bus->irq) {
@@ -1853,10 +1860,15 @@ static int bcm_enet_probe(struct platform_device *pdev)
 			goto out_free_mdio;
 		}
 
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		if (priv->has_phy_interrupt)
 			bus->irq[priv->phy_id] = priv->phy_interrupt;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+//do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		else
 			bus->irq[priv->phy_id] = PHY_POLL;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 		ret = mdiobus_register(bus);
 		if (ret) {

@@ -43,15 +43,25 @@
 
 #define __PHYS_OFFSET	(KERNEL_START - TEXT_OFFSET)
 
+#ifdef MY_DEF_HERE
+
 #if (TEXT_OFFSET & 0xfff) != 0
 #error TEXT_OFFSET must be at least 4KB aligned
 #elif (PAGE_OFFSET & 0x1fffff) != 0
 #error PAGE_OFFSET must be at least 2MB aligned
-#ifndef MY_DEF_HERE
+#endif
+
+#else /* MY_DEF_HERE */
+
+#if (TEXT_OFFSET & 0xfff) != 0
+#error TEXT_OFFSET must be at least 4KB aligned
+#elif (PAGE_OFFSET & 0x1fffff) != 0
+#error PAGE_OFFSET must be at least 2MB aligned
 #elif TEXT_OFFSET > 0x1fffff
 #error TEXT_OFFSET must be less than 2MB
 #endif
-#endif
+
+#endif /* MY_DEF_HERE */
 
 #define KERNEL_START	_text
 #define KERNEL_END	_end
@@ -618,7 +628,7 @@ ENTRY(armv8_switch_to_el2)
 0:	ret
 1:	armv8_switch_to_el2_m x0
 ENDPROC(armv8_switch_to_el2)
-#endif
+#endif /* MY_DEF_HERE */
 	/*
 	 * This provides a "holding pen" for platforms to hold all secondary
 	 * cores are held until we're ready for them to initialise.
@@ -626,13 +636,13 @@ ENDPROC(armv8_switch_to_el2)
 ENTRY(secondary_holding_pen)
 #ifdef MY_DEF_HERE
 	bl	armv8_switch_to_el2
-#endif
+#endif /* MY_DEF_HERE */
 	bl	el2_setup			// Drop to EL1, w20=cpu_boot_mode
 	bl	set_cpu_boot_mode_flag
 	mrs	x0, mpidr_el1
 	ldr     x1, =MPIDR_HWID_BITMASK
 	and	x0, x0, x1
-#ifdef CONFIG_ARCH_RTD129X
+#if defined(CONFIG_ARCH_RTD129X) && defined(MY_DEF_HERE)
 	adr_l	x3, rtk_secondary_holding_pen_release
 #else
 	adr_l	x3, secondary_holding_pen_release

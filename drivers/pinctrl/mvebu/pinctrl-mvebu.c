@@ -26,9 +26,16 @@
 
 #include "pinctrl-mvebu.h"
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+/* need to align with the Soc settings, changed by mvebu_pinctrl_set_mpps() */
+static unsigned mpps_per_reg = 8;
+static unsigned mpp_bits = 4;
+static unsigned mpp_mask = 0xf;
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 #define MPPS_PER_REG	8
 #define MPP_BITS	4
 #define MPP_MASK	0xf
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 struct mvebu_pinctrl_function {
 	const char *name;
@@ -544,6 +551,45 @@ static int mvebu_pinctrl_build_functions(struct platform_device *pdev,
 
 	return 0;
 }
+
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+/*
+ * set the number of pins per reg in the soc, only needed by those
+ * socs which doesn't align to the default settings
+ */
+int mvebu_pinctrl_set_mpps(unsigned int npins)
+{
+	mpps_per_reg = npins;
+	mpp_bits = 32/mpps_per_reg;
+	mpp_mask = ((1UL<<(mpp_bits))-1);
+
+	return 0;
+}
+
+int default_mpp_ctrl_get(void __iomem *base, unsigned int pid,
+				       unsigned long *config)
+{
+	unsigned off = (pid / mpps_per_reg) * mpp_bits;
+	unsigned shift = (pid % mpps_per_reg) * mpp_bits;
+
+	*config = (readl(base + off) >> shift) & mpp_mask;
+
+	return 0;
+}
+
+int default_mpp_ctrl_set(void __iomem *base, unsigned int pid,
+				       unsigned long config)
+{
+	unsigned off = (pid / mpps_per_reg) * mpp_bits;
+	unsigned shift = (pid % mpps_per_reg) * mpp_bits;
+	unsigned long reg;
+
+	reg = readl(base + off) & ~(mpp_mask << shift);
+	writel(reg | (config << shift), base + off);
+
+	return 0;
+}
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 int mvebu_pinctrl_probe(struct platform_device *pdev)
 {

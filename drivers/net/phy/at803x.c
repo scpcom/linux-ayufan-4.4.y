@@ -190,7 +190,11 @@ static int at803x_resume(struct phy_device *phydev)
 
 static int at803x_probe(struct phy_device *phydev)
 {
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	struct device *dev = &phydev->mdio.dev;
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct device *dev = &phydev->dev;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct at803x_priv *priv;
 	struct gpio_desc *gpiod_reset;
 
@@ -281,8 +285,13 @@ static void at803x_link_change_notify(struct phy_device *phydev)
 
 				at803x_context_restore(phydev, &context);
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+				phydev_dbg(phydev, "%s(): phy was reset\n",
+					   __func__);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 				dev_dbg(&phydev->dev, "%s(): phy was reset\n",
 					__func__);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 				priv->phy_reset = true;
 			}
 		} else {
@@ -310,9 +319,13 @@ static struct phy_driver at803x_driver[] = {
 	.read_status		= genphy_read_status,
 	.ack_interrupt		= at803x_ack_interrupt,
 	.config_intr		= at803x_config_intr,
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+//do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	.driver			= {
 		.owner = THIS_MODULE,
 	},
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 }, {
 	/* ATHEROS 8030 */
 	.phy_id			= ATH8030_PHY_ID,
@@ -331,9 +344,13 @@ static struct phy_driver at803x_driver[] = {
 	.read_status		= genphy_read_status,
 	.ack_interrupt		= at803x_ack_interrupt,
 	.config_intr		= at803x_config_intr,
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+//do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	.driver			= {
 		.owner = THIS_MODULE,
 	},
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 }, {
 	/* ATHEROS 8031 */
 	.phy_id			= ATH8031_PHY_ID,
@@ -352,9 +369,13 @@ static struct phy_driver at803x_driver[] = {
 	.read_status		= genphy_read_status,
 	.ack_interrupt		= &at803x_ack_interrupt,
 	.config_intr		= &at803x_config_intr,
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+//do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	.driver			= {
 		.owner = THIS_MODULE,
 	},
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 } };
 
 module_phy_driver(at803x_driver);

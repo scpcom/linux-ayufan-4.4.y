@@ -176,8 +176,14 @@ static int exynos_irq_request_resources(struct irq_data *irqd)
 
 	ret = gpiochip_lock_as_irq(&bank->gpio_chip, irqd->hwirq);
 	if (ret) {
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+		dev_err(bank->gpio_chip.parent,
+			"unable to lock pin %s-%lu IRQ\n",
+			bank->name, irqd->hwirq);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		dev_err(bank->gpio_chip.dev, "unable to lock pin %s-%lu IRQ\n",
 			bank->name, irqd->hwirq);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		return ret;
 	}
 

@@ -908,8 +908,12 @@ static int ravb_phy_init(struct net_device *ndev)
 	/* 10BASE is not supported */
 	phydev->supported &= ~PHY_10BT_FEATURES;
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	phy_attached_info(phydev);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	netdev_info(ndev, "attached PHY %d (IRQ %d) to driver %s\n",
 		    phydev->addr, phydev->irq, phydev->drv->name);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	priv->phydev = phydev;
 

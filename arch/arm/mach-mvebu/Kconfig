@@ -2,7 +2,7 @@ menuconfig ARCH_MVEBU
 	bool "Marvell Engineering Business Unit (MVEBU) SoCs" if (ARCH_MULTI_V7 || ARCH_MULTI_V5)
 	select ARCH_SUPPORTS_BIG_ENDIAN
 	select CLKSRC_MMIO
-	select GENERIC_IRQ_CHIP
+	select GENERIC_IRQ_CHIP if (!SYNO_LSP_ARMADA_16_12)
 	select PINCTRL
 	select PLAT_ORION
 	select SOC_BUS
@@ -27,6 +27,7 @@ config MACH_MVEBU_V7
 config MACH_ARMADA_370
 	bool "Marvell Armada 370 boards" if ARCH_MULTI_V7
 	select ARMADA_370_CLK
+	select ARMADA_370_XP_IRQ if SYNO_LSP_ARMADA_16_12
 	select CPU_PJ4B
 	select MACH_MVEBU_V7
 	select PINCTRL_ARMADA_370
@@ -36,6 +37,7 @@ config MACH_ARMADA_370
 
 config MACH_ARMADA_375
 	bool "Marvell Armada 375 boards" if ARCH_MULTI_V7
+	select ARMADA_370_XP_IRQ if SYNO_LSP_ARMADA_16_12
 	select ARM_ERRATA_720789
 	select ARM_ERRATA_753970
 	select ARM_GIC
@@ -54,6 +56,7 @@ config MACH_ARMADA_38X
 	select ARM_ERRATA_720789
 	select ARM_ERRATA_753970
 	select ARM_GIC
+	select ARMADA_370_XP_IRQ if SYNO_LSP_ARMADA_16_12
 	select ARMADA_38X_CLK
 	select HAVE_ARM_SCU
 	select HAVE_ARM_TWD if SMP
@@ -67,6 +70,7 @@ config MACH_ARMADA_38X
 config MACH_ARMADA_39X
 	bool "Marvell Armada 39x boards" if ARCH_MULTI_V7
 	select ARM_GIC
+	select ARMADA_370_XP_IRQ if SYNO_LSP_ARMADA_16_12
 	select ARMADA_39X_CLK
 	select CACHE_L2X0
 	select HAVE_ARM_SCU
@@ -80,6 +84,7 @@ config MACH_ARMADA_39X
 
 config MACH_ARMADA_XP
 	bool "Marvell Armada XP boards" if ARCH_MULTI_V7
+	select ARMADA_370_XP_IRQ if SYNO_LSP_ARMADA_16_12
 	select ARMADA_XP_CLK
 	select CPU_PJ4B
 	select MACH_MVEBU_V7
@@ -116,5 +121,16 @@ config MACH_KIRKWOOD
 	help
 	  Say 'Y' here if you want your kernel to support boards based
 	  on the Marvell Kirkwood device tree.
+
+config MACH_MSYS
+	bool "Marvell Msys boards"
+	depends on SYNO_LSP_ARMADA_16_12
+	select MSYS_CLK
+	select CPU_PJ4B
+	select MACH_MVEBU_V7
+	select PINCTRL_MSYS
+	help
+	  Say 'Y' here if you want your kernel to support boards based
+	  on the Marvell Msys SoC family with device tree.
 
 endif

@@ -32,7 +32,7 @@ static void __iomem	*EMMC_MUXPAD;
 static u32 pcie_gpio_20 = 0;
 static u32 speed_mode = 0;
 
-static bool cfg_direct_access = false;
+static bool cfg_direct_access = true;
 
 static int rtd129x_cpu_id;
 static int rtd129x_cpu_revision;
@@ -46,56 +46,216 @@ static struct reset_control *rstn_pcie1_nonstich;
 static struct reset_control *rstn_pcie1_phy;
 static struct reset_control *rstn_pcie1_phy_mdio;
 
-struct task_struct *rtk_pcie2_str_task = NULL;
 static struct pci_bus *bus;
-static struct platform_device *local_pdev;
-int RTK_PCIE2_STR_FLAG = false;
 
-extern int RTK_PCIE2_RESET_FLAG;
+static spinlock_t rtk_pcie2_lock;
 
-static void rtk_pci2_ctrl_write(unsigned long addr, unsigned int val)
+static inline u32 rtk_pcie2_read(u32 addr, u8 size)
 {
-	writel(val, addr + PCIE_CTRL_BASE);
+	u32 rval = 0;
+	u32 mask;
+	u32 translate_val = 0;
+	u32 tmp_addr = addr & 0xFFF;
+	u32 pci_error_status = 0;
+	int retry_cnt = 0;
+	u8 retry = 5;
+	unsigned long irqL;
+
+	spin_lock_irqsave(&rtk_pcie2_lock, irqL);
+
+	/* PCIE1.1 0x9804FCEC, PCIE2.0 0x9803CCEC & 0x9803CC68
+	 * can't be used because of 1295 hardware issue.
+	 */
+	if (tmp_addr == 0xCEC || tmp_addr == 0xC68) {
+		mask = PCIE_IO_2K_MASK;
+		rtk_pci_ctrl_write(0xD00, PCIE_IO_2K_MASK);
+		translate_val = rtk_pci_ctrl_read(0xD04);
+		rtk_pci_ctrl_write(0xD04, translate_val | (addr & mask));
+	} else if (addr >= 0x1000) {
+		mask = PCIE_IO_4K_MASK;
+		translate_val = rtk_pci_ctrl_read(0xD04);
+		rtk_pci_ctrl_write(0xD04, translate_val | (addr & mask));
+	} else
+		mask = 0x0;
+
+pci_read_129x_retry:
+
+#ifdef CONFIG_RTK_SW_LOCK_API
+	/* All RBUS1 driver need to have a workaround for emmc hardware error. */
+	/* Need to protect 0xXXXX_X8XX~ 0xXXXX_X9XX. */
+	if((tmp_addr > 0x7FF) && (tmp_addr < 0xA00))
+		rtk_lockapi_lock(flags, __FUNCTION__);
+#endif
+
+	switch (size) {
+	case 1:
+		rval = rtk_pci_direct_read_byte((addr & ~mask));
+		break;
+	case 2:
+		rval = rtk_pci_direct_read_word((addr & ~mask));
+		break;
+	case 4:
+		rval = rtk_pci_direct_read((addr & ~mask));
+		break;
+	default:
+		printk(KERN_INFO "RTD129X: %s: wrong size %d\n", __func__, size);
+		break;
+	}
+
+#ifdef CONFIG_RTK_SW_LOCK_API
+	if((tmp_addr>0x7FF) && (tmp_addr<0xA00))
+		rtk_lockapi_unlock(flags, __FUNCTION__);
+#endif
+
+	//DLLP error patch
+	pci_error_status = rtk_pci_ctrl_read(0xc7c);
+	if (pci_error_status & 0x1F) {
+		rtk_pci_ctrl_write(0xc7c, pci_error_status);
+		printk(KERN_INFO "RTD129X: %s: DLLP(#%d) 0x%x reg=0x%x val=0x%x\n", __func__, retry_cnt, pci_error_status, addr, rval);
+
+		if (retry_cnt < retry) {
+			retry_cnt++;
+			goto pci_read_129x_retry;
+		}
+	}
+
+	/* PCIE1.1 0x9804FCEC, PCIE2.0 0x9803CCEC & 0x9803CC68
+	 * can't be used because of 1295 hardware issue.
+	 */
+	if (tmp_addr == 0xCEC || tmp_addr == 0xC68){
+		rtk_pci_ctrl_write(0xD04, translate_val);
+		rtk_pci_ctrl_write(0xD00, PCIE_IO_4K_MASK);
+	}else if(addr >= 0x1000){
+		rtk_pci_ctrl_write(0xD04, translate_val);
+	}
+
+	spin_unlock_irqrestore(&rtk_pcie2_lock, irqL);
+
+	return rval;
 }
 
-static unsigned int rtk_pci2_ctrl_read(unsigned long addr)
+static inline void rtk_pcie2_write(u32 addr, u8 size, u32 wval)
 {
-	unsigned int val = readl(addr + PCIE_CTRL_BASE);
-	return val;
+	u32 mask;
+	u32 translate_val = 0;
+	u32 tmp_addr = addr & 0xFFF;
+	unsigned long irqL;
+
+	spin_lock_irqsave(&rtk_pcie2_lock, irqL);
+
+	/* PCIE1.1 0x9804FCEC, PCIE2.0 0x9803CCEC & 0x9803CC68
+	 * can't be used because of 1295 hardware issue.
+	 */
+	if (tmp_addr == 0xCEC || tmp_addr == 0xC68) {
+		mask = PCIE_IO_2K_MASK;
+		rtk_pci_ctrl_write(0xD00, PCIE_IO_2K_MASK);
+		translate_val = rtk_pci_ctrl_read(0xD04);
+		rtk_pci_ctrl_write(0xD04, translate_val | (addr & mask));
+	} else if (addr >= 0x1000) {
+		mask = PCIE_IO_4K_MASK;
+		translate_val = rtk_pci_ctrl_read(0xD04);
+		rtk_pci_ctrl_write(0xD04, translate_val | (addr & mask));
+	} else
+		mask = 0x0;
+
+#ifdef CONFIG_RTK_SW_LOCK_API
+	/* All RBUS1 driver need to have a workaround for emmc hardware error. */
+	/* Need to protect 0xXXXX_X8XX~ 0xXXXX_X9XX. */
+	if((tmp_addr>0x7FF) && (tmp_addr < 0xA00))
+		rtk_lockapi_lock(flags, __FUNCTION__);
+#endif
+
+	switch (size) {
+	case 1:
+		rtk_pci_direct_write_byte((addr&~mask), wval);
+		break;
+	case 2:
+		rtk_pci_direct_write_word((addr&~mask), wval);
+		break;
+	case 4:
+		rtk_pci_direct_write((addr&~mask), wval);
+		break;
+	default:
+		printk(KERN_INFO "RTD129X: %s: wrong size %d\n", __func__, size);
+		break;
+	}
+
+#ifdef CONFIG_RTK_SW_LOCK_API
+	if((tmp_addr>0x7FF) && (tmp_addr<0xA00))
+		rtk_lockapi_unlock(flags, __FUNCTION__);
+#endif
+
+	/* PCIE1.1 0x9804FCEC, PCIE2.0 0x9803CCEC & 0x9803CC68
+	 * can't be used because of 1295 hardware issue.
+	 */
+	if (tmp_addr == 0xCEC || tmp_addr == 0xC68) {
+		rtk_pci_ctrl_write(0xD04, translate_val);
+		rtk_pci_ctrl_write(0xD00, PCIE_IO_4K_MASK);
+	} else if (addr >= 0x1000) {
+		rtk_pci_ctrl_write(0xD04, translate_val);
+	}
+
+	spin_unlock_irqrestore(&rtk_pcie2_lock, irqL);
 }
 
-static void rtk_pci2_direct_cfg_write(unsigned long addr, unsigned int val)
+u8 rtk_pcie2_readb(const volatile void __iomem *addr)
 {
-	writel(val, addr + PCIE_CFG_BASE);
+	return rtk_pcie2_read((u32)addr, 1);
 }
+EXPORT_SYMBOL(rtk_pcie2_readb);
 
-static void rtk_pci2_direct_cfg_write_word(unsigned long addr, u16 val)
+u16 rtk_pcie2_readw(const volatile void __iomem *addr)
 {
-	writew(val, addr + PCIE_CFG_BASE);
+	return rtk_pcie2_read((u32)addr, 2);
 }
+EXPORT_SYMBOL(rtk_pcie2_readw);
 
-static void rtk_pci2_direct_cfg_write_byte(unsigned long addr, u8 val)
+u32 rtk_pcie2_readl(const volatile void __iomem *addr)
 {
-	writeb(val, addr + PCIE_CFG_BASE);
+	return rtk_pcie2_read((u32)addr, 4);
 }
+EXPORT_SYMBOL(rtk_pcie2_readl);
 
-static unsigned int rtk_pci2_direct_cfg_read(unsigned long addr)
+u64 rtk_pcie2_readq(const volatile void __iomem *addr)
 {
-	unsigned int val = readl(addr + PCIE_CFG_BASE);
-	return val;
-}
+	const volatile u32 __iomem *p = addr;
+	u32 low, high;
 
-static u16 rtk_pci2_direct_cfg_read_word(unsigned long addr)
-{
-	u16 val = readw(addr + PCIE_CFG_BASE);
-	return val;
-}
+	low = rtk_pcie2_read((u32)p, 4);
+	high = rtk_pcie2_read((p + 1), 4);
 
-static u8 rtk_pci2_direct_cfg_read_byte(unsigned long addr)
-{
-	u8 val = readb(addr + PCIE_CFG_BASE);
-	return val;
+	return low + ((u64)high << 32);
 }
+EXPORT_SYMBOL(rtk_pcie2_readq);
+
+void rtk_pcie2_writeb(u8 val, volatile void __iomem *addr)
+{
+	rtk_pcie2_write((u32)addr, 1, val);
+	return;
+}
+EXPORT_SYMBOL(rtk_pcie2_writeb);
+
+void rtk_pcie2_writew(u16 val, volatile void __iomem *addr)
+{
+	rtk_pcie2_write((u32)addr, 2, val);
+	return;
+}
+EXPORT_SYMBOL(rtk_pcie2_writew);
+
+void rtk_pcie2_writel(u32 val, volatile void __iomem *addr)
+{
+	rtk_pcie2_write((u32)addr, 4, val);
+	return;
+}
+EXPORT_SYMBOL(rtk_pcie2_writel);
+
+void rtk_pcie2_writeq(u64 val, volatile void __iomem *addr)
+{
+	rtk_pcie2_write((u32)addr, 4, val);
+	rtk_pcie2_write((u32)addr + 4, 4, val >> 32);
+	return;
+}
+EXPORT_SYMBOL(rtk_pcie2_writeq);
 
 static int _indirect_cfg_write(unsigned long addr, unsigned long data, unsigned char size)
 {
@@ -114,20 +274,20 @@ static int _indirect_cfg_write(unsigned long addr, unsigned long data, unsigned 
 
 	data = (data << _pci_bit_shift(addr)) & _pci_bit_mask(mask);
 
-	rtk_pci2_ctrl_write(PCIE_INDIR_CTR, 0x12);
-	rtk_pci2_ctrl_write(PCIE_CFG_ST, CFG_ST_ERROR|CFG_ST_DONE);
-	rtk_pci2_ctrl_write(PCIE_CFG_ADDR, addr);
-	rtk_pci2_ctrl_write(PCIE_CFG_WDATA, data);
+	rtk_pci_ctrl_write(PCIE_INDIR_CTR, 0x12);
+	rtk_pci_ctrl_write(PCIE_CFG_ST, CFG_ST_ERROR|CFG_ST_DONE);
+	rtk_pci_ctrl_write(PCIE_CFG_ADDR, addr);
+	rtk_pci_ctrl_write(PCIE_CFG_WDATA, data);
 
 	if (size == 4)
-		rtk_pci2_ctrl_write(PCIE_CFG_EN, 0x1);
+		rtk_pci_ctrl_write(PCIE_CFG_EN, 0x1);
 	else
-		rtk_pci2_ctrl_write(PCIE_CFG_EN, BYTE_CNT(mask) | BYTE_EN | WRRD_EN(1));
+		rtk_pci_ctrl_write(PCIE_CFG_EN, BYTE_CNT(mask) | BYTE_EN | WRRD_EN(1));
 
-	rtk_pci2_ctrl_write(PCIE_CFG_CT, GO_CT);
+	rtk_pci_ctrl_write(PCIE_CFG_CT, GO_CT);
 
 	do {
-		status = rtk_pci2_ctrl_read(PCIE_CFG_ST);
+		status = rtk_pci_ctrl_read(PCIE_CFG_ST);
 		udelay(50);
 	} while (!(status & CFG_ST_DONE) && try_count--);
 
@@ -137,7 +297,7 @@ static int _indirect_cfg_write(unsigned long addr, unsigned long data, unsigned 
 		goto error_occur;
 	}
 
-	if (rtk_pci2_ctrl_read(PCIE_CFG_ST) & CFG_ST_ERROR) {
+	if (rtk_pci_ctrl_read(PCIE_CFG_ST) & CFG_ST_ERROR) {
 		if (status & CFG_ST_DETEC_PAR_ERROR)
 			PCI_CFG_WARNING("Write config data failed - PAR error detected\n");
 		if (status & CFG_ST_SIGNAL_SYS_ERROR)
@@ -152,13 +312,13 @@ static int _indirect_cfg_write(unsigned long addr, unsigned long data, unsigned 
 		goto error_occur;
 	}
 
-	rtk_pci2_ctrl_write(PCIE_CFG_ST, CFG_ST_ERROR|CFG_ST_DONE);
+	rtk_pci_ctrl_write(PCIE_CFG_ST, CFG_ST_ERROR|CFG_ST_DONE);
 
 	return PCIBIOS_SUCCESSFUL;
 
 error_occur:
 
-	rtk_pci2_ctrl_write(PCIE_CFG_ST, CFG_ST_ERROR|CFG_ST_DONE);
+	rtk_pci_ctrl_write(PCIE_CFG_ST, CFG_ST_ERROR|CFG_ST_DONE);
 
 	return PCIBIOS_SET_FAILED;
 }
@@ -177,14 +337,14 @@ static int _indirect_cfg_read(unsigned long addr, u32 *pdata, unsigned char size
 	if (!mask)
 		return PCIBIOS_SET_FAILED;
 
-	rtk_pci2_ctrl_write(PCIE_INDIR_CTR, 0x10);
-	rtk_pci2_ctrl_write(PCIE_CFG_ST, 0x3);
-	rtk_pci2_ctrl_write(PCIE_CFG_ADDR, (addr & ~0x3));
-	rtk_pci2_ctrl_write(PCIE_CFG_EN, BYTE_CNT(mask) | BYTE_EN | WRRD_EN(0));
-	rtk_pci2_ctrl_write(PCIE_CFG_CT, GO_CT);
+	rtk_pci_ctrl_write(PCIE_INDIR_CTR, 0x10);
+	rtk_pci_ctrl_write(PCIE_CFG_ST, 0x3);
+	rtk_pci_ctrl_write(PCIE_CFG_ADDR, (addr & ~0x3));
+	rtk_pci_ctrl_write(PCIE_CFG_EN, BYTE_CNT(mask) | BYTE_EN | WRRD_EN(0));
+	rtk_pci_ctrl_write(PCIE_CFG_CT, GO_CT);
 
 	do {
-		status = rtk_pci2_ctrl_read(PCIE_CFG_ST);
+		status = rtk_pci_ctrl_read(PCIE_CFG_ST);
 		udelay(50);
 	} while (!(status & CFG_ST_DONE) && try_count--);
 
@@ -193,7 +353,7 @@ static int _indirect_cfg_read(unsigned long addr, u32 *pdata, unsigned char size
 		goto error_occur;
 	}
 
-	if (rtk_pci2_ctrl_read(PCIE_CFG_ST) & CFG_ST_ERROR) {
+	if (rtk_pci_ctrl_read(PCIE_CFG_ST) & CFG_ST_ERROR) {
 		if (status & CFG_ST_DETEC_PAR_ERROR)
 			PCI_CFG_WARNING("Read config data failed - PAR error detected\n");
 		if (status & CFG_ST_SIGNAL_SYS_ERROR)
@@ -207,13 +367,13 @@ static int _indirect_cfg_read(unsigned long addr, u32 *pdata, unsigned char size
 		goto error_occur;
 	}
 
-	rtk_pci2_ctrl_write(PCIE_CFG_ST, 0x3);
+	rtk_pci_ctrl_write(PCIE_CFG_ST, 0x3);
 
-	*pdata = (rtk_pci2_ctrl_read(PCIE_CFG_RDATA) & _pci_bit_mask(mask)) >> _pci_bit_shift(addr);
+	*pdata = (rtk_pci_ctrl_read(PCIE_CFG_RDATA) & _pci_bit_mask(mask)) >> _pci_bit_shift(addr);
 	return PCIBIOS_SUCCESSFUL;
 
 error_occur:
-	rtk_pci2_ctrl_write(PCIE_CFG_ST, 0x3);
+	rtk_pci_ctrl_write(PCIE_CFG_ST, 0x3);
 	return PCIBIOS_SET_FAILED;
 }
 
@@ -224,23 +384,25 @@ static int rtk_pcie2_rd_conf(struct pci_bus *bus, unsigned int devfn,
 	int ret = PCIBIOS_DEVICE_NOT_FOUND;
 	u32 val = 0;
 	u8 retry = 5;
+	unsigned long irqL;
 
 	if (rtd129x_cpu_revision == RTD129x_CHIP_REVISION_A00)
 		udelay(200);
 
+	spin_lock_irqsave(&rtk_pcie2_lock, irqL);
 again:
 	if (bus->number == 1 && PCI_SLOT(devfn) == 0 && PCI_FUNC(devfn) == 0) {
 		if (cfg_direct_access) {
-			rtk_pci2_ctrl_write(0xC00, 0x40012);
+			rtk_pci_ctrl_write(0xC00, 0x40012);
 
 			if (size == 1)
-				*pval = rtk_pci2_direct_cfg_read_byte(reg);
+				*pval = rtk_pci_direct_read_byte(reg);
 			else if (size == 2)
-				*pval = rtk_pci2_direct_cfg_read_word(reg);
+				*pval = rtk_pci_direct_read_word(reg);
 			else if (size == 4)
-				*pval = rtk_pci2_direct_cfg_read(reg);
+				*pval = rtk_pci_direct_read(reg);
 
-			rtk_pci2_ctrl_write(0xC00, 0x1E0002);
+			rtk_pci_ctrl_write(0xC00, 0x1E0002);
 			ret = PCIBIOS_SUCCESSFUL;
 
 		} else {
@@ -249,13 +411,14 @@ again:
 		}
 	}
 
-	val = rtk_pci2_ctrl_read(0xC7C);
+	val = rtk_pci_ctrl_read(0xC7C);
 	if ((val & 0x1f) && retry) {
-		rtk_pci2_ctrl_write(0xC7C, val);
+		rtk_pci_ctrl_write(0xC7C, val);
 		retry--;
 		dev_err(&bus->dev, "pcie2 dllp error occur = 0x%x\n", val);
 		goto again;
 	}
+	spin_unlock_irqrestore(&rtk_pcie2_lock, irqL);
 
 	//dev_info(&bus->dev, "rtk_pcie2_rd_conf reg = 0x%x, *pval = 0x%x\n", reg, *pval);
 
@@ -266,6 +429,7 @@ static int rtk_pcie2_wr_conf(struct pci_bus *bus, unsigned int devfn,
 			     int reg, int size, u32 val)
 {
 	unsigned long address;
+	unsigned long irqL;
 	int ret = PCIBIOS_DEVICE_NOT_FOUND;
 
 	//dev_info(&bus->dev, "rtk_pcie2_wr_conf reg = 0x%x, val = 0x%x\n", reg, val);
@@ -273,23 +437,24 @@ static int rtk_pcie2_wr_conf(struct pci_bus *bus, unsigned int devfn,
 	if (rtd129x_cpu_revision == RTD129x_CHIP_REVISION_A00)
 		udelay(200);
 
+	spin_lock_irqsave(&rtk_pcie2_lock, irqL);
 	if (bus->number == 1 && PCI_SLOT(devfn) == 0 && PCI_FUNC(devfn) == 0) {
 		if ((reg == 0x10) || (reg == 0x18) || (reg == 0x20) || (reg == 0x24)) {
 			if ((val & 0xc1000000) == 0xc1000000)
-				rtk_pci2_ctrl_write(0xD04, (val&0xfffffff0));
+				rtk_pci_ctrl_write(0xD04, (val&0xfffffff0));
 		}
 
 		if (cfg_direct_access) {
-			rtk_pci2_ctrl_write(0xC00, 0x40012);
+			rtk_pci_ctrl_write(0xC00, 0x40012);
 
 			if (size == 1)
-				rtk_pci2_direct_cfg_write_byte(reg, val);
+				rtk_pci_direct_write_byte(reg, val);
 			else if (size == 2)
-				rtk_pci2_direct_cfg_write_word(reg, val);
+				rtk_pci_direct_write_word(reg, val);
 			else if (size == 4)
-				rtk_pci2_direct_cfg_write(reg, val);
+				rtk_pci_direct_write(reg, val);
 
-			rtk_pci2_ctrl_write(0xC00, 0x1E0002);
+			rtk_pci_ctrl_write(0xC00, 0x1E0002);
 			ret = PCIBIOS_SUCCESSFUL;
 
 		} else {
@@ -298,6 +463,7 @@ static int rtk_pcie2_wr_conf(struct pci_bus *bus, unsigned int devfn,
 		}
 	}
 
+	spin_unlock_irqrestore(&rtk_pcie2_lock, irqL);
 	return ret;
 }
 
@@ -313,7 +479,7 @@ static int rtk_pcie_mdio_chk(void){
 
 	timeout = jiffies + msecs_to_jiffies(200);
 	while(time_before(jiffies, timeout)){
-		if((rtk_pci2_ctrl_read(0xC1C) & 0x80) == 0x00000000){
+		if((rtk_pci_ctrl_read(0xC1C) & 0x80) == 0x00000000){
 			ret = 0;
 			break;
 		}
@@ -368,97 +534,97 @@ static int rtk_pcie2_hw_initial(struct device *dev)
 		return -EINVAL;
 	}
 
-	rtk_pci2_ctrl_write(0xC00, 0x00140010);
+	rtk_pci_ctrl_write(0xC00, 0x00140010);
 
 	if(speed_mode == 0){
-		rtk_pci2_ctrl_write(0x0A0, (rtk_pci2_ctrl_read(0x0A0)&0xFFFFFFF0)|0x00000001);
+		rtk_pci_ctrl_write(0x0A0, (rtk_pci_ctrl_read(0x0A0)&0xFFFFFFF0)|0x00000001);
 	}
 
 	/* #Write soft reset */
-	rtk_pci2_ctrl_write(0xC1C, 0x00000003);
+	rtk_pci_ctrl_write(0xC1C, 0x00000003);
 	if(rtk_pcie_mdio_chk())
 		return -1;
 
-	rtk_pci2_ctrl_write(0xC1C, 0x27f10301);
+	rtk_pci_ctrl_write(0xC1C, 0x27f10301);
 	if(rtk_pcie_mdio_chk())
 		return -1;
 
 	/* #F code,close SSC */
-	rtk_pci2_ctrl_write(0xC1C, 0x52F50401);
+	rtk_pci_ctrl_write(0xC1C, 0x52F50401);
 	if(rtk_pcie_mdio_chk())
 		return -1;
 
 	/* #modify N code */
-	rtk_pci2_ctrl_write(0xC1C, 0xead70501);
+	rtk_pci_ctrl_write(0xC1C, 0xead70501);
 	if(rtk_pcie_mdio_chk())
 		return -1;
 
 	/* #modify CMU ICP(TX jitter) */
-	rtk_pci2_ctrl_write(0xC1C, 0x000c0601);
+	rtk_pci_ctrl_write(0xC1C, 0x000c0601);
 	if(rtk_pcie_mdio_chk())
 		return -1;
 
 	/* #modify CMU RS(tx jitter) */
-	rtk_pci2_ctrl_write(0xC1C, 0xa6530a01);
+	rtk_pci_ctrl_write(0xC1C, 0xa6530a01);
 	if(rtk_pcie_mdio_chk())
 		return -1;
 
 	/* #modify AMP */
-	rtk_pci2_ctrl_write(0xC1C, 0xd4662001);
+	rtk_pci_ctrl_write(0xC1C, 0xd4662001);
 	if(rtk_pcie_mdio_chk())
 		return -1;
 
 	/* #modify Rx parameter */
-	rtk_pci2_ctrl_write(0xC1C, 0xa84a0101);
+	rtk_pci_ctrl_write(0xC1C, 0xa84a0101);
 	if(rtk_pcie_mdio_chk())
 		return -1;
 
 	/* #clk driving */
-	rtk_pci2_ctrl_write(0xC1C, 0xb8032b01);
+	rtk_pci_ctrl_write(0xC1C, 0xb8032b01);
 	if(rtk_pcie_mdio_chk())
 		return -1;
 
 	/* #EQ */
-	rtk_pci2_ctrl_write(0xC1C, 0x27e94301);
+	rtk_pci_ctrl_write(0xC1C, 0x27e94301);
 	if(rtk_pcie_mdio_chk())
 		return -1;
 
 	/* #F code,close SSC */
-	rtk_pci2_ctrl_write(0xC1C, 0x52f54401);
+	rtk_pci_ctrl_write(0xC1C, 0x52f54401);
 	if(rtk_pcie_mdio_chk())
 		return -1;
 
 	/* #modify N code */
-	rtk_pci2_ctrl_write(0xC1C, 0xead74501);
+	rtk_pci_ctrl_write(0xC1C, 0xead74501);
 	if(rtk_pcie_mdio_chk())
 		return -1;
 
 	/* #modify CMU ICP(TX jitter) */
-	rtk_pci2_ctrl_write(0xC1C, 0x000c4601);
+	rtk_pci_ctrl_write(0xC1C, 0x000c4601);
 	if(rtk_pcie_mdio_chk())
 		return -1;
 
 	/* #modify CMU RS(tx jitter) */
-	rtk_pci2_ctrl_write(0xC1C, 0xa6534a01);
+	rtk_pci_ctrl_write(0xC1C, 0xa6534a01);
 	if(rtk_pcie_mdio_chk())
 		return -1;
 
 	/* #modify AMP */
-	rtk_pci2_ctrl_write(0xC1C, 0xd4776001);
+	rtk_pci_ctrl_write(0xC1C, 0xd4776001);
 	if(rtk_pcie_mdio_chk())
 		return -1;
 
 	/* #modify Rx parameter */
-	rtk_pci2_ctrl_write(0xC1C, 0xa84a4101);
+	rtk_pci_ctrl_write(0xC1C, 0xa84a4101);
 	if(rtk_pcie_mdio_chk())
 		return -1;
 
 	/* #clk driving */
-	rtk_pci2_ctrl_write(0xC1C, 0xa8036b01);
+	rtk_pci_ctrl_write(0xC1C, 0xa8036b01);
 	if(rtk_pcie_mdio_chk())
 		return -1;
 
-	rtk_pci2_ctrl_write(0xC1C, 0x01225a01);
+	rtk_pci_ctrl_write(0xC1C, 0x01225a01);
 	if(rtk_pcie_mdio_chk())
 		return -1;
 
@@ -469,17 +635,17 @@ static int rtk_pcie2_hw_initial(struct device *dev)
 
 	/* set to MMIO */
 	if (cfg_direct_access)
-		rtk_pci2_ctrl_write(0xC00, 0x00040012);
+		rtk_pci_ctrl_write(0xC00, 0x00040012);
 	else
-		rtk_pci2_ctrl_write(0xC00, 0x001E0022);
+		rtk_pci_ctrl_write(0xC00, 0x001E0022);
 
 	msleep(50);
 
 	/* #Link initial setting */
-	rtk_pci2_ctrl_write(0x710, 0x00010120);
+	rtk_pci_ctrl_write(0x710, 0x00010120);
 
 	do {
-		pci_link_detected = (rtk_pci2_ctrl_read(0xCB4) & 0x800);
+		pci_link_detected = (rtk_pci_ctrl_read(0xCB4) & 0x800);
 		if (!pci_link_detected) {
 			mdelay(TIMEOUT_RESOLUTION);
 			timeout += TIMEOUT_RESOLUTION;
@@ -505,83 +671,25 @@ static int rtk_pcie2_hw_initial(struct device *dev)
 	writel(readl(EMMC_MUXPAD + 0x61C) | 0x00000010, EMMC_MUXPAD + 0x61C);
 
 	/* make sure DBI is working */
-	rtk_pci2_ctrl_write(0x04, 0x00000007);
+	rtk_pci_ctrl_write(0x04, 0x00000007);
 
 	/* #Base */
-	rtk_pci2_ctrl_write(0xCFC, 0x9803C000);
+	rtk_pci_ctrl_write(0xCFC, 0x9803C000);
 
 	/* #Mask */
-	rtk_pci2_ctrl_write(0xD00, 0xFFFFF000);
+	rtk_pci_ctrl_write(0xD00, 0xFFFFF000);
 
 	/* #translate for CFG R/W */
-	rtk_pci2_ctrl_write(0xD04, 0x50000000);
+	rtk_pci_ctrl_write(0xD04, 0x50000000);
 
 	/* prevent pcie hang if dllp error occur*/
-	rtk_pci2_ctrl_write(0xC78, 0x200001);
+	rtk_pci_ctrl_write(0xC78, 0x200001);
 
 	/* set limit and base register */
-	rtk_pci2_ctrl_write(0x20, 0x0000FFF0);
-	rtk_pci2_ctrl_write(0x24, 0x0000FFF0);
+	rtk_pci_ctrl_write(0x20, 0x0000FFF0);
+	rtk_pci_ctrl_write(0x24, 0x0000FFF0);
 
 	return ret;
-}
-
-static int rtk_pcie2_initialize(void)
-{
-	int ret = 0;
-
-	struct platform_device *pdev = local_pdev;
-
-	resource_size_t iobase = 0;
-	LIST_HEAD(res);
-
-	dev_info(&pdev->dev, "PCIE host driver initial begin.\n");
-
-	if (rtk_pcie2_hw_initial(&pdev->dev) < 0) {
-		dev_err(&pdev->dev, "rtk_pcie_hw_initial fail\n");
-		return -EINVAL;
-	}
-
-	mdelay(2);
-
-	/*-------------------------------------------
-	 * Register PCI-E host
-	 *-------------------------------------------*/
-	ret = of_pci_get_host_bridge_resources(pdev->dev.of_node, 0x1, 0xff, &res, &iobase);
-	if (ret)
-		return ret;
-
-	bus = pci_create_root_bus(&pdev->dev, 1, &rtk_pcie2_ops, NULL, &res);
-
-	if (!bus)
-		return -ENOMEM;
-
-	pci_scan_child_bus(bus);
-	pci_assign_unassigned_bus_resources(bus);
-	pci_bus_add_devices(bus);
-
-	dev_info(&pdev->dev, "PCIE host driver initial done.\n");
-
-	return ret;
-}
-
-static int rtk_pcie2_pm_fun(void *data)
-{
-	set_current_state(TASK_INTERRUPTIBLE);
-	while(!kthread_should_stop()){
-		schedule();
-		if(RTK_PCIE2_STR_FLAG == false){
-			pci_stop_root_bus(bus);
-			pci_remove_root_bus(bus);
-			RTK_PCIE2_STR_FLAG = true;
-		}else{
-			rtk_pcie2_initialize();
-			RTK_PCIE2_STR_FLAG = false;
-		}
-		set_current_state(TASK_INTERRUPTIBLE);
-	}
-
-	return 0;
 }
 
 static int rtk_pcie2_probe(struct platform_device *pdev)
@@ -592,8 +700,6 @@ static int rtk_pcie2_probe(struct platform_device *pdev)
 
 	resource_size_t iobase = 0;
 	LIST_HEAD(res);
-
-	local_pdev = pdev;
 
 	dev_info(&pdev->dev, "PCIE host driver initial begin.\n");
 
@@ -701,13 +807,6 @@ static int rtk_pcie2_probe(struct platform_device *pdev)
 		return -EINVAL;
 	}
 
-	/*rtk_pcie2_str_task = kthread_run(rtk_pcie2_pm_fun, &pdev, "rtk_pcie2_suspend_handler");
-	if (IS_ERR(rtk_pcie2_str_task)) {
-		ret = PTR_ERR(rtk_pcie2_str_task);
-		rtk_pcie2_str_task = NULL;
-		return -1;
-	}*/
-
 	/*-------------------------------------------
 	 * Register PCI-E host
 	 *-------------------------------------------*/
@@ -735,9 +834,9 @@ static int rtk_pcie2_suspend(struct device *dev)
 	dev_info(dev, "suspend enter ...\n");
 
 	if(RTK_PM_STATE == PM_SUSPEND_STANDBY){
-		rtk_pci2_ctrl_write(0x178, 0xA3FF0001);
-		rtk_pci2_ctrl_write(0x098, 0x400);
-		rtk_pci2_ctrl_write(0xC6C, 0x00000031);
+		rtk_pci_ctrl_write(0x178, 0xA3FF0001);
+		rtk_pci_ctrl_write(0x098, 0x400);
+		rtk_pci_ctrl_write(0xC6C, 0x00000031);
 		dev_info(dev, "Idle mode\n");
 	}else{
 		dev_info(dev, "Suspend mode\n");
@@ -763,7 +862,7 @@ static int rtk_pcie2_resume(struct device *dev)
 	dev_info(dev, "resume enter ...\n");
 
 	if(RTK_PM_STATE == PM_SUSPEND_STANDBY){
-		rtk_pci2_ctrl_write(0xC6C, 0x00000032);
+		rtk_pci_ctrl_write(0xC6C, 0x00000032);
 		dev_info(dev, "Idle mode\n");
 	}else{
 		dev_info(dev, "Suspend mode\n");

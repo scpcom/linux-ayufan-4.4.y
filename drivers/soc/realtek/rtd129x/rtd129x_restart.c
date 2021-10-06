@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #include <linux/kernel.h>
 #include <linux/init.h>
 #include <linux/interrupt.h>
@@ -9,6 +12,9 @@
 
 #include <asm/io.h>
 #include <asm/system_misc.h>
+#if defined(MY_DEF_HERE) && defined(MY_DEF_HERE)
+#include "rtd129x_syno_uart1.h"
+#endif /* MY_DEF_HERE && MY_DEF_HERE */
 
 static void __iomem * wdt_base;
 static int wdt_oe;
@@ -60,6 +66,11 @@ void rtk_machine_restart(char mode, const char *cmd)
 	} else {
 		setup_restart_action(RESET_ACTION_NO_ACTION);
 	}
+
+#if defined(MY_DEF_HERE) && defined(MY_DEF_HERE)
+	syno_uart1_write(SOFTWARE_POWER_LED_BLINK);
+	syno_uart1_write(SOFTWARE_STATUS_LED_OFF);
+#endif /* MY_DEF_HERE && MY_DEF_HERE */
 
 	if (wdt_oe >= 0)
 		writel(wdt_oe, wdt_base + WDT_OE);

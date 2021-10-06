@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * CPU kernel entry/exit control
  *
@@ -27,7 +30,7 @@
 extern const struct cpu_operations smp_spin_table_ops;
 extern const struct cpu_operations cpu_psci_ops;
 
-#ifdef CONFIG_ARCH_RTD129X
+#if defined(CONFIG_ARCH_RTD129X) && defined(MY_DEF_HERE)
 extern const struct cpu_operations rtk_smp_spin_table_ops;
 #endif
 
@@ -35,7 +38,7 @@ const struct cpu_operations *cpu_ops[NR_CPUS];
 
 static const struct cpu_operations *supported_cpu_ops[] __initconst = {
 	&smp_spin_table_ops,
-#ifdef CONFIG_ARCH_RTD129X
+#if defined(CONFIG_ARCH_RTD129X) && defined(MY_DEF_HERE)
 	&rtk_smp_spin_table_ops,
 #endif
 	&cpu_psci_ops,

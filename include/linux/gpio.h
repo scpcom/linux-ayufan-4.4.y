@@ -33,6 +33,15 @@ struct gpio {
 	const char	*label;
 };
 
+#ifdef MY_ABC_HERE
+extern u32 syno_pch_lpc_gpio_pin(int pin, int *pValue, int isWrite);
+#endif  
+
+#if defined(MY_DEF_HERE)
+extern int SYNO_GPIO_READ(int pin);
+extern void SYNO_GPIO_WRITE(int pin, int pValue);
+#endif  
+
 #ifdef CONFIG_GPIOLIB
 
 #ifdef MY_DEF_HERE

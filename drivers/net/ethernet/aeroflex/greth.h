@@ -125,7 +125,11 @@ struct greth_private {
 
 	struct phy_device *phy;
 	struct mii_bus *mdio;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+//do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	int mdio_irqs[PHY_MAX_ADDR];
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	unsigned int link;
 	unsigned int speed;
 	unsigned int duplex;

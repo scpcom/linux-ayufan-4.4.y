@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * drivers/uio/uio.c
  *
@@ -378,7 +381,7 @@ static int uio_get_minor(struct uio_device *idev)
 	return retval;
 }
 
-#ifdef CONFIG_UIO_ASSIGN_MINOR
+#if defined(CONFIG_UIO_ASSIGN_MINOR) && defined(MY_DEF_HERE)
 static int uio_use_minor(struct uio_device *idev, int minor)
 {
 	int retval = -ENOMEM;
@@ -396,7 +399,7 @@ static int uio_use_minor(struct uio_device *idev, int minor)
 	mutex_unlock(&minor_lock);
 	return retval;
 }
-#endif
+#endif /* defined(CONFIG_UIO_ASSIGN_MINOR) && defined(MY_DEF_HERE) */
 
 static void uio_free_minor(struct uio_device *idev)
 {
@@ -836,15 +839,15 @@ int __uio_register_device(struct module *owner,
 	init_waitqueue_head(&idev->wait);
 	atomic_set(&idev->event, 0);
 
-#ifdef CONFIG_UIO_ASSIGN_MINOR
+#if defined(CONFIG_UIO_ASSIGN_MINOR) && defined(MY_DEF_HERE)
 	if(info->minor >= 0)
 		ret = uio_use_minor(idev, info->minor);
 	else {
-#endif
+#endif /* defined(CONFIG_UIO_ASSIGN_MINOR) && defined(MY_DEF_HERE) */
 	ret = uio_get_minor(idev);
-#ifdef CONFIG_UIO_ASSIGN_MINOR
+#if defined(CONFIG_UIO_ASSIGN_MINOR) && defined(MY_DEF_HERE)
 	}
-#endif
+#endif /* defined(CONFIG_UIO_ASSIGN_MINOR) && defined(MY_DEF_HERE) */
 	if (ret)
 		return ret;
 

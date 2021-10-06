@@ -21,11 +21,47 @@
 #include <linux/of_mdio.h>
 #include <linux/of_platform.h>
 #include <linux/of_net.h>
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#include <linux/of_gpio.h>
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 #include <linux/sysfs.h>
 #include <linux/phy_fixed.h>
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#include <linux/gpio/consumer.h>
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 #include "dsa_priv.h"
 
 char dsa_driver_version[] = "0.1";
+
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+static struct sk_buff *dsa_slave_notag_xmit(struct sk_buff *skb,
+					    struct net_device *dev)
+{
+	/* Just return the original SKB */
+	return skb;
+}
+
+static const struct dsa_device_ops none_ops = {
+	.xmit	= dsa_slave_notag_xmit,
+	.rcv	= NULL,
+};
+
+const struct dsa_device_ops *dsa_device_ops[DSA_TAG_LAST] = {
+#ifdef CONFIG_NET_DSA_TAG_DSA
+	[DSA_TAG_PROTO_DSA] = &dsa_netdev_ops,
+#endif
+#ifdef CONFIG_NET_DSA_TAG_EDSA
+	[DSA_TAG_PROTO_EDSA] = &edsa_netdev_ops,
+#endif
+#ifdef CONFIG_NET_DSA_TAG_TRAILER
+	[DSA_TAG_PROTO_TRAILER] = &trailer_netdev_ops,
+#endif
+#ifdef CONFIG_NET_DSA_TAG_BRCM
+	[DSA_TAG_PROTO_BRCM] = &brcm_netdev_ops,
+#endif
+	[DSA_TAG_PROTO_NONE] = &none_ops,
+};
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 /* switch driver registration ***********************************************/
 static DEFINE_MUTEX(dsa_switch_drivers_mutex);
@@ -47,12 +83,22 @@ void unregister_switch_driver(struct dsa_switch_driver *drv)
 }
 EXPORT_SYMBOL_GPL(unregister_switch_driver);
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+static struct dsa_switch_driver *
+dsa_switch_probe(struct device *parent, struct device *host_dev, int sw_addr,
+		 const char **_name, void **priv)
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 static struct dsa_switch_driver *
 dsa_switch_probe(struct device *host_dev, int sw_addr, char **_name)
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 {
 	struct dsa_switch_driver *ret;
 	struct list_head *list;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	const char *name;
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	char *name;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	ret = NULL;
 	name = NULL;
@@ -63,7 +109,11 @@ dsa_switch_probe(struct device *host_dev, int sw_addr, char **_name)
 
 		drv = list_entry(list, struct dsa_switch_driver, list);
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+		name = drv->probe(parent, host_dev, sw_addr, priv);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		name = drv->probe(host_dev, sw_addr);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		if (name != NULL) {
 			ret = drv;
 			break;
@@ -176,6 +226,101 @@ __ATTRIBUTE_GROUPS(dsa_hwmon);
 #endif /* CONFIG_NET_DSA_HWMON */
 
 /* basic switch operations **************************************************/
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+int dsa_cpu_dsa_setup(struct dsa_switch *ds, struct device *dev,
+		      struct device_node *port_dn, int port)
+{
+	struct phy_device *phydev;
+	int ret, mode;
+
+	if (of_phy_is_fixed_link(port_dn)) {
+		ret = of_phy_register_fixed_link(port_dn);
+		if (ret) {
+			dev_err(dev, "failed to register fixed PHY\n");
+			return ret;
+		}
+		phydev = of_phy_find_device(port_dn);
+
+		mode = of_get_phy_mode(port_dn);
+		if (mode < 0)
+			mode = PHY_INTERFACE_MODE_NA;
+		phydev->interface = mode;
+
+		genphy_config_init(phydev);
+		genphy_read_status(phydev);
+		if (ds->drv->adjust_link)
+			ds->drv->adjust_link(ds, port, phydev);
+	}
+
+	return 0;
+}
+
+static int dsa_cpu_dsa_setups(struct dsa_switch *ds, struct device *dev)
+{
+	struct device_node *port_dn;
+	int ret, port;
+
+	for (port = 0; port < DSA_MAX_PORTS; port++) {
+		if (!(dsa_is_cpu_port(ds, port) || dsa_is_dsa_port(ds, port)))
+			continue;
+
+		port_dn = ds->ports[port].dn;
+		ret = dsa_cpu_dsa_setup(ds, dev, port_dn, port);
+		if (ret)
+			return ret;
+	}
+	return 0;
+}
+
+const struct dsa_device_ops *dsa_resolve_tag_protocol(int tag_protocol)
+{
+	const struct dsa_device_ops *ops;
+
+	if (tag_protocol >= DSA_TAG_LAST)
+		return ERR_PTR(-EINVAL);
+	ops = dsa_device_ops[tag_protocol];
+
+	if (!ops)
+		return ERR_PTR(-ENOPROTOOPT);
+
+	return ops;
+}
+
+int dsa_cpu_port_ethtool_setup(struct dsa_switch *ds)
+{
+	struct net_device *master;
+	struct ethtool_ops *cpu_ops;
+
+	master = ds->dst->master_netdev;
+	if (ds->master_netdev)
+		master = ds->master_netdev;
+
+	cpu_ops = devm_kzalloc(ds->dev, sizeof(*cpu_ops), GFP_KERNEL);
+	if (!cpu_ops)
+		return -ENOMEM;
+
+	memcpy(&ds->dst->master_ethtool_ops, master->ethtool_ops,
+	       sizeof(struct ethtool_ops));
+	ds->dst->master_orig_ethtool_ops = master->ethtool_ops;
+	memcpy(cpu_ops, &ds->dst->master_ethtool_ops,
+	       sizeof(struct ethtool_ops));
+	dsa_cpu_port_ethtool_init(cpu_ops);
+	master->ethtool_ops = cpu_ops;
+
+	return 0;
+}
+
+void dsa_cpu_port_ethtool_restore(struct dsa_switch *ds)
+{
+	struct net_device *master;
+
+	master = ds->dst->master_netdev;
+	if (ds->master_netdev)
+		master = ds->master_netdev;
+
+	master->ethtool_ops = ds->dst->master_orig_ethtool_ops;
+}
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 static int dsa_cpu_dsa_setup(struct dsa_switch *ds, struct net_device *master)
 {
 	struct dsa_chip_data *cd = ds->pd;
@@ -210,12 +355,17 @@ static int dsa_cpu_dsa_setup(struct dsa_switch *ds, struct net_device *master)
 	}
 	return 0;
 }
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 static int dsa_switch_setup_one(struct dsa_switch *ds, struct device *parent)
 {
 	struct dsa_switch_driver *drv = ds->drv;
 	struct dsa_switch_tree *dst = ds->dst;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	struct dsa_chip_data *cd = ds->cd;
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct dsa_chip_data *pd = ds->pd;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	bool valid_name_found = false;
 	int index = ds->index;
 	int i, ret;
@@ -226,7 +376,11 @@ static int dsa_switch_setup_one(struct dsa_switch *ds, struct device *parent)
 	for (i = 0; i < DSA_MAX_PORTS; i++) {
 		char *name;
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+		name = cd->port_names[i];
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		name = pd->port_names[i];
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		if (name == NULL)
 			continue;
 
@@ -239,10 +393,17 @@ static int dsa_switch_setup_one(struct dsa_switch *ds, struct device *parent)
 			}
 			dst->cpu_switch = index;
 			dst->cpu_port = i;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+			ds->cpu_port_mask |= 1 << i;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		} else if (!strcmp(name, "dsa")) {
 			ds->dsa_port_mask |= 1 << i;
 		} else {
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+			ds->enabled_port_mask |= 1 << i;
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 			ds->phys_port_mask |= 1 << i;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		}
 		valid_name_found = true;
 	}
@@ -255,7 +416,11 @@ static int dsa_switch_setup_one(struct dsa_switch *ds, struct device *parent)
 	/* Make the built-in MII bus mask match the number of ports,
 	 * switch drivers can override this later
 	 */
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	ds->phys_mii_mask = ds->enabled_port_mask;
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	ds->phys_mii_mask = ds->phys_port_mask;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	/*
 	 * If the CPU connects to this switch, set the switch tree
@@ -263,6 +428,15 @@ static int dsa_switch_setup_one(struct dsa_switch *ds, struct device *parent)
 	 * switch.
 	 */
 	if (dst->cpu_switch == index) {
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+		dst->tag_ops = dsa_resolve_tag_protocol(drv->tag_protocol);
+		if (IS_ERR(dst->tag_ops)) {
+			ret = PTR_ERR(dst->tag_ops);
+			goto out;
+		}
+
+		dst->rcv = dst->tag_ops->rcv;
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		switch (ds->tag_protocol) {
 #ifdef CONFIG_NET_DSA_TAG_DSA
 		case DSA_TAG_PROTO_DSA:
@@ -292,7 +466,12 @@ static int dsa_switch_setup_one(struct dsa_switch *ds, struct device *parent)
 		}
 
 		dst->tag_protocol = ds->tag_protocol;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	}
+
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	memcpy(ds->rtable, cd->rtable, sizeof(ds->rtable));
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	/*
 	 * Do basic register setup.
@@ -305,8 +484,15 @@ static int dsa_switch_setup_one(struct dsa_switch *ds, struct device *parent)
 	if (ret < 0)
 		goto out;
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	if (!ds->slave_mii_bus && drv->phy_read) {
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	ds->slave_mii_bus = devm_mdiobus_alloc(parent);
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	if (!ds->slave_mii_bus) {
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	if (ds->slave_mii_bus == NULL) {
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		ret = -ENOMEM;
 		goto out;
 	}
@@ -315,11 +501,27 @@ static int dsa_switch_setup_one(struct dsa_switch *ds, struct device *parent)
 	ret = mdiobus_register(ds->slave_mii_bus);
 	if (ret < 0)
 		goto out;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	}
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	/*
 	 * Create network devices for physical switch ports.
 	 */
 	for (i = 0; i < DSA_MAX_PORTS; i++) {
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+		ds->ports[i].dn = cd->port_dn[i];
+
+		if (!(ds->enabled_port_mask & (1 << i)))
+			continue;
+
+		ret = dsa_slave_create(ds, parent, i, cd->port_names[i]);
+		if (ret < 0) {
+			netdev_err(dst->master_netdev, "[%d]: can't create dsa slave device for port %d(%s): %d\n",
+				   index, i, cd->port_names[i], ret);
+			ret = 0;
+		}
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		if (!(ds->phys_port_mask & (1 << i)))
 			continue;
 
@@ -329,15 +531,26 @@ static int dsa_switch_setup_one(struct dsa_switch *ds, struct device *parent)
 				   index, i, pd->port_names[i], ret);
 			ret = 0;
 		}
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	}
 
 	/* Perform configuration of the CPU and DSA ports */
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	ret = dsa_cpu_dsa_setups(ds, parent);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	ret = dsa_cpu_dsa_setup(ds, dst->master_netdev);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	if (ret < 0) {
 		netdev_err(dst->master_netdev, "[%d] : can't configure CPU and DSA ports\n",
 			   index);
 		ret = 0;
 	}
+
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	ret = dsa_cpu_port_ethtool_setup(ds);
+	if (ret)
+		return ret;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 #ifdef CONFIG_NET_DSA_HWMON
 	/* If the switch provides a temperature sensor,
@@ -374,16 +587,29 @@ static struct dsa_switch *
 dsa_switch_setup(struct dsa_switch_tree *dst, int index,
 		 struct device *parent, struct device *host_dev)
 {
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	struct dsa_chip_data *cd = dst->pd->chip + index;
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct dsa_chip_data *pd = dst->pd->chip + index;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct dsa_switch_driver *drv;
 	struct dsa_switch *ds;
 	int ret;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	const char *name;
+	void *priv;
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	char *name;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	/*
 	 * Probe for switch model.
 	 */
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	drv = dsa_switch_probe(parent, host_dev, cd->sw_addr, &name, &priv);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	drv = dsa_switch_probe(host_dev, pd->sw_addr, &name);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	if (drv == NULL) {
 		netdev_err(dst->master_netdev, "[%d]: could not detect attached switch\n",
 			   index);
@@ -395,16 +621,29 @@ dsa_switch_setup(struct dsa_switch_tree *dst, int index,
 	/*
 	 * Allocate and initialise switch state.
 	 */
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	ds = devm_kzalloc(parent, sizeof(*ds), GFP_KERNEL);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	ds = devm_kzalloc(parent, sizeof(*ds) + drv->priv_size, GFP_KERNEL);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	if (ds == NULL)
 		return ERR_PTR(-ENOMEM);
 
 	ds->dst = dst;
 	ds->index = index;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	ds->cd = cd;
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	ds->pd = pd;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	ds->drv = drv;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	ds->priv = priv;
+	ds->dev = parent;
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	ds->tag_protocol = drv->tag_protocol;
 	ds->master_dev = host_dev;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	ret = dsa_switch_setup_one(ds, parent);
 	if (ret)
@@ -413,6 +652,55 @@ dsa_switch_setup(struct dsa_switch_tree *dst, int index,
 	return ds;
 }
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+void dsa_cpu_dsa_destroy(struct device_node *port_dn)
+{
+	struct phy_device *phydev;
+
+	if (of_phy_is_fixed_link(port_dn)) {
+		phydev = of_phy_find_device(port_dn);
+		if (phydev) {
+			phy_device_free(phydev);
+			fixed_phy_unregister(phydev);
+		}
+	}
+}
+
+static void dsa_switch_destroy(struct dsa_switch *ds)
+{
+	int port;
+
+#ifdef CONFIG_NET_DSA_HWMON
+	if (ds->hwmon_dev)
+		hwmon_device_unregister(ds->hwmon_dev);
+#endif
+
+	/* Destroy network devices for physical switch ports. */
+	for (port = 0; port < DSA_MAX_PORTS; port++) {
+		if (!(ds->enabled_port_mask & (1 << port)))
+			continue;
+
+		if (!ds->ports[port].netdev)
+			continue;
+
+		dsa_slave_destroy(ds->ports[port].netdev);
+	}
+
+	/* Disable configuration of the CPU and DSA ports */
+	for (port = 0; port < DSA_MAX_PORTS; port++) {
+		if (!(dsa_is_cpu_port(ds, port) || dsa_is_dsa_port(ds, port)))
+			continue;
+		dsa_cpu_dsa_destroy(ds->ports[port].dn);
+
+		/* Clearing a bit which is not set does no harm */
+		ds->cpu_port_mask |= ~(1 << port);
+		ds->dsa_port_mask |= ~(1 << port);
+	}
+
+	if (ds->slave_mii_bus && ds->drv->phy_read)
+		mdiobus_unregister(ds->slave_mii_bus);
+}
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 static void dsa_switch_destroy(struct dsa_switch *ds)
 {
 	struct device_node *port_dn;
@@ -424,7 +712,6 @@ static void dsa_switch_destroy(struct dsa_switch *ds)
 	if (ds->hwmon_dev)
 		hwmon_device_unregister(ds->hwmon_dev);
 #endif
-
 	/* Disable configuration of the CPU and DSA ports */
 	for (port = 0; port < DSA_MAX_PORTS; port++) {
 		if (!(dsa_is_cpu_port(ds, port) || dsa_is_dsa_port(ds, port)))
@@ -457,6 +744,7 @@ static void dsa_switch_destroy(struct dsa_switch *ds)
 
 	mdiobus_unregister(ds->slave_mii_bus);
 }
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 #ifdef CONFIG_PM_SLEEP
 static int dsa_switch_suspend(struct dsa_switch *ds)
@@ -468,7 +756,11 @@ static int dsa_switch_suspend(struct dsa_switch *ds)
 		if (!dsa_is_port_initialized(ds, i))
 			continue;
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+		ret = dsa_slave_suspend(ds->ports[i].netdev);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		ret = dsa_slave_suspend(ds->ports[i]);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		if (ret)
 			return ret;
 	}
@@ -494,7 +786,11 @@ static int dsa_switch_resume(struct dsa_switch *ds)
 		if (!dsa_is_port_initialized(ds, i))
 			continue;
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+		ret = dsa_slave_resume(ds->ports[i].netdev);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		ret = dsa_slave_resume(ds->ports[i]);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		if (ret)
 			return ret;
 	}
@@ -503,6 +799,9 @@ static int dsa_switch_resume(struct dsa_switch *ds)
 }
 #endif
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+// do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 /* link polling *************************************************************/
 static void dsa_link_poll_work(struct work_struct *ugly)
 {
@@ -527,6 +826,7 @@ static void dsa_link_poll_timer(unsigned long _dst)
 
 	schedule_work(&dst->link_poll_work);
 }
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 /* platform driver init and cleanup *****************************************/
 static int dev_is_class(struct device *dev, void *class)
@@ -611,6 +911,9 @@ static int dsa_of_setup_routing_table(struct dsa_platform_data *pd,
 	if (link_sw_addr >= pd->nr_chips)
 		return -EINVAL;
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+// do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	/* First time routing table allocation */
 	if (!cd->rtable) {
 		cd->rtable = kmalloc_array(pd->nr_chips, sizeof(s8),
@@ -621,6 +924,7 @@ static int dsa_of_setup_routing_table(struct dsa_platform_data *pd,
 		/* default to no valid uplink/downlink */
 		memset(cd->rtable, -1, pd->nr_chips * sizeof(s8));
 	}
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	cd->rtable[link_sw_addr] = port_index;
 
@@ -663,7 +967,10 @@ static void dsa_of_free_platform_data(struct dsa_platform_data *pd)
 			kfree(pd->chip[i].port_names[port_index]);
 			port_index++;
 		}
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		kfree(pd->chip[i].rtable);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 		/* Drop our reference to the MDIO bus device */
 		if (pd->chip[i].host_dev)
@@ -854,8 +1161,11 @@ static int dsa_setup_dst(struct dsa_switch_tree *dst, struct net_device *dev,
 		}
 
 		dst->ds[i] = ds;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		if (ds->drv->poll_link != NULL)
 			dst->link_poll_needed = 1;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 		++configured;
 	}
@@ -874,6 +1184,9 @@ static int dsa_setup_dst(struct dsa_switch_tree *dst, struct net_device *dev,
 	wmb();
 	dev->dsa_ptr = (void *)dst;
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+// do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	if (dst->link_poll_needed) {
 		INIT_WORK(&dst->link_poll_work, dsa_link_poll_work);
 		init_timer(&dst->link_poll_timer);
@@ -882,6 +1195,7 @@ static int dsa_setup_dst(struct dsa_switch_tree *dst, struct net_device *dev,
 		dst->link_poll_timer.expires = round_jiffies(jiffies + HZ);
 		add_timer(&dst->link_poll_timer);
 	}
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	return 0;
 }
@@ -934,8 +1248,15 @@ static int dsa_probe(struct platform_device *pdev)
 	platform_set_drvdata(pdev, dst);
 
 	ret = dsa_setup_dst(dst, dev, &pdev->dev, pd);
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	if (ret) {
+		dev_put(dev);
+		goto out;
+	}
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	if (ret)
 		goto out;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	return 0;
 
@@ -949,10 +1270,20 @@ static void dsa_remove_dst(struct dsa_switch_tree *dst)
 {
 	int i;
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	dst->master_netdev->dsa_ptr = NULL;
+
+	/* If we used a tagging format that doesn't have an ethertype
+	 * field, make sure that all packets from this point get sent
+	 * without the tag and go through the regular receive path.
+	 */
+	wmb();
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	if (dst->link_poll_needed)
 		del_timer_sync(&dst->link_poll_timer);
 
 	flush_work(&dst->link_poll_work);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	for (i = 0; i < dst->pd->nr_chips; i++) {
 		struct dsa_switch *ds = dst->ds[i];
@@ -960,6 +1291,12 @@ static void dsa_remove_dst(struct dsa_switch_tree *dst)
 		if (ds)
 			dsa_switch_destroy(ds);
 	}
+
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	dsa_cpu_port_ethtool_restore(dst->ds[0]);
+
+	dev_put(dst->master_netdev);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 }
 
 static int dsa_remove(struct platform_device *pdev)

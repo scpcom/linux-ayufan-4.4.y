@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * NVM Express device driver
  * Copyright (c) 2011-2014, Intel Corporation.
@@ -2535,10 +2538,19 @@ static inline bool nvme_io_incapable(struct nvme_dev *dev)
 							dev->online_queues < 2);
 }
 
+#ifdef MY_ABC_HERE
+int (*funcSYNORaidNVMeUnplug)(char *szNVMeName) = NULL;
+EXPORT_SYMBOL(funcSYNORaidNVMeUnplug);
+#endif /* MY_ABC_HERE */
+
 static void nvme_ns_remove(struct nvme_ns *ns)
 {
 	bool kill = nvme_io_incapable(ns->dev) && !blk_queue_dying(ns->queue);
+#ifdef MY_ABC_HERE
+	char device_name[16] = {0};
 
+	strlcpy(device_name, ns->disk->disk_name, sizeof(device_name));
+#endif /* MY_ABC_HERE */
 	if (kill) {
 		blk_set_queue_dying(ns->queue);
 
@@ -2558,6 +2570,11 @@ static void nvme_ns_remove(struct nvme_ns *ns)
 	}
 	list_del_init(&ns->list);
 	kref_put(&ns->kref, nvme_free_ns);
+#ifdef MY_ABC_HERE
+	if (funcSYNORaidNVMeUnplug) {
+		funcSYNORaidNVMeUnplug(device_name);
+	}
+#endif  /* MY_ABC_HERE */
 }
 
 static void nvme_scan_namespaces(struct nvme_dev *dev, unsigned nn)

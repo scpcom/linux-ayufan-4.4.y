@@ -257,7 +257,11 @@ static int add_children(struct i2c_client *client)
 	int		i;
 
 	/* GPIO-ish stuff */
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	dm355evm_msp_gpio.parent = &client->dev;
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	dm355evm_msp_gpio.dev = &client->dev;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	status = gpiochip_add(&dm355evm_msp_gpio);
 	if (status < 0)
 		return status;

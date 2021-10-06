@@ -486,7 +486,7 @@ static int configfs_release_bin_file(struct inode *inode, struct file *filp)
 	ssize_t len = 0;
 	int ret;
 
-#ifdef MY_DEF_HERE
+#ifdef MY_ABC_HERE
 	if (buffer->read_in_progress) {
 		buffer->read_in_progress = 0;
 		vfree(buffer->bin_buffer);

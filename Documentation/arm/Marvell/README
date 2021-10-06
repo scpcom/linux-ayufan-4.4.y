@@ -86,20 +86,25 @@ EBU Armada family
     Product Brief:   http://www.marvell.com/embedded-processors/armada-300/assets/Marvell_ARMADA_370_SoC.pdf
     Hardware Spec:   http://www.marvell.com/embedded-processors/armada-300/assets/ARMADA370-datasheet.pdf
     Functional Spec: http://www.marvell.com/embedded-processors/armada-300/assets/ARMADA370-FunctionalSpec-datasheet.pdf
+    Core:            Marvell PJ4B, ARMv7 compatible
 
   Armada 375 Flavors:
 	88F6720
     Product Brief: http://www.marvell.com/embedded-processors/armada-300/assets/ARMADA_375_SoC-01_product_brief.pdf
+    Core:          ARM Cortex-A9
 
   Armada 380/385 Flavors:
 	88F6810
 	88F6820
 	88F6828
+    Functional spec: https://marvellcorp.wufoo.com/forms/marvell-armada-38x-functional-specifications/
+    Core:          ARM Cortex-A9
 
   Armada 390/398 Flavors:
 	88F6920
 	88F6928
     Product infos: http://www.marvell.com/embedded-processors/armada-39x/
+    Core:          ARM Cortex-A9
 
   Armada XP Flavors:
         MV78230
@@ -112,11 +117,42 @@ EBU Armada family
       http://www.marvell.com/embedded-processors/armada-xp/assets/HW_MV78230_OS.PDF
       http://www.marvell.com/embedded-processors/armada-xp/assets/HW_MV78260_OS.PDF
       http://www.marvell.com/embedded-processors/armada-xp/assets/HW_MV78460_OS.PDF
-
-  Core: Sheeva ARMv7 compatible
+    Core: Marvell PJ4B-MP, ARMv7 compatible
 
   Linux kernel mach directory: arch/arm/mach-mvebu
   Linux kernel plat directory: none
+
+EBU Armada family ARMv8
+-----------------------
+
+  Armada 3710/3720 Flavors:
+	88F3710
+	88F3720
+	Core: ARM Cortex A53 (ARMv8)
+
+	Homepage: http://www.marvell.com/embedded-processors/armada-3700/
+	Product Brief: http://www.marvell.com/embedded-processors/assets/PB-88F3700-FNL.pdf
+	Device tree files: arch/arm64/boot/dts/marvell/armada-37*
+
+  Armada 7K Flavors:
+	88F7020 (AP806 Dual + one CP110)
+	88F7040 (AP806 Quad + one CP110)
+	Core: ARM Cortex A72
+
+	Homepage: http://www.marvell.com/embedded-processors/armada-70xx/
+	Product Brief: http://www.marvell.com/embedded-processors/assets/Armada7020PB-Jan2016.pdf
+		       http://www.marvell.com/embedded-processors/assets/Armada7040PB-Jan2016.pdf
+	Device tree files: arch/arm64/boot/dts/marvell/armada-70*
+
+  Armada 8K Flavors:
+	88F8020 (AP806 Dual + two CP110)
+	88F8040 (AP806 Quad + two CP110)
+	Core: ARM Cortex A72
+
+	Homepage: http://www.marvell.com/embedded-processors/armada-80xx/
+	Product Brief: http://www.marvell.com/embedded-processors/assets/Armada8020PB-Jan2016.pdf
+		       http://www.marvell.com/embedded-processors/assets/Armada8040PB-Jan2016.pdf
+	Device tree files: arch/arm64/boot/dts/marvell/armada-80*
 
 Avanta family
 -------------

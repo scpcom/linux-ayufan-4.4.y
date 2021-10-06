@@ -299,8 +299,13 @@ int phy_power_on(struct phy *phy)
 			dev_err(&phy->dev, "phy poweron failed --> %d\n", ret);
 			goto err_pwr_on;
 		}
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+		++phy->power_count;
+	}
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	}
 	++phy->power_count;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	mutex_unlock(&phy->mutex);
 	return 0;
 
@@ -330,8 +335,13 @@ int phy_power_off(struct phy *phy)
 			mutex_unlock(&phy->mutex);
 			return ret;
 		}
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+		--phy->power_count;
+	}
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	}
 	--phy->power_count;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	mutex_unlock(&phy->mutex);
 	phy_pm_runtime_put(phy);
 
@@ -342,6 +352,71 @@ int phy_power_off(struct phy *phy)
 }
 EXPORT_SYMBOL_GPL(phy_power_off);
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+int phy_set_mode(struct phy *phy, enum phy_mode mode)
+{
+	int ret;
+
+	if (!phy || !phy->ops->set_mode)
+		return 0;
+
+	mutex_lock(&phy->mutex);
+	ret = phy->ops->set_mode(phy, mode);
+	mutex_unlock(&phy->mutex);
+
+	return ret;
+}
+EXPORT_SYMBOL_GPL(phy_set_mode);
+
+enum phy_mode phy_get_mode(struct phy *phy)
+{
+	int ret;
+
+	if (!phy || !phy->ops->get_mode)
+		return 0;
+
+	mutex_lock(&phy->mutex);
+	ret = phy->ops->get_mode(phy);
+	mutex_unlock(&phy->mutex);
+
+	return ret;
+}
+EXPORT_SYMBOL_GPL(phy_get_mode);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+int phy_send_command(struct phy *phy, u32 command)
+{
+	int ret;
+
+	if (!phy || !phy->ops->get_mode)
+		return 0;
+
+	mutex_lock(&phy->mutex);
+	ret = phy->ops->send_command(phy, command);
+	mutex_unlock(&phy->mutex);
+
+	return ret;
+}
+EXPORT_SYMBOL_GPL(phy_send_command);
+
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+int phy_is_pll_locked(struct phy *phy)
+{
+	int ret;
+
+	if (!phy || !phy->ops->is_pll_locked)
+		return 0;
+
+	mutex_lock(&phy->mutex);
+	ret = phy->ops->is_pll_locked(phy);
+	mutex_unlock(&phy->mutex);
+
+	return ret;
+}
+
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 /**
  * _of_phy_get() - lookup and obtain a reference to a phy by phandle
  * @np: device_node for which to get the phy

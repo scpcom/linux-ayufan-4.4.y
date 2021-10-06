@@ -178,7 +178,7 @@ enum usb_device_speed of_usb_get_maximum_speed(struct device_node *np)
 }
 EXPORT_SYMBOL_GPL(of_usb_get_maximum_speed);
 
-#endif
+#endif /* MY_DEF_HERE */
 /**
  * of_usb_host_tpl_support - to get if Targeted Peripheral List is supported
  * for given targeted hosts (non-PC hosts)

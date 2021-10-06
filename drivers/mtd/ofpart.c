@@ -36,10 +36,18 @@ static int parse_ofpart_partitions(struct mtd_info *master,
 	int nr_parts, i, ret = 0;
 	bool dedicated = true;
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	/*
+	 * of_node can be provided through auxiliary parser data or (preferred)
+	 * by assigning the master device node
+	 */
+	mtd_node = data && data->of_node ? data->of_node : mtd_get_of_node(master);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	if (!data)
 		return 0;
 
 	mtd_node = data->of_node;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	if (!mtd_node)
 		return 0;
 
@@ -156,10 +164,18 @@ static int parse_ofoldpart_partitions(struct mtd_info *master,
 	} *part;
 	const char *names;
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	/*
+	 * of_node can be provided through auxiliary parser data or (preferred)
+	 * by assigning the master device node
+	 */
+	dp = data && data->of_node ? data->of_node : mtd_get_of_node(master);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	if (!data)
 		return 0;
 
 	dp = data->of_node;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	if (!dp)
 		return 0;
 

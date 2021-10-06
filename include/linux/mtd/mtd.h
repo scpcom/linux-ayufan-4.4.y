@@ -162,6 +162,19 @@ struct mtd_info {
 	int usecount;
 };
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+static inline void mtd_set_of_node(struct mtd_info *mtd,
+				   struct device_node *np)
+{
+	mtd->dev.of_node = np;
+}
+
+static inline struct device_node *mtd_get_of_node(struct mtd_info *mtd)
+{
+	return mtd->dev.of_node;
+}
+#endif  
+
 int mtd_erase(struct mtd_info *mtd, struct erase_info *instr);
 int mtd_point(struct mtd_info *mtd, loff_t from, size_t len, size_t *retlen,
 	      void **virt, resource_size_t *phys);

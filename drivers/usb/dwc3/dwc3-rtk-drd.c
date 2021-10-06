@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /**
  * dwc3-rtk-drd.c - Realtek DWC3 Specific Glue layer
  *
@@ -112,9 +109,7 @@ err0:
 	dev_info(dwc->dev, "%s END....", __func__);
 	return ret;
 }
-#ifdef MY_DEF_HERE
 EXPORT_SYMBOL_GPL(dwc3_drd_to_host);
-#endif
 
 int dwc3_drd_to_device(struct dwc3 *dwc)
 {
@@ -188,9 +183,7 @@ err0:
 	dev_info(dwc->dev, "%s END....", __func__);
 	return ret;
 }
-#ifdef MY_DEF_HERE
 EXPORT_SYMBOL_GPL(dwc3_drd_to_device);
-#endif
 
 int dwc3_drd_to_stop_all(struct dwc3 *dwc)
 {
@@ -208,6 +201,4 @@ int dwc3_drd_to_stop_all(struct dwc3 *dwc)
 	wmb();
 	return ret;
 }
-#ifdef MY_DEF_HERE
 EXPORT_SYMBOL_GPL(dwc3_drd_to_stop_all);
-#endif

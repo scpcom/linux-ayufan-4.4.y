@@ -488,7 +488,11 @@ static struct pinctrl_desc wmt_desc = {
 
 static int wmt_gpio_get_direction(struct gpio_chip *chip, unsigned offset)
 {
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	struct wmt_pinctrl_data *data = dev_get_drvdata(chip->parent);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct wmt_pinctrl_data *data = dev_get_drvdata(chip->dev);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	u32 bank = WMT_BANK_FROM_PIN(offset);
 	u32 bit = WMT_BIT_FROM_PIN(offset);
 	u32 reg_dir = data->banks[bank].reg_dir;
@@ -503,7 +507,11 @@ static int wmt_gpio_get_direction(struct gpio_chip *chip, unsigned offset)
 
 static int wmt_gpio_get_value(struct gpio_chip *chip, unsigned offset)
 {
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	struct wmt_pinctrl_data *data = dev_get_drvdata(chip->parent);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct wmt_pinctrl_data *data = dev_get_drvdata(chip->dev);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	u32 bank = WMT_BANK_FROM_PIN(offset);
 	u32 bit = WMT_BIT_FROM_PIN(offset);
 	u32 reg_data_in = data->banks[bank].reg_data_in;
@@ -519,7 +527,11 @@ static int wmt_gpio_get_value(struct gpio_chip *chip, unsigned offset)
 static void wmt_gpio_set_value(struct gpio_chip *chip, unsigned offset,
 			       int val)
 {
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	struct wmt_pinctrl_data *data = dev_get_drvdata(chip->parent);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct wmt_pinctrl_data *data = dev_get_drvdata(chip->dev);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	u32 bank = WMT_BANK_FROM_PIN(offset);
 	u32 bit = WMT_BIT_FROM_PIN(offset);
 	u32 reg_data_out = data->banks[bank].reg_data_out;
@@ -575,7 +587,11 @@ int wmt_pinctrl_probe(struct platform_device *pdev,
 	wmt_desc.npins = data->npins;
 
 	data->gpio_chip = wmt_gpio_chip;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	data->gpio_chip.parent = &pdev->dev;
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	data->gpio_chip.dev = &pdev->dev;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	data->gpio_chip.of_node = pdev->dev.of_node;
 	data->gpio_chip.ngpio = data->nbanks * 32;
 

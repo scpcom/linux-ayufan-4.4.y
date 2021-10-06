@@ -46,13 +46,26 @@
 #define SDCLK_DELAY_SHIFT	9
 #define SDCLK_DELAY_MASK	0x1f
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#define SD_EXTRA_PARAM_REG	0x100
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 #define SD_CFG_FIFO_PARAM       0x100
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 #define SDCFG_GEN_PAD_CLK_ON	(1<<6)
 #define SDCFG_GEN_PAD_CLK_CNT_MASK	0xFF
 #define SDCFG_GEN_PAD_CLK_CNT_SHIFT	24
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#define SD_FIFO_PARAM_REG	0x104
+#define SD_USE_DAT3		BIT(7)
+#define SD_OVRRD_CLK_OEN	BIT(11)
+#define SD_FORCE_CLK_ON		BIT(12)
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 #define SD_SPI_MODE          0x108
 #define SD_CE_ATA_1          0x10C
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#define SDCE_MMC_CARD		BIT(28)
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 #define SD_CE_ATA_2          0x10E
 #define SDCE_MISC_INT		(1<<2)
@@ -63,6 +76,10 @@ struct sdhci_pxa {
 	struct clk *clk_io;
 	u8	power_mode;
 	void __iomem *sdio3_conf_reg;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	void __iomem *mbus_win_regs;
+	bool dat3_cd_enabled;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 };
 
 /*
@@ -81,6 +98,17 @@ struct sdhci_pxa {
 #define SDIO3_CONF_CLK_INV	BIT(0)
 #define SDIO3_CONF_SD_FB_CLK	BIT(2)
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+static int mv_conf_mbus_windows(struct device *dev, void __iomem *regs,
+				const struct mbus_dram_target_info *dram)
+{
+	int i;
+
+	if (!dram) {
+		dev_err(dev, "no mbus dram info\n");
+		return -EINVAL;
+	}
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 static int mv_conf_mbus_windows(struct platform_device *pdev,
 				const struct mbus_dram_target_info *dram)
 {
@@ -104,6 +132,7 @@ static int mv_conf_mbus_windows(struct platform_device *pdev,
 		dev_err(&pdev->dev, "cannot map mbus registers\n");
 		return -ENOMEM;
 	}
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	for (i = 0; i < SDHCI_MAX_WIN_NUM; i++) {
 		writel(0, regs + SDHCI_WINDOW_CTRL(i));
@@ -122,7 +151,11 @@ static int mv_conf_mbus_windows(struct platform_device *pdev,
 		writel(cs->base, regs + SDHCI_WINDOW_BASE(i));
 	}
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+//do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	iounmap(regs);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	return 0;
 }
@@ -134,6 +167,13 @@ static int armada_38x_quirks(struct platform_device *pdev,
 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
 	struct sdhci_pxa *pxa = pltfm_host->priv;
 	struct resource *res;
+
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	res = platform_get_resource_byname(pdev, IORESOURCE_MEM, "mbus");
+	pxa->mbus_win_regs = devm_ioremap_resource(&pdev->dev, res);
+	if (IS_ERR(pxa->mbus_win_regs))
+		return PTR_ERR(pxa->mbus_win_regs);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	host->quirks &= ~SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN;
 	host->quirks |= SDHCI_QUIRK_MISSING_CAPS;
@@ -170,13 +210,42 @@ static int armada_38x_quirks(struct platform_device *pdev,
 	}
 	host->caps1 &= ~(SDHCI_SUPPORT_SDR104 | SDHCI_USE_SDR50_TUNING);
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	if (of_property_read_bool(np, "dat3-cd") &&
+	    !of_property_read_bool(np, "broken-cd"))
+		pxa->dat3_cd_enabled = true;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+
 	return 0;
 }
+
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+static void pxav3_set_clock(struct sdhci_host *host, unsigned int clock)
+{
+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+	struct sdhci_pxa *pxa = pltfm_host->priv;
+
+	sdhci_set_clock(host, clock);
+
+	/*
+	 * The interface clock enable is also used as control
+	 * for the A38x SDIO IP, so it can't be powered down
+	 * when using HW-based card detection.
+	 */
+	if (clock == 0 && pxa->dat3_cd_enabled)
+		sdhci_writew(host, SDHCI_CLOCK_INT_EN, SDHCI_CLOCK_CONTROL);
+}
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 static void pxav3_reset(struct sdhci_host *host, u8 mask)
 {
 	struct platform_device *pdev = to_platform_device(mmc_dev(host->mmc));
 	struct sdhci_pxa_platdata *pdata = pdev->dev.platform_data;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+	struct sdhci_pxa *pxa = pltfm_host->priv;
+	u32 reg_val;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	sdhci_reset(host, mask);
 
@@ -194,8 +263,47 @@ static void pxav3_reset(struct sdhci_host *host, u8 mask)
 			tmp |= SDCLK_SEL;
 			writew(tmp, host->ioaddr + SD_CLOCK_BURST_SIZE_SETUP);
 		}
+
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+		if (pxa->dat3_cd_enabled) {
+			reg_val = sdhci_readl(host, SD_FIFO_PARAM_REG);
+			reg_val |= SD_USE_DAT3 | SD_OVRRD_CLK_OEN |
+				   SD_FORCE_CLK_ON;
+			sdhci_writel(host, reg_val, SD_FIFO_PARAM_REG);
+
+			/*
+			 * For HW detection based on DAT3 pin keep internal
+			 * clk switched on after controller reset.
+			 */
+			reg_val = sdhci_readl(host, SDHCI_CLOCK_CONTROL);
+			reg_val |= SDHCI_CLOCK_INT_EN;
+			sdhci_writel(host, reg_val, SDHCI_CLOCK_CONTROL);
+		}
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	}
 }
+
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+static void pxav3_init_card(struct sdhci_host *host, struct mmc_card *card)
+{
+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+	struct sdhci_pxa *pxa = pltfm_host->priv;
+	u32 reg_val;
+
+	/*
+	 * Armada 38x SDHCI controller requires update of
+	 * MMC_CARD bit depending on inserted card type.
+	 */
+	if (pxa->mbus_win_regs) {
+		reg_val = sdhci_readl(host, SD_CE_ATA_1);
+		if (mmc_card_mmc(card))
+			reg_val |= SDCE_MMC_CARD;
+		else
+			reg_val &= ~SDCE_MMC_CARD;
+		sdhci_writel(host, reg_val, SD_CE_ATA_1);
+	}
+}
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 #define MAX_WAIT_COUNT 5
 static void pxav3_gen_init_74_clocks(struct sdhci_host *host, u8 power_mode)
@@ -221,9 +329,15 @@ static void pxav3_gen_init_74_clocks(struct sdhci_host *host, u8 power_mode)
 		writew(tmp, host->ioaddr + SD_CE_ATA_2);
 
 		/* start sending the 74 clocks */
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+		tmp = readw(host->ioaddr + SD_EXTRA_PARAM_REG);
+		tmp |= SDCFG_GEN_PAD_CLK_ON;
+		writew(tmp, host->ioaddr + SD_EXTRA_PARAM_REG);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		tmp = readw(host->ioaddr + SD_CFG_FIFO_PARAM);
 		tmp |= SDCFG_GEN_PAD_CLK_ON;
 		writew(tmp, host->ioaddr + SD_CFG_FIFO_PARAM);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 		/* slowest speed is about 100KHz or 10usec per clock */
 		udelay(740);
@@ -291,7 +405,12 @@ static void pxav3_set_uhs_signaling(struct sdhci_host *host, unsigned int uhs)
 		    uhs == MMC_TIMING_UHS_DDR50) {
 			reg_val &= ~SDIO3_CONF_CLK_INV;
 			reg_val |= SDIO3_CONF_SD_FB_CLK;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+		} else if (uhs == MMC_TIMING_MMC_HS ||
+			   uhs == MMC_TIMING_SD_HS) {
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		} else if (uhs == MMC_TIMING_MMC_HS) {
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 			reg_val &= ~SDIO3_CONF_CLK_INV;
 			reg_val &= ~SDIO3_CONF_SD_FB_CLK;
 		} else {
@@ -308,12 +427,19 @@ static void pxav3_set_uhs_signaling(struct sdhci_host *host, unsigned int uhs)
 }
 
 static const struct sdhci_ops pxav3_sdhci_ops = {
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	.set_clock = pxav3_set_clock,
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	.set_clock = sdhci_set_clock,
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	.platform_send_init_74_clocks = pxav3_gen_init_74_clocks,
 	.get_max_clock = sdhci_pltfm_clk_get_max_clock,
 	.set_bus_width = sdhci_set_bus_width,
 	.reset = pxav3_reset,
 	.set_uhs_signaling = pxav3_set_uhs_signaling,
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	.init_card = pxav3_init_card,
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 };
 
 static struct sdhci_pltfm_data sdhci_pxav3_pdata = {
@@ -403,7 +529,12 @@ static int sdhci_pxav3_probe(struct platform_device *pdev)
 		ret = armada_38x_quirks(pdev, host);
 		if (ret < 0)
 			goto err_mbus_win;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+		ret = mv_conf_mbus_windows(&pdev->dev, pxa->mbus_win_regs,
+					   mv_mbus_dram_info());
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		ret = mv_conf_mbus_windows(pdev, mv_mbus_dram_info());
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		if (ret < 0)
 			goto err_mbus_win;
 	}
@@ -447,12 +578,18 @@ static int sdhci_pxav3_probe(struct platform_device *pdev)
 		}
 	}
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	if (!pxa->dat3_cd_enabled) {
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	pm_runtime_get_noresume(&pdev->dev);
 	pm_runtime_set_active(&pdev->dev);
 	pm_runtime_set_autosuspend_delay(&pdev->dev, PXAV3_RPM_DELAY_MS);
 	pm_runtime_use_autosuspend(&pdev->dev);
 	pm_runtime_enable(&pdev->dev);
 	pm_suspend_ignore_children(&pdev->dev, 1);
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	}
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	ret = sdhci_add_host(host);
 	if (ret) {
@@ -465,13 +602,22 @@ static int sdhci_pxav3_probe(struct platform_device *pdev)
 	if (host->mmc->pm_caps & MMC_PM_WAKE_SDIO_IRQ)
 		device_init_wakeup(&pdev->dev, 1);
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	if (!pxa->dat3_cd_enabled)
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	pm_runtime_put_autosuspend(&pdev->dev);
 
 	return 0;
 
 err_add_host:
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	if (!pxa->dat3_cd_enabled) {
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	pm_runtime_disable(&pdev->dev);
 	pm_runtime_put_noidle(&pdev->dev);
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	}
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 err_of_parse:
 err_cd_req:
 err_mbus_win:
@@ -488,9 +634,15 @@ static int sdhci_pxav3_remove(struct platform_device *pdev)
 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
 	struct sdhci_pxa *pxa = pltfm_host->priv;
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	if (!pxa->dat3_cd_enabled) {
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	pm_runtime_get_sync(&pdev->dev);
 	pm_runtime_disable(&pdev->dev);
 	pm_runtime_put_noidle(&pdev->dev);
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	}
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	sdhci_remove_host(host, 1);
 
@@ -507,9 +659,21 @@ static int sdhci_pxav3_suspend(struct device *dev)
 {
 	int ret;
 	struct sdhci_host *host = dev_get_drvdata(dev);
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+	struct sdhci_pxa *pxa = pltfm_host->priv;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	if (!pxa->dat3_cd_enabled)
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	pm_runtime_get_sync(dev);
 	ret = sdhci_suspend_host(host);
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	if (pxa->dat3_cd_enabled)
+		return ret;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+
 	pm_runtime_mark_last_busy(dev);
 	pm_runtime_put_autosuspend(dev);
 
@@ -520,9 +684,25 @@ static int sdhci_pxav3_resume(struct device *dev)
 {
 	int ret;
 	struct sdhci_host *host = dev_get_drvdata(dev);
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+	struct sdhci_pxa *pxa = pltfm_host->priv;
 
+	if (pxa->mbus_win_regs)
+		ret = mv_conf_mbus_windows(dev, pxa->mbus_win_regs,
+					   mv_mbus_dram_info());
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	if (!pxa->dat3_cd_enabled)
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	pm_runtime_get_sync(dev);
 	ret = sdhci_resume_host(host);
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	if (pxa->dat3_cd_enabled)
+		return ret;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+
 	pm_runtime_mark_last_busy(dev);
 	pm_runtime_put_autosuspend(dev);
 

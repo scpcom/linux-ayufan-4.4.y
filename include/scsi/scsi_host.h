@@ -161,6 +161,9 @@ struct scsi_host_template {
 #endif  
 
 	u64 vendor_id;
+#ifdef MY_DEF_HERE
+        unsigned char (* syno_get_disk_speed)(struct Scsi_Host *host, unsigned int phy_id);
+#endif  
 
 	unsigned int cmd_size;
 	struct scsi_host_cmd_pool *cmd_pool;

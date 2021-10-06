@@ -33,7 +33,11 @@ static struct gen_74x164_chip *gpio_to_74x164_chip(struct gpio_chip *gc)
 
 static int __gen_74x164_write_config(struct gen_74x164_chip *chip)
 {
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	struct spi_device *spi = to_spi_device(chip->gpio_chip.parent);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct spi_device *spi = to_spi_device(chip->gpio_chip.dev);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct spi_message message;
 	struct spi_transfer *msg_buf;
 	int i, ret = 0;
@@ -143,7 +147,11 @@ static int gen_74x164_probe(struct spi_device *spi)
 		return -ENOMEM;
 
 	chip->gpio_chip.can_sleep = true;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	chip->gpio_chip.parent = &spi->dev;
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	chip->gpio_chip.dev = &spi->dev;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	chip->gpio_chip.owner = THIS_MODULE;
 
 	mutex_init(&chip->lock);

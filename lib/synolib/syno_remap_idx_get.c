@@ -10,3 +10,13 @@ int syno_get_remap_idx(int origin_idx)
 	}
 }
 EXPORT_SYMBOL(syno_get_remap_idx);
+
+int syno_get_mv_14xx_remap_idx(int origin_idx)
+{
+	if ((g_use_mv14xx_remap) && (origin_idx < SATA_REMAP_MAX)) {
+		return g_syno_mv14xx_remap[origin_idx];
+	} else {
+		return origin_idx;
+	}
+}
+EXPORT_SYMBOL(syno_get_mv_14xx_remap_idx);

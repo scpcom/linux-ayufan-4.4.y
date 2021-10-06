@@ -32,7 +32,7 @@ static void __iomem	*EMMC_MUXPAD;
 static u32 pcie0_gpio_reset = 0;
 static u32 pcie0_gpio_iso = 0;
 
-static bool cfg_direct_access = false;
+static bool cfg_direct_access = true;
 
 static int rtd129x_cpu_id;
 static int rtd129x_cpu_revision;
@@ -48,49 +48,215 @@ static struct reset_control *rstn_pcie0_phy_mdio;
 
 static struct pci_bus *bus;
 
-static void rtk_pci_ctrl_write(unsigned long addr, unsigned int val)
+static spinlock_t rtk_pcie1_lock;
+
+static inline u32 rtk_pcie1_read(u32 addr, u8 size)
 {
-	writel(val, addr + PCIE_CTRL_BASE);
+	u32 rval = 0;
+	u32 mask;
+	u32 translate_val = 0;
+	u32 tmp_addr = addr & 0xFFF;
+	u32 pci_error_status = 0;
+	int retry_cnt = 0;
+	u8 retry = 5;
+
+	unsigned long irqL;
+
+	spin_lock_irqsave(&rtk_pcie1_lock, irqL);
+
+	/* PCIE1.1 0x9804FCEC, PCIE2.0 0x9803CCEC & 0x9803CC68
+	 * can't be used because of 1295 hardware issue.
+	 */
+	if (tmp_addr == 0xCEC || tmp_addr == 0xC68) {
+		mask = PCIE_IO_2K_MASK;
+		rtk_pci_ctrl_write(0xD00, PCIE_IO_2K_MASK);
+		translate_val = rtk_pci_ctrl_read(0xD04);
+		rtk_pci_ctrl_write(0xD04, translate_val | (addr & mask));
+	} else if (addr >= 0x1000) {
+		mask = PCIE_IO_4K_MASK;
+		translate_val = rtk_pci_ctrl_read(0xD04);
+		rtk_pci_ctrl_write(0xD04, translate_val | (addr & mask));
+	} else
+		mask = 0x0;
+
+pci_read_129x_retry:
+
+#ifdef CONFIG_RTK_SW_LOCK_API
+	/* All RBUS1 driver need to have a workaround for emmc hardware error. */
+	/* Need to protect 0xXXXX_X8XX~ 0xXXXX_X9XX. */
+	if((tmp_addr > 0x7FF) && (tmp_addr < 0xA00))
+		rtk_lockapi_lock(flags, __FUNCTION__);
+#endif
+
+	switch (size) {
+	case 1:
+		rval = rtk_pci_direct_read_byte((addr & ~mask));
+		break;
+	case 2:
+		rval = rtk_pci_direct_read_word((addr & ~mask));
+		break;
+	case 4:
+		rval = rtk_pci_direct_read((addr & ~mask));
+		break;
+	default:
+		printk(KERN_INFO "RTD129X: %s: wrong size %d\n", __func__, size);
+		break;
+	}
+
+#ifdef CONFIG_RTK_SW_LOCK_API
+	if((tmp_addr>0x7FF) && (tmp_addr<0xA00))
+		rtk_lockapi_unlock(flags, __FUNCTION__);
+#endif
+
+	//DLLP error patch
+	pci_error_status = rtk_pci_ctrl_read(0xc7c);
+	if (pci_error_status & 0x1F) {
+		rtk_pci_ctrl_write(0xc7c, pci_error_status);
+		printk(KERN_INFO "RTD129X: %s: DLLP(#%d) 0x%x reg=0x%x val=0x%x\n", __func__, retry_cnt, pci_error_status, addr, rval);
+
+		if (retry_cnt < retry) {
+			retry_cnt++;
+			goto pci_read_129x_retry;
+		}
+	}
+
+	/* PCIE1.1 0x9804FCEC, PCIE2.0 0x9803CCEC & 0x9803CC68
+	 * can't be used because of 1295 hardware issue.
+	 */
+	if (tmp_addr == 0xCEC || tmp_addr == 0xC68){
+		rtk_pci_ctrl_write(0xD04, translate_val);
+		rtk_pci_ctrl_write(0xD00, PCIE_IO_4K_MASK);
+	}else if(addr >= 0x1000){
+		rtk_pci_ctrl_write(0xD04, translate_val);
+	}
+
+	spin_unlock_irqrestore(&rtk_pcie1_lock, irqL);
+
+	return rval;
 }
 
-static unsigned int rtk_pci_ctrl_read(unsigned long addr)
+static inline void rtk_pcie1_write(u32 addr, u8 size, u32 wval)
 {
-	unsigned int val = readl(addr + PCIE_CTRL_BASE);
-	return val;
+	u32 mask;
+	u32 translate_val = 0;
+	u32 tmp_addr = addr & 0xFFF;
+	unsigned long irqL;
+
+	spin_lock_irqsave(&rtk_pcie1_lock, irqL);
+
+	/* PCIE1.1 0x9804FCEC, PCIE2.0 0x9803CCEC & 0x9803CC68
+	 * can't be used because of 1295 hardware issue.
+	 */
+	if (tmp_addr == 0xCEC || tmp_addr == 0xC68) {
+		mask = PCIE_IO_2K_MASK;
+		rtk_pci_ctrl_write(0xD00, PCIE_IO_2K_MASK);
+		translate_val = rtk_pci_ctrl_read(0xD04);
+		rtk_pci_ctrl_write(0xD04, translate_val | (addr & mask));
+	} else if (addr >= 0x1000) {
+		mask = PCIE_IO_4K_MASK;
+		translate_val = rtk_pci_ctrl_read(0xD04);
+		rtk_pci_ctrl_write(0xD04, translate_val | (addr & mask));
+	} else
+		mask = 0x0;
+
+#ifdef CONFIG_RTK_SW_LOCK_API
+	/* All RBUS1 driver need to have a workaround for emmc hardware error. */
+	/* Need to protect 0xXXXX_X8XX~ 0xXXXX_X9XX. */
+	if((tmp_addr>0x7FF) && (tmp_addr < 0xA00))
+		rtk_lockapi_lock(flags, __FUNCTION__);
+#endif
+
+	switch (size) {
+	case 1:
+		rtk_pci_direct_write_byte((addr&~mask), wval);
+		break;
+	case 2:
+		rtk_pci_direct_write_word((addr&~mask), wval);
+		break;
+	case 4:
+		rtk_pci_direct_write((addr&~mask), wval);
+		break;
+	default:
+		printk(KERN_INFO "RTD129X: %s: wrong size %d\n", __func__, size);
+		break;
+	}
+
+#ifdef CONFIG_RTK_SW_LOCK_API
+	if((tmp_addr>0x7FF) && (tmp_addr<0xA00))
+		rtk_lockapi_unlock(flags, __FUNCTION__);
+#endif
+
+	/* PCIE1.1 0x9804FCEC, PCIE2.0 0x9803CCEC & 0x9803CC68
+	 * can't be used because of 1295 hardware issue.
+	 */
+	if (tmp_addr == 0xCEC || tmp_addr == 0xC68) {
+		rtk_pci_ctrl_write(0xD04, translate_val);
+		rtk_pci_ctrl_write(0xD00, PCIE_IO_4K_MASK);
+	} else if (addr >= 0x1000) {
+		rtk_pci_ctrl_write(0xD04, translate_val);
+	}
+
+	spin_unlock_irqrestore(&rtk_pcie1_lock, irqL);
 }
 
-static void rtk_pci_direct_cfg_write(unsigned long addr, unsigned int val)
+u8 rtk_pcie1_readb(const volatile void __iomem *addr)
 {
-	writel(val, addr + PCIE_CFG_BASE);
+	return rtk_pcie1_read((u32)addr, 1);
 }
+EXPORT_SYMBOL(rtk_pcie1_readb);
 
-static void rtk_pci_direct_cfg_write_word(unsigned long addr, u16 val)
+u16 rtk_pcie1_readw(const volatile void __iomem *addr)
 {
-	writew(val, addr + PCIE_CFG_BASE);
+	return rtk_pcie1_read((u32)addr, 2);
 }
+EXPORT_SYMBOL(rtk_pcie1_readw);
 
-static void rtk_pci_direct_cfg_write_byte(unsigned long addr, u8 val)
+u32 rtk_pcie1_readl(const volatile void __iomem *addr)
 {
-	writeb(val, addr + PCIE_CFG_BASE);
+	return rtk_pcie1_read((u32)addr, 4);
 }
+EXPORT_SYMBOL(rtk_pcie1_readl);
 
-static unsigned int rtk_pci_direct_cfg_read(unsigned long addr)
+u64 rtk_pcie1_readq(const volatile void __iomem *addr)
 {
-	unsigned int val = readl(addr + PCIE_CFG_BASE);
-	return val;
-}
+	const volatile u32 __iomem *p = addr;
+	u32 low, high;
 
-static u16 rtk_pci_direct_cfg_read_word(unsigned long addr)
-{
-	u16 val = readw(addr + PCIE_CFG_BASE);
-	return val;
-}
+	low = rtk_pcie1_read((u32)p, 4);
+	high = rtk_pcie1_read((u32)(p + 1), 4);
 
-static u8 rtk_pci_direct_cfg_read_byte(unsigned long addr)
-{
-	u8 val = readb(addr + PCIE_CFG_BASE);
-	return val;
+	return low + ((u64)high << 32);
 }
+EXPORT_SYMBOL(rtk_pcie1_readq);
+
+void rtk_pcie1_writeb(u8 val, volatile void __iomem *addr)
+{
+	rtk_pcie1_write((u32)addr, 1, val);
+	return;
+}
+EXPORT_SYMBOL(rtk_pcie1_writeb);
+
+void rtk_pcie1_writew(u16 val, volatile void __iomem *addr)
+{
+	rtk_pcie1_write((u32)addr, 2, val);
+	return;
+}
+EXPORT_SYMBOL(rtk_pcie1_writew);
+
+void rtk_pcie1_writel(u32 val, volatile void __iomem *addr)
+{
+	rtk_pcie1_write((u32)addr, 4, val);
+	return;
+}
+EXPORT_SYMBOL(rtk_pcie1_writel);
+
+void rtk_pcie1_writeq(u64 val, volatile void __iomem *addr)
+{
+	rtk_pcie1_write((u32)addr, 4, val);
+	rtk_pcie1_write((u32)addr + 4, 4, val >> 32);
+	return;
+}
+EXPORT_SYMBOL(rtk_pcie1_writeq);
 
 static int _indirect_cfg_write(unsigned long addr, unsigned long data, unsigned char size)
 {
@@ -220,21 +386,23 @@ static int rtk_pcie_rd_conf(struct pci_bus *bus, unsigned int devfn,
 	int ret = PCIBIOS_DEVICE_NOT_FOUND;
 	u32 val = 0;
 	u8 retry = 5;
+	unsigned long irqL;
 
 	if (rtd129x_cpu_revision == RTD129x_CHIP_REVISION_A00)
 		udelay(200);
 
+	spin_lock_irqsave(&rtk_pcie1_lock, irqL);
 again:
 	if (bus->number == 0 && PCI_SLOT(devfn) == 0 && PCI_FUNC(devfn) == 0) {
 		if (cfg_direct_access) {
 			rtk_pci_ctrl_write(0xC00, 0x40012);
 
 			if (size == 1)
-				*pval = rtk_pci_direct_cfg_read_byte(reg);
+				*pval = rtk_pci_direct_read_byte(reg);
 			else if (size == 2)
-				*pval = rtk_pci_direct_cfg_read_word(reg);
+				*pval = rtk_pci_direct_read_word(reg);
 			else if (size == 4)
-				*pval = rtk_pci_direct_cfg_read(reg);
+				*pval = rtk_pci_direct_read(reg);
 
 			rtk_pci_ctrl_write(0xC00, 0x1E0002);
 			ret = PCIBIOS_SUCCESSFUL;
@@ -253,6 +421,7 @@ again:
 		goto again;
 	}
 
+	spin_unlock_irqrestore(&rtk_pcie1_lock, irqL);
 	//dev_info(&bus->dev, "rtk_pcie_rd_conf devfn = 0x%x, reg = 0x%x, *pval = 0x%x\n", devfn, reg, *pval);
 
 	return ret;
@@ -262,6 +431,7 @@ static int rtk_pcie_wr_conf(struct pci_bus *bus, unsigned int devfn,
 			    int reg, int size, u32 val)
 {
 	unsigned long address;
+	unsigned long irqL;
 	int ret = PCIBIOS_DEVICE_NOT_FOUND;
 
 	if (rtd129x_cpu_revision == RTD129x_CHIP_REVISION_A00)
@@ -269,6 +439,7 @@ static int rtk_pcie_wr_conf(struct pci_bus *bus, unsigned int devfn,
 
 	//dev_info(&bus->dev, "rtk_pcie_wr_conf devfn = 0x%x, reg = 0x%x, val = 0x%x\n", devfn, reg, val);
 
+	spin_lock_irqsave(&rtk_pcie1_lock, irqL);
 	if (bus->number == 0 && PCI_SLOT(devfn) == 0 && PCI_FUNC(devfn) == 0) {
 		if ((reg == 0x10) || (reg == 0x18) || (reg == 0x20) || (reg == 0x24)) {
 			if ((val & 0xc0000000) == 0xc0000000)
@@ -279,11 +450,11 @@ static int rtk_pcie_wr_conf(struct pci_bus *bus, unsigned int devfn,
 			rtk_pci_ctrl_write(0xC00, 0x40012);
 
 			if (size == 1)
-				rtk_pci_direct_cfg_write_byte(reg, val);
+				rtk_pci_direct_write_byte(reg, val);
 			else if (size == 2)
-				rtk_pci_direct_cfg_write_word(reg, val);
+				rtk_pci_direct_write_word(reg, val);
 			else if (size == 4)
-				rtk_pci_direct_cfg_write(reg, val);
+				rtk_pci_direct_write(reg, val);
 
 			rtk_pci_ctrl_write(0xC00, 0x1E0002);
 			ret = PCIBIOS_SUCCESSFUL;
@@ -293,6 +464,7 @@ static int rtk_pcie_wr_conf(struct pci_bus *bus, unsigned int devfn,
 		}
 	}
 
+	spin_unlock_irqrestore(&rtk_pcie1_lock, irqL);
 	return ret;
 }
 
@@ -464,6 +636,10 @@ static int rtk_pcie_probe(struct platform_device *pdev)
 	resource_size_t iobase = 0;
 	LIST_HEAD(res);
 
+	spin_lock_init(&rtk_pcie1_lock);
+
+	msleep(100);
+
 	dev_info(&pdev->dev, "PCIE host driver initial begin.\n");
 
 	PCIE_CTRL_BASE = of_iomap(pdev->dev.of_node, 0);
@@ -599,7 +775,7 @@ static int rtk_pcie_probe(struct platform_device *pdev)
 	return ret;
 }
 
-static int rtk_pcie_shutdown(struct platform_device *pdev)
+static void rtk_pcie_shutdown(struct platform_device *pdev)
 {
 	dev_info(&pdev->dev, "shutdown enter ...\n");
 
@@ -612,6 +788,8 @@ static int rtk_pcie_shutdown(struct platform_device *pdev)
 		gpio_direction_output(pcie0_gpio_iso, 0);
 
 	dev_info(&pdev->dev, "shutdown exit ...\n");
+
+	return;
 }
 
 #ifdef CONFIG_SUSPEND

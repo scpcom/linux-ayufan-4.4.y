@@ -50,6 +50,10 @@ struct bcm_sf2_port_status {
 	struct ethtool_eee eee;
 
 	u32 vlan_ctl_mask;
+
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	struct net_device *bridge_dev;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 };
 
 struct bcm_sf2_arl_entry {

@@ -4,21 +4,19 @@ menu "RTD129X Device Drivers"
 
 config RTK_SB2_MEM_TRASH_MONITOR
 	bool "Memory trash monitor"
-	depends on SYNO_RTD1296
 	default n
 	help
 	  Enable helper functions for memory trash detection. If unsure, say N.
 
 config RTK_RBUS_BARRIER
 	bool "R-bus barrier"
-	depends on RTK_MEM_REMAP && SYNO_RTD1296
+	depends on RTK_MEM_REMAP
 	default y
 	help
 	  Enable helper functions for R-bus barrier. If unsure, say N.
 
 config RTK_MEM_REMAP
 	bool "Memory remap"
-	depends on SYNO_RTD1296
 	default y
 	help
 	  Enable helper functions for static ioremap. If unsure, say N.

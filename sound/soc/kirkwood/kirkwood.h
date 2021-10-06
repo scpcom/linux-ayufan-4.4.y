@@ -132,6 +132,10 @@
 
 struct kirkwood_dma_data {
 	void __iomem *io;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	void __iomem *pll_config;
+	void __iomem *soc_control;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct clk *clk;
 	struct clk *extclk;
 	uint32_t ctl_play;

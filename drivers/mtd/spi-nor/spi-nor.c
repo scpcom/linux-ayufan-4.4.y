@@ -1212,6 +1212,9 @@ int spi_nor_scan(struct spi_nor *nor, const char *name, enum read_mode mode)
 		mtd->flags |= MTD_NO_ERASE;
 
 	mtd->dev.parent = dev;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	mtd_set_of_node(mtd, np);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	nor->page_size = info->page_size;
 	mtd->writebufsize = nor->page_size;
 

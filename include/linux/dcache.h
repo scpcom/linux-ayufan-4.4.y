@@ -184,13 +184,8 @@ struct dentry_operations {
 extern seqlock_t rename_lock;
 
 #ifdef MY_ABC_HERE
-#ifdef MY_DEF_HERE
 extern int dentry_cmp(const struct dentry *dentry, const unsigned char *ct, unsigned tcount);
 extern int dentry_string_cmp(const unsigned char *cs, const unsigned char *ct, unsigned tcount);
-#else
-extern inline int dentry_cmp(const struct dentry *dentry, const unsigned char *ct, unsigned tcount);
-extern inline int dentry_string_cmp(const unsigned char *cs, const unsigned char *ct, unsigned tcount);
-#endif  
 #endif  
 
 extern void d_instantiate(struct dentry *, struct inode *);

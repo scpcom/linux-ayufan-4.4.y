@@ -262,7 +262,11 @@ static inline bool early_page_uninitialised(unsigned long pfn)
 
 static inline bool early_page_nid_uninitialised(unsigned long pfn, int nid)
 {
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	return true;
+#else  
 	return false;
+#endif  
 }
 
 static inline bool update_defer_init(pg_data_t *pgdat,
@@ -1227,6 +1231,18 @@ struct page *__rmqueue_smallest(struct zone *zone, unsigned int order,
 }
 
 static int fallbacks[MIGRATE_TYPES][4] = {
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	[MIGRATE_UNMOVABLE]   = { MIGRATE_RECLAIMABLE, MIGRATE_MOVABLE,     MIGRATE_RESERVE },
+	[MIGRATE_RECLAIMABLE] = { MIGRATE_UNMOVABLE,   MIGRATE_MOVABLE,     MIGRATE_RESERVE },
+	[MIGRATE_MOVABLE]     = { MIGRATE_RECLAIMABLE, MIGRATE_UNMOVABLE,   MIGRATE_RESERVE },
+#ifdef CONFIG_CMA
+	[MIGRATE_CMA]         = { MIGRATE_RESERVE },  
+#endif
+	[MIGRATE_RESERVE]     = { MIGRATE_RESERVE },  
+#ifdef CONFIG_MEMORY_ISOLATION
+	[MIGRATE_ISOLATE]     = { MIGRATE_RESERVE },  
+#endif
+#else
 	[MIGRATE_UNMOVABLE]   = { MIGRATE_RECLAIMABLE, MIGRATE_MOVABLE,   MIGRATE_TYPES },
 	[MIGRATE_RECLAIMABLE] = { MIGRATE_UNMOVABLE,   MIGRATE_MOVABLE,   MIGRATE_TYPES },
 	[MIGRATE_MOVABLE]     = { MIGRATE_RECLAIMABLE, MIGRATE_UNMOVABLE, MIGRATE_TYPES },
@@ -1236,6 +1252,7 @@ static int fallbacks[MIGRATE_TYPES][4] = {
 #ifdef CONFIG_MEMORY_ISOLATION
 	[MIGRATE_ISOLATE]     = { MIGRATE_TYPES },  
 #endif
+#endif  
 };
 
 #ifdef CONFIG_CMA
@@ -1362,7 +1379,11 @@ int find_suitable_fallback(struct free_area *area, unsigned int order,
 	*can_steal = false;
 	for (i = 0;; i++) {
 		fallback_mt = fallbacks[migratetype][i];
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+		if (fallback_mt == MIGRATE_RESERVE)
+#else  
 		if (fallback_mt == MIGRATE_TYPES)
+#endif  
 			break;
 
 		if (list_empty(&area->free_list[fallback_mt]))
@@ -1381,6 +1402,10 @@ int find_suitable_fallback(struct free_area *area, unsigned int order,
 	return -1;
 }
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+ 
+#else  
+ 
 static void reserve_highatomic_pageblock(struct page *page, struct zone *zone,
 				unsigned int alloc_order)
 {
@@ -1444,6 +1469,7 @@ static void unreserve_highatomic_pageblock(const struct alloc_context *ac)
 		spin_unlock_irqrestore(&zone->lock, flags);
 	}
 }
+#endif  
 
 static inline struct page *
 __rmqueue_fallback(struct zone *zone, unsigned int order, int start_migratetype)
@@ -1486,18 +1512,38 @@ __rmqueue_fallback(struct zone *zone, unsigned int order, int start_migratetype)
 	return NULL;
 }
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+static struct page *__rmqueue(struct zone *zone, unsigned int order,
+						int migratetype)
+#else  
 static struct page *__rmqueue(struct zone *zone, unsigned int order,
 				int migratetype, gfp_t gfp_flags)
+#endif  
 {
 	struct page *page;
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+retry_reserve:
+#endif  
 	page = __rmqueue_smallest(zone, order, migratetype);
+
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	if (unlikely(!page) && migratetype != MIGRATE_RESERVE) {
+#else  
 	if (unlikely(!page)) {
+#endif  
 		if (migratetype == MIGRATE_MOVABLE)
 			page = __rmqueue_cma_fallback(zone, order);
 
 		if (!page)
 			page = __rmqueue_fallback(zone, order, migratetype);
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+
+		if (!page) {
+			migratetype = MIGRATE_RESERVE;
+			goto retry_reserve;
+		}
+#endif  
 	}
 
 	trace_mm_page_alloc_zone_locked(page, order, migratetype);
@@ -1512,7 +1558,11 @@ static int rmqueue_bulk(struct zone *zone, unsigned int order,
 
 	spin_lock(&zone->lock);
 	for (i = 0; i < count; ++i) {
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+		struct page *page = __rmqueue(zone, order, migratetype);
+#else  
 		struct page *page = __rmqueue(zone, order, migratetype, 0);
+#endif  
 		if (unlikely(page == NULL))
 			break;
 
@@ -1782,10 +1832,17 @@ int split_free_page(struct page *page)
 	return nr_pages;
 }
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+static inline
+struct page *buffered_rmqueue(struct zone *preferred_zone,
+			struct zone *zone, unsigned int order,
+			gfp_t gfp_flags, int migratetype)
+#else  
 static inline
 struct page *buffered_rmqueue(struct zone *preferred_zone,
 			struct zone *zone, unsigned int order,
 			gfp_t gfp_flags, int alloc_flags, int migratetype)
+#endif  
 {
 	unsigned long flags;
 	struct page *page;
@@ -1819,6 +1876,9 @@ struct page *buffered_rmqueue(struct zone *preferred_zone,
 			WARN_ON_ONCE(order > 1);
 		}
 		spin_lock_irqsave(&zone->lock, flags);
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+		page = __rmqueue(zone, order, migratetype);
+#else  
 
 		page = NULL;
 		if (alloc_flags & ALLOC_HARDER) {
@@ -1828,6 +1888,7 @@ struct page *buffered_rmqueue(struct zone *preferred_zone,
 		}
 		if (!page)
 			page = __rmqueue(zone, order, migratetype, gfp_flags);
+#endif  
 		spin_unlock(&zone->lock);
 		if (!page)
 			goto failed;
@@ -1930,6 +1991,43 @@ static inline bool should_fail_alloc_page(gfp_t gfp_mask, unsigned int order)
 
 #endif  
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+ 
+static bool __zone_watermark_ok(struct zone *z, unsigned int order,
+			unsigned long mark, int classzone_idx, int alloc_flags,
+			long free_pages)
+{
+	 
+	long min = mark;
+	int o;
+	long free_cma = 0;
+	free_pages -= (1 << order) - 1;
+	if (alloc_flags & ALLOC_HIGH)
+		min -= min / 2;
+	if (alloc_flags & ALLOC_HARDER)
+		min -= min / 4;
+
+#ifdef CONFIG_CMA
+	 
+	if (!(alloc_flags & ALLOC_CMA))
+		free_cma = zone_page_state(z, NR_FREE_CMA_PAGES);
+#endif
+
+	if (free_pages - free_cma <= min + z->lowmem_reserve[classzone_idx])
+		return false;
+	for (o = 0; o < order; o++) {
+		 
+		free_pages -= z->free_area[o].nr_free << o;
+
+		min >>= 1;
+
+		if (free_pages <= min)
+			return false;
+	}
+	return true;
+}
+#else  
+ 
 static bool __zone_watermark_ok(struct zone *z, unsigned int order,
 			unsigned long mark, int classzone_idx, int alloc_flags,
 			long free_pages)
@@ -1984,6 +2082,7 @@ static bool __zone_watermark_ok(struct zone *z, unsigned int order,
 	}
 	return false;
 }
+#endif  
 
 bool zone_watermark_ok(struct zone *z, unsigned int order, unsigned long mark,
 		      int classzone_idx, int alloc_flags)
@@ -2106,6 +2205,13 @@ zonelist_scan:
 		}
 
 try_this_zone:
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+		page = buffered_rmqueue(ac->preferred_zone, zone, order,
+						gfp_mask, ac->migratetype);
+		if (page) {
+			if (prep_new_page(page, order, gfp_mask, alloc_flags))
+				goto try_this_zone;
+#else  
 		page = buffered_rmqueue(ac->preferred_zone, zone, order,
 				gfp_mask, alloc_flags, ac->migratetype);
 		if (page) {
@@ -2114,6 +2220,7 @@ try_this_zone:
 
 			if (unlikely(order && (alloc_flags & ALLOC_HARDER)))
 				reserve_highatomic_pageblock(page, zone, order);
+#endif  
 
 			return page;
 		}
@@ -2344,12 +2451,22 @@ retry:
 	page = get_page_from_freelist(gfp_mask, order,
 					alloc_flags & ~ALLOC_NO_WATERMARKS, ac);
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	 
+	if (!page && !drained) {
+		drain_all_pages(NULL);
+		drained = true;
+		goto retry;
+	}
+#else  
+	 
 	if (!page && !drained) {
 		unreserve_highatomic_pageblock(ac);
 		drain_all_pages(NULL);
 		drained = true;
 		goto retry;
 	}
+#endif  
 
 	return page;
 }
@@ -2958,7 +3075,11 @@ static void show_migration_types(unsigned char type)
 		[MIGRATE_UNMOVABLE]	= 'U',
 		[MIGRATE_MOVABLE]	= 'M',
 		[MIGRATE_RECLAIMABLE]	= 'E',
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+		[MIGRATE_RESERVE]	= 'R',
+#else  
 		[MIGRATE_HIGHATOMIC]	= 'H',
+#endif  
 #ifdef CONFIG_CMA
 		[MIGRATE_CMA]		= 'C',
 #endif
@@ -3568,6 +3689,85 @@ static inline unsigned long wait_table_bits(unsigned long size)
 {
 	return ffz(~size);
 }
+
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+ 
+static int pageblock_is_reserved(unsigned long start_pfn, unsigned long end_pfn)
+{
+	unsigned long pfn;
+
+	for (pfn = start_pfn; pfn < end_pfn; pfn++) {
+		if (!pfn_valid_within(pfn) || PageReserved(pfn_to_page(pfn)))
+			return 1;
+	}
+	return 0;
+}
+
+static void setup_zone_migrate_reserve(struct zone *zone)
+{
+	unsigned long start_pfn, pfn, end_pfn, block_end_pfn;
+	struct page *page;
+	unsigned long block_migratetype;
+	int reserve;
+	int old_reserve;
+
+	start_pfn = zone->zone_start_pfn;
+	end_pfn = zone_end_pfn(zone);
+	start_pfn = roundup(start_pfn, pageblock_nr_pages);
+	reserve = roundup(min_wmark_pages(zone), pageblock_nr_pages) >>
+							pageblock_order;
+
+	reserve = min(2, reserve);
+	old_reserve = zone->nr_migrate_reserve_block;
+
+	if (reserve == old_reserve)
+		return;
+	zone->nr_migrate_reserve_block = reserve;
+
+	for (pfn = start_pfn; pfn < end_pfn; pfn += pageblock_nr_pages) {
+		if (!early_page_nid_uninitialised(pfn, zone_to_nid(zone)))
+			return;
+
+		if (!pfn_valid(pfn))
+			continue;
+		page = pfn_to_page(pfn);
+
+		if (page_to_nid(page) != zone_to_nid(zone))
+			continue;
+
+		block_migratetype = get_pageblock_migratetype(page);
+
+		if (reserve > 0) {
+			 
+			block_end_pfn = min(pfn + pageblock_nr_pages, end_pfn);
+			if (pageblock_is_reserved(pfn, block_end_pfn))
+				continue;
+
+			if (block_migratetype == MIGRATE_RESERVE) {
+				reserve--;
+				continue;
+			}
+
+			if (block_migratetype == MIGRATE_MOVABLE) {
+				set_pageblock_migratetype(page,
+							MIGRATE_RESERVE);
+				move_freepages_block(zone, page,
+							MIGRATE_RESERVE);
+				reserve--;
+				continue;
+			}
+		} else if (!old_reserve) {
+			 
+			break;
+		}
+
+		if (block_migratetype == MIGRATE_RESERVE) {
+			set_pageblock_migratetype(page, MIGRATE_MOVABLE);
+			move_freepages_block(zone, page, MIGRATE_MOVABLE);
+		}
+	}
+}
+#endif  
 
 void __meminit memmap_init_zone(unsigned long size, int nid, unsigned long zone,
 		unsigned long start_pfn, enum memmap_context context)
@@ -4758,6 +4958,9 @@ static void __setup_per_zone_wmarks(void)
 			high_wmark_pages(zone) - low_wmark_pages(zone) -
 			atomic_long_read(&zone->vm_stat[NR_ALLOC_BATCH]));
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+		setup_zone_migrate_reserve(zone);
+#endif  
 		spin_unlock_irqrestore(&zone->lock, flags);
 	}
 
@@ -4796,33 +4999,16 @@ int __meminit init_per_zone_wmark_min(void)
 {
 	unsigned long lowmem_kbytes;
 	int new_min_free_kbytes;
-#ifdef CONFIG_ARCH_RTD129X
-	const int max_free_kbytes = 102400;
-#else
-	const int max_free_kbytes = 65536;
-#endif
 
 	lowmem_kbytes = nr_free_buffer_pages() * (PAGE_SIZE >> 10);
-#ifdef CONFIG_ARCH_RTD129X
-	if(lowmem_kbytes > 256000)
-		new_min_free_kbytes = 102400;
-	else
-		new_min_free_kbytes = int_sqrt(lowmem_kbytes * 16);
-#else
 	new_min_free_kbytes = int_sqrt(lowmem_kbytes * 16);
-#endif
 
 	if (new_min_free_kbytes > user_min_free_kbytes) {
 		min_free_kbytes = new_min_free_kbytes;
 		if (min_free_kbytes < 128)
 			min_free_kbytes = 128;
-#ifdef MY_DEF_HERE
-		if (min_free_kbytes > max_free_kbytes)
-			min_free_kbytes = max_free_kbytes;
-#else
 		if (min_free_kbytes > 65536)
 			min_free_kbytes = 65536;
-#endif  
 	} else {
 		pr_warn("min_free_kbytes is not updated to %d because user defined value %d is preferred\n",
 				new_min_free_kbytes, user_min_free_kbytes);

@@ -74,8 +74,8 @@
 		#size-cells = <1>;
 		controller = <&mbusc>;
 		interrupt-parent = <&gic>;
-		pcie-mem-aperture = <0xe0000000 0x8000000>;
-		pcie-io-aperture  = <0xe8000000 0x100000>;
+		pcie-mem-aperture = <0xf8000000 0x7e00000>;
+		pcie-io-aperture  = <0xffe00000 0x100000>;
 
 		bootrom {
 			compatible = "marvell,bootrom";
@@ -137,6 +137,11 @@
 			#address-cells = <1>;
 			#size-cells = <1>;
 			ranges = <0 MBUS_ID(0xf0, 0x01) 0 0x100000>;
+
+			sdramc@1400 {
+				compatible = "marvell,armada-xp-sdram-controller";
+				reg = <0x1400 0x500>;
+			};
 
 			L2: cache-controller@8000 {
 				compatible = "arm,pl310-cache";
@@ -239,6 +244,12 @@
 			pinctrl: pinctrl@18000 {
 				reg = <0x18000 0x20>;
 
+				tdm_pins: tdm_pins {
+					marvell,pins = "mpp48", "mpp49", "mpp50",
+						       "mpp51", "mpp52", "mpp53";
+					marvell,function = "tdm";
+				};
+
 				ge0_rgmii_pins: ge-rgmii-pins-0 {
 					marvell,pins = "mpp6", "mpp7", "mpp8",
 						       "mpp9", "mpp10", "mpp11",
@@ -324,6 +335,13 @@
 					marvell,pins = "mpp44";
 					marvell,function = "sata3";
 				};
+
+				i2s_pins: i2s_pins {
+					marvell,pins = "mpp48", "mpp49",
+						       "mpp50", "mpp51",
+						       "mpp52", "mpp53";
+					marvell,function = "audio";
+				};
 			};
 
 			gpio0: gpio@18100 {
@@ -373,9 +391,19 @@
 				#clock-cells = <1>;
 			};
 
+			cpuclk: clock-complex@18700 {
+				compatible = "marvell,armada-380-cpu-clock",
+				"marvell,armada-xp-cpu-clock";
+				reg = <0x18700 0xA0>, <0x1c054 0x40>,
+				<0xe4260 0x8>;
+				clocks = <&coreclk 1>;
+				#clock-cells = <1>;
+			};
+
 			mbusc: mbus-controller@20000 {
 				compatible = "marvell,mbus-controller";
-				reg = <0x20000 0x100>, <0x20180 0x20>;
+				reg = <0x20000 0x100>, <0x20180 0x20>,
+				      <0x20250 0x8>, <0x20420 0xc>;
 			};
 
 			mpic: interrupt-controller@20a00 {
@@ -426,7 +454,16 @@
 
 			pmsu@22000 {
 				compatible = "marvell,armada-380-pmsu";
-				reg = <0x22000 0x1000>;
+				reg = <0x22000 0x1000>, <0x20280 0x4>;
+			};
+
+			eth0: ethernet@70000 {
+				compatible = "marvell,armada-370-neta";
+				reg = <0x70000 0x4000>;
+				interrupts-extended = <&mpic 8>;
+				clocks = <&gateclk 4>;
+				tx-csum-limit = <9800>;
+				status = "disabled";
 			};
 
 			eth1: ethernet@30000 {
@@ -493,15 +530,6 @@
 				};
 			};
 
-			eth0: ethernet@70000 {
-				compatible = "marvell,armada-370-neta";
-				reg = <0x70000 0x4000>;
-				interrupts-extended = <&mpic 8>;
-				clocks = <&gateclk 4>;
-				tx-csum-limit = <9800>;
-				status = "disabled";
-			};
-
 			mdio: mdio@72004 {
 				#address-cells = <1>;
 				#size-cells = <0>;
@@ -523,6 +551,7 @@
 				marvell,crypto-srams = <&crypto_sram0>,
 						       <&crypto_sram1>;
 				marvell,crypto-sram-size = <0x800>;
+				status = "disabled";
 			};
 
 			rtc@a3800 {
@@ -537,6 +566,14 @@
 				reg = <0xa8000 0x2000>;
 				interrupts = <GIC_SPI 26 IRQ_TYPE_LEVEL_HIGH>;
 				clocks = <&gateclk 15>;
+				status = "disabled";
+			};
+
+			bm: bm@c8000 {
+				compatible = "marvell,armada-380-neta-bm";
+				reg = <0xc8000 0xac>;
+				clocks = <&gateclk 13>;
+				internal-mem = <&bm_bppi>;
 				status = "disabled";
 			};
 
@@ -558,7 +595,11 @@
 
 			thermal@e8078 {
 				compatible = "marvell,armada380-thermal";
-				reg = <0xe4078 0x4>, <0xe4074 0x4>;
+				reg = <0xe4078 0x4>, <0xe4070 0x8>,
+				      <0xe4100 0x20>;
+				interrupts = <GIC_SPI 78 IRQ_TYPE_LEVEL_HIGH>;
+				threshold = <100>;
+				hysteresis = <2>;
 				status = "okay";
 			};
 
@@ -572,6 +613,16 @@
 				status = "disabled";
 			};
 
+			tdm@b0000 {
+				compatible = "marvell,armada-380-tdm";
+				reg = <0xb0000 0x5000>, <0x18400 0xc>, <0x18730 0x4>;
+				reg-names = "tdm_regs", "pll_regs", "dco_div";
+				interrupts = <0 27 0x4>;
+				clocks = <&gateclk 25>;
+				clock-names = "gateclk";
+				status = "disabled";
+			};
+
 			sdhci@d8000 {
 				compatible = "marvell,armada-380-sdhci";
 				reg-names = "sdhci", "mbus", "conf-sdio3";
@@ -581,6 +632,18 @@
 				interrupts = <GIC_SPI 25 IRQ_TYPE_LEVEL_HIGH>;
 				clocks = <&gateclk 17>;
 				mrvl,clk-delay-cycles = <0x1F>;
+				status = "disabled";
+			};
+
+			audio_controller: audio-controller@e8000 {
+				#sound-dai-cells = <1>;
+				compatible = "marvell,armada-380-audio";
+				reg = <0xe8000 0x4000>, <0x18410 0xc>,
+				      <0x18204 0x4>;
+				reg-names = "i2s_regs", "pll_regs", "soc_ctrl";
+				interrupts = <GIC_SPI 75 IRQ_TYPE_LEVEL_HIGH>;
+				clocks = <&gateclk 0>;
+				clock-names = "internal";
 				status = "disabled";
 			};
 
@@ -617,6 +680,17 @@
 			#address-cells = <1>;
 			#size-cells = <1>;
 			ranges = <0 MBUS_ID(0x09, 0x15) 0 0x800>;
+		};
+
+		bm_bppi: bm-bppi {
+			compatible = "mmio-sram";
+			reg = <MBUS_ID(0x0c, 0x04) 0 0x100000>;
+			ranges = <0 MBUS_ID(0x0c, 0x04) 0 0x100000>;
+			#address-cells = <1>;
+			#size-cells = <1>;
+			clocks = <&gateclk 13>;
+			no-memory-wc;
+			status = "disabled";
 		};
 	};
 

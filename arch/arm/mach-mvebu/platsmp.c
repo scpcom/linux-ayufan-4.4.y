@@ -54,6 +54,12 @@ static void set_secondary_cpu_clock(unsigned int cpu)
 	unsigned long rate;
 	struct clk *cpu_clk;
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	/* Do not configure Msys SoC's secondary CPU clock */
+	if (of_machine_is_compatible("marvell,msys"))
+		return;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+
 	thiscpu = get_cpu();
 
 	cpu_clk = get_cpu_clk(thiscpu);

@@ -891,13 +891,12 @@ asmlinkage long sys_mlock2(unsigned long start, size_t len, int flags);
   asmlinkage long sys_SYNOMTDAlloc(bool alloc);
 #endif  
 #ifdef MY_ABC_HERE
-#if BITS_PER_LONG == 32
+#if defined(__ARCH_WANT_STAT64) || defined(__ARCH_WANT_COMPAT_STAT64)
   asmlinkage long sys_SYNOCaselessStat64(char __user *filename, struct stat64 __user *statbuf);
   asmlinkage long sys_SYNOCaselessLStat64(char __user *filename, struct stat64 __user *statbuf);
-#else
+#endif  
   asmlinkage long sys_SYNOCaselessStat(char __user *filename, struct stat __user *statbuf);
   asmlinkage long sys_SYNOCaselessLStat(char __user *filename, struct stat __user *statbuf);
-#endif  
 #endif  
 #ifdef MY_ABC_HERE
   asmlinkage long sys_SYNOEcryptName(const char __user *src, char __user *dst);
@@ -908,15 +907,14 @@ asmlinkage long sys_mlock2(unsigned long start, size_t len, int flags);
   asmlinkage long sys_SYNOACLGetPerm(const char __user *szPath, int __user *pOutPerm);
   asmlinkage long sys_SYNOFlushAggregate(int fd);
 #ifdef MY_ABC_HERE
-#if BITS_PER_LONG == 32
+#if defined(__ARCH_WANT_STAT64) || defined(__ARCH_WANT_COMPAT_STAT64)
   asmlinkage long sys_SYNOStat64(char __user *filename, unsigned int flags, struct SYNOSTAT64 __user *statbuf);
   asmlinkage long sys_SYNOFStat64(unsigned int fd, unsigned int flags, struct SYNOSTAT64 __user *statbuf);
   asmlinkage long sys_SYNOLStat64(char __user *filename, unsigned int flags, struct SYNOSTAT64 __user *statbuf);
-#else
+#endif  
   asmlinkage long sys_SYNOStat(char __user *filename, unsigned int flags, struct SYNOSTAT __user *statbuf);
   asmlinkage long sys_SYNOFStat(unsigned int fd, unsigned int flags, struct SYNOSTAT __user *statbuf);
   asmlinkage long sys_SYNOLStat(char __user *filename, unsigned int flags, struct SYNOSTAT __user *statbuf);
-#endif  
 #endif  
 #ifdef MY_ABC_HERE
   asmlinkage long sys_SYNONotifyInit(unsigned int event_f_flags);

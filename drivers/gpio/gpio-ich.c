@@ -282,7 +282,11 @@ static void ichx_gpiolib_setup(struct gpio_chip *chip)
 {
 	chip->owner = THIS_MODULE;
 	chip->label = DRV_NAME;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	chip->parent = &ichx_priv.dev->dev;
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	chip->dev = &ichx_priv.dev->dev;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	/* Allow chip-specific overrides of request()/get() */
 	chip->request = ichx_priv.desc->request ?

@@ -79,3 +79,12 @@ obj-$(CONFIG_MMC_SDHCI_ST)		+= sdhci-st.o
 ifeq ($(CONFIG_CB710_DEBUG),y)
 	CFLAGS-cb710-mmc	+= -DDEBUG
 endif
+
+ifeq ($(CONFIG_SYNO_LSP_ARMADA_16_12), y)
+ifeq ($(CONFIG_SYNO_LSP_ARMADA_17_02_02), y)
+obj-$(CONFIG_MMC_SDHCI_XENON)	+= sdhci-xenon-driver.o
+sdhci-xenon-driver-y		+= sdhci-xenon.o sdhci-xenon-phy.o
+else  # CONFIG_SYNO_LSP_ARMADA_17_02_02
+obj-$(CONFIG_MMC_SDHCI_XENON)		+= sdhci-xenon.o sdhci-xenon-phy.o
+endif # CONFIG_SYNO_LSP_ARMADA_17_02_02
+endif

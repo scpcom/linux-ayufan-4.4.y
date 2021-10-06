@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  Copyright (C) 2002 ARM Limited, All Rights Reserved.
  *
@@ -318,7 +321,7 @@ static int gic_set_affinity(struct irq_data *d, const struct cpumask *mask_val,
 	raw_spin_lock_irqsave(&irq_controller_lock, flags);
 	mask = 0xff << shift;
 
-#ifdef CONFIG_ARCH_RTD129X
+#if defined(CONFIG_ARCH_RTD129X) && defined(MY_DEF_HERE)
 	bit = *cpumask_bits(mask_val) << shift;
 #else
 	bit = gic_cpu_map[cpu] << shift;
@@ -490,7 +493,7 @@ static void __init gic_dist_init(struct gic_chip_data *gic)
 	cpumask |= cpumask << 8;
 	cpumask |= cpumask << 16;
 
-#ifdef CONFIG_ARCH_RTD129X
+#if defined(CONFIG_ARCH_RTD129X) && defined(MY_DEF_HERE)
 	for (i = 32; i < gic_irqs; i += 4)
 		writel_relaxed(0x0F0F0F0F, base + GIC_DIST_TARGET + i * 4 / 4);
 #else

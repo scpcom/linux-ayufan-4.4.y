@@ -115,7 +115,11 @@ static void set_recommended_min_free_kbytes(void)
 	for_each_populated_zone(zone)
 		nr_zones++;
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	/* Make sure at least 2 hugepages are free for MIGRATE_RESERVE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	/* Ensure 2 pageblocks are free to assist fragmentation avoidance */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	recommended_min = pageblock_nr_pages * nr_zones * 2;
 
 	/*

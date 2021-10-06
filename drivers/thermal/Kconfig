@@ -247,12 +247,12 @@ config DB8500_THERMAL
 	  thermal zone if trip points reached.
 
 config ARMADA_THERMAL
-	tristate "Armada 370/XP thermal management"
+	tristate "Armada 370/XP/(armada37xx 16.12: 8K) thermal management"
 	depends on ARCH_MVEBU || COMPILE_TEST
 	depends on OF
 	help
 	  Enable this option if you want to have support for thermal management
-	  controller present in Armada 370 and Armada XP SoC.
+	  controller present in Armada 370, Armada XP, and (armada37xx 16.12: Armada 8K) SoC.
 
 config TEGRA_SOCTHERM
 	tristate "Tegra SOCTHERM thermal management"
@@ -380,10 +380,11 @@ depends on ARCH_STI && OF
 source "drivers/thermal/st/Kconfig"
 endmenu
 
+if SYNO_LSP_RTD129X
 menu "Realtek thermal drivers"
-depends on SYNO_RTD1296
 source "drivers/thermal/realtek/Kconfig"
 endmenu
+endif # SYNO_LSP_RTD129X
 
 config QCOM_SPMI_TEMP_ALARM
 	tristate "Qualcomm SPMI PMIC Temperature Alarm"

@@ -219,7 +219,11 @@ found:
 		goto out;
 	}
 	gp.pdev = pdev;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	gp.chip.parent = &pdev->dev;
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	gp.chip.dev = &pdev->dev;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	spin_lock_init(&gp.lock);
 

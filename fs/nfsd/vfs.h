@@ -7,7 +7,7 @@
 
 #ifdef MY_ABC_HERE
 #include <linux/sched.h>
-#endif
+#endif  
 #include "nfsfh.h"
 #include "nfsd.h"
 
@@ -28,6 +28,11 @@
 #define NFSD_MAY_READ_IF_EXEC		0x800
 
 #define NFSD_MAY_64BIT_COOKIE		0x1000  
+
+#ifdef MY_ABC_HERE
+#define NFSD_MAY_SYNO_NOP		0x2000
+#define NFSD_MAY_APPEND			0x4000
+#endif  
 
 #define NFSD_MAY_CREATE		(NFSD_MAY_EXEC|NFSD_MAY_WRITE)
 #define NFSD_MAY_REMOVE		(NFSD_MAY_EXEC|NFSD_MAY_WRITE|NFSD_MAY_TRUNC)

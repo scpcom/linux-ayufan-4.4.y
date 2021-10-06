@@ -367,7 +367,11 @@ static void pca953x_setup_gpio(struct pca953x_chip *chip, int gpios)
 	gc->base = chip->gpio_start;
 	gc->ngpio = gpios;
 	gc->label = chip->client->name;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	gc->parent = &chip->client->dev;
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	gc->dev = &chip->client->dev;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	gc->owner = THIS_MODULE;
 	gc->names = chip->names;
 }

@@ -1,6 +1,10 @@
 # Makefile for Linux PHY drivers
 
+ifeq ($(CONFIG_SYNO_LSP_ARMADA_16_12), y)
+libphy-objs			:= phy.o phy_device.o mdio_bus.o mdio_device.o
+else
 libphy-objs			:= phy.o phy_device.o mdio_bus.o
+endif
 
 obj-$(CONFIG_PHYLIB)		+= libphy.o
 obj-$(CONFIG_AQUANTIA_PHY)	+= aquantia.o

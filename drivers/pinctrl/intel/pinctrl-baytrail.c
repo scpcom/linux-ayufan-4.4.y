@@ -598,7 +598,11 @@ static int byt_gpio_probe(struct platform_device *pdev)
 	gc->dbg_show = byt_gpio_dbg_show;
 	gc->base = -1;
 	gc->can_sleep = false;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	gc->parent = dev;
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	gc->dev = dev;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 #ifdef CONFIG_PM_SLEEP
 	vg->saved_context = devm_kcalloc(&pdev->dev, gc->ngpio,

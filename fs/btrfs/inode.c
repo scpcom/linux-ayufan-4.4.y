@@ -4102,8 +4102,8 @@ delete:
 			BUG_ON(ret);
 			if (btrfs_should_throttle_delayed_refs(trans, root))
 				btrfs_async_run_delayed_refs(root,
-							     trans->transid,
-					trans->delayed_ref_updates * 2, 0);
+					trans->delayed_ref_updates * 2,
+					trans->transid, 0);
 			if (be_nice) {
 				if (truncate_space_check(trans, root,
 							 extent_num_bytes)) {
@@ -5268,7 +5268,7 @@ static int btrfs_real_readdir(struct file *file, struct dir_context *ctx)
 #ifdef MY_ABC_HERE
 			if (location.type == BTRFS_ROOT_ITEM_KEY) {
 				struct btrfs_root *subvol_root = btrfs_read_fs_root_no_name(root->fs_info, &location);
-				if (IS_ERR(subvol_root) || btrfs_root_hide(subvol_root)) {
+				if (!IS_ERR(subvol_root) && btrfs_root_hide(subvol_root)) {
 					over = 0;
 					goto skip;
 				}

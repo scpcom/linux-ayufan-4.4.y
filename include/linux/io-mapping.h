@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright © 2008 Keith Packard <keithp@keithp.com>
  *
@@ -100,16 +103,14 @@ io_mapping_unmap_atomic(void __iomem *vaddr)
 }
 
 static inline void __iomem *
-io_mapping_map_wc(struct io_mapping *mapping,
-		  unsigned long offset,
-		  unsigned long size)
+io_mapping_map_wc(struct io_mapping *mapping, unsigned long offset)
 {
 	resource_size_t phys_addr;
 
 	BUG_ON(offset >= mapping->size);
 	phys_addr = mapping->base + offset;
 
-	return ioremap_wc(phys_addr, size);
+	return ioremap_wc(phys_addr, PAGE_SIZE);
 }
 
 static inline void
@@ -122,8 +123,18 @@ io_mapping_unmap(void __iomem *vaddr)
 
 #include <linux/uaccess.h>
 
+#ifdef MY_DEF_HERE
+#include <asm/iomap.h>
+
+struct io_mapping {
+	resource_size_t base;
+	unsigned long size;
+	pgprot_t prot;
+};
+#else /* MY_DEF_HERE */
 /* this struct isn't actually defined anywhere */
 struct io_mapping;
+#endif /* MY_DEF_HERE */
 
 /* Create the io_mapping object*/
 static inline struct io_mapping *
@@ -157,9 +168,7 @@ io_mapping_unmap_atomic(void __iomem *vaddr)
 
 /* Non-atomic map/unmap */
 static inline void __iomem *
-io_mapping_map_wc(struct io_mapping *mapping,
-		  unsigned long offset,
-		  unsigned long size)
+io_mapping_map_wc(struct io_mapping *mapping, unsigned long offset)
 {
 	return ((char __force __iomem *) mapping) + offset;
 }

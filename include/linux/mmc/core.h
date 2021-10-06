@@ -211,4 +211,8 @@ struct device_node;
 extern u32 mmc_vddrange_to_ocrmask(int vdd_min, int vdd_max);
 extern int mmc_of_parse_voltage(struct device_node *np, u32 *mask);
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+extern bool mmc_of_parse_mmc_card(struct mmc_host *host);
+
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 #endif /* LINUX_MMC_CORE_H */

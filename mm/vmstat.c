@@ -921,7 +921,11 @@ static char * const migratetype_names[MIGRATE_TYPES] = {
 	"Unmovable",
 	"Movable",
 	"Reclaimable",
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	"Reserve",
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	"HighAtomic",
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 #ifdef CONFIG_CMA
 	"CMA",
 #endif

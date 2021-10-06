@@ -283,6 +283,7 @@ static void linear_make_request(struct mddev *mddev, struct bio *bio)
 #else  
 		if (mddev->degraded) {
 #endif  
+			bio->bi_error = -EIO;
 			bio_endio(bio);
 			return;
 		}

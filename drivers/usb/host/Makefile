@@ -45,10 +45,12 @@ obj-$(CONFIG_USB_EHCI_HCD_AT91) += ehci-atmel.o
 obj-$(CONFIG_USB_EHCI_MSM)	+= ehci-msm.o
 obj-$(CONFIG_USB_EHCI_TEGRA)	+= ehci-tegra.o
 obj-$(CONFIG_USB_W90X900_EHCI)	+= ehci-w90x900.o
+ifeq ($(CONFIG_SYNO_LSP_RTD129X),y)
 obj-$(CONFIG_USB_EHCI_RTK)      += ehci-rtk.o
 ifneq ($(or $(CONFIG_USB_EHCI_RTK), $(CONFIG_USB_DWC3_RTK)), )
 	obj-y   += rtk-usb-power-manager.o
 endif
+endif # CONFIG_SYNO_LSP_RTD129X
 
 obj-$(CONFIG_USB_OXU210HP_HCD)	+= oxu210hp-hcd.o
 obj-$(CONFIG_USB_ISP116X_HCD)	+= isp116x-hcd.o

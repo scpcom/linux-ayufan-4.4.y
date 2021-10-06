@@ -289,7 +289,11 @@ static int altera_gpio_probe(struct platform_device *pdev)
 	altera_gc->mmchip.gc.get		= altera_gpio_get;
 	altera_gc->mmchip.gc.set		= altera_gpio_set;
 	altera_gc->mmchip.gc.owner		= THIS_MODULE;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	altera_gc->mmchip.gc.parent		= &pdev->dev;
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	altera_gc->mmchip.gc.dev		= &pdev->dev;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	ret = of_mm_gpiochip_add(node, &altera_gc->mmchip);
 	if (ret) {

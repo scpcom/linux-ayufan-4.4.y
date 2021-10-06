@@ -744,6 +744,25 @@ dtb-$(CONFIG_MACH_ARMADA_370) += \
 	armada-370-synology-ds213j.dtb
 dtb-$(CONFIG_MACH_ARMADA_375) += \
 	armada-375-db.dtb
+ifeq ($(CONFIG_SYNO_LSP_ARMADA_16_12), y)
+dtb-$(CONFIG_MACH_ARMADA_38X) += \
+	armada-380-gp.dtb \
+	armada-382-db.dtb \
+	armada-385-amc.dtb \
+	armada-385-db-ap.dtb \
+	armada-385-linksys-caiman.dtb \
+	armada-385-linksys-cobra.dtb \
+	armada-388-clearfog.dtb \
+	armada-388-db.dtb \
+	armada-388-gp.dtb \
+	armada-388-rd.dtb
+dtb-$(CONFIG_MACH_ARMADA_39X) += \
+	armada-398-db.dtb \
+	armada-390-db.dtb \
+	armada-395-amc.dtb \
+	armada-395-gp-eap.dtb \
+	armada-395-gp-gw.dtb
+else
 dtb-$(CONFIG_MACH_ARMADA_38X) += \
 	armada-385-db-ap.dtb \
 	armada-385-linksys-caiman.dtb \
@@ -753,6 +772,7 @@ dtb-$(CONFIG_MACH_ARMADA_38X) += \
 	armada-388-rd.dtb
 dtb-$(CONFIG_MACH_ARMADA_39X) += \
 	armada-398-db.dtb
+endif
 dtb-$(CONFIG_MACH_ARMADA_XP) += \
 	armada-xp-axpwifiap.dtb \
 	armada-xp-db.dtb \

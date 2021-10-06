@@ -525,6 +525,22 @@ config VEXPRESS_SYSCFG
 	  bus. System Configuration interface is one of the possible means
 	  of generating transactions on this bus.
 
+config MVEBU_A8K_DEBUGFS
+	bool "Marvell Aramda-8K debugfs driver"
+	depends on ARCH_MVEBU && ARM64 && SYNO_LSP_ARMADA_16_12
+	default y
+	help
+	  Debugfs interface for Marvell's Armada-8K SoCs.
+	  This drivers provide access (status and configuration) to some SoC
+	  status and configuration registers.
+
+config MVEBU_SOC_INFO
+	bool "Marvell Aramda-8K AP806 SoC information driver"
+	depends on ARCH_MVEBU && SYNO_LSP_ARMADA_17_02_02
+	default y if !SYNO_LSP_ARMADA_17_04_02
+	help
+	  Marvell AP806 SoC information driver for AP806
+
 source "drivers/misc/c2port/Kconfig"
 source "drivers/misc/eeprom/Kconfig"
 source "drivers/misc/cb710/Kconfig"

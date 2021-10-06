@@ -1648,8 +1648,8 @@ source certs/Kconfig
 
 endif	# if CRYPTO
 
-if SYNO_RTD1296
+if SYNO_RTD129X
 
 source "crypto/ocf/Kconfig"
 
-endif # if SYNO_RTD1296
+endif # if SYNO_RTD129X

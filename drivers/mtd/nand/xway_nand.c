@@ -89,7 +89,11 @@ static void xway_select_chip(struct mtd_info *mtd, int chip)
 
 static void xway_cmd_ctrl(struct mtd_info *mtd, int cmd, unsigned int ctrl)
 {
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	struct nand_chip *this = mtd_to_nand(mtd);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct nand_chip *this = mtd->priv;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	unsigned long nandaddr = (unsigned long) this->IO_ADDR_W;
 	unsigned long flags;
 
@@ -118,7 +122,11 @@ static int xway_dev_ready(struct mtd_info *mtd)
 
 static unsigned char xway_read_byte(struct mtd_info *mtd)
 {
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	struct nand_chip *this = mtd_to_nand(mtd);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct nand_chip *this = mtd->priv;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	unsigned long nandaddr = (unsigned long) this->IO_ADDR_R;
 	unsigned long flags;
 	int ret;

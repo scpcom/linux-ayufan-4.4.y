@@ -747,6 +747,8 @@ static int jpu_probe(struct platform_device *pdev)
     void __iomem *iobase;
     int irq;
     struct device_node *node = pdev->dev.of_node;
+    if (!of_device_is_available(pdev->dev.of_node))
+        return -ENODEV;
 
     printk(KERN_INFO "jpu_probe\n");
 

@@ -633,7 +633,11 @@ static int tps65010_probe(struct i2c_client *client,
 		tps->outmask = board->outmask;
 
 		tps->chip.label = client->name;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+		tps->chip.parent = &client->dev;
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		tps->chip.dev = &client->dev;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		tps->chip.owner = THIS_MODULE;
 
 		tps->chip.set = tps65010_gpio_set;

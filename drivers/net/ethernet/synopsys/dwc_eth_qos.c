@@ -972,9 +972,13 @@ static int dwceqos_mii_probe(struct net_device *ndev)
 	}
 
 	if (netif_msg_probe(lp))
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+		phy_attached_info(phydev);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		netdev_dbg(lp->ndev,
 			   "phydev %p, phydev->phy_id 0xa%x, phydev->addr 0x%x\n",
 			   phydev, phydev->phy_id, phydev->addr);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	phydev->supported &= PHY_GBIT_FEATURES;
 
@@ -983,6 +987,9 @@ static int dwceqos_mii_probe(struct net_device *ndev)
 	lp->duplex  = DUPLEX_UNKNOWN;
 	lp->phy_dev = phydev;
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+//do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	if (netif_msg_probe(lp)) {
 		netdev_dbg(lp->ndev, "phy_addr 0x%x, phy_id 0x%08x\n",
 			   lp->phy_dev->addr, lp->phy_dev->phy_id);
@@ -990,6 +997,7 @@ static int dwceqos_mii_probe(struct net_device *ndev)
 		netdev_dbg(lp->ndev, "attach [%s] phy driver\n",
 			   lp->phy_dev->drv->name);
 	}
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	return 0;
 }
@@ -1230,7 +1238,11 @@ static void dwceqos_enable_mmc_interrupt(struct net_local *lp)
 
 static int dwceqos_mii_init(struct net_local *lp)
 {
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	int ret = -ENXIO;
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	int ret = -ENXIO, i;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct resource res;
 	struct device_node *mdionode;
 
@@ -1251,6 +1263,9 @@ static int dwceqos_mii_init(struct net_local *lp)
 	lp->mii_bus->priv = lp;
 	lp->mii_bus->parent = &lp->ndev->dev;
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+//do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	lp->mii_bus->irq = kmalloc(sizeof(int) * PHY_MAX_ADDR, GFP_KERNEL);
 	if (!lp->mii_bus->irq) {
 		ret = -ENOMEM;
@@ -1259,16 +1274,25 @@ static int dwceqos_mii_init(struct net_local *lp)
 
 	for (i = 0; i < PHY_MAX_ADDR; i++)
 		lp->mii_bus->irq[i] = PHY_POLL;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	of_address_to_resource(lp->pdev->dev.of_node, 0, &res);
 	snprintf(lp->mii_bus->id, MII_BUS_ID_SIZE, "%.8llx",
 		 (unsigned long long)res.start);
 	if (of_mdiobus_register(lp->mii_bus, mdionode))
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+		goto err_out_free_mdiobus;
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		goto err_out_free_mdio_irq;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	return 0;
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+//do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 err_out_free_mdio_irq:
 	kfree(lp->mii_bus->irq);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 err_out_free_mdiobus:
 	mdiobus_free(lp->mii_bus);
 err_out:
@@ -2987,7 +3011,11 @@ static int dwceqos_remove(struct platform_device *pdev)
 		if (lp->phy_dev)
 			phy_disconnect(lp->phy_dev);
 		mdiobus_unregister(lp->mii_bus);
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+//do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		kfree(lp->mii_bus->irq);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		mdiobus_free(lp->mii_bus);
 
 		unregister_netdev(ndev);

@@ -95,6 +95,7 @@ config ARM_OMAP2PLUS_CPUFREQ
 	depends on ARCH_OMAP2PLUS
 	default ARCH_OMAP2PLUS
 
+if SYNO_LSP_RTD129X
 config ARM_REALTEK_CPUFREQ
 	bool "Realtek CPUFreq support"
 	depends on ARCH_RTD129X
@@ -104,26 +105,27 @@ config ARM_REALTEK_CPUFREQ
 
 config ARM_REALTEK_RVURDK
 	bool "RVU/RDK feature "
-	depends on ARM_REALTEK_CPUFREQ && SYNO_RTD1296
+	depends on ARM_REALTEK_CPUFREQ
 	default n
 	help
 	  This features RVURDK's policy
 
 config REALTEK_CPUFREQ_CORE_CONTROL_HELPER
 	bool "Core-control by CPUFreq loading"
-	depends on ARM_REALTEK_CPUFREQ && SYNO_RTD1296
+	depends on ARM_REALTEK_CPUFREQ
 	default y
 	help
 	  Enable Core-control by CPUFreq loading.
 
 config REALTEL_CPUFREQ_GPU_HELPER
 	bool "Frequency Enhancement for GPU"
-	depends on ARM_REALTEK_CPUFREQ && SYNO_RTD1296
+	depends on ARM_REALTEK_CPUFREQ
 	default y
 	help
           GPU performance will be much better if CPU freuency
 	  is higher than 500MHz. This will enable a worker to
 	  help rise CPU freqency when GPU is busy.
+endif # SYNO_LSP_RTD129X
 
 config ARM_S3C_CPUFREQ
 	bool
@@ -266,6 +268,28 @@ config ARM_PXA2xx_CPUFREQ
 	depends on PXA27x || PXA25x
 	help
 	  This add the CPUFreq driver support for Intel PXA2xx SOCs.
+
+	  If in doubt, say N.
+
+config ARM_ARMADA3700_CPUFREQ
+	tristate "Armada3700 CPUFreq support"
+	depends on ARCH_MVEBU && SYNO_LSP_ARMADA_16_12
+	default y
+	help
+	  This adds the CPUFreq driver support for Marvell
+	  Armada3700 SOCs.
+	  Armada3700 PMU supports 4 frequency and VDD levels,
+	  which will be preset and loaded later.
+
+config ARM_ARMADA_8K_CPUFREQ
+	tristate "Armada 8K CPUFreq driver"
+	depends on ARCH_MVEBU && CPUFREQ_DT && SYNO_LSP_ARMADA_16_12
+	default y
+	help
+	  This enables the CPUFreq driver support for Marvell
+	  Armada8k SOCs.
+	  Armada8K device has the AP806 which supports scaling
+	  to any full integer divider.
 
 	  If in doubt, say N.
 

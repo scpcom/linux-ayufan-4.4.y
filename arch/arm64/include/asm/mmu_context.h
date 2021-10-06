@@ -76,11 +76,8 @@ static inline bool __cpu_uses_extended_idmap(void)
 /*
  * Set TCR.T0SZ to its default value (based on VA_BITS)
  */
-#ifndef MY_DEF_HERE
-static inline void cpu_set_default_tcr_t0sz(void)
-#else
+#if defined(MY_DEF_HERE)
 static inline void __cpu_set_tcr_t0sz(u64 t0sz)
-#endif	
 {
 	unsigned long tcr;
 
@@ -93,12 +90,27 @@ static inline void __cpu_set_tcr_t0sz(u64 t0sz)
 	"	msr	tcr_el1, %0	;"
 	"	isb"
 	: "=&r" (tcr)
-#ifndef MY_DEF_HERE
-	: "r"(TCR_T0SZ(VA_BITS)), "I"(TCR_T0SZ_OFFSET), "I"(TCR_TxSZ_WIDTH));
-#else
 	: "r"(t0sz), "I"(TCR_T0SZ_OFFSET), "I"(TCR_TxSZ_WIDTH));
 }
+#else /* MY_DEF_HERE */
+static inline void cpu_set_default_tcr_t0sz(void)
+{
+	unsigned long tcr;
 
+	if (!__cpu_uses_extended_idmap())
+		return;
+
+	asm volatile (
+	"	mrs	%0, tcr_el1	;"
+	"	bfi	%0, %1, %2, %3	;"
+	"	msr	tcr_el1, %0	;"
+	"	isb"
+	: "=&r" (tcr)
+	: "r"(TCR_T0SZ(VA_BITS)), "I"(TCR_T0SZ_OFFSET), "I"(TCR_TxSZ_WIDTH));
+}
+#endif /* MY_DEF_HERE */
+
+#if defined(MY_DEF_HERE)
 /*
 - * Set TCR.T0SZ to the value appropriate for activating the identity map.
 - */
@@ -115,8 +127,8 @@ static inline void cpu_set_default_tcr_t0sz(void)
 {
 	__cpu_set_tcr_t0sz(TCR_T0SZ(VA_BITS));
 }
+#endif /* MY_DEF_HERE */
 
-#endif
 /*
  * It would be nice to return ASIDs back to the allocator, but unfortunately
  * that introduces a race with a generation rollover where we could erroneously

@@ -29,6 +29,17 @@
 #include "md-cluster.h"
 
 #ifdef MY_ABC_HERE
+static struct kmem_cache *syno_mdio_cache;
+
+struct syno_mdio {
+	unsigned long start_time;
+	struct mddev *mddev;
+	void *bi_private;
+	bio_end_io_t *bi_end_io;
+};
+#endif  
+
+#ifdef MY_ABC_HERE
 void SynoMDWakeUpDevices(void *md);
 #endif  
 
@@ -42,6 +53,9 @@ static void autostart_arrays(int part);
 
 #ifdef MY_ABC_HERE
 extern int (*funcSYNORaidDiskUnplug)(char *szDiskName);
+#ifdef CONFIG_BLK_DEV_NVME
+extern int (*funcSYNORaidNVMeUnplug)(char *szDiskName);
+#endif  
 EXPORT_SYMBOL(SYNORaidRdevUnplug);
 int SYNORaidDiskUnplug(char *szArgDiskName);
 void SYNORaidUnplugTask(struct work_struct *);
@@ -181,6 +195,28 @@ static DEFINE_SPINLOCK(all_mddevs_lock);
 		_tmp = _tmp->next;})					\
 		)
 
+#ifdef MY_ABC_HERE
+static void syno_md_endio(struct bio *bio)
+{
+	struct syno_mdio *mdio = bio->bi_private;
+	int rw = bio_data_dir(bio);
+	unsigned long duration = jiffies - mdio->start_time;
+	struct mddev *mddev = mdio->mddev;
+	int cpu;
+
+	cpu = part_stat_lock();
+	part_stat_add(cpu, &mddev->gendisk->part0, ticks[rw], duration);
+	part_round_stats(cpu, &mddev->gendisk->part0);
+	part_dec_in_flight(&mddev->gendisk->part0, rw);
+	part_stat_unlock();
+
+	bio->bi_end_io = mdio->bi_end_io;
+	bio->bi_private = mdio->bi_private;
+	mempool_free(mdio, mddev->syno_mdio_mempool);
+	bio_endio(bio);
+}
+#endif  
+
 static blk_qc_t md_make_request(struct request_queue *q, struct bio *bio)
 {
 	const int rw = bio_data_dir(bio);
@@ -189,6 +225,9 @@ static blk_qc_t md_make_request(struct request_queue *q, struct bio *bio)
 	int cpu;
 #ifdef MY_ABC_HERE
 	unsigned char blActive = 1;
+#endif  
+#ifdef MY_ABC_HERE
+	struct syno_mdio *mdio;
 #endif  
 
 	blk_queue_split(q, &bio, q->bio_split);
@@ -237,6 +276,21 @@ static blk_qc_t md_make_request(struct request_queue *q, struct bio *bio)
 
 	mddev->ulLastReq = jiffies;
 #endif  
+
+#ifdef MY_ABC_HERE
+	mdio = mempool_alloc(mddev->syno_mdio_mempool, GFP_NOIO);
+	if (!mdio) {
+		bio->bi_error = -ENOMEM;
+		bio_endio(bio);
+		return BLK_QC_T_NONE;
+	}
+	mdio->start_time = jiffies;
+	mdio->bi_private = bio->bi_private;
+	mdio->bi_end_io = bio->bi_end_io;
+	mdio->mddev = mddev;
+	bio->bi_end_io = syno_md_endio;
+	bio->bi_private = mdio;
+#endif  
 	 
 	sectors = bio_sectors(bio);
 	 
@@ -246,6 +300,10 @@ static blk_qc_t md_make_request(struct request_queue *q, struct bio *bio)
 	cpu = part_stat_lock();
 	part_stat_inc(cpu, &mddev->gendisk->part0, ios[rw]);
 	part_stat_add(cpu, &mddev->gendisk->part0, sectors[rw], sectors);
+#ifdef MY_ABC_HERE
+	part_round_stats(cpu, &mddev->gendisk->part0);
+	part_inc_in_flight(&mddev->gendisk->part0, rw);
+#endif  
 	part_stat_unlock();
 
 	if (atomic_dec_and_test(&mddev->active_io) && mddev->suspended)
@@ -420,6 +478,9 @@ static void mddev_delayed_delete(struct work_struct *ws);
 static void mddev_put(struct mddev *mddev)
 {
 	struct bio_set *bs = NULL;
+#ifdef MY_ABC_HERE
+	mempool_t *mempool = NULL;
+#endif  
 
 	if (!atomic_dec_and_lock(&mddev->active, &all_mddevs_lock))
 		return;
@@ -429,6 +490,10 @@ static void mddev_put(struct mddev *mddev)
 		list_del_init(&mddev->all_mddevs);
 		bs = mddev->bio_set;
 		mddev->bio_set = NULL;
+#ifdef MY_ABC_HERE
+		mempool = mddev->syno_mdio_mempool;
+		mddev->syno_mdio_mempool = NULL;
+#endif  
 		if (mddev->gendisk) {
 			 
 			INIT_WORK(&mddev->del_work, mddev_delayed_delete);
@@ -439,6 +504,11 @@ static void mddev_put(struct mddev *mddev)
 	spin_unlock(&all_mddevs_lock);
 	if (bs)
 		bioset_free(bs);
+#ifdef MY_ABC_HERE
+	if (mempool) {
+		mempool_destroy(mempool);
+	}
+#endif  
 }
 
 static void md_safemode_timeout(unsigned long data);
@@ -5103,6 +5173,15 @@ int md_run(struct mddev *mddev)
 		sysfs_notify_dirent_safe(rdev->sysfs_state);
 	}
 
+#ifdef MY_ABC_HERE
+	if (mddev->syno_mdio_mempool == NULL) {
+		mddev->syno_mdio_mempool = mempool_create_slab_pool(256, syno_mdio_cache);
+		if (mddev->syno_mdio_mempool == NULL) {
+			return -ENOMEM;
+		}
+	}
+#endif  
+
 	if (mddev->bio_set == NULL)
 		mddev->bio_set = bioset_create(BIO_POOL_SIZE, 0);
 
@@ -7583,6 +7662,9 @@ void md_do_sync(struct md_thread *thread)
 	sector_t max_sectors,j, io_sectors, recovery_done;
 	unsigned long mark[SYNC_MARKS];
 	unsigned long update_time;
+#ifdef MY_ABC_HERE
+	unsigned long last_print_time = jiffies - (1 * 60 * 60 * HZ);
+#endif  
 	sector_t mark_cnt[SYNC_MARKS];
 	int last_mark,m;
 	struct list_head *tmp;
@@ -7648,10 +7730,20 @@ void md_do_sync(struct md_thread *thread)
 				prepare_to_wait(&resync_wait, &wq, TASK_INTERRUPTIBLE);
 				if (!test_bit(MD_RECOVERY_INTR, &mddev->recovery) &&
 				    mddev2->curr_resync >= mddev->curr_resync) {
+#ifdef MY_ABC_HERE
+					if (time_after_eq(jiffies, last_print_time + 1 * 60 * 60 * HZ)) {
+						printk(KERN_INFO "md: delaying %s of %s"
+							" until %s has finished (they"
+							" share one or more physical units)\n",
+							desc, mdname(mddev), mdname(mddev2));
+						last_print_time = jiffies;
+					}
+#else  
 					printk(KERN_INFO "md: delaying %s of %s"
 					       " until %s has finished (they"
 					       " share one or more physical units)\n",
 					       desc, mdname(mddev), mdname(mddev2));
+#endif  
 					mddev_put(mddev2);
 					if (signal_pending(current))
 						flush_signals(current);
@@ -7701,6 +7793,9 @@ void md_do_sync(struct md_thread *thread)
 	printk(KERN_WARNING "md: %s of RAID array %s\n", desc, mdname(mddev));
 #else  
 	printk(KERN_INFO "md: %s of RAID array %s\n", desc, mdname(mddev));
+#endif  
+#ifdef MY_ABC_HERE
+	SynoReportSyncStatus(desc, 0, 0, mddev->md_minor);
 #endif  
 	printk(KERN_INFO "md: minimum _guaranteed_  speed:"
 		" %d KB/sec/disk.\n", speed_min(mddev));
@@ -7865,6 +7960,9 @@ void md_do_sync(struct md_thread *thread)
 		cluster_resync_finished = true;
 	}
 	mddev->pers->sync_request(mddev, max_sectors, &skipped);
+#ifdef MY_ABC_HERE
+	SynoReportSyncStatus(desc, 1, (test_bit(MD_RECOVERY_INTR, &mddev->recovery) ? 1 : 0), mddev->md_minor);
+#endif  
 
 	if (!test_bit(MD_RECOVERY_CHECK, &mddev->recovery) &&
 	    mddev->curr_resync > 2) {
@@ -8199,7 +8297,7 @@ void md_check_recovery(struct mddev *mddev)
 			printk(KERN_ERR "%s: crashed, stop sync\n", mdname(mddev));
 			clear_bit(MD_RECOVERY_SYNC, &mddev->recovery);
 			clear_bit(MD_RECOVERY_RECOVER, &mddev->recovery);
-			goto unlock;
+			goto not_running;
 		}
 #endif  
 		if (mddev->pers->sync_request) {
@@ -8762,6 +8860,12 @@ static int __init md_init(void)
 		goto err_mdp;
 	mdp_major = ret;
 
+#ifdef MY_ABC_HERE
+	syno_mdio_cache = KMEM_CACHE(syno_mdio, 0);
+	if (!syno_mdio_cache)
+		goto err_cache;
+#endif  
+
 	blk_register_region(MKDEV(MD_MAJOR, 0), 512, THIS_MODULE,
 			    md_probe, NULL, NULL);
 	blk_register_region(MKDEV(mdp_major, 0), 1UL<<MINORBITS, THIS_MODULE,
@@ -8774,10 +8878,17 @@ static int __init md_init(void)
 
 #ifdef MY_ABC_HERE
 	funcSYNORaidDiskUnplug = SYNORaidDiskUnplug;
+#ifdef CONFIG_BLK_DEV_NVME
+	funcSYNORaidNVMeUnplug = SYNORaidDiskUnplug;
+#endif  
 #endif  
 
 	return 0;
 
+#ifdef MY_ABC_HERE
+err_cache:
+	unregister_blkdev(mdp_major, "mdp");
+#endif  
 err_mdp:
 	unregister_blkdev(MD_MAJOR, "md");
 err_md:
@@ -9065,6 +9176,9 @@ static __exit void md_exit(void)
 	struct list_head *tmp;
 	int delay = 1;
 
+#ifdef MY_ABC_HERE
+	kmem_cache_destroy(syno_mdio_cache);
+#endif  
 	blk_unregister_region(MKDEV(MD_MAJOR,0), 512);
 	blk_unregister_region(MKDEV(mdp_major,0), 1U << MINORBITS);
 

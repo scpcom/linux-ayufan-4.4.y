@@ -70,7 +70,8 @@
 		((smmu->options & ARM_SMMU_OPT_SECURE_CFG_ACCESS)	\
 			? 0x400 : 0))
 
-#ifdef CONFIG_64BIT
+#if (defined(CONFIG_SYNO_LSP_ARMADA_16_12) && defined(CONFIG_MMIO_64BIT)) || \
+	(!defined(CONFIG_SYNO_LSP_ARMADA_16_12) && defined(CONFIG_64BIT))
 #define smmu_writeq	writeq_relaxed
 #else
 #define smmu_writeq(reg64, addr)				\

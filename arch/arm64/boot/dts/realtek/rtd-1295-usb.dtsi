@@ -22,16 +22,6 @@
 	dwc3_drd: rtk_dwc3_drd@98013200 {
 		compatible = "Realtek,rtd129x-dwc3-drd";
 		status = "okay";
-
-		dwc3_drd@98020000 {
-			dr_mode = "peripheral";               /*host, peripheral*/
-		};
-
-		rtk_dwc3_drd_type_c {
-			compatible = "Realtek,rtd1295-dwc3-type_c";
-			drd_mode;  //depend on dr_mode = "peripheral"
-		};
-
 	};
 
 	dwc3_u2host: rtk_dwc3_u2host@98013E00 {

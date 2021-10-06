@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * drivers/staging/android/ion/ion_heap.c
  *
@@ -24,9 +27,9 @@
 #include <linux/vmalloc.h>
 #include "ion.h"
 #include "ion_priv.h"
-#if defined(CONFIG_ION_RTK_PHOENIX)
+#if defined(CONFIG_ION_RTK_PHOENIX) && defined(MY_DEF_HERE)
 #include "../uapi/rtk_phoenix_ion.h"
-#endif
+#endif /* defined(CONFIG_ION_RTK_PHOENIX) && defined(MY_DEF_HERE) */
 
 void *ion_heap_map_kernel(struct ion_heap *heap,
 			  struct ion_buffer *buffer)
@@ -95,7 +98,7 @@ int ion_heap_map_user(struct ion_heap *heap, struct ion_buffer *buffer,
 			offset = 0;
 		}
 		len = min(len, remainder);
-#if defined(CONFIG_ION_RTK_PHOENIX) //20130208 charleslin: supports noncached mmap for user space
+#if defined(CONFIG_ION_RTK_PHOENIX) && defined(MY_DEF_HERE) //20130208 charleslin: supports noncached mmap for user space
 #if 0
     if (    heap->type == RTK_PHOENIX_ION_HEAP_TYPE_MEDIA ||
             heap->type == RTK_PHOENIX_ION_HEAP_TYPE_AUDIO ||
@@ -107,7 +110,7 @@ int ion_heap_map_user(struct ion_heap *heap, struct ion_buffer *buffer,
     else
                 if (!(buffer->flags & ION_FLAG_CACHED))
 		    vma->vm_page_prot = pgprot_writecombine(vma->vm_page_prot);
-#endif
+#endif /* defined(CONFIG_ION_RTK_PHOENIX) && defined(MY_DEF_HERE) */
 		ret = remap_pfn_range(vma, addr, page_to_pfn(page), len,
 				vma->vm_page_prot);
 		if (ret)
@@ -352,7 +355,7 @@ struct ion_heap *ion_heap_create(struct ion_platform_heap *heap_data)
 		heap = ion_cma_heap_create(heap_data);
 		break;
 
-#if defined(CONFIG_ION_RTK_PHOENIX)
+#if defined(CONFIG_ION_RTK_PHOENIX) && defined(MY_DEF_HERE)
 #if 0 /* legacy */
 	case RTK_PHOENIX_ION_HEAP_TYPE_TILER:
 		heap = rtk_phoenix_tiler_heap_create(heap_data);
@@ -373,7 +376,7 @@ struct ion_heap *ion_heap_create(struct ion_platform_heap *heap_data)
             heap->type = heap_data->type;
         break;
 #endif
-#endif
+#endif /* defined(CONFIG_ION_RTK_PHOENIX) && defined(MY_DEF_HERE) */
 	default:
 		pr_err("%s: Invalid heap type %d\n", __func__,
 		       heap_data->type);
@@ -414,14 +417,14 @@ void ion_heap_destroy(struct ion_heap *heap)
 	case ION_HEAP_TYPE_DMA:
 		ion_cma_heap_destroy(heap);
 		break;
-#if defined(CONFIG_ION_RTK_PHOENIX)
+#if defined(CONFIG_ION_RTK_PHOENIX) && defined(MY_DEF_HERE)
 	case RTK_PHOENIX_ION_HEAP_TYPE_TILER:
 	case RTK_PHOENIX_ION_HEAP_TYPE_MEDIA:
 	case RTK_PHOENIX_ION_HEAP_TYPE_AUDIO:
 	case RTK_PHOENIX_ION_HEAP_TYPE_SECURE:
         ion_rtk_carveout_heap_destroy(heap);
         break;
-#endif
+#endif /* defined(CONFIG_ION_RTK_PHOENIX) && defined(MY_DEF_HERE) */
 	default:
 		pr_err("%s: Invalid heap type %d\n", __func__,
 		       heap->type);

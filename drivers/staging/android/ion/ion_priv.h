@@ -329,10 +329,10 @@ void ion_system_contig_heap_destroy(struct ion_heap *);
 struct ion_heap *ion_carveout_heap_create(struct ion_platform_heap *);
 void ion_carveout_heap_destroy(struct ion_heap *);
 
-#if defined(CONFIG_ION_RTK_PHOENIX)
+#if defined(CONFIG_ION_RTK_PHOENIX) && defined(MY_DEF_HERE)
 struct ion_heap *ion_rtk_carveout_heap_create(struct ion_platform_heap *);
 void ion_rtk_carveout_heap_destroy(struct ion_heap *);
-#endif
+#endif /* defined(CONFIG_ION_RTK_PHOENIX) && defined(MY_DEF_HERE) */
 
 struct ion_heap *ion_chunk_heap_create(struct ion_platform_heap *);
 void ion_chunk_heap_destroy(struct ion_heap *);

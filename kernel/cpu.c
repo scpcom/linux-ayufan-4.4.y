@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /* CPU control.
  * (C) 2001, 2002, 2003, 2004 Rusty Russell
  *
@@ -26,7 +29,7 @@
 
 #include "smpboot.h"
 
-#ifdef CONFIG_ARCH_RTD129X //CPU core 1-3 power gating, jamestai20160118
+#if defined(CONFIG_ARCH_RTD129X) && defined(MY_DEF_HERE)//CPU core 1-3 power gating, jamestai20160118
 extern void rtk_cpu_power_down(int cpu);
 extern void rtk_cpu_power_up(int cpu);
 #endif /* CONFIG_ARCH_RTD129X */
@@ -592,7 +595,7 @@ int disable_nonboot_cpus(void)
 		trace_suspend_resume(TPS("CPU_OFF"), cpu, true);
 		error = _cpu_down(cpu, 1);
 
-#ifdef CONFIG_ARCH_RTD129X //CPU core 1-3 power gating, jamestai20160118
+#if defined(CONFIG_ARCH_RTD129X) && defined(MY_DEF_HERE)//CPU core 1-3 power gating, jamestai20160118
 		rtk_cpu_power_down(cpu);
 #endif /* CONIFG_ARCH_RTD129X */
 
@@ -646,7 +649,7 @@ void enable_nonboot_cpus(void)
 	for_each_cpu(cpu, frozen_cpus) {
 		trace_suspend_resume(TPS("CPU_ON"), cpu, true);
 
-#ifdef CONFIG_ARCH_RTD129X //CPU core 1-3 power gating, jamestai20160118
+#if defined(CONFIG_ARCH_RTD129X) && defined(MY_DEF_HERE)//CPU core 1-3 power gating, jamestai20160118
 		rtk_cpu_power_up(cpu);
 #endif /* CONIFG_ARCH_RTD129X */
 

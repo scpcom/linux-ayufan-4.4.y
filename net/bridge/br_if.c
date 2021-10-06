@@ -510,8 +510,16 @@ int br_add_if(struct net_bridge *br, struct net_device *dev)
 	if (br_fdb_insert(br, p, dev->dev_addr, 0))
 		netdev_err(dev, "failed insert local address bridge forwarding table\n");
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	err = nbp_vlan_init(p);
+	if (err) {
+		netdev_err(dev, "failed to initialize vlan filtering on this port\n");
+		goto err6;
+	}
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	if (nbp_vlan_init(p))
 		netdev_err(dev, "failed to initialize vlan filtering on this port\n");
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	spin_lock_bh(&br->lock);
 	changed_addr = br_stp_recalculate_bridge_id(br);
@@ -531,6 +539,14 @@ int br_add_if(struct net_bridge *br, struct net_device *dev)
 	kobject_uevent(&p->kobj, KOBJ_ADD);
 
 	return 0;
+
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+err6:
+	list_del_rcu(&p->list);
+	br_fdb_delete_by_port(br, p, 0, 1);
+	nbp_update_port_count(br);
+	netdev_upper_dev_unlink(dev, br->dev);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 err5:
 	dev->priv_flags &= ~IFF_BRIDGE_PORT;

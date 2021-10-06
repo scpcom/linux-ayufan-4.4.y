@@ -32,6 +32,9 @@
 #include <linux/clkdev.h>
 #include <linux/clk-provider.h>
 #include <linux/clk.h>
+
+#include <soc/realtek/rtd129x_cpu.h>
+
 #ifdef CONFIG_POWER_CONTROL
 #include <linux/power-control.h>
 #endif
@@ -95,6 +98,7 @@ typedef struct
 } hantrodec_t;
 
 static hantrodec_t hantrodec_data; /* dynamic allocation? */
+static unsigned int nInstance = 0;
 
 static int ReserveIO(void);
 static void ReleaseIO(void);
@@ -150,6 +154,20 @@ static void ve3_pctrl_off(struct power_control *pctrl);
 static void ve3_pctrl_on(struct power_control *pctrl);
 static struct power_control *ve3_pctrl_get(void);
 #endif
+
+static void ve3_wrapper_setup(volatile u8 * base)
+{
+    unsigned int ctrl_1 = __raw_readl(base+0x3F00);
+    unsigned int ctrl_2 = __raw_readl(base+0x3F04);
+    if (get_rtd129x_cpu_revision() >= RTD129x_CHIP_REVISION_B00)
+        ctrl_1 = (ctrl_1 & ~0x7) | 0x3;         // ve3_ack_div_sel 'b011 = 8
+    else
+        ctrl_1 = (ctrl_1 & ~0x7) | 0x2;         // ve3_ack_div_sel 'b010 = 16 
+    ctrl_1 |= 0x10;                         // ve3_axi2cti_en
+    ctrl_2 = (ctrl_2 & ~0x3f) | 0x1a;        // ve3_cti_cmd_depth for 1296 timing issue
+    __raw_writel(ctrl_1, (base+0x3F00));
+    __raw_writel(ctrl_2, (base+0x3F04));
+}
 
 static void ve3_pll_setting(unsigned long offset, unsigned int value, unsigned int bOverwrite, unsigned int bEnable)
 {
@@ -637,8 +655,7 @@ static long hantrodec_ioctl(struct file *filp, unsigned int cmd,
             printk(KERN_INFO "VE3: after pctrl_on for laterncy watching!!\n");
 #endif
             ve3_clk_enable(s_ve3_clk);
-            __raw_writel(__raw_readl(base_address+0x3F00) | 0x13, (base_address+0x3F00));
-            __raw_writel((__raw_readl(base_address+0x3F04) & 0xffffff00) | 0xf, (base_address+0x3F04)); // for 1296 timing issue
+            ve3_wrapper_setup(base_address);
             msleep(1);
             dec_release = 0;
         }
@@ -658,8 +675,7 @@ static long hantrodec_ioctl(struct file *filp, unsigned int cmd,
         reset_control_reset(rstc_ve3);
         ve3_clk_enable(s_ve3_clk);
 
-        __raw_writel(__raw_readl(base_address+0x3F00) | 0x13, (base_address+0x3F00));
-        __raw_writel((__raw_readl(base_address+0x3F04) & 0xffffff00) | 0xf, (base_address+0x3F04)); // for 1296 timing issue
+        ve3_wrapper_setup(base_address);
         //msleep(1);
     }
     break;
@@ -670,6 +686,9 @@ static long hantrodec_ioctl(struct file *filp, unsigned int cmd,
         wake_up_interruptible_all(&dec_wait_queue);
     }
     break;
+    case HANTRODEC_GET_INSTANCE:
+        __put_user(nInstance, (unsigned int *) arg);
+        break;
     default:
         return -ENOTTY;
     }
@@ -687,6 +706,8 @@ static long hantrodec_ioctl(struct file *filp, unsigned int cmd,
 static int hantrodec_open(struct inode *inode, struct file *filp)
 {
     PDEBUG("dev opened\n");
+    nInstance ++;
+
     return 0;
 }
 
@@ -703,6 +724,8 @@ static int hantrodec_release(struct inode *inode, struct file *filp)
     hantrodec_t *dev = &hantrodec_data;
 
     PDEBUG("closing ...\n");
+
+    nInstance --;
 
     for(n = 0; n < dev->cores; n++)
     {
@@ -895,6 +918,8 @@ static int ve3_probe(struct platform_device *pdev)
     void __iomem *iobase;
     int irq;
     struct device_node *node = pdev->dev.of_node;
+    if (!of_device_is_available(pdev->dev.of_node))
+        return -ENODEV;
 
     printk(KERN_INFO "VE3: ve3_probe\n");
 
@@ -958,8 +983,7 @@ static int ve3_probe(struct platform_device *pdev)
     reset_control_deassert(rstc_ve3); // RESET disable
     ve3_clk_enable(s_ve3_clk);
 
-    __raw_writel(__raw_readl(base_address+0x3F00) | 0x13, (base_address+0x3F00));
-    __raw_writel((__raw_readl(base_address+0x3F04) & 0xffffff00) | 0xf, (base_address+0x3F04)); // for 1296 timing issue
+    ve3_wrapper_setup(base_address);
     msleep(1);
     printk(KERN_INFO "Get cti: 0x%x\n", __raw_readl(base_address+0x3F00));
 
@@ -1332,7 +1356,8 @@ void ve3_clk_disable(struct clk *clk)
 {
     if (clk) {
         PDEBUG("ve3_clk_disable\n");
-        clk_disable_unprepare(clk);
+        while(__clk_is_enabled(clk))
+            clk_disable_unprepare(clk);
     }
 }
 

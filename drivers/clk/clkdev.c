@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * drivers/clk/clkdev.c
  *
@@ -242,7 +245,7 @@ void clkdev_add_table(struct clk_lookup *cl, size_t num)
 }
 
 #define MAX_DEV_ID	20
-#ifdef CONFIG_ARCH_RTD129X
+#if defined(CONFIG_ARCH_RTD129X) && defined(MY_DEF_HERE)
 #define MAX_CON_ID	24
 #else
 #define MAX_CON_ID	16
@@ -266,7 +269,7 @@ vclkdev_alloc(struct clk_hw *hw, const char *con_id, const char *dev_fmt,
 
 	cla->cl.clk_hw = hw;
 	if (con_id) {
-#ifdef CONFIG_ARCH_RTD129X
+#if defined(CONFIG_ARCH_RTD129X) && defined(MY_DEF_HERE)
 		if (strlen(con_id) >= MAX_CON_ID)
 			printk(KERN_WARNING "RTK-WARNING: con_id's length MUST be less than MAX_CON_ID!\n");
 #endif

@@ -19,6 +19,52 @@
 #include <asm/dma.h>	 
 #include "pci.h"
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#define _8M	0x00800000
+#define _64M	0x04000000
+#define MV_PCI_BAR_1	2
+#define MV_PCI_BAR_2	4
+
+static void quirk_ignore_msys_bar(struct pci_dev *dev)
+{
+	int bar2_size;
+
+	switch (dev->device) {
+	case PCI_DEVICE_ID_MARVELL_BOBCAT2:
+		bar2_size = _64M;
+		break;
+	case PCI_DEVICE_ID_MARVELL_ALLEYCAT3:
+		bar2_size = _8M;
+		break;
+	default:
+		return;
+	}
+
+	if (resource_size(&dev->resource[MV_PCI_BAR_2]) != bar2_size) {
+		dev_info(&dev->dev, "BAR %d size: %pR is corrupted - skipping\n",
+			 MV_PCI_BAR_2, &dev->resource[MV_PCI_BAR_2]);
+
+		dev->resource[MV_PCI_BAR_2].start = 0;
+		dev->resource[MV_PCI_BAR_2].end = 0;
+		dev->resource[MV_PCI_BAR_2].flags = 0;
+	}
+
+	if (resource_size(&dev->resource[MV_PCI_BAR_1]) != _64M) {
+		dev_info(&dev->dev, "BAR %d size: %pR is corrupted - skipping\n",
+			 MV_PCI_BAR_1, &dev->resource[MV_PCI_BAR_1]);
+
+		dev->resource[MV_PCI_BAR_2].start = 0;
+		dev->resource[MV_PCI_BAR_2].end = 0;
+		dev->resource[MV_PCI_BAR_1].flags = 0;
+	}
+}
+
+DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_MARVELL, PCI_DEVICE_ID_MARVELL_ALLEYCAT3,
+			 quirk_ignore_msys_bar);
+DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_MARVELL, PCI_DEVICE_ID_MARVELL_BOBCAT2,
+			 quirk_ignore_msys_bar);
+#endif  
+
 static void quirk_mmio_always_on(struct pci_dev *dev)
 {
 	dev->mmio_always_on = 1;
@@ -3153,6 +3199,14 @@ static const u16 pci_quirk_intel_pch_acs_ids[] = {
 	0x8c90, 0x8c92, 0x8c94, 0x8c96, 0x8c98, 0x8c9a, 0x8c9c, 0x8c9e,
 };
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+ 
+static const u16 pci_quirk_marvell_acs_ids[] = {
+	 
+	0x0110,
+};
+#endif  
+
 static bool pci_quirk_intel_pch_acs_match(struct pci_dev *dev)
 {
 	int i;
@@ -3179,6 +3233,22 @@ static int pci_quirk_intel_pch_acs(struct pci_dev *dev, u16 acs_flags)
 
 	return acs_flags & ~flags ? 0 : 1;
 }
+
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+static int pci_quirk_marvell_acs(struct pci_dev *dev, u16 acs_flags)
+{
+	int i;
+
+	if (!pci_is_pcie(dev) || pci_pcie_type(dev) != PCI_EXP_TYPE_ROOT_PORT)
+		return false;
+
+	for (i = 0; i < ARRAY_SIZE(pci_quirk_marvell_acs_ids); i++)
+		if (pci_quirk_marvell_acs_ids[i] == dev->device)
+			return true;
+
+	return false;
+}
+#endif  
 
 static int pci_quirk_mf_endpoint_acs(struct pci_dev *dev, u16 acs_flags)
 {
@@ -3262,6 +3332,10 @@ static const struct pci_dev_acs_enabled {
 	{ PCI_VENDOR_ID_INTEL, PCI_ANY_ID, pci_quirk_intel_pch_acs },
 	{ 0x19a2, 0x710, pci_quirk_mf_endpoint_acs },  
 	{ 0x10df, 0x720, pci_quirk_mf_endpoint_acs },  
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	 
+	{ PCI_VENDOR_ID_MARVELL, PCI_ANY_ID, pci_quirk_marvell_acs },
+#endif  
 	{ 0 }
 };
 

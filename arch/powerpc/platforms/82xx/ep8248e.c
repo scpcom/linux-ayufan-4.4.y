@@ -131,11 +131,15 @@ static int ep8248e_mdio_probe(struct platform_device *ofdev)
 	if (!bus)
 		return -ENOMEM;
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+//do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	bus->irq = kmalloc(sizeof(int) * PHY_MAX_ADDR, GFP_KERNEL);
 	if (bus->irq == NULL) {
 		ret = -ENOMEM;
 		goto err_free_bus;
 	}
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	bus->name = "ep8248e-mdio-bitbang";
 	bus->parent = &ofdev->dev;
@@ -143,11 +147,19 @@ static int ep8248e_mdio_probe(struct platform_device *ofdev)
 
 	ret = of_mdiobus_register(bus, ofdev->dev.of_node);
 	if (ret)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+		goto err_free_bus;
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		goto err_free_irq;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	return 0;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+//do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 err_free_irq:
 	kfree(bus->irq);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 err_free_bus:
 	free_mdio_bitbang(bus);
 	return ret;

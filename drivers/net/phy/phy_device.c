@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
 
@@ -33,7 +30,11 @@ MODULE_LICENSE("GPL");
 
 void phy_device_free(struct phy_device *phydev)
 {
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	put_device(&phydev->mdio.dev);
+#else  
 	put_device(&phydev->dev);
+#endif  
 }
 EXPORT_SYMBOL(phy_device_free);
 
@@ -90,7 +91,11 @@ EXPORT_SYMBOL(phy_register_fixup_for_id);
 
 static int phy_needs_fixup(struct phy_device *phydev, struct phy_fixup *fixup)
 {
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	if (strcmp(fixup->bus_id, phydev_name(phydev)) != 0)
+#else  
 	if (strcmp(fixup->bus_id, dev_name(&phydev->dev)) != 0)
+#endif  
 		if (strcmp(fixup->bus_id, PHY_ANY_ID) != 0)
 			return 0;
 
@@ -123,17 +128,63 @@ static int phy_scan_fixups(struct phy_device *phydev)
 	return 0;
 }
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+static int phy_bus_match(struct device *dev, struct device_driver *drv)
+{
+	struct phy_device *phydev = to_phy_device(dev);
+	struct phy_driver *phydrv = to_phy_driver(drv);
+	const int num_ids = ARRAY_SIZE(phydev->c45_ids.device_ids);
+	int i;
+
+	if (!(phydrv->mdiodrv.flags & MDIO_DEVICE_IS_PHY))
+		return 0;
+
+	if (phydrv->match_phy_device)
+		return phydrv->match_phy_device(phydev);
+
+	if (phydev->is_c45) {
+		for (i = 1; i < num_ids; i++) {
+			if (!(phydev->c45_ids.devices_in_package & (1 << i)))
+				continue;
+
+			if ((phydrv->phy_id & phydrv->phy_id_mask) ==
+			    (phydev->c45_ids.device_ids[i] &
+			     phydrv->phy_id_mask))
+				return 1;
+		}
+		return 0;
+	} else {
+		return (phydrv->phy_id & phydrv->phy_id_mask) ==
+			(phydev->phy_id & phydrv->phy_id_mask);
+	}
+}
+#endif  
+
 struct phy_device *phy_device_create(struct mii_bus *bus, int addr, int phy_id,
 				     bool is_c45,
 				     struct phy_c45_device_ids *c45_ids)
 {
 	struct phy_device *dev;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	struct mdio_device *mdiodev;
+#endif  
 
 	dev = kzalloc(sizeof(*dev), GFP_KERNEL);
 	if (!dev)
 		return ERR_PTR(-ENOMEM);
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	mdiodev = &dev->mdio;
+	mdiodev->dev.release = phy_device_release;
+	mdiodev->dev.parent = &bus->dev;
+	mdiodev->dev.bus = &mdio_bus_type;
+	mdiodev->bus = bus;
+	mdiodev->bus_match = phy_bus_match;
+	mdiodev->addr = addr;
+	mdiodev->flags = MDIO_DEVICE_FLAG_PHY;
+#else  
 	dev->dev.release = phy_device_release;
+#endif  
 
 	dev->speed = 0;
 	dev->duplex = -1;
@@ -145,15 +196,27 @@ struct phy_device *phy_device_create(struct mii_bus *bus, int addr, int phy_id,
 	dev->autoneg = AUTONEG_ENABLE;
 
 	dev->is_c45 = is_c45;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+ 
+#else  
 	dev->addr = addr;
+#endif  
 	dev->phy_id = phy_id;
 	if (c45_ids)
 		dev->c45_ids = *c45_ids;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+ 
+#else  
 	dev->bus = bus;
 	dev->dev.parent = &bus->dev;
 	dev->dev.bus = &mdio_bus_type;
+#endif  
 	dev->irq = bus->irq ? bus->irq[addr] : PHY_POLL;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	dev_set_name(&mdiodev->dev, PHY_ID_FMT, bus->id, addr);
+#else  
 	dev_set_name(&dev->dev, PHY_ID_FMT, bus->id, addr);
+#endif  
 
 	dev->state = PHY_DOWN;
 
@@ -163,7 +226,11 @@ struct phy_device *phy_device_create(struct mii_bus *bus, int addr, int phy_id,
 
 	request_module(MDIO_MODULE_PREFIX MDIO_ID_FMT, MDIO_ID_ARGS(phy_id));
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	device_initialize(&mdiodev->dev);
+#else  
 	device_initialize(&dev->dev);
+#endif  
 
 	return dev;
 }
@@ -280,58 +347,83 @@ int phy_device_register(struct phy_device *phydev)
 {
 	int err;
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	err = mdiobus_register_device(&phydev->mdio);
+	if (err)
+		return err;
+#else  
+	 
 	if (phydev->bus->phy_map[phydev->addr])
 		return -EINVAL;
 	phydev->bus->phy_map[phydev->addr] = phydev;
+#endif  
 
 	err = phy_scan_fixups(phydev);
 	if (err) {
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+		pr_err("PHY %d failed to initialize\n", phydev->mdio.addr);
+#else  
 		pr_err("PHY %d failed to initialize\n", phydev->addr);
-		goto out;
-	}
-
-	err = device_add(&phydev->dev);
-	if (err) {
-		pr_err("PHY %d failed to add\n", phydev->addr);
-		goto out;
-	}
-
-#if defined(MY_DEF_HERE)
-	 
-	if (phydev->drv && phydev->drv->config_init) {
-		err = phydev->drv->config_init(phydev);
-		if (err) {
-			pr_err("PHY %d failed to initialize config\n", phydev->addr);
-			goto out;
-		}
-	}
 #endif  
+		goto out;
+	}
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	err = device_add(&phydev->mdio.dev);
+#else  
+	err = device_add(&phydev->dev);
+#endif  
+	if (err) {
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+		pr_err("PHY %d failed to add\n", phydev->mdio.addr);
+#else  
+		pr_err("PHY %d failed to add\n", phydev->addr);
+#endif  
+		goto out;
+	}
 	return 0;
 
  out:
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	mdiobus_unregister_device(&phydev->mdio);
+#else  
 	phydev->bus->phy_map[phydev->addr] = NULL;
+#endif  
 	return err;
 }
 EXPORT_SYMBOL(phy_device_register);
 
 void phy_device_remove(struct phy_device *phydev)
 {
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	device_del(&phydev->mdio.dev);
+	mdiobus_unregister_device(&phydev->mdio);
+#else  
 	struct mii_bus *bus = phydev->bus;
 	int addr = phydev->addr;
 
 	device_del(&phydev->dev);
 	bus->phy_map[addr] = NULL;
+#endif  
 }
 EXPORT_SYMBOL(phy_device_remove);
 
 struct phy_device *phy_find_first(struct mii_bus *bus)
 {
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	struct phy_device *phydev;
+#endif  
 	int addr;
 
 	for (addr = 0; addr < PHY_MAX_ADDR; addr++) {
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+		phydev = mdiobus_get_phy(bus, addr);
+		if (phydev)
+			return phydev;
+#else  
 		if (bus->phy_map[addr])
 			return bus->phy_map[addr];
+#endif  
 	}
 	return NULL;
 }
@@ -440,11 +532,45 @@ int phy_init_hw(struct phy_device *phydev)
 }
 EXPORT_SYMBOL(phy_init_hw);
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+void phy_attached_info(struct phy_device *phydev)
+{
+	phy_attached_print(phydev, NULL);
+}
+EXPORT_SYMBOL(phy_attached_info);
+
+#define ATTACHED_FMT "attached PHY driver [%s] (mii_bus:phy_addr=%s, irq=%d)"
+void phy_attached_print(struct phy_device *phydev, const char *fmt, ...)
+{
+	if (!fmt) {
+		dev_info(&phydev->mdio.dev, ATTACHED_FMT "\n",
+			 phydev->drv->name, phydev_name(phydev),
+			 phydev->irq);
+	} else {
+		va_list ap;
+
+		dev_info(&phydev->mdio.dev, ATTACHED_FMT,
+			 phydev->drv->name, phydev_name(phydev),
+			 phydev->irq);
+
+		va_start(ap, fmt);
+		vprintk(fmt, ap);
+		va_end(ap);
+	}
+}
+EXPORT_SYMBOL(phy_attached_print);
+#endif  
+
 int phy_attach_direct(struct net_device *dev, struct phy_device *phydev,
 		      u32 flags, phy_interface_t interface)
 {
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	struct mii_bus *bus = phydev->mdio.bus;
+	struct device *d = &phydev->mdio.dev;
+#else  
 	struct mii_bus *bus = phydev->bus;
 	struct device *d = &phydev->dev;
+#endif  
 	int err;
 
 	if (!try_module_get(bus->owner)) {
@@ -456,9 +582,19 @@ int phy_attach_direct(struct net_device *dev, struct phy_device *phydev,
 
 	if (!d->driver) {
 		if (phydev->is_c45)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+			d->driver =
+				&genphy_driver[GENPHY_DRV_10G].mdiodrv.driver;
+#else  
 			d->driver = &genphy_driver[GENPHY_DRV_10G].driver;
+#endif  
 		else
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+			d->driver =
+				&genphy_driver[GENPHY_DRV_1G].mdiodrv.driver;
+#else  
 			d->driver = &genphy_driver[GENPHY_DRV_1G].driver;
+#endif  
 
 		err = d->driver->probe(d);
 		if (err >= 0)
@@ -531,22 +667,38 @@ void phy_detach(struct phy_device *phydev)
 	phy_suspend(phydev);
 
 	for (i = 0; i < ARRAY_SIZE(genphy_driver); i++) {
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+		if (phydev->mdio.dev.driver ==
+		    &genphy_driver[i].mdiodrv.driver) {
+			device_release_driver(&phydev->mdio.dev);
+#else  
 		if (phydev->dev.driver == &genphy_driver[i].driver) {
 			device_release_driver(&phydev->dev);
+#endif  
 			break;
 		}
 	}
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	bus = phydev->mdio.bus;
+
+	put_device(&phydev->mdio.dev);
+#else  
 	bus = phydev->bus;
 
 	put_device(&phydev->dev);
+#endif  
 	module_put(bus->owner);
 }
 EXPORT_SYMBOL(phy_detach);
 
 int phy_suspend(struct phy_device *phydev)
 {
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	struct phy_driver *phydrv = to_phy_driver(phydev->mdio.dev.driver);
+#else  
 	struct phy_driver *phydrv = to_phy_driver(phydev->dev.driver);
+#endif  
 	struct ethtool_wolinfo wol = { .cmd = ETHTOOL_GWOL };
 	int ret = 0;
 
@@ -568,7 +720,11 @@ EXPORT_SYMBOL(phy_suspend);
 
 int phy_resume(struct phy_device *phydev)
 {
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	struct phy_driver *phydrv = to_phy_driver(phydev->mdio.dev.driver);
+#else  
 	struct phy_driver *phydrv = to_phy_driver(phydev->dev.driver);
+#endif  
 	int ret = 0;
 
 	if (phydrv->resume)
@@ -996,7 +1152,11 @@ EXPORT_SYMBOL(phy_set_max_speed);
 
 static void of_set_phy_supported(struct phy_device *phydev)
 {
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	struct device_node *node = phydev->mdio.dev.of_node;
+#else  
 	struct device_node *node = phydev->dev.of_node;
+#endif  
 	u32 max_speed;
 
 	if (!IS_ENABLED(CONFIG_OF_MDIO))
@@ -1012,7 +1172,11 @@ static void of_set_phy_supported(struct phy_device *phydev)
 static int phy_probe(struct device *dev)
 {
 	struct phy_device *phydev = to_phy_device(dev);
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	struct device_driver *drv = phydev->mdio.dev.driver;
+#else  
 	struct device_driver *drv = phydev->dev.driver;
+#endif  
 	struct phy_driver *phydrv = to_phy_driver(drv);
 	int err = 0;
 
@@ -1056,16 +1220,33 @@ static int phy_remove(struct device *dev)
 	return 0;
 }
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+ 
+int phy_driver_register(struct phy_driver *new_driver, struct module *owner)
+#else  
+ 
 int phy_driver_register(struct phy_driver *new_driver)
+#endif  
 {
 	int retval;
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	new_driver->mdiodrv.flags |= MDIO_DEVICE_IS_PHY;
+	new_driver->mdiodrv.driver.name = new_driver->name;
+	new_driver->mdiodrv.driver.bus = &mdio_bus_type;
+	new_driver->mdiodrv.driver.probe = phy_probe;
+	new_driver->mdiodrv.driver.remove = phy_remove;
+	new_driver->mdiodrv.driver.owner = owner;
+
+	retval = driver_register(&new_driver->mdiodrv.driver);
+#else  
 	new_driver->driver.name = new_driver->name;
 	new_driver->driver.bus = &mdio_bus_type;
 	new_driver->driver.probe = phy_probe;
 	new_driver->driver.remove = phy_remove;
 
 	retval = driver_register(&new_driver->driver);
+#endif  
 	if (retval) {
 		pr_err("%s: Error %d in registering driver\n",
 		       new_driver->name, retval);
@@ -1079,12 +1260,21 @@ int phy_driver_register(struct phy_driver *new_driver)
 }
 EXPORT_SYMBOL(phy_driver_register);
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+int phy_drivers_register(struct phy_driver *new_driver, int n,
+			 struct module *owner)
+#else  
 int phy_drivers_register(struct phy_driver *new_driver, int n)
+#endif  
 {
 	int i, ret = 0;
 
 	for (i = 0; i < n; i++) {
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+		ret = phy_driver_register(new_driver + i, owner);
+#else  
 		ret = phy_driver_register(new_driver + i);
+#endif  
 		if (ret) {
 			while (i-- > 0)
 				phy_driver_unregister(new_driver + i);
@@ -1097,7 +1287,11 @@ EXPORT_SYMBOL(phy_drivers_register);
 
 void phy_driver_unregister(struct phy_driver *drv)
 {
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	driver_unregister(&drv->mdiodrv.driver);
+#else  
 	driver_unregister(&drv->driver);
+#endif  
 }
 EXPORT_SYMBOL(phy_driver_unregister);
 
@@ -1125,7 +1319,11 @@ static struct phy_driver genphy_driver[] = {
 	.read_status	= genphy_read_status,
 	.suspend	= genphy_suspend,
 	.resume		= genphy_resume,
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+ 
+#else  
 	.driver		= { .owner = THIS_MODULE, },
+#endif  
 }, {
 	.phy_id         = 0xffffffff,
 	.phy_id_mask    = 0xffffffff,
@@ -1137,7 +1335,11 @@ static struct phy_driver genphy_driver[] = {
 	.read_status    = gen10g_read_status,
 	.suspend        = gen10g_suspend,
 	.resume         = gen10g_resume,
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+ 
+#else  
 	.driver         = {.owner = THIS_MODULE, },
+#endif  
 } };
 
 static int __init phy_init(void)
@@ -1148,8 +1350,13 @@ static int __init phy_init(void)
 	if (rc)
 		return rc;
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	rc = phy_drivers_register(genphy_driver,
+				  ARRAY_SIZE(genphy_driver), THIS_MODULE);
+#else  
 	rc = phy_drivers_register(genphy_driver,
 				  ARRAY_SIZE(genphy_driver));
+#endif  
 	if (rc)
 		mdio_bus_exit();
 

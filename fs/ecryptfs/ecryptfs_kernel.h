@@ -18,11 +18,7 @@
 #include <linux/crypto.h>
 
 #define ECRYPTFS_DEFAULT_IV_BYTES 16
-#ifdef MY_DEF_HERE
-#define ECRYPTFS_DEFAULT_EXTENT_SIZE PAGE_SIZE
-#else  
 #define ECRYPTFS_DEFAULT_EXTENT_SIZE 4096
-#endif  
 #define ECRYPTFS_MINIMUM_HEADER_EXTENT_SIZE 8192
 #define ECRYPTFS_DEFAULT_MSG_CTX_ELEMS 32
 #define ECRYPTFS_DEFAULT_SEND_TIMEOUT HZ
@@ -636,5 +632,9 @@ int ecryptfs_set_f_namelen(long *namelen, long lower_namelen,
 			   struct ecryptfs_mount_crypt_stat *mount_crypt_stat);
 int ecryptfs_derive_iv(char *iv, struct ecryptfs_crypt_stat *crypt_stat,
 		       loff_t offset);
+
+#ifdef MY_ABC_HERE
+loff_t upper_size_to_lower_size(struct ecryptfs_crypt_stat *crypt_stat, loff_t upper_size);
+#endif  
 
 #endif  

@@ -102,6 +102,9 @@ obj-$(CONFIG_REGULATOR_WM8350) += wm8350-regulator.o
 obj-$(CONFIG_REGULATOR_WM8400) += wm8400-regulator.o
 obj-$(CONFIG_REGULATOR_WM8994) += wm8994-regulator.o
 obj-$(CONFIG_REGULATOR_G2227)	+= gmt-g2227.o
+ifeq ($(CONFIG_SYNO_LSP_ARMADA_17_04_02), y)
+obj-$(CONFIG_REGULATOR_ARMADA3700) += armada-37xx-regulator.o
+endif # CONFIG_SYNO_LSP_ARMADA_17_04_02
 
 
 

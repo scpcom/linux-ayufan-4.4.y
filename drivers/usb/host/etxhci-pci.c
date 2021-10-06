@@ -31,7 +31,7 @@
 #define PCI_DEVICE_ID_ETRON_EJ168	0x7023
 #define PCI_DEVICE_ID_ETRON_EJ188	0x7052
 
-static const char hcd_name[] = "etxhci_hcd-161027";
+static const char hcd_name[] = "etxhci_hcd-170202";
 
 /* called after powerup, by probe or system-pm "wakeup" */
 static int xhci_pci_reinit(struct xhci_hcd *xhci, struct pci_dev *pdev)

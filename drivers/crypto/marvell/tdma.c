@@ -37,9 +37,17 @@ bool mv_cesa_req_dma_iter_next_transfer(struct mv_cesa_dma_iter *iter,
 	return true;
 }
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+void mv_cesa_dma_step(struct mv_cesa_req *dreq)
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 void mv_cesa_dma_step(struct mv_cesa_tdma_req *dreq)
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 {
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+	struct mv_cesa_engine *engine = dreq->engine;
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	struct mv_cesa_engine *engine = dreq->base.engine;
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 
 	writel_relaxed(0, engine->regs + CESA_SA_CFG);
 
@@ -53,17 +61,32 @@ void mv_cesa_dma_step(struct mv_cesa_tdma_req *dreq)
 		       engine->regs + CESA_SA_CFG);
 	writel_relaxed(dreq->chain.first->cur_dma,
 		       engine->regs + CESA_TDMA_NEXT_ADDR);
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+	BUG_ON(readl(engine->regs + CESA_SA_CMD) &
+	       CESA_SA_CMD_EN_CESA_SA_ACCL0);
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	writel(CESA_SA_CMD_EN_CESA_SA_ACCL0, engine->regs + CESA_SA_CMD);
 }
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+void mv_cesa_dma_cleanup(struct mv_cesa_req *dreq)
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 void mv_cesa_dma_cleanup(struct mv_cesa_tdma_req *dreq)
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 {
 	struct mv_cesa_tdma_desc *tdma;
 
 	for (tdma = dreq->chain.first; tdma;) {
 		struct mv_cesa_tdma_desc *old_tdma = tdma;
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+		u32 type = tdma->flags & CESA_TDMA_TYPE_MSK;
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+		if (type == CESA_TDMA_OP)
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 		if (tdma->flags & CESA_TDMA_OP)
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 			dma_pool_free(cesa_dev->dma->op_pool, tdma->op,
 				      le32_to_cpu(tdma->src));
 
@@ -76,7 +99,11 @@ void mv_cesa_dma_cleanup(struct mv_cesa_tdma_req *dreq)
 	dreq->chain.last = NULL;
 }
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+void mv_cesa_dma_prepare(struct mv_cesa_req *dreq,
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 void mv_cesa_dma_prepare(struct mv_cesa_tdma_req *dreq,
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 			 struct mv_cesa_engine *engine)
 {
 	struct mv_cesa_tdma_desc *tdma;
@@ -88,23 +115,131 @@ void mv_cesa_dma_prepare(struct mv_cesa_tdma_req *dreq,
 		if (tdma->flags & CESA_TDMA_SRC_IN_SRAM)
 			tdma->src = cpu_to_le32(tdma->src + engine->sram_dma);
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+		if ((tdma->flags & CESA_TDMA_TYPE_MSK) == CESA_TDMA_OP)
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 		if (tdma->flags & CESA_TDMA_OP)
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 			mv_cesa_adjust_op(engine, tdma->op);
 	}
 }
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+void mv_cesa_tdma_chain(struct mv_cesa_engine *engine,
+			struct mv_cesa_req *dreq)
+{
+	if (engine->chain.first == NULL && engine->chain.last == NULL) {
+		engine->chain.first = dreq->chain.first;
+		engine->chain.last  = dreq->chain.last;
+	} else {
+		struct mv_cesa_tdma_desc *last;
+
+		last = engine->chain.last;
+		last->next = dreq->chain.first;
+		engine->chain.last = dreq->chain.last;
+
+		/*
+		 * Break the DMA chain if the CESA_TDMA_BREAK_CHAIN is set on
+		 * the last element of the current chain, or if the request
+		 * being queued needs the IV regs to be set before lauching
+		 * the request.
+		 */
+		if (!(last->flags & CESA_TDMA_BREAK_CHAIN) &&
+		    !(dreq->chain.first->flags & CESA_TDMA_SET_STATE))
+			last->next_dma = dreq->chain.first->cur_dma;
+	}
+}
+
+int mv_cesa_tdma_process(struct mv_cesa_engine *engine, u32 status)
+{
+	struct crypto_async_request *req = NULL;
+	struct mv_cesa_tdma_desc *tdma = NULL, *next = NULL;
+	dma_addr_t tdma_cur;
+	int res = 0;
+
+	tdma_cur = readl(engine->regs + CESA_TDMA_CUR);
+
+	for (tdma = engine->chain.first; tdma; tdma = next) {
+		spin_lock_bh(&engine->lock);
+		next = tdma->next;
+		spin_unlock_bh(&engine->lock);
+
+		if (tdma->flags & CESA_TDMA_END_OF_REQ) {
+			struct crypto_async_request *backlog = NULL;
+			struct mv_cesa_ctx *ctx;
+			u32 current_status;
+
+			spin_lock_bh(&engine->lock);
+			/*
+			 * if req is NULL, this means we're processing the
+			 * request in engine->req.
+			 */
+			if (!req)
+				req = engine->req;
+			else
+				req = mv_cesa_dequeue_req_locked(engine,
+								 &backlog);
+
+			/* Re-chaining to the next request */
+			engine->chain.first = tdma->next;
+			tdma->next = NULL;
+
+			/* If this is the last request, clear the chain */
+			if (engine->chain.first == NULL)
+				engine->chain.last  = NULL;
+			spin_unlock_bh(&engine->lock);
+
+			ctx = crypto_tfm_ctx(req->tfm);
+			current_status = (tdma->cur_dma == tdma_cur) ?
+					  status : CESA_SA_INT_ACC0_IDMA_DONE;
+			res = ctx->ops->process(req, current_status);
+			ctx->ops->complete(req);
+
+			if (res == 0)
+				mv_cesa_engine_enqueue_complete_request(engine,
+									req);
+
+			if (backlog)
+				backlog->complete(backlog, -EINPROGRESS);
+		}
+
+		if (res || tdma->cur_dma == tdma_cur)
+			break;
+	}
+
+	/* Save the last request in error to engine->req, so that the core
+	 * knows which request was fautly */
+	if (res) {
+		spin_lock_bh(&engine->lock);
+		engine->req = req;
+		spin_unlock_bh(&engine->lock);
+	}
+
+	return res;
+}
+
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 static struct mv_cesa_tdma_desc *
 mv_cesa_dma_add_desc(struct mv_cesa_tdma_chain *chain, gfp_t flags)
 {
 	struct mv_cesa_tdma_desc *new_tdma = NULL;
 	dma_addr_t dma_handle;
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+	new_tdma = dma_pool_zalloc(cesa_dev->dma->tdma_desc_pool, flags,
+				   &dma_handle);
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	new_tdma = dma_pool_alloc(cesa_dev->dma->tdma_desc_pool, flags,
 				  &dma_handle);
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	if (!new_tdma)
 		return ERR_PTR(-ENOMEM);
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+//do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	memset(new_tdma, 0, sizeof(*new_tdma));
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	new_tdma->cur_dma = dma_handle;
 	if (chain->last) {
 		chain->last->next_dma = cpu_to_le32(dma_handle);
@@ -118,6 +253,42 @@ mv_cesa_dma_add_desc(struct mv_cesa_tdma_chain *chain, gfp_t flags)
 	return new_tdma;
 }
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+int mv_cesa_dma_add_result_op(struct mv_cesa_tdma_chain *chain, dma_addr_t src,
+			  u32 size, u32 flags, gfp_t gfp_flags)
+{
+	struct mv_cesa_tdma_desc *tdma, *op_desc;
+
+	tdma = mv_cesa_dma_add_desc(chain, gfp_flags);
+	if (IS_ERR(tdma))
+		return PTR_ERR(tdma);
+
+	/* We re-use an existing op_desc object to retrieve the context
+	 * and result instead of allocating a new one.
+	 * There is at least one object of this type in a CESA crypto
+	 * req, just pick the first one in the chain.
+	 */
+	for (op_desc = chain->first; op_desc; op_desc = op_desc->next) {
+		u32 type = op_desc->flags & CESA_TDMA_TYPE_MSK;
+
+		if (type == CESA_TDMA_OP)
+			break;
+	}
+
+	if (!op_desc)
+		return -EIO;
+
+	tdma->byte_cnt = cpu_to_le32(size | BIT(31));
+	tdma->src = src;
+	tdma->dst = op_desc->src;
+	tdma->op = op_desc->op;
+
+	flags &= (CESA_TDMA_DST_IN_SRAM | CESA_TDMA_SRC_IN_SRAM);
+	tdma->flags = flags | CESA_TDMA_RESULT;
+	return 0;
+}
+
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 struct mv_cesa_op_ctx *mv_cesa_dma_add_op(struct mv_cesa_tdma_chain *chain,
 					const struct mv_cesa_op_ctx *op_templ,
 					bool skip_ctx,
@@ -144,6 +315,9 @@ struct mv_cesa_op_ctx *mv_cesa_dma_add_op(struct mv_cesa_tdma_chain *chain,
 	tdma->op = op;
 	tdma->byte_cnt = cpu_to_le32(size | BIT(31));
 	tdma->src = cpu_to_le32(dma_handle);
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+	tdma->dst = CESA_SA_CFG_SRAM_OFFSET;
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	tdma->flags = CESA_TDMA_DST_IN_SRAM | CESA_TDMA_OP;
 
 	return op;

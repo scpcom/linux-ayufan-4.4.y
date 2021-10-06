@@ -98,7 +98,11 @@ static void ax88172a_status(struct usbnet *dev, struct urb *urb)
 static int ax88172a_init_mdio(struct usbnet *dev)
 {
 	struct ax88172a_private *priv = dev->driver_priv;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	int ret;
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	int ret, i;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	priv->mdio = mdiobus_alloc();
 	if (!priv->mdio) {
@@ -114,6 +118,9 @@ static int ax88172a_init_mdio(struct usbnet *dev)
 	snprintf(priv->mdio->id, MII_BUS_ID_SIZE, "usb-%03d:%03d",
 		 dev->udev->bus->busnum, dev->udev->devnum);
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+//do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	priv->mdio->irq = kzalloc(sizeof(int) * PHY_MAX_ADDR, GFP_KERNEL);
 	if (!priv->mdio->irq) {
 		ret = -ENOMEM;
@@ -121,18 +128,27 @@ static int ax88172a_init_mdio(struct usbnet *dev)
 	}
 	for (i = 0; i < PHY_MAX_ADDR; i++)
 		priv->mdio->irq[i] = PHY_POLL;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	ret = mdiobus_register(priv->mdio);
 	if (ret) {
 		netdev_err(dev->net, "Could not register MDIO bus\n");
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+		goto mfree;
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		goto ifree;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	}
 
 	netdev_info(dev->net, "registered mdio bus %s\n", priv->mdio->id);
 	return 0;
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+//do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 ifree:
 	kfree(priv->mdio->irq);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 mfree:
 	mdiobus_free(priv->mdio);
 	return ret;

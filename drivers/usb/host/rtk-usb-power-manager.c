@@ -31,7 +31,12 @@
 #define CRT_CLOCK_ENABLE1 	0xc
 
 struct manager_data {
+    int rtd129x_cpu_id;
     void __iomem *crt_base;
+    void __iomem *reg_charger;
+    void __iomem *usb_typec_ctrl_cc1_0;
+    void __iomem *reg_usb_ctrl;
+
     struct device *dev;
 
     /*GPIO*/
@@ -50,8 +55,6 @@ struct manager_data {
     struct device_node *ehci_node;
     struct device_node *ohci_node;
     struct device_node *u3host_node;
-
-    spinlock_t		lock;
 };
 
 static inline void __power_control_set_power(const char *name, bool power_on)
@@ -93,7 +96,7 @@ static __maybe_unused void __rtk_usb_set_hw_pm_enable(struct manager_data *data)
 static __maybe_unused void __rtk_usb_set_charger_power(struct manager_data *data, bool power_on)
 {
     struct device *dev = data->dev;
-    void __iomem *reg_charger  = ioremap(0x98007044, 0x4);
+    void __iomem *reg_charger  = data->reg_charger;
     unsigned int val = 0;
 
     if (power_on) {
@@ -106,8 +109,6 @@ static __maybe_unused void __rtk_usb_set_charger_power(struct manager_data *data
     dev_dbg(dev, "set usb_charger to 0x%08x\n", val);
 
     writel(val, reg_charger);
-
-    iounmap(reg_charger);
 }
 
 /* set usb power domain */
@@ -126,12 +127,10 @@ static void __rtk_usb_set_pd_power(struct manager_data* data, bool power_on)
         __power_control_set_power("pctrl_usb_p3_mac", data->port3);
 
     } else {
-        void __iomem *reg_usb_ctrl = ioremap(0x98007fb0, 0x4);
+        void __iomem *reg_usb_ctrl = data->reg_usb_ctrl;
 
         dev_dbg(dev, "set power_domain off\n");
         writel(0x00000000, reg_usb_ctrl);
-
-        iounmap(reg_usb_ctrl);
     }
 }
 
@@ -278,18 +277,16 @@ static int __rtk_usb_host_reset(struct manager_data* data) {
 static int rtk_usb_drd_gpio_power_on_off(struct manager_data *data, bool on) {
     struct device *dev = data->dev;
     int gpio = data->type_c_pow_gpio;
-    // 1294 DRD Type A
-    if (get_rtd129x_cpu_id() == RTK1294_CPU_ID) {
-        void __iomem *usb_typec_ctrl_cc1_0 = ioremap(0x9801334c, 0x4);
-        writel(BIT(29), usb_typec_ctrl_cc1_0);
-        if (gpio_is_valid(gpio)) {
-            if (gpio_direction_output(gpio, on))
-                dev_err(dev, "%s ERROR set gpio fail\n", __func__);
-            else dev_info(dev, "%s 1294 type c power %s by gpio (id=%d) OK\n",
+    void __iomem *usb_typec_ctrl_cc1_0 = data->usb_typec_ctrl_cc1_0;
+
+    writel(BIT(29), usb_typec_ctrl_cc1_0);
+    if (gpio_is_valid(gpio)) {
+        if (gpio_direction_output(gpio, on))
+            dev_err(dev, "%s ERROR set gpio fail\n", __func__);
+        else dev_info(dev, "%s 1294 type c power %s by gpio (id=%d) OK\n",
                               __func__, on?"on":"off", gpio);
-        }
-        __iounmap(usb_typec_ctrl_cc1_0);
     }
+
     return 0;
 }
 
@@ -327,7 +324,7 @@ static int rtk_usb_u3host_gpio_power_on_off(struct manager_data *data, bool on) 
 
 #if 0
     // add workaround to enable QA board u2host power
-    if (get_rtd129x_cpu_id() == RTK1296_CPU_ID) {
+    if (data->rtd129x_cpu_id == RTK1296_CPU_ID) {
         int qa_borad_gpio19 = 19;
         if (gpio_is_valid(qa_borad_gpio19)) {
             if (gpio_request(qa_borad_gpio19, "qa_u2host_pow_gpio"))         //request gpio
@@ -364,6 +361,8 @@ static int rtk_usb_resume_power_on(struct manager_data *data) {
 }
 
 int rtk_usb_init_power_on(struct device *usb_dev) {
+
+#ifdef CONFIG_ARCH_RTD129X
     struct device_node *usb_node = usb_dev->of_node;
     struct device_node *node = of_find_compatible_node(NULL, NULL, "Realtek,rtd129x-usb-power-manager");
     struct platform_device *pdev = NULL;
@@ -381,7 +380,6 @@ int rtk_usb_init_power_on(struct device *usb_dev) {
     }
 
     dev_info(data->dev, "%s for %s", __func__, dev_name(usb_dev));
-    spin_lock(&data->lock);
     if (data->port0 && (data->drd_node->phandle == usb_node->phandle)) {
         dev_dbg(data->dev, "%s %s power on port 0", __func__, dev_name(usb_dev));
         rtk_usb_drd_gpio_power_on_off(data, on);
@@ -403,13 +401,11 @@ int rtk_usb_init_power_on(struct device *usb_dev) {
         dev_dbg(data->dev, "%s %s power on port 3", __func__, dev_name(usb_dev));
         rtk_usb_u3host_gpio_power_on_off(data, on);
     }
+#endif
 
-    spin_unlock(&data->lock);
     return 0;
 }
-#ifdef MY_DEF_HERE
 EXPORT_SYMBOL_GPL(rtk_usb_init_power_on);
-#endif
 
 static int rtk_usb_gpio_init(struct manager_data *data) {
     struct device *dev = data->dev;
@@ -490,6 +486,30 @@ static int rtk_usb_power_manager_probe(struct platform_device *pdev) {
         ret = -EFAULT;
         goto err1;
     }
+
+    data->reg_charger  = ioremap(0x98007044, 0x4);
+    if (data->reg_charger == NULL) {
+        dev_err(&pdev->dev, "error mapping memory for reg_charger\n");
+        ret = -EFAULT;
+        goto err1;
+    }
+
+    data->usb_typec_ctrl_cc1_0 = ioremap(0x9801334c, 0x4);
+    if (data->usb_typec_ctrl_cc1_0 == NULL) {
+        dev_err(&pdev->dev, "error mapping memory for usb_typec_ctrl_cc1_0\n");
+        ret = -EFAULT;
+        goto err1;
+    }
+
+    data->reg_usb_ctrl = ioremap(0x98007fb0, 0x4);
+    if (data->reg_usb_ctrl == NULL) {
+        dev_err(&pdev->dev, "error mapping memory for reg_usb_ctrl\n");
+        ret = -EFAULT;
+        goto err1;
+    }
+
+    data->rtd129x_cpu_id = get_rtd129x_cpu_id();
+
     data->dev = dev;
 
     if (node && of_device_is_available(node)) {
@@ -519,6 +539,17 @@ static int rtk_usb_power_manager_probe(struct platform_device *pdev) {
             data->u3host_pow_gpio = -1;
             dev_dbg(dev, " u3host-power-gpio no found");
         }
+#ifdef MY_DEF_HERE
+        /*
+         * remove rtk power enable on USB device
+         * because synology power enable is earlier
+         * than RTK. so the USB power enable on RTK
+         * is redundant
+         */
+        data->type_c_pow_gpio = -1;
+        data->u2host_pow_gpio = -1;
+        data->u3host_pow_gpio = -1;
+#endif /* MY_DEF_HERE */
     }
 
     if (node && of_device_is_available(node)) {

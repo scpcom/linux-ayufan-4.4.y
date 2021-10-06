@@ -1,26 +1,8 @@
 /dts-v1/;
-#include "../../../../../include/soc/realtek/memory.h"
-
-/memreserve/ SYS_BOOTCODE_MEMBASE       SYS_BOOTCODE_MEMSIZE        ; /* 0x00000000 ~ 0x00030000 */
-/memreserve/ RPC_COMM_PHYS              RPC_COMM_SIZE               ; /* 0x0001f000 ~ 0x0001ffff */
-/memreserve/ RESERVED_832KB_PHYS        RESERVED_832KB_SIZE         ; /* 0x00030000 ~ 0x000fffff */
-/memreserve/ ACPU_FIREWARE_PHYS         ACPU_FIREWARE_SIZE          ; /* 0x01b00000 ~ 0x01efffff */
-/memreserve/ RPC_RINGBUF_PHYS           RPC_RINGBUF_SIZE            ; /* 0x01ffe000 ~ 0x02001fff */
-/memreserve/ ACPU_IDMEM_PHYS            ACPU_IDMEM_SIZE             ; /* 0x10000000 ~ 0x10013fff */
-/memreserve/ ROOTFS_NORMAL_START        ROOTFS_NORMAL_SIZE          ; /* RootFS */
 
 #include "rtd-1296.dtsi"
-#include "rtd-129x-dvfs.dtsi"
-#include "rtd-1296-saola-common.dtsi"
 
 / {
-	model= "Realtek_RTD1296";
-	compatible = "Realtek,rtd-1296";
-
-	aliases {
-		serial0 = &uart0;
-	};
-
 	chosen {
 		bootargs = "earlycon=uart8250,mmio32,0x98007800 console=ttyS0,115200 androidboot.hardware=kylin loglevel=8";
 		linux,initrd-start = <ROOTFS_NORMAL_START>;
@@ -41,34 +23,34 @@
 			<RPC_RINGBUF_PHYS RPC_RINGBUF_SIZE>,
 			<ACPU_IDMEM_PHYS ACPU_IDMEM_SIZE>;
 	};
-
-	rtk_misc_gpio: rtk_misc_gpio@9801b100 {
-		gpios = <&rtk_misc_gpio 8 0 0>;
-		/* install button, input, default N/A */
-	};
-
-	rtk_iso_gpio: rtk_iso_gpio@98007100 {
-		gpios = <&rtk_iso_gpio 21 1 0>;
-		/* igpio21, output, default low */
-	};
-
-	timer {
-		clock-frequency = <27000000>;
-	};
-
-	timer0@9801b000 {
-		clock-frequency = <27000000>;
-	};
-
-	uart0: serial0@98007800 {
-		clock-frequency = <27000000>;
-	};
-
-
-	rfkill: rfkilligpio@0{
-		gpios = <&rtk_iso_gpio 24 1 0>;                         /*bt power , output, default low */
-		status = "okay";
-	};
+    rtk,ion {
+		compatible = "Realtek,rtk-ion";
+		#address-cells = <1>;
+		#size-cells = <0>;
+		rtk,ion-heap@0 {    /* SYSTEM_HEAP */
+		    compatible = "Realtek,rtk-ion-reserve";
+		    reg = <0>;
+		    rtk,memory-reservation-size = <0x0>;
+		};
+		rtk,ion-heap@1 {    /* System contig */
+		    compatible = "Realtek,rtk-ion-reserve";
+		    reg = <1>;
+		    rtk,memory-reservation-size = <0x0>;
+		};
+		rtk,ion-heap@4 {    /* DMA_HEAP */
+		    compatible = "Realtek,rtk-ion-reserve";
+		    reg = <4>;
+		    rtk,memory-reservation-size = <0x0>;
+		};
+        rtk,ion-heap@8 {    /* Audio */
+            compatible = "Realtek,rtk-ion-reserve";
+            reg = <8>;
+        };
+        rtk,ion-heap@7 {    /* TYPE_MEDIA */
+            compatible = "Realtek,rtk-ion-reserve";
+            reg = <7>;
+        };
+    };
 
 	power-management{
 		compatible = "Realtek,power-management";
@@ -76,7 +58,7 @@
 	/* GPIO Wakeup */
 	wakeup-gpio-enable = /* (0) disable (1) enable */
 		<1>; /* Wakeup from BT : disable */
-		//<0>; /* Wakeup from WiFi : disable */
+		//<1>; /* Wakeup from WiFi : disable */
 	wakeup-gpio-list = /* <&rtk_iso_gpio {num} {force input (0) } {default N/A (0)] }> */
 		<&rtk_iso_gpio 23 0 0>; /* BT wakeup host pin */
 		//<&rtk_iso_gpio 33 0 0>; /* WiFi wakeup host pin */
@@ -85,9 +67,9 @@
 		//<0>; /* Wifi : high activity */
 	};
 
-	sata@9803F000 {
-		compatible = "Realtek,ahci-sata";
-		tx-driving = <8>;
+	uart1: serial1@9801B200 {
+		compatible = "snps,dw-apb-uart";
+		status = "okay";
 	};
 
 	pcie@9804E000 {
@@ -99,6 +81,12 @@
 		compatible = "Realtek,ahci-sata";
 		tx-driving = <8>;
 		blink-gpios = <&rtk_misc_gpio 18 1 0>, <&rtk_misc_gpio 19 1 0>;
+	};
+	
+	rtk_usb_power_manager {
+		compatible = "Realtek,rtd129x-usb-power-manager";
+		realtek,u3host-power-gpio = <&rtk_misc_gpio 22 1 0>; /*1296 u3host power, output, default low */
+		realtek,type_c-power-gpio = <&rtk_misc_gpio 23 1 0>; /*TypeC power, output, default low */
 	};
 
 };

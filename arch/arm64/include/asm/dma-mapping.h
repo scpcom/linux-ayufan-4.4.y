@@ -31,7 +31,7 @@
 extern struct dma_map_ops dummy_dma_ops;
 #ifdef MY_DEF_HERE
 extern struct dma_map_ops swiotlb_dma_ops;
-#endif
+#endif /* MY_DEF_HERE */
 
 static inline struct dma_map_ops *__generic_dma_ops(struct device *dev)
 {
@@ -42,11 +42,11 @@ static inline struct dma_map_ops *__generic_dma_ops(struct device *dev)
 	 * We expect no ISA devices, and all other DMA masters are expected to
 	 * have someone call arch_setup_dma_ops at device creation time.
 	 */
-#ifndef MY_DEF_HERE
-	return &dummy_dma_ops;
-#else
+#ifdef MY_DEF_HERE
 	return &swiotlb_dma_ops;
-#endif
+#else
+	return &dummy_dma_ops;
+#endif /* MY_DEF_HERE */
 }
 
 static inline struct dma_map_ops *get_dma_ops(struct device *dev)

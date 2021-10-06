@@ -23,6 +23,9 @@
 #ifdef MY_ABC_HERE
 #include <linux/raid/libmd-report.h>
 #endif  
+#ifdef MY_ABC_HERE
+#include <linux/raid/libmd-sync-report.h>
+#endif  
 
 #define MaxSector (~(sector_t)0)
 
@@ -311,6 +314,9 @@ struct mddev {
 #ifdef MY_ABC_HERE
 	void                            *syno_private;     
 	char                            lv_name[16];
+#endif  
+#ifdef MY_ABC_HERE
+	mempool_t	*syno_mdio_mempool;
 #endif  
 
 	struct attribute_group		*to_remove;

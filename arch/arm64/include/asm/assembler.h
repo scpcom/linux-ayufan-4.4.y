@@ -63,7 +63,7 @@
 	.macro  restore_irqs, olddaif
 	msr     daif, \olddaif
 	.endm
-#endif
+#endif /* MY_DEF_HERE */
 /*
  * Enable and disable debug exceptions.
  */

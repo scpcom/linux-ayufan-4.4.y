@@ -188,54 +188,58 @@ static atomic_t s_interrupt_flag_ve2;
 static wait_queue_head_t s_interrupt_wait_q_ve2;
 
 static spinlock_t s_vpu_lock = __SPIN_LOCK_UNLOCKED(s_vpu_lock);
+static spinlock_t s_ve1_lock = __SPIN_LOCK_UNLOCKED(s_ve1_lock);
+static spinlock_t s_ve2_lock = __SPIN_LOCK_UNLOCKED(s_ve2_lock);
 static DEFINE_SEMAPHORE(s_vpu_sem);
 static struct list_head s_vbp_head = LIST_HEAD_INIT(s_vbp_head);
 static struct list_head s_inst_list_head = LIST_HEAD_INIT(s_inst_list_head);
 
 static vpu_bit_firmware_info_t s_bit_firmware_info[MAX_NUM_VPU_CORE];
 
-#define BIT_BASE			0x0000
-#define BIT_INT_STS				 (BIT_BASE + 0x010)
-#define BIT_INT_REASON			  (BIT_BASE + 0x174)
-#define BIT_INT_CLEAR			   (BIT_BASE + 0x00C)
-#define VE_CTRL_REG                         (BIT_BASE + 0x3000)
+#define BIT_BASE            0x0000
+#define BIT_INT_STS         (BIT_BASE + 0x010)
+#define BIT_INT_REASON      (BIT_BASE + 0x174)
+#define BIT_INT_CLEAR       (BIT_BASE + 0x00C)
+#define VE_CTRL_REG         (BIT_BASE + 0x3000)
+#define VE_CTI_GRP_REG      (BIT_BASE + 0x3004)
 
-#define W4_REG_BASE					 0x0000
-#define W4_VPU_INT_CLEAR				(W4_REG_BASE + 0x003C)
-#define W4_VPU_INT_STS				  (W4_REG_BASE + 0x0044)
-#define W4_VPU_INT_REASON			   (W4_REG_BASE + 0x004c)
-#define W4_VPU_INT_REASON_CLEAR		 (W4_REG_BASE + 0x0034)
-#define W4_VE_CTRL_REG                         (W4_REG_BASE + 0x3E00)
+#define W4_REG_BASE                 0x0000
+#define W4_VPU_INT_CLEAR            (W4_REG_BASE + 0x003C)
+#define W4_VPU_INT_STS              (W4_REG_BASE + 0x0044)
+#define W4_VPU_INT_REASON           (W4_REG_BASE + 0x004c)
+#define W4_VPU_INT_REASON_CLEAR     (W4_REG_BASE + 0x0034)
+#define W4_VE_CTRL_REG              (W4_REG_BASE + 0x3E00)
+#define W4_VE_CTI_GRP_REG           (W4_REG_BASE + 0x3E04)
 #ifdef CONFIG_PM
 /* implement to power management functions */
-#define BIT_CODE_RUN				(BIT_BASE + 0x000)
-#define BIT_CODE_DOWN			   (BIT_BASE + 0x004)
-#define BIT_CODE_RESET			(BIT_BASE + 0x014)
-#define BIT_BUSY_FLAG			   (BIT_BASE + 0x160)
-#define BIT_RUN_COMMAND			 (BIT_BASE + 0x164)
-#define BIT_RUN_INDEX			   (BIT_BASE + 0x168)
-#define BIT_RUN_COD_STD			 (BIT_BASE + 0x16C)
+#define BIT_CODE_RUN        (BIT_BASE + 0x000)
+#define BIT_CODE_DOWN       (BIT_BASE + 0x004)
+#define BIT_CODE_RESET      (BIT_BASE + 0x014)
+#define BIT_BUSY_FLAG       (BIT_BASE + 0x160)
+#define BIT_RUN_COMMAND     (BIT_BASE + 0x164)
+#define BIT_RUN_INDEX       (BIT_BASE + 0x168)
+#define BIT_RUN_COD_STD     (BIT_BASE + 0x16C)
 
 /* WAVE4 registers */
-#define W4_VPU_BUSY_STATUS			  (W4_REG_BASE + 0x0070)
+#define W4_VPU_BUSY_STATUS          (W4_REG_BASE + 0x0070)
 
-#define W4_RET_SUCCESS				  (W4_REG_BASE + 0x0110)
-#define W4_RET_FAIL_REASON			  (W4_REG_BASE + 0x0114)
+#define W4_RET_SUCCESS              (W4_REG_BASE + 0x0110)
+#define W4_RET_FAIL_REASON          (W4_REG_BASE + 0x0114)
 
 /* WAVE4 INIT, WAKEUP */
-#define W4_PO_CONF					  (W4_REG_BASE + 0x0000)
-#define W4_VCPU_CUR_PC				  (W4_REG_BASE + 0x0004)
+#define W4_PO_CONF                  (W4_REG_BASE + 0x0000)
+#define W4_VCPU_CUR_PC              (W4_REG_BASE + 0x0004)
 
-#define W4_VPU_INT_ENABLE			   (W4_REG_BASE + 0x0048)
+#define W4_VPU_INT_ENABLE           (W4_REG_BASE + 0x0048)
 
-#define W4_RESET_REQ					(W4_REG_BASE + 0x0050)
-#define W4_RESET_STATUS				 (W4_REG_BASE + 0x0054)
+#define W4_RESET_REQ                (W4_REG_BASE + 0x0050)
+#define W4_RESET_STATUS             (W4_REG_BASE + 0x0054)
 
-#define W4_VPU_REMAP_CTRL			   (W4_REG_BASE + 0x0060)
-#define W4_VPU_REMAP_VADDR			  (W4_REG_BASE + 0x0064)
-#define W4_VPU_REMAP_PADDR			  (W4_REG_BASE + 0x0068)
-#define W4_VPU_REMAP_PROC_START		 (W4_REG_BASE + 0x006C)
-#define W4_VPU_BUSY_STATUS			  (W4_REG_BASE + 0x0070)
+#define W4_VPU_REMAP_CTRL           (W4_REG_BASE + 0x0060)
+#define W4_VPU_REMAP_VADDR          (W4_REG_BASE + 0x0064)
+#define W4_VPU_REMAP_PADDR          (W4_REG_BASE + 0x0068)
+#define W4_VPU_REMAP_PROC_START     (W4_REG_BASE + 0x006C)
+#define W4_VPU_BUSY_STATUS          (W4_REG_BASE + 0x0070)
 
 #define W4_REMAP_CODE_INDEX			 0
 enum {
@@ -310,6 +314,32 @@ static void ve1_pll_setting(unsigned long offset, unsigned int value, unsigned i
         {
             __raw_writel(__raw_readl((volatile u8 *)(s_vpll_register.virt_addr+offset)) & value, (volatile u8 *)(s_vpll_register.virt_addr+offset));
         }
+    }
+}
+
+static void ve1_wrapper_setup(unsigned int coreIdx)
+{
+    unsigned int ctrl_1;
+    unsigned int ctrl_2;
+
+    if ((coreIdx & (1 << 0)) != 0) //coreIdx == 0
+    {
+        ctrl_1 = ReadVpuRegister(VE_CTRL_REG, 0);
+        ctrl_2 = ReadVpuRegister(VE_CTI_GRP_REG, 0);
+        ctrl_1 |= (ve_cti_en << 1 | ve_idle_en << 6);
+        ctrl_2 = (ctrl_2 & ~(0x3f << 24)) | (0x1a << 24);   //ve1_cti_cmd_depth for 1296 timing issue
+        WriteVpuRegister(VE_CTRL_REG, ctrl_1, 0);
+        WriteVpuRegister(VE_CTI_GRP_REG, ctrl_2, 0);
+    }
+
+    if ((coreIdx & (1 << 1)) != 0) //coreIdx == 1
+    {
+        ctrl_1 = ReadVpuRegister(W4_VE_CTRL_REG, 1);
+        ctrl_2 = ReadVpuRegister(W4_VE_CTI_GRP_REG, 1);
+        ctrl_1 |= (ve_cti_en << 1 | ve_idle_en << 6);
+        ctrl_2 = (ctrl_2 & ~(0x3f << 24)) | (0x1a << 24);   //ve2_cti_cmd_depth for 1296 timing issue
+        WriteVpuRegister(W4_VE_CTRL_REG, ctrl_1, 1);
+        WriteVpuRegister(W4_VE_CTI_GRP_REG, ctrl_2, 1);
     }
 }
 
@@ -441,6 +471,9 @@ static irqreturn_t ve1_irq_handler(int irq, void *dev_id)
 
     /* this can be removed. it also work in VPU_WaitInterrupt of API function */
     int core = 0;
+    unsigned long interrupt_reason_ve1 = 0;
+    unsigned int vpu_int_sts_ve1 = 0;
+    unsigned long flags;
 
     //DPRINTK("[VPUDRV][+]%s\n", __func__);
 
@@ -449,9 +482,9 @@ static irqreturn_t ve1_irq_handler(int irq, void *dev_id)
         return IRQ_HANDLED;
     }
 
-    if (ReadVpuRegister(BIT_INT_STS, core)) {
-        dev->interrupt_reason_ve1 = ReadVpuRegister(BIT_INT_REASON, core);
-        //printk("@@ In[%s][%d]  reason:%d @@\n", __func__, __LINE__, dev->vpu_interrupt_reason_ve1);
+    vpu_int_sts_ve1 = ReadVpuRegister(BIT_INT_STS, core);
+    if (vpu_int_sts_ve1) {
+        interrupt_reason_ve1 = ReadVpuRegister(BIT_INT_REASON, core);
         WriteVpuRegister(BIT_INT_REASON, 0, core);
         WriteVpuRegister(BIT_INT_CLEAR, 0x1, core);
     }
@@ -460,9 +493,14 @@ static irqreturn_t ve1_irq_handler(int irq, void *dev_id)
     if (dev->async_queue)
         kill_fasync(&dev->async_queue, SIGIO, POLL_IN);	/* notify the interrupt to user space */
 
-    atomic_set(&s_interrupt_flag_ve1, 1);
-    smp_wmb();
-    wake_up_interruptible(&s_interrupt_wait_q_ve1);
+    if(vpu_int_sts_ve1) {
+        spin_lock_irqsave(&s_ve1_lock, flags);
+        dev->interrupt_reason_ve1 = interrupt_reason_ve1;
+        atomic_set(&s_interrupt_flag_ve1, 1);
+        smp_wmb();
+        spin_unlock_irqrestore(&s_ve1_lock, flags);
+        wake_up_interruptible(&s_interrupt_wait_q_ve1);
+    }
     //DPRINTK("[VPUDRV][-]%s\n", __func__);
 
     return IRQ_HANDLED;
@@ -474,6 +512,9 @@ static irqreturn_t ve2_irq_handler(int irq, void *dev_id)
 
     /* this can be removed. it also work in VPU_WaitInterrupt of API function */
     int core = 1;
+    unsigned long interrupt_reason_ve2 = 0;
+    unsigned int vpu_int_sts_ve2 = 0;
+    unsigned long flags;
 
     //DPRINTK("[VPUDRV][+]%s\n", __func__);
 
@@ -482,10 +523,10 @@ static irqreturn_t ve2_irq_handler(int irq, void *dev_id)
         return IRQ_HANDLED;
     }
 
-    if (ReadVpuRegister(W4_VPU_INT_STS, core)) {
-        dev->interrupt_reason_ve2 = ReadVpuRegister(W4_VPU_INT_REASON, core);
-        //printk("@@ In[%s][%d]  reason:%d @@\n", __func__, __LINE__, dev->vpu_interrupt_reason_ve2);
-        WriteVpuRegister(W4_VPU_INT_REASON_CLEAR, dev->interrupt_reason_ve2, core);
+    vpu_int_sts_ve2 = ReadVpuRegister(W4_VPU_INT_STS, core);
+    if (vpu_int_sts_ve2) {
+        interrupt_reason_ve2 = ReadVpuRegister(W4_VPU_INT_REASON, core);
+        WriteVpuRegister(W4_VPU_INT_REASON_CLEAR, interrupt_reason_ve2, core);
         WriteVpuRegister(W4_VPU_INT_CLEAR, 0x1, core);
     }
     //DPRINTK("[VPUDRV] VE2 intr_reason: 0x%08lx\n", dev->interrupt_reason_ve2);
@@ -493,10 +534,15 @@ static irqreturn_t ve2_irq_handler(int irq, void *dev_id)
     if (dev->async_queue)
         kill_fasync(&dev->async_queue, SIGIO, POLL_IN);	/* notify the interrupt to user space */
 
-    atomic_set(&s_interrupt_flag_ve2, 1);
-    smp_wmb();
-    wake_up_interruptible(&s_interrupt_wait_q_ve2);
-    //DPRINTK("[VPUDRV][-]%s\n", __func__);
+    if(vpu_int_sts_ve2) {
+        spin_lock_irqsave(&s_ve2_lock, flags);
+        dev->interrupt_reason_ve2 = interrupt_reason_ve2;
+        atomic_set(&s_interrupt_flag_ve2, 1);
+        smp_wmb();
+        spin_unlock_irqrestore(&s_ve2_lock, flags);
+        wake_up_interruptible(&s_interrupt_wait_q_ve2);
+        //DPRINTK("[VPUDRV][-]%s\n", __func__);
+     }
 
     return IRQ_HANDLED;
 }
@@ -621,6 +667,7 @@ static long vpu_ioctl(struct file *filp, u_int cmd, u_long arg)
     case VDI_IOCTL_WAIT_INTERRUPT:
     {
         vpudrv_intr_info_t info;
+        unsigned long flags;
         //DPRINTK("[VPUDRV][+]VDI_IOCTL_WAIT_INTERRUPT\n");
         ret = copy_from_user(&info, (vpudrv_intr_info_t *)arg, sizeof(vpudrv_intr_info_t));
         if (ret != 0)
@@ -641,11 +688,12 @@ static long vpu_ioctl(struct file *filp, u_int cmd, u_long arg)
             }
 
             //DPRINTK("[VPUDRV] s_interrupt_flag_ve1(%d), reason(0x%08lx)\n", atomic_read(&s_interrupt_flag_ve1), dev->interrupt_reason_ve1);
-
+            spin_lock_irqsave(&s_ve1_lock, flags);
             atomic_set(&s_interrupt_flag_ve1, 0);
             smp_wmb();
             info.intr_reason = dev->interrupt_reason_ve1;
             dev->interrupt_reason_ve1 = 0;
+            spin_unlock_irqrestore(&s_ve1_lock, flags);
         }
         else //VE2
         {
@@ -662,11 +710,12 @@ static long vpu_ioctl(struct file *filp, u_int cmd, u_long arg)
             }
 
             //DPRINTK("[VPUDRV] s_interrupt_flag_ve2(%d), reason(0x%08lx)\n", atomic_read(&s_interrupt_flag_ve2), dev->interrupt_reason_ve2);
-
+            spin_lock_irqsave(&s_ve2_lock, flags);
             atomic_set(&s_interrupt_flag_ve2, 0);
             smp_wmb();
             info.intr_reason = dev->interrupt_reason_ve2;
             dev->interrupt_reason_ve2 = 0;
+            spin_unlock_irqrestore(&s_ve2_lock, flags);
         }
 
         ret = copy_to_user((void __user *)arg, &info, sizeof(vpudrv_intr_info_t));
@@ -912,20 +961,7 @@ static long vpu_ioctl(struct file *filp, u_int cmd, u_long arg)
             printk(KERN_INFO "[VPUDRV] after pctrl_on for laterncy watching!!\n");
 #endif
             vpu_clk_enable(s_vpu_clk);
-            if (clockInfo.core_idx == 0)
-            {
-                value = ReadVpuRegister(VE_CTRL_REG, 0);
-                value |= (ve_cti_en << 1 | ve_idle_en << 6);
-                WriteVpuRegister(VE_CTRL_REG, value, 0);
-                DPRINTK("[VPUDRV]VDI_IOCTL_SET_RTK_CLK_GATING VE1_CTRL_REG = 0x%08x (0x%08x)\n", value, ReadVpuRegister(VE_CTRL_REG, 0));
-            }
-            else
-            {
-                value = ReadVpuRegister(W4_VE_CTRL_REG, 1);
-                value |= (ve_cti_en << 1 | ve_idle_en << 6);
-                WriteVpuRegister(W4_VE_CTRL_REG, value, 1);
-                DPRINTK("[VPUDRV]VDI_IOCTL_SET_RTK_CLK_GATING VE2_CTRL_REG = 0x%08x (0x%08x)\n", value, ReadVpuRegister(W4_VE_CTRL_REG, 1));
-            }
+            ve1_wrapper_setup((1 << clockInfo.core_idx));
         }
         else
         {
@@ -959,9 +995,7 @@ static long vpu_ioctl(struct file *filp, u_int cmd, u_long arg)
             ve1_pll_setting(0x1d4, (0x3), 1, 0); // VE2 PLL enable
             vpu_clk_enable(s_vpu_clk_ve2);
 
-            value = ReadVpuRegister(W4_VE_CTRL_REG, 1);
-            value |= (ve_cti_en << 1 | ve_idle_en << 6);
-            WriteVpuRegister(W4_VE_CTRL_REG, value, 1);
+            ve1_wrapper_setup((1 << clockInfo.core_idx));
         }
         DPRINTK("[VPUDRV][-]VDI_IOCTL_SET_RTK_CLK_PLL clockInfo.core_idx:%d, clockInfo.value:0x%x\n", clockInfo.core_idx, clockInfo.value);
     }
@@ -1261,6 +1295,8 @@ static int vpu_probe(struct platform_device *pdev)
     void __iomem *iobase;
     int irq;
     struct device_node *node = pdev->dev.of_node;
+    if (!of_device_is_available(pdev->dev.of_node))
+        return -ENODEV;
 #if 0 //Fuchun disable 20160204, set clock gating by vdi.c
     unsigned int val = 0;
 #endif
@@ -1281,7 +1317,6 @@ static int vpu_probe(struct platform_device *pdev)
     s_vpll_register.phys_addr = res.start;
     s_vpll_register.virt_addr = (unsigned long)iobase;
     s_vpll_register.size = res.end - res.start + 1;
-    DPRINTK("[VPUDRV] : vpll base address get from DTB physical base addr=0x%lx, virtual base=0x%lx, size=0x%x\n", s_vpll_register.phys_addr , s_vpll_register.virt_addr, s_vpll_register.size);
 
     s_vpu_dev.minor = MISC_DYNAMIC_MINOR;
     s_vpu_dev.name = VPU_DEV_NAME;
@@ -1506,13 +1541,7 @@ static int vpu_suspend(struct platform_device *pdev, pm_message_t state)
     vpu_clk_enable(s_vpu_clk_ve2);
 
     //RTK wrapper
-    value = ReadVpuRegister(VE_CTRL_REG, 0);
-    value |= (ve_cti_en << 1 | ve_idle_en << 6);
-    WriteVpuRegister(VE_CTRL_REG, value, 0);
-
-    value = ReadVpuRegister(W4_VE_CTRL_REG, 1);
-    value |= (ve_cti_en << 1 | ve_idle_en << 6);
-    WriteVpuRegister(W4_VE_CTRL_REG, value, 1);
+    ve1_wrapper_setup((1 << 1) | 1);
 
     if (s_vpu_open_ref_count > 0) {
 #ifdef DISABLE_ORIGIN_SUSPEND
@@ -1642,13 +1671,7 @@ static int vpu_resume(struct platform_device *pdev)
     vpu_clk_enable(s_vpu_clk_ve2);
 
     //RTK wrapper
-    value = ReadVpuRegister(VE_CTRL_REG, 0);
-    value |= (ve_cti_en << 1 | ve_idle_en << 6);
-    WriteVpuRegister(VE_CTRL_REG, value, 0);
-
-    value = ReadVpuRegister(W4_VE_CTRL_REG, 1);
-    value |= (ve_cti_en << 1 | ve_idle_en << 6);
-    WriteVpuRegister(W4_VE_CTRL_REG, value, 1);
+    ve1_wrapper_setup((1 << 1) | 1);
 
 #ifdef DISABLE_ORIGIN_SUSPEND
     /* RTK clock setting */
@@ -1887,19 +1910,10 @@ int vpu_hw_reset(u32 coreIdx)
     DPRINTK("[VPUDRV] request vpu reset from application. \n");
 
     if (coreIdx == 0)
-    {
         reset_control_reset(rstc_ve1);
-        val = ReadVpuRegister(VE_CTRL_REG, 0);
-        val |= (ve_cti_en << 1 | ve_idle_en << 6);
-        WriteVpuRegister(VE_CTRL_REG, val, 0);
-    }
     else
-    {
         reset_control_reset(rstc_ve2);
-        val = ReadVpuRegister(W4_VE_CTRL_REG, 1);
-        val |= (ve_cti_en << 1 | ve_idle_en << 6);
-        WriteVpuRegister(W4_VE_CTRL_REG, val, 1);
-    }
+    ve1_wrapper_setup((1 << coreIdx));
 #endif
     return 0;
 }

@@ -27,9 +27,9 @@
 #include <linux/vmalloc.h>
 #include "ion.h"
 #include "ion_priv.h"
-#if defined(CONFIG_ION_RTK_PHOENIX)
+#if defined(CONFIG_ION_RTK_PHOENIX) && defined(MY_DEF_HERE)
 #include "../uapi/rtk_phoenix_ion.h"
-#endif
+#endif /* defined(CONFIG_ION_RTK_PHOENIX) && defined(MY_DEF_HERE) */
 
 struct ion_carveout_heap {
 	struct ion_heap heap;
@@ -100,12 +100,12 @@ static int ion_carveout_heap_allocate(struct ion_heap *heap,
 		goto err_free_table;
 	}
 
-#if defined(CONFIG_ION_RTK_PHOENIX)
+#if defined(CONFIG_ION_RTK_PHOENIX) && defined(MY_DEF_HERE)
         if (flags == RTK_PHOENIX_ION_HEAP_TILER_MASK)
         {
             rtk_phoenix_ion_update_last_alloc_addr(paddr, size);
         }
-#endif
+#endif /* defined(CONFIG_ION_RTK_PHOENIX) && defined(MY_DEF_HERE) */
 
 	sg_set_page(table->sgl, pfn_to_page(PFN_DOWN(paddr)), size, 0);
 	buffer->priv_virt = table;

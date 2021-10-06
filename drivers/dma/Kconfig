@@ -332,12 +332,22 @@ config MPC512X_DMA
 
 config MV_XOR
 	bool "Marvell XOR engine support"
-	depends on PLAT_ORION
+	depends on (!SYNO_LSP_ARMADA_16_12) && PLAT_ORION
 	select DMA_ENGINE
 	select DMA_ENGINE_RAID
 	select ASYNC_TX_ENABLE_CHANNEL_SWITCH
 	---help---
 	  Enable support for the Marvell XOR engine.
+
+config MV_XOR_V2
+	bool "Marvell XOR engine version 2 support "
+	depends on SYNO_LSP_ARMADA_16_12
+	select DMA_ENGINE
+	select DMA_ENGINE_RAID
+	select ASYNC_TX_ENABLE_CHANNEL_SWITCH
+	select GENERIC_MSI_IRQ_DOMAIN
+	---help---
+	  Enable support for the Marvell version 2 XOR engine.
 
 config MXS_DMA
 	bool "MXS DMA support"

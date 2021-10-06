@@ -367,7 +367,11 @@ static int lp_gpio_probe(struct platform_device *pdev)
 	gc->base = -1;
 	gc->ngpio = LP_NUM_GPIO;
 	gc->can_sleep = false;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	gc->parent = dev;
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	gc->dev = dev;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	ret = gpiochip_add(gc);
 	if (ret) {

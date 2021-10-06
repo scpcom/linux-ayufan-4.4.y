@@ -110,8 +110,24 @@ config SYNO_MD_RESHAPE_AND_MOUNT_DEADLOCK_WORKAROUND
 	bool "Fix when md call finish_reshape and mount deadlock workaround."
 	default y
 
+config SYNO_MD_FIX_RAID1_IO_BARRIER_CKSUM_ERROR
+	bool "Fix raid1's io barrier mechanism"
+	default y
+
 config SYNO_MD_RAID5D_PROXY
 	bool "run proxy thread when raid5 finish reshaping"
+	default y
+
+config SYNO_MD_LESS_DELAY_RESYNC_MESSAGE
+	bool "Avoid md write same delay resync message too much"
+	default y
+
+config SYNO_MD_SYNC_STATUS_REPORT
+	bool "Report sync status to user space"
+	default y
+
+config SYNO_MD_DISKSTATS
+	bool "Show md's util in iostat"
 	default y
 
 endmenu #MD
@@ -139,8 +155,8 @@ config SYNO_BADSECTOR_TEST
 config SYNO_MAX_INTERNAL_DISK
 	int "Maximum Internal Disk Number"
 	depends on SYNO_FIXED_DISK_NAME || SYNO_BADSECTOR_TEST
-	default "19" if SYNO_BROMOLOW || SYNO_GRANTLEY || SYNO_KVMX64 || SYNO_BROADWELL
-	default "15" if !SYNO_BROMOLOW && !SYNO_GRANTLEY && !SYNO_KVMX64 && !SYNO_BROADWELL
+	default "19" if SYNO_BROMOLOW || SYNO_GRANTLEY || SYNO_KVMX64 || SYNO_BROADWELL || SYNO_PURLEY
+	default "15" if !SYNO_BROMOLOW && !SYNO_GRANTLEY && !SYNO_KVMX64 && !SYNO_BROADWELL && !SYNO_PURLEY
 
 config SYNO_SATA_PORT_MAP
 	bool "Modify SATA Hosts Port Number"
@@ -156,11 +172,6 @@ config SYNO_SATA_REMAP
 	bool "Re-map Disk Name Sequence"
 	depends on SYNO_FIXED_DISK_NAME
 	default y
-
-config SYNO_MAX_PCI_SLOT
-	int "Maximun number of PCIe slot"
-	depends on SYNO_PCI_HOST_SATA_CACHE
-	default "1"
 
 config SYNO_PCI_HOST_SATA_CACHE
 	bool "Force SATA SSD on specific PCI slot used as cache device "
@@ -206,7 +217,7 @@ config SYNO_ATA_AHCI_LED_SWITCH
 
 config SYNO_ATA_PWR_CTRL
     bool "Disk Power Control"
-	depends on SYNO_INTERNAL_HD_NUM && SYNO_HW_VERSION && (SYNO_ICH_GPIO_CTRL || SYNO_X86_PINCTRL_GPIO || GPIO_RTD129X)
+	depends on SYNO_INTERNAL_HD_NUM && SYNO_HW_VERSION && (SYNO_ICH_GPIO_CTRL || SYNO_X86_PINCTRL_GPIO || GPIO_RTD129X || GPIO_MVEBU_A3700)
 	default y
 
 config SYNO_ATA_PWR_CTRL_ICH_GPIO
@@ -261,12 +272,20 @@ config SYNO_MV_9170_GPIO_CTRL
 	bool "Interfaces For Marvell 9170 GPIO Control"
 	default y
 
+config SYNO_MV_9170_GPIO_ACTIVE_LOW
+	bool "Set MV9170 GPIO Polarity to Active Low(unset will be active high)"
+	depends on SYNO_MV_9170_GPIO_CTRL
+
 config SYNO_SCSI_DEVICE_INDEX
 	bool "Get device index from scsi layer"
 	default y
 
 config SYNO_PM_DISABLE_LINK_LIMIT
 	bool "Clear the link speed limit when pmp attach"
+	default y
+
+config SYNO_ATA_DISABLE_QUEUED_TRIM
+	bool "Disable queued TRIM function"
 	default y
 
 config SYNO_SATA_88SX7042_MSI
@@ -408,11 +427,6 @@ config SYNO_AHCI_PMP_SII3x26_DEFER_CMD
 	depends on (SYNO_BRASWELL || SYNO_APOLLOLAKE || SYNO_ALPINE || SYNO_AVOTON) && SYNO_SATA_PM_DEVICE_GPIO
 	default n
 
-config SYNO_DISABLE_SIL3x26
-	bool "Disable SiI3x26 with 88SE9170 for DS1517+"
-	depends on SYNO_AVOTON && SYNO_SATA_PM_DEVICE_GPIO
-	default n
-
 config SYNO_SATA_LINK_SPEED_RETRY
 	bool "Enable SATA Link Speed Retry"
 	default y
@@ -439,6 +453,10 @@ config SYNO_SATA_HOST_ATTR
 	bool "Sata host attributes"
 	default y
 
+config SYNO_SATA_DISABLE_TRIM_ZERO_WHITELIST
+	bool "Disable the zero-after-trimmed whiltelist mechanism for SSDs"
+	default y
+
 config SYNO_MV9215_EXTPORT_NCQ_OFF
 	bool "Disable marvell 9215 ncq on pm port"
 	depends on SYNO_SATA_PM_DEVICE_GPIO
@@ -449,13 +467,29 @@ config SYNO_CHERRYVIEW_GPIO_WRITE_RETRY
 	depends on PINCTRL_CHERRYVIEW
 	default y
 
+config SYNO_GET_DISK_SPEED
+        bool "Get disk speed from disk driver"
+        default y
+
 config SYNO_EUNIT_SPD_UNKNOWN_RESCAN
 	bool "Rescan sata speed after thaw port"
 	default n
 
 config SYNO_ASMEDIA_AMP_ADJUST
 	bool "adjust amplitude and de-emphasis for asmedia 1061 sata signal"
-	depends on SYNO_RTD1296
+	depends on SYNO_RTD129X || SYNO_APOLLOLAKE
+	default y
+
+config SYNO_LINK_RETRY_AFTER_COMRESET
+	bool "sata link retry after COMRESET"
+	default y
+
+config SYNO_ATA_IDLE_IMMEDIATE
+	bool "Issue idle immediate cmd instead of read cmd to wake up disk"
+	default y
+
+config SYNO_EUNIT_SCSI_HOST_RECOVERY
+	bool "Prevent eunit scsi host stuck in recovery state"
 	default y
 
 endmenu #SATA
@@ -567,8 +601,13 @@ config SYNO_SCSI_MAX_QUEUE_DEPTH_LOCK
 
 config SYNO_SAS_HBA_IDX
 	bool "Indexing Synology SAS HBA"
-	depends on SYNO_GRANTLEY || SYNO_BROADWELL
+	depends on SYNO_GRANTLEY || SYNO_BROADWELL || SYNO_PURLEY
 	default n
+
+config SYNO_SAS_MAX_HBA_SLOT
+	int "Maximun number of SAS HBA PCIe slot"
+	depends on SYNO_SAS_HBA_IDX
+	default "2"
 
 config SYNO_SAS_TASK_ABORT_MESSAGE
 	bool "show task abort message in var/log/messages"
@@ -595,6 +634,11 @@ config SYNO_AVOTON_PHY_OPS
 	bool "Avoton-specific NIC phy operation"
 	default y
 	depends on SYNO_AVOTON
+
+config SYNO_ARMADA37XX_WOL
+        bool "Support WOL on Armada 37xx Platform"
+        default y
+        depends on SYNO_ARMADA37XX
 
 endmenu #Network
 
@@ -669,7 +713,7 @@ config SYNO_USB_UPS_DISCONNECT_FILTER
 config SYNO_USB_XHCI_RESET_DELAY
 	bool "Add extra delay in xhci_reset"
 	default y
-	depends on SYNO_BRASWELL || SYNO_APOLLOLAKE || SYNO_BROADWELL || SYNO_GRANTLEY
+	depends on SYNO_BRASWELL || SYNO_APOLLOLAKE || SYNO_BROADWELL || SYNO_GRANTLEY || SYNO_PURLEY
 
 config SYNO_USB_CONNECT_DEBOUNCER
 	bool "Add connect-debouncer during USB reset"
@@ -746,9 +790,39 @@ config SYNO_USB_VBUS_NUM_GPIO
 	depends on SYNO_USB_VBUS_GPIO_CONTROL
 	default "5"
 
+config SYNO_USB_VBUS_GPIO_POLARITY_INVERT
+        bool "Invert USB VBUS GPIO POLARITY"
+        default n
+        depends on SYNO_USB_VBUS_GPIO_CONTROL
+
 config SYNO_USB_UNBIND_DRIVER_BEFORE_SHUTDOWN_QUIRKS
 	bool "Unbind all USB device drivers before system shutdown"
 	default y
+
+config SYNO_USB_HAS_EXTERNAL_USB3_HUB
+        bool "Apply Syno USB Features On External USB3.0 Hub"
+	default n
+        select SYNO_USB_HAS_EXTERNAL_USB2_HUB
+
+config SYNO_USB_EXTERNAL_USB3_HUB_VID
+        hex "External USB3.0 Hub's vid hex number"
+        depends on SYNO_USB_HAS_EXTERNAL_USB3_HUB
+
+config SYNO_USB_EXTERNAL_USB3_HUB_PID
+        hex "External USB3.0 Hub's pid hex number"
+        depends on SYNO_USB_HAS_EXTERNAL_USB3_HUB
+
+config SYNO_USB_HAS_EXTERNAL_USB2_HUB
+        bool "Apply Syno USB Features On External USB3.0 Hub"
+	default n
+
+config SYNO_USB_EXTERNAL_USB2_HUB_VID
+        hex "External USB2.0 Hub's vid hex number"
+        depends on SYNO_USB_HAS_EXTERNAL_USB2_HUB
+
+config SYNO_USB_EXTERNAL_USB2_HUB_PID
+        hex "External USB2.0 Hub's pid hex number"
+        depends on SYNO_USB_HAS_EXTERNAL_USB2_HUB
 
 endmenu #USB
 
@@ -789,9 +863,9 @@ config SYNO_TTY_APL_EARLYPRINTK
 	default y
 	depends on SYNO_APOLLOLAKE
 
-config SYNO_RTK_CLEAR_ACRECOVERY
-	bool "send uP command to clear AC recovery flag"
-	depends on SYNO_RTD1296
+config SYNO_RTD129X_UART1
+	bool "Send uP command via UART1"
+	depends on SYNO_RTD129X
 	default y
 
 endmenu #Serial/TTYs
@@ -907,11 +981,24 @@ config SYNO_S35390A_FIX_12HOUR_MODE
 
 endmenu #RTC
 
+menu "PCI"
+config SYNO_OPTIONAL_PCI_SLOT
+	bool "Support optional PCIe slots"
+	depends on PCI
+	default n
+
+config SYNO_MAX_PCI_SLOT
+	int "Maximun number of PCIe slot"
+	depends on SYNO_OPTIONAL_PCI_SLOT
+	default "1"
+
+endmenu #PCI
+
 menu "TRANSCODING"
 
 config SYNO_LINARO_BACKPORT
-	bool "enable linaro backport for rtd1296 transcoding"
-	depends on SYNO_RTD1296
+	bool "enable linaro backport for rtd129x transcoding"
+	depends on SYNO_RTD129X
 	default n
 
 endmenu #TRANSCODING

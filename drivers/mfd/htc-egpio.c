@@ -319,7 +319,11 @@ static int __init egpio_probe(struct platform_device *pdev)
 		ei->chip[i].dev = &(pdev->dev);
 		chip = &(ei->chip[i].chip);
 		chip->label           = "htc-egpio";
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+		chip->parent          = &pdev->dev;
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		chip->dev             = &pdev->dev;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		chip->owner           = THIS_MODULE;
 		chip->get             = egpio_get;
 		chip->set             = egpio_set;

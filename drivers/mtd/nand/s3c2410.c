@@ -382,7 +382,11 @@ static void s3c2410_nand_select_chip(struct mtd_info *mtd, int chip)
 {
 	struct s3c2410_nand_info *info;
 	struct s3c2410_nand_mtd *nmtd;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	struct nand_chip *this = mtd_to_nand(mtd);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct nand_chip *this = mtd->priv;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	unsigned long cur;
 
 	nmtd = this->priv;
@@ -634,7 +638,11 @@ static int s3c2440_nand_calculate_ecc(struct mtd_info *mtd, const u_char *dat,
 
 static void s3c2410_nand_read_buf(struct mtd_info *mtd, u_char *buf, int len)
 {
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	struct nand_chip *this = mtd_to_nand(mtd);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct nand_chip *this = mtd->priv;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	readsb(this->IO_ADDR_R, buf, len);
 }
 
@@ -656,7 +664,11 @@ static void s3c2440_nand_read_buf(struct mtd_info *mtd, u_char *buf, int len)
 static void s3c2410_nand_write_buf(struct mtd_info *mtd, const u_char *buf,
 				   int len)
 {
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	struct nand_chip *this = mtd_to_nand(mtd);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct nand_chip *this = mtd->priv;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	writesb(this->IO_ADDR_W, buf, len);
 }
 

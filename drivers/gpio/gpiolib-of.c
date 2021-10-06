@@ -423,8 +423,13 @@ int of_gpiochip_add(struct gpio_chip *chip)
 {
 	int status;
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	if ((!chip->of_node) && (chip->parent))
+		chip->of_node = chip->parent->of_node;
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	if ((!chip->of_node) && (chip->dev))
 		chip->of_node = chip->dev->of_node;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	if (!chip->of_node)
 		return 0;

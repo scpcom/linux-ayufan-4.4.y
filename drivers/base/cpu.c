@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * CPU subsystem support
  */
@@ -20,7 +23,7 @@
 
 #include "base.h"
 
-#ifdef CONFIG_ARCH_RTD129X //CPU core 1-3 power gating, jamestai20160118
+#if defined(CONFIG_ARCH_RTD129X) && defined(MY_DEF_HERE) //CPU core 1-3 power gating, jamestai20160118
 extern void rtk_cpu_power_down(int cpu);
 extern void rtk_cpu_power_up(int cpu);
 #endif
@@ -57,7 +60,7 @@ static int cpu_subsys_online(struct device *dev)
 	if (from_nid == NUMA_NO_NODE)
 		return -ENODEV;
 
-#ifdef CONFIG_ARCH_RTD129X //CPU core 1-3 power gating, jamestai20160118
+#if defined(CONFIG_ARCH_RTD129X) && defined(MY_DEF_HERE) //CPU core 1-3 power gating, jamestai20160118
 	rtk_cpu_power_up(cpuid);
 #endif
 
@@ -75,7 +78,7 @@ static int cpu_subsys_online(struct device *dev)
 
 static int cpu_subsys_offline(struct device *dev)
 {
-#ifdef CONFIG_ARCH_RTD129X //CPU core 1-3 power gating, jamestai20160118
+#if defined(CONFIG_ARCH_RTD129X) && defined(MY_DEF_HERE) //CPU core 1-3 power gating, jamestai20160118
 	int ret = 0;
 	ret = cpu_down(dev->id);
 	rtk_cpu_power_down(dev->id);

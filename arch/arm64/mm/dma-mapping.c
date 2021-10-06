@@ -42,7 +42,11 @@ static pgprot_t __get_dma_pgprot(struct dma_attrs *attrs, pgprot_t prot,
 
 static struct gen_pool *atomic_pool;
 
+#ifdef MY_DEF_HERE
+#define DEFAULT_DMA_COHERENT_POOL_SIZE  SZ_1M
+#else /* MY_DEF_HERE */
 #define DEFAULT_DMA_COHERENT_POOL_SIZE  SZ_256K
+#endif /* MY_DEF_HERE */
 static size_t atomic_pool_size = DEFAULT_DMA_COHERENT_POOL_SIZE;
 
 static int __init early_coherent_pool(char *p)
@@ -345,9 +349,9 @@ static int __swiotlb_get_sgtable(struct device *dev, struct sg_table *sgt,
 
 #ifdef MY_DEF_HERE
 struct dma_map_ops swiotlb_dma_ops = {
-#else
+#else /* MY_DEF_HERE */
 static struct dma_map_ops swiotlb_dma_ops = {
-#endif
+#endif /* MY_DEF_HERE */
 	.alloc = __dma_alloc,
 	.free = __dma_free,
 	.mmap = __swiotlb_mmap,

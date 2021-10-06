@@ -121,9 +121,9 @@ obj-$(CONFIG_CRYPTO_USER_API_HASH) += algif_hash.o
 obj-$(CONFIG_CRYPTO_USER_API_SKCIPHER) += algif_skcipher.o
 obj-$(CONFIG_CRYPTO_USER_API_RNG) += algif_rng.o
 obj-$(CONFIG_CRYPTO_USER_API_AEAD) += algif_aead.o
-ifdef CONFIG_SYNO_RTD1296
+ifeq ($(CONFIG_SYNO_RTD129X),y)
 obj-$(CONFIG_OCF_OCF) += ocf/
-endif
+endif # CONFIG_SYNO_RTD129X
 
 #
 # generic algorithms and the async_tx api

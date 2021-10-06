@@ -30,12 +30,16 @@ static const char *const br_port_state_names[] = {
 	[BR_STATE_BLOCKING] = "blocking",
 };
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+//do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 void br_log_state(const struct net_bridge_port *p)
 {
 	br_info(p->br, "port %u(%s) entered %s state\n",
 		(unsigned int) p->port_no, p->dev->name,
 		br_port_state_names[p->state]);
 }
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 void br_set_state(struct net_bridge_port *p, unsigned int state)
 {
@@ -51,6 +55,12 @@ void br_set_state(struct net_bridge_port *p, unsigned int state)
 	if (err && err != -EOPNOTSUPP)
 		br_warn(p->br, "error setting offload STP state on port %u(%s)\n",
 				(unsigned int) p->port_no, p->dev->name);
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	else
+		br_info(p->br, "port %u(%s) entered %s state\n",
+				(unsigned int) p->port_no, p->dev->name,
+				br_port_state_names[p->state]);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 }
 
 /* called under bridge lock */
@@ -125,7 +135,11 @@ static void br_root_port_block(const struct net_bridge *br,
 		  (unsigned int) p->port_no, p->dev->name);
 
 	br_set_state(p, BR_STATE_LISTENING);
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+//do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	br_log_state(p);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	br_ifinfo_notify(RTM_NEWLINK, p);
 
 	if (br->forward_delay > 0)
@@ -405,7 +419,11 @@ static void br_make_blocking(struct net_bridge_port *p)
 			br_topology_change_detection(p->br);
 
 		br_set_state(p, BR_STATE_BLOCKING);
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+//do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		br_log_state(p);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		br_ifinfo_notify(RTM_NEWLINK, p);
 
 		del_timer(&p->forward_delay_timer);
@@ -429,7 +447,11 @@ static void br_make_forwarding(struct net_bridge_port *p)
 	else
 		br_set_state(p, BR_STATE_LEARNING);
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+//do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	br_log_state(p);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	br_ifinfo_notify(RTM_NEWLINK, p);
 
 	if (br->forward_delay != 0)

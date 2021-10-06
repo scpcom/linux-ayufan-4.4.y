@@ -1038,8 +1038,13 @@ static int r6040_mii_probe(struct net_device *dev)
 		return -ENODEV;
 	}
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	phydev = phy_connect(dev, phydev_name(phydev), &r6040_adjust_link,
+			     PHY_INTERFACE_MODE_MII);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	phydev = phy_connect(dev, dev_name(&phydev->dev), &r6040_adjust_link,
 			     PHY_INTERFACE_MODE_MII);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	if (IS_ERR(phydev)) {
 		dev_err(&lp->pdev->dev, "could not attach to PHY\n");
@@ -1060,9 +1065,13 @@ static int r6040_mii_probe(struct net_device *dev)
 	lp->old_link = 0;
 	lp->old_duplex = -1;
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	phy_attached_info(phydev);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	dev_info(&lp->pdev->dev, "attached PHY driver [%s] "
 		"(mii_bus:phy_addr=%s)\n",
 		phydev->drv->name, dev_name(&phydev->dev));
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	return 0;
 }
@@ -1076,7 +1085,11 @@ static int r6040_init_one(struct pci_dev *pdev, const struct pci_device_id *ent)
 	static int card_idx = -1;
 	int bar = 0;
 	u16 *adrp;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+//do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	int i;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	pr_info("%s\n", version);
 
@@ -1188,6 +1201,9 @@ static int r6040_init_one(struct pci_dev *pdev, const struct pci_device_id *ent)
 	lp->mii_bus->name = "r6040_eth_mii";
 	snprintf(lp->mii_bus->id, MII_BUS_ID_SIZE, "%s-%x",
 		dev_name(&pdev->dev), card_idx);
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+//do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	lp->mii_bus->irq = kmalloc_array(PHY_MAX_ADDR, sizeof(int), GFP_KERNEL);
 	if (!lp->mii_bus->irq) {
 		err = -ENOMEM;
@@ -1196,11 +1212,16 @@ static int r6040_init_one(struct pci_dev *pdev, const struct pci_device_id *ent)
 
 	for (i = 0; i < PHY_MAX_ADDR; i++)
 		lp->mii_bus->irq[i] = PHY_POLL;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	err = mdiobus_register(lp->mii_bus);
 	if (err) {
 		dev_err(&pdev->dev, "failed to register MII bus\n");
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+		goto err_out_mdio;
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		goto err_out_mdio_irq;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	}
 
 	err = r6040_mii_probe(dev);
@@ -1219,8 +1240,12 @@ static int r6040_init_one(struct pci_dev *pdev, const struct pci_device_id *ent)
 
 err_out_mdio_unregister:
 	mdiobus_unregister(lp->mii_bus);
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+//do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 err_out_mdio_irq:
 	kfree(lp->mii_bus->irq);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 err_out_mdio:
 	mdiobus_free(lp->mii_bus);
 err_out_unmap:
@@ -1243,7 +1268,11 @@ static void r6040_remove_one(struct pci_dev *pdev)
 
 	unregister_netdev(dev);
 	mdiobus_unregister(lp->mii_bus);
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+//do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	kfree(lp->mii_bus->irq);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	mdiobus_free(lp->mii_bus);
 	netif_napi_del(&lp->napi);
 	pci_iounmap(pdev, lp->base);

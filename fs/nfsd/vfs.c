@@ -32,6 +32,9 @@
 #include "nfsd.h"
 #include "vfs.h"
 
+#ifdef MY_ABC_HERE
+#include "../synoacl_int.h"
+#endif  
 #define NFSDDBG_FACILITY		NFSDDBG_FILEOP
 
 struct raparms {
@@ -463,6 +466,25 @@ static struct accessmap	nfs3_anyaccess[] = {
     {	0,			0				}
 };
 
+#ifdef MY_ABC_HERE
+static struct accessmap	nfs3_synoacl_regaccess[] = {
+    {	NFS3_ACCESS_READ, MAY_READ },
+    {	NFS3_ACCESS_EXECUTE, MAY_EXEC },
+    {	NFS3_ACCESS_MODIFY,	MAY_WRITE | MAY_APPEND },
+    {	NFS3_ACCESS_EXTEND,	MAY_WRITE | MAY_APPEND },
+    {	0, 0 }
+};
+
+static struct accessmap	nfs3_synoacl_diraccess[] = {
+    {	NFS3_ACCESS_READ, MAY_READ },
+    {	NFS3_ACCESS_LOOKUP,	MAY_EXEC },
+    {	NFS3_ACCESS_MODIFY,	MAY_WRITE },
+    {	NFS3_ACCESS_EXTEND,	MAY_APPEND },
+    {	NFS3_ACCESS_DELETE,	MAY_DEL },
+    {	0, 0 }
+};
+#endif  
+
 __be32
 nfsd_access(struct svc_rqst *rqstp, struct svc_fh *fhp, u32 *access, u32 *supported)
 {
@@ -471,6 +493,11 @@ nfsd_access(struct svc_rqst *rqstp, struct svc_fh *fhp, u32 *access, u32 *suppor
 	struct dentry		*dentry;
 	u32			query, result = 0, sresult = 0;
 	__be32			error;
+#ifdef MY_ABC_HERE
+	int isInodeInACLMode = 0;
+	int isFSInACLMode = 0;
+	struct inode *inode = NULL;
+#endif  
 
 	error = fh_verify(rqstp, fhp, 0, NFSD_MAY_NOP);
 	if (error)
@@ -479,12 +506,32 @@ nfsd_access(struct svc_rqst *rqstp, struct svc_fh *fhp, u32 *access, u32 *suppor
 	export = fhp->fh_export;
 	dentry = fhp->fh_dentry;
 
+#ifdef MY_ABC_HERE
+	inode = dentry->d_inode;
+	isFSInACLMode = IS_FS_SYNOACL(inode);
+	isInodeInACLMode = IS_INODE_SYNOACL(inode, dentry) && isFSInACLMode;
+
+	if (isInodeInACLMode) {
+		if (S_ISREG(inode->i_mode))
+			map = nfs3_synoacl_regaccess;
+		else if (S_ISDIR(inode->i_mode))
+			map = nfs3_synoacl_diraccess;
+		else
+			map = nfs3_synoacl_regaccess;
+	} else if (d_is_reg(dentry))
+		map = nfs3_regaccess;
+	else if (d_is_dir(dentry))
+		map = nfs3_diraccess;
+	else
+		map = nfs3_anyaccess;
+#else
 	if (d_is_reg(dentry))
 		map = nfs3_regaccess;
 	else if (d_is_dir(dentry))
 		map = nfs3_diraccess;
 	else
 		map = nfs3_anyaccess;
+#endif  
 
 	query = *access;
 	for  (; map->access; map++) {
@@ -493,6 +540,18 @@ nfsd_access(struct svc_rqst *rqstp, struct svc_fh *fhp, u32 *access, u32 *suppor
 
 			sresult |= map->access;
 
+#ifdef MY_ABC_HERE
+			if (isInodeInACLMode){
+				if (inode->i_op) {
+					err2 = nfserrno(synoacl_op_perm(dentry, map->how));
+				} else { 
+					printk(KERN_WARNING "nfsd: (%s) is in acl mode but has no operator \n", dentry->d_iname);
+					err2 = nfs_ok;
+				}
+			} else if (isFSInACLMode && (NFS3_ACCESS_DELETE == map->access)) {
+				err2 = nfserrno(synoacl_op_may_delete(dentry, dentry->d_parent->d_inode));
+			} else
+#endif  
 			err2 = nfsd_permission(rqstp, export, dentry, map->how);
 			switch (err2) {
 			case nfs_ok:
@@ -1724,6 +1783,28 @@ static int exp_rdonly(struct svc_rqst *rqstp, struct svc_export *exp)
 	return nfsexp_flags(rqstp, exp) & NFSEXP_READONLY;
 }
 
+#ifdef MY_ABC_HERE
+static int syno_acl_nfs_perm_switch(struct inode *inode, int acc)
+{
+	int synoPerm = 0;
+
+	if (NFSD_MAY_EXEC & acc) {
+		synoPerm |= MAY_EXEC;
+	}
+	if ((NFSD_MAY_TRUNC|NFSD_MAY_WRITE) & acc) {
+		synoPerm |= MAY_WRITE;
+	}
+	if (NFSD_MAY_READ & acc) {
+		synoPerm |= MAY_READ;
+	}
+	if (NFSD_MAY_APPEND & acc) {
+		synoPerm |= MAY_APPEND;
+	}
+
+	return synoPerm;
+}
+#endif  
+ 
 __be32
 nfsd_permission(struct svc_rqst *rqstp, struct svc_export *exp,
 					struct dentry *dentry, int acc)
@@ -1770,16 +1851,40 @@ nfsd_permission(struct svc_rqst *rqstp, struct svc_export *exp,
 			acc = NFSD_MAY_READ | NFSD_MAY_OWNER_OVERRIDE;
 	}
 	 
+#ifdef MY_ABC_HERE
+	if (IS_SYNOACL(dentry)) {
+		if ((acc & NFSD_MAY_OWNER_OVERRIDE) && is_synoacl_owner(dentry))
+			return 0;
+		if (acc & NFSD_MAY_SYNO_NOP) {
+			 
+			return 0;
+		}
+		err = synoacl_op_perm(dentry, syno_acl_nfs_perm_switch(inode, acc));
+	} else {
+#endif  
 	if ((acc & NFSD_MAY_OWNER_OVERRIDE) &&
 	    uid_eq(inode->i_uid, current_fsuid()))
 		return 0;
 
 	err = inode_permission(inode, acc & (MAY_READ|MAY_WRITE|MAY_EXEC));
+#ifdef MY_ABC_HERE
+	}
+#endif  
 
 	if (err == -EACCES && S_ISREG(inode->i_mode) &&
 	     (acc == (NFSD_MAY_READ | NFSD_MAY_OWNER_OVERRIDE) ||
 	      acc == (NFSD_MAY_READ | NFSD_MAY_READ_IF_EXEC)))
+#ifdef MY_ABC_HERE
+	{
+		if (IS_SYNOACL(dentry)){
+			err = synoacl_op_perm(dentry, MAY_EXEC);
+		} else {
+			err = inode_permission(inode, MAY_EXEC);
+		}
+	}
+#else
 		err = inode_permission(inode, MAY_EXEC);
+#endif  
 
 	return err? nfserrno(err) : 0;
 }

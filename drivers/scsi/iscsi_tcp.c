@@ -290,24 +290,41 @@ static inline int iscsi_sw_tcp_xmit_qlen(struct iscsi_conn *conn)
 static int iscsi_sw_tcp_pdu_xmit(struct iscsi_task *task)
 {
 	struct iscsi_conn *conn = task->conn;
+#ifdef MY_ABC_HERE
+	int rc;
+#else
 	unsigned long pflags = current->flags;
 	int rc = 0;
 
 	current->flags |= PF_MEMALLOC;
+#endif  
 
 	while (iscsi_sw_tcp_xmit_qlen(conn)) {
 		rc = iscsi_sw_tcp_xmit(conn);
+#ifdef MY_ABC_HERE
+		if (rc == 0)
+			return -EAGAIN;
+#else
 		if (rc == 0) {
 			rc = -EAGAIN;
 			break;
 		}
+#endif  
 		if (rc < 0)
+#ifdef MY_ABC_HERE
+			return rc;
+#else
 			break;
 		rc = 0;
+#endif  
 	}
 
+#ifdef MY_ABC_HERE
+	return 0;
+#else
 	tsk_restore_flags(current, pflags, PF_MEMALLOC);
 	return rc;
+#endif  
 }
 
 static int iscsi_sw_tcp_send_hdr_done(struct iscsi_tcp_conn *tcp_conn,
@@ -564,7 +581,10 @@ iscsi_sw_tcp_conn_bind(struct iscsi_cls_session *cls_session,
 	sk->sk_reuse = SK_CAN_REUSE;
 	sk->sk_sndtimeo = 15 * HZ;  
 	sk->sk_allocation = GFP_ATOMIC;
+#ifdef MY_ABC_HERE
+#else
 	sk_set_memalloc(sk);
+#endif  
 
 	iscsi_sw_tcp_conn_set_callbacks(conn);
 	tcp_sw_conn->sendpage = tcp_sw_conn->sock->ops->sendpage;

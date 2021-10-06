@@ -92,7 +92,11 @@ int temac_mdio_setup(struct temac_local *lp, struct device_node *np)
 	bus->read = temac_mdio_read;
 	bus->write = temac_mdio_write;
 	bus->parent = lp->dev;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+//do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	bus->irq = lp->mdio_irqs; /* preallocated IRQ table */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	lp->mii_bus = bus;
 
@@ -114,7 +118,11 @@ int temac_mdio_setup(struct temac_local *lp, struct device_node *np)
 void temac_mdio_teardown(struct temac_local *lp)
 {
 	mdiobus_unregister(lp->mii_bus);
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+//do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	kfree(lp->mii_bus->irq);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	mdiobus_free(lp->mii_bus);
 	lp->mii_bus = NULL;
 }

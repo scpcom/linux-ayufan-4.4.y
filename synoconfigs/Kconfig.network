@@ -34,14 +34,9 @@ config SYNO_SFP_UNSUPPORTED_NOTIFY
 	bool "SFP+ module unsupported notify"
 	default y
 
-config SYNO_PHY_INIT
-	bool "syno initialization of phy device"
+config SYNO_PHY_INIT_88E151X
+	bool "Enable phy driver of the phy 88E151X"
 	default n
-
-config SYNO_PHY_INIT_88E1514
-	bool "Enable phy driver of the phy 88E1514"
-	default y
-	depends on SYNO_PHY_INIT
 
 config SYNO_IPV6_EXPORT_IN6ADDR_ANY
 	bool "Export in6addr_any value for modules"
@@ -50,5 +45,18 @@ config SYNO_IPV6_EXPORT_IN6ADDR_ANY
 config SYNO_SYSFS_EXPORT_OVS_BONDS
 	bool "To export OVS bond information on sysfs"
 	default y
+
+config SYNO_NF_NAT_WORKAROUND
+	bool "Fix BUG_ON on nf_nat_setup_info"
+	default y
+
+config SYNO_REMOVE_RA_ERROR_LOG
+	bool "To remove error log when receiving RA"
+	default y
+
+config SYNO_ARMADA_REFILL_COUNT
+	bool "Add refill fail count in statistics"
+	default y
+	depends on SYNO_LSP_ARMADA_17_06_01
 
 endmenu #Network

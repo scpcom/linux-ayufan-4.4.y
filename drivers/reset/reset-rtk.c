@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 #define pr_fmt(fmt) "reset-rtk: " fmt
 
 #include <linux/reset-controller.h>
@@ -11,9 +8,8 @@
 #include <linux/reset.h>
 #include <linux/reset-helper.h>
 
-#ifndef MY_DEF_HERE
-#include <asm-generic/io.h>
-#endif /* MY_DEF_HERE */
+//#include <asm-generic/io.h>
+#include <asm/io.h>    //use asm/io.h instead
 
 #include <linux/cpu_pm.h>
 #include <linux/suspend.h>

@@ -1,9 +1,16 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
  
 #include <linux/namei.h>
 
 #include "cache.h"
 #include "xdr.h"
 #include "vfs.h"
+
+#ifdef MY_ABC_HERE
+#include "../synoacl_int.h"
+#endif  
 
 typedef struct svc_rqst	svc_rqst;
 typedef struct svc_buf	svc_buf;
@@ -71,11 +78,23 @@ nfsd_proc_setattr(struct svc_rqst *rqstp, struct nfsd_sattrargs *argp,
 
 		if (delta < 0)
 			delta = -delta;
+#ifdef MY_ABC_HERE
+		if (delta < MAX_TOUCH_TIME_ERROR) {
+			if (IS_SYNOACL(fhp->fh_dentry)) {
+				if (0 > synoacl_op_inode_chg_ok(fhp->fh_dentry, iap)) {
+					iap->ia_valid &= ~BOTH_TIME_SET;
+				}
+			} else if (0 > inode_change_ok(inode, iap)){
+				iap->ia_valid &= ~BOTH_TIME_SET;
+			}
+		}
+#else
 		if (delta < MAX_TOUCH_TIME_ERROR &&
 		    inode_change_ok(inode, iap) != 0) {
 			 
 			iap->ia_valid &= ~BOTH_TIME_SET;
 		}
+#endif  
 	}
 
 	nfserr = nfsd_setattr(rqstp, fhp, iap, 0, (time_t)0);

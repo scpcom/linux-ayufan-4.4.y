@@ -22,12 +22,27 @@
 
 struct phy;
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+enum phy_mode {
+	PHY_MODE_INVALID,
+	PHY_MODE_USB_HOST,
+	PHY_MODE_USB_DEVICE,
+	PHY_MODE_USB_OTG,
+};
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+
 /**
  * struct phy_ops - set of function pointers for performing phy operations
  * @init: operation to be performed for initializing phy
  * @exit: operation to be performed while exiting
  * @power_on: powering on the phy
  * @power_off: powering off the phy
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+ * @is_pll_locked: check phy's PLL status (locked/unlocked)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+ * @send_command: request specific operations from the phy
+#endif // CONFIG_SYNO_LSP_ARMADA_17_04_02
+#endif // CONFIG_SYNO_LSP_ARMADA_17_02_02
  * @owner: the module owner containing the ops
  */
 struct phy_ops {
@@ -35,6 +50,20 @@ struct phy_ops {
 	int	(*exit)(struct phy *phy);
 	int	(*power_on)(struct phy *phy);
 	int	(*power_off)(struct phy *phy);
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+/**
+ * @set_mode: set the mode of the phy
+ * @get_mode: get the mode of the phy
+ */
+	int	(*set_mode)(struct phy *phy, enum phy_mode mode);
+	enum phy_mode	(*get_mode)(struct phy *phy);
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+	int	(*send_command)(struct phy *phy, u32 command);
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+	int	(*is_pll_locked)(struct phy *phy);
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct module *owner;
 };
 
@@ -119,6 +148,16 @@ int phy_init(struct phy *phy);
 int phy_exit(struct phy *phy);
 int phy_power_on(struct phy *phy);
 int phy_power_off(struct phy *phy);
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+int phy_set_mode(struct phy *phy, enum phy_mode mode);
+enum phy_mode phy_get_mode(struct phy *phy);
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+int phy_send_command(struct phy *phy, u32 command);
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+int phy_is_pll_locked(struct phy *phy);
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 static inline int phy_get_bus_width(struct phy *phy)
 {
 	return phy->attrs.bus_width;
@@ -224,6 +263,40 @@ static inline int phy_power_off(struct phy *phy)
 	return -ENOSYS;
 }
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+static inline int phy_set_mode(struct phy *phy, enum phy_mode mode)
+{
+	if (!phy)
+		return 0;
+	return -ENOSYS;
+}
+
+static inline enum phy_mode phy_get_mode(struct phy *phy)
+{
+	if (!phy)
+		return 0;
+	return -ENOSYS;
+}
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+static inline int phy_send_command(struct phy *phy, u32 command)
+{
+	if (!phy)
+		return 0;
+	return -ENOSYS;
+}
+
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+static inline int phy_is_pll_locked(struct phy *phy)
+{
+	if (!phy)
+		return 0;
+	return -ENOSYS;
+}
+
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 static inline int phy_get_bus_width(struct phy *phy)
 {
 	return -ENOSYS;

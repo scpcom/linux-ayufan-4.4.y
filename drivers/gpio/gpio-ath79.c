@@ -177,7 +177,11 @@ static int ath79_gpio_probe(struct platform_device *pdev)
 
 	spin_lock_init(&ctrl->lock);
 	memcpy(&ctrl->chip, &ath79_gpio_chip, sizeof(ctrl->chip));
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	ctrl->chip.parent = &pdev->dev;
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	ctrl->chip.dev = &pdev->dev;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	ctrl->chip.ngpio = ath79_gpio_count;
 	if (oe_inverted) {
 		ctrl->chip.direction_input = ar934x_gpio_direction_input;

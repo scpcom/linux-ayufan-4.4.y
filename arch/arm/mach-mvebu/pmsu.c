@@ -45,15 +45,34 @@
 #define PMSU_REG_SIZE	    0x1000
 
 /* PMSU MP registers */
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#define PMSU_CTL_CFG(cpu)		((cpu * 0x100) + 0x104)
+#define PMSU_CTL_CFG_CPU0_FRQ_ID_SFT		4
+#define PMSU_CTL_CFG_CPU0_FRQ_ID_MSK		0xF
+#define PMSU_CTL_CFG_DFS_REQ			BIT(18)
+#define PMSU_CTL_CFG_PWDDN_REQ			BIT(16)
+#define PMSU_CTL_CFG_L2_PWDDN			BIT(20)
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 #define PMSU_CONTROL_AND_CONFIG(cpu)	    ((cpu * 0x100) + 0x104)
 #define PMSU_CONTROL_AND_CONFIG_DFS_REQ		BIT(18)
 #define PMSU_CONTROL_AND_CONFIG_PWDDN_REQ	BIT(16)
 #define PMSU_CONTROL_AND_CONFIG_L2_PWDDN	BIT(20)
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 #define PMSU_CPU_POWER_DOWN_CONTROL(cpu)    ((cpu * 0x100) + 0x108)
 
 #define PMSU_CPU_POWER_DOWN_DIS_SNP_Q_SKIP	BIT(0)
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#define PMSU_STATUS_MSK(cpu)	    ((cpu * 0x100) + 0x10c)
+#define PMSU_STATUS_MSK_CPU_IDLE_WAIT		BIT(16)
+#define PMSU_STATUS_MSK_SNP_Q_EMPTY_WAIT	BIT(17)
+#define PMSU_STATUS_MSK_IRQ_WAKEUP		BIT(20)
+#define PMSU_STATUS_MSK_FIQ_WAKEUP		BIT(21)
+#define PMSU_STATUS_MSK_DBG_WAKEUP		BIT(22)
+#define PMSU_STATUS_MSK_IRQ_MASK		BIT(24)
+#define PMSU_STATUS_MSK_FIQ_MASK		BIT(25)
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 #define PMSU_STATUS_AND_MASK(cpu)	    ((cpu * 0x100) + 0x10c)
 #define PMSU_STATUS_AND_MASK_CPU_IDLE_WAIT	BIT(16)
 #define PMSU_STATUS_AND_MASK_SNP_Q_EMPTY_WAIT	BIT(17)
@@ -62,10 +81,17 @@
 #define PMSU_STATUS_AND_MASK_DBG_WAKEUP		BIT(22)
 #define PMSU_STATUS_AND_MASK_IRQ_MASK		BIT(24)
 #define PMSU_STATUS_AND_MASK_FIQ_MASK		BIT(25)
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#define PMSU_EVENT_STATUS_MSK(cpu)     ((cpu * 0x100) + 0x120)
+#define PMSU_EVENT_STATUS_MSK_DFS_DONE        BIT(1)
+#define PMSU_EVENT_STATUS_MSK_DFS_DONE_MASK   BIT(17)
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 #define PMSU_EVENT_STATUS_AND_MASK(cpu)     ((cpu * 0x100) + 0x120)
 #define PMSU_EVENT_STATUS_AND_MASK_DFS_DONE        BIT(1)
 #define PMSU_EVENT_STATUS_AND_MASK_DFS_DONE_MASK   BIT(17)
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 #define PMSU_BOOT_ADDR_REDIRECT_OFFSET(cpu) ((cpu * 0x100) + 0x124)
 
@@ -78,6 +104,17 @@
 #define PMSU_POWERDOWN_DELAY_PMU		BIT(1)
 #define PMSU_POWERDOWN_DELAY_MASK		0xFFFE
 #define PMSU_DFLT_ARMADA38X_DELAY	        0x64
+
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+/* CIB Control and Configuration */
+#define CIB_CONTROL_AND_CONFIG_ACCK_EN_OFFSET		9
+#define CIB_CONTROL_AND_CONFIG_ACCK_EN_MASK		0x1
+#define CIB_CONTROL_AND_CONFIG_ACCK_EN_DISABLE		0x1
+#define CIB_CONTROL_AND_CONFIG_ACCK_ENABLE		0x0
+#define CIB_CONTROL_AND_CONFIG_EMPTY_STAT_OFFSET	13
+#define CIB_CONTROL_AND_CONFIG_EMPTY_STATUS_MASK	0x1
+#define CIB_CONTROL_AND_CONFIG_NOT_EMPTY		0x0
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 /* CA9 MPcore SoC Control registers */
 
@@ -100,18 +137,39 @@ extern void armada_38x_cpu_resume(void);
 
 static phys_addr_t pmsu_mp_phys_base;
 static void __iomem *pmsu_mp_base;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+static void __iomem *cib_control;
+static void __iomem *pmsu_msys_ba_redirect_reg;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+static bool freq_id_wa;
+
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 static void *mvebu_cpu_resume;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+static int (*mvebu_pmsu_dfs_request_ptr)(int cpu);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 static const struct of_device_id of_pmsu_table[] = {
 	{ .compatible = "marvell,armada-370-pmsu", },
 	{ .compatible = "marvell,armada-370-xp-pmsu", },
 	{ .compatible = "marvell,armada-380-pmsu", },
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	{ .compatible = "marvell,msys-pmsu", },
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	{ /* end of list */ },
 };
 
 void mvebu_pmsu_set_cpu_boot_addr(int hw_cpu, void *boot_addr)
 {
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	if (pmsu_msys_ba_redirect_reg) {
+		writel(virt_to_phys(boot_addr), pmsu_msys_ba_redirect_reg);
+		return;
+	}
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+
 	writel(virt_to_phys(boot_addr), pmsu_mp_base +
 		PMSU_BOOT_ADDR_REDIRECT_OFFSET(hw_cpu));
 }
@@ -158,6 +216,36 @@ int mvebu_setup_boot_addr_wa(unsigned int crypto_eng_target,
 	return 0;
 }
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+/* Msys SoCs address of boot address redirect register is different than in
+ * other mvebu machines. Its offset is out of common pmsu address range.
+ */
+static int msys_ba_redirect_quirk(struct device_node *np)
+{
+	struct resource res;
+
+	if (of_address_to_resource(np, 1, &res)) {
+		pr_err("unable to get resource\n");
+		return -ENOENT;
+	}
+
+	if (!request_mem_region(res.start, resource_size(&res),
+				np->full_name)) {
+		pr_err("unable to request region\n");
+		return -EBUSY;
+	}
+
+	pmsu_msys_ba_redirect_reg = ioremap(res.start, resource_size(&res));
+	if (!pmsu_mp_base) {
+		pr_err("unable to map register\n");
+		release_mem_region(res.start, resource_size(&res));
+		return -ENOMEM;
+	}
+
+	return 0;
+}
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+
 static int __init mvebu_v7_pmsu_init(void)
 {
 	struct device_node *np;
@@ -199,6 +287,34 @@ static int __init mvebu_v7_pmsu_init(void)
 		goto out;
 	}
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	cib_control = of_iomap(np, 1);
+	if (!cib_control) {
+		pr_err("unable to map registers\n");
+		iounmap(pmsu_mp_base);
+		ret = -ENOMEM;
+		goto out;
+	}
+
+	if (of_device_is_compatible(np, "marvell,msys-pmsu")) {
+		ret = msys_ba_redirect_quirk(np);
+		if (ret)
+			iounmap(pmsu_mp_base);
+	}
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+	if (of_machine_is_compatible("marvell,armadaxp")) {
+		/*
+		 * Enable work-around for modifying Frequency ID during
+		 * CPU_PM_EXIT. Change added originally for Armada 38x
+		 * SoC does not work on Armada XP and causes very early
+		 * fail during boot.
+		 */
+		freq_id_wa = true;
+	}
+
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
  out:
 	of_node_put(np);
 	return ret;
@@ -224,6 +340,48 @@ enum pmsu_idle_prepare_flags {
 };
 
 /* No locking is needed because we only access per-CPU registers */
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+static int mvebu_v7_pmsu_idle_prepare(unsigned long flags)
+{
+	unsigned int hw_cpu = cpu_logical_map(smp_processor_id());
+	u32 reg;
+
+	if (pmsu_mp_base == NULL)
+		return -EINVAL;
+
+	/*
+	 * Adjust the PMSU configuration to wait for WFI signal, enable
+	 * IRQ and FIQ as wakeup events, set wait for snoop queue empty
+	 * indication and mask IRQ and FIQ from CPU
+	 */
+	reg = readl(pmsu_mp_base + PMSU_STATUS_MSK(hw_cpu));
+	reg |= PMSU_STATUS_MSK_CPU_IDLE_WAIT    |
+	       PMSU_STATUS_MSK_IRQ_WAKEUP       |
+	       PMSU_STATUS_MSK_FIQ_WAKEUP       |
+	       PMSU_STATUS_MSK_SNP_Q_EMPTY_WAIT |
+	       PMSU_STATUS_MSK_IRQ_MASK         |
+	       PMSU_STATUS_MSK_FIQ_MASK;
+	writel(reg, pmsu_mp_base + PMSU_STATUS_MSK(hw_cpu));
+
+	reg = readl(pmsu_mp_base + PMSU_CTL_CFG(hw_cpu));
+	/* ask HW to power down the L2 Cache if needed */
+	if (flags & PMSU_PREPARE_DEEP_IDLE)
+		reg |= PMSU_CTL_CFG_L2_PWDDN;
+
+	/* request power down */
+	reg |= PMSU_CTL_CFG_PWDDN_REQ;
+	writel(reg, pmsu_mp_base + PMSU_CTL_CFG(hw_cpu));
+
+	if (flags & PMSU_PREPARE_SNOOP_DISABLE) {
+		/* Disable snoop disable by HW - SW is taking care of it */
+		reg = readl(pmsu_mp_base + PMSU_CPU_POWER_DOWN_CONTROL(hw_cpu));
+		reg |= PMSU_CPU_POWER_DOWN_DIS_SNP_Q_SKIP;
+		writel(reg, pmsu_mp_base + PMSU_CPU_POWER_DOWN_CONTROL(hw_cpu));
+	}
+
+	return 0;
+}
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 static int mvebu_v7_pmsu_idle_prepare(unsigned long flags)
 {
 	unsigned int hw_cpu = cpu_logical_map(smp_processor_id());
@@ -264,6 +422,7 @@ static int mvebu_v7_pmsu_idle_prepare(unsigned long flags)
 
 	return 0;
 }
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 int armada_370_xp_pmsu_idle_enter(unsigned long deepidle)
 {
@@ -338,6 +497,52 @@ static int armada_38x_cpu_suspend(unsigned long deepidle)
 }
 
 /* No locking is needed because we only access per-CPU registers */
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+void mvebu_v7_pmsu_idle_exit(void)
+{
+	unsigned int hw_cpu = cpu_logical_map(smp_processor_id());
+	u32 reg;
+
+	if (pmsu_mp_base == NULL)
+		return;
+	/* cancel ask HW to power down the L2 Cache if possible */
+	reg = readl(pmsu_mp_base + PMSU_CTL_CFG(hw_cpu));
+	reg &= ~PMSU_CTL_CFG_L2_PWDDN;
+
+	/*
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+	 * Below modification of Frequency ID is valid only on Armada 38x
+	 * SoC. Due to hardware issue it causes fail on Armada XP, so
+	 * avoid this section, depending on freq_id_wa flag value.
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+	 * When exiting from idle state such as cpuidle or hotplug,
+	 * Enable PMU wait for the CPU to enter WFI when doing DFS
+	 * by setting CPUx Frequency ID to 1
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+	 */
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+	if (!freq_id_wa) {
+		/*
+		 * When exiting from idle state such as cpuidle or hotplug,
+		 * Enable PMU wait for the CPU to enter WFI when doing DFS
+		 * by setting CPUx Frequency ID to 1
+		 */
+		reg |= 1 << PMSU_CTL_CFG_CPU0_FRQ_ID_SFT;
+	}
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+	reg |= 1 << PMSU_CTL_CFG_CPU0_FRQ_ID_SFT;
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+	writel(reg, pmsu_mp_base + PMSU_CTL_CFG(hw_cpu));
+
+	/* cancel Enable wakeup events and mask interrupts */
+	reg = readl(pmsu_mp_base + PMSU_STATUS_MSK(hw_cpu));
+	reg &= ~(PMSU_STATUS_MSK_IRQ_WAKEUP | PMSU_STATUS_MSK_FIQ_WAKEUP);
+	reg &= ~PMSU_STATUS_MSK_CPU_IDLE_WAIT;
+	reg &= ~PMSU_STATUS_MSK_SNP_Q_EMPTY_WAIT;
+	reg &= ~(PMSU_STATUS_MSK_IRQ_MASK | PMSU_STATUS_MSK_FIQ_MASK);
+	writel(reg, pmsu_mp_base + PMSU_STATUS_MSK(hw_cpu));
+}
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 void mvebu_v7_pmsu_idle_exit(void)
 {
 	unsigned int hw_cpu = cpu_logical_map(smp_processor_id());
@@ -358,6 +563,7 @@ void mvebu_v7_pmsu_idle_exit(void)
 	reg &= ~(PMSU_STATUS_AND_MASK_IRQ_MASK | PMSU_STATUS_AND_MASK_FIQ_MASK);
 	writel(reg, pmsu_mp_base + PMSU_STATUS_AND_MASK(hw_cpu));
 }
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 static int mvebu_v7_cpu_pm_notify(struct notifier_block *self,
 				    unsigned long action, void *hcpu)
@@ -511,7 +717,12 @@ static int __init mvebu_v7_cpu_pm_init(void)
 		pr_warn("CPU hotplug support is currently broken on Armada 38x: disabling\n");
 	}
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	if (of_machine_is_compatible("marvell,armadaxp") ||
+	    of_machine_is_compatible("marvell,msys"))
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	if (of_machine_is_compatible("marvell,armadaxp"))
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		ret = armada_xp_cpuidle_init();
 	else if (of_machine_is_compatible("marvell,armada370"))
 		ret = armada_370_cpuidle_init();
@@ -534,6 +745,68 @@ static int __init mvebu_v7_cpu_pm_init(void)
 arch_initcall(mvebu_v7_cpu_pm_init);
 early_initcall(mvebu_v7_pmsu_init);
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+static void mvebu_pmsu_dfs_request_local(void *data)
+{
+	u32 reg;
+	u32 cpu = smp_processor_id();
+	unsigned long flags;
+
+	local_irq_save(flags);
+
+	/* Clear any previous DFS DONE event */
+	reg = readl(pmsu_mp_base + PMSU_EVENT_STATUS_MSK(cpu));
+	reg &= ~PMSU_EVENT_STATUS_MSK_DFS_DONE;
+
+	/* Mask the DFS done interrupt, since we are going to poll */
+	reg |= PMSU_EVENT_STATUS_MSK_DFS_DONE_MASK;
+	writel(reg, pmsu_mp_base + PMSU_EVENT_STATUS_MSK(cpu));
+
+	/* Prepare to enter idle */
+	reg = readl(pmsu_mp_base + PMSU_STATUS_MSK(cpu));
+	reg |= PMSU_STATUS_MSK_CPU_IDLE_WAIT |
+	       PMSU_STATUS_MSK_IRQ_MASK     |
+	       PMSU_STATUS_MSK_FIQ_MASK;
+	writel(reg, pmsu_mp_base + PMSU_STATUS_MSK(cpu));
+
+	/* Request the DFS transition */
+	reg = readl(pmsu_mp_base + PMSU_CTL_CFG(cpu));
+	reg |= PMSU_CTL_CFG_DFS_REQ;
+	writel(reg, pmsu_mp_base + PMSU_CTL_CFG(cpu));
+
+	/* before enter wfi need to empty the CIB */
+	reg = readl(cib_control);
+	reg |= (CIB_CONTROL_AND_CONFIG_ACCK_EN_DISABLE <<
+			CIB_CONTROL_AND_CONFIG_ACCK_EN_OFFSET);
+
+	writel(reg, cib_control);
+
+	/* wait until CIB is empty */
+	while (((readl(cib_control) >> CIB_CONTROL_AND_CONFIG_EMPTY_STAT_OFFSET)
+			& CIB_CONTROL_AND_CONFIG_EMPTY_STATUS_MASK) ==
+			CIB_CONTROL_AND_CONFIG_NOT_EMPTY)
+		;
+
+	/* The fact of entering idle will trigger the DFS transition */
+	isb();
+	wfi();
+
+	/*
+	 * We're back from idle, the DFS transition has completed,
+	 * clear the idle wait indication.
+	 */
+	reg = readl(pmsu_mp_base + PMSU_STATUS_MSK(cpu));
+	reg &= ~PMSU_STATUS_MSK_CPU_IDLE_WAIT;
+	writel(reg, pmsu_mp_base + PMSU_STATUS_MSK(cpu));
+
+	/* Restore the DFS mask to its original state */
+	reg = readl(pmsu_mp_base + PMSU_EVENT_STATUS_MSK(cpu));
+	reg &= ~PMSU_EVENT_STATUS_MSK_DFS_DONE_MASK;
+	writel(reg, pmsu_mp_base + PMSU_EVENT_STATUS_MSK(cpu));
+
+	local_irq_restore(flags);
+}
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 static void mvebu_pmsu_dfs_request_local(void *data)
 {
 	u32 reg;
@@ -567,7 +840,33 @@ static void mvebu_pmsu_dfs_request_local(void *data)
 
 	local_irq_restore(flags);
 }
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+int armada_xp_pmsu_dfs_request(int cpu)
+{
+	unsigned long timeout;
+	int hwcpu = cpu_logical_map(cpu);
+	u32 reg;
+
+	/* Trigger the DFS on the appropriate CPU */
+	smp_call_function_single(cpu, mvebu_pmsu_dfs_request_local,
+				 NULL, false);
+
+	/* Poll until the DFS done event is generated */
+	timeout = jiffies + HZ;
+	while (time_before(jiffies, timeout)) {
+		reg = readl(pmsu_mp_base + PMSU_EVENT_STATUS_MSK(hwcpu));
+		if (reg & PMSU_EVENT_STATUS_MSK_DFS_DONE)
+			break;
+		udelay(10);
+	}
+
+	if (time_after(jiffies, timeout))
+		return -ETIME;
+	return 0;
+}
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 int mvebu_pmsu_dfs_request(int cpu)
 {
 	unsigned long timeout;
@@ -607,20 +906,88 @@ int mvebu_pmsu_dfs_request(int cpu)
 
 	return 0;
 }
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+void mvebu_v7_pmsu_disable_dfs_cpu(int hw_cpu)
+{
+	u32 reg;
+
+	if (pmsu_mp_base == NULL)
+		return;
+	/*
+	 * Disable PMU wait for the CPU to enter WFI when doing DFS
+	 * by setting CPUx Frequency ID to 0
+	 */
+	reg = readl(pmsu_mp_base + PMSU_CTL_CFG(hw_cpu));
+	reg &= ~(PMSU_CTL_CFG_CPU0_FRQ_ID_MSK << PMSU_CTL_CFG_CPU0_FRQ_ID_SFT);
+	writel(reg, pmsu_mp_base + PMSU_CTL_CFG(hw_cpu));
+}
+
+int armada_38x_pmsu_dfs_request(int cpu)
+{
+	/*
+	 * Protect CPU DFS from changing the number of online cpus number during
+	 * frequency transition by temporarily disable cpu hotplug
+	 */
+	cpu_hotplug_disable();
+
+	/* Trigger the DFS on all the CPUs */
+	on_each_cpu(mvebu_pmsu_dfs_request_local,
+		    NULL, false);
+
+	cpu_hotplug_enable();
+
+	return 0;
+}
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+int mvebu_pmsu_dfs_request(int cpu)
+{
+	return mvebu_pmsu_dfs_request_ptr(cpu);
+}
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+struct cpufreq_dt_platform_data armada_xp_cpufreq_dt_pd = {
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 struct cpufreq_dt_platform_data cpufreq_dt_pd = {
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	.independent_clocks = true,
 };
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+struct cpufreq_dt_platform_data armada_38x_cpufreq_dt_pd = {
+	.independent_clocks = false,
+};
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+static int __init mvebu_pmsu_cpufreq_init(void)
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 static int __init armada_xp_pmsu_cpufreq_init(void)
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 {
 	struct device_node *np;
 	struct resource res;
 	int ret, cpu;
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	if (!of_machine_is_compatible("marvell,armadaxp") &&
+	    !of_machine_is_compatible("marvell,armada380"))
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	if (!of_machine_is_compatible("marvell,armadaxp"))
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		return 0;
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	if (of_machine_is_compatible("marvell,armada380") &&
+	    (num_possible_cpus() > 1)) {
+		pr_warn("CPU freq is currently broken on Armada 38x: disabling");
+		return 0;
+	}
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	/*
 	 * In order to have proper cpufreq handling, we need to ensure
 	 * that the Device Tree description of the CPU clock includes
@@ -665,6 +1032,10 @@ static int __init armada_xp_pmsu_cpufreq_init(void)
 			return PTR_ERR(clk);
 		}
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+		clk_prepare_enable(clk);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+
 		/*
 		 * In case of a failure of dev_pm_opp_add(), we don't
 		 * bother with cleaning up the registered OPP (there's
@@ -683,10 +1054,31 @@ static int __init armada_xp_pmsu_cpufreq_init(void)
 			return ret;
 		}
 	}
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	if (of_machine_is_compatible("marvell,armada380")) {
+		if (num_online_cpus() == 1)
+			mvebu_v7_pmsu_disable_dfs_cpu(1);
+
+		mvebu_pmsu_dfs_request_ptr = armada_38x_pmsu_dfs_request;
+		platform_device_register_data(NULL, "cpufreq-dt", -1,
+					      &armada_38x_cpufreq_dt_pd,
+					      sizeof(armada_38x_cpufreq_dt_pd));
+	} else if (of_machine_is_compatible("marvell,armadaxp")) {
+		mvebu_pmsu_dfs_request_ptr = armada_xp_pmsu_dfs_request;
+		platform_device_register_data(NULL, "cpufreq-dt", -1,
+					      &armada_xp_cpufreq_dt_pd,
+					      sizeof(armada_xp_cpufreq_dt_pd));
+	}
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	platform_device_register_data(NULL, "cpufreq-dt", -1,
 				      &cpufreq_dt_pd, sizeof(cpufreq_dt_pd));
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	return 0;
 }
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+device_initcall(mvebu_pmsu_cpufreq_init);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 device_initcall(armada_xp_pmsu_cpufreq_init);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */

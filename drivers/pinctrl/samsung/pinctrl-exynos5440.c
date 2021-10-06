@@ -541,7 +541,11 @@ static const struct pinconf_ops exynos5440_pinconf_ops = {
 /* gpiolib gpio_set callback function */
 static void exynos5440_gpio_set(struct gpio_chip *gc, unsigned offset, int value)
 {
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	struct exynos5440_pinctrl_priv_data *priv = dev_get_drvdata(gc->parent);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct exynos5440_pinctrl_priv_data *priv = dev_get_drvdata(gc->dev);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	void __iomem *base = priv->reg_base;
 	u32 data;
 
@@ -555,7 +559,11 @@ static void exynos5440_gpio_set(struct gpio_chip *gc, unsigned offset, int value
 /* gpiolib gpio_get callback function */
 static int exynos5440_gpio_get(struct gpio_chip *gc, unsigned offset)
 {
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	struct exynos5440_pinctrl_priv_data *priv = dev_get_drvdata(gc->parent);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct exynos5440_pinctrl_priv_data *priv = dev_get_drvdata(gc->dev);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	void __iomem *base = priv->reg_base;
 	u32 data;
 
@@ -568,7 +576,11 @@ static int exynos5440_gpio_get(struct gpio_chip *gc, unsigned offset)
 /* gpiolib gpio_direction_input callback function */
 static int exynos5440_gpio_direction_input(struct gpio_chip *gc, unsigned offset)
 {
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	struct exynos5440_pinctrl_priv_data *priv = dev_get_drvdata(gc->parent);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct exynos5440_pinctrl_priv_data *priv = dev_get_drvdata(gc->dev);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	void __iomem *base = priv->reg_base;
 	u32 data;
 
@@ -588,7 +600,11 @@ static int exynos5440_gpio_direction_input(struct gpio_chip *gc, unsigned offset
 static int exynos5440_gpio_direction_output(struct gpio_chip *gc, unsigned offset,
 							int value)
 {
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	struct exynos5440_pinctrl_priv_data *priv = dev_get_drvdata(gc->parent);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct exynos5440_pinctrl_priv_data *priv = dev_get_drvdata(gc->dev);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	void __iomem *base = priv->reg_base;
 	u32 data;
 
@@ -609,7 +625,11 @@ static int exynos5440_gpio_direction_output(struct gpio_chip *gc, unsigned offse
 /* gpiolib gpio_to_irq callback function */
 static int exynos5440_gpio_to_irq(struct gpio_chip *gc, unsigned offset)
 {
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	struct exynos5440_pinctrl_priv_data *priv = dev_get_drvdata(gc->parent);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct exynos5440_pinctrl_priv_data *priv = dev_get_drvdata(gc->dev);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	unsigned int virq;
 
 	if (offset < 16 || offset > 23)
@@ -818,7 +838,11 @@ static int exynos5440_gpiolib_register(struct platform_device *pdev,
 	priv->gc = gc;
 	gc->base = 0;
 	gc->ngpio = EXYNOS5440_MAX_PINS;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	gc->parent = &pdev->dev;
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	gc->dev = &pdev->dev;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	gc->set = exynos5440_gpio_set;
 	gc->get = exynos5440_gpio_get;
 	gc->direction_input = exynos5440_gpio_direction_input;

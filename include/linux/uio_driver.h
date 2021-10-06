@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * include/linux/uio_driver.h
  *
@@ -100,9 +103,9 @@ struct uio_info {
 	long			irq;
 	unsigned long		irq_flags;
 	void			*priv;
-#ifdef CONFIG_UIO_ASSIGN_MINOR
+#if defined(CONFIG_UIO_ASSIGN_MINOR) && defined(MY_DEF_HERE)
 	int             	minor;
-#endif
+#endif /* defined(CONFIG_UIO_ASSIGN_MINOR) && defined(MY_DEF_HERE) */
 	irqreturn_t (*handler)(int irq, struct uio_info *dev_info);
 	int (*mmap)(struct uio_info *info, struct vm_area_struct *vma);
 	int (*open)(struct uio_info *info, struct inode *inode);

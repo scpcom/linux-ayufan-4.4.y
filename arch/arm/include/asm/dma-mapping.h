@@ -185,6 +185,11 @@ extern int arm_dma_set_mask(struct device *dev, u64 dma_mask);
 extern void *arm_dma_alloc(struct device *dev, size_t size, dma_addr_t *handle,
 			   gfp_t gfp, struct dma_attrs *attrs);
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+extern void *arm_coherent_dma_alloc(struct device *dev, size_t size,
+				    dma_addr_t *handle, gfp_t gfp, struct dma_attrs *attrs);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+
 /**
  * arm_dma_free - free memory allocated by arm_dma_alloc
  * @dev: valid struct device pointer, or NULL for ISA and EISA-like devices
@@ -201,6 +206,11 @@ extern void *arm_dma_alloc(struct device *dev, size_t size, dma_addr_t *handle,
  */
 extern void arm_dma_free(struct device *dev, size_t size, void *cpu_addr,
 			 dma_addr_t handle, struct dma_attrs *attrs);
+
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+extern void arm_coherent_dma_free(struct device *dev, size_t size, void *cpu_addr,
+				  dma_addr_t handle, struct dma_attrs *attrs);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 /**
  * arm_dma_mmap - map a coherent DMA allocation into user space

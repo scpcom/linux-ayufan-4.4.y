@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *
  * drivers/staging/android/ion/ion.c
@@ -40,9 +43,9 @@
 #include "ion.h"
 #include "ion_priv.h"
 #include "compat_ion.h"
-#if defined(CONFIG_ION_RTK_PHOENIX)
+#if defined(CONFIG_ION_RTK_PHOENIX) && defined(MY_DEF_HERE)
 #include "../uapi/rtk_phoenix_ion.h"
-#endif
+#endif /* defined(CONFIG_ION_RTK_PHOENIX) && defined(MY_DEF_HERE) */
 
 /**
  * struct ion_device - the metadata of the ion device node
@@ -1028,7 +1031,7 @@ static int ion_mmap(struct dma_buf *dmabuf, struct vm_area_struct *vma)
 		return 0;
 	}
 
-#if defined(CONFIG_ION_RTK_PHOENIX)
+#if defined(CONFIG_ION_RTK_PHOENIX) && defined(MY_DEF_HERE)
 #if 0
     if (    buffer->heap->type == RTK_PHOENIX_ION_HEAP_TYPE_MEDIA ||
             buffer->heap->type == RTK_PHOENIX_ION_HEAP_TYPE_AUDIO ||
@@ -1038,7 +1041,7 @@ static int ion_mmap(struct dma_buf *dmabuf, struct vm_area_struct *vma)
 #endif
 		vma->vm_page_prot = pgprot_noncached(vma->vm_page_prot);
     else
-#endif
+#endif /* defined(CONFIG_ION_RTK_PHOENIX) && defined(MY_DEF_HERE) */
 	if (!(buffer->flags & ION_FLAG_CACHED))
 		vma->vm_page_prot = pgprot_writecombine(vma->vm_page_prot);
 
@@ -1265,9 +1268,9 @@ static long ion_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 		struct ion_allocation_data allocation;
 		struct ion_handle_data handle;
 		struct ion_custom_data custom;
-#if defined(CONFIG_ION_RTK_PHOENIX)
+#if defined(CONFIG_ION_RTK_PHOENIX) && defined(MY_DEF_HERE)
 		struct ion_phys_data phys;
-#endif
+#endif /* defined(CONFIG_ION_RTK_PHOENIX) && defined(MY_DEF_HERE) */
 	} data;
 
 	dir = ion_ioctl_dir(cmd);
@@ -1307,7 +1310,7 @@ static long ion_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 		ion_handle_put(handle);
 		break;
 	}
-#if defined(CONFIG_ION_RTK_PHOENIX)
+#if defined(CONFIG_ION_RTK_PHOENIX) && defined(MY_DEF_HERE)
 #if 1   //20130208 charleslin: add ioctl to get physical address
 	case ION_IOC_PHYS:
 	{
@@ -1337,7 +1340,7 @@ static long ion_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 		break;
 	}
 #endif
-#endif
+#endif /* defined(CONFIG_ION_RTK_PHOENIX) && defined(MY_DEF_HERE) */
 	case ION_IOC_SHARE:
 	case ION_IOC_MAP:
 	{

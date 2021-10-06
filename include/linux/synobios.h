@@ -182,14 +182,14 @@
 #define HW_RS217       "RS217"         //"RS217"
 #define HW_FS3017      "FS3017"        //"FS3017"
 #define HW_RS3617xs    "RS3617xs"      //"RS3617xs"
-#define HW_RS2417p     "RS2417+"       //"RS2417+"
-#define HW_RS2417rpp   "RS2417rp+"     //"RS2417rp+"
+#define HW_RS2418p     "RS2418+"       //"RS2418+"
+#define HW_RS2418rpp   "RS2418rp+"     //"RS2418rp+"
 #define HW_DS918p      "DS918+"        //DS918+
 #define HW_RS4017xsp   "RS4017xs+"     //"RS4017xs+"
 #define HW_DS3617xs    "DS3617xs"      //"DS3617xs"
 #define HW_RS18017xsp  "RS18017xs+"    //"RS18017xs+"
-#define HW_DS217p      "DS217+"        //DS217+
-#define HW_DS1518p     "DS1518+"       //"DS1518+"
+#define HW_DS218p      "DS218+"        //DS218+
+#define HW_DS1618p     "DS1618+"       //"DS1618+"
 #define HW_C2DSM       "C2DSM"         //"C2DSM"
 #define HW_DS1517p     "DS1517+"       //"DS1517+"
 #define HW_DS1817p     "DS1817+"       //"DS1817+"
@@ -197,7 +197,18 @@
 #define HW_FS2017      "FS2017"        //"FS2017"
 #define HW_DS418j      "DS418j"        //"DS418j"
 #define HW_DS418       "DS418"         //"DS418"
+#define HW_DS218play   "DS218play"     //"DS218play"
+#define HW_DS118       "DS118"         //"DS118"
 #define HW_DS3017xs    "DS3017xs"      //"DS3017xs"
+#define HW_DS3018xs    "DS3018xs"      //"DS3018xs"
+#define HW_FS1018      "FS1018"        //"FS1018"
+#define HW_FS3018      "FS3018"        //"FS3018"
+#define HW_RS818p      "RS818+"        //"RS818+"
+#define HW_RS818rpp    "RS818rp+"      //"RS818rp+"
+#define HW_DS418play   "DS418play"     //DS418play
+#define HW_DS219j      "DS219j"        //"DS219j"
+#define HW_DS218se     "DS218se"       //"DS218se"
+#define HW_RS2818rpp   "RS2818rp+"     //"RS2818rp+"
 #define HW_UNKNOWN     "DSUnknown"
 
 #define EBOX_INFO_UNIQUE_RX410  "RX410"

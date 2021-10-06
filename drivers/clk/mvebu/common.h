@@ -42,6 +42,9 @@ struct clk_gating_soc_desc {
 	const char *parent;
 	int bit_idx;
 	unsigned long flags;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	u8 clk_gate_flags;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 };
 
 void __init mvebu_coreclk_setup(struct device_node *np,

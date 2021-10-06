@@ -12,6 +12,9 @@
 #define __MV88E6XXX_H
 
 #include <linux/if_vlan.h>
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#include <linux/gpio/consumer.h>
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 #ifndef UINT64_MAX
 #define UINT64_MAX		(u64)(~((u64)0))
@@ -28,7 +31,19 @@
 #define SMI_CMD_OP_45_READ_DATA_INC	((3 << 10) | SMI_CMD_BUSY)
 #define SMI_DATA		0x01
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+/* Fiber/SERDES Registers are located at SMI address F, page 1 */
+#define REG_FIBER_SERDES	0x0f
+#define PAGE_FIBER_SERDES	0x01
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#define REG_PORT_BASE_LEGACY 0x10
+#define REG_PORT_BASE_PERIDOT  0
+#define REG_PORT(p)		(REG_PORT_BASE + (p))
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 #define REG_PORT(p)		(0x10 + (p))
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 #define PORT_STATUS		0x00
 #define PORT_STATUS_PAUSE_EN	BIT(15)
 #define PORT_STATUS_MY_PAUSE	BIT(14)
@@ -45,9 +60,18 @@
 #define PORT_STATUS_MGMII	BIT(6) /* 6185 */
 #define PORT_STATUS_TX_PAUSED	BIT(5)
 #define PORT_STATUS_FLOW_CTRL	BIT(4)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#define PORT_STATUS_CMODE_MASK	0x0f
+#define PORT_STATUS_CMODE_100BASE_X	0x8
+#define PORT_STATUS_CMODE_1000BASE_X	0x9
+#define PORT_STATUS_CMODE_SGMII		0xa
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 #define PORT_PCS_CTRL		0x01
 #define PORT_PCS_CTRL_RGMII_DELAY_RXCLK	BIT(15)
 #define PORT_PCS_CTRL_RGMII_DELAY_TXCLK	BIT(14)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#define PORT_PCS_CTRL_FORCE_SPEED	BIT(13)
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 #define PORT_PCS_CTRL_FC		BIT(7)
 #define PORT_PCS_CTRL_FORCE_FC		BIT(6)
 #define PORT_PCS_CTRL_LINK_UP		BIT(5)
@@ -60,6 +84,35 @@
 #define PORT_PCS_CTRL_UNFORCED		0x03
 #define PORT_PAUSE_CTRL		0x02
 #define PORT_SWITCH_ID		0x03
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#define PORT_SWITCH_ID_PROD_NUM_6085	0x04a
+#define PORT_SWITCH_ID_PROD_NUM_6095	0x095
+#define PORT_SWITCH_ID_PROD_NUM_6131	0x106
+#define PORT_SWITCH_ID_PROD_NUM_6320	0x115
+#define PORT_SWITCH_ID_PROD_NUM_6123	0x121
+#define PORT_SWITCH_ID_PROD_NUM_6161	0x161
+#define PORT_SWITCH_ID_PROD_NUM_6165	0x165
+#define PORT_SWITCH_ID_PROD_NUM_6171	0x171
+#define PORT_SWITCH_ID_PROD_NUM_6172	0x172
+#define PORT_SWITCH_ID_PROD_NUM_6175	0x175
+#define PORT_SWITCH_ID_PROD_NUM_6176	0x176
+#define PORT_SWITCH_ID_PROD_NUM_6185	0x1a7
+#define PORT_SWITCH_ID_PROD_NUM_6240	0x240
+#define PORT_SWITCH_ID_PROD_NUM_6321	0x310
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#define PORT_SWITCH_ID_PROD_NUM_6341	0x341
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#define PORT_SWITCH_ID_PROD_NUM_6341	0x340
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#define PORT_SWITCH_ID_PROD_NUM_6352	0x352
+#define PORT_SWITCH_ID_PROD_NUM_6350	0x371
+#define PORT_SWITCH_ID_PROD_NUM_6351	0x375
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#define PORT_SWITCH_ID_PROD_NUM_6190	0x190
+#define PORT_SWITCH_ID_PROD_NUM_6290	0x290
+#define PORT_SWITCH_ID_PROD_NUM_6390	0x390
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 #define PORT_SWITCH_ID_PROD_NUM_MASK	0xfff0
 #define PORT_SWITCH_ID_REV_MASK		0x000f
 #define PORT_SWITCH_ID_6031	0x0310
@@ -106,6 +159,7 @@
 #define PORT_SWITCH_ID_6352	0x3520
 #define PORT_SWITCH_ID_6352_A0	0x3521
 #define PORT_SWITCH_ID_6352_A1	0x3522
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 #define PORT_CONTROL		0x04
 #define PORT_CONTROL_USE_CORE_TAG	BIT(15)
 #define PORT_CONTROL_DROP_ON_LOCK	BIT(14)
@@ -133,7 +187,13 @@
 #define PORT_CONTROL_STATE_LEARNING	0x02
 #define PORT_CONTROL_STATE_FORWARDING	0x03
 #define PORT_CONTROL_1		0x05
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#define PORT_CONTROL_1_FID_11_4_MASK	(0xff << 0)
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 #define PORT_BASE_VLAN		0x06
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#define PORT_BASE_VLAN_FID_3_0_MASK	(0xf << 12)
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 #define PORT_DEFAULT_VLAN	0x07
 #define PORT_DEFAULT_VLAN_MASK	0xfff
 #define PORT_CONTROL_2		0x08
@@ -288,6 +348,9 @@
 #define GLOBAL_STATS_OP_HIST_RX		((1 << 10) | GLOBAL_STATS_OP_BUSY)
 #define GLOBAL_STATS_OP_HIST_TX		((2 << 10) | GLOBAL_STATS_OP_BUSY)
 #define GLOBAL_STATS_OP_HIST_RX_TX	((3 << 10) | GLOBAL_STATS_OP_BUSY)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#define GLOBAL_STATS_OP_BANK_1	BIT(9)
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 #define GLOBAL_STATS_COUNTER_32	0x1e
 #define GLOBAL_STATS_COUNTER_01	0x1f
 
@@ -354,10 +417,229 @@
 #define GLOBAL2_QOS_WEIGHT	0x1c
 #define GLOBAL2_MISC		0x1d
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#define MV88E6XXX_N_FID		4096
+
+/* List of supported models */
+enum mv88e6xxx_model {
+	MV88E6085,
+	MV88E6095,
+	MV88E6123,
+	MV88E6131,
+	MV88E6161,
+	MV88E6165,
+	MV88E6171,
+	MV88E6172,
+	MV88E6175,
+	MV88E6176,
+	MV88E6185,
+	MV88E6240,
+	MV88E6320,
+	MV88E6321,
+	MV88E6341,
+	MV88E6350,
+	MV88E6351,
+	MV88E6352,
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+	MV88E6190,
+	MV88E6290,
+	MV88E6390,
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+};
+
+enum mv88e6xxx_family {
+	MV88E6XXX_FAMILY_NONE,
+	MV88E6XXX_FAMILY_6065,	/* 6031 6035 6061 6065 */
+	MV88E6XXX_FAMILY_6095,	/* 6092 6095 */
+	MV88E6XXX_FAMILY_6097,	/* 6046 6085 6096 6097 */
+	MV88E6XXX_FAMILY_6165,	/* 6123 6161 6165 */
+	MV88E6XXX_FAMILY_6185,	/* 6108 6121 6122 6131 6152 6155 6182 6185 */
+	MV88E6XXX_FAMILY_6320,	/* 6320 6321 */
+	MV88E6XXX_FAMILY_6351,	/* 6171 6175 6350 6351 */
+	MV88E6XXX_FAMILY_6352,	/* 6172 6176 6240 6341 6352 */
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+	MV88E6XXX_FAMILY_6390,	/* 6190 6190X 6290 6390 6390X*/
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+};
+
+enum mv88e6xxx_cap {
+	/* Address Translation Unit.
+	 * The ATU is used to lookup and learn MAC addresses. See GLOBAL_ATU_OP.
+	 */
+	MV88E6XXX_CAP_ATU,
+
+	/* Energy Efficient Ethernet.
+	 */
+	MV88E6XXX_CAP_EEE,
+
+	/* EEPROM Command and Data registers.
+	 * See GLOBAL2_EEPROM_OP and GLOBAL2_EEPROM_DATA.
+	 */
+	MV88E6XXX_CAP_EEPROM,
+
+	/* Port State Filtering for 802.1D Spanning Tree.
+	 * See PORT_CONTROL_STATE_* values in the PORT_CONTROL register.
+	 */
+	MV88E6XXX_CAP_PORTSTATE,
+
+	/* PHY Polling Unit.
+	 * See GLOBAL_CONTROL_PPU_ENABLE and GLOBAL_STATUS_PPU_POLLING.
+	 */
+	MV88E6XXX_CAP_PPU,
+	MV88E6XXX_CAP_PPU_ACTIVE,
+
+	/* SMI PHY Command and Data registers.
+	 * This requires an indirect access to PHY registers through
+	 * GLOBAL2_SMI_OP, otherwise direct access to PHY registers is done.
+	 */
+	MV88E6XXX_CAP_SMI_PHY,
+
+	/* Per VLAN Spanning Tree Unit (STU).
+	 * The Port State database, if present, is accessed through VTU
+	 * operations and dedicated SID registers. See GLOBAL_VTU_SID.
+	 */
+	MV88E6XXX_CAP_STU,
+
+	/* Switch MAC/WoL/WoF register.
+	 * This requires an indirect access to set the switch MAC address
+	 * through GLOBAL2_SWITCH_MAC, otherwise GLOBAL_MAC_01, GLOBAL_MAC_23,
+	 * and GLOBAL_MAC_45 are used with a direct access.
+	 */
+	MV88E6XXX_CAP_SWITCH_MAC_WOL_WOF,
+
+	/* Internal temperature sensor.
+	 * Available from any enabled port's PHY register 26, page 6.
+	 */
+	MV88E6XXX_CAP_TEMP,
+	MV88E6XXX_CAP_TEMP_LIMIT,
+
+	/* In-chip Port Based VLANs.
+	 * Each port VLANTable register (see PORT_BASE_VLAN) is used to restrict
+	 * the output (or egress) ports to which it is allowed to send frames.
+	 */
+	MV88E6XXX_CAP_VLANTABLE,
+
+	/* VLAN Table Unit.
+	 * The VTU is used to program 802.1Q VLANs. See GLOBAL_VTU_OP.
+	 */
+	MV88E6XXX_CAP_VTU,
+
+	/* Switch internal PHY SMI address conversion.
+	 * Most of switch internal PHY SMI address are equal to switch port ID
+	 * However Some switch internal PHY SMI addressis are (0x10 + port ID)
+	 */
+	MV88E6XXX_PHY_ADDR_CONVERT,
+};
+
+/* Bitmask of capabilities */
+#define MV88E6XXX_FLAG_ATU		BIT(MV88E6XXX_CAP_ATU)
+#define MV88E6XXX_FLAG_EEE		BIT(MV88E6XXX_CAP_EEE)
+#define MV88E6XXX_FLAG_EEPROM		BIT(MV88E6XXX_CAP_EEPROM)
+#define MV88E6XXX_FLAG_PORTSTATE	BIT(MV88E6XXX_CAP_PORTSTATE)
+#define MV88E6XXX_FLAG_PPU		BIT(MV88E6XXX_CAP_PPU)
+#define MV88E6XXX_FLAG_PPU_ACTIVE	BIT(MV88E6XXX_CAP_PPU_ACTIVE)
+#define MV88E6XXX_FLAG_SMI_PHY		BIT(MV88E6XXX_CAP_SMI_PHY)
+#define MV88E6XXX_FLAG_STU		BIT(MV88E6XXX_CAP_STU)
+#define MV88E6XXX_FLAG_SWITCH_MAC	BIT(MV88E6XXX_CAP_SWITCH_MAC_WOL_WOF)
+#define MV88E6XXX_FLAG_TEMP		BIT(MV88E6XXX_CAP_TEMP)
+#define MV88E6XXX_FLAG_TEMP_LIMIT	BIT(MV88E6XXX_CAP_TEMP_LIMIT)
+#define MV88E6XXX_FLAG_VLANTABLE	BIT(MV88E6XXX_CAP_VLANTABLE)
+#define MV88E6XXX_FLAG_VTU		BIT(MV88E6XXX_CAP_VTU)
+#define MV88E6XXX_FLAG_PHY_ADDR		BIT(MV88E6XXX_PHY_ADDR_CONVERT)
+
+#define MV88E6XXX_FLAGS_FAMILY_6095	\
+	(MV88E6XXX_FLAG_ATU |		\
+	 MV88E6XXX_FLAG_PPU |		\
+	 MV88E6XXX_FLAG_VLANTABLE |	\
+	 MV88E6XXX_FLAG_VTU)
+
+#define MV88E6XXX_FLAGS_FAMILY_6097	\
+	(MV88E6XXX_FLAG_ATU |		\
+	 MV88E6XXX_FLAG_PPU |		\
+	 MV88E6XXX_FLAG_STU |		\
+	 MV88E6XXX_FLAG_VLANTABLE |	\
+	 MV88E6XXX_FLAG_VTU)
+
+#define MV88E6XXX_FLAGS_FAMILY_6165	\
+	(MV88E6XXX_FLAG_STU |		\
+	 MV88E6XXX_FLAG_SWITCH_MAC |	\
+	 MV88E6XXX_FLAG_TEMP |		\
+	 MV88E6XXX_FLAG_VTU)
+
+#define MV88E6XXX_FLAGS_FAMILY_6185	\
+	(MV88E6XXX_FLAG_ATU |		\
+	 MV88E6XXX_FLAG_PPU |		\
+	 MV88E6XXX_FLAG_VLANTABLE |	\
+	 MV88E6XXX_FLAG_VTU)
+
+#define MV88E6XXX_FLAGS_FAMILY_6320	\
+	(MV88E6XXX_FLAG_ATU |		\
+	 MV88E6XXX_FLAG_EEE |		\
+	 MV88E6XXX_FLAG_EEPROM |	\
+	 MV88E6XXX_FLAG_PORTSTATE |	\
+	 MV88E6XXX_FLAG_PPU_ACTIVE |	\
+	 MV88E6XXX_FLAG_SMI_PHY |	\
+	 MV88E6XXX_FLAG_SWITCH_MAC |	\
+	 MV88E6XXX_FLAG_TEMP |		\
+	 MV88E6XXX_FLAG_TEMP_LIMIT |	\
+	 MV88E6XXX_FLAG_VLANTABLE |	\
+	 MV88E6XXX_FLAG_VTU)
+
+#define MV88E6XXX_FLAGS_FAMILY_6351	\
+	(MV88E6XXX_FLAG_ATU |		\
+	 MV88E6XXX_FLAG_PORTSTATE |	\
+	 MV88E6XXX_FLAG_PPU_ACTIVE |	\
+	 MV88E6XXX_FLAG_SMI_PHY |	\
+	 MV88E6XXX_FLAG_STU |		\
+	 MV88E6XXX_FLAG_SWITCH_MAC |	\
+	 MV88E6XXX_FLAG_TEMP |		\
+	 MV88E6XXX_FLAG_VLANTABLE |	\
+	 MV88E6XXX_FLAG_VTU)
+
+#define MV88E6XXX_FLAGS_FAMILY_6352	\
+	(MV88E6XXX_FLAG_ATU |		\
+	 MV88E6XXX_FLAG_EEE |		\
+	 MV88E6XXX_FLAG_EEPROM |	\
+	 MV88E6XXX_FLAG_PORTSTATE |	\
+	 MV88E6XXX_FLAG_PPU_ACTIVE |	\
+	 MV88E6XXX_FLAG_SMI_PHY |	\
+	 MV88E6XXX_FLAG_STU |		\
+	 MV88E6XXX_FLAG_SWITCH_MAC |	\
+	 MV88E6XXX_FLAG_TEMP |		\
+	 MV88E6XXX_FLAG_TEMP_LIMIT |	\
+	 MV88E6XXX_FLAG_VLANTABLE |	\
+	 MV88E6XXX_FLAG_VTU)
+
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#define MV88E6XXX_FLAGS_FAMILY_6390	\
+	(MV88E6XXX_FLAG_ATU |		\
+	 MV88E6XXX_FLAG_EEE |		\
+	 MV88E6XXX_FLAG_EEPROM |	\
+	 MV88E6XXX_FLAG_PORTSTATE |	\
+	 MV88E6XXX_FLAG_PPU_ACTIVE |	\
+	 MV88E6XXX_FLAG_SMI_PHY |	\
+	 MV88E6XXX_FLAG_STU |		\
+	 MV88E6XXX_FLAG_SWITCH_MAC |	\
+	 MV88E6XXX_FLAG_TEMP |		\
+	 MV88E6XXX_FLAG_TEMP_LIMIT |	\
+	 MV88E6XXX_FLAG_VLANTABLE |	\
+	 MV88E6XXX_FLAG_VTU)
+
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+struct mv88e6xxx_info {
+	enum mv88e6xxx_family family;
+	u16 prod_num;
+	const char *name;
+	unsigned int num_databases;
+	unsigned int num_ports;
+	unsigned long flags;
+};
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 struct mv88e6xxx_switch_id {
 	u16 id;
 	char *name;
 };
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 struct mv88e6xxx_atu_entry {
 	u16	fid;
@@ -378,14 +660,37 @@ struct mv88e6xxx_vtu_stu_entry {
 	u8	data[DSA_MAX_PORTS];
 };
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+struct mv88e6xxx_priv_port {
+	struct net_device *bridge_dev;
+};
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+
 struct mv88e6xxx_priv_state {
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	const struct mv88e6xxx_info *info;
+
+	/* The dsa_switch this private structure is related to */
+	struct dsa_switch *ds;
+
+	/* The device this structure is associated to */
+	struct device *dev;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+
 	/* When using multi-chip addressing, this mutex protects
 	 * access to the indirect access registers.  (In single-chip
 	 * mode, this mutex is effectively useless.)
 	 */
 	struct mutex	smi_mutex;
 
-#ifdef CONFIG_NET_DSA_MV88E6XXX_NEED_PPU
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	/* The MII bus and the address on the bus that is used to
+	 * communication with the switch
+	 */
+	struct mii_bus *bus;
+	int sw_addr;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#if (defined(CONFIG_NET_DSA_MV88E6XXX_NEED_PPU) && !defined(CONFIG_SYNO_LSP_ARMADA_16_12)) || defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	/* Handles automatic disabling and re-enabling of the PHY
 	 * polling unit.
 	 */
@@ -393,7 +698,7 @@ struct mv88e6xxx_priv_state {
 	int			ppu_disabled;
 	struct work_struct	ppu_work;
 	struct timer_list	ppu_timer;
-#endif
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	/* This mutex serialises access to the statistics unit.
 	 * Hold this mutex over snapshot + dump sequences.
@@ -411,21 +716,60 @@ struct mv88e6xxx_priv_state {
 	 */
 	struct mutex eeprom_mutex;
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	struct mv88e6xxx_priv_port	ports[DSA_MAX_PORTS];
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	int		id; /* switch product id */
 	int		num_ports;	/* number of switch ports */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	/* A switch may have a GPIO line tied to its reset pin. Parse
+	 * this from the device tree, and use it before performing
+	 * switch soft reset.
+	 */
+	struct gpio_desc *reset;
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	unsigned long port_state_update_mask;
 	u8 port_state[DSA_MAX_PORTS];
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	/* set to size of eeprom if supported by the switch */
+	int		eeprom_len;
+
+	/* Device node for the MDIO bus */
+	struct device_node *mdio_np;
+
+	/* And the MDIO bus itself */
+	struct mii_bus *mdio_bus;
+};
+
+enum stat_type {
+	BANK0,
+	BANK1,
+	PORT,
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct work_struct bridge_work;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 };
 
 struct mv88e6xxx_hw_stat {
 	char string[ETH_GSTRING_LEN];
 	int sizeof_stat;
 	int reg;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	enum stat_type type;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 };
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+static inline bool mv88e6xxx_has(struct mv88e6xxx_priv_state *ps,
+				 unsigned long flags)
+{
+	return (ps->info->flags & flags) == flags;
+}
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 int mv88e6xxx_switch_reset(struct dsa_switch *ds, bool ppu_active);
 char *mv88e6xxx_lookup_name(struct device *host_dev, int sw_addr,
 			    const struct mv88e6xxx_switch_id *table,
@@ -520,5 +864,7 @@ extern struct dsa_switch_driver mv88e6171_switch_driver;
 		if (__ret < 0)						\
 			return __ret;					\
 	})
+
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 #endif

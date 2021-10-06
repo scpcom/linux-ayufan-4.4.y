@@ -1104,7 +1104,11 @@ static int cp2112_probe(struct hid_device *hdev, const struct hid_device_id *id)
 	dev->gc.base			= -1;
 	dev->gc.ngpio			= 8;
 	dev->gc.can_sleep		= 1;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	dev->gc.parent			= &hdev->dev;
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	dev->gc.dev			= &hdev->dev;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	ret = gpiochip_add(&dev->gc);
 	if (ret < 0) {

@@ -32,6 +32,9 @@
 
 #include <soc/realtek/memory.h>
 #include "rtd129x_suspend.h"
+#if defined(MY_DEF_HERE) && defined(MY_DEF_HERE)
+#include "rtd129x_syno_uart1.h"
+#endif /* MY_DEF_HERE && MY_DEF_HERE */
 
 static int suspend_version = 2;
 static unsigned int suspend_context = 0;
@@ -79,33 +82,6 @@ rtk_suspend_shm_func(gpio_wakeup_act2, gpio_wakeup_activity2, GPIO_WAKEUP_ACT2);
 rtk_suspend_shm_func(gpio_output_change_en2, gpio_output_change_enable2, GPIO_OUTPUT_CHANGE_EN2);
 rtk_suspend_shm_func(gpio_output_change_act2, gpio_output_change_activity2, GPIO_OUTPUT_CHANGE_ACT2);
 rtk_suspend_shm_func(timer_sec, audio_reciprocal_timer_sec, AUDIO_RECIPROCAL_TIMER);
-
-#if defined(MY_DEF_HERE)
-#include <linux/serial_reg.h>
-#define SET8N1				0x03
-#define SOFTWARE_SHUTDOWN		0x31
-#define RTK_RSTN_UR1_ADDR		0x98000004
-#define RTK_CLK_EN_UR1_ADDR		0x98000010
-#define RTK_UR1_BASE_ADDR		0x9801b200
-static void clear_recovery_flag(void)
-{
-	u32 data = 0;
-	void __iomem * rstn_ur1 = ioremap(RTK_RSTN_UR1_ADDR, 4);
-	void __iomem * clk_en_ur1 = ioremap(RTK_CLK_EN_UR1_ADDR, 4);
-	void __iomem * base_addr = ioremap(RTK_UR1_BASE_ADDR, 0x100);
-
-	data = __raw_readl(rstn_ur1);
-	data |= (1 << 28);
-	__raw_writel(data, rstn_ur1);
-
-	data = __raw_readl(clk_en_ur1);
-	data |= (1 << 28);
-	__raw_writel(data, clk_en_ur1);
-
-	__raw_writeb(SET8N1 & 0xff, base_addr + (UART_LCR << 2));
-	__raw_writeb(SOFTWARE_SHUTDOWN & 0xff, base_addr + (UART_TX << 2));
-}
-#endif /* MY_DEF_HERE */
 
 static int suspend_mode_stored = 0;
 
@@ -648,9 +624,10 @@ static void rtk_poweroff_to_suspend_prepare(void)
 {
     printk(KERN_INFO "[RTD129x_PM] Power off to Suspend Prepare.\n");
 
-#if defined(MY_DEF_HERE)
-    clear_recovery_flag();
-#endif /* MY_DEF_HERE */
+#if defined(MY_DEF_HERE) && defined(MY_DEF_HERE)
+    syno_uart1_write(SOFTWARE_POWER_LED_BLINK);
+    syno_uart1_write(SOFTWARE_SHUTDOWN); // clear AC recovery flag
+#endif /* MY_DEF_HERE && MY_DEF_HERE */
 
     suspend_mode = SUSPEND_TO_COOLBOOT;
     pm_suspend(PM_SUSPEND_MEM);

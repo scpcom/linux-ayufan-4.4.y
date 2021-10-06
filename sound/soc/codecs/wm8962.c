@@ -3376,7 +3376,11 @@ static void wm8962_init_gpio(struct snd_soc_codec *codec)
 
 	wm8962->gpio_chip = wm8962_template_chip;
 	wm8962->gpio_chip.ngpio = WM8962_MAX_GPIO;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	wm8962->gpio_chip.parent = codec->dev;
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	wm8962->gpio_chip.dev = codec->dev;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	if (pdata->gpio_base)
 		wm8962->gpio_chip.base = pdata->gpio_base;

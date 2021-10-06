@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
 ################################################################################
 #
@@ -7514,7 +7517,11 @@ rtl8168_hw_ephy_config(struct net_device *dev)
                 rtl8168_ephy_write(ioaddr, 0x05, 0x2089);
                 rtl8168_ephy_write(ioaddr, 0x06, 0x5881);
 
+#ifdef MY_DEF_HERE
+                rtl8168_ephy_write(ioaddr, 0x04, 0x854A);
+#else /* MY_DEF_HERE */
                 rtl8168_ephy_write(ioaddr, 0x04, 0x154A);
+#endif /* MY_DEF_HERE */
                 rtl8168_ephy_write(ioaddr, 0x01, 0x068B);
         }
 }
@@ -22571,14 +22578,7 @@ rtl8168_init_board(struct pci_dev *pdev,
         pci_set_master(pdev);
 
         /* ioremap MMIO region */
-#ifdef CONFIG_ARCH_RTD129X
-	if (pdev->bus->number == 0)
-		ioaddr = ioremap(0x9804f000, 1024);
-	else
-		ioaddr = ioremap(0x9803C000, 1024);
-#else
 	ioaddr = ioremap(pci_resource_start(pdev, 2), R8168_REGS_SIZE);
-#endif
         if (ioaddr == NULL) {
 #if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,0)
                 if (netif_msg_probe(tp))
@@ -22634,147 +22634,6 @@ err_out:
 }
 
 #define PCI_DEVICE_SERIAL_NUMBER (0x0164)
-
-static void
-rtl8168_esd_timer(unsigned long __opaque)
-{
-        struct net_device *dev = (struct net_device *)__opaque;
-        struct rtl8168_private *tp = netdev_priv(dev);
-        struct pci_dev *pdev = tp->pci_dev;
-        struct timer_list *timer = &tp->esd_timer;
-        unsigned long timeout = RTL8168_ESD_TIMEOUT;
-        unsigned long flags;
-        u8 cmd;
-        u16 io_base_l;
-        u16 mem_base_l;
-        u16 mem_base_h;
-        u8 ilr;
-        u16 resv_0x1c_h;
-        u16 resv_0x1c_l;
-        u16 resv_0x20_l;
-        u16 resv_0x20_h;
-        u16 resv_0x24_l;
-        u16 resv_0x24_h;
-        u16 resv_0x2c_h;
-        u16 resv_0x2c_l;
-        u32 pci_sn_l;
-        u32 pci_sn_h;
-
-        spin_lock_irqsave(&tp->lock, flags);
-
-        tp->esd_flag = 0;
-#if 0
-        pci_read_config_byte(pdev, PCI_COMMAND, &cmd);
-        if (cmd != tp->pci_cfg_space.cmd) {
-                pci_write_config_byte(pdev, PCI_COMMAND, tp->pci_cfg_space.cmd);
-                tp->esd_flag |= BIT_0;
-        }
-
-        pci_read_config_word(pdev, PCI_BASE_ADDRESS_0, &io_base_l);
-        if (io_base_l != tp->pci_cfg_space.io_base_l) {
-                pci_write_config_word(pdev, PCI_BASE_ADDRESS_0, tp->pci_cfg_space.io_base_l);
-                tp->esd_flag |= BIT_1;
-        }
-
-        pci_read_config_word(pdev, PCI_BASE_ADDRESS_2, &mem_base_l);
-        if (mem_base_l != tp->pci_cfg_space.mem_base_l) {
-                pci_write_config_word(pdev, PCI_BASE_ADDRESS_2, tp->pci_cfg_space.mem_base_l);
-                tp->esd_flag |= BIT_2;
-        }
-
-        pci_read_config_word(pdev, PCI_BASE_ADDRESS_2 + 2, &mem_base_h);
-        if (mem_base_h!= tp->pci_cfg_space.mem_base_h) {
-                pci_write_config_word(pdev, PCI_BASE_ADDRESS_2 + 2, tp->pci_cfg_space.mem_base_h);
-                tp->esd_flag |= BIT_3;
-        }
-
-        pci_read_config_word(pdev, PCI_BASE_ADDRESS_3, &resv_0x1c_l);
-        if (resv_0x1c_l != tp->pci_cfg_space.resv_0x1c_l) {
-                pci_write_config_word(pdev, PCI_BASE_ADDRESS_3, tp->pci_cfg_space.resv_0x1c_l);
-                tp->esd_flag |= BIT_4;
-        }
-
-        pci_read_config_word(pdev, PCI_BASE_ADDRESS_3 + 2, &resv_0x1c_h);
-        if (resv_0x1c_h != tp->pci_cfg_space.resv_0x1c_h) {
-                pci_write_config_word(pdev, PCI_BASE_ADDRESS_3 + 2, tp->pci_cfg_space.resv_0x1c_h);
-                tp->esd_flag |= BIT_5;
-        }
-
-        pci_read_config_word(pdev, PCI_BASE_ADDRESS_4, &resv_0x20_l);
-        if (resv_0x20_l != tp->pci_cfg_space.resv_0x20_l) {
-                pci_write_config_word(pdev, PCI_BASE_ADDRESS_4, tp->pci_cfg_space.resv_0x20_l);
-                tp->esd_flag |= BIT_6;
-        }
-
-        pci_read_config_word(pdev, PCI_BASE_ADDRESS_4 + 2, &resv_0x20_h);
-        if (resv_0x20_h != tp->pci_cfg_space.resv_0x20_h) {
-                pci_write_config_word(pdev, PCI_BASE_ADDRESS_4 + 2, tp->pci_cfg_space.resv_0x20_h);
-                tp->esd_flag |= BIT_7;
-        }
-
-        pci_read_config_word(pdev, PCI_BASE_ADDRESS_5, &resv_0x24_l);
-        if (resv_0x24_l != tp->pci_cfg_space.resv_0x24_l) {
-                pci_write_config_word(pdev, PCI_BASE_ADDRESS_5, tp->pci_cfg_space.resv_0x24_l);
-                tp->esd_flag |= BIT_8;
-        }
-
-        pci_read_config_word(pdev, PCI_BASE_ADDRESS_5 + 2, &resv_0x24_h);
-        if (resv_0x24_h != tp->pci_cfg_space.resv_0x24_h) {
-                pci_write_config_word(pdev, PCI_BASE_ADDRESS_5 + 2, tp->pci_cfg_space.resv_0x24_h);
-                tp->esd_flag |= BIT_9;
-        }
-
-        pci_read_config_byte(pdev, PCI_INTERRUPT_LINE, &ilr);
-        if (ilr != tp->pci_cfg_space.ilr) {
-                pci_write_config_byte(pdev, PCI_INTERRUPT_LINE, tp->pci_cfg_space.ilr);
-                tp->esd_flag |= BIT_10;
-        }
-
-        pci_read_config_word(pdev, PCI_SUBSYSTEM_VENDOR_ID, &resv_0x2c_l);
-        if (resv_0x2c_l != tp->pci_cfg_space.resv_0x2c_l) {
-                pci_write_config_word(pdev, PCI_SUBSYSTEM_VENDOR_ID, tp->pci_cfg_space.resv_0x2c_l);
-                tp->esd_flag |= BIT_11;
-        }
-
-        pci_read_config_word(pdev, PCI_SUBSYSTEM_VENDOR_ID + 2, &resv_0x2c_h);
-        if (resv_0x2c_h != tp->pci_cfg_space.resv_0x2c_h) {
-                pci_write_config_word(pdev, PCI_SUBSYSTEM_VENDOR_ID + 2, tp->pci_cfg_space.resv_0x2c_h);
-                tp->esd_flag |= BIT_12;
-        }
-
-        pci_sn_l = rtl8168_csi_read(tp, PCI_DEVICE_SERIAL_NUMBER);
-        if (pci_sn_l != tp->pci_cfg_space.pci_sn_l) {
-                rtl8168_csi_write(tp, PCI_DEVICE_SERIAL_NUMBER, tp->pci_cfg_space.pci_sn_l);
-                tp->esd_flag |= BIT_13;
-        }
-
-        pci_sn_h = rtl8168_csi_read(tp, PCI_DEVICE_SERIAL_NUMBER + 4);
-        if (pci_sn_h != tp->pci_cfg_space.pci_sn_h) {
-                rtl8168_csi_write(tp, PCI_DEVICE_SERIAL_NUMBER + 4, tp->pci_cfg_space.pci_sn_h);
-                tp->esd_flag |= BIT_14;
-        }
-
-        if (tp->esd_flag != 0) {
-                netif_stop_queue(dev);
-                netif_carrier_off(dev);
-                rtl8168_hw_reset(dev);
-                rtl8168_tx_clear(tp);
-                rtl8168_rx_clear(tp);
-                rtl8168_init_ring(dev);
-                rtl8168_hw_init(dev);
-                rtl8168_powerup_pll(dev);
-                rtl8168_hw_ephy_config(dev);
-                rtl8168_hw_phy_config(dev);
-                rtl8168_hw_config(dev);
-                rtl8168_set_speed(dev, tp->autoneg, tp->speed, tp->duplex);
-                tp->esd_flag = 0;
-        }
-#endif
-        spin_unlock_irqrestore(&tp->lock, flags);
-
-        mod_timer(timer, jiffies + timeout);
-}
-
 static void
 rtl8168_link_timer(unsigned long __opaque)
 {
@@ -24680,6 +24539,12 @@ static void rtl8168_reset_task(struct work_struct *work)
         if (!netif_running(dev))
                 return;
 
+	if ((tp->RxDescArray == NULL) || (tp->TxDescArray == NULL))
+	{
+		printk(KERN_ERR "Tx/Rx Descriptor is NULL, return \n");
+		return;
+	}
+
         rtl8168_wait_for_quiescence(dev);
 
         rtl8168_rx_interrupt(dev, tp, tp->mmio_addr, ~(u32)0);
@@ -24691,7 +24556,7 @@ static void rtl8168_reset_task(struct work_struct *work)
         if (tp->dirty_rx == tp->cur_rx) {
                 rtl8168_rx_clear(tp);
                 rtl8168_init_ring(dev);
-                rtl8168_set_speed(dev, tp->autoneg, tp->speed, tp->duplex);
+//                rtl8168_set_speed(dev, tp->autoneg, tp->speed, tp->duplex);
                 spin_unlock_irqrestore(&tp->lock, flags);
         } else {
                 spin_unlock_irqrestore(&tp->lock, flags);
@@ -24705,6 +24570,84 @@ static void rtl8168_reset_task(struct work_struct *work)
                 }
                 rtl8168_schedule_work(dev, rtl8168_reset_task);
         }
+}
+
+static void
+rtl8168_esd_timer(unsigned long __opaque)
+{
+        struct net_device *dev = (struct net_device *)__opaque;
+        struct rtl8168_private *tp = netdev_priv(dev);
+        struct pci_dev *pdev = tp->pci_dev;
+        struct timer_list *timer = &tp->esd_timer;
+	void __iomem *ioaddr = tp->mmio_addr;
+        unsigned long timeout = RTL8168_ESD_TIMEOUT;
+        unsigned long flags;
+        u8 cmd;
+        u16 io_base_l;
+        u16 mem_base_l;
+        u16 mem_base_h;
+        u8 ilr;
+        u16 resv_0x1c_h;
+        u16 resv_0x1c_l;
+        u16 resv_0x20_l;
+        u16 resv_0x20_h;
+        u16 resv_0x24_l;
+        u16 resv_0x24_h;
+        u16 resv_0x2c_h;
+        u16 resv_0x2c_l;
+        u32 pci_sn_l;
+        u32 pci_sn_h;
+
+        spin_lock_irqsave(&tp->lock, flags);
+
+        tp->esd_flag = 0;
+
+        if(tp->cur_tx > tp->dirty_tx)
+                if(tp->last_dirty_tx==tp->dirty_tx){
+                        if (tp->tx_reset_count>3){
+				netif_stop_queue(dev);
+				netif_carrier_off(dev);
+				rtl8168_hw_reset(dev);
+				rtl8168_schedule_work(dev, rtl8168_reset_task);
+printk(KERN_ERR " BUG! Tx detect Tx hang dirty=%x cur=%x! IMR=%x  ISR=%x\n",tp->dirty_tx,tp->cur_tx,RTL_R16(IntrMask),RTL_R16(IntrStatus));
+				tp->tx_reset_count=0;
+                        }
+                        else
+				tp->tx_reset_count++;
+                }
+                else{
+                        tp->last_dirty_tx=tp->dirty_tx;
+                        tp->tx_reset_count=0;
+                }
+        else{
+                tp->last_dirty_tx=tp->dirty_tx;
+                tp->tx_reset_count=0;
+        }
+
+	if(tp->checkRDU == 1){
+		tp->checkRDU = 0;
+
+		if(tp->last_cur_rx == tp->cur_rx){
+			if(tp->rx_reset_count>3){
+				netif_stop_queue(dev);
+				netif_carrier_off(dev);
+				rtl8168_hw_reset(dev);
+				rtl8168_schedule_work(dev, rtl8168_reset_task);
+printk(KERN_ERR " BUG! Rx detect Rx hang dirty=%x cur=%x! IMR=%x  ISR=%x\n",tp->dirty_rx,tp->cur_rx,RTL_R16(IntrMask),RTL_R16(IntrStatus));
+				tp->rx_reset_count=0;
+			}
+			else
+				tp->rx_reset_count++;
+		}
+		else{
+			tp->last_cur_rx = tp->cur_rx;
+			tp->rx_reset_count=0;
+		}
+	}
+
+        spin_unlock_irqrestore(&tp->lock, flags);
+
+        mod_timer(timer, jiffies + timeout);
 }
 
 static void
@@ -25503,6 +25446,11 @@ static irqreturn_t rtl8168_interrupt(int irq, void *dev_instance)
                                 netif_wake_queue(dev);
                         }
                 }
+
+		// Work around for RDU
+		if (unlikely(status & RxDescUnavail)) {
+			tp->checkRDU = 1;
+		}
 
 #ifdef ENABLE_DASH_SUPPORT
                 if ( tp->DASH ) {

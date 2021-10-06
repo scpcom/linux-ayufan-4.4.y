@@ -9,7 +9,7 @@
 
 export ARCH=${ARCH}
 case "$BUILD_TARGET" in
-	APOLLOLAKE|DENVERTON|KVMX64|REALTEK_RTD1296)
+	APOLLOLAKE|DENVERTON|KVMX64|REALTEK_RTD1296|BROADWELLNK|PURLEY|MARVELL_ARMADA37XX)
 		export CROSS_COMPILE=${ToolChainPrefix64} CC=${CC64}
 		KERNEL_CC=${CC64}
 		;;
@@ -63,6 +63,21 @@ case "$BUILD_TARGET" in
 		KernelTarget=Image.gz
 		MAKE_DTBS="yes"
 		MAKE_DTC_FLAGS="-p 8192"
+		;;
+	BROADWELLNK)
+		KernelImage=${KernelDir}/arch/x86_64/boot/bzImage
+		KernelConfig=synoconfigs/broadwellnk
+		KernelTarget=bzImage
+		;;
+	PURLEY)
+		KernelImage=${KernelDir}/arch/x86_64/boot/bzImage
+		KernelConfig=synoconfigs/purley
+		KernelTarget=bzImage
+		;;
+	MARVELL_ARMADA37XX)
+		KernelImage=${KernelDir}/arch/arm64/boot/Image
+		KernelConfig=synoconfigs/armada37xx
+		KernelTarget=Image.gz
 		;;
 	*)
 		SkipThisProject

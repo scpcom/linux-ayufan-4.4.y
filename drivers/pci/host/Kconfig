@@ -16,6 +16,15 @@ config PCI_MVEBU
 	depends on ARCH_MVEBU || ARCH_DOVE
 	depends on OF
 
+config IGNORE_ASYNC_ABORT
+	bool "Ignore asynchronous abort from configuration access"
+	depends on ARCH_MVEBU && SYNO_LSP_ARMADA_16_12
+	help
+	 Ignore asynchronous abort caused during configuration
+	 access to ports with no endpoint connected.
+	 Warning: This will mask all Serror aborts
+	 regardless of their cause
+
 config PCIE_DW
 	bool
 
@@ -184,5 +193,26 @@ config PCIE2_RTD1295
 	depends on ARCH_RTD129X
 	help
 	  RTD129x PCIe host controller support (slot2).
+
+config PCIE_ARMADA_8K
+	bool "Marvell Armada-8K PCIe controller"
+	depends on ARCH_MVEBU && SYNO_LSP_ARMADA_16_12
+	select PCIE_DW
+	select PCIEPORTBUS
+	help
+	  Say Y here if you want to enable PCIe controller support on Armada-8K
+	  SoCs. The PCIe controller on Armada-8K is based on Designware hardware
+	  and therefore the driver re-uses the Designware core functions to
+	  implement the driver.
+
+config PCI_AARDVARK
+	bool "Aardvark PCIe controller"
+	depends on ARCH_MVEBU && ARM64 && SYNO_LSP_ARMADA_16_12
+	depends on OF
+	depends on PCI_MSI_IRQ_DOMAIN
+	help
+	 Add support for Aardvark 64bit PCIe Host Controller. This
+	 controller is part of the South Bridge of the Marvel Armada
+	 3700 SoC.
 
 endmenu

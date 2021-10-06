@@ -41,8 +41,10 @@ config ION_POOL_CACHE_POLICY
 	  Choose this option if need to explicity set cache policy of the
 	  pages in the page pool.
 
+if SYNO_LSP_RTD129X
 config ION_RTK_PHOENIX
 	tristate "Ion for RTK Phoenix"
-	depends on ION && SYNO_RTD1296
+	depends on ION
 	help
 	  Choose this option if you wish to use ion on Realtek Phoenix.
+endif # SYNO_LSP_RTD129X

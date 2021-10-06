@@ -267,6 +267,10 @@ static int ecryptfs_i_size_read(struct dentry *dentry, struct inode *inode)
 	if (mount_crypt_stat->flags & ECRYPTFS_GLOBAL_FAST_LOOKUP_ENABLED) {
 		rc = ecryptfs_read_and_validate_xattr_region(dentry, inode);
 		if (rc) {
+			if (rc == -EOPNOTSUPP) {
+				printk(KERN_WARNING "%s: user xattr not supported, turn off FAST_LOOKUP", __func__);
+				mount_crypt_stat->flags &= ~ECRYPTFS_GLOBAL_FAST_LOOKUP_ENABLED;
+			}
 			rc = ecryptfs_read_and_validate_header_region(inode);
 		}
 		ecryptfs_put_lower_file(inode);
@@ -659,7 +663,11 @@ static const char *ecryptfs_follow_link(struct dentry *dentry, void **cookie)
 	return *cookie = buf;
 }
 
+#ifdef MY_ABC_HERE
+loff_t
+#else
 static loff_t
+#endif  
 upper_size_to_lower_size(struct ecryptfs_crypt_stat *crypt_stat,
 			 loff_t upper_size)
 {

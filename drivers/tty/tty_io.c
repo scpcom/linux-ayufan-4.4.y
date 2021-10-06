@@ -369,6 +369,9 @@ static const struct file_operations hung_up_tty_fops = {
 };
 
 static DEFINE_SPINLOCK(redirect_lock);
+#ifdef CONFIG_SYNO_TTY_COMMAND
+static DEFINE_SPINLOCK(ttyS1_lock);
+#endif  
 static struct file *redirect;
 
 void proc_clear_tty(struct task_struct *p)

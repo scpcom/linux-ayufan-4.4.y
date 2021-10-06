@@ -93,7 +93,7 @@ static struct fsg_module_parameters mod_data = {
 
 static unsigned int fsg_num_buffers = CONFIG_USB_GADGET_STORAGE_NUM_BUFFERS;
 
-#else
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 /*
  * Number of buffers we will use.
@@ -110,7 +110,11 @@ static void msg_cleanup(void);
 
 static int msg_thread_exits(struct fsg_common *common)
 {
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+//do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	msg_cleanup();
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	return 0;
 }
 

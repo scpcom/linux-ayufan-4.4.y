@@ -169,8 +169,13 @@ static int bcm7xxx_28nm_config_init(struct phy_device *phydev)
 	u8 patch = PHY_BRCM_7XXX_PATCH(phydev->dev_flags);
 	int ret = 0;
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	pr_info_once("%s: %s PHY revision: 0x%02x, patch: %d\n",
+		     phydev_name(phydev), phydev->drv->name, rev, patch);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	pr_info_once("%s: %s PHY revision: 0x%02x, patch: %d\n",
 		     dev_name(&phydev->dev), phydev->drv->name, rev, patch);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	/* Dummy read to a register to workaround an issue upon reset where the
 	 * internal inverter may not allow the first MDIO transaction to pass
@@ -312,6 +317,21 @@ static int bcm7xxx_dummy_config_init(struct phy_device *phydev)
 	return 0;
 }
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#define BCM7XXX_28NM_GPHY(_oui, _name)					\
+{									\
+	.phy_id		= (_oui),					\
+	.phy_id_mask	= 0xfffffff0,					\
+	.name		= _name,					\
+	.features	= PHY_GBIT_FEATURES |				\
+			  SUPPORTED_Pause | SUPPORTED_Asym_Pause,	\
+	.flags		= PHY_IS_INTERNAL,				\
+	.config_init	= bcm7xxx_28nm_config_init,			\
+	.config_aneg	= genphy_config_aneg,				\
+	.read_status	= genphy_read_status,				\
+	.resume		= bcm7xxx_28nm_resume,				\
+}
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 #define BCM7XXX_28NM_GPHY(_oui, _name)					\
 {									\
 	.phy_id		= (_oui),					\
@@ -326,6 +346,7 @@ static int bcm7xxx_dummy_config_init(struct phy_device *phydev)
 	.resume		= bcm7xxx_28nm_resume,				\
 	.driver		= { .owner = THIS_MODULE },			\
 }
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 static struct phy_driver bcm7xxx_driver[] = {
 	BCM7XXX_28NM_GPHY(PHY_ID_BCM7250, "Broadcom BCM7250"),
@@ -346,7 +367,11 @@ static struct phy_driver bcm7xxx_driver[] = {
 	.read_status    = genphy_read_status,
 	.suspend        = bcm7xxx_suspend,
 	.resume         = bcm7xxx_config_init,
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+//do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	.driver         = { .owner = THIS_MODULE },
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 }, {
 	.phy_id         = PHY_ID_BCM7429,
 	.phy_id_mask    = 0xfffffff0,
@@ -359,7 +384,11 @@ static struct phy_driver bcm7xxx_driver[] = {
 	.read_status    = genphy_read_status,
 	.suspend        = bcm7xxx_suspend,
 	.resume         = bcm7xxx_config_init,
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+//do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	.driver         = { .owner = THIS_MODULE },
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 }, {
 	.phy_id		= PHY_BCM_OUI_4,
 	.phy_id_mask	= 0xffff0000,
@@ -372,7 +401,11 @@ static struct phy_driver bcm7xxx_driver[] = {
 	.read_status	= genphy_read_status,
 	.suspend	= bcm7xxx_suspend,
 	.resume		= bcm7xxx_config_init,
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+//do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	.driver		= { .owner = THIS_MODULE },
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 }, {
 	.phy_id		= PHY_BCM_OUI_5,
 	.phy_id_mask	= 0xffffff00,
@@ -385,7 +418,11 @@ static struct phy_driver bcm7xxx_driver[] = {
 	.read_status	= genphy_read_status,
 	.suspend	= bcm7xxx_suspend,
 	.resume		= bcm7xxx_config_init,
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+//do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	.driver		= { .owner = THIS_MODULE },
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 } };
 
 static struct mdio_device_id __maybe_unused bcm7xxx_tbl[] = {

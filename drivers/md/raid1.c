@@ -22,8 +22,12 @@
 
 static int max_queued_requests = 1024;
 
+#ifdef MY_ABC_HERE
+static void allow_barrier(struct r1conf *conf);
+#else  
 static void allow_barrier(struct r1conf *conf, sector_t start_next_window,
 			  sector_t bi_sector);
+#endif  
 static void lower_barrier(struct r1conf *conf);
 
 #ifdef MY_ABC_HERE
@@ -212,8 +216,11 @@ static void call_bio_endio(struct r1bio *r1_bio)
 	struct bio *bio = r1_bio->master_bio;
 	int done;
 	struct r1conf *conf = r1_bio->mddev->private;
+#ifdef MY_ABC_HERE
+#else  
 	sector_t start_next_window = r1_bio->start_next_window;
 	sector_t bi_sector = bio->bi_iter.bi_sector;
+#endif  
 
 	if (bio->bi_phys_segments) {
 		unsigned long flags;
@@ -221,8 +228,11 @@ static void call_bio_endio(struct r1bio *r1_bio)
 		bio->bi_phys_segments--;
 		done = (bio->bi_phys_segments == 0);
 		spin_unlock_irqrestore(&conf->device_lock, flags);
+#ifdef MY_ABC_HERE
+#else  
 		 
 		wake_up(&conf->wait_barrier);
+#endif  
 	} else
 		done = 1;
 
@@ -232,7 +242,11 @@ static void call_bio_endio(struct r1bio *r1_bio)
 	if (done) {
 		bio_endio(bio);
 		 
+#ifdef MY_ABC_HERE
+		allow_barrier(conf);
+#else  
 		allow_barrier(conf, start_next_window, bi_sector);
+#endif  
 	}
 }
 
@@ -684,13 +698,21 @@ static void raise_barrier(struct r1conf *conf, sector_t sector_nr)
 
 	conf->barrier++;
 	conf->next_resync = sector_nr;
-
+#ifdef MY_ABC_HERE
+	 
+#else  
+	 
+#endif  
 	wait_event_lock_irq(conf->wait_barrier,
 			    !conf->array_frozen &&
+#ifdef MY_ABC_HERE
+			    !conf->nr_pending && conf->barrier < RESYNC_DEPTH,
+#else  
 			    conf->barrier < RESYNC_DEPTH &&
 			    conf->current_window_requests == 0 &&
 			    (conf->start_next_window >=
 			     conf->next_resync + RESYNC_SECTORS),
+#endif  
 			    conf->resync_lock);
 
 	conf->nr_pending++;
@@ -708,6 +730,8 @@ static void lower_barrier(struct r1conf *conf)
 	wake_up(&conf->wait_barrier);
 }
 
+#ifdef MY_ABC_HERE
+#else  
 static bool need_to_wait_for_sync(struct r1conf *conf, struct bio *bio)
 {
 	bool wait = false;
@@ -726,26 +750,42 @@ static bool need_to_wait_for_sync(struct r1conf *conf, struct bio *bio)
 
 	return wait;
 }
+#endif  
 
+#ifdef MY_ABC_HERE
+static void wait_barrier(struct r1conf *conf)
+{
+#else  
 static sector_t wait_barrier(struct r1conf *conf, struct bio *bio)
 {
 	sector_t sector = 0;
+#endif  
 
 	spin_lock_irq(&conf->resync_lock);
+#ifdef MY_ABC_HERE
+	if (conf->barrier) {
+#else  
 	if (need_to_wait_for_sync(conf, bio)) {
+#endif  
 		conf->nr_waiting++;
 		 
 		wait_event_lock_irq(conf->wait_barrier,
 				    !conf->array_frozen &&
 				    (!conf->barrier ||
+#ifdef MY_ABC_HERE
+				     (conf->nr_pending &&
+#else  
 				     ((conf->start_next_window <
 				       conf->next_resync + RESYNC_SECTORS) &&
+#endif  
 				      current->bio_list &&
 				      !bio_list_empty(current->bio_list))),
 				    conf->resync_lock);
 		conf->nr_waiting--;
 	}
 
+#ifdef MY_ABC_HERE
+#else  
 	if (bio && bio_data_dir(bio) == WRITE) {
 		if (bio->bi_iter.bi_sector >= conf->next_resync) {
 			if (conf->start_next_window == MaxSector)
@@ -761,19 +801,29 @@ static sector_t wait_barrier(struct r1conf *conf, struct bio *bio)
 			sector = conf->start_next_window;
 		}
 	}
+#endif  
 
 	conf->nr_pending++;
 	spin_unlock_irq(&conf->resync_lock);
+#ifdef MY_ABC_HERE
+#else  
 	return sector;
+#endif  
 }
 
+#ifdef MY_ABC_HERE
+static void allow_barrier(struct r1conf *conf)
+#else  
 static void allow_barrier(struct r1conf *conf, sector_t start_next_window,
 			  sector_t bi_sector)
+#endif  
 {
 	unsigned long flags;
 
 	spin_lock_irqsave(&conf->resync_lock, flags);
 	conf->nr_pending--;
+#ifdef MY_ABC_HERE
+#else  
 	if (start_next_window) {
 		if (start_next_window == conf->start_next_window) {
 			if (conf->start_next_window + NEXT_NORMALIO_DISTANCE
@@ -795,6 +845,7 @@ static void allow_barrier(struct r1conf *conf, sector_t start_next_window,
 				conf->start_next_window = MaxSector;
 		}
 	}
+#endif  
 	spin_unlock_irqrestore(&conf->resync_lock, flags);
 	wake_up(&conf->wait_barrier);
 }
@@ -916,7 +967,10 @@ static void make_request(struct mddev *mddev, struct bio * bio)
 	int first_clone;
 	int sectors_handled;
 	int max_sectors;
+#ifdef MY_ABC_HERE
+#else  
 	sector_t start_next_window;
+#endif  
 
 #ifdef MY_ABC_HERE
 #ifdef MY_ABC_HERE
@@ -928,6 +982,7 @@ static void make_request(struct mddev *mddev, struct bio * bio)
 #ifdef  MY_ABC_HERE
 		syno_flashcache_return_error(bio);
 #else
+		bio->bi_error = -EIO;
 		bio_endio(bio);
 #endif   
 		return;
@@ -959,7 +1014,11 @@ static void make_request(struct mddev *mddev, struct bio * bio)
 		finish_wait(&conf->wait_barrier, &w);
 	}
 
+#ifdef MY_ABC_HERE
+	wait_barrier(conf);
+#else  
 	start_next_window = wait_barrier(conf, bio);
+#endif  
 
 	bitmap = mddev->bitmap;
 
@@ -995,7 +1054,10 @@ read_again:
 				   atomic_read(&bitmap->behind_writes) == 0);
 		}
 		r1_bio->read_disk = rdisk;
+#ifdef MY_ABC_HERE
+#else  
 		r1_bio->start_next_window = 0;
+#endif  
 
 		read_bio = bio_clone_mddev(bio, GFP_NOIO, mddev);
 		bio_trim(read_bio, r1_bio->sector - bio->bi_iter.bi_sector,
@@ -1046,7 +1108,10 @@ read_again:
 	 
 	disks = conf->raid_disks * 2;
  retry_write:
+#ifdef MY_ABC_HERE
+#else  
 	r1_bio->start_next_window = start_next_window;
+#endif  
 	blocked_rdev = NULL;
 	rcu_read_lock();
 	max_sectors = r1_bio->sectors;
@@ -1102,14 +1167,24 @@ read_again:
 	if (unlikely(blocked_rdev)) {
 		 
 		int j;
+#ifdef MY_ABC_HERE
+#else  
 		sector_t old = start_next_window;
+#endif  
 
 		for (j = 0; j < i; j++)
 			if (r1_bio->bios[j])
 				rdev_dec_pending(conf->mirrors[j].rdev, mddev);
 		r1_bio->state = 0;
+#ifdef MY_ABC_HERE
+		allow_barrier(conf);
+#else  
 		allow_barrier(conf, start_next_window, bio->bi_iter.bi_sector);
+#endif  
 		md_wait_for_blocked_rdev(blocked_rdev, mddev);
+#ifdef MY_ABC_HERE
+		wait_barrier(conf);
+#else  
 		start_next_window = wait_barrier(conf, bio);
 		 
 		if (bio->bi_phys_segments && old &&
@@ -1117,6 +1192,7 @@ read_again:
 			 
 			wait_event(conf->wait_barrier,
 				   bio->bi_phys_segments == 1);
+#endif  
 		goto retry_write;
 	}
 
@@ -1398,12 +1474,19 @@ static void print_conf(struct r1conf *conf)
 
 static void close_sync(struct r1conf *conf)
 {
+#ifdef MY_ABC_HERE
+	wait_barrier(conf);
+	allow_barrier(conf);
+#else  
 	wait_barrier(conf, NULL);
 	allow_barrier(conf, 0, 0);
+#endif  
 
 	mempool_destroy(conf->r1buf_pool);
 	conf->r1buf_pool = NULL;
 
+#ifdef MY_ABC_HERE
+#else  
 	spin_lock_irq(&conf->resync_lock);
 	conf->next_resync = MaxSector - 2 * NEXT_NORMALIO_DISTANCE;
 	conf->start_next_window = MaxSector;
@@ -1411,6 +1494,7 @@ static void close_sync(struct r1conf *conf)
 		conf->next_window_requests;
 	conf->next_window_requests = 0;
 	spin_unlock_irq(&conf->resync_lock);
+#endif  
 }
 
 static int raid1_spare_active(struct mddev *mddev)
@@ -2712,8 +2796,11 @@ static struct r1conf *setup_conf(struct mddev *mddev)
 	conf->pending_count = 0;
 	conf->recovery_disabled = mddev->recovery_disabled - 1;
 
+#ifdef MY_ABC_HERE
+#else  
 	conf->start_next_window = MaxSector;
 	conf->current_window_requests = conf->next_window_requests = 0;
+#endif  
 
 	err = -EIO;
 	for (i = 0; i < conf->raid_disks * 2; i++) {

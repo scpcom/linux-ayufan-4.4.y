@@ -89,7 +89,11 @@ static int bcm47xxnflash_ops_bcm4706_poll(struct bcma_drv_cc *cc)
 static void bcm47xxnflash_ops_bcm4706_read(struct mtd_info *mtd, uint8_t *buf,
 					   int len)
 {
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	struct nand_chip *nand_chip = mtd_to_nand(mtd);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct nand_chip *nand_chip = (struct nand_chip *)mtd->priv;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct bcm47xxnflash *b47n = (struct bcm47xxnflash *)nand_chip->priv;
 
 	u32 ctlcode;
@@ -139,7 +143,11 @@ static void bcm47xxnflash_ops_bcm4706_read(struct mtd_info *mtd, uint8_t *buf,
 static void bcm47xxnflash_ops_bcm4706_write(struct mtd_info *mtd,
 					    const uint8_t *buf, int len)
 {
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	struct nand_chip *nand_chip = mtd_to_nand(mtd);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct nand_chip *nand_chip = (struct nand_chip *)mtd->priv;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct bcm47xxnflash *b47n = (struct bcm47xxnflash *)nand_chip->priv;
 	struct bcma_drv_cc *cc = b47n->cc;
 
@@ -173,7 +181,11 @@ static void bcm47xxnflash_ops_bcm4706_write(struct mtd_info *mtd,
 static void bcm47xxnflash_ops_bcm4706_cmd_ctrl(struct mtd_info *mtd, int cmd,
 					       unsigned int ctrl)
 {
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	struct nand_chip *nand_chip = mtd_to_nand(mtd);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct nand_chip *nand_chip = (struct nand_chip *)mtd->priv;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct bcm47xxnflash *b47n = (struct bcm47xxnflash *)nand_chip->priv;
 	u32 code = 0;
 
@@ -199,7 +211,11 @@ static void bcm47xxnflash_ops_bcm4706_select_chip(struct mtd_info *mtd,
 
 static int bcm47xxnflash_ops_bcm4706_dev_ready(struct mtd_info *mtd)
 {
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	struct nand_chip *nand_chip = mtd_to_nand(mtd);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct nand_chip *nand_chip = (struct nand_chip *)mtd->priv;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct bcm47xxnflash *b47n = (struct bcm47xxnflash *)nand_chip->priv;
 
 	return !!(bcma_cc_read32(b47n->cc, BCMA_CC_NFLASH_CTL) & NCTL_READY);
@@ -216,7 +232,11 @@ static void bcm47xxnflash_ops_bcm4706_cmdfunc(struct mtd_info *mtd,
 					      unsigned command, int column,
 					      int page_addr)
 {
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	struct nand_chip *nand_chip = mtd_to_nand(mtd);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct nand_chip *nand_chip = (struct nand_chip *)mtd->priv;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct bcm47xxnflash *b47n = (struct bcm47xxnflash *)nand_chip->priv;
 	struct bcma_drv_cc *cc = b47n->cc;
 	u32 ctlcode;
@@ -312,7 +332,11 @@ static void bcm47xxnflash_ops_bcm4706_cmdfunc(struct mtd_info *mtd,
 
 static u8 bcm47xxnflash_ops_bcm4706_read_byte(struct mtd_info *mtd)
 {
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	struct nand_chip *nand_chip = mtd_to_nand(mtd);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct nand_chip *nand_chip = (struct nand_chip *)mtd->priv;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct bcm47xxnflash *b47n = (struct bcm47xxnflash *)nand_chip->priv;
 	struct bcma_drv_cc *cc = b47n->cc;
 	u32 tmp = 0;
@@ -341,7 +365,11 @@ static u8 bcm47xxnflash_ops_bcm4706_read_byte(struct mtd_info *mtd)
 static void bcm47xxnflash_ops_bcm4706_read_buf(struct mtd_info *mtd,
 					       uint8_t *buf, int len)
 {
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	struct nand_chip *nand_chip = mtd_to_nand(mtd);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct nand_chip *nand_chip = (struct nand_chip *)mtd->priv;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct bcm47xxnflash *b47n = (struct bcm47xxnflash *)nand_chip->priv;
 
 	switch (b47n->curr_command) {
@@ -357,7 +385,11 @@ static void bcm47xxnflash_ops_bcm4706_read_buf(struct mtd_info *mtd,
 static void bcm47xxnflash_ops_bcm4706_write_buf(struct mtd_info *mtd,
 						const uint8_t *buf, int len)
 {
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	struct nand_chip *nand_chip = mtd_to_nand(mtd);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct nand_chip *nand_chip = (struct nand_chip *)mtd->priv;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct bcm47xxnflash *b47n = (struct bcm47xxnflash *)nand_chip->priv;
 
 	switch (b47n->curr_command) {

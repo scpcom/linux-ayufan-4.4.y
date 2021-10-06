@@ -51,7 +51,7 @@ config SYNO_X86_PINCTRL_GPIO
 config SYNO_RTD_PINCTRL_GPIO
        bool "RTD GPIO Control With Pinctrl Subsystem"
        default y
-       depends on SYNO_RTD1296
+       depends on SYNO_RTD129X
        select PINCTRL
 
 config SYNO_X86_PINCTRL_CALC_GPIOBASE
@@ -94,10 +94,20 @@ config SYNO_ISCSI_DEVICE
 	default y
 	depends on SYNO_FIXED_DISK_NAME
 
+config SYNO_ISCSI_LOOPBACK_DEVICE
+	bool "Loopback Iscsi device name"
+	default y
+	depends on SYNO_FIXED_DISK_NAME
+
 config SYNO_ISCSI_DEVICE_PREFIX
 	string "The prefix of iSCSI device"
 	default "isd"
 	depends on SYNO_ISCSI_DEVICE
+
+config SYNO_ISCSI_REVERT_SUPPORT_PFMALLOC
+	bool "Revert iscsi initiator support PF_MALLOC"
+	default y
+	depends on ISCSI_TCP
 
 config SYNO_SATA_DEVICE_PREFIX
 	string "The prefix of sata device"
@@ -126,7 +136,7 @@ config SYNO_DISPLAY_CPUINFO
 config SYNO_GRANTLEY_MAX_CPU_NUM
 	int "Support display CPU Number Information"
 	default 2
-	depends on SYNO_GRANTLEY && SYNO_DISPLAY_CPUINFO
+	depends on (SYNO_GRANTLEY || SYNO_PURLEY) && SYNO_DISPLAY_CPUINFO
 
 config SYNO_IT87_SUPERIO_RW
 	bool "Support IT87 super IO pins r/w"
@@ -161,6 +171,14 @@ config SYNO_GPIO
 
 config SYNO_PSTATE_CALC
 	bool "Compare P-state ratio only"
+	default y
+
+config SYNO_DMA_COHERENT_POOL_1M
+	bool "increase DMA coherent pool from 256K to 1M"
+	default n
+
+config SYNO_DISK_EH_FLAG
+	bool "report to userspace if kernel is in SCSI error handling"
 	default y
 
 endmenu #System Features
@@ -247,5 +265,9 @@ config SYNO_SOFTLOCKUP_THRESH_EXTENSION
     bool "Extend soft lockup threshold."
 	default y
 	depends on LOCKUP_DETECTOR
+
+config SYNO_DEVICES_LIST_REORDER
+	bool "Rollback devices_kset list order to the same as kernel 3.10"
+	default y
 
 endmenu #Kernel Core Enhancements

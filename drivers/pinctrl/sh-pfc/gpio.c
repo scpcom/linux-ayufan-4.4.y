@@ -246,7 +246,11 @@ static int gpio_pin_setup(struct sh_pfc_chip *chip)
 	gc->to_irq = gpio_pin_to_irq;
 
 	gc->label = pfc->info->name;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	gc->parent = pfc->dev;
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	gc->dev = pfc->dev;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	gc->owner = THIS_MODULE;
 	gc->base = 0;
 	gc->ngpio = pfc->nr_gpio_pins;

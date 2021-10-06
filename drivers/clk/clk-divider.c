@@ -28,7 +28,11 @@
  * parent - fixed parent.  No clk_set_parent support
  */
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+//do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 #define to_clk_divider(_hw) container_of(_hw, struct clk_divider, hw)
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 #define div_mask(width)	((1 << (width)) - 1)
 

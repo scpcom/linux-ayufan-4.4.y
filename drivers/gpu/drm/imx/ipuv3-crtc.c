@@ -19,7 +19,6 @@
 #include <linux/platform_device.h>
 #include <drm/drmP.h>
 #include <drm/drm_crtc_helper.h>
-#include <linux/fb.h>
 #include <linux/clk.h>
 #include <linux/errno.h>
 #include <drm/drm_gem_cma_helper.h>

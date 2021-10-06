@@ -2451,6 +2451,7 @@ void syno_flashcache_return_error(struct bio *bio)
 		bio->bi_error = -EIO;
 		bio_endio(bio);
 	} else {
+		bio->bi_error = -EIO;
 		bio_endio(bio);
 	}
 }

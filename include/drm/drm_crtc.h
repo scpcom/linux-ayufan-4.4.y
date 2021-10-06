@@ -35,6 +35,7 @@
 #include <uapi/drm/drm_mode.h>
 #include <uapi/drm/drm_fourcc.h>
 #include <drm/drm_modeset_lock.h>
+#include <drm/drm_rect.h>
 
 struct drm_device;
 struct drm_mode_set;
@@ -83,14 +84,15 @@ static inline uint64_t I642U64(int64_t val)
  * specified amount in degrees in counter clockwise direction. DRM_REFLECT_X and
  * DRM_REFLECT_Y reflects the image along the specified axis prior to rotation
  */
-#define DRM_ROTATE_MASK 0x0f
-#define DRM_ROTATE_0	0
-#define DRM_ROTATE_90	1
-#define DRM_ROTATE_180	2
-#define DRM_ROTATE_270	3
-#define DRM_REFLECT_MASK (~DRM_ROTATE_MASK)
-#define DRM_REFLECT_X	4
-#define DRM_REFLECT_Y	5
+#define DRM_ROTATE_0	BIT(0)
+#define DRM_ROTATE_90	BIT(1)
+#define DRM_ROTATE_180	BIT(2)
+#define DRM_ROTATE_270	BIT(3)
+#define DRM_ROTATE_MASK (DRM_ROTATE_0   | DRM_ROTATE_90 | \
+			 DRM_ROTATE_180 | DRM_ROTATE_270)
+#define DRM_REFLECT_X	BIT(4)
+#define DRM_REFLECT_Y	BIT(5)
+#define DRM_REFLECT_MASK (DRM_REFLECT_X | DRM_REFLECT_Y)
 
 enum drm_connector_force {
 	DRM_FORCE_UNSPECIFIED,
@@ -1195,7 +1197,7 @@ struct drm_encoder_funcs {
  * @head: list management
  * @base: base KMS object
  * @name: human readable name, can be overwritten by the driver
- * @encoder_type: one of the %DRM_MODE_ENCODER_<foo> types in drm_mode.h
+ * @encoder_type: one of the DRM_MODE_ENCODER_<foo> types in drm_mode.h
  * @possible_crtcs: bitmask of potential CRTC bindings
  * @possible_clones: bitmask of potential sibling encoders for cloning
  * @crtc: currently bound CRTC
@@ -1248,7 +1250,7 @@ struct drm_encoder {
  * @head: list management
  * @base: base KMS object
  * @name: human readable name, can be overwritten by the driver
- * @connector_type: one of the %DRM_MODE_CONNECTOR_<foo> types from drm_mode.h
+ * @connector_type: one of the DRM_MODE_CONNECTOR_<foo> types from drm_mode.h
  * @connector_type_id: index into connector type enum
  * @interlace_allowed: can this connector handle interlaced modes?
  * @doublescan_allowed: can this connector handle doublescan?
@@ -1261,11 +1263,11 @@ struct drm_encoder {
  * @funcs: connector control functions
  * @edid_blob_ptr: DRM property containing EDID if present
  * @properties: property tracking for this connector
- * @polled: a %DRM_CONNECTOR_POLL_<foo> value for core driven polling
+ * @polled: a DRM_CONNECTOR_POLL_<foo> value for core driven polling
  * @dpms: current dpms state
  * @helper_private: mid-layer private data
  * @cmdline_mode: mode line parsed from the kernel cmdline for this connector
- * @force: a %DRM_FORCE_<foo> state for forced mode sets
+ * @force: a DRM_FORCE_<foo> state for forced mode sets
  * @override_edid: has the EDID been overwritten through debugfs for testing?
  * @encoder_ids: valid encoders for this connector
  * @encoder: encoder driving this connector, if any
@@ -1414,6 +1416,9 @@ struct drm_connector {
  * @zpos: priority of the given plane on crtc (optional)
  * @normalized_zpos: normalized value of zpos: unique, range from 0 to N-1
  *	where N is the number of active planes for given crtc
+ * @src: clipped source coordinates of the plane (in 16.16)
+ * @dst: clipped destination coordinates of the plane
+ * @visible: visibility of the plane
  * @state: backpointer to global drm_atomic_state
  */
 struct drm_plane_state {
@@ -1437,6 +1442,15 @@ struct drm_plane_state {
 	/* Plane zpos */
 	unsigned int zpos;
 	unsigned int normalized_zpos;
+
+	/* Clipped coordinates */
+	struct drm_rect src, dst;
+
+	/*
+	 * Is the plane actually visible? Can be false even
+	 * if fb!=NULL and crtc!=NULL, due to clipping.
+	 */
+	bool visible;
 
 	struct drm_atomic_state *state;
 };

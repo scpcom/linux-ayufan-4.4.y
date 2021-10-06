@@ -163,6 +163,14 @@
 				clocks = <&coreclk 1>;
 			};
 
+			coredivclk: corediv-clock@18740 {
+				compatible = "marvell,armada-370-corediv-clock";
+				reg = <0x18740 0xc>;
+				#clock-cells = <1>;
+				clocks = <&mainpll>;
+				clock-output-names = "nand";
+			};
+
 			interrupt-controller@20a00 {
 			      reg = <0x20a00 0x2d0>, <0x21070 0x58>;
 			};
@@ -253,6 +261,24 @@
 				marvell,crypto-sram-size = <0x800>;
 			};
 
+			bm: bm@c0000 {
+				compatible = "marvell,armada-380-neta-bm";
+				reg = <0xc0000 0xac>;
+				clocks = <&gateclk 13>;
+				internal-mem = <&bm_bppi>;
+				status = "disabled";
+			};
+
+			tdm@b0000 {
+				compatible = "marvell,armada-xp-tdm";
+				reg = <0xb0000 0x9000>;
+				reg-names = "tdm_regs";
+				interrupts = <56>;
+				clocks = <&gateclk 25>;
+				clock-names = "gateclk";
+				status = "disabled";
+			};
+
 			xor@f0900 {
 				compatible = "marvell,orion-xor";
 				reg = <0xF0900 0x100
@@ -290,6 +316,17 @@
 			#address-cells = <1>;
 			#size-cells = <1>;
 			ranges = <0 MBUS_ID(0x09, 0x05) 0 0x800>;
+		};
+
+		bm_bppi: bm-bppi {
+			compatible = "mmio-sram";
+			reg = <MBUS_ID(0x0c, 0x04) 0 0x100000>;
+			ranges = <0 MBUS_ID(0x0c, 0x04) 0 0x100000>;
+			#address-cells = <1>;
+			#size-cells = <1>;
+			clocks = <&gateclk 13>;
+			no-memory-wc;
+			status = "disabled";
 		};
 	};
 
@@ -331,6 +368,14 @@
 		marvell,function = "ge1";
 	};
 
+	tdm_pins: tdm-pins {
+		marvell,pins =
+		     "mpp24", "mpp25", "mpp26", "mpp27",
+		     "mpp28", "mpp29", "mpp30", "mpp31",
+		     "mpp32", "mpp33", "mpp34", "mpp35";
+		marvell,function = "tdm";
+	};
+
 	sdio_pins: sdio-pins {
 		marvell,pins = "mpp30", "mpp31", "mpp32",
 			       "mpp33", "mpp34", "mpp35";
@@ -338,8 +383,8 @@
 	};
 
 	spi0_pins: spi0-pins {
-		marvell,pins = "mpp36", "mpp37",
-			       "mpp38", "mpp39";
+		marvell,pins = "mpp36", "mpp37", "mpp38",
+			       "mpp39", "mpp40", "mpp41";
 		marvell,function = "spi0";
 	};
 

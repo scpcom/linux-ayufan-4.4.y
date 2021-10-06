@@ -74,6 +74,8 @@ static struct kmem_cache *mnt_cache __read_mostly;
 #ifdef MY_ABC_HERE
  
 DECLARE_RWSEM(namespace_sem);
+
+static DEFINE_MUTEX(namespace_mutex);
 #else
 static DECLARE_RWSEM(namespace_sem);
 #endif  
@@ -1005,6 +1007,9 @@ static void *m_start(struct seq_file *m, loff_t *pos)
 {
 	struct proc_mounts *p = m->private;
 
+#ifdef MY_ABC_HERE
+	mutex_lock(&namespace_mutex);
+#endif  
 	down_read(&namespace_sem);
 	if (p->cached_event == p->ns->event) {
 		void *v = p->cached_mount;
@@ -1034,6 +1039,9 @@ static void *m_next(struct seq_file *m, void *v, loff_t *pos)
 static void m_stop(struct seq_file *m, void *v)
 {
 	up_read(&namespace_sem);
+#ifdef MY_ABC_HERE
+	mutex_unlock(&namespace_mutex);
+#endif  
 }
 
 static int m_show(struct seq_file *m, void *v)
@@ -1097,6 +1105,9 @@ static void namespace_unlock(void)
 	hlist_move_list(&unmounted, &head);
 
 	up_write(&namespace_sem);
+#ifdef MY_ABC_HERE
+	mutex_unlock(&namespace_mutex);
+#endif  
 
 	if (likely(hlist_empty(&head)))
 		return;
@@ -1108,6 +1119,9 @@ static void namespace_unlock(void)
 
 static inline void namespace_lock(void)
 {
+#ifdef MY_ABC_HERE
+	mutex_lock(&namespace_mutex);
+#endif  
 	down_write(&namespace_sem);
 }
 

@@ -71,6 +71,18 @@ config SYNO_ARM64_CPU_MODELNAME_DISPLAY
 	default y
 	depends on ARM64
 
+config SYNO_SKIP_DETACH_DVB_USB_DIB0700
+	bool "skip dvb_detach for dvb-usb-dib0700 driver"
+	default y
+
+config SYNO_SKIP_UNUSED_ERROR_LOG_PCTV452E
+	bool "skip unused error log from pctv452e driver"
+	default y
+
+config SYNO_DISABL_HAVE_ARCH_HUGE_VMAP
+	bool "diable HAVE_ARCH_HUGE_VMAP in 4.4 kernel"
+	default n
+
 endmenu #MISC Features
 
 menu "Encryption"

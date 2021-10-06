@@ -96,7 +96,11 @@ static int sun4i_mdio_probe(struct platform_device *pdev)
 	struct mii_bus *bus;
 	struct sun4i_mdio_data *data;
 	struct resource *res;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	int ret;
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	int ret, i;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	bus = mdiobus_alloc_size(sizeof(*data));
 	if (!bus)
@@ -108,6 +112,9 @@ static int sun4i_mdio_probe(struct platform_device *pdev)
 	snprintf(bus->id, MII_BUS_ID_SIZE, "%s-mii", dev_name(&pdev->dev));
 	bus->parent = &pdev->dev;
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+//do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	bus->irq = devm_kzalloc(&pdev->dev, sizeof(int) * PHY_MAX_ADDR,
 			GFP_KERNEL);
 	if (!bus->irq) {
@@ -117,6 +124,7 @@ static int sun4i_mdio_probe(struct platform_device *pdev)
 
 	for (i = 0; i < PHY_MAX_ADDR; i++)
 		bus->irq[i] = PHY_POLL;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	data = bus->priv;
 	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);

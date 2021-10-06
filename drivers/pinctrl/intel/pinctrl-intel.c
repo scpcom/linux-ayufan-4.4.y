@@ -860,7 +860,11 @@ static int intel_gpio_probe(struct intel_pinctrl *pctrl, int irq)
 
 	pctrl->chip.ngpio = pctrl->soc->npins;
 	pctrl->chip.label = dev_name(pctrl->dev);
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	pctrl->chip.parent = pctrl->dev;
+#else  
 	pctrl->chip.dev = pctrl->dev;
+#endif  
 	pctrl->chip.base = -1;
 
 	ret = gpiochip_add(&pctrl->chip);

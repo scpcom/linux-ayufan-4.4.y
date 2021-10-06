@@ -6,4 +6,10 @@ obj-$(CONFIG_PINCTRL_ARMADA_375) += pinctrl-armada-375.o
 obj-$(CONFIG_PINCTRL_ARMADA_38X) += pinctrl-armada-38x.o
 obj-$(CONFIG_PINCTRL_ARMADA_39X) += pinctrl-armada-39x.o
 obj-$(CONFIG_PINCTRL_ARMADA_XP)  += pinctrl-armada-xp.o
+ifeq ($(CONFIG_SYNO_LSP_ARMADA_16_12), y)
+obj-$(CONFIG_PINCTRL_ARMADA_3700) += pinctrl-armada-3700.o
+obj-$(CONFIG_PINCTRL_ARMADA_AP806) += pinctrl-armada-ap806.o
+obj-$(CONFIG_PINCTRL_ARMADA_CP110) += pinctrl-armada-cp110.o
+obj-$(CONFIG_PINCTRL_MSYS)  += pinctrl-msys.o
+endif
 obj-$(CONFIG_PINCTRL_ORION)  += pinctrl-orion.o

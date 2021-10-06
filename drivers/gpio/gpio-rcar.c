@@ -449,7 +449,11 @@ static int gpio_rcar_probe(struct platform_device *pdev)
 	gpio_chip->direction_output = gpio_rcar_direction_output;
 	gpio_chip->set = gpio_rcar_set;
 	gpio_chip->label = name;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	gpio_chip->parent = dev;
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	gpio_chip->dev = dev;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	gpio_chip->owner = THIS_MODULE;
 	gpio_chip->base = p->config.gpio_base;
 	gpio_chip->ngpio = p->config.number_of_pins;

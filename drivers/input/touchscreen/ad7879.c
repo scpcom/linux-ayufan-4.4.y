@@ -453,7 +453,11 @@ static int ad7879_gpio_add(struct ad7879 *ts,
 		ts->gc.ngpio = 1;
 		ts->gc.label = "AD7879-GPIO";
 		ts->gc.owner = THIS_MODULE;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+		ts->gc.parent = ts->dev;
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		ts->gc.dev = ts->dev;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 		ret = gpiochip_add(&ts->gc);
 		if (ret)

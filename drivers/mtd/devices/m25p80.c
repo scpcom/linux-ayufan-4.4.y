@@ -31,6 +31,11 @@ static int lock_chip(struct spi_nor *nor, loff_t ofs, uint64_t len)
 {
 	return 0;
 }
+
+static int is_locked(struct spi_nor *nor, loff_t ofs, uint64_t len)
+{
+	return 0;
+}
 #endif  
 
 static int m25p80_read_reg(struct spi_nor *nor, u8 code, u8 *val, int len)
@@ -187,6 +192,7 @@ static int m25p_probe(struct spi_device *spi)
 #ifdef MY_DEF_HERE
 	nor->flash_lock    = lock_chip;
 	nor->flash_unlock  = unlock_chip;
+	nor->flash_is_locked  = is_locked;
 #endif  
 
 	nor->dev = &spi->dev;

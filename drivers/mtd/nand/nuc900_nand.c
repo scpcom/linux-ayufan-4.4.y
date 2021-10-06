@@ -136,7 +136,11 @@ static int nuc900_nand_devready(struct mtd_info *mtd)
 static void nuc900_nand_command_lp(struct mtd_info *mtd, unsigned int command,
 				   int column, int page_addr)
 {
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	register struct nand_chip *chip = mtd_to_nand(mtd);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	register struct nand_chip *chip = mtd->priv;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct nuc900_nand *nand;
 
 	nand = container_of(mtd, struct nuc900_nand, mtd);

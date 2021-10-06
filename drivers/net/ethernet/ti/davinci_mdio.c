@@ -393,10 +393,18 @@ static int davinci_mdio_probe(struct platform_device *pdev)
 
 	/* scan and dump the bus */
 	for (addr = 0; addr < PHY_MAX_ADDR; addr++) {
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+		phy = mdiobus_get_phy(data->bus, addr);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		phy = data->bus->phy_map[addr];
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		if (phy) {
 			dev_info(dev, "phy[%d]: device %s, driver %s\n",
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+				 phy->mdio.addr, phydev_name(phy),
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 				 phy->addr, dev_name(&phy->dev),
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 				 phy->drv ? phy->drv->name : "unknown");
 		}
 	}

@@ -977,8 +977,14 @@ int ecryptfs_write_metadata(struct dentry *ecryptfs_dentry,
 #ifdef MY_ABC_HERE
 	if (mount_crypt_stat->flags & ECRYPTFS_GLOBAL_FAST_LOOKUP_ENABLED) {
 		rc = ecryptfs_write_metadata_to_contents(ecryptfs_inode, virt, virt_len);
-		if(!rc)
+		if (!rc) {
 			rc = ecryptfs_write_metadata_to_xattr(ecryptfs_dentry, virt, ECRYPTFS_SIZE_AND_MARKER_BYTES);
+			if (rc == -EOPNOTSUPP) {
+				printk(KERN_WARNING "%s: user xattr not supported, turn off FAST_LOOKUP", __func__);
+				mount_crypt_stat->flags &= ~ECRYPTFS_GLOBAL_FAST_LOOKUP_ENABLED;
+				rc = 0;
+			}
+		}
 	}
 	else {
 #endif  
@@ -1037,7 +1043,11 @@ static void set_default_header_data(struct ecryptfs_crypt_stat *crypt_stat)
 	crypt_stat->metadata_size = ECRYPTFS_MINIMUM_HEADER_EXTENT_SIZE;
 }
 
+#ifdef MY_ABC_HERE
+static void __ecryptfs_i_size_init(const char *page_virt, struct inode *inode, int is_fast_lookup)
+#else
 void ecryptfs_i_size_init(const char *page_virt, struct inode *inode)
+#endif  
 {
 	struct ecryptfs_mount_crypt_stat *mount_crypt_stat;
 	struct ecryptfs_crypt_stat *crypt_stat;
@@ -1053,8 +1063,18 @@ void ecryptfs_i_size_init(const char *page_virt, struct inode *inode)
 	} else
 		file_size = get_unaligned_be64(page_virt);
 	i_size_write(inode, (loff_t)file_size);
+#ifdef MY_ABC_HERE
+	if (!is_fast_lookup)
+#endif  
 	crypt_stat->flags |= ECRYPTFS_I_SIZE_INITIALIZED;
 }
+
+#ifdef MY_ABC_HERE
+void ecryptfs_i_size_init(const char *page_virt, struct inode *inode)
+{
+	__ecryptfs_i_size_init(page_virt, inode, 0);
+}
+#endif  
 
 static int ecryptfs_read_headers_virt(char *page_virt,
 				      struct ecryptfs_crypt_stat *crypt_stat,
@@ -1135,7 +1155,10 @@ int ecryptfs_read_and_validate_xattr_region(struct dentry *dentry,
 	u8 *marker = file_size + ECRYPTFS_FILE_SIZE_BYTES;
 	int rc;
 #ifdef MY_ABC_HERE
+	u64 lower_file_size, upper_file_size;
+	loff_t lower_file_size_expect;
 	char *page_virt = NULL;
+	struct ecryptfs_crypt_stat *crypt_stat;
 	struct ecryptfs_mount_crypt_stat *mount_crypt_stat =
 		&ecryptfs_superblock_to_private(inode->i_sb)->mount_crypt_stat;
 	if (mount_crypt_stat->flags & ECRYPTFS_GLOBAL_FAST_LOOKUP_ENABLED) {
@@ -1155,8 +1178,19 @@ int ecryptfs_read_and_validate_xattr_region(struct dentry *dentry,
 			goto out;
 		}
 		rc = ecryptfs_validate_marker(page_virt+ECRYPTFS_FILE_SIZE_BYTES);
-		if (!rc)
-			ecryptfs_i_size_init(page_virt, inode);
+		if (!rc) {
+			 
+			crypt_stat = &ecryptfs_inode_to_private(inode)->crypt_stat;
+			lower_file_size = i_size_read(ecryptfs_inode_to_lower(inode));
+			upper_file_size = get_unaligned_be64(page_virt);
+			lower_file_size_expect = upper_size_to_lower_size(crypt_stat, upper_file_size);
+			if (lower_file_size == lower_file_size_expect) {
+				__ecryptfs_i_size_init(page_virt, inode, 1);
+			} else {
+				rc = -EINVAL;
+				goto out;
+			}
+		}
 out:
 		if (page_virt) {
 			memset(page_virt, 0, PAGE_CACHE_SIZE);

@@ -224,16 +224,36 @@ static void scsi_init_cmd_errh(struct scsi_cmnd *cmd)
 		cmd->cmd_len = scsi_command_size(cmd->cmnd);
 }
 
+#ifdef MY_ABC_HERE
+ 
+static void __scsi_eh_wakeup(struct Scsi_Host *shost)
+{
+	unsigned long flags;
+
+	spin_lock_irqsave(shost->host_lock, flags);
+	if (unlikely(scsi_host_in_recovery(shost) &&
+		     (shost->host_failed || shost->host_eh_scheduled)))
+		scsi_eh_wakeup(shost);
+	spin_unlock_irqrestore(shost->host_lock, flags);
+}
+#endif  
+
 void scsi_device_unbusy(struct scsi_device *sdev)
 {
 	struct Scsi_Host *shost = sdev->host;
 	struct scsi_target *starget = scsi_target(sdev);
+#ifdef MY_ABC_HERE
+#else
 	unsigned long flags;
+#endif  
 
 	atomic_dec(&shost->host_busy);
 	if (starget->can_queue > 0)
 		atomic_dec(&starget->target_busy);
 
+#ifdef MY_ABC_HERE
+	__scsi_eh_wakeup(shost);
+#else
 	if (unlikely(scsi_host_in_recovery(shost) &&
 		     (shost->host_failed || shost->host_eh_scheduled))) {
 		spin_lock_irqsave(shost->host_lock, flags);
@@ -241,6 +261,7 @@ void scsi_device_unbusy(struct scsi_device *sdev)
 		spin_unlock_irqrestore(shost->host_lock, flags);
 	}
 
+#endif  
 	atomic_dec(&sdev->device_busy);
 }
 
@@ -1589,6 +1610,9 @@ starved:
 	spin_unlock_irq(shost->host_lock);
 out_dec:
 	atomic_dec(&shost->host_busy);
+#ifdef MY_ABC_HERE
+	__scsi_eh_wakeup(shost);
+#endif  
 	return 0;
 }
 
@@ -2068,6 +2092,9 @@ static int scsi_queue_rq(struct blk_mq_hw_ctx *hctx,
 
 out_dec_host_busy:
 	atomic_dec(&shost->host_busy);
+#ifdef MY_ABC_HERE
+	__scsi_eh_wakeup(shost);
+#endif  
 out_dec_target_busy:
 	if (scsi_target(sdev)->can_queue > 0)
 		atomic_dec(&scsi_target(sdev)->target_busy);

@@ -341,7 +341,11 @@ static int crystalcove_gpio_probe(struct platform_device *pdev)
 	cg->chip.base = -1;
 	cg->chip.ngpio = CRYSTALCOVE_VGPIO_NUM;
 	cg->chip.can_sleep = true;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	cg->chip.parent = dev;
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	cg->chip.dev = dev;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	cg->chip.dbg_show = crystalcove_gpio_dbg_show;
 	cg->regmap = pmic->regmap;
 

@@ -40,7 +40,11 @@ enum {
 	MIGRATE_MOVABLE,
 	MIGRATE_RECLAIMABLE,
 	MIGRATE_PCPTYPES,	/* the number of types on the pcp lists */
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	MIGRATE_RESERVE = MIGRATE_PCPTYPES,
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	MIGRATE_HIGHATOMIC = MIGRATE_PCPTYPES,
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 #ifdef CONFIG_CMA
 	/*
 	 * MIGRATE_CMA migration type is designed to mimic the way
@@ -334,7 +338,11 @@ struct zone {
 	/* zone watermarks, access with *_wmark_pages(zone) macros */
 	unsigned long watermark[NR_WMARK];
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+//do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	unsigned long nr_reserved_highatomic;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	/*
 	 * We don't know if the memory that we're going to allocate will be
@@ -431,6 +439,14 @@ struct zone {
 	unsigned long		present_pages;
 
 	const char		*name;
+
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	/*
+	 * Number of MIGRATE_RESERVE page block. To maintain for just
+	 * optimization. Protected by zone->lock.
+	 */
+	int			nr_migrate_reserve_block;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 #ifdef CONFIG_MEMORY_ISOLATION
 	/*

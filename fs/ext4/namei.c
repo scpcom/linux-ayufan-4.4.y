@@ -28,11 +28,6 @@
 #define NAMEI_RA_SIZE	     (NAMEI_RA_CHUNKS * NAMEI_RA_BLOCKS)
 
 #ifdef MY_ABC_HERE
-extern struct kmem_cache *ext4_syno_caseless_cachep;
- 
-static unsigned char ext4_utf8_namei_buf[UNICODE_UTF8_BUFSIZE];
-extern spinlock_t ext4_namei_buf_lock;   
-
 unsigned int ext4_strhash(const unsigned char *name, unsigned int len)
 {
 	unsigned long hash = init_name_hash();
@@ -44,29 +39,16 @@ unsigned int ext4_strhash(const unsigned char *name, unsigned int len)
 
 static int ext4_dentry_hash(const struct dentry *dentry, struct qstr *this)
 {
-	char* hash_buf;
+	 
+	char hash_buf[EXT4_NAME_LEN+1];
 	unsigned int upperlen;
 
-	if (NAME_MAX < this->len) {
-		goto static_buf;
+	if (this->len > EXT4_NAME_LEN) {
+		return -ENAMETOOLONG;
 	}
 
-	hash_buf = kmem_cache_alloc(ext4_syno_caseless_cachep, GFP_NOFS);
-	if (NULL == hash_buf) {
-		goto static_buf;
-	}
-
-	upperlen = syno_utf8_toupper(hash_buf, this->name, NAME_MAX, this->len, NULL);
+	upperlen = syno_utf8_toupper(hash_buf, this->name, EXT4_NAME_LEN, this->len, NULL);
 	this->hash = ext4_strhash(hash_buf, upperlen);
-	kmem_cache_free(ext4_syno_caseless_cachep, hash_buf);
-
-	return 0;
-
-static_buf:
-	spin_lock(&ext4_namei_buf_lock);
-	upperlen = syno_utf8_toupper(ext4_utf8_namei_buf, this->name, UNICODE_UTF8_BUFSIZE - 1 , this->len, NULL);
-	this->hash = ext4_strhash(ext4_utf8_namei_buf, upperlen);
-	spin_unlock(&ext4_namei_buf_lock);
 
 	return 0;
 }

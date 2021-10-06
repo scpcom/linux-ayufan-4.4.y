@@ -139,7 +139,11 @@ static void unmask_giuint_low(struct irq_data *d)
 static unsigned int startup_giuint(struct irq_data *data)
 {
 	if (gpiochip_lock_as_irq(&vr41xx_gpio_chip, data->hwirq))
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+		dev_err(vr41xx_gpio_chip.parent,
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		dev_err(vr41xx_gpio_chip.dev,
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 			"unable to lock HW IRQ %lu for IRQ\n",
 			data->hwirq);
 	/* Satisfy the .enable semantics by unmasking the line */
@@ -541,7 +545,11 @@ static int giu_probe(struct platform_device *pdev)
 	if (!giu_base)
 		return -ENOMEM;
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	vr41xx_gpio_chip.parent = &pdev->dev;
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	vr41xx_gpio_chip.dev = &pdev->dev;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	ret = gpiochip_add(&vr41xx_gpio_chip);
 	if (!ret) {

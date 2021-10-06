@@ -275,15 +275,24 @@ struct nand_onfi_params {
 	__le16 t_r;
 	__le16 t_ccs;
 	__le16 src_sync_timing_mode;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	u8 src_ssync_features;
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	__le16 src_ssync_features;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	__le16 clk_pin_capacitance_typ;
 	__le16 io_pin_capacitance_typ;
 	__le16 input_pin_capacitance_typ;
 	u8 input_pin_capacitance_max;
 	u8 driver_strength_support;
 	__le16 t_int_r;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	__le16 t_adl;
+	u8 reserved4[8];
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	__le16 t_ald;
 	u8 reserved4[7];
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	/* vendor */
 	__le16 vendor_revision;
@@ -406,7 +415,11 @@ struct nand_jedec_params {
 	__le16 input_pin_capacitance_typ;
 	__le16 clk_pin_capacitance_typ;
 	u8 driver_strength_support;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	__le16 t_adl;
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	__le16 t_ald;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	u8 reserved4[36];
 
 	/* ECC and endurance block */
@@ -639,6 +652,12 @@ struct nand_buffers {
  */
 
 struct nand_chip {
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+/*
+ * @mtd:		MTD device registered to the MTD framework
+ */
+	struct mtd_info mtd;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	void __iomem *IO_ADDR_R;
 	void __iomem *IO_ADDR_W;
 
@@ -718,6 +737,29 @@ struct nand_chip {
 	void *priv;
 };
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+static inline void nand_set_flash_node(struct nand_chip *chip,
+				       struct device_node *np)
+{
+	chip->flash_node = np;
+}
+
+static inline struct device_node *nand_get_flash_node(struct nand_chip *chip)
+{
+	return chip->flash_node;
+}
+
+static inline struct nand_chip *mtd_to_nand(struct mtd_info *mtd)
+{
+	return mtd->priv;
+}
+
+static inline struct mtd_info *nand_to_mtd(struct nand_chip *chip)
+{
+	return &chip->mtd;
+}
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+
 /*
  * NAND Flash Manufacturer ID Codes
  */
@@ -735,6 +777,9 @@ struct nand_chip {
 #define NAND_MFR_SANDISK	0x45
 #define NAND_MFR_INTEL		0x89
 #define NAND_MFR_ATO		0x9b
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#define NAND_MFR_GIGA		0xc8
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 
 /* The maximum expected count of bytes in the NAND ID sequence */
 #define NAND_MAX_ID_LEN 8

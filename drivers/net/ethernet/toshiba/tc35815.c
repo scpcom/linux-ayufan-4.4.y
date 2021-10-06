@@ -628,17 +628,28 @@ static int tc_mii_probe(struct net_device *dev)
 	}
 
 	/* attach the mac to the phy */
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	phydev = phy_connect(dev, phydev_name(phydev),
+			     &tc_handle_link_change,
+			     lp->chiptype == TC35815_TX4939 ? PHY_INTERFACE_MODE_RMII : PHY_INTERFACE_MODE_MII);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	phydev = phy_connect(dev, dev_name(&phydev->dev),
 			     &tc_handle_link_change,
 			     lp->chiptype == TC35815_TX4939 ? PHY_INTERFACE_MODE_RMII : PHY_INTERFACE_MODE_MII);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	if (IS_ERR(phydev)) {
 		printk(KERN_ERR "%s: Could not attach to PHY\n", dev->name);
 		return PTR_ERR(phydev);
 	}
+
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	phy_attached_info(phydev);
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	printk(KERN_INFO "%s: attached PHY driver [%s] "
 		"(mii_bus:phy_addr=%s, id=%x)\n",
 		dev->name, phydev->drv->name, dev_name(&phydev->dev),
 		phydev->phy_id);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	/* mask with MAC supported features */
 	phydev->supported &= PHY_BASIC_FEATURES;
@@ -681,6 +692,9 @@ static int tc_mii_init(struct net_device *dev)
 		 (lp->pci_dev->bus->number << 8) | lp->pci_dev->devfn);
 	lp->mii_bus->priv = dev;
 	lp->mii_bus->parent = &lp->pci_dev->dev;
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+//do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	lp->mii_bus->irq = kmalloc(sizeof(int) * PHY_MAX_ADDR, GFP_KERNEL);
 	if (!lp->mii_bus->irq) {
 		err = -ENOMEM;
@@ -689,10 +703,15 @@ static int tc_mii_init(struct net_device *dev)
 
 	for (i = 0; i < PHY_MAX_ADDR; i++)
 		lp->mii_bus->irq[i] = PHY_POLL;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	err = mdiobus_register(lp->mii_bus);
 	if (err)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+		goto err_out_free_mii_bus;
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		goto err_out_free_mdio_irq;
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	err = tc_mii_probe(dev);
 	if (err)
 		goto err_out_unregister_bus;
@@ -700,8 +719,12 @@ static int tc_mii_init(struct net_device *dev)
 
 err_out_unregister_bus:
 	mdiobus_unregister(lp->mii_bus);
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+//do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 err_out_free_mdio_irq:
 	kfree(lp->mii_bus->irq);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 err_out_free_mii_bus:
 	mdiobus_free(lp->mii_bus);
 err_out:
@@ -878,7 +901,11 @@ static void tc35815_remove_one(struct pci_dev *pdev)
 
 	phy_disconnect(lp->phy_dev);
 	mdiobus_unregister(lp->mii_bus);
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+//do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	kfree(lp->mii_bus->irq);
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	mdiobus_free(lp->mii_bus);
 	unregister_netdev(dev);
 	free_netdev(dev);

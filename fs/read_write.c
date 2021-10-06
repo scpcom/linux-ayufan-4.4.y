@@ -1487,8 +1487,8 @@ SYSCALL_DEFINE5(recvfile, int, fd, int, s, loff_t *, offset, size_t, nbytes, siz
 			} while(nbytes > 0);
 		} else {
 			do {
-				ret = do_recvfile(file, sock, pos, (nbytes > MAX_RECVFILE_BUF) ?
-					   MAX_RECVFILE_BUF : nbytes, &bytes_received, &bytes_written);
+				ret = do_recvfile(file, sock, pos, (nbytes > (MAX_RECVFILE_BUF - (pos & (PAGE_CACHE_SIZE - 1)))) ?
+					   (MAX_RECVFILE_BUF - (pos & (PAGE_CACHE_SIZE - 1))) : nbytes, &bytes_received, &bytes_written);
 				total_received += bytes_received;
 				total_written += bytes_written;
 				if (0 >= ret) {
@@ -1507,11 +1507,11 @@ SYSCALL_DEFINE5(recvfile, int, fd, int, s, loff_t *, offset, size_t, nbytes, siz
 		fsnotify_modify(file);
 		ret = total_written;
 	} else if(rwbytes) {
-		if (copy_to_user(&rwbytes[0], &total_received, sizeof(size_t)) < 0) {
+		if (copy_to_user(&rwbytes[0], &total_received, sizeof(size_t))) {
 			ret = -ENOMEM;
 			goto out;
 		}
-		if (copy_to_user(&rwbytes[1], &total_written, sizeof(size_t)) < 0) {
+		if (copy_to_user(&rwbytes[1], &total_written, sizeof(size_t))) {
 			ret = -ENOMEM;
 			goto out;
 		}

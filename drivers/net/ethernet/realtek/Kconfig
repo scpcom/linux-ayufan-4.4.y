@@ -106,6 +106,7 @@ config R8169
 	  To compile this driver as a module, choose M here: the module
 	  will be called r8169.  This is recommended.
 
+if SYNO_LSP_RTD129X || SYNO_APOLLOLAKE
 config R8169SOC
 	tristate "Realtek 8169SoC gigabit ethernet support"
 	depends on ARCH_RTD129X
@@ -120,7 +121,7 @@ config R8169SOC
 
 config R8168
 	tristate "Realtek 8168 gigabit ethernet support"
-	depends on PCI && SYNO_RTD1296
+	depends on PCI
 	select FW_LOADER
 	select CRC32
 	select MII
@@ -139,5 +140,6 @@ config R8168_PG
 
 	  To compile this driver as a module, choose M here: the module
 	  will be called r8168.  This is recommended.
+endif # SYNO_LSP_RTD129X || SYNO_APOLLOLAKE
 
 endif # NET_VENDOR_REALTEK

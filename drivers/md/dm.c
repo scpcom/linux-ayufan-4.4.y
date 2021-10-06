@@ -628,10 +628,7 @@ static int dm_blk_ioctl(struct block_device *bdev, fmode_t mode,
 
 #ifdef MY_ABC_HERE
 	r = syno_dm_do_extra_ioctl(md, &tgt, &tgt_bdev, &mode, &srcu_idx, cmd, arg);
-	if (0 == r) {
-		goto out_no_put;
-	} else if (0 > r) {
-		printk(KERN_ERR "Do extra ioctl failed r=%d", r);
+	if (0 >= r) {
 		goto out_no_put;
 	}
 	 
