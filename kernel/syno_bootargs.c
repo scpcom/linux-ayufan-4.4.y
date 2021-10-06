@@ -1,7 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-// Copyright (c) 2003-2015 Synology Inc. All rights reserved.
+ 
 #include <linux/kernel.h>
 #include <linux/synolib.h>
 
@@ -9,109 +9,109 @@
 extern int setup_early_printk(char *);
 extern char gszSynoTtyS0[50];
 extern char gszSynoTtyS1[50];
-#endif /* MY_DEF_HERE */
+#endif 
 
 #ifdef MY_ABC_HERE
 #include <linux/syno.h>
 
 extern int grgPwrCtlPin[];
-#endif /* MY_ABC_HERE */
+#endif 
 
 #ifdef MY_ABC_HERE
 extern char gszDiskIdxMap[16];
-#endif /* MY_ABC_HERE */
+#endif 
 
 #ifdef MY_ABC_HERE
 extern char gszSynoHWRevision[];
-#endif /* MY_ABC_HERE */
+#endif 
 
 #ifdef MY_ABC_HERE
 extern char gszSynoHWVersion[];
-#endif /* MY_ABC_HERE */
+#endif 
 
 #if defined(MY_ABC_HERE) && !defined(MY_DEF_HERE)
 extern long g_syno_hdd_powerup_seq;
-#endif /* MY_ABC_HERE && !MY_DEF_HERE*/
+#endif 
 
 #ifdef MY_DEF_HERE
 extern long g_hdd_hotplug;
-#endif /* MY_DEF_HERE */
+#endif 
 
 #ifdef MY_ABC_HERE
 extern unsigned char grgbLanMac[SYNO_MAC_MAX_NUMBER][16];
 extern int giVenderFormatVersion;
 extern char gszSkipVenderMacInterfaces[256];
-#endif /* MY_ABC_HERE */
+#endif 
 
 #ifdef MY_ABC_HERE
 extern char gszSerialNum[32];
 extern char gszCustomSerialNum[32];
-#endif /* MY_ABC_HERE */
+#endif 
 
 #ifdef MY_ABC_HERE
 extern int g_syno_sata_remap[SATA_REMAP_MAX];
 extern int g_use_sata_remap;
 extern int g_syno_mv14xx_remap[SATA_REMAP_MAX];
 extern int g_use_mv14xx_remap;
-#endif /* MY_ABC_HERE */
+#endif 
 
 #ifdef MY_DEF_HERE
 extern char gszPciAddrList[PCI_ADDR_NUM_MAX][PCI_ADDR_LEN_MAX];
 extern int gPciAddrNum;
-#endif /* MY_DEF_HERE */
+#endif 
 
 #ifdef MY_ABC_HERE
 extern long g_internal_netif_num;
-#endif /* MY_ABC_HERE*/
+#endif 
 
 #ifdef MY_ABC_HERE
 extern long g_sata_mv_led;
-#endif /* MY_ABC_HERE */
+#endif 
 
 #ifdef MY_ABC_HERE
 extern int gSynoFactoryUSBFastReset;
-#endif /* MY_ABC_HERE */
+#endif 
 
 #ifdef MY_ABC_HERE
 extern int gSynoFactoryUSB3Disable;
-#endif /* MY_ABC_HERE */
+#endif 
 
 #ifdef MY_DEF_HERE
 extern int gSynoMemMode;
-#endif /* MY_DEF_HERE */
+#endif 
 
 #ifdef MY_DEF_HERE
 extern long g_is_sas_model;
-#endif /* MY_DEF_HERE */
+#endif 
 
 #ifdef MY_DEF_HERE
 extern int gSynoDualHead;
-#endif /* MY_DEF_HERE */
+#endif 
 
 #ifdef MY_DEF_HERE
 extern int gSynoSASWriteConflictPanic;
-#endif /* MY_DEF_HERE */
+#endif 
 
 #ifdef MY_DEF_HERE
 extern char gSynoSASHBAAddr[CONFIG_SYNO_SAS_MAX_HBA_SLOT][13];
-#endif /* MY_DEF_HERE */
+#endif 
 
 #ifdef MY_ABC_HERE
 extern int gSynoBootSATADOM;
-#endif /* MY_DEF_HERE */
+#endif 
 
 #ifdef MY_ABC_HERE
 extern char g_ahci_switch;
-#endif /* MY_ABC_HERE */
+#endif 
 
 #ifdef MY_ABC_HERE
 extern char gszSataPortMap[8];
-#endif /* MY_ABC_HERE */
+#endif 
 
 #ifdef MY_DEF_HERE
 extern char gSynoCastratedXhcAddr[CONFIG_SYNO_USB_NUM_CASTRATED_XHC][32];
 extern unsigned int gSynoCastratedXhcPortBitmap[CONFIG_SYNO_USB_NUM_CASTRATED_XHC];
-#endif /* MY_DEF_HERE */
+#endif 
 
 #ifdef MY_DEF_HERE
 extern char gSynoUsbVbusHostAddr[CONFIG_SYNO_USB_VBUS_NUM_GPIO][20];
@@ -119,22 +119,17 @@ extern int gSynoUsbVbusPort[CONFIG_SYNO_USB_VBUS_NUM_GPIO];
 extern unsigned gSynoUsbVbusGpp[CONFIG_SYNO_USB_VBUS_NUM_GPIO];
 extern unsigned gSynoUsbVbusGppPol[CONFIG_SYNO_USB_VBUS_NUM_GPIO];
 #include <linux/synobios.h>
-#endif /* MY_DEF_HERE */
+#endif 
 
 #ifdef MY_DEF_HERE
 extern int giSynoSpinupGroup[SYNO_SPINUP_GROUP_MAX];
 extern int giSynoSpinupGroupNum;
 extern int giSynoSpinupGroupDelay;
 extern int giSynoSpinupGroupDebug;
-#endif /* MY_DEF_HERE */
+#endif 
 
 #ifdef MY_ABC_HERE
-/**
- * This function will parsing "pwrctl_pin" from uboot to get poweron pin
- * ex. "pwrctl_pin=N0910N1034"
- * N0910 means sata id 09 poweron pin is 10
- * N1034 means sata id 10 poweron pin is 34
- */
+
 static int __init early_pwrctl_pin(char *p)
 {
        int i = 0;
@@ -145,7 +140,7 @@ static int __init early_pwrctl_pin(char *p)
        char szSataID[CONFIG_SYNO_PWRPIN_ENCODE_LEN + 1] = {'\0'};
        char szPin[CONFIG_SYNO_PWRPIN_ENCODE_LEN + 1] = {'\0'};
 
-       // no pwr ctl pin
+       
        if ((NULL == p) || (0 == (iLen = strlen(p)))) {
                goto END;
        }
@@ -155,10 +150,10 @@ static int __init early_pwrctl_pin(char *p)
                if (CONFIG_SYNO_PORT_SIGN[0] != p[0]) {
                        goto END;
                }
-               /* jump CONFIG_SYNO_PORT_SIGN */
+               
                ++p;
 
-               /* get port number */
+               
                snprintf(szSataID, CONFIG_SYNO_PWRPIN_ENCODE_LEN + 1, "%s", p);
                iSataID = simple_strtol(szSataID, NULL, 10);
                if (0 > iSataID  || CONFIG_SYNO_MAX_SATA_ID < iSataID) {
@@ -166,18 +161,18 @@ static int __init early_pwrctl_pin(char *p)
                                        iSataID);
                        goto END;
                }
-               /* jump port number */
+               
                p+= CONFIG_SYNO_PWRPIN_ENCODE_LEN;
 
-               /* get pwrctl_pin */
+               
                snprintf(szPin, CONFIG_SYNO_PWRPIN_ENCODE_LEN + 1, "%s", p);
                if (0 > (iPin = simple_strtol(szPin, NULL, 10))) {
                        printk("!!!!!!!!! wrong iPin %d, set pwrctl_pin fail\n", iPin);
                }
-               /* jump pin number */
+               
                p+= CONFIG_SYNO_PWRPIN_ENCODE_LEN;
 
-               /* set this item */
+               
                printk("Get sata id %d pwrctl pin %d\n", iSataID, iPin);
                grgPwrCtlPin[iSataID] = iPin;
        }
@@ -187,7 +182,7 @@ END:
 }
 
 __setup("pwrctl_pin=", early_pwrctl_pin);
-#endif /* MY_ABC_HERE */
+#endif 
 
 #ifdef MY_ABC_HERE
 static int __init early_disk_idx_map(char *p)
@@ -201,7 +196,7 @@ static int __init early_disk_idx_map(char *p)
 	return 1;
 }
 __setup("DiskIdxMap=", early_disk_idx_map);
-#endif /* MY_ABC_HERE */
+#endif  
 
 #ifdef MY_ABC_HERE
 static int __init early_hw_revision(char *p)
@@ -213,7 +208,7 @@ static int __init early_hw_revision(char *p)
        return 1;
 }
 __setup("rev=", early_hw_revision);
-#endif /* MY_ABC_HERE */
+#endif  
 
 #ifdef MY_ABC_HERE
 static int __init early_hw_version(char *p)
@@ -225,13 +220,10 @@ static int __init early_hw_version(char *p)
 	return 1;
 }
 __setup("syno_hw_version=", early_hw_version);
-#endif /* MY_ABC_HERE */
+#endif  
 
 #if defined(MY_ABC_HERE) && !defined(MY_DEF_HERE)
-/* It is recommanded to use syno_hdd_powerup_seq instead of ihd_num.
- * Because the actual usage of the variable is represented the powerup seq,
- * the syno_hdd_powerup_seq is designed to replace ihd_num.
- * */
+ 
 static int __init early_internal_hd_num(char *p)
 {
         g_syno_hdd_powerup_seq = simple_strtol(p, NULL, 10);
@@ -251,13 +243,10 @@ static int __init syno_hdd_powerup_seq(char *p)
         return 1;
 }
 __setup("syno_hdd_powerup_seq=", syno_hdd_powerup_seq);
-#endif /* MY_ABC_HERE && !MY_DEF_HERE */
+#endif  
 
 #ifdef MY_DEF_HERE
-/* It is recommanded to use enable_hdd_hotplug instead of HddHotplug.
- * Beacuse the bootarg is referred to a bool variable,
- * the enable_hdd_hotplug is designed to replace HddHotplug.
- * */
+ 
 static int __init early_hdd_hotplug(char *p)
 {
 	g_hdd_hotplug = simple_strtol(p, NULL, 10);
@@ -293,7 +282,7 @@ static int __init enable_hdd_hotplug(char *p)
 	return 1;
 }
 __setup("enable_hdd_hotplug=", enable_hdd_hotplug);
-#endif /* MY_DEF_HERE */
+#endif 
 
 #ifdef MY_ABC_HERE
 static int __init early_mac1(char *p)
@@ -377,7 +366,7 @@ static int __init early_skip_vender_mac_interfaces(char *p)
 	return 1;
 }
 __setup("skip_vender_mac_interfaces=", early_skip_vender_mac_interfaces);
-#endif /* MY_ABC_HERE */
+#endif  
 
 #ifdef MY_ABC_HERE
 static int __init early_sn(char *p)
@@ -395,7 +384,7 @@ static int __init early_custom_sn(char *p)
 	return 1;
 }
 __setup("custom_sn=", early_custom_sn);
-#endif /* MY_ABC_HERE */
+#endif  
 
 #ifdef MY_ABC_HERE
 static int __init early_factory_usb_fast_reset(char *p)
@@ -407,7 +396,7 @@ static int __init early_factory_usb_fast_reset(char *p)
 	return 1;
 }
 __setup("syno_usb_fast_reset=", early_factory_usb_fast_reset);
-#endif /* MY_ABC_HERE */
+#endif  
 
 #ifdef MY_ABC_HERE
 static int __init early_factory_usb3_disable(char *p)
@@ -419,7 +408,7 @@ static int __init early_factory_usb3_disable(char *p)
 	return 1;
 }
 __setup("syno_disable_usb3=", early_factory_usb3_disable);
-#endif /* MY_ABC_HERE */
+#endif  
 
 #ifdef MY_ABC_HERE
 static int remap_parser(char *p, int *rgRemapTable)
@@ -427,11 +416,9 @@ static int remap_parser(char *p, int *rgRemapTable)
 	int i;
 	char *ptr = p;
 
-	/* initialize basic mapping */
 	for ( i = 0; i < SATA_REMAP_MAX; i++)
 		rgRemapTable[i] = i;
 
-	/* parse command line specified mapping */
 	while (ptr && *ptr) {
 		char *cp = ptr;
 		char *sz_origin;
@@ -467,24 +454,12 @@ static int remap_parser(char *p, int *rgRemapTable)
 	return 0;
 
 FMT_ERR:
-	/* format error */
+	 
 	printk(KERN_ERR "SYNO: Parsing remap format error, ignore.\n");
 	rgRemapTable[0] = SATA_REMAP_NOT_INIT;
 	return -1;
 }
 
-/* Provide a simple way to remap data port sequence in boot cmdline
- * Not apply to port multiplier
- * ex:
- * 	1) ahci_remap=0>4:4>0
- * 	  In RS814, 7042 use 0~3, integrated sata uses 4~5. And we want
- * 	  to use 7042 1st port as sde(esata), integrated sata 1st port
- * 	  as sda (first internal port).
- * 	2) ahci_remap=4>5:5>8:12>16
- * 	  Port remap does not need to be symmetric
- * Note:
- * 	1) Not apply to port multipler
- */
 static int __init early_ahci_remap(char *p)
 {
 	if (0 > remap_parser(p, g_syno_sata_remap)) {
@@ -499,11 +474,6 @@ static int __init early_ahci_remap(char *p)
 }
 __setup("ahci_remap=", early_ahci_remap);
 
-/*
- * Similar to sata_remap, however front number is represented for scsi port
- * instead of scsi host.
- * This could only be used by mv14xx driver.
- */
 static int __init early_mv14xx_remap(char *p)
 {
 	if (0 > remap_parser(p, g_syno_mv14xx_remap)) {
@@ -518,12 +488,6 @@ static int __init early_mv14xx_remap(char *p)
 }
 __setup("mv14xx_remap=", early_mv14xx_remap);
 
-/* For legacy model only. We hope to phase this bootargs out.
- * mv1475 and ahci both use sata_remap, however they have diffiernet defintions
- * of the index it represented. The prefix index means SCSI host in ahci and SCSI
- * port in mv1475. This makes other feel confused easily, so we separated this bootargs
- * into ahci_remap and mv14xx_remap. PLEASE USE THOSE BOOTARGS.
- */
 static int __init early_sata_remap_deprecated(char *p)
 {
 	if (0 > remap_parser(p, g_syno_sata_remap)) {
@@ -537,7 +501,7 @@ static int __init early_sata_remap_deprecated(char *p)
 	return 0;
 }
 __setup("sata_remap=", early_sata_remap_deprecated);
-#endif /* MY_DEF_HERE */
+#endif  
 
 #ifdef MY_DEF_HERE
 static int __init early_opt_pci_slot(char *p)
@@ -570,7 +534,7 @@ FMT_ERR:
 	return 0;
 }
 __setup("opt_pci_slot=", early_opt_pci_slot);
-#endif /* MY_ABC_HERE */
+#endif  
 
 #ifdef  MY_ABC_HERE
 static int __init early_internal_netif_num(char *p)
@@ -584,7 +548,7 @@ static int __init early_internal_netif_num(char *p)
 	return 1;
 }
 __setup("netif_num=", early_internal_netif_num);
-#endif /* MY_ABC_HERE */
+#endif  
 
 #ifdef MY_ABC_HERE
 static int __init early_sataled_special(char *p)
@@ -598,7 +562,7 @@ static int __init early_sataled_special(char *p)
 	return 1;
 }
 __setup("SataLedSpecial=", early_sataled_special);
-#endif /* MY_ABC_HERE */
+#endif  
 
 #ifdef MY_DEF_HERE
 static int __init early_mem_mode(int *p)
@@ -610,7 +574,7 @@ static int __init early_mem_mode(int *p)
 	return 1;
 }
 __setup("syno_mem_mode=", early_mem_mode);
-#endif /* MY_DEF_HERE */
+#endif  
 
 #ifdef MY_ABC_HERE
 static int __init early_sataport_map(char *p)
@@ -624,7 +588,7 @@ static int __init early_sataport_map(char *p)
 	return 1;
 }
 __setup("SataPortMap=", early_sataport_map);
-#endif /* MY_DEF_HERE */
+#endif  
 
 #if defined(MY_DEF_HERE) || (defined(MY_DEF_HERE) && defined(MY_DEF_HERE))
 static int __init early_SASmodel(char *p)
@@ -638,7 +602,7 @@ static int __init early_SASmodel(char *p)
 	return 1;
 }
 __setup("SASmodel=", early_SASmodel);
-#endif /* MY_DEF_HERE || (defined(MY_ABC_HERE) && defined(MY_DEF_HERE)) */
+#endif  
 
 #ifdef MY_DEF_HERE
 static int __init early_dual_head(char *p)
@@ -646,7 +610,7 @@ static int __init early_dual_head(char *p)
 	gSynoDualHead = simple_strtol(p, NULL, 10);
 #ifdef MY_ABC_HERE
 	gSynoBootSATADOM = gSynoDualHead;
-#endif /* MY_DEF_HERE */
+#endif  
 #ifdef MY_DEF_HERE
 	gSynoSASWriteConflictPanic = gSynoDualHead;
 #endif
@@ -656,7 +620,7 @@ static int __init early_dual_head(char *p)
 	return 1;
 }
 __setup("dual_head=", early_dual_head);
-#endif /* MY_DEF_HERE */
+#endif  
 
 #ifdef MY_DEF_HERE
 static int __init early_sas_reservation_write_conflict(char *p)
@@ -668,7 +632,7 @@ static int __init early_sas_reservation_write_conflict(char *p)
 	return 1;
 }
 __setup("sas_reservation_write_conflict=", early_sas_reservation_write_conflict);
-#endif /* MY_DEF_HERE */
+#endif  
 
 #ifdef MY_DEF_HERE
 static int __init early_sas_hba_idx(char *p)
@@ -691,7 +655,7 @@ static int __init early_sas_hba_idx(char *p)
         return 1;
 }
 __setup("sas_hba_idx_addr=", early_sas_hba_idx);
-#endif /* MY_DEF_HERE */
+#endif  
 
 #ifdef MY_ABC_HERE
 static int __init early_synoboot_satadom(char *p)
@@ -703,7 +667,7 @@ static int __init early_synoboot_satadom(char *p)
 	return 1;
 }
 __setup("synoboot_satadom=", early_synoboot_satadom);
-#endif /* MY_DEF_HERE */
+#endif  
 
 #ifdef  MY_ABC_HERE
 static int __init early_ahci_switch(char *p)
@@ -718,7 +682,7 @@ static int __init early_ahci_switch(char *p)
 	return 1;
 }
 __setup("ahci=", early_ahci_switch);
-#endif /* MY_ABC_HERE */
+#endif  
 
 #ifdef MY_DEF_HERE
 static int __init early_castrated_xhc(char *p)
@@ -751,7 +715,7 @@ static int __init early_castrated_xhc(char *p)
 	return 1;
 }
 __setup("syno_castrated_xhc=", early_castrated_xhc);
-#endif /* MY_ABC_HERE */
+#endif  
 
 #ifdef MY_DEF_HERE
 #ifdef MY_DEF_HERE
@@ -772,7 +736,7 @@ static int __init early_usb_vbus_gpio(char *p)
 		}
 #endif
 	pEnd = strstr(pBegin, ",");
-	//initialize gsynousbvbusgpp array
+	 
 	for (iCount = 0; iCount < CONFIG_SYNO_USB_VBUS_NUM_GPIO; iCount++) {
 		gSynoUsbVbusGpp[iCount] = UINT_MAX;
 	}
@@ -813,9 +777,9 @@ static int __init early_usb_vbus_gpio(char *p)
 		}
 #endif
 #if defined(MY_DEF_HERE)
-		//rtd129x misuse zoro-base index
+		 
 		gSynoUsbVbusPort[iCount]++;
-#endif /* MY_DEF_HERE */
+#endif  
 		printk(" - Port:%d", gSynoUsbVbusPort[iCount]);
 
 		pSeparator = strstr(pSeparator + 1, "@");
@@ -855,8 +819,8 @@ static int __init early_usb_vbus_gpio(char *p)
 	return 1;
 }
 __setup("syno_usb_vbus_gpio=", early_usb_vbus_gpio);
-#endif /* MY_ABC_HERE */
-#endif /* MY_ABC_HERE */
+#endif  
+#endif  
 #ifdef MY_DEF_HERE
 static int __init early_syno_set_ttyS0(char *p)
 {
@@ -873,7 +837,7 @@ static int __init early_syno_set_ttyS1(char *p)
 }
 __setup("syno_ttyS1=", early_syno_set_ttyS1);
 
-#endif /* MY_DEF_HERE */
+#endif  
 #ifdef MY_DEF_HERE
 static int __init early_syno_m2_port(char *p)
 {
@@ -936,7 +900,7 @@ ERR:
 	return 1;
 }
 __setup("m2_port=", early_syno_m2_port);
-#endif /* MY_DEF_HERE */
+#endif  
 #ifdef MY_DEF_HERE
 static int __init early_syno_spinup_group(char *p)
 {
@@ -949,8 +913,7 @@ static int __init early_syno_spinup_group(char *p)
 		giSynoSpinupGroup[group_num] = simple_strtol(p, &endp, 10) & 0xFF;
 		printk("SYNO Spinup Group %d: %d\n", group_num, giSynoSpinupGroup[group_num]);
 		group_num++;
-		// endp will point to a non digit position
-		// Break if reach the end of string
+		 
 		if (*endp == '\0') {
 			break;
 		}
@@ -960,7 +923,7 @@ static int __init early_syno_spinup_group(char *p)
 #ifdef MY_DEF_HERE
 	printk(KERN_ERR "ERROR !!! Kernel parameter for spinup group is only for HW tuning.\n");
 	printk(KERN_ERR "ERROR !!! The spinup group should be read from dts.\n");
-#endif /* MY_ABC_HERE */
+#endif  
 	return 1;
 }
 __setup("syno_spinup_group=", early_syno_spinup_group);
@@ -972,7 +935,7 @@ static int __init early_syno_spinup_group_delay(char *p)
 #ifdef MY_DEF_HERE
 	printk(KERN_ERR "ERROR !!! Kernel parameter for spinup group delay is only for HW tuning.\n");
 	printk(KERN_ERR "ERROR !!! The spinup group delay should be read from dts.\n");
-#endif /* MY_ABC_HERE */
+#endif  
 	return 1;
 }
 __setup("syno_spinup_group_delay=", early_syno_spinup_group_delay);
@@ -984,4 +947,4 @@ static int __init early_syno_spinup_group_debug(char *p)
 	return 1;
 }
 __setup("syno_spinup_group_debug=", early_syno_spinup_group_debug);
-#endif /* MY_DEF_HERE */
+#endif  

@@ -1,14 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * linux/fs/hfsplus/xattr.c
- *
- * Vyacheslav Dubeyko <slava@dubeyko.com>
- *
- * Logic of processing extended attributes
- */
-
+ 
 #include "hfsplus_fs.h"
 #include <linux/posix_acl_xattr.h>
 #include <linux/nls.h>
@@ -16,10 +9,9 @@
 #include "acl.h"
 
 #ifdef MY_ABC_HERE
-/* Zero out the date added field for the specified cnode */
+ 
 static void hfsplus_zero_dateadded(u16 entry_type, u8 *finderinfo) {
 
-	/* Advance finfo by 16 bytes to the 2nd half of the finderinfo */
     finderinfo = finderinfo + 16;
 
 	if (entry_type == HFSPLUS_FOLDER) {
@@ -30,7 +22,7 @@ static void hfsplus_zero_dateadded(u16 entry_type, u8 *finderinfo) {
 		fileinfo->date_added = 0;
     }
 }
-#endif /* MY_ABC_HERE */
+#endif  
 
 static int hfsplus_removexattr(struct inode *inode, const char *name);
 
@@ -92,7 +84,6 @@ static void hfsplus_init_header_node(struct inode *attr_file,
 	hfs_dbg(ATTR_MOD, "init_hdr_attr_file: clump %u, node_size %u\n",
 		clump_size, node_size);
 
-	/* The end of the node contains list of record offsets */
 	rec_offsets = (__be16 *)(buf + node_size);
 
 	desc = (struct hfs_bnode_desc *)buf;
@@ -168,20 +159,7 @@ check_attr_tree_state_again:
 			goto check_attr_tree_state_again;
 		break;
 	case HFSPLUS_CREATING_ATTR_TREE:
-		/*
-		 * This state means that another thread is in process
-		 * of AttributesFile creation. Theoretically, it is
-		 * possible to be here. But really __setxattr() method
-		 * first of all calls hfs_find_init() for lookup in
-		 * B-tree of CatalogFile. This method locks mutex of
-		 * CatalogFile's B-tree. As a result, if some thread
-		 * is inside AttributedFile creation operation then
-		 * another threads will be waiting unlocking of
-		 * CatalogFile's B-tree's mutex. However, if code will
-		 * change then we will return error code (-EAGAIN) from
-		 * here. Really, it means that first try to set of xattr
-		 * fails with error but second attempt will have success.
-		 */
+		 
 		return -EAGAIN;
 	case HFSPLUS_VALID_ATTR_TREE:
 		return 0;
@@ -318,7 +296,7 @@ int __hfsplus_setxattr(struct inode *inode, const char *name,
 			err = -EOPNOTSUPP;
 			goto end_setxattr;
 		}
-#ifdef MY_ABC_HERE // SOLVE GFP call trace
+#ifdef MY_ABC_HERE  
 		cat_entry_type = hfs_bnode_read_u16(cat_fd.bnode, cat_fd.entryoffset);
 		if (cat_entry_type == HFSPLUS_FOLDER) {
 			hfs_bnode_read(cat_fd.bnode, &entry, cat_fd.entryoffset, sizeof(struct hfsplus_cat_folder));
@@ -328,7 +306,7 @@ int __hfsplus_setxattr(struct inode *inode, const char *name,
 #else
 		hfs_bnode_read(cat_fd.bnode, &entry, cat_fd.entryoffset,
 					sizeof(hfsplus_cat_entry));
-#endif /* MY_ABC_HERE */
+#endif  
 		if (be16_to_cpu(entry.type) == HFSPLUS_FOLDER) {
 			if (size == folder_finderinfo_len) {
 				memcpy(&entry.folder.user_info, value,
@@ -505,7 +483,7 @@ static ssize_t hfsplus_getxattr_finder_info(struct inode *inode,
 				folder_rec_len);
 #ifdef MY_ABC_HERE
 			hfsplus_zero_dateadded(entry_type, folder_finder_info);
-#endif /* MY_ABC_HERE */
+#endif  
 			memcpy(value, folder_finder_info, folder_rec_len);
 			res = folder_rec_len;
 		} else if (entry_type == HFSPLUS_FILE) {
@@ -515,7 +493,7 @@ static ssize_t hfsplus_getxattr_finder_info(struct inode *inode,
 				file_rec_len);
 #ifdef MY_ABC_HERE
 			hfsplus_zero_dateadded(entry_type, file_finder_info);
-#endif /* MY_ABC_HERE */
+#endif  
 			memcpy(value, file_finder_info, file_rec_len);
 			res = file_rec_len;
 		} else {
@@ -542,7 +520,7 @@ ssize_t __hfsplus_getxattr(struct inode *inode, const char *name,
 	u32 record_length = 0;
 #else
 	u16 record_length = 0;
-#endif /* MY_ABC_HERE */
+#endif  
 	ssize_t res = 0;
 
 	if ((!S_ISREG(inode->i_mode) &&
@@ -602,7 +580,7 @@ ssize_t __hfsplus_getxattr(struct inode *inode, const char *name,
 			res = -EIO;
 			goto out;
 		}
-#endif /* MY_ABC_HERE */
+#endif  
 	} else if (record_type == HFSPLUS_ATTR_FORK_DATA ||
 			record_type == HFSPLUS_ATTR_EXTENTS) {
 		pr_err("only inline data xattr are supported\n");
@@ -719,7 +697,7 @@ end_listxattr_rfork:
 
 	return res;
 }
-#endif /* MY_ABC_HERE */
+#endif  
 
 static ssize_t hfsplus_listxattr_finder_info(struct dentry *dentry,
 						char *buffer, size_t size)
@@ -752,7 +730,7 @@ static ssize_t hfsplus_listxattr_finder_info(struct dentry *dentry,
 				len);
 #ifdef MY_ABC_HERE
 		hfsplus_zero_dateadded(entry_type, folder_finder_info);
-#endif /* MY_ABC_HERE */
+#endif  
 		found_bit = find_first_bit((void *)folder_finder_info, len*8);
 	} else if (entry_type == HFSPLUS_FILE) {
 		len = sizeof(struct FInfo) + sizeof(struct FXInfo);
@@ -762,7 +740,7 @@ static ssize_t hfsplus_listxattr_finder_info(struct dentry *dentry,
 				len);
 #ifdef MY_ABC_HERE
 		hfsplus_zero_dateadded(entry_type, file_finder_info);
-#endif /* MY_ABC_HERE */
+#endif  
 		found_bit = find_first_bit((void *)file_finder_info, len*8);
 	} else {
 		res = -EOPNOTSUPP;
@@ -822,7 +800,7 @@ ssize_t hfsplus_listxattr(struct dentry *dentry, char *buffer, size_t size)
 	if (err < 0) {
 		return err;
 	}
-#endif /* MY_ABC_HERE */
+#endif  
 	else if (!HFSPLUS_SB(inode->i_sb)->attr_tree)
 		return (res == 0) ? -EOPNOTSUPP : res;
 
@@ -986,19 +964,9 @@ static int hfsplus_osx_getxattr(const struct xattr_handler *handler,
 	if (!strcmp(name, ""))
 		return -EINVAL;
 
-	/*
-	 * Don't allow retrieving properly prefixed attributes
-	 * by prepending them with "osx."
-	 */
 	if (is_known_namespace(name))
 		return -EOPNOTSUPP;
 
-	/*
-	 * osx is the namespace we use to indicate an unprefixed
-	 * attribute on the filesystem (like the ones that OS X
-	 * creates), so we pass the name through unmodified (after
-	 * ensuring it doesn't conflict with another namespace).
-	 */
 	return __hfsplus_getxattr(d_inode(dentry), name, buffer, size);
 }
 
@@ -1009,19 +977,9 @@ static int hfsplus_osx_setxattr(const struct xattr_handler *handler,
 	if (!strcmp(name, ""))
 		return -EINVAL;
 
-	/*
-	 * Don't allow setting properly prefixed attributes
-	 * by prepending them with "osx."
-	 */
 	if (is_known_namespace(name))
 		return -EOPNOTSUPP;
 
-	/*
-	 * osx is the namespace we use to indicate an unprefixed
-	 * attribute on the filesystem (like the ones that OS X
-	 * creates), so we pass the name through unmodified (after
-	 * ensuring it doesn't conflict with another namespace).
-	 */
 	return __hfsplus_setxattr(d_inode(dentry), name, buffer, size, flags);
 }
 

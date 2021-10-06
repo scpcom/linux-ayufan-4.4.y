@@ -7,7 +7,6 @@
 #include <linux/rbtree.h>
 #include "ulist.h"
 
-/* bits for the extent state */
 #define EXTENT_DIRTY		(1U << 0)
 #define EXTENT_WRITEBACK	(1U << 1)
 #define EXTENT_UPTODATE		(1U << 2)
@@ -26,37 +25,34 @@
 #define EXTENT_IOBITS		(EXTENT_LOCKED | EXTENT_WRITEBACK)
 #define EXTENT_CTLBITS		(EXTENT_DO_ACCOUNTING | EXTENT_FIRST_DELALLOC)
 
-/*
- * flags for bio submission. The high bits indicate the compression
- * type for this bio
- */
+
 #define EXTENT_BIO_COMPRESSED 1
 #define EXTENT_BIO_TREE_LOG 2
 #ifdef MY_ABC_HERE
 #define EXTENT_BIO_RETRY 8
-// EXTENT_BIO_FLAG_SHIFT is not a bit flag, we are safe here.
+
 #define EXTENT_BIO_ABORT 16
-#endif /* MY_ABC_HERE */
+#endif 
 #define EXTENT_BIO_FLAG_SHIFT 16
 
-/* these are bit numbers for test/set bit */
+
 #define EXTENT_BUFFER_UPTODATE 0
 #define EXTENT_BUFFER_DIRTY 2
 #define EXTENT_BUFFER_CORRUPT 3
-#define EXTENT_BUFFER_READAHEAD 4	/* this got triggered by readahead */
+#define EXTENT_BUFFER_READAHEAD 4	
 #define EXTENT_BUFFER_TREE_REF 5
 #define EXTENT_BUFFER_STALE 6
 #define EXTENT_BUFFER_WRITEBACK 7
-#define EXTENT_BUFFER_READ_ERR 8        /* read IO error */
+#define EXTENT_BUFFER_READ_ERR 8        
 #define EXTENT_BUFFER_DUMMY 9
 #define EXTENT_BUFFER_IN_TREE 10
-#define EXTENT_BUFFER_WRITE_ERR 11    /* write IO error */
+#define EXTENT_BUFFER_WRITE_ERR 11    
 #ifdef MY_ABC_HERE
-#define EXTENT_BUFFER_SHOULD_REPAIR 31    /* one and only one process can do the repair in repair_eb_io_failure() */
-#define EXTENT_BUFFER_RETRY_ERR 32    /* no more redundancies in lower layer */
+#define EXTENT_BUFFER_SHOULD_REPAIR 31    
+#define EXTENT_BUFFER_RETRY_ERR 32    
 #endif
 
-/* these are flags for extent_clear_unlock_delalloc */
+
 #define PAGE_UNLOCK		(1 << 0)
 #define PAGE_CLEAR_DIRTY	(1 << 1)
 #define PAGE_SET_WRITEBACK	(1 << 2)
@@ -64,19 +60,8 @@
 #define PAGE_SET_PRIVATE2	(1 << 4)
 #define PAGE_SET_ERROR		(1 << 5)
 
-/*
- * page->private values.  Every page that is controlled by the extent
- * map has page->private set to one.
- */
 #define EXTENT_PAGE_PRIVATE 1
 
-/*
- * The extent buffer bitmap operations are done with byte granularity instead of
- * word granularity for two reasons:
- * 1. The bitmaps must be little-endian on disk.
- * 2. Bitmap items are not guaranteed to be aligned to a word and therefore a
- *    single word in a bitmap may straddle two pages in the extent buffer.
- */
 #define BIT_BYTE(nr) ((nr) / BITS_PER_BYTE)
 #define BYTE_MASK ((1 << BITS_PER_BYTE) - 1)
 #define BITMAP_FIRST_BYTE_MASK(start) \
@@ -113,7 +98,7 @@ struct extent_io_ops {
 	int (*readpage_io_failed_hook)(struct page *page, int failed_mirror, int correction_err);
 #else
 	int (*readpage_io_failed_hook)(struct page *page, int failed_mirror);
-#endif /* MY_ABC_HERE */
+#endif 
 	int (*readpage_end_io_hook)(struct btrfs_io_bio *io_bio, u64 phy_offset,
 				    struct page *page, u64 start, u64 end,
 				    int mirror);
@@ -141,10 +126,9 @@ struct extent_io_tree {
 
 struct extent_state {
 	u64 start;
-	u64 end; /* inclusive */
+	u64 end;  
 	struct rb_node rb_node;
 
-	/* ADD NEW ELEMENTS AFTER THIS */
 	wait_queue_head_t wq;
 	atomic_t refs;
 	unsigned state;
@@ -159,13 +143,13 @@ struct extent_state {
 #ifdef MY_ABC_HERE
 #define EXTENT_BUFFER_SHOULD_ABORT_RETRY ((u8)-2)
 #define EXTENT_BUFFER_RETRY_ABORTED ((u8)-1)
-#endif /* MY_ABC_HERE */
+#endif 
 
 #ifdef MY_ABC_HERE
 #define INLINE_EXTENT_BUFFER_PAGES 8
 #else
 #define INLINE_EXTENT_BUFFER_PAGES 16
-#endif /* MY_ABC_HERE */
+#endif 
 #define MAX_INLINE_EXTENT_BUFFER_SIZE (INLINE_EXTENT_BUFFER_PAGES * PAGE_CACHE_SIZE)
 struct extent_buffer {
 	u64 start;
@@ -179,7 +163,6 @@ struct extent_buffer {
 	struct rcu_head rcu_head;
 	pid_t lock_owner;
 
-	/* count of read lock holders on the extent buffer */
 	atomic_t write_locks;
 	atomic_t read_locks;
 	atomic_t blocking_writers;
@@ -187,44 +170,38 @@ struct extent_buffer {
 	atomic_t spinning_readers;
 	atomic_t spinning_writers;
 	short lock_nested;
-	/* >= 0 if eb belongs to a log tree, -1 otherwise */
+	
 	short log_index;
 
-	/* protects write locks */
+	
 	rwlock_t lock;
 
-	/* readers use lock_wq while they wait for the write
-	 * lock holders to unlock
-	 */
+	
 	wait_queue_head_t write_lock_wq;
 
-	/* writers use read_lock_wq while they wait for readers
-	 * to unlock
-	 */
+	
 	wait_queue_head_t read_lock_wq;
 #ifdef MY_ABC_HERE
 	u8 nr_retry;
 	u8 can_retry;
 	u32 prev_bad_csum;
-#endif /* MY_ABC_HERE */
+#endif 
 	struct page *pages[INLINE_EXTENT_BUFFER_PAGES];
 #ifdef CONFIG_BTRFS_DEBUG
 	struct list_head leak_list;
 #endif
 };
 
-/*
- * Structure to record how many bytes and which ranges are set/cleared
- */
+
 struct extent_changeset {
-	/* How many bytes are set/cleared in this operation */
+	
 	u64 bytes_changed;
 
-	/* Changed ranges */
+	
 	struct ulist *range_changed;
 #ifdef MY_ABC_HERE
 	struct ulist_node *prealloc_ulist_node;
-#endif /* MY_ABC_HERE */
+#endif 
 };
 
 static inline void extent_set_compress_type(unsigned long *bio_flags,
@@ -404,7 +381,7 @@ struct extent_buffer *alloc_extent_buffer(struct btrfs_root *root,
 #else
 struct extent_buffer *alloc_extent_buffer(struct btrfs_fs_info *fs_info,
 					  u64 start);
-#endif /* MY_ABC_HERE */
+#endif  
 struct extent_buffer *__alloc_dummy_extent_buffer(struct btrfs_fs_info *fs_info,
 						  u64 start, unsigned long len);
 struct extent_buffer *alloc_dummy_extent_buffer(struct btrfs_fs_info *fs_info,
@@ -416,7 +393,7 @@ struct extent_buffer *find_extent_buffer(struct btrfs_root *root,
 #else
 struct extent_buffer *find_extent_buffer(struct btrfs_fs_info *fs_info,
 					 u64 start);
-#endif /* MY_ABC_HERE */
+#endif 
 void free_extent_buffer(struct extent_buffer *eb);
 void free_extent_buffer_stale(struct extent_buffer *eb);
 #define WAIT_NONE	0
@@ -430,7 +407,7 @@ int read_extent_buffer_pages(struct extent_io_tree *tree,
 int read_extent_buffer_pages(struct extent_io_tree *tree,
 			     struct extent_buffer *eb, u64 start, int wait,
 			     get_extent_t *get_extent, int mirror_num);
-#endif /* MY_ABC_HERE */
+#endif 
 void wait_on_extent_buffer_writeback(struct extent_buffer *eb);
 
 static inline unsigned long num_extent_pages(u64 start, u64 len)
@@ -452,7 +429,7 @@ int memcmp_caseless_extent_buffer(struct extent_buffer *eb, const void *ptrv,
 			  unsigned long len_ptrv,
 			  unsigned long start,
 			  unsigned long len);
-#endif /* MY_ABC_HERE */
+#endif 
 void read_extent_buffer(struct extent_buffer *eb, void *dst,
 			unsigned long start,
 			unsigned long len);
@@ -508,21 +485,14 @@ int repair_io_failure(struct inode *inode, u64 start, u64 length, u64 logical,
 int repair_io_failure(struct inode *inode, u64 start, u64 length, u64 logical,
 		      struct page *page, unsigned int pg_offset,
 		      int mirror_num);
-#endif /* MY_ABC_HERE */
+#endif 
 int clean_io_failure(struct inode *inode, u64 start, struct page *page,
 		     unsigned int pg_offset);
 void end_extent_writepage(struct page *page, int err, u64 start, u64 end);
 int repair_eb_io_failure(struct btrfs_root *root, struct extent_buffer *eb,
 			 int mirror_num);
 
-/*
- * When IO fails, either with EIO or csum verification fails, we
- * try other mirrors that might have a good copy of the data.  This
- * io_failure_record is used to record state as we go through all the
- * mirrors.  If another mirror has good data, the page is set up to date
- * and things continue.  If a good mirror can't be found, the original
- * bio end_io callback is called to indicate things have failed.
- */
+
 struct io_failure_record {
 	struct page *page;
 	u64 start;
@@ -541,7 +511,7 @@ int btrfs_get_io_failure_record(struct inode *inode, u64 start, u64 end,
 #else
 int btrfs_get_io_failure_record(struct inode *inode, u64 start, u64 end,
 				struct io_failure_record **failrec_ret);
-#endif /* MY_ABC_HERE */
+#endif 
 int btrfs_check_repairable(struct inode *inode, struct bio *failed_bio,
 			   struct io_failure_record *failrec, int fail_mirror);
 struct bio *btrfs_create_repair_bio(struct inode *inode, struct bio *failed_bio,
@@ -568,6 +538,6 @@ struct correction_record {
 void correction_get_locked_record(struct btrfs_fs_info *fs_info, u64 logical);
 void correction_put_locked_record(struct btrfs_fs_info *fs_info, u64 logical);
 void correction_destroy_locked_record(struct btrfs_fs_info *fs_info);
-#endif /* MY_ABC_HERE */
+#endif 
 
 #endif

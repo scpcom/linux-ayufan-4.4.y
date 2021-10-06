@@ -1,26 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * sysctl.h: General linux system control interface
- *
- * Begun 24 March 1995, Stephen Tweedie
- *
- ****************************************************************
- ****************************************************************
- **
- **  WARNING:
- **  The values in this file are exported to user space via 
- **  the sysctl() binary interface.  Do *NOT* change the
- **  numbering of any existing values here, and do not change
- **  any numbers within any one set of values.  If you have to
- **  redefine an existing interface, use a new number for it.
- **  The kernel will then return -ENOTDIR to any application using
- **  the old binary interface.
- **
- ****************************************************************
- ****************************************************************
- */
+ 
 #ifndef _LINUX_SYSCTL_H
 #define _LINUX_SYSCTL_H
 
@@ -30,7 +11,6 @@
 #include <linux/rbtree.h>
 #include <uapi/linux/sysctl.h>
 
-/* For the /proc/sys support */
 struct ctl_table;
 struct nsproxy;
 struct ctl_table_root;
@@ -63,40 +43,12 @@ extern int proc_do_large_bitmap(struct ctl_table *, int,
 #if defined (MY_ABC_HERE) || defined(MY_DEF_HERE)
 extern int SynoProcDoStringVec(struct ctl_table *, int,
 		                void __user *, size_t *, loff_t *);
-#endif /* MY_ABC_HERE || MY_DEF_HERE */
+#endif  
 #ifdef MY_ABC_HERE
 extern int SynoProcDoIntVec(struct ctl_table *, int,
 	void __user *, size_t *, loff_t *);
-#endif /* MY_ABC_HERE */
+#endif  
 
-/*
- * Register a set of sysctl names by calling register_sysctl_table
- * with an initialised array of struct ctl_table's.  An entry with 
- * NULL procname terminates the table.  table->de will be
- * set up by the registration and need not be initialised in advance.
- *
- * sysctl names can be mirrored automatically under /proc/sys.  The
- * procname supplied controls /proc naming.
- *
- * The table's mode will be honoured both for sys_sysctl(2) and
- * proc-fs access.
- *
- * Leaf nodes in the sysctl tree will be represented by a single file
- * under /proc; non-leaf nodes will be represented by directories.  A
- * null procname disables /proc mirroring at this node.
- *
- * sysctl(2) can automatically manage read and write requests through
- * the sysctl table.  The data and maxlen fields of the ctl_table
- * struct enable minimal validation of the values being written to be
- * performed, and the mode field allows minimal authentication.
- * 
- * There must be a proc_handler routine for any terminal nodes
- * mirrored under /proc/sys (non-terminals are handled by a built-in
- * directory handler).  Several default handlers are available to
- * cover common cases.
- */
-
-/* Support for userspace poll() to watch for changes */
 struct ctl_table_poll {
 	atomic_t event;
 	wait_queue_head_t wait;
@@ -114,15 +66,14 @@ static inline void *proc_sys_poll_event(struct ctl_table_poll *poll)
 #define DEFINE_CTL_TABLE_POLL(name)					\
 	struct ctl_table_poll name = __CTL_TABLE_POLL_INITIALIZER(name)
 
-/* A sysctl table is an array of struct ctl_table: */
 struct ctl_table 
 {
-	const char *procname;		/* Text ID for /proc/sys, or zero */
+	const char *procname;		 
 	void *data;
 	int maxlen;
 	umode_t mode;
-	struct ctl_table *child;	/* Deprecated */
-	proc_handler *proc_handler;	/* Callback for text formatting */
+	struct ctl_table *child;	 
+	proc_handler *proc_handler;	 
 	struct ctl_table_poll *poll;
 	void *extra1;
 	void *extra2;
@@ -133,8 +84,6 @@ struct ctl_node {
 	struct ctl_table_header *header;
 };
 
-/* struct ctl_table_header is used to maintain dynamic lists of
-   struct ctl_table trees. */
 struct ctl_table_header
 {
 	union {
@@ -155,7 +104,7 @@ struct ctl_table_header
 };
 
 struct ctl_dir {
-	/* Header must be at the start of ctl_dir */
+	 
 	struct ctl_table_header header;
 	struct rb_root root;
 };
@@ -172,7 +121,6 @@ struct ctl_table_root {
 	int (*permissions)(struct ctl_table_header *head, struct ctl_table *table);
 };
 
-/* struct ctl_path describes where in the hierarchy a table is added */
 struct ctl_path {
 	const char *procname;
 };
@@ -204,7 +152,7 @@ extern int sysctl_init(void);
 
 extern struct ctl_table sysctl_mount_point[];
 
-#else /* CONFIG_SYSCTL */
+#else  
 static inline struct ctl_table_header *register_sysctl_table(struct ctl_table * table)
 {
 	return NULL;
@@ -226,9 +174,9 @@ static inline void setup_sysctl_set(struct ctl_table_set *p,
 {
 }
 
-#endif /* CONFIG_SYSCTL */
+#endif  
 
 int sysctl_max_threads(struct ctl_table *table, int write,
 		       void __user *buffer, size_t *lenp, loff_t *ppos);
 
-#endif /* _LINUX_SYSCTL_H */
+#endif  

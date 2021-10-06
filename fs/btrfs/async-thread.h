@@ -1,31 +1,13 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * Copyright (C) 2007 Oracle.  All rights reserved.
- * Copyright (C) 2014 Fujitsu.  All rights reserved.
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public
- * License v2 as published by the Free Software Foundation.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * General Public License for more details.
- *
- * You should have received a copy of the GNU General Public
- * License along with this program; if not, write to the
- * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
- * Boston, MA 021110-1307, USA.
- */
-
+ 
 #ifndef __BTRFS_ASYNC_THREAD_
 #define __BTRFS_ASYNC_THREAD_
 #include <linux/workqueue.h>
 
 struct btrfs_workqueue;
-/* Internal use only */
+ 
 struct __btrfs_workqueue;
 struct btrfs_work;
 typedef void (*btrfs_func_t)(struct btrfs_work *arg);
@@ -36,7 +18,6 @@ struct btrfs_work {
 	btrfs_func_t ordered_func;
 	btrfs_func_t ordered_free;
 
-	/* Don't touch things below */
 	struct work_struct normal_work;
 	struct list_head ordered_list;
 	struct __btrfs_workqueue *wq;
@@ -51,7 +32,7 @@ BTRFS_WORK_HELPER_PROTO(delalloc_helper);
 BTRFS_WORK_HELPER_PROTO(flush_delalloc_helper);
 #ifdef MY_ABC_HERE
 BTRFS_WORK_HELPER_PROTO(flush_meta_helper);
-#endif /* MY_ABC_HERE */
+#endif  
 BTRFS_WORK_HELPER_PROTO(cache_helper);
 BTRFS_WORK_HELPER_PROTO(submit_helper);
 BTRFS_WORK_HELPER_PROTO(fixup_helper);
@@ -59,7 +40,7 @@ BTRFS_WORK_HELPER_PROTO(endio_helper);
 BTRFS_WORK_HELPER_PROTO(endio_meta_helper);
 #ifdef MY_ABC_HERE
 BTRFS_WORK_HELPER_PROTO(endio_meta_fix_helper);
-#endif /* MY_ABC_HERE */
+#endif  
 BTRFS_WORK_HELPER_PROTO(endio_meta_write_helper);
 BTRFS_WORK_HELPER_PROTO(endio_raid56_helper);
 BTRFS_WORK_HELPER_PROTO(endio_repair_helper);
@@ -70,11 +51,11 @@ BTRFS_WORK_HELPER_PROTO(delayed_meta_helper);
 BTRFS_WORK_HELPER_PROTO(readahead_helper);
 #ifdef MY_ABC_HERE
 BTRFS_WORK_HELPER_PROTO(reada_path_start_helper);
-#endif /* MY_ABC_HERE */
+#endif 
 BTRFS_WORK_HELPER_PROTO(qgroup_rescan_helper);
 #ifdef MY_ABC_HERE
 BTRFS_WORK_HELPER_PROTO(usrquota_rescan_helper);
-#endif /* MY_ABC_HERE */
+#endif 
 BTRFS_WORK_HELPER_PROTO(extent_refs_helper);
 BTRFS_WORK_HELPER_PROTO(scrub_helper);
 BTRFS_WORK_HELPER_PROTO(scrubwrc_helper);

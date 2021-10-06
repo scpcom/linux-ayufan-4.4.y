@@ -81,12 +81,12 @@
 
 typedef enum rtk_sfc_read_mode {
     eREAD_MODE_NORMAL_READ,
-    eREAD_MODE_SINGLE_FAST_READ,    
+    eREAD_MODE_SINGLE_FAST_READ,
     eREAD_MODE_DUAL_FAST_READ
         //eREAD_MODE_1I1O_FAST_READ,
         //eREAD_MODE_1I2O_FAST_READ,
-        //eREAD_MODE_2IO_FAST_READ  
-} rtk_sfc_read_mode_t; 
+        //eREAD_MODE_2IO_FAST_READ
+} rtk_sfc_read_mode_t;
 
 #define SUPPORTED       1
 #define NOT_SUPPORTED   0

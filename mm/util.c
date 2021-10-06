@@ -26,12 +26,6 @@ static inline int is_kernel_rodata(unsigned long addr)
 		addr < (unsigned long)__end_rodata;
 }
 
-/**
- * kfree_const - conditionally free memory
- * @x: pointer to the memory
- *
- * Function calls kfree only if @x is not in .rodata section.
- */
 void kfree_const(const void *x)
 {
 	if (!is_kernel_rodata((unsigned long)x))
@@ -39,11 +33,6 @@ void kfree_const(const void *x)
 }
 EXPORT_SYMBOL(kfree_const);
 
-/**
- * kstrdup - allocate space for and copy an existing string
- * @s: the string to duplicate
- * @gfp: the GFP mask used in the kmalloc() call when allocating memory
- */
 char *kstrdup(const char *s, gfp_t gfp)
 {
 	size_t len;
@@ -60,15 +49,6 @@ char *kstrdup(const char *s, gfp_t gfp)
 }
 EXPORT_SYMBOL(kstrdup);
 
-/**
- * kstrdup_const - conditionally duplicate an existing const string
- * @s: the string to duplicate
- * @gfp: the GFP mask used in the kmalloc() call when allocating memory
- *
- * Function returns source string if it is in .rodata section otherwise it
- * fallbacks to kstrdup.
- * Strings allocated by kstrdup_const should be freed by kfree_const.
- */
 const char *kstrdup_const(const char *s, gfp_t gfp)
 {
 	if (is_kernel_rodata((unsigned long)s))
@@ -78,12 +58,6 @@ const char *kstrdup_const(const char *s, gfp_t gfp)
 }
 EXPORT_SYMBOL(kstrdup_const);
 
-/**
- * kstrndup - allocate space for and copy an existing string
- * @s: the string to duplicate
- * @max: read at most @max chars from @s
- * @gfp: the GFP mask used in the kmalloc() call when allocating memory
- */
 char *kstrndup(const char *s, size_t max, gfp_t gfp)
 {
 	size_t len;
@@ -102,13 +76,6 @@ char *kstrndup(const char *s, size_t max, gfp_t gfp)
 }
 EXPORT_SYMBOL(kstrndup);
 
-/**
- * kmemdup - duplicate region of memory
- *
- * @src: memory region to duplicate
- * @len: memory region length
- * @gfp: GFP mask to use
- */
 void *kmemdup(const void *src, size_t len, gfp_t gfp)
 {
 	void *p;
@@ -120,23 +87,10 @@ void *kmemdup(const void *src, size_t len, gfp_t gfp)
 }
 EXPORT_SYMBOL(kmemdup);
 
-/**
- * memdup_user - duplicate memory region from user space
- *
- * @src: source address in user space
- * @len: number of bytes to copy
- *
- * Returns an ERR_PTR() on failure.
- */
 void *memdup_user(const void __user *src, size_t len)
 {
 	void *p;
 
-	/*
-	 * Always use GFP_KERNEL, since copy_from_user() can sleep and
-	 * cause pagefault, which makes it pointless to use GFP_NOFS
-	 * or GFP_ATOMIC.
-	 */
 	p = kmalloc_track_caller(len, GFP_KERNEL);
 	if (!p)
 		return ERR_PTR(-ENOMEM);
@@ -150,11 +104,6 @@ void *memdup_user(const void __user *src, size_t len)
 }
 EXPORT_SYMBOL(memdup_user);
 
-/*
- * strndup_user - duplicate an existing string from user space
- * @s: The string to duplicate
- * @n: Maximum number of bytes to copy, including the trailing NUL.
- */
 char *strndup_user(const char __user *s, long n)
 {
 	char *p;
@@ -179,23 +128,10 @@ char *strndup_user(const char __user *s, long n)
 }
 EXPORT_SYMBOL(strndup_user);
 
-/**
- * memdup_user_nul - duplicate memory region from user space and NUL-terminate
- *
- * @src: source address in user space
- * @len: number of bytes to copy
- *
- * Returns an ERR_PTR() on failure.
- */
 void *memdup_user_nul(const void __user *src, size_t len)
 {
 	char *p;
 
-	/*
-	 * Always use GFP_KERNEL, since copy_from_user() can sleep and
-	 * cause pagefault, which makes it pointless to use GFP_NOFS
-	 * or GFP_ATOMIC.
-	 */
 	p = kmalloc_track_caller(len + 1, GFP_KERNEL);
 	if (!p)
 		return ERR_PTR(-ENOMEM);
@@ -232,7 +168,6 @@ void __vma_link_list(struct mm_struct *mm, struct vm_area_struct *vma,
 		next->vm_prev = vma;
 }
 
-/* Check if the vma is being used as a stack by this task */
 int vma_is_stack_for_task(struct vm_area_struct *vma, struct task_struct *t)
 {
 	return (vma->vm_start <= KSTK_ESP(t) && vma->vm_end >= KSTK_ESP(t));
@@ -246,12 +181,6 @@ void arch_pick_mmap_layout(struct mm_struct *mm)
 }
 #endif
 
-/*
- * Like get_user_pages_fast() except its IRQ-safe in that it won't fall
- * back to the regular GUP.
- * If the architecture not support this function, simply return with no
- * page pinned
- */
 int __weak __get_user_pages_fast(unsigned long start,
 				 int nr_pages, int write, struct page **pages)
 {
@@ -259,30 +188,6 @@ int __weak __get_user_pages_fast(unsigned long start,
 }
 EXPORT_SYMBOL_GPL(__get_user_pages_fast);
 
-/**
- * get_user_pages_fast() - pin user pages in memory
- * @start:	starting user address
- * @nr_pages:	number of pages from start to pin
- * @write:	whether pages will be written to
- * @pages:	array that receives pointers to the pages pinned.
- *		Should be at least nr_pages long.
- *
- * Returns number of pages pinned. This may be fewer than the number
- * requested. If nr_pages is 0 or negative, returns 0. If no pages
- * were pinned, returns -errno.
- *
- * get_user_pages_fast provides equivalent functionality to get_user_pages,
- * operating on current and current->mm, with force=0 and vma=NULL. However
- * unlike get_user_pages, it must be called without mmap_sem held.
- *
- * get_user_pages_fast may take mmap_sem and page table locks, so no
- * assumptions can be made about lack of locking. get_user_pages_fast is to be
- * implemented in a way that is advantageous (vs get_user_pages()) when the
- * user memory area is already faulted in and present in ptes. However if the
- * pages have to be faulted in, it may turn out to be slightly slower so
- * callers need to carefully consider what to use. On many architectures,
- * get_user_pages_fast simply falls back to get_user_pages.
- */
 int __weak get_user_pages_fast(unsigned long start,
 				int nr_pages, int write, struct page **pages)
 {
@@ -325,44 +230,18 @@ unsigned long vm_mmap(struct file *file, unsigned long addr,
 }
 EXPORT_SYMBOL(vm_mmap);
 
-/**
- * kvmalloc_node - attempt to allocate physically contiguous memory, but upon
- * failure, fall back to non-contiguous (vmalloc) allocation.
- * @size: size of the request.
- * @flags: gfp mask for the allocation - must be compatible (superset) with GFP_KERNEL.
- * @node: numa node to allocate from
- *
- * Uses kmalloc to get the memory but if the allocation fails then falls back
- * to the vmalloc allocator. Use kvfree for freeing the memory.
- *
- * Reclaim modifiers - __GFP_NORETRY, __GFP_REPEAT and __GFP_NOFAIL are not supported
- *
- * Any use of gfp flags outside of GFP_KERNEL should be consulted with mm people.
- */
 void *kvmalloc_node(size_t size, gfp_t flags, int node)
 {
 	gfp_t kmalloc_flags = flags;
 	void *ret;
 
-	/*
-	 * vmalloc uses GFP_KERNEL for some internal allocations (e.g page tables)
-	 * so the given set of flags has to be compatible.
-	 */
 	WARN_ON_ONCE((flags & GFP_KERNEL) != GFP_KERNEL);
 
-	/*
-	 * Make sure that larger requests are not too disruptive - no OOM
-	 * killer and no allocation failure warnings as we have a fallback
-	 */
 	if (size > PAGE_SIZE)
 		kmalloc_flags |= __GFP_NORETRY | __GFP_NOWARN;
 
 	ret = kmalloc_node(size, kmalloc_flags, node);
 
-	/*
-	 * It doesn't really make sense to fallback to vmalloc for sub page
-	 * requests
-	 */
 	if (ret || size <= PAGE_SIZE)
 		return ret;
 
@@ -390,7 +269,6 @@ static inline void *__page_rmapping(struct page *page)
 	return (void *)mapping;
 }
 
-/* Neutral page->mapping pointer to address_space or anon_vma or other */
 void *page_rmapping(struct page *page)
 {
 	page = compound_head(page);
@@ -412,7 +290,6 @@ struct address_space *page_mapping(struct page *page)
 {
 	unsigned long mapping;
 
-	/* This happens if someone calls flush_dcache_page on slab page */
 	if (unlikely(PageSlab(page)))
 		return NULL;
 
@@ -453,9 +330,6 @@ int overcommit_kbytes_handler(struct ctl_table *table, int write,
 	return ret;
 }
 
-/*
- * Committed memory limit enforced when OVERCOMMIT_NEVER policy is used
- */
 unsigned long vm_commit_limit(void)
 {
 	unsigned long allowed;
@@ -470,15 +344,6 @@ unsigned long vm_commit_limit(void)
 	return allowed;
 }
 
-/**
- * get_cmdline() - copy the cmdline value to a buffer.
- * @task:     the task whose cmdline value to copy.
- * @buffer:   the buffer to copy to.
- * @buflen:   the length of the buffer. Larger cmdline values are truncated
- *            to this length.
- * Returns the size of the cmdline field copied. Note that the copy does
- * not guarantee an ending NULL byte.
- */
 int get_cmdline(struct task_struct *task, char *buffer, int buflen)
 {
 	int res = 0;
@@ -488,7 +353,7 @@ int get_cmdline(struct task_struct *task, char *buffer, int buflen)
 	if (!mm)
 		goto out;
 	if (!mm->arg_end)
-		goto out_mm;	/* Shh! No looking before we're done */
+		goto out_mm;	 
 
 	down_read(&mm->mmap_sem);
 	arg_start = mm->arg_start;
@@ -504,10 +369,6 @@ int get_cmdline(struct task_struct *task, char *buffer, int buflen)
 
 	res = access_process_vm(task, arg_start, buffer, len, 0);
 
-	/*
-	 * If the nul at the end of args has been overwritten, then
-	 * assume application is using setproctitle(3).
-	 */
 	if (res > 0 && buffer[res-1] != '\0' && len < buflen) {
 		len = strnlen(buffer, res);
 		if (len < res) {

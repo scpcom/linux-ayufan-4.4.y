@@ -1,37 +1,12 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * Copyright (C) 2007 Oracle.  All rights reserved.
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public
- * License v2 as published by the Free Software Foundation.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * General Public License for more details.
- *
- * You should have received a copy of the GNU General Public
- * License along with this program; if not, write to the
- * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
- * Boston, MA 021110-1307, USA.
- */
-
+ 
 #include "ctree.h"
 #include "disk-io.h"
 #include "hash.h"
 #include "transaction.h"
 
-/*
- * insert a name into a directory, doing overflow properly if there is a hash
- * collision.  data_size indicates how big the item inserted should be.  On
- * success a struct btrfs_dir_item pointer is returned, otherwise it is
- * an ERR_PTR.
- *
- * The name is not copied into the dir item, you have to do that yourself.
- */
 static struct btrfs_dir_item *insert_with_overflow(struct btrfs_trans_handle
 						   *trans,
 						   struct btrfs_root *root,
@@ -64,10 +39,6 @@ static struct btrfs_dir_item *insert_with_overflow(struct btrfs_trans_handle
 	return (struct btrfs_dir_item *)ptr;
 }
 
-/*
- * xattrs work a lot like directories, this inserts an xattr item
- * into the tree
- */
 int btrfs_insert_xattr_item(struct btrfs_trans_handle *trans,
 			    struct btrfs_root *root,
 			    struct btrfs_path *path, u64 objectid,
@@ -164,16 +135,9 @@ out_release:
 	btrfs_free_path(path);
 	return ret;
 }
-#endif /* MY_ABC_HERE */
+#endif 
 
-/*
- * insert a directory item in the tree, doing all the magic for
- * both indexes. 'dir' indicates which objectid to insert it into,
- * 'location' is the key to stuff into the directory item, 'type' is the
- * type of the inode we're pointing to, and 'index' is the sequence number
- * to use for the second index (if one is created).
- * Will return 0 or -ENOMEM
- */
+
 int btrfs_insert_dir_item(struct btrfs_trans_handle *trans, struct btrfs_root
 			  *root, const char *name, int name_len,
 			  struct inode *dir, struct btrfs_key *location,
@@ -222,7 +186,7 @@ int btrfs_insert_dir_item(struct btrfs_trans_handle *trans, struct btrfs_root
 	btrfs_mark_buffer_dirty(leaf);
 
 second_insert:
-	/* FIXME, use some real flag for selecting the extra index */
+	 
 	if (root == root->fs_info->tree_root) {
 		ret = 0;
 		goto out_free;
@@ -241,14 +205,12 @@ out_free:
 	if (btrfs_super_compat_flags(root->fs_info->super_copy) & BTRFS_FEATURE_COMPAT_SYNO_CASELESS)
 		return btrfs_insert_dir_item_caseless(trans, root, name, name_len, dir, &disk_key, type);
 	else
-#endif /* MY_ABC_HERE */
+#endif 
 	return 0;
 }
 
 #ifdef MY_ABC_HERE
-/*
- *  linear lookup for syno btrfs caseless stat
- */
+
 static struct btrfs_dir_item *btrfs_syno_linear_lookup_dir_item_caseless(
 					     struct btrfs_root *root,
 					     struct btrfs_path *path, u64 dir,
@@ -295,13 +257,9 @@ static struct btrfs_dir_item *btrfs_syno_linear_lookup_dir_item_caseless(
 	}
 	return NULL;
 }
-#endif /* MY_ABC_HERE */
+#endif 
 
-/*
- * lookup a directory item based on name.  'dir' is the objectid
- * we're searching in, and 'mod' tells us if you plan on deleting the
- * item (use mod < 0) or changing the options (use mod > 0)
- */
+
 struct btrfs_dir_item *btrfs_lookup_dir_item(struct btrfs_trans_handle *trans,
 					     struct btrfs_root *root,
 					     struct btrfs_path *path, u64 dir,
@@ -314,7 +272,7 @@ struct btrfs_dir_item *btrfs_lookup_dir_item(struct btrfs_trans_handle *trans,
 	int cow = mod != 0;
 #ifdef MY_ABC_HERE
 	u32 hash;
-#endif /* MY_ABC_HERE */
+#endif 
 
 	key.objectid = dir;
 #ifdef MY_ABC_HERE
@@ -326,7 +284,7 @@ struct btrfs_dir_item *btrfs_lookup_dir_item(struct btrfs_trans_handle *trans,
 		key.offset = hash;
 		key.type = BTRFS_DIR_ITEM_CASELESS_KEY;
 	} else {
-#endif /* MY_ABC_HERE */
+#endif 
 	key.type = BTRFS_DIR_ITEM_KEY;
 
 	key.offset = btrfs_name_hash(name, name_len);
@@ -335,7 +293,7 @@ struct btrfs_dir_item *btrfs_lookup_dir_item(struct btrfs_trans_handle *trans,
 
 	if (!path->caseless_key && path->caseless_name)
 		return btrfs_syno_linear_lookup_dir_item_caseless(root, path, dir, name, name_len);
-#endif /* MY_ABC_HERE */
+#endif 
 
 	ret = btrfs_search_slot(trans, root, &key, path, ins_len, cow);
 	if (ret < 0)
@@ -359,7 +317,7 @@ int btrfs_check_dir_item_collision(struct btrfs_root *root, u64 dir,
 #ifdef MY_ABC_HERE
 	int check_caseless = 0;
 	u32 hash;
-#endif /* MY_ABC_HERE */
+#endif 
 
 	path = btrfs_alloc_path();
 	if (!path)
@@ -382,49 +340,42 @@ check_caseless:
 	key.objectid = dir;
 	key.type = BTRFS_DIR_ITEM_KEY;
 	key.offset = btrfs_name_hash(name, name_len);
-#endif /* MY_ABC_HERE */
+#endif 
 
 	ret = btrfs_search_slot(NULL, root, &key, path, 0, 0);
 
-	/* return back any errors */
+	
 	if (ret < 0)
 		goto out;
 
-	/* nothing found, we're safe */
+	
 	if (ret > 0) {
 		ret = 0;
 		goto out;
 	}
 
-	/* we found an item, look for our name in the item */
+	
 	di = btrfs_match_dir_item_name(root, path, name, name_len);
 	if (di) {
-		/* our exact name was found */
+		
 		ret = -EEXIST;
 		goto out;
 	}
 
-	/*
-	 * see if there is room in the item to insert this
-	 * name
-	 */
+	
 #ifdef MY_ABC_HERE
-	/*
-	 * This size is not correct here(open source is right),
-	 * but to make the check condition consistent with btrfs_search_slot
-	 * we need to account btrfs_item here
-	 */
+	
 	data_size = sizeof(*di) + name_len + sizeof(struct btrfs_item);
 #else
 	data_size = sizeof(*di) + name_len;
-#endif /* MY_ABC_HERE */
+#endif 
 	leaf = path->nodes[0];
 	slot = path->slots[0];
 	if (data_size + btrfs_item_size_nr(leaf, slot) +
 	    sizeof(struct btrfs_item) > BTRFS_LEAF_DATA_SIZE(root)) {
 		ret = -EOVERFLOW;
 	} else {
-		/* plenty of insertion room */
+		
 		ret = 0;
 	}
 out:
@@ -436,19 +387,12 @@ out:
 		btrfs_release_path(path);
 		goto check_caseless;
 	}
-#endif /* MY_ABC_HERE */
+#endif 
 	btrfs_free_path(path);
 	return ret;
 }
 
-/*
- * lookup a directory item based on index.  'dir' is the objectid
- * we're searching in, and 'mod' tells us if you plan on deleting the
- * item (use mod < 0) or changing the options (use mod > 0)
- *
- * The name is used to make sure the index really points to the name you were
- * looking for.
- */
+
 struct btrfs_dir_item *
 btrfs_lookup_dir_index_item(struct btrfs_trans_handle *trans,
 			    struct btrfs_root *root,
@@ -543,11 +487,6 @@ struct btrfs_dir_item *btrfs_lookup_xattr(struct btrfs_trans_handle *trans,
 	return btrfs_match_dir_item_name(root, path, name, name_len);
 }
 
-/*
- * helper function to look at the directory item pointed to by 'path'
- * this walks through all the entries in a dir item and finds one
- * for a specific name.
- */
 struct btrfs_dir_item *btrfs_match_dir_item_name(struct btrfs_root *root,
 						 struct btrfs_path *path,
 						 const char *name, int name_len)
@@ -577,13 +516,13 @@ struct btrfs_dir_item *btrfs_match_dir_item_name(struct btrfs_root *root,
 				return dir_item;
 			}
 		} else {
-#endif /* MY_ABC_HERE */
+#endif 
 		if (btrfs_dir_name_len(leaf, dir_item) == name_len &&
 		    memcmp_extent_buffer(leaf, name, name_ptr, name_len) == 0)
 			return dir_item;
 #ifdef MY_ABC_HERE
 		}
-#endif /* MY_ABC_HERE */
+#endif 
 
 		cur += this_len;
 		dir_item = (struct btrfs_dir_item *)((char *)dir_item +
@@ -592,10 +531,6 @@ struct btrfs_dir_item *btrfs_match_dir_item_name(struct btrfs_root *root,
 	return NULL;
 }
 
-/*
- * given a pointer into a directory item, delete it.  This
- * handles items that have more than one entry in them.
- */
 int btrfs_delete_one_dir_name(struct btrfs_trans_handle *trans,
 			      struct btrfs_root *root,
 			      struct btrfs_path *path,
@@ -614,7 +549,7 @@ int btrfs_delete_one_dir_name(struct btrfs_trans_handle *trans,
 	if (sub_item_len == item_len) {
 		ret = btrfs_del_item(trans, root, path);
 	} else {
-		/* MARKER */
+		 
 		unsigned long ptr = (unsigned long)di;
 		unsigned long start;
 
@@ -648,7 +583,6 @@ int verify_dir_item(struct btrfs_root *root,
 		return 1;
 	}
 
-	/* BTRFS_MAX_XATTR_SIZE is the same for all dir items */
 	if ((btrfs_dir_data_len(leaf, dir_item) +
 	     btrfs_dir_name_len(leaf, dir_item)) > BTRFS_MAX_XATTR_SIZE(root)) {
 		btrfs_crit(root->fs_info, "invalid dir item name + data len: %u + %u",

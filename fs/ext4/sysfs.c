@@ -1,15 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- *  linux/fs/ext4/sysfs.c
- *
- * Copyright (C) 1992, 1993, 1994, 1995
- * Remy Card (card@masi.ibp.fr)
- * Theodore Ts'o (tytso@mit.edu)
- *
- */
-
+ 
 #include <linux/time.h>
 #include <linux/fs.h>
 #include <linux/seq_file.h>
@@ -33,11 +25,11 @@ typedef enum {
 	attr_syno_fs_error_new_event_flag,
 	attr_syno_fs_error_mounted,
 	attr_syno_fs_error_count,
-#endif /* MY_ABC_HERE */
+#endif  
 #ifdef MY_ABC_HERE
 	attr_lazyinit_info,
 	attr_lazyinit_speed,
-#endif /* MY_ABC_HERE */
+#endif  
 } attr_id_t;
 
 typedef enum {
@@ -136,7 +128,7 @@ static ssize_t syno_fs_error_new_event_flag_store(struct ext4_attr *a,
 	sbi->s_new_error_fs_event_flag = (int)t;
 	return count;
 }
-#endif /* MY_ABC_HERE */
+#endif  
 
 static ssize_t trigger_test_error(struct ext4_attr *a,
 				  struct ext4_sb_info *sbi,
@@ -222,11 +214,11 @@ EXT4_RO_ATTR_ES_UI(last_error_time, s_last_error_time);
 EXT4_ATTR_FUNC(syno_fs_error_new_event_flag, 0644);
 EXT4_ATTR_FUNC(syno_fs_error_mounted, 0444);
 EXT4_ATTR_FUNC(syno_fs_error_count, 0444);
-#endif /* MY_ABC_HERE */
+#endif  
 #ifdef MY_ABC_HERE
 EXT4_ATTR_FUNC(lazyinit_info, 0444);
 EXT4_ATTR_FUNC(lazyinit_speed, 0444);
-#endif /* MY_ABC_HERE */
+#endif  
 
 static unsigned int old_bump_val = 128;
 EXT4_ATTR_PTR(max_writeback_mb_bump, 0444, pointer_ui, &old_bump_val);
@@ -260,15 +252,14 @@ static struct attribute *ext4_attrs[] = {
 	ATTR_LIST(syno_fs_error_new_event_flag),
 	ATTR_LIST(syno_fs_error_mounted),
 	ATTR_LIST(syno_fs_error_count),
-#endif /* MY_ABC_HERE */
+#endif  
 #ifdef MY_ABC_HERE
 	ATTR_LIST(lazyinit_info),
 	ATTR_LIST(lazyinit_speed),
-#endif /* MY_ABC_HERE */
+#endif  
 	NULL,
 };
 
-/* Features this copy of ext4 supports */
 EXT4_ATTR_FEATURE(lazy_itable_init);
 EXT4_ATTR_FEATURE(batched_discard);
 EXT4_ATTR_FEATURE(meta_bg_resize);
@@ -342,7 +333,7 @@ static ssize_t ext4_attr_show(struct kobject *kobj,
 		return snprintf(buf, PAGE_SIZE, "%s\n", sbi->s_mount_path);
 	case attr_syno_fs_error_count:
 		return snprintf(buf, PAGE_SIZE, "%d\n", sbi->s_es->s_error_count); 
-#endif /* MY_ABC_HERE */
+#endif  
 #ifdef MY_ABC_HERE
 	case attr_lazyinit_info:
 		return snprintf(buf, PAGE_SIZE, "%u %u\n",
@@ -351,7 +342,7 @@ static ssize_t ext4_attr_show(struct kobject *kobj,
 	case attr_lazyinit_speed:
 		return snprintf(buf, PAGE_SIZE, "%lu\n",
 				sbi->s_li_request ? sbi->s_li_request->lr_timeout : 0);
-#endif /* MY_ABC_HERE */
+#endif  
 	}
 
 	return 0;
@@ -386,7 +377,7 @@ static ssize_t ext4_attr_store(struct kobject *kobj,
 #ifdef MY_ABC_HERE
 	case attr_syno_fs_error_new_event_flag:
 		return syno_fs_error_new_event_flag_store(a, sbi, buf, len);
-#endif /* MY_ABC_HERE */
+#endif  
 	}
 	return 0;
 }

@@ -221,7 +221,7 @@ static void amd_gpio_dbg_show(struct seq_file *s, struct gpio_chip *gc)
 			if (pin_reg & BIT(INTERRUPT_ENABLE_OFF)) {
 				interrupt_enable = "interrupt is enabled|";
 
-				if (!(pin_reg & BIT(ACTIVE_LEVEL_OFF))
+		if (!(pin_reg & BIT(ACTIVE_LEVEL_OFF))
 				&& !(pin_reg & BIT(ACTIVE_LEVEL_OFF+1)))
 					active_level = "Active low|";
 				else if (pin_reg & BIT(ACTIVE_LEVEL_OFF)
@@ -808,7 +808,6 @@ static int amd_gpio_probe(struct platform_device *pdev)
 				 &amd_gpio_irqchip,
 				 irq_base,
 				 amd_gpio_irq_handler);
-
 	platform_set_drvdata(pdev, gpio_dev);
 
 	dev_dbg(&pdev->dev, "amd gpio driver loaded\n");

@@ -1,13 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * Copyright (C) 2001-2002 Sistina Software (UK) Limited.
- * Copyright (C) 2006-2008 Red Hat GmbH
- *
- * This file is released under the GPL.
- */
-
+ 
 #include "dm-exception-store.h"
 
 #include <linux/ctype.h>
@@ -49,29 +43,6 @@ static struct dm_exception_store_type *_get_exception_store_type(const char *nam
 	return type;
 }
 
-/*
- * get_type
- * @type_name
- *
- * Attempt to retrieve the dm_exception_store_type by name.  If not already
- * available, attempt to load the appropriate module.
- *
- * Exstore modules are named "dm-exstore-" followed by the 'type_name'.
- * Modules may contain multiple types.
- * This function will first try the module "dm-exstore-<type_name>",
- * then truncate 'type_name' on the last '-' and try again.
- *
- * For example, if type_name was "clustered-shared", it would search
- * 'dm-exstore-clustered-shared' then 'dm-exstore-clustered'.
- *
- * 'dm-exception-store-<type_name>' is too long of a name in my
- * opinion, which is why I've chosen to have the files
- * containing exception store implementations be 'dm-exstore-<type_name>'.
- * If you want your module to be autoloaded, you will follow this
- * naming convention.
- *
- * Returns: dm_exception_store_type* on success, NULL on failure
- */
 static struct dm_exception_store_type *get_type(const char *type_name)
 {
 	char *p, *type_name_dup;
@@ -164,25 +135,19 @@ int dm_exception_store_set_chunk_size(struct dm_exception_store *store,
 				      unsigned chunk_size,
 				      char **error)
 {
-	/* Check chunk_size is a power of 2 */
+	 
 	if (!is_power_of_2(chunk_size)) {
 		*error = "Chunk size is not a power of 2";
 		return -EINVAL;
 	}
 
 #ifdef MY_ABC_HERE
-	/* DSM #62671 - for Time Backup to support 4K HDD.
-	 * DSM #77071 - for Time Backup align to SSD Cache chunk size.
-	 * Although this bug can be fixed by changing the attribute of the dmsetup caller in Time Backup,
-	 * we do not want to release another version of Time Backup. So we workaround here.
-	 * We will change the input chunk size to 8(4K) if the input is 4(2K),
-	 * since Time Backup use 4 in its option but we want to modify it to 8.
-	 */
+	 
 	if (4 == chunk_size) {
 		chunk_size = 8;
 	}
-#endif	/* MY_ABC_HERE */
-	/* Validate the chunk size against the device block size */
+#endif	 
+	 
 	if (chunk_size %
 	    (bdev_logical_block_size(dm_snap_cow(store->snap)->bdev) >> 9) ||
 	    chunk_size %

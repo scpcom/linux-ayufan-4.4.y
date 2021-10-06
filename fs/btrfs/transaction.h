@@ -1,24 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * Copyright (C) 2007 Oracle.  All rights reserved.
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public
- * License v2 as published by the Free Software Foundation.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * General Public License for more details.
- *
- * You should have received a copy of the GNU General Public
- * License along with this program; if not, write to the
- * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
- * Boston, MA 021110-1307, USA.
- */
-
+ 
 #ifndef __BTRFS_TRANSACTION__
 #define __BTRFS_TRANSACTION__
 #include "btrfs_inode.h"
@@ -41,23 +24,15 @@ enum btrfs_trans_state {
 
 struct btrfs_transaction {
 	u64 transid;
-	/*
-	 * total external writers(USERSPACE/START/ATTACH) in this
-	 * transaction, it must be zero before the transaction is
-	 * being committed
-	 */
+	 
 	atomic_t num_extwriters;
-	/*
-	 * total writers in this transaction, it must be zero before the
-	 * transaction can end
-	 */
+	 
 	atomic_t num_writers;
 	atomic_t use_count;
 	atomic_t pending_ordered;
 
 	unsigned long flags;
 
-	/* Be protected by fs_info->trans_lock when we want to change it. */
 	enum btrfs_trans_state state;
 	struct list_head list;
 	struct extent_io_tree dirty_pages;
@@ -73,24 +48,20 @@ struct btrfs_transaction {
 	struct list_head dropped_roots;
 	u64 num_dirty_bgs;
 
-	/*
-	 * we need to make sure block group deletion doesn't race with
-	 * free space cache writeout.  This mutex keeps them from stomping
-	 * on each other
-	 */
+	
 	struct mutex cache_write_mutex;
 	spinlock_t dirty_bgs_lock;
-	/* Protected by spin lock fs_info->unused_bgs_lock. */
+	
 	struct list_head deleted_bgs;
 	spinlock_t dropped_roots_lock;
 	struct btrfs_delayed_ref_root delayed_refs;
 #ifdef MY_ABC_HERE
 	struct list_head quota_account_list;
 	spinlock_t quota_account_lock;
-#endif /* MY_ABC_HERE */
+#endif 
 #ifdef MY_ABC_HERE
 	struct rw_semaphore delayed_refs_rw_sem;
-#endif /* MY_ABC_HERE */
+#endif 
 	int aborted;
 };
 
@@ -132,22 +103,18 @@ struct btrfs_trans_handle {
 	bool sync;
 	bool dirty;
 	unsigned int type;
-	/*
-	 * this root is only needed to validate that the root passed to
-	 * start_transaction is the same as the one passed to end_transaction.
-	 * Subvolume quota depends on this
-	 */
+	
 	struct btrfs_root *root;
 	struct seq_list delayed_ref_elem;
 #ifdef MY_ABC_HERE
 #else
 	struct list_head qgroup_ref_list;
-#endif /* MY_ABC_HERE */
+#endif 
 	struct list_head new_bgs;
 #ifdef MY_ABC_HERE
 	struct btrfs_pending_snapshot *pending_snap;
 	bool pending_snap_rm;
-#endif /* MY_ABC_HERE */
+#endif 
 };
 
 struct btrfs_pending_snapshot {
@@ -158,13 +125,13 @@ struct btrfs_pending_snapshot {
 	struct btrfs_root *snap;
 	struct btrfs_qgroup_inherit *inherit;
 	struct btrfs_path *path;
-	/* block reservation for the operation */
+	
 	struct btrfs_block_rsv block_rsv;
 	u64 qgroup_reserved;
 #ifdef MY_ABC_HERE
 	u64 copy_limit_from;
-#endif /* MY_ABC_HERE */
-	/* extra metadata reservation for relocation */
+#endif 
+	
 	int error;
 	bool readonly;
 	struct list_head list;
@@ -180,10 +147,6 @@ static inline void btrfs_set_inode_last_trans(struct btrfs_trans_handle *trans,
 	spin_unlock(&BTRFS_I(inode)->lock);
 }
 
-/*
- * Make qgroup codes to skip given qgroupid, means the old/new_roots for
- * qgroup won't contain the qgroupid in it.
- */
 static inline void btrfs_set_skip_qgroup(struct btrfs_trans_handle *trans,
 					 u64 qgroupid)
 {
@@ -206,7 +169,7 @@ static inline void btrfs_clear_skip_qgroup(struct btrfs_trans_handle *trans)
 #ifdef MY_ABC_HERE
 int btrfs_end_transaction_nosync_delayed(struct btrfs_trans_handle *trans,
 			  struct btrfs_root *root);
-#endif /* MY_ABC_HERE */
+#endif  
 int btrfs_end_transaction(struct btrfs_trans_handle *trans,
 			  struct btrfs_root *root);
 struct btrfs_trans_handle *btrfs_start_transaction(struct btrfs_root *root,
@@ -229,7 +192,7 @@ int btrfs_wait_for_commit(struct btrfs_root *root, u64 transid);
 void btrfs_add_dead_root(struct btrfs_root *root);
 #if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
 void btrfs_add_dead_root_head(struct btrfs_root *root);
-#endif /* MY_ABC_HERE || MY_ABC_HERE */
+#endif  
 int btrfs_defrag_root(struct btrfs_root *root);
 int btrfs_clean_one_deleted_snapshot(struct btrfs_root *root);
 int btrfs_commit_transaction(struct btrfs_trans_handle *trans,

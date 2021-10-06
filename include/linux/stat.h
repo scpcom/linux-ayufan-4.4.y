@@ -26,10 +26,10 @@ struct kstat {
 	umode_t		mode;
 #ifdef MY_ABC_HERE
 	__u32		syno_archive_bit;
-#endif /* MY_ABC_HERE */
+#endif  
 #ifdef MY_ABC_HERE
 	__u32		syno_archive_version;
-#endif /* MY_ABC_HERE */
+#endif  
 	unsigned int	nlink;
 	kuid_t		uid;
 	kgid_t		gid;
@@ -40,7 +40,7 @@ struct kstat {
 	struct timespec	ctime;
 #ifdef MY_ABC_HERE
 	struct timespec syno_create_time;
-#endif /* MY_ABC_HERE */
+#endif  
 	unsigned long	blksize;
 	unsigned long long	blocks;
 };
@@ -57,18 +57,16 @@ struct SYNOSTAT {
 };
 
 #ifdef MY_ABC_HERE
-/*
- * flags: decide which information to get.
- */
-#define SYNOST_STAT         0x00000001  /* stat */
-#define SYNOST_ARCHIVE_BIT  0x00000002  /* Archive Bit */
-#define SYNOST_ARCHIVE_VER  0x00000004  /* Archive Version (aka Backup Version) */
-#define SYNOST_CREATE_TIME  0x00000008  /* Create Time */
+ 
+#define SYNOST_STAT         0x00000001   
+#define SYNOST_ARCHIVE_BIT  0x00000002   
+#define SYNOST_ARCHIVE_VER  0x00000004   
+#define SYNOST_CREATE_TIME  0x00000008   
 
 #define SYNOST_ALL          SYNOST_STAT|SYNOST_ARCHIVE_BIT|SYNOST_ARCHIVE_VER|SYNOST_CREATE_TIME
-#define SYNOST_IS_CASELESS      0x10000000      /* Is Caseless */
+#define SYNOST_IS_CASELESS      0x10000000       
 
-#endif /* MY_ABC_HERE */
-#endif /* MY_ABC_HERE */
+#endif  
+#endif  
 
 #endif

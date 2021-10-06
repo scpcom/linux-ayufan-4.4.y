@@ -47,8 +47,8 @@ EXPORT_SYMBOL_GPL(rtk_dwc3_set_and_get_usb_gadget_driver);
 int dwc3_drd_to_host(struct dwc3 *dwc)
 {
 	int ret;
-	unsigned long timeout; 
-//	unsigned long flags = 0;
+	unsigned long timeout;
+	//unsigned long flags = 0;
 	u32 reg;
 
 	dev_info(dwc->dev, "%s START....", __func__);

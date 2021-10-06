@@ -1,22 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- *  USB HID quirks support for Linux
- *
- *  Copyright (c) 1999 Andreas Gal
- *  Copyright (c) 2000-2005 Vojtech Pavlik <vojtech@suse.cz>
- *  Copyright (c) 2005 Michael Haboustak <mike-@cinci.rr.com> for Concept2, Inc
- *  Copyright (c) 2006-2007 Jiri Kosina
- */
-
-/*
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the Free
- * Software Foundation; either version 2 of the License, or (at your option)
- * any later version.
- */
-
+ 
 #ifndef HID_IDS_H_FILE
 #define HID_IDS_H_FILE
 
@@ -684,7 +669,7 @@
 #define USB_DEVICE_ID_BELKIN_UPS4       0x0912
 #define USB_DEVICE_ID_BELKIN_UPS5       0x0551
 #define USB_DEVICE_ID_BELKIN_UPS6       0x0751
-#endif /* MY_ABC_HERE */
+#endif  
 
 #define USB_VENDOR_ID_MICROCHIP		0x04d8
 #define USB_DEVICE_ID_PICKIT1		0x0032
@@ -1067,8 +1052,8 @@
 #define USB_DEVICE_ID_PRIMAX_MOUSE_4D22	0x4d22
 #define USB_DEVICE_ID_PRIMAX_KEYBOARD	0x4e05
 
-#define USB_VENDOR_ID_RISO_KAGAKU	0x1294	/* Riso Kagaku Corp. */
-#define USB_DEVICE_ID_RI_KA_WEBMAIL	0x1320	/* Webmail Notifier */
+#define USB_VENDOR_ID_RISO_KAGAKU	0x1294	 
+#define USB_DEVICE_ID_RI_KA_WEBMAIL	0x1320	 
 
 #define USB_VENDOR_ID_MULTIPLE_1781	0x1781
 #define USB_DEVICE_ID_RAPHNET_4NES4SNES_OLD	0x0a8d

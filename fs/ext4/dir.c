@@ -1,29 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- *  linux/fs/ext4/dir.c
- *
- * Copyright (C) 1992, 1993, 1994, 1995
- * Remy Card (card@masi.ibp.fr)
- * Laboratoire MASI - Institut Blaise Pascal
- * Universite Pierre et Marie Curie (Paris VI)
- *
- *  from
- *
- *  linux/fs/minix/dir.c
- *
- *  Copyright (C) 1991, 1992  Linus Torvalds
- *
- *  ext4 directory handling functions
- *
- *  Big-endian to little-endian byte-swapping/bitmaps by
- *        David S. Miller (davem@caip.rutgers.edu), 1995
- *
- * Hash Tree Directory indexing (c) 2001  Daniel Phillips
- *
- */
-
+ 
 #include <linux/fs.h>
 #include <linux/buffer_head.h>
 #include <linux/slab.h>
@@ -32,13 +10,6 @@
 
 static int ext4_dx_readdir(struct file *, struct dir_context *);
 
-/**
- * Check if the given dir-inode refers to an htree-indexed directory
- * (or a directory which could potentially get converted to use htree
- * indexing).
- *
- * Return 1 if it is a dx dir, 0 if not
- */
 static int is_dx_dir(struct inode *inode)
 {
 	struct super_block *sb = inode->i_sb;
@@ -53,20 +24,12 @@ static int is_dx_dir(struct inode *inode)
 	    ((ext4_test_inode_flag(inode, EXT4_INODE_INDEX)) ||
 	     ((inode->i_size >> sb->s_blocksize_bits) == 1) ||
 	     ext4_has_inline_data(inode)))
-#endif /* MY_ABC_HERE */
+#endif  
 		return 1;
 
 	return 0;
 }
 
-/*
- * Return 0 if the directory entry is OK, and 1 if there is a problem
- *
- * Note: this is the opposite of what ext2 and ext3 historically returned...
- *
- * bh passed here can be an inode block or a dir data block, depending
- * on the inode inline data flag.
- */
 int __ext4_check_dir_entry(const char *function, unsigned int line,
 			   struct inode *dir, struct file *filp,
 			   struct ext4_dir_entry_2 *de,
@@ -78,7 +41,7 @@ int __ext4_check_dir_entry(const char *function, unsigned int line,
 						dir->i_sb->s_blocksize);
 #ifdef MY_ABC_HERE
 	int dangerous_entry = 0;
-#endif /*MY_ABC_HERE */
+#endif 
 
 	if (unlikely(rlen < EXT4_DIR_REC_LEN(1)))
 		error_msg = "rec_len is smaller than minimal";
@@ -96,7 +59,7 @@ int __ext4_check_dir_entry(const char *function, unsigned int line,
 		error_msg = "dangerous dot entry";
 		dangerous_entry = 1;
 	}
-#endif /*MY_ABC_HERE */
+#endif 
 	else
 		return 0;
 
@@ -110,7 +73,7 @@ int __ext4_check_dir_entry(const char *function, unsigned int line,
 				offset, le32_to_cpu(de->inode),
 				rlen, de->name_len);
 	}
-#else /* MY_ABC_HERE */
+#else  
 	if (filp)
 		ext4_error_file(filp, function, line, bh->b_blocknr,
 				"bad entry in directory: %s - offset=%u(%u), "
@@ -118,11 +81,11 @@ int __ext4_check_dir_entry(const char *function, unsigned int line,
 				error_msg, (unsigned) (offset % size),
 				offset, le32_to_cpu(de->inode),
 				rlen, de->name_len);
-#endif /* MY_ABC_HERE */
+#endif 
 	else
 #ifdef MY_ABC_HERE
 		if (printk_ratelimit())
-#endif /* MY_ABC_HERE */
+#endif 
 		ext4_error_inode(dir, function, line, bh->b_blocknr,
 				"bad entry in directory: %s - offset=%u(%u), "
 				"inode=%u, rec_len=%d, name_len=%d",
@@ -130,10 +93,10 @@ int __ext4_check_dir_entry(const char *function, unsigned int line,
 				offset, le32_to_cpu(de->inode),
 				rlen, de->name_len);
 #ifdef MY_ABC_HERE
-	/* do not bother if failure of such type */
+	
 	if (dangerous_entry)
 		return 0;
-#endif /*MY_ABC_HERE */
+#endif 
 
 	return 1;
 }
@@ -155,10 +118,7 @@ static int ext4_readdir(struct file *file, struct dir_context *ctx)
 		if (err != ERR_BAD_DX_DIR) {
 			return err;
 		}
-		/*
-		 * We don't set the inode dirty flag since it's not
-		 * critical that it get flushed back to the disk.
-		 */
+		 
 		ext4_clear_inode_flag(file_inode(file),
 				      EXT4_INODE_INDEX);
 	}
@@ -208,14 +168,13 @@ static int ext4_readdir(struct file *file, struct dir_context *ctx)
 					   (unsigned long long) ctx->pos);
 				dir_has_error = 1;
 			}
-			/* corrupt size?  Maybe no more blocks to read */
+			 
 			if (ctx->pos > inode->i_blocks << 9)
 				break;
 			ctx->pos += sb->s_blocksize - offset;
 			continue;
 		}
 
-		/* Check the checksum */
 		if (!buffer_verified(bh) &&
 		    !ext4_dirent_csum_verify(inode,
 				(struct ext4_dir_entry *)bh->b_data)) {
@@ -233,24 +192,15 @@ static int ext4_readdir(struct file *file, struct dir_context *ctx)
 			brelse(bh);
 			bh = NULL;
 			continue;
-#endif /* MY_ABC_HERE */
+#endif  
 		}
 		set_buffer_verified(bh);
 
-		/* If the dir block has changed since the last call to
-		 * readdir(2), then we might be pointing to an invalid
-		 * dirent right now.  Scan from the start of the block
-		 * to make sure. */
 		if (file->f_version != inode->i_version) {
 			for (i = 0; i < sb->s_blocksize && i < offset; ) {
 				de = (struct ext4_dir_entry_2 *)
 					(bh->b_data + i);
-				/* It's too expensive to do a full
-				 * dirent test each time round this
-				 * loop, but we do have to test at
-				 * least that it is non-zero.  A
-				 * failure will be detected in the
-				 * dirent test below. */
+				 
 				if (ext4_rec_len_from_disk(de->rec_len,
 					sb->s_blocksize) < EXT4_DIR_REC_LEN(1))
 					break;
@@ -269,9 +219,7 @@ static int ext4_readdir(struct file *file, struct dir_context *ctx)
 			if (ext4_check_dir_entry(inode, file, de, bh,
 						 bh->b_data, bh->b_size,
 						 offset)) {
-				/*
-				 * On error, skip to the next block
-				 */
+				 
 				ctx->pos = (ctx->pos |
 						(sb->s_blocksize - 1)) + 1;
 				break;
@@ -285,7 +233,7 @@ static int ext4_readdir(struct file *file, struct dir_context *ctx)
 						if (!dir_emit_dot(file, ctx))
 							goto done;
 					} else
-#endif /*MY_ABC_HERE */
+#endif 
 					if (!dir_emit(ctx, de->name,
 					    de->name_len,
 					    le32_to_cpu(de->inode),
@@ -294,7 +242,6 @@ static int ext4_readdir(struct file *file, struct dir_context *ctx)
 				} else {
 					int save_len = fname_crypto_str.len;
 
-					/* Directory is encrypted */
 					err = ext4_fname_disk_to_usr(inode,
 						NULL, de, &fname_crypto_str);
 					fname_crypto_str.len = save_len;
@@ -335,15 +282,6 @@ static inline int is_32bit_api(void)
 #endif
 }
 
-/*
- * These functions convert from the major/minor hash to an f_pos
- * value for dx directories
- *
- * Upper layer (for example NFS) should specify FMODE_32BITHASH or
- * FMODE_64BITHASH explicitly. On the other hand, we allow ext4 to be mounted
- * directly on both 32-bit and 64-bit nodes, under such case, neither
- * FMODE_32BITHASH nor FMODE_64BITHASH is specified.
- */
 static inline loff_t hash2pos(struct file *filp, __u32 major, __u32 minor)
 {
 	if ((filp->f_mode & FMODE_32BITHASH) ||
@@ -371,9 +309,6 @@ static inline __u32 pos2min_hash(struct file *filp, loff_t pos)
 		return pos & 0xffffffff;
 }
 
-/*
- * Return 32- or 64-bit end-of-file for dx directories
- */
 static inline loff_t ext4_get_htree_eof(struct file *filp)
 {
 	if ((filp->f_mode & FMODE_32BITHASH) ||
@@ -383,17 +318,6 @@ static inline loff_t ext4_get_htree_eof(struct file *filp)
 		return EXT4_HTREE_EOF_64BIT;
 }
 
-/*
- * ext4_dir_llseek() calls generic_file_llseek_size to handle htree
- * directories, where the "offset" is in terms of the filename hash
- * value instead of the byte offset.
- *
- * Because we may return a 64-bit hash that is well beyond offset limits,
- * we need to pass the max hash as the maximum allowable offset in
- * the htree directory case.
- *
- * For non-htree, ext4_llseek already chooses the proper max offset.
- */
 static loff_t ext4_dir_llseek(struct file *file, loff_t offset, int whence)
 {
 	struct inode *inode = file->f_mapping->host;
@@ -407,10 +331,6 @@ static loff_t ext4_dir_llseek(struct file *file, loff_t offset, int whence)
 		return ext4_llseek(file, offset, whence);
 }
 
-/*
- * This structure holds the nodes of the red-black tree used to store
- * the directory entry in hash order.
- */
 struct fname {
 	__u32		hash;
 	__u32		minor_hash;
@@ -422,10 +342,6 @@ struct fname {
 	char		name[0];
 };
 
-/*
- * This functoin implements a non-recursive way of freeing all of the
- * nodes in the red-black tree.
- */
 static void free_rb_tree_fname(struct rb_root *root)
 {
 	struct fname *fname, *next;
@@ -459,13 +375,6 @@ void ext4_htree_free_dir_info(struct dir_private_info *p)
 	kfree(p);
 }
 
-/*
- * Given a directory entry, enter it into the fname rb tree.
- *
- * When filename encryption is enabled, the dirent will hold the
- * encrypted filename, while the htree will hold decrypted filename.
- * The decrypted filename is passed in via ent_name.  parameter.
- */
 int ext4_htree_store_dirent(struct file *dir_file, __u32 hash,
 			     __u32 minor_hash,
 			    struct ext4_dir_entry_2 *dirent,
@@ -479,7 +388,6 @@ int ext4_htree_store_dirent(struct file *dir_file, __u32 hash,
 	info = dir_file->private_data;
 	p = &info->root.rb_node;
 
-	/* Create and allocate the fname structure */
 	len = sizeof(struct fname) + ent_name->len + 1;
 	new_fn = kzalloc(len, GFP_KERNEL);
 	if (!new_fn)
@@ -496,10 +404,6 @@ int ext4_htree_store_dirent(struct file *dir_file, __u32 hash,
 		parent = *p;
 		fname = rb_entry(parent, struct fname, rb_hash);
 
-		/*
-		 * If the hash and minor hash match up, then we put
-		 * them on a linked list.  This rarely happens...
-		 */
 		if ((new_fn->hash == fname->hash) &&
 		    (new_fn->minor_hash == fname->minor_hash)) {
 			new_fn->next = fname->next;
@@ -513,7 +417,7 @@ int ext4_htree_store_dirent(struct file *dir_file, __u32 hash,
 			p = &(*p)->rb_right;
 		else if (new_fn->minor_hash < fname->minor_hash)
 			p = &(*p)->rb_left;
-		else /* if (new_fn->minor_hash > fname->minor_hash) */
+		else  
 			p = &(*p)->rb_right;
 	}
 
@@ -522,11 +426,6 @@ int ext4_htree_store_dirent(struct file *dir_file, __u32 hash,
 	return 0;
 }
 
-/*
- * This is a helper function for ext4_dx_readdir.  It calls filldir
- * for all entres on the fname linked list.  (Normally there is only
- * one entry on the linked list, unless there are 62 bit hash collisions.)
- */
 static int call_filldir(struct file *file, struct dir_context *ctx,
 			struct fname *fname)
 {
@@ -569,9 +468,8 @@ static int ext4_dx_readdir(struct file *file, struct dir_context *ctx)
 	}
 
 	if (ctx->pos == ext4_get_htree_eof(file))
-		return 0;	/* EOF */
+		return 0;	 
 
-	/* Some one has messed with f_pos; reset the world */
 	if (info->last_pos != ctx->pos) {
 		free_rb_tree_fname(&info->root);
 		info->curr_node = NULL;
@@ -580,10 +478,6 @@ static int ext4_dx_readdir(struct file *file, struct dir_context *ctx)
 		info->curr_minor_hash = pos2min_hash(file, ctx->pos);
 	}
 
-	/*
-	 * If there are any leftover names on the hash collision
-	 * chain, return them first.
-	 */
 	if (info->extra_fname) {
 		if (call_filldir(file, ctx, info->extra_fname))
 			goto finished;
@@ -593,11 +487,7 @@ static int ext4_dx_readdir(struct file *file, struct dir_context *ctx)
 		info->curr_node = rb_first(&info->root);
 
 	while (1) {
-		/*
-		 * Fill the rbtree if we have no more entries,
-		 * or the inode has changed since we last read in the
-		 * cached entries.
-		 */
+		 
 		if ((!info->curr_node) ||
 		    (file->f_version != inode->i_version)) {
 			info->curr_node = NULL;

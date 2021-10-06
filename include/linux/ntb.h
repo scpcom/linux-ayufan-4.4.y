@@ -337,7 +337,6 @@ struct ntb_dev {
 	/* block unregister until device is fully released */
 	struct completion		released;
 };
-
 #define dev_ntb(__dev) container_of((__dev), struct ntb_dev, dev)
 
 /**

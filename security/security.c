@@ -1,19 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * Security plug functions
- *
- * Copyright (C) 2001 WireX Communications, Inc <chris@wirex.com>
- * Copyright (C) 2001-2002 Greg Kroah-Hartman <greg@kroah.com>
- * Copyright (C) 2001 Networks Associates Technology, Inc <ssmalley@nai.com>
- *
- *	This program is free software; you can redistribute it and/or modify
- *	it under the terms of the GNU General Public License as published by
- *	the Free Software Foundation; either version 2 of the License, or
- *	(at your option) any later version.
- */
-
+ 
 #include <linux/capability.h>
 #include <linux/dcache.h>
 #include <linux/module.h>
@@ -32,10 +20,8 @@
 
 #define MAX_LSM_EVM_XATTR	2
 
-/* Maximum number of letters for an LSM name string */
 #define SECURITY_NAME_MAX	10
 
-/* Boot-time LSM user choice */
 static __initdata char chosen_lsm[SECURITY_NAME_MAX + 1] =
 	CONFIG_DEFAULT_SECURITY;
 
@@ -49,30 +35,18 @@ static void __init do_security_initcalls(void)
 	}
 }
 
-/**
- * security_init - initializes the security framework
- *
- * This should be called early in the kernel initialization sequence.
- */
 int __init security_init(void)
 {
 	pr_info("Security Framework initialized\n");
 
-	/*
-	 * Load minor LSMs, with the capability module always first.
-	 */
 	capability_add_hooks();
 	yama_add_hooks();
 
-	/*
-	 * Load all the remaining security modules.
-	 */
 	do_security_initcalls();
 
 	return 0;
 }
 
-/* Save user chosen LSM */
 static int __init choose_lsm(char *str)
 {
 	strncpy(chosen_lsm, str, SECURITY_NAME_MAX);
@@ -80,34 +54,10 @@ static int __init choose_lsm(char *str)
 }
 __setup("security=", choose_lsm);
 
-/**
- * security_module_enable - Load given security module on boot ?
- * @module: the name of the module
- *
- * Each LSM must pass this method before registering its own operations
- * to avoid security registration races. This method may also be used
- * to check if your LSM is currently loaded during kernel initialization.
- *
- * Return true if:
- *	-The passed LSM is the one chosen by user at boot time,
- *	-or the passed LSM is configured as the default and the user did not
- *	 choose an alternate LSM at boot time.
- * Otherwise, return false.
- */
 int __init security_module_enable(const char *module)
 {
 	return !strcmp(module, chosen_lsm);
 }
-
-/*
- * Hook list operation macros.
- *
- * call_void_hook:
- *	This is a hook that does not return a value.
- *
- * call_int_hook:
- *	This is a hook that returns a value.
- */
 
 #define call_void_hook(FUNC, ...)				\
 	do {							\
@@ -130,8 +80,6 @@ int __init security_module_enable(const char *module)
 	} while (0);						\
 	RC;							\
 })
-
-/* Security operations */
 
 int security_binder_set_context_mgr(struct task_struct *mgr)
 {
@@ -222,13 +170,6 @@ int security_vm_enough_memory_mm(struct mm_struct *mm, long pages)
 	int cap_sys_admin = 1;
 	int rc;
 
-	/*
-	 * The module will respond with a positive value if
-	 * it thinks the __vm_enough_memory() call should be
-	 * made with the cap_sys_admin set. If all of the modules
-	 * agree that it should be set it will. If any module
-	 * thinks it should not be set it won't.
-	 */
 	list_for_each_entry(hp, &security_hook_heads.vm_enough_memory, list) {
 		rc = hp->hook.vm_enough_memory(mm, pages);
 		if (rc <= 0) {
@@ -438,7 +379,7 @@ int security_path_rmdir(struct path *dir, struct dentry *dentry)
 }
 #ifdef CONFIG_AUFS_FHSM
 EXPORT_SYMBOL_GPL(security_path_rmdir);
-#endif /* CONFIG_AUFS_FHSM */
+#endif  
 
 int security_path_unlink(struct path *dir, struct dentry *dentry)
 {
@@ -457,7 +398,7 @@ int security_path_symlink(struct path *dir, struct dentry *dentry,
 }
 #ifdef CONFIG_AUFS_FHSM
 EXPORT_SYMBOL_GPL(security_path_symlink);
-#endif /* CONFIG_AUFS_FHSM */
+#endif  
 
 int security_path_link(struct dentry *old_dentry, struct path *new_dir,
 		       struct dentry *new_dentry)
@@ -468,7 +409,7 @@ int security_path_link(struct dentry *old_dentry, struct path *new_dir,
 }
 #ifdef CONFIG_AUFS_FHSM
 EXPORT_SYMBOL_GPL(security_path_link);
-#endif /* CONFIG_AUFS_FHSM */
+#endif  
 
 int security_path_rename(struct path *old_dir, struct dentry *old_dentry,
 			 struct path *new_dir, struct dentry *new_dentry,
@@ -498,7 +439,7 @@ int security_path_truncate(struct path *path)
 }
 #ifdef CONFIG_AUFS_FHSM
 EXPORT_SYMBOL_GPL(security_path_truncate);
-#endif /* CONFIG_AUFS_FHSM */
+#endif  
 
 int security_path_chmod(struct path *path, umode_t mode)
 {
@@ -508,7 +449,7 @@ int security_path_chmod(struct path *path, umode_t mode)
 }
 #ifdef CONFIG_AUFS_FHSM
 EXPORT_SYMBOL_GPL(security_path_chmod);
-#endif /* CONFIG_AUFS_FHSM */
+#endif  
 
 int security_path_chown(struct path *path, kuid_t uid, kgid_t gid)
 {
@@ -518,7 +459,7 @@ int security_path_chown(struct path *path, kuid_t uid, kgid_t gid)
 }
 #ifdef CONFIG_AUFS_FHSM
 EXPORT_SYMBOL_GPL(security_path_chown);
-#endif /* CONFIG_AUFS_FHSM */
+#endif  
 
 int security_path_chroot(struct path *path)
 {
@@ -606,7 +547,7 @@ int security_inode_readlink(struct dentry *dentry)
 }
 #ifdef CONFIG_AUFS_FHSM
 EXPORT_SYMBOL_GPL(security_inode_readlink);
-#endif /* CONFIG_AUFS_FHSM */
+#endif  
 
 int security_inode_follow_link(struct dentry *dentry, struct inode *inode,
 			       bool rcu)
@@ -624,7 +565,7 @@ int security_inode_permission(struct inode *inode, int mask)
 }
 #if defined(MY_ABC_HERE) || defined(CONFIG_AUFS_FHSM)
 EXPORT_SYMBOL(security_inode_permission);
-#endif /* MY_ABC_HERE || CONFIG_AUFS_FHSM */
+#endif  
 
 int security_inode_setattr(struct dentry *dentry, struct iattr *attr)
 {
@@ -653,10 +594,7 @@ int security_inode_setxattr(struct dentry *dentry, const char *name,
 
 	if (unlikely(IS_PRIVATE(d_backing_inode(dentry))))
 		return 0;
-	/*
-	 * SELinux and Smack integrate the cap call,
-	 * so assume that all LSMs supplying this call do so.
-	 */
+	 
 	ret = call_int_hook(inode_setxattr, 1, dentry, name, value, size,
 				flags);
 
@@ -699,10 +637,7 @@ int security_inode_removexattr(struct dentry *dentry, const char *name)
 
 	if (unlikely(IS_PRIVATE(d_backing_inode(dentry))))
 		return 0;
-	/*
-	 * SELinux and Smack integrate the cap call,
-	 * so assume that all LSMs supplying this call do so.
-	 */
+	 
 	ret = call_int_hook(inode_removexattr, 1, dentry, name);
 	if (ret == 1)
 		ret = cap_inode_removexattr(dentry, name);
@@ -765,7 +700,7 @@ int security_file_permission(struct file *file, int mask)
 }
 #ifdef CONFIG_AUFS_FHSM
 EXPORT_SYMBOL_GPL(security_file_permission);
-#endif /* CONFIG_AUFS_FHSM */
+#endif  
 
 int security_file_alloc(struct file *file)
 {
@@ -784,23 +719,15 @@ int security_file_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 
 static inline unsigned long mmap_prot(struct file *file, unsigned long prot)
 {
-	/*
-	 * Does we have PROT_READ and does the application expect
-	 * it to imply PROT_EXEC?  If not, nothing to talk about...
-	 */
+	 
 	if ((prot & (PROT_READ | PROT_EXEC)) != PROT_READ)
 		return prot;
 	if (!(current->personality & READ_IMPLIES_EXEC))
 		return prot;
-	/*
-	 * if that's an anonymous mapping, let it.
-	 */
+	 
 	if (!file)
 		return prot | PROT_EXEC;
-	/*
-	 * ditto if it's not on noexec mount, except that on !MMU we need
-	 * NOMMU_MAP_EXEC (== VM_MAYEXEC) in this case
-	 */
+	 
 	if (!path_noexec(&file->f_path)) {
 #ifndef CONFIG_MMU
 		if (file->f_op->mmap_capabilities) {
@@ -811,7 +738,7 @@ static inline unsigned long mmap_prot(struct file *file, unsigned long prot)
 #endif
 		return prot | PROT_EXEC;
 	}
-	/* anything on noexec mount won't get PROT_EXEC */
+	 
 	return prot;
 }
 
@@ -827,7 +754,7 @@ int security_mmap_file(struct file *file, unsigned long prot,
 }
 #ifdef CONFIG_AUFS_FHSM
 EXPORT_SYMBOL_GPL(security_mmap_file);
-#endif /* CONFIG_AUFS_FHSM */
+#endif  
 
 int security_mmap_addr(unsigned long addr)
 {
@@ -1421,7 +1348,7 @@ int security_tun_dev_open(void *security)
 }
 EXPORT_SYMBOL(security_tun_dev_open);
 
-#endif	/* CONFIG_SECURITY_NETWORK */
+#endif	 
 
 #ifdef CONFIG_SECURITY_NETWORK_XFRM
 
@@ -1486,15 +1413,6 @@ int security_xfrm_state_pol_flow_match(struct xfrm_state *x,
 	struct security_hook_list *hp;
 	int rc = 1;
 
-	/*
-	 * Since this function is expected to return 0 or 1, the judgment
-	 * becomes difficult if multiple LSMs supply this call. Fortunately,
-	 * we can use the first LSM's judgment because currently only SELinux
-	 * supplies this call.
-	 *
-	 * For speed optimization, we explicitly break the loop rather than
-	 * using the macro
-	 */
 	list_for_each_entry(hp, &security_hook_heads.xfrm_state_pol_flow_match,
 				list) {
 		rc = hp->hook.xfrm_state_pol_flow_match(x, xp, fl);
@@ -1517,7 +1435,7 @@ void security_skb_classify_flow(struct sk_buff *skb, struct flowi *fl)
 }
 EXPORT_SYMBOL(security_skb_classify_flow);
 
-#endif	/* CONFIG_SECURITY_NETWORK_XFRM */
+#endif	 
 
 #ifdef CONFIG_KEYS
 
@@ -1544,7 +1462,7 @@ int security_key_getsecurity(struct key *key, char **_buffer)
 	return call_int_hook(key_getsecurity, 0, key, _buffer);
 }
 
-#endif	/* CONFIG_KEYS */
+#endif	 
 
 #ifdef CONFIG_AUDIT
 
@@ -1569,7 +1487,7 @@ int security_audit_rule_match(u32 secid, u32 field, u32 op, void *lsmrule,
 	return call_int_hook(audit_rule_match, 0, secid, field, op, lsmrule,
 				actx);
 }
-#endif /* CONFIG_AUDIT */
+#endif  
 
 struct security_hook_heads security_hook_heads = {
 	.binder_set_context_mgr =
@@ -1872,7 +1790,7 @@ struct security_hook_heads security_hook_heads = {
 		LIST_HEAD_INIT(security_hook_heads.tun_dev_attach),
 	.tun_dev_open =	LIST_HEAD_INIT(security_hook_heads.tun_dev_open),
 	.skb_owned_by =	LIST_HEAD_INIT(security_hook_heads.skb_owned_by),
-#endif	/* CONFIG_SECURITY_NETWORK */
+#endif	 
 #ifdef CONFIG_SECURITY_NETWORK_XFRM
 	.xfrm_policy_alloc_security =
 		LIST_HEAD_INIT(security_hook_heads.xfrm_policy_alloc_security),
@@ -1896,7 +1814,7 @@ struct security_hook_heads security_hook_heads = {
 		LIST_HEAD_INIT(security_hook_heads.xfrm_state_pol_flow_match),
 	.xfrm_decode_session =
 		LIST_HEAD_INIT(security_hook_heads.xfrm_decode_session),
-#endif	/* CONFIG_SECURITY_NETWORK_XFRM */
+#endif	 
 #ifdef CONFIG_KEYS
 	.key_alloc =	LIST_HEAD_INIT(security_hook_heads.key_alloc),
 	.key_free =	LIST_HEAD_INIT(security_hook_heads.key_free),
@@ -1904,7 +1822,7 @@ struct security_hook_heads security_hook_heads = {
 		LIST_HEAD_INIT(security_hook_heads.key_permission),
 	.key_getsecurity =
 		LIST_HEAD_INIT(security_hook_heads.key_getsecurity),
-#endif	/* CONFIG_KEYS */
+#endif	 
 #ifdef CONFIG_AUDIT
 	.audit_rule_init =
 		LIST_HEAD_INIT(security_hook_heads.audit_rule_init),
@@ -1914,5 +1832,5 @@ struct security_hook_heads security_hook_heads = {
 		LIST_HEAD_INIT(security_hook_heads.audit_rule_match),
 	.audit_rule_free =
 		LIST_HEAD_INIT(security_hook_heads.audit_rule_free),
-#endif /* CONFIG_AUDIT */
+#endif  
 };

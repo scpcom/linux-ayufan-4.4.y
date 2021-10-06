@@ -1,12 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * linux/fs/btrfs/xattr_syno.c
- *
- * Copyright (C) 2001-2016 Synology Inc.
- */
-
+ 
 #include <linux/fs.h>
 #include <linux/slab.h>
 #include <linux/types.h>
@@ -27,12 +22,9 @@ btrfs_xattr_syno_set(const struct xattr_handler *handler,
 	if (ret)
 		goto out;
 #ifdef MY_ABC_HERE
-	/* In <FS Snapshot> #264, we handles non-cached issue for
-	   archive bit while btrfs send receive.*/
+	 
 	if (!strcmp(name, XATTR_SYNO_ARCHIVE_BIT)) {
-		/*
-		 * value == NULL is removexattr
-		 */
+		 
 		if (value) {
 			const __le32 *archive_bit_le32 = value;
 			inode->i_archive_bit = le32_to_cpu(*archive_bit_le32);
@@ -41,7 +33,7 @@ btrfs_xattr_syno_set(const struct xattr_handler *handler,
 		}
 		return ret;
 	}
-#endif /* MY_ABC_HERE */
+#endif  
 #ifdef MY_ABC_HERE
 	if (!strcmp(name, XATTR_SYNO_ARCHIVE_VERSION)) {
 		if (value) {
@@ -53,7 +45,7 @@ btrfs_xattr_syno_set(const struct xattr_handler *handler,
 		inode->i_flags |= S_ARCHIVE_VERSION_CACHED;
 		return ret;
 	}
-#endif /* MY_ABC_HERE */
+#endif  
 #ifdef MY_ABC_HERE
 	if (!strcmp(name, XATTR_SYNO_CREATE_TIME)) {
 		if (value) {
@@ -67,15 +59,11 @@ btrfs_xattr_syno_set(const struct xattr_handler *handler,
 		inode->i_flags |= S_CREATE_TIME_CACHED;
 		return ret;
 	}
-#endif /* MY_ABC_HERE */
+#endif  
 out:
 	return ret;
 }
 
-/*
- * Copied from btrfs/xattr.c btrfs_xattr_handler_get, because we don't
- * want to add syno define over there and expose this function.
- */
 static int btrfs_xattr_syno_get(const struct xattr_handler *handler,
 				   struct dentry *dentry, const char *name,
 				   void *buffer, size_t size)

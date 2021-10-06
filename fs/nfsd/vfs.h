@@ -1,45 +1,41 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * Copyright (C) 1995-1997 Olaf Kirch <okir@monad.swb.de>
- */
+
 
 #ifndef LINUX_NFSD_VFS_H
 #define LINUX_NFSD_VFS_H
 
 #ifdef MY_ABC_HERE
 #include <linux/sched.h>
-#endif /* MY_ABC_HERE */
+#endif 
 #include "nfsfh.h"
 #include "nfsd.h"
 
-/*
- * Flags for nfsd_permission
- */
+
 #define NFSD_MAY_NOP			0
-#define NFSD_MAY_EXEC			0x001 /* == MAY_EXEC */
-#define NFSD_MAY_WRITE			0x002 /* == MAY_WRITE */
-#define NFSD_MAY_READ			0x004 /* == MAY_READ */
+#define NFSD_MAY_EXEC			0x001 
+#define NFSD_MAY_WRITE			0x002 
+#define NFSD_MAY_READ			0x004 
 #define NFSD_MAY_SATTR			0x008
 #define NFSD_MAY_TRUNC			0x010
 #define NFSD_MAY_LOCK			0x020
 #define NFSD_MAY_MASK			0x03f
 
-/* extra hints to permission and open routines: */
+
 #define NFSD_MAY_OWNER_OVERRIDE		0x040
-#define NFSD_MAY_LOCAL_ACCESS		0x080 /* for device special files */
+#define NFSD_MAY_LOCAL_ACCESS		0x080 
 #define NFSD_MAY_BYPASS_GSS_ON_ROOT	0x100
 #define NFSD_MAY_NOT_BREAK_LEASE	0x200
 #define NFSD_MAY_BYPASS_GSS		0x400
 #define NFSD_MAY_READ_IF_EXEC		0x800
 
-#define NFSD_MAY_64BIT_COOKIE		0x1000 /* 64 bit readdir cookies for >= NFSv3 */
+#define NFSD_MAY_64BIT_COOKIE		0x1000 
 
 #ifdef MY_ABC_HERE
 #define NFSD_MAY_SYNO_NOP		0x2000
 #define NFSD_MAY_APPEND			0x4000
-#endif /* MY_ABC_HERE */
+#endif 
 
 #define NFSD_MAY_CREATE		(NFSD_MAY_EXEC|NFSD_MAY_WRITE)
 #define NFSD_MAY_REMOVE		(NFSD_MAY_EXEC|NFSD_MAY_WRITE|NFSD_MAY_TRUNC)
@@ -49,12 +45,10 @@
 #define NFSD_PAGESIZE                           (1<<12)
 #endif
 
-/*
- * Callback function for readdir
- */
+
 typedef int (*nfsd_filldir_t)(void *, const char *, int, loff_t, u64, unsigned);
 
-/* nfsd/vfs.c */
+
 int		nfsd_racache_init(int);
 void		nfsd_racache_shutdown(void);
 int		nfsd_cross_mnt(struct svc_rqst *rqstp, struct dentry **dpp,
@@ -74,7 +68,7 @@ __be32		nfsd4_vfs_fallocate(struct svc_rqst *, struct svc_fh *,
 				    struct file *, loff_t, loff_t, int);
 __be32		nfsd4_clone_file_range(struct file *, u64, struct file *,
 			u64, u64);
-#endif /* CONFIG_NFSD_V4 */
+#endif  
 __be32		nfsd_create(struct svc_rqst *, struct svc_fh *,
 				char *name, int len, struct iattr *attrs,
 				int type, dev_t rdev, struct svc_fh *res);
@@ -86,7 +80,7 @@ __be32		do_nfsd_create(struct svc_rqst *, struct svc_fh *,
 				u32 *verifier, bool *truncp, bool *created);
 __be32		nfsd_commit(struct svc_rqst *, struct svc_fh *,
 				loff_t, unsigned long);
-#endif /* CONFIG_NFSD_V3 */
+#endif  
 __be32		nfsd_open(struct svc_rqst *, struct svc_fh *, umode_t,
 				int, struct file **);
 struct raparms;
@@ -105,7 +99,7 @@ __be32		nfsd_synocopy(const char *, struct svc_rqst *, struct svc_fh *,
                                 loff_t, unsigned long *, bool);
 #ifdef MY_ABC_HERE
 __be32		nfsd_synoclone(const char *, struct svc_rqst *, struct svc_fh *);
-#endif /* MY_ABC_HERE */
+#endif 
 #endif
 __be32		nfsd_vfs_write(struct svc_rqst *rqstp, struct svc_fh *fhp,
 				struct file *file, loff_t offset,
@@ -173,4 +167,4 @@ static inline int nfsd_create_is_exclusive(int createmode)
 	       || createmode == NFS4_CREATE_EXCLUSIVE4_1;
 }
 
-#endif /* LINUX_NFSD_VFS_H */
+#endif  

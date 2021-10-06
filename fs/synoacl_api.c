@@ -1,15 +1,10 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * linux/fs/synoacl_api.c
- *
- * Copyright (c) 2000-2014 Synology Inc.
- */
-
+ 
 #ifdef MY_ABC_HERE
 #include <linux/syscalls.h>
-#endif /* MY_ABC_HERE */
+#endif  
 #ifdef MY_ABC_HERE
 #include <linux/kernel.h>
 #include <linux/slab.h>
@@ -76,7 +71,6 @@ Err:
 }
 EXPORT_SYMBOL(UseACLModule);
 
-/* --------------- Register Function ---------------- */
 int synoacl_vfs_register(struct synoacl_vfs_operations *pvfs, struct synoacl_syscall_operations *psys)
 {
 	if (!pvfs || !psys) {
@@ -97,13 +91,12 @@ void synoacl_vfs_unregister(void)
 }
 EXPORT_SYMBOL(synoacl_vfs_unregister);
 
-/* --------------- VFS API ---------------- */
 int synoacl_mod_archive_change_ok(struct dentry *d, unsigned int cmd, int tag, int mask)
 {
 	if (IS_VFS_ACL_READY(archive_change_ok)) {
 		return DO_VFS(archive_change_ok, d, cmd, tag, mask);
 	}
-	return 0; //is settable
+	return 0;  
 }
 EXPORT_SYMBOL(synoacl_mod_archive_change_ok);
 
@@ -186,7 +179,7 @@ int synoacl_mod_init_acl(struct dentry *dentry, struct inode *inode)
 	return -EOPNOTSUPP;
 }
 EXPORT_SYMBOL(synoacl_mod_init_acl);
-#endif /* MY_ABC_HERE */
+#endif  
 
 #ifdef MY_ABC_HERE
 SYSCALL_DEFINE2(SYNOACLCheckPerm, const char __user *, name, int , mask)
@@ -228,7 +221,7 @@ out:
 	return error;
 #else
 	return 0;
-#endif /* MY_ABC_HERE */
+#endif  
 }
 
 SYSCALL_DEFINE3(SYNOACLIsSupport, const char __user *, name, int , fd, int , tag)
@@ -287,7 +280,7 @@ out:
 	return error;
 #else
 	return 0;
-#endif /* MY_ABC_HERE */
+#endif  
 }
 
 SYSCALL_DEFINE2(SYNOACLGetPerm, const char __user *, name, int __user *, out_perm)
@@ -342,6 +335,6 @@ err:
 	return error;
 #else
 	return 0;
-#endif /* MY_ABC_HERE */
+#endif  
 }
-#endif /* MY_ABC_HERE */
+#endif  
