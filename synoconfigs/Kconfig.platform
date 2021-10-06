@@ -1,0 +1,65 @@
+menu "Platform Selection"
+
+config SYNO_X64
+	bool
+	default y
+	depends on X86_64
+
+config SYNO_SELECT_PLATFORM
+	def_bool y
+choice
+	prompt "Synology platform"
+
+config SYNO_BROMOLOW
+	bool "Intel-Bromolow"
+	depends on X86_64
+
+config SYNO_GRANTLEY
+	bool "Intel Grantley"
+	depends on X86_64
+
+config SYNO_AVOTON
+	bool "Intel-Avoton"
+	depends on X86_64
+
+config SYNO_BRASWELL
+	bool "Intel-Braswell"
+	depends on X86_64
+
+config SYNO_APOLLOLAKE
+	bool "Intel-Apollolake"
+	depends on X86_64
+
+config SYNO_KVMX64
+	bool "KVM X64 Virtual machine"
+	depends on X86_64
+
+config SYNO_BROADWELL
+	bool "Intel-Broadwell"
+	depends on X86_64
+
+config SYNO_DENVERTON
+	bool "Intel-Denverton"
+	depends on X86_64
+
+config SYNO_DOCKERX64
+	bool "Docker X64 Virtual machine"
+	depends on X86_64
+
+config SYNO_RTD1296
+	bool "realtek rtd1296"
+	depends on ARM64
+
+endchoice
+
+config SYNO_DUAL_HEAD
+	bool "Synology Dual Head Host"
+	default n
+	depends on SYNO_BROMOLOW || SYNO_BROADWELL
+
+config SYNO_SAS
+	bool "Synology SAS Support"
+	default y
+	depends on SYNO_BROMOLOW || SYNO_BROADWELL || SYNO_GRANTLEY
+
+endmenu #Platform Selection

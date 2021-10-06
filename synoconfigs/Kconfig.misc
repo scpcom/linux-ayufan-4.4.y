@@ -1,0 +1,86 @@
+menu "MISC Features"
+
+config SYNO_HDDMON
+	tristate "Syno HDD monitor"
+	depends on SYNO_ATA_PWR_CTRL && SYNO_HDD_HOTPLUG
+
+config SYNO_PLUGIN_INTERFACE
+	bool "Synology plugin interface for kernel modules"
+	default y
+
+config SYNO_INCREASE_READAHEAD
+	bool "Increase default max readahead"
+	default y
+
+config SYNO_MAX_READAHEAD_SIZE
+	int "Set default max readahead size"
+	depends on SYNO_INCREASE_READAHEAD
+	default "192" if X86_64
+	default "512" if !X86_64
+
+config SYNO_BLOCK_LIMIT_BAD_SECTOR_MSG
+	bool "Reduce the rate of bad sector messages"
+	default y
+
+config SYNO_IO_ERROR_LIMIT_MSG
+	bool "Reduce the rate of IO error print messages"
+	default y
+
+config SYNO_IO_ERROR_LIMIT_MSG_SHIFT
+	int "Reduce the rate of IO error print messages - for the variable number"
+	depends on SYNO_IO_ERROR_LIMIT_MSG
+	default "12"
+
+config SYNO_EMULATE_U64_DIVISOR
+	bool "Emulate caculating of u64 remainder"
+	default y
+
+config SYNO_APPARMOR_PATCH
+	bool "Declare APPARMOR usage for userspace"
+	default y
+	depends on SECURITY_APPARMOR
+
+config SYNO_POWEROFF_INFO_PRINT
+	bool "Show pma1 and pma2 in poweroff procedure"
+	default n
+
+config SYNO_LOWER_MD_RESYNC_NICE
+	bool "Lower nice value to MD resync threads"
+	depends on SYNO_ALPINE
+	default n
+
+config SYNO_FIX_DM_DISK_ALIGNMENT
+	bool "Fix issue of device mapper disk alignment problem"
+	default y
+
+config SYNO_OOM_DUMP_MODULE
+	bool "Dump modules and occupied memory sizes while OOM"
+	default y
+
+config SYNO_ELEVATE_LOG_LEVEL
+	bool "Elevate log level of kernel log"
+	default y
+
+config SYNO_DYNAMIC_IDENTIFY_CPU_NAME
+	bool "dynamic identify CPU name"
+	default y
+	depends on SYNO_BROADWELL
+
+config SYNO_ARM64_CPU_MODELNAME_DISPLAY
+	tristate "Display cpu model for arm64"
+	default y
+	depends on ARM64
+
+endmenu #MISC Features
+
+menu "Encryption"
+
+endmenu #Encryption
+
+menu "Udev"
+
+config SYNO_DEPRECATED_UEVENT_ENV
+	bool "Export deprecate uevent environment to userspace"
+	default y
+
+endmenu #Udev
