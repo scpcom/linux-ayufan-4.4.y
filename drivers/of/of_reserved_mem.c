@@ -347,7 +347,7 @@ void of_reserved_mem_device_release(struct device *dev)
 	rmem->ops->device_release(rmem, dev);
 }
 EXPORT_SYMBOL_GPL(of_reserved_mem_device_release);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 
 #ifdef CONFIG_RTK_MEM_REMAP
 void __init of_reserved_mem_remap(void)
@@ -359,4 +359,4 @@ void __init of_reserved_mem_remap(void)
 }
 EXPORT_SYMBOL_GPL(of_reserved_mem_remap);
 #endif
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */

@@ -841,7 +841,7 @@ static int mtdchar_ioctl(struct file *file, u_int cmd, u_long arg)
 	{
 		struct nand_oobinfo oi;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 		if (!mtd->ooblayout)
 #else  
 		if (!mtd->ecclayout)
@@ -981,7 +981,7 @@ static int mtdchar_ioctl(struct file *file, u_int cmd, u_long arg)
 	{
 		struct nand_ecclayout_user *usrlay;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 		if (!mtd->ooblayout)
 #else  
 		if (!mtd->ecclayout)

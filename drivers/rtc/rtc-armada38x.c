@@ -1,12 +1,9 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
  * RTC driver for the Armada 38x & A8K Marvell SoCs
-#else  // MY_DEF_HERE
+#else  // CONFIG_SYNO_LSP_ARMADA_17_02_02
  * RTC driver for the Armada 38x Marvell SoCs
-#endif // MY_DEF_HERE
+#endif // CONFIG_SYNO_LSP_ARMADA_17_02_02
  *
  * Copyright (C) 2015 Marvell
  *
@@ -19,9 +16,9 @@
  *
  */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 #include <linux/of_device.h>
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 #include <linux/delay.h>
 #include <linux/io.h>
 #include <linux/module.h>
@@ -29,27 +26,27 @@
 #include <linux/platform_device.h>
 #include <linux/rtc.h>
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 // do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 #define RTC_STATUS	    0x0
 #define RTC_STATUS_ALARM1	    BIT(0)
 #define RTC_STATUS_ALARM2	    BIT(1)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 #define RTC_IRQ1_CONF	    0x4
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 #define RTC_IRQ_AL_EN			BIT(0)
 #define RTC_IRQ_FREQ_EN			BIT(1)
 #define RTC_IRQ_FREQ_1HZ		BIT(2)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 #define RTC_IRQ1_AL_EN		    BIT(0)
 #define RTC_IRQ1_FREQ_EN	    BIT(1)
 #define RTC_IRQ1_FREQ_1HZ	    BIT(2)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 #define RTC_TIME	    0xC
 #define RTC_ALARM1	    0x10
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 /* armada38x Interrupt registers  */
 #define RTC_38X_STATUS			0x0
 #define RTC_38X_STATUS_ALARM1		BIT(0)
@@ -65,9 +62,9 @@
 #define RTC_70X0_ALARM_MASK		0x94
 #define RTC_70X0_ALARM1_MASK		BIT(1)
 #define RTC_70X0_ALARM2_MASK		BIT(0)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 /* armada38x SoC registers  */
 #define RTC_38X_BRIDGE_TIMING_CTRL_REG_OFFS		0x0
 #define RTC_38X_WRCLK_PERIOD_OFFS			0
@@ -84,34 +81,34 @@
 #define RTC_70X0_BRIDGE_TIMING_CTRL1_REG_OFFS		0x4
 #define RTC_70X0_READ_OUTPUT_DELAY_OFFS			0
 #define RTC_70X0_READ_OUTPUT_DELAY_MASK			(0xFFFF << RTC_70X0_READ_OUTPUT_DELAY_OFFS)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 #define SAMPLE_NR 100
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 /* Armada-38x SoC supports alarm 1
  * Armada-8K SoC sopports alarm 2 (though it has 2 alarm units, as
  *				   alarm 1 interrupt is not connected)
  */
 #define ALARM1	0
 #define ALARM2	1
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 #define SOC_RTC_INTERRUPT   0x8
 #define SOC_RTC_ALARM1		BIT(0)
 #define SOC_RTC_ALARM2		BIT(1)
 #define SOC_RTC_ALARM1_MASK	BIT(2)
 #define SOC_RTC_ALARM2_MASK	BIT(3)
 
-#endif /* MY_DEF_HERE */
-#if defined(MY_DEF_HERE)
-#if defined(MY_DEF_HERE)
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 #define ALARM_REG(base, alarm)		(base + alarm * sizeof(u32))
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 #define SAMPLE_NR 100
-#endif /* MY_DEF_HERE */
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 struct armada38x_rtc {
 	struct rtc_device   *rtc_dev;
@@ -119,27 +116,27 @@ struct armada38x_rtc {
 	void __iomem	    *regs_soc;
 	spinlock_t	    lock;
 	int		    irq;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	struct armada38x_rtc_data *data;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 };
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 struct armada38x_rtc_data {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	int		active_alarm;		/* the alarm which is wired to the interrupt */
 	void (*update_mbus_timing)(struct armada38x_rtc *rtc); /* Initialize the RTC-MBUS bridge timing */
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	/* Initialize the RTC-MBUS bridge timing */
 	void (*update_mbus_timing)(struct armada38x_rtc *rtc);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	unsigned long (*read_rtc_reg)(struct armada38x_rtc *rtc, uint8_t rtc_reg);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	void (*rtc_alarm_irq_ack)(struct armada38x_rtc *rtc);
 	void (*rtc_mask_interrupt)(struct armada38x_rtc *rtc);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 };
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 /*
  * According to the datasheet, the OS should wait 5us after every
@@ -148,26 +145,26 @@ struct armada38x_rtc_data {
  */
 static void rtc_delayed_write(u32 val, struct armada38x_rtc *rtc, int offset)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	/*
 	 * According to errata FE-3124064, Write to any RTC register
 	 * may fail. As a workaround, before writing to RTC
 	 * register, issue a dummy write of 0x0 twice to RTC Status
 	 * register.
 	 */
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	writel(0, rtc->regs + RTC_38X_STATUS);
 	writel(0, rtc->regs + RTC_38X_STATUS);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	writel(0, rtc->regs + RTC_STATUS);
 	writel(0, rtc->regs + RTC_STATUS);
-#endif /* MY_DEF_HERE */
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	writel(val, rtc->regs + offset);
 	udelay(5);
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 /* Update RTC-MBUS bridge timing parameters */
 static void rtc_update_70x0_mbus_timing_params(struct armada38x_rtc *rtc)
 {
@@ -246,7 +243,7 @@ static unsigned long read_rtc_reg(struct armada38x_rtc *rtc, uint8_t rtc_reg)
 	return value;
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 static void armada38x_rtc_alarm_irq_ack(struct armada38x_rtc *rtc)
 {
 	u32 val;
@@ -282,29 +279,29 @@ static void armada70x0_rtc_mask_interrupt(struct armada38x_rtc *rtc)
 	writel(val | RTC_70X0_ALARM2_MASK, rtc->regs + RTC_70X0_ALARM_MASK);
 }
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 static const struct armada38x_rtc_data armada38x_data = {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	.active_alarm = ALARM1,
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	.update_mbus_timing = rtc_update_38x_mbus_timing_params,
 	.read_rtc_reg = read_rtc_38x_reg_wa,
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	.rtc_alarm_irq_ack = armada38x_rtc_alarm_irq_ack,
 	.rtc_mask_interrupt = armada38x_rtc_mask_interrupt,
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 };
 
 static const struct armada38x_rtc_data armada70x0_data = {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	.active_alarm = ALARM2, /* Only alarm 2 is wired to ICU/GIC */
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	.update_mbus_timing = rtc_update_70x0_mbus_timing_params,
 	.read_rtc_reg = read_rtc_reg,
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	.rtc_alarm_irq_ack = armada70x0_rtc_alarm_irq_ack,
 	.rtc_mask_interrupt = armada70x0_rtc_mask_interrupt,
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 };
 
 #ifdef CONFIG_OF
@@ -323,12 +320,12 @@ static const struct of_device_id armada38x_rtc_of_match_table[] = {
 };
 MODULE_DEVICE_TABLE(of, armada38x_rtc_of_match_table);
 #endif
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 static int armada38x_rtc_read_time(struct device *dev, struct rtc_time *tm)
 {
 	struct armada38x_rtc *rtc = dev_get_drvdata(dev);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	unsigned long time, flags;
 
 	spin_lock_irqsave(&rtc->lock, flags);
@@ -336,7 +333,7 @@ static int armada38x_rtc_read_time(struct device *dev, struct rtc_time *tm)
 	spin_unlock_irqrestore(&rtc->lock, flags);
 
 	rtc_time_to_tm(time, tm);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	unsigned long time, time_check, flags;
 
 	spin_lock_irqsave(&rtc->lock, flags);
@@ -353,7 +350,7 @@ static int armada38x_rtc_read_time(struct device *dev, struct rtc_time *tm)
 	spin_unlock_irqrestore(&rtc->lock, flags);
 
 	rtc_time_to_tm(time_check, tm);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	return 0;
 }
@@ -369,24 +366,24 @@ static int armada38x_rtc_set_time(struct device *dev, struct rtc_time *tm)
 	if (ret)
 		goto out;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	/*
 	 * According to errata FE-3124064, Write to RTC TIME register
 	 * may fail. As a workaround, after writing to RTC TIME
 	 * register, issue a dummy write of 0x0 twice to RTC Status
 	 * register.
 	 */
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	spin_lock_irqsave(&rtc->lock, flags);
 	rtc_delayed_write(time, rtc, RTC_TIME);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	rtc_delayed_write(0, rtc, RTC_STATUS);
 	rtc_delayed_write(0, rtc, RTC_STATUS);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	spin_unlock_irqrestore(&rtc->lock, flags);
 
 out:
@@ -401,18 +398,18 @@ static int armada38x_rtc_read_alarm(struct device *dev, struct rtc_wkalrm *alrm)
 
 	spin_lock_irqsave(&rtc->lock, flags);
 
-#if defined(MY_DEF_HERE)
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	time = rtc->data->read_rtc_reg(rtc, ALARM_REG(RTC_ALARM1, rtc->data->active_alarm));
 	val = rtc->data->read_rtc_reg(rtc, ALARM_REG(RTC_IRQ1_CONF, rtc->data->active_alarm)) & RTC_IRQ_AL_EN;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	time = rtc->data->read_rtc_reg(rtc, RTC_ALARM1);
 	val = rtc->data->read_rtc_reg(rtc, RTC_IRQ1_CONF) & RTC_IRQ1_AL_EN;
-#endif /* MY_DEF_HERE */
-#else /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	time = readl(rtc->regs + RTC_ALARM1);
 	val = readl(rtc->regs + RTC_IRQ1_CONF) & RTC_IRQ1_AL_EN;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	spin_unlock_irqrestore(&rtc->lock, flags);
 
@@ -427,11 +424,11 @@ static int armada38x_rtc_set_alarm(struct device *dev, struct rtc_wkalrm *alrm)
 	struct armada38x_rtc *rtc = dev_get_drvdata(dev);
 	unsigned long time, flags;
 	int ret = 0;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	u32 val;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 
 	ret = rtc_tm_to_time(&alrm->time, &time);
 
@@ -440,29 +437,29 @@ static int armada38x_rtc_set_alarm(struct device *dev, struct rtc_wkalrm *alrm)
 
 	spin_lock_irqsave(&rtc->lock, flags);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	rtc_delayed_write(time, rtc, ALARM_REG(RTC_ALARM1, rtc->data->active_alarm));
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	rtc_delayed_write(time, rtc, RTC_ALARM1);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 
 	if (alrm->enabled) {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 		/* enable the alarm */
 		rtc_delayed_write(RTC_IRQ_AL_EN, rtc, ALARM_REG(RTC_IRQ1_CONF, rtc->data->active_alarm));
 
 		/* mask RTC interrupt */
 		rtc->data->rtc_mask_interrupt(rtc);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 			rtc_delayed_write(RTC_IRQ1_AL_EN, rtc, RTC_IRQ1_CONF);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 			val = rtc->data->read_rtc_reg(rtc, SOC_RTC_INTERRUPT);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 			val = readl(rtc->regs_soc + SOC_RTC_INTERRUPT);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 			writel(val | SOC_RTC_ALARM1_MASK,
 			       rtc->regs_soc + SOC_RTC_INTERRUPT);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	}
 
 	spin_unlock_irqrestore(&rtc->lock, flags);
@@ -480,17 +477,17 @@ static int armada38x_rtc_alarm_irq_enable(struct device *dev,
 	spin_lock_irqsave(&rtc->lock, flags);
 
 	if (enabled)
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 		rtc_delayed_write(RTC_IRQ_AL_EN, rtc, ALARM_REG(RTC_IRQ1_CONF, rtc->data->active_alarm));
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 		rtc_delayed_write(RTC_IRQ1_AL_EN, rtc, RTC_IRQ1_CONF);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	else
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 		rtc_delayed_write(0, rtc, ALARM_REG(RTC_IRQ1_CONF, rtc->data->active_alarm));
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 		rtc_delayed_write(0, rtc, RTC_IRQ1_CONF);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 
 	spin_unlock_irqrestore(&rtc->lock, flags);
 
@@ -507,50 +504,50 @@ static irqreturn_t armada38x_rtc_alarm_irq(int irq, void *data)
 
 	spin_lock(&rtc->lock);
 
-#if defined(MY_DEF_HERE)
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 // do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	val = rtc->data->read_rtc_reg(rtc, SOC_RTC_INTERRUPT);
 
 	writel(val & ~SOC_RTC_ALARM1, rtc->regs_soc + SOC_RTC_INTERRUPT);
 	val = rtc->data->read_rtc_reg(rtc, RTC_IRQ1_CONF);
-#endif /* MY_DEF_HERE */
-#if defined(MY_DEF_HERE)
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	rtc->data->rtc_alarm_irq_ack(rtc);
 
 	val = rtc->data->read_rtc_reg(rtc, ALARM_REG(RTC_IRQ1_CONF, rtc->data->active_alarm));
 	/* disable the alarm */
 	rtc_delayed_write(0, rtc, ALARM_REG(RTC_IRQ1_CONF, rtc->data->active_alarm));
-#endif /* MY_DEF_HERE */
-#else /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	val = readl(rtc->regs_soc + SOC_RTC_INTERRUPT);
 
 	writel(val & ~SOC_RTC_ALARM1, rtc->regs_soc + SOC_RTC_INTERRUPT);
 	val = readl(rtc->regs + RTC_IRQ1_CONF);
-#endif /* MY_DEF_HERE */
-#if defined(MY_DEF_HERE)
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 // do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	/* disable all the interrupts for alarm 1 */
 	rtc_delayed_write(0, rtc, RTC_IRQ1_CONF);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	/* Ack the event */
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 // do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	rtc_delayed_write(RTC_STATUS_ALARM1, rtc, RTC_STATUS);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	spin_unlock(&rtc->lock);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	if (val & RTC_IRQ_FREQ_EN) {
 		if (val & RTC_IRQ_FREQ_1HZ)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	if (val & RTC_IRQ1_FREQ_EN) {
 		if (val & RTC_IRQ1_FREQ_1HZ)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 			event |= RTC_UF;
 		else
 			event |= RTC_PF;
@@ -572,17 +569,17 @@ static struct rtc_class_ops armada38x_rtc_ops = {
 static __init int armada38x_rtc_probe(struct platform_device *pdev)
 {
 	struct resource *res;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	const struct of_device_id *match;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct armada38x_rtc *rtc;
 	int ret;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	match = of_match_device(armada38x_rtc_of_match_table, &pdev->dev);
 	if (!match)
 		return -ENODEV;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	rtc = devm_kzalloc(&pdev->dev, sizeof(struct armada38x_rtc),
 			    GFP_KERNEL);
@@ -600,21 +597,21 @@ static __init int armada38x_rtc_probe(struct platform_device *pdev)
 	if (IS_ERR(rtc->regs_soc))
 		return PTR_ERR(rtc->regs_soc);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	rtc->data = (struct armada38x_rtc_data *)match->data;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	rtc->irq = platform_get_irq(pdev, 0);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 // nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	if (of_device_is_compatible(pdev->dev.of_node, "marvell,armada8k-rtc")) {
 		rtc->irq = -1;
 		armada38x_rtc_ops.set_alarm = NULL;
 		armada38x_rtc_ops.alarm_irq_enable = NULL;
 	} else {
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 		if (rtc->irq < 0) {
 			dev_err(&pdev->dev, "no irq\n");
 			return rtc->irq;
@@ -630,18 +627,18 @@ static __init int armada38x_rtc_probe(struct platform_device *pdev)
 			armada38x_rtc_ops.set_alarm = NULL;
 			armada38x_rtc_ops.alarm_irq_enable = NULL;
 		}
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	}
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	platform_set_drvdata(pdev, rtc);
 	if (rtc->irq != -1)
 		device_init_wakeup(&pdev->dev, 1);
 
 	/* Update RTC-MBUS bridge timing parameters */
 	rtc->data->update_mbus_timing(rtc);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	if (rtc->irq < 0) {
 		dev_err(&pdev->dev, "no irq\n");
 		return rtc->irq;
@@ -660,7 +657,7 @@ static __init int armada38x_rtc_probe(struct platform_device *pdev)
 	platform_set_drvdata(pdev, rtc);
 	if (rtc->irq != -1)
 		device_init_wakeup(&pdev->dev, 1);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	rtc->rtc_dev = devm_rtc_device_register(&pdev->dev, pdev->name,
 					&armada38x_rtc_ops, THIS_MODULE);
@@ -678,11 +675,11 @@ static int armada38x_rtc_suspend(struct device *dev)
 	if (device_may_wakeup(dev)) {
 		struct armada38x_rtc *rtc = dev_get_drvdata(dev);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_10)
 		enable_irq_wake(rtc->irq);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_10 */
 		return enable_irq_wake(rtc->irq);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_10 */
 	}
 
 	return 0;
@@ -693,16 +690,16 @@ static int armada38x_rtc_resume(struct device *dev)
 	if (device_may_wakeup(dev)) {
 		struct armada38x_rtc *rtc = dev_get_drvdata(dev);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 		/* Update RTC-MBUS bridge timing parameters */
 		rtc->data->update_mbus_timing(rtc);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_10)
 		disable_irq_wake(rtc->irq);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_10 */
 		return disable_irq_wake(rtc->irq);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_10 */
 	}
 
 	return 0;
@@ -712,9 +709,9 @@ static int armada38x_rtc_resume(struct device *dev)
 static SIMPLE_DEV_PM_OPS(armada38x_rtc_pm_ops,
 			 armada38x_rtc_suspend, armada38x_rtc_resume);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 #ifdef CONFIG_OF
 static const struct of_device_id armada38x_rtc_of_match_table[] = {
 	{ .compatible = "marvell,armada-380-rtc", },
@@ -722,7 +719,7 @@ static const struct of_device_id armada38x_rtc_of_match_table[] = {
 };
 MODULE_DEVICE_TABLE(of, armada38x_rtc_of_match_table);
 #endif
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 static struct platform_driver armada38x_rtc_driver = {
 	.driver		= {

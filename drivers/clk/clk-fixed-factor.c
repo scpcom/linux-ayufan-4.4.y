@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * Copyright (C) 2011 Sascha Hauer, Pengutronix <s.hauer@pengutronix.de>
  *
@@ -26,11 +23,11 @@
  * parent - fixed parent.  No clk_set_parent support
  */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 #define to_clk_fixed_factor(_hw) container_of(_hw, struct clk_fixed_factor, hw)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 static unsigned long clk_factor_recalc_rate(struct clk_hw *hw,
 		unsigned long parent_rate)
@@ -109,7 +106,7 @@ struct clk *clk_register_fixed_factor(struct device *dev, const char *name,
 }
 EXPORT_SYMBOL_GPL(clk_register_fixed_factor);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 void clk_unregister_fixed_factor(struct clk *clk)
 {
 	struct clk_hw *hw;
@@ -122,7 +119,7 @@ void clk_unregister_fixed_factor(struct clk *clk)
 	kfree(to_clk_fixed_factor(hw));
 }
 EXPORT_SYMBOL_GPL(clk_unregister_fixed_factor);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 #ifdef CONFIG_OF
 /**

@@ -12,7 +12,7 @@
 #include <linux/usb/xhci_pdriver.h>
 #include <linux/acpi.h>
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 #ifdef CONFIG_USB_PATCH_ON_RTK
 #include <linux/suspend.h>
 #endif
@@ -21,7 +21,7 @@
 #include "xhci.h"
 #include "xhci-mvebu.h"
 #include "xhci-rcar.h"
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 #include <linux/usb/otg.h>
 #endif  
 
@@ -40,7 +40,7 @@ static void xhci_plat_quirks(struct device *dev, struct xhci_hcd *xhci)
 {
 	 
 	xhci->quirks |= XHCI_PLAT;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 
 	if (of_property_read_bool(dev->of_node, "needs-reset-on-resume"))
 		xhci->quirks |= XHCI_RESET_ON_RESUME;
@@ -73,7 +73,7 @@ static int xhci_plat_start(struct usb_hcd *hcd)
 	return xhci_run(hcd);
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
  
 int xhci_phy_init(struct usb_hcd *hcd, const char *phy_name)
 {
@@ -231,9 +231,9 @@ static int xhci_plat_probe(struct platform_device *pdev)
 #endif  
 #endif  
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	if (of_device_is_compatible(pdev->dev.of_node,
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 				    "marvell,armada-3700-xhci")) {
 #else  
 				    "marvell,armada-3700-xhci-otg")) {
@@ -246,7 +246,7 @@ static int xhci_plat_probe(struct platform_device *pdev)
 
 		hcd->irq = irq;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 		 
 		if (of_property_read_bool(pdev->dev.of_node, "separated-phys-for-usb2-usb3")) {
 			if (xhci_phy_init(hcd, "usb2")) {
@@ -266,7 +266,7 @@ static int xhci_plat_probe(struct platform_device *pdev)
 			goto disable_usb_phy;
 		}
 	} else {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 		 
 		if (of_property_read_bool(pdev->dev.of_node, "separated-phys-for-usb2-usb3")) {
 			ret = usb_add_hcd_with_phy_name(hcd, irq, IRQF_SHARED, "usb2");
@@ -309,7 +309,7 @@ static int xhci_plat_probe(struct platform_device *pdev)
 		if (HCC_MAX_PSA(xhci->hcc_params) >= 4)
 			xhci->shared_hcd->can_do_streams = 1;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
  
 #else  
 		ret = usb_add_hcd(xhci->shared_hcd, irq, IRQF_SHARED);
@@ -374,9 +374,9 @@ static int xhci_plat_remove(struct platform_device *dev)
 
 	xhci->xhc_state |= XHCI_STATE_REMOVING;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	if (of_device_is_compatible(dev->dev.of_node,
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 				    "marvell,armada-3700-xhci")) {
 #else  
 				    "marvell,armada-3700-xhci-otg")) {
@@ -385,7 +385,7 @@ static int xhci_plat_remove(struct platform_device *dev)
 	} else {
 		usb_remove_hcd(xhci->shared_hcd);
 		usb_phy_shutdown(hcd->usb_phy);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_10)
 		usb_put_phy(hcd->usb_phy);
 		hcd->usb_phy = NULL;
 #endif  
@@ -408,7 +408,7 @@ static int xhci_plat_remove(struct platform_device *dev)
 	return 0;
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 void xhci_plat_shutdown(struct platform_device *dev)
 {
 	xhci_plat_remove(dev);
@@ -416,7 +416,7 @@ void xhci_plat_shutdown(struct platform_device *dev)
 #endif  
 
 #ifdef CONFIG_PM_SLEEP
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 #ifdef CONFIG_USB_PATCH_ON_RTK
  
 static int xhci_plat_suspend(struct device *dev);
@@ -430,11 +430,11 @@ static int xhci_plat_suspend(struct device *dev)
 {
 	struct usb_hcd	*hcd = dev_get_drvdata(dev);
 	struct xhci_hcd	*xhci = hcd_to_xhci(hcd);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	int ret;
 #endif  
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 #ifdef CONFIG_USB_PATCH_ON_RTK
 	if (RTK_PM_STATE == PM_SUSPEND_STANDBY) {
 		dev_info(dev, "[USB] %s Idle mode\n", __func__);
@@ -446,7 +446,7 @@ static int xhci_plat_suspend(struct device *dev)
 
 #endif  
 	 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	ret = xhci_suspend(xhci, device_may_wakeup(dev));
 	if (ret) {
 		dev_err(dev, "unable to suspend xhci\n");
@@ -467,7 +467,7 @@ static int xhci_plat_suspend(struct device *dev)
 #endif  
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 #ifdef CONFIG_USB_PATCH_ON_RTK
  
 static int xhci_plat_resume(struct device *dev);
@@ -482,7 +482,7 @@ static int xhci_plat_resume(struct device *dev)
 {
 	struct usb_hcd	*hcd = dev_get_drvdata(dev);
 	struct xhci_hcd	*xhci = hcd_to_xhci(hcd);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	int ret;
 
 	ret = phy_init(hcd->phy);
@@ -511,7 +511,7 @@ static int xhci_plat_resume(struct device *dev)
 	}
 #endif  
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 #ifdef CONFIG_USB_PATCH_ON_RTK
 	if (RTK_PM_STATE == PM_SUSPEND_STANDBY) {
 		dev_info(dev, "[USB] %s Idle mode\n", __func__);
@@ -540,8 +540,8 @@ static const struct of_device_id usb_xhci_of_match[] = {
 	{ .compatible = "marvell,armada-380-xhci"},
 	{ .compatible = "renesas,xhci-r8a7790"},
 	{ .compatible = "renesas,xhci-r8a7791"},
-#if defined(MY_DEF_HERE)
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 	{ .compatible = "marvell,armada-3700-xhci"},
 #else  
 	{ .compatible = "marvell,armada-3700-xhci-otg"},
@@ -560,7 +560,7 @@ static const struct acpi_device_id usb_xhci_acpi_match[] = {
 MODULE_DEVICE_TABLE(acpi, usb_xhci_acpi_match);
 
 static struct platform_driver usb_xhci_driver = {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	.probe		= xhci_plat_probe,
 	.remove		= xhci_plat_remove,
 	.shutdown	= xhci_plat_shutdown,

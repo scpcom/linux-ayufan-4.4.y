@@ -891,7 +891,7 @@ static ssize_t fill_registers_buffer(struct debug_buffer *buf)
 	size -= temp;
 	next += temp;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 #ifdef CONFIG_USB_PATCH_ON_RTK
 	temp = scnprintf (next, size, "CTRLDSSEGMENT %08x\n",
 			ehci_readl(ehci, &ehci->regs->segment));
@@ -916,10 +916,10 @@ static ssize_t fill_registers_buffer(struct debug_buffer *buf)
 
 	for (i = 1; i <= HCS_N_PORTS(ehci->hcs_params); i++) {
 		temp = dbg_port_buf(scratch, sizeof(scratch), label, i,
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_RTD1619 */
 	for (i = 1; i <= HCS_N_PORTS (ehci->hcs_params); i++) {
 		temp = dbg_port_buf (scratch, sizeof scratch, label, i,
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */
 				ehci_readl(ehci,
 					&ehci->regs->port_status[i - 1]));
 		temp = scnprintf (next, size, fmt, temp, scratch);

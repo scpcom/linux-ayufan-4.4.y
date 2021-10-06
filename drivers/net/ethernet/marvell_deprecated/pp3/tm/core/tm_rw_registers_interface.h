@@ -1,7 +1,4 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -46,4 +43,4 @@ int tm_table_entry_read(void *environment_handle, void *vpAddress, long int inde
 int tm_table_entry_write(void *environment_handle, void *vpAddress, long int index, void *vpData);
 
 #endif   /* TM_RW_REGISTERS_INTERFACE_H */
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */

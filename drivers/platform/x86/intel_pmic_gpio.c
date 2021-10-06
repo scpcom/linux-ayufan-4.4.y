@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /* Moorestown PMIC GPIO (access through IPC) driver
  * Copyright (c) 2008 - 2009, Intel Corporation.
  *
@@ -277,19 +274,19 @@ static int platform_pmic_gpio_probe(struct platform_device *pdev)
 	pg->chip.base = pdata->gpio_base;
 	pg->chip.ngpio = NUM_GPIO;
 	pg->chip.can_sleep = 1;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	pg->chip.parent = dev;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	pg->chip.dev = dev;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	mutex_init(&pg->buslock);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	pg->chip.parent = dev;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	pg->chip.dev = dev;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	retval = gpiochip_add(&pg->chip);
 	if (retval) {
 		pr_err("Can not add pmic gpio chip\n");

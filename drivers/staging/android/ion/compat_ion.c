@@ -42,13 +42,13 @@ struct compat_ion_handle_data {
 	compat_int_t handle;
 };
 
-#if defined(MY_DEF_HERE) || defined(CONFIG_ION_RTK) && defined(MY_DEF_HERE)
+#if defined(MY_DEF_HERE) || defined(CONFIG_ION_RTK) && defined(CONFIG_SYNO_LSP_RTD1619)
 struct compat_ion_phys_data {
 	compat_int_t handle;
 	compat_ulong_t addr;
 	compat_size_t len;
 };
-#endif /* MY_DEF_HERE || CONFIG_ION_RTK && MY_DEF_HERE */
+#endif /* MY_DEF_HERE || CONFIG_ION_RTK && CONFIG_SYNO_LSP_RTD1619 */
 
 #define COMPAT_ION_IOC_ALLOC	_IOWR(ION_IOC_MAGIC, 0, \
 				      struct compat_ion_allocation_data)
@@ -56,12 +56,12 @@ struct compat_ion_phys_data {
 				      struct compat_ion_handle_data)
 #define COMPAT_ION_IOC_CUSTOM	_IOWR(ION_IOC_MAGIC, 6, \
 				      struct compat_ion_custom_data)
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 #if defined(CONFIG_ION_RTK)
 #define COMPAT_ION_IOC_PHYS	_IOWR(ION_IOC_MAGIC, 8, \
 				      struct compat_ion_phys_data)
 #endif /* CONFIG_ION_RTK */
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */
 
 #if defined(MY_DEF_HERE)
 #define COMPAT_ION_IOC_PHYS	_IOWR(ION_IOC_MAGIC, 8, \
@@ -104,7 +104,7 @@ static int compat_get_ion_handle_data(
 	return err;
 }
 
-#if defined(MY_DEF_HERE) || defined(CONFIG_ION_RTK) && defined(MY_DEF_HERE)
+#if defined(MY_DEF_HERE) || defined(CONFIG_ION_RTK) && defined(CONFIG_SYNO_LSP_RTD1619)
 static int compat_get_ion_phys_data(
 			struct compat_ion_phys_data __user *data32,
 			struct ion_phys_data __user *data)
@@ -142,7 +142,7 @@ static int compat_put_ion_phys_data(
 
 	return err;
 }
-#endif /* MY_DEF_HERE || CONFIG_ION_RTK && MY_DEF_HERE */
+#endif /* MY_DEF_HERE || CONFIG_ION_RTK && CONFIG_SYNO_LSP_RTD1619 */
 
 static int compat_put_ion_allocation_data(
 			struct compat_ion_allocation_data __user *data32,
@@ -251,7 +251,7 @@ long compat_ion_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 	case ION_IOC_SYNC:
 		return filp->f_op->unlocked_ioctl(filp, cmd,
 						(unsigned long)compat_ptr(arg));
-#if defined(MY_DEF_HERE) || defined(CONFIG_ION_RTK) && defined(MY_DEF_HERE)
+#if defined(MY_DEF_HERE) || defined(CONFIG_ION_RTK) && defined(CONFIG_SYNO_LSP_RTD1619)
 	case COMPAT_ION_IOC_PHYS:
 	{
 		struct compat_ion_phys_data __user *data32;
@@ -274,7 +274,7 @@ long compat_ion_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 		return err;
 
 	}
-#endif /* MY_DEF_HERE || CONFIG_ION_RTK && MY_DEF_HERE */
+#endif /* MY_DEF_HERE || CONFIG_ION_RTK && CONFIG_SYNO_LSP_RTD1619 */
 	default:
 		return -ENOIOCTLCMD;
 	}

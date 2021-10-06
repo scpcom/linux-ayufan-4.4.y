@@ -709,7 +709,7 @@ static u32 xhci_get_port_status(struct usb_hcd *hcd,
 	return status;
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 #ifdef CONFIG_USB_PATCH_ON_RTK
 #if IS_ENABLED(CONFIG_USB_DWC3_RTK)
 extern void RTK_dwc3_usb3_phy_toggle(struct device *dwc3_dev, bool isConnect, int port);
@@ -771,7 +771,7 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 	u16 link_state = 0;
 	u16 wake_mask = 0;
 	u16 timeout = 0;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 #ifdef CONFIG_USB_RTK_HCD_TEST_MODE
 	int test_mode = (wIndex & 0xff00) >> 8;
 #endif
@@ -1077,7 +1077,7 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 			temp |= PORT_U2_TIMEOUT(timeout);
 			writel(temp, port_array[wIndex] + PORTPMSC);
 			break;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 #ifdef CONFIG_USB_RTK_HCD_TEST_MODE
 		case USB_PORT_FEAT_TEST:
 			if (!test_mode || test_mode > 5)
@@ -1151,7 +1151,7 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 		case USB_PORT_FEAT_C_RESET:
 		case USB_PORT_FEAT_C_BH_PORT_RESET:
 		case USB_PORT_FEAT_C_CONNECTION:
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 #ifdef CONFIG_USB_PATCH_ON_RTK
 			RTK_phy_toggle(hcd, wValue, wIndex, temp);
 #endif

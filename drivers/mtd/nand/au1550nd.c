@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  *  drivers/mtd/nand/au1550nd.c
  *
@@ -41,11 +38,11 @@ struct au1550nd_ctx {
  */
 static u_char au_read_byte(struct mtd_info *mtd)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	struct nand_chip *this = mtd_to_nand(mtd);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct nand_chip *this = mtd->priv;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	u_char ret = readb(this->IO_ADDR_R);
 	wmb(); /* drain writebuffer */
 	return ret;
@@ -60,11 +57,11 @@ static u_char au_read_byte(struct mtd_info *mtd)
  */
 static void au_write_byte(struct mtd_info *mtd, u_char byte)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	struct nand_chip *this = mtd_to_nand(mtd);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct nand_chip *this = mtd->priv;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	writeb(byte, this->IO_ADDR_W);
 	wmb(); /* drain writebuffer */
 }
@@ -77,11 +74,11 @@ static void au_write_byte(struct mtd_info *mtd, u_char byte)
  */
 static u_char au_read_byte16(struct mtd_info *mtd)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	struct nand_chip *this = mtd_to_nand(mtd);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct nand_chip *this = mtd->priv;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	u_char ret = (u_char) cpu_to_le16(readw(this->IO_ADDR_R));
 	wmb(); /* drain writebuffer */
 	return ret;
@@ -96,11 +93,11 @@ static u_char au_read_byte16(struct mtd_info *mtd)
  */
 static void au_write_byte16(struct mtd_info *mtd, u_char byte)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	struct nand_chip *this = mtd_to_nand(mtd);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct nand_chip *this = mtd->priv;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	writew(le16_to_cpu((u16) byte), this->IO_ADDR_W);
 	wmb(); /* drain writebuffer */
 }
@@ -113,11 +110,11 @@ static void au_write_byte16(struct mtd_info *mtd, u_char byte)
  */
 static u16 au_read_word(struct mtd_info *mtd)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	struct nand_chip *this = mtd_to_nand(mtd);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct nand_chip *this = mtd->priv;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	u16 ret = readw(this->IO_ADDR_R);
 	wmb(); /* drain writebuffer */
 	return ret;
@@ -134,11 +131,11 @@ static u16 au_read_word(struct mtd_info *mtd)
 static void au_write_buf(struct mtd_info *mtd, const u_char *buf, int len)
 {
 	int i;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	struct nand_chip *this = mtd_to_nand(mtd);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct nand_chip *this = mtd->priv;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	for (i = 0; i < len; i++) {
 		writeb(buf[i], this->IO_ADDR_W);
@@ -157,11 +154,11 @@ static void au_write_buf(struct mtd_info *mtd, const u_char *buf, int len)
 static void au_read_buf(struct mtd_info *mtd, u_char *buf, int len)
 {
 	int i;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	struct nand_chip *this = mtd_to_nand(mtd);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct nand_chip *this = mtd->priv;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	for (i = 0; i < len; i++) {
 		buf[i] = readb(this->IO_ADDR_R);
@@ -180,11 +177,11 @@ static void au_read_buf(struct mtd_info *mtd, u_char *buf, int len)
 static void au_write_buf16(struct mtd_info *mtd, const u_char *buf, int len)
 {
 	int i;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	struct nand_chip *this = mtd_to_nand(mtd);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct nand_chip *this = mtd->priv;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	u16 *p = (u16 *) buf;
 	len >>= 1;
 
@@ -206,11 +203,11 @@ static void au_write_buf16(struct mtd_info *mtd, const u_char *buf, int len)
 static void au_read_buf16(struct mtd_info *mtd, u_char *buf, int len)
 {
 	int i;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	struct nand_chip *this = mtd_to_nand(mtd);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct nand_chip *this = mtd->priv;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	u16 *p = (u16 *) buf;
 	len >>= 1;
 
@@ -236,11 +233,11 @@ static void au_read_buf16(struct mtd_info *mtd, u_char *buf, int len)
 static void au1550_hwcontrol(struct mtd_info *mtd, int cmd)
 {
 	struct au1550nd_ctx *ctx = container_of(mtd, struct au1550nd_ctx, info);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	struct nand_chip *this = mtd_to_nand(mtd);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct nand_chip *this = mtd->priv;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	switch (cmd) {
 
@@ -310,11 +307,11 @@ static void au1550_select_chip(struct mtd_info *mtd, int chip)
 static void au1550_command(struct mtd_info *mtd, unsigned command, int column, int page_addr)
 {
 	struct au1550nd_ctx *ctx = container_of(mtd, struct au1550nd_ctx, info);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	struct nand_chip *this = mtd_to_nand(mtd);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct nand_chip *this = mtd->priv;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	int ce_override = 0, i;
 	unsigned long flags = 0;
 

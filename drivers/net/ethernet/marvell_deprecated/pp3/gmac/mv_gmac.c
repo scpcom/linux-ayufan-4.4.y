@@ -1,7 +1,4 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -801,4 +798,4 @@ void pp3_gmac_mib_counters_show(int port)
 	/* This counter must be read last. Read it clear all the counters */
 	pp3_gmac_mib_print(port, GMAC_MIB_LATE_COLLISION, "LATE_COLLISION");
 }
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */

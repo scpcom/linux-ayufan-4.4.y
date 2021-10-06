@@ -38,14 +38,14 @@
 #define SFC_SCK_TAP         (0x9801a824)
 #define SFP_OPCODE2         (0x9801a828)
 
-#if defined(CONFIG_ARCH_RTD16xx) && defined(MY_DEF_HERE)
+#if defined(CONFIG_ARCH_RTD16xx) && defined(CONFIG_SYNO_LSP_RTD1619)
 #define ISO_MUXPAD1         (0x9804e004)
 #define ISO_MUXPAD6         (0x9804e048)
-#else /* CONFIG_ARCH_RTD16xx && MY_DEF_HERE */
+#else /* CONFIG_ARCH_RTD16xx && CONFIG_SYNO_LSP_RTD1619 */
 // System Bridge II
 #define SB2_WRAPPER_CTRL    (0x9801a018)
 #define SYS_MUXPAD5         (0x9801a914)
-#endif /* CONFIG_ARCH_RTD16xx && MY_DEF_HERE */
+#endif /* CONFIG_ARCH_RTD16xx && CONFIG_SYNO_LSP_RTD1619 */
 
 // Move Data Engine
 #define MD_FDMA_DDR_SADDR   (0x9800b088)
@@ -165,8 +165,8 @@ typedef struct rtk_sfc_info {
 #define SYS_REG_TRY_UNLOCK
 #define SFC_FLUSH_CACHE(buff, len)
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 int rtk_sfc_panic_erase(struct mtd_info *mtd, struct erase_info *instr);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */
 
 #endif

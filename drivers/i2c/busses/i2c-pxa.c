@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  *  i2c_adap_pxa.c
  *
@@ -58,9 +55,9 @@ enum pxa_i2c_types {
 	REGS_PXA3XX,
 	REGS_CE4100,
 	REGS_PXA910,
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	REGS_ARMADA3700,
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 };
 
 /*
@@ -97,7 +94,7 @@ static struct pxa_reg_layout pxa_reg_layout[] = {
 		.ilcr = 0x28,
 		.iwcr = 0x30,
 	},
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	[REGS_ARMADA3700] = {
 		.ibmr = 0x00,
 		.idbr = 0x04,
@@ -105,7 +102,7 @@ static struct pxa_reg_layout pxa_reg_layout[] = {
 		.isr =	0x0c,
 		.isar = 0x10,
 	},
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 };
 
 static const struct platform_device_id i2c_pxa_id_table[] = {
@@ -113,9 +110,9 @@ static const struct platform_device_id i2c_pxa_id_table[] = {
 	{ "pxa3xx-pwri2c",	REGS_PXA3XX },
 	{ "ce4100-i2c",		REGS_CE4100 },
 	{ "pxa910-i2c",		REGS_PXA910 },
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	{ "armada-3700-i2c",	REGS_ARMADA3700 },
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	{ },
 };
 MODULE_DEVICE_TABLE(platform, i2c_pxa_id_table);
@@ -140,17 +137,17 @@ MODULE_DEVICE_TABLE(platform, i2c_pxa_id_table);
 #define ICR_SADIE	(1 << 13)	   /* slave address detected int enable */
 #define ICR_UR		(1 << 14)	   /* unit reset */
 #define ICR_FM		(1 << 15)	   /* fast mode */
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 #define ICR_SHIFT_FM	(1 << 16)	   /* shifted fast mode */
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 #define ICR_HS		(1 << 16)	   /* High Speed mode */
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 #define ICR_SHIFT_HS	(1 << 17)	   /* shifted high speed mode */
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 #define ICR_GPIOEN	(1 << 19)	   /* enable GPIO mode for SCL in HS */
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 #define ICR_HSEN	(1 << 20)	   /* enable high speed mode */
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 #define ISR_RWM		(1 << 0)	   /* read/write mode */
 #define ISR_ACKNAK	(1 << 1)	   /* ack/nak status */
@@ -181,10 +178,10 @@ MODULE_DEVICE_TABLE(platform, i2c_pxa_id_table);
 #define IWCR_HS_CNT2_SHIFT	10
 #define IWCR_HS_CNT2_MASK	(0x1F << IWCR_HS_CNT2_SHIFT)
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 /* Controller has different FM HS relavant definition in register */
 #define I2C_PXA_QUIRK_SHIFT_FM_HS	(1 << 0)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 struct pxa_i2c {
 	spinlock_t		lock;
@@ -196,9 +193,9 @@ struct pxa_i2c {
 	unsigned int		slave_addr;
 	unsigned int		req_slave_addr;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	unsigned int		quirk;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	struct i2c_adapter	adap;
 	struct clk		*clk;
@@ -539,7 +536,7 @@ static void i2c_pxa_reset(struct pxa_i2c *i2c)
 		writel(i2c->slave_addr, _ISAR(i2c));
 
 	/* set control register values */
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	if (i2c->quirk & I2C_PXA_QUIRK_SHIFT_FM_HS) {
 		writel(I2C_ICR_INIT | (i2c->fast_mode ? ICR_SHIFT_FM : 0), _ICR(i2c));
 		writel(readl(_ICR(i2c)) | (i2c->high_mode ? ICR_SHIFT_HS : 0), _ICR(i2c));
@@ -547,10 +544,10 @@ static void i2c_pxa_reset(struct pxa_i2c *i2c)
 		writel(I2C_ICR_INIT | (i2c->fast_mode ? ICR_FM : 0), _ICR(i2c));
 		writel(readl(_ICR(i2c)) | (i2c->high_mode ? ICR_HS : 0), _ICR(i2c));
 	}
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	writel(I2C_ICR_INIT | (i2c->fast_mode ? ICR_FM : 0), _ICR(i2c));
 	writel(readl(_ICR(i2c)) | (i2c->high_mode ? ICR_HS : 0), _ICR(i2c));
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 #ifdef CONFIG_I2C_PXA_SLAVE
 	dev_info(&i2c->adap.dev, "Enabling slave mode\n");
@@ -788,15 +785,15 @@ static int i2c_pxa_send_mastercode(struct pxa_i2c *i2c)
 	writel(i2c->master_code, _IDBR(i2c));
 
 	icr = readl(_ICR(i2c)) & ~(ICR_STOP | ICR_ALDIE);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	icr |= ICR_START | ICR_TB | ICR_ITEIE;
 	if (i2c->quirk & I2C_PXA_QUIRK_SHIFT_FM_HS)
 		icr |= ICR_HSEN;
 	else
 		icr |= ICR_GPIOEN;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	icr |= ICR_GPIOEN | ICR_START | ICR_TB | ICR_ITEIE;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	writel(icr, _ICR(i2c));
 
@@ -1190,9 +1187,9 @@ static const struct of_device_id i2c_pxa_dt_ids[] = {
 	{ .compatible = "mrvl,pxa-i2c", .data = (void *)REGS_PXA2XX },
 	{ .compatible = "mrvl,pwri2c", .data = (void *)REGS_PXA3XX },
 	{ .compatible = "mrvl,mmp-twsi", .data = (void *)REGS_PXA910 },
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	{ .compatible = "marvell,armada-3700-i2c", .data = (void *)REGS_ARMADA3700 },
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	{}
 };
 MODULE_DEVICE_TABLE(of, i2c_pxa_dt_ids);
@@ -1217,11 +1214,11 @@ static int i2c_pxa_probe_dt(struct platform_device *pdev, struct pxa_i2c *i2c,
 
 	*i2c_types = (enum pxa_i2c_types)(of_id->data);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	if (of_device_is_compatible(np, "marvell,armada-3700-i2c"))
 		i2c->quirk |= I2C_PXA_QUIRK_SHIFT_FM_HS;
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	return 0;
 }
 

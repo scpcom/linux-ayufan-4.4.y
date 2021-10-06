@@ -47,7 +47,7 @@ static void disk_add_events(struct gendisk *disk);
 static void disk_del_events(struct gendisk *disk);
 static void disk_release_events(struct gendisk *disk);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_SYSFS_BLOCK_DEV_LINK
 extern int g_is_sas_model;
 static inline char *make_class_name(const char *name, struct kobject *kobj)
 {
@@ -64,7 +64,7 @@ static inline char *make_class_name(const char *name, struct kobject *kobj)
 
 	return class_name;
 }
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_SAS_SYSFS_BLOCK_DEV_LINK */
 
 /**
  * disk_get_part - get partition
@@ -534,9 +534,9 @@ static void register_disk(struct gendisk *disk)
 	struct disk_part_iter piter;
 	struct hd_struct *part;
 	int err;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_SYSFS_BLOCK_DEV_LINK
 	int error = 0;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_SAS_SYSFS_BLOCK_DEV_LINK */
 
 	ddev->parent = disk->driverfs_dev;
 
@@ -547,7 +547,7 @@ static void register_disk(struct gendisk *disk)
 
 	if (device_add(ddev))
 		return;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_SYSFS_BLOCK_DEV_LINK
 	if (1 == g_is_sas_model && ddev->parent) {
 		char *class_name = NULL;
 		class_name = make_class_name(ddev->class->name,
@@ -558,12 +558,12 @@ static void register_disk(struct gendisk *disk)
 			kfree(class_name);
 		}
 	}
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_SAS_SYSFS_BLOCK_DEV_LINK */
 	if (!sysfs_deprecated) {
 		err = sysfs_create_link(block_depr, &ddev->kobj,
 					kobject_name(&ddev->kobj));
 		if (err) {
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_SYSFS_BLOCK_DEV_LINK
 			if (1 == g_is_sas_model && ddev->parent && !error) {
 				char *class_name = NULL;
 				class_name = make_class_name(ddev->class->name,
@@ -573,7 +573,7 @@ static void register_disk(struct gendisk *disk)
 					kfree(class_name);
 				}
 			}
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_SAS_SYSFS_BLOCK_DEV_LINK */
 			device_del(ddev);
 			return;
 		}
@@ -686,9 +686,9 @@ void del_gendisk(struct gendisk *disk)
 {
 	struct disk_part_iter piter;
 	struct hd_struct *part;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_SYSFS_BLOCK_DEV_LINK
 	struct device *ddev = disk_to_dev(disk);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_SAS_SYSFS_BLOCK_DEV_LINK */
 
 	blk_integrity_del(disk);
 	disk_del_events(disk);
@@ -718,7 +718,7 @@ void del_gendisk(struct gendisk *disk)
 	disk->driverfs_dev = NULL;
 	if (!sysfs_deprecated)
 		sysfs_remove_link(block_depr, dev_name(disk_to_dev(disk)));
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_SYSFS_BLOCK_DEV_LINK
 	if (1 == g_is_sas_model && ddev && ddev->parent) {
 		char *class_name = NULL;
 		class_name = make_class_name(ddev->class->name,
@@ -728,7 +728,7 @@ void del_gendisk(struct gendisk *disk)
 			kfree(class_name);
 		}
 	}
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_SAS_SYSFS_BLOCK_DEV_LINK */
 	pm_runtime_set_memalloc_noio(disk_to_dev(disk), false);
 	device_del(disk_to_dev(disk));
 }

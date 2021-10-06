@@ -1,7 +1,4 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 /*
 * ***************************************************************************
 * Copyright (C) 2016 Marvell International Ltd.
@@ -217,14 +214,14 @@ static void a3700_otg_work(struct work_struct *work)
 		}
 		break;
 	default:
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_10)
 		dev_dbg(mvotg->dev, "wrong state.\n");
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_10 */
 		break;
 	}
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_10)
 	mvotg->old_state = mvotg->port_state;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_10 */
 }
 
 static void a3700_static_host_work(struct work_struct *work)
@@ -255,23 +252,23 @@ static void a3700_static_host_work(struct work_struct *work)
 		if (vbus_on) {
 			if (regulator_enable(mvotg->vcc))
 				dev_err(mvotg->dev, "Failed to enable power\n");
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_10)
 			else
 				/* done for moving to host mode and need to
 				 * store state after regulator enabled.
 				 */
 				mvotg->old_state = USB_HOST_ATTACHED;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_10 */
 		} else {
 			if (regulator_disable(mvotg->vcc))
 				dev_err(mvotg->dev, "Failed to disable power\n");
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_10)
 			else
 				/* done for moving to idle mode and need to
 				 * store state after regulator disabled.
 				 */
 				mvotg->old_state = USB_PORT_IDLE;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_10 */
 		}
 	}
 }
@@ -317,11 +314,11 @@ static irqreturn_t a3700_usb_id_isr_static_host(int irq, void *data)
 	}
 
 	if (port_state_original != mvotg->port_state) {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_10)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_10 */
 		mvotg->old_state = port_state_original;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_10 */
 		a3700_otg_run_state_machine(mvotg, 0);
 	}
 
@@ -374,11 +371,11 @@ static irqreturn_t a3700_usb_id_isr(int irq, void *data)
 	}
 
 	if (port_state_original != mvotg->port_state) {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_10)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_10 */
 		mvotg->old_state = port_state_original;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_10 */
 		a3700_otg_run_state_machine(mvotg, 0);
 	}
 
@@ -635,4 +632,4 @@ MODULE_ALIAS("platform:a3700_otg_phy");
 MODULE_AUTHOR("Terry Zhou <bjzhou@marvell.com>");
 MODULE_DESCRIPTION("Marvell Armada3700 otg phy driver");
 MODULE_LICENSE("GPL");
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */

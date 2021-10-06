@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * Copyright (c) 2000-2014 LSI Corporation.
  *
@@ -515,9 +512,9 @@ typedef struct _MPI2_SEP_REQUEST {
 #define MPI2_SEP_REQ_FLAGS_ENCLOSURE_SLOT_ADDRESS       (0x01)
 
 /*SlotStatus defines */
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_HOST_DISK_LED_CTRL
 #define MPI2_SEP_REQ_SLOTSTATUS_DEV_OFF                 (0x00080000) /* MPI v2.6 and newer */
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_SAS_HOST_DISK_LED_CTRL */
 #define MPI2_SEP_REQ_SLOTSTATUS_REQUEST_REMOVE          (0x00040000)
 #define MPI2_SEP_REQ_SLOTSTATUS_IDENTIFY_REQUEST        (0x00020000)
 #define MPI2_SEP_REQ_SLOTSTATUS_REBUILD_STOPPED         (0x00000200)

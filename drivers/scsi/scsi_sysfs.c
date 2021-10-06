@@ -604,7 +604,7 @@ END:
 static DEVICE_ATTR(syno_disk_serial, S_IRUGO, syno_disk_serial_show, NULL);
 #endif  
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_PORT_MAPPING_V2
 static ssize_t
 syno_block_info_show(struct device *device, struct device_attribute *attr, char *buf)
 {
@@ -718,7 +718,7 @@ END:
 static DEVICE_ATTR(syno_standby_syncing, S_IRUGO | S_IWUSR, sdev_show_syno_standby_syncing, sdev_store_syno_standby_syncing);
 #endif  
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_GET_DISK_SPEED
 const char *disk_spd_string(unsigned char spd)
 {
         const char *szRet;
@@ -1204,13 +1204,13 @@ static struct attribute *scsi_sdev_attrs[] = {
 #ifdef MY_ABC_HERE
 	&dev_attr_syno_scmd_min_timeout.attr,
 #endif  
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_GET_DISK_SPEED
         &dev_attr_syno_disk_spd.attr,
 #endif  
 #ifdef MY_ABC_HERE
 	&dev_attr_syno_disk_serial.attr,
 #endif  
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_PORT_MAPPING_V2
 	&dev_attr_syno_block_info.attr,
 #endif  
 	REF_EVT(media_change),
@@ -1371,7 +1371,7 @@ void scsi_remove_device(struct scsi_device *sdev)
 	mutex_lock(&shost->scan_mutex);
 	__scsi_remove_device(sdev);
 	mutex_unlock(&shost->scan_mutex);
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_SPINUP_DELAY
 	SynoSpinupRemove(sdev);
 #endif  
 #ifdef MY_ABC_HERE

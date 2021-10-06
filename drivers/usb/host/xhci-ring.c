@@ -1257,7 +1257,7 @@ static void handle_port_status(struct xhci_hcd *xhci,
 	if (hcd->speed >= HCD_USB3 && (temp & PORT_PLS_MASK) == XDEV_INACTIVE)
 		bus_state->port_remote_wakeup &= ~(1 << faked_port_index);
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619) || defined(MY_DEF_HERE)
 #ifdef CONFIG_USB_PATCH_ON_RTK
 	if (hcd->speed >= HCD_USB3 && (temp & PORT_PLS_MASK) == XDEV_INACTIVE &&
 		   (temp & PORT_PLC)) {

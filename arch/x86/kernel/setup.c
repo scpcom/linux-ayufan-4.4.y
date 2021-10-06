@@ -110,7 +110,7 @@ extern u32 syno_pch_lpc_gpio_pin(int pin, int *pValue, int isWrite);
 #endif  
 
 #ifdef MY_ABC_HERE
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_PORT_MAPPING_V2
 extern int gSynoHddPowerupSeq, gSynoInternalHddNumber;
 #else  
 extern long g_syno_hdd_powerup_seq;
@@ -270,7 +270,7 @@ void * __init extend_brk(size_t size, size_t align)
 	return ret;
 }
 
-#if defined(MY_ABC_HERE) && defined(MY_ABC_HERE) && !defined(MY_DEF_HERE) && !defined(MY_DEF_HERE) && !defined(MY_DEF_HERE) && !defined(CONFIG_SYNO_COFFEELAKE) && !defined(CONFIG_SYNO_GEMINILAKE) && !defined(CONFIG_SYNO_V1000)
+#if defined(MY_ABC_HERE) && defined(MY_ABC_HERE) && !defined(CONFIG_SYNO_BRASWELL) && !defined(MY_DEF_HERE) && !defined(CONFIG_SYNO_DENVERTON) && !defined(CONFIG_SYNO_COFFEELAKE) && !defined(CONFIG_SYNO_GEMINILAKE) && !defined(CONFIG_SYNO_V1000)
  
 #define SYNO_MAX_HDD_PRZ	4
 #define GPIO_UNDEF			0xFF
@@ -480,7 +480,7 @@ int SYNO_CHECK_HDD_PRESENT(int index)
 		goto END;
 	}
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_PORT_MAPPING_V2
 	if (gSynoHddPowerupSeq && gSynoInternalHddNumber < index) {
 #else  
 	if (0 < g_syno_hdd_powerup_seq && g_syno_hdd_powerup_seq < index) {
@@ -584,7 +584,7 @@ int SYNO_SUPPORT_HDD_DYNAMIC_ENABLE_POWER(void)
 {
 	int iRet = 0;
 
-#ifndef MY_DEF_HERE
+#ifndef CONFIG_SYNO_PORT_MAPPING_V2
 	if (0 > g_syno_hdd_powerup_seq || SYNO_MAX_HDD_PRZ < g_syno_hdd_powerup_seq) {
 		goto END;
 	}
@@ -619,7 +619,7 @@ EXPORT_SYMBOL(SYNO_GET_HDD_PRESENT_PIN);
 EXPORT_SYMBOL(SYNO_SUPPORT_HDD_DYNAMIC_ENABLE_POWER);
 #endif  
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_ENCOLURE_PWR_CTL
  
 int SynoProcEncPwrCtl(struct ctl_table *table, int write,
 		void __user *buffer, size_t *lenp, loff_t *ppos)

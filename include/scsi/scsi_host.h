@@ -36,7 +36,7 @@ struct blk_queue_tags;
 #define DISABLE_CLUSTERING 0
 #define ENABLE_CLUSTERING 1
 
-#if defined(MY_ABC_HERE) || defined(MY_DEF_HERE)
+#if defined(MY_ABC_HERE) || defined(CONFIG_SYNO_PORT_MAPPING_V2)
 enum {
 	SYNO_PORT_TYPE_SATA = 1,
 	SYNO_PORT_TYPE_USB = 2,
@@ -148,7 +148,7 @@ struct scsi_host_template {
 
 	struct list_head legacy_hosts;
 
-#if defined(MY_ABC_HERE) || defined(MY_DEF_HERE)
+#if defined(MY_ABC_HERE) || defined(CONFIG_SYNO_PORT_MAPPING_V2)
 	 
 	int  (* syno_index_get)(struct Scsi_Host *host, uint channel, uint id, uint lun);
 #endif  
@@ -161,12 +161,12 @@ struct scsi_host_template {
 	int  (* syno_get_dbg)(struct Scsi_Host *host, unsigned int *uiDbglvl);
 	int  (* syno_dbg_info)(struct Scsi_Host *host);
 
-#if defined(MY_ABC_HERE) || defined(MY_DEF_HERE)
+#if defined(MY_ABC_HERE) || defined(CONFIG_SYNO_PORT_MAPPING_V2)
 	int  syno_port_type;
 #endif  
 
 	u64 vendor_id;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_GET_DISK_SPEED
         unsigned char (* syno_get_disk_speed)(struct Scsi_Host *host, unsigned int phy_id);
 #endif  
 
@@ -175,7 +175,7 @@ struct scsi_host_template {
 
 	bool disable_blk_mq;
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_HOST_DISK_LED_CTRL
 	int (*syno_set_sashost_disk_led)(struct scsi_device *, int);
 #endif
 };

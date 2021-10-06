@@ -35,7 +35,7 @@ static void svc_unregister(const struct svc_serv *serv, struct net *net);
 #define SVC_POOL_DEFAULT	SVC_POOL_GLOBAL
 
 struct svc_pool_map svc_pool_map = {
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_NFSD_NUMA_SVC_POOL_PERNODE
 	.mode = SVC_POOL_PERNODE
 #else
 	.mode = SVC_POOL_DEFAULT

@@ -1,7 +1,4 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 /******************************************************************************
 *Copyright (C) Marvell International Ltd. and its affiliates
 *
@@ -242,4 +239,4 @@ void mv_net_complex_nss_select(u32 val);
 void mv_nss_sw_reset(void);
 
 #endif /* LINUX_MV_NETCOMPLEX_A39X_H */
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */

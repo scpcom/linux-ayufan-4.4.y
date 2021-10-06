@@ -30,12 +30,12 @@
 #include <linux/list.h>
 #include <linux/dma-mapping.h>
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 #if IS_ENABLED(CONFIG_USB_DWC3_RTK)
 #include <linux/of_device.h>
 #endif /* CONFIG_USB_DWC3_RTK */
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */
 #include <linux/usb/ch9.h>
 #include <linux/usb/gadget.h>
 
@@ -2317,7 +2317,7 @@ static void dwc3_stop_active_transfer(struct dwc3 *dwc, u32 epnum, bool force)
 	 *
 	 * - Issue EndTransfer WITH CMDIOC bit set
 	 * - Wait 100us
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 	 *
 	 * As of IP version 3.10a of the DWC_usb3 IP, the controller
 	 * supports a mode to work around the above limitation. The
@@ -2330,7 +2330,7 @@ static void dwc3_stop_active_transfer(struct dwc3 *dwc, u32 epnum, bool force)
 	 * 100us.
 	 *
 	 * This mode is NOT available on the DWC_usb31 IP.
-#endif // MY_DEF_HERE
+#endif // CONFIG_SYNO_LSP_RTD1619
 	 */
 
 	cmd = DWC3_DEPCMD_ENDTRANSFER;
@@ -2983,11 +2983,11 @@ int dwc3_gadget_init(struct dwc3 *dwc)
 		goto err3;
 	}
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 #if IS_ENABLED(CONFIG_USB_DWC3_RTK)
 	of_dma_configure(&dwc->gadget.dev, NULL);
 #endif /* CONFIG_USB_DWC3_RTK */
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */
 	dwc->gadget.ops			= &dwc3_gadget_ops;
 	dwc->gadget.speed		= USB_SPEED_UNKNOWN;
 	dwc->gadget.sg_supported	= true;

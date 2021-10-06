@@ -777,11 +777,11 @@ struct mtd_info *mtd_concat_create(struct mtd_info *subdev[],	/* subdevices to c
 
 	}
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 	mtd_set_ooblayout(&concat->mtd, subdev[0]->ooblayout);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_RTD1619 */
 	concat->mtd.ecclayout = subdev[0]->ecclayout;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */
 
 	concat->num_subdev = num_devs;
 	concat->mtd.name = name;

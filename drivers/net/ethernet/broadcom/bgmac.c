@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * Driver for (BCM4706)? GBit MAC core on BCMA bus.
  *
@@ -1477,11 +1474,11 @@ static int bgmac_mii_register(struct bgmac *bgmac)
 	struct mii_bus *mii_bus;
 	struct phy_device *phy_dev;
 	char bus_id[MII_BUS_ID_SIZE + 3];
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	int err = 0;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	int i, err = 0;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	if (ci->id == BCMA_CHIP_ID_BCM4707 ||
 	    ci->id == BCMA_CHIP_ID_BCM53018)
@@ -1500,9 +1497,9 @@ static int bgmac_mii_register(struct bgmac *bgmac)
 	mii_bus->parent = &bgmac->core->dev;
 	mii_bus->phy_mask = ~(1 << bgmac->phyaddr);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	mii_bus->irq = kmalloc_array(PHY_MAX_ADDR, sizeof(int), GFP_KERNEL);
 	if (!mii_bus->irq) {
 		err = -ENOMEM;
@@ -1511,15 +1508,15 @@ static int bgmac_mii_register(struct bgmac *bgmac)
 	for (i = 0; i < PHY_MAX_ADDR; i++)
 		mii_bus->irq[i] = PHY_POLL;
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	err = mdiobus_register(mii_bus);
 	if (err) {
 		bgmac_err(bgmac, "Registration of mii bus failed\n");
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 		goto err_free_bus;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		goto err_free_irq;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	}
 
 	bgmac->mii_bus = mii_bus;
@@ -1540,12 +1537,12 @@ static int bgmac_mii_register(struct bgmac *bgmac)
 
 err_unregister_bus:
 	mdiobus_unregister(mii_bus);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 err_free_irq:
 	kfree(mii_bus->irq);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 err_free_bus:
 	mdiobus_free(mii_bus);
 	return err;
@@ -1556,11 +1553,11 @@ static void bgmac_mii_unregister(struct bgmac *bgmac)
 	struct mii_bus *mii_bus = bgmac->mii_bus;
 
 	mdiobus_unregister(mii_bus);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	kfree(mii_bus->irq);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	mdiobus_free(mii_bus);
 }
 

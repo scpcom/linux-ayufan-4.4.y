@@ -69,7 +69,7 @@ struct lp3943 {
 	int num_leds;
 };
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LP3943_PROBE_FIXED_BUS
 static struct i2c_client *gpClient = NULL;
 #endif  
 
@@ -641,7 +641,7 @@ static struct i2c_driver lp3943_driver = {
 
 static int __init lp3943_init(void)
 {
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LP3943_PROBE_FIXED_BUS
 	int iErr = -1;
 	struct i2c_adapter *pAdapter = NULL;
 	 
@@ -670,7 +670,7 @@ module_init(lp3943_init);
 
 static void __exit lp3943_exit(void)
 {
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LP3943_PROBE_FIXED_BUS
 	i2c_unregister_device(gpClient);
 #endif  
 	i2c_del_driver(&lp3943_driver);

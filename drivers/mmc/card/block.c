@@ -207,14 +207,14 @@ static ssize_t power_ro_lock_show(struct device *dev,
 	struct mmc_blk_data *md = mmc_blk_get(dev_to_disk(dev));
 	struct mmc_card *card = md->queue.card;
 	int locked = 0;
-#if defined(CONFIG_MMC_RTK_EMMC) && defined(MY_DEF_HERE)
+#if defined(CONFIG_MMC_RTK_EMMC) && defined(CONFIG_SYNO_LSP_RTD1619)
 	locked = card->ext_csd.boot_ro_lock;
-#else /* CONFIG_MMC_RTK_EMMC && MY_DEF_HERE */
+#else /* CONFIG_MMC_RTK_EMMC && CONFIG_SYNO_LSP_RTD1619 */
 	if (card->ext_csd.boot_ro_lock & EXT_CSD_BOOT_WP_B_PERM_WP_EN)
 		locked = 2;
 	else if (card->ext_csd.boot_ro_lock & EXT_CSD_BOOT_WP_B_PWR_WP_EN)
 		locked = 1;
-#endif /* CONFIG_MMC_RTK_EMMC && MY_DEF_HERE */
+#endif /* CONFIG_MMC_RTK_EMMC && CONFIG_SYNO_LSP_RTD1619 */
 	ret = snprintf(buf, PAGE_SIZE, "%d\n", locked);
 
 	mmc_blk_put(md);
@@ -229,33 +229,33 @@ static ssize_t power_ro_lock_store(struct device *dev,
 	struct mmc_blk_data *md, *part_md;
 	struct mmc_card *card;
 	unsigned long set;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 #ifdef CONFIG_MMC_RTK_EMMC
 	unsigned int mode=0, mode_tmp=0;
 #endif /* CONFIG_MMC_RTK_EMMC */
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */
 
 	if (kstrtoul(buf, 0, &set))
 		return -EINVAL;
 
-#if defined(CONFIG_MMC_RTK_EMMC) && defined(MY_DEF_HERE)
+#if defined(CONFIG_MMC_RTK_EMMC) && defined(CONFIG_SYNO_LSP_RTD1619)
 	sscanf(buf,"%d",&mode);
 
         if(mode>255 || ((mode & EXT_CSD_BOOT_WP_B_PWR_WP_EN)==0 && (mode & EXT_CSD_BOOT_WP_B_PERM_WP_EN)==0)) {
                 printk(KERN_ERR "Bad setting...\n");
                 return count;
         }
-#else /* CONFIG_MMC_RTK_EMMC && MY_DEF_HERE */
+#else /* CONFIG_MMC_RTK_EMMC && CONFIG_SYNO_LSP_RTD1619 */
 	if (set != 1)
 		return count;
-#endif /* CONFIG_MMC_RTK_EMMC && MY_DEF_HERE */
+#endif /* CONFIG_MMC_RTK_EMMC && CONFIG_SYNO_LSP_RTD1619 */
 
 	md = mmc_blk_get(dev_to_disk(dev));
 	card = md->queue.card;
 
 	mmc_get_card(card);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 #ifdef CONFIG_MMC_RTK_EMMC
 	if((mode & EXT_CSD_BOOT_WP_SEL)==0x0) {
 		if(mode & EXT_CSD_BOOT_WP_B_PERM_WP_EN) mode_tmp |= EXT_CSD_BOOT_WP_B_PERM_WP_EN;
@@ -274,9 +274,9 @@ static ssize_t power_ro_lock_store(struct device *dev,
 		}
 	}
 #endif /* CONFIG_MMC_RTK_EMMC */
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */
 
-#if defined(CONFIG_MMC_RTK_EMMC) && defined(MY_DEF_HERE)
+#if defined(CONFIG_MMC_RTK_EMMC) && defined(CONFIG_SYNO_LSP_RTD1619)
 	ret = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL, EXT_CSD_BOOT_WP,
 				card->ext_csd.boot_ro_lock | mode_tmp,
 				card->ext_csd.part_time);
@@ -286,7 +286,7 @@ static ssize_t power_ro_lock_store(struct device *dev,
 	}
 	else
 		card->ext_csd.boot_ro_lock |= mode_tmp;
-#else /* CONFIG_MMC_RTK_EMMC && MY_DEF_HERE */
+#else /* CONFIG_MMC_RTK_EMMC && CONFIG_SYNO_LSP_RTD1619 */
 	ret = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL, EXT_CSD_BOOT_WP,
 				card->ext_csd.boot_ro_lock |
 				EXT_CSD_BOOT_WP_B_PWR_WP_EN,
@@ -295,11 +295,11 @@ static ssize_t power_ro_lock_store(struct device *dev,
 		pr_err("%s: Locking boot partition ro until next power on failed: %d\n", md->disk->disk_name, ret);
 	else
 		card->ext_csd.boot_ro_lock |= EXT_CSD_BOOT_WP_B_PWR_WP_EN;
-#endif /* CONFIG_MMC_RTK_EMMC && MY_DEF_HERE */
+#endif /* CONFIG_MMC_RTK_EMMC && CONFIG_SYNO_LSP_RTD1619 */
 	mmc_put_card(card);
 
 	if (!ret) {
-#if defined(CONFIG_MMC_RTK_EMMC) && defined(MY_DEF_HERE)
+#if defined(CONFIG_MMC_RTK_EMMC) && defined(CONFIG_SYNO_LSP_RTD1619)
 		if((mode & EXT_CSD_BOOT_WP_SEL)==0x0) {
 			if(mode & EXT_CSD_BOOT_WP_B_PERM_WP_EN) printk(KERN_ERR "%s: [1] Locking boot partition ro permanently\n", md->disk->disk_name);
 			else printk(KERN_ERR "%s: Locking boot partition ro until next power on\n", md->disk->disk_name);
@@ -370,7 +370,7 @@ static ssize_t power_ro_lock_store(struct device *dev,
 				}
 			}
 		}
-#else /* CONFIG_MMC_RTK_EMMC && MY_DEF_HERE */
+#else /* CONFIG_MMC_RTK_EMMC && CONFIG_SYNO_LSP_RTD1619 */
 		pr_info("%s: Locking boot partition ro until next power on\n",
 			md->disk->disk_name);
 		set_disk_ro(md->disk, 1);
@@ -380,7 +380,7 @@ static ssize_t power_ro_lock_store(struct device *dev,
 				pr_info("%s: Locking boot partition ro until next power on\n", part_md->disk->disk_name);
 				set_disk_ro(part_md->disk, 1);
 			}
-#endif /* CONFIG_MMC_RTK_EMMC && MY_DEF_HERE */
+#endif /* CONFIG_MMC_RTK_EMMC && CONFIG_SYNO_LSP_RTD1619 */
 	}
 
 	mmc_blk_put(md);

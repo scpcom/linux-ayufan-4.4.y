@@ -115,7 +115,7 @@ enum {
 	PORT_SCR_NTF		= 0x3c,  
 	PORT_FBS		= 0x40,  
 	PORT_DEVSLP		= 0x44,  
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	PORT_INDIRECT_ADDR	= 0x78,  
 	PORT_INDIRECT_DATA	= 0x7c,  
 #endif  
@@ -188,7 +188,7 @@ enum {
 	PORT_DEVSLP_DSP		= (1 << 1),        
 	PORT_DEVSLP_ADSE	= (1 << 0),        
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	 
 	PORT_OOB_INDIRECT_ADDR	= 0x48,		 
 	PORT_OOB_COMRESET_U_MASK = 0x3f,	 
@@ -323,7 +323,7 @@ struct ahci_host_priv {
 	unsigned		nports;		 
 	void			*plat_data;	 
 	unsigned int		irq;		 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 
 	u32 comreset_u;
 	 
@@ -333,8 +333,8 @@ struct ahci_host_priv {
 	 
 	void			(*start_engine)(struct ata_port *ap);
 
-#if defined(MY_DEF_HERE)
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
  
 #else  
 	 
@@ -370,7 +370,7 @@ extern int sata_syno_ahci_defer_cmd(struct ata_queued_cmd *qc);
 extern int ahci_syno_pmp_3x26_qc_defer(struct ata_queued_cmd *qc);
 #endif  
 
-#if defined(MY_ABC_HERE) || defined(MY_DEF_HERE)
+#if defined(MY_ABC_HERE) || defined(CONFIG_SYNO_PORT_MAPPING_V2)
 extern struct ata_device *ata_scsi_find_dev(struct ata_port *ap,
                                             const struct scsi_device *scsidev);
 #endif  
@@ -401,7 +401,7 @@ void ahci_print_info(struct ata_host *host, const char *scc_s);
 int ahci_host_activate(struct ata_host *host, struct scsi_host_template *sht);
 void ahci_error_handler(struct ata_port *ap);
 
-#if defined(MY_ABC_HERE) || defined(MY_DEF_HERE)
+#if defined(MY_ABC_HERE) || defined(CONFIG_SYNO_MV_9170_GPIO_CTRL)
 static inline void __iomem *ahci_host_base(struct ata_host *host)
 {
 	struct ahci_host_priv *hpriv = host->private_data;
@@ -415,8 +415,8 @@ static inline void __iomem *__ahci_port_base(struct ata_host *host,
 	struct ahci_host_priv *hpriv = host->private_data;
 	void __iomem *mmio = hpriv->mmio;
 
-#if defined(MY_DEF_HERE)
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
  
 #else  
 	if (hpriv->a8k_a0_wa && hpriv->port_base && hpriv->port_offset)

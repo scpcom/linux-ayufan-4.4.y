@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * pinmux driver for CSR SiRFprimaII
  *
@@ -813,11 +810,11 @@ static int sirfsoc_gpio_probe(struct device_node *np)
 	sgpio->chip.gc.of_node = np;
 	sgpio->chip.gc.of_xlate = sirfsoc_gpio_of_xlate;
 	sgpio->chip.gc.of_gpio_n_cells = 2;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	sgpio->chip.gc.parent = &pdev->dev;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	sgpio->chip.gc.dev = &pdev->dev;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	sgpio->chip.regs = regs;
 
 	err = gpiochip_add(&sgpio->chip.gc);

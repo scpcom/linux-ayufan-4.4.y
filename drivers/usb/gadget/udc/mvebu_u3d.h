@@ -1,7 +1,4 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 /**
  * core.h - Marvell Central IP usb3 core header
  *
@@ -354,9 +351,9 @@ struct mvc2 {
 	struct device   *dev;
 	struct clk  *clk;
 	struct usb_phy *phy;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	struct phy *comphy;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	int irq;
 	void    __iomem *base;
 	void    __iomem *win_base;
@@ -400,10 +397,10 @@ struct mvc2 {
 	int prev_vbus;
 	struct work_struct	vbus_work;
 	struct workqueue_struct *qwork;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_10)
 	/* Flags for HW reset. false: no need reset; true: need reset */
 	bool phy_hw_reset;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_10 */
 };
 
 extern void mvc2_usb2_connect(void);
@@ -578,4 +575,4 @@ void mvc2_handle_setup(struct mvc2 *cp);
 int mv_udc_register_status_notify(struct notifier_block *nb);
 
 #endif
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */

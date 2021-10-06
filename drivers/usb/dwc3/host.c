@@ -20,12 +20,12 @@
 
 #include <linux/platform_device.h>
 #include <linux/usb/xhci_pdriver.h>
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 #if IS_ENABLED(CONFIG_USB_DWC3_RTK)
 #include <linux/of_device.h>
 #endif /* CONFIG_USB_DWC3_RTK */
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */
 
 #include "core.h"
 
@@ -34,11 +34,11 @@ int dwc3_host_init(struct dwc3 *dwc)
 	struct platform_device	*xhci;
 	struct usb_xhci_pdata	pdata;
 	int			ret;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 #ifdef CONFIG_USB_RTK_DWC3_DRD_MODE
 	dev_info(dwc->dev, "%s\n", __func__);
 #endif
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */
 
 #if defined(CONFIG_USB_RTK_DWC3_DRD_MODE) && defined(MY_DEF_HERE)
 	dev_info(dwc->dev, "%s\n", __func__);
@@ -50,12 +50,12 @@ int dwc3_host_init(struct dwc3 *dwc)
 		return -ENOMEM;
 	}
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 #if IS_ENABLED(CONFIG_USB_DWC3_RTK)
 	of_dma_configure(&xhci->dev, NULL);
 #endif /* CONFIG_USB_DWC3_RTK */
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */
 	dma_set_coherent_mask(&xhci->dev, dwc->dev->coherent_dma_mask);
 
 	xhci->dev.parent	= dwc->dev;
@@ -63,11 +63,11 @@ int dwc3_host_init(struct dwc3 *dwc)
 	xhci->dev.dma_parms	= dwc->dev->dma_parms;
 
 	dwc->xhci = xhci;
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(MY_DEF_HERE) || defined(CONFIG_SYNO_LSP_RTD1619)
 #if defined(CONFIG_USB_RTK_DWC3_DRD_MODE)
 	dwc->has_xhci = true;
 #endif /* CONFIG_USB_RTK_DWC3_DRD_MODE */
-#endif /* MY_DEF_HERE || MY_DEF_HERE */
+#endif /* MY_DEF_HERE || CONFIG_SYNO_LSP_RTD1619 */
 
 	ret = platform_device_add_resources(xhci, dwc->xhci_resources,
 						DWC3_XHCI_RESOURCES_NUM);
@@ -117,11 +117,11 @@ void dwc3_host_exit(struct dwc3 *dwc)
 			  dev_name(&dwc->xhci->dev));
 	phy_remove_lookup(dwc->usb3_generic_phy, "usb3-phy",
 			  dev_name(&dwc->xhci->dev));
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(MY_DEF_HERE) || defined(CONFIG_SYNO_LSP_RTD1619)
 #if defined(CONFIG_USB_RTK_DWC3_DRD_MODE)
 	dwc->has_xhci = false;
 #endif /* CONFIG_USB_RTK_DWC3_DRD_MODE */
-#endif /* MY_DEF_HERE || MY_DEF_HERE */
+#endif /* MY_DEF_HERE || CONFIG_SYNO_LSP_RTD1619 */
 	platform_device_unregister(dwc->xhci);
 }
 #ifdef MY_DEF_HERE

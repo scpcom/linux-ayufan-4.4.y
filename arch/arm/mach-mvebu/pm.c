@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * Suspend/resume support. Currently supporting Armada XP only.
  *
@@ -152,7 +149,7 @@ static void mvebu_pm_store_armadaxp_bootinfo(u32 *store_addr)
 	writel(BOOT_MAGIC_LIST_END, store_addr);
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 static void mvebu_pm_store_armada38x_bootinfo(u32 *store_addr)
 {
 	phys_addr_t resume_pc;
@@ -191,7 +188,7 @@ static void mvebu_pm_store_armada38x_bootinfo(u32 *store_addr)
 
 	writel(BOOT_MAGIC_LIST_END, store_addr);
 }
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 static int mvebu_pm_store_bootinfo(void)
 {
@@ -201,10 +198,10 @@ static int mvebu_pm_store_bootinfo(void)
 
 	if (of_machine_is_compatible("marvell,armadaxp"))
 		mvebu_pm_store_armadaxp_bootinfo(store_addr);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	else if (of_machine_is_compatible("marvell,armada380"))
 		mvebu_pm_store_armada38x_bootinfo(store_addr);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	else
 		return -ENODEV;
 
@@ -223,10 +220,10 @@ static int mvebu_enter_suspend(void)
 
 	cpu_suspend(0, mvebu_pm_powerdown);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	/* Remove CPU1 from the PMU frequency domain until it becomes online */
 	mvebu_v7_pmsu_disable_dfs_cpu(1);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	outer_resume();
 

@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 // Copyright (c) 2003-2015 Synology Inc. All rights reserved.
 #ifndef __SYNO_SATA_USER_H_
 #define __SYNO_SATA_USER_H_
@@ -17,7 +14,7 @@
 static inline char
 *DeviceNameGet(const int index, char *szBuf)
 {
-#if !defined(MY_DEF_HERE)
+#if !defined(CONFIG_SYNO_PORT_MAPPING_V2)
 	if (index < 26) {
 		sprintf(szBuf, "sd%c", 'a' + index % 26);
 	} else if (index < (26 + 1) * 26) {
@@ -30,7 +27,7 @@ static inline char
 		sprintf(szBuf, "sd%c%c%c",
 			'a' + m1, 'a' + m2, 'a' + m3);
 	}
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_PORT_MAPPING_V2 */
 
 	return szBuf;
 }

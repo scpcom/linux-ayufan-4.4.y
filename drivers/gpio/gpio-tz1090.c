@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * Toumaz Xenif TZ1090 GPIO handling.
  *
@@ -428,11 +425,11 @@ static int tz1090_gpio_bank_probe(struct tz1090_gpio_bank_info *info)
 	snprintf(bank->label, sizeof(bank->label), "tz1090-gpio-%u",
 		 info->index);
 	bank->chip.label		= bank->label;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	bank->chip.parent			= dev;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	bank->chip.dev			= dev;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	bank->chip.direction_input	= tz1090_gpio_direction_input;
 	bank->chip.direction_output	= tz1090_gpio_direction_output;
 	bank->chip.get			= tz1090_gpio_get;

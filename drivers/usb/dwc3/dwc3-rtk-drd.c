@@ -1,10 +1,10 @@
 /**
  * dwc3-rtk-drd.c - Realtek DWC3 Specific Glue layer
  *
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
  * Copyright (C) 2017 Realtek Semiconductor Corporation
  *
-#endif // MY_DEF_HERE
+#endif // CONFIG_SYNO_LSP_RTD1619
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -115,10 +115,10 @@ err0:
 	dev_info(dwc->dev, "%s END....", __func__);
 	return ret;
 }
-#if defined(MY_DEF_HERE)
-#else /* MY_DEF_HERE */
+#if defined(CONFIG_SYNO_LSP_RTD1619)
+#else /* CONFIG_SYNO_LSP_RTD1619 */
 EXPORT_SYMBOL_GPL(dwc3_drd_to_host);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */
 
 int dwc3_drd_to_device(struct dwc3 *dwc)
 {
@@ -178,11 +178,11 @@ int dwc3_drd_to_device(struct dwc3 *dwc)
 	if (ret) {
 		dev_err(dwc->dev, "failed to init gadget\n");
 		goto err0;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 	} else {
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_RTD1619 */
 	{
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */
 		struct usb_gadget_driver *driver =
 			    rtk_dwc3_set_and_get_usb_gadget_driver(NULL);
 		if (driver)
@@ -196,18 +196,18 @@ err0:
 	dev_info(dwc->dev, "%s END....", __func__);
 	return ret;
 }
-#if defined(MY_DEF_HERE)
-#else /* MY_DEF_HERE */
+#if defined(CONFIG_SYNO_LSP_RTD1619)
+#else /* CONFIG_SYNO_LSP_RTD1619 */
 EXPORT_SYMBOL_GPL(dwc3_drd_to_device);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */
 
 int dwc3_drd_to_stop_all(struct dwc3 *dwc)
 {
 	int ret = 0;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 	dev_info(dwc->dev, "%s START....", __func__);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */
 	if (dwc->has_xhci)
 		dwc3_host_exit(dwc);
 	if (dwc->has_gadget) {
@@ -218,12 +218,12 @@ int dwc3_drd_to_stop_all(struct dwc3 *dwc)
 		dwc3_gadget_exit(dwc);
 	}
 	wmb();
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 	dev_info(dwc->dev, "%s END....", __func__);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */
 	return ret;
 }
-#if defined(MY_DEF_HERE)
-#else /* MY_DEF_HERE */
+#if defined(CONFIG_SYNO_LSP_RTD1619)
+#else /* CONFIG_SYNO_LSP_RTD1619 */
 EXPORT_SYMBOL_GPL(dwc3_drd_to_stop_all);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */

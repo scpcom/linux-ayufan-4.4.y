@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * Generic on-chip SRAM allocation driver
  *
@@ -363,14 +360,14 @@ static int sram_probe(struct platform_device *pdev)
 		return -EBUSY;
 	}
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	if (of_property_read_bool(pdev->dev.of_node, "no-memory-wc"))
 		sram->virt_base = devm_ioremap(sram->dev, res->start, size);
 	else
 		sram->virt_base = devm_ioremap_wc(sram->dev, res->start, size);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	sram->virt_base = devm_ioremap_wc(sram->dev, res->start, size);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	if (IS_ERR(sram->virt_base))
 		return PTR_ERR(sram->virt_base);
 

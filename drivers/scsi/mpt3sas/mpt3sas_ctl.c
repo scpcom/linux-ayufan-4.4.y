@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * Management Module Support for MPT (Message Passing Technology) based
  * controllers
@@ -2536,11 +2533,11 @@ _ctl_board_name_show(struct device *cdev, struct device_attribute *attr,
 	struct Scsi_Host *shost = class_to_shost(cdev);
 	struct MPT3SAS_ADAPTER *ioc = shost_priv(shost);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_HBA_IDX
 	if (0 != ioc->syno_ids) {
 		return snprintf(buf, 16, "%s_%d\n", ioc->manu_pg0.BoardName, ioc->syno_ids);
 	} else
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_SAS_HBA_IDX */
 	return snprintf(buf, 16, "%s\n", ioc->manu_pg0.BoardName);
 }
 static DEVICE_ATTR(board_name, S_IRUGO, _ctl_board_name_show, NULL);

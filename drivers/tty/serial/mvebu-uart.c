@@ -1,7 +1,4 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 /*
 * ***************************************************************************
 * Copyright (C) 2015 Marvell International Ltd.
@@ -20,12 +17,12 @@
 * ***************************************************************************
 */
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ARMADA37XX
 #if defined(CONFIG_SERIAL_MVEBU_CONSOLE) && defined(CONFIG_MAGIC_SYSRQ)
 #define SUPPORT_SYSRQ
 #include <linux/sysrq.h>
 #endif /* CONFIG_SERIAL_MVEBU_CONSOLE && CONFIG_MAGIC_SYSRQ */
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_ARMADA37XX */
 
 #include <linux/clk.h>
 #include <linux/console.h>
@@ -47,12 +44,12 @@
 #include <linux/tty.h>
 #include <linux/tty_flip.h>
 
-#if defined(MY_DEF_HERE)
-#ifdef MY_DEF_HERE
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#ifdef CONFIG_SYNO_ARMADA37XX
 void __iomem *syno_uart1_base;
 EXPORT_SYMBOL(syno_uart1_base);
 #define PORT1_BASE 0xD0012200
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_ARMADA37XX */
 
 enum reg_uart_type {
 	REG_UART_A3700,
@@ -68,12 +65,12 @@ struct uart_regs_layout {
 	unsigned int uart_stat;
 	unsigned int uart_over_sample;
 };
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 /* Register Map */
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 
 /* REG_UART_A3700 */
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 #define UART_RBR		0x00
 #define  RBR_BRK_DET		BIT(15)
 #define  RBR_FRM_ERR_DET	BIT(14)
@@ -100,13 +97,13 @@ struct uart_regs_layout {
 #define  CTRL_FRM_ERR_INT	BIT(2)
 #define  CTRL_PAR_ERR_INT	BIT(1)
 #define  CTRL_OVR_ERR_INT	BIT(0)
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 #define  CTRL_BRK_INT		(CTRL_BRK_DET_INT | CTRL_FRM_ERR_INT\
 				 | CTRL_PAR_ERR_INT | CTRL_OVR_ERR_INT)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 #define  CTRL_RX_INT			(CTRL_RX_RDY_INT | CTRL_BRK_DET_INT |\
 	CTRL_FRM_ERR_INT | CTRL_PAR_ERR_INT | CTRL_OVR_ERR_INT)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 
 #define UART_STAT		0x0c
 #define  STAT_TX_FIFO_EMP	BIT(13)
@@ -127,7 +124,7 @@ struct uart_regs_layout {
 				 | STAT_PAR_ERR | STAT_OVR_ERR)
 
 #define UART_BRDV		0x10
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 #define  BAUD_MASK		0x000003ff
 #define  BAUD_OFFSET		0
 
@@ -145,9 +142,9 @@ struct uart_regs_layout {
 #define UART_EXT_OSAMP		0x14
 
 #define UART_EXT_RBR_1BYTE	0x18
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 #define UART_EXT_TSH_1BYTE	0x1c
 
 #define UART_EXT_CTRL2		0x20
@@ -195,9 +192,9 @@ static struct uart_regs_layout uart_regs_layout[] = {
 };
 
 #define MVEBU_NR_UARTS		2
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 #define MVEBU_NR_UARTS		1
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 
 #define MVEBU_UART_TYPE		"mvebu-uart"
 #define DRIVER_NAME		"mvebu-serial"
@@ -205,14 +202,14 @@ static struct uart_regs_layout uart_regs_layout[] = {
 static struct uart_port mvebu_uart_ports[MVEBU_NR_UARTS];
 
 struct mvebu_uart_data {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	struct uart_port        *port;
 	struct clk              *clk;
 	struct uart_regs_layout *regs;
 	enum reg_uart_type       reg_type;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_UART_FIX)
 	spinlock_t               tx_lock;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_UART_FIX */
 
 #ifdef CONFIG_PM
 	/* Used to restore the uart registers status*/
@@ -246,13 +243,13 @@ struct mvebu_uart_data {
 		 */
 		unsigned char __iomem *uart_int_base;
 	} intr;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	struct uart_port *port;
 	struct clk       *clk;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 };
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 #define REG_CTRL(uart_data)	((uart_data)->regs->uart_ctrl)
 #define REG_CTRL2(uart_data)	((uart_data)->regs->uart_ctrl2)
 #define REG_RBR(uart_data)	((uart_data)->regs->uart_rbr)
@@ -314,22 +311,22 @@ static inline unsigned int get_stat_tx_1byte_rdy(struct mvebu_uart_data *data)
 	return 0;
 }
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 /* Core UART Driver Operations */
 static unsigned int mvebu_uart_tx_empty(struct uart_port *port)
 {
 	unsigned long flags;
 	unsigned int st;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	struct mvebu_uart_data *uart_data = (struct mvebu_uart_data *)port->private_data;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 
 	spin_lock_irqsave(&port->lock, flags);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	st = readl(port->membase + REG_STAT(uart_data));
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	st = readl(port->membase + UART_STAT);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	spin_unlock_irqrestore(&port->lock, flags);
 
 	return (st & STAT_TX_FIFO_EMP) ? TIOCSER_TEMT : 0;
@@ -351,24 +348,24 @@ static void mvebu_uart_set_mctrl(struct uart_port *port,
 
 static void mvebu_uart_stop_tx(struct uart_port *port)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	unsigned int ctl;
 	struct mvebu_uart_data *uart_data = (struct mvebu_uart_data *)port->private_data;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	unsigned int ctl = readl(port->membase + UART_CTRL);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	ctl = readl(port->membase + uart_data->intr.ctrl_reg);
 	ctl &= ~uart_data->reg_bits.ctrl_tx_rdy_int(uart_data);
 	writel(ctl, port->membase + uart_data->intr.ctrl_reg);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	ctl &= ~CTRL_TX_RDY_INT;
 	writel(ctl, port->membase + UART_CTRL);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_UART_FIX)
 /* mvebu_uart_tx_lock:
  * This lock is only used to lock the TX data when pulse interrupt is enabled.
  */
@@ -388,23 +385,23 @@ do {												\
 		spin_unlock_irqrestore(&uart_data->tx_lock, flags);				\
 	}											\
 } while (0)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_UART_FIX */
 
 static void mvebu_uart_start_tx(struct uart_port *port)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	unsigned int ctl;
 	struct mvebu_uart_data *uart_data = (struct mvebu_uart_data *)port->private_data;
 	struct circ_buf *xmit = &port->state->xmit;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_UART_FIX)
 	unsigned long flags = 0;
-#endif /* MY_DEF_HERE */
-#else /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_UART_FIX */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	unsigned int ctl = readl(port->membase + UART_CTRL);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 
-#if defined(MY_DEF_HERE)
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(CONFIG_SYNO_LSP_ARMADA_UART_FIX)
 	/* When Armada37x0 works with pulse interrupt, the TX interrupt
 	 * is triggered only when TX FIFO state transmites in following
 	 * two scenarios:
@@ -422,7 +419,7 @@ static void mvebu_uart_start_tx(struct uart_port *port)
 	 * This can prevent the tx interrupt from breaking the writing action.
 	 */
 	mvebu_uart_tx_lock(uart_data, flags);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_UART_FIX */
 	if (!IS_ERR_OR_NULL(uart_data->intr.uart_int_base)) {
 		if (!uart_circ_empty(xmit)) {
 			writel(xmit->buf[xmit->tail], port->membase + REG_TSH(uart_data));
@@ -430,29 +427,29 @@ static void mvebu_uart_start_tx(struct uart_port *port)
 			port->icount.tx++;
 		}
 	}
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_UART_FIX)
 	mvebu_uart_tx_unlock(uart_data, flags);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_UART_FIX */
 	ctl = readl(port->membase + uart_data->intr.ctrl_reg);
 	ctl |= uart_data->reg_bits.ctrl_tx_rdy_int(uart_data);
 	writel(ctl, port->membase + uart_data->intr.ctrl_reg);
-#endif /* MY_DEF_HERE */
-#else /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_UART_FIX */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	ctl |= CTRL_TX_RDY_INT;
 	writel(ctl, port->membase + UART_CTRL);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 }
 
 static void mvebu_uart_stop_rx(struct uart_port *port)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	unsigned int ctl;
 	struct mvebu_uart_data *uart_data = (struct mvebu_uart_data *)port->private_data;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	unsigned int ctl = readl(port->membase + UART_CTRL);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	ctl = readl(port->membase + REG_CTRL(uart_data));
 	ctl &= ~CTRL_BRK_INT;
 	writel(ctl, port->membase + REG_CTRL(uart_data));
@@ -460,36 +457,36 @@ static void mvebu_uart_stop_rx(struct uart_port *port)
 	ctl = readl(port->membase + uart_data->intr.ctrl_reg);
 	ctl &= ~uart_data->reg_bits.ctrl_rx_rdy_int(uart_data);
 	writel(ctl, port->membase + uart_data->intr.ctrl_reg);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	ctl &= ~CTRL_RX_INT;
 	writel(ctl, port->membase + UART_CTRL);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 }
 
 static void mvebu_uart_break_ctl(struct uart_port *port, int brk)
 {
 	unsigned int ctl;
 	unsigned long flags;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	struct mvebu_uart_data *uart_data = (struct mvebu_uart_data *)port->private_data;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	spin_lock_irqsave(&port->lock, flags);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	ctl = readl(port->membase + REG_CTRL(uart_data));
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	ctl = readl(port->membase + UART_CTRL);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	if (brk == -1)
 		ctl |= CTRL_SND_BRK_SEQ;
 	else
 		ctl &= ~CTRL_SND_BRK_SEQ;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	writel(ctl, port->membase + REG_CTRL(uart_data));
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	writel(ctl, port->membase + UART_CTRL);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	spin_unlock_irqrestore(&port->lock, flags);
 }
 
@@ -498,19 +495,19 @@ static void mvebu_uart_rx_chars(struct uart_port *port, unsigned int status)
 	struct tty_port *tport = &port->state->port;
 	unsigned char ch = 0;
 	char flag = 0;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	struct mvebu_uart_data *uart_data = (struct mvebu_uart_data *)port->private_data;
 	unsigned int stat_bit_rx_rdy = uart_data->reg_bits.stat_rx_rdy(uart_data);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 
 	do {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 		if (status & stat_bit_rx_rdy) {
 			ch = readl(port->membase + REG_RBR(uart_data));
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 		if (status & STAT_RX_RDY) {
 			ch = readl(port->membase + UART_RBR);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 			ch &= 0xff;
 			flag = TTY_NORMAL;
 			port->icount.rx++;
@@ -519,14 +516,14 @@ static void mvebu_uart_rx_chars(struct uart_port *port, unsigned int status)
 				port->icount.parity++;
 		}
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ARMADA37XX
 		/* This is a workaround to prevent from break
 		 * cmd flushing.
 		 */
 		if ((status & STAT_BRK_DET) && !port->sysrq) {
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_ARMADA37XX */
 		if (status & STAT_BRK_DET) {
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_ARMADA37XX */
 			port->icount.brk++;
 			status &= ~(STAT_FRM_ERR | STAT_PAR_ERR);
 			if (uart_handle_break(port))
@@ -543,11 +540,11 @@ static void mvebu_uart_rx_chars(struct uart_port *port, unsigned int status)
 			goto ignore_char;
 
 		if (status & port->ignore_status_mask & STAT_PAR_ERR)
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 			status &= ~stat_bit_rx_rdy;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 			status &= ~STAT_RX_RDY;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 
 		status &= port->read_status_mask;
 
@@ -556,11 +553,11 @@ static void mvebu_uart_rx_chars(struct uart_port *port, unsigned int status)
 
 		status &= ~port->ignore_status_mask;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 		if (status & stat_bit_rx_rdy)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 		if (status & STAT_RX_RDY)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 			tty_insert_flip_char(tport, ch, flag);
 
 		if (status & STAT_BRK_DET)
@@ -573,13 +570,13 @@ static void mvebu_uart_rx_chars(struct uart_port *port, unsigned int status)
 			tty_insert_flip_char(tport, 0, TTY_OVERRUN);
 
 ignore_char:
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 		status = readl(port->membase + REG_STAT(uart_data));
 	} while (status & (stat_bit_rx_rdy | STAT_BRK_DET));
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 		status = readl(port->membase + UART_STAT);
 	} while (status & (STAT_RX_RDY | STAT_BRK_DET));
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 
 	tty_flip_buffer_push(tport);
 }
@@ -587,22 +584,22 @@ ignore_char:
 static void mvebu_uart_tx_chars(struct uart_port *port, unsigned int status)
 {
 	struct circ_buf *xmit = &port->state->xmit;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	unsigned int count;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	unsigned int st;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	struct mvebu_uart_data *uart_data = (struct mvebu_uart_data *)port->private_data;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 
 	if (port->x_char) {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 		writel(port->x_char, port->membase + REG_TSH(uart_data));
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 		writel(port->x_char, port->membase + UART_TSH);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 		port->icount.tx++;
 		port->x_char = 0;
 		return;
@@ -613,24 +610,24 @@ static void mvebu_uart_tx_chars(struct uart_port *port, unsigned int status)
 		return;
 	}
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	for (;;) {
 		writel(xmit->buf[xmit->tail], port->membase + REG_TSH(uart_data));
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	for (count = 0; count < port->fifosize; count++) {
 		writel(xmit->buf[xmit->tail], port->membase + UART_TSH);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 		xmit->tail = (xmit->tail + 1) & (UART_XMIT_SIZE - 1);
 		port->icount.tx++;
 
 		if (uart_circ_empty(xmit))
 			break;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 		st = readl(port->membase + REG_STAT(uart_data));
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 		st = readl(port->membase + UART_STAT);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 		if (st & STAT_TX_FIFO_FUL)
 			break;
 	}
@@ -645,36 +642,36 @@ static void mvebu_uart_tx_chars(struct uart_port *port, unsigned int status)
 static irqreturn_t mvebu_uart_isr(int irq, void *dev_id)
 {
 	struct uart_port *port = (struct uart_port *)dev_id;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	unsigned int st;
 	struct mvebu_uart_data *uart_data = (struct mvebu_uart_data *)port->private_data;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_UART_FIX)
 	unsigned long flags = 0;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_UART_FIX */
 
 	st = readl(port->membase + REG_STAT(uart_data));
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	unsigned int st = readl(port->membase + UART_STAT);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 
 	if (st & (STAT_RX_RDY | STAT_OVR_ERR | STAT_FRM_ERR | STAT_BRK_DET))
 		mvebu_uart_rx_chars(port, st);
 
 	if (st & STAT_TX_RDY)
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_UART_FIX)
 	{
 		mvebu_uart_tx_lock(uart_data, flags);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_UART_FIX */
 		mvebu_uart_tx_chars(port, st);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_UART_FIX)
 		mvebu_uart_tx_unlock(uart_data, flags);
 	}
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_UART_FIX */
 
 	return IRQ_HANDLED;
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 static irqreturn_t mvebu_uart_rx_isr(int irq, void *dev_id)
 {
 	struct uart_port *port = (struct uart_port *)dev_id;
@@ -699,20 +696,20 @@ static irqreturn_t mvebu_uart_tx_isr(int irq, void *dev_id)
 	struct mvebu_uart_data *uart_data = (struct mvebu_uart_data *)port->private_data;
 	unsigned int st = readl(port->membase + REG_STAT(uart_data));
 	unsigned int stat_bit_tx_rdy = uart_data->reg_bits.stat_tx_rdy(uart_data);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_UART_FIX)
 	unsigned long flags = 0;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_UART_FIX */
 
 	if (st & stat_bit_tx_rdy)
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_UART_FIX)
 	{
 		mvebu_uart_tx_lock(uart_data, flags);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_UART_FIX */
 		mvebu_uart_tx_chars(port, st);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_UART_FIX)
 		mvebu_uart_tx_unlock(uart_data, flags);
 	}
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_UART_FIX */
 
 	if (!IS_ERR_OR_NULL(uart_data->intr.uart_int_base)) {
 		st = readl(uart_data->intr.uart_int_base + NORTH_BRIDGE_UART_EXT_INT_STAT);
@@ -749,81 +746,81 @@ static int mvebu_uart_irq_request(struct uart_port *port)
 	return ret;
 }
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 static int mvebu_uart_startup(struct uart_port *port)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	struct mvebu_uart_data *uart_data = (struct mvebu_uart_data *)port->private_data;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 	unsigned int ctl, ret;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 	unsigned int ctl;
-#endif /* MY_DEF_HERE */
-#else /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	int ret;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 
 	writel(CTRL_TXFIFO_RST | CTRL_RXFIFO_RST,
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 		port->membase + REG_CTRL(uart_data));
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	       port->membase + UART_CTRL);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	udelay(1);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 
 	/* Clear the Error bits of state reg before irq request */
 	ret = readl(port->membase + REG_STAT(uart_data));
 	ret |= STAT_BRK_ERR;
 	writel(ret, port->membase + REG_STAT(uart_data));
 
-#endif /* MY_DEF_HERE */
-#if defined(MY_DEF_HERE)
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	writel(CTRL_BRK_INT, port->membase + REG_CTRL(uart_data));
 	ctl = readl(port->membase + uart_data->intr.ctrl_reg);
 	ctl |= uart_data->reg_bits.ctrl_rx_rdy_int(uart_data);
 	writel(ctl, port->membase + uart_data->intr.ctrl_reg);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	writel(CTRL_RX_INT, port->membase + UART_CTRL);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	/* Requset irq_sum, irq_tx, irq_rx separately for uart ports */
 	return mvebu_uart_irq_request(port);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	ret = request_irq(port->irq, mvebu_uart_isr, port->irqflags, DRIVER_NAME,
 			  port);
 	if (ret) {
 		dev_err(port->dev, "failed to request irq\n");
 		return ret;
 	}
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	return 0;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 }
 
 static void mvebu_uart_shutdown(struct uart_port *port)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	struct mvebu_uart_data *uart_data = (struct mvebu_uart_data *)port->private_data;
 
 	writel(0, port->membase + REG_CTRL(uart_data));
 	writel(0, port->membase + uart_data->intr.ctrl_reg);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 	if (uart_data->intr.irq_sum > 0)
 		free_irq(port->irq, port);
 	else {
 		free_irq(uart_data->intr.irq_tx, port);
 		free_irq(uart_data->intr.irq_rx, port);
 	}
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 	free_irq(port->irq, port);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 }
 
 static void mvebu_uart_baud_rate_set(struct uart_port *port, unsigned int baud)
@@ -857,9 +854,9 @@ static void mvebu_uart_baud_rate_set(struct uart_port *port, unsigned int baud)
 		value |= baud_rate_div << BAUD_OFFSET;
 		writel(value, port->membase + REG_BRDV(uart_data));
 	}
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	writel(0, port->membase + UART_CTRL);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 }
 
 static void mvebu_uart_set_termios(struct uart_port *port,
@@ -868,21 +865,21 @@ static void mvebu_uart_set_termios(struct uart_port *port,
 {
 	unsigned long flags;
 	unsigned int baud;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	struct mvebu_uart_data *uart_data = (struct mvebu_uart_data *)port->private_data;
 	unsigned int stat_bit_rx_rdy = uart_data->reg_bits.stat_rx_rdy(uart_data);
 	unsigned int stat_bit_tx_rdy = uart_data->reg_bits.stat_tx_rdy(uart_data);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 
 	spin_lock_irqsave(&port->lock, flags);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	port->read_status_mask = stat_bit_rx_rdy | STAT_OVR_ERR |
 		stat_bit_tx_rdy | STAT_TX_FIFO_FUL;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	port->read_status_mask = STAT_RX_RDY | STAT_OVR_ERR |
 		STAT_TX_RDY | STAT_TX_FIFO_FUL;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 
 	if (termios->c_iflag & INPCK)
 		port->read_status_mask |= STAT_FRM_ERR | STAT_PAR_ERR;
@@ -893,23 +890,23 @@ static void mvebu_uart_set_termios(struct uart_port *port,
 			STAT_FRM_ERR | STAT_PAR_ERR | STAT_OVR_ERR;
 
 	if ((termios->c_cflag & CREAD) == 0)
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 		port->ignore_status_mask |= stat_bit_rx_rdy | STAT_BRK_ERR;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 		port->ignore_status_mask |= STAT_RX_RDY | STAT_BRK_ERR;
 
 	if (old)
 		tty_termios_copy_hw(termios, old);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 
 	baud = uart_get_baud_rate(port, termios, old, 0, 460800);
 	uart_update_timeout(port, termios->c_cflag, baud);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	/* Baud-rate set*/
 	mvebu_uart_baud_rate_set(port, baud);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	spin_unlock_irqrestore(&port->lock, flags);
 }
 
@@ -931,38 +928,38 @@ static int mvebu_uart_request_port(struct uart_port *port)
 #ifdef CONFIG_CONSOLE_POLL
 static int mvebu_uart_get_poll_char(struct uart_port *port)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	unsigned int st;
 	struct mvebu_uart_data *uart_data = (struct mvebu_uart_data *)port->private_data;
 
 	st = readl(port->membase + REG_STAT(uart_data));
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	unsigned int st = readl(port->membase + UART_STAT);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 
 	if (!(st & STAT_RX_RDY))
 		return NO_POLL_CHAR;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	return readl(port->membase + REG_RBR(uart_data));
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	return readl(port->membase + UART_RBR);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 }
 
 static void mvebu_uart_put_poll_char(struct uart_port *port, unsigned char c)
 {
 	unsigned int st;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	struct mvebu_uart_data *uart_data = (struct mvebu_uart_data *)port->private_data;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 
 	for (;;) {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 		st = readl(port->membase + REG_STAT(uart_data));
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 		st = readl(port->membase + UART_STAT);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 
 		if (!(st & STAT_TX_FIFO_FUL))
 			break;
@@ -970,11 +967,11 @@ static void mvebu_uart_put_poll_char(struct uart_port *port, unsigned char c)
 		udelay(1);
 	}
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	writel(c, port->membase + REG_TSH(uart_data));
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	writel(c, port->membase + UART_TSH);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 }
 #endif
 
@@ -1048,47 +1045,47 @@ OF_EARLYCON_DECLARE(ar3700_uart, "marvell,armada-3700-uart",
 
 static void wait_for_xmitr(struct uart_port *port)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	struct mvebu_uart_data *uart_data = (struct mvebu_uart_data *)port->private_data;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	u32 val;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	readl_poll_timeout_atomic(port->membase + REG_STAT(uart_data),
 				  val, (val & STAT_TX_EMP), 1, 10000);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	readl_poll_timeout_atomic(port->membase + UART_STAT, val,
 				  (val & STAT_TX_EMP), 1, 10000);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 }
 
 static void mvebu_uart_console_putchar(struct uart_port *port, int ch)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	struct mvebu_uart_data *uart_data = (struct mvebu_uart_data *)port->private_data;
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	wait_for_xmitr(port);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	writel(ch, port->membase + REG_TSH(uart_data));
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	writel(ch, port->membase + UART_TSH);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 }
 
 static void mvebu_uart_console_write(struct console *co, const char *s,
 				     unsigned int count)
 {
 	struct uart_port *port = &mvebu_uart_ports[co->index];
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	struct mvebu_uart_data *uart_data = (struct mvebu_uart_data *)port->private_data;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	unsigned long flags;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	unsigned int ier, intr, ctl;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	unsigned int ier;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	int locked = 1;
 
 	if (oops_in_progress)
@@ -1096,7 +1093,7 @@ static void mvebu_uart_console_write(struct console *co, const char *s,
 	else
 		spin_lock_irqsave(&port->lock, flags);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	ier = readl(port->membase + REG_CTRL(uart_data)) & CTRL_BRK_INT;
 	intr = readl(port->membase + uart_data->intr.ctrl_reg);
 	intr &= (uart_data->reg_bits.ctrl_rx_rdy_int(uart_data)
@@ -1104,27 +1101,27 @@ static void mvebu_uart_console_write(struct console *co, const char *s,
 
 	writel(0, port->membase + REG_CTRL(uart_data));
 	writel(0, port->membase + uart_data->intr.ctrl_reg);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	ier = readl(port->membase + UART_CTRL) &
 		(CTRL_RX_INT | CTRL_TX_RDY_INT);
 	writel(0, port->membase + UART_CTRL);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 
 	uart_console_write(port, s, count, mvebu_uart_console_putchar);
 
 	wait_for_xmitr(port);
 
 	if (ier)
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 		writel(ier, port->membase + REG_CTRL(uart_data));
 
 	if (intr) {
 		ctl = intr | readl(port->membase + uart_data->intr.ctrl_reg);
 		writel(ctl, port->membase + uart_data->intr.ctrl_reg);
 	}
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 		writel(ier, port->membase + UART_CTRL);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 
 	if (locked)
 		spin_unlock_irqrestore(&port->lock, flags);
@@ -1144,11 +1141,11 @@ static int mvebu_uart_console_setup(struct console *co, char *options)
 	port = &mvebu_uart_ports[co->index];
 
 	if (!port->mapbase || !port->membase) {
-#ifdef MY_DEF_HERE /* MY_DEF_HERE */
+#ifdef CONFIG_SYNO_ARMADA37XX /* CONFIG_SYNO_ARMADA37XX */
 		pr_debug("console on ttyS%i not present\n", co->index);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_ARMADA37XX */
 		pr_debug("console on ttyMV%i not present\n", co->index);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_ARMADA37XX */
 		return -ENODEV;
 	}
 
@@ -1161,11 +1158,11 @@ static int mvebu_uart_console_setup(struct console *co, char *options)
 static struct uart_driver mvebu_uart_driver;
 
 static struct console mvebu_uart_console = {
-#ifdef MY_DEF_HERE /* MY_DEF_HERE */
+#ifdef CONFIG_SYNO_ARMADA37XX /* CONFIG_SYNO_ARMADA37XX */
 	.name	= "ttyS",
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_ARMADA37XX */
 	.name	= "ttyMV",
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_ARMADA37XX */
 	.write	= mvebu_uart_console_write,
 	.device	= uart_console_device,
 	.setup	= mvebu_uart_console_setup,
@@ -1187,25 +1184,25 @@ console_initcall(mvebu_uart_console_init);
 static struct uart_driver mvebu_uart_driver = {
 	.owner			= THIS_MODULE,
 	.driver_name		= DRIVER_NAME,
-#ifdef MY_DEF_HERE /* MY_DEF_HERE */
+#ifdef CONFIG_SYNO_ARMADA37XX /* CONFIG_SYNO_ARMADA37XX */
 	.dev_name		= "ttyS",
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_ARMADA37XX */
 	.dev_name		= "ttyMV",
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_ARMADA37XX */
 	.nr			= MVEBU_NR_UARTS,
 #ifdef CONFIG_SERIAL_MVEBU_CONSOLE
 	.cons			= &mvebu_uart_console,
 #endif
 };
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 static const struct of_device_id mvebu_uart_of_match[];
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 static int mvebu_uart_probe(struct platform_device *pdev)
 {
 	struct resource *reg = platform_get_resource(pdev, IORESOURCE_MEM, 0);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	struct resource *uart_int_base = platform_get_resource(pdev, IORESOURCE_MEM, 1);
 	struct device_node *np = pdev->dev.of_node;
 
@@ -1213,25 +1210,25 @@ static int mvebu_uart_probe(struct platform_device *pdev)
 	int irq_rx = platform_get_irq_byname(pdev, "irq_rx");
 	int irq_tx = platform_get_irq_byname(pdev, "irq_tx");
 	const struct of_device_id *match = of_match_device(mvebu_uart_of_match, &pdev->dev);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	struct resource *irq = platform_get_resource(pdev, IORESOURCE_IRQ, 0);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	struct uart_port *port;
 	struct mvebu_uart_data *data;
 	int ret;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	u32 value;
 
 	if (!reg) {
 		dev_err(&pdev->dev, "no registers defined\n");
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	if (!reg || !irq) {
 		dev_err(&pdev->dev, "no registers/irq defined\n");
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 		return -EINVAL;
 	}
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	if ((irq_sum < 0) && ((irq_rx < 0) || (irq_tx < 0))) {
 		dev_err(&pdev->dev, "no irq defined\n");
 		return -EINVAL;
@@ -1239,20 +1236,20 @@ static int mvebu_uart_probe(struct platform_device *pdev)
 
 	if (pdev->dev.of_node)
 		pdev->id = of_alias_get_id(pdev->dev.of_node, "serial");
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	port = &mvebu_uart_ports[0];
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	if (pdev->id >= MVEBU_NR_UARTS) {
 		dev_err(&pdev->dev, "exceed max uart ports\n");
 		return -EINVAL;
 	}
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	port = &mvebu_uart_ports[pdev->id];
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 
 	spin_lock_init(&port->lock);
 
@@ -1264,17 +1261,17 @@ static int mvebu_uart_probe(struct platform_device *pdev)
 	port->fifosize   = 32;
 	port->iotype     = UPIO_MEM32;
 	port->flags      = UPF_FIXED_PORT;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	port->line       = pdev->id;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	port->line       = 0; /* single port: force line number to  0 */
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	port->irq        = irq->start;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	port->irqflags   = IRQF_SHARED;
 	port->mapbase    = reg->start;
 
@@ -1287,7 +1284,7 @@ static int mvebu_uart_probe(struct platform_device *pdev)
 	if (!data)
 		return -ENOMEM;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	data->reg_type = (enum reg_uart_type)match->data;
 	data->regs     = &uart_regs_layout[data->reg_type];
 	data->port     = port;
@@ -1333,18 +1330,18 @@ static int mvebu_uart_probe(struct platform_device *pdev)
 		data->intr.ctrl_reg = REG_CTRL2(data);
 	else
 		data->intr.ctrl_reg = REG_CTRL(data);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	data->port = port;
-#endif /* MY_DEF_HERE */
-#if defined(MY_DEF_HERE)
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#if defined(CONFIG_SYNO_LSP_ARMADA_UART_FIX)
 	/* Initialize the tx spin_lock */
 	spin_lock_init(&data->tx_lock);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_UART_FIX */
 
 	port->private_data = data;
 	platform_set_drvdata(pdev, data);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	/* UART interrupt status selected */
 	/* Select UART_EXT RX and TX as the interrupt status mode*/
 	if (uart_int_base) {
@@ -1361,7 +1358,7 @@ static int mvebu_uart_probe(struct platform_device *pdev)
 	udelay(1);
 	writel(0, port->membase + REG_CTRL(data));
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	ret = uart_add_one_port(&mvebu_uart_driver, port);
 	if (ret)
 		return ret;
@@ -1379,7 +1376,7 @@ static int mvebu_uart_remove(struct platform_device *pdev)
 	return 0;
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 #ifdef CONFIG_PM
 
 /* Uart registers status save in suspend process*/
@@ -1390,11 +1387,11 @@ static int mvebu_uart_reg_save(struct mvebu_uart_data *data)
 	if (data->reg_type == REG_UART_A3700_EXT)
 		data->pm_reg_value.uart_ctrl2 = readl(data->port->membase + REG_CTRL2(data));
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 	data->pm_reg_value.uart_tsh = readl(data->port->membase + REG_TSH(data));
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 	data->pm_reg_value.uart_brdv = readl(data->port->membase + REG_BRDV(data));
 	data->pm_reg_value.uart_over_sample = readl(data->port->membase + REG_OSAMP(data));
 	if (!IS_ERR_OR_NULL(data->intr.uart_int_base))
@@ -1411,11 +1408,11 @@ static int mvebu_uart_reg_restore(struct mvebu_uart_data *data)
 	if (data->reg_type == REG_UART_A3700_EXT)
 		writel(data->pm_reg_value.uart_ctrl2, data->port->membase + REG_CTRL2(data));
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 	writel(data->pm_reg_value.uart_tsh, data->port->membase + REG_TSH(data));
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 	writel(data->pm_reg_value.uart_brdv, data->port->membase + REG_BRDV(data));
 	writel(data->pm_reg_value.uart_over_sample, data->port->membase + REG_OSAMP(data));
 	if (!IS_ERR_OR_NULL(data->intr.uart_int_base))
@@ -1458,15 +1455,15 @@ static const struct dev_pm_ops mvebu_uart_pm_ops = {
 };
 #endif
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 /* Match table for of_platform binding */
 static const struct of_device_id mvebu_uart_of_match[] = {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	{ .compatible = "marvell,armada-3700-uart",     .data = (void *)REG_UART_A3700     },
 	{ .compatible = "marvell,armada-3700-uart-ext", .data = (void *)REG_UART_A3700_EXT },
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	{ .compatible = "marvell,armada-3700-uart", },
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	{}
 };
 MODULE_DEVICE_TABLE(of, mvebu_uart_of_match);
@@ -1478,11 +1475,11 @@ static struct platform_driver mvebu_uart_platform_driver = {
 		.owner	= THIS_MODULE,
 		.name  = "mvebu-uart",
 		.of_match_table = of_match_ptr(mvebu_uart_of_match),
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 #ifdef CONFIG_PM
 		.pm	= &mvebu_uart_pm_ops,
 #endif
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	},
 };
 
@@ -1490,9 +1487,9 @@ static int __init mvebu_uart_init(void)
 {
 	int ret;
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ARMADA37XX
 	syno_uart1_base = ioremap(PORT1_BASE, 0x2C);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_ARMADA37XX */
 	ret = uart_register_driver(&mvebu_uart_driver);
 	if (ret)
 		return ret;
@@ -1516,4 +1513,4 @@ module_exit(mvebu_uart_exit);
 MODULE_AUTHOR("Wilson Ding <dingwei@marvell.com>");
 MODULE_DESCRIPTION("Marvell Armada-3700 Serial Driver");
 MODULE_LICENSE("GPL");
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */

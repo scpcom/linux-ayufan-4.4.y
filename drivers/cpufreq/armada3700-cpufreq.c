@@ -1,24 +1,21 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 /*
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
  * CPU frequency scaling support for Armada 3700 platform.
-#else // MY_DEF_HERE
+#else // CONFIG_SYNO_LSP_ARMADA_17_04_02
  * CPU frequency scaling support for Armada-3700 platform.
-#endif // MY_DEF_HERE
+#endif // CONFIG_SYNO_LSP_ARMADA_17_04_02
  *
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
  * Copyright (C) 2017 Marvell
-#else // MY_DEF_HERE
+#else // CONFIG_SYNO_LSP_ARMADA_17_04_02
  * Copyright (C) 2016 Marvell
-#endif // MY_DEF_HERE
+#endif // CONFIG_SYNO_LSP_ARMADA_17_04_02
  *
  * Victor Gu <xigu@marvell.com>
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
  * Evan Wang <xswang@marvell.com>
-#endif // MY_DEF_HERE
+#endif // CONFIG_SYNO_LSP_ARMADA_17_04_02
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -39,9 +36,9 @@
 #include <linux/platform_device.h>
 #include <linux/slab.h>
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 /* North bridge PM configuration registers */
 #define MVEBU_PM_CONTROL_REG		(0)
 #define  MVEBU_PM_DVFS_INT_SHIFT	(13)
@@ -70,13 +67,13 @@ enum mvebu_tbg_divider {
 	MVEBU_TBG_DIVIDER_6
 };
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 /* CPU LOAD index */
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 enum armada3700_cpu_load_index {
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 enum mvebu_cpu_load_index {
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	MVEBU_CPU_LOAD_0 = 0,
 	MVEBU_CPU_LOAD_1,
 	MVEBU_CPU_LOAD_2,
@@ -84,18 +81,18 @@ enum mvebu_cpu_load_index {
 	MVEBU_CPU_LOAD_MAX
 };
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 #define MHZ_TO_HZ 1000000
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 #define CPUFREQ_NAME		"armada3700_dvfs"
 #define DEF_TRANS_LATENCY	1000
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 struct a3700_cpu_freq_div_info {
 	u32 cpu_freq_max;/* MHz */
 	u8 divider[MVEBU_CPU_LOAD_MAX];
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 struct armada3700_dvfs_data {
 	void __iomem *base;
 	struct resource *mem;
@@ -107,17 +104,17 @@ struct armada3700_dvfs_data {
 	struct device *dev;
 	bool dvfs_enabled;
 	struct work_struct irq_work;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 };
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 static struct a3700_cpu_freq_div_info a3700_divider_info[] = {
 	{.cpu_freq_max = 1200, .divider = {1, 2, 4, 6} },
 	{.cpu_freq_max = 1000, .divider = {1, 2, 4, 5} },
 	{.cpu_freq_max = 800,  .divider = {1, 2, 3, 4} },
 	{.cpu_freq_max = 600,  .divider = {2, 4, 5, 6} },
 };
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 static struct armada3700_dvfs_data *dvfs_info;
 static DEFINE_MUTEX(cpufreq_lock);
 static struct cpufreq_freqs freqs;
@@ -176,21 +173,21 @@ static int armada3700_target(struct cpufreq_policy *policy, unsigned int index)
 
 	return 0;
 }
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 static struct a3700_cpu_freq_div_info *armada_3700_cpu_freq_info_get(u32 max_cpu_freq)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 static irqreturn_t armada3700_cpufreq_irq(int irq, void *id)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	int i;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	unsigned int reg;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	for (i = 0; i < ARRAY_SIZE(a3700_divider_info); i++) {
 		if (max_cpu_freq == a3700_divider_info[i].cpu_freq_max)
 			break;
@@ -198,16 +195,16 @@ static irqreturn_t armada3700_cpufreq_irq(int irq, void *id)
 	if (i == ARRAY_SIZE(a3700_divider_info)) {
 		pr_err("unsupported CPU frequency %d MHz\n", max_cpu_freq);
 		return NULL;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	reg = readl(dvfs_info->base + MVEBU_PM_CONTROL_REG);
 	if (reg >> MVEBU_PM_DVFS_INT_SHIFT & 0x1) {
 		writel(reg, dvfs_info->base + MVEBU_PM_CONTROL_REG);
 		disable_irq_nosync(irq);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	}
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	return IRQ_HANDLED;
 }
 
@@ -240,11 +237,11 @@ MODULE_DEVICE_TABLE(of, armada3700_cpufreq_match);
 static void armada3700_cpufreq_divider_get(unsigned int *div_arr)
 {
 	unsigned int reg;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	return &a3700_divider_info[i];
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	reg = readl(dvfs_info->base + MVEBU_PM_NB_L0_L1_CONFIG_REG);
 	div_arr[MVEBU_CPU_LOAD_0] = (reg >> (MVEBU_PM_NB_TBG_DIV_LX_OFF + MVEBU_PM_NB_LX_CONFIG_SHIFT)) &
 					MVEBU_PM_NB_TBG_DIV_LX_MASK;
@@ -255,45 +252,45 @@ static void armada3700_cpufreq_divider_get(unsigned int *div_arr)
 					MVEBU_PM_NB_TBG_DIV_LX_MASK;
 	div_arr[MVEBU_CPU_LOAD_3] = (reg >> (MVEBU_PM_NB_TBG_DIV_LX_OFF)) &
 					MVEBU_PM_NB_TBG_DIV_LX_MASK;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 static int __init armada3700_cpufreq_driver_init(void)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 static int armada3700_cpufreq_probe(struct platform_device *pdev)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	struct platform_device *pdev;
 	struct device_node *node;
 	struct a3700_cpu_freq_div_info *divider_info;
 	struct device *cpu_dev;
 	struct clk *clk;
 	int load_level, ret;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	int ret = -EINVAL;
 	struct device_node *np;
 	struct resource res;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	unsigned int cur_frequency;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	const struct of_device_id *match;
 	unsigned int div_arr[MVEBU_CPU_LOAD_MAX];
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	node = of_find_compatible_node(NULL, NULL, "marvell,armada-37xx-cpu-pm-clk");
 	if (!node || !of_device_is_available(node))
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	match = of_match_device(armada3700_cpufreq_match, &pdev->dev);
 	if (!match)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 		return -ENODEV;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	/*
 	 * On CPU 0 register the operating points
 	 * supported (which are the nominal CPU frequency and full integer
@@ -303,7 +300,7 @@ static int armada3700_cpufreq_probe(struct platform_device *pdev)
 	if (!cpu_dev) {
 		dev_err(cpu_dev, "Cannot get CPU\n");
 		return -ENODEV;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	np = pdev->dev.of_node;
 	dvfs_info = devm_kzalloc(&pdev->dev, sizeof(*dvfs_info), GFP_KERNEL);
 	if (!dvfs_info) {
@@ -321,30 +318,30 @@ static int armada3700_cpufreq_probe(struct platform_device *pdev)
 	if (IS_ERR(dvfs_info->base)) {
 		ret = PTR_ERR(dvfs_info->base);
 		goto err_put_node;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	}
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	clk = clk_get(cpu_dev, 0);
 	if (IS_ERR(clk)) {
 		dev_err(cpu_dev, "Cannot get clock for CPU0\n");
 		return PTR_ERR(clk);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	dvfs_info->irq = irq_of_parse_and_map(np, 0);
 	if (!dvfs_info->irq) {
 		dev_err(dvfs_info->dev, "No cpufreq irq found\n");
 		ret = -ENODEV;
 		goto err_put_node;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	}
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	/* Get nominal (current) CPU frequency */
 	cur_frequency = clk_get_rate(clk);
 	if (!cur_frequency) {
 		dev_err(cpu_dev, "Failed to get clock rate for CPU\n");
 		return -EINVAL;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	if (of_property_read_u32(np, "clock-latency", &dvfs_info->latency))
 		dvfs_info->latency = DEF_TRANS_LATENCY;
 
@@ -354,47 +351,47 @@ static int armada3700_cpufreq_probe(struct platform_device *pdev)
 		dev_err(dvfs_info->dev, "Failed to get cpu clock\n");
 		ret = PTR_ERR(dvfs_info->cpu_clk);
 		goto err_put_node;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	}
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	divider_info = armada_3700_cpu_freq_info_get(cur_frequency / MHZ_TO_HZ);
 	if (!divider_info) {
 		dev_err(cpu_dev, "Failed to get freq divider info for CPU\n");
 		return -EINVAL;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	/* Get MAX CPU frequency */
 	cur_frequency = clk_get_rate(dvfs_info->cpu_clk);
 	if (!cur_frequency) {
 		dev_err(dvfs_info->dev, "Failed to get clock rate\n");
 		ret = -EINVAL;
 		goto err_put_node;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	}
 
 	/*
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 // do nothing
-#else // MY_DEF_HERE
+#else // CONFIG_SYNO_LSP_ARMADA_17_04_02
 	 * Get divider for all the four levels, then caculate
 	 * corresponding CPU frequency and reigster to Linux.
-#endif // MY_DEF_HERE
+#endif // CONFIG_SYNO_LSP_ARMADA_17_04_02
 	 * In case of a failure of dev_pm_opp_add(), we don't
 	 * bother with cleaning up the registered OPP (there's
 	 * no function to do so), and simply cancel the
 	 * registration of the cpufreq device.
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	 * Armada 3700 supports up to four CPU loads, but here register higher three loads,
 	 * the lowest CPU load will be added by DTS.
-#endif // MY_DEF_HERE
+#endif // CONFIG_SYNO_LSP_ARMADA_17_04_02
 	 */
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	cur_frequency *= divider_info->divider[MVEBU_CPU_LOAD_0];
 	for (load_level = MVEBU_CPU_LOAD_0; load_level < MVEBU_CPU_LOAD_3; load_level++) {
 		ret = dev_pm_opp_add(cpu_dev, cur_frequency / divider_info->divider[load_level], 0);
 		if (ret)
 			return ret;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	armada3700_cpufreq_divider_get(&div_arr[0]);
 	ret = dev_pm_opp_add(dvfs_info->dev, cur_frequency, 0);
 	if (ret)
@@ -428,12 +425,12 @@ static int armada3700_cpufreq_probe(struct platform_device *pdev)
 	if (ret) {
 		dev_err(dvfs_info->dev, "Failed to register IRQ\n");
 		goto err_put_node;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	}
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	pdev = platform_device_register_simple("cpufreq-dt", -1, NULL, 0);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	/* Enable DVFS */
 	armada3700_enable_dvfs();
 
@@ -449,23 +446,23 @@ static int armada3700_cpufreq_probe(struct platform_device *pdev)
 	return 0;
 
 err_put_node:
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	return PTR_ERR_OR_ZERO(pdev);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	of_node_put(np);
 	dev_err(&pdev->dev, "%s: failed initialization\n", __func__);
 	return ret;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 }
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_10)
 /* late_initcall, to guarantee the driver is loaded after A3700 clock driver */
 late_initcall(armada3700_cpufreq_driver_init);
-#else /* MY_DEF_HERE */
-#if defined(MY_DEF_HERE)
+#else /* CONFIG_SYNO_LSP_ARMADA_17_10 */
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 module_init(armada3700_cpufreq_driver_init);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 
 static int armada3700_cpufreq_remove(struct platform_device *pdev)
 {
@@ -485,15 +482,15 @@ static struct platform_driver armada3700_cpufreq_platdrv = {
 	.remove		= armada3700_cpufreq_remove,
 };
 module_platform_driver(armada3700_cpufreq_platdrv);
-#endif /* MY_DEF_HERE */
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_10 */
 
 MODULE_AUTHOR("Victor Gu <xigu@marvell.com>");
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 MODULE_AUTHOR("Evan Wang <xswang@marvell.com>");
 MODULE_DESCRIPTION("Armada 3700 cpufreq driver");
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 MODULE_DESCRIPTION("Armada3700 cpufreq driver");
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 MODULE_LICENSE("GPL");
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */

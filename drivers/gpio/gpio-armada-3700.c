@@ -1,7 +1,4 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 /*
 * ***************************************************************************
 * Copyright (C) 2016 Marvell International Ltd.
@@ -491,11 +488,11 @@ static int mvebu_gpio_suspend(struct platform_device *pdev, pm_message_t state)
 static int mvebu_gpio_resume(struct platform_device *pdev)
 {
 	struct mvebu_gpio_chip *mvchip = platform_get_drvdata(pdev);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 	u32 i, mask, type, level;
 	u32 *polarity;
 	int irq;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 
 	/*
 	 * There are 36 GPIO pin for A3700, so there are two registers holding
@@ -505,17 +502,17 @@ static int mvebu_gpio_resume(struct platform_device *pdev)
 	writel(mvchip->io_conf_reg, mvebu_gpioreg_io_conf(mvchip, 0));
 	writel(mvchip->out_reg_hi, mvebu_gpioreg_out(mvchip, GPIO_IO_BITWIDTH));
 	writel(mvchip->io_conf_reg_hi, mvebu_gpioreg_io_conf(mvchip, GPIO_IO_BITWIDTH));
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 	writel(mvchip->irq_pol_reg, mvebu_gpioreg_int_pol(mvchip, 0));
 	writel(mvchip->irq_pol_reg_hi, mvebu_gpioreg_int_pol(mvchip, GPIO_IO_BITWIDTH));
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 	writel(mvchip->edge_mask_regs[0], mvebu_gpioreg_edge_mask(mvchip, 0));
 	if (mvchip->chip.ngpio > GPIO_IO_BITWIDTH)
 		writel(mvchip->edge_mask_regs[1], mvebu_gpioreg_edge_mask(mvchip, GPIO_IO_BITWIDTH));
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 	/*
 	* For the gpios which are used for both-edge irqs, in system suspend
 	* their input levels may be changed but their polarities are not updated
@@ -543,7 +540,7 @@ static int mvebu_gpio_resume(struct platform_device *pdev)
 	writel(mvchip->irq_pol_reg, mvebu_gpioreg_int_pol(mvchip, 0));
 	writel(mvchip->irq_pol_reg_hi, mvebu_gpioreg_int_pol(mvchip, GPIO_IO_BITWIDTH));
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 	return 0;
 }
 
@@ -738,4 +735,4 @@ static struct platform_driver mvebu_gpio_driver = {
 	.resume         = mvebu_gpio_resume,
 };
 module_platform_driver(mvebu_gpio_driver);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */

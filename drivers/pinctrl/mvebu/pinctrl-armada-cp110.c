@@ -1,7 +1,4 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 /*
  * Marvell Armada CP110 pinctrl driver based on mvebu pinctrl core
  *
@@ -24,17 +21,17 @@
 #include <linux/of.h>
 #include <linux/of_device.h>
 #include <linux/pinctrl/pinctrl.h>
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_10)
 #include <linux/syscore_ops.h>
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_10 */
 
 #include "pinctrl-mvebu.h"
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_10)
 /* Global list of devices (struct mvebu_pinctrl_soc_info) */
 static LIST_HEAD(drvdata_list);
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_10 */
 static void __iomem *cp0_mpp_base;
 
 static int armada_cp110_0_mpp_ctrl_get(unsigned pid, unsigned long *config)
@@ -672,9 +669,9 @@ static struct pinctrl_gpio_range armada_cp110_1_mpp_gpio_ranges[] = {
 static int armada_cp110_pinctrl_probe(struct platform_device *pdev)
 {
 	struct mvebu_pinctrl_soc_info *soc;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_10)
 	struct mvebu_pinctrl_pm_save *pm_save;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_10 */
 	const struct of_device_id *match =
 		of_match_device(armada_cp110_pinctrl_of_match, &pdev->dev);
 	struct resource *res;
@@ -717,7 +714,7 @@ static int armada_cp110_pinctrl_probe(struct platform_device *pdev)
 		break;
 	}
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_10)
 #ifdef CONFIG_PM
 	pm_save = devm_kzalloc(&pdev->dev,
 			       sizeof(struct mvebu_pinctrl_pm_save),
@@ -736,14 +733,14 @@ static int armada_cp110_pinctrl_probe(struct platform_device *pdev)
 	soc->pm_save = pm_save;
 #endif /* CONFIG_PM */
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_10 */
 	pdev->dev.platform_data = soc;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_10)
 	/* Add to the global list */
 	list_add_tail(&soc->node, &drvdata_list);
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_10 */
 	return mvebu_pinctrl_probe(pdev);
 }
 
@@ -752,7 +749,7 @@ static int armada_cp110_pinctrl_remove(struct platform_device *pdev)
 	return mvebu_pinctrl_remove(pdev);
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_10)
 #ifdef CONFIG_PM
 /* armada_cp110_pinctrl_suspend - save pinctrl register for suspend */
 static int armada_cp110_pinctrl_suspend(void)
@@ -800,7 +797,7 @@ static struct syscore_ops armada_cp110_pinctrl_syscore_ops = {
 	.resume		= armada_cp110_pinctrl_resume,
 };
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_10 */
 static struct platform_driver armada_cp110_pinctrl_driver = {
 	.driver = {
 		.name = "armada-cp110-pinctrl",
@@ -810,7 +807,7 @@ static struct platform_driver armada_cp110_pinctrl_driver = {
 	.remove = armada_cp110_pinctrl_remove,
 };
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_10)
 static int __init armada_cp110_pinctrl_drv_register(void)
 {
 	/*
@@ -830,11 +827,11 @@ static void __exit armada_cp110_pinctrl_drv_unregister(void)
 	platform_driver_unregister(&armada_cp110_pinctrl_driver);
 }
 module_exit(armada_cp110_pinctrl_drv_unregister);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_10 */
 module_platform_driver(armada_cp110_pinctrl_driver);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_10 */
 
 MODULE_AUTHOR("Hanna Hawa <hannah@marvell.com>");
 MODULE_DESCRIPTION("Marvell Armada CP-110 pinctrl driver");
 MODULE_LICENSE("GPL v2");
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */

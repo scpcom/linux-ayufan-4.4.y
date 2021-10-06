@@ -58,17 +58,17 @@
 #elif (PAGE_OFFSET & 0x1fffff) != 0
 #error PAGE_OFFSET must be at least 2MB aligned
 #elif TEXT_OFFSET > 0x1fffff
-#if defined(CONFIG_RTK_PLATFORM) && defined(MY_DEF_HERE)
-#else /* CONFIG_RTK_PLATFORM && MY_DEF_HERE */
+#if defined(CONFIG_RTK_PLATFORM) && defined(CONFIG_SYNO_LSP_RTD1619)
+#else /* CONFIG_RTK_PLATFORM && CONFIG_SYNO_LSP_RTD1619 */
 #error TEXT_OFFSET must be less than 2MB
-#endif /* CONFIG_RTK_PLATFORM && MY_DEF_HERE */
+#endif /* CONFIG_RTK_PLATFORM && CONFIG_SYNO_LSP_RTD1619 */
 #endif
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 #ifdef CONFIG_RTK_PLATFORM_FPGA
 #define DTB_ADDR 0x02100000
 #endif /* CONFIG_RTK_PLATFORM_FPGA */
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */
 #endif /* MY_DEF_HERE */
 
 #define KERNEL_START	_text
@@ -652,13 +652,13 @@ ENTRY(secondary_holding_pen)
 	ldr     x1, =MPIDR_HWID_BITMASK
 	and	x0, x0, x1
 #if defined(CONFIG_ARCH_RTD129X) && defined(MY_DEF_HERE) || \
-	defined(CONFIG_RTK_PLATFORM) && defined(MY_DEF_HERE)
+	defined(CONFIG_RTK_PLATFORM) && defined(CONFIG_SYNO_LSP_RTD1619)
 	adr_l	x3, rtk_secondary_holding_pen_release
 #else /* CONFIG_ARCH_RTD129X && MY_DEF_HERE ||
-		 CONFIG_RTK_PLATFORM && MY_DEF_HERE */
+		 CONFIG_RTK_PLATFORM && CONFIG_SYNO_LSP_RTD1619 */
 	adr_l	x3, secondary_holding_pen_release
 #endif /* CONFIG_ARCH_RTD129X && MY_DEF_HERE ||
-		  CONFIG_RTK_PLATFORM && MY_DEF_HERE */
+		  CONFIG_RTK_PLATFORM && CONFIG_SYNO_LSP_RTD1619 */
 pen:	ldr	x4, [x3]
 	cmp	x4, x0
 	b.eq	secondary_startup

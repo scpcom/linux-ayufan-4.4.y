@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * Copyright (C) 2015 Cavium, Inc.
  *
@@ -268,11 +265,11 @@ struct snd_queue {
 	u64		*skbuff;
 	void		*desc;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_10)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_10 */
 #define	TSO_HEADER_SIZE	128
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_10 */
 	/* For TSO segment's header */
 	char		*tso_hdrs;
 	dma_addr_t	tso_hdrs_phys;

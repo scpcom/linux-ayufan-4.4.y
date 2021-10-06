@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * Broadcom tag support
  *
@@ -130,11 +127,11 @@ static int brcm_tag_rcv(struct sk_buff *skb, struct net_device *dev,
 	source_port = brcm_tag[3] & BRCM_EG_PID_MASK;
 
 	/* Validate port against switch setup, either the port is totally */
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	if (source_port >= DSA_MAX_PORTS || !ds->ports[source_port].netdev)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	if (source_port >= DSA_MAX_PORTS || ds->ports[source_port] == NULL)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		goto out_drop;
 
 	/* Remove Broadcom tag and update checksum */
@@ -147,11 +144,11 @@ static int brcm_tag_rcv(struct sk_buff *skb, struct net_device *dev,
 
 	skb_push(skb, ETH_HLEN);
 	skb->pkt_type = PACKET_HOST;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	skb->dev = ds->ports[source_port].netdev;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	skb->dev = ds->ports[source_port];
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	skb->protocol = eth_type_trans(skb, skb->dev);
 
 	skb->dev->stats.rx_packets++;

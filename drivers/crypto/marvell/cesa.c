@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * Support for Marvell's Cryptographic Engine and Security Accelerator (CESA)
  * that can be found on the following platform: Orion, Kirkwood, Armada. This
@@ -34,18 +31,18 @@
 
 #include "cesa.h"
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 /* Limit of the crypto queue before reaching the backlog */
 #define CESA_CRYPTO_DEFAULT_MAX_QLEN 128
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 static int allhwsupport = !IS_ENABLED(CONFIG_CRYPTO_DEV_MV_CESA);
 module_param_named(allhwsupport, allhwsupport, int, 0444);
 MODULE_PARM_DESC(allhwsupport, "Enable support for all hardware (even it if overlaps with the mv_cesa driver)");
 
 struct mv_cesa_dev *cesa_dev;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 struct crypto_async_request *
 mv_cesa_dequeue_req_locked(struct mv_cesa_engine *engine,
 			   struct crypto_async_request **backlog)
@@ -62,18 +59,18 @@ mv_cesa_dequeue_req_locked(struct mv_cesa_engine *engine,
 }
 
 static void mv_cesa_rearm_engine(struct mv_cesa_engine *engine)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 static void mv_cesa_dequeue_req_unlocked(struct mv_cesa_engine *engine)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	struct crypto_async_request *req = NULL, *backlog = NULL;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	struct crypto_async_request *req, *backlog;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	struct mv_cesa_ctx *ctx;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 
 	spin_lock_bh(&engine->lock);
 	if (!engine->req) {
@@ -81,13 +78,13 @@ static void mv_cesa_dequeue_req_unlocked(struct mv_cesa_engine *engine)
 		engine->req = req;
 	}
 	spin_unlock_bh(&engine->lock);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	spin_lock_bh(&cesa_dev->lock);
 	backlog = crypto_get_backlog(&cesa_dev->queue);
 	req = crypto_dequeue_request(&cesa_dev->queue);
 	engine->req = req;
 	spin_unlock_bh(&cesa_dev->lock);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 
 	if (!req)
 		return;
@@ -96,13 +93,13 @@ static void mv_cesa_dequeue_req_unlocked(struct mv_cesa_engine *engine)
 		backlog->complete(backlog, -EINPROGRESS);
 
 	ctx = crypto_tfm_ctx(req->tfm);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	ctx->ops->prepare(req, engine);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	ctx->ops->step(req);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 
 	return;
 }
@@ -143,7 +140,7 @@ mv_cesa_complete_req(struct mv_cesa_ctx *ctx, struct crypto_async_request *req,
 	local_bh_disable();
 	req->complete(req, res);
 	local_bh_enable();
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 }
 
 static irqreturn_t mv_cesa_int(int irq, void *priv)
@@ -170,20 +167,20 @@ static irqreturn_t mv_cesa_int(int irq, void *priv)
 		writel(~status, engine->regs + CESA_SA_FPGA_INT_STATUS);
 		writel(~status, engine->regs + CESA_SA_INT_STATUS);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 		/* Process fetched requests */
 		res = mv_cesa_int_process(engine, status & mask);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 		ret = IRQ_HANDLED;
 
 		spin_lock_bh(&engine->lock);
 		req = engine->req;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 		if (res != -EINPROGRESS)
 			engine->req = NULL;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 		spin_unlock_bh(&engine->lock);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 
 		ctx = crypto_tfm_ctx(req->tfm);
 
@@ -199,13 +196,13 @@ static irqreturn_t mv_cesa_int(int irq, void *priv)
 			if (!req)
 				break;
 
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 		if (req) {
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 			ctx = crypto_tfm_ctx(req->tfm);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 			mv_cesa_complete_req(ctx, req, 0);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 			res = ctx->ops->process(req, status & mask);
 			if (res != -EINPROGRESS) {
 				spin_lock_bh(&engine->lock);
@@ -219,28 +216,28 @@ static irqreturn_t mv_cesa_int(int irq, void *priv)
 			} else {
 				ctx->ops->step(req);
 			}
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 		}
 	}
 
 	return ret;
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 int mv_cesa_queue_req(struct crypto_async_request *req,
 		      struct mv_cesa_req *creq)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 int mv_cesa_queue_req(struct crypto_async_request *req)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 {
 	int ret;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	struct mv_cesa_engine *engine = creq->engine;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	int i;
 
-#endif /* MY_DEF_HERE */
-#if defined(MY_DEF_HERE)
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	spin_lock_bh(&engine->lock);
 	ret = crypto_enqueue_request(&engine->queue, req);
 	if ((mv_cesa_req_get_type(creq) == CESA_DMA_REQ) &&
@@ -248,25 +245,25 @@ int mv_cesa_queue_req(struct crypto_async_request *req)
 	    (ret == -EBUSY && req->flags & CRYPTO_TFM_REQ_MAY_BACKLOG)))
 		mv_cesa_tdma_chain(engine, creq);
 	spin_unlock_bh(&engine->lock);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	spin_lock_bh(&cesa_dev->lock);
 	ret = crypto_enqueue_request(&cesa_dev->queue, req);
 	spin_unlock_bh(&cesa_dev->lock);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 
 	if (ret != -EINPROGRESS)
 		return ret;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	mv_cesa_rearm_engine(engine);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	for (i = 0; i < cesa_dev->caps->nengines; i++) {
 		spin_lock_bh(&cesa_dev->engines[i].lock);
 		if (!cesa_dev->engines[i].req)
 			mv_cesa_dequeue_req_unlocked(&cesa_dev->engines[i]);
 		spin_unlock_bh(&cesa_dev->engines[i].lock);
 	}
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 
 	return -EINPROGRESS;
 }
@@ -557,11 +554,11 @@ static int mv_cesa_probe(struct platform_device *pdev)
 		return -ENOMEM;
 
 	spin_lock_init(&cesa->lock);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	crypto_init_queue(&cesa->queue, 50);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	res = platform_get_resource_byname(pdev, IORESOURCE_MEM, "regs");
 	cesa->regs = devm_ioremap_resource(dev, res);
 	if (IS_ERR(cesa->regs))
@@ -620,46 +617,46 @@ static int mv_cesa_probe(struct platform_device *pdev)
 		engine->regs = cesa->regs + CESA_ENGINE_OFF(i);
 
 		if (dram && cesa->caps->has_tdma)
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 			mv_cesa_conf_mbus_windows(engine, dram);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 			mv_cesa_conf_mbus_windows(&cesa->engines[i], dram);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 		writel(0, engine->regs + CESA_SA_INT_STATUS);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 		writel(0, cesa->engines[i].regs + CESA_SA_INT_STATUS);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 		writel(CESA_SA_CFG_STOP_DIG_ERR,
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 		       engine->regs + CESA_SA_CFG);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 		       cesa->engines[i].regs + CESA_SA_CFG);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 		writel(engine->sram_dma & CESA_SA_SRAM_MSK,
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 		       engine->regs + CESA_SA_DESC_P0);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 		       cesa->engines[i].regs + CESA_SA_DESC_P0);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 
 		ret = devm_request_threaded_irq(dev, irq, NULL, mv_cesa_int,
 						IRQF_ONESHOT,
 						dev_name(&pdev->dev),
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 						engine);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 						&cesa->engines[i]);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 		if (ret)
 			goto err_cleanup;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 
 		crypto_init_queue(&engine->queue, CESA_CRYPTO_DEFAULT_MAX_QLEN);
 		atomic_set(&engine->load, 0);
 		INIT_LIST_HEAD(&engine->complete_queue);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	}
 
 	cesa_dev = cesa;

@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * AMD Promontory GPIO driver
  *
@@ -42,23 +39,23 @@ static int pt_gpio_request(struct gpio_chip *gc, unsigned offset)
 	unsigned long flags;
 	u32 using_pins;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	dev_dbg(gc->parent, "pt_gpio_request offset=%x\n", offset);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	dev_dbg(gc->dev, "pt_gpio_request offset=%x\n", offset);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	spin_lock_irqsave(&pt_gpio->lock, flags);
 
 	using_pins = readl(pt_gpio->reg_base + PT_SYNC_REG);
 	if (using_pins & BIT(offset)) {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 		dev_warn(gc->parent, "PT GPIO pin %x reconfigured\n",
 			 offset);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		dev_warn(gc->dev, "PT GPIO pin %x reconfigured\n",
 			offset);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		spin_unlock_irqrestore(&pt_gpio->lock, flags);
 		return -EINVAL;
 	}
@@ -84,11 +81,11 @@ static void pt_gpio_free(struct gpio_chip *gc, unsigned offset)
 
 	spin_unlock_irqrestore(&pt_gpio->lock, flags);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	dev_dbg(gc->parent, "pt_gpio_free offset=%x\n", offset);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	dev_dbg(gc->dev, "pt_gpio_free offset=%x\n", offset);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 }
 
 static void pt_gpio_set_value(struct gpio_chip *gc, unsigned offset, int value)
@@ -97,11 +94,11 @@ static void pt_gpio_set_value(struct gpio_chip *gc, unsigned offset, int value)
 	unsigned long flags;
 	u32 data;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	dev_dbg(gc->parent, "pt_gpio_set_value offset=%x, value=%x\n",
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	dev_dbg(gc->dev, "pt_gpio_set_value offset=%x, value=%x\n",
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		offset, value);
 
 	spin_lock_irqsave(&pt_gpio->lock, flags);
@@ -136,11 +133,11 @@ static int pt_gpio_get_value(struct gpio_chip *gc, unsigned offset)
 	data >>= offset;
 	data &= 1;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	dev_dbg(gc->parent, "pt_gpio_get_value offset=%x, value=%x\n",
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	dev_dbg(gc->dev, "pt_gpio_get_value offset=%x, value=%x\n",
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		offset, data);
 
 	return data;
@@ -152,11 +149,11 @@ static int pt_gpio_direction_input(struct gpio_chip *gc, unsigned offset)
 	unsigned long flags;
 	u32 data;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	dev_dbg(gc->parent, "pt_gpio_dirction_input offset=%x\n", offset);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	dev_dbg(gc->dev, "pt_gpio_dirction_input offset=%x\n", offset);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	spin_lock_irqsave(&pt_gpio->lock, flags);
 
@@ -176,11 +173,11 @@ static int pt_gpio_direction_output(struct gpio_chip *gc,
 	unsigned long flags;
 	u32 data;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	dev_dbg(gc->parent, "pt_gpio_direction_output offset=%x, value=%x\n",
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	dev_dbg(gc->dev, "pt_gpio_direction_output offset=%x, value=%x\n",
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		offset, value);
 
 	spin_lock_irqsave(&pt_gpio->lock, flags);
@@ -234,11 +231,11 @@ static int pt_gpio_probe(struct platform_device *pdev)
 
 	pt_gpio->gc.label            = pdev->name;
 	pt_gpio->gc.owner            = THIS_MODULE;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	pt_gpio->gc.parent              = dev;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	pt_gpio->gc.dev              = dev;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	pt_gpio->gc.request          = pt_gpio_request;
 	pt_gpio->gc.free             = pt_gpio_free;
 	pt_gpio->gc.direction_input  = pt_gpio_direction_input;

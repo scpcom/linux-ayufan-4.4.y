@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * phy-core.c  --  Generic Phy framework.
  *
@@ -302,13 +299,13 @@ int phy_power_on(struct phy *phy)
 			dev_err(&phy->dev, "phy poweron failed --> %d\n", ret);
 			goto err_pwr_on;
 		}
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 		++phy->power_count;
 	}
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	}
 	++phy->power_count;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	mutex_unlock(&phy->mutex);
 	return 0;
 
@@ -338,13 +335,13 @@ int phy_power_off(struct phy *phy)
 			mutex_unlock(&phy->mutex);
 			return ret;
 		}
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 		--phy->power_count;
 	}
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	}
 	--phy->power_count;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	mutex_unlock(&phy->mutex);
 	phy_pm_runtime_put(phy);
 
@@ -355,7 +352,7 @@ int phy_power_off(struct phy *phy)
 }
 EXPORT_SYMBOL_GPL(phy_power_off);
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12) || defined(CONFIG_SYNO_LSP_RTD1619)
 int phy_set_mode(struct phy *phy, enum phy_mode mode)
 {
 	int ret;
@@ -370,9 +367,9 @@ int phy_set_mode(struct phy *phy, enum phy_mode mode)
 	return ret;
 }
 EXPORT_SYMBOL_GPL(phy_set_mode);
-#endif /* MY_DEF_HERE / MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 / CONFIG_SYNO_LSP_RTD1619 */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 enum phy_mode phy_get_mode(struct phy *phy)
 {
 	int ret;
@@ -387,10 +384,10 @@ enum phy_mode phy_get_mode(struct phy *phy)
 	return ret;
 }
 EXPORT_SYMBOL_GPL(phy_get_mode);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
-#if defined(MY_DEF_HERE)
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 int phy_send_command(struct phy *phy, u32 command)
 {
 	int ret;
@@ -406,7 +403,7 @@ int phy_send_command(struct phy *phy, u32 command)
 }
 EXPORT_SYMBOL_GPL(phy_send_command);
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 int phy_is_pll_locked(struct phy *phy)
 {
 	int ret;
@@ -421,7 +418,7 @@ int phy_is_pll_locked(struct phy *phy)
 	return ret;
 }
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 /**
  * _of_phy_get() - lookup and obtain a reference to a phy by phandle
  * @np: device_node for which to get the phy

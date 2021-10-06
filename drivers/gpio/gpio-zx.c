@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * Copyright (C) 2015 Linaro Ltd.
  *
@@ -248,11 +245,11 @@ static int zx_gpio_probe(struct platform_device *pdev)
 	chip->gc.base = ZX_GPIO_NR * id;
 	chip->gc.ngpio = ZX_GPIO_NR;
 	chip->gc.label = dev_name(dev);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	chip->gc.parent = dev;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	chip->gc.dev = dev;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	chip->gc.owner = THIS_MODULE;
 
 	ret = gpiochip_add(&chip->gc);

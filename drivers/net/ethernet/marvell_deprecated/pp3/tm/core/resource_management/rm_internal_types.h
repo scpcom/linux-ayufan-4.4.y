@@ -1,7 +1,4 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -177,4 +174,4 @@ struct rmctl {
 };
 
 #endif   /* RM_INTERNAL_TYPES_H */
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */

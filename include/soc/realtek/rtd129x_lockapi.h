@@ -1,4 +1,4 @@
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 /*
  * rtd129x_lockapi.h
  *
@@ -9,7 +9,7 @@
  * only version 2 as published by the Free Software Foundation.
  *
  */
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */
 
 #ifndef _RTD129x_LOCKAPI_H_
 #define _RTD129x_LOCKAPI_H_
@@ -24,7 +24,7 @@
 #define _AT_(X) __FILE__ " " LINE2STR(X)
 #define _at_(X) X " " LINE2STR(__LINE__)
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 #if (defined(EN_SPINLOCK) || defined(EN_SPINLOCK_IRQ) || defined(EN_SEMAPHORE) || defined(EN_MUTEX)) && \
 	defined(CONFIG_ARCH_RTD129x)
     #define LOCKAPI_EN
@@ -52,7 +52,7 @@
     #define rtk_lockapi_lock3(X,Y,Z)
     #define rtk_lockapi_unlock3(X,Y,Z)
 #endif /* (EN_SPINLOCK || EN_SPINLOCK_IRQ || EN_SEMAPHORE || EN_MUTEX) && CONFIG_ARCH_RTD129x */
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_RTD1619 */
 #if defined(EN_SPINLOCK) || defined(EN_SPINLOCK_IRQ) || defined(EN_SEMAPHORE) || defined(EN_MUTEX)
 
     #define LOCKAPI_EN
@@ -80,12 +80,12 @@
     #define rtk_lockapi_lock3(X,Y,Z)
     #define rtk_lockapi_unlock3(X,Y,Z)
 #endif
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */
 
 #define LOCKAPI_MAGICNUM (0xdeadbeef)
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 #define LOCKAPI_BY_PASS (0xbeefdead)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */
 #define MAX_LOG_MSG_LEN  (64)
 
 #define LOCK_NOP_DELAY_CNT (30)

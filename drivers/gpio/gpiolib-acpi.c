@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * ACPI helpers for GPIO API
  *
@@ -54,16 +51,16 @@ struct acpi_gpio_chip {
 
 static int acpi_gpiochip_find(struct gpio_chip *gc, void *data)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	if (!gc->parent)
 		return false;
 	return ACPI_HANDLE(gc->parent) == data;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	if (!gc->dev)
 		return false;
 
 	return ACPI_HANDLE(gc->dev) == data;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 }
 
 #ifdef CONFIG_PINCTRL
@@ -193,11 +190,11 @@ static acpi_status acpi_gpiochip_request_interrupt(struct acpi_resource *ares,
 	if (agpio->connection_type != ACPI_RESOURCE_GPIO_TYPE_INT)
 		return AE_OK;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	handle = ACPI_HANDLE(chip->parent);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	handle = ACPI_HANDLE(chip->dev);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	pin = agpio->pin_table[0];
 
 	if (pin <= 255) {
@@ -221,11 +218,11 @@ static acpi_status acpi_gpiochip_request_interrupt(struct acpi_resource *ares,
 
 	desc = gpiochip_request_own_desc(chip, pin, "ACPI:Event");
 	if (IS_ERR(desc)) {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 		dev_err(chip->parent, "Failed to request GPIO\n");
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		dev_err(chip->dev, "Failed to request GPIO\n");
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		return AE_ERROR;
 	}
 
@@ -233,21 +230,21 @@ static acpi_status acpi_gpiochip_request_interrupt(struct acpi_resource *ares,
 
 	ret = gpiochip_lock_as_irq(chip, pin);
 	if (ret) {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 		dev_err(chip->parent, "Failed to lock GPIO as interrupt\n");
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		dev_err(chip->dev, "Failed to lock GPIO as interrupt\n");
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		goto fail_free_desc;
 	}
 
 	irq = gpiod_to_irq(desc);
 	if (irq < 0) {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 		dev_err(chip->parent, "Failed to translate GPIO to IRQ\n");
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		dev_err(chip->dev, "Failed to translate GPIO to IRQ\n");
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		goto fail_unlock_irq;
 	}
 
@@ -284,12 +281,12 @@ static acpi_status acpi_gpiochip_request_interrupt(struct acpi_resource *ares,
 	ret = request_threaded_irq(event->irq, NULL, handler, irqflags,
 				   "ACPI:Event", event);
 	if (ret) {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 		dev_err(chip->parent,
 			"Failed to setup interrupt handler for %d\n",
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		dev_err(chip->dev, "Failed to setup interrupt handler for %d\n",
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 			event->irq);
 		goto fail_free_event;
 	}
@@ -323,18 +320,18 @@ void acpi_gpiochip_request_interrupts(struct gpio_chip *chip)
 	acpi_handle handle;
 	acpi_status status;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	if (!chip->parent || !chip->to_irq)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	if (!chip->dev || !chip->to_irq)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		return;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	handle = ACPI_HANDLE(chip->parent);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	handle = ACPI_HANDLE(chip->dev);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	if (!handle)
 		return;
 
@@ -361,18 +358,18 @@ void acpi_gpiochip_free_interrupts(struct gpio_chip *chip)
 	acpi_handle handle;
 	acpi_status status;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	if (!chip->parent || !chip->to_irq)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	if (!chip->dev || !chip->to_irq)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		return;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	handle = ACPI_HANDLE(chip->parent);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	handle = ACPI_HANDLE(chip->dev);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	if (!handle)
 		return;
 
@@ -794,11 +791,11 @@ out:
 static void acpi_gpiochip_request_regions(struct acpi_gpio_chip *achip)
 {
 	struct gpio_chip *chip = achip->chip;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	acpi_handle handle = ACPI_HANDLE(chip->parent);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	acpi_handle handle = ACPI_HANDLE(chip->dev);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	acpi_status status;
 
 	INIT_LIST_HEAD(&achip->conns);
@@ -807,34 +804,34 @@ static void acpi_gpiochip_request_regions(struct acpi_gpio_chip *achip)
 						    acpi_gpio_adr_space_handler,
 						    NULL, achip);
 	if (ACPI_FAILURE(status))
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 		dev_err(chip->parent,
 		        "Failed to install GPIO OpRegion handler\n");
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		dev_err(chip->dev, "Failed to install GPIO OpRegion handler\n");
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 }
 
 static void acpi_gpiochip_free_regions(struct acpi_gpio_chip *achip)
 {
 	struct gpio_chip *chip = achip->chip;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	acpi_handle handle = ACPI_HANDLE(chip->parent);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	acpi_handle handle = ACPI_HANDLE(chip->dev);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct acpi_gpio_connection *conn, *tmp;
 	acpi_status status;
 
 	status = acpi_remove_address_space_handler(handle, ACPI_ADR_SPACE_GPIO,
 						   acpi_gpio_adr_space_handler);
 	if (ACPI_FAILURE(status)) {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 		dev_err(chip->parent,
 			"Failed to remove GPIO OpRegion handler\n");
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		dev_err(chip->dev, "Failed to remove GPIO OpRegion handler\n");
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		return;
 	}
 
@@ -851,28 +848,28 @@ void acpi_gpiochip_add(struct gpio_chip *chip)
 	acpi_handle handle;
 	acpi_status status;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	if (!chip || !chip->parent)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	if (!chip || !chip->dev)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		return;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	handle = ACPI_HANDLE(chip->parent);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	handle = ACPI_HANDLE(chip->dev);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	if (!handle)
 		return;
 
 	acpi_gpio = kzalloc(sizeof(*acpi_gpio), GFP_KERNEL);
 	if (!acpi_gpio) {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 		dev_err(chip->parent,
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		dev_err(chip->dev,
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 			"Failed to allocate memory for ACPI GPIO chip\n");
 		return;
 	}
@@ -882,11 +879,11 @@ void acpi_gpiochip_add(struct gpio_chip *chip)
 
 	status = acpi_attach_data(handle, acpi_gpio_chip_dh, acpi_gpio);
 	if (ACPI_FAILURE(status)) {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 		dev_err(chip->parent, "Failed to attach ACPI GPIO chip\n");
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		dev_err(chip->dev, "Failed to attach ACPI GPIO chip\n");
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		kfree(acpi_gpio);
 		return;
 	}
@@ -900,28 +897,28 @@ void acpi_gpiochip_remove(struct gpio_chip *chip)
 	acpi_handle handle;
 	acpi_status status;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	if (!chip || !chip->parent)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	if (!chip || !chip->dev)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		return;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	handle = ACPI_HANDLE(chip->parent);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	handle = ACPI_HANDLE(chip->dev);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	if (!handle)
 		return;
 
 	status = acpi_get_data(handle, acpi_gpio_chip_dh, (void **)&acpi_gpio);
 	if (ACPI_FAILURE(status)) {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 		dev_warn(chip->parent, "Failed to retrieve ACPI GPIO chip\n");
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		dev_warn(chip->dev, "Failed to retrieve ACPI GPIO chip\n");
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		return;
 	}
 

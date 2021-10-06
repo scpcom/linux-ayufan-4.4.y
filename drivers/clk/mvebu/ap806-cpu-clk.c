@@ -1,7 +1,4 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 /*
  * Marvell Armada AP806 CPU Clock Controller
  *
@@ -260,4 +257,4 @@ static int __init ap806_clk_init(void)
 }
 subsys_initcall(ap806_clk_init);
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */

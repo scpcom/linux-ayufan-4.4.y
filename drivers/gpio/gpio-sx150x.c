@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /* Copyright (c) 2010, Code Aurora Forum. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -476,11 +473,11 @@ static void sx150x_init_chip(struct sx150x_chip *chip,
 
 	chip->client                     = client;
 	chip->dev_cfg                    = &sx150x_devices[driver_data];
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	chip->gpio_chip.parent              = &client->dev;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	chip->gpio_chip.dev              = &client->dev;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	chip->gpio_chip.label            = client->name;
 	chip->gpio_chip.direction_input  = sx150x_gpio_direction_input;
 	chip->gpio_chip.direction_output = sx150x_gpio_direction_output;

@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  *  linux/drivers/mmc/core/sd.c
  *
@@ -30,7 +27,7 @@
 #include "sd.h"
 #include "sd_ops.h"
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 #ifdef CONFIG_MMC_RTK_SDMMC
 int mmc_runtime_resume_flag=0;
 int get_mmc_runtime_resume_flag(void)
@@ -45,7 +42,7 @@ void set_mmc_runtime_resume_flag(int flag)
 EXPORT_SYMBOL(set_mmc_runtime_resume_flag);
 #endif
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */
 static const unsigned int tran_exp[] = {
 	10000,		100000,		1000000,	10000000,
 	0,		0,		0,		0
@@ -646,16 +643,16 @@ static int mmc_sd_init_uhs_card(struct mmc_card *card)
 	 */
 	if (!mmc_host_is_spi(card->host) &&
 		(card->host->ios.timing == MMC_TIMING_UHS_SDR50 ||
-#if defined(MY_DEF_HERE)
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 		 card->host->ios.timing == MMC_TIMING_UHS_DDR50 ||
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 		 (!(card->host->caps2 & MMC_CAP2_NO_DDR50_TUNING) &&
 		 (card->host->ios.timing == MMC_TIMING_UHS_DDR50)) ||
-#endif /* MY_DEF_HERE */
-#else /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		 card->host->ios.timing == MMC_TIMING_UHS_DDR50 ||
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		 card->host->ios.timing == MMC_TIMING_UHS_SDR104)) {
 		err = mmc_execute_tuning(card);
 
@@ -1196,17 +1193,17 @@ static int mmc_sd_runtime_resume(struct mmc_host *host)
 		return 0;
 
 	err = _mmc_sd_resume(host);
-#if defined(CONFIG_MMC_RTK_SDMMC) && defined(MY_DEF_HERE)
+#if defined(CONFIG_MMC_RTK_SDMMC) && defined(CONFIG_SYNO_LSP_RTD1619)
 	if (err) {
 		mmc_runtime_resume_flag=1;
 		pr_err("%s: error %d doing aggressive resume\n",
 			mmc_hostname(host), err);
 	}
-#else /* CONFIG_MMC_RTK_SDMMC && MY_DEF_HERE */
+#else /* CONFIG_MMC_RTK_SDMMC && CONFIG_SYNO_LSP_RTD1619 */
 	if (err)
 		pr_err("%s: error %d doing aggressive resume\n",
 			mmc_hostname(host), err);
-#endif /* CONFIG_MMC_RTK_SDMMC && MY_DEF_HERE */
+#endif /* CONFIG_MMC_RTK_SDMMC && CONFIG_SYNO_LSP_RTD1619 */
 
 	return 0;
 }

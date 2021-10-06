@@ -26,9 +26,9 @@
 #if defined(MY_DEF_HERE)
 #include "soc/realtek/memory.h"
 #endif /* MY_DEF_HERE */
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 #include "soc/realtek/memory_1619.h"
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */
 #include "../../../../mm/cma.h"
 
 struct ion_device *rtk_phoenix_ion_device;

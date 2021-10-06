@@ -1,7 +1,4 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -44,4 +41,4 @@ void mv_serdes_init(int lane, enum sd_media_mode mode);
 void mv_serdes_reset(int lane, bool analog_reset, bool core_reset, bool digital_reset);
 
 #endif /* __mv_serdes_if_h__ */
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */

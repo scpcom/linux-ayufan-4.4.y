@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  *  Copyright (C) 2014 Linaro Ltd
  *
@@ -32,11 +29,11 @@ static struct mmc_pwrseq_match pwrseq_match[] = {
 	}, {
 		.compatible = "mmc-pwrseq-emmc",
 		.alloc = mmc_pwrseq_emmc_alloc,
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_10)
 	}, {
 		.compatible = "mmc-pwrseq-a3700-sd",
 		.alloc = mmc_pwrseq_a3700_alloc,
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_10 */
 	},
 };
 

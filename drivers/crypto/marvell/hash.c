@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * Hash algorithms supported by the CESA: MD5, SHA1 and SHA256.
  *
@@ -48,34 +45,34 @@ mv_cesa_ahash_req_iter_next_op(struct mv_cesa_ahash_dma_iter *iter)
 	return mv_cesa_req_dma_iter_next_op(&iter->base);
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 static inline int
 mv_cesa_ahash_dma_alloc_cache(struct mv_cesa_ahash_dma_req *req, gfp_t flags)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 static inline int mv_cesa_ahash_dma_alloc_cache(struct mv_cesa_ahash_req *creq,
 						gfp_t flags)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	req->cache = dma_pool_alloc(cesa_dev->dma->cache_pool, flags,
 				    &req->cache_dma);
 	if (!req->cache)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	struct mv_cesa_ahash_dma_req *dreq = &creq->req.dma;
 
 	creq->cache = dma_pool_alloc(cesa_dev->dma->cache_pool, flags,
 				     &dreq->cache_dma);
 	if (!creq->cache)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 		return -ENOMEM;
 
 	return 0;
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 static inline void
 mv_cesa_ahash_dma_free_cache(struct mv_cesa_ahash_dma_req *req)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 static inline int mv_cesa_ahash_std_alloc_cache(struct mv_cesa_ahash_req *creq,
 						gfp_t flags)
 {
@@ -116,26 +113,26 @@ static inline void mv_cesa_ahash_std_free_cache(struct mv_cesa_ahash_req *creq)
 }
 
 static void mv_cesa_ahash_free_cache(struct mv_cesa_ahash_req *creq)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	if (!req->cache)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	if (!creq->cache)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 		return;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	dma_pool_free(cesa_dev->dma->cache_pool, req->cache,
 		      req->cache_dma);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	if (creq->req.base.type == CESA_DMA_REQ)
 		mv_cesa_ahash_dma_free_cache(creq);
 	else
 		mv_cesa_ahash_std_free_cache(creq);
 
 	creq->cache = NULL;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 }
 
 static int mv_cesa_ahash_dma_alloc_padding(struct mv_cesa_ahash_dma_req *req,
@@ -174,23 +171,23 @@ static inline void mv_cesa_ahash_dma_cleanup(struct ahash_request *req)
 	struct mv_cesa_ahash_req *creq = ahash_request_ctx(req);
 
 	dma_unmap_sg(cesa_dev->dev, req->src, creq->src_nents, DMA_TO_DEVICE);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	mv_cesa_ahash_dma_free_cache(&creq->req.dma);
 	mv_cesa_dma_cleanup(&creq->base);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	mv_cesa_dma_cleanup(&creq->req.dma.base);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 }
 
 static inline void mv_cesa_ahash_cleanup(struct ahash_request *req)
 {
 	struct mv_cesa_ahash_req *creq = ahash_request_ctx(req);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	if (mv_cesa_req_get_type(&creq->base) == CESA_DMA_REQ)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	if (creq->req.base.type == CESA_DMA_REQ)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 		mv_cesa_ahash_dma_cleanup(req);
 }
 
@@ -198,13 +195,13 @@ static void mv_cesa_ahash_last_cleanup(struct ahash_request *req)
 {
 	struct mv_cesa_ahash_req *creq = ahash_request_ctx(req);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	if (mv_cesa_req_get_type(&creq->base) == CESA_DMA_REQ)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	mv_cesa_ahash_free_cache(creq);
 
 	if (creq->req.base.type == CESA_DMA_REQ)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 		mv_cesa_ahash_dma_last_cleanup(req);
 }
 
@@ -243,16 +240,16 @@ static void mv_cesa_ahash_std_step(struct ahash_request *req)
 {
 	struct mv_cesa_ahash_req *creq = ahash_request_ctx(req);
 	struct mv_cesa_ahash_std_req *sreq = &creq->req.std;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	struct mv_cesa_engine *engine = creq->base.engine;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	struct mv_cesa_engine *engine = sreq->base.engine;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	struct mv_cesa_op_ctx *op;
 	unsigned int new_cache_ptr = 0;
 	u32 frag_mode;
 	size_t  len;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	unsigned int digsize;
 	int i;
 
@@ -264,7 +261,7 @@ static void mv_cesa_ahash_std_step(struct ahash_request *req)
 		for (i = 0; i < digsize / 4; i++)
 			writel_relaxed(creq->state[i], engine->regs + CESA_IVDIG(i));
 	}
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 
 	if (creq->cache_ptr)
 		memcpy_toio(engine->sram + CESA_SA_DATA_SRAM_OFFSET,
@@ -340,10 +337,10 @@ static void mv_cesa_ahash_std_step(struct ahash_request *req)
 
 	mv_cesa_set_int_mask(engine, CESA_SA_INT_ACCEL0_DONE);
 	writel_relaxed(CESA_SA_CFG_PARA_DIS, engine->regs + CESA_SA_CFG);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	BUG_ON(readl(engine->regs + CESA_SA_CMD) &
 	       CESA_SA_CMD_EN_CESA_SA_ACCL0);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	writel(CESA_SA_CMD_EN_CESA_SA_ACCL0, engine->regs + CESA_SA_CMD);
 }
 
@@ -361,31 +358,31 @@ static int mv_cesa_ahash_std_process(struct ahash_request *req, u32 status)
 static inline void mv_cesa_ahash_dma_prepare(struct ahash_request *req)
 {
 	struct mv_cesa_ahash_req *creq = ahash_request_ctx(req);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	struct mv_cesa_req *basereq = &creq->base;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	struct mv_cesa_tdma_req *dreq = &creq->req.dma.base;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	mv_cesa_dma_prepare(basereq, basereq->engine);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	mv_cesa_dma_prepare(dreq, dreq->base.engine);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 }
 
 static void mv_cesa_ahash_std_prepare(struct ahash_request *req)
 {
 	struct mv_cesa_ahash_req *creq = ahash_request_ctx(req);
 	struct mv_cesa_ahash_std_req *sreq = &creq->req.std;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	struct mv_cesa_engine *engine = sreq->base.engine;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 
 	sreq->offset = 0;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 }
 
 static void mv_cesa_ahash_dma_step(struct ahash_request *req)
@@ -405,10 +402,10 @@ static void mv_cesa_ahash_dma_step(struct ahash_request *req)
 	}
 
 	mv_cesa_dma_step(base);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	mv_cesa_adjust_op(engine, &creq->op_tmpl);
 	memcpy_toio(engine->sram, &creq->op_tmpl, sizeof(creq->op_tmpl));
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 }
 
 static void mv_cesa_ahash_step(struct crypto_async_request *req)
@@ -416,13 +413,13 @@ static void mv_cesa_ahash_step(struct crypto_async_request *req)
 	struct ahash_request *ahashreq = ahash_request_cast(req);
 	struct mv_cesa_ahash_req *creq = ahash_request_ctx(ahashreq);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	if (mv_cesa_req_get_type(&creq->base) == CESA_DMA_REQ)
 		mv_cesa_ahash_dma_step(ahashreq);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	if (creq->req.base.type == CESA_DMA_REQ)
 		mv_cesa_dma_step(&creq->req.dma.base);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	else
 		mv_cesa_ahash_std_step(ahashreq);
 }
@@ -431,25 +428,25 @@ static int mv_cesa_ahash_process(struct crypto_async_request *req, u32 status)
 {
 	struct ahash_request *ahashreq = ahash_request_cast(req);
 	struct mv_cesa_ahash_req *creq = ahash_request_ctx(ahashreq);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	struct mv_cesa_engine *engine = creq->req.base.engine;
 	unsigned int digsize;
 	int ret, i;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	if (mv_cesa_req_get_type(&creq->base) == CESA_DMA_REQ)
 		return mv_cesa_dma_process(&creq->base, status);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	if (creq->req.base.type == CESA_DMA_REQ)
 		ret = mv_cesa_dma_process(&creq->req.dma.base, status);
 	else
 		ret = mv_cesa_ahash_std_process(ahashreq, status);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	return mv_cesa_ahash_std_process(ahashreq, status);
 }
 
@@ -460,55 +457,55 @@ static void mv_cesa_ahash_complete(struct crypto_async_request *req)
 	struct mv_cesa_engine *engine = creq->base.engine;
 	unsigned int digsize;
 	int i;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	if (ret == -EINPROGRESS)
 		return ret;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 
 	digsize = crypto_ahash_digestsize(crypto_ahash_reqtfm(ahashreq));
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	for (i = 0; i < digsize / 4; i++)
 		creq->state[i] = readl_relaxed(engine->regs + CESA_IVDIG(i));
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	if (mv_cesa_req_get_type(&creq->base) == CESA_DMA_REQ &&
 	    (creq->base.chain.last->flags & CESA_TDMA_TYPE_MSK) == CESA_TDMA_RESULT) {
 		__le32 *data = NULL;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	if (creq->cache_ptr)
 		sg_pcopy_to_buffer(ahashreq->src, creq->src_nents,
 				   creq->cache,
 				   creq->cache_ptr,
 				   ahashreq->nbytes - creq->cache_ptr);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	if (creq->last_req) {
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 		/*
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 		 * Result is already in the correct endianess when the SA is
 		 * used
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 		 * Hardware's MD5 digest is in little endian format, but
 		 * SHA in big endian format
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 		 */
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 		data = creq->base.chain.last->op->ctx.hash.hash;
 		for (i = 0; i < digsize / 4; i++)
 			creq->state[i] = cpu_to_le32(data[i]);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 		if (creq->algo_le) {
 			__le32 *result = (void *)ahashreq->result;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 		memcpy(ahashreq->result, data, digsize);
 	} else {
 		for (i = 0; i < digsize / 4; i++)
@@ -526,29 +523,29 @@ static void mv_cesa_ahash_complete(struct crypto_async_request *req)
 					result[i] = cpu_to_le32(creq->state[i]);
 			} else {
 				__be32 *result = (void *)ahashreq->result;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 			for (i = 0; i < digsize / 4; i++)
 				result[i] = cpu_to_le32(creq->state[i]);
 		} else {
 			__be32 *result = (void *)ahashreq->result;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 				for (i = 0; i < digsize / 4; i++)
 					result[i] = cpu_to_be32(creq->state[i]);
 			}
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 			for (i = 0; i < digsize / 4; i++)
 				result[i] = cpu_to_be32(creq->state[i]);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 		}
 	}
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	atomic_sub(ahashreq->nbytes, &engine->load);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	return ret;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 }
 
 static void mv_cesa_ahash_prepare(struct crypto_async_request *req,
@@ -556,35 +553,35 @@ static void mv_cesa_ahash_prepare(struct crypto_async_request *req,
 {
 	struct ahash_request *ahashreq = ahash_request_cast(req);
 	struct mv_cesa_ahash_req *creq = ahash_request_ctx(ahashreq);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	unsigned int digsize;
 	int i;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	creq->base.engine = engine;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	creq->req.base.engine = engine;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	if (mv_cesa_req_get_type(&creq->base) == CESA_DMA_REQ)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	if (creq->req.base.type == CESA_DMA_REQ)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 		mv_cesa_ahash_dma_prepare(ahashreq);
 	else
 		mv_cesa_ahash_std_prepare(ahashreq);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 
 	digsize = crypto_ahash_digestsize(crypto_ahash_reqtfm(ahashreq));
 	for (i = 0; i < digsize / 4; i++)
 		writel_relaxed(creq->state[i], engine->regs + CESA_IVDIG(i));
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 }
 
 static void mv_cesa_ahash_req_cleanup(struct crypto_async_request *req)
@@ -596,35 +593,35 @@ static void mv_cesa_ahash_req_cleanup(struct crypto_async_request *req)
 		mv_cesa_ahash_last_cleanup(ahashreq);
 
 	mv_cesa_ahash_cleanup(ahashreq);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 
 	if (creq->cache_ptr)
 		sg_pcopy_to_buffer(ahashreq->src, creq->src_nents,
 				   creq->cache,
 				   creq->cache_ptr,
 				   ahashreq->nbytes - creq->cache_ptr);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 }
 
 static const struct mv_cesa_req_ops mv_cesa_ahash_req_ops = {
 	.step = mv_cesa_ahash_step,
 	.process = mv_cesa_ahash_process,
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	.prepare = mv_cesa_ahash_prepare,
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	.cleanup = mv_cesa_ahash_req_cleanup,
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	.complete = mv_cesa_ahash_complete,
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 };
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 static void mv_cesa_ahash_init(struct ahash_request *req,
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 static int mv_cesa_ahash_init(struct ahash_request *req,
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 			      struct mv_cesa_op_ctx *tmpl, bool algo_le)
 {
 	struct mv_cesa_ahash_req *creq = ahash_request_ctx(req);
@@ -640,12 +637,12 @@ static int mv_cesa_ahash_init(struct ahash_request *req,
 	creq->op_tmpl = *tmpl;
 	creq->len = 0;
 	creq->algo_le = algo_le;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 
 	return 0;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 }
 
 static inline int mv_cesa_ahash_cra_init(struct crypto_tfm *tfm)
@@ -659,16 +656,16 @@ static inline int mv_cesa_ahash_cra_init(struct crypto_tfm *tfm)
 	return 0;
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 static bool mv_cesa_ahash_cache_req(struct ahash_request *req)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 static int mv_cesa_ahash_cache_req(struct ahash_request *req, bool *cached)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 {
 	struct mv_cesa_ahash_req *creq = ahash_request_ctx(req);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	bool cached = false;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	int ret;
 
 	if (((creq->cache_ptr + req->nbytes) & CESA_HASH_BLOCK_SIZE_MSK) &&
@@ -677,22 +674,22 @@ static int mv_cesa_ahash_cache_req(struct ahash_request *req, bool *cached)
 		if (ret)
 			return ret;
 	}
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	if (creq->cache_ptr + req->nbytes < CESA_MAX_HASH_BLOCK_SIZE && !creq->last_req) {
 		cached = true;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	if (creq->cache_ptr + req->nbytes < 64 && !creq->last_req) {
 		*cached = true;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 
 		if (!req->nbytes)
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 			return cached;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 			return 0;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 
 		sg_pcopy_to_buffer(req->src, creq->src_nents,
 				   creq->cache + creq->cache_ptr,
@@ -701,11 +698,11 @@ static int mv_cesa_ahash_cache_req(struct ahash_request *req, bool *cached)
 		creq->cache_ptr += req->nbytes;
 	}
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	return cached;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	return 0;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 }
 
 static struct mv_cesa_op_ctx *
@@ -738,30 +735,30 @@ mv_cesa_dma_add_frag(struct mv_cesa_tdma_chain *chain,
 
 static int
 mv_cesa_ahash_dma_add_cache(struct mv_cesa_tdma_chain *chain,
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 			    struct mv_cesa_ahash_dma_iter *dma_iter,
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 			    struct mv_cesa_ahash_req *creq,
 			    gfp_t flags)
 {
 	struct mv_cesa_ahash_dma_req *ahashdreq = &creq->req.dma;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	int ret;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 
 	if (!creq->cache_ptr)
 		return 0;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	ret = mv_cesa_ahash_dma_alloc_cache(ahashdreq, flags);
 	if (ret)
 		return ret;
 
 	memcpy(ahashdreq->cache, creq->cache, creq->cache_ptr);
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	return mv_cesa_dma_add_data_transfer(chain,
 					     CESA_SA_DATA_SRAM_OFFSET,
 					     ahashdreq->cache_dma,
@@ -797,14 +794,14 @@ mv_cesa_ahash_dma_last_req(struct mv_cesa_tdma_chain *chain,
 						CESA_SA_DESC_CFG_LAST_FRAG,
 				      CESA_SA_DESC_CFG_FRAG_MSK);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 		ret = mv_cesa_dma_add_result_op(chain,
 						CESA_SA_CFG_SRAM_OFFSET,
 						CESA_SA_DATA_SRAM_OFFSET,
 						CESA_TDMA_SRC_IN_SRAM, flags);
 		if (ret)
 			return ERR_PTR(-ENOMEM);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 		return op;
 	}
 
@@ -860,33 +857,33 @@ static int mv_cesa_ahash_dma_req_init(struct ahash_request *req)
 	struct mv_cesa_ahash_req *creq = ahash_request_ctx(req);
 	gfp_t flags = (req->base.flags & CRYPTO_TFM_REQ_MAY_SLEEP) ?
 		      GFP_KERNEL : GFP_ATOMIC;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	struct mv_cesa_req *basereq = &creq->base;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	struct mv_cesa_ahash_dma_req *ahashdreq = &creq->req.dma;
 	struct mv_cesa_tdma_req *dreq = &ahashdreq->base;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	struct mv_cesa_ahash_dma_iter iter;
 	struct mv_cesa_op_ctx *op = NULL;
 	unsigned int frag_len;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	bool set_state = false;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	int ret;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	u32 type;
 
 	basereq->chain.first = NULL;
 	basereq->chain.last = NULL;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	if (!mv_cesa_mac_op_is_first_frag(&creq->op_tmpl))
 		set_state = true;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	dreq->chain.first = NULL;
 	dreq->chain.last = NULL;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 
 	if (creq->src_nents) {
 		ret = dma_map_sg(cesa_dev->dev, req->src, creq->src_nents,
@@ -897,22 +894,22 @@ static int mv_cesa_ahash_dma_req_init(struct ahash_request *req)
 		}
 	}
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	mv_cesa_tdma_desc_iter_init(&basereq->chain);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	mv_cesa_tdma_desc_iter_init(&dreq->chain);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	mv_cesa_ahash_req_iter_init(&iter, req);
 
 	/*
 	 * Add the cache (left-over data from a previous block) first.
 	 * This will never overflow the SRAM size.
 	 */
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	ret = mv_cesa_ahash_dma_add_cache(&basereq->chain, creq, flags);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	ret = mv_cesa_ahash_dma_add_cache(&dreq->chain, &iter, creq, flags);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	if (ret)
 		goto err_free_tdma;
 
@@ -923,11 +920,11 @@ static int mv_cesa_ahash_dma_req_init(struct ahash_request *req)
 		 * data. We intentionally do not add the final op block.
 		 */
 		while (true) {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 			ret = mv_cesa_dma_add_op_transfers(&basereq->chain,
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 			ret = mv_cesa_dma_add_op_transfers(&dreq->chain,
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 							   &iter.base,
 							   &iter.src, flags);
 			if (ret)
@@ -938,11 +935,11 @@ static int mv_cesa_ahash_dma_req_init(struct ahash_request *req)
 			if (!mv_cesa_ahash_req_iter_next_op(&iter))
 				break;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 			op = mv_cesa_dma_add_frag(&basereq->chain, &creq->op_tmpl,
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 			op = mv_cesa_dma_add_frag(&dreq->chain, &creq->op_tmpl,
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 						  frag_len, flags);
 			if (IS_ERR(op)) {
 				ret = PTR_ERR(op);
@@ -960,18 +957,18 @@ static int mv_cesa_ahash_dma_req_init(struct ahash_request *req)
 	 * operation, which depends whether this is the final request.
 	 */
 	if (creq->last_req)
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 		op = mv_cesa_ahash_dma_last_req(&basereq->chain, &iter, creq,
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 		op = mv_cesa_ahash_dma_last_req(&dreq->chain, &iter, creq,
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 						frag_len, flags);
 	else if (frag_len)
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 		op = mv_cesa_dma_add_frag(&basereq->chain, &creq->op_tmpl,
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 		op = mv_cesa_dma_add_frag(&dreq->chain, &creq->op_tmpl,
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 					  frag_len, flags);
 
 	if (IS_ERR(op)) {
@@ -979,7 +976,7 @@ static int mv_cesa_ahash_dma_req_init(struct ahash_request *req)
 		goto err_free_tdma;
 	}
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	/*
 	 * If results are copied via DMA, this means that this
 	 * request can be directly processed by the engine,
@@ -989,15 +986,15 @@ static int mv_cesa_ahash_dma_req_init(struct ahash_request *req)
 	type = basereq->chain.last->flags & CESA_TDMA_TYPE_MSK;
 
 	if (op && type != CESA_TDMA_RESULT) {
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	if (op) {
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 		/* Add dummy desc to wait for crypto operation end */
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 		ret = mv_cesa_dma_add_dummy_end(&basereq->chain, flags);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 		ret = mv_cesa_dma_add_dummy_end(&dreq->chain, flags);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 		if (ret)
 			goto err_free_tdma;
 	}
@@ -1008,7 +1005,7 @@ static int mv_cesa_ahash_dma_req_init(struct ahash_request *req)
 	else
 		creq->cache_ptr = 0;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	basereq->chain.last->flags |= CESA_TDMA_END_OF_REQ;
 
 	if (type != CESA_TDMA_RESULT)
@@ -1023,15 +1020,15 @@ static int mv_cesa_ahash_dma_req_init(struct ahash_request *req)
 		basereq->chain.first->flags |= CESA_TDMA_SET_STATE;
 	}
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	return 0;
 
 err_free_tdma:
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	mv_cesa_dma_cleanup(basereq);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	mv_cesa_dma_cleanup(dreq);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	dma_unmap_sg(cesa_dev->dev, req->src, creq->src_nents, DMA_TO_DEVICE);
 
 err:
@@ -1043,67 +1040,67 @@ err:
 static int mv_cesa_ahash_req_init(struct ahash_request *req, bool *cached)
 {
 	struct mv_cesa_ahash_req *creq = ahash_request_ctx(req);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	int ret;
 
 	if (cesa_dev->caps->has_tdma)
 		creq->req.base.type = CESA_DMA_REQ;
 	else
 		creq->req.base.type = CESA_STD_REQ;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 
 	creq->src_nents = sg_nents_for_len(req->src, req->nbytes);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	if (creq->src_nents < 0) {
 		dev_err(cesa_dev->dev, "Invalid number of src SG");
 		return creq->src_nents;
 	}
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	*cached = mv_cesa_ahash_cache_req(req);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	ret = mv_cesa_ahash_cache_req(req, cached);
 	if (ret)
 		return ret;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 
 	if (*cached)
 		return 0;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	if (cesa_dev->caps->has_tdma)
 		return mv_cesa_ahash_dma_req_init(req);
 	else
 		return 0;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	if (creq->req.base.type == CESA_DMA_REQ)
 		ret = mv_cesa_ahash_dma_req_init(req);
 
 	return ret;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 static int mv_cesa_ahash_queue_req(struct ahash_request *req)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 static int mv_cesa_ahash_update(struct ahash_request *req)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 {
 	struct mv_cesa_ahash_req *creq = ahash_request_ctx(req);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	struct mv_cesa_engine *engine;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	bool cached = false;
 	int ret;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	creq->len += req->nbytes;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	ret = mv_cesa_ahash_req_init(req, &cached);
 	if (ret)
 		return ret;
@@ -1111,22 +1108,22 @@ static int mv_cesa_ahash_update(struct ahash_request *req)
 	if (cached)
 		return 0;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	engine = mv_cesa_select_engine(req->nbytes);
 	mv_cesa_ahash_prepare(&req->base, engine);
 
 	ret = mv_cesa_queue_req(&req->base, &creq->base);
 
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	ret = mv_cesa_queue_req(&req->base);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	if (mv_cesa_req_needs_cleanup(&req->base, ret))
 		mv_cesa_ahash_cleanup(req);
 
 	return ret;
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 static int mv_cesa_ahash_update(struct ahash_request *req)
 {
 	struct mv_cesa_ahash_req *creq = ahash_request_ctx(req);
@@ -1136,25 +1133,25 @@ static int mv_cesa_ahash_update(struct ahash_request *req)
 	return mv_cesa_ahash_queue_req(req);
 }
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 static int mv_cesa_ahash_final(struct ahash_request *req)
 {
 	struct mv_cesa_ahash_req *creq = ahash_request_ctx(req);
 	struct mv_cesa_op_ctx *tmpl = &creq->op_tmpl;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	bool cached = false;
 	int ret;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 
 	mv_cesa_set_mac_op_total_len(tmpl, creq->len);
 	creq->last_req = true;
 	req->nbytes = 0;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	return mv_cesa_ahash_queue_req(req);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	ret = mv_cesa_ahash_req_init(req, &cached);
 	if (ret)
 		return ret;
@@ -1167,27 +1164,27 @@ static int mv_cesa_ahash_final(struct ahash_request *req)
 		mv_cesa_ahash_cleanup(req);
 
 	return ret;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 }
 
 static int mv_cesa_ahash_finup(struct ahash_request *req)
 {
 	struct mv_cesa_ahash_req *creq = ahash_request_ctx(req);
 	struct mv_cesa_op_ctx *tmpl = &creq->op_tmpl;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	bool cached = false;
 	int ret;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 
 	creq->len += req->nbytes;
 	mv_cesa_set_mac_op_total_len(tmpl, creq->len);
 	creq->last_req = true;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	return mv_cesa_ahash_queue_req(req);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	ret = mv_cesa_ahash_req_init(req, &cached);
 	if (ret)
 		return ret;
@@ -1200,7 +1197,7 @@ static int mv_cesa_ahash_finup(struct ahash_request *req)
 		mv_cesa_ahash_cleanup(req);
 
 	return ret;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 }
 
 static int mv_cesa_ahash_export(struct ahash_request *req, void *hash,
@@ -1216,12 +1213,12 @@ static int mv_cesa_ahash_export(struct ahash_request *req, void *hash,
 	*len = creq->len;
 	memcpy(hash, creq->state, digsize);
 	memset(cache, 0, blocksize);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	memcpy(cache, creq->cache, creq->cache_ptr);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	if (creq->cache)
 		memcpy(cache, creq->cache, creq->cache_ptr);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 
 	return 0;
 }
@@ -1254,14 +1251,14 @@ static int mv_cesa_ahash_import(struct ahash_request *req, const void *hash,
 	if (!cache_ptr)
 		return 0;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	ret = mv_cesa_ahash_alloc_cache(req);
 	if (ret)
 		return ret;
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	memcpy(creq->cache, cache, cache_ptr);
 	creq->cache_ptr = cache_ptr;
 
@@ -1270,22 +1267,22 @@ static int mv_cesa_ahash_import(struct ahash_request *req, const void *hash,
 
 static int mv_cesa_md5_init(struct ahash_request *req)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	struct mv_cesa_ahash_req *creq = ahash_request_ctx(req);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	struct mv_cesa_op_ctx tmpl = { };
 
 	mv_cesa_set_op_cfg(&tmpl, CESA_SA_DESC_CFG_MACM_MD5);
 
 	mv_cesa_ahash_init(req, &tmpl, true);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	creq->state[0] = MD5_H0;
 	creq->state[1] = MD5_H1;
 	creq->state[2] = MD5_H2;
 	creq->state[3] = MD5_H3;
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	return 0;
 }
 
@@ -1343,23 +1340,23 @@ struct ahash_alg mv_md5_alg = {
 
 static int mv_cesa_sha1_init(struct ahash_request *req)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	struct mv_cesa_ahash_req *creq = ahash_request_ctx(req);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	struct mv_cesa_op_ctx tmpl = { };
 
 	mv_cesa_set_op_cfg(&tmpl, CESA_SA_DESC_CFG_MACM_SHA1);
 
 	mv_cesa_ahash_init(req, &tmpl, false);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	creq->state[0] = SHA1_H0;
 	creq->state[1] = SHA1_H1;
 	creq->state[2] = SHA1_H2;
 	creq->state[3] = SHA1_H3;
 	creq->state[4] = SHA1_H4;
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	return 0;
 }
 
@@ -1417,16 +1414,16 @@ struct ahash_alg mv_sha1_alg = {
 
 static int mv_cesa_sha256_init(struct ahash_request *req)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	struct mv_cesa_ahash_req *creq = ahash_request_ctx(req);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	struct mv_cesa_op_ctx tmpl = { };
 
 	mv_cesa_set_op_cfg(&tmpl, CESA_SA_DESC_CFG_MACM_SHA256);
 
 	mv_cesa_ahash_init(req, &tmpl, false);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	creq->state[0] = SHA256_H0;
 	creq->state[1] = SHA256_H1;
 	creq->state[2] = SHA256_H2;
@@ -1436,7 +1433,7 @@ static int mv_cesa_sha256_init(struct ahash_request *req)
 	creq->state[6] = SHA256_H6;
 	creq->state[7] = SHA256_H7;
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	return 0;
 }
 

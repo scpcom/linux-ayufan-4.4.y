@@ -1,10 +1,7 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 /* linux/drivers/mmc/host/sdhci-xenon-emmc-phy.h
  *
  * Author: Hu Ziji <huziji@marvell.com>
@@ -137,5 +134,5 @@ struct xenon_phy_ops {
 	void (*soc_pad_ctrl)(struct sdhci_host *host, unsigned char signal_voltage);
 };
 #endif
-#endif /* MY_DEF_HERE */
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */

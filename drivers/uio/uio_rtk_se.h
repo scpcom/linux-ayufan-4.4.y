@@ -8,7 +8,7 @@
 //#include "se_export.h"
 //#include "debug.h"
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 #ifdef CONFIG_ARCH_RTD129x
 #  define SE_NUM_ENGINES       2
 #elif defined(CONFIG_ARCH_RTD139x)
@@ -22,9 +22,9 @@
 #else
 #  error "unknown platform"
 #endif
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_RTD1619 */
 #define SE_NUM_ENGINES			2 //3
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */
 
 #define SE_COMMAND_ENTRIES		4096
 #define SE_CMDBUF_SIZE			(SE_COMMAND_ENTRIES * sizeof(uint32_t))

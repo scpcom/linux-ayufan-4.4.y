@@ -256,7 +256,7 @@ static int usb_probe_device(struct device *dev)
 	return error;
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 #ifdef CONFIG_USB_PATCH_ON_RTK
 int RTK_usb_probe_device(struct device *dev)
 {
@@ -299,7 +299,7 @@ static void syno_usb_shutdown_device(struct device *dev)
 }
 #endif  
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 #ifdef CONFIG_USB_PATCH_ON_RTK
 int RTK_usb_unbind_device(struct device *dev)
 {

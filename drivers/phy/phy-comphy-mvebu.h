@@ -1,7 +1,4 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 #ifndef _COMPHY_MVEBU_H
 #define _COMPHY_MVEBU_H
 
@@ -11,8 +8,8 @@
 #define to_mvebu_comphy_priv(lane) \
 	container_of((lane), struct mvebu_comphy_priv, lanes[(lane)->index])
 
-#if defined(MY_DEF_HERE)
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_10)
 enum {
 	COMPHY_LANE0 = 0,
 	COMPHY_LANE1,
@@ -23,13 +20,13 @@ enum {
 	COMPHY_LANE_MAX,
 };
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_10 */
 enum reg_width_type {
 	REG_16BIT = 0,
 	REG_32BIT,
 };
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 struct mvebu_comphy_priv {
 	struct device *dev;
 	void __iomem *comphy_regs;
@@ -40,14 +37,14 @@ struct mvebu_comphy_priv {
 		struct phy *phy;
 		int mode;
 		int index;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_10)
 		/* in case PCIe is in End point mode */
 		bool skip_pcie_power_off;
 		struct misc_info {
 			int pcie_width: 8;
 			int pcie_is_ep: 1;
 		} misc;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_10 */
 	} lanes[MVEBU_COMPHY_MAX_CNT];
 };
 
@@ -67,7 +64,7 @@ static inline void __maybe_unused reg_set(void __iomem *addr, u32 data, u32 mask
 	writel(reg_data, addr);
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 static inline void __maybe_unused reg_set16(void __iomem *addr, u16 data, u16 mask)
 {
 	u16 reg_data;
@@ -78,29 +75,29 @@ static inline void __maybe_unused reg_set16(void __iomem *addr, u16 data, u16 ma
 	writew(reg_data, addr);
 }
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 static inline u32 __maybe_unused polling_with_timeout(void __iomem *addr,
 						      u32 val,
 						      u32 mask,
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 						      unsigned long usec_timout,
 						      enum reg_width_type type)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 						      unsigned long usec_timout)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 {
 	u32 data;
 
 	do {
 		udelay(1);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 		if (type == REG_16BIT)
 			data = readw(addr) & mask;
 		else
 			data = readl(addr) & mask;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 		data = readl(addr) & mask;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	} while (data != val  && --usec_timout > 0);
 
 	if (usec_timout == 0)
@@ -114,4 +111,4 @@ int mvebu_comphy_set_mode(struct phy *phy, enum phy_mode mode);
 enum phy_mode mvebu_comphy_get_mode(struct phy *phy);
 
 #endif /* _COMPHY_MVEBU_H */
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */

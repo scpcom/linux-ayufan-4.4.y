@@ -1,7 +1,4 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_ARMADA_16_12)
 /*******************************************************************************
  * Copyright (C) 2016 Marvell International Ltd.
  *
@@ -111,9 +108,9 @@
 
 #define DRV_NAME "mvebu_phone"
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 long int tdm_base;
 int use_pclk_external;
 int mv_phone_enabled;
@@ -121,26 +118,26 @@ struct mv_phone_dev *priv;
 
 #define TDM_STOP_MAX_POLLING_TIME 20 /* ms */
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 /* TDM Interrupt Service Routine */
 static irqreturn_t tdm_if_isr(int irq, void *dev_id);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 /* PCM start/stop */
 static void tdm_if_pcm_start(void);
 static void tdm_if_pcm_stop(void);
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 /* Rx/Tx Tasklets  */
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 static void tdm2c_if_pcm_rx_process(unsigned long arg);
 static void tdmmc_if_pcm_rx_process(unsigned long arg);
 static void tdm2c_if_pcm_tx_process(unsigned long arg);
 static void tdmmc_if_pcm_tx_process(unsigned long arg);
 static void tdm2c_if_reset_channels(unsigned long arg);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 #if !(defined CONFIG_MV_PHONE_USE_IRQ_PROCESSING) && !(defined CONFIG_MV_PHONE_USE_FIQ_PROCESSING)
 static void tdm_if_pcm_rx_process(unsigned long arg);
 static void tdm_if_pcm_tx_process(unsigned long arg);
@@ -148,9 +145,9 @@ static void tdm_if_pcm_tx_process(unsigned long arg);
 static inline void tdm_if_pcm_rx_process(void);
 static inline void tdm_if_pcm_tx_process(void);
 #endif
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 /* Globals */
 static struct mv_phone_dev *priv;
 static DECLARE_TASKLET(tdm2c_if_rx_tasklet, tdm2c_if_pcm_rx_process, 0);
@@ -162,36 +159,36 @@ static DECLARE_TASKLET(tdm2c_if_reset_tasklet, tdm2c_if_reset_channels, 0);
 /* Statistic printout in userspace via /proc/tdm */
 static int mv_phone_status_show(struct seq_file *m, void *v)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	struct mv_phone_extended_stats tdm_ext_stats;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 /* TDM SW Reset */
 #ifdef CONFIG_MV_TDM2C_SUPPORT
 static void tdm2c_if_stop_channels(unsigned long args);
-#endif /* MY_DEF_HERE */
-#if defined(MY_DEF_HERE)
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 #endif
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	seq_printf(m, "tdm_init:	%u\n", priv->tdm_init);
 	seq_printf(m, "rx_miss:		%u\n", priv->rx_miss);
 	seq_printf(m, "tx_miss:		%u\n", priv->tx_miss);
 	seq_printf(m, "rx_over:		%u\n", priv->rx_over);
 	seq_printf(m, "tx_under:	%u\n", priv->tx_under);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 /* Module */
 static int tdm_if_module_init(void);
 static void tdm_if_module_exit(void);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 /* Globals */
 #if !(defined CONFIG_MV_PHONE_USE_IRQ_PROCESSING) && !(defined CONFIG_MV_PHONE_USE_FIQ_PROCESSING)
 static DECLARE_TASKLET(tdm_if_rx_tasklet, tdm_if_pcm_rx_process, 0);
@@ -211,13 +208,13 @@ static int irq_init;
 static int tdm_init;
 static int buff_size;
 static u16 test_enable;
-#endif /* MY_DEF_HERE */
-#if defined(MY_DEF_HERE)
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	if (!priv->use_tdm_ext_stats)
 		return 0;
 
-#else /* MY_DEF_HERE */
-#if defined(MY_DEF_HERE)
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	tdm2c_ext_stats_get(&tdm_ext_stats);
 
 	seq_puts(m, "\nTDM Extended Statistics:\n");
@@ -233,7 +230,7 @@ static u16 test_enable;
 	seq_printf(m, "int_tx1_miss	= %u\n", tdm_ext_stats.int_tx1_miss);
 	seq_printf(m, "pcm_restart_count= %u\n", tdm_ext_stats.pcm_restart_count);
 	seq_printf(m, "pcm_stop_fail	= %u\n", priv->pcm_stop_fail);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 static u32 pcm_stop_fail;
 #endif
 #ifdef CONFIG_MV_TDM2C_SUPPORT
@@ -241,34 +238,34 @@ static int pcm_stop_flag;
 static int pcm_stop_status;
 static u32 pcm_start_stop_state;
 static u32 is_pcm_stopping;
-#endif /* MY_DEF_HERE */
-#if defined(MY_DEF_HERE)
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 #endif
-#endif /* MY_DEF_HERE */
-#if defined(MY_DEF_HERE)
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	return 0;
 }
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 static u32 mv_tdm_unit_type;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 static int mv_phone_status_open(struct inode *inode, struct file *file)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 /* Get TDM unit interrupt number */
 static u32 mv_phone_get_irq(int id)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	return single_open(file, mv_phone_status_show, PDE_DATA(inode));
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	return priv->irq[id];
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 static const struct file_operations mv_phone_operations = {
 	.open		= mv_phone_status_open,
 	.read		= seq_read,
@@ -280,12 +277,12 @@ static const struct file_operations mv_phone_operations = {
 
 /* PCM start */
 static void tdm2c_if_pcm_start(void)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 /* Get TDM unit type. */
 static enum mv_phone_unit_type mv_phone_get_unit_type(void)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	unsigned long flags;
 	u32 max_poll = 0;
 
@@ -320,12 +317,12 @@ static enum mv_phone_unit_type mv_phone_get_unit_type(void)
 			else
 				dev_dbg(priv->dev, "pcm stop timeout\n");
 
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	if (!mv_phone_enabled)
 		return MV_TDM_UNIT_NONE;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 			priv->pcm_is_stopping = false;
 			priv->pcm_stop_flag = false;
 			priv->pcm_stop_status = false;
@@ -338,30 +335,30 @@ static enum mv_phone_unit_type mv_phone_get_unit_type(void)
 				priv->pcm_start_stop_state, max_poll);
 		}
 	}
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	return priv->tdm_type;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	spin_unlock_irqrestore(&priv->lock, flags);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 static void tdmmc_if_pcm_start(void)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 /* Initialize the TDM subsystem. */
 static int mv_phone_init(struct mv_phone_params *tdm_params)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 // do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	struct mv_phone_data hal_data;
 	u8 spi_mode = 0;
 	int ret;
-#endif /* MY_DEF_HERE */
-#if defined(MY_DEF_HERE)
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	unsigned long flags;
 
 	spin_lock_irqsave(&priv->lock, flags);
@@ -407,9 +404,9 @@ static void tdm2c_if_pcm_stop(void)
 static void tdmmc_if_pcm_stop(void)
 {
 	unsigned long flags;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	spin_lock_irqsave(&priv->lock, flags);
 
 	if (!priv->pcm_enable) {
@@ -428,44 +425,44 @@ static int tdm_hw_init(struct mv_phone_params *tdm_params)
 {
 	enum mv_phone_frame_ts frame_ts;
 	int ret;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	hal_data.spi_mode = spi_mode;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 
 	switch (priv->pclk_freq_mhz) {
 	case 8:
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 		frame_ts = MV_FRAME_128TS;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 		hal_data.frame_ts = MV_FRAME_128TS;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 		break;
 	case 4:
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 		frame_ts = MV_FRAME_64TS;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 		hal_data.frame_ts = MV_FRAME_64TS;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 		break;
 	case 2:
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 		frame_ts = MV_FRAME_32TS;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 		hal_data.frame_ts = MV_FRAME_32TS;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 		break;
 	default:
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 		frame_ts = MV_FRAME_128TS;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 		hal_data.frame_ts = MV_FRAME_128TS;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 		break;
 	}
 
 	switch (priv->tdm_type) {
 	case MV_TDM_UNIT_TDM2C:
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 		ret = tdm2c_init(priv->tdm_base, priv->dev, tdm_params,
 				 frame_ts, priv->tdm2c_spi_mode,
 				 priv->use_pclk_external);
@@ -473,26 +470,26 @@ static int tdm_hw_init(struct mv_phone_params *tdm_params)
 		/* Soft reset to PCM I/F */
 		tdm2c_pcm_if_reset();
 
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 		ret = tdm2c_init(priv->tdm_base, priv->dev, tdm_params, &hal_data);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 		break;
 	case MV_TDM_UNIT_TDMMC:
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 		ret = tdmmc_init(priv->tdm_base, priv->dev, tdm_params,
 				 frame_ts, priv->tdmmc_ip_ver);
 
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 		ret = tdmmc_init(priv->tdm_base, priv->dev, tdm_params, &hal_data);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 		/* Issue SLIC reset */
 		ret |= tdmmc_reset_slic();
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 
 		/* WA to stop the MCDMA gracefully after tdmmc initialization */
 		tdmmc_if_pcm_stop();
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 		break;
 	default:
 		dev_err(&priv->parent->dev, "%s: undefined TDM type\n",
@@ -505,9 +502,9 @@ static int tdm_hw_init(struct mv_phone_params *tdm_params)
 	return ret;
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 /* Main TDM initialization routine */
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 static int proc_tdm_status_show(struct seq_file *m, void *v)
 {
 #ifdef CONFIG_MV_TDM_EXT_STATS
@@ -567,21 +564,21 @@ static u32 tdm_if_unit_type_get(void)
 	return mv_tdm_unit_type;
 }
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 int tdm_if_init(struct tal_params *tal_params)
 {
 	struct mv_phone_params tdm_params;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	int i, irqs_requested, ret;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	int ret;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	if (priv->tdm_init) {
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	if (tdm_init) {
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 		dev_warn(priv->dev, "Marvell Telephony Driver already started...\n");
 		return 0;
 	}
@@ -594,14 +591,14 @@ int tdm_if_init(struct tal_params *tal_params)
 
 	}
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	/* Reset operation flags */
 	priv->tdm_init = false;
 	priv->pcm_enable = false;
 	priv->pcm_is_stopping = false;
 	priv->pcm_stop_flag = false;
 	priv->pcm_stop_status = false;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	/* Reset globals */
 	rx_buff = tx_buff = NULL;
 	irq_init = 0;
@@ -621,31 +618,31 @@ int tdm_if_init(struct tal_params *tal_params)
 		pcm_enable = 1;
 #endif
 
-#endif /* MY_DEF_HERE */
-#if defined(MY_DEF_HERE)
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 //do nothing
-#else /* MY_DEF_HERE */
-#if defined(MY_DEF_HERE)
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	priv->pcm_stop_fail = 0;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	pcm_stop_fail = 0;
-#endif /* MY_DEF_HERE */
-#if defined(MY_DEF_HERE)
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 #endif
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	/* Calculate Rx/Tx buffer size(use in callbacks) */
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	priv->buff_size = (tal_params->pcm_format * tal_params->total_lines * 80 *
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	buff_size = (tal_params->pcm_format * tal_params->total_lines * 80 *
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 			(tal_params->sampling_period/MV_TDM_BASE_SAMPLING_PERIOD));
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	/* Extract TDM irq number */
 	irqnr[0] = mv_phone_get_irq(0);
 #if (!(defined(CONFIG_MACH_ARMADA_38X) || defined(CONFIG_MACH_ARMADA_XP)))
@@ -653,39 +650,39 @@ int tdm_if_init(struct tal_params *tal_params)
 	irqnr[2] = mv_phone_get_irq(2);
 #endif
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	/* Assign TDM parameters */
 	memcpy(&tdm_params, tal_params, sizeof(struct mv_phone_params));
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	/* TDM hardware initialization */
 	ret = tdm_hw_init(&tdm_params);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	/* TDM init */
 	ret = mv_phone_init(&tdm_params);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	if (ret) {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 		dev_err(priv->dev, "%s: TDM initialization failed\n", __func__);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 		dev_err(priv->dev, "%s: Error, TDM initialization failed !!!\n", __func__);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 		return ret;
 	}
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	tdm_init = 1;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	/* Create TDM procfs statistics */
 	priv->tdm_stats = proc_mkdir("tdm", NULL);
 	if (priv->tdm_stats) {
 		if (!proc_create("tdm_stats", S_IRUGO,
 				 priv->tdm_stats, &mv_phone_operations))
 			return -ENOMEM;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	/* Soft reset to PCM I/F */
 #ifdef CONFIG_MV_TDM2C_SUPPORT
 	if (tdm_if_unit_type_get() == MV_TDM_UNIT_TDM2C)
@@ -698,40 +695,40 @@ int tdm_if_init(struct tal_params *tal_params)
 	if (ret) {
 		dev_err(priv->dev, "%s: Failed to connect fiq(%d)\n", __func__, irqnr[0]);
 		return ret;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	}
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 
 	/* Register TDM interrupts */
 	irqs_requested = 0;
 	for (i = 0; i < priv->irq_count; i++) {
 		ret = request_irq(priv->irq[i], tdm_if_isr, 0x0, "tdm", NULL);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 #else /* CONFIG_MV_PHONE_USE_FIQ_PROCESSING */
 	ret = request_irq(irqnr[0], tdm_if_isr, 0x0, "tdm", NULL);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	if (ret) {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 			dev_err(priv->dev, "%s: Failed to connect irq(%d)\n",
 				__func__, priv->irq[i]);
 			goto err_irq;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 		dev_err(priv->dev, "%s: Failed to connect irq(%d)\n", __func__, irqnr[0]);
 		return ret;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	}
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 		irqs_requested++;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 #if (!(defined(CONFIG_MACH_ARMADA_38X) || defined(CONFIG_MACH_ARMADA_XP)))
 	/* XXX add proper error path */
 	ret = request_irq(irqnr[1], tdm_if_isr, 0x0, "tdm", NULL);
 	if (ret) {
 		dev_err(priv->dev, "%s: Failed to connect irq(%d)\n", __func__, irqnr[1]);
 		return ret;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	}
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 
 	priv->tdm_init = true;
 
@@ -741,49 +738,49 @@ err_irq:
 	for (i = 0; i < irqs_requested; i++)
 		free_irq(priv->irq[i], NULL);
 
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	ret = request_irq(irqnr[2], tdm_if_isr, 0x0, "tdm", NULL);
 	if (ret) {
 		dev_err(priv->dev, "%s: Failed to connect irq(%d)\n", __func__, irqnr[2]);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 		return ret;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 }
 
 /* Disable TDM2C PCM */
 void tdm2c_pcm_disable(void)
 {
 	u32 max_poll = 0;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	}
 #endif
 #endif /* CONFIG_MV_PHONE_USE_FIQ_PROCESSING */
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	tdm2c_if_pcm_stop();
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	irq_init = 1;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	while (priv->pcm_is_stopping && (max_poll < MV_TDM_STOP_POLLING_TIMEOUT)) {
 		mdelay(1);
 		max_poll++;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	/* Create TDM procFS statistics */
 	tdm_stats = proc_mkdir("tdm", NULL);
 	if (tdm_stats != NULL) {
 		if (!proc_create("tdm_stats", S_IRUGO, tdm_stats, &proc_tdm_operations))
 			return -ENOMEM;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	}
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	if (max_poll >= MV_TDM_STOP_POLLING_TIMEOUT)
 		dev_warn(priv->dev, "\n%s: Channels disabling timeout (%dms)\n",
 			 __func__, MV_TDM_STOP_POLLING_TIMEOUT);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	/* WA to stop the MCDMA gracefully after commUnit initialization */
 #ifdef CONFIG_MV_TDMMC_SUPPORT
 	if (tdm_if_unit_type_get() == MV_TDM_UNIT_TDMMC)
@@ -791,31 +788,31 @@ void tdm2c_pcm_disable(void)
 #endif
 	return 0;
 }
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 }
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 /* Main TDM deinitialization routine */
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 void tdm_if_exit(void)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	int i;
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	/* Check if already stopped */
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	if (!priv->pcm_enable && !priv->tdm_init)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	if (!irq_init && !pcm_enable && !tdm_init)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 		return;
 
 	/* Stop PCM channels */
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	if (priv->pcm_enable) {
 		switch (priv->tdm_type) {
 		case MV_TDM_UNIT_TDM2C:
@@ -827,7 +824,7 @@ void tdm_if_exit(void)
 		default:
 			dev_err(&priv->parent->dev, "%s: undefined TDM type\n",
 				__func__);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	if (pcm_enable)
 		tdm_if_pcm_stop();
 
@@ -842,11 +839,11 @@ void tdm_if_exit(void)
 
 			if (max_poll >= 20)
 				dev_warn(priv->dev, "%s: waiting for pcm channels to stop exceeded 20ms\n", __func__);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 		}
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 #endif
 
 	if (irq_init) {
@@ -861,75 +858,75 @@ void tdm_if_exit(void)
 		free_fiq(irqnr[0], NULL);
 #endif /* !CONFIG_MV_PHONE_USE_FIQ_PROCESSING */
 		irq_init = 0;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	}
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	/* Disable TDM and release resources */
 	if (priv->tdm_init) {
 		switch (priv->tdm_type) {
 		case MV_TDM_UNIT_TDM2C:
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	if (tdm_init) {
 #ifdef CONFIG_MV_TDM2C_SUPPORT
 		if (tdm_if_unit_type_get() == MV_TDM_UNIT_TDM2C)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 			tdm2c_release();
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 			break;
 		case MV_TDM_UNIT_TDMMC:
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 #endif
 #ifdef CONFIG_MV_TDMMC_SUPPORT
 		if (tdm_if_unit_type_get() == MV_TDM_UNIT_TDMMC)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 			tdmmc_release();
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 			break;
 		default:
 			dev_err(&priv->parent->dev, "%s: undefined TDM type\n",
 				__func__);
 		}
 
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 #endif
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 		/* Remove proc directory & entries */
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 		remove_proc_entry("tdm_stats", priv->tdm_stats);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 		remove_proc_entry("tdm_stats", tdm_stats);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 		remove_proc_entry("tdm", NULL);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 		/* Release interrupt */
 		for (i = 0; i < priv->irq_count; i++)
 			free_irq(priv->irq[i], NULL);
 
 		priv->tdm_init = false;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 		tdm_init = 0;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	}
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 static int tdm_if_control(int cmd, void *arg)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 static void tdm_if_pcm_start(void)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	switch (cmd) {
 	case TDM_DEV_TDM_TEST_MODE_ENABLE:
 		priv->test_enable = true;
 		break;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	unsigned long flags;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	case TDM_DEV_TDM_TEST_MODE_DISABLE:
 		priv->test_enable = false;
 		break;
@@ -940,7 +937,7 @@ static void tdm_if_pcm_start(void)
 
 	return 0;
 }
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	spin_lock_irqsave(&tdm_if_lock, flags);
 	if (!pcm_enable) {
 		pcm_enable = 1;
@@ -991,31 +988,31 @@ static void tdm_if_pcm_start(void)
 #endif
 	}
 	spin_unlock_irqrestore(&tdm_if_lock, flags);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 static int tdm2c_if_write(u8 *buffer, int size)
 {
 	if (priv->test_enable)
 		return tdm2c_tx(buffer);
 
 	return 0;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 static int tdmmc_if_write(u8 *buffer, int size)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 static void tdm_if_pcm_stop(void)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	if (priv->test_enable)
 		return tdmmc_tx(buffer);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	unsigned long flags;
-#endif /* MY_DEF_HERE */
-#if defined(MY_DEF_HERE)
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	return 0;
 }
 
@@ -1029,15 +1026,15 @@ static void tdm_if_stats_get(struct tal_stats *tdm_if_stats)
 	tdm_if_stats->tx_miss = priv->tx_miss;
 	tdm_if_stats->rx_over = priv->rx_over;
 	tdm_if_stats->tx_under = priv->tx_under;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 
 	if (priv->use_tdm_ext_stats)
 		tdm2c_ext_stats_get(&tdm_if_stats->tdm_ext_stats);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 #ifdef CONFIG_MV_TDM_EXT_STATS
 	tdm2c_ext_stats_get(&tdm_if_stats->tdm_ext_stats);
-#endif /* MY_DEF_HERE */
-#else /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	spin_lock_irqsave(&tdm_if_lock, flags);
 	if (pcm_enable) {
 		pcm_enable = 0;
@@ -1056,21 +1053,21 @@ static void tdm_if_stats_get(struct tal_stats *tdm_if_stats)
 #ifdef CONFIG_MV_TDMMC_SUPPORT
 		if (tdm_if_unit_type_get() == MV_TDM_UNIT_TDMMC)
 			tdmmc_pcm_stop();
-#endif /* MY_DEF_HERE */
-#if defined(MY_DEF_HERE)
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 #endif
-#endif /* MY_DEF_HERE */
-#if defined(MY_DEF_HERE)
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	}
 	spin_unlock_irqrestore(&tdm_if_lock, flags);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 static struct tal_if tdm2c_if = {
 	.pcm_start	= tdm2c_if_pcm_start,
 	.pcm_stop	= tdm2c_if_pcm_stop,
@@ -1094,27 +1091,27 @@ static struct tal_if tdmmc_if = {
 /* Interrupt handling and tasklet callbacks */
 
 /* Common interrupt top-half handler */
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 static irqreturn_t tdm_if_isr(int irq, void *dev_id)
 {
 	struct mv_phone_intr_info tdm_int_info;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	struct tasklet_struct *tdm_rx_tasklet = NULL;
 	struct tasklet_struct *tdm_tx_tasklet = NULL;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	u32 int_type;
 	int ret = 0;
 
 	/* Extract interrupt information from low level ISR */
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	switch (priv->tdm_type) {
 	case MV_TDM_UNIT_TDM2C:
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 #ifdef CONFIG_MV_TDM2C_SUPPORT
 	if (tdm_if_unit_type_get() == MV_TDM_UNIT_TDM2C)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 		ret = tdm2c_intr_low(&tdm_int_info);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 		tdm_rx_tasklet = &tdm2c_if_rx_tasklet;
 		tdm_tx_tasklet = &tdm2c_if_tx_tasklet;
 		break;
@@ -1127,23 +1124,23 @@ static irqreturn_t tdm_if_isr(int irq, void *dev_id)
 		dev_err(&priv->parent->dev, "%s: undefined TDM type\n", __func__);
 		return IRQ_NONE;
 	}
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 #endif
 #ifdef CONFIG_MV_TDMMC_SUPPORT
 	if (tdm_if_unit_type_get() == MV_TDM_UNIT_TDMMC)
 		ret = tdmmc_intr_low(&tdm_int_info);
 #endif
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 
 	int_type = tdm_int_info.int_type;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 
 	/* Nothing to do - return */
 	if (int_type == MV_EMPTY_INT)
 		return IRQ_HANDLED;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	/*device_id = tdm_int_info.cs;*/
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 
 	/* Handle ZSI interrupts */
 	if (mv_phone_get_slic_board_type() == MV_BOARD_SLIC_ZSI_ID)
@@ -1152,10 +1149,10 @@ static irqreturn_t tdm_if_isr(int irq, void *dev_id)
 	else if (mv_phone_get_slic_board_type() == MV_BOARD_SLIC_ISI_ID)
 		silabs_if_isi_interrupt();
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	if (ret && !priv->pcm_stop_status)	{
 		priv->pcm_stop_status = true;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	/* Nothing to do - return */
 	if (int_type == MV_EMPTY_INT)
 		goto out;
@@ -1164,124 +1161,124 @@ static irqreturn_t tdm_if_isr(int irq, void *dev_id)
 	if (tdm_if_unit_type_get() == MV_TDM_UNIT_TDM2C) {
 		if ((ret == -1) && (pcm_stop_status == 0))	{
 			pcm_stop_status = 1;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 		/* If Rx/Tx tasklets are already scheduled, let them do the work */
 		if (!priv->rx_buff && !priv->tx_buff) {
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 			/* If Rx/Tx tasklets already scheduled, let them do the work. */
 			if ((!rx_buff) && (!tx_buff)) {
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 				dev_dbg(priv->dev, "Stopping the TDM\n");
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 			tdm2c_if_pcm_stop();
 			priv->pcm_stop_flag = false;
 			tasklet_hi_schedule(&tdm2c_if_reset_tasklet);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 				tdm_if_pcm_stop();
 				pcm_stop_flag = 0;
 				tasklet_hi_schedule(&tdm2c_if_stop_tasklet);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 			} else {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 			dev_dbg(priv->dev, "Tasklet already runningstop_flag\n");
 			priv->pcm_stop_flag = true;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 				dev_dbg(priv->dev, "Some tasklet is running, mark pcm_stop_flag\n");
 				pcm_stop_flag = 1;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 			}
 		}
 
 		/* Restarting PCM, skip Rx/Tx handling */
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	if (priv->pcm_stop_status)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 		if (pcm_stop_status)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 			goto skip_rx_tx;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	}
 #endif
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 
 	/* Support multiple interrupt handling */
 	/* RX interrupt */
 	if (int_type & MV_RX_INT) {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 		if (priv->rx_buff) {
 			priv->rx_miss++;
 			dev_dbg(priv->dev, "%s: Rx buffer not ready\n", __func__);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 		if (rx_buff != NULL) {
 			rx_miss++;
 			dev_dbg(priv->dev, "%s: Warning, missed Rx buffer processing !!!\n", __func__);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 		} else {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 			priv->rx_buff = tdm_int_info.tdm_rx_buff;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 			rx_buff = tdm_int_info.tdm_rx_buff;
 #if (defined CONFIG_MV_PHONE_USE_IRQ_PROCESSING) || (defined CONFIG_MV_PHONE_USE_FIQ_PROCESSING)
 			dev_dbg(priv->dev, "%s: running Rx in ISR\n", __func__);
 			tdm_if_pcm_rx_process();
 #else
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 			/* Schedule Rx processing within SOFT_IRQ context */
 			dev_dbg(priv->dev, "%s: schedule Rx tasklet\n", __func__);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 			tasklet_hi_schedule(tdm_rx_tasklet);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 			tasklet_hi_schedule(&tdm_if_rx_tasklet);
 #endif
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 		}
 	}
 
 	/* TX interrupt */
 	if (int_type & MV_TX_INT) {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 		if (priv->tx_buff) {
 			priv->tx_miss++;
 			dev_dbg(priv->dev, "%s: Tx buffer not ready\n", __func__);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 		if (tx_buff != NULL) {
 			tx_miss++;
 			dev_dbg(priv->dev, "%s: Warning, missed Tx buffer processing !!!\n", __func__);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 		} else {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 			priv->tx_buff = tdm_int_info.tdm_tx_buff;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 			tx_buff = tdm_int_info.tdm_tx_buff;
 #if (defined CONFIG_MV_PHONE_USE_IRQ_PROCESSING) || (defined CONFIG_MV_PHONE_USE_FIQ_PROCESSING)
 			dev_dbg(priv->dev, "%s: running Tx in ISR\n", __func__);
 			tdm_if_pcm_tx_process();
 #else
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 			/* Schedule Tx processing within SOFT_IRQ context */
 			dev_dbg(priv->dev, "%s: schedule Tx tasklet\n", __func__);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 			tasklet_hi_schedule(tdm_tx_tasklet);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 			tasklet_hi_schedule(&tdm_if_tx_tasklet);
 #endif
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 		}
 	}
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 // do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 #ifdef CONFIG_MV_TDM2C_SUPPORT
 	if (tdm_if_unit_type_get() == MV_TDM_UNIT_TDM2C) {
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 		/* TDM2CH PCM channels stop indication */
 		if ((int_type & MV_CHAN_STOP_INT) && (tdm_int_info.data == 4)) {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 		dev_dbg(priv->dev, "%s: Received MV_CHAN_STOP_INT indication\n",
 			__func__);
 		priv->pcm_is_stopping = false;
@@ -1290,7 +1287,7 @@ static irqreturn_t tdm_if_isr(int irq, void *dev_id)
 			priv->pcm_enable = false;
 			/* Issue SW reset */
 			tasklet_hi_schedule(&tdm2c_if_reset_tasklet);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 			dev_dbg(priv->dev, "%s: Received MV_CHAN_STOP_INT indication\n", __func__);
 			is_pcm_stopping = 0;
 			if (pcm_start_stop_state) {
@@ -1298,115 +1295,115 @@ static irqreturn_t tdm_if_isr(int irq, void *dev_id)
 				pcm_enable = 0;
 				tdm_if_pcm_start();
 			}
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 		}
 	}
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 #endif
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 skip_rx_tx:
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 #endif
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	/* PHONE interrupt, Lantiq specific */
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	if (int_type & MV_PHONE_INT)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	if (int_type & MV_PHONE_INT) {
 		/* TBD */
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 		drv_dxt_if_signal_interrupt();
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	}
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 
 	/* ERROR interrupt */
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	if (int_type & MV_ERROR_INT) {
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 		if (int_type & MV_RX_ERROR_INT)
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 		priv->rx_over++;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 			rx_over++;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 
 		if (int_type & MV_TX_ERROR_INT)
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 		priv->tx_under++;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 			tx_under++;
 	}
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 out:
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	return IRQ_HANDLED;
 }
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 
 /* Rx tasklets */
 static void tdm2c_if_pcm_rx_process(unsigned long arg)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 #if (defined CONFIG_MV_PHONE_USE_IRQ_PROCESSING) || (defined CONFIG_MV_PHONE_USE_FIQ_PROCESSING)
 static inline void tdm_if_pcm_rx_process(void)
 #else
 /* Rx tasklet */
 static void tdm_if_pcm_rx_process(unsigned long arg)
 #endif
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 {
 	unsigned long flags;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	u32 tdm_type;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	if (priv->pcm_enable) {
 		if (!priv->rx_buff) {
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	tdm_type = tdm_if_unit_type_get();
 	if (pcm_enable) {
 		if (rx_buff == NULL) {
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 			dev_warn(priv->dev, "%s: Error, empty Rx processing\n", __func__);
 			return;
 		}
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 		/* Fill TDM Rx aggregated buffer */
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 		if (tdm2c_rx(priv->rx_buff) == 0)
 			/* Dispatch Rx handler */
 			tal_mmp_rx(priv->rx_buff, priv->buff_size);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 		if (tdm_type == MV_TDM_UNIT_TDM2C) {
 			if (tdm2c_rx(rx_buff) == 0)
 				tal_mmp_rx(rx_buff, buff_size); /* Dispatch Rx handler */
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 			else
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 			dev_warn(priv->dev, "%s: Could not fill Rx buffer\n", __func__);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 				dev_warn(priv->dev, "%s: could not fill Rx buffer\n", __func__);
 		}
 #endif
@@ -1418,70 +1415,70 @@ static void tdm_if_pcm_rx_process(unsigned long arg)
 				dev_warn(priv->dev, "%s: could not fill Rx buffer\n", __func__);
 		}
 #endif
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	}
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	spin_lock_irqsave(&priv->lock, flags);
 	/* Clear Rx buff for next iteration */
 	priv->rx_buff = NULL;
 	spin_unlock_irqrestore(&priv->lock, flags);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	spin_lock_irqsave(&tdm_if_lock, flags);
 	/* Clear rx_buff for next iteration */
 	rx_buff = NULL;
 	spin_unlock_irqrestore(&tdm_if_lock, flags);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	if (priv->pcm_stop_flag && !priv->tx_buff) {
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 #ifdef CONFIG_MV_TDM2C_SUPPORT
 	if (tdm_type == MV_TDM_UNIT_TDM2C) {
 		if ((pcm_stop_flag == 1) && !tx_buff) {
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 			dev_dbg(priv->dev, "Stopping TDM from Rx tasklet\n");
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 		tdm2c_if_pcm_stop();
 		spin_lock_irqsave(&priv->lock, flags);
 		priv->pcm_stop_flag = false;
 		spin_unlock_irqrestore(&priv->lock, flags);
 		tasklet_hi_schedule(&tdm2c_if_reset_tasklet);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 			tdm_if_pcm_stop();
 			spin_lock_irqsave(&tdm_if_lock, flags);
 			pcm_stop_flag = 0;
 			spin_unlock_irqrestore(&tdm_if_lock, flags);
 			tasklet_hi_schedule(&tdm2c_if_stop_tasklet);
 		}
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	}
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 #endif
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 static void tdmmc_if_pcm_rx_process(unsigned long arg)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 #if (defined CONFIG_MV_PHONE_USE_IRQ_PROCESSING) || (defined CONFIG_MV_PHONE_USE_FIQ_PROCESSING)
 static inline void tdm_if_pcm_tx_process(void)
 #else
 /* Tx tasklet */
 static void tdm_if_pcm_tx_process(unsigned long arg)
 #endif
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 {
 	unsigned long flags;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	u32 tdm_type;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	if (priv->pcm_enable) {
 		if (!priv->rx_buff) {
 			dev_warn(priv->dev, "%s: Error, empty Rx processing\n", __func__);
@@ -1505,37 +1502,37 @@ static void tdm_if_pcm_tx_process(unsigned long arg)
 static void tdm2c_if_pcm_tx_process(unsigned long arg)
 {
 	unsigned long flags;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	tdm_type = tdm_if_unit_type_get();
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	if (priv->pcm_enable) {
 		if (!priv->tx_buff) {
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	if (pcm_enable) {
 		if (tx_buff == NULL) {
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 			dev_warn(priv->dev, "%s: Error, empty Tx processing\n", __func__);
 			return;
 		}
 
 		/* Dispatch Tx handler */
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 		tal_mmp_tx(priv->tx_buff, priv->buff_size);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 		tal_mmp_tx(tx_buff, buff_size);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 		if (!priv->test_enable) {
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 		if (test_enable == 0) {
 			/* Fill Tx aggregated buffer */
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 			if (tdm2c_tx(priv->tx_buff) != 0)
 				dev_warn(priv->dev, "%s: Could not fill Tx buffer\n", __func__);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 			if (tdm_type == MV_TDM_UNIT_TDM2C) {
 				if (tdm2c_tx(tx_buff) != 0)
 					dev_warn(priv->dev, "%s: could not fill Tx buffer\n", __func__);
@@ -1547,73 +1544,73 @@ static void tdm2c_if_pcm_tx_process(unsigned long arg)
 					dev_warn(priv->dev, "%s: could not fill Tx buffer\n", __func__);
 			}
 #endif
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 		}
 	}
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	spin_lock_irqsave(&priv->lock, flags);
 	/* Clear Tx buff for next iteration */
 	priv->tx_buff = NULL;
 	spin_unlock_irqrestore(&priv->lock, flags);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	spin_lock_irqsave(&tdm_if_lock, flags);
 	/* Clear tx_buff for next iteration */
 	tx_buff = NULL;
 	spin_unlock_irqrestore(&tdm_if_lock, flags);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	if (priv->pcm_stop_flag && !priv->rx_buff) {
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 #ifdef CONFIG_MV_TDM2C_SUPPORT
 	if (tdm_type == MV_TDM_UNIT_TDM2C) {
 		if ((pcm_stop_flag == 1) && !rx_buff) {
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 			dev_dbg(priv->dev, "Stopping TDM from Tx tasklet\n");
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 		tdm2c_if_pcm_stop();
 		spin_lock_irqsave(&priv->lock, flags);
 		priv->pcm_stop_flag = false;
 		spin_unlock_irqrestore(&priv->lock, flags);
 		tasklet_hi_schedule(&tdm2c_if_reset_tasklet);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 			tdm_if_pcm_stop();
 			spin_lock_irqsave(&tdm_if_lock, flags);
 			pcm_stop_flag = 0;
 			spin_unlock_irqrestore(&tdm_if_lock, flags);
 			tasklet_hi_schedule(&tdm2c_if_stop_tasklet);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 		}
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	}
 #endif
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 static void tdmmc_if_pcm_tx_process(unsigned long arg)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 static void tdm_if_stats_get(struct tal_stats *tdm_if_stats)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	unsigned long flags;
 
 	if (priv->pcm_enable) {
 		if (!priv->tx_buff) {
 			dev_warn(priv->dev, "%s: Error, empty Tx processing\n", __func__);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	if (tdm_init == 0)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 		return;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 		}
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 		/* Dispatch Tx handler */
 		tal_mmp_tx(priv->tx_buff, priv->buff_size);
 
@@ -1627,7 +1624,7 @@ static void tdm_if_stats_get(struct tal_stats *tdm_if_stats)
 	/* Clear Tx buff for next iteration */
 	priv->tx_buff = NULL;
 	spin_unlock_irqrestore(&priv->lock, flags);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	tdm_if_stats->tdm_init = tdm_init;
 	tdm_if_stats->rx_miss = rx_miss;
 	tdm_if_stats->tx_miss = tx_miss;
@@ -1636,85 +1633,85 @@ static void tdm_if_stats_get(struct tal_stats *tdm_if_stats)
 #ifdef CONFIG_MV_TDM_EXT_STATS
 	tdm2c_ext_stats_get(&tdm_if_stats->tdm_ext_stats);
 #endif
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 /* TDM2C restart channel callback */
 static void tdm2c_if_reset_channels(unsigned long arg)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 #ifdef CONFIG_MV_TDM2C_SUPPORT
 static void tdm2c_if_stop_channels(unsigned long arg)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 {
 	u32 max_poll = 0;
 	unsigned long flags;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	void __iomem *tdm_base = get_tdm_base();
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 
 	/* Wait for all channels to stop  */
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	while (((readl(priv->tdm_base + CH_ENABLE_REG(0)) & CH_RXTX_EN_MASK) ||
 		(readl(priv->tdm_base + CH_ENABLE_REG(1)) & CH_RXTX_EN_MASK)) &&
 		(max_poll < MV_TDM_STOP_POLLING_TIMEOUT)) {
 
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	while (((readl(tdm_base + CH_ENABLE_REG(0)) & 0x101) ||
 		(readl(tdm_base + CH_ENABLE_REG(1)) & 0x101)) && (max_poll < 30)) {
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 		mdelay(1);
 		max_poll++;
 	}
 
 	dev_dbg(priv->dev, "Finished polling on channels disable\n");
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	if (max_poll >= MV_TDM_STOP_POLLING_TIMEOUT) {
 		writel(0, priv->tdm_base + CH_ENABLE_REG(0));
 		writel(0, priv->tdm_base + CH_ENABLE_REG(1));
 		dev_warn(priv->dev, "\n%s: Channels disabling timeout (%dms)\n",
 			 __func__, MV_TDM_STOP_POLLING_TIMEOUT);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	if (max_poll >= 30) {
 		writel(0, tdm_base + CH_ENABLE_REG(0));
 		writel(0, tdm_base + CH_ENABLE_REG(1));
 		dev_warn(priv->dev, "\n\npolling on channels disabling exceeded 30ms\n\n");
-#endif /* MY_DEF_HERE */
-#if defined(MY_DEF_HERE)
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 //do nothing
-#else /* MY_DEF_HERE */
-#if defined(MY_DEF_HERE)
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 		priv->pcm_stop_fail++;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 		pcm_stop_fail++;
-#endif /* MY_DEF_HERE */
-#if defined(MY_DEF_HERE)
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 #endif
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 		mdelay(10);
 	}
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	spin_lock_irqsave(&priv->lock, flags);
 	priv->pcm_is_stopping = false;
 	spin_unlock_irqrestore(&priv->lock, flags);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	spin_lock_irqsave(&tdm_if_lock, flags);
 	is_pcm_stopping = 0;
 	spin_unlock_irqrestore(&tdm_if_lock, flags);
 	tdm_if_pcm_start();
 }
 #endif
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	/* Restart channels */
 	tdm2c_if_pcm_start();
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 static int tdm_if_control(int cmd, void *arg)
 {
 	switch (cmd) {
@@ -1780,7 +1777,7 @@ static void tdm_if_module_exit(void)
 	if (tdm_unit == MV_TDM_UNIT_TDM2C ||
 	    tdm_unit == MV_TDM_UNIT_TDMMC)
 		tal_set_if(NULL);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 }
 
 /* Enable device interrupts. */
@@ -1936,9 +1933,9 @@ static int mv_phone_dco_post_div_config(struct platform_device *pdev,
 	return 0;
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 /* Initialize decoding windows */
 static int mv_tdm2c_mbus_windows(struct device *dev, void __iomem *regs,
 				 const struct mbus_dram_target_info *dram)
@@ -1985,16 +1982,16 @@ static int mv_tdmmc_a8k_windows(struct device *dev, void __iomem *regs)
 	return 0;
 }
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 static int mvebu_phone_probe(struct platform_device *pdev)
 {
 	struct device_node *np = pdev->dev.of_node;
 	struct resource *mem;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	int err, i;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	int err;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 
 	priv = devm_kzalloc(&pdev->dev, sizeof(struct mv_phone_dev),
 			    GFP_KERNEL);
@@ -2007,9 +2004,9 @@ static int mvebu_phone_probe(struct platform_device *pdev)
 	priv->tdm_base = devm_ioremap_resource(&pdev->dev, mem);
 	if (IS_ERR(priv->tdm_base))
 		return PTR_ERR(priv->tdm_base);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	tdm_base = (long int)priv->tdm_base;
 
 	/* Get the first IRQ */
@@ -2018,7 +2015,7 @@ static int mvebu_phone_probe(struct platform_device *pdev)
 		dev_err(&pdev->dev, "platform_get_irq failed\n");
 		return -ENXIO;
 	}
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 
 	priv->clk = devm_clk_get(&pdev->dev, "gateclk");
 	if (PTR_ERR(priv->clk) == -EPROBE_DEFER)
@@ -2033,9 +2030,9 @@ static int mvebu_phone_probe(struct platform_device *pdev)
 	if (err)
 		return err;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	if (of_property_read_bool(np, "use-external-pclk")) {
 		dev_info(&pdev->dev, "using external pclk\n");
 		use_pclk_external = 1;
@@ -2044,7 +2041,7 @@ static int mvebu_phone_probe(struct platform_device *pdev)
 		use_pclk_external = 0;
 	}
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	if (of_property_read_u32(np, "pclk-freq-mhz", &priv->pclk_freq_mhz) ||
 	    (priv->pclk_freq_mhz != 8 && priv->pclk_freq_mhz != 4 &&
 	     priv->pclk_freq_mhz != 2)) {
@@ -2058,20 +2055,20 @@ static int mvebu_phone_probe(struct platform_device *pdev)
 		priv->tdm_type = MV_TDM_UNIT_TDM2C;
 		err = mv_phone_tdm_clk_pll_config(pdev);
 		err |= mv_phone_dco_post_div_config(pdev, priv->pclk_freq_mhz);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 		err |= tdm2c_set_mbus_windows(&pdev->dev, priv->tdm_base,
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 		err |= mv_tdm2c_mbus_windows(&pdev->dev, priv->tdm_base,
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 					     mv_mbus_dram_info());
 		if (err < 0)
 			goto err_clk;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 
 		priv->irq_count = 1;
 
 		tal_set_if(&tdm2c_if);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	}
 
 	if (of_device_is_compatible(priv->np, "marvell,armada-xp-tdm")) {
@@ -2079,37 +2076,37 @@ static int mvebu_phone_probe(struct platform_device *pdev)
 		err = tdmmc_set_mbus_windows(&pdev->dev, priv->tdm_base);
 		if (err < 0)
 			goto err_clk;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 
 		priv->irq_count = 1;
 		priv->tdmmc_ip_ver = TDMMC_REV1;
 
 		tal_set_if(&tdmmc_if);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	}
 
 	if (of_device_is_compatible(priv->np, "marvell,armada-a8k-tdm")) {
 		priv->tdm_type = MV_TDM_UNIT_TDMMC;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 		tdmmc_set_a8k_windows(&pdev->dev, priv->tdm_base);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 		mv_tdmmc_a8k_windows(&pdev->dev, priv->tdm_base);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 		priv->irq_count = 3;
 		priv->tdmmc_ip_ver = TDMMC_REV1;
 
 		tal_set_if(&tdmmc_if);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 		/* Get the second and third IRQ - in A8k there are 3 IRQs */
 		priv->irq[1] = platform_get_irq(pdev, 1);
 		if (priv->irq[1] <= 0) {
 			dev_err(&pdev->dev, "platform_get_irq failed\n");
 			return -ENXIO;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 		}
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 
 	/* Obtain IRQ numbers */
 	for (i = 0; i < priv->irq_count; i++) {
@@ -2118,16 +2115,16 @@ static int mvebu_phone_probe(struct platform_device *pdev)
 			dev_err(&pdev->dev, "platform_get_irq %d failed\n", i);
 			err = priv->irq[i];
 			goto err_clk;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 		priv->irq[2] = platform_get_irq(pdev, 2);
 		if (priv->irq[2] <= 0) {
 			dev_err(&pdev->dev, "platform_get_irq failed\n");
 			return -ENXIO;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 		}
 	}
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	if (priv->tdm_type == MV_TDM_UNIT_TDM2C) {
 		priv->use_pclk_external = of_property_read_bool(np, "use-external-pclk");
 		dev_info(&pdev->dev, "using %s pclk\n",
@@ -2139,22 +2136,22 @@ static int mvebu_phone_probe(struct platform_device *pdev)
 
 		dev_info(&pdev->dev, "using %s SPI mode\n",
 			 priv->tdm2c_spi_mode ? "daisy-chain" : "direct");
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 
 #ifdef CONFIG_MV_TDM_EXT_STATS
 		priv->use_tdm_ext_stats = true;
 #endif
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	}
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	mv_phone_enabled = 1;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	spin_lock_init(&priv->lock);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	tdm_if_module_init();
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 
 	priv->dev = &pdev->dev;
 	return 0;
@@ -2167,11 +2164,11 @@ err_clk:
 
 static int mvebu_phone_remove(struct platform_device *pdev)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	tal_set_if(NULL);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	tdm_if_module_exit();
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 
 	clk_disable_unprepare(priv->clk);
 
@@ -2202,11 +2199,11 @@ static int mvebu_phone_resume(struct device *dev)
 	struct platform_device *pdev = priv->parent;
 	int err, i;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	err = tdm2c_set_mbus_windows(dev, priv->tdm_base,
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	err = mv_tdm2c_mbus_windows(dev, priv->tdm_base,
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 				    mv_mbus_dram_info());
 	if (err < 0)
 		return err;
@@ -2267,4 +2264,4 @@ module_platform_driver(mvebu_phone_driver);
 
 MODULE_DESCRIPTION("Marvell Telephony Driver");
 MODULE_AUTHOR("Marcin Wojtas <mw@semihalf.com>");
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */

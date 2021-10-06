@@ -7,7 +7,7 @@
 #include <linux/synobios.h>
 #include <linux/syno_gpio.h>
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_PORT_MAPPING_V2
 #include <linux/synolib.h>
 #include <linux/of.h>
 #endif  
@@ -87,7 +87,7 @@ int SYNO_GPIO_READ(int pin)
 	syno_gpio_value_get(pin, &iVal);
 	return iVal;
 #else
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA37XX)
 	 
 	pin = pin < 36 ? (512 - 36 + pin) : (512 - 36 - 30) + pin - 36;
 #endif  
@@ -103,7 +103,7 @@ void SYNO_GPIO_WRITE(int pin, int pValue)
 #elif defined(MY_DEF_HERE)
 	syno_gpio_direction_output(pin, pValue);
 #else
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA37XX)
 	 
 	pin = pin < 36 ? (512 - 36 + pin) : (512 - 36 - 30) + pin - 36;
 #endif  
@@ -149,7 +149,7 @@ void DBG_SpinupGroupListGpio(void)
 EXPORT_SYMBOL(DBG_SpinupGroupListGpio);
 #endif  
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_PORT_MAPPING_V2
  
 u32 syno_disk_gpio_pin_get(const int diskPort, const char *szPropertyName, const int propertyIndex)
 {

@@ -96,7 +96,7 @@ enum ion_heap_type {
 #define ION_USAGE_ALGO_LAST_FIT         (1 << 19) /* 0:first fit(default), 1:last fit */
 #define ION_USAGE_MASK                  (ION_USAGE_PROTECTED | ION_USAGE_MMAP_NONCACHED | ION_USAGE_MMAP_CACHED | ION_USAGE_MMAP_WRITECOMBINE | ION_USAGE_ALGO_LAST_FIT)
 #endif /* defined(CONFIG_ION_RTK_PHOENIX) && defined(MY_DEF_HERE) */
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 #if defined(CONFIG_ION_RTK)
 #define ION_FLAG_NONCACHED		(1 << 31)
 #define ION_FLAG_SCPUACC		(1 << 30)
@@ -115,7 +115,7 @@ enum ion_heap_type {
 #define ION_USAGE_ALGO_LAST_FIT		(1 << 19) /* 0:first fit(default), 1:last fit */
 #define ION_USAGE_MASK		(ION_USAGE_PROTECTED | ION_USAGE_MMAP_NONCACHED | ION_USAGE_MMAP_CACHED | ION_USAGE_MMAP_WRITECOMBINE | ION_USAGE_ALGO_LAST_FIT)
 #endif /* CONFIG_ION_RTK */
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */
 
 /**
  * DOC: Ion Userspace API
@@ -181,7 +181,7 @@ struct ion_custom_data {
 };
 
 #if defined(CONFIG_ION_RTK_PHOENIX) && defined(MY_DEF_HERE) || \
-	defined(CONFIG_ION_RTK) && defined(MY_DEF_HERE)
+	defined(CONFIG_ION_RTK) && defined(CONFIG_SYNO_LSP_RTD1619)
 /* 20130208 charleslin: support getting physical address */
 struct ion_phys_data {
 	ion_user_handle_t handle;
@@ -189,7 +189,7 @@ struct ion_phys_data {
 	unsigned int len;
 };
 #endif /* CONFIG_ION_RTK_PHOENIX && MY_DEF_HERE ||
-		  CONFIG_ION_RTK && MY_DEF_HERE */
+		  CONFIG_ION_RTK && CONFIG_SYNO_LSP_RTD1619 */
 
 #define ION_IOC_MAGIC		'I'
 
@@ -262,11 +262,11 @@ struct ion_phys_data {
 #define ION_IOC_PHYS _IOWR(ION_IOC_MAGIC, 8, struct ion_phys_data)
 #endif
 #endif /* defined(CONFIG_ION_RTK_PHOENIX) && defined(MY_DEF_HERE) */
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 #if defined(CONFIG_ION_RTK)
 /* 20130208 charleslin: support getting physical address */
 #define ION_IOC_PHYS _IOWR(ION_IOC_MAGIC, 9, struct ion_phys_data)
 #endif /* CONFIG_ION_RTK */
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */
 
 #endif /* _UAPI_LINUX_ION_H */

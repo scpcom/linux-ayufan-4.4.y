@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * Copyright (C) 2003-2015 Broadcom Corporation
  * All Rights Reserved
@@ -376,11 +373,11 @@ static int xlp_gpio_probe(struct platform_device *pdev)
 	gc->owner = THIS_MODULE;
 	gc->label = dev_name(&pdev->dev);
 	gc->base = 0;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	gc->parent = &pdev->dev;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	gc->dev = &pdev->dev;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	gc->ngpio = ngpio;
 	gc->of_node = pdev->dev.of_node;
 	gc->direction_output = xlp_gpio_dir_output;

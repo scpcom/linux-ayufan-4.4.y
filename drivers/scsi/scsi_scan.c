@@ -170,7 +170,7 @@ static struct scsi_device *scsi_alloc_sdev(struct scsi_target *starget,
 	struct Scsi_Host *shost = dev_to_shost(starget->dev.parent);
 	extern void scsi_evt_thread(struct work_struct *work);
 	extern void scsi_requeue_run_queue(struct work_struct *work);
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_SPINUP_DELAY
 	extern void SynoSubmitSpinupReq(struct work_struct *work);
 #endif  
 
@@ -198,7 +198,7 @@ static struct scsi_device *scsi_alloc_sdev(struct scsi_target *starget,
 	spin_lock_init(&sdev->list_lock);
 	INIT_WORK(&sdev->event_work, scsi_evt_thread);
 	INIT_WORK(&sdev->requeue_work, scsi_requeue_run_queue);
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_SPINUP_DELAY
 	INIT_WORK(&sdev->spinup_work, SynoSubmitSpinupReq);
 	INIT_LIST_HEAD(&sdev->spinup_list);
 	sdev->spinup_in_process = 0;

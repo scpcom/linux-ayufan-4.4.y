@@ -913,7 +913,7 @@ struct ata_port {
 #ifdef MY_ABC_HERE
 	struct delayed_work	syno_pmp_task;
 #endif  
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 
 #ifdef CONFIG_AHCI_RTK
 	unsigned int hotplug_flag;
@@ -953,7 +953,7 @@ struct ata_port {
 	u8				PMSynoCpldVer;
 	SYNO_PMP_SWITCH_MODE	PMSynoSwitchMode;
 #endif  
-#if defined(MY_ABC_HERE) || defined(MY_DEF_HERE)
+#if defined(MY_ABC_HERE) || defined(CONFIG_SYNO_PORT_MAPPING_V2)
 	int			syno_disk_index;
 #endif  
 #ifdef MY_DEF_HERE
@@ -962,7 +962,7 @@ struct ata_port {
 #ifdef MY_ABC_HERE
 	unsigned int error_handling;
 #endif  
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_PORT_MAPPING_V2
 	struct klist_node ata_port_list;
 #endif  
 #ifdef MY_DEF_HERE
@@ -970,7 +970,7 @@ struct ata_port {
 #endif  
 };
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_PORT_MAPPING_V2
 struct ata_port *syno_ata_port_get_by_port(const unsigned short diskPort);
 #endif  
 
@@ -1059,7 +1059,7 @@ struct ata_port_operations {
 	void (*phy_reset)(struct ata_port *ap);
 	void (*eng_timeout)(struct ata_port *ap);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_PORT_MAPPING_V2
 	    bool (*syno_compare_node_info)(const struct ata_port *ap, const struct device_node *np);
 #endif  
 
@@ -1442,7 +1442,7 @@ extern u8 syno_pm_is_synology_3xxx(const struct ata_port *ap);
 extern u8 syno_pm_is_synology_9705(const struct ata_port *ap);
 #endif  
 
-#if defined(MY_ABC_HERE) || defined(MY_DEF_HERE)
+#if defined(MY_ABC_HERE) || defined(CONFIG_SYNO_PORT_MAPPING_V2)
 extern int syno_libata_index_get(struct Scsi_Host *host, uint channel, uint id, uint lun);
 extern int syno_external_libata_index_get(const struct ata_port *ap);
 #endif  
@@ -1479,7 +1479,7 @@ extern int syno_external_libata_index_get(const struct ata_port *ap);
 extern const struct ata_port_operations ata_base_port_ops;
 extern const struct ata_port_operations sata_port_ops;
 extern struct device_attribute *ata_common_sdev_attrs[];
-#if defined(MY_ABC_HERE) || defined(MY_DEF_HERE)
+#if defined(MY_ABC_HERE) || defined(CONFIG_SYNO_PORT_MAPPING_V2)
 extern unsigned int gSynoSataHostCnt;
 #endif  
 #ifdef MY_ABC_HERE
@@ -1498,7 +1498,7 @@ extern char gszSataPortMap[8];
 extern char giDiskSeqReverse[];
 #endif  
 
-#if defined(MY_ABC_HERE) || defined(MY_DEF_HERE)
+#if defined(MY_ABC_HERE) || defined(CONFIG_SYNO_PORT_MAPPING_V2)
 #define	SYNO_FIXED_DISK_NAME_MACRO		\
 	.syno_index_get = syno_libata_index_get,		\
 	.syno_port_type = SYNO_PORT_TYPE_SATA,

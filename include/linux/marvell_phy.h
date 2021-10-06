@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 #ifndef _MARVELL_PHY_H
 #define _MARVELL_PHY_H
 
@@ -18,11 +15,11 @@
 #define MARVELL_PHY_ID_88E1116R		0x01410e40
 #define MARVELL_PHY_ID_88E1510		0x01410dd0
 #define MARVELL_PHY_ID_88E1540		0x01410eb0
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_10)
 #define MARVELL_PHY_ID_88E2110		0x002b09b8
 #endif  
 #define MARVELL_PHY_ID_88E3016		0x01410e60
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 #define MARVELL_PHY_ID_88E3310		0x01410da0
 #endif  
 

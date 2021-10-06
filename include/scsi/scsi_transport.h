@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #ifndef SCSI_TRANSPORT_H
 #define SCSI_TRANSPORT_H

@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 #ifndef _LINUX_MMZONE_H
 #define _LINUX_MMZONE_H
 
@@ -43,11 +40,11 @@ enum {
 	MIGRATE_MOVABLE,
 	MIGRATE_RECLAIMABLE,
 	MIGRATE_PCPTYPES,	/* the number of types on the pcp lists */
-#if defined(MY_DEF_HERE) && !defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12) && !defined(CONFIG_SYNO_LSP_ARMADA_16_12_MM_REVERT)
 	MIGRATE_RESERVE = MIGRATE_PCPTYPES,
-#else /* MY_DEF_HERE && !CONFIG_SYNO_LSP_ARMADA_16_12_MM_REVERT */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 && !CONFIG_SYNO_LSP_ARMADA_16_12_MM_REVERT */
 	MIGRATE_HIGHATOMIC = MIGRATE_PCPTYPES,
-#endif /* MY_DEF_HERE && !CONFIG_SYNO_LSP_ARMADA_16_12_MM_REVERT */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 && !CONFIG_SYNO_LSP_ARMADA_16_12_MM_REVERT */
 #ifdef CONFIG_CMA
 	/*
 	 * MIGRATE_CMA migration type is designed to mimic the way
@@ -342,11 +339,11 @@ struct zone {
 	/* zone watermarks, access with *_wmark_pages(zone) macros */
 	unsigned long watermark[NR_WMARK];
 
-#if defined(MY_DEF_HERE) && !defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12) && !defined(CONFIG_SYNO_LSP_ARMADA_16_12_MM_REVERT)
 //do nothing
-#else /* MY_DEF_HERE && !CONFIG_SYNO_LSP_ARMADA_16_12_MM_REVERT */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 && !CONFIG_SYNO_LSP_ARMADA_16_12_MM_REVERT */
 	unsigned long nr_reserved_highatomic;
-#endif /* MY_DEF_HERE && !CONFIG_SYNO_LSP_ARMADA_16_12_MM_REVERT */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 && !CONFIG_SYNO_LSP_ARMADA_16_12_MM_REVERT */
 
 	/*
 	 * We don't know if the memory that we're going to allocate will be
@@ -444,13 +441,13 @@ struct zone {
 
 	const char		*name;
 
-#if defined(MY_DEF_HERE) && !defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12) && !defined(CONFIG_SYNO_LSP_ARMADA_16_12_MM_REVERT)
 	/*
 	 * Number of MIGRATE_RESERVE page block. To maintain for just
 	 * optimization. Protected by zone->lock.
 	 */
 	int			nr_migrate_reserve_block;
-#endif /* MY_DEF_HERE && !CONFIG_SYNO_LSP_ARMADA_16_12_MM_REVERT */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 && !CONFIG_SYNO_LSP_ARMADA_16_12_MM_REVERT */
 
 #ifdef CONFIG_MEMORY_ISOLATION
 	/*

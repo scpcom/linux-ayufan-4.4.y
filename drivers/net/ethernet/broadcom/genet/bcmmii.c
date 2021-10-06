@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * Broadcom GENET MDIO routines
  *
@@ -387,13 +384,13 @@ int bcmgenet_mii_probe(struct net_device *dev)
 	 * Ethernet MAC ISRs
 	 */
 	if (priv->internal_phy)
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 		priv->mii_bus->irq[phydev->mdio.addr] = PHY_IGNORE_INTERRUPT;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		priv->mii_bus->irq[phydev->addr] = PHY_IGNORE_INTERRUPT;
 	else
 		priv->mii_bus->irq[phydev->addr] = PHY_POLL;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	return 0;
 }
@@ -467,16 +464,16 @@ static int bcmgenet_mii_alloc(struct bcmgenet_priv *priv)
 	snprintf(bus->id, MII_BUS_ID_SIZE, "%s-%d",
 		 priv->pdev->name, priv->pdev->id);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	bus->irq = kcalloc(PHY_MAX_ADDR, sizeof(int), GFP_KERNEL);
 	if (!bus->irq) {
 		mdiobus_free(priv->mii_bus);
 		return -ENOMEM;
 	}
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	return 0;
 }
 
@@ -575,11 +572,11 @@ static int bcmgenet_mii_pd_init(struct bcmgenet_priv *priv)
 		}
 
 		if (pd->phy_address >= 0 && pd->phy_address < PHY_MAX_ADDR)
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 			phydev = mdiobus_get_phy(mdio, pd->phy_address);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 			phydev = mdio->phy_map[pd->phy_address];
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		else
 			phydev = phy_find_first(mdio);
 
@@ -646,11 +643,11 @@ int bcmgenet_mii_init(struct net_device *dev)
 out:
 	of_node_put(priv->phy_dn);
 	mdiobus_unregister(priv->mii_bus);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	kfree(priv->mii_bus->irq);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	mdiobus_free(priv->mii_bus);
 	return ret;
 }
@@ -661,10 +658,10 @@ void bcmgenet_mii_exit(struct net_device *dev)
 
 	of_node_put(priv->phy_dn);
 	mdiobus_unregister(priv->mii_bus);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	kfree(priv->mii_bus->irq);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	mdiobus_free(priv->mii_bus);
 }

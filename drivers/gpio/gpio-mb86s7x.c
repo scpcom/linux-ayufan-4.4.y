@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  *  linux/drivers/gpio/gpio-mb86s7x.c
  *
@@ -190,11 +187,11 @@ static int mb86s70_gpio_probe(struct platform_device *pdev)
 	gchip->gc.label = dev_name(&pdev->dev);
 	gchip->gc.ngpio = 32;
 	gchip->gc.owner = THIS_MODULE;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	gchip->gc.parent = &pdev->dev;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	gchip->gc.dev = &pdev->dev;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	gchip->gc.base = -1;
 
 	platform_set_drvdata(pdev, gchip);

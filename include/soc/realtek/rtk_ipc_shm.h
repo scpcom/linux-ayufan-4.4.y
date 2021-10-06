@@ -40,7 +40,7 @@ struct RTK119X_ipc_shm {
 
 #endif /* MY_DEF_HERE */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 /*
  * rtk_ipc_shm.h
  *
@@ -140,4 +140,4 @@ struct avcpu_syslog_struct{
 #endif /* defined(CONFIG_RTK_XEN_SUPPORT) && defined(CONFIG_RTK_RPC) */
 
 #endif /* End of  __ASM_ARCH_RTK_IPC_SHM_H */
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */

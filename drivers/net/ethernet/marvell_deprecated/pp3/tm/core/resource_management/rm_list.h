@@ -1,7 +1,4 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -133,4 +130,4 @@ int rm_list_del_index(rmctl_t hndl, struct rm_list *list,
 int rm_list_delete(rmctl_t hndl, struct rm_list *list);
 
 #endif   /* RM_LIST_H */
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */

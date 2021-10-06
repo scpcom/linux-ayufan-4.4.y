@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /* drivers/net/ethernet/freescale/gianfar.c
  *
  * Gianfar Ethernet Driver
@@ -1839,11 +1836,11 @@ static void gfar_configure_serdes(struct net_device *dev)
 	 * several seconds for it to come back.
 	 */
 	if (phy_read(tbiphy, MII_BMSR) & BMSR_LSTATUS) {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 		put_device(&tbiphy->mdio.dev);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		put_device(&tbiphy->dev);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		return;
 	}
 
@@ -1858,11 +1855,11 @@ static void gfar_configure_serdes(struct net_device *dev)
 		  BMCR_ANENABLE | BMCR_ANRESTART | BMCR_FULLDPLX |
 		  BMCR_SPEED1000);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	put_device(&tbiphy->mdio.dev);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	put_device(&tbiphy->dev);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 }
 
 static int __gfar_is_rx_idle(struct gfar_private *priv)

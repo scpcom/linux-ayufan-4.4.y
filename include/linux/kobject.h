@@ -60,12 +60,12 @@ enum kobject_action {
 	KOBJ_MOVE,
 	KOBJ_ONLINE,
 	KOBJ_OFFLINE,
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(MY_DEF_HERE) || defined(CONFIG_SYNO_LSP_RTD1619)
 #if defined(CONFIG_R8168) || defined(CONFIG_R8169SOC)
 	KOBJ_LINKUP,
 	KOBJ_LINKDOWN,
 #endif /* CONFIG_R8168 || CONFIG_R8169SOC */
-#endif /* MY_DEF_HERE || MY_DEF_HERE */
+#endif /* MY_DEF_HERE || CONFIG_SYNO_LSP_RTD1619 */
 	KOBJ_MAX
 };
 

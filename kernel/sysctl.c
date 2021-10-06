@@ -85,7 +85,7 @@
 
 #if defined(CONFIG_SYSCTL)
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_FIX_TTYS_FUNCTIONS
 char gszSynoTtyS0[50] = {0};
 EXPORT_SYMBOL(gszSynoTtyS0);
 char gszSynoTtyS1[50] = {0};
@@ -119,7 +119,7 @@ char gszSataPortMap[8] = {0};
 EXPORT_SYMBOL(gszSataPortMap);
 #endif  
 
-#if defined(MY_ABC_HERE) || defined(MY_DEF_HERE)
+#if defined(MY_ABC_HERE) || defined(CONFIG_SYNO_PORT_MAPPING_V2)
 unsigned int gSynoSataHostCnt = 0;
 EXPORT_SYMBOL(gSynoSataHostCnt);
 #endif  
@@ -176,7 +176,7 @@ EXPORT_SYMBOL(gszSynoHWVersion);
 #endif  
 
 #ifdef MY_ABC_HERE
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_PORT_MAPPING_V2
 int gSynoHddPowerupSeq = 0, gSynoInternalHddNumber = 0;
 EXPORT_SYMBOL(gSynoHddPowerupSeq);
 EXPORT_SYMBOL(gSynoInternalHddNumber);
@@ -198,7 +198,7 @@ long g_sata_mv_led = 0;
 EXPORT_SYMBOL(g_sata_mv_led);
 #endif  
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ATA_AHCI_LED_SWITCH
 int giSynoHddLedEnabled = 1;
 EXPORT_SYMBOL(giSynoHddLedEnabled);
 #endif   
@@ -218,7 +218,7 @@ EUNIT_PWRON_TYPE (*funcSynoEunitPowerctlType)(void) = NULL;
 EXPORT_SYMBOL(funcSynoEunitPowerctlType);
 #endif  
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_MV1475_SGPIO_LED_CTRL
 int (*funcSYNOCtrlDiskLedBy1475)(unsigned short, unsigned short) = NULL;
 EXPORT_SYMBOL(funcSYNOCtrlDiskLedBy1475);
 #endif  
@@ -269,7 +269,7 @@ char gszSkipVenderMacInterfaces[256] = {'\0'};
 EXPORT_SYMBOL(gszSkipVenderMacInterfaces);
 #endif  
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS
 long g_is_sas_model = 0;
 EXPORT_SYMBOL(g_is_sas_model);
 #endif  
@@ -289,7 +289,7 @@ EXPORT_SYMBOL(gSynoCPUInfoClock);
 int gSynoBootSATADOM = 0;
 EXPORT_SYMBOL(gSynoBootSATADOM);
 #endif  
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_DUAL_HEAD
 int gSynoDualHead = 0;
 EXPORT_SYMBOL(gSynoDualHead);
 unsigned char gszSynoDualHeadPrivateIP[9][32];
@@ -298,7 +298,7 @@ static int iSynoMacIFCount = 9;
 static int iSynoDualheadIPValueLen = 32;
 #endif  
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_RESERVATION_WRITE_CONFLICT_KERNEL_PANIC
 int gSynoSASWriteConflictPanic = 0;
 EXPORT_SYMBOL(gSynoSASWriteConflictPanic);
 #endif  
@@ -331,13 +331,13 @@ EXPORT_SYMBOL(gSynoUsbVbusGpp);
 EXPORT_SYMBOL(gSynoUsbVbusGppPol);
 #endif  
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_ENCOLURE_PWR_CTL
 int giSynoEncPwrCtl = 0;
 extern int SynoProcEncPwrCtl(struct ctl_table *table, int write,
 		        void __user *buffer, size_t *lenp, loff_t *ppos);
 #endif  
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_HBA_IDX
 char gSynoSASHBAAddr[CONFIG_SYNO_SAS_MAX_HBA_SLOT][13] = {{0}};
 EXPORT_SYMBOL(gSynoSASHBAAddr);
 #endif  
@@ -349,12 +349,12 @@ int (*syno_get_current)(unsigned char, struct tty_struct *);
 EXPORT_SYMBOL(syno_get_current);
 #endif  
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_HOST_DISK_LED_CTRL
 int (*syno_valid_lsi3008_led)(u8 cmd);
 EXPORT_SYMBOL(syno_valid_lsi3008_led);
 #endif  
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_FIXED_DISK_NAME_MV14XX
 int (*syno_disk_map_table_gen_mv14xx)(int *iDiskMapTable, int iPortMax);
 EXPORT_SYMBOL(syno_disk_map_table_gen_mv14xx);
 #endif  
@@ -371,7 +371,7 @@ EXPORT_SYMBOL(giSynoDiskEhFlag);
 unsigned long guSynoScsiCmdSN = 0;
 EXPORT_SYMBOL(guSynoScsiCmdSN);
 #endif  
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ONBOARD_M2_SATA_AS_NVC
 char gSynoM2HostName[M2_HOST_LEN_MAX] = {0};
 EXPORT_SYMBOL(gSynoM2HostName);
 unsigned long gSynoM2PortNo = 0;
@@ -1581,7 +1581,7 @@ static struct ctl_table kern_table[] = {
 		.proc_handler   = proc_dostring,
 	},
 #endif  
-#if defined(MY_ABC_HERE) && !defined(MY_DEF_HERE)
+#if defined(MY_ABC_HERE) && !defined(CONFIG_SYNO_PORT_MAPPING_V2)
 	{
 		.procname	= "syno_internal_hd_num",
 		.data		= &g_syno_hdd_powerup_seq,
@@ -1709,7 +1709,7 @@ static struct ctl_table kern_table[] = {
 		.proc_handler	= proc_dointvec,
 	},
 #endif  
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_DUAL_HEAD
 	{
 		.procname       = "syno_dual_head_private_ip",
 		.data           = &gszSynoDualHeadPrivateIP,
@@ -1720,7 +1720,7 @@ static struct ctl_table kern_table[] = {
 		.extra2         = &iSynoDualheadIPValueLen,
 	},
 #endif  
-#if defined(MY_DEF_HERE) || (defined(MY_DEF_HERE) && defined(MY_DEF_HERE))
+#if defined(CONFIG_SYNO_SAS_DISK_NAME) || (defined(CONFIG_SYNO_PORT_MAPPING_V2) && defined(CONFIG_SYNO_SAS))
 	{
 		.procname		= "syno_is_sas_model",
 		.data			= &g_is_sas_model,
@@ -1737,7 +1737,7 @@ static struct ctl_table kern_table[] = {
             .mode           = 0644,
             .proc_handler   = proc_dointvec,
         },
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_GRANTLEY) || defined(CONFIG_SYNO_PURLEY)
         {
             .procname       = "syno_CPU_info_multicore_1",
             .data           = &gSynoMultiCPUInfoCore[0],
@@ -1780,7 +1780,7 @@ static struct ctl_table kern_table[] = {
 		.proc_handler	= &proc_dointvec,
 	},
 #endif  
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_ENCOLURE_PWR_CTL
 	{
 		.procname       = "syno_enc_pwr_ctl",
 		.data           = &giSynoEncPwrCtl,
@@ -3283,7 +3283,7 @@ int proc_do_large_bitmap(struct ctl_table *table, int write,
 	}
 }
 
-#if defined(MY_ABC_HERE) || defined(MY_DEF_HERE)
+#if defined(MY_ABC_HERE) || defined(CONFIG_SYNO_DUAL_HEAD)
  
 int SynoProcDoStringVec(struct ctl_table *table, int write,
 		void __user *buffer, size_t *lenp, loff_t *ppos)
@@ -3297,7 +3297,7 @@ int SynoProcDoStringVec(struct ctl_table *table, int write,
 	char stBuf[512] = {'\0'};
 	char *pBuf = stBuf;
 	int iArrayIndex = 0;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_DUAL_HEAD
 	int iOffset = 0;
 	char *p = NULL;
 	char c = -1;
@@ -3310,7 +3310,7 @@ int SynoProcDoStringVec(struct ctl_table *table, int write,
 
 	if (write) {
 		 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_DUAL_HEAD
 		for (iArrayIndex = 0; iArrayIndex < *pArraySize; iArrayIndex++) {
 			if (0 == c) {
 				pStr = ((char *)table->data) + iArrayIndex * (*pEntrySize);
@@ -3536,7 +3536,7 @@ int proc_doulongvec_ms_jiffies_minmax(struct ctl_table *table, int write,
     return -ENOSYS;
 }
 
-#if defined(MY_ABC_HERE) || defined(MY_DEF_HERE)
+#if defined(MY_ABC_HERE) || defined(CONFIG_SYNO_DUAL_HEAD)
 int SynoProcDoStringVec(struct ctl_table *table, int write,
 			void __user *buffer, size_t *lenp, loff_t *ppos)
 {

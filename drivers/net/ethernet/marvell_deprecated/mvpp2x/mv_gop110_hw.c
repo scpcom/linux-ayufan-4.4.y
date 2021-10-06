@@ -1,7 +1,4 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 /*
 * ***************************************************************************
 * Copyright (C) 2016 Marvell International Ltd.
@@ -26,19 +23,19 @@
 #include <linux/platform_device.h>
 #include <linux/inetdevice.h>
 #include <uapi/linux/ppp_defs.h>
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 #include <dt-bindings/phy/phy-comphy-mvebu.h>
 #include <linux/phy/phy.h>
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 
 #include <net/ip.h>
 #include <net/ipv6.h>
 
 #include "mv_pp2x.h"
 #include "mv_gop110_hw.h"
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 #include "mv_pp2x_hw.h"
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 
 void mv_gop110_register_bases_dump(struct gop_hw *gop)
 {
@@ -505,16 +502,16 @@ int mv_gop110_gmac_link_status(struct gop_hw *gop, int mac_num,
 			pstatus->autoneg_fc = MV_PORT_FC_AN_ASYM;
 		else
 			pstatus->autoneg_fc = MV_PORT_FC_AN_SYM;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	} else {
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 		}
 	else
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 		pstatus->autoneg_fc = MV_PORT_FC_AN_NO;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	}
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 
 	return 0;
 }
@@ -1078,11 +1075,11 @@ int mv_gop110_port_reset(struct gop_hw *gop, struct mv_mac_data *mac)
 }
 
 /*-------------------------------------------------------------------*/
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 void mv_gop110_port_enable(struct gop_hw *gop, struct mv_mac_data *mac, struct phy *comphy)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 void mv_gop110_port_enable(struct gop_hw *gop, struct mv_mac_data *mac)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 {
 	int port_num = mac->gop_index;
 
@@ -1099,9 +1096,9 @@ void mv_gop110_port_enable(struct gop_hw *gop, struct mv_mac_data *mac)
 	case PHY_INTERFACE_MODE_KR:
 	case PHY_INTERFACE_MODE_SFI:
 	case PHY_INTERFACE_MODE_XFI:
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 		phy_send_command(comphy, COMPHY_COMMAND_DIGITAL_PWR_ON);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 		mv_gop110_mpcs_clock_reset(gop,  UNRESET);
 		mv_gop110_xlg_mac_reset(gop, port_num, UNRESET);
 		mv_gop110_xlg_mac_port_enable(gop, port_num);
@@ -1112,11 +1109,11 @@ void mv_gop110_port_enable(struct gop_hw *gop, struct mv_mac_data *mac)
 	}
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 void mv_gop110_port_disable(struct gop_hw *gop, struct mv_mac_data *mac, struct phy *comphy)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 void mv_gop110_port_disable(struct gop_hw *gop, struct mv_mac_data *mac)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 {
 	int port_num = mac->gop_index;
 
@@ -1136,9 +1133,9 @@ void mv_gop110_port_disable(struct gop_hw *gop, struct mv_mac_data *mac)
 		mv_gop110_xlg_mac_port_disable(gop, port_num);
 		mv_gop110_xlg_mac_reset(gop, port_num, RESET);
 		mv_gop110_mpcs_clock_reset(gop,  RESET);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 		phy_send_command(comphy, COMPHY_COMMAND_DIGITAL_PWR_OFF);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	break;
 	default:
 		pr_err("%s: Wrong port mode (%d)", __func__, mac->phy_mode);
@@ -1185,11 +1182,11 @@ bool mv_gop110_port_is_link_up(struct gop_hw *gop, struct mv_mac_data *mac)
 	case PHY_INTERFACE_MODE_KR:
 	case PHY_INTERFACE_MODE_SFI:
 	case PHY_INTERFACE_MODE_XFI:
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 		udelay(1000);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 		return mv_gop110_xlg_mac_link_status_get(gop, port_num);
 	break;
 	default:
@@ -2538,7 +2535,7 @@ void mv_gop110_mib_counters_stat_update(struct gop_hw *gop, int port, struct gop
 	gop_statistics->rx_mcast += val;
 	gop_statistics->rx_frames += val;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 	gop_statistics->frames_64 += mv_gop110_mib_read64(gop, port, MV_MIB_FRAMES_64_OCTETS);
 
 	gop_statistics->frames_65_to_127 += mv_gop110_mib_read64(gop, port,
@@ -2556,7 +2553,7 @@ void mv_gop110_mib_counters_stat_update(struct gop_hw *gop, int port, struct gop
 	gop_statistics->frames_1024_to_max += mv_gop110_mib_read64(gop, port,
 								   MV_MIB_FRAMES_1024_TO_MAX_OCTETS);
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 	gop_statistics->tx_byte += mv_gop110_mib_read64(gop, port,
 							MV_MIB_GOOD_OCTETS_SENT_LOW);
 
@@ -2582,54 +2579,54 @@ void mv_gop110_mib_counters_stat_update(struct gop_hw *gop, int port, struct gop
 							MV_MIB_FC_SENT);
 
 	val = mv_gop110_mib_read64(gop, port, MV_MIB_RX_FIFO_OVERRUN);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 	gop_statistics->rx_mac_overrun += val;
 	gop_statistics->rx_sw_drop += val;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 	gop_statistics->rx_overrun += val;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 	gop_statistics->rx_total_err += val;
 
 	val = mv_gop110_mib_read64(gop, port, MV_MIB_UNDERSIZE_RECEIVED);
 	gop_statistics->rx_runt += val;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 	gop_statistics->rx_sw_drop += val;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 	gop_statistics->rx_total_err += val;
 
 	val = mv_gop110_mib_read64(gop, port, MV_MIB_FRAGMENTS_RECEIVED);
 	gop_statistics->rx_fragments_err += val;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 	gop_statistics->rx_sw_drop += val;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 	gop_statistics->rx_total_err += val;
 
 	val = mv_gop110_mib_read64(gop, port, MV_MIB_OVERSIZE_RECEIVED);
 	gop_statistics->rx_giant += val;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 	gop_statistics->rx_sw_drop += val;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 	gop_statistics->rx_total_err += val;
 
 	val = mv_gop110_mib_read64(gop, port, MV_MIB_JABBER_RECEIVED);
 	gop_statistics->rx_jabber += val;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 	gop_statistics->rx_sw_drop += val;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 	gop_statistics->rx_total_err += val;
 
 	val = mv_gop110_mib_read64(gop, port, MV_MIB_MAC_RECEIVE_ERROR);
 	gop_statistics->rx_jabber += val;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 	gop_statistics->rx_sw_drop += val;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 	gop_statistics->rx_total_err += val;
 
 	val = mv_gop110_mib_read64(gop, port, MV_MIB_BAD_CRC_EVENT);
 	gop_statistics->rx_crc += val;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 	gop_statistics->rx_sw_drop += val;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 	gop_statistics->rx_total_err += val;
 
 	gop_statistics->collision += mv_gop110_mib_read64(gop, port,
@@ -2640,21 +2637,21 @@ void mv_gop110_mib_counters_stat_update(struct gop_hw *gop, int port, struct gop
 							MV_MIB_LATE_COLLISION);
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 void mv_gop110_mib_counters_clear(struct gop_hw *gop, int port)
 {
 	mv_gop110_mib_read64(gop, port, MV_MIB_GOOD_OCTETS_RECEIVED_LOW);
 	mv_gop110_mib_read64(gop, port, MV_MIB_UNICAST_FRAMES_RECEIVED);
 	mv_gop110_mib_read64(gop, port, MV_MIB_BROADCAST_FRAMES_RECEIVED);
 	mv_gop110_mib_read64(gop, port, MV_MIB_MULTICAST_FRAMES_RECEIVED);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 	mv_gop110_mib_read64(gop, port, MV_MIB_FRAMES_64_OCTETS);
 	mv_gop110_mib_read64(gop, port, MV_MIB_FRAMES_65_TO_127_OCTETS);
 	mv_gop110_mib_read64(gop, port, MV_MIB_FRAMES_128_TO_255_OCTETS);
 	mv_gop110_mib_read64(gop, port, MV_MIB_FRAMES_256_TO_511_OCTETS);
 	mv_gop110_mib_read64(gop, port, MV_MIB_FRAMES_512_TO_1023_OCTETS);
 	mv_gop110_mib_read64(gop, port, MV_MIB_FRAMES_1024_TO_MAX_OCTETS);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 	mv_gop110_mib_read64(gop, port, MV_MIB_GOOD_OCTETS_SENT_LOW);
 	mv_gop110_mib_read64(gop, port, MV_MIB_UNICAST_FRAMES_SENT);
 	mv_gop110_mib_read64(gop, port, MV_MIB_MULTICAST_FRAMES_SENT);
@@ -2674,7 +2671,7 @@ void mv_gop110_mib_counters_clear(struct gop_hw *gop, int port)
 	/* This counter must be read last. Read it clear all read counters */
 	mv_gop110_mib_read64(gop, port, MV_MIB_LATE_COLLISION);
 }
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 
 void mv_gop110_netc_active_port(struct gop_hw *gop, u32 port, u32 val)
 {
@@ -2947,17 +2944,17 @@ int mv_gop110_netc_init(struct gop_hw *gop,
 		mv_gop110_netc_mac_to_sgmii(gop, 2, phase);
 	else
 		mv_gop110_netc_mac_to_xgmii(gop, 2, phase);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	if (c & MV_NETC_GE_MAC3_SGMII) {
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	if (c & MV_NETC_GE_MAC3_SGMII)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 		mv_gop110_netc_mac_to_sgmii(gop, 3, phase);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	} else {
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	else {
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 		mv_gop110_netc_mac_to_xgmii(gop, 3, phase);
 		if (c & MV_NETC_GE_MAC3_RGMII)
 			mv_gop110_netc_mii_mode(gop, 3, MV_NETC_GBE_RGMII);
@@ -3289,7 +3286,7 @@ void mv_gop110_xlg_registers_dump(struct mv_pp2x_port *port, u32 *regs_buff)
 						    MV_XLG_MAC_DIC_PPM_IPG_REDUCE_REG);
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 static void mv_gop110_set_new_phy_mode(u32 speed, struct mv_mac_data *mac)
 {
 	mac->flags &= ~(MV_EMAC_F_SGMII2_5 | MV_EMAC_F_5G);
@@ -3394,5 +3391,5 @@ out:
 
 	return err;
 }
-#endif /* MY_DEF_HERE */
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */

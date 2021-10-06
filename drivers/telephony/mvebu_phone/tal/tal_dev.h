@@ -1,7 +1,4 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 /*******************************************************************************
  * Copyright (C) 2016 Marvell International Ltd.
  *
@@ -117,4 +114,4 @@ struct tal_dev_params {
 #define	TDM_DEV_TDM_TEST_MODE_DISABLE	_IO(TAL_DEV_IOCTL_MAGIC, 9)
 
 #endif /*_TAL_DEV_H_*/
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */

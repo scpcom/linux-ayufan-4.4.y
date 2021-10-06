@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * Driver for the i2c controller on the Marvell line of host bridges
  * (e.g, gt642[46]0, mv643[46]0, mv644[46]0, and Orion SoC family).
@@ -441,10 +438,10 @@ mv64xxx_i2c_read_offload_rx_data(struct mv64xxx_i2c_data *drv_data,
 
 	buf[0] = readl(drv_data->reg_base + MV64XXX_I2C_REG_RX_DATA_LO);
 	buf[1] = readl(drv_data->reg_base + MV64XXX_I2C_REG_RX_DATA_HI);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	buf[0] = le32_to_cpu(buf[0]);
 	buf[1] = le32_to_cpu(buf[1]);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	memcpy(msg->buf, buf, msg->len);
 }
@@ -599,17 +596,17 @@ static void
 mv64xxx_i2c_prepare_tx(struct mv64xxx_i2c_data *drv_data)
 {
 	struct i2c_msg *msg = drv_data->msgs;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	u32 buf[2] = {0};
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	u32 buf[2];
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	memcpy(buf, msg->buf, msg->len);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	buf[0] = cpu_to_le32(buf[0]);
 	buf[1] = cpu_to_le32(buf[1]);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	writel(buf[0], drv_data->reg_base + MV64XXX_I2C_REG_TX_DATA_LO);
 	writel(buf[1], drv_data->reg_base + MV64XXX_I2C_REG_TX_DATA_HI);
@@ -822,11 +819,11 @@ mv64xxx_of_config(struct mv64xxx_i2c_data *drv_data,
 #else
 	const struct of_device_id *device;
 	struct device_node *np = dev->of_node;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	u32 bus_freq, tclk, timeout;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	u32 bus_freq, tclk;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	int rc = 0;
 
 	if (IS_ERR(drv_data->clk)) {
@@ -858,17 +855,17 @@ mv64xxx_of_config(struct mv64xxx_i2c_data *drv_data,
 		reset_control_deassert(drv_data->rstc);
 	}
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	if (of_property_read_u32(np, "timeout-ms", &timeout))
 		timeout = 1000; /* 1000ms by default */
 	drv_data->adapter.timeout = msecs_to_jiffies(timeout);
 
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	/* Its not yet defined how timeouts will be specified in device tree.
 	 * So hard code the value to 1 second.
 	 */
 	drv_data->adapter.timeout = HZ;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	device = of_match_device(mv64xxx_i2c_of_match_table, dev);
 	if (!device)
@@ -936,10 +933,10 @@ mv64xxx_i2c_probe(struct platform_device *pd)
 #if defined(CONFIG_HAVE_CLK)
 	/* Not all platforms have a clk */
 	drv_data->clk = devm_clk_get(&pd->dev, NULL);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	if (IS_ERR(drv_data->clk) && PTR_ERR(drv_data->clk) == -EPROBE_DEFER)
 		return -EPROBE_DEFER;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	if (!IS_ERR(drv_data->clk)) {
 		clk_prepare(drv_data->clk);
 		clk_enable(drv_data->clk);
@@ -1024,7 +1021,7 @@ mv64xxx_i2c_remove(struct platform_device *dev)
 	return 0;
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 static int mv64xxx_i2c_resume(struct platform_device *dev)
 {
 	struct mv64xxx_i2c_data *drv_data = platform_get_drvdata(dev);
@@ -1033,16 +1030,16 @@ static int mv64xxx_i2c_resume(struct platform_device *dev)
 
 	return 0;
 }
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 static struct platform_driver mv64xxx_i2c_driver = {
 	.probe	= mv64xxx_i2c_probe,
 	.remove	= mv64xxx_i2c_remove,
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 #ifdef CONFIG_PM
 	.resume = mv64xxx_i2c_resume,
 #endif
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	.driver	= {
 		.name	= MV64XXX_I2C_CTLR_NAME,
 		.of_match_table = mv64xxx_i2c_of_match_table,

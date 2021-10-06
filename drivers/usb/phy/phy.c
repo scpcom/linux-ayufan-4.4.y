@@ -18,16 +18,16 @@
 #include <linux/module.h>
 #include <linux/slab.h>
 #include <linux/of.h>
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(MY_DEF_HERE) || defined(CONFIG_SYNO_LSP_RTD1619)
 #include <linux/of_device.h>
-#endif /* MY_DEF_HERE || MY_DEF_HERE */
-#if defined(MY_DEF_HERE)
+#endif /* MY_DEF_HERE || CONFIG_SYNO_LSP_RTD1619 */
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 #include <linux/debugfs.h>
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */
 
 #include <linux/usb/phy.h>
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 #ifdef CONFIG_USB_PATCH_ON_RTK
 #include <linux/of_platform.h>
 #endif
@@ -46,7 +46,7 @@ struct dentry *create_phy_debug_root(void) {
 }
 #endif
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */
 static LIST_HEAD(phy_list);
 static LIST_HEAD(phy_bind_list);
 static DEFINE_SPINLOCK(phy_lock);
@@ -236,7 +236,7 @@ struct  usb_phy *devm_usb_get_phy_by_node(struct device *dev,
 	spin_lock_irqsave(&phy_lock, flags);
 
 	phy = __of_usb_find_phy(node);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 
 #ifdef CONFIG_USB_PATCH_ON_RTK
 	// Add to support different phy driver on multi-host controller
@@ -256,7 +256,7 @@ struct  usb_phy *devm_usb_get_phy_by_node(struct device *dev,
 	}
 #endif
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */
 	if (IS_ERR(phy)) {
 		devres_free(ptr);
 		goto err1;

@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * Copyright (C) 2011 Marvell International Ltd. All rights reserved.
  *
@@ -198,10 +195,10 @@ struct mv_udc {
 	struct mv_req			*status_req;
 	struct usb_ctrlrequest		local_setup_buff;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	struct phy			*utmi_phy;
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	unsigned int		resume_state;	/* USB state to resume */
 	unsigned int		usb_state;	/* USB current state */
 	unsigned int		ep0_state;	/* Endpoint zero state */
@@ -220,9 +217,9 @@ struct mv_udc {
 				active:1,
 				stopped:1;      /* stop bit is setted */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	int vbus_pin;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct work_struct	vbus_work;
 	struct workqueue_struct *qwork;
 

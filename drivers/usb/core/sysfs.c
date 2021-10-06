@@ -756,7 +756,7 @@ static ssize_t remove_store(struct device *dev, struct device_attribute *attr,
 }
 static DEVICE_ATTR_IGNORE_LOCKDEP(remove, S_IWUSR, NULL, remove_store);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 #ifdef CONFIG_USB_RTK_HCD_TEST_MODE
 #include <linux/slab.h>
 #include <linux/usb/ch11.h>
@@ -971,7 +971,7 @@ static struct attribute *dev_attrs[] = {
 #if defined (MY_DEF_HERE)
 	&dev_attr_syno_vbus_reset.attr,
 #endif  
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 #ifdef CONFIG_USB_RTK_HCD_TEST_MODE
 	&dev_attr_runTestMode.attr,
 #endif  

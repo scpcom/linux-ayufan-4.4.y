@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * ID and revision information for mvebu SoCs
  *
@@ -37,10 +34,10 @@
 #define SOC_ID_MASK	    0xFFFF0000
 #define SOC_REV_MASK	    0xFF
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 #define MSYS_DEV_ID_MASK	0xFF00
 #define MSYS_REV_MASK		0xF
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 static u32 soc_dev_id;
 static u32 soc_rev;
@@ -53,12 +50,12 @@ static const struct of_device_id mvebu_pcie_of_match_table[] = {
 	{},
 };
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 static const struct of_device_id mvebu_msys_of_match_table[] = {
 	{ .compatible = "marvell,msys-soc-id", },
 	{},
 };
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 int mvebu_get_soc_id(u32 *dev, u32 *rev)
 {
@@ -146,7 +143,7 @@ clk_err:
 	return ret;
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 static int __init get_soc_id_by_dfx(void)
 {
 	struct device_node *np;
@@ -177,7 +174,7 @@ static int __init get_soc_id_by_dfx(void)
 
 	return ret;
 }
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 static int __init mvebu_soc_id_init(void)
 {
@@ -196,14 +193,14 @@ static int __init mvebu_soc_id_init(void)
 		return 0;
 	}
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	if (!get_soc_id_by_pci())
 		return 0;
 
 	return get_soc_id_by_dfx();
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	return get_soc_id_by_pci();
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 }
 early_initcall(mvebu_soc_id_init);
 

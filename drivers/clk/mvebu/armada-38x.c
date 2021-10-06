@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * Marvell Armada 380/385 SoC clocks
  *
@@ -49,18 +46,18 @@ static u32 __init armada_38x_get_tclk_freq(void __iomem *sar)
 }
 
 static const u32 armada_38x_cpu_frequencies[] __initconst = {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	666 * 1000 * 1000, 0, 800 * 1000 * 1000, 0,
 	1066 * 1000 * 1000, 0, 1200 * 1000 * 1000, 0,
 	1332 * 1000 * 1000, 0, 0, 0,
 	1600 * 1000 * 1000, 0, 0, 0,
 	1866 * 1000 * 1000, 0, 0, 2000 * 1000 * 1000,
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	0, 0, 0, 0,
 	1066 * 1000 * 1000, 0, 0, 0,
 	1332 * 1000 * 1000, 0, 0, 0,
 	1600 * 1000 * 1000,
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 };
 
 static u32 __init armada_38x_get_cpu_freq(void __iomem *sar)

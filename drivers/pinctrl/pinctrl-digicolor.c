@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  *  Driver for Conexant Digicolor General Purpose Pin Mapping
  *
@@ -247,11 +244,11 @@ static int dc_gpiochip_add(struct dc_pinmap *pmap, struct device_node *np)
 	int ret;
 
 	chip->label		= DRIVER_NAME;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	chip->parent		= pmap->dev;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	chip->dev		= pmap->dev;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	chip->request		= gpiochip_generic_request;
 	chip->free		= gpiochip_generic_free;
 	chip->direction_input	= dc_gpio_direction_input;

@@ -1,7 +1,4 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -24,4 +21,4 @@ void a390_addr_completion_fixed_init(u32 dedicated_region_no, u32 reg_base);
 u32 a390_addr_completion_cfg(u32 reg_addr);
 
 #endif /* __a390_mg_if_h__ */
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */

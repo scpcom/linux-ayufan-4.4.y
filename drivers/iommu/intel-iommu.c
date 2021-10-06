@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #define pr_fmt(fmt)     "DMAR: " fmt
 
@@ -2849,7 +2846,7 @@ static int __init init_dmars(void)
 	if (iommu_pass_through)
 		iommu_identity_mapping |= IDENTMAP_ALL;
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_IOMMU_PASSTHROUGH
 	printk(KERN_INFO "IOMMU passthrough mode = %d\n", iommu_pass_through);
 #endif  
 #ifdef CONFIG_INTEL_IOMMU_BROKEN_GFX_WA

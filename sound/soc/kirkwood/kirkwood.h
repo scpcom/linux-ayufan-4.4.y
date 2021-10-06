@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * kirkwood.h
  *
@@ -135,10 +132,10 @@
 
 struct kirkwood_dma_data {
 	void __iomem *io;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	void __iomem *pll_config;
 	void __iomem *soc_control;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct clk *clk;
 	struct clk *extclk;
 	uint32_t ctl_play;

@@ -1,4 +1,4 @@
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 /*
  * Realtek SD/MMC/mini SD card driver
  *
@@ -9,7 +9,7 @@
  * it under the terms of the GNU General Public License version 2 as
  * published by the Free Software Foundation.
  */
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */
 #ifdef CONFIG_SUSPEND
 
 #include <linux/suspend.h>
@@ -22,7 +22,7 @@ EXPORT_SYMBOL(get_RTK_PM_STATE);
 
 #endif //CONFIG_SUSPEND
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 int initial_flag2=0;
 
 int get_RTK_initial_flag(void) {
@@ -36,4 +36,4 @@ void set_RTK_initial_flag(int flag) {
 }
 
 EXPORT_SYMBOL(set_RTK_initial_flag);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */

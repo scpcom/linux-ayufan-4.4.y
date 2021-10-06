@@ -85,7 +85,7 @@ typedef enum AUDIO_IO_PIN AUDIO_IO_PIN;
 #endif
 #endif /* MY_DEF_HERE */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 /**
  * snd-realtek_common.h - Realtek alsa driver
  *
@@ -211,4 +211,4 @@ enum AUDIO_IO_PIN {
 typedef enum AUDIO_IO_PIN AUDIO_IO_PIN;
 
 #endif
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */

@@ -1,7 +1,4 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 /*
  * Copyright (C) 2016 Marvell
  *
@@ -197,11 +194,11 @@
 
 /* EIP197_HIA_xDR_DMA_CFG */
 #define EIP197_HIA_xDR_WR_RES_BUF			BIT(22)
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 #define EIP197_HIA_xDR_WR_CTRL_BUF			BIT(23)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 #define EIP197_HIA_xDR_WR_CTRL_BUG			BIT(23)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 #define EIP197_HIA_xDR_WR_OWN_BUF			BIT(24)
 #define EIP197_HIA_xDR_CFG_WR_CACHE(n)			(((n) & 0x7) << 25)
 #define EIP197_HIA_xDR_CFG_RD_CACHE(n)			(((n) & 0x7) << 29)
@@ -213,22 +210,22 @@
 #define EIP197_HIA_CDR_THRESH_TIMEOUT(n)		((n) << 24) /* x256 clk cycles */
 
 /* EIP197_HIA_RDR_THRESH */
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 #define EIP197_HIA_RDR_THRESH_PROC_PKT(n)		(GENMASK(15, 0) & (n))
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 #define EIP197_HIA_RDR_THRESH_PROC_PKT(n)		((n) << 0)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 #define EIP197_HIA_RDR_THRESH_PKT_MODE			BIT(23)
 #define EIP197_HIA_RDR_THRESH_TIMEOUT(n)		((n) << 24) /* x256 clk cycles */
 
 /* EIP197_HIA_xDR_PREP_COUNT */
 #define EIP197_xDR_PREP_CLR_COUNT			BIT(31)
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 #define EIP197_xDR_PREP_xD_COUNT_INCR_OFFSET		2
 #define EIP197_xDR_PREP_RD_COUNT_INCR_MASK		(GENMASK(14, 0))
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 #define EIP197_xDR_PREP_RD_COUNT_INCR_OFFSET		2
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 
 /* EIP197_HIA_xDR_PROC_COUNT */
 #define EIP197_xDR_PROC_xD_PKT_OFFSET			24
@@ -264,7 +261,7 @@
 #define EIP197_CLASSIFICATION_RAMS			0xe0000
 #define EIP197_HIA_GC					0xf0000
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 #define EIP97_HIA_AIC_ADDR				0x00000
 #define EIP97_HIA_AIC_G_ADDR				0x00000
 #define EIP97_HIA_AIC_R_ADDR				0x00000
@@ -276,7 +273,7 @@
 #define EIP97_HIA_PE_ADDR				0x10000
 #define EIP97_HIA_GC					0x10000
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 #define EIP197_HIA_AIC_R_OFF(r)			((r) * 0x1000)
 #define EIP197_HIA_AIC_R_ENABLE_CTRL(r)		(0xe008 - EIP197_HIA_AIC_R_OFF(r))
 #define EIP197_HIA_AIC_R_ENABLED_STAT(r)	(0xe010 - EIP197_HIA_AIC_R_OFF(r))
@@ -539,9 +536,9 @@ enum eip197_fw {
 
 enum safexcel_eip_type {
 	EIP197,
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 	EIP97,
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 };
 
 struct safexcel_ring {
@@ -627,16 +624,16 @@ struct safexcel_crypto_priv {
 	struct {
 		spinlock_t lock;
 		spinlock_t egress_lock;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 		int egress_cnt;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 
 		struct list_head list;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 		int busy;
 		struct crypto_async_request *req;
 		struct crypto_async_request *backlog;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 		struct workqueue_struct *workqueue;
 		struct safexcel_work_data work_data;
 
@@ -719,13 +716,13 @@ int safexcel_invalidate_cache(struct crypto_async_request *async,
 int safexcel_init_ring_descriptors(struct safexcel_crypto_priv *priv,
 				   struct safexcel_ring *cdr,
 				   struct safexcel_ring *rdr);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 void safexcel_free_ring_descriptors(struct safexcel_crypto_priv *priv,
 				    struct safexcel_ring *cdr,
 				    struct safexcel_ring *rdr);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 int safexcel_select_ring(struct safexcel_crypto_priv *priv);
 void *safexcel_ring_next_rptr(struct safexcel_crypto_priv *priv,
 			      struct safexcel_ring *ring);
@@ -734,25 +731,25 @@ void safexcel_ring_rollback_wptr(struct safexcel_crypto_priv *priv,
 struct safexcel_command_desc *safexcel_add_cdesc(struct safexcel_crypto_priv *priv,
 						 int ring_id,
 						 bool first, bool last,
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 						 dma_addr_t data, u32 len,
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 						 phys_addr_t data, u32 len,
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 						 u32 full_data_len,
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 						 dma_addr_t context);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 						 phys_addr_t context);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 struct safexcel_result_desc *safexcel_add_rdesc(struct safexcel_crypto_priv *priv,
 						 int ring_id,
 						bool first, bool last,
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 						dma_addr_t data, u32 len);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 						phys_addr_t data, u32 len);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 void safexcel_inv_complete(struct crypto_async_request *req, int error);
 
 /* available algorithms */
@@ -764,4 +761,4 @@ extern struct safexcel_alg_template safexcel_alg_sha256;
 extern struct safexcel_alg_template safexcel_alg_hmac_sha1;
 
 #endif
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */

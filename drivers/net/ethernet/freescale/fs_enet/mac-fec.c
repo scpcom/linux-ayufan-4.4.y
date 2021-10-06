@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * Freescale Ethernet controllers
  *
@@ -257,11 +254,11 @@ static void restart(struct net_device *dev)
 	int r;
 	u32 addrhi, addrlo;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	struct mii_bus *mii = fep->phydev->mdio.bus;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct mii_bus* mii = fep->phydev->bus;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct fec_info* fec_inf = mii->priv;
 
 	r = whack_reset(fep->fec.fecp);

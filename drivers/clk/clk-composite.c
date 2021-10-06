@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * Copyright (c) 2013 NVIDIA CORPORATION.  All rights reserved.
  *
@@ -22,11 +19,11 @@
 #include <linux/err.h>
 #include <linux/slab.h>
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 #define to_clk_composite(_hw) container_of(_hw, struct clk_composite, hw)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 static u8 clk_composite_get_parent(struct clk_hw *hw)
 {

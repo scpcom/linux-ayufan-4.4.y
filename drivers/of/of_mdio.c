@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * OF helpers for the MDIO (Ethernet PHY) API
  *
@@ -78,11 +75,11 @@ static int of_mdiobus_register_phy(struct mii_bus *mdio, struct device_node *chi
 	/* Associate the OF node with the device structure so it
 	 * can be looked up later */
 	of_node_get(child);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	phy->mdio.dev.of_node = child;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	phy->dev.of_node = child;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	/* All data is now stored in the phy struct;
 	 * register it */
@@ -99,7 +96,7 @@ static int of_mdiobus_register_phy(struct mii_bus *mdio, struct device_node *chi
 	return 0;
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 static int of_mdiobus_register_device(struct mii_bus *mdio,
 				      struct device_node *child,
 				      u32 addr)
@@ -130,7 +127,7 @@ static int of_mdiobus_register_device(struct mii_bus *mdio,
 
 	return 0;
 }
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 int of_mdio_parse_addr(struct device *dev, const struct device_node *np)
 {
@@ -154,7 +151,7 @@ int of_mdio_parse_addr(struct device *dev, const struct device_node *np)
 }
 EXPORT_SYMBOL(of_mdio_parse_addr);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 /*
  * Return true if the child node is for a phy. It must either:
  * o Compatible string of "ethernet-phy-idX.X"
@@ -183,7 +180,7 @@ static bool of_mdiobus_child_is_phy(struct device_node *child)
 
 	return false;
 }
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 /**
  * of_mdiobus_register - Register mii_bus and create PHYs from the device tree
@@ -198,24 +195,24 @@ int of_mdiobus_register(struct mii_bus *mdio, struct device_node *np)
 	struct device_node *child;
 	const __be32 *paddr;
 	bool scanphys = false;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	int addr, rc;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	int addr, rc, i;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	/* Mask out all PHYs from auto probing.  Instead the PHYs listed in
 	 * the device tree are populated after the bus has been registered */
 	mdio->phy_mask = ~0;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	/* Clear all the IRQ properties */
 	if (mdio->irq)
 		for (i=0; i<PHY_MAX_ADDR; i++)
 			mdio->irq[i] = PHY_POLL;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	mdio->dev.of_node = np;
 
@@ -224,11 +221,11 @@ int of_mdiobus_register(struct mii_bus *mdio, struct device_node *np)
 	if (rc)
 		return rc;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	/* Loop over the child nodes and register a phy_device for each phy */
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	/* Loop over the child nodes and register a phy_device for each one */
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	for_each_available_child_of_node(np, child) {
 		addr = of_mdio_parse_addr(&mdio->dev, child);
 		if (addr < 0) {
@@ -236,16 +233,16 @@ int of_mdiobus_register(struct mii_bus *mdio, struct device_node *np)
 			continue;
 		}
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 		if (of_mdiobus_child_is_phy(child))
 			of_mdiobus_register_phy(mdio, child, addr);
 		else
 			of_mdiobus_register_device(mdio, child, addr);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		rc = of_mdiobus_register_phy(mdio, child, addr);
 		if (rc)
 			continue;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	}
 
 	if (!scanphys)
@@ -260,25 +257,25 @@ int of_mdiobus_register(struct mii_bus *mdio, struct device_node *np)
 
 		for (addr = 0; addr < PHY_MAX_ADDR; addr++) {
 			/* skip already registered PHYs */
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 			if (mdiobus_is_registered_device(mdio, addr))
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 			if (mdio->phy_map[addr])
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 				continue;
 
 			/* be noisy to encourage people to set reg property */
 			dev_info(&mdio->dev, "scan phy %s at address %i\n",
 				 child->name, addr);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 			if (of_mdiobus_child_is_phy(child))
 				of_mdiobus_register_phy(mdio, child, addr);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 			rc = of_mdiobus_register_phy(mdio, child, addr);
 			if (rc)
 				continue;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		}
 	}
 
@@ -337,11 +334,11 @@ struct phy_device *of_phy_connect(struct net_device *dev,
 	ret = phy_connect_direct(dev, phy, hndlr, iface);
 
 	/* refcount is held by phy_connect_direct() on success */
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	put_device(&phy->mdio.dev);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	put_device(&phy->dev);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	return ret ? NULL : phy;
 }
@@ -371,11 +368,11 @@ struct phy_device *of_phy_attach(struct net_device *dev,
 	ret = phy_attach_direct(dev, phy, flags, iface);
 
 	/* refcount is held by phy_attach_direct() on success */
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	put_device(&phy->mdio.dev);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	put_device(&phy->dev);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	return ret ? NULL : phy;
 }

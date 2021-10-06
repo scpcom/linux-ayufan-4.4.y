@@ -247,7 +247,7 @@ done:
 	if (value)
 		DBG(config->cdev, "adding '%s'/%p --> %d\n",
 				function->name, function, value);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 
 #ifdef CONFIG_USB_PATCH_ON_RTK
 	/* add to print log*/
@@ -256,7 +256,7 @@ done:
 			config->label, config, value?"Fail":"Ok", value);
 #endif
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */
 	return value;
 }
 EXPORT_SYMBOL_GPL(usb_add_function);

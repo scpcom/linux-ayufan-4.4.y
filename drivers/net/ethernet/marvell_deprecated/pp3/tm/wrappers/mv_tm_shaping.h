@@ -1,7 +1,4 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -80,4 +77,4 @@ int mv_tm_get_shaping_full_info(enum mv_tm_level level, uint32_t index, uint8_t 
 						uint32_t *cir, uint32_t *eir, uint32_t *pcbs, uint32_t *pebs);
 
 #endif /* MV_TM_SHAPING__H */
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */

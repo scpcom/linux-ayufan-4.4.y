@@ -1,7 +1,4 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 /*
  * Marvell AP806 SoC info definitions.
  *
@@ -23,4 +20,4 @@
 int mv_soc_info_get_revision(void);
 
 #endif /* MV_SOC_INFO_H */
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */

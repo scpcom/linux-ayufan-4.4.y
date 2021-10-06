@@ -139,10 +139,10 @@ struct nvme_ctrl {
 #ifdef MY_ABC_HERE
 	unsigned long idle; /* nvme device idle time in jiffies */
 #endif /* MY_ABC_HERE */
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_PORT_MAPPING_V2
 #define BLOCK_INFO_SIZE        512     /* Largest string for a nvme device block information */
 	char syno_block_info[BLOCK_INFO_SIZE];
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_PORT_MAPPING_V2 */
 	unsigned long quirks;
 	struct nvme_id_power_state psd[32];
 

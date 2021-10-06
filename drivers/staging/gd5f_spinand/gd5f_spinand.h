@@ -1,7 +1,4 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 #ifndef __LINUX_MTD_SPI_GD5F_SPINAND_H_
 #define __LINUX_MTD_SPI_GD5F_SPINAND_H_
 
@@ -184,4 +181,4 @@ struct spinand_cmd {
 };
 
 #endif /* __LINUX_MTD_SPI_GD5F_SPINAND_H_ */
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */

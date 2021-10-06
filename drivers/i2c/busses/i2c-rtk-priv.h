@@ -488,7 +488,7 @@ venus_i2c_port* venus_i2c_find_current_port(venus_i2c* p_this);
 #endif  // __I2C_VENUS_PRIV_H__
 #endif /* MY_DEF_HERE */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 /*
  * Realtek I2C driver
  *
@@ -798,4 +798,4 @@ int rtk_i2c_load_message(struct rtk_i2c_handler *handler, unsigned char mode,
 int rtk_i2c_start_xfer(struct rtk_i2c_handler *handler);
 unsigned int rtk_i2c_get_tx_abort_reason(struct rtk_i2c_handler *handler);
 irqreturn_t rtk_i2c_isr(int this_irq, void *dev_id);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */

@@ -1,7 +1,4 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 /*
  * Copyright (C) 2016 Marvell
  *
@@ -36,20 +33,20 @@ int safexcel_init_ring_descriptors(struct safexcel_crypto_priv *priv,
 	rdr->base = dmam_alloc_coherent(priv->dev,
 					rdr->offset * EIP197_DEFAULT_RING_SIZE,
 					&rdr->base_dma, GFP_KERNEL);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 	if (!rdr->base)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 	if (!rdr->base) {
 		dmam_free_coherent(priv->dev,
 				   cdr->offset * EIP197_DEFAULT_RING_SIZE,
 				   cdr->base, cdr->base_dma);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 		return -ENOMEM;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 	}
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 	rdr->write = rdr->base;
 	rdr->base_end = rdr->base + rdr->offset * EIP197_DEFAULT_RING_SIZE;
 	rdr->read = rdr->base;
@@ -57,9 +54,9 @@ int safexcel_init_ring_descriptors(struct safexcel_crypto_priv *priv,
 	return 0;
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 /* Free the ring descriptors */
 void safexcel_free_ring_descriptors(struct safexcel_crypto_priv *priv,
 				    struct safexcel_ring *cdr,
@@ -73,7 +70,7 @@ void safexcel_free_ring_descriptors(struct safexcel_crypto_priv *priv,
 			   rdr->base, rdr->base_dma);
 }
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 /* Return the next available descriptor for use (command/result) */
 static void *safexcel_ring_next_wptr(struct safexcel_crypto_priv *priv,
 				     struct safexcel_ring *ring)
@@ -127,17 +124,17 @@ void safexcel_ring_rollback_wptr(struct safexcel_crypto_priv *priv,
 struct safexcel_command_desc *safexcel_add_cdesc(struct safexcel_crypto_priv *priv,
 						 int ring_id,
 						 bool first, bool last,
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 						 dma_addr_t data, u32 data_len,
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 						 phys_addr_t data, u32 data_len,
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 						 u32 full_data_len,
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 						 dma_addr_t context) {
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 						 phys_addr_t context) {
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 	struct safexcel_command_desc *cdesc;
 	int i;
 
@@ -182,11 +179,11 @@ struct safexcel_command_desc *safexcel_add_cdesc(struct safexcel_crypto_priv *pr
 struct safexcel_result_desc *safexcel_add_rdesc(struct safexcel_crypto_priv *priv,
 						int ring_id,
 						bool first, bool last,
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 						dma_addr_t data, u32 len)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 						phys_addr_t data, u32 len)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 {
 	struct safexcel_result_desc *rdesc;
 
@@ -204,4 +201,4 @@ struct safexcel_result_desc *safexcel_add_rdesc(struct safexcel_crypto_priv *pri
 
 	return rdesc;
 }
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */

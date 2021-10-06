@@ -124,7 +124,7 @@ static u32 syslog_idx;
 static enum log_flags syslog_prev;
 static size_t syslog_partial;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_DENVERTON)
 static u64 dnv_console_seq = 0;
 static u32 dnv_console_idx = 0;
 #endif
@@ -2067,7 +2067,7 @@ void register_console(struct console *newcon)
 	if (newcon->flags & CON_PRINTBUFFER) {
 		 
 		raw_spin_lock_irqsave(&logbuf_lock, flags);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_DENVERTON)
 		console_seq = dnv_console_seq;
 		console_idx = dnv_console_idx;
 #else
@@ -2096,7 +2096,7 @@ void register_console(struct console *newcon)
 }
 EXPORT_SYMBOL(register_console);
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(MY_DEF_HERE) || defined(CONFIG_SYNO_FIX_TTYS_FUNCTIONS)
 static void __ref pci_console_unmap_memory(void __iomem *addr, u32 size)
 {
 	if (!addr || !size)
@@ -2116,7 +2116,7 @@ int unregister_console(struct console *console)
 		(console->flags & CON_BOOT) ? "boot" : "" ,
 		console->name, console->index);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_DENVERTON)
 	dnv_console_seq = console_seq;
 	dnv_console_idx = console_idx;
 #endif
@@ -2150,7 +2150,7 @@ int unregister_console(struct console *console)
 	console->flags &= ~CON_ENABLED;
 	console_unlock();
 	console_sysfs_notify();
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(MY_DEF_HERE) || defined(CONFIG_SYNO_FIX_TTYS_FUNCTIONS)
 	if (console->pcimapaddress) {
 		pci_console_unmap_memory(console->pcimapaddress, console->pcimapsize);
 	}

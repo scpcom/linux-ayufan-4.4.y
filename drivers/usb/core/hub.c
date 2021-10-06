@@ -27,11 +27,11 @@
 #include <linux/gpio.h>
 #endif  
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_PORT_MAPPING_V2
 #include <linux/synolib.h>
 #include <linux/syno_gpio.h>
 #endif  
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 #ifdef CONFIG_USB_PATCH_ON_RTK
 #include <linux/platform_device.h>
 #include <linux/timer.h>
@@ -48,7 +48,7 @@
 #define USB_VENDOR_GENESYS_LOGIC		0x05e3
 #define HUB_QUIRK_CHECK_PORT_AUTOSUSPEND	0x01
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 #ifdef CONFIG_USB_PATCH_ON_RTK
 #ifdef CONFIG_USB_RTK_CTRL_MANAGER
 extern int RTK_usb_reprobe_usb_storage(struct usb_device *udev);
@@ -56,7 +56,7 @@ extern bool RTK_usb_disable_hub_autosuspend(void);
 #endif
 #endif
 #endif  
-#if defined(MY_DEF_HERE) || defined(CONFIG_SYNO_USB_HAS_EXTERNAL_USB2_HUB)
+#if defined(CONFIG_SYNO_USB_HAS_EXTERNAL_USB3_HUB) || defined(CONFIG_SYNO_USB_HAS_EXTERNAL_USB2_HUB)
 #define SYNO_SERIAL_EXT_HUB "syno.ext.hub"
 #endif  
 
@@ -102,7 +102,7 @@ DEFINE_MUTEX(hub_init_mutex);
 static void hub_release(struct kref *kref);
 static int usb_reset_and_verify_device(struct usb_device *udev);
 static int hub_port_disable(struct usb_hub *hub, int port1, int set_state);
-#if defined (MY_DEF_HERE) || defined (CONFIG_SYNO_USB_HAS_EXTERNAL_USB2_HUB)
+#if defined (CONFIG_SYNO_USB_HAS_EXTERNAL_USB3_HUB) || defined (CONFIG_SYNO_USB_HAS_EXTERNAL_USB2_HUB)
 static int is_syno_ext_hub(struct usb_device *udev);
 #endif  
 
@@ -298,7 +298,7 @@ static int get_hub_descriptor(struct usb_device *hdev, void *data)
 	return -EINVAL;
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 #ifdef CONFIG_USB_RTK_HCD_TEST_MODE
 int get_hub_descriptor_port(struct usb_device *hdev, void *data, int size, int port1)
 {
@@ -799,11 +799,11 @@ syno_get_power_on_time_ms(void) {
 	return CONFIG_SYNO_USB_POWER_ON_TIME;
 }
 
-#if defined(MY_DEF_HERE) || defined(CONFIG_SYNO_USB_HAS_EXTERNAL_USB2_HUB)
+#if defined(CONFIG_SYNO_USB_HAS_EXTERNAL_USB3_HUB) || defined(CONFIG_SYNO_USB_HAS_EXTERNAL_USB2_HUB)
  
 static int syno_usb_power_set_children(const struct usb_hub *hub, const int port, const int enable)
 {
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_PORT_MAPPING_V2
 	char szHubName[SYNO_DTS_PROPERTY_CONTENT_LENGTH] = {'\0'};
 	u32 vbusGpioPin = U32_MAX, vbusGpioPolarity = 0, usbHub = 0;
 	struct device_node *pUSBNode = NULL, *pVbusNode = NULL;
@@ -821,7 +821,7 @@ static int syno_usb_power_set_children(const struct usb_hub *hub, const int port
 			CONFIG_SYNO_USB_EXT_HUB_PARENT_SERIAL);
 		goto END;
 	}
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_PORT_MAPPING_V2
 	for_each_child_of_node(of_root, pUSBNode) {
 		pVbusNode = NULL;
 		 
@@ -896,7 +896,7 @@ __syno_usb_power_cycle(struct usb_hub *hub, int port) {
 		hub->ports[port - 1]->power_cycle_counter,
 		SYNO_POWER_CYCLE_TRIES,
 		power_cycle_delay_time, port);
-#if defined(MY_DEF_HERE) || defined(CONFIG_SYNO_USB_HAS_EXTERNAL_USB2_HUB)
+#if defined(CONFIG_SYNO_USB_HAS_EXTERNAL_USB3_HUB) || defined(CONFIG_SYNO_USB_HAS_EXTERNAL_USB2_HUB)
 	syno_usb_power_set_children(hub, port, 0);
 #endif  
 	ret = syno_usb_set_power(hub, 0, port);
@@ -913,7 +913,7 @@ __syno_usb_power_cycle(struct usb_hub *hub, int port) {
 	ret = syno_usb_set_power(hub, 1, port);
 	if (0 > ret)
 		return -EINVAL;
-#if defined(MY_DEF_HERE) || defined(CONFIG_SYNO_USB_HAS_EXTERNAL_USB2_HUB)
+#if defined(CONFIG_SYNO_USB_HAS_EXTERNAL_USB3_HUB) || defined(CONFIG_SYNO_USB_HAS_EXTERNAL_USB2_HUB)
 	 
 	msleep(power_cycle_delay_time);
 	syno_usb_power_set_children(hub, port, 1);
@@ -927,7 +927,7 @@ int
 syno_usb_power_cycle(struct usb_hub *hub, int port, int status) {
 	struct usb_device *hdev = hub->hdev;
 	struct usb_hcd *hcd = bus_to_hcd(hdev->bus);
-#if defined (MY_DEF_HERE) || defined (CONFIG_SYNO_USB_HAS_EXTERNAL_USB2_HUB)
+#if defined (CONFIG_SYNO_USB_HAS_EXTERNAL_USB3_HUB) || defined (CONFIG_SYNO_USB_HAS_EXTERNAL_USB2_HUB)
 	if (hdev->parent && 0 != is_syno_ext_hub(hdev))
 #else  
 	 
@@ -1618,7 +1618,7 @@ static int hub_probe(struct usb_interface *intf, const struct usb_device_id *id)
 
 	if (hdev->parent) {		 
 		usb_enable_autosuspend(hdev);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 #ifdef CONFIG_USB_PATCH_ON_RTK
 #ifdef CONFIG_USB_RTK_CTRL_MANAGER
 		if (RTK_usb_disable_hub_autosuspend()) {
@@ -2115,7 +2115,7 @@ static int device_serial_match(struct usb_device *dev, struct usb_device *udev_s
 		if (childdev && childdev != udev_search && childdev->serial) {
 
 			if (
-#if defined(MY_DEF_HERE) || defined(CONFIG_SYNO_USB_HAS_EXTERNAL_USB2_HUB)
+#if defined(CONFIG_SYNO_USB_HAS_EXTERNAL_USB3_HUB) || defined(CONFIG_SYNO_USB_HAS_EXTERNAL_USB2_HUB)
 					0 != is_syno_ext_hub(childdev) &&
 #endif  
 					childdev->serial[0] &&
@@ -2229,7 +2229,7 @@ int usb_new_device(struct usb_device *udev)
 		if (NULL != udev->serial) {
 			const int cProductLen = strlen(udev->product);
 
-#if defined(MY_DEF_HERE) || defined(CONFIG_SYNO_USB_HAS_EXTERNAL_USB2_HUB)
+#if defined(CONFIG_SYNO_USB_HAS_EXTERNAL_USB3_HUB) || defined(CONFIG_SYNO_USB_HAS_EXTERNAL_USB2_HUB)
 			if (0 == is_syno_ext_hub(udev)) {
 				snprintf(udev->serial, SERIAL_LEN, "%s", SYNO_SERIAL_EXT_HUB);
 				printk("Set serial number \"%s\" for Synology External hub.\n",udev->serial);
@@ -2245,7 +2245,7 @@ int usb_new_device(struct usb_device *udev)
 					   "%02x", (seed ^= udev->product[cProductLen-i-1]));
 			}
 			udev->serial[SERIAL_LEN-1] = '\0';
-#if defined(MY_DEF_HERE) || defined(CONFIG_SYNO_USB_HAS_EXTERNAL_USB2_HUB)
+#if defined(CONFIG_SYNO_USB_HAS_EXTERNAL_USB3_HUB) || defined(CONFIG_SYNO_USB_HAS_EXTERNAL_USB2_HUB)
 			}
 #endif  
 		}
@@ -3083,7 +3083,7 @@ int usb_port_resume(struct usb_device *udev, pm_message_t msg)
 
 	status = check_port_resume_type(udev,
 			hub, port1, status, portchange, portstatus);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 
 #ifdef CONFIG_USB_PATCH_ON_RTK
 	 
@@ -3762,12 +3762,12 @@ static int hub_set_address(struct usb_device *udev, int devnum)
 	return retval;
 }
 
-#if defined (MY_DEF_HERE) || defined (CONFIG_SYNO_USB_HAS_EXTERNAL_USB2_HUB)
+#if defined (CONFIG_SYNO_USB_HAS_EXTERNAL_USB3_HUB) || defined (CONFIG_SYNO_USB_HAS_EXTERNAL_USB2_HUB)
 static int is_syno_ext_hub(struct usb_device *udev)
 {
 	int ret = -1;
 	if (udev->level == 1) {
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_USB_HAS_EXTERNAL_USB3_HUB)
 		if (USB_SPEED_SUPER == udev->speed) {
 			if ((CONFIG_SYNO_USB_EXTERNAL_USB3_HUB_VID ==
 				udev->descriptor.idVendor) &&
@@ -3798,7 +3798,7 @@ static int check_superspeed(struct usb_hub *hub, struct usb_device *udev)
 {
 	struct usb_device *hdev = hub->hdev;
 	int retval = -EINVAL;
-#if defined (MY_DEF_HERE) || defined (CONFIG_SYNO_USB_HAS_EXTERNAL_USB2_HUB)
+#if defined (CONFIG_SYNO_USB_HAS_EXTERNAL_USB3_HUB) || defined (CONFIG_SYNO_USB_HAS_EXTERNAL_USB2_HUB)
 	 
 	if (0 == is_syno_ext_hub(udev)) {
 		dev_info(&udev->dev, "This is Synology external hub. Skip %s\n", __func__);
@@ -3952,7 +3952,7 @@ port_speed_morph:
 	else
 		speed = usb_speed_string(udev->speed);
 
-#if defined(CONFIG_USB_PATCH_ON_RTK) && defined(MY_DEF_HERE)
+#if defined(CONFIG_USB_PATCH_ON_RTK) && defined(CONFIG_SYNO_LSP_RTD1619)
 	if (udev->speed < USB_SPEED_SUPER)
 		dev_notice(&udev->dev,
 				"%s %s USB device number %d using %s\n",
@@ -4100,7 +4100,7 @@ delay_poweron_failed:
 			}
 			if (udev->speed >= USB_SPEED_SUPER) {
 				devnum = udev->devnum;
-#if defined(CONFIG_USB_PATCH_ON_RTK) && defined(MY_DEF_HERE)
+#if defined(CONFIG_USB_PATCH_ON_RTK) && defined(CONFIG_SYNO_LSP_RTD1619)
 				dev_notice(&udev->dev,
 						"%s SuperSpeed%s USB device number %d using %s\n",
 						(udev->config) ? "reset" : "new",
@@ -4493,7 +4493,7 @@ static void hub_port_connect(struct usb_hub *hub, int port1, u16 portstatus,
 
 		if (!status) {
 			status = usb_new_device(udev);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 #ifdef CONFIG_USB_PATCH_ON_RTK
 #ifdef CONFIG_USB_RTK_CTRL_MANAGER
 			if (!status)
@@ -4560,7 +4560,7 @@ static void hub_port_connect_change(struct usb_hub *hub, int port1,
 	struct usb_device *udev = port_dev->child;
 	int status = -ENODEV;
 
-#if defined(CONFIG_USB_PATCH_ON_RTK) && defined(MY_DEF_HERE)
+#if defined(CONFIG_USB_PATCH_ON_RTK) && defined(CONFIG_SYNO_LSP_RTD1619)
 	dev_notice(&port_dev->dev, "port %d, status %04x, change %04x, %s\n",
 			port1, portstatus, portchange, portspeed(hub, portstatus));
 #else  

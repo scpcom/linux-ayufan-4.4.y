@@ -13,7 +13,7 @@
 #endif  
 
 #ifdef MY_ABC_HERE
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_PORT_MAPPING_V2
 extern int gSynoHddPowerupSeq, gSynoInternalHddNumber;
 #else  
 extern long g_syno_hdd_powerup_seq;
@@ -43,7 +43,7 @@ static inline void SleepForLatency(void)
 #ifdef MY_ABC_HERE
 static inline void SleepForHD(int i)
 {
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_PORT_MAPPING_V2
 	if ((syno_boot_hd_count != gSynoInternalHddNumber - 1) &&  
 		(gSynoHddPowerupSeq && (syno_boot_hd_count < gSynoInternalHddNumber))) {
 #else  
@@ -73,7 +73,7 @@ static inline void SleepForHW(int iDisk, int iIsDoLatency)
 	}
 #endif  
 	 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_PORT_MAPPING_V2
 	if (syno_boot_hd_count &&
 		(gSynoHddPowerupSeq && (syno_boot_hd_count < gSynoInternalHddNumber))) {
 #else  

@@ -36,11 +36,11 @@
 #include <linux/math64.h>
 #endif  
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_PORT_MAPPING_V2
 #include <linux/of.h>
 #endif  
 
-#if defined(MY_DEF_HERE) || defined(CONFIG_SYNO_SMBUS_HDD_POWERCTL)
+#if defined(CONFIG_SYNO_PORT_MAPPING_V2) || defined(CONFIG_SYNO_SMBUS_HDD_POWERCTL)
 #include <linux/synolib.h>
 #endif  
 
@@ -55,7 +55,7 @@
 static struct mutex mutex_spin;
 static DEFINE_MUTEX(mutex_spin);
 #endif  
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 #ifdef CONFIG_AHCI_RTK
 extern void rtk_sata_phy_poweron(struct ata_link *link);
 #endif  
@@ -120,11 +120,11 @@ struct ata_force_ent {
 static struct ata_force_ent *ata_force_tbl;
 static int ata_force_tbl_size;
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_PORT_MAPPING_V2
 struct klist syno_ata_port_head;
 #endif  
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_PORT_MAPPING_V2
  
 struct ata_port *syno_ata_port_get_by_port(const unsigned short diskPort)
 {
@@ -192,7 +192,7 @@ EXPORT_SYMBOL(syno_compare_dts_ata_port);
 #if defined(MY_DEF_HERE)
 #include <linux/syno_gpio.h>
 extern SYNO_GPIO syno_gpio;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_PORT_MAPPING_V2
 #else
 static SYNO_GPIO_INFO hdd_detect = {
 	.name 			= "hdd detect",
@@ -351,7 +351,7 @@ int SYNO_CHECK_HDD_DETECT(int index)
 	}
 	ret = SYNO_GPIO_READ(HDD_DETECT_PIN(index));
 	 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_PORT_MAPPING_V2
 	if (ACTIVE_LOW == HDD_DETECT_POLARITY(index)) {
 #else
 	if (ACTIVE_LOW == HDD_DETECT_POLARITY()) {
@@ -375,7 +375,7 @@ int SYNO_SUPPORT_HDD_DYNAMIC_ENABLE_POWER(void)
 	return 0;
 }
 EXPORT_SYMBOL(SYNO_SUPPORT_HDD_DYNAMIC_ENABLE_POWER);
-#if defined(MY_DEF_HERE)  
+#if defined(CONFIG_SYNO_PORT_MAPPING_V2)  
 #else
 int SYNO_CTRL_GPIO_HDD_ACT_LED(int index, int value)
 {
@@ -391,7 +391,7 @@ int SYNO_CTRL_GPIO_HDD_ACT_LED(int index, int value)
 EXPORT_SYMBOL(SYNO_CTRL_GPIO_HDD_ACT_LED);
 #endif  
 #ifdef MY_DEF_HERE
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_PORT_MAPPING_V2
 #else
 static SYNO_GPIO_INFO redundant_power_detect = {
 	.name 			= "redundant power detect",
@@ -3244,7 +3244,7 @@ int sata_link_resume(struct ata_link *link, const unsigned long *params,
 			return rc;
 	} while ((scontrol & 0xf0f) != 0x300 && --tries);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 #if defined(CONFIG_AHCI_RTK)
 	rtk_sata_phy_poweron(link);
 #endif  
@@ -4768,7 +4768,7 @@ void ata_dev_init(struct ata_device *dev)
 	link->sata_spd_limit = link->hw_sata_spd_limit;
 	link->sata_spd = 0;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 #if defined(CONFIG_AHCI_RTK)
 	sata_set_spd(link);
 #endif  
@@ -4888,7 +4888,7 @@ struct ata_port *ata_port_alloc(struct ata_host *host)
 #endif  
 
 	ata_sff_port_init(ap);
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_PORT_MAPPING_V2
 	ap->syno_disk_index = -1;
 	 
 	syno_libata_index_get(ap->scsi_host, 0, 0, 0);
@@ -5147,7 +5147,7 @@ static void HddPowerOn(struct ata_port *pAp) {
 	}
 
 	iSynoDiskIdx = syno_libata_index_get(pAp->scsi_host, 0, 0, 0) + 1;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_PORT_MAPPING_V2
 	 
 	if (0 == iSynoDiskIdx) {
 		 
@@ -5155,7 +5155,7 @@ static void HddPowerOn(struct ata_port *pAp) {
 	}
 #endif  
 	 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_PORT_MAPPING_V2
 	if (gSynoHddPowerupSeq && gSynoInternalHddNumber < iSynoDiskIdx) {
 #else  
 	if (0 < g_syno_hdd_powerup_seq && g_syno_hdd_powerup_seq < iSynoDiskIdx) {
@@ -5203,7 +5203,7 @@ static void DelayForHWCtl(struct ata_port *pAp)
 	}
 
 	iSynoDiskIdx = syno_libata_index_get(pAp->scsi_host, 0, 0, 0) + 1;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_PORT_MAPPING_V2
 	 
 	if (0 == iSynoDiskIdx) {
 		 
@@ -5211,7 +5211,7 @@ static void DelayForHWCtl(struct ata_port *pAp)
 	}
 #endif  
 	 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_PORT_MAPPING_V2
 	if (gSynoHddPowerupSeq && gSynoInternalHddNumber < iSynoDiskIdx) {
 #else  
 	if (0 < g_syno_hdd_powerup_seq && g_syno_hdd_powerup_seq < iSynoDiskIdx) {
@@ -5403,7 +5403,7 @@ int ata_host_register(struct ata_host *host, struct scsi_host_template *sht)
 		struct ata_port *ap = host->ports[i];
 #ifdef MY_DEF_HERE
 		 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_PORT_MAPPING_V2
 		if (gSynoHddPowerupSeq) {
 #else  
 		if (0 < giSynoSpinupGroupNum) {
@@ -5413,7 +5413,7 @@ int ata_host_register(struct ata_host *host, struct scsi_host_template *sht)
 		}
 #endif  
 #ifdef MY_ABC_HERE
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_PORT_MAPPING_V2
 		if (0 == gSynoHddPowerupSeq) {
 #else  
 		if (0 == g_syno_hdd_powerup_seq) {
@@ -5428,7 +5428,7 @@ int ata_host_register(struct ata_host *host, struct scsi_host_template *sht)
 #endif  
 	}
 #ifdef MY_ABC_HERE
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_PORT_MAPPING_V2
 	if (gSynoHddPowerupSeq) {
 #else  
 	if (0 != g_syno_hdd_powerup_seq) {
@@ -5518,7 +5518,7 @@ static void ata_port_detach(struct ata_port *ap)
 		for (i = 0; i < SATA_PMP_MAX_PORTS; i++)
 			ata_tlink_delete(&ap->pmp_link[i]);
 	}
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_PORT_MAPPING_V2
 	klist_del(&ap->ata_port_list);
 #endif  
 	 
@@ -5836,7 +5836,7 @@ static int __init ata_init(void)
 		rc = -ENOMEM;
 		goto err_out;
 	}
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_PORT_MAPPING_V2
 	klist_init(&syno_ata_port_head, NULL, NULL);
 #endif  
 
@@ -5967,7 +5967,7 @@ void ata_port_printk(const struct ata_port *ap, const char *level,
 
 	vaf.fmt = fmt;
 	vaf.va = &args;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_PORT_MAPPING_V2
 	if (0 <= ap->syno_disk_index) {
 		printk("%sata%u (slot %d): %pV", level, ap->print_id, ap->syno_disk_index + 1 , &vaf);
 	} else {
@@ -5992,7 +5992,7 @@ void ata_link_printk(const struct ata_link *link, const char *level,
 	vaf.fmt = fmt;
 	vaf.va = &args;
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_PORT_MAPPING_V2
 	if (sata_pmp_attached(link->ap) || link->ap->slave_link) {
 		if (0 <= link->ap->syno_disk_index) {
 			printk("%sata%u.%02u (slot %d): %pV",
@@ -6033,7 +6033,7 @@ void ata_dev_printk(const struct ata_device *dev, const char *level,
 
 	vaf.fmt = fmt;
 	vaf.va = &args;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_PORT_MAPPING_V2
 	if (0 <= dev->link->ap->syno_disk_index) {
 		printk("%sata%u.%02u (slot %d): %pV",
 		       level, dev->link->ap->print_id, dev->link->pmp + dev->devno, dev->link->ap->syno_disk_index + 1,

@@ -1,22 +1,19 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 /*
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
  * Driver for Marvell Xenon SDHC as a platform device
-#else  // MY_DEF_HERE
+#else  // CONFIG_SYNO_LSP_ARMADA_17_02_02
  * Driver for Marvell SOCP Xenon SDHC as a platform device
-#endif // MY_DEF_HERE
+#endif // CONFIG_SYNO_LSP_ARMADA_17_02_02
  *
  * Copyright (C) 2016 Marvell, All Rights Reserved.
  *
  * Author:	Hu Ziji <huziji@marvell.com>
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
  * Date:	2016-8-24
-#else  // MY_DEF_HERE
+#else  // CONFIG_SYNO_LSP_ARMADA_17_02_02
  * Date:	2016-7-30
-#endif // MY_DEF_HERE
+#endif // CONFIG_SYNO_LSP_ARMADA_17_02_02
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -27,9 +24,9 @@
  */
 
 #include <linux/delay.h>
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 #include <linux/err.h>
 #include <linux/io.h>
 #include <linux/mmc/host.h>
@@ -37,29 +34,29 @@
 #include <linux/mmc/sdio.h>
 #include <linux/mmc/card.h>
 #include <linux/mmc/host.h>
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 #include <linux/module.h>
 #include <linux/of.h>
 
 #include "sdhci-pltfm.h"
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 #include "sdhci.h"
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 #include "sdhci-xenon.h"
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 static int enable_xenon_internal_clk(struct sdhci_host *host)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 /*
  * Xenon Specific Initialization Operations
  */
 static inline void xenon_set_tuning_count(struct sdhci_host *host,
 				unsigned int count)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	u32 reg;
 	u8 timeout;
 
@@ -78,15 +75,15 @@ static inline void xenon_set_tuning_count(struct sdhci_host *host,
 		timeout--;
 		mdelay(1);
 	}
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	/* A valid count value */
 	host->tuning_count = 1 << (count - 1);
 }
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	return 0;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 /*
  * Current driver can only support Tuning Mode 1.
  * Tuning timer is only setup only tuning_mode == Tuning Mode 1.
@@ -95,51 +92,51 @@ static inline void xenon_set_tuning_count(struct sdhci_host *host,
 static inline void xenon_set_tuning_mode(struct sdhci_host *host)
 {
 	host->tuning_mode = SDHCI_TUNING_MODE_1;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 }
 
 /* Set SDCLK-off-while-idle */
 static void xenon_set_sdclk_off_idle(struct sdhci_host *host,
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 				     unsigned char sdhc_id, bool enable)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 			unsigned char slot_idx, bool enable)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 {
 	u32 reg;
 	u32 mask;
 
-#if defined(MY_DEF_HERE)
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	reg = sdhci_readl(host, XENON_SYS_OP_CTRL);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	reg = sdhci_readl(host, SDHCI_SYS_OP_CTRL);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	/* Get the bit shift basing on the SDHC index */
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	mask = (0x1 << (XENON_SDCLK_IDLEOFF_ENABLE_SHIFT + sdhc_id));
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	mask = (0x1 << (SDHCI_SDCLK_IDLEOFF_ENABLE_SHIFT + sdhc_id));
-#endif /* MY_DEF_HERE */
-#else /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	reg = sdhci_readl(host, SDHC_SYS_OP_CTRL);
 	/* Get the bit shift basing on the slot index */
 	mask = (0x1 << (SDCLK_IDLEOFF_ENABLE_SHIFT + slot_idx));
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	if (enable)
 		reg |= mask;
 	else
 		reg &= ~mask;
 
-#if defined(MY_DEF_HERE)
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	sdhci_writel(host, reg, XENON_SYS_OP_CTRL);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	sdhci_writel(host, reg, SDHCI_SYS_OP_CTRL);
-#endif /* MY_DEF_HERE */
-#else /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	sdhci_writel(host, reg, SDHC_SYS_OP_CTRL);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 }
 
 /* Enable/Disable the Auto Clock Gating function */
@@ -147,140 +144,140 @@ static void xenon_set_acg(struct sdhci_host *host, bool enable)
 {
 	u32 reg;
 
-#if defined(MY_DEF_HERE)
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	reg = sdhci_readl(host, XENON_SYS_OP_CTRL);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	reg = sdhci_readl(host, SDHCI_SYS_OP_CTRL);
-#endif /* MY_DEF_HERE */
-#else /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	reg = sdhci_readl(host, SDHC_SYS_OP_CTRL);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	if (enable)
-#if defined(MY_DEF_HERE)
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 		reg &= ~XENON_AUTO_CLKGATE_DISABLE_MASK;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 		reg &= ~SDHCI_AUTO_CLKGATE_DISABLE_MASK;
-#endif /* MY_DEF_HERE */
-#else /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 		reg &= ~AUTO_CLKGATE_DISABLE_MASK;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	else
-#if defined(MY_DEF_HERE)
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 		reg |= XENON_AUTO_CLKGATE_DISABLE_MASK;
 	sdhci_writel(host, reg, XENON_SYS_OP_CTRL);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 		reg |= SDHCI_AUTO_CLKGATE_DISABLE_MASK;
 	sdhci_writel(host, reg, SDHCI_SYS_OP_CTRL);
-#endif /* MY_DEF_HERE */
-#else /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 		reg |= AUTO_CLKGATE_DISABLE_MASK;
 	sdhci_writel(host, reg, SDHC_SYS_OP_CTRL);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 /* Enable this SDHC */
 static void xenon_enable_sdhc(struct sdhci_host *host,
 			      unsigned char sdhc_id)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 /* Enable this slot */
 static void xenon_enable_slot(struct sdhci_host *host,
 			unsigned char slot_idx)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 {
 	u32 reg;
 
-#if defined(MY_DEF_HERE)
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	reg = sdhci_readl(host, XENON_SYS_OP_CTRL);
 	reg |= (BIT(sdhc_id) << XENON_SLOT_ENABLE_SHIFT);
 	sdhci_writel(host, reg, XENON_SYS_OP_CTRL);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	reg = sdhci_readl(host, SDHCI_SYS_OP_CTRL);
 	reg |= (BIT(sdhc_id) << SDHCI_SLOT_ENABLE_SHIFT);
 	sdhci_writel(host, reg, SDHCI_SYS_OP_CTRL);
-#endif /* MY_DEF_HERE */
-#else /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	reg = sdhci_readl(host, SDHC_SYS_OP_CTRL);
 	reg |= ((0x1 << slot_idx) << SLOT_ENABLE_SHIFT);
 	sdhci_writel(host, reg, SDHC_SYS_OP_CTRL);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 
 	/*
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	 * Manually set the flag which all the card types require,
-#else  // MY_DEF_HERE
+#else  // CONFIG_SYNO_LSP_ARMADA_17_02_02
 	 * Manually set the flag which all the slots require,
-#endif // MY_DEF_HERE
+#endif // CONFIG_SYNO_LSP_ARMADA_17_02_02
 	 * including SD, eMMC, SDIO
 	 */
 	host->mmc->caps |= MMC_CAP_WAIT_WHILE_BUSY;
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 /* Disable this SDHC */
 static void xenon_disable_sdhc(struct sdhci_host *host,
 			       unsigned char sdhc_id)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 /* Disable this slot */
 static void xenon_disable_slot(struct sdhci_host *host,
 			unsigned char slot_idx)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 {
 	u32 reg;
 
-#if defined(MY_DEF_HERE)
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	reg = sdhci_readl(host, XENON_SYS_OP_CTRL);
 	reg &= ~(BIT(sdhc_id) << XENON_SLOT_ENABLE_SHIFT);
 	sdhci_writel(host, reg, XENON_SYS_OP_CTRL);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	reg = sdhci_readl(host, SDHCI_SYS_OP_CTRL);
 	reg &= ~(BIT(sdhc_id) << SDHCI_SLOT_ENABLE_SHIFT);
 	sdhci_writel(host, reg, SDHCI_SYS_OP_CTRL);
-#endif /* MY_DEF_HERE */
-#else /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	reg = sdhci_readl(host, SDHC_SYS_OP_CTRL);
 	reg &= ~((0x1 << slot_idx) << SLOT_ENABLE_SHIFT);
 	sdhci_writel(host, reg, SDHC_SYS_OP_CTRL);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 }
 
 /* Enable Parallel Transfer Mode */
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 static void xenon_enable_sdhc_parallel_tran(struct sdhci_host *host,
 					    unsigned char sdhc_id)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 static void xenon_enable_slot_parallel_tran(struct sdhci_host *host,
 			unsigned char slot_idx)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 {
 	u32 reg;
 
-#if defined(MY_DEF_HERE)
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	reg = sdhci_readl(host, XENON_SYS_EXT_OP_CTRL);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	reg = sdhci_readl(host, SDHCI_SYS_EXT_OP_CTRL);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	reg |= BIT(sdhc_id);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	sdhci_writel(host, reg, XENON_SYS_EXT_OP_CTRL);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	sdhci_writel(host, reg, SDHCI_SYS_EXT_OP_CTRL);
-#endif /* MY_DEF_HERE */
-#else /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	reg = sdhci_readl(host, SDHC_SYS_EXT_OP_CTRL);
 	reg |= (0x1 << slot_idx);
 	sdhci_writel(host, reg, SDHC_SYS_EXT_OP_CTRL);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 }
 
-#if defined(MY_DEF_HERE)
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 /* Mask command conflict error */
 static void xenon_mask_cmd_conflict_err(struct sdhci_host *host)
 {
@@ -292,61 +289,61 @@ static void xenon_mask_cmd_conflict_err(struct sdhci_host *host)
 }
 
 static void xenon_sdhc_retune_setup(struct sdhci_host *host)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 static void xenon_sdhc_tuning_setup(struct sdhci_host *host)
-#endif /* MY_DEF_HERE */
-#else /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 static void xenon_slot_tuning_setup(struct sdhci_host *host)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
 	struct sdhci_xenon_priv *priv = sdhci_pltfm_priv(pltfm_host);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	u32 reg;
 
 	/* Disable the Re-Tuning Request functionality */
-#if defined(MY_DEF_HERE)
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	reg = sdhci_readl(host, XENON_SLOT_RETUNING_REQ_CTRL);
 	reg &= ~XENON_RETUNING_COMPATIBLE;
 	sdhci_writel(host, reg, XENON_SLOT_RETUNING_REQ_CTRL);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	reg = sdhci_readl(host, SDHCI_SLOT_RETUNING_REQ_CTRL);
 	reg &= ~SDHCI_RETUNING_COMPATIBLE;
 	sdhci_writel(host, reg, SDHCI_SLOT_RETUNING_REQ_CTRL);
-#endif /* MY_DEF_HERE */
-#else /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	reg = sdhci_readl(host, SDHC_SLOT_RETUNING_REQ_CTRL);
 	reg &= ~RETUNING_COMPATIBLE;
 	sdhci_writel(host, reg, SDHC_SLOT_RETUNING_REQ_CTRL);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	/* Disable the Re-tuning Interrupt */
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	/* Disable the Re-tuning Event Signal Enable */
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	reg = sdhci_readl(host, SDHCI_SIGNAL_ENABLE);
 	reg &= ~SDHCI_INT_RETUNE;
 	sdhci_writel(host, reg, SDHCI_SIGNAL_ENABLE);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	reg = sdhci_readl(host, SDHCI_INT_ENABLE);
 	reg &= ~SDHCI_INT_RETUNE;
 	sdhci_writel(host, reg, SDHCI_INT_ENABLE);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	/* Force to use Tuning Mode 1 */
 	host->tuning_mode = SDHCI_TUNING_MODE_1;
 	/* Set re-tuning period */
 	host->tuning_count = 1 << (priv->tuning_count - 1);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	/* Disable Auto-retuning */
 	reg = sdhci_readl(host, SDHC_SLOT_AUTO_RETUNING_CTRL);
 	reg &= ~ENABLE_AUTO_RETUNING;
 	sdhci_writel(host, reg, SDHC_SLOT_AUTO_RETUNING_CTRL);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 }
 
 /*
@@ -354,39 +351,39 @@ static void xenon_slot_tuning_setup(struct sdhci_host *host)
  */
 /* Recover the Register Setting cleared during SOFTWARE_RESET_ALL */
 static void sdhci_xenon_reset_exit(struct sdhci_host *host,
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 				   unsigned char sdhc_id, u8 mask)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 					unsigned char slot_idx, u8 mask)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 {
 	/* Only SOFTWARE RESET ALL will clear the register setting */
 	if (!(mask & SDHCI_RESET_ALL))
 		return;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	/* Disable tuning request and auto-retuning again */
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	xenon_sdhc_retune_setup(host);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	xenon_sdhc_tuning_setup(host);
-#endif /* MY_DEF_HERE */
-#else /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	/* Disable tuning request and auto-retuing again */
 	xenon_slot_tuning_setup(host);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 
 	xenon_set_acg(host, true);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	xenon_set_sdclk_off_idle(host, sdhc_id, false);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	xenon_set_sdclk_off_idle(host, slot_idx, false);
-#endif /* MY_DEF_HERE */
-#if defined(MY_DEF_HERE)
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 
 	xenon_mask_cmd_conflict_err(host);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 }
 
 static void sdhci_xenon_reset(struct sdhci_host *host, u8 mask)
@@ -395,24 +392,24 @@ static void sdhci_xenon_reset(struct sdhci_host *host, u8 mask)
 	struct sdhci_xenon_priv *priv = sdhci_pltfm_priv(pltfm_host);
 
 	sdhci_reset(host, mask);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	sdhci_xenon_reset_exit(host, priv->sdhc_id, mask);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	sdhci_xenon_reset_exit(host, priv->slot_idx, mask);
 }
 
 static void xenon_platform_init(struct sdhci_host *host)
 {
 	xenon_set_acg(host, false);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 }
 
 /*
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
  * Xenon defines different values for HS200 and HS400
-#else  // MY_DEF_HERE
+#else  // CONFIG_SYNO_LSP_ARMADA_17_02_02
  * Xenon defines different values for HS200 and SDR104
-#endif // MY_DEF_HERE
+#endif // CONFIG_SYNO_LSP_ARMADA_17_02_02
  * in Host_Control_2
  */
 static void xenon_set_uhs_signaling(struct sdhci_host *host,
@@ -424,15 +421,15 @@ static void xenon_set_uhs_signaling(struct sdhci_host *host,
 	/* Select Bus Speed Mode for host */
 	ctrl_2 &= ~SDHCI_CTRL_UHS_MASK;
 	if (timing == MMC_TIMING_MMC_HS200)
-#if defined(MY_DEF_HERE)
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 		ctrl_2 |= XENON_CTRL_HS200;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 		ctrl_2 |= SDHCI_XENON_CTRL_HS200;
-#endif /* MY_DEF_HERE */
-#else /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 		ctrl_2 |= XENON_SDHCI_CTRL_HS200;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	else if (timing == MMC_TIMING_UHS_SDR104)
 		ctrl_2 |= SDHCI_CTRL_UHS_SDR104;
 	else if (timing == MMC_TIMING_UHS_SDR12)
@@ -445,15 +442,15 @@ static void xenon_set_uhs_signaling(struct sdhci_host *host,
 		 (timing == MMC_TIMING_MMC_DDR52))
 		ctrl_2 |= SDHCI_CTRL_UHS_DDR50;
 	else if (timing == MMC_TIMING_MMC_HS400)
-#if defined(MY_DEF_HERE)
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 		ctrl_2 |= XENON_CTRL_HS400;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 		ctrl_2 |= SDHCI_XENON_CTRL_HS400;
-#endif /* MY_DEF_HERE */
-#else /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 		ctrl_2 |= XENON_SDHCI_CTRL_HS400;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	sdhci_writew(host, ctrl_2, SDHCI_HOST_CONTROL2);
 }
 
@@ -462,32 +459,32 @@ static const struct sdhci_ops sdhci_xenon_ops = {
 	.set_bus_width		= sdhci_set_bus_width,
 	.reset			= sdhci_xenon_reset,
 	.set_uhs_signaling	= xenon_set_uhs_signaling,
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	.platform_init		= xenon_platform_init,
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	.get_max_clock		= sdhci_pltfm_clk_get_max_clock,
 };
 
 static const struct sdhci_pltfm_data sdhci_xenon_pdata = {
 	.ops = &sdhci_xenon_ops,
 	.quirks = SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC |
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 // do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 			SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12 |
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 			SDHCI_QUIRK_NO_SIMULT_VDD_AND_POWER |
 			SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 // do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	/*
 	 * Add SOC specific quirks in the above .quirks, .quirks2
 	 * fields.
 	 */
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 };
 
 /*
@@ -499,9 +496,9 @@ static void xenon_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
 	struct sdhci_xenon_priv *priv = sdhci_pltfm_priv(pltfm_host);
 	unsigned long flags;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	u32 reg;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 
 	/*
 	 * HS400/HS200/eMMC HS doesn't have Preset Value register.
@@ -516,131 +513,131 @@ static void xenon_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
 		(ios->timing == MMC_TIMING_MMC_HS)) {
 		host->preset_enabled = false;
 		host->quirks2 |= SDHCI_QUIRK2_PRESET_VALUE_BROKEN;
-#if defined(MY_DEF_HERE)
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 		host->flags &= ~SDHCI_PV_ENABLED;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 
 		reg = sdhci_readw(host, SDHCI_HOST_CONTROL2);
 		reg &= ~SDHCI_CTRL_PRESET_VAL_ENABLE;
 		sdhci_writew(host, reg, SDHCI_HOST_CONTROL2);
 	} else {
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	} else
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 		host->quirks2 &= ~SDHCI_QUIRK2_PRESET_VALUE_BROKEN;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	}
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	spin_unlock_irqrestore(&host->lock, flags);
 
 	sdhci_set_ios(mmc, ios);
 	xenon_phy_adj(host, ios);
 
-#if defined(MY_DEF_HERE)
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	if (host->clock > XENON_DEFAULT_SDCLK_FREQ) {
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	if (host->clock > SDHCI_DEFAULT_SDCLK_FREQ) {
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 		spin_lock_irqsave(&host->lock, flags);
 		xenon_set_sdclk_off_idle(host, priv->sdhc_id, true);
 		spin_unlock_irqrestore(&host->lock, flags);
 	}
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	if (host->clock > DEFAULT_SDCLK_FREQ)
 		xenon_set_sdclk_off_idle(host, priv->slot_idx, true);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 static int xenon_emmc_signal_voltage_switch(struct mmc_host *mmc,
 					    struct mmc_ios *ios)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 static int __emmc_signal_voltage_switch(struct mmc_host *mmc,
 				const unsigned char signal_voltage)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	unsigned char voltage = ios->signal_voltage;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	u32 ctrl;
 	unsigned char voltage_code;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	struct sdhci_host *host = mmc_priv(mmc);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	unsigned char voltage_code;
 	u32 ctrl;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	if ((voltage == MMC_SIGNAL_VOLTAGE_330) ||
 	    (voltage == MMC_SIGNAL_VOLTAGE_180)) {
 		if (voltage == MMC_SIGNAL_VOLTAGE_330)
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 			voltage_code = XENON_EMMC_VCCQ_3_3V;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 			voltage_code = SDHCI_EMMC_VCCQ_3_3V;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 		else if (voltage == MMC_SIGNAL_VOLTAGE_180)
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 			voltage_code = XENON_EMMC_VCCQ_1_8V;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 			voltage_code = SDHCI_EMMC_VCCQ_1_8V;
-#endif /* MY_DEF_HERE */
-#else /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	if (signal_voltage == MMC_SIGNAL_VOLTAGE_330)
 		voltage_code = eMMC_VCCQ_3_3V;
 	else if (signal_voltage == MMC_SIGNAL_VOLTAGE_180)
 		voltage_code = eMMC_VCCQ_1_8V;
 	else
 		return -EINVAL;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 
 	/*
 	 * This host is for eMMC, XENON self-defined
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	 * eMMC control register should be accessed
-#else  // MY_DEF_HERE
+#else  // CONFIG_SYNO_LSP_ARMADA_17_02_02
 	 * eMMC slot control register should be accessed
-#endif // MY_DEF_HERE
+#endif // CONFIG_SYNO_LSP_ARMADA_17_02_02
 	 * instead of Host Control 2
 	 */
-#if defined(MY_DEF_HERE)
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 		ctrl = sdhci_readl(host, XENON_SLOT_EMMC_CTRL);
 		ctrl &= ~XENON_EMMC_VCCQ_MASK;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 		ctrl = sdhci_readl(host, SDHCI_SLOT_EMMC_CTRL);
 		ctrl &= ~SDHCI_EMMC_VCCQ_MASK;
-#endif /* MY_DEF_HERE */
-#else /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	ctrl = sdhci_readl(host, SDHC_SLOT_eMMC_CTRL);
 	ctrl &= ~eMMC_VCCQ_MASK;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	ctrl |= voltage_code;
-#if defined(MY_DEF_HERE)
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 		sdhci_writel(host, ctrl, XENON_SLOT_EMMC_CTRL);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 		sdhci_writel(host, ctrl, SDHCI_SLOT_EMMC_CTRL);
-#endif /* MY_DEF_HERE */
-#else /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	sdhci_writel(host, ctrl, SDHC_SLOT_eMMC_CTRL);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 
 	/* There is no standard to determine this waiting period */
 	usleep_range(1000, 2000);
 
 	/* Check whether io voltage switch is done */
-#if defined(MY_DEF_HERE)
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 		ctrl = sdhci_readl(host, XENON_SLOT_EMMC_CTRL);
 		ctrl &= XENON_EMMC_VCCQ_MASK;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 		ctrl = sdhci_readl(host, SDHCI_SLOT_EMMC_CTRL);
 		ctrl &= SDHCI_EMMC_VCCQ_MASK;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 		/*
 		 * This bit is set only when regulator feeds back
 		 * the voltage switch results to Xenon SDHC.
@@ -651,7 +648,7 @@ static int __emmc_signal_voltage_switch(struct mmc_host *mmc,
 		 * If the bit is not set, just throw a message.
 		 * Besides, error code should not be returned.
 		 */
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	ctrl = sdhci_readl(host, SDHC_SLOT_eMMC_CTRL);
 	ctrl &= eMMC_VCCQ_MASK;
 	/*
@@ -663,18 +660,18 @@ static int __emmc_signal_voltage_switch(struct mmc_host *mmc,
 	 * If the bit is not set, just throw a warning.
 	 * Besides, error code should neither be returned.
 	 */
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	if (ctrl != voltage_code)
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 			dev_info(mmc_dev(mmc), "fail to detect eMMC signal voltage stable\n");
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 		pr_info("%s: Xenon fail to detect eMMC signal voltage stable\n",
 					mmc_hostname(mmc));
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	return 0;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	}
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 }
 
 static int xenon_emmc_signal_voltage_switch(struct mmc_host *mmc,
@@ -685,14 +682,14 @@ static int xenon_emmc_signal_voltage_switch(struct mmc_host *mmc,
 	if ((voltage == MMC_SIGNAL_VOLTAGE_330) ||
 		(voltage == MMC_SIGNAL_VOLTAGE_180))
 		return __emmc_signal_voltage_switch(mmc, voltage);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	dev_err(mmc_dev(mmc), "Unsupported signal voltage: %d\n", voltage);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	pr_err("%s: Xenon Unsupported signal voltage: %d\n",
 				mmc_hostname(mmc), voltage);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	return -EINVAL;
 }
 
@@ -710,60 +707,60 @@ static int xenon_start_signal_voltage_switch(struct mmc_host *mmc,
 	 * If Internal clock is disabled, the 3.3V/1.8V bit can not be updated.
 	 * Thus here manually enable internal clock.
 	 *
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	 * After switch completes, it is unnecessary to disable internal clock,
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	 * After switch completes, it is unnessary to disable internal clock,
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	 * since keeping internal clock active obeys SD spec.
 	 */
 	enable_xenon_internal_clk(host);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 // do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	if (priv->card_candidate) {
 		if (mmc_card_mmc(priv->card_candidate)) {
 			/* Set SoC PAD register for MMC PHY voltage */
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 			xenon_soc_pad_ctrl(host, ios->signal_voltage);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	if (priv->init_card_type == MMC_TYPE_MMC)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 			return xenon_emmc_signal_voltage_switch(mmc, ios);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 // do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 		}
 	}
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 
 	return sdhci_start_signal_voltage_switch(mmc, ios);
 }
 
 /*
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
  * Update card type.
  * priv->init_card_type will be used in PHY timing adjustment.
-#else  // MY_DEF_HERE
+#else  // CONFIG_SYNO_LSP_ARMADA_17_02_02
  * After determining the slot is used for SDIO,
  * some addtional task is required.
-#endif // MY_DEF_HERE
+#endif // CONFIG_SYNO_LSP_ARMADA_17_02_02
  */
 static void xenon_init_card(struct mmc_host *mmc, struct mmc_card *card)
 {
 	struct sdhci_host *host = mmc_priv(mmc);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	u32 reg;
 	u8 slot_idx;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
 	struct sdhci_xenon_priv *priv = sdhci_pltfm_priv(pltfm_host);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	/* Update card type*/
 	priv->init_card_type = card->type;
 }
@@ -775,7 +772,7 @@ static int xenon_execute_tuning(struct mmc_host *mmc, u32 opcode)
 	if (host->timing == MMC_TIMING_UHS_DDR50)
 		return 0;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	/*
 	 * Currently force Xenon driver back to support mode 1 only,
 	 * even though Xenon might claim to support mode 2 or mode 3.
@@ -784,10 +781,10 @@ static int xenon_execute_tuning(struct mmc_host *mmc, u32 opcode)
 	if (host->tuning_mode != SDHCI_TUNING_MODE_1)
 		xenon_sdhc_retune_setup(host);
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	return sdhci_execute_tuning(mmc, opcode);
 }
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	/* Link the card for delay adjustment */
 	priv->card_candidate = card;
 	/* Set Xenon tuning */
@@ -828,8 +825,8 @@ static int xenon_execute_tuning(struct mmc_host *mmc, u32 opcode)
 		 */
 		host->quirks &= ~SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12;
 		host->flags &= ~SDHCI_AUTO_CMD12;
-#endif /* MY_DEF_HERE */
-#if defined(MY_DEF_HERE)
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 static void xenon_enable_sdio_irq(struct mmc_host *mmc, int enable)
 {
 	struct sdhci_host *host = mmc_priv(mmc);
@@ -841,42 +838,42 @@ static void xenon_enable_sdio_irq(struct mmc_host *mmc, int enable)
 	sdhci_enable_sdio_irq(mmc, enable);
 
 	if (enable) {
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 		/*
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 		 * Set SDIO Card Inserted indication
 		 * to enable detecting SDIO async irq.
-#else  // MY_DEF_HERE
+#else  // CONFIG_SYNO_LSP_ARMADA_17_02_02
 		 * Set SDIO Card Insterted indication
 		 * to inform that the current slot is for SDIO
-#endif // MY_DEF_HERE
+#endif // CONFIG_SYNO_LSP_ARMADA_17_02_02
 		 */
-#if defined(MY_DEF_HERE)
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 		reg = sdhci_readl(host, XENON_SYS_CFG_INFO);
 		reg |= (1 << (sdhc_id + XENON_SLOT_TYPE_SDIO_SHIFT));
 		sdhci_writel(host, reg, XENON_SYS_CFG_INFO);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 		reg = sdhci_readl(host, SDHCI_SYS_CFG_INFO);
 		reg |= (1 << (sdhc_id + SDHCI_SLOT_TYPE_SDIO_SHIFT));
 		sdhci_writel(host, reg, SDHCI_SYS_CFG_INFO);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	} else {
 		/* Clear SDIO Card Inserted indication */
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 		reg = sdhci_readl(host, XENON_SYS_CFG_INFO);
 		reg &= ~(1 << (sdhc_id + XENON_SLOT_TYPE_SDIO_SHIFT));
 		sdhci_writel(host, reg, XENON_SYS_CFG_INFO);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 		reg = sdhci_readl(host, SDHCI_SYS_CFG_INFO);
 		reg &= ~(1 << (sdhc_id + SDHCI_SLOT_TYPE_SDIO_SHIFT));
 		sdhci_writel(host, reg, SDHCI_SYS_CFG_INFO);
-#endif /* MY_DEF_HERE */
-#else /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 		reg = sdhci_readl(host, SDHC_SYS_CFG_INFO);
 		reg |= (1 << (slot_idx + SLOT_TYPE_SDIO_SHIFT));
 		sdhci_writel(host, reg, SDHC_SYS_CFG_INFO);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	}
 }
 
@@ -886,27 +883,27 @@ static void xenon_replace_mmc_host_ops(struct sdhci_host *host)
 	host->mmc_host_ops.start_signal_voltage_switch =
 			xenon_start_signal_voltage_switch;
 	host->mmc_host_ops.init_card = xenon_init_card;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	host->mmc_host_ops.execute_tuning = xenon_execute_tuning;
 	host->mmc_host_ops.enable_sdio_irq = xenon_enable_sdio_irq;
 }
 
 /*
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
  * Parse Xenon specific DT properties:
  * init_card_type: check whether this SDHC is for eMMC
  * sdhc-id: the index of current SDHC.
  *	    Refer to XENON_SYS_CFG_INFO register
  * tun-count: the interval between re-tuning
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
  * Parse child node in Xenon DT.
  * Search for the following item(s):
  * - eMMC card type
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
  */
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 static int xenon_child_node_of_parse(struct platform_device *pdev)
 {
 	struct device_node *np = pdev->dev.of_node;
@@ -941,14 +938,14 @@ static int xenon_child_node_of_parse(struct platform_device *pdev)
 	}
 
 	return 0;
-#endif /* MY_DEF_HERE */
-#endif /* MY_DEF_HERE */
-#if defined(MY_DEF_HERE)
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 }
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 static int xenon_probe_dt(struct platform_device *pdev)
 {
 	struct device_node *np = pdev->dev.of_node;
@@ -956,30 +953,30 @@ static int xenon_probe_dt(struct platform_device *pdev)
 	struct mmc_host *mmc = host->mmc;
 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
 	struct sdhci_xenon_priv *priv = sdhci_pltfm_priv(pltfm_host);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	int err;
-#endif /* MY_DEF_HERE */
-#if defined(MY_DEF_HERE)
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	u32 sdhc_id, nr_sdhc;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	u32 slot_idx;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	u32 tuning_count;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	/* Disable HS200 on Armada AP806 */
 	if (of_device_is_compatible(np, "marvell,armada-ap806-sdhci"))
 		host->quirks2 |= SDHCI_QUIRK2_BROKEN_HS200;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	/* Standard MMC property */
 	err = mmc_of_parse(mmc);
 	if (err)
 		return err;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	priv->init_card_type = XENON_CARD_TYPE_UNKNOWN;
 	/* Check if mmc-card sub-node exists */
 	if (mmc_of_parse_mmc_card(mmc)) {
@@ -990,68 +987,68 @@ static int xenon_probe_dt(struct platform_device *pdev)
 		 */
 		mmc->caps &= ~MMC_CAP_BUS_WIDTH_TEST;
 	}
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	/* Standard SDHCI property */
 	sdhci_get_of_property(pdev);
 
 	/*
 	 * Xenon Specific property:
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	 * init_card_type: check whether this SDHC is for eMMC
 	 * sdhc-id: the index of current SDHC.
 	 *	    Refer to SDHCI_SYS_CFG_INFO register
 	 * tun-count: the interval between re-tuning
-#else  // MY_DEF_HERE
+#else  // CONFIG_SYNO_LSP_ARMADA_17_02_02
 	 * slotno: the index of slot. Refer to SDHC_SYS_CFG_INFO register
 	 * tuning-count: the interval between re-tuning
 	 * PHY type: "sdhc phy", "emmc phy 5.0" or "emmc phy 5.1"
-#endif // MY_DEF_HERE
+#endif // CONFIG_SYNO_LSP_ARMADA_17_02_02
 	 */
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	/* Parse child node, including checking emmc type */
 	err = xenon_child_node_of_parse(pdev);
 	if (err)
 		return err;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 
 	priv->sdhc_id = 0x0;
 	if (!of_property_read_u32(np, "marvell,xenon-sdhc-id", &sdhc_id)) {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 		nr_sdhc = sdhci_readl(host, XENON_SYS_CFG_INFO);
 		nr_sdhc &= XENON_NR_SUPPORTED_SLOT_MASK;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 		nr_sdhc = sdhci_readl(host, SDHCI_SYS_CFG_INFO);
 		nr_sdhc &= SDHCI_NR_SUPPORTED_SLOT_MASK;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 		if (unlikely(sdhc_id > nr_sdhc)) {
 			dev_err(mmc_dev(mmc), "SDHC Index %d exceeds Number of SDHCs %d\n",
 				sdhc_id, nr_sdhc);
 			return -EINVAL;
 		}
 	}
-#if defined(MY_DEF_HERE)
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	tuning_count = XENON_DEF_TUNING_COUNT;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	tuning_count = SDHCI_DEF_TUNING_COUNT;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	if (!of_property_read_u32(np, "marvell,xenon-tun-count",
 				  &tuning_count)) {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 		if (unlikely(tuning_count >= XENON_TMR_RETUN_NO_PRESENT)) {
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 		if (unlikely(tuning_count >= SDHCI_TMR_RETUN_NO_PRESENT)) {
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 			dev_err(mmc_dev(mmc), "Wrong Re-tuning Count. Set default value %d\n",
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 				XENON_DEF_TUNING_COUNT);
 			tuning_count = XENON_DEF_TUNING_COUNT;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 				SDHCI_DEF_TUNING_COUNT);
 			tuning_count = SDHCI_DEF_TUNING_COUNT;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 		}
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	if (!of_property_read_u32(np, "xenon,slotno", &slot_idx))
 		priv->slot_idx = slot_idx & 0xff;
 	else
@@ -1062,91 +1059,91 @@ static int xenon_probe_dt(struct platform_device *pdev)
 			pr_err("%s: Wrong Re-tuning Count. Set default value %d\n",
 				mmc_hostname(mmc), DEF_TUNING_COUNT);
 			tuning_count = DEF_TUNING_COUNT;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 		}
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	priv->tuning_count = tuning_count;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 		priv->tuning_count = tuning_count & 0xf;
 	} else
 		priv->tuning_count = DEF_TUNING_COUNT;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	return xenon_phy_parse_dt(np, host);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	err = xenon_phy_parse_dt(np, priv);
 	return err;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 static int xenon_sdhc_probe(struct sdhci_host *host)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 static int xenon_slot_probe(struct sdhci_host *host)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 {
 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
 	struct sdhci_xenon_priv *priv = sdhci_pltfm_priv(pltfm_host);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	u8 sdhc_id = priv->sdhc_id;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	u8 slot_idx = priv->slot_idx;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	/* Enable SDHC */
 	xenon_enable_sdhc(host, sdhc_id);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	/* Enable slot */
 	xenon_enable_slot(host, slot_idx);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 
 	/* Enable ACG */
 	xenon_set_acg(host, true);
 
 	/* Enable Parallel Transfer Mode */
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	xenon_enable_sdhc_parallel_tran(host, sdhc_id);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	xenon_enable_slot_parallel_tran(host, slot_idx);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 
-#if defined(MY_DEF_HERE)
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	xenon_mask_cmd_conflict_err(host);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	/* Set tuning functionality of this SDHC */
 	xenon_sdhc_tuning_setup(host);
-#endif /* MY_DEF_HERE */
-#else /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	priv->timing = MMC_TIMING_FAKE;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 
 	return 0;
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 static void xenon_sdhc_remove(struct sdhci_host *host)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 static void xenon_slot_remove(struct sdhci_host *host)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 {
 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
 	struct sdhci_xenon_priv *priv = sdhci_pltfm_priv(pltfm_host);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	u8 sdhc_id = priv->sdhc_id;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	u8 slot_idx = priv->slot_idx;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	/* disable SDHC */
 	xenon_disable_sdhc(host, sdhc_id);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	/* disable slot */
 	xenon_disable_slot(host, slot_idx);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 }
 
 static int sdhci_xenon_probe(struct platform_device *pdev)
@@ -1164,10 +1161,10 @@ static int sdhci_xenon_probe(struct platform_device *pdev)
 	pltfm_host = sdhci_priv(host);
 	priv = sdhci_pltfm_priv(pltfm_host);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	xenon_set_acg(host, false);
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	/*
 	 * Link Xenon specific mmc_host_ops function,
 	 * to replace standard ones in sdhci_ops.
@@ -1175,9 +1172,9 @@ static int sdhci_xenon_probe(struct platform_device *pdev)
 	xenon_replace_mmc_host_ops(host);
 
 	pltfm_host->clk = devm_clk_get(&pdev->dev, "core");
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	if (IS_ERR(pltfm_host->clk)) {
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	if (!IS_ERR(pltfm_host->clk)) {
 		err = clk_prepare_enable(pltfm_host->clk);
 		if (err)
@@ -1188,16 +1185,16 @@ static int sdhci_xenon_probe(struct platform_device *pdev)
 	} else {
 		pr_err("%s: Failed to setup input clk.\n",
 			mmc_hostname(host->mmc));
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 		err = PTR_ERR(pltfm_host->clk);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 		dev_err(&pdev->dev, "Failed to setup input clk: %d\n", err);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 		goto free_pltfm;
 	}
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	err = clk_prepare_enable(pltfm_host->clk);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 
 	/*
 	 * Some SOCs require additional clock to
@@ -1207,16 +1204,16 @@ static int sdhci_xenon_probe(struct platform_device *pdev)
 	priv->axi_clk = devm_clk_get(&pdev->dev, "axi");
 	if (!IS_ERR(priv->axi_clk)) {
 		err = clk_prepare_enable(priv->axi_clk);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 		if (err)
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 		goto free_pltfm;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 			goto err_clk;
 	}
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	err = mmc_of_parse(host->mmc);
 	if (err)
 		goto err_clk;
@@ -1224,24 +1221,24 @@ static int sdhci_xenon_probe(struct platform_device *pdev)
 	sdhci_get_of_property(pdev);
 
 	/* Xenon specific dt parse */
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	err = xenon_probe_dt(pdev);
 	if (err)
 		goto err_clk;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	err = xenon_sdhc_probe(host);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	err = xenon_slot_probe(host);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	if (err)
 		goto err_clk;
 
 	err = sdhci_add_host(host);
 	if (err)
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 		goto remove_sdhc;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 		goto remove_slot;
 
 	/* Set tuning functionality of this slot */
@@ -1252,30 +1249,30 @@ static int sdhci_xenon_probe(struct platform_device *pdev)
 	 * For SD/SDIO, it is set to 3.3V
 	 */
 	xenon_soc_pad_ctrl(host, MMC_SIGNAL_VOLTAGE_330);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 
 	return 0;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 remove_sdhc:
 	xenon_sdhc_remove(host);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 remove_slot:
 	xenon_slot_remove(host);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 err_clk:
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 // do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	if (!IS_ERR(pltfm_host->clk))
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 		clk_disable_unprepare(pltfm_host->clk);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 // do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	if (!IS_ERR(priv->axi_clk))
 		clk_disable_unprepare(priv->axi_clk);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 free_pltfm:
 	sdhci_pltfm_free(pdev);
 	return err;
@@ -1285,42 +1282,42 @@ static int sdhci_xenon_remove(struct platform_device *pdev)
 {
 	struct sdhci_host *host = platform_get_drvdata(pdev);
 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-#if defined(MY_DEF_HERE)
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	int dead = (readl(host->ioaddr + SDHCI_INT_STATUS) == 0xFFFFFFFF);
-#endif /* MY_DEF_HERE */
-#else /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	struct sdhci_xenon_priv *priv = sdhci_pltfm_priv(pltfm_host);
 	int dead = (readl(host->ioaddr + SDHCI_INT_STATUS) == 0xffffffff);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	xenon_sdhc_remove(host);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	xenon_slot_remove(host);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	sdhci_remove_host(host, 0);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	sdhci_remove_host(host, dead);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 
 	clk_disable_unprepare(pltfm_host->clk);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	clk_disable_unprepare(priv->axi_clk);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 
 	sdhci_pltfm_free(pdev);
 
 	return 0;
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 #ifdef CONFIG_PM
 static int sdhci_xenon_suspend(struct device *dev)
 {
@@ -1363,42 +1360,42 @@ static const struct dev_pm_ops sdhci_xenon_pmops = {
 };
 #endif
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 static const struct of_device_id sdhci_xenon_dt_ids[] = {
-#if defined(MY_DEF_HERE)
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	{ .compatible = "marvell,armada-ap806-sdhci",},
 	{ .compatible = "marvell,armada-cp110-sdhci",},
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	{ .compatible = "marvell,armada8k-sdhci",},
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	{ .compatible = "marvell,armada-3700-sdhci",},
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	{ .compatible = "marvell,xenon-sdhci",},
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	{}
 };
 MODULE_DEVICE_TABLE(of, sdhci_xenon_dt_ids);
 
 static struct platform_driver sdhci_xenon_driver = {
 	.driver	= {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 		.name	= "xenon-sdhci",
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 		.name	= "mv-xenon-sdhci",
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 		.of_match_table = sdhci_xenon_dt_ids,
-#if defined(MY_DEF_HERE)
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 #ifdef CONFIG_PM
 		.pm = &sdhci_xenon_pmops,
 #endif
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 		.pm = &sdhci_pltfm_pmops,
-#endif /* MY_DEF_HERE */
-#else /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 		.pm = SDHCI_PLTFM_PMOPS,
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	},
 	.probe	= sdhci_xenon_probe,
 	.remove	= sdhci_xenon_remove,
@@ -1409,4 +1406,4 @@ module_platform_driver(sdhci_xenon_driver);
 MODULE_DESCRIPTION("SDHCI platform driver for Marvell Xenon SDHC");
 MODULE_AUTHOR("Hu Ziji <huziji@marvell.com>");
 MODULE_LICENSE("GPL v2");
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */

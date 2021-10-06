@@ -1,4 +1,4 @@
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 /*
  * kernel-rpc.h
  *
@@ -9,7 +9,7 @@
  * only version 2 as published by the Free Software Foundation.
  *
  */
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */
 
 #ifndef _KERNEL_RPC_H_
 #define _KERNEL_RPC_H_

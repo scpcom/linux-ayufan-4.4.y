@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /* 10G controller driver for Samsung SoCs
  *
  * Copyright (C) 2013 Samsung Electronics Co., Ltd.
@@ -183,11 +180,11 @@ int sxgbe_mdio_register(struct net_device *ndev)
 	}
 
 	for (phy_addr = 0; phy_addr < PHY_MAX_ADDR; phy_addr++) {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 		struct phy_device *phy = mdiobus_get_phy(mdio_bus, phy_addr);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		struct phy_device *phy = mdio_bus->phy_map[phy_addr];
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 		if (phy) {
 			char irq_num[4];
@@ -223,11 +220,11 @@ int sxgbe_mdio_register(struct net_device *ndev)
 			}
 			netdev_info(ndev, "PHY ID %08x at %d IRQ %s (%s)%s\n",
 				    phy->phy_id, phy_addr, irq_str,
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 				    phydev_name(phy), act ? " active" : "");
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 				    dev_name(&phy->dev), act ? " active" : "");
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 			phy_found = true;
 		}
 	}

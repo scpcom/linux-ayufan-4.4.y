@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * Driver for the Diolan DLN-2 USB-GPIO adapter
  *
@@ -380,11 +377,11 @@ static void dln2_irq_bus_unlock(struct irq_data *irqd)
 
 		ret = dln2_gpio_set_event_cfg(dln2, pin, type, 0);
 		if (ret)
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 			dev_err(dln2->gpio.parent, "failed to set event\n");
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 			dev_err(dln2->gpio.dev, "failed to set event\n");
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	}
 
 	mutex_unlock(&dln2->irq_lock);
@@ -413,31 +410,31 @@ static void dln2_gpio_event(struct platform_device *pdev, u16 echo,
 	struct dln2_gpio *dln2 = platform_get_drvdata(pdev);
 
 	if (len < sizeof(*event)) {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 		dev_err(dln2->gpio.parent, "short event message\n");
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		dev_err(dln2->gpio.dev, "short event message\n");
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		return;
 	}
 
 	pin = le16_to_cpu(event->pin);
 	if (pin >= dln2->gpio.ngpio) {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 		dev_err(dln2->gpio.parent, "out of bounds pin %d\n", pin);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		dev_err(dln2->gpio.dev, "out of bounds pin %d\n", pin);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		return;
 	}
 
 	irq = irq_find_mapping(dln2->gpio.irqdomain, pin);
 	if (!irq) {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 		dev_err(dln2->gpio.parent, "pin %d not mapped to IRQ\n", pin);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		dev_err(dln2->gpio.dev, "pin %d not mapped to IRQ\n", pin);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		return;
 	}
 
@@ -481,11 +478,11 @@ static int dln2_gpio_probe(struct platform_device *pdev)
 	dln2->pdev = pdev;
 
 	dln2->gpio.label = "dln2";
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	dln2->gpio.parent = dev;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	dln2->gpio.dev = dev;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	dln2->gpio.owner = THIS_MODULE;
 	dln2->gpio.base = -1;
 	dln2->gpio.ngpio = pins;

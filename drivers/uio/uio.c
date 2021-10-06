@@ -381,7 +381,7 @@ static int uio_get_minor(struct uio_device *idev)
 	return retval;
 }
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(MY_DEF_HERE) || defined(CONFIG_SYNO_LSP_RTD1619)
 #if defined(CONFIG_UIO_ASSIGN_MINOR)
 static int uio_use_minor(struct uio_device *idev, int minor)
 {
@@ -401,7 +401,7 @@ static int uio_use_minor(struct uio_device *idev, int minor)
 	return retval;
 }
 #endif /* CONFIG_UIO_ASSIGN_MINOR */
-#endif /* MY_DEF_HERE || MY_DEF_HERE */
+#endif /* MY_DEF_HERE || CONFIG_SYNO_LSP_RTD1619 */
 
 static void uio_free_minor(struct uio_device *idev)
 {
@@ -841,19 +841,19 @@ int __uio_register_device(struct module *owner,
 	init_waitqueue_head(&idev->wait);
 	atomic_set(&idev->event, 0);
 
-#if defined(CONFIG_UIO_ASSIGN_MINOR) && (defined(MY_DEF_HERE) || defined(MY_DEF_HERE))
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_UIO_ASSIGN_MINOR) && (defined(MY_DEF_HERE) || defined(CONFIG_SYNO_LSP_RTD1619))
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 	if(info->minor > 0) {
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_RTD1619 */
 	if(info->minor >= 0) {
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */
 		ret = uio_use_minor(idev, info->minor);
 	} else {
 		ret = uio_get_minor(idev);
 	}
-#else /* CONFIG_UIO_ASSIGN_MINOR && (MY_DEF_HERE || MY_DEF_HERE) */
+#else /* CONFIG_UIO_ASSIGN_MINOR && (MY_DEF_HERE || CONFIG_SYNO_LSP_RTD1619) */
 	ret = uio_get_minor(idev);
-#endif /* CONFIG_UIO_ASSIGN_MINOR && (MY_DEF_HERE || MY_DEF_HERE) */
+#endif /* CONFIG_UIO_ASSIGN_MINOR && (MY_DEF_HERE || CONFIG_SYNO_LSP_RTD1619) */
 	if (ret)
 		return ret;
 

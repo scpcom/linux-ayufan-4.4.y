@@ -204,7 +204,7 @@ struct gendisk {
 	struct kobject integrity_kobj;
 #endif	 
 	int node_id;
-#if defined(MY_ABC_HERE) || defined(MY_DEF_HERE)
+#if defined(MY_ABC_HERE) || defined(CONFIG_SYNO_PORT_MAPPING_V2)
 	int systemDisk;
 	 
 	int syno_slot_index;

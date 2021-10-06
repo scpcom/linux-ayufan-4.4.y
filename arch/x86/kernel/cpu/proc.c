@@ -1,13 +1,10 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 #include <linux/smp.h>
 #include <linux/timex.h>
 #include <linux/string.h>
 #include <linux/seq_file.h>
 #include <linux/cpufreq.h>
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_DYNAMIC_IDENTIFY_CPU_NAME)
 char syno_cpu_model_name[64];
 #endif  
 
@@ -90,7 +87,7 @@ static int show_cpuinfo(struct seq_file *m, void *v)
 			   freq / 1000, (freq % 1000));
 	}
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_DYNAMIC_IDENTIFY_CPU_NAME)
 	strncpy(syno_cpu_model_name, c->x86_model_id, sizeof(c->x86_model_id));
 #endif  
 
@@ -162,7 +159,7 @@ static void c_stop(struct seq_file *m, void *v)
 {
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_DYNAMIC_IDENTIFY_CPU_NAME)
 static char *syno_get_cpu_model_name(void)
 {
 	return syno_cpu_model_name;

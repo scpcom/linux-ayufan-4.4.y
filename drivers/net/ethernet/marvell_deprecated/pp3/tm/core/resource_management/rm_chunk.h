@@ -1,7 +1,4 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -95,4 +92,4 @@ chunk_ptr rm_new_chunk(uint32_t start_index, uint32_t length, struct rm_chunk *c
 void clear_chunk_list(chunk_ptr list);
 
 #endif   /* RM_CHUNK_H */
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */

@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 #ifndef GRETH_H
 #define GRETH_H
 
@@ -128,11 +125,11 @@ struct greth_private {
 
 	struct phy_device *phy;
 	struct mii_bus *mdio;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	int mdio_irqs[PHY_MAX_ADDR];
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	unsigned int link;
 	unsigned int speed;
 	unsigned int duplex;

@@ -34,7 +34,7 @@ extern int SYNO_CHECK_HDD_DETECT(int index);
 extern int SYNO_CHECK_HDD_PRESENT(int index);
 #endif  
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_PORT_MAPPING_V2
 extern struct ata_port *syno_ata_port_get_by_port(const unsigned short diskPort);
 #endif  
 
@@ -42,7 +42,7 @@ typedef struct __SynoHddMonData {
 	int iProcessingIdx;
 	int blHddHotPlugSupport;
 	int iMaxHddNum;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_PORT_MAPPING_V2
 	int* blHddEnStat;
 #else  
 	int blHddEnStat[SYNO_MAX_HDD_PRZ];
@@ -72,7 +72,7 @@ static int syno_hddmon_data_init(SynoHddMonData_t *pData)
 	}
 #endif  
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_PORT_MAPPING_V2
 	if (gSynoHddPowerupSeq) {
 		pData->iMaxHddNum = gSynoInternalHddNumber;
 		pData->blHddEnStat = kmalloc(sizeof(int) * pData->iMaxHddNum, GFP_KERNEL);
@@ -310,7 +310,7 @@ static void __exit syno_hddman_exit(void)
 		WARN_ON(1);
 		kthread_stop(pHddPrzPolling);
 	}
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_PORT_MAPPING_V2
 	if (synoHddMonData.blHddEnStat) {
 		kfree(synoHddMonData.blHddEnStat);
 	}

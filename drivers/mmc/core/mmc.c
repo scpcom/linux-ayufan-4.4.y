@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  *  linux/drivers/mmc/core/mmc.c
  *
@@ -29,14 +26,14 @@
 #include "mmc_ops.h"
 #include "sd_ops.h"
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 #ifdef CONFIG_MMC_RTK_EMMC
 #include "../host/reg_mmc.h"
 #endif
 
 #define DEFAULT_CMD6_TIMEOUT_MS	500
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */
 static const unsigned int tran_exp[] = {
 	10000,		100000,		1000000,	10000000,
 	0,		0,		0,		0
@@ -251,7 +248,7 @@ static void mmc_select_card_type(struct mmc_card *card)
 	card->mmc_avail_type = avail_type;
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 #ifdef CONFIG_MMC_RTK_EMMC
 void rtkemmc_select_card_type(struct mmc_card *card)
 {
@@ -260,7 +257,7 @@ void rtkemmc_select_card_type(struct mmc_card *card)
 EXPORT_SYMBOL(rtkemmc_select_card_type);
 #endif
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */
 static void mmc_manage_enhanced_area(struct mmc_card *card, u8 *ext_csd)
 {
 	u8 hc_erase_grp_sz, hc_wp_grp_sz;
@@ -573,12 +570,12 @@ static int mmc_decode_ext_csd(struct mmc_card *card, u8 *ext_csd)
 	if (card->ext_csd.rev >= 6) {
 		card->ext_csd.feature_support |= MMC_DISCARD_FEATURE;
 
-#if defined(CONFIG_MMC_RTK_EMMC) && defined(MY_DEF_HERE)
+#if defined(CONFIG_MMC_RTK_EMMC) && defined(CONFIG_SYNO_LSP_RTD1619)
 		card->ext_csd.generic_cmd6_time = 3000;
-#else /* CONFIG_MMC_RTK_EMMC && MY_DEF_HERE */
+#else /* CONFIG_MMC_RTK_EMMC && CONFIG_SYNO_LSP_RTD1619 */
 		card->ext_csd.generic_cmd6_time = 10 *
 			ext_csd[EXT_CSD_GENERIC_CMD6_TIME];
-#endif /* CONFIG_MMC_RTK_EMMC && MY_DEF_HERE */
+#endif /* CONFIG_MMC_RTK_EMMC && CONFIG_SYNO_LSP_RTD1619 */
 		card->ext_csd.power_off_longtime = 10 *
 			ext_csd[EXT_CSD_POWER_OFF_LONG_TIME];
 
@@ -1085,7 +1082,7 @@ static int mmc_switch_status(struct mmc_card *card)
 	return mmc_switch_status_error(card->host, status);
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 #ifdef CONFIG_MMC_RTK_EMMC
 static int mmc_select_ddr50(struct mmc_card *card)
 {
@@ -1113,7 +1110,7 @@ static int mmc_select_ddr50(struct mmc_card *card)
 }
 #endif
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */
 static int mmc_select_hs400(struct mmc_card *card)
 {
 	struct mmc_host *host = card->host;
@@ -1128,7 +1125,7 @@ static int mmc_select_hs400(struct mmc_card *card)
 	if (!(card->mmc_avail_type & EXT_CSD_CARD_TYPE_HS400 &&
 	      host->ios.bus_width == MMC_BUS_WIDTH_8))
 		return 0;
-#if defined(CONFIG_MMC_RTK_EMMC) && defined(MY_DEF_HERE)
+#if defined(CONFIG_MMC_RTK_EMMC) && defined(CONFIG_SYNO_LSP_RTD1619)
 	mmc_set_timing(card->host, MMC_TIMING_MMC_HS);
 	/* Reduce frequency to HS frequency */
 	max_dtr = card->ext_csd.hs_max_dtr;
@@ -1149,7 +1146,7 @@ static int mmc_select_hs400(struct mmc_card *card)
 	err = mmc_switch_status(card);
 	if (err)
 		goto out_err;
-#else /* CONFIG_MMC_RTK_EMMC && MY_DEF_HERE */
+#else /* CONFIG_MMC_RTK_EMMC && CONFIG_SYNO_LSP_RTD1619 */
 	if (host->caps & MMC_CAP_WAIT_WHILE_BUSY)
 		send_status = false;
 
@@ -1177,7 +1174,7 @@ static int mmc_select_hs400(struct mmc_card *card)
 		if (err)
 			goto out_err;
 	}
-#endif /* CONFIG_MMC_RTK_EMMC && MY_DEF_HERE */
+#endif /* CONFIG_MMC_RTK_EMMC && CONFIG_SYNO_LSP_RTD1619 */
 	/* Switch card to DDR */
 	err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
 			 EXT_CSD_BUS_WIDTH,
@@ -1189,7 +1186,7 @@ static int mmc_select_hs400(struct mmc_card *card)
 		return err;
 	}
 
-#if defined(CONFIG_MMC_RTK_EMMC) && defined(MY_DEF_HERE)
+#if defined(CONFIG_MMC_RTK_EMMC) && defined(CONFIG_SYNO_LSP_RTD1619)
 	if(card->ext_csd.raw_driver_strength & 0x2)
 		card->drive_strength = 0x1;	//in realtek chip, some emmc need to strengthen the device ability
 	printk(KERN_ERR "mmc_select_hs400: card->ext_csd.raw_driver_strength=%x\n",card->ext_csd.raw_driver_strength);
@@ -1208,7 +1205,7 @@ static int mmc_select_hs400(struct mmc_card *card)
         /* Set host controller to HS400 timing and frequency */
         mmc_set_timing(host, MMC_TIMING_MMC_HS400);
         mmc_set_bus_speed(card);
-#else /* CONFIG_MMC_RTK_EMMC && MY_DEF_HERE */
+#else /* CONFIG_MMC_RTK_EMMC && CONFIG_SYNO_LSP_RTD1619 */
 	/* Switch card to HS400 */
 	val = EXT_CSD_TIMING_HS400 |
 	      card->drive_strength << EXT_CSD_DRV_STR_SHIFT;
@@ -1231,13 +1228,13 @@ static int mmc_select_hs400(struct mmc_card *card)
 		if (err)
 			goto out_err;
 	}
-#endif /* CONFIG_MMC_RTK_EMMC && MY_DEF_HERE */
-#if defined(MY_DEF_HERE)
+#endif /* CONFIG_MMC_RTK_EMMC && CONFIG_SYNO_LSP_RTD1619 */
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 #ifdef CONFIG_MMC_RTK_EMMC
 	if(host->ops->dqs_tuning)
 		host->ops->dqs_tuning(host);
 #endif
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */
 	return 0;
 
 out_err:
@@ -1266,7 +1263,7 @@ int mmc_hs400_to_hs200(struct mmc_card *card)
 	max_dtr = card->ext_csd.hs_max_dtr;
 	mmc_set_clock(host, max_dtr);
 
-#if defined(CONFIG_MMC_RTK_EMMC) && defined(MY_DEF_HERE)
+#if defined(CONFIG_MMC_RTK_EMMC) && defined(CONFIG_SYNO_LSP_RTD1619)
 	mmc_set_timing(host, MMC_TIMING_MMC_DDR52);
 	val = EXT_CSD_TIMING_HS;
     err = __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL, EXT_CSD_HS_TIMING,
@@ -1292,7 +1289,7 @@ int mmc_hs400_to_hs200(struct mmc_card *card)
             true, true, true);
     if (err)
 	goto out_err;
-#else /* CONFIG_MMC_RTK_EMMC && MY_DEF_HERE */
+#else /* CONFIG_MMC_RTK_EMMC && CONFIG_SYNO_LSP_RTD1619 */
 	/* Switch HS400 to HS DDR */
 	val = EXT_CSD_TIMING_HS;
 	err = __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL, EXT_CSD_HS_TIMING,
@@ -1340,7 +1337,7 @@ int mmc_hs400_to_hs200(struct mmc_card *card)
 		if (err)
 			goto out_err;
 	}
-#endif /* CONFIG_MMC_RTK_EMMC && MY_DEF_HERE */
+#endif /* CONFIG_MMC_RTK_EMMC && CONFIG_SYNO_LSP_RTD1619 */
 	mmc_set_bus_speed(card);
 
 	return 0;
@@ -1406,24 +1403,24 @@ static int mmc_select_hs200(struct mmc_card *card)
 	if (!IS_ERR_VALUE(err)) {
 		val = EXT_CSD_TIMING_HS200 |
 		      card->drive_strength << EXT_CSD_DRV_STR_SHIFT;
-#if defined(CONFIG_MMC_RTK_EMMC) && defined(MY_DEF_HERE)
+#if defined(CONFIG_MMC_RTK_EMMC) && defined(CONFIG_SYNO_LSP_RTD1619)
 		err = __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
 				   EXT_CSD_HS_TIMING, val,
 				   card->ext_csd.generic_cmd6_time,
 				   true, true, true);
-#else /* CONFIG_MMC_RTK_EMMC && MY_DEF_HERE */
+#else /* CONFIG_MMC_RTK_EMMC && CONFIG_SYNO_LSP_RTD1619 */
 		err = __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
 				   EXT_CSD_HS_TIMING, val,
 				   card->ext_csd.generic_cmd6_time,
 				   true, send_status, true);
-#endif /* CONFIG_MMC_RTK_EMMC && MY_DEF_HERE */
+#endif /* CONFIG_MMC_RTK_EMMC && CONFIG_SYNO_LSP_RTD1619 */
 		if (err)
 			goto err;
 		old_timing = host->ios.timing;
 		mmc_set_timing(host, MMC_TIMING_MMC_HS200);
-#if defined(CONFIG_MMC_RTK_EMMC) && defined(MY_DEF_HERE)
+#if defined(CONFIG_MMC_RTK_EMMC) && defined(CONFIG_SYNO_LSP_RTD1619)
 		return err;
-#else /* CONFIG_MMC_RTK_EMMC && MY_DEF_HERE */
+#else /* CONFIG_MMC_RTK_EMMC && CONFIG_SYNO_LSP_RTD1619 */
 		if (!send_status) {
 			err = mmc_switch_status(card);
 			/*
@@ -1433,7 +1430,7 @@ static int mmc_select_hs200(struct mmc_card *card)
 			if (err == -EBADMSG)
 				mmc_set_timing(host, old_timing);
 		}
-#endif /* CONFIG_MMC_RTK_EMMC && MY_DEF_HERE */
+#endif /* CONFIG_MMC_RTK_EMMC && CONFIG_SYNO_LSP_RTD1619 */
 	}
 err:
 	if (err)
@@ -1454,12 +1451,12 @@ static int mmc_select_timing(struct mmc_card *card)
 
 	if (card->mmc_avail_type & EXT_CSD_CARD_TYPE_HS200)
 		err = mmc_select_hs200(card);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 #ifdef CONFIG_MMC_RTK_EMMC
 	else if (card->mmc_avail_type & EXT_CSD_CARD_TYPE_DDR_52)
 		err = mmc_select_ddr50(card);
 #endif
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */
 	else if (card->mmc_avail_type & EXT_CSD_CARD_TYPE_HS)
 		err = mmc_select_hs(card);
 
@@ -1483,7 +1480,7 @@ bus_speed:
 	return err;
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 #ifdef CONFIG_MMC_RTK_EMMC
 int rtkemmc_select_timing(struct mmc_card *card)
 {
@@ -1492,12 +1489,12 @@ int rtkemmc_select_timing(struct mmc_card *card)
 EXPORT_SYMBOL(rtkemmc_select_timing);
 #endif
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */
 /*
  * Execute tuning sequence to seek the proper bus operating
  * conditions for HS200 and HS400, which sends CMD21 to the device.
  */
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 #ifdef CONFIG_MMC_RTK_EMMC
 static int mmc_ddr50_tuning(struct mmc_card *card)
 {
@@ -1505,7 +1502,7 @@ static int mmc_ddr50_tuning(struct mmc_card *card)
 	return mmc_execute_tuning(card);
 }
 #endif
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */
 static int mmc_hs200_tuning(struct mmc_card *card)
 {
 	struct mmc_host *host = card->host;
@@ -1514,7 +1511,7 @@ static int mmc_hs200_tuning(struct mmc_card *card)
 	 * Timing should be adjusted to the HS400 target
 	 * operation frequency for tuning process
 	 */
-#if defined(CONFIG_MMC_RTK_EMMC) && defined(MY_DEF_HERE)
+#if defined(CONFIG_MMC_RTK_EMMC) && defined(CONFIG_SYNO_LSP_RTD1619)
 	if (card->mmc_avail_type & EXT_CSD_CARD_TYPE_HS400 &&
 	    host->ios.bus_width == MMC_BUS_WIDTH_8){
 		if (host->ops->prepare_hs400_tuning) {
@@ -1524,16 +1521,16 @@ static int mmc_hs200_tuning(struct mmc_card *card)
 	} else {
 		card->host->mode = MODE_HS200; //execute tuning hs200
 	}
-#else /* CONFIG_MMC_RTK_EMMC && MY_DEF_HERE */
+#else /* CONFIG_MMC_RTK_EMMC && CONFIG_SYNO_LSP_RTD1619 */
 	if (card->mmc_avail_type & EXT_CSD_CARD_TYPE_HS400 &&
 	    host->ios.bus_width == MMC_BUS_WIDTH_8)
 		if (host->ops->prepare_hs400_tuning)
 			host->ops->prepare_hs400_tuning(host, &host->ios);
-#endif /* CONFIG_MMC_RTK_EMMC && MY_DEF_HERE */
+#endif /* CONFIG_MMC_RTK_EMMC && CONFIG_SYNO_LSP_RTD1619 */
 	return mmc_execute_tuning(card);
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 #ifdef CONFIG_MMC_RTK_EMMC
 int rtkemmc_hs200_tuning(struct mmc_card *card)
 {
@@ -1542,7 +1539,7 @@ int rtkemmc_hs200_tuning(struct mmc_card *card)
 EXPORT_SYMBOL(rtkemmc_hs200_tuning);
 #endif
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */
 /*
  * Handle the detection and initialisation of a card.
  *
@@ -1757,16 +1754,16 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
 	err = mmc_select_timing(card);
 	if (err)
 		goto free_card;
-#if defined(CONFIG_MMC_RTK_EMMC) && defined(MY_DEF_HERE)
+#if defined(CONFIG_MMC_RTK_EMMC) && defined(CONFIG_SYNO_LSP_RTD1619)
 	if (mmc_card_ddr52(card)) {
 		err = mmc_ddr50_tuning(card);
                 if (err)
                         goto free_card;
 	}
 	else if (mmc_card_hs200(card)) {
-#else /* CONFIG_MMC_RTK_EMMC && MY_DEF_HERE */
+#else /* CONFIG_MMC_RTK_EMMC && CONFIG_SYNO_LSP_RTD1619 */
 	if (mmc_card_hs200(card)) {
-#endif /* CONFIG_MMC_RTK_EMMC && MY_DEF_HERE */
+#endif /* CONFIG_MMC_RTK_EMMC && CONFIG_SYNO_LSP_RTD1619 */
 		err = mmc_hs200_tuning(card);
 		if (err)
 			goto free_card;
@@ -2196,7 +2193,7 @@ static const struct mmc_bus_ops mmc_ops = {
 	.reset = mmc_reset,
 };
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 /*
  * Parse mmc-card dt sub-node and set eMMC common caps
  * if mmc-card exists.
@@ -2220,7 +2217,7 @@ bool mmc_of_parse_mmc_card(struct mmc_host *host)
 	return ret;
 }
 EXPORT_SYMBOL_GPL(mmc_of_parse_mmc_card);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 
 /*
  * Starting point for MMC card init.

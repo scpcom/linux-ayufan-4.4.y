@@ -173,7 +173,7 @@ int snd_monitor_raw_data_queue(void);
 #endif
 #endif /* MY_DEF_HERE */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 /**
  * snd-realtek-compress.h - Realtek alsa driver
  *
@@ -364,4 +364,4 @@ int snd_card_create_compress_instance(RTK_snd_card_t *pSnd, int instance_idx);
 int snd_monitor_raw_data_queue(void);
 //int snd_monitor_raw_data_queue_new(rtk_runtime_stream_t *stream);
 #endif
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */

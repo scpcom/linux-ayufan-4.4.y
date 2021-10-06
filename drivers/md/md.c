@@ -9371,7 +9371,7 @@ static LIST_HEAD(all_detected_devices);
 struct detected_devices_node {
 	struct list_head list;
 	dev_t dev;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_PORT_MAPPING_V2
 	int slot;
 #endif  
 };
@@ -9379,7 +9379,7 @@ struct detected_devices_node {
 void md_autodetect_dev(dev_t dev)
 {
 	struct detected_devices_node *node_detected_dev;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_PORT_MAPPING_V2
 	struct gendisk *disk;
 	int partno;
 #endif  
@@ -9387,7 +9387,7 @@ void md_autodetect_dev(dev_t dev)
 	node_detected_dev = kzalloc(sizeof(*node_detected_dev), GFP_KERNEL);
 	if (node_detected_dev) {
 		node_detected_dev->dev = dev;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_PORT_MAPPING_V2
 		disk = get_gendisk(dev, &partno);
 		if (disk) {
 			node_detected_dev->slot = disk->syno_slot_index;
@@ -9421,7 +9421,7 @@ blDenyDisks(const struct block_device *pBDev)
 		goto END;
 	}
 	 
-#if defined(MY_ABC_HERE) || defined(MY_DEF_HERE)
+#if defined(MY_ABC_HERE) || defined(CONFIG_SYNO_NEXTKVMX64)
 	 
 #else
 	if (!(pBDev->bd_disk->systemDisk)) {
@@ -9453,7 +9453,7 @@ static int device_sort_cmp(void *priv, struct list_head *plistHead1, struct list
 		pnode1 = list_entry(plistHead1, struct detected_devices_node, list);
 		pnode2 = list_entry(plistHead2, struct detected_devices_node, list);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_PORT_MAPPING_V2
 		if (pnode1->slot > pnode2->slot) {
 			iRet = 1;
 		} else if (pnode1->slot < pnode2->slot) {

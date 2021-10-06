@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * TI DaVinci GPIO Support
  *
@@ -182,13 +179,13 @@ static int davinci_gpio_of_xlate(struct gpio_chip *gc,
 			     const struct of_phandle_args *gpiospec,
 			     u32 *flags)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	struct davinci_gpio_controller *chips = dev_get_drvdata(gc->parent);
 	struct davinci_gpio_platform_data *pdata = dev_get_platdata(gc->parent);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct davinci_gpio_controller *chips = dev_get_drvdata(gc->dev);
 	struct davinci_gpio_platform_data *pdata = dev_get_platdata(gc->dev);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	if (gpiospec->args[0] > pdata->ngpio)
 		return -EINVAL;

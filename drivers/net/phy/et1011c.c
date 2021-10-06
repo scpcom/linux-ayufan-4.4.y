@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * drivers/net/phy/et1011c.c
  *
@@ -97,11 +94,11 @@ static struct phy_driver et1011c_driver[] = { {
 	.flags		= PHY_POLL,
 	.config_aneg	= et1011c_config_aneg,
 	.read_status	= et1011c_read_status,
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	.driver 	= { .owner = THIS_MODULE,},
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 } };
 
 module_phy_driver(et1011c_driver);

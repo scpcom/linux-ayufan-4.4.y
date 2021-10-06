@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * Pinctrl GPIO driver for Intel Baytrail
  * Copyright (c) 2012-2013, Intel Corporation.
@@ -601,11 +598,11 @@ static int byt_gpio_probe(struct platform_device *pdev)
 	gc->dbg_show = byt_gpio_dbg_show;
 	gc->base = -1;
 	gc->can_sleep = false;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	gc->parent = dev;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	gc->dev = dev;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 #ifdef CONFIG_PM_SLEEP
 	vg->saved_context = devm_kcalloc(&pdev->dev, gc->ngpio,

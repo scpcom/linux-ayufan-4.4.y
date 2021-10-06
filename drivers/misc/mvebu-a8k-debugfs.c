@@ -1,7 +1,4 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 /*
  * debugfs entry for Marvell's Armada-8K CPU system registers access.
  *
@@ -306,4 +303,4 @@ static __init int mvebu_a8k_debugfs_init(void)
 }
 fs_initcall(mvebu_a8k_debugfs_init);
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */

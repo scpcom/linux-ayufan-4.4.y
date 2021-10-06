@@ -1,7 +1,4 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 /*
  * Copyright (C) 2013 Marvell International Ltd. All rights reserved.
  *
@@ -46,12 +43,12 @@
 #include <linux/highmem.h>
 #include <linux/of_gpio.h>
 #include <linux/gpio.h>
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 #include <linux/phy/phy.h>
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 #include <linux/usb/composite.h>
-#endif /* MY_DEF_HERE */
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 
 #include "mvebu_u3d.h"
 
@@ -944,7 +941,7 @@ static int mvc2_ep_disable(struct usb_ep *_ep)
 	return 0;
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 static inline void mvc2_send_erdy(struct mvc2 *cp)
 {
 	/* ep0 erdy should be smp safe, and no lock is needed */
@@ -952,7 +949,7 @@ static inline void mvc2_send_erdy(struct mvc2 *cp)
 		    MVCP_ENDPOINT_0_CONFIG_CHG_STATE, MVCP_ENDPOINT_0_CONFIG);
 }
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 #ifndef ASSEMBLE_REQ
 /* queues (submits) an I/O request to an endpoint */
 static int
@@ -971,7 +968,7 @@ mvc2_ep_queue(struct usb_ep *_ep, struct usb_request *_req, gfp_t gfp_flags)
 	num = _ep->desc->bEndpointAddress & USB_ENDPOINT_NUMBER_MASK;
 	/* Reset the endpoint 0 to prevent previous left data */
 	if (num == 0) {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 		/*
 		 * After USB_GADGET_DELAYED_STATUS is set and the USB upper layer in USB function thread
 		 * finishes the handling, the USB compsite layer will send request to continue with the
@@ -982,13 +979,13 @@ mvc2_ep_queue(struct usb_ep *_ep, struct usb_request *_req, gfp_t gfp_flags)
 		 */
 		if (!req->req.length) {
 			mvc2_send_erdy(cp);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 		if (!req->req.length)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 			return 0;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 		}
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 
 		if (cp->ep0_dir == USB_DIR_IN)
 			ep = &cp->eps[1];
@@ -1047,7 +1044,7 @@ mvc2_ep_queue(struct usb_ep *_ep, struct usb_request *_req, gfp_t gfp_flags)
 	num = _ep->desc->bEndpointAddress & USB_ENDPOINT_NUMBER_MASK;
 	/* Reset the endpoint 0 to prevent previous left data */
 	if (num == 0) {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 		/*
 		 * After USB_GADGET_DELAYED_STATUS is set and the USB upper layer in USB function thread
 		 * finishes the handling, the USB compsite layer will send request to continue with the
@@ -1058,13 +1055,13 @@ mvc2_ep_queue(struct usb_ep *_ep, struct usb_request *_req, gfp_t gfp_flags)
 		 */
 		if (!req->req.length) {
 			mvc2_send_erdy(cp);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 		if (!req->req.length)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 			return 0;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 		}
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 
 		if (cp->ep0_dir == USB_DIR_IN)
 			ep = &cp->eps[1];
@@ -1348,9 +1345,9 @@ static void stop_activity(struct mvc2 *udc, struct usb_gadget_driver *driver)
 		driver->disconnect(&udc->gadget);
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 static inline void mvc2_send_erdy(struct mvc2 *cp)
 {
 	/* ep0 erdy should be smp safe, and no lock is needed */
@@ -1358,7 +1355,7 @@ static inline void mvc2_send_erdy(struct mvc2 *cp)
 		    MVCP_ENDPOINT_0_CONFIG_CHG_STATE, MVCP_ENDPOINT_0_CONFIG);
 }
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 static void mvc2_init_interrupt(struct mvc2 *cp)
 {
 	int i;
@@ -1528,13 +1525,13 @@ static int mvc2_vbus_session(struct usb_gadget *gadget, int is_active)
 
 	val = MV_CP_READ(MVCP_DMA_GLOBAL_CONFIG);
 	if (is_active) {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_10)
 		/* For Armada 3700, need to skip PHY HW reset */
 		if (cp->phy_hw_reset)
 			mvc2_hw_reset(cp);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_10 */
 		mvc2_hw_reset(cp);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_10 */
 		pm_stay_awake(cp->dev);
 		/* turn on dma int */
 		val |= MVCP_DMA_GLOBAL_CONFIG_RUN
@@ -1579,11 +1576,11 @@ static void mvc2_vbus_work(struct work_struct *work)
 	cp = container_of(work, struct mvc2, vbus_work);
 
 	if (gpio_is_valid(cp->vbus_pin))
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 		vbus = gpio_get_value_cansleep(cp->vbus_pin);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 		vbus = gpio_get_value(cp->vbus_pin);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 	else {
 		dev_err(cp->dev, "VBUS interrupt status is missing\n");
 		return;
@@ -1697,21 +1694,21 @@ void mvc2_handle_setup(struct mvc2 *cp)
 		ep_set_halt(cp, 0, 0, 1);
 	/*
 	 * If current setup has no data pharse or failed, we would directly
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 	 * jump to status pharse.
 	 * If the USB_GADGET_DELAYED_STATUS is set, the USB interface requests
 	 * delay for it to handle the setup, thus here should not send erdy to
 	 * continue the transfer. Instead, the erdy will be sent from mvc2_ep_queue,
 	 * once a request with length 0 is issued.
-#else // MY_DEF_HERE
+#else // CONFIG_SYNO_LSP_ARMADA_17_06_01
 	 * jump to status pharse
-#endif // MY_DEF_HERE
+#endif // CONFIG_SYNO_LSP_ARMADA_17_06_01
 	 */
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 	 if ((ret < 0) || (r->wLength == 0 && ret != USB_GADGET_DELAYED_STATUS))
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 	if (r->wLength == 0 || ret < 0)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 		mvc2_send_erdy(cp);
 }
 
@@ -2347,11 +2344,11 @@ void mvc2_connect(struct mvc2 *cp, int is_on)
 		val = MV_CP_READ(cp->reg->global_control);
 		val &= ~MVCP_GLOBAL_CONTROL_SOFT_CONNECT;
 		MV_CP_WRITE(val, cp->reg->global_control);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 		mvc2_hw_reset(cp);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 	}
 }
 
@@ -2388,11 +2385,11 @@ static int mvc2_probe(struct platform_device *pdev)
 	/* phy address for VBUS toggling */
 	res = platform_get_resource(pdev, IORESOURCE_MEM, 1);
 	if (res) {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 		phy_base = devm_ioremap(&pdev->dev, res->start, resource_size(res));
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 		phy_base = devm_ioremap_resource(&pdev->dev, res);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 		if (!phy_base) {
 			dev_err(&pdev->dev, "%s: register mapping failed\n", __func__);
 			ret = -ENXIO;
@@ -2405,72 +2402,72 @@ static int mvc2_probe(struct platform_device *pdev)
 	if (!res) {
 		dev_err(&pdev->dev, "missing mem resource\n");
 		ret = -ENODEV;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 		goto err_clk;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 		goto err_phybase;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 	}
 
 	base = devm_ioremap_resource(&pdev->dev, res);
 	if (!base) {
 		dev_err(&pdev->dev, "%s: register mapping failed\n", __func__);
 		ret = -ENXIO;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 		goto err_clk;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 		goto err_phybase;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 	}
 
 	ver = ioread32(base);
 	if (ver == 0) {
 		dev_err(&pdev->dev, "IP version error!\n");
 		ret = -ENXIO;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 		goto err_clk;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 		goto err_base;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 	}
 
 	cp->mvc2_version = ver & 0xFFFF;
 
 	/* setup vbus gpio */
 	cp->vbus_pin = of_get_named_gpio(pdev->dev.of_node, "vbus-gpio", 0);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 	if ((cp->vbus_pin == -ENODEV) || (cp->vbus_pin == -EPROBE_DEFER)) {
 		ret = -EPROBE_DEFER;
 		goto err_clk;
 	}
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 	if (cp->vbus_pin < 0)
 		cp->vbus_pin = -ENODEV;
 
 	if (gpio_is_valid(cp->vbus_pin)) {
 		cp->prev_vbus = 0;
 		if (!devm_gpio_request(&pdev->dev, cp->vbus_pin, "mvebu-u3d")) {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 			/* Use the 'any_context' version of function to allow
 			 * requesting both direct GPIO interrupt (hardirq) and
 			 * IO-expander's GPIO (nested interrupt)
 			 */
 			ret = devm_request_any_context_irq(&pdev->dev,
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 			ret = devm_request_irq(&pdev->dev,
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 					       gpio_to_irq(cp->vbus_pin),
 					       mvc2_vbus_irq,
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 					       IRQ_TYPE_EDGE_BOTH | IRQF_ONESHOT,
 					       "mvebu-u3d", cp);
 			if (ret < 0) {
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 					       IRQ_TYPE_EDGE_BOTH, "mvebu-u3d",
 					       cp);
 			if (ret) {
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 				cp->vbus_pin = -ENODEV;
 				dev_warn(&pdev->dev,
 					 "failed to request vbus irq; "
@@ -2483,11 +2480,11 @@ static int mvc2_probe(struct platform_device *pdev)
 		if (!cp->qwork) {
 			dev_err(&pdev->dev, "cannot create workqueue\n");
 			ret = -ENOMEM;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 			goto err_clk;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 			goto err_base;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 		}
 
 		INIT_WORK(&cp->vbus_work, mvc2_vbus_work);
@@ -2520,8 +2517,8 @@ static int mvc2_probe(struct platform_device *pdev)
 		cp->reg->global_control = 0x24;
 	}
 
-#if defined(MY_DEF_HERE)
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_10)
 	/* For Armada 3700, need to skip PHY HW reset */
 	if (of_device_is_compatible(pdev->dev.of_node,
 				    "marvell,armada3700-u3d"))
@@ -2529,7 +2526,7 @@ static int mvc2_probe(struct platform_device *pdev)
 	else
 		cp->phy_hw_reset = true;
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_10 */
 	/* Get comphy and init if there is */
 	cp->comphy = devm_of_phy_get(&pdev->dev, pdev->dev.of_node, "usb");
 	if (!IS_ERR(cp->comphy)) {
@@ -2544,7 +2541,7 @@ static int mvc2_probe(struct platform_device *pdev)
 		}
 	}
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	spin_lock_init(&cp->lock);
 
 	/* init irq status */
@@ -2562,12 +2559,12 @@ static int mvc2_probe(struct platform_device *pdev)
 
 	eps_init(cp);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_10)
 	if (cp->phy_hw_reset)
 		mvc2_hw_reset(cp);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_10 */
 	mvc2_hw_reset(cp);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_10 */
 
 	dev_set_drvdata(cp->dev, cp);
 	dev_info(cp->dev, "Detected ver %x from Marvell Central IP.\n", ver);
@@ -2579,21 +2576,21 @@ err_alloc_eps:
 err_qwork:
 	if (cp->qwork)
 		destroy_workqueue(cp->qwork);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 disable_phy:
 	if (cp->comphy) {
 		phy_power_off(cp->comphy);
 		phy_exit(cp->comphy);
 	}
-#endif /* MY_DEF_HERE */
-#if defined(MY_DEF_HERE)
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 err_base:
 	iounmap(base);
 err_phybase:
 	iounmap(phy_base);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 err_clk:
 	clk_disable_unprepare(cp->clk);
 err_mem:
@@ -2604,7 +2601,7 @@ err_mem:
 #ifdef CONFIG_PM
 static int mvc2_suspend(struct device *dev)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	struct mvc2 *cp = (struct mvc2 *)dev_get_drvdata(dev);
 
 	/* Stop the current activities */
@@ -2617,13 +2614,13 @@ static int mvc2_suspend(struct device *dev)
 		phy_exit(cp->comphy);
 	}
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	return 0;
 }
 
 static int mvc2_resume(struct device *dev)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	struct mvc2 *cp = (struct mvc2 *)dev_get_drvdata(dev);
 	int ret;
 
@@ -2641,7 +2638,7 @@ static int mvc2_resume(struct device *dev)
 		}
 	}
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 	/*
 	 * USB device will be started only in mvc2_complete, once all other
 	 * required device drivers have been resumed.
@@ -2649,17 +2646,17 @@ static int mvc2_resume(struct device *dev)
 	 * before mass storage thread has been resumed, which will lead to USB
 	 * transfer time out.
 	*/
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 	/* Start the current device if driver is connected */
 	if (cp->driver)
 		mvc2_start(&cp->gadget, cp->driver);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	return 0;
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 /*
  * The PM core executes complete() callbacks after it has executed
  * the appropriate resume callbacks for all device drivers.
@@ -2684,9 +2681,9 @@ static const struct dev_pm_ops mvc2_pm_ops = {
 	.resume = mvc2_resume,
 	.complete = mvc2_complete
 };
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 SIMPLE_DEV_PM_OPS(mvc2_pm_ops, mvc2_suspend, mvc2_resume);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 #endif
 
 static int mvc2_remove(struct platform_device *dev)
@@ -2701,14 +2698,14 @@ static int mvc2_remove(struct platform_device *dev)
 		destroy_workqueue(cp->qwork);
 	}
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	/* PHY exit if there is */
 	if (cp->comphy) {
 		phy_power_off(cp->comphy);
 		phy_exit(cp->comphy);
 	}
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	return 0;
 }
 
@@ -2718,9 +2715,9 @@ static void mvc2_shutdown(struct platform_device *dev)
 
 static const struct of_device_id mv_usb3_dt_match[] = {
 	{.compatible = "marvell,mvebu-u3d"},
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_10)
 	{.compatible = "marvell,armada3700-u3d"},
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_10 */
 	{},
 };
 
@@ -2746,4 +2743,4 @@ MODULE_ALIAS("platform:mvc2");
 MODULE_DESCRIPTION(DRIVER_DESC);
 MODULE_AUTHOR("Lei Wen <leiwen@marvell.com>");
 MODULE_LICENSE("GPL");
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */

@@ -49,7 +49,7 @@ enum {
 	SD_LBP_DISABLE,		 
 };
 
-#if defined(MY_ABC_HERE) || defined(MY_DEF_HERE)
+#if defined(MY_ABC_HERE) || defined(CONFIG_SYNO_PORT_MAPPING_V2)
 typedef enum __syno_disk_type {
 	SYNO_DISK_UNKNOWN = 0,
 	SYNO_DISK_SATA,
@@ -60,7 +60,7 @@ typedef enum __syno_disk_type {
 #ifdef MY_DEF_HERE
 	SYNO_DISK_CACHE,  
 #endif  
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_REMAP_SATA_TO_SYS_ONLY_DEV
 	SYNO_DISK_SYSTEM,  
 #endif  
 	SYNO_DISK_END,  
@@ -81,10 +81,10 @@ struct scsi_disk {
 	u32		unmap_granularity;
 	u32		unmap_alignment;
 	u32		index;
-#if defined(MY_ABC_HERE) || defined(MY_DEF_HERE)
+#if defined(MY_ABC_HERE) || defined(CONFIG_SYNO_PORT_MAPPING_V2)
 	SYNO_DISK_TYPE	synodisktype;
 #endif  
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_SAS_DISK_NAME) || defined(MY_DEF_HERE) || defined(CONFIG_SYNO_PORT_MAPPING_V2)
 	u32		synoindex;
 #endif  
 	unsigned int	physical_block_size;

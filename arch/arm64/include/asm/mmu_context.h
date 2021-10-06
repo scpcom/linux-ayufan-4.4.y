@@ -76,13 +76,13 @@ static inline bool __cpu_uses_extended_idmap(void)
 /*
  * Set TCR.T0SZ to its default value (based on VA_BITS)
  */
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(MY_DEF_HERE) || defined(CONFIG_SYNO_LSP_RTD1619)
 #if defined(MY_DEF_HERE)
 static inline void __cpu_set_tcr_t0sz(u64 t0sz)
 #endif /* MY_DEF_HERE */
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 static inline void __cpu_set_tcr_t0sz(unsigned long t0sz)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */
 {
 	unsigned long tcr;
 
@@ -97,7 +97,7 @@ static inline void __cpu_set_tcr_t0sz(unsigned long t0sz)
 	: "=&r" (tcr)
 	: "r"(t0sz), "I"(TCR_T0SZ_OFFSET), "I"(TCR_TxSZ_WIDTH));
 }
-#else /* MY_DEF_HERE || MY_DEF_HERE */
+#else /* MY_DEF_HERE || CONFIG_SYNO_LSP_RTD1619 */
 static inline void cpu_set_default_tcr_t0sz(void)
 {
 	unsigned long tcr;
@@ -113,12 +113,12 @@ static inline void cpu_set_default_tcr_t0sz(void)
 	: "=&r" (tcr)
 	: "r"(TCR_T0SZ(VA_BITS)), "I"(TCR_T0SZ_OFFSET), "I"(TCR_TxSZ_WIDTH));
 }
-#endif /* MY_DEF_HERE || MY_DEF_HERE */
+#endif /* MY_DEF_HERE || CONFIG_SYNO_LSP_RTD1619 */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 #define cpu_set_default_tcr_t0sz()	__cpu_set_tcr_t0sz(TCR_T0SZ(VA_BITS))
 #define cpu_set_idmap_tcr_t0sz()	__cpu_set_tcr_t0sz(idmap_t0sz)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */
 
 #if defined(MY_DEF_HERE)
 /*

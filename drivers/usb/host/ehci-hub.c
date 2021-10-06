@@ -858,7 +858,7 @@ cleanup:
 #endif /* CONFIG_USB_HCD_TEST_MODE */
 /*-------------------------------------------------------------------------*/
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 #ifdef CONFIG_USB_PATCH_ON_RTK
 #ifdef CONFIG_USB_EHCI_RTK
 extern int RTK_ehci_usb2_phy_toggle(struct device *ehci_dev, bool isConnect);
@@ -887,7 +887,7 @@ static void RTK_phy_toggle(struct usb_hcd *hcd, u16 wValue, u16 wIndex,
 }
 #endif
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */
 int ehci_hub_control(
 	struct usb_hcd	*hcd,
 	u16		typeReq,
@@ -991,11 +991,11 @@ int ehci_hub_control(
 			}
 			break;
 		case USB_PORT_FEAT_C_CONNECTION:
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 #ifdef CONFIG_USB_PATCH_ON_RTK
 			RTK_phy_toggle(hcd, wValue, wIndex, temp);
 #endif
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */
 			ehci_writel(ehci, temp | PORT_CSC, status_reg);
 			break;
 		case USB_PORT_FEAT_C_OVER_CURRENT:

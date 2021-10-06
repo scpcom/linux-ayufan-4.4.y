@@ -1414,7 +1414,7 @@ END:
 static DEVICE_ATTR(syno_idle_time, S_IRUGO | S_IWUSR, sdev_show_syno_idle_time, sdev_store_syno_idle_time);
 #endif /* MY_ABC_HERE */
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_PORT_MAPPING_V2
 static ssize_t syno_block_info_show(struct device *device, struct device_attribute *attr, char *buf)
 {
 	struct nvme_ctrl *ctrl = dev_get_drvdata(device);
@@ -1429,7 +1429,7 @@ END:
 	return len;
 }
 static DEVICE_ATTR(syno_block_info, S_IRUGO, syno_block_info_show, NULL);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_PORT_MAPPING_V2 */
 
 static ssize_t uuid_show(struct device *dev, struct device_attribute *attr,
 								char *buf)
@@ -1505,9 +1505,9 @@ static struct attribute *nvme_dev_attrs[] = {
 #ifdef MY_ABC_HERE
 	&dev_attr_syno_idle_time.attr,
 #endif /* MY_ABC_HERE */
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_PORT_MAPPING_V2
 	&dev_attr_syno_block_info.attr,
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_PORT_MAPPING_V2 */
 	&dev_attr_model.attr,
 	&dev_attr_serial.attr,
 	&dev_attr_firmware_rev.attr,
@@ -1570,7 +1570,7 @@ static void nvme_alloc_ns(struct nvme_ctrl *ctrl, unsigned nsid)
 	if (!disk)
 		goto out_free_queue;
 
-#if defined(MY_ABC_HERE) || defined(MY_DEF_HERE)
+#if defined(MY_ABC_HERE) || defined(CONFIG_SYNO_PORT_MAPPING_V2)
 	disk->systemDisk = 1;
 #endif /* MY_ABC_HERE */
 	kref_init(&ns->kref);

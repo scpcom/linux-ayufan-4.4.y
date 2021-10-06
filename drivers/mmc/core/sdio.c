@@ -28,14 +28,14 @@
 #include "sdio_ops.h"
 #include "sdio_cis.h"
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 #ifdef CONFIG_MMC_SDHCI_RTK
 void set_SDIO_version(int version);
 int get_SDIO_version(void);
 void rtk_register_set(void);
 #endif
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */
 static int sdio_read_fbr(struct sdio_func *func)
 {
 	int ret;
@@ -165,12 +165,12 @@ static int sdio_read_cccr(struct mmc_card *card, u32 ocr)
 			if (ret)
 				goto out;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 #ifdef CONFIG_MMC_SDHCI_RTK
 			set_SDIO_version(3);
 			rtk_register_set();
 #endif
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */
 			if (mmc_host_uhs(card->host)) {
 				if (data & SDIO_UHS_DDR50)
 					card->sw_caps.sd3_bus_mode
@@ -183,14 +183,14 @@ static int sdio_read_cccr(struct mmc_card *card, u32 ocr)
 				if (data & SDIO_UHS_SDR104)
 					card->sw_caps.sd3_bus_mode
 						|= SD_MODE_UHS_SDR104;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 #ifdef CONFIG_MMC_SDHCI_RTK
 					if(card->host->caps & MMC_CAP_UHS_SDR104) {
 						set_SDIO_version(4);
 						rtk_register_set();
 					}
 #endif
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */
 			}
 
 			ret = mmc_io_rw_direct(card, 0, 0,
@@ -208,12 +208,12 @@ static int sdio_read_cccr(struct mmc_card *card, u32 ocr)
 
 		/* if no uhs mode ensure we check for high speed */
 		if (!card->sw_caps.sd3_bus_mode) {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 #ifdef CONFIG_MMC_SDHCI_RTK
 			set_SDIO_version(2);
 			rtk_register_set();
 #endif
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */
 			if (speed & SDIO_SPEED_SHS) {
 				card->cccr.high_speed = 1;
 				card->sw_caps.hs_max_dtr = 50000000;
@@ -657,13 +657,13 @@ try_again:
 	 * it.
 	 */
 	if (!powered_resume && (rocr & ocr & R4_18V_PRESENT)) {
-#if defined(CONFIG_MMC_SDHCI_RTK) && defined(MY_DEF_HERE)
+#if defined(CONFIG_MMC_SDHCI_RTK) && defined(CONFIG_SYNO_LSP_RTD1619)
 		host->ios.signal_voltage = MMC_SIGNAL_VOLTAGE_180;
 		ocr |= R4_18V_PRESENT;
-#else /* CONFIG_MMC_SDHCI_RTK && MY_DEF_HERE */
+#else /* CONFIG_MMC_SDHCI_RTK && CONFIG_SYNO_LSP_RTD1619 */
 		err = mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_180,
 					ocr_card);
-#endif /* CONFIG_MMC_SDHCI_RTK && MY_DEF_HERE */
+#endif /* CONFIG_MMC_SDHCI_RTK && CONFIG_SYNO_LSP_RTD1619 */
 		if (err == -EAGAIN) {
 			sdio_reset(host);
 			mmc_go_idle(host);

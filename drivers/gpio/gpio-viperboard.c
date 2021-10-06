@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  *  Nano River Technologies viperboard GPIO lib driver
  *
@@ -176,11 +173,11 @@ static void vprbrd_gpioa_set(struct gpio_chip *chip,
 		mutex_unlock(&vb->lock);
 
 		if (ret != sizeof(struct vprbrd_gpioa_msg))
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 			dev_err(chip->parent, "usb error setting pin value\n");
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 			dev_err(chip->dev, "usb error setting pin value\n");
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	}
 }
 
@@ -352,11 +349,11 @@ static void vprbrd_gpiob_set(struct gpio_chip *chip,
 		mutex_unlock(&vb->lock);
 
 		if (ret != sizeof(struct vprbrd_gpiob_msg))
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 			dev_err(chip->parent, "usb error setting pin value\n");
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 			dev_err(chip->dev, "usb error setting pin value\n");
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	}
 }
 
@@ -377,11 +374,11 @@ static int vprbrd_gpiob_direction_input(struct gpio_chip *chip,
 	mutex_unlock(&vb->lock);
 
 	if (ret)
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 		dev_err(chip->parent, "usb error setting pin to input\n");
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		dev_err(chip->dev, "usb error setting pin to input\n");
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	return ret;
 }
@@ -400,11 +397,11 @@ static int vprbrd_gpiob_direction_output(struct gpio_chip *chip,
 
 	ret = vprbrd_gpiob_setdir(vb, offset, 1);
 	if (ret)
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 		dev_err(chip->parent, "usb error setting pin to output\n");
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		dev_err(chip->dev, "usb error setting pin to output\n");
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	mutex_unlock(&vb->lock);
 
@@ -428,11 +425,11 @@ static int vprbrd_gpio_probe(struct platform_device *pdev)
 	vb_gpio->vb = vb;
 	/* registering gpio a */
 	vb_gpio->gpioa.label = "viperboard gpio a";
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	vb_gpio->gpioa.parent = &pdev->dev;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	vb_gpio->gpioa.dev = &pdev->dev;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	vb_gpio->gpioa.owner = THIS_MODULE;
 	vb_gpio->gpioa.base = -1;
 	vb_gpio->gpioa.ngpio = 16;
@@ -443,21 +440,21 @@ static int vprbrd_gpio_probe(struct platform_device *pdev)
 	vb_gpio->gpioa.direction_output = vprbrd_gpioa_direction_output;
 	ret = gpiochip_add(&vb_gpio->gpioa);
 	if (ret < 0) {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 		dev_err(vb_gpio->gpioa.parent, "could not add gpio a");
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		dev_err(vb_gpio->gpioa.dev, "could not add gpio a");
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		goto err_gpioa;
 	}
 
 	/* registering gpio b */
 	vb_gpio->gpiob.label = "viperboard gpio b";
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	vb_gpio->gpiob.parent = &pdev->dev;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	vb_gpio->gpiob.dev = &pdev->dev;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	vb_gpio->gpiob.owner = THIS_MODULE;
 	vb_gpio->gpiob.base = -1;
 	vb_gpio->gpiob.ngpio = 16;
@@ -468,11 +465,11 @@ static int vprbrd_gpio_probe(struct platform_device *pdev)
 	vb_gpio->gpiob.direction_output = vprbrd_gpiob_direction_output;
 	ret = gpiochip_add(&vb_gpio->gpiob);
 	if (ret < 0) {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 		dev_err(vb_gpio->gpiob.parent, "could not add gpio b");
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		dev_err(vb_gpio->gpiob.dev, "could not add gpio b");
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		goto err_gpiob;
 	}
 

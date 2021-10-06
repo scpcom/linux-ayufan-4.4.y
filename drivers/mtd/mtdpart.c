@@ -40,7 +40,7 @@ struct mtd_part {
 	struct list_head list;
 };
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 static inline struct mtd_part *mtd_to_part(const struct mtd_info *mtd)
 {
 	return container_of(mtd, struct mtd_part, mtd);
@@ -52,7 +52,7 @@ static inline struct mtd_part *mtd_to_part(const struct mtd_info *mtd)
 static int part_read(struct mtd_info *mtd, loff_t from, size_t len,
 		size_t *retlen, u_char *buf)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 	struct mtd_part *part = mtd_to_part(mtd);
 #else  
 	struct mtd_part *part = PART(mtd);
@@ -75,7 +75,7 @@ static int part_read(struct mtd_info *mtd, loff_t from, size_t len,
 static int part_point(struct mtd_info *mtd, loff_t from, size_t len,
 		size_t *retlen, void **virt, resource_size_t *phys)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 	struct mtd_part *part = mtd_to_part(mtd);
 #else  
 	struct mtd_part *part = PART(mtd);
@@ -87,7 +87,7 @@ static int part_point(struct mtd_info *mtd, loff_t from, size_t len,
 
 static int part_unpoint(struct mtd_info *mtd, loff_t from, size_t len)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 	struct mtd_part *part = mtd_to_part(mtd);
 #else  
 	struct mtd_part *part = PART(mtd);
@@ -101,7 +101,7 @@ static unsigned long part_get_unmapped_area(struct mtd_info *mtd,
 					    unsigned long offset,
 					    unsigned long flags)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 	struct mtd_part *part = mtd_to_part(mtd);
 #else  
 	struct mtd_part *part = PART(mtd);
@@ -115,7 +115,7 @@ static unsigned long part_get_unmapped_area(struct mtd_info *mtd,
 static int part_read_oob(struct mtd_info *mtd, loff_t from,
 		struct mtd_oob_ops *ops)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 	struct mtd_part *part = mtd_to_part(mtd);
 #else  
 	struct mtd_part *part = PART(mtd);
@@ -130,7 +130,7 @@ static int part_read_oob(struct mtd_info *mtd, loff_t from,
 	if (ops->oobbuf) {
 		size_t len, pages;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 		len = mtd_oobavail(mtd, ops);
 #else  
 		if (ops->mode == MTD_OPS_AUTO_OOB)
@@ -157,7 +157,7 @@ static int part_read_oob(struct mtd_info *mtd, loff_t from,
 static int part_read_user_prot_reg(struct mtd_info *mtd, loff_t from,
 		size_t len, size_t *retlen, u_char *buf)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 	struct mtd_part *part = mtd_to_part(mtd);
 #else  
 	struct mtd_part *part = PART(mtd);
@@ -169,7 +169,7 @@ static int part_read_user_prot_reg(struct mtd_info *mtd, loff_t from,
 static int part_get_user_prot_info(struct mtd_info *mtd, size_t len,
 				   size_t *retlen, struct otp_info *buf)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 	struct mtd_part *part = mtd_to_part(mtd);
 #else  
 	struct mtd_part *part = PART(mtd);
@@ -181,7 +181,7 @@ static int part_get_user_prot_info(struct mtd_info *mtd, size_t len,
 static int part_read_fact_prot_reg(struct mtd_info *mtd, loff_t from,
 		size_t len, size_t *retlen, u_char *buf)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 	struct mtd_part *part = mtd_to_part(mtd);
 #else  
 	struct mtd_part *part = PART(mtd);
@@ -193,7 +193,7 @@ static int part_read_fact_prot_reg(struct mtd_info *mtd, loff_t from,
 static int part_get_fact_prot_info(struct mtd_info *mtd, size_t len,
 				   size_t *retlen, struct otp_info *buf)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 	struct mtd_part *part = mtd_to_part(mtd);
 #else  
 	struct mtd_part *part = PART(mtd);
@@ -205,7 +205,7 @@ static int part_get_fact_prot_info(struct mtd_info *mtd, size_t len,
 static int part_write(struct mtd_info *mtd, loff_t to, size_t len,
 		size_t *retlen, const u_char *buf)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 	struct mtd_part *part = mtd_to_part(mtd);
 #else  
 	struct mtd_part *part = PART(mtd);
@@ -217,7 +217,7 @@ static int part_write(struct mtd_info *mtd, loff_t to, size_t len,
 static int part_panic_write(struct mtd_info *mtd, loff_t to, size_t len,
 		size_t *retlen, const u_char *buf)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 	struct mtd_part *part = mtd_to_part(mtd);
 #else  
 	struct mtd_part *part = PART(mtd);
@@ -229,7 +229,7 @@ static int part_panic_write(struct mtd_info *mtd, loff_t to, size_t len,
 static int part_write_oob(struct mtd_info *mtd, loff_t to,
 		struct mtd_oob_ops *ops)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 	struct mtd_part *part = mtd_to_part(mtd);
 #else  
 	struct mtd_part *part = PART(mtd);
@@ -245,7 +245,7 @@ static int part_write_oob(struct mtd_info *mtd, loff_t to,
 static int part_write_user_prot_reg(struct mtd_info *mtd, loff_t from,
 		size_t len, size_t *retlen, u_char *buf)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 	struct mtd_part *part = mtd_to_part(mtd);
 #else  
 	struct mtd_part *part = PART(mtd);
@@ -257,7 +257,7 @@ static int part_write_user_prot_reg(struct mtd_info *mtd, loff_t from,
 static int part_lock_user_prot_reg(struct mtd_info *mtd, loff_t from,
 		size_t len)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 	struct mtd_part *part = mtd_to_part(mtd);
 #else  
 	struct mtd_part *part = PART(mtd);
@@ -268,7 +268,7 @@ static int part_lock_user_prot_reg(struct mtd_info *mtd, loff_t from,
 static int part_writev(struct mtd_info *mtd, const struct kvec *vecs,
 		unsigned long count, loff_t to, size_t *retlen)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 	struct mtd_part *part = mtd_to_part(mtd);
 #else  
 	struct mtd_part *part = PART(mtd);
@@ -279,7 +279,7 @@ static int part_writev(struct mtd_info *mtd, const struct kvec *vecs,
 
 static int part_erase(struct mtd_info *mtd, struct erase_info *instr)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 	struct mtd_part *part = mtd_to_part(mtd);
 #else  
 	struct mtd_part *part = PART(mtd);
@@ -299,7 +299,7 @@ static int part_erase(struct mtd_info *mtd, struct erase_info *instr)
 void mtd_erase_callback(struct erase_info *instr)
 {
 	if (instr->mtd->_erase == part_erase) {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 		struct mtd_part *part = mtd_to_part(instr->mtd);
 #else  
 		struct mtd_part *part = PART(instr->mtd);
@@ -316,7 +316,7 @@ EXPORT_SYMBOL_GPL(mtd_erase_callback);
 
 static int part_lock(struct mtd_info *mtd, loff_t ofs, uint64_t len)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 	struct mtd_part *part = mtd_to_part(mtd);
 #else  
 	struct mtd_part *part = PART(mtd);
@@ -326,7 +326,7 @@ static int part_lock(struct mtd_info *mtd, loff_t ofs, uint64_t len)
 
 static int part_unlock(struct mtd_info *mtd, loff_t ofs, uint64_t len)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 	struct mtd_part *part = mtd_to_part(mtd);
 #else  
 	struct mtd_part *part = PART(mtd);
@@ -336,7 +336,7 @@ static int part_unlock(struct mtd_info *mtd, loff_t ofs, uint64_t len)
 
 static int part_is_locked(struct mtd_info *mtd, loff_t ofs, uint64_t len)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 	struct mtd_part *part = mtd_to_part(mtd);
 #else  
 	struct mtd_part *part = PART(mtd);
@@ -346,7 +346,7 @@ static int part_is_locked(struct mtd_info *mtd, loff_t ofs, uint64_t len)
 
 static void part_sync(struct mtd_info *mtd)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 	struct mtd_part *part = mtd_to_part(mtd);
 #else  
 	struct mtd_part *part = PART(mtd);
@@ -356,7 +356,7 @@ static void part_sync(struct mtd_info *mtd)
 
 static int part_suspend(struct mtd_info *mtd)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 	struct mtd_part *part = mtd_to_part(mtd);
 #else  
 	struct mtd_part *part = PART(mtd);
@@ -366,7 +366,7 @@ static int part_suspend(struct mtd_info *mtd)
 
 static void part_resume(struct mtd_info *mtd)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 	struct mtd_part *part = mtd_to_part(mtd);
 #else  
 	struct mtd_part *part = PART(mtd);
@@ -376,7 +376,7 @@ static void part_resume(struct mtd_info *mtd)
 
 static int part_block_isreserved(struct mtd_info *mtd, loff_t ofs)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 	struct mtd_part *part = mtd_to_part(mtd);
 #else  
 	struct mtd_part *part = PART(mtd);
@@ -387,7 +387,7 @@ static int part_block_isreserved(struct mtd_info *mtd, loff_t ofs)
 
 static int part_block_isbad(struct mtd_info *mtd, loff_t ofs)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 	struct mtd_part *part = mtd_to_part(mtd);
 #else  
 	struct mtd_part *part = PART(mtd);
@@ -398,7 +398,7 @@ static int part_block_isbad(struct mtd_info *mtd, loff_t ofs)
 
 static int part_block_markbad(struct mtd_info *mtd, loff_t ofs)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 	struct mtd_part *part = mtd_to_part(mtd);
 #else  
 	struct mtd_part *part = PART(mtd);
@@ -412,7 +412,7 @@ static int part_block_markbad(struct mtd_info *mtd, loff_t ofs)
 	return res;
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 static int part_get_device(struct mtd_info *mtd)
 {
 	struct mtd_part *part = mtd_to_part(mtd);
@@ -499,7 +499,7 @@ static struct mtd_part *allocate_partition(struct mtd_info *master,
 	slave->mtd.oobsize = master->oobsize;
 	slave->mtd.oobavail = master->oobavail;
 	slave->mtd.subpage_sft = master->subpage_sft;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 	slave->mtd.pairing = master->pairing;
 #endif  
 
@@ -560,7 +560,7 @@ static struct mtd_part *allocate_partition(struct mtd_info *master,
 		slave->mtd._block_isbad = part_block_isbad;
 	if (master->_block_markbad)
 		slave->mtd._block_markbad = part_block_markbad;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 
 	if (master->_get_device)
 		slave->mtd._get_device = part_get_device;
@@ -653,7 +653,7 @@ static struct mtd_part *allocate_partition(struct mtd_info *master,
 			part->name);
 	}
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 	mtd_set_ooblayout(&slave->mtd, &part_ooblayout_ops);
 #else  
 	slave->mtd.ecclayout = master->ecclayout;
@@ -835,7 +835,7 @@ static ssize_t mtd_partition_offset_show(struct device *dev,
 		struct device_attribute *attr, char *buf)
 {
 	struct mtd_info *mtd = dev_get_drvdata(dev);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 	struct mtd_part *part = mtd_to_part(mtd);
 #else  
 	struct mtd_part *part = PART(mtd);
@@ -876,13 +876,13 @@ int mtd_add_partition(struct mtd_info *master, const char *name,
 	if (length <= 0)
 		return -EINVAL;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 	memset(&part, 0, sizeof(part));
 #endif  
 	part.name = name;
 	part.size = length;
 	part.offset = offset;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
  
 #else  
 	part.mask_flags = 0;
@@ -963,7 +963,7 @@ int add_mtd_partitions(struct mtd_info *master,
 static DEFINE_SPINLOCK(part_parser_lock);
 static LIST_HEAD(part_parsers);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 static struct mtd_part_parser *mtd_part_parser_get(const char *name)
 #else  
 static struct mtd_part_parser *get_partition_parser(const char *name)
@@ -984,7 +984,7 @@ static struct mtd_part_parser *get_partition_parser(const char *name)
 	return ret;
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 static inline void mtd_part_parser_put(const struct mtd_part_parser *p)
 {
 	module_put(p->owner);
@@ -999,13 +999,13 @@ static void mtd_part_parser_cleanup_default(const struct mtd_partition *pparts,
 #define put_partition_parser(p) do { module_put((p)->owner); } while (0)
 #endif  
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 int __register_mtd_parser(struct mtd_part_parser *p, struct module *owner)
 #else  
 void register_mtd_parser(struct mtd_part_parser *p)
 #endif  
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 	p->owner = owner;
 
 	if (!p->cleanup)
@@ -1015,12 +1015,12 @@ void register_mtd_parser(struct mtd_part_parser *p)
 	spin_lock(&part_parser_lock);
 	list_add(&p->list, &part_parsers);
 	spin_unlock(&part_parser_lock);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 
 	return 0;
 #endif  
 }
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 EXPORT_SYMBOL_GPL(__register_mtd_parser);
 #else  
 EXPORT_SYMBOL_GPL(register_mtd_parser);
@@ -1041,7 +1041,7 @@ static const char * const default_mtd_part_types[] = {
 };
 
 int parse_mtd_partitions(struct mtd_info *master, const char *const *types,
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 			 struct mtd_partitions *pparts,
 #else  
 			 struct mtd_partition **pparts,
@@ -1056,13 +1056,13 @@ int parse_mtd_partitions(struct mtd_info *master, const char *const *types,
 
 	for ( ; *types; types++) {
 		pr_debug("%s: parsing partitions %s\n", master->name, *types);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 		parser = mtd_part_parser_get(*types);
 #else  
 		parser = get_partition_parser(*types);
 #endif  
 		if (!parser && !request_module("%s", *types))
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 			parser = mtd_part_parser_get(*types);
 #else  
 			parser = get_partition_parser(*types);
@@ -1071,14 +1071,14 @@ int parse_mtd_partitions(struct mtd_info *master, const char *const *types,
 			 parser ? parser->name : NULL);
 		if (!parser)
 			continue;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 		ret = (*parser->parse_fn)(master, &pparts->parts, data);
 #else  
 		ret = (*parser->parse_fn)(master, pparts, data);
 #endif  
 		pr_debug("%s: parser %s: %i\n",
 			 master->name, parser->name, ret);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
  
 #else  
 		put_partition_parser(parser);
@@ -1086,7 +1086,7 @@ int parse_mtd_partitions(struct mtd_info *master, const char *const *types,
 		if (ret > 0) {
 			printk(KERN_NOTICE "%d %s partitions found on MTD device %s\n",
 			       ret, parser->name, master->name);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 			pparts->nr_parts = ret;
 			pparts->parser = parser;
 			return 0;
@@ -1094,7 +1094,7 @@ int parse_mtd_partitions(struct mtd_info *master, const char *const *types,
 			return ret;
 #endif  
 		}
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 		mtd_part_parser_put(parser);
 #endif  
 		 
@@ -1104,7 +1104,7 @@ int parse_mtd_partitions(struct mtd_info *master, const char *const *types,
 	return err;
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 void mtd_part_parser_cleanup(struct mtd_partitions *parts)
 {
 	const struct mtd_part_parser *parser;
@@ -1144,7 +1144,7 @@ uint64_t mtd_get_device_size(const struct mtd_info *mtd)
 	if (!mtd_is_partition(mtd))
 		return mtd->size;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 	return mtd_to_part(mtd)->master->size;
 #else  
 	return PART(mtd)->master->size;
@@ -1155,7 +1155,7 @@ EXPORT_SYMBOL_GPL(mtd_get_device_size);
 #ifdef MY_ABC_HERE
 int SYNOMTDModifyPartInfo(struct mtd_info *mtd, unsigned long offset, unsigned long length)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 	struct mtd_part *part = mtd_to_part(mtd);
 #else  
 	struct mtd_part *part = PART(mtd);

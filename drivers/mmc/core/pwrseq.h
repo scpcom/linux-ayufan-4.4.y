@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * Copyright (C) 2014 Linaro Ltd
  *
@@ -34,10 +31,10 @@ struct mmc_pwrseq *mmc_pwrseq_simple_alloc(struct mmc_host *host,
 					   struct device *dev);
 struct mmc_pwrseq *mmc_pwrseq_emmc_alloc(struct mmc_host *host,
 					 struct device *dev);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_10)
 struct mmc_pwrseq *mmc_pwrseq_a3700_alloc(struct mmc_host *host,
 					 struct device *dev);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_10 */
 
 #else
 

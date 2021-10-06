@@ -1,7 +1,4 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 /*
  * Marvell Armada 3700 pinctrl driver based on mvebu pinctrl core
  *
@@ -22,9 +19,9 @@
 #include <linux/of.h>
 #include <linux/of_device.h>
 #include <linux/platform_device.h>
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 #include <linux/syscore_ops.h>
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 #include <linux/pinctrl/pinctrl.h>
 #include "pinctrl-mvebu.h"
 
@@ -59,9 +56,9 @@ struct  armada_3700_mpp_setting_bitmap {
 };
 
 static void __iomem *mpp_base[I_MAXCONTROLLER];/* north & south bridge mpp base */
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 static unsigned int mpp_saved_regs[I_MAXCONTROLLER];/* north & south bridge mpp status, for suspend/resume usage */
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 
 struct  armada_3700_mpp_conf {
 	struct mvebu_pinctrl_soc_info *soc_info;
@@ -984,7 +981,7 @@ static int armada_3700_pinctrl_remove(struct platform_device *pdev)
 	return mvebu_pinctrl_remove(pdev);
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 #ifdef CONFIG_PM
 static int armada_3700_pinctrl_suspend(void)
 {
@@ -1011,7 +1008,7 @@ static struct syscore_ops armada_3700_pinctrl_syscore_ops = {
 };
 #endif
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 static struct platform_driver armada_3700_pinctrl_driver = {
 	.driver = {
 		.name = "armada-3700-pinctrl",
@@ -1021,7 +1018,7 @@ static struct platform_driver armada_3700_pinctrl_driver = {
 	.remove = armada_3700_pinctrl_remove,
 };
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 static int __init armada_3700_pinctrl_init(void)
 {
 #ifdef CONFIG_PM
@@ -1043,11 +1040,11 @@ static void __exit armada_3700_pinctrl_exit(void)
 }
 
 module_exit(armada_3700_pinctrl_exit);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 module_platform_driver(armada_3700_pinctrl_driver);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 
 MODULE_AUTHOR("Terry Zhou <bjzhou@marvell.com>");
 MODULE_DESCRIPTION("Marvell Armada 3700 pinctrl driver");
 MODULE_LICENSE("GPL v2");
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */

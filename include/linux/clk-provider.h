@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  *  linux/include/linux/clk-provider.h
  *
@@ -278,9 +275,9 @@ struct clk_fixed_rate {
 	u8		flags;
 };
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 #define to_clk_fixed_rate(_hw) container_of(_hw, struct clk_fixed_rate, hw)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 extern const struct clk_ops clk_fixed_rate_ops;
 struct clk *clk_register_fixed_rate(struct device *dev, const char *name,
@@ -289,9 +286,9 @@ struct clk *clk_register_fixed_rate(struct device *dev, const char *name,
 struct clk *clk_register_fixed_rate_with_accuracy(struct device *dev,
 		const char *name, const char *parent_name, unsigned long flags,
 		unsigned long fixed_rate, unsigned long fixed_accuracy);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 void clk_unregister_fixed_rate(struct clk *clk);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 void of_fixed_clk_setup(struct device_node *np);
 
@@ -323,9 +320,9 @@ struct clk_gate {
 	spinlock_t	*lock;
 };
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 #define to_clk_gate(_hw) container_of(_hw, struct clk_gate, hw)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 #define CLK_GATE_SET_TO_DISABLE		BIT(0)
 #define CLK_GATE_HIWORD_MASK		BIT(1)
@@ -389,9 +386,9 @@ struct clk_divider {
 	spinlock_t	*lock;
 };
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 #define to_clk_divider(_hw) container_of(_hw, struct clk_divider, hw)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 #define CLK_DIVIDER_ONE_BASED		BIT(0)
 #define CLK_DIVIDER_POWER_OF_TWO	BIT(1)
@@ -458,9 +455,9 @@ struct clk_mux {
 	spinlock_t	*lock;
 };
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 #define to_clk_mux(_hw) container_of(_hw, struct clk_mux, hw)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 #define CLK_MUX_INDEX_ONE		BIT(0)
 #define CLK_MUX_INDEX_BIT		BIT(1)
@@ -505,17 +502,17 @@ struct clk_fixed_factor {
 	unsigned int	div;
 };
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 #define to_clk_fixed_factor(_hw) container_of(_hw, struct clk_fixed_factor, hw)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 extern const struct clk_ops clk_fixed_factor_ops;
 struct clk *clk_register_fixed_factor(struct device *dev, const char *name,
 		const char *parent_name, unsigned long flags,
 		unsigned int mult, unsigned int div);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 void clk_unregister_fixed_factor(struct clk *clk);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 /**
  * struct clk_fractional_divider - adjustable fractional divider clock
@@ -543,9 +540,9 @@ struct clk_fractional_divider {
 	spinlock_t	*lock;
 };
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 #define to_clk_fd(_hw) container_of(_hw, struct clk_fractional_divider, hw)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 extern const struct clk_ops clk_fractional_divider_ops;
 struct clk *clk_register_fractional_divider(struct device *dev,
@@ -583,9 +580,9 @@ struct clk_multiplier {
 	spinlock_t	*lock;
 };
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 #define to_clk_multiplier(_hw) container_of(_hw, struct clk_multiplier, hw)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 #define CLK_MULTIPLIER_ZERO_BYPASS		BIT(0)
 #define CLK_MULTIPLIER_ROUND_CLOSEST	BIT(1)
@@ -616,9 +613,9 @@ struct clk_composite {
 	const struct clk_ops	*gate_ops;
 };
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 #define to_clk_composite(_hw) container_of(_hw, struct clk_composite, hw)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 struct clk *clk_register_composite(struct device *dev, const char *name,
 		const char * const *parent_names, int num_parents,
@@ -642,9 +639,9 @@ struct clk_gpio {
 	struct gpio_desc *gpiod;
 };
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 #define to_clk_gpio(_hw) container_of(_hw, struct clk_gpio, hw)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 extern const struct clk_ops clk_gpio_gate_ops;
 struct clk *clk_register_gpio_gate(struct device *dev, const char *name,

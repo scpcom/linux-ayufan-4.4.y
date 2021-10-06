@@ -47,12 +47,12 @@
 #include "../uapi/rtk_phoenix_ion.h"
 #endif /* defined(CONFIG_ION_RTK_PHOENIX) && defined(MY_DEF_HERE) */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 #if defined(CONFIG_ION_RTK)
 #include "../uapi/ion_rtk.h"
 #endif
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */
 /**
  * struct ion_device - the metadata of the ion device node
  * @dev:		the actual misc device
@@ -472,7 +472,7 @@ static struct ion_handle *ion_handle_get_by_id(struct ion_client *client,
 	return handle ? handle : ERR_PTR(-EINVAL);
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 struct ion_handle *ion_handle_get_by_id(struct ion_client *client,
 						int id)
 {
@@ -485,7 +485,7 @@ struct ion_handle *ion_handle_get_by_id(struct ion_client *client,
 	return handle;
 }
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */
 static bool ion_handle_validate(struct ion_client *client,
 				struct ion_handle *handle)
 {
@@ -523,7 +523,7 @@ static int ion_handle_add(struct ion_client *client, struct ion_handle *handle)
 
 	return 0;
 }
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 #if defined(CONFIG_ION_RTK)
 struct ion_heap * ion_get_client_heap_by_mask(struct ion_client *client,  unsigned int heap_id_mask)
 {
@@ -542,7 +542,7 @@ struct ion_heap * ion_get_client_heap_by_mask(struct ion_client *client,  unsign
 }
 EXPORT_SYMBOL(ion_get_client_heap_by_mask);
 #endif /* CONFIG_ION_RTK */
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */
 
 struct ion_handle *ion_alloc(struct ion_client *client, size_t len,
 			     size_t align, unsigned int heap_id_mask,
@@ -1100,20 +1100,20 @@ static void ion_vm_close(struct vm_area_struct *vma)
 	mutex_unlock(&buffer->lock);
 }
 
-#if defined(CONFIG_ION_RTK) && defined(MY_DEF_HERE)
+#if defined(CONFIG_ION_RTK) && defined(CONFIG_SYNO_LSP_RTD1619)
 const struct vm_operations_struct ion_vma_ops = {
 	.open = ion_vm_open,
 	.close = ion_vm_close,
 	.fault = ion_vm_fault,
 };
 EXPORT_SYMBOL(ion_vma_ops);
-#else /* CONFIG_ION_RTK && MY_DEF_HERE */
+#else /* CONFIG_ION_RTK && CONFIG_SYNO_LSP_RTD1619 */
 static const struct vm_operations_struct ion_vma_ops = {
 	.open = ion_vm_open,
 	.close = ion_vm_close,
 	.fault = ion_vm_fault,
 };
-#endif /* CONFIG_ION_RTK && MY_DEF_HERE */
+#endif /* CONFIG_ION_RTK && CONFIG_SYNO_LSP_RTD1619 */
 
 static int ion_mmap(struct dma_buf *dmabuf, struct vm_area_struct *vma)
 {
@@ -1136,7 +1136,7 @@ static int ion_mmap(struct dma_buf *dmabuf, struct vm_area_struct *vma)
 	}
 
 #if defined(CONFIG_ION_RTK_PHOENIX) && defined(MY_DEF_HERE) || \
-	defined(CONFIG_ION_RTK) && defined(MY_DEF_HERE)
+	defined(CONFIG_ION_RTK) && defined(CONFIG_SYNO_LSP_RTD1619)
 #if 0
 	if (buffer->heap->type == RTK_PHOENIX_ION_HEAP_TYPE_MEDIA ||
 		buffer->heap->type == RTK_PHOENIX_ION_HEAP_TYPE_AUDIO ||
@@ -1147,7 +1147,7 @@ static int ion_mmap(struct dma_buf *dmabuf, struct vm_area_struct *vma)
 		vma->vm_page_prot = pgprot_noncached(vma->vm_page_prot);
 	else
 #endif /* CONFIG_ION_RTK_PHOENIX && MY_DEF_HERE ||
-		  CONFIG_ION_RTK && MY_DEF_HERE */
+		  CONFIG_ION_RTK && CONFIG_SYNO_LSP_RTD1619 */
 	if (!(buffer->flags & ION_FLAG_CACHED))
 		vma->vm_page_prot = pgprot_writecombine(vma->vm_page_prot);
 
@@ -1162,7 +1162,7 @@ static int ion_mmap(struct dma_buf *dmabuf, struct vm_area_struct *vma)
 
 	return ret;
 }
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 #if defined(CONFIG_ION_RTK)
 int ion_mmap_by_handle(struct ion_handle *handle, struct vm_area_struct *vma)
 {
@@ -1175,7 +1175,7 @@ int ion_mmap_by_handle(struct ion_handle *handle, struct vm_area_struct *vma)
 }
 EXPORT_SYMBOL(ion_mmap_by_handle);
 #endif /* CONFIG_ION_RTK */
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */
 
 static void ion_dma_buf_release(struct dma_buf *dmabuf)
 {
@@ -1338,7 +1338,7 @@ end:
 }
 EXPORT_SYMBOL(ion_import_dma_buf);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 #if defined(CONFIG_ION_RTK)
 struct ion_handle *ion_import_dma_buf_point(struct ion_client *client, struct dma_buf *dmabuf)
 {
@@ -1387,7 +1387,7 @@ end:
 EXPORT_SYMBOL(ion_import_dma_buf_point);
 #endif /* CONFIG_ION_RTK */
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */
 static int ion_sync_for_device(struct ion_client *client, int fd)
 {
 	struct dma_buf *dmabuf;
@@ -1439,10 +1439,10 @@ static long ion_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 		struct ion_handle_data handle;
 		struct ion_custom_data custom;
 #if defined(CONFIG_ION_RTK_PHOENIX) && defined(MY_DEF_HERE) || \
-	defined(CONFIG_ION_RTK) && defined(MY_DEF_HERE)
+	defined(CONFIG_ION_RTK) && defined(CONFIG_SYNO_LSP_RTD1619)
 		struct ion_phys_data phys;
 #endif /* CONFIG_ION_RTK_PHOENIX && MY_DEF_HERE ||
-		  CONFIG_ION_RTK && MY_DEF_HERE */
+		  CONFIG_ION_RTK && CONFIG_SYNO_LSP_RTD1619 */
 	} data;
 
 	dir = ion_ioctl_dir(cmd);
@@ -1497,7 +1497,7 @@ static long ion_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 		break;
 	}
 #if defined(CONFIG_ION_RTK_PHOENIX) && defined(MY_DEF_HERE) || \
-	defined(CONFIG_ION_RTK) && defined(MY_DEF_HERE)
+	defined(CONFIG_ION_RTK) && defined(CONFIG_SYNO_LSP_RTD1619)
 	case ION_IOC_PHYS:
 	{
 		int ret;
@@ -1524,7 +1524,7 @@ static long ion_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 		break;
 	}
 #endif /* CONFIG_ION_RTK_PHOENIX && MY_DEF_HERE ||
-		  CONFIG_ION_RTK && MY_DEF_HERE */
+		  CONFIG_ION_RTK && CONFIG_SYNO_LSP_RTD1619 */
 	case ION_IOC_SHARE:
 	case ION_IOC_MAP:
 	{

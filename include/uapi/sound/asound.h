@@ -583,15 +583,15 @@ enum {
 #define SNDRV_PCM_IOCTL_READN_FRAMES	_IOR('A', 0x53, struct snd_xfern)
 #define SNDRV_PCM_IOCTL_LINK		_IOW('A', 0x60, int)
 #define SNDRV_PCM_IOCTL_UNLINK		_IO('A', 0x61)
-#if defined(MY_DEF_HERE) || defined(CONFIG_RTK_PLATFORM) && defined(MY_DEF_HERE)
+#if defined(MY_DEF_HERE) || defined(CONFIG_RTK_PLATFORM) && defined(CONFIG_SYNO_LSP_RTD1619)
 #define SNDRV_PCM_IOCTL_VOLUME_SET   _IOW('A', 0xE0, int)
 #define SNDRV_PCM_IOCTL_VOLUME_GET   _IOR('A', 0xE1, int)
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 #define SNDRV_PCM_IOCTL_EQ_SET       _IOW('A', 0xE2, struct AUDIO_RPC_EQUALIZER_MODE)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */
 #define SNDRV_PCM_IOCTL_GET_LATENCY  _IOR('A', 0xF0, int)
 #define SNDRV_PCM_IOCTL_GET_FW_DELAY _IOR('A', 0xF1, snd_pcm_sframes_t)
-#endif /* MY_DEF_HERE || CONFIG_RTK_PLATFORM && MY_DEF_HERE */
+#endif /* MY_DEF_HERE || CONFIG_RTK_PLATFORM && CONFIG_SYNO_LSP_RTD1619 */
 
 /*****************************************************************************
  *                                                                           *

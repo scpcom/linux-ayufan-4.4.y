@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * Driver for Marvell NETA network controller Buffer Manager.
  *
@@ -21,13 +18,13 @@
 #include <linux/module.h>
 #include <linux/netdevice.h>
 #include <linux/of.h>
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA37XX_MVNETA_FIX)
 #include <linux/of_platform.h>
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_ARMADA37XX_MVNETA_FIX */
 #include <linux/platform_device.h>
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA37XX_MVNETA_FIX)
 #include <linux/netdevice.h>
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_ARMADA37XX_MVNETA_FIX */
 #include <linux/skbuff.h>
 #include <net/hwbm.h>
 #include "mvneta_bm.h"
@@ -173,7 +170,7 @@ static int mvneta_bm_pool_create(struct mvneta_bm *priv,
 	return 0;
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA37XX_MVNETA_FIX)
 static void mvneta_bm_skb_free(struct sk_buff *skb)
 {
 	dev_kfree_skb_any(skb);
@@ -207,7 +204,7 @@ static struct sk_buff *mvneta_bm_skb_alloc(struct mvneta_bm_pool *bm_pool,
 	return skb;
 }
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_ARMADA37XX_MVNETA_FIX */
 /* Notify the driver that BM pool is being used as specific type and return the
  * pool pointer on success
  */
@@ -231,11 +228,11 @@ struct mvneta_bm_pool *mvneta_bm_pool_use(struct mvneta_bm *priv, u8 pool_id,
 		return NULL;
 	}
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA37XX_MVNETA_FIX)
 	if (type == MVNETA_BM_SHORT)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_ARMADA37XX_MVNETA_FIX */
 	if (new_pool->pkt_size == 0 || type != MVNETA_BM_SHORT)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_ARMADA37XX_MVNETA_FIX */
 		new_pool->pkt_size = pkt_size;
 
 	/* Allocate buffers in case BM pool hasn't been used yet */
@@ -259,7 +256,7 @@ struct mvneta_bm_pool *mvneta_bm_pool_use(struct mvneta_bm *priv, u8 pool_id,
 			return NULL;
 		}
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA37XX_MVNETA_FIX)
 #ifdef CONFIG_64BIT
 		{
 			struct sk_buff *skb;
@@ -280,13 +277,13 @@ struct mvneta_bm_pool *mvneta_bm_pool_use(struct mvneta_bm *priv, u8 pool_id,
 		}
 #endif /* CONFIG_64BIT */
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_ARMADA37XX_MVNETA_FIX */
 		/* Allocate buffers for this pool */
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA37XX_MVNETA_FIX)
 		num = mvneta_bm_bufs_add(new_pool, hwbm_pool->size);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_ARMADA37XX_MVNETA_FIX */
 		num = hwbm_pool_add(hwbm_pool, hwbm_pool->size, GFP_ATOMIC);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_ARMADA37XX_MVNETA_FIX */
 		if (num != hwbm_pool->size) {
 			WARN(1, "pool %d: %d of %d allocated\n",
 			     new_pool->id, num, hwbm_pool->size);
@@ -298,7 +295,7 @@ struct mvneta_bm_pool *mvneta_bm_pool_use(struct mvneta_bm *priv, u8 pool_id,
 }
 EXPORT_SYMBOL_GPL(mvneta_bm_pool_use);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA37XX_MVNETA_FIX)
 int mvneta_bm_refill(struct mvneta_bm_pool *bm_pool, gfp_t gfp_mask)
 {
 	dma_addr_t paddr;
@@ -364,7 +361,7 @@ int mvneta_bm_bufs_add(struct mvneta_bm_pool *bm_pool, int nof_bufs)
 }
 EXPORT_SYMBOL_GPL(mvneta_bm_bufs_add);
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_ARMADA37XX_MVNETA_FIX */
 /* Free all buffers from the pool */
 void mvneta_bm_bufs_free(struct mvneta_bm *priv, struct mvneta_bm_pool *bm_pool,
 			 u8 port_map)
@@ -380,9 +377,9 @@ void mvneta_bm_bufs_free(struct mvneta_bm *priv, struct mvneta_bm_pool *bm_pool,
 	for (i = 0; i < bm_pool->hwbm_pool.buf_num; i++) {
 		dma_addr_t buf_phys_addr;
 		u32 *vaddr;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA37XX_MVNETA_FIX)
 		struct sk_buff *skb;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_ARMADA37XX_MVNETA_FIX */
 
 		/* Get buffer physical address (indirect access) */
 		buf_phys_addr = mvneta_bm_pool_get_bp(priv, bm_pool);
@@ -391,20 +388,20 @@ void mvneta_bm_bufs_free(struct mvneta_bm *priv, struct mvneta_bm_pool *bm_pool,
 		 * when it occurs that a read access to BPPI returns 0.
 		 */
 		if (buf_phys_addr == 0)
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA37XX_MVNETA_FIX)
 			break;
 
 		dma_unmap_single(&priv->pdev->dev, buf_phys_addr - priv->rx_offset_correction,
 				 bm_pool->buf_size, DMA_FROM_DEVICE);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_ARMADA37XX_MVNETA_FIX */
 			continue;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_ARMADA37XX_MVNETA_FIX */
 
 		vaddr = phys_to_virt(buf_phys_addr);
 		if (!vaddr)
 			break;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA37XX_MVNETA_FIX)
 #ifdef CONFIG_64BIT
 		skb = (struct sk_buff *)((u64)(*(u32 *)vaddr) | bm_pool->data_high);
 #else
@@ -414,20 +411,20 @@ void mvneta_bm_bufs_free(struct mvneta_bm *priv, struct mvneta_bm_pool *bm_pool,
 			break;
 
 		mvneta_bm_skb_free(skb);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_ARMADA37XX_MVNETA_FIX */
 		dma_unmap_single(&priv->pdev->dev, buf_phys_addr,
 				 bm_pool->buf_size, DMA_FROM_DEVICE);
 		hwbm_buf_free(&bm_pool->hwbm_pool, vaddr);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_ARMADA37XX_MVNETA_FIX */
 	}
 
 	mvneta_bm_config_clear(priv, MVNETA_BM_EMPTY_LIMIT_MASK);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA37XX_MVNETA_FIX)
 	pr_info("BM pool #%d: %d of %d buffers are freed\n",
 		bm_pool->id, i, bm_pool->hwbm_pool.buf_num);
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_ARMADA37XX_MVNETA_FIX */
 	/* Update BM driver with number of buffers removed from pool */
 	bm_pool->hwbm_pool.buf_num -= i;
 }
@@ -511,12 +508,12 @@ static void mvneta_bm_pools_init(struct mvneta_bm *priv)
 		/* Obtain custom pkt_size from DT */
 		sprintf(prop, "pool%d,pkt-size", i);
 		if (of_property_read_u32(dn, prop, &bm_pool->pkt_size))
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA37XX_MVNETA_FIX)
 			/* if not specified by DT, set default buffer size to support Jumbo */
 			bm_pool->pkt_size = MVNETA_BM_LONG_PKT_SIZE;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_ARMADA37XX_MVNETA_FIX */
 			bm_pool->pkt_size = 0;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_ARMADA37XX_MVNETA_FIX */
 	}
 }
 
@@ -558,7 +555,7 @@ static int mvneta_bm_init(struct mvneta_bm *priv)
 static int mvneta_bm_get_sram(struct device_node *dn,
 			      struct mvneta_bm *priv)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA37XX_MVNETA_FIX)
 	struct platform_device *pdev;
 	struct device_node *np_pool;
 	struct resource *res;
@@ -575,7 +572,7 @@ static int mvneta_bm_get_sram(struct device_node *dn,
 	/* get size of internal SRAM access region */
 	priv->bppi_size = resource_size(res);
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_ARMADA37XX_MVNETA_FIX */
 	priv->bppi_pool = of_gen_pool_get(dn, "internal-mem", 0);
 	if (!priv->bppi_pool) {
 		pr_err("%s:: no internal-mem node found\n", __func__);
@@ -583,11 +580,11 @@ static int mvneta_bm_get_sram(struct device_node *dn,
 	}
 
 	priv->bppi_virt_addr = gen_pool_dma_alloc(priv->bppi_pool,
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA37XX_MVNETA_FIX)
 						  priv->bppi_size,
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_ARMADA37XX_MVNETA_FIX */
 						  MVNETA_BM_BPPI_SIZE,
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_ARMADA37XX_MVNETA_FIX */
 						  &priv->bppi_phys_addr);
 	if (!priv->bppi_virt_addr)
 		return -ENOMEM;
@@ -597,12 +594,12 @@ static int mvneta_bm_get_sram(struct device_node *dn,
 
 static void mvneta_bm_put_sram(struct mvneta_bm *priv)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA37XX_MVNETA_FIX)
 	gen_pool_free(priv->bppi_pool, priv->bppi_phys_addr, priv->bppi_size);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_ARMADA37XX_MVNETA_FIX */
 	gen_pool_free(priv->bppi_pool, priv->bppi_phys_addr,
 		      MVNETA_BM_BPPI_SIZE);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_ARMADA37XX_MVNETA_FIX */
 }
 
 static int mvneta_bm_probe(struct platform_device *pdev)

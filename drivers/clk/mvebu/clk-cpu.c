@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * Marvell MVEBU CPU clock handling.
  *
@@ -23,7 +20,7 @@
 #include <linux/mvebu-pmsu.h>
 #include <asm/smp_plat.h>
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 /* Clock complex registers */
 #define SYS_CTRL_CLK_DIV_CTRL_OFFSET		    0x0
 #define   SYS_CTRL_CLK_DIV_CTRL_RESET_ALL	    0xFF
@@ -52,7 +49,7 @@
 #define   DFX_CPU_PLL_CLK_DIV_CTRL1_RESET_MASK_MASK	0xFF
 #define   DFX_CPU_PLL_CLK_DIV_CTRL1_RESET_MASK_SHIFT	0x0
 #define   DFX_CPU_PLL_CLK_DIV_CTRL1_RESET_MASK_PCLK	0x10
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 #define SYS_CTRL_CLK_DIVIDER_CTRL_OFFSET               0x0
 #define   SYS_CTRL_CLK_DIVIDER_CTRL_RESET_ALL          0xff
 #define   SYS_CTRL_CLK_DIVIDER_CTRL_RESET_SHIFT        8
@@ -63,7 +60,7 @@
 
 #define PMU_DFS_RATIO_SHIFT 16
 #define PMU_DFS_RATIO_MASK  0x3F
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 #define MAX_CPU	    4
 struct cpu_clk {
@@ -73,9 +70,9 @@ struct cpu_clk {
 	const char *parent_name;
 	void __iomem *reg_base;
 	void __iomem *pmu_dfs;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	void __iomem *dfx_server_base;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 };
 
 static struct clk **clks;
@@ -84,7 +81,7 @@ static struct clk_onecell_data clk_data;
 
 #define to_cpu_clk(p) container_of(p, struct cpu_clk, hw)
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 static unsigned long armada_xp_clk_cpu_recalc_rate(struct clk_hw *hwclk,
 					 unsigned long parent_rate)
 {
@@ -111,7 +108,7 @@ static unsigned long armada_38x_clk_cpu_recalc_rate(struct clk_hw *hwclk,
 	div = (reg >> (cpuclk->cpu * 8)) & SYS_CTRL_CLK_DIV_MASK;
 	return parent_rate / div;
 }
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 static unsigned long clk_cpu_recalc_rate(struct clk_hw *hwclk,
 					 unsigned long parent_rate)
 {
@@ -122,7 +119,7 @@ static unsigned long clk_cpu_recalc_rate(struct clk_hw *hwclk,
 	div = (reg >> (cpuclk->cpu * 8)) & SYS_CTRL_CLK_DIVIDER_MASK;
 	return parent_rate / div;
 }
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 static long clk_cpu_round_rate(struct clk_hw *hwclk, unsigned long rate,
 			       unsigned long *parent_rate)
@@ -139,7 +136,7 @@ static long clk_cpu_round_rate(struct clk_hw *hwclk, unsigned long rate,
 	return *parent_rate / div;
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 static int armada_xp_clk_cpu_off_set_rate(struct clk_hw *hwclk,
 					  unsigned long rate,
 					  unsigned long parent_rate)
@@ -173,7 +170,7 @@ static int armada_xp_clk_cpu_off_set_rate(struct clk_hw *hwclk,
 
 	return 0;
 }
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 static int clk_cpu_off_set_rate(struct clk_hw *hwclk, unsigned long rate,
 				unsigned long parent_rate)
 {
@@ -206,16 +203,16 @@ static int clk_cpu_off_set_rate(struct clk_hw *hwclk, unsigned long rate,
 
 	return 0;
 }
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 static int armada_xp_clk_cpu_on_set_rate(struct clk_hw *hwclk,
 					 unsigned long rate,
 					 unsigned long parent_rate)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 static int clk_cpu_on_set_rate(struct clk_hw *hwclk, unsigned long rate,
 			       unsigned long parent_rate)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 {
 	u32 reg;
 	unsigned long fabric_div, target_div, cur_rate;
@@ -230,15 +227,15 @@ static int clk_cpu_on_set_rate(struct clk_hw *hwclk, unsigned long rate,
 
 	cur_rate = clk_hw_get_rate(hwclk);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	reg = readl(cpuclk->reg_base + SYS_CTRL_CLK_DIV_CTRL2_OFFSET);
 	fabric_div = (reg >> SYS_CTRL_CLK_DIV_CTRL2_NBCLK_RATIO_SHIFT) &
 		SYS_CTRL_CLK_DIV_MASK;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	reg = readl(cpuclk->reg_base + SYS_CTRL_CLK_DIVIDER_CTRL2_OFFSET);
 	fabric_div = (reg >> SYS_CTRL_CLK_DIVIDER_CTRL2_NBCLK_RATIO_SHIFT) &
 		SYS_CTRL_CLK_DIVIDER_MASK;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	/* Frequency is going up */
 	if (rate == 2 * cur_rate)
@@ -255,22 +252,22 @@ static int clk_cpu_on_set_rate(struct clk_hw *hwclk, unsigned long rate,
 	reg |= (target_div << PMU_DFS_RATIO_SHIFT);
 	writel(reg, cpuclk->pmu_dfs);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	reg = readl(cpuclk->reg_base + SYS_CTRL_CLK_DIV_CTRL_OFFSET);
 	reg |= (SYS_CTRL_CLK_DIV_CTRL_RESET_ALL <<
 		SYS_CTRL_CLK_DIV_CTRL_RESET_SHIFT);
 	writel(reg, cpuclk->reg_base + SYS_CTRL_CLK_DIV_CTRL_OFFSET);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	reg = readl(cpuclk->reg_base + SYS_CTRL_CLK_DIVIDER_CTRL_OFFSET);
 	reg |= (SYS_CTRL_CLK_DIVIDER_CTRL_RESET_ALL <<
 		SYS_CTRL_CLK_DIVIDER_CTRL_RESET_SHIFT);
 	writel(reg, cpuclk->reg_base + SYS_CTRL_CLK_DIVIDER_CTRL_OFFSET);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	return mvebu_pmsu_dfs_request(cpuclk->cpu);
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 static int armada_xp_clk_cpu_set_rate(struct clk_hw *hwclk, unsigned long rate,
 				unsigned long parent_rate)
 {
@@ -337,7 +334,7 @@ static const struct clk_ops armada_xp_cpu_ops = {
 	.round_rate = clk_cpu_round_rate,
 	.set_rate = armada_xp_clk_cpu_set_rate,
 };
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 static int clk_cpu_set_rate(struct clk_hw *hwclk, unsigned long rate,
 			    unsigned long parent_rate)
 {
@@ -352,9 +349,9 @@ static const struct clk_ops cpu_ops = {
 	.round_rate = clk_cpu_round_rate,
 	.set_rate = clk_cpu_set_rate,
 };
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 static const struct clk_ops armada_38x_cpu_ops = {
 	.recalc_rate = armada_38x_clk_cpu_recalc_rate,
 	.round_rate = clk_cpu_round_rate,
@@ -371,7 +368,7 @@ static void __init common_cpu_clk_init(struct device_node *node, bool cortexa9)
 	struct device_node *dn;
 	bool independent_clocks = true;
 	const struct clk_ops *cpu_ops = NULL;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 static void __init of_cpu_clk_setup(struct device_node *node)
 {
 	struct cpu_clk *cpuclk;
@@ -379,7 +376,7 @@ static void __init of_cpu_clk_setup(struct device_node *node)
 	void __iomem *pmu_dfs_base = of_iomap(node, 1);
 	int ncpus = 0;
 	struct device_node *dn;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	if (clock_complex_base == NULL) {
 		pr_err("%s: clock-complex base register not set\n",
@@ -393,7 +390,7 @@ static void __init of_cpu_clk_setup(struct device_node *node)
 
 	for_each_node_by_type(dn, "cpu")
 		ncpus++;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	if (cortexa9) {
 		if (dfx_server_base == NULL) {
 			pr_err("%s: DFX server base register not set\n",
@@ -408,7 +405,7 @@ static void __init of_cpu_clk_setup(struct device_node *node)
 		for_each_node_by_type(dn, "cpu")
 			ncpus++;
 	}
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	cpuclk = kzalloc(ncpus * sizeof(*cpuclk), GFP_KERNEL);
 	if (WARN_ON(!cpuclk))
 		goto cpuclk_out;
@@ -439,17 +436,17 @@ static void __init of_cpu_clk_setup(struct device_node *node)
 		if (pmu_dfs_base)
 			cpuclk[cpu].pmu_dfs = pmu_dfs_base + 4 * cpu;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 		cpuclk[cpu].dfx_server_base = dfx_server_base;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		cpuclk[cpu].hw.init = &init;
 
 		init.name = cpuclk[cpu].clk_name;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 		init.ops = cpu_ops;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		init.ops = &cpu_ops;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		init.flags = 0;
 		init.parent_names = &cpuclk[cpu].parent_name;
 		init.num_parents = 1;
@@ -459,12 +456,12 @@ static void __init of_cpu_clk_setup(struct device_node *node)
 			goto bail_out;
 		clks[cpu] = clk;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 		if (independent_clocks == false) {
 			/* use 1 clock to all cpus */
 			break;
 		}
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	}
 	clk_data.clk_num = MAX_CPU;
 	clk_data.clks = clks;
@@ -479,13 +476,13 @@ clks_out:
 	kfree(cpuclk);
 cpuclk_out:
 	iounmap(clock_complex_base);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	iounmap(pmu_dfs_base);
 	iounmap(dfx_server_base);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 static void __init armada_xp_cpu_clk_init(struct device_node *node)
 {
 	common_cpu_clk_init(node, false);
@@ -500,7 +497,7 @@ CLK_OF_DECLARE(armada_xp_cpu_clock, "marvell,armada-xp-cpu-clock",
 	       armada_xp_cpu_clk_init);
 CLK_OF_DECLARE(armada_38x_cpu_clock, "marvell,armada-380-cpu-clock",
 	       armada_38x_cpu_clk_init);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 CLK_OF_DECLARE(armada_xp_cpu_clock, "marvell,armada-xp-cpu-clock",
 					 of_cpu_clk_setup);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */

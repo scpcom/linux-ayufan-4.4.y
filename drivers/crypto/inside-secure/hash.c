@@ -1,7 +1,4 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 /*
  * Copyright (C) 2016 Marvell
  *
@@ -181,11 +178,11 @@ static int safexcel_ahash_send(struct crypto_async_request *async, int ring,
 	struct scatterlist *sg;
 	int i, nents, queued, len = req->len, n_cdesc = 0, ret = 0;
 	int cache_len = do_div(len, crypto_ahash_blocksize(ahash));
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 	phys_addr_t ctxr_phys = 0;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 
 	if (req->last_req) {
 		if (!cache_len)
@@ -197,12 +194,12 @@ static int safexcel_ahash_send(struct crypto_async_request *async, int ring,
 			       ~(crypto_ahash_blocksize(ahash) - 1);
 	}
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 	ctxr_phys = dma_to_phys(priv->dev, ctx->base.ctxr_dma);
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 	spin_lock_bh(&priv->ring[ring].egress_lock);
 
 	/* Add a command descriptor for the cached data, if any */
@@ -217,14 +214,14 @@ static int safexcel_ahash_send(struct crypto_async_request *async, int ring,
 		ctx->base.cache_sz = cache_len;
 		first_cdesc = safexcel_add_cdesc(priv, ring, 1,
 						 (cache_len == len),
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 						 ctx->base.cache_dma,
 						 cache_len, len,
 						 ctx->base.ctxr_dma);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 						 dma_to_phys(priv->dev, ctx->base.cache_dma),
 						 cache_len, len, ctxr_phys);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 		if (IS_ERR(first_cdesc)) {
 			ret = PTR_ERR(first_cdesc);
 			goto free_cache;
@@ -244,11 +241,11 @@ static int safexcel_ahash_send(struct crypto_async_request *async, int ring,
 	}
 
 	for_each_sg(areq->src, sg, nents, i) {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 		phys_addr_t sg_phys = dma_to_phys(priv->dev, sg_dma_address(sg));
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 		int sglen = sg_dma_len(sg);
 
 		/* Do not overflow the request */
@@ -256,14 +253,14 @@ static int safexcel_ahash_send(struct crypto_async_request *async, int ring,
 			sglen = queued;
 
 		cdesc = safexcel_add_cdesc(priv, ring, !n_cdesc,
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 					   !(queued - sglen), sg_dma_address(sg),
 					   sglen, len, ctx->base.ctxr_dma);
 
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 					   !(queued - sglen), sg_phys, sglen,
 					   len, ctxr_phys);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 		if (IS_ERR(cdesc)) {
 			ret = PTR_ERR(cdesc);
 			goto cdesc_rollback;
@@ -297,11 +294,11 @@ send_command:
 
 	/* Add a result descriptor */
 	rdesc = safexcel_add_rdesc(priv, ring, 1, 1,
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 				   ctx->base.result_dma,
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 				   dma_to_phys(priv->dev, ctx->base.result_dma),
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 				   req->state_sz);
 	if (IS_ERR(rdesc)) {
 		ret = PTR_ERR(rdesc);
@@ -322,13 +319,13 @@ send_command:
 	return 0;
 
 cdesc_rollback:
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 	if (nents)
 		dma_unmap_sg(priv->dev, areq->src,
 			     sg_nents_for_len(areq->src, areq->nbytes),
 			     DMA_TO_DEVICE);
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 	for (i = 0; i < n_cdesc; i++)
 		safexcel_ring_rollback_wptr(priv, &priv->ring[ring].cdr);
 free_cache:
@@ -405,23 +402,23 @@ static int safexcel_handle_inv_result(struct safexcel_crypto_priv *priv,
 	ctx->base.send = safexcel_ahash_send;
 
 	spin_lock_bh(&priv->ring[ctx->base.ring].queue_lock);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 	enq_ret = ahash_enqueue_request(&priv->ring[ctx->base.ring].queue, areq);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 	enq_ret = crypto_enqueue_request(&priv->ring[ctx->base.ring].queue, async);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 	spin_unlock_bh(&priv->ring[ctx->base.ring].queue_lock);
 
 	if (enq_ret != -EINPROGRESS)
 		*ret = enq_ret;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 	queue_work(priv->ring[ctx->base.ring].workqueue,
 		   &priv->ring[ctx->base.ring].work_data.work);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 	if (!priv->ring[ctx->base.ring].need_dequeue)
 		safexcel_dequeue(priv, ctx->base.ring);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 
 	*should_complete = false;
 
@@ -471,20 +468,20 @@ static int safexcel_ahash_exit_inv(struct crypto_tfm *tfm)
 	ctx->base.send = safexcel_ahash_send_inv;
 
 	spin_lock_bh(&priv->ring[ctx->base.ring].queue_lock);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 	ret = ahash_enqueue_request(&priv->ring[ctx->base.ring].queue, &req);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 	ret = crypto_enqueue_request(&priv->ring[ctx->base.ring].queue, &req.base);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 	spin_unlock_bh(&priv->ring[ctx->base.ring].queue_lock);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 	queue_work(priv->ring[ctx->base.ring].workqueue,
 		   &priv->ring[ctx->base.ring].work_data.work);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 	if (!priv->ring[ctx->base.ring].need_dequeue)
 		safexcel_dequeue(priv, ctx->base.ring);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 
 	wait_for_completion_interruptible(&result.completion);
 
@@ -587,7 +584,7 @@ static int safexcel_ahash_update(struct ahash_request *areq)
 
 	ctx->base.send = safexcel_ahash_send;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 	/*
 	 * Check if the context exists, if yes:
 	 *	- EIP197: check if it needs to be invalidated
@@ -596,13 +593,13 @@ static int safexcel_ahash_update(struct ahash_request *areq)
 	 * and set the send routine for the new allocated context.
 	 * If it's EIP97 with existing context, the send routine is already set.
 	 */
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 	if (ctx->base.ctxr) {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 		if (priv->eip_type == EIP197 && ctx->base.needs_inv)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 		if (ctx->base.needs_inv)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 			ctx->base.send = safexcel_ahash_send_inv;
 	} else {
 		ctx->base.ring = safexcel_select_ring(priv);
@@ -614,20 +611,20 @@ static int safexcel_ahash_update(struct ahash_request *areq)
 	}
 
 	spin_lock_bh(&priv->ring[ctx->base.ring].queue_lock);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 	ret = ahash_enqueue_request(&priv->ring[ctx->base.ring].queue, areq);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 	ret = crypto_enqueue_request(&priv->ring[ctx->base.ring].queue, &areq->base);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 	spin_unlock_bh(&priv->ring[ctx->base.ring].queue_lock);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 	queue_work(priv->ring[ctx->base.ring].workqueue,
 		   &priv->ring[ctx->base.ring].work_data.work);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 	if (!priv->ring[ctx->base.ring].need_dequeue)
 		safexcel_dequeue(priv, ctx->base.ring);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 
 	return ret;
 }
@@ -636,23 +633,23 @@ static int safexcel_ahash_final(struct ahash_request *areq)
 {
 	struct safexcel_ahash_req *req = ahash_request_ctx(areq);
 	struct safexcel_ahash_ctx *ctx = crypto_ahash_ctx(crypto_ahash_reqtfm(areq));
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 	struct safexcel_crypto_priv *priv = ctx->priv;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 
 	req->last_req = true;
 	req->finish = true;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 	/*
 	 * Check if we need to invalidate the context,
 	 * this should be done only for EIP197 (no cache in EIP97).
 	 */
 	if (priv->eip_type == EIP197 && req->len &&
 	    ctx->digest == CONTEXT_CONTROL_DIGEST_PRECOMPUTED)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 	if (req->len && ctx->digest == CONTEXT_CONTROL_DIGEST_PRECOMPUTED)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 		ctx->base.needs_inv = safexcel_ahash_needs_inv_get(areq);
 
 	return safexcel_ahash_update(areq);
@@ -747,7 +744,7 @@ static void safexcel_ahash_cra_exit(struct crypto_tfm *tfm)
 	if (!ctx->base.ctxr)
 		return;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 	/*
 	 * EIP197 has internal cache which needs to be invalidated
 	 * when the context is closed.
@@ -764,11 +761,11 @@ static void safexcel_ahash_cra_exit(struct crypto_tfm *tfm)
 		dma_pool_free(priv->context_pool, ctx->base.ctxr,
 			      ctx->base.ctxr_dma);
 	}
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 	ret = safexcel_ahash_exit_inv(tfm);
 	if (ret != -EINPROGRESS)
 		dev_warn(priv->dev, "hash: invalidation error %d\n", ret);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 }
 
 struct safexcel_alg_template safexcel_alg_sha1 = {
@@ -877,9 +874,9 @@ static int safexcel_hmac_sha1_setkey(struct crypto_ahash *tfm, const u8 *key,
 				     unsigned int keylen)
 {
 	struct safexcel_ahash_ctx *ctx = crypto_tfm_ctx(crypto_ahash_tfm(tfm));
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 	struct safexcel_crypto_priv *priv = ctx->priv;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 	struct ahash_request *areq;
 	struct crypto_ahash *ahash;
 	struct sha1_state s0, s1;
@@ -943,7 +940,7 @@ static int safexcel_hmac_sha1_setkey(struct crypto_ahash *tfm, const u8 *key,
 
 	ret = safexcel_hmac_prepare_pad(areq, opad, blocksize, &s1, false);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 	/*
 	 * For EIP197 we need to Check if the ipad/opad were changed,
 	 * if yes, need to invalidate the context.
@@ -955,13 +952,13 @@ static int safexcel_hmac_sha1_setkey(struct crypto_ahash *tfm, const u8 *key,
 				ctx->base.needs_inv = true;
 				break;
 			}
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 	for (i = 0; i < ARRAY_SIZE(s0.state); i++) {
 		if (ctx->ipad[i] != le32_to_cpu(s0.state[i]) ||
 		    ctx->opad[i] != le32_to_cpu(s1.state[i])) {
 			ctx->base.needs_inv = true;
 			break;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 		}
 	}
 
@@ -1160,4 +1157,4 @@ struct safexcel_alg_template safexcel_alg_sha224 = {
 		},
 	},
 };
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */

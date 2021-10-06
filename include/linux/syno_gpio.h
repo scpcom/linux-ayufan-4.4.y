@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /* Copyright (c) 2009-2015 Synology Inc. All rights reserved. */
 #ifndef SYNO_ARM_GPIO_TYPE_H
 #define SYNO_ARM_GPIO_TYPE_H
@@ -22,7 +19,7 @@
 #define ACTIVE_LOW 1
 #define ACTIVE_IGNORE 0xFF
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_PORT_MAPPING_V2
 enum SYNO_GPIO_INDEX
 {
 	SYNO_GPIO_PIN = 0,
@@ -31,7 +28,7 @@ enum SYNO_GPIO_INDEX
 	/* Must be the last item, DO NOT append after this. */
 	SYNO_GPIO_INDEX_MAX
 };
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_PORT_MAPPING_V2 */
 
 /* The following GPIO macro are 1-based */
 #define HAVE_GPIO_PIN(index, type)             ((syno_gpio.type) && (0 < index) && (index <= syno_gpio.type->nr_gpio))
@@ -40,7 +37,7 @@ enum SYNO_GPIO_INDEX
 
 #define HAVE_FAN_CTRL(index)                   HAVE_GPIO_PIN(index, fan_ctrl)
 #define HAVE_FAN_FAIL(index)                   HAVE_GPIO_PIN(index, fan_fail)
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_PORT_MAPPING_V2
 #define HAVE_HDD_FAIL_LED(index)               syno_led_pin_have(DT_INTERNAL_SLOT, index, DT_HDD_ORANGE_LED) /* Deprecated, see HAVE_HDD_FAIL_LED_BY_SLOT */
 #define HAVE_HDD_PRESENT_LED(index)            syno_led_pin_have(DT_INTERNAL_SLOT, index, DT_HDD_GREEN_LED) /* Deprecated, see HAVE_HDD_PRESENT_LED_BY_SLOT */
 #define HAVE_HDD_ACT_LED(index)                syno_led_pin_have(DT_INTERNAL_SLOT, index, DT_HDD_ACT_LED) /* Deprecated, see HAVE_HDD_ACT_LED_BY_SLOT */
@@ -56,7 +53,7 @@ enum SYNO_GPIO_INDEX
 #define HAVE_HDD_ACT_LED(index)                HAVE_GPIO_PIN(index, hdd_act_led)
 #define HAVE_HDD_DETECT(index)                 HAVE_GPIO_PIN(index, hdd_detect)
 #define HAVE_HDD_ENABLE(index)                 HAVE_GPIO_PIN(index, hdd_enable)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_PORT_MAPPING_V2 */
 
 #define HAVE_MODEL_ID(index)                   HAVE_GPIO_PIN(index, model_id)
 #define HAVE_ALARM_LED()                       HAVE_GPIO_PIN(1, alarm_led)
@@ -70,7 +67,7 @@ enum SYNO_GPIO_INDEX
 
 #define FAN_CTRL_PIN(index)                    GPIO_PORT(index, fan_ctrl)
 #define FAN_FAIL_PIN(index)                    GPIO_PORT(index, fan_fail)
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_PORT_MAPPING_V2
 #define HDD_FAIL_LED_PIN(index)                syno_led_pin_get(DT_INTERNAL_SLOT, index, DT_HDD_ORANGE_LED, SYNO_GPIO_PIN) /* Deprecated, see HDD_FAIL_LED_PIN_BY_SLOT */
 #define HDD_PRESENT_LED_PIN(index)             syno_led_pin_get(DT_INTERNAL_SLOT, index, DT_HDD_GREEN_LED, SYNO_GPIO_PIN) /* Deprecated, see HDD_PRESENT_LED_PIN_BY_SLOT */
 #define HDD_ACT_LED_PIN(index)                 syno_led_pin_get(DT_INTERNAL_SLOT, index, DT_HDD_ACT_LED, SYNO_GPIO_PIN) /* Deprecated, see HDD_ACT_LED_PIN_BY_SLOT */
@@ -86,7 +83,7 @@ enum SYNO_GPIO_INDEX
 #define HDD_ACT_LED_PIN(index)                 GPIO_PORT(index, hdd_act_led)
 #define HDD_DETECT_PIN(index)                  GPIO_PORT(index, hdd_detect)
 #define HDD_ENABLE_PIN(index)                  GPIO_PORT(index, hdd_enable)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_PORT_MAPPING_V2 */
 
 #define MODEL_ID_PIN(index)                    GPIO_PORT(index, model_id)
 #define ALARM_LED_PIN()                        GPIO_PORT(1, alarm_led)
@@ -100,7 +97,7 @@ enum SYNO_GPIO_INDEX
 
 #define FAN_CTRL_POLARITY()                    GPIO_POLARITY(fan_ctrl)
 #define FAN_FAIL_POLARITY()                    GPIO_POLARITY(fan_fail)
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_PORT_MAPPING_V2
 #define HDD_FAIL_LED_POLARITY(index)           syno_led_pin_get(DT_INTERNAL_SLOT, index, DT_HDD_ORANGE_LED, SYNO_POLARITY_PIN) /* Deprecated, see HDD_FAIL_LED_POLARITY_BY_SLOT */
 #define HDD_PRESENT_LED_POLARITY(index)        syno_led_pin_get(DT_INTERNAL_SLOT, index, DT_HDD_GREEN_LED, SYNO_POLARITY_PIN) /* Deprecated, HDD_PRESENT_LED_POLARITY_BY_SLOT */
 #define HDD_ACT_LED_POLARITY(index)            syno_led_pin_get(DT_INTERNAL_SLOT, index, DT_HDD_ACT_LED, SYNO_POLARITY_PIN) /* Deprecated, HDD_ACT_LED_POLARITY_BY_SLOT */
@@ -116,7 +113,7 @@ enum SYNO_GPIO_INDEX
 #define HDD_ACT_LED_POLARITY()                 GPIO_POLARITY(hdd_act_led)
 #define HDD_DETECT_POLARITY()                  GPIO_POLARITY(hdd_detect)
 #define HDD_ENABLE_POLARITY()                  GPIO_POLARITY(hdd_enable)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_PORT_MAPPING_V2 */
 #define MODEL_ID_POLARITY()                    GPIO_POLARITY(model_id)
 #define ALARM_LED_POLARITY()                   GPIO_POLARITY(alarm_led)
 #define POWER_LED_POLARITY()                   GPIO_POLARITY(power_led)
@@ -155,10 +152,10 @@ typedef struct __tag_SYNO_GPIO {
 	SYNO_GPIO_INFO *redundant_power_detect;
 } SYNO_GPIO;
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_PORT_MAPPING_V2
 u32 syno_disk_gpio_pin_get(const int diskPort, const char *szPropertyName, const int propertyIndex);
 int syno_disk_gpio_pin_have(const int diskPort, const char *szPropertyName);
 u32 syno_led_pin_get(const char* name, const int diskPort, const char *szLedName, const int propertyIndex);
 int syno_led_pin_have(const char* name, const int diskPort, const char *szLedName);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_PORT_MAPPING_V2 */
 #endif /* SYNO_ARM_GPIO_TYPE_H */

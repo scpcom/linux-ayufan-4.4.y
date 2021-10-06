@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /* Altera Triple-Speed Ethernet MAC driver
  * Copyright (C) 2008-2014 Altera Corporation. All rights reserved
  *
@@ -133,11 +130,11 @@ static int altera_tse_mdio_create(struct net_device *dev, unsigned int id)
 {
 	struct altera_tse_private *priv = netdev_priv(dev);
 	int ret;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	int i;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct device_node *mdio_node = NULL;
 	struct mii_bus *mdio = NULL;
 	struct device_node *child_node = NULL;
@@ -167,9 +164,9 @@ static int altera_tse_mdio_create(struct net_device *dev, unsigned int id)
 	mdio->write = &altera_tse_mdio_write;
 	snprintf(mdio->id, MII_BUS_ID_SIZE, "%s-%u", mdio->name, id);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	mdio->irq = kcalloc(PHY_MAX_ADDR, sizeof(int), GFP_KERNEL);
 	if (mdio->irq == NULL) {
 		ret = -ENOMEM;
@@ -178,7 +175,7 @@ static int altera_tse_mdio_create(struct net_device *dev, unsigned int id)
 	for (i = 0; i < PHY_MAX_ADDR; i++)
 		mdio->irq[i] = PHY_POLL;
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	mdio->priv = dev;
 	mdio->parent = priv->device;
 
@@ -186,11 +183,11 @@ static int altera_tse_mdio_create(struct net_device *dev, unsigned int id)
 	if (ret != 0) {
 		netdev_err(dev, "Cannot register MDIO bus %s\n",
 			   mdio->id);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 		goto out_free_mdio;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		goto out_free_mdio_irq;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	}
 
 	if (netif_msg_drv(priv))
@@ -198,12 +195,12 @@ static int altera_tse_mdio_create(struct net_device *dev, unsigned int id)
 
 	priv->mdio = mdio;
 	return 0;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 out_free_mdio_irq:
 	kfree(mdio->irq);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 out_free_mdio:
 	mdiobus_free(mdio);
 	mdio = NULL;
@@ -871,11 +868,11 @@ static int init_phy(struct net_device *dev)
 	}
 
 	netdev_dbg(dev, "attached to PHY %d UID 0x%08x Link = %d\n",
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 		   phydev->mdio.addr, phydev->phy_id, phydev->link);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		   phydev->addr, phydev->phy_id, phydev->link);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	priv->phydev = phydev;
 	return 0;

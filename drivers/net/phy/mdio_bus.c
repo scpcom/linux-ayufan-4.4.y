@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /* MDIO Bus interface
  *
  * Author: Andy Fleming
@@ -41,7 +38,7 @@
 
 #include <asm/irq.h>
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 int mdiobus_register_device(struct mdio_device *mdiodev)
 {
 	if (mdiodev->bus->mdio_map[mdiodev->addr])
@@ -83,7 +80,7 @@ bool mdiobus_is_registered_device(struct mii_bus *bus, int addr)
 	return bus->mdio_map[addr];
 }
 EXPORT_SYMBOL(mdiobus_is_registered_device);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 /**
  * mdiobus_alloc_size - allocate a mii_bus structure
@@ -98,9 +95,9 @@ struct mii_bus *mdiobus_alloc_size(size_t size)
 	struct mii_bus *bus;
 	size_t aligned_size = ALIGN(sizeof(*bus), NETDEV_ALIGN);
 	size_t alloc_size;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	int i;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	/* If we alloc extra space, it should be aligned */
 	if (size)
@@ -115,11 +112,11 @@ struct mii_bus *mdiobus_alloc_size(size_t size)
 			bus->priv = (void *)bus + aligned_size;
 	}
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	/* Initialise the interrupts to polling */
 	for (i = 0; i < PHY_MAX_ADDR; i++)
 		bus->irq[i] = PHY_POLL;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	return bus;
 }
@@ -251,33 +248,33 @@ EXPORT_SYMBOL(of_mdio_find_bus);
  * the phy. This allows auto-probed pyh devices to be supplied with information
  * passed in via DT.
  */
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 static void of_mdiobus_link_phydev(struct mii_bus *bus,
 				   struct phy_device *phydev)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 static void of_mdiobus_link_phydev(struct mii_bus *mdio,
 				   struct phy_device *phydev)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	struct device *dev = &phydev->mdio.dev;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct device *dev = &phydev->dev;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct device_node *child;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	if (dev->of_node || !bus->dev.of_node)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	if (dev->of_node || !mdio->dev.of_node)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		return;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	for_each_available_child_of_node(bus->dev.of_node, child) {
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	for_each_available_child_of_node(mdio->dev.of_node, child) {
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		int addr;
 		int ret;
 
@@ -295,11 +292,11 @@ static void of_mdiobus_link_phydev(struct mii_bus *mdio,
 			continue;
 		}
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 		if (addr == phydev->mdio.addr) {
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		if (addr == phydev->addr) {
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 			dev->of_node = child;
 			return;
 		}
@@ -371,11 +368,11 @@ int __mdiobus_register(struct mii_bus *bus, struct module *owner)
 
 error:
 	while (--i >= 0) {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 		struct phy_device *phydev = mdiobus_get_phy(bus, i);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		struct phy_device *phydev = bus->phy_map[i];
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		if (phydev) {
 			phy_device_remove(phydev);
 			phy_device_free(phydev);
@@ -388,34 +385,34 @@ EXPORT_SYMBOL(__mdiobus_register);
 
 void mdiobus_unregister(struct mii_bus *bus)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	struct mdio_device *mdiodev;
 	struct phy_device *phydev;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	int i;
 
 	BUG_ON(bus->state != MDIOBUS_REGISTERED);
 	bus->state = MDIOBUS_UNREGISTERED;
 
 	for (i = 0; i < PHY_MAX_ADDR; i++) {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 		mdiodev = bus->mdio_map[i];
 		if (!mdiodev)
 			continue;
 
 		if (!(mdiodev->flags & MDIO_DEVICE_FLAG_PHY)) {
 			phydev = container_of(mdiodev, struct phy_device, mdio);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		struct phy_device *phydev = bus->phy_map[i];
 		if (phydev) {
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 			phy_device_remove(phydev);
 			phy_device_free(phydev);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 		} else {
 			mdio_device_remove(mdiodev);
 			mdio_device_free(mdiodev);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		}
 	}
 	device_del(&bus->dev);
@@ -574,7 +571,7 @@ int mdiobus_write(struct mii_bus *bus, int addr, u32 regnum, u16 val)
 }
 EXPORT_SYMBOL(mdiobus_write);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 /**
  * mdio_bus_match - determine if given MDIO driver supports the given
  *		    MDIO device
@@ -598,7 +595,7 @@ static int mdio_bus_match(struct device *dev, struct device_driver *drv)
 
 	return 0;
 }
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 /**
  * mdio_bus_match - determine if given PHY driver supports the given PHY device
  * @dev: target PHY device
@@ -636,17 +633,17 @@ static int mdio_bus_match(struct device *dev, struct device_driver *drv)
 			(phydev->phy_id & phydrv->phy_id_mask);
 	}
 }
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 #ifdef CONFIG_PM
 
 static bool mdio_bus_phy_may_suspend(struct phy_device *phydev)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	struct device_driver *drv = phydev->mdio.dev.driver;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct device_driver *drv = phydev->dev.driver;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct phy_driver *phydrv = to_phy_driver(drv);
 	struct net_device *netdev = phydev->attached_dev;
 

@@ -57,7 +57,7 @@ static int slave_configure(struct scsi_device *sdev)
 	} else if (sdev->type == TYPE_TAPE) {
 		 
 		blk_queue_max_hw_sectors(sdev->request_queue, 0x7FFFFF);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 	} else if (us->pusb_dev->speed >= USB_SPEED_SUPER) {
 		 
 		blk_queue_max_hw_sectors(sdev->request_queue, 2048);
@@ -383,7 +383,7 @@ static const struct scsi_host_template usb_stor_host_template = {
 
 	.sdev_attrs =			sysfs_device_attr_list,
 
-#if defined(MY_ABC_HERE) || defined(MY_DEF_HERE)
+#if defined(MY_ABC_HERE) || defined(CONFIG_SYNO_PORT_MAPPING_V2)
 	.syno_port_type         = SYNO_PORT_TYPE_USB,
 #endif  
 

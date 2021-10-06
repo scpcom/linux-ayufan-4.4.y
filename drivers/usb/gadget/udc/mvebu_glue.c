@@ -1,7 +1,4 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 /*
  * Copyright (C) 2013 Marvell International Ltd. All rights reserved.
  *
@@ -191,4 +188,4 @@ static int __init mvc2_glue_init(void)
 }
 
 device_initcall(mvc2_glue_init);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */

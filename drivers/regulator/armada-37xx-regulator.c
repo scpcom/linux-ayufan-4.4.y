@@ -1,7 +1,4 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 /*
  * Marvell Armada 3700 AVS driver
  *
@@ -287,15 +284,15 @@ static int armada_3700_avs_probe(struct platform_device *pdev)
 
 	max_cpu_clk = devm_clk_get(&pdev->dev, NULL);
 	if (IS_ERR(max_cpu_clk)) {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_10)
 		dev_err(&pdev->dev,
 			"error getting max cpu frequency, try again later\n");
 		/* Try probe again after A3700 clock driver loaded */
 		ret = -EPROBE_DEFER;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_10 */
 		dev_err(&pdev->dev, "error getting max cpu frequency\n");
 		ret = PTR_ERR(max_cpu_clk);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_10 */
 		goto err_put_node;
 	}
 	max_cpu_freq = clk_get_rate(max_cpu_clk) / MHZ_TO_HZ;
@@ -427,4 +424,4 @@ static int __init armada3700_regulator_avs_init(void)
 }
 subsys_initcall(armada3700_regulator_avs_init);
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */

@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * Copyright (C) 2013 Freescale Semiconductor, Inc.
  *
@@ -18,11 +15,11 @@
 #include <linux/slab.h>
 #include "clk.h"
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 #define to_clk_div(_hw) container_of(_hw, struct clk_divider, hw)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 #define div_mask(d)	((1 << (d->width)) - 1)
 
 /**
@@ -42,11 +39,11 @@ struct clk_fixup_div {
 
 static inline struct clk_fixup_div *to_clk_fixup_div(struct clk_hw *hw)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	struct clk_divider *divider = to_clk_divider(hw);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct clk_divider *divider = to_clk_div(hw);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	return container_of(divider, struct clk_fixup_div, divider);
 }
@@ -71,11 +68,11 @@ static int clk_fixup_div_set_rate(struct clk_hw *hw, unsigned long rate,
 			    unsigned long parent_rate)
 {
 	struct clk_fixup_div *fixup_div = to_clk_fixup_div(hw);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	struct clk_divider *div = to_clk_divider(hw);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct clk_divider *div = to_clk_div(hw);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	unsigned int divider, value;
 	unsigned long flags = 0;
 	u32 val;

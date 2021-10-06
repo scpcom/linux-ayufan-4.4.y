@@ -1949,9 +1949,9 @@ static int syno_parse_adt_peci_input(struct _SynoCpuTemp *pCpuTemp)
 
 	data = i2c_get_clientdata(client);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ADT7490_PECI1_ENABLE
 	cpu_count = 2;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_ADT7490_PECI1_ENABLE */
 
 	for (i = 0; i < cpu_count; ++i) {
 		pCpuTemp->cpu_temp[i] = reg2temp(data, data->peci[INPUT][i]);
@@ -2084,13 +2084,13 @@ static int adt7475_probe(struct i2c_client *client,
 			}
 		}
 		configPECI = adt7475_read(REG_PECI_CONFIG);
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ADT7490_PECI1_ENABLE
 		// 40h = 01000000b
 		// Bits [7:6], 01: 2 CPUs (PECI0, PECI1)
 		configPECI = 0x40;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_ADT7490_PECI1_ENABLE */
 		configPECI = 0x00;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_ADT7490_PECI1_ENABLE */
 		i2c_smbus_write_byte_data(client, REG_PECI_CONFIG, configPECI);
 
 		funcSYNOReadAdtPeci = syno_parse_adt_peci_input;

@@ -141,55 +141,55 @@ int reset_control_status(struct reset_control *rstc)
 EXPORT_SYMBOL_GPL(reset_control_status);
 
 /**
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
  * of_reset_control_get_by_index - Lookup and obtain a reference to a reset
  * controller by index.
-#else // MY_DEF_HERE
+#else // CONFIG_SYNO_LSP_RTD1619
  * of_reset_control_get - Lookup and obtain a reference to a reset controller.
-#endif // MY_DEF_HERE
+#endif // CONFIG_SYNO_LSP_RTD1619
  * @node: device to be reset by the controller
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
  * @index: index of the reset controller
-#else // MY_DEF_HERE
+#else // CONFIG_SYNO_LSP_RTD1619
  * @id: reset line name
  *
  * Returns a struct reset_control or IS_ERR() condition containing errno.
-#endif // MY_DEF_HERE
+#endif // CONFIG_SYNO_LSP_RTD1619
  *
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
  * This is to be used to perform a list of resets for a device or power domain
  * in whatever order. Returns a struct reset_control or IS_ERR() condition
  * containing errno.
-#else // MY_DEF_HERE
+#else // CONFIG_SYNO_LSP_RTD1619
  * Use of id names is optional.
-#endif // MY_DEF_HERE
+#endif // CONFIG_SYNO_LSP_RTD1619
  */
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 struct reset_control *of_reset_control_get_by_index(struct device_node *node,
 					   int index)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_RTD1619 */
 struct reset_control *of_reset_control_get(struct device_node *node,
 					   const char *id)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */
 {
 	struct reset_control *rstc = ERR_PTR(-EPROBE_DEFER);
 	struct reset_controller_dev *r, *rcdev;
 	struct of_phandle_args args;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_RTD1619 */
 	int index = 0;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */
 	int rstc_id;
 	int ret;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_RTD1619 */
 	if (id)
 		index = of_property_match_string(node,
 						 "reset-names", id);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */
 	ret = of_parse_phandle_with_args(node, "resets", "#reset-cells",
 					 index, &args);
 	if (ret)
@@ -230,7 +230,7 @@ struct reset_control *of_reset_control_get(struct device_node *node,
 
 	return rstc;
 }
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 EXPORT_SYMBOL_GPL(of_reset_control_get_by_index);
 
 /**
@@ -255,7 +255,7 @@ struct reset_control *of_reset_control_get(struct device_node *node,
 	}
 	return of_reset_control_get_by_index(node, index);
 }
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */
 EXPORT_SYMBOL_GPL(of_reset_control_get);
 
 /**

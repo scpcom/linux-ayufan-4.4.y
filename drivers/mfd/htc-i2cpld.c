@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  *  htc-i2cpld.c
  *  Chip driver for an unknown CPLD chip found on omap850 HTC devices like
@@ -432,11 +429,11 @@ static int htcpld_register_chip_gpio(
 	/* Setup the GPIO chips */
 	gpio_chip = &(chip->chip_out);
 	gpio_chip->label           = "htcpld-out";
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	gpio_chip->parent             = dev;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	gpio_chip->dev             = dev;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	gpio_chip->owner           = THIS_MODULE;
 	gpio_chip->get             = htcpld_chip_get;
 	gpio_chip->set             = htcpld_chip_set;
@@ -447,11 +444,11 @@ static int htcpld_register_chip_gpio(
 
 	gpio_chip = &(chip->chip_in);
 	gpio_chip->label           = "htcpld-in";
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	gpio_chip->parent             = dev;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	gpio_chip->dev             = dev;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	gpio_chip->owner           = THIS_MODULE;
 	gpio_chip->get             = htcpld_chip_get;
 	gpio_chip->set             = NULL;

@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * Copyright (c) 2003-2012 Broadcom Corporation
  * All Rights Reserved
@@ -841,13 +838,13 @@ static int xlr_mii_probe(struct xlr_net_priv *priv)
 	}
 
 	/* Attach MAC to PHY */
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	phydev = phy_connect(priv->ndev, phydev_name(phydev),
 			     &xlr_gmac_link_adjust, priv->nd->phy_interface);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	phydev = phy_connect(priv->ndev, dev_name(&phydev->dev),
 			&xlr_gmac_link_adjust, priv->nd->phy_interface);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	if (IS_ERR(phydev)) {
 		pr_err("could not attach PHY\n");
@@ -862,12 +859,12 @@ static int xlr_mii_probe(struct xlr_net_priv *priv)
 				| ADVERTISED_MII);
 
 	phydev->advertising = phydev->supported;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	phy_attached_info(phydev);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	pr_info("attached PHY driver [%s] (mii_bus:phy_addr=%s\n",
 		phydev->drv->name, dev_name(&phydev->dev));
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	return 0;
 }
 

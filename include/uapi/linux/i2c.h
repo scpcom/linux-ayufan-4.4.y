@@ -72,10 +72,10 @@ struct i2c_msg {
 	__u16 addr;	/* slave address			*/
 	__u16 flags;
 #define I2C_M_TEN		0x0010	/* this is a ten bit chip address */
-#if defined(MY_DEF_HERE) || defined(CONFIG_I2C_RTK) && defined(MY_DEF_HERE)
+#if defined(MY_DEF_HERE) || defined(CONFIG_I2C_RTK) && defined(CONFIG_SYNO_LSP_RTD1619)
 #define I2C_M_NO_GUARD_TIME		0x0020  /* 20121120 - Kevin Wang add for disable guard time*/
 #define I2C_GPIO_RW				0x0080  /* 20100510 - Kevin Wang add for Venus I2C */
-#endif /* MY_DEF_HERE || CONFIG_I2C_RTK && MY_DEF_HERE */
+#endif /* MY_DEF_HERE || CONFIG_I2C_RTK && CONFIG_SYNO_LSP_RTD1619 */
 #define I2C_M_RD		0x0001	/* read data, from slave to master */
 #define I2C_M_STOP		0x8000	/* if I2C_FUNC_PROTOCOL_MANGLING */
 #define I2C_M_NOSTART		0x4000	/* if I2C_FUNC_NOSTART */
@@ -83,7 +83,7 @@ struct i2c_msg {
 #define I2C_M_IGNORE_NAK	0x1000	/* if I2C_FUNC_PROTOCOL_MANGLING */
 #define I2C_M_NO_RD_ACK		0x0800	/* if I2C_FUNC_PROTOCOL_MANGLING */
 #define I2C_M_RECV_LEN		0x0400	/* length will be first received byte */
-#if defined(MY_DEF_HERE) || defined(CONFIG_I2C_RTK) && defined(MY_DEF_HERE)
+#if defined(MY_DEF_HERE) || defined(CONFIG_I2C_RTK) && defined(CONFIG_SYNO_LSP_RTD1619)
 #define I2C_M_NORMAL_SPEED	0x0000  /* 20120716 - Kevin Wang add for Standard Speed Transmission : 100Kbps */
 #define I2C_M_FAST_SPEED	0x0002  /* 20120716 - Kevin Wang add for Fast Speed Transmission : 400Kbps */
 #define I2C_M_HIGH_SPEED	0x0004  /* 20120716 - Kevin Wang add for High Speed Transmission : > 400Kbps to max 3.4 Mbps */
@@ -93,7 +93,7 @@ struct i2c_msg {
 #define I2C_M_LOW_SPEED_33	0x000c  /* 20140910 - Victor hsu add for Low  Speed Transmission : 33Kbps */
 #define I2C_M_LOW_SPEED_10	0x000e  /* 20140910 - Victor hsu add for Low  Speed Transmission : 10Kbps */
 #define I2C_M_SPEED_MASK	0x000e  /* 20120716 - Kevin Wang add for speed control*/
-#endif /* MY_DEF_HERE || CONFIG_I2C_RTK && MY_DEF_HERE */
+#endif /* MY_DEF_HERE || CONFIG_I2C_RTK && CONFIG_SYNO_LSP_RTD1619 */
 	__u16 len;		/* msg length				*/
 	__u8 *buf;		/* pointer to msg data			*/
 };

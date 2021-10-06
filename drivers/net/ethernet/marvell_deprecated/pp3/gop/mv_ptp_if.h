@@ -1,7 +1,4 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 /*
 * ***************************************************************************
 * Copyright (C) 2015 Marvell International Ltd.
@@ -62,4 +59,4 @@ void mv_pp3_tai_tod_dump(void);
 int mv_pp3_tai_tod_load_set(u32 sec_h, u32 sec_l, u32 nano, u32 frac);
 
 #endif /* _mv_ptp_if_h_ */
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */

@@ -2,7 +2,7 @@
 #define MY_ABC_HERE
 #endif
  
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 #ifdef CONFIG_USB_PATCH_ON_RTK
 extern int RTK_ohci_force_suspend(const char *func);
 
@@ -700,7 +700,7 @@ done:
 
 static void enable_async(struct ehci_hcd *ehci)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 #ifdef CONFIG_USB_PATCH_ON_RTK
 	 
 	check_and_restore_async_list(ehci, __func__, __LINE__);
@@ -718,7 +718,7 @@ static void enable_async(struct ehci_hcd *ehci)
 
 static void disable_async(struct ehci_hcd *ehci)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 #ifdef CONFIG_USB_PATCH_ON_RTK
 	 
 	check_and_restore_async_list(ehci, __func__, __LINE__);
@@ -739,7 +739,7 @@ static void qh_link_async (struct ehci_hcd *ehci, struct ehci_qh *qh)
 	__hc32		dma = QH_NEXT(ehci, qh->qh_dma);
 	struct ehci_qh	*head;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 #ifdef CONFIG_USB_PATCH_ON_RTK
 	 
 	check_and_restore_async_list(ehci, __func__, __LINE__);
@@ -850,7 +850,7 @@ submit_async (
 
 	epnum = urb->ep->desc.bEndpointAddress;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 #ifdef CONFIG_USB_PATCH_ON_RTK
 #ifdef CONFIG_USB_OHCI_RTK
 	 
@@ -989,7 +989,7 @@ static void single_unlink_async(struct ehci_hcd *ehci, struct ehci_qh *qh)
 	prev->qh_next = qh->qh_next;
 	if (ehci->qh_scan_next == qh)
 		ehci->qh_scan_next = qh->qh_next.qh;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 
 #ifdef CONFIG_USB_PATCH_ON_RTK
 	 
@@ -1028,7 +1028,7 @@ static void end_unlink_async(struct ehci_hcd *ehci)
 		ehci_writel(ehci, (u32) ehci->async->qh_dma,
 			    &ehci->regs->async_next);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 #ifdef CONFIG_USB_PATCH_ON_RTK
 	 
 	check_and_restore_async_list(ehci, __func__, __LINE__);

@@ -92,7 +92,7 @@ inline static int power_control_disable_hw_pm(struct power_control *pctrl)
 #endif
 #endif /* MY_DEF_HERE */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 #warning "Please include soc/realtek/power-control.h"
 #include <soc/realtek/power-control.h>
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */

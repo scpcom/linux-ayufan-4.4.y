@@ -247,11 +247,11 @@ void scsi_print_command(struct scsi_cmnd *cmd)
 	if (cmd->cmd_len > 16) {
 		/* Print opcode in one line and use separate lines for CDB */
 		off += scnprintf(logbuf + off, logbuf_len - off, "\n");
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_TASK_ABORT_MESSAGE
 		dev_printk(KERN_WARNING, &cmd->device->sdev_gendev, "%s", logbuf);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_SAS_TASK_ABORT_MESSAGE */
 		dev_printk(KERN_INFO, &cmd->device->sdev_gendev, "%s", logbuf);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_SAS_TASK_ABORT_MESSAGE */
 		scsi_log_release_buffer(logbuf);
 		for (k = 0; k < cmd->cmd_len; k += 16) {
 			size_t linelen = min(cmd->cmd_len - k, 16);
@@ -269,11 +269,11 @@ void scsi_print_command(struct scsi_cmnd *cmd)
 						   16, 1, logbuf + off,
 						   logbuf_len - off, false);
 			}
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_TASK_ABORT_MESSAGE
 			dev_printk(KERN_WARNING, &cmd->device->sdev_gendev, "%s",
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_SAS_TASK_ABORT_MESSAGE */
 			dev_printk(KERN_INFO, &cmd->device->sdev_gendev, "%s",
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_SAS_TASK_ABORT_MESSAGE */
 				   logbuf);
 			scsi_log_release_buffer(logbuf);
 		}
@@ -286,11 +286,11 @@ void scsi_print_command(struct scsi_cmnd *cmd)
 				   false);
 	}
 out_printk:
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_TASK_ABORT_MESSAGE
 	dev_printk(KERN_WARNING, &cmd->device->sdev_gendev, "%s", logbuf);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_SAS_TASK_ABORT_MESSAGE */
 	dev_printk(KERN_INFO, &cmd->device->sdev_gendev, "%s", logbuf);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_SAS_TASK_ABORT_MESSAGE */
 	scsi_log_release_buffer(logbuf);
 }
 EXPORT_SYMBOL(scsi_print_command);

@@ -1,7 +1,4 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 /*
 * ***************************************************************************
 * Copyright (C) 2016 Marvell International Ltd.
@@ -27,30 +24,30 @@
 #include <linux/skbuff.h>
 #include <linux/bitops.h>
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 #define CREATE_MASK(pos, len)		GENMASK((pos) + (len) - 1, (pos))
 #define CREATE_MASK_ULL(pos, len)	GENMASK_ULL((pos) + (len) - 1, (pos))
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 #define CREATE_MASK(pos, len)		GENMASK((pos)+(len)-1, (pos))
 #define CREATE_MASK_ULL(pos, len)	GENMASK_ULL((pos)+(len)-1, (pos))
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 
 #define AUTO_MASK(reg_name)	CREATE_MASK(reg_name##_OFFS, reg_name##_SIZE)
 
 /*All PPV22 Addresses are 40-bit */
 #define MVPP22_ADDR_HIGH_SIZE			8
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 #define MVPP22_ADDR_HIGH_MASK		((1 << MVPP22_ADDR_HIGH_SIZE) - 1)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 #define MVPP22_ADDR_HIGH_MASK		((1<<MVPP22_ADDR_HIGH_SIZE) - 1)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 
 /*PPV22 ADDRESS SPACE */
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 #define MVPP2_ADDR_SPACE_SIZE			(64 * 1024)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 #define MVPP2_ADDR_SPACE_SIZE			(64*1024)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 
 /*TODO*/
 /*AXI_BRIDGE*/
@@ -58,11 +55,11 @@
 /*Top Regfile*/
 
 #define MVPP21_DESC_ADDR_SHIFT		0 /*Applies to RXQ, AGGR_TXQ*/
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 #define MVPP22_DESC_ADDR_SHIFT		(9 - 1) /*Applies to RXQ, AGGR_TXQ*/
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 #define MVPP22_DESC_ADDR_SHIFT		(9-1) /*Applies to RXQ, AGGR_TXQ*/
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 
 /* RX Fifo Registers */
 #define MVPP2_RX_DATA_FIFO_SIZE_REG(port)	(0x00 + 4 * (port))
@@ -139,18 +136,18 @@
 #define MVPP22_AXI_ATTR_DOMAIN_SIZE		2
 #define MVPP22_AXI_ATTR_DOMAIN_MASK	AUTO_MASK(MVPP22_AXI_ATTR_DOMAIN)
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 #define MVPP22_AXI_ATTR_NON_CACHE	((0x3 << MVPP22_AXI_ATTR_DOMAIN_OFFS) + \
 					 (0x3 << MVPP22_AXI_ATTR_CACHE_OFFS))
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 #define MVPP22_AXI_ATTR_NON_CACHE	((0x3<<MVPP22_AXI_ATTR_DOMAIN_OFFS) + \
 					 (0x3<<MVPP22_AXI_ATTR_CACHE_OFFS))
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 #define MVPP22_AXI_ATTR_SW_COH_WRITE	((0x0 << MVPP22_AXI_ATTR_DOMAIN_OFFS) + \
 					 (0x7 << MVPP22_AXI_ATTR_CACHE_OFFS))
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 #define MVPP22_AXI_ATTR_SW_COH_WRITE	((0x0<<MVPP22_AXI_ATTR_DOMAIN_OFFS) + \
 					 (0x7<<MVPP22_AXI_ATTR_CACHE_OFFS))
 
@@ -162,22 +159,22 @@
 
 #define MVPP22_AXI_ATTR_HW_COH_READ	((0x2<<MVPP22_AXI_ATTR_DOMAIN_OFFS) + \
 					 (0xB<<MVPP22_AXI_ATTR_CACHE_OFFS))
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 #define MVPP22_AXI_ATTR_SW_COH_READ	((0x0 << MVPP22_AXI_ATTR_DOMAIN_OFFS) + \
 					 (0xB << MVPP22_AXI_ATTR_CACHE_OFFS))
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 #define MVPP22_AXI_ATTR_HW_COH_WRITE	((0x2 << MVPP22_AXI_ATTR_DOMAIN_OFFS) + \
 					 (0x7 << MVPP22_AXI_ATTR_CACHE_OFFS))
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 #define MVPP22_AXI_ATTR_HW_COH_READ	((0x2 << MVPP22_AXI_ATTR_DOMAIN_OFFS) + \
 					 (0xB << MVPP22_AXI_ATTR_CACHE_OFFS))
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 
 #define MVPP22_AXI_ATTR_SNOOP_CNTRL_BIT		BIT(16)
 
@@ -411,11 +408,11 @@
 /* Flow counters index */
 #define MVPP2_CNT_IDX_FLOW(index)		(index)
 /* TX counters index */
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 #define MVPP2_CNT_IDX_TX(port, txq)		(((16 + port) << 3) | (txq))
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 #define MVPP2_CNT_IDX_TX(port, txq)		(((16+port) << 3) | (txq))
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 
 #define MVPP2_TX_DESC_ENQ_REG			0x7100
 #define MVPP2_TX_DESC_ENQ_TO_DRAM_REG		0x7104
@@ -666,11 +663,11 @@
 #define MVPP2_CLS3_HASH_OP_TBL_ADDR_MASK	\
 	((MVPP2_CLS3_HASH_OP_TBL_ADDR_MAX) << MVPP2_CLS3_HASH_OP_TBL_ADDR)
 #define MVPP2_CLS3_MISS_PTR			12
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 #define MVPP2_CLS3_MISS_PTR_MASK		BIT(MVPP2_CLS3_MISS_PTR)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 #define MVPP2_CLS3_MISS_PTR_MASK		(1 << MVPP2_CLS3_MISS_PTR)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 #define MVPP2_CLS3_HASH_OP_DEL			14
 #define MVPP2_CLS3_HASH_OP_ADD			15
 #define MVPP2_CLS3_HASH_OP_EXT_TBL_ADDR		16
@@ -689,11 +686,11 @@
 #define MVPP2_CLS3_STATE_CLEAR_CTR_DONE_MASK	(1 << \
 					MVPP2_CLS3_STATE_CLEAR_CTR_DONE)
 #define MVPP2_CLS3_STATE_SC_DONE		2
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 #define MVPP2_CLS3_STATE_SC_DONE_MASK		BIT(MVPP2_CLS3_STATE_SC_DONE)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 #define MVPP2_CLS3_STATE_SC_DONE_MASK		(1 << MVPP2_CLS3_STATE_SC_DONE)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 #define MVPP2_CLS3_STATE_OCCIPIED		8
 #define MVPP2_CLS3_STATE_OCCIPIED_BITS		8
 #define MVPP2_CLS3_STATE_OCCIPIED_MASK		(((1 << \
@@ -719,11 +716,11 @@
 
 #define MVPP2_CLS3_DB_INDEX_REG			0x1C90
 #define MVPP2_CLS3_DB_MISS_OFFS			12
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 #define MVPP2_CLS3_DB_MISS_MASK			BIT(MVPP2_CLS3_DB_MISS_OFFS)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 #define MVPP2_CLS3_DB_MISS_MASK			(1 << MVPP2_CLS3_DB_MISS_OFFS)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 
 						/* 0-3 valid val*/
 #define MVPP2_CLS3_HASH_DATA_REG(num)		(0x1CA0 + 4 * (num))
@@ -868,11 +865,11 @@
 #define MVPP21_TXQ_SENT_REG(txq)		(0x3c00 + 4 * (txq))
 #define MVPP21_TRANSMITTED_COUNT_OFFSET		16
 #define MVPP21_TRANSMITTED_COUNT_MASK		0x3fff0000
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 #define MVPP22_TXQ_SENT_REG(txq)		(0x3e00 + 4 * (txq - 128))
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 #define MVPP22_TXQ_SENT_REG(txq)		(0x3e00 + 4 * (txq-128))
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 #define MVPP22_TRANSMITTED_COUNT_OFFSET		16
 #define MVPP22_TRANSMITTED_COUNT_MASK		0x3fff0000
 
@@ -1268,35 +1265,35 @@
 #define MVPP2_RXQ_TOTAL_NUM		(MVPP2_MAX_PORTS * MVPP2_MAX_RXQ)
 
 #define MVPP2_TXQ_TOTAL_NUM		(128/*pon*/ + \
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 					MVPP2_MAX_PORTS * MVPP2_MAX_TXQ/*eth*/)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 					MVPP2_MAX_PORTS*MVPP2_MAX_TXQ/*eth*/)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 
 /* Max number of Rx descriptors */
 #define MVPP2_MAX_RXD			1024
 
 /* Max number of Tx descriptors */
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 #define MVPP2_MAX_TXD			2048
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 #define MVPP2_MAX_TXD			1024
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 
 /* Amount of Tx descriptors that can be reserved at once by CPU */
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 #define MVPP2_CPU_DESC_CHUNK		128
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 #define MVPP2_CPU_DESC_CHUNK		64
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 
 /* Max number of Tx descriptors in each aggregated queue */
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 #define MVPP2_AGGR_TXQ_SIZE		512
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 #define MVPP2_AGGR_TXQ_SIZE		256
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 
 /* Descriptor aligned size */
 #define MVPP2_DESC_ALIGNED_SIZE		32
@@ -1309,7 +1306,7 @@
 /* Descriptor alignment mask */
 #define MVPP2_TX_DESC_ALIGN		(MVPP2_DESC_ALIGNED_SIZE - 1)
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 /* TX FIFO constants */
 #define MVPP2_TX_FIFO_DATA_SIZE_10KB		0xa
 #define MVPP2_TX_FIFO_DATA_SIZE_3KB		0x3
@@ -1320,19 +1317,19 @@
 #define MVPP2_TX_FIFO_THRESHOLD_3KB	(MVPP2_TX_FIFO_DATA_SIZE_3KB * 1024 - \
 					MVPP2_TX_FIFO_MINIMUM_THRESHOLD)
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 /* RX FIFO constants */
 #define MVPP2_RX_FIFO_PORT_DATA_SIZE	0x2000
 #define MVPP2_RX_FIFO_PORT_ATTR_SIZE	0x80
 #define MVPP2_RX_FIFO_PORT_MIN_PKT	0x80
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 #define MVPP2_RX_FIFO_DATA_SIZE_32KB	0x8000
 #define MVPP2_RX_FIFO_DATA_SIZE_8KB	0x2000
 #define MVPP2_RX_FIFO_DATA_SIZE_4KB	0x1000
 #define MVPP2_RX_FIFO_ATTR_SIZE_32KB	0x200
 #define MVPP2_RX_FIFO_ATTR_SIZE_8KB	0x80
 #define MVPP2_RX_FIFO_ATTR_SIZE_4KB	0x40
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 
 /* RX buffer constants */
 #define MVPP2_SKB_SHINFO_SIZE \
@@ -1391,21 +1388,21 @@ enum mv_pp2x_tag_type {
 #define MVPP2_PRS_TCAM_PROTO_MASK_L	0x3f
 #define MVPP2_PRS_DBL_VLANS_MAX		100
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 /* There is a TCAM range reserved for MAC entries, range size is 80
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 /* There is TCAM range reserved for MAC entries, range size is 113
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
  * 1 BC MAC entry for all ports
  * 4 M2M entries, 1 entry per port, and 4 ports in all
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
  * 25 UC/MC MAC filter entries per port
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
  * 36 UC/MC MAC filter entries per port
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
  * It is assumed that there are 3 ports for filter, not including loopback port
  */
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 #define MVPP2_PRS_MAC_UC_MC_FILT_MAX	25
 #define MVPP2_PRS_MAC_RANGE_SIZE	80
 
@@ -1425,10 +1422,10 @@ enum mv_pp2x_tag_type {
 #define MVPP2_PRS_VID_H_WORD_SHIFT	8
 #define MVPP2_PRS_VID_L_WORD_MASK	0xff
 #define MVPP2_PRS_VID_TCAM_BYTE		2
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 #define MVPP2_PRS_MAC_UC_MC_FILT_MAX	36
 #define MVPP2_PRS_MAC_RANGE_SIZE	113
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 
 /* Tcam structure:
  * - lookup ID - 4 bits
@@ -1450,23 +1447,23 @@ enum mv_pp2x_tag_type {
 /* Tcam entries ID */
 #define MVPP2_PE_DROP_ALL		0
 #define MVPP2_PE_FIRST_FREE_TID		1
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 #define MVPP2_PE_MAC_RANGE_END		(MVPP2_PE_VID_FILT_RANGE_START - 1)
 #define MVPP2_PE_MAC_RANGE_START	(MVPP2_PE_MAC_RANGE_END - MVPP2_PRS_MAC_RANGE_SIZE + 1)
 #define MVPP2_PE_VID_FILT_RANGE_END	(MVPP2_PRS_TCAM_SRAM_SIZE - 31)
 #define MVPP2_PE_VID_FILT_RANGE_START	(MVPP2_PE_VID_FILT_RANGE_END - MVPP2_PRS_VLAN_FILT_RANGE_SIZE + 1)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 #define MVPP2_PE_MAC_RANGE_END		(MVPP2_PRS_TCAM_SRAM_SIZE - 31)
 #define MVPP2_PE_MAC_RANGE_START	(MVPP2_PE_MAC_RANGE_END -\
 					 MVPP2_PRS_MAC_RANGE_SIZE + 1)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 #define MVPP2_PE_LAST_FREE_TID		(MVPP2_PE_MAC_RANGE_START - 1)
 #define MVPP2_PE_IP6_EXT_PROTO_UN	(MVPP2_PRS_TCAM_SRAM_SIZE - 30)
 #define MVPP2_PE_MAC_MC_IP6		(MVPP2_PRS_TCAM_SRAM_SIZE - 29)
 #define MVPP2_PE_IP6_ADDR_UN		(MVPP2_PRS_TCAM_SRAM_SIZE - 28)
 #define MVPP2_PE_IP4_ADDR_UN		(MVPP2_PRS_TCAM_SRAM_SIZE - 27)
 #define MVPP2_PE_LAST_DEFAULT_FLOW	(MVPP2_PRS_TCAM_SRAM_SIZE - 26)
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 #define MVPP2_PE_FIRST_DEFAULT_FLOW	(MVPP2_PRS_TCAM_SRAM_SIZE - 20)
 #define MVPP2_PE_EDSA_TAGGED		(MVPP2_PRS_TCAM_SRAM_SIZE - 19)
 #define MVPP2_PE_EDSA_UNTAGGED		(MVPP2_PRS_TCAM_SRAM_SIZE - 18)
@@ -1482,7 +1479,7 @@ enum mv_pp2x_tag_type {
 #define MVPP2_PE_IP4_PROTO_UN		(MVPP2_PRS_TCAM_SRAM_SIZE - 8)
 #define MVPP2_PE_ETH_TYPE_UN		(MVPP2_PRS_TCAM_SRAM_SIZE - 7)
 #define MVPP2_PE_VID_FLTR_DEFAULT	(MVPP2_PRS_TCAM_SRAM_SIZE - 6)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 #define MVPP2_PE_FIRST_DEFAULT_FLOW	(MVPP2_PRS_TCAM_SRAM_SIZE - 19)
 #define MVPP2_PE_EDSA_TAGGED		(MVPP2_PRS_TCAM_SRAM_SIZE - 18)
 #define MVPP2_PE_EDSA_UNTAGGED		(MVPP2_PRS_TCAM_SRAM_SIZE - 17)
@@ -1497,7 +1494,7 @@ enum mv_pp2x_tag_type {
 #define MVPP2_PE_IP6_PROTO_UN		(MVPP2_PRS_TCAM_SRAM_SIZE - 8)
 #define MVPP2_PE_IP4_PROTO_UN		(MVPP2_PRS_TCAM_SRAM_SIZE - 7)
 #define MVPP2_PE_ETH_TYPE_UN		(MVPP2_PRS_TCAM_SRAM_SIZE - 6)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 #define MVPP2_PE_VLAN_DBL		(MVPP2_PRS_TCAM_SRAM_SIZE - 5)
 #define MVPP2_PE_VLAN_NONE		(MVPP2_PRS_TCAM_SRAM_SIZE - 4)
 #define MVPP2_PE_MAC_MC_ALL		(MVPP2_PRS_TCAM_SRAM_SIZE - 3)
@@ -1626,11 +1623,11 @@ enum mv_pp2x_tag_type {
 			MVPP2_FLOWID_FLOW_BITS) - 1) << MVPP2_FLOWID_FLOW)
 
 #define MVPP2_FLOWID_EN			25 /*one bit */
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 #define MVPP2_FLOWID_EN_MASK		BIT(MVPP2_FLOWID_EN)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 #define MVPP2_FLOWID_EN_MASK		(1 << MVPP2_FLOWID_EN)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 
 /* flow table structure */
 #define MVPP2_FLOW_TBL_SIZE		512
@@ -1681,11 +1678,11 @@ enum mv_pp2x_tag_type {
 #define MVPP2_FLOW_UDF7_MAX		((1 << MVPP2_FLOW_UDF7_BITS) - 1)
 
 #define MVPP2_FLOW_PORT_ID_SEL		23
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 #define MVPP2_FLOW_PORT_ID_SEL_MASK	BIT(MVPP2_FLOW_PORT_ID_SEL)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 #define MVPP2_FLOW_PORT_ID_SEL_MASK	(1 << MVPP2_FLOW_PORT_ID_SEL)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 
 /*-----------------------  DWORD 1  ------------------------------------ */
 
@@ -1782,9 +1779,9 @@ enum mv_pp2x_prs_lookup {
 	MVPP2_PRS_LU_MAC,
 	MVPP2_PRS_LU_DSA,
 	MVPP2_PRS_LU_VLAN,
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	MVPP2_PRS_LU_VID,
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	MVPP2_PRS_LU_L2,
 	MVPP2_PRS_LU_PPPOE,
 	MVPP2_PRS_LU_IP4,
@@ -1857,11 +1854,11 @@ enum mv_pp2x_cls_filed_id {
 	MVPP2_CLS_FIELD_IP4SA = 0x10,
 	MVPP2_CLS_FIELD_IP4DA = 0x11,
 	MVPP2_CLS_FIELD_IP6SA = 0x17,
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 	MVPP2_CLS_FIELD_IP6DA = 0x1A,
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 	MVPP2_CLS_FIELD_IP6DA = 0x18,
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 	MVPP2_CLS_FIELD_L4SIP = 0x1D,
 	MVPP2_CLS_FIELD_L4DIP = 0x1E,
 };
@@ -1963,11 +1960,11 @@ enum mv_pp2x_bm_pool_log_num {
 #define MVPP2_RXD_CPU_CODE_MASK		(((1 << \
 		MVPP2_RXD_CPU_CODE_BITS) - 1) << MVPP2_RXD_CPU_CODE_OFFS)
 #define MVPP2_RXD_PPPOE_BIT		9
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 #define MVPP2_RXD_PPPOE_MASK		BIT(MVPP2_RXD_PPPOE_BIT)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 #define MVPP2_RXD_PPPOE_MASK		(1 << MVPP2_RXD_PPPOE_BIT)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 #define MVPP2_RXD_L3_CAST_OFFS		10
 #define MVPP2_RXD_L3_CAST_BITS		2
 #define MVPP2_RXD_L3_CAST_MASK		(((1 << \
@@ -1991,35 +1988,35 @@ enum mv_pp2x_bm_pool_log_num {
 #define MVPP2_RXD_IP_HLEN_OFFS		8
 #define MVPP2_RXD_IP_HLEN_MASK		(0x1F << MVPP2_RXD_IP_HLEN_OFFS)
 #define MVPP2_RXD_ES_BIT		15
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 #define MVPP2_RXD_ES_MASK		BIT(MVPP2_RXD_ES_BIT)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 #define MVPP2_RXD_ES_MASK		(1 << MVPP2_RXD_ES_BIT)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 #define MVPP2_RXD_HWF_SYNC_BIT		21
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 #define MVPP2_RXD_HWF_SYNC_MASK		BIT(MVPP2_RXD_HWF_SYNC_BIT)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 #define MVPP2_RXD_HWF_SYNC_MASK		(1 << MVPP2_RXD_HWF_SYNC_BIT)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 #define MVPP2_RXD_L4_CHK_OK_BIT		22
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 #define MVPP2_RXD_L4_CHK_OK_MASK	BIT(MVPP2_RXD_L4_CHK_OK_BIT)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 #define MVPP2_RXD_L4_CHK_OK_MASK	(1 << MVPP2_RXD_L4_CHK_OK_BIT)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 #define MVPP2_RXD_IP_FRAG_BIT		23
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 #define MVPP2_RXD_IP_FRAG_MASK		BIT(MVPP2_RXD_IP_FRAG_BIT)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 #define MVPP2_RXD_IP_FRAG_MASK		(1 << MVPP2_RXD_IP_FRAG_BIT)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 #define MVPP2_RXD_IP4_HEADER_ERR_BIT	24
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 #define MVPP2_RXD_IP4_HEADER_ERR_MASK	BIT(MVPP2_RXD_IP4_HEADER_ERR_BIT)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 #define MVPP2_RXD_IP4_HEADER_ERR_MASK	(1 << MVPP2_RXD_IP4_HEADER_ERR_BIT)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 #define MVPP2_RXD_L4_OFFS		25
 #define MVPP2_RXD_L4_MASK		(7 << MVPP2_RXD_L4_OFFS)
 /* Value 0 - N/A, 3-7 - User Defined */
@@ -2030,11 +2027,11 @@ enum mv_pp2x_bm_pool_log_num {
 #define MVPP2_RXD_L3_IP4_OTHER		(3 << MVPP2_RXD_L3_OFFS)
 #define MVPP2_RXD_L3_IP6_EXT		(5 << MVPP2_RXD_L3_OFFS)
 #define MVPP2_RXD_BUF_HDR_BIT		31
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 #define MVPP2_RXD_BUF_HDR_MASK		BIT(MVPP2_RXD_BUF_HDR_BIT)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 #define MVPP2_RXD_BUF_HDR_MASK		(1 << MVPP2_RXD_BUF_HDR_BIT)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 /* status field MACROs */
 #define MVPP2_RXD_L3_IS_IP4(status)		(((status) & \
 				MVPP2_RXD_L3_MASK) == MVPP2_RXD_L3_IP4)
@@ -2588,11 +2585,11 @@ struct mv_pp2x_cls_c3_shadow_hash_entry {
 };
 
 /* Classifier C4 Top Registers */
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 #define MVPP2_CLS4_PHY_TO_RL_REG(port)			(0x1E00 + ((port) * 4))
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 #define MVPP2_CLS4_PHY_TO_RL_REG(port)			(0x1E00 + ((port)*4))
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 #define MVPP2_CLS4_PHY_TO_RL_GRP			0
 #define MVPP2_CLS4_PHY_TO_RL_GRP_BITS			3
 #define MVPP2_CLS4_PHY_TO_RL_GRP_MASK			(((1 << MVPP2_CLS4_PHY_TO_RL_GRP_BITS) - 1) << \
@@ -2602,11 +2599,11 @@ struct mv_pp2x_cls_c3_shadow_hash_entry {
 #define MVPP2_CLS4_PHY_TO_RL_RULE_NUM_MASK		(((1 << MVPP2_CLS4_PHY_TO_RL_RULE_NUM_BITS) - 1) << \
 							 MVPP2_CLS4_PHY_TO_RL_RULE_NUM)
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 #define MVPP2_CLS4_UNI_TO_RL_REG(uni)			(0x1E20 + ((uni) * 4))
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 #define MVPP2_CLS4_UNI_TO_RL_REG(uni)			(0x1E20 + ((uni)*4))
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 #define MVPP2_CLS4_UNI_TO_RL_GRP			0
 #define MVPP2_CLS4_UNI_TO_RL_RULE_NUM			4
 
@@ -2640,11 +2637,11 @@ struct mv_pp2x_cls_c3_shadow_hash_entry {
 #define MVPP2_CLS4_FDATA6_REG				(0x1E6C)
 #define MVPP2_CLS4_FDATA7_REG				(0x1E70)
 #define MVPP2_CLS4_FDATA8_REG				(0x1E74)
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 #define MVPP2_CLS4_FDATA_REG(reg_num)			(0x1E58 + (4 * (reg_num)))
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 #define MVPP2_CLS4_FDATA_REG(reg_num)			(0x1E58 + (4*(reg_num)))
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 #define MVPP2_CLS4_FDATA_REGS_NUM			8
 
 #define MVPP2_CLS4_FDATA7_L3INFO			16
@@ -2695,22 +2692,22 @@ struct mv_pp2x_cls_c3_shadow_hash_entry {
 
 /* C4 entry structure */
 struct mv_pp2x_cls_c4_entry {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	u32 rule_index;
 	u32 set_index;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	u32 ruleIndex;
 	u32 setIndex;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	union {
 		u32	words[MVPP2_CLS_C4_TBL_WORDS];
 		struct {
 			u32 attr[MVPP2_CLS4_FATTR_REG_NUM];
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 			u32 fdata_arr[MVPP2_CLS_C4_TBL_DATA_WORDS];
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 			u32 fdataArr[MVPP2_CLS_C4_TBL_DATA_WORDS];
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 		} regs;
 	} rules;
 	union {
@@ -2753,11 +2750,11 @@ struct mv_pp2x_cls_c4_entry {
 /*--------------------------------------------------------------------------*/
 #define MVPP2_PME_TTL_ZERO_FRWD_REG		(0x8640)
 #define MVPP2_PME_TTL_ZERO_FRWD_BIT		0
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 #define MVPP2_PME_TTL_ZERO_FRWD_MASK		BIT(MVPP2_PME_TTL_ZERO_FRWD_BIT)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 #define MVPP2_PME_TTL_ZERO_FRWD_MASK		(1 << MVPP2_PME_TTL_ZERO_FRWD_BIT)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 /*--------------------------------------------------------------------------*/
 #define MVPP2_PME_PPPOE_ETYPE_REG		(0x8650)
 #define MVPP2_PME_PPPOE_DATA_REG		(0x8654)
@@ -2804,11 +2801,11 @@ struct mv_pp2x_cls_c4_entry {
 						 MVPP2_PME_MAX_INSTR_NUM_ALL_MASK)
 
 #define MVPP2_PME_DROP_ON_ERR_BIT		24
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 #define MVPP2_PME_DROP_ON_ERR_MASK		BIT(MVPP2_PME_DROP_ON_ERR_BIT)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 #define MVPP2_PME_DROP_ON_ERR_MASK		(1 << MVPP2_PME_DROP_ON_ERR_BIT)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 /*--------------------------------------------------------------------------*/
 
 #define MVPP2_PME_STATUS_1_REG			(0x8664)
@@ -2830,25 +2827,25 @@ struct mv_pp2x_cls_c4_entry {
 #define MVPP2_PME_CMD_MASK(cmd)			((cmd) << MVPP2_PME_CMD_OFFS)
 
 #define MVPP2_PME_IP4_CSUM_BIT			21
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 #define MVPP2_PME_IP4_CSUM_MASK			BIT(MVPP2_PME_IP4_CSUM_BIT)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 #define MVPP2_PME_IP4_CSUM_MASK			(1 << MVPP2_PME_IP4_CSUM_BIT)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 
 #define MVPP2_PME_L4_CSUM_BIT			22
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 #define MVPP2_PME_L4_CSUM_MASK			BIT(MVPP2_PME_L4_CSUM_BIT)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 #define MVPP2_PME_L4_CSUM_MASK			(1 << MVPP2_PME_L4_CSUM_BIT)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 
 #define MVPP2_PME_LAST_BIT			23
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 #define MVPP2_PME_LAST_MASK			BIT(MVPP2_PME_LAST_BIT)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 #define MVPP2_PME_LAST_MASK			(1 << MVPP2_PME_LAST_BIT)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 
 #define MVPP2_PME_CMD_TYPE_OFFS			24
 #define MVPP2_PME_CMD_TYPE_BITS			3
@@ -2922,23 +2919,23 @@ struct mv_pp2x_pme_entry {
 #define MVPP2_MC_DATA2_GEM_ID			0
 #define MVPP2_MC_DATA2_PRI			12
 #define MVPP2_MC_DATA2_DSCP			15
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 #define MVPP2_MC_DATA2_GEM_ID_EN		BIT(21)
 #define MVPP2_MC_DATA2_PRI_EN			BIT(22)
 #define MVPP2_MC_DATA2_DSCP_EN			BIT(23)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 #define MVPP2_MC_DATA2_GEM_ID_EN		(1 << 21)
 #define MVPP2_MC_DATA2_PRI_EN			(1 << 22)
 #define MVPP2_MC_DATA2_DSCP_EN			(1 << 23)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 /*------------------------------------------------------------------------------*/
 #define MVPP2_MC_DATA3_REG			(0x16C)
 #define MVPP2_MC_DATA3_QUEUE			0
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 #define MVPP2_MC_DATA3_HWF_EN			BIT(8)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 #define MVPP2_MC_DATA3_HWF_EN			(1 << 8)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 #define MVPP2_MC_DATA3_NEXT			16
 #define MVPP2_MC_DATA3_NEXT_MASK		(MVPP2_MC_INDEX_MAX << MVPP2_MC_DATA3_NEXT)
 
@@ -2982,11 +2979,11 @@ struct mv_pp2x_mc_entry {
 		(((p) << MVPP2_PLCR_BASE_PERIOD_OFFS) & MVPP2_PLCR_BASE_PERIOD_ALL_MASK)
 
 #define MVPP2_PLCR_ADD_TOKENS_EN_BIT		16
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 #define MVPP2_PLCR_ADD_TOKENS_EN_MASK		BIT(MVPP2_PLCR_ADD_TOKENS_EN_BIT)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 #define MVPP2_PLCR_ADD_TOKENS_EN_MASK		(1 << MVPP2_PLCR_ADD_TOKENS_EN_BIT)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 /*--------------------------------------------------------------------------------------------*/
 #define MVPP2_PLCR_MODE_REG			(0x1308)
 #define MVPP2_PLCR_MODE_BITS			(3)
@@ -3033,37 +3030,37 @@ struct mv_pp2x_mc_entry {
 		(((type) << MVPP2_PLCR_TOKEN_TYPE_OFFS) & MVPP2_PLCR_TOKEN_TYPE_ALL_MASK)
 
 #define MVPP2_PLCR_TOKEN_UNIT_BIT		31
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 #define MVPP2_PLCR_TOKEN_UNIT_MASK		BIT(MVPP2_PLCR_TOKEN_UNIT_BIT)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 #define MVPP2_PLCR_TOKEN_UNIT_MASK		(1 << MVPP2_PLCR_TOKEN_UNIT_BIT)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 #define MVPP2_PLCR_TOKEN_UNIT_BYTES		(0 << MVPP2_PLCR_TOKEN_UNIT_BIT)
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 #define MVPP2_PLCR_TOKEN_UNIT_PKTS		BIT(MVPP2_PLCR_TOKEN_UNIT_BIT)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 #define MVPP2_PLCR_TOKEN_UNIT_PKTS		(1 << MVPP2_PLCR_TOKEN_UNIT_BIT)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 
 #define MVPP2_PLCR_COLOR_MODE_BIT		30
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 #define MVPP2_PLCR_COLOR_MODE_MASK		BIT(MVPP2_PLCR_COLOR_MODE_BIT)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 #define MVPP2_PLCR_COLOR_MODE_MASK		(1 << MVPP2_PLCR_COLOR_MODE_BIT)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 #define MVPP2_PLCR_COLOR_MODE_BLIND		(0 << MVPP2_PLCR_COLOR_MODE_BIT)
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 #define MVPP2_PLCR_COLOR_MODE_AWARE		BIT(MVPP2_PLCR_COLOR_MODE_BIT)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 #define MVPP2_PLCR_COLOR_MODE_AWARE		(1 << MVPP2_PLCR_COLOR_MODE_BIT)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 
 #define MVPP2_PLCR_ENABLE_BIT			29
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 #define MVPP2_PLCR_ENABLE_MASK			BIT(MVPP2_PLCR_ENABLE_BIT)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 #define MVPP2_PLCR_ENABLE_MASK			(1 << MVPP2_PLCR_ENABLE_BIT)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 /*---------------------------------------------------------------------------------------------*/
 
 #define MVPP2_PLCR_MIN_PKT_LEN_REG		(0x1320)
@@ -3079,11 +3076,11 @@ struct mv_pp2x_mc_entry {
 #define MVPP2_PLCR_EDROP_EN_REG		(0x1330)
 
 #define MVPP2_PLCR_EDROP_EN_BIT		0
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 #define MVPP2_PLCR_EDROP_EN_MASK		BIT(MVPP2_PLCR_EDROP_EN_BIT)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 #define MVPP2_PLCR_EDROP_EN_MASK		(1 << MVPP2_PLCR_EDROP_EN_BIT)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 /*---------------------------------------------------------------------------------------------*/
 /*ppv2.1 policer early drop threshold mechanism changed*/
 #define MVPP2_V0_PLCR_EDROP_THRESH_NUM		4
@@ -3124,4 +3121,4 @@ struct mv_pp2x_mc_entry {
 #define MVPP2_V1_PLCR_PKT_RED_REG(pol)		(0x7600 + 4 * (pol))
 /*---------------------------------------------------------------------------------------------*/
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */

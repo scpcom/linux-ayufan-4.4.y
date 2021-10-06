@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * GPIO controller in LSI ZEVIO SoCs.
  *
@@ -188,11 +185,11 @@ static int zevio_gpio_probe(struct platform_device *pdev)
 
 	/* Copy our reference */
 	controller->chip.gc = zevio_gpio_chip;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	controller->chip.gc.parent = &pdev->dev;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	controller->chip.gc.dev = &pdev->dev;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	status = of_mm_gpiochip_add(pdev->dev.of_node, &(controller->chip));
 	if (status) {
@@ -206,11 +203,11 @@ static int zevio_gpio_probe(struct platform_device *pdev)
 	for (i = 0; i < controller->chip.gc.ngpio; i += 8)
 		zevio_gpio_port_set(controller, i, ZEVIO_GPIO_INT_MASK, 0xFF);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	dev_dbg(controller->chip.gc.parent, "ZEVIO GPIO controller set up!\n");
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	dev_dbg(controller->chip.gc.dev, "ZEVIO GPIO controller set up!\n");
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	return 0;
 }

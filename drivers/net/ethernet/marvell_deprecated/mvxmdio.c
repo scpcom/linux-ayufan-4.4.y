@@ -1,7 +1,4 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 /**
 * ***************************************************************************
 * Copyright (C) 2015 Marvell International Ltd.
@@ -43,34 +40,34 @@
 #define XPORT_ADDR(x)		((x & 0x1f) << XPHYADDR_OFFS)
 #define XDEVADDR_OFFS		21	/* Phy device addr offset */
 #define XDEV_ADDR(x)		((x & 0x1f) << XDEVADDR_OFFS)
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 #define XSMI_ADDR_REG_OFFS	0x8
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 
 struct xmdio_controller {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	void __iomem *xmdio_mngmnt;	/* XSMI Management Register */
 	void __iomem *xmdio_addr;	/* XSMI Address Register */
 };
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	__u32 __bitwise xmdio_mngmnt;	/* XSMI Management Register */
 	__u32 __bitwise unused;		/* unused */
 	__u32 __bitwise xmdio_addr;	/* XSMI Address Register */
 } __packed;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 
 /* Check if XSMI bus is idle */
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 static int xmdio_check_idle(struct xmdio_controller __iomem *regs)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 static int xmdio_chck_idle(struct xmdio_controller __iomem *regs)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	return !(readl(regs->xmdio_mngmnt) & XBUSY);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	return !(readl(&regs->xmdio_mngmnt) & XBUSY);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 }
 
 /* Wait until XSMI bus is free */
@@ -79,11 +76,11 @@ static int xmdio_wait_free(struct device *dev, struct xmdio_controller __iomem *
 	int ntries = NTRIES;
 
 	while (ntries > 0) {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 		if (xmdio_check_idle(regs))
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 		if (xmdio_chck_idle(regs))
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 			return 0;
 
 		usleep_range(TIMEOUT_MIN, TIMEOUT_MAX);
@@ -95,17 +92,17 @@ static int xmdio_wait_free(struct device *dev, struct xmdio_controller __iomem *
 }
 
 /* Check if XSMI bus read operaton is done */
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 static int xmdio_check_read_done(struct xmdio_controller __iomem *regs)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 static int xmdio_chck_read_done(struct xmdio_controller __iomem *regs)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	return readl(regs->xmdio_mngmnt) & XREAD_VALID;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	return readl(&regs->xmdio_mngmnt) & XREAD_VALID;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 }
 
 /* Wait until XSMI bus read operation is done */
@@ -114,11 +111,11 @@ static int xmdio_wait_read_done(struct device *dev, struct xmdio_controller __io
 	int ntries = NTRIES;
 
 	while (ntries > 0) {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 		if (xmdio_check_read_done(regs))
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 		if (xmdio_chck_read_done(regs))
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 			return 0;
 
 		usleep_range(TIMEOUT_MIN, TIMEOUT_MAX);
@@ -131,11 +128,11 @@ static int xmdio_wait_read_done(struct device *dev, struct xmdio_controller __io
 
 static int xmdio_read(struct mii_bus *bus, int phy_id, int regnum)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	struct xmdio_controller *regs = bus->priv;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	struct xmdio_controller __iomem *regs = bus->priv;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	u32 reg_val;
 	u16 dev_addr = regnum >> 16;
 	u16 data;
@@ -146,31 +143,31 @@ static int xmdio_read(struct mii_bus *bus, int phy_id, int regnum)
 		return ret;
 
 	/* Write phy reg addr */
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	writel(regnum & 0xffff, regs->xmdio_addr);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	writel(regnum & 0xffff, &regs->xmdio_addr);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 
 	/* Set phy port and device addrs, and read opcode */
 	reg_val = XPORT_ADDR(phy_id) | XDEV_ADDR(dev_addr) | XOPCODE_ADDR_READ;
 
 	/* Initiate the read operation */
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	writel(reg_val, regs->xmdio_mngmnt);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	writel(reg_val, &regs->xmdio_mngmnt);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 
 	ret = xmdio_wait_read_done(&bus->dev, regs);
 	if (ret)
 		return ret;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	data = readl(regs->xmdio_mngmnt) & 0xffff;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	data = readl(&regs->xmdio_mngmnt) & 0xffff;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 
 	return data;
 }
@@ -187,21 +184,21 @@ static int xmdio_write(struct mii_bus *bus, int phy_id, int regnum, u16 value)
 		return ret;
 
 	/* Write phy reg addr */
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	writel(regnum & 0xffff, regs->xmdio_addr);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	writel(regnum & 0xffff, &regs->xmdio_addr);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 
 	/* Set phy port and device addrs, write opcode, and value */
 	reg_val = XPORT_ADDR(phy_id) | XDEV_ADDR(dev_addr) | XOPCODE_ADDR_WRITE | value;
 
 	/* Initiate the write operation */
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	writel(reg_val, regs->xmdio_mngmnt);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	writel(reg_val, &regs->xmdio_mngmnt);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 
 	ret = xmdio_wait_free(&bus->dev, regs);
 	if (ret)
@@ -219,17 +216,17 @@ static int xmdio_probe(struct platform_device *pdev)
 {
 	struct device_node *np = pdev->dev.of_node;
 	struct mii_bus *bus;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	struct resource *res;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	struct resource res;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	int ret;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	struct xmdio_controller *regs;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	regs = devm_kzalloc(&pdev->dev, sizeof(struct xmdio_controller), GFP_KERNEL);
 
 	if (!regs)
@@ -243,13 +240,13 @@ static int xmdio_probe(struct platform_device *pdev)
 		return PTR_ERR(regs->xmdio_mngmnt);
 
 	regs->xmdio_addr = regs->xmdio_mngmnt + XSMI_ADDR_REG_OFFS;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	ret = of_address_to_resource(np, 0, &res);
 	if (ret) {
 		dev_err(&pdev->dev, "could not obtain address\n");
 		return ret;
 	}
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 
 	bus = mdiobus_alloc_size(PHY_MAX_ADDR * sizeof(int));
 	if (!bus)
@@ -260,18 +257,18 @@ static int xmdio_probe(struct platform_device *pdev)
 	bus->write = xmdio_write;
 	bus->reset = xmdio_reset;
 	bus->parent = &pdev->dev;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	snprintf(bus->id, MII_BUS_ID_SIZE, "%llx", (unsigned long long)res->start);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	snprintf(bus->id, MII_BUS_ID_SIZE, "%llx", (unsigned long long)res.start);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 
 	/* Set the PHY base address */
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	bus->priv = regs;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	bus->priv = of_iomap(np, 0);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 
 	if (!bus->priv) {
 		ret = -ENOMEM;
@@ -301,10 +298,10 @@ static int xmdio_remove(struct platform_device *pdev)
 {
 	struct mii_bus *bus = platform_get_drvdata(pdev);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	devm_kfree(&pdev->dev, bus->priv);
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	mdiobus_unregister(bus);
 	iounmap(bus->priv);
 	mdiobus_free(bus);
@@ -333,4 +330,4 @@ MODULE_DESCRIPTION("Marvell XSMI MDIO interface driver");
 MODULE_AUTHOR("Victor Axelrod <victora@marvell.com>");
 MODULE_LICENSE("GPL v2");
 MODULE_ALIAS("platform:marvell-xmdio");
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */

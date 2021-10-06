@@ -595,7 +595,7 @@ static struct scsi_host_template mv5_sht = {
 	ATA_BASE_SHT(DRV_NAME),
 	.sg_tablesize		= MV_MAX_SG_CT / 2,
 	.dma_boundary		= MV_DMA_BOUNDARY,
-#if defined(MY_ABC_HERE) || defined(MY_DEF_HERE)
+#if defined(MY_ABC_HERE) || defined(CONFIG_SYNO_PORT_MAPPING_V2)
 	.syno_index_get         = syno_libata_index_get,
 #endif  
 };
@@ -1971,14 +1971,14 @@ static struct ata_queued_cmd *mv_get_active_qc(struct ata_port *ap)
 {
 	struct mv_port_priv *pp = ap->private_data;
 	struct ata_queued_cmd *qc;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	struct ata_link *link = NULL;
 #endif  
 
 	if (pp->pp_flags & MV_PP_FLAG_NCQ_EN)
 		return NULL;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	ata_for_each_link(link, ap, EDGE)
 		if (ata_link_active(link))
 			break;
@@ -3033,7 +3033,7 @@ END:
 	return ret;
 }
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_PORT_MAPPING_V2
  
 int syno_sata_mv_gpio_read_by_port(const unsigned short iDiskPort)
 {
@@ -3095,7 +3095,7 @@ END:
 	return;
 }
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_PORT_MAPPING_V2
  
 void syno_sata_mv_gpio_write_by_port(u8 blFaulty, const unsigned short iDiskPort)
 {

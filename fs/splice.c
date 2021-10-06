@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * "splice": joining two ropes together by interweaving their strands.
  *
@@ -35,11 +32,11 @@
 #include <linux/gfp.h>
 #include <linux/socket.h>
 #include <linux/compat.h>
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 #ifdef CONFIG_SPLICE_FROM_SOCKET
 #include <linux/net.h>
 #endif
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 #include "internal.h"
 #if defined(CONFIG_SENDFILE_PATCH)
 #include <net/sock.h>
@@ -2171,19 +2168,19 @@ SYSCALL_DEFINE6(splice, int, fd_in, loff_t __user *, off_in,
 	struct fd in, out;
 	long error;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 #ifdef CONFIG_SPLICE_FROM_SOCKET
 	struct socket *sock = NULL;
 	ssize_t ret;
 	loff_t offset;
 #endif
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	if (unlikely(!len))
 		return 0;
 
 	error = -EBADF;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 #ifdef CONFIG_SPLICE_FROM_SOCKET
 	/* check if fd_in is a socket */
 	sock = sockfd_lookup(fd_in, (int *)&error);
@@ -2227,7 +2224,7 @@ nosock:
 		return error;
 	}
 #endif
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	in = fdget(fd_in);
 	if (in.file) {

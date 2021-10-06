@@ -1,7 +1,4 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 /*
 * ***************************************************************************
 * Copyright (C) 2015 Marvell International Ltd.
@@ -116,4 +113,4 @@ struct mv_pp3_channel *mv_pp3_chan_get(int ch_num);
 int mv_pp3_chan_num_get(void);
 
 #endif /* __mv_pp3_msg_chan_h__ */
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */

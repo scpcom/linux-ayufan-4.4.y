@@ -52,12 +52,12 @@ static const char *kobject_actions[] = {
 	[KOBJ_MOVE] =		"move",
 	[KOBJ_ONLINE] =		"online",
 	[KOBJ_OFFLINE] =	"offline",
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(MY_DEF_HERE) || defined(CONFIG_SYNO_LSP_RTD1619)
 #if defined(CONFIG_R8168) || defined(CONFIG_R8169SOC)
 	[KOBJ_LINKUP] =		"linkup",
 	[KOBJ_LINKDOWN] =	"linkdown",
 #endif /* CONFIG_R8168 || CONFIG_R8169SOC */
-#endif /* MY_DEF_HERE || MY_DEF_HERE */
+#endif /* MY_DEF_HERE || CONFIG_SYNO_LSP_RTD1619 */
 };
 
 /**

@@ -1,4 +1,4 @@
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 /*
  * Realtek SD/MMC/mini SD card driver
  *
@@ -9,17 +9,17 @@
  * it under the terms of the GNU General Public License version 2 as
  * published by the Free Software Foundation.
  */
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */
 
 #ifndef DRIVERS_MMC_HOST_RTK_SDMMC_REG_H_
 #define DRIVERS_MMC_HOST_RTK_SDMMC_REG_H_
 
 // Card Reader Register Sets
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 #if defined(CONFIG_ARCH_RTD139x) || defined(CONFIG_ARCH_RTD16xx)
 #define GPDATI1			      (0x120)
 #endif
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */
 
 #define SDMMC_SYNC                    (0x0020)
 
@@ -29,11 +29,11 @@
 #define CR_PLL_SD3                    (0x01E8)
 #define CR_PLL_SD4                    (0x01EC)
 
-#if defined(CONFIG_ARCH_RTD119X) && defined(MY_DEF_HERE)
+#if defined(CONFIG_ARCH_RTD119X) && defined(CONFIG_SYNO_LSP_RTD1619)
 #define CR_PFUNC_CR                   (0x0380)
-#else /* CONFIG_ARCH_RTD119X && MY_DEF_HERE */
+#else /* CONFIG_ARCH_RTD119X && CONFIG_SYNO_LSP_RTD1619 */
 #define CR_PFUNC_CR                   (0x0610)
-#endif /* CONFIG_ARCH_RTD119X && MY_DEF_HERE */
+#endif /* CONFIG_ARCH_RTD119X && CONFIG_SYNO_LSP_RTD1619 */
 
 #define SDIO_NORML_INT_STA            (0x0030)
 #define EMMC_DMA_CTL3                 (0x000C)

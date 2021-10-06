@@ -1,4 +1,4 @@
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 /*
  * Realtek I2C driver
  *
@@ -9,19 +9,19 @@
  * Free Software Foundation; either version 2 of the License, or (at your
  * option) any later version.
  */
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */
 
 #ifndef __I2C_RTK_H__
 #define __I2C_RTK_H__
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 #include "platform.h"
 #include "../algos/i2c-algo-phoenix.h"
 
 #define MODLE_NAME        "rtk_i2c"
 #define I2C_PHY_CNT       7
 #define VERSION                "2.2"
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_RTD1619 */
 #include <soc/realtek/venus_gpio.h>
 #include "../algos/i2c-algo-phoenix.h"
 #include "i2c-rtk-priv.h"
@@ -59,7 +59,7 @@ typedef struct
     };
 
 }venus_i2c_adapter_config;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */
 
 #define SET_I2C_CFG(phy_id, port_id)          ((0x80000000) | ((phy_id)<<8) | (port_id))
 #define SET_G2C_CFG(sda, scl)                 ((0xC0000000) | ((sda)<<8) | (scl))
@@ -80,10 +80,10 @@ typedef struct
 #define I2C_SS_SCL_LCNT         0x0018
 #define I2C_FS_SCL_HCNT         0x001c
 #define I2C_FS_SCL_LCNT         0x0020
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 #define I2C_HS_SCL_HCNT         0x0024
 #define I2C_HS_SCL_LCNT         0x0028
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */
 #define I2C_INTR_STAT           0x002c
 #define I2C_INTR_MASK           0x0030
 #define I2C_RAW_INTR_STAT       0x0034
@@ -117,13 +117,13 @@ typedef struct
 #define I2C_COMP_VERSION        0x00f8
 #define I2C_COMP_TYPE           0x00fc
 
-#if defined(CONFIG_ARCH_RTD119X) && defined(MY_DEF_HERE)
+#if defined(CONFIG_ARCH_RTD119X) && defined(CONFIG_SYNO_LSP_RTD1619)
 #define MISC_ISR_I2C1    (0x00000001 << 4)
 #define MISC_I2C1_SDA_DEL	0x0088
-#else /* CONFIG_ARCH_RTD119X && MY_DEF_HERE */
+#else /* CONFIG_ARCH_RTD119X && CONFIG_SYNO_LSP_RTD1619 */
 #define ISO_ISR_I2C1    (0x00000001 << 11)
 #define ISO_I2C1_SDA_DEL	0x0080
-#endif /* CONFIG_ARCH_RTD119X && MY_DEF_HERE */
+#endif /* CONFIG_ARCH_RTD119X && CONFIG_SYNO_LSP_RTD1619 */
 
 #define ISO_ISR_I2C0	(0x00000001 << 8)
 #define ISO_ISR_I2C6	(0x00000001 << 10)
@@ -177,7 +177,7 @@ typedef struct
 #define ST_TFNF_BIT         0x02
 #define ST_ACTIVITY_BIT     0x01
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 /*DELAY*/
 #define I2C_SDA_DEL_MASK	(0x1FF)
 #define I2C_SDA_DEL_EN		(0x00000001<<8)
@@ -187,6 +187,6 @@ typedef struct
 #define SDA_DEL_1554NS		3
 #define SDA_DEL_2072NS		4
 #define SDA_DEL_2590NS		5
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */
 
 #endif /*__I2C_RTK_H__*/

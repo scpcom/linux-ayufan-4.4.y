@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * drivers/mtd/nand/socrates_nand.c
  *
@@ -48,11 +45,11 @@ static void socrates_nand_write_buf(struct mtd_info *mtd,
 		const uint8_t *buf, int len)
 {
 	int i;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	struct nand_chip *this = mtd_to_nand(mtd);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct nand_chip *this = mtd->priv;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct socrates_nand_host *host = this->priv;
 
 	for (i = 0; i < len; i++) {
@@ -71,11 +68,11 @@ static void socrates_nand_write_buf(struct mtd_info *mtd,
 static void socrates_nand_read_buf(struct mtd_info *mtd, uint8_t *buf, int len)
 {
 	int i;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	struct nand_chip *this = mtd_to_nand(mtd);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct nand_chip *this = mtd->priv;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct socrates_nand_host *host = this->priv;
 	uint32_t val;
 
@@ -116,11 +113,11 @@ static uint16_t socrates_nand_read_word(struct mtd_info *mtd)
 static void socrates_nand_cmd_ctrl(struct mtd_info *mtd, int cmd,
 		unsigned int ctrl)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	struct nand_chip *nand_chip = mtd_to_nand(mtd);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct nand_chip *nand_chip = mtd->priv;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct socrates_nand_host *host = nand_chip->priv;
 	uint32_t val;
 
@@ -145,11 +142,11 @@ static void socrates_nand_cmd_ctrl(struct mtd_info *mtd, int cmd,
  */
 static int socrates_nand_device_ready(struct mtd_info *mtd)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	struct nand_chip *nand_chip = mtd_to_nand(mtd);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct nand_chip *nand_chip = mtd->priv;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct socrates_nand_host *host = nand_chip->priv;
 
 	if (in_be32(host->io_base) & FPGA_NAND_BUSY)
@@ -166,11 +163,11 @@ static int socrates_nand_probe(struct platform_device *ofdev)
 	struct mtd_info *mtd;
 	struct nand_chip *nand_chip;
 	int res;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct mtd_part_parser_data ppdata;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	/* Allocate memory for the device structure (and zero it) */
 	host = devm_kzalloc(&ofdev->dev, sizeof(*host), GFP_KERNEL);
@@ -188,17 +185,17 @@ static int socrates_nand_probe(struct platform_device *ofdev)
 	host->dev = &ofdev->dev;
 
 	nand_chip->priv = host;		/* link the private data structures */
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	nand_set_flash_node(nand_chip, ofdev->dev.of_node);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	mtd->priv = nand_chip;
 	mtd->name = "socrates_nand";
 	mtd->dev.parent = &ofdev->dev;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	ppdata.of_node = ofdev->dev.of_node;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	/*should never be accessed directly */
 	nand_chip->IO_ADDR_R = (void *)0xdeadbeef;
@@ -230,11 +227,11 @@ static int socrates_nand_probe(struct platform_device *ofdev)
 		goto out;
 	}
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	res = mtd_device_register(mtd, NULL, 0);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	res = mtd_device_parse_register(mtd, NULL, &ppdata, NULL, 0);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	if (!res)
 		return res;
 

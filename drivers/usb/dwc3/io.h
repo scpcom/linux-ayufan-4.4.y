@@ -24,19 +24,19 @@
 #include "debug.h"
 #include "core.h"
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 #ifdef CONFIG_USB_PATCH_ON_RTK
 /* Add global lock for emmc issue*/
 #include <soc/realtek/rtd129x_lockapi.h>
 #endif
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */
 static inline u32 dwc3_readl(void __iomem *base, u32 offset)
 {
 	u32 offs = offset - DWC3_GLOBALS_REGS_START;
 	u32 value;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 #ifdef CONFIG_USB_PATCH_ON_RTK
 	/* Add global lock for emmc issue*/
 #if defined(CONFIG_ARCH_RTD129x)
@@ -45,7 +45,7 @@ static inline u32 dwc3_readl(void __iomem *base, u32 offset)
 	rtk_lockapi_lock(flags, __FUNCTION__);
 #endif
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */
 	/*
 	 * We requested the mem region starting from the Globals address
 	 * space, see dwc3_probe in core.c.
@@ -53,13 +53,13 @@ static inline u32 dwc3_readl(void __iomem *base, u32 offset)
 	 */
 	value = readl(base + offs);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 #ifdef CONFIG_USB_PATCH_ON_RTK
 	/* Add global lock for emmc issue*/
 	rtk_lockapi_unlock(flags,__FUNCTION__);
 #endif
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */
 	/*
 	 * When tracing we want to make it easy to find the correct address on
 	 * documentation, so we revert it back to the proper addresses, the
@@ -74,14 +74,14 @@ static inline u32 dwc3_readl(void __iomem *base, u32 offset)
 static inline void dwc3_writel(void __iomem *base, u32 offset, u32 value)
 {
 	u32 offs = 0;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 #ifdef CONFIG_USB_PATCH_ON_RTK
 #if defined(CONFIG_ARCH_RTD129x)
 	unsigned long flags;
 #endif /* CONFIG_ARCH_RTD129x */
 	rtk_lockapi_lock(flags, __FUNCTION__);
 #endif
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */
 	offs = offset - DWC3_GLOBALS_REGS_START;
 
 	/*
@@ -91,12 +91,12 @@ static inline void dwc3_writel(void __iomem *base, u32 offset, u32 value)
 	 */
 	writel(value, base + offs);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 #ifdef CONFIG_USB_PATCH_ON_RTK
 	rtk_lockapi_unlock(flags,__FUNCTION__);
 #endif
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */
 	/*
 	 * When tracing we want to make it easy to find the correct address on
 	 * documentation, so we revert it back to the proper addresses, the

@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 
 #ifndef XILINX_LL_TEMAC_H
 #define XILINX_LL_TEMAC_H
@@ -340,11 +337,11 @@ struct temac_local {
 
 	/* MDIO bus data */
 	struct mii_bus *mii_bus;	/* MII bus reference */
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	int mdio_irqs[PHY_MAX_ADDR];	/* IRQs table for MDIO bus */
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	/* IO registers, dma functions and IRQs */
 	void __iomem *regs;

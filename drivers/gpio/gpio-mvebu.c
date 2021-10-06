@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * GPIO driver for Marvell SoCs
  *
@@ -666,20 +663,20 @@ static int mvebu_gpio_probe(struct platform_device *pdev)
 	struct irq_chip_type *ct;
 	struct clk *clk;
 	unsigned int ngpios;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	unsigned int gpio_base = -1;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	int soc_variant;
 	int i, cpu, id;
 	int err;
 
 	match = of_match_device(mvebu_gpio_of_match, &pdev->dev);
 	if (match)
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 		soc_variant = (uintptr_t) match->data;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		soc_variant = (int) match->data;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	else
 		soc_variant = MVEBU_GPIO_SOC_VARIANT_ORION;
 
@@ -695,10 +692,10 @@ static int mvebu_gpio_probe(struct platform_device *pdev)
 		return -ENODEV;
 	}
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	if (of_property_read_u32(pdev->dev.of_node, "gpiobase", &gpio_base))
 		gpio_base = -1;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	id = of_alias_get_id(pdev->dev.of_node, "gpio");
 	if (id < 0) {
@@ -713,11 +710,11 @@ static int mvebu_gpio_probe(struct platform_device *pdev)
 
 	mvchip->soc_variant = soc_variant;
 	mvchip->chip.label = dev_name(&pdev->dev);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	mvchip->chip.parent = &pdev->dev;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	mvchip->chip.dev = &pdev->dev;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	mvchip->chip.request = gpiochip_generic_request;
 	mvchip->chip.free = gpiochip_generic_free;
 	mvchip->chip.direction_input = mvebu_gpio_direction_input;
@@ -725,14 +722,14 @@ static int mvebu_gpio_probe(struct platform_device *pdev)
 	mvchip->chip.direction_output = mvebu_gpio_direction_output;
 	mvchip->chip.set = mvebu_gpio_set;
 	mvchip->chip.to_irq = mvebu_gpio_to_irq;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	if (gpio_base != -1)
 		mvchip->chip.base = gpio_base;
 	else
 		mvchip->chip.base = id * MVEBU_MAX_GPIO_PER_BANK;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	mvchip->chip.base = id * MVEBU_MAX_GPIO_PER_BANK;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	mvchip->chip.ngpio = ngpios;
 	mvchip->chip.can_sleep = false;
 	mvchip->chip.of_node = np;

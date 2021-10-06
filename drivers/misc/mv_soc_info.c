@@ -1,7 +1,4 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 /*
  * Copyright (C) 2015-2016 Marvell International Ltd.
 
@@ -83,4 +80,4 @@ free_node:
 	of_node_put(node);
 	return -EINVAL;
 }
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */

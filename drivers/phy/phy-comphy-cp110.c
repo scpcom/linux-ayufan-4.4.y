@@ -1,7 +1,4 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 /*
  * Marvell cp110 comphy driver
  *
@@ -22,11 +19,11 @@
 #include <linux/phy/phy.h>
 #include <linux/platform_device.h>
 #include <dt-bindings/phy/phy-comphy-mvebu.h>
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_10)
 #include <linux/mvebu-sample-at-reset.h>
 #include <linux/of_address.h>
 #include <linux/pci.h>
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_10 */
 
 #include "phy-comphy-mvebu.h"
 #include "phy-comphy-cp110.h"
@@ -100,21 +97,21 @@ static void mvebu_cp110_comphy_set_phy_selector(struct mvebu_comphy_priv *priv,
 			 /* For comphy 4:
 			  * 0x1 = SGMII/HS-SGMII Port1
 			  * 0x2 = SGMII/HS-SGMII Port0: XFI/SFI, RXAUI_Lane0
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_10)
 			  *
 			  * We want to check if SGMII1/HS_SGMII1 is the requested mode in order to
 			  * determine which value should be set (all other modes use the same value)
 			  * so we need to strip the mode, and check the ID because we might handle
 			  * SGMII0/HS_SGMII0 too.
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_10 */
 			  */
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_10)
 			if ((mode == COMPHY_SGMII_MODE || mode == COMPHY_HS_SGMII_MODE) &&
 			    COMPHY_GET_ID(priv->lanes[comphy->index].mode) == 1)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_10 */
 			if (priv->lanes[comphy->index].mode == COMPHY_SGMII1 ||
 			    priv->lanes[comphy->index].mode == COMPHY_HS_SGMII1)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_10 */
 				reg |= COMMON_SELECTOR_COMPHY4_SGMII1 << comphy_offset;
 			else
 				reg |= COMMON_SELECTOR_COMPHY4_ALL_OTHERS << comphy_offset;
@@ -136,7 +133,7 @@ static void mvebu_cp110_comphy_set_phy_selector(struct mvebu_comphy_priv *priv,
 
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_10)
 /* Clear PIPE selector - avoid collision with prior u-boot configuration */
 void mvebu_cp110_comphy_clr_pipe_selector(struct mvebu_comphy_priv *priv,
 					  struct mvebu_comphy *comphy)
@@ -204,7 +201,7 @@ void mvebu_cp110_comphy_set_pipe_selector(struct mvebu_comphy_priv *priv,
 	       priv->comphy_regs + COMMON_SELECTOR_PIPE_REG_OFFSET);
 }
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_10 */
 static int mvebu_cp110_comphy_sata_power_on(struct mvebu_comphy_priv *priv,
 					    struct mvebu_comphy *comphy)
 {
@@ -339,7 +336,7 @@ static int mvebu_cp110_comphy_sata_power_on(struct mvebu_comphy_priv *priv,
 	data |= 0x1 << HPIPE_PWR_CTR_DTL_CLK_MODE_FORCE_OFFSET;
 	reg_set(hpipe_addr + HPIPE_PWR_CTR_DTL_REG, data, mask);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	/* Trigger sampler enable pulse */
 	mask = HPIPE_SMAPLER_MASK;
 	data = 0x1 << HPIPE_SMAPLER_OFFSET;
@@ -380,26 +377,26 @@ static int mvebu_cp110_comphy_sata_power_on(struct mvebu_comphy_priv *priv,
 
 	/* G3 Setting 4 */
 	mask = HPIPE_G3_DFE_RES_MASK;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_10)
 	data = 0x1 << HPIPE_G3_DFE_RES_OFFSET;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_10 */
 	data = 0x2 << HPIPE_G3_DFE_RES_OFFSET;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_10 */
 	reg_set(hpipe_addr + HPIPE_G3_SETTING_4_REG, data, mask);
 
 	/* Offset Phase Control */
 	mask = HPIPE_OS_PH_OFFSET_MASK;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_10)
 	data = 0x61 << HPIPE_OS_PH_OFFSET_OFFSET;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_10 */
 	data = 0x5c << HPIPE_OS_PH_OFFSET_OFFSET;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_10 */
 	mask |= HPIPE_OS_PH_OFFSET_FORCE_MASK;
 	data |= 0x1 << HPIPE_OS_PH_OFFSET_FORCE_OFFSET;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_10)
 	mask |= HPIPE_OS_PH_VALID_MASK;
 	data |= 0x0 << HPIPE_OS_PH_VALID_OFFSET;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_10 */
 	reg_set(hpipe_addr + HPIPE_PHASE_CONTROL_REG, data, mask);
 	mask = HPIPE_OS_PH_VALID_MASK;
 	data = 0x1 << HPIPE_OS_PH_VALID_OFFSET;
@@ -432,19 +429,19 @@ static int mvebu_cp110_comphy_sata_power_on(struct mvebu_comphy_priv *priv,
 
 	/* Set G3 TX amplitude and TX post emphasis value */
 	mask = HPIPE_G3_SET_0_G3_TX_AMP_MASK;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_10)
 	data = 0x1e << HPIPE_G3_SET_0_G3_TX_AMP_OFFSET;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_10 */
 	data = 0xe << HPIPE_G3_SET_0_G3_TX_AMP_OFFSET;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_10 */
 	mask |= HPIPE_G3_SET_0_G3_TX_AMP_ADJ_MASK;
 	data |= 0x1 << HPIPE_G3_SET_0_G3_TX_AMP_ADJ_OFFSET;
 	mask |= HPIPE_G3_SET_0_G3_TX_EMPH1_MASK;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_10)
 	data |= 0xe << HPIPE_G3_SET_0_G3_TX_EMPH1_OFFSET;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_10 */
 	data |= 0x6 << HPIPE_G3_SET_0_G3_TX_EMPH1_OFFSET;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_10 */
 	mask |= HPIPE_G3_SET_0_G3_TX_EMPH1_EN_MASK;
 	data |= 0x1 << HPIPE_G3_SET_0_G3_TX_EMPH1_EN_OFFSET;
 	mask |= HPIPE_G3_SET_0_G3_TX_SLEW_RATE_SEL_MASK;
@@ -458,7 +455,7 @@ static int mvebu_cp110_comphy_sata_power_on(struct mvebu_comphy_priv *priv,
 	data = 0x1 << SD_EXTERNAL_CONFIG2_SSC_ENABLE_OFFSET;
 	reg_set(sd_ip_addr + SD_EXTERNAL_CONFIG2_REG, data, mask);
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	/* DFE reset sequence */
 	reg_set(hpipe_addr + HPIPE_PWR_CTR_REG,
 		0x1 << HPIPE_PWR_CTR_RST_DFE_OFFSET, HPIPE_PWR_CTR_RST_DFE_MASK);
@@ -603,11 +600,11 @@ static int mvebu_cp110_comphy_sgmii_power_on(struct mvebu_comphy_priv *priv,
 	addr = sd_ip_addr + SD_EXTERNAL_STATUS0_REG;
 	data = SD_EXTERNAL_STATUS0_PLL_RX_MASK | SD_EXTERNAL_STATUS0_PLL_TX_MASK;
 	mask = data;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	data = polling_with_timeout(addr, data, mask, 15000, REG_32BIT);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	data = polling_with_timeout(addr, data, mask, 15000);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	if (data != 0) {
 		if (data & SD_EXTERNAL_STATUS0_PLL_RX_MASK)
 			dev_err(priv->dev, "RX PLL is not locked\n");
@@ -626,11 +623,11 @@ static int mvebu_cp110_comphy_sgmii_power_on(struct mvebu_comphy_priv *priv,
 	addr = sd_ip_addr + SD_EXTERNAL_STATUS0_REG;
 	data = SD_EXTERNAL_STATUS0_RX_INIT_MASK;
 	mask = data;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	data = polling_with_timeout(addr, data, mask, 100, REG_32BIT);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	data = polling_with_timeout(addr, data, mask, 100);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	if (data != 0) {
 		dev_err(priv->dev, "RX init failed\n");
 		ret = -ETIMEDOUT;
@@ -650,15 +647,15 @@ static int mvebu_cp110_comphy_sgmii_power_on(struct mvebu_comphy_priv *priv,
 static int mvebu_cp110_comphy_usb3_power_on(struct mvebu_comphy_priv *priv,
 					    struct mvebu_comphy *comphy)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_10)
 	void __iomem *hpipe_addr, *comphy_addr, *addr;
 	u32 mask, data;
 	int ret = 0;
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_10 */
 	dev_dbg(priv->dev, "%s: Enter\n", __func__);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_10)
 	/* Configure PIPE selector for USB3 */
 	mvebu_cp110_comphy_set_pipe_selector(priv, comphy);
 
@@ -773,23 +770,23 @@ static int mvebu_cp110_comphy_usb3_power_on(struct mvebu_comphy_priv *priv,
 		dev_err(priv->dev, "HPIPE_LANE_STATUS1_PCLK_EN_MASK is 0\n");
 		ret = -ETIMEDOUT;
 	}
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_10 */
 	dev_err(priv->dev, "USB mode is not implemented\n");
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_10 */
 
 	dev_dbg(priv->dev, "%s: Exit\n", __func__);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_10)
 	return ret;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_10 */
 	return -ENOTSUPP;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_10 */
 }
 
 static int mvebu_cp110_comphy_pcie_power_on(struct mvebu_comphy_priv *priv,
 					    struct mvebu_comphy *comphy)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_10)
 	int ret = 0;
 	u32 mask, data, pcie_width;
 	unsigned int lane = comphy->index;
@@ -807,10 +804,10 @@ static int mvebu_cp110_comphy_pcie_power_on(struct mvebu_comphy_priv *priv,
 						    dev);
 	struct device_node *dn = pdev->dev.of_node;
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_10 */
 	dev_dbg(priv->dev, "%s: Enter\n", __func__);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_10)
 	/* Configure PIPE selector for PCIE */
 	mvebu_cp110_comphy_set_pipe_selector(priv, comphy);
 
@@ -1285,17 +1282,17 @@ static int mvebu_cp110_comphy_pcie_power_on(struct mvebu_comphy_priv *priv,
 		}
 
 	}
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_10 */
 	dev_err(priv->dev, "PCIE mode is not implemented\n");
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_10 */
 
 	dev_dbg(priv->dev, "%s: Exit\n", __func__);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_10)
 	return ret;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_10 */
 	return -ENOTSUPP;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_10 */
 }
 
 static int mvebu_cp110_comphy_rxaui_power_on(struct mvebu_comphy_priv *priv,
@@ -1317,16 +1314,16 @@ static int mvebu_cp110_comphy_xfi_power_on(struct mvebu_comphy_priv *priv,
 					   struct mvebu_comphy *comphy)
 {
 	void __iomem *hpipe_addr, *sd_ip_addr, *comphy_addr, *addr;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	u32 mask, data, speed = COMPHY_GET_SPEED(priv->lanes[comphy->index].mode);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	u32 mask, data;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	int ret = 0;
 
 	dev_dbg(priv->dev, "%s: Enter\n", __func__);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	if ((speed != COMPHY_SPEED_5_15625G) &&
 	     (speed != COMPHY_SPEED_10_3125G) &&
 	     (speed != COMPHY_SPEED_DEFAULT)) {
@@ -1335,7 +1332,7 @@ static int mvebu_cp110_comphy_xfi_power_on(struct mvebu_comphy_priv *priv,
 		return -EINVAL;
 	}
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	hpipe_addr = HPIPE_ADDR(priv->comphy_pipe_regs, comphy->index);
 	sd_ip_addr = SD_ADDR(priv->comphy_pipe_regs, comphy->index);
 	comphy_addr = COMPHY_ADDR(priv->comphy_regs, comphy->index);
@@ -1395,13 +1392,13 @@ static int mvebu_cp110_comphy_xfi_power_on(struct mvebu_comphy_priv *priv,
 	dev_dbg(priv->dev, "stage: Comphy configuration\n");
 	/* set reference clock */
 	mask = HPIPE_MISC_ICP_FORCE_MASK;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	data = (speed == COMPHY_SPEED_5_15625G) ?
 		(0x0 << HPIPE_MISC_ICP_FORCE_OFFSET) :
 		(0x1 << HPIPE_MISC_ICP_FORCE_OFFSET);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	data = 0x1 << HPIPE_MISC_ICP_FORCE_OFFSET;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	mask |= HPIPE_MISC_REFCLK_SEL_MASK;
 	data |= 0x0 << HPIPE_MISC_REFCLK_SEL_OFFSET;
 	reg_set(hpipe_addr + HPIPE_MISC_REG, data, mask);
@@ -1426,7 +1423,7 @@ static int mvebu_cp110_comphy_xfi_power_on(struct mvebu_comphy_priv *priv,
 	data = 0x1 << HPIPE_PWR_CTR_DTL_FLOOP_EN_OFFSET;
 	reg_set(hpipe_addr + HPIPE_PWR_CTR_DTL_REG, data, mask);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	/* Transmitter/Receiver Speed Divider Force */
 	if (speed == COMPHY_SPEED_5_15625G) {
 		mask = HPIPE_SPD_DIV_FORCE_RX_SPD_DIV_MASK;
@@ -1443,7 +1440,7 @@ static int mvebu_cp110_comphy_xfi_power_on(struct mvebu_comphy_priv *priv,
 	}
 	reg_set(hpipe_addr + HPIPE_SPD_DIV_FORCE_REG, data, mask);
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	/* Set analog parameters from ETP(HW) */
 	dev_dbg(priv->dev, "stage: Analog parameters from ETP(HW)\n");
 	/* SERDES External Configuration 2 */
@@ -1455,7 +1452,7 @@ static int mvebu_cp110_comphy_xfi_power_on(struct mvebu_comphy_priv *priv,
 	data = 0x1 << HPIPE_DFE_RES_FORCE_OFFSET;
 	reg_set(hpipe_addr + HPIPE_DFE_REG0, data, mask);
 	/* 0xd-G1_Setting_0 */
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	if (speed == COMPHY_SPEED_5_15625G) {
 		mask = HPIPE_G1_SET_0_G1_TX_EMPH1_MASK;
 		data = 0x6 << HPIPE_G1_SET_0_G1_TX_EMPH1_OFFSET;
@@ -1465,12 +1462,12 @@ static int mvebu_cp110_comphy_xfi_power_on(struct mvebu_comphy_priv *priv,
 		mask |= HPIPE_G1_SET_0_G1_TX_EMPH1_MASK;
 		data |= 0xe << HPIPE_G1_SET_0_G1_TX_EMPH1_OFFSET;
 	}
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	mask = HPIPE_G1_SET_0_G1_TX_AMP_MASK;
 	data = 0x1c << HPIPE_G1_SET_0_G1_TX_AMP_OFFSET;
 	mask |= HPIPE_G1_SET_0_G1_TX_EMPH1_MASK;
 	data |= 0xe << HPIPE_G1_SET_0_G1_TX_EMPH1_OFFSET;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	reg_set(hpipe_addr + HPIPE_G1_SET_0_REG, data, mask);
 	/* Genration 1 setting 2 (G1_Setting_2) */
 	mask = HPIPE_G1_SET_2_G1_TX_EMPH0_MASK;
@@ -1496,7 +1493,7 @@ static int mvebu_cp110_comphy_xfi_power_on(struct mvebu_comphy_priv *priv,
 	reg_set(hpipe_addr + HPIPE_G1_SETTING_5_REG, data, mask);
 
 	/* 0xE-G1_Setting_1 */
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	mask = HPIPE_G1_SET_1_G1_RX_DFE_EN_MASK;
 	data = 0x1 << HPIPE_G1_SET_1_G1_RX_DFE_EN_OFFSET;
 	if (speed == COMPHY_SPEED_5_15625G) {
@@ -1516,14 +1513,14 @@ static int mvebu_cp110_comphy_xfi_power_on(struct mvebu_comphy_priv *priv,
 		mask |= HPIPE_G1_SET_1_G1_RX_DIGCK_DIV_MASK;
 		data |= 0x3 << HPIPE_G1_SET_1_G1_RX_DIGCK_DIV_OFFSET;
 	}
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	mask = HPIPE_G1_SET_1_G1_RX_SELMUPI_MASK;
 	data = 0x1 << HPIPE_G1_SET_1_G1_RX_SELMUPI_OFFSET;
 	mask |= HPIPE_G1_SET_1_G1_RX_SELMUPP_MASK;
 	data |= 0x1 << HPIPE_G1_SET_1_G1_RX_SELMUPP_OFFSET;
 	mask |= HPIPE_G1_SET_1_G1_RX_DFE_EN_MASK;
 	data |= 0x1 << HPIPE_G1_SET_1_G1_RX_DFE_EN_OFFSET;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	reg_set(hpipe_addr + HPIPE_G1_SET_1_REG, data, mask);
 
 	/* 0xA-DFE_Reg3 */
@@ -1540,7 +1537,7 @@ static int mvebu_cp110_comphy_xfi_power_on(struct mvebu_comphy_priv *priv,
 	/* Genration 1 setting 3 (G1_Setting_3) */
 	mask = HPIPE_G1_SETTINGS_3_G1_FBCK_SEL_MASK;
 	data = 0x1 << HPIPE_G1_SETTINGS_3_G1_FBCK_SEL_OFFSET;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	if (speed == COMPHY_SPEED_5_15625G) {
 		/* Force FFE (Feed Forward Equalization) to 5G */
 		mask |= HPIPE_G1_SETTINGS_3_G1_FFE_CAP_SEL_MASK;
@@ -1550,10 +1547,10 @@ static int mvebu_cp110_comphy_xfi_power_on(struct mvebu_comphy_priv *priv,
 		mask |= HPIPE_G1_SETTINGS_3_G1_FFE_SETTING_FORCE_MASK;
 		data |= 0x1 << HPIPE_G1_SETTINGS_3_G1_FFE_SETTING_FORCE_OFFSET;
 	}
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	reg_set(hpipe_addr + HPIPE_G1_SETTINGS_3_REG, data, mask);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	/* Connfigure RX training timer */
 	mask = HPIPE_RX_TRAIN_TIMER_MASK;
 	data = 0x13 << HPIPE_RX_TRAIN_TIMER_OFFSET;
@@ -1611,7 +1608,7 @@ static int mvebu_cp110_comphy_xfi_power_on(struct mvebu_comphy_priv *priv,
 	data = 0x1A << HPIPE_EXT_SELLV_RXSAMPL_OFFSET;
 	reg_set(hpipe_addr + HPIPE_VDD_CAL_CTRL_REG, data, mask);
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	dev_dbg(priv->dev, "stage: RFU configurations- Power Up PLL,Tx,Rx\n");
 	/* SERDES External Configuration */
 	mask = SD_EXTERNAL_CONFIG0_SD_PU_PLL_MASK;
@@ -1626,11 +1623,11 @@ static int mvebu_cp110_comphy_xfi_power_on(struct mvebu_comphy_priv *priv,
 	addr = sd_ip_addr + SD_EXTERNAL_STATUS0_REG;
 	data = SD_EXTERNAL_STATUS0_PLL_RX_MASK | SD_EXTERNAL_STATUS0_PLL_TX_MASK;
 	mask = data;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	data = polling_with_timeout(addr, data, mask, 15000, REG_32BIT);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	data = polling_with_timeout(addr, data, mask, 15000);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	if (data != 0) {
 		if (data & SD_EXTERNAL_STATUS0_PLL_RX_MASK)
 			dev_err(priv->dev, "RX PLL is not locked\n");
@@ -1649,11 +1646,11 @@ static int mvebu_cp110_comphy_xfi_power_on(struct mvebu_comphy_priv *priv,
 	addr = sd_ip_addr + SD_EXTERNAL_STATUS0_REG;
 	data = SD_EXTERNAL_STATUS0_RX_INIT_MASK;
 	mask = data;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	data = polling_with_timeout(addr, data, mask, 100, REG_32BIT);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	data = polling_with_timeout(addr, data, mask, 100);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	if (data != 0) {
 		dev_err(priv->dev, "RX init failed\n");
 		ret = -ETIMEDOUT;
@@ -1670,7 +1667,7 @@ static int mvebu_cp110_comphy_xfi_power_on(struct mvebu_comphy_priv *priv,
 	return ret;
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_10)
 /* This function performs RX training for one Feed Forward Equalization (FFE)
  * value.
  * The RX traiing result is stored in 'Saved DFE values Register' (SAV_F0D).
@@ -1845,7 +1842,7 @@ static int mvebu_cp110_comphy_xfi_rx_training(struct mvebu_comphy_priv *priv,
 	return ret;
 }
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_10 */
 static int mvebu_cp110_comphy_power_on(struct phy *phy)
 {
 	struct mvebu_comphy *comphy = phy_get_drvdata(phy);
@@ -1903,29 +1900,29 @@ static int mvebu_cp110_comphy_power_off(struct phy *phy)
 {
 	struct mvebu_comphy *comphy = phy_get_drvdata(phy);
 	struct mvebu_comphy_priv *priv = to_mvebu_comphy_priv(comphy);
-#if defined(MY_DEF_HERE)
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_10)
 	void __iomem *sd_ip_addr, *comphy_ip_addr;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_10 */
 	int mode = COMPHY_GET_MODE(priv->lanes[comphy->index].mode);
 	void __iomem *sd_ip_addr;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_10 */
 	u32 mask, data;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 
 	dev_dbg(priv->dev, "%s: Enter\n", __func__);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_10)
 	if (comphy->skip_pcie_power_off) {
 		dev_dbg(priv->dev, "skip_pcie_power_off indicated, so avoid powering off lane\n");
 		goto exit;
 	}
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_10 */
 	spin_lock(&priv->lock);
 
-#if defined(MY_DEF_HERE)
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_10)
 	sd_ip_addr = SD_ADDR(priv->comphy_pipe_regs, comphy->index);
 
 	/* Hard reset the comphy, for Ethernet modes and Sata */
@@ -1945,7 +1942,7 @@ static int mvebu_cp110_comphy_power_off(struct phy *phy)
 	mask |= COMMON_PHY_CFG1_CORE_RSTN_MASK;
 	data |= 0x0 << COMMON_PHY_CFG1_CORE_RSTN_OFFSET;
 	reg_set(comphy_ip_addr + COMMON_PHY_CFG1_REG, data, mask);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_10 */
 	switch (mode) {
 	case(COMPHY_SGMII_MODE):
 	case(COMPHY_HS_SGMII_MODE):
@@ -1968,40 +1965,40 @@ static int mvebu_cp110_comphy_power_off(struct phy *phy)
 			comphy->index, mode);
 		break;
 	}
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_10 */
 
-#endif /* MY_DEF_HERE */
-#if defined(MY_DEF_HERE)
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_10)
 	/* Clear comphy PHY and PIPE selector, can't rely on u-boot */
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_10 */
 	/* Clear comphy selector, can't rely on u-boot */
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_10 */
 	mvebu_cp110_comphy_clr_phy_selector(priv, comphy);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_10)
 	mvebu_cp110_comphy_clr_pipe_selector(priv, comphy);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_10 */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	dev_dbg(priv->dev, "power off is not implemented\n");
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	spin_unlock(&priv->lock);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_10)
 exit:
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_10 */
 	dev_dbg(priv->dev, "%s: Exit\n", __func__);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_10)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_10 */
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_10 */
 	return 0;
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 /*
  * This function allows to reset the digital synchronizers between
  * the MAC and the PHY, it is required when the MAC changes its state.
@@ -2033,29 +2030,29 @@ static int mvebu_cp110_comphy_digital_reset(struct mvebu_comphy *comphy,
 	}
 
 	return 0;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_10)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_10 */
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_10 */
 }
 
 static int mvebu_cp110_comphy_send_command(struct phy *phy, u32 command)
 {
 	struct mvebu_comphy *comphy = phy_get_drvdata(phy);
 	struct mvebu_comphy_priv *priv = to_mvebu_comphy_priv(comphy);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_10)
 	int ret = 0, pcie_width;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_10 */
 	int ret = 0;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_10 */
 
 	switch (command) {
 	case(COMPHY_COMMAND_DIGITAL_PWR_OFF):
 	case(COMPHY_COMMAND_DIGITAL_PWR_ON):
 		ret = mvebu_cp110_comphy_digital_reset(comphy, priv, command);
 		break;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_10)
 	/* The following commands are for PCIe width, currently the A8K supports
 	 * width of X1, X2 and X4. The command is from PCIe host driver before
 	 * comphy is initialized.
@@ -2095,7 +2092,7 @@ static int mvebu_cp110_comphy_send_command(struct phy *phy, u32 command)
 			ret = -EINVAL;
 		}
 		break;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_10 */
 	default:
 		dev_err(priv->dev, "%s: unsupported command (0x%x)\n",
 			__func__, command);
@@ -2105,7 +2102,7 @@ static int mvebu_cp110_comphy_send_command(struct phy *phy, u32 command)
 	return ret;
 }
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 static int mvebu_cp110_comphy_is_pll_locked(struct phy *phy)
 {
 
@@ -2120,11 +2117,11 @@ static int mvebu_cp110_comphy_is_pll_locked(struct phy *phy)
 	addr = sd_ip_addr + SD_EXTERNAL_STATUS0_REG;
 	data = SD_EXTERNAL_STATUS0_PLL_TX_MASK & SD_EXTERNAL_STATUS0_PLL_RX_MASK;
 	mask = data;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	data = polling_with_timeout(addr, data, mask, PLL_LOCK_TIMEOUT, REG_32BIT);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	data = polling_with_timeout(addr, data, mask, PLL_LOCK_TIMEOUT);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	if (data != 0) {
 		if (data & SD_EXTERNAL_STATUS0_PLL_RX_MASK)
 			dev_err(priv->dev, "RX PLL is not locked\n");
@@ -2142,9 +2139,9 @@ static struct phy_ops cp110_comphy_ops = {
 	.power_off	= mvebu_cp110_comphy_power_off,
 	.set_mode	= mvebu_comphy_set_mode,
 	.get_mode	= mvebu_comphy_get_mode,
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	.send_command	= mvebu_cp110_comphy_send_command,
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	.is_pll_locked  = mvebu_cp110_comphy_is_pll_locked,
 	.owner		= THIS_MODULE,
 };
@@ -2183,4 +2180,4 @@ const struct mvebu_comphy_soc_info cp110_comphy = {
 	},
 	.comphy_ops = &cp110_comphy_ops,
 };
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */

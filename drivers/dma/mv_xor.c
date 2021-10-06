@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * offload engine driver for the Marvell XOR engine
  * Copyright (C) 2007, 2008, Marvell International Ltd.
@@ -28,11 +25,11 @@
 #include <linux/of.h>
 #include <linux/of_irq.h>
 #include <linux/irqdomain.h>
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 #include <linux/cpumask.h>
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 #include <linux/platform_data/dma-mv_xor.h>
 
 #include "dmaengine.h"
@@ -43,13 +40,13 @@ enum mv_xor_mode {
 	XOR_MODE_IN_DESC,
 };
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 /* engine coefficients  */
 static u8 mv_xor_raid6_coefs[8] = {
 	0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80
 };
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 static void mv_xor_issue_pending(struct dma_chan *chan);
 
 #define to_mv_xor_chan(chan)		\
@@ -62,11 +59,11 @@ static void mv_xor_issue_pending(struct dma_chan *chan);
 	((chan)->dmadev.dev)
 
 static void mv_desc_init(struct mv_xor_desc_slot *desc,
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 			 dma_addr_t addr, u32 byte_count,
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 			 enum dma_ctrl_flags flags)
 {
 	struct mv_xor_desc *hw_desc = desc->hw_desc;
@@ -76,12 +73,12 @@ static void mv_desc_init(struct mv_xor_desc_slot *desc,
 	/* Enable end-of-descriptor interrupts only for DMA_PREP_INTERRUPT */
 	hw_desc->desc_command = (flags & DMA_PREP_INTERRUPT) ?
 				XOR_DESC_EOD_INT_EN : 0;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	hw_desc->phy_dest_addr = addr;
 	hw_desc->byte_count = byte_count;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 }
 
 static void mv_desc_set_mode(struct mv_xor_desc_slot *desc)
@@ -96,18 +93,18 @@ static void mv_desc_set_mode(struct mv_xor_desc_slot *desc)
 	case DMA_MEMCPY:
 		hw_desc->desc_command |= XOR_DESC_OPERATION_MEMCPY;
 		break;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	case DMA_PQ:
 		hw_desc->desc_command |= XOR_DESC_OPERATION_PQ;
 		break;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	default:
 		BUG();
 		return;
 	}
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 static void mv_desc_set_byte_count(struct mv_xor_desc_slot *desc,
 				   u32 byte_count)
 {
@@ -116,7 +113,7 @@ static void mv_desc_set_byte_count(struct mv_xor_desc_slot *desc,
 	hw_desc->byte_count = byte_count;
 }
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 static void mv_desc_set_next_desc(struct mv_xor_desc_slot *desc,
 				  u32 next_desc_addr)
 {
@@ -125,7 +122,7 @@ static void mv_desc_set_next_desc(struct mv_xor_desc_slot *desc,
 	hw_desc->phy_next_desc = next_desc_addr;
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 static void mv_desc_set_dest_addr(struct mv_xor_desc_slot *desc,
 				  dma_addr_t addr)
 {
@@ -146,27 +143,27 @@ static void mv_desc_set_q_dest_addr(struct mv_xor_desc_slot *desc,
 		hw_desc->desc_command |= (1 << 9);
 }
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 static void mv_desc_set_src_addr(struct mv_xor_desc_slot *desc,
 				 int index, dma_addr_t addr)
 {
 	struct mv_xor_desc *hw_desc = desc->hw_desc;
 	hw_desc->phy_src_addr[mv_phy_src_idx(index)] = addr;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	if ((desc->type == DMA_XOR) || (desc->type == DMA_PQ))
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	if (desc->type == DMA_XOR)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 		hw_desc->desc_command |= (1 << index);
 }
 
 static u32 mv_chan_get_current_desc(struct mv_xor_chan *chan)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	return readl(XOR_CURR_DESC(chan));
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	return readl_relaxed(XOR_CURR_DESC(chan));
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 }
 
 static void mv_chan_set_next_descriptor(struct mv_xor_chan *chan,
@@ -205,7 +202,7 @@ static void mv_chan_clear_err_status(struct mv_xor_chan *chan)
 	writel_relaxed(val, XOR_INTR_CAUSE(chan));
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 static void mv_chan_set_mode(struct mv_xor_chan *chan,
 			     u32 op_mode)
 {
@@ -222,7 +219,7 @@ static void mv_chan_set_mode(struct mv_xor_chan *chan,
 
 	writel_relaxed(config, XOR_CONFIG(chan));
 }
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 static void mv_chan_set_mode(struct mv_xor_chan *chan,
 			     enum dma_transaction_type type)
 {
@@ -275,7 +272,7 @@ static void mv_chan_set_mode_to_desc(struct mv_xor_chan *chan)
 
 	writel_relaxed(config, XOR_CONFIG(chan));
 }
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 static void mv_chan_activate(struct mv_xor_chan *chan)
 {
@@ -287,11 +284,11 @@ static void mv_chan_activate(struct mv_xor_chan *chan)
 
 static char mv_chan_is_busy(struct mv_xor_chan *chan)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	u32 state = readl(XOR_ACTIVATION(chan));
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	u32 state = readl_relaxed(XOR_ACTIVATION(chan));
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	state = (state >> 4) & 0x3;
 
@@ -385,7 +382,7 @@ static void mv_chan_slot_cleanup(struct mv_xor_chan *mv_chan)
 	u32 current_desc = mv_chan_get_current_desc(mv_chan);
 	int current_cleaned = 0;
 	struct mv_xor_desc *hw_desc;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	struct dma_chan *dma_chan;
 
 	dma_chan = &mv_chan->dmachan;
@@ -397,7 +394,7 @@ static void mv_chan_slot_cleanup(struct mv_xor_chan *mv_chan)
 	 */
 	dma_sync_single_for_cpu(dma_chan->device->dev, (dma_addr_t) NULL,
 				(size_t) NULL, DMA_FROM_DEVICE);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 
 	dev_dbg(mv_chan_to_devp(mv_chan), "%s %d\n", __func__, __LINE__);
 	dev_dbg(mv_chan_to_devp(mv_chan), "current_desc %x\n", current_desc);
@@ -604,7 +601,7 @@ static int mv_xor_alloc_chan_resources(struct dma_chan *chan)
 }
 
 static struct dma_async_tx_descriptor *
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 mv_xor_prep_dma_pq(struct dma_chan *chan, dma_addr_t *dst, dma_addr_t *src,
 			unsigned int src_cnt, const unsigned char *scf,
 			size_t len, unsigned long flags)
@@ -664,7 +661,7 @@ mv_xor_prep_dma_pq(struct dma_chan *chan, dma_addr_t *dst, dma_addr_t *src,
 }
 
 static struct dma_async_tx_descriptor *
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 mv_xor_prep_dma_xor(struct dma_chan *chan, dma_addr_t dest, dma_addr_t *src,
 		    unsigned int src_cnt, size_t len, unsigned long flags)
 {
@@ -676,27 +673,27 @@ mv_xor_prep_dma_xor(struct dma_chan *chan, dma_addr_t dest, dma_addr_t *src,
 
 	BUG_ON(len > MV_XOR_MAX_BYTE_COUNT);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	dev_dbg(mv_chan_to_devp(mv_chan),
 		"%s src_cnt: %d len: %u dest %pad flags: %ld\n",
 		__func__, src_cnt, (unsigned int)len, &dest, flags);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	dev_dbg(mv_chan_to_devp(mv_chan),
 		"%s src_cnt: %d len: %u dest %pad flags: %ld\n",
 		__func__, src_cnt, len, &dest, flags);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	sw_desc = mv_chan_alloc_slot(mv_chan);
 	if (sw_desc) {
 		sw_desc->type = DMA_XOR;
 		sw_desc->async_tx.flags = flags;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 		mv_desc_init(sw_desc, flags);
 		mv_desc_set_byte_count(sw_desc, len);
 		mv_desc_set_dest_addr(sw_desc, dest);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 		mv_desc_init(sw_desc, dest, len, flags);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 		if (mv_chan->op_in_desc == XOR_MODE_IN_DESC)
 			mv_desc_set_mode(sw_desc);
 		while (src_cnt--)
@@ -1166,17 +1163,17 @@ mv_xor_channel_add(struct mv_xor_device *xordev,
 	 * a DMA_INTERRUPT operation as a minimum-sized XOR operation.
 	 * Hence, we only need to map the buffers at initialization-time.
 	 */
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	mv_chan->dummy_src_addr = dma_map_single(&pdev->dev,
 		mv_chan->dummy_src, MV_XOR_MIN_BYTE_COUNT, DMA_FROM_DEVICE);
 	mv_chan->dummy_dst_addr = dma_map_single(&pdev->dev,
 		mv_chan->dummy_dst, MV_XOR_MIN_BYTE_COUNT, DMA_TO_DEVICE);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	mv_chan->dummy_src_addr = dma_map_single(dma_dev->dev,
 		mv_chan->dummy_src, MV_XOR_MIN_BYTE_COUNT, DMA_FROM_DEVICE);
 	mv_chan->dummy_dst_addr = dma_map_single(dma_dev->dev,
 		mv_chan->dummy_dst, MV_XOR_MIN_BYTE_COUNT, DMA_TO_DEVICE);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	/* allocate coherent memory for hardware descriptors
 	 * note: writecombine gives slightly better performance, but
@@ -1209,12 +1206,12 @@ mv_xor_channel_add(struct mv_xor_device *xordev,
 		dma_dev->max_xor = 8;
 		dma_dev->device_prep_dma_xor = mv_xor_prep_dma_xor;
 	}
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	if (dma_has_cap(DMA_PQ, dma_dev->cap_mask)) {
 		dma_set_maxpq(dma_dev, 8, 0);
 		dma_dev->device_prep_dma_pq = mv_xor_prep_dma_pq;
 	}
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 
 	mv_chan->mmr_base = xordev->xor_base;
 	mv_chan->mmr_high_base = xordev->xor_high_base;
@@ -1231,17 +1228,17 @@ mv_xor_channel_add(struct mv_xor_device *xordev,
 
 	mv_chan_unmask_interrupts(mv_chan);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	if (mv_chan->op_in_desc == XOR_MODE_IN_DESC)
 		mv_chan_set_mode(mv_chan, XOR_OPERATION_MODE_IN_DESC);
 	else
 		mv_chan_set_mode(mv_chan, XOR_OPERATION_MODE_XOR);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	if (mv_chan->op_in_desc == XOR_MODE_IN_DESC)
 		mv_chan_set_mode_to_desc(mv_chan);
 	else
 		mv_chan_set_mode(mv_chan, DMA_XOR);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	spin_lock_init(&mv_chan->lock);
 	INIT_LIST_HEAD(&mv_chan->chain);
@@ -1267,20 +1264,20 @@ mv_xor_channel_add(struct mv_xor_device *xordev,
 			goto err_free_irq;
 	}
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	dev_info(&pdev->dev, "Marvell XOR (%s): ( %s%s%s%s)\n",
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	dev_info(&pdev->dev, "Marvell XOR (%s): ( %s%s%s)\n",
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 		 mv_chan->op_in_desc ? "Descriptor Mode" : "Registers Mode",
 		 dma_has_cap(DMA_XOR, dma_dev->cap_mask) ? "xor " : "",
 		 dma_has_cap(DMA_MEMCPY, dma_dev->cap_mask) ? "cpy " : "",
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 		 dma_has_cap(DMA_INTERRUPT, dma_dev->cap_mask) ? "intr " : "",
 		 dma_has_cap(DMA_PQ, dma_dev->cap_mask) ? "pq " : "");
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 		 dma_has_cap(DMA_INTERRUPT, dma_dev->cap_mask) ? "intr " : "");
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 
 	dma_async_device_register(dma_dev);
 	return mv_chan;
@@ -1308,7 +1305,7 @@ mv_xor_conf_mbus_windows(struct mv_xor_device *xordev,
 			writel(0, base + WINDOW_REMAP_HIGH(i));
 	}
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	if (dram) {
 		for (i = 0; i < dram->num_cs; i++) {
 			const struct mbus_dram_window *cs = dram->cs + i;
@@ -1330,7 +1327,7 @@ mv_xor_conf_mbus_windows(struct mv_xor_device *xordev,
 		win_enable |= 1;
 		win_enable |= 3 << 16;
 	}
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	for (i = 0; i < dram->num_cs; i++) {
 		const struct mbus_dram_window *cs = dram->cs + i;
 
@@ -1342,7 +1339,7 @@ mv_xor_conf_mbus_windows(struct mv_xor_device *xordev,
 		win_enable |= (1 << i);
 		win_enable |= 3 << (16 + (2 * i));
 	}
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	writel(win_enable, base + WINDOW_BAR_ENABLE(0));
 	writel(win_enable, base + WINDOW_BAR_ENABLE(1));
@@ -1350,7 +1347,7 @@ mv_xor_conf_mbus_windows(struct mv_xor_device *xordev,
 	writel(0, base + WINDOW_OVERRIDE_CTRL(1));
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 /*
  * Since this XOR driver is basically used only for RAID5, we don't
  * need to care about synchronizing ->suspend with DMA activity,
@@ -1401,14 +1398,14 @@ static int mv_xor_resume(struct platform_device *dev)
 
 	return 0;
 }
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 static const struct of_device_id mv_xor_dt_ids[] = {
 	{ .compatible = "marvell,orion-xor", .data = (void *)XOR_MODE_IN_REG },
 	{ .compatible = "marvell,armada-380-xor", .data = (void *)XOR_MODE_IN_DESC },
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	{ .compatible = "marvell,armada-3700-xor", .data = (void *)XOR_MODE_IN_DESC },
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	{},
 };
 
@@ -1417,19 +1414,19 @@ static unsigned int mv_xor_engine_count;
 static int mv_xor_probe(struct platform_device *pdev)
 {
 	const struct mbus_dram_target_info *dram;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	struct device_node *dn = pdev->dev.of_node;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct mv_xor_device *xordev;
 	struct mv_xor_platform_data *pdata = dev_get_platdata(&pdev->dev);
 	struct resource *res;
 	unsigned int max_engines, max_channels;
 	int i, ret;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	long op_in_desc;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	int op_in_desc;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	dev_notice(&pdev->dev, "Marvell shared XOR driver\n");
 
@@ -1457,12 +1454,12 @@ static int mv_xor_probe(struct platform_device *pdev)
 
 	platform_set_drvdata(pdev, xordev);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	/* Get special Soc configurations */
 	if (of_device_is_compatible(dn, "marvell,armada-3700-xor"))
 		xordev->xor_armada3700 = true;
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	/*
 	 * (Re-)program MBUS remapping windows if we are asked to.
 	 * Armada3700 requires setting default configuration of Mbus
@@ -1470,11 +1467,11 @@ static int mv_xor_probe(struct platform_device *pdev)
 	 * structure.
 	 */
 	dram = mv_mbus_dram_info();
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	if (dram || xordev->xor_armada3700)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	if (dram)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		mv_xor_conf_mbus_windows(xordev, dram);
 
 	/* Not all platforms can gate the clock, so it is not
@@ -1493,17 +1490,17 @@ static int mv_xor_probe(struct platform_device *pdev)
 	 * SoC with single XOR engine allow using its both channels.
 	 */
 	max_engines = num_present_cpus();
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	max_channels = xordev->xor_armada3700 ? num_present_cpus() :
 		       min_t(unsigned int,
 			     MV_XOR_MAX_CHANNELS,
 			     DIV_ROUND_UP(num_present_cpus(), 2));
 
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	max_channels = min_t(unsigned int,
 			     MV_XOR_MAX_CHANNELS,
 			     DIV_ROUND_UP(num_present_cpus(), 2));
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	if (mv_xor_engine_count >= max_engines)
 		return 0;
@@ -1519,11 +1516,11 @@ static int mv_xor_probe(struct platform_device *pdev)
 			struct mv_xor_chan *chan;
 			dma_cap_mask_t cap_mask;
 			int irq;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 			op_in_desc = (long)of_id->data;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 			op_in_desc = (int)of_id->data;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 			if (i >= max_channels)
 				continue;
@@ -1532,9 +1529,9 @@ static int mv_xor_probe(struct platform_device *pdev)
 			dma_cap_set(DMA_MEMCPY, cap_mask);
 			dma_cap_set(DMA_XOR, cap_mask);
 			dma_cap_set(DMA_INTERRUPT, cap_mask);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 			dma_cap_set(DMA_PQ, cap_mask);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 
 			irq = irq_of_parse_and_map(np, 0);
 			if (!irq) {
@@ -1601,7 +1598,7 @@ err_channel_add:
 	return ret;
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 static void mv_xor_shutdown(struct platform_device *pdev)
 {
 	struct mv_xor_device *xordev = platform_get_drvdata(pdev);
@@ -1611,15 +1608,15 @@ static void mv_xor_shutdown(struct platform_device *pdev)
 		clk_put(xordev->clk);
 	}
 }
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 static struct platform_driver mv_xor_driver = {
 	.probe		= mv_xor_probe,
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	.suspend        = mv_xor_suspend,
 	.resume         = mv_xor_resume,
 	.shutdown	= mv_xor_shutdown,
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	.driver		= {
 		.name	        = MV_XOR_NAME,
 		.of_match_table = of_match_ptr(mv_xor_dt_ids),

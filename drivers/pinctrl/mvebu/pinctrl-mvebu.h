@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * Marvell MVEBU pinctrl driver
  *
@@ -95,11 +92,11 @@ struct mvebu_mpp_mode {
 /**
  * struct mvebu_pinctrl_soc_info - SoC specific info passed to pinctrl-mvebu
  */
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_10)
 /* 
  * @node: global list node
  */
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_10 */
 /*
  * @variant: variant mask of soc_info
  * @controls: list of available mvebu_mpp_ctrls
@@ -109,20 +106,20 @@ struct mvebu_mpp_mode {
  * @gpioranges: list of pinctrl_gpio_ranges
  * @ngpioranges: number of available pinctrl_gpio_ranges
  */
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_10)
 /*
  * @pm_save: saved register values during suspend
  */
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_10 */
 /*
  * This struct describes all pinctrl related information for a specific SoC.
  * If variant is unequal 0 it will be matched (AND) with variant of each
  * setting and allows to distinguish between different revisions of one SoC.
  */
 struct mvebu_pinctrl_soc_info {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_10)
 	struct list_head node;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_10 */
 	u8 variant;
 	struct mvebu_mpp_ctrl *controls;
 	int ncontrols;
@@ -130,7 +127,7 @@ struct mvebu_pinctrl_soc_info {
 	int nmodes;
 	struct pinctrl_gpio_range *gpioranges;
 	int ngpioranges;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_10)
 	struct mvebu_pinctrl_pm_save *pm_save;
 };
 
@@ -144,7 +141,7 @@ struct mvebu_pinctrl_pm_save {
 	unsigned int *regs;
 	unsigned int length;
 	unsigned int emmc_phy_ctrl;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_10 */
 };
 
 #define MPP_FUNC_CTRL(_idl, _idh, _name, _func)			\
@@ -207,13 +204,13 @@ struct mvebu_pinctrl_pm_save {
 		.npins = _npins,				\
 	}
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 int default_mpp_ctrl_get(void __iomem *base, unsigned int pid,
 				       unsigned long *config);
 int default_mpp_ctrl_set(void __iomem *base, unsigned int pid,
 				       unsigned long config);
 int mvebu_pinctrl_set_mpps(unsigned int npins);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 #define MVEBU_MPPS_PER_REG	8
 #define MVEBU_MPP_BITS		4
 #define MVEBU_MPP_MASK		0xf
@@ -242,7 +239,7 @@ static inline int default_mpp_ctrl_set(void __iomem *base, unsigned int pid,
 	return 0;
 }
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 int mvebu_pinctrl_probe(struct platform_device *pdev);
 int mvebu_pinctrl_remove(struct platform_device *pdev);
 

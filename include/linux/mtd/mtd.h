@@ -65,7 +65,7 @@ struct nand_ecclayout {
 	struct nand_oobfree oobfree[MTD_MAX_OOBFREE_ENTRIES_LARGE];
 };
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
  
 struct mtd_oob_region {
 	u32 offset;
@@ -120,14 +120,14 @@ struct mtd_info {
 	const char *name;
 	int index;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 	 
 #else  
 	 
 #endif  
 	struct nand_ecclayout *ecclayout;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 	 
 	const struct mtd_ooblayout_ops *ooblayout;
 
@@ -203,7 +203,7 @@ struct mtd_info {
 	int usecount;
 };
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 int mtd_ooblayout_ecc(struct mtd_info *mtd, int section,
 		      struct mtd_oob_region *oobecc);
 int mtd_ooblayout_find_eccregion(struct mtd_info *mtd, int eccbyte,
@@ -237,7 +237,7 @@ static inline void mtd_set_pairing_scheme(struct mtd_info *mtd,
 }
 #endif  
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 static inline void mtd_set_of_node(struct mtd_info *mtd,
 				   struct device_node *np)
 {
@@ -250,7 +250,7 @@ static inline struct device_node *mtd_get_of_node(struct mtd_info *mtd)
 }
 #endif  
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 static inline int mtd_oobavail(struct mtd_info *mtd, struct mtd_oob_ops *ops)
 {
 	return ops->mode == MTD_OPS_AUTO_OOB ? mtd->oobavail : mtd->oobsize;
@@ -276,7 +276,7 @@ int mtd_panic_write(struct mtd_info *mtd, loff_t to, size_t len, size_t *retlen,
 		    const u_char *buf);
 
 int mtd_read_oob(struct mtd_info *mtd, loff_t from, struct mtd_oob_ops *ops);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 int mtd_write_oob(struct mtd_info *mtd, loff_t to, struct mtd_oob_ops *ops);
 #else  
 
@@ -361,7 +361,7 @@ static inline uint32_t mtd_mod_by_ws(uint64_t sz, struct mtd_info *mtd)
 	return do_div(sz, mtd->writesize);
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 static inline int mtd_wunit_per_eb(struct mtd_info *mtd)
 {
 	return mtd->erasesize / mtd->writesize;

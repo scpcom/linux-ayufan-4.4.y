@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * Copyright (C) 2014 Marvell
  *
@@ -53,7 +50,7 @@ ARM_BE8(setend	be )			@ go BE8 if entered LE
 	b	cpu_resume
 ENDPROC(armada_38x_cpu_resume)
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 .global armada_38x_mem_resume_data
 
 #define MBUS_INTERNAL_REG_ADDRESS 0xd0020080
@@ -96,7 +93,7 @@ ARM_BE8(rev	r2, r2)
 armada_38x_mem_resume_data:
 	.long	.
 ENDPROC(armada_38x_mem_resume)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 .global mvebu_boot_wa_start
 .global mvebu_boot_wa_end

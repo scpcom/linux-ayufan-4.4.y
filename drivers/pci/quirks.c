@@ -19,7 +19,7 @@
 #include <asm/dma.h>	 
 #include "pci.h"
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 #define _8M	0x00800000
 #define _64M	0x04000000
 #define MV_PCI_BAR_1	2
@@ -3226,7 +3226,7 @@ static const u16 pci_quirk_intel_pch_acs_ids[] = {
 	0x8c90, 0x8c92, 0x8c94, 0x8c96, 0x8c98, 0x8c9a, 0x8c9c, 0x8c9e,
 };
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
  
 static const u16 pci_quirk_marvell_acs_ids[] = {
 	 
@@ -3261,7 +3261,7 @@ static int pci_quirk_intel_pch_acs(struct pci_dev *dev, u16 acs_flags)
 	return acs_flags & ~flags ? 0 : 1;
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 static int pci_quirk_marvell_acs(struct pci_dev *dev, u16 acs_flags)
 {
 	int i;
@@ -3359,7 +3359,7 @@ static const struct pci_dev_acs_enabled {
 	{ PCI_VENDOR_ID_INTEL, PCI_ANY_ID, pci_quirk_intel_pch_acs },
 	{ 0x19a2, 0x710, pci_quirk_mf_endpoint_acs },  
 	{ 0x10df, 0x720, pci_quirk_mf_endpoint_acs },  
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	 
 	{ PCI_VENDOR_ID_MARVELL, PCI_ANY_ID, pci_quirk_marvell_acs },
 #endif  

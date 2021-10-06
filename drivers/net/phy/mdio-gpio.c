@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * GPIO based MDIO bitbang driver.
  * Supports OpenFirmware.
@@ -162,11 +159,11 @@ static struct mii_bus *mdio_gpio_bus_init(struct device *dev,
 
 	new_bus->phy_mask = pdata->phy_mask;
 	new_bus->phy_ignore_ta_mask = pdata->phy_ignore_ta_mask;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	memcpy(new_bus->irq, pdata->irqs, sizeof(new_bus->irq));
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	new_bus->irq = pdata->irqs;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	new_bus->parent = dev;
 
 	if (new_bus->phy_mask == ~0)

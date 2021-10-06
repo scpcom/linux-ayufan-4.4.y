@@ -31,12 +31,12 @@
 #include "../uapi/rtk_phoenix_ion.h"
 #endif /* defined(CONFIG_ION_RTK_PHOENIX) && defined(MY_DEF_HERE) */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 #if defined(CONFIG_ION_RTK)
 #include "../uapi/ion_rtk.h"
 #endif
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */
 struct ion_carveout_heap {
 	struct ion_heap heap;
 	struct gen_pool *pool;

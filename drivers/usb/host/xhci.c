@@ -11,7 +11,7 @@
 #include <linux/dmi.h>
 #include <linux/dma-mapping.h>
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 #ifdef CONFIG_USB_PATCH_ON_RTK
 #include <linux/usb/quirks.h>
 #endif

@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * GPIO driver for the SMSC SCH311x Super-I/O chips
  *
@@ -150,11 +147,11 @@ static int sch311x_gpio_request(struct gpio_chip *chip, unsigned offset)
 
 	if (!request_region(block->runtime_reg + block->config_regs[offset],
 			    1, DRV_NAME)) {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 		dev_err(chip->parent, "Failed to request region 0x%04x.\n",
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		dev_err(chip->dev, "Failed to request region 0x%04x.\n",
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 			block->runtime_reg + block->config_regs[offset]);
 		return -EBUSY;
 	}
@@ -266,11 +263,11 @@ static int sch311x_gpio_probe(struct platform_device *pdev)
 		block->chip.get = sch311x_gpio_get;
 		block->chip.set = sch311x_gpio_set;
 		block->chip.ngpio = 8;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 		block->chip.parent = &pdev->dev;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		block->chip.dev = &pdev->dev;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		block->chip.base = sch311x_gpio_blocks[i].base;
 		block->config_regs = sch311x_gpio_blocks[i].config_regs;
 		block->data_reg = sch311x_gpio_blocks[i].data_reg;

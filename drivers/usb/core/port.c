@@ -7,11 +7,11 @@
 #ifdef MY_DEF_HERE
 #include <linux/gpio.h>
 #endif  
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_DENVERTON
 #define SYNO_SERIAL_EXT_HUB "syno.ext.hub"
 #endif  
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_PORT_MAPPING_V2
 #include <linux/synolib.h>
 #include <linux/syno_gpio.h>
 #endif  
@@ -337,7 +337,7 @@ static void find_and_link_peer(struct usb_hub *hub, int port1)
 		link_peers_report(port_dev, peer);
 }
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_PORT_MAPPING_V2
  
 static struct device_node *__syno_usb_hub_node_get(const struct usb_device *hdev, const int portnum, const char *szNodeName)
 {
@@ -405,7 +405,7 @@ void syno_vbus_gpio_set(const char *vbus_host_addr, const unsigned vbus_gpio_pin
 #ifdef MY_ABC_HERE
 	unsigned vbusGPIOValue = 0;
 #endif  
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_PORT_MAPPING_V2
 	if (UINT_MAX == vbus_gpio_pin || UINT_MAX == vbus_gpio_polarity || 0 > port1) {
 		return;
 	}
@@ -431,7 +431,7 @@ void syno_vbus_gpio_set(const char *vbus_host_addr, const unsigned vbus_gpio_pin
 		printk(KERN_INFO " port%d is going to power up Vbus by "
 				"GPIO#%d(%s)\n", port1, vbus_gpio_pin,
 				vbus_gpio_polarity ? "ACTIVE_HIGH" : "ACTIVE_LOW");
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_DENVERTON
 		if (0 == strncmp(SYNO_SERIAL_EXT_HUB, vbus_host_addr,strlen(SYNO_SERIAL_EXT_HUB))) {
 			mdelay(1000);
 		} else {
@@ -461,7 +461,7 @@ int usb_hub_create_port_device(struct usb_hub *hub, int port1)
 	int i = 0;
 #endif  
 #ifdef MY_DEF_HERE
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_PORT_MAPPING_V2
 	u32 vbusGpioPin = U32_MAX, vbusGpioPolarity = 0;
 	char *szGpioShared = NULL;
 	struct device_node *pVbusNode = NULL, *pUSBNode = NULL;
@@ -524,7 +524,7 @@ int usb_hub_create_port_device(struct usb_hub *hub, int port1)
 	port_dev->syno_vbus_gpp = -1;
 	port_dev->syno_vbus_gpp_pol = -1;
 	if (hdev && hdev->serial) {
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_PORT_MAPPING_V2
 		pUSBNode = syno_usb_hub_node_get(hdev, port1);
 		if (NULL == pUSBNode) {
 			goto PUT_NODE;

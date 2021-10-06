@@ -1,7 +1,4 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 /*
  * Copyright (C) 2016 Marvell
  *
@@ -360,7 +357,7 @@ static void eip_priv_unit_offset_init(struct safexcel_crypto_priv *priv)
 {
 	struct safexcel_unit_offset *unit_off = &priv->unit_off;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 	if (priv->eip_type == EIP197) {
 		unit_off->hia_aic = EIP197_HIA_AIC_ADDR;
 		unit_off->hia_aic_g = EIP197_HIA_AIC_G_ADDR;
@@ -384,7 +381,7 @@ static void eip_priv_unit_offset_init(struct safexcel_crypto_priv *priv)
 		unit_off->hia_gen_cfg = EIP97_HIA_GC;
 		unit_off->pe = EIP97_HIA_PE_ADDR;
 	}
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 	unit_off->hia_aic = EIP197_HIA_AIC_ADDR;
 	unit_off->hia_aic_g = EIP197_HIA_AIC_G_ADDR;
 	unit_off->hia_aic_r = EIP197_HIA_AIC_R_ADDR;
@@ -395,7 +392,7 @@ static void eip_priv_unit_offset_init(struct safexcel_crypto_priv *priv)
 	unit_off->hia_dse_thrd = EIP197_HIA_AIC_DSE_THRD_ADDR;
 	unit_off->hia_gen_cfg = EIP197_HIA_GC;
 	unit_off->pe = EIP197_HIA_PE_ADDR;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 }
 
 /* Configure the command descriptor ring manager */
@@ -467,11 +464,11 @@ static int eip_hw_setup_rdesc_rings(struct safexcel_crypto_priv *priv)
 		/* Configure DMA tx control */
 		val = EIP197_HIA_xDR_CFG_WR_CACHE(WR_CACHE_3BITS);
 		val |= EIP197_HIA_xDR_CFG_RD_CACHE(RD_CACHE_3BITS);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 		val |= EIP197_HIA_xDR_WR_RES_BUF | EIP197_HIA_xDR_WR_CTRL_BUF;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 		val |= EIP197_HIA_xDR_WR_RES_BUF | EIP197_HIA_xDR_WR_CTRL_BUG;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 		writel(val, EIP197_HIA_AIC_xDR(priv) + EIP197_HIA_RDR(i) + EIP197_HIA_xDR_DMA_CFG);
 
 		/* clear any pending interrupt */
@@ -525,18 +522,18 @@ static int eip197_hw_init(struct device *dev, struct safexcel_crypto_priv *priv)
 	writel(EIP197_DxE_THR_CTRL_RESET_PE,
 	       EIP197_HIA_DFE_THRD(priv) + EIP197_HIA_DFE_THR_CTRL);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 	/* Configure ring arbiter, available only for EIP197 */
 	if (priv->eip_type == EIP197) {
 		/* Reset HIA input interface arbiter */
 		writel(EIP197_HIA_RA_PE_CTRL_RESET,
 		       EIP197_HIA_AIC(priv) + EIP197_HIA_RA_PE_CTRL);
 	}
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 	/* Reset HIA input interface arbiter */
 	writel(EIP197_HIA_RA_PE_CTRL_RESET,
 	       EIP197_HIA_AIC(priv) + EIP197_HIA_RA_PE_CTRL);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 
 	/* DMA transfer size to use */
 	val = EIP197_HIA_DFE_CFG_DIS_DEBUG;
@@ -555,18 +552,18 @@ static int eip197_hw_init(struct device *dev, struct safexcel_crypto_priv *priv)
 	writel(EIP197_PE_IN_xBUF_THRES_MIN(5) | EIP197_PE_IN_xBUF_THRES_MAX(7),
 	      EIP197_PE(priv) + EIP197_PE_IN_TBUF_THRES);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 	/* Configure ring arbiter, available only for EIP197 */
 	if (priv->eip_type == EIP197) {
 		/* enable HIA input interface arbiter and rings */
 		writel(EIP197_HIA_RA_PE_CTRL_EN | GENMASK(priv->config.hw_rings - 1, 0),
 		       EIP197_HIA_AIC(priv) + EIP197_HIA_RA_PE_CTRL);
 	}
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 	/* enable HIA input interface arbiter and rings */
 	writel(EIP197_HIA_RA_PE_CTRL_EN | GENMASK(priv->config.hw_rings - 1, 0),
 	       EIP197_HIA_AIC(priv) + EIP197_HIA_RA_PE_CTRL);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 
 	/*
 	 * Data Store Engine configuration
@@ -586,7 +583,7 @@ static int eip197_hw_init(struct device *dev, struct safexcel_crypto_priv *priv)
 	val |= EIP197_HIA_DxE_CFG_MIN_DATA_SIZE(7) | EIP197_HIA_DxE_CFG_MAX_DATA_SIZE(8);
 	val |= EIP197_HIA_DxE_CFG_DATA_CACHE_CTRL(WR_CACHE_3BITS);
 	val |= EIP197_HIA_DSE_CFG_ALLWAYS_BUFFERABLE;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 	/*
 	 * TODO: Generally, EN_SINGLE_WR should be enabled.
 	 * Some instabilities with this option enabled might occur,
@@ -597,9 +594,9 @@ static int eip197_hw_init(struct device *dev, struct safexcel_crypto_priv *priv)
 	if (priv->eip_type == EIP197)
 		val |= EIP197_HIA_DSE_CFG_EN_SINGLE_WR;
 
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 	val |= EIP197_HIA_DSE_CFG_EN_SINGLE_WR;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 	writel(val, EIP197_HIA_DSE(priv) + EIP197_HIA_DSE_CFG);
 
 	/* Leave the DSE threads reset state */
@@ -674,7 +671,7 @@ static int eip197_hw_init(struct device *dev, struct safexcel_crypto_priv *priv)
 	/* Clear any HIA interrupt */
 	writel(EIP197_AIC_G_ACK_HIA_MASK, EIP197_HIA_AIC_G(priv) + EIP197_HIA_AIC_G_ACK);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 	/*
 	 * Initialize EIP197 specifics:
 	 *	- PRNG
@@ -684,41 +681,41 @@ static int eip197_hw_init(struct device *dev, struct safexcel_crypto_priv *priv)
 	if (priv->eip_type == EIP197) {
 		/* init PRNG */
 		eip197_prng_init(priv);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 	/* init PRNG */
 	eip197_prng_init(priv);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 		/* init transform record cache */
 		ret = eip197_trc_cache_init(dev, priv);
 		if (ret) {
 			dev_err(dev, "eip197_trc_cache_init failed\n");
 			return ret;
 		}
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 	/* init transform record cache */
 	ret = eip197_trc_cache_init(dev, priv);
 	if (ret) {
 		dev_err(dev, "eip197_trc_cache_init failed\n");
 		return ret;
 	}
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 		/* Firmware load */
 		ret = eip197_load_fw(dev, priv);
 		if (ret) {
 			dev_err(dev, "eip197_load_fw failed\n");
 			return ret;
 		}
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 	/* Firmware load */
 	ret = eip197_load_fw(dev, priv);
 	if (ret) {
 		dev_err(dev, "eip197_load_fw failed\n");
 		return ret;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 	}
 
 	eip_hw_setup_cdesc_rings(priv);
@@ -738,13 +735,13 @@ void safexcel_dequeue(struct safexcel_crypto_priv *priv, int ring)
 	int commands, results;
 	u32 val;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 	req = priv->ring[ring].req;
 	backlog = priv->ring[ring].backlog;
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 	do {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 		/* get a new request if no ring saved req */
 		if (!req) {
 			spin_lock_bh(&priv->ring[ring].queue_lock);
@@ -752,30 +749,30 @@ void safexcel_dequeue(struct safexcel_crypto_priv *priv, int ring)
 			req = crypto_dequeue_request(&priv->ring[ring].queue);
 			spin_unlock_bh(&priv->ring[ring].queue_lock);
 		}
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 		spin_lock_bh(&priv->ring[ring].queue_lock);
 		req = crypto_dequeue_request(&priv->ring[ring].queue);
 		backlog = crypto_get_backlog(&priv->ring[ring].queue);
 		spin_unlock_bh(&priv->ring[ring].queue_lock);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 		/* no more requests, update ring saved req */
 		if (!req) {
 			/* no more requests, clear */
 			priv->ring[ring].req = NULL;
 			priv->ring[ring].backlog = NULL;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 		if (!req)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 			goto finalize;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 		}
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 
 		if (backlog)
 			backlog->complete(backlog, -EINPROGRESS);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 
 		request = kzalloc(sizeof(*request), EIP197_GFP_FLAGS(*req));
 		if (!request) {
@@ -790,36 +787,36 @@ void safexcel_dequeue(struct safexcel_crypto_priv *priv, int ring)
 			goto resource_fail;
 		}
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 		if (backlog)
 			backlog->complete(backlog, -EINPROGRESS);
 
 		backlog = NULL;
 		req = NULL;
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 		cdesc += commands;
 		rdesc += results;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 		nreq++;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 
 		if (++nreq > EIP197_MAX_BATCH_SZ) {
 			priv->ring[ring].need_dequeue = true;
 			goto finalize;
 		}
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 	} while (true);
 
 resource_fail:
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 	/*
 	 * resource alloc fail, bail out, save the request and backlog
 	 * for later dequeue handling
 	 */
 	priv->ring[ring].req = req;
 	priv->ring[ring].backlog = backlog;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 	/* resource alloc fail, bail out, complete the request and */
 	/* leave dequeue enabled since we have not cleaned it all  */
 	priv->ring[ring].need_dequeue = true;
@@ -827,52 +824,52 @@ resource_fail:
 	local_bh_disable();
 	req->complete(req, ret);
 	local_bh_enable();
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 
 finalize:
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 	if (!nreq)
 		return;
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 	spin_lock_bh(&priv->ring[ring].lock);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 	/* update the ring request count */
 	priv->ring[ring].egress_cnt += nreq;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 	/* Configure when we want an interrupt */
 	val = EIP197_HIA_RDR_THRESH_PKT_MODE | EIP197_HIA_RDR_THRESH_PROC_PKT(nreq);
 	val |= EIP197_HIA_RDR_THRESH_TIMEOUT(0x80);
 	writel_relaxed(val, EIP197_HIA_AIC_xDR(priv) + EIP197_HIA_RDR(ring) + EIP197_HIA_xDR_THRESH);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 	if (!priv->ring[ring].busy && priv->ring[ring].egress_cnt) {
 		/* Configure when we want an interrupt */
 		priv->ring[ring].busy = 1;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 	/* let the RDR know we have pending descriptors */
 	writel_relaxed((rdesc * priv->config.rd_offset) << EIP197_xDR_PREP_RD_COUNT_INCR_OFFSET,
 	       EIP197_HIA_AIC_xDR(priv) + EIP197_HIA_RDR(ring) + EIP197_HIA_xDR_PREP_COUNT);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 		val = EIP197_HIA_RDR_THRESH_PKT_MODE |
 			EIP197_HIA_RDR_THRESH_PROC_PKT(min(priv->ring[ring].egress_cnt,
 							   EIP197_MAX_BATCH_SZ));
 		writel(val, EIP197_HIA_AIC_xDR(priv) + EIP197_HIA_RDR(ring) + EIP197_HIA_xDR_THRESH);
 	}
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 	/* let the CDR know we have pending descriptors */
 	writel((cdesc * priv->config.cd_offset) << EIP197_xDR_PREP_RD_COUNT_INCR_OFFSET,
 	       EIP197_HIA_AIC_xDR(priv) + EIP197_HIA_CDR(ring) + EIP197_HIA_xDR_PREP_COUNT);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 
 	spin_unlock_bh(&priv->ring[ring].lock);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 
 	if (nreq) {
 		/* let the RDR know we have pending descriptors */
@@ -883,7 +880,7 @@ finalize:
 		writel((cdesc * priv->config.cd_offset) << EIP197_xDR_PREP_xD_COUNT_INCR_OFFSET,
 			EIP197_HIA_AIC_xDR(priv) + EIP197_HIA_CDR(ring) + EIP197_HIA_xDR_PREP_COUNT);
 	}
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 }
 
 /* Select the ring which will be used for the operation */
@@ -968,28 +965,28 @@ int safexcel_invalidate_cache(struct crypto_async_request *async,
 {
 	struct safexcel_command_desc *cdesc;
 	struct safexcel_result_desc *rdesc;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 	phys_addr_t ctxr_phys;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 	int ret;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 	ctxr_phys = dma_to_phys(priv->dev, ctxr_dma);
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 	spin_lock_bh(&priv->ring[ring].egress_lock);
 
 	/* prepare command descriptor */
 	cdesc = safexcel_add_cdesc(priv, ring, true, true,
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 				   0, 0, 0, ctxr_dma);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 				   0, 0, 0, ctxr_phys);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 
 	if (IS_ERR(cdesc)) {
 		ret = PTR_ERR(cdesc);
@@ -1003,11 +1000,11 @@ int safexcel_invalidate_cache(struct crypto_async_request *async,
 				       CONTEXT_CONTROL_HW_SERVICES_OFFSET;
 
 	/* prepare result descriptor */
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 	rdesc = safexcel_add_rdesc(priv, ring, true, true, 0, 0);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 	rdesc = safexcel_add_rdesc(priv, ring, true, true, ctxr_phys, 0);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 
 	if (IS_ERR(rdesc)) {
 		ret = PTR_ERR(rdesc);
@@ -1030,50 +1027,50 @@ unlock:
 }
 
 /* Generic result handler */
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 static void safexcel_handle_result_descriptor(struct safexcel_crypto_priv *priv,
 					      int ring)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 static inline void safexcel_handle_result_descriptor(struct safexcel_crypto_priv *priv,
 						     int ring)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 {
 	struct safexcel_request *sreq;
 	struct safexcel_context *ctx;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 	int ret, i, ndesc, ndesc_tot, nreq_cnt, nreq_tot;
 	u32 val, results;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 	int ret, i, nreq, ndesc = 0;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 	bool should_complete;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 	int egress_cnt;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 more_results:
 	results = readl(EIP197_HIA_AIC_xDR(priv) + EIP197_HIA_RDR(ring) + EIP197_HIA_xDR_PROC_COUNT);
 	results = (results >> EIP197_xDR_PROC_xD_PKT_OFFSET) & EIP197_xDR_PROC_xD_PKT_MASK;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 	nreq = readl(EIP197_HIA_AIC_xDR(priv) + EIP197_HIA_RDR(ring) + EIP197_HIA_xDR_PROC_COUNT);
 	nreq = (nreq >> EIP197_xDR_PROC_xD_PKT_OFFSET) & EIP197_xDR_PROC_xD_PKT_MASK;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 	nreq_cnt = 0;
 	nreq_tot = 0;
 	ndesc_tot = 0;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 	if (!nreq)
 		return;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 	for (i = 0; i < results; i++) {
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 	for (i = 0; i < nreq; i++) {
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 		spin_lock_bh(&priv->ring[ring].egress_lock);
 		sreq = list_first_entry(&priv->ring[ring].list, struct safexcel_request, list);
 		list_del(&sreq->list);
@@ -1083,20 +1080,20 @@ more_results:
 		ndesc = ctx->handle_result(priv, ring, sreq->req,
 					   &should_complete, &ret);
 		if (ndesc < 0) {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 			kfree(sreq);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 			dev_err(priv->dev, "failed to handle result (%d)", ndesc);
 			return;
 		}
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 		nreq_cnt++;
 		ndesc_tot += ndesc;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 		writel(EIP197_xDR_PROC_xD_PKT(1) | EIP197_xDR_PROC_xD_COUNT(ndesc * priv->config.rd_offset),
 		       EIP197_HIA_AIC_xDR(priv) + EIP197_HIA_RDR(ring) + EIP197_HIA_xDR_PROC_COUNT);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 
 		if (should_complete) {
 			local_bh_disable();
@@ -1106,7 +1103,7 @@ more_results:
 
 		kfree(sreq);
 	}
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 
 	if (nreq_cnt) {
 		/* decrement the handled results */
@@ -1149,30 +1146,30 @@ more_results:
 	       EIP197_HIA_xDR_THRESH);
 
 	spin_unlock_bh(&priv->ring[ring].lock);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 /* dequeue from Crypto API FIFO and insert requests into HW ring */
 static void safexcel_handle_queued_work(struct work_struct *work)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 /* Result worker routine */
 static void safexcel_handle_result_work(struct work_struct *work)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 {
 	struct safexcel_work_data *data = container_of(work, struct safexcel_work_data, work);
 	struct safexcel_crypto_priv *priv = data->priv;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 	safexcel_dequeue(priv, data->ring);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 	safexcel_handle_result_descriptor(priv, data->ring);
 
 	if (priv->ring[data->ring].need_dequeue) {
 		priv->ring[data->ring].need_dequeue = false;
 		safexcel_dequeue(data->priv, data->ring);
 	}
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 }
 
 struct safexcel_ring_irq_data {
@@ -1180,7 +1177,7 @@ struct safexcel_ring_irq_data {
 	int ring;
 };
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 /* threaded irq handler that handles all results from a ring */
 static irqreturn_t safexcel_irq_ring_thread_handler(int irq, void *data)
 {
@@ -1198,7 +1195,7 @@ static irqreturn_t safexcel_irq_ring_thread_handler(int irq, void *data)
 	return IRQ_HANDLED;
 }
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 /* Ring IRQ handler */
 static irqreturn_t safexcel_irq_ring(int irq, void *data)
 {
@@ -1206,18 +1203,18 @@ static irqreturn_t safexcel_irq_ring(int irq, void *data)
 	struct safexcel_crypto_priv *priv = irq_data->priv;
 	int ring = irq_data->ring;
 	u32 status, stat;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 	int rc = IRQ_NONE;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 
 	status = readl(EIP197_HIA_AIC_R(priv) + EIP197_HIA_AIC_R_ENABLED_STAT(ring));
 
 	if (!status)
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 		return rc;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 		return IRQ_NONE;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 
 	/* CDR interrupts */
 	if (status & EIP197_CDR_IRQ(ring)) {
@@ -1251,10 +1248,10 @@ static irqreturn_t safexcel_irq_ring(int irq, void *data)
 			dev_err(priv->dev, "RDR: fatal error.");
 		}
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 		if (stat & EIP197_xDR_THRESH)
 			rc = IRQ_WAKE_THREAD;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 		if (likely(stat & EIP197_xDR_THRESH)) {
 			writel_relaxed(0, EIP197_HIA_AIC_xDR(priv) +
 				       EIP197_HIA_RDR(ring) + EIP197_HIA_xDR_THRESH);
@@ -1262,7 +1259,7 @@ static irqreturn_t safexcel_irq_ring(int irq, void *data)
 		} else if (unlikely(stat & EIP197_xDR_TIMEOUT)) {
 			queue_work(priv->ring[ring].workqueue, &priv->ring[ring].work_data.work);
 		}
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 
 		/* ACK the interrupts */
 		writel_relaxed(stat & 0xff, EIP197_HIA_AIC_xDR(priv) +
@@ -1272,11 +1269,11 @@ static irqreturn_t safexcel_irq_ring(int irq, void *data)
 	/* ACK the interrupts */
 	writel(status, EIP197_HIA_AIC_R(priv) + EIP197_HIA_AIC_R_ACK(ring));
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 	return rc;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 	return IRQ_HANDLED;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 }
 
 /* Register gloabl interrupts */
@@ -1303,12 +1300,12 @@ static int safexcel_request_irq(struct platform_device *pdev, const char *name,
 
 /* Register ring interrupts */
 static int safexcel_request_ring_irq(struct platform_device *pdev, const char *name,
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 				     irq_handler_t irq_handler,
 				     irq_handler_t irq_thread_handler,
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 				     irq_handler_t handler,
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 				     struct safexcel_ring_irq_data *ring_irq_priv)
 {
 	int ret, irq = platform_get_irq_byname(pdev, name);
@@ -1318,14 +1315,14 @@ static int safexcel_request_ring_irq(struct platform_device *pdev, const char *n
 		return irq;
 	}
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 	ret = devm_request_threaded_irq(&pdev->dev, irq, irq_handler,
 					irq_thread_handler, IRQF_ONESHOT,
 					dev_name(&pdev->dev), ring_irq_priv);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 	ret = devm_request_irq(&pdev->dev, irq, handler, 0,
 			       dev_name(&pdev->dev), ring_irq_priv);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 	if (ret) {
 		dev_err(&pdev->dev, "unable to request IRQ %d\n", irq);
 		return ret;
@@ -1429,9 +1426,9 @@ static int safexcel_probe(struct platform_device *pdev)
 	struct resource *res;
 	struct safexcel_crypto_priv *priv;
 	int i, ret;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 	u32 dma_bus_width;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 
 	priv = devm_kzalloc(dev, sizeof(struct safexcel_crypto_priv),
 			    GFP_KERNEL);
@@ -1469,7 +1466,7 @@ static int safexcel_probe(struct platform_device *pdev)
 			return -EPROBE_DEFER;
 	}
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 	ret = of_property_read_u32(dev->of_node, "dma-bus-width", &dma_bus_width);
 	if (ret) {
 		dev_err(dev, "Failed to read dma-bus-width property\n");
@@ -1481,7 +1478,7 @@ static int safexcel_probe(struct platform_device *pdev)
 	if (ret)
 		goto err_clk;
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 	priv->context_pool = dmam_pool_create("safexcel-context", dev,
 					      sizeof(struct safexcel_context_record),
 					      1, 0);
@@ -1524,9 +1521,9 @@ static int safexcel_probe(struct platform_device *pdev)
 
 		snprintf(irq_name, 6, "ring%d", i);
 		irq = safexcel_request_ring_irq(pdev, irq_name, safexcel_irq_ring,
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 						safexcel_irq_ring_thread_handler,
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 						ring_irq);
 
 		if (irq < 0)
@@ -1534,11 +1531,11 @@ static int safexcel_probe(struct platform_device *pdev)
 
 		priv->ring[i].work_data.priv = priv;
 		priv->ring[i].work_data.ring = i;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 		INIT_WORK(&priv->ring[i].work_data.work, safexcel_handle_queued_work);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 		INIT_WORK(&priv->ring[i].work_data.work, safexcel_handle_result_work);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 
 		snprintf(wq_name, 9, "wq_ring%d", i);
 		priv->ring[i].workqueue = create_singlethread_workqueue(wq_name);
@@ -1547,14 +1544,14 @@ static int safexcel_probe(struct platform_device *pdev)
 			goto err_pool;
 		}
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 		priv->ring[i].egress_cnt = 0;
 		priv->ring[i].busy = 0;
 
 		priv->ring[i].req = NULL;
 		priv->ring[i].backlog = NULL;
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 		INIT_LIST_HEAD(&priv->ring[i].list);
 		spin_lock_init(&priv->ring[i].lock);
 		spin_lock_init(&priv->ring[i].egress_lock);
@@ -1591,11 +1588,11 @@ static int safexcel_probe(struct platform_device *pdev)
 	return 0;
 
 err_pool:
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 	dmam_pool_destroy(priv->context_pool);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 	dma_pool_destroy(priv->context_pool);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 err_clk:
 	clk_disable_unprepare(priv->clk);
 	return ret;
@@ -1611,31 +1608,31 @@ static int safexcel_remove(struct platform_device *pdev)
 
 	clk_disable_unprepare(priv->clk);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 	for (i = 0; i < priv->config.rings; i++)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 	for (i = 0; i < priv->config.rings; i++) {
 		safexcel_free_ring_descriptors(priv, &priv->ring[i].cdr,
 					       &priv->ring[i].rdr);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 		destroy_workqueue(priv->ring[i].workqueue);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 	}
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 
 	return 0;
 }
 
 static const struct of_device_id safexcel_of_match_table[] = {
 	{
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 		.compatible = "inside-secure,safexcel-eip97",
 		.data = (void *)EIP97,
 	},
 	{
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 		.compatible = "inside-secure,safexcel-eip197",
 		.data = (void *)EIP197,
 	},
@@ -1654,10 +1651,10 @@ module_param_array(rings, uint, NULL, 0);
 MODULE_PARM_DESC(rings, "number of rings to be used by the driver");
 
 MODULE_AUTHOR("Antoine Tenart <antoine.tenart@free-electrons.com>");
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 MODULE_DESCRIPTION("Support for SafeXcel Cryptographic Engines EIP97/197");
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 MODULE_DESCRIPTION("Support for SafeXcel Cryptographic Engines EIP197");
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 MODULE_LICENSE("GPL v2");
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */

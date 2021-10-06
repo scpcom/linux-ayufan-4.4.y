@@ -31,13 +31,13 @@
 #include "../uapi/rtk_phoenix_ion.h"
 #endif /* defined(CONFIG_ION_RTK_PHOENIX) && defined(MY_DEF_HERE) */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 #if defined(CONFIG_ION_RTK)
 #include "../uapi/ion_rtk.h"
 #include "realtek/ion_rtk_carveout_heap.h"
 #endif
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */
 void *ion_heap_map_kernel(struct ion_heap *heap,
 			  struct ion_buffer *buffer)
 {
@@ -106,7 +106,7 @@ int ion_heap_map_user(struct ion_heap *heap, struct ion_buffer *buffer,
 		}
 		len = min(len, remainder);
 #if defined(CONFIG_ION_RTK_PHOENIX) && defined(MY_DEF_HERE) || \
-	defined(CONFIG_ION_RTK) && defined(MY_DEF_HERE)
+	defined(CONFIG_ION_RTK) && defined(CONFIG_SYNO_LSP_RTD1619)
 		/* 20130208 charleslin: supports noncached mmap for user space */
 #if 0
 		if (heap->type == RTK_PHOENIX_ION_HEAP_TYPE_MEDIA ||
@@ -120,11 +120,11 @@ int ion_heap_map_user(struct ion_heap *heap, struct ion_buffer *buffer,
 			if (!(buffer->flags & ION_FLAG_CACHED))
 				vma->vm_page_prot = pgprot_writecombine(vma->vm_page_prot);
 #endif /* defined(CONFIG_ION_RTK_PHOENIX) && defined(MY_DEF_HERE) ||
-		  defined(CONFIG_ION_RTK) && defined(MY_DEF_HERE) */
-#if defined(MY_DEF_HERE)
+		  defined(CONFIG_ION_RTK) && defined(CONFIG_SYNO_LSP_RTD1619) */
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 		/* NAS transcode: force to use "write combine" instead of "noncache" */
 		vma->vm_page_prot = pgprot_writecombine(vma->vm_page_prot);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */
 		ret = remap_pfn_range(vma, addr, page_to_pfn(page), len,
 				vma->vm_page_prot);
 		if (ret)
@@ -352,11 +352,11 @@ struct ion_heap *ion_heap_create(struct ion_platform_heap *heap_data)
 {
 	struct ion_heap *heap = NULL;
 
-#if defined(CONFIG_ION_RTK) && defined(MY_DEF_HERE)
+#if defined(CONFIG_ION_RTK) && defined(CONFIG_SYNO_LSP_RTD1619)
 	switch ((int)heap_data->type) {
-#else /* CONFIG_ION_RTK && MY_DEF_HERE */
+#else /* CONFIG_ION_RTK && CONFIG_SYNO_LSP_RTD1619 */
 	switch (heap_data->type) {
-#endif /* CONFIG_ION_RTK && MY_DEF_HERE */
+#endif /* CONFIG_ION_RTK && CONFIG_SYNO_LSP_RTD1619 */
 	case ION_HEAP_TYPE_SYSTEM_CONTIG:
 		heap = ion_system_contig_heap_create(heap_data);
 		break;
@@ -373,7 +373,7 @@ struct ion_heap *ion_heap_create(struct ion_platform_heap *heap_data)
 		heap = ion_cma_heap_create(heap_data);
 		break;
 #if defined(CONFIG_ION_RTK_PHOENIX) && defined(MY_DEF_HERE) || \
-	defined(CONFIG_ION_RTK) && defined(MY_DEF_HERE)
+	defined(CONFIG_ION_RTK) && defined(CONFIG_SYNO_LSP_RTD1619)
 	case RTK_PHOENIX_ION_HEAP_TYPE_TILER:
 	case RTK_PHOENIX_ION_HEAP_TYPE_MEDIA:
 	case RTK_PHOENIX_ION_HEAP_TYPE_AUDIO:
@@ -383,7 +383,7 @@ struct ion_heap *ion_heap_create(struct ion_platform_heap *heap_data)
 			heap->type = heap_data->type;
 		break;
 #endif /* CONFIG_ION_RTK_PHOENIX && MY_DEF_HERE ||
-		  CONFIG_ION_RTK && MY_DEF_HERE */
+		  CONFIG_ION_RTK && CONFIG_SYNO_LSP_RTD1619 */
 	default:
 		pr_err("%s: Invalid heap type %d\n", __func__,
 		       heap_data->type);
@@ -408,11 +408,11 @@ void ion_heap_destroy(struct ion_heap *heap)
 	if (!heap)
 		return;
 
-#if defined(CONFIG_ION_RTK) && defined(MY_DEF_HERE)
+#if defined(CONFIG_ION_RTK) && defined(CONFIG_SYNO_LSP_RTD1619)
 	switch ((int)heap->type) {
-#else /* CONFIG_ION_RTK && MY_DEF_HERE */
+#else /* CONFIG_ION_RTK && CONFIG_SYNO_LSP_RTD1619 */
 	switch (heap->type) {
-#endif /* CONFIG_ION_RTK && MY_DEF_HERE */
+#endif /* CONFIG_ION_RTK && CONFIG_SYNO_LSP_RTD1619 */
 	case ION_HEAP_TYPE_SYSTEM_CONTIG:
 		ion_system_contig_heap_destroy(heap);
 		break;
@@ -429,7 +429,7 @@ void ion_heap_destroy(struct ion_heap *heap)
 		ion_cma_heap_destroy(heap);
 		break;
 #if defined(CONFIG_ION_RTK_PHOENIX) && defined(MY_DEF_HERE) || \
-	defined(CONFIG_ION_RTK) && defined(MY_DEF_HERE)
+	defined(CONFIG_ION_RTK) && defined(CONFIG_SYNO_LSP_RTD1619)
 	case RTK_PHOENIX_ION_HEAP_TYPE_TILER:
 	case RTK_PHOENIX_ION_HEAP_TYPE_MEDIA:
 	case RTK_PHOENIX_ION_HEAP_TYPE_AUDIO:
@@ -437,7 +437,7 @@ void ion_heap_destroy(struct ion_heap *heap)
 		ion_rtk_carveout_heap_destroy(heap);
 		break;
 #endif /* defined(CONFIG_ION_RTK_PHOENIX) && defined(MY_DEF_HERE) ||
-		  defined(CONFIG_ION_RTK) && defined(MY_DEF_HERE) */
+		  defined(CONFIG_ION_RTK) && defined(CONFIG_SYNO_LSP_RTD1619) */
 	default:
 		pr_err("%s: Invalid heap type %d\n", __func__,
 		       heap->type);

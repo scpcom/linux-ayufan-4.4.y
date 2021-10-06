@@ -31,11 +31,11 @@
 #include "smpboot.h"
 
 #if defined(CONFIG_ARCH_RTD129X) && defined(MY_DEF_HERE) || \
-	defined(CONFIG_RTK_PLATFORM) && defined(MY_DEF_HERE)
+	defined(CONFIG_RTK_PLATFORM) && defined(CONFIG_SYNO_LSP_RTD1619)
 extern void rtk_cpu_power_down(int cpu);
 extern void rtk_cpu_power_up(int cpu);
 #endif /* CONFIG_ARCH_RTD129X && MY_DEF_HERE ||
-		  CONFIG_RTK_PLATFORM && MY_DEF_HERE */
+		  CONFIG_RTK_PLATFORM && CONFIG_SYNO_LSP_RTD1619 */
 
 #ifdef CONFIG_SMP
 /* Serializes the updates to cpu_online_mask, cpu_present_mask */
@@ -606,10 +606,10 @@ int disable_nonboot_cpus(void)
 		error = _cpu_down(cpu, 1);
 
 #if defined(CONFIG_ARCH_RTD129X) && defined(MY_DEF_HERE) || \
-	defined(CONFIG_RTK_PLATFORM) && defined(MY_DEF_HERE)
+	defined(CONFIG_RTK_PLATFORM) && defined(CONFIG_SYNO_LSP_RTD1619)
 		rtk_cpu_power_down(cpu);
 #endif /* CONIFG_ARCH_RTD129X && MY_DEF_HERE ||
-		  CONFIG_RTK_PLATFORM && MY_DEF_HERE */
+		  CONFIG_RTK_PLATFORM && CONFIG_SYNO_LSP_RTD1619 */
 
 		trace_suspend_resume(TPS("CPU_OFF"), cpu, false);
 		if (!error)
@@ -662,10 +662,10 @@ void enable_nonboot_cpus(void)
 		trace_suspend_resume(TPS("CPU_ON"), cpu, true);
 
 #if defined(CONFIG_ARCH_RTD129X) && defined(MY_DEF_HERE) || \
-	defined(CONFIG_RTK_PLATFORM) && defined(MY_DEF_HERE)
+	defined(CONFIG_RTK_PLATFORM) && defined(CONFIG_SYNO_LSP_RTD1619)
 		rtk_cpu_power_up(cpu);
 #endif /* CONIFG_ARCH_RTD129X && MY_DEF_HERE ||
-		  CONFIG_RTK_PLATFORM && MY_DEF_HERE */
+		  CONFIG_RTK_PLATFORM && CONFIG_SYNO_LSP_RTD1619 */
 
 		error = _cpu_up(cpu, 1);
 		trace_suspend_resume(TPS("CPU_ON"), cpu, false);

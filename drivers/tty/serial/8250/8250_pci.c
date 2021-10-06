@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #undef DEBUG
 #include <linux/module.h>
@@ -1566,7 +1563,7 @@ pci_xr17v35x_setup(struct serial_private *priv,
 	if (xr17v35x_has_slave(priv) && idx >= 8)
 		port->port.uartclk = (7812500 * 16 / 2);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_XR17V35X_SERIAL
 	if (idx == 0) {
 		writeb(0x01, p + 0x8f);  
 		writeb(0x00, p + 0x90);  
@@ -3532,7 +3529,7 @@ static const struct pci_device_id blacklist[] = {
 	{ PCI_VDEVICE(INTEL, 0x081c), },
 	{ PCI_VDEVICE(INTEL, 0x081d), },
 	{ PCI_VDEVICE(INTEL, 0x1191), },
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_DENVERTON)
 #else
 	{ PCI_VDEVICE(INTEL, 0x19d8), },
 #endif

@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  *  drivers/mtd/nand/ams-delta.c
  *
@@ -67,11 +64,11 @@ static struct mtd_partition partition_info[] = {
 
 static void ams_delta_write_byte(struct mtd_info *mtd, u_char byte)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	struct nand_chip *this = mtd_to_nand(mtd);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct nand_chip *this = mtd->priv;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	void __iomem *io_base = this->priv;
 
 	writew(0, io_base + OMAP_MPUIO_IO_CNTL);
@@ -84,11 +81,11 @@ static void ams_delta_write_byte(struct mtd_info *mtd, u_char byte)
 static u_char ams_delta_read_byte(struct mtd_info *mtd)
 {
 	u_char res;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	struct nand_chip *this = mtd_to_nand(mtd);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct nand_chip *this = mtd->priv;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	void __iomem *io_base = this->priv;
 
 	gpio_set_value(AMS_DELTA_GPIO_PIN_NAND_NRE, 0);

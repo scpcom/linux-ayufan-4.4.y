@@ -1321,7 +1321,7 @@ static int serial8250_default_handle_irq(struct uart_port *port)
 	return ret;
 }
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_XR17V35X_SERIAL
 int gSynoBuzzerMutePressed = 0;
 EXPORT_SYMBOL(gSynoBuzzerMutePressed);
 #endif  
@@ -1336,7 +1336,7 @@ static int exar_handle_irq(struct uart_port *port)
 
 	if ((port->type == PORT_XR17V35X) ||
 	   (port->type == PORT_XR17D15X)) {
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_XR17V35X_SERIAL
 		unsigned long flags;
 		unsigned char mpiolow, mpiohigh;
 		spin_lock_irqsave(&port->lock, flags);
@@ -1345,7 +1345,7 @@ static int exar_handle_irq(struct uart_port *port)
 		int1 = serial_port_in(port, 0x81);
 		int2 = serial_port_in(port, 0x82);
 		int3 = serial_port_in(port, 0x83);
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_XR17V35X_SERIAL
 		if (int1 & 0x6) {
 			mpiolow = serial_port_in(port, 0x90);
 			mpiohigh = serial_port_in(port, 0x96);

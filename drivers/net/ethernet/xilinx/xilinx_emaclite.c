@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * Xilinx EmacLite Linux driver for the Xilinx Ethernet MAC Lite device.
  *
@@ -136,11 +133,11 @@ struct net_local {
 	struct device_node *phy_node;
 
 	struct mii_bus *mii_bus;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	int mdio_irqs[PHY_MAX_ADDR];
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	int last_link;
 	bool has_mdio;
@@ -833,11 +830,11 @@ static int xemaclite_mdio_setup(struct net_local *lp, struct device *dev)
 			dev_info(dev,
 				 "MDIO of the phy is not registered yet\n");
 		else
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 			put_device(&phydev->mdio.dev);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 			put_device(&phydev->dev);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		return 0;
 	}
 
@@ -860,11 +857,11 @@ static int xemaclite_mdio_setup(struct net_local *lp, struct device *dev)
 	bus->read = xemaclite_mdio_read;
 	bus->write = xemaclite_mdio_write;
 	bus->parent = dev;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	bus->irq = lp->mdio_irqs; /* preallocated IRQ table */
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	lp->mii_bus = bus;
 
@@ -1208,11 +1205,11 @@ static int xemaclite_of_remove(struct platform_device *of_dev)
 	/* Un-register the mii_bus, if configured */
 	if (lp->has_mdio) {
 		mdiobus_unregister(lp->mii_bus);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		kfree(lp->mii_bus->irq);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		mdiobus_free(lp->mii_bus);
 		lp->mii_bus = NULL;
 	}

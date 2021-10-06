@@ -5,7 +5,7 @@
 #include <linux/kernel.h>
 #include <linux/synolib.h>
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_FIX_TTYS_FUNCTIONS
 extern int setup_early_printk(char *);
 extern char gszSynoTtyS0[50];
 extern char gszSynoTtyS1[50];
@@ -23,7 +23,7 @@ extern char gszSynoHWRevision[];
 extern char gszSynoHWVersion[];
 #endif  
 
-#if defined(MY_ABC_HERE) && !defined(MY_DEF_HERE)
+#if defined(MY_ABC_HERE) && !defined(CONFIG_SYNO_PORT_MAPPING_V2)
 extern long g_syno_hdd_powerup_seq;
 #endif  
 
@@ -77,23 +77,23 @@ extern int gSynoFactoryUSBFastReset;
 extern int gSynoFactoryUSB3Disable;
 #endif  
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_MEM_MODE_INFO
 extern int gSynoMemMode;
 #endif  
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS
 extern long g_is_sas_model;
 #endif  
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_DUAL_HEAD
 extern int gSynoDualHead;
 #endif  
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_RESERVATION_WRITE_CONFLICT_KERNEL_PANIC
 extern int gSynoSASWriteConflictPanic;
 #endif  
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_HBA_IDX
 extern char gSynoSASHBAAddr[CONFIG_SYNO_SAS_MAX_HBA_SLOT][13];
 #endif  
 
@@ -167,7 +167,7 @@ static int __init early_hw_version(char *p)
 __setup("syno_hw_version=", early_hw_version);
 #endif  
 
-#if defined(MY_ABC_HERE) && !defined(MY_DEF_HERE)
+#if defined(MY_ABC_HERE) && !defined(CONFIG_SYNO_PORT_MAPPING_V2)
  
 static int __init early_internal_hd_num(char *p)
 {
@@ -552,7 +552,7 @@ static int __init early_sataled_special(char *p)
 __setup("SataLedSpecial=", early_sataled_special);
 #endif  
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_MEM_MODE_INFO
 static int __init early_mem_mode(int *p)
 {
 	gSynoMemMode = simple_strtol(p, NULL, 10);
@@ -578,7 +578,7 @@ static int __init early_sataport_map(char *p)
 __setup("SataPortMap=", early_sataport_map);
 #endif  
 
-#if defined(MY_DEF_HERE) || (defined(MY_DEF_HERE) && defined(MY_DEF_HERE))
+#if defined(CONFIG_SYNO_SAS_DISK_NAME) || (defined(CONFIG_SYNO_PORT_MAPPING_V2) && defined(CONFIG_SYNO_SAS))
 static int __init early_SASmodel(char *p)
 {
 	g_is_sas_model = simple_strtol(p, NULL, 10);
@@ -592,14 +592,14 @@ static int __init early_SASmodel(char *p)
 __setup("SASmodel=", early_SASmodel);
 #endif  
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_DUAL_HEAD
 static int __init early_dual_head(char *p)
 {
 	gSynoDualHead = simple_strtol(p, NULL, 10);
 #ifdef MY_ABC_HERE
 	gSynoBootSATADOM = gSynoDualHead;
 #endif  
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_RESERVATION_WRITE_CONFLICT_KERNEL_PANIC
 	gSynoSASWriteConflictPanic = gSynoDualHead;
 #endif
 
@@ -610,7 +610,7 @@ static int __init early_dual_head(char *p)
 __setup("dual_head=", early_dual_head);
 #endif  
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_RESERVATION_WRITE_CONFLICT_KERNEL_PANIC
 static int __init early_sas_reservation_write_conflict(char *p)
 {
 	gSynoSASWriteConflictPanic = simple_strtol(p, NULL, 10);
@@ -622,7 +622,7 @@ static int __init early_sas_reservation_write_conflict(char *p)
 __setup("sas_reservation_write_conflict=", early_sas_reservation_write_conflict);
 #endif  
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_HBA_IDX
 static int __init early_sas_hba_idx(char *p)
 {
         int iCount = 0;
@@ -706,7 +706,7 @@ __setup("syno_castrated_xhc=", early_castrated_xhc);
 #endif  
 
 #ifdef MY_DEF_HERE
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_PORT_MAPPING_V2
 #else
 static int __init early_usb_vbus_gpio(char *p)
 {
@@ -756,7 +756,7 @@ static int __init early_usb_vbus_gpio(char *p)
 		printk(" - Host: %-20s", gSynoUsbVbusHostAddr[iCount]);
 
 		gSynoUsbVbusPort[iCount] = simple_strtol(pSeparator + 1, NULL, 10);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_DENVERTON)
 		if (syno_is_hw_version(HW_DS1618p) && -1 == gSynoUsbVbusPort[iCount]) {
 			if ( 0 == (strcmp("0000:00:15.00", gSynoUsbVbusHostAddr[iCount]))) {
 				snprintf(gSynoUsbVbusHostAddr[iCount],sizeof(gSynoUsbVbusHostAddr[iCount]), "%s","0000:00:15.0");
@@ -809,7 +809,7 @@ static int __init early_usb_vbus_gpio(char *p)
 __setup("syno_usb_vbus_gpio=", early_usb_vbus_gpio);
 #endif  
 #endif  
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_FIX_TTYS_FUNCTIONS
 static int __init early_syno_set_ttyS0(char *p)
 {
 	snprintf(gszSynoTtyS0, strlen(p) + 1, "%s", p);
@@ -826,7 +826,7 @@ static int __init early_syno_set_ttyS1(char *p)
 __setup("syno_ttyS1=", early_syno_set_ttyS1);
 
 #endif  
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ONBOARD_M2_SATA_AS_NVC
 static int __init early_syno_m2_port(char *p)
 {
 	char *begin, *end;
@@ -908,7 +908,7 @@ static int __init early_syno_spinup_group(char *p)
 		p = ++endp;
 	}
 	giSynoSpinupGroupNum = group_num;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_PORT_MAPPING_V2
 	printk(KERN_ERR "ERROR !!! Kernel parameter for spinup group is only for HW tuning.\n");
 	printk(KERN_ERR "ERROR !!! The spinup group should be read from dts.\n");
 #endif  
@@ -920,7 +920,7 @@ static int __init early_syno_spinup_group_delay(char *p)
 {
 	giSynoSpinupGroupDelay = simple_strtol(p, NULL, 10);
 	printk("SYNO Spinup Group Delay: %d\n", (int)giSynoSpinupGroupDelay);
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_PORT_MAPPING_V2
 	printk(KERN_ERR "ERROR !!! Kernel parameter for spinup group delay is only for HW tuning.\n");
 	printk(KERN_ERR "ERROR !!! The spinup group delay should be read from dts.\n");
 #endif  

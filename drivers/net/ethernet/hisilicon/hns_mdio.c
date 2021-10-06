@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * Copyright (c) 2014-2015 Hisilicon Limited.
  *
@@ -466,14 +463,14 @@ static int hns_mdio_probe(struct platform_device *pdev)
 		dev_warn(&pdev->dev, "no syscon hisilicon,peri-c-subctrl\n");
 		mdio_dev->subctrl_vbase = NULL;
 	}
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	new_bus->irq = devm_kcalloc(&pdev->dev, PHY_MAX_ADDR,
 				    sizeof(int), GFP_KERNEL);
 	if (!new_bus->irq)
 		return -ENOMEM;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	new_bus->parent = &pdev->dev;
 	platform_set_drvdata(pdev, new_bus);

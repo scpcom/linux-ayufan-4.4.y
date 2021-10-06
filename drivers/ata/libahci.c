@@ -16,7 +16,7 @@
 #include <scsi/scsi_device.h>
 #endif  
 #include <linux/libata.h>
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(MY_DEF_HERE) || defined(CONFIG_SYNO_AHCI_GPIO_SOFTWARE_ACITIVITY)
 #include <linux/pci.h>
 #include <linux/leds.h>
 #endif  
@@ -36,15 +36,15 @@ extern int *gpGreenLedMap;
 #ifdef MY_ABC_HERE
 #include <linux/synolib.h>
 #endif  
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_PORT_MAPPING_V2
 #include <linux/synolib.h>
 #endif  
 #ifdef CONFIG_SYNO_AHCI_GPIO_SOFTWARE_PRESENT_BLINK
 #include <linux/syno_gpio.h>
 #endif  
 
-#if defined(MY_DEF_HERE)
-#ifdef MY_DEF_HERE
+#if defined(CONFIG_SYNO_AHCI_GPIO_SOFTWARE_ACITIVITY)
+#ifdef CONFIG_SYNO_PORT_MAPPING_V2
 #include <linux/syno_gpio.h>
 #define SYNO_LED_BLINK_OFF 0
 #define SYNO_LED_BLINK_ON 1
@@ -54,8 +54,8 @@ extern int SYNO_CTRL_GPIO_HDD_ACT_LED(int index, int value);
 #endif  
 #endif
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
-#ifdef MY_DEF_HERE
+#if defined(MY_DEF_HERE) || defined(CONFIG_SYNO_AHCI_GPIO_SOFTWARE_ACITIVITY)
+#ifdef CONFIG_SYNO_PORT_MAPPING_V2
 static u32 syno_get_prop_sw_activity(struct ata_port* ap);
 #endif  
 #endif  
@@ -194,7 +194,7 @@ ata_ahci_fault_show(struct device *dev, struct device_attribute *attr,
 
 static void ahci_sw_fault_set(struct ata_link *link, u8 blEnable);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_PORT_MAPPING_V2
  
 void sata_syno_ahci_diskled_set_by_port(int iDiskPort, int iPresent, int iFault)
 {
@@ -884,10 +884,10 @@ static void ahci_power_down(struct ata_port *ap)
 }
 #endif
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(MY_DEF_HERE) || defined(CONFIG_SYNO_AHCI_GPIO_SOFTWARE_ACITIVITY)
 static int syno_need_ahci_software_activity(struct ata_port *ap)
 {
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_PORT_MAPPING_V2
 	return syno_get_prop_sw_activity(ap);
 #else
 	struct pci_dev *pdev = NULL;
@@ -974,7 +974,7 @@ ERROR:
 	return ret;
 }
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_PORT_MAPPING_V2
  
 #else  
  
@@ -1003,11 +1003,11 @@ END:
 EXPORT_SYMBOL(syno_ahci_disk_led_enable);
 #endif  
 
-#if defined(MY_ABC_HERE) || defined(MY_DEF_HERE)
+#if defined(MY_ABC_HERE) || defined(CONFIG_SYNO_PORT_MAPPING_V2)
  
 int syno_ahci_disk_led_enable_by_port(const unsigned short diskPort, const int iValue)
 {
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_PORT_MAPPING_V2
 	struct ata_port *ap;
 	ap = syno_ata_port_get_by_port(diskPort);
 	return __syno_ahci_disk_led_enable(ap, iValue);
@@ -1060,7 +1060,7 @@ static void ahci_start_port(struct ata_port *ap)
 		}
 	}
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(MY_DEF_HERE) || defined(CONFIG_SYNO_AHCI_GPIO_SOFTWARE_ACITIVITY)
 	if (syno_need_ahci_software_activity(ap)) {
 		ap->flags |= ATA_FLAG_SW_ACTIVITY;
 	}
@@ -1209,7 +1209,7 @@ static void ahci_sw_activity_blink(unsigned long arg)
 	struct ahci_port_priv *pp = ap->private_data;
 	struct ahci_em_priv *emp = &pp->em_priv[link->pmp];
 	unsigned long led_message = emp->led_state;
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(MY_DEF_HERE) || defined(CONFIG_SYNO_AHCI_GPIO_SOFTWARE_ACITIVITY)
 #else
 	u32 activity_led_state;
 #endif  
@@ -1221,8 +1221,8 @@ static void ahci_sw_activity_blink(unsigned long arg)
 	spin_lock_irqsave(ap->lock, flags);
 	if (emp->saved_activity != emp->activity) {
 		emp->saved_activity = emp->activity;
-#if defined(MY_DEF_HERE)
-#ifdef MY_DEF_HERE
+#if defined(CONFIG_SYNO_AHCI_GPIO_SOFTWARE_ACITIVITY)
+#ifdef CONFIG_SYNO_PORT_MAPPING_V2
 		syno_set_blink(ap, SYNO_LED_BLINK_ON);
 #else  
 		SYNO_CTRL_GPIO_HDD_ACT_LED(ap->port_no, 0);
@@ -1246,8 +1246,8 @@ static void ahci_sw_activity_blink(unsigned long arg)
 #ifdef MY_DEF_HERE
 #else
 	} else {
-#if defined(MY_DEF_HERE)
-#ifdef MY_DEF_HERE
+#if defined(CONFIG_SYNO_AHCI_GPIO_SOFTWARE_ACITIVITY)
+#ifdef CONFIG_SYNO_PORT_MAPPING_V2
 		syno_set_blink(ap, SYNO_LED_BLINK_OFF);
 #else  
 		SYNO_CTRL_GPIO_HDD_ACT_LED(ap->port_no, 1);
@@ -1261,7 +1261,7 @@ static void ahci_sw_activity_blink(unsigned long arg)
 #endif  
 	}
 	spin_unlock_irqrestore(ap->lock, flags);
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(MY_DEF_HERE) || defined(CONFIG_SYNO_AHCI_GPIO_SOFTWARE_ACITIVITY)
 #else
 	ap->ops->transmit_led_message(ap, led_message, 4);
 #endif  
@@ -1281,7 +1281,7 @@ static void ahci_init_sw_activity(struct ata_link *link)
 	emp->blink_policy = BLINK_ON;
 #endif  
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(MY_DEF_HERE) || defined(CONFIG_SYNO_AHCI_GPIO_SOFTWARE_ACITIVITY)
 #else
 	if (emp->blink_policy)
 #endif  
@@ -1544,7 +1544,7 @@ static void ahci_port_init(struct device *dev, struct ata_port *ap,
 	if (rc)
 		dev_warn(dev, "%s (%d)\n", emsg, rc);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	if (hpriv->comreset_u) {
 		u32 reg;
 
@@ -2995,8 +2995,8 @@ int ahci_host_activate(struct ata_host *host, struct scsi_host_template *sht)
 }
 EXPORT_SYMBOL_GPL(ahci_host_activate);
 
-#if defined(MY_DEF_HERE)
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_PORT_MAPPING_V2)
+#if defined(CONFIG_SYNO_AHCI_GPIO_SOFTWARE_ACITIVITY)
  
 static int syno_set_blink(struct ata_port* ap, u32 state)
 {
@@ -3044,7 +3044,7 @@ Err:
 }
 #endif  
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(MY_DEF_HERE) || defined(CONFIG_SYNO_AHCI_GPIO_SOFTWARE_ACITIVITY)
  
 static u32 syno_get_prop_sw_activity(struct ata_port* ap)
 {

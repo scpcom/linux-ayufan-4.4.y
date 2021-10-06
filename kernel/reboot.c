@@ -20,7 +20,7 @@
 #ifdef MY_DEF_HERE
 #include <linux/gpio.h>
 #include <linux/delay.h>
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_PORT_MAPPING_V2
 #include <linux/of.h>
 #include <linux/synolib.h>
 #endif  
@@ -85,7 +85,7 @@ static void syno_turnoff_usb_vbus_gpio(const unsigned vbus_gpio_pin, const unsig
 
 static void syno_turnoff_all_usb_vbus_gpio(void)
 {
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_PORT_MAPPING_V2
 		int index;
 		struct device_node *pUSBNode = NULL, *pVbusNode = NULL;
 		u32 vbusGpioPin = U32_MAX, vbusGpioPolarity = U32_MAX;

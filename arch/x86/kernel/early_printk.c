@@ -209,13 +209,13 @@ static struct console early_serial_console = {
 	.write =	early_serial_write,
 	.flags =	CON_PRINTBUFFER,
 	.index =	-1,
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(MY_DEF_HERE) || defined(CONFIG_SYNO_FIX_TTYS_FUNCTIONS)
 	.pcimapaddress = 0,
 	.pcimapsize = 0,
 #endif  
 };
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_FIX_TTYS_FUNCTIONS
 static __init void early_mmio_serial_init(char *s)
 {
         unsigned divisor;
@@ -294,7 +294,7 @@ static __init void early_pci_serial_init(char *s)
 	classcode = read_pci_config(bus, slot, func, PCI_CLASS_REVISION);
 	bar0 = read_pci_config(bus, slot, func, PCI_BASE_ADDRESS_0);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_FIX_TTYS_FUNCTIONS
 #else
 	if (((classcode >> 16 != PCI_CLASS_COMMUNICATION_MODEM) &&
 	     (classcode >> 16 != PCI_CLASS_COMMUNICATION_SERIAL)) ||
@@ -321,7 +321,7 @@ static __init void early_pci_serial_init(char *s)
 						cmdreg|PCI_COMMAND_MEMORY);
 	}
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_FIX_TTYS_FUNCTIONS
 	early_serial_console.pcimapaddress = (void __iomem *)early_serial_base;
 	 
 	early_serial_console.pcimapsize = 0x10;
@@ -403,7 +403,7 @@ static void early_console_register(struct console *con, int keep_early)
 	register_console(early_console);
 }
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_FIX_TTYS_FUNCTIONS
 int __init setup_early_printk(char *buf)
 #else
 static int __init setup_early_printk(char *buf)
@@ -438,7 +438,7 @@ static int __init setup_early_printk(char *buf)
 			buf += 9;  
 		}
 #endif
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_FIX_TTYS_FUNCTIONS
 		if (!strncmp(buf, "mmio", 4)) {
 			early_mmio_serial_init(buf + 4);
 			early_console_register(&early_serial_console, keep);
@@ -476,7 +476,7 @@ static int __init setup_early_printk(char *buf)
 	return 0;
 }
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_FIX_TTYS_FUNCTIONS
 EXPORT_SYMBOL(setup_early_printk);
 #endif  
 early_param("earlyprintk", setup_early_printk);

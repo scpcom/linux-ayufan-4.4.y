@@ -287,9 +287,9 @@
 #define IS_SYNOLOGY_DX1215(x) (x == 0x13)
 #define IS_SYNOLOGY_DX517(x) (x == 0x15)
 #define IS_SYNOLOGY_RX418(x) (x == 0x16)
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_PORT_MAPPING_V2
 #define IS_SYNOLOGY_M2DXX(x) (0)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_PORT_MAPPING_V2 */
 
 #define HWMON_CPU_TEMP_NAME "CPU_Temperature"
 #define HWMON_SYS_THERMAL_NAME "System_Thermal_Sensor"

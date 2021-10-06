@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * Marvell EBU SoC common clock handling
  *
@@ -202,68 +199,68 @@ struct clk_gating_ctrl {
 	u32 saved_reg;
 };
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 #define MAX_CLK_GATE_DOMAINS	(4)
 static struct clk_gating_ctrl *ctrl[MAX_CLK_GATE_DOMAINS];
 static int ctrl_cnt;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 #define to_clk_gate(_hw) container_of(_hw, struct clk_gate, hw)
 
 static struct clk_gating_ctrl *ctrl;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 static struct clk *clk_gating_get_src(
 	struct of_phandle_args *clkspec, void *data)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	struct clk_gating_ctrl *ctrlp = data;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	int n;
 
 	if (clkspec->args_count < 1)
 		return ERR_PTR(-EINVAL);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	for (n = 0; n < ctrlp->num_gates; n++) {
 		struct clk_gate *gate =
 			to_clk_gate(__clk_get_hw(ctrlp->gates[n]));
 		if (clkspec->args[0] == gate->bit_idx)
 			return ctrlp->gates[n];
 	}
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	for (n = 0; n < ctrl->num_gates; n++) {
 		struct clk_gate *gate =
 			to_clk_gate(__clk_get_hw(ctrl->gates[n]));
 		if (clkspec->args[0] == gate->bit_idx)
 			return ctrl->gates[n];
 	}
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	return ERR_PTR(-ENODEV);
 }
 
 static int mvebu_clk_gating_suspend(void)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	int i;
 
 	for (i = 0; i < ctrl_cnt; i++)
 		ctrl[i]->saved_reg = readl(ctrl[i]->base);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	ctrl->saved_reg = readl(ctrl->base);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	return 0;
 }
 
 static void mvebu_clk_gating_resume(void)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	int i;
 
 	for (i = 0; i < ctrl_cnt; i++)
 		writel(ctrl[i]->saved_reg, ctrl[i]->base);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	writel(ctrl->saved_reg, ctrl->base);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 }
 
 static struct syscore_ops clk_gate_syscore_ops = {
@@ -278,15 +275,15 @@ void __init mvebu_clk_gating_setup(struct device_node *np,
 	void __iomem *base;
 	const char *default_parent = NULL;
 	int n;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	struct clk_gating_ctrl *ctrlp;
 
 	if (ctrl_cnt >= MAX_CLK_GATE_DOMAINS) {
 		pr_err("mvebu-clk-gating: too many gatable clock devices.\n");
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	if (ctrl) {
 		pr_err("mvebu-clk-gating: cannot instantiate more than one gatable clock device\n");
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		return;
 	}
 
@@ -300,7 +297,7 @@ void __init mvebu_clk_gating_setup(struct device_node *np,
 		clk_put(clk);
 	}
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	ctrlp = kzalloc(sizeof(*ctrlp), GFP_KERNEL);
 	if (WARN_ON(!ctrlp))
 		goto ctrl_out;
@@ -308,7 +305,7 @@ void __init mvebu_clk_gating_setup(struct device_node *np,
 	ctrl[ctrl_cnt] = ctrlp;
 	ctrlp->lock = &ctrl_gating_lock;
 	ctrlp->base = base;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	ctrl = kzalloc(sizeof(*ctrl), GFP_KERNEL);
 	if (WARN_ON(!ctrl))
 		goto ctrl_out;
@@ -317,13 +314,13 @@ void __init mvebu_clk_gating_setup(struct device_node *np,
 	ctrl->lock = &ctrl_gating_lock;
 
 	ctrl->base = base;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	/* Count, allocate, and register clock gates */
 	for (n = 0; desc[n].name;)
 		n++;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	ctrlp->num_gates = n;
 	ctrlp->gates = kcalloc(ctrlp->num_gates, sizeof(struct clk *),
 			      GFP_KERNEL);
@@ -350,7 +347,7 @@ void __init mvebu_clk_gating_setup(struct device_node *np,
 	return;
 gates_out:
 	kfree(ctrlp);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	ctrl->num_gates = n;
 	ctrl->gates = kzalloc(ctrl->num_gates * sizeof(struct clk *),
 			      GFP_KERNEL);
@@ -373,7 +370,7 @@ gates_out:
 	return;
 gates_out:
 	kfree(ctrl);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 ctrl_out:
 	iounmap(base);
 }

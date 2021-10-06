@@ -15,7 +15,7 @@
 #include <linux/pinctrl/pinconf-generic.h>
 #include <linux/platform_device.h>
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_CHERRYVIEW_GPIO_WRITE_RETRY
 #include <linux/delay.h>
 #endif  
 
@@ -1114,7 +1114,7 @@ static void chv_gpio_set(struct gpio_chip *chip, unsigned offset, int value)
 	unsigned long flags;
 	void __iomem *reg;
 	u32 ctrl0;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_CHERRYVIEW_GPIO_WRITE_RETRY
 	int iRetry = 0;
 #endif  
 
@@ -1130,7 +1130,7 @@ static void chv_gpio_set(struct gpio_chip *chip, unsigned offset, int value)
 
 	chv_writel(ctrl0, reg);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_CHERRYVIEW_GPIO_WRITE_RETRY
 	do {
 		mdelay(10);
 		if (ctrl0 == readl(reg)) {
@@ -1411,7 +1411,7 @@ static int chv_gpio_probe(struct chv_pinctrl *pctrl, int irq)
 
 	chip->ngpio = pctrl->community->ngpios;
 	chip->label = dev_name(pctrl->dev);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	chip->parent = pctrl->dev;
 #else
 	chip->dev = pctrl->dev;

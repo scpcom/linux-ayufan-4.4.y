@@ -1,7 +1,4 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 /*
  * Marvell Msys pinctrl driver based on mvebu pinctrl core
  *
@@ -303,4 +300,4 @@ module_platform_driver(msys_pinctrl_driver);
 MODULE_AUTHOR("Marcin Wojtas <mw@semihalf.com>");
 MODULE_DESCRIPTION("Marvell Msys pinctrl driver");
 MODULE_LICENSE("GPL v2");
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */

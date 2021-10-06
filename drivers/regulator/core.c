@@ -42,11 +42,11 @@
 #include "dummy.h"
 #include "internal.h"
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 #define SYSFS_RW_uV_EN      //Add by Simon 2014/1/6
 #define SYSFS_RW_OPMODE
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */
 #define rdev_crit(rdev, fmt, ...)					\
 	pr_crit("%s: " fmt, rdev_get_name(rdev), ##__VA_ARGS__)
 #define rdev_err(rdev, fmt, ...)					\
@@ -440,7 +440,7 @@ static ssize_t regulator_print_opmode(char *buf, int mode)
 	return sprintf(buf, "unknown\n");
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 static __maybe_unused ssize_t regulator_opmode_store(struct device *dev, struct device_attribute *attr,
             const char *buf, size_t count)
 {
@@ -491,7 +491,7 @@ out:
     return count;
 }
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */
 static ssize_t regulator_opmode_show(struct device *dev,
 				    struct device_attribute *attr, char *buf)
 {
@@ -499,11 +499,11 @@ static ssize_t regulator_opmode_show(struct device *dev,
 
 	return regulator_print_opmode(buf, _regulator_get_mode(rdev));
 }
-#if defined(SYSFS_RW_OPMODE) && defined(MY_DEF_HERE)
+#if defined(SYSFS_RW_OPMODE) && defined(CONFIG_SYNO_LSP_RTD1619)
 static DEVICE_ATTR(opmode, S_IRUSR | S_IWUSR, regulator_opmode_show, regulator_opmode_store);
-#else /* SYSFS_RW_OPMODE && MY_DEF_HERE */
+#else /* SYSFS_RW_OPMODE && CONFIG_SYNO_LSP_RTD1619 */
 static DEVICE_ATTR(opmode, 0444, regulator_opmode_show, NULL);
-#endif /* SYSFS_RW_OPMODE && MY_DEF_HERE */
+#endif /* SYSFS_RW_OPMODE && CONFIG_SYNO_LSP_RTD1619 */
 
 static ssize_t regulator_print_state(char *buf, int state)
 {

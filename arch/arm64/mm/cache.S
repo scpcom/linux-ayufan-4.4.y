@@ -29,7 +29,7 @@
 
 #include "proc-macros.S"
 
-#if defined(MY_DEF_HERE) || defined(CONFIG_RTK_PLATFORM) && defined(MY_DEF_HERE)
+#if defined(MY_DEF_HERE) || defined(CONFIG_RTK_PLATFORM) && defined(CONFIG_SYNO_LSP_RTD1619)
 /*
  *     __flush_dcache_all()
  *
@@ -102,7 +102,7 @@ ENTRY(flush_cache_all)
 	ic      ialluis				// I+BTB cache invalidate
 	ret     x12
 ENDPROC(flush_cache_all)
-#endif /* MY_DEF_HERE || CONFIG_RTK_PLATFORM && MY_DEF_HERE */
+#endif /* MY_DEF_HERE || CONFIG_RTK_PLATFORM && CONFIG_SYNO_LSP_RTD1619 */
 /*
  *	flush_icache_range(start,end)
  *
@@ -140,15 +140,15 @@ USER(9f, dc	cvau, x4	)		// clean D line to PoU
 	icache_line_size x2, x3
 	sub	x3, x2, #1
 	bic	x4, x0, x3
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA37XX)
 	ic	ialluis
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_ARMADA37XX */
 1:
 USER(9f, ic	ivau, x4	)		// invalidate I line PoU
 	add	x4, x4, x2
 	cmp	x4, x1
 	b.lo	1b
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_ARMADA37XX */
 	dsb	ish
 	isb
 	mov	x0, #0

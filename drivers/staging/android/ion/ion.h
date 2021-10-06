@@ -202,11 +202,11 @@ int ion_share_dma_buf_fd(struct ion_client *client, struct ion_handle *handle);
  */
 struct ion_handle *ion_import_dma_buf(struct ion_client *client, int fd);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 #if defined(CONFIG_ION_RTK)
 struct ion_handle *ion_import_dma_buf_point(struct ion_client *client, struct dma_buf *dmabuf);
 int ion_mmap_by_handle(struct ion_handle *handle, struct vm_area_struct *vma);
 extern const struct vm_operations_struct ion_vma_ops;
 #endif /* CONFIG_ION_RTK */
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */
 #endif /* _LINUX_ION_H */

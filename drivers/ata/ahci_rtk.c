@@ -202,7 +202,7 @@ static ssize_t ahci_rtk_transmit_led_message(struct ata_port *ap, u32 state,
 	return ahci_ops.transmit_led_message(ap, state, size);
 }
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_PORT_MAPPING_V2
 extern int syno_compare_dts_ata_port(const struct ata_port *pAtaPort, const struct device_node *pDeviceNode);
 /**
  * syno_ahci_rtk_compare_ata_devicetree_info - check the ata_port matches the device_node
@@ -228,16 +228,16 @@ bool syno_ahci_rtk_compare_ata_devicetree_info(const struct ata_port *ap, const 
 END:
 	return ret;
 }
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_PORT_MAPPING_V2 */
 
 struct ata_port_operations ahci_rtk_ops = {
 	.inherits	= &ahci_ops,
 	.host_stop	= ahci_rtk_host_stop,
 	.postreset	= ahci_rtk_postreset,
 	.transmit_led_message = ahci_rtk_transmit_led_message,
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_PORT_MAPPING_V2
 	.syno_compare_node_info = syno_ahci_rtk_compare_ata_devicetree_info,
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_PORT_MAPPING_V2 */
 };
 
 static const struct ata_port_info ahci_port_info = {

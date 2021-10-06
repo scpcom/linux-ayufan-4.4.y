@@ -373,7 +373,7 @@ static int mtd_reboot_notifier(struct notifier_block *n, unsigned long state,
 	return NOTIFY_DONE;
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 /**
  * mtd_wunit_to_pairing_info - get pairing information of a wunit
  * @mtd: pointer to new MTD device info structure
@@ -478,7 +478,7 @@ int mtd_pairing_groups(struct mtd_info *mtd)
 }
 EXPORT_SYMBOL_GPL(mtd_pairing_groups);
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */
 /**
  *	add_mtd_device - register an MTD device
  *	@mtd: pointer to new MTD device info structure
@@ -625,17 +625,17 @@ out_error:
 }
 
 static int mtd_add_device_partitions(struct mtd_info *mtd,
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 				     struct mtd_partitions *parts)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_RTD1619 */
 				     struct mtd_partition *real_parts,
 				     int nbparts)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 	const struct mtd_partition *real_parts = parts->parts;
 	int nbparts = parts->nr_parts;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */
 	int ret;
 
 	if (nbparts == 0 || IS_ENABLED(CONFIG_MTD_PARTITIONED_MASTER)) {
@@ -654,8 +654,8 @@ static int mtd_add_device_partitions(struct mtd_info *mtd,
 	return 0;
 }
 
-#if defined(MY_DEF_HERE)
-#else /* MY_DEF_HERE */
+#if defined(CONFIG_SYNO_LSP_RTD1619)
+#else /* CONFIG_SYNO_LSP_RTD1619 */
 /*
  * Set a few defaults based on the parent devices, if not provided by the
  * driver
@@ -671,7 +671,7 @@ static void mtd_set_dev_defaults(struct mtd_info *mtd)
 		pr_debug("mtd device won't show a device symlink in sysfs\n");
 	}
 }
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */
 
 /**
  * mtd_device_parse_register - parse partitions and register an MTD device.
@@ -707,11 +707,11 @@ int mtd_device_parse_register(struct mtd_info *mtd, const char * const *types,
 			      const struct mtd_partition *parts,
 			      int nr_parts)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 	struct mtd_partitions parsed;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */
 	int ret;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 
 	memset(&parsed, 0, sizeof(parsed));
 
@@ -724,7 +724,7 @@ int mtd_device_parse_register(struct mtd_info *mtd, const char * const *types,
 		};
 	} else if (ret < 0) {
 		/* Didn't come up with parsed OR fallback partitions */
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_RTD1619 */
 	struct mtd_partition *real_parts = NULL;
 
 	mtd_set_dev_defaults(mtd);
@@ -740,22 +740,22 @@ int mtd_device_parse_register(struct mtd_info *mtd, const char * const *types,
 	}
 	/* Didn't come up with either parsed OR fallback partitions */
 	if (ret < 0) {
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */
 		pr_info("mtd: failed to find partitions; one or more parsers reports errors (%d)\n",
 			ret);
 		/* Don't abort on errors; we can still use unpartitioned MTD */
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 		memset(&parsed, 0, sizeof(parsed));
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_RTD1619 */
 		ret = 0;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */
 	}
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 	ret = mtd_add_device_partitions(mtd, &parsed);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_RTD1619 */
 	ret = mtd_add_device_partitions(mtd, real_parts, ret);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */
 	if (ret)
 		goto out;
 
@@ -775,12 +775,12 @@ int mtd_device_parse_register(struct mtd_info *mtd, const char * const *types,
 	}
 
 out:
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 	/* Cleanup any parsed partitions */
 	mtd_part_parser_cleanup(&parsed);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_RTD1619 */
 	kfree(real_parts);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */
 	return ret;
 }
 EXPORT_SYMBOL_GPL(mtd_device_parse_register);
@@ -1139,7 +1139,7 @@ int mtd_read_oob(struct mtd_info *mtd, loff_t from, struct mtd_oob_ops *ops)
 }
 EXPORT_SYMBOL_GPL(mtd_read_oob);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 int mtd_write_oob(struct mtd_info *mtd, loff_t to,
 				struct mtd_oob_ops *ops)
 {
@@ -1629,7 +1629,7 @@ void mtd_set_ecclayout(struct mtd_info *mtd, struct nand_ecclayout *ecclayout)
 }
 EXPORT_SYMBOL_GPL(mtd_set_ecclayout);
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */
 /*
  * Method to access the protection register area, present in some flash
  * devices. The user data is one time programmable but the factory data is read

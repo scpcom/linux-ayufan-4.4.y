@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * Copyright 2009-2015 Freescale Semiconductor, Inc. and others
  *
@@ -814,15 +811,15 @@ static int vf610_nfc_probe(struct platform_device *pdev)
 	platform_set_drvdata(pdev, mtd);
 
 	/* Register device in MTD */
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	return mtd_device_register(mtd, NULL, 0);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	return mtd_device_parse_register(mtd, NULL,
 		&(struct mtd_part_parser_data){
 			.of_node = chip->flash_node,
 		},
 		NULL, 0);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 error:
 	of_node_put(chip->flash_node);

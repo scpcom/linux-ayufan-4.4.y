@@ -49,12 +49,12 @@
 #include <asm/unaligned.h>
 
 #include "nvme.h"
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_PORT_MAPPING_V2
 #include <linux/synolib.h>
 #include <linux/of.h>
 extern int syno_pciepath_dts_pattern_get(struct pci_dev *pdev, char *szPciePath, const int size);
 extern int syno_compare_dts_pciepath(const struct pci_dev *pdev, const struct device_node *pDeviceNode);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_PORT_MAPPING_V2 */
 
 #ifdef MY_DEF_HERE
 extern void syno_ledtrig_active_set(int iLedNum);
@@ -2185,7 +2185,7 @@ static int nvme_reset(struct nvme_dev *dev)
 	return 0;
 }
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_PORT_MAPPING_V2
 /* copy from driver/scsi/sd.c */
 static void syno_pciepath_enum(struct device *dev, char *buf) {
 	struct pci_dev *pdev = NULL;
@@ -2204,7 +2204,7 @@ static void syno_pciepath_enum(struct device *dev, char *buf) {
 		snprintf(buf, BLOCK_INFO_SIZE, "%spciepath=%s\n", buf, sztemp);
 	}
 }
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_PORT_MAPPING_V2 */
 
 static int nvme_pci_reg_read32(struct nvme_ctrl *ctrl, u32 off, u32 *val)
 {
@@ -2299,7 +2299,7 @@ static unsigned long check_vendor_combination_bug(struct pci_dev *pdev)
 	return 0;
 }
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_PORT_MAPPING_V2
 static int syno_nvme_index_get(const struct pci_dev *pdev)
 {
 	int iIndex = -1;
@@ -2327,7 +2327,7 @@ static int syno_nvme_index_get(const struct pci_dev *pdev)
 END:
 	return iIndex;
 }
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_PORT_MAPPING_V2 */
 
 static int nvme_probe(struct pci_dev *pdev, const struct pci_device_id *id)
 {
@@ -2376,10 +2376,10 @@ static int nvme_probe(struct pci_dev *pdev, const struct pci_device_id *id)
 	if (result)
 		goto release_pools;
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_PORT_MAPPING_V2
 	syno_pciepath_enum(&pdev->dev, dev->ctrl.syno_block_info);
-#endif /* MY_DEF_HERE */
-#if defined(MY_DEF_HERE) && defined(MY_DEF_HERE)
+#endif /* CONFIG_SYNO_PORT_MAPPING_V2 */
+#if defined(MY_DEF_HERE) && defined(CONFIG_SYNO_PORT_MAPPING_V2)
 	dev->syno_disk_index = syno_nvme_index_get(pdev) - 1;
 #endif /* MY_DEF_HERE */
 

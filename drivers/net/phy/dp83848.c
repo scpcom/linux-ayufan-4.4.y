@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * Driver for the Texas Instruments DP83848 PHY
  *
@@ -92,11 +89,11 @@ static struct phy_driver dp83848_driver[] = {
 		.ack_interrupt	= dp83848_ack_interrupt,
 		.config_intr	= dp83848_config_intr,
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		.driver		= { .owner = THIS_MODULE, },
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	},
 };
 module_phy_driver(dp83848_driver);

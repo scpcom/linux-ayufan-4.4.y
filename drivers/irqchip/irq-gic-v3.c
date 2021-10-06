@@ -52,7 +52,7 @@ struct gic_chip_data {
 
 static struct gic_chip_data gic_data __read_mostly;
 static struct static_key supports_deactivate = STATIC_KEY_INIT_TRUE;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 #ifdef CONFIG_RTK_PLATFORM
 static unsigned int GICR_ISENABLER0_REG = 0;
 static unsigned int GIC_ISENABLER0_REG = 0;
@@ -60,7 +60,7 @@ static unsigned int GIC_ISENABLER1_REG = 0;
 static unsigned int GIC_ISENABLER2_REG = 0;
 static unsigned int GIC_ISENABLER3_REG = 0;
 #endif /* CONFIG_RTK_PLATFORM */
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */
 
 #define gic_data_rdist()		(this_cpu_ptr(gic_data.rdists.rdist))
 #define gic_data_rdist_rd_base()	(gic_data_rdist()->rd_base)
@@ -408,21 +408,21 @@ static void __init gic_dist_init(void)
 	gic_dist_config(base, gic_data.irq_nr, gic_dist_wait_for_rwp);
 
 	/* Enable distributor with ARE, Group1 */
-#if defined(CONFIG_RTK_PLATFORM) && defined(MY_DEF_HERE)
+#if defined(CONFIG_RTK_PLATFORM) && defined(CONFIG_SYNO_LSP_RTD1619)
 #define GICD_CTLR_E1NWF (1 << 7)
 	writel_relaxed(GICD_CTLR_E1NWF | GICD_CTLR_ARE_NS | GICD_CTLR_ENABLE_G1A | GICD_CTLR_ENABLE_G1,
 		       base + GICD_CTLR);
-#else /* CONFIG_RTK_PLATFORM && MY_DEF_HERE */
+#else /* CONFIG_RTK_PLATFORM && CONFIG_SYNO_LSP_RTD1619 */
 	writel_relaxed(GICD_CTLR_ARE_NS | GICD_CTLR_ENABLE_G1A | GICD_CTLR_ENABLE_G1,
 		       base + GICD_CTLR);
-#endif /* CONFIG_RTK_PLATFORM && MY_DEF_HERE */
+#endif /* CONFIG_RTK_PLATFORM && CONFIG_SYNO_LSP_RTD1619 */
 
 	/*
 	 * Set all global interrupts to the boot CPU only. ARE must be
 	 * enabled.
 	 */
 	affinity = gic_mpidr_to_affinity(cpu_logical_map(smp_processor_id()));
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 
 #ifdef CONFIG_RTK_PLATFORM
 	/*
@@ -434,7 +434,7 @@ static void __init gic_dist_init(void)
 
 #endif /* CONFIG_RTK_PLATFORM */
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */
 	for (i = 32; i < gic_data.irq_nr; i++)
 		gic_write_irouter(affinity, base + GICD_IROUTER + i * 8);
 }
@@ -671,12 +671,12 @@ static int gic_set_affinity(struct irq_data *d, const struct cpumask *mask_val,
 	reg = gic_dist_base(d) + GICD_IROUTER + (gic_irq(d) * 8);
 	val = gic_mpidr_to_affinity(cpu_logical_map(cpu));
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 #ifdef CONFIG_RTK_PLATFORM
 	if (cpumask_subset(cpu_online_mask, mask_val))
 		val |= 0x80000000;
 #endif /* CONFIG_RTK_PLATFORM */
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */
 	gic_write_irouter(val, reg);
 
 	/*
@@ -696,18 +696,18 @@ static int gic_set_affinity(struct irq_data *d, const struct cpumask *mask_val,
 #endif
 
 #ifdef CONFIG_CPU_PM
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 /* Check whether it's single security state view */
 static bool gic_dist_security_disabled(void)
 {
 	return readl_relaxed(gic_data.dist_base + GICD_CTLR) & GICD_CTLR_DS;
 }
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */
 static int gic_cpu_pm_notifier(struct notifier_block *self,
 			       unsigned long cmd, void *v)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 #ifdef CONFIG_RTK_PLATFORM
 	void __iomem *rbase;
 
@@ -738,15 +738,15 @@ static int gic_cpu_pm_notifier(struct notifier_block *self,
 	}
 #endif /* CONFIG_RTK_PLATFORM */
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */
 	if (cmd == CPU_PM_EXIT) {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 		if (gic_dist_security_disabled()) {
 			gic_enable_redist(true);
 		}
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_RTD1619 */
 		gic_enable_redist(true);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */
 		gic_cpu_sys_reg_init();
 	} else if (cmd == CPU_PM_ENTER) {
 		gic_write_grpen1(0);

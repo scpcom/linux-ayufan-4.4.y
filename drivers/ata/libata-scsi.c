@@ -39,7 +39,7 @@
 #include <linux/synolib.h>
 #endif  
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_PORT_MAPPING_V2
 #include <linux/pci.h>
 #include <linux/synolib.h>
 #include <linux/of.h>
@@ -84,7 +84,7 @@ typedef unsigned int (*ata_xlat_func_t)(struct ata_queued_cmd *qc);
 
 static struct ata_device *__ata_scsi_find_dev(struct ata_port *ap,
 					const struct scsi_device *scsidev);
-#if defined(MY_ABC_HERE) || defined(MY_DEF_HERE)
+#if defined(MY_ABC_HERE) || defined(CONFIG_SYNO_PORT_MAPPING_V2)
 struct ata_device *ata_scsi_find_dev(struct ata_port *ap,
 					    const struct scsi_device *scsidev);
 #else  
@@ -718,11 +718,11 @@ syno_trans_host_to_disk_show(struct device *dev, struct device_attribute *attr, 
 	int iStartIdx = 0;
 	char szTmp[BDEVNAME_SIZE] = {'\0'};
 	struct Scsi_Host *pShost = NULL;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_PORT_MAPPING_V2
 	iLen = snprintf(buf, 6, "SATA\n");
 	goto END;
 #endif  
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_DISK_NAME
 	extern int g_is_sas_model;
 
 	if (1 == g_is_sas_model) {
@@ -771,7 +771,7 @@ syno_pm_info_show(struct device *dev, struct device_attribute *attr, char *buf)
 	ssize_t len = 0;
 	int index, start_idx;
 	int NumOfPMPorts = 0;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_PORT_MAPPING_V2
 	char szPciePath[SYNO_DTS_PROPERTY_CONTENT_LENGTH] = {'\0'};
 #endif  
 
@@ -1000,7 +1000,7 @@ syno_pm_info_show(struct device *dev, struct device_attribute *attr, char *buf)
 
 		strncat(szTmp1, szTmp, BDEVNAME_SIZE);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_PORT_MAPPING_V2
 		 
 		if (ap->dev->bus && !strcmp("pci", ap->dev->bus->name)) {
 			syno_pciepath_dts_pattern_get(to_pci_dev(ap->dev), szPciePath, sizeof(szPciePath));
@@ -3759,7 +3759,7 @@ static struct ata_device *__ata_scsi_find_dev(struct ata_port *ap,
 	return ata_find_dev(ap, devno);
 }
 
-#if defined(MY_ABC_HERE) || defined(MY_DEF_HERE)
+#if defined(MY_ABC_HERE) || defined(CONFIG_SYNO_PORT_MAPPING_V2)
 struct ata_device *
 ata_scsi_find_dev(struct ata_port *ap, const struct scsi_device *scsidev)
 #else  
@@ -3774,7 +3774,7 @@ ata_scsi_find_dev(struct ata_port *ap, const struct scsi_device *scsidev)
 
 	return dev;
 }
-#if defined(MY_ABC_HERE) || defined(MY_DEF_HERE)
+#if defined(MY_ABC_HERE) || defined(CONFIG_SYNO_PORT_MAPPING_V2)
 EXPORT_SYMBOL(ata_scsi_find_dev);
 #endif
 
@@ -4278,7 +4278,7 @@ static inline int __ata_scsi_queuecmd(struct scsi_cmnd *scmd,
 		}
 #endif  
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_PORT_MAPPING_V2
 		if (0 == gSynoHddPowerupSeq && 1 == guiWakeupDisksNum) {
 #else  
 		if (0 == g_syno_hdd_powerup_seq && 1 == guiWakeupDisksNum) {
@@ -4465,7 +4465,7 @@ void ata_scsi_simulate(struct ata_device *dev, struct scsi_cmnd *cmd)
 		break;
 	}
 }
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ONBOARD_M2_SATA_AS_NVC
 int syno_check_onboard_m2(const char* hostname, int port)
 {
 	int i;
@@ -4529,7 +4529,7 @@ int ata_scsi_add_hosts(struct ata_host *host, struct scsi_host_template *sht)
 			g_nvc_map_index++;
 		}
 #endif
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ONBOARD_M2_SATA_AS_NVC
 		if (syno_check_onboard_m2(dev_name(host->dev), i)) {
 			shost->is_nvc_ssd = 1;
 			g_syno_nvc_index_map[g_nvc_map_index] = shost->host_no;
@@ -5145,7 +5145,7 @@ END:
 }
 #endif  
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_PORT_MAPPING_V2
 struct scsi_device * syno_look_up_scsi_dev_from_ata_link(struct ata_link *pAtaLink)
 {
 	struct scsi_device *pScsiDevice = NULL;

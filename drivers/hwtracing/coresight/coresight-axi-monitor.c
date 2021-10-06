@@ -1,7 +1,4 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 /* Copyright (c) 2016 Marvell semiconductiors inc. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -435,12 +432,12 @@ static ssize_t prof_counters_show(struct device *dev,
 
 	/* # of transactions */
 	trans = readl(axim->base + AXI_MON_PR_SMP_TRANS);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	size += scnprintf(buf + size, PAGE_SIZE, "Trans   - %10u [%d trans/sec]\n", trans,
 			  (u32)((u64)trans * 1000 / msec));
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	size += scnprintf(buf + size, PAGE_SIZE, "Trans   - %10u [%d trans/sec]\n", trans, trans * 1000 / msec);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 
 	/* # of AXI beats */
 	val = readl(axim->base + AXI_MON_PR_SMP_BEATS);
@@ -818,4 +815,4 @@ static struct amba_driver axim_driver = {
 };
 
 module_amba_driver(axim_driver);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */

@@ -97,9 +97,9 @@ static u8 scsih_cb_idx = -1;
 static u8 config_cb_idx = -1;
 static int mpt2_ids;
 static int mpt3_ids;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_HBA_IDX
 static int syno_mpt_ids;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_SAS_HBA_IDX */
 
 static u8 tm_tr_cb_idx = -1 ;
 static u8 tm_tr_volume_cb_idx = -1 ;
@@ -2377,7 +2377,7 @@ _scsih_tm_display_info(struct MPT3SAS_ADAPTER *ioc, struct scsi_cmnd *scmd)
 				    sas_device->volume_handle,
 				   (unsigned long long)sas_device->volume_wwid);
 			}
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_TASK_ABORT_MESSAGE
 			starget_printk(KERN_NOTICE, starget,
 			    "handle(0x%04x), sas_address(0x%016llx), phy(%d)\n",
 			    sas_device->handle,
@@ -2394,7 +2394,7 @@ _scsih_tm_display_info(struct MPT3SAS_ADAPTER *ioc, struct scsi_cmnd *scmd)
 				"enclosure level(0x%04x),connector name(%s)\n",
 				 sas_device->enclosure_level,
 				 sas_device->connector_name);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_SAS_TASK_ABORT_MESSAGE */
 			starget_printk(KERN_INFO, starget,
 			    "handle(0x%04x), sas_address(0x%016llx), phy(%d)\n",
 			    sas_device->handle,
@@ -2411,7 +2411,7 @@ _scsih_tm_display_info(struct MPT3SAS_ADAPTER *ioc, struct scsi_cmnd *scmd)
 				"enclosure level(0x%04x),connector name(%s)\n",
 				 sas_device->enclosure_level,
 				 sas_device->connector_name);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_SAS_TASK_ABORT_MESSAGE */
 
 			sas_device_put(sas_device);
 		}
@@ -2434,13 +2434,13 @@ scsih_abort(struct scsi_cmnd *scmd)
 	u16 handle;
 	int r;
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_TASK_ABORT_MESSAGE
 	sdev_printk(KERN_NOTICE, scmd->device,
 		"attempting task abort! scmd(%p)\n", scmd);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_SAS_TASK_ABORT_MESSAGE */
 	sdev_printk(KERN_INFO, scmd->device,
 		"attempting task abort! scmd(%p)\n", scmd);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_SAS_TASK_ABORT_MESSAGE */
 	_scsih_tm_display_info(ioc, scmd);
 
 	sas_device_priv_data = scmd->device->hostdata;
@@ -2478,13 +2478,13 @@ scsih_abort(struct scsi_cmnd *scmd)
 	    MPI2_SCSITASKMGMT_TASKTYPE_ABORT_TASK, smid, 30, TM_MUTEX_ON);
 
  out:
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_TASK_ABORT_MESSAGE
 	sdev_printk(KERN_NOTICE, scmd->device, "task abort: %s scmd(%p)\n",
 	    ((r == SUCCESS) ? "SUCCESS" : "FAILED"), scmd);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_SAS_TASK_ABORT_MESSAGE */
 	sdev_printk(KERN_INFO, scmd->device, "task abort: %s scmd(%p)\n",
 	    ((r == SUCCESS) ? "SUCCESS" : "FAILED"), scmd);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_SAS_TASK_ABORT_MESSAGE */
 	return r;
 }
 
@@ -4245,7 +4245,7 @@ _scsih_scsi_ioc_info(struct MPT3SAS_ADAPTER *ioc, struct scsi_cmnd *scmd,
 	}
 }
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_HOST_DISK_LED_CTRL
 /**
  * syno_handle_lsi3008_set_led - control SAS handle LED
  * @ioc: per adapter object
@@ -4371,7 +4371,7 @@ end:
 	return iRet;
 }
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_SAS_HOST_DISK_LED_CTRL */
 
 /**
  * _scsih_turn_on_pfa_led - illuminate PFA LED
@@ -4437,14 +4437,14 @@ _scsih_turn_off_pfa_led(struct MPT3SAS_ADAPTER *ioc,
 	mpi_request.Function = MPI2_FUNCTION_SCSI_ENCLOSURE_PROCESSOR;
 	mpi_request.Action = MPI2_SEP_REQ_ACTION_WRITE_STATUS;
 	mpi_request.SlotStatus = 0;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_HOST_DISK_LED_CTRL
 	/* If we have set led status,we should clear it before removing.
 	 * Status 0 only clear faulty, So we should set it DEV_OFF
 	 */
 	if (sas_device->any_led_on) {
 		mpi_request.SlotStatus = cpu_to_le32(MPI2_SEP_REQ_SLOTSTATUS_DEV_OFF);
 	}
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_SAS_HOST_DISK_LED_CTRL */
 	mpi_request.Slot = cpu_to_le16(sas_device->slot);
 	mpi_request.DevHandle = 0;
 	mpi_request.EnclosureHandle = cpu_to_le16(sas_device->enclosure_handle);
@@ -5525,7 +5525,7 @@ _scsih_remove_device(struct MPT3SAS_ADAPTER *ioc,
 		_scsih_turn_off_pfa_led(ioc, sas_device);
 		sas_device->pfa_led_on = 0;
 	}
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_HOST_DISK_LED_CTRL
 	if (sas_device->any_led_on) {
 		_scsih_turn_off_pfa_led(ioc, sas_device);
 		sas_device->any_led_on = 0;
@@ -7991,9 +7991,9 @@ _scsih_expander_node_remove(struct MPT3SAS_ADAPTER *ioc,
 {
 	struct _sas_port *mpt3sas_port, *next;
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_RECOVER_REMOVED_ENCS
 	msleep(100);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_SAS_RECOVER_REMOVED_ENCS */
 	/* remove sibling ports attached to this expander */
 	list_for_each_entry_safe(mpt3sas_port, next,
 	   &sas_expander->sas_port_list, port_list) {
@@ -8518,7 +8518,7 @@ static struct scsi_host_template mpt2sas_driver_template = {
 	.shost_attrs			= mpt3sas_host_attrs,
 	.sdev_attrs			= mpt3sas_dev_attrs,
 	.track_queue_depth		= 1,
-#if defined(MY_ABC_HERE) || defined(MY_DEF_HERE)
+#if defined(MY_ABC_HERE) || defined(CONFIG_SYNO_PORT_MAPPING_V2)
 	.syno_port_type			= SYNO_PORT_TYPE_SAS,
 #endif /* MY_ABC_HERE */
 };
@@ -8729,7 +8729,7 @@ _scsih_probe(struct pci_dev *pdev, const struct pci_device_id *id)
 	shost->max_lun = max_lun;
 	shost->transportt = mpt3sas_transport_template;
 	shost->unique_id = ioc->id;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_HOST_DISK_LED_CTRL
 	shost->hostt->syno_set_sashost_disk_led = syno_scsih_lsi3008_set_led;
 #endif
 
@@ -8782,9 +8782,9 @@ _scsih_probe(struct pci_dev *pdev, const struct pci_device_id *id)
 		rv = -ENODEV;
 		goto out_attach_fail;
 	}
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_HBA_IDX
 	ioc->syno_ids = syno_mpt_ids++;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_SAS_HBA_IDX */
 
 	if (ioc->is_warpdrive) {
 		if (ioc->mfg_pg10_hide_flag ==  MFG_PAGE10_EXPOSE_ALL_DISKS)
@@ -9092,9 +9092,9 @@ scsih_init(void)
 {
 	mpt2_ids = 0;
 	mpt3_ids = 0;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_HBA_IDX
 	syno_mpt_ids = 1;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_SAS_HBA_IDX */
 
 	mpt3sas_base_initialize_callback_handler();
 

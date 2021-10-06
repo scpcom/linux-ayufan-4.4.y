@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * Device Tree support for Armada 370 and XP platforms.
  *
@@ -37,9 +34,9 @@
 #include "coherency.h"
 #include "mvebu-soc-id.h"
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 #define SCU_CTRL		0x00
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 static void __iomem *scu_base;
 
 /*
@@ -48,15 +45,15 @@ static void __iomem *scu_base;
  */
 static void __init mvebu_scu_enable(void)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	u32 scu_ctrl;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct device_node *np =
 		of_find_compatible_node(NULL, NULL, "arm,cortex-a9-scu");
 	if (np) {
 		scu_base = of_iomap(np, 0);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 		scu_ctrl = readl_relaxed(scu_base + SCU_CTRL);
 		/* already enabled? */
 		if (!(scu_ctrl & 1)) {
@@ -64,7 +61,7 @@ static void __init mvebu_scu_enable(void)
 			scu_ctrl |= (1 << 3);
 			writel_relaxed(scu_ctrl, scu_base + SCU_CTRL);
 		}
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 		scu_enable(scu_base);
 		of_node_put(np);
@@ -124,7 +121,7 @@ static void __init mvebu_memblock_reserve(void)
 static void __init mvebu_memblock_reserve(void) {}
 #endif
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 void __init mvebu_l2_optimizations(void)
 {
 	void __iomem *l2x0_base;
@@ -158,17 +155,17 @@ void __init mvebu_l2_optimizations(void)
 	iounmap(l2x0_base);
 	of_node_put(np);
 }
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 static void __init mvebu_init_irq(void)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	mvebu_l2_optimizations();
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	irqchip_init();
 	mvebu_scu_enable();
 	coherency_init();
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 
 	/* In case we are running from MSYS, skip mbus initialization. The
 	 * mvebu_mbus_dt_init was executed earlier in msys_irqchip_init. This
@@ -177,12 +174,12 @@ static void __init mvebu_init_irq(void)
 	 */
 	if (!(of_machine_is_compatible("marvell,msys")))
 		BUG_ON(mvebu_mbus_dt_init(coherency_available()));
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	BUG_ON(mvebu_mbus_dt_init(coherency_available()));
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 static void __init msys_irqchip_init(void)
 {
 	/* Because the switch interrupt driver (marvell,swic) uses register from
@@ -192,7 +189,7 @@ static void __init msys_irqchip_init(void)
 	BUG_ON(mvebu_mbus_dt_init(coherency_available()));
 	mvebu_init_irq();
 }
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 static void __init i2c_quirk(void)
 {
@@ -276,9 +273,9 @@ DT_MACHINE_START(ARMADA_38X_DT, "Marvell Armada 380/385 (Device Tree)")
 	.l2c_aux_mask	= ~0,
 	.init_irq       = mvebu_init_irq,
 	.restart	= mvebu_restart,
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	.reserve        = mvebu_memblock_reserve,
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	.dt_compat	= armada_38x_dt_compat,
 MACHINE_END
 
@@ -296,7 +293,7 @@ DT_MACHINE_START(ARMADA_39X_DT, "Marvell Armada 39x (Device Tree)")
 	.dt_compat	= armada_39x_dt_compat,
 MACHINE_END
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 static const char * const msys_dt_compat[] __initconst = {
 	"marvell,msys",
 	NULL,
@@ -317,4 +314,4 @@ DT_MACHINE_START(MSYS_DT, "Marvell SYS (Device Tree)")
 	.reserve        = mvebu_memblock_reserve,
 	.dt_compat	= msys_dt_compat,
 MACHINE_END
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */

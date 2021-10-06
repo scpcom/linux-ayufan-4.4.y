@@ -53,15 +53,15 @@ static int ion_cma_allocate(struct ion_heap *heap, struct ion_buffer *buffer,
 
 	dev_dbg(dev, "Request buffer allocation len %ld\n", len);
 
-#if defined(MY_DEF_HERE) || defined(CONFIG_ION_RTK) && defined(MY_DEF_HERE)
+#if defined(MY_DEF_HERE) || defined(CONFIG_ION_RTK) && defined(CONFIG_SYNO_LSP_RTD1619)
 	if (buffer->flags & ION_FLAG_CACHED) {
 		dev_err(dev, "Can't allocate buffer cause buffer->flags(0x%.8lx) & ION_FLAG_CACHED\n", buffer->flags);
 		return -EINVAL;
 	}
-#else /* MY_DEF_HERE || CONFIG_ION_RTK && MY_DEF_HERE */
+#else /* MY_DEF_HERE || CONFIG_ION_RTK && CONFIG_SYNO_LSP_RTD1619 */
 	if (buffer->flags & ION_FLAG_CACHED)
 		return -EINVAL;
-#endif /* MY_DEF_HERE || CONFIG_ION_RTK && MY_DEF_HERE */
+#endif /* MY_DEF_HERE || CONFIG_ION_RTK && CONFIG_SYNO_LSP_RTD1619 */
 
 	if (align > PAGE_SIZE)
 		return -EINVAL;

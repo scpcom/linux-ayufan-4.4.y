@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * Marvell MVEBU pinctrl core driver
  *
@@ -29,16 +26,16 @@
 
 #include "pinctrl-mvebu.h"
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 /* need to align with the Soc settings, changed by mvebu_pinctrl_set_mpps() */
 static unsigned mpps_per_reg = 8;
 static unsigned mpp_bits = 4;
 static unsigned mpp_mask = 0xf;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 #define MPPS_PER_REG	8
 #define MPP_BITS	4
 #define MPP_MASK	0xf
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 struct mvebu_pinctrl_function {
 	const char *name;
@@ -555,7 +552,7 @@ static int mvebu_pinctrl_build_functions(struct platform_device *pdev,
 	return 0;
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 /*
  * set the number of pins per reg in the soc, only needed by those
  * socs which doesn't align to the default settings
@@ -592,7 +589,7 @@ int default_mpp_ctrl_set(void __iomem *base, unsigned int pid,
 
 	return 0;
 }
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 int mvebu_pinctrl_probe(struct platform_device *pdev)
 {

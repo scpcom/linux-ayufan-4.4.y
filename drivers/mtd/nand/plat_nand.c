@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * Generic NAND driver
  *
@@ -33,11 +30,11 @@ struct plat_nand_data {
 static int plat_nand_probe(struct platform_device *pdev)
 {
 	struct platform_nand_data *pdata = dev_get_platdata(&pdev->dev);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct mtd_part_parser_data ppdata;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	struct plat_nand_data *data;
 	struct resource *res;
 	const char **part_types;
@@ -65,9 +62,9 @@ static int plat_nand_probe(struct platform_device *pdev)
 		return PTR_ERR(data->io_base);
 
 	data->chip.priv = &data;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	nand_set_flash_node(&data->chip, pdev->dev.of_node);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	data->mtd.priv = &data->chip;
 	data->mtd.dev.parent = &pdev->dev;
 
@@ -104,12 +101,12 @@ static int plat_nand_probe(struct platform_device *pdev)
 
 	part_types = pdata->chip.part_probe_types;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	err = mtd_device_parse_register(&data->mtd, part_types, NULL,
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	ppdata.of_node = pdev->dev.of_node;
 	err = mtd_device_parse_register(&data->mtd, part_types, &ppdata,
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 					pdata->chip.partitions,
 					pdata->chip.nr_partitions);
 

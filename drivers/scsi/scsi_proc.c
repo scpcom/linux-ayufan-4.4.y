@@ -24,7 +24,7 @@
 
 #define PROC_BLOCK_SIZE (3*1024)
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SCSI_WAIT_DISK_READY
 #define DISK_READY_MAX_WAIT_MSEC 120000  
 #define SZ_SYNO_PROC_DISK_READY "syno_disk_ready_check"
 
@@ -34,7 +34,7 @@ atomic_long_t syno_drive_start_time = ATOMIC_LONG_INIT(0);
 
 static struct proc_dir_entry *proc_scsi;
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SCSI_WAIT_DISK_READY
 static void syno_disk_not_ready_count_increase(void)
 {
 	atomic_inc(&syno_disk_not_ready_count);
@@ -102,7 +102,7 @@ static const struct file_operations proc_scsi_fops = {
 	.write = proc_scsi_host_write
 };
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SCSI_WAIT_DISK_READY
 
 static int syno_scsi_disk_ready_check(void)
 {
@@ -421,7 +421,7 @@ int __init scsi_init_procfs(void)
 	if (!pde)
 		goto err2;
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SCSI_WAIT_DISK_READY
 	 
 	atomic_long_set(&syno_drive_start_time, jiffies);
 	if (!proc_create_data(SZ_SYNO_PROC_DISK_READY,
@@ -434,7 +434,7 @@ int __init scsi_init_procfs(void)
 #endif  
 
 	return 0;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SCSI_WAIT_DISK_READY
 err3:
 	remove_proc_entry("scsi/scsi", NULL);
 #endif  
@@ -447,7 +447,7 @@ err1:
 void scsi_exit_procfs(void)
 {
 	remove_proc_entry("scsi/scsi", NULL);
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SCSI_WAIT_DISK_READY
 	remove_proc_entry(SZ_SYNO_PROC_DISK_READY, proc_scsi);
 #endif  
 	remove_proc_entry("scsi", NULL);

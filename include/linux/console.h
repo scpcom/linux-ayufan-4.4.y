@@ -101,7 +101,7 @@ struct console {
 	short	index;
 	int	cflag;
 	void	*data;
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(MY_DEF_HERE) || defined(CONFIG_SYNO_FIX_TTYS_FUNCTIONS)
 	void __iomem * pcimapaddress;
 	unsigned long pcimapsize;
 #endif  

@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * SuperH Pin Function Controller GPIO driver.
  *
@@ -249,11 +246,11 @@ static int gpio_pin_setup(struct sh_pfc_chip *chip)
 	gc->to_irq = gpio_pin_to_irq;
 
 	gc->label = pfc->info->name;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	gc->parent = pfc->dev;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	gc->dev = pfc->dev;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	gc->owner = THIS_MODULE;
 	gc->base = 0;
 	gc->ngpio = pfc->nr_gpio_pins;

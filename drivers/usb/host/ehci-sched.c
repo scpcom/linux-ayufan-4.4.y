@@ -19,13 +19,13 @@
 
 /* this file is part of ehci-hcd.c */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 #ifdef CONFIG_USB_PATCH_ON_RTK
 /* Add Workaround to fixed EHCI/OHCI Wrapper can't work simultaneously */
 extern int RTK_ohci_force_suspend(const char *func);
 #endif
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */
 /*-------------------------------------------------------------------------*/
 
 /*
@@ -947,7 +947,7 @@ static int intr_submit (
 	/* get endpoint and transfer/schedule data */
 	epnum = urb->ep->desc.bEndpointAddress;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 #ifdef CONFIG_USB_PATCH_ON_RTK
 #ifdef CONFIG_USB_OHCI_RTK
 	/* Add Workaround to fixed EHCI/OHCI Wrapper can't work simultaneously */
@@ -957,9 +957,9 @@ static int intr_submit (
 #endif
 
 	spin_lock_irqsave(&ehci->lock, flags);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_RTD1619 */
 	spin_lock_irqsave (&ehci->lock, flags);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */
 
 	if (unlikely(!HCD_HW_ACCESSIBLE(ehci_to_hcd(ehci)))) {
 		status = -ESHUTDOWN;

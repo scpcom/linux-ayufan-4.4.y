@@ -1,7 +1,4 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 /*
 * ***************************************************************************
 * Copyright (C) 2016 Marvell International Ltd.
@@ -70,43 +67,43 @@ static inline u32 mv_pp2x_relaxed_read(struct mv_pp2x_hw *hw, u32 offset, int cp
 static inline void mv_pp22_thread_write(struct mv_pp2x_hw *hw, u32 sw_thread,
 					     u32 offset, u32 data)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	writel(data, hw->base + sw_thread * MVPP2_ADDR_SPACE_SIZE + offset);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	writel(data, hw->base + sw_thread*MVPP2_ADDR_SPACE_SIZE + offset);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 }
 
 static inline u32 mv_pp22_thread_read(struct mv_pp2x_hw *hw, u32 sw_thread,
 					    u32 offset)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	return readl(hw->base + sw_thread * MVPP2_ADDR_SPACE_SIZE + offset);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	return readl(hw->base + sw_thread*MVPP2_ADDR_SPACE_SIZE + offset);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 }
 
 static inline void mv_pp22_thread_relaxed_write(struct mv_pp2x_hw *hw,
 						u32 sw_thread,
 						u32 offset, u32 data)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	writel_relaxed(data, hw->base + sw_thread * MVPP2_ADDR_SPACE_SIZE + offset);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	writel_relaxed(data, hw->base + sw_thread*MVPP2_ADDR_SPACE_SIZE + offset);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 }
 
 static inline u32 mv_pp22_thread_relaxed_read(struct mv_pp2x_hw *hw,
 					      u32 sw_thread,
 					      u32 offset)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	return readl_relaxed(hw->base + sw_thread * MVPP2_ADDR_SPACE_SIZE + offset);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	return readl_relaxed(hw->base + sw_thread*MVPP2_ADDR_SPACE_SIZE + offset);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 }
 
 static inline void mv_pp21_isr_rx_group_write(struct mv_pp2x_hw *hw, int port,
@@ -196,11 +193,11 @@ static inline void mv_pp2x_interrupts_mask(void *arg)
 {
 	struct mv_pp2x_port *port = arg;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	mv_pp2x_write(&port->priv->hw, MVPP2_ISR_RX_TX_MASK_REG(port->id), 0);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	mv_pp2x_write(&(port->priv->hw), MVPP2_ISR_RX_TX_MASK_REG(port->id), 0);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 }
 
 /* Unmask the current CPU's Rx/Tx interrupts */
@@ -210,18 +207,18 @@ static inline void mv_pp2x_interrupts_unmask(void *arg)
 	u32 val;
 
 	val = MVPP2_CAUSE_MISC_SUM_MASK | MVPP2_CAUSE_RXQ_OCCUP_DESC_ALL_MASK;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	if (port->priv->pp2xdata->interrupt_tx_done)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	if (port->priv->pp2xdata->interrupt_tx_done == true)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 		val |= MVPP2_CAUSE_TXQ_OCCUP_DESC_ALL_MASK;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	mv_pp2x_write(&port->priv->hw,
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	mv_pp2x_write(&(port->priv->hw),
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 		      MVPP2_ISR_RX_TX_MASK_REG(port->id), val);
 }
 
@@ -231,11 +228,11 @@ static inline void mv_pp2x_shared_thread_interrupts_mask(
 	struct queue_vector *q_vec = &port->q_vector[0];
 	int i;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	if (!port->priv->pp2xdata->multi_addr_space)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	if (port->priv->pp2xdata->multi_addr_space == false)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 		return;
 
 	for (i = 0; i < port->num_qvector; i++) {
@@ -254,11 +251,11 @@ static inline void mv_pp2x_shared_thread_interrupts_unmask(
 	struct queue_vector *q_vec = &port->q_vector[0];
 	int i;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	if (!port->priv->pp2xdata->multi_addr_space)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	if (port->priv->pp2xdata->multi_addr_space == false)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 		return;
 
 	for (i = 0; i < port->num_qvector; i++) {
@@ -292,12 +289,12 @@ static inline dma_addr_t mv_pp2x_bm_phys_addr_get(struct mv_pp2x_hw *hw, u32 poo
 
 	val = mv_pp2x_read(hw, MVPP2_BM_PHY_ALLOC_REG(pool));
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	/*  Disregard BM_ADDR_HIGH_ALLOC if Buffer Manager failed to return buffer */
 	if (!val)
 		return 0;
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 #ifdef CONFIG_PHYS_ADDR_T_64BIT
 	{
 	u64 val2;
@@ -364,19 +361,19 @@ static inline void mv_pp2x_bm_pool_mc_put(struct mv_pp2x_port *port, int pool,
 	u32 val = 0;
 
 	val |= (mc_id & MVPP21_BM_MC_ID_MASK);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	mv_pp2x_write(&port->priv->hw, MVPP21_BM_MC_RLS_REG, val);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	mv_pp2x_write(&(port->priv->hw), MVPP21_BM_MC_RLS_REG, val);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	/*TODO : YuvalC, this is just workaround to compile.
 	 * Need to handle mv_pp2x_buff_hdr_rx().
 	 */
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	mv_pp2x_bm_pool_put(&port->priv->hw, pool,
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	mv_pp2x_bm_pool_put(&(port->priv->hw), pool,
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 			    (dma_addr_t)(buf_phys_addr |
 			    MVPP2_BM_PHY_RLS_MC_BUFF_MASK), cpu);
 }
@@ -473,18 +470,18 @@ static inline void mv_pp2x_txq_sent_counter_clear(void *arg)
 		int id = port->txqs[queue]->id;
 
 		if (port->priv->pp2_version == PPV21)
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 			mv_pp2x_read(&port->priv->hw,
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 			mv_pp2x_read(&(port->priv->hw),
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 				     MVPP21_TXQ_SENT_REG(id));
 		else
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 			mv_pp2x_read(&port->priv->hw,
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 			mv_pp2x_read(&(port->priv->hw),
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 				     MVPP22_TXQ_SENT_REG(id));
 	}
 }
@@ -595,9 +592,9 @@ void mv_pp2x_prs_mac_multi_set(struct mv_pp2x_hw *hw, int port, int index,
 			       bool add);
 int mv_pp2x_prs_mac_da_accept(struct mv_pp2x_port *port,
 			      const u8 *da, bool add);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 int mv_pp2x_prs_vid_entry_accept(struct net_device *dev, u16 proto, u16 vid, bool add);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 int mv_pp2x_prs_def_flow(struct mv_pp2x_port *port);
 int mv_pp2x_prs_flow_set(struct mv_pp2x_port *port);
 void mv_pp2x_prs_mac_entry_del(struct mv_pp2x_port *port,
@@ -694,11 +691,11 @@ int mv_pp2x_prs_sw_sram_shift_set(struct mv_pp2x_prs_entry *pe, int shift,
 int mv_pp2x_prs_sw_sram_shift_get(struct mv_pp2x_prs_entry *pe, int *shift);
 int mv_pp2x_prs_sw_sram_next_lu_get(struct mv_pp2x_prs_entry *pe,
 				    unsigned int *lu);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 int mv_pp2x_prs_sram_bit_get(struct mv_pp2x_prs_entry *pe, int bit_num,
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 int mv_pp2x_prs_sram_bit_get(struct mv_pp2x_prs_entry *pe, int bitNum,
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 			     unsigned int *bit);
 int mv_pp2x_prs_sw_sram_lu_done_get(struct mv_pp2x_prs_entry *pe,
 				    unsigned int *bit);
@@ -802,19 +799,19 @@ int mv_pp2x_cls_c2_qos_hw_read(struct mv_pp2x_hw *hw, int tbl_id, int tbl_sel,
 			       struct mv_pp2x_cls_c2_qos_entry *qos);
 int mv_pp2x_cls_c2_qos_hw_write(struct mv_pp2x_hw *hw,
 				struct mv_pp2x_cls_c2_qos_entry *qos);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 int mv_pp2_cls_c2_qos_prio_get(struct mv_pp2x_cls_c2_qos_entry *qos, int *prio);
 int mv_pp2_cls_c2_qos_dscp_get(struct mv_pp2x_cls_c2_qos_entry *qos, int *dscp);
 int mv_pp2_cls_c2_qos_color_get(struct mv_pp2x_cls_c2_qos_entry *qos, int *color);
 int mv_pp2_cls_c2_qos_gpid_get(struct mv_pp2x_cls_c2_qos_entry *qos, int *gpid);
 int mv_pp2_cls_c2_qos_queue_get(struct mv_pp2x_cls_c2_qos_entry *qos, int *queue);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 int mvPp2ClsC2QosPrioGet(struct mv_pp2x_cls_c2_qos_entry *qos, int *prio);
 int mvPp2ClsC2QosDscpGet(struct mv_pp2x_cls_c2_qos_entry *qos, int *dscp);
 int mvPp2ClsC2QosColorGet(struct mv_pp2x_cls_c2_qos_entry *qos, int *color);
 int mvPp2ClsC2QosGpidGet(struct mv_pp2x_cls_c2_qos_entry *qos, int *gpid);
 int mvPp2ClsC2QosQueueGet(struct mv_pp2x_cls_c2_qos_entry *qos, int *queue);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 int mv_pp2x_cls_c2_qos_tbl_set(struct mv_pp2x_cls_c2_entry *c2, int tbl_id,
 				     int tbl_sel);
 int mv_pp2x_cls_c2_hw_write(struct mv_pp2x_hw *hw, int index,
@@ -871,11 +868,11 @@ void mv_pp2x_tx_fifo_threshold_set(struct mv_pp2x_hw *hw, u32 port_id, u32 val);
 int mv_pp2x_check_hw_buf_num(struct mv_pp2x *priv, struct mv_pp2x_bm_pool *bm_pool);
 void mv_pp22_set_net_comp(struct mv_pp2x *priv);
 int mvcpn110_mac_hw_init(struct mv_pp2x_port *port);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 void mv_pp2x_counters_stat_update(struct mv_pp2x_port *port,
 				  struct gop_stat *gop_statistics);
 void mv_pp2x_counters_stat_clear(struct mv_pp2x_port *port);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 
 #endif /* _MVPP2_HW_H_ */
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */

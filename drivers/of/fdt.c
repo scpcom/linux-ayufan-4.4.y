@@ -35,7 +35,7 @@
 #include <asm/setup.h>  /* for COMMAND_LINE_SIZE */
 #include <asm/page.h>
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_PORT_MAPPING_V2
 #include <linux/synolib.h>
 #ifdef MY_ABC_HERE
 extern int gSynoHddPowerupSeq, gSynoInternalHddNumber;
@@ -125,7 +125,7 @@ void __init syno_init_smbus_hdd_pwrctl(void)
 	}
 }
 #endif /*CONFIG_SYNO_SMBUS_HDD_POWERCTL */
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_PORT_MAPPING_V2 */
 
 /*
  * of_fdt_limit_memory - limit the number of regions in the /memory node
@@ -1330,7 +1330,7 @@ void __init unflatten_device_tree(void)
 	/* Get pointer to "/chosen" and "/aliases" nodes for use everywhere */
 	of_alias_scan(early_init_dt_alloc_memory_arch);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_PORT_MAPPING_V2
 #ifdef MY_DEF_HERE
 	syno_init_spinup_group();
 #endif /* MY_DEF_HERE */
@@ -1340,7 +1340,7 @@ void __init unflatten_device_tree(void)
 #ifdef CONFIG_SYNO_SMBUS_HDD_POWERCTL
 	syno_init_smbus_hdd_pwrctl();
 #endif /* CONFIG_SYNO_SMBUS_HDD_POWERCTL */
-#endif /* MY_DEF_HERE && MY_DEF_HERE */
+#endif /* CONFIG_SYNO_PORT_MAPPING_V2 && MY_DEF_HERE */
 }
 
 /**
@@ -1376,12 +1376,12 @@ void __init unflatten_and_copy_device_tree(void)
 }
 
 #ifdef CONFIG_SYSFS
-#if defined(CONFIG_X86) && defined(MY_DEF_HERE)
+#if defined(CONFIG_X86) && defined(CONFIG_SYNO_PORT_MAPPING_V2)
 static int __init of_fdt_raw_init(void)
 {
 	return 0;
 }
-#else /* CONFIG_X86 && MY_DEF_HERE*/
+#else /* CONFIG_X86 && CONFIG_SYNO_PORT_MAPPING_V2*/
 static ssize_t of_fdt_raw_read(struct file *filp, struct kobject *kobj,
 			       struct bin_attribute *bin_attr,
 			       char *buf, loff_t off, size_t count)
@@ -1406,7 +1406,7 @@ static int __init of_fdt_raw_init(void)
 	of_fdt_raw_attr.size = fdt_totalsize(initial_boot_params);
 	return sysfs_create_bin_file(firmware_kobj, &of_fdt_raw_attr);
 }
-#endif /* CONFIG_X86 && MY_DEF_HERE*/
+#endif /* CONFIG_X86 && CONFIG_SYNO_PORT_MAPPING_V2*/
 late_initcall(of_fdt_raw_init);
 #endif
 

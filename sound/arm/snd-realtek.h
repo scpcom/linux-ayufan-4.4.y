@@ -1125,7 +1125,7 @@ void RPC_TOAGENT_AO_INIT_FLASH(snd_pcm_substream_t *substream);
 #endif //SND_REALTEK_H
 #endif /* MY_DEF_HERE */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 /**
  * snd-realtek.h - Realtek alsa driver
  *
@@ -2453,4 +2453,4 @@ int RPC_TOAGENT_GET_AI_AGENT(snd_card_RTK_capture_pcm_t *dpcm);
 int RPC_TOAGENT_SET_EQ(snd_card_RTK_pcm_t *dpcm, AUDIO_RPC_EQUALIZER_MODE equalizer_mode);
 
 #endif //SND_REALTEK_H
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */

@@ -1,4 +1,4 @@
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 /*
  *  phy-rtk-usb.h RTK usb phy header file
  *
@@ -9,7 +9,7 @@
  * the free software foundation; either version 2 of the license, or
  * (at your option) any later version.
  */
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */
 
 #ifndef __PHY_RTK_USB_H__
 #define __PHY_RTK_USB_H__
@@ -18,22 +18,22 @@ struct rtk_usb_phy_s {
 	struct usb_phy phy;
 	struct device *dev;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 	enum rtd_chip_id chip_id;
 	enum rtd_chip_revision chip_revision;
 
 	int phyN;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_RTD1619 */
 	int portN;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */
 	void *reg_addr;
 	void *phy_data;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 #ifdef CONFIG_DYNAMIC_DEBUG
 	struct dentry		*debug_dir;
 #endif
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */
 };
 
 struct rtk_usb_phy_data_s {
@@ -41,7 +41,7 @@ struct rtk_usb_phy_data_s {
 	char data;
 };
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 #define phy_read(addr)			__raw_readl(addr)
 #define phy_write(addr, val)	do { smp_wmb(); __raw_writel(val, addr); } while(0)
 #define PHY_IO_TIMEOUT_MSEC		(50)
@@ -58,6 +58,6 @@ static inline int utmi_wait_register(void __iomem *reg, u32 mask, u32 result)
 	pr_err("\033[0;32;31m can't program USB phy \033[m\n");
 	return -1;
 }
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */
 
 #endif /* __PHY_RTK_USB_H__ */

@@ -65,7 +65,7 @@ struct iov_iter;
 #ifdef CONFIG_SENDFILE_PATCH
 struct socket;
 #endif
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 #ifdef CONFIG_SPLICE_FROM_SOCKET
 struct socket;
 #endif
@@ -1375,7 +1375,7 @@ struct file_operations {
 					loff_t *ppos, size_t count, bool ppage);
 					 
 #endif
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 #ifdef CONFIG_SPLICE_FROM_SOCKET
 	ssize_t (*splice_from_socket)(struct file *file, struct socket *sock, loff_t __user *ppos, size_t count);
 #endif

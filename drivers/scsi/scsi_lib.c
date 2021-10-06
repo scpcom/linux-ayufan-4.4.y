@@ -43,7 +43,7 @@
 #define SG_MEMPOOL_NR		ARRAY_SIZE(scsi_sg_pools)
 #define SG_MEMPOOL_SIZE		2
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_RESERVATION_WRITE_CONFLICT_KERNEL_PANIC
 extern int gSynoSASWriteConflictPanic;
 #endif  
 
@@ -548,7 +548,7 @@ static void scsi_release_buffers(struct scsi_cmnd *cmd)
 		scsi_free_sgtable(cmd->prot_sdb, false);
 }
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_SPINUP_DELAY
 static void SynoSpinupDone(struct request *req, int uptodate)
 {
 	struct scsi_device *sdev = req->q->queuedata;
@@ -925,7 +925,7 @@ void scsi_io_completion(struct scsi_cmnd *cmd, unsigned int good_bytes)
 			sense_deferred = scsi_sense_is_deferred(&sshdr);
 	}
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_RESERVATION_WRITE_CONFLICT_KERNEL_PANIC
 	 
 	if (1 == gSynoSASWriteConflictPanic) {
 		if (unlikely(RESERVATION_CONFLICT == status_byte(cmd->result) && COMMAND_COMPLETE == msg_byte(cmd->result) &&
@@ -950,7 +950,7 @@ void scsi_io_completion(struct scsi_cmnd *cmd, unsigned int good_bytes)
 	}
 #endif  
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_SPINUP_DELAY
 #ifdef CONFIG_SYNO_SAS_SPINUP_DELAY_DEBUG
 	if (0x1b == cmd->cmnd[0]) {
 		sdev_printk(KERN_ERR, cmd->device,
@@ -1172,7 +1172,7 @@ void scsi_io_completion(struct scsi_cmnd *cmd, unsigned int good_bytes)
 	    time_before(cmd->jiffies_at_alloc + wait_for, jiffies))
 		action = ACTION_FAIL;
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_SPINUP_DELAY
 handle_cmd:
 #endif  
 	switch (action) {

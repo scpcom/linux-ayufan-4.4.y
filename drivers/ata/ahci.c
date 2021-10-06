@@ -608,7 +608,7 @@ static const struct pci_device_id ahci_pci_tbl[] = {
 	{ }	 
 };
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_MV_9170_GPIO_CTRL
  
 enum {
 	MV_9170_GPIO_DATA_OUT			= 0x220,
@@ -658,7 +658,7 @@ void syno_mv_9170_gpio_active_init(struct ata_host *host)
 {
 	 
 	syno_mv_9170_gpio_reg_set(host, MV_9170_GPIO_DATA_OUT_ENABLE, 0x0);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_MV_9170_GPIO_ACTIVE_LOW)
 	 
 	syno_mv_9170_gpio_reg_set(host, MV_9170_GPIO_DATA_OUT, 0x00000021);
 #else
@@ -710,7 +710,7 @@ int syno_mv_9170_disk_led_get(const unsigned short hostnum)
 	} else {
 		ret = 0;
 	}
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_MV_9170_GPIO_ACTIVE_LOW)
 	ret = !ret;
 #endif  
 END:
@@ -725,7 +725,7 @@ static u32 syno_mv_9170_prepare_value_by_polarity(u32 orig_reg_value, int iValue
 {
 	u32 target_reg_value = orig_reg_value;
 	int new_bit_value;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_MV_9170_GPIO_ACTIVE_LOW)
         new_bit_value = !iValue;
 #else  
         new_bit_value = iValue;
@@ -756,7 +756,7 @@ int __syno_mv_9170_disk_led_set(const struct ata_port *ap, int iValue)
 END:
 	return ret;
 }
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_PORT_MAPPING_V2
  
 int syno_mv_9170_disk_led_set_by_port(const int iDiskPort, int iValue)
 {
@@ -793,7 +793,7 @@ END:
 EXPORT_SYMBOL(syno_mv_9170_disk_led_set);
 #endif  
 
-#if defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
+#if defined(CONFIG_SYNO_MV_9170_GPIO_CTRL) || defined(MY_ABC_HERE)
 #define MV_GEN 3
 #define MV_PORT 4
  
@@ -848,7 +848,7 @@ END:
 }
 #endif  
 
-#if defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
+#if defined(CONFIG_SYNO_MV_9170_GPIO_CTRL) || defined(MY_ABC_HERE)
  
 static u32 syno_mv_9xxx_reg_get(struct ata_host *host, const unsigned int reg_addr, unsigned int addr_offset, unsigned int data_offset)
 {
@@ -894,7 +894,7 @@ void syno_mv_9235_gpio_active_init(struct ata_host *host)
 }
 #endif  
 
-#if defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
+#if defined(CONFIG_SYNO_MV_9170_GPIO_CTRL) || defined(MY_ABC_HERE)
 void syno_mv_9xxx_amp_adjust_by_port(struct ata_host *host, u32 val, unsigned int addr_offset, const unsigned int data_offset, const unsigned int reg_addr)
 {
 	u32 reg_val = 0;
@@ -1363,7 +1363,7 @@ END:
 }
 EXPORT_SYMBOL(syno_mv_9235_disk_led_get);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_PORT_MAPPING_V2
  
 int syno_mv_9235_disk_led_get_by_port(const int iDiskPort)
 {
@@ -1395,7 +1395,7 @@ END:
 	return ret;
 }
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_PORT_MAPPING_V2
  
 int syno_mv_9235_disk_led_set_by_port(const int iDiskPort, int iValue)
 {
@@ -2330,7 +2330,7 @@ void syno_asmedia_1061_init(struct ata_host *host)
 }
 #endif  
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_PORT_MAPPING_V2
 extern int syno_compare_dts_ata_port(const struct ata_port *pAtaPort, const struct device_node *pDeviceNode);
 extern int syno_compare_dts_pciepath(const struct pci_dev *pdev, const struct device_node *pDeviceNode);
  
@@ -2525,7 +2525,7 @@ static int ahci_init_one(struct pci_dev *pdev, const struct pci_device_id *ent)
 		if (!(hpriv->port_map & (1 << i)))
 			ap->ops = &ata_dummy_port_ops;
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_PORT_MAPPING_V2
 		ap->ops->syno_compare_node_info = syno_ahci_compare_ata_devicetree_info;
 #endif  
 	}
@@ -2572,7 +2572,7 @@ static int ahci_init_one(struct pci_dev *pdev, const struct pci_device_id *ent)
 		syno_mv_9235_gpio_active_init(host);
 	}
 #endif  
-#if defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
+#if defined(CONFIG_SYNO_MV_9170_GPIO_CTRL) || defined(MY_ABC_HERE)
 	if (pdev->vendor == 0x1b4b && (pdev->device == 0x9235 || pdev->device == 0x9215 || pdev->device == 0x9170)) {
 		syno_mv_9xxx_amp_adjust(host, pdev);
 	}
@@ -2584,7 +2584,7 @@ static int ahci_init_one(struct pci_dev *pdev, const struct pci_device_id *ent)
 	}
 #endif  
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_MV_9170_GPIO_CTRL
 	if (pdev->vendor == 0x1b4b && pdev->device == 0x9170) {
 		syno_mv_9170_gpio_active_init(host);
 	}

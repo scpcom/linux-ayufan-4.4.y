@@ -28,7 +28,7 @@ static const struct usb_device_id usb_quirk_list[] = {
 
 	{ USB_DEVICE(0x045e, 0x0770), .driver_info = USB_QUIRK_RESET_RESUME },
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 #ifdef CONFIG_USB_PATCH_ON_RTK
 	 
 	{ USB_DEVICE(0x045e, 0x0745), .driver_info = USB_QUIRK_RESET },
@@ -57,7 +57,7 @@ static const struct usb_device_id usb_quirk_list[] = {
 
 	{ USB_DEVICE(0x046d, 0xc122), .driver_info = USB_QUIRK_DELAY_INIT },
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 #ifdef CONFIG_USB_PATCH_ON_RTK
 	 
 	{ USB_DEVICE(0x046d, 0xc52b), .driver_info = USB_QUIRK_RESET },
@@ -166,7 +166,7 @@ static const struct usb_device_id usb_quirk_list[] = {
 
 	{ USB_DEVICE(0x1edb, 0xbd4f), .driver_info = USB_QUIRK_NO_LPM },
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 #ifdef CONFIG_USB_PATCH_ON_RTK
 	 
 	{ USB_DEVICE_VER(0x0951, 0x1666, 0, 0x1100), .driver_info = USB_QUIRK_RESET_RESUME },

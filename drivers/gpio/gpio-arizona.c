@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * gpiolib support for Wolfson Arizona class devices
  *
@@ -111,11 +108,11 @@ static int arizona_gpio_probe(struct platform_device *pdev)
 
 	arizona_gpio->arizona = arizona;
 	arizona_gpio->gpio_chip = template_chip;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	arizona_gpio->gpio_chip.parent = &pdev->dev;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	arizona_gpio->gpio_chip.dev = &pdev->dev;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 #ifdef CONFIG_OF_GPIO
 	arizona_gpio->gpio_chip.of_node = arizona->dev->of_node;
 #endif

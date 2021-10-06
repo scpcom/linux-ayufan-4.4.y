@@ -26,9 +26,9 @@
 
 #include <linux/types.h>
 #include <linux/blk_types.h>
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 #include <linux/rtk_trace.h>
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */
 
 #include <asm/byteorder.h>
 #include <asm/barrier.h>
@@ -146,7 +146,7 @@ static inline u64 __raw_readq(const volatile void __iomem *addr)
 	return val;
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 static inline void __raw_writeb_no_log(u8 val, volatile void __iomem *addr)
 {
 	asm volatile("strb %w0, [%1]" : : "rZ" (val), "r" (addr));
@@ -208,7 +208,7 @@ static inline u64 __raw_readq_no_log(const volatile void __iomem *addr)
 	return val;
 }
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */
 /* IO barriers */
 #define __iormb()		rmb()
 #define __iowmb()		wmb()
@@ -230,7 +230,7 @@ static inline u64 __raw_readq_no_log(const volatile void __iomem *addr)
 #define writel_relaxed(v,c)	((void)__raw_writel((__force u32)cpu_to_le32(v),(c)))
 #define writeq_relaxed(v,c)	((void)__raw_writeq((__force u64)cpu_to_le64(v),(c)))
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 #define readb_relaxed_no_log(c)	({ u8 __v = __raw_readb_no_log(c); __v; })
 #define readw_relaxed_no_log(c)	({ u16 __v = le16_to_cpu((__force __le16)__raw_readw_no_log(c)); __v; })
 #define readl_relaxed_no_log(c)	({ u32 __v = le32_to_cpu((__force __le32)__raw_readl_no_log(c)); __v; })
@@ -241,7 +241,7 @@ static inline u64 __raw_readq_no_log(const volatile void __iomem *addr)
 #define writel_relaxed_no_log(v, c)	((void)__raw_writel_no_log((__force u32)cpu_to_le32(v), (c)))
 #define writeq_relaxed_no_log(v, c)	((void)__raw_writeq_no_log((__force u64)cpu_to_le64(v), (c)))
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */
 /*
  * I/O memory access primitives. Reads are ordered relative to any
  * following Normal memory access. Writes are ordered relative to any prior
@@ -415,7 +415,7 @@ static inline void writeq(u64 val, volatile void __iomem *addr)
 #define writel(v,c)		({ __iowmb(); writel_relaxed((v),(c)); })
 #define writeq(v,c)		({ __iowmb(); writeq_relaxed((v),(c)); })
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 #define readb_no_log(c)		({ u8  __v = readb_relaxed_no_log(c); __iormb(); __v; })
 #define readw_no_log(c)		({ u16 __v = readw_relaxed_no_log(c); __iormb(); __v; })
 #define readl_no_log(c)		({ u32 __v = readl_relaxed_no_log(c); __iormb(); __v; })
@@ -425,7 +425,7 @@ static inline void writeq(u64 val, volatile void __iomem *addr)
 #define writew_no_log(v, c)	({ __iowmb(); writew_relaxed_no_log((v), (c)); })
 #define writel_no_log(v, c)	({ __iowmb(); writel_relaxed_no_log((v), (c)); })
 #define writeq_no_log(v, c)	({ __iowmb(); writeq_relaxed_no_log((v), (c)); })
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */
 #endif /* MY_DEF_HERE */
 /*
  *  I/O port access primitives.

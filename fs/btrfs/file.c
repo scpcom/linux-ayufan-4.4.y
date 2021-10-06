@@ -18,7 +18,7 @@
 #include <linux/slab.h>
 #include <linux/btrfs.h>
 #include <linux/uio.h>
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 #ifdef CONFIG_SPLICE_FROM_SOCKET
 #include <net/sock.h>
 #endif
@@ -2837,7 +2837,7 @@ out:
 	return offset;
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 #ifdef CONFIG_SPLICE_FROM_SOCKET
 static ssize_t btrfs_splice_from_socket(struct file *file, struct socket *sock,
 					loff_t __user *ppos, size_t write_bytes)
@@ -3127,7 +3127,7 @@ const struct file_operations btrfs_file_operations = {
 	.llseek		= btrfs_file_llseek,
 	.read_iter      = generic_file_read_iter,
 	.splice_read	= generic_file_splice_read,
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 #ifdef CONFIG_SPLICE_FROM_SOCKET
 	.splice_from_socket = btrfs_splice_from_socket,
 #endif

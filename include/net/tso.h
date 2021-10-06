@@ -1,15 +1,12 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 #ifndef _TSO_H
 #define _TSO_H
 
 #include <net/ip.h>
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_10)
 #define TSO_HEADER_SIZE		128
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_10 */
 struct tso_t {
 	int next_frag_idx;
 	void *data;

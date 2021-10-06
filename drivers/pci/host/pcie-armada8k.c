@@ -1,7 +1,4 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 /*
  * PCIe host controller driver for Marvell Armada-8K SoCs
  *
@@ -26,27 +23,27 @@
 #include <linux/resource.h>
 #include <linux/of_pci.h>
 #include <linux/of_irq.h>
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_10)
 #include <dt-bindings/phy/phy-comphy-mvebu.h>
 #include <linux/of_gpio.h>
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_10 */
 
 #include "pcie-designware.h"
 
 struct armada8k_pcie {
 	void __iomem		*regs_base;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_10)
 	struct phy		**phys;
 	int			phy_count;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_10 */
 	struct phy		*phy;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_10 */
 	struct clk		*clk;
 	struct pcie_port	pp;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_10)
 	struct gpio_desc	*reset_gpio;
 	enum of_gpio_flags	flags;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_10 */
 };
 
 #define PCIE_GLOBAL_CONTROL             0x0
@@ -241,7 +238,7 @@ static int armada8k_add_pcie_port(struct pcie_port *pp,
 	return 0;
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_10)
 /* armada8k_pcie_reset
  * The function implements the PCIe reset via GPIO.
  * First, pull down the GPIO used for PCIe reset, and wait 200ms;
@@ -260,21 +257,21 @@ static void armada8k_pcie_reset(struct armada8k_pcie *pcie)
 	mdelay(200);
 }
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_10 */
 static int armada8k_pcie_probe(struct platform_device *pdev)
 {
 	struct armada8k_pcie *armada8k_pcie;
 	struct pcie_port *pp;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_10)
 	struct phy **phys = NULL;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_10 */
 	struct device *dev = &pdev->dev;
 	struct resource *base;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_10)
 	int i, reset_gpio, phy_count = 0;
 	u32 command;
 	char phy_name[16];
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_10 */
 	int ret = 0;
 
 	armada8k_pcie = devm_kzalloc(dev, sizeof(*armada8k_pcie), GFP_KERNEL);
@@ -287,7 +284,7 @@ static int armada8k_pcie_probe(struct platform_device *pdev)
 
 	clk_prepare_enable(armada8k_pcie->clk);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_10)
 	/* Get PHY count according to phy name */
 	phy_count = of_property_count_strings(pdev->dev.of_node, "phy-names");
 	if (phy_count > 0) {
@@ -330,7 +327,7 @@ static int armada8k_pcie_probe(struct platform_device *pdev)
 				goto err_phy;
 			}
 		}
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_10 */
 #if 0
 	/* Keep this code commented out till we write a PHY driver for
 	** armada-8k PCIe PHY. */
@@ -345,10 +342,10 @@ static int armada8k_pcie_probe(struct platform_device *pdev)
 		goto fail_free;
 	phy_init(armada8k_pcie->phy);
 #endif
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_10 */
 	}
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_10)
 	/* Config reset gpio for pcie if the reset connected to gpio */
 	reset_gpio = of_get_named_gpio_flags(pdev->dev.of_node,
 					     "reset-gpios", 0,
@@ -357,19 +354,19 @@ static int armada8k_pcie_probe(struct platform_device *pdev)
 		armada8k_pcie->reset_gpio = gpio_to_desc(reset_gpio);
 		armada8k_pcie_reset(armada8k_pcie);
 	}
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_10 */
 
 	pp = &armada8k_pcie->pp;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_10)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_10 */
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_10 */
 	pp->dev = dev;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_10)
 	armada8k_pcie->phys = phys;
 	armada8k_pcie->phy_count = phy_count;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_10 */
 	platform_set_drvdata(pdev, armada8k_pcie);
 
 	/* Get the dw-pcie unit configuration/control registers base. */
@@ -387,21 +384,21 @@ static int armada8k_pcie_probe(struct platform_device *pdev)
 	ret = armada8k_add_pcie_port(pp, pdev);
 	if (ret < 0)
 		goto fail_free;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_10)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_10 */
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_10 */
 	return 0;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_10)
 err_phy:
 	while (--i >= 0) {
 		phy_power_off(phys[i]);
 		phy_exit(phys[i]);
 	}
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_10 */
 fail_free:
 	if (!IS_ERR(armada8k_pcie->clk))
 		clk_disable_unprepare(armada8k_pcie->clk);
@@ -409,7 +406,7 @@ fail_free:
 	return ret;
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_10)
 static int armada8k_pcie_suspend_noirq(struct device *dev)
 {
 	int i;
@@ -505,7 +502,7 @@ static const struct dev_pm_ops armada8k_pcie_pm_ops = {
 	.resume_noirq = armada8k_pcie_resume_noirq,
 };
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_10 */
 static const struct of_device_id armada8k_pcie_of_match[] = {
 	{ .compatible = "marvell,armada8k-pcie", },
 	{},
@@ -517,9 +514,9 @@ static struct platform_driver armada8k_pcie_driver = {
 	.driver = {
 		.name	= "armada8k-pcie",
 		.of_match_table = of_match_ptr(armada8k_pcie_of_match),
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_10)
 		.pm	= &armada8k_pcie_pm_ops,
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_10 */
 	},
 };
 
@@ -529,4 +526,4 @@ MODULE_DESCRIPTION("Armada 8k PCIe host controller driver");
 MODULE_AUTHOR("Yehuda Yitshak <yehuday@marvell.com>");
 MODULE_AUTHOR("Shadi Ammouri <shadi@marvell.com>");
 MODULE_LICENSE("GPL v2");
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */

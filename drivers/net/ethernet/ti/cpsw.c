@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * Texas Instruments Ethernet Switch Driver
  *
@@ -1161,13 +1158,13 @@ static void cpsw_slave_open(struct cpsw_slave *slave, struct cpsw_priv *priv)
 			slave->data->phy_id, slave->slave_num);
 		slave->phy = NULL;
 	} else {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 		phy_attached_info(slave->phy);
 
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		dev_info(priv->dev, "phy found : id is : 0x%x\n",
 			 slave->phy->phy_id);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		phy_start(slave->phy);
 
 		/* Configure GMII_SEL register */
@@ -2056,14 +2053,14 @@ static int cpsw_probe_dt(struct cpsw_priv *priv,
 			phy_dev = of_phy_find_device(phy_node);
 			if (!phy_dev)
 				return -ENODEV;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 			snprintf(slave_data->phy_id, sizeof(slave_data->phy_id),
 				 PHY_ID_FMT, phy_dev->mdio.bus->id,
 				 phy_dev->mdio.addr);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 			snprintf(slave_data->phy_id, sizeof(slave_data->phy_id),
 				 PHY_ID_FMT, phy_dev->bus->id, phy_dev->addr);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		} else if (parp) {
 			u32 phyid;
 			struct device_node *mdio_node;

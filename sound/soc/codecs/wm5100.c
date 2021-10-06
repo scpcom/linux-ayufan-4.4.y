@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * wm5100.c  --  WM5100 ALSA SoC Audio driver
  *
@@ -2309,11 +2306,11 @@ static void wm5100_init_gpio(struct i2c_client *i2c)
 
 	wm5100->gpio_chip = wm5100_template_chip;
 	wm5100->gpio_chip.ngpio = 6;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	wm5100->gpio_chip.parent = &i2c->dev;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	wm5100->gpio_chip.dev = &i2c->dev;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	if (wm5100->pdata.gpio_base)
 		wm5100->gpio_chip.base = wm5100->pdata.gpio_base;

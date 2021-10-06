@@ -564,12 +564,12 @@ enum ethtool_stringset {
 	ETH_SS_FEATURES,
 	ETH_SS_RSS_HASH_FUNCS,
 	ETH_SS_TUNABLES,
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 /*
  * @ETH_SS_PHY_STATS: Statistic names, for use with %ETHTOOL_GPHYSTATS
  */
 	ETH_SS_PHY_STATS,
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 };
 
 /**
@@ -1251,9 +1251,9 @@ enum ethtool_sfeatures_retval_bits {
 #define ETHTOOL_SRSSH		0x00000047 /* Set RX flow hash configuration */
 #define ETHTOOL_GTUNABLE	0x00000048 /* Get tunable configuration */
 #define ETHTOOL_STUNABLE	0x00000049 /* Set tunable configuration */
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 #define ETHTOOL_GPHYSTATS	0x0000004a /* get PHY-specific statistics */
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 #if defined(MY_ABC_HERE)
 #define ETHTOOL_GLINKSETTINGS	0x0000004c /* Get ethtool_link_settings */

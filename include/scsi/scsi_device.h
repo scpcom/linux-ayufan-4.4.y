@@ -85,7 +85,7 @@ struct scsi_device {
 
 	unsigned int id, channel;
 	u64 lun;
-#if defined(MY_ABC_HERE) || defined(MY_DEF_HERE)
+#if defined(MY_ABC_HERE) || defined(CONFIG_SYNO_PORT_MAPPING_V2)
 	char syno_disk_name[BDEVNAME_SIZE];		 
 #endif  
 #ifdef MY_ABC_HERE
@@ -193,7 +193,7 @@ struct scsi_device {
 
 	enum scsi_device_state sdev_state;
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_SPINUP_DELAY
 	 
 	unsigned int	    spinup_queue_id;
 	 
@@ -217,7 +217,7 @@ struct scsi_device {
 #define SERIAL_NUM_SIZE        36       
 	char syno_disk_serial[SERIAL_NUM_SIZE + 1];
 #endif  
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_PORT_MAPPING_V2
 #define BLOCK_INFO_SIZE        512      
 	char syno_block_info[BLOCK_INFO_SIZE];
 #endif  
@@ -298,7 +298,7 @@ static inline struct scsi_target *scsi_target(struct scsi_device *sdev)
 #define starget_printk(prefix, starget, fmt, a...)	\
 	dev_printk(prefix, &(starget)->dev, fmt, ##a)
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_SPINUP_DELAY
 int SynoSpinupBegin(struct scsi_device *device);
 void SynoSpinupEnd(struct scsi_device *sdev);
 int SynoSpinupRemove(struct scsi_device *sdev);

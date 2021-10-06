@@ -121,9 +121,9 @@ EXPORT_SYMBOL(system_state);
 
 #ifdef CONFIG_RTK_MEM_REMAP
 extern void rtk_mem_remap_of_init(void);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 extern void of_reserved_mem_remap(void);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */
 #endif
 
 extern void time_init(void);
@@ -607,11 +607,11 @@ asmlinkage __visible void __init start_kernel(void)
         rtk_mem_remap_of_init();
 #endif /* CONFIG_RTK_MEM_REMAP */
 #endif /* MY_DEF_HERE */
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 #ifdef CONFIG_RTK_MEM_REMAP
 	of_reserved_mem_remap();
 #endif /* CONFIG_RTK_MEM_REMAP */
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */
 	sched_clock_postinit();
 	perf_event_init();
 	profile_init();

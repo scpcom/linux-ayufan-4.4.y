@@ -77,7 +77,7 @@
 #define SYNO_LIBATA_JMB_BEHAVIOR
 #endif
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_MV_9170_GPIO_CTRL
 #define SYNO_MV_9170_GPIO_CTRL
 #endif  
 
@@ -85,7 +85,7 @@
 #define SYNO_SMB_PSTRING_LEN 1024
 #endif
 
-#if defined(CONFIG_MV_XOR_MEMCOPY) && (defined(MY_DEF_HERE) || defined(MY_ABC_HERE))
+#if defined(CONFIG_MV_XOR_MEMCOPY) && (defined(CONFIG_SYNO_LIO) || defined(MY_ABC_HERE))
 #define SYNO_MV_PERF
 #endif  
 
@@ -109,7 +109,7 @@
  
 #define SYNO_ISCSI_DEVICE_INDEX    (26 + 25 * 26)     
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ARMADA
  
 #define SYNO_INTERNAL_MICROSD_NAME "4-4"
 #endif  

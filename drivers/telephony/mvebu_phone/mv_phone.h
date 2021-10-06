@@ -1,7 +1,4 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_ARMADA_16_12)
 /*******************************************************************************
  * Copyright (C) 2016 Marvell International Ltd.
  *
@@ -127,13 +124,13 @@
 /****************************************************************/
 /*************** Telephony configuration ************************/
 /****************************************************************/
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 extern int use_pclk_external;
 extern long int tdm_base;
 #define MV_TDM_REGS_BASE	(tdm_base)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 
 /* Core DivClk Control Register */
 
@@ -192,16 +189,16 @@ enum mv_phone_frame_ts {
 	MV_FRAME_128TS = 128
 };
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 enum mv_phone_spi_mode {
 	MV_SPI_MODE_DIRECT = 0,
 	MV_SPI_MODE_DAISY_CHAIN = 1
 };
 
-#endif /* MY_DEF_HERE */
-#if defined(MY_DEF_HERE)
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 struct mv_phone_extended_stats {
 	u32 int_rx_count;
 	u32 int_tx_count;
@@ -215,11 +212,11 @@ struct mv_phone_extended_stats {
 	u32 int_tx1_miss;
 	u32 pcm_restart_count;
 };
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 #endif
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 
 struct mv_phone_intr_info {
 	u8 *tdm_rx_buff;
@@ -236,16 +233,16 @@ struct mv_phone_params {
 	u16 total_channels;
 };
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 struct mv_phone_data {
 	u8 spi_mode;
 	u32 family_id;
 	enum mv_phone_frame_ts frame_ts;
 };
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 struct mv_phone_dev {
 	void __iomem *tdm_base;
 	void __iomem *pll_base;
@@ -256,13 +253,13 @@ struct mv_phone_dev {
 	struct device_node *np;
 	struct clk *clk;
 	u32 pclk_freq_mhz;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	u8 irq_count;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	int irq[3];
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	spinlock_t lock;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 
 	/* Used to preserve TDM registers across suspend/resume */
 	u32 tdm_ctrl_regs[TDM_CTRL_REGS_NUM];
@@ -272,7 +269,7 @@ struct mv_phone_dev {
 	u32 tdm_misc_reg;
 
 	struct device *dev;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 
 	/* Transmit buffers */
 	u8 *rx_buff;
@@ -294,15 +291,15 @@ struct mv_phone_dev {
 	bool pcm_stop_status;
 	int pcm_start_stop_state;
 	bool pcm_is_stopping;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 	u32 pcm_stop_fail;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 	bool use_tdm_ext_stats;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 #endif
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 
 	/* TDM2C SPI operation mode */
 	enum mv_phone_spi_mode tdm2c_spi_mode;
@@ -311,7 +308,7 @@ struct mv_phone_dev {
 
 	/* TDMMC silicon revision */
 	enum tdmmc_ip_version tdmmc_ip_ver;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 };
 
 /* This enumerator defines the Marvell Units ID */
@@ -351,56 +348,56 @@ static inline void mv_phone_reset_bit(void __iomem *addr, u32 bit_mask)
 
 /* MV Phone */
 u32 mv_phone_get_slic_board_type(void);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 void mv_phone_spi_write(u16 line_id, u8 *cmd_buff, u8 cmd_size,
 			u8 *data_buff, u8 data_size, u32 spi_type);
 void mv_phone_spi_read(u16 line_id, u8 *cmd_buff, u8 cmd_size,
 		       u8 *data_buff, u8 data_size, u32 spi_type);
 void mv_phone_intr_enable(u8 device_id);
 void mv_phone_intr_disable(u8 device_id);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 void mv_phone_spi_write(u16 lineId, u8 *cmdBuff, u8 cmdSize,
 			u8 *dataBuff, u8 dataSize, u32 spiType);
 void mv_phone_spi_read(u16 lineId, u8 *cmdBuff, u8 cmdSize,
 		       u8 *dataBuff, u8 dataSize, u32 spiType);
 void mv_phone_intr_enable(u8 deviceId);
 void mv_phone_intr_disable(u8 deviceId);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 
 /* TDM2C */
 int tdm2c_init(void __iomem *base, struct device *dev,
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	       struct mv_phone_params *tdm_params,
 	       enum mv_phone_frame_ts frame_ts,
 	       enum mv_phone_spi_mode spi_mode,
 	       bool use_pclk_external);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	       struct mv_phone_params *tdmParams, struct mv_phone_data *halData);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 int tdm2c_intr_low(struct mv_phone_intr_info *tdm_intr_info);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 //do nothing
-#else /* MY_DEF_HERE */
-#if defined(MY_DEF_HERE)
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 void tdm2c_ext_stats_get(struct mv_phone_extended_stats *tdm_ext_stats);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 void tdm2c_ext_stats_get(struct mv_phone_extended_stats *tdmExtStats);
-#endif /* MY_DEF_HERE */
-#if defined(MY_DEF_HERE)
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 #endif
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
 
 /* TDMMC */
 int tdmmc_init(void __iomem *base, struct device *dev, struct mv_phone_params *tdm_params,
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
 	       enum mv_phone_frame_ts frame_ts, enum tdmmc_ip_version tdmmc_ip_ver);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 	       struct mv_phone_data *hal_data);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
 int tdmmc_intr_low(struct mv_phone_intr_info *tdm_intr_info);
 
 #endif /* _MV_PHONE_H_ */
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */

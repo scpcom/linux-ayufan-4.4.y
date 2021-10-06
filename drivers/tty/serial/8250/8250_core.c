@@ -29,7 +29,7 @@
 
 #include "8250.h"
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_FIX_TTYS_FUNCTIONS
 #include <linux/pci_regs.h>
 #include <asm/pci-direct.h>
 
@@ -462,7 +462,7 @@ static void __init serial8250_isa_init_ports(void)
 	     i < ARRAY_SIZE(old_serial_port) && i < nr_uarts;
 	     i++, up++) {
 		struct uart_port *port = &up->port;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_FIX_TTYS_FUNCTIONS
 		 
 		char *str;
 		if ((0 == i) && (!strncmp(gszSynoTtyS0, "serial", 6))) {
@@ -612,7 +612,7 @@ static int __init univ8250_console_init(void)
 	if (nr_uarts == 0)
 		return -ENODEV;
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(MY_DEF_HERE) || defined(CONFIG_SYNO_FIX_TTYS_FUNCTIONS)
 	return -ENODEV;
 #endif  
 
@@ -805,7 +805,7 @@ static struct platform_device *serial8250_isa_devs;
 
 static DEFINE_MUTEX(serial_mutex);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_FIX_TTYS_FUNCTIONS
 static unsigned long syno_parse_ttys_port(char* s)
 {
 	unsigned long Ret = 0;
@@ -868,7 +868,7 @@ static struct uart_8250_port *serial8250_find_match_or_unused(struct uart_port *
 {
 	int i;
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_FIX_TTYS_FUNCTIONS
 	char *str;
 	switch (port->iotype) {
 		case UPIO_PORT:
@@ -925,7 +925,7 @@ static struct uart_8250_port *serial8250_find_match_or_unused(struct uart_port *
  
 #endif  
 	 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_FIX_TTYS_FUNCTIONS
 	for (i = CONFIG_SYNO_TTYS_FUN_NUM; i < nr_uarts; i++)
 #else  
 	for (i = 0; i < nr_uarts; i++)
@@ -936,13 +936,13 @@ static struct uart_8250_port *serial8250_find_match_or_unused(struct uart_port *
 	i = port->line;
 	if (i < nr_uarts && serial8250_ports[i].port.type == PORT_UNKNOWN &&
 			serial8250_ports[i].port.iobase == 0
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_FIX_TTYS_FUNCTIONS
 			&& i > (CONFIG_SYNO_TTYS_FUN_NUM - 1)
 #endif  
 	)
 		return &serial8250_ports[i];
 	 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_FIX_TTYS_FUNCTIONS
 	for (i = CONFIG_SYNO_TTYS_FUN_NUM; i < nr_uarts; i++)
 #else  
 	for (i = 0; i < nr_uarts; i++)
@@ -951,7 +951,7 @@ static struct uart_8250_port *serial8250_find_match_or_unused(struct uart_port *
 		    serial8250_ports[i].port.iobase == 0)
 			return &serial8250_ports[i];
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_FIX_TTYS_FUNCTIONS
 	for (i = CONFIG_SYNO_TTYS_FUN_NUM; i < nr_uarts; i++)
 #else  
 	for (i = 0; i < nr_uarts; i++)

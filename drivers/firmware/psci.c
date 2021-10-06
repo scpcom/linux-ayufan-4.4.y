@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -35,7 +32,7 @@
 #include <asm/smp_plat.h>
 #include <asm/suspend.h>
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ARMADA37XX
 #include <linux/delay.h>
 #include <linux/serial_reg.h>
 
@@ -47,7 +44,7 @@
 #define UART_1BYTE_TX_HOLDING	0x1C
 #define SOFTWARE_SHUTDOWN	0x31
 #define SOFTWARE_REBOOT		0x43
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_ARMADA37XX */
 /*
  * While a 64-bit OS can make calls with SMC32 calling conventions, for some
  * calls it is necessary to use SMC64 to pass or return 64-bit values.
@@ -253,7 +250,7 @@ static int get_set_conduit_method(struct device_node *np)
 	}
 	return 0;
 }
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ARMADA37XX
 #define  CTRL_TXFIFO_RST	BIT(15)
 #define  CTRL_RXFIFO_RST	BIT(14)
 #define  CTRL_BRK_DET_INT	BIT(3)
@@ -324,7 +321,7 @@ static void synology_power_off(void)
 	synology_init_uart(uart1_base);
 	UART1_WRITE(SOFTWARE_SHUTDOWN, uart1_base, UART_1BYTE_TX_HOLDING);
 }
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_ARMADA37XX */
 static void psci_sys_reset(enum reboot_mode reboot_mode, const char *cmd)
 {
 	invoke_psci_fn(PSCI_0_2_FN_SYSTEM_RESET, 0, 0, 0);
@@ -334,7 +331,7 @@ static void psci_sys_poweroff(void)
 {
 	invoke_psci_fn(PSCI_0_2_FN_SYSTEM_OFF, 0, 0, 0);
 }
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_ARMADA37XX */
 
 static int __init psci_features(u32 psci_func_id)
 {
@@ -439,14 +436,14 @@ static void __init psci_0_2_set_functions(void)
 
 	psci_ops.migrate_info_type = psci_migrate_info_type;
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ARMADA37XX
 	arm_pm_restart = synology_restart;
 	pm_power_off = synology_power_off;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_ARMADA37XX */
 	arm_pm_restart = psci_sys_reset;
 
 	pm_power_off = psci_sys_poweroff;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_ARMADA37XX */
 }
 
 /*

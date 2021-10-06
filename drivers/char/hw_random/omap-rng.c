@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * omap-rng.c - RNG driver for TI OMAP CPU family
  *
@@ -31,9 +28,9 @@
 #include <linux/of_device.h>
 #include <linux/of_address.h>
 #include <linux/interrupt.h>
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 #include <linux/clk.h>
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 #include <asm/io.h>
 
@@ -69,20 +66,20 @@
 
 #define OMAP2_RNG_OUTPUT_SIZE			0x4
 #define OMAP4_RNG_OUTPUT_SIZE			0x8
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 #define EIP76_RNG_OUTPUT_SIZE			0x10
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 enum {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	RNG_OUTPUT_0_REG = 0,
 	RNG_OUTPUT_1_REG,
 	RNG_OUTPUT_2_REG,
 	RNG_OUTPUT_3_REG,
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	RNG_OUTPUT_L_REG = 0,
 	RNG_OUTPUT_H_REG,
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	RNG_STATUS_REG,
 	RNG_INTMASK_REG,
 	RNG_INTACK_REG,
@@ -98,11 +95,11 @@ enum {
 };
 
 static const u16 reg_map_omap2[] = {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	[RNG_OUTPUT_0_REG]	= 0x0,
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	[RNG_OUTPUT_L_REG]	= 0x0,
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	[RNG_STATUS_REG]	= 0x4,
 	[RNG_CONFIG_REG]	= 0x28,
 	[RNG_REV_REG]		= 0x3c,
@@ -110,13 +107,13 @@ static const u16 reg_map_omap2[] = {
 };
 
 static const u16 reg_map_omap4[] = {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	[RNG_OUTPUT_0_REG]	= 0x0,
 	[RNG_OUTPUT_1_REG]	= 0x4,
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	[RNG_OUTPUT_L_REG]	= 0x0,
 	[RNG_OUTPUT_H_REG]	= 0x4,
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	[RNG_STATUS_REG]	= 0x8,
 	[RNG_INTMASK_REG]	= 0xc,
 	[RNG_INTACK_REG]	= 0x10,
@@ -131,7 +128,7 @@ static const u16 reg_map_omap4[] = {
 	[RNG_SYSCONFIG_REG]	= 0x1FE4,
 };
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 static const u16 reg_map_eip76[] = {
 	[RNG_OUTPUT_0_REG]	= 0x0,
 	[RNG_OUTPUT_1_REG]	= 0x4,
@@ -148,7 +145,7 @@ static const u16 reg_map_eip76[] = {
 	[RNG_ALARMSTOP_REG]	= 0x2c,
 	[RNG_REV_REG]		= 0x7c,
 };
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 struct omap_rng_dev;
 /**
@@ -171,10 +168,10 @@ struct omap_rng_dev {
 	void __iomem			*base;
 	struct device			*dev;
 	const struct omap_rng_pdata	*pdata;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	struct hwrng rng;
 	struct clk			*clk;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 };
 
 static inline u32 omap_rng_read(struct omap_rng_dev *priv, u16 reg)
@@ -188,7 +185,7 @@ static inline void omap_rng_write(struct omap_rng_dev *priv, u16 reg,
 	__raw_writel(val, priv->base + priv->pdata->regs[reg]);
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 static int omap_rng_do_read(struct hwrng *rng, void *data, size_t max,
 			    bool wait)
 {
@@ -207,7 +204,7 @@ static int omap_rng_do_read(struct hwrng *rng, void *data, size_t max,
 
 	return priv->pdata->data_size;
 }
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 static int omap_rng_data_present(struct hwrng *rng, int wait)
 {
 	struct omap_rng_dev *priv;
@@ -244,7 +241,7 @@ static int omap_rng_data_read(struct hwrng *rng, u32 *data)
 		omap_rng_write(priv, RNG_INTACK_REG, RNG_REG_INTACK_RDY_MASK);
 	return data_size;
 }
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 static int omap_rng_init(struct hwrng *rng)
 {
@@ -262,9 +259,9 @@ static void omap_rng_cleanup(struct hwrng *rng)
 	priv->pdata->cleanup(priv);
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 static struct hwrng omap_rng_ops = {
 	.name		= "omap",
 	.data_present	= omap_rng_data_present,
@@ -272,7 +269,7 @@ static struct hwrng omap_rng_ops = {
 	.init		= omap_rng_init,
 	.cleanup	= omap_rng_cleanup,
 };
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 static inline u32 omap2_rng_data_present(struct omap_rng_dev *priv)
 {
@@ -304,7 +301,7 @@ static inline u32 omap4_rng_data_present(struct omap_rng_dev *priv)
 	return omap_rng_read(priv, RNG_STATUS_REG) & RNG_REG_STATUS_RDY;
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 static int eip76_rng_init(struct omap_rng_dev *priv)
 {
 	u32 val;
@@ -336,7 +333,7 @@ static int eip76_rng_init(struct omap_rng_dev *priv)
 
 	return 0;
 }
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 static int omap4_rng_init(struct omap_rng_dev *priv)
 {
@@ -407,7 +404,7 @@ static struct omap_rng_pdata omap4_rng_pdata = {
 	.cleanup	= omap4_rng_cleanup,
 };
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 static struct omap_rng_pdata eip76_rng_pdata = {
 	.regs		= (u16 *)reg_map_eip76,
 	.data_size	= EIP76_RNG_OUTPUT_SIZE,
@@ -415,7 +412,7 @@ static struct omap_rng_pdata eip76_rng_pdata = {
 	.init		= eip76_rng_init,
 	.cleanup	= omap4_rng_cleanup,
 };
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 static const struct of_device_id omap_rng_of_match[] = {
 		{
@@ -426,12 +423,12 @@ static const struct of_device_id omap_rng_of_match[] = {
 			.compatible	= "ti,omap4-rng",
 			.data		= &omap4_rng_pdata,
 		},
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 		{
 			.compatible	= "inside-secure,safexcel-eip76",
 			.data		= &eip76_rng_pdata,
 		},
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		{},
 };
 MODULE_DEVICE_TABLE(of, omap_rng_of_match);
@@ -450,12 +447,12 @@ static int of_get_omap_rng_device_details(struct omap_rng_dev *priv,
 	}
 	priv->pdata = match->data;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	if (of_device_is_compatible(dev->of_node, "ti,omap4-rng") ||
 	    of_device_is_compatible(dev->of_node, "inside-secure,safexcel-eip76")) {
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	if (of_device_is_compatible(dev->of_node, "ti,omap4-rng")) {
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 		irq = platform_get_irq(pdev, 0);
 		if (irq < 0) {
 			dev_err(dev, "%s: error getting IRQ resource - %d\n",
@@ -472,7 +469,7 @@ static int of_get_omap_rng_device_details(struct omap_rng_dev *priv,
 		}
 		omap_rng_write(priv, RNG_INTMASK_REG, RNG_SHUTDOWN_OFLO_MASK);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 		priv->clk = of_clk_get(pdev->dev.of_node, 0);
 		if (IS_ERR(priv->clk) && PTR_ERR(priv->clk) == -EPROBE_DEFER)
 			return -EPROBE_DEFER;
@@ -481,7 +478,7 @@ static int of_get_omap_rng_device_details(struct omap_rng_dev *priv,
 			if (err)
 				dev_err(&pdev->dev, "unable to enable the clk, err = %d\n", err);
 		}
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	}
 	return 0;
 }
@@ -511,15 +508,15 @@ static int omap_rng_probe(struct platform_device *pdev)
 	if (!priv)
 		return -ENOMEM;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	priv->rng.read = omap_rng_do_read;
 	priv->rng.init = omap_rng_init;
 	priv->rng.cleanup = omap_rng_cleanup;
 
 	priv->rng.priv = (unsigned long)priv;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	omap_rng_ops.priv = (unsigned long)priv;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	platform_set_drvdata(pdev, priv);
 	priv->dev = dev;
 
@@ -530,7 +527,7 @@ static int omap_rng_probe(struct platform_device *pdev)
 		goto err_ioremap;
 	}
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	priv->rng.name = devm_kstrdup(dev, dev_name(dev), GFP_KERNEL);
 
 	if (!priv->rng.name) {
@@ -556,7 +553,7 @@ static int omap_rng_probe(struct platform_device *pdev)
 
 	dev_info(&pdev->dev, "Random Number Generator ver. %02x\n",
 		 omap_rng_read(priv, RNG_REV_REG));
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	pm_runtime_enable(&pdev->dev);
 	ret = pm_runtime_get_sync(&pdev->dev);
 	if (ret < 0) {
@@ -576,30 +573,30 @@ static int omap_rng_probe(struct platform_device *pdev)
 
 	dev_info(&pdev->dev, "OMAP Random Number Generator ver. %02x\n",
 		 omap_rng_read(priv, RNG_REV_REG));
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	return 0;
 
 err_register:
 	priv->base = NULL;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	pm_runtime_put_sync(&pdev->dev);
 	pm_runtime_disable(&pdev->dev);
 
 	if (!IS_ERR(priv->clk))
 		clk_disable_unprepare(priv->clk);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	pm_runtime_disable(&pdev->dev);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 err_ioremap:
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_10)
 	if (ret != -EPROBE_DEFER)
 		dev_err(dev, "initialization failed.\n");
 
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_10 */
 	dev_err(dev, "initialization failed.\n");
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_10 */
 	return ret;
 }
 
@@ -607,21 +604,21 @@ static int omap_rng_remove(struct platform_device *pdev)
 {
 	struct omap_rng_dev *priv = platform_get_drvdata(pdev);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	hwrng_unregister(&omap_rng_ops);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	priv->pdata->cleanup(priv);
 
 	pm_runtime_put_sync(&pdev->dev);
 	pm_runtime_disable(&pdev->dev);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	if (!IS_ERR(priv->clk))
 		clk_disable_unprepare(priv->clk);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 
 	return 0;
 }

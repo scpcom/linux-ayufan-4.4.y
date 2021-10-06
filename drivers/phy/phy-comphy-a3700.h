@@ -1,7 +1,4 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
 #ifndef _COMPHY_A3700_H
 #define _COMPHY_A3700_H
 
@@ -11,16 +8,16 @@ extern const struct mvebu_comphy_soc_info a3700_comphy;
 #define A3700_COMPHY_PLL_LOCK_TIMEOUT		1000
 #define REG_16_BIT_MASK				0xFFFF
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_10)
 //do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_10 */
 enum {
 	COMPHY_LANE0 = 0,
 	COMPHY_LANE1,
 	COMPHY_LANE2,
 	COMPHY_LANE_MAX,
 };
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_10 */
 #define COMPHY_SELECTOR_PHY_REG_OFFSET		0xFC
 /* bit0: 0: Lane0 is GBE0; 1: Lane1 is PCIE */
 #define COMPHY_SELECTOR_PCIE_GBE0_SEL_BIT	BIT(0)
@@ -213,11 +210,11 @@ enum {
 #define CFG_PM_RXDLOZ_WAIT_12_UNIT		(0xC << CFG_PM_RXDLOZ_WAIT_OFF)
 
 /* SGMII */
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 #define COMPHY_PHY_CFG1_OFFSET(lane)		((1 - (lane)) * 0x28)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 #define COMPHY_PHY_CFG1_OFFSET(lane)		((lane) * 0x28)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 #define PIN_PU_IVEREF_BIT			BIT(1)
 #define PIN_RESET_CORE_BIT			BIT(11)
 #define PIN_RESET_COMPHY_BIT			BIT(12)
@@ -237,11 +234,11 @@ enum {
  * lane0: PCIe/GbE0 PHY Status 1
  * lane1: USB3/GbE1 PHY Status 1
  */
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
 #define COMPHY_PHY_STATUS_OFFSET(lane)		(0x18 + (1 - (lane)) * 0x28)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 #define COMPHY_PHY_STATUS_OFFSET(lane)		(0x18 + (lane) * 0x28)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
 #define PHY_RX_INIT_DONE_BIT			BIT(0)
 #define PHY_PLL_READY_RX_BIT			BIT(2)
 #define PHY_PLL_READY_TX_BIT			BIT(3)
@@ -250,4 +247,4 @@ enum {
 
 #endif /* _COMPHY_A3700_H */
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */

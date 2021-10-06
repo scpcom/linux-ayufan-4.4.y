@@ -1,4 +1,4 @@
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 /*
  * Realtek pin controller driver
  *
@@ -9,7 +9,7 @@
  * Free Software Foundation; either version 2 of the License, or (at your
  * option) any later version.
  */
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */
 
 #ifndef __PINCTRL_RTK129X_H
 #define __PINCTRL_RTK129X_H
@@ -19,11 +19,11 @@
 
 //#define RTK_PINCTRL_DEBUG
 #ifdef RTK_PINCTRL_DEBUG
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 #define RTK_PINCTRL_DBG(fmt, ....) pr_info("[PINCTRL] " fmt "\n", ## __VA_ARGS__)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_RTD1619 */
 #define RTK_PINCTRL_DBG(fmt, ...) printk("[PINCTRL] " fmt "\n", ## __VA_ARGS__)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */
 #else
 #define RTK_PINCTRL_DBG(fmt, ...) do {} while (0)
 #endif
@@ -491,21 +491,21 @@ struct RTK_pinctrl_desc {
 struct RTK_pinctrl_function {
 	const char	*name;
 	const char	**groups;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 	unsigned int	ngroups;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_RTD1619 */
 	unsigned	ngroups;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */
 };
 
 struct RTK_pinctrl_group {
 	const char	*name;
 	unsigned long	config;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 	unsigned int	pin;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_RTD1619 */
 	unsigned	pin;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */
 };
 
 struct RTK_pinctrl {
@@ -517,17 +517,17 @@ struct RTK_pinctrl {
 	struct RTK_pinctrl_desc	*desc;
 	struct device			*dev;
 	struct RTK_pinctrl_function	*functions;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 	unsigned int			nfunctions;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_RTD1619 */
 	unsigned			nfunctions;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */
 	struct RTK_pinctrl_group	*groups;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_RTD1619)
 	unsigned int			ngroups;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_RTD1619 */
 	unsigned			ngroups;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_RTD1619 */
 	struct pinctrl_dev		*pctl_dev;
 };
 

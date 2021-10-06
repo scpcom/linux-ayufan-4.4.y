@@ -1134,10 +1134,10 @@ void tick_setup_sched_timer(void)
 {
 	struct tick_sched *ts = this_cpu_ptr(&tick_cpu_sched);
 	ktime_t now = ktime_get();
-#if defined(CONFIG_ARCH_RTD16xx) && defined(MY_DEF_HERE)
+#if defined(CONFIG_ARCH_RTD16xx) && defined(CONFIG_SYNO_LSP_RTD1619)
 	/* Offset the tick to avert jiffies_lock contentio,(CH bonding) */
 	u64 offset = ktime_to_ns(tick_period) >> 1;
-#endif /* CONFIG_ARCH_RTD16xx && MY_DEF_HERE */
+#endif /* CONFIG_ARCH_RTD16xx && CONFIG_SYNO_LSP_RTD1619 */
 
 	/*
 	 * Emulate tick processing via per-CPU hrtimers:
@@ -1148,11 +1148,11 @@ void tick_setup_sched_timer(void)
 	/* Get the next period (per cpu) */
 	hrtimer_set_expires(&ts->sched_timer, tick_init_jiffy_update());
 
-#if defined(CONFIG_ARCH_RTD16xx) && defined(MY_DEF_HERE)
+#if defined(CONFIG_ARCH_RTD16xx) && defined(CONFIG_SYNO_LSP_RTD1619)
 	do_div(offset, num_possible_cpus());
 	offset *= smp_processor_id();
 	hrtimer_add_expires_ns(&ts->sched_timer, offset);
-#else /* CONFIG_ARCH_RTD16xx && MY_DEF_HERE */
+#else /* CONFIG_ARCH_RTD16xx && CONFIG_SYNO_LSP_RTD1619 */
 	/* Offset the tick to avert jiffies_lock contention. */
 	if (sched_skew_tick) {
 		u64 offset = ktime_to_ns(tick_period) >> 1;
@@ -1160,7 +1160,7 @@ void tick_setup_sched_timer(void)
 		offset *= smp_processor_id();
 		hrtimer_add_expires_ns(&ts->sched_timer, offset);
 	}
-#endif /* CONFIG_ARCH_RTD16xx && MY_DEF_HERE */
+#endif /* CONFIG_ARCH_RTD16xx && CONFIG_SYNO_LSP_RTD1619 */
 
 	hrtimer_forward(&ts->sched_timer, now, tick_period);
 	hrtimer_start_expires(&ts->sched_timer, HRTIMER_MODE_ABS_PINNED);

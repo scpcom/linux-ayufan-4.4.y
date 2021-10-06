@@ -61,7 +61,7 @@ extern int g_use_mv14xx_remap;
 int syno_get_mv_14xx_remap_idx(int origin_idx);
 #endif  
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_PORT_MAPPING_V2
 #define DT_INTERNAL_SLOT "internal_slot"
 #define DT_ESATA_SLOT "esata_port"
 #define DT_PCIE_SLOT "pcie_slot"
@@ -145,7 +145,7 @@ extern int g_nvc_map_index;
 extern int g_syno_nvc_index_map[SATA_REMAP_MAX];
 void syno_insert_sata_index_remap(unsigned int idx, unsigned int num, unsigned int id_start);
 #endif  
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ONBOARD_M2_SATA_AS_NVC
 #define M2_HOST_LEN_MAX 128
 #define M2_PORT_NO_MAX 16
 extern char gSynoM2HostName[M2_HOST_LEN_MAX];
@@ -163,7 +163,7 @@ extern int g_syno_hdd_enable_no;
 extern int g_syno_hdd_enable_list[SYNO_SPINUP_GROUP_PIN_MAX_NUM];
 #endif  
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_REMAP_SATA_TO_SYS_ONLY_DEV
 #define SYSTEM_DEVICE_START_IDX 900
 #define SYSTEM_DEVICE_NUM_MAX 10
 #endif  
