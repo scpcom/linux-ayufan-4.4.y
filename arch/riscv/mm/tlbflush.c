@@ -3,8 +3,7 @@
 #include <linux/mm.h>
 #include <linux/smp.h>
 
-#define XUANTIE
-#ifdef XUANTIE
+#ifdef CONFIG_RISCV_XUANTIE
 #include <asm/mmu_context.h>
 
 void flush_tlb_all(void)

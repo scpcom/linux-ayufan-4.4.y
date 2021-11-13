@@ -13,9 +13,13 @@ config SOC_SIFIVE
 config RISCV_SUNXI
        bool
 
+config RISCV_XUANTIE
+       bool
+
 config ARCH_SUNXI
        bool "Allwinner RISC-V SoC Family"
        select RISCV_SUNXI
+       select RISCV_XUANTIE
        select CPU_PM if CPU_IDLE
        help
          This enables support for SUNXI SoC platform hardware.
