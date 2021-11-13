@@ -17,6 +17,12 @@
 
 #include <asm/div64.h>
 
+#define MTD_ERASE_PENDING	0x01
+#define MTD_ERASING		0x02
+#define MTD_ERASE_SUSPEND	0x04
+#define MTD_ERASE_DONE		0x08
+#define MTD_ERASE_FAILED	0x10
+
 #define MTD_FAIL_ADDR_UNKNOWN -1LL
 
 struct mtd_info;
@@ -27,9 +33,18 @@ struct mtd_info;
  * or was not specific to any particular block.
  */
 struct erase_info {
+	struct mtd_info *mtd;
 	uint64_t addr;
 	uint64_t len;
 	uint64_t fail_addr;
+	u_long time;
+	u_long retries;
+	unsigned dev;
+	unsigned cell;
+	void (*callback) (struct erase_info *self);
+	u_long priv;
+	u_char state;
+	struct erase_info *next;
 };
 
 struct mtd_erase_region_info {
@@ -277,6 +292,10 @@ struct mtd_info {
 	int (*_point) (struct mtd_info *mtd, loff_t from, size_t len,
 		       size_t *retlen, void **virt, resource_size_t *phys);
 	int (*_unpoint) (struct mtd_info *mtd, loff_t from, size_t len);
+	unsigned long (*_get_unmapped_area) (struct mtd_info *mtd,
+					     unsigned long len,
+					     unsigned long offset,
+					     unsigned long flags);
 	int (*_read) (struct mtd_info *mtd, loff_t from, size_t len,
 		      size_t *retlen, u_char *buf);
 	int (*_write) (struct mtd_info *mtd, loff_t to, size_t len,
@@ -324,6 +343,8 @@ struct mtd_info {
 	 * action if required to ensure writes go through
 	 */
 	bool oops_panic_write;
+
+	struct backing_dev_info *backing_dev_info;
 
 	struct notifier_block reboot_notifier;  /* default mode before reboot */
 
@@ -581,6 +602,8 @@ struct mtd_notifier {
 extern void register_mtd_user (struct mtd_notifier *new);
 extern int unregister_mtd_user (struct mtd_notifier *old);
 void *mtd_kmalloc_up_to(const struct mtd_info *mtd, size_t *size);
+
+void mtd_erase_callback(struct erase_info *instr);
 
 static inline int mtd_is_bitflip(int err) {
 	return err == -EUCLEAN;

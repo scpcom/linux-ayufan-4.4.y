@@ -99,6 +99,15 @@ void flush_icache_mm(struct mm_struct *mm, bool local);
 
 #endif /* CONFIG_SMP */
 
+void dma_wbinv_range(unsigned long start, unsigned long end);
+void dma_wb_range(unsigned long start, unsigned long end);
+void dma_usr_va_wb_range(void *user_addr, unsigned long len);
+void dma_usr_va_inv_range(void *user_addr, unsigned long len);
+void dma_va_wb_range(void *kernel_addr, unsigned long len);
+void dma_va_inv_range(void *kernel_addr, unsigned long len);
+void dma_va_wbinv_range(void *kernel_addr, unsigned long len);
+void dma_clean_dcache_all(void);
+
 /*
  * Bits in sys_riscv_flush_icache()'s flags argument.
  */

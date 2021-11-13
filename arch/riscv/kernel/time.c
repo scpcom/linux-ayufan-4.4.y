@@ -8,6 +8,7 @@
 #include <linux/delay.h>
 #include <asm/sbi.h>
 #include <asm/processor.h>
+#include <linux/of_clk.h>
 
 unsigned long riscv_timebase;
 EXPORT_SYMBOL_GPL(riscv_timebase);
@@ -24,5 +25,8 @@ void __init time_init(void)
 	riscv_timebase = prop;
 
 	lpj_fine = riscv_timebase / HZ;
+#ifdef CONFIG_COMMON_CLK
+	of_clk_init(NULL);
+#endif
 	timer_probe();
 }

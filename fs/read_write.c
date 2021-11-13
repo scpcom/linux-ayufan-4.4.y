@@ -25,6 +25,8 @@
 #include <linux/uaccess.h>
 #include <asm/unistd.h>
 
+#include <trace/events/readahead.h>//jiangbin add for treadahead
+
 const struct file_operations generic_ro_fops = {
 	.llseek		= generic_file_llseek,
 	.read_iter	= generic_file_read_iter,
@@ -453,6 +455,13 @@ ssize_t vfs_read(struct file *file, char __user *buf, size_t count, loff_t *pos)
 		return -EINVAL;
 	if (unlikely(!access_ok(buf, count)))
 		return -EFAULT;
+	/*AW_CODE;jiangbin,add trace for readahead)*/
+	if (S_ISREG(file->f_path.dentry->d_inode->i_mode) &&
+		MAJOR(file->f_path.dentry->d_inode->i_sb->s_dev)) {
+		unsigned long ulpos = (unsigned long)*pos;
+		trace_do_fs_read(file->f_path.dentry->d_inode, ulpos, count);
+	}
+	/*end*/
 
 	ret = rw_verify_area(READ, file, pos, count);
 	if (!ret) {

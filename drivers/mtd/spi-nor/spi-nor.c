@@ -1861,6 +1861,48 @@ static int spansion_read_cr_quad_enable(struct spi_nor *nor)
 	return 0;
 }
 
+static int write_sr_gd(struct spi_nor *nor, u8 val)
+{
+	if (nor->spimem) {
+		struct spi_mem_op op =
+			SPI_MEM_OP(SPI_MEM_OP_CMD(SPINOR_OP_WRCR, 1),
+				   SPI_MEM_OP_NO_ADDR,
+				   SPI_MEM_OP_NO_DUMMY,
+				   SPI_MEM_OP_DATA_OUT(1, &val, 1));
+
+		return spi_mem_exec_op(nor->spimem, &op);
+	}
+
+	return nor->write_reg(nor, SPINOR_OP_WRCR, &val, 1);
+}
+
+
+static int gd_read_cr_quad_enable(struct spi_nor *nor)
+{
+	int ret, val;
+
+	val = read_cr(nor);
+	if (val < 0)
+		return val;
+	if (val & CR_QUAD_EN_GD)
+		return 0;
+
+	write_enable(nor);
+	write_sr_gd(nor, val | CR_QUAD_EN_GD);
+
+	ret = spi_nor_wait_till_ready(nor);
+	if (ret)
+		return ret;
+
+	ret = read_cr(nor);
+	if (!(ret > 0 && (ret & CR_QUAD_EN_GD))) {
+		dev_err(nor->dev, "Gd Quad bit not set\n");
+		return -EINVAL;
+	}
+
+	return 0;
+}
+
 static int spi_nor_write_sr2(struct spi_nor *nor, u8 *sr2)
 {
 	if (nor->spimem) {
@@ -2503,6 +2545,14 @@ static const struct flash_info spi_nor_ids[] = {
 	/* XMC (Wuhan Xinxin Semiconductor Manufacturing Corp.) */
 	{ "XM25QH64A", INFO(0x207017, 0, 64 * 1024, 128, SECT_4K | SPI_NOR_DUAL_READ | SPI_NOR_QUAD_READ) },
 	{ "XM25QH128A", INFO(0x207018, 0, 64 * 1024, 256, SECT_4K | SPI_NOR_DUAL_READ | SPI_NOR_QUAD_READ) },
+
+	/* PUYA */
+	{ "p25q64h", INFO(0x856017, 0x0, 64 * 1024, 128, SECT_4K | SPI_NOR_DUAL_READ | SPI_NOR_QUAD_READ) },
+	{ "p25q32h", INFO(0x856016, 0x0, 64 * 1024, 64, SECT_4K | SPI_NOR_DUAL_READ | SPI_NOR_QUAD_READ) },
+
+	/*Zetta*/
+	{ "zd25q64b", INFO(0xba3217, 0, 64 * 1024, 128, SECT_4K | SPI_NOR_DUAL_READ | SPI_NOR_QUAD_READ) },
+
 	{ },
 };
 
@@ -4397,9 +4447,14 @@ static void st_micron_set_default_init(struct spi_nor *nor)
 
 static void winbond_set_default_init(struct spi_nor *nor)
 {
+	nor->params.quad_enable = spansion_read_cr_quad_enable;
 	nor->params.set_4byte = winbond_set_4byte;
 }
 
+static void gigadevice_set_default_init(struct spi_nor *nor)
+{
+	nor->params.quad_enable = gd_read_cr_quad_enable;
+}
 /**
  * spi_nor_manufacturer_init_params() - Initialize the flash's parameters and
  * settings based on MFR register and ->default_init() hook.
@@ -4410,19 +4465,33 @@ static void spi_nor_manufacturer_init_params(struct spi_nor *nor)
 	/* Init flash parameters based on MFR */
 	switch (JEDEC_MFR(nor->info)) {
 	case SNOR_MFR_MACRONIX:
+	case SNOR_MFR_XMC:
+		//SNOR_MFR_MICRON
+		if (nor->info->id[1] >> 4 == 'b') {
+			st_micron_set_default_init(nor);
+			break;//because XMC and MICRON id[0] equal
+		}
 		macronix_set_default_init(nor);
 		break;
-
-	case SNOR_MFR_ST:
 	case SNOR_MFR_MICRON:
 		st_micron_set_default_init(nor);
 		break;
+	case SNOR_MFR_GIGADEVICE:
+	case SNOR_MFR_ADESTO:
+	case SNOR_MFR_PUYA:
+	case SNOR_MFR_ZETTA:
+		gigadevice_set_default_init(nor);
+		break;
 
+	case SNOR_MFR_SPANSION:
 	case SNOR_MFR_WINBOND:
+	case SNOR_MFR_XT:
 		winbond_set_default_init(nor);
 		break;
 
 	default:
+		dev_err(nor->dev, "SF: Need set QEB func for %02x flash\n",
+				JEDEC_MFR(nor->info));
 		break;
 	}
 

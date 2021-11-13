@@ -73,6 +73,7 @@
 
 #include <trace/events/sched.h>
 
+
 int suid_dumpable = 0;
 
 static LIST_HEAD(formats);
@@ -889,6 +890,7 @@ struct file *open_exec(const char *name)
 		f = do_open_execat(AT_FDCWD, filename, 0);
 		putname(filename);
 	}
+
 	return f;
 }
 EXPORT_SYMBOL(open_exec);

@@ -586,17 +586,21 @@ static int f_audio_bind(struct usb_configuration *c, struct usb_function *f)
 	status = -ENODEV;
 
 	/* allocate instance-specific endpoints */
-	ep = usb_ep_autoconfig(cdev->gadget, &as_out_ep_desc);
-	if (!ep)
-		goto fail;
-	audio->out_ep = ep;
-	audio->out_ep->desc = &as_out_ep_desc;
+	if (audio_opts->c_chmask != 0) {
+		ep = usb_ep_autoconfig(cdev->gadget, &as_out_ep_desc);
+		if (!ep)
+			goto fail;
+		audio->out_ep = ep;
+		audio->out_ep->desc = &as_out_ep_desc;
+	}
 
-	ep = usb_ep_autoconfig(cdev->gadget, &as_in_ep_desc);
-	if (!ep)
-		goto fail;
-	audio->in_ep = ep;
-	audio->in_ep->desc = &as_in_ep_desc;
+	if (audio_opts->p_chmask != 0) {
+		ep = usb_ep_autoconfig(cdev->gadget, &as_in_ep_desc);
+		if (!ep)
+			goto fail;
+		audio->in_ep = ep;
+		audio->in_ep->desc = &as_in_ep_desc;
+	}
 
 	/* copy descriptors, and track endpoint copies */
 	status = usb_assign_descriptors(f, f_audio_desc, f_audio_desc, NULL,
@@ -654,7 +658,7 @@ static ssize_t f_uac1_opts_##name##_show(				\
 	int result;							\
 									\
 	mutex_lock(&opts->lock);					\
-	result = sprintf(page, "%u\n", opts->name);			\
+	result = sprintf(page, "%d\n", opts->name);			\
 	mutex_unlock(&opts->lock);					\
 									\
 	return result;							\

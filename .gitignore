@@ -11,6 +11,7 @@
 #
 .*
 *.a
+*.a.symversions
 *.asn1.[ch]
 *.bin
 *.bz2
@@ -146,3 +147,18 @@ x509.genkey
 
 # Clang's compilation database file
 /compile_commands.json
+
+# Allwinner
+skel/
+!rootfs.cpio.gz
+!rootfs_32bit.cpio.gz
+!rootfs_rv64.cpio.gz
+output/
+arch/arm64/boot/dts/sunxi/board.dts
+arch/arm/boot/dts/board.dts
+arch/riscv/boot/dts/sunxi/board.dts
+!drivers/input/touchscreen/focaltech_touch/include/firmware/*.i
+!drivers/input/touchscreen/focaltech_touch/include/pramboot/*.i
+
+#lto lds
+scripts/module-lto.lds

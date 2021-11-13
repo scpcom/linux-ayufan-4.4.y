@@ -8,7 +8,7 @@
 
 #include <linux/errno.h>
 
-#ifdef CONFIG_SUNXI_CCU
+#if IS_ENABLED(CONFIG_SUNXI_CCU)
 int sunxi_ccu_set_mmc_timing_mode(struct clk *clk, bool new_mode);
 int sunxi_ccu_get_mmc_timing_mode(struct clk *clk);
 #else

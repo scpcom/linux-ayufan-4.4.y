@@ -22,7 +22,7 @@
 
 static gfp_t high_order_gfp_flags = (GFP_HIGHUSER | __GFP_ZERO | __GFP_NOWARN |
 				     __GFP_NORETRY) & ~__GFP_RECLAIM;
-static gfp_t low_order_gfp_flags  = GFP_HIGHUSER | __GFP_ZERO;
+static gfp_t low_order_gfp_flags  = GFP_HIGHUSER | __GFP_ZERO | __GFP_NOWARN;
 static const unsigned int orders[] = {8, 4, 0};
 
 static int order_to_index(unsigned int order)
@@ -285,6 +285,6 @@ static void __exit ion_system_heap_exit(void)
 	ion_system_heap_destroy_pools(system_heap.pools);
 }
 
-module_init(ion_system_heap_init);
+subsys_initcall(ion_system_heap_init);
 module_exit(ion_system_heap_exit);
 MODULE_LICENSE("GPL v2");

@@ -332,7 +332,7 @@ int user_min_free_kbytes = -1;
  */
 int watermark_boost_factor __read_mostly;
 #else
-int watermark_boost_factor __read_mostly = 15000;
+int watermark_boost_factor __read_mostly = 5000;
 #endif
 int watermark_scale_factor = 10;
 
@@ -2429,8 +2429,10 @@ static void steal_suitable_fallback(struct zone *zone, struct page *page,
 	 * may be balanced overall and kswapd will not wake naturally.
 	 */
 	boost_watermark(zone);
+#ifdef CONFIG_TRANSPARENT_HUGEPAGE
 	if (alloc_flags & ALLOC_KSWAPD)
 		set_bit(ZONE_BOOSTED_WATERMARK, &zone->flags);
+#endif
 
 	/* We are not allowed to try stealing from the whole block */
 	if (!whole_block)
@@ -5484,6 +5486,7 @@ void show_free_areas(unsigned int filter, nodemask_t *nodemask)
 
 	for_each_populated_zone(zone) {
 		unsigned int order;
+		int type;
 		unsigned long nr[MAX_ORDER], flags, total = 0;
 		unsigned char types[MAX_ORDER];
 
@@ -5495,7 +5498,6 @@ void show_free_areas(unsigned int filter, nodemask_t *nodemask)
 		spin_lock_irqsave(&zone->lock, flags);
 		for (order = 0; order < MAX_ORDER; order++) {
 			struct free_area *area = &zone->free_area[order];
-			int type;
 
 			nr[order] = area->nr_free;
 			total += nr[order] << order;
@@ -5514,6 +5516,28 @@ void show_free_areas(unsigned int filter, nodemask_t *nodemask)
 				show_migration_types(types[order]);
 		}
 		printk(KERN_CONT "= %lukB\n", K(total));
+
+		printk(KERN_CONT "Free pages count per migrate typeat order:");
+		for (order = 0; order < MAX_ORDER; ++order)
+			printk(KERN_CONT "%6d ", order);
+		printk(KERN_CONT "\n");
+		for (type = 0; type < MIGRATE_TYPES; type++) {
+			printk(KERN_CONT "zone %8s, type %12s ",
+						zone->name,
+						migratetype_names[type]);
+			for (order = 0; order < MAX_ORDER; ++order) {
+				unsigned long freecount = 0;
+				struct free_area *area;
+				struct list_head *curr;
+
+				area = &(zone->free_area[order]);
+
+				list_for_each(curr, &area->free_list[type])
+					freecount++;
+				printk(KERN_CONT "%6ld ", freecount);
+			}
+			printk(KERN_CONT "\n");
+		}
 	}
 
 	hugetlb_show_meminfo();

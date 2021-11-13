@@ -766,6 +766,16 @@ static irqreturn_t ehci_irq (struct usb_hcd *hcd)
 		unsigned	i = HCS_N_PORTS (ehci->hcs_params);
 		u32		ppcd = ~0;
 
+{
+		int pstatus0 = 0;
+		pstatus0 = ehci_readl(ehci, &ehci->regs->port_status[0]);
+
+		if ((pstatus0 & PORT_CONNECT) && (pstatus0 & PORT_CSC)) {
+			ehci_info(ehci, "ehci_irq: highspeed device connect\n");
+		} else if (!(pstatus0 & PORT_CONNECT) && (pstatus0 & PORT_CSC)) {
+			ehci_info(ehci, "ehci_irq: highspeed device disconnect\n");
+		}
+}
 		/* kick root hub later */
 		pcd_status = status;
 
@@ -1333,6 +1343,7 @@ static int __init ehci_hcd_init(void)
 	if (retval < 0)
 		goto clean4;
 #endif
+
 	return retval;
 
 #ifdef XILINX_OF_PLATFORM_DRIVER

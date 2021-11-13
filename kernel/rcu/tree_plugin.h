@@ -1283,7 +1283,7 @@ static void rcu_prepare_for_idle(void)
  * adjustment, they can be converted into kernel config parameters, though
  * making the state machine smarter might be a better option.
  */
-#define RCU_IDLE_GP_DELAY 4		/* Roughly one grace period. */
+#define RCU_IDLE_GP_DELAY 1		/* Roughly one grace period. */
 #define RCU_IDLE_LAZY_GP_DELAY (6 * HZ)	/* Roughly six seconds. */
 
 static int rcu_idle_gp_delay = RCU_IDLE_GP_DELAY;

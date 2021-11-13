@@ -502,6 +502,15 @@ config INPUT_AXP20X_PEK
 	  To compile this driver as a module, choose M here. The module will
 	  be called axp20x-pek.
 
+config INPUT_AXP2101_PEK
+	tristate "X-Powers AXP2101 power button driver"
+	depends on MFD_AXP2101
+	help
+	  Say Y here if you want to enable power key reporting via the
+	  AXP20X PMIC.
+
+	  To compile this driver as a module, choose M here. The module will
+	  be called axp2101-pek.
 
 config INPUT_TWL4030_PWRBUTTON
 	tristate "TWL4030 Power button Driver"
@@ -893,5 +902,11 @@ config INPUT_STPMIC1_ONKEY
 
 	  To compile this driver as a module, choose M here: the
 	  module will be called stpmic1_onkey.
+
+config HALL_SENSOR
+	tristate "hall sensor driver support"
+	default n
+	help
+		This driver implements hall device driver.
 
 endif

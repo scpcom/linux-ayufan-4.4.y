@@ -616,9 +616,9 @@ int add_mtd_device(struct mtd_info *mtd)
 	 * MTD drivers should implement ->_{write,read}() or
 	 * ->_{write,read}_oob(), but not both.
 	 */
-	if (WARN_ON((mtd->_write && mtd->_write_oob) ||
+	/*if (WARN_ON((mtd->_write && mtd->_write_oob) ||
 		    (mtd->_read && mtd->_read_oob)))
-		return -EINVAL;
+		return -EINVAL;*/
 
 	if (WARN_ON((!mtd->erasesize || !mtd->_erase) &&
 		    !(mtd->flags & MTD_NO_ERASE)))

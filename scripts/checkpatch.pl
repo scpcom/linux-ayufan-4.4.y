@@ -2400,6 +2400,14 @@ sub process {
 
 	my $checklicenseline = 1;
 
+	# longan commit log
+	my $sunxi_has_loglevel = 0;
+	my $sunxi_has_pmsid = 0;
+	my $sunxi_has_module_version = 0;
+	my $sunxi_loglevel = 1;
+	my $sunxi_author_isaw = 0;
+	my $sunxi_isrevert = 0;
+
 	sanitise_line_reset();
 	my $line;
 	foreach my $rawline (@rawlines) {
@@ -2782,11 +2790,46 @@ sub process {
 			     "A patch subject line should describe the change not the tool that found it\n" . $herecurr);
 		}
 
-# Check for Gerrit Change-Ids not in any patch context
-		if ($realfile eq '' && !$has_patch_separator && $line =~ /^\s*change-id:/i) {
-			ERROR("GERRIT_CHANGE_ID",
-			      "Remove Gerrit Change-Id's before submitting upstream\n" . $herecurr);
+## Check for unwanted Gerrit info
+#		if ($in_commit_log && $line =~ /^\s*change-id:/i) {
+#			ERROR("GERRIT_CHANGE_ID",
+#			      "Remove Gerrit Change-Id's before submitting upstream.\n" . $herecurr);
+#		}
+
+
+# Check for log level for sunxi
+# clk|pinctrl|uart|dma|rtc|gic|timer|mbus|sid|sysinfo|iommu|pmu|cpufreq|devfreq|thermal|standby|hotplug|cpuidle|pd|rpm|disp|drm|g2d|di|usb|twi|spi|ir|gpadc|lradc|ledc|can|pwm|emac|wifi|bt|mali-utgard|mali-midgard|mali-bifrost|img-sgx|img-rgx
+		if ($in_commit_log && $line =~ /^\ {4}K[01]:sun(?:xi|[1-9][0-9]?i(w[1-9][0-9]?)?(p[1-9])?):P[012]:(?:script|clk|pinctrl|uart|dma|rtc|gic|timer|mbus|sid|sysinfo|iommu|pmu|cpufreq|devfreq|thermal|standby|hotplug|cpuidle|pd|rpm|disp|drm|g2d|di|usb|twi|spi|ir|gpadc|lradc|ledc|can|pwm|emac|wifi|bt|mali-utgard|mali-midgard|mali-bifrost|img-sgx|img-rgx|nand|mmc|nor|mtd|ce|sid|camera|vin|io|tpadc|crypto|input|tee|ramdisk|watchdog|defconfig|min-system|ve|audio|dump_reg|tvd|dsp|tv|msgbox|gpio|plic|reboot|esl|cache|nsi)/){
+		    if ($line =~ /^\ {4}K0:.*/i){
+			$sunxi_loglevel = 0;
+		    }
+		    $sunxi_has_loglevel = 1;
 		}
+
+# Check for PMS ID for sunxi
+		if ($in_commit_log && $line =~ /^\ {4}PMS\ (?:Bug|Task)ID\s*:/){
+		    $sunxi_has_pmsid = 1;
+		}
+
+# Check for Module Version for sunxi
+		if ($in_commit_log && $line =~ /^\ {4}Module Version\s*:/){
+		    $sunxi_has_module_version = 1;
+		}
+
+		if ($in_commit_log && $line =~ /^\ {4}Revert /){
+		    $sunxi_isrevert = 1;
+		}
+
+# Check for Author whether allwinner
+		if ($line =~ /^Author: .*allwinnertech\.com>$/){
+		    $sunxi_author_isaw = 1;
+		}
+
+## Check for Gerrit Change-Ids not in any patch context
+#		if ($realfile eq '' && !$has_patch_separator && $line =~ /^\s*change-id:/i) {
+#			ERROR("GERRIT_CHANGE_ID",
+#			      "Remove Gerrit Change-Id's before submitting upstream\n" . $herecurr);
+#		}
 
 # Check if the commit log is in a possible stack dump
 		if ($in_commit_log && !$commit_log_possible_stack_dump &&
@@ -2875,7 +2918,7 @@ sub process {
 
 			if (defined($id) &&
 			   ($short || $long || $space || $case || ($orig_desc ne $description) || !$hasparens)) {
-				ERROR("GIT_COMMIT_ID",
+				WARN("GIT_COMMIT_ID",
 				      "Please use git commit description style 'commit <12+ chars of sha1> (\"<title line>\")' - ie: '${init_char}ommit $id (\"$description\")'\n" . $herecurr);
 			}
 		}
@@ -6881,6 +6924,22 @@ sub process {
 	if (!$chk_patch && !$is_patch) {
 		exit(0);
 	}
+
+	if ($has_commit_log && $sunxi_author_isaw && !$sunxi_isrevert && !$sunxi_has_loglevel){
+	    ERROR("NO_COMMIT_LEVEL",
+		    "Does not conform to the submission specification, eg:\"K1:sun8i:P0:\[script|clk|pinctrl|uart|dma|rtc|gic|timer|mbus|sid|sysinfo|iommu|pmu|cpufreq|devfreq|thermal|standby|hotplug|cpuidle|pd|rpm|disp|drm|g2d|di|usb|twi|spi|ir|gpadc|lradc|ledc|can|pwm|emac|wifi|bt|mali-utgard|mali-midgard|mali-bifrost|img-sgx|img-rgx|nand|mmc|nor|mtd|ce|sid|carema|vin|io|tpadc|crypto|input|tee|ramdisk|watchdog|defconfig|min-system|ve|audio|dump_reg|tvd|dsp|tv|msgbox|gpio|plic|reboot|esl|cache|nsi\]\n");
+	}
+
+	if ($has_commit_log && $sunxi_author_isaw && !$sunxi_isrevert && !$sunxi_has_pmsid){
+	    ERROR("NO_PMS_ID",
+		    "Without PMS TaskID,or PMS BugID\n");
+	}
+
+	if ($has_commit_log && $sunxi_loglevel && $sunxi_author_isaw && !$sunxi_isrevert && !$sunxi_has_module_version) {
+	    ERROR("NO_MODULE_VERSION",
+		    "Without Module Version information\n");
+	}
+
 
 	if (!$is_patch && $filename !~ /cover-letter\.patch$/) {
 		ERROR("NOT_UNIFIED_DIFF",

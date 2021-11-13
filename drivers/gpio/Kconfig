@@ -141,6 +141,11 @@ config GPIO_RASPBERRYPI_EXP
 	  Turn on GPIO support for the expander on Raspberry Pi 3 boards, using
 	  the firmware mailbox to communicate with VideoCore on BCM283x chips.
 
+config GPIO_SUNXI
+	tristate "SUNXI GPIO Support"
+	help
+	  Say yes if need SUNXI GPIO Support
+
 config GPIO_BCM_KONA
 	bool "Broadcom Kona GPIO"
 	depends on OF_GPIO && (ARCH_BCM_MOBILE || COMPILE_TEST)
@@ -842,6 +847,14 @@ config GPIO_ADNP
 	  example: if a controller provides 48 pins, 6 registers will be
 	  enough to represent all pins, but the driver will assume a
 	  register layout for 64 pins (8 registers).
+
+config GPIO_BS83B16C
+	tristate "bs83b16c I2C GPIO expanders"
+	depends on OF_GPIO && PINCONF && PINCTRL_SUNXI
+	default n
+	help
+	 Say yes herer to enable the bs83b16c to be used as an interrupt
+	 controller.
 
 config GPIO_GW_PLD
 	tristate "Gateworks PLD GPIO Expander"

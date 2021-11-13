@@ -110,3 +110,6 @@ obj-$(CONFIG_TOUCHSCREEN_COLIBRI_VF50)	+= colibri-vf50-ts.o
 obj-$(CONFIG_TOUCHSCREEN_ROHM_BU21023)	+= rohm_bu21023.o
 obj-$(CONFIG_TOUCHSCREEN_RASPBERRYPI_FW)	+= raspberrypi-ts.o
 obj-$(CONFIG_TOUCHSCREEN_IQS5XX)	+= iqs5xx.o
+obj-$(CONFIG_TOUCHSCREEN_GSLX680NEW)    += gslx680new/
+obj-$(CONFIG_TOUCHSCREEN_FTS)    += focaltech_touch/
+obj-$(CONFIG_INPUT_TOUCHSCREEN)    += gt9xxnew/

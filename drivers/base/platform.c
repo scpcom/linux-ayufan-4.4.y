@@ -583,15 +583,31 @@ void platform_device_del(struct platform_device *pdev)
 }
 EXPORT_SYMBOL_GPL(platform_device_del);
 
+#ifdef CONFIG_SUNXI_BOOTEVENT
+#include "../misc/sunxi-bootevent/bootevent.h"
+#else
+#define TIME_LOG_START()
+#define TIME_LOG_END()
+#define bootevent_pdev_register(ts, pdev)
+#endif
+
 /**
  * platform_device_register - add a platform-level device
  * @pdev: platform device we're adding
  */
 int platform_device_register(struct platform_device *pdev)
 {
+	int ret;
+#ifdef CONFIG_SUNXI_BOOTEVENT
+	unsigned long long ts = 0;
+#endif
+	TIME_LOG_START();
 	device_initialize(&pdev->dev);
 	setup_pdev_dma_masks(pdev);
-	return platform_device_add(pdev);
+	ret = platform_device_add(pdev);
+	TIME_LOG_END();
+	bootevent_pdev_register(ts, pdev);
+	return ret;
 }
 EXPORT_SYMBOL_GPL(platform_device_register);
 

@@ -38,15 +38,8 @@ config SND_JACK_INPUT_DEV
 	depends on SND_JACK
 	default y if INPUT=y || INPUT=SND
 
-config SND_OSSEMUL
-	bool "Enable OSS Emulation"
-	select SOUND_OSS_CORE
-	help
-	  This option enables the build of OSS emulation layer.
-
 config SND_MIXER_OSS
 	tristate "OSS Mixer API"
-	depends on SND_OSSEMUL
 	help
 	  To enable OSS mixer API emulation (/dev/mixer*), say Y here
 	  and read <file:Documentation/sound/designs/oss-emulation.rst>.

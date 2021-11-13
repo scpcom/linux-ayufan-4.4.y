@@ -47,6 +47,23 @@ struct ccu_mux {
 	struct ccu_common	common;
 };
 
+#define SUNXI_CCU_MUX_WITH_GATE_KEY(_struct, _name, _parents,		\
+				    _reg, _shift, _width,		\
+				    _key_value, _gate, _flags)		\
+	struct ccu_mux _struct = {					\
+		.enable	= _gate,					\
+		.mux	= _SUNXI_CCU_MUX(_shift, _width),		\
+		.common	= {						\
+			.reg		= _reg,				\
+			.features	= CCU_FEATURE_KEY_FIELD_MOD,	\
+			.key_value	= _key_value,			\
+			.hw.init	= CLK_HW_INIT_PARENTS(_name,	\
+							      _parents, \
+							      &ccu_mux_ops, \
+							      _flags),	\
+		}							\
+	}
+
 #define SUNXI_CCU_MUX_TABLE_WITH_GATE(_struct, _name, _parents, _table,	\
 				     _reg, _shift, _width, _gate,	\
 				     _flags)				\

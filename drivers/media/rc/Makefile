@@ -50,3 +50,6 @@ obj-$(CONFIG_IR_MTK) += mtk-cir.o
 obj-$(CONFIG_IR_ZX) += zx-irdec.o
 obj-$(CONFIG_IR_TANGO) += tango-ir.o
 obj-$(CONFIG_RC_XBOX_DVD) += xbox_remote.o
+obj-$(CONFIG_IR_RX_SUNXI) += sunxi-ir-rx.o
+obj-$(CONFIG_IR_TX_SUNXI) += sunxi-ir-tx.o
+sunxi-ir-rx-objs := rc-sunxi-keymaps.o sunxi-ir-dev.o

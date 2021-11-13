@@ -3,6 +3,7 @@
 config VIDEOBUF2_CORE
 	select DMA_SHARED_BUFFER
 	tristate
+	default y
 
 config VIDEOBUF2_V4L2
 	tristate
@@ -13,7 +14,6 @@ config VIDEOBUF2_MEMOPS
 
 config VIDEOBUF2_DMA_CONTIG
 	tristate
-	select VIDEOBUF2_CORE
 	select VIDEOBUF2_MEMOPS
 	select DMA_SHARED_BUFFER
 

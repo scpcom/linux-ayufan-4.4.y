@@ -22,6 +22,7 @@
 #include <linux/mtd/mtd.h>
 #include <linux/mtd/partitions.h>
 #include <linux/mtd/map.h>
+#include <linux/mtd/aw-spinand.h>
 
 #include <linux/uaccess.h>
 
@@ -37,6 +38,20 @@ struct mtd_file_info {
 	struct mtd_info *mtd;
 	enum mtd_file_modes mode;
 };
+
+struct burn_param_t {
+	void *buffer;
+	long length;
+};
+
+#if IS_ENABLED(CONFIG_AW_SPINAND_SECURE_STORAGE)
+struct secblc_op_t {
+	int item;
+	unsigned char *buf;
+	unsigned int len;
+};
+#endif
+
 
 static loff_t mtdchar_lseek(struct file *file, loff_t offset, int orig)
 {
@@ -635,6 +650,14 @@ static int mtdchar_ioctl(struct file *file, u_int cmd, u_long arg)
 	void __user *argp = (void __user *)arg;
 	int ret = 0;
 	struct mtd_info_user info;
+#if IS_ENABLED(CONFIG_AW_MTD_SPINAND)
+	struct burn_param_t burn_param;
+	char *boot0_kbuf, *boot1_kbuf;
+#endif
+#if IS_ENABLED(CONFIG_AW_SPINAND_SECURE_STORAGE)
+	struct secblc_op_t sec_op_st;
+	char *buf_secure;
+#endif
 
 	pr_debug("MTD_ioctl\n");
 
@@ -664,6 +687,10 @@ static int mtdchar_ioctl(struct file *file, u_int cmd, u_long arg)
 	case MTDFILEMODE:
 	case BLKPG:
 	case BLKRRPART:
+	case BLKBURNBOOT0:
+	case BLKBURNBOOT1:
+	case SECBLK_READ:
+	case SECBLK_WRITE:
 		break;
 
 	/* "dangerous" commands */
@@ -681,6 +708,93 @@ static int mtdchar_ioctl(struct file *file, u_int cmd, u_long arg)
 	}
 
 	switch (cmd) {
+#if IS_ENABLED(CONFIG_AW_MTD_SPINAND)
+	case BLKBURNBOOT0:
+		if (copy_from_user(&burn_param,
+			(struct burn_param_t __user *)arg,
+			sizeof(burn_param))) {
+			pr_err("nand ioctl input arg err\n");
+			return -EINVAL;
+		}
+
+		boot0_kbuf = vmalloc(burn_param.length + 16 * 1024);
+		if (!boot0_kbuf)
+			return -ENOMEM;
+
+		if (copy_from_user(boot0_kbuf,
+			(const void *)burn_param.buffer, burn_param.length)) {
+			pr_err("nand ioctl input buffer err\n");
+			vfree(boot0_kbuf);
+			return -EINVAL;
+		}
+		ret = aw_spinand_mtd_download_boot0(mtd->priv,
+				burn_param.length, boot0_kbuf);
+		vfree(boot0_kbuf);
+		break;
+	case BLKBURNBOOT1:
+		if (copy_from_user(&burn_param,
+			(struct burn_param_t __user *)arg,
+			sizeof(burn_param))) {
+			pr_err("nand ioctl input arg err\n");
+			return -EINVAL;
+		}
+		boot1_kbuf = vmalloc(burn_param.length + 0x10000);
+		if (!boot1_kbuf)
+			return -ENOMEM;
+
+		if (copy_from_user(boot1_kbuf,
+			(const void *)burn_param.buffer, burn_param.length)) {
+			pr_err("nand ioctl input buffer err\n");
+			vfree(boot1_kbuf);
+			return -EINVAL;
+		}
+		ret = aw_spinand_mtd_download_uboot(mtd->priv,
+				burn_param.length, boot1_kbuf);
+		vfree(boot1_kbuf);
+		break;
+#endif
+#if IS_ENABLED(CONFIG_AW_SPINAND_SECURE_STORAGE)
+	case SECBLK_READ:
+		if (copy_from_user(&sec_op_st,
+			(struct secblc_op_t __user *)arg,
+			sizeof(sec_op_st))) {
+			pr_err("nand_ioctl input arg err\n");
+			return -EINVAL;
+		}
+		buf_secure = kmalloc(sec_op_st.len, GFP_KERNEL);
+		if (buf_secure == NULL) {
+			pr_err("buf_secure malloc fail!\n");
+			return -ENOMEM;
+		}
+		ret = aw_spinand_mtd_read_secure_storage(mtd->priv,
+				sec_op_st.item, buf_secure, sec_op_st.len);
+		if (copy_to_user(sec_op_st.buf, buf_secure, sec_op_st.len))
+			ret = -EFAULT;
+		kfree(buf_secure);
+		break;
+	case SECBLK_WRITE:
+		if (copy_from_user(&sec_op_st,
+			(struct secblc_op_t __user *)arg,
+			sizeof(sec_op_st))) {
+			pr_err("nand_ioctl input arg err\n");
+			return -EINVAL;
+		}
+		buf_secure = kmalloc(sec_op_st.len, GFP_KERNEL);
+		if (buf_secure == NULL) {
+			pr_err("buf_secure malloc fail!\n");
+			return -ENOMEM;
+		}
+		if (copy_from_user(buf_secure,
+				(const void *)sec_op_st.buf, sec_op_st.len))
+			ret = -EFAULT;
+
+		ret = aw_spinand_mtd_write_secure_storage(mtd->priv,
+				sec_op_st.item, buf_secure, sec_op_st.len);
+		if (copy_to_user(sec_op_st.buf, buf_secure, sec_op_st.len))
+			ret = -EFAULT;
+		kfree(buf_secure);
+		break;
+#endif
 	case MEMGETREGIONCOUNT:
 		if (copy_to_user(argp, &(mtd->numeraseregions), sizeof(int)))
 			return -EFAULT;
@@ -1046,6 +1160,76 @@ struct mtd_oob_buf32 {
 #define MEMWRITEOOB32		_IOWR('M', 3, struct mtd_oob_buf32)
 #define MEMREADOOB32		_IOWR('M', 4, struct mtd_oob_buf32)
 
+#if IS_ENABLED(CONFIG_AW_MTD_SPINAND)
+struct burn_param_t32 {
+	compat_caddr_t buffer;
+	compat_size_t length;
+};
+
+int mtdchar_burnboot_compat(struct file *file, unsigned int cmd,
+		struct burn_param_t32 __user *arg)
+{
+	struct burn_param_t32 burn_param32;
+	struct burn_param_t __user *burn_param;
+	int ret;
+
+	if (copy_from_user(&burn_param32, (void __user *)arg, sizeof(burn_param32)))
+		return -EFAULT;
+
+	burn_param = compat_alloc_user_space(sizeof(*burn_param));
+	if (!access_ok(VERIFY_WRITE, burn_param, sizeof(*burn_param)))
+		return -EFAULT;
+
+	if (put_user(compat_ptr(burn_param32.buffer), &burn_param->buffer) ||
+	    put_user(burn_param32.length, &burn_param->length))
+		return -EFAULT;
+
+	ret = mtdchar_ioctl(file, cmd, (unsigned long)burn_param);
+	if (ret < 0)
+		return ret;
+
+	return 0;
+}
+#endif
+
+#if IS_ENABLED(CONFIG_AW_SPINAND_SECURE_STORAGE)
+struct secblc_op_t32 {
+	u_int32_t item;
+	compat_caddr_t buf;
+	u_int32_t len;
+};
+
+int mtdchar_securestorage_compat(struct file *file, unsigned int cmd,
+		struct secblc_op_t32 __user *arg)
+{
+	struct secblc_op_t32 secblc_op32;
+	struct secblc_op_t __user *secblc_op;
+	int ret;
+
+	if (copy_from_user(&secblc_op32, (void __user *)arg, sizeof(secblc_op32)))
+		return -EFAULT;
+
+	secblc_op = compat_alloc_user_space(sizeof(*secblc_op));
+	if (!access_ok(VERIFY_WRITE, secblc_op, sizeof(*secblc_op)))
+		return -EFAULT;
+
+	if (put_user(secblc_op32.item, &secblc_op->item) ||
+	    put_user(compat_ptr(secblc_op32.buf), &secblc_op->buf) ||
+	    put_user(secblc_op32.len, &secblc_op->len))
+		return -EFAULT;
+
+	ret = mtdchar_ioctl(file, cmd, (unsigned long)secblc_op);
+	if (ret < 0)
+		return ret;
+
+	if (copy_in_user(&arg->item, &secblc_op->item, sizeof(arg->item)) ||
+	    copy_in_user(&arg->len, &secblc_op->len, sizeof(arg->len)))
+		return -EFAULT;
+
+	return 0;
+}
+#endif
+
 static long mtdchar_compat_ioctl(struct file *file, unsigned int cmd,
 	unsigned long arg)
 {
@@ -1053,6 +1237,14 @@ static long mtdchar_compat_ioctl(struct file *file, unsigned int cmd,
 	struct mtd_info *mtd = mfi->mtd;
 	void __user *argp = compat_ptr(arg);
 	int ret = 0;
+#if IS_ENABLED(CONFIG_AW_MTD_SPINAND)
+	struct burn_param_t32 burn_param32;
+	char *boot0_kbuf, *boot1_kbuf;
+#endif
+#if IS_ENABLED(CONFIG_AW_SPINAND_SECURE_STORAGE)
+	struct secblc_op_t32 sec_op_st32;
+	char *buf_secure;
+#endif
 
 	mutex_lock(&mtd_mutex);
 
@@ -1112,6 +1304,20 @@ static long mtdchar_compat_ioctl(struct file *file, unsigned int cmd,
 		ret = mtdchar_blkpg_ioctl(mtd, &a);
 		break;
 	}
+#if IS_ENABLED(CONFIG_AW_MTD_SPINAND)
+	case BLKBURNBOOT0:
+	case BLKBURNBOOT1: {
+		ret = mtdchar_burnboot_compat(file, cmd, compat_ptr(arg));
+		break;
+	}
+#endif
+#if IS_ENABLED(CONFIG_AW_SPINAND_SECURE_STORAGE)
+	case SECBLK_READ:
+	case SECBLK_WRITE: {
+		ret = mtdchar_securestorage_compat(file, cmd, compat_ptr(arg));
+		break;
+	}
+#endif
 
 	default:
 		ret = mtdchar_ioctl(file, cmd, (unsigned long)argp);

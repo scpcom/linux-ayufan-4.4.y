@@ -215,6 +215,7 @@ source "drivers/fpga/Kconfig"
 source "drivers/fsi/Kconfig"
 
 source "drivers/tee/Kconfig"
+source "drivers/sunxi_drm_heap/Kconfig"
 
 source "drivers/mux/Kconfig"
 

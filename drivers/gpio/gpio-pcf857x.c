@@ -17,6 +17,7 @@
 #include <linux/of_device.h>
 #include <linux/slab.h>
 #include <linux/spinlock.h>
+#include <linux/of_gpio.h>
 
 
 static const struct i2c_device_id pcf857x_id[] = {
@@ -228,6 +229,63 @@ static void pcf857x_irq_bus_sync_unlock(struct irq_data *data)
 	mutex_unlock(&gpio->lock);
 }
 
+#ifdef IO_EXPAND_DEBUG
+static irqreturn_t gpio_test_handler(int irq, void *data)
+{
+	pr_info("[%s] line=%d\n", __func__, __LINE__);
+	return IRQ_HANDLED;
+}
+
+static ssize_t gpio_test_show(struct device  *dev,
+		struct device_attribute *attr, char *buf)
+{
+	int gpio = 2021;
+	int gpio2 = 2023;
+	int ret, irq;
+	int flags = IRQF_TRIGGER_FALLING | IRQF_SHARED;
+
+	pr_info("------gpio:%d state test------\n", gpio);
+	ret = gpio_request(gpio, "gpio_test");
+	pr_info("gpio_request return %d\n", ret);
+
+	ret = gpio_direction_output(gpio, 0);
+	pr_info("gpio_direction_output return %d\n", ret);
+
+	ret = gpio_get_value_cansleep(gpio);
+	pr_info("gpio_get_value return %d\n", ret);
+
+	ret = gpio_direction_input(gpio);
+	pr_info("gpio_direction_input return %d\n", ret);
+
+
+	pr_info("------gpio:%d state test------\n", gpio2);
+	ret = gpio_request(gpio2, "gpio2_test");
+	pr_info("gpio2_request return %d\n", ret);
+
+	ret = gpio_direction_output(gpio2, 1);
+	pr_info("gpio2_direction_output return %d\n", ret);
+
+	ret = gpio_get_value_cansleep(gpio2);
+	pr_info("gpio2_get_value return %d\n", ret);
+
+	pr_info("------gpio:%d irq tese-------\n", gpio);
+	irq = gpio_to_irq(gpio);
+	pr_info("gpio to irq:%d\n", irq);
+
+	ret = request_irq(irq, gpio_test_handler, flags, dev_name(dev), dev);
+	pr_info("request irq return%d\n", ret);
+
+	disable_irq(irq);
+	pr_info("disable irq\n");
+	enable_irq(irq);
+	pr_info("enable irq\n");
+
+	return 0;
+}
+
+static DEVICE_ATTR(gpio_test, 0444, gpio_test_show, NULL);
+#endif
+
 /*-------------------------------------------------------------------------*/
 
 static int pcf857x_probe(struct i2c_client *client,
@@ -262,6 +320,10 @@ static int pcf857x_probe(struct i2c_client *client,
 	gpio->chip.direction_input	= pcf857x_input;
 	gpio->chip.direction_output	= pcf857x_output;
 	gpio->chip.ngpio		= id->driver_data;
+
+	/* get the gpio_base from dts */
+	if (gpio->chip.base < 0)
+		of_property_read_u32(np, "gpio_base", &gpio->chip.base);
 
 	/* NOTE:  the OnSemi jlc1562b is also largely compatible with
 	 * these parts, notably for output.  It has a low-resolution
@@ -379,6 +441,10 @@ static int pcf857x_probe(struct i2c_client *client,
 		if (status < 0)
 			dev_warn(&client->dev, "setup --> %d\n", status);
 	}
+
+#ifdef IO_EXPAND_DEBUG
+	device_create_file(&client->dev, &dev_attr_gpio_test);
+#endif
 
 	dev_info(&client->dev, "probed\n");
 

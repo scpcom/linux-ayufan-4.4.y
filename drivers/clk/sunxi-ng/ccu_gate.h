@@ -12,9 +12,55 @@
 
 struct ccu_gate {
 	u32			enable;
+	u32			fixed_rate;
 
 	struct ccu_common	common;
 };
+
+#define SUNXI_CCU_GATE_WITH_FIXED_RATE(_struct, _name, _parent, _reg,	\
+				       _fixed_rate, _gate)	\
+	struct ccu_gate _struct = {					\
+		.enable		= _gate,				\
+		.fixed_rate	= _fixed_rate,				\
+		.common	= {						\
+			.reg		= _reg,				\
+			.features	= CCU_FEATURE_FIXED_RATE_GATE,	\
+			.hw.init	= CLK_HW_INIT(_name,		\
+						      _parent,		\
+						      &ccu_gate_ops,	\
+						      0),		\
+		}							\
+	}
+
+#define SUNXI_CCU_GATE_WITH_PREDIV(_struct, _name, _parent, _reg,	\
+				   _prediv, _gate, _flags)		\
+	struct ccu_gate _struct = {					\
+		.enable	= _gate,					\
+		.common	= {						\
+			.reg		= _reg,				\
+			.prediv		= _prediv,			\
+			.features	= CCU_FEATURE_ALL_PREDIV,	\
+			.hw.init	= CLK_HW_INIT(_name,		\
+						      _parent,		\
+						      &ccu_gate_ops,	\
+						      _flags),		\
+		}							\
+	}
+
+#define SUNXI_CCU_GATE_WITH_KEY(_struct, _name, _parent, _reg,		\
+				_key_value, _gate, _flags)		\
+	struct ccu_gate _struct = {					\
+		.enable	= _gate,					\
+		.common	= {						\
+			.reg		= _reg,				\
+			.key_value	= _key_value,			\
+			.features	= CCU_FEATURE_KEY_FIELD_MOD,	\
+			.hw.init	= CLK_HW_INIT(_name,		\
+						      _parent,		\
+						      &ccu_gate_ops,	\
+						      _flags),		\
+		}							\
+	}
 
 #define SUNXI_CCU_GATE(_struct, _name, _parent, _reg, _gate, _flags)	\
 	struct ccu_gate _struct = {					\

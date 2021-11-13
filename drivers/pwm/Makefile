@@ -55,3 +55,6 @@ obj-$(CONFIG_PWM_TWL)		+= pwm-twl.o
 obj-$(CONFIG_PWM_TWL_LED)	+= pwm-twl-led.o
 obj-$(CONFIG_PWM_VT8500)	+= pwm-vt8500.o
 obj-$(CONFIG_PWM_ZX)		+= pwm-zx.o
+obj-$(CONFIG_PWM_SUNXI_ENHANCE)	+= pwm-sunxi-enhance.o
+obj-$(CONFIG_PWM_SUNXI_GROUP)	+= pwm-sunxi-group.o
+obj-$(CONFIG_PWM_SUNXI_GROUP)	+= pwm-sunxi-g_dev.o

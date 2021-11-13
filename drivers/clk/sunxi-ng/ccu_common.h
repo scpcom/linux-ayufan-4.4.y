@@ -18,16 +18,36 @@
 #define CCU_FEATURE_MMC_TIMING_SWITCH	BIT(6)
 #define CCU_FEATURE_SIGMA_DELTA_MOD	BIT(7)
 
+/* Support key-field reg setting */
+#define CCU_FEATURE_KEY_FIELD_MOD	BIT(8)
+
+/* New formula support in MP: clk = parent / M / P */
+#define CCU_FEATURE_MP_NO_INDEX_MODE	BIT(9)
+
+/* Support fixed rate in gate-clk */
+#define CCU_FEATURE_FIXED_RATE_GATE	BIT(10)
+
 /* MMC timing mode switch bit */
 #define CCU_MMC_NEW_TIMING_MODE		BIT(30)
 
 struct device_node;
+
+/**
+ * struct ccu_reg_dump: register dump of clock controller registers.
+ * @offset: clock register offset from the controller base address.
+ * @value: the value to be register at offset.
+ */
+struct ccu_reg_dump {
+	u32	offset;
+	u32	value;
+};
 
 struct ccu_common {
 	void __iomem	*base;
 	u16		reg;
 	u16		lock_reg;
 	u32		prediv;
+	u32		key_value;
 
 	unsigned long	features;
 	spinlock_t	*lock;
@@ -66,4 +86,15 @@ int ccu_pll_notifier_register(struct ccu_pll_nb *pll_nb);
 int sunxi_ccu_probe(struct device_node *node, void __iomem *reg,
 		    const struct sunxi_ccu_desc *desc);
 
+void sunxi_ccu_sleep_init(void __iomem *reg_base,
+			  struct ccu_common **rdump,
+			  unsigned long nr_rdump,
+			  const struct ccu_reg_dump *rsuspend,
+			  unsigned long nr_rsuspend);
+
+void set_reg(char __iomem *addr, u32 val, u8 bw, u8 bs);
+
+void set_reg_key(char __iomem *addr,
+		 u32 key, u8 kbw, u8 kbs,
+		 u32 val, u8 bw, u8 bs);
 #endif /* _COMMON_H_ */

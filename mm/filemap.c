@@ -53,6 +53,8 @@
 
 #include <asm/mman.h>
 
+#include <trace/events/readahead.h>//jiangbin add for treadahead
+
 /*
  * Shared mappings implemented 30.11.1994. It's not fully working yet,
  * though.
@@ -2485,6 +2487,9 @@ vm_fault_t filemap_fault(struct vm_fault *vmf)
 	pgoff_t max_off;
 	struct page *page;
 	vm_fault_t ret = 0;
+	/*AW_CODE;jiangbin,add trace for readahead)*/
+	trace_do_file_map(inode, offset << PAGE_SHIFT, PAGE_SIZE);
+	/*end*/
 
 	max_off = DIV_ROUND_UP(i_size_read(inode), PAGE_SIZE);
 	if (unlikely(offset >= max_off))

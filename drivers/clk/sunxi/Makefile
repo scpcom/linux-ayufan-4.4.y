@@ -3,9 +3,6 @@
 # Makefile for sunxi specific clk
 #
 
-obj-$(CONFIG_CLK_SUNXI) += clk-factors.o
-
-obj-$(CONFIG_CLK_SUNXI_CLOCKS) += clk-sunxi.o
 obj-$(CONFIG_CLK_SUNXI_CLOCKS) += clk-a10-codec.o
 obj-$(CONFIG_CLK_SUNXI_CLOCKS) += clk-a10-hosc.o
 obj-$(CONFIG_CLK_SUNXI_CLOCKS) += clk-a10-mod1.o
@@ -32,3 +29,12 @@ obj-$(CONFIG_CLK_SUNXI_PRCM_SUN6I)	+= clk-sun6i-ar100.o
 
 obj-$(CONFIG_CLK_SUNXI_PRCM_SUN8I)	+= clk-sun8i-apb0.o
 obj-$(CONFIG_CLK_SUNXI_PRCM_SUN8I)	+= clk-sun6i-apb0-gates.o
+
+obj-$(CONFIG_COMMON_CLK_DEBUG) += clk-debugfs.o
+
+obj-$(CONFIG_CLK_SUNXI_DDR) += clk-ddr.o
+
+obj-$(CONFIG_CLK_SUN8IW15) += clk.o
+ifneq ($(CONFIG_CLK_SUN8IW15),)
+clk-y += clk-sunxi.o clk-factors.o clk-periph.o clk-cpu.o clk-sun8iw15.o
+endif

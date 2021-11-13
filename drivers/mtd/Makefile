@@ -8,6 +8,7 @@ obj-$(CONFIG_MTD)		+= mtd.o
 mtd-y				:= mtdcore.o mtdsuper.o mtdconcat.o mtdpart.o mtdchar.o
 
 obj-y				+= parsers/
+obj-$(CONFIG_MTD_SUNXI_PARTS)	+= sunxipart.o
 
 # 'Users' - code which presents functionality to userspace.
 obj-$(CONFIG_MTD_BLKDEVS)	+= mtd_blkdevs.o
@@ -29,4 +30,5 @@ obj-y		+= chips/ lpddr/ maps/ devices/ nand/ tests/
 
 obj-$(CONFIG_MTD_SPI_NOR)	+= spi-nor/
 obj-$(CONFIG_MTD_UBI)		+= ubi/
+obj-y				+= awnand/
 obj-$(CONFIG_MTD_HYPERBUS)	+= hyperbus/

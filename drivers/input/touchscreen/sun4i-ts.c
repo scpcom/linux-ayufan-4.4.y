@@ -38,6 +38,11 @@
 #include <linux/of_platform.h>
 #include <linux/platform_device.h>
 #include <linux/slab.h>
+#include <linux/clkdev.h>
+#include <linux/clk-provider.h>
+#include <linux/clk/sunxi.h>
+#include <linux/clk.h>
+#include <linux/reset.h>
 
 #define TP_CTRL0		0x00
 #define TP_CTRL1		0x04
@@ -61,11 +66,20 @@
 /* TP_CTRL1 bits */
 #define STYLUS_UP_DEBOUN(x)	((x) << 12) /* 8 bits */
 #define STYLUS_UP_DEBOUN_EN(x)	((x) << 9)
-#define TOUCH_PAN_CALI_EN(x)	((x) << 6)
-#define TP_DUAL_EN(x)		((x) << 5)
-#define TP_MODE_EN(x)		((x) << 4)
-#define TP_ADC_SELECT(x)	((x) << 3)
-#define ADC_CHAN_SELECT(x)	((x) << 0)  /* 3 bits */
+#if (defined(CONFIG_ARCH_SUN8IW20) || defined(CONFIG_ARCH_SUN20IW1))
+	#define CHOPPER_EN(x)		((x) << 8)
+	#define TOUCH_PAN_CALI_EN(x)	((x) << 7)
+	#define TP_DUAL_EN(x)		((x) << 6)
+	#define TP_MODE_EN(x)		((x) << 5)
+	#define TP_ADC_SELECT(x)	((x) << 4)
+	#define ADC_CHAN_SELECT(x)	((x) << 0)  /* 4 bits */
+#else
+	#define TOUCH_PAN_CALI_EN(x)	((x) << 6)
+	#define TP_DUAL_EN(x)		((x) << 5)
+	#define TP_MODE_EN(x)		((x) << 4)
+	#define TP_ADC_SELECT(x)	((x) << 3)
+	#define ADC_CHAN_SELECT(x)	((x) << 0)  /* 3 bits */
+#endif
 
 /* on sun6i, bits 3~6 are left shifted by 1 to 4~7 */
 #define SUN6I_TP_MODE_EN(x)	((x) << 5)
@@ -103,6 +117,25 @@
 #define TEMP_ENABLE(x)		((x) << 16)
 #define TEMP_PERIOD(x)		((x) << 0)  /* t = x * 256 * 16 / clkin */
 
+/* Registers which needs to be saved and restored before and after sleeping */
+static u32 regs_offset[] = {
+	TP_CTRL0,
+	TP_CTRL1,
+	TP_CTRL2,
+	TP_CTRL3,
+	TP_INT_FIFOC,
+	TP_INT_FIFOS,
+	TP_TPR,
+};
+
+enum {
+	DEBUG_INIT    = 1U << 0,
+	DEBUG_SUSPEND = 1U << 1,
+	DEBUG_INFO    = 1U << 2,
+	DEBUG_INFO1   = 1U << 3,
+	DEBUG_INFO2   = 1U << 4,
+};
+
 struct sun4i_ts_data {
 	struct device *dev;
 	struct input_dev *input;
@@ -112,17 +145,91 @@ struct sun4i_ts_data {
 	int temp_data;
 	int temp_offset;
 	int temp_step;
+	struct clk *bus_clk;
+	struct clk *mod_clk;
+	struct reset_control *reset;
+	u32 regs_backup[ARRAY_SIZE(regs_offset)];
 };
+
+static int sunxi_ts_clk_enable(struct sun4i_ts_data *ts)
+{
+	if (ts->reset)
+		reset_control_deassert(ts->reset);
+
+	if (ts->mod_clk)
+		clk_prepare_enable(ts->mod_clk);
+
+	if (ts->bus_clk)
+		clk_prepare_enable(ts->bus_clk);
+
+	return 0;
+}
+
+static int sunxi_ts_clk_disable(struct sun4i_ts_data *ts)
+{
+	if (ts->bus_clk)
+		clk_disable_unprepare(ts->mod_clk);
+
+	if (ts->mod_clk)
+		clk_disable_unprepare(ts->bus_clk);
+
+	if (ts->reset)
+		reset_control_assert(ts->reset);
+
+	return 0;
+}
+
+static int sunxi_ts_clk_init(struct sun4i_ts_data *ts)
+{
+	ts->reset = devm_reset_control_get(ts->dev, NULL);
+	if (ts->reset) {
+		reset_control_assert(ts->reset);
+		reset_control_deassert(ts->reset);
+	} else
+		pr_err("get tpadc reset failed\n");
+
+	ts->mod_clk = devm_clk_get(ts->dev, "mod");
+	if (ts->mod_clk)
+		clk_prepare_enable(ts->mod_clk);
+	else
+		pr_err("get tpadc mode clock failed \n");
+
+	ts->bus_clk = devm_clk_get(ts->dev, "bus");
+	if (ts->bus_clk)
+		clk_prepare_enable(ts->bus_clk);
+	else
+		pr_err("get tpadc bus clock failed\n");
+
+	return 0;
+}
+
+static int sunxi_ts_clk_exit(struct sun4i_ts_data *ts)
+{
+	if (ts->bus_clk) {
+		clk_disable_unprepare(ts->mod_clk);
+		devm_clk_put(ts->dev, ts->mod_clk);
+	}
+
+	if (ts->mod_clk) {
+		clk_disable_unprepare(ts->bus_clk);
+		devm_clk_put(ts->dev, ts->bus_clk);
+	}
+
+	return 0;
+}
 
 static void sun4i_ts_irq_handle_input(struct sun4i_ts_data *ts, u32 reg_val)
 {
 	u32 x, y;
 
 	if (reg_val & FIFO_DATA_PENDING) {
+		pr_debug("sun4i-ts fifo data  pending \n");
 		x = readl(ts->base + TP_DATA);
 		y = readl(ts->base + TP_DATA);
+
 		/* The 1st location reported after an up event is unreliable */
 		if (!ts->ignore_fifo_data) {
+			pr_debug("sun4i-ts report fifo data \n");
 			input_report_abs(ts->input, ABS_X, x);
 			input_report_abs(ts->input, ABS_Y, y);
 			/*
@@ -133,11 +240,13 @@ static void sun4i_ts_irq_handle_input(struct sun4i_ts_data *ts, u32 reg_val)
 			input_report_key(ts->input, BTN_TOUCH, 1);
 			input_sync(ts->input);
 		} else {
+			pr_debug("sun4i-ts ignore first fifo dataY \n");
 			ts->ignore_fifo_data = false;
 		}
 	}
 
 	if (reg_val & TP_UP_PENDING) {
+		pr_debug("sun4i-ts up pending \n");
 		ts->ignore_fifo_data = true;
 		input_report_key(ts->input, BTN_TOUCH, 0);
 		input_sync(ts->input);
@@ -165,10 +274,18 @@ static irqreturn_t sun4i_ts_irq(int irq, void *dev_id)
 static int sun4i_ts_open(struct input_dev *dev)
 {
 	struct sun4i_ts_data *ts = input_get_drvdata(dev);
+	struct device_node *np = ts->dev->of_node;
+	u32 reg;
 
 	/* Flush, set trig level to 1, enable temp, data and up irqs */
 	writel(TEMP_IRQ_EN(1) | DATA_IRQ_EN(1) | FIFO_TRIG(1) | FIFO_FLUSH(1) |
 		TP_UP_IRQ_EN(1), ts->base + TP_INT_FIFOC);
+
+	if (of_device_is_compatible(np, "allwinner,sun8i-ts")) {
+		reg = readl(ts->base + TP_INT_FIFOC);
+		reg |= OVERRUN_IRQ_EN(1) | DATA_DRQ_EN(1) | TP_DOWN_IRQ_EN(1);
+		writel(reg, ts->base + TP_INT_FIFOC);
+	}
 
 	return 0;
 }
@@ -244,6 +361,8 @@ static int sun4i_ts_probe(struct platform_device *pdev)
 	u32 tp_sensitive_adjust = 15;
 	u32 filter_type = 1;
 
+	pr_err("ts probe start");
+
 	ts = devm_kzalloc(dev, sizeof(struct sun4i_ts_data), GFP_KERNEL);
 	if (!ts)
 		return -ENOMEM;
@@ -264,6 +383,12 @@ static int sun4i_ts_probe(struct platform_device *pdev)
 		 */
 		ts->temp_offset = 257000;
 		ts->temp_step = 133;
+	} else if (of_device_is_compatible(np, "allwinner,sun8i-ts")) {
+		if (sunxi_ts_clk_init(ts)) {
+			pr_err(" init tpadc clk failed! \n");
+			sunxi_ts_clk_exit(ts);
+			return -EINVAL;
+		}
 	} else {
 		/*
 		 * The user manuals do not contain the formula for calculating
@@ -307,16 +432,28 @@ static int sun4i_ts_probe(struct platform_device *pdev)
 
 	ts->irq = platform_get_irq(pdev, 0);
 	error = devm_request_irq(dev, ts->irq, sun4i_ts_irq, 0, "sun4i-ts", ts);
-	if (error)
+	if (error) {
+		pr_err("tpadc request irq failed ");
 		return error;
+	}
 
+	/*
+	 * Calibrate tpadc
+	 */
+	reg = readl(ts->base + TP_CTRL0);
+	writel(reg |= T_ACQ(0xffff), ts->base + TP_CTRL0);
+	reg = readl(ts->base + TP_CTRL1);
+	writel(reg |= TOUCH_PAN_CALI_EN(0x1), ts->base + TP_CTRL1);
 	/*
 	 * Select HOSC clk, clkin = clk / 6, adc samplefreq = clkin / 8192,
 	 * t_acq = clkin / (16 * 64)
 	 */
 	writel(ADC_CLK_SEL(0) | ADC_CLK_DIV(2) | FS_DIV(7) | T_ACQ(63),
 	       ts->base + TP_CTRL0);
-
+	if (of_device_is_compatible(np, "allwinner,sun8i-ts"))
+		writel(ADC_FIRST_DLY(0x1) | ADC_FIRST_DLY_MODE(0x1)
+			| ADC_CLK_DIV(0x2) | FS_DIV(2) | T_ACQ(5),
+			ts->base + TP_CTRL0);
 	/*
 	 * tp_sensitive_adjust is an optional property
 	 * tp_mode = 0 : only x and y coordinates, as we don't use dual touch
@@ -326,6 +463,10 @@ static int sun4i_ts_probe(struct platform_device *pdev)
 	writel(TP_SENSITIVE_ADJUST(tp_sensitive_adjust) | TP_MODE_SELECT(0),
 	       ts->base + TP_CTRL2);
 
+	if (of_device_is_compatible(np, "allwinner,sun8i-ts")) {
+		reg = readl(ts->base + TP_CTRL2);
+		writel(reg | PRE_MEA_THRE_CNT(0xfff), ts->base + TP_CTRL2);
+	}
 	/*
 	 * Enable median and averaging filter, optional property for
 	 * filter type.
@@ -334,8 +475,8 @@ static int sun4i_ts_probe(struct platform_device *pdev)
 	writel(FILTER_EN(1) | FILTER_TYPE(filter_type), ts->base + TP_CTRL3);
 
 	/* Enable temperature measurement, period 1953 (2 seconds) */
-	writel(TEMP_ENABLE(1) | TEMP_PERIOD(1953), ts->base + TP_TPR);
-
+	if (!of_device_is_compatible(np, "allwinner,sun8i-ts"))
+		writel(TEMP_ENABLE(1) | TEMP_PERIOD(1953), ts->base + TP_TPR);
 	/*
 	 * Set stylus up debounce to aprox 10 ms, enable debounce, and
 	 * finally enable tp mode.
@@ -345,33 +486,46 @@ static int sun4i_ts_probe(struct platform_device *pdev)
 		reg |= SUN6I_TP_MODE_EN(1);
 	else
 		reg |= TP_MODE_EN(1);
+
+	if (of_device_is_compatible(np, "allwinner,sun8i-ts"))
+		reg |= CHOPPER_EN(1);
+
+	/* Select normal adc(aux-adc) mode or tpadc mode */
+	if (of_property_read_bool(np, "aux-adc"))
+		reg |= TP_ADC_SELECT(1);
+
 	writel(reg, ts->base + TP_CTRL1);
 
-	/*
-	 * The thermal core does not register hwmon devices for DT-based
-	 * thermal zone sensors, such as this one.
-	 */
-	hwmon = devm_hwmon_device_register_with_groups(ts->dev, "sun4i_ts",
-						       ts, sun4i_ts_groups);
-	if (IS_ERR(hwmon))
-		return PTR_ERR(hwmon);
+	if (!of_device_is_compatible(np, "allwinner,sun8i-ts")) {
+		/*
+		 * The thermal core does not register hwmon devices for DT-based
+		 * thermal zone sensors, such as this one.
+		 */
+		hwmon = devm_hwmon_device_register_with_groups(ts->dev, "sun4i_ts",
+				ts, sun4i_ts_groups);
+		if (IS_ERR(hwmon))
+			return PTR_ERR(hwmon);
 
-	thermal = devm_thermal_zone_of_sensor_register(ts->dev, 0, ts,
-						       &sun4i_ts_tz_ops);
-	if (IS_ERR(thermal))
-		return PTR_ERR(thermal);
+		thermal = devm_thermal_zone_of_sensor_register(ts->dev, 0, ts,
+				&sun4i_ts_tz_ops);
+		if (IS_ERR(thermal))
+			return PTR_ERR(thermal);
+	}
 
 	writel(TEMP_IRQ_EN(1), ts->base + TP_INT_FIFOC);
-
 	if (ts_attached) {
 		error = input_register_device(ts->input);
 		if (error) {
 			writel(0, ts->base + TP_INT_FIFOC);
+			pr_err("sunxi ts register failed ");
 			return error;
 		}
 	}
 
 	platform_set_drvdata(pdev, ts);
+
+	pr_err("ts probe success");
+
 	return 0;
 }
 
@@ -389,18 +543,68 @@ static int sun4i_ts_remove(struct platform_device *pdev)
 	return 0;
 }
 
+static inline void save_regs(struct sun4i_ts_data *ts)
+{
+	int i;
+
+	for (i = 0; i < ARRAY_SIZE(regs_offset); i++)
+		ts->regs_backup[i] = readl(ts->base + regs_offset[i]);
+}
+
+static inline void restore_regs(struct sun4i_ts_data *ts)
+{
+	int i;
+
+	for (i = 0; i < ARRAY_SIZE(regs_offset); i++)
+		writel(ts->regs_backup[i], ts->base + regs_offset[i]);
+}
+
+#ifdef CONFIG_PM
+static int sun4i_ts_suspend_noirq(struct device *dev)
+{
+	struct platform_device *pdev = to_platform_device(dev);
+	struct sun4i_ts_data *ts = platform_get_drvdata(pdev);
+
+	save_regs(ts);
+	sunxi_ts_clk_disable(ts);
+
+	return 0;
+}
+
+static int sun4i_ts_resume_noirq(struct device *dev)
+{
+	struct platform_device *pdev = to_platform_device(dev);
+	struct sun4i_ts_data *ts = platform_get_drvdata(pdev);
+
+	sunxi_ts_clk_enable(ts);
+	restore_regs(ts);
+
+	return 0;
+}
+
+static const struct dev_pm_ops sun4i_ts_dev_pm_ops = {
+	.suspend_noirq = sun4i_ts_suspend_noirq,
+	.resume_noirq = sun4i_ts_resume_noirq,
+};
+#define SUN4I_TS_DEV_PM_OPS (&sun4i_ts_dev_pm_ops)
+#else
+#define SUN4I_TS_DEV_PM_OPS NULL
+#endif
 static const struct of_device_id sun4i_ts_of_match[] = {
 	{ .compatible = "allwinner,sun4i-a10-ts", },
 	{ .compatible = "allwinner,sun5i-a13-ts", },
 	{ .compatible = "allwinner,sun6i-a31-ts", },
+	{ .compatible = "allwinner,sun8i-ts", },
 	{ /* sentinel */ }
 };
+
 MODULE_DEVICE_TABLE(of, sun4i_ts_of_match);
 
 static struct platform_driver sun4i_ts_driver = {
 	.driver = {
 		.name	= "sun4i-ts",
 		.of_match_table = of_match_ptr(sun4i_ts_of_match),
+		.pm = SUN4I_TS_DEV_PM_OPS,
 	},
 	.probe	= sun4i_ts_probe,
 	.remove	= sun4i_ts_remove,

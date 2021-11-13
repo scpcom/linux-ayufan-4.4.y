@@ -31,3 +31,16 @@ void machine_power_off(void)
 {
 	pm_power_off();
 }
+
+void machine_shutdown(void)
+{
+}
+
+static struct notifier_block sbi_srst_reboot_nb;
+ void __init sbi_init(void)
+{
+	pm_power_off = sbi_srst_power_off;
+	sbi_srst_reboot_nb.notifier_call = sbi_srst_reboot;
+	sbi_srst_reboot_nb.priority = 192;
+	register_restart_handler(&sbi_srst_reboot_nb);
+}

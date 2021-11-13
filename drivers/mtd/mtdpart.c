@@ -425,6 +425,7 @@ static struct mtd_part *allocate_partition(struct mtd_info *parent,
 	if (parent->_put_device)
 		slave->mtd._put_device = part_put_device;
 
+	slave->mtd.priv = parent;
 	slave->mtd._erase = part_erase;
 	slave->parent = parent;
 	slave->offset = part->offset;
@@ -818,6 +819,7 @@ EXPORT_SYMBOL_GPL(deregister_mtd_parser);
 static const char * const default_mtd_part_types[] = {
 	"cmdlinepart",
 	"ofpart",
+	"sunxipart",
 	NULL
 };
 
