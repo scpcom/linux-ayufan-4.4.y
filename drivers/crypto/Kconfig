@@ -697,6 +697,15 @@ config CRYPTO_DEV_SUNXI
 	  CryptoEngine. It support some SoC of sun8i/sun50i series.
 	  Select this if you want to use it.
 
+config CRYPTO_SUNXI_CE_ADAPTER
+	bool "Support for Allwinner Sunxi CryptoEngine Adapter"
+	depends on ARCH_SUNXI
+	default y if ARCH_SUNXI
+	help
+	  Allwinner Sunxi SoC have a crypto accelerator named
+	  CryptoEngine Adapter.
+	  Select this if you want to use it.
+
 config CRYPTO_DEV_ROCKCHIP
 	tristate "Rockchip's Cryptographic Engine driver"
 	depends on OF && ARCH_ROCKCHIP

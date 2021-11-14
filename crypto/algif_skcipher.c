@@ -34,8 +34,6 @@
 #include <linux/net.h>
 #include <net/sock.h>
 
-#define SUNXI_CE_ADAPTER
-
 static int skcipher_sendmsg(struct socket *sock, struct msghdr *msg,
 			    size_t size)
 {
@@ -102,7 +100,7 @@ static int _skcipher_recvmsg(struct socket *sock, struct msghdr *msg,
 		goto free;
 	}
 	sg_init_table(areq->tsgl, areq->tsgl_entries);
-#ifndef SUNXI_CE_ADAPTER
+#ifndef CONFIG_CRYPTO_SUNXI_CE_ADAPTER
 	af_alg_pull_tsgl(sk, len, areq->tsgl, 0);
 #else
 	af_alg_pull_tsgl(sk, ctx->used, areq->tsgl, 0);
@@ -245,7 +243,7 @@ static int skcipher_sendmsg_nokey(struct socket *sock, struct msghdr *msg,
 	int err;
 
 	err = skcipher_check_key(sock);
-#ifndef SUNXI_CE_ADAPTER
+#ifndef CONFIG_CRYPTO_SUNXI_CE_ADAPTER
 	if (err)
 		return err;
 #endif
@@ -259,7 +257,7 @@ static ssize_t skcipher_sendpage_nokey(struct socket *sock, struct page *page,
 	int err;
 
 	err = skcipher_check_key(sock);
-#ifndef SUNXI_CE_ADAPTER
+#ifndef CONFIG_CRYPTO_SUNXI_CE_ADAPTER
 	if (err)
 		return err;
 #endif
@@ -273,7 +271,7 @@ static int skcipher_recvmsg_nokey(struct socket *sock, struct msghdr *msg,
 	int err;
 
 	err = skcipher_check_key(sock);
-#ifndef SUNXI_CE_ADAPTER
+#ifndef CONFIG_CRYPTO_SUNXI_CE_ADAPTER
 	if (err)
 		return err;
 #endif
