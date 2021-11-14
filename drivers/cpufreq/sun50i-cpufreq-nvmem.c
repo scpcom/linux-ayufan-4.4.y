@@ -370,6 +370,7 @@ static const struct of_device_id sun50i_cpufreq_match_list[] = {
 	{ .compatible = "arm,sun20iw1p1", .data = &sun20iw1_soc_data, },
 	{}
 };
+MODULE_DEVICE_TABLE(of, sun50i_cpufreq_match_list);
 
 static const struct of_device_id *sun50i_cpufreq_match_node(void)
 {

@@ -1181,6 +1181,9 @@ static void f2fs_put_super(struct super_block *sb)
 	int i;
 	bool dropped;
 
+	/* unregister procfs/sysfs entries in advance to avoid race case */
+	f2fs_unregister_sysfs(sbi);
+
 	f2fs_quota_off_umount(sb);
 
 	/* prevent remaining shrinker jobs */
@@ -1245,8 +1248,6 @@ static void f2fs_put_super(struct super_block *sb)
 	f2fs_destroy_post_read_wq(sbi);
 
 	kvfree(sbi->ckpt);
-
-	f2fs_unregister_sysfs(sbi);
 
 	sb->s_fs_info = NULL;
 	if (sbi->s_chksum_driver)
@@ -2150,6 +2151,33 @@ static int f2fs_enable_quotas(struct super_block *sb)
 	return 0;
 }
 
+static int f2fs_quota_sync_file(struct f2fs_sb_info *sbi, int type)
+{
+	struct quota_info *dqopt = sb_dqopt(sbi->sb);
+	struct address_space *mapping = dqopt->files[type]->i_mapping;
+	int ret = 0;
+
+	ret = dquot_writeback_dquots(sbi->sb, type);
+	if (ret)
+		goto out;
+
+	ret = filemap_fdatawrite(mapping);
+	if (ret)
+		goto out;
+
+	/* if we are using journalled quota */
+	if (is_journalled_quota(sbi))
+		goto out;
+
+	ret = filemap_fdatawait(mapping);
+
+	truncate_inode_pages(&dqopt->files[type]->i_data, 0);
+out:
+	if (ret)
+		set_sbi_flag(sbi, SBI_QUOTA_NEED_REPAIR);
+	return ret;
+}
+
 int f2fs_quota_sync(struct super_block *sb, int type)
 {
 	struct f2fs_sb_info *sbi = F2FS_SB(sb);
@@ -2158,56 +2186,41 @@ int f2fs_quota_sync(struct super_block *sb, int type)
 	int ret;
 
 	/*
-	 * do_quotactl
-	 *  f2fs_quota_sync
-	 *  down_read(quota_sem)
-	 *  dquot_writeback_dquots()
-	 *  f2fs_dquot_commit
-	 *                            block_operation
-	 *                            down_read(quota_sem)
-	 */
-	f2fs_lock_op(sbi);
-
-	down_read(&sbi->quota_sem);
-	ret = dquot_writeback_dquots(sb, type);
-	if (ret)
-		goto out;
-
-	/*
 	 * Now when everything is written we can discard the pagecache so
 	 * that userspace sees the changes.
 	 */
 	for (cnt = 0; cnt < MAXQUOTAS; cnt++) {
-		struct address_space *mapping;
 
 		if (type != -1 && cnt != type)
 			continue;
-		if (!sb_has_quota_active(sb, cnt))
-			continue;
 
-		mapping = dqopt->files[cnt]->i_mapping;
-
-		ret = filemap_fdatawrite(mapping);
-		if (ret)
-			goto out;
-
-		/* if we are using journalled quota */
-		if (is_journalled_quota(sbi))
-			continue;
-
-		ret = filemap_fdatawait(mapping);
-		if (ret)
-			set_sbi_flag(F2FS_SB(sb), SBI_QUOTA_NEED_REPAIR);
+		if (!sb_has_quota_active(sb, type))
+			return 0;
 
 		inode_lock(dqopt->files[cnt]);
-		truncate_inode_pages(&dqopt->files[cnt]->i_data, 0);
+
+		/*
+		 * do_quotactl
+		 *  f2fs_quota_sync
+		 *  down_read(quota_sem)
+		 *  dquot_writeback_dquots()
+		 *  f2fs_dquot_commit
+		 *			      block_operation
+		 *			      down_read(quota_sem)
+		 */
+		f2fs_lock_op(sbi);
+		down_read(&sbi->quota_sem);
+
+		ret = f2fs_quota_sync_file(sbi, cnt);
+
+		up_read(&sbi->quota_sem);
+		f2fs_unlock_op(sbi);
+
 		inode_unlock(dqopt->files[cnt]);
+
+		if (ret)
+			break;
 	}
-out:
-	if (ret)
-		set_sbi_flag(F2FS_SB(sb), SBI_QUOTA_NEED_REPAIR);
-	up_read(&sbi->quota_sem);
-	f2fs_unlock_op(sbi);
 	return ret;
 }
 
@@ -2711,7 +2724,6 @@ static int sanity_check_raw_super(struct f2fs_sb_info *sbi,
 	block_t total_sections, blocks_per_seg;
 	struct f2fs_super_block *raw_super = (struct f2fs_super_block *)
 					(bh->b_data + F2FS_SUPER_OFFSET);
-	unsigned int blocksize;
 	size_t crc_offset = 0;
 	__u32 crc = 0;
 
@@ -2745,10 +2757,10 @@ static int sanity_check_raw_super(struct f2fs_sb_info *sbi,
 	}
 
 	/* Currently, support only 4KB block size */
-	blocksize = 1 << le32_to_cpu(raw_super->log_blocksize);
-	if (blocksize != F2FS_BLKSIZE) {
-		f2fs_info(sbi, "Invalid blocksize (%u), supports only 4KB",
-			  blocksize);
+	if (le32_to_cpu(raw_super->log_blocksize) != F2FS_BLKSIZE_BITS) {
+		f2fs_info(sbi, "Invalid log_blocksize (%u), supports only %u",
+			  le32_to_cpu(raw_super->log_blocksize),
+			  F2FS_BLKSIZE_BITS);
 		return -EFSCORRUPTED;
 	}
 
@@ -3843,6 +3855,7 @@ free_bio_info:
 
 #ifdef CONFIG_UNICODE
 	utf8_unload(sb->s_encoding);
+	sb->s_encoding = NULL;
 #endif
 free_options:
 #ifdef CONFIG_QUOTA
@@ -4026,4 +4039,5 @@ module_exit(exit_f2fs_fs)
 MODULE_AUTHOR("Samsung Electronics's Praesto Team");
 MODULE_DESCRIPTION("Flash Friendly File System");
 MODULE_LICENSE("GPL");
+MODULE_SOFTDEP("pre: crc32");
 

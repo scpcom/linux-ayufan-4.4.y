@@ -1421,7 +1421,8 @@ void phy_detach(struct phy_device *phydev)
 
 	phy_led_triggers_unregister(phydev);
 
-	module_put(phydev->mdio.dev.driver->owner);
+	if (phydev->mdio.dev.driver)
+		module_put(phydev->mdio.dev.driver->owner);
 
 	/* If the device had no specific driver before (i.e. - it
 	 * was using the generic driver), we unbind the device
@@ -1765,9 +1766,10 @@ int genphy_update_link(struct phy_device *phydev)
 
 	/* The link state is latched low so that momentary link
 	 * drops can be detected. Do not double-read the status
-	 * in polling mode to detect such short link drops.
+	 * in polling mode to detect such short link drops except
+	 * the link was already down.
 	 */
-	if (!phy_polling_mode(phydev)) {
+	if (!phy_polling_mode(phydev) || !phydev->link) {
 		status = phy_read(phydev, MII_BMSR);
 		if (status < 0)
 			return status;

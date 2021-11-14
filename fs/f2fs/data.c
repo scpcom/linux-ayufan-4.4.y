@@ -502,7 +502,7 @@ static inline void __submit_bio(struct f2fs_sb_info *sbi,
 		if (f2fs_lfs_mode(sbi) && current->plug)
 			blk_finish_plug(current->plug);
 
-		if (F2FS_IO_ALIGNED(sbi))
+		if (!F2FS_IO_ALIGNED(sbi))
 			goto submit_io;
 
 		start = bio->bi_iter.bi_size >> F2FS_BLKSIZE_BITS;
@@ -1548,7 +1548,21 @@ next_dnode:
 	if (err) {
 		if (flag == F2FS_GET_BLOCK_BMAP)
 			map->m_pblk = 0;
+
 		if (err == -ENOENT) {
+			/*
+			 * There is one exceptional case that read_node_page()
+			 * may return -ENOENT due to filesystem has been
+			 * shutdown or cp_error, so force to convert error
+			 * number to EIO for such case.
+			 */
+			if (map->m_may_create &&
+				(is_sbi_flag_set(sbi, SBI_IS_SHUTDOWN) ||
+				f2fs_cp_error(sbi))) {
+				err = -EIO;
+				goto unlock_out;
+			}
+
 			err = 0;
 			if (map->m_next_pgofs)
 				*map->m_next_pgofs =
@@ -3350,7 +3364,13 @@ static int f2fs_write_begin(struct file *file, struct address_space *mapping,
 	block_t blkaddr = NULL_ADDR;
 	int err = 0;
 
-	if (trace_android_fs_datawrite_start_enabled()) {
+	/*
+	 * Should avoid quota operations which can make deadlock:
+	 * kswapd -> f2fs_evict_inode -> dquot_drop ->
+	 *   f2fs_dquot_commit -> f2fs_write_begin ->
+	 *   d_obtain_alias -> __d_alloc -> kmem_cache_alloc(GFP_KERNEL)
+	 */
+	if (trace_android_fs_datawrite_start_enabled() && !IS_NOQUOTA(inode)) {
 		char *path, pathbuf[MAX_TRACE_PATHBUF_LEN];
 
 		path = android_fstrace_get_pathname(pathbuf,
@@ -3533,6 +3553,9 @@ static int check_direct_IO(struct inode *inode, struct iov_iter *iter,
 	unsigned blocksize_mask = (1 << blkbits) - 1;
 	unsigned long align = offset | iov_iter_alignment(iter);
 	struct block_device *bdev = inode->i_sb->s_bdev;
+
+	if (iov_iter_rw(iter) == READ && offset >= i_size_read(inode))
+		return 1;
 
 	if (align & blocksize_mask) {
 		if (bdev)
