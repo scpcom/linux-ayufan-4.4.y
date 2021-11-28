@@ -82,6 +82,7 @@ static struct mtd_info *allocate_partition(struct mtd_info *parent,
 	child->dev.parent = IS_ENABLED(CONFIG_MTD_PARTITIONED_MASTER) || mtd_is_partition(parent) ?
 			    &parent->dev : parent->dev.parent;
 	child->dev.of_node = part->of_node;
+	//child->mtd.priv = parent;
 	child->parent = parent;
 	child->part.offset = part->offset;
 	INIT_LIST_HEAD(&child->partitions);
@@ -503,6 +504,9 @@ EXPORT_SYMBOL_GPL(deregister_mtd_parser);
 static const char * const default_mtd_part_types[] = {
 	"cmdlinepart",
 	"ofpart",
+#ifdef CONFIG_ARCH_SUNXI
+	"sunxipart",
+#endif
 	NULL
 };
 
