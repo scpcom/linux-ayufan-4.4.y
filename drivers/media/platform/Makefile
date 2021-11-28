@@ -85,4 +85,7 @@ obj-$(CONFIG_VIDEO_QCOM_VENUS)		+= qcom/venus/
 
 obj-y					+= sunxi/
 
+obj-$(CONFIG_VIDEO_SUNXI_VIN)		+= sunxi-vin/
+obj-$(CONFIG_VIDEO_SUNXI_TVD) += sunxi-tvd/
+
 obj-$(CONFIG_VIDEO_MESON_GE2D)		+= meson/ge2d/
