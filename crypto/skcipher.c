@@ -23,8 +23,6 @@
 
 #include "internal.h"
 
-#define SUNXI_CE_ADAPTER
-
 enum {
 	SKCIPHER_WALK_PHYS = 1 << 0,
 	SKCIPHER_WALK_SLOW = 1 << 1,
@@ -852,7 +850,7 @@ int crypto_skcipher_encrypt(struct skcipher_request *req)
 
 	crypto_stats_get(alg);
 	if (crypto_skcipher_get_flags(tfm) & CRYPTO_TFM_NEED_KEY)
-#ifndef SUNXI_CE_ADAPTER
+#ifndef CONFIG_CRYPTO_SUNXI_CE_ADAPTER
 		ret = -ENOKEY;
 #else
 		ret = tfm->encrypt(req);
@@ -873,7 +871,7 @@ int crypto_skcipher_decrypt(struct skcipher_request *req)
 
 	crypto_stats_get(alg);
 	if (crypto_skcipher_get_flags(tfm) & CRYPTO_TFM_NEED_KEY)
-#ifndef SUNXI_CE_ADAPTER
+#ifndef CONFIG_CRYPTO_SUNXI_CE_ADAPTER
 		ret = -ENOKEY;
 #else
 		ret = tfm->decrypt(req);
