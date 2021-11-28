@@ -304,6 +304,10 @@ static int matrix_keypad_init_gpio(struct platform_device *pdev,
 				   struct matrix_keypad *keypad)
 {
 	const struct matrix_keypad_platform_data *pdata = keypad->pdata;
+#ifdef CONFIG_ARCH_SUNXI
+	unsigned long config_set = 0;
+	int config_arg = 1;
+#endif
 	int i, err;
 
 	/* initialized strobe lines as outputs, activated */
@@ -357,6 +361,14 @@ static int matrix_keypad_init_gpio(struct platform_device *pdev,
 			}
 		}
 	}
+
+#ifdef CONFIG_ARCH_SUNXI
+	/* pull up row gpios for sunxi platform */
+	config_set = pinconf_to_config_packed(PIN_CONFIG_BIAS_PULL_UP, config_arg);
+	for (i = 0; i < pdata->num_row_gpios; i++) {
+		pinctrl_gpio_set_config(pdata->row_gpios[i], config_set);
+	}
+#endif
 
 	/* initialized as disabled - enabled by input->open */
 	disable_row_irqs(keypad);
