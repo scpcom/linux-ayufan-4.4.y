@@ -58,3 +58,4 @@ obj-$(CONFIG_UACCE)		+= uacce/
 obj-$(CONFIG_XILINX_SDFEC)	+= xilinx_sdfec.o
 obj-$(CONFIG_HISI_HIKEY_USB)	+= hisi_hikey_usb.o
 obj-$(CONFIG_SUNXI_ADDR_MGT)    += sunxi-addr/
+obj-$(CONFIG_SUNXI_RFKILL)      += sunxi-rf/
