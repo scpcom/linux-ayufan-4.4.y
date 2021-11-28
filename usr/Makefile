@@ -30,6 +30,11 @@ hostprogs-y := gen_init_cpio
 initramfs   := $(CONFIG_SHELL) $(srctree)/$(src)/gen_initramfs_list.sh
 ramfs-input := $(if $(filter-out "",$(CONFIG_INITRAMFS_SOURCE)), \
 			$(shell echo $(CONFIG_INITRAMFS_SOURCE)),-d)
+
+ifeq ($(filter /% -d,$(ramfs-input)),)
+ramfs-input := $(patsubst %, $(srctree)/%, $(ramfs-input))
+endif
+
 ramfs-args  := \
         $(if $(CONFIG_INITRAMFS_ROOT_UID), -u $(CONFIG_INITRAMFS_ROOT_UID)) \
         $(if $(CONFIG_INITRAMFS_ROOT_GID), -g $(CONFIG_INITRAMFS_ROOT_GID))

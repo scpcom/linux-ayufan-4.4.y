@@ -180,6 +180,6 @@ obj-$(CONFIG_SENSORS_XGENE)	+= xgene-hwmon.o
 
 obj-$(CONFIG_SENSORS_OCC)	+= occ/
 obj-$(CONFIG_PMBUS)		+= pmbus/
-
+obj-$(CONFIG_TPS65185_VCOM)  +=  tps65185.o
 ccflags-$(CONFIG_HWMON_DEBUG_CHIP) := -DDEBUG
 

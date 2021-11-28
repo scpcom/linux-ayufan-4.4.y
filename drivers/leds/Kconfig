@@ -824,6 +824,22 @@ config LEDS_LM36274
 	  Say Y to enable the LM36274 LED driver for TI LMU devices.
 	  This supports the LED device LM36274.
 
+config LEDS_SUNXI
+	tristate "LED support for Allwinner platforms"
+	depends on ARCH_SUNXI
+	depends on LEDS_CLASS
+	help
+	  This option enabled support for the LEDs on the Allwinner
+	  platforms. Say Y to enabled these.
+
+config MATRIX_LEDS_SUNXI
+	tristate "LED Matrix support for Allwinner platforms"
+	depends on ARCH_SUNXI
+	depends on LEDS_CLASS
+	help
+	  This option enabled support for the LEDs matrix on the Allwinner
+	  platforms. Say Y to enabled these.
+
 comment "LED Triggers"
 source "drivers/leds/trigger/Kconfig"
 

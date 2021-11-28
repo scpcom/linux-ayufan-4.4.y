@@ -328,7 +328,11 @@ int user_min_free_kbytes = -1;
  */
 int watermark_boost_factor __read_mostly;
 #else
+#ifdef CONFIG_ARCH_SUNXI
+int watermark_boost_factor __read_mostly = 5000;
+#else
 int watermark_boost_factor __read_mostly = 15000;
+#endif
 #endif
 int watermark_scale_factor = 10;
 
@@ -5420,6 +5424,7 @@ void show_free_areas(unsigned int filter, nodemask_t *nodemask)
 
 	for_each_populated_zone(zone) {
 		unsigned int order;
+		int type;
 		unsigned long nr[MAX_ORDER], flags, total = 0;
 		unsigned char types[MAX_ORDER];
 
@@ -5431,7 +5436,6 @@ void show_free_areas(unsigned int filter, nodemask_t *nodemask)
 		spin_lock_irqsave(&zone->lock, flags);
 		for (order = 0; order < MAX_ORDER; order++) {
 			struct free_area *area = &zone->free_area[order];
-			int type;
 
 			nr[order] = area->nr_free;
 			total += nr[order] << order;
@@ -5450,6 +5454,30 @@ void show_free_areas(unsigned int filter, nodemask_t *nodemask)
 				show_migration_types(types[order]);
 		}
 		printk(KERN_CONT "= %lukB\n", K(total));
+
+#ifdef CONFIG_ARCH_SUNXI
+		printk(KERN_CONT "Free pages count per migrate typeat order:");
+		for (order = 0; order < MAX_ORDER; ++order)
+			printk(KERN_CONT "%6d ", order);
+		printk(KERN_CONT "\n");
+		for (type = 0; type < MIGRATE_TYPES; type++) {
+			printk(KERN_CONT "zone %8s, type %12s ",
+						zone->name,
+						migratetype_names[type]);
+			for (order = 0; order < MAX_ORDER; ++order) {
+				unsigned long freecount = 0;
+				struct free_area *area;
+				struct list_head *curr;
+
+				area = &(zone->free_area[order]);
+
+				list_for_each(curr, &area->free_list[type])
+					freecount++;
+				printk(KERN_CONT "%6ld ", freecount);
+			}
+			printk(KERN_CONT "\n");
+		}
+#endif
 	}
 
 	hugetlb_show_meminfo();

@@ -29,6 +29,13 @@ config RPMSG_QCOM_GLINK_RPM
 	  which serves as a channel for communication with the RPM in GLINK
 	  enabled systems.
 
+config RPMSG_SUNXI_AMP
+	tristate "sunxi amp msgbox driver"
+	select RPMSG
+	default n
+	help
+	  Say y here to enable support for the sunxi msgbox communication driver.
+
 config RPMSG_QCOM_GLINK_SMEM
 	tristate "Qualcomm SMEM Glink driver"
 	select RPMSG_QCOM_GLINK_NATIVE

@@ -194,6 +194,16 @@ static const struct sunxi_sid_cfg sun50i_h6_cfg = {
 	.size = 0x200,
 };
 
+static const struct sunxi_sid_cfg sun50iw9p1_cfg = {
+	.value_offset = 0x200,
+	.size = 0x100,
+};
+
+static const struct sunxi_sid_cfg sun50iw11p1_cfg = {
+	.value_offset = 0x200,
+	.size = 0x80,
+};
+
 static const struct of_device_id sunxi_sid_of_match[] = {
 	{ .compatible = "allwinner,sun4i-a10-sid", .data = &sun4i_a10_cfg },
 	{ .compatible = "allwinner,sun7i-a20-sid", .data = &sun7i_a20_cfg },
@@ -202,6 +212,11 @@ static const struct of_device_id sunxi_sid_of_match[] = {
 	{ .compatible = "allwinner,sun50i-a64-sid", .data = &sun50i_a64_cfg },
 	{ .compatible = "allwinner,sun50i-h5-sid", .data = &sun50i_a64_cfg },
 	{ .compatible = "allwinner,sun50i-h6-sid", .data = &sun50i_h6_cfg },
+	{ .compatible = "allwinner,sun50iw9p1-sid", .data = &sun50iw9p1_cfg },
+	{ .compatible = "allwinner,sun50iw10p1-sid", .data = &sun50iw9p1_cfg },
+	{ .compatible = "allwinner,sun50iw11p1-sid", .data = &sun50iw11p1_cfg },
+	{ .compatible = "allwinner,sun8iw20p1-sid", .data = &sun50iw9p1_cfg },
+	{ .compatible = "allwinner,sun20iw1p1-sid", .data = &sun50iw9p1_cfg },
 	{/* sentinel */},
 };
 MODULE_DEVICE_TABLE(of, sunxi_sid_of_match);

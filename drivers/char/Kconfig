@@ -544,6 +544,18 @@ config EXYNOS_GPIOMEM
 	  page to the user's pointer. This drvier can allow to access gpio
 	  memory area in user account.
 
+config SUNXI_BS83B16C
+	bool "sunxi bs83b16c driver"
+	depends on ARCH_SUNXI || LEDS_CLASS || OF_GPIO
+	default n
+	help
+	  This driver is used to control mcu-bs83b16c, which has the functions
+	  of matrix button and LED array. Through the driver, the function of
+	  detecting matrix key press and reporting input can be realized, and
+	  and the LED array can also be turned on. In addition, before using
+	  the driver, it is necessary to ensure that the MCU has burned the
+	  corresponding firmware.
+
 endmenu
 
 config RANDOM_TRUST_CPU
@@ -569,3 +581,7 @@ config RANDOM_TRUST_BOOTLOADER
 	booloader is trustworthy so it will be added to the kernel's entropy
 	pool. Otherwise, say N here so it will be regarded as device input that
 	only mixes the entropy pool.
+
+source "drivers/char/sunxi_g2d/Kconfig"
+source "drivers/char/sunxi-di/Kconfig"
+source "drivers/char/sunxi-sysinfo/Kconfig"

@@ -34,6 +34,8 @@
 #include <linux/net.h>
 #include <net/sock.h>
 
+#define SUNXI_CE_ADAPTER
+
 static int skcipher_sendmsg(struct socket *sock, struct msghdr *msg,
 			    size_t size)
 {
@@ -100,8 +102,11 @@ static int _skcipher_recvmsg(struct socket *sock, struct msghdr *msg,
 		goto free;
 	}
 	sg_init_table(areq->tsgl, areq->tsgl_entries);
+#ifndef SUNXI_CE_ADAPTER
 	af_alg_pull_tsgl(sk, len, areq->tsgl, 0);
-
+#else
+	af_alg_pull_tsgl(sk, ctx->used, areq->tsgl, 0);
+#endif
 	/* Initialize the crypto operation */
 	skcipher_request_set_tfm(&areq->cra_u.skcipher_req, tfm);
 	skcipher_request_set_crypt(&areq->cra_u.skcipher_req, areq->tsgl,
@@ -139,7 +144,6 @@ static int _skcipher_recvmsg(struct socket *sock, struct msghdr *msg,
 						 &ctx->wait);
 	}
 
-
 free:
 	af_alg_free_resources(areq);
 
@@ -169,7 +173,6 @@ static int skcipher_recvmsg(struct socket *sock, struct msghdr *msg,
 				ret = err;
 			goto out;
 		}
-
 		ret += err;
 	}
 
@@ -242,8 +245,10 @@ static int skcipher_sendmsg_nokey(struct socket *sock, struct msghdr *msg,
 	int err;
 
 	err = skcipher_check_key(sock);
+#ifndef SUNXI_CE_ADAPTER
 	if (err)
 		return err;
+#endif
 
 	return skcipher_sendmsg(sock, msg, size);
 }
@@ -254,8 +259,10 @@ static ssize_t skcipher_sendpage_nokey(struct socket *sock, struct page *page,
 	int err;
 
 	err = skcipher_check_key(sock);
+#ifndef SUNXI_CE_ADAPTER
 	if (err)
 		return err;
+#endif
 
 	return af_alg_sendpage(sock, page, offset, size, flags);
 }
@@ -266,8 +273,10 @@ static int skcipher_recvmsg_nokey(struct socket *sock, struct msghdr *msg,
 	int err;
 
 	err = skcipher_check_key(sock);
+#ifndef SUNXI_CE_ADAPTER
 	if (err)
 		return err;
+#endif
 
 	return skcipher_recvmsg(sock, msg, ignored, flags);
 }

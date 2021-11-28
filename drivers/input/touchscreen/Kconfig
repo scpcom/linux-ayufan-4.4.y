@@ -1336,4 +1336,7 @@ config TOUCHSCREEN_DWAV_USB_MT
 
 	  module will be called dwav-usb-mt.
 
+source "drivers/input/touchscreen/gslx680new/Kconfig"
+source "drivers/input/touchscreen/gt9xxnew/Kconfig"
+source "drivers/input/touchscreen/focaltech_touch/Kconfig"
 endif

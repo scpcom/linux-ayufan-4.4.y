@@ -29,6 +29,7 @@
 #define TIMER_IRQ_EN_REG	0x00
 #define TIMER_IRQ_EN(val)		BIT(val)
 #define TIMER_IRQ_ST_REG	0x04
+#define TIMER_IRQ_CLEAR(val)		BIT(val)
 #define TIMER_CTL_REG(val)	(0x10 * val + 0x10)
 #define TIMER_CTL_ENABLE		BIT(0)
 #define TIMER_CTL_RELOAD		BIT(1)
@@ -40,6 +41,18 @@
 #define TIMER_CNTVAL_REG(val)	(0x10 * (val) + 0x18)
 
 #define TIMER_SYNC_TICKS	3
+
+/* Registers which needs to be saved and restored before and after sleeping */
+static u32 regs_offset[] = {
+	TIMER_IRQ_EN_REG,
+	TIMER_CTL_REG(0),
+	TIMER_INTVAL_REG(0),
+	TIMER_CNTVAL_REG(0),
+	TIMER_CTL_REG(1),
+	TIMER_INTVAL_REG(1),
+	TIMER_CNTVAL_REG(1),
+};
+static u32 regs_backup[ARRAY_SIZE(regs_offset)];
 
 /*
  * When we disable a timer, we need to wait at least for 2 cycles of
@@ -82,10 +95,35 @@ static void sun4i_clkevt_time_start(void __iomem *base, u8 timer,
 	       base + TIMER_CTL_REG(timer));
 }
 
+static inline void save_regs(void __iomem *base)
+{
+	int i;
+	for (i = 0; i < ARRAY_SIZE(regs_offset); i++)
+		regs_backup[i] = readl(base + regs_offset[i]);
+}
+
+static inline void restore_regs(void __iomem *base)
+{
+	int i;
+	for (i = 0; i < ARRAY_SIZE(regs_offset); i++)
+		writel(regs_backup[i], base + regs_offset[i]);
+}
+
 static int sun4i_clkevt_shutdown(struct clock_event_device *evt)
 {
 	struct timer_of *to = to_timer_of(evt);
 
+	save_regs(timer_of_base(to));
+	sun4i_clkevt_time_stop(timer_of_base(to), 0);
+
+	return 0;
+}
+
+static int sun4i_tick_resume(struct clock_event_device *evt)
+{
+	struct timer_of *to = to_timer_of(evt);
+
+	restore_regs(timer_of_base(to));
 	sun4i_clkevt_time_stop(timer_of_base(to), 0);
 
 	return 0;
@@ -126,7 +164,7 @@ static int sun4i_clkevt_next_event(unsigned long evt,
 
 static void sun4i_timer_clear_interrupt(void __iomem *base)
 {
-	writel(TIMER_IRQ_EN(0), base + TIMER_IRQ_ST_REG);
+	writel(TIMER_IRQ_CLEAR(0), base + TIMER_IRQ_ST_REG);
 }
 
 static irqreturn_t sun4i_timer_interrupt(int irq, void *dev_id)
@@ -150,7 +188,7 @@ static struct timer_of to = {
 		.set_state_shutdown = sun4i_clkevt_shutdown,
 		.set_state_periodic = sun4i_clkevt_set_periodic,
 		.set_state_oneshot = sun4i_clkevt_set_oneshot,
-		.tick_resume = sun4i_clkevt_shutdown,
+		.tick_resume = sun4i_tick_resume,
 		.set_next_event = sun4i_clkevt_next_event,
 		.cpumask = cpu_possible_mask,
 	},

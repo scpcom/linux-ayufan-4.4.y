@@ -28,8 +28,10 @@ obj-y	+= stacktrace.o
 obj-y	+= vdso.o
 obj-y	+= cacheinfo.o
 obj-y	+= vdso/
+obj-y	+= cpuidle.o
 
 obj-$(CONFIG_FPU)		+= fpu.o
+obj-$(CONFIG_VECTOR)		+= vector.o
 obj-$(CONFIG_SMP)		+= smpboot.o
 obj-$(CONFIG_SMP)		+= smp.o
 obj-$(CONFIG_MODULES)		+= module.o
@@ -41,5 +43,9 @@ obj-$(CONFIG_DYNAMIC_FTRACE)	+= mcount-dyn.o
 obj-$(CONFIG_PERF_EVENTS)	+= perf_event.o
 obj-$(CONFIG_PERF_EVENTS)	+= perf_callchain.o
 obj-$(CONFIG_HAVE_PERF_REGS)	+= perf_regs.o
+
+obj-$(CONFIG_KEXEC_CORE)        += machine_kexec.o relocate_kernel.o    \
+						cpu-reset.o
+obj-$(CONFIG_CRASH_DUMP)        += crash_dump.o
 
 clean:

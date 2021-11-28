@@ -49,6 +49,11 @@
 #define ELF_HWCAP	(elf_hwcap)
 extern unsigned long elf_hwcap;
 
+#define ELF_CORE_COPY_REGS(dest, regs)                           \
+do {								 \
+	*(struct user_regs_struct *)&(dest) = (regs)->user_regs; \
+} while (0);
+
 /*
  * This yields a string that ld.so will use to load implementation
  * specific libraries for optimization.  This is more specific in

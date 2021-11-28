@@ -3,8 +3,6 @@
 config HAVE_GENERIC_VDSO
 	bool
 
-if HAVE_GENERIC_VDSO
-
 config GENERIC_GETTIMEOFDAY
 	bool
 	help
@@ -23,5 +21,3 @@ config GENERIC_COMPAT_VDSO
 	bool
 	help
 	  This config option enables the compat VDSO layer.
-
-endif

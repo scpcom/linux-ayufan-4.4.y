@@ -57,3 +57,6 @@ obj-y				+= cardreader/
 obj-$(CONFIG_PVPANIC)   	+= pvpanic.o
 obj-$(CONFIG_HABANA_AI)		+= habanalabs/
 obj-$(CONFIG_XILINX_SDFEC)	+= xilinx_sdfec.o
+obj-$(CONFIG_SUNXI_RFKILL)      += sunxi-rf/
+obj-$(CONFIG_SUNXI_ADDR_MGT)    += sunxi-addr/
+obj-y                           += sunxi-gorilla/

@@ -53,3 +53,7 @@ obj-$(CONFIG_XILLYBUS)		+= xillybus/
 obj-$(CONFIG_POWERNV_OP_PANEL)	+= powernv-op-panel.o
 obj-$(CONFIG_ADI)		+= adi.o
 obj-$(CONFIG_EXYNOS_GPIOMEM)	+= exynos-gpiomem.o
+obj-$(CONFIG_SUNXI_G2D) += sunxi_g2d/
+obj-$(CONFIG_SUNXI_DI) += sunxi-di/
+obj-$(CONFIG_ARCH_SUNXI)        += sunxi-sysinfo/
+obj-$(CONFIG_SUNXI_BS83B16C)	+= sunxi-bs83b16c.o

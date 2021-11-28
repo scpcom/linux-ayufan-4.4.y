@@ -16,6 +16,8 @@
 #include <linux/platform_device.h>
 #include <linux/spinlock.h>
 #include <asm/smp.h>
+#include <asm/sbi.h>
+#include <linux/cpu_pm.h>
 
 /*
  * This driver implements a version of the RISC-V PLIC with the actual layout
@@ -55,6 +57,9 @@
 #define     CONTEXT_THRESHOLD		0x00
 #define     CONTEXT_CLAIM		0x04
 
+#define IRQS_NUM_MAX                   256
+#define IRQS_PER_U32                   32
+
 static void __iomem *plic_regs;
 
 struct plic_handler {
@@ -66,6 +71,10 @@ struct plic_handler {
 	 */
 	raw_spinlock_t		enable_lock;
 	void __iomem		*enable_base;
+#if defined(CONFIG_CPU_PM)
+	u32 __percpu saved_plic_enable[IRQS_NUM_MAX/IRQS_PER_U32]; /*save 256 interrupts*/
+	u32 __percpu poriority;
+#endif
 };
 static DEFINE_PER_CPU(struct plic_handler, plic_handlers);
 
@@ -141,6 +150,15 @@ static void plic_irq_eoi(struct irq_data *d)
 	writel(d->hwirq, handler->hart_base + CONTEXT_CLAIM);
 }
 
+static int plic_irq_set_wake(struct irq_data *data, unsigned int on)
+{
+	unsigned long hw_irq = data->hwirq;
+
+	sbi_set_wakeup(hw_irq, on);
+
+	return 0;
+}
+
 static struct irq_chip plic_chip = {
 	.name		= "SiFive PLIC",
 	.irq_mask	= plic_irq_mask,
@@ -149,6 +167,7 @@ static struct irq_chip plic_chip = {
 #ifdef CONFIG_SMP
 	.irq_set_affinity = plic_set_affinity,
 #endif
+	.irq_set_wake   = plic_irq_set_wake,
 };
 
 static int plic_irqdomain_map(struct irq_domain *d, unsigned int irq,
@@ -207,6 +226,93 @@ static int plic_find_hart_id(struct device_node *node)
 
 	return -1;
 }
+
+#if defined(CONFIG_CPU_PM)
+void plic_cpu_save(void)
+{
+	int cpu = 0, i = 0;
+	struct plic_handler *handler = NULL;
+
+	cpu = smp_processor_id();
+	if (WARN_ON_ONCE(cpu >= nr_cpu_ids))
+		return;
+	handler = per_cpu_ptr(&plic_handlers, cpu);
+
+	raw_spin_lock(&handler->enable_lock);
+	/* save poriority */
+	handler->poriority = readl(handler->hart_base + CONTEXT_THRESHOLD);
+
+	for (i = 0; i < IRQS_NUM_MAX/IRQS_PER_U32; i++) {
+		u32 __iomem *reg = handler->enable_base + i * sizeof(u32);
+		handler->saved_plic_enable[i] = readl(reg);
+	}
+	raw_spin_unlock(&handler->enable_lock);
+
+}
+
+void plic_cpu_restore(void)
+{
+	int cpu = 0, i = 0, j = 0;
+	struct plic_handler *handler = NULL;
+
+	cpu = smp_processor_id();
+	if (WARN_ON_ONCE(cpu >= nr_cpu_ids))
+		return;
+	handler = per_cpu_ptr(&plic_handlers, cpu);
+
+	raw_spin_lock(&handler->enable_lock);
+	/* set poriority > threshold*/
+	writel(handler->poriority, handler->hart_base + CONTEXT_THRESHOLD);
+	/* save 256 interrupts */
+	for (i = 0; i < IRQS_NUM_MAX/IRQS_PER_U32; i++) {
+		u32 __iomem *reg = handler->enable_base + i * sizeof(u32);
+		writel(handler->saved_plic_enable[i], reg);
+		for (j = 0; j < IRQS_PER_U32; j++) {
+			int mask = 0x1 << j;
+			if (mask > handler->saved_plic_enable[i])
+				break;
+			if (mask & handler->saved_plic_enable[i])
+				writel(1, plic_regs + PRIORITY_BASE + (j + i * IRQS_PER_U32) * PRIORITY_PER_ID);
+		}
+	}
+	raw_spin_unlock(&handler->enable_lock);
+}
+
+static int plic_notifier(struct notifier_block *self, unsigned long cmd, void *v)
+{
+	switch (cmd) {
+	case CPU_PM_ENTER:
+		plic_cpu_save();
+		break;
+	case CPU_PM_ENTER_FAILED:
+	case CPU_PM_EXIT:
+		plic_cpu_restore();
+		break;
+	case CPU_CLUSTER_PM_ENTER:
+		break;
+	case CPU_CLUSTER_PM_ENTER_FAILED:
+	case CPU_CLUSTER_PM_EXIT:
+		break;
+	}
+	return NOTIFY_OK;
+}
+
+static struct notifier_block plic_notifier_block = {
+	.notifier_call = plic_notifier,
+};
+
+static int plic_pm_init(void)
+{
+	cpu_pm_register_notifier(&plic_notifier_block);
+	return 0;
+}
+#else
+static int plic_pm_init(void)
+{
+	return 0;
+}
+#endif
+
 
 static int __init plic_init(struct device_node *node,
 		struct device_node *parent)
@@ -298,6 +404,9 @@ done:
 	pr_info("mapped %d interrupts with %d handlers for %d contexts.\n",
 		nr_irqs, nr_handlers, nr_contexts);
 	set_handle_irq(plic_handle_irq);
+	error = plic_pm_init();
+	if (error)
+		goto out_iounmap;
 	return 0;
 
 out_iounmap:

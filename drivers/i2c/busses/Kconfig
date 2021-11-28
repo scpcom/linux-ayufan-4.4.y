@@ -806,6 +806,17 @@ config I2C_OMAP
 	  Like OMAP1510/1610/1710/5912 and OMAP242x.
 	  For details see http://www.ti.com/omap.
 
+config I2C_SUNXI
+	tristate "SUNXI I2C controller"
+	depends on ARCH_SUNXI
+	default y if MACH_SUNXI
+	help
+	  If you say yes to this option, support will be included for the
+	  I2C interface from Allwinner Technology SUNXI platform.
+
+	  This driver can also be built as a module. If so, the module
+	  will be called i2c-sunxi.
+
 config I2C_OWL
 	tristate "Actions Semiconductor Owl I2C Controller"
 	depends on ARCH_ACTIONS || COMPILE_TEST
