@@ -118,6 +118,7 @@ int __cpu_up(unsigned int cpu, struct task_struct *tidle)
 	int ret = 0;
 	tidle->thread_info.cpu = cpu;
 
+	SBI_CALL_1(0x09000003, hartid);
 	ret = start_secondary_cpu(cpu, tidle);
 	if (!ret) {
 		wait_for_completion_timeout(&cpu_running,

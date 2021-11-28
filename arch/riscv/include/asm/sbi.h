@@ -8,6 +8,7 @@
 #define _ASM_RISCV_SBI_H
 
 #include <linux/types.h>
+#include <linux/reboot.h>
 
 #ifdef CONFIG_RISCV_SBI
 enum sbi_ext_id {
@@ -27,6 +28,10 @@ enum sbi_ext_id {
 	SBI_EXT_IPI = 0x735049,
 	SBI_EXT_RFENCE = 0x52464E43,
 	SBI_EXT_HSM = 0x48534D,
+	SBI_PMU = 0x09000001,
+	SBI_SYSPEND  = 0x09000007,
+	SBI_WAKEUP = 0x09000008,
+	SBI_EXT_SRST = 0x53525354,
 };
 
 enum sbi_ext_base_fid {
@@ -68,6 +73,21 @@ enum sbi_hsm_hart_status {
 	SBI_HSM_HART_STATUS_STOPPED,
 	SBI_HSM_HART_STATUS_START_PENDING,
 	SBI_HSM_HART_STATUS_STOP_PENDING,
+};
+
+enum sbi_ext_srst_fid {
+	SBI_EXT_SRST_RESET = 0,
+};
+
+enum sbi_srst_reset_type {
+	SBI_SRST_RESET_TYPE_SHUTDOWN = 0,
+	SBI_SRST_RESET_TYPE_COLD_REBOOT,
+	SBI_SRST_RESET_TYPE_WARM_REBOOT,
+};
+
+enum sbi_srst_reset_reason {
+	SBI_SRST_RESET_REASON_NONE = 0,
+	SBI_SRST_RESET_REASON_SYS_FAILURE,
 };
 
 #define SBI_SPEC_VERSION_DEFAULT	0x1
@@ -146,6 +166,46 @@ static inline unsigned long sbi_minor_version(void)
 }
 
 int sbi_err_map_linux_errno(int err);
+
+static inline void sbi_set_pmu(int start)
+{
+	SBI_CALL_1(SBI_PMU, start);
+}
+
+static inline void sbi_suspend(int state)
+{
+	SBI_CALL_1(SBI_SYSPEND, state);
+}
+
+static inline void sbi_set_wakeup(unsigned long irq, unsigned int enable)
+{
+	SBI_CALL_2(SBI_WAKEUP, irq, enable);
+}
+
+static inline void sbi_srst_reset(unsigned long type, unsigned long reason)
+{
+	SBI_CALL_3(SBI_EXT_SRST, SBI_EXT_SRST_RESET, type, reason);
+	pr_warn("%s: type=0x%lx reason=0x%lx failed\n",
+		__func__, type, reason);
+}
+
+static inline int sbi_srst_reboot(struct notifier_block *this,
+			   unsigned long mode, void *cmd)
+{
+	sbi_srst_reset((mode == REBOOT_WARM || mode == REBOOT_SOFT) ?
+		       SBI_SRST_RESET_TYPE_WARM_REBOOT :
+		       SBI_SRST_RESET_TYPE_COLD_REBOOT,
+		       SBI_SRST_RESET_REASON_NONE);
+	return NOTIFY_DONE;
+}
+
+static inline void sbi_srst_power_off(void)
+{
+	sbi_srst_reset(SBI_SRST_RESET_TYPE_SHUTDOWN,
+		       SBI_SRST_RESET_REASON_NONE);
+}
+
+void sbi_init(void);
 #else /* CONFIG_RISCV_SBI */
 /* stubs for code that is only reachable under IS_ENABLED(CONFIG_RISCV_SBI): */
 void sbi_set_timer(uint64_t stime_value);

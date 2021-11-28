@@ -12,14 +12,14 @@
 #include <linux/ptrace.h>
 #include <linux/interrupt.h>
 
-#ifdef CONFIG_RISCV_BASE_PMU
+#if defined(CONFIG_RISCV_BASE_PMU) || defined(CONFIG_THEAD_XT_V1_PMU)
 #define RISCV_BASE_COUNTERS	2
 
 /*
  * The RISCV_MAX_COUNTERS parameter should be specified.
  */
 
-#define RISCV_MAX_COUNTERS	2
+#define RISCV_MAX_COUNTERS	32
 
 /*
  * These are the indexes of bits in counteren register *minus* 1,

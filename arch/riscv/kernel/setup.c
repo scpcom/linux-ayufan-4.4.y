@@ -93,6 +93,7 @@ void __init setup_arch(char **cmdline_p)
 #ifdef CONFIG_SWIOTLB
 	swiotlb_init(1);
 #endif
+	sbi_init();
 
 #ifdef CONFIG_KASAN
 	kasan_init();
