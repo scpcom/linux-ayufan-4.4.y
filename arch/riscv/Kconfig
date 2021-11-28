@@ -233,6 +233,12 @@ config RISCV_DMA_NONCOHERENT
 config AS_HAS_INSN
 	def_bool $(as-instr,.insn r 51$(comma) 0$(comma) 0$(comma) t0$(comma) t0$(comma) zero)
 
+config SUNXI_SOC_NAME
+	string "The name of Sunxi SoC"
+	default ""
+	help
+	  Used for /proc/cpuinfo and /sys/.../sysinfo.
+
 source "arch/riscv/Kconfig.socs"
 source "arch/riscv/Kconfig.erratas"
 
@@ -469,6 +475,15 @@ config FPU
 	default y
 	help
 	  Say N here if you want to disable all floating-point related procedure
+	  in the kernel.
+
+	  If you don't know what to do here, say Y.
+
+config VECTOR
+	bool "VECTOR support"
+	default n
+	help
+	  Say N here if you want to disable all vector related procedure
 	  in the kernel.
 
 	  If you don't know what to do here, say Y.
