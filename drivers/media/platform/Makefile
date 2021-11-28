@@ -80,3 +80,8 @@ obj-$(CONFIG_VIDEO_QCOM_CAMSS)		+= qcom/camss/
 obj-$(CONFIG_VIDEO_QCOM_VENUS)		+= qcom/venus/
 
 obj-y					+= sunxi/
+
+obj-$(CONFIG_VIDEO_SUNXI_VIN)		+= sunxi-vin/
+obj-$(CONFIG_VIDEO_SUNXI_TVD) += sunxi-tvd/
+
+obj-$(CONFIG_SENSOR_POWER)  		+= sunxi-vin/modules/sensor_power/
