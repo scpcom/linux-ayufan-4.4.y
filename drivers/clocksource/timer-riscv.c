@@ -10,6 +10,7 @@
 #include <linux/clocksource.h>
 #include <linux/clockchips.h>
 #include <linux/cpu.h>
+#include <linux/cpu_pm.h>
 #include <linux/delay.h>
 #include <linux/irq.h>
 #include <linux/irqdomain.h>
@@ -33,7 +34,7 @@ static unsigned int riscv_clock_event_irq;
 static DEFINE_PER_CPU(struct clock_event_device, riscv_clock_event) = {
 	.name			= "riscv_timer_clockevent",
 	.features		= CLOCK_EVT_FEAT_ONESHOT | CLOCK_EVT_FEAT_C3STOP,
-	.rating			= 100,
+	.rating			= 400,
 	.set_next_event		= riscv_clock_next_event,
 };
 
@@ -54,7 +55,7 @@ static u64 notrace riscv_sched_clock(void)
 
 static struct clocksource riscv_clocksource = {
 	.name		= "riscv_clocksource",
-	.rating		= 300,
+	.rating		= 400,
 	.mask		= CLOCKSOURCE_MASK(64),
 	.flags		= CLOCK_SOURCE_IS_CONTINUOUS,
 	.read		= riscv_clocksource_rdtime,
@@ -89,6 +90,35 @@ static irqreturn_t riscv_timer_interrupt(int irq, void *dev_id)
 
 	return IRQ_HANDLED;
 }
+
+#ifdef CONFIG_CPU_PM
+static DEFINE_PER_CPU(unsigned long, saved_sie_stie);
+static int riscv_timer_cpu_pm_notify(struct notifier_block *self,
+				    unsigned long action, void *hcpu)
+{
+	if (action == CPU_PM_ENTER) {
+		__this_cpu_write(saved_sie_stie, csr_read(sie));
+		csr_clear(sie, SIE_STIE);
+	} else if (action == CPU_PM_ENTER_FAILED || action == CPU_PM_EXIT) {
+		csr_write(sie, saved_sie_stie);
+	}
+	return NOTIFY_OK;
+}
+
+static struct notifier_block riscv_timer_cpu_pm_notifier = {
+	.notifier_call = riscv_timer_cpu_pm_notify,
+};
+
+static int __init riscv_timer_cpu_pm_init(void)
+{
+	return cpu_pm_register_notifier(&riscv_timer_cpu_pm_notifier);
+}
+#else
+static int __init riscv_timer_cpu_pm_init(void)
+{
+	return 0;
+}
+#endif
 
 static int __init riscv_timer_init_dt(struct device_node *n)
 {
@@ -156,6 +186,9 @@ static int __init riscv_timer_init_dt(struct device_node *n)
 	if (error)
 		pr_err("cpu hp setup state failed for RISCV timer [%d]\n",
 		       error);
+	error = riscv_timer_cpu_pm_init();
+	if (error)
+		pr_err("failed to register RISCV timer PM API[%d]\n", error);
 	return error;
 }
 

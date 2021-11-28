@@ -73,6 +73,16 @@ obj-$(CONFIG_MMC_MESON_MX_SDHC)	+= meson-mx-sdhc.o
 obj-$(CONFIG_MMC_MESON_MX_SDIO)	+= meson-mx-sdio.o
 obj-$(CONFIG_MMC_MOXART)	+= moxart-mmc.o
 obj-$(CONFIG_MMC_SUNXI)		+= sunxi-mmc.o
+obj-$(CONFIG_MMC_SUNXI)		+= sunxi_mmc_host.o
+sunxi_mmc_host-$(CONFIG_ARCH_SUN8IW10P1)         += sunxi-smhc.o sunxi-mmc-v5px.o
+sunxi_mmc_host-$(CONFIG_ARCH_SUN50IW1P1)          += sunxi-mmc-sun50iw1p1-2.o sunxi-mmc-sun50iw1p1-1.o sunxi-mmc-sun50iw1p1-0.o
+sunxi_mmc_host-$(CONFIG_MMC_SUNXI_V4P1X)          += sunxi-mmc-v4p1x.o
+sunxi_mmc_host-$(CONFIG_MMC_SUNXI_V4P00X)          += sunxi-mmc-v4p00x.o
+sunxi_mmc_host-$(CONFIG_MMC_SUNXI_V4P10X)          += sunxi-mmc-v4p10x.o
+sunxi_mmc_host-$(CONFIG_MMC_SUNXI_V4P5X)          += sunxi-mmc-v4p5x.o
+sunxi_mmc_host-$(CONFIG_MMC_SUNXI_V5P3X)          += sunxi-mmc-v5p3x.o
+sunxi_mmc_host-y                += sunx0i-mmc.o sunxi-mmc-debug.o sunxi-mmc-export.o sunxi-mmc-panic.o
+
 obj-$(CONFIG_MMC_USDHI6ROL0)	+= usdhi6rol0.o
 obj-$(CONFIG_MMC_TOSHIBA_PCI)	+= toshsd.o
 obj-$(CONFIG_MMC_BCM2835)	+= bcm2835.o

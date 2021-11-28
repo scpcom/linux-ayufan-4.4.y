@@ -16,29 +16,31 @@
 #include <linux/kernel.h>
 #include <linux/spinlock.h>
 
-#define PA_BASE	0
-#define PB_BASE	32
-#define PC_BASE	64
-#define PD_BASE	96
-#define PE_BASE	128
-#define PF_BASE	160
-#define PG_BASE	192
-#define PH_BASE	224
-#define PI_BASE	256
-#define PL_BASE	352
-#define PM_BASE	384
-#define PN_BASE	416
+#define SUNXI_BANK_OFFSET(bank, bankbase)	((bank) - (bankbase))
+#define SUNXI_PIN_BASE(bank)			(SUNXI_BANK_OFFSET(bank, 'A') * 32)
+
+#define PA_BASE			SUNXI_PIN_BASE('A')
+#define PB_BASE			SUNXI_PIN_BASE('B')
+#define PC_BASE			SUNXI_PIN_BASE('C')
+#define PD_BASE			SUNXI_PIN_BASE('D')
+#define PE_BASE			SUNXI_PIN_BASE('E')
+#define PF_BASE			SUNXI_PIN_BASE('F')
+#define PG_BASE			SUNXI_PIN_BASE('G')
+#define PH_BASE			SUNXI_PIN_BASE('H')
+#define PI_BASE			SUNXI_PIN_BASE('I')
+#define PJ_BASE			SUNXI_PIN_BASE('J')
+#define PL_BASE			SUNXI_PIN_BASE('L')
+#define PM_BASE			SUNXI_PIN_BASE('M')
+#define PN_BASE			SUNXI_PIN_BASE('N')
 
 #define SUNXI_PINCTRL_PIN(bank, pin)		\
 	PINCTRL_PIN(P ## bank ## _BASE + (pin), "P" #bank #pin)
 
 #define SUNXI_PIN_NAME_MAX_LEN	5
 
-#define BANK_MEM_SIZE		0x24
 #define MUX_REGS_OFFSET		0x0
 #define DATA_REGS_OFFSET	0x10
 #define DLEVEL_REGS_OFFSET	0x14
-#define PULL_REGS_OFFSET	0x1c
 
 #define PINS_PER_BANK		32
 #define MUX_PINS_PER_REG	8
@@ -47,9 +49,6 @@
 #define DATA_PINS_PER_REG	32
 #define DATA_PINS_BITS		1
 #define DATA_PINS_MASK		0x01
-#define DLEVEL_PINS_PER_REG	16
-#define DLEVEL_PINS_BITS	2
-#define DLEVEL_PINS_MASK	0x03
 #define PULL_PINS_PER_REG	16
 #define PULL_PINS_BITS		2
 #define PULL_PINS_MASK		0x03
@@ -84,7 +83,6 @@
 #define IO_BIAS_MASK		GENMASK(3, 0)
 
 #define SUN4I_FUNC_INPUT	0
-#define SUN4I_FUNC_IRQ		6
 
 #define PINCTRL_SUN5I_A10S	BIT(1)
 #define PINCTRL_SUN5I_A13	BIT(2)
@@ -98,6 +96,10 @@
 #define PINCTRL_SUN8I_V3S	BIT(10)
 
 #define PIO_POW_MOD_SEL_REG	0x340
+#define PIO_POW_MOD_CTL_REG	0x344
+#define PIO_POW_CTL_REG		0x350
+
+#define POWER_SOURCE_MASK	0x01
 
 enum sunxi_desc_bias_voltage {
 	BIAS_VOLTAGE_NONE,
@@ -111,7 +113,33 @@ enum sunxi_desc_bias_voltage {
 	 * register, as seen on H6 SoC, for example.
 	 */
 	BIAS_VOLTAGE_PIO_POW_MODE_SEL,
+	/*
+	 * Bias voltage is set through PIO_POW_MOD_SEL_REG
+	 * and PIO_POW_MOD_CTL_REG register, as seen on
+	 * A100 SoC, for example.
+	 */
+	BIAS_VOLTAGE_PIO_POW_MODE_CTL,
 };
+
+enum sunxi_pinctrl_hw_type {
+	SUNXI_PCTL_HW_TYPE_0,  /* Older chips */
+	SUNXI_PCTL_HW_TYPE_1,  /* Newer chips: sun8iw20, sun20iw1, sun50iw12 */
+	/* Add new types here ... */
+	SUNXI_PCTL_HW_TYPE_CNT,
+};
+
+/* Reference <Port_Controller_Spec: Port Register List> for the information below: */
+struct sunxi_pinctrl_hw_info {
+	u8 bank_mem_size;  	/* Size of the basic registers (including CFG/DAT/DRV/PUL) of any bank  */
+	u8 pull_regs_offset;	/* Pull Register's offset */
+	u8 dlevel_pins_per_reg; /* How many pins does a 'Multi-Driving Register' contain? */
+	u8 dlevel_pins_bits;	/* How many bits does a 'Multi-Driving Register' use for a pin? */
+	u8 dlevel_pins_mask;	/* Bit mask for 'dlevel_pins_bits' */
+	u8 irq_mux_val;		/* Mux value for IRQ function */
+};
+
+/* Indexed by `enum sunxi_pinctrl_hw_type` */
+extern struct sunxi_pinctrl_hw_info sunxi_pinctrl_hw_info[SUNXI_PCTL_HW_TYPE_CNT];
 
 struct sunxi_desc_function {
 	unsigned long	variant;
@@ -136,6 +164,8 @@ struct sunxi_pinctrl_desc {
 	bool				irq_read_needs_mux;
 	bool				disable_strict_mode;
 	enum sunxi_desc_bias_voltage	io_bias_cfg_variant;
+	bool				pf_power_source_switch;
+	enum sunxi_pinctrl_hw_type	hw_type;
 };
 
 struct sunxi_pinctrl_function {
@@ -151,6 +181,7 @@ struct sunxi_pinctrl_group {
 
 struct sunxi_pinctrl_regulator {
 	struct regulator	*regulator;
+	struct regulator	*regulator_optional;
 	refcount_t		refcount;
 };
 
@@ -232,10 +263,10 @@ struct sunxi_pinctrl {
  * The following functions calculate from the pin number the register
  * and the bit offset that we should access.
  */
-static inline u32 sunxi_mux_reg(u16 pin)
+static inline u32 sunxi_mux_reg(u16 pin, enum sunxi_pinctrl_hw_type hw_type)
 {
 	u8 bank = pin / PINS_PER_BANK;
-	u32 offset = bank * BANK_MEM_SIZE;
+	u32 offset = bank * sunxi_pinctrl_hw_info[hw_type].bank_mem_size;
 	offset += MUX_REGS_OFFSET;
 	offset += pin % PINS_PER_BANK / MUX_PINS_PER_REG * 0x04;
 	return round_down(offset, 4);
@@ -247,10 +278,10 @@ static inline u32 sunxi_mux_offset(u16 pin)
 	return pin_num * MUX_PINS_BITS;
 }
 
-static inline u32 sunxi_data_reg(u16 pin)
+static inline u32 sunxi_data_reg(u16 pin, enum sunxi_pinctrl_hw_type hw_type)
 {
 	u8 bank = pin / PINS_PER_BANK;
-	u32 offset = bank * BANK_MEM_SIZE;
+	u32 offset = bank * sunxi_pinctrl_hw_info[hw_type].bank_mem_size;
 	offset += DATA_REGS_OFFSET;
 	offset += pin % PINS_PER_BANK / DATA_PINS_PER_REG * 0x04;
 	return round_down(offset, 4);
@@ -262,26 +293,26 @@ static inline u32 sunxi_data_offset(u16 pin)
 	return pin_num * DATA_PINS_BITS;
 }
 
-static inline u32 sunxi_dlevel_reg(u16 pin)
+static inline u32 sunxi_dlevel_reg(u16 pin, enum sunxi_pinctrl_hw_type hw_type)
 {
 	u8 bank = pin / PINS_PER_BANK;
-	u32 offset = bank * BANK_MEM_SIZE;
+	u32 offset = bank * sunxi_pinctrl_hw_info[hw_type].bank_mem_size;
 	offset += DLEVEL_REGS_OFFSET;
-	offset += pin % PINS_PER_BANK / DLEVEL_PINS_PER_REG * 0x04;
+	offset += pin % PINS_PER_BANK / sunxi_pinctrl_hw_info[hw_type].dlevel_pins_per_reg * 0x04;
 	return round_down(offset, 4);
 }
 
-static inline u32 sunxi_dlevel_offset(u16 pin)
+static inline u32 sunxi_dlevel_offset(u16 pin, enum sunxi_pinctrl_hw_type hw_type)
 {
-	u32 pin_num = pin % DLEVEL_PINS_PER_REG;
-	return pin_num * DLEVEL_PINS_BITS;
+	u32 pin_num = pin % sunxi_pinctrl_hw_info[hw_type].dlevel_pins_per_reg;
+	return pin_num * sunxi_pinctrl_hw_info[hw_type].dlevel_pins_bits;
 }
 
-static inline u32 sunxi_pull_reg(u16 pin)
+static inline u32 sunxi_pull_reg(u16 pin, enum sunxi_pinctrl_hw_type hw_type)
 {
 	u8 bank = pin / PINS_PER_BANK;
-	u32 offset = bank * BANK_MEM_SIZE;
-	offset += PULL_REGS_OFFSET;
+	u32 offset = bank * sunxi_pinctrl_hw_info[hw_type].bank_mem_size;
+	offset += sunxi_pinctrl_hw_info[hw_type].pull_regs_offset;
 	offset += pin % PINS_PER_BANK / PULL_PINS_PER_REG * 0x04;
 	return round_down(offset, 4);
 }
@@ -294,6 +325,7 @@ static inline u32 sunxi_pull_offset(u16 pin)
 
 static inline u32 sunxi_irq_hw_bank_num(const struct sunxi_pinctrl_desc *desc, u8 bank)
 {
+	BUG_ON(bank >= desc->irq_banks);
 	if (!desc->irq_bank_map)
 		return bank;
 	else

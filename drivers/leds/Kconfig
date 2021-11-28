@@ -929,6 +929,22 @@ config LEDS_ACER_A500
 	  This option enables support for the Power Button LED of
 	  Acer Iconia Tab A500.
 
+config LEDS_SUNXI
+	tristate "LED support for Allwinner platforms"
+	depends on ARCH_SUNXI
+	depends on LEDS_CLASS
+	help
+	  This option enabled support for the LEDs on the Allwinner
+	  platforms. Say Y to enabled these.
+
+config MATRIX_LEDS_SUNXI
+	tristate "LED Matrix support for Allwinner platforms"
+	depends on ARCH_SUNXI
+	depends on LEDS_CLASS
+	help
+	  This option enabled support for the LEDs matrix on the Allwinner
+	  platforms. Say Y to enabled these.
+
 comment "LED Triggers"
 source "drivers/leds/trigger/Kconfig"
 

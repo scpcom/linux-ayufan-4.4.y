@@ -27,3 +27,5 @@ obj-$(CONFIG_FSL_PAMU) += fsl_pamu.o fsl_pamu_domain.o
 obj-$(CONFIG_S390_IOMMU) += s390-iommu.o
 obj-$(CONFIG_HYPERV_IOMMU) += hyperv-iommu.o
 obj-$(CONFIG_VIRTIO_IOMMU) += virtio-iommu.o
+obj-$(CONFIG_SUNXI_IOMMU) += sunxi-iommu.o
+obj-$(CONFIG_SUNXI_IOMMU_DEBUG) += sunxi-iommu-debug.o

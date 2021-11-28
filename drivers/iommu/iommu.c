@@ -1958,8 +1958,12 @@ int iommu_attach_device(struct iommu_domain *domain, struct device *dev)
 	 */
 	mutex_lock(&group->mutex);
 	ret = -EINVAL;
-	if (iommu_group_device_count(group) != 1)
+	if (iommu_group_device_count(group) != 1) {
+#ifdef CONFIG_ARCH_SUNXI
+		ret =  __iommu_attach_device(domain, dev);
+#endif
 		goto out_unlock;
+	}
 
 	ret = __iommu_attach_group(domain, group);
 
@@ -2539,7 +2543,11 @@ static size_t __iommu_map_sg(struct iommu_domain *domain, unsigned long iova,
 	phys_addr_t start;
 	unsigned int i = 0;
 	int ret;
+#ifdef CONFIG_ARCH_SUNXI
+	struct iommu_iotlb_gather iotlb_gather;
 
+	prot |= (1 << 16);
+#endif
 	while (i <= nents) {
 		phys_addr_t s_phys = sg_phys(sg);
 
@@ -2567,6 +2575,12 @@ static size_t __iommu_map_sg(struct iommu_domain *domain, unsigned long iova,
 
 	if (ops->iotlb_sync_map)
 		ops->iotlb_sync_map(domain);
+#ifdef CONFIG_ARCH_SUNXI
+	iotlb_gather.start = iova;
+	iotlb_gather.end = iova + mapped;
+	if (domain->ops->iotlb_sync)
+		domain->ops->iotlb_sync(domain, &iotlb_gather);
+#endif
 	return mapped;
 
 out_err:

@@ -20,6 +20,11 @@ void ccu_gate_helper_disable(struct ccu_common *common, u32 gate)
 	spin_lock_irqsave(common->lock, flags);
 
 	reg = readl(common->base + common->reg);
+	/* data reading result of the keyfield bits are always 0 */
+	if (common->features & CCU_FEATURE_KEY_FIELD_MOD) {
+		reg = reg | common->key_value;
+	}
+
 	writel(reg & ~gate, common->base + common->reg);
 
 	spin_unlock_irqrestore(common->lock, flags);
@@ -43,6 +48,12 @@ int ccu_gate_helper_enable(struct ccu_common *common, u32 gate)
 	spin_lock_irqsave(common->lock, flags);
 
 	reg = readl(common->base + common->reg);
+
+	/* data reading result of the keyfield bits are always 0 */
+	if (common->features & CCU_FEATURE_KEY_FIELD_MOD) {
+		reg = reg | common->key_value;
+	}
+
 	writel(reg | gate, common->base + common->reg);
 
 	spin_unlock_irqrestore(common->lock, flags);
@@ -78,6 +89,9 @@ static unsigned long ccu_gate_recalc_rate(struct clk_hw *hw,
 	struct ccu_gate *cg = hw_to_ccu_gate(hw);
 	unsigned long rate = parent_rate;
 
+	if (cg->common.features & CCU_FEATURE_FIXED_RATE_GATE)
+		return cg->fixed_rate;
+
 	if (cg->common.features & CCU_FEATURE_ALL_PREDIV)
 		rate /= cg->common.prediv;
 
@@ -89,6 +103,9 @@ static long ccu_gate_round_rate(struct clk_hw *hw, unsigned long rate,
 {
 	struct ccu_gate *cg = hw_to_ccu_gate(hw);
 	int div = 1;
+
+	if (cg->common.features & CCU_FEATURE_FIXED_RATE_GATE)
+		return cg->fixed_rate;
 
 	if (cg->common.features & CCU_FEATURE_ALL_PREDIV)
 		div = cg->common.prediv;
@@ -124,3 +141,4 @@ const struct clk_ops ccu_gate_ops = {
 	.set_rate	= ccu_gate_set_rate,
 	.recalc_rate	= ccu_gate_recalc_rate,
 };
+EXPORT_SYMBOL_GPL(ccu_gate_ops);
