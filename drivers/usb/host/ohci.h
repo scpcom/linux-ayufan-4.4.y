@@ -16,6 +16,8 @@
 typedef __u32 __bitwise __hc32;
 typedef __u16 __bitwise __hc16;
 
+#include <linux/io.h>
+
 /*
  * OHCI Endpoint Descriptor (ED) ... holds TD queue
  * See OHCI spec, section 4.2
