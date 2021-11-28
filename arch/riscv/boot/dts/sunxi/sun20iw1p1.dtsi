@@ -125,7 +125,7 @@
 		opp@1008000000 {
 			opp-hz = /bits/ 64 <1008000000>;
 			clock-latency-ns = <244144>; /* 8 32k periods */
-			opp-microvolt-a0 = <900000>;
+			opp-microvolt-a0 = <1100000>;
 		};
 	};
 
@@ -868,8 +868,6 @@
 				      "audio_clk_dac", "audio_clk_adc",
 				      "audio_clk_bus";
 			resets = <&ccu RST_BUS_AUDIO_CODEC>;
-			playback_cma    = <128>;
-			capture_cma     = <256>;
 			device_type = "codec";
 			status = "disabled";
 		};
