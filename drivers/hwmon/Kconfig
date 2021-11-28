@@ -25,6 +25,10 @@ menuconfig HWMON
 
 if HWMON
 
+config TPS65185_VCOM
+	depends on EINK200_SUNXI
+	tristate "TPS65185 IC"
+
 config HWMON_VID
 	tristate
 
