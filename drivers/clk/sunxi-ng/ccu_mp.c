@@ -166,7 +166,14 @@ static unsigned long ccu_mp_recalc_rate(struct clk_hw *hw,
 	p = reg >> cmp->p.shift;
 	p &= (1 << cmp->p.width) - 1;
 
-	rate = (parent_rate >> p) / m;
+	if (unlikely(cmp->common.features & CCU_FEATURE_MP_NO_INDEX_MODE)) {
+		p += cmp->p.offset;
+		if (!p)
+			p++;
+		rate = (parent_rate / p) / m;
+	} else {
+		rate = (parent_rate >> p) / m;
+	}
 	if (cmp->common.features & CCU_FEATURE_FIXED_POSTDIV)
 		rate /= cmp->fixed_post_div;
 
@@ -196,7 +203,12 @@ static int ccu_mp_set_rate(struct clk_hw *hw, unsigned long rate,
 						  parent_rate);
 
 	max_m = cmp->m.max ?: 1 << cmp->m.width;
-	max_p = cmp->p.max ?: 1 << ((1 << cmp->p.width) - 1);
+
+	if (unlikely(cmp->common.features & CCU_FEATURE_MP_NO_INDEX_MODE))
+		max_p = cmp->p.max ?: 1 << cmp->p.width;
+	else
+		max_p = cmp->p.max ?: 1 << ((1 << cmp->p.width) - 1);
+
 
 	/* Adjust target rate according to post-dividers */
 	if (cmp->common.features & CCU_FEATURE_FIXED_POSTDIV)
@@ -210,7 +222,11 @@ static int ccu_mp_set_rate(struct clk_hw *hw, unsigned long rate,
 	reg &= ~GENMASK(cmp->m.width + cmp->m.shift - 1, cmp->m.shift);
 	reg &= ~GENMASK(cmp->p.width + cmp->p.shift - 1, cmp->p.shift);
 	reg |= (m - cmp->m.offset) << cmp->m.shift;
-	reg |= ilog2(p) << cmp->p.shift;
+
+	if (unlikely(cmp->common.features & CCU_FEATURE_MP_NO_INDEX_MODE))
+		reg |= (p - cmp->p.offset) << cmp->p.shift;
+	else
+		reg |= ilog2(p) << cmp->p.shift;
 
 	writel(reg, cmp->common.base + cmp->common.reg);
 
@@ -245,6 +261,7 @@ const struct clk_ops ccu_mp_ops = {
 	.recalc_rate	= ccu_mp_recalc_rate,
 	.set_rate	= ccu_mp_set_rate,
 };
+EXPORT_SYMBOL_GPL(ccu_mp_ops);
 
 /*
  * Support for MMC timing mode switching
