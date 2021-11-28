@@ -17,7 +17,54 @@
 #include <asm/mmu_context.h>
 
 #ifdef CONFIG_MMU
+#ifdef CONFIG_RISCV_XUANTIE
+static inline void set_mm(struct mm_struct *mm, unsigned int cpu)
+{
+	u64 asid;
 
+	check_and_switch_context(mm, cpu);
+	asid = (mm->context.asid.counter & SATP_ASID_MASK)
+		<< SATP_ASID_SHIFT;
+
+	csr_write(sptbr, virt_to_pfn(mm->pgd) | SATP_MODE | asid);
+}
+
+static DEFINE_PER_CPU(atomic64_t, active_asids);
+static DEFINE_PER_CPU(u64, reserved_asids);
+
+struct asid_info asid_info;
+
+void check_and_switch_context(struct mm_struct *mm, unsigned int cpu)
+{
+	asid_check_context(&asid_info, &mm->context.asid, cpu, mm);
+}
+
+static void asid_flush_cpu_ctxt(void)
+{
+	local_flush_tlb_all();
+}
+
+static int __init asids_init(void)
+{
+	BUG_ON(((1 << SATP_ASID_BITS) - 1) <= num_possible_cpus());
+
+	if (asid_allocator_init(&asid_info, SATP_ASID_BITS, 1,
+				asid_flush_cpu_ctxt))
+		panic("Unable to initialize ASID allocator for %lu ASIDs\n",
+		      NUM_ASIDS(&asid_info));
+
+	asid_info.active = &active_asids;
+	asid_info.reserved = &reserved_asids;
+
+	pr_info("ASID allocator initialised with %lu entries\n",
+		NUM_CTXT_ASIDS(&asid_info));
+
+	local_flush_tlb_all();
+
+	return 0;
+}
+early_initcall(asids_init);
+#else
 DEFINE_STATIC_KEY_FALSE(use_asid_allocator);
 
 static unsigned long asid_bits;
@@ -261,6 +308,7 @@ static int __init asids_init(void)
 	return 0;
 }
 early_initcall(asids_init);
+#endif
 #else
 static inline void set_mm(struct mm_struct *mm, unsigned int cpu)
 {

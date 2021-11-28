@@ -13,7 +13,11 @@ typedef struct {
 #ifndef CONFIG_MMU
 	unsigned long	end_brk;
 #else
+#ifdef CONFIG_RISCV_XUANTIE
+	atomic64_t asid;
+#else
 	atomic_long_t id;
+#endif
 #endif
 	void *vdso;
 #ifdef CONFIG_SMP
