@@ -470,6 +470,19 @@ config ADI
 	  This feature is also known as MCD (Memory Corruption Detection)
 	  and SSM (Silicon Secured Memory).  Intended consumers of this
 	  driver include crash and makedumpfile.
+ 
+config SUNXI_BS83B16C
+	bool "sunxi bs83b16c driver"
+	depends on ARCH_SUNXI || LEDS_CLASS || OF_GPIO
+	default n
+	help
+	  This driver is used to control mcu-bs83b16c, which has the functions
+	  of matrix button and LED array. Through the driver, the function of
+	  detecting matrix key press and reporting input can be realized, and
+	  and the LED array can also be turned on. In addition, before using
+	  the driver, it is necessary to ensure that the MCU has burned the
+	  corresponding firmware.
+
 
 config RANDOM_TRUST_CPU
 	bool "Initialize RNG using CPU RNG instructions"
