@@ -1,0 +1,22 @@
+# SPDX-License-Identifier: GPL-2.0-only
+if CLK_SUNXI
+
+config CLK_SUNXI_DDR
+	tristate "Legacy A100 ddr clock drivers"
+	default y
+	help
+	  Legacy ddr clock drivers being used on A100 SoCs.
+	  These drivers are kept around for
+	  Device Tree backward compatibility issues, in case one would
+	  still use a Device Tree with one clock provider by
+	  node. Newer Device Trees and newer SoCs use the drivers
+	  controlled by CONFIG_SUNXI_CCU.
+
+config CLK_SUN8IW15
+	tristate "Legacy clock support for sun8iw15p1"
+	default y
+	depends on ARCH_SUN8IW15
+	help
+	  Legacy clock driver for sun8iw15p1.
+
+endif
