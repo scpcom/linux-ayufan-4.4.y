@@ -2701,12 +2701,16 @@ static int sunxi_mmc_extra_of_parse(struct mmc_host *mmc)
 		}
 	}
 
+#ifdef MMC_PM_IGNORE_PM_NOTIFY
 	if (of_property_read_bool(np, "ignore-pm-notify"))
 		mmc->pm_flags |= MMC_PM_IGNORE_PM_NOTIFY;
+#endif
 	if (of_property_read_bool(np, "cap-cmd23"))
 		mmc->caps |= MMC_CAP_CMD23;
+#ifdef MMC_PM_IGNORE_PM_NOTIFY
 	if (of_property_read_bool(np, "ignore-pm-notify"))
 		mmc->pm_flags |= MMC_PM_IGNORE_PM_NOTIFY;
+#endif
 	if (of_property_read_bool(np, "cap-pack-write"))
 		mmc->caps2 |= MMC_CAP2_PACKED_WR;
 	if (of_property_read_bool(np, "mmc-cache-ctrl"))
