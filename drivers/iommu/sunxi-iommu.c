@@ -1672,7 +1672,6 @@ static const struct iommu_ops sunxi_iommu_ops = {
 	.device_group	= sunxi_iommu_device_group,
 	.of_xlate = sunxi_iommu_of_xlate,
 	.iova_to_phys = sunxi_iommu_iova_to_phys,
-	.owner = THIS_MODULE,
 };
 
 static int sunxi_iommu_probe(struct platform_device *pdev)
