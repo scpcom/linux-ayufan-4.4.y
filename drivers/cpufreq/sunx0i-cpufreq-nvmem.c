@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0
 /*
- * The sun50i-cpufreq-nvmem driver reads the efuse value from the SoC to
+ * The sunx0i-cpufreq-nvmem driver reads the efuse value from the SoC to
  * provide the OPP framework with required information.
  *
  * Copyright (C) 2020 frank@allwinnertech.com
@@ -355,11 +355,11 @@ static int sun50i_cpufreq_nvmem_remove(struct platform_device *pdev)
 	return 0;
 }
 
-static struct platform_driver sun50i_cpufreq_driver = {
+static struct platform_driver sunx0i_cpufreq_driver = {
 	.probe = sun50i_cpufreq_nvmem_probe,
 	.remove = sun50i_cpufreq_nvmem_remove,
 	.driver = {
-		.name = "sun50i-cpufreq-nvmem",
+		.name = "sunx0i-cpufreq-nvmem",
 	},
 };
 
@@ -397,19 +397,19 @@ static int __init sun50i_cpufreq_init(void)
 	if (!match)
 		return -ENODEV;
 
-	ret = platform_driver_register(&sun50i_cpufreq_driver);
+	ret = platform_driver_register(&sunx0i_cpufreq_driver);
 	if (unlikely(ret < 0))
 		return ret;
 
 	sun50i_cpufreq_pdev = platform_device_register_data(NULL,
-							    "sun50i-cpufreq-nvmem",
+							    "sunx0i-cpufreq-nvmem",
 							    -1, match,
 							    sizeof(*match));
 	ret = PTR_ERR_OR_ZERO(sun50i_cpufreq_pdev);
 	if (ret == 0)
 		return 0;
 
-	platform_driver_unregister(&sun50i_cpufreq_driver);
+	platform_driver_unregister(&sunx0i_cpufreq_driver);
 	return ret;
 }
 module_init(sun50i_cpufreq_init);
@@ -417,7 +417,7 @@ module_init(sun50i_cpufreq_init);
 static void __exit sun50i_cpufreq_exit(void)
 {
 	platform_device_unregister(sun50i_cpufreq_pdev);
-	platform_driver_unregister(&sun50i_cpufreq_driver);
+	platform_driver_unregister(&sunx0i_cpufreq_driver);
 }
 module_exit(sun50i_cpufreq_exit);
 
