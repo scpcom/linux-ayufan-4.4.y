@@ -1092,11 +1092,11 @@ static int sunxi_rtc_remove(struct platform_device *pdev)
 	return 0;
 }
 
-static struct platform_driver sunxi_rtc_driver = {
+static struct platform_driver sunx0i_rtc_driver = {
 	.probe    = sunxi_rtc_probe,
 	.remove   = sunxi_rtc_remove,
 	.driver   = {
-		.name  = "sunxi-rtc",
+		.name  = "sunx0i-rtc",
 		.owner = THIS_MODULE,
 		.of_match_table = sunxi_rtc_dt_ids,
 	},
@@ -1106,7 +1106,7 @@ static int __init sunxi_rtc_init(void)
 {
 	int err;
 
-	err = platform_driver_register(&sunxi_rtc_driver);
+	err = platform_driver_register(&sunx0i_rtc_driver);
 	if (err)
 		pr_err("register sunxi rtc failed\n");
 
@@ -1116,7 +1116,7 @@ module_init(sunxi_rtc_init);
 
 static void __exit sunxi_rtc_exit(void)
 {
-	platform_driver_unregister(&sunxi_rtc_driver);
+	platform_driver_unregister(&sunx0i_rtc_driver);
 }
 module_exit(sunxi_rtc_exit);
 
