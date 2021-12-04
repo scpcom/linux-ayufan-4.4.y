@@ -1169,6 +1169,13 @@ struct ieee80211_mgmt {
 				} __packed chan_switch;
 				struct{
 					u8 action_code;
+					u8 element_id;
+					u8 length;
+					struct ieee80211_channel_sw_ie sw_elem;
+					u8 variable[0];
+				} __packed swe_chan_switch;
+				struct{
+					u8 action_code;
 					struct ieee80211_ext_chansw_ie data;
 					u8 variable[0];
 				} __packed ext_chan_switch;
@@ -2892,6 +2899,8 @@ enum ieee80211_eid {
 	WLAN_EID_RSNX = 244,
 	WLAN_EID_EXTENSION = 255
 };
+
+#define WLAN_EID_HT_INFORMATION WLAN_EID_HT_OPERATION
 
 /* Element ID Extensions for Element ID 255 */
 enum ieee80211_eid_ext {
