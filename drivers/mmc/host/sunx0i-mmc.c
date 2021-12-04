@@ -3199,9 +3199,9 @@ void sunxi_shutdown_mmc(struct platform_device *pdev)
 		host->sunxi_mmc_shutdown(pdev);
 }
 
-static struct platform_driver sunxi_mmc_driver = {
+static struct platform_driver sunx0i_mmc_driver = {
 	.driver = {
-		   .name = "sunxi-mmc",
+		   .name = "sunx0i-mmc",
 		   .of_match_table = of_match_ptr(sunxi_mmc_of_match),
 		   .pm = sunxi_mmc_pm_ops,
 		   },
@@ -3210,7 +3210,7 @@ static struct platform_driver sunxi_mmc_driver = {
 	.shutdown = sunxi_shutdown_mmc,
 };
 
-module_platform_driver(sunxi_mmc_driver);
+module_platform_driver(sunx0i_mmc_driver);
 
 MODULE_DESCRIPTION("Allwinner's SD/MMC Card Controller Driver");
 MODULE_LICENSE("GPL v2");
