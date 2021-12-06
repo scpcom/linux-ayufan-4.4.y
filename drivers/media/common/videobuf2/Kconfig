@@ -2,7 +2,7 @@
 # Used by drivers that need Videobuf2 modules
 config VIDEOBUF2_CORE
 	select DMA_SHARED_BUFFER
-	tristate
+	bool
 
 config VIDEOBUF2_V4L2
 	tristate
