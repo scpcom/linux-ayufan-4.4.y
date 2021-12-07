@@ -1128,11 +1128,11 @@ chn_cfg_mode     : Hardware DE channel allocation config. 0:single display with 
 	disp_init_enable         = <1>;
 	disp_mode                = <0>;
 
-	screen0_output_type      = <3>;
-	screen0_output_mode      = <10>;
+	screen0_output_type      = <1>;
+	screen0_output_mode      = <4>;
 
-	screen1_output_type      = <1>;
-	screen1_output_mode      = <4>;
+	screen1_output_type      = <3>;
+	screen1_output_mode      = <10>;
 
 	screen1_output_format    = <0>;
 	screen1_output_bits      = <0>;
@@ -1143,26 +1143,26 @@ chn_cfg_mode     : Hardware DE channel allocation config. 0:single display with 
 	screen1_output_scan      = <0>;
 	screen1_output_aspect_ratio = <8>;
 
-	dev0_output_type         = <4>;
-	dev0_output_mode         = <10>;
+	dev0_output_type         = <1>;
+	dev0_output_mode         = <4>;
 	dev0_screen_id           = <0>;
-	dev0_do_hpd              = <1>;
+	dev0_do_hpd              = <0>;
 
-	dev1_output_type         = <1>;
-	dev1_output_mode         = <4>;
+	dev1_output_type         = <4>;
+	dev1_output_mode         = <10>;
 	dev1_screen_id           = <1>;
-	dev1_do_hpd              = <0>;
+	dev1_do_hpd              = <1>;
 
 	def_output_dev           = <0>;
 	hdmi_mode_check          = <1>;
 
 	fb0_format               = <0>;
-	fb0_width                = <1920>;
-	fb0_height               = <1080>;
+	fb0_width                = <0>;
+	fb0_height               = <0>;
 
 	fb1_format               = <0>;
-	fb1_width                = <1920>;
-	fb1_height               = <1080>;
+	fb1_width                = <0>;
+	fb1_height               = <0>;
 	chn_cfg_mode             = <1>;
 
 	disp_para_zone           = <1>;
