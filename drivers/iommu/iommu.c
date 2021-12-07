@@ -2799,12 +2799,6 @@ static ssize_t __iommu_map_sg(struct iommu_domain *domain, unsigned long iova,
 
 	if (ops->iotlb_sync_map)
 		ops->iotlb_sync_map(domain, iova, mapped);
-
-#ifdef IOMMU_TLB_SHOT_ENTIRE
-	if (domain->ops->flush_iotlb_all && (prot & IOMMU_TLB_SHOT_ENTIRE))
-		domain->ops->flush_iotlb_all(domain);
-#endif
-
 #ifdef CONFIG_ARCH_SUNXI
 	iotlb_gather.start = iova;
 	iotlb_gather.end = iova + mapped;
