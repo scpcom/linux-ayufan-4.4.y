@@ -32,13 +32,6 @@
  */
 #define IOMMU_PRIV	(1 << 5)
 
-#ifdef CONFIG_NO_GKI
-
-/* For shoting entire IOMMU tlb once */
-#define IOMMU_TLB_SHOT_ENTIRE	(1 << 8)
-
-#endif
-
 #ifdef CONFIG_ARCH_SUNXI
 /*
  * Do not call sunxi_zap_tlb on map if this flag is set.
