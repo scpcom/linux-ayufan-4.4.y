@@ -24,6 +24,7 @@
 #include <asm/setup.h>
 #include <asm/sections.h>
 #include <asm/sbi.h>
+#include <asm/system_info.h>
 #include <asm/tlbflush.h>
 #include <asm/thread_info.h>
 #include <asm/kasan.h>
@@ -51,11 +52,26 @@ atomic_t hart_lottery __section(".sdata");
 unsigned long boot_cpu_hartid;
 static DEFINE_PER_CPU(struct cpu, cpu_devices);
 
+static void __init setup_machine_fdt(void)
+{
+	const char *name;
+
+	name = of_flat_dt_get_machine_name();
+	if (!name)
+		return;
+	machine_name = name;
+
+	pr_info("Machine model: %s\n", name);
+	dump_stack_set_arch_desc("%s (DT)", name);
+}
+
 static void __init parse_dtb(void)
 {
 	/* Early scan of device tree from init memory */
-	if (early_init_dt_scan(dtb_early_va))
+	if (early_init_dt_scan(dtb_early_va)) {
+		setup_machine_fdt();
 		return;
+	}
 
 	pr_err("No DTB passed to the kernel\n");
 #ifdef CONFIG_CMDLINE_FORCE
