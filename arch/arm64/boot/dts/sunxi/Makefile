@@ -1,4 +1,4 @@
-dtb-$(CONFIG_ARCH_SUNXI) += board.dtb
+dtb-$(CONFIG_ARCH_SUNXI_BOARD) += board.dtb
 
 always		:= $(dtb-y)
 subdir-y	:= $(dts-dirs)

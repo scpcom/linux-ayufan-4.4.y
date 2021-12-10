@@ -15,6 +15,11 @@ menuconfig ARCH_SUNXI
 
 if ARCH_SUNXI
 
+config ARCH_SUNXI_BOARD
+	bool "Allwinner sunxi SDK board"
+	help
+	  This enables SDK board dtb.
+
 if ARCH_MULTI_V7
 
 config MACH_SUN4I
