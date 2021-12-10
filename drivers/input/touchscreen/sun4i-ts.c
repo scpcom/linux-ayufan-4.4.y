@@ -487,8 +487,10 @@ static int sun4i_ts_probe(struct platform_device *pdev)
 	else
 		reg |= TP_MODE_EN(1);
 
+#if (defined(CONFIG_ARCH_SUN8IW20) || defined(CONFIG_ARCH_SUN20IW1))
 	if (of_device_is_compatible(np, "allwinner,sun8i-ts"))
 		reg |= CHOPPER_EN(1);
+#endif
 
 	/* Select normal adc(aux-adc) mode or tpadc mode */
 	if (of_property_read_bool(np, "aux-adc"))
