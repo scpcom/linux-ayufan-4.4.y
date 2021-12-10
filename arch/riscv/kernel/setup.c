@@ -30,6 +30,7 @@
 #include <asm/set_memory.h>
 #include <asm/sections.h>
 #include <asm/sbi.h>
+#include <asm/system_info.h>
 #include <asm/tlbflush.h>
 #include <asm/thread_info.h>
 #include <asm/kasan.h>
@@ -249,6 +250,8 @@ static void __init parse_dtb(void)
 		const char *name = of_flat_dt_get_machine_name();
 
 		if (name) {
+			machine_name = name;
+
 			pr_info("Machine model: %s\n", name);
 			dump_stack_set_arch_desc("%s (DT)", name);
 		}
