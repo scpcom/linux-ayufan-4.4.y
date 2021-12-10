@@ -86,6 +86,11 @@ config EVB_PLATFORM
 endchoice
 
 if ARCH_SUNXI
+config ARCH_SUNXI_BOARD
+	bool "Allwinner sunxi SDK board"
+	help
+	  This enables SDK board dtb.
+
 choice
 	prompt "Select the architecture of SoC"
 	default ARCH_SUN20I
