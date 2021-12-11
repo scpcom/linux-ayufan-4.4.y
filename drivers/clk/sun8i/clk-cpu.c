@@ -16,6 +16,9 @@
 #include <linux/err.h>
 #include <linux/module.h>
 #include "clk-cpu.h"
+#ifdef CONFIG_COMMON_CLK_DEBUG
+#include "clk-debugfs.h"
+#endif
 
 static int sunxi_cpuclk_pre_rate_change(struct clk_notifier_data *ndata,
 		struct sunxi_cpuclk *cpuclk)
@@ -25,11 +28,13 @@ static int sunxi_cpuclk_pre_rate_change(struct clk_notifier_data *ndata,
 	struct clk *parent = cpuclk->alt_parent;
 
 	ret =  clk_set_parent(clk, parent);
+#ifdef CONFIG_COMMON_CLK_DEBUG
 	if (ret) {
 		pr_err("%s: failed to switch alternate parent %s\n",
 				__func__, parent->core->name);
 		return ret;
 	}
+#endif
 
 	return ret;
 }
@@ -42,11 +47,13 @@ static int sunxi_cpuclk_post_rate_change(struct clk_notifier_data *ndata,
 	struct clk *parent = cpuclk->parent;
 
 	ret =  clk_set_parent(clk, parent);
+#ifdef CONFIG_COMMON_CLK_DEBUG
 	if (ret) {
 		pr_err("%s: failed to switch alternate parent %s\n",
 				__func__, parent->core->name);
 		return ret;
 	}
+#endif
 	return ret;
 
 }
