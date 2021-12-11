@@ -109,13 +109,84 @@ endchoice
 if ARCH_SUN8I
 choice
 	prompt "Select the wafer with arch sun8i"
+	default ARCH_SUN8IW2
 	help
 	  Select the wafer with arch sun8i
+
+config ARCH_SUN8IW1
+        bool "Allwinner sun8iw1 SoCs"
+        help
+          Allwinner sun8iw1 SoCs
+
+config ARCH_SUN8IW2
+        bool "Allwinner sun8iw2 SoCs"
+        help
+          Allwinner sun8iw2 SoCs
+
+config ARCH_SUN8IW3
+        bool "Allwinner sun8iw3 SoCs"
+        help
+          Allwinner sun8iw3 SoCs
+
+config ARCH_SUN8IW5
+        bool "Allwinner sun8iw5 SoCs"
+        help
+          Allwinner sun8iw5 SoCs
+
+config ARCH_SUN8IW6
+        bool "Allwinner sun8iw6 SoCs"
+        help
+          Allwinner sun8iw6 SoCs
+
+config ARCH_SUN8IW7
+        bool "Allwinner sun8iw7 SoCs"
+        help
+          Allwinner sun8iw7 SoCs
+
+config ARCH_SUN8IW8
+        bool "Allwinner sun8iw8 SoCs"
+        help
+          Allwinner sun8iw8 SoCs
+
+config ARCH_SUN8IW10
+        bool "Allwinner sun8iw10 SoCs"
+        help
+          Allwinner sun8iw10 SoCs
+
+config ARCH_SUN8IW11
+        bool "Allwinner sun8iw11 SoCs"
+        help
+          Allwinner sun8iw11 SoCs
+
+config ARCH_SUN8IW12
+        bool "Allwinner sun8iw12 SoCs"
+        help
+          Allwinner sun8iw12 SoCs
 
 config ARCH_SUN8IW15
         bool "Allwinner sun8iw15 SoCs"
         help
           Allwinner sun8iw15 SoCs
+
+config ARCH_SUN8IW16
+        bool "Allwinner sun8iw16 SoCs"
+        help
+          Allwinner sun8iw16 SoCs
+
+config ARCH_SUN8IW17
+        bool "Allwinner sun8iw17 SoCs"
+        help
+          Allwinner sun8iw17 SoCs
+
+config ARCH_SUN8IW18
+        bool "Allwinner sun8iw18 SoCs"
+        help
+          Allwinner sun8iw18 SoCs
+
+config ARCH_SUN8IW19
+        bool "Allwinner sun8iw19 SoCs"
+        help
+          Allwinner sun8iw19 SoCs
 
 config ARCH_SUN8IW20
         bool "Allwinner sun8iw20 SoCs"
@@ -126,6 +197,20 @@ endchoice
 endif
 
 # Select the SoC with specific arch and wafer
+
+if ARCH_SUN8IW10
+choice
+	prompt "Select the SoC with wafer sun8iw10"
+	default ARCH_SUN8IW10P1
+	help
+	 Select the SoC with wafer sun8iw10
+
+config ARCH_SUN8IW10P1
+	bool "Allwinner sun8iw10p1 SoC"
+	help
+	  Allwinner sun8iw10p1 SoC
+endchoice
+endif
 
 if ARCH_SUN8IW15
 choice
