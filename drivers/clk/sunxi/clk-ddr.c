@@ -143,7 +143,7 @@ static unsigned long sunxi_ddr_clk_recalc_rate(struct clk_hw *hw,
 {
 	struct sunxi_ddrclk *ddrclk = to_sunxi_ddrclk_hw(hw);
 	unsigned int reg_val, div;
-	unsigned long rate = parent_rate;
+	u64 rate = parent_rate;
 
 	reg_val = readl_relaxed(ddrclk->mctl_base + MC_DFS_DIV);
 	if (reg_val == 0)
