@@ -41,9 +41,30 @@ endchoice
 if ARCH_SUN50I
 choice
 	prompt "Select the wafer with arch sun50i"
-	default ARCH_SUN50IW10
+	default ARCH_SUN50IW1
 	help
 	  Select the wafer with arch sun50i
+
+config ARCH_SUN50IW1
+	bool "Allwinner SUN50IW1 SoCs"
+	help
+	  Support for Allwinner SUN50IW1 SoC family
+
+config ARCH_SUN50IW2
+	bool "Allwinner SUN50IW2 SoCs"
+	help
+	  Support for Allwinner SUN50IW2 SoC family
+
+
+config ARCH_SUN50IW3
+	bool "Allwinner SUN50IW3 SoCs"
+	help
+	  Support for Allwinner SUN50IW3 SoC family
+
+config ARCH_SUN50IW6
+	bool "Allwinner SUN50IW6 SoCs"
+	help
+	  Support for Allwinner SUN50IW6 SoC family
 
 config ARCH_SUN50IW9
 	bool "Allwinner SUN50IW9 SoCs"
@@ -54,6 +75,11 @@ config ARCH_SUN50IW10
 	bool "Allwinner SUN50IW10 SoCs"
 	help
 	  Support for Allwinner SUN50IW10 SoC family
+
+config ARCH_SUN50IW11
+	bool "Allwinner SUN50IW11 SoCs"
+	help
+	  Support for Allwinner SUN50IW11 SoC family
 
 config ARCH_SUN50IW12
 	bool "Allwinner SUN50IW12 SoCs"
