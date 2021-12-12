@@ -502,7 +502,7 @@ static int sunxi_iommu_map(struct iommu_domain *domain, unsigned long iova,
 	dma_sync_single_for_device(dma_dev, virt_to_phys(iopte_offset(dent, s_iova_start)),
 			flush_count << 2, DMA_TO_DEVICE);
 out:
-	if (!(prot & (1 << 16)))
+	if (!(prot & IOMMU_SUNXI_NO_ZAP_TLB))
 		sunxi_zap_tlb(iova, size);
 	mutex_unlock(&sunxi_domain->dt_lock);
 
