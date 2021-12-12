@@ -36,6 +36,12 @@
  * last level cache, aka system cache.
  */
 #define IOMMU_QCOM_SYS_CACHE	(1 << 6)
+#ifdef CONFIG_ARCH_SUNXI
+/*
+ * Do not call sunxi_zap_tlb on map if this flag is set.
+*/
+#define IOMMU_SUNXI_NO_ZAP_TLB	(1 << 16)
+#endif
 
 struct iommu_ops;
 struct iommu_group;

@@ -2009,7 +2009,7 @@ size_t iommu_map_sg(struct iommu_domain *domain, unsigned long iova,
 #ifdef CONFIG_ARCH_SUNXI
 	struct iommu_iotlb_gather iotlb_gather;
 
-	prot |= (1 << 16);
+	prot |= IOMMU_SUNXI_NO_ZAP_TLB;
 #endif
 	while (i <= nents) {
 		phys_addr_t s_phys = sg_phys(sg);
