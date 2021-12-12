@@ -31,6 +31,12 @@
  * if the IOMMU page table format is equivalent.
  */
 #define IOMMU_PRIV	(1 << 5)
+#ifdef CONFIG_ARCH_SUNXI
+/*
+ * Do not call sunxi_zap_tlb on map if this flag is set.
+*/
+#define IOMMU_SUNXI_NO_ZAP_TLB	(1 << 16)
+#endif
 
 struct iommu_ops;
 struct iommu_group;
