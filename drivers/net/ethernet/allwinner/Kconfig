@@ -39,6 +39,7 @@ config SUNXI_GMAC
 	depends on ARCH_SUNXI
 	depends on OF
 	select CRC32
+	select CRYPTO_MD5
 	select MII
 	select PHYLIB
 	select MDIO_SUNXI
