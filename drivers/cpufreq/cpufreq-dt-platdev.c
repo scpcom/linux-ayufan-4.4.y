@@ -12,6 +12,8 @@
 
 #include "cpufreq-dt.h"
 
+static struct platform_device *cpufreq_dt_platdev_pdev;
+
 /*
  * Machines for which the cpufreq device is *always* created, mostly used for
  * platforms using "operating-points" (V1) property.
@@ -184,8 +186,22 @@ static int __init cpufreq_dt_platdev_init(void)
 
 create_pdev:
 	of_node_put(np);
-	return PTR_ERR_OR_ZERO(platform_device_register_data(NULL, "cpufreq-dt",
+	cpufreq_dt_platdev_pdev = platform_device_register_data(NULL, "cpufreq-dt",
 			       -1, data,
-			       sizeof(struct cpufreq_dt_platform_data)));
+			       sizeof(struct cpufreq_dt_platform_data));
+	return PTR_ERR_OR_ZERO(cpufreq_dt_platdev_pdev);
 }
+#ifdef MODULE
+module_init(cpufreq_dt_platdev_init);
+#else
 device_initcall(cpufreq_dt_platdev_init);
+#endif
+
+static void __exit cpufreq_dt_platdev_exit(void)
+{
+        platform_device_unregister(cpufreq_dt_platdev_pdev);
+}
+module_exit(cpufreq_dt_platdev_exit);
+
+MODULE_DESCRIPTION("dt platdev cpufreq driver");
+MODULE_LICENSE("GPL v2");
