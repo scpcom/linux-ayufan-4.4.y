@@ -1438,6 +1438,33 @@ static int sunxi_set_led_brightness(struct led_classdev *led_cdev,
 	return 0;
 }
 
+static int sunxi_get_led_trigger(struct device *dev, struct led_classdev *pcdev)
+{
+	struct fwnode_handle *child;
+	int count;
+
+	count = device_get_child_node_count(dev);
+	if (!count)
+		return -ENODEV;
+
+	device_for_each_child_node(dev, child) {
+		struct led_info led = {};
+
+		fwnode_property_read_string(child, "label",
+					    &led.name);
+
+		fwnode_property_read_string(child, "linux,default-trigger",
+					    &led.default_trigger);
+
+		if (!strcmp(pcdev->name, led.name)) {
+			pcdev->default_trigger = led.default_trigger;
+			return 0;
+		}
+	}
+
+	return 0;
+}
+
 static int sunxi_register_led_classdev(struct sunxi_led *led)
 {
 	int i, err;
@@ -1464,6 +1491,7 @@ static int sunxi_register_led_classdev(struct sunxi_led *led)
 		pcdev_RGB->brightness = LED_OFF;
 		pcdev_RGB->brightness_set_blocking = sunxi_set_led_brightness;
 		pcdev_RGB->dev = dev;
+		sunxi_get_led_trigger(dev, pcdev_RGB);
 		err = led_classdev_register(dev, pcdev_RGB);
 		if (err < 0) {
 			LED_ERR("led_classdev_register %s failed!\n",
@@ -1478,6 +1506,7 @@ static int sunxi_register_led_classdev(struct sunxi_led *led)
 		pcdev_RGB->brightness = LED_OFF;
 		pcdev_RGB->brightness_set_blocking = sunxi_set_led_brightness;
 		pcdev_RGB->dev = dev;
+		sunxi_get_led_trigger(dev, pcdev_RGB);
 		err = led_classdev_register(dev, pcdev_RGB);
 		if (err < 0) {
 			LED_ERR("led_classdev_register %s failed!\n",
@@ -1492,6 +1521,7 @@ static int sunxi_register_led_classdev(struct sunxi_led *led)
 		pcdev_RGB->brightness = LED_OFF;
 		pcdev_RGB->brightness_set_blocking = sunxi_set_led_brightness;
 		pcdev_RGB->dev = dev;
+		sunxi_get_led_trigger(dev, pcdev_RGB);
 		err = led_classdev_register(dev, pcdev_RGB);
 		if (err < 0) {
 			LED_ERR("led_classdev_register %s failed!\n",
