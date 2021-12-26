@@ -29,7 +29,7 @@
 				bpp = <16>;
 				reset-gpios = <&gpx1 5 GPIO_ACTIVE_HIGH>;
 				dc-gpios = <&gpx1 6 GPIO_ACTIVE_HIGH>;
-				led-gpios = <&gpx1 2 GPIO_ACTIVE_HIGH>;
+				led-gpios = <&gpx1 2 GPIO_ACTIVE_LOW>;
 				debug = <0>;
 
 				hktft_cs_ogst_pins: hktft_cs_ogst_pins {
