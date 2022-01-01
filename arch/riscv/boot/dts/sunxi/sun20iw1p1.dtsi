@@ -222,6 +222,8 @@
 		sram_ctrl: sram_ctrl@3000000 {
 			compatible = "allwinner,sram_ctrl";
 			reg = <0x0 0x3000000 0 0x16C>;
+			status = "disabled";
+
 			soc_ver {
 				offset = <0x24>;
 				mask = <0x7>;
@@ -242,6 +244,57 @@
 				shift = <0x0>;
 			};
 
+		};
+
+		syscon: syscon@3000000 {
+			compatible = "allwinner,sun20i-d1-system-control";
+			reg = <0x0 0x3000000 0x0 0x1000>;
+			#address-cells = <2>;
+			#size-cells = <2>;
+			ranges;
+
+			regulators {
+				reg_ldoa: ldoa {
+					regulator-name = "ldoa";
+				};
+
+				reg_ldob: ldob {
+					regulator-name = "ldob";
+				};
+			};
+
+			sram@400000 {
+				compatible = "mmio-sram";
+				reg = <0x0 0x400000 0x0 0x20000>;
+				#address-cells = <2>;
+				#size-cells = <2>;
+				ranges = <0 0 0x0 0x400000 0x0 0x20000>;
+
+				/*
+				 * This can be further divided into DSP IRAM,
+				 * DSP DRAM0, and DSP DRAM1, but the mapping
+				 * of all three is controlled by a single bit.
+				 */
+				dsp_sram: sram-section@0 {
+					compatible = "allwinner,sun20i-d1-dsp-sram";
+					reg = <0 0 0x0 0x20000>;
+				};
+			};
+
+			// FIXME: Address is not verified. It is copied from A64/H6.
+			sram@1d00000 {
+				compatible = "mmio-sram";
+				reg = <0x0 0x1d00000 0x0 0x40000>;
+				#address-cells = <2>;
+				#size-cells = <2>;
+				ranges = <0 0 0x0 0x1d00000 0x0 0x40000>;
+
+				ve_sram: sram-section@0 {
+					compatible = "allwinner,sun20i-d1-sram-c1",
+						     "allwinner,sun4i-a10-sram-c1";
+					reg = <0 0 0x0 0x40000>;
+				};
+			};
 		};
 
 		rtc_ccu: rtc_ccu@7090000 {
@@ -446,6 +499,27 @@
 			gmac-power1;
 			gmac-power2;
 			status = "disabled";
+		};
+
+		emac: ethernet@4500000 {
+			compatible = "allwinner,sun20i-d1-emac",
+				     "allwinner,sun50i-a64-emac";
+			reg = <0x0 0x4500000 0x0 0x10000>;
+			clocks = <&ccu CLK_BUS_EMAC0>;
+			clock-names = "stmmaceth";
+			resets = <&ccu RST_BUS_EMAC0>;
+			reset-names = "stmmaceth";
+			/*interrupts = <62 IRQ_TYPE_LEVEL_HIGH>;*/
+			interrupts-extended = <&plic0 62 IRQ_TYPE_LEVEL_HIGH>;
+			interrupt-names = "macirq";
+			syscon = <&syscon>;
+			status = "disabled";
+
+			mdio: mdio {
+				compatible = "snps,dwmac-mdio";
+				#address-cells = <1>;
+				#size-cells = <0>;
+			};
 		};
 
 		rtc: rtc@7090000 {
