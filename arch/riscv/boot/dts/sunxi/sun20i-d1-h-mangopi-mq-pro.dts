@@ -15,7 +15,7 @@
 	aliases {
 		dsp0 = &dsp0;
 		dsp0_gpio_int= &dsp0_gpio_int;
-		gmac0 = &gmac0;
+		emac = &emac;
 	};
 
 	dsp0: dsp0 {
@@ -248,6 +248,13 @@
 		       "PE8", "PE9", "PE10", "PE11",
 		       "PE12", "PE13", "PE14", "PE15";
 		function = "gpio_in";
+	};
+
+	rgmii_pe_pins: rgmii-pe-pins@0 {
+		pins = "PE0", "PE1", "PE2", "PE3", "PE4",
+		       "PE5", "PE6", "PE7", "PE8", "PE9",
+		       "PE11", "PE12", "PE13", "PE14", "PE15";
+		function = "gmac0";
 	};
 
 	dmic_pins_a: dmic@0 {
@@ -1053,6 +1060,23 @@ tvd_row*tvd_column is the total tvd channel number to be used in multichannel mo
 	phy-rst = <&pio PE 16 GPIO_ACTIVE_HIGH>;
 	tx-delay = <3>; /*2~4*/
 	rx-delay = <0>;
+	status = "disabled";
+};
+
+
+&mdio {
+	ext_rgmii_phy: ethernet-phy@1 {
+		compatible = "ethernet-phy-ieee802.3-c22";
+		reg = <1>;
+	};
+};
+
+&emac {
+	pinctrl-0 = <&rgmii_pe_pins>;
+	pinctrl-names = "default";
+	phy-handle = <&ext_rgmii_phy>;
+	phy-mode = "rgmii-id";
+	/*phy-supply = <&reg_vcc_3v3>;*/
 	status = "okay";
 };
 
