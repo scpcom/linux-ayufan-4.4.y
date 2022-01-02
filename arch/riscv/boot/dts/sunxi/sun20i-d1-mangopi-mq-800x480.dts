@@ -231,23 +231,6 @@
 		function = "gpio_in";
 	};
 
-	gmac_pins_a: gmac@0 {
-		pins = "PE0", "PE1", "PE2", "PE3",
-		       "PE4", "PE5", "PE6", "PE7",
-		       "PE8", "PE9", "PE10", "PE11",
-		       "PE12", "PE13", "PE14", "PE15";
-		function = "gmac0";
-		drive-strength = <10>;
-	};
-
-	gmac_pins_b: gmac@1 {
-		pins = "PE0", "PE1", "PE2", "PE3",
-		       "PE4", "PE5", "PE6", "PE7",
-		       "PE8", "PE9", "PE10", "PE11",
-		       "PE12", "PE13", "PE14", "PE15";
-		function = "gpio_in";
-	};
-
 	rgmii_pe_pins: rgmii-pe-pins@0 {
 		pins = "PE0", "PE1", "PE2", "PE3", "PE4",
 		       "PE5", "PE6", "PE7", "PE8", "PE9",
@@ -1025,19 +1008,6 @@ tvd_row*tvd_column is the total tvd channel number to be used in multichannel mo
 	pinctrl-names = "default", "sleep";
 	status = "disabled";
 };
-
-&gmac0 {
-	phy-mode = "rgmii";
-	use_ephy25m = <1>;
-	pinctrl-0 = <&gmac_pins_a>;
-	pinctrl-1 = <&gmac_pins_b>;
-	pinctrl-names = "default", "sleep";
-	phy-rst = <&pio PE 16 GPIO_ACTIVE_HIGH>;
-	tx-delay = <3>; /*2~4*/
-	rx-delay = <0>;
-	status = "disabled";
-};
-
 
 &mdio {
 	ext_rgmii_phy: ethernet-phy@1 {
