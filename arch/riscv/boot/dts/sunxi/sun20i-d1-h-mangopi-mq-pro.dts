@@ -10,6 +10,7 @@
 #include "sun20iw1p1.dtsi"
 
 /{
+	model = "MangoPi MQ-Pro";
 	compatible = "allwinner,d1-h", "arm,sun20iw1p1", "allwinner,sun20iw1p1";
 
 	aliases {
