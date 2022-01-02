@@ -220,7 +220,8 @@
 		ranges;
 
 		syscon: syscon@3000000 {
-			compatible = "allwinner,sun20i-d1-system-control";
+			compatible = "allwinner,sun20i-d1-system-control",
+				     "allwinner,sun50i-a64-system-control";
 			reg = <0x0 0x3000000 0x0 0x1000>;
 			#address-cells = <2>;
 			#size-cells = <2>;
@@ -234,6 +235,26 @@
 				reg_ldob: ldob {
 					regulator-name = "ldob";
 				};
+			};
+
+			soc_ver {
+				offset = <0x24>;
+				mask = <0x7>;
+				shift = <0>;
+				ver_a = <0x18590000>;
+				ver_b = <0x18590002>;
+			};
+
+			soc_id {
+				offset = <0x200>;
+				mask = <0x1>;
+				shift = <22>;
+			};
+
+			soc_bin {
+				offset = <0x0>;
+				mask = <0x3ff>;
+				shift = <0x0>;
 			};
 
 			sram@400000 {
