@@ -219,33 +219,6 @@
 		compatible = "simple-bus";
 		ranges;
 
-		sram_ctrl: sram_ctrl@3000000 {
-			compatible = "allwinner,sram_ctrl";
-			reg = <0x0 0x3000000 0 0x16C>;
-			status = "disabled";
-
-			soc_ver {
-				offset = <0x24>;
-				mask = <0x7>;
-				shift = <0>;
-				ver_a = <0x18590000>;
-				ver_b = <0x18590002>;
-			};
-
-			soc_id {
-				offset = <0x200>;
-				mask = <0x1>;
-				shift = <22>;
-			};
-
-			soc_bin {
-				offset = <0x0>;
-				mask = <0x3ff>;
-				shift = <0x0>;
-			};
-
-		};
-
 		syscon: syscon@3000000 {
 			compatible = "allwinner,sun20i-d1-system-control";
 			reg = <0x0 0x3000000 0x0 0x1000>;
@@ -475,30 +448,6 @@
 
 			iommus = <&mmu_aw 4 1>;
 			status = "okay";
-		};
-
-		gmac0: eth@4500000 {
-			compatible = "allwinner,sunxi-gmac";
-			reg = <0x0 0x04500000 0x0 0x10000>,
-			      <0x0 0x03000030 0x0 0x4>;
-			interrupts-extended = <&plic0 62 IRQ_TYPE_LEVEL_HIGH>;
-			interrupt-names = "gmacirq";
-			clocks = <&ccu CLK_BUS_EMAC0>, <&ccu CLK_EMAC0_25M>;
-			clock-names = "gmac", "ephy";
-			resets = <&ccu RST_BUS_EMAC0>;
-			device_type = "gmac0";
-			pinctrl-0 = <&gmac_pins_a>;
-			pinctrl-1 = <&gmac_pins_b>;
-			pinctrl-names = "default", "sleep";
-			phy-mode = "rgmii";
-			use_ephy25m = <1>;
-			tx-delay = <7>;
-			rx-delay = <31>;
-			phy-rst = <&pio PA 14 GPIO_ACTIVE_LOW>;
-			gmac-power0;
-			gmac-power1;
-			gmac-power2;
-			status = "disabled";
 		};
 
 		emac: ethernet@4500000 {
