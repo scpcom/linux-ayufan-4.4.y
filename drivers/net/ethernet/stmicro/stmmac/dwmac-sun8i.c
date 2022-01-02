@@ -647,8 +647,6 @@ static void sun8i_dwmac_get_umac_addr(struct mac_device_info *hw,
 		int ret = get_custom_mac_address(1, "eth", addr);
 		if ((ret >= 0) && is_valid_ether_addr(addr))
 			return;
-	} else {
-		pr_info("reg: %d\n", reg_n);
 	}
 #endif
 
