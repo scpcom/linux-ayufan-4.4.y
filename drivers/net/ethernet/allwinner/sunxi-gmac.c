@@ -1093,6 +1093,10 @@ out:
 	crypto_free_ahash(tfm);
 }
 
+#if IS_ENABLED(CONFIG_SUNXI_ADDR_MGT) && IS_ENABLED(CONFIG_SUNXI_SID)
+extern int get_custom_mac_address(int fmt, char *name, char *addr);
+#endif
+
 static void geth_check_addr(struct net_device *ndev, unsigned char *mac)
 {
 	int i;
@@ -1101,6 +1105,11 @@ static void geth_check_addr(struct net_device *ndev, unsigned char *mac)
 	if (!is_valid_ether_addr(ndev->dev_addr)) {
 		for (i = 0; i < ETH_ALEN; i++, p++)
 			ndev->dev_addr[i] = simple_strtoul(p, &p, 16);
+
+#if IS_ENABLED(CONFIG_SUNXI_ADDR_MGT) && IS_ENABLED(CONFIG_SUNXI_SID)
+		if (!is_valid_ether_addr(ndev->dev_addr))
+			get_custom_mac_address(1, "eth", ndev->dev_addr);
+#endif
 
 		if (!is_valid_ether_addr(ndev->dev_addr))
 			geth_chip_hwaddr(ndev->dev_addr);
