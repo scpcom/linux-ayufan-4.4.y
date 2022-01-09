@@ -26,7 +26,7 @@ config DISP2_SUNXI_ION
 	bool "DISP Driver ION Support"
 	depends on (DISP2_SUNXI)
 	depends on ION
-	default n
+	default y
 	---help---
 	  Enable DISP driver ION support.
 
