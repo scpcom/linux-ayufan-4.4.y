@@ -901,6 +901,9 @@ static int data_show(struct seq_file *s, void *data)
 	int i;
 	struct sunxi_led *led = sunxi_led_global;
 
+	if (!led->data)
+		return -EFAULT;
+
 	for (i = 0; i < led->led_count; i++) {
 		if (!(i % 4)) {
 			if (i + 4 <= led->led_count)
@@ -1105,6 +1108,9 @@ static void sunxi_ledc_trans_data(struct sunxi_led *led)
 	struct dma_slave_config slave_config;
 	struct device *dev = led->dev;
 	struct dma_async_tx_descriptor *dma_desc;
+
+	if (!led->data)
+		return;
 
 	if (led->length <= SUNXI_LEDC_FIFO_DEPTH) {
 		dprintk(DEBUG_INFO, "cpu xfer\n");
@@ -1379,6 +1385,9 @@ static int sunxi_set_led_brightness(struct led_classdev *led_cdev,
 	struct sunxi_led_info *pinfo;
 	struct sunxi_led_classdev_group *pcdev_group;
 	struct sunxi_led *led = sunxi_led_global;
+
+	if (!led->data)
+		return -EFAULT;
 
 	pinfo = container_of(led_cdev, struct sunxi_led_info, cdev);
 
