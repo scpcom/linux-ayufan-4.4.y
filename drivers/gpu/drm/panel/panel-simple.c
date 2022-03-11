@@ -968,8 +968,11 @@ static int panel_simple_probe(struct device *dev, const struct panel_desc *desc,
 	}
 
 	panel->supply = devm_regulator_get(dev, "power");
-	if (IS_ERR(panel->supply))
-		return PTR_ERR(panel->supply);
+	if (IS_ERR(panel->supply)) {
+		err = PTR_ERR(panel->supply);
+		dev_err(dev, "failed to get power regulator: %d\n", err);
+		return err;
+	}
 
 	panel->enable_gpio = devm_gpiod_get_optional(dev, "enable", GPIOD_ASIS);
 	if (IS_ERR(panel->enable_gpio)) {
@@ -1000,8 +1003,11 @@ static int panel_simple_probe(struct device *dev, const struct panel_desc *desc,
 		panel->ddc = of_find_i2c_adapter_by_node(ddc);
 		of_node_put(ddc);
 
-		if (!panel->ddc)
-			return -EPROBE_DEFER;
+		if (!panel->ddc) {
+			err = -EPROBE_DEFER;
+			dev_err(dev, "failed to find ddc-i2c-bus: %d\n", err);
+			return err;
+		}
 	} else if (aux) {
 		panel->ddc = &aux->ddc;
 	}
@@ -1086,8 +1092,10 @@ static int panel_simple_probe(struct device *dev, const struct panel_desc *desc,
 	drm_panel_init(&panel->base, dev, &panel_simple_funcs, connector_type);
 
 	err = drm_panel_of_backlight(&panel->base);
-	if (err)
+	if (err) {
+		dev_err(dev, "failed to find backlight: %d\n", err);
 		goto disable_pm_runtime;
+	}
 
 	if (!panel->base.backlight && panel->aux) {
 		pm_runtime_get_sync(dev);
