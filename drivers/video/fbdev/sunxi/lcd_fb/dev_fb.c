@@ -17,7 +17,11 @@
 #include "include.h"
 #include "dev_fb.h"
 #include "disp_display.h"
+#include "logo.h"
 
+#ifndef dma_mmap_writecombine
+#define dma_mmap_writecombine dma_mmap_wc
+#endif
 
 struct fb_info_t {
 	struct device *dev;
@@ -39,6 +43,16 @@ static int lcd_fb_release(struct fb_info *info, int user)
 	return 0;
 }
 
+void lcd_fb_black_screen(u32 sel)
+{
+	if (sel >= LCD_FB_MAX) {
+		lcd_fb_wrn("Exceed max fb:%d >= %d\n", sel, LCD_FB_MAX);
+		return;
+	}
+
+	bsp_disp_lcd_set_layer(sel, g_fbi.fbinfo[sel]);
+}
+
 static int lcd_fb_pan_display(struct fb_var_screeninfo *var,
 				struct fb_info *info)
 {
@@ -50,6 +64,7 @@ static int lcd_fb_pan_display(struct fb_var_screeninfo *var,
 	for (sel = 0; sel < LCD_FB_MAX; sel++) {
 		if (sel == g_fbi.fb_index[info->node]) {
 			bsp_disp_lcd_set_layer(sel, &tmp_info);
+			bsp_disp_lcd_wait_for_vsync(sel);
 		}
 	}
 	return 0;
@@ -437,6 +452,7 @@ int fb_init(struct dev_lcd_fb_t *p_info)
 		/*TODO:display something?*/
 		g_fbi.fb_index[i] = i;
 		register_framebuffer(g_fbi.fbinfo[i]);
+		logo_parse(g_fbi.fbinfo[i]);
 	}
 
 	return 0;

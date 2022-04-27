@@ -53,6 +53,10 @@ static unsigned long log_count;
 static bool bootevent_enabled;
 static u64 timestamp_on, timestamp_off;
 
+static int bootprof_uboot_t, bootprof_boot0_t;
+core_param(boot0_time, bootprof_boot0_t, int, 0644);
+core_param(uboot_time, bootprof_uboot_t, int, 0644);
+
 static DEFINE_MUTEX(bootevent_lock);
 
 long long nsec_high(unsigned long long nsec)
@@ -241,6 +245,11 @@ static int sunxi_bootevent_show(struct seq_file *m, void *v)
 	SEQ_printf(m, "----------------------------------------\n");
 	SEQ_printf(m, "%d BOOTEVENT (unit:msec)\n", bootevent_enabled);
 	SEQ_printf(m, "----------------------------------------\n");
+
+	SEQ_printf(m, "%10s        : %d ms\n", "boot0", bootprof_boot0_t);
+	SEQ_printf(m, "%10s        : %d ms\n", "uboot", bootprof_uboot_t);
+	SEQ_printf(m, "----------------------------------------\n");
+
 	SEQ_printf(m, "%10Ld.%06ld : ON\n",
 		   nsec_high(timestamp_on), nsec_low(timestamp_on));
 

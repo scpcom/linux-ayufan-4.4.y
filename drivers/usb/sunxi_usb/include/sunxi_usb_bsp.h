@@ -125,6 +125,7 @@
 #define  USBC_REG_o_PHYCTL	0x0404
 #define  USBC_REG_o_PHYBIST	0x0408
 #define  USBC_REG_o_PHYTUNE	0x0418
+#define  USBC_REG_o_PHYSTATUS	0x0424
 
 #if defined(CONFIG_ARCH_SUN50I) \
 		|| defined(CONFIG_ARCH_SUN8IW10) \
@@ -931,6 +932,8 @@ void USBC_PHY_Clear_Ctl(void __iomem *regs, __u32 mask);
 void UsbPhyInit(__u32 usbc_no);
 void UsbPhyEndReset(__u32 usbc_no);
 void usb_otg_phy_txtune(void __iomem *regs);
+void usbc_new_phy_res_cal(void __iomem *regs);
+void usbc_new_phy_init(void __iomem *regs);
 
 /* usb test mode */
 void USBC_EnterMode_TestPacket(__hdle hUSB);

@@ -107,8 +107,11 @@ static unsigned long ccu_mp_round_rate(struct ccu_mux_internal *mux,
 
 	max_m = cmp->m.max ?: 1 << cmp->m.width;
 	max_p = cmp->p.max ?: 1 << ((1 << cmp->p.width) - 1);
-
-	if (!(clk_hw_get_flags(hw) & CLK_SET_RATE_PARENT)) {
+	/*
+	 * When mp-clk use the clk_round_rate, the clk shouldn't recal
+	 * parent's rate unless this clk set CLK_SET_RATE_PARENT flag.
+	 */
+	if (!(clk_hw_get_flags(&cmp->common.hw) & CLK_SET_RATE_PARENT)) {
 		ccu_mp_find_best(*parent_rate, rate, max_m, max_p, &m, &p);
 		rate = *parent_rate / p / m;
 	} else {

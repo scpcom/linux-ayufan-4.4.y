@@ -162,3 +162,5 @@ arch/riscv/boot/dts/sunxi/board.dts
 
 #lto lds
 scripts/module-lto.lds
+
+user_headers/

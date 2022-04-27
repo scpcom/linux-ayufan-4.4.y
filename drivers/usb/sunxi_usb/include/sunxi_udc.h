@@ -19,7 +19,7 @@
 #include <linux/usb.h>
 #include <linux/usb/gadget.h>
 #include <linux/dma-mapping.h>
-
+#include <linux/regulator/consumer.h>
 
 #if 1
 typedef struct sunxi_udc_dma {
@@ -185,6 +185,7 @@ struct sunxi_udc_request {
 
 	__u32 is_queue;			/* flag... */
 	enum sunxi_buffer_map_state map_state;
+	void *saved_req_buf;
 };
 
 enum ep0_state {
@@ -269,6 +270,7 @@ typedef struct sunxi_udc {
 	struct work_struct		set_cur_vol_work;
 
 	struct wakeup_source		*ws;
+	struct regulator		*udc_regulator; /* usbc regulator:vcc-USB */
 } sunxi_udc_t;
 
 enum sunxi_udc_cmd_e {

@@ -554,7 +554,7 @@ static SUNXI_CCU_GATE(emac1_25m_clk, "emac1-25m", "ahb3", 0x974,
 static SUNXI_CCU_GATE(bus_emac0_clk, "bus-emac0", "ahb3", 0x97c, BIT(0), 0);
 static SUNXI_CCU_GATE(bus_emac1_clk, "bus-emac1", "ahb3", 0x97c, BIT(1), 0);
 
-static const char * const ir_parents[] = { "osc32k", "iosc",
+static const char * const ir_parents[] = { "osc32k", "dcxo24M",
 					   "pll-periph0", "pll-periph1" };
 static SUNXI_CCU_MP_WITH_MUX_GATE(ir_rx_clk, "ir-rx", ir_parents, 0x990,
 				  0, 4,		/* M */

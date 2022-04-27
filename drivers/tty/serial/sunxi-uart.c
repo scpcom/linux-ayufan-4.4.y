@@ -2228,6 +2228,10 @@ static const struct of_device_id sunxi_uart_match[] = {
 #if IS_ENABLED(CONFIG_ARCH_SUN20I)
 	{ .compatible = "allwinner,sun20i-uart", },
 #endif
+
+#if IS_ENABLED(CONFIG_ARCH_SUN55I)
+	{ .compatible = "allwinner,sun55i-uart", },
+#endif
 	{},
 };
 MODULE_DEVICE_TABLE(of, sunxi_uart_match);
@@ -2273,3 +2277,4 @@ module_exit(sunxi_uart_exit);
 MODULE_AUTHOR("Aaron<leafy.myeh@allwinnertech.com>");
 MODULE_DESCRIPTION("Driver for Allwinner UART controller");
 MODULE_LICENSE("GPL");
+MODULE_VERSION("1.0.0");

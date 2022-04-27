@@ -889,8 +889,9 @@ static int __hci_init(struct hci_dev *hdev)
 	}
 
 	err = __hci_req_sync(hdev, hci_init4_req, 0, HCI_INIT_TIMEOUT, NULL);
-	if (err < 0)
-		return err;
+	if (err < 0) {
+		pr_err("%s(%d), err = %d, EIO.\n", __func__, __LINE__, err);
+	}
 
 	/* This function is only called when the controller is actually in
 	 * configured state. When the controller is marked as unconfigured,

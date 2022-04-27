@@ -27,6 +27,10 @@
 #include <linux/platform_device.h>
 #include <linux/sysfs.h>
 #include <linux/mod_devicetable.h>
+
+#include <linux/suspend.h>
+#include <linux/syscore_ops.h>
+
 #include "dump_reg.h"
 
 /* the register and vaule to be test by dump_reg */
@@ -41,6 +45,29 @@ static unsigned int rw_byte_mode;
 static struct dump_addr dump_para;
 static struct write_group *wt_group;
 static struct compare_group *cmp_group;
+
+static u32   standby_dump_ctrl;
+static char *standby_dump_buff;
+
+
+enum {
+	DUMP_CTRL_DEV_PREPARE = 0,
+	DUMP_CTRL_DEV_SUSPEND,
+	DUMP_CTRL_DEV_SUSPEND_LATE,
+	DUMP_CTRL_DEV_SUSPEND_NOIRQ,
+	DUMP_CTRL_SYSCORE_SUSPEND,
+
+
+	DUMP_CTRL_DEV_COMPLETE = 8,
+	DUMP_CTRL_DEV_RESUME,
+	DUMP_CTRL_DEV_RESUME_EARLY,
+	DUMP_CTRL_DEV_RESUME_NOIRQ,
+	DUMP_CTRL_SYSCORE_RESUME,
+
+	DUMP_CTRL_SUSPEND_WRITE = 16,
+	DUMP_CTRL_RESUME_WRITE  = 17,
+};
+
 
 static u32 _read(void __iomem *vaddr)
 {
@@ -625,6 +652,211 @@ void __compare_item_deinit(struct compare_group *pgroup)
 }
 EXPORT_SYMBOL(__compare_item_deinit);
 
+static int __write_store(struct write_group *group)
+{
+	int i;
+	int index;
+	unsigned long reg;
+	u32 val;
+	const struct dump_struct *dump;
+	struct dump_addr dump_addr;
+
+
+	if (!group)
+		return -1;
+	/**
+	 * write reg
+	 * it is better if the regs been remaped and unmaped only once,
+	 * but we map everytime for the range between min and max address
+	 * maybe too large.
+	 */
+	for (i = 0; i < group->num; i++) {
+		reg = group->pitem[i].reg_addr;
+		dump_addr.uaddr_start = reg;
+		val = group->pitem[i].val;
+		index = __addr_valid(reg);
+		dump = &dump_table[index];
+		if (dump->remap)
+			dump_addr.vaddr_start = dump->remap(reg, 4);
+		else
+			dump_addr.vaddr_start = (void __iomem *)reg;
+		dump->write(val, dump->get_vaddr(&dump_addr, reg));
+		if (dump->unmap)
+			dump->unmap(dump_addr.vaddr_start);
+	}
+
+	return 0;
+}
+
+static ssize_t standby_dump_ctrl_show(struct class *class, struct class_attribute *attr,
+		char *buf)
+{
+	ssize_t size = 0;
+
+	size = sprintf(buf, "0x%08x\n", standby_dump_ctrl);
+
+	return size;
+}
+
+static ssize_t standby_dump_ctrl_store(struct class *class, struct class_attribute *attr,
+		const char *buf, size_t count)
+{
+	u32 value = 0;
+	int ret;
+
+	ret = kstrtou32(buf, 16, &value);
+	if (ret) {
+		pr_err("%s,%d err, invalid para!\n", __func__, __LINE__);
+		return -EINVAL;
+	}
+
+	standby_dump_ctrl = value;
+
+	pr_info("standby_dump_ctrl change to 0x%08x\n", standby_dump_ctrl);
+
+	return count;
+}
+
+static int standby_dump_printk(void)
+{
+	ssize_t  cnt = 0;
+
+	if (!standby_dump_buff)
+		return 0;
+
+	cnt = __dump_regs_ex(&dump_para, standby_dump_buff, PAGE_SIZE);
+
+	if (cnt < 0)
+		return -1;
+
+	pr_alert("%s\n", standby_dump_buff);
+
+	return 0;
+}
+
+static int standby_dump_dev_prepare(struct device *dev)
+{
+	if (!(standby_dump_ctrl & (0x1<<DUMP_CTRL_DEV_PREPARE)))
+		return 0;
+
+	return standby_dump_printk();
+}
+
+static void standby_dump_dev_complete(struct device *dev)
+{
+	if (!(standby_dump_ctrl & (0x1<<DUMP_CTRL_DEV_COMPLETE)))
+		return;
+
+	standby_dump_printk();
+}
+
+
+static int standby_dump_dev_suspend(struct device *dev)
+{
+	if (!(standby_dump_ctrl & (0x1<<DUMP_CTRL_DEV_SUSPEND)))
+		return 0;
+
+	return standby_dump_printk();
+}
+
+static int standby_dump_dev_resume(struct device *dev)
+{
+	if (!(standby_dump_ctrl & (0x1<<DUMP_CTRL_DEV_RESUME)))
+		return 0;
+
+	return standby_dump_printk();
+}
+
+static int standby_dump_dev_suspend_late(struct device *dev)
+{
+	if (!(standby_dump_ctrl & (0x1<<DUMP_CTRL_DEV_SUSPEND_LATE)))
+		return 0;
+
+	return standby_dump_printk();
+}
+
+static int standby_dump_dev_resume_early(struct device *dev)
+{
+	if (!(standby_dump_ctrl & (0x1<<DUMP_CTRL_DEV_RESUME_EARLY)))
+		return 0;
+
+	return standby_dump_printk();
+}
+
+static int standby_dump_dev_suspend_noirq(struct device *dev)
+{
+	if (!(standby_dump_ctrl & (0x1<<DUMP_CTRL_DEV_SUSPEND_NOIRQ)))
+		return 0;
+
+	return standby_dump_printk();
+}
+
+static int standby_dump_dev_resume_noirq(struct device *dev)
+{
+	if (!(standby_dump_ctrl & (0x1<<DUMP_CTRL_DEV_RESUME_NOIRQ)))
+		return 0;
+
+	return standby_dump_printk();
+}
+
+static int standby_dump_syscore_suspend(void)
+{
+	int ret  = 0;
+
+	if (!(standby_dump_ctrl & (0x1<<DUMP_CTRL_SYSCORE_SUSPEND)))
+		return 0;
+
+	ret = standby_dump_printk();
+	if (ret)
+		return ret;
+
+	if (standby_dump_ctrl & (0x1<<DUMP_CTRL_SUSPEND_WRITE)) {
+		/* flush to reg */
+		__write_store(wt_group);
+
+		__write_show(wt_group, standby_dump_buff, PAGE_SIZE);
+		pr_alert("%s\n", standby_dump_buff);
+	}
+
+	return ret;
+}
+
+static void standby_dump_syscore_resume(void)
+{
+	int ret = 0;
+
+	if (!(standby_dump_ctrl & (0x1<<DUMP_CTRL_SYSCORE_RESUME)))
+		return;
+
+	ret = standby_dump_printk();
+	if (ret)
+		return;
+
+	if (standby_dump_ctrl & (0x1<<DUMP_CTRL_RESUME_WRITE)) {
+		/* flush to reg */
+		__write_store(wt_group);
+
+		__write_show(wt_group, standby_dump_buff, PAGE_SIZE);
+		pr_alert("%s\n", standby_dump_buff);
+	}
+}
+
+static struct dev_pm_ops standby_dump_ops = {
+	.prepare = standby_dump_dev_prepare,
+	.complete = standby_dump_dev_complete,
+	.suspend = standby_dump_dev_suspend,
+	.resume = standby_dump_dev_resume,
+	.suspend_late = standby_dump_dev_suspend_late,
+	.resume_early = standby_dump_dev_resume_early,
+	.suspend_noirq = standby_dump_dev_suspend_noirq,
+	.resume_noirq = standby_dump_dev_resume_noirq,
+};
+
+static struct syscore_ops standby_dump_syscore = {
+	.suspend = standby_dump_syscore_suspend,
+	.resume  = standby_dump_syscore_resume,
+};
+
 /**
  * dump_show - show func of dump attribute.
  * @dev: class ptr.
@@ -680,16 +912,11 @@ write_show(struct class *class, struct class_attribute *attr, char *buf)
 	return __write_show(wt_group, buf, PAGE_SIZE);
 }
 
+
 static ssize_t
 write_store(struct class *class, struct class_attribute *attr,
 	    const char *buf, size_t count)
 {
-	int i;
-	int index;
-	unsigned long reg;
-	u32 val;
-	const struct dump_struct *dump;
-	struct dump_addr dump_addr;
 
 	/* free if not NULL */
 	if (wt_group) {
@@ -701,25 +928,12 @@ write_store(struct class *class, struct class_attribute *attr,
 	if (__write_item_init(&wt_group, buf, count) < 0)
 		return -EINVAL;
 
-	/**
-	 * write reg
-	 * it is better if the regs been remaped and unmaped only once,
-	 * but we map everytime for the range between min and max address
-	 * maybe too large.
-	 */
-	for (i = 0; i < wt_group->num; i++) {
-		reg = wt_group->pitem[i].reg_addr;
-		dump_addr.uaddr_start = reg;
-		val = wt_group->pitem[i].val;
-		index = __addr_valid(reg);
-		dump = &dump_table[index];
-		if (dump->remap)
-			dump_addr.vaddr_start = dump->remap(reg, 4);
-		else
-			dump_addr.vaddr_start = (void __iomem *)reg;
-		dump->write(val, dump->get_vaddr(&dump_addr, reg));
-		if (dump->unmap)
-			dump->unmap(dump_addr.vaddr_start);
+	if (!(standby_dump_ctrl & \
+		((0x1<<DUMP_CTRL_SUSPEND_WRITE) | (0x1<<DUMP_CTRL_RESUME_WRITE)))) {
+		/* flush to reg */
+		__write_store(wt_group);
+	} else {
+		pr_alert("Will write it actually when suspend.\n");
 	}
 
 	return count;
@@ -791,7 +1005,11 @@ help_show(struct class *class, struct class_attribute *attr, char *buf)
 		"compare multi  registers:      echo {addr1} {expect-val1} {mask1},{addr2} {expect-val2} {mask2},... > compare; cat compare\n"
 		"byte-access mode:              echo 1 > rw_byte\n"
 		"word-access mode (default):    echo 0 > rw_byte\n"
-		"show test address info:        cat test\n";
+		"show test address info:        cat test\n"
+		"abort standby_dump_ctrl, \n"
+		"	If you don't know it, please keep at zero.\n"
+		"	If you want to use it, please read the source code or the wiki first.\n";
+
 	return sprintf(buf, info);
 }
 
@@ -802,6 +1020,7 @@ static struct class_attribute dump_class_attrs[] = {
 	__ATTR(rw_byte,  S_IWUSR | S_IRUGO, rw_byte_show,  rw_byte_store),
 	__ATTR(test,     S_IRUGO,           test_show, NULL),
 	__ATTR(help,     S_IRUGO,           help_show, NULL),
+	__ATTR(standby_dump_ctrl, S_IWUSR | S_IRUGO, standby_dump_ctrl_show, standby_dump_ctrl_store),
 };
 
 static const struct of_device_id sunxi_dump_reg_match[] = {
@@ -848,6 +1067,12 @@ static int sunxi_dump_reg_probe(struct platform_device *pdev)
 	test_addr = res->start;
 	test_size = resource_size(res);
 
+	standby_dump_buff = devm_kmalloc(dev, PAGE_SIZE, GFP_KERNEL);
+	if (!standby_dump_buff)
+		dev_err(dev, "malloc memory failed.\n");
+
+	register_syscore_ops(&standby_dump_syscore);
+
 	return 0;
 error:
 	dev_err(dev, "sunxi_dump_reg probe error\n");
@@ -873,6 +1098,7 @@ static struct platform_driver sunxi_dump_reg_driver = {
 		.name   = "dump_reg",
 		.owner  = THIS_MODULE,
 		.of_match_table = sunxi_dump_reg_match,
+		.pm     = &standby_dump_ops,
 	},
 };
 

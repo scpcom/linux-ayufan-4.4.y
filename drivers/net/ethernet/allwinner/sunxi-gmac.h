@@ -41,6 +41,9 @@
 #define RX_SINGLE_DESC0		0x80000000
 #define RX_SINGLE_DESC1		0x83000000
 
+#define AC300_ID		0xc0000000
+#define EPHY_ID			0x00441400
+
 typedef union {
 	struct {
 		/* TDES0 */

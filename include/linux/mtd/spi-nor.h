@@ -28,9 +28,11 @@
 #define SNOR_MFR_WINBOND	0xef /* Also used by some Spansion */
 #define SNOR_MFR_ADESTO		0x1f /* Also used by some Spansion0 */
 #define SNOR_MFR_XMC		0x20
-#define SNOR_MFR_XT		0x0b
+#define SNOR_MFR_XTX		0x0b
 #define SNOR_MFR_PUYA		0x85
 #define SNOR_MFR_ZETTA		0xba
+#define SNOR_MFR_BOYA		0x68
+#define SNOR_MFR_FM             0xa1
 
 /*
  * Note on opcode nomenclature: some opcodes have a format like
@@ -402,6 +404,7 @@ struct spi_nor_hwcaps {
 #define SNOR_HWCAPS_PP_8_8_8	BIT(22)
 
 #define SNOR_HWCAPS_X_X_X	(SNOR_HWCAPS_READ_2_2_2 |	\
+				 SNOR_HWCAPS_READ_1_4_4 |	\
 				 SNOR_HWCAPS_READ_4_4_4 |	\
 				 SNOR_HWCAPS_READ_8_8_8 |	\
 				 SNOR_HWCAPS_PP_4_4_4 |		\

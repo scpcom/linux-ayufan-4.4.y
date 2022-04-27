@@ -75,7 +75,7 @@
  * 01:single-cycle conversion mode
  * 10:continuous mode, 11:burst mode
  */
-#define GP_MODE_SELECT		(3 << 8)
+#define GP_MODE_SELECT		(3 << 18)
 
 /* 0:disable, 1:enable */
 #define GP_CH7_CMP_EN		(1 << 23)
@@ -271,6 +271,24 @@ struct sunxi_config {
 	u32 channel_scan_data;
 };
 
+/* Registers which needs to be saved and restored before and after sleeping */
+static u32 sunxi_gpadc_regs_offset[] = {
+	GP_SR_REG,
+	GP_CS_EN_REG,
+	GP_DATAL_INTC_REG,
+	GP_DATAH_INTC_REG,
+	GP_CH0_CMP_DATA_REG,
+	GP_CH1_CMP_DATA_REG,
+	GP_CH2_CMP_DATA_REG,
+	GP_CH3_CMP_DATA_REG,
+	GP_CH4_CMP_DATA_REG,
+	GP_CH5_CMP_DATA_REG,
+	GP_CH6_CMP_DATA_REG,
+	GP_CH7_CMP_DATA_REG,
+	GP_CTRL_REG,
+	GP_FIFO_INTC_REG,
+};
+
 struct sunxi_gpadc {
 	struct platform_device	*pdev;
 	struct input_dev *input_gpadc[CHANNEL_MAX_NUM];
@@ -279,6 +297,7 @@ struct sunxi_gpadc {
 	struct clk *pclk;
 	void __iomem *reg_base;
 	int irq_num;
+	u32 wakeup_en;
 	u32 channel_num;
 	u32 scankeycodes[KEY_MAX_CNT];
 	u32 gpadc_sample_rate;
@@ -295,6 +314,7 @@ struct sunxi_gpadc {
 	struct device *dev;
 	struct clk *bus_clk;
 	struct reset_control *reset;
+	u32 regs_backup[ARRAY_SIZE(sunxi_gpadc_regs_offset)];
 };
 
 struct status_reg {

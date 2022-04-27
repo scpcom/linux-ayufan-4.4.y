@@ -670,11 +670,18 @@ static const char * const riscv_parents[] = { "dcxo24M", "osc32k",
 					      "iosc", "pll-periph0-800m",
 					      "pll-periph0", "pll-cpux",
 					      "pll-audio1-div2"};
-static SUNXI_CCU_M_WITH_MUX(riscv_clk, "riscv",
-			    riscv_parents, 0xd00,
-			    0, 5,
-			    24, 3,
-			    CLK_SET_RATE_PARENT | CLK_SET_RATE_NO_REPARENT);
+static struct ccu_div riscv_clk = {
+	.div	= _SUNXI_CCU_DIV(0, 5),
+	.mux	= _SUNXI_CCU_MUX(24, 3),
+	.common	= {
+		.reg		= 0xd00,
+		.features	= CCU_FEATURE_REPEAT_SET_MUX,
+		.hw.init	= CLK_HW_INIT_PARENTS("riscv", riscv_parents,
+						      &ccu_div_ops,
+						      CLK_SET_RATE_PARENT |
+						      CLK_SET_RATE_NO_REPARENT),
+	},
+};
 
 /* The riscv-axi clk needs to be divided by at least 2 */
 static struct clk_div_table riscv_axi_table[] = {

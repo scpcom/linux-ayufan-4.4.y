@@ -152,9 +152,22 @@ extern struct __lcd_panel jd9366ab_3_panel;
 #ifdef CONFIG_LCD_SUPPORT_TFT08006
 extern struct __lcd_panel tft08006_panel;
 #endif
+#ifdef CONFIG_LCD_SUPPORT_BP101WX1_206
 extern struct __lcd_panel bp101wx1_panel;
+#endif
+#ifdef CONFIG_LCD_SUPPORT_K101IM2QA04
 extern struct __lcd_panel k101im2qa04_panel;
+#endif
+#ifdef CONFIG_LCD_SUPPORT_FX070
 extern struct __lcd_panel fx070_panel;
+#endif
+#ifdef CONFIG_LCD_SUPPORT_K101_IM2BYL02_L_800X1280
 extern struct __lcd_panel K101_IM2BYL02_L_800X1280_mipi_panel;
+#endif
+#ifdef CONFIG_LCD_SUPPORT_K080_IM2HYL802R_800X1280
 extern struct __lcd_panel K080_IM2HYL802R_800X1280_mipi_panel;
+#endif
+
+extern struct __lcd_panel super_lcd_panel;
+
 #endif

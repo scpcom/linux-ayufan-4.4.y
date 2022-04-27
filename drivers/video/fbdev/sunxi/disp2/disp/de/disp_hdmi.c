@@ -195,14 +195,14 @@ static s32 hdmi_clk_enable(struct disp_device *hdmi)
 		}
 	}
 
-	if (hdmip->bus_clk && (!__clk_is_enabled(hdmip->bus_clk))) {
+	if (hdmip->bus_clk) {
 		ret = clk_prepare_enable(hdmip->bus_clk);
 		if (ret != 0)
 			DE_WRN("fail enable hdmi's bus clock!\n");
 	}
 
 	hdmi_clk_config(hdmi);
-	if (hdmip->clk && (!__clk_is_enabled(hdmip->clk))) {
+	if (hdmip->clk) {
 		ret = clk_prepare_enable(hdmip->clk);
 		if (ret != 0)
 			DE_WRN("fail enable hdmi's clock!\n");
