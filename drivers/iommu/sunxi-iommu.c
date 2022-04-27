@@ -193,8 +193,11 @@ sunxi_tlb_init(struct sunxi_iommu_owner *owner,
 		/* disable preftech for tlb invalid mode for unsolved issue for sun50iw10(old)*/
 		sunxi_iommu_write(iommu, IOMMU_TLB_PREFETCH_REG, 0x0);
 	}
-#elif IS_ENABLED(CONFIG_ARCH_SUN8IW20) || IS_ENABLED(CONFIG_ARCH_SUN20IW1)
+#elif IS_ENABLED(CONFIG_ARCH_SUN8IW20)
 	sunxi_iommu_write(iommu, IOMMU_TLB_PREFETCH_REG, 0x17);
+#elif IS_ENABLED(CONFIG_ARCH_SUN20IW1)
+	/* sun20iw1p1: disable preftech on G2D/VE for better performance */
+	sunxi_iommu_write(iommu, IOMMU_TLB_PREFETCH_REG, 0x16);
 #else
 	sunxi_iommu_write(iommu, IOMMU_TLB_PREFETCH_REG, 0x7f);
 #endif
@@ -1799,12 +1802,15 @@ static int sunxi_iommu_remove(struct platform_device *pdev)
 
 static int sunxi_iommu_suspend(struct device *dev)
 {
+	clk_disable_unprepare(global_iommu_dev->clk);
 	return 0;
 }
 
 static int sunxi_iommu_resume(struct device *dev)
 {
 	int err;
+
+	clk_prepare_enable(global_iommu_dev->clk);
 
 	if (unlikely(!global_sunxi_iommu_domain))
 		return 0;
