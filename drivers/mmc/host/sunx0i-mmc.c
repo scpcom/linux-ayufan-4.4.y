@@ -607,7 +607,7 @@ static void sunxi_mmc_send_manual_stop(struct sunxi_mmc_host *host,
 
 	if (!(ri & SDXC_COMMAND_DONE) || (ri & SDXC_INTERRUPT_ERROR_BIT)) {
 		dev_err(mmc_dev(host->mmc),
-			"send  manual stop command failed\n");
+			"send  manual stop command failed %x\n", (unsigned int)(ri & SDXC_INTERRUPT_ERROR_BIT));
 		if (req->stop)
 			req->stop->resp[0] = -ETIMEDOUT;
 	} else {
@@ -1020,6 +1020,25 @@ static irqreturn_t sunxi_mmc_handle_do_bottom_half(void *dev_id)
 
 	if (mrq_stop) {
 		dev_err(mmc_dev(mmc), "data error, sending stop command\n");
+		/***reset host***/
+		spin_lock_irqsave(&host->lock, iflags);
+		sunxi_mmc_regs_save(host);
+		spin_unlock_irqrestore(&host->lock, iflags);
+		/**if gating/reset protect itself,so no lock use host->lock**/
+		sunxi_mmc_bus_clk_en(host, 0);
+		sunxi_mmc_bus_clk_en(host, 1);
+		sunxi_mmc_regs_restore(host);
+		dev_dbg(mmc_dev(host->mmc),
+			"no device retry:host reset and reg recover ok\n");
+
+		/***use sunxi_mmc_oclk_en  to update clk***/
+		rval = host->sunxi_mmc_oclk_en(host, 1);
+		dev_err(mmc_dev(host->mmc),
+		"stop:recover\n");
+		if (rval) {
+			dev_err(mmc_dev(mmc), "retry:update clk failed %s %d\n",
+					__func__, __LINE__);
+		}
 
 		/*
 		 * We will never have more than one outstanding request,
@@ -1069,11 +1088,33 @@ static irqreturn_t sunxi_mmc_handle_do_bottom_half(void *dev_id)
 		struct mmc_data *data = mrq_retry->data;
 		cmd = (mrq_retry->sbc && !host->sunxi_mmc_opacmd23) ? mrq_retry->sbc : mrq_retry->cmd;
 
-		dev_info(mmc_dev(host->mmc), "*****retry:start*****\n");
+		dev_info(mmc_dev(host->mmc), "retry:start\n");
 
 		/***Recover device state and stop host state machine****/
-		if (data)
+		if (data) {
+			dev_err(mmc_dev(mmc), "retry:stop\n");
+			/***reset host***/
+			spin_lock_irqsave(&host->lock, iflags);
+			sunxi_mmc_regs_save(host);
+			spin_unlock_irqrestore(&host->lock, iflags);
+			/**if gating/reset protect itself,so no lock use host->lock**/
+			sunxi_mmc_bus_clk_en(host, 0);
+			sunxi_mmc_bus_clk_en(host, 1);
+			sunxi_mmc_regs_restore(host);
+			dev_dbg(mmc_dev(host->mmc),
+			"no device retry:host reset and reg recover ok\n");
+
+			/***use sunxi_mmc_oclk_en  to update clk***/
+			rval = host->sunxi_mmc_oclk_en(host, 1);
+			dev_err(mmc_dev(host->mmc),
+			"retry:stop recover\n");
+			if (rval) {
+				dev_err(mmc_dev(mmc), "retry:update clk failed %s %d\n",
+					__func__, __LINE__);
+			}
+
 			sunxi_mmc_send_manual_stop(host, mrq_retry);
+		}
 
 		/*****If device not exit,no need to retry*****/
 		/**to do:how to deal with data3 detect better here**/
@@ -2715,8 +2756,6 @@ static int sunxi_mmc_extra_of_parse(struct mmc_host *mmc)
 		mmc->caps2 |= MMC_CAP2_PACKED_WR;
 	if (of_property_read_bool(np, "mmc-cache-ctrl"))
 		mmc->caps2 |= MMC_CAP2_CACHE_CTRL;
-	if (of_property_read_bool(np, "cd-used-24M"))
-		host->sunxi_caps3 |= MMC_SUNXI_CAP3_CD_USED_24M;
 	if (of_property_read_bool(np, "mmc-bootpart-noacc"))
 		mmc->caps2 |= MMC_CAP2_BOOTPART_NOACC;
 
@@ -2729,7 +2768,10 @@ static int sunxi_mmc_extra_of_parse(struct mmc_host *mmc)
 		}
 	}
 #endif
-
+	if (of_property_read_bool(np, "cd-used-24M"))
+		host->sunxi_caps3 |= MMC_SUNXI_CAP3_CD_USED_24M;
+	if (of_property_read_bool(np, "data3-detect"))
+		host->sunxi_caps3 |= MMC_SUNXI_CAP3_DAT3_DET;
 
 	if (of_property_read_u32(np,
 			"filter_speed", &(host->filter_speed)) < 0) {

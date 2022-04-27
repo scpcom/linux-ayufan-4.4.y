@@ -55,6 +55,10 @@ config FIXED_PHY
 
 	  Currently tested with mpc866ads and mpc8349e-mitx.
 
+config SUNXI_EPHY
+	tristate "Drivers for Allwinnertech EPHY"
+	depends on MFD_ACX00
+
 config SFP
 	tristate "SFP cage support"
 	depends on I2C && PHYLINK
@@ -259,6 +263,11 @@ config ROCKCHIP_PHY
 	tristate "Rockchip Ethernet PHYs"
 	help
 	  Currently supports the integrated Ethernet PHY.
+
+config RTL8363_NB
+	tristate "RealTek RTL-8363NB Ethernet Adapter support"
+	---help---
+	  This is a driver for the Fast Ethernet PCI network cards
 
 config SMSC_PHY
 	tristate "SMSC PHYs"

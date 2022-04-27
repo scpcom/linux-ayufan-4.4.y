@@ -26,6 +26,7 @@
 #include <linux/phy/phy.h>
 #include <linux/usb.h>
 #include <linux/usb/hcd.h>
+#include <linux/regulator/consumer.h>
 #include "ehci.h"
 #include "sunxi-hci.h"
 
@@ -601,6 +602,11 @@ int sunxi_insmod_ehci(struct platform_device *pdev)
 		sunxi_ehci->supply = NULL;
 	}
 
+	sunxi_ehci->hci_regulator = regulator_get(dev, "hci");
+	if (IS_ERR(sunxi_ehci->hci_regulator)) {
+		DMSG_PANIC("%s()%d WARN: get hci regulator failed\n", __func__, __LINE__);
+		sunxi_ehci->hci_regulator = NULL;
+	}
 	/* echi start to work */
 	sunxi_start_ehci(sunxi_ehci);
 

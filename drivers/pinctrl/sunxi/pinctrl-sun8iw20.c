@@ -8,6 +8,7 @@
 #include <linux/of.h>
 #include <linux/of_device.h>
 #include <linux/pinctrl/pinctrl.h>
+#include <linux/io.h>
 
 #include "pinctrl-sunxi.h"
 
@@ -850,8 +851,8 @@ static const struct sunxi_desc_pin sun8iw20_pins[] = {
 		SUNXI_FUNCTION(0x1, "gpio_out"),
 		SUNXI_FUNCTION(0x2, "ncsi0"),		/* D7 */
 		SUNXI_FUNCTION(0x3, "uart1"),		/* RX */
-		SUNXI_FUNCTION(0x4, "i2s0"),		/* DOUT3 */
-		SUNXI_FUNCTION(0x5, "i2s0"),		/* DIN3 */
+		SUNXI_FUNCTION(0x4, "i2s0_dout"),	/* DOUT3 */
+		SUNXI_FUNCTION(0x5, "i2s0_din"),	/* DIN3 */
 		SUNXI_FUNCTION(0x6, "jtag"),		/* CK */
 		SUNXI_FUNCTION(0x8, "gmac0"),
 		SUNXI_FUNCTION_IRQ_BANK(0xE, 3, 11),
@@ -861,8 +862,8 @@ static const struct sunxi_desc_pin sun8iw20_pins[] = {
 		SUNXI_FUNCTION(0x1, "gpio_out"),
 		SUNXI_FUNCTION(0x2, "twi2"),		/* SCK */
 		SUNXI_FUNCTION(0x3, "ncsi0"),		/* FIELD */
-		SUNXI_FUNCTION(0x4, "i2s0"),		/* DOUT2 */
-		SUNXI_FUNCTION(0x5, "i2s0"),		/* DIN2 */
+		SUNXI_FUNCTION(0x4, "i2s0_dout"),	/* DOUT2 */
+		SUNXI_FUNCTION(0x5, "i2s0_din"),	/* DIN2 */
 		SUNXI_FUNCTION(0x8, "gmac0"),		/* TXD3/NULL */
 		SUNXI_FUNCTION_IRQ_BANK(0xE, 3, 12),
 		SUNXI_FUNCTION(0xF, "io_disabled")),
@@ -871,8 +872,8 @@ static const struct sunxi_desc_pin sun8iw20_pins[] = {
 		SUNXI_FUNCTION(0x1, "gpio_out"),
 		SUNXI_FUNCTION(0x2, "twi2"),		/* SDA */
 		SUNXI_FUNCTION(0x3, "pwm5"),
-		SUNXI_FUNCTION(0x4, "i2s0"),		/* DOUT0 */
-		SUNXI_FUNCTION(0x5, "i2s0"),		/* DIN1 */
+		SUNXI_FUNCTION(0x4, "i2s0_dout"),	/* DOUT0 */
+		SUNXI_FUNCTION(0x5, "i2s0_din"),	/* DIN1 */
 		SUNXI_FUNCTION(0x8, "gmac0"),		/* RXD3/MULL */
 		SUNXI_FUNCTION_IRQ_BANK(0xE, 3, 13),
 		SUNXI_FUNCTION(0xF, "io_disabled")),
@@ -881,8 +882,8 @@ static const struct sunxi_desc_pin sun8iw20_pins[] = {
 		SUNXI_FUNCTION(0x1, "gpio_out"),
 		SUNXI_FUNCTION(0x2, "twi1"),		/* SCK */
 		SUNXI_FUNCTION(0x3, "d_jtag"),	/* MS */
-		SUNXI_FUNCTION(0x4, "i2s0"),		/* DOUT1 */
-		SUNXI_FUNCTION(0x5, "i2s0"),		/* DIN0 */
+		SUNXI_FUNCTION(0x4, "i2s0_dout"),	/* DOUT1 */
+		SUNXI_FUNCTION(0x5, "i2s0_din"),		/* DIN0 */
 		SUNXI_FUNCTION(0x6, "dmic"),		/* DATA2 */
 		SUNXI_FUNCTION(0x8, "gmac0"),		/* RXD3/MULL */
 		SUNXI_FUNCTION_IRQ_BANK(0xE, 3, 14),
@@ -1122,10 +1123,10 @@ static const struct sunxi_desc_pin sun8iw20_pins[] = {
 	SUNXI_PIN(SUNXI_PINCTRL_PIN(G, 14),
 		SUNXI_FUNCTION(0x0, "gpio_in"),
 		SUNXI_FUNCTION(0x1, "gpio_out"),
-		SUNXI_FUNCTION(0x2, "i2s1"),		/* DIN0 */
+		SUNXI_FUNCTION(0x2, "i2s1_din"),	/* DIN0 */
 		SUNXI_FUNCTION(0x3, "twi2"),		/* SCK */
 		SUNXI_FUNCTION(0x4, "gmac0"),
-		SUNXI_FUNCTION(0x5, "i2s1"),		/* DOUT1 */
+		SUNXI_FUNCTION(0x5, "i2s1_dout"),	/* DOUT1 */
 		SUNXI_FUNCTION(0x6, "spi0"),		/* WP */
 		SUNXI_FUNCTION(0x7, "uart1"),		/* RTS */
 		SUNXI_FUNCTION_IRQ_BANK(0xE, 5, 14),
@@ -1133,10 +1134,10 @@ static const struct sunxi_desc_pin sun8iw20_pins[] = {
 	SUNXI_PIN(SUNXI_PINCTRL_PIN(G, 15),
 		SUNXI_FUNCTION(0x0, "gpio_in"),
 		SUNXI_FUNCTION(0x1, "gpio_out"),
-		SUNXI_FUNCTION(0x2, "i2s1"),		/* DOUT0 */
+		SUNXI_FUNCTION(0x2, "i2s1_dout"),	/* DOUT0 */
 		SUNXI_FUNCTION(0x3, "twi2"),		/* SDA */
 		SUNXI_FUNCTION(0x4, "gmac0"),
-		SUNXI_FUNCTION(0x5, "i2s1"),		/* DIN1 */
+		SUNXI_FUNCTION(0x5, "i2s1_din"),	/* DIN1 */
 		SUNXI_FUNCTION(0x6, "spi0"),		/* HOLD */
 		SUNXI_FUNCTION(0x7, "uart1"),		/* CTS */
 		SUNXI_FUNCTION_IRQ_BANK(0xE, 5, 15),
@@ -1225,7 +1226,7 @@ static int sun8iw20_pinctrl_suspend_noirq(struct device *dev)
 	dev_info(dev, "pinctrl suspend\n");
 
 	raw_spin_lock_irqsave(&pctl->lock, flags);
-	memcpy(mem, pctl->membase, mem_size);
+	memcpy_fromio(mem, pctl->membase, mem_size);
 	raw_spin_unlock_irqrestore(&pctl->lock, flags);
 
 	return 0;
@@ -1237,7 +1238,7 @@ static int sun8iw20_pinctrl_resume_noirq(struct device *dev)
 	unsigned long flags;
 
 	raw_spin_lock_irqsave(&pctl->lock, flags);
-	memcpy(pctl->membase, mem, mem_size);
+	memcpy_toio(pctl->membase, mem, mem_size);
 	raw_spin_unlock_irqrestore(&pctl->lock, flags);
 
 	dev_info(dev, "pinctrl resume\n");

@@ -14,7 +14,7 @@ struct ccu_frac_internal {
 	u32		enable;
 	u32		select;
 
-	unsigned long	rates[2];
+	u64		rates[2];
 };
 
 #define _SUNXI_CCU_FRAC(_enable, _select, _rate1, _rate2)		\
@@ -33,13 +33,13 @@ void ccu_frac_helper_disable(struct ccu_common *common,
 
 bool ccu_frac_helper_has_rate(struct ccu_common *common,
 			      struct ccu_frac_internal *cf,
-			      unsigned long rate);
+			      u64 rate);
 
 unsigned long ccu_frac_helper_read_rate(struct ccu_common *common,
 					struct ccu_frac_internal *cf);
 
 int ccu_frac_helper_set_rate(struct ccu_common *common,
 			     struct ccu_frac_internal *cf,
-			     unsigned long rate, u32 lock);
+			     u64 rate, u32 lock);
 
 #endif /* _CCU_FRAC_H_ */

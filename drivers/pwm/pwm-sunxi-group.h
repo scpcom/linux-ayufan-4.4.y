@@ -1,4 +1,4 @@
-/*
+/*`
  * drivers/pwm/pwm-sunxi-new.h
  *
  * Allwinnertech pulse-width-modulation controller driver
@@ -28,27 +28,16 @@
 
 #define PCGR            (0x0040)
 
-#define PWM_PDZCR01	(0x0060)
-#define PWM_PDZCR23	(0x0064)
-#define	PWM_PDZCR45	(0x0068)
 #define	PWM_PDZCR67	(0x006c)
 #define	PWM_PDZCR89	(0x0070)
 #define	PWM_PDZCRAB	(0x0074)
 #define	PWM_PDZCRCD	(0x0078)
 #define	PWM_PDZCREF	(0x007c)
-#define PWM_PER         (0x0080)
 
 #define PGR0            (0x0090)
 #define PGR1            (0x0094)
 
-#define PWM_CER		(0x00c0)
-#define PWM_PCR_BASE	(0x0100 + 0x0000)
-#define PWM_PPR_BASE	(0x0100 + 0x0004)
-#define PWM_PCNTR_BASE	(0x0100 + 0x0008)
 #define PPCNTP_BASE     (0x0100 + 0x000c)
-#define PWM_CCR_BASE	(0x0100 + 0x0010)
-#define	PWM_CRLR_BASE	(0x0100 + 0x0014)
-#define PWM_CFLR_BASE	(0x0100 + 0x0018)
 /*#define PWM_PCCR8	(0x0300)*/
 
 #define PWMG_CS_SHIFT           0
@@ -61,7 +50,7 @@
 #define PWM_PUL_START_WIDTH     1
 #define PWM_PUL_NUM_SHIFT       16
 #define PWM_PUL_NUM_WIDTH       16
-#define PWM_MODE_ACTS_SHIFT		8
+#define PWM_MODE_ACTS_SHIFT	8
 #define PWM_MODE_ACTS_WIDTH     2
 #define PWM_ACT_STA_SHIFT	0x8
 #define PWM_ACT_STA_WIDTH	0x1
@@ -79,9 +68,9 @@
 #define PWM_DZ_EN_WIDTH		0x1
 #define PWM_PDZINTV_SHIFT	0x8
 #define PWM_PDZINTV_WIDTH	0x8
+#define PWM_BYPASS_SHIFT	0x5
 #define PWM_BYPASS_WIDTH	0x1
 #define PWM_CLK_GATING_SHIFT	0x4
 #define PWM_CLK_GATING_WIDTH	0x1
-
+#define PWM_REG_UNIFORM_OFFSET	0x20 /* multiple registers use uniform offset */
 #endif
-

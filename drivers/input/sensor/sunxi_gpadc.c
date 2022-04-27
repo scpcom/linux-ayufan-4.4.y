@@ -28,6 +28,8 @@
 #include <linux/of_irq.h>
 #include <linux/of_address.h>
 #include <linux/pm.h>
+#include <linux/pm_wakeirq.h>
+#include <linux/pm_runtime.h>
 #include <linux/workqueue.h>
 #include "sunxi_gpadc.h"
 #include <linux/sched.h>
@@ -35,6 +37,13 @@
 #include <linux/clk-provider.h>
 #include <linux/reset.h>
 #include <linux/clk/sunxi.h>
+
+#if IS_ENABLED(CONFIG_IIO)
+#include <linux/iio/iio.h>
+#include <linux/iio/machine.h>
+#include <linux/iio/driver.h>
+#include <linux/regmap.h>
+#endif
 
 static u32 debug_mask = 1;
 #define dprintk(level_mask, fmt, ...)				\
@@ -64,6 +73,22 @@ static unsigned char keypad_mapindex[128] = {
 	6, 6, 6, 6, 6, 6, 6, 6, 6,		/* key 7, 40-49 */
 	7, 7, 7, 7, 7, 7, 7			/* key 8, 50-63 */
 };
+
+static inline void sunxi_gpadc_save_regs(struct sunxi_gpadc *sunxi_gpadc)
+{
+	int i;
+
+	for (i = 0; i < ARRAY_SIZE(sunxi_gpadc_regs_offset); i++)
+		sunxi_gpadc->regs_backup[i] = readl(sunxi_gpadc->reg_base + sunxi_gpadc_regs_offset[i]);
+}
+
+static inline void sunxi_gpadc_restore_regs(struct sunxi_gpadc *sunxi_gpadc)
+{
+	int i;
+
+	for (i = 0; i < ARRAY_SIZE(sunxi_gpadc_regs_offset); i++)
+		writel(sunxi_gpadc->regs_backup[i], sunxi_gpadc->reg_base + sunxi_gpadc_regs_offset[i]);
+}
 
 #ifdef CONFIG_ARCH_SUN8IW18
 static u32 sunxi_gpadc_check_vin(void)
@@ -782,15 +807,7 @@ static u32 sunxi_gpadc_read_ch_higirq_enable(void __iomem *reg_base)
 
 static u32 sunxi_gpadc_read_ch_irq_enable(void __iomem *reg_base)
 {
-	u32 reg_val;
-
-	reg_val = readl(reg_base + GP_DATA_INTC_REG);
-	reg_val |= GP_CH0_SELECT;
-	reg_val |= GP_CH1_SELECT;
-	writel(reg_val, reg_base + GP_DATA_INTC_REG);
-
 	return readl(reg_base + GP_DATA_INTC_REG);
-
 }
 
 static u32 sunxi_gpadc_read_data(void __iomem *reg_base, enum gp_channel_id id)
@@ -1077,6 +1094,13 @@ static int sunxi_gpadc_setup(struct platform_device *pdev,
 			val = 0;
 		}
 		gpadc_config->channel_compare_higdata[i] = val;
+	}
+
+	sunxi_gpadc->wakeup_en = 0;
+	if (of_property_read_bool(np, "wakeup-source")) {
+		device_init_wakeup(&pdev->dev, true);
+		dev_pm_set_wake_irq(&pdev->dev, sunxi_gpadc->irq_num);
+		sunxi_gpadc->wakeup_en = 1;
 	}
 
 	return 0;
@@ -1791,6 +1815,145 @@ static struct class gpadc_class = {
 	.owner		= THIS_MODULE,
 };
 
+#if IS_ENABLED(CONFIG_IIO)
+struct sunxi_gpadc_iio {
+	struct sunxi_gpadc *sunxi_gpadc;
+};
+
+static int sunxi_gpadc_read_raw(struct iio_dev *indio_dev,
+			struct iio_chan_spec const *chan,
+			int *val, int *val2, long mask)
+{
+	int ret = 0;
+	int key_val, id_vol;
+	struct sunxi_gpadc_iio *info = iio_priv(indio_dev);
+	struct sunxi_gpadc *sunxi_gpadc = info->sunxi_gpadc;
+	u32 data, vol_data;
+
+	mutex_lock(&indio_dev->mlock);
+	switch (mask) {
+	case IIO_CHAN_INFO_RAW:
+		/*
+		* This is an example,so if there are new requirements,
+		* you can replace it with your interface to upload data.
+		* *val and *val2 are used as needed.
+		* In the shell console you can use the "cat in_voltage0_raw" command to view the data.
+		*/
+		data = sunxi_gpadc_read_data(sunxi_gpadc->reg_base, chan->channel);
+
+		data = ((VOL_RANGE / 4096)*data);		/* 12bits sample rate */
+		vol_data = data / 1000;					/* data to val_data */
+		*val  = vol_data;
+
+		ret = IIO_VAL_INT;
+		break;
+
+	case IIO_CHAN_INFO_SCALE:
+		break;
+
+	default:
+		ret = -EINVAL;
+	}
+	mutex_unlock(&indio_dev->mlock);
+
+	return ret;
+}
+
+/*
+* If necessary, you can fill other callback functions
+* in this data structure, for example:
+* write_raw/read_event_value/write_event_value and so on...
+*/
+static const struct iio_info sunxi_gpadc_iio_info = {
+	.read_raw = &sunxi_gpadc_read_raw,
+};
+
+static void sunxi_gpadc_remove_iio(void *data)
+{
+	struct iio_dev *indio_dev = data;
+
+	if (!indio_dev)
+		pr_err("indio_dev is null\n");
+	else
+		iio_device_unregister(indio_dev);
+
+}
+
+#define ADC_CHANNEL(_index, _id) {	\
+	.type = IIO_VOLTAGE,			\
+	.indexed = 1,					\
+	.channel = _index,				\
+	.address = _index,				\
+	.info_mask_separate = BIT(IIO_CHAN_INFO_RAW),	\
+	.datasheet_name = _id,							\
+}
+
+/*
+* According to the GPADC spec,
+* the current GPADC only supports 4 channels.
+*/
+static const struct iio_chan_spec gpadc_adc_iio_channels[] = {
+	ADC_CHANNEL(0, "adc_chan0"),
+	ADC_CHANNEL(1, "adc_chan1"),
+	ADC_CHANNEL(2, "adc_chan2"),
+	ADC_CHANNEL(3, "adc_chan3"),
+	//ADC_CHANNEL(4, "adc_chan4"),
+	//ADC_CHANNEL(5, "adc_chan5"),
+	//ADC_CHANNEL(6, "adc_chan6"),
+	//ADC_CHANNEL(7, "adc_chan7"),
+};
+
+/*
+* Register the IIO data structure,
+* the basic data has been initialized in the function: sunxi_gpadc_probe,
+* you can use it directly here: platform_get_drvdata.
+*/
+static int sunxi_gpadc_iio_init(struct platform_device *pdev)
+{
+	int ret;
+	struct iio_dev *indio_dev;
+	struct sunxi_gpadc_iio *info;
+	struct sunxi_gpadc *sunxi_gpadc = platform_get_drvdata(pdev);
+
+	indio_dev = devm_iio_device_alloc(&pdev->dev, sizeof(struct sunxi_gpadc));
+	if (!indio_dev)
+		return -ENOMEM;
+
+	info = iio_priv(indio_dev);
+	info->sunxi_gpadc = sunxi_gpadc;
+
+	indio_dev->dev.parent = &pdev->dev;
+	indio_dev->name = pdev->name;
+	indio_dev->channels = gpadc_adc_iio_channels;
+	indio_dev->num_channels = ARRAY_SIZE(gpadc_adc_iio_channels);
+	indio_dev->info = &sunxi_gpadc_iio_info;
+	indio_dev->modes = INDIO_DIRECT_MODE;
+
+	ret = iio_device_register(indio_dev);
+	if (ret < 0) {
+		dev_err(&pdev->dev, "unable to register iio device\n");
+		ret = -EINVAL;
+	}
+/*
+ * Destroy IIO:the kernel will call the callback to execute sunxi_gpadc_remove_iio.
+ */
+	ret = devm_add_action(&pdev->dev, sunxi_gpadc_remove_iio, indio_dev);
+
+	if (ret) {
+		dev_err(&pdev->dev, "unable to add iio cleanup action\n");
+		goto err_iio_unregister;
+	}
+
+	return 0;
+
+err_iio_unregister:
+	iio_device_unregister(indio_dev);
+
+	return ret;
+}
+#endif
+
+
 int sunxi_gpadc_probe(struct platform_device *pdev)
 {
 	struct device_node *np = pdev->dev.of_node;
@@ -1827,6 +1990,7 @@ int sunxi_gpadc_probe(struct platform_device *pdev)
 		ret = -EBUSY;
 		goto fail2;
 	}
+
 #if 0
 	sunxi_gpadc->mclk = of_clk_get(np, 0);
 	if (IS_ERR_OR_NULL(sunxi_gpadc->mclk)) {
@@ -1860,6 +2024,13 @@ int sunxi_gpadc_probe(struct platform_device *pdev)
 		pr_err("sunxi_gpadc request irq failure\n");
 		return -1;
 	}
+
+/*
+* This function will only be used when IIO is enabled !!!
+*/
+#if IS_ENABLED(CONFIG_IIO)
+	sunxi_gpadc_iio_init(pdev);
+#endif
 
 	return 0;
 #if 0
@@ -1901,11 +2072,15 @@ static int sunxi_gpadc_suspend(struct device *dev)
 	flush_delayed_work(&sunxi_gpadc->gpadc_work);
 	cancel_delayed_work_sync(&sunxi_gpadc->gpadc_work);
 #endif
-	sunxi_gpadc_enable(sunxi_gpadc->reg_base, false);
 
-	disable_irq_nosync(sunxi_gpadc->irq_num);
-
-	clk_disable_unprepare(sunxi_gpadc->bus_clk);
+	if (sunxi_gpadc->wakeup_en)
+		sunxi_gpadc_save_regs(sunxi_gpadc);		/* standby need irq enable */
+	else {
+		disable_irq_nosync(sunxi_gpadc->irq_num);
+		sunxi_gpadc_save_regs(sunxi_gpadc);
+		clk_disable_unprepare(sunxi_gpadc->bus_clk);
+		reset_control_assert(sunxi_gpadc->reset);
+	}
 
 	return 0;
 }
@@ -1915,14 +2090,22 @@ static int sunxi_gpadc_resume(struct device *dev)
 	struct platform_device *pdev = to_platform_device(dev);
 	struct sunxi_gpadc *sunxi_gpadc = platform_get_drvdata(pdev);
 
+	if (sunxi_gpadc->wakeup_en)
+		sunxi_gpadc_restore_regs(sunxi_gpadc);
+	else {
+		reset_control_deassert(sunxi_gpadc->reset);
+
+		if (clk_prepare_enable(sunxi_gpadc->bus_clk)) {
+			pr_err("[gpadc%d] enable clock failed!\n", sunxi_gpadc->bus_num);
+			return 0;
+		}
+
+		sunxi_gpadc_restore_regs(sunxi_gpadc);
+		enable_irq(sunxi_gpadc->irq_num);
+	}
 #ifdef USE_DATA_SCAN
 	schedule_delayed_work(&sunxi_gpadc->gpadc_work, sunxi_gpadc->interval);
 #endif
-	clk_prepare_enable(sunxi_gpadc->bus_clk);
-
-	enable_irq(sunxi_gpadc->irq_num);
-
-	sunxi_gpadc_enable(sunxi_gpadc->reg_base, true);
 
 	return 0;
 }

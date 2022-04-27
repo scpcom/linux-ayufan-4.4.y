@@ -38,6 +38,8 @@
 #include <asm/irq.h>
 #include <asm/unaligned.h>
 
+#include <linux/regulator/consumer.h>
+
 #include  "sunxi_udc_config.h"
 #include  "sunxi_udc_board.h"
 
@@ -370,8 +372,9 @@ static __u32 is_peripheral_active(void)
  * 3. more than one packet
  */
 #define  big_req(req, ep)	((req->req.length != req->req.actual) \
-				? ((req->req.length - req->req.actual) \
-				> ep->ep.maxpacket) \
+				? ((req->req.length >= 512) \
+				&& ((req->req.length - req->req.actual) \
+				> ep->ep.maxpacket)) \
 				: (req->req.length > ep->ep.maxpacket))
 #define  is_sunxi_udc_dma_capable(req, ep)	(is_udc_support_dma() \
 						&& big_req(req, ep) \
@@ -469,6 +472,54 @@ static inline void sunxi_udc_unmap_dma_buffer(
 	req->map_state = UN_MAPPED;
 }
 
+static int sunxi_udc_handle_unaligned_buf_start(struct sunxi_udc_ep *ep, struct sunxi_udc_request *req)
+{
+	void *req_buf = req->req.buf;
+
+	/* if dma is not being used and buffer is aligned */
+	if (!is_sunxi_udc_dma_capable(req, ep))
+		return 0;
+
+	if (!((long)req_buf & 0x3))
+		return 0;
+
+	req->req.buf = kmalloc(req->req.length, GFP_ATOMIC);
+	if (!req->req.buf) {
+		req->req.buf = req_buf;
+		DMSG_PANIC("%s: unable to allocate memory for bounce buffer\n", __func__);
+		return -ENOMEM;
+	}
+
+	req->saved_req_buf = req_buf;
+
+	if (ep->bEndpointAddress & USB_DIR_IN)
+		memcpy(req->req.buf, req_buf, req->req.length);
+
+	return 0;
+}
+
+static void sunxi_udc_handle_unaligned_buf_complete(struct sunxi_udc_ep *ep, struct sunxi_udc_request *req)
+{
+
+	/* if dma is not being used and buffer is aligned */
+	if (!req->saved_req_buf)
+		return;
+
+	if (!is_sunxi_udc_dma_capable(req, ep))
+		return;
+
+	/* Copy data from bounce buffer on successful out transfer */
+	if (!(ep->bEndpointAddress & USB_DIR_IN) && !req->req.status)
+		memcpy(req->saved_req_buf, req->req.buf,
+		       req->req.actual);
+
+	/* Free bounce buffer */
+	kfree(req->req.buf);
+
+	req->req.buf = req->saved_req_buf;
+	req->saved_req_buf = NULL;
+}
+
 static void sunxi_udc_done(struct sunxi_udc_ep *ep,
 		struct sunxi_udc_request *req, int status)
 __releases(ep->dev->lock)
@@ -492,6 +543,7 @@ __acquires(ep->dev->lock)
 	if (is_sunxi_udc_dma_capable(req, ep)) {
 		spin_unlock(&ep->dev->lock);
 		sunxi_udc_unmap_dma_buffer(req, ep->dev, ep);
+		sunxi_udc_handle_unaligned_buf_complete(ep, req);
 		req->req.complete(&ep->ep, &req->req);
 		spin_lock(&ep->dev->lock);
 	} else {
@@ -2462,6 +2514,7 @@ static int sunxi_udc_queue(struct usb_ep *_ep,
 		return -EINVAL;
 	}
 
+	sunxi_udc_handle_unaligned_buf_start(ep, req);
 	spin_lock_irqsave(&ep->dev->lock, flags);
 	_req->status = -EINPROGRESS;
 	_req->actual = 0;
@@ -2968,7 +3021,15 @@ static void sunxi_udc_reinit(struct sunxi_udc *dev)
 
 static void sunxi_udc_enable(struct sunxi_udc *dev)
 {
+	int ret;
+
 	DMSG_DBG_UDC("sunxi_udc_enable called\n");
+
+	if (!IS_ERR_OR_NULL(dev->udc_regulator)) {
+		ret = regulator_enable(dev->udc_regulator);
+		if (ret)
+			DMSG_PANIC("ERR:udc regulator enable failed\n");
+	}
 
 	dev->gadget.speed = USB_SPEED_UNKNOWN;
 
@@ -3008,6 +3069,9 @@ static void sunxi_udc_disable(struct sunxi_udc *dev)
 
 	/* Set speed to unknown */
 	dev->gadget.speed = USB_SPEED_UNKNOWN;
+
+	if (!IS_ERR_OR_NULL(dev->udc_regulator))
+		regulator_disable(dev->udc_regulator);
 }
 
 static s32  usbd_start_work(void)
@@ -3421,12 +3485,20 @@ int sunxi_usb_device_enable(void)
 		}
 	}
 
+
 	if (first_enable) {
 		first_enable = 0;
 		INIT_WORK(&udc->vbus_det_work, sunxi_vbus_det_work);
 #if !defined(SUNXI_USB_FPGA) && defined(CONFIG_POWER_SUPPLY)
 		INIT_WORK(&udc->set_cur_vol_work, sunxi_set_cur_vol_work);
 #endif
+		udc->udc_regulator = devm_regulator_get(&(pdev->dev), "udc");
+
+		if (!IS_ERR_OR_NULL(udc->udc_regulator)) {
+			retval = regulator_enable(udc->udc_regulator);
+			if (retval)
+				DMSG_PANIC("ERR:udc regulator enable failed\n");
+		}
 	}
 
 	retval = request_irq(udc->irq_no, sunxi_udc_irq,

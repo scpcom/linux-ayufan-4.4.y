@@ -12,8 +12,8 @@
  * the License, or (at your option) any later version.
  *
  */
-
 #include  "usbc_i.h"
+#include "linux/sunxi-sid.h"
 
 /**
  * define USB PHY controller reg bit
@@ -236,3 +236,173 @@ void usb_otg_phy_txtune(void __iomem *regs)
 	reg_val |= 0xc << 8;	/* TXVREFTUNE */
 	USBC_Writel(reg_val, (regs + USBC_REG_o_PHYTUNE));
 }
+
+/*for new phy*/
+static int usbc_new_phyx_tp_write(void __iomem *regs,
+		int addr, int data, int len)
+{
+	int temp = 0;
+	int j = 0;
+	int dtmp = 0;
+
+	/*device: 0x410(phy_ctl)*/
+	dtmp = data;
+
+	for (j = 0; j < len; j++) {
+
+		temp = USBC_Readb(regs + USBPHYC_REG_o_PHYCTL);
+		temp |= (0x1 << 1);
+		USBC_Writeb(temp, regs + USBPHYC_REG_o_PHYCTL);
+
+		USBC_Writeb(addr + j, regs + USBPHYC_REG_o_PHYCTL + 1);
+
+		temp = USBC_Readb(regs + USBPHYC_REG_o_PHYCTL);
+		temp &= ~(0x1 << 0);
+		USBC_Writeb(temp, regs + USBPHYC_REG_o_PHYCTL);
+
+		temp = USBC_Readb(regs + USBPHYC_REG_o_PHYCTL);
+		temp &= ~(0x1 << 7);
+		temp |= (dtmp & 0x1) << 7;
+		USBC_Writeb(temp, regs + USBPHYC_REG_o_PHYCTL);
+
+		temp |= (0x1 << 0);
+		USBC_Writeb(temp, regs + USBPHYC_REG_o_PHYCTL);
+
+		temp &= ~(0x1 << 0);
+		USBC_Writeb(temp, regs + USBPHYC_REG_o_PHYCTL);
+
+		temp = USBC_Readb(regs + USBPHYC_REG_o_PHYCTL);
+		temp &= ~(0x1 << 1);
+		USBC_Writeb(temp, regs + USBPHYC_REG_o_PHYCTL);
+
+		dtmp >>= 1;
+	}
+
+	return 0;
+}
+
+static int usbc_new_phyx_tp_read(void __iomem *regs, int addr, int len)
+{
+	int temp = 0;
+	int i = 0;
+	int j = 0;
+	int ret = 0;
+
+	temp = USBC_Readb(regs + USBPHYC_REG_o_PHYCTL);
+	temp |= (0x1 << 1);
+	USBC_Writeb(temp, regs + USBPHYC_REG_o_PHYCTL);
+
+	for (j = len; j > 0; j--) {
+		USBC_Writeb((addr + j - 1), regs + USBPHYC_REG_o_PHYCTL + 1);
+
+		for (i = 0; i < 0x4; i++)
+			;
+
+		temp = USBC_Readb(regs + USBC_REG_o_PHYSTATUS);
+		ret <<= 1;
+		ret |= (temp & 0x1);
+	}
+
+	temp = USBC_Readb(regs + USBPHYC_REG_o_PHYCTL);
+	temp &= ~(0x1 << 1);
+	USBC_Writeb(temp, regs + USBPHYC_REG_o_PHYCTL);
+
+	return ret;
+}
+
+
+void usbc_new_phy_init(void __iomem *regs)
+{
+	int value = 0;
+	u32 efuse_val  = 0;
+
+	pr_debug("addr:%x,len:%x,value:%x\n", 0x03, 0x06,
+			usbc_new_phyx_tp_read(regs, 0x03, 0x06));
+	pr_debug("addr:%x,len:%x,value:%x\n", 0x16, 0x03,
+			usbc_new_phyx_tp_read(regs, 0x16, 0x03));
+	pr_debug("addr:%x,len:%x,value:%x\n", 0x0b, 0x08,
+			usbc_new_phyx_tp_read(regs, 0x0b, 0x08));
+	pr_debug("addr:%x,len:%x,value:%x\n", 0x09, 0x03,
+			usbc_new_phyx_tp_read(regs, 0x09, 0x03));
+
+	sunxi_get_module_param_from_sid(&efuse_val, EFUSE_OFFSET, 4);
+	pr_debug("efuse_val:0x%x\n", efuse_val);
+
+	usbc_new_phyx_tp_write(regs, 0x1c, 0x0, 0x03);
+	pr_debug("addr:%x,len:%x,value:%x\n", 0x1c, 0x03,
+			usbc_new_phyx_tp_read(regs, 0x1c, 0x03));
+
+	if (efuse_val & SUNXI_USB_PHY_EFUSE_ADJUST) {
+		if (efuse_val & SUNXI_USB_PHY_EFUSE_MODE) {
+			/* iref mode */
+			usbc_new_phyx_tp_write(regs, 0x60, 0x1, 0x01);
+
+			/* usbc-0 */
+			value = (efuse_val & SUNXI_USB_PHY_EFUSE_USB0TX) >> 22;
+			usbc_new_phyx_tp_write(regs, 0x61, value, 0x03);
+
+			value = (efuse_val & SUNXI_USB_PHY_EFUSE_RES) >> 18;
+			usbc_new_phyx_tp_write(regs, 0x44, value, 0x04);
+
+			pr_debug("addr:%x,len:%x,value:%x\n", 0x60, 0x01,
+				usbc_new_phyx_tp_read(regs, 0x60, 0x01));
+			pr_debug("addr:%x,len:%x,value:%x\n", 0x61, 0x03,
+				usbc_new_phyx_tp_read(regs, 0x61, 0x03));
+			pr_debug("addr:%x,len:%x,value:%x\n", 0x44, 0x04,
+				usbc_new_phyx_tp_read(regs, 0x44, 0x04));
+		} else {
+			/* verf mode */
+			usbc_new_phyx_tp_write(regs, 0x60, 0x0, 0x01);
+
+			value = (efuse_val & SUNXI_USB_PHY_EFUSE_RES) >> 18;
+			usbc_new_phyx_tp_write(regs, 0x44, value, 0x04);
+
+			value = (efuse_val & SUNXI_USB_PHY_EFUSE_COM) >> 22;
+			usbc_new_phyx_tp_write(regs, 0x36, value, 0x03);
+
+			pr_debug("addr:%x,len:%x,value:%x\n", 0x60, 0x01,
+				usbc_new_phyx_tp_read(regs, 0x60, 0x01));
+			pr_debug("addr:%x,len:%x,value:%x\n", 0x44, 0x04,
+				usbc_new_phyx_tp_read(regs, 0x44, 0x04));
+			pr_debug("addr:%x,len:%x,value:%x\n", 0x36, 0x03,
+				usbc_new_phyx_tp_read(regs, 0x36, 0x03));
+		}
+	}
+
+	pr_debug("addr:%x,len:%x,value:%x\n", 0x03, 0x06,
+			usbc_new_phyx_tp_read(regs, 0x03, 0x06));
+	pr_debug("addr:%x,len:%x,value:%x\n", 0x16, 0x03,
+			usbc_new_phyx_tp_read(regs, 0x16, 0x03));
+	pr_debug("addr:%x,len:%x,value:%x\n", 0x0b, 0x08,
+			usbc_new_phyx_tp_read(regs, 0x0b, 0x08));
+	pr_debug("addr:%x,len:%x,value:%x\n", 0x09, 0x03,
+			usbc_new_phyx_tp_read(regs, 0x09, 0x03));
+}
+
+void usbc_new_phy_res_cal(void __iomem *regs)
+{
+	int value;
+
+	/*clear software res cail*/
+	usbc_new_phyx_tp_write(regs, 0x43, 0x0, 0x01);
+	usbc_new_phyx_tp_write(regs, 0x41, 0x0, 0x01);
+	usbc_new_phyx_tp_write(regs, 0x40, 0x0, 0x01);
+	/*res cail*/
+	usbc_new_phyx_tp_write(regs, 0x40, 0x01, 0x01);
+	mdelay(1);
+	usbc_new_phyx_tp_write(regs, 0x41, 0x01, 0x01);
+
+	while (1) {
+		if (usbc_new_phyx_tp_read(regs, 0x42, 0x01))
+			break;
+	}
+
+	/*set res*/
+	value = usbc_new_phyx_tp_read(regs, 0x49, 0x04);
+	pr_debug("addr:%x,,value:%x\n", 0x49, value);
+	usbc_new_phyx_tp_write(regs, 0x44, value, 0x04);
+	usbc_new_phyx_tp_write(regs, 0x41, 0x0, 0x01);
+	usbc_new_phyx_tp_write(regs, 0x40, 0x0, 0x01);
+	usbc_new_phyx_tp_write(regs, 0x43, 0x01, 0x01);
+}
+
