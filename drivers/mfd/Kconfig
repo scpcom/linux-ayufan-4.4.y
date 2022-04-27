@@ -19,6 +19,19 @@ config MFD_CS5535
 	  This is the core driver for CS5535/CS5536 MFD functions.  This is
 	  necessary for using the board's GPIO and MFGPT functionality.
 
+config MFD_ACX00
+	bool "Support Allwinnertech ACX00"
+	select MFD_CORE
+	select REGMAP_I2C
+        select REGMAP_IRQ
+	depends on I2C=y
+	default n
+	help
+	 Say yes here if you have ac100/ac200 chip on your board.
+	 This driver provides core support for the ac100,ac200,
+	 in order to use the actual functionaltiy of the device
+	 other drivers must be enabled.
+
 config MFD_ALTERA_A10SR
 	bool "Altera Arria10 DevKit System Resource chip"
 	depends on ARCH_SOCFPGA && SPI_MASTER=y && OF
