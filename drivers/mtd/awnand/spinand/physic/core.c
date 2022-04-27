@@ -9,6 +9,7 @@
 #include <linux/of.h>
 
 #include "physic.h"
+#include "../sunxi-spinand.h"
 
 /**
  * aw_spinand_chip_update_cfg() - Update the configuration register
@@ -81,6 +82,7 @@ static void aw_spinand_chip_clean(struct aw_spinand_chip *chip)
 
 int aw_spinand_fill_phy_info(struct aw_spinand_chip *chip, void *data)
 {
+	struct aw_spinand *spinand = get_aw_spinand();
 	struct aw_spinand_info *info = chip->info;
 	struct aw_spinand_phy_info *pinfo = info->phy_info;
 	struct device_node *node = chip->spi->dev.of_node;
@@ -91,6 +93,19 @@ int aw_spinand_fill_phy_info(struct aw_spinand_chip *chip, void *data)
 	ret = of_property_read_u32(node, "spi-max-frequency", &max_hz);
 	if (ret < 0)
 		pr_err("get spi-max-frequency from node of spi-nand failed\n");
+
+	ret = of_property_read_u32(node, "sample_mode",
+				&spinand->right_sample_mode);
+	if (ret) {
+		pr_err("Failed to get sample mode\n");
+		spinand->right_sample_mode = AW_SAMP_MODE_DL_DEFAULT;
+	}
+	ret = of_property_read_u32(node, "sample_delay",
+				&spinand->right_sample_delay);
+	if (ret) {
+		pr_err("Failed to get sample delay\n");
+		spinand->right_sample_delay = AW_SAMP_MODE_DL_DEFAULT;
+	}
 
 	/* nand information */
 	boot_info->ChipCnt = 1;
@@ -112,6 +127,9 @@ int aw_spinand_fill_phy_info(struct aw_spinand_chip *chip, void *data)
 	/* there is no metter what max ecc bits is */
 	boot_info->MaxEccBits = 4;
 	boot_info->EccLimitBits = 4;
+
+	boot_info->sample_mode = spinand->right_sample_mode;
+	boot_info->sample_delay = spinand->right_sample_delay;
 
 	return 0;
 }

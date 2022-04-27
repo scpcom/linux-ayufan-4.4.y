@@ -20,6 +20,7 @@
 #define PSTORE_SIZE_KB	512
 #define NAND_BOOT0_BLK_START    0
 #define VALID_PAGESIZE_FOR_BOOT0 2048
+#define AW_SAMP_MODE_DL_DEFAULT 0xaaaaffff
 
 struct aw_spinand {
 	struct mutex lock;
@@ -31,6 +32,8 @@ struct aw_spinand {
 #if IS_ENABLED(CONFIG_AW_SPINAND_SECURE_STORAGE)
 	struct aw_spinand_sec_sto sec_sto;
 #endif
+	unsigned int right_sample_delay;
+	unsigned int right_sample_mode;
 };
 
 extern struct aw_spinand *get_aw_spinand(void);
