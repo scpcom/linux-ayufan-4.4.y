@@ -746,28 +746,6 @@ config CRYPTO_DEV_IMGTEC_HASH
 	  hardware hash accelerator. Supporting MD5/SHA1/SHA224/SHA256
 	  hashing algorithms.
 
-config CRYPTO_DEV_SUNXI
-	tristate "Support for Allwinner Sunxi CryptoEngine"
-	depends on ARCH_SUNXI
-	select CRYPTO_MD5
-	select CRYPTO_SHA1
-	select CRYPTO_AES
-	select CRYPTO_DES
-	select CRYPTO_BLKCIPHER
-	help
-	  Allwinner Sunxi SoC have a crypto accelerator named
-	  CryptoEngine. It support some SoC of sun8i/sun50i series.
-	  Select this if you want to use it.
-
-config CRYPTO_SUNXI_CE_ADAPTER
-	bool "Support for Allwinner Sunxi CryptoEngine Adapter"
-	depends on ARCH_SUNXI
-	default y if ARCH_SUNXI
-	help
-	  Allwinner Sunxi SoC have a crypto accelerator named
-	  CryptoEngine Adapter.
-	  Select this if you want to use it.
-
 config CRYPTO_DEV_ROCKCHIP
 	tristate "Rockchip's Cryptographic Engine driver"
 	depends on OF && ARCH_ROCKCHIP
@@ -905,7 +883,9 @@ config CRYPTO_DEV_CCREE
 source "drivers/crypto/hisilicon/Kconfig"
 
 source "drivers/crypto/amlogic/Kconfig"
-
+menu "Support for Allwinner Sunxi CryptoEngine"
+source "drivers/crypto/sunxi-ce/Kconfig"
+endmenu
 config CRYPTO_DEV_SA2UL
 	tristate "Support for TI security accelerator"
 	depends on ARCH_K3 || COMPILE_TEST
