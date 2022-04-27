@@ -6,6 +6,7 @@
 
 #include <linux/clk-provider.h>
 #include <linux/io.h>
+#include <linux/delay.h>
 
 #include "ccu_gate.h"
 #include "ccu_mult.h"
@@ -14,12 +15,12 @@ struct _ccu_mult {
 	unsigned long	mult, min, max;
 };
 
-static void ccu_mult_find_best(unsigned long parent, unsigned long rate,
+static void ccu_mult_find_best(unsigned long parent, u64 rate,
 			       struct _ccu_mult *mult)
 {
-	int _mult;
+	u64 _mult = rate;
 
-	_mult = rate / parent;
+	do_div(_mult, parent);
 	if (_mult < mult->min)
 		_mult = mult->min;
 
@@ -100,13 +101,14 @@ static int ccu_mult_determine_rate(struct clk_hw *hw,
 					     req, ccu_mult_round_rate, cm);
 }
 
-static int ccu_mult_set_rate(struct clk_hw *hw, unsigned long rate,
+static int ccu_mult_set_rate(struct clk_hw *hw, unsigned long _rate,
 			   unsigned long parent_rate)
 {
 	struct ccu_mult *cm = hw_to_ccu_mult(hw);
 	struct _ccu_mult _cm;
 	unsigned long flags;
 	u32 reg;
+	u64 rate = _rate;
 
 	if (ccu_frac_helper_has_rate(&cm->common, &cm->frac, rate)) {
 		ccu_frac_helper_enable(&cm->common, &cm->frac);
@@ -140,6 +142,7 @@ static int ccu_mult_set_rate(struct clk_hw *hw, unsigned long rate,
 	spin_unlock_irqrestore(cm->common.lock, flags);
 
 	ccu_helper_wait_for_lock(&cm->common, cm->lock);
+	msleep(2);
 
 	return 0;
 }

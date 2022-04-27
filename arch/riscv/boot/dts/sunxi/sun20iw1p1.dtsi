@@ -3,9 +3,7 @@
  *
  */
 
-/memreserve/ 0x40000000 0x200000;  /* opensbi */
-
-/memreserve/ 0x42000000 0x100000;  /* dsp used 1MB */
+/memreserve/ 0x41fc0000 0x020000;  /* opensbi */
 
 #include <dt-bindings/clock/sun8iw20-ccu.h>
 #include <dt-bindings/clock/sun8iw20-r-ccu.h>
@@ -48,6 +46,7 @@
 		ir0 = &s_cir0;
 		ir1 = &ir1;
 		mmc0 = &sdc0;
+		ve0 = &ve;
 		tvd = &tvd;
 		tvd0 = &tvd0;
 	} ;
@@ -118,14 +117,18 @@
 
 	cpu_opp_table: cpu-opp-table {
 		compatible = "allwinner,sun50i-operating-points";
-		nvmem-cells = <&vf_table>;
-		nvmem-cell-names = "speed";
+		nvmem-cells = <&speedbin_efuse>, <&cpubin_efuse>;
+		nvmem-cell-names = "speed", "bin";
 		opp-shared;
 
 		opp@1008000000 {
 			opp-hz = /bits/ 64 <1008000000>;
 			clock-latency-ns = <244144>; /* 8 32k periods */
 			opp-microvolt-a0 = <1100000>;
+			opp-microvolt-a1 = <950000>;
+
+			opp-microvolt-b1 = <950000>;
+			opp-supported-hw = <0x1>;
 		};
 	};
 
@@ -243,6 +246,7 @@
 				shift = <0>;
 				ver_a = <0x18590000>;
 				ver_b = <0x18590002>;
+				ver_d = <0x18590003>;
 			};
 
 			soc_id {
@@ -441,7 +445,7 @@
 		};
 
 		ir1: ir@2003000 {
-			compatible = "allwinner,ir_tx";
+			compatible = "allwinner,irtx";
 			reg = <0x0 0x02003000 0x0 0x400>;
 			interrupts-extended = <&plic0 35 IRQ_TYPE_LEVEL_HIGH>;
 			clocks = <&ccu CLK_BUS_IR_TX>, <&dcxo24M>, <&ccu CLK_IR_TX>;
@@ -511,7 +515,7 @@
 			clocks = <&ccu CLK_BUS_DMA>, <&ccu CLK_MBUS_DMA>;
 			clock-names = "bus", "mbus";
 			resets = <&ccu RST_BUS_DMA>;
-			dma-channels = <16>;
+			dma-channels = <8>;
 			dma-requests = <48>;
 			#dma-cells = <1>;
 			status = "okay";
@@ -681,15 +685,28 @@
 				bias-disable;
 			};
 
+			dsi2lane_pins_a: dsi2lane@0 {
+				pins = "PD0", "PD1", "PD2", "PD3", "PD4", "PD5";
+				function = "dsi";
+				drive-strength = <30>;
+				bias-disable;
+			};
+
+			dsi2lane_pins_b: dsi2lane@1 {
+				pins = "PD0", "PD1", "PD2", "PD3", "PD4", "PD5";
+				function = "io_disabled";
+				bias-disable;
+			};
+
 			dsi4lane_pins_a: dsi4lane@0 {
-				pins = "PD0", "PD1", "PD2", "PD3","PD4", "PD5","PD6", "PD7", "PD8", "PD9";
+				pins = "PD0", "PD1", "PD2", "PD3", "PD4", "PD5", "PD6", "PD7", "PD8", "PD9";
 				function = "dsi";
 				drive-strength = <30>;
 				bias-disable;
 			};
 
 			dsi4lane_pins_b: dsi4lane@1 {
-				pins = "PD0", "PD1", "PD2", "PD3","PD4", "PD5","PD6", "PD7", "PD8", "PD9";
+				pins = "PD0", "PD1", "PD2", "PD3", "PD4", "PD5", "PD6", "PD7", "PD8", "PD9";
 				function = "io_disabled";
 				bias-disable;
 			};
@@ -837,7 +854,7 @@
 			key2 = <590 139>;
 			key3 = <750 28>;
 			key4 = <880 172>;
-			status = "okay";
+			status = "disabled";
 		};
 
 		sid@3006000 {
@@ -852,14 +869,24 @@
 				size = <0x10>;
 			};
 
+			oem {
+				reg = <0x0 0>;
+				offset = <0x238>;
+				size = <0x8>;
+			};
+
 			secure_status {
 				reg = <0x0 0>;
-				offset = <0xa0>;
+				offset = <0x210>;
 				size = <0x4>;
 			};
 
-			vf_table: vf-table@00 {
+			speedbin_efuse: speedbin@00 {
 				reg = <0x00 2>;
+			};
+
+			cpubin_efuse: cpubin@28 {
+				reg = <0x28 2>;
 			};
 
 			ths_calib: calib@14 {
@@ -888,6 +915,17 @@
 			#thermal-sensor-cells = <1>;
 		};
 
+		tpadc: tpadc@2009c00 {
+			compatible = "allwinner,tp_key";
+			reg = <0x0 0x02009c00 0x0 0x400>;
+			interrupts-extended = <&plic0 78 IRQ_TYPE_LEVEL_HIGH>;
+			clocks = <&ccu CLK_TPADC>, <&ccu CLK_BUS_TPADC>;
+			clock-names = "mod", "bus";
+			clock-frequency = <1000000>;
+			resets = <&ccu RST_BUS_TPADC>;
+			status = "disabled";
+		};
+
 		rtp:rtp@2009c00 {
 			compatible = "allwinner,sun8i-ts";
 			reg = <0x0 0x02009c00 0x0 0x400>;
@@ -912,6 +950,7 @@
 				      "audio_clk_dac", "audio_clk_adc",
 				      "audio_clk_bus";
 			resets = <&ccu RST_BUS_AUDIO_CODEC>;
+			rx_sync_en  = <0x00>;
 			device_type = "codec";
 			status = "disabled";
 		};
@@ -964,8 +1003,8 @@
 			clk_parent	= <0x1>;
 			capture_cma	= <256>;
 			data_vol	= <0xB0>;
-			dmic_rxsync_en	= <0x0>;
 			rx_chmap	= <0x76543210>;
+			rx_sync_en      = <0x00>;
 			device_type = "dmic";
 			status = "disabled";
 		};
@@ -1010,7 +1049,6 @@
 			tx_data_mode		= <0x00>;
 			rx_data_mode		= <0x00>;
 			msb_lsb_first		= <0x00>;
-			daudio_rxsync_en	= <0x00>;
 			pcm_lrck_period		= <0x80>;
 			slot_width_select	= <0x20>;
 			frametype		= <0x00>;
@@ -1029,6 +1067,7 @@
 			rx_chmap1		= <0x0B0A0908>;
 			rx_chmap0		= <0x0F0E0D0C>;
 			asrc_function_en	= <0x00>;
+			rx_sync_en              = <0x00>;
 			device_type = "daudio0";
 			status = "disabled";
 		};
@@ -1065,7 +1104,6 @@
 			tx_data_mode		= <0x00>;
 			rx_data_mode		= <0x00>;
 			msb_lsb_first		= <0x00>;
-			daudio_rxsync_en	= <0x00>;
 			pcm_lrck_period		= <0x80>;
 			slot_width_select	= <0x20>;
 			frametype		= <0x00>;
@@ -1084,6 +1122,7 @@
 			rx_chmap1		= <0x0B0A0908>;
 			rx_chmap0		= <0x0F0E0D0C>;
 			asrc_function_en	= <0x00>;
+			rx_sync_en              = <0x00>;
 			device_type = "daudio1";
 			status = "disabled";
 		};
@@ -1117,7 +1156,6 @@
 			tx_data_mode		= <0x00>;
 			rx_data_mode		= <0x00>;
 			msb_lsb_first		= <0x00>;
-			daudio_rxsync_en	= <0x00>;
 			pcm_lrck_period		= <0x80>;
 			slot_width_select	= <0x20>;
 			frametype		= <0x00>;
@@ -1136,6 +1174,7 @@
 			rx_chmap1		= <0x0B0A0908>;
 			rx_chmap0		= <0x0F0E0D0C>;
 			asrc_function_en	= <0x00>;
+			rx_sync_en              = <0x00>;
 			device_type = "daudio2";
 			status = "disabled";
 		};
@@ -1163,14 +1202,16 @@
 			#sound-dai-cells = <0>;
 			compatible = "allwinner,sunxi-spdif";
 			reg = <0x0 0x02036000 0x0 0x58>;
-			clocks = <&ccu CLK_PLL_AUDIO0>,
+			clocks = <&ccu CLK_PLL_AUDIO0_4X>,
 				 <&ccu CLK_SPDIF_TX>,
 				 <&ccu CLK_BUS_SPDIF>,
 				 <&ccu CLK_PLL_AUDIO1>,
 				 <&ccu CLK_PLL_AUDIO1_DIV5>,
+				 <&ccu CLK_PLL_PERIPH0>,
 				 <&ccu CLK_SPDIF_RX>;
-			clock-names = "pll_audio", "spdif", "spdif_bus",
-				      "pll_audio1", "pll_audio1_div5", "spdif_rx";
+			clock-names = "pll_audio0", "spdif", "spdif_bus",
+				      "pll_audio1", "pll_audio1_div5",
+				      "pll_periph","spdif_rx";
 			resets = <&ccu RST_BUS_SPDIF>;
 			dmas		= <&dma 2>, <&dma 2>;
 			dma-names	= "tx", "rx";
@@ -1178,6 +1219,7 @@
 			clk_parent	= <0x1>;
 			playback_cma	= <128>;
 			capture_cma	= <128>;
+			rx_sync_en      = <0>;
 			device_type = "spdif";
 			status = "disabled";
 		};
@@ -1276,7 +1318,7 @@
 			<&ccu CLK_PLL_VIDEO0_4X>,
 			<&ccu CLK_PLL_VIDEO1_4X>;
 			assigned-clock-rates = <300000000>,
-			<0>,
+			<150000000>,
 			<0>,
 			<0>;
 
@@ -1310,7 +1352,7 @@
 					<&plic0 102 IRQ_TYPE_LEVEL_HIGH>,
 					<&plic0 140 IRQ_TYPE_LEVEL_HIGH>;
 			clocks = <&ccu CLK_BUS_MSGBOX2>;
-			rpmsg_id = "sunxi,dsp-msgbox";
+			rpmsg_id = "sunxi,dsp-msgbox","sunxi,dsp-power-msgbox";
 			resets = <&ccu RST_BUS_MSGBOX2>;
 			reset-names = "rst";
 			msgbox_amp_counts = <3>;
@@ -1318,6 +1360,9 @@
 			rpmsg_amp_remote-0 = <1>;
 			rpmsg_read_channel-0 = <2>;
 			rpmsg_write_channel-0 = <2>;
+			rpmsg_amp_remote-1 = <1>;
+			rpmsg_read_channel-1 = <0>;
+			rpmsg_write_channel-1 = <0>;
 		};
 
 		lcd0: lcd0@1c0c000 {
@@ -1655,6 +1700,13 @@
 			reg = <0x0 0x02000c17 0x0 0x4>;
 			reg_base = <0x02000c00>;
 		};
+
+		lcd_fb0: lcd_fb0@0 {
+			compatible = "allwinner,sunxi-lcd_fb0";
+			pinctrl-names = "active","sleep";
+			status = "disabled";
+		};
+
 		vind0: vind@5800800 {
 			compatible = "allwinner,sunxi-vin-media", "simple-bus";
 			#address-cells = <2>;

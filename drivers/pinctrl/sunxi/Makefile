@@ -13,6 +13,8 @@ obj-$(CONFIG_PINCTRL_SUN50IW10P1)	+= pinctrl-sun50iw10p1.o
 obj-$(CONFIG_PINCTRL_SUN50IW10P1_R)	+= pinctrl-sun50iw10p1-r.o
 obj-$(CONFIG_PINCTRL_SUN50IW12)		+= pinctrl-sun50iw12.o
 obj-$(CONFIG_PINCTRL_SUN50IW12_R)	+= pinctrl-sun50iw12-r.o
+obj-$(CONFIG_PINCTRL_SUN55IW3)		+= pinctrl-sun55iw3.o
+#obj-$(CONFIG_PINCTRL_SUN55IW3_R)	+= pinctrl-sun55iw3-r.o
 # Mainline SoC Drivers
 obj-$(CONFIG_PINCTRL_SUNIV_F1C100S)	+= pinctrl-suniv-f1c100s.o
 obj-$(CONFIG_PINCTRL_SUN4I_A10)		+= pinctrl-sun4i-a10.o

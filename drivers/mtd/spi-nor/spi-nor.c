@@ -2327,7 +2327,7 @@ static const struct flash_info spi_nor_ids[] = {
 	{ "mx25u4035",   INFO(0xc22533, 0, 64 * 1024,   8, SECT_4K) },
 	{ "mx25u8035",   INFO(0xc22534, 0, 64 * 1024,  16, SECT_4K) },
 	{ "mx25u6435f",  INFO(0xc22537, 0, 64 * 1024, 128, SECT_4K) },
-	{ "mx25l12805d", INFO(0xc22018, 0, 64 * 1024, 256, 0) },
+	{ "mx25l12805d", INFO(0xc22018, 0, 64 * 1024, 256, SECT_4K | SPI_NOR_DUAL_READ | SPI_NOR_QUAD_READ) },
 	{ "mx25l12855e", INFO(0xc22618, 0, 64 * 1024, 256, 0) },
 	{ "mx25u12835f", INFO(0xc22538, 0, 64 * 1024, 256,
 			 SECT_4K | SPI_NOR_DUAL_READ | SPI_NOR_QUAD_READ) },
@@ -2549,12 +2549,21 @@ static const struct flash_info spi_nor_ids[] = {
 	{ "XM25QH128A", INFO(0x207018, 0, 64 * 1024, 256, SECT_4K | SPI_NOR_DUAL_READ | SPI_NOR_QUAD_READ) },
 
 	/* PUYA */
+	{ "p25q128", INFO(0x856018, 0, 64 * 1024, 256, SECT_4K | SPI_NOR_DUAL_READ | SPI_NOR_QUAD_READ) },
 	{ "p25q64h", INFO(0x856017, 0x0, 64 * 1024, 128, SECT_4K | SPI_NOR_DUAL_READ | SPI_NOR_QUAD_READ) },
 	{ "p25q32h", INFO(0x856016, 0x0, 64 * 1024, 64, SECT_4K | SPI_NOR_DUAL_READ | SPI_NOR_QUAD_READ) },
 
 	/*Zetta*/
 	{ "zd25q64b", INFO(0xba3217, 0, 64 * 1024, 128, SECT_4K | SPI_NOR_DUAL_READ | SPI_NOR_QUAD_READ) },
 
+	/* BOYA*/
+	{ "BY25q128",   INFO(0x684018, 0, 64 * 1024, 256, SECT_4K | SPI_NOR_DUAL_READ | SPI_NOR_QUAD_READ) },
+
+	/* XTX */
+	{ "xt25p1288",  INFO(0x0b4018, 0, 64 * 1024, 256, SECT_4K | SPI_NOR_DUAL_READ | SPI_NOR_QUAD_READ) },
+
+	/* FM */
+	{ "fm25w128",  INFO(0xa12818, 0, 64 * 1024, 256, SECT_4K | SPI_NOR_DUAL_READ | SPI_NOR_QUAD_READ) },
 	{ },
 };
 
@@ -4455,6 +4464,7 @@ static void winbond_set_default_init(struct spi_nor *nor)
 static void gigadevice_set_default_init(struct spi_nor *nor)
 {
 	nor->params.quad_enable = gd_read_cr_quad_enable;
+	nor->params.set_4byte = macronix_set_4byte;
 }
 /**
  * spi_nor_manufacturer_init_params() - Initialize the flash's parameters and
@@ -4481,12 +4491,14 @@ static void spi_nor_manufacturer_init_params(struct spi_nor *nor)
 	case SNOR_MFR_ADESTO:
 	case SNOR_MFR_PUYA:
 	case SNOR_MFR_ZETTA:
+	case SNOR_MFR_BOYA:
 		gigadevice_set_default_init(nor);
 		break;
 
 	case SNOR_MFR_SPANSION:
 	case SNOR_MFR_WINBOND:
-	case SNOR_MFR_XT:
+	case SNOR_MFR_XTX:
+	case SNOR_MFR_FM:
 		winbond_set_default_init(nor);
 		break;
 

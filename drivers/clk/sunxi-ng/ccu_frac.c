@@ -51,7 +51,7 @@ void ccu_frac_helper_disable(struct ccu_common *common,
 
 bool ccu_frac_helper_has_rate(struct ccu_common *common,
 			      struct ccu_frac_internal *cf,
-			      unsigned long rate)
+			      u64 rate)
 {
 	if (!(common->features & CCU_FEATURE_FRACTIONAL))
 		return false;
@@ -69,7 +69,7 @@ unsigned long ccu_frac_helper_read_rate(struct ccu_common *common,
 	if (!(common->features & CCU_FEATURE_FRACTIONAL))
 		return 0;
 
-	pr_debug("%s: clock is fractional (rates %lu and %lu)\n",
+	pr_debug("%s: clock is fractional (rates %llu and %llu)\n",
 		 clk_hw_get_name(&common->hw), cf->rates[0], cf->rates[1]);
 
 	reg = readl(common->base + common->reg);
@@ -82,7 +82,7 @@ unsigned long ccu_frac_helper_read_rate(struct ccu_common *common,
 
 int ccu_frac_helper_set_rate(struct ccu_common *common,
 			     struct ccu_frac_internal *cf,
-			     unsigned long rate, u32 lock)
+			     u64 rate, u32 lock)
 {
 	unsigned long flags;
 	u32 reg, sel;

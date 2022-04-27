@@ -243,6 +243,13 @@ static const struct sunxi_desc_pin sun50iw12_pins[] = {
 		SUNXI_FUNCTION(0x3, "i2c0"),		/* SDA */
 		SUNXI_FUNCTION(0x4, "pwm1"),
 		SUNXI_FUNCTION_IRQ_BANK(0xe, 1, 13)),
+	SUNXI_PIN(SUNXI_PINCTRL_PIN(B, 21),
+		SUNXI_FUNCTION(0x0, "gpio_in"),
+		SUNXI_FUNCTION(0x1, "gpio_out"),
+		SUNXI_FUNCTION(0x2, "s_cir0"),		/* RX */
+		SUNXI_FUNCTION(0x3, "i2c0"),		/* SDA */
+		SUNXI_FUNCTION(0x4, "pwm1"),
+		SUNXI_FUNCTION_IRQ_BANK(0xe, 1, 13)),
 	/* Hole */
 	SUNXI_PIN(SUNXI_PINCTRL_PIN(C, 0),
 		SUNXI_FUNCTION(0x0, "gpio_in"),
@@ -935,6 +942,9 @@ static const struct sunxi_pinctrl_desc sun50iw12_pinctrl_data = {
 
 static int sun50iw12_pinctrl_probe(struct platform_device *pdev)
 {
+#if IS_ENABLED(CONFIG_PINCTRL_SUNXI_DEBUGFS)
+	dev_set_name(&pdev->dev, "pio");
+#endif
 	return sunxi_pinctrl_init(pdev, &sun50iw12_pinctrl_data);
 }
 

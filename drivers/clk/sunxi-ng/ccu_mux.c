@@ -193,6 +193,9 @@ int ccu_mux_helper_set_parent(struct ccu_common *common,
 	}
 	reg &= ~GENMASK(cm->width + cm->shift - 1, cm->shift);
 	writel(reg | (index << cm->shift), common->base + common->reg);
+	/* some clks need set mux reg repeatedly to fix ic bug */
+	if (common->features & CCU_FEATURE_REPEAT_SET_MUX)
+		writel(reg | (index << cm->shift), common->base + common->reg);
 
 	spin_unlock_irqrestore(common->lock, flags);
 

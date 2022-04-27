@@ -36,9 +36,13 @@ choice
 	  Select the architecture for SoC
 	  sunxi
 	  `-- sun50i ----- Cortex-A53 based Family SoCs
+	  `-- sun55i ----- Cortex-A55 based Family SoCs
 
-	config ARCH_SUN50I
+config ARCH_SUN50I
 	bool "Allwinner SUN50I"
+
+config ARCH_SUN55I
+	bool "Allwinner SUN55I"
 endchoice
 
 # Select the wafer with sun50i
@@ -90,7 +94,20 @@ config ARCH_SUN50IW12
 	bool "Allwinner SUN50IW12 SoCs"
 	help
 	  Support for Allwinner SUN50IW12 SoC family
+endchoice
+endif
 
+if ARCH_SUN55I
+choice
+       prompt "Select the wafer with arch sun55i"
+       default ARCH_SUN55IW3
+       help
+         Select the wafer with arch sun55i
+
+config ARCH_SUN55IW3
+       bool "Allwinner SUN55IW3 SoCs"
+       help
+         Support for Allwinner SUN55IW3 SoC family
 endchoice
 endif
 

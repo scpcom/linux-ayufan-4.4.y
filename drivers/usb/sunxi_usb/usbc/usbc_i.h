@@ -43,5 +43,15 @@ typedef struct __usbc_otg {
 	__u32 no;			/* index in manager table */
 } __usbc_otg_t;
 
+
+/* PHYS EFUSE offest */
+#define EFUSE_OFFSET					0x18		//esuse offset
+#define SUNXI_USB_PHY_EFUSE_ADJUST      0x10000     //bit16
+#define SUNXI_USB_PHY_EFUSE_MODE        0x20000     //bit17
+#define SUNXI_USB_PHY_EFUSE_RES         0x3C0000    //bit18-21
+#define SUNXI_USB_PHY_EFUSE_COM         0x1C00000   //bit22-24
+#define SUNXI_USB_PHY_EFUSE_USB0TX      0x1C00000   //bit22-24
+#define SUNXI_USB_PHY_EFUSE_USB1TX		0xE000000   //bit25-27
+
 #endif /* __USBC_I_H__ */
 
