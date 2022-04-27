@@ -126,6 +126,8 @@ config RISCV
 	select TRACE_IRQFLAGS_SUPPORT
 	select UACCESS_MEMCPY if !MMU
 	select ZONE_DMA32 if 64BIT
+	select CPU_PM if (SUSPEND || CPU_IDLE)
+	select ARCH_KEEP_MEMBLOCK if FLATMEM
 
 config ARCH_MMAP_RND_BITS_MIN
 	default 18 if 64BIT

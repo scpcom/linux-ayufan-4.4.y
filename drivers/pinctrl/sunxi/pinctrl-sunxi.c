@@ -26,12 +26,14 @@
 #include <linux/pinctrl/consumer.h>
 #include <linux/pinctrl/machine.h>
 #include <linux/pinctrl/pinctrl.h>
-#include <linux/pinctrl/pinconf-generic.h>
 #include <linux/pinctrl/pinmux.h>
 #include <linux/regulator/consumer.h>
 #include <linux/platform_device.h>
 #include <linux/slab.h>
 #include <soc/allwinner/sunxi_sip.h>
+#ifdef CONFIG_RISCV
+#include <asm/sbi.h>
+#endif
 
 #include <dt-bindings/pinctrl/sun4i-a10.h>
 
@@ -603,6 +605,20 @@ static int sunxi_pconf_reg(unsigned pin, enum pin_config_param param,
 		*mask = POWER_SOURCE_MASK;
 		break;
 
+#if IS_ENABLED(CONFIG_PINCTRL_SUNXI_DEBUGFS)
+	case SUNXI_PINCFG_TYPE_DAT:
+		*offset = sunxi_data_reg(pin, hw_type);
+		*shift = sunxi_data_offset(pin);
+		*mask = DATA_PINS_MASK;
+		break;
+
+	case SUNXI_PINCFG_TYPE_FUNC:
+		*offset = sunxi_mux_reg(pin, hw_type);
+		*shift = sunxi_mux_offset(pin);
+		*mask = MUX_PINS_MASK;
+		break;
+#endif
+
 	default:
 		return -ENOTSUPP;
 	}
@@ -654,6 +670,12 @@ static int sunxi_pconf_get(struct pinctrl_dev *pctldev, unsigned pin,
 		arg = val ? 3300 : 1800;
 		break;
 
+#if IS_ENABLED(CONFIG_PINCTRL_SUNXI_DEBUGFS)
+	case SUNXI_PINCFG_TYPE_DAT:
+	case SUNXI_PINCFG_TYPE_FUNC:
+		arg = val;
+		break;
+#endif
 	default:
 		/* sunxi_pconf_reg should catch anything unsupported */
 		WARN_ON(1);
@@ -743,6 +765,14 @@ static int sunxi_pconf_set(struct pinctrl_dev *pctldev, unsigned pin,
 
 			val = arg == 3300 ? 1 : 0;
 			break;
+#if IS_ENABLED(CONFIG_PINCTRL_SUNXI_DEBUGFS)
+		case SUNXI_PINCFG_TYPE_DAT:
+			val = arg;
+			break;
+		case SUNXI_PINCFG_TYPE_FUNC:
+			val = arg;
+			break;
+#endif
 		default:
 			/* sunxi_pconf_reg should catch anything unsupported */
 			WARN_ON(1);
@@ -1240,11 +1270,16 @@ static void sunxi_pinctrl_irq_ack_unmask(struct irq_data *d)
 
 static int sunxi_pinctrl_irq_set_wake(struct irq_data *d, unsigned int on)
 {
-#if IS_ENABLED(CONFIG_ARM) || IS_ENABLED(CONFIG_ARM64)
 	struct sunxi_pinctrl *pctl = irq_data_get_irq_chip_data(d);
 	u8 bank = d->hwirq / IRQ_PER_BANK;
 
+#if IS_ENABLED(CONFIG_ARM) || IS_ENABLED(CONFIG_ARM64)
 	return irq_set_irq_wake(pctl->irq[bank], on);
+#elif IS_ENABLED(CONFIG_RISCV)
+	struct irq_data *bank_irq_d = irq_get_irq_data(pctl->irq[bank]);
+
+	sbi_set_wakeup(bank_irq_d->hwirq, on);
+	return 0;
 #else
 	return 0;
 #endif

@@ -41,6 +41,7 @@
 #include  <linux/of.h>
 #include  <linux/of_address.h>
 #include  <linux/of_device.h>
+#include <linux/sunxi-sid.h>
 
 #include  "sunxi-hci.h"
 
@@ -320,6 +321,202 @@ int usb_phyx_tp_read(struct sunxi_hci_hcd *sunxi_hci, int addr, int len)
 }
 EXPORT_SYMBOL(usb_phyx_tp_read);
 
+#if defined(CONFIG_ARCH_SUN8IW20) || defined(CONFIG_ARCH_SUN20IW1)
+/*for new phy*/
+static int usb_new_phyx_tp_write(struct sunxi_hci_hcd *sunxi_hci,
+		int addr, int data, int len)
+{
+	int temp = 0;
+	int j = 0;
+	int dtmp = 0;
+	void __iomem *base;
+
+	if (sunxi_hci->otg_vbase == NULL) {
+		DMSG_PANIC("%s,otg_vbase is null\n", __func__);
+		return -1;
+	}
+
+	if (usb_phy_csr_add(sunxi_hci) == NULL) {
+		DMSG_PANIC("%s,phy_csr_add is null\n", __func__);
+		return -1;
+	}
+
+	if (usb_phy_csr_write(sunxi_hci) == NULL) {
+
+		DMSG_PANIC("%s,phy_csr_write is null\n", __func__);
+		return -1;
+	}
+	/*device: 0x410(phy_ctl)*/
+	base = sunxi_hci->usb_vbase;
+	dtmp = data;
+	for (j = 0; j < len; j++) {
+		temp = USBC_Readb(base + SUNXI_HCI_PHY_CTRL);
+		temp |= (0x1 << 1);
+		USBC_Writeb(temp, base + SUNXI_HCI_PHY_CTRL);
+
+		USBC_Writeb(addr + j, base + SUNXI_HCI_PHY_CTRL + 1);
+
+		temp = USBC_Readb(base + SUNXI_HCI_PHY_CTRL);
+		temp &= ~(0x1 << 0);
+		USBC_Writeb(temp, base + SUNXI_HCI_PHY_CTRL);
+
+		temp = USBC_Readb(base + SUNXI_HCI_PHY_CTRL);
+		temp &= ~(0x1 << 7);
+		temp |= (dtmp & 0x1) << 7;
+		USBC_Writeb(temp, base + SUNXI_HCI_PHY_CTRL);
+
+		temp |= (0x1 << 0);
+		USBC_Writeb(temp, base + SUNXI_HCI_PHY_CTRL);
+
+		temp &= ~(0x1 << 0);
+		USBC_Writeb(temp, base + SUNXI_HCI_PHY_CTRL);
+
+		temp = USBC_Readb(base + SUNXI_HCI_PHY_CTRL);
+		temp &= ~(0x1 << 1);
+		USBC_Writeb(temp, base + SUNXI_HCI_PHY_CTRL);
+
+		dtmp >>= 1;
+	}
+
+	return 0;
+}
+
+static int usb_new_phyx_tp_read(struct sunxi_hci_hcd *sunxi_hci, int addr, int len)
+{
+	int temp = 0;
+	int i = 0;
+	int j = 0;
+	int ret = 0;
+	void __iomem *base;
+
+	if (sunxi_hci->otg_vbase == NULL) {
+		DMSG_PANIC("%s,otg_vbase is null\n", __func__);
+		return -1;
+	}
+
+	if (usb_phy_csr_add(sunxi_hci) == NULL) {
+		DMSG_PANIC("%s,phy_csr_add is null\n", __func__);
+		return -1;
+	}
+
+	if (usb_phy_csr_read(sunxi_hci) == NULL) {
+		DMSG_PANIC("%s,phy_csr_read is null\n", __func__);
+		return -1;
+	}
+
+	base = sunxi_hci->usb_vbase;
+
+	temp = USBC_Readb(base + SUNXI_HCI_PHY_CTRL);
+	temp |= (0x1 << 1);
+	USBC_Writeb(temp, base + SUNXI_HCI_PHY_CTRL);
+
+	for (j = len; j > 0; j--) {
+		USBC_Writeb((addr + j - 1), base + SUNXI_HCI_PHY_CTRL + 1);
+
+		for (i = 0; i < 0x4; i++)
+			;
+
+		temp = USBC_Readb(base + SUNXI_HCI_UTMI_PHY_STATUS);
+		ret <<= 1;
+		ret |= (temp & 0x1);
+	}
+
+	temp = USBC_Readb(base + SUNXI_HCI_PHY_CTRL);
+	temp &= ~(0x1 << 1);
+	USBC_Writeb(temp, base + SUNXI_HCI_PHY_CTRL);
+
+	return ret;
+}
+
+static void usb_new_phy_init(struct sunxi_hci_hcd *sunxi_hci)
+{
+	int value = 0;
+	u32 efuse_val  = 0;
+
+	pr_debug("addr:%x,len:%x,value:%x\n", 0x03, 0x06,
+			usb_new_phyx_tp_read(sunxi_hci, 0x03, 0x06));
+
+	//pll_prediv
+	pr_debug("addr:%x,len:%x,value:%x\n", 0x16, 0x03,
+			usb_new_phyx_tp_read(sunxi_hci, 0x16, 0x03));
+
+	//usbc_new_phyx_tp_write(regs, 0x1c, 0x07, 0x03);
+	//pll_n
+	pr_debug("addr:%x,len:%x,value:%x\n", 0x0b, 0x08,
+			usb_new_phyx_tp_read(sunxi_hci, 0x0b, 0x08));
+
+	//usbc_new_phyx_tp_write(regs, 0x30, 0x0f, 0x0d);
+	//pll_sts
+	pr_debug("addr:%x,len:%x,value:%x\n", 0x09, 0x03,
+			usb_new_phyx_tp_read(sunxi_hci, 0x09, 0x03));
+
+	sunxi_get_module_param_from_sid(&efuse_val, EFUSE_OFFSET, 4);
+	pr_debug("efuse_val:0x%x\n", efuse_val);
+
+	usb_new_phyx_tp_write(sunxi_hci, 0x1c, 0x0, 0x03);
+	pr_debug("addr:%x,len:%x,value:%x\n", 0x1c, 0x03,
+			usb_new_phyx_tp_read(sunxi_hci, 0x1c, 0x03));
+
+	if (efuse_val & SUNXI_HCI_PHY_EFUSE_ADJUST) {
+		if (efuse_val & SUNXI_HCI_PHY_EFUSE_MODE) {
+			/* iref mode */
+			usb_new_phyx_tp_write(sunxi_hci, 0x60, 0x1, 0x01);
+
+			switch (sunxi_hci->usbc_no) {
+			case 0:
+				value = (efuse_val & SUNXI_HCI_PHY_EFUSE_USB0TX) >> 22;
+				usb_new_phyx_tp_write(sunxi_hci, 0x61, value, 0x03);
+				break;
+
+			case 1:
+				value = (efuse_val & SUNXI_HCI_PHY_EFUSE_USB0TX) >> 25;
+				usb_new_phyx_tp_write(sunxi_hci, 0x61, value, 0x03);
+				break;
+
+			default:
+				pr_err("usb %d not exist!\n", sunxi_hci->usbc_no);
+				break;
+			}
+
+			value = (efuse_val & SUNXI_HCI_PHY_EFUSE_RES) >> 18;
+			usb_new_phyx_tp_write(sunxi_hci, 0x44, value, 0x04);
+
+			pr_debug("addr:%x,len:%x,value:%x\n", 0x61, 0x03,
+				usb_new_phyx_tp_read(sunxi_hci, 0x61, 0x03));
+			pr_debug("addr:%x,len:%x,value:%x\n", 0x44, 0x04,
+				usb_new_phyx_tp_read(sunxi_hci, 0x44, 0x04));
+		} else {
+			/* vref mode */
+			usb_new_phyx_tp_write(sunxi_hci, 0x60, 0x0, 0x01);
+
+			value = (efuse_val & SUNXI_HCI_PHY_EFUSE_RES) >> 18;
+			usb_new_phyx_tp_write(sunxi_hci, 0x44, value, 0x04);
+
+			value = (efuse_val & SUNXI_HCI_PHY_EFUSE_COM) >> 22;
+			usb_new_phyx_tp_write(sunxi_hci, 0x36, value, 0x03);
+
+
+			pr_debug("addr:%x,len:%x,value:%x\n", 0x60, 0x01,
+				usb_new_phyx_tp_read(sunxi_hci, 0x60, 0x01));
+			pr_debug("addr:%x,len:%x,value:%x\n", 0x44, 0x04,
+				usb_new_phyx_tp_read(sunxi_hci, 0x44, 0x04));
+			pr_debug("addr:%x,len:%x,value:%x\n", 0x36, 0x03,
+				usb_new_phyx_tp_read(sunxi_hci, 0x36, 0x03));
+		}
+	}
+
+	pr_debug("addr:%x,len:%x,value:%x\n", 0x03, 0x06,
+			usb_new_phyx_tp_read(sunxi_hci, 0x03, 0x06));
+	pr_debug("addr:%x,len:%x,value:%x\n", 0x16, 0x03,
+			usb_new_phyx_tp_read(sunxi_hci, 0x16, 0x03));
+	pr_debug("addr:%x,len:%x,value:%x\n", 0x0b, 0x08,
+			usb_new_phyx_tp_read(sunxi_hci, 0x0b, 0x08));
+	pr_debug("addr:%x,len:%x,value:%x\n", 0x09, 0x03,
+			usb_new_phyx_tp_read(sunxi_hci, 0x09, 0x03));
+}
+
+#endif
+
 #if defined(CONFIG_ARCH_SUN8IW7) || defined(CONFIG_ARCH_SUN8IW12) \
 	|| defined(CONFIG_ARCH_SUN8IW15) || defined(CONFIG_ARCH_SUN50IW3) \
 	|| defined(CONFIG_ARCH_SUN50IW6) || defined(CONFIG_ARCH_SUN50IW9) \
@@ -499,6 +696,12 @@ static int open_clock(struct sunxi_hci_hcd *sunxi_hci, u32 ohci)
 	 * Notice: not need any more on new platforms.
 	 */
 
+	if (sunxi_hci->hci_regulator) {
+		ret = regulator_enable(sunxi_hci->hci_regulator);
+		if (ret)
+			DMSG_PANIC("ERR:%s hci regulator enable failed\n",
+					sunxi_hci->hci_name);
+	}
 	/* otg and hci0 Controller Shared phy in SUN50I */
 	if (sunxi_hci->usbc_no == HCI0_USBC_NO)
 		USBC_SelectPhyToHci(sunxi_hci);
@@ -623,6 +826,11 @@ static int open_clock(struct sunxi_hci_hcd *sunxi_hci, u32 ohci)
 	&& !defined(CONFIG_ARCH_SUN50IW12)
 	usb_phyx_tp_write(sunxi_hci, 0x2a, 3, 2);
 #endif
+
+#if defined(CONFIG_ARCH_SUN8IW20) || defined(CONFIG_ARCH_SUN20IW1)
+	usb_new_phy_init(sunxi_hci);
+#endif
+
 	mutex_unlock(&usb_clock_lock);
 
 	return 0;
@@ -940,6 +1148,15 @@ static void __sunxi_set_vbus(struct sunxi_hci_hcd *sunxi_hci, int is_on)
 			ret = regulator_disable(sunxi_hci->supply);
 			if (ret)
 				DMSG_PANIC("ERR: %s regulator force disable failed\n",
+					sunxi_hci->hci_name);
+		}
+	}
+
+	if (sunxi_hci->hci_regulator) {
+		if (!is_on) {
+			ret = regulator_disable(sunxi_hci->hci_regulator);
+			if (ret)
+				DMSG_PANIC("ERR: %s hci regulator force disable failed\n",
 					sunxi_hci->hci_name);
 		}
 	}

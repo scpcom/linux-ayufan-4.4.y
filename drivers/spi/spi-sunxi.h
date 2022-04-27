@@ -44,6 +44,7 @@
 #define SPI_FIFO_STA_REG	(0x1C)	/* fifo status register */
 #define SPI_WAIT_CNT_REG	(0x20)	/* wait clock counter register */
 #define SPI_CLK_CTL_REG		(0x24)	/* clock rate control register */
+#define SPI_SAMPLE_DELAY_REG	(0x28)	/* sample delay control register */
 #define SPI_BURST_CNT_REG	(0x30)	/* burst counter register */
 #define SPI_TRANSMIT_CNT_REG	(0x34)	/* transmit counter register */
 #define SPI_BCC_REG		(0x38)	/* burst control counter register */
@@ -78,6 +79,7 @@
 #define SPI_TC_RPSM		(0x1 << 10) /* select mode for high speed write,0:normal write mode,1:rapids write mode,default 0 */
 #define SPI_TC_SDM		(0x1 << 13) /* master sample data mode, 1: normal sample mode;0:delay sample mode. */
 #define SPI_TC_SDC		(0x1 << 11) /* master sample data control, 1: delay--high speed operation;0:no delay. */
+#define SPI_TC_SDC1		(0x1 << 15) /* master sample data control, 1: delay--high speed operation;0:no delay. */
 #define SPI_TC_FBS		(0x1 << 12) /* LSB/MSB transfer first select 0:MSB,1:LSB,default 0:MSB first */
 #define SPI_TC_XCH		(0x1 << 31) /* Exchange burst default 0:idle,1:start exchange;when BC is zero,this bit cleared by SPI controller*/
 #define SPI_TC_SS_BIT_POS	(4)
@@ -138,6 +140,21 @@
 /* SPI Wait Clock Register Bit Fields & Masks,default value:0x0000_0000 */
 #define SPI_WAIT_WCC_MASK	(0xFFFF <<  0) /* used only in master mode: Wait Between Transactions */
 #define SPI_WAIT_SWC_MASK	(0xF    << 16) /* used only in master mode: Wait before start dual data transfer in dual SPI mode */
+
+/* SPI Sample Delay Control Register  Bit Fields & Masks,default value:0x0000_2000 */
+#define SPI_SAMP_MODE_EN	(1 << 2) /* Sample Timong Mode Select */
+#define SPI_SAMP_DL_SW_EN	(1 << 7) /* Sample Delay Software Enable */
+#define DELAY_NORMAL_SAMPLE	(0x100)
+#define DELAY_0_5_CYCLE_SAMPLE	(0x000)
+#define DELAY_1_CYCLE_SAMPLE	(0x010)
+#define DELAY_1_5_CYCLE_SAMPLE	(0x110)
+#define DELAY_2_CYCLE_SAMPLE	(0x101)
+#define DELAY_2_5_CYCLE_SAMPLE	(0x001)
+#define DELAY_3_CYCLE_SAMPLE	(0x011)
+#define DELAY_SDM_POS		(8)
+#define DELAY_SDC_POS		(4)
+#define DELAY_SDC1_POS		(0)
+#define SAMP_MODE_DL_DEFAULT	(0xaaaaffff)
 
 /* SPI Clock Control Register Bit Fields & Masks,default:0x0000_0002 */
 #define SPI_CLK_CTL_CDR2	(0xFF <<  0) /* Clock Divide Rate 2,master mode only : SPI_CLK = AHB_CLK/(2*(n+1)) */
@@ -295,7 +312,8 @@ struct spi_dbi_config {
 	char			dbi_read_bytes;
 };
 
-extern void __spi_get_dbi_config(struct spi_device *spi, struct spi_dbi_config *dbi_config);
+extern int spi_get_dbi_config(const struct spi_device *spi, struct spi_dbi_config *dbi_config);
+extern int spi_set_dbi_config(struct spi_device *spi, const struct spi_dbi_config *dbi_config);
 
 #define DBI_RGB111		(0x0)
 #define DBI_RGB444		(0x1)
@@ -317,13 +335,13 @@ extern void __spi_get_dbi_config(struct spi_device *spi, struct spi_dbi_config *
 #define SPI_DBI_CLK_AUTO_GATING	 (0x0) /*default*/
 #define SPI_DBI_CLK_ALWAYS_ON	(0x1)
 
-#define DBI_READ(dbi_config)			(dbi_config.dbi_mode |= (SPI_DBI_READ))
-#define DBI_WRITE(dbi_config)			(dbi_config.dbi_mode &= ~(SPI_DBI_READ))
-#define DBI_LSB_FIRST(dbi_config)		(dbi_config.dbi_mode |= SPI_DBI_LSB_FIRST)
-#define DBI_MSB_FIRST(dbi_config)		(dbi_config.dbi_mode &= ~SPI_DBI_LSB_FIRST)
-#define	DBI_TR_VIDEO(dbi_config)		(dbi_config.dbi_mode |= SPI_DBI_TRANSMIT_VIDEO)
-#define	DBI_TR_COMMAND(dbi_config)		(dbi_config.dbi_mode &= ~(SPI_DBI_TRANSMIT_VIDEO))
-#define DBI_DCX_DATA(dbi_config)		(dbi_config.dbi_mode |= SPI_DBI_DCX_DATA)
-#define DBI_DCX_COMMAND(dbi_config)		(dbi_config.dbi_mode &= ~(SPI_DBI_DCX_DATA))
+#define DBI_READ(dbi_mode)			(dbi_mode |= (SPI_DBI_READ))
+#define DBI_WRITE(dbi_mode)			(dbi_mode &= ~(SPI_DBI_READ))
+#define DBI_LSB_FIRST(dbi_mode)		(dbi_mode |= SPI_DBI_LSB_FIRST)
+#define DBI_MSB_FIRST(dbi_mode)		(dbi_mode &= ~SPI_DBI_LSB_FIRST)
+#define	DBI_TR_VIDEO(dbi_mode)		(dbi_mode |= SPI_DBI_TRANSMIT_VIDEO)
+#define	DBI_TR_COMMAND(dbi_mode)	(dbi_mode &= ~(SPI_DBI_TRANSMIT_VIDEO))
+#define DBI_DCX_DATA(dbi_mode)		(dbi_mode |= SPI_DBI_DCX_DATA)
+#define DBI_DCX_COMMAND(dbi_mode)	(dbi_mode &= ~(SPI_DBI_DCX_DATA))
 
 #endif

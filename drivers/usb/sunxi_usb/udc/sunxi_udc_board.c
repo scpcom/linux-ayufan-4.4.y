@@ -118,6 +118,10 @@ u32  open_usb_clock(sunxi_udc_io_t *sunxi_udc_io)
 	USBC_SelectPhyToDevice(sunxi_udc_io->usb_vbase);
 #endif
 
+#if defined(CONFIG_ARCH_SUN8IW20) || defined(CONFIG_ARCH_SUN20IW1)
+	usbc_new_phy_init(sunxi_udc_io->usb_vbase);
+#endif
+
 	return 0;
 }
 

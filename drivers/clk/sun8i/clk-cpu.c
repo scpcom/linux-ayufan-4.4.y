@@ -17,7 +17,7 @@
 #include <linux/module.h>
 #include "clk-cpu.h"
 #ifdef CONFIG_COMMON_CLK_DEBUG
-#include "clk-debugfs.h"
+#include "../clk-debugfs.h"
 #endif
 
 static int sunxi_cpuclk_pre_rate_change(struct clk_notifier_data *ndata,

@@ -23,7 +23,7 @@ bool ccu_sdm_helper_is_enabled(struct ccu_common *common,
 
 void ccu_sdm_helper_enable(struct ccu_common *common,
 			   struct ccu_sdm_internal *sdm,
-			   unsigned long rate)
+			   u64 rate)
 {
 	unsigned long flags;
 	unsigned int i;
@@ -89,7 +89,7 @@ void ccu_sdm_helper_disable(struct ccu_common *common,
  */
 bool ccu_sdm_helper_has_rate(struct ccu_common *common,
 			     struct ccu_sdm_internal *sdm,
-			     unsigned long rate)
+			     u64 rate)
 {
 	unsigned int i;
 
@@ -135,7 +135,7 @@ unsigned long ccu_sdm_helper_read_rate(struct ccu_common *common,
 
 int ccu_sdm_helper_get_factors(struct ccu_common *common,
 			       struct ccu_sdm_internal *sdm,
-			       unsigned long rate,
+			       u64 rate,
 			       unsigned long *m, unsigned long *n)
 {
 	unsigned int i;

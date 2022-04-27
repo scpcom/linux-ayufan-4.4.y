@@ -11,7 +11,7 @@
 #include "ccu_common.h"
 
 struct ccu_sdm_setting {
-	unsigned long	rate;
+	u64		rate;
 
 	/*
 	 * XXX We don't know what the step and bottom register fields
@@ -52,13 +52,13 @@ bool ccu_sdm_helper_is_enabled(struct ccu_common *common,
 			       struct ccu_sdm_internal *sdm);
 void ccu_sdm_helper_enable(struct ccu_common *common,
 			   struct ccu_sdm_internal *sdm,
-			   unsigned long rate);
+			   u64 rate);
 void ccu_sdm_helper_disable(struct ccu_common *common,
 			    struct ccu_sdm_internal *sdm);
 
 bool ccu_sdm_helper_has_rate(struct ccu_common *common,
 			     struct ccu_sdm_internal *sdm,
-			     unsigned long rate);
+			     u64 rate);
 
 unsigned long ccu_sdm_helper_read_rate(struct ccu_common *common,
 				       struct ccu_sdm_internal *sdm,
@@ -66,7 +66,7 @@ unsigned long ccu_sdm_helper_read_rate(struct ccu_common *common,
 
 int ccu_sdm_helper_get_factors(struct ccu_common *common,
 			       struct ccu_sdm_internal *sdm,
-			       unsigned long rate,
+			       u64 rate,
 			       unsigned long *m, unsigned long *n);
 
 #endif
