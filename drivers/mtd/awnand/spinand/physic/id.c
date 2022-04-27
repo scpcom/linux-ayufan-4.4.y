@@ -94,6 +94,38 @@ struct aw_spinand_phy_info gigadevice[] = {
 		.EccProtectedType = SIZE16_OFF4_LEN4_OFF8,
 		.BadBlockFlag	= BAD_BLK_FLAG_FIRST_2_PAGE,
 	},
+	{
+		.Model		= "GD5F1GQ5UEYIG",
+		.NandID		= {0xc8, 0x51, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff},
+		.DieCntPerChip  = 1,
+		.SectCntPerPage = 4,
+		.PageCntPerBlk  = 64,
+		.BlkCntPerDie	= 1024,
+		.OobSizePerPage = 64,
+		.OperationOpt	= SPINAND_QUAD_READ | SPINAND_QUAD_PROGRAM |
+			SPINAND_DUAL_READ,
+		.MaxEraseTimes  = 50000,
+		.EccFlag	= HAS_EXT_ECC_SE01,
+		.EccType	= BIT4_LIMIT5_TO_7_ERR8_LIMIT_12,
+		.EccProtectedType = SIZE16_OFF4_LEN12,
+		.BadBlockFlag	= BAD_BLK_FLAG_FRIST_1_PAGE,
+	},
+	{
+		.Model		= "GD5F2GQ5UEYIGR",
+		.NandID		= {0xc8, 0x52, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff},
+		.DieCntPerChip  = 1,
+		.SectCntPerPage = 4,
+		.PageCntPerBlk  = 64,
+		.BlkCntPerDie	= 2048,
+		.OobSizePerPage = 64,
+		.OperationOpt	= SPINAND_QUAD_READ | SPINAND_QUAD_PROGRAM |
+			SPINAND_DUAL_READ,
+		.MaxEraseTimes  = 50000,
+		.EccFlag	= HAS_EXT_ECC_SE01,
+		.EccType	= BIT4_LIMIT5_TO_7_ERR8_LIMIT_12,
+		.EccProtectedType = SIZE16_OFF4_LEN12,
+		.BadBlockFlag	= BAD_BLK_FLAG_FRIST_1_PAGE,
+	},
 };
 
 struct aw_spinand_phy_info micron[] = {
@@ -121,7 +153,8 @@ struct aw_spinand_phy_info micron[] = {
 		.BlkCntPerDie	= 2048,
 		.OobSizePerPage = 64,
 		.OperationOpt	= SPINAND_QUAD_READ | SPINAND_QUAD_PROGRAM |
-			SPINAND_DUAL_READ | SPINAND_QUAD_NO_NEED_ENABLE,
+			SPINAND_DUAL_READ | SPINAND_QUAD_NO_NEED_ENABLE |
+			SPINAND_TWO_PLANE_SELECT,
 		.MaxEraseTimes  = 65000,
 		.EccType	= BIT3_LIMIT5_ERR2,
 		.EccProtectedType = SIZE16_OFF32_LEN16,
@@ -162,6 +195,23 @@ struct aw_spinand_phy_info xtx[] = {
 		.ecc_status_shift = ECC_STATUS_SHIFT_2,
 		.EccType	= BIT4_LIMIT5_TO_7_ERR8_LIMIT_12,
 		.EccProtectedType = SIZE16_OFF8_LEN16,
+		.BadBlockFlag	= BAD_BLK_FLAG_FRIST_1_PAGE,
+	},
+	{
+		/* XT26G01C */
+		.Model		= "XT26G01C",
+		.NandID		= {0x0B, 0x11, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff},
+		.DieCntPerChip  = 1,
+		.SectCntPerPage = 4,
+		.PageCntPerBlk  = 64,
+		.BlkCntPerDie	= 1024,
+		.OobSizePerPage = 64,
+		.OperationOpt	= SPINAND_QUAD_READ | SPINAND_QUAD_PROGRAM |
+			SPINAND_DUAL_READ,
+		.MaxEraseTimes  = 50000,
+		.ecc_status_shift = ECC_STATUS_SHIFT_4,
+		.EccType	= BIT4_LIMIT5_TO_8_ERR9_TO_15,
+		.EccProtectedType = SIZE16_OFF0_LEN16,
 		.BadBlockFlag	= BAD_BLK_FLAG_FRIST_1_PAGE,
 	},
 };

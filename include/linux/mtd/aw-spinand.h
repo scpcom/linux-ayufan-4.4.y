@@ -143,6 +143,8 @@ typedef struct {
 	__u32       nand_specialinfo_page;
 	__u32       nand_specialinfo_offset;
 	__u32       physic_block_reserved;
+	__u32	    sample_mode;
+	__u32	    sample_delay;
 	__u32       Reserved[4];
 } boot_spinand_para_t;
 
