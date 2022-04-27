@@ -63,6 +63,16 @@ config PINCTRL_SUN50IW12_R
 	select PINCTRL_SUNXI
 	default ARCH_SUN50IW12
 
+config PINCTRL_SUN55IW3
+	tristate "Pinctrl sun55iw3 PIO controller"
+	select PINCTRL_SUNXI
+	default ARCH_SUN55IW3
+
+config PINCTRL_SUN55IW3_R
+	tristate "Pinctrl sun55iw3 R_PIO controller"
+	select PINCTRL_SUNXI
+	default ARCH_SUN55IW3
+
 config PINCTRL_SUNIV_F1C100S
 	def_bool MACH_SUNIV
 	select PINCTRL_SUNXI

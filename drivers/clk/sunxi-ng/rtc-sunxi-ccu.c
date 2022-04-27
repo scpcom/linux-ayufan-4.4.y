@@ -409,14 +409,50 @@ static struct clk_info sun50iw10_clk_info_table[] = {
 	},
 };
 
+static struct clk_info sun50iw12_clk_info_table[] = {
+	/* Keep it in the same order with the DT-BINDINGS in include/dt-bindings/clock/sun50iw12-rtc.h */
+	{
+		.clk_name = "dcxo24M-out",
+		.parent_names = { "dcxo24M", NULL },
+		.reg_fn = register_dcxo24M_out_as_gate,
+		.unreg_fn = unregister_dcxo24M_out_as_gate,
+	},
+#if OSC32KOUT_PARENT_FIX_TO_OSC32KSYS
+	{
+		.clk_name = "osc32k-out",
+		.parent_names = { "osc32k", NULL },
+		.reg_fn = register_osc32k_out_as_gate,
+		.unreg_fn = unregister_osc32k_out_as_gate,
+	},
+#else
+	/* @TODO */
+#endif
+	{
+		.clk_name = "rtc-1k",
+		.parent_names = { "osc32k", NULL },
+		.reg_fn = register_rtc_1k_as_fixed_factor,
+		.unreg_fn = unregister_rtc_1k_as_fixed_factor,
+	},
+	{
+		/* sentinel */
+	},
+};
+
 static struct sunxi_rtc_ccu_hw_data sun50iw10_hw_data = {
 	.support_cali = true,
 	.support_rtc_src_sel = false,
 	.clk_info_table = sun50iw10_clk_info_table,
 };
 
+static struct sunxi_rtc_ccu_hw_data sun50iw12_hw_data = {
+	.support_cali = true,
+	.support_rtc_src_sel = false,
+	.clk_info_table = sun50iw12_clk_info_table,
+};
+
 static const struct of_device_id sunxi_rtc_ccu_dt_ids[] = {
 	{ .compatible = "allwinner,sun50iw10p1-rtc-ccu", .data = &sun50iw10_hw_data },
+	{ .compatible = "allwinner,sun50iw12p1-rtc-ccu", .data = &sun50iw12_hw_data },
 	{ /* sentinel */ },
 };
 MODULE_DEVICE_TABLE(of, sunxi_rtc_ccu_dt_ids);

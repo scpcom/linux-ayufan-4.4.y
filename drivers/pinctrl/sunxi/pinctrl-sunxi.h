@@ -15,6 +15,7 @@
 
 #include <linux/kernel.h>
 #include <linux/spinlock.h>
+#include <linux/pinctrl/pinconf-generic.h>
 
 #define SUNXI_BANK_OFFSET(bank, bankbase)	((bank) - (bankbase))
 #define SUNXI_PIN_BASE(bank)			(SUNXI_BANK_OFFSET(bank, 'A') * 32)
@@ -101,6 +102,10 @@
 
 #define POWER_SOURCE_MASK	0x01
 
+#if IS_ENABLED(CONFIG_PINCTRL_SUNXI_DEBUGFS)
+#define SUNXI_PINCFG_TYPE_FUNC 	(PIN_CONFIG_END - 2)
+#define SUNXI_PINCFG_TYPE_DAT 	(PIN_CONFIG_END - 1)
+#endif
 enum sunxi_desc_bias_voltage {
 	BIAS_VOLTAGE_NONE,
 	/*

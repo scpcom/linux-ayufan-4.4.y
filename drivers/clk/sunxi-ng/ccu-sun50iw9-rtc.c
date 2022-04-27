@@ -37,10 +37,10 @@
  * clk-fixed-rate.c
  */
 
-static CLK_FIXED_FACTOR_FW_NAME(rtc_1k_clk, "rtc-1k", "osc32k", 32, 1, 0);
+static CLK_FIXED_FACTOR_FW_NAME(rtc_1k_clk, "rtc-1k", "losc", 32, 1, 0);
 
 /* pll-periph0-2x-32k, real source is pll-periph0-2x */
-static CLK_FIXED_FACTOR_FW_NAME(pll_periph0_2x_32k_clk, "pll-periph0-2x-32k", "osc32k", 1, 1, 0);
+static CLK_FIXED_FACTOR_FW_NAME(pll_periph0_2x_32k_clk, "pll-periph0-2x-32k", "losc", 1, 1, 0);
 
 static CLK_FIXED_FACTOR_FW_NAME(dcxo_32k_clk, "dcxo-32k", "dcxo24M", 750, 1, 0);
 

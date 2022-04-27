@@ -266,6 +266,11 @@ static int sunxi_insmod_ohci(struct platform_device *pdev)
 		sunxi_ohci->supply = NULL;
 	}
 
+	sunxi_ohci->hci_regulator = regulator_get(dev, "hci");
+	if (IS_ERR(sunxi_ohci->hci_regulator)) {
+		DMSG_PANIC("%s()%d WARN: get hci regulator failed\n", __func__, __LINE__);
+		sunxi_ohci->hci_regulator = NULL;
+	}
 	/* ochi start to work */
 	sunxi_start_ohci(sunxi_ohci);
 

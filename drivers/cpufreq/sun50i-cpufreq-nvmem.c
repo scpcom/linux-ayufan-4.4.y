@@ -26,6 +26,7 @@ struct cpufreq_nvmem_data {
 	u32 nv_speed;
 	u32 nv_Icpu;
 	u32 nv_bin;
+	u32 nv_bin_ext;
 	u32 version;
 	char name[MAX_NAME_LEN];
 };
@@ -36,13 +37,16 @@ struct cpufreq_soc_data {
 	void (*nvmem_xlate)(u32 *versions, char *name);
 	bool has_nvmem_Icpu;
 	bool has_nvmem_bin;
+	bool has_nvmem_extend_bin;
 };
 
 static int sun50i_nvmem_get_data(char *cell_name, u32 *data)
 {
 	struct nvmem_cell *cell_nvmem;
 	size_t len;
-	u32 *cell_value;
+	u8 *cell_value;
+	u32 tmp_data = 0;
+	u32 i;
 	struct device_node *np;
 	struct device *cpu_dev;
 	int ret = 0;
@@ -76,7 +80,15 @@ static int sun50i_nvmem_get_data(char *cell_name, u32 *data)
 	if (IS_ERR(cell_value))
 		return PTR_ERR(cell_value);
 
-	*data = *cell_value;
+	if (len > 4) {
+		pr_err("Invalid nvmem cell length\n");
+		ret = -EINVAL;
+	} else {
+		for (i = 0; i < len; i++)
+			tmp_data |= ((u32)cell_value[i] << (i * 8));
+		*data = tmp_data;
+	}
+
 	kfree(cell_value);
 
 	return 0;
@@ -129,31 +141,73 @@ static struct cpufreq_soc_data sun50iw9_soc_data = {
 static void sun50iw10_bin_xlate(bool high_speed, char *name, u32 bin)
 {
 	int value = 0;
+	bool version_before_f;
+	unsigned int ver_bits = sunxi_get_soc_ver() & 0x7;
+	u32 bin_ext = ver_data.nv_bin_ext;
 
 	bin >>= 12;
+	bin_ext >>= 31;
+
+	if (ver_bits == 0 || ver_bits == 3 || ver_bits == 4)
+		version_before_f = true;
+	else
+		version_before_f = false;
 
 	if (high_speed) {
 		switch (bin) {
 		case 0b100:
-			value = 1;
+			if (version_before_f) {
+				/* ic version A-E */
+				value = 1;
+			} else {
+				/* ic version F and later version */
+				value = 3;
+			}
 			break;
 		default:
-			value = 0;
+			if (version_before_f) {
+				/* ic version A-E */
+				value = 0;
+			} else {
+				/* ic version F and later version */
+				value = 2;
+			}
 		}
 
 		snprintf(name, MAX_NAME_LEN, "b%d", value);
 	} else {
-		switch (bin) {
-		case 0b100:
-			value = 2;
-			break;
-		case 0b010:
-			value = 1;
-			break;
-		default:
-			value = 0;
+		if (bin_ext && (!version_before_f)) {
+			value = 6;
+		} else {
+			switch (bin) {
+			case 0b100:
+				if (version_before_f) {
+					/* ic version A-E */
+					value = 2;
+				} else {
+					/* ic version F and later version */
+					value = 5;
+				}
+				break;
+			case 0b010:
+				if (version_before_f) {
+					/* ic version A-E */
+					value = 1;
+				} else {
+					/* ic version F and later version */
+					value = 4;
+				}
+				break;
+			default:
+				if (version_before_f) {
+					/* ic version A-E */
+					value = 0;
+				} else {
+					/* ic version F and later version */
+					value = 3;
+				}
+			}
 		}
-
 		snprintf(name, MAX_NAME_LEN, "a%d", value);
 	}
 }
@@ -163,6 +217,10 @@ static void sun50iw10_nvmem_xlate(u32 *versions, char *name)
 	unsigned int ver_bits = sunxi_get_soc_ver() & 0x7;
 
 	switch (ver_data.nv_speed) {
+	case 0x0200:
+	case 0x0600:
+	case 0x0620:
+	case 0x0640:
 	case 0x0800:
 	case 0x1000:
 	case 0x1400:
@@ -187,42 +245,96 @@ static void sun50iw10_nvmem_xlate(u32 *versions, char *name)
 static struct cpufreq_soc_data sun50iw10_soc_data = {
 	.nvmem_xlate = sun50iw10_nvmem_xlate,
 	.has_nvmem_bin = true,
+	.has_nvmem_extend_bin = true,
 };
+
+static void sun8iw20_bin_xlate(bool bin_select, char *name, u32 nv_bin)
+{
+	int value = 0;
+	u32 bin = (nv_bin >> 12) & 0xf;
+
+	if (bin_select) {
+		if (bin <= 1)
+			value = 1;
+		else
+			value = 0;
+		/*BGA use axx in VF table*/
+		snprintf(name, MAX_NAME_LEN, "a%d", value);
+	} else {
+		value = 0;
+		/*QFN use bxx in VF table*/
+		snprintf(name, MAX_NAME_LEN, "b%d", value);
+	}
+}
 
 static void sun8iw20_nvmem_xlate(u32 *versions, char *name)
 {
-	int vf = 0;
-
-	switch ((ver_data.nv_speed >> 8) & 0x0f) {
+	switch (ver_data.nv_speed) {
+	case 0x6000:
+		sun8iw20_bin_xlate(false, name, ver_data.nv_bin);
+		*versions = 0b0010;
+		break;
+	case 0x6400:
+	case 0x7000:
+	case 0x7c00:
 	default:
-		/* vf1 table */
-		vf = 0;
+		sun8iw20_bin_xlate(true, name, ver_data.nv_bin);
+		*versions = 0b0001;
 		break;
 	}
-
-	snprintf(name, MAX_NAME_LEN, "a%d", vf);
+	pr_debug("sun8iw20 match vf:%s, mark:0x%x\n", name, ver_data.nv_speed);
 }
 
 static struct cpufreq_soc_data sun8iw20_soc_data = {
 	.nvmem_xlate = sun8iw20_nvmem_xlate,
+	.has_nvmem_bin = true,
 };
+
+static void sun20iw1_bin_xlate(bool bin_select, bool high_speed, char *name, u32 nv_bin)
+{
+	int value = 0;
+	u32 bin = (nv_bin >> 12) & 0xf;
+
+	if (bin_select) {
+		if (bin <= 1)
+			value = 1;
+		else
+			value = 0;
+		/*BGA use axx in VF table*/
+		snprintf(name, MAX_NAME_LEN, "a%d", value);
+	} else {
+		if (high_speed)
+			value = 1;
+		else
+			value = 0;
+		/*QFN use bxx in VF table*/
+		snprintf(name, MAX_NAME_LEN, "b%d", value);
+	}
+}
 
 static void sun20iw1_nvmem_xlate(u32 *versions, char *name)
 {
-	int vf = 0;
-
-	switch ((ver_data.nv_speed >> 8) & 0x0f) {
-	default:
-		/* vf1 table */
-		vf = 0;
+	switch (ver_data.nv_speed) {
+	case 0x5e00:
+		sun20iw1_bin_xlate(false, false, name, ver_data.nv_bin);
+		*versions = 0b0010;
 		break;
+	case 0x5c00:
+	case 0x7400:
+		sun20iw1_bin_xlate(false, true, name, ver_data.nv_bin);
+		*versions = 0b0001;
+		break;
+	case 0x5000:
+	default:
+		sun20iw1_bin_xlate(true, true, name, ver_data.nv_bin);
+		*versions = 0b0001;
 	}
-
-	snprintf(name, MAX_NAME_LEN, "a%d", vf);
+	pr_debug("sun20iw1 match vf:%s, mark:0x%x\n", name, ver_data.nv_speed);
 }
 
 static struct cpufreq_soc_data sun20iw1_soc_data = {
 	.nvmem_xlate = sun20iw1_nvmem_xlate,
+	.has_nvmem_bin = true,
 };
 
 /**
@@ -248,6 +360,12 @@ static int sun50i_cpufreq_get_efuse(const struct cpufreq_soc_data *soc_data,
 
 	if (soc_data->has_nvmem_bin) {
 		ret = sun50i_nvmem_get_data("bin", &ver_data.nv_bin);
+		if (ret)
+			return ret;
+	}
+
+	if (soc_data->has_nvmem_extend_bin) {
+		ret = sun50i_nvmem_get_data("bin_ext", &ver_data.nv_bin_ext);
 		if (ret)
 			return ret;
 	}

@@ -271,6 +271,15 @@ extern int usb_disabled(void);
 #define SUNXI_TX_RES_TUNE		(0x3 << SUNXI_TX_RES_TUNE_OFFSET)
 #define SUNXI_TX_PREEMPAMP_TUNE		(0x3 << SUNXI_TX_PREEMPAMP_TUNE_OFFSET)
 
+/* PHYS EFUSE offest */
+#define EFUSE_OFFSET					0x18		//esuse offset
+#define SUNXI_HCI_PHY_EFUSE_ADJUST		0x10000		//bit16
+#define SUNXI_HCI_PHY_EFUSE_MODE		0x20000		//bit17
+#define SUNXI_HCI_PHY_EFUSE_RES			0x3C0000	//bit18-21
+#define SUNXI_HCI_PHY_EFUSE_COM			0x1C00000	//bit22-24
+#define SUNXI_HCI_PHY_EFUSE_USB0TX		0x1C00000	//bit22-24
+#define SUNXI_HCI_PHY_EFUSE_USB1TX		0xE000000	//bit25-27
+
 #if defined(CONFIG_FPGA_V4_PLATFORM) || defined(CONFIG_FPGA_V7_PLATFORM)
 #define SUNXI_USB_FPGA
 #endif
@@ -392,6 +401,7 @@ struct sunxi_hci_hcd {
 	u32 usb_restrict_valid;
 	__u8 power_flag;                        /* flag. power on or not */
 	struct regulator *supply;
+	struct regulator *hci_regulator;        /* hci regulator: VCC_USB */
 
 	int used;                              /* flag. in use or not */
 	__u8 probe;                             /* hc initialize */

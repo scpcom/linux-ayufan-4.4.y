@@ -16,19 +16,19 @@ struct _ccu_nkm {
 	unsigned long	m, min_m, max_m;
 };
 
-static void ccu_nkm_find_best(unsigned long parent, unsigned long rate,
+static void ccu_nkm_find_best(unsigned long parent, u64 rate,
 			      struct _ccu_nkm *nkm)
 {
-	unsigned long best_rate = 0;
+	u64 best_rate = 0;
 	unsigned long best_n = 0, best_k = 0, best_m = 0;
 	unsigned long _n, _k, _m;
 
 	for (_k = nkm->min_k; _k <= nkm->max_k; _k++) {
 		for (_n = nkm->min_n; _n <= nkm->max_n; _n++) {
 			for (_m = nkm->min_m; _m <= nkm->max_m; _m++) {
-				unsigned long tmp_rate;
-
-				tmp_rate = parent * _n * _k / _m;
+				u64 tmp_rate;
+				tmp_rate = parent * _n * _k;
+				do_div(tmp_rate, _m);
 
 				if (tmp_rate > rate)
 					continue;
@@ -106,11 +106,12 @@ static unsigned long ccu_nkm_recalc_rate(struct clk_hw *hw,
 static unsigned long ccu_nkm_round_rate(struct ccu_mux_internal *mux,
 					struct clk_hw *hw,
 					unsigned long *parent_rate,
-					unsigned long rate,
+					unsigned long _rate,
 					void *data)
 {
 	struct ccu_nkm *nkm = data;
 	struct _ccu_nkm _nkm;
+	u64 rate = _rate;
 
 	_nkm.min_n = nkm->n.min ?: 1;
 	_nkm.max_n = nkm->n.max ?: 1 << nkm->n.width;
@@ -124,10 +125,11 @@ static unsigned long ccu_nkm_round_rate(struct ccu_mux_internal *mux,
 
 	ccu_nkm_find_best(*parent_rate, rate, &_nkm);
 
-	rate = *parent_rate * _nkm.n * _nkm.k / _nkm.m;
+	rate = *parent_rate * _nkm.n * _nkm.k;
+	do_div(rate, _nkm.m);
 
 	if (nkm->common.features & CCU_FEATURE_FIXED_POSTDIV)
-		rate /= nkm->fixed_post_div;
+		do_div(rate, nkm->fixed_post_div);
 
 	return rate;
 }
@@ -141,12 +143,13 @@ static int ccu_nkm_determine_rate(struct clk_hw *hw,
 					     req, ccu_nkm_round_rate, nkm);
 }
 
-static int ccu_nkm_set_rate(struct clk_hw *hw, unsigned long rate,
+static int ccu_nkm_set_rate(struct clk_hw *hw, unsigned long _rate,
 			   unsigned long parent_rate)
 {
 	struct ccu_nkm *nkm = hw_to_ccu_nkm(hw);
 	struct _ccu_nkm _nkm;
 	unsigned long flags;
+	u64 rate = _rate;
 	u32 reg;
 
 	if (nkm->common.features & CCU_FEATURE_FIXED_POSTDIV)

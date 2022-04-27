@@ -15,16 +15,16 @@ struct _ccu_nk {
 	unsigned long	k, min_k, max_k;
 };
 
-static void ccu_nk_find_best(unsigned long parent, unsigned long rate,
+static void ccu_nk_find_best(unsigned long parent, u64 rate,
 			     struct _ccu_nk *nk)
 {
-	unsigned long best_rate = 0;
+	u64 best_rate = 0;
 	unsigned int best_k = 0, best_n = 0;
 	unsigned int _k, _n;
 
 	for (_k = nk->min_k; _k <= nk->max_k; _k++) {
 		for (_n = nk->min_n; _n <= nk->max_n; _n++) {
-			unsigned long tmp_rate = parent * _n * _k;
+			u64 tmp_rate = parent * _n * _k;
 
 			if (tmp_rate > rate)
 				continue;
@@ -66,7 +66,8 @@ static unsigned long ccu_nk_recalc_rate(struct clk_hw *hw,
 					unsigned long parent_rate)
 {
 	struct ccu_nk *nk = hw_to_ccu_nk(hw);
-	unsigned long rate, n, k;
+	unsigned long n, k;
+	u64 rate;
 	u32 reg;
 
 	reg = readl(nk->common.base + nk->common.reg);
@@ -85,16 +86,17 @@ static unsigned long ccu_nk_recalc_rate(struct clk_hw *hw,
 
 	rate = parent_rate * n * k;
 	if (nk->common.features & CCU_FEATURE_FIXED_POSTDIV)
-		rate /= nk->fixed_post_div;
+		do_div(rate, nk->fixed_post_div);
 
 	return rate;
 }
 
-static long ccu_nk_round_rate(struct clk_hw *hw, unsigned long rate,
+static long ccu_nk_round_rate(struct clk_hw *hw, unsigned long _rate,
 			      unsigned long *parent_rate)
 {
 	struct ccu_nk *nk = hw_to_ccu_nk(hw);
 	struct _ccu_nk _nk;
+	u64 rate = _rate;
 
 	if (nk->common.features & CCU_FEATURE_FIXED_POSTDIV)
 		rate *= nk->fixed_post_div;
@@ -108,17 +110,18 @@ static long ccu_nk_round_rate(struct clk_hw *hw, unsigned long rate,
 	rate = *parent_rate * _nk.n * _nk.k;
 
 	if (nk->common.features & CCU_FEATURE_FIXED_POSTDIV)
-		rate = rate / nk->fixed_post_div;
+		do_div(rate, nk->fixed_post_div);
 
 	return rate;
 }
 
-static int ccu_nk_set_rate(struct clk_hw *hw, unsigned long rate,
+static int ccu_nk_set_rate(struct clk_hw *hw, unsigned long _rate,
 			   unsigned long parent_rate)
 {
 	struct ccu_nk *nk = hw_to_ccu_nk(hw);
 	unsigned long flags;
 	struct _ccu_nk _nk;
+	u64 rate = _rate;
 	u32 reg;
 
 	if (nk->common.features & CCU_FEATURE_FIXED_POSTDIV)

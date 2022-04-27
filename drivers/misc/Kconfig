@@ -487,6 +487,12 @@ config HISI_HIKEY_USB
 	help
 	  If you say yes here you get support for usb functionality of HiSilicon Hikey Platform.
 
+config SUNXI_CPU_COMM
+	tristate "sunxi cpu comm api for tv subsystem"
+	depends on RPMSG_SUNXI_AMP
+	help
+	  If you say yes here you get support for tv subsystem cpu comm protocol.
+
 source "drivers/misc/c2port/Kconfig"
 source "drivers/misc/eeprom/Kconfig"
 source "drivers/misc/cb710/Kconfig"
@@ -506,5 +512,6 @@ source "drivers/misc/sunxi-rf/Kconfig"
 source "drivers/misc/sunxi-addr/Kconfig"
 source "drivers/misc/sunxi-bootevent/Kconfig"
 source "drivers/misc/sunxi-gorilla/Kconfig"
+source "drivers/misc/sunxi-tvutils/Kconfig"
 
 endmenu

@@ -27,6 +27,9 @@
 /* Support fixed rate in gate-clk */
 #define CCU_FEATURE_FIXED_RATE_GATE	BIT(10)
 
+/* Some clks need config the mux reg repeatedly to fix ic bug */
+#define CCU_FEATURE_REPEAT_SET_MUX	BIT(11)
+
 /* MMC timing mode switch bit */
 #define CCU_MMC_NEW_TIMING_MODE		BIT(30)
 
