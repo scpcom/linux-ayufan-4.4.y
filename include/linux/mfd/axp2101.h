@@ -283,6 +283,10 @@ extern int axp_debug_mask;
 #define AXP20X_OCV(m)			(0xc0 + (m))
 #define AXP20X_OCV_MAX			0xf
 
+/* Hot shutdoen */
+
+#define AXP20X_OVER_TMP_VAL		0xf3
+
 /* AXP22X specific registers */
 #define AXP22X_BATLOW_THRES1		0xe6
 
@@ -725,6 +729,7 @@ extern int axp_debug_mask;
 #define AXP803_WARNING_LEVEL       (0xE6)
 #define AXP803_ADJUST_PARA         (0xE8)
 #define AXP803_ADJUST_PARA1        (0xE9)
+#define AXP803_HOTOVER_VAL         (0xF3)
 #define AXP803_REG_ADDR_EXT        (0xFF)
 
 /*

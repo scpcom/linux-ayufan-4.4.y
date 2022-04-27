@@ -2245,19 +2245,64 @@ static void axp20x_power_off(void)
  */
 static void axp2101_dts_parse(struct axp20x_dev *axp20x)
 {
+	struct device_node *node = axp20x->dev->of_node;
+	struct regmap *map = axp20x->regmap;
+	u32 val, tempval;
+
 	if (of_property_read_bool(axp20x->dev->of_node, "pmu_powerok_noreset")) {
 		regmap_update_bits(axp20x->regmap, AXP2101_COMM_CFG, BIT(3), 0);
 	} else {
 		regmap_update_bits(axp20x->regmap, AXP2101_COMM_CFG, BIT(3),
 				   BIT(3));
 	}
+
+	/* init 16's reset pmu en */
+	if (of_property_read_u32(node, "pmu_reset", &val))
+		val = 0;
+	if (val) {
+		regmap_update_bits(map, AXP2101_COMM_CFG, BIT(2), BIT(2));
+	} else {
+		regmap_update_bits(map, AXP2101_COMM_CFG, BIT(2), 0);
+	}
+
+	/* enable pwrok pin pull low to restart the system */
+	regmap_update_bits(map, AXP2101_COMM_CFG, BIT(3), BIT(3));
+
+	/* init pmu over temperature protection */
+	if (of_property_read_u32(node, "pmu_hot_shutdown", &val))
+		val = 0;
+	if (val) {
+		regmap_update_bits(map, AXP2101_PWROFF_EN, BIT(2), BIT(2));
+		if (of_property_read_u32(node, "pmu_hot_shutdown_value", &tempval))
+			tempval = 125;
+		regmap_read(map, AXP2101_DIE_TEMP_CFG, &val);
+		val &= 0xF9;
+		if (tempval > 135)
+			val |= 0x06;
+		else if (tempval > 125)
+			val |= 0x04;
+		else if (tempval > 115)
+			val |= 0x02;
+		else
+			val |= 0x00;
+		regmap_write(map, AXP2101_DIE_TEMP_CFG, val);
+	} else {
+		regmap_update_bits(map, AXP2101_PWROFF_EN, BIT(2), 0);
+	}
+
+	/* 85% low voltage turn off pmic function */
+	/* axp_regmap_write(axp2101->regmap, axp2101_DCDC_PWROFF_EN, 0x3f); */
+	/* set 2.6v for battery poweroff */
+	regmap_write(map, AXP2101_VOFF_THLD, 0x00);
+	/* set delay of powerok after all power output good to 8ms */
+	regmap_update_bits(map, AXP2101_PWR_TIME_CTRL, 0x03, 0x00);
 }
 
 static void axp803_dts_parse(struct axp20x_dev *axp20x)
 {
 	struct device_node *node = axp20x->dev->of_node;
 	struct regmap *map = axp20x->regmap;
-	u32 val;
+	u32 val, tempval;
 
 	/* init 16's reset pmu en */
 	if (of_property_read_u32(node, "pmu_reset", &val))
@@ -2282,6 +2327,29 @@ static void axp803_dts_parse(struct axp20x_dev *axp20x)
 		val = 1;
 	if (val) {
 		regmap_update_bits(map, AXP803_HOTOVER_CTL, BIT(2), BIT(2));
+		/* default warning level 1 is 105 */
+		/* level 2/3 add 6.4/12.8 */
+		if (of_property_read_u32(node, "pmu_hot_shutdown_value", &tempval))
+			tempval = 105;
+		regmap_read(map, AXP803_HOTOVER_VAL, &val);
+		val &= 0xF8;
+		if (tempval > 135)
+			val |= 0x07;
+		else if (tempval > 125)
+			val |= 0x06;
+		else if (tempval > 115)
+			val |= 0x05;
+		else if (tempval > 105)
+			val |= 0x04;
+		else if (tempval > 95)
+			val |= 0x03;
+		else if (tempval > 85)
+			val |= 0x02;
+		else if (tempval > 75)
+			val |= 0x01;
+		else
+			val |= 0x00;
+		regmap_write(map, AXP803_HOTOVER_VAL, val);
 	} else {
 		regmap_update_bits(map, AXP803_HOTOVER_CTL, BIT(2), 0);
 	}
@@ -2295,6 +2363,267 @@ static void axp803_dts_parse(struct axp20x_dev *axp20x)
 	} else {
 		regmap_update_bits(map, AXP803_HOTOVER_CTL,
 				BIT(5) | BIT(6), 0);
+	}
+}
+
+static void axp2202_dts_parse(struct axp20x_dev *axp20x)
+{
+	struct device_node *node = axp20x->dev->of_node;
+	struct regmap *map = axp20x->regmap;
+	u32 val, tempval;
+
+	/* init powerok reset function */
+	if (of_property_read_u32(node, "pmu_powerok_noreset", &val))
+		val = 0;
+	if (val) {
+		regmap_update_bits(map, AXP2202_SOFT_PWROFF, BIT(3), 0);
+	} else {
+		regmap_update_bits(map, AXP2202_SOFT_PWROFF, BIT(3), BIT(3));
+	}
+
+	/* init 16's por function */
+	if (of_property_read_u32(node, "pmu_reset", &val))
+		val = 0;
+	if (val) {
+		regmap_update_bits(map, AXP2202_SOFT_PWROFF, BIT(2), BIT(2));
+	} else {
+		regmap_update_bits(map, AXP2202_SOFT_PWROFF, BIT(2), 0);
+	}
+
+	/* init irq wakeup en */
+	if (of_property_read_u32(node, "pmu_irq_wakeup", &val))
+		val = 0;
+	if (val) {
+		regmap_update_bits(map, AXP2202_SLEEP_CFG, BIT(5), BIT(5));
+	} else {
+		regmap_update_bits(map, AXP2202_SLEEP_CFG, BIT(5), 0);
+	}
+
+	/* init pmu over temperature protection */
+	if (of_property_read_u32(node, "pmu_hot_shutdown", &val))
+		val = 1;
+	if (val) {
+		regmap_update_bits(map, AXP2202_PWROFF_EN, BIT(2), BIT(2));
+	} else {
+		regmap_update_bits(map, AXP2202_PWROFF_EN, BIT(2), 0);
+	}
+
+	/* init pmu over temperature protection */
+	if (of_property_read_u32(node, "pmu_hot_shutdown", &val))
+		val = 0;
+	if (val) {
+		regmap_update_bits(map, AXP2202_PWROFF_EN, BIT(2), BIT(2));
+		if (of_property_read_u32(node,
+					"pmu_hot_shutdown_value", &tempval))
+			tempval = 125;
+		regmap_read(map, AXP2202_DIE_TEMP_CFG, &val);
+		val &= 0xF9;
+		if (tempval > 135)
+			val |= 0x06;
+		else if (tempval > 125)
+			val |= 0x04;
+		else if (tempval > 115)
+			val |= 0x02;
+		else
+			val |= 0x00;
+		regmap_write(map, AXP2202_DIE_TEMP_CFG, val);
+	} else {
+		regmap_update_bits(map, AXP2202_PWROFF_EN, BIT(1), 0);
+	}
+}
+
+/* AXP221/AXP223 AXP809*/
+static void axp20x_dts_parse(struct axp20x_dev *axp20x)
+{
+	struct device_node *node = axp20x->dev->of_node;
+	struct regmap *map = axp20x->regmap;
+	u32 val, tempval;
+
+	/* init pmu over temperature protection */
+	if (of_property_read_u32(node, "pmu_hot_shutdown", &val))
+		val = 0;
+	if (val) {
+		regmap_update_bits(map, AXP20X_OVER_TMP, BIT(2), BIT(2));
+		/* set overtmp to 105 */
+		if (of_property_read_u32(node, "pmu_hot_shutdown_value", &tempval))
+			tempval = 105;
+		regmap_read(map, AXP20X_OVER_TMP_VAL, &val);
+		val &= 0xF8;
+		if (tempval > 135)
+			val |= 0x07;
+		else if (tempval > 125)
+			val |= 0x06;
+		else if (tempval > 115)
+			val |= 0x05;
+		else if (tempval > 105)
+			val |= 0x04;
+		else if (tempval > 95)
+			val |= 0x03;
+		else if (tempval > 85)
+			val |= 0x02;
+		else if (tempval > 75)
+			val |= 0x01;
+		else
+			val |= 0x00;
+		regmap_write(map, AXP20X_OVER_TMP_VAL, val);
+	} else {
+		regmap_update_bits(map, AXP20X_OVER_TMP, BIT(2), 0);
+	}
+}
+
+/* AXP202/AXP209 */
+static void axp209_dts_parse(struct axp20x_dev *axp20x)
+{
+	struct device_node *node = axp20x->dev->of_node;
+	struct regmap *map = axp20x->regmap;
+	u32 val, tempval;
+
+	/* init pmu over temperature protection */
+	if (of_property_read_u32(node, "pmu_hot_shutdown", &val))
+		val = 0;
+	if (val) {
+		regmap_update_bits(map, AXP20X_OVER_TMP, BIT(2), BIT(2));
+		if (of_property_read_u32(node, "pmu_hot_shutdown_value", &tempval))
+			tempval = 104;
+		regmap_read(map, AXP20X_OVER_TMP_VAL, &val);
+		val &= 0xF8;
+		if (tempval > 124)
+			val |= 0x07;
+		else if (tempval > 117)
+			val |= 0x06;
+		else if (tempval > 111)
+			val |= 0x05;
+		else if (tempval > 104)
+			val |= 0x04;
+		else if (tempval > 98)
+			val |= 0x03;
+		else if (tempval > 92)
+			val |= 0x02;
+		else if (tempval > 85)
+			val |= 0x01;
+		else
+			val |= 0x00;
+		val |= tempval;
+		regmap_write(map, AXP20X_OVER_TMP_VAL, val);
+	} else {
+		regmap_update_bits(map, AXP20X_OVER_TMP, BIT(2), 0);
+	}
+}
+
+static void axp152_dts_parse(struct axp20x_dev *axp20x)
+{
+	struct device_node *node = axp20x->dev->of_node;
+	struct regmap *map = axp20x->regmap;
+	u32 val, tempval;
+
+	/* init pmu over temperature protection */
+	if (of_property_read_u32(node, "pmu_hot_shutdown", &val))
+		val = 0;
+	if (val) {
+		regmap_update_bits(map, AXP20X_OVER_TMP, BIT(2), BIT(2));
+		/* default tempval value: BIT(1) */
+		if (of_property_read_u32(node,
+					"pmu_hot_shutdown_value", &tempval))
+			tempval = 125;
+		regmap_read(map, AXP20X_OVER_TMP, &val);
+		val &= 0xFC;
+		if (tempval > 135)
+			val |= 0x03;
+		else if (tempval > 125)
+			val |= 0x02;
+		else if (tempval > 115)
+			val |= 0x01;
+		else
+			val |= 0x00;
+		regmap_write(map, AXP20X_OVER_TMP, val);
+	} else {
+		regmap_update_bits(map, AXP20X_OVER_TMP, BIT(2), 0);
+	}
+}
+
+static void axp806_dts_parse(struct axp20x_dev *axp20x)
+{
+	struct device_node *node = axp20x->dev->of_node;
+	struct regmap *map = axp20x->regmap;
+	u32 val, tempval;
+
+	/* init pmu over temperature protection */
+	if (of_property_read_u32(node, "pmu_hot_shutdown", &val))
+		val = 0;
+	if (val) {
+		regmap_update_bits(map, AXP806_OFF_CTL, BIT(1), BIT(1));
+		if (of_property_read_u32(node,
+					"pmu_hot_shutdown_value", &tempval))
+			tempval = 125;
+		regmap_read(map, AXP806_VREF_TEMP_WARN_L, &val);
+		val &= 0xFC;
+		if (tempval > 135)
+			val |= 0x03;
+		else if (tempval > 125)
+			val |= 0x02;
+		else if (tempval > 115)
+			val |= 0x01;
+		else
+			val |= 0x00;
+		regmap_write(map, AXP806_VREF_TEMP_WARN_L, val);
+	} else {
+		regmap_update_bits(map, AXP806_OFF_CTL, BIT(1), 0);
+	}
+}
+
+static void axp1530_dts_parse(struct axp20x_dev *axp20x)
+{
+	struct device_node *node = axp20x->dev->of_node;
+	struct regmap *map = axp20x->regmap;
+	u32 val, tempval;
+
+	/* init pmu over temperature protection */
+	if (of_property_read_u32(node, "pmu_hot_shutdown", &val))
+		val = 0;
+	if (val) {
+		regmap_update_bits(map, AXP1530_POWER_STATUS, BIT(1), BIT(1));
+		if (of_property_read_u32(node,
+					"pmu_hot_shutdown_value", &tempval))
+			tempval = 125;
+		regmap_read(map, AXP1530_POWER_STATUS, &val);
+		val &= 0xFE;
+		if (tempval > 125)
+			val |= 0x01;
+		else
+			val |= 0x00;
+		regmap_write(map, AXP1530_POWER_STATUS, val);
+	} else {
+		regmap_update_bits(map, AXP1530_POWER_STATUS, BIT(1), 0);
+	}
+}
+
+static void axp858_dts_parse(struct axp20x_dev *axp20x)
+{
+	struct device_node *node = axp20x->dev->of_node;
+	struct regmap *map = axp20x->regmap;
+	u32 val, tempval;
+
+	/* init pmu over temperature protection */
+	if (of_property_read_u32(node, "pmu_hot_shutdown", &val))
+		val = 0;
+	if (val) {
+		regmap_update_bits(map, AXP858_POWER_DOWN_DIS, BIT(1), BIT(1));
+		if (of_property_read_u32(node,
+					"pmu_hot_shutdown_value", &tempval))
+			tempval = 125;
+		regmap_read(map, AXP858_VREF_TEM_SET, &val);
+		val &= 0xFC;
+		if (tempval > 135)
+			val |= 0x03;
+		else if (tempval > 125)
+			val |= 0x02;
+		else if (tempval > 115)
+			val |= 0x01;
+		else
+			val |= 0x00;
+		regmap_write(map, AXP858_VREF_TEM_SET, val);
+	} else {
+		regmap_update_bits(map, AXP858_POWER_DOWN_DIS, BIT(1), 0);
 	}
 }
 
@@ -2326,6 +2655,7 @@ int axp20x_match_device(struct axp20x_dev *axp20x)
 		axp20x->cells = axp152_cells;
 		axp20x->regmap_cfg = &axp152_regmap_config;
 		axp20x->regmap_irq_chip = &axp152_regmap_irq_chip;
+		axp20x->dts_parse = axp152_dts_parse;
 		break;
 	case AXP202_ID:
 	case AXP209_ID:
@@ -2333,6 +2663,7 @@ int axp20x_match_device(struct axp20x_dev *axp20x)
 		axp20x->cells = axp20x_cells;
 		axp20x->regmap_cfg = &axp20x_regmap_config;
 		axp20x->regmap_irq_chip = &axp20x_regmap_irq_chip;
+		axp20x->dts_parse = axp209_dts_parse;
 		break;
 	case AXP221_ID:
 	case AXP223_ID:
@@ -2340,6 +2671,7 @@ int axp20x_match_device(struct axp20x_dev *axp20x)
 		axp20x->cells = axp22x_cells;
 		axp20x->regmap_cfg = &axp22x_regmap_config;
 		axp20x->regmap_irq_chip = &axp22x_regmap_irq_chip;
+		axp20x->dts_parse = axp20x_dts_parse;
 		break;
 	case AXP288_ID:
 		axp20x->cells = axp288_cells;
@@ -2352,12 +2684,14 @@ int axp20x_match_device(struct axp20x_dev *axp20x)
 		axp20x->cells = axp806_cells;
 		axp20x->regmap_cfg = &axp806_regmap_config;
 		axp20x->regmap_irq_chip = &axp806_regmap_irq_chip;
+		axp20x->dts_parse = axp806_dts_parse;
 		break;
 	case AXP809_ID:
 		axp20x->nr_cells = ARRAY_SIZE(axp809_cells);
 		axp20x->cells = axp809_cells;
 		axp20x->regmap_cfg = &axp22x_regmap_config;
 		axp20x->regmap_irq_chip = &axp809_regmap_irq_chip;
+		axp20x->dts_parse = axp20x_dts_parse;
 		break;
 	case AXP2101_ID:
 		axp20x->nr_cells = ARRAY_SIZE(axp2101_cells);
@@ -2379,6 +2713,7 @@ int axp20x_match_device(struct axp20x_dev *axp20x)
 		axp20x->cells = axp1530_cells;
 		axp20x->regmap_cfg = &axp1530_regmap_config;
 		axp20x->regmap_irq_chip = &axp1530_regmap_irq_chip;
+		axp20x->dts_parse = axp1530_dts_parse;
 		break;
 /**************************************/
 	case AXP858_ID:
@@ -2386,6 +2721,7 @@ int axp20x_match_device(struct axp20x_dev *axp20x)
 		axp20x->cells = axp858_cells;
 		axp20x->regmap_cfg = &axp858_regmap_config;
 		axp20x->regmap_irq_chip = &axp858_regmap_irq_chip;
+		axp20x->dts_parse = axp858_dts_parse;
 		break;
 	case AXP803_ID:
 		axp20x->nr_cells = ARRAY_SIZE(axp803_cells);
@@ -2399,6 +2735,7 @@ int axp20x_match_device(struct axp20x_dev *axp20x)
 		axp20x->cells = axp2202_cells;
 		axp20x->regmap_cfg = &axp2202_regmap_config;
 		axp20x->regmap_irq_chip = &axp2202_regmap_irq_chip;
+		axp20x->dts_parse = axp2202_dts_parse;
 		break;
 /*-------------------*/
 	default:

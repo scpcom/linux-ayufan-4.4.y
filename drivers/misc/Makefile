@@ -62,3 +62,5 @@ obj-$(CONFIG_HI6421V600_IRQ)	+= hi6421v600-irq.o
 obj-$(CONFIG_SUNXI_ADDR_MGT)    += sunxi-addr/
 obj-$(CONFIG_SUNXI_RFKILL)      += sunxi-rf/
 obj-y                           += sunxi-gorilla/
+obj-$(CONFIG_ARCH_SUNXI)        += sunxi-tvutils/
+obj-$(CONFIG_SUNXI_CPU_COMM)	+= sunxi_cpu_comm.o
