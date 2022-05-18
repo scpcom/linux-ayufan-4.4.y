@@ -280,6 +280,8 @@ struct dw_mipi_dsi {
 
 	const struct dw_mipi_dsi_plat_data *pdata;
 	struct rockchip_drm_sub_dev sub_dev;
+
+	bool dsi_bound;
 };
 
 static inline struct dw_mipi_dsi *host_to_dsi(struct mipi_dsi_host *host)
@@ -1573,6 +1575,8 @@ static void dw_mipi_dsi_unbind(struct device *dev, struct device *master,
 
 	if (dsi->panel)
 		drm_panel_detach(dsi->panel);
+
+	dsi->dsi_bound = false;
 
 	dsi->connector.funcs->destroy(&dsi->connector);
 	dsi->encoder.funcs->destroy(&dsi->encoder);
