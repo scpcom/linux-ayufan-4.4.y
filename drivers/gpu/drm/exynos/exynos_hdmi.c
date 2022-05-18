@@ -1105,7 +1105,8 @@ static int hdmi_get_modes(struct drm_connector *connector)
 	if (gdvi_mode)
 		hdata->dvi_mode = true;
 	else
-		hdata->dvi_mode = !drm_detect_hdmi_monitor(edid);
+		hdata->dvi_mode = false;
+
 	DRM_DEV_DEBUG_KMS(hdata->dev, "%s : width[%d] x height[%d]\n",
 			  (hdata->dvi_mode ? "dvi monitor" : "hdmi monitor"),
 			  edid->width_cm, edid->height_cm);

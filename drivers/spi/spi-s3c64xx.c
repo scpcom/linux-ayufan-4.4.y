@@ -520,7 +520,7 @@ static int s3c64xx_wait_for_pio(struct s3c64xx_spi_driver_data *sdd,
 	val = msecs_to_loops(ms);
 	do {
 		status = readl(regs + S3C64XX_SPI_STATUS);
-	} while (RX_FIFO_LVL(status, sdd) < xfer->len && --val);
+	} while (RX_FIFO_LVL(status, sdd) < (xfer->len / 4) && --val);
 
 	if (!val)
 		return -EIO;
