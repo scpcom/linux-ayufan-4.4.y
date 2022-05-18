@@ -19,6 +19,7 @@
 #include <linux/sysfs.h>
 #include <linux/thermal.h>
 #include <linux/timer.h>
+#include <linux/types.h>
 
 #define MAX_PWM 255
 
@@ -39,6 +40,7 @@ struct pwm_fan_ctx {
 	unsigned int pwm_fan_max_state;
 	unsigned int *pwm_fan_cooling_levels;
 	struct thermal_cooling_device *cdev;
+	bool automatic;
 };
 
 /* This handler assumes self resetting edge triggered interrupt. */
@@ -137,12 +139,91 @@ static ssize_t rpm_show(struct device *dev,
 	return sprintf(buf, "%u\n", ctx->rpm);
 }
 
+static ssize_t fan_speed_store(struct device *dev, struct device_attribute *attr,
+			     const char *buf, size_t count)
+{
+	struct pwm_fan_ctx *ctx = dev_get_drvdata(dev);
+	unsigned int speed_0, speed_1, speed_2, speed_3;
+
+	if(sscanf(buf, "%u %u %u %u\n", &speed_0, &speed_1, &speed_2, &speed_3) != 4) {
+		dev_err(dev, "invalid speed input");
+		return  -EINVAL;
+	}
+
+	if(!(speed_0 < speed_1 && speed_1 < speed_2 && speed_2 < speed_3)){
+		dev_err(dev, "fan speeds must be increasing in value");
+		return count;
+	}
+
+	dev_info(dev, "fan_speeds : %s [%d %d %d %d] \n",
+			__func__, speed_0, speed_1, speed_2, speed_3);
+
+	mutex_lock(&ctx->lock);
+	ctx->pwm_fan_cooling_levels[0] = speed_0;
+	ctx->pwm_fan_cooling_levels[1] = speed_1;
+	ctx->pwm_fan_cooling_levels[2] = speed_2;
+	ctx->pwm_fan_cooling_levels[3] = speed_3;
+	mutex_unlock(&ctx->lock);
+
+	return count;
+}
+
+static ssize_t fan_speed_show(struct device *dev, struct device_attribute *attr,
+			      char *buf)
+{
+	struct pwm_fan_ctx *ctx = dev_get_drvdata(dev);
+	int lenght = 0, i;
+
+	mutex_lock(&ctx->lock);
+	for (i = 0; i <= ctx->pwm_fan_max_state; i++)
+                lenght += sprintf(buf+lenght, "%u ", ctx->pwm_fan_cooling_levels[i]);
+	mutex_unlock(&ctx->lock);
+
+	return lenght;
+}
+
+static ssize_t automatic_show(struct device *dev,
+			struct device_attribute *attr, char *buf)
+{
+	struct pwm_fan_ctx *ctx = dev_get_drvdata(dev);
+
+	return sprintf(buf, "%d\n", ctx->automatic);
+}
+
+static ssize_t automatic_store(struct device *dev, struct device_attribute *attr,
+			     const char *buf, size_t count)
+{
+	struct pwm_fan_ctx *ctx = dev_get_drvdata(dev);
+	bool automatic;
+	int ret;
+
+	if (kstrtobool(buf, &automatic))
+		return -EINVAL;
+
+	mutex_lock(&ctx->lock);
+	ctx->automatic = automatic;
+	mutex_unlock(&ctx->lock);
+
+	if (automatic) {
+		ret = __set_pwm(ctx, ctx->pwm_fan_cooling_levels[ctx->pwm_fan_state]);
+		if (ret)
+			return ret;
+	}
+
+	return count;
+}
+
+
 static SENSOR_DEVICE_ATTR_RW(pwm1, pwm, 0);
 static SENSOR_DEVICE_ATTR_RO(fan1_input, rpm, 0);
+static SENSOR_DEVICE_ATTR_RW(fan_speed, fan_speed, 0);
+static SENSOR_DEVICE_ATTR_RW(automatic, automatic, 0);
 
 static struct attribute *pwm_fan_attrs[] = {
 	&sensor_dev_attr_pwm1.dev_attr.attr,
 	&sensor_dev_attr_fan1_input.dev_attr.attr,
+	&sensor_dev_attr_fan_speed.dev_attr.attr,
+	&sensor_dev_attr_automatic.dev_attr.attr,
 	NULL,
 };
 
@@ -208,10 +289,12 @@ pwm_fan_set_cur_state(struct thermal_cooling_device *cdev, unsigned long state)
 	if (state == ctx->pwm_fan_state)
 		return 0;
 
-	ret = __set_pwm(ctx, ctx->pwm_fan_cooling_levels[state]);
-	if (ret) {
-		dev_err(&cdev->device, "Cannot set pwm!\n");
-		return ret;
+	if (ctx->automatic) {
+		ret = __set_pwm(ctx, ctx->pwm_fan_cooling_levels[state]);
+		if (ret) {
+			dev_err(&cdev->device, "Cannot set pwm!\n");
+			return ret;
+		}
 	}
 
 	ctx->pwm_fan_state = state;
@@ -303,6 +386,8 @@ static int pwm_fan_probe(struct platform_device *pdev)
 
 		return ret;
 	}
+
+	ctx->automatic = true;
 
 	platform_set_drvdata(pdev, ctx);
 
