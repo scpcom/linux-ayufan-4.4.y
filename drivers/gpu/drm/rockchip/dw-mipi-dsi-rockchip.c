@@ -1549,6 +1549,8 @@ static int dw_mipi_dsi_bind(struct device *dev, struct device *master,
 	if (dsi->slave)
 		pm_runtime_enable(dsi->slave->dev);
 
+	dsi->dsi_bound = true;
+
 	return 0;
 
 connector_cleanup:
