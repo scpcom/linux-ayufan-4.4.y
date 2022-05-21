@@ -277,6 +277,7 @@ static int sun50i_cpufreq_nvmem_probe(struct platform_device *pdev)
 				       &ver_data.version, ver_data.name);
 	if (ret)
 		return ret;
+	}
 
 	for_each_possible_cpu(cpu) {
 		struct device *cpu_dev = get_cpu_device(cpu);
