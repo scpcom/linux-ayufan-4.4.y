@@ -275,7 +275,8 @@ static int sun50i_cpufreq_nvmem_probe(struct platform_device *pdev)
 
 	ret = sun50i_cpufreq_get_efuse(match->data,
 				       &ver_data.version, ver_data.name);
-	if (ret)
+	if (ret) {
+		kfree(opp_tables);
 		return ret;
 	}
 
