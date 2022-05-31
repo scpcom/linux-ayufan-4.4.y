@@ -335,19 +335,21 @@
 	};
 
 	spi0_pins_a: spi0@0 {
-		pins = "PC2", "PC4"; /*clk mosi*/
+		pins = "PC2", "PC3", "PC4"; /*clk cs mosi*/
 		function = "spi0";
 		muxsel = <2>;
 		drive-strength = <10>;
 	};
 
+	/*
 	spi0_pins_b: spi0@1 {
 		pins = "PC3";
 		function = "spi0";
 		muxsel = <2>;
 		drive-strength = <10>;
-		bias-pull-up;   /* only CS should be pulled up */
+		bias-pull-up;   // only CS should be pulled up //
 	};
+	*/
 
 	spi0_pins_c: spi0@2 {
 		pins = "PC2", "PC3", "PC4";
@@ -1034,12 +1036,13 @@ tvd_row*tvd_column is the total tvd channel number to be used in multichannel mo
 	status = "okay";
 };
 
+/*
 &spi0 {
 	clock-frequency = <100000000>;
 	pinctrl-0 = <&spi0_pins_a &spi0_pins_b>;
 	pinctrl-1 = <&spi0_pins_c>;
 	pinctrl-names = "default", "sleep";
-	/*spi-supply = <&reg_dcdc1>;*/
+	//spi-supply = <&reg_dcdc1>;//
 	spi_slave_mode = <0>;
 	spi0_cs_number = <1>;
         spi0_cs_bitmap = <1>;
@@ -1052,6 +1055,38 @@ tvd_row*tvd_column is the total tvd channel number to be used in multichannel mo
 		spi-rx-bus-width=<0x04>;
 		spi-tx-bus-width=<0x04>;
 		status="disabled";
+	};
+};
+*/
+
+&spi0 {
+	compatible = "allwinner,sun8i-h3-spi";
+	clocks = <&ccu CLK_BUS_SPI0 &ccu CLK_SPI0>;
+	clock-names = "ahb", "mod";
+	resets = <&ccu RST_BUS_SPI0>;
+	clock-frequency = <1000000000>;
+	num-cs = <0x01>;
+	status = "okay";
+	pinctrl-0 = <&spi0_pins_a>;
+	pinctrl-1 = <&spi0_pins_c>;
+	pinctrl-names = "default", "sleep";
+
+	st7789v@0 {
+		compatible = "sitronix,st7789v";
+		reg = <0x00>;
+		spi-max-frequency = <36000000>;
+		spi-cpol;
+		spi-cpha;
+		//width = <135>;
+		//height = <240>;
+		rotate = <90>;
+		fps = <60>;
+		buswidth = <8>;
+		dc-gpios = <&pio PC 5 GPIO_ACTIVE_HIGH>;
+		reset-gpios = <&pio PC 6 GPIO_ACTIVE_LOW>;
+		//led-gpios = <&pio PD 18 GPIO_ACTIVE_HIGH>;
+		debug = <0>;
+		status = "okay";
 	};
 };
 
@@ -1292,12 +1327,13 @@ pull up or pull down(default 0), driver level(default 1), data>
 	pinctrl-1       = <&rgb18_pins_b>;
 };
 
+/*
 &lcd_fb0 {
 	lcd_used = <1>;
 	lcd_driver_name = "st7789_spi";
-	lcd_if = <0>;       /*SPI*/
-	lcd_dbi_if = <2>;   /*L4I1*/
-	lcd_dbi_fmt = <2>;  /*RGB565*/
+	lcd_if = <0>;       //SPI//
+	lcd_dbi_if = <2>;   //L4I1//
+	lcd_dbi_fmt = <2>;  //RGB565//
 	lcd_dbi_te = <0>;   
 	lcd_rgb_order = <0>;
 	lcd_x = <135>;
@@ -1310,14 +1346,15 @@ pull up or pull down(default 0), driver level(default 1), data>
 	lcd_pwm_freq = <20000>;
 	lcd_pwm_pol = <0>;
 	lcd_backlight = <200>;
-	lcd_gpio_0 = <&pio PC 6 1 1 2 1>; /*RST*/
-	lcd_gpio_1 = <&pio PC 5 1 1 2 1>; /*DC*/
+	lcd_gpio_0 = <&pio PC 6 1 1 2 1>; //RST//
+	lcd_gpio_1 = <&pio PC 5 1 1 2 1>; //DC//
 
 	lcd_spi_bus_num = <0>;
 	lcd_pixel_fmt = <0x0a>;
 	fb_buffer_num = <2>;
 	status = "okay";
 };
+*/
 
 
 &hdmi {
