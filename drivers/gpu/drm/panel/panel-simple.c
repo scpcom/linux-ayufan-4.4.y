@@ -659,12 +659,12 @@ static int panel_simple_prepare_once(struct panel_simple *p)
 
 	gpiod_direction_output(p->reset_gpio, 0);
 
+	if (p->desc->delay.init)
+		msleep(p->desc->delay.init);
+
 	if (p->desc->init_seq)
 		if (p->dsi)
 			panel_simple_xfer_dsi_cmd_seq(p, p->desc->init_seq);
-
-	if (p->desc->delay.init)
-		msleep(p->desc->delay.init);
 
 	p->prepared_time = ktime_get();
 
