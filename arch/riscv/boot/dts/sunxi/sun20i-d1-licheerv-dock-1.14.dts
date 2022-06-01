@@ -1077,8 +1077,8 @@ tvd_row*tvd_column is the total tvd channel number to be used in multichannel mo
 		spi-max-frequency = <36000000>;
 		spi-cpol;
 		spi-cpha;
-		//width = <135>;
-		//height = <240>;
+		width = <135>;
+		height = <240>;
 		rotate = <90>;
 		fps = <60>;
 		buswidth = <8>;
