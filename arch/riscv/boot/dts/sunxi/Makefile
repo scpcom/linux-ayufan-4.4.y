@@ -4,6 +4,7 @@ dtb-$(CONFIG_ARCH_SUNXI) += \
 	sun20i-d1-licheerv-86panel.dtb \
 	sun20i-d1-licheerv-86panel-720x720.dtb \
 	sun20i-d1-licheerv-dock.dtb \
+	sun20i-d1-licheerv-dock-160x80.dtb \
 	sun20i-d1-licheerv-dock-1.14.dtb \
 	sun20i-d1-licheerv-dock-480x272.dtb \
 	sun20i-d1-licheerv-dock-800x480.dtb \
