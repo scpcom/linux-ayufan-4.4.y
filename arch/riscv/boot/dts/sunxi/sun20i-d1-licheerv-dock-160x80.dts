@@ -9,7 +9,7 @@
 #include "sun20iw1p1.dtsi"
 
 /{
-	model = "Sipeed Lichee RV 86 Panel";
+	model = "Sipeed Lichee RV";
 	compatible = "allwinner,d1", "arm,sun20iw1p1", "allwinner,sun20iw1p1";
 
 	aliases {
