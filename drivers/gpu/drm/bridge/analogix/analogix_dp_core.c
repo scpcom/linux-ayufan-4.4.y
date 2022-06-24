@@ -1634,7 +1634,7 @@ analogix_dp_bind(struct device *dev, struct drm_device *drm_dev,
 					    "hpd_gpio");
 		if (ret) {
 			dev_err(&pdev->dev, "failed to get hpd gpio\n");
-			return ERR_PTR(ret);
+			goto err_disable_clk;
 		}
 		dp->irq = gpio_to_irq(dp->hpd_gpio);
 		irq_flags = IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING;
@@ -1685,6 +1685,8 @@ err_disable_pm_runtime:
 
 	pm_runtime_disable(dev);
 
+err_disable_clk:
+	clk_disable_unprepare(dp->clock);
 	return ERR_PTR(ret);
 }
 EXPORT_SYMBOL_GPL(analogix_dp_bind);
