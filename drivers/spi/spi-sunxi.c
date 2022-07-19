@@ -1631,14 +1631,18 @@ static int sunxi_spi_transfer_one(struct spi_controller *master,
 	unsigned char *rx_buf = (unsigned char *)t->rx_buf;
 	unsigned long timeout = 0;
 	int ret = 0;
+	static int xfer_setup;
 
 	dprintk(DEBUG_INFO, "[spi%d] begin transfer, txbuf %p, rxbuf %p, len %d\n",
 		spi->master->bus_num, tx_buf, rx_buf, t->len);
 	if ((!t->tx_buf && !t->rx_buf) || !t->len)
 		return -EINVAL;
 
-	if (sunxi_spi_xfer_setup(spi, t) < 0)
-		return -EINVAL;
+	if (!xfer_setup || spi->master->bus_num) {
+		if (sunxi_spi_xfer_setup(spi, t) < 0)
+			return -EINVAL;
+		xfer_setup = 1;
+	}
 
 	/* write 1 to clear 0 */
 	spi_clr_irq_pending(SPI_INT_STA_MASK, base_addr);
@@ -1797,6 +1801,9 @@ static int sunxi_spi_setup(struct spi_device *spi)
 
 	sspi->spi = spi;
 
+	if (sunxi_spi_xfer_setup(spi, NULL) < 0)
+		SPI_ERR("failed to xfer setup\n");
+
 	return 0;
 }
 
@@ -1806,63 +1813,25 @@ static bool sunxi_spi_can_dma(struct spi_master *master, struct spi_device *spi,
 	return (xfer->len > BULK_DATA_BOUNDARY);
 }
 
-static struct device_data *sunxi_spi_slave_set_txdata(struct sunxi_spi_slave_head *head)
-{
-	u8 *buf, i;
-	struct device_data *data;
-
-	buf = kzalloc(head->len, GFP_KERNEL);
-	if (IS_ERR_OR_NULL(buf)) {
-		SPI_ERR("failed to alloc mem\n");
-		goto err0;
-	}
-
-	data = kzalloc(sizeof(*data), GFP_KERNEL);
-	if (IS_ERR_OR_NULL(data)) {
-		SPI_ERR("failed to alloc mem\n");
-		goto err1;
-	}
-
-	for (i = 0; i < head->len; i++) {
-		buf[i] = i + SAMPLE_NUMBER;
-	}
-	udelay(100);
-
-	dprintk(DEBUG_DATA, "[debugging only] send data:\n");
-	if (debug_mask & DEBUG_DATA)
-		spi_dump_data(buf, head->len);
-
-	data->tx_buf = buf;
-	data->len = head->len;
-
-	return data;
-
-err1:
-	kfree(buf);
-err0:
-	return NULL;
-}
-
 static int sunxi_spi_slave_cpu_tx_config(struct sunxi_spi *sspi)
 {
 	int ret = 0, i;
 	u32 poll_time = 0x7ffffff;
 	unsigned long timeout = 0;
 	unsigned long flags = 0;
+	int len = sspi->slave->head->len;
+	int offset = sspi->slave->head->addr;
 
-	dprintk(DEBUG_INFO, "[spi%d] receive pkt head ok\n", sspi->master->bus_num);
-	if (sspi->slave->set_up_txdata) {
-		sspi->slave->data = sspi->slave->set_up_txdata(sspi->slave->head);
-		if (IS_ERR_OR_NULL(sspi->slave->data)) {
-			SPI_ERR("[spi%d] null data\n", sspi->master->bus_num);
-			ret = -1;
-			goto err;
-		}
-	} else {
-		SPI_ERR("[spi%d] none define set_up_txdata\n", sspi->master->bus_num);
-		ret = -1;
-		goto err;
+	if (offset > STORAGE_SIZE) {
+		SPI_ERR("The data offset is greater than the storage size\n");
+		return -1;
 	}
+
+	dprintk(DEBUG_INFO, "[spi%d] receive pkt head ok\n",
+			sspi->master->bus_num);
+
+	sspi->slave->data.len = (STORAGE_SIZE - offset) < len ?
+				(STORAGE_SIZE - offset) : len;
 
 	sspi->done.done = 0;
 	spi_clr_irq_pending(SPI_INT_STA_MASK, sspi->base_addr);
@@ -1871,21 +1840,25 @@ static int sunxi_spi_slave_cpu_tx_config(struct sunxi_spi *sspi)
 	spi_set_bc_tc_stc(0, 0, 0, 0, sspi->base_addr);
 	spi_enable_irq(SPI_INTEN_TC|SPI_INTEN_ERR, sspi->base_addr);
 
-	dprintk(DEBUG_INFO, "[spi%d] to be send data init ok\n", sspi->master->bus_num);
 	spin_lock_irqsave(&sspi->lock, flags);
 	for (i = 0; i < sspi->slave->head->len; i++) {
 		while ((spi_query_txfifo(sspi->base_addr) >= MAX_FIFU) && (--poll_time))
 			;
 		if (poll_time == 0) {
-			dprintk(DEBUG_INFO, "[spi%d]cpu send data timeout\n", sspi->master->bus_num);
+			dprintk(DEBUG_INFO, "[spi%d]cpu send data timeout\n",
+						sspi->master->bus_num);
 			goto err;
 		}
 
-		writeb(sspi->slave->data->tx_buf[i], sspi->base_addr + SPI_TXDATA_REG);
+		writeb(sspi->slave->data.storage[i + offset],
+					sspi->base_addr + SPI_TXDATA_REG);
 	}
 	spin_unlock_irqrestore(&sspi->lock, flags);
 
-	dprintk(DEBUG_INFO, "[spi%d] already send data to fifo\n", sspi->master->bus_num);
+	dprintk(DEBUG_DATA, "[debugging only] send data:\n");
+	if (debug_mask & DEBUG_DATA)
+		spi_dump_data(sspi->slave->data.storage + offset,
+				sspi->slave->data.len);
 
 	/* wait for xfer complete in the isr. */
 	timeout = wait_for_completion_timeout(
@@ -1904,12 +1877,10 @@ static int sunxi_spi_slave_cpu_tx_config(struct sunxi_spi *sspi)
 err:
 	spi_clr_irq_pending(SPI_INT_STA_MASK, sspi->base_addr);
 	spi_disable_irq(SPI_INTEN_TC|SPI_INTEN_ERR, sspi->base_addr);
-#if IS_ENABLED(CONFIG_DMA_ENGINE)
+#ifdef CONFIG_DMA_ENGINE
 	spi_disable_dma_irq(SPI_FIFO_CTL_DRQEN_MASK, sspi->base_addr);
 #endif
 	spi_reset_fifo(sspi->base_addr);
-	kfree(sspi->slave->data->tx_buf);
-	kfree(sspi->slave->data);
 
 	return ret;
 }
@@ -1918,64 +1889,58 @@ static int sunxi_spi_slave_cpu_rx_config(struct sunxi_spi *sspi)
 {
 	int ret = 0, i;
 	u32 poll_time = 0x7ffffff;
+	int len = sspi->slave->head->len;
+	int offset = sspi->slave->head->addr;
 
-	dprintk(DEBUG_INFO, "[spi%d] receive pkt head ok\n", sspi->master->bus_num);
-	sspi->slave->data = kzalloc(sizeof(struct device_data), GFP_KERNEL);
-	if (IS_ERR_OR_NULL(sspi->slave->data)) {
-		SPI_ERR("failed to alloc mem\n");
-		ret = -ENOMEM;
-		goto err0;
+	if (offset > STORAGE_SIZE) {
+		SPI_ERR("The data offset is greater than the storage size\n");
+		return -1;
 	}
 
-	sspi->slave->data->len = sspi->slave->head->len;
-	sspi->slave->data->rx_buf = kzalloc(sspi->slave->data->len, GFP_KERNEL);
-	if (IS_ERR_OR_NULL(sspi->slave->data->rx_buf)) {
-		SPI_ERR("failed to alloc mem\n");
-		ret = -ENOMEM;
-		goto err1;
-	}
+	dprintk(DEBUG_INFO, "[spi%d] receive pkt head ok\n",
+			sspi->master->bus_num);
+
+	sspi->slave->data.len = (STORAGE_SIZE - offset) < len ?
+				(STORAGE_SIZE - offset) : len;
 
 	sspi->done.done = 0;
 
-	spi_set_rx_trig(sspi->slave->data->len/2, sspi->base_addr);
+	spi_set_rx_trig(sspi->slave->data.len/2, sspi->base_addr);
 	spi_enable_irq(SPI_INTEN_ERR|SPI_INTEN_RX_RDY, sspi->base_addr);
 	spi_set_bc_tc_stc(0, 0, 0, 0, sspi->base_addr);
 
-	dprintk(DEBUG_INFO, "[spi%d] to be receive data init ok\n", sspi->master->bus_num);
-	for (i = 0; i < sspi->slave->data->len; i++) {
+	for (i = 0; i < sspi->slave->data.len; i++) {
 		while (!spi_query_rxfifo(sspi->base_addr) && (--poll_time > 0))
 			;
-		sspi->slave->data->rx_buf[i] =  readb(sspi->base_addr + SPI_RXDATA_REG);
+		sspi->slave->data.storage[offset + i] =
+			readb(sspi->base_addr + SPI_RXDATA_REG);
 	}
 
-
 	if (poll_time <= 0) {
-		SPI_ERR("[spi%d] cpu receive pkt head time out!\n", sspi->master->bus_num);
+		SPI_ERR("[spi%d] cpu receive pkt head time out!\n",
+				sspi->master->bus_num);
 		spi_reset_fifo(sspi->base_addr);
 		ret = -1;
-		goto err2;
+		goto err0;
 	} else if (sspi->result < 0) {
 		SPI_ERR("[spi%d] xfer failed...\n", sspi->master->bus_num);
 		spi_reset_fifo(sspi->base_addr);
 		ret = -1;
-		goto err2;
+		goto err0;
 	}
 
 	dprintk(DEBUG_DATA, "[debugging only] receive data:\n");
 	if (debug_mask & DEBUG_DATA)
-		spi_dump_data(sspi->slave->data->rx_buf, sspi->slave->data->len);
+		spi_dump_data(sspi->slave->data.storage + offset,
+				sspi->slave->data.len);
 
-err2:
+err0:
 	spi_clr_irq_pending(SPI_INT_STA_MASK, sspi->base_addr);
 	spi_disable_irq(SPI_INTEN_TC|SPI_INTEN_ERR, sspi->base_addr);
-#if IS_ENABLED(CONFIG_DMA_ENGINE)
+#ifdef CONFIG_DMA_ENGINE
 	spi_disable_dma_irq(SPI_FIFO_CTL_DRQEN_MASK, sspi->base_addr);
 #endif
 	spi_reset_fifo(sspi->base_addr);
-	kfree(sspi->slave->data->rx_buf);
-err1:
-	kfree(sspi->slave->data);
-err0:
 	return ret;
 }
 static int sunxi_spi_slave_handle_head(struct sunxi_spi *sspi, u8 *buf)
@@ -2625,8 +2590,13 @@ static int sunxi_spi_probe(struct platform_device *pdev)
 			ret = -ENOMEM;
 			goto err5;
 		}
+		slave->data.storage = kzalloc(STORAGE_SIZE, GFP_KERNEL);
+		if (IS_ERR_OR_NULL(slave->data.storage)) {
+			SPI_ERR("failed to alloc mem\n");
+			ret = -ENOMEM;
+			goto err0;
+		}
 		sspi->slave = slave;
-		sspi->slave->set_up_txdata = sunxi_spi_slave_set_txdata;
 		sspi->task = kthread_create(sunxi_spi_slave_task, sspi, "spi_slave");
 		if (IS_ERR(sspi->task)) {
 			SPI_ERR("[spi%d] unable to start kernel thread.\n", sspi->master->bus_num);

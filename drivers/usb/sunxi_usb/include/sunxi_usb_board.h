@@ -48,6 +48,8 @@
 
 #define  KEY_USB_WAKEUP_SUSPEND		        "usb_wakeup_suspend"
 
+#define  KEY_USB_DET_TYPE			"usb_detect_type"
+
 /* USB config info */
 enum usb_gpio_group_type {
 	GPIO_GROUP_TYPE_PIO = 0,
@@ -61,10 +63,11 @@ enum usb_port_type {
 	USB_PORT_TYPE_OTG,
 };
 
-/* 0: dp/dm detect, 1: vbus/id detect */
+/* 0: dp/dm detect, 1: vbus/id detect 2: vbus/pmu detect*/
 enum usb_detect_type {
 	USB_DETECT_TYPE_DP_DM = 0,
 	USB_DETECT_TYPE_VBUS_ID,
+	USB_DETECT_TYPE_VBUS_PMU,
 };
 
 /* 0: thread scan mode; 1: gpio interrupt mode */
@@ -84,6 +87,7 @@ enum usb_id_type {
 	USB_ID_TYPE_GPIO,
 	USB_ID_TYPE_AXP,
 };
+
 
 /* pio info */
 typedef struct usb_gpio {
@@ -122,6 +126,10 @@ typedef struct usb_port_info {
 	struct typec_partner *partner;
 	struct typec_capability typec_caps;
 	bool connected;
+#endif
+#if defined(CONFIG_POWER_SUPPLY)
+	struct power_supply *pmu_psy;            /* pmu type*/
+	union  power_supply_propval *pmu;
 #endif
 } usb_port_info_t;
 

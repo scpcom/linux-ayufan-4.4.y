@@ -238,7 +238,7 @@ void usb_otg_phy_txtune(void __iomem *regs)
 }
 
 /*for new phy*/
-static int usbc_new_phyx_tp_write(void __iomem *regs,
+int usbc_new_phyx_tp_write(void __iomem *regs,
 		int addr, int data, int len)
 {
 	int temp = 0;
@@ -281,7 +281,7 @@ static int usbc_new_phyx_tp_write(void __iomem *regs,
 	return 0;
 }
 
-static int usbc_new_phyx_tp_read(void __iomem *regs, int addr, int len)
+int usbc_new_phyx_tp_read(void __iomem *regs, int addr, int len)
 {
 	int temp = 0;
 	int i = 0;

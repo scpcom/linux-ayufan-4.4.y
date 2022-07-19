@@ -126,6 +126,66 @@ static __u32 PIODataIn_debounce(struct usb_gpio *usb_gpio, __u32 *value)
 	return change;
 }
 
+static __u32 PMUDataIn_debounce(struct power_supply *pmu_psy, union power_supply_propval *value)
+{
+	__u32 retry  = 0;
+	__u32 time   = 10;
+	union power_supply_propval temp;
+	__u32 cnt    = 0;
+	__u32 change = 0;	/* if have shake */
+
+	/**
+	 * try 10 times, if value is the same,
+	 * then current read is valid; otherwise invalid.
+	 */
+	if (pmu_psy) {
+		retry = time;
+		while (retry--) {
+			power_supply_get_property(pmu_psy,
+						POWER_SUPPLY_PROP_SCOPE, &temp);
+
+			temp.intval -= 1;
+
+			if (temp.intval)
+				cnt++;
+		}
+
+		/* 10 times, the value is all 0 or 1 */
+		if ((cnt == time) || (cnt == 0))
+			change = 0;
+		else
+			change = 1;
+	}
+
+	if (!change)
+		*value = temp;
+
+	DMSG_DBG_MANAGER("usb_gpio->valid = %x, cnt = %x, change= %d, temp1 = %x\n",
+		usb_gpio->valid, cnt, change, temp1);
+
+	return change;
+}
+
+
+static __u32 get_pmu_state(struct usb_scan_info *info)
+{
+	enum usb_id_state id_state = USB_DEVICE_MODE;
+	union power_supply_propval pin_data;
+
+	if (!PMUDataIn_debounce(info->cfg->port.pmu_psy, &pin_data)) {
+		if (pin_data.intval)
+			id_state = USB_DEVICE_MODE;
+		else
+			id_state = USB_HOST_MODE;
+
+		info->id_old_state = id_state;
+	} else {
+		id_state = info->id_old_state;
+	}
+
+	return id_state;
+}
+
 static u32 get_id_state(struct usb_scan_info *info)
 {
 	enum usb_id_state id_state = USB_DEVICE_MODE;
@@ -448,6 +508,20 @@ static __u32 get_vbus_id_state(struct usb_scan_info *info)
 
 	return state;
 }
+
+static __u32 get_vbus_pmu_state(struct usb_scan_info *info)
+{
+	u32 state = 0;
+
+	if (get_pmu_state(info) == USB_DEVICE_MODE)
+		x_set_bit(state, 0);
+
+	if (get_detect_vbus_state(info) == USB_DET_VBUS_VALID)
+		x_set_bit(state, 1);
+
+	return state;
+}
+
 #endif
 
 static void vbus_id_hw_scan(struct usb_scan_info *info)
@@ -455,6 +529,35 @@ static void vbus_id_hw_scan(struct usb_scan_info *info)
 	__u32 vbus_id_state = 0;
 
 	vbus_id_state = get_vbus_id_state(info);
+
+	if (usb_hw_scan_debug)
+		DMSG_INFO("Id=%d,role=%d\n", vbus_id_state, get_usb_role());
+
+	switch (vbus_id_state) {
+	case  0x00:
+		do_vbus0_id0(info);
+		break;
+	case  0x01:
+		do_vbus0_id1(info);
+		break;
+	case  0x02:
+		do_vbus1_id0(info);
+		break;
+	case  0x03:
+		do_vbus1_id1(info);
+		break;
+	default:
+		DMSG_PANIC("ERR: vbus_id_hw_scan: ");
+		DMSG_PANIC("unknown vbus_id_state(0x%x)\n",
+			vbus_id_state);
+	}
+}
+
+static void vbus_pmu_hw_scan(struct usb_scan_info *info)
+{
+	__u32 vbus_id_state = 0;
+
+	vbus_id_state = get_vbus_pmu_state(info);
 
 	if (usb_hw_scan_debug)
 		DMSG_INFO("Id=%d,role=%d\n", vbus_id_state, get_usb_role());
@@ -603,7 +706,10 @@ __s32 usb_hw_scan_init(struct usb_cfg *cfg)
 			}
 		}
 
-		__usb_hw_scan = vbus_id_hw_scan;
+		if (port_info->detect_type == USB_DETECT_TYPE_VBUS_ID)
+			__usb_hw_scan = vbus_id_hw_scan;
+		else if (port_info->detect_type == USB_DETECT_TYPE_VBUS_PMU)
+			__usb_hw_scan = vbus_pmu_hw_scan;
 	}
 #endif
 		break;

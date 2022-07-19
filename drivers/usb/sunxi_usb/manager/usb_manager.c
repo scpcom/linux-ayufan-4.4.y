@@ -31,6 +31,8 @@
 #include <linux/debugfs.h>
 #include <linux/seq_file.h>
 #include <linux/of_gpio.h>
+#include <linux/regulator/consumer.h>
+#include <linux/power_supply.h>
 
 #include  "../include/sunxi_usb_config.h"
 #include  "usb_manager.h"
@@ -42,6 +44,7 @@ struct usb_cfg g_usb_cfg;
 int thread_id_irq_run_flag;
 int thread_device_run_flag;
 int thread_host_run_flag;
+int thread_pmu_run_flag;
 
 __u32 thread_run_flag = 1;
 int thread_stopped_flag = 1;
@@ -157,6 +160,24 @@ static int usb_host_scan_thread(void *pArg)
 		thread_host_run_flag = 0;
 		DMSG_INFO("host_chose finished %d!\n", __LINE__);
 	}
+
+	return 0;
+}
+
+static int usb_pmu_scan_thread(void *pArg)
+{
+	struct usb_cfg *cfg = pArg;
+
+	while (thread_pmu_run_flag) {
+		msleep(1000);  /* 1s */
+
+		if (atomic_read(&thread_suspend_flag))
+			continue;
+		usb_hw_scan(cfg);
+		usb_msg_center(cfg);
+	}
+
+	thread_stopped_flag = 1;
 
 	return 0;
 }
@@ -298,6 +319,14 @@ static __s32 usb_script_parse(struct device_node *np, struct usb_cfg *cfg)
 		}
 	}
 
+	/* usbc det type */
+	ret = of_property_read_u32(usbc_np,
+					KEY_USB_DET_TYPE,
+					&cfg->port.detect_type);
+	if (ret) {
+		DMSG_INFO("get usb_detect_type is fail, %d\n", ret);
+	}
+
 	/* usbc id  */
 	ret = of_property_read_string(usbc_np,
 					KEY_USB_ID_GPIO,
@@ -337,9 +366,12 @@ int usb_otg_id_status(void)
 		return 1;
 
 	if (cfg->port.port_type == USB_PORT_TYPE_OTG) {
-		if (cfg->port.id.valid)
-			id_status = __gpio_get_value(
-						cfg->port.id.gpio_set.gpio);
+		if (cfg->port.detect_type == USB_DETECT_TYPE_VBUS_ID) {
+			if (cfg->port.id.valid)
+				id_status = __gpio_get_value(cfg->port.id.gpio_set.gpio);
+		} else if (cfg->port.detect_type == USB_DETECT_TYPE_VBUS_PMU) {
+			id_status = get_usb_role() - 1;
+		}
 	}
 
 	return id_status;
@@ -353,6 +385,7 @@ static int sunxi_otg_manager_probe(struct platform_device *pdev)
 	struct task_struct *host_th = NULL;
 	struct task_struct *th = NULL;
 	struct task_struct *id_irq_th = NULL;
+	struct task_struct *pmu_th = NULL;
 	int ret = -1;
 
 	memset(&g_usb_cfg, 0, sizeof(struct usb_cfg));
@@ -403,36 +436,60 @@ static int sunxi_otg_manager_probe(struct platform_device *pdev)
 	}
 
 	if (g_usb_cfg.port.port_type == USB_PORT_TYPE_OTG) {
-		usb_hw_scan_init(&g_usb_cfg);
+		if (g_usb_cfg.port.detect_type == USB_DETECT_TYPE_VBUS_ID) {
+			usb_hw_scan_init(&g_usb_cfg);
 
-		if (g_usb_cfg.port.detect_mode == USB_DETECT_MODE_THREAD) {
-			atomic_set(&thread_suspend_flag, 0);
-			thread_run_flag = 1;
-			thread_stopped_flag = 0;
+			if (g_usb_cfg.port.detect_mode == USB_DETECT_MODE_THREAD) {
+				atomic_set(&thread_suspend_flag, 0);
+				thread_run_flag = 1;
+				thread_stopped_flag = 0;
 
-			th = kthread_create(usb_hardware_scan_thread,
-						&g_usb_cfg,
-						"usb-hardware-scan");
-			if (IS_ERR(th)) {
-				DMSG_PANIC("ERR: kthread_create failed\n");
-				return -1;
-			}
-
-			wake_up_process(th);
-		} else if (g_usb_cfg.port.detect_mode == USB_DETECT_MODE_INTR) {
-			thread_id_irq_run_flag = 1;
-			id_irq_th = kthread_create(usb_id_irq_thread,
+				th = kthread_create(usb_hardware_scan_thread,
 							&g_usb_cfg,
-							"usb_id_irq");
-			if (IS_ERR(id_irq_th)) {
-				DMSG_PANIC("ERR: id_irq kthread_create failed\n");
+							"usb-hardware-scan");
+				if (IS_ERR(th)) {
+					DMSG_PANIC("ERR: kthread_create failed\n");
+					return -1;
+				}
+
+				wake_up_process(th);
+			} else if (g_usb_cfg.port.detect_mode == USB_DETECT_MODE_INTR) {
+				thread_id_irq_run_flag = 1;
+				id_irq_th = kthread_create(usb_id_irq_thread,
+								&g_usb_cfg,
+								"usb_id_irq");
+				if (IS_ERR(id_irq_th)) {
+					DMSG_PANIC("ERR: id_irq kthread_create failed\n");
+					return -1;
+				}
+
+				wake_up_process(id_irq_th);
+			} else {
+				DMSG_PANIC("ERR: usb detect mode isn't supported\n");
 				return -1;
 			}
+		} else if (g_usb_cfg.port.detect_type == USB_DETECT_TYPE_VBUS_PMU) {
+#if defined(CONFIG_POWER_SUPPLY)
 
-			wake_up_process(id_irq_th);
-		} else {
-			DMSG_PANIC("ERR: usb detect mode isn't supported\n");
-			return -1;
+			if (of_find_property(np, "det_vbus_supply", NULL))
+				g_usb_cfg.port.pmu_psy = devm_power_supply_get_by_phandle(&pdev->dev,
+											"det_vbus_supply");
+			if (!g_usb_cfg.port.pmu_psy  || IS_ERR(g_usb_cfg.port.pmu_psy)) {
+				DMSG_PANIC("%s()%d WARN: get power supply failed\n", __func__, __LINE__);
+				return -1;
+			}
+			usb_hw_scan_init(&g_usb_cfg);
+			thread_pmu_run_flag = 1;
+			thread_stopped_flag = 0;
+			pmu_th = kthread_create(usb_pmu_scan_thread,
+						&g_usb_cfg,
+						"usb_pmu_scan");
+			if (IS_ERR(pmu_th)) {
+				DMSG_PANIC("ERR:pmu_scan kthread_create failed\n");
+				return -1;
+			}
+			wake_up_process(pmu_th);
+#endif
 		}
 
 #if IS_ENABLED(CONFIG_DUAL_ROLE_USB_INTF)
