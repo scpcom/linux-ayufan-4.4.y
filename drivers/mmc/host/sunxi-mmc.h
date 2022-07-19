@@ -46,7 +46,7 @@
 #define __SUNXI_MMC_H__
 
 #define DRIVER_NAME "sunxi-mmc"
-#define DRIVER_RIVISION "v4.21 2021-11-18 10:02"
+#define DRIVER_RIVISION "v4.22 2021-12-20 15:40"
 #define DRIVER_VERSION "SD/MMC/SDIO Host Controller Driver(" DRIVER_RIVISION ")"
 
 #if defined CONFIG_FPGA_V4_PLATFORM || defined CONFIG_FPGA_V7_PLATFORM
@@ -423,6 +423,7 @@ struct sunxi_mmc_host {
 /*#define SUNXI_NO_ERASE				0x80*/
 #define SUNXI_SC_EN_RETRY_CMD			0x100
 #define SUNXI_SC_EN_TIMEOUT_DETECT		0x200
+#define SUNXI_CMD11_TIMEOUT_DETECT		0x400
 /*control specal function control,for customer need*/
 	u32 ctl_spec_cap;
 

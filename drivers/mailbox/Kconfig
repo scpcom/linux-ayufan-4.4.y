@@ -254,4 +254,11 @@ config QCOM_IPCC
 	  acts as an interrupt controller for receiving interrupts from clients.
 	  Say Y here if you want to build this driver.
 
+config SUNXI_MAILBOX
+	tristate "Allwinner mailbox support"
+	depends on ARCH_SUNXI
+	help
+	  Say y here to support Allwinner SOC processors via the
+	  mailbox framework.
+
 endif

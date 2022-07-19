@@ -79,11 +79,11 @@ static struct ccu_div r_timer2_clk = {
 	},
 };
 
-static SUNXI_CCU_GATE(r_timer_gating_clk, "r-timer-gating",
+static SUNXI_CCU_GATE(r_bus_timer_clk, "r-timer-gating",
                       "dcxo24M",
                       0x011c, BIT(0), 0);
 
-static SUNXI_CCU_GATE(r_twd_gating_clk, "r-twd-gating",
+static SUNXI_CCU_GATE(r_bus_twd_clk, "r-twd-gating",
                       "dcxo24M",
                       0x012c, BIT(0), 0);
 
@@ -94,11 +94,11 @@ static SUNXI_CCU_MUX_WITH_GATE(r_pwm_clk, "r-pwm",
 			24, 2,
 			BIT(31), 0 );
 
-static SUNXI_CCU_GATE(r_pwm_gating_clk, "r-pwm-gating",
+static SUNXI_CCU_GATE(r_bus_pwm_clk, "r-pwm-gating",
                       "dcxo24M",
                       0x013c, BIT(0), 0);
 
-static SUNXI_CCU_GATE(r_can_gating_clk, "r-can-gating",
+static SUNXI_CCU_GATE(r_bus_can_clk, "r-can-gating",
                       "dcxo24M",
                       0x014c, BIT(0), 0);
 
@@ -112,47 +112,47 @@ static SUNXI_CCU_M_WITH_MUX_GATE(r_spi_clk, "r-spi",
 				 BIT(31),	/* gate */
 				 CLK_SET_RATE_PARENT);
 
-static SUNXI_CCU_GATE(r_spi_gating_clk, "r-spi-gating",
+static SUNXI_CCU_GATE(r_bus_spi_clk, "r-spi-gating",
                       "dcxo24M",
                       0x015c, BIT(0), 0);
 
-static SUNXI_CCU_GATE(r_splock_gating_clk, "r-splock-gating",
+static SUNXI_CCU_GATE(r_bus_splock_clk, "r-splock-gating",
                       "dcxo24M",
                       0x016c, BIT(0), 0);
 
-static SUNXI_CCU_GATE(r_mbox_gating_clk, "r-mbox-gating",
+static SUNXI_CCU_GATE(r_bus_mbox_clk, "r-mbox-gating",
                       "dcxo24M",
                       0x017c, BIT(0), 0);
 
-static SUNXI_CCU_GATE(r_uart1_gating_clk, "r-uart1-gating",
+static SUNXI_CCU_GATE(r_bus_uart1_clk, "r-uart1-gating",
                       "dcxo24M",
                       0x018c, BIT(1), 0);
 
-static SUNXI_CCU_GATE(r_uart0_gating_clk, "r-uart0-gating",
+static SUNXI_CCU_GATE(r_bus_uart0_clk, "r-uart0-gating",
                       "dcxo24M",
                       0x018c, BIT(1), 0);
 
-static SUNXI_CCU_GATE(r_twi1_gating_clk, "r-twi1-gating",
+static SUNXI_CCU_GATE(r_bus_twi1_clk, "r-twi1-gating",
                       "dcxo24M",
                       0x019c, BIT(1), 0);
 
-static SUNXI_CCU_GATE(r_twi0_gating_clk, "r-twi0-gating",
+static SUNXI_CCU_GATE(r_bus_twi0_clk, "r-twi0-gating",
                       "dcxo24M",
                       0x019c, BIT(0), 0);
 
-static SUNXI_CCU_GATE(r_ppu1_gating_clk, "r-ppu1-gating",
+static SUNXI_CCU_GATE(r_bus_ppu1_clk, "r-ppu1-gating",
                       "dcxo24M",
                       0x01ac, BIT(1), 0);
 
-static SUNXI_CCU_GATE(r_ppu_gating_clk, "r-ppu-gating",
+static SUNXI_CCU_GATE(r_bus_ppu_clk, "r-ppu-gating",
                       "dcxo24M",
                       0x01ac, BIT(0), 0);
 
-static SUNXI_CCU_GATE(r_tzma_gating_clk, "r-tzma-gating",
+static SUNXI_CCU_GATE(r_bus_tzma_clk, "r-tzma-gating",
                       "dcxo24M",
                       0x01b0, BIT(0), 0);
 
-static SUNXI_CCU_GATE(r_cpus_bist_gating_clk, "r-cpus-bist-gating",
+static SUNXI_CCU_GATE(r_cpus_bus_bist_clk, "r-cpus-bist-gating",
                       "dcxo24M",
                       0x01bc, BIT(0), 0);
 
@@ -165,7 +165,7 @@ static SUNXI_CCU_M_WITH_MUX_GATE(r_irrx_clk, "r-irrx",
 				 BIT(31),	/* gate */
 				 CLK_SET_RATE_PARENT);
 
-static SUNXI_CCU_GATE(r_irrx_gating_clk, "r-irrx-gating",
+static SUNXI_CCU_GATE(r_bus_irrx_clk, "r-irrx-gating",
                       "dcxo24M",
                       0x01cc, BIT(0), 0);
 
@@ -173,11 +173,11 @@ static SUNXI_CCU_GATE(dma_clken_sw_clk, "dma-clken-sw",
                       "dcxo24M",
                       0x01dc, BIT(0), 0);
 
-static SUNXI_CCU_GATE(r_rtc_gating_clk, "r-rtc-gating",
+static SUNXI_CCU_GATE(r_bus_rtc_clk, "r-rtc-gating",
                       "dcxo24M",
                       0x020c, BIT(0), 0);
 
-static SUNXI_CCU_GATE(r_cpucfg_gating_clk, "r-cpucfg-gating",
+static SUNXI_CCU_GATE(r_bus_cpucfg_clk, "r-cpucfg-gating",
                       "dcxo24M",
                       0x022c, BIT(0), 0);
 
@@ -188,15 +188,59 @@ static struct ccu_common *sun55iw3_r_ccu_clks[] = {
 	&r_timer0_clk.common,
 	&r_timer1_clk.common,
 	&r_timer2_clk.common,
+	&r_bus_timer_clk.common,
+	&r_bus_twd_clk.common,
+	&r_pwm_clk.common,
+	&r_bus_pwm_clk.common,
+	&r_bus_can_clk.common,
+	&r_spi_clk.common,
+	&r_bus_spi_clk.common,
+	&r_bus_splock_clk.common,
+	&r_bus_mbox_clk.common,
+	&r_bus_uart1_clk.common,
+	&r_bus_uart0_clk.common,
+	&r_bus_twi1_clk.common,
+	&r_bus_twi0_clk.common,
+	&r_bus_ppu1_clk.common,
+	&r_bus_ppu_clk.common,
+	&r_bus_tzma_clk.common,
+	&r_cpus_bus_bist_clk.common,
+	&r_irrx_clk.common,
+	&r_bus_irrx_clk.common,
+	&dma_clken_sw_clk.common,
+	&r_bus_rtc_clk.common,
+	&r_bus_cpucfg_clk.common,
 };
 
 static struct clk_hw_onecell_data sun55iw3_r_hw_clks = {
 	.hws	= {
-		[CLK_R_TIMER0]	= &r_timer0_clk.common.hw,
-		[CLK_R_TIMER1]	= &r_timer1_clk.common.hw,
-		[CLK_R_TIMER2]	= &r_timer2_clk.common.hw,
+		[CLK_R_TIMER0]		= &r_timer0_clk.common.hw,
+		[CLK_R_TIMER1]		= &r_timer1_clk.common.hw,
+		[CLK_R_TIMER2]		= &r_timer2_clk.common.hw,
+		[CLK_BUS_R_TIMER]	= &r_bus_timer_clk.common.hw,
+		[CLK_BUS_R_TWD]		= &r_bus_twd_clk.common.hw,
+		[CLK_R_PWM]		= &r_pwm_clk.common.hw,
+		[CLK_BUS_R_PWM]		= &r_bus_pwm_clk.common.hw,
+		[CLK_BUS_R_CAN]		= &r_bus_can_clk.common.hw,
+		[CLK_R_SPI]		= &r_spi_clk.common.hw,
+		[CLK_BUS_R_SPI]		= &r_bus_spi_clk.common.hw,
+		[CLK_BUS_R_SPLOCK]	= &r_bus_splock_clk.common.hw,
+		[CLK_BUS_R_MBOX]	= &r_bus_mbox_clk.common.hw,
+		[CLK_BUS_R_UART1]	= &r_bus_uart1_clk.common.hw,
+		[CLK_BUS_R_UART0]	= &r_bus_uart0_clk.common.hw,
+		[CLK_BUS_R_TWI1]	= &r_bus_twi1_clk.common.hw,
+		[CLK_BUS_R_TWI0]	= &r_bus_twi0_clk.common.hw,
+		[CLK_R_PPU1]		= &r_bus_ppu1_clk.common.hw,
+		[CLK_R_PPU]		= &r_bus_ppu_clk.common.hw,
+		[CLK_BUS_R_TZMA]	= &r_bus_tzma_clk.common.hw,
+		[CLK_BUS_R_BIST]	= &r_cpus_bus_bist_clk.common.hw,
+		[CLK_R_IRRX]		= &r_irrx_clk.common.hw,
+		[CLK_BUS_R_IRRX]	= &r_bus_irrx_clk.common.hw,
+		[CLK_DMA_CLKEN_SW]	= &dma_clken_sw_clk.common.hw,
+		[CLK_BUS_R_RTC]		= &r_bus_rtc_clk.common.hw,
+		[CLK_BUS_R_CPUCFG]	= &r_bus_cpucfg_clk.common.hw,
 	},
-	.num	= CLK_NUMBER,
+	.num	= CLK_R_NUMBER,
 };
 
 static struct ccu_reset_map sun55iw3_r_ccu_resets[] = {
@@ -227,56 +271,24 @@ static const struct sunxi_ccu_desc sun55iw3_r_ccu_desc = {
 	.num_resets	= ARRAY_SIZE(sun55iw3_r_ccu_resets),
 };
 
-static int sun55iw3_r_ccu_probe(struct platform_device *pdev)
+static void __init of_sun55iw3_r_ccu_init(struct device_node *node)
 {
 	void __iomem *reg;
 	int ret;
 
-	reg = devm_platform_ioremap_resource(pdev, 0);
+	reg = of_iomap(node, 0);
 	if (IS_ERR(reg))
-		return PTR_ERR(reg);
+		return;
 
-	ret = sunxi_ccu_probe(pdev->dev.of_node, reg, &sun55iw3_r_ccu_desc);
+	ret = sunxi_ccu_probe(node, reg, &sun55iw3_r_ccu_desc);
 	if (ret)
-		return ret;
+		return;
 
 	sunxi_ccu_sleep_init(reg, sun55iw3_r_ccu_clks,
 			     ARRAY_SIZE(sun55iw3_r_ccu_clks),
 			     NULL, 0);
-
-	return 0;
 }
 
-static const struct of_device_id sun55iw3_r_ccu_ids[] = {
-	{ .compatible = "allwinner,sun55iw3-r-ccu" },
-	{ .compatible = "allwinner,sun20iw1-r-ccu" },
-	{ }
-};
+CLK_OF_DECLARE(sun55iw3_r_ccu_init, "allwinner,sun55iw3-r-ccu", of_sun55iw3_r_ccu_init);
 
-static struct platform_driver sun55iw3_r_ccu_driver = {
-	.probe	= sun55iw3_r_ccu_probe,
-	.driver	= {
-		.name	= "sun55iw3-r-ccu",
-		.of_match_table	= sun55iw3_r_ccu_ids,
-	},
-};
-
-static int __init sunxi_r_ccu_sun55iw3_init(void)
-{
-	int ret;
-
-	ret = platform_driver_register(&sun55iw3_r_ccu_driver);
-	if (ret)
-		pr_err("register ccu sun55iw3 failed\n");
-
-	return ret;
-}
-core_initcall(sunxi_r_ccu_sun55iw3_init);
-
-static void __exit sunxi_r_ccu_sun55iw3_exit(void)
-{
-	return platform_driver_unregister(&sun55iw3_r_ccu_driver);
-}
-module_exit(sunxi_r_ccu_sun55iw3_exit);
-
-MODULE_VERSION("1.0.0");
+MODULE_VERSION("1.0.2");

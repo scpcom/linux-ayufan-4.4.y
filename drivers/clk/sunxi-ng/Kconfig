@@ -99,6 +99,11 @@ config SUN55IW3_R_CCU
 	default ARM64 && ARCH_SUN55IW3
 	depends on (ARM64 && ARCH_SUNXI) || COMPILE_TEST
 
+config SUN55IW3_DSP_CCU
+	tristate "Support for the Allwinner SUN55IW3 DSP PRCM CCU"
+	default ARM64 && ARCH_SUN55IW3
+	depends on (ARM64 && ARCH_SUNXI) || COMPILE_TEST
+
 config SUN6I_A31_CCU
 	bool "Support for the Allwinner A31/A31s CCU"
 	default MACH_SUN6I

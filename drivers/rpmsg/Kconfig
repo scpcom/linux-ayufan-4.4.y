@@ -80,4 +80,22 @@ config RPMSG_VIRTIO
 	select RPMSG
 	select VIRTIO
 
+config RPMSG_SUNXI_TTY
+	tristate "Allwinner RPMsg tty driver"
+	select RPMSG
+	help
+	  Say y here to export rpmsg endpoints as tty console, usually found
+	  in /dev/tty_rpmsg.
+	  This makes it possible for user-space programs to send and receive
+	  rpmsg messages as a standard tty protocol.
+
+config RPMSG_SUNXI_CLIENT_SAMPLE
+	tristate "Allwinner RPMsg client sample"
+	select RPMSG
+	select RPMSG_VIRTIO
+	default n
+	help
+	  Say y here to enable support for the RPMsg client sample driver to
+	  communicate with remote processors on allwinner platforms.
+
 endmenu

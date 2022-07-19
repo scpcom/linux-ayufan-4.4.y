@@ -121,6 +121,55 @@
 		nvmem-cell-names = "speed", "bin";
 		opp-shared;
 
+		opp@480000000 {
+			opp-hz = /bits/ 64 <480000000>;
+			clock-latency-ns = <244144>; /* 8 32k periods */
+			opp-microvolt-a0 = <900000>;
+			opp-microvolt-a1 = <900000>;
+
+			opp-microvolt-b0 = <950000>;
+			opp-microvolt-b1 = <950000>;
+			opp-supported-hw = <0x3>;
+		};
+
+		opp@600000000 {
+			opp-hz = /bits/ 64 <600000000>;
+			clock-latency-ns = <244144>; /* 8 32k periods */
+			opp-microvolt-b0 = <950000>;
+			opp-supported-hw = <0x2>;
+		};
+
+		opp@720000000 {
+			opp-hz = /bits/ 64 <720000000>;
+			clock-latency-ns = <244144>; /* 8 32k periods */
+			opp-microvolt-a0 = <950000>;
+			opp-microvolt-a1 = <900000>;
+
+			opp-microvolt-b0 = <950000>;
+			opp-microvolt-b1 = <950000>;
+			opp-supported-hw = <0x3>;
+		};
+
+		opp@816000000 {
+			opp-hz = /bits/ 64 <816000000>;
+			clock-latency-ns = <244144>; /* 8 32k periods */
+			opp-microvolt-a0 = <1000000>;
+			opp-microvolt-a1 = <900000>;
+
+			opp-microvolt-b1 = <950000>;
+			opp-supported-hw = <0x1>;
+		};
+
+		opp@912000000 {
+			opp-hz = /bits/ 64 <912000000>;
+			clock-latency-ns = <244144>; /* 8 32k periods */
+			opp-microvolt-a0 = <1050000>;
+			opp-microvolt-a1 = <900000>;
+
+			opp-microvolt-b1 = <950000>;
+			opp-supported-hw = <0x1>;
+		};
+
 		opp@1008000000 {
 			opp-hz = /bits/ 64 <1008000000>;
 			clock-latency-ns = <244144>; /* 8 32k periods */

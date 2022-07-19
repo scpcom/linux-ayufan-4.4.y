@@ -25,9 +25,10 @@
 #define SUNXI_OP_READ	0x03
 */
 
-#define HEAD_LEN 5
-#define PKT_MAX_LEN 0x40
-#define STATUS_LEN 0x01
+#define HEAD_LEN		5
+#define STORAGE_SIZE		128
+#define PKT_MAX_LEN		0x40
+#define STATUS_LEN		0x01
 
 #define STATUS_WRITABLE 0x02
 #define STATUS_NOTWRITABLE 0x03
@@ -50,14 +51,14 @@ struct sunxi_spi_slave_head {
 };
 
 struct device_data {
-	unsigned char *tx_buf, *rx_buf;
+	//unsigned char *tx_buf, *rx_buf;
+	unsigned char *storage;
 	unsigned char len; /* max len is 64 */
 };
 
 struct sunxi_slave {
 	struct sunxi_spi_slave_head *head;
-	struct device_data *data;
-	struct device_data *(*set_up_txdata)(struct sunxi_spi_slave_head *head);
+	struct device_data data;
 };
 
 
