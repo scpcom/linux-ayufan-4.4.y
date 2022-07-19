@@ -934,6 +934,10 @@ void UsbPhyEndReset(__u32 usbc_no);
 void usb_otg_phy_txtune(void __iomem *regs);
 void usbc_new_phy_res_cal(void __iomem *regs);
 void usbc_new_phy_init(void __iomem *regs);
+int usbc_new_phyx_tp_write(void __iomem *regs,
+		int addr, int data, int len);
+int usbc_new_phyx_tp_read(void __iomem *regs,
+		int addr, int len);
 
 /* usb test mode */
 void USBC_EnterMode_TestPacket(__hdle hUSB);

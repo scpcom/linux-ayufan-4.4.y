@@ -193,6 +193,11 @@ void ss_iv_set(char *iv, int size, ce_task_desc_t *task)
 	ce_task_addr_set(iv, 0, task->iv_addr);
 }
 
+void ce_iv_phyaddr_set(dma_addr_t phy_addr, ce_task_desc_t *task)
+{
+	ce_task_addr_set(0, phy_addr, task->iv_addr);
+}
+
 void ss_iv_mode_set(int mode, ce_task_desc_t *task)
 {
 	task->comm_ctl |= mode << CE_COMM_CTL_IV_MODE_SHIFT;
@@ -333,15 +338,19 @@ void ss_ctrl_start(ce_task_desc_t *task, int type, int mode)
 {
 	phys_addr_t task_phy;
 
-	task_phy = virt_to_phys(task);
+	if (task->task_phy_addr) {
+		task_phy = task->task_phy_addr;
+    } else {
+		task_phy = virt_to_phys(task);
+	}
+
 	if (task_phy > 0xffffffff) {
 		ss_writel(CE_REG_TSK0, task_phy & 0xffffffff);
-		ss_writel(CE_REG_TSK1, (task_phy >> 32));
+		ss_writel(CE_REG_TSK1, ((unsigned long long)task_phy >> 32));
 	} else {
 		ss_writel(CE_REG_TSK0, task_phy);
 	}
 
-	task->task_phy_addr = task_phy;
 	if (CE_METHOD_IS_AES(type) && (mode == SS_AES_MODE_XTS))
 		ss_writel(CE_REG_TLR, 0x1 << CE_REG_TLR_RAES_TYPE_SHIFT);
 	else if (CE_METHOD_IS_AES(type) && (mode != SS_AES_MODE_XTS))
@@ -379,6 +388,76 @@ void ss_wait_idle(void)
 void ss_data_len_set(int len, ce_task_desc_t *task)
 {
 	task->data_len = len;
+}
+
+/* key: phsical address. */
+void ss_rng_key_set(char *key, int size, ce_new_task_desc_t *task)
+{
+	ce_task_addr_set(key, 0, task->key_addr);
+}
+
+/* iv: phsical address. */
+void ss_hash_iv_set(char *iv, int size, ce_new_task_desc_t *task)
+{
+	ce_task_addr_set(iv, 0, task->iv_addr);
+}
+
+void ss_hash_iv_mode_set(int mode, ce_new_task_desc_t *task)
+{
+	task->comm_ctl |= mode << CE_CTL_IV_MODE_SHIFT;
+}
+
+void ss_hmac_sha1_last(ce_new_task_desc_t *task)
+{
+	task->comm_ctl |= CE_CTL_HMAC_SHA1_LAST;
+}
+
+void ss_hmac_method_set(int type, ce_new_task_desc_t *task)
+{
+	task->main_cmd |= type << CE_CMD_HASH_METHOD_SHIFT;
+	task->main_cmd |= 0x1 << CE_CMD_HMAC_METHOD_SHIFT;
+}
+
+void ss_hash_method_set(int type, ce_new_task_desc_t *task)
+{
+	task->main_cmd |= type << CE_CMD_HASH_METHOD_SHIFT;
+}
+
+void ss_rng_method_set(int hash_type, int type, ce_new_task_desc_t *task)
+{
+	task->main_cmd |= (type << CE_CMD_RNG_METHOD_SHIFT);
+	task->main_cmd |= (hash_type << CE_CMD_HASH_METHOD_SHIFT);
+	if (type == SS_METHOD_DRBG) {
+		task->comm_ctl |= CE_CTL_HMAC_SHA1_LAST;
+		/* for drbg, need set sub_cmd bit[28:16] */
+		task->main_cmd |= (2 << 16 | 0 << 20 | BIT(28));
+	}
+}
+
+void ss_hash_rng_ctrl_start(ce_new_task_desc_t *task)
+{
+	phys_addr_t task_phy;
+
+	if (task->task_phy_addr) {
+		task_phy = task->task_phy_addr;
+	} else {
+		task_phy = virt_to_phys(task);
+	}
+
+	if (task_phy > 0xffffffff) {
+		ss_writel(CE_REG_TSK0, task_phy & 0xffffffff);
+		ss_writel(CE_REG_TSK1, ((unsigned long long)task_phy >> 32));
+	} else {
+		ss_writel(CE_REG_TSK0, task_phy);
+	}
+	ss_writel(CE_REG_TLR, 0x1 << CE_REG_TLR_HASH_RBG_TYPE_SHIFT);
+	task->task_phy_addr = task_phy;
+}
+
+void ss_hash_data_len_set(int len, ce_new_task_desc_t *task)
+{
+	task->comm_ctl |= 0 << 13;
+	ce_task_data_len_set(len, task->data_len);
 }
 
 int ss_reg_print(char *buf, int len)
@@ -442,68 +521,37 @@ int ss_reg_print(char *buf, int len)
 		);
 }
 
-/* key: phsical address. */
-void ss_rng_key_set(char *key, int size, ce_new_task_desc_t *task)
-{
-	ce_task_addr_set(key, 0, task->key_addr);
-}
 
-/* iv: phsical address. */
-void ss_hash_iv_set(char *iv, int size, ce_new_task_desc_t *task)
+void ce_reg_print(void)
 {
-	ce_task_addr_set(iv, 0, task->iv_addr);
-}
+		pr_err("The SS control register:\n");
+		pr_err("[TSK] 0x%02x = 0x%08x\n", CE_REG_TSK0, ss_readl(CE_REG_TSK0));
+		pr_err("[TSK] 0x%02x = 0x%08x\n", CE_REG_TSK1, ss_readl(CE_REG_TSK1));
+#ifdef SS_SUPPORT_CE_V3_1
+		pr_err("[CTL] 0x%02x = 0x%08x\n", CE_REG_CTL, ss_readl(CE_REG_CTL));
+#endif
+		pr_err("[ICR] 0x%02x = 0x%08x\n", CE_REG_ICR, ss_readl(CE_REG_ICR));
+		pr_err("[ISR] 0x%02x = 0x%08x\n", CE_REG_ISR, ss_readl(CE_REG_ISR));
+		pr_err("[TLR] 0x%02x = 0x%08x\n", CE_REG_TLR, ss_readl(CE_REG_TLR));
+		pr_err("[TSR] 0x%02x = 0x%08x\n", CE_REG_TSR, ss_readl(CE_REG_TSR));
+		pr_err("[ERR] 0x%02x = 0x%08x\n", CE_REG_ERR, ss_readl(CE_REG_ERR));
+#ifdef SS_SUPPORT_CE_V3_1
+		pr_err("[CSS] 0x%02x = 0x%08x\n", CE_REG_CSS, ss_readl(CE_REG_CSS));
+		pr_err("[CDS] 0x%02x = 0x%08x\n", CE_REG_CDS, ss_readl(CE_REG_CDS));
+#endif
+		pr_err("[CSA] 0x%02x = 0x%08x\n", CE_REG_CSA, ss_readl(CE_REG_CSA));
+		pr_err("[CDA] 0x%02x = 0x%08x\n", CE_REG_CDA, ss_readl(CE_REG_CDA));
+#ifdef SS_SUPPORT_CE_V3_1
+		pr_err("[TPR] 0x%02x = 0x%08x\n", CE_REG_TPR, ss_readl(CE_REG_TPR));
+#else
+		pr_err("[HCSA] 0x%02x = 0x%08x\n", CE_REG_HCSA, ss_readl(CE_REG_HCSA));
+		pr_err("[HCDA] 0x%02x = 0x%08x\n", CE_REG_HCDA, ss_readl(CE_REG_HCDA));
+		pr_err("[ACSA] 0x%02x = 0x%08x\n", CE_REG_ACSA, ss_readl(CE_REG_ACSA));
+		pr_err("[ACDA] 0x%02x = 0x%08x\n", CE_REG_ACDA, ss_readl(CE_REG_ACDA));
+		pr_err("[XCSA] 0x%02x = 0x%08x\n", CE_REG_XCSA, ss_readl(CE_REG_XCSA));
+		pr_err("[XCDA] 0x%02x = 0x%08x\n", CE_REG_XCDA, ss_readl(CE_REG_XCDA));
+		pr_err("[VER] 0x%02x = 0x%08x\n", CE_REG_VER, ss_readl(CE_REG_VER));
+#endif
 
-void ss_hash_iv_mode_set(int mode, ce_new_task_desc_t *task)
-{
-	task->comm_ctl |= mode << CE_CTL_IV_MODE_SHIFT;
-}
-
-void ss_hmac_sha1_last(ce_new_task_desc_t *task)
-{
-	task->comm_ctl |= CE_CTL_HMAC_SHA1_LAST;
-}
-
-void ss_hmac_method_set(int type, ce_new_task_desc_t *task)
-{
-	task->main_cmd |= type << CE_CMD_HASH_METHOD_SHIFT;
-	task->main_cmd |= 0x1 << CE_CMD_HMAC_METHOD_SHIFT;
-}
-
-void ss_hash_method_set(int type, ce_new_task_desc_t *task)
-{
-	task->main_cmd |= type << CE_CMD_HASH_METHOD_SHIFT;
-}
-
-void ss_rng_method_set(int hash_type, int type, ce_new_task_desc_t *task)
-{
-	task->main_cmd |= (type << CE_CMD_RNG_METHOD_SHIFT);
-	task->main_cmd |= (hash_type << CE_CMD_HASH_METHOD_SHIFT);
-	if (type == SS_METHOD_DRBG) {
-		task->comm_ctl |= CE_CTL_HMAC_SHA1_LAST;
-		/* for drbg, need set sub_cmd bit[28:16] */
-		task->main_cmd |= (2 << 16 | 0 << 20 | BIT(28));
-	}
-}
-
-void ss_hash_rng_ctrl_start(ce_new_task_desc_t *task)
-{
-	phys_addr_t task_phy;
-
-	task_phy = virt_to_phys(task);
-	if (task_phy > 0xffffffff) {
-		ss_writel(CE_REG_TSK0, task_phy & 0xffffffff);
-		ss_writel(CE_REG_TSK1, (task_phy >> 32));
-	} else {
-		ss_writel(CE_REG_TSK0, task_phy);
-	}
-	ss_writel(CE_REG_TLR, 0x1 << CE_REG_TLR_HASH_RBG_TYPE_SHIFT);
-	task->task_phy_addr = task_phy;
-}
-
-void ss_hash_data_len_set(int len, ce_new_task_desc_t *task)
-{
-	task->comm_ctl |= 0 << 13;
-	ce_task_data_len_set(len, task->data_len);
 }
 

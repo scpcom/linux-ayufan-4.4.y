@@ -117,9 +117,17 @@ static CLK_FIXED_FACTOR(pll_peri0_160m_clk, "pll-peri0-160m",
 			   "pll-peri0-480m",
 			   3, 1, 0);
 
+static CLK_FIXED_FACTOR(pll_peri0_16m_clk, "pll-peri0-16m",
+			   "pll-peri0-160m",
+			   10, 1, 0);
+
 static CLK_FIXED_FACTOR(pll_peri0_150m_clk, "pll-peri0-150m",
 			   "pll-peri0-300m",
 			   2, 1, 0);
+
+static CLK_FIXED_FACTOR(pll_peri0_25m_clk, "pll-peri0-25m",
+			   "pll-peri0-150m",
+			   6, 1, 0);
 
 #define SUN55IW3_PLL_PERI1_CTRL_REG   0x0028
 static struct ccu_nm pll_peri1_parent_clk = {
@@ -193,7 +201,7 @@ static struct ccu_nm pll_video0_4x_clk = {
 	.m		= _SUNXI_CCU_DIV(1, 1), /* input divider */
 	.common		= {
 		.reg		= 0x0040,
-		.hw.init	= CLK_HW_INIT("pll_video0_4x_clk", "dcxo24M",
+		.hw.init	= CLK_HW_INIT("pll-video0-4x", "dcxo24M",
 					      &ccu_nm_ops,
 					      CLK_SET_RATE_UNGATE |
 					      CLK_IS_CRITICAL),
@@ -216,7 +224,7 @@ static struct ccu_nm pll_video1_4x_clk = {
 	.m		= _SUNXI_CCU_DIV(0, 1), /* input divider */
 	.common		= {
 		.reg		= 0x0048,
-		.hw.init	= CLK_HW_INIT("pll_video1_4x_clk", "dcxo24M",
+		.hw.init	= CLK_HW_INIT("pll-video1-4x", "dcxo24M",
 					      &ccu_nm_ops,
 					      CLK_SET_RATE_UNGATE |
 					      CLK_IS_CRITICAL),
@@ -239,7 +247,7 @@ static struct ccu_nm pll_video2_4x_clk = {
 	.m		= _SUNXI_CCU_DIV(1, 1), /* input divider */
 	.common		= {
 		.reg		= 0x0050,
-		.hw.init	= CLK_HW_INIT("pll_video2_4x_clk", "dcxo24M",
+		.hw.init	= CLK_HW_INIT("pll-video2-4x", "dcxo24M",
 					      &ccu_nm_ops,
 					      CLK_SET_RATE_UNGATE |
 					      CLK_IS_CRITICAL),
@@ -359,38 +367,37 @@ static struct clk_div_table cpu0_div_table[] = {
 	{ .val = 2, .div = 4 },
 };
 
-static SUNXI_CCU_DIV_TABLE(cpu0_div, "cpu0-div", "pll-cpu0",
+static SUNXI_CCU_DIV_TABLE(cpu0_div_clk, "cpu0-div", "pll-cpu0",
 		0x0500, 16, 2, cpu0_div_table, CLK_SET_RATE_PARENT);
 
-static const char * const cpu_parents[] = { "hosc", "osc32k", "clk16m-rc", "cpu0-div", "pll-peri0-600m", "pll-cpu2" };
+static const char * const cpu_parents[] = { "dcxo24M", "osc32k", "iosc", "cpu0-div", "pll-peri0-600m", "pll-cpu2" };
 
 static SUNXI_CCU_MUX(cpu_clk, "cpu", cpu_parents,
 		     0x0500, 24, 3, CLK_SET_RATE_PARENT | CLK_IS_CRITICAL);
 
 static SUNXI_CCU_M(cpu_axi_clk, "cpu-axi",
-		   "dsu-parent", 0x0500, 1, 2, 0);
+		   "dsu", 0x0500, 1, 2, 0);
 
 static SUNXI_CCU_M(cpu_apb_clk, "cpu-apb",
-		   "dsu-parent", 0x0500, 8, 2, 0);
+		   "dsu", 0x0500, 8, 2, 0);
 
 static SUNXI_CCU_M(cpu_peri_clk, "cpu-peri",
-		   "dsu-parent", 0x0500, 2, 2, 0);
+		   "dsu", 0x0500, 2, 2, 0);
 
 /* wrong clk name:0504
 static SUNXI_CCU_GATE(cpu_gatin_clk, "cpu-gatin",
                       "cpu-gatin-clk-parents",
                       0x0504, BIT(16), 0);
-
-static SUNXI_CCU_GATE(dsu_clk_clk, "dsu-clk",
-                      "dsu-clk-clk-parents",
+*/
+static SUNXI_CCU_GATE(dsu_clk, "dsu", "hosc",
                       0x0504, BIT(1), 0);
-
+/*
 static SUNXI_CCU_GATE(cpu0_clk_clk, "cpu0-clk",
                       "cpu0-clk-clk-parents",
                       0x0504, BIT(0), 0);
 */
 
-static const char * const trace_parents[] = { "hosc", "osc32k", "clk16m-rc", "peri0-300m", "peri0-400m" };
+static const char * const trace_parents[] = { "dcxo24M", "osc32k", "iosc", "pll-peri0-300m", "pll-peri0-400m" };
 
 static SUNXI_CCU_M_WITH_MUX_GATE(trace_clk, "trace",
                                  trace_parents, 0x0508,
@@ -405,30 +412,30 @@ static struct clk_div_table cpu1_div_table[] = {
 	{ .val = 2, .div = 4 },
 };
 
-static SUNXI_CCU_DIV_TABLE(cpu1_div, "cpu1-div", "pll-cpu1",
-		0x050c, 16, 2, cpu0_div_table, CLK_SET_RATE_PARENT);
+static SUNXI_CCU_DIV_TABLE(cpu1_div_clk, "cpu1-div", "pll-cpu1",
+		0x050c, 16, 2, cpu1_div_table, CLK_SET_RATE_PARENT);
 
-static const char * const dsu_parents[] = { "hosc", "osc32k", "clk16m-rc", "cpu1-div", "pll-peri0-2x", "pll-peri0-600m" };
+static const char * const dsu_parents[] = { "dcxo24M", "osc32k", "iosc", "cpu1-div", "pll-peri0-2x", "pll-peri0-600m" };
 
 static SUNXI_CCU_MUX(dsu_parents_clk, "dsu-parents", dsu_parents,
 		     0x050c, 24, 3, CLK_SET_RATE_PARENT | CLK_IS_CRITICAL);
 
-static const char * const ahb_parents[] = { "hosc", "osc32k", "clk16m-rc", "pll-peri0-600m" };
+static const char * const ahb_parents[] = { "dcxo24M", "osc32k", "iosc", "pll-peri0-600m" };
 
 SUNXI_CCU_M_WITH_MUX(ahb_clk, "ahb", ahb_parents,
 		     0x0510, 0, 5, 24, 2, CLK_SET_RATE_PARENT);
 
-static const char * const apb0_parents[] = { "hosc", "osc32k", "clk16m-rc", "pll-peri0-600m" };
+static const char * const apb0_parents[] = { "dcxo24M", "osc32k", "iosc", "pll-peri0-600m" };
 
 SUNXI_CCU_M_WITH_MUX(apb0_clk, "apb0", apb0_parents,
 		     0x0520, 0, 5, 24, 2, CLK_SET_RATE_PARENT);
 
-static const char * const apb1_parents[] = { "hosc", "osc32k", "clk16m-rc", "pll-peri0-600m" };
+static const char * const apb1_parents[] = { "dcxo24M", "osc32k", "iosc", "pll-peri0-600m" };
 
 SUNXI_CCU_M_WITH_MUX(apb1_clk, "apb1", apb1_parents,
 		     0x0524, 0, 5, 24, 2, CLK_SET_RATE_PARENT);
 
-static const char * const mbus_parents[] = { "hosc", "pll-ddr", "peri0-600m", "peri0-480m", "peri0-400m" };
+static const char * const mbus_parents[] = { "pll-ddr", "pll-peri1-600m", "pll-peri1-480m", "pll-peri1-400m", "pll-peri1-150m", "hosc" };
 
 static SUNXI_CCU_M_WITH_MUX_GATE(mbus_clk, "mbus",
                                  mbus_parents, 0x0540,
@@ -441,7 +448,7 @@ static SUNXI_CCU_GATE(nsi_clk, "nsi",
                       "dcxo24M",
                       0x054C, BIT(0), 0);
 
-static const char * const gic_parents[] = { "hosc", "osc32k", "peri0-600m", "peri0-480m" };
+static const char * const gic_parents[] = { "dcxo24M", "osc32k", "pll-peri0-600m", "pll-peri0-480m" };
 
 static SUNXI_CCU_M_WITH_MUX_GATE(gic_clk, "gic",
                                  gic_parents, 0x0550,
@@ -450,7 +457,7 @@ static SUNXI_CCU_M_WITH_MUX_GATE(gic_clk, "gic",
 				 BIT(31),	/* gate */
 				 CLK_SET_RATE_PARENT);
 
-static const char * const de_parents[] = { "peri0-300m", "peri0-400m", "pll-video0-4x", "pll-video1-4x", "pll-video2-4x", "pll-video3-4x" };
+static const char * const de_parents[] = { "pll-peri0-300m", "pll-peri0-400m", "pll-video0-4x", "pll-video1-4x", "pll-video2-4x", "pll-video3-4x" };
 
 static SUNXI_CCU_M_WITH_MUX_GATE(de_clk, "de",
                                  de_parents, 0x0600,
@@ -463,7 +470,7 @@ static SUNXI_CCU_GATE(de0_clk, "de0",
                       "dcxo24M",
                       0x060C, BIT(0), 0);
 
-static const char * const di_parents[] = { "peri0-400m", "pll-video0-4x" };
+static const char * const di_parents[] = { "pll-peri0-400m", "pll-video0-4x" };
 
 static SUNXI_CCU_M_WITH_MUX_GATE(di_clk, "di",
                                  di_parents, 0x0620,
@@ -476,7 +483,7 @@ static SUNXI_CCU_GATE(bus_di_clk, "bus-di",
                       "dcxo24M",
                       0x062C, BIT(0), 0);
 
-static const char * const g2d_parents[] = { "peri0-400m", "peri0-300m", "pll-video0-4x" };
+static const char * const g2d_parents[] = { "pll-peri0-400m", "pll-peri0-300m", "pll-video0-4x" };
 
 static SUNXI_CCU_M_WITH_MUX_GATE(g2d_clk, "g2d",
                                  g2d_parents, 0x0630,
@@ -489,7 +496,7 @@ static SUNXI_CCU_GATE(bus_g2d_clk, "bus-g2d",
                       "dcxo24M",
                       0x063C, BIT(0), 0);
 
-static const char * const cpu_core_parents[] = { "peri0-800m", "peri0-600m", "peri0-400m", "peri0-300m", "peri0-200m" };
+static const char * const cpu_core_parents[] = { "pll-peri0-800m", "pll-peri0-600m", "pll-peri0-400m", "pll-peri0-300m", "pll-peri0-200m" };
 
 static SUNXI_CCU_M_WITH_MUX_GATE(cpu_core_clk, "cpu-core",
                                  cpu_core_parents, 0x0670,
@@ -502,7 +509,7 @@ static SUNXI_CCU_GATE(gpu_clk, "gpu",
                       "dcxo24M",
                       0x067C, BIT(0), 0);
 
-static const char * const ce_parents[] = { "hosc", "peri0-480m", "peri0-400m", "peri0-300m" };
+static const char * const ce_parents[] = { "dcxo24M", "pll-peri0-480m", "pll-peri0-400m", "pll-peri0-300m" };
 
 static SUNXI_CCU_M_WITH_MUX_GATE(ce_clk, "ce",
                                  ce_parents, 0x0680,
@@ -519,7 +526,7 @@ static SUNXI_CCU_GATE(bus_ce_clk, "bus-ce",
                       "dcxo24M",
                       0x068C, BIT(0), 0);
 
-static const char * const ve_parents[] = { "vepll", "peri0-480m", "peri0-400m", "peri0-300m" };
+static const char * const ve_parents[] = { "vepll", "pll-peri0-480m", "pll-peri0-400m", "pll-peri0-300m" };
 
 static SUNXI_CCU_M_WITH_MUX_GATE(ve_clk, "ve",
                                  ve_parents, 0x0690,
@@ -532,7 +539,7 @@ static SUNXI_CCU_GATE(bus_ve_clk, "bus-ve",
                       "dcxo24M",
                       0x069C, BIT(0), 0);
 
-static const char * const npu_parents[] = { "peri0-480m", "peri0-600m", "peri0-800m", "npupll4x" };
+static const char * const npu_parents[] = { "pll-peri0-480m", "pll-peri0-600m", "pll-peri0-800m", "npupll4x" };
 
 static SUNXI_CCU_M_WITH_MUX_GATE(npu_clk, "npu",
                                  npu_parents, 0x06E0,
@@ -565,15 +572,19 @@ static SUNXI_CCU_GATE(dbgsys_clk, "dbgsys",
                       "dcxo24M",
                       0x078C, BIT(0), 0);
 
+static SUNXI_CCU_GATE(pwm1_clk, "pwm1",
+			"dcxo24M",
+			0x07AC, BIT(1), 0);
+
 static SUNXI_CCU_GATE(pwm_clk, "pwm",
-                      "dcxo24M",
-                      0x07AC, BIT(0), 0);
+			"dcxo24M",
+			0x07AC, BIT(0), 0);
 
 static SUNXI_CCU_GATE(iommu_clk, "iommu",
                       "dcxo24M",
                       0x07BC, BIT(0), 0);
 
-static const char * const timer0_parents[] = { "hosc", "rc-clk-16m", "clk-32k", "clk- peri0-200m" };
+static const char * const timer_parents[] = { "dcxo24M", "iosc", "clk-32k", "clk-peri0-200m" };
 
 static struct ccu_div timer0_clk = {
 	.enable		= BIT(31),
@@ -581,11 +592,9 @@ static struct ccu_div timer0_clk = {
 	.mux		= _SUNXI_CCU_MUX(24, 3),
 	.common		= {
 		.reg		= 0x0730,
-		.hw.init	= CLK_HW_INIT("timer0", "timer0-parent", &ccu_div_ops, 0),
+		.hw.init	= CLK_HW_INIT_PARENTS("timer0", timer_parents, &ccu_div_ops, 0),
 	},
 };
-
-static const char * const timer1_parents[] = { "hosc", "rc-clk-16m", "clk-32k", "clk- peri0-200m" };
 
 static struct ccu_div timer1_clk = {
 	.enable		= BIT(31),
@@ -593,11 +602,9 @@ static struct ccu_div timer1_clk = {
 	.mux		= _SUNXI_CCU_MUX(24, 3),
 	.common		= {
 		.reg		= 0x0730,
-		.hw.init	= CLK_HW_INIT("timer1", "timer1-parent", &ccu_div_ops, 0),
+		.hw.init	= CLK_HW_INIT_PARENTS("timer1", timer_parents, &ccu_div_ops, 0),
 	},
 };
-
-static const char * const timer2_parents[] = { "hosc", "rc-clk-16m", "clk-32k", "clk- peri0-200m" };
 
 static struct ccu_div timer2_clk = {
 	.enable		= BIT(31),
@@ -605,11 +612,9 @@ static struct ccu_div timer2_clk = {
 	.mux		= _SUNXI_CCU_MUX(24, 3),
 	.common		= {
 		.reg		= 0x0730,
-		.hw.init	= CLK_HW_INIT("timer2", "timer2-parent", &ccu_div_ops, 0),
+		.hw.init	= CLK_HW_INIT_PARENTS("timer2", timer_parents, &ccu_div_ops, 0),
 	},
 };
-
-static const char * const timer3_parents[] = { "hosc", "rc-clk-16m", "clk-32k", "clk- peri0-200m" };
 
 static struct ccu_div timer3_clk = {
 	.enable		= BIT(31),
@@ -617,11 +622,9 @@ static struct ccu_div timer3_clk = {
 	.mux		= _SUNXI_CCU_MUX(24, 3),
 	.common		= {
 		.reg		= 0x0730,
-		.hw.init	= CLK_HW_INIT("timer3", "timer3-parent", &ccu_div_ops, 0),
+		.hw.init	= CLK_HW_INIT_PARENTS("timer3", timer_parents, &ccu_div_ops, 0),
 	},
 };
-
-static const char * const timer4_parents[] = { "hosc", "rc-clk-16m", "clk-32k", "clk- peri0-200m" };
 
 static struct ccu_div timer4_clk = {
 	.enable		= BIT(31),
@@ -629,11 +632,9 @@ static struct ccu_div timer4_clk = {
 	.mux		= _SUNXI_CCU_MUX(24, 3),
 	.common		= {
 		.reg		= 0x0730,
-		.hw.init	= CLK_HW_INIT("timer4", "timer4-parent", &ccu_div_ops, 0),
+		.hw.init	= CLK_HW_INIT_PARENTS("timer4", timer_parents, &ccu_div_ops, 0),
 	},
 };
-
-static const char * const timer5_parents[] = { "hosc", "rc-clk-16m", "clk-32k", "clk- peri0-200m" };
 
 static struct ccu_div timer5_clk = {
 	.enable		= BIT(31),
@@ -641,11 +642,11 @@ static struct ccu_div timer5_clk = {
 	.mux		= _SUNXI_CCU_MUX(24, 3),
 	.common		= {
 		.reg		= 0x0730,
-		.hw.init	= CLK_HW_INIT("timer5", "timer5-parent", &ccu_div_ops, 0),
+		.hw.init	= CLK_HW_INIT_PARENTS("timer5", timer_parents, &ccu_div_ops, 0),
 	},
 };
 
-static const char * const dram_parents[] = { "pll-ddr", "peri1-600m", "peri1-480m", "peri1-400m", "peri1-150m" };
+static const char * const dram_parents[] = { "pll-ddr", "pll-peri1-600m", "peri1-480m", "pll-peri1-400m", "peri1-150m" };
 
 static SUNXI_CCU_M_WITH_MUX_GATE(dram_clk, "dram",
                                  dram_parents, 0x0800,
@@ -686,7 +687,7 @@ static SUNXI_CCU_GATE(bus_dram_clk, "bus-dram",
                       "dcxo24M",
                       0x080C, BIT(0), 0);
 
-static const char * const nand0_clk0_parents[] = { "hosc", "peri0-400m", "peri0-300m", "peri1-400m", "peri1-300m" };
+static const char * const nand0_clk0_parents[] = { "dcxo24M", "pll-peri0-400m", "pll-peri0-300m", "pll-peri1-400m", "pll-peri1-300m" };
 
 static SUNXI_CCU_M_WITH_MUX_GATE(nand0_clk0_clk, "nand0-clk0",
                                  nand0_clk0_parents, 0x0810,
@@ -695,7 +696,7 @@ static SUNXI_CCU_M_WITH_MUX_GATE(nand0_clk0_clk, "nand0-clk0",
 				 BIT(31),	/* gate */
 				 CLK_SET_RATE_PARENT);
 
-static const char * const nand0_clk1_parents[] = { "hosc", "peri0-400m", "peri0-300m", "peri1-400m", "peri1-300m" };
+static const char * const nand0_clk1_parents[] = { "dcxo24M", "pll-peri0-400m", "pll-peri0-300m", "pll-peri1-400m", "pll-peri1-300m" };
 
 static SUNXI_CCU_M_WITH_MUX_GATE(nand0_clk1_clk, "nand0-clk1",
                                  nand0_clk1_parents, 0x0814,
@@ -708,7 +709,7 @@ static SUNXI_CCU_GATE(nand0_clk, "nand0",
                       "dcxo24M",
                       0x082C, BIT(0), 0);
 
-static const char * const smhc0_parents[] = { "hosc", "peri0-400m", "peri0-300m", "peri1-400m", "peri1-300m" };
+static const char * const smhc0_parents[] = { "dcxo24M", "pll-peri0-400m", "pll-peri0-300m", "pll-peri1-400m", "pll-peri1-300m" };
 
 static SUNXI_CCU_MP_WITH_MUX_GATE_NO_INDEX(smhc0_clk, "smhc0",
                                            smhc0_parents, 0x0830,
@@ -717,7 +718,7 @@ static SUNXI_CCU_MP_WITH_MUX_GATE_NO_INDEX(smhc0_clk, "smhc0",
 			                   24, 3,	/* mux */
 					   BIT(31), 0);
 
-static const char * const smhc1_parents[] = { "hosc", "peri0-400m", "peri0-300m", "peri1-400m", "peri1-300m" };
+static const char * const smhc1_parents[] = { "dcxo24M", "pll-peri0-400m", "pll-peri0-300m", "pll-peri1-400m", "pll-peri1-300m" };
 
 static SUNXI_CCU_MP_WITH_MUX_GATE_NO_INDEX(smhc1_clk, "smhc1",
                                            smhc1_parents, 0x0834,
@@ -726,7 +727,7 @@ static SUNXI_CCU_MP_WITH_MUX_GATE_NO_INDEX(smhc1_clk, "smhc1",
 			                   24, 3,	/* mux */
 					   BIT(31), 0);
 
-static const char * const smhc2_parents[] = { "hosc", "peri0-800m", "peri0-600m", "peri1-800m", "peri1-600m" };
+static const char * const smhc2_parents[] = { "dcxo24M", "pll-peri0-800m", "pll-peri0-600m", "pll-peri1-800m", "pll-peri1-600m" };
 
 static SUNXI_CCU_MP_WITH_MUX_GATE_NO_INDEX(smhc2_clk, "smhc2",
                                            smhc2_parents, 0x0838,
@@ -811,7 +812,7 @@ static SUNXI_CCU_GATE(can0_clk, "can0",
                       "dcxo24M",
                       0x092C, BIT(0), 0);
 
-static const char * const spi0_parents[] = { "hosc", "peri0-300m", "peri0-200m", "peri1-300m", "peri1-200m" };
+static const char * const spi0_parents[] = { "dcxo24M", "pll-peri0-300m", "pll-peri0-200m", "pll-peri1-300m", "pll-peri1-200m" };
 
 static SUNXI_CCU_M_WITH_MUX_GATE(spi0_clk, "spi0",
                                            spi0_parents, 0x0940,
@@ -819,7 +820,7 @@ static SUNXI_CCU_M_WITH_MUX_GATE(spi0_clk, "spi0",
 			                   24, 3,	/* mux */
 					   BIT(31), 0);
 
-static const char * const spi1_parents[] = { "hosc", "peri0-300m", "peri0-200m", "peri1-300m", "peri1-200m" };
+static const char * const spi1_parents[] = { "dcxo24M", "pll-peri0-300m", "pll-peri0-200m", "pll-peri1-300m", "pll-peri1-200m" };
 
 static SUNXI_CCU_M_WITH_MUX_GATE(spi1_clk, "spi1",
                                            spi1_parents, 0x0944,
@@ -827,7 +828,7 @@ static SUNXI_CCU_M_WITH_MUX_GATE(spi1_clk, "spi1",
 			                   24, 3,	/* mux */
 					   BIT(31), 0);
 
-static const char * const spi2_parents[] = { "hosc", "peri0-300m", "peri0-200m", "peri1-300m", "peri1-200m" };
+static const char * const spi2_parents[] = { "dcxo24M", "pll-peri0-300m", "pll-peri0-200m", "pll-peri1-300m", "pll-peri1-200m" };
 
 static SUNXI_CCU_M_WITH_MUX_GATE(spi2_clk, "spi2",
                                            spi2_parents, 0x0948,
@@ -835,7 +836,7 @@ static SUNXI_CCU_M_WITH_MUX_GATE(spi2_clk, "spi2",
 			                   24, 3,	/* mux */
 					   BIT(31), 0);
 
-static const char * const spif_parents[] = { "hosc", "peri0-200m", "peri0-300m", "peri1-200m", "peri1-300m" };
+static const char * const spif_parents[] = { "dcxo24M", "pll-peri0-200m", "pll-peri0-300m", "pll-peri1-200m", "pll-peri1-300m" };
 
 static SUNXI_CCU_MP_WITH_MUX_GATE_NO_INDEX(spif_clk, "spif",
                                            spif_parents, 0x0950,
@@ -884,7 +885,7 @@ static SUNXI_CCU_GATE(gmac0_clk, "gmac0",
                       "dcxo24M",
                       0x097C, BIT(0), 0);
 
-static const char * const irrx_parents[] = { "osc32k", "hosc" };
+static const char * const irrx_parents[] = { "osc32k", "dcxo24M" };
 
 static SUNXI_CCU_M_WITH_MUX_GATE(irrx_clk, "irrx",
                                  irrx_parents, 0x0990,
@@ -897,7 +898,7 @@ static SUNXI_CCU_GATE(bus_irrx_clk, "bus-irrx",
                       "dcxo24M",
                       0x099C, BIT(0), 0);
 
-static const char * const irtx_parents[] = { "hosc", "peri1-600m" };
+static const char * const irtx_parents[] = { "dcxo24M", "pll-peri1-600m" };
 
 static SUNXI_CCU_M_WITH_MUX_GATE(irtx_clk, "irtx",
                                  irtx_parents, 0x09C0,
@@ -910,11 +911,11 @@ static SUNXI_CCU_GATE(bus_irtx_clk, "bus-irtx",
                       "dcxo24M",
                       0x09CC, BIT(0), 0);
 
-static SUNXI_CCU_GATE(gpadc_24m_clk, "gpadc-24m",
+static SUNXI_CCU_GATE(bus_gpadc0_clk, "bus-gpadc0",
                       "dcxo24M",
                       0x09E0, BIT(31), 0);
 
-static SUNXI_CCU_GATE(gpadc_clk, "gpadc",
+static SUNXI_CCU_GATE(bus_gpadc1_clk, "bus-gpadc1",
                       "dcxo24M",
                       0x09EC, BIT(0), 0);
 
@@ -926,10 +927,10 @@ static SUNXI_CCU_GATE(usb_clk, "usb",
                       "dcxo24M",
                       0x0A70, BIT(31), 0);
 
-static CLK_FIXED_FACTOR(dcxo24M_div_12m_clk, "dcxo24M-div-12m", "dcxo24M", 2, 1, 0);
+static CLK_FIXED_FACTOR(dcxo12M_clk, "dcxo12M", "dcxo24M", 2, 1, 0);
 
 #define SUN55IW3_USB0_CTRL_REG   0x0A70
-static const char * const usb_parents[] = { "pll-audio0-div-48m", "dcxo24-div-12m", "osc32k", "iosc" };
+static const char * const usb_parents[] = { "pll-audio0-div-48m", "dcxo12M", "osc32k", "iosc" };
 
 static SUNXI_CCU_MUX_WITH_GATE(usb0_clk, "usb0", usb_parents, 0x0A70,
 			       24, 2, BIT(31), 0);
@@ -962,7 +963,7 @@ static SUNXI_CCU_GATE(lradc_clk, "lradc",
                       "dcxo24M",
                       0x0A9C, BIT(0), 0);
 
-static const char * const pcie_ref_alt_parents[] = { "hosc", "osc32k" };
+static const char * const pcie_ref_alt_parents[] = { "dcxo24M", "osc32k" };
 
 static SUNXI_CCU_M_WITH_MUX_GATE(pcie_ref_alt_clk, "pcie-ref-alt",
                                  pcie_ref_alt_parents, 0x0AA0,
@@ -1002,7 +1003,7 @@ static SUNXI_CCU_GATE(hdmi_clk, "hdmi",
                       "dcxo24M",
                       0x0B1C, BIT(0), 0);
 
-static const char * const dsi0_parents[] = { "hosc", "peri0-200m", "peri0-150m" };
+static const char * const dsi0_parents[] = { "dcxo24M", "pll-peri0-200m", "pll-peri0-150m" };
 
 static SUNXI_CCU_M_WITH_MUX_GATE(dsi0_clk, "dsi0",
                                  dsi0_parents, 0x0B24,
@@ -1011,7 +1012,7 @@ static SUNXI_CCU_M_WITH_MUX_GATE(dsi0_clk, "dsi0",
 				 BIT(31),	/* gate */
 				 CLK_SET_RATE_PARENT);
 
-static const char * const dsi1_parents[] = { "hosc", "peri0-200m", "peri0-150m" };
+static const char * const dsi1_parents[] = { "dcxo24M", "pll-peri0-200m", "pll-peri0-150m" };
 
 static SUNXI_CCU_M_WITH_MUX_GATE(dsi1_clk, "dsi1",
                                  dsi1_parents, 0x0B28,
@@ -1111,7 +1112,7 @@ static SUNXI_CCU_GATE(bus_tcontv_clk, "bus-tcontv",
                       "dcxo24M",
                       0x0B9C, BIT(0), 0);
 
-static const char * const ledc_parents[] = { "hosc", "peri0-600m" };
+static const char * const ledc_parents[] = { "dcxo24M", "pll-peri0-600m" };
 
 static SUNXI_CCU_M_WITH_MUX_GATE(ledc_clk, "ledc",
                                            ledc_parents, 0x0BF0,
@@ -1119,7 +1120,7 @@ static SUNXI_CCU_M_WITH_MUX_GATE(ledc_clk, "ledc",
 			                   24, 1,	/* mux */
 					   BIT(31), 0);
 
-static const char * const edp_parents[] = { "pll-video0-4x", "pll-vidio1-4x", "pll-vidio2-4x", "pll-vidio3-4x", "pll-peri0-2x", };
+static const char * const edp_parents[] = { "pll-video0-4x", "pll-vidio1-4x", "pll-vidio2-4x", "pll-vidio3-4x", "pll-peri0-2x" };
 
 static SUNXI_CCU_M_WITH_MUX_GATE(edp_clk, "edp",
                                  edp_parents, 0x0BB0,
@@ -1132,16 +1133,15 @@ static SUNXI_CCU_GATE(bus_ledc_clk, "bus-ledc",
                       "dcxo24M",
                       0x0BFC, BIT(0), 0);
 
-static const char * const csi_parents[] = { "peri0-300m", "peri0-400m", "peri0-480m", "pll-video0-4x", "pll-video3-4x" };
+static const char * const csi_parents[] = { "pll-peri0-300m", "pll-peri0-400m", "pll-peri0-480m", "pll-video0-4x", "pll-video3-4x" };
 
 static SUNXI_CCU_M_WITH_MUX_GATE(csi_clk, "csi",
                                  csi_parents, 0x0C04,
-			         0, 5,	/* M */
+				 0, 5, /* m */
 			         24, 3,	/* mux */
-				 BIT(31),	/* gate */
-				 CLK_SET_RATE_PARENT);
+				 BIT(31), 0);
 
-static const char * const csi_master0_parents[] = { "hosc", "pll-video3-4x", "pll-video0-4x", "pll-video1-4x", "pll-video2-4x" };
+static const char * const csi_master0_parents[] = { "dcxo24m", "pll-video3-4x", "pll-video0-4x", "pll-video1-4x", "pll-video2-4x" };
 
 static SUNXI_CCU_MP_WITH_MUX_GATE_NO_INDEX(csi_master0_clk, "csi-master0",
                                            csi_master0_parents, 0x0C08,
@@ -1150,7 +1150,7 @@ static SUNXI_CCU_MP_WITH_MUX_GATE_NO_INDEX(csi_master0_clk, "csi-master0",
 			                   24, 3,	/* mux */
 					   BIT(31), 0);
 
-static const char * const csi_master1_parents[] = { "hosc", "pll-video3-4x", "pll-video0-4x", "pll-video1-4x", "pll-video2-4x" };
+static const char * const csi_master1_parents[] = { "dcxo24M", "pll-video3-4x", "pll-video0-4x", "pll-video1-4x", "pll-video2-4x" };
 
 static SUNXI_CCU_MP_WITH_MUX_GATE_NO_INDEX(csi_master1_clk, "csi-master1",
                                            csi_master1_parents, 0x0C0C,
@@ -1159,7 +1159,7 @@ static SUNXI_CCU_MP_WITH_MUX_GATE_NO_INDEX(csi_master1_clk, "csi-master1",
 			                   24, 3,	/* mux */
 					   BIT(31), 0);
 
-static const char * const csi_master2_parents[] = { "hosc", "pll-video3-4x", "pll-video0-4x", "pll-video1-4x", "pll-video2-4x" };
+static const char * const csi_master2_parents[] = { "dcxo24M", "pll-video3-4x", "pll-video0-4x", "pll-video1-4x", "pll-video2-4x" };
 
 static SUNXI_CCU_MP_WITH_MUX_GATE_NO_INDEX(csi_master2_clk, "csi-master2",
                                            csi_master2_parents, 0x0C10,
@@ -1168,7 +1168,7 @@ static SUNXI_CCU_MP_WITH_MUX_GATE_NO_INDEX(csi_master2_clk, "csi-master2",
 			                   24, 3,	/* mux */
 					   BIT(31), 0);
 
-static const char * const csi_master3_parents[] = { "hosc", "pll-video3-4x", "pll-video0-4x", "pll-video1-4x", "pll-video2-4x" };
+static const char * const csi_master3_parents[] = { "dcxo24M", "pll-video3-4x", "pll-video0-4x", "pll-video1-4x", "pll-video2-4x" };
 
 static SUNXI_CCU_MP_WITH_MUX_GATE_NO_INDEX(csi_master3_clk, "csi-master3",
                                            csi_master3_parents, 0x0C14,
@@ -1181,7 +1181,7 @@ static SUNXI_CCU_GATE(bus_csi_clk, "bus-csi",
                       "dcxo24M",
                       0x0C1C, BIT(0), 0);
 
-static const char * const isp_parents[] = { "peri0-300m", "peri0-400m", "pll-video0-4x", "pll-video3-4x" };
+static const char * const isp_parents[] = { "pll-peri0-300m", "pll-peri0-400m", "pll-video0-4x", "pll-video3-4x" };
 
 static SUNXI_CCU_M_WITH_MUX_GATE(isp_clk, "isp",
                                  isp_parents, 0x0C20,
@@ -1190,7 +1190,7 @@ static SUNXI_CCU_M_WITH_MUX_GATE(isp_clk, "isp",
 				 BIT(31),	/* gate */
 				 CLK_SET_RATE_PARENT);
 
-static const char * const dsp_parents[] = { "hosc", "osc32k", "clk16m-rc", "pll-peri0-2x", "peri0-480m" };
+static const char * const dsp_parents[] = { "dcxo24M", "osc32k", "iosc", "pll-peri0-2x", "pll-peri0-480m" };
 
 static SUNXI_CCU_M_WITH_MUX_GATE(dsp_clk, "dsp",
                                  dsp_parents, 0x0C70,
@@ -1306,33 +1306,26 @@ static SUNXI_CCU_MP_WITH_MUX_GATE_NO_INDEX(clk27m_fanout_clk, "clk27m_fanout",
 
 static const char * const clk_fanout_parents[] = { "apb0" };
 
-static SUNXI_CCU_MP_WITH_MUX_GATE_NO_INDEX(clk_fanout_clk, "clk_fanout",
+static SUNXI_CCU_MP_WITH_MUX_GATE_NO_INDEX(clk_fanout_clk, "clk-fanout",
                                            clk_fanout_parents, 0x0F38,
                                            0, 5,	/* M */
                                            5, 5,	/* N */
 			                   24, 2,	/* mux */
 					   BIT(31), 0);
 
-static const char * const fanout2_clk_parents[] = { "fanout-32k", "osc32k","clk12m", "clk16m", "clk24m", "clk25m", "clk27m", "pclk" };
+static const char * const fanout_clk_parents[] = { "rtc-32k-fanout", "osc32k", "dcxo-div-12m", "pll-peri0-16m", "dcxo24M", "pll-peri0-25m", "clk27m-fanout", "clk-fanout" };
 
-static SUNXI_CCU_MUX(fanout2_clk, "fanout2", fanout2_clk_parents,
+static SUNXI_CCU_MUX(fanout2_clk, "fanout2", fanout_clk_parents,
 		     0x0F3C, 6, 3, CLK_SET_RATE_PARENT | CLK_IS_CRITICAL);
 
-static const char * const fanout1_clk_parents[] = { "fanout-32k", "osc32k","clk12m", "clk16m", "clk24m", "clk25m", "clk27m", "pclk" };
-
-static SUNXI_CCU_MUX(fanout1_clk, "fanout1", fanout1_clk_parents,
+static SUNXI_CCU_MUX(fanout1_clk, "fanout1", fanout_clk_parents,
 		     0x0F3C, 3, 3, CLK_SET_RATE_PARENT | CLK_IS_CRITICAL);
 
-static const char * const fanout0_clk_parents[] = { "fanout-32k", "osc32k","clk12m", "clk16m", "clk24m", "clk25m", "clk27m", "pclk" };
-
-static SUNXI_CCU_MUX(fanout0_clk, "fanout0", fanout0_clk_parents,
+static SUNXI_CCU_MUX(fanout0_clk, "fanout0", fanout_clk_parents,
 		     0x0F3C, 0, 3, CLK_SET_RATE_PARENT | CLK_IS_CRITICAL);
 
 /* for pm resume */
 #define SUN55IW3_PLL_PERIPH1_PATTERN0_REG	0x128
-static struct ccu_common pll_periph1_pattern0_common = {
-	.reg = 0x128,
-};
 
 /* ccu_des_end */
 
@@ -1353,6 +1346,7 @@ static struct ccu_reset_map sun55iw3_ccu_resets[] = {
  [RST_BUS_SPINLOCK]		= { 0x072c, BIT(16) },
  [RST_BUS_TIME]			= { 0x074c, BIT(16) },
  [RST_BUS_DBGSY]		= { 0x078c, BIT(16) },
+ [RST_BUS_PWM1]			= { 0x07ac, BIT(17) },
  [RST_BUS_PWM]			= { 0x07ac, BIT(16) },
  [RST_BUS_DRAM]			= { 0x080c, BIT(16) },
  [RST_BUS_NAND0]		= { 0x082c, BIT(16) },
@@ -1383,7 +1377,8 @@ static struct ccu_reset_map sun55iw3_ccu_resets[] = {
  [RST_BUS_GMAC0]		= { 0x097c, BIT(16) },
  [RST_BUS_IRRX]			= { 0x099c, BIT(16) },
  [RST_BUS_IRTX]			= { 0x09cc, BIT(16) },
- [RST_BUS_GPADC]		= { 0x09ec, BIT(16) },
+ [RST_BUS_GPADC1]		= { 0x09ec, BIT(17) },
+ [RST_BUS_GPADC0]		= { 0x09ec, BIT(16) },
  [RST_BUS_TH]			= { 0x09fc, BIT(16) },
  [RST_USB_PHY0_RSTN]		= { 0x0a70, BIT(30) },
  [RST_USB_PHY1_RSTN]		= { 0x0a74, BIT(30) },
@@ -1423,11 +1418,28 @@ static struct clk_hw_onecell_data sun55iw3_hw_clks = {
 		[CLK_PLL_CPU0]			= &pll_cpu0_clk.common.hw,
 		[CLK_PLL_DDR]			= &pll_ddr_clk.common.hw,
 		[CLK_PLL_PERI0_PARENT]		= &pll_peri0_parent_clk.common.hw,
+		[CLK_PLL_PERI0_2X]		= &pll_peri0_2x_clk.common.hw,
+		[CLK_PERI0_DIV3]		= &pll_peri0_div3_clk.hw,
 		[CLK_PLL_PERI0_800M]		= &pll_peri0_800m_clk.common.hw,
 		[CLK_PLL_PERI0_480M]		= &pll_peri0_480m_clk.common.hw,
+		[CLK_PLL_PERI0_600M]		= &pll_peri0_600m_clk.hw,
+		[CLK_PLL_PERI0_400M]		= &pll_peri0_400m_clk.hw,
+		[CLK_PLL_PERI0_300M]		= &pll_peri0_300m_clk.hw,
+		[CLK_PLL_PERI0_200M]		= &pll_peri0_200m_clk.hw,
+		[CLK_PLL_PERI0_160M]		= &pll_peri0_160m_clk.hw,
+		[CLK_PLL_PERI0_16M]		= &pll_peri0_16m_clk.hw,
+		[CLK_PLL_PERI0_150M]		= &pll_peri0_150m_clk.hw,
+		[CLK_PLL_PERI0_25M]		= &pll_peri0_25m_clk.hw,
 		[CLK_PLL_PERI1_PARENT]		= &pll_peri1_parent_clk.common.hw,
+		[CLK_PLL_PERI1_2X]		= &pll_peri1_2x_clk.common.hw,
 		[CLK_PLL_PERI1_800M]		= &pll_peri1_800m_clk.common.hw,
 		[CLK_PLL_PERI1_480M]		= &pll_peri1_480m_clk.common.hw,
+		[CLK_PLL_PERI1_600M]		= &pll_peri1_600m_clk.hw,
+		[CLK_PLL_PERI1_400M]		= &pll_peri1_400m_clk.hw,
+		[CLK_PLL_PERI1_300M]		= &pll_peri1_300m_clk.hw,
+		[CLK_PLL_PERI1_200M]		= &pll_peri1_200m_clk.hw,
+		[CLK_PLL_PERI1_160M]		= &pll_peri1_160m_clk.hw,
+		[CLK_PLL_PERI1_150M]		= &pll_peri1_150m_clk.hw,
 		[CLK_PLL_GPU]			= &pll_gpu_clk.common.hw,
 		[CLK_PLL_VIDEO0_2X]		= &pll_video0_2x_clk.hw,
 		[CLK_PLL_VIDEO0_1X]		= &pll_video0_1x_clk.hw,
@@ -1438,13 +1450,20 @@ static struct clk_hw_onecell_data sun55iw3_hw_clks = {
 		[CLK_PLL_VE]			= &pll_ve_clk.common.hw,
 		[CLK_PLL_VIDEO3_2X]		= &pll_video3_2x_clk.hw,
 		[CLK_PLL_VIDEO3_1X]		= &pll_video3_1x_clk.hw,
+		[CLK_PLL_AUDIO0_4X]		= &pll_audio0_4x_clk.common.hw,
+		[CLK_PLL_AUDIO0_2X]		= &pll_audio0_2x_clk.hw,
+		[CLK_PLL_AUDIO0_1X]		= &pll_audio0_1x_clk.hw,
+		[CLK_PLL_AUDIO0_DIV_48M]	= &pll_audio0_div_48m_clk.hw,
 		[CLK_PLL_NPU_2X]		= &pll_npu_2x_clk.hw,
 		[CLK_PLL_NPU_1X]		= &pll_npu_1x_clk.hw,
+		[CLK_CPU0_DIV]			= &cpu0_div_clk.common.hw,
 		[CLK_CPU]			= &cpu_clk.common.hw,
 		[CLK_CPU_AXI]			= &cpu_axi_clk.common.hw,
 		[CLK_CPU_APB]			= &cpu_apb_clk.common.hw,
 		[CLK_CPU_PERI]			= &cpu_peri_clk.common.hw,
+		[CLK_DSU]			= &dsu_clk.common.hw,
 		[CLK_TRACE]			= &trace_clk.common.hw,
+		[CLK_CPU1_DIV]			= &cpu1_div_clk.common.hw,
 		[CLK_DSU_PARENTS]		= &dsu_parents_clk.common.hw,
 		[CLK_AHB]			= &ahb_clk.common.hw,
 		[CLK_APB0]			= &apb0_clk.common.hw,
@@ -1472,6 +1491,7 @@ static struct clk_hw_onecell_data sun55iw3_hw_clks = {
 		[CLK_SPINLOCK]			= &spinlock_clk.common.hw,
 		[CLK_TIMER]			= &timer_clk.common.hw,
 		[CLK_DBGSYS]			= &dbgsys_clk.common.hw,
+		[CLK_PWM1]			= &pwm1_clk.common.hw,
 		[CLK_PWM]			= &pwm_clk.common.hw,
 		[CLK_IOMMU]			= &iommu_clk.common.hw,
 		[CLK_TIMER0]			= &timer0_clk.common.hw,
@@ -1532,10 +1552,11 @@ static struct clk_hw_onecell_data sun55iw3_hw_clks = {
 		[CLK_BUS_IRRX]			= &bus_irrx_clk.common.hw,
 		[CLK_IRTX]			= &irtx_clk.common.hw,
 		[CLK_BUS_IRTX]			= &bus_irtx_clk.common.hw,
-		[CLK_GPADC_24M]			= &gpadc_24m_clk.common.hw,
-		[CLK_GPADC]			= &gpadc_clk.common.hw,
+		[CLK_BUS_GPADC0]		= &bus_gpadc0_clk.common.hw,
+		[CLK_BUS_GPADC1]		= &bus_gpadc1_clk.common.hw,
 		[CLK_THS]			= &ths_clk.common.hw,
 		[CLK_USB]			= &usb_clk.common.hw,
+		[CLK_DCXO12M]			= &dcxo12M_clk.hw,
 		[CLK_USB0]			= &usb0_clk.common.hw,
 		[CLK_USB1]			= &usb1_clk.common.hw,
 		[CLK_USBOTG0]			= &usbotg0_clk.common.hw,
@@ -1597,6 +1618,8 @@ static struct clk_hw_onecell_data sun55iw3_hw_clks = {
 		[CLK_VID_IN_AHB_GATE]		= &vid_in_ahb_gate_clk.common.hw,
 		[CLK_VE_AHB_GATE]		= &ve_ahb_gate_clk.common.hw,
 		[CLK_NPU_AHB_GATE]		= &npu_ahb_gate_clk.common.hw,
+		[CLK_RES_DCAP_24M]		= &res_dcap_24m_clk.common.hw,
+		[CLK_USB_24M]			= &usb_24m_clk.common.hw,
 		[CLK_FANOUT_25M]		= &fanout_25m_clk.common.hw,
 		[CLK_FANOUT_16M]		= &fanout_16m_clk.common.hw,
 		[CLK_FANOUT_12M]		= &fanout_12m_clk.common.hw,
@@ -1615,18 +1638,24 @@ static struct ccu_common *sun55iw3_ccu_clks[] = {
 	&pll_cpu0_clk.common,
 	&pll_ddr_clk.common,
 	&pll_peri0_parent_clk.common,
+	&pll_peri0_2x_clk.common,
 	&pll_peri0_800m_clk.common,
 	&pll_peri0_480m_clk.common,
 	&pll_peri1_parent_clk.common,
+	&pll_peri1_2x_clk.common,
 	&pll_peri1_800m_clk.common,
 	&pll_peri1_480m_clk.common,
 	&pll_gpu_clk.common,
 	&pll_ve_clk.common,
+	&pll_audio0_4x_clk.common,
+	&cpu0_div_clk.common,
 	&cpu_clk.common,
 	&cpu_axi_clk.common,
 	&cpu_apb_clk.common,
 	&cpu_peri_clk.common,
+	&dsu_clk.common,
 	&trace_clk.common,
+	&cpu1_div_clk.common,
 	&dsu_parents_clk.common,
 	&ahb_clk.common,
 	&apb0_clk.common,
@@ -1654,6 +1683,7 @@ static struct ccu_common *sun55iw3_ccu_clks[] = {
 	&spinlock_clk.common,
 	&timer_clk.common,
 	&dbgsys_clk.common,
+	&pwm1_clk.common,
 	&pwm_clk.common,
 	&iommu_clk.common,
 	&timer0_clk.common,
@@ -1718,8 +1748,8 @@ static struct ccu_common *sun55iw3_ccu_clks[] = {
 	&bus_irrx_clk.common,
 	&irtx_clk.common,
 	&bus_irtx_clk.common,
-	&gpadc_24m_clk.common,
-	&gpadc_clk.common,
+	&bus_gpadc0_clk.common,
+	&bus_gpadc1_clk.common,
 	&ths_clk.common,
 	&usb_clk.common,
 	&usb0_clk.common,
@@ -1783,6 +1813,8 @@ static struct ccu_common *sun55iw3_ccu_clks[] = {
 	&vid_in_ahb_gate_clk.common,
 	&ve_ahb_gate_clk.common,
 	&npu_ahb_gate_clk.common,
+	&res_dcap_24m_clk.common,
+	&usb_24m_clk.common,
 	&fanout_25m_clk.common,
 	&fanout_16m_clk.common,
 	&fanout_12m_clk.common,
@@ -1835,15 +1867,14 @@ static const u32 sun55iw3_usb_clk_regs[] = {
 	SUN55IW3_USB1_CTRL_REG,
 };
 
-static int sun55iw3_ccu_probe(struct platform_device *pdev)
+static void __init of_sun55iw3_ccu_init(struct device_node *node)
 {
 	void __iomem *reg;
-	int ret;
 	int i;
 
-	reg = devm_platform_ioremap_resource(pdev, 0);
+	reg = of_iomap(node, 0);
 	if (IS_ERR(reg))
-		return PTR_ERR(reg);
+		return;
 
 	/* Enable the lock bits on all PLLs */
 	for (i = 0; i < ARRAY_SIZE(sun55iw3_pll_regs); i++) {
@@ -1874,42 +1905,14 @@ static int sun55iw3_ccu_probe(struct platform_device *pdev)
 		set_reg(reg + sun55iw3_usb_clk_regs[i], 0x0, 2, 24);
 	}
 
-	ret = sunxi_ccu_probe(pdev->dev.of_node, reg, &sun55iw3_ccu_desc);
-	if (ret)
-		return ret;
+	sunxi_ccu_probe(node, reg, &sun55iw3_ccu_desc);
 
 	sunxi_ccu_sleep_init(reg, sun55iw3_ccu_clks,
 			     ARRAY_SIZE(sun55iw3_ccu_clks),
 			     NULL, 0);
 
-	return 0;
+	return;
 }
 
-static const struct of_device_id sun55iw3_ccu_ids[] = {
-	{ .compatible = "allwinner,sun55iw3-ccu" },
-	{ }
-};
-
-static struct platform_driver sun55iw3_ccu_driver = {
-	.probe	= sun55iw3_ccu_probe,
-	.driver	= {
-		.name	= "sun55iw3-ccu",
-		.of_match_table	= sun55iw3_ccu_ids,
-	},
-};
-
-static int __init sunxi_ccu_sun55iw3_init(void)
-{
-	return platform_driver_register(&sun55iw3_ccu_driver);
-}
-core_initcall(sunxi_ccu_sun55iw3_init);
-
-static void __exit sunxi_ccu_sun55iw3_exit(void)
-{
-	return platform_driver_unregister(&sun55iw3_ccu_driver);
-}
-module_exit(sunxi_ccu_sun55iw3_exit);
-
-MODULE_DESCRIPTION("Allwinner sun55iw3 clk driver");
-MODULE_LICENSE("GPL v3");
-MODULE_VERSION("1.0.1");
+CLK_OF_DECLARE(sun55iw3_ccu_init, "allwinner,sun55iw3-ccu", of_sun55iw3_ccu_init);
+MODULE_VERSION("1.0.6");

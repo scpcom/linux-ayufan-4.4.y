@@ -436,34 +436,15 @@ static void ss_aead_unmap_padding(ce_scatter_t *scatter,
 	dma_unmap_single(&ss_dev->pdev->dev, phy_addr, len, dir);
 }
 
-void ss_change_clk(int type)
-{
-#ifdef SS_RSA_CLK_ENABLE
-	if ((type == SS_METHOD_RSA) || (type == SS_METHOD_ECC))
-		ss_clk_set(ss_dev->rsa_clkrate);
-	else
-		ss_clk_set(ss_dev->gen_clkrate);
-#endif
-}
-
-void ss_hash_rng_change_clk(void)
-{
-#ifdef SS_RSA_CLK_ENABLE
-		ss_clk_set(ss_dev->gen_clkrate);
-#endif
-}
-
 static int ss_hmac_start(ss_aes_ctx_t *ctx, ss_aes_req_ctx_t *req_ctx, int len)
 {
 	int ret = 0;
-	int i = 0;
 	int src_len = len;
 	int align_size;
 	int flow = ctx->comm.flow;
 	phys_addr_t phy_addr = 0;
 	ce_new_task_desc_t *task = (ce_new_task_desc_t *)&ss_dev->flows[flow].task;
 
-	ss_hash_rng_change_clk();
 	ss_new_task_desc_init(task, flow);
 
 	ss_pending_clear(flow);
@@ -514,18 +495,8 @@ static int ss_hmac_start(ss_aes_ctx_t *ctx, ss_aes_req_ctx_t *req_ctx, int len)
 
 	/* data_len set and last_flag set */
 	ss_hmac_sha1_last(task);
-	ss_hash_data_len_set((src_len - SHA256_BLOCK_SIZE) * 8, task);
+	ss_hash_data_len_set((src_len) * 8, task);
 
-	/*  for openssl add SHA256_BLOCK_SIZE after data*/
-	task->ce_sg[0].src_len = task->ce_sg[0].src_len - SHA256_BLOCK_SIZE;
-#if 0
-	/* addr should set in word, src_len and dst_len set in bytes */
-	for (i = 0; i < 8; i++) {
-		task->ce_sg[i].dst_len = (task->ce_sg[i].dst_len);
-	}
-#endif
-
-	ce_print_new_task_desc(task);
 	/* Start CE controller. */
 	init_completion(&ss_dev->flows[flow].done);
 	dma_map_single(&ss_dev->pdev->dev, task,
@@ -534,11 +505,13 @@ static int ss_hmac_start(ss_aes_ctx_t *ctx, ss_aes_req_ctx_t *req_ctx, int len)
 	SS_DBG("Before CE, COMM_CTL: 0x%08x, ICR: 0x%08x\n",
 		task->comm_ctl, ss_reg_rd(CE_REG_ICR));
 	ss_hash_rng_ctrl_start(task);
+	ce_print_new_task_desc(task);
 
 	ret = wait_for_completion_timeout(&ss_dev->flows[flow].done,
 		msecs_to_jiffies(SS_WAIT_TIME));
 	if (ret == 0) {
 		SS_ERR("Timed out\n");
+		ce_reg_print();
 		ss_reset();
 		ret = -ETIMEDOUT;
 	}
@@ -584,7 +557,6 @@ static int ss_aead_start(ss_aead_ctx_t *ctx, ss_aes_req_ctx_t *req_ctx)
 	ce_task_desc_t *task = &ss_dev->flows[flow].task;
 	int more;
 
-	ss_change_clk(req_ctx->type);
 	ss_task_desc_init(task, flow);
 
 	ss_pending_clear(flow);
@@ -760,7 +732,6 @@ static int ss_aes_start(ss_aes_ctx_t *ctx, ss_aes_req_ctx_t *req_ctx, int len)
 	phys_addr_t phy_addr = 0;
 	ce_task_desc_t *task = &ss_dev->flows[flow].task;
 
-	ss_change_clk(req_ctx->type);
 	ss_task_desc_init(task, flow);
 
 	ss_pending_clear(flow);
@@ -1005,8 +976,6 @@ static int ss_rng_start(ss_aes_ctx_t *ctx, u8 *rdata, u32 dlen, u32 trng)
 		return -ENOMEM;
 	}
 
-	ss_hash_rng_change_clk();
-
 	ss_new_task_desc_init(task, flow);
 
 	ss_pending_clear(flow);
@@ -1149,7 +1118,6 @@ static int ss_drbg_start(ss_drbg_ctx_t *ctx, u8 *src, u32 slen, u8 *rdata, u32 d
 			return -ENOMEM;
 		}
 	}
-	ss_hash_rng_change_clk();
 
 	ss_new_task_desc_init(task, flow);
 
@@ -1293,7 +1261,6 @@ u32 ss_hash_start(ss_hash_ctx_t *ctx,
 		ctx->cnt += len;
 		return 0;
 	}
-	ss_hash_rng_change_clk();
 
 	digest = kzalloc(SHA512_DIGEST_SIZE, GFP_KERNEL);
 	if (digest == NULL) {
@@ -1425,7 +1392,8 @@ void ss_load_iv(ss_aes_ctx_t *ctx, ss_aes_req_ctx_t *req_ctx,
 	if ((ctx->cnt == 0)
 		|| (CE_IS_AES_MODE(req_ctx->type, req_ctx->mode, CBC))
 		|| (CE_IS_AES_MODE(req_ctx->type, req_ctx->mode, CTS))
-		|| (CE_IS_AES_MODE(req_ctx->type, req_ctx->mode, GCM))) {
+		|| (CE_IS_AES_MODE(req_ctx->type, req_ctx->mode, GCM))
+		|| (CE_IS_AES_MODE(req_ctx->type, req_ctx->mode, XTS))) {
 		SS_DBG("IV address = 0x%px, size = %d\n", buf, size);
 		ctx->iv_size = size;
 		memcpy(ctx->iv, buf, ctx->iv_size);

@@ -26,7 +26,7 @@
 #define PWM_PCCRCD	(0x0038)
 #define PWM_PCCREF	(0x003c)
 
-#define PCGR            (0x0040)
+#define PWM_PCGR            (0x0040)
 
 #define	PWM_PDZCR67	(0x006c)
 #define	PWM_PDZCR89	(0x0070)
@@ -34,8 +34,8 @@
 #define	PWM_PDZCRCD	(0x0078)
 #define	PWM_PDZCREF	(0x007c)
 
-#define PGR0            (0x0090)
-#define PGR1            (0x0094)
+#define PWM_PGR0            (0x0090)
+#define PWM_PGR1            (0x0094)
 
 #define PPCNTP_BASE     (0x0100 + 0x000c)
 /*#define PWM_PCCR8	(0x0300)*/

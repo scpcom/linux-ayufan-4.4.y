@@ -66,6 +66,21 @@ void __iomem *ss_membase(void)
 	return ss_dev->base_addr;
 }
 
+void print_hex(void *_data, int _len)
+{
+	int i;
+	unsigned char *data = (unsigned char *)_data;
+
+	pr_err("-------------------- The valid len = %d ----------------------- \n", _len);
+	for (i = 0; i < (_len + 7) / 8; i++) {
+		pr_err("0x%08X: %02X %02X %02X %02X %02X %02X %02X %02X \n", i * 8,
+			data[i*8+0], data[i*8+1], data[i*8+2], data[i*8+3],
+			data[i*8+4], data[i*8+5], data[i*8+6], data[i*8+7]);
+	}
+	pr_err("-------------------------------------------------------------- \n");
+
+}
+
 void ss_reset(void)
 {
 	SS_ENTER();

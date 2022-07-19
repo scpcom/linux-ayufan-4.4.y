@@ -349,7 +349,22 @@ static ssize_t show_phy_range(struct device *dev,
 	struct sunxi_hci_hcd *sunxi_ehci = NULL;
 
 	sunxi_ehci = dev->platform_data;
-#if defined(CONFIG_ARCH_SUN8IW17) | defined(CONFIG_ARCH_SUN8IW11)
+#if defined(CONFIG_ARCH_SUN8IW20)
+	printk("addr:0x%x, len:0x%x, value:0x%x\n", 0x60, 0x1,
+			usb_new_phyx_tp_read(sunxi_ehci, 0x60, 0x1));
+	printk("addr:0x%x, len:0x%x, value:0x%x\n", 0x30, 0x3,
+			usb_new_phyx_tp_read(sunxi_ehci, 0x30, 0x3));
+	printk("addr:0x%x, len:0x%x, value:0x%x\n", 0x36, 0x3,
+			usb_new_phyx_tp_read(sunxi_ehci, 0x36, 0x3));
+	printk("addr:0x%x, len:0x%x, value:0x%x\n", 0x61, 0x3,
+			usb_new_phyx_tp_read(sunxi_ehci, 0x61, 0x3));
+	printk("addr:0x%x, len:0x%x, value:0x%x\n", 0x64, 0x2,
+			usb_new_phyx_tp_read(sunxi_ehci, 0x64, 0x2));
+	printk("addr:0x%x, len:0x%x, value:0x%x\n", 0x44, 0x4,
+			usb_new_phyx_tp_read(sunxi_ehci, 0x44, 0x4));
+
+	return 0;
+#elif defined(CONFIG_ARCH_SUN8IW17) | defined(CONFIG_ARCH_SUN8IW11)
 	DMSG_INFO("PHY's rate and range:0x0~0x1f\n");
 	return sprintf(buf, "rate:0x%x\n",
 		usb_phyx_tp_read(sunxi_ehci, 0x20, 5));
@@ -364,22 +379,90 @@ static ssize_t ehci_phy_range(struct device *dev, struct device_attribute *attr,
 		const char *buf, size_t count)
 {
 	struct sunxi_hci_hcd *sunxi_ehci = NULL;
-	int val = 0;
 	int err;
 
-	if (dev == NULL) {
-		DMSG_PANIC("ERR: Argment is invalid\n");
-		return 0;
+#if defined(CONFIG_ARCH_SUN8IW20)
+	char data[20];
+	char *str = NULL;
+	char *token = NULL;
+	int mod_type, common_data, trancevie_data, preemphasis_data, resistance_data;
+
+	sunxi_ehci = dev->platform_data;
+
+	snprintf(data, sizeof(data), "%s", buf);
+	printk("data = %s\n", data);
+
+	str = data;
+	token = strsep(&str, " ");
+
+	err = kstrtoint(token, 10, &mod_type);
+	if (err != 0)
+		return -EINVAL;
+
+	err = kstrtoint(strsep(&str, " "), 16, &common_data);
+	if (err != 0)
+		return -EINVAL;
+
+	err = kstrtoint(strsep(&str, " "), 16, &trancevie_data);
+	if (err != 0)
+		return -EINVAL;
+
+	err = kstrtoint(strsep(&str, " "), 16, &preemphasis_data);
+	if (err != 0)
+		return -EINVAL;
+
+	err = kstrtoint(strsep(&str, " "), 16, &resistance_data);
+	if (err != 0)
+		return -EINVAL;
+
+	if (mod_type == 1) {
+		printk("iref mod\n");
+		/* iref mod */
+		usb_new_phyx_tp_write(sunxi_ehci, 0x60, 0x1, 0x1);
+
+		/* iref common data */
+		usb_new_phyx_tp_write(sunxi_ehci, 0x30, common_data, 0x3);
+		printk("write to common data: 0x%x\n", common_data);
+
+		/* iref tranceive data */
+		usb_new_phyx_tp_write(sunxi_ehci, 0x61, trancevie_data, 0x3);
+		printk("write to trancevie data: 0x%x\n", trancevie_data);
+
+	} else if (mod_type == 0) {
+		printk("verf mod\n");
+		/* verf mod */
+		usb_new_phyx_tp_write(sunxi_ehci, 0x60, 0x0, 0x1);
+
+		/* verf common data */
+		usb_new_phyx_tp_write(sunxi_ehci, 0x36, common_data, 0x3);
+		printk("write to common data: 0x%x\n", common_data);
+
+		printk("verf mod no need to control trancevie data!\n");
 	}
+
+	usb_new_phyx_tp_write(sunxi_ehci, 0x64, preemphasis_data, 0x2);
+	printk("write to preemphasis data: 0x%x", preemphasis_data);
+
+	usb_new_phyx_tp_write(sunxi_ehci, 0x43, 0x0, 0x1);
+
+	usb_new_phyx_tp_write(sunxi_ehci, 0x41, 0x0, 0x1);
+
+	usb_new_phyx_tp_write(sunxi_ehci, 0x40, 0x0, 0x1);
+
+	usb_new_phyx_tp_write(sunxi_ehci, 0x44, resistance_data, 0x4);
+	printk("write to resistance data: 0x%x\n", resistance_data);
+
+	usb_new_phyx_tp_write(sunxi_ehci, 0x43, 0x1, 0x1);
+
+#elif defined(CONFIG_ARCH_SUN8IW17) || defined(CONFIG_ARCH_SUN8IW11)
+	int val = 0;
+
+	sunxi_ehci = dev->platform_data;
 
 	err = kstrtoint(buf, 16, &val);
 	if (err != 0)
 		return -EINVAL;
 
-	sunxi_ehci = dev->platform_data;
-
-
-#if defined(CONFIG_ARCH_SUN8IW17) || defined(CONFIG_ARCH_SUN8IW11)
 	DMSG_INFO("adjust PHY's rate and range:0x0~0x1f\n");
 	if ((val >= 0) && (val <= 0x1f)) {
 		usb_phyx_tp_write(sunxi_ehci, 0x20, val, 5);
@@ -392,6 +475,14 @@ static ssize_t ehci_phy_range(struct device *dev, struct device_attribute *attr,
 			usb_phyx_tp_read(sunxi_ehci, 0x20, 5),
 			sunxi_ehci->usbc_no);
 #else
+	int val = 0;
+
+	sunxi_ehci = dev->platform_data;
+
+	err = kstrtoint(buf, 16, &val);
+	if (err != 0)
+		return -EINVAL;
+
 	DMSG_INFO("adjust PHY's rate and range:0x0~0x3ff\n");
 	if ((val >= 0x0) && (val <= 0x3ff)) {
 		usb_phyx_write(sunxi_ehci, val);

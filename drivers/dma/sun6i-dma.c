@@ -136,7 +136,6 @@ struct sun6i_dma_config {
 	u32 dst_burst_lengths;
 	u32 src_addr_widths;
 	u32 dst_addr_widths;
-	bool has_mbus_clk;
 };
 
 /*
@@ -1244,7 +1243,6 @@ static struct sun6i_dma_config sun50i_h6_dma_cfg = {
 			     BIT(DMA_SLAVE_BUSWIDTH_2_BYTES) |
 			     BIT(DMA_SLAVE_BUSWIDTH_4_BYTES) |
 			     BIT(DMA_SLAVE_BUSWIDTH_8_BYTES),
-	.has_mbus_clk = true,
 };
 
 /*
@@ -1266,7 +1264,6 @@ static struct sun6i_dma_config sun50iw9_dma_cfg = {
 			     BIT(DMA_SLAVE_BUSWIDTH_2_BYTES) |
 			     BIT(DMA_SLAVE_BUSWIDTH_4_BYTES) |
 			     BIT(DMA_SLAVE_BUSWIDTH_8_BYTES),
-	.has_mbus_clk = true,
 };
 
 /*
@@ -1304,6 +1301,7 @@ static const struct of_device_id sun6i_dma_match[] = {
 	{ .compatible = "allwinner,sun50iw9-dma", .data = &sun50iw9_dma_cfg },
 	{ .compatible = "allwinner,sun50iw10-dma", .data = &sun50iw9_dma_cfg },
 	{ .compatible = "allwinner,sun50iw12-dma", .data = &sun50iw9_dma_cfg },
+	{ .compatible = "allwinner,dma-v30001", .data = &sun50iw9_dma_cfg },
 	{ /* sentinel */ }
 };
 MODULE_DEVICE_TABLE(of, sun6i_dma_match);
@@ -1338,12 +1336,10 @@ static int sun6i_dma_probe(struct platform_device *pdev)
 		return PTR_ERR(sdc->clk);
 	}
 
-	if (sdc->cfg->has_mbus_clk) {
-		sdc->clk_mbus = devm_clk_get(&pdev->dev, "mbus");
-		if (IS_ERR(sdc->clk_mbus)) {
-			dev_err(&pdev->dev, "No mbus clock specified\n");
-			return PTR_ERR(sdc->clk_mbus);
-		}
+	sdc->clk_mbus = devm_clk_get(&pdev->dev, "mbus");
+	if (IS_ERR(sdc->clk_mbus)) {
+		sdc->clk_mbus = NULL;
+		dev_warn(&pdev->dev, "No mbus clock specified\n");
 	}
 
 	sdc->rstc = devm_reset_control_get(&pdev->dev, NULL);
@@ -1439,16 +1435,9 @@ static int sun6i_dma_probe(struct platform_device *pdev)
 		vchan_init(&vchan->vc, &sdc->slave);
 	}
 
-	ret = reset_control_assert(sdc->rstc);
+	ret = reset_control_reset(sdc->rstc);
 	if (ret) {
-		dev_err(&pdev->dev, "Couldn't assert the device from reset\n");
-		goto err_chan_free;
-	}
-	usleep_range(20, 25); /* ensure dma controller is reset */
-
-	ret = reset_control_deassert(sdc->rstc);
-	if (ret) {
-		dev_err(&pdev->dev, "Couldn't deassert the device from reset\n");
+		dev_err(&pdev->dev, "reset_control_reset() failed\n");
 		goto err_chan_free;
 	}
 
@@ -1458,14 +1447,13 @@ static int sun6i_dma_probe(struct platform_device *pdev)
 		goto err_reset_assert;
 	}
 
-	if (sdc->cfg->has_mbus_clk) {
+	if (sdc->clk_mbus) {
 		ret = clk_prepare_enable(sdc->clk_mbus);
 		if (ret) {
 			dev_err(&pdev->dev, "Couldn't enable mbus clock\n");
 			goto err_clk_disable;
 		}
 	}
-
 	ret = devm_request_irq(&pdev->dev, sdc->irq, sun6i_dma_interrupt, 0,
 			       dev_name(&pdev->dev), sdc);
 	if (ret) {
@@ -1496,7 +1484,8 @@ err_dma_unregister:
 err_irq_disable:
 	sun6i_kill_tasklet(sdc);
 err_mbus_clk_disable:
-	clk_disable_unprepare(sdc->clk_mbus);
+	if (sdc->clk_mbus)
+		clk_disable_unprepare(sdc->clk_mbus);
 err_clk_disable:
 	clk_disable_unprepare(sdc->clk);
 err_reset_assert:
