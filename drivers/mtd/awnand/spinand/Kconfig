@@ -53,3 +53,14 @@ config AW_SPINAND_SIMULATE_MULTIPLANE
 	  * |------------|------------|
 
 	  If unsure, say Y.
+
+config AW_MTD_SPINAND_OOB_RAW_SPARE
+	bool "support mtd read oob raw spare data"
+	depends on AW_MTD_SPINAND
+	default n
+	help
+		aw spinand do not support read raw spare data by default, say yes to
+		support mtd read oob raw spare data.
+
+		if enable AW_MTD_SPINAND_OOB_RAW_SPARE, the oob is equivalent to spare area,
+		otherwise oob is the user data spare area in ecc protected.

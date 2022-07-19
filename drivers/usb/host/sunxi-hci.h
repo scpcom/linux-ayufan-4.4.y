@@ -479,7 +479,10 @@ void sunxi_hci_set_rc_clk(struct sunxi_hci_hcd *sunxi_hci, int is_on);
 void sunxi_hci_set_standby_irq(struct sunxi_hci_hcd *sunxi_hci, int is_on);
 void sunxi_hci_clean_standby_irq(struct sunxi_hci_hcd *sunxi_hci);
 #endif
-
+int usb_new_phyx_tp_write(struct sunxi_hci_hcd *sunxi_hci,
+		int addr, int data, int len);
+int usb_new_phyx_tp_read(struct sunxi_hci_hcd *sunxi_hci,
+		int adddr, int len);
 #if IS_ENABLED(CONFIG_ARCH_SUN50IW10)
 void sunxi_hci_common_set_rc_clk(struct sunxi_hci_hcd *sunxi_hci,
 					int is_on);

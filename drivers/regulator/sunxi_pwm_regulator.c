@@ -242,14 +242,6 @@ static int pwm_regulator_set_voltage(struct regulator_dev *rdev,
 }
 
 
-static int sunxi_set_voltage_time(struct regulator_dev *rdev,
-		 int old_uV, int new_uV)
-{
-	mdelay (4);
-	dev_dbg(rdev_get_dev(rdev), "set voltage delay 4ms done\n");
-	return 0;
-}
-
 static struct regulator_ops pwm_regulator_voltage_table_ops = {
 	.set_voltage_sel = pwm_regulator_set_voltage_sel,
 	.get_voltage_sel = pwm_regulator_get_voltage_sel,
@@ -263,7 +255,6 @@ static struct regulator_ops pwm_regulator_voltage_table_ops = {
 static struct regulator_ops pwm_regulator_voltage_continuous_ops = {
 	.get_voltage      = pwm_regulator_get_voltage,
 	.set_voltage      = pwm_regulator_set_voltage,
-	.set_voltage_time = sunxi_set_voltage_time,
 	.enable           = pwm_regulator_enable,
 	.disable          = pwm_regulator_disable,
 	.is_enabled       = pwm_regulator_is_enabled,

@@ -141,6 +141,7 @@ static s32 gtp_bak_ref_proc(struct goodix_ts_data *ts, u8 mode);
 
 /*#if GTP_GESTURE_WAKEUP*/
 static bool gtp_gesture_wakeup;
+static bool gtp_normal_wakeup;
 static bool gtp_power_ctrl_sleep;
 static bool g_suspend_flag;
 unsigned long tp_wakeup_timecheck;
@@ -2748,6 +2749,15 @@ static void goodix_ts_suspend(struct goodix_ts_data *ts)
 	}
 }
 
+static void normal_suspend(struct goodix_ts_data *ts)
+{
+	ts->gtp_is_suspend = 1;
+	g_suspend_flag = 1;
+
+	if (ts->use_irq)
+		gtp_irq_disable(ts);
+}
+
 /*******************************************************
 Function:
     Late resume function.
@@ -2799,6 +2809,15 @@ static void goodix_ts_resume(struct goodix_ts_data *ts)
 #endif
 }
 
+static void normal_resume(struct goodix_ts_data *ts)
+{
+	ts->gtp_is_suspend = 0;
+	g_suspend_flag = 0;
+
+	if (ts->use_irq)
+		gtp_irq_enable(ts);
+}
+
 static int gtp_pm_suspend(struct device *dev)
 {
 	struct goodix_ts_data *ts = dev_get_drvdata(dev);
@@ -2807,7 +2826,10 @@ static int gtp_pm_suspend(struct device *dev)
 		return 0;
 
 	if (ts) {
-		goodix_ts_suspend(ts);
+		if (gtp_normal_wakeup)
+			normal_suspend(ts);
+		else
+			goodix_ts_suspend(ts);
 	}
 
 	return 0;
@@ -2820,7 +2842,10 @@ static int gtp_pm_resume(struct device *dev)
 		return 0;
 
 	if (ts) {
-		goodix_ts_resume(ts);
+		if (gtp_normal_wakeup)
+			normal_resume(ts);
+		else
+			goodix_ts_resume(ts);
 	}
 
 	return 0;
@@ -3227,6 +3252,7 @@ static int startup(void)
 		return -1;
 	}
 
+	gtp_normal_wakeup = 1;
 	if (config_info.ctp_gesture_wakeup == 1) {
 		gtp_gesture_wakeup = 1;
 		dprintk(DEBUG_INIT, "GTP driver gesture wakeup is used!\n");

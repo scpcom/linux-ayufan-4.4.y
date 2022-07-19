@@ -323,7 +323,7 @@ EXPORT_SYMBOL(usb_phyx_tp_read);
 
 #if defined(CONFIG_ARCH_SUN8IW20) || defined(CONFIG_ARCH_SUN20IW1)
 /*for new phy*/
-static int usb_new_phyx_tp_write(struct sunxi_hci_hcd *sunxi_hci,
+int usb_new_phyx_tp_write(struct sunxi_hci_hcd *sunxi_hci,
 		int addr, int data, int len)
 {
 	int temp = 0;
@@ -381,7 +381,7 @@ static int usb_new_phyx_tp_write(struct sunxi_hci_hcd *sunxi_hci,
 	return 0;
 }
 
-static int usb_new_phyx_tp_read(struct sunxi_hci_hcd *sunxi_hci, int addr, int len)
+int usb_new_phyx_tp_read(struct sunxi_hci_hcd *sunxi_hci, int addr, int len)
 {
 	int temp = 0;
 	int i = 0;

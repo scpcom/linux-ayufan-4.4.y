@@ -126,6 +126,37 @@ struct aw_spinand_phy_info gigadevice[] = {
 		.EccProtectedType = SIZE16_OFF4_LEN12,
 		.BadBlockFlag	= BAD_BLK_FLAG_FRIST_1_PAGE,
 	},
+	{
+		.Model		= "SCN00SA3W1AI8A",
+		.NandID		= {0xc8, 0x21, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff},
+		.DieCntPerChip  = 1,
+		.SectCntPerPage = 4,
+		.PageCntPerBlk  = 64,
+		.BlkCntPerDie	= 1024,
+		.OobSizePerPage = 64,
+		.OperationOpt	= SPINAND_QUAD_READ | SPINAND_QUAD_PROGRAM |
+			SPINAND_DUAL_READ | SPINAND_QUAD_NO_NEED_ENABLE,
+		.MaxEraseTimes  = 50000,
+		.EccType	= BIT2_LIMIT1_ERR2,
+		.EccProtectedType = SIZE16_OFF4_LEN12,
+		.BadBlockFlag = BAD_BLK_FLAG_FRIST_1_PAGE,
+	},
+	{
+		.Model		= "GD5F4GQ6UEY1G",
+		.NandID		= {0xc8, 0x55, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff},
+		.DieCntPerChip  = 1,
+		.SectCntPerPage = 4,
+		.PageCntPerBlk  = 64,
+		.BlkCntPerDie	= 4096,
+		.OobSizePerPage = 64,
+		.OperationOpt	= SPINAND_QUAD_READ | SPINAND_QUAD_PROGRAM |
+			SPINAND_DUAL_READ,
+		.MaxEraseTimes  = 50000,
+		.EccFlag	= HAS_EXT_ECC_SE01,
+		.EccType	= BIT4_LIMIT5_TO_7_ERR8_LIMIT_12,
+		.EccProtectedType = SIZE16_OFF4_LEN12,
+		.BadBlockFlag	= BAD_BLK_FLAG_FRIST_1_PAGE,
+	},
 };
 
 struct aw_spinand_phy_info micron[] = {
@@ -205,6 +236,40 @@ struct aw_spinand_phy_info xtx[] = {
 		.SectCntPerPage = 4,
 		.PageCntPerBlk  = 64,
 		.BlkCntPerDie	= 1024,
+		.OobSizePerPage = 64,
+		.OperationOpt	= SPINAND_QUAD_READ | SPINAND_QUAD_PROGRAM |
+			SPINAND_DUAL_READ,
+		.MaxEraseTimes  = 50000,
+		.ecc_status_shift = ECC_STATUS_SHIFT_4,
+		.EccType	= BIT4_LIMIT5_TO_8_ERR9_TO_15,
+		.EccProtectedType = SIZE16_OFF0_LEN16,
+		.BadBlockFlag	= BAD_BLK_FLAG_FRIST_1_PAGE,
+	},
+	{
+		/* XT26G02C */
+		.Model		= "XT26G02CWSIG",
+		.NandID		= {0x0B, 0x12, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff},
+		.DieCntPerChip  = 1,
+		.SectCntPerPage = 4,
+		.PageCntPerBlk  = 64,
+		.BlkCntPerDie	= 2048,
+		.OobSizePerPage = 64,
+		.OperationOpt	= SPINAND_QUAD_READ | SPINAND_QUAD_PROGRAM |
+			SPINAND_DUAL_READ,
+		.MaxEraseTimes  = 50000,
+		.ecc_status_shift = ECC_STATUS_SHIFT_2,
+		.EccType	= BIT4_LIMIT5_TO_7_ERR8_LIMIT_12,
+		.EccProtectedType = SIZE16_OFF8_LEN16,
+		.BadBlockFlag	= BAD_BLK_FLAG_FRIST_1_PAGE,
+	},
+	{
+		/* XT26G04C */
+		.Model		= "XT26G04CWSIG",
+		.NandID		= {0x0B, 0x13, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff},
+		.DieCntPerChip  = 1,
+		.SectCntPerPage = 8,
+		.PageCntPerBlk  = 64,
+		.BlkCntPerDie	= 2048,
 		.OobSizePerPage = 64,
 		.OperationOpt	= SPINAND_QUAD_READ | SPINAND_QUAD_PROGRAM |
 			SPINAND_DUAL_READ,
@@ -322,6 +387,21 @@ struct aw_spinand_phy_info dosilicon[] = {
 		.EccProtectedType = SIZE16_OFF4_LEN4_OFF8,
 		.BadBlockFlag = BAD_BLK_FLAG_FIRST_2_PAGE,
 	},
+	{
+		.Model		= "DS35X2GBXXX",
+		.NandID		= {0xe5, 0xf2, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff},
+		.DieCntPerChip  = 1,
+		.SectCntPerPage = 4,
+		.PageCntPerBlk  = 64,
+		.BlkCntPerDie	= 2048,
+		.OobSizePerPage = 64,
+		.OperationOpt	= SPINAND_QUAD_READ | SPINAND_QUAD_PROGRAM |
+			SPINAND_DUAL_READ | SPINAND_TWO_PLANE_SELECT,
+		.MaxEraseTimes  = 65000,
+		.EccType	= BIT3_LIMIT5_ERR2,
+		.EccProtectedType = SIZE16_OFF0_LEN16,
+		.BadBlockFlag = BAD_BLK_FLAG_FIRST_2_PAGE,
+	},
 };
 
 struct aw_spinand_phy_info foresee[] = {
@@ -354,7 +434,22 @@ struct aw_spinand_phy_info foresee[] = {
 		.EccType	= BIT2_LIMIT1_ERR2,
 		.EccProtectedType = SIZE16_OFF0_LEN16,
 		.BadBlockFlag = BAD_BLK_FLAG_FRIST_1_PAGE,
-	}
+	},
+	{
+		.Model		= "FS35SQA001G",
+		.NandID		= {0xcd, 0x71, 0x71, 0xff, 0xff, 0xff, 0xff, 0xff},
+		.DieCntPerChip  = 1,
+		.SectCntPerPage = 4,
+		.PageCntPerBlk  = 64,
+		.BlkCntPerDie	= 1024,
+		.OobSizePerPage = 64,
+		.OperationOpt	= SPINAND_QUAD_READ | SPINAND_QUAD_PROGRAM |
+			SPINAND_DUAL_READ,
+		.MaxEraseTimes  = 50000,
+		.EccType	= BIT2_LIMIT1_ERR2,
+		.EccProtectedType = SIZE16_OFF0_LEN16,
+		.BadBlockFlag = BAD_BLK_FLAG_FRIST_1_PAGE,
+	},
 };
 
 struct aw_spinand_phy_info zetta[] = {

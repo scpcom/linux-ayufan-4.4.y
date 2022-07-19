@@ -68,6 +68,7 @@
 #define SUNXI_DEF_MAX_R1B_TIMEOUT_MS (600000U)
 #define SUNXI_MIN_R1B_TIMEOUT_MS (20)
 #define SUNXI_TRANS_TIMEOUT  (5*HZ)
+#define SUNXI_CMD11_TIMEOUT  (1*HZ)
 
 /*judge encryption flag bit*/
 #define sunxi_crypt_flags(sg) (((sg->offset)	\
@@ -109,6 +110,35 @@ static void sunxi_mmc_exe_cmd(struct sunxi_mmc_host *host,
 static irqreturn_t sunxi_mmc_handle_bottom_half(int irq, void *dev_id);
 static irqreturn_t sunxi_mmc_handle_do_bottom_half(void *dev_id);
 
+static void sunxi_cmd11_timerout_handle(struct work_struct *work)
+{
+	struct sunxi_mmc_host *host;
+	unsigned long flags;
+	struct mmc_request *mrq = NULL;
+
+	host = container_of(work, struct sunxi_mmc_host, sunxi_timerout_work.work);
+	mrq = host->mrq;
+	dev_err(mmc_dev(host->mmc), "cmd11 timout\n");
+	spin_lock_irqsave(&host->lock, flags);
+
+	mrq->cmd->error = -ETIMEDOUT;
+	if (mrq->stop)
+		mrq->stop->error = -ETIMEDOUT;
+	host->mrq = NULL;
+	host->int_sum = 0;
+	host->wait_dma = false;
+
+	/***reset host***/
+	sunxi_mmc_regs_save(host);
+	spin_unlock_irqrestore(&host->lock, flags);
+	/**if gating/reset protect itself,so no lock use host->lock**/
+	sunxi_mmc_bus_clk_en(host, 0);
+	sunxi_mmc_bus_clk_en(host, 1);
+	sunxi_mmc_regs_restore(host);
+
+	mmc_request_done(host->mmc, mrq);
+}
+
 static void sunxi_timerout_handle(struct work_struct *work)
 {
 	struct sunxi_mmc_host *host;
@@ -145,7 +175,10 @@ timeout_out:
 static void sunxi_mmc_request_done(struct mmc_host *mmc, struct mmc_request *mrq)
 {
 	struct sunxi_mmc_host *host = mmc_priv(mmc);
-	if (host->ctl_spec_cap & SUNXI_SC_EN_TIMEOUT_DETECT) {
+	struct mmc_command *cmd = (mrq->sbc && !host->sunxi_mmc_opacmd23) ? mrq->sbc : mrq->cmd;
+
+	if ((host->ctl_spec_cap & SUNXI_SC_EN_TIMEOUT_DETECT)
+	    || (cmd->opcode == SD_SWITCH_VOLTAGE && (host->ctl_spec_cap & SUNXI_CMD11_TIMEOUT_DETECT))) {
 		cancel_delayed_work(&host->sunxi_timerout_work);
 	}
 	mmc_request_done(mmc, mrq);
@@ -1895,6 +1928,15 @@ static void sunxi_mmc_request(struct mmc_host *mmc, struct mmc_request *mrq)
 	int crypt_flags = 0;
 	struct scatterlist *sg = NULL;
 	int ret;
+	int work_timeout;
+
+	if (cmd->opcode == SD_SWITCH_VOLTAGE && host->ctl_spec_cap & SUNXI_CMD11_TIMEOUT_DETECT) {
+		INIT_DELAYED_WORK(&host->sunxi_timerout_work, sunxi_cmd11_timerout_handle);
+		work_timeout = SUNXI_CMD11_TIMEOUT;
+	} else if (host->ctl_spec_cap & SUNXI_SC_EN_TIMEOUT_DETECT) {
+		INIT_DELAYED_WORK(&host->sunxi_timerout_work, sunxi_timerout_handle);
+		work_timeout = SUNXI_TRANS_TIMEOUT;
+	}
 
 	/* Check for set_ios errors (should never happen) */
 	if (host->ferror) {
@@ -1992,10 +2034,11 @@ static void sunxi_mmc_request(struct mmc_host *mmc, struct mmc_request *mrq)
 
 	host->mrq = mrq;
 	host->wait_dma = wait_dma;
-	if (host->ctl_spec_cap & SUNXI_SC_EN_TIMEOUT_DETECT)
+	if ((cmd->opcode == SD_SWITCH_VOLTAGE && (host->ctl_spec_cap & SUNXI_CMD11_TIMEOUT_DETECT))
+		|| (host->ctl_spec_cap & SUNXI_SC_EN_TIMEOUT_DETECT))
 		queue_delayed_work(system_wq, \
 				&host->sunxi_timerout_work, \
-				SUNXI_TRANS_TIMEOUT);
+				work_timeout);
 	sunxi_mmc_exe_cmd(host, cmd, cmd_val, imask);
 /******************************************************/
 	smp_wmb();
@@ -2657,9 +2700,6 @@ static int sunxi_mmc_resource_request(struct sunxi_mmc_host *host,
 		dev_err(&pdev->dev, "failed to request irq %d\n", ret);
 		goto error_disable_clk_mmc;
 	}
-
-	if (host->ctl_spec_cap & SUNXI_SC_EN_TIMEOUT_DETECT)
-				INIT_DELAYED_WORK(&host->sunxi_timerout_work, sunxi_timerout_handle);
 
 	disable_irq(host->irq);
 

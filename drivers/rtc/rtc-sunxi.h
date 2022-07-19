@@ -28,6 +28,8 @@ struct sunxi_rtc_data {
 	u32 leap_shift;	/* bit shift of LEAP-YEAR field */
 	u32 gpr_offset; /* Offset to General-Purpose-Register */
 	u32 gpr_len;    /* Number of General-Purpose-Register */
+	bool has_dcxo_ictrl; /* Support modifying rtc dcxo current control value and creating dcxo_ictrl sysfs or not */
+	u32 dcxo_ictrl_val; /* For rtc dcxo current control value when has_dcxo_ictrl = true */
 };
 
 struct sunxi_rtc_dev {

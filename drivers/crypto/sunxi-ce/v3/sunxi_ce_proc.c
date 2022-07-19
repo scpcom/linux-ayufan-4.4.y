@@ -814,7 +814,8 @@ void ss_load_iv(ss_aes_ctx_t *ctx, ss_aes_req_ctx_t *req_ctx,
 	/* CBC/CTS need update the IV eachtime. */
 	if ((ctx->cnt == 0)
 		|| (CE_IS_AES_MODE(req_ctx->type, req_ctx->mode, CBC))
-		|| (CE_IS_AES_MODE(req_ctx->type, req_ctx->mode, CTS))) {
+		|| (CE_IS_AES_MODE(req_ctx->type, req_ctx->mode, CTS))
+		|| (CE_IS_AES_MODE(req_ctx->type, req_ctx->mode, XTS))) {
 		SS_DBG("IV address = 0x%px, size = %d\n", buf, size);
 		ctx->iv_size = size;
 		memcpy(ctx->iv, buf, ctx->iv_size);

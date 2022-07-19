@@ -75,33 +75,49 @@
 #define SS_SCATTER_ENABLE		1
 #define	TASK_DMA_POOL			1
 #define SS_SHA_SWAP_PRE_ENABLE	1 /* The initial IV need to be converted. */
+#define TASK_MAX_DATA_SIZE		(1 * 1024 * 1024 *1024)
 #endif
 
 /*define CE_V2_X---->CE_DRIVER_V3_2*/
 #if defined(CONFIG_ARCH_SUN50IW3) || defined(CONFIG_ARCH_SUN50IW6) || \
 	defined(CONFIG_ARCH_SUN8IW15) || defined(CONFIG_ARCH_SUN50IW8) || \
 	defined(CONFIG_ARCH_SUN8IW16) || defined(CONFIG_ARCH_SUN50IW9) || \
-	defined(CONFIG_ARCH_SUN8IW19) || defined(CONFIG_ARCH_SUN50IW10) || \
-	defined(CONFIG_ARCH_SUN50IW12) || defined(CONFIG_ARCH_SUN8IW21)
+	defined(CONFIG_ARCH_SUN8IW19) || defined(CONFIG_ARCH_SUN50IW10)
 
 #define SS_SUPPORT_CE_V3_2		1
 #define SS_SCATTER_ENABLE		1
 #define	TASK_DMA_POOL			1
-
 #define SS_SHA_SWAP_PRE_ENABLE	1 /* The initial IV need to be converted. */
+#endif
 
+/*define CE_V2.3---->CE_DRIVER_V5*/
 #if defined(CONFIG_ARCH_SUN50IW12) || defined(CONFIG_ARCH_SUN8IW21)
-#define	CE_BYTE_ADDR_ENABLE
+
+#define SS_SUPPORT_CE_V5		1
+#define SS_SCATTER_ENABLE		1
+#define	TASK_DMA_POOL			1
+#define SS_SHA_SWAP_PRE_ENABLE	1 /* The initial IV need to be converted. */
+#define	CE_BYTE_ADDR_ENABLE		1
+
+#if defined(CONFIG_ARCH_SUN8IW21)
+#define SET_CE_CLKFRE_MODE2		1
+#define TASK_MAX_DATA_SIZE		(1 * 1024 * 1024 *1024)
+#endif
 #endif
 
+/*ce_2.x bug: task must be less 127*1024*/
+#ifndef TASK_MAX_DATA_SIZE
+#define TASK_MAX_DATA_SIZE		(127 * 1024)
 #endif
+
 
 #ifdef CONFIG_EVB_PLATFORM
 #define SS_TRNG_ENABLE				1
 #define SS_TRNG_POSTPROCESS_ENABLE	1
 #endif
 
-#if defined(SS_SUPPORT_CE_V3_1) || defined(SS_SUPPORT_CE_V3_2)
+#if defined(SS_SUPPORT_CE_V3_1) || defined(SS_SUPPORT_CE_V3_2) || \
+	defined(SS_SUPPORT_CE_V5)
 #define SS_CTR_MODE_ENABLE		1
 #define SS_CTS_MODE_ENABLE		1
 #define SS_OFB_MODE_ENABLE		1
@@ -126,7 +142,7 @@
 #endif	/*SS_SUPPORT_CE_V3_1*/
 
 
-#if defined(SS_SUPPORT_CE_V3_2)
+#if defined(SS_SUPPORT_CE_V3_2) || defined(SS_SUPPORT_CE_V5)
 #define SS_XTS_MODE_ENABLE		1
 
 #define SS_RSA3072_ENABLE		1

@@ -27,3 +27,6 @@ qcom_wcnss_pil-y			+= qcom_wcnss_iris.o
 obj-$(CONFIG_ST_REMOTEPROC)		+= st_remoteproc.o
 obj-$(CONFIG_ST_SLIM_REMOTEPROC)	+= st_slim_rproc.o
 obj-$(CONFIG_STM32_RPROC)		+= stm32_rproc.o
+obj-$(CONFIG_SUNXI_REMOTEPROC)		+= sunxi_rproc.o
+obj-$(CONFIG_SUNXI_REMOTEPROC_SRM_CORE)	+= sunxi_rproc_srm_core.o
+obj-$(CONFIG_SUNXI_REMOTEPROC_SRM_DEV)	+= sunxi_rproc_srm_dev.o

@@ -698,6 +698,7 @@ extern int axp_debug_mask;
 #define AXP803_DISIBATH_REG        (0x7C)
 #define AXP803_DCDC_MODESET        (0x80)
 #define AXP803_ADC_EN              (0x82)
+#define AXP803_ADC_TS_CTL          (0x84)
 #define AXP803_ADC_SPEED_SET       (0x85)
 #define AXP803_HOTOVER_CTL         (0x8F)
 #define AXP803_GPIO0_CTL           (0x90)

@@ -657,8 +657,8 @@ static SUNXI_CCU_GATE(bus_tpadc_clk, "bus-tpadc", "apb0", 0xc5c, BIT(0), 0);
 
 static SUNXI_CCU_GATE(bus_tzma_clk, "bus-tzma", "apb0", 0xc6c, BIT(0), 0);
 
-static const char * const dsp_parents[] = { "dcxo24M", "osc32k",
-					    "iosc", "pll-periph0-2x" };
+static const char * const dsp_parents[] = { "hosc", "osc32k",
+					    "osc16m-rc", "pll-periph0-2x", "pll-audio1-div2"};
 static SUNXI_CCU_M_WITH_MUX_GATE(dsp_clk, "dsp", dsp_parents, 0xc70,
 				 0, 4,
 				 24, 3,

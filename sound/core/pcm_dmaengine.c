@@ -16,12 +16,7 @@
 #include <sound/pcm.h>
 #include <sound/pcm_params.h>
 #include <sound/soc.h>
-
-#ifdef CONFIG_SND_SOC_SUNXI_AHUB_TMP
-#include "../soc/sunxi_v2/ahub/sunxi-pcm.h"
-#else
 #include <sound/simple_card.h>
-#endif
 
 #include <sound/dmaengine_pcm.h>
 
@@ -155,11 +150,8 @@ static int dmaengine_pcm_prepare_and_submit(struct snd_pcm_substream *substream)
 	unsigned long flags = DMA_CTRL_ACK;
 
 	struct snd_card *card = substream->pcm->card;
-#ifdef CONFIG_SND_SOC_SUNXI_AHUB_TMP
-#else
 	struct snd_soc_pcm_runtime *rtd = NULL;
 	struct asoc_simple_priv *sndhdmi_priv = NULL;
-#endif
 	unsigned int raw_flag;
 
 	direction = snd_pcm_substream_to_dma_direction(substream);
@@ -168,16 +160,11 @@ static int dmaengine_pcm_prepare_and_submit(struct snd_pcm_substream *substream)
 		flags |= DMA_PREP_INTERRUPT;
 
 	prtd->pos = 0;
-/* sunxi for hdmi dma transfer */
-#ifdef CONFIG_SND_SOC_SUNXI_AHUB_TMP
-	if (strcmp(card->shortname, "sndahub") == 0) {
-		raw_flag = sunxi_ahub_get_rawflag();
-#else
+	/* sunxi for hdmi dma transfer */
 	if (strcmp(card->shortname, "sndhdmi") == 0) {
 		rtd = substream->private_data;
 		sndhdmi_priv = snd_soc_card_get_drvdata(rtd->card);
 		raw_flag = sndhdmi_priv->hdmi_format;
-#endif
 		if (raw_flag > 1)
 			desc = dmaengine_prep_dma_cyclic(chan,
 				substream->runtime->dma_addr,

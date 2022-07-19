@@ -227,4 +227,11 @@ config ZYNQMP_IPI_MBOX
 	  message to the IPI buffer and will access the IPI control
 	  registers to kick the other processor or enquire status.
 
+config SUNXI_MAILBOX
+	tristate "Allwinner mailbox support"
+	depends on ARCH_SUNXI
+	help
+	  Say y here to support Allwinner SOC processors via the
+	  mailbox framework.
+
 endif

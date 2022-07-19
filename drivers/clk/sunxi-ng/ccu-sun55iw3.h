@@ -9,6 +9,6 @@
 #include <dt-bindings/clock/sun55iw3-ccu.h>
 #include <dt-bindings/reset/sun55iw3-ccu.h>
 
-#define CLK_NUMBER		(CLK_MAX_NO + 1)
+#define CLK_NUMBER	(CLK_MAX_NO)
 
 #endif /* _CCU_SUN55IW3_H_ */

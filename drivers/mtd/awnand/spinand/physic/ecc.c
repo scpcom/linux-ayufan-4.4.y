@@ -15,7 +15,7 @@ static int __copy_to_oob(unsigned char *to, unsigned char *from,
 	unsigned int i;
 
 	/* bad block mark byte */
-	to[0] = from[0];
+	/*to[0] = from[0];*/
 
 	for (i = 0; cnt > 0; i++) {
 		/*

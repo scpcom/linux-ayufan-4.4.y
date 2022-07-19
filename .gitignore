@@ -101,6 +101,7 @@ modules.order
 /include/generated/
 /include/ksym/
 /arch/*/include/generated/
+/user_headers/
 
 # stgit generated dirs
 patches-*
@@ -164,5 +165,3 @@ arch/riscv/boot/dts/sunxi/board.dts
 
 #lto lds
 scripts/module-lto.lds
-
-user_headers/
