@@ -147,6 +147,7 @@ static int sunxi_ce_hw_init(sunxi_ce_cdev_t *p_cdev)
 		return PTR_RET(p_cdev->ce_clk);
 	}
 
+#ifndef SET_CE_CLKFRE_MODE2
 	/*get ce need configure clk*/
 	if (of_property_read_u32(p_cdev->pnode, "clock-frequency", &gen_clkrate)) {
 
@@ -154,7 +155,7 @@ static int sunxi_ce_hw_init(sunxi_ce_cdev_t *p_cdev)
 		return -EINVAL;
 	}
 	SS_DBG("The clk freq: %d\n", gen_clkrate);
-
+#endif
 	p_cdev->reset = devm_reset_control_get(p_cdev->pdevice, NULL);
 	if (IS_ERR(p_cdev->reset)) {
 		SS_ERR("Fail to get reset clk, ret %x\n", PTR_RET(p_cdev->reset));
@@ -169,11 +170,13 @@ static int sunxi_ce_hw_init(sunxi_ce_cdev_t *p_cdev)
 		return ret;
 	}
 
+#ifndef SET_CE_CLKFRE_MODE2
 	ret = clk_set_rate(p_cdev->ce_clk, gen_clkrate);
 	if (ret != 0) {
 		SS_ERR("Set rate(%d) failed! ret %d\n", gen_clkrate, ret);
 		return ret;
 	}
+#endif
 #endif
 	SS_DBG("SS mclk %luMHz, pclk %luMHz\n", clk_get_rate(p_cdev->ce_clk)/1000000,
 			clk_get_rate(pclk)/1000000);
@@ -282,7 +285,7 @@ static void sunxi_ce_channel_free(int id)
 	spin_lock_irqsave(&ce_cdev->lock, flags);
 	ce_cdev->flows[id].available = SS_FLOW_AVAILABLE;
 	ce_cdev->flag = 0;
-	SS_DBG("The flow %d is available.\n", id);
+	SS_DBG("The flow %d is free.\n", id);
 	spin_unlock_irqrestore(&ce_cdev->lock, flags);
 }
 
@@ -294,7 +297,7 @@ static long sunxi_ce_ioctl(struct file *file, unsigned int cmd, unsigned long ar
 	phys_addr_t usr_key_addr;
 	phys_addr_t usr_dst_addr;
 
-	SS_DBG("cmd = %u\n", cmd);
+	SS_DBG("cmd = 0x%x\n", cmd);
 	switch (cmd) {
 	case CE_IOC_REQUEST:
 	{
@@ -327,7 +330,7 @@ static long sunxi_ce_ioctl(struct file *file, unsigned int cmd, unsigned long ar
 
 	case CE_IOC_AES_CRYPTO:
 	{
-		SS_DBG("arg_size = %d\n", _IOC_SIZE(cmd));
+		SS_DBG("arg_size = 0x%x\n", _IOC_SIZE(cmd));
 		if (_IOC_SIZE(cmd) != sizeof(crypto_aes_req_ctx_t)) {
 			SS_DBG("arg_size != sizeof(crypto_aes_req_ctx_t)\n");
 			return -EINVAL;
@@ -379,7 +382,7 @@ static long sunxi_ce_ioctl(struct file *file, unsigned int cmd, unsigned long ar
 			}
 		}
 
-		SS_ERR("do_aes_crypto start\n");
+		SS_DBG("do_aes_crypto start\n");
 		ret = do_aes_crypto(aes_req_ctx);
 		if (ret) {
 			kfree(aes_req_ctx);
@@ -477,7 +480,7 @@ static int sunxi_ce_setup_cdev(void)
 	ce_cdev->pdevice->dma_mask = &sunxi_ss_dma_mask;
 	ce_cdev->pdevice->coherent_dma_mask = DMA_BIT_MASK(32);
 #endif
-
+	memcpy(ce_cdev->dev_name, SUNXI_SS_DEV_NAME, 3);
 	return 0;
 
 err0:

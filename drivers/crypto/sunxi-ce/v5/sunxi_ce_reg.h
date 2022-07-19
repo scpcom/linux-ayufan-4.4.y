@@ -280,7 +280,9 @@ int ss_flow_err(int flow);
 
 void ss_data_len_set(int len, ce_task_desc_t *task);
 
+void ce_reg_print(void);
 int ss_reg_print(char *buf, int len);
+
 void ss_keyselect_set(int select, ce_task_desc_t *task);
 void ss_keysize_set(int size, ce_task_desc_t *task);
 
@@ -296,6 +298,7 @@ void ss_hash_data_len_set(int len, ce_new_task_desc_t *task);
 
 void ce_task_data_len_set(u32 len, u8 *dst);
 void ce_task_addr_set(u8 *vir_addr, phys_addr_t phy_addr, u8 *dst);
+void ce_iv_phyaddr_set(dma_addr_t phy_addr, ce_task_desc_t *task);
 phys_addr_t ce_task_addr_get(u8 *dst);
 
 #endif /* end of _SUNXI_SECURITY_SYSTEM_REG_H_ */

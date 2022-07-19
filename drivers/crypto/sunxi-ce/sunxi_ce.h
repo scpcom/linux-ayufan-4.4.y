@@ -487,5 +487,5 @@ void ss_dev_unlock(void);
 void __iomem *ss_membase(void);
 void ss_reset(void);
 void ss_clk_set(u32 rate);
-
+void print_hex(void *_data, int _len);
 #endif /* end of _SUNXI_SECURITY_SYSTEM_H_ */
