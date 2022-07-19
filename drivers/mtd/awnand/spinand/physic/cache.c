@@ -36,6 +36,53 @@ static void update_cache_info(struct aw_spinand_cache *cache,
 }
 
 /* the request must bases on single physical page/block */
+#if IS_ENABLED(CONFIG_AW_MTD_SPINAND_OOB_RAW_SPARE)
+static int aw_spinand_cache_copy_to_cache(struct aw_spinand_chip *chip,
+		struct aw_spinand_chip_request *req)
+{
+	unsigned int len;
+	struct aw_spinand_cache *cache = chip->cache;
+	unsigned char *databuf = cache->databuf;
+	unsigned char *oobbuf = databuf + cache->data_maxlen;
+
+	memset(databuf, 0xFF, cache->data_maxlen);
+	if (req->databuf && req->datalen) {
+		len = min(req->datalen, cache->data_maxlen - req->pageoff);
+		memcpy(databuf + req->pageoff, req->databuf, len);
+	}
+
+	memset(oobbuf, 0xFF, cache->oob_maxlen);
+	if (req->oobbuf && req->ooblen) {
+
+		len = min(req->ooblen, cache->oob_maxlen);
+		memcpy(oobbuf, req->oobbuf, len);
+	}
+
+	/* we must update cache information when update cache buffer */
+	update_cache_info(cache, req);
+	return 0;
+}
+
+/* the request must bases on single physical page/block */
+static int aw_spinand_cache_copy_from_cache(struct aw_spinand_chip *chip,
+		struct aw_spinand_chip_request *req)
+{
+	unsigned int len;
+	struct aw_spinand_cache *cache = chip->cache;
+
+	if (req->datalen && req->databuf) {
+		len = min(req->datalen, cache->data_maxlen - req->pageoff);
+		memcpy(req->databuf, cache->databuf + req->pageoff, len);
+	}
+
+	if (req->oobbuf && req->ooblen) {
+		len = min(req->ooblen, cache->oob_maxlen);
+		memcpy(req->oobbuf, cache->oobbuf, len);
+	}
+
+	return 0;
+}
+#else
 static int aw_spinand_cache_copy_to_cache(struct aw_spinand_chip *chip,
 		struct aw_spinand_chip_request *req)
 {
@@ -53,17 +100,23 @@ static int aw_spinand_cache_copy_to_cache(struct aw_spinand_chip *chip,
 
 	memset(cache->oobbuf, 0xFF, cache->oob_maxlen);
 	if (req->oobbuf && req->ooblen) {
-		int ret;
-		struct aw_spinand_ecc *ecc = chip->ecc;
-		struct aw_spinand_info *info = chip->info;
-		struct aw_spinand_phy_info *pinfo = info->phy_info;
+		if (req->mode != AW_SPINAND_MTD_OPS_RAW) {
+			int ret;
+			struct aw_spinand_ecc *ecc = chip->ecc;
+			struct aw_spinand_info *info = chip->info;
+			struct aw_spinand_phy_info *pinfo = info->phy_info;
 
-		len = min3(req->ooblen, cache->oob_maxlen,
-				(unsigned int)AW_OOB_SIZE_PER_PHY_PAGE);
-		ret = ecc->copy_to_oob(pinfo->EccProtectedType,
-				cache->oobbuf, req->oobbuf, len);
-		if (unlikely(ret))
-			return ret;
+			len = min3(req->ooblen, cache->oob_maxlen,
+					(unsigned int)AW_OOB_SIZE_PER_PHY_PAGE);
+			ret = ecc->copy_to_oob(pinfo->EccProtectedType,
+					cache->oobbuf, req->oobbuf, len);
+			if (unlikely(ret))
+				return ret;
+		} else {
+			len = min3(req->ooblen, cache->oob_maxlen,
+					(unsigned int)AW_OOB_SIZE_PER_PHY_PAGE);
+			memcpy(cache->oobbuf, req->oobbuf, len);
+		}
 	}
 
 	/* we must update cache information when update cache buffer */
@@ -86,30 +139,28 @@ static int aw_spinand_cache_copy_from_cache(struct aw_spinand_chip *chip,
 	}
 
 	if (req->oobbuf && req->ooblen) {
-		int ret;
-		struct aw_spinand_ecc *ecc = chip->ecc;
-		struct aw_spinand_info *info = chip->info;
-		struct aw_spinand_phy_info *pinfo = info->phy_info;
-		unsigned char *oobtmp;
+		if (req->mode != AW_SPINAND_MTD_OPS_RAW) {
+			int ret;
+			struct aw_spinand_ecc *ecc = chip->ecc;
+			struct aw_spinand_info *info = chip->info;
+			struct aw_spinand_phy_info *pinfo = info->phy_info;
 
-		len = min3(req->ooblen, cache->oob_maxlen,
-				(unsigned int)AW_OOB_SIZE_PER_PHY_PAGE);
-		ret = ecc->copy_from_oob(pinfo->EccProtectedType,
-				req->oobbuf, cache->oobbuf, len);
-		if (unlikely(ret))
-			return ret;
-
-		/*
-		 * the first byte of cache->oobbuf and req->oobbuf is
-		 * not 0xFF means bad block
-		 */
-		oobtmp = req->oobbuf;
-		if (oobtmp[0] != 0xFF || cache->oobbuf[0] != 0xFF)
-			oobtmp[0] = 0x00;
+			len = min3(req->ooblen, cache->oob_maxlen,
+					(unsigned int)AW_OOB_SIZE_PER_PHY_PAGE);
+			ret = ecc->copy_from_oob(pinfo->EccProtectedType,
+					req->oobbuf, cache->oobbuf, len);
+			if (unlikely(ret))
+				return ret;
+		} else {
+			len = min3(req->ooblen, cache->oob_maxlen,
+					(unsigned int)AW_OOB_SIZE_PER_PHY_PAGE);
+			memcpy(req->oobbuf, cache->oobbuf, len);
+		}
 	}
 
 	return 0;
 }
+#endif
 
 static bool aw_spinand_cache_match_cache(struct aw_spinand_chip *chip,
 		struct aw_spinand_chip_request *req)

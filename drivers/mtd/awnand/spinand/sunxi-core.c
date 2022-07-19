@@ -86,6 +86,10 @@ static void aw_spinand_init_mtd_info(struct aw_spinand_chip *chip,
 	mtd->oobavail = AW_OOB_SIZE_PER_PHY_PAGE;
 	mtd->subpage_sft = 0;
 #endif
+
+#if IS_ENABLED(CONFIG_AW_SPINAND_OOB_RAW_SPARE)
+	mtd->oobavail = mtd->oobsize;
+#endif
 	mtd->writebufsize = info->page_size(chip);
 	mtd->size = info->total_size(chip);
 	mtd->name = "sunxi_mtd_nand";
@@ -191,7 +195,7 @@ static int aw_spinand_read_oob(struct mtd_info *mtd, loff_t from,
 
 	if (from < 0 || from >= mtd->size || ops->len > mtd->size - from)
 		return -EINVAL;
-	if (!ops->len)
+	if (!ops->len && !ops->ooblen)
 		return 0;
 
 	mutex_lock(&spinand->lock);
@@ -262,7 +266,7 @@ static int aw_spinand_write_oob(struct mtd_info *mtd, loff_t to,
 
 	if (to < 0 || to >= mtd->size || ops->len > mtd->size - to)
 		return -EOVERFLOW;
-	if (!ops->len)
+	if (!ops->len && !ops->ooblen)
 		return 0;
 	/*
 	 * if enable CONFIG_AW_SPINAND_SIMULATE_MULTIPLANE, will eanble
