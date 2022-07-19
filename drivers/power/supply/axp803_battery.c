@@ -567,6 +567,16 @@ static int axp803_bat_power_init(struct axp803_bat_power *bat_power)
 		val &= (~(0x1 << 2));
 	regmap_write(map, AXP803_ADC_SPEED_SET, val);
 
+	regmap_read(map, AXP803_ADC_TS_CTL, &val);
+	if (axp_config->pmu_bat_temp_enable != 0) {
+		val &= 0xF8;
+		val |= 0x02;
+	} else {
+		val &= 0xF8;
+		val |= 0x04;
+	}
+	regmap_write(map, AXP803_ADC_TS_CTL, val);
+
 	/* bat para */
 	regmap_write(map, AXP803_WARNING_LEVEL,
 		((axp_config->pmu_battery_warning_level1 - 5) << 4)
