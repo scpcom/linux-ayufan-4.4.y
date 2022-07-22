@@ -11,6 +11,7 @@ dtb-$(CONFIG_ARCH_SUNXI) += \
 	sun20i-d1-licheerv-dock-1024x600.dtb \
 	sun20i-d1-licheerv-dock-mipi.dtb \
 	sun20i-d1-mangopi-mq-800x480.dtb \
+	sun20i-d1-h-mangopi-mq-pro.dtb \
 	sun20i-d1-nezha.dtb \
 	sun20i-d1-nezha-lcd.dtb \
 	sun20i-d1-nezha-min.dtb
