@@ -20,8 +20,6 @@ obj-$(CONFIG_WLAN_VENDOR_TI) += ti/
 obj-$(CONFIG_WLAN_VENDOR_ZYDAS) += zydas/
 obj-$(CONFIG_WLAN_VENDOR_QUANTENNA) += quantenna/
 
-obj-$(CONFIG_RTL8723DS) 	+= rtl8723ds/
-
 # 16-bit wireless PCMCIA client drivers
 obj-$(CONFIG_PCMCIA_RAYCS)	+= ray_cs.o
 obj-$(CONFIG_PCMCIA_WL3501)	+= wl3501_cs.o
@@ -34,6 +32,8 @@ obj-$(CONFIG_VIRT_WIFI)	+= virt_wifi.o
 
 obj-$(CONFIG_XR829_WLAN)   += xr829/
 obj-$(CONFIG_XR819S_WLAN)   += xr819s/
+obj-$(CONFIG_RTL8821CS)   += rtl8821cs/
+obj-$(CONFIG_RTL8723DS)   += rtl8723ds/
 obj-$(CONFIG_SPARD_WLAN_SUPPORT) += uwe5622/
 obj-$(CONFIG_BCMDHD) += bcmdhd/
 obj-$(CONFIG_AIC_WLAN_SUPPORT) += aic8800/
