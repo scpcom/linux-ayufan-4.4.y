@@ -1,0 +1,290 @@
+/*******************************************************************************
+@File
+@Title          Server bridge for rgxfwdbg
+@Copyright      Copyright (c) Imagination Technologies Ltd. All Rights Reserved
+@Description    Implements the server side of the bridge for rgxfwdbg
+@License        Dual MIT/GPLv2
+
+The contents of this file are subject to the MIT license as set out below.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+Alternatively, the contents of this file may be used under the terms of
+the GNU General Public License Version 2 ("GPL") in which case the provisions
+of GPL are applicable instead of those above.
+
+If you wish to allow use of your version of this file only under the terms of
+GPL, and not to allow others to use your version of this file under the terms
+of the MIT license, indicate your decision by deleting the provisions above
+and replace them with the notice and other provisions required by GPL as set
+out in the file called "GPL-COPYING" included in this distribution. If you do
+not delete the provisions above, a recipient may use your version of this file
+under the terms of either the MIT license or GPL.
+
+This License is also included in this distribution in the file called
+"MIT-COPYING".
+
+EXCEPT AS OTHERWISE STATED IN A NEGOTIATED AGREEMENT: (A) THE SOFTWARE IS
+PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
+BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
+PURPOSE AND NONINFRINGEMENT; AND (B) IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*******************************************************************************/
+
+#include <linux/uaccess.h>
+
+#include "img_defs.h"
+
+#include "devicemem_server.h"
+#include "rgxfwdbg.h"
+#include "pmr.h"
+#include "rgxtimecorr.h"
+
+#include "common_rgxfwdbg_bridge.h"
+
+#include "allocmem.h"
+#include "pvr_debug.h"
+#include "connection_server.h"
+#include "pvr_bridge.h"
+#if defined(SUPPORT_RGX)
+#include "rgx_bridge.h"
+#endif
+#include "srvcore.h"
+#include "handle.h"
+
+#include <linux/slab.h>
+
+/* ***************************************************************************
+ * Server-side bridge entry points
+ */
+
+static IMG_INT
+PVRSRVBridgeRGXFWDebugSLCSetBypassState(IMG_UINT32 ui32DispatchTableEntry,
+					void
+					* psRGXFWDebugSLCSetBypassStateINt,
+					void
+					* psRGXFWDebugSLCSetBypassStateOUTt,
+					CONNECTION_DATA * psConnection)
+{
+	PVRSRV_BRIDGE_IN_RGXFWDEBUGSLCSETBYPASSSTATE *psRGXFWDebugSLCSetBypassStateIN = psRGXFWDebugSLCSetBypassStateINt;
+	PVRSRV_BRIDGE_OUT_RGXFWDEBUGSLCSETBYPASSSTATE *psRGXFWDebugSLCSetBypassStateOUT = psRGXFWDebugSLCSetBypassStateOUTt;
+	psRGXFWDebugSLCSetBypassStateOUT->eError =
+	    PVRSRVRGXFWDebugSLCSetBypassStateKM(psConnection,
+						OSGetDevData(psConnection),
+						psRGXFWDebugSLCSetBypassStateIN->
+						ui32Flags,
+						psRGXFWDebugSLCSetBypassStateIN->
+						bIsBypassed);
+
+	return 0;
+}
+
+static IMG_INT
+PVRSRVBridgeRGXFWDebugSetFWLog(IMG_UINT32 ui32DispatchTableEntry,
+			       void *
+			       psRGXFWDebugSetFWLogINt,
+			       void *
+			       psRGXFWDebugSetFWLogOUTt,
+			       CONNECTION_DATA * psConnection)
+{
+	PVRSRV_BRIDGE_IN_RGXFWDEBUGSETFWLOG *psRGXFWDebugSetFWLogIN = psRGXFWDebugSetFWLogINt;
+	PVRSRV_BRIDGE_OUT_RGXFWDEBUGSETFWLOG *psRGXFWDebugSetFWLogOUT = psRGXFWDebugSetFWLogOUTt;
+	psRGXFWDebugSetFWLogOUT->eError =
+	    PVRSRVRGXFWDebugSetFWLogKM(psConnection, OSGetDevData(psConnection),
+				       psRGXFWDebugSetFWLogIN->
+				       ui32RGXFWLogType);
+
+	return 0;
+}
+
+static IMG_INT
+PVRSRVBridgeRGXFWDebugDumpFreelistPageList(IMG_UINT32 ui32DispatchTableEntry,
+					   void
+					   * psRGXFWDebugDumpFreelistPageListINt,
+					   void
+					   *
+					   psRGXFWDebugDumpFreelistPageListOUTt,
+					   CONNECTION_DATA * psConnection)
+{
+	PVRSRV_BRIDGE_IN_RGXFWDEBUGDUMPFREELISTPAGELIST *psRGXFWDebugDumpFreelistPageListIN = psRGXFWDebugDumpFreelistPageListINt;
+	PVRSRV_BRIDGE_OUT_RGXFWDEBUGDUMPFREELISTPAGELIST *psRGXFWDebugDumpFreelistPageListOUT = psRGXFWDebugDumpFreelistPageListOUTt;
+	PVR_UNREFERENCED_PARAMETER(psRGXFWDebugDumpFreelistPageListIN);
+
+	psRGXFWDebugDumpFreelistPageListOUT->eError =
+	    PVRSRVRGXFWDebugDumpFreelistPageListKM(psConnection,
+						   OSGetDevData(psConnection));
+
+	return 0;
+}
+
+static IMG_INT
+PVRSRVBridgeRGXFWDebugSetHCSDeadline(IMG_UINT32 ui32DispatchTableEntry,
+				     void *
+				     psRGXFWDebugSetHCSDeadlineINt,
+				     void
+				     * psRGXFWDebugSetHCSDeadlineOUTt,
+				     CONNECTION_DATA * psConnection)
+{
+
+	PVRSRV_BRIDGE_IN_RGXFWDEBUGSETHCSDEADLINE *psRGXFWDebugSetHCSDeadlineIN = psRGXFWDebugSetHCSDeadlineINt;
+	PVRSRV_BRIDGE_OUT_RGXFWDEBUGSETHCSDEADLINE *psRGXFWDebugSetHCSDeadlineOUT = psRGXFWDebugSetHCSDeadlineOUTt;
+	psRGXFWDebugSetHCSDeadlineOUT->eError =
+	    PVRSRVRGXFWDebugSetHCSDeadlineKM(psConnection,
+					     OSGetDevData(psConnection),
+					     psRGXFWDebugSetHCSDeadlineIN->
+					     ui32RGXHCSDeadline);
+
+	return 0;
+}
+
+static IMG_INT
+PVRSRVBridgeRGXFWDebugSetOSidPriority(IMG_UINT32 ui32DispatchTableEntry,
+				      void
+				      * psRGXFWDebugSetOSidPriorityINt,
+				      void
+				      * psRGXFWDebugSetOSidPriorityOUTt,
+				      CONNECTION_DATA * psConnection)
+{
+	PVRSRV_BRIDGE_IN_RGXFWDEBUGSETOSIDPRIORITY *psRGXFWDebugSetOSidPriorityIN = psRGXFWDebugSetOSidPriorityINt;
+	PVRSRV_BRIDGE_OUT_RGXFWDEBUGSETOSIDPRIORITY *psRGXFWDebugSetOSidPriorityOUT = psRGXFWDebugSetOSidPriorityOUTt;
+	psRGXFWDebugSetOSidPriorityOUT->eError =
+	    PVRSRVRGXFWDebugSetOSidPriorityKM(psConnection,
+					      OSGetDevData(psConnection),
+					      psRGXFWDebugSetOSidPriorityIN->
+					      ui32OSid,
+					      psRGXFWDebugSetOSidPriorityIN->
+					      ui32Priority);
+
+	return 0;
+}
+
+static IMG_INT
+PVRSRVBridgeRGXFWDebugSetOSNewOnlineState(IMG_UINT32 ui32DispatchTableEntry,
+					  void
+					  * psRGXFWDebugSetOSNewOnlineStateINt,
+					  void
+					  * psRGXFWDebugSetOSNewOnlineStateOUTt,
+					  CONNECTION_DATA * psConnection)
+{
+
+	PVRSRV_BRIDGE_IN_RGXFWDEBUGSETOSNEWONLINESTATE *psRGXFWDebugSetOSNewOnlineStateIN = psRGXFWDebugSetOSNewOnlineStateINt;
+	PVRSRV_BRIDGE_OUT_RGXFWDEBUGSETOSNEWONLINESTATE *psRGXFWDebugSetOSNewOnlineStateOUT = psRGXFWDebugSetOSNewOnlineStateOUTt;
+	psRGXFWDebugSetOSNewOnlineStateOUT->eError =
+	    PVRSRVRGXFWDebugSetOSNewOnlineStateKM(psConnection,
+						  OSGetDevData(psConnection),
+						  psRGXFWDebugSetOSNewOnlineStateIN->
+						  ui32OSid,
+						  psRGXFWDebugSetOSNewOnlineStateIN->
+						  ui32OSNewState);
+
+	return 0;
+}
+
+static IMG_INT
+PVRSRVBridgeRGXCurrentTime(IMG_UINT32 ui32DispatchTableEntry,
+			   void * psRGXCurrentTimeINt,
+			   void *
+			   psRGXCurrentTimeOUTt, CONNECTION_DATA * psConnection)
+{
+
+	PVRSRV_BRIDGE_IN_RGXCURRENTTIME * psRGXCurrentTimeIN = psRGXCurrentTimeINt;
+	PVRSRV_BRIDGE_OUT_RGXCURRENTTIME *psRGXCurrentTimeOUT = psRGXCurrentTimeOUTt;
+	PVR_UNREFERENCED_PARAMETER(psRGXCurrentTimeIN);
+
+	psRGXCurrentTimeOUT->eError =
+	    PVRSRVRGXCurrentTime(psConnection, OSGetDevData(psConnection),
+				 &psRGXCurrentTimeOUT->ui64Time);
+
+	return 0;
+}
+
+/* ***************************************************************************
+ * Server bridge dispatch related glue
+ */
+
+static IMG_BOOL bUseLock = IMG_TRUE;
+
+PVRSRV_ERROR InitRGXFWDBGBridge(void);
+PVRSRV_ERROR DeinitRGXFWDBGBridge(void);
+
+/*
+ * Register all RGXFWDBG functions with services
+ */
+PVRSRV_ERROR InitRGXFWDBGBridge(void)
+{
+
+	SetDispatchTableEntry(PVRSRV_BRIDGE_RGXFWDBG,
+			      PVRSRV_BRIDGE_RGXFWDBG_RGXFWDEBUGSLCSETBYPASSSTATE,
+			      PVRSRVBridgeRGXFWDebugSLCSetBypassState, NULL,
+			      bUseLock);
+
+	SetDispatchTableEntry(PVRSRV_BRIDGE_RGXFWDBG,
+			      PVRSRV_BRIDGE_RGXFWDBG_RGXFWDEBUGSETFWLOG,
+			      PVRSRVBridgeRGXFWDebugSetFWLog, NULL, bUseLock);
+
+	SetDispatchTableEntry(PVRSRV_BRIDGE_RGXFWDBG,
+			      PVRSRV_BRIDGE_RGXFWDBG_RGXFWDEBUGDUMPFREELISTPAGELIST,
+			      PVRSRVBridgeRGXFWDebugDumpFreelistPageList, NULL,
+			      bUseLock);
+
+	SetDispatchTableEntry(PVRSRV_BRIDGE_RGXFWDBG,
+			      PVRSRV_BRIDGE_RGXFWDBG_RGXFWDEBUGSETHCSDEADLINE,
+			      PVRSRVBridgeRGXFWDebugSetHCSDeadline, NULL,
+			      bUseLock);
+
+	SetDispatchTableEntry(PVRSRV_BRIDGE_RGXFWDBG,
+			      PVRSRV_BRIDGE_RGXFWDBG_RGXFWDEBUGSETOSIDPRIORITY,
+			      PVRSRVBridgeRGXFWDebugSetOSidPriority, NULL,
+			      bUseLock);
+
+	SetDispatchTableEntry(PVRSRV_BRIDGE_RGXFWDBG,
+			      PVRSRV_BRIDGE_RGXFWDBG_RGXFWDEBUGSETOSNEWONLINESTATE,
+			      PVRSRVBridgeRGXFWDebugSetOSNewOnlineState, NULL,
+			      bUseLock);
+
+	SetDispatchTableEntry(PVRSRV_BRIDGE_RGXFWDBG,
+			      PVRSRV_BRIDGE_RGXFWDBG_RGXCURRENTTIME,
+			      PVRSRVBridgeRGXCurrentTime, NULL, bUseLock);
+
+	return PVRSRV_OK;
+}
+
+/*
+ * Unregister all rgxfwdbg functions with services
+ */
+PVRSRV_ERROR DeinitRGXFWDBGBridge(void)
+{
+
+	UnsetDispatchTableEntry(PVRSRV_BRIDGE_RGXFWDBG,
+				PVRSRV_BRIDGE_RGXFWDBG_RGXFWDEBUGSLCSETBYPASSSTATE);
+
+	UnsetDispatchTableEntry(PVRSRV_BRIDGE_RGXFWDBG,
+				PVRSRV_BRIDGE_RGXFWDBG_RGXFWDEBUGSETFWLOG);
+
+	UnsetDispatchTableEntry(PVRSRV_BRIDGE_RGXFWDBG,
+				PVRSRV_BRIDGE_RGXFWDBG_RGXFWDEBUGDUMPFREELISTPAGELIST);
+
+	UnsetDispatchTableEntry(PVRSRV_BRIDGE_RGXFWDBG,
+				PVRSRV_BRIDGE_RGXFWDBG_RGXFWDEBUGSETHCSDEADLINE);
+
+	UnsetDispatchTableEntry(PVRSRV_BRIDGE_RGXFWDBG,
+				PVRSRV_BRIDGE_RGXFWDBG_RGXFWDEBUGSETOSIDPRIORITY);
+
+	UnsetDispatchTableEntry(PVRSRV_BRIDGE_RGXFWDBG,
+				PVRSRV_BRIDGE_RGXFWDBG_RGXFWDEBUGSETOSNEWONLINESTATE);
+
+	UnsetDispatchTableEntry(PVRSRV_BRIDGE_RGXFWDBG,
+				PVRSRV_BRIDGE_RGXFWDBG_RGXCURRENTTIME);
+
+	return PVRSRV_OK;
+}
