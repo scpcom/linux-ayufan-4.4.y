@@ -166,6 +166,9 @@ struct geth_priv {
 
 	/* resume work */
 	struct work_struct eth_work;
+
+	/* for debug phy reg */
+	struct mii_reg_dump mii_reg;
 };
 
 #ifdef CONFIG_RTL8363_NB
@@ -407,7 +410,7 @@ static ssize_t gphy_test_store(struct device *dev,
 
 static DEVICE_ATTR(gphy_test, 0664, gphy_test_show, gphy_test_store);
 
-static ssize_t mii_reg_show(struct device *dev,
+static ssize_t mii_read_show(struct device *dev,
 		struct device_attribute *attr, char *buf)
 {
 	struct net_device *ndev = NULL;
@@ -435,22 +438,139 @@ static ssize_t mii_reg_show(struct device *dev,
 		return 0;
 	}
 
-	return sprintf(buf,
-		"Current MII Registers:\n"
-		"BMCR[0x%02x] = 0x%04x,\t\tBMSR[0x%02x] = 0x%04x,\t\tPHYSID1[0x%02x] = 0x%04x\n"
-		"PHYSID2[0x%02x] = 0x%04x,\t\tADVERTISE[0x%02x] = 0x%04x,\tLPA[0x%02x] = 0x%04x\n"
-		"EXPANSION[0x%02x] = 0x%04x,\tCTRL1000[0x%02x] = 0x%04x,\tSTAT1000[0x%02x] = 0x%04x\n",
-		MII_BMCR, sunxi_mdio_read(priv->base, priv->phy_addr, MII_BMCR),
-		MII_BMSR, sunxi_mdio_read(priv->base, priv->phy_addr, MII_BMSR),
-		MII_PHYSID1, sunxi_mdio_read(priv->base, priv->phy_addr, MII_PHYSID1),
-		MII_PHYSID2, sunxi_mdio_read(priv->base, priv->phy_addr, MII_PHYSID2),
-		MII_ADVERTISE, sunxi_mdio_read(priv->base, priv->phy_addr, MII_ADVERTISE),
-		MII_LPA, sunxi_mdio_read(priv->base, priv->phy_addr, MII_LPA),
-		MII_EXPANSION, sunxi_mdio_read(priv->base, priv->phy_addr, MII_EXPANSION),
-		MII_CTRL1000, sunxi_mdio_read(priv->base, priv->phy_addr, MII_CTRL1000),
-		MII_STAT1000, sunxi_mdio_read(priv->base, priv->phy_addr, MII_STAT1000));
+	priv->mii_reg.value = sunxi_mdio_read(priv->base, priv->mii_reg.addr, priv->mii_reg.reg);
+	return sprintf(buf, "ADDR[0x%02x]:REG[0x%02x] = 0x%04x\n",
+		       priv->mii_reg.addr, priv->mii_reg.reg, priv->mii_reg.value);
 }
-static DEVICE_ATTR(mii_reg, 0444, mii_reg_show, NULL);
+
+static ssize_t mii_read_store(struct device *dev,
+		struct device_attribute *attr, const char *buf, size_t count)
+{
+	struct net_device *ndev = NULL;
+	struct geth_priv *priv = NULL;
+	int ret = 0;
+	u16 reg, addr;
+	char *ptr;
+
+	ptr = (char *)buf;
+
+	if (dev == NULL) {
+		pr_err("Argment is invalid\n");
+		return count;
+	}
+
+	ndev = dev_get_drvdata(dev);
+	if (ndev == NULL) {
+		pr_err("Net device is null\n");
+		return count;
+	}
+
+	priv = netdev_priv(ndev);
+	if (priv == NULL) {
+		pr_err("geth_priv is null\n");
+		return count;
+	}
+
+	if (!netif_running(ndev)) {
+		pr_warn("eth is down!\n");
+		return count;
+	}
+
+	ret = sunxi_parse_read_str(ptr, &addr, &reg);
+	if (ret)
+		return ret;
+
+	priv->mii_reg.addr = addr;
+	priv->mii_reg.reg = reg;
+
+	return count;
+}
+
+static DEVICE_ATTR(mii_read, 0664, mii_read_show, mii_read_store);
+
+static ssize_t mii_write_show(struct device *dev,
+		struct device_attribute *attr, char *buf)
+{
+	struct net_device *ndev = NULL;
+	struct geth_priv *priv = NULL;
+	u16 bef_val, aft_val;
+
+	if (dev == NULL) {
+		pr_err("Argment is invalid\n");
+		return 0;
+	}
+
+	ndev = dev_get_drvdata(dev);
+	if (ndev == NULL) {
+		pr_err("Net device is null\n");
+		return 0;
+	}
+
+	priv = netdev_priv(ndev);
+	if (priv == NULL) {
+		pr_err("geth_priv is null\n");
+		return 0;
+	}
+
+	if (!netif_running(ndev)) {
+		pr_warn("eth is down!\n");
+		return 0;
+	}
+
+	bef_val = sunxi_mdio_read(priv->base, priv->mii_reg.addr, priv->mii_reg.reg);
+	sunxi_mdio_write(priv->base, priv->mii_reg.addr, priv->mii_reg.reg, priv->mii_reg.value);
+	aft_val = sunxi_mdio_read(priv->base, priv->mii_reg.addr, priv->mii_reg.reg);
+	return sprintf(buf, "before ADDR[0x%02x]:REG[0x%02x] = 0x%04x\n"
+			    "after  ADDR[0x%02x]:REG[0x%02x] = 0x%04x\n",
+			    priv->mii_reg.addr, priv->mii_reg.reg, bef_val,
+			    priv->mii_reg.addr, priv->mii_reg.reg, aft_val);
+}
+
+static ssize_t mii_write_store(struct device *dev,
+		struct device_attribute *attr, const char *buf, size_t count)
+{
+	struct net_device *ndev = NULL;
+	struct geth_priv *priv = NULL;
+	int ret = 0;
+	u16 reg, addr, val;
+	char *ptr;
+
+	ptr = (char *)buf;
+
+	if (dev == NULL) {
+		pr_err("Argment is invalid\n");
+		return count;
+	}
+
+	ndev = dev_get_drvdata(dev);
+	if (ndev == NULL) {
+		pr_err("Net device is null\n");
+		return count;
+	}
+
+	priv = netdev_priv(ndev);
+	if (priv == NULL) {
+		pr_err("geth_priv is null\n");
+		return count;
+	}
+
+	if (!netif_running(ndev)) {
+		pr_warn("eth is down!\n");
+		return count;
+	}
+
+	ret = sunxi_parse_write_str(ptr, &addr, &reg, &val);
+	if (ret)
+		return ret;
+
+	priv->mii_reg.reg = reg;
+	priv->mii_reg.addr = addr;
+	priv->mii_reg.value = val;
+
+	return count;
+}
+
+static DEVICE_ATTR(mii_write, 0664, mii_write_show, mii_write_store);
 
 static ssize_t loopback_test_show(struct device *dev,
 		struct device_attribute *attr, char *buf)
@@ -2283,7 +2403,8 @@ static int geth_probe(struct platform_device *pdev)
 	geth_create_attrs(ndev);
 #endif
 	device_create_file(&pdev->dev, &dev_attr_gphy_test);
-	device_create_file(&pdev->dev, &dev_attr_mii_reg);
+	device_create_file(&pdev->dev, &dev_attr_mii_read);
+	device_create_file(&pdev->dev, &dev_attr_mii_write);
 	device_create_file(&pdev->dev, &dev_attr_loopback_test);
 	device_create_file(&pdev->dev, &dev_attr_extra_tx_stats);
 	device_create_file(&pdev->dev, &dev_attr_extra_rx_stats);
@@ -2312,7 +2433,8 @@ static int geth_remove(struct platform_device *pdev)
 	struct geth_priv *priv = netdev_priv(ndev);
 
 	device_remove_file(&pdev->dev, &dev_attr_gphy_test);
-	device_remove_file(&pdev->dev, &dev_attr_mii_reg);
+	device_remove_file(&pdev->dev, &dev_attr_mii_read);
+	device_remove_file(&pdev->dev, &dev_attr_mii_write);
 	device_remove_file(&pdev->dev, &dev_attr_loopback_test);
 	device_remove_file(&pdev->dev, &dev_attr_extra_tx_stats);
 	device_remove_file(&pdev->dev, &dev_attr_extra_rx_stats);

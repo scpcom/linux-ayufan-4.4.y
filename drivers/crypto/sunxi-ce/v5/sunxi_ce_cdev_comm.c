@@ -31,6 +31,44 @@
 
 extern sunxi_ce_cdev_t	*ce_cdev;
 
+void ce_print_task_desc(ce_task_desc_t *task)
+{
+	int i;
+	u64 phy_addr;
+
+#ifndef SUNXI_CE_DEBUG
+	return;
+#endif
+
+	printk("---------------------task_info--------------------\n");
+	printk("task->comm_ctl = 0x%x\n", task->comm_ctl);
+	printk("task->sym_ctl = 0x%x\n", task->sym_ctl);
+	printk("task->asym_ctl = 0x%x\n", task->asym_ctl);
+	printk("task->key_addr = 0x%llx\n", (u64)ce_task_addr_get(task->key_addr));
+	printk("task->iv_addr = 0x%llx\n", (u64)ce_task_addr_get(task->iv_addr));
+	printk("task->ctr_addr = 0x%llx\n", (u64)ce_task_addr_get(task->ctr_addr));
+	printk("task->data_len = 0x%x\n", task->data_len);
+
+
+	for (i = 0; i < 8; i++) {
+		phy_addr = (u64)ce_task_addr_get(task->ce_sg[i].src_addr);
+		if (phy_addr) {
+			printk("task->src[%d].addr = 0x%llx\n", i, phy_addr);
+			printk("task->src[%d].len = 0x%x\n", i, task->ce_sg[i].src_len);
+		}
+	}
+
+	for (i = 0; i < 8; i++) {
+		phy_addr = (u64)ce_task_addr_get(task->ce_sg[i].dst_addr);
+		if (phy_addr) {
+			printk("task->dst[%d].addr = 0x%llx\n", i, phy_addr);
+			printk("task->dst[%d].len = 0x%x\n", i, task->ce_sg[i].dst_len);
+		}
+	}
+	printk("task->task_phy_addr = 0x%llx\n", (u64)task->task_phy_addr);
+}
+
+
 irqreturn_t sunxi_ce_irq_handler(int irq, void *dev_id)
 {
 	int i;
@@ -142,15 +180,14 @@ static void ce_task_destroy(ce_task_desc_t *task)
 static int ce_task_data_init(crypto_aes_req_ctx_t *req, phys_addr_t src_phy,
 						phys_addr_t dst_phy, u32 length, ce_task_desc_t *task)
 {
-	u32 block_size = 127 * 1024;
-	u32 block_size_word = (block_size >> 2);
+	u32 block_size = TASK_MAX_DATA_SIZE;
 	u32 block_num, alloc_flag = 0;
 	u32 last_data_len, last_size;
 	u32 data_len_offset = 0;
 	u32 i = 0, n;
 	dma_addr_t ptask_phy;
 	dma_addr_t tmp_addr;
-	dma_addr_t next_iv_phy;
+	dma_addr_t next_iv_phy = 0;
 	ce_task_desc_t *ptask = task, *prev;
 
 	block_num = length / block_size;
@@ -158,7 +195,6 @@ static int ce_task_data_init(crypto_aes_req_ctx_t *req, phys_addr_t src_phy,
 	ptask->data_len = 0;
 	SS_DBG("total_len = 0x%x block_num =%d last_size =%d\n", length, block_num, last_size);
 	while (length) {
-
 		if (alloc_flag) {
 			ptask = dma_pool_zalloc(ce_cdev->task_pool, GFP_KERNEL, &ptask_phy);
 			if (ptask == NULL) {
@@ -189,10 +225,10 @@ static int ce_task_data_init(crypto_aes_req_ctx_t *req, phys_addr_t src_phy,
 		if (block_num) {
 			n = (block_num > 8) ? CE_SCATTERS_PER_TASK : block_num;
 			for (i = 0; i < n; i++) {
-				ce_task_addr_set(0, (src_phy + data_len_offset), ptask->ce_sg[i].src_addr);
-				ptask->ce_sg[i].src_len = block_size_word;
-				ce_task_addr_set(0, (dst_phy + data_len_offset), ptask->ce_sg[i].dst_addr);
-				ptask->ce_sg[i].dst_len = block_size_word;
+				ce_task_addr_set(NULL, (src_phy + data_len_offset), ptask->ce_sg[i].src_addr);
+				ptask->ce_sg[i].src_len = block_size;
+				ce_task_addr_set(NULL, (dst_phy + data_len_offset), ptask->ce_sg[i].dst_addr);
+				ptask->ce_sg[i].dst_len = block_size;
 				ptask->data_len += block_size;
 				data_len_offset += block_size;
 			}
@@ -213,9 +249,9 @@ static int ce_task_data_init(crypto_aes_req_ctx_t *req, phys_addr_t src_phy,
 			if ((i < CE_SCATTERS_PER_TASK) && (data_len_offset < length)) {
 				last_data_len = length - data_len_offset;
 				ce_task_addr_set(0, (src_phy + data_len_offset), ptask->ce_sg[i].src_addr);
-				ptask->ce_sg[i].src_len = (last_data_len >> 2);
+				ptask->ce_sg[i].src_len = last_data_len;
 				ce_task_addr_set(0, (dst_phy + data_len_offset), ptask->ce_sg[i].dst_addr);
-				ptask->ce_sg[i].dst_len = (last_data_len >> 2);
+				ptask->ce_sg[i].dst_len = last_data_len;
 				ptask->data_len += last_data_len;
 				ptask->comm_ctl |= CE_COMM_CTL_TASK_INT_MASK;
 				//ptask->next = NULL;
@@ -224,15 +260,15 @@ static int ce_task_data_init(crypto_aes_req_ctx_t *req, phys_addr_t src_phy,
 		}
 
 		if (req->dir == SS_DIR_ENCRYPT) {
+			SS_DBG("next_iv_phy = 0x%x\n", next_iv_phy);
 			tmp_addr = ce_task_addr_get(ptask->ce_sg[7].dst_addr);
-			tmp_addr = tmp_addr + (ptask->ce_sg[i].dst_len << 2) - 16;
-			ce_task_addr_set(0, tmp_addr, (u8 *)next_iv_phy);
-			//next_iv_phy = ptask->dst[7].addr + (ptask->dst[7].len << 2) - 16;
+			tmp_addr = tmp_addr + ptask->ce_sg[i].dst_len - 16;
+			ce_task_addr_set(0, tmp_addr, (u8 *)&next_iv_phy);
+			SS_DBG("next_iv_phy = 0x%x\n", next_iv_phy);
 		} else {
 			tmp_addr = ce_task_addr_get(ptask->ce_sg[7].src_addr);
-			tmp_addr = tmp_addr + (ptask->ce_sg[7].src_len << 2) - 16;
-			ce_task_addr_set(0, tmp_addr, (u8 *)next_iv_phy);
-			//next_iv_phy = ptask->src[7].addr + (ptask->src[7].len << 2) - 16;
+			tmp_addr = tmp_addr + ptask->ce_sg[7].src_len - 16;
+			ce_task_addr_set(0, tmp_addr, (u8 *)&next_iv_phy);
 		}
 		alloc_flag = 1;
 		prev = ptask;
@@ -294,7 +330,7 @@ static int aes_crypto_start(crypto_aes_req_ctx_t *req, u8 *src_buffer,
 	SS_DBG("dst = 0x%px, dst_phy_addr = 0x%px\n", dst_buffer, (void *)dst_phy);
 
 	ce_task_data_init(req, src_phy, dst_phy, src_length, task);
-	/*ce_print_task_info(task);*/
+	ce_print_task_desc(task);
 
 	/*start ce*/
 	ss_pending_clear(channel_id);
@@ -302,13 +338,12 @@ static int aes_crypto_start(crypto_aes_req_ctx_t *req, u8 *src_buffer,
 
 	init_completion(&ce_cdev->flows[channel_id].done);
 	ss_ctrl_start(task, SS_METHOD_AES, req->aes_mode);
-	/*ce_reg_print();*/
-
 
 	ret = wait_for_completion_timeout(&ce_cdev->flows[channel_id].done,
 		msecs_to_jiffies(SS_WAIT_TIME));
 	if (ret == 0) {
 		SS_ERR("Timed out\n");
+		ce_reg_print();
 		ce_task_destroy(task);
 		ce_reset();
 		ret = -ETIMEDOUT;
@@ -448,7 +483,7 @@ int do_aes_crypto(crypto_aes_req_ctx_t *req_ctx)
 			req_ctx->dst_length = (block_num + 1) * AES_BLOCK_SIZE;
 		}
 	}
-	SS_ERR("do_aes_crypto sucess\n");
+	SS_DBG("do_aes_crypto sucess\n");
 	return 0;
 }
 

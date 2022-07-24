@@ -20,6 +20,7 @@
 #include <linux/mfd/syscon.h>
 #include <dt-bindings/power/tv303-power.h>
 #include <dt-bindings/power/r528-power.h>
+#include <dt-bindings/power/a523-power.h>
 
 struct sunxi_domain_info {
 	u32 domain_id;
@@ -62,7 +63,7 @@ struct sunxi_pmu {
 
 #define to_sunxi_pd(gpd) container_of(gpd, struct sunxi_pm_domain, genpd)
 
-#define DOMAIN_TV303(id, wait, pwr_on, pwr_off, imask, smask, trans_mask)	\
+#define DOMAIN(id, wait, pwr_on, pwr_off, imask, smask, trans_mask)	\
 {							\
 	.domain_id = (id),			\
 	.wait_mode = (wait),			\
@@ -200,6 +201,44 @@ static int sunxi_pd_power_off(struct generic_pm_domain *domain)
 	return sunxi_pd_power(pd, false);
 }
 
+static int sunxi_pd_attach_dev(struct generic_pm_domain *genpd,
+				  struct device *dev)
+{
+	struct clk *clk;
+	int i;
+	int error;
+
+	dev_dbg(dev, "attaching to power domain '%s'\n", genpd->name);
+
+	error = pm_clk_create(dev);
+	if (error) {
+		dev_err(dev, "pm_clk_create failed %d\n", error);
+		return error;
+	}
+
+	i = 0;
+	while ((clk = of_clk_get(dev->of_node, i++)) && !IS_ERR(clk)) {
+		dev_dbg(dev, "adding clock '%pC' to list of PM clocks\n", clk);
+		error = pm_clk_add_clk(dev, clk);
+		if (error) {
+			dev_err(dev, "pm_clk_add_clk failed %d\n", error);
+			clk_put(clk);
+			pm_clk_destroy(dev);
+			return error;
+		}
+	}
+
+	return 0;
+}
+
+static void sunxi_pd_detach_dev(struct generic_pm_domain *genpd,
+				   struct device *dev)
+{
+	dev_dbg(dev, "detaching from power domain '%s'\n", genpd->name);
+
+	pm_clk_destroy(dev);
+}
+
 static int sunxi_pm_add_one_domain(struct sunxi_pmu *pmu,
 				      struct device_node *node)
 {
@@ -247,6 +286,8 @@ static int sunxi_pm_add_one_domain(struct sunxi_pmu *pmu,
 	pd->genpd.name = node->name;
 	pd->genpd.power_off = sunxi_pd_power_off;
 	pd->genpd.power_on = sunxi_pd_power_on;
+	pd->genpd.attach_dev = sunxi_pd_attach_dev;
+	pd->genpd.detach_dev = sunxi_pd_detach_dev;
 	pd->genpd.flags = GENPD_FLAG_PM_CLK;
 	pm_genpd_init(&pd->genpd, NULL, false);
 
@@ -479,11 +520,11 @@ static int sunxi_pm_domain_remove(struct platform_device *pdev)
 }
 
 static const struct sunxi_domain_info tv303_pm_domains[] = {
-	[TV303_PD_GPU] = DOMAIN_TV303(TV303_PD_GPU,  0x8, 0x080808,  0x080808,  BIT(3),  0x30000,  BIT(1)),
-	[TV303_PD_TVFE] = DOMAIN_TV303(TV303_PD_TVFE,  0x8, 0x080808,  0x080808,  BIT(3),  0x30000,  BIT(1)),
-	[TV303_PD_TVCAP] = DOMAIN_TV303(TV303_PD_TVCAP, 0x8, 0x080808, 0x080808,  BIT(3),  0x30000,  BIT(1)),
-	[TV303_PD_VE] = DOMAIN_TV303(TV303_PD_VE, 0x8, 0x080808, 0x080808,  BIT(3),  0x30000,  BIT(1)),
-	[TV303_PD_AV1] = DOMAIN_TV303(TV303_PD_AV1, 0x8, 0x080808, 0x080808,  BIT(3),  0x30000,  BIT(1)),
+	[TV303_PD_GPU] = DOMAIN(TV303_PD_GPU,  0x8, 0x080808,  0x080808,  BIT(3),  0x30000,  BIT(1)),
+	[TV303_PD_TVFE] = DOMAIN(TV303_PD_TVFE,  0x8, 0x080808,  0x080808,  BIT(3),  0x30000,  BIT(1)),
+	[TV303_PD_TVCAP] = DOMAIN(TV303_PD_TVCAP, 0x8, 0x080808, 0x080808,  BIT(3),  0x30000,  BIT(1)),
+	[TV303_PD_VE] = DOMAIN(TV303_PD_VE, 0x8, 0x080808, 0x080808,  BIT(3),  0x30000,  BIT(1)),
+	[TV303_PD_AV1] = DOMAIN(TV303_PD_AV1, 0x8, 0x080808, 0x080808,  BIT(3),  0x30000,  BIT(1)),
 };
 
 static const struct sunxi_pmu_info tv303_pmu = {
@@ -497,9 +538,9 @@ static const struct sunxi_pmu_info tv303_pmu = {
 };
 
 static const struct sunxi_domain_info r528_pm_domains[] = {
-	[R528_PD_CPU] = DOMAIN_TV303(R528_PD_CPU,  0x8, 0x080808,  0x080808,  BIT(3),  0x30000,  BIT(1)),
-	[R528_PD_VE] = DOMAIN_TV303(R528_PD_VE,  0x8, 0x080808,  0x080808,  BIT(3),  0x30000,  BIT(1)),
-	[R528_PD_DSP] = DOMAIN_TV303(R528_PD_DSP, 0x8, 0x080808, 0x080808,  BIT(3),  0x30000,  BIT(1)),
+	[R528_PD_CPU] = DOMAIN(R528_PD_CPU,  0x8, 0x080808,  0x080808,  BIT(3),  0x30000,  BIT(1)),
+	[R528_PD_VE] = DOMAIN(R528_PD_VE,  0x8, 0x080808,  0x080808,  BIT(3),  0x30000,  BIT(1)),
+	[R528_PD_DSP] = DOMAIN(R528_PD_DSP, 0x8, 0x080808, 0x080808,  BIT(3),  0x30000,  BIT(1)),
 };
 
 static const struct sunxi_pmu_info r528_pmu = {
@@ -512,6 +553,24 @@ static const struct sunxi_pmu_info r528_pmu = {
 	.domain_info = r528_pm_domains,
 };
 
+static const struct sunxi_domain_info a523_pm_domains[] = {
+	[A523_PD_DSP] = DOMAIN(A523_PD_DSP,  0x8, 0x080808,  0x080808,  BIT(3),  0x30000,  BIT(1)),
+	[A523_PD_NPU] = DOMAIN(A523_PD_NPU,  0x8, 0x080808,  0x080808,  BIT(3),  0x30000,  BIT(1)),
+	[A523_PD_AUDIO] = DOMAIN(A523_PD_AUDIO, 0x8, 0x080808, 0x080808,  BIT(3),  0x30000,  BIT(1)),
+	[A523_PD_SRAM] = DOMAIN(A523_PD_SRAM, 0x8, 0x080808, 0x080808,  BIT(3),  0x30000,  BIT(1)),
+	[A523_PD_RISCV] = DOMAIN(A523_PD_RISCV, 0x8, 0x080808, 0x080808,  BIT(3),  0x30000,  BIT(1)),
+};
+
+static const struct sunxi_pmu_info a523_pmu = {
+	.wait_mode_offset = 0x14,
+	.pwr_off_delay_offset = 0x18,
+	.pwr_on_delay_offset = 0x1c,
+	.pwr_offset = 0x20,
+	.status_offset = 0x24,
+	.num_domains = ARRAY_SIZE(a523_pm_domains),
+	.domain_info = a523_pm_domains,
+};
+
 static const struct of_device_id sunxi_pm_domain_dt_match[] = {
 	{
 		.compatible = "allwinner,tv303-power-controller",
@@ -520,6 +579,10 @@ static const struct of_device_id sunxi_pm_domain_dt_match[] = {
 	{
 		.compatible = "allwinner,r528-power-controller",
 		.data = (void *)&r528_pmu,
+	},
+	{
+		.compatible = "allwinner,a523-power-controller",
+		.data = (void *)&a523_pmu,
 	},
 	{ /* sentinel */ },
 };

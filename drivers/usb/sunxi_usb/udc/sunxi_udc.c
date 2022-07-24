@@ -42,6 +42,7 @@
 
 #include  "sunxi_udc_config.h"
 #include  "sunxi_udc_board.h"
+#include  "../include/sunxi_usb_bsp.h"
 
 #include  "sunxi_udc_debug.h"
 #include  "sunxi_udc_dma.h"
@@ -151,20 +152,105 @@ static DEVICE_ATTR(otg_ed_test, 0644, show_ed_test, ed_test);
 static ssize_t show_phy_range(struct device *dev,
 		struct device_attribute *attr, char *buf)
 {
+#if defined(CONFIG_ARCH_SUN8IW20)
+	printk("addr:0x%x, len:0x%x, value:0x%x\n", 0x60, 0x1,
+			usbc_new_phyx_tp_read(g_sunxi_udc_io.usb_vbase, 0x60, 0x1));
+	printk("addr:0x%x, len:0x%x, value:0x%x\n", 0x30, 0x3,
+			usbc_new_phyx_tp_read(g_sunxi_udc_io.usb_vbase, 0x30, 0x3));
+	printk("addr:0x%x, len:0x%x, value:0x%x\n", 0x36, 0x3,
+			usbc_new_phyx_tp_read(g_sunxi_udc_io.usb_vbase, 0x36, 0x3));
+	printk("addr:0x%x, len:0x%x, value:0x%x\n", 0x61, 0x3,
+			usbc_new_phyx_tp_read(g_sunxi_udc_io.usb_vbase, 0x61, 0x3));
+	printk("addr:0x%x, len:0x%x, value:0x%x\n", 0x64, 0x2,
+			usbc_new_phyx_tp_read(g_sunxi_udc_io.usb_vbase, 0x64, 0x2));
+	printk("addr:0x%x, len:0x%x, value:0x%x\n", 0x44, 0x4,
+			usbc_new_phyx_tp_read(g_sunxi_udc_io.usb_vbase, 0x44, 0x4));
+
+	return 0;
+#else
 	return sprintf(buf, "rate:0x%x\n",
 			USBC_Phyx_Read(g_sunxi_udc_io.usb_bsp_hdle));
+#endif
 }
 
 static ssize_t udc_phy_range(struct device *dev, struct device_attribute *attr,
 		const char *buf, size_t count)
 {
-	int val = 0;
 	int err;
 
-	if (dev == NULL) {
-		DMSG_PANIC("ERR: Argment is invalid\n");
-		return 0;
+#if defined(CONFIG_ARCH_SUN8IW20)
+	int mod_type, common_data, trancevie_data, preemphasis_data, resistance_data;
+	char data[20];
+	char *str = NULL;
+	char *token = NULL;
+
+	snprintf(data, sizeof(data), "%s", buf);
+	printk("data = %s\n", data);
+
+	str = data;
+	token = strsep(&str, " ");
+
+	err = kstrtoint(token, 10, &mod_type);
+	if (err != 0)
+		return -EINVAL;
+
+	err = kstrtoint(strsep(&str, " "), 16, &common_data);
+	if (err != 0)
+		return -EINVAL;
+
+	err = kstrtoint(strsep(&str, " "), 16, &trancevie_data);
+	if (err != 0)
+		return -EINVAL;
+
+	err = kstrtoint(strsep(&str, " "), 16, &preemphasis_data);
+	if (err != 0)
+		return -EINVAL;
+
+	err = kstrtoint(strsep(&str, " "), 16, &resistance_data);
+	if (err != 0)
+		return -EINVAL;
+
+	if (mod_type == 1) {
+		printk("iref mod\n");
+		/* iref mod */
+		usbc_new_phyx_tp_write(g_sunxi_udc_io.usb_vbase, 0x60, 0x1, 0x1);
+
+		/* iref common data */
+		usbc_new_phyx_tp_write(g_sunxi_udc_io.usb_vbase, 0x30, common_data, 0x3);
+		printk("write to common data: 0x%x\n", common_data);
+
+		/* iref tranceive data */
+		usbc_new_phyx_tp_write(g_sunxi_udc_io.usb_vbase, 0x61, trancevie_data, 0x3);
+		printk("write to trancevie data: 0x%x\n", trancevie_data);
+
+	} else if (mod_type == 0) {
+		printk("verf mod\n");
+		/* verf mod */
+		usbc_new_phyx_tp_write(g_sunxi_udc_io.usb_vbase, 0x60, 0x0, 0x1);
+
+		/* verf common data */
+		usbc_new_phyx_tp_write(g_sunxi_udc_io.usb_vbase, 0x36, common_data, 0x3);
+		printk("write to common data: 0x%x\n", common_data);
+
+		printk("verf mod no need to control trancevie data!\n");
 	}
+
+	usbc_new_phyx_tp_write(g_sunxi_udc_io.usb_vbase, 0x64, preemphasis_data, 0x2);
+	printk("write to preemphasis data: 0x%x", preemphasis_data);
+
+	usbc_new_phyx_tp_write(g_sunxi_udc_io.usb_vbase, 0x43, 0x0, 0x1);
+
+	usbc_new_phyx_tp_write(g_sunxi_udc_io.usb_vbase, 0x41, 0x0, 0x1);
+
+	usbc_new_phyx_tp_write(g_sunxi_udc_io.usb_vbase, 0x40, 0x0, 0x1);
+
+	usbc_new_phyx_tp_write(g_sunxi_udc_io.usb_vbase, 0x44, resistance_data, 0x4);
+	printk("write to resistance data: 0x%x\n", resistance_data);
+
+	usbc_new_phyx_tp_write(g_sunxi_udc_io.usb_vbase, 0x43, 0x1, 0x1);
+
+#else
+	int val = 0;
 
 	err = kstrtoint(buf, 16, &val);
 	if (err != 0)
@@ -179,6 +265,7 @@ static ssize_t udc_phy_range(struct device *dev, struct device_attribute *attr,
 
 	DMSG_INFO("adjust succeed, PHY's paraments:0x%x.\n",
 		USBC_Phyx_Read(g_sunxi_udc_io.usb_bsp_hdle));
+#endif
 
 	return count;
 }
@@ -388,6 +475,7 @@ void sunxi_set_cur_vol_work(struct work_struct *work)
 #if !defined(SUNXI_USB_FPGA) && defined(CONFIG_POWER_SUPPLY)
 	struct power_supply *psy = NULL;
 	union power_supply_propval temp;
+	struct device_node *np = NULL;
 
 	if (of_find_property(g_udc_pdev->dev.of_node, "det_vbus_supply", NULL))
 		psy = devm_power_supply_get_by_phandle(&g_udc_pdev->dev,
@@ -398,6 +486,13 @@ void sunxi_set_cur_vol_work(struct work_struct *work)
 			   __func__, __LINE__);
 	} else {
 		temp.intval = 500;
+		/*
+		 * When connect to PC, we will parse dts to get current limit value.
+		 * If get failed, we will set default value 500.
+		 */
+		np = of_parse_phandle(g_udc_pdev->dev.of_node, "det_vbus_supply", 0);
+		if (np)
+			of_property_read_u32(np, "pmu_usbpc_cur", &temp.intval);
 
 		power_supply_set_property(psy,
 					POWER_SUPPLY_PROP_INPUT_CURRENT_LIMIT, &temp);
@@ -953,7 +1048,7 @@ static int dma_got_short_pkt(struct sunxi_udc_ep *ep, struct sunxi_udc_request *
 	int dma_bc = 0;
 	int dma_r_bc = 0;
 	int fifo_count = 0;
-	unsigned long flags = 0;
+	//unsigned long flags = 0;
 	__s32		ret		= 0;
 
 	pchan = (dma_channel_t *)ep->dma_hdle;
@@ -961,6 +1056,9 @@ static int dma_got_short_pkt(struct sunxi_udc_ep *ep, struct sunxi_udc_request *
 		DMSG_DBG_UDC("[dma_got_short_pkt] dma_hdle is NULL!\n");
 		return 0;
 	}
+
+	if (!sunxi_udc_confirm_rx_ready())
+		return 0;
 
 	dma_bc = USBC_Readw(USBC_REG_DMA_BC(pchan->reg_base, pchan->channel_num));
 	dma_r_bc = USBC_Readw(USBC_REG_DMA_RESIDUAL_BC(pchan->reg_base, pchan->channel_num));
@@ -970,9 +1068,6 @@ static int dma_got_short_pkt(struct sunxi_udc_ep *ep, struct sunxi_udc_request *
 		DMSG_INFO("read_fifo: dma_working... rx_cnt = %d, dma_channel = %d, dma_bc = %d, dma_r_bc = %d\n",
 				fifo_count, pchan->channel_num, dma_bc, dma_r_bc);
 	}
-
-	if (!sunxi_udc_confirm_rx_ready())
-		return 0;
 
 	if (!fifo_count) {
 		ret = USBC_Dev_ReadDataStatus(
@@ -1005,9 +1100,11 @@ reassign:
 		sunxi_udc_dma_release((dm_hdl_t)ep->dma_hdle);
 		ep->dma_hdle = NULL;
 
-		spin_unlock_irqrestore(&ep->dev->lock, flags);
+		// spin_unlock_irqrestore(&ep->dev->lock, flags);
+		spin_unlock_irq(&ep->dev->lock);
 		sunxi_udc_dma_completion(ep->dev, ep, req);
-		spin_lock_irqsave(&ep->dev->lock, flags);
+		spin_lock_irq(&ep->dev->lock);
+		// spin_lock_irqsave(&ep->dev->lock, flags);
 
 		return 1;
 	}
@@ -3340,6 +3437,7 @@ static void sunxi_vbus_det_work(struct work_struct *work)
 #if defined(CONFIG_POWER_SUPPLY)
 	struct power_supply *psy = NULL;
 	union power_supply_propval temp;
+	struct device_node *np = NULL;
 #endif
 
 	/* wait for axp vbus detect ready */
@@ -3368,8 +3466,24 @@ static void sunxi_vbus_det_work(struct work_struct *work)
 		}
 	}
 #endif
-	if (udc->driver && udc->driver->disconnect)
+	if (udc->driver && udc->driver->disconnect) {
 		udc->driver->disconnect(&udc->gadget);
+#if !defined(SUNXI_USB_FPGA) && defined(CONFIG_POWER_SUPPLY)
+		/*
+		 * When disconnect from PC, we should recover current limit value.
+		 * If get failed, we will set original value.
+		 */
+		if (psy && !IS_ERR(psy)) {
+			power_supply_get_property(psy,
+						  POWER_SUPPLY_PROP_INPUT_CURRENT_LIMIT, &temp);
+			np = of_parse_phandle(g_udc_pdev->dev.of_node, "det_vbus_supply", 0);
+			if (np)
+				of_property_read_u32(np, "pmu_usbad_cur", &temp.intval);
+			power_supply_set_property(psy,
+						  POWER_SUPPLY_PROP_INPUT_CURRENT_LIMIT, &temp);
+		}
+#endif
+	}
 }
 
 void __iomem *get_otgc_vbase(void)
@@ -3956,6 +4070,6 @@ module_exit(udc_exit);
 
 MODULE_AUTHOR(DRIVER_AUTHOR);
 MODULE_DESCRIPTION(DRIVER_DESC);
-MODULE_VERSION("1.0.13");
+MODULE_VERSION("1.0.14");
 MODULE_LICENSE("GPL v2");
 MODULE_ALIAS("platform:softwinner-usbgadget");

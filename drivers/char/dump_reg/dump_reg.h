@@ -35,7 +35,7 @@
 #define PRINT_ADDR_FMT			"0x%016lx"
 #define CMP_PRINT_FMT                   "reg                 expect      actual      mask        result\n"
 #define WR_PRINT_FMT                    "reg                 to_write    after_write\n"
-#else
+#elif IS_ENABLED(CONFIG_ARM)
 /* Virtual address space 2 */
 #define SUNXI_MEM_PHYS_START		PAGE_OFFSET
 #define SUNXI_MEM_PHYS_END		(SUNXI_MEM_PHYS_START + SZ_1G - 1)

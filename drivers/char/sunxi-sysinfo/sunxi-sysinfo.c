@@ -26,6 +26,7 @@
 #include <linux/fs.h>
 #include <linux/miscdevice.h>
 
+#include <linux/sunxi-smc.h>
 #include "sunxi-sysinfo-user.h"
 
 static s8 key_name[SUNXI_KEY_NAME_LEN];
@@ -130,7 +131,18 @@ static ssize_t sys_info_show(struct class *class,
 	/* secure */
 	size += sprintf(buf + size, "sunxi_secure      : ");
 	if (sunxi_soc_is_secure()) {
+#if IS_ENABLED(CONFIG_SUNXI_SMC)
+		/* t-coffer version */
+		uint32_t major;
+		uint32_t minor;
+		uint32_t patch;
+		sunxi_smc_get_tcoffer_ver(&major, &minor, &patch);
+		sprintf(tmpbuf, "secure(T-Coffer v%d.%d.%d)", major, minor,
+			patch);
+		size += sprintf(buf + size, "%s\n", tmpbuf);
+#else
 		size += sprintf(buf + size, "%s\n", "secure");
+#endif
 		/* rotpk status */
 		memset(tmpbuf, 0x0, sizeof(tmpbuf));
 		sunxi_get_soc_rotpk_status_str(tmpbuf);

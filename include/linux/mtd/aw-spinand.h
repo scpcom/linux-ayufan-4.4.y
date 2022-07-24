@@ -59,6 +59,8 @@ struct aw_spinand_chip_request {
 
 	unsigned int oobleft;
 	unsigned int dataleft;
+#define AW_SPINAND_MTD_OPS_RAW (2)
+	int mode;
 };
 
 struct aw_spinand_chip_ops {

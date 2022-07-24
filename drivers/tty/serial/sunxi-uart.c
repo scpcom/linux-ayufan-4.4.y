@@ -1963,9 +1963,7 @@ static int sw_uart_probe(struct platform_device *pdev)
 
 	snprintf(uart_para, sizeof(uart_para), "uart%d_regulator", pdev->id);
 	ret = of_property_read_string(np, uart_para, &uart_string);
-	if (ret)
-		dev_err(&pdev->dev, "get regulator failed\n");
-	else
+	if (!ret)
 		strncpy(pdata->regulator_id, uart_string, 16);
 
 	/* request system resource and init them */
@@ -2277,4 +2275,4 @@ module_exit(sunxi_uart_exit);
 MODULE_AUTHOR("Aaron<leafy.myeh@allwinnertech.com>");
 MODULE_DESCRIPTION("Driver for Allwinner UART controller");
 MODULE_LICENSE("GPL");
-MODULE_VERSION("1.0.0");
+MODULE_VERSION("1.0.1");

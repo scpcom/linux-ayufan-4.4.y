@@ -624,6 +624,11 @@ static void sunxi_i2c_set_clock(struct sunxi_i2c *i2c, u8 clk_m, u8 clk_n)
 	u32 clk_n_mask, clk_n_offset, clk_m_offset, clk_m_mask;
 	u32 reg, duty, reg_val;
 
+	/* @IP-TODO
+	 * drv-mode set clkm and clkn bit to adjust frequency, finally the
+	 * I2C_DRV_BUS_CTRL register will not be changed, the value of the I2C_CCR
+	 * register will represent the current drv-mode operating frequency
+	 */
 	if (i2c->twi_drv_used) {
 		reg = I2C_DRV_BUS_CTRL;
 		clk_n_mask = I2C_DRV_CLK_N;
@@ -705,8 +710,12 @@ i2c_set_clk:
 	return 0;
 }
 
-/* if write SOFT_RESET to I2C_DRV_CTRL to reset, drv_master_xfer will timeout,
- * @TODO : fix it in the future
+/*
+ * i2c controller soft_reset can only clear flag bit inside of ip, include the
+ * state machine parameters, counters, various flags, fifo, fifo-cnt.
+ *
+ * But the internal configurations or external register configurations of ip
+ * will not be changed.
  */
 static inline void sunxi_i2c_soft_reset(struct sunxi_i2c *i2c)
 {
@@ -722,12 +731,14 @@ static inline void sunxi_i2c_soft_reset(struct sunxi_i2c *i2c)
 
 	reg_val = readl(i2c->base_addr + reg);
 	reg_val |= mask;
-
 	writel(reg_val, i2c->base_addr + reg);
 
-	if (!i2c->twi_drv_used) {
-		/* engine-mode soft_reset will not clear automatically,write 0 to it */
-		usleep_range(50, 60);
+	/*
+	 * drv-mode soft_reset bit will not clear automatically, write 0 to unreset.
+	 * The reset only takes one or two CPU clk cycle.
+	 */
+	if (i2c->twi_drv_used) {
+		usleep_range(20, 25);
 
 		reg_val &= (~mask);
 		writel(reg_val, i2c->base_addr + reg);
@@ -1029,6 +1040,10 @@ static void sunxi_i2c_drv_disable_dma_irq(void __iomem *base_addr, u32 bitmap)
 	writel(reg_val, base_addr + I2C_DRV_DMA_CFG);
 }
 
+/*
+ * The engine-mode bus_en bit is automatically set to 1 after the drv-mode START_TRAN bit set to 1.
+ * (because drv-mode rely on engine-mode)
+ */
 static inline void sunxi_i2c_drv_start_xfer(struct sunxi_i2c *i2c)
 {
 	u32 reg_val = readl(i2c->base_addr + I2C_DRV_CTRL);
@@ -1050,9 +1065,11 @@ static void sunxi_i2c_drv_set_tx_trig(void __iomem *base_addr, u32 trig)
 	writel(reg_val, base_addr + I2C_DRV_DMA_CFG);
 }
 
-/* send DMA RX Req when:
- * 1: data byte number in RECV_FIFO reaches RX_TRIG or
- * 2: Read Packet Tansmission completed with RECV_FIFO not empty
+/* When one of the following conditions is met:
+ * 1. The number of data (in bytes) in RECV_FIFO reaches RX_TRIG;
+ * 2. Packet read done and RECV_FIFO not empty.
+ * If RX_REQ is enabled,  the rx-pending-bit will be set to 1 and the interrupt will be triggered;
+ * If RX_REQ is disabled, the rx-pending-bit will be set to 1 but the interrupt will NOT be triggered.
  */
 static void sunxi_i2c_drv_set_rx_trig(void __iomem *base_addr, u32 trig)
 {
@@ -1136,19 +1153,21 @@ static void sunxi_i2c_drv_disable_read_mode(void __iomem *base_addr)
 static void
 sunxi_i2c_drv_set_slave_addr(struct sunxi_i2c *i2c, struct i2c_msg *msgs)
 {
-	unsigned int reg_val = 0, cmd = 0;
+	unsigned int reg_val = 0;
 
 	/* read, default value is write */
 	if (msgs->flags & I2C_M_RD)
-		cmd = CMD;
+		reg_val |= CMD;
+	else
+		reg_val &= ~CMD;
 
 	if (msgs->flags & I2C_M_TEN) {
 		/* SLV_ID | CMD | SLV_ID_X */
-		reg_val = ((0x78 | ((msgs->addr >> 8) & 0x03)) << 9) | cmd
-			| (msgs->addr & 0xff);
+		reg_val |= ((0x78 | ((msgs->addr >> 8) & 0x03)) << 9);
+		reg_val |= (msgs->addr & 0xff);
 		dev_dbg(i2c->dev, "drv-mode: first 10bit(0x%x) xfered\n", msgs->addr);
 	} else {
-		reg_val = ((msgs->addr & 0x7f) << 9) | cmd;
+		reg_val |= ((msgs->addr & 0x7f) << 9);
 		dev_dbg(i2c->dev, "drv-mode: 7bits(0x%x) + r/w xfered", msgs->addr);
 	}
 
@@ -1532,32 +1551,29 @@ static int sunxi_i2c_drv_core_process(struct sunxi_i2c *i2c)
 {
 	void __iomem *base_addr = i2c->base_addr;
 	unsigned long flags = 0;
-	unsigned int flag, code;
+	unsigned int irq, err_sta;
 
 	spin_lock_irqsave(&i2c->lock, flags);
+	irq = sunxi_i2c_drv_get_irq(base_addr);
+	dev_dbg(i2c->dev, "drv-mode: the enabled irq 0x%x coming\n", irq);
+	sunxi_i2c_drv_clear_irq(i2c->base_addr, irq);
 
-	flag = sunxi_i2c_drv_get_irq(base_addr);
-	sunxi_i2c_drv_clear_irq(i2c->base_addr, flag);
-	sunxi_i2c_drv_disable_irq(i2c->base_addr, I2C_DRV_INT_EN_MASK);
-	dev_dbg(i2c->dev, "drv-mode: irq 0x%x coming\n", flag);
-
-	if (flag & TRAN_COM_PD) {
+	if (irq & TRAN_COM_PD) {
 		dev_dbg(i2c->dev, "drv-mode: packet transmission completed\n");
+		sunxi_i2c_drv_disable_irq(i2c->base_addr, I2C_DRV_INT_EN_MASK);
 		i2c->result = RESULT_COMPLETE;
 
 		/* cpu read tiggered by the interrupt tiggered
 		 * dma read tiggered by the fifo level(dma_callback when success)
 		 * */
-		if ((flag & RX_REQ_PD) && (i2c->msg->len < DMA_THRESHOLD))
+		if ((irq & RX_REQ_PD) && (i2c->msg->len < DMA_THRESHOLD))
 			if (sunxi_i2c_drv_recv_msg(i2c, i2c->msg))
 				i2c->result = RESULT_ERR;
-
 		wake_up(&i2c->wait);
-	}
-
-	if (flag & TRAN_ERR_PD) {
-		code = sunxi_i2c_get_xfer_sta(i2c);
-		switch (code) {
+	} else if (irq & TRAN_ERR_PD) {
+		sunxi_i2c_drv_disable_irq(i2c->base_addr, I2C_DRV_INT_EN_MASK);
+		err_sta = sunxi_i2c_get_xfer_sta(i2c);
+		switch (err_sta) {
 		case 0x00:
 			dev_err(i2c->dev, "drv-mode: bus error\n");
 			break;
@@ -1588,11 +1604,11 @@ static int sunxi_i2c_drv_core_process(struct sunxi_i2c *i2c)
 			break;
 		}
 
-		i2c->msg_idx = code;
+		i2c->msg_idx = err_sta;
 		i2c->result = RESULT_ERR;
 		wake_up(&i2c->wait);
 		spin_unlock_irqrestore(&i2c->lock, flags);
-		return -code;
+		return -err_sta;
 	}
 
 	spin_unlock_irqrestore(&i2c->lock, flags);
@@ -1822,7 +1838,7 @@ static int sunxi_i2c_drv_tx_one_msg(struct sunxi_i2c *i2c, struct i2c_msg *msg)
 	sunxi_i2c_drv_enable_irq(i2c->base_addr, TRAN_ERR_INT_EN | TRAN_COM_INT_EN);
 
 	if (i2c->dma_tx && (msg->len >= MAX_FIFO)) {
-		dev_dbg(i2c->dev, "drv-mode dma write\n");
+		dev_dbg(i2c->dev, "drv-mode: dma write\n");
 		sunxi_i2c_drv_set_tx_trig(i2c->base_addr, MAX_FIFO/2);
 		sunxi_i2c_drv_enable_dma_irq(i2c->base_addr, DMA_TX_EN);
 
@@ -1834,7 +1850,7 @@ static int sunxi_i2c_drv_tx_one_msg(struct sunxi_i2c *i2c, struct i2c_msg *msg)
 
 		sunxi_i2c_drv_start_xfer(i2c);
 	} else {
-		dev_dbg(i2c->dev, "drv-mode cpu write\n");
+		dev_dbg(i2c->dev, "drv-mode: cpu write\n");
 		sunxi_i2c_drv_set_tx_trig(i2c->base_addr, msg->len);
 		 /*
 		  * if now fifo can't store all the msg data buf
@@ -1915,7 +1931,7 @@ sunxi_i2c_drv_rx_msgs(struct sunxi_i2c *i2c, struct i2c_msg *msgs, int num)
 		sunxi_i2c_drv_send_msg(i2c, wmsg);
 
 	if (i2c->dma_rx && (rmsg->len > MAX_FIFO)) {
-		dev_dbg(i2c->dev, "drv-mode rx msgs by dma\n");
+		dev_dbg(i2c->dev, "drv-mode: rx msgs by dma\n");
 		sunxi_i2c_drv_set_rx_trig(i2c->base_addr, MAX_FIFO/2);
 		sunxi_i2c_drv_enable_dma_irq(i2c->base_addr, DMA_RX_EN);
 
@@ -1927,8 +1943,9 @@ sunxi_i2c_drv_rx_msgs(struct sunxi_i2c *i2c, struct i2c_msg *msgs, int num)
 
 		sunxi_i2c_drv_start_xfer(i2c);
 	} else {
-		dev_dbg(i2c->dev, "drv-mode rx msgs by cpu\n");
-		sunxi_i2c_drv_set_rx_trig(i2c->base_addr, rmsg->len);
+		dev_dbg(i2c->dev, "drv-mode: rx msgs by cpu\n");
+		/* set the rx_trigger_level max to avoid the RX_REQ com before COM_REQ */
+		sunxi_i2c_drv_set_rx_trig(i2c->base_addr, MAX_FIFO);
 		sunxi_i2c_drv_enable_irq(i2c->base_addr, RX_REQ_INT_EN);
 		sunxi_i2c_drv_start_xfer(i2c);
 	}
@@ -1949,8 +1966,6 @@ err_dma:
 
 	return ret;
 }
-
-
 
 /**
  * @i2c: struct of sunxi_i2c
@@ -2005,8 +2020,6 @@ sunxi_i2c_engine_xfer(struct sunxi_i2c *i2c, struct i2c_msg *msgs, int num)
 	int ret;
 	void __iomem *base_addr = i2c->base_addr;
 
-	sunxi_i2c_soft_reset(i2c);
-
 	sunxi_i2c_engine_disable_ack(base_addr);
 	sunxi_i2c_engine_set_efr(base_addr, NO_DATA_WROTE);
 	sunxi_i2c_engine_clear_irq(base_addr);
@@ -2058,6 +2071,8 @@ sunxi_i2c_xfer(struct i2c_adapter *adap, struct i2c_msg *msgs, int num)
 	if (ret < 0)
 		goto out;
 
+	sunxi_i2c_soft_reset(i2c);
+
 	ret = sunxi_i2c_bus_barrier(&i2c->adap);
 	if (ret) {
 		dev_err(i2c->dev, "i2c bus barrier failed, sda is still low!\n");
@@ -2066,7 +2081,6 @@ sunxi_i2c_xfer(struct i2c_adapter *adap, struct i2c_msg *msgs, int num)
 
 	/* set the i2c status to idle */
 	i2c->result = RESULT_IDLE;
-
 	if (i2c->twi_drv_used)
 		ret = sunxi_i2c_drv_xfer(i2c, msgs, num);
 	else
@@ -2158,7 +2172,7 @@ static int sunxi_i2c_clk_request(struct sunxi_i2c *i2c)
 	}
 
 	i2c->reset = devm_reset_control_get(i2c->dev, NULL);
-	if (IS_ERR(i2c->reset)) {
+	if (IS_ERR_OR_NULL(i2c->reset)) {
 		dev_err(i2c->dev, "request reset failed\n");
 		return -EINVAL;
 	}
@@ -2281,23 +2295,27 @@ static int sunxi_i2c_clk_init(struct sunxi_i2c *i2c)
 	unsigned long clk_rate;
 	int err;
 
-	if (reset_control_deassert(i2c->reset)) {
+	/*
+	 * i2c will be used in the uboot stage, so it must be reset before
+	 * configuring the module registers to clean up the configuration
+	 * information of the uboot stage
+	 */
+	if (reset_control_reset(i2c->reset)) {
 		dev_err(i2c->dev, "reset control deassert  failed!\n");
 		return -EINVAL;
 	}
 
 	if (clk_prepare_enable(i2c->bus_clk)) {
 		dev_err(i2c->dev, "enable apb_twi clock failed!\n");
-		err = -EINVAL;
-		goto err0;
+		return -EINVAL;
 	}
 
-	/* set twi module clock */
+	/* get twi module clock */
 	clk_rate = clk_get_rate(i2c->bus_clk);
 	if (clk_rate == 0) {
 		dev_err(i2c->dev, "get source clock frequency failed!\n");
 		err = -EINVAL;
-		goto err1;
+		goto err0;
 	}
 
 	/* i2c ctroller module clock is controllerd by self */
@@ -2305,11 +2323,8 @@ static int sunxi_i2c_clk_init(struct sunxi_i2c *i2c)
 
 	return 0;
 
-err1:
-	clk_disable_unprepare(i2c->bus_clk);
-
 err0:
-	reset_control_assert(i2c->reset);
+	clk_disable_unprepare(i2c->bus_clk);
 	return err;
 }
 
@@ -2347,10 +2362,9 @@ static int sunxi_i2c_hw_init(struct sunxi_i2c *i2c)
 		goto err2;
 	}
 
-	sunxi_i2c_bus_enable(i2c);
+	sunxi_i2c_soft_reset(i2c);
 
-	if (!i2c->twi_drv_used)
-		sunxi_i2c_soft_reset(i2c);
+	sunxi_i2c_bus_enable(i2c);
 
 	return 0;
 
@@ -2483,9 +2497,8 @@ static int sunxi_i2c_probe(struct platform_device *pdev)
 	sunxi_i2c_create_sysfs(pdev);
 
 	pm_runtime_set_active(i2c->dev);
-	if (i2c->no_suspend) {
+	if (i2c->no_suspend)
 		pm_runtime_get_noresume(i2c->dev);
-	}
 	pm_runtime_set_autosuspend_delay(i2c->dev, AUTOSUSPEND_TIMEOUT);
 	pm_runtime_use_autosuspend(i2c->dev);
 	pm_runtime_enable(i2c->dev);
@@ -2513,6 +2526,11 @@ static int sunxi_i2c_probe(struct platform_device *pdev)
 	if (err) {
 		dev_err(i2c->dev, "failed to add adapter\n");
 		goto err2;
+	}
+
+	if (!i2c->no_suspend) {
+		pm_runtime_mark_last_busy(i2c->dev);
+		pm_runtime_put_autosuspend(i2c->dev);
 	}
 
 	dev_info(i2c->dev, "probe success\n");
@@ -2670,6 +2688,6 @@ module_exit(sunxi_i2c_adap_exit);
 
 MODULE_LICENSE("GPL");
 MODULE_ALIAS("platform:i2c-sunxi");
-MODULE_VERSION("2.0.3");
+MODULE_VERSION("2.0.5");
 MODULE_DESCRIPTION("SUNXI I2C Bus Driver");
 MODULE_AUTHOR("pannan");

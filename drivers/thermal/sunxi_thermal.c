@@ -394,18 +394,28 @@ static const struct ths_thermal_chip sun8iw20p1_ths = {
 	.has_bus_clk = true,
 	.offset = -2800,
 	.scale = -67,
+	.ft_deviation = 8000,
+	.temp_data_base = SUN50I_H616_THS_TEMP_DATA,
+	.calibrate = sun50i_h616_ths_calibrate,
+	.init = sun50i_h616_thermal_init,
+};
+
+static const struct ths_thermal_chip sun20iw1p1_ths = {
+	.sensor_num = 1,
+	.has_bus_clk = true,
+	.offset = -2800,
+	.scale = -67,
 	.ft_deviation = 0,
 	.temp_data_base = SUN50I_H616_THS_TEMP_DATA,
 	.calibrate = sun50i_h616_ths_calibrate,
 	.init = sun50i_h616_thermal_init,
 };
 
-
 static const struct of_device_id of_ths_match[] = {
 	{ .compatible = "allwinner,sun50iw9p1-ths", .data = &sun50iw9p1_ths },
 	{ .compatible = "allwinner,sun50iw10p1-ths", .data = &sun50iw10p1_ths },
 	{ .compatible = "allwinner,sun8iw20p1-ths", .data = &sun8iw20p1_ths },
-	{ .compatible = "allwinner,sun20iw1p1-ths", .data = &sun8iw20p1_ths },
+	{ .compatible = "allwinner,sun20iw1p1-ths", .data = &sun20iw1p1_ths },
 	{ /* sentinel */ },
 };
 MODULE_DEVICE_TABLE(of, of_ths_match);

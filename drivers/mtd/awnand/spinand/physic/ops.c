@@ -457,6 +457,7 @@ static int _aw_spinand_chip_isbad_single_block(struct aw_spinand_chip *chip,
 		tmp.page = (unsigned int)page_addr[i];
 		tmp.ooblen = AW_OOB_SIZE_PER_PHY_PAGE;
 		tmp.oobbuf = oob;
+		tmp.mode = AW_SPINAND_MTD_OPS_RAW;
 		ret = aw_spinand_chip_read_single_page(chip, &tmp);
 		if (ret < 0)
 			ret = aw_spinand_chip_read_single_page(chip, &tmp);
@@ -513,6 +514,7 @@ static int aw_spinand_chip_markbad_single_block(struct aw_spinand_chip *chip,
 	tmp.block = req->block;
 	tmp.oobbuf = oob;
 	tmp.ooblen = AW_OOB_SIZE_PER_PHY_PAGE;
+	tmp.mode = AW_SPINAND_MTD_OPS_RAW;
 
 	/* write bad flag on the first page */
 	tmp.page = 0;
@@ -581,6 +583,31 @@ free_databuf:
 
 #if IS_ENABLED(CONFIG_AW_SPINAND_SIMULATE_MULTIPLANE)
 
+#if IS_ENABLED(CONFIG_AW_SPINAND_MTD_OOB_RAW_SPARE)
+static void super_to_phy(struct aw_spinand_chip *chip,
+		struct aw_spinand_chip_request *super,
+		struct aw_spinand_chip_request *phy)
+{
+	struct aw_spinand_info *info = chip->info;
+	unsigned int phy_page_size, phy_oob_size;
+
+	phy_page_size = info->phy_page_size(chip);
+	phy_oob_size = info->phy_oob_size(chip);
+
+	phy->databuf = super->databuf;
+	phy->oobbuf = super->oobbuf;
+	phy->dataleft = super->datalen;
+	phy->oobleft = super->ooblen;
+	phy->pageoff = super->pageoff & (phy_page_size - 1);
+	phy->ooblen = min(phy_oob_size, super->ooblen);
+	phy->datalen = min(phy_page_size - phy->pageoff, phy->dataleft);
+	phy->page = super->page;
+	if (super->pageoff >= phy_page_size)
+		phy->block = super->block * 2 + 1;
+	else
+		phy->block = super->block * 2;
+}
+#else
 static void super_to_phy(struct aw_spinand_chip *chip,
 		struct aw_spinand_chip_request *super,
 		struct aw_spinand_chip_request *phy)
@@ -605,6 +632,7 @@ static void super_to_phy(struct aw_spinand_chip *chip,
 	else
 		phy->block = super->block * 2;
 }
+#endif
 
 void aw_spinand_chip_super_init(struct aw_spinand_chip *chip,
 		struct aw_spinand_chip_request *super,

@@ -36,6 +36,9 @@
 #define RTC_DAY_ACCESS			BIT(7)  /* 1: the DAY setting operation is in progress */
 #define RTC_HHMMSS_ACCESS		BIT(8)  /* 1: the HH-MM-SS setting operation is in progress */
 
+#define LOSC_AUTO_SWT_STA_REG		0x0004
+#define LOSC_STATUS			BIT(0)
+
 #define RTC_DAY_REG			0x0010
 #define RTC_HHMMSS_REG			0x0014
 
@@ -77,7 +80,9 @@
 #define SEC_IN_MIN			(60)
 #define SEC_IN_HOUR			(60 * SEC_IN_MIN)
 #define SEC_IN_DAY			(24 * SEC_IN_HOUR)
-
+#define XO_CTRL_REG			0x160
+#define XO_CTRL_MASK			0x0F000000
+#define XO_ICTRL_SHIFT			24
 /*
  * NOTE: To know the valid range of each member in 'struct rtc_time', see 'struct tm' in include/linux/time.h
  *       See also rtc_valid_tm() in drivers/rtc/lib.c.
@@ -323,7 +328,12 @@ static int sunxi_rtc_gettime(struct device *dev, struct rtc_time *tm)
 {
 	struct sunxi_rtc_dev *chip = dev_get_drvdata(dev);
 	u32 hw_day, hw_hhmmss;
+	u32 val;
 	int err;
+
+	val = rtc_reg_read(chip, LOSC_AUTO_SWT_STA_REG);
+	if ((val & LOSC_STATUS) == 0)
+		dev_warn(dev, "Warning: Using internal RC 16M clock source. Time may be inaccurate!\n");
 
 	do {  /* read again in case it changes */
 		hw_day = rtc_reg_read(chip, RTC_DAY_REG);
@@ -605,6 +615,16 @@ static struct sunxi_rtc_data sunxi_rtc_v200_data = {
 	.max_year   = HW_YEAR_MAX(1970),
 	.gpr_offset = 0x100,
 	.gpr_len    = 8,
+	.has_dcxo_ictrl = false,
+};
+
+static struct sunxi_rtc_data sunxi_rtc_v201_data = {
+	.min_year   = 1970,
+	.max_year   = HW_YEAR_MAX(1970),
+	.gpr_offset = 0x100,
+	.gpr_len    = 8,
+	.has_dcxo_ictrl = true,
+	.dcxo_ictrl_val = 0xf,
 };
 
 static const struct of_device_id sunxi_rtc_dt_ids[] = {
@@ -613,6 +633,7 @@ static const struct of_device_id sunxi_rtc_dt_ids[] = {
 	{.compatible = "allwinner,sun8iw20-rtc",    .data = &sunxi_rtc_v200_data},
 	{.compatible = "allwinner,sun20iw1-rtc",    .data = &sunxi_rtc_v200_data},
 	{.compatible = "allwinner,rtc-v200",        .data = &sunxi_rtc_v200_data},
+	{.compatible = "allwinner,rtc-v201",        .data = &sunxi_rtc_v201_data},
 	{ /* sentinel */ },
 };
 MODULE_DEVICE_TABLE(of, sunxi_rtc_dt_ids);
@@ -632,10 +653,54 @@ static ssize_t max_year_show(struct device *dev,
 	struct sunxi_rtc_dev *chip = platform_get_drvdata(pdev);
 	return snprintf(buf, PAGE_SIZE, "%u \n", chip->data->max_year);
 }
+
+static ssize_t dcxo_ictrl_show(struct device *dev,
+	struct device_attribute *attr, char *buf)
+{
+	unsigned int val;
+	struct platform_device *pdev = container_of(dev, struct platform_device, dev);
+	struct sunxi_rtc_dev *chip = platform_get_drvdata(pdev);
+
+	val = rtc_reg_read(chip, XO_CTRL_REG);
+	val = (val & XO_CTRL_MASK) >> XO_ICTRL_SHIFT;
+
+	return sprintf(buf, "0x%x\n", val);
+
+}
+
+static ssize_t dcxo_ictrl_store(struct device *dev,
+	struct device_attribute *attr, const char *buf, size_t size)
+{
+	u32 val, temp, ret;
+	char str[5]; /* the value rage is 0x0~0xf, so the len is set to 5 */
+	struct platform_device *pdev = container_of(dev, struct platform_device, dev);
+	struct sunxi_rtc_dev *chip = platform_get_drvdata(pdev);
+
+	if (size >= ARRAY_SIZE(str)) {
+		dev_err(dev, "parameter is too long\n");
+		return -EINVAL;
+	}
+
+	ret = kstrtou32(buf, 16, &val);
+	if (ret) {
+		dev_err(dev, "invalid para!\n");
+		return -EINVAL;
+	}
+
+	temp = rtc_reg_read(chip, XO_CTRL_REG);
+	temp = (temp & (~XO_CTRL_MASK)) | (val << XO_ICTRL_SHIFT);
+	rtc_reg_write(chip, XO_CTRL_REG, temp);
+
+	return size;
+
+}
+
 static struct device_attribute min_year_attr =
 	__ATTR(min_year, S_IRUGO, min_year_show, NULL);
 static struct device_attribute max_year_attr =
 	__ATTR(max_year, S_IRUGO, max_year_show, NULL);
+static struct device_attribute dcxo_ictrl_attr =
+	__ATTR(dcxo_ictrl, 0664, dcxo_ictrl_show, dcxo_ictrl_store);
 
 static int rtc_registers_access_check(struct sunxi_rtc_dev *chip)
 {
@@ -876,6 +941,7 @@ static int sunxi_rtc_probe(struct platform_device *pdev)
 	const struct of_device_id *of_id;
 	struct resource *res;
 	int err;
+	u32 val;
 
 	dev_dbg(dev, "%s(): BEGIN\n", __func__);
 
@@ -1019,6 +1085,15 @@ static int sunxi_rtc_probe(struct platform_device *pdev)
 		goto err5;
 	}
 
+	/* Change XO_CTRL_REG bit[24:27] value to dcxo_ictrl_val for
+	 * adjust current value to reduce power consumption
+	 */
+	if (chip->data->has_dcxo_ictrl) {
+		val = rtc_reg_read(chip, XO_CTRL_REG);
+		val |= (chip->data->dcxo_ictrl_val << XO_ICTRL_SHIFT);
+		rtc_reg_write(chip, XO_CTRL_REG, val);
+		device_create_file(dev, &dcxo_ictrl_attr);
+	}
 	device_create_file(dev, &min_year_attr);
 	device_create_file(dev, &max_year_attr);
 
@@ -1046,6 +1121,8 @@ static int sunxi_rtc_remove(struct platform_device *pdev)
 
 	device_remove_file(dev, &max_year_attr);
 	device_remove_file(dev, &min_year_attr);
+	if (chip->data->has_dcxo_ictrl)
+		device_remove_file(dev, &dcxo_ictrl_attr);
 	sunxi_rtc_reboot_flag_destroy(chip);
 	clk_disable_unprepare(chip->clk_spi);
 	clk_disable_unprepare(chip->clk);
@@ -1086,4 +1163,4 @@ module_exit(sunxi_rtc_exit);
 MODULE_DESCRIPTION("sunxi RTC driver");
 MODULE_AUTHOR("Martin <wuyan@allwinnertech.com>");
 MODULE_LICENSE("GPL v2");
-MODULE_VERSION("1.1.2");
+MODULE_VERSION("1.1.3");
