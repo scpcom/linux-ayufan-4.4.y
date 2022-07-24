@@ -121,6 +121,7 @@ source "drivers/block/mtip32xx/Kconfig"
 
 source "drivers/block/zram/Kconfig"
 
+source "modules/nand/Kconfig"
 config BLK_DEV_UMEM
 	tristate "Micro Memory MM5415 Battery Backed RAM support"
 	depends on PCI
