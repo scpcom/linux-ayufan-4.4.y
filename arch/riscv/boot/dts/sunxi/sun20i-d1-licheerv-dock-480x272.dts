@@ -386,27 +386,27 @@
 	};
 
 	pwm0_pin_a: pwm0@0 {
-		pins = "PD16";
+		pins = "PB5";
 		function = "pwm0";
 		drive-strength = <10>;
 		bias-pull-up;
 	};
 
 	pwm0_pin_b: pwm0@1 {
-		pins = "PD16";
+		pins = "PB5";
 		function = "gpio_in";
 		bias-disable;
 	};
 
 	pwm2_pin_a: pwm2@0 {
-		pins = "PD18";
+		pins = "PE8";
 		function = "pwm2";
 		drive-strength = <10>;
 		bias-pull-up;
 	};
 
 	pwm2_pin_b: pwm2@1 {
-		pins = "PD18";
+		pins = "PE8";
 		function = "gpio_in";
 	};
 
