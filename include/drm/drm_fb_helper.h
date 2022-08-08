@@ -38,7 +38,7 @@ struct drm_fb_helper;
 #include <linux/fb.h>
 #include <linux/kgdb.h>
 
-#if defined(CONFIG_UMP)
+#if IS_ENABLED(CONFIG_UMP)
 #include <ump/ump_kernel_interface.h>
 #endif
 
@@ -192,7 +192,7 @@ struct drm_fb_helper {
 	 * See also: @deferred_setup
 	 */
 	int preferred_bpp;
-#if defined(CONFIG_UMP)
+#if IS_ENABLED(CONFIG_UMP)
 	ump_dd_handle ump_wrapped_buffer[DRM_FB_UMP_COUNT][2];
 #endif
 };
@@ -459,7 +459,7 @@ drm_fbdev_generic_setup(struct drm_device *dev, unsigned int preferred_bpp)
 
 #endif
 
-#if defined(CONFIG_UMP)
+#if IS_ENABLED(CONFIG_UMP)
 extern int (*drm_get_ump_secure_id) (struct fb_info *info,
         struct drm_fb_helper *g_fbi,     unsigned long arg, int buf);
 #define GET_UMP_SECURE_ID_BUF1 _IOWR('m', 311, unsigned int)
