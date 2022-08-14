@@ -188,6 +188,14 @@
 			status = "disabled";
 		};
 
+		iommu: iommu@2010000 {
+			compatible = "allwinner,sun20i-d1-iommu";
+			reg = <0x2010000 0x10000>;
+			interrupts = <80 IRQ_TYPE_LEVEL_HIGH>;
+			clocks = <&ccu CLK_BUS_IOMMU>;
+			#iommu-cells = <1>;
+		};
+
 		codec: audio-codec@2030000 {
 			compatible = "simple-mfd", "syscon";
 			reg = <0x2030000 0x1000>;
@@ -681,6 +689,7 @@
 				 <&display_clocks CLK_MIXER0>;
 			clock-names = "bus", "mod";
 			resets = <&display_clocks RST_MIXER0>;
+			iommus = <&iommu 2>;
 
 			ports {
 				#address-cells = <1>;
@@ -703,6 +712,7 @@
 				 <&display_clocks CLK_MIXER1>;
 			clock-names = "bus", "mod";
 			resets = <&display_clocks RST_MIXER1>;
+			iommus = <&iommu 2>;
 
 			ports {
 				#address-cells = <1>;
