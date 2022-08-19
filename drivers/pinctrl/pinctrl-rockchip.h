@@ -297,4 +297,6 @@ struct rockchip_pinctrl {
 	unsigned int			nfunctions;
 };
 
+int rockchip_set_mux(struct rockchip_pin_bank *bank, int pin, int mux);
+
 #endif

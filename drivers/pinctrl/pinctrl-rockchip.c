@@ -921,7 +921,7 @@ static int rockchip_verify_mux(struct rockchip_pin_bank *bank,
  * @pin: pin to change
  * @mux: new mux function to set
  */
-static int rockchip_set_mux(struct rockchip_pin_bank *bank, int pin, int mux)
+int rockchip_set_mux(struct rockchip_pin_bank *bank, int pin, int mux)
 {
 	struct rockchip_pinctrl *info = bank->drvdata;
 	int iomux_num = (pin / 8);

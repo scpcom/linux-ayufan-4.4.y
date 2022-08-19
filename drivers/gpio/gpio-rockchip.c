@@ -21,6 +21,7 @@
 #include <linux/of_irq.h>
 #include <linux/pinctrl/pinconf-generic.h>
 #include <linux/regmap.h>
+#include <dt-bindings/pinctrl/rockchip.h>
 
 #include "../pinctrl/core.h"
 #include "../pinctrl/pinctrl-rockchip.h"
@@ -154,6 +155,12 @@ static int rockchip_gpio_set_direction(struct gpio_chip *chip,
 	struct rockchip_pin_bank *bank = gpiochip_get_data(chip);
 	unsigned long flags;
 	u32 data = input ? 0 : 1;
+	int rc;
+
+	rc = rockchip_set_mux(bank, offset,
+			      RK_FUNC_GPIO);
+	if (rc != RK_FUNC_GPIO)
+		return -EINVAL;
 
 	raw_spin_lock_irqsave(&bank->slock, flags);
 	rockchip_gpio_writel_bit(bank, offset, data, bank->gpio_regs->port_ddr);
