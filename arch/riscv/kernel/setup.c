@@ -84,7 +84,6 @@ static struct resource bss_res = { .name = "Kernel bss", };
 #ifdef CONFIG_CRASH_DUMP
 static struct resource elfcorehdr_res = { .name = "ELF Core hdr", };
 #endif
-	sbi_init();
 
 static int __init add_resource(struct resource *parent,
 				struct resource *res)

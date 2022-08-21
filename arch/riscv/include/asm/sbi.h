@@ -207,8 +207,6 @@ static inline void sbi_srst_power_off(void)
 	sbi_srst_reset(SBI_SRST_RESET_TYPE_SHUTDOWN,
 		       SBI_SRST_RESET_REASON_NONE);
 }
-
-void sbi_init(void);
 #else /* CONFIG_RISCV_SBI */
 static inline int sbi_remote_fence_i(const unsigned long *hart_mask) { return -1; }
 static inline void sbi_init(void) {}
