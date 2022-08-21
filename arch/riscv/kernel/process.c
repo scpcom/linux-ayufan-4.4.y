@@ -84,7 +84,7 @@ void start_thread(struct pt_regs *regs, unsigned long pc,
 	}
 
 	if (has_vector) {
-		regs->sstatus |= SR_VS_INITIAL;
+		regs->status |= SR_VS_INITIAL;
 		vstate_restore(current, regs);
 	}
 
