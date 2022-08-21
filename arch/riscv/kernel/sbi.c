@@ -168,9 +168,13 @@ static int __sbi_rfence_v01(int fid, const unsigned long *hart_mask,
 	return result;
 }
 
+static struct notifier_block sbi_srst_reboot_nb;
 static void sbi_set_power_off(void)
 {
 	pm_power_off = sbi_shutdown;
+	sbi_srst_reboot_nb.notifier_call = sbi_srst_reboot;
+	sbi_srst_reboot_nb.priority = 192;
+	register_restart_handler(&sbi_srst_reboot_nb);
 }
 #else
 static void __sbi_set_timer_v01(uint64_t stime_value)
