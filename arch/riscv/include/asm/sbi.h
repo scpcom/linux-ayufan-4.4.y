@@ -167,6 +167,11 @@ static inline unsigned long sbi_minor_version(void)
 
 int sbi_err_map_linux_errno(int err);
 
+#define SBI_CALL_1(which, arg0) sbi_ecall(which, 0, (unsigned long)arg0, 0, 0, 0, 0, 0)
+#define SBI_CALL_2(which, arg0, arg1) sbi_ecall(which, 0, arg0, arg1, 0, 0, 0, 0)
+#define SBI_CALL_3(which, arg0, arg1, arg2) \
+		sbi_ecall(which, 0, arg0, arg1, arg2, 0, 0, 0)
+
 static inline void sbi_set_pmu(int start)
 {
 	SBI_CALL_1(SBI_PMU, start);
