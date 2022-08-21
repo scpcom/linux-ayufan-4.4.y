@@ -91,15 +91,16 @@ static int riscv_fpr_set(struct task_struct *target,
 #ifdef CONFIG_VECTOR
 static int riscv_vr_get(struct task_struct *target,
 			 const struct user_regset *regset,
-			 unsigned int pos, unsigned int count,
-			 void *kbuf, void __user *ubuf)
+			 struct membuf to)
 {
-	int ret;
 	struct __riscv_v_state *vstate = &target->thread.vstate;
 
-	ret = user_regset_copyout(&pos, &count, &kbuf, &ubuf, vstate, 0,
-				  offsetof(struct __riscv_v_state, vtype));
-	return ret;
+	if (target == current)
+		vstate_save(current, task_pt_regs(current));
+
+	membuf_write(&to, vstate, offsetof(struct __riscv_v_state, vtype));
+	membuf_store(&to, vstate->vtype);
+	return membuf_zero(&to, 4);
 }
 
 static int riscv_vr_set(struct task_struct *target,
@@ -141,7 +142,7 @@ static const struct user_regset riscv_user_regset[] = {
 		.n = ELF_NVREG,
 		.size = sizeof(elf_greg_t),
 		.align = sizeof(elf_greg_t),
-		.get = &riscv_vr_get,
+		.regset_get = &riscv_vr_get,
 		.set = &riscv_vr_set,
 	},
 #endif
