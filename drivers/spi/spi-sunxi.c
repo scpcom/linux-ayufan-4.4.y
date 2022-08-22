@@ -2122,21 +2122,21 @@ static int sunxi_spi_resource_get(struct sunxi_spi *sspi)
 	sspi->pclk = devm_clk_get(&sspi->pdev->dev, "pll");
 	if (IS_ERR_OR_NULL(sspi->pclk)) {
 		SPI_ERR("[spi%d] Unable to acquire module clock '%s', return %x\n",
-			sspi->master->bus_num, sspi->dev_name, PTR_RET(sspi->pclk));
+			sspi->master->bus_num, sspi->dev_name, PTR_ERR_OR_ZERO(sspi->pclk));
 		return -ENXIO;
 	}
 
 	sspi->mclk = devm_clk_get(&sspi->pdev->dev, "mod");
 	if (IS_ERR_OR_NULL(sspi->mclk)) {
 		SPI_ERR("[spi%d] Unable to acquire module clock '%s', return %x\n",
-			sspi->master->bus_num, sspi->dev_name, PTR_RET(sspi->mclk));
+			sspi->master->bus_num, sspi->dev_name, PTR_ERR_OR_ZERO(sspi->mclk));
 		return -ENXIO;
 	}
 
 	sspi->bus_clk = devm_clk_get(&sspi->pdev->dev, "bus");
 	if (IS_ERR_OR_NULL(sspi->bus_clk)) {
 		SPI_ERR("[spi%d] Unable to acquire bus clock '%s', return %x\n",
-			sspi->master->bus_num, sspi->dev_name, PTR_RET(sspi->bus_clk));
+			sspi->master->bus_num, sspi->dev_name, PTR_ERR_OR_ZERO(sspi->bus_clk));
 		return -ENXIO;
 	}
 
@@ -2144,7 +2144,7 @@ static int sunxi_spi_resource_get(struct sunxi_spi *sspi)
 		sspi->reset = devm_reset_control_get(&sspi->pdev->dev, NULL);
 		if (IS_ERR_OR_NULL(sspi->reset)) {
 			SPI_ERR("[spi%d] Unable to acquire reset clock '%s', return %x\n",
-				sspi->master->bus_num, sspi->dev_name, PTR_RET(sspi->reset));
+				sspi->master->bus_num, sspi->dev_name, PTR_ERR_OR_ZERO(sspi->reset));
 			return -ENXIO;
 		}
 	}
@@ -2174,13 +2174,13 @@ static int sunxi_spi_clk_init(struct sunxi_spi *sspi, u32 mod_clk)
 	ret = reset_control_assert(sspi->reset);
 	if (ret != 0) {
 		SPI_ERR("[spi%d] Unable to assert reset clock '%s', return %x\n",
-			sspi->master->bus_num, sspi->dev_name, PTR_RET(sspi->mclk));
+			sspi->master->bus_num, sspi->dev_name, PTR_ERR_OR_ZERO(sspi->mclk));
 		return -ENXIO;
 	}
 	ret = reset_control_deassert(sspi->reset);
 	if (ret != 0) {
 		SPI_ERR("[spi%d] Unable to deassert reset clock '%s', return %x\n",
-			sspi->master->bus_num, sspi->dev_name, PTR_RET(sspi->mclk));
+			sspi->master->bus_num, sspi->dev_name, PTR_ERR_OR_ZERO(sspi->mclk));
 		return -ENXIO;
 	}
 
