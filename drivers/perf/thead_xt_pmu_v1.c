@@ -693,13 +693,13 @@ static int init_hw_perf_events(void)
 static int riscv_pmu_starting_cpu(unsigned int cpu)
 {
 	sbi_set_pmu(1);
-	csr_set(sie, SIE_SMIE);
+	csr_set(CSR_IE, IE_MIE);
 	return 0;
 }
 
 static int riscv_pmu_dying_cpu(unsigned int cpu)
 {
-	csr_clear(sie, SIE_SMIE);
+	csr_clear(CSR_IE, IE_MIE);
 	return 0;
 }
 
