@@ -30,7 +30,7 @@
 extern int usb_disabled(void);
 
 #define  DMSG_ERR(format, args...)		pr_err("hci: "format, ##args)
-#define  DMSG_PRINT(format, args...)		pr_warning(format, ##args)
+#define  DMSG_PRINT(format, args...)		pr_warn(format, ##args)
 
 #define HCI_USBC_NO     "hci_ctrl_no"
 
