@@ -98,7 +98,7 @@ static int riscv_timer_cpu_pm_notify(struct notifier_block *self,
 {
 	if (action == CPU_PM_ENTER) {
 		__this_cpu_write(saved_sie_stie, csr_read(sie));
-		csr_clear(sie, SIE_STIE);
+		csr_clear(CSR_IE, IE_TIE);
 	} else if (action == CPU_PM_ENTER_FAILED || action == CPU_PM_EXIT) {
 		csr_write(sie, saved_sie_stie);
 	}
