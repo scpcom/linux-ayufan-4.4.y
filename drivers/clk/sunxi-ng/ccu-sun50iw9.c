@@ -1233,7 +1233,7 @@ static int sun50iw9_ccu_probe(struct platform_device *pdev)
 		set_reg(reg + sun50iw9_usb_clk_regs[i], 0x0, 2, 24);
 	}
 
-	ret = sunxi_ccu_probe(pdev->dev.of_node, reg, &sun50iw9_ccu_desc);
+	ret = devm_sunxi_ccu_probe(&pdev->dev, reg, &sun50iw9_ccu_desc);
 	if (ret)
 		return ret;
 

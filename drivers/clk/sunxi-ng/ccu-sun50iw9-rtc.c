@@ -142,7 +142,7 @@ static int sun50iw9_rtc_ccu_probe(struct platform_device *pdev)
 
 	clock_source_init(reg);
 
-	return sunxi_ccu_probe(pdev->dev.of_node, reg, &sun50iw9_rtc_ccu_desc);
+	return devm_sunxi_ccu_probe(&pdev->dev, reg, &sun50iw9_rtc_ccu_desc);
 }
 
 static const struct of_device_id sun50iw9_rtc_ccu_ids[] = {

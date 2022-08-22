@@ -280,7 +280,7 @@ static void __init of_sun55iw3_r_ccu_init(struct device_node *node)
 	if (IS_ERR(reg))
 		return;
 
-	ret = sunxi_ccu_probe(node, reg, &sun55iw3_r_ccu_desc);
+	ret = of_sunxi_ccu_probe(node, reg, &sun55iw3_r_ccu_desc);
 	if (ret)
 		return;
 

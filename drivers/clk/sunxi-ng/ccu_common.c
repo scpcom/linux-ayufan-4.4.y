@@ -359,6 +359,5 @@ void set_reg_key(char __iomem *addr,
 
 	writel(tmp | ((val & mask) << bs) | ((key & kmask) << kbs), addr);
 }
-EXPORT_SYMBOL_GPL(sunxi_ccu_probe);
 
 MODULE_LICENSE("GPL v2");

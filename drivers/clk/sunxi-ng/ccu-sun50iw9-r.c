@@ -159,7 +159,7 @@ static int sun50iw9_r_ccu_probe(struct platform_device *pdev)
 	if (IS_ERR(reg))
 		return PTR_ERR(reg);
 
-	ret = sunxi_ccu_probe(pdev->dev.of_node, reg, &sun50iw9_r_ccu_desc);
+	ret = devm_sunxi_ccu_probe(&pdev->dev, reg, &sun50iw9_r_ccu_desc);
 	if (ret)
 		return ret;
 

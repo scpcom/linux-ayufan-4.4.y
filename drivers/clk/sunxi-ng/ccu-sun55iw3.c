@@ -1905,7 +1905,7 @@ static void __init of_sun55iw3_ccu_init(struct device_node *node)
 		set_reg(reg + sun55iw3_usb_clk_regs[i], 0x0, 2, 24);
 	}
 
-	sunxi_ccu_probe(node, reg, &sun55iw3_ccu_desc);
+	of_sunxi_ccu_probe(node, reg, &sun55iw3_ccu_desc);
 
 	sunxi_ccu_sleep_init(reg, sun55iw3_ccu_clks,
 			     ARRAY_SIZE(sun55iw3_ccu_clks),

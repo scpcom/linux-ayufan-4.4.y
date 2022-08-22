@@ -1323,7 +1323,7 @@ static void __init of_sun50iw12_ccu_init(struct device_node *node)
 		writel(val, reg + pll_regs[i]);
 	}
 
-	sunxi_ccu_probe(node, reg, &sun50iw12_ccu_desc);
+	of_sunxi_ccu_probe(node, reg, &sun50iw12_ccu_desc);
 }
 
 CLK_OF_DECLARE(sun50iw12_ccu_init, "allwinner,sun50iw12-ccu", of_sun50iw12_ccu_init);
