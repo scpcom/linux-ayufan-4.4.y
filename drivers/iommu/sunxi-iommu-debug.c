@@ -18,7 +18,6 @@
 #include <linux/platform_device.h>
 #include <linux/slab.h>
 #include <linux/uaccess.h>
-#include <linux/dma-contiguous.h>
 #include <linux/dma-mapping.h>
 #include <asm/cacheflush.h>
 #include <asm/barrier.h>
