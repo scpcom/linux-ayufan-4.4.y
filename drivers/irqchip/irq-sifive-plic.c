@@ -65,6 +65,7 @@
 #define	PLIC_DISABLE_THRESHOLD		0x7
 #define	PLIC_ENABLE_THRESHOLD		0
 
+static void __iomem *plic_regs;
 struct plic_priv {
 	struct cpumask lmask;
 	struct irq_domain *irqdomain;
@@ -398,6 +399,7 @@ static int __init plic_init(struct device_node *node,
 		return -ENOMEM;
 
 	priv->regs = of_iomap(node, 0);
+	plic_regs = priv->regs;
 	if (WARN_ON(!priv->regs)) {
 		error = -EIO;
 		goto out_free_priv;
