@@ -26,7 +26,7 @@
 //#include <linux/hwmon-sysfs.h>
 #include <linux/err.h>
 //#include <linux/hwmon.h>
-#include <linux/input-polldev.h>
+#include <linux/input.h>
 #include <linux/miscdevice.h>
 #include <linux/fs.h>
 #include <linux/stat.h>
@@ -768,10 +768,10 @@ static enum hrtimer_restart my_hrtimer_callback(struct hrtimer *timer)
 #if MIR3DA_OFFSET_TEMP_SOLUTION
 MIR_GENERAL_OPS_DECLARE(ops_handle, i2c_smbus_read, i2c_smbus_read_block, i2c_smbus_write,
 		sensor_sync_write, sensor_sync_read, check_califolder_exist, get_address,
-		support_fast_auto_cali, msdelay, printk, sprintf);
+		support_fast_auto_cali, msdelay, _printk, sprintf);
 #else
 MIR_GENERAL_OPS_DECLARE(ops_handle, i2c_smbus_read, i2c_smbus_read_block, i2c_smbus_write,
-		NULL, NULL, NULL, get_address, NULL, msdelay, printk, sprintf);
+		NULL, NULL, NULL, get_address, NULL, msdelay, _printk, sprintf);
 #endif
 /*----------------------------------------------------------------------------*/
 static int mir3da_probe(struct i2c_client *client, const struct i2c_device_id *id)
