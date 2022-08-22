@@ -1073,7 +1073,7 @@ static int sunxi_rtc_probe(struct platform_device *pdev)
 		goto err5;
 	}
 	chip->rtc->ops = &sunxi_rtc_ops;
-	err = rtc_register_device(chip->rtc);
+	err = devm_rtc_register_device(chip->rtc);
 	if (err) {
 		dev_err(dev, "Unable to register RTC device\n");
 		goto err5;
