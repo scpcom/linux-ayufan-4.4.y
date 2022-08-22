@@ -48,7 +48,24 @@ static inline mm_segment_t force_uaccess_begin(void)
 static inline void force_uaccess_end(mm_segment_t oldfs)
 {
 }
+
+#define MAKE_MM_SEG(s)	((mm_segment_t) { })
+
+#define KERNEL_DS	MAKE_MM_SEG(~0UL)
+#define USER_DS		MAKE_MM_SEG(TASK_SIZE)
+
+#define get_fs()	((mm_segment_t) { })
+
+static inline void set_fs(mm_segment_t fs)
+{
+}
 #endif /* CONFIG_SET_FS */
+
+#ifndef get_ds
+#ifdef KERNEL_DS
+#define get_ds()       (KERNEL_DS)
+#endif
+#endif
 
 /*
  * Architectures should provide two primitives (raw_copy_{to,from}_user())
