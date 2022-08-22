@@ -64,10 +64,9 @@ static struct proc_dir_entry *goodix_proc_entry;
 
 static ssize_t goodix_tool_read(struct file *, char __user *, size_t, loff_t *);
 static ssize_t goodix_tool_write(struct file *, const char __user *, size_t, loff_t *);
-static const struct file_operations tool_ops = {
-	.owner = THIS_MODULE,
-	.read = goodix_tool_read,
-	.write = goodix_tool_write,
+static const struct proc_ops tool_ops = {
+	.proc_read = goodix_tool_read,
+	.proc_write = goodix_tool_write,
 };
 
 //static s32 goodix_tool_write(struct file *filp, const char __user *buff, unsigned long len, void *data);
