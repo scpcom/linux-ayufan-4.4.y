@@ -1417,25 +1417,25 @@ static void sunxi_udc_handle_ep0_idle(struct sunxi_udc *dev,
 					case SUNXI_UDC_TEST_J:
 						USBC_Dev_ReadDataStatus(g_sunxi_udc_io.usb_bsp_hdle, USBC_EP_TYPE_EP0, 1);
 						dev->ep0state = EP0_END_XFER;
-						crq_wIndex = TEST_J;
+						crq_wIndex = USB_TEST_J;
 						crq_bRequest = USB_REQ_SET_FEATURE;
 						return;
 					case SUNXI_UDC_TEST_K:
 						USBC_Dev_ReadDataStatus(g_sunxi_udc_io.usb_bsp_hdle, USBC_EP_TYPE_EP0, 1);
 						dev->ep0state = EP0_END_XFER;
-						crq_wIndex = TEST_K;
+						crq_wIndex = USB_TEST_K;
 						crq_bRequest = USB_REQ_SET_FEATURE;
 						return;
 					case SUNXI_UDC_TEST_SE0_NAK:
 						USBC_Dev_ReadDataStatus(g_sunxi_udc_io.usb_bsp_hdle, USBC_EP_TYPE_EP0, 1);
 						dev->ep0state = EP0_END_XFER;
-						crq_wIndex = TEST_SE0_NAK;
+						crq_wIndex = USB_TEST_SE0_NAK;
 						crq_bRequest = USB_REQ_SET_FEATURE;
 						return;
 					case SUNXI_UDC_TEST_PACKET:
 						USBC_Dev_ReadDataStatus(g_sunxi_udc_io.usb_bsp_hdle, USBC_EP_TYPE_EP0, 1);
 						dev->ep0state = EP0_END_XFER;
-						crq_wIndex = TEST_PACKET;
+						crq_wIndex = USB_TEST_PACKET;
 						crq_bRequest = USB_REQ_SET_FEATURE;
 						return;
 					default:
@@ -1650,22 +1650,22 @@ static void sunxi_udc_handle_ep0(struct sunxi_udc *dev)
 			break;
 		case USB_REQ_SET_FEATURE:
 			switch (crq_wIndex) {
-			case TEST_J:
+			case USB_TEST_J:
 				USBC_EnterMode_Test_J(
 						g_sunxi_udc_io.usb_bsp_hdle);
 				break;
 
-			case TEST_K:
+			case USB_TEST_K:
 				USBC_EnterMode_Test_K(
 						g_sunxi_udc_io.usb_bsp_hdle);
 				break;
 
-			case TEST_SE0_NAK:
+			case USB_TEST_SE0_NAK:
 				USBC_EnterMode_Test_SE0_NAK(
 						g_sunxi_udc_io.usb_bsp_hdle);
 				break;
 
-			case TEST_PACKET:
+			case USB_TEST_PACKET:
 			{
 				void __iomem *fifo = 0;
 
