@@ -26,7 +26,7 @@
 #include <linux/err.h>
 #include <linux/hwmon.h>
 #include <linux/fs.h>
-#include <linux/input-polldev.h>
+#include <linux/input.h>
 #include <linux/device.h>
 #include "../init-input.h"
 #include <linux/errno.h>
