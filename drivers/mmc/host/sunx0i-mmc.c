@@ -2759,8 +2759,6 @@ static int sunxi_mmc_extra_of_parse(struct mmc_host *mmc)
 
 	np = mmc->parent->of_node;
 
-	if (of_property_read_bool(np, "cap-erase"))
-		mmc->caps |= MMC_CAP_ERASE;
 	if (of_property_read_bool(np, "mmc-high-capacity-erase-size"))
 		mmc->caps2 |= MMC_CAP2_HC_ERASE_SZ;
 	if (sunxi_mmc_chk_hr1b_cap(host)
@@ -2948,7 +2946,7 @@ static int sunxi_mmc_probe(struct platform_device *pdev)
 		goto error_free_dma;
 
 	/*fix Unbalanced pm_runtime_enable when async occured.*/
-	dev_pm_set_driver_flags(&mmc->class_dev, DPM_FLAG_NEVER_SKIP);
+	dev_pm_set_driver_flags(&mmc->class_dev, DPM_FLAG_NO_DIRECT_COMPLETE);
 	sunxi_show_det_mode(mmc);
 	ret = mmc_create_sys_fs(host, pdev);
 	if (ret) {
