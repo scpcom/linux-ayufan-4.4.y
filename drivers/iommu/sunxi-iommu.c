@@ -432,7 +432,7 @@ static inline u32 sunxi_mk_pte(u32 page, int prot)
 
 
 static int sunxi_iommu_map(struct iommu_domain *domain, unsigned long iova,
-	   phys_addr_t paddr, size_t size, int prot)
+	   phys_addr_t paddr, size_t size, int prot, gfp_t gfp)
 {
 	struct sunxi_iommu_domain *sunxi_domain =
 		container_of(domain, struct sunxi_iommu_domain, domain);
