@@ -22,7 +22,7 @@
 #include <linux/hugetlb.h>
 
 #include <linux/crash_dump.h>
-#include <linux/dma-contiguous.h>
+#include <linux/dma-map-ops.h>
 
 #include <asm/fixmap.h>
 #include <asm/tlbflush.h>
