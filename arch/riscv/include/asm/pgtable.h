@@ -117,7 +117,7 @@
  * The RISC-V ISA doesn't yet specify how to query or modify PMAs, so we can't
  * change the properties of memory regions.
  */
-#define _PAGE_IOREMAP _PAGE_KERNEL
+#define _PAGE_IOREMAP _pgprot_noncached(PAGE_KERNEL)
 
 extern pgd_t swapper_pg_dir[];
 
@@ -418,26 +418,26 @@ struct file;
 extern pgprot_t phys_mem_access_prot(struct file *file, unsigned long pfn,
 				     unsigned long size, pgprot_t vma_prot);
 
-#define pgprot_noncached pgprot_noncached
-static inline pgprot_t pgprot_noncached(pgprot_t _prot)
+static inline unsigned long _pgprot_noncached(pgprot_t _prot)
 {
 	unsigned long prot = pgprot_val(_prot);
 
 	prot &= ~(_PAGE_CACHE | _PAGE_BUF);
 	prot |= _PAGE_SO;
 
-	return __pgprot(prot);
+	return prot;
 }
+#define pgprot_noncached(prot) __pgprot(_pgprot_noncached(prot))
 
-#define pgprot_writecombine pgprot_writecombine
-static inline pgprot_t pgprot_writecombine(pgprot_t _prot)
+static inline unsigned long _pgprot_writecombine(pgprot_t _prot)
 {
 	unsigned long prot = pgprot_val(_prot);
 
 	prot &= ~(_PAGE_CACHE | _PAGE_BUF);
 
-	return __pgprot(prot);
+	return prot;
 }
+#define pgprot_writecombine(prot) __pgprot(_pgprot_writecombine(prot))
 
 /*
  * Encode and decode a swap entry
