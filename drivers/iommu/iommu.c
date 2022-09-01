@@ -194,6 +194,59 @@ static void dev_iommu_free(struct device *dev)
 	kfree(param);
 }
 
+int iommu_add_device(struct device *dev)
+{
+	const struct iommu_ops *ops = dev->bus->iommu_ops;
+	struct iommu_group *group;
+	int ret;
+
+	WARN_ON(dev->iommu_group);
+
+	if (!ops)
+		return -EINVAL;
+
+	if (!dev_iommu_get(dev))
+		return -ENOMEM;
+
+	if (!try_module_get(ops->owner)) {
+		ret = -EINVAL;
+		goto err_free_dev_param;
+	}
+
+	ret = ops->add_device(dev);
+	if (ret)
+		goto err_module_put;
+
+	group = iommu_group_get(dev);
+	iommu_create_device_direct_mappings(group, dev);
+	iommu_group_put(group);
+
+	if (ops->probe_finalize)
+		ops->probe_finalize(dev);
+
+	return 0;
+
+err_module_put:
+	module_put(ops->owner);
+err_free_dev_param:
+	dev_iommu_free(dev);
+	return ret;
+}
+
+void iommu_remove_device(struct device *dev)
+{
+	const struct iommu_ops *ops = dev->bus->iommu_ops;
+
+	if (!dev->iommu)
+		return;
+
+	if (dev->iommu_group)
+		ops->remove_device(dev);
+
+	module_put(ops->owner);
+	dev_iommu_free(dev);
+}
+
 static int __iommu_probe_device(struct device *dev, struct list_head *group_list)
 {
 	const struct iommu_ops *ops = dev->bus->iommu_ops;
@@ -252,6 +305,9 @@ int iommu_probe_device(struct device *dev)
 	struct iommu_group *group;
 	int ret;
 
+	if (!ops->probe_device)
+		return iommu_add_device(dev);
+
 	ret = __iommu_probe_device(dev, NULL);
 	if (ret)
 		goto err_out;
@@ -296,6 +352,11 @@ err_out:
 void iommu_release_device(struct device *dev)
 {
 	const struct iommu_ops *ops = dev->bus->iommu_ops;
+
+	if (!ops->release_device) {
+		iommu_remove_device(dev);
+		return;
+	}
 
 	if (!dev->iommu)
 		return;
@@ -1555,6 +1616,23 @@ struct iommu_group *iommu_group_get_for_dev(struct device *dev)
 	if (ret)
 		goto out_put_group;
 
+	/*
+	 * Try to allocate a default domain - needs support from the
+	 * IOMMU driver. There are still some drivers which don't support
+	 * default domains, so the return value is not yet checked. Only
+	 * allocate the domain here when the driver still has the
+	 * add_device/remove_device call-backs implemented.
+	 */
+	if (!ops->probe_device) {
+		iommu_alloc_default_domain(group, dev);
+
+		if (group->default_domain)
+			ret = __iommu_attach_device(group->default_domain, dev);
+
+		if (ret)
+			goto out_put_group;
+	}
+
 	return group;
 
 out_put_group:
@@ -1567,6 +1645,21 @@ EXPORT_SYMBOL(iommu_group_get_for_dev);
 struct iommu_domain *iommu_group_default_domain(struct iommu_group *group)
 {
 	return group->default_domain;
+}
+
+static int add_iommu_group(struct device *dev, void *data)
+{
+	int ret = iommu_add_device(dev);
+
+	/*
+	 * We ignore -ENODEV errors for now, as they just mean that the
+	 * device is not translated by an IOMMU. We still care about
+	 * other errors and fail to initialize when they happen.
+	 */
+	if (ret == -ENODEV)
+		ret = 0;
+
+	return ret;
 }
 
 static int probe_iommu_group(struct device *dev, void *data)
@@ -1748,9 +1841,13 @@ static int iommu_group_create_direct_mappings(struct iommu_group *group)
 
 int bus_iommu_probe(struct bus_type *bus)
 {
+	const struct iommu_ops *ops = bus->iommu_ops;
 	struct iommu_group *group, *next;
 	LIST_HEAD(group_list);
 	int ret;
+
+	if (!ops->probe_device)
+		return bus_for_each_dev(bus, NULL, NULL, add_iommu_group);
 
 	/*
 	 * This code-path does not allocate the default domain when
