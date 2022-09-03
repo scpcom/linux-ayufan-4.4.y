@@ -2200,7 +2200,7 @@ static int sunxi_i2c_resource_get(struct device_node *np, struct sunxi_i2c *i2c)
 	i2c->base_addr = devm_ioremap_resource(&i2c->pdev->dev, i2c->res);
 	if (IS_ERR_OR_NULL(i2c->base_addr)) {
 		dev_err(i2c->dev, "unable to ioremap\n");
-		return PTR_RET(i2c->base_addr);
+		return PTR_ERR_OR_ZERO(i2c->base_addr);
 	}
 
 	err = sunxi_i2c_clk_request(i2c);
