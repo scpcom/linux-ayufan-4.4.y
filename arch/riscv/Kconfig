@@ -392,6 +392,12 @@ config CRASH_DUMP
 
 	  For more details see Documentation/kdump/kdump.txt
 
+config RISCV_FIXMAP_DTB
+	bool "Keep DT mapping in fixmap"
+	default n
+	help
+	  This config allows kernel to load DT into fixmap"
+
 config RISCV_SBI_V01
 	bool "SBI v0.1 support"
 	default y

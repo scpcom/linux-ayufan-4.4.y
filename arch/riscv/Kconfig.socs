@@ -58,6 +58,7 @@ config ARCH_SUNXI
        bool "Allwinner RISC-V SoC Family"
        select RISCV_SUNXI
        select RISCV_XUANTIE
+       select RISCV_FIXMAP_DTB
        help
          This enables support for SUNXI SoC platform hardware.
 

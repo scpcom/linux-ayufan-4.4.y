@@ -31,9 +31,14 @@ unsigned long empty_zero_page[PAGE_SIZE / sizeof(unsigned long)]
 EXPORT_SYMBOL(empty_zero_page);
 
 extern char _start[];
+#ifdef CONFIG_RISCV_FIXMAP_DTB
+void *dtb_early_va;
+phys_addr_t dtb_early_pa __initdata;
+#else
 #define DTB_EARLY_BASE_VA      PGDIR_SIZE
 void *dtb_early_va __initdata;
 uintptr_t dtb_early_pa __initdata;
+#endif
 
 struct pt_alloc_ops {
 	pte_t *(*get_pte_virt)(phys_addr_t pa);
@@ -659,7 +664,18 @@ asmlinkage void __init setup_vm(uintptr_t dtb_pa)
 				   load_pa + (va - PAGE_OFFSET),
 				   map_size, PAGE_KERNEL_EXEC);
 
-#ifndef __PAGETABLE_PMD_FOLDED
+#if defined(CONFIG_RISCV_FIXMAP_DTB)
+	/* Create fixed mapping for early FDT parsing */
+	end_va = __fix_to_virt(FIX_FDT) + FIX_FDT_SIZE;
+	for (va = __fix_to_virt(FIX_FDT); va < end_va; va += PAGE_SIZE)
+		create_pte_mapping(fixmap_pte, va,
+				   dtb_pa + (va - __fix_to_virt(FIX_FDT)),
+				   PAGE_SIZE, PAGE_KERNEL);
+
+	/* Save pointer to DTB for early FDT parsing */
+	dtb_early_va = (void *)fix_to_virt(FIX_FDT) + (dtb_pa & ~PAGE_MASK);
+	/* Save physical address for memblock reservation */
+#elif !defined(__PAGETABLE_PMD_FOLDED)
 	/* Setup early PMD for DTB */
 	create_pgd_mapping(early_pg_dir, DTB_EARLY_BASE_VA,
 			   (uintptr_t)early_dtb_pmd, PGDIR_SIZE, PAGE_TABLE);

@@ -500,7 +500,11 @@ static inline void __kernel_map_pages(struct page *page, int numpages, int enabl
 #define kern_addr_valid(addr)   (1) /* FIXME */
 
 extern void *dtb_early_va;
+#ifdef CONFIG_RISCV_FIXMAP_DTB
+extern phys_addr_t dtb_early_pa;
+#else
 extern uintptr_t dtb_early_pa;
+#endif
 void setup_bootmem(void);
 void paging_init(void);
 
