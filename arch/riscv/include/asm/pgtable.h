@@ -714,7 +714,11 @@ static inline pmd_t pmdp_establish(struct vm_area_struct *vma,
 
 extern char _start[];
 extern void *_dtb_early_va;
+#ifdef CONFIG_RISCV_FIXMAP_DTB
+extern phys_addr_t _dtb_early_pa;
+#else
 extern uintptr_t _dtb_early_pa;
+#endif
 #if defined(CONFIG_XIP_KERNEL) && defined(CONFIG_MMU)
 #define dtb_early_va	(*(void **)XIP_FIXUP(&_dtb_early_va))
 #define dtb_early_pa	(*(uintptr_t *)XIP_FIXUP(&_dtb_early_pa))
