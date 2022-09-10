@@ -16,7 +16,9 @@
 #include <crypto/internal/hash.h>
 #include <crypto/internal/rng.h>
 #include <crypto/internal/aead.h>
+#include <crypto/internal/skcipher.h>
 #include <crypto/hash.h>
+#include <crypto/skcipher.h>
 
 #include "sunxi_ce.h"
 #include "sunxi_ce_proc.h"
@@ -61,12 +63,12 @@ int ss_sg_cnt(struct scatterlist *sg, int total)
 	return cnt;
 }
 
-int ss_aes_crypt(struct ablkcipher_request *req, int dir, int method, int mode)
+int ss_aes_crypt(struct skcipher_request *req, int dir, int method, int mode)
 {
-	ss_aes_req_ctx_t *req_ctx = ablkcipher_request_ctx(req);
+	ss_aes_req_ctx_t *req_ctx = skcipher_request_ctx(req);
 
 	SS_DBG("nbytes: %d, dec: %d, method: %d, mode: %d\n",
-		req->nbytes, dir, method, mode);
+		req->cryptlen, dir, method, mode);
 	if (ss_dev->suspend) {
 		SS_ERR("SS has already suspend.\n");
 		return -EAGAIN;

@@ -24,9 +24,11 @@
 #include <crypto/hash.h>
 #include <crypto/md5.h>
 #include <crypto/des.h>
+#include <crypto/skcipher.h>
 #include <crypto/internal/aead.h>
 #include <crypto/internal/hash.h>
 #include <crypto/internal/rng.h>
+#include <crypto/internal/skcipher.h>
 
 #include <linux/dmaengine.h>
 #include <linux/dma-mapping.h>
@@ -128,7 +130,7 @@ static int sunxi_aes_gcm_setkey(struct crypto_aead *tfm, const u8 *key,
 	if (keylen != AES_KEYSIZE_256 &&
 	    keylen != AES_KEYSIZE_192 &&
 	    keylen != AES_KEYSIZE_128) {
-		crypto_aead_set_flags(tfm, CRYPTO_TFM_RES_BAD_KEY_LEN);
+		//crypto_aead_set_flags(tfm, CRYPTO_TFM_RES_BAD_KEY_LEN);
 		return -EINVAL;
 	}
 
@@ -159,11 +161,11 @@ static int sunxi_aes_gcm_setauthsize(struct crypto_aead *tfm,
 }
 #endif
 
-static int ss_aes_setkey(struct crypto_ablkcipher *tfm, const u8 *key,
+static int ss_aes_setkey(struct crypto_skcipher *tfm, const u8 *key,
 				unsigned int keylen)
 {
 	int ret = 0;
-	ss_aes_ctx_t *ctx = crypto_ablkcipher_ctx(tfm);
+	ss_aes_ctx_t *ctx = crypto_skcipher_ctx(tfm);
 
 	SS_DBG("keylen = %d\n", keylen);
 	if (ctx->comm.flags & SS_FLAG_NEW_KEY) {
@@ -176,7 +178,7 @@ static int ss_aes_setkey(struct crypto_ablkcipher *tfm, const u8 *key,
 		return ret;
 
 	if (ss_aes_key_is_weak(key, keylen)) {
-		crypto_ablkcipher_tfm(tfm)->crt_flags
+		crypto_skcipher_tfm(tfm)->crt_flags
 					|= CRYPTO_TFM_REQ_FORBID_WEAK_KEYS;
 		/* testmgr.c need this, but we don't want to support it. */
 /*		return -EINVAL; */
@@ -191,38 +193,38 @@ static int ss_aes_setkey(struct crypto_ablkcipher *tfm, const u8 *key,
 	return 0;
 }
 
-static int ss_aes_ecb_encrypt(struct ablkcipher_request *req)
+static int ss_aes_ecb_encrypt(struct skcipher_request *req)
 {
 	return ss_aes_crypt(req,
 		SS_DIR_ENCRYPT, SS_METHOD_AES, SS_AES_MODE_ECB);
 }
 
-static int ss_aes_ecb_decrypt(struct ablkcipher_request *req)
+static int ss_aes_ecb_decrypt(struct skcipher_request *req)
 {
 	return ss_aes_crypt(req,
 		SS_DIR_DECRYPT, SS_METHOD_AES, SS_AES_MODE_ECB);
 }
 
-static int ss_aes_cbc_encrypt(struct ablkcipher_request *req)
+static int ss_aes_cbc_encrypt(struct skcipher_request *req)
 {
 	return ss_aes_crypt(req,
 		SS_DIR_ENCRYPT, SS_METHOD_AES, SS_AES_MODE_CBC);
 }
 
-static int ss_aes_cbc_decrypt(struct ablkcipher_request *req)
+static int ss_aes_cbc_decrypt(struct skcipher_request *req)
 {
 	return ss_aes_crypt(req,
 		SS_DIR_DECRYPT, SS_METHOD_AES, SS_AES_MODE_CBC);
 }
 
 #ifdef SS_CTR_MODE_ENABLE
-static int ss_aes_ctr_encrypt(struct ablkcipher_request *req)
+static int ss_aes_ctr_encrypt(struct skcipher_request *req)
 {
 	return ss_aes_crypt(req,
 		SS_DIR_ENCRYPT, SS_METHOD_AES, SS_AES_MODE_CTR);
 }
 
-static int ss_aes_ctr_decrypt(struct ablkcipher_request *req)
+static int ss_aes_ctr_decrypt(struct skcipher_request *req)
 {
 	return ss_aes_crypt(req,
 		SS_DIR_DECRYPT, SS_METHOD_AES, SS_AES_MODE_CTR);
@@ -230,13 +232,13 @@ static int ss_aes_ctr_decrypt(struct ablkcipher_request *req)
 #endif
 
 #ifdef SS_CTS_MODE_ENABLE
-static int ss_aes_cts_encrypt(struct ablkcipher_request *req)
+static int ss_aes_cts_encrypt(struct skcipher_request *req)
 {
 	return ss_aes_crypt(req,
 		SS_DIR_ENCRYPT, SS_METHOD_AES, SS_AES_MODE_CTS);
 }
 
-static int ss_aes_cts_decrypt(struct ablkcipher_request *req)
+static int ss_aes_cts_decrypt(struct skcipher_request *req)
 {
 	return ss_aes_crypt(req,
 		SS_DIR_DECRYPT, SS_METHOD_AES, SS_AES_MODE_CTS);
@@ -244,13 +246,13 @@ static int ss_aes_cts_decrypt(struct ablkcipher_request *req)
 #endif
 
 #ifdef SS_XTS_MODE_ENABLE
-static int ss_aes_xts_encrypt(struct ablkcipher_request *req)
+static int ss_aes_xts_encrypt(struct skcipher_request *req)
 {
 	return ss_aes_crypt(req,
 			SS_DIR_ENCRYPT, SS_METHOD_AES, SS_AES_MODE_XTS);
 }
 
-static int ss_aes_xts_decrypt(struct ablkcipher_request *req)
+static int ss_aes_xts_decrypt(struct skcipher_request *req)
 {
 	return ss_aes_crypt(req,
 			SS_DIR_DECRYPT, SS_METHOD_AES, SS_AES_MODE_XTS);
@@ -258,13 +260,13 @@ static int ss_aes_xts_decrypt(struct ablkcipher_request *req)
 #endif
 
 #ifdef SS_OFB_MODE_ENABLE
-static int ss_aes_ofb_encrypt(struct ablkcipher_request *req)
+static int ss_aes_ofb_encrypt(struct skcipher_request *req)
 {
 	return ss_aes_crypt(req,
 		SS_DIR_ENCRYPT, SS_METHOD_AES, SS_AES_MODE_OFB);
 }
 
-static int ss_aes_ofb_decrypt(struct ablkcipher_request *req)
+static int ss_aes_ofb_decrypt(struct skcipher_request *req)
 {
 	return ss_aes_crypt(req,
 		SS_DIR_DECRYPT, SS_METHOD_AES, SS_AES_MODE_OFB);
@@ -272,72 +274,72 @@ static int ss_aes_ofb_decrypt(struct ablkcipher_request *req)
 #endif
 
 #ifdef SS_CFB_MODE_ENABLE
-static int ss_aes_cfb1_encrypt(struct ablkcipher_request *req)
+static int ss_aes_cfb1_encrypt(struct skcipher_request *req)
 {
-	ss_aes_req_ctx_t *req_ctx = ablkcipher_request_ctx(req);
+	ss_aes_req_ctx_t *req_ctx = skcipher_request_ctx(req);
 
 	req_ctx->bitwidth = 1;
 	return ss_aes_crypt(req,
 		SS_DIR_ENCRYPT, SS_METHOD_AES, SS_AES_MODE_CFB);
 }
 
-static int ss_aes_cfb1_decrypt(struct ablkcipher_request *req)
+static int ss_aes_cfb1_decrypt(struct skcipher_request *req)
 {
-	ss_aes_req_ctx_t *req_ctx = ablkcipher_request_ctx(req);
+	ss_aes_req_ctx_t *req_ctx = skcipher_request_ctx(req);
 
 	req_ctx->bitwidth = 1;
 	return ss_aes_crypt(req,
 		SS_DIR_DECRYPT, SS_METHOD_AES, SS_AES_MODE_CFB);
 }
 
-static int ss_aes_cfb8_encrypt(struct ablkcipher_request *req)
+static int ss_aes_cfb8_encrypt(struct skcipher_request *req)
 {
-	ss_aes_req_ctx_t *req_ctx = ablkcipher_request_ctx(req);
+	ss_aes_req_ctx_t *req_ctx = skcipher_request_ctx(req);
 
 	req_ctx->bitwidth = 8;
 	return ss_aes_crypt(req,
 		SS_DIR_ENCRYPT, SS_METHOD_AES, SS_AES_MODE_CFB);
 }
 
-static int ss_aes_cfb8_decrypt(struct ablkcipher_request *req)
+static int ss_aes_cfb8_decrypt(struct skcipher_request *req)
 {
-	ss_aes_req_ctx_t *req_ctx = ablkcipher_request_ctx(req);
+	ss_aes_req_ctx_t *req_ctx = skcipher_request_ctx(req);
 
 	req_ctx->bitwidth = 8;
 	return ss_aes_crypt(req,
 		SS_DIR_DECRYPT, SS_METHOD_AES, SS_AES_MODE_CFB);
 }
 
-static int ss_aes_cfb64_encrypt(struct ablkcipher_request *req)
+static int ss_aes_cfb64_encrypt(struct skcipher_request *req)
 {
-	ss_aes_req_ctx_t *req_ctx = ablkcipher_request_ctx(req);
+	ss_aes_req_ctx_t *req_ctx = skcipher_request_ctx(req);
 
 	req_ctx->bitwidth = 64;
 	return ss_aes_crypt(req,
 		SS_DIR_ENCRYPT, SS_METHOD_AES, SS_AES_MODE_CFB);
 }
 
-static int ss_aes_cfb64_decrypt(struct ablkcipher_request *req)
+static int ss_aes_cfb64_decrypt(struct skcipher_request *req)
 {
-	ss_aes_req_ctx_t *req_ctx = ablkcipher_request_ctx(req);
+	ss_aes_req_ctx_t *req_ctx = skcipher_request_ctx(req);
 
 	req_ctx->bitwidth = 64;
 	return ss_aes_crypt(req,
 		SS_DIR_DECRYPT, SS_METHOD_AES, SS_AES_MODE_CFB);
 }
 
-static int ss_aes_cfb128_encrypt(struct ablkcipher_request *req)
+static int ss_aes_cfb128_encrypt(struct skcipher_request *req)
 {
-	ss_aes_req_ctx_t *req_ctx = ablkcipher_request_ctx(req);
+	ss_aes_req_ctx_t *req_ctx = skcipher_request_ctx(req);
 
 	req_ctx->bitwidth = 128;
 	return ss_aes_crypt(req,
 		SS_DIR_ENCRYPT, SS_METHOD_AES, SS_AES_MODE_CFB);
 }
 
-static int ss_aes_cfb128_decrypt(struct ablkcipher_request *req)
+static int ss_aes_cfb128_decrypt(struct skcipher_request *req)
 {
-	ss_aes_req_ctx_t *req_ctx = ablkcipher_request_ctx(req);
+	ss_aes_req_ctx_t *req_ctx = skcipher_request_ctx(req);
 
 	req_ctx->bitwidth = 128;
 	return ss_aes_crypt(req,
@@ -359,62 +361,62 @@ static int sunxi_aes_gcm_decrypt(struct aead_request *req)
 }
 #endif
 
-static int ss_des_ecb_encrypt(struct ablkcipher_request *req)
+static int ss_des_ecb_encrypt(struct skcipher_request *req)
 {
 	return ss_aes_crypt(req,
 		SS_DIR_ENCRYPT, SS_METHOD_DES, SS_AES_MODE_ECB);
 }
 
-static int ss_des_ecb_decrypt(struct ablkcipher_request *req)
+static int ss_des_ecb_decrypt(struct skcipher_request *req)
 {
 	return ss_aes_crypt(req,
 		SS_DIR_DECRYPT, SS_METHOD_DES, SS_AES_MODE_ECB);
 }
 
-static int ss_des_cbc_encrypt(struct ablkcipher_request *req)
+static int ss_des_cbc_encrypt(struct skcipher_request *req)
 {
 	return ss_aes_crypt(req,
 		SS_DIR_ENCRYPT, SS_METHOD_DES, SS_AES_MODE_CBC);
 }
 
-static int ss_des_cbc_decrypt(struct ablkcipher_request *req)
+static int ss_des_cbc_decrypt(struct skcipher_request *req)
 {
 	return ss_aes_crypt(req,
 		SS_DIR_DECRYPT, SS_METHOD_DES, SS_AES_MODE_CBC);
 }
 
-static int ss_des3_ecb_encrypt(struct ablkcipher_request *req)
+static int ss_des3_ecb_encrypt(struct skcipher_request *req)
 {
 	return ss_aes_crypt(req,
 		SS_DIR_ENCRYPT, SS_METHOD_3DES, SS_AES_MODE_ECB);
 }
 
-static int ss_des3_ecb_decrypt(struct ablkcipher_request *req)
+static int ss_des3_ecb_decrypt(struct skcipher_request *req)
 {
 	return ss_aes_crypt(req,
 		SS_DIR_DECRYPT, SS_METHOD_3DES, SS_AES_MODE_ECB);
 }
 
-static int ss_des3_cbc_encrypt(struct ablkcipher_request *req)
+static int ss_des3_cbc_encrypt(struct skcipher_request *req)
 {
 	return ss_aes_crypt(req,
 		SS_DIR_ENCRYPT, SS_METHOD_3DES, SS_AES_MODE_CBC);
 }
 
-static int ss_des3_cbc_decrypt(struct ablkcipher_request *req)
+static int ss_des3_cbc_decrypt(struct skcipher_request *req)
 {
 	return ss_aes_crypt(req,
 		SS_DIR_DECRYPT, SS_METHOD_3DES, SS_AES_MODE_CBC);
 }
 
 #ifdef SS_RSA_ENABLE
-static int ss_rsa_encrypt(struct ablkcipher_request *req)
+static int ss_rsa_encrypt(struct skcipher_request *req)
 {
 	return ss_aes_crypt(req, SS_DIR_ENCRYPT,
 		SS_METHOD_RSA, CE_RSA_OP_M_EXP);
 }
 
-static int ss_rsa_decrypt(struct ablkcipher_request *req)
+static int ss_rsa_decrypt(struct skcipher_request *req)
 {
 	return ss_aes_crypt(req, SS_DIR_DECRYPT,
 		SS_METHOD_RSA, CE_RSA_OP_M_EXP);
@@ -422,13 +424,13 @@ static int ss_rsa_decrypt(struct ablkcipher_request *req)
 #endif
 
 #ifdef SS_DH_ENABLE
-static int ss_dh_encrypt(struct ablkcipher_request *req)
+static int ss_dh_encrypt(struct skcipher_request *req)
 {
 	return ss_aes_crypt(req, SS_DIR_ENCRYPT,
 		SS_METHOD_DH, CE_RSA_OP_M_EXP);
 }
 
-static int ss_dh_decrypt(struct ablkcipher_request *req)
+static int ss_dh_decrypt(struct skcipher_request *req)
 {
 	return ss_aes_crypt(req, SS_DIR_DECRYPT,
 		SS_METHOD_DH, CE_RSA_OP_M_EXP);
@@ -436,35 +438,35 @@ static int ss_dh_decrypt(struct ablkcipher_request *req)
 #endif
 
 #ifdef SS_ECC_ENABLE
-static int ss_ecdh_encrypt(struct ablkcipher_request *req)
+static int ss_ecdh_encrypt(struct skcipher_request *req)
 {
 	return ss_aes_crypt(req, SS_DIR_ENCRYPT, SS_METHOD_ECC,
 				CE_ECC_OP_POINT_MUL);
 }
 
-static int ss_ecdh_decrypt(struct ablkcipher_request *req)
+static int ss_ecdh_decrypt(struct skcipher_request *req)
 {
 	return ss_aes_crypt(req, SS_DIR_DECRYPT, SS_METHOD_ECC,
 				CE_ECC_OP_POINT_MUL);
 }
 
-static int ss_ecc_sign_encrypt(struct ablkcipher_request *req)
+static int ss_ecc_sign_encrypt(struct skcipher_request *req)
 {
 	return ss_aes_crypt(req, SS_DIR_ENCRYPT, SS_METHOD_ECC, CE_ECC_OP_SIGN);
 }
 
-static int ss_ecc_sign_decrypt(struct ablkcipher_request *req)
+static int ss_ecc_sign_decrypt(struct skcipher_request *req)
 {
 	return ss_aes_crypt(req, SS_DIR_DECRYPT, SS_METHOD_ECC, CE_ECC_OP_SIGN);
 }
 
-static int ss_ecc_verify_encrypt(struct ablkcipher_request *req)
+static int ss_ecc_verify_encrypt(struct skcipher_request *req)
 {
 	return ss_aes_crypt(req, SS_DIR_ENCRYPT, SS_METHOD_RSA,
 				CE_RSA_OP_M_MUL);
 }
 
-static int ss_ecc_verify_decrypt(struct ablkcipher_request *req)
+static int ss_ecc_verify_decrypt(struct skcipher_request *req)
 {
 	return ss_aes_crypt(req, SS_DIR_DECRYPT, SS_METHOD_RSA,
 				CE_RSA_OP_M_MUL);
@@ -473,7 +475,7 @@ static int ss_ecc_verify_decrypt(struct ablkcipher_request *req)
 #endif
 
 #ifdef SS_HMAC_SHA1_ENABLE
-static int ss_hmac_sha1_encrypt(struct ablkcipher_request *req)
+static int ss_hmac_sha1_encrypt(struct skcipher_request *req)
 {
 	return ss_aes_crypt(req,
 		SS_DIR_ENCRYPT, SS_METHOD_HMAC_SHA1, SS_AES_MODE_ECB);
@@ -481,7 +483,7 @@ static int ss_hmac_sha1_encrypt(struct ablkcipher_request *req)
 #endif
 
 #ifdef SS_HMAC_SHA256_ENABLE
-static int ss_hmac_sha256_encrypt(struct ablkcipher_request *req)
+static int ss_hmac_sha256_encrypt(struct skcipher_request *req)
 {
 	return ss_aes_crypt(req,
 		SS_DIR_ENCRYPT, SS_METHOD_HMAC_SHA256, SS_AES_MODE_ECB);
@@ -586,14 +588,24 @@ static void sunxi_aes_gcm_exit(struct crypto_aead *tfm)
 }
 #endif
 
-static int sunxi_ss_cra_init(struct crypto_tfm *tfm)
+static int sunxi_ss_cra_init(struct crypto_skcipher *tfm)
 {
-	if (ss_flow_request(crypto_tfm_ctx(tfm)) < 0)
+	if (ss_flow_request(crypto_skcipher_ctx(tfm)) < 0)
 		return -1;
 
-	tfm->crt_ablkcipher.reqsize = sizeof(ss_aes_req_ctx_t);
-	SS_DBG("reqsize = %d\n", tfm->crt_u.ablkcipher.reqsize);
+	crypto_skcipher_set_reqsize(tfm, sizeof(ss_aes_req_ctx_t));
+	SS_DBG("reqsize = %d\n", sizeof(ss_aes_req_ctx_t));
 	return 0;
+}
+
+static void sunxi_ss_skcipher_exit(struct crypto_skcipher *tfm)
+{
+	SS_ENTER();
+	ss_flow_release(crypto_skcipher_ctx(tfm));
+	/* sun8iw6 and sun9iw1 need reset SS controller after each operation. */
+#ifdef SS_IDMA_ENABLE
+	ss_reset();
+#endif
 }
 
 static int sunxi_ss_cra_rng_init(struct crypto_tfm *tfm)
@@ -753,58 +765,55 @@ static int ss_sha512_init(struct ahash_request *req)
 
 #define DECLARE_SS_AES_ALG(utype, ltype, lmode, block_size, iv_size) \
 { \
+    .base = { \
 	.cra_name	 = #lmode"("#ltype")", \
 	.cra_driver_name = "ss-"#lmode"-"#ltype, \
-	.cra_flags	 = CRYPTO_ALG_TYPE_ABLKCIPHER | CRYPTO_ALG_ASYNC, \
-	.cra_type	 = &crypto_ablkcipher_type, \
+	.cra_flags	 = CRYPTO_ALG_TYPE_SKCIPHER | CRYPTO_ALG_ASYNC, \
 	.cra_blocksize	 = block_size, \
 	.cra_alignmask	 = 3, \
-	.cra_u.ablkcipher = { \
+    }, \
 		.setkey      = ss_aes_setkey, \
 		.encrypt     = ss_##ltype##_##lmode##_encrypt, \
 		.decrypt     = ss_##ltype##_##lmode##_decrypt, \
 		.min_keysize = utype##_MIN_KEY_SIZE, \
 		.max_keysize = utype##_MAX_KEY_SIZE, \
 		.ivsize	     = iv_size, \
-	} \
 }
 
 #ifdef SS_XTS_MODE_ENABLE
 #define DECLARE_SS_AES_XTS_ALG(utype, ltype, lmode, block_size, iv_size) \
 { \
+    .base = { \
 	.cra_name	 = #lmode"("#ltype")", \
 	.cra_driver_name = "ss-"#lmode"-"#ltype, \
-	.cra_flags	 = CRYPTO_ALG_TYPE_ABLKCIPHER | CRYPTO_ALG_ASYNC, \
-	.cra_type	 = &crypto_ablkcipher_type, \
+	.cra_flags	 = CRYPTO_ALG_TYPE_SKCIPHER | CRYPTO_ALG_ASYNC, \
 	.cra_blocksize	 = block_size, \
 	.cra_alignmask	 = 3, \
-	.cra_u.ablkcipher = { \
+    }, \
 		.setkey      = ss_aes_setkey, \
 		.encrypt     = ss_##ltype##_##lmode##_encrypt, \
 		.decrypt     = ss_##ltype##_##lmode##_decrypt, \
 		.min_keysize = utype##_MAX_KEY_SIZE, \
 		.max_keysize = utype##_MAX_KEY_SIZE * 2, \
 		.ivsize	     = iv_size, \
-	} \
 }
 #endif
 
 #define DECLARE_SS_ASYM_ALG(type, bitwidth, key_size, iv_size) \
 { \
+    .base = { \
 	.cra_name	 = #type"("#bitwidth")", \
 	.cra_driver_name = "ss-"#type"-"#bitwidth, \
-	.cra_flags	 = CRYPTO_ALG_TYPE_ABLKCIPHER | CRYPTO_ALG_ASYNC, \
-	.cra_type	 = &crypto_ablkcipher_type, \
+	.cra_flags	 = CRYPTO_ALG_TYPE_SKCIPHER | CRYPTO_ALG_ASYNC, \
 	.cra_blocksize	 = key_size%AES_BLOCK_SIZE == 0 ? AES_BLOCK_SIZE : 4, \
 	.cra_alignmask	 = key_size%AES_BLOCK_SIZE == 0 ? 31 : 3, \
-	.cra_u.ablkcipher = { \
+    }, \
 		.setkey      = ss_aes_setkey, \
 		.encrypt     = ss_##type##_encrypt, \
 		.decrypt     = ss_##type##_decrypt, \
 		.min_keysize = key_size, \
 		.max_keysize = key_size, \
 		.ivsize      = iv_size, \
-	}, \
 }
 #ifndef SS_SUPPORT_CE_V3_2
 #define DECLARE_SS_RSA_ALG(type, bitwidth) \
@@ -839,7 +848,7 @@ static struct aead_alg sunxi_aes_gcm_alg = {
 };
 #endif
 
-static struct crypto_alg sunxi_ss_algs[] = {
+static struct skcipher_alg sunxi_ss_algs[] = {
 	DECLARE_SS_AES_ALG(AES, aes, ecb, AES_BLOCK_SIZE, 0),
 	DECLARE_SS_AES_ALG(AES, aes, cbc, AES_BLOCK_SIZE, AES_MIN_KEY_SIZE),
 #ifdef SS_CTR_MODE_ENABLE
@@ -920,38 +929,36 @@ static struct crypto_alg sunxi_ss_algs[] = {
 
 #ifdef SS_HMAC_SHA1_ENABLE
 	{
+	    .base = {
 		.cra_name	 = "hmac-sha1",
 		.cra_driver_name = "ss-hmac-sha1",
-		.cra_flags	= CRYPTO_ALG_TYPE_ABLKCIPHER | CRYPTO_ALG_ASYNC,
-		.cra_type	 = &crypto_ablkcipher_type,
+		.cra_flags	= CRYPTO_ALG_TYPE_SKCIPHER | CRYPTO_ALG_ASYNC,
 		.cra_blocksize	 = 4,
 		.cra_alignmask	 = 3,
-		.cra_u.ablkcipher = {
+	    },
 			.setkey	     = ss_aes_setkey,
 			.encrypt     = ss_hmac_sha1_encrypt,
 			.decrypt     = NULL,
 			.min_keysize = SHA1_BLOCK_SIZE,
 			.max_keysize = SHA1_BLOCK_SIZE,
 			.ivsize	     = 0,
-		}
 	},
 #endif
 #ifdef SS_HMAC_SHA256_ENABLE
 	{
+	    .base = {
 		.cra_name	 = "hmac-sha256",
 		.cra_driver_name = "ss-hmac-sha256",
-		.cra_flags	 = CRYPTO_ALG_TYPE_ABLKCIPHER|CRYPTO_ALG_ASYNC,
-		.cra_type	 = &crypto_ablkcipher_type,
+		.cra_flags	 = CRYPTO_ALG_TYPE_SKCIPHER|CRYPTO_ALG_ASYNC,
 		.cra_blocksize	 = 4,
 		.cra_alignmask	 = 3,
-		.cra_u.ablkcipher = {
+	    },
 			.setkey      = ss_aes_setkey,
 			.encrypt     = ss_hmac_sha256_encrypt,
 			.decrypt     = NULL,
 			.min_keysize = SHA256_BLOCK_SIZE,
 			.max_keysize = SHA256_BLOCK_SIZE,
 			.ivsize	     = 0,
-		}
 	},
 #endif
 };
@@ -1238,18 +1245,18 @@ static int sunxi_ss_alg_register(void)
 	int ret = 0;
 
 	for (i = 0; i < ARRAY_SIZE(sunxi_ss_algs); i++) {
-		INIT_LIST_HEAD(&sunxi_ss_algs[i].cra_list);
-		SS_DBG("Add %s...\n", sunxi_ss_algs[i].cra_name);
-		sunxi_ss_algs[i].cra_priority = SS_ALG_PRIORITY;
-		sunxi_ss_algs[i].cra_ctxsize = sizeof(ss_aes_ctx_t);
-		sunxi_ss_algs[i].cra_module = THIS_MODULE;
-		sunxi_ss_algs[i].cra_exit = sunxi_ss_cra_exit;
-		sunxi_ss_algs[i].cra_init = sunxi_ss_cra_init;
+		INIT_LIST_HEAD(&sunxi_ss_algs[i].base.cra_list);
+		SS_DBG("Add %s...\n", sunxi_ss_algs[i].base.cra_name);
+		sunxi_ss_algs[i].base.cra_priority = SS_ALG_PRIORITY;
+		sunxi_ss_algs[i].base.cra_ctxsize = sizeof(ss_aes_ctx_t);
+		sunxi_ss_algs[i].base.cra_module = THIS_MODULE;
+		sunxi_ss_algs[i].exit = sunxi_ss_skcipher_exit;
+		sunxi_ss_algs[i].init = sunxi_ss_cra_init;
 
-		ret = crypto_register_alg(&sunxi_ss_algs[i]);
+		ret = crypto_register_skcipher(&sunxi_ss_algs[i]);
 		if (ret != 0) {
-			SS_ERR("crypto_register_alg(%s) failed! return %d\n",
-				sunxi_ss_algs[i].cra_name, ret);
+			SS_ERR("crypto_register_skcipher(%s) failed! return %d\n",
+				sunxi_ss_algs[i].base.cra_name, ret);
 			return ret;
 		}
 	}
@@ -1291,7 +1298,7 @@ static void sunxi_ss_alg_unregister(void)
 	int i;
 
 	for (i = 0; i < ARRAY_SIZE(sunxi_ss_algs); i++)
-		crypto_unregister_alg(&sunxi_ss_algs[i]);
+		crypto_unregister_skcipher(&sunxi_ss_algs[i]);
 
 	for (i = 0; i < ARRAY_SIZE(sunxi_ss_algs_rng); i++)
 		crypto_unregister_rng(&sunxi_ss_algs_rng[i]);

@@ -15,9 +15,12 @@
 #include <linux/highmem.h>
 #include <linux/dmaengine.h>
 #include <linux/dmapool.h>
+#include <linux/dma-mapping.h>
 #include <crypto/internal/hash.h>
 #include <crypto/internal/rng.h>
+#include <crypto/internal/skcipher.h>
 #include <crypto/des.h>
+#include <crypto/skcipher.h>
 
 #include "../sunxi_ce.h"
 #include "../sunxi_ce_proc.h"
@@ -482,11 +485,10 @@ static int ss_aes_start(ss_aes_ctx_t *ctx, ss_aes_req_ctx_t *req_ctx, int len)
 }
 
 /* verify the key_len */
-int ss_aes_key_valid(struct crypto_ablkcipher *tfm, int len)
+int ss_aes_key_valid(struct crypto_skcipher *tfm, int len)
 {
 	if (unlikely(len > SS_RSA_MAX_SIZE)) {
 		SS_ERR("Unsupported key size: %d\n", len);
-		tfm->base.crt_flags |= CRYPTO_TFM_RES_BAD_KEY_LEN;
 		return -EINVAL;
 	}
 	return 0;
@@ -825,10 +827,10 @@ void ss_load_iv(ss_aes_ctx_t *ctx, ss_aes_req_ctx_t *req_ctx,
 	ss_print_hex(ctx->iv, ctx->iv_size, ctx->iv);
 }
 
-int ss_aes_one_req(sunxi_ss_t *sss, struct ablkcipher_request *req)
+int ss_aes_one_req(sunxi_ss_t *sss, struct skcipher_request *req)
 {
 	int ret = 0;
-	struct crypto_ablkcipher *tfm = NULL;
+	struct crypto_skcipher *tfm = NULL;
 	ss_aes_ctx_t *ctx = NULL;
 	ss_aes_req_ctx_t *req_ctx = NULL;
 
@@ -840,20 +842,20 @@ int ss_aes_one_req(sunxi_ss_t *sss, struct ablkcipher_request *req)
 
 	ss_dev_lock();
 
-	tfm = crypto_ablkcipher_reqtfm(req);
-	req_ctx = ablkcipher_request_ctx(req);
-	ctx = crypto_ablkcipher_ctx(tfm);
+	tfm = crypto_skcipher_reqtfm(req);
+	req_ctx = skcipher_request_ctx(req);
+	ctx = crypto_skcipher_ctx(tfm);
 
-	ss_load_iv(ctx, req_ctx, req->info, crypto_ablkcipher_ivsize(tfm));
+	ss_load_iv(ctx, req_ctx, (void *)req->iv, crypto_skcipher_ivsize(tfm));
 
 	req_ctx->dma_src.sg = req->src;
 	req_ctx->dma_dst.sg = req->dst;
 
 #ifdef SS_RSA_PREPROCESS_ENABLE
-	ss_rsa_preprocess(ctx, req_ctx, req->nbytes);
+	ss_rsa_preprocess(ctx, req_ctx, req->cryptlen);
 #endif
 
-	ret = ss_aes_start(ctx, req_ctx, req->nbytes);
+	ret = ss_aes_start(ctx, req_ctx, req->cryptlen);
 	if (ret < 0)
 		SS_ERR("ss_aes_start fail(%d)\n", ret);
 
@@ -867,7 +869,7 @@ int ss_aes_one_req(sunxi_ss_t *sss, struct ablkcipher_request *req)
 	}
 #endif
 
-	ctx->cnt += req->nbytes;
+	ctx->cnt += req->cryptlen;
 	return ret;
 }
 
