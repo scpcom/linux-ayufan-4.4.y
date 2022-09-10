@@ -139,7 +139,7 @@ static int sunxi_dmcfreq_probe(struct platform_device *pdev)
 		return PTR_ERR(dmcfreq->dmc_clk);
 	}
 
-	dmcfreq->edev = devfreq_event_get_edev_by_phandle(dev, 0);
+	dmcfreq->edev = devfreq_event_get_edev_by_phandle(dev, "devfreq-events", 0);
 	if (IS_ERR(dmcfreq->edev)) {
 		dev_err(&pdev->dev, "event get phandle error!\n");
 		return -EPROBE_DEFER;
