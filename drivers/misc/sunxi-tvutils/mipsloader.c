@@ -25,6 +25,7 @@
 #include <asm-generic/cacheflush.h>
 #include <linux/device.h>
 #include <linux/uaccess.h>
+#include <linux/mm.h>
 
 MODULE_AUTHOR("allwinnertech.com");
 MODULE_LICENSE("Dual BSD/GPL");
