@@ -183,13 +183,6 @@ static irqreturn_t sunxi_timer_interrupt(int irq, void *dev_id)
 	return IRQ_HANDLED;
 }
 
-static struct irqaction sunxi_timer_irq = {
-	.name = "sunxi_timer0",
-	.flags = IRQF_TIMER | IRQF_IRQPOLL,
-	.handler = sunxi_timer_interrupt,
-	.dev_id = &sunxi_clockevent,
-};
-
 /*
  * The code below are copied from drivers/clocksource/mmio.c.
  * Since they are not exported, we cannot use it in a module.
@@ -315,7 +308,8 @@ static int sunxi_timer_init(struct device_node *node)
 	clockevents_config_and_register(&sunxi_clockevent, rate,
 		TIMER_SYNC_TICKS, 0xffffffff);
 
-	ret = setup_irq(irq, &sunxi_timer_irq);
+	ret = request_irq(irq, sunxi_timer_interrupt, IRQF_TIMER | IRQF_IRQPOLL,
+			  "sunxi_timer0", &sunxi_clockevent);
 	if (ret) {
 		pr_err("failed to setup irq %d\n", irq);
 		goto fail_setup_irq;
