@@ -1137,31 +1137,31 @@ static int sunxi_get_ce_clk(sunxi_ss_t *sss)
 
 	sss->pll_clk = devm_clk_get(&pdev->dev, "pll_periph0_2x");
 	if (IS_ERR(sss->pll_clk)) {
-		SS_ERR("Fail to get pll clk, ret %x\n", PTR_RET(sss->pll_clk));
-		return PTR_RET(sss->pll_clk);
+		SS_ERR("Fail to get pll clk, ret %x\n", PTR_ERR_OR_ZERO(sss->pll_clk));
+		return PTR_ERR_OR_ZERO(sss->pll_clk);
 	}
 	sss->ce_clk = devm_clk_get(&pdev->dev, "ce_clk");
 	if (IS_ERR(sss->ce_clk)) {
-		SS_ERR("Fail to get module clk, ret %x\n", PTR_RET(sss->ce_clk));
-		return PTR_RET(sss->ce_clk);
+		SS_ERR("Fail to get module clk, ret %x\n", PTR_ERR_OR_ZERO(sss->ce_clk));
+		return PTR_ERR_OR_ZERO(sss->ce_clk);
 	}
 
 	sss->bus_clk = devm_clk_get(&pdev->dev, "bus_ce");
 	if (IS_ERR(sss->bus_clk)) {
-		SS_ERR("Fail to get bus_ce clk, ret %x\n", PTR_RET(sss->bus_clk));
-		return PTR_RET(sss->bus_clk);
+		SS_ERR("Fail to get bus_ce clk, ret %x\n", PTR_ERR_OR_ZERO(sss->bus_clk));
+		return PTR_ERR_OR_ZERO(sss->bus_clk);
 	}
 
 	sss->mbus_clk = devm_clk_get(&pdev->dev, "mbus_ce");
 	if (IS_ERR(sss->mbus_clk)) {
-		SS_ERR("Fail to get mbus clk, ret %x\n", PTR_RET(sss->mbus_clk));
-		return PTR_RET(sss->mbus_clk);
+		SS_ERR("Fail to get mbus clk, ret %x\n", PTR_ERR_OR_ZERO(sss->mbus_clk));
+		return PTR_ERR_OR_ZERO(sss->mbus_clk);
 	}
 
 	sss->reset = devm_reset_control_get(&pdev->dev, NULL);
 	if (IS_ERR(sss->reset)) {
-		SS_ERR("Fail to get reset clk, ret %x\n", PTR_RET(sss->reset));
-		return PTR_RET(sss->reset);
+		SS_ERR("Fail to get reset clk, ret %x\n", PTR_ERR_OR_ZERO(sss->reset));
+		return PTR_ERR_OR_ZERO(sss->reset);
 	}
 
 	return 0;
