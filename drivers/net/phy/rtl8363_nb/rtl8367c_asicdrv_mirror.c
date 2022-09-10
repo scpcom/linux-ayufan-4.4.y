@@ -16,7 +16,7 @@
  * Feature : Port mirror related functions
  *
  */
-#include <rtl8367c_asicdrv_mirror.h>
+#include "rtl8367c_asicdrv_mirror.h"
 /* Function Name:
  *      rtl8367c_setAsicPortMirror
  * Description:

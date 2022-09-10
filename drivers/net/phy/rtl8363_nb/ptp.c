@@ -17,13 +17,13 @@
  *
  */
 
-#include <rtk_switch.h>
-#include <rtk_error.h>
-#include <ptp.h>
+#include "rtk_switch.h"
+#include "rtk_error.h"
+#include "ptp.h"
 #include <linux/string.h>
 
-#include <rtl8367c_asicdrv.h>
-#include <rtl8367c_asicdrv_eav.h>
+#include "rtl8367c_asicdrv.h"
+#include "rtl8367c_asicdrv_eav.h"
 
 static rtk_api_ret_t _rtk_ptp_init(void)
 {

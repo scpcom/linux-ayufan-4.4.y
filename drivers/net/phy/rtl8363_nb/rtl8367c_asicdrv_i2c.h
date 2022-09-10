@@ -1,7 +1,7 @@
 #ifndef _RTL8367C_ASICDRV_I2C_H_
 #define _RTL8367C_ASICDRV_I2C_H_
-#include <rtk_types.h>
-#include <rtl8367c_asicdrv.h>
+#include "rtk_types.h"
+#include "rtl8367c_asicdrv.h"
 
 
 #define TIMEROUT_FOR_MICROSEMI (0x400)

@@ -17,13 +17,13 @@
  *
  */
 
-#include <rtk_switch.h>
-#include <rtk_error.h>
-#include <cpu.h>
+#include "rtk_switch.h"
+#include "rtk_error.h"
+#include "cpu.h"
 #include <linux/string.h>
 
-#include <rtl8367c_asicdrv.h>
-#include <rtl8367c_asicdrv_cputag.h>
+#include "rtl8367c_asicdrv.h"
+#include "rtl8367c_asicdrv_cputag.h"
 
 static rtk_api_ret_t _rtk_cpu_enable_set(rtk_enable_t enable)
 {

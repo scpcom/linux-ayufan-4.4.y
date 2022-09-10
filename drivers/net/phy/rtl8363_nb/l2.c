@@ -17,14 +17,14 @@
  *
  */
 
-#include <rtk_switch.h>
-#include <rtk_error.h>
-#include <l2.h>
+#include "rtk_switch.h"
+#include "rtk_error.h"
+#include "l2.h"
 #include <linux/string.h>
 
-#include <rtl8367c_asicdrv.h>
-#include <rtl8367c_asicdrv_lut.h>
-#include <rtl8367c_asicdrv_port.h>
+#include "rtl8367c_asicdrv.h"
+#include "rtl8367c_asicdrv_lut.h"
+#include "rtl8367c_asicdrv_port.h"
 
 static rtk_api_ret_t _rtk_l2_init(void)
 {

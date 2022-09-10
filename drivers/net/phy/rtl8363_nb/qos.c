@@ -17,15 +17,15 @@
  *
  */
 
-#include <rtk_switch.h>
-#include <rtk_error.h>
-#include <qos.h>
+#include "rtk_switch.h"
+#include "rtk_error.h"
+#include "qos.h"
 #include <linux/string.h>
 
-#include <rtl8367c_asicdrv.h>
-#include <rtl8367c_asicdrv_qos.h>
-#include <rtl8367c_asicdrv_fc.h>
-#include <rtl8367c_asicdrv_scheduling.h>
+#include "rtl8367c_asicdrv.h"
+#include "rtl8367c_asicdrv_qos.h"
+#include "rtl8367c_asicdrv_fc.h"
+#include "rtl8367c_asicdrv_scheduling.h"
 
 static rtk_api_ret_t _rtk_qos_init(rtk_queue_num_t queueNum)
 {

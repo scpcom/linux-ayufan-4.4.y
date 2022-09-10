@@ -1,7 +1,7 @@
 #ifndef _RTL8367C_ASICDRV_STORM_H_
 #define _RTL8367C_ASICDRV_STORM_H_
 
-#include <rtl8367c_asicdrv.h>
+#include "rtl8367c_asicdrv.h"
 
 extern ret_t rtl8367c_setAsicStormFilterBroadcastEnable(rtk_uint32 port, rtk_uint32 enabled);
 extern ret_t rtl8367c_getAsicStormFilterBroadcastEnable(rtk_uint32 port, rtk_uint32 *pEnabled);

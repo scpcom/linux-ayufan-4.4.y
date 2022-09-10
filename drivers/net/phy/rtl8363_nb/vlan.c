@@ -17,15 +17,15 @@
  *
  */
 
-#include <rtk_switch.h>
-#include <rtk_error.h>
-#include <vlan.h>
-#include <rate.h>
+#include "rtk_switch.h"
+#include "rtk_error.h"
+#include "vlan.h"
+#include "rate.h"
 #include <linux/string.h>
 
-#include <rtl8367c_asicdrv.h>
-#include <rtl8367c_asicdrv_vlan.h>
-#include <rtl8367c_asicdrv_dot1x.h>
+#include "rtl8367c_asicdrv.h"
+#include "rtl8367c_asicdrv_vlan.h"
+#include "rtl8367c_asicdrv_dot1x.h"
 
 typedef enum vlan_mbrCfgType_e
 {

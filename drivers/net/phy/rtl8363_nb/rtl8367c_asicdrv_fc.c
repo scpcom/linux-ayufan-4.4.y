@@ -17,7 +17,7 @@
  *
  */
 
-#include <rtl8367c_asicdrv_fc.h>
+#include "rtl8367c_asicdrv_fc.h"
 /* Function Name:
  *      rtl8367c_setAsicFlowControlSelect
  * Description:

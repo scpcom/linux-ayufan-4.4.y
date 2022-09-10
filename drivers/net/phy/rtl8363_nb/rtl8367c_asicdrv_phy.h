@@ -1,7 +1,7 @@
 #ifndef _RTL8367C_ASICDRV_PHY_H_
 #define _RTL8367C_ASICDRV_PHY_H_
 
-#include <rtl8367c_asicdrv.h>
+#include "rtl8367c_asicdrv.h"
 
 #define RTL8367C_PHY_REGNOMAX           0x1F
 #define RTL8367C_PHY_EXTERNALMAX        0x7

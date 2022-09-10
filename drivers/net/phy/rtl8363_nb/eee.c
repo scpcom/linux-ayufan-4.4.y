@@ -17,14 +17,14 @@
  *
  */
 
-#include <rtk_switch.h>
-#include <rtk_error.h>
-#include <eee.h>
+#include "rtk_switch.h"
+#include "rtk_error.h"
+#include "eee.h"
 #include <linux/string.h>
 
-#include <rtl8367c_asicdrv.h>
-#include <rtl8367c_asicdrv_eee.h>
-#include <rtl8367c_asicdrv_phy.h>
+#include "rtl8367c_asicdrv.h"
+#include "rtl8367c_asicdrv_eee.h"
+#include "rtl8367c_asicdrv_phy.h"
 
 static rtk_api_ret_t _rtk_eee_init(void)
 {

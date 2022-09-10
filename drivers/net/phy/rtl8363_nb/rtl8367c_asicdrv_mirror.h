@@ -1,7 +1,7 @@
 #ifndef _RTL8367C_ASICDRV_MIRROR_H_
 #define _RTL8367C_ASICDRV_MIRROR_H_
 
-#include <rtl8367c_asicdrv.h>
+#include "rtl8367c_asicdrv.h"
 
 extern ret_t rtl8367c_setAsicPortMirror(rtk_uint32 source, rtk_uint32 monitor);
 extern ret_t rtl8367c_getAsicPortMirror(rtk_uint32 *pSource, rtk_uint32 *pMonitor);

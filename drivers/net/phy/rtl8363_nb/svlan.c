@@ -17,14 +17,14 @@
  *
  */
 
-#include <rtk_switch.h>
-#include <rtk_error.h>
-#include <svlan.h>
-#include <vlan.h>
+#include "rtk_switch.h"
+#include "rtk_error.h"
+#include "svlan.h"
+#include "vlan.h"
 #include <linux/string.h>
 
-#include <rtl8367c_asicdrv.h>
-#include <rtl8367c_asicdrv_svlan.h>
+#include "rtl8367c_asicdrv.h"
+#include "rtl8367c_asicdrv_svlan.h"
 
 rtk_uint8               svlan_mbrCfgUsage[RTL8367C_SVIDXNO];
 rtk_uint16              svlan_mbrCfgVid[RTL8367C_SVIDXNO];

@@ -17,13 +17,13 @@
  *
  */
 
-#include <rtk_switch.h>
-#include <rtk_error.h>
-#include <interrupt.h>
+#include "rtk_switch.h"
+#include "rtk_error.h"
+#include "interrupt.h"
 #include <linux/string.h>
 
-#include <rtl8367c_asicdrv.h>
-#include <rtl8367c_asicdrv_interrupt.h>
+#include "rtl8367c_asicdrv.h"
+#include "rtl8367c_asicdrv_interrupt.h"
 
 static rtk_api_ret_t _rtk_int_polarity_set(rtk_int_polarity_t type)
 {

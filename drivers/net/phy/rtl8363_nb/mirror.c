@@ -17,12 +17,12 @@
  *
  */
 
-#include <rtk_switch.h>
-#include <rtk_error.h>
-#include <mirror.h>
+#include "rtk_switch.h"
+#include "rtk_error.h"
+#include "mirror.h"
 #include <linux/string.h>
-#include <rtl8367c_asicdrv.h>
-#include <rtl8367c_asicdrv_mirror.h>
+#include "rtl8367c_asicdrv.h"
+#include "rtl8367c_asicdrv_mirror.h"
 
 static rtk_api_ret_t _rtk_mirror_portBased_set(rtk_port_t mirroring_port, rtk_portmask_t *pMirrored_rx_portmask, rtk_portmask_t *pMirrored_tx_portmask)
 {

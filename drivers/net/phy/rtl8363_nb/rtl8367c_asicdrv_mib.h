@@ -1,7 +1,7 @@
 #ifndef _RTL8367C_ASICDRV_MIB_H_
 #define _RTL8367C_ASICDRV_MIB_H_
 
-#include <rtl8367c_asicdrv.h>
+#include "rtl8367c_asicdrv.h"
 
 #define RTL8367C_MIB_PORT_OFFSET                (0x7C)
 #define RTL8367C_MIB_LEARNENTRYDISCARD_OFFSET   (0x420)

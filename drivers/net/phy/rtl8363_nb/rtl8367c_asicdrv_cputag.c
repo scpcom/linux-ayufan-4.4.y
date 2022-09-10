@@ -16,7 +16,7 @@
  * Feature : Proprietary CPU-tag related function drivers
  *
  */
-#include <rtl8367c_asicdrv_cputag.h>
+#include "rtl8367c_asicdrv_cputag.h"
 /* Function Name:
  *      rtl8367c_setAsicCputagEnable
  * Description:

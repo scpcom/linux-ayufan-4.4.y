@@ -1,7 +1,7 @@
 #ifndef _RTL8367C_ASICDRV_EEE_H_
 #define _RTL8367C_ASICDRV_EEE_H_
 
-#include <rtl8367c_asicdrv.h>
+#include "rtl8367c_asicdrv.h"
 
 #define EEE_OCP_PHY_ADDR    (0xA5D0)
 

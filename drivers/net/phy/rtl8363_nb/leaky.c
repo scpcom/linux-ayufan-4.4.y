@@ -17,15 +17,15 @@
  *
  */
 
-#include <rtk_switch.h>
-#include <rtk_error.h>
-#include <leaky.h>
+#include "rtk_switch.h"
+#include "rtk_error.h"
+#include "leaky.h"
 #include <linux/string.h>
 
-#include <rtl8367c_asicdrv.h>
-#include <rtl8367c_asicdrv_portIsolation.h>
-#include <rtl8367c_asicdrv_rma.h>
-#include <rtl8367c_asicdrv_igmp.h>
+#include "rtl8367c_asicdrv.h"
+#include "rtl8367c_asicdrv_portIsolation.h"
+#include "rtl8367c_asicdrv_rma.h"
+#include "rtl8367c_asicdrv_igmp.h"
 
 static rtk_api_ret_t _rtk_leaky_vlan_set(rtk_leaky_type_t type, rtk_enable_t enable)
 {

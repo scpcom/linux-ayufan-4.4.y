@@ -16,7 +16,7 @@
  * Feature : Field selector related functions
  *
  */
-#include <rtl8367c_asicdrv_hsb.h>
+#include "rtl8367c_asicdrv_hsb.h"
 /* Function Name:
  *      rtl8367c_setAsicFieldSelector
  * Description:

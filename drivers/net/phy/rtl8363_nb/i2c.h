@@ -18,7 +18,7 @@
 
 #ifndef __RTK_API_I2C_H__
 #define __RTK_API_I2C_H__
-#include <rtk_types.h>
+#include "rtk_types.h"
 
 #define I2C_GPIO_MAX_GROUP (3)
 

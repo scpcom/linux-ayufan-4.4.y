@@ -14,7 +14,7 @@
 #ifndef __RTK_SWITCH_H__
 #define __RTK_SWITCH_H__
 
-#include <rtk_types.h>
+#include "rtk_types.h"
 
 #if defined(RTK_X86_CLE)
 #include <pthread.h>

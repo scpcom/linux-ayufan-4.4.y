@@ -16,7 +16,7 @@
  * Feature : PHY related functions
  *
  */
-#include <rtl8367c_asicdrv_phy.h>
+#include "rtl8367c_asicdrv_phy.h"
 
 #if defined(MDC_MDIO_OPERATION)
 /* Function Name:

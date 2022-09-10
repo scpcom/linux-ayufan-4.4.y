@@ -16,7 +16,7 @@
  * Feature : SVLAN related functions
  *
  */
-#include <rtl8367c_asicdrv_svlan.h>
+#include "rtl8367c_asicdrv_svlan.h"
 
 #include <linux/string.h>
 

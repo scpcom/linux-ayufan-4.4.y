@@ -1,7 +1,7 @@
 #ifndef _RTL8367C_ASICDRV_EAV_H_
 #define _RTL8367C_ASICDRV_EAV_H_
 
-#include <rtl8367c_asicdrv.h>
+#include "rtl8367c_asicdrv.h"
 
 typedef enum RTL8367C_PTP_TIME_CMD_E
 {

@@ -7,10 +7,10 @@
 * Author : Yu-Mei Pan (ympan@realtek.com.cn)
 *  $Id: smi.c,v 1.2 2008-04-10 03:04:19 shiehyy Exp $
 */
-#include <rtk_types.h>
-#include <smi.h>
+#include "rtk_types.h"
+#include "smi.h"
 #include "rtk_error.h"
-#include "rtk8363.h"
+#include "../rtk8363.h"
 
 #if defined(MDC_MDIO_OPERATION)
 /*******************************************************************************/

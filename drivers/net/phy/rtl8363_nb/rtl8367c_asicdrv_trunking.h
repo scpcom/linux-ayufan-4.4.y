@@ -1,7 +1,7 @@
 #ifndef _RTL8367C_ASICDRV_TRUNKING_H_
 #define _RTL8367C_ASICDRV_TRUNKING_H_
 
-#include <rtl8367c_asicdrv.h>
+#include "rtl8367c_asicdrv.h"
 
 #define RTL8367C_MAX_TRUNK_GID              (2)
 #define RTL8367C_TRUNKING_PORTNO            (4)

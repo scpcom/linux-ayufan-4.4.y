@@ -17,15 +17,15 @@
  *
  */
 
-#include <rtk_switch.h>
-#include <rtk_error.h>
-#include <port.h>
+#include "rtk_switch.h"
+#include "rtk_error.h"
+#include "port.h"
 #include <linux/string.h>
 
-#include <rtl8367c_asicdrv.h>
-#include <rtl8367c_asicdrv_port.h>
-#include <rtl8367c_asicdrv_misc.h>
-#include <rtl8367c_asicdrv_portIsolation.h>
+#include "rtl8367c_asicdrv.h"
+#include "rtl8367c_asicdrv_port.h"
+#include "rtl8367c_asicdrv_misc.h"
+#include "rtl8367c_asicdrv_portIsolation.h"
 
 #define FIBER_INIT_SIZE 1507
 CONST_T rtk_uint8 Fiber[FIBER_INIT_SIZE] = {

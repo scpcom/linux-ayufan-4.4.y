@@ -1,8 +1,8 @@
 #ifndef _RTL8367C_ASICDRV_GREEN_H_
 #define _RTL8367C_ASICDRV_GREEN_H_
 
-#include <rtl8367c_asicdrv.h>
-#include <rtl8367c_asicdrv_phy.h>
+#include "rtl8367c_asicdrv.h"
+#include "rtl8367c_asicdrv_phy.h"
 
 #define PHY_POWERSAVING_REG                         24
 

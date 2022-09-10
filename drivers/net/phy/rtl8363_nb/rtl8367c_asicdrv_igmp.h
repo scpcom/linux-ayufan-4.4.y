@@ -4,7 +4,7 @@
 /****************************************************************/
 /* Header File inclusion                                        */
 /****************************************************************/
-#include <rtl8367c_asicdrv.h>
+#include "rtl8367c_asicdrv.h"
 
 #define RTL8367C_MAX_LEAVE_TIMER        (7)
 #define RTL8367C_MAX_QUERY_INT          (0xFFFF)

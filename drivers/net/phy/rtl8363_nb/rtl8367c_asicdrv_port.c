@@ -17,7 +17,7 @@
  *
  */
 
-#include <rtl8367c_asicdrv_port.h>
+#include "rtl8367c_asicdrv_port.h"
 
 #include <linux/string.h>
 

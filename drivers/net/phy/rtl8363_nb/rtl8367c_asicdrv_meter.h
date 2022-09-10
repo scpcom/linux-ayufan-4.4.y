@@ -1,7 +1,7 @@
 #ifndef _RTL8367C_ASICDRV_METER_H_
 #define _RTL8367C_ASICDRV_METER_H_
 
-#include <rtl8367c_asicdrv.h>
+#include "rtl8367c_asicdrv.h"
 
 
 extern ret_t rtl8367c_setAsicShareMeter(rtk_uint32 index, rtk_uint32 rate, rtk_uint32 ifg);
