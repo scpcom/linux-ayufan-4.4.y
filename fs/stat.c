@@ -215,6 +215,7 @@ int vfs_fstatat(int dfd, const char __user *filename,
 	return vfs_statx(dfd, filename, flags | AT_NO_AUTOMOUNT,
 			 stat, STATX_BASIC_STATS);
 }
+EXPORT_SYMBOL(vfs_fstatat);
 
 #ifdef __ARCH_WANT_OLD_STAT
 
