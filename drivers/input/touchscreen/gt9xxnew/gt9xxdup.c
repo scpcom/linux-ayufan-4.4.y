@@ -282,11 +282,11 @@ void gtp_set_int_value(int status)
 	long unsigned int	config;
 
 	config = SUNXI_PINCFG_PACK(SUNXI_PINCFG_TYPE_FUNC, 0xFFFF);
-	pin_config_get(SUNXI_PINCTRL, irq_pin_name, &config);
+	//pin_config_get(SUNXI_PINCTRL, irq_pin_name, &config);
 
 	if (1 != SUNXI_PINCFG_UNPACK_VALUE(config)) {
 		config = SUNXI_PINCFG_PACK(SUNXI_PINCFG_TYPE_FUNC, 1);
-		pin_config_set(SUNXI_PINCTRL, irq_pin_name, config);;
+		//pin_config_set(SUNXI_PINCTRL, irq_pin_name, config);;
 	}
 
 	__gpio_set_value(CTP_IRQ_NUMBER, status);
@@ -296,11 +296,11 @@ void gtp_set_io_int(void)
 {
 	long unsigned int	config;
 	config = SUNXI_PINCFG_PACK(SUNXI_PINCFG_TYPE_FUNC, 0xFFFF);
-	pin_config_get(SUNXI_PINCTRL, irq_pin_name, &config);
+	//pin_config_get(SUNXI_PINCTRL, irq_pin_name, &config);
 
 	if (6 != SUNXI_PINCFG_UNPACK_VALUE(config)) {
 		config = SUNXI_PINCFG_PACK(SUNXI_PINCFG_TYPE_FUNC, 6);
-		pin_config_set(SUNXI_PINCTRL, irq_pin_name, config);
+		//pin_config_set(SUNXI_PINCTRL, irq_pin_name, config);
 	}
 
 }
@@ -1927,6 +1927,7 @@ static s8 gtp_request_irq(struct goodix_ts_data *ts)
 {
 	s32 ret = -1;
 
+	gpio_direction_input(config_info.irq_gpio.gpio);	/* set input mode before irq */
 	ret = input_request_int(&(config_info.input_type), goodix_ts_irq_handler, CTP_IRQ_MODE, ts);
 
 	if (ret) {
@@ -3128,7 +3129,10 @@ static int startup(void)
 		return -1;
 	}
 	sunxi_gpio_to_name(CTP_IRQ_NUMBER, irq_pin_name);
-	gtp_io_init(20);
+	//gtp_io_init(20);
+	gpio_direction_output(config_info.irq_gpio.gpio, 0);
+	gpio_direction_output(config_info.wakeup_gpio.gpio, 0);
+	gtp_reset_guitar(i2c_connect_client, 10);
 	return 0;
 }
 
@@ -3152,8 +3156,9 @@ static int goodix_ts_init(void)
 	if (startup() != 0)
 		return 0;
 #else
-	config_info.np_name = CTP_NODENAME;
-	np = of_find_node_by_name(NULL, CTP_NODENAME);
+	//config_info.np_name = CTP_NODENAME;
+	//np = of_find_node_by_name(NULL, CTP_NODENAME);
+	np = of_find_node_by_name(NULL, "ctp");
 	if (np && np->parent) {
 		p = (char *) np->parent->name;
 		if (strncmp(p, "twi", 3) != 0) {
