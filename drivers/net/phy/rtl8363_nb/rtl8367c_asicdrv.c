@@ -17,12 +17,12 @@
  *
  */
 
-#include <rtl8367c_asicdrv.h>
+#include "rtl8367c_asicdrv.h"
 
 #if defined(RTK_X86_ASICDRV)
 #include <I2Clib.h>
 #else
-#include <smi.h>
+#include "smi.h"
 #endif
 
 /*for driver verify testing only*/

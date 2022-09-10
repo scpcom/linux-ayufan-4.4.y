@@ -17,7 +17,7 @@
  *
  */
 
-#include <rtl8367c_asicdrv_portIsolation.h>
+#include "rtl8367c_asicdrv_portIsolation.h"
 /* Function Name:
  *      rtl8367c_setAsicPortIsolationPermittedPortmask
  * Description:

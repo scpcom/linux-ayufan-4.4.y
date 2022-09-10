@@ -16,7 +16,7 @@
  * Feature : IGMP related functions
  *
  */
-#include <rtl8367c_asicdrv_igmp.h>
+#include "rtl8367c_asicdrv_igmp.h"
 /* Function Name:
  *      rtl8367c_setAsicIgmp
  * Description:

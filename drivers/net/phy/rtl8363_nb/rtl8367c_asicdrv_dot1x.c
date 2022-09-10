@@ -16,7 +16,7 @@
  * Feature : 802.1X related functions
  *
  */
-#include <rtl8367c_asicdrv_dot1x.h>
+#include "rtl8367c_asicdrv_dot1x.h"
 /* Function Name:
  *      rtl8367c_setAsic1xPBEnConfig
  * Description:

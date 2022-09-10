@@ -1,7 +1,7 @@
 #ifndef _RTL8367C_ASICDRV_LUT_H_
 #define _RTL8367C_ASICDRV_LUT_H_
 
-#include <rtl8367c_asicdrv.h>
+#include "rtl8367c_asicdrv.h"
 
 #define RTL8367C_LUT_AGETIMERMAX        (7)
 #define RTL8367C_LUT_AGESPEEDMAX        (3)

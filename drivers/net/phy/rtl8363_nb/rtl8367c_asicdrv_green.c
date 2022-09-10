@@ -16,7 +16,7 @@
  * Feature : Green ethernet related functions
  *
  */
-#include <rtl8367c_asicdrv_green.h>
+#include "rtl8367c_asicdrv_green.h"
 
 /* Function Name:
  *      rtl8367c_getAsicGreenPortPage

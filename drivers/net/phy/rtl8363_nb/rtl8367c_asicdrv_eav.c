@@ -17,7 +17,7 @@
  *
  */
 
-#include <rtl8367c_asicdrv_eav.h>
+#include "rtl8367c_asicdrv_eav.h"
 /* Function Name:
  *      rtl8367c_setAsicEavMacAddress
  * Description:

@@ -1,7 +1,7 @@
 #ifndef _RTL8367C_ASICDRV_QOS_H_
 #define _RTL8367C_ASICDRV_QOS_H_
 
-#include <rtl8367c_asicdrv.h>
+#include "rtl8367c_asicdrv.h"
 
 #define RTL8367C_DECISIONPRIMAX    0xFF
 

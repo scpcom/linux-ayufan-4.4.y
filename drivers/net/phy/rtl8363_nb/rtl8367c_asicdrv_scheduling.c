@@ -17,7 +17,7 @@
  *
  */
 
-#include <rtl8367c_asicdrv_scheduling.h>
+#include "rtl8367c_asicdrv_scheduling.h"
 /* Function Name:
  *      rtl8367c_setAsicLeakyBucketParameter
  * Description:

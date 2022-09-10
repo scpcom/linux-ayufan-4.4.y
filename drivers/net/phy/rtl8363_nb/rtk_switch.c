@@ -16,20 +16,20 @@
  * Feature : Here is a list of all functions and variables in this module.
  *
  */
-#include <rtk_switch.h>
-#include <rtk_error.h>
+#include "rtk_switch.h"
+#include "rtk_error.h"
 #include <linux/string.h>
 #include <linux/kernel.h>
 
-#include <rate.h>
-#include <rtl8367c_asicdrv.h>
-#include <rtl8367c_asicdrv_misc.h>
-#include <rtl8367c_asicdrv_green.h>
-#include <rtl8367c_asicdrv_lut.h>
-#include <rtl8367c_asicdrv_rma.h>
-#include <rtl8367c_asicdrv_mirror.h>
-#include <rtl8367c_asicdrv_scheduling.h>
-#include <rtl8367c_asicdrv_inbwctrl.h>
+#include "rate.h"
+#include "rtl8367c_asicdrv.h"
+#include "rtl8367c_asicdrv_misc.h"
+#include "rtl8367c_asicdrv_green.h"
+#include "rtl8367c_asicdrv_lut.h"
+#include "rtl8367c_asicdrv_rma.h"
+#include "rtl8367c_asicdrv_mirror.h"
+#include "rtl8367c_asicdrv_scheduling.h"
+#include "rtl8367c_asicdrv_inbwctrl.h"
 
 #if defined(FORCE_PROBE_RTL8367C)
 static init_state_t    init_state = INIT_COMPLETED;

@@ -17,7 +17,7 @@
  *
  */
 
-#include <rtl8367c_asicdrv_trunking.h>
+#include "rtl8367c_asicdrv_trunking.h"
 /* Function Name:
  *      rtl8367c_setAsicTrunkingMode
  * Description:

@@ -17,16 +17,16 @@
  *
  */
 
-#include <rtk_switch.h>
-#include <rtk_error.h>
-#include <rate.h>
-#include <qos.h>
+#include "rtk_switch.h"
+#include "rtk_error.h"
+#include "rate.h"
+#include "qos.h"
 #include <linux/string.h>
 
-#include <rtl8367c_asicdrv.h>
-#include <rtl8367c_asicdrv_meter.h>
-#include <rtl8367c_asicdrv_inbwctrl.h>
-#include <rtl8367c_asicdrv_scheduling.h>
+#include "rtl8367c_asicdrv.h"
+#include "rtl8367c_asicdrv_meter.h"
+#include "rtl8367c_asicdrv_inbwctrl.h"
+#include "rtl8367c_asicdrv_scheduling.h"
 
 static rtk_api_ret_t _rtk_rate_shareMeter_set(rtk_meter_id_t index, rtk_meter_type_t type, rtk_rate_t rate, rtk_enable_t ifg_include)
 {

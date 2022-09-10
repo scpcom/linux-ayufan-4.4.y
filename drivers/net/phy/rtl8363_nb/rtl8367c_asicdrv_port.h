@@ -1,9 +1,9 @@
 #ifndef _RTL8367C_ASICDRV_PORTSECURITY_H_
 #define _RTL8367C_ASICDRV_PORTSECURITY_H_
 
-#include <rtl8367c_asicdrv.h>
-#include <rtl8367c_asicdrv_unknownMulticast.h>
-#include <rtl8367c_asicdrv_phy.h>
+#include "rtl8367c_asicdrv.h"
+#include "rtl8367c_asicdrv_unknownMulticast.h"
+#include "rtl8367c_asicdrv_phy.h"
 
 /****************************************************************/
 /* Type Definition                                              */

@@ -1,7 +1,7 @@
 #ifndef _RTL8367C_ASICDRV_PORTISOLATION_H_
 #define _RTL8367C_ASICDRV_PORTISOLATION_H_
 
-#include <rtl8367c_asicdrv.h>
+#include "rtl8367c_asicdrv.h"
 
 extern ret_t rtl8367c_setAsicPortIsolationPermittedPortmask(rtk_uint32 port, rtk_uint32 permitPortmask);
 extern ret_t rtl8367c_getAsicPortIsolationPermittedPortmask(rtk_uint32 port, rtk_uint32 *pPermitPortmask);

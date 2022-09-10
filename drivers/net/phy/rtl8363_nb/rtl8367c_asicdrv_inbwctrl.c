@@ -16,7 +16,7 @@
  * Feature : Ingress bandwidth control related functions
  *
  */
-#include <rtl8367c_asicdrv_inbwctrl.h>
+#include "rtl8367c_asicdrv_inbwctrl.h"
 /* Function Name:
  *      rtl8367c_setAsicPortIngressBandwidth
  * Description:

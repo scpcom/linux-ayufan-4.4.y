@@ -17,7 +17,7 @@
  *
  */
 
-#include <rtl8367c_asicdrv_lut.h>
+#include "rtl8367c_asicdrv_lut.h"
 
 #include <linux/string.h>
 

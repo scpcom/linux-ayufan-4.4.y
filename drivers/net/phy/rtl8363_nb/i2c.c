@@ -16,17 +16,17 @@
  *
  */
 
-#include <rtk_switch.h>
-#include <rtk_error.h>
-#include <port.h>
+#include "rtk_switch.h"
+#include "rtk_error.h"
+#include "port.h"
 #include <linux/string.h>
-#include <rtl8367c_reg.h>
+#include "rtl8367c_reg.h"
 
-#include <rtl8367c_asicdrv_i2c.h>
-#include <rtk_switch.h>
-#include <rtl8367c_asicdrv.h>
-#include <rtk_types.h>
-#include <i2c.h>
+#include "rtl8367c_asicdrv_i2c.h"
+#include "rtk_switch.h"
+#include "rtl8367c_asicdrv.h"
+#include "rtk_types.h"
+#include "i2c.h"
 
 
 static rtk_I2C_16bit_mode_t rtk_i2c_mode = I2C_LSB_16BIT_MODE;

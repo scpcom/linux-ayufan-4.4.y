@@ -1,7 +1,7 @@
 #ifndef _RTL8367C_ASICDRV_MISC_H_
 #define _RTL8367C_ASICDRV_MISC_H_
 
-#include <rtl8367c_asicdrv.h>
+#include "rtl8367c_asicdrv.h"
 
 extern ret_t rtl8367c_setAsicMacAddress(ether_addr_t mac);
 extern ret_t rtl8367c_getAsicMacAddress(ether_addr_t *pMac);

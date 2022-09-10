@@ -1,7 +1,7 @@
 #ifndef _RTL8367C_ASICDRV_RLDP_H_
 #define _RTL8367C_ASICDRV_RLDP_H_
 
-#include <rtl8367c_asicdrv.h>
+#include "rtl8367c_asicdrv.h"
 #include <linux/string.h>
 
 extern ret_t rtl8367c_setAsicRldp(rtk_uint32 enabled);

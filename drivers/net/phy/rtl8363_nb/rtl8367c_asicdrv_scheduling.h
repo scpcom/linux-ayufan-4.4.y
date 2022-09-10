@@ -1,7 +1,7 @@
 #ifndef _RTL8367C_ASICDRV_SCHEDULING_H_
 #define _RTL8367C_ASICDRV_SCHEDULING_H_
 
-#include <rtl8367c_asicdrv.h>
+#include "rtl8367c_asicdrv.h"
 
 #define RTL8367C_QWEIGHTMAX    0x7F
 #define RTL8367C_PORT_QUEUE_METER_INDEX_MAX    7

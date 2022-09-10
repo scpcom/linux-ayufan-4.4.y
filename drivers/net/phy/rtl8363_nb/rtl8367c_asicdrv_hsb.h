@@ -1,7 +1,7 @@
 #ifndef _RTL8367C_ASICDRV__HSB_H_
 #define _RTL8367C_ASICDRV__HSB_H_
 
-#include <rtl8367c_asicdrv.h>
+#include "rtl8367c_asicdrv.h"
 
 #define RTL8367C_FIELDSEL_FORMAT_NUMBER      (16)
 #define RTL8367C_FIELDSEL_MAX_OFFSET         (255)

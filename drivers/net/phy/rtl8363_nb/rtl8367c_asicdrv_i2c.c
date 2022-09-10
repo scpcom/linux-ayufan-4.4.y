@@ -18,9 +18,9 @@
  */
 
 
-#include <rtl8367c_asicdrv_i2c.h>
-#include <rtk_error.h>
-#include <rtk_types.h>
+#include "rtl8367c_asicdrv_i2c.h"
+#include "rtk_error.h"
+#include "rtk_types.h"
 
 
 

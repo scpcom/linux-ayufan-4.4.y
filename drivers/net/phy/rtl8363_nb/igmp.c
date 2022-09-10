@@ -17,14 +17,14 @@
  *
  */
 
-#include <rtk_switch.h>
-#include <rtk_error.h>
-#include <igmp.h>
+#include "rtk_switch.h"
+#include "rtk_error.h"
+#include "igmp.h"
 #include <linux/string.h>
 
-#include <rtl8367c_asicdrv.h>
-#include <rtl8367c_asicdrv_igmp.h>
-#include <rtl8367c_asicdrv_lut.h>
+#include "rtl8367c_asicdrv.h"
+#include "rtl8367c_asicdrv_igmp.h"
+#include "rtl8367c_asicdrv_lut.h"
 
 static rtk_api_ret_t _rtk_igmp_init(void)
 {

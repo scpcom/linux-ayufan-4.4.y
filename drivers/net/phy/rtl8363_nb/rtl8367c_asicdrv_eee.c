@@ -17,8 +17,8 @@
  *
  */
 
-#include <rtl8367c_asicdrv_eee.h>
-#include <rtl8367c_asicdrv_phy.h>
+#include "rtl8367c_asicdrv_eee.h"
+#include "rtl8367c_asicdrv_phy.h"
 
 /*
 @func ret_t | rtl8367c_setAsicEee100M | Set eee force mode function enable/disable.

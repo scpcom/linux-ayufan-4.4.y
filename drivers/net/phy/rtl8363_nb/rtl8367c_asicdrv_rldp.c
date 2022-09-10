@@ -17,7 +17,7 @@
  *
  */
 
-#include <rtl8367c_asicdrv_rldp.h>
+#include "rtl8367c_asicdrv_rldp.h"
 /* Function Name:
  *      rtl8367c_setAsicRldp
  * Description:

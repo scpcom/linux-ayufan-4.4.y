@@ -17,13 +17,13 @@
  *
  */
 
-#include <rtk_switch.h>
-#include <rtk_error.h>
-#include <oam.h>
+#include "rtk_switch.h"
+#include "rtk_error.h"
+#include "oam.h"
 #include <linux/string.h>
 
-#include <rtl8367c_asicdrv.h>
-#include <rtl8367c_asicdrv_oam.h>
+#include "rtl8367c_asicdrv.h"
+#include "rtl8367c_asicdrv_oam.h"
 
 
 /* Module Name : OAM */

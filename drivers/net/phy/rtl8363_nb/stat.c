@@ -17,13 +17,13 @@
  *
  */
 
-#include <rtk_switch.h>
-#include <rtk_error.h>
-#include <stat.h>
+#include "rtk_switch.h"
+#include "rtk_error.h"
+#include "stat.h"
 #include <linux/string.h>
 
-#include <rtl8367c_asicdrv.h>
-#include <rtl8367c_asicdrv_mib.h>
+#include "rtl8367c_asicdrv.h"
+#include "rtl8367c_asicdrv_mib.h"
 
 #define MIB_NOT_SUPPORT     (0xFFFF)
 static rtk_api_ret_t _get_asic_mib_idx(rtk_stat_port_type_t cnt_idx, RTL8367C_MIBCOUNTER *pMib_idx)

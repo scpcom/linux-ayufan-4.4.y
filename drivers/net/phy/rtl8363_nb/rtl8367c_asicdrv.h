@@ -1,10 +1,10 @@
 #ifndef _RTL8367C_ASICDRV_H_
 #define _RTL8367C_ASICDRV_H_
 
-#include <rtk_types.h>
-#include <rtk_error.h>
-#include <rtl8367c_reg.h>
-#include <rtl8367c_base.h>
+#include "rtk_types.h"
+#include "rtk_error.h"
+#include "rtl8367c_reg.h"
+#include "rtl8367c_base.h"
 
 #define RTL8367C_REGBITLENGTH               16
 #define RTL8367C_REGDATAMAX                 0xFFFF

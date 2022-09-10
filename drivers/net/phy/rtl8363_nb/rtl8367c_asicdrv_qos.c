@@ -17,7 +17,7 @@
  *
  */
 
-#include <rtl8367c_asicdrv_qos.h>
+#include "rtl8367c_asicdrv_qos.h"
 /* Function Name:
  *      rtl8367c_setAsicPriorityDot1qRemapping
  * Description:

@@ -16,7 +16,7 @@
  * Feature : VLAN related functions
  *
  */
-#include <rtl8367c_asicdrv_vlan.h>
+#include "rtl8367c_asicdrv_vlan.h"
 
 #include <linux/string.h>
 

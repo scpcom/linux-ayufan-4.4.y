@@ -17,13 +17,13 @@
  *
  */
 
-#include <rtk_switch.h>
-#include <rtk_error.h>
-#include <trunk.h>
+#include "rtk_switch.h"
+#include "rtk_error.h"
+#include "trunk.h"
 #include <linux/string.h>
 
-#include <rtl8367c_asicdrv.h>
-#include <rtl8367c_asicdrv_trunking.h>
+#include "rtl8367c_asicdrv.h"
+#include "rtl8367c_asicdrv_trunking.h"
 
 static rtk_api_ret_t _rtk_trunk_port_set(rtk_trunk_group_t trk_gid, rtk_portmask_t *pTrunk_member_portmask)
 {

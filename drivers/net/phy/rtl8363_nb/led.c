@@ -17,13 +17,13 @@
  *
  */
 
-#include <rtk_switch.h>
-#include <rtk_error.h>
-#include <led.h>
+#include "rtk_switch.h"
+#include "rtk_error.h"
+#include "led.h"
 #include <linux/string.h>
 
-#include <rtl8367c_asicdrv.h>
-#include <rtl8367c_asicdrv_led.h>
+#include "rtl8367c_asicdrv.h"
+#include "rtl8367c_asicdrv_led.h"
 
 static rtk_api_ret_t _rtk_led_enable_set(rtk_led_group_t group, rtk_portmask_t *pPortmask)
 {

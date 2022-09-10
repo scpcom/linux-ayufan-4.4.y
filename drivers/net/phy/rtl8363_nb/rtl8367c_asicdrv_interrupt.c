@@ -16,7 +16,7 @@
  * Feature : Interrupt related functions
  *
  */
-#include <rtl8367c_asicdrv_interrupt.h>
+#include "rtl8367c_asicdrv_interrupt.h"
 /* Function Name:
  *      rtl8367c_setAsicInterruptPolarity
  * Description:

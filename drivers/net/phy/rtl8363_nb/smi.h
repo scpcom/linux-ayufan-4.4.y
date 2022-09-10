@@ -2,7 +2,7 @@
 #ifndef __SMI_H__
 #define __SMI_H__
 
-#include <rtk_types.h>
+#include "rtk_types.h"
 #include "rtk_error.h"
 
 #define MDC_MDIO_CTRL0_REG          31
