@@ -136,15 +136,15 @@ static int sunxi_ce_hw_init(sunxi_ce_cdev_t *p_cdev)
 	/*get periph0 clk reg*/
 	pclk = of_clk_get(p_cdev->pnode, 1);
 	if (IS_ERR_OR_NULL(pclk)) {
-		SS_ERR("Unable to get pll clock, return %x\n", PTR_RET(pclk));
-		return PTR_RET(pclk);
+		SS_ERR("Unable to get pll clock, return %x\n", PTR_ERR_OR_ZERO(pclk));
+		return PTR_ERR_OR_ZERO(pclk);
 	}
 
 	/*get ce clk reg*/
 	p_cdev->ce_clk = of_clk_get(p_cdev->pnode, 0);
 	if (IS_ERR_OR_NULL(p_cdev->ce_clk)) {
-		SS_ERR("Fail to get module clk, ret %x\n", PTR_RET(p_cdev->ce_clk));
-		return PTR_RET(p_cdev->ce_clk);
+		SS_ERR("Fail to get module clk, ret %x\n", PTR_ERR_OR_ZERO(p_cdev->ce_clk));
+		return PTR_ERR_OR_ZERO(p_cdev->ce_clk);
 	}
 
 #ifndef SET_CE_CLKFRE_MODE2
@@ -158,8 +158,8 @@ static int sunxi_ce_hw_init(sunxi_ce_cdev_t *p_cdev)
 #endif
 	p_cdev->reset = devm_reset_control_get(p_cdev->pdevice, NULL);
 	if (IS_ERR(p_cdev->reset)) {
-		SS_ERR("Fail to get reset clk, ret %x\n", PTR_RET(p_cdev->reset));
-		return PTR_RET(p_cdev->reset);
+		SS_ERR("Fail to get reset clk, ret %x\n", PTR_ERR_OR_ZERO(p_cdev->reset));
+		return PTR_ERR_OR_ZERO(p_cdev->reset);
 	}
 
 	/*configure ce clk form periph0*/
