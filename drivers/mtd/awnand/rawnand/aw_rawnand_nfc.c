@@ -18,6 +18,7 @@
 #include <linux/dma-mapping.h>
 #include <linux/regulator/consumer.h>
 #include <linux/of_address.h>
+#include <linux/pinctrl/consumer.h>
 
 struct aw_nand_host aw_host;
 
@@ -135,7 +136,7 @@ static int aw_host_set_pin(struct aw_nand_host *host)
 {
 	struct pinctrl *pinctrl = NULL;
 
-	pinctrl = pinctrl_get_select(host->dev, "default");
+	pinctrl = devm_pinctrl_get_select_default(host->dev);
 	if (IS_ERR_OR_NULL(pinctrl)) {
 		awrawnand_err("set nand0 pin fail\n");
 		return -EIO;
