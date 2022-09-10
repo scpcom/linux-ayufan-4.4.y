@@ -299,4 +299,25 @@ void ion_page_pool_free(struct ion_page_pool *pool, struct page *page);
 int ion_page_pool_shrink(struct ion_page_pool *pool, gfp_t gfp_mask,
 			 int nr_to_scan);
 
+/**
+ * ion_alloc - Allocates an ion buffer of given size from given heap
+ *
+ * @len:               size of the buffer to be allocated.
+ * @heap_id_mask:      a bitwise maks of heap ids to allocate from
+ * @flags:             ION_BUFFER_XXXX flags for the new buffer.
+ *
+ * The function exports a dma_buf object for the new ion buffer internally
+ * and returns that to the caller. So, the buffer is ready to be used by other
+ * drivers immediately. Returns ERR_PTR in case of failure.
+ */
+struct dma_buf *ion_alloc(size_t len, unsigned int heap_id_mask,
+			  unsigned int flags);
+
+/**
+ * ion_free - Releases the ion buffer.
+ *
+ * @buffer:             ion buffer to be released
+ */
+int ion_free(struct ion_buffer *buffer);
+
 #endif /* _ION_H */
