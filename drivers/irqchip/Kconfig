@@ -601,6 +601,7 @@ config MST_IRQ
 config SUNXI_WAKEUPGEN
 	tristate "sunxi wakeup irq chip"
 	depends on ARCH_SUNXI
+	depends on ARM || ARM64
 	select IRQ_DOMAIN_HIERARCHY
 	help
 	   This enables support for sunxi wakeupgen irq domain.
