@@ -22,8 +22,8 @@
 #define DST_FLAG	(0x1)
 /* Inner functions declaration, defined in vx/sunxi_ss_proc.c */
 
-int ss_aes_key_valid(struct crypto_ablkcipher *tfm, int len);
-int ss_aes_one_req(sunxi_ss_t *sss, struct ablkcipher_request *req);
+int ss_aes_key_valid(struct crypto_skcipher *tfm, int len);
+int ss_aes_one_req(sunxi_ss_t *sss, struct skcipher_request *req);
 
 #ifdef SS_GCM_MODE_ENABLE
 int ss_aead_crypt(struct aead_request *req, int dir, int method, int mode);
@@ -66,7 +66,7 @@ int ss_trng_get_random(struct crypto_rng *tfm, const u8 *src, unsigned int slen,
 void ss_trng_postprocess(u8 *out, u32 outlen, u8 *in, u32 inlen);
 #endif
 
-int ss_aes_crypt(struct ablkcipher_request *req, int dir, int method, int mode);
+int ss_aes_crypt(struct skcipher_request *req, int dir, int method, int mode);
 
 void ss_hash_swap(char *data, int len);
 int ss_hash_blk_size(int type);

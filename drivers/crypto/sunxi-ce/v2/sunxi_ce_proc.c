@@ -14,6 +14,7 @@
 #include <linux/platform_device.h>
 #include <crypto/internal/hash.h>
 #include <crypto/internal/rng.h>
+#include <crypto/internal/skcipher.h>
 
 #include <linux/dmaengine.h>
 #include <linux/dma-mapping.h>
@@ -283,7 +284,7 @@ static int ss_aes_start(ss_aes_ctx_t *ctx, ss_aes_req_ctx_t *req_ctx, int len)
 	return 0;
 }
 
-int ss_aes_key_valid(struct crypto_ablkcipher *tfm, int len)
+int ss_aes_key_valid(struct crypto_skcipher *tfm, int len)
 {
 	if (unlikely(len > SS_RSA_MAX_SIZE)) {
 		SS_ERR("Unsupported key size: %d\n", len);
@@ -490,10 +491,10 @@ u32 ss_hash_start(ss_hash_ctx_t *ctx,
 	return 0;
 }
 
-int ss_aes_one_req(sunxi_ss_t *sss, struct ablkcipher_request *req)
+int ss_aes_one_req(sunxi_ss_t *sss, struct skcipher_request *req)
 {
 	int ret = 0;
-	struct crypto_ablkcipher *tfm = NULL;
+	struct crypto_skcipher *tfm = NULL;
 	ss_aes_ctx_t *ctx = NULL;
 	ss_aes_req_ctx_t *req_ctx = NULL;
 	int key_map_flag = 0;
@@ -507,9 +508,9 @@ int ss_aes_one_req(sunxi_ss_t *sss, struct ablkcipher_request *req)
 
 	ss_dev_lock();
 
-	tfm = crypto_ablkcipher_reqtfm(req);
-	req_ctx = ablkcipher_request_ctx(req);
-	ctx = crypto_ablkcipher_ctx(tfm);
+	tfm = crypto_skcipher_reqtfm(req);
+	req_ctx = skcipher_request_ctx(req);
+	ctx = crypto_skcipher_ctx(tfm);
 
 	/* A31 SS need update key each cycle in decryption. */
 	if ((ctx->comm.flags & SS_FLAG_NEW_KEY)
@@ -529,28 +530,28 @@ int ss_aes_one_req(sunxi_ss_t *sss, struct ablkcipher_request *req)
 	if ((req_ctx->mode == SS_AES_MODE_CBC) && (req->info != NULL)) {
 #endif
 		SS_DBG("IV address = %p, size = %d\n", req->info,
-			crypto_ablkcipher_ivsize(tfm));
-		memcpy(ctx->iv, req->info, crypto_ablkcipher_ivsize(tfm));
-		ss_iv_set(ctx->iv, crypto_ablkcipher_ivsize(tfm));
+			crypto_skcipher_ivsize(tfm));
+		memcpy(ctx->iv, req->info, crypto_skcipher_ivsize(tfm));
+		ss_iv_set(ctx->iv, crypto_skcipher_ivsize(tfm));
 		dma_map_single(&sss->pdev->dev, ctx->iv,
-			crypto_ablkcipher_ivsize(tfm), DMA_MEM_TO_DEV);
+			crypto_skcipher_ivsize(tfm), DMA_MEM_TO_DEV);
 		iv_map_flag = 1;
 	}
 
 #ifdef SS_CTR_MODE_ENABLE
 	if (req_ctx->mode == SS_AES_MODE_CTR) {
 		SS_DBG("Cnt address = %p, size = %d\n", req->info,
-			crypto_ablkcipher_ivsize(tfm));
+			crypto_skcipher_ivsize(tfm));
 		if (ctx->cnt == 0)
 			memcpy(ctx->iv, req->info,
-				crypto_ablkcipher_ivsize(tfm));
+				crypto_skcipher_ivsize(tfm));
 
 		SS_DBG("CNT: %08x %08x %08x %08x\n",
 			*(int *)&ctx->iv[0], *(int *)&ctx->iv[4],
 			*(int *)&ctx->iv[8], *(int *)&ctx->iv[12]);
-		ss_cnt_set(ctx->iv, crypto_ablkcipher_ivsize(tfm));
+		ss_cnt_set(ctx->iv, crypto_skcipher_ivsize(tfm));
 		dma_map_single(&sss->pdev->dev, ctx->iv,
-			crypto_ablkcipher_ivsize(tfm), DMA_MEM_TO_DEV);
+			crypto_skcipher_ivsize(tfm), DMA_MEM_TO_DEV);
 		iv_map_flag = 1;
 	}
 #endif
@@ -559,7 +560,7 @@ int ss_aes_one_req(sunxi_ss_t *sss, struct ablkcipher_request *req)
 	ss_print_hex(ctx->iv, 16, ctx->iv);
 
 	if (req_ctx->type == SS_METHOD_RSA)
-		ss_rsa_width_set(crypto_ablkcipher_ivsize(tfm));
+		ss_rsa_width_set(crypto_skcipher_ivsize(tfm));
 
 	req_ctx->dma_src.sg = req->src;
 	req_ctx->dma_dst.sg = req->dst;
@@ -575,12 +576,12 @@ int ss_aes_one_req(sunxi_ss_t *sss, struct ablkcipher_request *req)
 			ctx->key_size, DMA_MEM_TO_DEV);
 	if (iv_map_flag == 1)
 		dma_unmap_single(&sss->pdev->dev, virt_to_phys(ctx->iv),
-			crypto_ablkcipher_ivsize(tfm), DMA_MEM_TO_DEV);
+			crypto_skcipher_ivsize(tfm), DMA_MEM_TO_DEV);
 
 #ifdef SS_CTR_MODE_ENABLE
 	if (req_ctx->mode == SS_AES_MODE_CTR) {
 		ss_cnt_get(ctx->comm.flow,
-			ctx->iv, crypto_ablkcipher_ivsize(tfm));
+			ctx->iv, crypto_skcipher_ivsize(tfm));
 		SS_DBG("CNT: %08x %08x %08x %08x\n",
 			*(int *)&ctx->iv[0], *(int *)&ctx->iv[4],
 			*(int *)&ctx->iv[8], *(int *)&ctx->iv[12]);

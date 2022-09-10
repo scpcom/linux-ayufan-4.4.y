@@ -19,6 +19,7 @@
 #include <linux/of.h>
 #include <linux/platform_device.h>
 #include <crypto/scatterwalk.h>
+#include <crypto/internal/skcipher.h>
 #include <linux/scatterlist.h>
 #include <linux/interrupt.h>
 #include <linux/delay.h>
@@ -49,7 +50,7 @@ static struct sun4i_ss_alg_template ss_algs[] = {
 				.cra_blocksize = MD5_HMAC_BLOCK_SIZE,
 				.cra_ctxsize = sizeof(struct sun4i_req_ctx),
 				.cra_module = THIS_MODULE,
-				.cra_type = &crypto_ahash_type,
+				//.cra_type = &crypto_ahash_type,
 				.cra_init = sun4i_hash_crainit
 			}
 		}
@@ -77,141 +78,141 @@ static struct sun4i_ss_alg_template ss_algs[] = {
 				.cra_blocksize = SHA1_BLOCK_SIZE,
 				.cra_ctxsize = sizeof(struct sun4i_req_ctx),
 				.cra_module = THIS_MODULE,
-				.cra_type = &crypto_ahash_type,
+				//.cra_type = &crypto_ahash_type,
 				.cra_init = sun4i_hash_crainit
 			}
 		}
 	}
 },
-{       .type = CRYPTO_ALG_TYPE_ABLKCIPHER,
+{       .type = CRYPTO_ALG_TYPE_SKCIPHER,
 	.alg.crypto = {
+	    .base = {
 		.cra_name = "cbc(aes)",
 		.cra_driver_name = "cbc-aes-sun4i-ss",
 		.cra_priority = 300,
 		.cra_blocksize = AES_BLOCK_SIZE,
-		.cra_flags = CRYPTO_ALG_TYPE_ABLKCIPHER,
+		.cra_flags = CRYPTO_ALG_TYPE_SKCIPHER,
 		.cra_ctxsize = sizeof(struct sun4i_tfm_ctx),
 		.cra_module = THIS_MODULE,
 		.cra_alignmask = 3,
-		.cra_type = &crypto_ablkcipher_type,
-		.cra_init = sun4i_ss_cipher_init,
-		.cra_ablkcipher = {
+		//.cra_type = &crypto_skcipher_type,
+	    },
+		.init = sun4i_ss_cipher_init,
 			.min_keysize	= AES_MIN_KEY_SIZE,
 			.max_keysize	= AES_MAX_KEY_SIZE,
 			.ivsize		= AES_BLOCK_SIZE,
 			.setkey         = sun4i_ss_aes_setkey,
 			.encrypt        = sun4i_ss_cbc_aes_encrypt,
 			.decrypt        = sun4i_ss_cbc_aes_decrypt,
-		}
 	}
 },
-{       .type = CRYPTO_ALG_TYPE_ABLKCIPHER,
+{       .type = CRYPTO_ALG_TYPE_SKCIPHER,
 	.alg.crypto = {
+	    .base = {
 		.cra_name = "ecb(aes)",
 		.cra_driver_name = "ecb-aes-sun4i-ss",
 		.cra_priority = 300,
 		.cra_blocksize = AES_BLOCK_SIZE,
-		.cra_flags = CRYPTO_ALG_TYPE_ABLKCIPHER,
+		.cra_flags = CRYPTO_ALG_TYPE_SKCIPHER,
 		.cra_ctxsize = sizeof(struct sun4i_tfm_ctx),
 		.cra_module = THIS_MODULE,
 		.cra_alignmask = 3,
-		.cra_type = &crypto_ablkcipher_type,
-		.cra_init = sun4i_ss_cipher_init,
-		.cra_ablkcipher = {
+		//.cra_type = &crypto_skcipher_type,
+	    },
+		.init = sun4i_ss_cipher_init,
 			.min_keysize	= AES_MIN_KEY_SIZE,
 			.max_keysize	= AES_MAX_KEY_SIZE,
 			.ivsize		= AES_BLOCK_SIZE,
 			.setkey         = sun4i_ss_aes_setkey,
 			.encrypt        = sun4i_ss_ecb_aes_encrypt,
 			.decrypt        = sun4i_ss_ecb_aes_decrypt,
-		}
 	}
 },
-{       .type = CRYPTO_ALG_TYPE_ABLKCIPHER,
+{       .type = CRYPTO_ALG_TYPE_SKCIPHER,
 	.alg.crypto = {
+	    .base = {
 		.cra_name = "cbc(des)",
 		.cra_driver_name = "cbc-des-sun4i-ss",
 		.cra_priority = 300,
 		.cra_blocksize = DES_BLOCK_SIZE,
-		.cra_flags = CRYPTO_ALG_TYPE_ABLKCIPHER,
+		.cra_flags = CRYPTO_ALG_TYPE_SKCIPHER,
 		.cra_ctxsize = sizeof(struct sun4i_req_ctx),
 		.cra_module = THIS_MODULE,
 		.cra_alignmask = 3,
-		.cra_type = &crypto_ablkcipher_type,
-		.cra_init = sun4i_ss_cipher_init,
-		.cra_u.ablkcipher = {
+		//.cra_type = &crypto_skcipher_type,
+	    },
+		.init = sun4i_ss_cipher_init,
 			.min_keysize    = DES_KEY_SIZE,
 			.max_keysize    = DES_KEY_SIZE,
 			.ivsize         = DES_BLOCK_SIZE,
 			.setkey         = sun4i_ss_des_setkey,
 			.encrypt        = sun4i_ss_cbc_des_encrypt,
 			.decrypt        = sun4i_ss_cbc_des_decrypt,
-		}
 	}
 },
-{       .type = CRYPTO_ALG_TYPE_ABLKCIPHER,
+{       .type = CRYPTO_ALG_TYPE_SKCIPHER,
 	.alg.crypto = {
+	    .base = {
 		.cra_name = "ecb(des)",
 		.cra_driver_name = "ecb-des-sun4i-ss",
 		.cra_priority = 300,
 		.cra_blocksize = DES_BLOCK_SIZE,
-		.cra_flags = CRYPTO_ALG_TYPE_ABLKCIPHER,
+		.cra_flags = CRYPTO_ALG_TYPE_SKCIPHER,
 		.cra_ctxsize = sizeof(struct sun4i_req_ctx),
 		.cra_module = THIS_MODULE,
 		.cra_alignmask = 3,
-		.cra_type = &crypto_ablkcipher_type,
-		.cra_init = sun4i_ss_cipher_init,
-		.cra_u.ablkcipher = {
+		//.cra_type = &crypto_skcipher_type,
+	    },
+		.init = sun4i_ss_cipher_init,
 			.min_keysize    = DES_KEY_SIZE,
 			.max_keysize    = DES_KEY_SIZE,
 			.setkey         = sun4i_ss_des_setkey,
 			.encrypt        = sun4i_ss_ecb_des_encrypt,
 			.decrypt        = sun4i_ss_ecb_des_decrypt,
-		}
 	}
 },
-{       .type = CRYPTO_ALG_TYPE_ABLKCIPHER,
+{       .type = CRYPTO_ALG_TYPE_SKCIPHER,
 	.alg.crypto = {
+	    .base = {
 		.cra_name = "cbc(des3_ede)",
 		.cra_driver_name = "cbc-des3-sun4i-ss",
 		.cra_priority = 300,
 		.cra_blocksize = DES3_EDE_BLOCK_SIZE,
-		.cra_flags = CRYPTO_ALG_TYPE_ABLKCIPHER,
+		.cra_flags = CRYPTO_ALG_TYPE_SKCIPHER,
 		.cra_ctxsize = sizeof(struct sun4i_req_ctx),
 		.cra_module = THIS_MODULE,
 		.cra_alignmask = 3,
-		.cra_type = &crypto_ablkcipher_type,
-		.cra_init = sun4i_ss_cipher_init,
-		.cra_u.ablkcipher = {
+		//.cra_type = &crypto_skcipher_type,
+	    },
+		.init = sun4i_ss_cipher_init,
 			.min_keysize    = DES3_EDE_KEY_SIZE,
 			.max_keysize    = DES3_EDE_KEY_SIZE,
 			.ivsize         = DES3_EDE_BLOCK_SIZE,
 			.setkey         = sun4i_ss_des3_setkey,
 			.encrypt        = sun4i_ss_cbc_des3_encrypt,
 			.decrypt        = sun4i_ss_cbc_des3_decrypt,
-		}
 	}
 },
-{       .type = CRYPTO_ALG_TYPE_ABLKCIPHER,
+{       .type = CRYPTO_ALG_TYPE_SKCIPHER,
 	.alg.crypto = {
+	    .base = {
 		.cra_name = "ecb(des3_ede)",
 		.cra_driver_name = "ecb-des3-sun4i-ss",
 		.cra_priority = 300,
 		.cra_blocksize = DES3_EDE_BLOCK_SIZE,
-		.cra_flags = CRYPTO_ALG_TYPE_ABLKCIPHER,
+		.cra_flags = CRYPTO_ALG_TYPE_SKCIPHER,
 		.cra_ctxsize = sizeof(struct sun4i_req_ctx),
 		.cra_module = THIS_MODULE,
 		.cra_alignmask = 3,
-		.cra_type = &crypto_ablkcipher_type,
-		.cra_init = sun4i_ss_cipher_init,
-		.cra_u.ablkcipher = {
+		//.cra_type = &crypto_skcipher_type,
+	    },
+		.init = sun4i_ss_cipher_init,
 			.min_keysize    = DES3_EDE_KEY_SIZE,
 			.max_keysize    = DES3_EDE_KEY_SIZE,
 			.ivsize         = DES3_EDE_BLOCK_SIZE,
 			.setkey         = sun4i_ss_des3_setkey,
 			.encrypt        = sun4i_ss_ecb_des3_encrypt,
 			.decrypt        = sun4i_ss_ecb_des3_decrypt,
-		}
 	}
 },
 };
@@ -340,11 +341,11 @@ static int sun4i_ss_probe(struct platform_device *pdev)
 	for (i = 0; i < ARRAY_SIZE(ss_algs); i++) {
 		ss_algs[i].ss = ss;
 		switch (ss_algs[i].type) {
-		case CRYPTO_ALG_TYPE_ABLKCIPHER:
-			err = crypto_register_alg(&ss_algs[i].alg.crypto);
+		case CRYPTO_ALG_TYPE_SKCIPHER:
+			err = crypto_register_skcipher(&ss_algs[i].alg.crypto);
 			if (err != 0) {
 				dev_err(ss->dev, "Fail to register %s\n",
-					ss_algs[i].alg.crypto.cra_name);
+					ss_algs[i].alg.crypto.base.cra_name);
 				goto error_alg;
 			}
 			break;
@@ -364,8 +365,8 @@ error_alg:
 	i--;
 	for (; i >= 0; i--) {
 		switch (ss_algs[i].type) {
-		case CRYPTO_ALG_TYPE_ABLKCIPHER:
-			crypto_unregister_alg(&ss_algs[i].alg.crypto);
+		case CRYPTO_ALG_TYPE_SKCIPHER:
+			crypto_unregister_skcipher(&ss_algs[i].alg.crypto);
 			break;
 		case CRYPTO_ALG_TYPE_AHASH:
 			crypto_unregister_ahash(&ss_algs[i].alg.hash);
@@ -388,8 +389,8 @@ static int sun4i_ss_remove(struct platform_device *pdev)
 
 	for (i = 0; i < ARRAY_SIZE(ss_algs); i++) {
 		switch (ss_algs[i].type) {
-		case CRYPTO_ALG_TYPE_ABLKCIPHER:
-			crypto_unregister_alg(&ss_algs[i].alg.crypto);
+		case CRYPTO_ALG_TYPE_SKCIPHER:
+			crypto_unregister_skcipher(&ss_algs[i].alg.crypto);
 			break;
 		case CRYPTO_ALG_TYPE_AHASH:
 			crypto_unregister_ahash(&ss_algs[i].alg.hash);

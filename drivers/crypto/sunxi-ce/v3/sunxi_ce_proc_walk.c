@@ -222,16 +222,16 @@ void ss_task_chan_init(ce_task_desc_t *task, u32 flow)
 	task->chan_id = flow;
 }
 
-static phys_addr_t ss_task_iv_init(struct ablkcipher_walk *walk, struct ablkcipher_request *req, ce_task_desc_t *task)
+static phys_addr_t ss_task_iv_init(struct ablkcipher_walk *walk, struct skcipher_request *req, ce_task_desc_t *task)
 {
 	ce_task_desc_t *p_task;
 	phys_addr_t nextiv_phys = 0;
-	struct crypto_ablkcipher *tfm = crypto_ablkcipher_reqtfm(req);
-	ss_aes_ctx_t *ctx =	crypto_ablkcipher_ctx(tfm);
-	ss_aes_req_ctx_t *req_ctx = ablkcipher_request_ctx(req);
-	u32 iv_size = crypto_ablkcipher_ivsize(tfm);
+	struct crypto_skcipher *tfm = crypto_skcipher_reqtfm(req);
+	ss_aes_ctx_t *ctx =	crypto_skcipher_ctx(tfm);
+	ss_aes_req_ctx_t *req_ctx = skcipher_request_ctx(req);
+	u32 iv_size = crypto_skcipher_ivsize(tfm);
 
-	SS_DBG("iv len =%d\n", crypto_ablkcipher_ivsize(tfm));
+	SS_DBG("iv len =%d\n", crypto_skcipher_ivsize(tfm));
 	if (iv_size) {
 		dma_map_single(&ss_dev->pdev->dev, req->info, iv_size, DMA_BIDIRECTIONAL);
 		dma_map_single(&ss_dev->pdev->dev, ctx->next_iv, iv_size, DMA_BIDIRECTIONAL);
@@ -290,10 +290,10 @@ static phys_addr_t ss_task_iv_init(struct ablkcipher_walk *walk, struct ablkciph
 	return nextiv_phys;
 }
 
-static void ss_task_data_len_set(struct ablkcipher_request *req,
+static void ss_task_data_len_set(struct skcipher_request *req,
 									ce_task_desc_t *task)
 {
-	ss_aes_req_ctx_t *req_ctx = ablkcipher_request_ctx(req);
+	ss_aes_req_ctx_t *req_ctx = skcipher_request_ctx(req);
 	u32 word_len = 0;
 
 	if (CE_METHOD_IS_AES(req_ctx->type)) {
@@ -340,7 +340,7 @@ static void ss_task_destroy(ce_task_desc_t *task)
 }
 
 static ce_task_desc_t *ss_task_create(struct ablkcipher_walk *walk,
-					struct ablkcipher_request *req)
+					struct skcipher_request *req)
 {
 	int err, nbytes;
 	ce_task_desc_t *first = NULL, *prev = NULL, *task;
@@ -430,7 +430,7 @@ err:
 	return NULL;
 }
 
-static int ss_aes_start_by_walk(struct ablkcipher_request *req)
+static int ss_aes_start_by_walk(struct skcipher_request *req)
 {
 	int ret = 0;
 	phys_addr_t nextiv_phys = 0;
@@ -440,11 +440,11 @@ static int ss_aes_start_by_walk(struct ablkcipher_request *req)
 	ce_task_desc_t *task = NULL;
 	void *nextiv_virt = NULL;
 	struct ablkcipher_walk walk;
-	struct crypto_ablkcipher *tfm = crypto_ablkcipher_reqtfm(req);
-	ss_aes_req_ctx_t *req_ctx = ablkcipher_request_ctx(req);
-	ss_aes_ctx_t *ctx = crypto_ablkcipher_ctx(tfm);
+	struct crypto_skcipher *tfm = crypto_skcipher_reqtfm(req);
+	ss_aes_req_ctx_t *req_ctx = skcipher_request_ctx(req);
+	ss_aes_ctx_t *ctx = crypto_skcipher_ctx(tfm);
 	u32 flow = ctx->comm.flow;
-	u32 iv_size = crypto_ablkcipher_ivsize(tfm);
+	u32 iv_size = crypto_skcipher_ivsize(tfm);
 
 	ss_change_clk(req_ctx->type);
 
@@ -755,7 +755,7 @@ static int ss_aes_start(ss_aes_ctx_t *ctx, ss_aes_req_ctx_t *req_ctx, int len)
 }
 
 /* verify the key_len */
-int ss_aes_key_valid(struct crypto_ablkcipher *tfm, int len)
+int ss_aes_key_valid(struct crypto_skcipher *tfm, int len)
 {
 	if (unlikely(len > SS_RSA_MAX_SIZE)) {
 		SS_ERR("Unsupported key size: %d\n", len);
@@ -1093,10 +1093,10 @@ void ss_load_iv(ss_aes_ctx_t *ctx, ss_aes_req_ctx_t *req_ctx,
 	ss_print_hex(ctx->iv, ctx->iv_size, ctx->iv);
 }
 
-int ss_aes_one_req(sunxi_ss_t *sss, struct ablkcipher_request *req)
+int ss_aes_one_req(sunxi_ss_t *sss, struct skcipher_request *req)
 {
 	int ret = 0;
-	struct crypto_ablkcipher *tfm = NULL;
+	struct crypto_skcipher *tfm = NULL;
 	ss_aes_ctx_t *ctx = NULL;
 	ss_aes_req_ctx_t *req_ctx = NULL;
 
@@ -1108,11 +1108,11 @@ int ss_aes_one_req(sunxi_ss_t *sss, struct ablkcipher_request *req)
 
 	ss_dev_lock();
 
-	tfm = crypto_ablkcipher_reqtfm(req);
-	req_ctx = ablkcipher_request_ctx(req);
-	ctx = crypto_ablkcipher_ctx(tfm);
+	tfm = crypto_skcipher_reqtfm(req);
+	req_ctx = skcipher_request_ctx(req);
+	ctx = crypto_skcipher_ctx(tfm);
 
-	ss_load_iv(ctx, req_ctx, req->info, crypto_ablkcipher_ivsize(tfm));
+	ss_load_iv(ctx, req_ctx, req->info, crypto_skcipher_ivsize(tfm));
 
 	req_ctx->dma_src.sg = req->src;
 	req_ctx->dma_dst.sg = req->dst;
