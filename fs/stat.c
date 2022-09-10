@@ -269,6 +269,7 @@ int vfs_fstatat(int dfd, const char __user *filename,
 
 	return ret;
 }
+EXPORT_SYMBOL(vfs_fstatat);
 
 #ifdef __ARCH_WANT_OLD_STAT
 
