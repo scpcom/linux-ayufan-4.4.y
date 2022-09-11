@@ -202,27 +202,27 @@ static struct regulator_ops axp20x_ops_sw = {
 	.is_enabled		= regulator_is_enabled_regmap,
 };
 
-static const struct regulator_linear_range axp152_dcdc1_ranges[] = {
+static const struct linear_range axp152_dcdc1_ranges[] = {
 	REGULATOR_LINEAR_RANGE(1700000, 0x0, 0x4, 100000),
 	REGULATOR_LINEAR_RANGE(2400000, 0x5, 0x9, 100000),
 	REGULATOR_LINEAR_RANGE(3000000, 0xa, 0xf, 100000),
 };
 
-static const struct regulator_linear_range axp152_aldo1_ranges[] = {
+static const struct linear_range axp152_aldo1_ranges[] = {
 	REGULATOR_LINEAR_RANGE(1200000, 0x0, 0x8, 100000),
 	REGULATOR_LINEAR_RANGE(2500000, 0x9, 0x9, 0),
 	REGULATOR_LINEAR_RANGE(2700000, 0xa, 0xb, 100000),
 	REGULATOR_LINEAR_RANGE(3000000, 0xc, 0xf, 100000),
 };
 
-static const struct regulator_linear_range axp152_aldo2_ranges[] = {
+static const struct linear_range axp152_aldo2_ranges[] = {
 	REGULATOR_LINEAR_RANGE(1200000, 0x0, 0x8, 100000),
 	REGULATOR_LINEAR_RANGE(2500000, 0x9, 0x9, 0),
 	REGULATOR_LINEAR_RANGE(2700000, 0xa, 0xb, 100000),
 	REGULATOR_LINEAR_RANGE(3000000, 0xc, 0xf, 100000),
 };
 
-static const struct regulator_linear_range axp152_ldo0_ranges[] = {
+static const struct linear_range axp152_ldo0_ranges[] = {
 	REGULATOR_LINEAR_RANGE(5000000, 0x0, 0x0, 0),
 	REGULATOR_LINEAR_RANGE(3300000, 0x1, 0x1, 0),
 	REGULATOR_LINEAR_RANGE(2800000, 0x2, 0x2, 0),
@@ -254,7 +254,7 @@ static const struct regulator_desc axp152_regulators[] = {
 	AXP_DESC_FIXED(AXP152, RTC18, "rtcldo18", "rtcldo18in", 1800),
 };
 
-static const struct regulator_linear_range axp20x_ldo4_ranges[] = {
+static const struct linear_range axp20x_ldo4_ranges[] = {
 	REGULATOR_LINEAR_RANGE(1250000, 0x0, 0x0, 0),
 	REGULATOR_LINEAR_RANGE(1300000, 0x1, 0x8, 100000),
 	REGULATOR_LINEAR_RANGE(2500000, 0x9, 0x9, 0),
@@ -342,17 +342,17 @@ static const struct regulator_desc axp22x_drivevbus_regulator = {
 	.ops		= &axp20x_ops_sw,
 };
 
-static const struct regulator_linear_range axp806_dcdca_ranges[] = {
+static const struct linear_range axp806_dcdca_ranges[] = {
 	REGULATOR_LINEAR_RANGE(600000, 0x0, 0x32, 10000),
 	REGULATOR_LINEAR_RANGE(1120000, 0x33, 0x47, 20000),
 };
 
-static const struct regulator_linear_range axp806_dcdcd_ranges[] = {
+static const struct linear_range axp806_dcdcd_ranges[] = {
 	REGULATOR_LINEAR_RANGE(600000, 0x0, 0x2d, 20000),
 	REGULATOR_LINEAR_RANGE(1600000, 0x2e, 0x3f, 100000),
 };
 
-static const struct regulator_linear_range axp806_cldo2_ranges[] = {
+static const struct linear_range axp806_cldo2_ranges[] = {
 	REGULATOR_LINEAR_RANGE(700000, 0x0, 0x1a, 100000),
 	REGULATOR_LINEAR_RANGE(3400000, 0x1b, 0x1f, 200000),
 };
@@ -395,7 +395,7 @@ static const struct regulator_desc axp806_regulators[] = {
 	AXP_DESC_SW(AXP806, SW, "sw", "swin", AXP806_PWR_OUT_CTRL2, BIT(7)),
 };
 
-static const struct regulator_linear_range axp809_dcdc4_ranges[] = {
+static const struct linear_range axp809_dcdc4_ranges[] = {
 	REGULATOR_LINEAR_RANGE(600000, 0x0, 0x2f, 20000),
 	REGULATOR_LINEAR_RANGE(1800000, 0x30, 0x38, 100000),
 };
@@ -453,30 +453,30 @@ static const struct regulator_desc axp809_regulators[] = {
 	AXP_DESC_SW(AXP809, SW, "sw", "swin", AXP22X_PWR_OUT_CTRL2, BIT(6)),
 };
 
-static const struct regulator_linear_range axp2101_dcdc2_ranges[] = {
+static const struct linear_range axp2101_dcdc2_ranges[] = {
 	REGULATOR_LINEAR_RANGE(500000, 0x0, 0x46, 10000),
 	REGULATOR_LINEAR_RANGE(1220000, 0x47, 0x57, 20000),
 };
 
-static const struct regulator_linear_range axp2101_dcdc3_ranges[] = {
+static const struct linear_range axp2101_dcdc3_ranges[] = {
 	REGULATOR_LINEAR_RANGE(500000, 0x0, 0x46, 10000),
 	REGULATOR_LINEAR_RANGE(1220000, 0x47, 0x57, 20000),
 	REGULATOR_LINEAR_RANGE(1600000, 0x58, 0x6a, 100000),
 };
 
-static const struct regulator_linear_range axp2101_dcdc4_ranges[] = {
+static const struct linear_range axp2101_dcdc4_ranges[] = {
 	REGULATOR_LINEAR_RANGE(500000, 0x0, 0x46, 10000),
 	REGULATOR_LINEAR_RANGE(1220000, 0x47, 0x66, 20000),
 };
 
-static const struct regulator_linear_range axp2101_rtcldo_ranges[] = {
+static const struct linear_range axp2101_rtcldo_ranges[] = {
 	REGULATOR_LINEAR_RANGE(1800000, 0x0, 0x0, 0),
 	REGULATOR_LINEAR_RANGE(2500000, 0x1, 0x1, 0),
 	REGULATOR_LINEAR_RANGE(2800000, 0x2, 0x2, 0),
 	REGULATOR_LINEAR_RANGE(3300000, 0x3, 0x3, 0),
 };
 
-static const struct regulator_linear_range axp2101_dcdc5_ranges[] = {
+static const struct linear_range axp2101_dcdc5_ranges[] = {
 	REGULATOR_LINEAR_RANGE(1400000, 0x0, 0x17, 100000),
 	REGULATOR_LINEAR_RANGE(1200000, 0x19, 0x19, 0),
 };
@@ -518,20 +518,20 @@ static const struct regulator_desc axp2101_regulators[] = {
 		 AXP2101_CPUSLD_CFG, 0x1f, AXP2101_LDO_EN_CFG0, BIT(6)),
 };
 
-static const struct regulator_linear_range axp15_dcdc1_ranges[] = {
+static const struct linear_range axp15_dcdc1_ranges[] = {
 	REGULATOR_LINEAR_RANGE(1700000, 0x0, 0x4, 100000),
 	REGULATOR_LINEAR_RANGE(2400000, 0x5, 0x9, 100000),
 	REGULATOR_LINEAR_RANGE(3000000, 0xA, 0xF, 100000),
 };
 
-static const struct regulator_linear_range axp15_aldo2_ranges[] = {
+static const struct linear_range axp15_aldo2_ranges[] = {
 	REGULATOR_LINEAR_RANGE(1200000, 0x0, 0x8, 100000),
 	REGULATOR_LINEAR_RANGE(2500000, 0x9, 0x9, 0),
 	REGULATOR_LINEAR_RANGE(2700000, 0xA, 0xB, 100000),
 	REGULATOR_LINEAR_RANGE(3000000, 0xC, 0xF, 100000),
 };
 
-static const struct regulator_linear_range axp15_ldo0_ranges[] = {
+static const struct linear_range axp15_ldo0_ranges[] = {
 	REGULATOR_LINEAR_RANGE(5000000, 0x0, 0x0, 0),
 	REGULATOR_LINEAR_RANGE(3300000, 0x1, 0x1, 0),
 	REGULATOR_LINEAR_RANGE(2800000, 0x2, 0x2, 0),
@@ -563,18 +563,18 @@ static const struct regulator_desc axp15_regulators[] = {
 		 AXP15_GPIO0_VOL, 0xf, AXP15_GPIO2_CTL, 0x7, 0x2, 0x7),
 };
 
-static const struct regulator_linear_range axp1530_dcdc1_ranges[] = {
+static const struct linear_range axp1530_dcdc1_ranges[] = {
 	REGULATOR_LINEAR_RANGE(500000, 0x0, 0x46, 10000),
 	REGULATOR_LINEAR_RANGE(1220000, 0x47, 0x57, 20000),
 	REGULATOR_LINEAR_RANGE(1600000, 0x58, 0x6A, 100000),
 };
 
-static const struct regulator_linear_range axp1530_dcdc2_ranges[] = {
+static const struct linear_range axp1530_dcdc2_ranges[] = {
 	REGULATOR_LINEAR_RANGE(500000, 0x0, 0x46, 10000),
 	REGULATOR_LINEAR_RANGE(1220000, 0x47, 0x57, 20000),
 };
 
-static const struct regulator_linear_range axp1530_dcdc3_ranges[] = {
+static const struct linear_range axp1530_dcdc3_ranges[] = {
 	REGULATOR_LINEAR_RANGE(500000, 0x0, 0x46, 10000),
 	REGULATOR_LINEAR_RANGE(1220000, 0x47, 0x66, 20000),
 };
@@ -592,22 +592,22 @@ static const struct regulator_desc axp1530_regulators[] = {
 		AXP1530_DLDO1_CONRTOL, 0x1f, AXP1530_OUTPUT_CONTROL, BIT(4)),
 };
 
-static const struct regulator_linear_range axp858_dcdc2_ranges[] = {
+static const struct linear_range axp858_dcdc2_ranges[] = {
 	REGULATOR_LINEAR_RANGE(500000, 0x0, 0x46, 10000),
 	REGULATOR_LINEAR_RANGE(1220000, 0x47, 0x57, 20000),
 };
 
-static const struct regulator_linear_range axp858_dcdc3_ranges[] = {
+static const struct linear_range axp858_dcdc3_ranges[] = {
 	REGULATOR_LINEAR_RANGE(500000, 0x0, 0x46, 10000),
 	REGULATOR_LINEAR_RANGE(1220000, 0x47, 0x57, 20000),
 };
 
-static const struct regulator_linear_range axp858_dcdc4_ranges[] = {
+static const struct linear_range axp858_dcdc4_ranges[] = {
 	REGULATOR_LINEAR_RANGE(500000, 0x0, 0x46, 10000),
 	REGULATOR_LINEAR_RANGE(1220000, 0x47, 0x57, 20000),
 };
 
-static const struct regulator_linear_range axp858_dcdc5_ranges[] = {
+static const struct linear_range axp858_dcdc5_ranges[] = {
 	REGULATOR_LINEAR_RANGE(800000, 0x0, 0x20, 10000),
 	REGULATOR_LINEAR_RANGE(1140000, 0x21, 0x44, 20000),
 };
@@ -659,46 +659,46 @@ static const struct regulator_desc axp858_regulators[] = {
 	AXP_DESC_SW(AXP858, DC1SW, "dc1sw", "swin", AXP858_OUTPUT_CONTROL3, BIT(7)),
 };
 
-static const struct regulator_linear_range axp803_dcdc1_ranges[] = {
+static const struct linear_range axp803_dcdc1_ranges[] = {
 	REGULATOR_LINEAR_RANGE(1600000, 0x0, 0x12, 100000),
 };
 
-static const struct regulator_linear_range axp803_dcdc2_ranges[] = {
+static const struct linear_range axp803_dcdc2_ranges[] = {
 	REGULATOR_LINEAR_RANGE(500000, 0x0, 0x46, 10000),
 	REGULATOR_LINEAR_RANGE(1220000, 0x47, 0x4b, 20000),
 };
 
-static const struct regulator_linear_range axp803_dcdc3_ranges[] = {
+static const struct linear_range axp803_dcdc3_ranges[] = {
 	REGULATOR_LINEAR_RANGE(500000, 0x0, 0x46, 10000),
 	REGULATOR_LINEAR_RANGE(1220000, 0x47, 0x4b, 20000),
 };
 
-static const struct regulator_linear_range axp803_dcdc4_ranges[] = {
+static const struct linear_range axp803_dcdc4_ranges[] = {
 	REGULATOR_LINEAR_RANGE(500000, 0x0, 0x46, 10000),
 	REGULATOR_LINEAR_RANGE(1220000, 0x47, 0x4b, 20000),
 };
 
-static const struct regulator_linear_range axp803_dcdc5_ranges[] = {
+static const struct linear_range axp803_dcdc5_ranges[] = {
 	REGULATOR_LINEAR_RANGE(800000, 0x0, 0x20, 10000),
 	REGULATOR_LINEAR_RANGE(1140000, 0x21, 0x44, 20000),
 };
 
-static const struct regulator_linear_range axp803_dcdc6_ranges[] = {
+static const struct linear_range axp803_dcdc6_ranges[] = {
 	REGULATOR_LINEAR_RANGE(600000, 0x0, 0x32, 10000),
 	REGULATOR_LINEAR_RANGE(1120000, 0x33, 0x47, 20000),
 };
 
-static const struct regulator_linear_range axp803_dcdc7_ranges[] = {
+static const struct linear_range axp803_dcdc7_ranges[] = {
 	REGULATOR_LINEAR_RANGE(600000, 0x0, 0x32, 10000),
 	REGULATOR_LINEAR_RANGE(1120000, 0x33, 0x47, 20000),
 };
 
-static const struct regulator_linear_range axp803_aldo3_ranges[] = {
+static const struct linear_range axp803_aldo3_ranges[] = {
 	REGULATOR_LINEAR_RANGE(700000, 0x0, 0x1a, 100000),
 	REGULATOR_LINEAR_RANGE(3300000, 0x1b, 0x1f, 0),
 };
 
-static const struct regulator_linear_range axp803_dldo2_ranges[] = {
+static const struct linear_range axp803_dldo2_ranges[] = {
 	REGULATOR_LINEAR_RANGE(700000, 0x0, 0x1b, 100000),
 	REGULATOR_LINEAR_RANGE(3600000, 0x1c, 0x1f, 200000),
 };
@@ -759,18 +759,18 @@ static const struct regulator_desc axp803_regulators[] = {
 	AXP_DESC_SW(AXP803, DC1SW, "dc1sw", "swin", AXP803_LDO_DC_EN2, BIT(7)),
 };
 
-static struct regulator_linear_range axp2202_dcdc1_ranger[] = {
+static struct linear_range axp2202_dcdc1_ranger[] = {
 	REGULATOR_LINEAR_RANGE(500000, 0x0, 0x46, 10000),
 	REGULATOR_LINEAR_RANGE(1220000, 0x47, 0x57, 20000),
 };
 
-static struct regulator_linear_range axp2202_dcdc2_ranger[] = {
+static struct linear_range axp2202_dcdc2_ranger[] = {
 	REGULATOR_LINEAR_RANGE(500000, 0, 0x46, 10000),
 	REGULATOR_LINEAR_RANGE(1220000, 0x47, 0x57, 20000),
 	REGULATOR_LINEAR_RANGE(1600000, 0x58, 0x6b, 100000),
 };
 
-static struct regulator_linear_range axp2202_dcdc3_ranger[] = {
+static struct linear_range axp2202_dcdc3_ranger[] = {
 	REGULATOR_LINEAR_RANGE(500000, 0, 0x46, 10000),
 	REGULATOR_LINEAR_RANGE(1220000, 0x47, 0x66, 20000),
 };
