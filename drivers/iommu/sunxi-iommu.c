@@ -10,6 +10,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the
  * GNU General Public License for more details.
  ******************************************************************************/
+#include <linux/compiler.h>
 #include <linux/of_iommu.h>
 #include <linux/module.h>
 #include <linux/of_platform.h>
@@ -1757,10 +1758,10 @@ static int sunxi_iommu_probe(struct platform_device *pdev)
 	}
 
 //	iommu_device_set_ops(&sunxi_iommu->iommu, &sunxi_iommu_ops);
-	sunxi_iommu->iommu.ops = &sunxi_iommu_ops;
-	iommu_device_set_fwnode(&sunxi_iommu->iommu, dev->fwnode);
+//	sunxi_iommu->iommu.ops = &sunxi_iommu_ops;
+//	iommu_device_set_fwnode(&sunxi_iommu->iommu, dev->fwnode);
 
-	ret = iommu_device_register(&sunxi_iommu->iommu);
+	ret = iommu_device_register(&sunxi_iommu->iommu, &sunxi_iommu_ops, dev);
 	if (ret) {
 		dev_err(dev, "Failed to register iommu\n");
 		return ret;
