@@ -1287,7 +1287,7 @@ static struct sun6i_dma_config sun50iw9_dma_cfg = {
 			     BIT(DMA_SLAVE_BUSWIDTH_2_BYTES) |
 			     BIT(DMA_SLAVE_BUSWIDTH_4_BYTES) |
 			     BIT(DMA_SLAVE_BUSWIDTH_8_BYTES),
-	.has_mbus_clk = true,
+	//.has_mbus_clk = true,
 };
 
 /*
