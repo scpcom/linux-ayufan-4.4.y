@@ -150,6 +150,11 @@
 					 | _PAGE_EXEC)
 #define PAGE_KERNEL_SO		__pgprot((_PAGE_KERNEL | _PAGE_SO) & \
 					~(_PAGE_CACHE | _PAGE_BUF))
+#ifdef CONFIG_RISCV_RELAXED_ALLOC_RWX
+#define PAGE_KERNEL_MAY_EXEC	PAGE_KERNEL_EXEC
+#else
+#define PAGE_KERNEL_MAY_EXEC	PAGE_KERNEL
+#endif
 
 #define PAGE_TABLE		__pgprot(_PAGE_TABLE)
 

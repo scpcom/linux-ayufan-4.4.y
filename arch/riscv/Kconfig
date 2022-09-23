@@ -33,8 +33,8 @@ config RISCV
 	select ARCH_HAS_PTE_SPECIAL
 	select ARCH_HAS_SET_DIRECT_MAP if MMU
 	select ARCH_HAS_SET_MEMORY if MMU
-	select ARCH_HAS_STRICT_KERNEL_RWX if MMU && !XIP_KERNEL
-	select ARCH_HAS_STRICT_MODULE_RWX if MMU && !XIP_KERNEL
+	select ARCH_HAS_STRICT_KERNEL_RWX if MMU && !RISCV_RELAXED_RWX
+	select ARCH_HAS_STRICT_MODULE_RWX if MMU && !RISCV_RELAXED_RWX
 	select ARCH_HAS_TICK_BROADCAST if GENERIC_CLOCKEVENTS_BROADCAST
 	select ARCH_HAS_UBSAN_SANITIZE_ALL
 	select ARCH_OPTIONAL_KERNEL_RWX if ARCH_HAS_STRICT_KERNEL_RWX
@@ -529,6 +529,15 @@ config PHYS_RAM_BASE
 	  explicitly specified to run early relocations of read-write data
 	  from flash to RAM.
 
+config RISCV_RELAXED_RWX
+	bool
+	default n
+
+config RISCV_RELAXED_ALLOC_RWX
+	bool
+	select RISCV_RELAXED_RWX
+	default n
+
 config XIP_KERNEL
 	bool "Kernel Execute-In-Place from ROM"
 	depends on MMU && SPARSEMEM
@@ -536,6 +545,7 @@ config XIP_KERNEL
 	# fail to build since XIP doesn't support large kernels.
 	depends on !COMPILE_TEST
 	select PHYS_RAM_BASE_FIXED
+	select RISCV_RELAXED_RWX
 	help
 	  Execute-In-Place allows the kernel to run from non-volatile storage
 	  directly addressable by the CPU, such as NOR flash. This saves RAM
