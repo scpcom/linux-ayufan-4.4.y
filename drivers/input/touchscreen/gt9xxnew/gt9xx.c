@@ -3283,6 +3283,7 @@ Output:
 ********************************************************/
 static int goodix_ts_init(void)
 {
+	int ret = 0;
 #if !USE_DETECT
 	struct device_node *np = NULL;
 	char *p = NULL;
@@ -3313,11 +3314,20 @@ static int goodix_ts_init(void)
 	gtp_esd_check_workqueue = create_workqueue("gtp_esd_check");
 #endif
 
-	i2c_add_driver(&goodix_ts_driver);
-	if (config_info.probed)
-		return 0;
-	else
-		return -1;
+	ret = i2c_add_driver(&goodix_ts_driver);
+	if ((!ret) && (!config_info.probed))
+		ret = -1;
+	if (ret)
+		goto err_register;
+	return 0;
+
+err_register:
+	i2c_del_driver(&goodix_ts_driver);
+	if (goodix_wq) {
+		destroy_workqueue(goodix_wq);
+		goodix_wq = NULL;
+	}
+	return ret;
 }
 
 /*******************************************************
@@ -3334,6 +3344,7 @@ static void __exit goodix_ts_exit(void)
 	i2c_del_driver(&goodix_ts_driver);
 	if (goodix_wq) {
 		destroy_workqueue(goodix_wq);
+		goodix_wq = NULL;
 	}
 	input_set_power_enable(&(config_info.input_type), 0);
 	input_sensor_free(&(config_info.input_type));
