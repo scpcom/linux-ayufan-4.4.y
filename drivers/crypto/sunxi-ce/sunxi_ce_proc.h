@@ -14,7 +14,8 @@
 #define _SUNXI_SECURITY_SYSTEM_PROC_H_
 
 #include <crypto/aes.h>
-#include <crypto/sha.h>
+#include <crypto/sha1.h>
+#include <crypto/sha2.h>
 #include <crypto/algapi.h>
 #include <linux/scatterlist.h>
 

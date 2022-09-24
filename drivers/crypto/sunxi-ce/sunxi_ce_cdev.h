@@ -14,7 +14,7 @@
 #define _SUNXI_CE_CDEV_H_
 
 #include <crypto/aes.h>
-#include <crypto/sha.h>
+#include <crypto/sha2.h>
 #include <crypto/hash.h>
 
 #include <linux/scatterlist.h>
