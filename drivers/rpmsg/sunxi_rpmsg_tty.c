@@ -170,7 +170,7 @@ static int rpmsg_tty_write(struct tty_struct *tty, const unsigned char *buf,
 	return total;
 }
 
-static int rpmsg_tty_write_room(struct tty_struct *tty)
+static unsigned int rpmsg_tty_write_room(struct tty_struct *tty)
 {
 	struct rpmsg_tty_port *cport = rpmsg_tty_get(tty->index);
 	struct rpmsg_device *rpdev = cport->rpdev;
@@ -338,7 +338,7 @@ static int __init rpmsg_tty_init(void)
 	tty_unregister_driver(rpmsg_tty_driver);
 
 tty_error:
-	put_tty_driver(rpmsg_tty_driver);
+	tty_driver_kref_put(rpmsg_tty_driver);
 
 	return err;
 }
@@ -353,7 +353,7 @@ static void __exit rpmsg_tty_exit(void)
 	/* release port allocations */
 	for (index = 0; index < MAX_TTY_RPMSG_INDEX; index++)
 		kfree(rpmsg_tty_driver->ports[index]);
-	put_tty_driver(rpmsg_tty_driver);
+	tty_driver_kref_put(rpmsg_tty_driver);
 }
 
 module_init(rpmsg_tty_init);
