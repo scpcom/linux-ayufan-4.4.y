@@ -244,7 +244,6 @@ static int rpmsg_tty_probe(struct rpmsg_device *rpdev)
 	cport->port->ops = &rpmsg_tty_port_ops;
 
 	spin_lock_init(&cport->rx_lock);
-	cport->port->low_latency = cport->port->flags | ASYNC_LOW_LATENCY;
 	cport->rpdev = rpdev;
 
 	tty_dev = tty_port_register_device(cport->port, rpmsg_tty_driver,
