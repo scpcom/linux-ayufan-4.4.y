@@ -88,7 +88,7 @@ int ccu_pll_notifier_register(struct ccu_pll_nb *pll_nb);
 
 int devm_sunxi_ccu_probe(struct device *dev, void __iomem *reg,
 			 const struct sunxi_ccu_desc *desc);
-void of_sunxi_ccu_probe(struct device_node *node, void __iomem *reg,
+int of_sunxi_ccu_probe(struct device_node *node, void __iomem *reg,
 			const struct sunxi_ccu_desc *desc);
 
 void sunxi_ccu_sleep_init(void __iomem *reg_base,

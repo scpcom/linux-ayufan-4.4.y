@@ -315,7 +315,7 @@ int devm_sunxi_ccu_probe(struct device *dev, void __iomem *reg,
 	return 0;
 }
 
-void of_sunxi_ccu_probe(struct device_node *node, void __iomem *reg,
+int of_sunxi_ccu_probe(struct device_node *node, void __iomem *reg,
 			const struct sunxi_ccu_desc *desc)
 {
 	struct sunxi_ccu *ccu;
@@ -323,13 +323,16 @@ void of_sunxi_ccu_probe(struct device_node *node, void __iomem *reg,
 
 	ccu = kzalloc(sizeof(*ccu), GFP_KERNEL);
 	if (!ccu)
-		return;
+		return -ENOMEM;
 
 	ret = sunxi_ccu_probe(ccu, NULL, node, reg, desc);
 	if (ret) {
 		pr_err("%pOF: probing clocks failed: %d\n", node, ret);
 		kfree(ccu);
+		return ret;
 	}
+
+	return 0;
 }
 
 void set_reg(char __iomem *addr, u32 val, u8 bw, u8 bs)
