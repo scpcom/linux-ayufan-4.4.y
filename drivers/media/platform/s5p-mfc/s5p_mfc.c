@@ -858,7 +858,7 @@ static int s5p_mfc_open(struct file *file)
 	 * We'll do mostly sequential access, so sacrifice TLB efficiency for
 	 * faster allocation.
 	 */
-	q->dma_attrs = DMA_ATTR_ALLOC_SINGLE_PAGES | DMA_ATTR_NON_CONSISTENT | DMA_ATTR_NO_KERNEL_MAPPING;
+	q->dma_attrs = DMA_ATTR_ALLOC_SINGLE_PAGES | DMA_ATTR_NO_KERNEL_MAPPING;
 	q->mem_ops = &vb2_dma_contig_memops;
 	q->timestamp_flags = V4L2_BUF_FLAG_TIMESTAMP_COPY;
 	ret = vb2_queue_init(q);
@@ -893,7 +893,7 @@ static int s5p_mfc_open(struct file *file)
 	 * We'll do mostly sequential access, so sacrifice TLB efficiency for
 	 * faster allocation.
 	 */
-	q->dma_attrs = DMA_ATTR_ALLOC_SINGLE_PAGES | DMA_ATTR_NON_CONSISTENT | DMA_ATTR_NO_KERNEL_MAPPING;
+	q->dma_attrs = DMA_ATTR_ALLOC_SINGLE_PAGES | DMA_ATTR_NO_KERNEL_MAPPING;
 	q->mem_ops = &vb2_dma_contig_memops;
 	q->timestamp_flags = V4L2_BUF_FLAG_TIMESTAMP_COPY;
 	ret = vb2_queue_init(q);
@@ -1284,15 +1284,11 @@ static int s5p_mfc_probe(struct platform_device *pdev)
 	spin_lock_init(&dev->condlock);
 	dev->plat_dev = pdev;
 	if (!dev->plat_dev) {
-		mfc_err("No platform data specified\n");
+		dev_err(&pdev->dev, "No platform data specified\n");
 		return -ENODEV;
 	}
 
 	dev->variant = of_device_get_match_data(&pdev->dev);
-	if (!dev->variant) {
-		dev_err(&pdev->dev, "Failed to get device MFC hardware variant information\n");
-		return -ENOENT;
-	}
 
 	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
 	dev->regs_base = devm_ioremap_resource(&pdev->dev, res);
