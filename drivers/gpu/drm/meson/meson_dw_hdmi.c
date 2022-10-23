@@ -613,6 +613,7 @@ static irqreturn_t dw_hdmi_top_thread_irq(int irq, void *dev_id)
 
 static enum drm_mode_status
 dw_hdmi_mode_valid(struct drm_connector *connector,
+		   void *data,
 		   const struct drm_display_info *display_info,
 		   const struct drm_display_mode *mode)
 {
@@ -1068,7 +1069,7 @@ static int __maybe_unused meson_dw_hdmi_pm_resume(struct device *dev)
 
 	meson_dw_hdmi_init(meson_dw_hdmi);
 
-	dw_hdmi_resume(dev, meson_dw_hdmi->hdmi);
+	dw_hdmi_resume(meson_dw_hdmi->hdmi);
 
 	return 0;
 }
