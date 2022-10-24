@@ -75,6 +75,13 @@ static int cedrus_s_ctrl(struct v4l2_ctrl *ctrl)
 	struct vb2_queue *vq = v4l2_m2m_get_vq(ctx->fh.m2m_ctx,
 					       V4L2_BUF_TYPE_VIDEO_CAPTURE);
 
+	if (ctrl->id == V4L2_CID_STATELESS_HEVC_SPS) {
+		const struct v4l2_ctrl_hevc_sps *sps = ctrl->p_new.p_hevc_sps;
+
+		ctx->bit_depth = max(sps->bit_depth_luma_minus8,
+				     sps->bit_depth_chroma_minus8) + 8;
+	}
+
 	if (!vb2_is_busy(vq) && !vb2_is_streaming(vq))
 		cedrus_reset_cap_format(ctx);
 
