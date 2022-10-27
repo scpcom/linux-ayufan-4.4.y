@@ -1184,10 +1184,8 @@
 &vopl {
 	rockchip,grf = <&grf>;
 	status = "okay";
-/*
 	assigned-clocks = <&cru DCLK_VOP1_DIV>;
 	assigned-clock-parents = <&cru PLL_VPLL>;
-*/
 };
 
 &vopl_mmu {
@@ -1197,10 +1195,8 @@
 &vopb {
 	rockchip,grf = <&grf>;
 	status = "okay";
-/*
 	assigned-clocks = <&cru DCLK_VOP0_DIV>;
 	assigned-clock-parents = <&cru PLL_CPLL>;
-*/
 };
 
 &vopb_mmu {
