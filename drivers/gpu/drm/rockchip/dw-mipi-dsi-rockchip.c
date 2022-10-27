@@ -282,6 +282,7 @@ struct dw_mipi_dsi_rockchip {
 	struct dw_mipi_dsi *dmd;
 	const struct rockchip_dw_dsi_chip_data *cdata;
 	struct dw_mipi_dsi_plat_data pdata;
+	int devcnt;
 };
 
 static struct dw_mipi_dsi_rockchip *to_dsi(struct drm_encoder *encoder)
@@ -1442,6 +1443,9 @@ err_clkdisable:
 static int dw_mipi_dsi_rockchip_remove(struct platform_device *pdev)
 {
 	struct dw_mipi_dsi_rockchip *dsi = platform_get_drvdata(pdev);
+
+	if (dsi->devcnt == 0)
+		component_del(dsi->dev, &dw_mipi_dsi_rockchip_ops);
 
 	dw_mipi_dsi_remove(dsi->dmd);
 
