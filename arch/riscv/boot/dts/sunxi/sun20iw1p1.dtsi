@@ -273,7 +273,8 @@
 
 		syscon: syscon@3000000 {
 			compatible = "allwinner,sun20i-d1-system-control",
-				     "allwinner,sun50i-a64-system-control";
+				     "allwinner,sun50i-a64-system-control",
+				     "allwinner,sunxi-system-control";
 			reg = <0x0 0x3000000 0x0 0x1000>;
 			#address-cells = <2>;
 			#size-cells = <2>;
