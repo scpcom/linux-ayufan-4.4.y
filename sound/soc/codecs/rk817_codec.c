@@ -26,17 +26,20 @@
 #include <sound/soc.h>
 #include <sound/tlv.h>
 #include "rk817_codec.h"
+#ifdef CONFIG_SND_SOC_HP_SPK_FIREFLY
 #include <sound/jack.h>
 
 #include <linux/iio/iio.h>
 #include <linux/iio/machine.h>
 #include <linux/iio/driver.h>
 #include <linux/iio/consumer.h>
+#endif
 
 static int dbg_enable;
 module_param_named(dbg_level, dbg_enable, int, 0644);
 
 //firefly
+#ifdef CONFIG_SND_SOC_HP_SPK_FIREFLY
 #define FIRST_BOOT                       1
 #define FF_MUTE                          2
 #define UFF_MUTE                         3
@@ -46,6 +49,7 @@ module_param_named(dbg_level, dbg_enable, int, 0644);
 #define RK817_ADC_INVALID_ADVALUE	-1
 #define RK817_ADC_SAMPLE_JIFFIES	(500 / (MSEC_PER_SEC / HZ))     /* 500ms */
 static int hp_enable_global = 0;
+#endif
 
 #define DBG(args...) \
 	do { \
@@ -117,21 +121,27 @@ struct rk817_codec_priv {
 	long int playback_path;
 	long int capture_path;
 
+#ifdef CONFIG_SND_SOC_HP_SPK_FIREFLY
 	struct delayed_work adc_poll_work;
 	struct delayed_work hp_det_gpio_poll_work;
+#endif
 	struct gpio_desc *spk_ctl_gpio;
 	struct gpio_desc *hp_ctl_gpio;
+#ifdef CONFIG_SND_SOC_HP_SPK_FIREFLY
 	struct iio_channel *chan;
 	int spk_gpio;
 	int hp_det_gpio;
+#endif
 	int spk_mute_delay;
 	int hp_mute_delay;
+#ifdef CONFIG_SND_SOC_HP_SPK_FIREFLY
 	int hp_det_adc_value;
 	bool hp_insert;
 	struct snd_soc_jack hp_jack;
 
 	int mute; //daijh
 	int firefly_state;//daijh
+#endif
 };
 
 static const struct reg_default rk817_reg_defaults[] = {
@@ -279,15 +289,19 @@ static bool rk817_codec_register(struct device *dev, unsigned int reg)
 static int rk817_codec_ctl_gpio(struct rk817_codec_priv *rk817,
 				int gpio, int level)
 {
+#ifdef CONFIG_SND_SOC_HP_SPK_FIREFLY
 	if ((gpio & CODEC_SET_SPK) &&
 	    rk817->spk_gpio){
 		gpio_set_value(rk817->spk_gpio, level);
 		DBG("%s set spk clt %d\n", __func__, level);
 	}
+#endif
 	if ((gpio & CODEC_SET_SPK) &&
 	    rk817->spk_ctl_gpio) {
 		gpiod_set_value(rk817->spk_ctl_gpio, level);
+#ifdef CONFIG_SND_SOC_HP_SPK_FIREFLY
 		gpio_set_value(rk817->spk_gpio, level);
+#endif
 		DBG("%s set spk clt %d\n", __func__, level);
 		msleep(rk817->spk_mute_delay);
 	}
@@ -642,10 +656,15 @@ static int rk817_playback_path_put(struct snd_kcontrol *kcontrol,
 				    DACMT_ENABLE, DACMT_DISABLE);
 
 #ifndef CONFIG_ARCH_ROCKCHIP_ODROIDGOA
+#ifdef CONFIG_SND_SOC_HP_SPK_FIREFLY
 		if (hp_enable_global) {
 			snd_soc_write(codec, RK817_CODEC_DDAC_VOLL, rk817->hp_volume);
 			snd_soc_write(codec, RK817_CODEC_DDAC_VOLR, rk817->hp_volume);
 		}
+#else
+		snd_soc_write(codec, RK817_CODEC_DDAC_VOLL, rk817->hp_volume);
+		snd_soc_write(codec, RK817_CODEC_DDAC_VOLR, rk817->hp_volume);
+#endif
 		break;
 	case BT:
 		break;
@@ -883,6 +902,7 @@ static void rk817_output_ctl(struct rk817_codec_priv *rk817)
 #ifndef CONFIG_ARCH_ROCKCHIP_ODROIDGOA
 		case RING_SPK_HP:
 #endif
+#ifdef CONFIG_SND_SOC_HP_SPK_FIREFLY
 			if (hp_enable_global) {
 				rk817_codec_ctl_gpio(rk817, CODEC_SET_SPK, 0);
 				rk817_codec_ctl_gpio(rk817, CODEC_SET_HP, 1);
@@ -890,6 +910,10 @@ static void rk817_output_ctl(struct rk817_codec_priv *rk817)
 				rk817_codec_ctl_gpio(rk817, CODEC_SET_SPK, 1);
 				rk817_codec_ctl_gpio(rk817, CODEC_SET_HP, 0);
 			}
+#else
+			rk817_codec_ctl_gpio(rk817, CODEC_SET_SPK, 1);
+			rk817_codec_ctl_gpio(rk817, CODEC_SET_HP, 1);
+#endif
 			break;
 		default:
 			break;
@@ -902,7 +926,9 @@ static int rk817_digital_mute(struct snd_soc_dai *dai, int mute)
 {
 	struct snd_soc_codec *codec = dai->codec;
 	struct rk817_codec_priv *rk817 = snd_soc_codec_get_drvdata(codec);
+#ifdef CONFIG_SND_SOC_HP_SPK_FIREFLY
 	rk817->mute = mute; //daijh
+#endif
 	DBG("%s %d\n", __func__, mute);
 	if (mute)
 		snd_soc_update_bits(codec, RK817_CODEC_DDAC_MUTE_MIXCTL,
@@ -1072,6 +1098,7 @@ static int rk817_resume(struct snd_soc_codec *codec)
 	return 0;
 }
 
+#ifdef CONFIG_SND_SOC_HP_SPK_FIREFLY
 static int rk817_hp_jack_change(struct notifier_block *nb,
         unsigned long flags, void *data)
 {
@@ -1188,7 +1215,7 @@ static void rk817_hp_det_gpio_poll(struct work_struct *work)
 	}
         schedule_delayed_work(&rk817->hp_det_gpio_poll_work, RK817_ADC_SAMPLE_JIFFIES);
 }
-
+#endif
 
 
 static int rk817_probe(struct snd_soc_codec *codec)
@@ -1211,6 +1238,7 @@ static int rk817_probe(struct snd_soc_codec *codec)
 	snd_soc_add_codec_controls(codec, rk817_snd_path_controls,
 				   ARRAY_SIZE(rk817_snd_path_controls));
 
+#ifdef CONFIG_SND_SOC_HP_SPK_FIREFLY
 	rk817->hp_insert = false;
 	rk817->firefly_state = FIRST_BOOT;
         if (rk817->chan) {
@@ -1226,6 +1254,7 @@ static int rk817_probe(struct snd_soc_codec *codec)
                         schedule_delayed_work(&rk817->hp_det_gpio_poll_work,
                                                   3000);
         }
+#endif
 	return 0;
 }
 
@@ -1270,12 +1299,14 @@ static int rk817_codec_parse_dt_property(struct device *dev,
 					 struct rk817_codec_priv *rk817)
 {
 	struct device_node *node = dev->parent->of_node;
+#ifdef CONFIG_SND_SOC_HP_SPK_FIREFLY
 	struct iio_channel *chan;
 	struct pinctrl_state    *gpio_state, *default_state;
 	struct pinctrl          *pinctrl;
 	enum of_gpio_flags flags;
-	int ret;
 	u32 adc_value;
+#endif
+	int ret;
 
 	DBG("%s()\n", __func__);
 
@@ -1292,6 +1323,7 @@ static int rk817_codec_parse_dt_property(struct device *dev,
 		return -ENODEV;
 	}
 
+#ifdef CONFIG_SND_SOC_HP_SPK_FIREFLY
         chan = iio_channel_get(dev, NULL);
         if (IS_ERR(chan)) {
                 printk("%s: rk809 have no io-channels defined\n", __func__);
@@ -1334,7 +1366,7 @@ static int rk817_codec_parse_dt_property(struct device *dev,
 		gpio_direction_output(rk817->spk_gpio, 0);
 	  }
 	}
-
+#endif
 
 	rk817->hp_ctl_gpio = devm_gpiod_get_optional(dev, "hp-ctl",
 						  GPIOD_OUT_LOW);

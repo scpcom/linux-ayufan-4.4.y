@@ -1016,4 +1016,11 @@ config SND_SOC_TPA6130A2
 	tristate "Texas Instruments TPA6130A2 headphone amplifier"
 	depends on I2C
 
+config SND_SOC_HP_SPK_FIREFLY
+	tristate "Firefly HP/SPK support"
+	depends on SND_SOC_RK817
+	default n
+	help
+	  Select this option if your Firefly board needs to run headphone/speaker.
+
 endmenu
