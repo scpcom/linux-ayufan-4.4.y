@@ -181,6 +181,9 @@ obj-$(CONFIG_FPGA)		+= fpga/
 obj-$(CONFIG_FSI)		+= fsi/
 obj-$(CONFIG_TEE)		+= tee/
 obj-$(CONFIG_GATOR)		+= gator/
+ifneq ($(CONFIG_GATOR),)
+obj-y += gator/gator_builtin.o
+endif
 obj-$(CONFIG_SUNXI_DRM_HEAP)	+= sunxi_drm_heap/
 obj-$(CONFIG_MULTIPLEXER)	+= mux/
 obj-$(CONFIG_UNISYS_VISORBUS)	+= visorbus/
