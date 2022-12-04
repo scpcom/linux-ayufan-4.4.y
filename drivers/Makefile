@@ -194,3 +194,6 @@ obj-$(CONFIG_RK_HEADSET)	+= headset_observe/
 obj-$(CONFIG_RK_NAND)		+= rk_nand/
 obj-$(CONFIG_ROCKCHIP_RKNPU)	+= rknpu/
 obj-$(CONFIG_GATOR)		+= gator/
+ifneq ($(CONFIG_GATOR),)
+obj-y += gator/gator_builtin.o
+endif
