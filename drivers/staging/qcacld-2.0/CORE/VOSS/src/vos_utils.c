@@ -72,7 +72,7 @@
 #include <linux/ieee80211.h>
 #include <crypto/hash.h>
 #include <crypto/aes.h>
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 12, 0))
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 10, 0))
 #include <crypto/internal/cipher.h>
 #endif
 #include <wcnss_api.h>
