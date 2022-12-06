@@ -1467,8 +1467,7 @@ static int mmc_select_hs400es(struct mmc_card *card)
 	 * SEND_STATUS reliably at the initial frequency.
 	 */
 	mmc_set_timing(host, MMC_TIMING_MMC_HS);
-	/* Set clock immediately after changing timing */
-	mmc_set_clock(host, card->ext_csd.hs_max_dtr);
+	mmc_set_bus_speed(card);
 
 	err = mmc_switch_status(card, true);
 	if (err)
