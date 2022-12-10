@@ -11,7 +11,9 @@
 #include <linux/module.h>
 #include <linux/of.h>
 #include <linux/of_device.h>
+#ifdef CONFIG_PWM_ROCKCHIP_ACTIVE_PINCTRL
 #include <linux/pinctrl/consumer.h>
+#endif
 #include <linux/platform_device.h>
 #include <linux/pwm.h>
 #include <linux/time.h>
@@ -38,8 +40,10 @@ struct rockchip_pwm_chip {
 	struct pwm_chip chip;
 	struct clk *clk;
 	struct clk *pclk;
+#ifdef CONFIG_PWM_ROCKCHIP_ACTIVE_PINCTRL
 	struct pinctrl *pinctrl;
 	struct pinctrl_state *active_state;
+#endif
 	const struct rockchip_pwm_data *data;
 	void __iomem *base;
 	unsigned long clk_rate;
@@ -249,8 +253,10 @@ static int rockchip_pwm_apply(struct pwm_chip *chip, struct pwm_device *pwm,
 			goto out;
 	}
 
-	if (state->enabled)
+#ifdef CONFIG_PWM_ROCKCHIP_ACTIVE_PINCTRL
+	if (state->enabled && pc->active_state)
 		ret = pinctrl_select_state(pc->pinctrl, pc->active_state);
+#endif
 out:
 	clk_disable(pc->pclk);
 
@@ -392,6 +398,7 @@ static int rockchip_pwm_probe(struct platform_device *pdev)
 		goto err_clk;
 	}
 
+#ifdef CONFIG_PWM_ROCKCHIP_ACTIVE_PINCTRL
 	pc->pinctrl = devm_pinctrl_get(&pdev->dev);
 	if (IS_ERR(pc->pinctrl)) {
 		dev_err(&pdev->dev, "Get pinctrl failed!\n");
@@ -400,9 +407,10 @@ static int rockchip_pwm_probe(struct platform_device *pdev)
 
 	pc->active_state = pinctrl_lookup_state(pc->pinctrl, "active");
 	if (IS_ERR(pc->active_state)) {
-		dev_err(&pdev->dev, "No active pinctrl state\n");
-		return PTR_ERR(pc->active_state);
+		dev_warn(&pdev->dev, "No active pinctrl state\n");
+		pc->active_state = NULL;
 	}
+#endif
 
 	platform_set_drvdata(pdev, pc);
 
