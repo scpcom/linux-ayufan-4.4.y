@@ -414,6 +414,13 @@ config PWM_ROCKCHIP_ONESHOT
 	help
 	  Support Rockchip pwm oneshot mode for specified number of cycles.
 
+config PWM_ROCKCHIP_ACTIVE_PINCTRL
+	bool "Rockchip PWM active pinctrl support"
+	depends on PWM_ROCKCHIP
+	default y if PWM_ROCKCHIP
+	help
+	  Make pwm pinctrl setting after pwm enabled.
+
 config PWM_SAMSUNG
 	tristate "Samsung PWM support"
 	depends on PLAT_SAMSUNG || ARCH_S5PV210 || ARCH_EXYNOS || COMPILE_TEST
