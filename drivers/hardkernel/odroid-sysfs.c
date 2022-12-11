@@ -29,6 +29,7 @@
 #include <linux/irq.h>
 #include <linux/sysfs.h>
 #include <linux/io.h>
+#include <linux/of.h>
 #include <asm/setup.h>
 
 MODULE_AUTHOR("Hardkernel Co,.Ltd");
@@ -65,7 +66,7 @@ int board_boot_from_emmc(void)
 }
 EXPORT_SYMBOL(board_boot_from_emmc);
 
-static ssize_t show_bootdev(struct class *class,
+static ssize_t bootdev_show(struct class *class,
 		struct class_attribute *attr, char *buf)
 {
 	const char *boot_dev_name[BOOT_DEVICE_MAX] = {
@@ -95,15 +96,18 @@ static int __init setup_boot_mode(char *str)
 }
 __setup("storagemedia=", setup_boot_mode);
 
-static struct class_attribute odroid_class_attrs[] = {
-	__ATTR(bootdev, 0444, show_bootdev, NULL),
-	__ATTR_NULL,
+static CLASS_ATTR_RO(bootdev);
+
+static struct attribute *odroid_class_attrs[] = {
+	&class_attr_bootdev.attr,
+	NULL,
 };
+ATTRIBUTE_GROUPS(odroid_class);
 
 static struct class odroid_class = {
 	.name = "odroid",
 	.owner = THIS_MODULE,
-	.class_attrs = odroid_class_attrs,
+	.class_groups = odroid_class_groups,
 };
 
 static int odroid_sysfs_probe(struct platform_device *pdev)
