@@ -984,7 +984,10 @@
 	status = "okay";
 };
 
-&soc_thermal {
+&thermal_zones {
+    /delete-node/ cpu-thermal;
+
+    soc_thermal: soc-thermal {
 	polling-delay-passive = <20>; /* milliseconds */
 	polling-delay = <1000>; /* milliseconds */
 	sustainable-power = <1000>; /* milliwatts */
@@ -1120,6 +1123,7 @@
 			contribution = <1024>;
 		};
 	};
+    };
 };
 
 &tsadc {
