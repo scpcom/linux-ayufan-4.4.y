@@ -4587,6 +4587,20 @@ CONFIG_RK_IOMMU=y
 # Rpmsg drivers
 #
 
+
+#
+# Rockchip CPU selection
+#
+# CONFIG_CPU_PX30 is not set
+# CONFIG_CPU_RK1808 is not set
+# CONFIG_CPU_RK3308 is not set
+# CONFIG_CPU_RK3328 is not set
+# CONFIG_CPU_RK3368 is not set
+CONFIG_CPU_RK3399=y
+# CONFIG_CPU_RK3568 is not set
+# CONFIG_CPU_RK3588 is not set
+# end of Rockchip CPU selection
+
 #
 # SOC (System On Chip) specific Drivers
 #
