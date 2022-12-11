@@ -967,7 +967,7 @@
 	bus-width = <4>;
 	supports-highspeed;
 	mmc-ddr-1_8v;
-	sd-uhs-sdr104;
+	//sd-uhs-sdr104;
 	disable-wp;
 	num-slots = <1>;
 	vqmmc-supply = <&vcc_sd>;
