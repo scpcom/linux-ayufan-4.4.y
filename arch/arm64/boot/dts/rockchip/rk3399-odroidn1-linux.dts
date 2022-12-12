@@ -502,9 +502,10 @@
 };
 
 &dmc_opp_table {
-	opp-933000000 {
-		opp-hz = /bits/ 64 <933000000>;
-		opp-microvolt = <900000>;
+	opp-928000000 {
+		opp-hz = /bits/ 64 <928000000>;
+		opp-microvolt = <925000>;
+		status = "disabled";
 	};
 };
 
