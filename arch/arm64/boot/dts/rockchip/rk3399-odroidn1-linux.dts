@@ -1365,3 +1365,14 @@
 	status = "okay";
 };
 
+&cdn_dp {
+	status = "disabled";
+};
+
+&dp_in_vopb {
+	status = "disabled";
+};
+
+&edp_in_vopb {
+	status = "disabled";
+};
