@@ -582,8 +582,9 @@
 		<594000000 0x8039 0x0000 0x019d>,
 		<000000000 0x0000 0x0000 0x0000>;
 
+	ddc-i2c-bus = <&i2c3>;
 	pinctrl-names = "default";
-	pinctrl-0 = <&hdmi_i2c_xfer>, <&hdmi_cec>;
+	pinctrl-0 = <&hdmi_cec>;
 
 	ports {
 		/* Don't use vopl for hdmi */
@@ -832,6 +833,12 @@
 	status = "okay";
 	i2c-scl-rising-time-ns = <300>;
 	i2c-scl-falling-time-ns = <15>;
+};
+
+&i2c3 {
+	i2c-scl-rising-time-ns = <450>;
+	i2c-scl-falling-time-ns = <15>;
+	status = "okay";
 };
 
 &i2c4 {
