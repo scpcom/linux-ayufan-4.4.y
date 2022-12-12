@@ -993,12 +993,14 @@
 	mmc-hs400-enhanced-strobe;
 	non-removable;
 	status = "okay";
-	supports-emmc;
+	no-sdio;
+	no-sd;
 };
 
 &sdmmc {
 	max-frequency = <150000000>;
-	supports-sd;
+	no-sdio;
+	no-mmc;
 	bus-width = <4>;
 	supports-highspeed;
 	mmc-ddr-1_8v;
