@@ -664,6 +664,10 @@
 		vcc12-supply = <&vcc3v3_sys>;
 		vddio-supply = <&vcc1v8_pmu>;
 
+		rtc {
+			status = "okay";
+		};
+
 		regulators {
 			vdd_center: DCDC_REG1 {
 				regulator-always-on;
