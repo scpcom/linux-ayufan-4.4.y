@@ -2197,15 +2197,12 @@
 	};
 
 	gpu: gpu@ff9a0000 {
-		compatible = "arm,malit860",
-			     "arm,malit86x",
-			     "arm,malit8xx",
-			     "arm,mali-midgard";
+		compatible = "rockchip,rk3399-mali", "arm,mali-midgard";
 		reg = <0x0 0xff9a0000 0x0 0x10000>;
-		interrupts = <GIC_SPI 20 IRQ_TYPE_LEVEL_HIGH 0>,
-			     <GIC_SPI 21 IRQ_TYPE_LEVEL_HIGH 0>,
-			     <GIC_SPI 19 IRQ_TYPE_LEVEL_HIGH 0>;
-		interrupt-names = "job", "mmu", "gpu";
+		interrupts = <GIC_SPI 19 IRQ_TYPE_LEVEL_HIGH 0>,
+			     <GIC_SPI 20 IRQ_TYPE_LEVEL_HIGH 0>,
+			     <GIC_SPI 21 IRQ_TYPE_LEVEL_HIGH 0>;
+		interrupt-names = "GPU", "JOB", "MMU";
 		clocks = <&cru ACLK_GPU>;
 		clock-names = "clk_mali";
 		#cooling-cells = <2>;
