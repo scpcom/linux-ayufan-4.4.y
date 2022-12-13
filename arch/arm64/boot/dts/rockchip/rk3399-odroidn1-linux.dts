@@ -190,36 +190,6 @@
 		#sound-dai-cells = <0>;
 	};
 
-	hdmi_sound: hdmi-sound {
-		status = "disabled";
-		compatible = "simple-audio-card";
-		simple-audio-card,format = "i2s";
-		simple-audio-card,mclk-fs = <256>;
-		simple-audio-card,name = "rockchip,hdmi";
-
-		simple-audio-card,cpu {
-			sound-dai = <&i2s2>;
-		};
-		simple-audio-card,codec {
-			sound-dai = <&dw_hdmi_audio>;
-		};
-	};
-
-	hdmi_codec: hdmi-codec {
-		compatible = "simple-audio-card";
-		simple-audio-card,format = "i2s";
-		simple-audio-card,mclk-fs = <256>;
-		simple-audio-card,name = "HDMI-CODEC";
-
-		simple-audio-card,cpu {
-			sound-dai = <&i2s2>;
-		};
-
-		simple-audio-card,codec {
-			sound-dai = <&hdmi>;
-		};
-	};
-
 	vcc12v_dcin: vcc12v-dcin {
 		compatible = "regulator-fixed";
 		regulator-name = "vcc12v_dcin";
@@ -592,6 +562,10 @@
 			/delete-node/ endpoint@1;
 		};
 	};
+};
+
+&hdmi_sound {
+	status = "okay";
 };
 
 &dp_in_vopl {
