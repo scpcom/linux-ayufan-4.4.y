@@ -1805,7 +1805,7 @@ static int imx477_g_frame_interval(struct v4l2_subdev *sd,
 	return 0;
 }
 
-static int imx477_g_mbus_config(struct v4l2_subdev *sd,
+static int imx477_g_mbus_config(struct v4l2_subdev *sd, unsigned int pad_id,
 				   struct v4l2_mbus_config *config)
 {
 	u32 val = 0;
@@ -2024,13 +2024,13 @@ static const struct v4l2_subdev_core_ops imx477_core_ops = {
 static const struct v4l2_subdev_video_ops imx477_video_ops = {
 	.s_stream = imx477_set_stream,
 	.g_frame_interval = imx477_g_frame_interval,
-	.g_mbus_config = imx477_g_mbus_config,
 };
 
 static const struct v4l2_subdev_pad_ops imx477_pad_ops = {
 	.enum_mbus_code = imx477_enum_mbus_code,
 	.get_fmt = imx477_get_pad_format,
 	.set_fmt = imx477_set_pad_format,
+	.get_mbus_config = imx477_g_mbus_config,
 	.get_selection = imx477_get_selection,
 	.enum_frame_size = imx477_enum_frame_size,
 	.enum_frame_interval = imx477_enum_frame_interval,
