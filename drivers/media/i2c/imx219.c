@@ -901,7 +901,7 @@ static int imx219_enum_frame_interval(struct v4l2_subdev *sd,
 	return 0;
 }
 
-static int imx219_g_mbus_config(struct v4l2_subdev *sd,
+static int imx219_g_mbus_config(struct v4l2_subdev *sd, unsigned int pad_id,
 				struct v4l2_mbus_config *config)
 {
 	u32 val = 0;
@@ -919,7 +919,6 @@ static int imx219_g_mbus_config(struct v4l2_subdev *sd,
 static struct v4l2_subdev_video_ops imx219_subdev_video_ops = {
 	.s_stream = imx219_s_stream,
 	.g_frame_interval = imx219_g_frame_interval,
-	.g_mbus_config = imx219_g_mbus_config,
 };
 
 static struct v4l2_subdev_core_ops imx219_subdev_core_ops = {
@@ -936,6 +935,7 @@ static const struct v4l2_subdev_pad_ops imx219_subdev_pad_ops = {
 	.enum_frame_interval = imx219_enum_frame_interval,
 	.set_fmt = imx219_set_fmt,
 	.get_fmt = imx219_get_fmt,
+	.get_mbus_config = imx219_g_mbus_config,
 };
 
 static struct v4l2_subdev_ops imx219_subdev_ops = {
