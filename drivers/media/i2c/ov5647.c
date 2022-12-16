@@ -20,6 +20,7 @@
  */
 
 #include <linux/clk.h>
+#include <linux/compat.h>
 #include <linux/delay.h>
 #include <linux/i2c.h>
 #include <linux/init.h>
