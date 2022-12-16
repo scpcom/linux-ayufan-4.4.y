@@ -705,7 +705,7 @@ static int ov5647_g_frame_interval(struct v4l2_subdev *sd,
 }
 
 #define OV5647_LANES	2
-static int ov5647_g_mbus_config(struct v4l2_subdev *sd,
+static int ov5647_g_mbus_config(struct v4l2_subdev *sd, unsigned int pad_id,
 				struct v4l2_mbus_config *config)
 {
 	u32 val = 0;
@@ -722,7 +722,6 @@ static int ov5647_g_mbus_config(struct v4l2_subdev *sd,
 static const struct v4l2_subdev_video_ops ov5647_subdev_video_ops = {
 	.s_stream = ov5647_s_stream,
 	.g_frame_interval = ov5647_g_frame_interval,
-	.g_mbus_config = ov5647_g_mbus_config,
 };
 
 static int ov5647_enum_mbus_code(struct v4l2_subdev *sd,
@@ -863,6 +862,7 @@ static const struct v4l2_subdev_pad_ops ov5647_subdev_pad_ops = {
 	.enum_frame_interval = ov5647_enum_frame_interval,
 	.get_fmt = ov5647_get_fmt,
 	.set_fmt = ov5647_set_fmt,
+	.get_mbus_config = ov5647_g_mbus_config,
 };
 
 static const struct v4l2_subdev_ops ov5647_subdev_ops = {
