@@ -815,7 +815,6 @@ static const struct drm_display_mode k101_im2byl02_default_mode = {
 
 static const struct drm_display_mode odroid_hj080be31ia1_default_mode = {
 	.clock		= 66000,
-	.vrefresh	= 60,
 
 	.hdisplay	= 800,
 	.hsync_start	= 800 + 32,
