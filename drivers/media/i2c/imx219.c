@@ -10,6 +10,7 @@
  * V0.0X01.0X02 add function g_mbus_config.
  */
 #include <linux/clk.h>
+#include <linux/compat.h>
 #include <linux/delay.h>
 #include <linux/i2c.h>
 #include <linux/init.h>
