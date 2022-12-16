@@ -26,4 +26,4 @@ dtbo-$(CONFIG_ARCH_ROCKCHIP_ODROIDM1) += \
 	uart1.dtbo
 
 targets += $(dtbo-y)
-always := $(dtbo-y)
+always-y += $(dtbo-y)
