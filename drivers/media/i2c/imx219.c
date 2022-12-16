@@ -909,7 +909,7 @@ static int imx219_g_mbus_config(struct v4l2_subdev *sd, unsigned int pad_id,
 	val = 1 << (IMX219_LANES - 1) |
 	      V4L2_MBUS_CSI2_CHANNEL_0 |
 	      V4L2_MBUS_CSI2_CONTINUOUS_CLOCK;
-	config->type = V4L2_MBUS_CSI2;
+	config->type = V4L2_MBUS_CSI2_DPHY;
 	config->flags = val;
 
 	return 0;
