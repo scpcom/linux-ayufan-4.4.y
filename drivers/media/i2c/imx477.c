@@ -2213,7 +2213,7 @@ static void imx477_free_controls(struct imx477 *imx477)
 static int imx477_check_hwcfg(struct device *dev)
 {
 	struct fwnode_handle *endpoint;
-	struct v4l2_fwnode_endpoint *ep_cfg;
+	struct v4l2_fwnode_endpoint ep_cfg = { .bus_type = 0 };
 	int ret = -EINVAL;
 
 	endpoint = fwnode_graph_get_next_endpoint(dev_fwnode(dev), NULL);
@@ -2222,35 +2222,35 @@ static int imx477_check_hwcfg(struct device *dev)
 		return -EINVAL;
 	}
 
-	ep_cfg = v4l2_fwnode_endpoint_alloc_parse(endpoint);
-	if (IS_ERR(ep_cfg)) {
+	ret = v4l2_fwnode_endpoint_alloc_parse(endpoint, &ep_cfg);
+	if (ret) {
 		dev_err(dev, "could not parse endpoint\n");
 		goto error_out;
 	}
 
 	/* Check the number of MIPI CSI2 data lanes */
-	if (ep_cfg->bus.mipi_csi2.num_data_lanes != 2) {
+	if (ep_cfg.bus.mipi_csi2.num_data_lanes != 2) {
 		dev_err(dev, "only 2 data lanes are currently supported\n");
 		goto error_out;
 	}
 
 	/* Check the link frequency set in device tree */
-	if (!ep_cfg->nr_of_link_frequencies) {
+	if (!ep_cfg.nr_of_link_frequencies) {
 		dev_err(dev, "link-frequency property not found in DT\n");
 		goto error_out;
 	}
 
-	if (ep_cfg->nr_of_link_frequencies != 1 ||
-	    ep_cfg->link_frequencies[0] != IMX477_DEFAULT_LINK_FREQ) {
+	if (ep_cfg.nr_of_link_frequencies != 1 ||
+	    ep_cfg.link_frequencies[0] != IMX477_DEFAULT_LINK_FREQ) {
 		dev_err(dev, "Link frequency not supported: %lld\n",
-			ep_cfg->link_frequencies[0]);
+			ep_cfg.link_frequencies[0]);
 		goto error_out;
 	}
 
 	ret = 0;
 
 error_out:
-	v4l2_fwnode_endpoint_free(ep_cfg);
+	v4l2_fwnode_endpoint_free(&ep_cfg);
 	fwnode_handle_put(endpoint);
 
 	return ret;
