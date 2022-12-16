@@ -227,23 +227,19 @@
 
 &rk809_sound {
 	status = "okay";
-	compatible = "simple-audio-card";
-	simple-audio-card,format = "i2s";
-	simple-audio-card,mclk-fs = <256>;
-	simple-audio-card,name = "rockchip,rk809-codec";
-	simple-audio-card,hp-det-gpio = <&gpio0 RK_PB0 GPIO_ACTIVE_HIGH>;
-	simple-audio-card,widgets = "Headphones", "Headphone Jack";
-
-	simple-audio-card,cpu {
-		sound-dai = <&i2s1_8ch>;
-	};
-	simple-audio-card,codec {
-		sound-dai = <&rk809_codec>;
-	};
+	compatible = "rockchip,multicodecs-card";
+	rockchip,card-name = "rockchip-rk809";
+	hp-det-gpio = <&gpio0 RK_PB0 GPIO_ACTIVE_HIGH>;
+	rockchip,format = "i2s";
+	rockchip,mclk-fs = <256>;
+	rockchip,cpu = <&i2s1_8ch>;
+	rockchip,codec = <&rk809_codec>;
+	pinctrl-names = "default";
+	pinctrl-0 = <&hp_det>;
 };
 
 &rk809_codec {
-	#sound-dai-cells = <0>;
+	#sound-dai-cells = <1>;
 	compatible = "rockchip,rk809-codec", "rockchip,rk817-codec";
 	clocks = <&cru I2S1_MCLKOUT>;
 	clock-names = "mclk";
@@ -251,7 +247,7 @@
 	assigned-clock-rates = <12288000>;
 	assigned-clock-parents = <&cru I2S1_MCLKOUT_TX>, <&cru I2S1_MCLKOUT_TX>;
 	pinctrl-names = "default";
-	pinctrl-0 = <&i2s1m0_mclk &hp_det>;
+	pinctrl-0 = <&i2s1m0_mclk>;
 	hp-volume = <3>;
 	spk-volume = <3>;
 	status = "okay";
