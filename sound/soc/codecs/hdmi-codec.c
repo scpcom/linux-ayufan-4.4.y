@@ -282,7 +282,9 @@ struct hdmi_codec_priv {
 
 static const struct snd_soc_dapm_widget hdmi_widgets[] = {
 	SND_SOC_DAPM_OUTPUT("TX"),
+#ifdef CONFIG_SND_SOC_HDMI_RX
 	SND_SOC_DAPM_OUTPUT("RX"),
+#endif
 };
 
 enum {
@@ -799,15 +801,17 @@ static int hdmi_dai_probe(struct snd_soc_dai *dai)
 			.sink = "TX",
 			.source = dai->driver->playback.stream_name,
 		},
+#ifdef CONFIG_SND_SOC_HDMI_RX
 		{
 			.sink = dai->driver->capture.stream_name,
 			.source = "RX",
 		},
+#endif
 	};
 	int ret;
 
 	dapm = snd_soc_component_get_dapm(dai->component);
-	ret = snd_soc_dapm_add_routes(dapm, route, 2);
+	ret = snd_soc_dapm_add_routes(dapm, route, ARRAY_SIZE(route));
 	if (ret)
 		return ret;
 
@@ -897,6 +901,7 @@ static const struct snd_soc_dai_driver hdmi_i2s_dai = {
 		.formats = I2S_FORMATS,
 		.sig_bits = 24,
 	},
+#ifdef CONFIG_SND_SOC_HDMI_RX
 	.capture = {
 		.stream_name = "Capture",
 		.channels_min = 2,
@@ -905,6 +910,7 @@ static const struct snd_soc_dai_driver hdmi_i2s_dai = {
 		.formats = I2S_FORMATS,
 		.sig_bits = 24,
 	},
+#endif
 	.ops = &hdmi_codec_i2s_dai_ops,
 	.pcm_new = hdmi_codec_pcm_new,
 };
@@ -921,6 +927,7 @@ static const struct snd_soc_dai_driver hdmi_spdif_dai = {
 		.rates = HDMI_RATES,
 		.formats = SPDIF_FORMATS,
 	},
+#ifdef CONFIG_SND_SOC_HDMI_RX
 	.capture = {
 		.stream_name = "Capture",
 		.channels_min = 2,
@@ -928,6 +935,7 @@ static const struct snd_soc_dai_driver hdmi_spdif_dai = {
 		.rates = HDMI_RATES,
 		.formats = SPDIF_FORMATS,
 	},
+#endif
 	.ops = &hdmi_codec_spdif_dai_ops,
 	.pcm_new = hdmi_codec_pcm_new,
 };
