@@ -5078,7 +5078,7 @@ int stmmac_dvr_probe(struct device *device,
 		dev_info(priv->device, "TSO feature enabled\n");
 	}
 
-	if (priv->dma_cap.sphen && !priv->plat->sph_disable) {
+	if (priv->dma_cap.sphen) {
 		ndev->hw_features |= NETIF_F_GRO;
 		if (!priv->plat->sph_disable) {
 			priv->sph = true;
