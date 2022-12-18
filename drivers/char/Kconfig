@@ -481,8 +481,6 @@ config ROCK_GPIOMEM
 	  page to the user's pointer. This driver can allow to access gpio
 	  memory area in user account.
 
-endmenu
-
 config RANDOM_TRUST_CPU
 	bool "Initialize RNG using CPU RNG instructions"
 	default y
