@@ -761,5 +761,6 @@ static void __exit dax_core_exit(void)
 
 MODULE_AUTHOR("Intel Corporation");
 MODULE_LICENSE("GPL v2");
+MODULE_IMPORT_NS(VFS_internal_I_am_really_a_filesystem_and_am_NOT_a_driver);
 subsys_initcall(dax_core_init);
 module_exit(dax_core_exit);
