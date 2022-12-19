@@ -67,6 +67,7 @@
 	rx_delay = <0x2d>;
 
 	phy-handle = <&rgmii_phy0>;
+	hardkernel,mac-rule = <2>;
 	status = "okay";
 };
 

@@ -489,6 +489,7 @@
 	pinctrl-0 = <&rgmii_pins>;
 	tx_delay = <0x100>;
 	rx_delay = <0x11>;
+	hardkernel,mac-rule = <1>;
 	status = "okay";
 };
 

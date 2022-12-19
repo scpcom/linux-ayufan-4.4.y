@@ -78,6 +78,7 @@ struct rk_priv_data {
 	struct regmap *xpcs;
 
 	unsigned char otp_data[4];
+	int hk_mac_rule;
 };
 
 /* XPCS */
@@ -2162,6 +2163,12 @@ static struct rk_priv_data *rk_gmac_setup(struct platform_device *pdev,
 	dev_info(dev, "integrated PHY? (%s).\n",
 		 bsp_priv->integrated_phy ? "yes" : "no");
 
+	ret = of_property_read_u32(dev->of_node, "hardkernel,mac-rule", &value);
+	if (ret)
+		bsp_priv->hk_mac_rule = device_property_read_bool(dev, "hardkernel,mac-rule");
+	else
+		bsp_priv->hk_mac_rule = value;
+
 	bsp_priv->pdev = pdev;
 
 	return bsp_priv;
@@ -2309,7 +2316,6 @@ int dwmac_rk_get_phy_interface(struct stmmac_priv *priv)
 }
 EXPORT_SYMBOL(dwmac_rk_get_phy_interface);
 
-#if defined(CONFIG_PLAT_RK3399_ODROIDN1)
 static unsigned char mac_addr[6];
 #define CPUID_SIZE	16
 
@@ -2420,20 +2426,14 @@ void rk_setup_mac_addr(unsigned char *addr)
 	addr[4] = (char)(0xff & (temp >> 8));
 	addr[5] = (char)(0xff & temp);
 }
-#endif /* CONFIG_PLAT_RK3399_ODROIDN1 */
 
 static void rk_get_eth_addr(void *priv, unsigned char *addr)
 {
 	struct rk_priv_data *bsp_priv = priv;
 	struct device *dev = &bsp_priv->pdev->dev;
-#if !defined(CONFIG_ARCH_ROCKCHIP_ODROID_COMMON)
 	unsigned char ethaddr[ETH_ALEN * MAX_ETH] = {0};
 	int ret, id = bsp_priv->bus_id;
-#else
-	int id = bsp_priv->bus_id;
-#endif
 
-#if defined(CONFIG_PLAT_RK3399_ODROIDN1)
 	/*
 	 * we don't consider that saving and getting information
 	 * using boot storage based on rockchip vendor storage solution
@@ -2442,9 +2442,11 @@ static void rk_get_eth_addr(void *priv, unsigned char *addr)
 	 */
 	/* check mac address from kernel command (boot.ini) */
 	memcpy(addr, mac_addr, sizeof(mac_addr));
-	if (!is_valid_ether_addr(addr) || is_zero_ether_addr(addr))
-	{
-		/* if this condition comes, run initial set-up with Hardkernel rule */
+	if (is_valid_ether_addr(addr) && !is_zero_ether_addr(addr))
+		goto out;
+
+	/* if this condition comes, run initial set-up with Hardkernel rule */
+	if (bsp_priv->hk_mac_rule == 1) {
 		rk_setup_mac_addr(addr);
 		if (is_zero_ether_addr(addr)) {
 			dev_err(dev, "%s: rk_vendor_read eth mac address failed (%d)",
@@ -2458,8 +2460,8 @@ static void rk_get_eth_addr(void *priv, unsigned char *addr)
 				dev_err(dev, "%s: rk_vendor_write eth mac address failed (%d)",
 						__func__, ret);
 		}
+		goto out;
 	}
-#else /* CONFIG_PLAT_RK3399_ODROIDN1 */
 
 	if (is_valid_ether_addr(addr))
 		goto out;
@@ -2469,7 +2471,9 @@ static void rk_get_eth_addr(void *priv, unsigned char *addr)
 		return;
 	}
 
-#if !defined(CONFIG_ARCH_ROCKCHIP_ODROID_COMMON)
+	if (bsp_priv->hk_mac_rule == 2)
+		goto out;
+
 	ret = rk_vendor_read(LAN_MAC_ID, ethaddr, ETH_ALEN * MAX_ETH);
 	if (ret <= 0 ||
 	    !is_valid_ether_addr(&ethaddr[id * ETH_ALEN])) {
@@ -2491,15 +2495,12 @@ static void rk_get_eth_addr(void *priv, unsigned char *addr)
 	} else {
 		memcpy(addr, &ethaddr[id * ETH_ALEN], ETH_ALEN);
 	}
-#endif
 
 out:
-#endif /* CONFIG_PLAT_RK3399_ODROIDN1 */
 
 	dev_err(dev, "%s: mac address: %pM\n", __func__, addr);
 }
 
-#if defined(CONFIG_PLAT_RK3399_ODROIDN1)
 static int __init setup_mac_addr(char *str)
 {
 	char *opt;
@@ -2517,7 +2518,6 @@ static int __init setup_mac_addr(char *str)
 	return 1;
 }
 __setup("ethaddr=", setup_mac_addr);
-#endif
 
 static int rk_gmac_probe(struct platform_device *pdev)
 {
@@ -2682,7 +2682,7 @@ static struct platform_driver rk_gmac_dwmac_driver = {
 	},
 };
 
-#if !defined(CONFIG_ARCH_ROCKCHIP_ODROID_COMMON)
+#ifdef MODULE
 module_platform_driver(rk_gmac_dwmac_driver);
 #else
 static int __init rk_gmac_init(void)
