@@ -1763,9 +1763,9 @@ dhdpcie_config_save(dhd_bus_t *bus)
 	return BCME_OK;
 }
 
-#ifdef CONFIG_ARCH_EXYNOS
+#ifdef CONFIG_BCMDHD_EXYNOS
 dhd_pub_t *link_recovery = NULL;
-#endif /* CONFIG_ARCH_EXYNOS */
+#endif /* CONFIG_BCMDHD_EXYNOS */
 
 static void
 dhdpcie_bus_intr_init(dhd_bus_t *bus)
@@ -2033,9 +2033,9 @@ dhdpcie_dongle_attach(dhd_bus_t *bus)
 		dhdpcie_cto_init(bus, TRUE);
 	}
 
-#ifdef CONFIG_ARCH_EXYNOS
+#ifdef CONFIG_BCMDHD_EXYNOS
 	link_recovery = bus->dhd;
-#endif /* CONFIG_ARCH_EXYNOS */
+#endif /* CONFIG_BCMDHD_EXYNOS */
 
 	dhd_init_pwr_req_lock(bus);
 	dhd_init_bus_lp_state_lock(bus);

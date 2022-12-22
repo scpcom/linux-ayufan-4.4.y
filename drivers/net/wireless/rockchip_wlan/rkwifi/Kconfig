@@ -30,6 +30,13 @@ config BCMDHD_PCIE
 
 endchoice
 
+config BCMDHD_EXYNOS
+       bool "Enable Exynos support"
+       depends on BCMDHD && ARCH_EXYNOS
+       default n
+       help
+         Enables Exynos support
+
 config PCIEASPM_ROCKCHIP_WIFI_EXTENSION
 	bool "Extend ASPM function"
 	depends on BCMDHD_PCIE && PCIEASPM_EXT

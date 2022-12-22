@@ -37,13 +37,13 @@
 #include <mach/msm_pcie.h>
 #endif /* CONFIG_PCI_MSM */
 #endif /* CONFIG_ARCH_MSM */
-#ifdef CONFIG_ARCH_EXYNOS
+#ifdef CONFIG_BCMDHD_EXYNOS
 #ifndef SUPPORT_EXYNOS7420
 #include <linux/exynos-pci-noti.h>
 extern int exynos_pcie_register_event(struct exynos_pcie_register_event *reg);
 extern int exynos_pcie_deregister_event(struct exynos_pcie_register_event *reg);
 #endif /* !SUPPORT_EXYNOS7420 */
-#endif /* CONFIG_ARCH_EXYNOS */
+#endif /* CONFIG_BCMDHD_EXYNOS */
 #endif /* SUPPORT_LINKDOWN_RECOVERY */
 
 #ifdef DHD_PCIE_RUNTIMEPM
@@ -70,12 +70,12 @@ extern int exynos_pcie_deregister_event(struct exynos_pcie_register_event *reg);
 #define struct_pcie_notify		struct msm_pcie_notify
 #define struct_pcie_register_event	struct msm_pcie_register_event
 #endif /* CONFIG_ARCH_MSM */
-#ifdef CONFIG_ARCH_EXYNOS
+#ifdef CONFIG_BCMDHD_EXYNOS
 #ifndef SUPPORT_EXYNOS7420
 #define struct_pcie_notify		struct exynos_pcie_notify
 #define struct_pcie_register_event	struct exynos_pcie_register_event
 #endif /* !SUPPORT_EXYNOS7420 */
-#endif /* CONFIG_ARCH_EXYNOS */
+#endif /* CONFIG_BCMDHD_EXYNOS */
 #endif /* SUPPORT_LINKDOWN_RECOVERY */
 
 #define MAX_DHD_TX_FLOWS	320
@@ -404,13 +404,13 @@ typedef struct dhd_bus {
 	bool	d2h_intr_method;
 	bool	d2h_intr_control;
 #ifdef SUPPORT_LINKDOWN_RECOVERY
-#if defined(CONFIG_ARCH_MSM) || (defined(CONFIG_ARCH_EXYNOS) && \
+#if defined(CONFIG_ARCH_MSM) || (defined(CONFIG_BCMDHD_EXYNOS) && \
 	!defined(SUPPORT_EXYNOS7420))
 #ifdef CONFIG_ARCH_MSM
 	uint8 no_cfg_restore;
 #endif /* CONFIG_ARCH_MSM */
 	struct_pcie_register_event pcie_event;
-#endif /* CONFIG_ARCH_MSM || CONFIG_ARCH_EXYNOS && !SUPPORT_EXYNOS7420  */
+#endif /* CONFIG_ARCH_MSM || CONFIG_BCMDHD_EXYNOS && !SUPPORT_EXYNOS7420  */
 	bool read_shm_fail;
 #endif /* SUPPORT_LINKDOWN_RECOVERY */
 	int32 idletime;                 /* Control for activity timeout */
@@ -824,7 +824,7 @@ extern void dhd_bus_doorbell_timeout_reset(struct dhd_bus *bus);
  * exynos_pcie_pm_suspend : RC goes to suspend status & assert PERST
  * exynos_pcie_pm_resume : de-assert PERST & RC goes to resume status
  */
-#if defined(CONFIG_ARCH_EXYNOS)
+#if defined(CONFIG_BCMDHD_EXYNOS)
 #define EXYNOS_PCIE_VENDOR_ID 0x144d
 #if defined(CONFIG_MACH_UNIVERSAL7420) || defined(CONFIG_SOC_EXYNOS7420)
 #define EXYNOS_PCIE_DEVICE_ID 0xa575
@@ -843,7 +843,7 @@ extern void dhd_bus_doorbell_timeout_reset(struct dhd_bus *bus);
 #endif /* CONFIG_SOC_EXYNOSXXXX & CONFIG_MACH_UNIVERSALXXXX */
 extern void exynos_pcie_pm_suspend(int ch_num);
 extern void exynos_pcie_pm_resume(int ch_num);
-#endif /* CONFIG_ARCH_EXYNOS */
+#endif /* CONFIG_BCMDHD_EXYNOS */
 
 #if defined(CONFIG_ARCH_MSM)
 #define MSM_PCIE_VENDOR_ID 0x17cb
@@ -881,7 +881,7 @@ extern void exynos_pcie_pm_resume(int ch_num);
 #define DUMMY_PCIE_VENDOR_ID 0xffff
 #define DUMMY_PCIE_DEVICE_ID 0xffff
 
-#if defined(CONFIG_ARCH_EXYNOS)
+#if defined(CONFIG_BCMDHD_EXYNOS)
 #define PCIE_RC_VENDOR_ID EXYNOS_PCIE_VENDOR_ID
 #define PCIE_RC_DEVICE_ID EXYNOS_PCIE_DEVICE_ID
 #elif defined(CONFIG_ARCH_MSM)
@@ -900,7 +900,7 @@ extern void exynos_pcie_pm_resume(int ch_num);
 /* Use dummy vendor and device IDs */
 #define PCIE_RC_VENDOR_ID DUMMY_PCIE_VENDOR_ID
 #define PCIE_RC_DEVICE_ID DUMMY_PCIE_DEVICE_ID
-#endif /* CONFIG_ARCH_EXYNOS */
+#endif /* CONFIG_BCMDHD_EXYNOS */
 #endif /* linux || LINUX */
 
 #define DHD_REGULAR_RING    0

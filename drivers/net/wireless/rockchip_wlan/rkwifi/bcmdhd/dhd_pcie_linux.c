@@ -1305,7 +1305,7 @@ static int dhdpcie_resume_host_dev(dhd_bus_t *bus)
 static int dhdpcie_suspend_host_dev(dhd_bus_t *bus)
 {
 	int bcmerror = 0;
-#ifdef CONFIG_ARCH_EXYNOS
+#ifdef CONFIG_BCMDHD_EXYNOS
 	/*
 	 * XXX : SWWLAN-82173, SWWLAN-82183 WAR for SS PCIe RC
 	 * SS PCIe RC/EP is 1 to 1 mapping using different channel
@@ -1318,7 +1318,7 @@ static int dhdpcie_suspend_host_dev(dhd_bus_t *bus)
 		DHD_ERROR(("%s: RC %x:%x handle is NULL\n",
 			__FUNCTION__, PCIE_RC_VENDOR_ID, PCIE_RC_DEVICE_ID));
 	}
-#endif /* CONFIG_ARCH_EXYNOS */
+#endif /* CONFIG_BCMDHD_EXYNOS */
 	bcmerror = dhdpcie_stop_host_dev(bus);
 	return bcmerror;
 }
@@ -1662,9 +1662,9 @@ dhdpcie_pci_remove(struct pci_dev *pdev)
 #ifdef CONFIG_ARCH_MSM
 		msm_pcie_deregister_event(&bus->pcie_event);
 #endif /* CONFIG_ARCH_MSM */
-#ifdef CONFIG_ARCH_EXYNOS
+#ifdef CONFIG_BCMDHD_EXYNOS
 		exynos_pcie_deregister_event(&bus->pcie_event);
-#endif /* CONFIG_ARCH_EXYNOS */
+#endif /* CONFIG_BCMDHD_EXYNOS */
 #endif /* SUPPORT_LINKDOWN_RECOVERY */
 
 		bus->rc_dev = NULL;
@@ -1984,7 +1984,7 @@ void dhdpcie_dump_resource(dhd_bus_t *bus)
 }
 
 #ifdef SUPPORT_LINKDOWN_RECOVERY
-#if defined(CONFIG_ARCH_MSM) || defined(CONFIG_ARCH_EXYNOS)
+#if defined(CONFIG_ARCH_MSM) || defined(CONFIG_BCMDHD_EXYNOS)
 void dhdpcie_linkdown_cb(struct_pcie_notify *noti)
 {
 	struct pci_dev *pdev = (struct pci_dev *)noti->user;
@@ -2023,7 +2023,7 @@ void dhdpcie_linkdown_cb(struct_pcie_notify *noti)
 	}
 
 }
-#endif /* CONFIG_ARCH_MSM || CONFIG_ARCH_EXYNOS */
+#endif /* CONFIG_ARCH_MSM || CONFIG_BCMDHD_EXYNOS */
 #endif /* SUPPORT_LINKDOWN_RECOVERY */
 
 int dhdpcie_init(struct pci_dev *pdev)
@@ -2188,13 +2188,13 @@ int dhdpcie_init(struct pci_dev *pdev)
 		msm_pcie_register_event(&bus->pcie_event);
 		bus->no_cfg_restore = FALSE;
 #endif /* CONFIG_ARCH_MSM */
-#ifdef CONFIG_ARCH_EXYNOS
+#ifdef CONFIG_BCMDHD_EXYNOS
 		bus->pcie_event.events = EXYNOS_PCIE_EVENT_LINKDOWN;
 		bus->pcie_event.user = pdev;
 		bus->pcie_event.mode = EXYNOS_PCIE_TRIGGER_CALLBACK;
 		bus->pcie_event.callback = dhdpcie_linkdown_cb;
 		exynos_pcie_register_event(&bus->pcie_event);
-#endif /* CONFIG_ARCH_EXYNOS */
+#endif /* CONFIG_BCMDHD_EXYNOS */
 		bus->read_shm_fail = FALSE;
 #endif /* SUPPORT_LINKDOWN_RECOVERY */
 
@@ -2424,9 +2424,9 @@ dhdpcie_irq_disabled(dhd_bus_t *bus)
 	return desc->depth;
 }
 
-#if defined(CONFIG_ARCH_EXYNOS)
+#if defined(CONFIG_BCMDHD_EXYNOS)
 int pcie_ch_num = EXYNOS_PCIE_CH_NUM;
-#endif /* CONFIG_ARCH_EXYNOS */
+#endif /* CONFIG_BCMDHD_EXYNOS */
 
 int
 dhdpcie_start_host_dev(dhd_bus_t *bus)
@@ -2447,9 +2447,9 @@ dhdpcie_start_host_dev(dhd_bus_t *bus)
 		return BCME_ERROR;
 	}
 
-#ifdef CONFIG_ARCH_EXYNOS
+#ifdef CONFIG_BCMDHD_EXYNOS
 	exynos_pcie_pm_resume(pcie_ch_num);
-#endif /* CONFIG_ARCH_EXYNOS */
+#endif /* CONFIG_BCMDHD_EXYNOS */
 #ifdef CONFIG_ARCH_MSM
 #ifdef SUPPORT_LINKDOWN_RECOVERY
 	if (bus->no_cfg_restore) {
@@ -2500,9 +2500,9 @@ dhdpcie_stop_host_dev(dhd_bus_t *bus)
 		return BCME_ERROR;
 	}
 
-#ifdef CONFIG_ARCH_EXYNOS
+#ifdef CONFIG_BCMDHD_EXYNOS
 	exynos_pcie_pm_suspend(pcie_ch_num);
-#endif /* CONFIG_ARCH_EXYNOS */
+#endif /* CONFIG_BCMDHD_EXYNOS */
 #ifdef CONFIG_ARCH_MSM
 #ifdef SUPPORT_LINKDOWN_RECOVERY
 	if (bus->no_cfg_restore) {

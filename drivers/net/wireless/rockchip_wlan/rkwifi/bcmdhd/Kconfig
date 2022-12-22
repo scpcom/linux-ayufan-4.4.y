@@ -60,3 +60,10 @@ config BCMDHD_SDIO_IRQ
 	help
 	  Interrupt from SDIO DAT[1]
 endchoice
+
+config BCMDHD_EXYNOS
+       bool "Enable Exynos support"
+       depends on BCMDHD && ARCH_EXYNOS
+       default n
+       help
+         Enables Exynos support

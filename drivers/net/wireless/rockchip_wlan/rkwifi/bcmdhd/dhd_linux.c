@@ -132,11 +132,11 @@
 #include <linux/compat.h>
 #endif
 
-#ifdef CONFIG_ARCH_EXYNOS
+#ifdef CONFIG_BCMDHD_EXYNOS
 #ifndef SUPPORT_EXYNOS7420
 #include <linux/exynos-pci-ctrl.h>
 #endif /* SUPPORT_EXYNOS7420 */
-#endif /* CONFIG_ARCH_EXYNOS */
+#endif /* CONFIG_BCMDHD_EXYNOS */
 
 #ifdef DHD_WMF
 #include <dhd_wmf_linux.h>
@@ -12906,7 +12906,7 @@ dhd_bus_start(dhd_pub_t *dhdp)
 		rk_dhd_bus_l1ss_enable_rc_ep(dhdp->bus, TRUE);
 #endif /* CUSTOMER_HW_ROCKCHIP && BCMPCIE */
 
-#if defined(CONFIG_ARCH_EXYNOS) && defined(BCMPCIE)
+#if defined(CONFIG_BCMDHD_EXYNOS) && defined(BCMPCIE)
 #if !defined(CONFIG_SOC_EXYNOS8890) && !defined(SUPPORT_EXYNOS7420)
 	/* XXX: JIRA SWWLAN-139454: Added L1ss enable
 	 * after firmware download completion due to link down issue
@@ -12919,7 +12919,7 @@ dhd_bus_start(dhd_pub_t *dhdp)
 	exynos_pcie_l1ss_ctrl(1, PCIE_L1SS_CTRL_WIFI);
 #endif /* CONFIG_SOC_GS101 */
 #endif /* !CONFIG_SOC_EXYNOS8890 && !SUPPORT_EXYNOS7420 */
-#endif /* CONFIG_ARCH_EXYNOS && BCMPCIE */
+#endif /* CONFIG_BCMDHD_EXYNOS && BCMPCIE */
 #if defined(DHD_DEBUG) && defined(BCMSDIO)
 	f2_sync_end = OSL_SYSUPTIME();
 	DHD_ERROR(("Time taken for FW download and F2 ready is: %d msec\n",
@@ -18084,11 +18084,11 @@ module_exit(rockchip_wifi_exit_module_rkwifi);
  * deferred_module_init() definition to include/linux/init.h in Linux Kernel.
  * #define deferred_module_init(fn)	module_init(fn)
  */
-#if defined(CONFIG_ARCH_MSM) || defined(CONFIG_ARCH_EXYNOS)
+#if defined(CONFIG_ARCH_MSM) || defined(CONFIG_BCMDHD_EXYNOS)
 deferred_module_init_sync(dhd_module_init);
 #else
 deferred_module_init(dhd_module_init);
-#endif /* CONFIG_ARCH_MSM || CONFIG_ARCH_EXYNOS */
+#endif /* CONFIG_ARCH_MSM || CONFIG_BCMDHD_EXYNOS */
 #elif defined(USE_LATE_INITCALL_SYNC)
 late_initcall_sync(dhd_module_init);
 #else
@@ -19045,7 +19045,7 @@ dhd_net_bus_devreset(struct net_device *dev, uint8 flag)
 			dhd->fw_path, dhd->nv_path, dhd->clm_path, dhd->conf_path);
 	}
 #endif /* BCMSDIO */
-#if defined(CONFIG_ARCH_EXYNOS) && defined(BCMPCIE)
+#if defined(CONFIG_BCMDHD_EXYNOS) && defined(BCMPCIE)
 #if !defined(CONFIG_SOC_EXYNOS8890) && !defined(SUPPORT_EXYNOS7420)
 	/* XXX: JIRA SWWLAN-139454: Added L1ss enable
 	 * after firmware download completion due to link down issue
@@ -19060,7 +19060,7 @@ dhd_net_bus_devreset(struct net_device *dev, uint8 flag)
 #endif /* CONFIG_SOC_GS101  */
 	}
 #endif /* !CONFIG_SOC_EXYNOS8890 && !defined(SUPPORT_EXYNOS7420)  */
-#endif /* CONFIG_ARCH_EXYNOS && BCMPCIE */
+#endif /* CONFIG_BCMDHD_EXYNOS && BCMPCIE */
 
 	ret = dhd_bus_devreset(&dhd->pub, flag);
 
@@ -20564,7 +20564,7 @@ static void dhd_hang_process(struct work_struct *work_data)
 #endif /* IFACE_HANG_FORCE_DEV_CLOSE */
 }
 
-#if defined(CONFIG_ARCH_EXYNOS) && defined(BCMPCIE)
+#if defined(CONFIG_BCMDHD_EXYNOS) && defined(BCMPCIE)
 extern dhd_pub_t *link_recovery;
 void dhd_host_recover_link(void)
 {
@@ -20574,7 +20574,7 @@ void dhd_host_recover_link(void)
 	dhd_os_send_hang_message(link_recovery);
 }
 EXPORT_SYMBOL(dhd_host_recover_link);
-#endif /* CONFIG_ARCH_EXYNOS && BCMPCIE */
+#endif /* CONFIG_BCMDHD_EXYNOS && BCMPCIE */
 
 #ifdef DHD_DETECT_CONSECUTIVE_MFG_HANG
 #define MAX_CONSECUTIVE_MFG_HANG_COUNT 2
