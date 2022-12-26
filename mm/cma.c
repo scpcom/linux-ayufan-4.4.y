@@ -535,6 +535,7 @@ struct page *cma_alloc(struct cma *cma, size_t count, unsigned int align,
 			lru_cache_enable();
 			goto out;
 		}
+		mutex_lock(&cma_mutex);
 		ret = alloc_contig_range(pfn, pfn + count, MIGRATE_CMA, gfp_mask, &info);
 		mutex_unlock(&cma_mutex);
 		cma_info.nr_migrated += info.nr_migrated;
