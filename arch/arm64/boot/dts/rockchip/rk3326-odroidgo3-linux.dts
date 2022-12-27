@@ -844,6 +844,7 @@
 			monitor_sec = <5>;
 			virtual_power = <0>;
 			sample_res = <10>;
+			low_voltage_poweroff;
 		};
 
 		charger {
