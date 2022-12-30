@@ -257,6 +257,8 @@ struct dw_pcie_ops {
 	void	(*stop_link)(struct dw_pcie *pcie);
 };
 
+#define DWC_IATU_UNROLL_EN	BIT(0)
+#define DWC_IATU_IOCFG_SHARED	BIT(1)
 struct dw_pcie {
 	struct device		*dev;
 	void __iomem		*dbi_base;

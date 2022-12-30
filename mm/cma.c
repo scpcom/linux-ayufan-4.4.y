@@ -47,6 +47,7 @@ extern void lru_cache_enable(void);
 
 struct cma cma_areas[MAX_CMA_AREAS];
 unsigned cma_area_count;
+static DEFINE_MUTEX(cma_mutex);
 
 phys_addr_t cma_get_base(const struct cma *cma)
 {
@@ -535,6 +536,7 @@ struct page *cma_alloc(struct cma *cma, size_t count, unsigned int align,
 			goto out;
 		}
 		ret = alloc_contig_range(pfn, pfn + count, MIGRATE_CMA, gfp_mask, &info);
+		mutex_unlock(&cma_mutex);
 		cma_info.nr_migrated += info.nr_migrated;
 		cma_info.nr_reclaimed += info.nr_reclaimed;
 		cma_info.nr_mapped += info.nr_mapped;

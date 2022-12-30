@@ -8,7 +8,7 @@
 #include <linux/kmemleak.h>
 #include <linux/page_owner.h>
 #include <linux/page_idle.h>
-
+#include <linux/rcupdate.h>
 /*
  * struct page extension
  *
@@ -57,6 +57,10 @@
  * cause inadequate state of extra data per page, so, to prevent it, client
  * can utilize this callback to initialize the state of it correctly.
  */
+
+#ifdef CONFIG_SPARSEMEM
+#define PAGE_EXT_INVALID       (0x1)
+#endif
 
 #if defined(CONFIG_PAGE_IDLE_FLAG) && !defined(CONFIG_64BIT)
 static bool need_page_idle(void)
@@ -138,6 +142,7 @@ struct page_ext *lookup_page_ext(const struct page *page)
 	unsigned long index;
 	struct page_ext *base;
 
+	WARN_ON_ONCE(!rcu_read_lock_held());
 	base = NODE_DATA(page_to_nid(page))->node_page_ext;
 	/*
 	 * The sanity checks the page allocator does upon freeing a
@@ -206,20 +211,27 @@ fail:
 }
 
 #else /* CONFIG_FLAT_NODE_MEM_MAP */
+static bool page_ext_invalid(struct page_ext *page_ext)
+{
+	return !page_ext || (((unsigned long)page_ext & PAGE_EXT_INVALID) == PAGE_EXT_INVALID);
+}
 
 struct page_ext *lookup_page_ext(const struct page *page)
 {
 	unsigned long pfn = page_to_pfn(page);
 	struct mem_section *section = __pfn_to_section(pfn);
+	struct page_ext *page_ext = READ_ONCE(section->page_ext);
+
+	WARN_ON_ONCE(!rcu_read_lock_held());
 	/*
 	 * The sanity checks the page allocator does upon freeing a
 	 * page can reach here before the page_ext arrays are
 	 * allocated when feeding a range of pages to the allocator
 	 * for the first time during bootup or memory hotplug.
 	 */
-	if (!section->page_ext)
+	if (page_ext_invalid(page_ext))
 		return NULL;
-	return get_entry(section->page_ext, pfn);
+	return get_entry(page_ext, pfn);
 }
 EXPORT_SYMBOL_GPL(lookup_page_ext);
 
@@ -299,9 +311,30 @@ static void __free_page_ext(unsigned long pfn)
 	ms = __pfn_to_section(pfn);
 	if (!ms || !ms->page_ext)
 		return;
-	base = get_entry(ms->page_ext, pfn);
+
+	base = READ_ONCE(ms->page_ext);
+	/*
+	 * page_ext here can be valid while doing the roll back
+	 * operation in online_page_ext().
+	 */
+	if (page_ext_invalid(base))
+		base = (void *)base - PAGE_EXT_INVALID;
+	WRITE_ONCE(ms->page_ext, NULL);
+
+	base = get_entry(base, pfn);
 	free_page_ext(base);
-	ms->page_ext = NULL;
+}
+
+static void __invalidate_page_ext(unsigned long pfn)
+{
+	struct mem_section *ms;
+	void *val;
+
+	ms = __pfn_to_section(pfn);
+	if (!ms || !ms->page_ext)
+		return;
+	val = (void *)ms->page_ext + PAGE_EXT_INVALID;
+	WRITE_ONCE(ms->page_ext, val);
 }
 
 static int __meminit online_page_ext(unsigned long start_pfn,
@@ -343,6 +376,20 @@ static int __meminit offline_page_ext(unsigned long start_pfn,
 
 	start = SECTION_ALIGN_DOWN(start_pfn);
 	end = SECTION_ALIGN_UP(start_pfn + nr_pages);
+
+	/*
+	 * Freeing of page_ext is done in 3 steps to avoid
+	 * use-after-free of it:
+	 * 1) Traverse all the sections and mark their page_ext
+	 *    as invalid.
+	 * 2) Wait for all the existing users of page_ext who
+	 *    started before invalidation to finish.
+	 * 3) Free the page_ext.
+	 */
+	for (pfn = start; pfn < end; pfn += PAGES_PER_SECTION)
+		__invalidate_page_ext(pfn);
+
+	synchronize_rcu();
 
 	for (pfn = start; pfn < end; pfn += PAGES_PER_SECTION)
 		__free_page_ext(pfn);
