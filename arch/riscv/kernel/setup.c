@@ -70,7 +70,8 @@ static void __init parse_dtb(void)
 	/* Early scan of device tree from init memory */
 	if (early_init_dt_scan(dtb_early_va)) {
 		setup_machine_fdt();
-		return;
+	} else {
+		pr_err("No DTB passed to the kernel\n");
 	}
 
 #ifdef CONFIG_CMDLINE_FORCE
