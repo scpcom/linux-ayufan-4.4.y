@@ -3794,8 +3794,11 @@ static struct edid *dw_hdmi_bridge_get_edid(struct drm_bridge *bridge,
 					    struct drm_connector *connector)
 {
 	struct dw_hdmi *hdmi = bridge->driver_private;
+	struct edid *edid = dw_hdmi_get_edid(hdmi, connector);
 
-	return dw_hdmi_get_edid(hdmi, connector);
+	dw_hdmi_check_output_type_changed(hdmi);
+
+	return edid;
 }
 
 static const struct drm_bridge_funcs dw_hdmi_bridge_funcs = {
