@@ -444,7 +444,7 @@ stmmac_probe_config_dt(struct platform_device *pdev, const char **mac)
 
 #ifdef CONFIG_DWMAC_MESON
 	if (g_mac_addr_setup)	/*so uboot mac= is first priority.*/
-		*mac = DEFMAC;
+		memcpy(mac, DEFMAC, 6);
 	else
 		*mac = of_get_mac_address(np);
 #else
