@@ -1825,7 +1825,6 @@ static int sunxi_gpadc_read_raw(struct iio_dev *indio_dev,
 			int *val, int *val2, long mask)
 {
 	int ret = 0;
-	int key_val, id_vol;
 	struct sunxi_gpadc_iio *info = iio_priv(indio_dev);
 	struct sunxi_gpadc *sunxi_gpadc = info->sunxi_gpadc;
 	u32 data, vol_data;
