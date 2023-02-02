@@ -1378,7 +1378,7 @@ unsigned char FT5X46_TestItem_PanelDifferTest(bool *bTestResult)
 		FTS_TEST_DBG("\n");
 		for (j = 0; j <  g_ScreenSetParam.iRxNum; j++) {
 
-			FTS_TEST_DBG("%ld,", abs(m_DifferData[i][j]));
+			FTS_TEST_DBG("%d,", abs(m_DifferData[i][j]));
 			m_absDifferData[i][j] = abs(m_DifferData[i][j]);
 
 			if (NODE_AST_TYPE == g_stCfg_MCap_DetailThreshold.InvalidNode[i][j] || NODE_INVALID_TYPE == g_stCfg_MCap_DetailThreshold.InvalidNode[i][j]) {
