@@ -401,7 +401,7 @@ static struct regmap_config sunxi_sram_emac_clock_regmap = {
 	.writeable_reg	= sunxi_sram_regmap_accessible_reg,
 };
 
-static int __init sunxi_sram_probe(struct platform_device *pdev)
+static int sunxi_sram_platform_probe(struct platform_device *pdev)
 {
 	struct regmap *emac_clock;
 	const struct sunxi_sramc_variant *variant;
@@ -448,6 +448,11 @@ static int __init sunxi_sram_probe(struct platform_device *pdev)
 			    &sunxi_sram_fops);
 
 	return 0;
+}
+
+static int __init sunxi_sram_probe(struct platform_device *pdev)
+{
+	return sunxi_sram_platform_probe(pdev);
 }
 
 static int sunxi_sram_remove(struct platform_device *pdev)
@@ -507,7 +512,7 @@ static struct platform_driver sunxi_sram_driver = {
 		.name		= "sunxi-sram",
 		.of_match_table	= sunxi_sram_dt_match,
 	},
-	.probe	= sunxi_sram_probe,
+	.probe	= sunxi_sram_platform_probe,
 	.remove	= sunxi_sram_remove,
 };
 builtin_platform_driver_probe(sunxi_sram_driver, sunxi_sram_probe);
