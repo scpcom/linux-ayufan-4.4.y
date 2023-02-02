@@ -318,7 +318,7 @@ static ssize_t dump_host_reg_show(struct device *dev,
 	p += sprintf(p, "Dump sdmmc regs:\n");
 	for (i = 0; i < SUNXI_MMC_MAX_HOST_PRT_ADDR; i += 4) {
 		if (!(i&0xf))
-			p += sprintf(p, "\n0x%lx : ", (size_t)(host->reg_base + i));
+			p += sprintf(p, "\n0x%zx : ", (size_t)(host->reg_base + i));
 		p += sprintf(p, "%08x ", readl(host->reg_base + i));
 	}
 	p += sprintf(p, "\n");
@@ -349,7 +349,7 @@ static ssize_t dump_gpio_reg_show(struct device *dev,
 	p += sprintf(p, "Dump gpio regs:\n");
 	for (i = 0; i < SUNXI_MMC_MAX_GPIO_PRT_ADDR; i += 4) {
 		if (!(i&0xf))
-			p += sprintf(p, "\n0x%lx : ", (size_t)(gpio_ptr + i));
+			p += sprintf(p, "\n0x%zx : ", (size_t)(gpio_ptr + i));
 		p += sprintf(p, "%08x ", readl(gpio_ptr + i));
 	}
 	p += sprintf(p, "\n");
@@ -357,7 +357,7 @@ static ssize_t dump_gpio_reg_show(struct device *dev,
 	p += sprintf(p, "Dump gpio irqc regs:\n");
 	for (i = SUNXI_GPIOIC_PRT_SADDR; i < SUNXI_GPIOIC_PRT_EADDR; i += 4) {
 		if (!(i&0xf))
-			p += sprintf(p, "\n0x%lx : ", (size_t) (gpio_ptr + i));
+			p += sprintf(p, "\n0x%zx : ", (size_t) (gpio_ptr + i));
 		p += sprintf(p, "%08x ", readl(gpio_ptr + i));
 	}
 	p += sprintf(p, "\n");
@@ -393,7 +393,7 @@ static ssize_t dump_ccmu_reg_show(struct device *dev,
 		p += sprintf(p, "Dump ccmu regs:gating\n");
 		for (i = SUNXI_BCLKG_SADDR; i < SUNXI_BCLKG_EADDR; i += 4) {
 			if (!(i&0xf))
-				p += sprintf(p, "\n0x%lx : ", (size_t)(ccmu_ptr + i));
+				p += sprintf(p, "\n0x%zx : ", (size_t)(ccmu_ptr + i));
 			p += sprintf(p, "%08x ", readl(ccmu_ptr + i));
 		}
 		p += sprintf(p, "\n");
@@ -401,7 +401,7 @@ static ssize_t dump_ccmu_reg_show(struct device *dev,
 		p += sprintf(p, "Dump ccmu regs:module clk\n");
 		for (i = SUNXI_CLK_PRT_SADDR; i < SUNXI_CLK_PRT_EADDR; i += 4) {
 			if (!(i&0xf))
-				p += sprintf(p, "\n0x%lx : ", (size_t)(ccmu_ptr + i));
+				p += sprintf(p, "\n0x%zx : ", (size_t)(ccmu_ptr + i));
 			p += sprintf(p, "%08x ", readl(ccmu_ptr + i));
 		}
 		p += sprintf(p, "\n");
@@ -409,7 +409,7 @@ static ssize_t dump_ccmu_reg_show(struct device *dev,
 		p += sprintf(p, "Dump ccmu regs:reset\n");
 		for (i = SUNXI_BSRES_SADDR; i < SUNXI_BSRES_EADDR; i += 4) {
 			if (!(i&0xf))
-				p += sprintf(p, "\n0x%lx : ", (size_t)(ccmu_ptr + i));
+				p += sprintf(p, "\n0x%zx : ", (size_t)(ccmu_ptr + i));
 			p += sprintf(p, "%08x ", readl(ccmu_ptr + i));
 		}
 		p += sprintf(p, "\n");
@@ -419,14 +419,14 @@ static ssize_t dump_ccmu_reg_show(struct device *dev,
 
 		for (i = SUNXI_PP_NCM_SADDR; i < SUNXI_PP_NCM_EADDR; i += 4) {
 			if (!(i&0xf))
-				p += sprintf(p, "\n0x%lx : ", (size_t)(ccmu_ptr + i));
+				p += sprintf(p, "\n0x%zx : ", (size_t)(ccmu_ptr + i));
 			p += sprintf(p, "%08x ", readl(ccmu_ptr + i));
 		}
 		p += sprintf(p, "\n");
 
 		for (i = SUNXI_NCCM_SADDR; i < SUNXI_NCCM_EADDR; i += 4) {
 			if (!(i&0xf))
-				p += sprintf(p, "\n0x%lx : ", (size_t)(ccmu_ptr + i));
+				p += sprintf(p, "\n0x%zx : ", (size_t)(ccmu_ptr + i));
 			p += sprintf(p, "%08x ", readl(ccmu_ptr + i));
 		}
 		p += sprintf(p, "\n");
