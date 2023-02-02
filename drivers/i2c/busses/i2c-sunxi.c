@@ -1650,7 +1650,7 @@ static int sunxi_i2c_engine_core_process(struct sunxi_i2c *i2c)
 			break;
 		}
 		/* for 7 bit addr, then directly send data byte--case 0xd0:  */
-		/* fall through */
+		fallthrough;
 
 	case 0xd0: /* SLA+W has transmitted,ACK received! */
 	case 0x28: /* then continue send data or current xfer end */
