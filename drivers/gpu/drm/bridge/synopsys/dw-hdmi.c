@@ -3876,6 +3876,7 @@ static irqreturn_t dw_hdmi_irq(int irq, void *dev_id)
 			cec_notifier_phys_addr_invalidate(hdmi->cec_notifier);
 			mutex_unlock(&hdmi->cec_notifier_mutex);
 		}
+	}
 
 	check_hdmi_irq(hdmi, intr_stat, phy_int_pol);
 
