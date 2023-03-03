@@ -60,6 +60,7 @@ DKMS_PATH := /usr/src/$(PACKAGE_NAME)-$(PACKAGE_VERSION)/
 
 EXTRA_CFLAGS += -Wno-implicit-fallthrough
 EXTRA_CFLAGS += -Wno-declaration-after-statement
+EXTRA_CFLAGS += -Wno-int-to-pointer-cast
 
 EXTRA_CFLAGS += -DDEBUG -DSIP_DEBUG -DFAST_TX_STATUS \
     -DKERNEL_IV_WAR -DRX_SENDUP_SYNC -DDEBUG_FS \
