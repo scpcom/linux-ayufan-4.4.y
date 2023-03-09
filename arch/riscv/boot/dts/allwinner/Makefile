@@ -15,3 +15,4 @@ dtb-$(CONFIG_ARCH_SUNXI) += sun20i-d1-mangopi-mq-pro.dtb
 dtb-$(CONFIG_ARCH_SUNXI) += sun20i-d1-nezha.dtb
 
 dtb-$(CONFIG_ARCH_SUNXI) += sun20i-d1-licheerv-86panel.dtb
+dtb-$(CONFIG_ARCH_SUNXI) += sun20i-d1-licheerv-86panel-720x720.dtb
