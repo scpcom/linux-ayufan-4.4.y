@@ -448,7 +448,7 @@ static int create_trip_attrs(struct thermal_zone_device *tz, int mask)
 	if (!tz->trip_type_attrs)
 		return -ENOMEM;
 
-	tz->trip_irq_mode_attrs = kcalloc(tz->trips,
+	tz->trip_irq_mode_attrs = kcalloc(tz->num_trips,
 					  sizeof(*tz->trip_irq_mode_attrs),
 					  GFP_KERNEL);
 	if (!tz->trip_irq_mode_attrs) {
@@ -456,7 +456,7 @@ static int create_trip_attrs(struct thermal_zone_device *tz, int mask)
 		return -ENOMEM;
 	}
 
-	tz->trip_temp_attrs = kcalloc(tz->trips, sizeof(*tz->trip_temp_attrs),
+	tz->trip_temp_attrs = kcalloc(tz->num_trips, sizeof(*tz->trip_temp_attrs),
 				      GFP_KERNEL);
 	if (!tz->trip_temp_attrs) {
 		kfree(tz->trip_type_attrs);
@@ -476,7 +476,7 @@ static int create_trip_attrs(struct thermal_zone_device *tz, int mask)
 		}
 	}
 
-	attrs = kcalloc(tz->trips * TRIP_ATTR_NUM + 1, sizeof(*attrs),
+	attrs = kcalloc(tz->num_trips * TRIP_ATTR_NUM + 1, sizeof(*attrs),
 			GFP_KERNEL);
 	if (!attrs) {
 		kfree(tz->trip_type_attrs);
@@ -509,7 +509,7 @@ static int create_trip_attrs(struct thermal_zone_device *tz, int mask)
 		tz->trip_irq_mode_attrs[indx].attr.attr.mode = S_IRUGO;
 		tz->trip_irq_mode_attrs[indx].attr.show =
 			trip_point_irq_mode_show;
-		attrs[indx + tz->trips * 3] =
+		attrs[indx + tz->num_trips * 3] =
 			&tz->trip_irq_mode_attrs[indx].attr.attr;
 
 		/* create trip temp attribute */
@@ -548,7 +548,7 @@ static int create_trip_attrs(struct thermal_zone_device *tz, int mask)
 		attrs[indx + tz->num_trips * 2] =
 					&tz->trip_hyst_attrs[indx].attr.attr;
 	}
-	attrs[tz->trips * TRIP_ATTR_NUM] = NULL;
+	attrs[tz->num_trips * TRIP_ATTR_NUM] = NULL;
 
 	tz->trips_attribute_group.attrs = attrs;
 
