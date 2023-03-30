@@ -1078,6 +1078,11 @@ config SND_SOC_RK817
 	depends on MFD_RK808
 	select REGMAP_I2C
 
+config SND_SOC_RK817_ODROIDGOA
+	bool "Rockchip RK817 ODROIDGOA"
+	default ARCH_ROCKCHIP_ODROIDGOA
+	depends on SND_SOC_RK817
+
 config SND_SOC_RL6231
 	tristate
 	default y if SND_SOC_RT5514=y
