@@ -7,6 +7,11 @@ menuconfig ROCKCHIP_RGA2
 
 if ROCKCHIP_RGA2
 
+config ROCKCHIP_RGA2_RGB_565_SWAP
+	bool "Enable RGA2 RGB_565 swap"
+	help
+	  Enable RGA2 RGB_565/BGR_565 swap.
+
 config ROCKCHIP_RGA2_PROC_FS
 	bool "Enable RGA2 procfs"
 	select ROCKCHIP_RGA2_DEBUGGER
