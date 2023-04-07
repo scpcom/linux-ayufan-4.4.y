@@ -919,6 +919,7 @@
 
 &rk_rga {
 	status = "okay";
+	rgb565_rb_swap = <1>;
 };
 
 &rockchip_suspend {
