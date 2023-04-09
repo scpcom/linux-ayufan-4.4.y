@@ -149,6 +149,7 @@ static void dmaengine_pcm_dma_complete(void *arg)
 	if (new_pos >= snd_pcm_lib_buffer_bytes(substream))
 		new_pos = 0;
 	prtd->pos = new_pos;
+	snd_pcm_stream_unlock_irq(substream);
 
 	snd_pcm_period_elapsed(substream);
 }
