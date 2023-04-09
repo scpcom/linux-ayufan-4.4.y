@@ -20,6 +20,7 @@
 #include <linux/thermal.h>
 #include <linux/timer.h>
 #include <linux/types.h>
+#include <soc/rockchip/rockchip_system_monitor.h>
 
 #define MAX_PWM 255
 
@@ -45,6 +46,9 @@ struct pwm_fan_ctx {
 	unsigned int pwm_fan_max_state;
 	unsigned int *pwm_fan_cooling_levels;
 	struct thermal_cooling_device *cdev;
+	struct notifier_block thermal_nb;
+	struct thermal_trips *thermal_trips;
+	bool thermal_notifier_is_ok;
 	bool automatic;
 };
 
