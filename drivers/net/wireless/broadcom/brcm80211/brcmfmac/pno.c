@@ -195,6 +195,10 @@ static int brcmf_pno_set_random(struct brcmf_if *ifp, struct brcmf_pno_info *pi)
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 12, 0))
 	brcmf_dbg(SCAN, "enabling random mac: reqid=%llu mac=%pM\n",
 		  pi->reqs[ri]->reqid, pfn_mac.mac);
+#else /* (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 12, 0)) */
+	brcmf_dbg(SCAN, "enabling random mac: reqid=0 mac=%pM\n",
+		  pfn_mac.mac);
+#endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 12, 0)) */
 	err = brcmf_fil_iovar_data_set(ifp, "pfn_macaddr", &pfn_mac,
 				       sizeof(pfn_mac));
 	if (err)
