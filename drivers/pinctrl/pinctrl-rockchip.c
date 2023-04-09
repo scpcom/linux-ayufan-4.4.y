@@ -3949,8 +3949,9 @@ static int rockchip_pinctrl_probe(struct platform_device *pdev)
 			return PTR_ERR(info->regmap_pmu);
 	}
 
-	if (IS_ENABLED(CONFIG_CPU_RK3308) && ctrl->type == RK3308) {
-		ret = rk3308_soc_data_init(info);
+	/* Special handle for some Socs */
+	if (ctrl->soc_data_init) {
+		ret = ctrl->soc_data_init(info);
 		if (ret)
 			return ret;
 	}
@@ -4395,6 +4396,7 @@ static struct rockchip_pin_ctrl rk3308_pin_ctrl __maybe_unused = {
 		.niomux_recalced	= ARRAY_SIZE(rk3308_mux_recalced_data),
 		.iomux_routes		= rk3308_mux_route_data,
 		.niomux_routes		= ARRAY_SIZE(rk3308_mux_route_data),
+		.soc_data_init		= rk3308_soc_data_init,
 		.pull_calc_reg		= rk3308_calc_pull_reg_and_bit,
 		.drv_calc_reg		= rk3308_calc_drv_reg_and_bit,
 		.schmitt_calc_reg	= rk3308_calc_schmitt_reg_and_bit,
