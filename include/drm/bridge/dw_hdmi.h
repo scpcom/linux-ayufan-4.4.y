@@ -7,6 +7,7 @@
 #define __DW_HDMI__
 
 #include <drm/drm_property.h>
+#include <drm/drm_crtc.h>
 #include <sound/hdmi-codec.h>
 #include <media/cec.h>
 
@@ -78,6 +79,8 @@ struct platform_device;
  * +----------------------+----------------------------------+------------------------------+
  */
 
+#define SUPPORT_HDMI_ALLM	BIT(1)
+
 enum {
 	DW_HDMI_RES_8,
 	DW_HDMI_RES_10,
@@ -135,6 +138,7 @@ struct dw_hdmi_link_config {
 	int frl_lanes;
 	int rate_per_lane;
 	int hcactive;
+	u8 add_func;
 	u8 pps_payload[128];
 };
 
@@ -165,7 +169,7 @@ struct dw_hdmi_qp_phy_ops {
 struct dw_hdmi_property_ops {
 	void (*attach_properties)(struct drm_connector *connector,
 				  unsigned int color, int version,
-				  void *data);
+				  void *data, bool allm_en);
 	void (*destroy_properties)(struct drm_connector *connector,
 				   void *data);
 	int (*set_property)(struct drm_connector *connector,
@@ -245,8 +249,9 @@ struct dw_hdmi_plat_data {
 	u64 (*get_grf_color_fmt)(void *data);
 	void (*convert_to_split_mode)(struct drm_display_mode *mode);
 	void (*convert_to_origin_mode)(struct drm_display_mode *mode);
-	int (*dclk_set)(void *data, bool enable);
+	int (*dclk_set)(void *data, bool enable, int vp_id);
 	int (*link_clk_set)(void *data, bool enable);
+	int (*get_vp_id)(struct drm_crtc_state *crtc_state);
 
 	/* Vendor Property support */
 	const struct dw_hdmi_property_ops *property_ops;
@@ -296,6 +301,7 @@ void dw_hdmi_set_output_type(struct dw_hdmi *hdmi, u64 val);
 bool dw_hdmi_get_output_whether_hdmi(struct dw_hdmi *hdmi);
 int dw_hdmi_get_output_type_cap(struct dw_hdmi *hdmi);
 void dw_hdmi_set_cec_adap(struct dw_hdmi *hdmi, struct cec_adapter *adap);
+void dw_hdmi_qp_set_allm_enable(struct dw_hdmi_qp *hdmi_qp, bool enable);
 
 void dw_hdmi_qp_unbind(struct dw_hdmi_qp *hdmi);
 struct dw_hdmi_qp *dw_hdmi_qp_bind(struct platform_device *pdev,
@@ -317,5 +323,8 @@ void dw_hdmi_qp_audio_enable(struct dw_hdmi_qp *hdmi);
 void dw_hdmi_qp_audio_disable(struct dw_hdmi_qp *hdmi);
 int dw_hdmi_qp_set_plugged_cb(struct dw_hdmi_qp *hdmi, hdmi_codec_plugged_cb fn,
 			      struct device *codec_dev);
+void dw_hdmi_qp_set_output_type(struct dw_hdmi_qp *hdmi, u64 val);
+bool dw_hdmi_qp_get_output_whether_hdmi(struct dw_hdmi_qp *hdmi);
+int dw_hdmi_qp_get_output_type_cap(struct dw_hdmi_qp *hdmi);
 
 #endif /* __IMX_HDMI_H__ */

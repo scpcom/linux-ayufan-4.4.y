@@ -467,8 +467,41 @@ out:
 	return ret;
 }
 
+
+static int rk3399_get_soc_info(struct device *dev, struct device_node *np,
+			       int *bin, int *process)
+{
+	int ret = 0;
+       	u8 value = -EINVAL;
+	
+	if (!bin)
+		return 0;
+
+	if (of_property_match_string(np, "nvmem-cell-names",
+				     "performance") >= 0) {
+		ret = rockchip_nvmem_cell_read_u8(np, "performance", &value);
+		if (ret) {
+			dev_err(dev, "Failed to get soc performance value\n");
+			goto out;
+		}
+		if (value == 0x01)
+			*bin = 2;
+		else
+			*bin = 0;
+	}
+
+	if (*bin >= 0)
+		dev_info(dev, "bin=%d\n", *bin);
+out:
+	return ret;
+}
+
 static const struct rockchip_opp_data rk3288_gpu_opp_data = {
 	.get_soc_info = rk3288_get_soc_info,
+};
+
+static const struct rockchip_opp_data rk3399_gpu_opp_data = {
+	.get_soc_info = rk3399_get_soc_info,
 };
 
 static const struct of_device_id rockchip_mali_of_match[] = {
@@ -479,6 +512,10 @@ static const struct of_device_id rockchip_mali_of_match[] = {
 	{
 		.compatible = "rockchip,rk3288w",
 		.data = (void *)&rk3288_gpu_opp_data,
+	},
+	{
+		.compatible = "rockchip,rk3399",
+		.data = (void *)&rk3399_gpu_opp_data,
 	},
 	{},
 };

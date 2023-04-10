@@ -18,6 +18,7 @@
 #include <sound/soc.h>
 
 #include <sound/dmaengine_pcm.h>
+#include "pcm_local.h"
 
 struct dmaengine_pcm_runtime_data {
 	struct dma_chan *dma_chan;
@@ -134,7 +135,15 @@ static void dmaengine_pcm_dma_complete(void *arg)
 {
 	unsigned int new_pos;
 	struct snd_pcm_substream *substream = arg;
-	struct dmaengine_pcm_runtime_data *prtd = substream_to_prtd(substream);
+	struct dmaengine_pcm_runtime_data *prtd;
+
+	snd_pcm_stream_lock_irq(substream);
+	if (PCM_RUNTIME_CHECK(substream)) {
+		snd_pcm_stream_unlock_irq(substream);
+		return;
+	}
+
+	prtd = substream_to_prtd(substream);
 
 	new_pos = prtd->pos + snd_pcm_lib_period_bytes(substream);
 	if (new_pos >= snd_pcm_lib_buffer_bytes(substream))

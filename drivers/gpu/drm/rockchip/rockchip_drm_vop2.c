@@ -118,6 +118,9 @@
 #define VOP_WIN_GET(vop2, win, name) \
 		vop2_read_reg(vop2, win->offset, &VOP_WIN_NAME(win, name))
 
+#define VOP_WIN_GET_REG_BAK(vop2, win, name) \
+			vop2_read_reg_bak(vop2, win->offset, &VOP_WIN_NAME(win, name))
+
 #define VOP_WIN_NAME(win, name) \
 		(vop2_get_win_regs(win, &win->regs->name)->name)
 
@@ -893,6 +896,12 @@ static inline uint32_t vop2_read_reg(struct vop2 *vop2, uint32_t base,
 	return (vop2_readl(vop2, base + reg->offset) >> reg->shift) & reg->mask;
 }
 
+static inline uint32_t vop2_read_reg_bak(struct vop2 *vop2, uint32_t base,
+					 const struct vop_reg *reg)
+{
+	return (vop2->regsbak[(base + reg->offset) >> 2] >> reg->shift) & reg->mask;
+}
+
 static inline uint32_t vop2_read_grf_reg(struct regmap *regmap, const struct vop_reg *reg)
 {
 	return (vop2_grf_readl(regmap, reg) >> reg->shift) & reg->mask;
@@ -1665,7 +1674,7 @@ static void vop2_win_disable(struct vop2_win *win, bool skip_splice_win)
 		win->splice_win = NULL;
 	}
 
-	if (VOP_WIN_GET(vop2, win, enable)) {
+	if (VOP_WIN_GET(vop2, win, enable) || VOP_WIN_GET_REG_BAK(vop2, win, enable)) {
 		VOP_WIN_SET(vop2, win, enable, 0);
 		if (win->feature & WIN_FEATURE_CLUSTER_MAIN) {
 			struct vop2_win *sub_win;
@@ -4344,6 +4353,8 @@ static void vop2_calc_drm_rect_for_splice(struct vop2_plane_state *vpstate,
 	int dst_w = drm_rect_width(dst);
 	int src_w = drm_rect_width(src) >> 16;
 	int left_src_w, left_dst_w, right_dst_w;
+	struct drm_plane_state *pstate = &vpstate->base;
+	struct drm_framebuffer *fb = pstate->fb;
 
 	left_dst_w = min_t(u16, half_hdisplay, dst->x2) - dst->x1;
 	if (left_dst_w < 0)
@@ -4354,6 +4365,17 @@ static void vop2_calc_drm_rect_for_splice(struct vop2_plane_state *vpstate,
 		left_src_w = src_w;
 	else
 		left_src_w = (left_dst_w * hscale) >> 16;
+
+	/*
+	 * Make sure the yrgb/uv mst of right win are byte aligned
+	 * with full pixel.
+	 */
+	if (right_dst_w) {
+		if (fb->format->format == DRM_FORMAT_NV15)
+			left_src_w &= ~0x7;
+		else if (fb->format->format == DRM_FORMAT_NV12)
+			left_src_w &= ~0x1;
+	}
 	left_src->x1 = src->x1;
 	left_src->x2 = src->x1 + (left_src_w << 16);
 	left_dst->x1 = dst->x1;
@@ -4361,6 +4383,9 @@ static void vop2_calc_drm_rect_for_splice(struct vop2_plane_state *vpstate,
 	right_src->x1 = left_src->x2;
 	right_src->x2 = src->x2;
 	right_dst->x1 = dst->x1 + left_dst_w - half_hdisplay;
+	if (right_dst->x1 < 0)
+		right_dst->x1 = 0;
+
 	right_dst->x2 = right_dst->x1 + right_dst_w;
 
 	left_src->y1 = src->y1;
@@ -6359,19 +6384,38 @@ static void vop2_crtc_enable_dsc(struct drm_crtc *crtc, struct drm_crtc_state *o
 		 * dly_num = delay_line_num * T(one-line) / T (dsc_cds)
 		 * T (one-line) = 1/v_pixclk_mhz * htotal = htotal/v_pixclk_mhz
 		 * T (dsc_cds) = 1 / dsc_cds_rate_mhz
+		 *
+		 * HDMI:
 		 * delay_line_num: according the pps initial_xmit_delay to adjust vop dsc delay
 		 *                 delay_line_num = 4 - BPP / 8
 		 *                                = (64 - target_bpp / 8) / 16
-		 *
 		 * dly_num = htotal * dsc_cds_rate_mhz / v_pixclk_mhz * (64 - target_bpp / 8) / 16;
+		 *
+		 * MIPI DSI[4320 and 9216 is buffer size for DSC]:
+		 * DSC0:delay_line_num = 4320 * 8 / slince_num / chunk_size;
+		 *	delay_line_num = delay_line_num > 5 ? 5 : delay_line_num;
+		 * DSC1:delay_line_num = 9216 * 2 / slince_num / chunk_size;
+		 *	delay_line_num = delay_line_num > 5 ? 5 : delay_line_num;
+		 * dly_num = htotal * dsc_cds_rate_mhz / v_pixclk_mhz * delay_line_num
 		 */
 		do_div(dsc_cds_rate, 1000000); /* hz to Mhz */
 		dsc_cds_rate_mhz = dsc_cds_rate;
-		dly_num = htotal * dsc_cds_rate_mhz / v_pixclk_mhz * (64 - target_bpp / 8) / 16;
+		dsc_hsync = hsync_len / 2;
+		if (dsc_interface_mode == VOP_DSC_IF_HDMI) {
+			dly_num = htotal * dsc_cds_rate_mhz / v_pixclk_mhz * (64 - target_bpp / 8) / 16;
+		} else {
+			int dsc_buf_size  = dsc->id == 0 ? 4320 * 8 : 9216 * 2;
+			int delay_line_num = dsc_buf_size / vcstate->dsc_slice_num / be16_to_cpu(vcstate->pps.chunk_size);
+
+			delay_line_num = delay_line_num > 5 ? 5 : delay_line_num;
+			dly_num = htotal * dsc_cds_rate_mhz / v_pixclk_mhz * delay_line_num;
+
+			/* The dsc mipi video mode dsc_hsync minimum size is 8 pixels */
+			if (dsc_hsync < 8)
+				dsc_hsync = 8;
+		}
 		VOP_MODULE_SET(vop2, dsc, dsc_init_dly_mode, 0);
 		VOP_MODULE_SET(vop2, dsc, dsc_init_dly_num, dly_num);
-
-		dsc_hsync = hsync_len / 2;
 		/*
 		 * htotal / dclk_core = dsc_htotal /cds_clk
 		 *
@@ -6593,11 +6637,6 @@ static void vop2_crtc_atomic_enable(struct drm_crtc *crtc, struct drm_crtc_state
 	vcstate->mode_update = vop2_crtc_mode_update(crtc);
 	if (vcstate->mode_update)
 		vop2_disable_all_planes_for_crtc(crtc);
-	/*
-	 * restore the lut table.
-	 */
-	if (vp->gamma_lut_active)
-		vop2_crtc_load_lut(crtc);
 
 	dclk_inv = (vcstate->bus_flags & DRM_BUS_FLAG_PIXDATA_DRIVE_NEGEDGE) ? 1 : 0;
 	val = (adjusted_mode->flags & DRM_MODE_FLAG_NHSYNC) ? 0 : BIT(HSYNC_POSITIVE);
@@ -6960,8 +6999,12 @@ static void vop2_crtc_atomic_enable(struct drm_crtc *crtc, struct drm_crtc_state
 		vop2_clk_reset(vp->dclk_rst);
 	if (vcstate->dsc_enable)
 		rk3588_vop2_dsc_cfg_done(crtc);
-
 	drm_crtc_vblank_on(crtc);
+	/*
+	 * restore the lut table.
+	 */
+	if (vp->gamma_lut_active)
+		vop2_crtc_load_lut(crtc);
 out:
 	vop2_unlock(vop2);
 }

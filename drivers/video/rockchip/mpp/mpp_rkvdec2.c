@@ -404,13 +404,15 @@ static int rkvdec2_isr(struct mpp_dev *mpp)
 	u32 err_mask;
 	struct rkvdec2_task *task = NULL;
 	struct mpp_task *mpp_task = mpp->cur_task;
+	struct rkvdec2_dev *dec = to_rkvdec2_dev(mpp);
 
 	/* FIXME use a spin lock here */
 	if (!mpp_task) {
 		dev_err(mpp->dev, "no current task\n");
 		return IRQ_HANDLED;
 	}
-	mpp_time_diff(mpp_task);
+	mpp_task->hw_cycles = mpp_read(mpp, RKVDEC_PERF_WORKING_CNT);
+	mpp_time_diff(mpp_task, dec->core_clk_info.real_rate_hz);
 	mpp->cur_task = NULL;
 	task = to_rkvdec2_task(mpp_task);
 	task->irq_status = mpp->irq_status;
@@ -1595,16 +1597,7 @@ static int __maybe_unused rkvdec2_runtime_suspend(struct device *dev)
 
 		mpp_clk_safe_disable(ccu->aclk_info.clk);
 	} else {
-		u32 val;
 		struct mpp_dev *mpp = dev_get_drvdata(dev);
-
-		/* soft reset */
-		mpp_write(mpp, RKVDEC_REG_IMPORTANT_BASE, RKVDEC_SOFTREST_EN);
-		udelay(5);
-		val = mpp_read(mpp, RKVDEC_REG_INT_EN);
-		if (!(val & RKVDEC_SOFT_RESET_READY))
-			mpp_err("soft reset fail, int %08x\n", val);
-		mpp_write(mpp, RKVDEC_REG_INT_EN, 0);
 
 		if (mpp->is_irq_startup) {
 			/* disable core irq */

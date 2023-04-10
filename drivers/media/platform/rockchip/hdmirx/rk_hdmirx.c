@@ -11,6 +11,7 @@
 #include <linux/debugfs.h>
 #include <linux/delay.h>
 #include <linux/dma-mapping.h>
+#include <linux/extcon-provider.h>
 #include <linux/fs.h>
 #include <linux/gpio/consumer.h>
 #include <linux/interrupt.h>
@@ -195,6 +196,7 @@ struct rk_hdmirx_dev {
 	struct dentry *debugfs_dir;
 	struct freq_qos_request min_sta_freq_req;
 	struct hdmirx_audiostate audio_state;
+	struct extcon_dev *extcon;
 	struct hdmirx_cec *cec;
 	struct mutex stream_lock;
 	struct mutex work_lock;
@@ -243,6 +245,11 @@ struct rk_hdmirx_dev {
 	u8 edid[EDID_BLOCK_SIZE * 2];
 	hdmi_codec_plugged_cb plugged_cb;
 	spinlock_t rst_lock;
+};
+
+static const unsigned int hdmirx_extcon_cable[] = {
+	EXTCON_JACK_VIDEO_IN,
+	EXTCON_NONE,
 };
 
 static bool tx_5v_power_present(struct rk_hdmirx_dev *hdmirx_dev);
@@ -881,11 +888,21 @@ static int hdmirx_try_to_get_timings(struct rk_hdmirx_dev *hdmirx_dev,
 	int i, cnt = 0, fail_cnt = 0, ret = 0;
 	bool from_dma = false;
 	struct v4l2_device *v4l2_dev = &hdmirx_dev->v4l2_dev;
+	u32 last_w, last_h;
+	struct v4l2_bt_timings *bt = &timings->bt;
 
+	last_w = 0;
+	last_h = 0;
 	hdmirx_set_negative_pol(hdmirx_dev, false);
 	for (i = 0; i < try_cnt; i++) {
 		ret = hdmirx_get_detected_timings(hdmirx_dev, timings, from_dma);
-		if (ret) {
+
+		if ((last_w == 0) && (last_h == 0)) {
+			last_w = bt->width;
+			last_h = bt->height;
+		}
+
+		if (ret || (last_w != bt->width) || (last_h != bt->height)) {
 			cnt = 0;
 			fail_cnt++;
 			if (fail_cnt > 3) {
@@ -896,9 +913,11 @@ static int hdmirx_try_to_get_timings(struct rk_hdmirx_dev *hdmirx_dev,
 			cnt++;
 		}
 
-		if (cnt >= 5)
+		if (cnt >= 8)
 			break;
 
+		last_w = bt->width;
+		last_h = bt->height;
 		usleep_range(10*1000, 10*1100);
 	}
 
@@ -1325,6 +1344,22 @@ static void hdmirx_phy_config(struct rk_hdmirx_dev *hdmirx_dev)
 	hdmirx_phy_register_write(hdmirx_dev, SUP_DIG_ANA_CREGS_SUP_ANA_NC, 1);
 	hdmirx_phy_register_write(hdmirx_dev, SUP_DIG_ANA_CREGS_SUP_ANA_NC, 0);
 	hdmirx_phy_register_write(hdmirx_dev, SUP_DIG_ANA_CREGS_SUP_ANA_NC, 0);
+
+	hdmirx_phy_register_write(hdmirx_dev,
+			HDMIPCS_DIG_CTRL_PATH_MAIN_FSM_RATE_CALC_HDMI14_CDR_SETTING_3_REG,
+			CDR_SETTING_BOUNDARY_3_DEFAULT);
+	hdmirx_phy_register_write(hdmirx_dev,
+			HDMIPCS_DIG_CTRL_PATH_MAIN_FSM_RATE_CALC_HDMI14_CDR_SETTING_4_REG,
+			CDR_SETTING_BOUNDARY_4_DEFAULT);
+	hdmirx_phy_register_write(hdmirx_dev,
+			HDMIPCS_DIG_CTRL_PATH_MAIN_FSM_RATE_CALC_HDMI14_CDR_SETTING_5_REG,
+			CDR_SETTING_BOUNDARY_5_DEFAULT);
+	hdmirx_phy_register_write(hdmirx_dev,
+			HDMIPCS_DIG_CTRL_PATH_MAIN_FSM_RATE_CALC_HDMI14_CDR_SETTING_6_REG,
+			CDR_SETTING_BOUNDARY_6_DEFAULT);
+	hdmirx_phy_register_write(hdmirx_dev,
+			HDMIPCS_DIG_CTRL_PATH_MAIN_FSM_RATE_CALC_HDMI14_CDR_SETTING_7_REG,
+			CDR_SETTING_BOUNDARY_7_DEFAULT);
 
 	hdmirx_update_bits(hdmirx_dev, PHY_CONFIG, PHY_PDDQ, 0);
 	if (wait_reg_bit_status(hdmirx_dev, PHY_STATUS, PDDQ_ACK, 0, false, 10))
@@ -2644,12 +2679,14 @@ static void hdmirx_plugin(struct rk_hdmirx_dev *hdmirx_dev)
 	}
 	hdmirx_dma_config(hdmirx_dev);
 	hdmirx_interrupts_setup(hdmirx_dev, true);
+	extcon_set_state_sync(hdmirx_dev->extcon, EXTCON_JACK_VIDEO_IN, true);
 	hdmirx_audio_handle_plugged_change(hdmirx_dev, 1);
 }
 
 static void hdmirx_plugout(struct rk_hdmirx_dev *hdmirx_dev)
 {
 	hdmirx_audio_handle_plugged_change(hdmirx_dev, 0);
+	extcon_set_state_sync(hdmirx_dev->extcon, EXTCON_JACK_VIDEO_IN, false);
 	hdmirx_update_bits(hdmirx_dev, SCDC_CONFIG, POWERPROVIDED, 0);
 	hdmirx_interrupts_setup(hdmirx_dev, false);
 	hdmirx_hpd_ctrl(hdmirx_dev, false);
@@ -4073,6 +4110,19 @@ static int hdmirx_probe(struct platform_device *pdev)
 	ret = devm_add_action_or_reset(dev, hdmirx_unregister_class_device, hdmirx_dev);
 	if (ret)
 		goto err_unreg_video_dev;
+
+	hdmirx_dev->extcon = devm_extcon_dev_allocate(dev, hdmirx_extcon_cable);
+	if (IS_ERR(hdmirx_dev->extcon)) {
+		ret = PTR_ERR(hdmirx_dev->extcon);
+		dev_err(&pdev->dev, "allocate extcon failed\n");
+		goto err_unreg_video_dev;
+	}
+
+	ret = devm_extcon_dev_register(dev, hdmirx_dev->extcon);
+	if (ret) {
+		dev_err(&pdev->dev, "failed to register extcon: %d\n", ret);
+		goto err_unreg_video_dev;
+	}
 
 	irq = gpiod_to_irq(hdmirx_dev->hdmirx_det_gpio);
 	if (irq < 0) {

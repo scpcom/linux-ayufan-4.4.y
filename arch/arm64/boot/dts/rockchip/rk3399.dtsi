@@ -44,11 +44,15 @@
 		mmc0 = &sdio0;
 		mmc1 = &sdmmc;
 		mmc2 = &sdhci;
+		pwm0 = &pwm0;
+		pwm1 = &pwm1;
 		serial0 = &uart0;
 		serial1 = &uart1;
 		serial2 = &uart2;
 		serial3 = &uart3;
 		serial4 = &uart4;
+		spi1 = &spi1;
+		spi2 = &spi2;
 	};
 
 	cpus {
@@ -1502,6 +1506,14 @@
 		};
 		wafer_info: wafer-info@1c {
 			reg = <0x1c 0x1>;
+		};
+		cpu_performance: cpu-performance@1e {
+			reg = <0x1e 0x1>;
+			bits = <3 3>;
+		};
+		gpu_performance: gpu-performance@1e {
+		reg = <0x1e 0x1>;
+			bits = <6 2>;
 		};
 		customer_demand: customer-demand@22 {
 			reg = <0x22 0x1>;

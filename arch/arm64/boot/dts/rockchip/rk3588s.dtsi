@@ -69,6 +69,22 @@
 		spi3 = &spi3;
 		spi4 = &spi4;
 		spi5 = &sfc;
+		pwm0 = &pwm0;
+		pwm1 = &pwm1;
+		pwm2 = &pwm2;
+		pwm3 = &pwm3;
+		pwm4 = &pwm4;
+		pwm5 = &pwm5;
+		pwm6 = &pwm6;
+		pwm7 = &pwm7;
+		pwm8 = &pwm8;
+		pwm9 = &pwm9;
+		pwm10 = &pwm10;
+		pwm11 = &pwm11;
+		pwm12 = &pwm12;
+		pwm13 = &pwm13;
+		pwm14 = &pwm14;
+		pwm15 = &pwm15;
 		hdcp0 = &hdcp0;
 		hdcp1 = &hdcp1;
 	};
@@ -896,28 +912,28 @@
 			clock-latency-ns = <40000>;
 		};
 		opp-2256000000 {
-			opp-supported-hw = <0xfd 0x13>;
+			opp-supported-hw = <0xff 0x0>;
 			opp-hz = /bits/ 64 <2256000000>;
 			opp-microvolt = <1000000 1000000 1000000>,
 					<1000000 1000000 1000000>;
 			clock-latency-ns = <40000>;
 		};
 		opp-2304000000 {
-			opp-supported-hw = <0xfd 0x24>;
+			opp-supported-hw = <0xff 0x0>;
 			opp-hz = /bits/ 64 <2304000000>;
 			opp-microvolt = <1000000 1000000 1000000>,
 					<1000000 1000000 1000000>;
 			clock-latency-ns = <40000>;
 		};
 		opp-2352000000 {
-			opp-supported-hw = <0xfd 0x48>;
+			opp-supported-hw = <0xff 0x0>;
 			opp-hz = /bits/ 64 <2352000000>;
 			opp-microvolt = <1000000 1000000 1000000>,
 					<1000000 1000000 1000000>;
 			clock-latency-ns = <40000>;
 		};
 		opp-2400000000 {
-			opp-supported-hw = <0xfd 0x80>;
+			opp-supported-hw = <0xff 0xffff>;
 			opp-hz = /bits/ 64 <2400000000>;
 			opp-microvolt = <1000000 1000000 1000000>,
 					<1000000 1000000 1000000>;
@@ -1105,28 +1121,28 @@
 			clock-latency-ns = <40000>;
 		};
 		opp-2256000000 {
-			opp-supported-hw = <0xfd 0x13>;
+			opp-supported-hw = <0xff 0x0>;
 			opp-hz = /bits/ 64 <2256000000>;
 			opp-microvolt = <1000000 1000000 1000000>,
 					<1000000 1000000 1000000>;
 			clock-latency-ns = <40000>;
 		};
 		opp-2304000000 {
-			opp-supported-hw = <0xfd 0x24>;
+			opp-supported-hw = <0xff 0x0>;
 			opp-hz = /bits/ 64 <2304000000>;
 			opp-microvolt = <1000000 1000000 1000000>,
 					<1000000 1000000 1000000>;
 			clock-latency-ns = <40000>;
 		};
 		opp-2352000000 {
-			opp-supported-hw = <0xfd 0x48>;
+			opp-supported-hw = <0xff 0x0>;
 			opp-hz = /bits/ 64 <2352000000>;
 			opp-microvolt = <1000000 1000000 1000000>,
 					<1000000 1000000 1000000>;
 			clock-latency-ns = <40000>;
 		};
 		opp-2400000000 {
-			opp-supported-hw = <0xfd 0x80>;
+			opp-supported-hw = <0xff 0xffff>;
 			opp-hz = /bits/ 64 <2400000000>;
 			opp-microvolt = <1000000 1000000 1000000>,
 					<1000000 1000000 1000000>;
@@ -1259,7 +1275,7 @@
 		clocks = <&scmi_clk 4>;
 		clock-names = "dmc_clk";
 		operating-points-v2 = <&dmc_opp_table>;
-		upthreshold = <40>;
+		upthreshold = <25>;
 		downdifferential = <20>;
 		system-status-level = <
 			/*system status         freq level*/
@@ -3711,7 +3727,7 @@
 			      "dclk_src_vp1",
 			      "dclk_src_vp2";
 		assigned-clocks = <&cru ACLK_VOP>;
-		assigned-clock-rates = <500000000>;
+		assigned-clock-rates = <800000000>;
 		resets = <&cru SRST_A_VOP>,
 			 <&cru SRST_H_VOP>,
 			 <&cru SRST_D_VOP0>,

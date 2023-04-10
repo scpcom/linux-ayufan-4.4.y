@@ -378,7 +378,7 @@ static int reg_read(struct i2c_client *client, const u16 addr, const u32 len, u3
 
 	*val = get_unaligned_be32(data_buf);
 
-	return 0;
+	return buf[0];
 }
 
 static int reg_write_table(struct i2c_client *client,
@@ -875,6 +875,10 @@ static long imx219_compat_ioctl32(struct v4l2_subdev *sd,
 		ret = -ENOIOCTLCMD;
 		break;
 	}
+	/* If enabled, apply settings immediately */
+	reg = reg_read(client, 0x0100);
+	if ((reg & 0x1f) == 0x01)
+		imx219_s_stream(&priv->subdev, 1);
 
 	return ret;
 }
@@ -1091,6 +1095,7 @@ static int imx219_ctrls_init(struct v4l2_subdev *sd)
 		ret = priv->ctrl_handler.error;
 		goto error;
 	}
+	model_id |= ret;
 
 	ret = v4l2_ctrl_handler_setup(&priv->ctrl_handler);
 	if (ret < 0) {

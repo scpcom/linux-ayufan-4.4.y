@@ -657,8 +657,16 @@ static int setup_initial_state(struct drm_device *drm_dev,
 	else
 		conn_state->best_encoder = rockchip_drm_connector_get_single_encoder(connector);
 
-	if (set->sub_dev->loader_protect)
-		set->sub_dev->loader_protect(conn_state->best_encoder, true);
+	if (set->sub_dev->loader_protect) {
+		ret = set->sub_dev->loader_protect(conn_state->best_encoder, true);
+		if (ret) {
+			dev_err(drm_dev->dev,
+				"connector[%s] loader protect failed\n",
+				connector->name);
+			return ret;
+		}
+	}
+
 	num_modes = rockchip_drm_fill_connector_modes(connector, 7680, 7680, set->force_output);
 	if (!num_modes) {
 		dev_err(drm_dev->dev, "connector[%s] can't found any modes\n",
@@ -828,6 +836,7 @@ static int update_state(struct drm_device *drm_dev,
 		const struct drm_encoder_helper_funcs *encoder_helper_funcs;
 		const struct drm_connector_helper_funcs *connector_helper_funcs;
 		struct drm_encoder *encoder;
+		struct drm_bridge *bridge;
 
 		connector_helper_funcs = connector->helper_private;
 		if (!connector_helper_funcs)
@@ -852,6 +861,9 @@ static int update_state(struct drm_device *drm_dev,
 							      conn_state);
 		else if (encoder_helper_funcs->mode_set)
 			encoder_helper_funcs->mode_set(encoder, mode, mode);
+
+		bridge = drm_bridge_chain_get_first_bridge(encoder);
+		drm_bridge_chain_mode_set(bridge, mode, mode);
 	}
 
 	primary_state = drm_atomic_get_plane_state(state, crtc->primary);

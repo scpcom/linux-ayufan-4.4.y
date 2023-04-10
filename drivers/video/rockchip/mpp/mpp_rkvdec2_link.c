@@ -71,6 +71,8 @@ struct rkvdec_link_info rkvdec_link_v2_hw_info = {
 		.reg_num = 28,
 	},
 	.tb_reg_int = 180,
+	.tb_reg_cycle = 195,
+	.hack_setup = 0,
 };
 
 /* vdpu34x link hw info for rk356x */
@@ -123,6 +125,8 @@ struct rkvdec_link_info rkvdec_link_rk356x_hw_info = {
 		.reg_num = 28,
 	},
 	.tb_reg_int = 164,
+	.tb_reg_cycle = 179,
+	.hack_setup = 1,
 };
 
 static void rkvdec_link_status_update(struct rkvdec_link_dev *dev)
@@ -536,6 +540,7 @@ static int rkvdec_link_isr_recv_task(struct mpp_dev *mpp,
 	struct rkvdec_link_info *info = link_dec->info;
 	u32 *table_base = (u32 *)link_dec->table->vaddr;
 	int i;
+	struct rkvdec2_dev *dec = to_rkvdec2_dev(mpp);
 
 	for (i = 0; i < count; i++) {
 		int idx = rkvdec_link_get_task_read(link_dec);
@@ -592,16 +597,17 @@ static int rkvdec_link_isr_recv_task(struct mpp_dev *mpp,
 
 			continue;
 		}
-
 		task = to_rkvdec2_task(mpp_task);
 		regs = table_base + idx * link_dec->link_reg_count;
 		irq_status = regs[info->tb_reg_int];
+		mpp_task->hw_cycles = regs[info->tb_reg_cycle];
+		mpp_time_diff(mpp_task, dec->core_clk_info.real_rate_hz);
 		mpp_dbg_link_flow("slot %d rd task %d\n", idx,
 				  mpp_task->task_id);
 
 		task->irq_status = irq_status ? irq_status : mpp->irq_status;
 
-		cancel_delayed_work_sync(&mpp_task->timeout_work);
+		cancel_delayed_work(&mpp_task->timeout_work);
 		set_bit(TASK_STATE_HANDLE, &mpp_task->state);
 
 		if (link_dec->statistic_count &&
@@ -768,7 +774,7 @@ static int rkvdec2_link_isr(struct mpp_dev *mpp)
 			rkvdec_link_reg_dump("timeout", link_dec);
 
 		val = mpp_read(mpp, 224 * 4);
-		if (!(val & BIT(2))) {
+		if (link_dec->info->hack_setup && !(val & BIT(2))) {
 			dev_info(mpp->dev, "frame not complete\n");
 			link_dec->decoded++;
 		}
@@ -954,6 +960,9 @@ int rkvdec2_link_init(struct platform_device *pdev, struct rkvdec2_dev *dec)
 	ret = rkvdec2_link_alloc_table(&dec->mpp, link_dec);
 	if (ret)
 		goto done;
+
+	if (dec->fix)
+		rkvdec2_link_hack_data_setup(dec->fix);
 
 	link_dec->mpp = mpp;
 	link_dec->dev = dev;
@@ -1200,7 +1209,6 @@ static int mpp_task_queue(struct mpp_dev *mpp, struct mpp_task *task)
 	mpp_debug_enter();
 
 	rkvdec2_link_power_on(mpp);
-	mpp_time_record(task);
 	mpp_debug(DEBUG_TASK_INFO, "pid %d, start hw %s\n",
 		  task->session->pid, dev_name(mpp->dev));
 
@@ -1282,11 +1290,21 @@ int rkvdec2_link_process_task(struct mpp_session *session,
 {
 	struct mpp_task *task = NULL;
 	struct mpp_dev *mpp = session->mpp;
+	struct rkvdec_link_info *link_info = mpp->var->hw_info->link_info;
 
 	task = rkvdec2_alloc_task(session, msgs);
 	if (!task) {
 		mpp_err("alloc_task failed.\n");
 		return -ENOMEM;
+	}
+
+	if (link_info->hack_setup) {
+		u32 fmt;
+		struct rkvdec2_task *dec_task = NULL;
+
+		dec_task = to_rkvdec2_task(task);
+		fmt = RKVDEC_GET_FORMAT(dec_task->reg[RKVDEC_REG_FORMAT_INDEX]);
+		dec_task->need_hack = (fmt == RKVDEC_FMT_H264D);
 	}
 
 	kref_init(&task->ref);
@@ -1644,6 +1662,7 @@ static int rkvdec2_soft_ccu_dequeue(struct mpp_taskqueue *queue)
 				 &queue->running_list,
 				 queue_link) {
 		struct mpp_dev *mpp = mpp_get_task_used_device(mpp_task, mpp_task->session);
+		struct rkvdec2_dev *dec = to_rkvdec2_dev(mpp);
 		u32 irq_status = mpp->irq_status;
 		u32 timeout_flag = test_bit(TASK_STATE_TIMEOUT, &mpp_task->state);
 		u32 abort_flag = test_bit(TASK_STATE_ABORT, &mpp_task->state);
@@ -1665,7 +1684,8 @@ static int rkvdec2_soft_ccu_dequeue(struct mpp_taskqueue *queue)
 
 			set_bit(TASK_STATE_HANDLE, &mpp_task->state);
 			cancel_delayed_work(&mpp_task->timeout_work);
-			mpp_time_diff(mpp_task);
+			mpp_task->hw_cycles = mpp_read(mpp, RKVDEC_PERF_WORKING_CNT);
+			mpp_time_diff(mpp_task, dec->core_clk_info.real_rate_hz);
 			task->irq_status = irq_status;
 			mpp_debug(DEBUG_IRQ_CHECK, "irq_status=%08x, timeout=%u, abort=%u\n",
 				  irq_status, timeout_flag, abort_flag);
@@ -1782,7 +1802,7 @@ int rkvdec2_ccu_iommu_fault_handle(struct iommu_domain *iommu,
 
 	atomic_inc(&mpp->queue->reset_request);
 	for (i = 0; i < mpp->queue->core_count; i++)
-		rk_iommu_mask_irq(mpp->queue->cores[i]->dev);
+		rockchip_iommu_mask_irq(mpp->queue->cores[i]->dev);
 
 	kthread_queue_work(&mpp->queue->worker, &mpp->work);
 

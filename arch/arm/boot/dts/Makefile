@@ -974,7 +974,9 @@ dtb-$(CONFIG_ARCH_RENESAS) += \
 dtb-$(CONFIG_ARCH_ROCKCHIP) += \
 	rv1103g-38x38-ipc-v10.dtb \
 	rv1103g-battery-ipc-v10.dtb \
+	rv1103g-battery-ipc-v11.dtb \
 	rv1103g-evb-v10.dtb \
+	rv1103g-evb-v11.dtb \
 	rv1103g-rmsl311-dloc-sl-v10.dtb \
 	rv1103g-scaner-v10.dtb \
 	rv1106g-38x38-ipc-v10.dtb \
@@ -983,6 +985,8 @@ dtb-$(CONFIG_ARCH_ROCKCHIP) += \
 	rv1106g-evb1-rgb-display-v11.dtb \
 	rv1106g-evb1-v10.dtb \
 	rv1106g-evb1-v11.dtb \
+	rv1106g-evb1-v11-cvr.dtb \
+	rv1106g-evb1-v11-spi-nand-cvr.dtb \
 	rv1106g-evb1-v11-sii902x-bt11202hdmi.dtb \
 	rv1106g-evb1-v11-sii902x-rgb2hdmi.dtb \
 	rv1106g-evb1-v10-dual-cam.dtb \

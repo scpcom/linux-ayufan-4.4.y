@@ -149,6 +149,11 @@
 #define PX30_DSI_TURNDISABLE		BIT(5)
 #define PX30_DSI_LCDC_SEL		BIT(0)
 
+#define RK3128_GRF_LVDS_CON0		0x0150
+#define RK3128_DSI_FORCETXSTOPMODE	(0xf << 10)
+#define RK3128_DSI_FORCERXMODE		(0x1 << 9)
+#define RK3128_DSI_TURNDISABLE		(0x1 << 8)
+
 #define RK3288_GRF_SOC_CON6		0x025c
 #define RK3288_DSI0_LCDC_SEL		BIT(6)
 #define RK3288_DSI1_LCDC_SEL		BIT(9)
@@ -213,6 +218,7 @@ enum {
 
 enum soc_type {
 	PX30,
+	RK3128,
 	RK3288,
 	RK3399,
 	RK3568,
@@ -272,6 +278,8 @@ struct dw_mipi_dsi_rockchip {
 
 	/* dual-channel */
 	bool is_slave;
+	bool is_dsi0;
+	struct dw_mipi_dsi_rockchip *dsi0;
 	struct dw_mipi_dsi_rockchip *slave;
 
 	/* optional external dphy */
@@ -812,6 +820,9 @@ static void dw_mipi_dsi_encoder_disable(struct drm_encoder *encoder)
 
 static void dw_mipi_dsi_rockchip_loader_protect(struct dw_mipi_dsi_rockchip *dsi, bool on)
 {
+	if (dsi->dsi0)
+		dw_mipi_dsi_rockchip_loader_protect(dsi->dsi0, on);
+
 	if (on) {
 		pm_runtime_get_sync(dsi->dev);
 		phy_init(dsi->phy);
@@ -830,7 +841,7 @@ static void dw_mipi_dsi_rockchip_loader_protect(struct dw_mipi_dsi_rockchip *dsi
 		dw_mipi_dsi_rockchip_loader_protect(dsi->slave, on);
 }
 
-static void dw_mipi_dsi_rockchip_encoder_loader_protect(struct drm_encoder *encoder,
+static int dw_mipi_dsi_rockchip_encoder_loader_protect(struct drm_encoder *encoder,
 					      bool on)
 {
 	struct dw_mipi_dsi_rockchip *dsi = to_dsi(encoder);
@@ -839,6 +850,8 @@ static void dw_mipi_dsi_rockchip_encoder_loader_protect(struct drm_encoder *enco
 		panel_simple_loader_protect(dsi->panel);
 
 	dw_mipi_dsi_rockchip_loader_protect(dsi, on);
+
+	return 0;
 }
 
 static const struct drm_encoder_helper_funcs
@@ -892,6 +905,32 @@ static struct device
 
 	return NULL;
 }
+
+static struct device
+*dw_mipi_dsi_rockchip_find_dsi0(struct dw_mipi_dsi_rockchip *dsi)
+{
+	struct device_node *node = NULL;
+	struct platform_device *pdev;
+	struct dw_mipi_dsi_rockchip *dsi2;
+
+	node = of_parse_phandle(dsi->dev->of_node, "rockchip,dsi-dsi0", 0);
+	if (node) {
+		pdev = of_find_device_by_node(node);
+		if (!pdev)
+			return ERR_PTR(-EPROBE_DEFER);
+
+		dsi2 = platform_get_drvdata(pdev);
+		if (!dsi2) {
+			platform_device_put(pdev);
+			return ERR_PTR(-EPROBE_DEFER);
+		}
+
+		return &pdev->dev;
+	}
+
+	return NULL;
+}
+
 
 static int dw_mipi_dsi_get_dsc_info_from_sink(struct dw_mipi_dsi_rockchip *dsi,
 					      struct drm_panel *panel,
@@ -982,6 +1021,27 @@ static int dw_mipi_dsi_rockchip_bind(struct device *dev,
 		dw_mipi_dsi_set_slave(dsi->dmd, dsi->slave->dmd);
 		put_device(second);
 	}
+	if(!second){
+		second = dw_mipi_dsi_rockchip_find_dsi0(dsi);
+		if (IS_ERR(second))
+			return PTR_ERR(second);
+
+		if (second) {
+			/* we are the slave in dual-DSI */
+			dsi->dsi0 = dev_get_drvdata(second);
+			if (!dsi->dsi0) {
+				DRM_DEV_ERROR(dev, "could not get dsi0 data\n");
+				return -ENODEV;
+			}
+
+			dsi->dsi0->is_dsi0 = true;
+			dw_mipi_dsi_set_dsi0(dsi->dmd, dsi->dsi0->dmd);
+			put_device(second);
+		} else
+			dsi->is_dsi0 = of_property_read_bool(dev->of_node, "dsi1-only");
+	}
+	if (dsi->is_dsi0)
+		return 0;
 
 	if (dsi->is_slave)
 		return 0;
@@ -1027,6 +1087,9 @@ static void dw_mipi_dsi_rockchip_unbind(struct device *dev,
 {
 	struct dw_mipi_dsi_rockchip *dsi = dev_get_drvdata(dev);
 
+	if (dsi->is_dsi0)
+		return;
+
 	if (dsi->is_slave)
 		return;
 
@@ -1058,6 +1121,19 @@ static int dw_mipi_dsi_rockchip_host_attach(void *priv_data,
 	}
 
 	second = dw_mipi_dsi_rockchip_find_second(dsi);
+	if (IS_ERR(second))
+		return PTR_ERR(second);
+	if (second) {
+		ret = component_add(second, &dw_mipi_dsi_rockchip_ops);
+		if (ret) {
+			DRM_DEV_ERROR(second,
+				      "Failed to register component: %d\n",
+				      ret);
+			return ret;
+		}
+	}
+
+	second = dw_mipi_dsi_rockchip_find_dsi0(dsi);
 	if (IS_ERR(second))
 		return PTR_ERR(second);
 	if (second) {
@@ -1281,6 +1357,21 @@ static const struct rockchip_dw_dsi_chip_data px30_chip_data[] = {
 	{ /* sentinel */ }
 };
 
+static const struct rockchip_dw_dsi_chip_data rk3128_chip_data[] = {
+	{
+		.reg = 0x10110000,
+		.lanecfg1_grf_reg = RK3128_GRF_LVDS_CON0,
+		.lanecfg1 = HIWORD_UPDATE(0, RK3128_DSI_TURNDISABLE |
+					     RK3128_DSI_FORCETXSTOPMODE |
+					     RK3128_DSI_FORCERXMODE),
+		.flags = DW_MIPI_NEEDS_HCLK,
+		.max_data_lanes = 4,
+		.max_bit_rate_per_lane = 1000000000UL,
+		.soc_type = RK3128,
+	},
+	{ /* sentinel */ }
+};
+
 static const struct rockchip_dw_dsi_chip_data rk3288_chip_data[] = {
 	{
 		.reg = 0xff960000,
@@ -1405,6 +1496,9 @@ static const struct of_device_id dw_mipi_dsi_rockchip_dt_ids[] = {
 	{
 	 .compatible = "rockchip,px30-mipi-dsi",
 	 .data = &px30_chip_data,
+	}, {
+	 .compatible = "rockchip,rk3128-mipi-dsi",
+	 .data = &rk3128_chip_data,
 	}, {
 	 .compatible = "rockchip,rk3288-mipi-dsi",
 	 .data = &rk3288_chip_data,

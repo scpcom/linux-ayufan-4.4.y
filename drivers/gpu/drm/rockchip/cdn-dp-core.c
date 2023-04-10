@@ -6,6 +6,7 @@
 
 #include <linux/clk.h>
 #include <linux/component.h>
+#include <linux/extcon-provider.h>
 #include <linux/firmware.h>
 #include <linux/mfd/syscon.h>
 #include <linux/phy/phy.h>
@@ -41,6 +42,13 @@
 #define CDN_FW_TIMEOUT_MS	(64 * 1000)
 #define CDN_DPCD_TIMEOUT_MS	5000
 #define CDN_DP_FIRMWARE		"rockchip/dptx.bin"
+
+static void cdn_dp_handle_plugged_change(struct cdn_dp_device *dp, bool plugged);
+
+static const unsigned int cdn_dp_cable[] = {
+	EXTCON_DISP_DP,
+	EXTCON_NONE,
+};
 
 struct cdn_dp_data {
 	u8 max_phy;
@@ -142,7 +150,24 @@ static void cdn_dp_clk_disable(struct cdn_dp_device *dp)
 
 static int cdn_dp_get_port_lanes(struct cdn_dp_port *port)
 {
-	return phy_get_bus_width(port->phy);
+	struct extcon_dev *edev = port->extcon;
+	union extcon_property_value property;
+	int dptx;
+	u8 lanes;
+
+	dptx = extcon_get_state(edev, EXTCON_DISP_DP);
+	if (dptx > 0) {
+		extcon_get_property(edev, EXTCON_DISP_DP,
+				    EXTCON_PROP_USB_SS, &property);
+		if (property.intval)
+			lanes = 2;
+		else
+			lanes = 4;
+	} else {
+		lanes = 0;
+	}
+
+	return lanes;
 }
 
 static int cdn_dp_get_sink_count(struct cdn_dp_device *dp, u8 *sink_count)
@@ -176,12 +201,15 @@ static struct cdn_dp_port *cdn_dp_connected_port(struct cdn_dp_device *dp)
 static bool cdn_dp_check_sink_connection(struct cdn_dp_device *dp)
 {
 	unsigned long timeout = jiffies + msecs_to_jiffies(CDN_DPCD_TIMEOUT_MS);
+	struct cdn_dp_port *port;
 	u8 sink_count = 0;
 
 	if (dp->active_port < 0 || dp->active_port >= dp->ports) {
 		DRM_DEV_ERROR(dp->dev, "active_port is wrong!\n");
 		return false;
 	}
+
+	port = dp->port[dp->active_port];
 
 	/*
 	 * Attempt to read sink count, retry in case the sink may not be ready.
@@ -190,6 +218,9 @@ static bool cdn_dp_check_sink_connection(struct cdn_dp_device *dp)
 	 * some docks need more time to power up.
 	 */
 	while (time_before(jiffies, timeout)) {
+		if (!extcon_get_state(port->extcon, EXTCON_DISP_DP))
+			return false;
+
 		if (!cdn_dp_get_sink_count(dp, &sink_count))
 			return sink_count ? true : false;
 
@@ -218,13 +249,6 @@ static void cdn_dp_connector_destroy(struct drm_connector *connector)
 {
 	drm_connector_unregister(connector);
 	drm_connector_cleanup(connector);
-}
-
-static void cdn_dp_oob_hotplug_event(struct drm_connector *connector)
-{
-	struct cdn_dp_device *dp = connector_to_dp(connector);
-
-	schedule_delayed_work(&dp->event_work, msecs_to_jiffies(100));
 }
 
 static const struct drm_connector_funcs cdn_dp_atomic_connector_funcs = {
@@ -259,9 +283,8 @@ static int cdn_dp_connector_get_modes(struct drm_connector *connector)
 	return ret;
 }
 
-static enum drm_mode_status
-cdn_dp_connector_mode_valid(struct drm_connector *connector,
-			    struct drm_display_mode *mode)
+static int cdn_dp_connector_mode_valid(struct drm_connector *connector,
+				       struct drm_display_mode *mode)
 {
 	struct cdn_dp_device *dp = connector_to_dp(connector);
 	struct drm_display_info *display_info = &dp->connector.display_info;
@@ -366,6 +389,7 @@ static int cdn_dp_get_sink_capability(struct cdn_dp_device *dp)
 
 static int cdn_dp_enable_phy(struct cdn_dp_device *dp, struct cdn_dp_port *port)
 {
+	union extcon_property_value property;
 	int ret;
 
 	if (!port->phy_enabled) {
@@ -392,8 +416,15 @@ static int cdn_dp_enable_phy(struct cdn_dp_device *dp, struct cdn_dp_port *port)
 		goto err_power_on;
 	}
 
+	ret = extcon_get_property(port->extcon, EXTCON_DISP_DP,
+				  EXTCON_PROP_USB_TYPEC_POLARITY, &property);
+	if (ret) {
+		DRM_DEV_ERROR(dp->dev, "get property failed\n");
+		goto err_power_on;
+	}
+
 	port->lanes = cdn_dp_get_port_lanes(port);
-	ret = cdn_dp_set_host_cap(dp, port->lanes, 0);
+	ret = cdn_dp_set_host_cap(dp, port->lanes, property.intval);
 	if (ret) {
 		DRM_DEV_ERROR(dp->dev, "set host capabilities failed: %d\n",
 			      ret);
@@ -616,6 +647,8 @@ static void cdn_dp_encoder_enable(struct drm_encoder *encoder)
 		DRM_DEV_ERROR(dp->dev, "Failed to valid video %d\n", ret);
 		goto out;
 	}
+	extcon_set_state_sync(dp->extcon, EXTCON_DISP_DP, true);
+	cdn_dp_handle_plugged_change(dp, true);
 out:
 	mutex_unlock(&dp->lock);
 }
@@ -634,7 +667,8 @@ static void cdn_dp_encoder_disable(struct drm_encoder *encoder)
 		}
 	}
 	mutex_unlock(&dp->lock);
-
+	extcon_set_state_sync(dp->extcon, EXTCON_DISP_DP, false);
+	cdn_dp_handle_plugged_change(dp, false);
 	/*
 	 * In the following 2 cases, we need to run the event_work to re-enable
 	 * the DP:
@@ -645,7 +679,7 @@ static void cdn_dp_encoder_disable(struct drm_encoder *encoder)
 	 *    run the event_work to re-connect it.
 	 */
 	if (!dp->connected && cdn_dp_connected_port(dp))
-		schedule_delayed_work(&dp->event_work, 0);
+		schedule_work(&dp->event_work);
 }
 
 static int cdn_dp_encoder_atomic_check(struct drm_encoder *encoder,
@@ -656,7 +690,13 @@ static int cdn_dp_encoder_atomic_check(struct drm_encoder *encoder,
 
 	s->output_mode = ROCKCHIP_OUT_MODE_AAAA;
 	s->output_type = DRM_MODE_CONNECTOR_DisplayPort;
-	s->tv_state = &conn_state->tv;
+
+	/*
+	 * Do a full modeset if crtc_state->active is changed to be true.
+	 * This ensures our ->mode_set() is called to get the CDN controller
+	 * and the PHY ready to send video data.
+	 */
+	crtc_state->mode_changed = true;
 
 	return 0;
 }
@@ -753,7 +793,7 @@ static int cdn_dp_audio_hw_params(struct device *dev,  void *data,
 
 	mutex_lock(&dp->lock);
 	if (!dp->active) {
-		ret = -ENODEV;
+		ret = 0;
 		goto out;
 	}
 
@@ -803,7 +843,7 @@ static int cdn_dp_audio_mute_stream(struct device *dev, void *data,
 
 	mutex_lock(&dp->lock);
 	if (!dp->active) {
-		ret = -ENODEV;
+		ret = 0;
 		goto out;
 	}
 
@@ -812,6 +852,36 @@ static int cdn_dp_audio_mute_stream(struct device *dev, void *data,
 out:
 	mutex_unlock(&dp->lock);
 	return ret;
+}
+
+static bool cdn_dp_detect(struct cdn_dp_device *dp)
+{
+	bool active;
+
+	mutex_lock(&dp->lock);
+	active = dp->active;
+	mutex_unlock(&dp->lock);
+
+	return active;
+}
+
+static void cdn_dp_handle_plugged_change(struct cdn_dp_device *dp, bool plugged)
+{
+	if (dp->plugged_cb && dp->codec_dev)
+		dp->plugged_cb(dp->codec_dev, plugged);
+}
+
+static int cdn_dp_audio_hook_plugged_cb(struct device *dev, void *data,
+				       hdmi_codec_plugged_cb fn,
+				       struct device *codec_dev)
+{
+	struct cdn_dp_device *dp = dev_get_drvdata(dev);
+
+	dp->plugged_cb = fn;
+	dp->codec_dev = codec_dev;
+	cdn_dp_handle_plugged_change(dp, cdn_dp_detect(dp));
+
+	return 0;
 }
 
 static int cdn_dp_audio_get_eld(struct device *dev, void *data,
@@ -830,6 +900,7 @@ static const struct hdmi_codec_ops audio_codec_ops = {
 	.mute_stream = cdn_dp_audio_mute_stream,
 	.get_eld = cdn_dp_audio_get_eld,
 	.no_capture_mute = 1,
+	.hook_plugged_cb = cdn_dp_audio_hook_plugged_cb
 };
 
 static int cdn_dp_audio_codec_init(struct cdn_dp_device *dp,
@@ -889,7 +960,7 @@ out:
 
 static void cdn_dp_pd_event_work(struct work_struct *work)
 {
-	struct cdn_dp_device *dp = container_of(to_delayed_work(work), struct cdn_dp_device,
+	struct cdn_dp_device *dp = container_of(work, struct cdn_dp_device,
 						event_work);
 	struct drm_connector *connector = &dp->connector;
 	enum drm_connector_status old_status;
@@ -962,13 +1033,31 @@ out:
 		drm_kms_helper_hotplug_event(dp->drm_dev);
 }
 
+static int cdn_dp_pd_event(struct notifier_block *nb,
+			   unsigned long event, void *priv)
+{
+	struct cdn_dp_port *port = container_of(nb, struct cdn_dp_port,
+						event_nb);
+	struct cdn_dp_device *dp = port->dp;
+
+	/*
+	 * It would be nice to be able to just do the work inline right here.
+	 * However, we need to make a bunch of calls that might sleep in order
+	 * to turn on the block/phy, so use a worker instead.
+	 */
+	schedule_work(&dp->event_work);
+
+	return NOTIFY_DONE;
+}
+
 static int cdn_dp_bind(struct device *dev, struct device *master, void *data)
 {
 	struct cdn_dp_device *dp = dev_get_drvdata(dev);
 	struct drm_encoder *encoder;
 	struct drm_connector *connector;
+	struct cdn_dp_port *port;
 	struct drm_device *drm_dev = data;
-	int ret;
+	int ret, i;
 
 	ret = cdn_dp_parse_dt(dp);
 	if (ret < 0)
@@ -980,12 +1069,12 @@ static int cdn_dp_bind(struct device *dev, struct device *master, void *data)
 	dp->active_port = -1;
 	dp->fw_loaded = false;
 
-	INIT_DELAYED_WORK(&dp->event_work, cdn_dp_pd_event_work);
+	INIT_WORK(&dp->event_work, cdn_dp_pd_event_work);
 
 	encoder = &dp->encoder;
 
 	encoder->possible_crtcs = rockchip_drm_of_find_possible_crtcs(drm_dev,
-								      dev->of_node);
+							     dev->of_node);
 	DRM_DEBUG_KMS("possible_crtcs = 0x%x\n", encoder->possible_crtcs);
 
 	ret = drm_simple_encoder_init(drm_dev, encoder,
@@ -1017,14 +1106,23 @@ static int cdn_dp_bind(struct device *dev, struct device *master, void *data)
 		goto err_free_connector;
 	}
 
-	dp->sub_dev.connector = &dp->connector;
-	dp->sub_dev.of_node = dev->of_node;
-	dp->sub_dev.oob_hotplug_event = cdn_dp_oob_hotplug_event;
-	rockchip_drm_register_sub_dev(&dp->sub_dev);
+	for (i = 0; i < dp->ports; i++) {
+		port = dp->port[i];
+
+		port->event_nb.notifier_call = cdn_dp_pd_event;
+		ret = devm_extcon_register_notifier(dp->dev, port->extcon,
+						    EXTCON_DISP_DP,
+						    &port->event_nb);
+		if (ret) {
+			DRM_DEV_ERROR(dev,
+				      "register EXTCON_DISP_DP notifier err\n");
+			goto err_free_connector;
+		}
+	}
 
 	pm_runtime_enable(dev);
 
-	schedule_delayed_work(&dp->event_work, 0);
+	schedule_work(&dp->event_work);
 
 	return 0;
 
@@ -1041,7 +1139,7 @@ static void cdn_dp_unbind(struct device *dev, struct device *master, void *data)
 	struct drm_encoder *encoder = &dp->encoder;
 	struct drm_connector *connector = &dp->connector;
 
-	cancel_delayed_work_sync(&dp->event_work);
+	cancel_work_sync(&dp->event_work);
 	cdn_dp_encoder_disable(encoder);
 	encoder->funcs->destroy(encoder);
 	connector->funcs->destroy(connector);
@@ -1079,7 +1177,7 @@ static __maybe_unused int cdn_dp_resume(struct device *dev)
 	mutex_lock(&dp->lock);
 	dp->suspended = false;
 	if (dp->fw_loaded)
-		schedule_delayed_work(&dp->event_work, 0);
+		schedule_work(&dp->event_work);
 	mutex_unlock(&dp->lock);
 
 	return 0;
@@ -1092,8 +1190,10 @@ static int cdn_dp_probe(struct platform_device *pdev)
 	struct cdn_dp_data *dp_data;
 	struct cdn_dp_port *port;
 	struct cdn_dp_device *dp;
+	struct extcon_dev *extcon;
 	struct phy *phy;
 	int i;
+	int ret;
 
 	dp = devm_kzalloc(dev, sizeof(*dp), GFP_KERNEL);
 	if (!dp)
@@ -1104,18 +1204,21 @@ static int cdn_dp_probe(struct platform_device *pdev)
 	dp_data = (struct cdn_dp_data *)match->data;
 
 	for (i = 0; i < dp_data->max_phy; i++) {
+		extcon = extcon_get_edev_by_phandle(dev, i);
 		phy = devm_of_phy_get_by_index(dev, dev->of_node, i);
 
-		if (PTR_ERR(phy) == -EPROBE_DEFER)
+		if (PTR_ERR(extcon) == -EPROBE_DEFER ||
+		    PTR_ERR(phy) == -EPROBE_DEFER)
 			return -EPROBE_DEFER;
 
-		if (IS_ERR(phy))
+		if (IS_ERR(extcon) || IS_ERR(phy))
 			continue;
 
 		port = devm_kzalloc(dev, sizeof(*port), GFP_KERNEL);
 		if (!port)
 			return -ENOMEM;
 
+		port->extcon = extcon;
 		port->phy = phy;
 		port->dp = dp;
 		port->id = i;
@@ -1123,14 +1226,26 @@ static int cdn_dp_probe(struct platform_device *pdev)
 	}
 
 	if (!dp->ports) {
-		DRM_DEV_ERROR(dev, "missing phy\n");
+		DRM_DEV_ERROR(dev, "missing extcon or phy\n");
 		return -EINVAL;
 	}
 
 	mutex_init(&dp->lock);
 	dev_set_drvdata(dev, dp);
 
+	dp->extcon = devm_extcon_dev_allocate(dp->dev, cdn_dp_cable);
+	if (IS_ERR(dp->extcon)) {
+		dev_err(dp->dev, "allocate extcon failed\n");
+		return -ENOMEM;
+	}
+	ret = devm_extcon_dev_register(dp->dev, dp->extcon);
+	if (ret) {
+		dev_err(dp->dev, "failed to register extcon: %d\n", ret);
+		return ret;
+	}
+
 	cdn_dp_audio_codec_init(dp, dev);
+	cdn_dp_handle_plugged_change(dp, false);
 
 	return component_add(dev, &cdn_dp_component_ops);
 }
