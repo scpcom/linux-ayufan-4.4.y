@@ -169,6 +169,6 @@ dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3326-odroidgo2-linux-v11.dtb
 dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3326-odroidgo3-linux.dtb
 dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3399-odroidn1-linux.dtb
 
-subdir-$(CONFIG_ARCH_ROCKCHIP_ODROIDM1) += overlays/odroidm1
+subdir-y += overlays/odroidm1
 
-subdir-y := $(dts-dirs) overlay
+subdir-y += overlay
