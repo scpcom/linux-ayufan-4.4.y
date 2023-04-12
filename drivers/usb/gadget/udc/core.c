@@ -732,9 +732,9 @@ int usb_gadget_disconnect(struct usb_gadget *gadget)
 	ret = gadget->ops->pullup(gadget, 0);
 	if (!ret)
 		gadget->connected = 0;
-		if (gadget->udc->driver)
-			gadget->udc->driver->disconnect(gadget);
-	}
+
+	if (gadget->udc->driver)
+		gadget->udc->driver->disconnect(gadget);
 
 out:
 	trace_usb_gadget_disconnect(gadget, ret);
