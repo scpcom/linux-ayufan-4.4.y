@@ -18,15 +18,19 @@
 
 #ifdef CONFIG_MMU
 #ifdef CONFIG_RISCV_XUANTIE
-static inline void set_mm(struct mm_struct *mm, unsigned int cpu)
+static inline void set_mm(struct mm_struct *prev,
+			  struct mm_struct *next, unsigned int cpu)
 {
 	u64 asid;
 
-	check_and_switch_context(mm, cpu);
-	asid = (mm->context.asid.counter & SATP_ASID_MASK)
+	cpumask_clear_cpu(cpu, mm_cpumask(prev));
+	cpumask_set_cpu(cpu, mm_cpumask(next));
+
+	check_and_switch_context(next, cpu);
+	asid = (next->context.asid.counter & SATP_ASID_MASK)
 		<< SATP_ASID_SHIFT;
 
-	csr_write(sptbr, virt_to_pfn(mm->pgd) | SATP_MODE | asid);
+	csr_write(sptbr, virt_to_pfn(next->pgd) | SATP_MODE | asid);
 }
 
 static DEFINE_PER_CPU(atomic64_t, active_asids);
