@@ -153,6 +153,11 @@ static int os_allocate(void *ctx, ump_dd_mem *descriptor)
 		if (is_cached) {
 			descriptor->block_array[pages_allocated].addr = page_to_phys(new_page);
 			descriptor->block_array[pages_allocated].size = PAGE_SIZE;
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 10, 0)
+		} else if (!ump_global_mdev->dma_mask) {
+			descriptor->block_array[pages_allocated].addr = DMA_MAPPING_ERROR;
+			descriptor->block_array[pages_allocated].size = PAGE_SIZE;
+#endif
 		} else {
 			descriptor->block_array[pages_allocated].addr = dma_map_page(ump_global_mdev, new_page, 0, PAGE_SIZE, DMA_BIDIRECTIONAL);
 			descriptor->block_array[pages_allocated].size = PAGE_SIZE;
