@@ -697,19 +697,21 @@ static struct i2c_client *rk808_i2c_client;
 static struct rk808_reg_data *suspend_reg, *resume_reg;
 static int suspend_reg_num, resume_reg_num;
 
-static void rk805_device_shutdown_prepare(void)
+static int rk805_device_shutdown_prepare(struct sys_off_data *data)
 {
 	int ret;
 	struct rk808 *rk808 = i2c_get_clientdata(rk808_i2c_client);
 
 	if (!rk808)
-		return;
+		return NOTIFY_DONE;
 
 	ret = regmap_update_bits(rk808->regmap,
 				 RK805_GPIO_IO_POL_REG,
 				 SLP_SD_MSK, SHUTDOWN_FUN);
 	if (ret)
 		dev_err(&rk808_i2c_client->dev, "Failed to shutdown device!\n");
+
+	return NOTIFY_DONE;
 }
 
 static int rk808_restart_notify(struct notifier_block *this, unsigned long mode, void *cmd)
@@ -740,7 +742,7 @@ static struct notifier_block rk808_restart_handler = {
 	.priority = 192,
 };
 
-static void rk817_shutdown_prepare(void)
+static int rk817_shutdown_prepare(struct sys_off_data *data)
 {
 	int ret;
 	struct rk808 *rk808 = i2c_get_clientdata(rk808_i2c_client);
@@ -783,6 +785,8 @@ static void rk817_shutdown_prepare(void)
 		dev_err(&rk808_i2c_client->dev, "Failed to shutdown device!\n");
 	/* pmic need the SCL clock to synchronize register */
 	mdelay(2);
+
+	return NOTIFY_DONE;
 }
 
 static void rk8xx_device_shutdown(void)
@@ -1379,8 +1383,9 @@ static int rk808_probe(struct i2c_client *client,
 
 	pm_off = of_property_read_bool(np, "rockchip,system-power-controller");
 	if (pm_off) {
-		if (!pm_power_off_prepare)
-			pm_power_off_prepare = rk808->pm_pwroff_prep_fn;
+		register_sys_off_handler(SYS_OFF_MODE_POWER_OFF_PREPARE,
+					 SYS_OFF_PRIO_DEFAULT,
+					 rk808->pm_pwroff_prep_fn, NULL);
 
 		if (device_shutdown_fn) {
 			register_syscore_ops(&rk808_syscore_ops);
@@ -1433,13 +1438,6 @@ static void rk808_remove(struct i2c_client *client)
 	 */
 	if (pm_power_off == rk808_pm_power_off_dummy)
 		pm_power_off = NULL;
-
-	/**
-	 * As above, check if the pointer is set by us before overwrite.
-	 */
-	if (rk808->pm_pwroff_prep_fn &&
-	    pm_power_off_prepare == rk808->pm_pwroff_prep_fn)
-		pm_power_off_prepare = NULL;
 
 	if (pm_shutdown)
 		unregister_syscore_ops(&rk808_syscore_ops);
