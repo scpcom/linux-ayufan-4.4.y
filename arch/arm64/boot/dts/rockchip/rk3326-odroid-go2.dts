@@ -528,10 +528,6 @@
 	status = "disabled";
 };
 
-&sfc {
-	status = "disabled";
-};
-
 &gpu {
 	mali-supply = <&vdd_logic>;
 	status = "okay";
