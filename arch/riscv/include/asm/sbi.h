@@ -31,6 +31,10 @@ enum sbi_ext_id {
 	SBI_EXT_SRST = 0x53525354,
 	SBI_EXT_PMU = 0x504D55,
 
+	SBI_PMU = 0x09000001,
+	SBI_SYSPEND  = 0x09000007,
+	SBI_WAKEUP = 0x09000008,
+
 	/* Experimentals extensions must lie within this range */
 	SBI_EXT_EXPERIMENTAL_START = 0x08000000,
 	SBI_EXT_EXPERIMENTAL_END = 0x08FFFFFF,
@@ -325,6 +329,26 @@ static inline unsigned long sbi_mk_version(unsigned long major,
 }
 
 int sbi_err_map_linux_errno(int err);
+
+#define SBI_CALL_1(which, arg0) sbi_ecall(which, 0, (unsigned long)arg0, 0, 0, 0, 0, 0)
+#define SBI_CALL_2(which, arg0, arg1) sbi_ecall(which, 0, arg0, arg1, 0, 0, 0, 0)
+#define SBI_CALL_3(which, arg0, arg1, arg2) \
+		sbi_ecall(which, 0, arg0, arg1, arg2, 0, 0, 0)
+
+static inline void sbi_set_pmu(int start)
+{
+	SBI_CALL_1(SBI_PMU, start);
+}
+
+static inline void sbi_suspend(int state)
+{
+	SBI_CALL_1(SBI_SYSPEND, state);
+}
+
+static inline void sbi_set_wakeup(unsigned long irq, unsigned int enable)
+{
+	SBI_CALL_2(SBI_WAKEUP, irq, enable);
+}
 #else /* CONFIG_RISCV_SBI */
 static inline int sbi_remote_fence_i(const struct cpumask *cpu_mask) { return -1; }
 static inline void sbi_init(void) {}
