@@ -55,8 +55,8 @@ enum {
  * describe its own UFP_D pin assignments).
  */
 #define DP_CAP_PIN_ASSIGN(_cap_)	(((_cap_) & DP_CAP_RECEPTACLE) ? \
-					 DP_CAP_UFP_D_PIN_ASSIGN(_cap_) : \
-					 DP_CAP_DFP_D_PIN_ASSIGN(_cap_))
+					 DP_CAP_PIN_ASSIGN_UFP_D(_cap_) : \
+					 DP_CAP_PIN_ASSIGN_DFP_D(_cap_))
 
 enum dp_state {
 	DP_STATE_IDLE,
@@ -443,18 +443,6 @@ static const char * const pin_assignments[] = {
 	[DP_PIN_ASSIGN_E] = "E",
 	[DP_PIN_ASSIGN_F] = "F",
 };
-
-/*
- * Helper function to extract a peripheral's currently supported
- * Pin Assignments from its DisplayPort alternate mode state.
- */
-static u8 get_current_pin_assignments(struct dp_altmode *dp)
-{
-	if (DP_CONF_CURRENTLY(dp->data.conf) == DP_CONF_DFP_D)
-		return DP_CAP_PIN_ASSIGN_DFP_D(dp->alt->vdo);
-	else
-		return DP_CAP_PIN_ASSIGN_UFP_D(dp->alt->vdo);
-}
 
 static ssize_t
 pin_assignment_store(struct device *dev, struct device_attribute *attr,
