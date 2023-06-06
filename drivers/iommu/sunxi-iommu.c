@@ -23,12 +23,12 @@
 #include <linux/iommu.h>
 #include <linux/dma-mapping.h>
 #include <linux/clk.h>
-#include <linux/dma-iommu.h>
 #include <linux/sizes.h>
 #include <linux/device.h>
 #include <asm/cacheflush.h>
 #include <linux/pm_runtime.h>
 
+#include "dma-iommu.h"
 #include "sunxi-iommu.h"
 
 #define _max(x, y) (((u64)(x) > (u64)(y)) ? (x) : (y))
@@ -962,11 +962,14 @@ sunxi_iommu_detach_dev(struct iommu_domain *domain, struct device *dev)
 static int sunxi_iommu_add_device(struct device *dev)
 {
 	struct iommu_group *group;
+	struct sunxi_iommu_dev *iommu = global_iommu_dev;
 	struct sunxi_iommu_owner *owner = dev->archdata.iommu;
 	int ret = 0;
 
 	if (!dev->archdata.iommu) /* Not a iommu client device */
 		return -ENODEV;
+
+	dev->iommu->iommu_dev = &iommu->iommu;
 
 	group = iommu_group_get_for_dev(dev);
 
@@ -1664,18 +1667,20 @@ static void sunxi_iommu_sysfs_remove(struct platform_device *_pdev)
 
 static const struct iommu_ops sunxi_iommu_ops = {
 	.pgsize_bitmap = SZ_4K | SZ_16K | SZ_64K | SZ_256K | SZ_1M | SZ_4M | SZ_16M,
-	.map  = sunxi_iommu_map,
-	.unmap = sunxi_iommu_unmap,
-	.iotlb_sync = sunxi_iommu_iotlb_sync,
+	.device_group	= sunxi_iommu_device_group,
 	.domain_alloc = sunxi_iommu_domain_alloc,
-	.domain_free = sunxi_iommu_domain_free,
-	.attach_dev = sunxi_iommu_attach_dev,
-	.detach_dev = sunxi_iommu_detach_dev,
+	.of_xlate = sunxi_iommu_of_xlate,
 	.add_device = sunxi_iommu_add_device,
 	.remove_device = sunxi_iommu_remove_device,
-	.device_group	= sunxi_iommu_device_group,
-	.of_xlate = sunxi_iommu_of_xlate,
-	.iova_to_phys = sunxi_iommu_iova_to_phys,
+	.default_domain_ops = &(const struct iommu_domain_ops) {
+	    .map  = sunxi_iommu_map,
+	    .unmap = sunxi_iommu_unmap,
+	    .iotlb_sync = sunxi_iommu_iotlb_sync,
+	    .free = sunxi_iommu_domain_free,
+	    .attach_dev = sunxi_iommu_attach_dev,
+	    .detach_dev = sunxi_iommu_detach_dev,
+	    .iova_to_phys = sunxi_iommu_iova_to_phys,
+	}
 };
 
 static int sunxi_iommu_probe(struct platform_device *pdev)
