@@ -2117,7 +2117,7 @@ static struct iommu_domain *__iommu_domain_alloc(struct bus_type *bus,
 	if (!domain->ops)
 		domain->ops = bus->iommu_ops->default_domain_ops;
 
-	if (iommu_is_dma_domain(domain) && iommu_get_dma_cookie(domain)) {
+	if (iommu_is_dma_domain(domain) && !domain->iova_cookie && iommu_get_dma_cookie(domain)) {
 		iommu_domain_free(domain);
 		domain = NULL;
 	}
