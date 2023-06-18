@@ -22,16 +22,9 @@
 #include <linux/delay.h>
 #include <linux/nvmem-consumer.h>
 #include <linux/rockchip/cpu.h>
-#ifdef CONFIG_ROCKCHIP_PVTM
 #include <linux/soc/rockchip/pvtm.h>
-#else
-static inline u32 rockchip_get_pvtm_value(unsigned int ch, unsigned int sub_ch,
-					  unsigned int time_us)
-{
-	return 0;
-}
-#endif
 #include <linux/thermal.h>
+#include <soc/rockchip/rockchip_opp_select.h>
 
 #include "mali_kbase_rk.h"
 
@@ -438,6 +431,7 @@ static void kbase_platform_rk_remove_sysfs_files(struct device *dev)
 	device_remove_file(dev, &dev_attr_utilisation);
 }
 
+#ifdef CONFIG_ROCKCHIP_OPP
 static int rk3288_get_soc_info(struct device *dev, struct device_node *np,
 			       int *bin, int *process)
 {
@@ -526,11 +520,16 @@ static const struct of_device_id rockchip_mali_of_match[] = {
 	},
 	{},
 };
+#endif
 
 int kbase_platform_rk_init_opp_table(struct kbase_device *kbdev)
 {
+#ifdef CONFIG_ROCKCHIP_OPP
 	rockchip_get_opp_data(rockchip_mali_of_match, &kbdev->opp_info);
 
 	return rockchip_init_opp_table(kbdev->dev, &kbdev->opp_info,
+#else
+	return rockchip_init_opp_table(kbdev->dev, NULL,
+#endif
 				       "gpu_leakage", "mali");
 }
