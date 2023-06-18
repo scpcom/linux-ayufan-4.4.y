@@ -1092,7 +1092,6 @@ struct kbase_device {
 	struct list_head        kctx_list;
 	struct mutex            kctx_list_lock;
 
-	struct rockchip_opp_info opp_info;
 #ifdef CONFIG_MALI_DEVFREQ
 	struct devfreq_dev_profile devfreq_profile;
 	struct devfreq *devfreq;
@@ -1102,7 +1101,10 @@ struct kbase_device {
 	u64 current_core_mask;
 	struct kbase_devfreq_opp *opp_table;
 	int num_opps;
+#ifdef CONFIG_ROCKCHIP_OPP
+	struct rockchip_opp_info opp_info;
 	struct monitor_dev_info *mdev_info;
+#endif
 #ifdef CONFIG_DEVFREQ_THERMAL
 #if LINUX_VERSION_CODE < KERNEL_VERSION(4, 4, 0)
 	struct devfreq_cooling_device *devfreq_cooling;
