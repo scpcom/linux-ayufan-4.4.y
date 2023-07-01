@@ -19,6 +19,9 @@
 #include <pthread.h>
 #include <math.h>
 
+#include <sys/time.h>
+#include <sys/resource.h>
+
 static char			const *input_name = "perf.data";
 
 static char			default_sort_order[] = "avg, max, switch, runtime";

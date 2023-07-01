@@ -52,6 +52,27 @@
 #define LOAD_OFFSET 0
 #endif
 
+#ifndef SYMTAB_KEEP_STR
+#define SYMTAB_KEEP_STR *(__ksymtab_strings+*)
+#define SYMTAB_DISCARD_STR
+#else
+#define SYMTAB_DISCARD_STR *(__ksymtab_strings+*)
+#endif
+
+#ifndef SYMTAB_KEEP
+#define SYMTAB_KEEP *(SORT(___ksymtab+*))
+#define SYMTAB_DISCARD
+#else
+#define SYMTAB_DISCARD *(SORT(___ksymtab+*))
+#endif
+
+#ifndef SYMTAB_KEEP_GPL
+#define SYMTAB_KEEP_GPL *(SORT(___ksymtab_gpl+*))
+#define SYMTAB_DISCARD_GPL
+#else
+#define SYMTAB_DISCARD_GPL *(SORT(___ksymtab_gpl+*))
+#endif
+
 #ifndef SYMBOL_PREFIX
 #define VMLINUX_SYMBOL(sym) sym
 #else
@@ -275,14 +296,14 @@
 	/* Kernel symbol table: Normal symbols */			\
 	__ksymtab         : AT(ADDR(__ksymtab) - LOAD_OFFSET) {		\
 		VMLINUX_SYMBOL(__start___ksymtab) = .;			\
-		*(SORT(___ksymtab+*))					\
+		SYMTAB_KEEP						\
 		VMLINUX_SYMBOL(__stop___ksymtab) = .;			\
 	}								\
 									\
 	/* Kernel symbol table: GPL-only symbols */			\
 	__ksymtab_gpl     : AT(ADDR(__ksymtab_gpl) - LOAD_OFFSET) {	\
 		VMLINUX_SYMBOL(__start___ksymtab_gpl) = .;		\
-		*(SORT(___ksymtab_gpl+*))				\
+		SYMTAB_KEEP_GPL						\
 		VMLINUX_SYMBOL(__stop___ksymtab_gpl) = .;		\
 	}								\
 									\
@@ -344,7 +365,7 @@
 									\
 	/* Kernel symbol table: strings */				\
         __ksymtab_strings : AT(ADDR(__ksymtab_strings) - LOAD_OFFSET) {	\
-		*(__ksymtab_strings)					\
+		SYMTAB_KEEP_STR						\
 	}								\
 									\
 	/* __*init sections */						\
@@ -676,6 +697,9 @@
 	EXIT_TEXT							\
 	EXIT_DATA							\
 	EXIT_CALL							\
+	SYMTAB_DISCARD							\
+	SYMTAB_DISCARD_GPL						\
+	SYMTAB_DISCARD_STR						\
 	*(.discard)							\
 	*(.discard.*)							\
 	}

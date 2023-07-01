@@ -64,4 +64,8 @@
 #define SO_DOMAIN		39
 
 #define SO_RXQ_OVFL             40
+#define SO_RXQ_ALLOC		101  /* non-upstreamed sockopt */
+
+#define SO_WIFI_STATUS		41
+#define SCM_WIFI_STATUS	SO_WIFI_STATUS
 #endif /* __ASM_GENERIC_SOCKET_H */

@@ -43,7 +43,11 @@ int br_dev_queue_push_xmit(struct sk_buff *skb)
 {
 	/* ip_fragment doesn't copy the MAC header */
 	if (nf_bridge_maybe_copy_header(skb) ||
+#if defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD)
+	    (packet_length(skb) > skb->dev->mtu && !skb_is_gso(skb) && (!skb->ipsec_offload))) {
+#else
 	    (packet_length(skb) > skb->dev->mtu && !skb_is_gso(skb))) {
+#endif
 		kfree_skb(skb);
 	} else {
 		skb_push(skb, ETH_HLEN);
@@ -110,7 +114,7 @@ void br_deliver(const struct net_bridge_port *to, struct sk_buff *skb)
 /* called with rcu_read_lock */
 void br_forward(const struct net_bridge_port *to, struct sk_buff *skb, struct sk_buff *skb0)
 {
-	if (should_deliver(to, skb)) {
+	if (should_deliver(to, skb) && !(to->flags & BR_ISOLATE_MODE)) {
 		if (skb0)
 			deliver_clone(to, skb, __br_forward);
 		else
@@ -165,7 +169,8 @@ out:
 static void br_flood(struct net_bridge *br, struct sk_buff *skb,
 		     struct sk_buff *skb0,
 		     void (*__packet_hook)(const struct net_bridge_port *p,
-					   struct sk_buff *skb))
+					   struct sk_buff *skb),
+		     bool forward)
 {
 	struct net_bridge_port *p;
 	struct net_bridge_port *prev;
@@ -173,6 +178,9 @@ static void br_flood(struct net_bridge *br, struct sk_buff *skb,
 	prev = NULL;
 
 	list_for_each_entry_rcu(p, &br->port_list, list) {
+		if (forward && (p->flags & BR_ISOLATE_MODE))
+			continue;
+
 		prev = maybe_deliver(prev, p, skb, __packet_hook);
 		if (IS_ERR(prev))
 			goto out;
@@ -196,14 +204,14 @@ out:
 /* called with rcu_read_lock */
 void br_flood_deliver(struct net_bridge *br, struct sk_buff *skb)
 {
-	br_flood(br, skb, NULL, __br_deliver);
+	br_flood(br, skb, NULL, __br_deliver, false);
 }
 
 /* called under bridge lock */
 void br_flood_forward(struct net_bridge *br, struct sk_buff *skb,
 		      struct sk_buff *skb2)
 {
-	br_flood(br, skb, skb2, __br_forward);
+	br_flood(br, skb, skb2, __br_forward, true);
 }
 
 #ifdef CONFIG_BRIDGE_IGMP_SNOOPING

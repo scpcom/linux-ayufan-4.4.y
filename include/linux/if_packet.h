@@ -29,6 +29,8 @@ struct sockaddr_ll {
 /* These ones are invisible by user level */
 #define PACKET_LOOPBACK		5		/* MC/BRD frame looped back */
 #define PACKET_FASTROUTE	6		/* Fastrouted frame	*/
+#define PACKET_MASK_ANY		0xffffffff	/* mask for packet type bits */
+
 
 /* Packet socket options */
 
@@ -50,6 +52,7 @@ struct sockaddr_ll {
 #define PACKET_TX_TIMESTAMP		16
 #define PACKET_TIMESTAMP		17
 #define PACKET_FANOUT			18
+#define PACKET_RECV_TYPE		19
 
 #define PACKET_FANOUT_HASH		0
 #define PACKET_FANOUT_LB		1

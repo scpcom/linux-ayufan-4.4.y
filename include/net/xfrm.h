@@ -137,7 +137,10 @@ struct xfrm_state {
 	};
 	struct hlist_node	bysrc;
 	struct hlist_node	byspi;
-
+#if defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD)
+	struct hlist_node 	byh;
+	u16			handle;
+#endif
 	atomic_t		refcnt;
 	spinlock_t		lock;
 
@@ -229,6 +232,11 @@ struct xfrm_state {
 	/* Private data of this transformer, format is opaque,
 	 * interpreted by xfrm_type methods. */
 	void			*data;
+#if defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD)
+	 /* Intended direction of this state, used for offloading */
+	int	dir;
+	int	offloaded;	
+#endif
 };
 
 static inline struct net *xs_net(struct xfrm_state *x)
@@ -247,6 +255,13 @@ enum {
 	XFRM_STATE_EXPIRED,
 	XFRM_STATE_DEAD
 };
+#if defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD)
+enum {
+	 XFRM_STATE_DIR_UNKNOWN,
+	 XFRM_STATE_DIR_IN,
+	 XFRM_STATE_DIR_OUT,
+};
+#endif
 
 /* callback structure passed from either netlink or pfkey */
 struct km_event {
@@ -299,6 +314,9 @@ struct xfrm_policy_afinfo {
 
 extern int xfrm_policy_register_afinfo(struct xfrm_policy_afinfo *afinfo);
 extern int xfrm_policy_unregister_afinfo(struct xfrm_policy_afinfo *afinfo);
+#if defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD)
+extern struct xfrm_policy_afinfo *xfrm_policy_get_afinfo(unsigned short family);
+#endif
 extern void km_policy_notify(struct xfrm_policy *xp, int dir, const struct km_event *c);
 extern void km_state_notify(struct xfrm_state *x, const struct km_event *c);
 
@@ -958,6 +976,35 @@ struct sec_path {
 	struct xfrm_state	*xvec[XFRM_MAX_DEPTH];
 };
 
+#if defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD)
+struct xfrm_input_shared
+{
+	struct sk_buff 		*skb;
+	int 			xfrm_nr, first, xfrm_encap;
+	struct xfrm_state 	*xfrm_vec[XFRM_MAX_DEPTH];
+	__u16 			encap_type;
+	int 			decaps;
+	u32			seq, spi;
+	unsigned int   nhoff;
+	int 			nexthdr;
+	int 			(*callback)(struct xfrm_input_shared *sh);
+	atomic_t		refcnt;
+};
+
+
+static inline void xfrm_shared_get(struct xfrm_input_shared *sh)
+{
+	atomic_inc(&sh->refcnt);
+}
+
+static inline void xfrm_shared_put(struct xfrm_input_shared *sh)
+{
+	if (atomic_dec_and_test(&sh->refcnt)) {
+		kfree(sh);
+	}
+}
+#endif
+
 static inline int secpath_exists(struct sk_buff *skb)
 {
 #ifdef CONFIG_XFRM
@@ -1469,6 +1516,10 @@ extern int xfrm4_tunnel_register(struct xfrm_tunnel *handler, unsigned short fam
 extern int xfrm4_tunnel_deregister(struct xfrm_tunnel *handler, unsigned short family);
 extern int xfrm6_extract_header(struct sk_buff *skb);
 extern int xfrm6_extract_input(struct xfrm_state *x, struct sk_buff *skb);
+/* NAT-T changes Start */
+extern int xfrm6_rcv_encap(struct sk_buff *skb, int nexthdr, __be32 spi,
+			   int encap_type);
+/* NAT-T changes End */
 extern int xfrm6_rcv_spi(struct sk_buff *skb, int nexthdr, __be32 spi);
 extern int xfrm6_transport_finish(struct sk_buff *skb, int async);
 extern int xfrm6_rcv(struct sk_buff *skb);
@@ -1487,12 +1538,21 @@ extern int xfrm6_find_1stfragopt(struct xfrm_state *x, struct sk_buff *skb,
 
 #ifdef CONFIG_XFRM
 extern int xfrm4_udp_encap_rcv(struct sock *sk, struct sk_buff *skb);
+extern int xfrm6_udp_encap_rcv(struct sock *sk, struct sk_buff *skb);
 extern int xfrm_user_policy(struct sock *sk, int optname, u8 __user *optval, int optlen);
 #else
 static inline int xfrm_user_policy(struct sock *sk, int optname, u8 __user *optval, int optlen)
 {
  	return -ENOPROTOOPT;
 } 
+/* NAT-T changes Start */
+static inline int xfrm6_udp_encap_rcv(struct sock *sk, struct sk_buff *skb)
+{
+	/* should not happen */
+	kfree_skb(skb);
+	return 0;
+}
+/* NAT-T changes End */
 
 static inline int xfrm4_udp_encap_rcv(struct sock *sk, struct sk_buff *skb)
 {

@@ -2079,6 +2079,25 @@ static int dev_gso_segment(struct sk_buff *skb, int features)
 	return 0;
 }
 
+/*
+ * Try to orphan skb early, right before transmission by the device.
+ * We cannot orphan skb if tx timestamp is requested or the sk-reference
+ * is needed on driver level for other reasons, e.g. see net/can/raw.c
+ */
+static inline void skb_orphan_try(struct sk_buff *skb)
+{
+	struct sock *sk = skb->sk;
+
+	if (sk && !skb_shinfo(skb)->tx_flags) {
+		/* skb_tx_hash() wont be able to get sk.
+		 * We copy sk_hash into skb->rxhash
+		 */
+		if (!skb->rxhash)
+			skb->rxhash = sk->sk_hash;
+		skb_orphan(skb);
+	}
+}
+
 static bool can_checksum_protocol(unsigned long features, __be16 protocol)
 {
 	return ((features & NETIF_F_GEN_CSUM) ||
@@ -2162,6 +2181,8 @@ int dev_hard_start_xmit(struct sk_buff *skb, struct net_device *dev,
 
 		if (!list_empty(&ptype_all))
 			dev_queue_xmit_nit(skb, dev);
+
+		skb_orphan_try(skb);
 
 		features = netif_skb_features(skb);
 
@@ -2272,7 +2293,7 @@ u16 __skb_tx_hash(const struct net_device *dev, const struct sk_buff *skb,
 	if (skb->sk && skb->sk->sk_hash)
 		hash = skb->sk->sk_hash;
 	else
-		hash = (__force u16) skb->protocol;
+		hash = (__force u16) skb->protocol ^ skb->rxhash;
 	hash = jhash_1word(hash, hashrnd);
 
 	return (u16) (((u64) hash * qcount) >> 32) + qoffset;
@@ -2460,6 +2481,16 @@ static DEFINE_PER_CPU(int, xmit_recursion);
  */
 int dev_queue_xmit(struct sk_buff *skb)
 {
+#if defined(CONFIG_ARCH_COMCERTO)
+	if (skb->dev->flags & IFF_WIFI_OFLD)
+		skb->dev = skb->dev->wifi_offload_dev;
+
+	return original_dev_queue_xmit(skb);
+}
+
+int original_dev_queue_xmit(struct sk_buff *skb)
+{
+#endif
 	struct net_device *dev = skb->dev;
 	struct netdev_queue *txq;
 	struct Qdisc *q;
@@ -2538,6 +2569,10 @@ out:
 	return rc;
 }
 EXPORT_SYMBOL(dev_queue_xmit);
+
+#if defined(CONFIG_ARCH_COMCERTO)
+EXPORT_SYMBOL(original_dev_queue_xmit);
+#endif
 
 
 /*=======================================================================
@@ -3366,6 +3401,52 @@ int netif_receive_skb(struct sk_buff *skb)
 #endif
 }
 EXPORT_SYMBOL(netif_receive_skb);
+
+#if defined(CONFIG_ARCH_COMCERTO)
+int capture_receive_skb(struct sk_buff *skb)
+{
+        struct net_device *null_or_orig = NULL;
+        struct packet_type *ptype, *pt_prev;
+        struct net_device *orig_dev;
+        int ret = NET_RX_DROP;
+
+	if (!netdev_tstamp_prequeue)
+		net_timestamp_check(skb);
+
+        if (!skb->skb_iif)
+                skb->skb_iif = skb->dev->ifindex;
+
+        skb_reset_network_header(skb);
+        skb_reset_transport_header(skb);
+	skb_reset_mac_len(skb);
+
+        pt_prev = NULL;
+        orig_dev = skb->dev;
+
+        rcu_read_lock();
+        list_for_each_entry_rcu(ptype, &ptype_all, list) {
+                if (!ptype->dev || ptype->dev == skb->dev) {
+                        if (pt_prev)
+                                ret = deliver_skb(skb, pt_prev, orig_dev);
+                        pt_prev = ptype;
+                }
+        }
+
+        if (pt_prev) {
+                ret = pt_prev->func(skb, skb->dev, pt_prev, orig_dev);
+        } else {
+                kfree_skb(skb);
+                /* Jamal, now you will not able to escape explaining
+                 * me how you were going to use this. :-)
+                 */
+                ret = NET_RX_DROP;
+        }
+        rcu_read_unlock();
+        return ret;
+}
+
+EXPORT_SYMBOL(capture_receive_skb);
+#endif
 
 /* Network device is going away, flush any packets still pending
  * Called with irqs disabled.

@@ -155,7 +155,13 @@ static struct mtd_partition * newpart(char *s,
         /* test for options */
         if (strncmp(s, "ro", 2) == 0)
 	{
+#if 0
+		/* It turns out that if you have a bootloader which marks
+		 * its partitions read-only, and you don't want it to do so,
+		 * you have trouble updating it BECAUSE IT IS READONLY.
+		 * <sob>. */
 		mask_flags |= MTD_WRITEABLE;
+#endif
 		s += 2;
         }
 

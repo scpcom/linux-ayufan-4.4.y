@@ -42,6 +42,7 @@
 #include <linux/sched.h>
 #include <linux/slab.h>
 #include <linux/timer.h>
+#include <mach/reset.h>
 
 #include "picoxcell_crypto_regs.h"
 
@@ -406,7 +407,7 @@ static void spacc_aead_free_ddts(struct spacc_req *req)
 	struct aead_request *areq = container_of(req->req, struct aead_request,
 						 base);
 	struct spacc_alg *alg = to_spacc_alg(req->req->tfm->__crt_alg);
-	struct spacc_ablk_ctx *aead_ctx = crypto_tfm_ctx(req->req->tfm);
+	struct spacc_aead_ctx *aead_ctx = crypto_tfm_ctx(req->req->tfm);
 	struct spacc_engine *engine = aead_ctx->generic.engine;
 	unsigned ivsize = alg->alg.cra_aead.ivsize;
 	unsigned nents = sg_count(areq->src, areq->cryptlen);
@@ -468,6 +469,7 @@ static int spacc_aead_aes_setkey(struct crypto_aead *aead, const u8 *key,
 	struct crypto_tfm *tfm = crypto_aead_tfm(aead);
 	struct spacc_aead_ctx *ctx = crypto_tfm_ctx(tfm);
 
+#if !defined(CONFIG_ARCH_COMCERTO)
 	/*
 	 * IPSec engine only supports 128 and 256 bit AES keys. If we get a
 	 * request for any other size (192 bits) then we need to do a software
@@ -483,6 +485,7 @@ static int spacc_aead_aes_setkey(struct crypto_aead *aead, const u8 *key,
 			tfm->crt_flags & CRYPTO_TFM_REQ_MASK;
 		return crypto_aead_setkey(ctx->sw_cipher, key, len);
 	}
+#endif
 
 	memcpy(ctx->cipher_key, key, len);
 	ctx->cipher_key_len = len;
@@ -552,6 +555,7 @@ static int spacc_aead_setauthsize(struct crypto_aead *tfm,
 	return 0;
 }
 
+#if !defined(CONFIG_ARCH_COMCERTO)
 /*
  * Check if an AEAD request requires a fallback operation. Some requests can't
  * be completed in hardware because the hardware may not support certain key
@@ -601,6 +605,7 @@ static int spacc_aead_do_fallback(struct aead_request *req, unsigned alg_type,
 
 	return err;
 }
+#endif
 
 static void spacc_aead_complete(struct spacc_req *req)
 {
@@ -712,8 +717,10 @@ static int spacc_aead_setup(struct aead_request *req, u8 *giv,
 	dev_req->engine		= engine;
 	dev_req->complete	= spacc_aead_complete;
 
+#if !defined(CONFIG_ARCH_COMCERTO)
 	if (unlikely(spacc_aead_need_fallback(dev_req)))
 		return spacc_aead_do_fallback(req, alg_type, is_encrypt);
+#endif
 
 	spacc_aead_make_ddts(dev_req, dev_req->giv);
 
@@ -793,6 +800,7 @@ static int spacc_aead_cra_init(struct crypto_tfm *tfm)
 
 	ctx->generic.flags = spacc_alg->type;
 	ctx->generic.engine = engine;
+#if !defined(CONFIG_ARCH_COMCERTO)
 	ctx->sw_cipher = crypto_alloc_aead(alg->cra_name, 0,
 					   CRYPTO_ALG_ASYNC |
 					   CRYPTO_ALG_NEED_FALLBACK);
@@ -801,6 +809,7 @@ static int spacc_aead_cra_init(struct crypto_tfm *tfm)
 			 alg->cra_name);
 		ctx->sw_cipher = NULL;
 	}
+#endif
 	ctx->generic.key_offs = spacc_alg->key_offs;
 	ctx->generic.iv_offs = spacc_alg->iv_offs;
 
@@ -868,6 +877,7 @@ static int spacc_aes_setkey(struct crypto_ablkcipher *cipher, const u8 *key,
 		return -EINVAL;
 	}
 
+#if !defined(CONFIG_ARCH_COMCERTO)
 	/*
 	 * IPSec engine only supports 128 and 256 bit AES keys. If we get a
 	 * request for any other size (192 bits) then we need to do a software
@@ -889,16 +899,19 @@ static int spacc_aes_setkey(struct crypto_ablkcipher *cipher, const u8 *key,
 	} else if ((len != AES_KEYSIZE_128 || len != AES_KEYSIZE_256) &&
 		   !ctx->sw_cipher)
 		err = -EINVAL;
+#endif
 
 	memcpy(ctx->key, key, len);
 	ctx->key_len = len;
 
+#if !defined(CONFIG_ARCH_COMCERTO)
 sw_setkey_failed:
 	if (err && ctx->sw_cipher) {
 		tfm->crt_flags &= ~CRYPTO_TFM_RES_MASK;
 		tfm->crt_flags |=
 			ctx->sw_cipher->base.crt_flags & CRYPTO_TFM_RES_MASK;
 	}
+#endif
 
 	return err;
 }
@@ -923,6 +936,7 @@ out:
 	return err;
 }
 
+#if !defined(CONFIG_ARCH_COMCERTO)
 static int spacc_ablk_need_fallback(struct spacc_req *req)
 {
 	struct spacc_ablk_ctx *ctx;
@@ -937,6 +951,7 @@ static int spacc_ablk_need_fallback(struct spacc_req *req)
 			ctx->key_len != AES_KEYSIZE_128 &&
 			ctx->key_len != AES_KEYSIZE_256;
 }
+#endif
 
 static void spacc_ablk_complete(struct spacc_req *req)
 {
@@ -976,7 +991,12 @@ static int spacc_ablk_submit(struct spacc_req *req)
 	writel(ablk_req->nbytes, engine->regs + SPA_PROC_LEN_REG_OFFSET);
 	writel(0, engine->regs + SPA_ICV_OFFSET_REG_OFFSET);
 	writel(0, engine->regs + SPA_AUX_INFO_REG_OFFSET);
+#if defined(CONFIG_ARCH_COMCERTO)
+	writel(0, engine->regs + SPA_PRE_AAD_LEN_REG_OFFSET);
+	writel(0, engine->regs + SPA_POST_AAD_LEN_REG_OFFSET);
+#else
 	writel(0, engine->regs + SPA_AAD_LEN_REG_OFFSET);
+#endif
 
 	ctrl = spacc_alg->ctrl_default | (req->ctx_id << SPA_CTRL_CTX_IDX) |
 		(req->is_encrypt ? (1 << SPA_CTRL_ENCRYPT_IDX) :
@@ -989,6 +1009,7 @@ static int spacc_ablk_submit(struct spacc_req *req)
 	return -EINPROGRESS;
 }
 
+#if !defined(CONFIG_ARCH_COMCERTO)
 static int spacc_ablk_do_fallback(struct ablkcipher_request *req,
 				  unsigned alg_type, bool is_encrypt)
 {
@@ -1012,6 +1033,7 @@ static int spacc_ablk_do_fallback(struct ablkcipher_request *req,
 
 	return err;
 }
+#endif
 
 static int spacc_ablk_setup(struct ablkcipher_request *req, unsigned alg_type,
 			    bool is_encrypt)
@@ -1028,8 +1050,10 @@ static int spacc_ablk_setup(struct ablkcipher_request *req, unsigned alg_type,
 	dev_req->complete	= spacc_ablk_complete;
 	dev_req->result		= -EINPROGRESS;
 
+#if !defined(CONFIG_ARCH_COMCERTO)
 	if (unlikely(spacc_ablk_need_fallback(dev_req)))
 		return spacc_ablk_do_fallback(req, alg_type, is_encrypt);
+#endif
 
 	/*
 	 * Create the DDT's for the engine. If we share the same source and
@@ -1099,6 +1123,7 @@ static int spacc_ablk_cra_init(struct crypto_tfm *tfm)
 
 	ctx->generic.flags = spacc_alg->type;
 	ctx->generic.engine = engine;
+#if !defined(CONFIG_ARCH_COMCERTO)
 	if (alg->cra_flags & CRYPTO_ALG_NEED_FALLBACK) {
 		ctx->sw_cipher = crypto_alloc_ablkcipher(alg->cra_name, 0,
 				CRYPTO_ALG_ASYNC | CRYPTO_ALG_NEED_FALLBACK);
@@ -1108,6 +1133,7 @@ static int spacc_ablk_cra_init(struct crypto_tfm *tfm)
 			ctx->sw_cipher = NULL;
 		}
 	}
+#endif
 	ctx->generic.key_offs = spacc_alg->key_offs;
 	ctx->generic.iv_offs = spacc_alg->iv_offs;
 
@@ -1340,6 +1366,34 @@ static struct spacc_alg ipsec_engine_algs[] = {
 			.cra_exit = spacc_ablk_cra_exit,
 		},
 	},
+#if defined(CONFIG_ARCH_COMCERTO)
+	{
+		.ctrl_default = SPA_CTRL_CIPH_ALG_AES | SPA_CTRL_CIPH_MODE_CTR,
+		.key_offs = 0,
+		.iv_offs = AES_MAX_KEY_SIZE,
+		.alg = {
+			.cra_name = "ctr(aes)",
+			.cra_driver_name = "ctr-aes-picoxcell",
+			.cra_priority = SPACC_CRYPTO_ALG_PRIORITY,
+			.cra_flags = CRYPTO_ALG_TYPE_ABLKCIPHER |
+				     CRYPTO_ALG_ASYNC,
+			.cra_blocksize = AES_BLOCK_SIZE,
+			.cra_ctxsize = sizeof(struct spacc_ablk_ctx),
+			.cra_type = &crypto_ablkcipher_type,
+			.cra_module = THIS_MODULE,
+			.cra_ablkcipher = {
+				.setkey = spacc_aes_setkey,
+				.encrypt = spacc_ablk_encrypt,
+				.decrypt = spacc_ablk_decrypt,
+				.min_keysize = AES_MIN_KEY_SIZE,
+				.max_keysize = AES_MAX_KEY_SIZE,
+				.ivsize = AES_BLOCK_SIZE,
+			},
+			.cra_init = spacc_ablk_cra_init,
+			.cra_exit = spacc_ablk_cra_exit,
+		},
+	},
+#endif
 	{
 		.key_offs = 0,
 		.iv_offs = AES_MAX_KEY_SIZE,
@@ -1662,6 +1716,9 @@ static struct spacc_alg l2_engine_algs[] = {
 static const struct of_device_id spacc_of_id_table[] = {
 	{ .compatible = "picochip,spacc-ipsec" },
 	{ .compatible = "picochip,spacc-l2" },
+#if defined(CONFIG_ARCH_COMCERTO)
+	{ .compatible = "Elliptic-EPN1802" },
+#endif
 	{}
 };
 #else /* CONFIG_OF */
@@ -1707,11 +1764,25 @@ static int __devinit spacc_probe(struct platform_device *pdev)
 		engine->fifo_sz		= SPACC_CRYPTO_L2_FIFO_SZ;
 		engine->algs		= l2_engine_algs;
 		engine->num_algs	= ARRAY_SIZE(l2_engine_algs);
+#if defined(CONFIG_ARCH_COMCERTO)
+	} else if (spacc_is_compatible(pdev, "Elliptic-EPN1802")) {
+		engine->max_ctxs	= SPACC_CRYPTO_IPSEC_MAX_CTXS;
+		engine->cipher_pg_sz	= 128;
+		engine->hash_pg_sz	= SPACC_CRYPTO_IPSEC_HASH_PG_SZ;
+		engine->fifo_sz		= 16;
+		engine->algs		= ipsec_engine_algs;
+		engine->num_algs	= ARRAY_SIZE(ipsec_engine_algs);
+#endif
 	} else {
 		return -EINVAL;
 	}
 
 	engine->name = dev_name(&pdev->dev);
+
+#if defined(CONFIG_ARCH_COMCERTO)
+	/*Take spacc out of reset*/
+	c2000_block_reset(COMPONENT_AXI_IPSEC_SPACC, 0);
+#endif
 
 	mem = platform_get_resource(pdev, IORESOURCE_MEM, 0);
 	irq = platform_get_resource(pdev, IORESOURCE_IRQ, 0);
@@ -1747,7 +1818,11 @@ static int __devinit spacc_probe(struct platform_device *pdev)
 
 	spin_lock_init(&engine->hw_lock);
 
+#if defined(CONFIG_ARCH_COMCERTO)
+	engine->clk = clk_get(&pdev->dev, "ipsec_spacc");
+#else
 	engine->clk = clk_get(&pdev->dev, "ref");
+#endif
 	if (IS_ERR(engine->clk)) {
 		dev_info(&pdev->dev, "clk unavailable\n");
 		device_remove_file(&pdev->dev, &dev_attr_stat_irq_thresh);
@@ -1833,12 +1908,20 @@ static int __devexit spacc_remove(struct platform_device *pdev)
 	clk_disable(engine->clk);
 	clk_put(engine->clk);
 
+#if defined(CONFIG_ARCH_COMCERTO)
+	/*put IPSEC spacc into reset */
+	c2000_block_reset(COMPONENT_AXI_IPSEC_SPACC,1);
+#endif
+
 	return 0;
 }
 
 static const struct platform_device_id spacc_id_table[] = {
 	{ "picochip,spacc-ipsec", },
 	{ "picochip,spacc-l2", },
+#if defined(CONFIG_ARCH_COMCERTO)
+	{ "Elliptic-EPN1802", },
+#endif
 };
 
 static struct platform_driver spacc_driver = {

@@ -24,12 +24,17 @@
 typedef u32 pteval_t;
 typedef u32 pmdval_t;
 
+#if !defined(CONFIG_COMCERTO_64K_PAGES)
 #undef STRICT_MM_TYPECHECKS
+#else
+#define STRICT_MM_TYPECHECKS	1
+#endif
 
 #ifdef STRICT_MM_TYPECHECKS
 /*
  * These are used to make use of C type-checking..
  */
+#if !defined(CONFIG_COMCERTO_64K_PAGES)
 typedef struct { pteval_t pte; } pte_t;
 typedef struct { pmdval_t pmd; } pmd_t;
 typedef struct { pmdval_t pgd[2]; } pgd_t;
@@ -43,6 +48,23 @@ typedef struct { pteval_t pgprot; } pgprot_t;
 #define __pte(x)        ((pte_t) { (x) } )
 #define __pmd(x)        ((pmd_t) { (x) } )
 #define __pgprot(x)     ((pgprot_t) { (x) } )
+
+#else
+#include <asm/pgtable-2level.h>
+typedef struct { pteval_t pte[16]; } pte_t;
+typedef struct { pmdval_t pmd; } pmd_t;
+typedef struct { pmdval_t pgd[LINKED_PMDS]; } pgd_t;
+typedef struct { pteval_t pgprot; } pgprot_t;
+
+#define pte_val(x)      ((x).pte[0])
+#define pmd_val(x)      ((x).pmd)
+#define pgd_val(x)	((x).pgd[0])
+#define pgprot_val(x)   ((x).pgprot)
+
+#define __pte(x)        ((pte_t) { {(x)} } )
+#define __pmd(x)        ((pmd_t) { (x) } )
+#define __pgprot(x)     ((pgprot_t) { (x) } )
+#endif
 
 #else
 /*

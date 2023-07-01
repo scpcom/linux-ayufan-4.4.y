@@ -201,6 +201,7 @@ struct otp_info {
  * modes (see "struct mtd_write_req")
  */
 #define MEMWRITE		_IOWR('M', 24, struct mtd_write_req)
+#define MTDREFRESH		_IO('M', 50)
 
 /*
  * Obsolete legacy interface. Keep it in order not to break userspace
@@ -248,6 +249,11 @@ struct mtd_ecc_stats {
 	__u32 failed;
 	__u32 badblocks;
 	__u32 bbtblocks;
+};
+
+struct mtd_ecc_subpage_stats {
+#define MTD_ECC_STAT_SUBPAGES 8
+	__u32 subpage_corrected[MTD_ECC_STAT_SUBPAGES];
 };
 
 /*

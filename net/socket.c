@@ -538,6 +538,8 @@ int sock_tx_timestamp(struct sock *sk, __u8 *tx_flags)
 		*tx_flags |= SKBTX_HW_TSTAMP;
 	if (sock_flag(sk, SOCK_TIMESTAMPING_TX_SOFTWARE))
 		*tx_flags |= SKBTX_SW_TSTAMP;
+	if (sock_flag(sk, SOCK_WIFI_STATUS))
+		*tx_flags |= SKBTX_WIFI_STATUS;
 	return 0;
 }
 EXPORT_SYMBOL(sock_tx_timestamp);
@@ -674,6 +676,22 @@ void __sock_recv_timestamp(struct msghdr *msg, struct sock *sk,
 }
 EXPORT_SYMBOL_GPL(__sock_recv_timestamp);
 
+void __sock_recv_wifi_status(struct msghdr *msg, struct sock *sk,
+	struct sk_buff *skb)
+{
+	int ack;
+
+	if (!sock_flag(sk, SOCK_WIFI_STATUS))
+		return;
+	if (!skb->wifi_acked_valid)
+		return;
+
+	ack = skb->wifi_acked;
+
+	put_cmsg(msg, SOL_SOCKET, SCM_WIFI_STATUS, sizeof(ack), &ack);
+}
+EXPORT_SYMBOL_GPL(__sock_recv_wifi_status);
+
 static inline void sock_recv_drops(struct msghdr *msg, struct sock *sk,
 				   struct sk_buff *skb)
 {
@@ -689,6 +707,18 @@ void __sock_recv_ts_and_drops(struct msghdr *msg, struct sock *sk,
 	sock_recv_drops(msg, sk, skb);
 }
 EXPORT_SYMBOL_GPL(__sock_recv_ts_and_drops);
+
+void __sock_recv_alloc(struct msghdr *msg, struct sock *sk)
+{
+	__u32 rmem_alloc;
+
+	if (sock_flag(sk, SOCK_RXQ_ALLOC)) {
+		rmem_alloc = atomic_read(&sk->sk_rmem_alloc);
+		put_cmsg(msg, SOL_SOCKET, SO_RXQ_ALLOC,
+			sizeof(rmem_alloc), &rmem_alloc);
+	}
+}
+EXPORT_SYMBOL_GPL(__sock_recv_alloc);
 
 static inline int __sock_recvmsg_nosec(struct kiocb *iocb, struct socket *sock,
 				       struct msghdr *msg, size_t size, int flags)

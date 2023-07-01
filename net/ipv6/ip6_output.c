@@ -152,8 +152,15 @@ static int ip6_finish_output2(struct sk_buff *skb)
 
 static int ip6_finish_output(struct sk_buff *skb)
 {
+
+#if defined(CONFIG_INET6_IPSEC_OFFLOAD)
+	if ((skb->ipsec_offload == 0) &&
+		(skb->len > ip6_skb_dst_mtu(skb) && !skb_is_gso(skb)) ||
+		dst_allfrag(skb_dst(skb)))
+#else
 	if ((skb->len > ip6_skb_dst_mtu(skb) && !skb_is_gso(skb)) ||
-	    dst_allfrag(skb_dst(skb)))
+		dst_allfrag(skb_dst(skb)))
+#endif
 		return ip6_fragment(skb, ip6_finish_output2);
 	else
 		return ip6_finish_output2(skb);

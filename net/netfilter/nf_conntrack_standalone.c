@@ -223,6 +223,12 @@ static int ct_seq_show(struct seq_file *s, void *v)
 		if (seq_printf(s, "[ASSURED] "))
 			goto release;
 
+#ifdef CONFIG_COMCERTO_FP
+	if (test_bit(IPS_PERMANENT_BIT, &ct->status))
+		if (seq_printf(s, "[PERMANENT] "))
+			goto release;
+#endif
+
 #if defined(CONFIG_NF_CONNTRACK_MARK)
 	if (seq_printf(s, "mark=%u ", ct->mark))
 		goto release;
@@ -238,6 +244,12 @@ static int ct_seq_show(struct seq_file *s, void *v)
 
 	if (ct_show_delta_time(s, ct))
 		goto release;
+
+#if defined(CONFIG_NETFILTER_XT_MATCH_LAYER7) || defined(CONFIG_NETFILTER_XT_MATCH_LAYER7_MODULE)
+	if(ct->layer7.app_proto &&
+           seq_printf(s, "l7proto=%s ", ct->layer7.app_proto))
+		return -ENOSPC;
+#endif
 
 	if (seq_printf(s, "use=%u\n", atomic_read(&ct->ct_general.use)))
 		goto release;

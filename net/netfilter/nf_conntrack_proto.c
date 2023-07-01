@@ -98,13 +98,18 @@ int
 nf_ct_l3proto_try_module_get(unsigned short l3proto)
 {
 	int ret;
+	int retried = 0;
 	struct nf_conntrack_l3proto *p;
 
 retry:	p = nf_ct_l3proto_find_get(l3proto);
 	if (p == &nf_conntrack_l3proto_generic) {
-		ret = request_module("nf_conntrack-%d", l3proto);
-		if (!ret)
-			goto retry;
+		if (!retried) {
+			ret = request_module("nf_conntrack-%d", l3proto);
+			if (!ret) {
+				retried = 1;
+				goto retry;
+			}
+		}
 
 		return -EPROTOTYPE;
 	}

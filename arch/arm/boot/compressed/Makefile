@@ -33,6 +33,11 @@ CFLAGS_string.o	:= -Os
 #
 # Architecture dependencies
 #
+
+ifeq ($(CONFIG_ARCH_COMCERTO),y)
+OBJS		+= head-comcerto.o
+endif
+
 ifeq ($(CONFIG_ARCH_ACORN),y)
 OBJS		+= ll_char_wr.o font.o
 endif
@@ -123,7 +128,7 @@ KBUILD_CFLAGS = $(subst -pg, , $(ORIG_CFLAGS))
 endif
 
 ccflags-y := -fpic -fno-builtin -I$(obj)
-asflags-y := -Wa,-march=all
+asflags-y :=
 
 # Supply kernel BSS size to the decompressor via a linker symbol.
 KBSS_SZ = $(shell size $(obj)/../../../../vmlinux | awk 'END{print $$3}')

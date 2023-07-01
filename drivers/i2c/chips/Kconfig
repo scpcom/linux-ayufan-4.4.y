@@ -1,0 +1,15 @@
+#
+# Miscellaneous I2C chip drivers configuration
+#
+# *** DEPRECATED! Do not add new entries! See Makefile ***
+#
+
+menu "Miscellaneous I2C Chip support"
+
+config EEPROM_AT
+	tristate "I2c-eeprom-at"
+	depends on I2C
+	help
+	  This provides an interface to read and write the EEPROM and reset the chip.
+
+endmenu

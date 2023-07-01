@@ -11,6 +11,12 @@
 #include <linux/mtd/map.h>
 #include <linux/mtd/cfi.h>
 #include <linux/mtd/gen_probe.h>
+#include <linux/mtd/exp_lock.h>
+
+/* Define a mutex available to both comcerto NAND driver and cfi NOR flash driver */
+DEFINE_MUTEX(exp_bus_lock);
+EXPORT_SYMBOL(exp_bus_lock);
+
 
 static struct mtd_info *check_cmd_set(struct map_info *, int);
 static struct cfi_private *genprobe_ident_chips(struct map_info *map,
@@ -28,6 +34,9 @@ struct mtd_info *mtd_do_chip_probe(struct map_info *map, struct chip_probe *cp)
 
 	if (!cfi)
 		return NULL;
+
+	/* Init the mutex which prevents concurrent NOR and NAND accesses to C2k EXP_BUS */
+	mutex_init(&exp_bus_lock);
 
 	map->fldrv_priv = cfi;
 	/* OK we liked it. Now find a driver for the command set it talks */

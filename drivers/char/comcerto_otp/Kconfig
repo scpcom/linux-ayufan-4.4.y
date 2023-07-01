@@ -1,0 +1,11 @@
+config COMCERTO_OTP
+	tristate "Comcerto On-Chip OTP Memory Support"
+	depends on ARCH_COMCERTO
+	default y
+	help
+		If you say Y here, you will get support for a proc file,
+		/proc/otp/islocked, that reports whether the Comcerto
+		One-Time Programmable (and thus the device) is locked or
+		not.
+
+		If unsure, it is safe to say Y.

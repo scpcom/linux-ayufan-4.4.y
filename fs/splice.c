@@ -32,6 +32,11 @@
 #include <linux/security.h>
 #include <linux/gfp.h>
 #include <linux/socket.h>
+#include <linux/time.h>
+
+#include <net/sock.h>
+#include <linux/net.h>
+#include <linux/genalloc.h>
 
 /*
  * Attempt to steal a page from a pipe buffer. This should perhaps go into
@@ -335,7 +340,11 @@ __generic_file_splice_read(struct file *in, loff_t *ppos,
 	/*
 	 * Lookup the (hopefully) full range of pages we need.
 	 */
+#ifdef CONFIG_COMCERTO_SPLICE_READ_NOCONTIG
+	spd.nr_pages = find_get_pages(mapping, index, nr_pages, spd.pages);
+#else
 	spd.nr_pages = find_get_pages_contig(mapping, index, nr_pages, spd.pages);
+#endif
 	index += spd.nr_pages;
 
 	/*
@@ -840,6 +849,380 @@ int splice_from_pipe_feed(struct pipe_inode_info *pipe, struct splice_desc *sd,
 }
 EXPORT_SYMBOL(splice_from_pipe_feed);
 
+
+#if defined(CONFIG_COMCERTO_IMPROVED_SPLICE)
+#if !defined(CONFIG_COMCERTO_SPLICE_USE_MDMA)
+#define MSPD_SPLICE_NUM_DMA		100
+#else
+#define MSPD_SPLICE_NUM_DMA		MDMA_OUTBOUND_BUF_DESC
+#endif
+
+#if defined(CONFIG_COMCERTO_SPLICE_PROF)
+unsigned int enable_splice_prof = 0;
+#endif
+
+int comcerto_splice_from_pipe_feed(struct pipe_inode_info *pipe, struct splice_desc *sd)
+{
+	struct page **mspd_splice_pages;
+	void **mspd_splice_fsdata;
+	struct pipe_buffer *buf;
+	const struct pipe_buf_operations *ops;
+	int ret, ret2 = 0, remaining;
+	unsigned int curbuf, nrbufs, len, nrbufs_len, done;
+	loff_t pos, offset;
+	struct file *file = sd->u.file;
+	struct address_space *mapping = file->f_mapping;
+	struct page **page;
+	void **fsdata;
+	unsigned int size;
+#if !defined(CONFIG_COMCERTO_SPLICE_USE_MDMA)
+	unsigned int buf_len, buf_offset;
+	char *src, *dst;
+#else
+	struct comcerto_dma_sg *sg;
+#endif
+
+	size = (sizeof(struct page *) + sizeof(void *)) * MSPD_SPLICE_NUM_DMA;
+
+#if defined(CONFIG_COMCERTO_SPLICE_USE_MDMA)
+	size = ALIGN(size, 8) + sizeof(struct comcerto_dma_sg);
+#endif
+
+	mspd_splice_pages = kmalloc(size, GFP_KERNEL);
+	if (!mspd_splice_pages)
+		return -ENOMEM;
+
+	mspd_splice_fsdata = (void **)(mspd_splice_pages + MSPD_SPLICE_NUM_DMA);
+
+#if defined(CONFIG_COMCERTO_SPLICE_USE_MDMA)
+	sg = (struct comcerto_dma_sg *)(mspd_splice_fsdata + MSPD_SPLICE_NUM_DMA);
+	sg = PTR_ALIGN(sg, 8);
+#endif
+
+start:
+#if defined(CONFIG_COMCERTO_SPLICE_USE_MDMA)
+	comcerto_dma_sg_init(sg);
+#endif
+
+	//Compute length to transfer (in bytes), and make sure data is there
+	nrbufs_len = 0;
+	nrbufs = pipe->nrbufs;
+	curbuf = pipe->curbuf;
+	while (nrbufs) {
+		buf = pipe->bufs + curbuf;
+
+		ret = buf->ops->confirm(pipe, buf);
+		if (unlikely(ret)) {
+			printk(KERN_WARNING "%s: buf->ops->confirm() failed(%d)\n", __func__, ret);
+			if (ret == -ENODATA)
+				ret = 0;
+			goto err;
+		}
+
+#if defined(CONFIG_COMCERTO_SPLICE_USE_MDMA)
+		// Is there a risk of getting the same page more than once (several buffers in a single page)?
+		ret = comcerto_dma_sg_add_input(sg, page_address(buf->page) + buf->offset, buf->len, 0);
+		if (unlikely(ret)) {
+			printk(KERN_WARNING "%s: out of input bdescs\n", __func__);
+			break; //We will transfer what we could up to the previous buffer, based on nrbufs_len
+		}
+#endif
+
+		nrbufs_len += buf->len;
+
+		if (nrbufs_len > sd->total_len) {
+			nrbufs_len = sd->total_len;
+			break;
+		}
+
+		// - 2 because first and last pages could be almost empty depending on alignment
+		if (nrbufs_len > (MSPD_SPLICE_NUM_DMA - 2)*PAGE_CACHE_SIZE) {
+			nrbufs_len = (MSPD_SPLICE_NUM_DMA - 2)*PAGE_CACHE_SIZE;
+			break;
+		}
+		curbuf = (curbuf + 1) & (pipe->buffers - 1);
+		nrbufs--;
+	}
+
+	if (unlikely(nrbufs_len == 0)) {
+		printk(KERN_WARNING "%s: nrbufs_len == 0\n", __func__);
+		ret = 0;
+		goto err;
+	}
+
+//	printk("BLA nrbufs_len: %d\n", nrbufs_len);
+
+	/* Allocate as many destinations pages as needed.
+	 * First and last pages are likely not to be filled, but the ones in-between will.
+	 * If some allocations fail, finish the work on the allocated pages.
+	 */
+	page = &mspd_splice_pages[0];
+	fsdata = &mspd_splice_fsdata[0];
+
+	pos = sd->pos;
+	offset = pos & ~PAGE_CACHE_MASK;
+	len = nrbufs_len;
+
+	if (likely(len + offset > PAGE_CACHE_SIZE))
+		len = PAGE_CACHE_SIZE - offset;
+
+	ret = pagecache_write_begin(file, mapping, pos, len,
+			AOP_FLAG_UNINTERRUPTIBLE, page, fsdata);
+	if (unlikely(ret))
+		goto err;		// We failed early, so we still have an easy way out
+
+#if defined(CONFIG_COMCERTO_SPLICE_USE_MDMA)
+	comcerto_dma_sg_add_output(sg, page_address(*page) + offset, len, 1); //Don't check result since we should have at least one entry at this point
+#endif
+
+	pos += len;
+	remaining = nrbufs_len - len;
+	page++;
+	fsdata++;
+
+	while (remaining > PAGE_CACHE_SIZE) {
+		ret = pagecache_write_begin(file, mapping, pos, PAGE_CACHE_SIZE,
+				AOP_FLAG_UNINTERRUPTIBLE, page, fsdata);
+
+		if (unlikely(ret))
+			goto write_begin_done;
+
+#if defined(CONFIG_COMCERTO_SPLICE_USE_MDMA)
+		ret = comcerto_dma_sg_add_output(sg, page_address(*page), PAGE_CACHE_SIZE, 1);
+		if (unlikely(ret)) {
+			pagecache_write_end(file, mapping, pos, PAGE_CACHE_SIZE, 0, *page, *fsdata);
+			goto write_begin_done;
+		}
+#endif
+		pos += PAGE_CACHE_SIZE;
+		remaining -= PAGE_CACHE_SIZE;
+		page++;
+		fsdata++;
+	}
+
+	if (remaining) {
+		ret = pagecache_write_begin(file, mapping, pos, remaining,
+						AOP_FLAG_UNINTERRUPTIBLE, page, fsdata);
+
+		if (unlikely(ret))
+			goto write_begin_done;
+
+#if defined(CONFIG_COMCERTO_SPLICE_USE_MDMA)
+		ret = comcerto_dma_sg_add_output(sg, page_address(*page), remaining, 1);
+		if (unlikely(ret)) {
+			pagecache_write_end(file, mapping, pos, remaining, 0, *page, *fsdata);
+			goto write_begin_done;
+		}
+#endif
+		remaining = 0;
+	}
+
+write_begin_done:
+	// Couldn't allocate all pages or bdescs, so update the total length accordingly
+	if (unlikely(remaining))
+		nrbufs_len = nrbufs_len - remaining;
+
+	//Now do the copies
+#if defined(CONFIG_COMCERTO_SPLICE_USE_MDMA)
+
+	comcerto_dma_get();
+
+	comcerto_dma_sg_setup(sg, nrbufs_len);
+
+	comcerto_dma_start();
+	comcerto_dma_wait();
+	comcerto_dma_put();
+
+	comcerto_dma_sg_cleanup(sg, nrbufs_len);
+#else
+	remaining = nrbufs_len;
+	curbuf = pipe->curbuf;
+	buf = pipe->bufs + curbuf;
+	buf_len = buf->len;
+	buf_offset = buf->offset;
+	src = buf->ops->map(pipe, buf, 1);
+	pos = sd->pos;
+	offset = pos & ~PAGE_CACHE_MASK;
+	page = &mspd_splice_pages[0];
+	dst = kmap_atomic(*page, KM_USER1);
+
+	while (remaining) {
+		len = remaining;
+		if (len + offset > PAGE_CACHE_SIZE)
+			len = PAGE_CACHE_SIZE - offset;
+		if (len > buf_len)
+			len = buf_len;
+
+		memcpy(dst + offset, src + buf_offset, len);
+
+		buf_len -= len;
+		buf_offset += len;
+		remaining -= len;
+		pos += len;
+		offset = pos & ~PAGE_CACHE_MASK;
+
+		if (!offset) {
+			/* FIXME if this was the last page we should still flush/unmap, even if it's not a full page */
+			/* ... actually it looks ok, the unmap is done outside the loop */
+			flush_dcache_page(*page);
+			kunmap_atomic(dst, KM_USER1);
+			if (remaining) {
+				page++;
+				dst = kmap_atomic(*page, KM_USER1);
+			}
+		}
+
+		if (!buf_len) {
+			buf->ops->unmap(pipe, buf, src);
+			if (remaining) {
+				curbuf = (curbuf + 1) & (pipe->buffers - 1);
+				buf = pipe->bufs + curbuf;
+				buf_len = buf->len;
+				buf_offset = buf->offset;
+				src = buf->ops->map(pipe, buf, 1);
+			}
+		}
+	}
+
+	if (offset) {
+		flush_dcache_page(*page);
+		kunmap_atomic(dst, KM_USER1);
+	}
+
+	if (buf_len)
+		buf->ops->unmap(pipe, buf, src);
+#endif
+
+
+	//loop on write_end, update sd fields
+	page = &mspd_splice_pages[0];
+	fsdata = &mspd_splice_fsdata[0];
+	offset = sd->pos & ~PAGE_CACHE_MASK;
+	pos = sd->pos;
+	remaining = nrbufs_len;
+	len = nrbufs_len;
+	done = 0;
+
+	if (likely(len + offset > PAGE_CACHE_SIZE))
+		len = PAGE_CACHE_SIZE - offset;
+
+	ret = pagecache_write_end(file, mapping, pos, len, len,
+			*page, *fsdata);
+
+	/* In case of error or short write we need to report error to the caller */
+	/* If there was already a previous error, just continue doing the pagecache_write_end() cleanup */
+	/* Otherwise keep track of how many bytes we have succefully written and that an error happened */
+	if (unlikely(ret != len)) {
+		printk(KERN_ERR "Failed on write_end, continuing with other buffers\n");
+
+		/* Only report error to caller if nothing has been done */
+		ret2 = ret;
+		nrbufs_len = (ret > 0) ? ret: 0;
+	}
+
+	pos += len;
+	done += len;
+	remaining -= len;
+
+	page++;
+	fsdata++;
+
+	while (remaining > PAGE_CACHE_SIZE) {
+		ret = pagecache_write_end(file, mapping, pos, PAGE_CACHE_SIZE, PAGE_CACHE_SIZE,
+				*page, *fsdata);
+
+		if (unlikely((ret != PAGE_CACHE_SIZE) && !ret2)) {
+			printk(KERN_ERR "Failed on write_end, continuing with other buffers\n");
+
+			nrbufs_len = done;
+
+			if (ret >= 0)
+				nrbufs_len += ret;
+
+			ret2 = nrbufs_len;
+		}
+
+		pos += PAGE_CACHE_SIZE;
+		done += PAGE_CACHE_SIZE;
+		remaining -= PAGE_CACHE_SIZE;
+
+		page++;
+		fsdata++;
+	}
+
+	if (remaining) {
+		ret = pagecache_write_end(file, mapping, pos, remaining, remaining,
+					*page, *fsdata);
+
+		if (unlikely((ret != remaining) && !ret2)) {
+			printk(KERN_ERR "Failed on write_end, continuing with other buffers\n");
+
+			nrbufs_len = done;
+
+			if (ret >= 0)
+				nrbufs_len += ret;
+
+			ret2 = nrbufs_len;
+		}
+	}
+
+	sd->num_spliced += nrbufs_len;
+	sd->len -= nrbufs_len;
+	sd->pos += nrbufs_len;
+	sd->total_len -= nrbufs_len;
+
+	//loop on pipe buffers to release them
+	remaining = nrbufs_len;
+	buf = pipe->bufs + pipe->curbuf;
+
+	while (remaining && (remaining >= buf->len)) {
+		ops = buf->ops;
+
+		remaining -= buf->len;
+		buf->len = 0;
+		buf->ops = NULL;
+		ops->release(pipe, buf);
+		pipe->nrbufs--;
+		pipe->curbuf = (pipe->curbuf + 1) & (pipe->buffers - 1);
+		buf = pipe->bufs + pipe->curbuf;
+	}
+
+	// Last buffer, might not be empty
+	if (remaining) {
+		buf->len -= remaining;
+		buf->offset += remaining;
+	}
+
+	if (pipe->inode)
+		sd->need_wakeup = true;
+
+	if (!sd->total_len) {
+		kfree(mspd_splice_pages);
+		return 0;
+	}
+
+	if (ret2) {
+		if (ret2 > 0)
+			ret = 0;
+		else
+			ret = ret2;
+
+		goto err;
+	}
+
+	if (pipe->nrbufs)
+		goto start;
+
+	ret = 1;
+
+err:
+	kfree(mspd_splice_pages);
+
+	return ret;
+}
+EXPORT_SYMBOL(comcerto_splice_from_pipe_feed);
+#endif
+
 /**
  * splice_from_pipe_next - wait for some data to splice from
  * @pipe:	pipe to splice from
@@ -1041,6 +1424,113 @@ generic_file_splice_write(struct pipe_inode_info *pipe, struct file *out,
 }
 
 EXPORT_SYMBOL(generic_file_splice_write);
+
+#if defined(CONFIG_COMCERTO_SPLICE_PROF)
+unsigned int splicew_time_counter[256];
+unsigned int splicew_reqtime_counter[256];
+unsigned int splicew_data_counter[256];
+static struct timeval last_splicew;
+unsigned int init_splicew_prof = 0;
+#endif
+
+#if defined(CONFIG_COMCERTO_IMPROVED_SPLICE)
+ssize_t
+comcerto_file_splice_write(struct pipe_inode_info *pipe, struct file *out,
+			  loff_t *ppos, size_t len, unsigned int flags)
+{
+	struct address_space *mapping = out->f_mapping;
+	struct inode *inode = mapping->host;
+	struct splice_desc sd = {
+		.total_len = len,
+		.flags = flags,
+		.pos = *ppos,
+		.u.file = out,
+	};
+	ssize_t ret;
+#if defined(CONFIG_COMCERTO_SPLICE_PROF)
+	struct timeval now;
+	int diff_time_ms;
+#endif
+
+	pipe_lock(pipe);
+
+#if defined(CONFIG_COMCERTO_SPLICE_PROF)
+	if (enable_splice_prof) {
+		do_gettimeofday(&now);
+		if (init_splicew_prof) {
+			diff_time_ms = ((now.tv_sec - last_splicew.tv_sec) * 1000) + ((now.tv_usec - last_splicew.tv_usec) / 1000);
+			if (diff_time_ms < 1000) {
+				splicew_time_counter[diff_time_ms >> 3]++;
+			}
+			else {
+				splicew_time_counter[255]++;
+			}
+		}
+		last_splicew = now;
+		if (len < (1 <<21))
+			splicew_data_counter[(len >> 13) & 0xFF]++;
+		else
+			splicew_data_counter[255]++;
+	}
+#endif
+
+	splice_from_pipe_begin(&sd);
+	do {
+		ret = splice_from_pipe_next(pipe, &sd);
+		if (ret <= 0)
+			break;
+
+		mutex_lock_nested(&inode->i_mutex, I_MUTEX_CHILD);
+		ret = file_remove_suid(out);
+		if (!ret) {
+			file_update_time(out);
+			ret = comcerto_splice_from_pipe_feed(pipe, &sd);
+		}
+		mutex_unlock(&inode->i_mutex);
+	} while (ret > 0);
+	splice_from_pipe_end(pipe, &sd);
+
+	pipe_unlock(pipe);
+
+	if (sd.num_spliced)
+		ret = sd.num_spliced;
+
+	if (ret > 0) {
+		unsigned long nr_pages;
+		int err;
+
+		nr_pages = (ret + PAGE_CACHE_SIZE - 1) >> PAGE_CACHE_SHIFT;
+
+		err = generic_write_sync(out, *ppos, ret);
+		if (err)
+			ret = err;
+		else
+			*ppos += ret;
+		balance_dirty_pages_ratelimited_nr(mapping, nr_pages);
+	}
+
+#if defined(CONFIG_COMCERTO_SPLICE_PROF)
+	if (enable_splice_prof) {
+		do_gettimeofday(&now);
+		
+		diff_time_ms = ((now.tv_sec - last_splicew.tv_sec) * 1000) + ((now.tv_usec - last_splicew.tv_usec) / 1000);
+		if (diff_time_ms < 1000) {//Don't record useless data
+			splicew_reqtime_counter[diff_time_ms >> 3]++;
+		}
+		else
+			splicew_reqtime_counter[255]++;
+
+		if(!init_splicew_prof)
+			init_splicew_prof = 1;
+
+		last_splicew = now;
+	}
+#endif
+	return ret;
+}
+
+EXPORT_SYMBOL(comcerto_file_splice_write);
+#endif
 
 static int write_pipe_buf(struct pipe_inode_info *pipe, struct pipe_buffer *buf,
 			  struct splice_desc *sd)
@@ -1692,30 +2182,39 @@ SYSCALL_DEFINE6(splice, int, fd_in, loff_t __user *, off_in,
 		int, fd_out, loff_t __user *, off_out,
 		size_t, len, unsigned int, flags)
 {
-	long error;
-	struct file *in, *out;
+	int error = -EBADF;
+	struct file *in, *out = NULL;
 	int fput_in, fput_out;
+	struct socket *sock = NULL;
 
 	if (unlikely(!len))
 		return 0;
 
-	error = -EBADF;
-	in = fget_light(fd_in, &fput_in);
-	if (in) {
-		if (in->f_mode & FMODE_READ) {
-			out = fget_light(fd_out, &fput_out);
-			if (out) {
-				if (out->f_mode & FMODE_WRITE)
-					error = do_splice(in, off_in,
-							  out, off_out,
-							  len, flags);
-				fput_light(out, fput_out);
-			}
-		}
+	if (!(out = fget_light(fd_out, &fput_out)))
+		return -EBADF;
 
+	if (!(out->f_mode & FMODE_WRITE))
+		goto out;
+
+	/* Check if fd_in is a socket while out_fd is NOT a pipe. */
+	if (!get_pipe_info(out) &&
+		(sock = sockfd_lookup(fd_in, &error))) {
+#if defined(CONFIG_COMCERTO_IMPROVED_SPLICE)
+		if (sock->sk && out->f_op->splice_from_socket)
+			error = out->f_op->splice_from_socket(out, sock,
+								off_out, len);
+#endif
+		fput(sock->file);
+	} else
+	{
+		if (!(in = fget_light(fd_in, &fput_in)))
+			goto out;
+		if ((in->f_mode & FMODE_READ))
+			error = do_splice(in, off_in, out, off_out, len, flags);
 		fput_light(in, fput_in);
 	}
-
+out:
+	fput_light(out, fput_out);
 	return error;
 }
 
@@ -1725,7 +2224,7 @@ SYSCALL_DEFINE6(splice, int, fd_in, loff_t __user *, off_in,
  */
 static int ipipe_prep(struct pipe_inode_info *pipe, unsigned int flags)
 {
-	int ret;
+	int ret = 0;
 
 	/*
 	 * Check ->nrbufs without the inode lock first. This function
@@ -1734,7 +2233,6 @@ static int ipipe_prep(struct pipe_inode_info *pipe, unsigned int flags)
 	if (pipe->nrbufs)
 		return 0;
 
-	ret = 0;
 	pipe_lock(pipe);
 
 	while (!pipe->nrbufs) {
@@ -1763,7 +2261,7 @@ static int ipipe_prep(struct pipe_inode_info *pipe, unsigned int flags)
  */
 static int opipe_prep(struct pipe_inode_info *pipe, unsigned int flags)
 {
-	int ret;
+	int ret = 0;
 
 	/*
 	 * Check ->nrbufs without the inode lock first. This function
@@ -1772,7 +2270,6 @@ static int opipe_prep(struct pipe_inode_info *pipe, unsigned int flags)
 	if (pipe->nrbufs < pipe->buffers)
 		return 0;
 
-	ret = 0;
 	pipe_lock(pipe);
 
 	while (pipe->nrbufs >= pipe->buffers) {

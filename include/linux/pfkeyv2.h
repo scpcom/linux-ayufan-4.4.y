@@ -268,6 +268,7 @@ struct sadb_x_kmaddress {
 #define SADB_SAFLAGS_NOPMTUDISC	0x20000000
 #define SADB_SAFLAGS_DECAP_DSCP	0x40000000
 #define SADB_SAFLAGS_NOECN	0x80000000
+#define SADB_SAFLAGS_ESN	0x01000000
 
 /* Security Association states */
 #define SADB_SASTATE_LARVAL	0

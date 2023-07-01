@@ -29,6 +29,27 @@
 
 #if __LINUX_ARM_ARCH__ >= 6
 
+#ifdef CONFIG_COMCERTO_ZONE_DMA_NCNB
+
+int comcerto_atomic_add(int i, atomic_t *v);
+int comcerto_atomic_cmpxchg(atomic_t *v, int old, int new);
+void comcerto_atomic_clear_mask(unsigned long mask, unsigned long *addr);
+
+
+struct virtual_zone {
+	void *start;
+	void *end;
+};
+
+extern struct virtual_zone arm_dma_zone;
+
+static inline bool is_dma_zone_virtual_address(void *addr)
+{
+	return ((addr < arm_dma_zone.end) && (addr >= arm_dma_zone.start));
+}
+
+#endif
+
 /*
  * ARMv6 UP and SMP safe atomic ops.  We use load exclusive and
  * store exclusive to ensure that these are atomic.  We may loop
@@ -38,6 +59,13 @@ static inline void atomic_add(int i, atomic_t *v)
 {
 	unsigned long tmp;
 	int result;
+
+#ifdef CONFIG_COMCERTO_ZONE_DMA_NCNB
+	if (unlikely(is_dma_zone_virtual_address(v))) {
+		comcerto_atomic_add(i, v);
+		return;
+	}
+#endif
 
 	__asm__ __volatile__("@ atomic_add\n"
 "1:	ldrex	%0, [%3]\n"
@@ -54,6 +82,11 @@ static inline int atomic_add_return(int i, atomic_t *v)
 {
 	unsigned long tmp;
 	int result;
+
+#ifdef CONFIG_COMCERTO_ZONE_DMA_NCNB
+	if (unlikely(is_dma_zone_virtual_address(v)))
+		return comcerto_atomic_add(i, v);
+#endif
 
 	smp_mb();
 
@@ -77,6 +110,13 @@ static inline void atomic_sub(int i, atomic_t *v)
 	unsigned long tmp;
 	int result;
 
+#ifdef CONFIG_COMCERTO_ZONE_DMA_NCNB
+	if (unlikely(is_dma_zone_virtual_address(v))) {
+		comcerto_atomic_add(-i, v);
+		return;
+	}
+#endif
+
 	__asm__ __volatile__("@ atomic_sub\n"
 "1:	ldrex	%0, [%3]\n"
 "	sub	%0, %0, %4\n"
@@ -92,6 +132,11 @@ static inline int atomic_sub_return(int i, atomic_t *v)
 {
 	unsigned long tmp;
 	int result;
+
+#ifdef CONFIG_COMCERTO_ZONE_DMA_NCNB
+	if (unlikely(is_dma_zone_virtual_address(v)))
+		return comcerto_atomic_add(-i, v);
+#endif
 
 	smp_mb();
 
@@ -114,6 +159,11 @@ static inline int atomic_cmpxchg(atomic_t *ptr, int old, int new)
 {
 	unsigned long oldval, res;
 
+#ifdef CONFIG_COMCERTO_ZONE_DMA_NCNB
+	if (unlikely(is_dma_zone_virtual_address(ptr)))
+		return comcerto_atomic_cmpxchg(ptr, old, new);
+#endif
+
 	smp_mb();
 
 	do {
@@ -135,6 +185,13 @@ static inline int atomic_cmpxchg(atomic_t *ptr, int old, int new)
 static inline void atomic_clear_mask(unsigned long mask, unsigned long *addr)
 {
 	unsigned long tmp, tmp2;
+
+#ifdef CONFIG_COMCERTO_ZONE_DMA_NCNB
+	if (unlikely(is_dma_zone_virtual_address(addr))) {
+		atomic_clear_mask(mask, addr);
+		return;
+	}
+#endif
 
 	__asm__ __volatile__("@ atomic_clear_mask\n"
 "1:	ldrex	%0, [%3]\n"

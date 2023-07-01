@@ -43,6 +43,7 @@
 #include <linux/rculist.h>
 
 #include <asm/uaccess.h>
+#include <asm/cacheflush.h>
 
 /*
  * Architectures can override it:
@@ -111,7 +112,12 @@ static DEFINE_RAW_SPINLOCK(logbuf_lock);
  */
 static unsigned log_start;	/* Index into log_buf: next char to be read by syslog() */
 static unsigned con_start;	/* Index into log_buf: next char to be sent to consoles */
+
+#ifdef CONFIG_PRINTK_PERSIST
+#define log_end logbits->_log_end
+#else
 static unsigned log_end;	/* Index into log_buf: most-recently-written-char + 1 */
+#endif
 
 /*
  * If exclusive_console is non-NULL then only this console is to be printed to.
@@ -144,12 +150,6 @@ static int console_may_schedule;
 
 #ifdef CONFIG_PRINTK
 
-static char __log_buf[__LOG_BUF_LEN];
-static char *log_buf = __log_buf;
-static int log_buf_len = __LOG_BUF_LEN;
-static unsigned logged_chars; /* Number of chars produced since last read+clear operation */
-static int saved_console_loglevel = -1;
-
 #ifdef CONFIG_KEXEC
 /*
  * This appends the listed symbols to /proc/vmcoreinfo
@@ -168,8 +168,163 @@ void log_buf_kexec_setup(void)
 }
 #endif
 
+static int saved_console_loglevel = -1;
+static char __log_buf[__LOG_BUF_LEN];
+static char *log_buf = __log_buf;
+
+#ifndef CONFIG_PRINTK_PERSIST
+
+static int log_buf_len = __LOG_BUF_LEN;
+static unsigned logged_chars; /* Number of chars produced since last read+clear operation */
+
+static __init char *log_buf_alloc(unsigned long size, unsigned *dest_offset)
+{
+	return alloc_bootmem(size);
+}
+
+#else	/* CONFIG_PRINTK_PERSIST */
+
+struct logbits {
+	int magic; /* needed to verify the memory across reboots */
+	int _log_buf_len; /* leading _ so they aren't replaced by #define */
+	unsigned _logged_chars;
+	unsigned _log_end;
+};
+static struct logbits __logbits = {
+	._log_buf_len = __LOG_BUF_LEN,
+};
+static struct logbits *logbits = &__logbits;
+#define log_buf_len logbits->_log_buf_len
+#define logged_chars logbits->_logged_chars
+
+#define PERSIST_SEARCH_START 0
+#define PERSIST_SEARCH_END 0xfe000000
+#define PERSIST_SEARCH_JUMP (16*1024*1024)
+#define PERSIST_MAGIC 0xbabb1e
+
+#ifdef CONFIG_BOOTLOG_COPY
+#define BOOTLOG_MAGIC (0x1090091e)
+struct bloghdr {
+	unsigned int magic; /* for kernel verification */
+	unsigned int offset; /* current log offset */
+};
+
+extern unsigned long bootlog_get_addr(void);
+extern unsigned long bootlog_get_size(void);
+extern void bootlog_free(void);
+
+static inline struct bloghdr *get_bootlog_hdr(void)
+{
+	unsigned long bootlog_size = bootlog_get_size();
+	if (bootlog_size) {
+		struct bloghdr *blog_hdr = (struct bloghdr *)
+				phys_to_virt(bootlog_get_addr());
+		if (BOOTLOG_MAGIC != blog_hdr->magic ||
+		    (blog_hdr->offset + sizeof(struct bloghdr) >
+                     bootlog_size)) {
+			printk(KERN_INFO "bootlog: header invalid m:0x%08x "
+			       "o:0x%08x s:0x%08lx\n", blog_hdr->magic,
+                               blog_hdr->offset, bootlog_size);
+			return NULL;
+		}
+		return blog_hdr;
+	}
+	return NULL;
+}
+
+static inline unsigned copy_bootlog(struct bloghdr *blog_hdr,
+				    unsigned dest_offset)
+{
+	if (blog_hdr) {
+		unsigned idx = dest_offset;
+		char *blog_buf = (char *)(blog_hdr + 1);
+		unsigned i;
+
+		for (i = 0; i < blog_hdr->offset; ++i) {
+			LOG_BUF(idx) = blog_buf[i];
+			++idx;
+		}
+		if (logged_chars + blog_hdr->offset <= log_buf_len)
+			logged_chars += blog_hdr->offset;
+		else
+			logged_chars = log_buf_len;
+		dest_offset = idx;
+	}
+        return dest_offset;
+}
+
+static inline void free_bootlog(void)
+{
+	bootlog_free();
+}
+
+#endif
+
+/*
+ * size is a power of 2 so that the printk offset mask will work.  We'll add
+ * a bit more space to the end of the buffer for our extra data, but that
+ * won't change the offset of the buffers.
+ */
+static __init char *log_buf_alloc(unsigned long size, unsigned *dest_offset)
+{
+	unsigned long where;
+	char *buf;
+	unsigned long full_size = size + sizeof(struct logbits);
+	struct logbits *new_logbits;
+
+	for (where = PERSIST_SEARCH_END - size;
+			where >= PERSIST_SEARCH_START;
+			where -= PERSIST_SEARCH_JUMP) {
+		if (reserve_bootmem(where, full_size, BOOTMEM_EXCLUSIVE))
+			continue;
+
+		buf = phys_to_virt(where);
+		new_logbits = phys_to_virt(where + size);
+		printk(KERN_INFO "printk_persist: memory reserved @ 0x%08lx\n",
+			where);
+		if (new_logbits->magic != PERSIST_MAGIC ||
+				new_logbits->_log_buf_len != size ||
+				new_logbits->_logged_chars > size) {
+			printk(KERN_INFO "printk_persist: header invalid, "
+				"cleared.\n");
+			memset(buf, 0, full_size);
+			new_logbits->magic = PERSIST_MAGIC;
+			new_logbits->_log_buf_len = size;
+			new_logbits->_logged_chars = 0;
+			new_logbits->_log_end = 0;
+		} else {
+			printk(KERN_INFO "printk_persist: header valid; "
+				"logged=%d next=%d\n",
+				new_logbits->_logged_chars,
+				new_logbits->_log_end);
+		}
+		*dest_offset = new_logbits->_log_end;
+		new_logbits->_log_end = log_end;
+		if (new_logbits->_logged_chars + logged_chars <= size)
+			new_logbits->_logged_chars += logged_chars;
+		else
+			new_logbits->_logged_chars = size;
+		logbits = new_logbits;
+		return buf;
+	}
+	goto error;
+
+error:
+	/* replace the buffer, but don't bother to swap struct logbits */
+	printk(KERN_ERR "printk_persist: failed to reserve bootmem "
+		"area. disabled.\n");
+	return alloc_bootmem(full_size);
+}
+#endif	 /* CONFIG_PRINTK_PERSIST */
+
 /* requested log_buf_len from kernel cmdline */
-static unsigned long __initdata new_log_buf_len;
+static unsigned long __initdata new_log_buf_len =
+#ifdef CONFIG_PRINTK_PERSIST_BUF_SHIFT
+	(1 << CONFIG_PRINTK_PERSIST_BUF_SHIFT)
+#else
+	0
+#endif
+;
 
 /* save requested log_buf_len since it's too early to process it */
 static int __init log_buf_len_setup(char *str)
@@ -178,7 +333,7 @@ static int __init log_buf_len_setup(char *str)
 
 	if (size)
 		size = roundup_pow_of_two(size);
-	if (size > log_buf_len)
+	if (size > log_buf_len || size == 0)
 		new_log_buf_len = size;
 
 	return 0;
@@ -188,9 +343,12 @@ early_param("log_buf_len", log_buf_len_setup);
 void __init setup_log_buf(int early)
 {
 	unsigned long flags;
-	unsigned start, dest_idx, offset;
-	char *new_log_buf;
+	unsigned start, dest_offset = 0, dest_idx, offset;
+	char *new_log_buf = NULL;
 	int free;
+#ifdef CONFIG_BOOTLOG_COPY
+	struct bloghdr *blog_hdr = NULL;
+#endif
 
 	if (!new_log_buf_len)
 		return;
@@ -203,7 +361,7 @@ void __init setup_log_buf(int early)
 			return;
 		new_log_buf = __va(mem);
 	} else {
-		new_log_buf = alloc_bootmem_nopanic(new_log_buf_len);
+		new_log_buf = log_buf_alloc(new_log_buf_len, &dest_offset);
 	}
 
 	if (unlikely(!new_log_buf)) {
@@ -212,25 +370,38 @@ void __init setup_log_buf(int early)
 		return;
 	}
 
+#ifdef CONFIG_BOOTLOG_COPY
+	/* Read out the blog_hdr before logbuf is locked in case print
+	 * is needed. */
+	blog_hdr = get_bootlog_hdr();
+#endif
+
 	raw_spin_lock_irqsave(&logbuf_lock, flags);
 	log_buf_len = new_log_buf_len;
 	log_buf = new_log_buf;
-	new_log_buf_len = 0;
 	free = __LOG_BUF_LEN - log_end;
 
+#ifdef CONFIG_BOOTLOG_COPY
+	dest_offset = copy_bootlog(blog_hdr, dest_offset);
+#endif
 	offset = start = min(con_start, log_start);
-	dest_idx = 0;
+	dest_idx = dest_offset;
 	while (start != log_end) {
 		unsigned log_idx_mask = start & (__LOG_BUF_LEN - 1);
+		unsigned dest_idx_mask = dest_idx & (new_log_buf_len - 1);
 
-		log_buf[dest_idx] = __log_buf[log_idx_mask];
+		log_buf[dest_idx_mask] = __log_buf[log_idx_mask];
 		start++;
 		dest_idx++;
 	}
-	log_start -= offset;
-	con_start -= offset;
-	log_end -= offset;
+	log_start += dest_offset - offset;
+	con_start += dest_offset - offset;
+	log_end += dest_offset - offset;
 	raw_spin_unlock_irqrestore(&logbuf_lock, flags);
+
+#ifdef CONFIG_BOOTLOG_COPY
+	free_bootlog();
+#endif
 
 	pr_info("log_buf_len: %d\n", log_buf_len);
 	pr_info("early log buf free: %d(%d%%)\n",
@@ -329,8 +500,11 @@ static int check_syslog_permissions(int type, bool from_file)
 	return 0;
 }
 
+#define COPY_SIZE 4096
+
 int do_syslog(int type, char __user *buf, int len, bool from_file)
 {
+	char *copybuf;
 	unsigned i, j, limit, count;
 	int do_clear = 0;
 	char c;
@@ -396,6 +570,11 @@ int do_syslog(int type, char __user *buf, int len, bool from_file)
 			error = -EFAULT;
 			goto out;
 		}
+		copybuf = kmalloc(COPY_SIZE, GFP_KERNEL);
+		if (!copybuf) {
+			error = -ENOMEM;
+			goto out;
+		}
 		count = len;
 		if (count > log_buf_len)
 			count = log_buf_len;
@@ -406,7 +585,7 @@ int do_syslog(int type, char __user *buf, int len, bool from_file)
 			logged_chars = 0;
 		limit = log_end;
 		/*
-		 * __put_user() could sleep, and while we sleep
+		 * copy_to_user() could sleep, and while we sleep
 		 * printk() could overwrite the messages
 		 * we try to copy to user space. Therefore
 		 * the messages are copied in reverse. <manfreds>
@@ -416,14 +595,26 @@ int do_syslog(int type, char __user *buf, int len, bool from_file)
 			if (j + log_buf_len < log_end)
 				break;
 			c = LOG_BUF(j);
-			raw_spin_unlock_irq(&logbuf_lock);
-			error = __put_user(c,&buf[count-1-i]);
-			cond_resched();
-			raw_spin_lock_irq(&logbuf_lock);
+			copybuf[COPY_SIZE-1-(i % COPY_SIZE)] = c;
+			if ((i+1) % COPY_SIZE == 0) {
+				raw_spin_unlock_irq(&logbuf_lock);
+				error = copy_to_user(&buf[count-1-i],
+						copybuf, COPY_SIZE);
+				cond_resched();
+				raw_spin_lock_irq(&logbuf_lock);
+			}
 		}
 		raw_spin_unlock_irq(&logbuf_lock);
-		if (error)
-			break;
+		if (!error) {
+			/* in case copybuf was only partially filled */
+			error = copy_to_user(&buf[count-i],
+				copybuf + COPY_SIZE - (i % COPY_SIZE),
+				i % COPY_SIZE);
+		}
+		if (error) {
+			error = -EFAULT;
+			goto copy_done;
+		}
 		error = i;
 		if (i != count) {
 			int offset = count-error;
@@ -437,6 +628,8 @@ int do_syslog(int type, char __user *buf, int len, bool from_file)
 				cond_resched();
 			}
 		}
+copy_done:
+		kfree(copybuf);
 		break;
 	/* Clear ring buffer */
 	case SYSLOG_ACTION_CLEAR:
@@ -827,12 +1020,28 @@ static inline void printk_delay(void)
 	}
 }
 
+static inline void flush_persist(void *ptr, size_t len) {
+#ifdef CONFIG_PRINTK_PERSIST
+	/*
+	 * If PRINTK_PERSIST, we need to make sure log messages are fully
+	 * flushed all the way to RAM in case the system gets reset
+	 * suddenly (eg. by a watchdog).  Such a case is exactly when
+	 * PRINTK_PERSIST is most useful.
+	 */
+	if (cpu_cache.flush_kern_dcache_area)
+		cpu_cache.flush_kern_dcache_area(ptr, len);
+	outer_flush_range(virt_to_phys(ptr),
+			  virt_to_phys(ptr) + len);
+#endif
+}
+
 asmlinkage int vprintk(const char *fmt, va_list args)
 {
 	int printed_len = 0;
 	int current_log_level = default_message_loglevel;
 	unsigned long flags;
 	int this_cpu;
+	unsigned orig_end = log_end & LOG_BUF_MASK, new_end;
 	char *p;
 	size_t plen;
 	char special;
@@ -911,13 +1120,11 @@ asmlinkage int vprintk(const char *fmt, va_list args)
 
 				for (i = 0; i < plen; i++)
 					emit_log_char(printk_buf[i]);
-				printed_len += plen;
 			} else {
 				/* Add log prefix */
 				emit_log_char('<');
 				emit_log_char(current_log_level + '0');
 				emit_log_char('>');
-				printed_len += 3;
 			}
 
 			if (printk_time) {
@@ -935,7 +1142,6 @@ asmlinkage int vprintk(const char *fmt, va_list args)
 
 				for (tp = tbuf; tp < tbuf + tlen; tp++)
 					emit_log_char(*tp);
-				printed_len += tlen;
 			}
 
 			if (!*p)
@@ -962,6 +1168,14 @@ asmlinkage int vprintk(const char *fmt, va_list args)
 
 	lockdep_on();
 out_restore_irqs:
+	new_end = log_end & LOG_BUF_MASK;
+	if (new_end >= orig_end) {
+		flush_persist(log_buf + orig_end, new_end - orig_end);
+	} else {
+		flush_persist(log_buf + orig_end, log_buf_len - orig_end);
+		flush_persist(log_buf, new_end);
+	}
+	flush_persist(logbits, sizeof(*logbits));
 	raw_local_irq_restore(flags);
 
 	preempt_enable();

@@ -65,4 +65,10 @@ config DEVFREQ_GOV_USERSPACE
 
 comment "DEVFREQ Drivers"
 
+config COMCERTO_DEVFREQ_SUPPORT
+	bool "Enable Comcerto devfreq"
+	select DEVFREQ_GOV_SIMPLE_ONDEMAND
+	help
+		Adds devfreq support in Comcerto.
+
 endif # PM_DEVFREQ

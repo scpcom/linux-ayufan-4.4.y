@@ -213,8 +213,14 @@ enum {
 	/* device driver is going to provide hardware time stamp */
 	SKBTX_IN_PROGRESS = 1 << 2,
 
+	/* ensure the originating sk reference is available on driver level */
+	SKBTX_DRV_NEEDS_SK_REF = 1 << 3,
+
 	/* device driver supports TX zero-copy buffers */
-	SKBTX_DEV_ZEROCOPY = 1 << 3,
+	SKBTX_DEV_ZEROCOPY = 1 << 4,
+
+	/* generate wifi status information (where possible) */
+	SKBTX_WIFI_STATUS = 1 << 5,
 };
 
 /*
@@ -349,6 +355,8 @@ typedef unsigned char *sk_buff_data_t;
  *	@ooo_okay: allow the mapping of a socket to a queue to be changed
  *	@l4_rxhash: indicate rxhash is a canonical 4-tuple hash over transport
  *		ports.
+ *	@wifi_acked_valid: wifi_acked was set
+ *	@wifi_acked: whether frame was acked on wifi or not
  *	@dma_cookie: a cookie to one of several possible DMA operations
  *		done by skb DMA functions
  *	@secmark: security marking
@@ -414,6 +422,9 @@ struct sk_buff {
 	kmemcheck_bitfield_end(flags1);
 	__be16			protocol;
 
+#if defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD)
+	__u32			ipsec_offload;
+#endif
 	void			(*destructor)(struct sk_buff *skb);
 #if defined(CONFIG_NF_CONNTRACK) || defined(CONFIG_NF_CONNTRACK_MODULE)
 	struct nf_conntrack	*nfct;
@@ -442,9 +453,10 @@ struct sk_buff {
 #endif
 	__u8			ooo_okay:1;
 	__u8			l4_rxhash:1;
+	__u8			wifi_acked_valid:1;
+	__u8			wifi_acked:1;
+	/* 10/12 bit hole (depending on ndisc_nodetype presence) */
 	kmemcheck_bitfield_end(flags2);
-
-	/* 0/13 bit hole */
 
 #ifdef CONFIG_NET_DMA
 	dma_cookie_t		dma_cookie;
@@ -468,6 +480,11 @@ struct sk_buff {
 	sk_buff_data_t		end;
 	unsigned char		*head,
 				*data;
+#if defined(CONFIG_COMCERTO_CUSTOM_SKB_LAYOUT)
+	unsigned char 		*mspd_data;
+	__u32 			mspd_len;
+	__u32 			mspd_ofst;
+#endif
 	unsigned int		truesize;
 	atomic_t		users;
 };
@@ -549,6 +566,17 @@ static inline struct sk_buff *alloc_skb_fclone(unsigned int size,
 {
 	return __alloc_skb(size, priority, 1, NUMA_NO_NODE);
 }
+
+#if defined(CONFIG_ARCH_COMCERTO)
+extern struct sk_buff *__alloc_skb_header(unsigned int size, void* data, gfp_t gfp_mask,
+			    int fclone, int node);
+static inline struct sk_buff *alloc_skb_header(unsigned int size, 
+					void* data,
+					gfp_t priority)
+{
+	return __alloc_skb_header(size, data, priority, 0, NUMA_NO_NODE);
+}
+#endif
 
 extern void skb_recycle(struct sk_buff *skb);
 extern bool skb_recycle_check(struct sk_buff *skb, int skb_size);
@@ -2085,6 +2113,11 @@ extern unsigned int    datagram_poll(struct file *file, struct socket *sock,
 extern int	       skb_copy_datagram_iovec(const struct sk_buff *from,
 					       int offset, struct iovec *to,
 					       int size);
+#if defined(CONFIG_COMCERTO_IMPROVED_SPLICE)
+extern int	       skb_copy_datagram_to_kernel_iovec(const struct sk_buff *from,
+					       int offset, struct iovec *to,
+					       int size);
+#endif
 extern int	       skb_copy_and_csum_datagram_iovec(struct sk_buff *skb,
 							int hlen,
 							struct iovec *iov);
@@ -2280,6 +2313,15 @@ static inline void skb_tx_timestamp(struct sk_buff *skb)
 	skb_clone_tx_timestamp(skb);
 	sw_tx_timestamp(skb);
 }
+
+/**
+ * skb_complete_wifi_ack - deliver skb with wifi status
+ *
+ * @skb: the original outgoing packet
+ * @acked: ack status
+ *
+ */
+void skb_complete_wifi_ack(struct sk_buff *skb, bool acked);
 
 extern __sum16 __skb_checksum_complete_head(struct sk_buff *skb, int len);
 extern __sum16 __skb_checksum_complete(struct sk_buff *skb);

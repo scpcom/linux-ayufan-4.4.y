@@ -5,6 +5,13 @@
 #include <asm/glue-cache.h>
 #include <asm/glue-proc.h>
 #include <asm/system.h>
+
+#ifdef CONFIG_ARCH_M86XXX
+/* 
+ * IRAM Location to restore the banked registers
+ */
+#define SCRATCHPAD_CPU_CONTEXT_LOC_DBG	 (0xf0802570)
+#endif
 	.text
 
 /*
@@ -64,9 +71,65 @@ ENTRY(cpu_resume_mmu)
 ENDPROC(cpu_resume_mmu)
 cpu_resume_after_mmu:
 	bl	cpu_init		@ restore the und/abt/irq banked regs
+
+#ifdef CONFIG_ARCH_M86XXX
+	/* 
+	 * This code is added to restore the banked registers
+	 * This restore has to be kept here as it has to happen 
+	 * after MMU int.
+	 */
+
+	/* Restore cpsr and spsr */
+        ldr 	r7, scratchpad_cpu_context_loc_dbg
+
+	/* Restoring all the banked registers */
+        mrs     r0, cpsr
+
+        /* Restore the Undef mode reisters */
+        bic     r1, r0, #0x1f
+        orr     r1, r1, #0x1b
+        msr     cpsr_c, r1
+	ARM ( ldmia	r7!, {r13-r14} )
+	ldmia	r7!, {r6}
+	msr	spsr, r6
+
+        /* Restore the Abort mode reisters */
+        bic     r1, r0, #0x1f
+        orr     r1, r1, #0x17
+        msr     cpsr_c, r1
+	ARM ( ldmia	r7!, {r13-r14} )
+	ldmia	r7!, {r6}
+	msr	spsr, r6
+
+        /* Restore the IRQ mode reisters */
+        bic     r1, r0, #0x1f
+        orr     r1, r1, #0x12
+        msr     cpsr_c, r1
+	ARM ( ldmia	r7!, {r13-r14} )
+	ldmia	r7!, {r6}
+	msr	spsr, r6
+
+        /* Restore the FIQ mode reisters */
+        bic     r1, r0, #0x1f
+        orr     r1, r1, #0x11
+        msr     cpsr_c, r1
+	ARM ( ldmia	r7!, {r8-r14} )
+	THUMB ( ldmia	r7!, {r8-r12} )
+	ldmia	r7!, {r6}
+	msr	spsr, r6
+
+        /* Return to the original mode */
+        msr     cpsr_c, r0
+#endif
 	mov	r0, #0			@ return zero on success
 	ldmfd	sp!, {r4 - r11, pc}
 ENDPROC(cpu_resume_after_mmu)
+
+
+#ifdef CONFIG_ARCH_M86XXX
+scratchpad_cpu_context_loc_dbg:
+        .word   SCRATCHPAD_CPU_CONTEXT_LOC_DBG
+#endif
 
 /*
  * Note: Yes, part of the following code is located into the .data section.

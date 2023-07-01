@@ -39,6 +39,7 @@
 #include <linux/sched.h>
 #include <linux/slab.h>
 #include <linux/types.h>
+#include <linux/ratelimit.h>
 #include <linux/mtd/mtd.h>
 #include <linux/mtd/nand.h>
 #include <linux/mtd/nand_ecc.h>
@@ -224,11 +225,9 @@ static void nand_select_chip(struct mtd_info *mtd, int chipnr)
  */
 static void nand_write_buf(struct mtd_info *mtd, const uint8_t *buf, int len)
 {
-	int i;
 	struct nand_chip *chip = mtd->priv;
 
-	for (i = 0; i < len; i++)
-		writeb(buf[i], chip->IO_ADDR_W);
+	iowrite8_rep(chip->IO_ADDR_W, buf, len);
 }
 
 /**
@@ -241,11 +240,9 @@ static void nand_write_buf(struct mtd_info *mtd, const uint8_t *buf, int len)
  */
 static void nand_read_buf(struct mtd_info *mtd, uint8_t *buf, int len)
 {
-	int i;
 	struct nand_chip *chip = mtd->priv;
 
-	for (i = 0; i < len; i++)
-		buf[i] = readb(chip->IO_ADDR_R);
+	ioread8_rep(chip->IO_ADDR_R, buf, len);
 }
 
 /**
@@ -277,14 +274,10 @@ static int nand_verify_buf(struct mtd_info *mtd, const uint8_t *buf, int len)
  */
 static void nand_write_buf16(struct mtd_info *mtd, const uint8_t *buf, int len)
 {
-	int i;
 	struct nand_chip *chip = mtd->priv;
 	u16 *p = (u16 *) buf;
-	len >>= 1;
 
-	for (i = 0; i < len; i++)
-		writew(p[i], chip->IO_ADDR_W);
-
+	iowrite16_rep(chip->IO_ADDR_W, p, len >> 1);
 }
 
 /**
@@ -297,13 +290,10 @@ static void nand_write_buf16(struct mtd_info *mtd, const uint8_t *buf, int len)
  */
 static void nand_read_buf16(struct mtd_info *mtd, uint8_t *buf, int len)
 {
-	int i;
 	struct nand_chip *chip = mtd->priv;
 	u16 *p = (u16 *) buf;
-	len >>= 1;
 
-	for (i = 0; i < len; i++)
-		p[i] = readw(chip->IO_ADDR_R);
+	ioread16_rep(chip->IO_ADDR_R, p, len >> 1);
 }
 
 /**
@@ -1420,6 +1410,76 @@ static uint8_t *nand_transfer_oob(struct nand_chip *chip, uint8_t *oob,
 	return NULL;
 }
 
+/*
+ * NOTE(dgentry): Newer kernels do this in a different, and much better, way.
+ *  The upstream mtd APIs to NAND drivers know about subpages and allow errors
+ *  to be reported on a per-subpage level.
+ *
+ *  Here, we judge errors in two ways:
+ *  1. If the underlying NAND driver reported errors per sub-page
+ *     via mtd_ecc_subpage_stats, we check that the number of corrected
+ *     bits is within a safe distance from the maximum number of bits
+ *     we can correct. At the time of this writing only comcerto_nand.c
+ *     reports per-subpage errors.
+ *  2. We check the number of bits corrected on the entire page. For
+ *     example, we might allow up to 72 bits to be corrected on a 4096
+ *     byte page. This is dangerous because there is a big difference between
+ *     having 18 bits corrected on each 1024 byte sub-page versus having
+ *     72 bits corrected all on one subpage.
+ *     Nonetheless if the NAND driver only reports stats using struct
+ *     mtd_ecc_stats, this is the best we can do.
+ *
+ *  Anyway, this code can go away someday when we use a newer kernel.
+ */
+static int unclean_if_too_many_flips(struct mtd_info *mtd,
+		struct mtd_ecc_stats *stats,
+		struct mtd_ecc_subpage_stats *subpage_stats) {
+	uint32_t flips = mtd->ecc_stats.corrected - stats->corrected;
+	uint32_t threshold, subpage_threshold;
+	int i, rc = 0;
+
+	switch (mtd->oobsize) {
+	case 8:
+	case 16:
+	case 64:
+		threshold = 0;
+		subpage_threshold = 0;
+		break;
+	case 128:
+		threshold = 4;
+		subpage_threshold = 2;
+		break;
+	case 224:
+		threshold = 72;
+		subpage_threshold = 18;
+		break;
+	default:
+		threshold = 0;
+		subpage_threshold = 0;
+		break;
+	}
+	if (flips > threshold / 2) {
+		// This should be very rare, but we want to know as we
+		// approach our threshold, which should be even more rare.
+		printk_ratelimited(KERN_WARNING
+			"ECC: corrected %d bits (threshold=%d)\n",
+			flips, threshold);
+	}
+	if (flips > threshold) rc = -EUCLEAN;
+	for (i = 0; i < MTD_ECC_STAT_SUBPAGES; i++) {
+		flips = mtd->ecc_subpage_stats.subpage_corrected[i] -
+		    subpage_stats->subpage_corrected[i];
+		if (flips > subpage_threshold / 2) {
+			printk_ratelimited(KERN_WARNING
+				"ECC: corrected %d bits in one subpage "
+				"(threshold=%d)\n", flips, subpage_threshold);
+		}
+		if (flips > subpage_threshold) rc = -EUCLEAN;
+	}
+
+	return rc;
+}
+
 /**
  * nand_do_read_ops - [INTERN] Read data with ECC
  * @mtd: MTD device structure
@@ -1434,6 +1494,7 @@ static int nand_do_read_ops(struct mtd_info *mtd, loff_t from,
 	int chipnr, page, realpage, col, bytes, aligned;
 	struct nand_chip *chip = mtd->priv;
 	struct mtd_ecc_stats stats;
+	struct mtd_ecc_subpage_stats subpage_stats;
 	int blkcheck = (1 << (chip->phys_erase_shift - chip->page_shift)) - 1;
 	int sndcmd = 1;
 	int ret = 0;
@@ -1445,6 +1506,7 @@ static int nand_do_read_ops(struct mtd_info *mtd, loff_t from,
 	uint8_t *bufpoi, *oob, *buf;
 
 	stats = mtd->ecc_stats;
+	subpage_stats = mtd->ecc_subpage_stats;
 
 	chipnr = (int)(from >> chip->chip_shift);
 	chip->select_chip(mtd, chipnr);
@@ -1566,7 +1628,7 @@ static int nand_do_read_ops(struct mtd_info *mtd, loff_t from,
 	if (mtd->ecc_stats.failed - stats.failed)
 		return -EBADMSG;
 
-	return  mtd->ecc_stats.corrected - stats.corrected ? -EUCLEAN : 0;
+	return unclean_if_too_many_flips(mtd, &stats, &subpage_stats);
 }
 
 /**
@@ -1761,6 +1823,7 @@ static int nand_do_read_oob(struct mtd_info *mtd, loff_t from,
 	int page, realpage, chipnr, sndcmd = 1;
 	struct nand_chip *chip = mtd->priv;
 	struct mtd_ecc_stats stats;
+	struct mtd_ecc_subpage_stats subpage_stats;
 	int blkcheck = (1 << (chip->phys_erase_shift - chip->page_shift)) - 1;
 	int readlen = ops->ooblen;
 	int len;
@@ -1770,6 +1833,7 @@ static int nand_do_read_oob(struct mtd_info *mtd, loff_t from,
 			__func__, (unsigned long long)from, readlen);
 
 	stats = mtd->ecc_stats;
+	subpage_stats = mtd->ecc_subpage_stats;
 
 	if (ops->mode == MTD_OPS_AUTO_OOB)
 		len = chip->ecc.layout->oobavail;
@@ -1848,7 +1912,7 @@ static int nand_do_read_oob(struct mtd_info *mtd, loff_t from,
 	if (mtd->ecc_stats.failed - stats.failed)
 		return -EBADMSG;
 
-	return  mtd->ecc_stats.corrected - stats.corrected ? -EUCLEAN : 0;
+	return unclean_if_too_many_flips(mtd, &stats, &subpage_stats);
 }
 
 /**
@@ -2593,8 +2657,13 @@ int nand_erase_nand(struct mtd_info *mtd, struct erase_info *instr,
 					chip->page_shift, 0, allowbbt)) {
 			pr_warn("%s: attempt to erase a bad block at page 0x%08x\n",
 				    __func__, page);
+#if 0
+			// NOTE(apenwarr): for us it's ok to erase bad blocks.
+			//  UBI deals with bad blocks a different way.
+			//  And we don't trust our bad block detection logic.
 			instr->state = MTD_ERASE_FAILED;
 			goto erase_exit;
+#endif
 		}
 
 		/*
@@ -3260,6 +3329,9 @@ int nand_scan_tail(struct mtd_info *mtd)
 			chip->ecc.layout = &nand_oob_64;
 			break;
 		case 128:
+			chip->ecc.layout = &nand_oob_128;
+			break;
+		case 224:
 			chip->ecc.layout = &nand_oob_128;
 			break;
 		default:

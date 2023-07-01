@@ -408,6 +408,7 @@ enum ip_defrag_users {
 	IP_DEFRAG_VS_FWD,
 	IP_DEFRAG_AF_PACKET,
 	IP_DEFRAG_MACVLAN,
+	IP_DEFRAG_IP6_TNL_4RD /* Used to support Post Fragmentation for 4o6 tunnels */
 };
 
 int ip_defrag(struct sk_buff *skb, u32 user);
