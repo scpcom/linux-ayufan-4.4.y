@@ -325,6 +325,9 @@ dtb-$(CONFIG_ARCH_LPC32XX) += \
 	lpc3250-phy3250.dtb
 dtb-$(CONFIG_ARCH_LS1024A) += \
 	ls1024a-evm.dtb \
+	ls1024a-nas520.dtb \
+	ls1024a-nas540.dtb \
+	ls1024a-nas5xx.dtb \
 	ls1024a-tsx31.dtb
 dtb-$(CONFIG_ARCH_NPCM7XX) += \
 	nuvoton-npcm750-evb.dtb
