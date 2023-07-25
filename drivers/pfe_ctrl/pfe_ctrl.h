@@ -108,4 +108,7 @@ struct fpp_msg {
         u16 *payload;
 };
 
+#define pfe_readl(r) readl((void*)(r))
+#define pfe_writel(v,r) writel(v, (void*)(r))
+
 #endif /* _PFE_CTRL_H_ */
