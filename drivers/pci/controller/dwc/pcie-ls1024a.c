@@ -231,7 +231,7 @@ static int ls1024a_pcie_start_link(struct dw_pcie *pci)
 
 static void ls1024a_pcie_mask_irq(struct irq_data *data)
 {
-	struct dw_pcie_rp *pp = irq_data_get_irq_chip_data(data);
+	struct pcie_port *pp = irq_data_get_irq_chip_data(data);
 	struct dw_pcie *pci = to_dw_pcie_from_pp(pp);
 	struct ls1024a_pcie *pcie = to_ls1024a_pcie(pci);
 	u32 irq = BIT(data->hwirq);
@@ -243,7 +243,7 @@ static void ls1024a_pcie_mask_irq(struct irq_data *data)
 
 static void ls1024a_pcie_unmask_irq(struct irq_data *data)
 {
-	struct dw_pcie_rp *pp = irq_data_get_irq_chip_data(data);
+	struct pcie_port *pp = irq_data_get_irq_chip_data(data);
 	struct dw_pcie *pci = to_dw_pcie_from_pp(pp);
 	struct ls1024a_pcie *pcie = to_ls1024a_pcie(pci);
 	u32 irq = BIT(data->hwirq);
@@ -350,7 +350,7 @@ static struct device_node *find_intc_node(unsigned int index)
 }
 
 static int ls1024a_pcie_init_irq(struct ls1024a_pcie *pcie,
-		struct dw_pcie_rp *pp)
+		struct pcie_port *pp)
 {
 	struct dw_pcie *pci = to_dw_pcie_from_pp(pp);
 	struct device *dev = pci->dev;
@@ -396,7 +396,7 @@ static int ls1024a_add_pcie_port(struct ls1024a_pcie *pcie,
 				 struct platform_device *pdev)
 {
 	struct dw_pcie *pci = pcie->pci;
-	struct dw_pcie_rp *pp = &pci->pp;
+	struct pcie_port *pp = &pci->pp;
 	struct device *dev = &pdev->dev;
 	int ret;
 
