@@ -18,6 +18,7 @@
 #include <linux/of_platform.h>
 #include <linux/module.h>
 #include <linux/proc_fs.h>
+#include <linux/uaccess.h>
 
 struct nas_mcu {
 	struct gpio_descs *gpios;
@@ -125,9 +126,9 @@ static ssize_t nas_mcu_wdt_write_fun(struct file *file, const char __user *buff,
 	return count;
 }
 
-static const struct proc_ops nas_mcu_wdt_fops = {
-	.proc_read = nas_mcu_wdt_read_fun,
-	.proc_write = nas_mcu_wdt_write_fun,
+static const struct file_operations nas_mcu_wdt_fops = {
+	.read = nas_mcu_wdt_read_fun,
+	.write = nas_mcu_wdt_write_fun,
 };
 
 static int nas_mcu_probe(struct platform_device *pdev)

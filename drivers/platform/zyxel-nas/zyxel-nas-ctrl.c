@@ -19,6 +19,7 @@
 #include <linux/of_platform.h>
 #include <linux/module.h>
 #include <linux/proc_fs.h>
+#include <linux/uaccess.h>
 #include <linux/version.h>
 
 #include "zyxel-nas-ctrl.h"
@@ -346,9 +347,9 @@ static ssize_t htp_status_write_fun(struct file *file, const char __user *buff,
 	return 0;
 }
 
-static const struct proc_ops htp_status_fops = {
-	.proc_read = htp_status_read_fun,
-	.proc_write = htp_status_write_fun,
+static const struct file_operations htp_status_fops = {
+	.read = htp_status_read_fun,
+	.write = htp_status_write_fun,
 };
 
 static ssize_t hdd1_status_read_fun(struct file *file, char __user *buff,
@@ -387,9 +388,9 @@ static ssize_t hdd1_status_write_fun(struct file *file, const char __user *buff,
 	return 0;
 }
 
-static const struct proc_ops hdd1_status_fops = {
-	.proc_read = hdd1_status_read_fun,
-	.proc_write = hdd1_status_write_fun,
+static const struct file_operations hdd1_status_fops = {
+	.read = hdd1_status_read_fun,
+	.write = hdd1_status_write_fun,
 };
 
 static ssize_t hdd2_status_read_fun(struct file *file, char __user *buff,
@@ -428,9 +429,9 @@ static ssize_t hdd2_status_write_fun(struct file *file, const char __user *buff,
 	return 0;
 }
 
-static const struct proc_ops hdd2_status_fops = {
-	.proc_read = hdd2_status_read_fun,
-	.proc_write = hdd2_status_write_fun,
+static const struct file_operations hdd2_status_fops = {
+	.read = hdd2_status_read_fun,
+	.write = hdd2_status_write_fun,
 };
 
 static ssize_t hdd3_status_read_fun(struct file *file, char __user *buff,
@@ -469,9 +470,9 @@ static ssize_t hdd3_status_write_fun(struct file *file, const char __user *buff,
 	return 0;
 }
 
-static const struct proc_ops hdd3_status_fops = {
-	.proc_read = hdd3_status_read_fun,
-	.proc_write = hdd3_status_write_fun,
+static const struct file_operations hdd3_status_fops = {
+	.read = hdd3_status_read_fun,
+	.write = hdd3_status_write_fun,
 };
 
 static ssize_t hdd4_status_read_fun(struct file *file, char __user *buff,
@@ -510,9 +511,9 @@ static ssize_t hdd4_status_write_fun(struct file *file, const char __user *buff,
 	return 0;
 }
 
-static const struct proc_ops hdd4_status_fops = {
-	.proc_read = hdd4_status_read_fun,
-	.proc_write = hdd4_status_write_fun,
+static const struct file_operations hdd4_status_fops = {
+	.read = hdd4_status_read_fun,
+	.write = hdd4_status_write_fun,
 };
 
 static ssize_t pwren_usb_read_fun(struct file *file, char __user *buff,
@@ -553,9 +554,9 @@ static ssize_t pwren_usb_write_fun(struct file *file, const char __user *buff,
 	return count;
 }
 
-static const struct proc_ops pwren_usb_fops = {
-	.proc_read = pwren_usb_read_fun,
-	.proc_write = pwren_usb_write_fun,
+static const struct file_operations pwren_usb_fops = {
+	.read = pwren_usb_read_fun,
+	.write = pwren_usb_write_fun,
 };
 
 static int drive_bays_count_read_func(struct file *file, char __user *buff,
@@ -585,9 +586,9 @@ static int drive_bays_count_write_func(struct file *file, const char __user *buf
 	return 0;
 }
 
-static const struct proc_ops drive_bays_count_ops = {
-	proc_read: drive_bays_count_read_func,
-	proc_write: drive_bays_count_write_func
+static const struct file_operations drive_bays_count_ops = {
+	read: drive_bays_count_read_func,
+	write: drive_bays_count_write_func
 };
 
 static int nas_ctrl_register_chrdev(void)
