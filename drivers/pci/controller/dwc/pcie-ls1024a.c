@@ -390,7 +390,20 @@ static int ls1024a_pcie_init_irq(struct ls1024a_pcie *pcie,
 	return 0;
 }
 
-static const struct dw_pcie_host_ops ls1024a_pcie_host_ops;
+static int ls1024a_pcie_host_init(struct pcie_port *pp)
+{
+	struct dw_pcie *pci = to_dw_pcie_from_pp(pp);
+
+	dw_pcie_setup_rc(pp);
+	ls1024a_pcie_start_link(pci);
+	dw_pcie_msi_init(pp);
+
+	return 0;
+}
+
+static const struct dw_pcie_host_ops ls1024a_pcie_host_ops = {
+	.host_init = ls1024a_pcie_host_init,
+};
 
 static int ls1024a_add_pcie_port(struct ls1024a_pcie *pcie,
 				 struct platform_device *pdev)
@@ -405,6 +418,12 @@ static int ls1024a_add_pcie_port(struct ls1024a_pcie *pcie,
 	ret = ls1024a_pcie_init_irq(pcie, pp);
 	if (ret < 0)
 		return ret;
+
+	if (IS_ENABLED(CONFIG_PCI_MSI)) {
+		pp->msi_irq = platform_get_irq_byname(pdev, "msi");
+		if (pp->msi_irq < 0)
+			return pp->msi_irq;
+	}
 
 	ret = dw_pcie_host_init(pp);
 	if (ret) {
