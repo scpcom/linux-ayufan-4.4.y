@@ -17,6 +17,7 @@
 #include <linux/reset.h>
 #include <linux/resource.h>
 
+#include "../../pci.h"
 #include "pcie-designware.h"
 
 struct ls1024a_pcie {
@@ -29,6 +30,7 @@ struct ls1024a_pcie {
 	struct regmap *app_regs;
 	struct irq_domain *irq_domain;
 	unsigned int port_idx;
+	int link_gen;
 };
 
 #define PCIEx_CFGx(port, reg)	(((port) * 0x20) + ((reg) * 0x4))
@@ -193,6 +195,7 @@ static void ls1024a_pcie_establish_link(struct ls1024a_pcie *pcie)
 	struct dw_pcie *pci = pcie->pci;
 	unsigned int reg;
 	unsigned int val = 0;
+	u32 exp_cap_off = dw_pcie_find_capability(pci, PCI_CAP_ID_EXP);
 
 	if (!dw_pcie_link_up(pci)) {
 		/* Disable LTSSM state machine to enable configuration */
@@ -200,6 +203,26 @@ static void ls1024a_pcie_establish_link(struct ls1024a_pcie *pcie)
 		regmap_read(pcie->app_regs, reg, &val);
 		val &= ~(CFG5_LTSSM_EN);
 		regmap_write(pcie->app_regs, reg, val);
+	}
+
+	if (pcie->link_gen == 1) {
+		dw_pcie_read(pci->dbi_base + exp_cap_off + PCI_EXP_LNKCAP,
+			     4, &reg);
+		if ((reg & PCI_EXP_LNKCAP_SLS) != PCI_EXP_LNKCAP_SLS_2_5GB) {
+			reg &= ~((u32)PCI_EXP_LNKCAP_SLS);
+			reg |= PCI_EXP_LNKCAP_SLS_2_5GB;
+			dw_pcie_write(pci->dbi_base + exp_cap_off +
+				      PCI_EXP_LNKCAP, 4, reg);
+		}
+
+		dw_pcie_read(pci->dbi_base + exp_cap_off + PCI_EXP_LNKCTL2,
+			     2, &reg);
+		if ((reg & PCI_EXP_LNKCAP_SLS) != PCI_EXP_LNKCAP_SLS_2_5GB) {
+			reg &= ~((u32)PCI_EXP_LNKCAP_SLS);
+			reg |= PCI_EXP_LNKCAP_SLS_2_5GB;
+			dw_pcie_write(pci->dbi_base + exp_cap_off +
+				      PCI_EXP_LNKCTL2, 2, reg);
+		}
 	}
 
 	/* Set the device to root complex mode */
@@ -530,6 +553,10 @@ static int ls1024a_pcie_probe(struct platform_device *pdev)
 		ret = PTR_ERR(pci->dbi_base);
 		goto reset;
 	}
+
+	pcie->link_gen = of_pci_get_max_link_speed(dev->of_node);
+	if (pcie->link_gen < 0 || pcie->link_gen > 2)
+		pcie->link_gen = 2;
 
 	platform_set_drvdata(pdev, pcie);
 
