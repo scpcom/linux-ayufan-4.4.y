@@ -16,6 +16,9 @@ config PCIE_DW_EP
 	depends on PCI_ENDPOINT
 	select PCIE_DW
 
+config PCIE_DW_MSI_MASK_ACK
+	bool
+
 config PCI_DRA7XX
 	bool
 
@@ -160,6 +163,7 @@ config PCIE_LS1024A
 	depends on OF && (ARCH_LS1024A || COMPILE_TEST)
 	depends on PCI_MSI_IRQ_DOMAIN
 	select PCIE_DW_HOST
+	select PCIE_DW_MSI_MASK_ACK
 	help
 	  Say Y here if you want PCIe controller support on the LS1024A SoC.
 
