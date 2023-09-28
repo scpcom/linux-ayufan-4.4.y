@@ -465,6 +465,8 @@ source "arch/arm/mach-keystone/Kconfig"
 
 source "arch/arm/mach-lpc32xx/Kconfig"
 
+source "arch/arm/mach-ls1024a/Kconfig"
+
 source "arch/arm/mach-mediatek/Kconfig"
 
 source "arch/arm/mach-meson/Kconfig"
@@ -1709,6 +1711,13 @@ config AUTO_ZRELADDR
 	  with 0xf8000000, or, if invalid, from the DTB passed in r2.
 	  This assumes the zImage being placed in the first 128MB from
 	  start of memory.
+
+config TEXT_ZRELADDR
+	bool "Static decompressed kernel image address"
+	help
+	  ZRELADDR is the physical address where the decompressed kernel
+	  image will be placed. If TEXT_ZRELADDR is selected, the address
+	  will be equal to TEXT_OFFSET.
 
 config EFI_STUB
 	bool

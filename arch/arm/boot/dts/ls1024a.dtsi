@@ -1,0 +1,522 @@
+// SPDX-License-Identifier: GPL-2.0
+#include <dt-bindings/interrupt-controller/arm-gic.h>
+#include <dt-bindings/clock/ls1024a.h>
+#include <dt-bindings/phy/phy-ls1024a-serdes.h>
+#include <dt-bindings/reset/ls1024a.h>
+
+/ {
+	#address-cells = <1>;
+	#size-cells = <1>;
+
+	compatible = "fsl,ls1024a";
+	interrupt-parent = <&gic>;
+
+	/*
+	 * The decompressor and also some bootloaders rely on a
+	 * pre-existing /chosen node to be available to insert the
+	 * command line and merge other ATAGS info.
+	 * Also for U-Boot there must be a pre-existing /memory node.
+	 */
+	chosen {};
+	memory { device_type = "memory"; reg = <0 0>; };
+	reserved-memory {
+		#address-cells = <1>;
+		#size-cells = <1>;
+		ranges;
+
+		smp-bringup {
+			reg = <0x00000000 0x800>;
+		};
+	};
+
+	aliases {
+		/* Inverted serial0 and serial1 */
+		serial0 = &uart1;
+		serial1 = &uart0;
+	};
+
+	cpus {
+		#address-cells = <1>;
+		#size-cells = <0>;
+		cpu0: cpu@900 {
+			device_type = "cpu";
+			compatible = "arm,cortex-a9";
+			reg = <0x900>;
+			enable-method = "fsl,ls1024a-smp";
+			next-level-cache = <&l2>;
+			clocks = <&clkcore LS1024A_CLK_A9DP>;
+			clock-names = "cpu";
+		};
+		cpu1: cpu@901 {
+			device_type = "cpu";
+			compatible = "arm,cortex-a9";
+			reg = <0x901>;
+			enable-method = "fsl,ls1024a-smp";
+			next-level-cache = <&l2>;
+			clocks = <&clkcore LS1024A_CLK_A9DP>;
+			clock-names = "cpu";
+		};
+	};
+
+	scu@fff00000 {
+		compatible = "arm,cortex-a9-scu";
+		reg = <0xfff00000 0x100>;
+	};
+
+	global_timer@fff00200 {
+		compatible = "arm,cortex-a9-global-timer";
+		reg = <0xfff00200 0x20>;
+		interrupts = <GIC_PPI 11 (GIC_CPU_MASK_SIMPLE(2) | IRQ_TYPE_EDGE_RISING)>;
+		clocks = <&clkcore LS1024A_CLK_A9DP_MPU>;
+		status = "disabled";
+	};
+
+	local_timer@fff00600 {
+		compatible = "arm,cortex-a9-twd-timer";
+		reg = <0xfff00600 0x20>;
+		interrupts = <GIC_PPI 13 (GIC_CPU_MASK_SIMPLE(2) | IRQ_TYPE_EDGE_RISING)>;
+		clocks = <&clkcore LS1024A_CLK_A9DP_MPU>;
+	};
+
+	local_watchdog@fff00620 {
+		compatible = "arm,cortex-a9-twd-wdt";
+		reg = <0xfff00620 0x20>;
+		interrupts = <GIC_PPI 14 (GIC_CPU_MASK_SIMPLE(2) | IRQ_TYPE_EDGE_RISING)>;
+	};
+
+	gic: interrupt-controller@fff01000 {
+		compatible = "arm,cortex-a9-gic";
+		#interrupt-cells = <3>;
+		#address-cells = <1>;
+		interrupt-controller;
+		/* gic dist base, gic cpu base */
+		reg = <0xfff01000 0x1000>,
+		      <0xfff00100 0x100>;
+	};
+
+	l2: l2-cache {
+		compatible = "arm,pl310-cache";
+		reg = <0xfff10000 0x1000>;
+		interrupts = <GIC_SPI 11 IRQ_TYPE_LEVEL_HIGH>;
+		cache-unified;
+		cache-level = <2>;
+	};
+
+	pmu {
+		compatible = "arm,cortex-a9-pmu";
+		interrupts =
+			<GIC_SPI 9 IRQ_TYPE_LEVEL_HIGH>,
+			<GIC_SPI 10 IRQ_TYPE_LEVEL_HIGH>;
+	};
+
+	soc {
+		compatible = "simple-bus";
+		#address-cells = <1>;
+		#size-cells = <1>;
+		ranges;
+
+		iram: iram@83000000 {
+			compatible = "mmio-sram";
+			reg = <0x83000000 0x10000>;
+
+			#address-cells = <1>;
+			#size-cells = <1>;
+			ranges = <0 0x83000000 0x10000>;
+
+			host_utilpe: host_utilpe@2400 {
+				reg = <0x2400 0x100>;
+			};
+
+			scratchpad_cpu_context_loc_dbg: scratchpad_cpu_context_loc_dbg@2570 {
+				reg = <0x2570 0x80>;
+			};
+
+			clk_bypass_bug: clk_bypass_bug@fc00 {
+				reg = <0xfc00 0x400>;
+			};
+		};
+
+		phystat: phystat@90410000 {
+			compatible = "fsl,ls1024a-phystat",
+			             "syscon";
+			reg = <0x90410000 0x100>;
+		};
+
+		timer: timer@90450000 {
+			compatible = "fsl,ls1024a-timer",
+				     "syscon", "simple-mfd";
+			reg = <0x90450000 0x100>;
+			clocks = <&clkcore LS1024A_CLK_RTC_TIM>;
+			resets = <&clkreset LS1024A_AXI_RTC_TIM_RST>;
+			watchdog: watchdog {
+				compatible = "fsl,ls1024a-wdt";
+				fsl,clkcore = <&clkcore>;
+			};
+		};
+
+		pwm: pwm@90458000 {
+			compatible = "fsl,ls1024a-pwm",
+				     "syscon", "simple-mfd";
+			reg = <0x90458000 0x100>;
+		};
+
+		pci_usb_ctrl: pci_usb_ctrl@90460000 {
+			compatible = "fsl,ls1024a-pci-usb-ctrl",
+			             "syscon", "simple-mfd";
+			reg = <0x90460000 0x10000>;
+			pcie0_intc: pcie0-interrupt-controller {
+				compatible = "fsl,ls1024a-pcie-intc";
+				interrupt-controller;
+				#address-cells = <0>;
+				#interrupt-cells = <1>;
+				interrupts = <GIC_SPI 43 IRQ_TYPE_LEVEL_HIGH>;
+			};
+			pcie1_intc: pcie1-interrupt-controller {
+				compatible = "fsl,ls1024a-pcie-intc";
+				interrupt-controller;
+				#address-cells = <0>;
+				#interrupt-cells = <1>;
+				interrupts = <GIC_SPI 44 IRQ_TYPE_LEVEL_HIGH>;
+			};
+		};
+
+		gpio: gpio@90470000 {
+			#gpio-cells = <2>;
+			compatible = "fsl,ls1024a-gpio",
+				     "syscon", "simple-mfd";
+			reg = <0x90470000 0x200>;
+			gpio-controller;
+			gpio-ranges = <&pinctrl 0 0 64>;
+
+			pinctrl: pinctrl {
+				compatible = "fsl,ls1024a-pinctrl";
+			};
+		};
+
+		ls_spi: spi@90498000 {
+			compatible = "snps,dw-apb-ssi";
+			reg = <0x90498000 0x1000>;
+			interrupts = <GIC_SPI 29 IRQ_TYPE_LEVEL_HIGH>;
+			clocks = <&clkcore LS1024A_CLK_DUS>;
+			clock-names = "ssi_clk";
+			reg-io-width = <4>;
+			#address-cells = <1>;
+			#size-cells = <0>;
+			status = "disabled";
+		};
+
+		i2c: i2c@9049c000 {
+			compatible = "fsl,ls1024a-i2c";
+			#address-cells = <1>;
+			#size-cells = <0>;
+			reg = <0x9049c000 0x20>;
+			interrupts = <GIC_SPI 30 IRQ_TYPE_LEVEL_HIGH>;
+			resets = <&clkreset LS1024A_AXI_I2CSPI_RST>;
+			clocks = <&clkcore LS1024A_CLK_I2CSPI>;
+			status = "disabled";
+		};
+
+		usb3_phy: usb3_phy@904a0000 {
+			compatible = "fsl,ls1024a-usb3-phy";
+			reg = <0x904a0000 0x800>;
+			clocks = <&clkcore LS1024A_CLK_REF>;
+			#phy-cells = <0>;
+			resets = <&clkreset LS1024A_USB_USB1_PHY_RESET>,
+			         <&clkreset LS1024A_USB_USB1_UTMI_RESET>;
+			reset-names = "phy", "utmi";
+			status = "disabled";
+		};
+
+		clkcore: clkcore@904b0000 {
+			compatible = "fsl,ls1024a-clkcore",
+				     "syscon", "simple-mfd";
+			reg = <0x904b0000 0x400>;
+			#clock-cells = <1>;
+			fsl,ls1024a-bypass-workaround = <&clk_bypass_bug>;
+			clkreset: reset-controller {
+				compatible = "fsl,ls1024a-reset";
+				#reset-cells = <1>;
+			};
+			syscon-reboot {
+				compatible = "syscon-reboot";
+				regmap = <&clkcore>;
+				/* DEVICE_RST_CNTRL */
+				offset = <0x00>;
+				/* PWR_ON_SOFT_RST */
+				mask = <0x01>;
+			};
+		};
+
+		serdes@90590000 {
+			compatible = "fsl,ls1024a-serdes-phy";
+			reg = <0x90590000 0xc000>;
+			#address-cells = <1>;
+			#size-cells = <0>;
+			resets = <&clkreset LS1024A_SERDES_SERDES0_RESET>,
+			         <&clkreset LS1024A_SERDES_SERDES1_RESET>,
+			         <&clkreset LS1024A_SERDES_SERDES2_RESET>;
+			serdes0: serdes0@0 {
+				#phy-cells = <1>;
+				reg = <0>;
+			};
+			serdes1: serdes1@1 {
+				#phy-cells = <1>;
+				reg = <1>;
+			};
+			serdes2: serdes2@2 {
+				#phy-cells = <1>;
+				reg = <2>;
+			};
+		};
+
+		uart0: uart@96300000 {
+			compatible = "snps,dw-apb-uart";
+			reg = <0x96300000 0x100000>;
+			clocks = <&clkcore LS1024A_CLK_DUS>;
+			interrupts = <GIC_SPI 26 IRQ_TYPE_LEVEL_HIGH>;
+			reg-shift = <2>;
+			reg-io-width = <4>;
+			status = "disabled";
+		};
+
+		uart1: uart@96400000 {
+			compatible = "snps,dw-apb-uart";
+			reg = <0x96400000 0x100000>;
+			clocks = <&clkcore LS1024A_CLK_DUS>;
+			interrupts = <GIC_SPI 27 IRQ_TYPE_LEVEL_HIGH>;
+			reg-shift = <2>;
+			reg-io-width = <4>;
+			status = "disabled";
+		};
+
+		hs_spi: spi@96500000 {
+			compatible = "snps,dw-apb-ssi";
+			reg = <0x96500000 0x100000>;
+			interrupts = <GIC_SPI 28 IRQ_TYPE_LEVEL_HIGH>;
+			clocks = <&clkcore LS1024A_CLK_DUS>;
+			clock-names = "ssi_clk";
+			reg-io-width = <4>;
+			#address-cells = <1>;
+			#size-cells = <0>;
+			status = "disabled";
+		};
+
+		pcie0: pcie@98000000 {
+			compatible = "fsl,ls1024a-pcie";
+			reg = <0x98000000 0x0080000>, /* IP registers */
+			      <0xaff10000 0x0020000>; /* Configuration space */
+			reg-names = "dbi", "config";
+			#address-cells = <3>;
+			#size-cells = <2>;
+			device_type = "pci";
+			bus-range = <0x00 0xff>;
+			ranges = <0x81000000 0 0x00000000 0xaff00000 0 0x00010000
+				  0x82000000 0 0x00000000 0xa0000000 0 0x0fe00000>;
+			interrupt-parent = <&pcie0_intc>;
+			interrupts = <12>;
+			interrupt-names = "msi";
+			#interrupt-cells = <1>;
+			clocks = <&clkcore LS1024A_CLK_PCIE0>;
+			clock-names = "axi";
+			resets = <&clkreset LS1024A_AXI_PCIE0_RST>,
+			         <&clkreset LS1024A_PCIe_SATA_PCIE0_PWR_RST>,
+			         <&clkreset LS1024A_PCIe_SATA_PCIE0_REG_RST>;
+			reset-names = "axi", "power", "regs";
+			phys = <&serdes0 LS1024A_SERDES_TYPE_PCIE>;
+			phy-names = "bus";
+			num-lanes = <1>;
+			fsl,port-index = <0>;
+			interrupt-map-mask = <0 0 0 7>;
+			interrupt-map = <0 0 0 1 &pcie0_intc 0>, /* INTA */
+					<0 0 0 2 &pcie0_intc 2>, /* INTB */
+					<0 0 0 3 &pcie0_intc 4>, /* INTC */
+					<0 0 0 4 &pcie0_intc 6>; /* INTD */
+			status = "disabled";
+		};
+
+		pcie1: pcie@99000000 {
+			compatible = "fsl,ls1024a-pcie";
+			reg = <0x99000000 0x0080000>, /* IP registers */
+			      <0xbff10000 0x0020000>; /* Configuration space */
+			reg-names = "dbi", "config";
+			#address-cells = <3>;
+			#size-cells = <2>;
+			device_type = "pci";
+			bus-range = <0x00 0xff>;
+			ranges = <0x81000000 0 0x00000000 0xbff00000 0 0x00010000
+				  0x82000000 0 0x00000000 0xb0000000 0 0x0fe00000>;
+			interrupt-parent = <&pcie1_intc>;
+			interrupts = <12>;
+			interrupt-names = "msi";
+			#interrupt-cells = <1>;
+			clocks = <&clkcore LS1024A_CLK_PCIE1>;
+			clock-names = "axi";
+			resets = <&clkreset LS1024A_AXI_PCIE1_RST>,
+			         <&clkreset LS1024A_PCIe_SATA_PCIE1_PWR_RST>,
+			         <&clkreset LS1024A_PCIe_SATA_PCIE1_REG_RST>;
+			reset-names = "axi", "power", "regs";
+			phys = <&serdes1 LS1024A_SERDES_TYPE_PCIE>;
+			phy-names = "bus";
+			num-lanes = <1>;
+			fsl,port-index = <1>;
+			interrupt-map-mask = <0 0 0 7>;
+			interrupt-map = <0 0 0 1 &pcie1_intc 0>, /* INTA */
+					<0 0 0 2 &pcie1_intc 2>, /* INTB */
+					<0 0 0 3 &pcie1_intc 4>, /* INTC */
+					<0 0 0 4 &pcie1_intc 6>; /* INTD */
+			status = "disabled";
+		};
+
+		sata: sata@9d000000 {
+			compatible = "fsl,ls1024a-sata", "generic-ahci";
+			reg = <0x9d000000 0x10000>;
+			interrupts = <GIC_SPI 16 IRQ_TYPE_LEVEL_HIGH>;
+			clocks =
+				<&clkcore LS1024A_CLK_SATA>,
+				<&clkcore LS1024A_CLK_SATA_OOB>,
+				<&clkcore LS1024A_CLK_SATA_PMU>;
+			clock-names = "axi", "oob", "pmu";
+			resets =
+				<&clkreset LS1024A_AXI_SATA_RST>,
+				<&clkreset LS1024A_SATA_OOB_RST>,
+				<&clkreset LS1024A_SATA_PMU_RST>,
+				<&clkreset LS1024A_PCIe_SATA_SATA0_RX_RST>,
+				<&clkreset LS1024A_PCIe_SATA_SATA0_TX_RST>,
+				<&clkreset LS1024A_PCIe_SATA_SATA1_RX_RST>,
+				<&clkreset LS1024A_PCIe_SATA_SATA1_TX_RST>;
+			reset-names =
+				"axi",
+				"oob",
+				"pmu",
+				"sata0_rx",
+				"sata0_tx",
+				"sata1_rx",
+				"sata1_tx";
+			#address-cells = <1>;
+			#size-cells = <0>;
+			status = "disabled";
+
+			sata0: sata-port@0 {
+				reg = <0>;
+				phys = <&serdes1 LS1024A_SERDES_TYPE_SATA>;
+			};
+
+			sata1: sata-port@1 {
+				reg = <1>;
+				phys = <&serdes2 LS1024A_SERDES_TYPE_SATA>;
+			};
+		};
+
+		usb3: usb3@9f000000 {
+			compatible = "snps,dwc3";
+			reg = <0x9f000000 0xcfff>;
+			interrupts = <GIC_SPI 22 IRQ_TYPE_LEVEL_HIGH>;
+			phys = <&usb3_phy>;
+			phy-names = "usb3-phy";
+			clocks =
+				<&clkcore LS1024A_CLK_USB1>,
+				<&clkcore LS1024A_CLK_USB1>,
+				<&clkcore LS1024A_CLK_INT_REF>;
+			clock-names = "ref", "bus_early", "suspend";
+			snps,usb3_lpm_capable;
+			status = "disabled";
+		};
+	};
+};
+
+&pinctrl {
+	/* UART0 with two wire */
+	pinctrl_uart0: uart0 {
+		uart0 {
+			groups = "gpio08_grp", "gpio09_grp";
+			function = "uart0";
+		};
+	};
+	pinctrl_uart0_rts: uart0_rts {
+		uart0 {
+			groups = "gpio10_grp";
+			function = "uart0";
+		};
+	};
+	pinctrl_uart0_cts: uart0_cts {
+		uart0 {
+			groups = "gpio11_grp";
+			function = "uart0";
+		};
+	};
+	pinctrl_uart1: uart1 {
+		uart1 {
+			groups = "uart1_grp";
+			function = "uart1";
+		};
+	};
+	pinctrl_uart2: uart2 {
+		uart2 {
+			groups = "uart1_grp";
+			function = "uart2";
+		};
+	};
+	/* High speed SPI */
+	pinctrl_spi_2: spi_2 {
+		spi_2 {
+			groups = "spi_2_rxd_grp";
+			function = "spi";
+		};
+	};
+	pinctrl_spi_2_ss0: spi_2_ss0 {
+		spi_2 {
+			groups = "spi_2_ss0_grp";
+			function = "spi";
+		};
+	};
+	pinctrl_spi_2_ss1: spi_2_ss1 {
+		spi_2 {
+			groups = "spi_2_ss1_grp";
+			function = "spi";
+		};
+	};
+	/* Low speed SPI */
+	pinctrl_spi_ls: spi_ls {
+		spi_ls {
+			groups = "spi_sclk_grp", "spi_rxd_grp", "spi_txd_grp";
+			function = "spi";
+		};
+	};
+	pinctrl_spi_ss0: spi_ss0 {
+		spi_ls {
+			groups = "spi_ss0_grp";
+			function = "spi";
+		};
+	};
+	pinctrl_spi_ss1: spi_ss1 {
+		spi_ls {
+			groups = "spi_ss1_grp";
+			function = "spi";
+		};
+	};
+	pinctrl_spi_ss2: spi_ss2 {
+		spi_ls {
+			groups = "spi_ss2_grp";
+			function = "spi";
+		};
+	};
+	pinctrl_spi_ss3: spi_ss3 {
+		spi_ls {
+			groups = "spi_ss3_grp";
+			function = "spi";
+		};
+	};
+	pinctrl_pwm4: pwm4 {
+		pwm4 {
+			groups = "gpio12_grp";
+			function = "pwm";
+		};
+	};
+	pinctrl_pwm5: pwm5 {
+		pwm5 {
+			groups = "gpio13_grp";
+			function = "pwm";
+		};
+	};
+};
+

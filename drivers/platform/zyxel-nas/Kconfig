@@ -1,0 +1,44 @@
+config ZYXEL_NAS_CONTROL
+	bool "Zyxel nas-control driver"
+	depends on OF_GPIO && (PLAT_ORION || ARCH_LS1024A)
+	default y
+	help
+	  This driver supports controlling Zyxel NAS devices.
+
+	  Say Y if you have a Zyxel NAS.
+
+config ZYXEL_NAS_KEYS
+	bool "Zyxel NAS keys driver"
+	depends on ZYXEL_NAS_CONTROL
+	default y
+	help
+	  This driver supports controlling the keys on Zyxel NAS devices.
+
+	  Say Y if you have a Zyxel NAS.
+
+config ZYXEL_NAS_LEDS
+	bool "Zyxel NAS LEDs driver"
+	depends on ZYXEL_NAS_CONTROL
+	default y
+	help
+	  This driver supports controlling the LEDs on Zyxel NAS devices.
+
+	  Say Y if you have a Zyxel NAS.
+
+config ZYXEL_NAS_PWMS
+	bool "Zyxel NAS pwms driver"
+	depends on ZYXEL_NAS_CONTROL
+	default y
+	help
+	  This driver supports controlling the pwms on Zyxel NAS devices.
+
+	  Say Y if you have a Zyxel NAS.
+
+config ZYXEL_NAS_MCU
+	bool "Zyxel MCU driver"
+	depends on OF_GPIO && (PLAT_ORION || ARCH_LS1024A)
+	default y
+	help
+	  This driver supports controlling the MCU on Zyxel NAS devices.
+
+	  Say Y if you have a Zyxel NAS.
