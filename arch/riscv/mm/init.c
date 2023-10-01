@@ -53,11 +53,7 @@ EXPORT_SYMBOL(empty_zero_page);
 
 extern char _start[];
 void *_dtb_early_va __initdata;
-#ifdef CONFIG_RISCV_FIXMAP_DTB
-phys_addr_t _dtb_early_pa __initdata;
-#else
 uintptr_t _dtb_early_pa __initdata;
-#endif
 
 struct pt_alloc_ops {
 	pte_t *(*get_pte_virt)(phys_addr_t pa);
@@ -578,20 +574,6 @@ static void __init create_kernel_page_table(pgd_t *pgdir, bool early)
 static void __init create_fdt_early_page_table(uintptr_t fix_fdt_va,
 					       uintptr_t dtb_pa)
 {
-#if defined(CONFIG_RISCV_FIXMAP_DTB)
-	uintptr_t va, end_va;
-
-	/* Create fixed mapping for early FDT parsing */
-	end_va = __fix_to_virt(FIX_FDT) + FIX_FDT_SIZE;
-	for (va = __fix_to_virt(FIX_FDT); va < end_va; va += PAGE_SIZE)
-		create_pte_mapping(fixmap_pte, va,
-				   dtb_pa + (va - __fix_to_virt(FIX_FDT)),
-				   PAGE_SIZE, PAGE_KERNEL);
-
-	/* Save pointer to DTB for early FDT parsing */
-	dtb_early_va = (void *)fix_to_virt(FIX_FDT) + (dtb_pa & ~PAGE_MASK);
-	/* Save physical address for memblock reservation */
-#else
 #ifndef CONFIG_BUILTIN_DTB
 	uintptr_t pa = dtb_pa & ~(PMD_SIZE - 1);
 
@@ -618,7 +600,6 @@ static void __init create_fdt_early_page_table(uintptr_t fix_fdt_va,
 	 * kernel is mapped in the linear mapping, that makes no difference.
 	 */
 	dtb_early_va = kernel_mapping_pa_to_va(XIP_FIXUP(dtb_pa));
-#endif
 #endif
 
 	dtb_early_pa = dtb_pa;
