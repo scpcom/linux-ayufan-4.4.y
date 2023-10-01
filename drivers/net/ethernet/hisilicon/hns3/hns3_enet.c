@@ -2251,7 +2251,7 @@ static int hns3_nic_net_set_mac_address(struct net_device *netdev, void *p)
 		return ret;
 	}
 
-	ether_addr_copy(netdev->dev_addr, mac_addr->sa_data);
+	eth_hw_addr_set(netdev, mac_addr->sa_data);
 
 	return 0;
 }
@@ -3117,8 +3117,6 @@ static void hns3_set_default_feature(struct net_device *netdev)
 	struct hnae3_ae_dev *ae_dev = pci_get_drvdata(pdev);
 
 	netdev->priv_flags |= IFF_UNICAST_FLT;
-
-	netdev->gso_partial_features |= NETIF_F_GSO_GRE_CSUM;
 
 	netdev->features |= NETIF_F_HW_VLAN_CTAG_FILTER |
 		NETIF_F_HW_VLAN_CTAG_TX | NETIF_F_HW_VLAN_CTAG_RX |
@@ -4921,7 +4919,7 @@ static int hns3_init_mac_addr(struct net_device *netdev)
 		dev_warn(priv->dev, "using random MAC address %s\n",
 			 format_mac_addr);
 	} else if (!ether_addr_equal(netdev->dev_addr, mac_addr_temp)) {
-		ether_addr_copy(netdev->dev_addr, mac_addr_temp);
+		eth_hw_addr_set(netdev, mac_addr_temp);
 		ether_addr_copy(netdev->perm_addr, mac_addr_temp);
 	} else {
 		return 0;
