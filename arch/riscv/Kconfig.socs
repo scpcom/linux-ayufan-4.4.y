@@ -9,7 +9,6 @@ config ARCH_SUNXI
 	select SIFIVE_PLIC
 	select SUN4I_TIMER
 	select RISCV_SUNXI
-	select RISCV_FIXMAP_DTB
 	select CPU_PM if CPU_IDLE
 	help
 	  This enables support for Allwinner sun20i platform hardware,
