@@ -1536,6 +1536,7 @@ static void vop_crtc_atomic_disable(struct drm_crtc *crtc,
 	rockchip_clear_system_status(sys_status);
 #endif
 
+out:
 	if (crtc->state->event && !crtc->state->active) {
 		spin_lock_irq(&crtc->dev->event_lock);
 		drm_crtc_send_vblank_event(crtc, crtc->state->event);

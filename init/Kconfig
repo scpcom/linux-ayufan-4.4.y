@@ -36,7 +36,7 @@ config CC_HAS_ASM_GOTO
 config CC_HAS_ASM_GOTO_TIED_OUTPUT
 	depends on CC_HAS_ASM_GOTO_OUTPUT
 	# Detect buggy gcc and clang, fixed in gcc-11 clang-14.
-	def_bool $(success,echo 'int foo(int *x) { asm goto (".long (%l[bar]) - .\n": "+m"(*x) ::: bar); return *x; bar: return 0; }' | $CC -x c - -c -o /dev/null)
+	def_bool $(success,echo 'int foo(int *x) { asm goto (".long (%l[bar]) - .": "+m"(*x) ::: bar); return *x; bar: return 0; }' | $CC -x c - -c -o /dev/null)
 
 config CC_HAS_ASM_GOTO_OUTPUT
 	depends on CC_HAS_ASM_GOTO
@@ -280,6 +280,15 @@ config DEFAULT_HOSTNAME
 #
 config ARCH_NO_SWAP
 	bool
+
+config VERSION_SIGNATURE
+	string "Arbitrary version signature"
+	help
+	  This string will be created in a file, /proc/version_signature. It
+	  is useful in determining arbitrary data about your kernel. For instance,
+	  if you have several kernels of the same version, but need to keep track
+	  of a revision of the same kernel, but not affect it's ability to load
+	  compatible modules, this is the easiest way to do that.
 
 config SWAP
 	bool "Support for paging of anonymous memory (swap)"
