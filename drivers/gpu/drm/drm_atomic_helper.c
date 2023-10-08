@@ -1053,14 +1053,14 @@ disable_outputs(struct drm_device *dev, struct drm_atomic_state *old_state)
 
 		conn_funcs = connector->helper_private;
 		if (connector->loader_protect) {
-			drm_bridge_pre_enable(encoder->bridge);
+			drm_bridge_chain_pre_enable(encoder->bridge);
 
 			if (funcs->enable)
 				funcs->enable(encoder);
 			else
 				funcs->commit(encoder);
 
-			drm_bridge_enable(encoder->bridge);
+			drm_bridge_chain_enable(encoder->bridge);
 
 			if (conn_funcs->loader_protect)
 				conn_funcs->loader_protect(connector, false);
