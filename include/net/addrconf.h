@@ -94,6 +94,12 @@ extern void			addrconf_join_solict(struct net_device *dev,
 extern void			addrconf_leave_solict(struct inet6_dev *idev,
 					const struct in6_addr *addr);
 
+extern int			(*ipv6_dev_get_saddr_hook)(struct net *net,
+						struct net_device *dev,
+						const struct in6_addr *daddr,
+						unsigned int srcprefs,
+						struct in6_addr *saddr);
+
 static inline unsigned long addrconf_timeout_fixup(u32 timeout,
 						    unsigned unit)
 {
