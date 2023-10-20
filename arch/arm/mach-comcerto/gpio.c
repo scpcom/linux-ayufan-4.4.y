@@ -28,6 +28,9 @@
 #include <asm/uaccess.h>
 #include <linux/kernel.h>
 #include <linux/signal.h>
+#include <asm/segment.h>
+#include <linux/buffer_head.h>
+#include <linux/slab.h>
 
 #include <mach/comcerto-2000/gpio.h>
 #include <mach/comcerto-2000/timer.h>
@@ -137,6 +140,8 @@ typedef struct _hdd_ioctl {
 
 /** define the buzzer settings **/
 #define BZ_TIMER_PERIOD (HZ/2)
+#define RING_FOREVER 1 
+#define RING_BRIEF 0
 
 #define TIME_BITS       5
 #define FREQ_BITS       4
@@ -192,10 +197,12 @@ enum LED_COLOR {
 static struct timer_list        bz_timer;
 static short bz_time;
 static short bz_timer_status = TIMER_SLEEPING;
+static short bz_type = RING_BRIEF;
 
 dev_t gpio_dev = 0;
 static int gpio_nr_devs = 1;
 struct cdev *gpio_cdev;
+static int is_mcu_burning = 0;
 
 static struct proc_dir_entry *htp_proc;
 static struct proc_dir_entry *hdd1_detect_proc;
@@ -372,6 +379,1190 @@ struct LED_SET led_set[LED_TOTAL] = {
 		},
 	},
 };
+
+
+// MCU burning related functions
+mm_segment_t oldfs;
+
+typedef struct _mcu_ioctl 
+{
+	unsigned int r_mode;	/* ROM Select */
+	unsigned int m_mode;	/* Mode Select */
+	unsigned int s_mode;	/* Serial Select */
+} mcu_ioctl;
+
+typedef struct _mcu_burn 
+{
+	char path[1024];		/* ROM Select */
+} mcu_burn;
+
+static DECLARE_WORK(mcu_reset_control, NULL);
+static DECLARE_WORK(mcu_power_resume, NULL);
+static DECLARE_WORK(mcu_assign_lock, NULL);
+struct workqueue_struct *mcu_workqueue;
+
+#define MCU_SDATA_REG_OFFSET			35
+#define MCU_SCLK_REG_OFFSET				36
+#define MCU_RESB_REG_OFFSET				37
+#define MCU_BI_REG_OFFSET				38
+
+#define BUTTON_TEST_IN_IOC_NUM  _IO(BTNCPY_IOC_MAGIC, 9)
+#define BUTTON_TEST_OUT_IOC_NUM _IO(BTNCPY_IOC_MAGIC, 10)
+
+/* MCU burning related information */
+#define NAS_IOC_MCU_TEST			_IOW(BTNCPY_IOC_MAGIC, 15, mcu_ioctl)
+#define NAS_IOC_MCU_BURNING         _IOW(BTNCPY_IOC_MAGIC, 16, mcu_burn)
+#define NAS_IOC_MCU_ERASE_ALL       _IO(BTNCPY_IOC_MAGIC, 17)
+
+/* set "gpio_bit" to "output" pin and output "out_val" to GPIO pin "gpio_bit" */
+void set_gpio_output(int gpio_bit, unsigned char out_val)
+{
+	unsigned long reg, val;
+
+	/* set gpio_bit to "output" pin */
+	reg = GPIO_DATA_OUT_ENABLE(gpio_bit);
+	if (gpio_bit > 31)	// active low: 0 -> output, 1 -> input
+		val = readl(reg) & ~(0x1 << GPIO_BIT_SET_OFFSET(gpio_bit));
+	else	// active high: 1 -> output, 0 -> input
+		val = readl(reg) | (0x1 << GPIO_BIT_SET_OFFSET(gpio_bit));
+	writel(val, reg);
+
+	// output "out_val" to gpio_bit
+	reg = GPIO_DATA_OUT(gpio_bit);
+
+	if(out_val & 0x1)
+		writel(readl(reg) | (0x1 << GPIO_BIT_SET_OFFSET(gpio_bit)), reg);	// output "1"
+	else
+		writel(readl(reg) & ~(0x1 << GPIO_BIT_SET_OFFSET(gpio_bit)), reg);	// output "0"
+}
+
+/* set "gpio_bit" to "input" pin */
+void set_gpio_input(int gpio_bit)
+{
+	unsigned long reg, val;
+
+	reg = GPIO_DATA_OUT_ENABLE(gpio_bit);
+	if (gpio_bit > 31)	// active low: 0 -> output, 1 -> input
+		val = readl(reg) | (0x1 << GPIO_BIT_SET_OFFSET(gpio_bit));
+	else	// active high: 1 -> output, 0 -> input
+		val = readl(reg) & ~(0x1 << GPIO_BIT_SET_OFFSET(gpio_bit));
+	writel(val, reg);
+}
+
+void power_resume_always_on_func(struct work_struct *in)
+{
+	/* setting power resume always on */
+	int ret;
+	char *argv[] = {"/sbin/i2cset", "-y", "0", "0xa", "0xa", "0x0107", "w", NULL};
+	ret = call_usermodehelper(argv[0], argv, NULL, 0);
+}
+
+void mcu_assign_lock_func(struct work_struct *in)
+{
+	int ret;
+	char *argv[] = {"/firmware/sbin/info_setenv", "mcu_lock", "1", NULL};
+	ret = call_usermodehelper(argv[0], argv, NULL, 0);	
+}
+
+void mcu_reset_func(struct work_struct *in)
+{
+//	unsigned long reg;
+
+	printk(KERN_ALERT "MCU Resetting...\n");
+	ssleep(1);
+
+	/* mcu reset pin */
+	set_gpio_output(MCU_RESB_REG_OFFSET, 0x0);
+	//reg = GPIO_DATA_OUT(MCU_RESB_REG_OFFSET);
+	//writel(readl(reg) & ~(0x1 << GPIO_BIT_SET_OFFSET(MCU_RESB_REG_OFFSET)), reg);
+
+	set_gpio_output(MCU_BI_REG_OFFSET, 0x1);
+	//reg = GPIO_DATA_OUT(MCU_BI_REG_OFFSET);
+	//writel(readl(reg) | (0x1 << GPIO_BIT_SET_OFFSET(MCU_BI_REG_OFFSET)), reg);
+	mdelay(10);
+
+	set_gpio_output(MCU_RESB_REG_OFFSET, 0x1);
+	//reg = GPIO_DATA_OUT(MCU_RESB_REG_OFFSET);
+	//writel(readl(reg) | (0x1 << GPIO_BIT_SET_OFFSET(MCU_RESB_REG_OFFSET)), reg);
+	mdelay(10);
+
+	set_gpio_output(MCU_RESB_REG_OFFSET, 0x0);
+	//reg = GPIO_DATA_OUT(MCU_RESB_REG_OFFSET);
+	//writel(readl(reg) & ~(0x1 << GPIO_BIT_SET_OFFSET(MCU_RESB_REG_OFFSET)), reg);
+	mdelay(10);
+
+	set_gpio_output(MCU_BI_REG_OFFSET, 0x0);
+	//reg = GPIO_DATA_OUT(MCU_BI_REG_OFFSET);
+	//writel(readl(reg) & ~(0x1 << GPIO_BIT_SET_OFFSET(MCU_BI_REG_OFFSET)), reg);
+}
+
+
+struct file *openFile(char *path,int flag,int mode)
+{
+	struct file *fp;
+	
+	fp=filp_open(path, flag, 0);
+	if (fp) return fp;
+		else return NULL;
+}
+
+
+int readFile(struct file *fp,int *buf,int readlen)
+{
+	if (fp->f_op && fp->f_op->read) {
+		return fp->f_op->read(fp,buf,readlen, &fp->f_pos);
+	} else {
+		return -1;
+	}
+}
+
+void closeFile(struct file *fp)
+{
+	filp_close(fp,NULL);
+}
+
+void initKernelEnv(void)
+{
+	oldfs = get_fs();
+	set_fs(KERNEL_DS);
+}
+
+int do_mcu_program_entry(unsigned int r_mode, unsigned int m_mode, unsigned int s_mode)
+{
+	unsigned int data[26] = {0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 1, 1, 0, 0, 0, 0};
+	unsigned int mode_sel[8][4] = {{0,0,0,0},{0,0,0,1},{0,1,1,0},{0,1,1,1},{1,0,0,0},{1,0,0,1},{1,1,0,0},{1,1,1,0}};
+	int i, mcu_sclk_gpio, mcu_resb_gpio, mcu_sdata_gpio, mcu_bi_gpio;
+	int check_ack[8] = {1,1,r_mode,mode_sel[m_mode][0],mode_sel[m_mode][1],mode_sel[m_mode][2],mode_sel[m_mode][3],s_mode};
+	int read_ack[8];
+
+	mcu_sclk_gpio = MCU_SCLK_REG_OFFSET;
+	mcu_resb_gpio = MCU_RESB_REG_OFFSET;
+	mcu_sdata_gpio = MCU_SDATA_REG_OFFSET;
+	mcu_bi_gpio = MCU_BI_REG_OFFSET;
+																																									        
+	set_gpio_output(mcu_resb_gpio, 0x0);
+	set_gpio_output(mcu_sclk_gpio, 0x0);
+	set_gpio_output(mcu_bi_gpio, 0x1);
+    mdelay(10);
+
+    set_gpio_output(mcu_sclk_gpio, 0x1);
+    mdelay(10);
+
+    set_gpio_output(mcu_resb_gpio, 0x1);
+    mdelay(10);
+
+    set_gpio_output(mcu_resb_gpio, 0x0);
+
+    for (i=0; i<26; i++) {
+		set_gpio_output(mcu_sclk_gpio, 0x1);
+		set_gpio_output(mcu_sdata_gpio, data[i]);
+		udelay(3);
+	    set_gpio_output(mcu_sclk_gpio, 0x0);
+		udelay(3);
+		set_gpio_output(mcu_sclk_gpio, 0x1);
+		udelay(3);
+	}
+
+	set_gpio_output(mcu_sclk_gpio, 0x1);
+	set_gpio_output(mcu_sdata_gpio, r_mode);
+	udelay(3);
+	set_gpio_output(mcu_sclk_gpio, 0x0);
+	udelay(3);
+	set_gpio_output(mcu_sclk_gpio, 0x1);
+	udelay(3);
+	
+	for (i=0; i<4; i++) {
+		set_gpio_output(mcu_sclk_gpio, 0x1);
+		set_gpio_output(mcu_sdata_gpio, mode_sel[m_mode][i]);
+		udelay(3);
+		set_gpio_output(mcu_sclk_gpio, 0x0);
+		udelay(3);
+		set_gpio_output(mcu_sclk_gpio, 0x1);
+		udelay(3);
+	}
+
+	set_gpio_output(mcu_sclk_gpio, 0x1);
+	set_gpio_output(mcu_sdata_gpio, s_mode);
+	udelay(3);
+	set_gpio_output(mcu_sclk_gpio, 0x0);
+	udelay(3);
+	set_gpio_output(mcu_sclk_gpio, 0x1);
+	udelay(3);
+																																																															
+	set_gpio_input(mcu_sdata_gpio);
+	udelay(100);
+	for (i=0; i<8; i++) {
+		set_gpio_output(mcu_sclk_gpio, 0x1);
+		udelay(5);
+		set_gpio_output(mcu_sclk_gpio, 0x0);
+		read_ack[i] = (readl(GPIO_DATA_IN(mcu_sdata_gpio)) & 0x1 << GPIO_BIT_SET_OFFSET(mcu_sdata_gpio)) ? 0x1 : 0x0;
+		udelay(5);
+		set_gpio_output(mcu_sclk_gpio, 0x1);
+		udelay(5);
+	}
+	
+	set_gpio_output(mcu_resb_gpio, 0x1);
+	
+	// check read ack
+	int check_fail_flag = 0;
+	for (i=0; i<8; i++) {
+		if (r_mode == 1) {
+			// Mode3~Mode0 don't care
+			if (i > 2 && i < 7) continue;
+		}
+		if (read_ack[i] != check_ack[i]) {
+			check_fail_flag = 1;
+			break;
+		}
+	}
+
+	if (check_fail_flag) {
+		printk(KERN_ERR "[do_mcu_program_entry] Cannot Enter Programming Mode...\n");
+		printk("[do_mcu_program_entry] The reading ACK is (%d%d%d%d%d%d%d%d)...\n", read_ack[0],read_ack[1],read_ack[2],read_ack[3],read_ack[4],read_ack[5],read_ack[6],read_ack[7]);
+		printk("[do_mcu_program_entry] The checking ACK is (%d%d%d%d%d%d%d%d)...\n", check_ack[0],check_ack[1],check_ack[2],check_ack[3],check_ack[4],check_ack[5],check_ack[6],check_ack[7]);
+		return -1;
+	} else {
+		//printk(KERN_ALERT "[do_mcu_program_entry] Entering Programming Mode Successfully...\n");
+		mdelay(10);
+	}
+
+	// for 1024 dummy clock
+	for (i=0; i<1024; i++) {
+		set_gpio_output(mcu_sclk_gpio, 0x1);
+		udelay(3);
+		set_gpio_output(mcu_sclk_gpio, 0x0);
+		udelay(3);
+		set_gpio_output(mcu_sclk_gpio, 0x1);
+		udelay(3);
+	}
+
+	mdelay(20);
+	return 0;
+}
+
+void mcu_erase_all(void)
+{
+	unsigned int r_mode = 0;
+	unsigned int m_mode = 6;
+	unsigned int s_mode = 1;
+
+	int i, mcu_sclk_gpio, mcu_resb_gpio, mcu_sdata_gpio, mcu_bi_gpio, entry_flag;
+
+	mcu_sclk_gpio = MCU_SCLK_REG_OFFSET;
+	mcu_resb_gpio = MCU_RESB_REG_OFFSET;
+	mcu_sdata_gpio = MCU_SDATA_REG_OFFSET;
+	mcu_bi_gpio = MCU_BI_REG_OFFSET;
+	
+	entry_flag = do_mcu_program_entry(r_mode, m_mode, s_mode);
+	if (entry_flag == 0) {
+		// send 20 bits address
+		for (i=0; i<20; i++) {
+			set_gpio_output(mcu_sclk_gpio, 0x1);
+			set_gpio_output(mcu_sdata_gpio, 0x0);
+			udelay(3);
+			set_gpio_output(mcu_sclk_gpio, 0x0);
+			udelay(3);
+			set_gpio_output(mcu_sclk_gpio, 0x1);
+			udelay(3);
+		}
+		
+		udelay(3);
+
+		//send 64 bits data
+		for (i=0; i<64; i++) {
+			set_gpio_output(mcu_sclk_gpio, 0x1);
+			set_gpio_output(mcu_sdata_gpio, 0x0);
+			udelay(3);
+			set_gpio_output(mcu_sclk_gpio, 0x0);
+			if (i >= 62) {
+				udelay(2000);
+			} else {
+				udelay(3);
+			}
+			set_gpio_output(mcu_sclk_gpio, 0x1);
+			udelay(3);
+		}											
+	}
+	
+	mdelay(10);
+	set_gpio_output(mcu_bi_gpio, 0x0);
+	set_gpio_output(mcu_resb_gpio, 0x0);
+	udelay(2000);
+	set_gpio_input(mcu_resb_gpio);
+		
+	printk(KERN_ALERT "[mcu_erase_all] MCU erases all Successfully...\n");
+}
+
+int mcu_program_check(int bit_64_num, long mcu_header, int checksum)
+{
+	unsigned int r_mode = 0;
+	unsigned int m_mode = 1;
+	unsigned int s_mode = 1;
+
+	int i, j, mcu_sclk_gpio, mcu_resb_gpio, mcu_sdata_gpio, mcu_bi_gpio, entry_flag;
+	int return_num = 0;
+	long check_value = 0;
+	check_value += mcu_header;
+
+	mcu_sclk_gpio = MCU_SCLK_REG_OFFSET;
+	mcu_resb_gpio = MCU_RESB_REG_OFFSET;
+	mcu_sdata_gpio = MCU_SDATA_REG_OFFSET;
+	mcu_bi_gpio = MCU_BI_REG_OFFSET;
+	
+	entry_flag = do_mcu_program_entry(r_mode, m_mode, s_mode);
+	return_num = entry_flag;
+																				
+	if (entry_flag == 0) {
+		// send 20 bits address
+		for (i=0; i<20; i++) {
+			set_gpio_output(mcu_sclk_gpio, 0x1);
+			set_gpio_output(mcu_sdata_gpio, 0x0);
+			udelay(3);
+			set_gpio_output(mcu_sclk_gpio, 0x0);
+			udelay(3);
+			set_gpio_output(mcu_sclk_gpio, 0x1);
+			udelay(3);
+		}	
+
+		udelay(3);
+
+		//receive 64 bits data
+		set_gpio_input(mcu_sdata_gpio);
+		for (i=0; i<bit_64_num; i++) {
+			for (j=0; j<64; j++) {
+				set_gpio_output(mcu_sclk_gpio, 0x1);
+				udelay(5);
+				set_gpio_output(mcu_sclk_gpio, 0x0);
+				check_value += (1 << (j % 8)) * ((readl(GPIO_DATA_IN(mcu_sdata_gpio)) & 0x1 << GPIO_BIT_SET_OFFSET(mcu_sdata_gpio)) ? 0x1 : 0x0);
+				udelay(5);
+				set_gpio_output(mcu_sclk_gpio, 0x1);
+				udelay(5);
+			}
+		}
+	
+		if ((check_value + checksum) % 256 == 0) {
+			printk(KERN_ALERT "[mcu_program_check] Verify Program ROM CheckSum is OK...\n");
+		} else {
+			printk(KERN_ERR "[mcu_program_check] Writing Program ROM unsuccessfully(check_value:%ld, checksum:%ld, mcu_header:%ld)...\n", check_value, checksum, mcu_header);
+			return_num = -1;
+		}	
+	}	
+																					
+	mdelay(10);
+	set_gpio_output(mcu_bi_gpio, 0x0);
+	set_gpio_output(mcu_resb_gpio, 0x0);
+	udelay(2000);
+	set_gpio_input(mcu_resb_gpio);
+
+	return return_num;
+}
+
+void mcu_write_program(int **Array, int bit_64_num)
+{
+	unsigned int r_mode = 0;
+	unsigned int m_mode = 3;
+	unsigned int s_mode = 1;
+
+	int i, j, mcu_sclk_gpio, mcu_resb_gpio, mcu_sdata_gpio, mcu_bi_gpio, entry_flag;
+
+	mcu_sclk_gpio = MCU_SCLK_REG_OFFSET;
+	mcu_resb_gpio = MCU_RESB_REG_OFFSET;
+	mcu_sdata_gpio = MCU_SDATA_REG_OFFSET;
+	mcu_bi_gpio = MCU_BI_REG_OFFSET;
+	
+	entry_flag = do_mcu_program_entry(r_mode, m_mode, s_mode);
+
+	if (entry_flag == 0) {
+		// send 20 bits address
+		for (i=0; i<20; i++) {
+			set_gpio_output(mcu_sclk_gpio, 0x1);
+			set_gpio_output(mcu_sdata_gpio, 0x0);
+			udelay(3);
+			set_gpio_output(mcu_sclk_gpio, 0x0);
+			udelay(3);
+			set_gpio_output(mcu_sclk_gpio, 0x1);
+			udelay(3);
+		}
+
+		udelay(3);
+
+		//send 64 bits data
+		for (i=0; i<bit_64_num; i++) {
+			for (j=0; j<64; j++) {
+				set_gpio_output(mcu_sclk_gpio, 0x1);
+				set_gpio_output(mcu_sdata_gpio, Array[i][j]);
+				udelay(3);
+				set_gpio_output(mcu_sclk_gpio, 0x0);
+				if (j > 62) {
+					udelay(2000);
+				} else {
+					udelay(3);
+				}
+				set_gpio_output(mcu_sclk_gpio, 0x1);
+				udelay(3);
+			}
+		}	
+	}
+	
+	mdelay(10);
+	set_gpio_output(mcu_bi_gpio, 0x0);
+	set_gpio_output(mcu_resb_gpio, 0x0);
+	udelay(2000);
+	set_gpio_input(mcu_resb_gpio);
+	
+	printk(KERN_ALERT "[mcu_write_program] Writing Program ROM finish...\n");
+}
+
+int mcu_data_check(int bit_8_num, long mcu_header, int checksum)
+{
+	unsigned int r_mode = 1;
+	unsigned int m_mode = 0;
+	unsigned int s_mode = 1;
+
+	int i = 0, j = 0, mcu_sclk_gpio, mcu_resb_gpio, mcu_sdata_gpio, mcu_bi_gpio, entry_flag;
+	int return_num = 0;
+	long check_value = 0;
+	check_value += mcu_header;
+
+	int mcu_addr[bit_8_num][9];
+	int sum;
+	for (i=0; i<bit_8_num; i++) {
+		sum = i;
+		do {
+			mcu_addr[i][j] = sum % 2;
+			sum = sum/2;
+			j++;
+		} while (j % 9 != 0);
+		j=0;
+	}
+
+	mcu_sclk_gpio = MCU_SCLK_REG_OFFSET;
+	mcu_resb_gpio = MCU_RESB_REG_OFFSET;
+	mcu_sdata_gpio = MCU_SDATA_REG_OFFSET;
+	mcu_bi_gpio = MCU_BI_REG_OFFSET;
+	
+	entry_flag = do_mcu_program_entry(r_mode, m_mode, s_mode);
+	return_num = entry_flag;
+
+	if (entry_flag == 0) {
+		for (i=0; i<bit_8_num; i++) {
+			// send start bit
+			set_gpio_output(mcu_sclk_gpio, 0x1);
+			set_gpio_output(mcu_sdata_gpio, 0x1);
+			udelay(3);
+			set_gpio_output(mcu_sclk_gpio, 0x0);
+			udelay(3);
+			set_gpio_output(mcu_sclk_gpio, 0x1);
+			udelay(3);
+
+			// send Op code
+			set_gpio_output(mcu_sclk_gpio, 0x1);
+			set_gpio_output(mcu_sdata_gpio, 0x1);
+			udelay(3);
+			set_gpio_output(mcu_sclk_gpio, 0x0);
+			udelay(3);
+			set_gpio_output(mcu_sclk_gpio, 0x1);
+			udelay(3);
+
+			set_gpio_output(mcu_sclk_gpio, 0x1);
+			set_gpio_output(mcu_sdata_gpio, 0x0);
+			udelay(3);
+			set_gpio_output(mcu_sclk_gpio, 0x0);
+			udelay(3);
+			set_gpio_output(mcu_sclk_gpio, 0x1);
+			udelay(3);
+
+			// send 9 bits address
+			for (j=8; j>=0; j--) {
+				set_gpio_output(mcu_sclk_gpio, 0x1);
+				set_gpio_output(mcu_sdata_gpio, mcu_addr[i][j]);
+				udelay(3);
+				set_gpio_output(mcu_sclk_gpio, 0x0);
+				udelay(3);
+				set_gpio_output(mcu_sclk_gpio, 0x1);
+				udelay(3);
+			}
+
+			// receive 8 bits data
+			set_gpio_input(mcu_sdata_gpio);
+			for (j=7; j>=0; j--) {
+				set_gpio_output(mcu_sclk_gpio, 0x1);
+				udelay(5);
+				set_gpio_output(mcu_sclk_gpio, 0x0);
+				check_value += (1 << (j % 8)) * ((readl(GPIO_DATA_IN(mcu_sdata_gpio)) & 0x1 << GPIO_BIT_SET_OFFSET(mcu_sdata_gpio)) ? 0x1 : 0x0);;
+				udelay(5);
+				set_gpio_output(mcu_sclk_gpio, 0x1);
+				udelay(5);
+			}
+
+			// x
+			set_gpio_output(mcu_sclk_gpio, 0x1);
+			udelay(3);
+			set_gpio_output(mcu_sclk_gpio, 0x0);
+			udelay(3);
+			set_gpio_output(mcu_sclk_gpio, 0x1);
+			udelay(3);
+
+			// x
+			set_gpio_output(mcu_sclk_gpio, 0x1);
+			udelay(3);
+			set_gpio_output(mcu_sclk_gpio, 0x0);
+			udelay(3);
+			set_gpio_output(mcu_sclk_gpio, 0x1);
+			udelay(3);
+		}
+
+		if ((check_value + checksum) % 256 == 0) {
+			printk(KERN_ALERT "[mcu_data_check] Verify Data ROM CheckSum is OK...\n");
+		} else {
+			printk(KERN_ERR "[mcu_data_check] Writing Data ROM unsuccessfully(check_value:%ld, checksum:%ld, mcu_header:%ld)...\n", check_value, checksum, mcu_header);
+			return_num = -1;
+		}
+	}
+										
+	mdelay(10);
+	set_gpio_output(mcu_bi_gpio, 0x0);
+	set_gpio_output(mcu_resb_gpio, 0x0);
+	udelay(2000);
+	set_gpio_input(mcu_resb_gpio);
+	
+	return return_num;
+}
+
+void mcu_write_data(int **Array, int bit_8_num)
+{
+	unsigned int r_mode = 1;
+	unsigned int m_mode = 0;
+	unsigned int s_mode = 1;
+
+	int i = 0, j = 0, mcu_sclk_gpio, mcu_resb_gpio, mcu_sdata_gpio, mcu_bi_gpio, entry_flag;
+	int mcu_addr[bit_8_num][9];
+	int sum;
+	for (i=0; i<bit_8_num; i++) {
+		sum = i;
+		do {
+			mcu_addr[i][j] = sum % 2;
+			sum = sum/2;
+			j++;
+		} while (j % 9 != 0);
+		j=0;
+	}
+
+	mcu_sclk_gpio = MCU_SCLK_REG_OFFSET;
+	mcu_resb_gpio = MCU_RESB_REG_OFFSET;
+	mcu_sdata_gpio = MCU_SDATA_REG_OFFSET;
+	mcu_bi_gpio = MCU_BI_REG_OFFSET;
+										
+	entry_flag = do_mcu_program_entry(r_mode, m_mode, s_mode);
+
+	if (entry_flag == 0) {
+		for (i=0; i<bit_8_num; i++) {
+			// send start bit
+			set_gpio_output(mcu_sclk_gpio, 0x1);
+			set_gpio_output(mcu_sdata_gpio, 0x1);
+			udelay(3);
+			set_gpio_output(mcu_sclk_gpio, 0x0);
+			udelay(3);
+			set_gpio_output(mcu_sclk_gpio, 0x1);
+			udelay(3);
+
+			// send Op code
+			set_gpio_output(mcu_sclk_gpio, 0x1);
+			set_gpio_output(mcu_sdata_gpio, 0x0);
+		    udelay(3);
+			set_gpio_output(mcu_sclk_gpio, 0x0);
+			udelay(3);
+			set_gpio_output(mcu_sclk_gpio, 0x1);
+			udelay(3);
+
+			set_gpio_output(mcu_sclk_gpio, 0x1);
+			set_gpio_output(mcu_sdata_gpio, 0x1);
+			udelay(3);
+			set_gpio_output(mcu_sclk_gpio, 0x0);
+			udelay(3);
+			set_gpio_output(mcu_sclk_gpio, 0x1);
+			udelay(3);
+
+			// send 9 bits address
+			for (j=8; j>=0; j--) {
+				set_gpio_output(mcu_sclk_gpio, 0x1);
+				set_gpio_output(mcu_sdata_gpio, mcu_addr[i][j]);
+				udelay(3);
+				set_gpio_output(mcu_sclk_gpio, 0x0);
+				udelay(3);
+				set_gpio_output(mcu_sclk_gpio, 0x1);
+				udelay(3);
+			}
+
+			// send 8 bits data
+			for (j=7; j>=0; j--) {
+				set_gpio_output(mcu_sclk_gpio, 0x1);
+				set_gpio_output(mcu_sdata_gpio, Array[i][j]);
+				udelay(3);
+				set_gpio_output(mcu_sclk_gpio, 0x0);
+				udelay(3);
+				set_gpio_output(mcu_sclk_gpio, 0x1);
+				udelay(3);
+			}
+
+			// x
+			set_gpio_output(mcu_sclk_gpio, 0x1);
+			udelay(3);
+			set_gpio_output(mcu_sclk_gpio, 0x0);
+			udelay(1000);
+			set_gpio_output(mcu_sclk_gpio, 0x1);
+			udelay(3);
+
+			//waiting for R=1
+			set_gpio_output(mcu_sclk_gpio, 0x1);
+			udelay(3);
+			set_gpio_output(mcu_sclk_gpio, 0x0);
+			set_gpio_input(mcu_sdata_gpio);
+			int num = 0;
+			do {
+				num++;
+				udelay(1000);
+			} while (!(readl(GPIO_DATA_IN(mcu_sdata_gpio)) & 0x1 << GPIO_BIT_SET_OFFSET(mcu_sdata_gpio)) && num < 1000);
+			
+			set_gpio_output(mcu_sclk_gpio, 0x1);
+			udelay(3);
+
+			if (num >= 1000) {
+				printk(KERN_ERR "[mcu_write_data] MCU Burning Fail!!! Program/Erase is busy!!!\n");
+				break;
+			}
+		}
+	}
+	
+	mdelay(10);
+	set_gpio_output(mcu_bi_gpio, 0x0);
+	set_gpio_output(mcu_resb_gpio, 0x0);
+	udelay(2000);
+	set_gpio_input(mcu_resb_gpio);
+	
+	printk(KERN_ALERT "[mcu_write_data] Writing Data ROM finish...\n");
+}
+
+int mcu_option_check(int bit_64_num, int mcu_header, int checksum, int mcu_tail)
+{
+	unsigned int r_mode = 0;
+	unsigned int m_mode = 0;
+	unsigned int s_mode = 1;
+
+	int i, j, mcu_sclk_gpio, mcu_resb_gpio, mcu_sdata_gpio, mcu_bi_gpio, entry_flag;
+	int return_num = 0;
+	long check_value = 0;
+	check_value += mcu_header;
+	check_value += mcu_tail;
+
+	int Array_CHK[bit_64_num];
+
+	mcu_sclk_gpio = MCU_SCLK_REG_OFFSET;
+	mcu_resb_gpio = MCU_RESB_REG_OFFSET;
+	mcu_sdata_gpio = MCU_SDATA_REG_OFFSET;
+	mcu_bi_gpio = MCU_BI_REG_OFFSET;
+																	
+	entry_flag = do_mcu_program_entry(r_mode, m_mode, s_mode);
+	return_num = entry_flag;	
+
+	if (entry_flag == 0) {
+		// send 20 bits address
+		for (i=0; i<20; i++) {
+			set_gpio_output(mcu_sclk_gpio, 0x1);
+			set_gpio_output(mcu_sdata_gpio, 0x0);
+			udelay(3);
+			set_gpio_output(mcu_sclk_gpio, 0x0);
+			udelay(3);
+			set_gpio_output(mcu_sclk_gpio, 0x1);
+			udelay(3);
+		}
+
+		udelay(3);
+
+		//receive 64 bits data
+		set_gpio_input(mcu_sdata_gpio);
+		/* skip the last 32 bytes when dumpping mcu */
+		for (i=0; i< bit_64_num - 4; i++) {
+			for (j=0; j<64; j++) {
+				set_gpio_output(mcu_sclk_gpio, 0x1);
+				udelay(5);
+				set_gpio_output(mcu_sclk_gpio, 0x0);
+				check_value += (1 << (j % 8)) * ((readl(GPIO_DATA_IN(mcu_sdata_gpio)) & 0x1 << GPIO_BIT_SET_OFFSET(mcu_sdata_gpio)) ? 0x1 : 0x0);
+				udelay(5);
+				set_gpio_output(mcu_sclk_gpio, 0x1);
+				udelay(5);
+			}
+			Array_CHK[i] = check_value;
+		}	
+		
+		if ((check_value + checksum) % 256 == 0) {
+			printk(KERN_ALERT "[mcu_option_check] Verify Option ROM CheckSum is OK...\n");
+		} else {
+			printk(KERN_ERR "[mcu_option_check] Writing Option ROM unsuccessfully(check_value:%ld, checksum:%ld, mcu_header:%ld, mcu_tail:%ld)...\n", check_value, checksum, mcu_header, mcu_tail);
+			
+			for (i=0; i<bit_64_num; i++) {
+				printk("%d\n",Array_CHK[i]);
+			}
+			
+			return_num = -1;
+		}
+	}
+	
+	mdelay(10);
+	set_gpio_output(mcu_bi_gpio, 0x0);
+	set_gpio_output(mcu_resb_gpio, 0x0);
+	udelay(2000);
+	set_gpio_input(mcu_resb_gpio);
+
+	return return_num;	
+}
+
+void mcu_write_option(int **Option, int bit_64_num)
+{
+	unsigned int r_mode = 0;
+	unsigned int m_mode = 2;
+	unsigned int s_mode = 1;
+
+	int i, j, mcu_sclk_gpio, mcu_resb_gpio, mcu_sdata_gpio, mcu_bi_gpio, entry_flag;
+
+	mcu_sclk_gpio = MCU_SCLK_REG_OFFSET;
+	mcu_resb_gpio = MCU_RESB_REG_OFFSET;
+	mcu_sdata_gpio = MCU_SDATA_REG_OFFSET;
+	mcu_bi_gpio = MCU_BI_REG_OFFSET;
+	
+	entry_flag = do_mcu_program_entry(r_mode, m_mode, s_mode);
+
+	if (entry_flag == 0) {
+		// send 20 bits address
+		for (i=0; i<20; i++) {
+			set_gpio_output(mcu_sclk_gpio, 0x1);
+			set_gpio_output(mcu_sdata_gpio, 0x0);
+			udelay(3);
+			set_gpio_output(mcu_sclk_gpio, 0x0);
+			udelay(3);
+			set_gpio_output(mcu_sclk_gpio, 0x1);
+			udelay(3);
+		}
+
+		udelay(3);
+
+		//send 64 bits data
+		for (i=0; i<bit_64_num; i++) {
+			for (j=0; j<64; j++) {
+				set_gpio_output(mcu_sclk_gpio, 0x1);
+				set_gpio_output(mcu_sdata_gpio, Option[i][j]);
+				udelay(3);
+				set_gpio_output(mcu_sclk_gpio, 0x0);
+				if (j > 62) {
+					udelay(2000);
+				} else {
+					udelay(3);
+				}
+				set_gpio_output(mcu_sclk_gpio, 0x1);
+				udelay(3);
+			}
+		}
+	}
+	
+	mdelay(10);
+	set_gpio_output(mcu_bi_gpio, 0x0);
+	set_gpio_output(mcu_resb_gpio, 0x0);
+	udelay(2000);
+	set_gpio_input(mcu_resb_gpio);
+	
+	printk(KERN_ALERT "[mcu_write_option] Writing Option ROM finish...\n");
+}
+
+void turn_on_led(unsigned int id, unsigned int color)
+{
+	int i;
+	unsigned long reg;
+	
+	/* System does not have LED_SET[id] */
+	if (led_set[id].presence == 0) return;
+	
+	for (i = 0; i < LED_COLOR_TOTAL; i++) {
+		if ((color & led_set[id].led[i].color) && (led_set[id].led[i].presence != 0)) {
+			led_set[id].led[i].state = LED_ON;
+			reg = GPIO_DATA_OUT(led_set[id].led[i].gpio);
+			writel(readl(reg) | (0x1 << GPIO_BIT_SET_OFFSET(led_set[id].led[i].gpio)), reg);
+		}
+	}
+}
+
+void turn_off_led(unsigned int id)
+{
+	int i;
+	unsigned long reg;
+	
+	/* System does not have LED_SET[id] */
+	if (led_set[id].presence == 0) return;
+	
+	for (i = 0; i < LED_COLOR_TOTAL; i++) {
+		if (led_set[id].led[i].presence != 0) {
+			led_set[id].led[i].state = LED_OFF;
+			reg = GPIO_DATA_OUT(led_set[id].led[i].gpio);
+			writel(readl(reg) & ~(0x1 << GPIO_BIT_SET_OFFSET(led_set[id].led[i].gpio)), reg);
+		}
+	}
+}
+
+void turn_off_led_all(unsigned int id)
+{
+	int i;
+	unsigned long reg;
+	
+	/* System does not have LED_SET[id] */
+	if (led_set[id].presence == 0) return;
+		    
+	for (i = 0; i < LED_COLOR_TOTAL; i++) {
+		if (led_set[id].led[i].presence == 0) continue;
+		
+		led_set[id].led[i].state = LED_OFF;
+		reg = GPIO_DATA_OUT(led_set[id].led[i].gpio);
+		writel(readl(reg) & ~(0x1 << GPIO_BIT_SET_OFFSET(led_set[id].led[i].gpio)), reg);
+	}
+}
+void led_all_red_on()
+{
+	int i = 0;
+
+	for (i = 0; i < LED_TOTAL; i++)
+	{
+		turn_off_led(i);
+		turn_on_led(i, RED);
+	}
+}
+
+void mcu_burning(struct _mcu_burn *mcu_data)
+{
+	char *path = mcu_data->path;
+	//char *path = "/home/norman/mcu_file/HT66F30_Addr.mtp";
+				
+	char buf[2]; 
+	struct file *fp; 
+	int ret;  
+	initKernelEnv(); 
+	
+	fp=openFile(path,O_RDONLY, 0);
+
+	if(IS_ERR(fp)) {
+		printk(KERN_ERR "[ERR] Cannot open the file path:%s\n", path);
+		led_all_red_on();
+		return;
+	}
+	
+	if (fp!=NULL) 
+	{ 
+		memset(buf,0,sizeof(buf));
+		int c, num=0, record_num=0, i;
+		int record_flag = 0;
+		int allocate_flag = 0;
+		int record_type = 0;
+		int length = 0;
+		long checksum = 0;
+		int sum = 0, x = 0, bit_64_num = 0, opt_64_num = 0, opt_checksum = 0, opt_header = 0, opt_tail = 0;
+		int **Array, **Option;
+		int mcu_header = 0;
+		int mcu_check = 0;
+		int verify_format_ok = 0;
+
+		while ((ret = readFile(fp,buf,1))>0) {
+			c = buf[0];
+			if (c != 101 && !record_flag) continue;
+			record_flag = 1;
+			num++;
+			checksum += c;
+			if (length == 1) {
+				verify_format_ok = 1;
+				if (checksum % 256 == 0) {
+					printk("[mcu_burning] checksum: %X\n", c);
+					if (record_type == 0) {
+						/* power resume always on */
+						PREPARE_WORK(&mcu_power_resume, power_resume_always_on_func);
+						queue_work(mcu_workqueue,&mcu_power_resume);
+						
+						ssleep(1);
+						
+						//ERASE MCU Code, Option and Data
+						mcu_erase_all();
+						
+						// write mcu program
+						mcu_write_program(Array, bit_64_num);
+						mcu_check = mcu_program_check(bit_64_num, mcu_header, c);
+					} else if (record_type == 1) {
+						memcpy(Option, Array, sizeof(Option));
+						opt_64_num = bit_64_num;
+						opt_header = mcu_header;
+						opt_checksum = c;
+					} else if (record_type == 2) {
+						/* mcu data rom needn't to burn. so mark it. */
+						// write mcu data
+						//mcu_write_data(Array, record_num);
+						//mcu_check = mcu_data_check( record_num, mcu_header, c);
+
+						if (mcu_check == 0) {
+							//write mcu option
+							mcu_write_option(Option, opt_64_num);
+							mcu_check = mcu_option_check(opt_64_num, opt_header, opt_checksum, opt_tail);
+						}
+
+						kfree(Option);
+						opt_64_num = 0;
+						opt_checksum = 0;
+						opt_header = 0;
+						opt_tail = 0;
+					}
+					
+					length = 0;
+					record_flag = 0;
+					checksum = 0;
+					num = 0;
+					record_num=0;
+					record_type++;
+					kfree(Array);
+					allocate_flag = 0;
+					bit_64_num = 0;
+					mcu_header = 0;
+					if (mcu_check == -1 || record_type == 2) break;
+				} else {
+					mcu_check = -1;
+					printk(KERN_ERR "[ERR] checksum error(%d)!!!\n", checksum);
+					break;
+				}
+			}
+
+			if (num == 2) {
+				length += c;
+			} else if (num == 3) {
+				length += 256 * c;
+			} else if (num > 3 && length > 1) {
+				if (num == 7) mcu_header = checksum;
+				if (num > 7) {
+					if (!allocate_flag) {
+						allocate_flag = 1;
+						int *pData;
+						int m, n;
+						if (record_type < 2) {
+							m = length / 8 + 1;
+							n = 64;
+						} else {
+							m = length;
+							n = 8;
+						}
+						Array = (int **)kmalloc(m*sizeof(int *)+m*n*sizeof(int), GFP_KERNEL);
+						if (record_type == 1) 
+							Option = (int **)kmalloc(m*sizeof(int *)+m*n*sizeof(int), GFP_KERNEL);
+						for (i = 0, pData = (int *)(Array+m); i < m; i++, pData += n) {
+							Array[i]=pData;
+							if (record_type == 1)
+								Option[i]=pData;
+						}
+					}
+					record_num++;
+					if (record_type < 2) {
+						/* collect option tail value for option checking */
+						if (record_type == 1) {
+							if (bit_64_num >= 5)
+								opt_tail += c;
+						}
+
+						if (record_num % 2 != 0) {
+							sum += c;
+						} else {
+							sum += 256 * c;
+							do {
+								Array[bit_64_num][x] = sum % 2;
+								sum = sum/2;
+								x++;
+							} while (x % 16 != 0);
+							sum = 0;
+							/* collect 64 bits data */
+							if (x == 64){
+								//for (i=0 ;i<x ; i++) {
+								//		printk("%d", Array[bit_64_num][i]);
+								//}
+								//printk("\n");
+								bit_64_num++;
+								x = 0;
+							}
+						}
+					} else {
+						sum = c;
+						do {
+							Array[record_num-1][x] = sum % 2;
+							sum = sum / 2;
+							x++;
+						} while (x % 8 != 0);
+						/* collect 8 bits data */
+						if (x == 8){
+							//int i;
+							//for (i=0 ;i<x ; i++) {
+							//		printk("%d", Array[record_num-1][i]);
+							//}
+							//printk("\n");
+							x = 0;
+						}
+					}
+				}
+				length--;
+			}
+		}
+																																																	
+		// No mcu data and writing mcu program rom successfully
+		if (record_type == 2 && mcu_check == 0) {
+			// write mcu option
+			mcu_write_option( Option, opt_64_num);
+			mcu_check = mcu_option_check( opt_64_num, opt_header, opt_checksum, opt_tail);
+			kfree(Option);
+			opt_64_num = 0;
+		}
+
+		if (!verify_format_ok) {
+			printk(KERN_ERR "[ERR] The file format error(%s)!!!\n", path);
+		}
+
+		printk(KERN_ALERT "MCU burning finish...\n");
+		
+		/* mcu burning successfully */
+		if (verify_format_ok && mcu_check == 0) {
+			/* assign a lock file to user space for mcu upgrade key */
+			PREPARE_WORK(&mcu_assign_lock, mcu_assign_lock_func);
+			queue_work(mcu_workqueue,&mcu_assign_lock);
+
+			ssleep(1);
+
+			/* Run a MCU Reset */
+			PREPARE_WORK(&mcu_reset_control, mcu_reset_func);
+			queue_work(mcu_workqueue,&mcu_reset_control);
+		} else {
+			/* Turn on all red led for error state*/
+			led_all_red_on();
+		}
+	}
+	
+	closeFile(fp);											 
+	set_fs(oldfs);
+}
+
+void mcu_program(struct _mcu_ioctl *mcu_data)
+{
+	unsigned int r_mode = mcu_data->r_mode;
+	unsigned int m_mode = mcu_data->m_mode;
+	unsigned int s_mode = mcu_data->s_mode;
+						
+	unsigned int data[26] = {0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 1, 1, 0, 0, 0, 0};
+	unsigned int mode_sel[8][4] = {{0,0,0,0},{0,0,0,1},{0,1,1,0},{0,1,1,1},{1,0,0,0},{1,0,0,1},{1,1,0,0},{1,1,1,0}};
+	int i, mcu_sclk_gpio, mcu_resb_gpio, mcu_sdata_gpio, mcu_bi_gpio;
+	int check_ack[8] = {1,1,r_mode,mode_sel[m_mode][0],mode_sel[m_mode][1],mode_sel[m_mode][2],mode_sel[m_mode][3],s_mode};
+	int read_ack[8];
+											
+	mcu_sclk_gpio = MCU_SCLK_REG_OFFSET;
+	mcu_resb_gpio = MCU_RESB_REG_OFFSET;
+	mcu_sdata_gpio = MCU_SDATA_REG_OFFSET;
+	mcu_bi_gpio = MCU_BI_REG_OFFSET;
+													
+	set_gpio_output(mcu_resb_gpio, 0x0);
+	set_gpio_output(mcu_sclk_gpio, 0x0);
+	set_gpio_output(mcu_bi_gpio, 0x1);
+																	
+	mdelay(10);																	
+	set_gpio_output(mcu_sclk_gpio, 0x1);
+	mdelay(10);
+	set_gpio_output(mcu_resb_gpio, 0x1);
+	mdelay(10);
+	set_gpio_output(mcu_resb_gpio, 0x0);
+																							
+	for (i=0; i<26; i++) {
+		set_gpio_output(mcu_sclk_gpio, 0x1);
+		set_gpio_output(mcu_sdata_gpio, data[i]);
+		udelay(3);
+		set_gpio_output(mcu_sclk_gpio, 0x0);
+		udelay(3);
+		set_gpio_output(mcu_sclk_gpio, 0x1);
+		udelay(3);			
+	}
+																								
+	set_gpio_output(mcu_sclk_gpio, 0x1);
+	set_gpio_output(mcu_sdata_gpio, r_mode);
+	udelay(3);
+	set_gpio_output(mcu_sclk_gpio, 0x0);
+	udelay(3);	
+	set_gpio_output(mcu_sclk_gpio, 0x1);
+	udelay(3);
+
+	for (i=0; i<4; i++) {
+		set_gpio_output(mcu_sclk_gpio, 0x1);
+		set_gpio_output(mcu_sdata_gpio, mode_sel[m_mode][i]);
+		udelay(3);
+		set_gpio_output(mcu_sclk_gpio, 0x0);
+		udelay(3);
+		set_gpio_output(mcu_sclk_gpio, 0x1);
+		udelay(3);
+	}
+																																
+	set_gpio_output(mcu_sclk_gpio, 0x1);
+	set_gpio_output(mcu_sdata_gpio, s_mode);
+	udelay(3);
+	set_gpio_output(mcu_sclk_gpio, 0x0);
+	udelay(3);
+	set_gpio_output(mcu_sclk_gpio, 0x1);
+	udelay(3);
+
+	set_gpio_input(mcu_sdata_gpio);
+	udelay(100);
+																																									
+	for (i=0; i<8; i++) {
+		set_gpio_output(mcu_sclk_gpio, 0x1);
+		udelay(5);
+		set_gpio_output(mcu_sclk_gpio, 0x0);
+		read_ack[i] = (readl(GPIO_DATA_IN(mcu_sdata_gpio)) & 0x1 << GPIO_BIT_SET_OFFSET(mcu_sdata_gpio)) ? 0x1 : 0x0;
+		udelay(5);
+		set_gpio_output(mcu_sclk_gpio, 0x1);
+		udelay(5);
+	}
+
+	set_gpio_output(mcu_resb_gpio, 0x1);
+
+	// check read ack
+	int check_fail_flag = 0;
+	for (i=0; i<8; i++) {
+		if (read_ack[i] != check_ack[i]) {
+			check_fail_flag = 1;
+			break;
+		}
+	}
+																																														
+	if (check_fail_flag) {
+		printk(KERN_ERR "Cannot Enter Programming Mode...");
+		printk("The reading ACK is (%d%d%d%d%d%d%d%d)...\n", read_ack[0],read_ack[1],read_ack[2],read_ack[3],read_ack[4],read_ack[5],read_ack[6],read_ack[7]);
+		printk("The checking ACK is (%d%d%d%d%d%d%d%d)...\n", check_ack[0],check_ack[1],check_ack[2],check_ack[3],check_ack[4],check_ack[5],check_ack[6],check_ack[7]);
+		return;
+	} else {
+		printk(KERN_ALERT "Entering Programming Mode Successfully...\n");
+	}
+																																															
+	// for 1024 dummy clock
+	for (i=0; i<1024; i++) {
+		set_gpio_output(mcu_sclk_gpio, 0x1);
+		udelay(3);
+		set_gpio_output(mcu_sclk_gpio, 0x0);
+		udelay(3);
+		set_gpio_output(mcu_sclk_gpio, 0x1);
+		udelay(3);
+	}
+	
+	mdelay(10);
+	set_gpio_output(mcu_bi_gpio, 0x0);
+	set_gpio_output(mcu_resb_gpio, 0x0);
+	udelay(2000);
+	set_gpio_input(mcu_resb_gpio);
+
+	printk(KERN_ALERT "MCU Testing finish...\n");
+}
+
+///////////////////////////////////////////////////////////////////////////////////
+
 
 /* Initialize HTP pin */
 static void init_htp_pin_gpio(void)
@@ -793,16 +1984,24 @@ int set_buzzer(unsigned long bz_data)
 	
 	printk(KERN_ERR"bz time = %x\n", time);
 	printk(KERN_ERR"bz status = %x\n", status);
+	printk(KERN_ERR"bz_timer_status = %x\n", bz_timer_status);
 	
 	// Turn off bz first
 	if(bz_timer_status == TIMER_RUNNING)
 	{
+		if(bz_type == RING_FOREVER && status == BUZ_ON)
+		{
+			//printk(KERN_ERR"Buzzer Forever Already On \n");
+			return;
+		}
 		bz_timer_status = TIMER_SLEEPING;
 		
 		/* Disable buzzer first */
 //		writel(readl(COMCERTO_PWM5_LOW_DUTY_CYCLE) & ~(GPIO_PIN_12), COMCERTO_PWM5_LOW_DUTY_CYCLE);
 		writel(readl(COMCERTO_PWM5_LOW_DUTY_CYCLE) & ~((GPIO_PIN_12)|(GPIO_PIN_13)|(GPIO_PIN_15)), COMCERTO_PWM5_LOW_DUTY_CYCLE);
-		del_timer(&bz_timer);
+		del_timer_sync(&bz_timer);
+		bz_type = RING_BRIEF;
+		//printk(KERN_ERR"Closed Buzzer, bz_type = %d\n", bz_type);
 	}
 	
 	if(status == BUZ_ON || status == BUZ_FOREVER)
@@ -815,57 +2014,10 @@ int set_buzzer(unsigned long bz_data)
 		printk(KERN_ERR"start buzzer\n");
 		bz_timer.function = buzzer_timer_func;
 		mod_timer(&bz_timer, jiffies + BZ_TIMER_PERIOD);
-	}
-}
-
-void turn_on_led(unsigned int id, unsigned int color)
-{
-	int i;
-	unsigned long reg;
-	
-	/* System does not have LED_SET[id] */
-	if (led_set[id].presence == 0) return;
-	
-	for (i = 0; i < LED_COLOR_TOTAL; i++) {
-		if ((color & led_set[id].led[i].color) && (led_set[id].led[i].presence != 0)) {
-			led_set[id].led[i].state = LED_ON;
-			reg = GPIO_DATA_OUT(led_set[id].led[i].gpio);
-			writel(readl(reg) | (0x1 << GPIO_BIT_SET_OFFSET(led_set[id].led[i].gpio)), reg);
+		if(status == BUZ_FOREVER){
+			bz_type = RING_FOREVER;
+			//printk(KERN_ERR"Buzzer Forever, bz_type = %d\n", bz_type);
 		}
-	}
-}
-
-void turn_off_led(unsigned int id, unsigned int color)
-{
-	int i;
-	unsigned long reg;
-	
-	/* System does not have LED_SET[id] */
-	if (led_set[id].presence == 0) return;
-	
-	for (i = 0; i < LED_COLOR_TOTAL; i++) {
-		if ((color & led_set[id].led[i].color) && (led_set[id].led[i].presence != 0)) {
-			led_set[id].led[i].state = LED_OFF;
-			reg = GPIO_DATA_OUT(led_set[id].led[i].gpio);
-			writel(readl(reg) & ~(0x1 << GPIO_BIT_SET_OFFSET(led_set[id].led[i].gpio)), reg);
-		}
-	}
-}
-
-void turn_off_led_all(unsigned int id)
-{
-	int i;
-	unsigned long reg;
-	
-	/* System does not have LED_SET[id] */
-	if (led_set[id].presence == 0) return;
-		    
-	for (i = 0; i < LED_COLOR_TOTAL; i++) {
-		if (led_set[id].led[i].presence == 0) continue;
-		
-		led_set[id].led[i].state = LED_OFF;
-		reg = GPIO_DATA_OUT(led_set[id].led[i].gpio);
-		writel(readl(reg) & ~(0x1 << GPIO_BIT_SET_OFFSET(led_set[id].led[i].gpio)), reg);
 	}
 }
 
@@ -1180,6 +2332,9 @@ static int gpio_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 {
 	unsigned long ret = 0;
 	struct _hdd_ioctl hdd_data;
+	struct _mcu_ioctl mcu_data;
+	struct _mcu_burn mcu_data2;
+
 
 	/* implement a lock scheme by myself */
 	/* get the inode ==> file->f_dentry->d_inode */
@@ -1209,6 +2364,12 @@ static int gpio_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 			copy_from_user(&hdd_data, (void __user *) arg, sizeof(struct _hdd_ioctl));
 			hdd_power_set(&hdd_data);
 			break;
+		case NAS_IOC_MCU_BURNING:
+			is_mcu_burning = 1;
+			copy_from_user(&mcu_data2, (void __user *) arg, sizeof(struct _mcu_burn));
+			mcu_burning(&mcu_data2);
+			break;
+
 		default :
 			return -ENOTTY;
 	}
@@ -1506,6 +2667,8 @@ static int __init gpio_init(void)
 	set_init_timer();
 
 	btn_workqueue = create_workqueue("button controller");
+
+	mcu_workqueue = create_workqueue("mcu controller");
 
 #if 0	
 	result = request_irq(POWER_BUTTON_IRQ, gpio_interrupt, IRQF_DISABLED,"Button Event", NULL);
