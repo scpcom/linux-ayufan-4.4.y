@@ -80,14 +80,7 @@ config INTEL_IOP_ADMA
 	help
 	  Enable support for the Intel(R) IOP Series RAID engines.
 
-config DW_DMAC
-	tristate "Synopsys DesignWare AHB DMA support"
-	depends on HAVE_CLK
-	select DMA_ENGINE
-	default y if CPU_AT32AP7000
-	help
-	  Support the Synopsys DesignWare AHB DMA controller.  This
-	  can be integrated in chips such as the Atmel AT32ap7000.
+source "drivers/dma/dw/Kconfig"
 
 config AT_HDMAC
 	tristate "Atmel AHB DMA support"
@@ -121,6 +114,22 @@ config MV_XOR
 	select ASYNC_TX_ENABLE_CHANNEL_SWITCH
 	---help---
 	  Enable support for the Marvell XOR engine.
+
+config COMCERTO_XOR
+	tristate "Mindspeed Comcerto 2000 XOR engine support"
+	depends on ARCH_M86XXX
+	select DMA_ENGINE
+	select ASYNC_TX_ENABLE_CHANNEL_SWITCH
+	---help---
+	  Enable support for the Mindspeed XOR engine.
+
+config COMCERTO_DMA_BASIC
+	tristate "Mindspeed Comcerto 2000 MDMA engine basic support"
+	depends on ARCH_M86XXX
+	select DMA_ENGINE
+	select ASYNC_TX_ENABLE_CHANNEL_SWITCH
+	---help---
+	  Enable support for the Mindspeed mdma engine.
 
 config MX3_IPU
 	bool "MX3x Image Processing Unit support"
@@ -271,6 +280,15 @@ config ASYNC_TX_DMA
 	  MD_RAID456 say Y.
 
 	  If unsure, say N.
+
+config RAID_ZERO_COPY
+        bool "Optimized DMA/XOR offload: reduce raid5 memcpy which offloaded for dma"
+        depends on ASYNC_TX_DMA
+        help
+          This allows the async_tx api try to reduce raid5 memcpy operations for
+          dma. If you have dma device to support memcpy offloading, you can set
+          it as Y, else N.
+
 
 config DMATEST
 	tristate "DMA Test client"

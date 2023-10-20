@@ -291,7 +291,11 @@ static void __init arm_bootmem_free(unsigned long min, unsigned long max_low,
 	if (arm_dma_zone_size) {
 		arm_adjust_dma_zone(zone_size, zhole_size,
 			arm_dma_zone_size >> PAGE_SHIFT);
+#ifdef CONFIG_COMCERTO_ZONE_DMA_NCNB
+		arm_dma_limit = 0xffffffff;
+#else
 		arm_dma_limit = PHYS_OFFSET + arm_dma_zone_size - 1;
+#endif
 	} else
 		arm_dma_limit = 0xffffffff;
 #endif
@@ -426,9 +430,15 @@ static inline int free_area(unsigned long pfn, unsigned long end, char *s)
 
 	for (; pfn < end; pfn++) {
 		struct page *page = pfn_to_page(pfn);
+#if defined(CONFIG_L2X0_INSTRUCTION_ONLY)
+		unsigned long phys = page_to_phys(page);
+#endif
 		ClearPageReserved(page);
 		init_page_count(page);
 		__free_page(page);
+#if defined(CONFIG_L2X0_INSTRUCTION_ONLY)
+		outer_flush_range(phys, phys + PAGE_SIZE);
+#endif
 		pages++;
 	}
 

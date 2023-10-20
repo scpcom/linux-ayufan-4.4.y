@@ -1739,6 +1739,8 @@ static void ahci_port_intr(struct ata_port *ap)
 	}
 }
 
+/*
+*/
 irqreturn_t ahci_interrupt(int irq, void *dev_instance)
 {
 	struct ata_host *host = dev_instance;
@@ -1800,6 +1802,8 @@ irqreturn_t ahci_interrupt(int irq, void *dev_instance)
 }
 EXPORT_SYMBOL_GPL(ahci_interrupt);
 
+#include <mach/stats.h>
+
 static unsigned int ahci_qc_issue(struct ata_queued_cmd *qc)
 {
 	struct ata_port *ap = qc->ap;
@@ -1822,6 +1826,8 @@ static unsigned int ahci_qc_issue(struct ata_queued_cmd *qc)
 		writel(fbs, port_mmio + PORT_FBS);
 		pp->fbs_last_dev = qc->dev->link->pmp;
 	}
+
+	ahci_stats_start(ap, qc);
 
 	writel(1 << qc->tag, port_mmio + PORT_CMD_ISSUE);
 

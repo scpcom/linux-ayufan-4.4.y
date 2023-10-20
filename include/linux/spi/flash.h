@@ -1,6 +1,8 @@
 #ifndef LINUX_SPI_FLASH_H
 #define LINUX_SPI_FLASH_H
 
+#include <linux/ioport.h>
+
 struct mtd_partition;
 
 /**
@@ -24,6 +26,9 @@ struct flash_platform_data {
 	unsigned int	nr_parts;
 
 	char		*type;
+
+	u32             num_resources;
+	struct resource * resource;
 
 	/* we'll likely add more ... use JEDEC IDs, etc */
 };

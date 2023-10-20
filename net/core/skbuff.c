@@ -218,6 +218,10 @@ struct sk_buff *__alloc_skb(unsigned int size, gfp_t gfp_mask,
 	skb->mac_header = ~0U;
 #endif
 
+#if defined(CONFIG_COMCERTO_CUSTOM_SKB_LAYOUT)
+	skb->mspd_data = NULL;
+	skb->mspd_len = 0;
+#endif
 	/* make sure we initialize shinfo sequentially */
 	shinfo = skb_shinfo(skb);
 	memset(shinfo, 0, offsetof(struct skb_shared_info, dataref));
@@ -243,6 +247,93 @@ nodata:
 	goto out;
 }
 EXPORT_SYMBOL(__alloc_skb);
+
+#if defined(CONFIG_ARCH_COMCERTO)
+/**
+ *	__alloc_skb_header	-	allocate a network buffer
+ *	@size: size to allocate
+ *	@gfp_mask: allocation mask
+ *	@fclone: allocate from fclone cache instead of head cache
+ *		and allocate a cloned (child) skb
+ *
+ *	Allocate a new &sk_buff. The returned buffer has no headroom and a
+ *	tail room of size bytes. The object has a reference count of one.
+ *	The return is the buffer. On a failure the return is %NULL.
+ *
+ *	Buffers may only be allocated from interrupts using a @gfp_mask of
+ *	%GFP_ATOMIC.
+ */
+struct sk_buff *__alloc_skb_header(unsigned int size, void *data, gfp_t gfp_mask,
+			    int fclone, int node)
+{
+	struct kmem_cache *cache;
+	struct skb_shared_info *shinfo;
+	struct sk_buff *skb;
+
+	cache = fclone ? skbuff_fclone_cache : skbuff_head_cache;
+
+	if (size <= SKB_DATA_ALIGN(sizeof(struct skb_shared_info))) {
+		skb = NULL;
+		goto out;
+	}
+
+	/* Get the HEAD */
+	skb = kmem_cache_alloc_node(cache, gfp_mask & ~__GFP_DMA, node);
+	if (!skb)
+		goto out;
+	prefetchw(skb);
+
+	/* kmalloc might give us more room than requested.
+	 * Put skb_shared_info exactly at the end of allocated zone,
+	 * to allow max possible filling before reallocation.
+	 */
+	size = SKB_WITH_OVERHEAD(ksize(data));
+	prefetchw(data + size);
+
+	/*
+	 * Only clear those fields we need to clear, not those that we will
+	 * actually initialise below. Hence, don't put any more fields after
+	 * the tail pointer in struct sk_buff!
+	 */
+	memset(skb, 0, offsetof(struct sk_buff, tail));
+	/* Account for allocated memory : skb + skb->head */
+	skb->truesize = SKB_TRUESIZE(size);
+	atomic_set(&skb->users, 1);
+	skb->head = data;
+	skb->data = data;
+	skb_reset_tail_pointer(skb);
+	skb->end = skb->tail + size;
+#ifdef NET_SKBUFF_DATA_USES_OFFSET
+	skb->mac_header = ~0U;
+#endif
+
+#if defined(CONFIG_COMCERTO_CUSTOM_SKB_LAYOUT)
+	skb->mspd_data = NULL;
+	skb->mspd_len = 0;
+#endif
+
+	/* make sure we initialize shinfo sequentially */
+	shinfo = skb_shinfo(skb);
+	memset(shinfo, 0, offsetof(struct skb_shared_info, dataref));
+	atomic_set(&shinfo->dataref, 1);
+	kmemcheck_annotate_variable(shinfo->destructor_arg);
+
+	if (fclone) {
+		struct sk_buff *child = skb + 1;
+		atomic_t *fclone_ref = (atomic_t *) (child + 1);
+
+		kmemcheck_annotate_bitfield(child, flags1);
+		kmemcheck_annotate_bitfield(child, flags2);
+		skb->fclone = SKB_FCLONE_ORIG;
+		atomic_set(fclone_ref, 1);
+
+		child->fclone = SKB_FCLONE_UNAVAILABLE;
+	}
+out:
+	return skb;
+}
+EXPORT_SYMBOL(__alloc_skb_header);
+#endif
 
 /**
  *	__netdev_alloc_skb - allocate an skbuff for rx on a specific device
@@ -356,6 +447,13 @@ static void skb_release_data(struct sk_buff *skb)
 			skb_drop_fraglist(skb);
 
 		kfree(skb->head);
+
+#if defined(CONFIG_COMCERTO_CUSTOM_SKB_LAYOUT)
+		if (skb->mspd_data) {
+			kfree(skb->mspd_data);
+			skb->mspd_data = NULL;
+		}
+#endif
 	}
 }
 
@@ -497,6 +595,9 @@ void skb_recycle(struct sk_buff *skb)
 {
 	struct skb_shared_info *shinfo;
 
+#if defined(CONFIG_COMCERTO_CUSTOM_SKB_LAYOUT)
+	WARN_ON(skb->mspd_len);
+#endif
 	skb_release_head_state(skb);
 
 	shinfo = skb_shinfo(skb);
@@ -546,6 +647,9 @@ static void __copy_skb_header(struct sk_buff *new, const struct sk_buff *old)
 #ifdef CONFIG_XFRM
 	new->sp			= secpath_get(old->sp);
 #endif
+#if defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD)
+        new->ipsec_offload      = old->ipsec_offload;
+#endif
 	memcpy(new->cb, old->cb, sizeof(old->cb));
 	new->csum		= old->csum;
 	new->local_df		= old->local_df;
@@ -583,6 +687,24 @@ static struct sk_buff *__skb_clone(struct sk_buff *n, struct sk_buff *skb)
 {
 #define C(x) n->x = skb->x
 
+#if defined(CONFIG_COMCERTO_CUSTOM_SKB_LAYOUT)
+	if (skb->mspd_data) {
+		if (skb->mspd_len) {
+			int ofst = skb->len - skb->mspd_len;
+
+			memcpy(skb->data + ofst, skb->mspd_data + skb->mspd_ofst, skb->mspd_len);
+			skb->mspd_len = 0;
+		}
+
+		WARN_ON(skb_shared(skb));
+
+		if (!skb_shared(skb)) {
+			kfree(skb->mspd_data);
+			skb->mspd_data = NULL;
+		}
+	}
+#endif
+
 	n->next = n->prev = NULL;
 	n->sk = NULL;
 	__copy_skb_header(n, skb);
@@ -600,6 +722,13 @@ static struct sk_buff *__skb_clone(struct sk_buff *n, struct sk_buff *skb)
 	C(data);
 	C(truesize);
 	atomic_set(&n->users, 1);
+
+#if defined(CONFIG_COMCERTO_CUSTOM_SKB_LAYOUT)
+	WARN_ON(skb->mspd_data);
+	C(mspd_data);
+	C(mspd_len);
+	C(mspd_ofst);
+#endif
 
 	atomic_inc(&(skb_shinfo(skb)->dataref));
 	skb->cloned = 1;
@@ -777,6 +906,24 @@ struct sk_buff *skb_copy(const struct sk_buff *skb, gfp_t gfp_mask)
 	if (!n)
 		return NULL;
 
+#if defined(CONFIG_COMCERTO_CUSTOM_SKB_LAYOUT)
+	if (skb->mspd_data) {
+		if (skb->mspd_len) {
+			int ofst = skb->len - skb->mspd_len;
+
+			memcpy(skb->data + ofst, skb->mspd_data + skb->mspd_ofst, skb->mspd_len);
+			((struct sk_buff *)skb)->mspd_len = 0;
+		}
+
+		WARN_ON(skb_shared(skb));
+
+		if (!skb_shared(skb)) {
+			kfree(skb->mspd_data);
+			((struct sk_buff *)skb)->mspd_data = NULL;
+		}
+	}
+#endif
+
 	/* Set the data pointer */
 	skb_reserve(n, headerlen);
 	/* Set the tail pointer and length */
@@ -807,6 +954,10 @@ struct sk_buff *pskb_copy(struct sk_buff *skb, gfp_t gfp_mask)
 {
 	unsigned int size = skb_end_pointer(skb) - skb->head;
 	struct sk_buff *n = alloc_skb(size, gfp_mask);
+
+#if defined(CONFIG_COMCERTO_CUSTOM_SKB_LAYOUT)
+	WARN_ON(skb->mspd_len);
+#endif
 
 	if (!n)
 		goto out;

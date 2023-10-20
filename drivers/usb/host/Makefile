@@ -16,7 +16,7 @@ xhci-hcd-y += xhci-ring.o xhci-hub.o xhci-dbg.o
 xhci-hcd-$(CONFIG_PCI)	+= xhci-pci.o
 
 ifneq ($(CONFIG_USB_XHCI_PLATFORM), )
-	xhci-hcd-y		+= xhci-plat.o
+	xhci-hcd-y		+= xhci-plat.o xhci-comcerto2000.o
 endif
 
 obj-$(CONFIG_USB_WHCI_HCD)	+= whci/

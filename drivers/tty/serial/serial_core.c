@@ -2092,6 +2092,7 @@ uart_configure_port(struct uart_driver *drv, struct uart_state *state,
 		if (!(port->flags & UPF_FIXED_TYPE)) {
 			port->type = PORT_UNKNOWN;
 			flags |= UART_CONFIG_TYPE;
+			uart_change_pm(state, 0);
 		}
 		port->ops->config_port(port, flags);
 	}
@@ -2127,7 +2128,8 @@ uart_configure_port(struct uart_driver *drv, struct uart_state *state,
 		 */
 		if (!uart_console(port))
 			uart_change_pm(state, 3);
-	}
+	} else
+		uart_change_pm(state, 3);
 }
 
 #ifdef CONFIG_CONSOLE_POLL

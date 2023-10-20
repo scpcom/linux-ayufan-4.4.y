@@ -593,6 +593,12 @@ static int __tcp_splice_read(struct sock *sk, struct tcp_splice_state *tss)
 	return tcp_read_sock(sk, &rd_desc, tcp_splice_data_recv);
 }
 
+#include <mach/stats.h>
+
+#if defined(CONFIG_COMCERTO_SPLICE_PROF)
+struct splicer_stats splicer_stats;
+#endif
+
 /**
  *  tcp_splice_read - splice data from TCP socket to a pipe
  * @sock:	socket to splice from
@@ -626,9 +632,14 @@ ssize_t tcp_splice_read(struct socket *sock, loff_t *ppos,
 	if (unlikely(*ppos))
 		return -ESPIPE;
 
+	splicer_stats_start();
+
 	ret = spliced = 0;
 
 	lock_sock(sk);
+
+	/* Need locked socket*/
+	splicer_stats_tcp(sk);
 
 	timeo = sock_rcvtimeo(sk, sock->file->f_flags & O_NONBLOCK);
 	while (tss.len) {
@@ -681,6 +692,8 @@ ssize_t tcp_splice_read(struct socket *sock, loff_t *ppos,
 	}
 
 	release_sock(sk);
+
+	splicer_stats_end(spliced);
 
 	if (spliced)
 		return spliced;
@@ -1459,6 +1472,23 @@ int tcp_recvmsg(struct kiocb *iocb, struct sock *sk, struct msghdr *msg,
 	do {
 		u32 offset;
 
+#if defined(CONFIG_COMCERTO_IMPROVED_SPLICE)
+		if (flags & MSG_NOCATCHSIG) {
+			if (signal_pending(current)) {
+				if (sigismember(&current->pending.signal, SIGQUIT) ||
+				    sigismember(&current->pending.signal, SIGABRT) ||
+				    sigismember(&current->pending.signal, SIGKILL) ||
+				    sigismember(&current->pending.signal, SIGTERM) ||
+				    sigismember(&current->pending.signal, SIGSTOP)) {
+
+					if (copied)
+						break;
+					copied = timeo ? sock_intr_errno(timeo) : -EAGAIN;
+					break;
+				}
+			}
+		} else
+#endif
 		/* Are we at urgent data? Stop if we have read anything or have SIGURG pending. */
 		if (tp->urg_data && tp->urg_seq == *seq) {
 			if (copied)
@@ -1693,8 +1723,16 @@ do_prequeue:
 			} else
 #endif
 			{
-				err = skb_copy_datagram_iovec(skb, offset,
-						msg->msg_iov, used);
+#if defined(CONFIG_COMCERTO_IMPROVED_SPLICE)
+				if (msg->msg_flags & MSG_KERNSPACE)
+				{
+					err = skb_copy_datagram_to_kernel_iovec(skb,
+							offset, msg->msg_iov, used);
+				}				
+				else
+#endif
+					err = skb_copy_datagram_iovec(skb, offset,
+							msg->msg_iov, used);
 				if (err) {
 					/* Exception. Bailout! */
 					if (!copied)

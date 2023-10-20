@@ -3687,8 +3687,11 @@ static int ext4_fill_super(struct super_block *sb, void *data, int silent)
 	}
 
 	sbi->s_stripe = ext4_get_stripe_size(sbi);
+#ifdef CONFIG_COMCERTO_EXT4_WRITEBACK_BUMP
+	sbi->s_max_writeback_mb_bump = 8;
+#else
 	sbi->s_max_writeback_mb_bump = 128;
-
+#endif
 	/*
 	 * set up enough so that it can read an inode
 	 */

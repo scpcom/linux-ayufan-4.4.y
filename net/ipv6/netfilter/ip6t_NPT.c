@@ -14,6 +14,7 @@
 #include <linux/netfilter_ipv6.h>
 #include <linux/netfilter_ipv6/ip6t_NPT.h>
 #include <linux/netfilter/x_tables.h>
+#include <net/netfilter/nf_conntrack.h>
 
 static int ip6t_npt_checkentry(const struct xt_tgchk_param *par)
 {
@@ -89,12 +90,22 @@ static unsigned int
 ip6t_snpt_tg(struct sk_buff *skb, const struct xt_action_param *par)
 {
 	const struct ip6t_npt_tginfo *npt = par->targinfo;
+	struct nf_conn *ct;
+	enum ip_conntrack_info ctinfo;
 
 	if (!ip6t_npt_map_pfx(npt, &ipv6_hdr(skb)->saddr)) {
 		icmpv6_send(skb, ICMPV6_PARAMPROB, ICMPV6_HDR_FIELD,
 			    offsetof(struct ipv6hdr, saddr));
 		return NF_DROP;
 	}
+#ifdef CONFIG_COMCERTO_FP
+	ct = nf_ct_get(skb, &ctinfo);
+	if (ct && ((ctinfo == IP_CT_NEW) || (ctinfo == IP_CT_RELATED))) {
+		rcu_read_lock();
+		memcpy(&ct->tuplehash[IP_CT_DIR_REPLY].tuple.dst.u3.in6, &ipv6_hdr(skb)->saddr, sizeof(struct in6_addr));
+		rcu_read_unlock();
+	}
+#endif
 	return XT_CONTINUE;
 }
 
@@ -102,12 +113,22 @@ static unsigned int
 ip6t_dnpt_tg(struct sk_buff *skb, const struct xt_action_param *par)
 {
 	const struct ip6t_npt_tginfo *npt = par->targinfo;
+	struct nf_conn *ct;
+	enum ip_conntrack_info ctinfo;
 
 	if (!ip6t_npt_map_pfx(npt, &ipv6_hdr(skb)->daddr)) {
 		icmpv6_send(skb, ICMPV6_PARAMPROB, ICMPV6_HDR_FIELD,
 			    offsetof(struct ipv6hdr, daddr));
 		return NF_DROP;
 	}
+#ifdef CONFIG_COMCERTO_FP
+	ct = nf_ct_get(skb, &ctinfo);
+	if (ct && ((ctinfo == IP_CT_NEW) || (ctinfo == IP_CT_RELATED))) {
+		rcu_read_lock();
+		memcpy(&ct->tuplehash[IP_CT_DIR_REPLY].tuple.src.u3.in6, &ipv6_hdr(skb)->daddr, sizeof(struct in6_addr));
+		rcu_read_unlock();
+	}
+#endif
 	return XT_CONTINUE;
 }
 

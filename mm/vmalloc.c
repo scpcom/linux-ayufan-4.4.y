@@ -33,6 +33,23 @@
 
 /*** Page table manipulation functions ***/
 
+static inline unsigned long __guard_size(unsigned long start, unsigned long end)
+{
+#if defined(CONFIG_COMCERTO_64K_PAGES)
+	/* Only allocate a guard page for non-module area allocations
+	   (to preserve the little memory available) */
+	if ((start >= MODULES_VADDR) && (end <= MODULES_END))
+		return 0;
+	else
+#endif
+		return PAGE_SIZE;
+}
+
+static unsigned long vm_area_guard_size(struct vm_struct *area)
+{
+	return __guard_size((unsigned long)area->addr, (unsigned long)area->addr + area->size);
+}
+
 static void vunmap_pte_range(pmd_t *pmd, unsigned long addr, unsigned long end)
 {
 	pte_t *pte;
@@ -1238,7 +1255,7 @@ EXPORT_SYMBOL_GPL(unmap_kernel_range);
 int map_vm_area(struct vm_struct *area, pgprot_t prot, struct page ***pages)
 {
 	unsigned long addr = (unsigned long)area->addr;
-	unsigned long end = addr + area->size - PAGE_SIZE;
+	unsigned long end = addr + area->size - vm_area_guard_size(area);
 	int err;
 
 	err = vmap_page_range(addr, end, prot, *pages);
@@ -1318,7 +1335,7 @@ static struct vm_struct *__get_vm_area_node(unsigned long size,
 	/*
 	 * We always allocate a guard page.
 	 */
-	size += PAGE_SIZE;
+	size += __guard_size(start, end);
 
 	va = alloc_vmap_area(size, align, start, end, node, gfp_mask);
 	if (IS_ERR(va)) {
@@ -1423,7 +1440,7 @@ struct vm_struct *remove_vm_area(const void *addr)
 
 		vmap_debug_free_range(va->va_start, va->va_end);
 		free_unmap_vmap_area(va);
-		vm->size -= PAGE_SIZE;
+		vm->size -= vm_area_guard_size(vm);
 
 		return vm;
 	}
@@ -1554,7 +1571,7 @@ static void *__vmalloc_area_node(struct vm_struct *area, gfp_t gfp_mask,
 	unsigned int nr_pages, array_size, i;
 	gfp_t nested_gfp = (gfp_mask & GFP_RECLAIM_MASK) | __GFP_ZERO;
 
-	nr_pages = (area->size - PAGE_SIZE) >> PAGE_SHIFT;
+	nr_pages = (area->size - vm_area_guard_size(area)) >> PAGE_SHIFT;
 	array_size = (nr_pages * sizeof(struct page *));
 
 	area->nr_pages = nr_pages;
@@ -1977,7 +1994,7 @@ long vread(char *buf, char *addr, unsigned long count)
 	read_lock(&vmlist_lock);
 	for (tmp = vmlist; count && tmp; tmp = tmp->next) {
 		vaddr = (char *) tmp->addr;
-		if (addr >= vaddr + tmp->size - PAGE_SIZE)
+		if (addr >= vaddr + tmp->size - vm_area_guard_size(tmp))
 			continue;
 		while (addr < vaddr) {
 			if (count == 0)
@@ -1987,7 +2004,7 @@ long vread(char *buf, char *addr, unsigned long count)
 			addr++;
 			count--;
 		}
-		n = vaddr + tmp->size - PAGE_SIZE - addr;
+		n = vaddr + tmp->size - vm_area_guard_size(tmp) - addr;
 		if (n > count)
 			n = count;
 		if (!(tmp->flags & VM_IOREMAP))
@@ -2053,7 +2070,7 @@ long vwrite(char *buf, char *addr, unsigned long count)
 	read_lock(&vmlist_lock);
 	for (tmp = vmlist; count && tmp; tmp = tmp->next) {
 		vaddr = (char *) tmp->addr;
-		if (addr >= vaddr + tmp->size - PAGE_SIZE)
+		if (addr >= vaddr + tmp->size - vm_area_guard_size(tmp))
 			continue;
 		while (addr < vaddr) {
 			if (count == 0)
@@ -2062,7 +2079,7 @@ long vwrite(char *buf, char *addr, unsigned long count)
 			addr++;
 			count--;
 		}
-		n = vaddr + tmp->size - PAGE_SIZE - addr;
+		n = vaddr + tmp->size - vm_area_guard_size(tmp) - addr;
 		if (n > count)
 			n = count;
 		if (!(tmp->flags & VM_IOREMAP)) {
@@ -2111,7 +2128,7 @@ int remap_vmalloc_range(struct vm_area_struct *vma, void *addr,
 	if (!(area->flags & VM_USERMAP))
 		return -EINVAL;
 
-	if (usize + (pgoff << PAGE_SHIFT) > area->size - PAGE_SIZE)
+	if (usize + (pgoff << PAGE_SHIFT) > area->size - vm_area_guard_size(area))
 		return -EINVAL;
 
 	addr += pgoff << PAGE_SHIFT;

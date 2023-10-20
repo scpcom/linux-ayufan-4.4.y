@@ -447,10 +447,36 @@ static unsigned int mem_serial_in(struct uart_port *p, int offset)
 	return readb(p->membase + offset);
 }
 
+#ifdef CONFIG_ARCH_M86XXX
+void serial8250_clear_and_reinit_fifos(struct uart_8250_port *p);
+
+void dw8250_force_idle(struct uart_port *p)
+{
+	struct uart_8250_port *up = container_of(p, struct uart_8250_port, port);
+
+	serial8250_clear_and_reinit_fifos(up);
+	(void)p->serial_in(p, UART_RX);
+}
+#endif
+
 static void mem_serial_out(struct uart_port *p, int offset, int value)
 {
-	offset = map_8250_out_reg(p, offset) << p->regshift;
-	writeb(value, p->membase + offset);
+	int offset1 = map_8250_out_reg(p, offset) << p->regshift;
+	writeb(value, p->membase + offset1);
+
+#ifdef CONFIG_ARCH_M86XXX
+	/* Make sure LCR write wasn't ignored */
+	if (offset == UART_LCR) {
+		int tries = 1000;
+		while (tries--) {
+			if (value == p->serial_in(p, UART_LCR))
+				return;
+			dw8250_force_idle(p);
+			writeb(value, p->membase + offset1);
+		}
+		dev_err(p->dev, "Couldn't set LCR to %d\n", value);
+	}
+#endif
 }
 
 static void mem32_serial_out(struct uart_port *p, int offset, int value)
@@ -642,6 +668,17 @@ static void serial8250_clear_fifos(struct uart_8250_port *p)
 		serial_outp(p, UART_FCR, 0);
 	}
 }
+
+#ifdef CONFIG_ARCH_M86XXX
+void serial8250_clear_and_reinit_fifos(struct uart_8250_port *p)
+{
+         unsigned char fcr;
+
+         serial8250_clear_fifos(p);
+         fcr = uart_config[p->port.type].fcr;
+         serial_outp(p, UART_FCR, fcr);
+}
+#endif
 
 /*
  * IER sleep support.  UARTs which have EFRs need the "extended
@@ -2374,11 +2411,17 @@ serial8250_do_set_termios(struct uart_port *port, struct ktermios *termios,
 	 * have sufficient FIFO entries for the latency of the remote
 	 * UART to respond.  IOW, at least 32 bytes of FIFO.
 	 */
+#ifdef CONFIG_ARCH_M86XXX
+	up->mcr &= ~UART_MCR_AFE;
+        if (termios->c_cflag & CRTSCTS)
+               up->mcr |= UART_MCR_AFE;
+#else
 	if (up->capabilities & UART_CAP_AFE && up->port.fifosize >= 32) {
 		up->mcr &= ~UART_MCR_AFE;
 		if (termios->c_cflag & CRTSCTS)
 			up->mcr |= UART_MCR_AFE;
 	}
+#endif
 
 	/*
 	 * Ok, we're now changing the port state.  Do it with
@@ -3097,7 +3140,7 @@ static int __devinit serial8250_probe(struct platform_device *dev)
 		port.membase		= p->membase;
 		port.irq		= p->irq;
 		port.irqflags		= p->irqflags;
-		port.uartclk		= p->uartclk;
+		port.uartclk		= p->uartclk;   /* Assigning the rate value got from Platfrom device*/
 		port.regshift		= p->regshift;
 		port.iotype		= p->iotype;
 		port.flags		= p->flags;
@@ -3120,6 +3163,7 @@ static int __devinit serial8250_probe(struct platform_device *dev)
 				p->irq, ret);
 		}
 	}
+
 	return 0;
 }
 
@@ -3136,9 +3180,11 @@ static int __devexit serial8250_remove(struct platform_device *dev)
 		if (up->port.dev == &dev->dev)
 			serial8250_unregister_port(i);
 	}
+
 	return 0;
 }
 
+#if CONFIG_PM
 static int serial8250_suspend(struct platform_device *dev, pm_message_t state)
 {
 	int i;
@@ -3166,12 +3212,15 @@ static int serial8250_resume(struct platform_device *dev)
 
 	return 0;
 }
+#endif
 
 static struct platform_driver serial8250_isa_driver = {
 	.probe		= serial8250_probe,
 	.remove		= __devexit_p(serial8250_remove),
+#if CONFIG_PM
 	.suspend	= serial8250_suspend,
 	.resume		= serial8250_resume,
+#endif
 	.driver		= {
 		.name	= "serial8250",
 		.owner	= THIS_MODULE,

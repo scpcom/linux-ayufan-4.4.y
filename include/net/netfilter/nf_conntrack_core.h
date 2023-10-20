@@ -76,4 +76,8 @@ print_tuple(struct seq_file *s, const struct nf_conntrack_tuple *tuple,
 
 extern spinlock_t nf_conntrack_lock ;
 
+#ifdef CONFIG_COMCERTO_FP
+#define COMCERTO_PERMANENT_TIMEOUT	1000
+#endif
+
 #endif /* _NF_CONNTRACK_CORE_H */

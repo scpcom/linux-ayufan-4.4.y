@@ -940,8 +940,16 @@ static int __pppoe_xmit(struct sock *sk, struct sk_buff *skb)
 
 	skb->protocol = cpu_to_be16(ETH_P_PPP_SES);
 	skb->dev = dev;
+#if defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD)	
+	if((skb->ipsec_offload == 1) && (!skb->sp))
+	{
+		  dev_hard_header(skb, dev, ETH_P_PPP_SES,
+			 dev->dev_addr, po->pppoe_pa.remote, data_len);
 
-	dev_hard_header(skb, dev, ETH_P_PPP_SES,
+	}
+	else
+#endif
+		dev_hard_header(skb, dev, ETH_P_PPP_SES,
 			po->pppoe_pa.remote, NULL, data_len);
 
 	dev_queue_xmit(skb);
@@ -1002,17 +1010,33 @@ static int pppoe_seq_show(struct seq_file *seq, void *v)
 {
 	struct pppox_sock *po;
 	char *dev_name;
+#if defined(CONFIG_COMCERTO_FP)
+	char *ppp_name;
+#endif
 
 	if (v == SEQ_START_TOKEN) {
-		seq_puts(seq, "Id       Address              Device\n");
+#if defined(CONFIG_COMCERTO_FP)
+		seq_puts(seq, "Id   Address           Device     PPPDevice  Unit\n");
+#else
+ 		seq_puts(seq, "Id       Address              Device\n");
+#endif
 		goto out;
 	}
 
 	po = v;
 	dev_name = po->pppoe_pa.dev;
 
-	seq_printf(seq, "%08X %pM %8s\n",
-		po->pppoe_pa.sid, po->pppoe_pa.remote, dev_name);
+#if defined(CONFIG_COMCERTO_FP)
+	ppp_name = ppp_dev_name(&po->chan);
+	if (!ppp_name)
+		goto out;
+
+	seq_printf(seq, "%04X %pM %-10s %-10s %d\n",
+		ntohs(po->pppoe_pa.sid), po->pppoe_pa.remote, dev_name, ppp_name, ppp_unit_number(&po->chan));
+#else
+ 	seq_printf(seq, "%08X %pM %8s\n",
+ 		po->pppoe_pa.sid, po->pppoe_pa.remote, dev_name);
+#endif
 out:
 	return 0;
 }

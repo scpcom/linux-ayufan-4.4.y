@@ -214,9 +214,16 @@ ENTRY(v7_coherent_user_range)
 #ifdef CONFIG_ARM_ERRATA_775420
 	dsb
 #endif
+#if !defined(CONFIG_COMCERTO_64K_PAGES)
 	mov	r12, r12, lsr #12
 	mov	r12, r12, lsl #12
 	add	r12, r12, #4096
+#else
+	mov	r12, r12, lsr #16
+	mov	r12, r12, lsl #16
+	add	r12, r12, #65536
+
+#endif
 	b	3b
  UNWIND(.fnend		)
 ENDPROC(v7_coherent_kern_range)

@@ -35,6 +35,11 @@
 #include <asm/irq.h>
 #include <asm/uaccess.h>
 
+#ifdef CONFIG_ARCH_M86XXX
+#include <mach/comcerto-2000/pm.h>
+#endif
+
+
 MODULE_DESCRIPTION("PHY library");
 MODULE_AUTHOR("Andy Fleming");
 MODULE_LICENSE("GPL");
@@ -885,7 +890,17 @@ static int genphy_config_init(struct phy_device *phydev)
 int genphy_suspend(struct phy_device *phydev)
 {
 	int value;
-
+#ifdef CONFIG_ARCH_M86XXX
+	/* Check for the Bit_Mask bit for WoL, if it is enabled
+	 * then we are not going suspend the WoL device , as by
+	 * this device , we will wake from System Resume.
+	 */
+	if ( !(host_utilpe_shared_pmu_bitmask & WOL_IRQ )){
+		/* We will just return
+		 */
+		return 0;
+	}
+#endif
 	mutex_lock(&phydev->lock);
 
 	value = phy_read(phydev, MII_BMCR);
@@ -900,7 +915,17 @@ EXPORT_SYMBOL(genphy_suspend);
 int genphy_resume(struct phy_device *phydev)
 {
 	int value;
-
+#ifdef CONFIG_ARCH_M86XXX
+	/* Check for the Bit_Mask bit for WoL, if it is enabled
+	 * then we are not going suspend the WoL device , as by
+	 * this device , we will wake from System Resume.
+	 */
+	if ( !(host_utilpe_shared_pmu_bitmask & WOL_IRQ )){
+		/* We will just return
+		 */
+		return 0;
+	}
+#endif
 	mutex_lock(&phydev->lock);
 
 	value = phy_read(phydev, MII_BMCR);

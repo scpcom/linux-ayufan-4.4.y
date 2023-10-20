@@ -125,11 +125,17 @@ _decode_session6(struct sk_buff *skb, struct flowi *fl, int reverse)
 {
 	struct flowi6 *fl6 = &fl->u.ip6;
 	int onlyproto = 0;
-	u16 offset = skb_network_header_len(skb);
-	const struct ipv6hdr *hdr = ipv6_hdr(skb);
+	/* use the reassembled packet if conntrack has done the reassembly */
+#ifdef NET_SKBUFF_NF_DEFRAG_NEEDED
+	struct sk_buff *whole_skb = (skb->nfct_reasm) ? skb->nfct_reasm : skb;
+#else
+	struct sk_buff *whole_skb = skb;
+#endif
+	u16 offset = skb_network_header_len(whole_skb);
+	const struct ipv6hdr *hdr = ipv6_hdr(whole_skb);
 	struct ipv6_opt_hdr *exthdr;
-	const unsigned char *nh = skb_network_header(skb);
-	u8 nexthdr = nh[IP6CB(skb)->nhoff];
+	const unsigned char *nh = skb_network_header(whole_skb);
+	u8 nexthdr = nh[IP6CB(whole_skb)->nhoff];
 
 	memset(fl6, 0, sizeof(struct flowi6));
 	fl6->flowi6_mark = skb->mark;
@@ -137,9 +143,9 @@ _decode_session6(struct sk_buff *skb, struct flowi *fl, int reverse)
 	ipv6_addr_copy(&fl6->daddr, reverse ? &hdr->saddr : &hdr->daddr);
 	ipv6_addr_copy(&fl6->saddr, reverse ? &hdr->daddr : &hdr->saddr);
 
-	while (nh + offset + 1 < skb->data ||
-	       pskb_may_pull(skb, nh + offset + 1 - skb->data)) {
-		nh = skb_network_header(skb);
+	while (nh + offset + 1 < whole_skb->data ||
+		pskb_may_pull(whole_skb, nh + offset + 1 - whole_skb->data)) {
+		nh = skb_network_header(whole_skb);
 		exthdr = (struct ipv6_opt_hdr *)(nh + offset);
 
 		switch (nexthdr) {
@@ -158,8 +164,8 @@ _decode_session6(struct sk_buff *skb, struct flowi *fl, int reverse)
 		case IPPROTO_TCP:
 		case IPPROTO_SCTP:
 		case IPPROTO_DCCP:
-			if (!onlyproto && (nh + offset + 4 < skb->data ||
-			     pskb_may_pull(skb, nh + offset + 4 - skb->data))) {
+			if (!onlyproto && (nh + offset + 4 < whole_skb->data ||
+			pskb_may_pull(whole_skb, nh + offset + 4 - whole_skb->data))) {
 				__be16 *ports = (__be16 *)exthdr;
 
 				fl6->fl6_sport = ports[!!reverse];

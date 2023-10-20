@@ -60,6 +60,7 @@
 #include <linux/rculist.h>
 #include <linux/idr.h>
 #include <linux/slab.h>
+#include <linux/sched.h>
 
 static DEFINE_MUTEX(dma_list_mutex);
 static DEFINE_IDR(dma_idr);
@@ -264,6 +265,10 @@ enum dma_status dma_sync_wait(struct dma_chan *chan, dma_cookie_t cookie)
 			printk(KERN_ERR "dma_sync_wait_timeout!\n");
 			return DMA_ERROR;
 		}
+#ifdef CONFIG_COMCERTO_NAS
+		if (need_resched() && !in_interrupt())
+			schedule();
+#endif
 	} while (status == DMA_IN_PROGRESS);
 
 	return status;
