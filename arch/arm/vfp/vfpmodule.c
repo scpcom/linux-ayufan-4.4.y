@@ -18,10 +18,12 @@
 #include <linux/sched.h>
 #include <linux/smp.h>
 #include <linux/init.h>
+#include <linux/export.h>
 
 #include <asm/cputype.h>
 #include <asm/thread_notify.h>
 #include <asm/vfp.h>
+#include <asm/bug.h>
 
 #include "vfpinstr.h"
 #include "vfp.h"
@@ -562,12 +564,8 @@ void kernel_neon_begin(void)
         unsigned int cpu;
         u32 fpexc;
 
-        /*
-         * Kernel mode NEON is only allowed outside of interrupt context
-         * with preemption disabled. This will make sure that the kernel
-         * mode NEON register contents never need to be preserved.
-         */
-        BUG_ON(in_interrupt());
+		/* Avoid using the NEON in interrupt context */
+		might_sleep();
         cpu = get_cpu();
 
         fpexc = fmrx(FPEXC) | FPEXC_EN;
@@ -600,21 +598,11 @@ EXPORT_SYMBOL(kernel_neon_end);
 void vfp_kmode_exception(void)
 {
 	/*
-	 * If we reach this point, a floating point exception has been raised
-	 * while running in kernel mode. If the NEON/VFP unit was enabled at the
-	 * time, it means a VFP instruction has been issued that requires
-	 * software assistance to complete, something which is not currently
-	 * supported in kernel mode.
-	 * If the NEON/VFP unit was disabled, and the location pointed to below
-	 * is properly preceded by a call to kernel_neon_begin(), something has
-	 * caused the task to be scheduled out and back in again. In this case,
-	 * rebuilding and running with CONFIG_DEBUG_ATOMIC_SLEEP enabled should
-	 * be helpful in localizing the problem.
+	 * Taking an FP exception in kernel mode is always a bug, because
+	 * none of the FP instructions currently supported in kernel mode
+	 * (i.e., NEON) should ever be bounced back to the support code.
 	 */
-	if (fmrx(FPEXC) & FPEXC_EN)
-		pr_crit("BUG: unsupported FP instruction in kernel mode\n");
-	else
-		pr_crit("BUG: FP instruction issued in kernel mode with FP unit disabled\n");
+	BUG_ON(fmrx(FPEXC) & FPEXC_EN);
 }
 
 /*
@@ -695,5 +683,4 @@ static int __init vfp_init(void)
 	return 0;
 }
 
-//late_initcall(vfp_init);
 core_initcall(vfp_init);
