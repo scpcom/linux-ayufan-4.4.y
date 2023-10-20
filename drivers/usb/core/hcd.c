@@ -1166,6 +1166,20 @@ int usb_hcd_check_unlink_urb(struct usb_hcd *hcd, struct urb *urb,
 	if (urb->unlinked)
 		return -EBUSY;
 	urb->unlinked = status;
+
+	/* IRQ setup can easily be broken so that USB controllers
+	 * never get completion IRQs ... maybe even the ones we need to
+	 * finish unlinking the initial failed usb_set_address()
+	 * or device descriptor fetch.
+	 */
+	if (!HCD_SAW_IRQ(hcd) && !is_root_hub(urb->dev)) {
+		dev_warn(hcd->self.controller, "Unlink after no-IRQ?  "
+			"Controller is probably using the wrong IRQ.\n");
+		set_bit(HCD_FLAG_SAW_IRQ, &hcd->flags);
+		if (hcd->shared_hcd)
+			set_bit(HCD_FLAG_SAW_IRQ, &hcd->shared_hcd->flags);
+	}
+
 	return 0;
 }
 EXPORT_SYMBOL_GPL(usb_hcd_check_unlink_urb);
@@ -2131,12 +2145,16 @@ irqreturn_t usb_hcd_irq (int irq, void *__hcd)
 	 */
 	local_irq_save(flags);
 
-	if (unlikely(HCD_DEAD(hcd) || !HCD_HW_ACCESSIBLE(hcd)))
+	if (unlikely(HCD_DEAD(hcd) || !HCD_HW_ACCESSIBLE(hcd))) {
 		rc = IRQ_NONE;
-	else if (hcd->driver->irq(hcd) == IRQ_NONE)
+	} else if (hcd->driver->irq(hcd) == IRQ_NONE) {
 		rc = IRQ_NONE;
-	else
+	} else {
+		set_bit(HCD_FLAG_SAW_IRQ, &hcd->flags);
+		if (hcd->shared_hcd)
+			set_bit(HCD_FLAG_SAW_IRQ, &hcd->shared_hcd->flags);
 		rc = IRQ_HANDLED;
+	}
 
 	local_irq_restore(flags);
 	return rc;
@@ -2350,7 +2368,7 @@ static int usb_hcd_request_irqs(struct usb_hcd *hcd,
 					"io mem" : "io base",
 					(unsigned long long)hcd->rsrc_start);
 	} else {
-		hcd->irq = 0;
+		hcd->irq = -1;
 		if (hcd->rsrc_start)
 			dev_info(hcd->self.controller, "%s 0x%08llx\n",
 					(hcd->driver->flags & HCD_MEMORY) ?
@@ -2506,7 +2524,7 @@ err_register_root_hub:
 	clear_bit(HCD_FLAG_POLL_RH, &hcd->flags);
 	del_timer_sync(&hcd->rh_timer);
 err_hcd_driver_start:
-	if (usb_hcd_is_primary_hcd(hcd) && hcd->irq > 0)
+	if (usb_hcd_is_primary_hcd(hcd) && hcd->irq >= 0)
 		free_irq(irqnum, hcd);
 err_request_irq:
 err_hcd_driver_setup:
@@ -2571,7 +2589,7 @@ void usb_remove_hcd(struct usb_hcd *hcd)
 	del_timer_sync(&hcd->rh_timer);
 
 	if (usb_hcd_is_primary_hcd(hcd)) {
-		if (hcd->irq > 0)
+		if (hcd->irq >= 0)
 			free_irq(hcd->irq, hcd);
 	}
 

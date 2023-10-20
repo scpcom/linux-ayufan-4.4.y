@@ -196,7 +196,7 @@ static int create_default_filesystem(struct ubifs_info *c)
 	sup->rp_size = cpu_to_le64(tmp64);
 	sup->ro_compat_version = cpu_to_le32(UBIFS_RO_COMPAT_VERSION);
 
-	err = ubifs_write_node(c, sup, UBIFS_SB_NODE_SZ, 0, 0, UBI_LONGTERM);
+	err = ubifs_write_node(c, sup, UBIFS_SB_NODE_SZ, 0, 0, 0);
 	kfree(sup);
 	if (err)
 		return err;

@@ -65,6 +65,13 @@ struct device_node {
 #endif
 };
 
+#define MAX_PHANDLE_ARGS 8
+struct of_phandle_args {
+        struct device_node *np;
+        int args_count;
+        uint32_t args[MAX_PHANDLE_ARGS];
+};
+
 #ifdef CONFIG_OF
 
 /* Pointer for first entry in chain of all nodes. */

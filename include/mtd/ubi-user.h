@@ -173,7 +173,10 @@
 
 #define UBI_VOL_IOC_MAGIC 'O'
 
-/* Start UBI volume update */
+/* Start UBI volume update
+ * Note: This actually takes a pointer (__s64*), but we can't change
+ *       that without breaking the ABI on 32bit systems
+ */
 #define UBI_IOCVOLUP _IOW(UBI_VOL_IOC_MAGIC, 0, __s64)
 /* LEB erasure command, used for debugging, disabled by default */
 #define UBI_IOCEBER _IOW(UBI_VOL_IOC_MAGIC, 1, __s32)
@@ -404,7 +407,7 @@ struct ubi_rnvol_req {
 struct ubi_leb_change_req {
 	__s32 lnum;
 	__s32 bytes;
-	__s8  dtype;
+	__s8  dtype; /* obsolete, do not use! */
 	__s8  padding[7];
 } __packed;
 
@@ -416,7 +419,7 @@ struct ubi_leb_change_req {
  */
 struct ubi_map_req {
 	__s32 lnum;
-	__s8  dtype;
+	__s8  dtype; /* obsolete, do not use! */
 	__s8  padding[3];
 } __packed;
 

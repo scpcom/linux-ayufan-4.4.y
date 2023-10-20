@@ -282,6 +282,9 @@ struct mtd_info {
 	void (*put_device) (struct mtd_info *mtd);
 };
 
+int mtd_block_isbad(struct mtd_info *mtd, loff_t ofs);
+int mtd_block_markbad(struct mtd_info *mtd, loff_t ofs);
+
 static inline struct mtd_info *dev_to_mtd(struct device *dev)
 {
 	return dev ? dev_get_drvdata(dev) : NULL;
@@ -315,6 +318,11 @@ static inline uint32_t mtd_mod_by_ws(uint64_t sz, struct mtd_info *mtd)
 	if (mtd->writesize_shift)
 		return sz & mtd->writesize_mask;
 	return do_div(sz, mtd->writesize);
+}
+
+static inline int mtd_can_have_bb(const struct mtd_info *mtd)
+{
+	return !!mtd->block_isbad;
 }
 
 	/* Kernel-side ioctl definitions */

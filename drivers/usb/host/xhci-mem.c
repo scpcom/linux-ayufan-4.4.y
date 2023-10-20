@@ -1797,6 +1797,7 @@ void xhci_mem_cleanup(struct xhci_hcd *xhci)
 	xhci_dbg(xhci, "Freed event ring\n");
 
 	xhci->cmd_ring_reserved_trbs = 0;
+
 	if (xhci->cmd_ring)
 		xhci_ring_free(xhci, xhci->cmd_ring);
 	xhci->cmd_ring = NULL;

@@ -60,12 +60,12 @@ static void xhci_common_hub_descriptor(struct xhci_hcd *xhci,
 	temp = 0;
 	/* Bits 1:0 - support per-port power switching, or power always on */
 	if (HCC_PPC(xhci->hcc_params))
-		temp |= HUB_CHAR_INDV_PORT_LPSM;
+		temp |= 0x0001;
 	else
-		temp |= HUB_CHAR_NO_LPSM;
+		temp |= 0x0002;
 	/* Bit  2 - root hubs are not part of a compound device */
 	/* Bits 4:3 - individual port over current protection */
-	temp |= HUB_CHAR_INDV_PORT_OCPM;
+	temp |= 0x0008;
 	/* Bits 6:5 - no TTs in root ports */
 	/* Bit  7 - no port indicators */
 	desc->wHubCharacteristics = cpu_to_le16(temp);
@@ -422,6 +422,7 @@ void xhci_set_link_state(struct xhci_hcd *xhci, __le32 __iomem **port_array,
 	xhci_writel(xhci, temp, port_array[port_id]);
 }
 
+#if 0
 void xhci_set_remote_wake_mask(struct xhci_hcd *xhci,
 		__le32 __iomem **port_array, int port_id, u16 wake_mask)
 {
@@ -447,6 +448,7 @@ void xhci_set_remote_wake_mask(struct xhci_hcd *xhci,
 
 	xhci_writel(xhci, temp, port_array[port_id]);
 }
+#endif
 
 /* Test and clear port RWC bit */
 void xhci_test_and_clear_bit(struct xhci_hcd *xhci, __le32 __iomem **port_array,
@@ -833,6 +835,7 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 			temp = xhci_readl(xhci, port_array[wIndex]);
 			xhci_dbg(xhci, "set port reset, actual port %d status  = 0x%x\n", wIndex, temp);
 			break;
+#if 0
 		case USB_PORT_FEAT_REMOTE_WAKE_MASK:
 			xhci_set_remote_wake_mask(xhci, port_array,
 					wIndex, wake_mask);
@@ -841,6 +844,7 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 					"actual port %d status  = 0x%x\n",
 					wIndex, temp);
 			break;
+#endif
 		case USB_PORT_FEAT_BH_PORT_RESET:
 			temp |= PORT_WR;
 			xhci_writel(xhci, temp, port_array[wIndex]);

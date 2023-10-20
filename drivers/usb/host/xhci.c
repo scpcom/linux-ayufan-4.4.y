@@ -109,6 +109,7 @@ int xhci_halt(struct xhci_hcd *xhci)
 		xhci->xhc_state |= XHCI_STATE_HALTED;
 		xhci->cmd_ring_state = CMD_RING_STATE_STOPPED;
 	} else
+
 		xhci_warn(xhci, "Host not halted after %u microseconds.\n",
 				XHCI_MAX_HALT_USEC);
 	return ret;
@@ -307,8 +308,8 @@ static void xhci_cleanup_msix(struct xhci_hcd *xhci)
 	struct usb_hcd *hcd = xhci_to_hcd(xhci);
 	struct pci_dev *pdev = to_pci_dev(hcd->self.controller);
 
-	if (xhci->quirks & XHCI_PLAT)
-		return;
+         if (xhci->quirks & XHCI_PLAT)
+            return;
 
 	xhci_free_irq(xhci);
 
@@ -337,14 +338,13 @@ static void xhci_msix_sync_irqs(struct xhci_hcd *xhci)
 static int xhci_try_enable_msi(struct usb_hcd *hcd)
 {
 	struct xhci_hcd *xhci = hcd_to_xhci(hcd);
-	struct pci_dev  *pdev;
+	struct pci_dev  *pdev = to_pci_dev(xhci_to_hcd(xhci)->self.controller);
 	int ret;
 
-	/* The xhci platform device has set up IRQs through usb_add_hcd. */
-	if (xhci->quirks & XHCI_PLAT)
-		return 0;
+    /* The xhci platform device has set up IRQs through usb_add_hcd. */
+    if (xhci->quirks & XHCI_PLAT)
+        return 0;
 
-	pdev = to_pci_dev(xhci_to_hcd(xhci)->self.controller);
 	/*
 	 * Some Fresco Logic host controllers advertise MSI, but fail to
 	 * generate interrupts.  Don't even try to enable MSI.
@@ -1522,9 +1522,7 @@ int xhci_urb_dequeue(struct usb_hcd *hcd, struct urb *urb, int status)
 		goto done;
 	}
 
-
 	urb_priv = urb->hcpriv;
-
 	i = urb_priv->td_cnt;
 	if (i < urb_priv->length)
 		xhci_dbg(xhci, "Cancel URB %p, dev %s, ep 0x%x, "

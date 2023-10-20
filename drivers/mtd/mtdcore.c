@@ -682,6 +682,28 @@ void __put_mtd_device(struct mtd_info *mtd)
 	module_put(mtd->owner);
 }
 
+int mtd_block_isbad(struct mtd_info *mtd, loff_t ofs)
+{
+	if (!mtd->block_isbad)
+		return 0;
+	if (ofs < 0 || ofs > mtd->size)
+		return -EINVAL;
+	return mtd->block_isbad(mtd, ofs);
+}
+EXPORT_SYMBOL_GPL(mtd_block_isbad);
+
+int mtd_block_markbad(struct mtd_info *mtd, loff_t ofs)
+{
+	if (!mtd->block_markbad)
+		return -EOPNOTSUPP;
+	if (ofs < 0 || ofs > mtd->size)
+		return -EINVAL;
+	if (!(mtd->flags & MTD_WRITEABLE))
+		return -EROFS;
+	return mtd->block_markbad(mtd, ofs);
+}
+EXPORT_SYMBOL_GPL(mtd_block_markbad);
+
 /* default_mtd_writev - default mtd writev method for MTD devices that
  *			don't implement their own
  */

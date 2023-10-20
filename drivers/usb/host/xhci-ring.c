@@ -146,9 +146,11 @@ static void next_trb(struct xhci_hcd *xhci,
 static void inc_deq(struct xhci_hcd *xhci, struct xhci_ring *ring)
 {
 	union xhci_trb *next;
+
 	unsigned long long addr;
 
 	ring->deq_updates++;
+
 
 	/* If this is not event ring, there is one more usable TRB */
 	if (ring->type != TYPE_EVENT &&
@@ -167,7 +169,8 @@ static void inc_deq(struct xhci_hcd *xhci, struct xhci_ring *ring)
 		ring->deq_seg = ring->deq_seg->next;
 		ring->dequeue = ring->deq_seg->trbs;
 		next = ring->dequeue;
-	}
+	} 
+
 	addr = (unsigned long long) xhci_trb_virt_to_dma(ring->deq_seg, ring->dequeue);
 }
 
@@ -1539,6 +1542,7 @@ static unsigned int find_faked_portnum_from_hw_portnum(struct usb_hcd *hcd,
 	return num_similar_speed_ports;
 }
 
+#if 0
 static void handle_device_notification(struct xhci_hcd *xhci,
 		union xhci_trb *event)
 {
@@ -1558,6 +1562,7 @@ static void handle_device_notification(struct xhci_hcd *xhci,
 	if (udev && udev->parent)
 		usb_wakeup_notification(udev->parent, udev->portnum);
 }
+#endif
 
 static void handle_port_status(struct xhci_hcd *xhci,
 		union xhci_trb *event)
@@ -1653,11 +1658,17 @@ static void handle_port_status(struct xhci_hcd *xhci,
 					faked_port_index, PORT_PLC);
 			xhci_set_link_state(xhci, port_array, faked_port_index,
 						XDEV_U0);
-			/* Need to wait until the next link state change
-			 * indicates the device is actually in U0.
-			 */
-			bogus_port_status = true;
-			goto cleanup;
+			slot_id = xhci_find_slot_id_by_port(hcd, xhci,
+					faked_port_index + 1);
+			if (!slot_id) {
+				xhci_dbg(xhci, "slot_id is zero\n");
+				goto cleanup;
+			}
+			xhci_ring_device(xhci, slot_id);
+			xhci_dbg(xhci, "resume SS port %d finished\n", port_id);
+			/* Clear PORT_PLC */
+			xhci_test_and_clear_bit(xhci, port_array,
+						faked_port_index, PORT_PLC);
 		} else {
 			xhci_dbg(xhci, "resume HS port %d\n", port_id);
 			bus_state->resume_done[faked_port_index] = jiffies +
@@ -1668,6 +1679,7 @@ static void handle_port_status(struct xhci_hcd *xhci,
 		}
 	}
 
+#if 0
 	if ((temp & PORT_PLC) && (temp & PORT_PLS_MASK) == XDEV_U0 &&
 			DEV_SUPERSPEED(temp)) {
 		xhci_dbg(xhci, "resume SS port %d finished\n", port_id);
@@ -1693,7 +1705,7 @@ static void handle_port_status(struct xhci_hcd *xhci,
 			goto cleanup;
 		}
 	}
-
+#endif
 	if (hcd->speed != HCD_USB3)
 		xhci_test_and_clear_bit(xhci, port_array, faked_port_index,
 					PORT_PLC);
@@ -2659,9 +2671,11 @@ static int xhci_handle_event(struct xhci_hcd *xhci)
 		else
 			update_ptrs = 0;
 		break;
+#if 0
 	case TRB_TYPE(TRB_DEV_NOTE):
 		handle_device_notification(xhci, event);
 		break;
+#endif
 	default:
 		if ((le32_to_cpu(event->event_cmd.flags) & TRB_TYPE_BITMASK) >=
 		    TRB_TYPE(48))

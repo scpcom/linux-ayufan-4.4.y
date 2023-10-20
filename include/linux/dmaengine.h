@@ -74,9 +74,6 @@ enum dma_transaction_type {
 	DMA_CYCLIC,
 };
 
-/* last transaction type for creation of the capabilities mask */
-#define DMA_TX_TYPE_END (DMA_CYCLIC + 1)
-
 /**
  * enum dma_transfer_direction - dma transfer mode and direction indicator
  * @DMA_MEM_TO_MEM: Async/Memcpy mode
@@ -85,12 +82,16 @@ enum dma_transaction_type {
  * @DMA_DEV_TO_DEV: Slave mode & From Device to Device
  */
 enum dma_transfer_direction {
-	DMA_MEM_TO_MEM,
-	DMA_MEM_TO_DEV,
-	DMA_DEV_TO_MEM,
-	DMA_DEV_TO_DEV,
-	DMA_TRANS_NONE,
+        DMA_MEM_TO_MEM,
+        DMA_MEM_TO_DEV,
+        DMA_DEV_TO_MEM,
+        DMA_DEV_TO_DEV,
+        DMA_TRANS_NONE,
 };
+
+/* last transaction type for creation of the capabilities mask */
+#define DMA_TX_TYPE_END (DMA_CYCLIC + 1)
+
 
 /**
  * enum dma_ctrl_flags - DMA flags to augment operation preparation,
@@ -201,6 +202,7 @@ struct dma_chan_percpu {
 struct dma_chan {
 	struct dma_device *device;
 	dma_cookie_t cookie;
+	dma_cookie_t completed_cookie;
 
 	/* sysfs */
 	int chan_id;
@@ -290,6 +292,8 @@ struct dma_slave_config {
 	enum dma_slave_buswidth dst_addr_width;
 	u32 src_maxburst;
 	u32 dst_maxburst;
+	bool device_fc;
+	unsigned int slave_id;
 };
 
 static inline const char *dma_chan_name(struct dma_chan *chan)
@@ -536,7 +540,7 @@ static inline int dmaengine_slave_config(struct dma_chan *chan,
 
 static inline bool is_slave_direction(enum dma_transfer_direction direction)
 {
-	return (direction == DMA_MEM_TO_DEV) || (direction == DMA_DEV_TO_MEM);
+        return (direction == DMA_MEM_TO_DEV) || (direction == DMA_DEV_TO_MEM);
 }
 
 static inline struct dma_async_tx_descriptor *dmaengine_prep_slave_single(

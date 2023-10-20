@@ -661,6 +661,7 @@ static irqreturn_t musb_stage0_irq(struct musb *musb, u8 int_usb,
 
 		handled = IRQ_HANDLED;
 		musb->is_active = 1;
+		set_bit(HCD_FLAG_SAW_IRQ, &hcd->flags);
 
 		musb->ep0_stage = MUSB_EP0_START;
 
@@ -1985,7 +1986,7 @@ musb_init_controller(struct device *dev, int nIrq, void __iomem *ctrl)
 		musb->xceiv->default_a = 1;
 		musb->xceiv->state = OTG_STATE_A_IDLE;
 
-		status = usb_add_hcd(musb_to_hcd(musb), 0, 0);
+		status = usb_add_hcd(musb_to_hcd(musb), -1, 0);
 
 		hcd->self.uses_pio_for_control = 1;
 		dev_dbg(musb->controller, "%s mode, status %d, devctl %02x %c\n",
