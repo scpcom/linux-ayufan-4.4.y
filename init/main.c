@@ -790,6 +790,7 @@ static noinline int init_post(void)
 
 static int __init kernel_init(void * unused)
 {
+	int retry_times = 0;
 	/*
 	 * Wait until kthreadd is all set-up.
 	 */
@@ -820,8 +821,19 @@ static int __init kernel_init(void * unused)
 	do_basic_setup();
 
 	/* Open the /dev/console on the rootfs, this should never fail */
-	if (sys_open((const char __user *) "/dev/console", O_RDWR, 0) < 0)
+	/*if (sys_open((const char __user *) "/dev/console", O_RDWR, 0) < 0)*/
+	while (sys_open((const char __user *) "/dev/console", O_RDWR, 0) < 0)
+	{
 		printk(KERN_WARNING "Please be patient, while OpenWrt loads ...\n");
+		printk(KERN_WARNING "retry_times: %d\n", retry_times);
+		mdelay(100);
+		retry_times++;
+		if (retry_times > 10)
+		{
+			printk(KERN_WARNING "Die! console is dead!!!\n");
+			break;
+		}
+	}
 
 	(void) sys_dup(0);
 	(void) sys_dup(0);

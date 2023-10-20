@@ -24,7 +24,8 @@
 #ifdef CONFIG_COMCERTO_UART1_SUPPORT
 	#define UART_DR		(*(volatile unsigned long *)0x96400000)
 	#define UART_LSR	(*(volatile unsigned long *)0x96400014)
-#elif CONFIG_COMCERTO_UART0_SUPPORT
+//#elif CONFIG_COMCERTO_UART0_SUPPORT
+#elif defined CONFIG_COMCERTO_UART0_SUPPORT
 	#define UART_DR		(*(volatile unsigned long *)0x96300000)
 	#define UART_LSR	(*(volatile unsigned long *)0x96300014)
 #else

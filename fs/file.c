@@ -268,7 +268,6 @@ int expand_files(struct files_struct *files, int nr)
 	/* All good, so we try */
 	return expand_fdtable(files, nr);
 }
-EXPORT_SYMBOL_GPL(expand_files);
 
 static int count_open_files(struct fdtable *fdt)
 {

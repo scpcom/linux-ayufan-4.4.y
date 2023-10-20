@@ -1670,7 +1670,7 @@ void ext4_get_group_no_and_offset(struct super_block *sb, ext4_fsblk_t blocknr,
 /*
  * Timeout and state flag for lazy initialization inode thread.
  */
-#define EXT4_DEF_LI_WAIT_MULT			10
+#define EXT4_DEF_LI_WAIT_MULT			2
 #define EXT4_DEF_LI_MAX_START_DELAY		5
 #define EXT4_LAZYINIT_QUIT			0x0001
 #define EXT4_LAZYINIT_RUNNING			0x0002

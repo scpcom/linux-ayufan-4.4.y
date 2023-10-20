@@ -852,6 +852,8 @@ retry:
 			long timeout = 3 * HZ;
 			tty_unlock();
 
+	// comment out following codes to fix issue: STG-540 cannot be powered off without console line connected
+#if 0
 			while (tty_ldisc_wait_idle(tty, timeout) == -EBUSY) {
 				timeout = MAX_SCHEDULE_TIMEOUT;
 				printk_ratelimited(KERN_WARNING
@@ -861,6 +863,7 @@ retry:
 			}
 			mutex_unlock(&tty->ldisc_mutex);
 			goto retry;
+#endif
 		}
 
 		if (reset == 0) {

@@ -3022,6 +3022,13 @@ static int transport_generic_cmd_sequencer(
 			" 0x%02x\n", cmd->se_tfo->get_fabric_name(),
 				cmd->data_length, size, cdb[0]);
 
+		/* 
+		 * FIXME: Check again... by Sam.Fang 2015/05/04, 
+		 *	workaround: when the Lun capacipy is over 2TB byte, the "size" always equal zero 
+		 * and initiator must wait for 1 min to detect the LUN
+		 */
+		size = (0 == size) ? cmd->data_length : size;
+
 		cmd->cmd_spdtl = size;
 
 		if (cmd->data_direction == DMA_TO_DEVICE) {

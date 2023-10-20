@@ -1,5 +1,12 @@
 menu "SCSI device support"
 
+config 4BAY
+	tristate "support disk 4 Bay (for LED now)"
+	default n
+	---help---
+	  support disk 4 Bay (for LED now), if not enable the option
+	  the default is 2 Bay
+
 config SCSI_MOD
        tristate
        default y if SCSI=n || SCSI=y

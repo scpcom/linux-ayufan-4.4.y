@@ -763,6 +763,9 @@ static int iscsi_target_locate_portal(
 	u32 payload_length;
 	int sessiontype = 0, ret = 0;
 
+	// RFC-3720 section 5.3, "The initial Login Request of the first connection of a session MAY include the SessionType key=value pair." Sam.Fang
+	const char default_session[] = {SESSIONTYPE"="NORMAL};
+
 	login_req = (struct iscsi_login_req *) login->req;
 	login_rsp = (struct iscsi_targ_login_rsp *) login->rsp;
 	payload_length = ntoh24(login_req->dlength);
@@ -783,7 +786,9 @@ static int iscsi_target_locate_portal(
 	if (iscsi_target_get_initial_payload(conn, login) < 0)
 		return -1;
 
-	tmpbuf = kzalloc(payload_length + 1, GFP_KERNEL);
+	//Sam.Fang
+	tmpbuf = kzalloc(payload_length + 1 + strlen(NORMAL) + 1, GFP_KERNEL);
+	//tmpbuf = kzalloc(payload_length + 1, GFP_KERNEL);
 	if (!tmpbuf) {
 		pr_err("Unable to allocate memory for tmpbuf.\n");
 		return -1;
@@ -836,12 +841,34 @@ static int iscsi_target_locate_portal(
 		if (!login->leading_connection)
 			goto get_target;
 
+		// RFC-3720 section 5.3, "The initial Login Request of the first connection of a session MAY include the SessionType key=value pair."
+		// add "SessionType=Normal" as default value if the content of first session without it. (ex: globalSAN) Sam.Fang
+		if((payload_length + strlen(default_session) + 1) < MAX_KEY_VALUE_PAIRS) {
+			memcpy(tmpbuf + payload_length + 1, NORMAL, strlen(NORMAL));
+			s_buf = tmpbuf + payload_length + 1;
+			s_buf[strlen(NORMAL)] = '\0';
+			memcpy(login->req_buf + payload_length, default_session, strlen(default_session));
+			payload_length += strlen(default_session) + 1;
+			hton24(login_req->dlength, payload_length);
+			login->req_buf[payload_length - 1] = '\0';
+		}
+		else {
+			pr_err("SessionType key not received"
+				" in first login request.\n");
+			iscsit_tx_login_rsp(conn, ISCSI_STATUS_CLS_INITIATOR_ERR,
+				ISCSI_LOGIN_STATUS_MISSING_FIELDS);
+			ret = -1;
+			goto out;
+		}
+
+		/* original code
 		pr_err("SessionType key not received"
 			" in first login request.\n");
 		iscsit_tx_login_rsp(conn, ISCSI_STATUS_CLS_INITIATOR_ERR,
 			ISCSI_LOGIN_STATUS_MISSING_FIELDS);
 		ret = -1;
 		goto out;
+		*/
 	}
 
 	/*
