@@ -188,7 +188,6 @@ static int create_strip_zones(struct mddev *mddev, struct r0conf **private_conf)
 
 		disk_stack_limits(mddev->gendisk, rdev1->bdev,
 				  rdev1->data_offset << 9);
-
 		if (rdev1->bdev->bd_disk->queue->merge_bvec_fn)
 			conf->has_merge_bvec = 1;
 

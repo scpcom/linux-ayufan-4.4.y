@@ -527,7 +527,7 @@ static int read_balance(struct r1conf *conf, struct r1bio *r1_bio, int *max_sect
 		rdev = rcu_dereference(conf->mirrors[disk].rdev);
 		if (r1_bio->bios[disk] == IO_BLOCKED
 		    || rdev == NULL
-		    || test_bit(Unmerged, &rdev->flags)
+			|| test_bit(Unmerged, &rdev->flags)
 		    || test_bit(Faulty, &rdev->flags))
 			continue;
 		if (!test_bit(In_sync, &rdev->flags) &&
@@ -582,30 +582,12 @@ static int read_balance(struct r1conf *conf, struct r1bio *r1_bio, int *max_sect
 			best_good_sectors = sectors;
 
 		dist = abs(this_sector - conf->mirrors[disk].head_position);
-		/* Prefer idle disk, but still choose best if more than one idle disk:
-		 * We add an artifical, arbitrary (Max/2) weight to busy disks to favor 
-		 * idle disks. If the distance is greater than Max/2, then we make it
-		 * the maximum value. We may not choose the smaller distance if all disks
-		 * fall into that situation, but since all disks will have long seek times
-		 * we don't really care.
-		 * We may end up choosing a busy disk if idle disks have a very high 
-		 * distance, but this may actually be preferable to minimize seek times.
-		 * If dist == 0, we choose that disk even if it busy to again minimize seek
-		 * times, as it is likely a sequential read with a single pending request.
-		 * TODO: use per disk next_seq_sect to better detect sequential reads?
-		 */
-		if (dist == 0) {
-			best_disk = disk;
-			break;
-		}
-		if (atomic_read(&rdev->nr_pending) != 0) {
-			if (dist < MaxSector/2)
-				dist += MaxSector / 2; 
-			else dist = MaxSector - 1;
-		}
 		if (choose_first
 		    /* Don't change to another disk for sequential reads */
-		    || conf->next_seq_sect == this_sector) {
+		    || conf->next_seq_sect == this_sector
+		    || dist == 0
+		    /* If device is idle, use it */
+		    || atomic_read(&rdev->nr_pending) == 0) {
 			best_disk = disk;
 			break;
 		}
@@ -1386,7 +1368,7 @@ static int raid1_add_disk(struct mddev *mddev, struct md_rdev *rdev)
 		mddev->merge_check_needed = 1;
 	}
 
-	for (mirror = first; mirror <= last; mirror++)
+	for (mirror = first; mirror <= last; mirror++) 
 		if ( !(p=conf->mirrors+mirror)->rdev) {
 
 			disk_stack_limits(mddev->gendisk, rdev->bdev,
@@ -1416,6 +1398,7 @@ static int raid1_add_disk(struct mddev *mddev, struct md_rdev *rdev)
 		lower_barrier(conf);
 		clear_bit(Unmerged, &rdev->flags);
 	}
+
 	md_integrity_add_rdev(rdev, mddev);
 	print_conf(conf);
 	return err;
@@ -2520,6 +2503,7 @@ static struct r1conf *setup_conf(struct mddev *mddev)
 
 	spin_lock_init(&conf->device_lock);
 	list_for_each_entry(rdev, &mddev->disks, same_set) {
+		struct request_queue *q;
 		int disk_idx = rdev->raid_disk;
 		if (disk_idx >= mddev->raid_disks
 		    || disk_idx < 0)
@@ -2527,6 +2511,9 @@ static struct r1conf *setup_conf(struct mddev *mddev)
 		disk = conf->mirrors + disk_idx;
 
 		disk->rdev = rdev;
+		q = bdev_get_queue(rdev->bdev);
+		if (q->merge_bvec_fn)
+			mddev->merge_check_needed = 1;
 
 		disk->head_position = 0;
 	}

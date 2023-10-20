@@ -79,7 +79,7 @@ static int linear_mergeable_bvec(struct request_queue *q,
 		bvm->bi_bdev = dev0->rdev->bdev;
 		bvm->bi_sector -= dev0->end_sector - dev0->rdev->sectors;
 		maxbytes = min(maxbytes, subq->merge_bvec_fn(subq, bvm,
-							     biovec));
+													 biovec));
 	}
 	rcu_read_unlock();
 

@@ -339,9 +339,9 @@ struct mddev {
 							 * adding a spare
 							 */
 	int				merge_check_needed; /* at least one
-							     * member device
-							     * has a
-							     * merge_bvec_fn */
+										  * member device
+										  * has a
+										  * merge_bvec_fn */
 
 	atomic_t			recovery_active; /* blocks scheduled, but not written */
 	wait_queue_head_t		recovery_wait;

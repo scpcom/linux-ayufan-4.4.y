@@ -532,7 +532,7 @@ static sector_t raid10_find_virt(struct r10conf *conf, sector_t sector, int dev)
  *	@biovec: the request that could be merged to it.
  *
  *	Return amount of bytes we can accept at this offset
- *	This requires checking for end-of-chunk if near_copies != raid_disks,
+ *	This requires checking for end-of-chunk if near_copies != raid_disk,
  *	and for subordinate merge_bvec_fns if merge_check_needed.
  */
 static int raid10_mergeable_bvec(struct request_queue *q,
@@ -642,16 +642,16 @@ retry:
 		disk = r10_bio->devs[slot].devnum;
 		rdev = rcu_dereference(conf->mirrors[disk].rdev);
 		if (rdev == NULL || test_bit(Faulty, &rdev->flags) ||
-		    test_bit(Unmerged, &rdev->flags) ||
-		    r10_bio->devs[slot].addr + sectors > rdev->recovery_offset)
-			rdev = rcu_dereference(conf->mirrors[disk].rdev);
+			test_bit(Unmerged, &rdev->flags) ||
+			r10_bio->devs[slot].addr + sectors > rdev->recovery_offset)
+				rdev = rcu_dereference(conf->mirrors[disk].rdev);
 		if (rdev == NULL ||
-		    test_bit(Faulty, &rdev->flags) ||
-		    test_bit(Unmerged, &rdev->flags))
-			continue;
+			test_bit(Faulty, &rdev->flags) ||
+			test_bit(Unmerged, &rdev->flags))
+				continue;
 		if (!test_bit(In_sync, &rdev->flags) &&
-		    r10_bio->devs[slot].addr + sectors > rdev->recovery_offset)
-			continue;
+			r10_bio->devs[slot].addr + sectors > rdev->recovery_offset)
+				continue;
 
 		dev_sector = r10_bio->devs[slot].addr;
 		if (is_badblock(rdev, dev_sector, sectors,
@@ -1102,7 +1102,7 @@ retry_write:
 		}
 		r10_bio->devs[i].bio = NULL;
 		if (!rdev || test_bit(Faulty, &rdev->flags) ||
-		    test_bit(Unmerged, &rdev->flags)) {
+			test_bit(Unmerged, &rdev->flags)) {
 			set_bit(R10BIO_Degraded, &r10_bio->state);
 			continue;
 		}
@@ -1899,6 +1899,7 @@ static void fix_read_error(struct r10conf *conf, struct mddev *mddev, struct r10
 		       "md/raid10:%s: %s: Failing raid device\n",
 		       mdname(mddev), b);
 		md_error(mddev, conf->mirrors[d].rdev);
+		r10_bio->devs[r10_bio->read_slot].bio = IO_BLOCKED;
 		return;
 	}
 
@@ -1919,7 +1920,7 @@ static void fix_read_error(struct r10conf *conf, struct mddev *mddev, struct r10
 			d = r10_bio->devs[sl].devnum;
 			rdev = rcu_dereference(conf->mirrors[d].rdev);
 			if (rdev &&
-			    !test_bit(Unmerged, &rdev->flags) &&
+				!test_bit(Unmerged, &rdev->flags) &&
 			    test_bit(In_sync, &rdev->flags) &&
 			    is_badblock(rdev, r10_bio->devs[sl].addr + sect, s,
 					&first_bad, &bad_sectors) == 0) {
@@ -1953,8 +1954,11 @@ static void fix_read_error(struct r10conf *conf, struct mddev *mddev, struct r10
 				    rdev,
 				    r10_bio->devs[r10_bio->read_slot].addr
 				    + sect,
-				    s, 0))
+				    s, 0)) {
 				md_error(mddev, rdev);
+				r10_bio->devs[r10_bio->read_slot].bio
+					= IO_BLOCKED;
+			}
 			break;
 		}
 
@@ -1970,7 +1974,7 @@ static void fix_read_error(struct r10conf *conf, struct mddev *mddev, struct r10
 			d = r10_bio->devs[sl].devnum;
 			rdev = rcu_dereference(conf->mirrors[d].rdev);
 			if (!rdev ||
-			    test_bit(Unmerged, &rdev->flags) ||
+				test_bit(Unmerged, &rdev->flags) ||
 			    !test_bit(In_sync, &rdev->flags))
 				continue;
 
@@ -2179,7 +2183,7 @@ read_more:
 	rdev = conf->mirrors[mirror].rdev;
 	printk_ratelimited(
 		KERN_ERR
-		"md/raid10:%s: %s: redirecting"
+		"md/raid10:%s: %s: redirecting "
 		"sector %llu to another mirror\n",
 		mdname(mddev),
 		bdevname(rdev->bdev, b),
@@ -2968,14 +2972,17 @@ static int run(struct mddev *mddev)
 				 (conf->raid_disks / conf->near_copies));
 
 	list_for_each_entry(rdev, &mddev->disks, same_set) {
-
 		disk_idx = rdev->raid_disk;
 		if (disk_idx >= conf->raid_disks
 		    || disk_idx < 0)
 			continue;
 		disk = conf->mirrors + disk_idx;
 
+		if (disk->rdev)
+			goto out_free_conf;
+
 		disk->rdev = rdev;
+
 		disk_stack_limits(mddev->gendisk, rdev->bdev,
 				  rdev->data_offset << 9);
 

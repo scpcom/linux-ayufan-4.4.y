@@ -130,7 +130,7 @@ smb_sendv(struct TCP_Server_Info *server, struct kvec *iov, int n_vec)
 	unsigned int len = iov[0].iov_len;
 	unsigned int total_len;
 	int first_vec = 0;
-	unsigned int smb_buf_length = be32_to_cpu(smb_buffer->smb_buf_length);
+	unsigned int smb_buf_length = get_rfc1002_length(iov[0].iov_base);
 	struct socket *ssocket = server->ssocket;
 
 	if (ssocket == NULL)
@@ -415,7 +415,7 @@ SendReceiveNoRsp(const unsigned int xid, struct cifs_ses *ses,
 	int resp_buf_type;
 
 	iov[0].iov_base = (char *)in_buf;
-	iov[0].iov_len = be32_to_cpu(in_buf->smb_buf_length) + 4;
+	iov[0].iov_len = get_rfc1002_length(in_buf) + 4;
 	flags |= CIFS_NO_RESP;
 	rc = SendReceive2(xid, ses, iov, 1, &resp_buf_type, flags);
 	cFYI(DBG2, "SendRcvNoRsp flags %d rc %d", flags, rc);
@@ -505,7 +505,7 @@ int
 cifs_check_receive(struct mid_q_entry *mid, struct TCP_Server_Info *server,
 		   bool log_error)
 {
-	unsigned int len = be32_to_cpu(mid->resp_buf->smb_buf_length) + 4;
+	unsigned int len = get_rfc1002_length(mid->resp_buf) + 4;
 
 	dump_smb(mid->resp_buf, min_t(u32, 92, len));
 
@@ -631,7 +631,7 @@ SendReceive2(const unsigned int xid, struct cifs_ses *ses,
 	}
 
 	iov[0].iov_base = (char *)midQ->resp_buf;
-	iov[0].iov_len = be32_to_cpu(midQ->resp_buf->smb_buf_length) + 4;
+	iov[0].iov_len = get_rfc1002_length(midQ->resp_buf) + 4;
 	if (midQ->largeBuf)
 		*pRespBufType = CIFS_LARGE_BUFFER;
 	else
@@ -709,7 +709,7 @@ SendReceive(const unsigned int xid, struct cifs_ses *ses,
 	midQ->midState = MID_REQUEST_SUBMITTED;
 
 	cifs_in_send_inc(ses->server);
-	rc = smb_send(ses->server, in_buf, be32_to_cpu(in_buf->smb_buf_length));
+	rc = smb_send(ses->server, in_buf, get_rfc1002_length(in_buf));
 	cifs_in_send_dec(ses->server);
 	cifs_save_when_sent(midQ);
 	mutex_unlock(&ses->server->srv_mutex);
@@ -749,7 +749,7 @@ SendReceive(const unsigned int xid, struct cifs_ses *ses,
 		goto out;
 	}
 
-	*pbytes_returned = be32_to_cpu(midQ->resp_buf->smb_buf_length);
+	*pbytes_returned = get_rfc1002_length(midQ->resp_buf);
 	memcpy(out_buf, midQ->resp_buf, *pbytes_returned + 4);
 	rc = cifs_check_receive(midQ, ses->server, 0);
 out:
@@ -917,7 +917,7 @@ SendReceiveBlockingLock(const unsigned int xid, struct cifs_tcon *tcon,
 		goto out;
 	}
 
-	*pbytes_returned = be32_to_cpu(midQ->resp_buf->smb_buf_length);
+	*pbytes_returned = get_rfc1002_length(midQ->resp_buf);
 	memcpy(out_buf, midQ->resp_buf, *pbytes_returned + 4);
 	rc = cifs_check_receive(midQ, ses->server, 0);
 out:

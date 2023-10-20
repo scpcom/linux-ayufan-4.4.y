@@ -708,8 +708,7 @@ standard_receive3(struct TCP_Server_Info *server, struct mid_q_entry *mid)
 {
 	int length;
 	char *buf = server->smallbuf;
-	struct smb_hdr *smb_buffer = (struct smb_hdr *)buf;
-	unsigned int pdu_length = be32_to_cpu(smb_buffer->smb_buf_length);
+	unsigned int pdu_length = get_rfc1002_length(buf);
 
 	/* make sure this will fit in a large buffer */
 	if (pdu_length > CIFSMaxBufSize + MAX_CIFS_HDR_SIZE - 4) {
@@ -725,7 +724,6 @@ standard_receive3(struct TCP_Server_Info *server, struct mid_q_entry *mid)
 		server->large_buf = true;
 		memcpy(server->bigbuf, server->smallbuf, server->total_read);
 		buf = server->bigbuf;
-		smb_buffer = (struct smb_hdr *)buf;
 	}
 
 	/* now read the rest */
@@ -736,7 +734,7 @@ standard_receive3(struct TCP_Server_Info *server, struct mid_q_entry *mid)
 		return length;
 	server->total_read += length;
 
-	dump_smb(smb_buffer, server->total_read);
+	dump_smb((struct smb_hdr*)buf, server->total_read);
 
 	/*
 	 * We know that we received enough to get to the MID as we
@@ -747,7 +745,7 @@ standard_receive3(struct TCP_Server_Info *server, struct mid_q_entry *mid)
 	 * 48 bytes is enough to display the header and a little bit
 	 * into the payload for debugging purposes.
 	 */
-	length = checkSMB(smb_buffer, smb_buffer->Mid, server->total_read);
+	length = checkSMB((struct smb_hdr*)buf, ((struct smb_hdr*)buf)->Mid, server->total_read);
 	if (length != 0)
 		cifs_dump_mem("Bad SMB: ", buf,
 			min_t(unsigned int, server->total_read, 48));
@@ -755,7 +753,7 @@ standard_receive3(struct TCP_Server_Info *server, struct mid_q_entry *mid)
 	if (!mid)
 		return length;
 
-	handle_mid(mid, server, smb_buffer, length);
+	handle_mid(mid, server, (struct smb_hdr*)buf, length);
 	return 0;
 }
 
@@ -787,7 +785,6 @@ cifs_demultiplex_thread(void *p)
 			continue;
 
 		server->large_buf = false;
-		smb_buffer = (struct smb_hdr *)server->smallbuf;
 		buf = server->smallbuf;
 		pdu_length = 4; /* enough to get RFC1001 header */
 
@@ -800,7 +797,7 @@ cifs_demultiplex_thread(void *p)
 		 * The right amount was read from socket - 4 bytes,
 		 * so we can now interpret the length field.
 		 */
-		pdu_length = be32_to_cpu(smb_buffer->smb_buf_length);
+		pdu_length = get_rfc1002_length(buf);
 
 		cFYI(1, "RFC1002 header 0x%x", pdu_length);
 		if (!is_smb_response(server, buf[0]))
@@ -822,7 +819,7 @@ cifs_demultiplex_thread(void *p)
 			continue;
 		server->total_read += length;
 
-		mid_entry = find_mid(server, smb_buffer);
+		mid_entry = find_mid(server, (struct smb_hdr*)buf);
 
 		if (!mid_entry || !mid_entry->receive)
 			length = standard_receive3(server, mid_entry);
@@ -832,22 +829,20 @@ cifs_demultiplex_thread(void *p)
 		if (length < 0)
 			continue;
 
-		if (server->large_buf) {
-			buf = server->bigbuf;
-			smb_buffer = (struct smb_hdr *)buf;
-		}
+		if (server->large_buf)
+			buf = (char*)server->bigbuf;
 
 		server->lstrp = jiffies;
 		if (mid_entry != NULL) {
 			if (!mid_entry->multiRsp || mid_entry->multiEnd)
 				mid_entry->callback(mid_entry);
-		} else if (!is_valid_oplock_break(smb_buffer, server)) {
+		} else if (!is_valid_oplock_break((struct smb_hdr*)buf, server)) {
 			cERROR(1, "No task to wake, unknown frame received! "
 				   "NumMids %d", atomic_read(&midCount));
 			cifs_dump_mem("Received Data is: ", buf,
 				      sizeof(struct smb_hdr));
 #ifdef CONFIG_CIFS_DEBUG2
-			cifs_dump_detail(smb_buffer);
+			cifs_dump_detail((struct smb_hdr*)buf);
 			cifs_dump_mids(server);
 #endif /* CIFS_DEBUG2 */
 
@@ -1113,7 +1108,8 @@ cifs_parse_mount_options(const char *mountdata, const char *devname,
 				cERROR(1, "Krb5 cifs privacy not supported");
 				goto cifs_parse_mount_err;
 			} else if (strnicmp(value, "krb5", 4) == 0) {
-				vol->secFlg |= CIFSSEC_MAY_KRB5;
+				vol->secFlg |= CIFSSEC_MAY_KRB5 | 
+					CIFSSEC_MAY_SIGN;
 			} else if (strnicmp(value, "ntlmsspi", 8) == 0) {
 				vol->secFlg |= CIFSSEC_MAY_NTLMSSP |
 					CIFSSEC_MUST_SIGN;
