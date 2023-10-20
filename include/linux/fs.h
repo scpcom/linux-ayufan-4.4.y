@@ -378,6 +378,12 @@ struct inodes_stat_t {
 #define SYNC_FILE_RANGE_WRITE		2
 #define SYNC_FILE_RANGE_WAIT_AFTER	4
 
+#ifdef CONFIG_COMCERTO_64K_PAGES
+#define MAX_PAGES_PER_RECVFILE	2
+#else
+#define MAX_PAGES_PER_RECVFILE	32
+#endif
+
 #ifdef __KERNEL__
 
 #include <linux/linkage.h>
