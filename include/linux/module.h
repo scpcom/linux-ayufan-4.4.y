@@ -86,8 +86,11 @@ void trim_init_extable(struct module *m);
 extern const struct gtype##_id __mod_##gtype##_table		\
   __attribute__ ((unused, alias(__stringify(name))))
 
+extern struct module __this_module;
+#define THIS_MODULE (&__this_module)
 #else  /* !MODULE */
 #define MODULE_GENERIC_TABLE(gtype,name)
+#define THIS_MODULE ((struct module *)0)
 #endif
 
 /* Generic info of form tag = "info" */

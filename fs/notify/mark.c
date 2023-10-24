@@ -175,8 +175,18 @@ void fsnotify_destroy_mark(struct fsnotify_mark *mark)
 	 * is just a lazy update (and could be a perf win...)
 	 */
 
-	if (inode && (mark->flags & FSNOTIFY_MARK_FLAG_OBJECT_PINNED))
-		iput(inode);
+	/*
+	# ITR:75721
+	# Abstract
+	# AAT: Hang during reboot (USB drive is attached) / Kernel crash on shutdown
+	# if (inode && (mark->flags & FSNOTIFY_MARK_FLAG_OBJECT_PINNED))
+	# 	iput(inode);
+	*/
+	if (inode && (mark->flags & FSNOTIFY_MARK_FLAG_OBJECT_PINNED)) {
+		/* Lets check if inode belongs to a valid super block or not. */
+		if (inode->i_sb && inode->i_sb->s_count > 0)
+			iput(inode);
+	}
 
 	/*
 	 * We don't necessarily have a ref on mark from caller so the above iput

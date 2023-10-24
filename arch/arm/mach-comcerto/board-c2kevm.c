@@ -239,7 +239,7 @@ struct spi_platform_data spi_pdata = {
 static struct spi_board_info comcerto_spi_board_info[] = {
 	{
 		/* FIXME: for chipselect-0 */
-		.modalias = "s25fl256s0",
+		.modalias = "w25x40",
 		.chip_select = 0,
 		.max_speed_hz = 4*1000*1000,
 		.bus_num = 0,
@@ -524,10 +524,14 @@ static struct comcerto_pfe_platform_data comcerto_pfe_pdata = {
 	 */
 	.comcerto_mdio_pdata[0] = {
 		.enabled = 1,
-		.phy_mask = 0xFFFFFFEF,
+        // JO: address...?
+		//.phy_mask = 0xFFFFFFEF,
+		.phy_mask = 0xFFFFFF00,
 		.mdc_div = 96,
 		.irq = {
-			[4] = PHY_POLL,
+            // jo: Changed to match phy number for broadcom phy above...
+			//[4] = PHY_POLL,
+			[0] = PHY_POLL,
 		},
 	},
 };

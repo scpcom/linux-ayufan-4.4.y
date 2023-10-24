@@ -817,7 +817,29 @@ SYSCALL_DEFINE2(inotify_rm_watch, int, fd, __s32, wd)
 
 	ret = 0;
 
-	fsnotify_destroy_mark(&i_mark->fsn_mark);
+	/*
+	 # ITR:75721
+	 # Abstract
+	 # AAT: Hang during reboot (USB drive is attached) / Kernel crash on shutdown
+	 * Check if this event is for an Inode change - if so
+	 * take a s_umount lock for inode's superblock so that if the
+	 * superblock is being destroyed the access to inode->i_sb is verified to be
+	 * for a valid super_block (or not).
+	 * If it is no longer valid the the group id will be NULL down the line in
+	 * fsnotify_destroy_mark() and this error will lead us to the kernel oops if
+	 * it is the loser of the race: between the umount path of superblock and
+	 * fsnotification path where it will call iput(inode)...
+	 */
+	if (i_mark->fsn_mark.flags & FSNOTIFY_MARK_FLAG_INODE) {
+		struct inode *inode;
+		inode = i_mark->fsn_mark.i.inode;
+		if (inode) {
+			down_read(&inode->i_sb->s_umount);
+			fsnotify_destroy_mark(&i_mark->fsn_mark);
+			up_read(&inode->i_sb->s_umount);
+		}
+	} else
+		fsnotify_destroy_mark(&i_mark->fsn_mark);
 
 	/* match ref taken by inotify_idr_find */
 	fsnotify_put_mark(&i_mark->fsn_mark);

@@ -469,8 +469,8 @@ static DEVICE_ATTR(field, S_IRUGO, sdev_show_##field, NULL);
  * sdev_rw_attr: create a function and attribute variable for a
  * read/write field.
  */
-#define sdev_rw_attr(field, format_string)				\
-	sdev_show_function(field, format_string)				\
+#define sdev_rw_attr(field, r_format_string, w_format_string)				\
+	sdev_show_function(field, r_format_string)				\
 									\
 static ssize_t								\
 sdev_store_##field (struct device *dev, struct device_attribute *attr,	\
@@ -478,7 +478,7 @@ sdev_store_##field (struct device *dev, struct device_attribute *attr,	\
 {									\
 	struct scsi_device *sdev;					\
 	sdev = to_scsi_device(dev);					\
-	sscanf (buf, format_string, &sdev->field);			\
+	sscanf (buf, w_format_string, &sdev->field);			\
 	return count;							\
 }									\
 static DEVICE_ATTR(field, S_IRUGO | S_IWUSR, sdev_show_##field, sdev_store_##field);
@@ -532,7 +532,7 @@ static int scsi_sdev_check_buf_bit(const char *buf)
 sdev_rd_attr (device_blocked, "%d\n");
 sdev_rd_attr (queue_depth, "%d\n");
 sdev_rd_attr (type, "%d\n");
-sdev_rd_attr (scsi_level, "%d\n");
+sdev_rw_attr (scsi_level, "%d\n", "%hhd\n");
 sdev_rd_attr (vendor, "%.8s\n");
 sdev_rd_attr (model, "%.16s\n");
 sdev_rd_attr (rev, "%.4s\n");

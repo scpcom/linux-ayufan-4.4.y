@@ -1151,17 +1151,15 @@ static int __init clk_disable_unused(void)
 		if (clk->usecount > 0)
 			continue;
 
-		/* FIXME Currently there is no clock FW support for the
-                 * following clocks in corresponding driver . So skipping these
-		 * clocks from by default disable state.
-                 * All other unused clocks will be disabled.
+		/* FIXME Currently We Are Only Disabling The EXT PHY0/1/2 
+		 * Clock For No Harm.
                 */
-		if ( strcmp(clk->name, "hfe_core") &&
-				strcmp(clk->name, "ipsec_eape") &&
-				strcmp(clk->name, "pll3") &&
-				strcmp(clk->name, "arm_peri") )
+		// Western Digital: Using EXT_PHY0 for 25mhz clock for eth0.
+		//if ( !strcmp(clk->name, "ext_phy0") || !strcmp(clk->name, "ext_phy1")
+		//				   || !strcmp(clk->name, "ext_phy2") ) 
+		if ( !strcmp(clk->name, "ext_phy1") || !strcmp(clk->name, "ext_phy2") )
 		{
-			pr_info("Clocks: disabled unused %s\n", clk->name);
+			pr_debug("Clocks: disabled unused %s\n", clk->name);
 			__clk_disable_unused(clk);
 		}
 	}

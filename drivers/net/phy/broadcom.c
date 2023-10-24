@@ -273,6 +273,42 @@ static int bcm50610_a0_workaround(struct phy_device *phydev)
 	return err;
 }
 
+
+#define CONFIG_WD
+#ifdef CONFIG_WD
+// 5/12/2012 ShaunA - added support for BCM54610 PHY
+static int bcm54610_config_init(struct phy_device *phydev)
+{
+        int regb, rega;
+
+        phy_write(phydev, 0x1C, 0x2C00);
+        regb = phy_read(phydev, 0x1C);
+
+        phy_write(phydev, 0x1C, 0xAC8C);
+
+        phy_write(phydev, 0x1C, 0x2C00);
+        rega = phy_read(phydev, 0x1C);
+
+        printk(KERN_INFO "%s: before 0x%04x, after 0x%04x\n",
+               __FUNCTION__, (regb & 0xffff), (rega & 0xffff));
+
+        /* the RGMII interface is not half-duplex capable */
+        rega = phy_read(phydev, 0x04);
+        phy_write(phydev, 0x04, rega & ~0x00a0);
+
+        regb = phy_read(phydev, 0x09);
+        phy_write(phydev, 0x09, regb & ~0x0100);
+
+        printk(KERN_INFO "%s: before 0x%04x, 0x%04x; after 0x%04x, 0x%04x\n",
+               __FUNCTION__, (rega & 0xffff), (regb & 0xffff),
+               (phy_read(phydev, 0x04) & 0xffff), (phy_read(phydev, 0x09) & 0xffff));
+
+        return 0;
+}
+
+#endif
+
+
 static int bcm54xx_phydsp_config(struct phy_device *phydev)
 {
 	int err, err2;
@@ -849,9 +885,51 @@ static struct phy_driver bcm5241_driver = {
 	.driver		= { .owner = THIS_MODULE },
 };
 
+// 5/12/2012 ShaunA
+static struct phy_driver bcm54610_driver = {
+	.phy_id		= PHY_ID_BCM54610,
+	.phy_id_mask	= 0xffffffff,
+	.name		= "Broadcom BCM54610",
+	.features	= PHY_GBIT_FEATURES |
+			  SUPPORTED_Pause | SUPPORTED_Asym_Pause,
+	.flags		= PHY_HAS_MAGICANEG | PHY_HAS_INTERRUPT,
+	.config_init	= bcm54610_config_init,
+	.config_aneg	= genphy_config_aneg,
+	.read_status	= genphy_read_status,
+	.ack_interrupt	= bcm54xx_ack_interrupt,
+	.config_intr	= bcm54xx_config_intr,
+	.driver		= { .owner = THIS_MODULE },
+};
+
+// JO...
+static struct phy_driver bcm54612_driver = {
+	.phy_id		= PHY_ID_BCM54612,
+	.phy_id_mask	= 0xffffffff,
+	.name		= "Broadcom BCM54612",
+	.features	= PHY_GBIT_FEATURES |
+			  SUPPORTED_Pause | SUPPORTED_Asym_Pause,
+	.flags		= PHY_HAS_MAGICANEG | PHY_HAS_INTERRUPT,
+	.config_init	= bcm54610_config_init,
+	.config_aneg	= genphy_config_aneg,
+	.read_status	= genphy_read_status,
+	.ack_interrupt	= bcm54xx_ack_interrupt,
+	.config_intr	= bcm54xx_config_intr,
+	.driver		= { .owner = THIS_MODULE },
+};
+
 static int __init broadcom_init(void)
 {
 	int ret;
+
+// JCO JO...
+	ret = phy_driver_register(&bcm54612_driver);
+	if (ret)
+		goto out_54612;
+
+// ShaunA
+	ret = phy_driver_register(&bcm54610_driver);
+	if (ret)
+		goto out_54610;
 
 	ret = phy_driver_register(&bcm5411_driver);
 	if (ret)
@@ -909,11 +987,17 @@ out_5461:
 out_5421:
 	phy_driver_unregister(&bcm5411_driver);
 out_5411:
+	phy_driver_unregister(&bcm54610_driver);
+out_54610:
+	phy_driver_unregister(&bcm54612_driver);
+out_54612:
 	return ret;
 }
 
 static void __exit broadcom_exit(void)
 {
+	phy_driver_unregister(&bcm54610_driver);
+	phy_driver_unregister(&bcm54612_driver);
 	phy_driver_unregister(&bcm5241_driver);
 	phy_driver_unregister(&bcmac131_driver);
 	phy_driver_unregister(&bcm57780_driver);

@@ -204,15 +204,22 @@ static __init void gpio_init(void)
 	/*[FIXME]: GPIO IRQ Configuration */
 	__raw_writel(COMCERTO_IRQ_RISING_EDGE_GPIO, COMCERTO_GPIO_INT_CFG_REG);
 
-#if !defined(CONFIG_C2K_MFCN_EVM)
 	/* [FIXME]: Need to have proper defines for enabling the GPIO irq */
-	__raw_writel(__raw_readl(COMCERTO_GPIO_OE_REG)     | (0x1 << 5), COMCERTO_GPIO_OE_REG);		// enable GPIO5 (SLIC_RESET_n) as output
-	__raw_writel(__raw_readl(COMCERTO_GPIO_OUTPUT_REG) | (0x1 << 5), COMCERTO_GPIO_OUTPUT_REG);     // clear reset
-	udelay(15);
-	__raw_writel(__raw_readl(COMCERTO_GPIO_OUTPUT_REG) & ~(0x1 << 5), COMCERTO_GPIO_OUTPUT_REG);	// put in reset
-	udelay(15);
-	__raw_writel(__raw_readl(COMCERTO_GPIO_OUTPUT_REG) | (0x1 << 5), COMCERTO_GPIO_OUTPUT_REG); 	// clear reset after some time
-#endif
+//	__raw_writel(__raw_readl(COMCERTO_GPIO_OE_REG)     | (0x1 << 5), COMCERTO_GPIO_OE_REG);       // enable GPIO5 (SLIC_RESET_n) as output
+//	__raw_writel(__raw_readl(COMCERTO_GPIO_OE_REG)     | (0x33e0), COMCERTO_GPIO_OE_REG);         // Sequoia LED-GPIO
+//	__raw_writel(__raw_readl(COMCERTO_GPIO_OUTPUT_REG) & ~(0x33e0), COMCERTO_GPIO_OUTPUT_REG);    // Sequoia LED-GPIO
+//	__raw_writel(__raw_readl(COMCERTO_GPIO_PIN_SELECT_REG) | (GPIO5_PWM1), COMCERTO_GPIO_PIN_SELECT_REG);  // Select GPIO5 as PWM1
+	__raw_writel(__raw_readl(COMCERTO_GPIO_PIN_SELECT_REG) | (GPIO4_PWM0), COMCERTO_GPIO_PIN_SELECT_REG);  // Select GPIO4 as PWM0
+	__raw_writel(__raw_readl(COMCERTO_PWM_REG) | (0xff), COMCERTO_PWM_REG);                       // Set PWM CLK Divider (val = 255)
+	__raw_writel(__raw_readl(COMCERTO_PWM_REG) | (0x1 << 31), COMCERTO_PWM_REG);                  // Enable PWM CLK Divider
+
+	
+
+// 	__raw_writel(__raw_readl(COMCERTO_GPIO_OUTPUT_REG) | (0x1 << 5), COMCERTO_GPIO_OUTPUT_REG);   // clear reset
+//	udelay(15);
+//	__raw_writel(__raw_readl(COMCERTO_GPIO_OUTPUT_REG) & ~(0x1 << 5), COMCERTO_GPIO_OUTPUT_REG);  // put in reset
+//	udelay(15);
+//	__raw_writel(__raw_readl(COMCERTO_GPIO_OUTPUT_REG) | (0x1 << 5), COMCERTO_GPIO_OUTPUT_REG);   // clear reset after some time
 	__raw_writel(0x4, COMCERTO_GPIO_INT_CFG_REG); /* si3227 is falling edge interrupt(gpio1) */
 
 
@@ -279,9 +286,9 @@ static __init void exp_bus_init(void)
 
 			/*Chip select timing configuration*/
 			/* [FIXME] : Using default timing values */
-			__raw_writel(comcerto_exp_values[cs][4], COMCERTO_EXP_CSx_TMG1_R(cs));
-			__raw_writel(comcerto_exp_values[cs][5], COMCERTO_EXP_CSx_TMG2_R(cs));
-			__raw_writel(comcerto_exp_values[cs][6], COMCERTO_EXP_CSx_TMG3_R(cs));
+			//__raw_writel(comcerto_exp_values[cs][4], COMCERTO_EXP_CSx_TMG1_R(cs));
+			//__raw_writel(comcerto_exp_values[cs][5], COMCERTO_EXP_CSx_TMG2_R(cs));
+			//__raw_writel(comcerto_exp_values[cs][6], COMCERTO_EXP_CSx_TMG3_R(cs));
 		}
 	}
 

@@ -9,6 +9,9 @@
 #define PHY_ID_BCM5464			0x002060b0
 #define PHY_ID_BCM5461			0x002060c0
 #define PHY_ID_BCM57780			0x03625d90
+#define PHY_ID_BCM54610			0x0143bd63
+#define PHY_ID_BCM54612 		0x03625e6a
+
 
 #define PHY_BCM_OUI_MASK		0xfffffc00
 #define PHY_BCM_OUI_1			0x00206000

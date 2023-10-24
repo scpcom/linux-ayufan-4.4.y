@@ -128,9 +128,9 @@
 #define GPIO_PIN_2		(0x1 << 2)
 #define GPIO_PIN_3		(0x1 << 3)
 #define GPIO_PIN_4		(0x1 << 4)
-#define GPIO_PIN_5		(0x1 << 5)
-#define GPIO_PIN_6		(0x1 << 6)
-#define GPIO_PIN_7		(0x1 << 7)
+#define GPIO_PIN_5		(0x1 << 5)             // GREEN LED
+#define GPIO_PIN_6		(0x1 << 6)             // BLUE LED
+#define GPIO_PIN_7		(0x1 << 7)             // RED LED
 #define GPIO_PIN_8		(0x1 << 8)
 #define GPIO_PIN_9		(0x1 << 9)
 #define GPIO_PIN_10		(0x1 << 10)

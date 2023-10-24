@@ -5170,7 +5170,7 @@ static int perf_swevent_init(struct perf_event *event)
 		break;
 	}
 
-	if (event_id >= PERF_COUNT_SW_MAX)
+	if (event_id < 0 || event_id >= PERF_COUNT_SW_MAX)
 		return -ENOENT;
 
 	if (!event->parent) {

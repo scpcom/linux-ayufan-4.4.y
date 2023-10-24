@@ -17,14 +17,42 @@
 #include <linux/rwsem.h>
 #include <linux/leds.h>
 
+#define  STATE_LED_OFF    0
+#define  STATE_LED_RED    1
+#define  STATE_LED_GREEN  2
+#define  STATE_LED_BLUE   3
+#define  STATE_LED_YELLOW 4
+#define  STATE_LED_ALL    5
+#define  STATE_LED_WHITE  5  /* save as _ALL */
+
+static inline void led_set_color(struct led_classdev *led_cdev,
+                                 enum led_brightness value)
+{
+	led_cdev->color = value;
+	if (!(led_cdev->flags & LED_SUSPENDED))
+		led_cdev->color_set(led_cdev, value);
+}
+
+static inline int led_get_color(struct led_classdev *led_cdev)
+{
+	return led_cdev->color;
+}
+static inline void led_set_blink(struct led_classdev *led_cdev,
+                                 enum led_brightness value)
+{
+	led_cdev->blink = value;
+        led_cdev->blink_set_3g(led_cdev, value);
+}
+
 static inline void led_set_brightness(struct led_classdev *led_cdev,
-					enum led_brightness value)
+                                      enum led_brightness value)
 {
 	if (value > led_cdev->max_brightness)
 		value = led_cdev->max_brightness;
 	led_cdev->brightness = value;
 	if (!(led_cdev->flags & LED_SUSPENDED))
 		led_cdev->brightness_set(led_cdev, value);
+	printk(KERN_DEBUG "We are here 8\n");
 }
 
 static inline int led_get_brightness(struct led_classdev *led_cdev)

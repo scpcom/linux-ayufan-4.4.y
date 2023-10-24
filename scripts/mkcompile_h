@@ -5,6 +5,8 @@ ARCH=$2
 SMP=$3
 PREEMPT=$4
 CC=$5
+WDVERSION=2.0
+WDBUILDEXTRA=rel #dbg or rel, or build no
 
 vecho() { [ "${quiet}" = "silent_" ] || echo "$@" ; }
 
@@ -67,11 +69,15 @@ UTS_TRUNCATE="cut -b -$UTS_LEN"
 # Generate a temporary compile.h
 
 ( echo /\* This file is auto generated, version $VERSION \*/
+ 
   if [ -n "$CONFIG_FLAGS" ] ; then echo "/* $CONFIG_FLAGS */"; fi
+  
+  echo \#define WDVERSION \"$WDVERSION\"
+  echo \#define WDBUILDEXTRA \"$WDBUILDEXTRA\"
   
   echo \#define UTS_MACHINE \"$ARCH\"
 
-  echo \#define UTS_VERSION \"`echo $UTS_VERSION | $UTS_TRUNCATE`\"
+  echo \#define UTS_VERSION \"`echo $UTS_VERSION wd-$WDVERSION-$WDBUILDEXTRA | $UTS_TRUNCATE`\"
 
   echo \#define LINUX_COMPILE_BY \"`echo $LINUX_COMPILE_BY | $UTS_TRUNCATE`\"
   echo \#define LINUX_COMPILE_HOST \"`echo $LINUX_COMPILE_HOST | $UTS_TRUNCATE`\"

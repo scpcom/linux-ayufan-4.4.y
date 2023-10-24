@@ -20,7 +20,61 @@
 #include <linux/err.h>
 #include <linux/ctype.h>
 #include <linux/leds.h>
+#include <mach/gpio.h>
 #include "leds.h"
+
+#define MAX_USERS          32
+#define N_COLORS           4
+#define N_EVENTS           3
+#define USR_LEN            81
+#define EVENT_LEN          81
+#define INDEX_LEN          8
+
+
+/* LED users */
+#define EV_NAS_SYSTEM      0    /* Overall system: NAS ready, booting, shutdown... */
+#define EV_DISK_SMART      1    /* Disk SMART including temp., error lba, ...*/
+#define EV_DISK_IO         2    /* Disk read/write error */
+#define EV_RAID_CFG        3    /* RAID setup failure: assembling, formatting, rebuild ...*/
+#define EV_FW_UPDATE       4    /* NAS firmware update */
+#define EV_NETWORK         5    /* Network connectivity error */
+#define EV_VM              6    /* Volume manager */
+
+char Led_user_arr[MAX_USERS][USR_LEN] = { "EV_NAS_SYSTEM", \
+                                          "EV_DISK_SMART", \
+                                          "EV_DISK_IO"   , \
+                                          "EV_RAID_CFG"  , \
+                                          "EV_FW_UPDATE" , \
+                                          "EV_NETWORK"   , \
+                                          "EV_VM",         \
+                                        };
+/* LED event types */
+#define   LED_STAT_OK        0    /* Happy user, normal operation */
+#define   LED_STAT_ERR       1    /* User error, needs led indication */
+#define   LED_STAT_IN_PROG   2    /* User doing something important, needs led indication */
+
+char *Led_ev_arr[] = { "LED_STAT_OK", "LED_STAT_ERR", "LED_STAT_IN_PROG" };
+
+char Color_map[MAX_USERS][N_EVENTS]  = { {'g','r','w'}, /* EV_NAS_SYSTEM */ \
+                                         {'g','y','w'}, /* EV_DISK_SMART */ \
+                                         {'g','r','w'}, /* EV_DISK_IO    */ \
+                                         {'g','r','w'}, /* EV_RAID_CFG   */ \
+                                         {'g','r','w'}, /* EV_FW_UPDATE  */ \
+                                         {'g','y','w'}, /* EV_NETWORK    */ \
+                                         {'g','r','w'}, /* EV_VM */ \
+                                       };
+
+char Blink_map[MAX_USERS][N_EVENTS]  = { {'n','n','n'}, /* EV_NAS_SYSTEM */ \
+                                         {'n','y','n'}, /* EV_DISK_SMART */ \
+                                         {'n','n','n'}, /* EV_DISK_IO    */ \
+                                         {'n','n','n'}, /* EV_RAID_CFG   */ \
+                                         {'n','n','n'}, /* EV_FW_UPDATE  */ \
+                                         {'n','y','n'}, /* EV_NETWORK    */ \
+                                         {'n','n','n'}, /* EV_VM */ \
+                                       };
+
+u32  Led_error_bits = 0;
+int  N_USERS = 7;    /* default number of users */
 
 static struct class *leds_class;
 
@@ -31,7 +85,7 @@ static void led_update_brightness(struct led_classdev *led_cdev)
 }
 
 static ssize_t led_brightness_show(struct device *dev, 
-		struct device_attribute *attr, char *buf)
+                                   struct device_attribute *attr, char *buf)
 {
 	struct led_classdev *led_cdev = dev_get_drvdata(dev);
 
@@ -42,7 +96,7 @@ static ssize_t led_brightness_show(struct device *dev,
 }
 
 static ssize_t led_brightness_store(struct device *dev,
-		struct device_attribute *attr, const char *buf, size_t size)
+                                    struct device_attribute *attr, const char *buf, size_t size)
 {
 	struct led_classdev *led_cdev = dev_get_drvdata(dev);
 	ssize_t ret = -EINVAL;
@@ -52,15 +106,13 @@ static ssize_t led_brightness_store(struct device *dev,
 
 	if (isspace(*after))
 		count++;
-
 	if (count == size) {
 		ret = count;
-
 		if (state == LED_OFF)
 			led_trigger_remove(led_cdev);
 		led_set_brightness(led_cdev, state);
 	}
-
+	printk(KERN_DEBUG "We are here 10\n");
 	return ret;
 }
 
@@ -72,7 +124,278 @@ static ssize_t led_max_brightness_show(struct device *dev,
 	return sprintf(buf, "%u\n", led_cdev->max_brightness);
 }
 
+static void led_update_color(struct led_classdev *led_cdev)
+{
+    if (led_cdev->color_get)
+        led_cdev->color = led_cdev->color_get(led_cdev);
+}
+
+static ssize_t led_color_show(struct device *dev, struct device_attribute *attr, char *buf) 
+{
+	struct led_classdev *led_cdev = dev_get_drvdata(dev);
+	char * readbuf[] = {"off", "red", "green", "blue", "yellow", "white"} ;
+	/* no lock needed for this */
+	led_update_color(led_cdev);
+
+	return sprintf(buf, "%s\n", readbuf[led_cdev->color]);
+}
+
+static ssize_t led_color_store(struct device *dev, struct device_attribute *attr, const char *buf, size_t size)
+{
+	struct led_classdev *led_cdev = dev_get_drvdata(dev);
+	unsigned long state = 9;
+	char user[USR_LEN], event[EVENT_LEN], index_str[INDEX_LEN], color;
+	int i = 0, j = 0, found = 0, tmp = 0, edit_policy = 0;
+	int reg_user = -1, reg_event = -1, reg_color = -1;
+	const char * cptr = NULL;
+	long int index = -1;
+	char blink;
+	int reg_blink = 'n';
+
+	cptr = &buf[0];
+
+	/* check for 'register' event */
+	// NB: Format of register event is 
+	// register:event,status,color
+	if( cptr[8] == ':' ) {
+		if( !memcmp("register", cptr, 8) ) {
+			edit_policy = 1;
+			cptr = &buf[9];
+		}
+	}
+
+	/* parse user name */ 
+	for( i = 0; i < (USR_LEN -1) && cptr[i]; i++ ) {
+		if( cptr[i] == ',' ) {
+			break;
+		}
+		user[i] = cptr[i];
+	}
+
+	/* null terminate user buf */
+	user[i] = '\0';
+	i++; /* skips the ',' delimiter */
+
+
+	for( j = 0; (j < EVENT_LEN -1) && cptr[i] ; j++,i++ ) {
+		if( (cptr[i] == ',') || (cptr[i] == '\0') || (cptr[i] == '\n') ) {
+			if( cptr[i] == ',' ) {
+				cptr = &cptr[i+1];
+			}
+			break;
+		}
+		event[j] = cptr[i];
+	}
+	/* null terminate event buf */
+	event[j] = '\0';
+
+	/* if editing policy, parse the color */ 
+	if( edit_policy ) {
+		if( cptr != NULL ) {
+			reg_color = cptr[0];  /* r,g,b,y,w */
+			if( reg_color != 'r' && reg_color != 'g' && 
+				reg_color != 'b' && reg_color != 'y' && reg_color != 'w' ) {
+				reg_color = -1;  /* invalid color */               
+			}
+
+			/** TBD: Get the value of reg_blink from cptr */
+		}
+	} else {
+		/* scan index for some users */
+		if( !strcmp(user, Led_user_arr[EV_DISK_SMART]) || 
+		    !strcmp(user, Led_user_arr[EV_DISK_IO]) ) {
+			if( cptr != NULL ) {
+				for( i = 0; (i < INDEX_LEN -1) && cptr[i] ; i++ ) {
+					if( (cptr[i] == ',') || (cptr[i] == '\0') || (cptr[i] == '\n') ) {
+						break;
+					}
+					index_str[i] = cptr[i];
+				}
+			}
+		}
+
+		/* null terminate index_str */
+		index_str[i] = '\0';
+		if( i ) {
+			tmp = strict_strtol(index_str, 10, &index);
+			if( !tmp && (index >= 0) ) {
+				/*
+				* TODO: insert code to fulfill req's. Currently not required.
+				*/
+				/*printk(KERN_INFO "\nindex %ld\n", index);*/
+			}
+		}
+	} /* if( !edit_policy ) */
+
+	/* Validate user and event */
+	found = 0; 
+	for( i = 0; i < N_USERS; i++ ) {
+		if( !strcmp( Led_user_arr[i], user ) ) {
+			found = 1;
+			break;
+		}
+	}
+
+	if( found || edit_policy) {
+		reg_user = i;
+		/* new user registration */
+		if( ! found ) {
+			if( N_USERS == MAX_USERS ) {
+			/* only support up to 32 users */
+				return (ssize_t)size;
+			}
+			reg_user = N_USERS++;
+
+			strcpy(Led_user_arr[reg_user], user);
+		}
+		found = 0;
+		for( j = 0; j < N_EVENTS; j++ ) {
+			if( ! strcmp(Led_ev_arr[j], event) ) {
+				if( j == LED_STAT_ERR ) {
+					Led_error_bits |= (1 << i); /* register error for this user */
+				}
+				else if( j == LED_STAT_OK ) {
+					Led_error_bits &= ~(1 << i); /* clear error for this user */
+				}
+				found = 1;
+				reg_event = j;
+				break;
+			}
+		}
+	}
+
+	/* if this is a register event, do just that */
+	if( edit_policy ) {
+		/* valid event above and color */
+		if( (reg_event != -1) && (reg_color != -1) ) {
+			Color_map[reg_user][reg_event] = reg_color;
+
+			/** TBD: Add support for registering blink with register: interface*/
+			reg_blink = 'n';
+			Blink_map[reg_user][reg_event] = reg_blink;
+		}
+		/*printk( KERN_INFO "reg_user = %d, reg_event= %d, reg_color = %c\n", reg_user, reg_event, reg_color, reg_blink);*/
+		return (ssize_t)size;
+	}
+
+	/* Be nice ! support older led mechanism */ 
+	color = buf[0];
+	blink = 'x';
+
+	/* If valid user and event, retrieve color & blink map */
+	if( found ) {
+		/* if a canceling event and other error(s) existing, don't do anything */
+		if( (j == LED_STAT_OK) && (Led_error_bits != 0) ) {
+			/* Do nothing */
+		} else {
+			color = Color_map[i][j];
+			blink = Blink_map[i][j];
+		}
+		/*printk(KERN_INFO "\nUser= %s, event= %s, color %c, %08x\n", user, event, color, blink, Led_error_bits);*/
+	}
+
+	switch (color) {
+		case 'o':         /* off */
+			state = STATE_LED_OFF;
+			break;
+		case 'r':         /* red */
+			state = STATE_LED_RED;
+			break;
+		case 'g':         /* green */
+			state = STATE_LED_GREEN;
+			break;
+		case 'b':         /* blue */
+			state = STATE_LED_BLUE;
+			break;
+		case 'y':         /* yellow */
+			state = STATE_LED_YELLOW;
+			break;
+		case 'w':         /* white */
+			state = STATE_LED_ALL;
+			break;
+		default:          /* error */
+			state = -1;
+			break;
+	}
+
+	/* do nothing if no color change is required */
+	if( state == -1 ) {
+		return (ssize_t)size;
+	}
+
+	/* printk(KERN_DEBUG "Calling led_set_color with value %c, blink is %c\n", color, blink); */
+	led_set_color(led_cdev, state);
+
+	/** blink the led */
+	{
+		int val = -1;
+
+		/* printk(KERN_DEBUG "Calling led_set_blink with value %c\n", blink); */
+
+		switch (blink) {
+			case 'y':	/** yes */
+				val = 1;
+				break;
+			case 'n':	/** no */
+				val = 0;
+				break;
+			case 'f':	/** forced */
+				val = 2;
+				break;
+			default:
+				break;
+		}
+
+		if( val >= 0 ) {
+			led_set_blink( led_cdev, val );
+		}
+	}
+
+
+	return (ssize_t)size;
+}
+
+static ssize_t led_blink_show(struct device *dev, struct device_attribute *attr,
+                              char *buf) {
+        char *blinkStr = "on";
+        struct led_classdev  *led_cdev = dev_get_drvdata(dev);
+        
+        if( led_cdev->blink == 0 ) {
+		blinkStr = "on";
+        } else if (led_cdev->blink == 1 ) {
+		blinkStr = "blink";
+        } else if (led_cdev->blink == 2 ) {
+		blinkStr = "pulse";
+	}
+
+    return sprintf(buf, "%s\n", blinkStr);
+}
+
+static ssize_t led_blink_store(struct device *dev, struct device_attribute *attr,
+	                       const char *buf, size_t size) {
+	int val = 0;
+	struct led_classdev * led_cdev = dev_get_drvdata(dev);
+
+	if (buf[0] == 'b') {
+		val = 1;
+	} else if (buf[0] == 'o') {
+		val = 0;
+	} else if (buf[0] == 'f') {
+		val = 2;
+	} else if (buf[0] == 'p') {
+		val = 3;
+	} else {
+		val = 0;
+	}
+
+	led_set_blink(led_cdev, val);
+
+	return (ssize_t)size;
+}
+
 static struct device_attribute led_class_attrs[] = {
+	__ATTR(color, 0644, led_color_show, led_color_store),
+	__ATTR(blink, 0644, led_blink_show, /*led_set_blink*/led_blink_store),
 	__ATTR(brightness, 0644, led_brightness_show, led_brightness_store),
 	__ATTR(max_brightness, 0444, led_max_brightness_show, NULL),
 #ifdef CONFIG_LEDS_TRIGGERS
@@ -80,6 +403,7 @@ static struct device_attribute led_class_attrs[] = {
 #endif
 	__ATTR_NULL,
 };
+
 
 static void led_timer_function(unsigned long data)
 {
@@ -204,8 +528,7 @@ static int led_resume(struct device *dev)
  */
 int led_classdev_register(struct device *parent, struct led_classdev *led_cdev)
 {
-	led_cdev->dev = device_create(leds_class, parent, 0, led_cdev,
-				      "%s", led_cdev->name);
+	led_cdev->dev = device_create(leds_class, parent, 0, led_cdev,"%s", led_cdev->name);
 	if (IS_ERR(led_cdev->dev))
 		return PTR_ERR(led_cdev->dev);
 
@@ -308,6 +631,6 @@ static void __exit leds_exit(void)
 subsys_initcall(leds_init);
 module_exit(leds_exit);
 
-MODULE_AUTHOR("John Lenz, Richard Purdie");
+MODULE_AUTHOR("John Lenz, Richard Purdie, Arya Ahmadi-Ardakani");
 MODULE_LICENSE("GPL");
 MODULE_DESCRIPTION("LED Class Interface");
