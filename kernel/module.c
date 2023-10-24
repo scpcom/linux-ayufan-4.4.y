@@ -107,6 +107,9 @@ static LIST_HEAD(modules);
 #ifdef CONFIG_KGDB_KDB
 struct list_head *kdb_modules = &modules; /* kdb needs the list of modules */
 #endif /* CONFIG_KGDB_KDB */
+#ifdef CONFIG_CRASHLOG
+struct list_head *crashlog_modules = &modules;
+#endif
 
 
 /* Block module loading/unloading? */
