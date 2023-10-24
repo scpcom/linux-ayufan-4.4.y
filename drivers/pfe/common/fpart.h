@@ -1,0 +1,79 @@
+/*
+ *  Copyright (c) 2009 Mindspeed Technologies, Inc.
+ *
+ *  THIS FILE IS CONFIDENTIAL.
+ *
+ *  AUTHORIZED USE IS GOVERNED BY CONFIDENTIALITY AND LICENSE AGREEMENTS WITH MINDSPEED TECHNOLOGIES, INC.
+ *
+ *  UNAUTHORIZED COPIES AND USE ARE STRICTLY PROHIBITED AND MAY RESULT IN CRIMINAL AND/OR CIVIL PROSECUTION.
+ */
+
+
+#ifndef _FASTPART_H_
+#define _FASTPART_H_
+
+#include "types.h"
+#include "system.h"
+
+typedef struct tagFASTPART {
+	volatile U8 lock;
+	U8 reserved1;
+	U32 * volatile freeblk;	// free block to allocate
+	U32 *storage;			// storage start address
+	U32 blksz;				// block size DWORDs!
+	U32 blkcnt;				// block count 
+	U32 *end_of_storage;	// storage end address
+	U16 reserved2;	
+	U16 reserved3;	
+	U16 freecnt;			 // number of available blocks
+} FASTPART, *PFASTPART;
+
+
+void	SFL_defpart(FASTPART *fp, void *storage, U32 blksz, U32 blkcnt) __attribute__ ((noinline));
+
+static __inline void *SFL_alloc_part_lock(FASTPART *fp)
+{
+	U32 *p;
+	DISABLE_INTERRUPTS();
+	
+	p = fp->freeblk;
+	if (p){
+		fp->freeblk = (U32 *)(*p);
+		//fp->freecnt--;
+	}
+	ENABLE_INTERRUPTS();
+	return (void *)p;
+}
+
+
+
+static __inline void *SFL_alloc_part(FASTPART *fp)
+{
+	U32 *p;
+
+	p = fp->freeblk;
+	if (p){
+		fp->freeblk = (U32 *)(*p);
+		//fp->freecnt--;
+	}
+	return (void *)p;
+}
+
+
+static __inline void SFL_free_part(FASTPART *fp, void *blk)
+{
+
+	*(U32 *)blk = (U32)fp->freeblk;
+	fp->freeblk =  blk;
+	//fp->freecnt++;
+}
+
+void *SFL_alloc_partlist(FASTPART *fp, U32 cnt, U32* nb);
+U32 SFL_free_partlist(FASTPART *fp, void *blk, void* last, U32 n);
+
+static __inline int SFL_querysize_part(FASTPART *fp) {
+    // report max number of poolA buffers which are held under mtds
+    return fp->blkcnt;
+}
+
+#endif /* _FASTPART_H_ */

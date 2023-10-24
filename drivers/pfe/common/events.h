@@ -1,0 +1,89 @@
+/*
+ *  Copyright (c) 2009 Mindspeed Technologies, Inc.
+ *
+ *  THIS FILE IS CONFIDENTIAL.
+ *
+ *  AUTHORIZED USE IS GOVERNED BY CONFIDENTIALITY AND LICENSE AGREEMENTS WITH MINDSPEED TECHNOLOGIES, INC.
+ *
+ *  UNAUTHORIZED COPIES AND USE ARE STRICTLY PROHIBITED AND MAY RESULT IN CRIMINAL AND/OR CIVIL PROSECUTION.
+ */
+
+
+#ifndef _EVENTS_H_
+#define _EVENTS_H_
+
+/* Event IDs */
+
+#if defined(COMCERTO_2000_UTIL)||defined(COMCERTO_2000_CLASS)
+enum EVENTS {
+		EVENT_FIRST = 0,
+		EVENT_IPS_IN = EVENT_FIRST,
+		EVENT_IPS_OUT,
+		EVENT_RTP_RELAY,
+		EVENT_IPS_IN_CB,
+		EVENT_IPS_OUT_CB,
+		EVENT_FRAG6,
+		EVENT_FRAG4,
+		EVENT_MAX
+};
+#elif !defined(COMCERTO_2000) || defined(COMCERTO_2000_CONTROL)
+
+enum EVENTS {
+	EVENT_FIRST = 0,
+	EVENT_EXPT = EVENT_FIRST,
+	EVENT_QM,
+	EVENT_PKT_TX,
+	EVENT_TIMER,
+	EVENT_PKT_RX,
+#ifdef WIFI_ENABLE
+	EVENT_PKT_WIFIRX,
+#endif
+	EVENT_MC6,
+	EVENT_MC4,
+	EVENT_BRIDGE,
+	EVENT_VLAN,
+#ifdef CFG_MACVLAN
+	EVENT_MACVLAN,
+#endif
+	EVENT_PPPOE,
+	EVENT_IPV4,
+	EVENT_IPV6,
+	EVENT_IPS_IN,
+	EVENT_IPS_OUT,
+	EVENT_IPS_IN_CB,
+	EVENT_IPS_OUT_CB,
+	EVENT_TNL_IN,
+	EVENT_TNL_OUT,
+#ifdef FPP_STATISTICS	
+	EVENT_STAT,
+#endif	
+	EVENT_FRAG6,
+	EVENT_FRAG4,
+	EVENT_RTP_RELAY,
+#ifdef COMCERTO_1000
+	EVENT_MSP,
+#endif
+	EVENT_NATPT,
+#ifdef PACKET_CAPTURE
+	EVENT_PKTCAP,
+#endif
+#if defined(COMCERTO_2000_CONTROL) && !defined(ICC_DISABLE)
+	EVENT_ICC,
+#endif
+	EVENT_HIDRV,
+	EVENT_MAX
+};
+#endif /* !defined(COMCERTO_2000) || defined(COMCERTO_2000_CONTROL) */
+
+#if !defined(COMCERTO_2000)
+
+/* Events management functions*/
+#define set_event(reg, mask) (reg |= (mask))
+#define clear_event(reg, mask) (reg &= ~(mask))
+#endif
+
+#define set_event_handler(event, handler)	gEventDataTable[event] = (handler)
+
+
+
+#endif /* _EVENTS_H_ */
