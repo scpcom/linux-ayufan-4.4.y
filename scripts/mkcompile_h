@@ -5,7 +5,7 @@ ARCH=$2
 SMP=$3
 PREEMPT=$4
 CC=$5
-WDVERSION=2.0
+WDVERSION=2.4
 WDBUILDEXTRA=rel #dbg or rel, or build no
 
 vecho() { [ "${quiet}" = "silent_" ] || echo "$@" ; }
