@@ -571,12 +571,30 @@ static int read_balance(struct r1conf *conf, struct r1bio *r1_bio, int *max_sect
 			best_good_sectors = sectors;
 
 		dist = abs(this_sector - conf->mirrors[disk].head_position);
+		/* Prefer idle disk, but still choose best if more than one idle disk:
+		 * We add an artifical, arbitrary (Max/2) weight to busy disks to favor 
+		 * idle disks. If the distance is greater than Max/2, then we make it
+		 * the maximum value. We may not choose the smaller distance if all disks
+		 * fall into that situation, but since all disks will have long seek times
+		 * we don't really care.
+		 * We may end up choosing a busy disk if idle disks have a very high 
+		 * distance, but this may actually be preferable to minimize seek times.
+		 * If dist == 0, we choose that disk even if it busy to again minimize seek
+		 * times, as it is likely a sequential read with a single pending request.
+		 * TODO: use per disk next_seq_sect to better detect sequential reads?
+		 */
+		if (dist == 0) {
+			best_disk = disk;
+			break;
+		}
+		if (atomic_read(&rdev->nr_pending) != 0) {
+			if (dist < MaxSector/2)
+				dist += MaxSector / 2; 
+			else dist = MaxSector - 1;
+		}
 		if (choose_first
 		    /* Don't change to another disk for sequential reads */
-		    || conf->next_seq_sect == this_sector
-		    || dist == 0
-		    /* If device is idle, use it */
-		    || atomic_read(&rdev->nr_pending) == 0) {
+		    || conf->next_seq_sect == this_sector) {
 			best_disk = disk;
 			break;
 		}

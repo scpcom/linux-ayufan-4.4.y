@@ -1351,9 +1351,7 @@ int xhci_urb_dequeue(struct usb_hcd *hcd, struct urb *urb, int status)
 		goto done;
 	}
 
-
 	urb_priv = urb->hcpriv;
-
 	i = urb_priv->td_cnt;
 	if (i < urb_priv->length)
 		xhci_dbg(xhci, "Cancel URB %p, dev %s, ep 0x%x, "
