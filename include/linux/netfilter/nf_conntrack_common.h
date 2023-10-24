@@ -83,6 +83,14 @@ enum ip_conntrack_status {
 	/* Conntrack is a fake untracked entry */
 	IPS_UNTRACKED_BIT = 12,
 	IPS_UNTRACKED = (1 << IPS_UNTRACKED_BIT),
+
+	/* Connection  cannot expire */
+	IPS_PERMANENT_BIT = 13,
+	IPS_PERMANENT = (1 << IPS_PERMANENT_BIT),
+
+	/* Connection is assured by DPI application */
+	IPS_DPI_ALLOWED_BIT = 14,
+	IPS_DPI_ALLOWED = (1 << IPS_DPI_ALLOWED_BIT),
 };
 
 /* Connection tracking event types */

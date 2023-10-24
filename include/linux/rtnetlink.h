@@ -621,6 +621,9 @@ extern void rtnl_notify(struct sk_buff *skb, struct net *net, u32 pid,
 			u32 group, struct nlmsghdr *nlh, gfp_t flags);
 extern void rtnl_set_sk_err(struct net *net, u32 group, int error);
 extern int rtnetlink_put_metrics(struct sk_buff *skb, u32 *metrics);
+#ifdef CONFIG_ARCH_COMCERTO
+extern int rtnetlink_put_metrics_2(struct sk_buff *skb, u32 *metrics, struct dst_entry *dst);
+#endif
 extern int rtnl_put_cacheinfo(struct sk_buff *skb, struct dst_entry *dst,
 			      u32 id, u32 ts, u32 tsage, long expires,
 			      u32 error);

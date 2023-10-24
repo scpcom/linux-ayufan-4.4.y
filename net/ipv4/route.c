@@ -3013,7 +3013,11 @@ static int rt_fill_info(struct net *net,
 	if (rt->rt_dst != rt->rt_gateway)
 		NLA_PUT_BE32(skb, RTA_GATEWAY, rt->rt_gateway);
 
+#ifdef CONFIG_ARCH_COMCERTO
+	if (rtnetlink_put_metrics_2(skb, dst_metrics_ptr(&rt->dst), &rt->dst) < 0)
+#else
 	if (rtnetlink_put_metrics(skb, dst_metrics_ptr(&rt->dst)) < 0)
+#endif
 		goto nla_put_failure;
 
 	if (rt->rt_mark)

@@ -622,7 +622,40 @@ nla_put_failure:
 	return -EMSGSIZE;
 }
 EXPORT_SYMBOL(rtnetlink_put_metrics);
+#ifdef CONFIG_ARCH_COMCERTO
+int rtnetlink_put_metrics_2(struct sk_buff *skb, u32 *metrics, struct dst_entry *dst)
+{
+	struct nlattr *mx;
+	int i, valid = 0;
 
+	mx = nla_nest_start(skb, RTA_METRICS);
+	if (mx == NULL)
+		return -ENOBUFS;
+
+	for (i = 0; i < RTAX_MAX; i++) {
+		if (metrics[i]) {
+			valid++;
+			NLA_PUT_U32(skb, i+1, metrics[i]);
+		}
+		else if ((i + 1) == RTAX_MTU){
+			valid++;
+			NLA_PUT_U32(skb, i+1, dst_mtu(dst));
+		}
+	}
+
+	if (!valid) {
+		nla_nest_cancel(skb, mx);
+		return 0;
+	}
+
+	return nla_nest_end(skb, mx);
+
+nla_put_failure:
+	nla_nest_cancel(skb, mx);
+	return -EMSGSIZE;
+}
+EXPORT_SYMBOL(rtnetlink_put_metrics_2);
+#endif
 int rtnl_put_cacheinfo(struct sk_buff *skb, struct dst_entry *dst, u32 id,
 		       u32 ts, u32 tsage, long expires, u32 error)
 {
@@ -1928,6 +1961,10 @@ errout:
 	if (err < 0)
 		rtnl_set_sk_err(net, RTNLGRP_LINK, err);
 }
+#if defined(CONFIG_COMCERTO_FP)
+EXPORT_SYMBOL(rtmsg_ifinfo);
+#endif
+
 
 /* Protected by RTNL sempahore.  */
 static struct rtattr **rta_buf;

@@ -22,6 +22,9 @@
 #include <linux/cpumask.h>
 #include <linux/mutex.h>
 #include <net/flow.h>
+#if defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD)
+#include <net/xfrm.h>
+#endif
 #include <linux/atomic.h>
 #include <linux/security.h>
 
@@ -204,9 +207,15 @@ static int flow_key_compare(const struct flowi *key1, const struct flowi *key2,
 	return 0;
 }
 
+#if defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD)
+struct flow_cache_object *
+flow_cache_lookup(struct net *net, const struct flowi *key, u16 family, u8 dir,
+			u8 *new_flow, flow_resolve_t resolver, void *ctx)
+#else
 struct flow_cache_object *
 flow_cache_lookup(struct net *net, const struct flowi *key, u16 family, u8 dir,
 		  flow_resolve_t resolver, void *ctx)
+#endif
 {
 	struct flow_cache *fc = &flow_cache_global;
 	struct flow_cache_percpu *fcp;
@@ -215,6 +224,11 @@ flow_cache_lookup(struct net *net, const struct flowi *key, u16 family, u8 dir,
 	struct flow_cache_object *flo;
 	size_t keysize;
 	unsigned int hash;
+
+#if defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD)
+	if (new_flow)
+		*new_flow = 0;
+#endif
 
 	local_bh_disable();
 	fcp = this_cpu_ptr(fc->percpu);
@@ -281,8 +295,13 @@ nocache:
 	flo = resolver(net, key, family, dir, flo, ctx);
 	if (fle) {
 		fle->genid = atomic_read(&flow_cache_genid);
-		if (!IS_ERR(flo))
+		if (!IS_ERR(flo)) {
 			fle->object = flo;
+#if defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD)
+			if (new_flow)
+				*new_flow = 1;
+#endif
+		}
 		else
 			fle->genid--;
 	} else {
@@ -357,6 +376,39 @@ void flow_cache_flush(void)
 	mutex_unlock(&flow_flush_sem);
 	put_online_cpus();
 }
+
+#if defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD)
+void flow_cache_remove(const struct flowi *key, 
+			unsigned short family, unsigned short dir)
+{
+	struct flow_cache *fc = &flow_cache_global;
+	struct flow_cache_percpu *fcp;
+	struct flow_cache_entry *fle;
+	struct hlist_node *entry;
+	size_t keysize;
+	unsigned int hash;
+
+	local_bh_disable();
+	fcp = this_cpu_ptr(fc->percpu);
+	
+	keysize = flow_key_size(family);
+	if (!keysize)
+		goto nocache;
+
+	hash = flow_hash_code(fc, fcp, key, keysize);
+	
+	hlist_for_each_entry(fle, entry, &fcp->hash_table[hash], u.hlist) {
+		if((fle->family == family) && (fle->dir == dir) && (flow_key_compare(&fle->key, key, keysize) == 0)) {
+			hlist_del(&fle->u.hlist);
+			flow_entry_kill(fle);
+			break;
+		}
+	}
+		
+nocache:	
+	local_bh_enable();
+}
+#endif
 
 static void flow_cache_flush_task(struct work_struct *work)
 {

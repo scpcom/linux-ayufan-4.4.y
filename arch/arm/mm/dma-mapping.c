@@ -29,6 +29,10 @@
 
 #include "mm.h"
 
+#ifdef CONFIG_COMCERTO_ZONE_DMA_NCNB
+extern unsigned long arm_dma_zone_size;
+#endif
+
 static u64 get_coherent_dma_mask(struct device *dev)
 {
 	u64 mask = (u64)arm_dma_limit;
@@ -168,7 +172,7 @@ static int __init consistent_init(void)
 	pte_t *pte;
 	int i = 0;
 	unsigned long base = consistent_base;
-	unsigned long num_ptes = (CONSISTENT_END - base) >> PMD_SHIFT;
+	unsigned long num_ptes = (CONSISTENT_END - base + PMD_SIZE -1) >> PMD_SHIFT;
 
 	consistent_pte = kmalloc(num_ptes * sizeof(pte_t), GFP_KERNEL);
 	if (!consistent_pte) {
@@ -195,8 +199,9 @@ static int __init consistent_init(void)
 			ret = -ENOMEM;
 			break;
 		}
+#if !defined(CONFIG_COMCERTO_64K_PAGES)
 		WARN_ON(!pmd_none(*pmd));
-
+#endif
 		pte = pte_alloc_kernel(pmd, base);
 		if (!pte) {
 			printk(KERN_ERR "%s: no pte tables\n", __func__);
@@ -205,8 +210,8 @@ static int __init consistent_init(void)
 		}
 
 		consistent_pte[i++] = pte;
-		base += PMD_SIZE;
-	} while (base < CONSISTENT_END);
+		base = (base + PMD_SIZE) & PMD_MASK;
+	} while ((base-1) < (CONSISTENT_END - 1));
 
 	return ret;
 }
@@ -455,6 +460,19 @@ void dma_free_coherent(struct device *dev, size_t size, void *cpu_addr, dma_addr
 }
 EXPORT_SYMBOL(dma_free_coherent);
 
+static inline void __dmac_unmap_area(const void *kaddr, size_t size,
+	int dir)
+{
+#if !defined(CONFIG_CPU_SPECULATIVE_ACCESS_DISABLED)
+	dmac_unmap_area(kaddr, size, dir);
+#else
+	size_t size_inv = min_t(size_t, 32, size);
+
+	dmac_unmap_area(kaddr, size_inv, dir);
+	dmac_unmap_area(kaddr + size - size_inv, size_inv, dir);
+#endif
+}
+
 /*
  * Make an area consistent for devices.
  * Note: Drivers should NOT use this function directly, as it will break
@@ -464,35 +482,55 @@ EXPORT_SYMBOL(dma_free_coherent);
 void ___dma_single_cpu_to_dev(const void *kaddr, size_t size,
 	enum dma_data_direction dir)
 {
-	unsigned long paddr;
+	unsigned long paddr = __pa(kaddr);
 
 	BUG_ON(!virt_addr_valid(kaddr) || !virt_addr_valid(kaddr + size - 1));
 
+#ifdef CONFIG_COMCERTO_ZONE_DMA_NCNB
+	if ((paddr + size) <= arm_dma_zone_size)
+		return;
+#endif
+
 	dmac_map_area(kaddr, size, dir);
 
-	paddr = __pa(kaddr);
+#if !defined(CONFIG_L2X0_INSTRUCTION_ONLY)
 	if (dir == DMA_FROM_DEVICE) {
 		outer_inv_range(paddr, paddr + size);
 	} else {
 		outer_clean_range(paddr, paddr + size);
 	}
 	/* FIXME: non-speculating: flush on bidirectional mappings? */
+#endif
 }
 EXPORT_SYMBOL(___dma_single_cpu_to_dev);
 
 void ___dma_single_dev_to_cpu(const void *kaddr, size_t size,
 	enum dma_data_direction dir)
 {
+	unsigned long paddr = __pa(kaddr);
+
 	BUG_ON(!virt_addr_valid(kaddr) || !virt_addr_valid(kaddr + size - 1));
 
-	/* FIXME: non-speculating: not required */
+#ifdef CONFIG_COMCERTO_ZONE_DMA_NCNB
+	if ((paddr + size) <= arm_dma_zone_size)
+		return;
+#endif
+
+#if !defined(CONFIG_L2X0_INSTRUCTION_ONLY)
 	/* don't bother invalidating if DMA to device */
 	if (dir != DMA_TO_DEVICE) {
-		unsigned long paddr = __pa(kaddr);
+#if !defined(CONFIG_CPU_SPECULATIVE_ACCESS_DISABLED)
 		outer_inv_range(paddr, paddr + size);
-	}
+#else
+		size_t size_inv = min_t(size_t, 32, size);
 
-	dmac_unmap_area(kaddr, size, dir);
+		outer_inv_range(paddr, paddr + size_inv);
+		outer_inv_range(paddr + size - size_inv, paddr + size);
+#endif
+	}
+#endif
+
+	__dmac_unmap_area(kaddr, size, dir);
 }
 EXPORT_SYMBOL(___dma_single_dev_to_cpu);
 
@@ -543,16 +581,22 @@ static void dma_cache_maint_page(struct page *page, unsigned long offset,
 void ___dma_page_cpu_to_dev(struct page *page, unsigned long off,
 	size_t size, enum dma_data_direction dir)
 {
-	unsigned long paddr;
+	unsigned long paddr = page_to_phys(page) + off;
+
+#ifdef CONFIG_COMCERTO_ZONE_DMA_NCNB
+	if ((paddr + size) <= arm_dma_zone_size)
+		return;
+#endif
 
 	dma_cache_maint_page(page, off, size, dir, dmac_map_area);
 
-	paddr = page_to_phys(page) + off;
+#if !defined(CONFIG_L2X0_INSTRUCTION_ONLY)
 	if (dir == DMA_FROM_DEVICE) {
 		outer_inv_range(paddr, paddr + size);
 	} else {
 		outer_clean_range(paddr, paddr + size);
 	}
+#endif
 	/* FIXME: non-speculating: flush on bidirectional mappings? */
 }
 EXPORT_SYMBOL(___dma_page_cpu_to_dev);
@@ -562,12 +606,25 @@ void ___dma_page_dev_to_cpu(struct page *page, unsigned long off,
 {
 	unsigned long paddr = page_to_phys(page) + off;
 
-	/* FIXME: non-speculating: not required */
-	/* don't bother invalidating if DMA to device */
-	if (dir != DMA_TO_DEVICE)
-		outer_inv_range(paddr, paddr + size);
+#ifdef CONFIG_COMCERTO_ZONE_DMA_NCNB
+	if ((paddr + size) <= arm_dma_zone_size)
+		return;
+#endif
 
-	dma_cache_maint_page(page, off, size, dir, dmac_unmap_area);
+#if !defined(CONFIG_L2X0_INSTRUCTION_ONLY)
+	/* don't bother invalidating if DMA to device */
+	if (dir != DMA_TO_DEVICE) {
+#if !defined(CONFIG_CPU_SPECULATIVE_ACCESS_DISABLED)
+		outer_inv_range(paddr, paddr + size);
+#else
+		size_t size_inv = min_t(size_t, 32, size);
+
+		outer_inv_range(paddr, paddr + size_inv);
+		outer_inv_range(paddr + size - size_inv, paddr + size);
+#endif
+	}
+#endif
+	dma_cache_maint_page(page, off, size, dir, __dmac_unmap_area);
 
 	/*
 	 * Mark the D-cache clean for this page to avoid extra flushing.

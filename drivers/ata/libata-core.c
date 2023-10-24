@@ -4663,6 +4663,14 @@ void swap_buf_le16(u16 *buf, unsigned int buf_words)
 #endif /* __BIG_ENDIAN */
 }
 
+#if defined(CONFIG_COMCERTO_AHCI_PROF)
+unsigned int ahci_qc_comp_counter[33];
+struct timeval ahci_last_qc_comp[32];
+unsigned int ahci_last_qc_comp_flag[32];
+unsigned int ahci_qc_no_free_slot = 0;
+extern unsigned int enable_ahci_prof;
+#endif
+
 /**
  *	ata_qc_new - Request an available ATA command, for queueing
  *	@ap: target port
@@ -4689,6 +4697,13 @@ static struct ata_queued_cmd *ata_qc_new(struct ata_port *ap)
 
 	if (qc)
 		qc->tag = i;
+
+#if defined(CONFIG_COMCERTO_AHCI_PROF)
+	if (enable_ahci_prof)
+		if (qc == NULL) {
+			ahci_qc_no_free_slot++;
+		}
+#endif
 
 	return qc;
 }
@@ -4733,6 +4748,11 @@ void ata_qc_free(struct ata_queued_cmd *qc)
 	struct ata_port *ap;
 	unsigned int tag;
 
+#if defined(CONFIG_COMCERTO_AHCI_PROF)
+	struct timeval now;
+	int diff_time_ms;
+#endif
+
 	WARN_ON_ONCE(qc == NULL); /* ata_qc_from_tag _might_ return NULL */
 	ap = qc->ap;
 
@@ -4741,6 +4761,26 @@ void ata_qc_free(struct ata_queued_cmd *qc)
 	if (likely(ata_tag_valid(tag))) {
 		qc->tag = ATA_TAG_POISON;
 		clear_bit(tag, &ap->qc_allocated);
+
+#if defined(CONFIG_COMCERTO_AHCI_PROF)
+	if (enable_ahci_prof) {
+		if (ahci_last_qc_comp_flag[tag]) {
+			int inx = 32;
+
+			do_gettimeofday(&now);
+
+			diff_time_ms = ((now.tv_sec - ahci_last_qc_comp[tag].tv_sec) * 1000) + 
+                                ((now.tv_usec - ahci_last_qc_comp[tag].tv_usec) / 1000);
+
+			if (diff_time_ms < 512) 
+				inx = diff_time_ms >> 4;
+
+			ahci_qc_comp_counter[inx]++;
+
+			ahci_last_qc_comp_flag[tag] = 0;
+		}
+	}
+#endif
 	}
 }
 

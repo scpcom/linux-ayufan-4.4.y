@@ -43,6 +43,8 @@
 #include <asm/mach/irq.h>
 #include <asm/hardware/gic.h>
 
+#include <mach/sema.h>
+
 static DEFINE_RAW_SPINLOCK(irq_controller_lock);
 
 /* Address of GIC 0 CPU interface */
@@ -90,30 +92,48 @@ static inline unsigned int gic_irq(struct irq_data *d)
 static void gic_mask_irq(struct irq_data *d)
 {
 	u32 mask = 1 << (gic_irq(d) % 32);
+	unsigned long flags;
+
+	if ((gic_irq(d) == 87) || (gic_irq(d) == 66) || (gic_irq(d) == 33)) {
+		return;
+	}
 
 	raw_spin_lock(&irq_controller_lock);
+	flags = msp_lock_frqsave();
 	writel_relaxed(mask, gic_dist_base(d) + GIC_DIST_ENABLE_CLEAR + (gic_irq(d) / 32) * 4);
 	if (gic_arch_extn.irq_mask)
 		gic_arch_extn.irq_mask(d);
+	msp_unlock_frqrestore(flags);
 	raw_spin_unlock(&irq_controller_lock);
 }
 
 static void gic_unmask_irq(struct irq_data *d)
 {
 	u32 mask = 1 << (gic_irq(d) % 32);
+	unsigned long flags;
+
+	if ((gic_irq(d) == 87) || (gic_irq(d) == 66) || (gic_irq(d) == 33)) {
+		return;
+	}
 
 	raw_spin_lock(&irq_controller_lock);
+	flags = msp_lock_frqsave();
 	if (gic_arch_extn.irq_unmask)
 		gic_arch_extn.irq_unmask(d);
 	writel_relaxed(mask, gic_dist_base(d) + GIC_DIST_ENABLE_SET + (gic_irq(d) / 32) * 4);
+	msp_unlock_frqrestore(flags);
 	raw_spin_unlock(&irq_controller_lock);
 }
 
 static void gic_eoi_irq(struct irq_data *d)
 {
 	if (gic_arch_extn.irq_eoi) {
+		unsigned long flags;
+
 		raw_spin_lock(&irq_controller_lock);
+		flags = msp_lock_frqsave();
 		gic_arch_extn.irq_eoi(d);
+		msp_unlock_frqrestore(flags);
 		raw_spin_unlock(&irq_controller_lock);
 	}
 
@@ -308,6 +328,14 @@ static void __init gic_dist_init(struct gic_chip_data *gic)
 	for (i = 32; i < gic_irqs; i += 32)
 		writel_relaxed(0xffffffff, base + GIC_DIST_ENABLE_CLEAR + i * 4 / 32);
 
+#ifdef CONFIG_COMCERTO_MSP
+	/*
+	 * Set SPI interrupts are nonSecure
+	 */
+	for (i = 32; i < gic_irqs; i += 32)
+		writel_relaxed(0xffffffff, base + GIC_DIST_SECURITY_BIT + i * 4 / 32);
+#endif  /* CONFIG_COMCERTO_MSP */
+
 	/*
 	 * Setup the Linux IRQ subsystem.
 	 */
@@ -325,7 +353,14 @@ static void __init gic_dist_init(struct gic_chip_data *gic)
 		irq_set_chip_data(irq, gic);
 	}
 
+#ifdef CONFIG_COMCERTO_MSP
+	/*
+	 * Enable NonSecure interrupts in Distributor
+	 */
+	writel_relaxed(3, base + GIC_DIST_CTRL);
+#else  /* !CONFIG_COMCERTO_MSP */
 	writel_relaxed(1, base + GIC_DIST_CTRL);
+#endif /* CONFIG_COMCERTO_MSP */
 }
 
 static void __cpuinit gic_cpu_init(struct gic_chip_data *gic)
@@ -348,8 +383,61 @@ static void __cpuinit gic_cpu_init(struct gic_chip_data *gic)
 		writel_relaxed(0xa0a0a0a0, dist_base + GIC_DIST_PRI + i * 4 / 4);
 
 	writel_relaxed(0xf0, base + GIC_CPU_PRIMASK);
+
+#ifdef CONFIG_COMCERTO_MSP
+	/*
+	 * Set PPI and SGI interrupts are nonSecure
+	 */
+	writel_relaxed(0xffffffff, dist_base + GIC_DIST_SECURITY_BIT);
+
+	/*
+	 * Enable NonSecure interrupts in CPU interface,
+	 * Secure interrupts go to FIQ line,
+	 * Secure read returns valid NonSecure interrupt ID
+	 */
+	writel_relaxed(0xf, base + GIC_CPU_CTRL);
+#else  /* !CONFIG_COMCERTO_MSP */
 	writel_relaxed(1, base + GIC_CPU_CTRL);
+#endif /* CONFIG_COMCERTO_MSP */
 }
+
+#ifdef CONFIG_COMCERTO_MSP
+
+static void __cpuinit gic_cpu_init_irq_only(struct gic_chip_data *gic)
+{
+	void __iomem *dist_base = gic->dist_base;
+	void __iomem *base = gic->cpu_base;
+	int i;
+
+	/*
+	 * Deal with the banked PPI and SGI interrupts - disable all
+	 * PPI interrupts, ensure all SGI interrupts are enabled.
+	 */
+	writel_relaxed(0xffff0000, dist_base + GIC_DIST_ENABLE_CLEAR);
+	writel_relaxed(0x0000ffff, dist_base + GIC_DIST_ENABLE_SET);
+
+	/*
+	 * Set priority on PPI and SGI interrupts
+	 */
+	for (i = 0; i < 32; i += 4)
+		writel_relaxed(0xa0a0a0a0, dist_base + GIC_DIST_PRI + i * 4 / 4);
+
+	writel_relaxed(0xf0, base + GIC_CPU_PRIMASK);
+
+	/*
+	 * Set PPI and SGI interrupts are nonSecure
+	 */
+	writel_relaxed(0xffffffff, dist_base + GIC_DIST_SECURITY_BIT);
+
+	/*
+	 * Enable NonSecure interrupts in CPU interface,
+	 * Secure interrupts go to IRQ line,
+	 * Secure read returns valid NonSecure interrupt ID
+	 */
+	writel_relaxed(0x7, base + GIC_CPU_CTRL);
+}
+
+#endif /* CONFIG_COMCERTO_MSP */
 
 #ifdef CONFIG_CPU_PM
 /*
@@ -625,7 +713,12 @@ void __cpuinit gic_secondary_init(unsigned int gic_nr)
 {
 	BUG_ON(gic_nr >= MAX_GIC_NR);
 
+#ifdef CONFIG_COMCERTO_MSP
+	/* run alternative secondary_boot gic init */
+	gic_cpu_init_irq_only(&gic_data[gic_nr]);
+#else  /* !CONFIG_COMCERTO_MSP */
 	gic_cpu_init(&gic_data[gic_nr]);
+#endif  /* CONFIG_COMCERTO_MSP */
 }
 
 #ifdef CONFIG_SMP
@@ -645,7 +738,16 @@ void gic_raise_softirq(const struct cpumask *mask, unsigned int irq)
 	dsb();
 
 	/* this always happens on GIC0 */
+
+#ifdef CONFIG_COMCERTO_MSP
+#define GIC_SGI_SATT (1 << 15)
+	/*
+	 * Send SGI from Secure write to NonSecure target
+	 */
+	writel_relaxed(map << 16 | GIC_SGI_SATT | irq, gic_data[0].dist_base + GIC_DIST_SOFTINT);
+#else  /* !CONFIG_COMCERTO_MSP */
 	writel_relaxed(map << 16 | irq, gic_data[0].dist_base + GIC_DIST_SOFTINT);
+#endif /* CONFIG_COMCERTO_MSP */
 }
 #endif
 

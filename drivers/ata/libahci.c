@@ -1724,6 +1724,22 @@ static void ahci_port_intr(struct ata_port *ap)
 	}
 }
 
+/*
+*/
+
+#if defined (CONFIG_COMCERTO_AHCI_PROF)
+unsigned int ahci_time_counter[256]; // 4 ms -> 1S
+unsigned int ahci_data_counter[256]; // 4K-> 1020K
+unsigned int ahci_int_before_req;
+static struct timeval last_ahci_req;
+unsigned int init_ahci_prof = 0;
+unsigned int enable_ahci_prof = 0;
+extern struct timeval ahci_last_qc_comp[32];
+extern unsigned int ahci_last_qc_comp_flag[32];
+#endif
+
+static struct timeval time;
+
 irqreturn_t ahci_interrupt(int irq, void *dev_instance)
 {
 	struct ata_host *host = dev_instance;
@@ -1791,6 +1807,33 @@ static unsigned int ahci_qc_issue(struct ata_queued_cmd *qc)
 	void __iomem *port_mmio = ahci_port_base(ap);
 	struct ahci_port_priv *pp = ap->private_data;
 
+#if defined(CONFIG_COMCERTO_AHCI_PROF)
+	struct timeval now;
+
+	if (enable_ahci_prof) {
+		do_gettimeofday(&now);
+
+		if (init_ahci_prof) {
+			int diff_time_ms;
+			diff_time_ms = ((now.tv_sec - last_ahci_req.tv_sec) * 1000) + ((now.tv_usec - last_ahci_req.tv_usec) / 1000);
+			if (diff_time_ms < 1000) {//Don't record more than 1s
+				ahci_time_counter[diff_time_ms >> 3]++;
+			}
+			else
+				ahci_time_counter[255]++;
+		}
+		else {
+			init_ahci_prof = 1;
+		}
+		last_ahci_req = now;
+
+		if (qc->nbytes < (1 << 21))
+			ahci_data_counter[(qc->nbytes >> 13) & 0xFF]++;
+		else
+			ahci_data_counter[255]++;
+	}
+#endif
+
 	/* Keep track of the currently active link.  It will be used
 	 * in completion path to determine whether NCQ phase is in
 	 * progress.
@@ -1807,6 +1850,12 @@ static unsigned int ahci_qc_issue(struct ata_queued_cmd *qc)
 		writel(fbs, port_mmio + PORT_FBS);
 		pp->fbs_last_dev = qc->dev->link->pmp;
 	}
+#if defined(CONFIG_COMCERTO_AHCI_PROF)
+	if (enable_ahci_prof) {
+		ahci_last_qc_comp[qc->tag] = now;
+		ahci_last_qc_comp_flag[qc->tag] = 1;
+	}
+#endif
 
 	writel(1 << qc->tag, port_mmio + PORT_CMD_ISSUE);
 

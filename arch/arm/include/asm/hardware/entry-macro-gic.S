@@ -34,6 +34,22 @@
 
 	.macro  get_irqnr_and_base, irqnr, irqstat, base, tmp
 
+#ifdef CONFIG_COMCERTO_MSP
+	ldr     \irqstat, [\base, #GIC_CPU_HIGHPRI]
+	bic     \irqnr, \irqstat, #0x1c00
+	cmp     \irqnr, #33
+	cmpne   \irqnr, #66
+	cmpne   \irqnr, #87
+	cmpeq   \irqnr, \irqnr
+	bne 1001f
+
+	mov \irqnr, \irqnr /* breakpoint here */
+
+	beq 1002f
+
+1001:
+#endif /* CONFIG_COMCERTO_MSP */
+
 	ldr     \irqstat, [\base, #GIC_CPU_INTACK]
 	/* bits 12-10 = src CPU, 9-0 = int # */
 
@@ -43,6 +59,11 @@
 	cmpcc	\irqnr, \irqnr
 	cmpne	\irqnr, \tmp
 	cmpcs	\irqnr, \irqnr
+
+#ifdef CONFIG_COMCERTO_MSP
+1002:
+#endif /* CONFIG_COMCERTO_MSP */
+
 	.endm
 
 /* We assume that irqstat (the raw value of the IRQ acknowledge
