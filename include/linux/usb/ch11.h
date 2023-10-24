@@ -77,11 +77,6 @@
 #define USB_PORT_FEAT_C_BH_PORT_RESET		29
 #define USB_PORT_FEAT_FORCE_LINKPM_ACCEPT	30
 
-/* USB 3.0 hub remote wake mask bits, see table 10-14 */
-#define USB_PORT_FEAT_REMOTE_WAKE_CONNECT	(1 << 8)
-#define USB_PORT_FEAT_REMOTE_WAKE_DISCONNECT	(1 << 9)
-#define USB_PORT_FEAT_REMOTE_WAKE_OVER_CURRENT	(1 << 10)
-
 /*
  * Hub Status and Hub Change results
  * See USB 2.0 spec Table 11-19 and Table 11-20
@@ -164,20 +159,11 @@ struct usb_port_status {
  * wHubCharacteristics (masks)
  * See USB 2.0 spec Table 11-13, offset 3
  */
-#define HUB_CHAR_LPSM		0x0003 /* Logical Power Switching Mode mask */
-#define HUB_CHAR_COMMON_LPSM	0x0000 /* All ports power control at once */
-#define HUB_CHAR_INDV_PORT_LPSM	0x0001 /* per-port power control */
-#define HUB_CHAR_NO_LPSM	0x0002 /* no power switching */
-
-#define HUB_CHAR_COMPOUND	0x0004 /* hub is part of a compound device */
-
-#define HUB_CHAR_OCPM		0x0018 /* Over-Current Protection Mode mask */
-#define HUB_CHAR_COMMON_OCPM	0x0000 /* All ports Over-Current reporting */
-#define HUB_CHAR_INDV_PORT_OCPM	0x0008 /* per-port Over-current reporting */
-#define HUB_CHAR_NO_OCPM	0x0010 /* No Over-current Protection support */
-
-#define HUB_CHAR_TTTT		0x0060 /* TT Think Time mask */
-#define HUB_CHAR_PORTIND	0x0080 /* per-port indicators (LEDs) */
+#define HUB_CHAR_LPSM		0x0003 /* D1 .. D0 */
+#define HUB_CHAR_COMPOUND	0x0004 /* D2       */
+#define HUB_CHAR_OCPM		0x0018 /* D4 .. D3 */
+#define HUB_CHAR_TTTT           0x0060 /* D6 .. D5 */
+#define HUB_CHAR_PORTIND        0x0080 /* D7       */
 
 struct usb_hub_status {
 	__le16 wHubStatus;

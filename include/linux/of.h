@@ -337,15 +337,15 @@ static inline int of_machine_is_compatible(const char *compat)
 #endif /* CONFIG_OF */
 
 /**
- * of_property_read_bool - Findfrom a property
- * @np:		device node from which the property value is to be read.
- * @propname:	name of the property to be searched.
- *
- * Search for a property in a device node.
- * Returns true if the property exist false otherwise.
- */
+* of_property_read_bool - Findfrom a property
+* @np:         device node from which the property value is to be read.
+* @propname:   name of the property to be searched.
+*
+* Search for a property in a device node.
+* Returns true if the property exist false otherwise.
+*/
 static inline bool of_property_read_bool(const struct device_node *np,
-					 const char *propname)
+										const char *propname)
 {
 	struct property *prop = of_find_property(np, propname, NULL);
 
