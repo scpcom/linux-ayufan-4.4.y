@@ -225,12 +225,40 @@ static ssize_t max_ratio_store(struct device *dev,
 }
 BDI_SHOW(max_ratio, bdi->max_ratio)
 
+#ifdef CONFIG_ARCH_M86XXX
+static ssize_t cpu0_bind_store(struct device *dev,
+		struct device_attribute *attr, const char *buf, size_t count)
+{
+	struct backing_dev_info *bdi = dev_get_drvdata(dev);
+	unsigned int flag;
+
+	flag = simple_strtoul(buf, NULL, 10);
+	if (flag)
+		bdi->cpu0_bind = 1;
+	else
+		bdi->cpu0_bind = 0;
+
+	return count;
+}
+
+static ssize_t cpu0_bind_show(struct device *dev,
+			   struct device_attribute *attr, char *page)
+{
+	struct backing_dev_info *bdi = dev_get_drvdata(dev);
+
+	return snprintf(page, PAGE_SIZE-1, "%d\n", bdi->cpu0_bind);
+}
+#endif /* CONFIG_ARCH_M86XXX */
+
 #define __ATTR_RW(attr) __ATTR(attr, 0644, attr##_show, attr##_store)
 
 static struct device_attribute bdi_dev_attrs[] = {
 	__ATTR_RW(read_ahead_kb),
 	__ATTR_RW(min_ratio),
 	__ATTR_RW(max_ratio),
+#ifdef CONFIG_ARCH_M86XXX
+	__ATTR_RW(cpu0_bind),
+#endif
 	__ATTR_NULL,
 };
 
@@ -478,6 +506,10 @@ static int bdi_forker_thread(void *ptr)
 				writeback_inodes_wb(&bdi->wb, 1024,
 						    WB_REASON_FORKER_THREAD);
 			} else {
+#ifdef CONFIG_ARCH_M86XXX
+				if (bdi->cpu0_bind)
+					kthread_bind(task, 0);
+#endif
 				/*
 				 * The spinlock makes sure we do not lose
 				 * wake-ups when racing with 'bdi_queue_work()'.

@@ -1138,6 +1138,10 @@ int neigh_update(struct neighbour *neigh, const u8 *lladdr, u8 new,
 						 neigh->parms->reachable_time :
 						 0)));
 		neigh->nud_state = new;
+#ifdef CONFIG_COMCERTO_FP
+		if ((old & (NUD_STALE | NUD_DELAY | NUD_PROBE)) && (new & NUD_REACHABLE))
+			notify = 1;
+#endif
 	}
 
 	if (lladdr != neigh->ha) {

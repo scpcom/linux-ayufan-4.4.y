@@ -28,6 +28,9 @@
 #include <linux/backing-dev.h>
 #include <linux/pagevec.h>
 #include <linux/blkdev.h>
+#ifdef CONFIG_RAID_ZERO_COPY
+#include <linux/rmap.h>
+#endif
 #include <linux/security.h>
 #include <linux/syscalls.h>
 #include <linux/cpuset.h>
@@ -609,9 +612,26 @@ void end_page_writeback(struct page *page)
 		BUG();
 
 	smp_mb__after_clear_bit();
+
+#ifdef CONFIG_RAID_ZERO_COPY
+	clear_page_constant(page);
+#endif
+
 	wake_up_page(page, PG_writeback);
 }
 EXPORT_SYMBOL(end_page_writeback);
+
+#ifdef CONFIG_RAID_ZERO_COPY
+void clear_page_constant(struct page *page)
+{
+       if (PageConstant(page)) {
+               ClearPageConstant(page);
+               SetPageUptodate(page);
+       }
+}
+EXPORT_SYMBOL(clear_page_constant);
+#endif
+
 
 /**
  * __lock_page - get a lock on the page, assuming we need to sleep to get it

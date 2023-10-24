@@ -7,6 +7,7 @@
 #define IP_NAT_RANGE_PROTO_SPECIFIED 2
 #define IP_NAT_RANGE_PROTO_RANDOM 4
 #define IP_NAT_RANGE_PERSISTENT 8
+#define IP_NAT_RANGE_4RD_NAPT 16
 
 /* The protocol-specific manipulable parts of the tuple. */
 union nf_conntrack_man_proto {

@@ -100,6 +100,14 @@ struct nf_conn_help {
 #include <net/netfilter/ipv4/nf_conntrack_ipv4.h>
 #include <net/netfilter/ipv6/nf_conntrack_ipv6.h>
 
+#if defined(CONFIG_COMCERTO_FP)
+struct comcerto_fp_info {
+	int ifindex;
+	int iif;
+	u32 mark;
+};
+#endif
+
 struct nf_conn {
 	/* Usage count in here is 1 for hash table/destruct timer, 1 per skb,
            plus 1 for any connection(s) we are `master' for */
@@ -126,6 +134,10 @@ struct nf_conn {
 
 #ifdef CONFIG_NF_CONNTRACK_SECMARK
 	u_int32_t secmark;
+#endif
+
+#if defined(CONFIG_COMCERTO_FP)
+	struct comcerto_fp_info fp_info[IP_CT_DIR_MAX];
 #endif
 
 	/* Extensions */
@@ -330,6 +342,9 @@ static inline bool nf_is_loopback_packet(const struct sk_buff *skb)
 }
 
 struct kernel_param;
+
+extern int nf_conntrack_set_dpi_allow_report(struct sk_buff *skb);
+extern int nf_conntrack_set_dpi_allow_and_mark(struct sk_buff *skb, int mark);
 
 extern int nf_conntrack_set_hashsize(const char *val, struct kernel_param *kp);
 extern unsigned int nf_conntrack_htable_size;

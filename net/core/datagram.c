@@ -128,6 +128,188 @@ out_noerr:
 	goto out;
 }
 
+#if defined(CONFIG_COMCERTO_IMPROVED_SPLICE)
+/*
+ *	skb_copy_datagram_to_kernel_iovec - Copy a datagram to a kernel iovec structure.
+ *	@skb: buffer to copy
+ *	@offset: offset in the buffer to start copying from
+ *	@to: io vector to copy to
+ *	@len: amount of data to copy from buffer to iovec
+ *
+ *	Note: the iovec is modified during the copy.
+ */
+
+#if defined(CONFIG_COMCERTO_SPLICE_USE_MDMA)
+int skb_copy_datagram_to_kernel_iovec_soft(const struct sk_buff *skb, int offset,
+				      struct iovec *to, int len)
+#else
+int skb_copy_datagram_to_kernel_iovec(const struct sk_buff *skb, int offset,
+				      struct iovec *to, int len)
+#endif
+{
+	int i, fraglen, end = 0;
+	struct sk_buff *next = skb_shinfo(skb)->frag_list;
+
+	if (!len)
+		return 0;
+
+next_skb:
+	fraglen = skb_headlen(skb);
+	i = -1;
+
+	while (1) {
+		int start = end;
+
+		if ((end += fraglen) > offset) {
+			int copy = end - offset;
+			int o = offset - start;
+
+			if (copy > len)
+				copy = len;
+			if (i == -1)
+				memcpy_tokerneliovec(to, skb->data + o, copy);
+			else {
+				skb_frag_t *frag = &skb_shinfo(skb)->frags[i];
+				struct page *page = skb_frag_page(frag);
+				void *p = kmap(page) + frag->page_offset + o;
+				memcpy_tokerneliovec(to, p, copy);
+				kunmap(page);
+			}
+
+			if (!(len -= copy))
+				return 0;
+			offset += copy;
+		}
+		if (++i >= skb_shinfo(skb)->nr_frags)
+			break;
+		fraglen = skb_shinfo(skb)->frags[i].size;
+	}
+	if (next) {
+		skb = next;
+		BUG_ON(skb_shinfo(skb)->frag_list);
+		next = skb->next;
+		goto next_skb;
+	}
+
+	return -EFAULT;
+}
+
+#if defined(CONFIG_COMCERTO_SPLICE_USE_MDMA)
+#include <mach/hardware.h>
+#include <mach/dma.h>
+int skb_copy_datagram_to_kernel_iovec(const struct sk_buff *skb, int offset,
+				      struct iovec *to, int len)
+{
+	int i, ret, fraglen, copy, o, end = 0;
+	struct sk_buff *next = skb_shinfo(skb)->frag_list;
+
+	struct comcerto_dma_sg *sg;
+	unsigned int size;
+	int total_len, input_len;
+	if (!len)
+		return 0;
+
+	total_len = len;
+	
+	size = sizeof(struct comcerto_dma_sg);
+	sg = kmalloc(size, GFP_ATOMIC);
+	if (!sg)
+		return skb_copy_datagram_to_kernel_iovec_soft (skb, offset, to, len);
+
+	comcerto_dma_sg_init(sg);
+
+next_skb:
+	fraglen = skb_headlen(skb);
+	i = -1;
+
+	while (1) {
+		int start = end;
+
+		if ((end += fraglen) > offset) {
+current_frag:
+			copy = end - offset;
+			o = offset - start;
+
+			if (copy > len)
+				copy = len;
+			
+			// preparing input
+			if (i == -1) {
+				ret = comcerto_dma_sg_add_input(sg, skb->data + o, copy, 0);
+			} else {
+				skb_frag_t *frag = &skb_shinfo(skb)->frags[i];
+				struct page *page = skb_frag_page(frag);
+				void *p = page_address(page) + frag->page_offset + o;
+				ret = comcerto_dma_sg_add_input(sg, p, copy, 0);
+			}
+			if (likely(ret == 0)) {
+				len -= copy;
+				offset += copy;
+			}
+
+			if ((len == 0) || unlikely(ret))
+			{
+				input_len = total_len - len;
+				len = input_len;
+				//preparing output
+				while (len > 0) {
+					if (to->iov_len) {
+						int copy = min_t(unsigned int, to->iov_len, len);
+
+						ret = comcerto_dma_sg_add_output(sg, to->iov_base, copy, 1);
+						if (unlikely(ret)) {
+							/* no clean way out, but this should never happen the way
+							 * skb_copy_datagram_to_kernel_iovec is called currently.
+							 */
+							comcerto_dma_sg_cleanup(sg, input_len);
+							kfree(sg);
+							return -EFAULT;
+						}
+						len -= copy;
+						to->iov_base += copy;
+						to->iov_len -= copy;
+					}
+					if (to->iov_len == 0)
+						to++;
+				}
+
+				//let's run the dma operation
+				comcerto_dma_get();
+				comcerto_dma_sg_setup(sg, input_len);
+				comcerto_dma_start();
+				comcerto_dma_wait();
+				comcerto_dma_put();
+				comcerto_dma_sg_cleanup(sg, input_len);
+
+				total_len = total_len - input_len;
+				if (total_len) {// Yes => last input fragment failed, add it again
+					comcerto_dma_sg_init(sg);
+					goto current_frag;
+				} else { //Everything copied, exit successfully
+					kfree(sg);
+					return 0;
+				}
+
+			}
+		}
+		if (++i >= skb_shinfo(skb)->nr_frags)
+			break;
+		fraglen = skb_shinfo(skb)->frags[i].size;
+	}
+	if (next) {
+		skb = next;
+		BUG_ON(skb_shinfo(skb)->frag_list);
+		next = skb->next;
+		goto next_skb;
+	}
+
+	comcerto_dma_sg_cleanup(sg, total_len - len);
+	kfree(sg);
+	return -EFAULT;
+}
+#endif
+#endif
+
 /**
  *	__skb_recv_datagram - Receive a datagram skbuff
  *	@sk: socket

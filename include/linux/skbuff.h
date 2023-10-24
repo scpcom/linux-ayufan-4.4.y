@@ -414,6 +414,9 @@ struct sk_buff {
 	kmemcheck_bitfield_end(flags1);
 	__be16			protocol;
 
+#if defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD)
+	__u32			ipsec_offload;
+#endif
 	void			(*destructor)(struct sk_buff *skb);
 #if defined(CONFIG_NF_CONNTRACK) || defined(CONFIG_NF_CONNTRACK_MODULE)
 	struct nf_conntrack	*nfct;
@@ -468,6 +471,11 @@ struct sk_buff {
 	sk_buff_data_t		end;
 	unsigned char		*head,
 				*data;
+#if defined(CONFIG_COMCERTO_CUSTOM_SKB_LAYOUT)
+	unsigned char 		*mspd_data;
+	__u32 			mspd_len;
+	__u32 			mspd_ofst;
+#endif
 	unsigned int		truesize;
 	atomic_t		users;
 };
@@ -549,6 +557,17 @@ static inline struct sk_buff *alloc_skb_fclone(unsigned int size,
 {
 	return __alloc_skb(size, priority, 1, NUMA_NO_NODE);
 }
+
+#if defined(CONFIG_ARCH_COMCERTO)
+extern struct sk_buff *__alloc_skb_header(unsigned int size, void* data, gfp_t gfp_mask,
+			    int fclone, int node);
+static inline struct sk_buff *alloc_skb_header(unsigned int size, 
+					void* data,
+					gfp_t priority)
+{
+	return __alloc_skb_header(size, data, priority, 0, NUMA_NO_NODE);
+}
+#endif
 
 extern void skb_recycle(struct sk_buff *skb);
 extern bool skb_recycle_check(struct sk_buff *skb, int skb_size);
@@ -2085,6 +2104,11 @@ extern unsigned int    datagram_poll(struct file *file, struct socket *sock,
 extern int	       skb_copy_datagram_iovec(const struct sk_buff *from,
 					       int offset, struct iovec *to,
 					       int size);
+#if defined(CONFIG_COMCERTO_IMPROVED_SPLICE)
+extern int	       skb_copy_datagram_to_kernel_iovec(const struct sk_buff *from,
+					       int offset, struct iovec *to,
+					       int size);
+#endif
 extern int	       skb_copy_and_csum_datagram_iovec(struct sk_buff *skb,
 							int hlen,
 							struct iovec *iov);

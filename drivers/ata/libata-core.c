@@ -4663,6 +4663,15 @@ void swap_buf_le16(u16 *buf, unsigned int buf_words)
 #endif /* __BIG_ENDIAN */
 }
 
+#if defined(CONFIG_COMCERTO_AHCI_PROF)
+
+#include "ahci.h"
+
+struct ahci_port_stats ahci_port_stats[MAX_AHCI_PORTS];
+unsigned int enable_ahci_prof = 0;
+
+#endif
+
 /**
  *	ata_qc_new - Request an available ATA command, for queueing
  *	@ap: target port
@@ -4689,6 +4698,13 @@ static struct ata_queued_cmd *ata_qc_new(struct ata_port *ap)
 
 	if (qc)
 		qc->tag = i;
+
+#if defined(CONFIG_COMCERTO_AHCI_PROF)
+	if (enable_ahci_prof)
+		if (qc == NULL) {
+			ahci_port_stats[ap->port_no].no_free_slot++;
+		}
+#endif
 
 	return qc;
 }
@@ -4741,6 +4757,48 @@ void ata_qc_free(struct ata_queued_cmd *qc)
 	if (likely(ata_tag_valid(tag))) {
 		qc->tag = ATA_TAG_POISON;
 		clear_bit(tag, &ap->qc_allocated);
+
+#if defined(CONFIG_COMCERTO_AHCI_PROF)
+		if (enable_ahci_prof) {
+			struct ahci_port_stats *stats = &ahci_port_stats[ap->port_no];
+
+			if (stats->pending_flag & (1 << tag)) {
+				stats->pending_flag &= ~(1 << tag);
+				stats->nb_pending--;
+
+				if (!stats->nb_pending) {
+					struct timeval now;
+					int diff_time_us;
+					unsigned int rate;
+					int bin;
+
+					do_gettimeofday(&now);
+
+					diff_time_us = ((now.tv_sec - stats->first_issue.tv_sec) * 1000 * 1000) +
+								(now.tv_usec - stats->first_issue.tv_usec);
+
+					stats->diff_us += diff_time_us;
+
+					/* Do the average for at least 10MiB of data transfered */
+					if (stats->bytes_pending > (10 * (1 << 20))) {
+
+						rate = ((stats->bytes_pending / stats->diff_us) * 1000 * 1000) >> 20; //MiBps
+
+						bin = rate >> RATE_SHIFT;
+						if (bin >= MAX_BINS)
+							bin = MAX_BINS - 1;
+
+						/* Track how many KiB were transfered at this rate */
+						stats->rate_counter[bin] += stats->bytes_pending >> 10;
+
+						/* Reset stats */
+						stats->bytes_pending = 0;
+						stats->diff_us = 0;
+					}
+				}
+			}
+		}
+#endif
 	}
 }
 

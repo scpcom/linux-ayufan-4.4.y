@@ -208,6 +208,7 @@ struct stripe_head {
 	atomic_t		count;	      /* nr of active thread/requests */
 	int			bm_seq;	/* sequence number for bitmap flushes */
 	int			disks;		/* disks in stripe */
+	int 		zero_copy_count;
 	enum check_states	check_state;
 	enum reconstruct_states reconstruct_state;
 	/**
@@ -228,10 +229,11 @@ struct stripe_head {
 	struct r5dev {
 		struct bio	req;
 		struct bio_vec	vec;
-		struct page	*page;
+		struct page	*page, *page_save;;
 		struct bio	*toread, *read, *towrite, *written;
 		sector_t	sector;			/* sector of this page */
 		unsigned long	flags;
+		dma_addr_t	pg_dma;
 	} dev[1]; /* allocated with extra space depending of RAID geometry */
 };
 
@@ -275,6 +277,14 @@ struct stripe_head_state {
 #define	R5_WantFUA	14	/* Write should be FUA */
 #define	R5_WriteError	15	/* got a write error - need to record it */
 #define	R5_MadeGood	16	/* A bad block has been fixed by writing to it*/
+
+#ifdef CONFIG_RAID_ZERO_COPY
+#define R5_DirectAccess 17 /* access cached pages directly instead of
+                                       * sh pages */
+#define R5_DirectAccessLock 18
+#endif
+
+
 /*
  * Write method
  */
@@ -306,6 +316,7 @@ enum {
 	STRIPE_BIOFILL_RUN,
 	STRIPE_COMPUTE_RUN,
 	STRIPE_OPS_REQ_PENDING,
+	STRIPE_ZERO_COPY_OPS,
 };
 
 /*

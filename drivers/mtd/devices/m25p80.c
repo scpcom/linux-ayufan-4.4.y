@@ -35,6 +35,7 @@
 #include <linux/spi/spi.h>
 #include <linux/spi/flash.h>
 
+
 /* Flash opcodes. */
 #define	OPCODE_WREN		0x06	/* Write enable */
 #define	OPCODE_RDSR		0x05	/* Read status register */
@@ -100,6 +101,54 @@ static inline struct m25p *mtd_to_m25p(struct mtd_info *mtd)
 	return container_of(mtd, struct m25p, mtd);
 }
 
+
+int m25p80_write_then_read(struct spi_device *spi,
+		const void *txbuf, unsigned n_tx,
+		void *rxbuf, unsigned n_rx)
+{
+	static DEFINE_MUTEX(m25p80_lock);
+	int			status;
+	struct spi_message	message;
+	struct spi_transfer	x[2];
+	u8			*local_buf;
+	u_char rx_data[8];
+	int len_to_tx = 0;
+	int len_tx_total = 0;
+	int len_tx_done = 0;
+
+	/* Use preallocated DMA-safe buffer.  We can't avoid copying here,
+	 * (as a pure convenience thing), but we can keep heap costs
+	 * out of the hot path ...
+	 */
+	if ((n_tx + n_rx) > 8)
+	{
+		printk(KERN_ERR "##### %s: size greater than 8 #########\n",__func__);
+		return -EINVAL;
+	}
+
+	spi_message_init(&message);
+	memset(x, 0, sizeof x);
+
+	len_to_tx = n_tx + n_rx;
+
+	x[0].len = len_to_tx;
+	x[0].tx_buf = txbuf;
+	x[0].rx_buf = &rx_data[0];
+
+	spi_message_add_tail(&x[0], &message);
+
+	mutex_lock(&m25p80_lock);
+
+	/* do the i/o */
+	status = spi_sync(spi, &message);
+	if (status == 0)
+		memcpy(rxbuf, rx_data + n_tx, n_rx);
+
+	mutex_unlock(&m25p80_lock);
+
+	return status;
+}
+
 /****************************************************************************/
 
 /*
@@ -117,7 +166,7 @@ static int read_sr(struct m25p *flash)
 	u8 code = OPCODE_RDSR;
 	u8 val;
 
-	retval = spi_write_then_read(flash->spi, &code, 1, &val, 1);
+	retval = m25p80_write_then_read(flash->spi, &code, 1, &val, 1);
 
 	if (retval < 0) {
 		dev_err(&flash->spi->dev, "error %d reading SR\n",
@@ -148,7 +197,7 @@ static inline int write_enable(struct m25p *flash)
 {
 	u8	code = OPCODE_WREN;
 
-	return spi_write_then_read(flash->spi, &code, 1, NULL, 0);
+	return m25p80_write_then_read(flash->spi, &code, 1, NULL, 0);
 }
 
 /*
@@ -158,7 +207,7 @@ static inline int write_disable(struct m25p *flash)
 {
 	u8	code = OPCODE_WRDI;
 
-	return spi_write_then_read(flash->spi, &code, 1, NULL, 0);
+	return m25p80_write_then_read(flash->spi, &code, 1, NULL, 0);
 }
 
 /*
@@ -249,8 +298,8 @@ static int m25p_cmdsz(struct m25p *flash)
  */
 static int erase_sector(struct m25p *flash, u32 offset)
 {
-	pr_debug("%s: %s %dKiB at 0x%08x\n", dev_name(&flash->spi->dev),
-			__func__, flash->mtd.erasesize / 1024, offset);
+	pr_debug("%s: %s %dKiB at 0x%08x cmdsz %d\n", dev_name(&flash->spi->dev),
+			__func__, flash->mtd.erasesize / 1024, offset, m25p_cmdsz(flash));
 
 	/* Wait until finished previous write command. */
 	if (wait_till_ready(flash))
@@ -339,6 +388,7 @@ static int m25p80_erase(struct mtd_info *mtd, struct erase_info *instr)
  * Read an address range from the flash chip.  The address range
  * may be any size provided it is within the physical boundaries.
  */
+#if 0
 static int m25p80_read(struct mtd_info *mtd, loff_t from, size_t len,
 	size_t *retlen, u_char *buf)
 {
@@ -371,6 +421,8 @@ static int m25p80_read(struct mtd_info *mtd, loff_t from, size_t len,
 	t[1].len = len;
 	spi_message_add_tail(&t[1], &m);
 
+	pr_debug("%s: t[0].len 0x%x t[1].len 0x%x\n",__func__, t[0].len, t[1].len);
+
 	/* Byte count starts at zero. */
 	*retlen = 0;
 
@@ -400,14 +452,95 @@ static int m25p80_read(struct mtd_info *mtd, loff_t from, size_t len,
 
 	return 0;
 }
+#endif
+
+static int m25p80_read(struct mtd_info *mtd, loff_t from, size_t len,
+	size_t *retlen, u_char *buf)
+{
+	struct m25p *flash = mtd_to_m25p(mtd);
+	struct spi_transfer t[2];
+	struct spi_message m;
+	int len_to_tx = 0;
+	int len_tx_total = 0;
+	int len_tx_done = 0;
+	int i;
+	u_char rx_data[8];
+	int cmd_size = m25p_cmdsz(flash);
+	int max_data_len = 8 - m25p_cmdsz(flash);
+
+	pr_debug("%s: %s from 0x%08x,len %zd\n", dev_name(&flash->spi->dev),
+			__func__, (u32)from, len);
+
+	/* sanity checks */
+	if (!len)
+		return 0;
+
+	if (from + len > flash->mtd.size)
+		return -EINVAL;
+
+	while(len_tx_done < len)
+	{
+
+		spi_message_init(&m);
+		memset(t, 0, (sizeof t));
+
+		if((len - len_tx_done) < max_data_len)
+			len_to_tx = len - len_tx_done;
+		else
+			len_to_tx = max_data_len;
+		/* NOTE:
+		 * OPCODE_FAST_READ (if available) is faster.
+		 * Should add 1 byte DUMMY_BYTE.
+		 */
+		t[0].tx_buf = flash->command;
+		t[0].rx_buf = &rx_data[0] ;
+		t[0].len = cmd_size + len_to_tx;
+		spi_message_add_tail(&t[0], &m);
+
+
+		/* Byte count starts at zero. */
+		*retlen = 0;
+
+		mutex_lock(&flash->lock);
+
+		/* Wait till previous write/erase is done. */
+		if (wait_till_ready(flash)) {
+			/* REVISIT status return?? */
+			mutex_unlock(&flash->lock);
+			return 1;
+		}
+
+		/* FIXME switch to OPCODE_FAST_READ.  It's required for higher
+		 * clocks; and at this writing, every chip this driver handles
+		 * supports that opcode.
+		 */
+
+		/* Set up the write data buffer. */
+		flash->command[0] = OPCODE_READ;
+		m25p_addr2cmd(flash, from + len_tx_done, flash->command);
+
+		spi_sync(flash->spi, &m);
+
+		memcpy(buf + len_tx_done, &rx_data[cmd_size], len_to_tx);
+
+		len_tx_done += len_to_tx;//valid data which will be read out of 8 bytes
+
+		mutex_unlock(&flash->lock);
+	}
+
+	*retlen = len_tx_done;
+
+	return 0;
+}
 
 /*
  * Write an address range to the flash chip.  Data must be written in
  * FLASH_PAGESIZE chunks.  The address range may be any size provided
  * it is within the physical boundaries.
  */
+#if 0
 static int m25p80_write(struct mtd_info *mtd, loff_t to, size_t len,
-	size_t *retlen, const u_char *buf)
+		size_t *retlen, const u_char *buf)
 {
 	struct m25p *flash = mtd_to_m25p(mtd);
 	u32 page_offset, page_size;
@@ -496,6 +629,78 @@ static int m25p80_write(struct mtd_info *mtd, loff_t to, size_t len,
 
 	return 0;
 }
+#endif
+
+static int m25p80_write(struct mtd_info *mtd, loff_t to, size_t len,
+		size_t *retlen, const u_char *buf)
+{
+	struct m25p *flash = mtd_to_m25p(mtd);
+	u32 page_offset, page_size;
+	struct spi_transfer t[2];
+	struct spi_message m;
+	u_char tx_buf[8];
+	int len_to_tx = 0;
+	int len_tx_total = 0;
+	int len_tx_done = 0;
+	int cmd_size = m25p_cmdsz(flash);
+	int max_data_len = 8 - m25p_cmdsz(flash);
+
+	pr_debug("%s: %s to 0x%08x, len %zd\n", dev_name(&flash->spi->dev),
+			__func__, (u32)to, len);
+
+	*retlen = 0;
+
+	/* sanity checks */
+	if (!len)
+		return(0);
+
+	if (to + len > flash->mtd.size)
+		return -EINVAL;
+
+	mutex_lock(&flash->lock);
+
+	while(len_tx_done < len)
+	{
+
+		spi_message_init(&m);
+		memset(t, 0, (sizeof t));
+
+		if((len - len_tx_done) < max_data_len)
+			len_to_tx = len - len_tx_done;
+		else
+			len_to_tx = max_data_len;
+
+		/* Set up the opcode in the write buffer. */
+		flash->command[0] = OPCODE_PP;
+		m25p_addr2cmd(flash, to + len_tx_done, flash->command);
+		memcpy(&tx_buf[0], flash->command, cmd_size);
+		memcpy(&tx_buf[cmd_size], buf + len_tx_done, len_to_tx);
+
+		t[0].tx_buf = &tx_buf[0];
+		t[0].len = cmd_size + len_to_tx;
+
+		spi_message_add_tail(&t[0], &m);
+
+		/* Wait until finished previous write command. */
+		if (wait_till_ready(flash)) {
+			mutex_unlock(&flash->lock);
+			return 1;
+		}
+
+		write_enable(flash);
+
+		spi_sync(flash->spi, &m);
+
+		len_tx_done += len_to_tx;//valid data which sent out of 8 bytes
+	}
+
+	*retlen = len_tx_done;
+
+	mutex_unlock(&flash->lock);
+
+	return 0;
+}
+
 
 static int sst_write(struct mtd_info *mtd, loff_t to, size_t len,
 		size_t *retlen, const u_char *buf)
@@ -783,7 +988,7 @@ static const struct spi_device_id *__devinit jedec_probe(struct spi_device *spi)
 	 * string for after vendor-specific data, after the three bytes
 	 * we use here.  Supporting some chips might require using it.
 	 */
-	tmp = spi_write_then_read(spi, &code, 1, id, 5);
+	tmp = m25p80_write_then_read(spi, &code, 1, id, 5);
 	if (tmp < 0) {
 		pr_debug("%s: error %d reading JEDEC ID\n",
 				dev_name(&spi->dev), tmp);

@@ -15,8 +15,13 @@
 #include <linux/compiler.h>
 #include <asm/fpstate.h>
 
+#if !defined(CONFIG_COMCERTO_64K_PAGES)
 #define THREAD_SIZE_ORDER	1
 #define THREAD_SIZE		8192
+#else
+#define THREAD_SIZE_ORDER	0
+#define THREAD_SIZE		65536
+#endif
 #define THREAD_START_SP		(THREAD_SIZE - 8)
 
 #ifndef __ASSEMBLY__

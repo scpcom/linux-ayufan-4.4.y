@@ -3367,6 +3367,52 @@ int netif_receive_skb(struct sk_buff *skb)
 }
 EXPORT_SYMBOL(netif_receive_skb);
 
+#if defined(CONFIG_ARCH_COMCERTO)
+int capture_receive_skb(struct sk_buff *skb)
+{
+        struct net_device *null_or_orig = NULL;
+        struct packet_type *ptype, *pt_prev;
+        struct net_device *orig_dev;
+        int ret = NET_RX_DROP;
+
+	if (!netdev_tstamp_prequeue)
+		net_timestamp_check(skb);
+
+        if (!skb->skb_iif)
+                skb->skb_iif = skb->dev->ifindex;
+
+        skb_reset_network_header(skb);
+        skb_reset_transport_header(skb);
+	skb_reset_mac_len(skb);
+
+        pt_prev = NULL;
+        orig_dev = skb->dev;
+
+        rcu_read_lock();
+        list_for_each_entry_rcu(ptype, &ptype_all, list) {
+                if (!ptype->dev || ptype->dev == skb->dev) {
+                        if (pt_prev)
+                                ret = deliver_skb(skb, pt_prev, orig_dev);
+                        pt_prev = ptype;
+                }
+        }
+
+        if (pt_prev) {
+                ret = pt_prev->func(skb, skb->dev, pt_prev, orig_dev);
+        } else {
+                kfree_skb(skb);
+                /* Jamal, now you will not able to escape explaining
+                 * me how you were going to use this. :-)
+                 */
+                ret = NET_RX_DROP;
+        }
+        rcu_read_unlock();
+        return ret;
+}
+
+EXPORT_SYMBOL(capture_receive_skb);
+#endif
+
 /* Network device is going away, flush any packets still pending
  * Called with irqs disabled.
  */
