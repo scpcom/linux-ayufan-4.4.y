@@ -205,6 +205,10 @@ static int pfe_hif_init_buffers(struct pfe_hif *hif)
 	desc--;
 	desc->next = (u32)first_desc_p;
 
+	hif->RxtocleanIndex = 0;
+	hif->page = NULL;
+	hif->page_off = 0;
+
 	/*Initialize Rx buffer descriptor ring base address */
 	writel(hif->descr_baseaddr_p, HIF_RX_BDP_ADDR);
 
@@ -351,8 +355,9 @@ static void pfe_hif_client_unregister(struct pfe_hif *hif, u32 client_id)
  * If the funtion returns NULL means client Rx queue is full and
  * packet couldn't send to client queue.
  */
-static void *client_put_rxpacket(struct hif_rx_queue *queue, void *pkt, u32 len, u32 flags, u32 client_ctrl)
+static void *client_put_rxpacket(struct pfe_hif *hif, void *pkt, u32 len, u32 flags, u32 client_ctrl)
 {
+	struct hif_rx_queue *queue = &hif->client[hif->client_id].rx_q[hif->qno];
 	void *free_pkt = NULL;
 	struct rx_queue_desc *desc = queue->base + queue->write_idx;
 
@@ -365,12 +370,24 @@ static void *client_put_rxpacket(struct hif_rx_queue *queue, void *pkt, u32 len,
 		inc_cl_idx(queue->write_idx);
 #else
 		//TODO: move allocations after Rx loop to improve instruction cache locality
-		if (page_mode)
+		if (page_mode) {
+#if PAGE_RATIO > 1
+			if (!hif->page_off) {
+				hif->page = free_pkt = (void *)__get_free_page(GFP_ATOMIC | GFP_DMA_PFE);
+			} else {
+				free_pkt = hif->page + hif->page_off * (PAGE_SIZE / PAGE_RATIO);
+				get_page(virt_to_page(hif->page));
+			}
+#else
 			free_pkt = (void *)__get_free_page(GFP_ATOMIC | GFP_DMA_PFE);
-		else
+#endif
+		} else
 			free_pkt = kmalloc(PFE_BUF_SIZE, GFP_ATOMIC | GFP_DMA_PFE);
 
 		if (free_pkt) {
+#if PAGE_RATIO > 1
+			hif->page_off = (hif->page_off + 1) % PAGE_RATIO;
+#endif
 			desc->data = pkt;
 			desc->client_ctrl = client_ctrl;
 			smp_wmb();
@@ -485,11 +502,9 @@ static int pfe_hif_rx_process(struct pfe_hif *hif, int budget)
 		}
 
 #if defined(CONFIG_PLATFORM_PCI)
-		free_buf = client_put_rxpacket(&hif->client[hif->client_id].rx_q[hif->qno],
-				(void *)PFE_PCI_TO_HOST(desc->data), len, flags, hif->client_ctrl);
+		free_buf = client_put_rxpacket(hif, (void *)PFE_PCI_TO_HOST(desc->data), len, flags, hif->client_ctrl);
 #else
-		free_buf = client_put_rxpacket(&hif->client[hif->client_id].rx_q[hif->qno],
-				(void *)pkt_hdr, len, flags, hif->client_ctrl);
+		free_buf = client_put_rxpacket(hif, (void *)pkt_hdr, len, flags, hif->client_ctrl);
 #endif
 
 		hif_lib_indicate_client(hif->client_id, EVENT_RX_PKT_IND, hif->qno);

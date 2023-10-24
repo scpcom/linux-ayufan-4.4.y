@@ -19,6 +19,12 @@ enum {
 };
 
 
+#if defined(CONFIG_COMCERTO_64K_PAGES)
+#define PAGE_RATIO	16	/* This is (PAGE_SIZE / pfe_pkt_size), MUST be 4, 8 or 16 */
+#else
+#define PAGE_RATIO	1
+#endif
+
 /* XXX  HIF_TX_DESC_NT value should be always greter than 4,
  *      Otherwise HIF_TX_POLL_MARK will become zero.
  */
@@ -27,7 +33,11 @@ enum {
 #define HIF_TX_DESC_NT		4
 #else
 #if defined(CONFIG_COMCERTO_64K_PAGES)
-#define HIF_RX_DESC_NT		64
+    #if PAGE_RATIO > 1
+    #define HIF_RX_DESC_NT		(PAGE_RATIO * 16)	/* Must be multiple of PAGE_RATIO */
+    #else /* PAGE_RATIO = 1 */
+    #define HIF_RX_DESC_NT		64
+    #endif
 #else
 #define HIF_RX_DESC_NT		256
 #endif
@@ -159,6 +169,8 @@ struct pfe_hif {
 	unsigned int client_id;
 	unsigned int client_ctrl;
 	unsigned int started;
+	void *page;
+	unsigned int page_off;
 
 	struct hif_desc *TxBase;
 	u32	TxRingSize;

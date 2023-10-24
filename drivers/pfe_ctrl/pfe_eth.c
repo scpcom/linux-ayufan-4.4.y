@@ -2369,6 +2369,7 @@ static struct sk_buff *pfe_eth_rx_page(struct net_device *dev, struct pfe_eth_pr
 	struct sk_buff *skb;
 	int length, offset, data_offset;
 	struct hif_lro_hdr *lro_hdr;
+	unsigned long page_offset;
 	u32 pe_id;
 
 	while (1) {
@@ -2386,6 +2387,9 @@ static struct sk_buff *pfe_eth_rx_page(struct net_device *dev, struct pfe_eth_pr
 #ifdef PFE_ETH_NAPI_STATS
 		priv->napi_counters[NAPI_DESC_COUNT]++;
 #endif
+
+		/* This is always zero for PAGE_RATIO = 1 */
+		page_offset = ((unsigned long)buf_addr & ~PAGE_MASK) & ~(PAGE_SIZE / PAGE_RATIO - 1);
 
 		/* First frag */
 		if ((desc_ctrl & CL_DESC_FIRST) && !skb) {
@@ -2417,7 +2421,8 @@ static struct sk_buff *pfe_eth_rx_page(struct net_device *dev, struct pfe_eth_pr
 			} else {
 				__memcpy(skb->data, buf_addr + offset, data_offset);
 				skb_put(skb, data_offset);
-				skb_add_rx_frag(skb, 0, p, offset + data_offset, length - data_offset);
+
+				skb_add_rx_frag(skb, 0, p, page_offset + offset + data_offset, length - data_offset);
 			}
 
 			skb->dev = dev;
@@ -2436,7 +2441,7 @@ static struct sk_buff *pfe_eth_rx_page(struct net_device *dev, struct pfe_eth_pr
 
 			p = virt_to_page(buf_addr);
 
-			skb_add_rx_frag(skb, skb_shinfo(skb)->nr_frags, p, offset, length);
+			skb_add_rx_frag(skb, skb_shinfo(skb)->nr_frags, p, page_offset + offset, length);
 		}
 
 		/* Last buffer in a software chain */

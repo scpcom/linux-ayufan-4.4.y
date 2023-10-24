@@ -64,9 +64,12 @@ static void pfe_hif_shm_clean(struct hif_shm *hif_shm)
 			hif_shm->rx_buf_pool[i] = NULL;
 			pkt -= pfe_pkt_headroom;
 
-			if (page_mode)
-				free_page((unsigned long)pkt);
-			else
+			if (page_mode) {
+				if (!(i % PAGE_RATIO))
+					free_page((unsigned long)pkt);
+				else
+					put_page(virt_to_page(pkt));
+			} else
 				kfree(pkt);
 		}
 	}
@@ -88,9 +91,14 @@ static int pfe_hif_shm_init(struct hif_shm *hif_shm)
 	hif_shm->rx_buf_pool_cnt = HIF_RX_DESC_NT;
 
 	for (i = 0; i < hif_shm->rx_buf_pool_cnt; i++) {
-		if (page_mode)
-			pkt = (void *)__get_free_page(GFP_KERNEL | GFP_DMA_PFE);
-		else
+		if (page_mode) {
+			if (!(i % PAGE_RATIO)) {
+				pkt = (void *)__get_free_page(GFP_KERNEL | GFP_DMA_PFE);
+			} else {
+				pkt = (void *)((unsigned long)hif_shm->rx_buf_pool[(i / PAGE_RATIO) * PAGE_RATIO] & PAGE_MASK) + (i % PAGE_RATIO) * (PAGE_SIZE / PAGE_RATIO);
+				get_page(virt_to_page(pkt));
+			}
+		} else
 			pkt = kmalloc(PFE_BUF_SIZE, GFP_KERNEL | GFP_DMA_PFE);
 
 		if (pkt)
@@ -649,7 +657,10 @@ int pfe_hif_lib_init(struct pfe *pfe)
 
 	if (lro_mode) {
 		page_mode = 1;
-		pfe_pkt_size = min(PAGE_SIZE, MAX_PFE_PKT_SIZE);
+
+		/* pfe packet size must be either 4K, 8K or 16K) */
+		pfe_pkt_size = min( (PAGE_SIZE / PAGE_RATIO), MAX_PFE_PKT_SIZE );
+
 		pfe_pkt_headroom = 0;
 	} else {
 		page_mode = 0;
@@ -659,6 +670,8 @@ int pfe_hif_lib_init(struct pfe *pfe)
 	hif_lib_tmu_credit_init(pfe);
 	pfe->hif.shm = &ghif_shm;
 	rc = pfe_hif_shm_init(pfe->hif.shm);
+
+	printk(KERN_INFO "%s: pfe packet size %d, # rx buffers %d, # buffers/page %d\n", __func__, pfe_pkt_size, HIF_RX_DESC_NT, PAGE_RATIO);
 
 	return rc;
 }

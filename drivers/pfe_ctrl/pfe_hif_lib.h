@@ -13,7 +13,7 @@
 #define HIF_CL_REQ_TIMEOUT	10
 
 #if defined(CONFIG_COMCERTO_ZONE_DMA_NCNB)
-#define GFP_DMA_PFE (GFP_DMA_NCNB | __GFP_NOWARN)
+#define GFP_DMA_PFE GFP_DMA_NCNB
 #else
 #define GFP_DMA_PFE 0
 #endif
