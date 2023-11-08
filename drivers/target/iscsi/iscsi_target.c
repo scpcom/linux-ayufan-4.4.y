@@ -31,7 +31,7 @@
 #include <scsi/iscsi_proto.h>
 #include <target/target_core_base.h>
 #include <target/target_core_fabric.h>
-#if defined(CONFIG_MACH_QNAPTS) && defined(SUPPORT_ISCSI_ZERO_COPY)   //20121130, adam hsu support iscsi zero-copy
+#if defined(CONFIG_MACH_QNAPTS) && defined(SUPPORT_ISCSI_ZERO_COPY)
 #include <target/target_core_backend.h>
 #endif
 #include "iscsi_target_core.h"
@@ -54,12 +54,8 @@
 #ifdef CONFIG_MACH_QNAPTS
 // 2009/11/26 Nike Chen add connection log 
 #include "iscsi_target_log.h"
-
-
-
 #include "../target_general.h"
 
-//20121130, adam hsu support iscsi zero-copy
 #if defined(SUPPORT_ISCSI_ZERO_COPY)
 #include "../target_core_file.h"
 #include <net/sock.h>
@@ -124,7 +120,34 @@ static int iscsit_logout_post_handler(struct iscsi_cmd *, struct iscsi_conn *);
 
 
 #if defined(CONFIG_MACH_QNAPTS)
-#if defined(SUPPORT_ISCSI_ZERO_COPY)   //20121130, adam hsu support iscsi zero-copy
+#if defined(SUPPORT_ISCSI_ZERO_COPY)
+
+static bool qnap_iscsit_zc_splice_work_on_scsi_op(
+	struct se_cmd *se_cmd
+	)
+{
+	int zc_val = 0;
+
+	if(qnap_transport_is_fio_blk_backend(se_cmd->se_dev) == 0) {
+		if ((se_cmd->t_task_cdb[0] == WRITE_6)
+		||  (se_cmd->t_task_cdb[0] == WRITE_10)
+		||  (se_cmd->t_task_cdb[0] == WRITE_12)
+		||  (se_cmd->t_task_cdb[0] == WRITE_16)
+		)
+		{
+			spin_lock(&se_cmd->se_dev->dev_zc_lock);
+			zc_val = se_cmd->se_dev->dev_zc;
+			spin_unlock(&se_cmd->se_dev->dev_zc_lock);
+
+			if (zc_val == 0)
+				return false;
+
+			return true;
+		}
+	}
+	return false;
+}
+
 static ssize_t mdo_splice_from_socket(struct file *file, struct socket *sock,loff_t __user *ppos,size_t count)
 {
     struct address_space *mapping = file->f_mapping;
@@ -134,16 +157,10 @@ static ssize_t mdo_splice_from_socket(struct file *file, struct socket *sock,lof
     int err = 0;
     int cPagePtr = 0;		
     int cPagesAllocated = 0;
-/*
-    struct RECV_FILE_CONTROL_BLOCK rv_cb[MAX_PAGES_PER_RECVFILE + 1];
-    struct kvec iov[MAX_PAGES_PER_RECVFILE + 1];
-*/
-
 	int count2;
 	count2=(count/PAGE_SIZE)+1;
 	struct RECV_FILE_CONTROL_BLOCK rv_cb[count2 + 1];
 	struct kvec iov[count2 + 1];
-
     struct msghdr msg;
     long rcvtimeo;
     int ret;
@@ -255,7 +272,7 @@ static ssize_t mdo_splice_from_socket(struct file *file, struct socket *sock,lof
 
     
 done:  
-//    current->backing_dev_info = NULL;    
+    current->backing_dev_info = NULL;    
     mutex_unlock(&inode->i_mutex);
 
     if (err)
@@ -1860,34 +1877,20 @@ static int iscsit_handle_data_out(struct iscsi_conn *conn, unsigned char *buf)
 		pr_debug("Receiving %u padding bytes.\n", padding);
 	}
 
-#if defined(CONFIG_MACH_QNAPTS) && defined(SUPPORT_ISCSI_ZERO_COPY)   //20121130, adam hsu support iscsi zero-copy
-
-    /*
-     * The policy is if found any write(6)/(10)/(16)/(32) command then to do 
-     * zero-copy. For other cases, NOT do zero-copy.
-     */
+#if defined(CONFIG_MACH_QNAPTS) && defined(SUPPORT_ISCSI_ZERO_COPY)
 	mse_cmd = &cmd->se_cmd;
 	mse_cmd->digest_zero_copy_skip = true;
 
-    if ((mse_cmd->t_task_cdb[0] == WRITE_6)
-    ||  (mse_cmd->t_task_cdb[0] == WRITE_10)
-    ||  (mse_cmd->t_task_cdb[0] == WRITE_16)
-    ||  ((mse_cmd->t_task_cdb[0] == VARIABLE_LENGTH_CMD) 
-        && (get_unaligned_be16(&mse_cmd->t_task_cdb[8]) == WRITE_32)
-        )
-    )
-    {
-//        printk("%s: found write(6,10,16,32) cmd !!\n", __func__);
-        mse_cmd->digest_zero_copy_skip = false;
-    }
+	if (qnap_iscsit_zc_splice_work_on_scsi_op(&cmd->se_cmd))
+		mse_cmd->digest_zero_copy_skip = false;
 #endif
 
 	if (conn->conn_ops->DataDigest) {
 		iov[iov_count].iov_base = &checksum;
 		iov[iov_count++].iov_len = ISCSI_CRC_LEN;
 		rx_size += ISCSI_CRC_LEN;
-#if defined(CONFIG_MACH_QNAPTS) && defined(SUPPORT_ISCSI_ZERO_COPY)   //20121130, adam hsu support iscsi zero-copy
-		mse_cmd->digest_zero_copy_skip = true;  //20121130, adam hsu support iscsi zero-copy
+#if defined(CONFIG_MACH_QNAPTS) && defined(SUPPORT_ISCSI_ZERO_COPY)
+		mse_cmd->digest_zero_copy_skip = true;
 #endif
 	}
 
@@ -1906,7 +1909,6 @@ static int iscsit_handle_data_out(struct iscsi_conn *conn, unsigned char *buf)
 	}
 	spin_unlock_irqrestore(&mse_dev->se_sub_dev->se_dev_lock, flags);
 
-//20121130, adam hsu support iscsi zero-copy
 #if defined(SUPPORT_ISCSI_ZERO_COPY)
 
 	if(!strcmp(mse_dev->transport->name, "fileio")) {
@@ -1928,27 +1930,24 @@ static int iscsit_handle_data_out(struct iscsi_conn *conn, unsigned char *buf)
 	ccc = 0;
 	ppos = (loff_t)hdr->offset;
 	ppos += (mse_cmd->t_task_lba *mse_dev->se_sub_dev->se_dev_attrib.block_size);
-	if(mse_dev->transport->name[0]=='f'&& !(mse_cmd->digest_zero_copy_skip)){
+
+	if (!qnap_transport_is_fio_blk_backend(mse_cmd->se_dev) 
+	&& !(mse_cmd->digest_zero_copy_skip)
+	)	
 		rx_got = (u32)mdo_splice_from_socket(mfile,conn->sock,&ppos,(size_t)rx_size);
-	}else
+	else
 #endif
 #endif
 	rx_got = rx_data(conn, &cmd->iov_data[0], iov_count, rx_size);
 
 	iscsit_unmap_iovec(cmd);
 
-/*
-	if (rx_got != rx_size)
-		return -1;
-*/
 #if defined(CONFIG_MACH_QNAPTS) && defined(SUPPORT_ISCSI_ZERO_COPY)
 	if (rx_got != rx_size){
 		if ( rx_got == -ENOSPC ){ // QNAP case
 			iscsit_dump_data_payload(conn, rx_size, 1);
-
 			se_cmd->err = rx_got;
 			rx_got = rx_size;
-
 		}
 		else // Original case
 			return -1;
@@ -2966,7 +2965,6 @@ static int iscsit_handle_immediate_data(
 	unsigned long flags;
 
 #if defined(SUPPORT_ISCSI_ZERO_COPY)
-	//20121130, adam hsu support iscsi zero-copy
 	struct se_cmd *mse_cmd = NULL;
 	struct se_device *mse_dev = NULL;
 	struct fd_dev *mdev = NULL;
@@ -2990,35 +2988,21 @@ static int iscsit_handle_immediate_data(
 		rx_size += padding;
 	}
 
-#if defined(CONFIG_MACH_QNAPTS) && defined(SUPPORT_ISCSI_ZERO_COPY)   //20121130, adam hsu support iscsi zero-copy
+#if defined(CONFIG_MACH_QNAPTS) && defined(SUPPORT_ISCSI_ZERO_COPY)
 
-    /*
-     * The policy is if found any write(6)/(10)/(16)/(32) command then to do 
-     * zero-copy. For other cases, NOT do zero-copy.
-     */
 	mse_cmd = &cmd->se_cmd;
 	mse_cmd->digest_zero_copy_skip = true;
 
-    /* Only write (6,10,16,32) command support iscsi zero-copy now */
-    if ((mse_cmd->t_task_cdb[0] == WRITE_6)
-    ||  (mse_cmd->t_task_cdb[0] == WRITE_10)
-    ||  (mse_cmd->t_task_cdb[0] == WRITE_16)
-    ||  ((mse_cmd->t_task_cdb[0] == VARIABLE_LENGTH_CMD)
-        && (get_unaligned_be16(&mse_cmd->t_task_cdb[8]) == WRITE_32)
-        )
-    )
-    {
-//        printk("%s: found write(6,10,16,32) cmd !!\n", __func__);
-        mse_cmd->digest_zero_copy_skip = false;
-    }
+	if (qnap_iscsit_zc_splice_work_on_scsi_op(&cmd->se_cmd))
+		mse_cmd->digest_zero_copy_skip = false;
 #endif
 
 	if (conn->conn_ops->DataDigest) {
 		iov[iov_count].iov_base		= &checksum;
 		iov[iov_count++].iov_len	= ISCSI_CRC_LEN;
 		rx_size += ISCSI_CRC_LEN;
-#if defined(CONFIG_MACH_QNAPTS) && defined(SUPPORT_ISCSI_ZERO_COPY)   //20121130, adam hsu support iscsi zero-copy
-		mse_cmd->digest_zero_copy_skip = true; //20121130, adam hsu support iscsi zero-copy
+#if defined(CONFIG_MACH_QNAPTS) && defined(SUPPORT_ISCSI_ZERO_COPY)
+		mse_cmd->digest_zero_copy_skip = true;
 #endif
 	}
 
@@ -3038,7 +3022,6 @@ static int iscsit_handle_immediate_data(
 	}
 	spin_unlock_irqrestore(&mse_dev->se_sub_dev->se_dev_lock, flags);
 
-//20121130, adam hsu support iscsi zero-copy
 #if defined(SUPPORT_ISCSI_ZERO_COPY)
 
 	if(!strcmp(mse_dev->transport->name, "fileio")) {
@@ -3059,9 +3042,12 @@ static int iscsit_handle_immediate_data(
 
 	/* fall-through for others */
 	ppos += (mse_cmd->t_task_lba *mse_dev->se_sub_dev->se_dev_attrib.block_size);
-	if(mse_dev->transport->name[0]=='f'&& !(mse_cmd->digest_zero_copy_skip)){
+
+	if(!qnap_transport_is_fio_blk_backend(mse_cmd->se_dev)
+	&& !(mse_cmd->digest_zero_copy_skip)
+	)
 		rx_got = (u32)mdo_splice_from_socket(mfile,conn->sock,&ppos,(size_t)rx_size);
-	}else
+	else
 #endif
 #endif
 	rx_got = rx_data(conn, &cmd->iov_data[0], iov_count, rx_size);
@@ -3070,7 +3056,6 @@ static int iscsit_handle_immediate_data(
 
 #if defined(CONFIG_MACH_QNAPTS) && defined(SUPPORT_ISCSI_ZERO_COPY)
 	if (rx_got != rx_size) {
-
 		if ( rx_got == -ENOSPC ){ // QNAP case
 			mse_cmd->err = rx_got;
 			rx_got = rx_size;
@@ -4457,8 +4442,9 @@ static int iscsit_build_sendtargets_response(struct iscsi_cmd *cmd)
 			spin_lock(&tpg->tpg_se_tpg.acl_node_lock);			
 			list_for_each_entry(acl, &tpg->tpg_se_tpg.acl_node_list, acl_list) {
 				/* Jonathan 2015/05/29 comparison should be case-insensitive */
-				if (!(strcmp(acl->initiatorname, QNAP_DEFAULT_INITIATOR)) ||
-						!(strcasecmp(acl->initiatorname, conn->sess->sess_ops->InitiatorName)))
+				if (!(strcmp(acl->initiatorname, DEFAULT_INITIATOR))
+				|| !(strcasecmp(acl->initiatorname, conn->sess->sess_ops->InitiatorName))
+				)
 						acl_count++;
 			}
 			spin_unlock(&tpg->tpg_se_tpg.acl_node_lock);		
@@ -5333,6 +5319,7 @@ restart:
 transport_err:
 	if (!signal_pending(current))
 		atomic_set(&conn->transport_failed, 1);
+
 	iscsit_take_action_for_connection_exit(conn);
 	goto restart;
 out:
@@ -5343,6 +5330,24 @@ static void iscsit_release_commands_from_conn(struct iscsi_conn *conn)
 {
 	struct iscsi_cmd *cmd = NULL, *cmd_tmp = NULL;
 	struct iscsi_session *sess = conn->sess;
+
+
+#ifdef CONFIG_MACH_QNAPTS
+	struct se_cmd *se_cmd = NULL;
+
+	spin_lock_bh(&conn->cmd_lock);
+	list_for_each_entry_safe(cmd, cmd_tmp, &conn->conn_cmd_list, 
+		i_list) 
+	{
+		se_cmd = &cmd->se_cmd;
+		if (se_cmd->se_cmd_flags & SCF_SE_LUN_CMD) {
+			qnap_transport_drop_fb_cmd(se_cmd, -1);
+			qnap_transport_drop_bb_cmd(se_cmd, -1);
+		}
+	}
+	spin_unlock_bh(&conn->cmd_lock);
+#endif
+
 	/*
 	 * We expect this function to only ever be called from either RX or TX
 	 * thread context via iscsit_close_connection() once the other context
@@ -6067,6 +6072,89 @@ int iscsit_release_sessions_for_tpg(struct iscsi_portal_group *tpg, int force)
 			" Group: %hu\n", session_count, tpg->tpgt);
 	return 0;
 }
+
+#ifdef CONFIG_MACH_QNAPTS
+int qnap_iscsi_lio_drop_cmd_from_lun_acl(
+	struct se_portal_group *se_tpg,
+	struct se_lun *se_lun
+	)
+{
+	/* this function only will be used on case about if 
+	 * someone will delete se_lun (se_dev) from lun_acl 
+	 * even the target is still online
+	 */
+	LIST_HEAD(free_cmd_list);
+	struct se_node_acl *se_nacl;
+	struct se_session *se_sess;
+	struct se_cmd *se_cmd;
+	struct iscsi_session *i_sess;
+	struct iscsi_conn *i_conn;
+	struct iscsi_cmd *i_cmd, *i_cmd_p;
+
+
+	/* find out all conns per sess on the tpg for this lun .... */
+	spin_lock_bh(&se_tpg->acl_node_lock);
+	list_for_each_entry(se_nacl, &se_tpg->acl_node_list, acl_list) {
+		spin_lock_bh(&se_nacl->nacl_sess_lock);
+
+		se_sess = se_nacl->nacl_sess;
+		if (!se_sess) {
+			spin_unlock_bh(&se_nacl->nacl_sess_lock);
+			continue;
+		}
+
+
+		i_sess = (struct iscsi_session *)se_sess->fabric_sess_ptr;
+
+		/* check all conns per sess */
+		spin_lock(&i_sess->conn_lock);
+		list_for_each_entry(i_conn, &i_sess->sess_conn_list, conn_list) 
+		{
+			if (!i_conn)
+				continue;
+			/* take care use list_for_each_entry_safe() since
+			 * we will use list_move_tail() later
+			 */
+			spin_lock(&i_conn->cmd_lock);
+			list_for_each_entry_safe(i_cmd, i_cmd_p, 
+				&i_conn->conn_cmd_list, i_list) 
+			{
+				if (i_cmd->iscsi_opcode != ISCSI_OP_SCSI_CMD)
+					continue;
+
+				se_cmd = &i_cmd->se_cmd;
+				if (se_lun->lun_se_dev != se_cmd->se_dev)
+					continue;
+
+				/* if backend se_dev for se_lun matches
+				 * the cmd->se_cmd.se_dev, try drop cmds
+				 */		
+				pr_debug("%s: found i_cmd:0x%p,se_cmd:0x%p, "
+					"se_dev:0x%p\n", __func__, i_cmd, 
+					se_cmd, se_cmd->se_dev);
+
+				qnap_transport_drop_bb_cmd(se_cmd, -1);
+
+				list_move_tail(&i_cmd->i_list, &free_cmd_list);
+			}
+			spin_unlock(&i_conn->cmd_lock);
+		}
+		spin_unlock(&i_sess->conn_lock);
+		spin_unlock_bh(&se_nacl->nacl_sess_lock);
+	}
+	spin_unlock_bh(&se_tpg->acl_node_lock);
+
+	list_for_each_entry_safe(i_cmd, i_cmd_p, &free_cmd_list, i_list) {
+		list_del_init(&i_cmd->i_list);
+		iscsit_free_cmd(i_cmd);
+	}
+
+	return 0;
+
+}
+
+#endif
+
 
 MODULE_DESCRIPTION("iSCSI-Target Driver for mainline target infrastructure");
 MODULE_VERSION("4.1.x");

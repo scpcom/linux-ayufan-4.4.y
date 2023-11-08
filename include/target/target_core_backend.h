@@ -51,6 +51,9 @@ struct se_subsystem_api {
 #endif    
 
 #if defined(CONFIG_MACH_QNAPTS)
+	int (*qnap_sync_cache)(struct se_task *);
+	int (*qnap_do_discard)(struct se_task *);
+
 #if defined(SUPPORT_VAAI)
 
 	/* api for write same function */

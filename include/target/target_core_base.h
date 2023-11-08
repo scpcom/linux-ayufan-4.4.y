@@ -76,6 +76,14 @@
 #ifdef CONFIG_MACH_QNAPTS
 // 2013/04/08, George Wu, target ACL supports multiple iSCSI initiators
 #define QNAP_DEFAULT_INITIATOR "iqn.2004-04.com.qnap:all:iscsi.default.ffffff"
+
+#if defined(IS_G)
+#define DEFAULT_INITIATOR	"iqn.2004-04.com.nas:all:iscsi.default.ffffff"
+#elif defined(Athens)
+#define DEFAULT_INITIATOR	"iqn.2004-04.com.cisco:all:iscsi.default.ffffff"
+#else
+#define DEFAULT_INITIATOR	QNAP_DEFAULT_INITIATOR
+#endif
 #endif
 
 
@@ -296,6 +304,7 @@ enum tcm_sense_reason_table {
     TCM_SPACE_ALLOCATION_FAILED_WRITE_PROTECT,
     TCM_THIN_PROVISIONING_SOFT_THRESHOLD_REACHED,
     TCM_CAPACITY_DATA_HAS_CHANGED,
+	TCM_REPORTED_LUNS_DATA_HAS_CHANGED,
 #endif
 };
 
@@ -617,6 +626,13 @@ typedef struct xcopy_info{
     u32                 DestSubSysType;
 } XCOPY_INFO;
 #endif
+
+struct __bio_obj {
+	struct list_head	bio_rec_lists;
+	spinlock_t		bio_rec_lists_lock;
+	atomic_t		bio_rec_count;
+};
+
 #endif
 
 struct se_queue_obj {
@@ -642,6 +658,10 @@ struct se_task {
 	bool			t_state_active;
 	struct completion	task_stop_comp;
 
+#ifdef CONFIG_MACH_QNAPTS
+	struct work_struct	unmap_work;
+	struct work_struct	sync_cache_work;
+
 #if defined(SUPPORT_CONCURRENT_TASKS)
     struct work_struct  multi_tasks_work;
 #endif
@@ -656,6 +676,8 @@ struct se_task {
     spinlock_t          t_rec_lock;
     int                 t_go_do_task;   /* 1: go do_task() , 0: go execute_task() */
 #endif
+#endif
+
 };
 
 #if defined(SUPPORT_PARALLEL_TASK_WQ)
@@ -767,6 +789,7 @@ struct se_cmd {
 #define CMD_T_CAP_CHANGE (1 << 11)
 
 #if defined(CONFIG_MACH_QNAPTS)
+#define CMD_T_RELEASE_CMD_FROM_CONN	(1 << 30)
 
 	/* TODO
 	 * These are used for QNAP TMF handing. After iscsi receive the TMF
@@ -774,10 +797,12 @@ struct se_cmd {
 	 * flag to indicate they will be check (aborted or not) before to
 	 * response them to host
 	 */
-	spinlock_t			tmf_data_lock;
-	unsigned int			tmf_code;
-	bool				tmf_resp_tas;
-	bool				tmf_diff_it_nexus;
+	spinlock_t		tmf_data_lock;
+	unsigned int		tmf_code;
+	bool			tmf_resp_tas;
+	bool			tmf_diff_it_nexus;
+
+	struct __bio_obj	bio_obj;
 #endif
 	spinlock_t		t_state_lock;
 	struct completion	t_transport_stop_comp;
@@ -877,7 +902,6 @@ struct se_node_acl {
 	struct list_head	acl_sess_list;
 	struct completion	acl_free_comp;
 	struct kref		acl_kref;
-
 };
 
 struct se_session {
@@ -896,6 +920,8 @@ struct se_session {
 #ifdef CONFIG_MACH_QNAPTS
 	spinlock_t		sess_reinstatement_lock;
 	bool			sess_reinstatement;
+	atomic_t                sess_lun_count;
+	bool                    sess_got_report_lun_cmd;
 
 /* 20140513, adamhsu, redmine 8253 */
 #if (LINUX_VERSION_CODE == KERNEL_VERSION(3,12,6))
@@ -1026,8 +1052,6 @@ struct se_subsystem_dev {
 #define SE_DEV_NAA_LEN	32
 	unsigned char	se_dev_naa[SE_DEV_NAA_LEN];
 
-
-
 	atomic_t    se_dev_provision_write_once;
 
 #if defined(SUPPORT_LOGICAL_BLOCK_4KB_FROM_NAS_GUI)
@@ -1106,6 +1130,24 @@ struct se_device {
 	struct task_struct	*process_thread;
 
 #if defined(CONFIG_MACH_QNAPTS) 
+	spinlock_t		dev_zc_lock;
+	int			dev_zc;
+	struct workqueue_struct *unmap_wq;
+	struct workqueue_struct *sync_cache_wq;
+	struct workqueue_struct *tmr_wq;
+	struct kmem_cache 	*fb_bio_rec_kmem;
+
+
+#define QNAP_DT_UNKNOWN		0
+#define QNAP_DT_FIO_BLK		1
+#define QNAP_DT_FIO_FILE	2
+#define QNAP_DT_IBLK_FBDISK	3
+#define QNAP_DT_IBLK_BLK	4
+#define QNAP_DT_RBD		5
+#define QNAP_DT_PSCSI		6
+
+	u32			dev_type;
+
 	/* used to create temporary cmd rec on se_dev */
 	struct list_head	cmd_rec_list;
 	spinlock_t		cmd_rec_lock;

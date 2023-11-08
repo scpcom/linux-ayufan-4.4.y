@@ -496,6 +496,8 @@ static int oom_kill_task(struct task_struct *p, struct mem_cgroup *mem)
         hal_event->arg.action = OOM_KILLED;
         hal_event->arg.param.oom_cb.pid = pid;
         strncpy(hal_event->arg.param.oom_cb.comm, comm, sizeof(hal_event->arg.param.oom_cb.comm));
+        hal_event->arg.param.oom_cb.comm[sizeof(hal_event->arg.param.oom_cb.comm) - 1] = '\0';
+        hal_event->arg.param.oom_cb.QNAP_QPKG[0] = '\0';
         // Send hal_event after killed process
         send_hal_netlink(hal_event);
 

@@ -227,6 +227,14 @@ static struct se_device *iblock_create_virtdevice(
 	 * in ATA and we need to set TPE=1
 	 */
 #if defined(CONFIG_MACH_QNAPTS)
+
+	if (!strncmp(bd->bd_disk->disk_name, "fbdisk", 6))
+		dev->dev_type = QNAP_DT_IBLK_FBDISK;
+	else
+		dev->dev_type = QNAP_DT_IBLK_BLK;
+
+	qnap_transport_create_fb_bio_rec_kmem(dev);
+
 #if defined(SUPPORT_TP)
 	if(!strcmp(dev->se_sub_dev->se_dev_provision, "thin"))
 		dev->se_sub_dev->se_dev_attrib.emulate_tpu = 1;
@@ -486,8 +494,6 @@ int __iblock_get_lba_map_status(
 	int *err
 	)
 {
-#define SIZE_ORDER	20
-
 	LIO_SE_DEVICE *se_dev = se_cmd->se_dev;
 	LIO_IBLOCK_DEV *ib_dev = NULL;
 	struct block_device *bd = NULL;
@@ -573,7 +579,9 @@ static int iblock_do_discard(struct se_cmd *se_cmd, sector_t lba, u32 range)
 	range *= ((1 << bs_order) >> 9);
 #endif
 
-	ret = blkdev_issue_discard(bd, lba, range, GFP_KERNEL, barrier);
+	ret = qnap_transport_blkdev_issue_discard(se_cmd, bd, lba, range,
+		GFP_KERNEL, barrier);
+
 	if (ret != 0){
 		if (ret == -ENOSPC)
 			__set_err_reason(ERR_NO_SPACE_WRITE_PROTECT, 
@@ -712,8 +720,23 @@ static ssize_t iblock_show_configfs_dev_params(
 #if (LINUX_VERSION_CODE == KERNEL_VERSION(3,2,26)) || (LINUX_VERSION_CODE == KERNEL_VERSION(3,4,6))
 static void iblock_bio_destructor(struct bio *bio)
 {
+#ifdef CONFIG_MACH_QNAPTS // take care this
+	struct se_task *task = NULL;
+	struct iblock_dev *ib_dev = NULL;
+	struct bio_rec *brec = NULL;
+
+	if (qnap_bi_private_is_brec(bio->bi_private)) {
+		brec = (struct bio_rec *)qnap_bi_private_clear_brec_bit(bio->bi_private);
+		task = brec->se_task;
+		qnap_transport_set_bio_rec_null(task->task_se_cmd, brec);
+	} else
+		task = bio->bi_private;
+
+	ib_dev = task->task_se_cmd->se_dev->dev_ptr;	
+#else
 	struct se_task *task = bio->bi_private;
 	struct iblock_dev *ib_dev = task->task_se_cmd->se_dev->dev_ptr;
+#endif
 
 	bio_free(bio, ib_dev->ibd_bio_set);
 }
@@ -943,6 +966,10 @@ static int iblock_do_task(struct se_task *task)
 	bio_list_add(&list, bio);
 	bio_cnt = 1;
 
+#ifdef CONFIG_MACH_QNAPTS
+	qnap_transport_alloc_bio_rec(task, bio);
+#endif	
+
 	for_each_sg(task->task_sg, sg, task->task_sg_nents, i) {
 		/*
 		 * XXX: if the length the device accepts is shorter than the
@@ -961,6 +988,10 @@ static int iblock_do_task(struct se_task *task)
 				goto fail;
 			bio_list_add(&list, bio);
 			bio_cnt++;
+
+#ifdef CONFIG_MACH_QNAPTS
+			qnap_transport_alloc_bio_rec(task, bio);
+#endif
 		}
 
 		/* Always in 512 byte units for Linux/Block */
@@ -1004,8 +1035,27 @@ static sector_t iblock_get_blocks(struct se_device *dev)
 
 static void iblock_bio_done(struct bio *bio, int err)
 {
+#ifdef CONFIG_MACH_QNAPTS // take care this
+	struct se_task *task = NULL;
+	struct iblock_req *ibr = NULL;
+	struct bio_rec *brec = NULL;
+
+	if (qnap_bi_private_is_brec(bio->bi_private)) {
+		brec = (struct bio_rec *)qnap_bi_private_clear_brec_bit(bio->bi_private);
+		task = brec->se_task;
+
+		/* Not free brec here due to the iblock_bio_destructor() 
+		 * will be called in bio_put().
+		 * It is only for kernel 3.2.26, 3.4.6
+		 */
+	} else
+		task = bio->bi_private;
+
+	ibr = IBLOCK_REQ(task);
+#else
 	struct se_task *task = bio->bi_private;
 	struct iblock_req *ibr = IBLOCK_REQ(task);
+#endif
 
 	/*
 	 * Set -EIO if !BIO_UPTODATE and the passed is still err=0
@@ -1110,6 +1160,9 @@ static struct se_subsystem_api iblock_template = {
 #endif	
 
 #if defined(CONFIG_MACH_QNAPTS)
+	.qnap_sync_cache	= qnap_target_execute_sync_cache,
+	.qnap_do_discard	= qnap_target_execute_discard,
+
 #if defined(SUPPORT_VAAI)
 	/* api for write same function */
 	.do_prepare_ws_buffer       = do_prepare_ws_buffer,

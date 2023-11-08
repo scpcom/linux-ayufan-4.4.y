@@ -1176,6 +1176,24 @@ static void iscsit_handle_dataout_timeout(unsigned long data)
 	sess = conn->sess;
 	na = iscsit_tpg_get_node_attrib(sess);
 
+#ifdef CONFIG_MACH_QNAPTS
+	/* skip after received TMR even if we are in any ERL */
+	struct se_cmd *se_cmd;
+	se_cmd = &cmd->se_cmd;
+
+	if (cmd->se_cmd.tmf_code == TMR_LUN_RESET 
+	|| cmd->se_cmd.tmf_code == TMR_ABORT_TASK
+	)
+	{
+		pr_debug("Dataout timeout timer triggered but cmd "
+			"was aborted already, skip to disconnect conn\n"); 
+
+		spin_unlock_bh(&cmd->dataout_timeout_lock);
+		iscsit_dec_conn_usage_count(conn);
+		return;
+	}
+#endif
+
 	if (!sess->sess_ops->ErrorRecoveryLevel) {
 		pr_debug("Unable to recover from DataOut timeout while"
 			" in ERL=0.\n");

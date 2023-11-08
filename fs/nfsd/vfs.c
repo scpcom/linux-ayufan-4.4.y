@@ -2512,8 +2512,10 @@ nfsd_unlink(struct svc_rqst *rqstp, struct svc_fh *fhp, int type,
 #endif
 ///////////////////////////////////		
 	else
-#ifdef	QNAP_FNOTIFY
 	{
+#ifdef	QNAP_FNOTIFY
+		T_FILE_STATUS  tfsOrg;
+		FILE_STATUS_BY_INODE(rdentry->d_inode, tfsOrg);
 #endif
 #ifdef CONFIG_NFSV4_FS_RICHACL
                 if (rqstp->rq_vers < 4)
@@ -2531,12 +2533,10 @@ nfsd_unlink(struct svc_rqst *rqstp, struct svc_fh *fhp, int type,
 #ifdef	QNAP_FNOTIFY
 		if (!host_err && (FN_RMDIR & msys_nodify))
 		{
-			T_FILE_STATUS  tfsOrg;
-			FILE_STATUS_BY_INODE(rdentry->d_inode, tfsOrg);
 			pfn_nfs_file_notify(FN_RMDIR, MARG_0, fhp, fname, flen, &tfsOrg, 0, 0, 0, 0);
 		}
-	}
 #endif	//QNAP_FNOTIFY
+	}
 ////////////////////////////////////		
 	if (!host_err)
 		host_err = commit_metadata(fhp);

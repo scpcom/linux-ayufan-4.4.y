@@ -58,7 +58,7 @@
  * 2. 2015/04/13, adamhsu, redmine 11438 
  */
 #define	MAX_UNMAP_COUNT_SHIFT	10	/* 2^10 */
-#define MAX_UNMAP_DESC_COUNT	16
+#define MAX_UNMAP_DESC_COUNT	1
 #define MAX_UNMAP_MB_SIZE	(512)
 
 /* 2014/06/26, adamhsu, redmine 8794 (start) */
@@ -264,6 +264,38 @@ typedef struct _logsense_func_table{
 	int	(*logsense_func)(struct se_cmd *cmd, u8 *buf);   
 	int	is_end_table;
 }__attribute__ ((packed)) LOGSENSE_FUNC_TABLE;
+
+struct bio_rec {
+	struct	list_head node;
+	struct	bio *bio;
+	void	*se_task;
+};
+
+/* tricky method like PageAnon(struct page *page) */
+#define BI_PRIVATE_BREC	(1)
+
+static inline int qnap_bi_private_is_brec(
+	void *bi_private
+	)
+{
+	return (((unsigned long)bi_private & BI_PRIVATE_BREC) != 0);
+}
+
+static inline void *qnap_bi_private_set_brec_bit(
+	void *bi_private
+	) 
+{
+	unsigned long tmp = (unsigned long)bi_private;
+	return (void *)(tmp + BI_PRIVATE_BREC);
+}
+
+static inline void *qnap_bi_private_clear_brec_bit(
+	void *bi_private
+	) 
+{
+	unsigned long tmp = (unsigned long)bi_private;
+	return (void *)(tmp - BI_PRIVATE_BREC);
+}
 
 /**/
 extern u32 __call_transport_get_size(
@@ -479,7 +511,28 @@ static int transport_free_extra_tag_pool(
 	);
 #endif
 
+int qnap_transport_is_iblock_fbdisk(struct se_device *se_dev);
+int qnap_transport_is_fio_blk_backend(struct se_device *se_dev);
+int qnap_transport_drop_bb_cmd(struct se_cmd *se_cmd, int type);
 
+int qnap_transport_blkdev_issue_discard(struct se_cmd *se_cmd, 
+	struct block_device *bdev, sector_t sector, sector_t nr_sects, 
+	gfp_t gfp_mask, unsigned long flags);
+
+bool qnap_transport_is_dropped_by_release_conn(struct se_cmd *se_cmd);
+bool qnap_transport_is_dropped_by_tmr(struct se_cmd *se_cmd);
+
+int qnap_target_execute_sync_cache(struct se_task *task);
+int qnap_target_execute_discard(struct se_task *se_task);
+
+int qnap_transport_drop_fb_cmd(struct se_cmd *se_cmd, int type);
+void qnap_transport_create_fb_bio_rec_kmem(struct se_device *se_dev);
+void qnap_transport_destroy_fb_bio_rec_kmem(struct se_device *se_dev);
+int qnap_transport_alloc_bio_rec(struct se_task *se_task, struct bio *bio);
+int qnap_transport_free_bio_rec_lists(struct se_cmd *se_cmd);
+void qnap_transport_set_bio_rec_null(struct se_cmd *se_cmd, struct bio_rec *brec);
+void qnap_transport_init_bio_rec_val(struct se_cmd *se_cmd);
+int qnap_transport_check_report_lun_changed(struct se_cmd *se_cmd);
 
 
 /**/

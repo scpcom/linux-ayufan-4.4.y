@@ -40,6 +40,13 @@ void iblock_update_allocated(struct se_device *dev)
 	struct inode *pInode = NULL;
 	loff_t total = 0, used = 0;
 	u32 i;
+
+	/* we may get null at this time if bd didn't be get completely in
+	 * iblock_create_virtdevice() so ...
+	 */
+	if (!bd)
+		return;
+
 	pfbdev = bd->bd_disk->private_data;
 
 	for ( i = 0; i < pfbdev->fb_file_num; i++ ){ // link all fbdisk files
@@ -366,7 +373,7 @@ int __qnap_scsi3_check_aptpl_metadata_file_exists(
 
 	file = filp_open(path, flags, 0600);
 	if (IS_ERR(file) || !file || !file->f_dentry) {
-		pr_err("%s: filp_open(%s) for APTPL metadata"
+		pr_debug("%s: filp_open(%s) for APTPL metadata"
 			" failed\n", __func__, path);
 		return IS_ERR(file) ? PTR_ERR(file) : -ENOENT;
 	}

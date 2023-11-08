@@ -356,6 +356,9 @@ ext4_set_acl(handle_t *handle, struct inode *inode, int type,
 	if (S_ISLNK(inode->i_mode))
 		return -EOPNOTSUPP;
 
+	if (unlikely(qnap_ext4_fake_readonly_check(inode->i_sb)))
+		return -EROFS;
+
 	switch (type) {
 	case ACL_TYPE_ACCESS:
 		name_index = EXT4_XATTR_INDEX_POSIX_ACL_ACCESS;

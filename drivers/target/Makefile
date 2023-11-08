@@ -49,6 +49,9 @@ target_core_mod-y		:= target_core_configfs.o \
 # ENABLE_DBG_PRINT        - enable the debug print
 #
 ##########################################################################
+
+ccflags-$(CONFIG_MACH_QNAPTS) += -I$(FBDISK_INCLUDE)
+
 ifeq ($(SUPPORT_TP),yes)
 target_core_mod-y	+= $(TP_OBJ)
 endif

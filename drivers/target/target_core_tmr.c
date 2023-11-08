@@ -44,6 +44,11 @@
 #include "iscsi/iscsi_target_core.h"
 #endif
 
+#ifdef CONFIG_MACH_QNAPTS
+#include "target_general.h"
+#endif
+
+
 int core_tmr_alloc_req(
 	struct se_cmd *se_cmd,
 	void *fabric_tmr_ptr,
@@ -187,10 +192,14 @@ void core_tmr_abort_task(
 		__check_tmf_i_t_nexus(TMR_ABORT_TASK, tas, se_cmd, tmr_nacl);
 		spin_unlock(&se_cmd->tmf_data_lock);
 
+		qnap_transport_drop_bb_cmd(se_cmd, TMR_ABORT_TASK);
+		qnap_transport_drop_fb_cmd(se_cmd, TMR_ABORT_TASK);
+
 		se_cmd->se_tfo->set_clear_delay_remove(se_cmd, 1, 0);
 
 		/* not call kref_get() for our modfication here */
 		spin_unlock_irqrestore(&se_sess->sess_cmd_lock, flags);
+
 		goto _FUNC_COMPLETE_;
 	}
 	spin_unlock_irqrestore(&se_sess->sess_cmd_lock, flags);
@@ -268,11 +277,14 @@ static void core_tmr_drain_task_list(
 		spin_lock(&cmd->tmf_data_lock);
 		__check_tmf_i_t_nexus(TMR_LUN_RESET, tas, cmd, tmr_nacl);
 		spin_unlock(&cmd->tmf_data_lock);
+
+		qnap_transport_drop_bb_cmd(cmd, TMR_LUN_RESET);
+		qnap_transport_drop_fb_cmd(cmd, TMR_LUN_RESET);
 	
 		cmd->se_tfo->set_clear_delay_remove(cmd, 1, 0);
-	
 	}
 	spin_unlock_irqrestore(&dev->execute_task_lock, flags);
+
 	return;
 }
 
@@ -288,6 +300,7 @@ static void core_tmr_drain_cmd_list(
 	struct se_queue_obj *qobj = &dev->dev_queue_obj;
 	struct se_cmd *cmd, *tcmd;
 	unsigned long flags;
+
 	/*
 	 * Release all commands remaining in the struct se_device cmd queue.
 	 *
@@ -327,6 +340,9 @@ static void core_tmr_drain_cmd_list(
 		spin_lock(&cmd->tmf_data_lock);
 		__check_tmf_i_t_nexus(TMR_LUN_RESET, tas, cmd, tmr_nacl);
 		spin_unlock(&cmd->tmf_data_lock);
+
+		qnap_transport_drop_bb_cmd(cmd, TMR_LUN_RESET);
+		qnap_transport_drop_fb_cmd(cmd, TMR_LUN_RESET);
 
 		cmd->se_tfo->set_clear_delay_remove(cmd, 1, 0);
 	}

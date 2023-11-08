@@ -37,6 +37,10 @@
 #include "iscsi_target_util.h"
 #include "iscsi_target.h"
 
+#ifdef CONFIG_MACH_QNAPTS
+#include "../target_general.h"
+#endif
+
 #define PRINT_BUFF(buff, len)					\
 {								\
 	int zzz;						\
@@ -707,6 +711,9 @@ struct iscsi_cmd *iscsit_find_cmd_from_itt(
 	u32 init_task_tag)
 {
 	struct iscsi_cmd *cmd;
+#ifdef CONFIG_MACH_QNAPTS
+	int count = 0;
+#endif
 
 	spin_lock_bh(&conn->cmd_lock);
 	list_for_each_entry(cmd, &conn->conn_cmd_list, i_list) {
@@ -721,6 +728,7 @@ struct iscsi_cmd *iscsit_find_cmd_from_itt(
 			)
 			{
 				spin_unlock(&cmd->se_cmd.tmf_data_lock);
+				count++;
 				spin_lock_bh(&conn->cmd_lock);
 				continue;
 			}
@@ -731,6 +739,12 @@ struct iscsi_cmd *iscsit_find_cmd_from_itt(
 	}
 	spin_unlock_bh(&conn->cmd_lock);
 
+#ifdef CONFIG_MACH_QNAPTS
+	if (count)
+		pr_warn("cmd itt:0x%08x on cid:%hu was aborted already, "
+			"skip to pick it up\n", init_task_tag, conn->cid);
+	else
+#endif
 	pr_err("Unable to locate ITT: 0x%08x on CID: %hu",
 			init_task_tag, conn->cid);
 	return NULL;
@@ -999,6 +1013,19 @@ static void iscsit_remove_cmd_from_response_queue(
 		return;
 	}
 
+#ifdef CONFIG_MACH_QNAPTS
+
+	LIST_HEAD(drain_q_list);
+
+	list_for_each_entry_safe(qr, qr_tmp, &conn->response_queue_list,
+				qr_list) {
+		if (qr->cmd != cmd)
+			continue;
+
+		atomic_dec(&qr->cmd->response_queue_count);
+		list_move_tail(&qr->qr_list, &drain_q_list);
+	}
+#else
 	list_for_each_entry_safe(qr, qr_tmp, &conn->response_queue_list,
 				qr_list) {
 		if (qr->cmd != cmd)
@@ -1008,7 +1035,19 @@ static void iscsit_remove_cmd_from_response_queue(
 		list_del(&qr->qr_list);
 		kmem_cache_free(lio_qr_cache, qr);
 	}
+#endif
+
 	spin_unlock_bh(&conn->response_queue_lock);
+
+#ifdef CONFIG_MACH_QNAPTS
+	while (!list_empty(&drain_q_list)) {
+		qr = list_entry(drain_q_list.next, 
+			struct iscsi_queue_req, qr_list);
+
+		list_del(&qr->qr_list);
+		kmem_cache_free(lio_qr_cache, qr);
+	}
+#endif
 
 	if (atomic_read(&cmd->response_queue_count)) {
 		pr_err("ITT: 0x%08x response_queue_count: %d\n",
@@ -1044,6 +1083,45 @@ void iscsit_free_queue_reqs_for_conn(struct iscsi_conn *conn)
 {
 	struct iscsi_queue_req *qr, *qr_tmp;
 
+#ifdef CONFIG_MACH_QNAPTS
+	
+	LIST_HEAD(drain_iq_list);
+	LIST_HEAD(drain_rq_list);
+
+	spin_lock_bh(&conn->immed_queue_lock);
+	list_for_each_entry_safe(qr, qr_tmp, &conn->immed_queue_list, qr_list) {
+		if (qr->cmd)
+			atomic_dec(&qr->cmd->immed_queue_count);
+		list_move_tail(&qr->qr_list, &drain_iq_list);
+	}
+	spin_unlock_bh(&conn->immed_queue_lock);
+
+	spin_lock_bh(&conn->response_queue_lock);
+	list_for_each_entry_safe(qr, qr_tmp, &conn->response_queue_list,
+			qr_list) {
+		if (qr->cmd)
+			atomic_dec(&qr->cmd->response_queue_count);
+		list_move_tail(&qr->qr_list, &drain_rq_list);
+	}
+	spin_unlock_bh(&conn->response_queue_lock);
+
+	while (!list_empty(&drain_iq_list)) {
+		qr = list_entry(drain_iq_list.next, 
+			struct iscsi_queue_req, qr_list);
+
+		list_del(&qr->qr_list);
+		kmem_cache_free(lio_qr_cache, qr);
+	}
+
+	while (!list_empty(&drain_rq_list)) {
+		qr = list_entry(drain_rq_list.next, 
+			struct iscsi_queue_req, qr_list);
+
+		list_del(&qr->qr_list);
+		kmem_cache_free(lio_qr_cache, qr);
+	}
+#else
+
 	spin_lock_bh(&conn->immed_queue_lock);
 	list_for_each_entry_safe(qr, qr_tmp, &conn->immed_queue_list, qr_list) {
 		list_del(&qr->qr_list);
@@ -1064,6 +1142,7 @@ void iscsit_free_queue_reqs_for_conn(struct iscsi_conn *conn)
 		kmem_cache_free(lio_qr_cache, qr);
 	}
 	spin_unlock_bh(&conn->response_queue_lock);
+#endif
 }
 
 void iscsit_release_cmd(struct iscsi_cmd *cmd)
@@ -1072,15 +1151,18 @@ void iscsit_release_cmd(struct iscsi_cmd *cmd)
 	int i;
 
 #ifdef CONFIG_MACH_QNAPTS
+	struct se_cmd *se_cmd = &cmd->se_cmd;
 
 	/* 20140513, adamhsu, redmine 8253 */
 #if (LINUX_VERSION_CODE == KERNEL_VERSION(3,12,6))
-	struct se_cmd *se_cmd = &cmd->se_cmd;
 	struct iscsi_session *sess;
 #endif
 
 	/* 2014/10/03, adamhsu, fixed system reboot randomly */
 	unsigned long flags;
+
+	if (se_cmd->se_cmd_flags & SCF_SE_LUN_CMD)
+		qnap_transport_free_bio_rec_lists(se_cmd);
 #endif
 
 

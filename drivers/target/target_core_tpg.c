@@ -125,9 +125,8 @@ struct se_node_acl *core_tpg_get_initiator_node_acl(
 	spin_lock_irq(&tpg->acl_node_lock);
 #ifdef CONFIG_MACH_QNAPTS
 // 2009/09/23 Nike Chen add for default initiator
-
-    list_for_each_entry(acl, &tpg->acl_node_list, acl_list) {
-		if (!tpg->default_acl && !(strcmp(acl->initiatorname, QNAP_DEFAULT_INITIATOR))) {
+	list_for_each_entry(acl, &tpg->acl_node_list, acl_list) {
+		if (!tpg->default_acl && !(strcmp(acl->initiatorname, DEFAULT_INITIATOR))) {
 				tpg->default_acl = acl;
 				pr_debug("Get default acl %p for tpg %p.\n", tpg->default_acl, tpg);
 		}
@@ -632,7 +631,7 @@ int core_tpg_del_initiator_node_acl(
 
 /* Jonathan Ho, 20131104, fix incomplete removal of default initiator */
 #ifdef CONFIG_MACH_QNAPTS
-	if (!strcmp(acl->initiatorname, QNAP_DEFAULT_INITIATOR)) {
+	if (!strcmp(acl->initiatorname, DEFAULT_INITIATOR)) {
 		pr_debug("set tpg->default_acl to NULL\n");
 		tpg->default_acl = NULL;
 	}

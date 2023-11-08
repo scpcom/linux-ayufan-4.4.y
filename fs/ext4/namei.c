@@ -2034,6 +2034,9 @@ static int ext4_create(struct inode *dir, struct dentry *dentry, int mode,
 	struct inode *inode;
 	int err, retries = 0;
 
+	if (unlikely(qnap_ext4_fake_readonly_check(dir->i_sb)))
+		return -EROFS;
+
 	dquot_initialize(dir);
 
 retry:
@@ -2069,6 +2072,8 @@ static int ext4_mknod(struct inode *dir, struct dentry *dentry,
 
 	if (!new_valid_dev(rdev))
 		return -EINVAL;
+	if (unlikely(qnap_ext4_fake_readonly_check(dir->i_sb)))
+		return -EROFS;
 
 	dquot_initialize(dir);
 
@@ -2108,6 +2113,8 @@ static int ext4_mkdir(struct inode *dir, struct dentry *dentry, int mode)
 
 	if (EXT4_DIR_LINK_MAX(dir))
 		return -EMLINK;
+	if (unlikely(qnap_ext4_fake_readonly_check(dir->i_sb)))
+		return -EROFS;
 
 	dquot_initialize(dir);
 
@@ -2556,6 +2563,8 @@ static int ext4_symlink(struct inode *dir,
 	int l, err, retries = 0;
 	int credits;
 
+	if (unlikely(qnap_ext4_fake_readonly_check(dir->i_sb)))
+		return -EROFS;
 	l = strlen(symname)+1;
 	if (l > dir->i_sb->s_blocksize)
 		return -ENAMETOOLONG;
@@ -2664,6 +2673,8 @@ static int ext4_link(struct dentry *old_dentry,
 
 	if (inode->i_nlink >= EXT4_LINK_MAX)
 		return -EMLINK;
+	if (unlikely(qnap_ext4_fake_readonly_check(dir->i_sb)))
+		return -EROFS;
 
 	dquot_initialize(dir);
 

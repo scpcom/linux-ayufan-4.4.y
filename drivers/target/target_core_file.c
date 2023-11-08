@@ -314,6 +314,8 @@ static struct se_device *fd_create_virtdevice(
 		struct request_queue *q;
 		q = bdev_get_queue(inode->i_bdev);
 
+		dev->dev_type = QNAP_DT_FIO_BLK;
+
 		/* FIXED ME !!
 		 *
 		 * Refer the iblock_create_virtdevice() to do this currently, 
@@ -339,6 +341,9 @@ static struct se_device *fd_create_virtdevice(
 #endif
 		}
 	}else{
+
+		dev->dev_type = QNAP_DT_FIO_FILE;
+
 		/*  FIXED ME !!
 		 *
 		 * Refer the loop_config_discard() in loop.c to do this
@@ -854,15 +859,21 @@ static int fd_do_discard(
 		pr_debug("%s: t_lba:0x%llx, t_range:0x%x\n", __FUNCTION__, 
 			(unsigned long long)t_lba, (u32)t_range);
 
-		Ret = blkdev_issue_discard(pInode->i_bdev, t_lba, t_range, 
-				GFP_KERNEL, barrier);
+		Ret = qnap_transport_blkdev_issue_discard(se_cmd,
+			pInode->i_bdev, t_lba, t_range,	GFP_KERNEL, barrier);
 
 		if (unlikely(Ret)) {
 			pr_err("%s: fail to exec discard_func() Ret:0x%x\n", 
 				__FUNCTION__, Ret);
 			break;
-		} else 
-			goto _GO_NEXT_;
+		}
+
+		if ((qnap_transport_is_dropped_by_release_conn(se_cmd) == true)
+		|| (qnap_transport_is_dropped_by_tmr(se_cmd) == true)
+		)
+			break;
+
+		goto _GO_NEXT_;
 
 _NORMAL_IO_:
 		/* The path for real io */
@@ -933,9 +944,8 @@ int __fd_get_lba_map_status(
 	struct se_subsystem_dev *se_dev = dev->se_sub_dev;
 	LIO_FD_DEV *fd_dev = (LIO_FD_DEV *)dev->dev_ptr;
 	struct inode *inode = fd_dev->fd_file->f_mapping->host;
-	u64 para_data_length = get_unaligned_be32(&se_cmd->t_task_cdb[10]);
-	u64 lindex, llen;
-	u32 num_of_lb, sector_per_block;
+	u64 lindex;
+	u32 num_of_lb, sector_per_block, len;
 	uint8_t *pro_status = NULL;
 	u16 off = 8;
 	int i, ret = -EOPNOTSUPP;
@@ -950,9 +960,7 @@ int __fd_get_lba_map_status(
 	}
 
 	/* get the desc counts first */
-	llen = ((para_data_length - 8) >> 4);
-
-	pro_status = kzalloc(llen, GFP_KERNEL);
+	pro_status = kzalloc(desc_count, GFP_KERNEL);
 	if (!pro_status){
 		err_reason = ERR_INVALID_PARAMETER_LIST;
 		ret = -ENOMEM;
@@ -982,7 +990,7 @@ int __fd_get_lba_map_status(
 	lindex = div_u64((u64)lba, sector_per_block);
 	num_of_lb =  sector_per_block;
 
-	ret = thin_get_lba_status(lvname, lindex, llen, pro_status);
+	ret = thin_get_lba_status(lvname, lindex, desc_count, pro_status);
 	if (ret != 0){
 		pr_debug("call thin_get_lba_status error!\n");
 		err_reason = ERR_INVALID_PARAMETER_LIST;
@@ -990,7 +998,7 @@ int __fd_get_lba_map_status(
 		goto EXIT;
 	}
 
-	for (i = 0; i < llen; i++){
+	for (i = 0; i < desc_count; i++){
 		/* STARTING LOGICAL BLOCK ADDRESS */
 		param[off + 0] = (lba >> 56) & 0xff;
 		param[off + 1] = (lba >> 48) & 0xff;
@@ -1019,12 +1027,11 @@ int __fd_get_lba_map_status(
 	}
 
 	/* to update PARAMETER DATA LENGTH finally */
-	llen = ((llen << 4) + 4);
-	param[0] = (llen >> 24) & 0xff;
-	param[1] = (llen >> 16) & 0xff;
-	param[2] = (llen >> 8) & 0xff;
-	param[3] = llen & 0xff;
-
+	len = ((desc_count << 4) + 4);
+	param[0] = (len >> 24) & 0xff;
+	param[1] = (len >> 16) & 0xff;
+	param[2] = (len >> 8) & 0xff;
+	param[3] = len & 0xff;
 	ret = 0;
 EXIT:
 	if (pro_status)
@@ -1824,6 +1831,9 @@ static struct se_subsystem_api fileio_template = {
 #endif		
 
 #if defined(CONFIG_MACH_QNAPTS)
+	.qnap_sync_cache	= qnap_target_execute_sync_cache,
+	.qnap_do_discard	= qnap_target_execute_discard,
+
 #if defined(SUPPORT_VAAI)
 
 	/* api for write same function */

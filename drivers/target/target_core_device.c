@@ -131,6 +131,16 @@ int transport_lookup_cmd_lun(struct se_cmd *se_cmd, u32 unpacked_lun)
 	spin_unlock_irqrestore(&se_sess->se_node_acl->device_list_lock, flags);
 
 	if (!se_lun) {
+#ifdef CONFIG_MACH_QNAPTS
+		se_cmd->scsi_sense_reason = 
+			qnap_transport_check_report_lun_changed(se_cmd);
+
+		if (se_cmd->scsi_sense_reason) {
+			se_cmd->se_cmd_flags |= SCF_SCSI_CDB_EXCEPTION;
+			return -EINVAL;
+		}
+#endif
+
 		/*
 		 * Use the se_portal_group->tpg_virt_lun0 to allow for
 		 * REPORT_LUNS, et al to be returned when no active
@@ -713,6 +723,12 @@ int target_report_luns(struct se_task *se_task)
 	 * See SPC3 r07, page 159.
 	 */
 done:
+
+#ifdef CONFIG_MACH_QNAPTS
+	atomic_set(&se_sess->sess_lun_count, lun_count);
+	se_sess->sess_got_report_lun_cmd = true;
+#endif
+
 	lun_count *= 8;
 	buf[0] = ((lun_count >> 24) & 0xff);
 	buf[1] = ((lun_count >> 16) & 0xff);
@@ -801,6 +817,25 @@ void se_release_device_for_hba(struct se_device *dev)
 #endif
 
 	if (dev->dev_ptr) {
+#ifdef CONFIG_MACH_QNAPTS
+		if (dev->unmap_wq) {
+			flush_workqueue(dev->unmap_wq);
+			destroy_workqueue(dev->unmap_wq);
+		}
+
+		if (dev->sync_cache_wq) {
+			flush_workqueue(dev->sync_cache_wq);
+			destroy_workqueue(dev->sync_cache_wq);
+		}
+
+		if (dev->tmr_wq) {
+			flush_workqueue(dev->tmr_wq);
+			destroy_workqueue(dev->tmr_wq);
+		}
+
+		qnap_transport_destroy_fb_bio_rec_kmem(dev);
+#endif
+
 		kthread_stop(dev->process_thread);
 		if (dev->transport->free_device)
 			dev->transport->free_device(dev->dev_ptr);
@@ -1855,6 +1890,16 @@ int core_dev_del_initiator_node_lun_acl(
 		tpg->se_tpg_tfo->get_fabric_name(),
 		tpg->se_tpg_tfo->tpg_get_tag(tpg), lun->unpacked_lun,
 		lacl->initiatorname, lacl->mapped_lun);
+
+#ifdef CONFIG_MACH_QNAPTS
+	/* Here is workaround for case about someone force to delete 
+	 * se_lun (se_dev) while the target is still online (it is illegal behavior).
+	 * Since the lun ACL was removed from node ACL, we shall take care
+	 * whether all lun commands related to conn need to be free or not
+	 */
+	if (tpg->se_tpg_tfo)
+		tpg->se_tpg_tfo->qnap_iscsi_drop_cmd_from_lun_acl(tpg, lun);
+#endif
 
 	return 0;
 }

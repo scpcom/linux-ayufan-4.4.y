@@ -383,12 +383,14 @@ int rpc_proc_init(struct net *net)
 	udp_payload = kmalloc(sizeof(*udp_payload), GFP_ATOMIC);
 	if(udp_payload == NULL) {
 		sn->proc_net_rpc_udp_payload = NULL;
+		kfree(tcp_payload);
 		return -ENOMEM;
 	}
 	snprintf(udp_payload->name, sizeof(udp_payload->name), UDP_PAYLOAD_NAME);
 	sn->proc_net_rpc_udp_payload = proc_create_data(udp_payload->name, paylod_perm, sn->proc_net_rpc, &payload_fops, udp_payload);
 	if(sn->proc_net_rpc_udp_payload == NULL) {
 		kfree(udp_payload);
+		kfree(tcp_payload);
 		return -ENOMEM;
 	}
 #endif

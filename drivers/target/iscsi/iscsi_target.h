@@ -30,6 +30,11 @@ extern int iscsit_free_session(struct iscsi_session *);
 extern void iscsit_stop_session(struct iscsi_session *, int, int);
 extern int iscsit_release_sessions_for_tpg(struct iscsi_portal_group *, int);
 
+#ifdef CONFIG_MACH_QNAPTS
+extern int qnap_iscsi_lio_drop_cmd_from_lun_acl(
+	struct se_portal_group *se_tpg,  struct se_lun *se_lun);
+#endif
+
 extern struct iscsit_global *iscsit_global;
 extern struct target_fabric_configfs *lio_target_fabric_configfs;
 

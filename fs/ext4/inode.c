@@ -819,6 +819,9 @@ static int ext4_write_begin(struct file *file, struct address_space *mapping,
 	unsigned from, to;
 
 	trace_ext4_write_begin(inode, pos, len, flags);
+	if (!IS_SWAPFILE(inode) &&
+	    unlikely(qnap_ext4_fake_readonly_check(inode->i_sb)))
+		return -EROFS;
 	/*
 	 * Reserve one block more for addition to orphan list in case
 	 * we allocate blocks but write fails for some reason
@@ -2421,6 +2424,10 @@ static int ext4_da_write_begin(struct file *file, struct address_space *mapping,
 	struct inode *inode = mapping->host;
 	handle_t *handle;
 
+	if (!IS_SWAPFILE(inode) &&
+	    unlikely(qnap_ext4_fake_readonly_check(inode->i_sb)))
+		return -EROFS;
+
 	index = pos >> PAGE_CACHE_SHIFT;
 
 	if (ext4_nonda_switch(inode->i_sb)) {
@@ -3025,6 +3032,12 @@ static ssize_t ext4_direct_IO(int rw, struct kiocb *iocb,
 	 * If we are doing data journalling we don't support O_DIRECT
 	 */
 	if (ext4_should_journal_data(inode))
+		return 0;
+
+	/* direct write I/O isn't allowed in fake readonly mode */
+	if (!IS_SWAPFILE(inode) &&
+	    unlikely(qnap_ext4_fake_readonly_check(inode->i_sb)) &&
+	    rw == WRITE)
 		return 0;
 
 	trace_ext4_direct_IO_enter(inode, offset, iov_length(iov, nr_segs), rw);
@@ -4228,6 +4241,9 @@ int ext4_setattr(struct dentry *dentry, struct iattr *attr)
 	int error, rc = 0;
 	int orphan = 0;
 	const unsigned int ia_valid = attr->ia_valid;
+
+	if (unlikely(qnap_ext4_fake_readonly_check(inode->i_sb)))
+		return -EROFS;
 
 	error = inode_change_ok(inode, attr);
 	if (error)

@@ -1753,7 +1753,6 @@ int __target_pre_cond_emulate_unmap(
 
 }
 
-
 int target_emulate_unmap(struct se_task *task)
 {
 	struct se_cmd *cmd = task->task_se_cmd;
@@ -1827,6 +1826,11 @@ int target_emulate_unmap(struct se_task *task)
 			pr_err("transport->do_discard() failed: %d\n", ret);
 			goto _EXIT_;
 		}
+
+		if ((qnap_transport_is_dropped_by_release_conn(cmd) == true)
+		|| (qnap_transport_is_dropped_by_tmr(cmd) == true)
+		)
+			goto _EXIT_;
 
 		ptr += 16;
 		size -= 16;
@@ -1970,7 +1974,6 @@ int target_emulate_write_same(struct se_task *task)
 	return 0;
 }
 
-
 int target_emulate_synchronize_cache(struct se_task *task)
 {
 	struct se_device *dev = task->task_se_cmd->se_dev;
@@ -1986,6 +1989,7 @@ int target_emulate_synchronize_cache(struct se_task *task)
 	dev->transport->do_sync_cache(task);
 	return 0;
 }
+
 
 #if defined(CONFIG_MACH_QNAPTS)
 /* 2014/01/13, support verify(10),(16) for HCK 2.1 (ver:8.100.26063) */
@@ -2330,13 +2334,14 @@ EXIT:
  */
 int target_emulate_getlbastatus(struct se_task *task)
 {
+#define MAX_DESC_COUNTS		64
+
 	struct se_cmd *cmd = task->task_se_cmd;
 	struct se_device *dev = cmd->se_dev;
-	struct se_subsystem_dev *se_dev = dev->se_sub_dev;
 	unsigned char *buf = NULL;
 	sector_t start_lba = get_unaligned_be64(&cmd->t_task_cdb[2]);
 	u32 para_data_length = get_unaligned_be32(&cmd->t_task_cdb[10]);
-	u32 llen;
+	u32 desc_count;
 	int err = (int)MAX_ERR_REASON_INDEX, ret = -EOPNOTSUPP;
 	ERR_REASON_INDEX err_reason = MAX_ERR_REASON_INDEX;
 
@@ -2368,9 +2373,19 @@ int target_emulate_getlbastatus(struct se_task *task)
 	 * (2) file i/o + block-based configuration
 	 * (3) file i/o + file-based configuration
 	 */
-	llen = ((para_data_length - 8) >> 4);
+	desc_count = ((para_data_length - 8) >> 4);
+
+	/* In order to reduce the memory allocation failure, we try limit
+	 * the descriptor count here. It's ok
+	 * sbc3r35j, p114
+	 * In response to a GET LBA STATUS command, the device serer may
+	 * send less data to Data-In buffer than is specified by allocation len
+	 */
+	if (desc_count > MAX_DESC_COUNTS)
+		desc_count = MAX_DESC_COUNTS;
+
 	ret = cmd->se_dev->transport->do_get_lba_map_status(
-		cmd, start_lba, llen, buf, &err);
+		cmd, start_lba, desc_count, buf, &err);
 
 EXIT:
 	if (buf)
@@ -2502,3 +2517,5 @@ void __get_target_parse_naa_6h_vendor_specific(
 	return;
 }
 #endif
+
+

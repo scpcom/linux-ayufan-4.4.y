@@ -1129,6 +1129,7 @@ struct ext4_super_block {
  */
 #define EXT4_MF_MNTDIR_SAMPLED	0x0001
 #define EXT4_MF_FS_ABORTED	0x0002	/* Fatal error detected */
+#define EXT4_MF_FAKE_READONLY   0x0008  /* Allow discard, unlink, rename operations */
 
 /*
  * fourth extended-fs super-block data in memory
@@ -2080,6 +2081,8 @@ extern __le16 ext4_group_desc_csum(struct ext4_sb_info *sbi, __u32 group,
 				   struct ext4_group_desc *gdp);
 extern int ext4_group_desc_csum_verify(struct ext4_sb_info *sbi, __u32 group,
 				       struct ext4_group_desc *gdp);
+extern bool qnap_ext4_fake_readonly_check(struct super_block *sb);
+
 
 static inline ext4_fsblk_t ext4_blocks_count(struct ext4_super_block *es)
 {

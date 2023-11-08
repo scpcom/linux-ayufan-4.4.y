@@ -53,6 +53,7 @@
 #ifdef CONFIG_MACH_QNAPTS
 #include "vaai_target_struc.h"
 #include "target_core_extern.h"
+#include "target_general.h"
 #endif
 
 extern struct t10_alua_lu_gp *default_lu_gp;
@@ -2083,6 +2084,73 @@ static struct target_core_configfs_attribute target_core_attr_dev_naa = {
 };
 // [E] Benjamin 20130117 for naa configfs
 
+ssize_t target_core_show_dev_zc(
+	void *p, 
+	char *page
+	)
+{
+	struct se_subsystem_dev *se_subdev = p;
+	struct se_device *se_dev = se_subdev->se_dev_ptr;
+	ssize_t rb;
+	int val;
+
+	spin_lock(&se_dev->dev_zc_lock);
+	val = se_dev->dev_zc;
+	spin_unlock(&se_dev->dev_zc_lock);
+
+	rb = snprintf(page, PAGE_SIZE, "%llu\n", (u64)val);
+	return rb;
+}
+
+ssize_t target_core_store_dev_zc(
+	void *p,
+	const char *page,
+	size_t count
+	)
+{
+	struct se_subsystem_dev *se_subdev = p;
+	struct se_device *se_dev = se_subdev->se_dev_ptr;
+	unsigned long zc_val = 0;
+	int ret = 0;
+
+	ret = strict_strtoul(page, 0, &zc_val);
+	if (ret < 0) {
+		pr_err("%s: kstrtoul() failed with  ret: %d\n", __func__, ret);
+		return -EINVAL;
+	}
+
+	if ((zc_val != 0) && (zc_val != 1)) {
+		pr_err("%s: dev[%p]: Illegal value. Must be 0 or 1\n", 
+			__func__, se_dev);
+		return -EINVAL;
+	}
+
+	/* zero-copy only supports on fio + blkdev configuration */
+	if(!strcmp(se_dev->transport->name, "fileio")
+	&& (qnap_transport_is_fio_blk_backend(se_dev) == 0)
+	)
+	{
+		spin_lock(&se_dev->dev_zc_lock);
+		se_dev->dev_zc = zc_val;
+		spin_unlock(&se_dev->dev_zc_lock);
+
+		pr_info("dev[%p]: %s dev zero copy\n", 
+			se_dev, ((zc_val == 1) ? "enable": "disable"));
+		return count;
+	}
+
+	pr_warn("dev[%p]: dev not support zero copy\n", se_dev);
+	return count;
+}
+
+/* switch to enable / disable the zc (zero copy) for lun by manual */
+struct target_core_configfs_attribute target_core_attr_dev_zc = {
+	.attr	= { .ca_owner = THIS_MODULE,
+		    .ca_name = "zc",
+		    .ca_mode =  S_IRUGO | S_IWUSR },
+	.show	= target_core_show_dev_zc,
+	.store	= target_core_store_dev_zc,
+};
 
 
 #if defined(SUPPORT_LOGICAL_BLOCK_4KB_FROM_NAS_GUI)
@@ -2470,6 +2538,7 @@ static struct configfs_attribute *lio_core_dev_attrs[] = {
 	&target_core_attr_dev_provision.attr,
 	//Benjamin 20130117 for naa configfs	
 	&target_core_attr_dev_naa.attr,	
+	&target_core_attr_dev_zc.attr,
 
 #if defined(SUPPORT_LOGICAL_BLOCK_4KB_FROM_NAS_GUI)
 	&target_core_attr_dev_qlbs.attr,	

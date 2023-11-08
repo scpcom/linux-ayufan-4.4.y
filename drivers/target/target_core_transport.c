@@ -81,6 +81,7 @@
 #if defined(SUPPORT_TP)
 #include "tp_def.h"
 #endif
+#include "fbdisk.h"
 
 #if defined(SUPPORT_CONCURRENT_TASKS)
 // 20130628, Jonathan Ho, add workqueue for executing iscsi tasks concurrently
@@ -130,6 +131,8 @@ static void target_complete_ok_work(struct work_struct *work);
 #if defined(SUPPORT_CONCURRENT_TASKS)
 static void transport_execute_tasks_wq(struct work_struct *work); // 20130628, Jonathan Ho, add workqueue for executing iscsi tasks concurrently
 #endif
+
+static void qnap_transport_target_tmr_work(struct work_struct *work);
 
 /* adamhsu, 
  * (1) redmine bug 6915 - bugzilla 40743
@@ -439,7 +442,8 @@ struct se_session *transport_init_session(void)
 #if (LINUX_VERSION_CODE == KERNEL_VERSION(3,12,6))
 	transport_init_tag_pool(se_sess);
 #endif
-
+	atomic_set(&se_sess->sess_lun_count, 0);
+	se_sess->sess_got_report_lun_cmd = false;
 #endif
 	kref_init(&se_sess->sess_kref);
 
@@ -1044,7 +1048,22 @@ void transport_complete_task(struct se_task *task, int success)
 		cmd->scsi_sense_reason = TCM_LOGICAL_UNIT_COMMUNICATION_FAILURE;
 		INIT_WORK(&cmd->work, target_complete_failure_work);
 	} 
-#if defined(CONFIG_MACH_QNAPTS) && defined(SUPPORT_TP)
+#if defined(CONFIG_MACH_QNAPTS)
+	else if (cmd->transport_state & CMD_T_STOP) 
+	{
+		if (qnap_transport_is_dropped_by_tmr(cmd) == true) {
+			spin_unlock_irqrestore(&cmd->t_state_lock, flags);
+			complete(&cmd->t_transport_stop_comp);
+			return;
+		}
+
+		if (!success)
+			INIT_WORK(&cmd->work, target_complete_failure_work);
+		else
+			INIT_WORK(&cmd->work, target_complete_ok_work);
+
+	}
+#if defined(SUPPORT_TP)
 	else if (cmd->transport_state & CMD_T_NO_SPACE_IO_FAILED) { // for no space response
 		cmd->scsi_sense_reason = TCM_SPACE_ALLOCATION_FAILED_WRITE_PROTECT;
 		INIT_WORK(&cmd->work, target_complete_failure_work);
@@ -1053,6 +1072,7 @@ void transport_complete_task(struct se_task *task, int success)
 		INIT_WORK(&cmd->work, target_complete_failure_work);	
 	}
 #endif	
+#endif
 	else {
 		INIT_WORK(&cmd->work, target_complete_ok_work);
 	}
@@ -1653,7 +1673,11 @@ struct se_device *transport_add_device_to_core_hba(
 
 
 #if defined(CONFIG_MACH_QNAPTS)
-
+	spin_lock_init(&dev->dev_zc_lock);
+	dev->dev_zc = 0;
+	dev->sync_cache_wq = NULL;
+	dev->unmap_wq = NULL;
+	dev->tmr_wq = NULL;
 	dev->fast_blk_clone = 0;
 
 	INIT_LIST_HEAD(&dev->cmd_rec_list);
@@ -1704,7 +1728,39 @@ struct se_device *transport_add_device_to_core_hba(
 	/*
 	 * Startup the struct se_device processing thread
 	 */
-#ifdef CONFIG_MACH_QNAPTS // 2009/7/31 Nike Chen change ID to QNAP
+#ifdef CONFIG_MACH_QNAPTS
+
+	char tmp_str[256];
+
+	sprintf(tmp_str, "QNAPuwq_%s%d", dev->transport->name, dev->dev_index);
+
+	dev->unmap_wq = alloc_workqueue(tmp_str,
+		(WQ_HIGHPRI | WQ_MEM_RECLAIM | WQ_UNBOUND), 0); 
+
+	if (!dev->unmap_wq)
+		pr_warn("%s: fail to create unmap wq on %s%d\n", 
+			__func__, dev->transport->name, dev->dev_index);
+
+	sprintf(tmp_str, "QNAPscwq_%s%d", dev->transport->name, dev->dev_index);
+
+	dev->sync_cache_wq = alloc_workqueue(tmp_str,
+		(WQ_HIGHPRI | WQ_MEM_RECLAIM | WQ_UNBOUND), 0); 
+
+	if (!dev->sync_cache_wq)
+		pr_warn("%s: fail to create sync_cache wq on %s%d\n\n", 
+			__func__, dev->transport->name, dev->dev_index);
+
+
+	sprintf(tmp_str, "QNAPtmr_%s%d", dev->transport->name, dev->dev_index);
+
+	dev->tmr_wq = alloc_workqueue(tmp_str,
+		(WQ_HIGHPRI | WQ_MEM_RECLAIM | WQ_UNBOUND), 1); 
+
+	if (!dev->tmr_wq)
+		pr_warn("%s: fail to create tmr_wq on %s%d\n\n", 
+			__func__, dev->transport->name, dev->dev_index);
+
+// 2009/7/31 Nike Chen change ID to QNAP
 #if defined(Athens)
 	dev->process_thread = kthread_run(transport_processing_thread, dev,
 					  "Cisco_%s", dev->transport->name);
@@ -1913,6 +1969,8 @@ void transport_init_se_cmd(
 	INIT_WORK(&cmd->work, target_work_nop);
 
 #if defined(CONFIG_MACH_QNAPTS)
+
+	qnap_transport_init_bio_rec_val(cmd);
 
 	/* 2014/08/16, adamhsu, redmine 9055,9076,9278 */
 	cmd->tmf_code = 0;
@@ -2331,6 +2389,21 @@ EXPORT_SYMBOL(transport_generic_handle_data);
 int transport_generic_handle_tmr(
 	struct se_cmd *cmd)
 {
+#ifdef CONFIG_MACH_QNAPTS
+	unsigned long flags;
+
+	if (cmd->se_dev->tmr_wq) {
+		spin_lock_irqsave(&cmd->t_state_lock, flags);
+		cmd->t_state = TRANSPORT_PROCESS_TMR;
+		cmd->transport_state |= CMD_T_ACTIVE;
+		spin_unlock_irqrestore(&cmd->t_state_lock, flags);
+
+		INIT_WORK(&cmd->work, qnap_transport_target_tmr_work);
+		queue_work(cmd->se_dev->tmr_wq, &cmd->work);
+		return 0;
+	}
+#endif
+
 	transport_add_cmd_to_queue(cmd, TRANSPORT_PROCESS_TMR, false);
 	return 0;
 }
@@ -2500,6 +2573,7 @@ void transport_generic_request_failure(struct se_cmd *cmd)
 	case TCM_SPACE_ALLOCATION_FAILED_WRITE_PROTECT:
 	case TCM_THIN_PROVISIONING_SOFT_THRESHOLD_REACHED:
 	case TCM_CAPACITY_DATA_HAS_CHANGED:
+	case TCM_REPORTED_LUNS_DATA_HAS_CHANGED:
 #endif
 		break;
 
@@ -2712,8 +2786,6 @@ static int transport_execute_tasks(struct se_cmd *cmd)
 	 * write (6),(10),(12),(16) */
 	if ((cmd->t_task_cdb[0] == READ_6) || (cmd->t_task_cdb[0] == READ_10)
 	||  (cmd->t_task_cdb[0] == READ_12) || (cmd->t_task_cdb[0] == READ_16)
-	||  (cmd->t_task_cdb[0] == WRITE_6) || (cmd->t_task_cdb[0] == WRITE_10)
-	||  (cmd->t_task_cdb[0] == WRITE_12) || (cmd->t_task_cdb[0] == WRITE_16)
 	)
 	{
 		if(cmd->t_task_lba == (se_dev->prev_lba + len)) 
@@ -2810,8 +2882,19 @@ check_depth:
 	spin_unlock_irq(&dev->execute_task_lock);
 
 	cmd = task->task_se_cmd;
-#if defined(CONFIG_MACH_QNAPTS)
+
+#ifdef CONFIG_MACH_QNAPTS
 	cmd->cur_se_task = task;
+
+	if ((qnap_transport_is_dropped_by_release_conn(cmd) == true)
+	|| (qnap_transport_is_dropped_by_tmr(cmd) == true)
+	) 
+	{
+		task->task_scsi_status = GOOD;
+		transport_complete_task(task, 1);
+		new_cmd = NULL;
+		goto check_depth;
+	}
 #endif
 
 	spin_lock_irqsave(&cmd->t_state_lock, flags);
@@ -3275,6 +3358,15 @@ static int transport_generic_cmd_sequencer(
 	u32 sectors = 0, size = 0, pr_reg_type = 0;
 	u16 service_action;
 	u8 alua_ascq = 0;
+
+#ifdef CONFIG_MACH_QNAPTS
+	cmd->scsi_sense_reason = qnap_transport_check_report_lun_changed(cmd);
+	if (cmd->scsi_sense_reason) {
+		cmd->se_cmd_flags |= SCF_SCSI_CDB_EXCEPTION;
+		return -EINVAL;
+	}
+#endif
+
 	/*
 	 * Check for an existing UNIT ATTENTION condition
 	 */
@@ -3822,13 +3914,24 @@ static int transport_generic_cmd_sequencer(
 			if (transport_cmd_get_valid_sectors(cmd) < 0)
 				goto out_invalid_cdb_field;
 		}
+#ifdef CONFIG_MACH_QNAPTS
+		if (cmd->se_dev->transport->qnap_sync_cache)
+			cmd->execute_task = cmd->se_dev->transport->qnap_sync_cache;
+		else
+#endif
 		cmd->execute_task = target_emulate_synchronize_cache;
 		break;
 	case UNMAP:
 		size = get_unaligned_be16(&cdb[7]);
 		cmd->se_cmd_flags |= SCF_SCSI_CONTROL_SG_IO_CDB;
-		if (!passthrough)
+		if (!passthrough) {
+#ifdef CONFIG_MACH_QNAPTS
+			if (cmd->se_dev->transport->qnap_do_discard)
+				cmd->execute_task = cmd->se_dev->transport->qnap_do_discard;
+			else
+#endif
 			cmd->execute_task = target_emulate_unmap;
+		}
 		break;
 	case WRITE_SAME_16:
 		sectors = transport_get_sectors_16(cdb, cmd, &sector_ret);
@@ -5365,6 +5468,19 @@ bool transport_wait_for_tasks(struct se_cmd *cmd)
 {
 	unsigned long flags;
 
+#ifdef CONFIG_MACH_QNAPTS
+	bool is_fio_blk = false, is_ib_fbdisk = false;
+	int is_thin;
+
+	is_thin = is_thin_lun(cmd->se_dev);
+
+	if (qnap_transport_is_fio_blk_backend(cmd->se_dev) == 0)
+		is_fio_blk = true;
+
+	if (qnap_transport_is_iblock_fbdisk(cmd->se_dev) == 0)
+		is_ib_fbdisk = true;
+#endif
+
 	spin_lock_irqsave(&cmd->t_state_lock, flags);
 	if (!(cmd->se_cmd_flags & SCF_SE_LUN_CMD) &&
 	    !(cmd->se_cmd_flags & SCF_SCSI_TMR_CDB)) {
@@ -5392,6 +5508,7 @@ bool transport_wait_for_tasks(struct se_cmd *cmd)
 			" wait_for_completion(&cmd->t_tasktransport_lun_fe"
 			"_stop_comp); for ITT: 0x%08x\n",
 			cmd->se_tfo->get_task_tag(cmd));
+
 		/*
 		 * There is a special case for WRITES where a FE exception +
 		 * LUN shutdown means ConfigFS context is still sleeping on
@@ -5416,7 +5533,6 @@ bool transport_wait_for_tasks(struct se_cmd *cmd)
 			" wait_for_completion(&cmd->t_tasktransport_lun_fe_"
 			"stop_comp); for ITT: 0x%08x\n",
 			cmd->se_tfo->get_task_tag(cmd));
-
 		cmd->transport_state &= ~CMD_T_LUN_STOP;
 	}
 
@@ -5432,6 +5548,20 @@ bool transport_wait_for_tasks(struct se_cmd *cmd)
 		cmd, cmd->se_tfo->get_task_tag(cmd),
 		cmd->se_tfo->get_cmd_state(cmd), cmd->t_state);
 
+#ifdef CONFIG_MACH_QNAPTS
+	if (cmd->se_cmd_flags & SCF_SE_LUN_CMD) {
+		pr_info("wait_for_tasks: Stopping %p ITT: 0x%08x"
+			" i_state: %d, t_state: %d, CMD_T_STOP, "
+			"transport_state: 0x%x, filebasd: %s, thin: %s, "
+			"scsi op:0x%x\n",
+			cmd, cmd->se_tfo->get_task_tag(cmd),
+			cmd->se_tfo->get_cmd_state(cmd), cmd->t_state,
+			cmd->transport_state, 
+			((is_fio_blk) ? "no": "yes"),
+			((is_thin) ? "yes" : "no"), cmd->t_task_cdb[0]);
+	}
+#endif
+
 	spin_unlock_irqrestore(&cmd->t_state_lock, flags);
 
 	wake_up_interruptible(&cmd->se_dev->dev_queue_obj.thread_wq);
@@ -5443,7 +5573,17 @@ bool transport_wait_for_tasks(struct se_cmd *cmd)
 	pr_debug("wait_for_tasks: Stopped wait_for_compltion("
 		"&cmd->t_transport_stop_comp) for ITT: 0x%08x\n",
 		cmd->se_tfo->get_task_tag(cmd));
-
+#ifdef CONFIG_MACH_QNAPTS
+	if (cmd->se_cmd_flags & SCF_SE_LUN_CMD) {
+		pr_info("wait_for_tasks: Stopped wait_for_compltion("
+			"&cmd->t_transport_stop_comp) for ITT: 0x%08x, "
+			"i_state: %d, t_state: %d, filebasd: %s, thin:%s, scsi op: 0x%x\n", 
+			cmd->se_tfo->get_task_tag(cmd),
+			cmd->se_tfo->get_cmd_state(cmd), cmd->t_state, 
+			((is_fio_blk) ? "no": "yes"),
+			((is_thin) ? "yes" : "no"), cmd->t_task_cdb[0]);
+	}
+#endif
 	spin_unlock_irqrestore(&cmd->t_state_lock, flags);
 	return true;
 }
@@ -5937,6 +6077,16 @@ int transport_send_check_condition_and_sense(
 		buffer[offset+SPC_ASCQ_KEY_OFFSET] = 0x09;		
 		break;
 #endif /* defined(SUPPORT_TP) */
+
+	case TCM_REPORTED_LUNS_DATA_HAS_CHANGED:
+		buffer[0] = 0x70;
+		buffer[SPC_ADD_SENSE_LEN_OFFSET] = 10;
+		/* UNIT_ATTENTION */
+		buffer[SPC_SENSE_KEY_OFFSET] = UNIT_ATTENTION;
+		buffer[SPC_ASC_KEY_OFFSET] = 0x3f;
+		buffer[SPC_ASCQ_KEY_OFFSET] = 0x0e;
+		break;
+
 #endif  /* #if defined(CONFIG_MACH_QNAPTS) */
 	case TCM_LOGICAL_UNIT_COMMUNICATION_FAILURE:
 	default:
@@ -9103,5 +9253,557 @@ void transport_setup_support_fbc(
 
 }
 
+int qnap_transport_is_iblock_fbdisk(
+	struct se_device *se_dev
+	)
+{
+	if (se_dev->dev_type == QNAP_DT_IBLK_FBDISK)
+		return 0;
+	return -ENODEV;
+}
+EXPORT_SYMBOL(qnap_transport_is_iblock_fbdisk);
+
+int qnap_transport_is_fio_blk_backend(
+	struct se_device *se_dev
+	)
+{
+	if (se_dev->dev_type == QNAP_DT_FIO_BLK)
+		return 0;
+	return -ENODEV;
+}
+EXPORT_SYMBOL(qnap_transport_is_fio_blk_backend);
+
+static char * __qnap_get_drop_type_str(
+	int type
+	)
+{
+	char *str;
+
+	/* refer from enum tcm_tmreq_table in target_core_base.h file 
+	 * and it matches for rfc3720 spec
+	 */
+	switch(type) {
+	case -1:
+		str = "RELEASE CONN";
+		break;
+	case TMR_ABORT_TASK:
+		str = "ABORT TASK";
+		break;
+	case TMR_ABORT_TASK_SET:
+		str = "ABORT TASK SET";
+		break;
+	case TMR_CLEAR_ACA:
+		str = "CLAER ACA";
+		break;
+	case TMR_CLEAR_TASK_SET:
+		str = "CLAER TASK SET";
+		break;
+	case TMR_LUN_RESET:
+		str = "LUN RESET";
+		break;
+	case TMR_TARGET_WARM_RESET:
+		str = "TARGET WARM RESET";
+		break;
+	case TMR_TARGET_COLD_RESET:
+		str = "TARGET COLD RESET";
+		break;
+	default:
+		str = NULL;
+		break;
+	}
+
+	return str;
+}
+
+int qnap_transport_drop_bb_cmd(	
+	struct se_cmd *se_cmd,
+	int type
+	)
+{
+	int ret;
+	char *type_str;
+
+	/* we do this only for fio + block-backend configuration */
+	ret = qnap_transport_is_fio_blk_backend(se_cmd->se_dev);
+	if (ret != 0)
+		return ret;
+
+	type_str = __qnap_get_drop_type_str(type);
+	if (!type_str)
+		return -EINVAL;
+
+	/* we do this only for fio + block-backend configuration */
+	ret = qnap_transport_is_fio_blk_backend(se_cmd->se_dev);
+	if (ret != 0)
+		return ret;
+
+	if (type == -1) {
+		spin_lock(&se_cmd->t_state_lock);
+		se_cmd->transport_state |= CMD_T_RELEASE_CMD_FROM_CONN;
+		spin_unlock(&se_cmd->t_state_lock);
+	} else {
+
+	}
+
+	pr_info("[iSCSI (block-based)][%s] ip: %s, drop itt:0x%08x, "
+		"scsi op:0x%x\n", type_str,
+		se_cmd->se_tfo->get_login_ip(se_cmd),
+		se_cmd->se_tfo->get_task_tag(se_cmd), 
+		se_cmd->t_task_cdb[0]);
+	return 0;
+
+}
+EXPORT_SYMBOL(qnap_transport_drop_bb_cmd);
+
+bool qnap_transport_is_dropped_by_release_conn(
+	struct se_cmd *se_cmd
+	)
+{
+	bool dropped = false;
+
+	spin_lock(&se_cmd->t_state_lock);
+	if (se_cmd->transport_state & CMD_T_RELEASE_CMD_FROM_CONN)
+		dropped = true;
+
+	spin_unlock(&se_cmd->t_state_lock);
+	return dropped;
+}
+EXPORT_SYMBOL(qnap_transport_is_dropped_by_release_conn);
+
+
+bool qnap_transport_is_dropped_by_tmr(
+	struct se_cmd *se_cmd
+	)
+{
+	bool dropped = false;
+
+	spin_lock(&se_cmd->tmf_data_lock);
+	if (se_cmd->tmf_code == TMR_LUN_RESET 
+	|| se_cmd->tmf_code == TMR_ABORT_TASK
+	)
+		dropped = true;
+	
+	spin_unlock(&se_cmd->tmf_data_lock);	
+	return dropped;
+}
+EXPORT_SYMBOL(qnap_transport_is_dropped_by_tmr);
+
+int qnap_transport_blkdev_issue_discard(
+	struct se_cmd *se_cmd,
+	struct block_device *bdev, 
+	sector_t sector,
+	sector_t nr_sects, 
+	gfp_t gfp_mask, 
+	unsigned long flags
+	)
+{
+#define MIN_REQ_SIZE	((1 << 20) >> 9)
+		
+	bool fio_blk_dev = false, iblock_fbdisk_dev = false;
+	int __ret = 0, ret = 0;
+	sector_t work_sects = 0;
+
+	if (qnap_transport_is_fio_blk_backend(se_cmd->se_dev) == 0)
+		fio_blk_dev = true;
+	else if (qnap_transport_is_iblock_fbdisk(se_cmd->se_dev) == 0)
+		iblock_fbdisk_dev = true;
+	else {
+		pr_warn("%s: unknown backend\n", __func__);
+		return -ENODEV;
+	}
+
+	while (nr_sects) {
+		/* treat the result to be pass for two conditions even if
+		 * original result is bad
+		 */
+		if (qnap_transport_is_dropped_by_tmr(se_cmd)) {
+			pr_info("[iSCSI (%s)] done to abort "
+				"discard io (itt:0x%08x) by TMR opcode: %d\n", 
+				((fio_blk_dev == true) ? "block-based" : \
+				((iblock_fbdisk_dev == true) ? "file-based": \
+				"unknown")), 
+				se_cmd->se_tfo->get_task_tag(se_cmd), 
+				se_cmd->tmf_code);
+			ret  = 0;
+			break;
+		}
+	
+		if (qnap_transport_is_dropped_by_release_conn(se_cmd)) {
+			pr_info("[iSCSI (%s)] done to drop cmd:0x%p, "
+				"itt:0x%08x, scsi op:0x%x\n", 
+				((fio_blk_dev == true) ? "block-based" : \
+				((iblock_fbdisk_dev == true) ? "file-based": \
+				"unknown")), se_cmd, 
+				se_cmd->se_tfo->get_task_tag(se_cmd), 
+				se_cmd->t_task_cdb[0]);
+			ret  = 0;
+			break;
+		}
+
+		/* split req to 1mb at least one by one */
+		work_sects = min_t (sector_t,  nr_sects, MIN_REQ_SIZE);
+	
+		ret = blkdev_issue_discard(bdev, sector, work_sects, 
+				gfp_mask, flags);
+		if (ret !=0)
+			break;
+
+		sector += work_sects;
+		nr_sects -= work_sects;
+	}
+
+	return ret;
+}
+EXPORT_SYMBOL(qnap_transport_blkdev_issue_discard);
+
+static void __qnap_target_execute_sync_cache(
+	struct work_struct *work
+	)
+{
+	struct se_task *se_task = container_of(work, struct se_task, sync_cache_work);
+	struct se_cmd *se_cmd = se_task->task_se_cmd;
+	struct se_device *se_dev = se_task->task_se_cmd->se_dev;
+	unsigned long flags;
+
+	if (target_emulate_synchronize_cache(se_task)) {
+		spin_lock_irqsave(&se_cmd->t_state_lock, flags);
+		se_task->task_flags &= ~TF_ACTIVE;
+		se_cmd->transport_state &= ~CMD_T_SENT;
+		spin_unlock_irqrestore(&se_cmd->t_state_lock, flags);
+		transport_stop_tasks_for_cmd(se_cmd);
+		transport_generic_request_failure(se_cmd);
+	}
+}
+
+int qnap_target_execute_sync_cache(
+	struct se_task *se_task
+	)
+{
+	struct se_cmd *se_cmd = se_task->task_se_cmd;
+	struct se_device *se_dev = se_task->task_se_cmd->se_dev;
+
+	if (!se_dev->transport->do_sync_cache) {
+		pr_err("SYNCHRONIZE_CACHE emulation not supported"
+			" for: %s\n", se_dev->transport->name);
+		se_cmd->scsi_sense_reason = TCM_UNSUPPORTED_SCSI_OPCODE;
+		return -ENOSYS;
+	}
+
+
+	if (!se_dev->sync_cache_wq)
+		return target_emulate_synchronize_cache(se_task);
+
+	INIT_WORK(&se_task->sync_cache_work, __qnap_target_execute_sync_cache);
+	queue_work(se_dev->sync_cache_wq,  &se_task->sync_cache_work);
+	return 0;
+}
+EXPORT_SYMBOL(qnap_target_execute_sync_cache);
+
+static void __qnap_target_execute_discard(
+	struct work_struct *work
+	)
+{
+	struct se_task *se_task = container_of(work, struct se_task, unmap_work);
+	struct se_cmd *se_cmd = se_task->task_se_cmd;
+	struct se_device *se_dev = se_task->task_se_cmd->se_dev;
+	unsigned long flags;
+
+	if (target_emulate_unmap(se_task)) {
+		spin_lock_irqsave(&se_cmd->t_state_lock, flags);
+		se_task->task_flags &= ~TF_ACTIVE;
+		se_cmd->transport_state &= ~CMD_T_SENT;
+		spin_unlock_irqrestore(&se_cmd->t_state_lock, flags);
+		transport_stop_tasks_for_cmd(se_cmd);
+		transport_generic_request_failure(se_cmd);
+	}
+}
+
+int qnap_target_execute_discard(
+	struct se_task *se_task
+	)
+{
+	struct se_cmd *se_cmd = se_task->task_se_cmd;
+	struct se_device *se_dev = se_task->task_se_cmd->se_dev;
+
+	if (!se_dev->transport->do_discard) {
+		pr_err("UNMAP emulation not supported on %s\n",
+			se_dev->transport->name);
+		se_cmd->scsi_sense_reason = TCM_UNSUPPORTED_SCSI_OPCODE;
+		return -ENOSYS;
+	}
+
+	if (!se_dev->unmap_wq)
+		return target_emulate_unmap(se_task);
+
+	INIT_WORK(&se_task->unmap_work, __qnap_target_execute_discard);
+	queue_work(se_dev->unmap_wq,  &se_task->unmap_work);
+	return 0;
+
+}
+EXPORT_SYMBOL(qnap_target_execute_discard);
+
+int qnap_transport_drop_fb_cmd(
+	struct se_cmd *se_cmd,
+	int type
+	)
+{
+	int ret, count = 0;
+	struct fbdisk_device *fb = NULL;
+	struct iblock_dev *ib_dev = NULL;
+	struct bio_rec *brec, *tmp_brec;
+	char *type_str;
+	char tmp_str[256];
+	struct __bio_obj *obj = NULL;
+
+	if (qnap_transport_is_iblock_fbdisk(se_cmd->se_dev) != 0)
+		return -ENODEV;
+
+	ib_dev = (struct iblock_dev *)se_cmd->se_dev->dev_ptr;
+	fb = ib_dev->ibd_bd->bd_disk->private_data;
+	if (!fb)
+		return -ENODEV;
+
+	type_str = __qnap_get_drop_type_str(type);
+	if (!type_str)
+		return -EINVAL;
+
+	/* try to drop all possible bio for iblock + block-backend */
+	if (type == -1) {
+		spin_lock(&se_cmd->t_state_lock);
+		se_cmd->transport_state |= CMD_T_RELEASE_CMD_FROM_CONN;
+		spin_unlock(&se_cmd->t_state_lock);
+	}
+
+	obj = &se_cmd->bio_obj;
+
+	/* take care this ... */
+	spin_lock(&obj->bio_rec_lists_lock);
+	list_for_each_entry_safe(brec, tmp_brec, &obj->bio_rec_lists, node)
+	{
+		if (brec->bio) {
+			count++;
+			set_bit(BIO_ISCSI_DROP_BIO, &brec->bio->bi_iscsi_flags);
+
+			pr_info("[iSCSI (file-based)][%s] ip: %s, "
+				"drop itt:0x%08x, scsi op:0x%x, "
+				"bio:0x%p, dev:%s\n", 
+				type_str, se_cmd->se_tfo->get_login_ip(se_cmd),
+				be32_to_cpu(se_cmd->se_tfo->get_task_tag(se_cmd)),
+				se_cmd->t_task_cdb[0],
+				brec->bio, fb->fb_device->bd_disk->disk_name);
+		}
+	}
+	spin_unlock(&obj->bio_rec_lists_lock);
+
+	if (count) {
+		pr_debug("[iSCSI (file-based)] wake fb event for dev:%s\n", // 24514
+			fb->fb_device->bd_disk->disk_name);
+		wake_up_interruptible(&fb->fb_event);
+	}
+
+	return 0;
+
+}
+EXPORT_SYMBOL(qnap_transport_drop_fb_cmd);
+
+static void qnap_transport_free_bio_rec(
+	struct se_cmd *se_cmd,
+	struct bio_rec *rec
+	)
+{
+	if (qnap_transport_is_iblock_fbdisk(se_cmd->se_dev) != 0)
+		return;
+
+	if (se_cmd->se_dev->fb_bio_rec_kmem && rec)
+		kmem_cache_free(se_cmd->se_dev->fb_bio_rec_kmem, rec);
+
+	return;
+}
+
+int qnap_transport_alloc_bio_rec(
+	struct se_task *se_task,
+	struct bio *bio
+	)
+{
+	struct se_cmd *se_cmd = se_task->task_se_cmd;
+	struct bio_rec *brec = NULL;
+	struct __bio_obj *obj = NULL;
+
+	if (qnap_transport_is_iblock_fbdisk(se_cmd->se_dev) != 0)
+		return -ENODEV;
+
+	obj = &se_cmd->bio_obj;
+
+	if (se_cmd->se_dev->fb_bio_rec_kmem) {
+		brec = kmem_cache_zalloc(se_cmd->se_dev->fb_bio_rec_kmem, 
+			GFP_KERNEL);
+		if (brec) {
+			INIT_LIST_HEAD(&brec->node);
+			brec->bio = bio;
+			brec->se_task = se_task;
+			bio->bi_private = qnap_bi_private_set_brec_bit((void *)brec);
+
+			spin_lock(&obj->bio_rec_lists_lock);
+			list_add_tail(&brec->node, &obj->bio_rec_lists);
+			atomic_inc(&obj->bio_rec_count);
+			spin_unlock(&obj->bio_rec_lists_lock);
+			return 0;
+		}
+	}
+	return -ENOMEM;
+}
+EXPORT_SYMBOL(qnap_transport_alloc_bio_rec);
+
+int qnap_transport_free_bio_rec_lists(
+	struct se_cmd *se_cmd
+	)
+{
+	struct bio_rec *brec = NULL, *tmp_bio_rec = NULL;
+	struct __bio_obj *obj = NULL;
+	LIST_HEAD(__free_list);
+
+	if (qnap_transport_is_iblock_fbdisk(se_cmd->se_dev) != 0)
+		return -ENODEV;
+
+	obj = &se_cmd->bio_obj;
+
+	spin_lock(&obj->bio_rec_lists_lock);
+	
+	pr_debug("bio rec count:%d\n", atomic_read(&obj->bio_rec_count));	
+
+	list_for_each_entry_safe(brec, tmp_bio_rec, &obj->bio_rec_lists, 
+		node)
+	{
+		list_move_tail(&brec->node, &__free_list);
+	}
+	spin_unlock(&obj->bio_rec_lists_lock);
+
+	list_for_each_entry_safe(brec, tmp_bio_rec, &__free_list, node) {
+		list_del_init(&brec->node);
+		atomic_dec(&obj->bio_rec_count);
+		qnap_transport_free_bio_rec(se_cmd, brec);
+	}
+
+	return 0;
+}
+EXPORT_SYMBOL(qnap_transport_free_bio_rec_lists);
+
+void qnap_transport_create_fb_bio_rec_kmem(
+	struct se_device *se_dev
+	)
+{
+	char tmp_name[128];
+
+	if (qnap_transport_is_iblock_fbdisk(se_dev) != 0)
+		return;
+
+	/* only for iblock + fbdisk device */
+	sprintf(tmp_name, "fb_bio_rec_cache-%d", se_dev->dev_index);
+
+	se_dev->fb_bio_rec_kmem = kmem_cache_create(tmp_name,
+			sizeof(struct bio_rec), 
+			__alignof__(struct bio_rec), 
+			0, NULL);
+
+	if (!se_dev->fb_bio_rec_kmem)
+		pr_warn("fail to create fb_bio_rec_cache, idx: %d\n", 
+			se_dev->dev_index);
+
+	return;
+}
+EXPORT_SYMBOL(qnap_transport_create_fb_bio_rec_kmem);
+
+void qnap_transport_destroy_fb_bio_rec_kmem(
+	struct se_device *se_dev
+	)
+{
+	if (qnap_transport_is_iblock_fbdisk(se_dev) != 0)
+		return;
+
+	if (se_dev->fb_bio_rec_kmem)
+		kmem_cache_destroy(se_dev->fb_bio_rec_kmem);
+
+	return;
+}
+EXPORT_SYMBOL(qnap_transport_destroy_fb_bio_rec_kmem);
+
+void qnap_transport_set_bio_rec_null(
+	struct se_cmd *se_cmd,
+	struct bio_rec *brec
+	)
+{
+	struct __bio_obj *obj = NULL;
+
+	if (qnap_transport_is_iblock_fbdisk(se_cmd->se_dev) != 0)
+		return;
+
+	obj = &se_cmd->bio_obj;
+
+	spin_lock(&obj->bio_rec_lists_lock);
+	list_del_init(&brec->node);
+	atomic_dec(&obj->bio_rec_count);
+	qnap_transport_free_bio_rec(se_cmd, brec);
+	spin_unlock(&obj->bio_rec_lists_lock);
+	return;
+}
+EXPORT_SYMBOL(qnap_transport_set_bio_rec_null);
+
+void qnap_transport_init_bio_rec_val(
+	struct se_cmd *se_cmd
+	)
+{
+	struct __bio_obj *obj = NULL;
+
+	obj = &se_cmd->bio_obj;
+
+	spin_lock_init(&obj->bio_rec_lists_lock);
+	INIT_LIST_HEAD(&obj->bio_rec_lists);
+	atomic_set(&obj->bio_rec_count, 1);
+	return;
+}
+EXPORT_SYMBOL(qnap_transport_init_bio_rec_val);
+
+static void qnap_transport_target_tmr_work(struct work_struct *work)
+{
+	struct se_cmd *cmd = container_of(work, struct se_cmd, work);
+	transport_generic_do_tmr(cmd);
+}
+
+int qnap_transport_check_report_lun_changed(
+	struct se_cmd *se_cmd
+	)
+{
+	struct se_session *se_sess = se_cmd->se_sess;
+	struct se_dev_entry *deve;	
+	u32 lun_count = 0, i;
+	
+	/* how can I do ??? */
+	if (!se_sess)
+		return TCM_LOGICAL_UNIT_COMMUNICATION_FAILURE;
+	
+	if (!se_sess->sess_got_report_lun_cmd)
+		return 0;
+
+	spin_lock_irq(&se_sess->se_node_acl->device_list_lock);
+	for (i = 0; i < TRANSPORT_MAX_LUNS_PER_TPG; i++) {
+		deve = se_sess->se_node_acl->device_list[i];
+		if (!(deve->lun_flags & TRANSPORT_LUNFLAGS_INITIATOR_ACCESS))
+			continue;
+		lun_count++;
+	}
+	spin_unlock_irq(&se_sess->se_node_acl->device_list_lock);
+
+	if (atomic_read(&se_sess->sess_lun_count) != lun_count) {
+		pr_warn("lun counts was changed. send REPORTED LUNS DATA "
+				"HAS CHANGED sense code\n");
+		/* reset it ... */
+		se_sess->sess_got_report_lun_cmd = false;
+		return TCM_REPORTED_LUNS_DATA_HAS_CHANGED;
+	}
+	return 0;
+}
+
 #endif  /* #if defined(CONFIG_MACH_QNAPTS) */
+
+
 

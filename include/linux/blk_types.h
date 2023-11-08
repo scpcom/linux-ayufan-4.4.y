@@ -39,6 +39,10 @@ struct bio {
 	unsigned long		bi_rw;		/* bottom bits READ/WRITE,
 						 * top bits priority
 						 */
+#ifdef CONFIG_MACH_QNAPTS
+	/* this will be used by iscsi layer if it wants to drop this bio (for fbdisk) */
+	unsigned long		bi_iscsi_flags;
+#endif
 
 	unsigned short		bi_vcnt;	/* how many bio_vec's */
 	unsigned short		bi_idx;		/* current index into bvl_vec */
@@ -79,6 +83,12 @@ struct bio {
 	 */
 	struct bio_vec		bi_inline_vecs[0];
 };
+
+#ifdef CONFIG_MACH_QNAPTS
+/* bio flags for iscsi layer */
+#define	BIO_ISCSI_DROP_BIO	0
+#endif
+
 
 /*
  * bio flags

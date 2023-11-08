@@ -39,10 +39,13 @@
 #include "iscsi_target_stat.h"
 #include "iscsi_target_configfs.h"
 
+#ifdef CONFIG_MACH_QNAPTS
+#include "iscsi_target_erl1.h"
 
 #if defined(QNAP_HAL)
 #include <qnap/hal_event.h>
 extern int send_hal_netlink(NETLINK_EVT *event);
+#endif
 #endif
 
 struct target_fabric_configfs *lio_target_fabric_configfs;
@@ -641,6 +644,14 @@ static struct configfs_attribute *lio_target_nacl_param_attrs[] = {
 
 #define QNAP_DEFAULT_INITIATOR "iqn.2004-04.com.qnap:all:iscsi.default.ffffff"
 
+#if defined(IS_G)
+#define DEFAULT_INITIATOR	"iqn.2004-04.com.nas:all:iscsi.default.ffffff"
+#elif defined(Athens)
+#define DEFAULT_INITIATOR	"iqn.2004-04.com.cisco:all:iscsi.default.ffffff"
+#else
+#define DEFAULT_INITIATOR	QNAP_DEFAULT_INITIATOR
+#endif
+
 static ssize_t lio_target_nacl_show_info(
 	struct se_node_acl *se_nacl,
 	char *page)
@@ -653,6 +664,7 @@ static ssize_t lio_target_nacl_show_info(
    	struct se_portal_group *se_tpg = NULL;
 	struct se_node_acl *acl;
 	struct iscsi_sess_ops *sess_ops;
+	bool is_default_initiator;
 
 #ifdef QNAP_KERNEL_STORAGE_V2
         struct file *fd;
@@ -662,7 +674,10 @@ static ssize_t lio_target_nacl_show_info(
         struct se_wwn *wwn;
 	struct iovec iov[1];
 	int first_conn, rret=0;
-	bool is_default_initiator;
+#else
+	char *tmp_page = NULL, *old_page = NULL;
+	ssize_t old_rb = 0;
+	int buf_result = 0;
 #endif
 	if (se_nacl)
 		se_tpg = se_nacl->se_tpg;
@@ -673,13 +688,12 @@ static ssize_t lio_target_nacl_show_info(
 
 	if (se_tpg) {
 
-#ifdef QNAP_KERNEL_STORAGE_V2	
-
-		if (!strcmp(se_nacl->initiatorname, QNAP_DEFAULT_INITIATOR))
+		if (!strcmp(se_nacl->initiatorname, DEFAULT_INITIATOR))
 			is_default_initiator = true;
 		else
 			is_default_initiator = false;
 
+#ifdef QNAP_KERNEL_STORAGE_V2	
 		wwn=se_tpg->se_tpg_wwn;
 
 		snprintf(path_t,sizeof(path_t),"/tmp/%s/%s/target_info",wwn->wwn_group.cg_item.ci_name,se_nacl->initiatorname);
@@ -696,7 +710,20 @@ static ssize_t lio_target_nacl_show_info(
 		if (!data_t) {
 			return 0;
 		}
+#else
+		/* since read of configfs only can carry PAGE_SIZE data, 
+		 * we setup tmp buffer size to be (PAGE_SIZE * 2) first
+		 */
+		tmp_page = kzalloc((PAGE_SIZE * 2), GFP_KERNEL);
+		if (!tmp_page)
+			return rb;
+
+		/* save original page address and use new one first */
+		old_page = page;
+		page = tmp_page;
+
 #endif
+
 		spin_lock_bh(&se_tpg->acl_node_lock);
 		list_for_each_entry(acl, &se_tpg->acl_node_list, acl_list) {
 			spin_lock_bh(&acl->nacl_sess_lock);
@@ -839,19 +866,41 @@ static ssize_t lio_target_nacl_show_info(
 #endif
 			}
 			spin_unlock_bh(&acl->nacl_sess_lock);
+
 #ifndef QNAP_KERNEL_STORAGE_V2
 			/* Benjamin 20130315 for BUG 31457: fill_read_buffer()
 			 * in configfs can only read one page. 
 			 * If exceeds, BUG_ON! 
 			 */
-			if (rb + 1024 > PAGE_SIZE)
+			if (rb > PAGE_SIZE) {
+				buf_result = -ENOMEM;
 				break;
+			} else
+				old_rb = rb;
 #endif
 	        }
 	        spin_unlock_bh(&se_tpg->acl_node_lock);
 
 #ifdef QNAP_KERNEL_STORAGE_V2
 		kfree(data_t);
+#else
+		/* restore original page address */
+		page = old_page;
+
+		if (!buf_result)
+			memcpy(page, tmp_page, old_rb);
+		else {
+			if (old_rb) {
+				memcpy(page, tmp_page, old_rb);
+				pr_warn("%s: nacl info exceeds PAGE_SIZE, "
+					"stop to get remain info\n", __func__); 		
+			} else
+				pr_err("%s: fail to get nacl info at "
+					"1st round ( > PAGE_SIZE )\n", __func__);
+		}
+
+		rb = old_rb;
+		kfree(tmp_page);
 #endif
 	}
 
@@ -2157,6 +2206,16 @@ static int lio_set_clear_delay_remove(
 	}
 	return 0;
 }
+
+static unsigned char *qnap_iscsi_get_login_ip(
+	struct se_cmd *se_cmd
+	)
+{
+	struct iscsi_cmd *cmd = container_of(se_cmd, struct iscsi_cmd, se_cmd);
+	if (cmd->conn)
+		return cmd->conn->login_ip;
+	return NULL;
+}
 #endif
 
 static void lio_release_cmd(struct se_cmd *se_cmd)
@@ -2222,6 +2281,8 @@ int iscsi_target_register_configfs(void)
 
 	/* 2014/08/16, adamhsu, redmine 9055,9076,9278 */
 	fabric->tf_ops.set_clear_delay_remove = &lio_set_clear_delay_remove;
+	fabric->tf_ops.get_login_ip = &qnap_iscsi_get_login_ip;
+	fabric->tf_ops.qnap_iscsi_drop_cmd_from_lun_acl = &qnap_iscsi_lio_drop_cmd_from_lun_acl;
 #endif	        
 
 

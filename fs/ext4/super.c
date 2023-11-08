@@ -436,6 +436,16 @@ static int block_device_ejected(struct super_block *sb)
 	return bdi->dev == NULL;
 }
 
+/*
+ * Check whether the volume is switched to fake readonly mode in which only
+ * discard I/O and unlink operations are allowed.  For other operations, they
+ * should be returned and behave like they are in real readonly mode.
+ */
+bool qnap_ext4_fake_readonly_check(struct super_block *sb)
+{
+	struct ext4_sb_info *sbi = EXT4_SB(sb);
+	return (sbi->s_mount_flags & EXT4_MF_FAKE_READONLY)? true : false;
+}
 
 /* Deal with the reporting of failure conditions on a filesystem such as
  * inconsistencies detected or read IO failures.
@@ -1360,6 +1370,7 @@ enum {
 #ifdef CONFIG_EXT4_FS_RICHACL
         Opt_richacl,
 #endif
+	Opt_priv, Opt_nopriv,
 };
 
 static const match_table_t tokens = {
@@ -1438,6 +1449,8 @@ static const match_table_t tokens = {
 #ifdef CONFIG_EXT4_FS_RICHACL
         {Opt_richacl, "richacl"},
 #endif
+	{Opt_priv, "priv"},
+	{Opt_nopriv, "nopriv"},
 	{Opt_err, NULL},
 };
 
@@ -2020,6 +2033,12 @@ set_qf_format:
 			break;
 		case Opt_noinit_itable:
 			clear_opt(sb, INIT_INODE_TABLE);
+			break;
+		case Opt_priv:
+			sbi->s_mount_flags |= EXT4_MF_FAKE_READONLY;
+			break;
+		case Opt_nopriv:
+			sbi->s_mount_flags &= ~EXT4_MF_FAKE_READONLY;
 			break;
 		default:
 			ext4_msg(sb, KERN_ERR,
@@ -4729,6 +4748,9 @@ static int ext4_remount(struct super_block *sb, int *flags, char *data)
 
 	if (sbi->s_mount_flags & EXT4_MF_FS_ABORTED)
 		ext4_abort(sb, "Abort forced by user");
+	if (sbi->s_mount_flags & EXT4_MF_FAKE_READONLY)
+		ext4_msg(sb, KERN_ERR, "switch to privileged mode, "
+			 "only discard and unlink are allowed");
 
 
 #ifdef CONFIG_EXT4_FS_RICHACL

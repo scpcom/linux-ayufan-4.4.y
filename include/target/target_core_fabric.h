@@ -84,6 +84,8 @@ struct target_core_fabric_ops {
 
 	/* 2014/08/16, adamhsu, redmine 9055,9076,9278 */
 	int (*set_clear_delay_remove)(struct se_cmd *, int, int);
+	unsigned char *(*get_login_ip)(struct se_cmd *);
+	int (*qnap_iscsi_drop_cmd_from_lun_acl)(struct se_portal_group *, struct se_lun *);
 #endif        
 	u32 (*get_task_tag)(struct se_cmd *);
 	int (*get_cmd_state)(struct se_cmd *);
