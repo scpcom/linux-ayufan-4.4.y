@@ -3746,7 +3746,7 @@ static int tcp_ack(struct sock *sk, const struct sk_buff *skb, int flag)
 			return -1;
 		}
 		goto old_ack;
-	}
+    }
 
 	/* If the ack includes data we haven't sent yet, discard
 	 * this segment (RFC793 Section 3.9).

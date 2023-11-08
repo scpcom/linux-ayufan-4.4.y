@@ -523,7 +523,7 @@ tcp_thin_dupack - BOOLEAN
 	For more information on thin streams, see
 	Documentation/networking/tcp-thin.txt
 	Default: 0
-
+	
 tcp_challenge_ack_limit - INTEGER
 	Limits number of Challenge ACK sent per second, as recommended
 	in RFC 5961 (Improving TCP's Robustness to Blind In-Window Attacks)

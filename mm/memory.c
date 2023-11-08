@@ -3043,7 +3043,6 @@ out_release:
 	return ret;
 }
 
-EXPORT_SYMBOL_GPL(vmtruncate_range);
 /*
  * We enter with non-exclusive mmap_sem (to exclude vma changes,
  * but allow concurrent faults), and pte mapped but not yet locked.
