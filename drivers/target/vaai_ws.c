@@ -300,15 +300,16 @@ int vaai_file_do_ws(
 					 * mapped to any block) or something 
 					 * wrong during normal sync-cache
 					 */
-
-					/* call again to make sure it is no space
-					 * really or not
-					 */
-					err_2 = check_dm_thin_cond(inode->i_bdev);
-					if (err_2 == -ENOSPC){
-						err_1 = err_2;
+					if (err_1 != -ENOSPC){					
+						/* call again to make sure it is no space
+						 * really or not
+						 */
+						err_2 = check_dm_thin_cond(inode->i_bdev);
+						if (err_2 == -ENOSPC){
+							err_1 = err_2;
+						}
+						/* it may something wrong duing sync-cache */
 					}
-					/* it may something wrong duing sync-cache */
 					Ret = err_1;
 					goto _EXIT_1_;
 				}
@@ -318,7 +319,6 @@ int vaai_file_do_ws(
 		}
 _EXIT_1_:
 #endif
-
 		if (Ret != 0){
 
 #if defined(SUPPORT_TP)

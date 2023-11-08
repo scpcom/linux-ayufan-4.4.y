@@ -1374,7 +1374,7 @@ void dev_enable_lro(struct net_device *dev)
     }
     else
     {
-        printk("enable %s lro\n", __func__, netdev_name(dev));
+        printk("enable %s lro\n", netdev_name(dev));
     }
 }
 EXPORT_SYMBOL(dev_enable_lro);

@@ -2111,6 +2111,14 @@ cifs_get_smb_ses(struct TCP_Server_Info *server, struct smb_vol *volume_info)
 		if (!ses->domainName)
 			goto get_ses_fail;
 	}
+#ifdef CONFIG_MACH_QNAPTS
+	/* for File Station remote mount */
+	if (volume_info->source_rfc1001_name) {
+		ses->netbiosName = kstrdup(volume_info->source_rfc1001_name, GFP_KERNEL);
+		if (!ses->netbiosName)
+			goto get_ses_fail;
+	}
+#endif
 	ses->cred_uid = volume_info->cred_uid;
 	ses->linux_uid = volume_info->linux_uid;
 

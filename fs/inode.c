@@ -26,6 +26,9 @@
 #include <linux/ima.h>
 #include <linux/cred.h>
 #include <linux/buffer_head.h> /* for inode_has_buffers */
+#ifdef CONFIG_FS_RICHACL
+#include <linux/richacl.h>
+#endif
 #include "internal.h"
 
 /*
@@ -194,6 +197,10 @@ int inode_init_always(struct super_block *sb, struct inode *inode)
 #ifdef CONFIG_FS_POSIX_ACL
 	inode->i_acl = inode->i_default_acl = ACL_NOT_CACHED;
 #endif
+#ifdef CONFIG_FS_RICHACL
+        if (IS_RICHACL(inode))
+            inode->i_richacl = ACL_NOT_CACHED;
+#endif
 
 #ifdef CONFIG_FSNOTIFY
 	inode->i_fsnotify_mask = 0;
@@ -247,6 +254,13 @@ void __destroy_inode(struct inode *inode)
 	if (inode->i_default_acl && inode->i_default_acl != ACL_NOT_CACHED)
 		posix_acl_release(inode->i_default_acl);
 #endif
+#ifdef CONFIG_FS_RICHACL
+        if (IS_RICHACL(inode)) {
+                if (inode->i_richacl && inode->i_richacl != ACL_NOT_CACHED)
+                        richacl_put(inode->i_richacl);
+        }
+#endif
+
 	this_cpu_dec(nr_inodes);
 }
 EXPORT_SYMBOL(__destroy_inode);

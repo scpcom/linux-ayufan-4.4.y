@@ -50,6 +50,9 @@
 
 #include <linux/usb/quirks.h>
 
+#ifdef CONFIG_MACH_QNAPTS
+#include <linux/delay.h>
+#endif
 #include <scsi/scsi.h>
 #include <scsi/scsi_eh.h>
 #include <scsi/scsi_device.h>
@@ -393,6 +396,9 @@ int usb_stor_bulk_transfer_buf(struct us_data *us, unsigned int pipe,
 	void *buf, unsigned int length, unsigned int *act_len)
 {
 	int result;
+#ifdef CONFIG_MACH_QNAPTS
+	int buflen;     
+#endif
 
 	US_DEBUGP("%s: xfer %u bytes\n", __func__, length);
 
@@ -404,6 +410,18 @@ int usb_stor_bulk_transfer_buf(struct us_data *us, unsigned int pipe,
 	/* store the actual length of the data transferred */
 	if (act_len)
 		*act_len = us->current_urb->actual_length;
+#ifdef CONFIG_MACH_QNAPTS 
+	if(us->fflags & US_FL_QNAP_JMS567QUIRK) {
+		if(usb_pipeout(us->current_urb->pipe)) {
+			buflen = us->current_urb->actual_length;
+			if((buflen >> 9) >= QNAP_USB_STOR_JM_QUIRK_MAX_SECTOR) {
+                                                                      
+			  udelay(QNAP_JM_QUIRK_US_WAIT);
+
+			} 
+		}    
+	}
+#endif
 	return interpret_urb_result(us, pipe, length, result, 
 			us->current_urb->actual_length);
 }
@@ -420,6 +438,9 @@ static int usb_stor_bulk_transfer_sglist(struct us_data *us, unsigned int pipe,
 		unsigned int *act_len)
 {
 	int result;
+#ifdef CONFIG_MACH_QNAPTS
+  int buflen;     
+#endif
 
 	/* don't submit s-g requests during abort processing */
 	if (test_bit(US_FLIDX_ABORTING, &us->dflags))
@@ -456,6 +477,19 @@ static int usb_stor_bulk_transfer_sglist(struct us_data *us, unsigned int pipe,
 	result = us->current_sg.status;
 	if (act_len)
 		*act_len = us->current_sg.bytes;
+#ifdef CONFIG_MACH_QNAPTS 
+  if(us->fflags & US_FL_QNAP_JMS567QUIRK) { 
+    if(usb_pipeout(us->current_urb->pipe)) { 
+
+      buflen = us->current_sg.bytes;
+
+      if((buflen >> 9) >= QNAP_USB_STOR_JM_QUIRK_MAX_SECTOR) {                                                                                              
+        udelay(QNAP_JM_QUIRK_US_WAIT);
+        //printk(KERN_DEBUG "sg.bytes=%d\n",buflen);
+      } 
+    }    
+	}
+#endif
 	return interpret_urb_result(us, pipe, length, result,
 			us->current_sg.bytes);
 }

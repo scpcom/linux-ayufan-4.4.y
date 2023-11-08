@@ -16,6 +16,7 @@
  */
 #include <linux/fs.h>
 #include <linux/blkdev.h>
+#include <linux/module.h>
 #include <target/target_core_base.h>
 #include <target/target_core_backend.h>
 #include <target/target_core_fabric.h>
@@ -83,12 +84,14 @@ struct block_device *__get_blk_dev(
 }
 
 static int __do_flush_and_drop(
-	struct file *fd,
+	LIO_SE_DEVICE *se_dev,
 	sector_t lba,
 	u32 bs_order,
 	u64 data_bytes
 	)
 {
+	LIO_FD_DEV *fd_dev = NULL;
+	struct file *fd = NULL;
 	struct inode *inode = NULL;
 	struct address_space *mapping = NULL;
 	int ret = 0;
@@ -98,6 +101,11 @@ static int __do_flush_and_drop(
 #if defined(SUPPORT_TP)
 	int err_1;
 #endif
+
+
+	fd_dev =  (LIO_FD_DEV *)se_dev->dev_ptr;
+	fd = fd_dev->fd_file;
+
 	/**/
 	inode = fd->f_mapping->host;
 	mapping = inode->i_mapping;
@@ -107,15 +115,23 @@ static int __do_flush_and_drop(
 		return -EOPNOTSUPP;
 	}
 
-//	pr_err("[fbc] flush bdev: %s\n", inode->i_bdev->bd_disk->disk_name);
-
+//	pr_info("[fbc] flush bdev: %s\n", inode->i_bdev->bd_disk->disk_name);
 	start = (loff_t)(lba << bs_order);
-	len   = (loff_t)(data_bytes << bs_order);
-		
+	len   = (loff_t)data_bytes;
+
 	first_page = (start >> PAGE_CACHE_SHIFT);
 	last_page = ((start + len - 1) >> PAGE_CACHE_SHIFT);
 	first_page_offset = first_page	<< PAGE_CACHE_SHIFT;
 	last_page_offset = (last_page << PAGE_CACHE_SHIFT) + (PAGE_CACHE_SIZE - 1);
+
+#if 0
+	pr_info("start:0x%llx\n", (unsigned long long)start);
+	pr_info("len:0x%llx\n", (unsigned long long)len);
+	pr_info("first_page:0x%llx\n", (unsigned long long)first_page);
+	pr_info("last_page:0x%llx\n", (unsigned long long)last_page);
+	pr_info("first_page_offset:0x%llx\n", (unsigned long long)first_page_offset);
+	pr_info("last_page_offset:0x%llx\n", (unsigned long long)last_page_offset);
+#endif
 
 	if (mapping->nrpages && mapping_tagged(mapping, PAGECACHE_TAG_DIRTY)){
 		ret = filemap_write_and_wait_range(mapping, 
@@ -123,33 +139,41 @@ static int __do_flush_and_drop(
 		
 		if (unlikely(ret)) {
 			pr_err("%s: fail to exec "
-			"filemap_write_and_wait_range(), ret:%d\n", 
-			__func__, ret);
+				"filemap_write_and_wait_range(), ret:%d\n", 
+				__func__, ret);
+
 
 #if defined(SUPPORT_TP)
+
 			if (!is_thin_lun(se_dev))
 				return ret;
-
-			err_1 = check_dm_thin_cond(inode->i_bdev);
-			if (err_1 == -ENOSPC){
+			if (ret != -ENOSPC) {
+				err_1 = check_dm_thin_cond(inode->i_bdev);
+				if (err_1 == -ENOSPC){
+					pr_warn("%s: space was full\n", __func__); 
+					ret = err_1;
+				}
+			} else
 				pr_warn("%s: space was full\n", __func__); 
-				ret = err_1;
-			}
+
 #endif
+
 			return ret;
 		}
 	}
 
+
 	truncate_pagecache_range(inode, first_page_offset, last_page_offset);
 
-	pr_debug("[fbc] flush / drop cache, start=0x%llx, len=0x%llx, "
+#if 0
+	pr_info("[fbc] flush / drop cache, start=0x%llx, len=0x%llx, "
 		"first_page=0x%llx, last_page=0x%llx, "
 		"first_page_offset=0x%llx, last_page_offset=0x%llx\n", 
 		(unsigned long long)start, (unsigned long long)len, 
 		(unsigned long long)first_page, (unsigned long long)last_page, 
 		(unsigned long long)first_page_offset, 
 		(unsigned long long)last_page_offset);
-
+#endif
 	return 0;
 
 }
@@ -170,10 +194,8 @@ int __do_fast_block_clone(
 {
 	LIO_FD_DEV *s_fd_dev = NULL, *d_fd_dev = NULL;
 	struct inode *s_inode = NULL, *d_inode = NULL;
-	struct completion fast_io_wait;
 	struct list_head io_lists;
-	int ret, done_blks = 0, curr_done_blks_512 = 0;
-	FCCB_DATA cb_data;
+	int ret, ret1, done_blks = 0, curr_done_blks_512 = 0;
 	CREATE_REC create_rec;
 	u32 s_bs_order, d_bs_order;
 	sector_t s_lba = fc_obj->s_lba, d_lba = fc_obj->d_lba;
@@ -183,7 +205,6 @@ int __do_fast_block_clone(
 	 * 0 ~ (OPTIMAL_TRANSFER_SIZE_IN_BYTES - 1) */
 	u64 data_bytes = fc_obj->data_bytes;
 
-	
 	/**/
 //	__dump_fc_obj(fc_obj);
 
@@ -196,12 +217,19 @@ int __do_fast_block_clone(
 
 _EXEC_AGAIN:
 
-	/* To flush and drop the cache data for dest first since we ask the
-	 * block layer to do fast copy 
+	/* To flush and drop the cache data for src / dest first since we will
+	 * ask block layer to do fast block clone
 	 */
-	ret = __do_flush_and_drop(d_fd_dev->fd_file, d_lba, d_bs_order, data_bytes);
+	ret1 = __do_flush_and_drop(fc_obj->s_se_dev, s_lba, s_bs_order, data_bytes);
+	ret = __do_flush_and_drop(fc_obj->d_se_dev, d_lba, d_bs_order, data_bytes);
 
-	if (ret != 0){
+	if (ret != 0 || ret1 != 0){
+
+		pr_warn("[fbc] fail to flush / drop cache for %s area\n",
+			(((ret != 0 && ret1 != 0)) ? "src/dest" : \
+			((ret1 != 0) ? "src": "dest"))
+			);
+		
 #if defined(SUPPORT_TP)
 		/* workaround to check whether thin space is full */
 		if (ret == -ENOSPC)
@@ -210,21 +238,17 @@ _EXEC_AGAIN:
 		return done_blks;
 	}
 
-
 	/* prepare the fbc io, to conver to 512b unit first */
 	s_lba_512 = ((s_lba << s_bs_order) >> 9);
 	d_lba_512 = ((d_lba << d_bs_order) >> 9);
 
 	INIT_LIST_HEAD(&io_lists);
-	init_completion(&fast_io_wait); 
-	__init_fccb_data(&cb_data, &fast_io_wait);
-	
+
 	create_rec.s_blkdev = s_inode->i_bdev;
 	create_rec.d_blkdev = d_inode->i_bdev;
 	create_rec.s_lba = s_lba_512;
 	create_rec.d_lba = d_lba_512;
 	create_rec.transfer_bytes = data_bytes;
-	create_rec.cb = &cb_data;
 
 	/* After to create io lists, the create_rec.transfer_bytes may NOT
 	 * the same as data_bytes  */
@@ -232,20 +256,20 @@ _EXEC_AGAIN:
 	if (ret != 0)
 		return 0;
 
-	ret = __submit_fast_clone_io_lists_wait(&io_lists, &cb_data);
+	ret = __submit_fast_clone_io_lists_wait(&io_lists);
+
 
 	/* After to submit io, the done_blks (unit is 512b) may 
 	 * NOT the same as (create_rec.transfer_bytes >> 9) */
 	curr_done_blks_512 = __get_done_blks_by_fast_clone_io_lists(&io_lists);
-
 	done_blks += ((curr_done_blks_512 << 9) >> d_bs_order);
 	__free_fast_clone_io_lists(&io_lists);
 
 
 	/* (ret != 0) contains the case about cb_data.io_err_count is not zero */
 	if ((ret != 0) || ((curr_done_blks_512 << 9) != create_rec.transfer_bytes)){
-		if (cb_data.nospc_err)
-			fc_obj->nospc_err = cb_data.nospc_err;
+		if (ret == -ENOSPC)
+			fc_obj->nospc_err = 1;
 		return done_blks;
 	}
 
@@ -256,7 +280,6 @@ _EXEC_AGAIN:
 		data_bytes -= create_rec.transfer_bytes;
 		goto _EXEC_AGAIN;
 	}
-
 	return done_blks;
 
 }
@@ -272,16 +295,19 @@ _EXEC_AGAIN:
  * @retval  0: Success, 1: Fail
  */
 int __submit_fast_clone_io_lists_wait(
-	struct list_head *io_lists,
-	FCCB_DATA *cb
+	struct list_head *io_lists
 	)
 {
 #define MAX_USEC_T	(1000)
-
+	DECLARE_COMPLETION_ONSTACK(fast_io_wait);
 	FCIO_REC *rec = NULL;
 	unsigned long t0;
+	int ret;
 	u32 t1;
+	FCCB_DATA cb;
+	THIN_BLOCKCLONE_DESC *desc;
 
+	__init_fccb_data(&cb, &fast_io_wait);
 	t0 = jiffies;
 
 	/* submit fast copy io */
@@ -292,12 +318,22 @@ int __submit_fast_clone_io_lists_wait(
 			(unsigned long long)rec->desc.dest_block_addr,
 			rec->desc.transfer_blocks
 			);
-		thin_do_block_cloning(&rec->desc, (void *)__fast_clone_cb);
+
+		desc = &rec->desc;
+		desc->private_data = &cb;
+		atomic_inc(&cb.io_done);
+		ret = thin_do_block_cloning(&rec->desc, (void *)__fast_clone_cb);
+
+		/* thin_do_block_cloning() will return -ENOMEM and 0 */
+		if (ret != 0){
+			pr_warn("[%s]: thin_do_block_cloning() return %d\n",ret);
+			__fast_clone_cb(ret, &rec->desc);
+		}
 	}
 
 	/* to wait the all io if possible */
-	if (atomic_read(&cb->io_count)){
-		while (wait_for_completion_timeout(cb->io_wait, 
+	if (!atomic_dec_and_test(&cb.io_done)){
+		while (wait_for_completion_timeout(&fast_io_wait, 
 				msecs_to_jiffies(FAST_CLONE_TIMEOUT_SEC * 1000)
 				) == 0)
 			printk("[fbc] wait fast copy io to be done\n");
@@ -308,9 +344,12 @@ int __submit_fast_clone_io_lists_wait(
 	if (t1 > MAX_USEC_T)
 		pr_debug("[fbc] diff time: %d (usec)\n", t1);
 
-	if (atomic_read(&cb->io_err_count)){
+	if (atomic_read(&cb.io_err_count)){
 		pr_debug("[fbc] err in %s\n", __FUNCTION__);
-		return 1;
+		if (cb.nospc_err)
+			return -ENOSPC;
+		else
+			return -EIO;
 	}
 	return 0;
 }
@@ -330,7 +369,6 @@ int __create_fast_clone_io_lists(
 	)
 {
 	FCIO_REC *io_rec;
-	FCCB_DATA *cb;
 	u64 tmp_bytes, buf_size, tmp_total;
 	sector_t s_lba, d_lba;
 
@@ -339,7 +377,6 @@ int __create_fast_clone_io_lists(
 
 	tmp_total = 0;
 	tmp_bytes = create_rec->transfer_bytes;
-	cb = create_rec->cb;
 	s_lba = create_rec->s_lba;
 	d_lba = create_rec->d_lba;
 
@@ -358,13 +395,11 @@ int __create_fast_clone_io_lists(
 		io_rec->desc.src_block_addr = s_lba;
 		io_rec->desc.dest_block_addr = d_lba;
 		io_rec->desc.transfer_blocks = (buf_size >> 9);
-		io_rec->desc.private_data = (void *)cb;
 
 		io_rec->io_done = 0;
 		INIT_LIST_HEAD(&io_rec->io_node);
 	
 		/* put the io req to lists */
-		atomic_inc(&cb->io_count);
 		list_add_tail(&io_rec->io_node, io_lists);		
 
 		s_lba += (buf_size >> 9);
@@ -426,7 +461,11 @@ void __fast_clone_cb(
 
 	/**/
 	rec->io_done = 1;
+
 	if (err != 0){
+		if (err != -EINVAL)
+			pr_err("%s: err:%d\n", __func__, err);
+
 		if (err == -ENOSPC)
 			cb->nospc_err = 1;
 
@@ -438,12 +477,12 @@ void __fast_clone_cb(
 	 * to -1 even if current status is w/o any error */
 	if (atomic_read(&cb->io_err_count))
 	    rec->io_done = -1;
-	
-	if (!atomic_dec_and_test(&cb->io_count))
-		return;
 
-	pr_debug("[fbc] all io was done, to compete them\n");
-	complete(cb->io_wait);
+
+	if (atomic_dec_and_test(&cb->io_done)){
+		pr_debug("[fbc] all io was done, to compete them\n");
+		complete(cb->io_wait);
+	}
 	return;
 	
 }
@@ -464,7 +503,7 @@ void __init_fccb_data(
 {
 	fccb_data->io_wait = io_wait;
 	fccb_data->nospc_err = 0;
-	atomic_set(&fccb_data->io_count, 0);
+	atomic_set(&fccb_data->io_done, 1);
 	atomic_set(&fccb_data->io_err_count, 0);
 	return;
 }
@@ -803,6 +842,48 @@ int __do_update_fbc_data_bytes(
 }
 
 
+
+
+int quick_check_support_fbc(
+	struct block_device *bd
+	)
+{
+
+	THIN_BLOCKCLONE_DESC tbc_desc;
+	unsigned long ret_bs = 0;
+	sector_t s_lba, d_lba;
+	u32 data_blks;
+	
+
+	if (!bd)
+		return -EINVAL;
+
+	/* quick check for file-based lun (fbdisk) */
+	if (!strncmp(bd->bd_disk->disk_name, "fbdisk", 6)){
+		pr_warn("not support fast clone on fbdisk dev\n");
+		return -ENOTSUPP;
+	}
+
+	/* unit is 512b */
+	data_blks = ((POOL_BLK_SIZE_KB << 10) >> 9);
+	s_lba = 0;
+	d_lba = s_lba + data_blks;
+
+	tbc_desc.src_dev = bd;
+	tbc_desc.dest_dev = bd;
+	tbc_desc.src_block_addr = s_lba;
+	tbc_desc.dest_block_addr = d_lba;
+	tbc_desc.transfer_blocks = data_blks;
+
+	if (thin_support_block_cloning(&tbc_desc, &ret_bs) != 0){
+		pr_warn("not support fast clone on dev: %s\n",
+			bd->bd_disk->disk_name);
+		return -ENOTSUPP;
+	}
+
+	return 0;
+}
+EXPORT_SYMBOL(quick_check_support_fbc);
 #if defined(CONFIG_MACH_QNAPTS) && defined(SUPPORT_TPC_CMD) 
 
 /*
@@ -828,19 +909,16 @@ int __do_wt_by_fbc(
 
 	/* FIXED ME */
 	w_done_blks = __do_fast_block_clone(fc_obj);
-	__tpc_update_t_cmd_transfer_count(wbt_obj->t_data, 
-		(sector_t)w_done_blks);
 
 	if ((e_bytes >> wbt_obj->d_obj->dev_bs_order) != (u64)w_done_blks){
-		pr_err("[fbc] tpc - w_done_blks != expected write blks\n");
-
-		if (fc_obj->nospc_err)
+		pr_debug("[fbc] tpc - w_done_blks != expected write blks\n");
+		if (fc_obj->nospc_err){
 			wbt_obj->err = ERR_NO_SPACE_WRITE_PROTECT;
+
+			pr_err("[fbc] %s: space was full\n", __func__);
+		}
 		else
 			wbt_obj->err = ERR_3RD_PARTY_DEVICE_FAILURE;
-
-		if (wbt_obj->err)
-			pr_err("[fbc] wbt_obj->err:0x%x\n", wbt_obj->err);
 
 		return 1;
 	}
@@ -862,15 +940,14 @@ int __do_b2b_xcopy_by_fbc(
 	w_done_blks = __do_fast_block_clone(fc_obj);
 
 	if ((e_bytes >> b2b_obj->d_bs_order) != (u64)w_done_blks){
-		pr_err("[fbc] b2b xcopy - w_done_blks != expected write blks\n");
+		pr_debug("[fbc] b2b xcopy - w_done_blks != expected write blks\n");
 
-		if (fc_obj->nospc_err)
+		if (fc_obj->nospc_err){
 			b2b_obj->err = ERR_NO_SPACE_WRITE_PROTECT;
+			pr_err("[fbc] %s: space was full\n", __func__);
+		}
 		else
 			b2b_obj->err = ERR_3RD_PARTY_DEVICE_FAILURE;
-
-		if (b2b_obj->err)
-			pr_err("[fbc] b2b_obj->err:0x%x\n", b2b_obj->err);
 
 		return 1;
 	}

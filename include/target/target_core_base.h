@@ -72,6 +72,13 @@
 
 #define PYX_TRANSPORT_STATUS_INTERVAL		5 /* In seconds */
 
+
+#ifdef CONFIG_MACH_QNAPTS
+// 2013/04/08, George Wu, target ACL supports multiple iSCSI initiators
+#define QNAP_DEFAULT_INITIATOR "iqn.2004-04.com.qnap:all:iscsi.default.ffffff"
+#endif
+
+
 /*
  * struct se_subsystem_dev->su_dev_flags
 */
@@ -541,6 +548,23 @@ struct t10_reservation {
 
 #if defined(CONFIG_MACH_QNAPTS)
 
+
+#if (LINUX_VERSION_CODE == KERNEL_VERSION(3,12,6))
+
+#define TAG_FROM_NATIVE_POOL		127
+#define TAG_IS_INVALID			128
+#define MAX_TAG_POOL			2
+#define RETRY_EXTRA_POOL_ALLOC_COUNT	2
+
+struct new_tag_pool {
+	void			*sess_cmd_map;
+	struct percpu_ida	sess_tag_pool;
+	spinlock_t		tag_count_lock;	
+	atomic_t		tag_count;
+};
+#endif
+
+
 typedef struct _t_cmd_rec{
 	struct list_head rec_node;
 	struct se_cmd *se_cmd;
@@ -679,6 +703,8 @@ struct se_cmd {
 #if (LINUX_VERSION_CODE == KERNEL_VERSION(3,12,6))
 	/* Used for se_sess->sess_tag_pool */
 	unsigned int		map_tag;
+	u8			tag_src_pool;
+	u8			reserved[3];
 #endif
 #endif
 	/* Transport protocol dependent state, see transport_state_table */
@@ -742,40 +768,16 @@ struct se_cmd {
 
 #if defined(CONFIG_MACH_QNAPTS)
 
-/* second helper to be used to check this cmd be aborted or not in QNAP
- * concurrent workqeueu arch. This shall cowork with TMF */
-#define CMD_T_ABORTED_1			(1 << 12)
-
-
- 
-/* 2014/10/17, adamhsu, solve race condition symptom for task management function
- *
- * a. CMD_T_ABORTED, CMD_T_ABORTED_1 was set by caller who want to abort the command
- * b. CMD_T_GOT_ABORTED was set by receiver who got the CMD_T_ABORTED and CMD_T_ABORTED_1
- */
-#define CMD_T_GOT_ABORTED		(1 << 30)
-
-	/* 2014/08/16, adamhsu, redmine 9055,9076,9278 (start) */
-#define CMD_T_SEND_STATUS		(1 << 31)
-
-
 	/* TODO
-	 *
-	 * 1. These are stupid lock method and shall be modified
-	 * 2. They are used for TMF temporally. For example, in some iSCSI code,
-	 *    we can see the se_dev->execute_task_lock will be lock and they are
-	 *    embedded in se_cmd->t_state_lock also. For this case, we can NOT
-	 *    get se_cmd->t_state value somewhere (i.e. core_tmr_drain_task_list() 
-	 *    function) So, we need to create another method ...
+	 * These are used for QNAP TMF handing. After iscsi receive the TMF
+	 * request, we won't ABORT them immediately, instead of we will set
+	 * flag to indicate they will be check (aborted or not) before to
+	 * response them to host
 	 */
-	spinlock_t			tmf_t_state_lock;
-	enum transport_state_table 	tmf_t_state;
 	spinlock_t			tmf_data_lock;
-	unsigned int			tmf_transport_state;
 	unsigned int			tmf_code;
 	bool				tmf_resp_tas;
 	bool				tmf_diff_it_nexus;
-	/* 2014/08/16, adamhsu, redmine 9055,9076,9278 (end) */
 #endif
 	spinlock_t		t_state_lock;
 	struct completion	t_transport_stop_comp;
@@ -798,9 +800,8 @@ struct se_cmd {
 
 	/* 2014/10/17, adamhsu */
 	unsigned long 	creation_jiffies;
+
 #if defined(SUPPORT_CONCURRENT_TASKS)
-	/* 2014/08/16, adamhsu, redmine 9055,9076,9278 */
-	spinlock_t		wq_lock;
 	int			use_wq;
 #endif
 
@@ -876,6 +877,11 @@ struct se_node_acl {
 	struct list_head	acl_sess_list;
 	struct completion	acl_free_comp;
 	struct kref		acl_kref;
+#ifdef CONFIG_MACH_QNAPTS
+	spinlock_t		node_sess_reinstatement_lock;
+	bool			node_sess_reinstatement;
+#endif
+
 };
 
 struct se_session {
@@ -891,11 +897,15 @@ struct se_session {
 	spinlock_t		sess_cmd_lock;
 	struct kref		sess_kref;
 
-/* 20140513, adamhsu, redmine 8253 */
 #ifdef CONFIG_MACH_QNAPTS
+	spinlock_t		sess_reinstatement_lock;
+	bool			sess_reinstatement;
+
+/* 20140513, adamhsu, redmine 8253 */
 #if (LINUX_VERSION_CODE == KERNEL_VERSION(3,12,6))
 	void			*sess_cmd_map;
 	struct percpu_ida	sess_tag_pool;
+	struct new_tag_pool	tag_pool[MAX_TAG_POOL];
 #endif
 #endif
 };
@@ -993,6 +1003,7 @@ struct se_dev_attrib {
 	struct config_group da_group;
 	int		lun_index;
 	u64		allocated;
+	u32		syswp;
 };
 
 struct se_dev_stat_grps {
@@ -1010,9 +1021,11 @@ struct se_subsystem_dev {
 #define SE_UDEV_PATH_LEN		512
 	unsigned char	se_dev_udev_path[SE_UDEV_PATH_LEN];
 #ifdef CONFIG_MACH_QNAPTS   
+
 //Benjamin 20121031 for provision configfs
 #define SE_DEV_PROVISION_LEN	32
 	unsigned char	se_dev_provision[SE_DEV_PROVISION_LEN];
+
 //Benjamin 20130117 for naa configfs
 #define SE_DEV_NAA_LEN	32
 	unsigned char	se_dev_naa[SE_DEV_NAA_LEN];
@@ -1106,6 +1119,9 @@ struct se_device {
 	sector_t		prev_lba;
 	u32			prev_len;
 #endif
+
+	int			fast_blk_clone;
+	int			pool_blk_sectors;
 #endif
 
 #if defined(SUPPORT_PARALLEL_TASK_WQ)
@@ -1134,6 +1150,7 @@ struct se_device {
 	struct se_subsystem_api *transport;
 	/* Linked list for struct se_hba struct se_device list */
 	struct list_head	dev_list;
+
 };
 
 struct se_hba {

@@ -1,5 +1,5 @@
 /**
- * $Header: /home/cvsroot/NasX86/Kernel/linux-3.2.26/drivers/target/iscsi/iscsi_logd.h,v 1.1.2.1 2014/03/07 07:24:11 jonathanho Exp $
+ * $Header: /home/cvsroot/NasX86/Kernel/linux-3.2.26/drivers/target/iscsi/iscsi_logd.h,v 1.2 2014/03/10 06:13:46 jonathanho Exp $
  *
  * Copyright (c) 2009, 2010 QNAP SYSTEMS, INC.
  *
@@ -21,7 +21,7 @@
  * @author	Nike Chen
  * @date	2009/11/25
  *
- * $Id: iscsi_logd.h,v 1.1.2.1 2014/03/07 07:24:11 jonathanho Exp $
+ * $Id: iscsi_logd.h,v 1.2 2014/03/10 06:13:46 jonathanho Exp $
  */
 
 #ifndef _ISCSI_LOG_DAEMON_HDR

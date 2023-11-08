@@ -16,6 +16,13 @@
 
 #define NFSDDBG_FACILITY		NFSDDBG_FH
 
+#define QNAP_GENERIC_LINUX    0
+#ifdef CONFIG_MACH_QNAPTS
+#define QNAP_WITHOUT_ACL      1
+#endif
+#ifdef CONFIG_NFSV4_FS_RICHACL
+#define QNAP_NFSV4_RICHACL    2
+#endif
 
 /*
  * our acceptability function.

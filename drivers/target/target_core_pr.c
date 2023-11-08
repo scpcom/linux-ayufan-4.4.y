@@ -41,6 +41,9 @@
 #include "target_core_pr.h"
 #include "target_core_ua.h"
 
+#if defined(CONFIG_MACH_QNAPTS)
+#include "target_general.h"
+#endif
 /*
  * Used for Specify Initiator Ports Capable Bit (SPEC_I_PT)
  */
@@ -590,7 +593,6 @@ static u32 core_scsi3_pr_generation(struct se_device *dev)
 	spin_lock(&dev->dev_reservation_lock);
 	prg = su_dev->t10_pr.pr_generation++;
 	spin_unlock(&dev->dev_reservation_lock);
-
 	return prg;
 }
 
@@ -1285,6 +1287,7 @@ static void __core_scsi3_free_registration(
 {
 	struct target_core_fabric_ops *tfo =
 			pr_reg->pr_reg_nacl->se_tpg->se_tpg_tfo;
+
 	struct t10_reservation *pr_tmpl = &dev->se_sub_dev->t10_pr;
 	char i_buf[PR_REG_ISID_ID_LEN];
 	int prf_isid;
@@ -1302,6 +1305,7 @@ static void __core_scsi3_free_registration(
 	 */
 	if (dec_holders)
 		core_scsi3_put_pr_reg(pr_reg);
+
 	/*
 	 * Wait until all reference from any other I_T nexuses for this
 	 * *pr_reg have been released.  Because list_del() is called above,
@@ -1342,18 +1346,100 @@ static void __core_scsi3_free_registration(
 	list_add_tail(&pr_reg->pr_reg_abort_list, preempt_and_abort_list);
 }
 
+#if defined(CONFIG_MACH_QNAPTS)
 void core_scsi3_free_pr_reg_from_nacl(
 	struct se_device *dev,
 	struct se_node_acl *nacl)
 {
 	struct t10_reservation *pr_tmpl = &dev->se_sub_dev->t10_pr;
 	struct t10_pr_registration *pr_reg, *pr_reg_tmp, *pr_res_holder;
+	void *backup = NULL;
+	int sess_reinstatement, release = 1;
+
+	sess_reinstatement = 
+		__transport_t10_prb_check_sess_reinstatement_from_nacl(nacl);
+
 	/*
 	 * If the passed se_node_acl matches the reservation holder,
 	 * release the reservation.
 	 */
 	spin_lock(&dev->dev_reservation_lock);
 	pr_res_holder = dev->dev_pr_res_holder;
+
+	if ((pr_res_holder != NULL) &&
+	    (pr_res_holder->pr_reg_nacl == nacl)){
+
+		if (sess_reinstatement){
+			release = 0;
+
+			pr_info("i_t nexus for sess reinstatement is the "
+				"same as pr holder, skip the release action\n");
+			pr_info("i_t nexus initiatorname:%s\n",nacl->initiatorname);	
+			pr_info("i_t nexus nacl:0x%p\n",nacl);
+#if 0
+			pr_info("res holder nacl->initiatorname:%s\n",
+				pr_res_holder->pr_reg_nacl->initiatorname);
+			pr_info("res holder nacl:0x%p\n",
+				pr_res_holder->pr_reg_nacl);	
+			pr_info("res holder:0x%p\n", pr_res_holder);
+#endif
+		}
+
+		if (release)
+			__core_scsi3_complete_pro_release(dev, nacl, pr_res_holder, 0);
+	}
+
+	spin_unlock(&dev->dev_reservation_lock);
+	/*
+	 * Release any registration associated with the struct se_node_acl.
+	 */
+	spin_lock(&pr_tmpl->registration_lock);
+	list_for_each_entry_safe(pr_reg, pr_reg_tmp,
+			&pr_tmpl->registration_list, pr_reg_list) {
+
+		if (pr_reg->pr_reg_nacl != nacl)
+			continue;
+
+		if (sess_reinstatement){
+			release = 0;
+
+			pr_info("i_t nexus for sess reinstatement is the same "
+				"as pr registration, skip to free registration\n");
+
+			pr_info("i_t nexus initiatorname:%s\n",	nacl->initiatorname);	
+			pr_info("i_t nexus nacl:0x%p\n",nacl);
+#if 0 
+			pr_info("pr reg nacl->initiatorname:%s\n",
+				pr_reg->pr_reg_nacl->initiatorname);
+			pr_info("pr reg nacl:0x%p\n",pr_reg->pr_reg_nacl);	
+#endif
+			backup = __transport_t10_prb_alloc();
+			__transport_t10_prb_backup_pr_reg(backup, pr_reg);
+		}
+
+
+		if (release)
+			__core_scsi3_free_registration(dev, pr_reg, NULL, 0);
+	}
+	spin_unlock(&pr_tmpl->registration_lock);
+
+}
+
+#else
+void core_scsi3_free_pr_reg_from_nacl(
+	struct se_device *dev,
+	struct se_node_acl *nacl)
+{
+	struct t10_reservation *pr_tmpl = &dev->se_sub_dev->t10_pr;
+	struct t10_pr_registration *pr_reg, *pr_reg_tmp, *pr_res_holder;
+
+	/*
+	 * If the passed se_node_acl matches the reservation holder,
+	 * release the reservation.
+	 */
+	spin_lock(&dev->dev_reservation_lock);
+	pr_res_holder = dev->dev_pr_res_holder;
+
 	if ((pr_res_holder != NULL) &&
 	    (pr_res_holder->pr_reg_nacl == nacl))
 		__core_scsi3_complete_pro_release(dev, nacl, pr_res_holder, 0);
@@ -1372,6 +1458,7 @@ void core_scsi3_free_pr_reg_from_nacl(
 	}
 	spin_unlock(&pr_tmpl->registration_lock);
 }
+#endif
 
 void core_scsi3_free_all_registrations(
 	struct se_device *dev)
@@ -2148,6 +2235,7 @@ static int core_scsi3_emulate_pro_register(
 	 */
 	pr_reg_e = core_scsi3_locate_pr_reg(dev, se_sess->se_node_acl, se_sess);
 	if (!pr_reg_e) {
+
 		if (res_key) {
 			pr_warn("SPC-3 PR: Reservation Key non-zero"
 				" for SA REGISTER, returning CONFLICT\n");
@@ -2215,7 +2303,6 @@ static int core_scsi3_emulate_pro_register(
 			pr_tmpl->pr_aptpl_active = 1;
 			pr_debug("SPC-3 PR: Set APTPL Bit Activated for REGISTER\n");
 		}
-
 		core_scsi3_put_pr_reg(pr_reg);
 		return ret;
 	} else {
@@ -2277,6 +2364,7 @@ static int core_scsi3_emulate_pro_register(
 		 * Nexus.
 		 */
 		if (!sa_res_key) {
+
 			pr_holder = core_scsi3_check_implict_release(
 					cmd->se_dev, pr_reg);
 			if (pr_holder < 0) {
@@ -2292,6 +2380,7 @@ static int core_scsi3_emulate_pro_register(
 			 * and matching pr_res_key.
 			 */
 			if (pr_reg->pr_reg_all_tg_pt) {
+
 				list_for_each_entry_safe(pr_reg_p, pr_reg_tmp,
 						&pr_tmpl->registration_list,
 						pr_reg_list) {
@@ -2308,7 +2397,6 @@ static int core_scsi3_emulate_pro_register(
 					if (strcmp(pr_reg->pr_reg_nacl->initiatorname,
 						   pr_reg_p->pr_reg_nacl->initiatorname))
 						continue;
-
 					__core_scsi3_free_registration(dev,
 							pr_reg_p, NULL, 0);
 				}
@@ -2369,7 +2457,6 @@ static int core_scsi3_emulate_pro_register(
 						" for UNREGISTER\n");
 				return 0;
 			}
-
 			ret = core_scsi3_update_and_write_aptpl(dev,
 					&pr_aptpl_buf[0],
 					pr_tmpl->pr_aptpl_buf_len);
@@ -2390,6 +2477,7 @@ static int core_scsi3_emulate_pro_register(
 			pr_reg->pr_res_generation = core_scsi3_pr_generation(
 							cmd->se_dev);
 			pr_reg->pr_res_key = sa_res_key;
+
 			pr_debug("SPC-3 PR [%s] REGISTER%s: Changed Reservation"
 				" Key for %s to: 0x%016Lx PRgeneration:"
 				" 0x%08x\n", cmd->se_tfo->get_fabric_name(),
@@ -3190,7 +3278,6 @@ static int core_scsi3_pro_preempt(
 					" metadata for  PREEMPT%s\n", (abort) ?
 					"_AND_ABORT" : "");
 		}
-
 		core_scsi3_put_pr_reg(pr_reg_n);
 		core_scsi3_pr_generation(cmd->se_dev);
 		return 0;
@@ -3252,9 +3339,11 @@ static int core_scsi3_pro_preempt(
 
 		pr_reg_nacl = pr_reg->pr_reg_nacl;
 		pr_res_mapped_lun = pr_reg->pr_res_mapped_lun;
+
 		__core_scsi3_free_registration(dev, pr_reg,
 				(abort) ? &preempt_and_abort_list : NULL,
 				calling_it_nexus);
+
 		/*
 		 * e) Establish a unit attention condition for the initiator
 		 *    port associated with every I_T nexus that lost its
@@ -3325,7 +3414,6 @@ static int core_scsi3_pro_preempt(
 			pr_debug("SPC-3 PR: Updated APTPL metadata for PREEMPT"
 				"%s\n", (abort) ? "_AND_ABORT" : "");
 	}
-
 	core_scsi3_put_pr_reg(pr_reg_n);
 	core_scsi3_pr_generation(cmd->se_dev);
 	return 0;

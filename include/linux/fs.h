@@ -67,6 +67,17 @@ struct inodes_stat_t {
 #define MAY_CHDIR		0x00000040
 /* called from RCU mode, don't block */
 #define MAY_NOT_BLOCK		0x00000080
+#ifdef CONFIG_FS_RICHACL
+#define MAY_CREATE_FILE         0x00000100
+#define MAY_CREATE_DIR          0x00000200
+#define MAY_DELETE_CHILD        0x00000400
+#define MAY_DELETE_SELF         0x00000800
+#define MAY_TAKE_OWNERSHIP      0x00001000
+#define MAY_CHMOD               0x00002000
+#define MAY_SET_TIMES           0x00004000
+#endif
+
+
 
 /*
  * flags in file.f_mode.  Note that FMODE_READ and FMODE_WRITE must correspond
@@ -201,7 +212,11 @@ struct inodes_stat_t {
 #define MS_VERBOSE	32768	/* War is peace. Verbosity is silence.
 				   MS_VERBOSE is deprecated. */
 #define MS_SILENT	32768
-#define MS_POSIXACL	(1<<16)	/* VFS does not apply the umask */
+#ifdef CONFIG_FS_RICHACL
+#define MS_POSIXACL     (1<<16) /* Supports POSIX ACLs */
+#else
+#define MS_POSIXACL     (1<<16) /* VFS does not apply the umask */
+#endif
 #define MS_UNBINDABLE	(1<<17)	/* change to unbindable */
 #define MS_PRIVATE	(1<<18)	/* change to private */
 #define MS_SLAVE	(1<<19)	/* change to slave */
@@ -210,6 +225,9 @@ struct inodes_stat_t {
 #define MS_KERNMOUNT	(1<<22) /* this is a kern_mount call */
 #define MS_I_VERSION	(1<<23) /* Update inode I_version field */
 #define MS_STRICTATIME	(1<<24) /* Always perform atime updates */
+#ifdef CONFIG_FS_RICHACL
+#define MS_RICHACL      (1<<25) /* Supports richacls */
+#endif
 #define MS_NOSEC	(1<<28)
 #define MS_BORN		(1<<29)
 #define MS_ACTIVE	(1<<30)
@@ -271,6 +289,12 @@ struct inodes_stat_t {
 #define IS_IMMUTABLE(inode)	((inode)->i_flags & S_IMMUTABLE)
 #define IS_POSIXACL(inode)	__IS_FLG(inode, MS_POSIXACL)
 
+#ifdef CONFIG_FS_RICHACL
+#define IS_RICHACL(inode)       __IS_FLG(inode, MS_RICHACL)
+#else
+#define IS_RICHACL(inode)       0
+#endif
+
 #define IS_DEADDIR(inode)	((inode)->i_flags & S_DEAD)
 #define IS_NOCMTIME(inode)	((inode)->i_flags & S_NOCMTIME)
 #define IS_SWAPFILE(inode)	((inode)->i_flags & S_SWAPFILE)
@@ -278,6 +302,14 @@ struct inodes_stat_t {
 #define IS_IMA(inode)		((inode)->i_flags & S_IMA)
 #define IS_AUTOMOUNT(inode)	((inode)->i_flags & S_AUTOMOUNT)
 #define IS_NOSEC(inode)		((inode)->i_flags & S_NOSEC)
+
+/*
+ * IS_ACL() tells the VFS to not apply the umask
+ * and use check_acl for acl permission checks when defined.
+ */
+#ifdef CONFIG_FS_RICHACL
+#define IS_ACL(inode)           __IS_FLG(inode, MS_POSIXACL | MS_RICHACL)
+#endif
 
 /* the read-only stuff doesn't really belong here, but any other place is
    probably as bad and I don't want to create yet another include file. */
@@ -756,6 +788,10 @@ static inline int mapping_writably_mapped(struct address_space *mapping)
 #endif
 
 struct posix_acl;
+#ifdef CONFIG_FS_RICHACL
+struct richacl;
+#endif
+
 #define ACL_NOT_CACHED ((void *)(-1))
 
 #define IOP_FASTPERM	0x0001
@@ -774,9 +810,23 @@ struct inode {
 	gid_t			i_gid;
 	unsigned int		i_flags;
 
+#ifdef CONFIG_FS_RICHACL
+        union {
 #ifdef CONFIG_FS_POSIX_ACL
-	struct posix_acl	*i_acl;
-	struct posix_acl	*i_default_acl;
+                struct {
+                        struct posix_acl        *i_acl;
+                        struct posix_acl        *i_default_acl;
+                };
+#endif
+#ifdef CONFIG_FS_RICHACL
+                struct richacl          *i_richacl;
+#endif
+        };
+#else
+#ifdef CONFIG_FS_POSIX_ACL
+        struct posix_acl        *i_acl;
+        struct posix_acl        *i_default_acl;
+#endif
 #endif
 
 	const struct inode_operations	*i_op;
@@ -1561,14 +1611,25 @@ extern int vfs_unlink(struct inode *, struct dentry *);
 extern int vfs_rename(struct inode *, struct dentry *, struct inode *, struct dentry *);
 
 #ifdef CONFIG_MACH_QNAPTS
-extern int vfs_create_without_acl(struct inode *, struct dentry *, umode_t, struct nameidata *);
+extern int vfs_create_without_acl(struct inode *, struct dentry *, int, struct nameidata *);
 extern int vfs_link_without_acl(struct dentry *, struct inode *, struct dentry *);
-extern int vfs_mkdir_without_acl(struct inode *, struct dentry *, umode_t);
-extern int vfs_mknod_without_acl(struct inode *, struct dentry *, umode_t, dev_t);
+extern int vfs_mkdir_without_acl(struct inode *, struct dentry *, int);
+extern int vfs_mknod_without_acl(struct inode *, struct dentry *, int, dev_t);
 extern int vfs_rename_without_acl(struct inode *, struct dentry *, struct inode *, struct dentry *);
 extern int vfs_rmdir_without_acl(struct inode *, struct dentry *);
 extern int vfs_symlink_without_acl(struct inode *, struct dentry *, const char *);
 extern int vfs_unlink_without_acl(struct inode *, struct dentry *);
+#endif
+
+#ifdef CONFIG_FS_RICHACL
+extern int vfs_create_nfsv4_racl(struct inode *, struct dentry *, int, struct nameidata *);
+extern int vfs_link_nfsv4_racl(struct dentry *, struct inode *, struct dentry *);
+extern int vfs_mkdir_nfsv4_racl(struct inode *, struct dentry *, int);
+extern int vfs_mknod_nfsv4_racl(struct inode *, struct dentry *, int, dev_t);
+extern int vfs_rename_nfsv4_racl(struct inode *, struct dentry *, struct inode *, struct dentry *);
+extern int vfs_rmdir_nfsv4_racl(struct inode *, struct dentry *);
+extern int vfs_symlink_nfsv4_racl(struct inode *, struct dentry *, const char *);
+extern int vfs_unlink_nfsv4_racl(struct inode *, struct dentry *);
 #endif
 
 /*
@@ -1665,7 +1726,9 @@ struct inode_operations {
 	void * (*follow_link) (struct dentry *, struct nameidata *);
 	int (*permission) (struct inode *, int);
 	struct posix_acl * (*get_acl)(struct inode *, int);
-
+#ifdef CONFIG_FS_RICHACL
+        struct richacl * (*get_richacl)(struct inode *);
+#endif
 	int (*readlink) (struct dentry *, char __user *,int);
 	void (*put_link) (struct dentry *, struct nameidata *, void *);
 
@@ -2303,6 +2366,10 @@ extern int inode_permission(struct inode *, int);
 #ifdef CONFIG_MACH_QNAPTS
 extern int inode_permission_without_acl(struct inode *, int);
 #endif
+#ifdef CONFIG_FS_RICHACL
+extern int inode_permission_nfsv4_racl(struct inode *, int);
+#endif
+
 extern int generic_permission(struct inode *, int);
 
 static inline bool execute_ok(struct inode *inode)
@@ -2642,8 +2709,11 @@ extern int buffer_migrate_page(struct address_space *,
 #else
 #define buffer_migrate_page NULL
 #endif
-
+#ifdef CONFIG_FS_RICHACL
+extern int inode_change_ok(struct inode *, struct iattr *);
+#else
 extern int inode_change_ok(const struct inode *, struct iattr *);
+#endif
 extern int inode_newsize_ok(const struct inode *, loff_t offset);
 extern void setattr_copy(struct inode *inode, const struct iattr *attr);
 

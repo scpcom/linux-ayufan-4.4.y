@@ -24,18 +24,28 @@
 #include "target_fast_clone.h"
 #endif
 
+/* Jonathan Ho, 20131212, monitor ODX */
+#ifdef SHOW_OFFLOAD_STATS
+extern int Xmon_enable;
+extern u64 Xpcmd;
+extern unsigned int Tpcmd;
+extern unsigned long cmd_done;
+extern u64 Xtotal;
+#endif /* SHOW_OFFLOAD_STATS */
 #endif /* defined(CONFIG_MACH_QNAPTS) */
 
 /**/
 static int __core_do_wt(WBT_OBJ *wbt_obj);
 
 static int __do_chk_before_write_by_token(
-    IN LIO_SE_CMD *se_cmd
-    );
+	IN LIO_SE_CMD *se_cmd,
+	IN OUT int *err
+	);
 
 static int __do_chk_before_populate_token(
-    IN LIO_SE_CMD *se_cmd
-    );
+	IN LIO_SE_CMD *se_cmd,
+	IN OUT int *err
+	);
 
 static int __do_chk_max_lba_in_desc_list(
     IN LIO_SE_CMD *se_cmd,
@@ -158,6 +168,7 @@ static int __do_wt_by_normal_rw(
 		pr_err("w_done_blks != expected write blks\n");
 
 _RW_ERR_:
+
 	if (wbt_obj->err != ERR_NO_SPACE_WRITE_PROTECT)
 		__tpc_update_t_cmd_transfer_count(wbt_obj->t_data, (sector_t)w_done_blks);
 
@@ -196,12 +207,14 @@ static int __core_do_wt(
 	sector_t src_lba, dest_lba = wbt_obj->d_lba;
 	u64 t_off_to_rod = wbt_obj->s_off_rod;
 
-#if defined(CONFIG_MACH_QNAPTS) && defined(SUPPORT_FAST_BLOCK_CLONE)
+#if defined(CONFIG_MACH_QNAPTS)
+#if defined(SUPPORT_FAST_BLOCK_CLONE)
 	LIO_SE_DEVICE *s_se_dev = wbt_obj->s_obj->se_lun->lun_se_dev;
 	LIO_SE_DEVICE *d_se_dev = wbt_obj->d_obj->se_lun->lun_se_dev;
 	int is_create = 0, do_fbc = 0;
 	FC_OBJ fc_obj;
 	TBC_DESC_DATA tbc_desc_data;
+#endif
 #endif
 
 	/* main while loop() to read(or write) data */
@@ -248,6 +261,16 @@ static int __core_do_wt(
 			e_bytes = tmp_w_bytes;
 
 #if defined(CONFIG_MACH_QNAPTS) && defined(SUPPORT_FAST_BLOCK_CLONE)
+
+		if (!s_se_dev->fast_blk_clone)
+			goto _NORMAL_RW_;
+	
+		if (!d_se_dev->fast_blk_clone)
+			goto _NORMAL_RW_;
+
+
+
+
 		if (!is_create){
 			__create_fbc_obj(&fc_obj, s_se_dev, d_se_dev,
 				src_lba, dest_lba, e_bytes);
@@ -271,12 +294,36 @@ static int __core_do_wt(
 				src_lba, dest_lba, e_bytes);
 
 			ret = __do_wt_by_fbc(wbt_obj, &fc_obj, &e_bytes);
-			if (ret == 0)
-				goto _GO_NEXT_;
 
-			/* to exit if fast-clone operation is fail */
-			goto _EXIT_;
+			if (ret == 0){
+				/* udpate how many blks we did successfully */
+				__tpc_update_t_cmd_transfer_count(
+					wbt_obj->t_data, 
+					(sector_t)(e_bytes >> wbt_obj->d_obj->dev_bs_order));
+				goto _GO_NEXT_;
+			}
+
+			/* if found error try to use general read / write
+			 * to do copy operation except the no-space event */
+
+			if (ERR_NO_SPACE_WRITE_PROTECT == wbt_obj->err)
+				goto _EXIT_;
+
+			/* not update how many blks we did cause of we will
+			 * force rollback to nomal read / write
+			 */
+			pr_debug("[wrt] fail to execute "
+				"fast-block-clone, try rollback to "
+				"general read/write, src lba:0x%llx, "
+				"dest lba:0x%llx, bytes:0x%llx\n",
+				(unsigned long long)src_lba, 
+				(unsigned long long)dest_lba, 
+				(unsigned long long)e_bytes);
+
+			goto _NORMAL_RW_;
 		}
+
+_NORMAL_RW_:
 #endif
 		ret = __do_wt_by_normal_rw(wbt_obj, src_lba, dest_lba, 
 			&e_bytes);
@@ -284,6 +331,11 @@ static int __core_do_wt(
 			goto _EXIT_;
 
 _GO_NEXT_:	
+/* Jonathan Ho, 20131231, change place to get data */
+#ifdef SHOW_OFFLOAD_STATS
+		if (Xmon_enable)
+			Xtotal += e_bytes >> 10; /* bytes to KB */
+#endif /* SHOW_OFFLOAD_STATS */
 		tmp_w_bytes -= e_bytes;
 		t_off_to_rod += e_bytes;
 		dest_lba += (sector_t)(e_bytes >> wbt_obj->d_obj->dev_bs_order);
@@ -1435,136 +1487,142 @@ static int __tpc_check_duplicated_obj_data(
  *
  * @sa 
  * @param[in] se_cmd
- * @retval 0 -Success / 1 - Success but no need to transfer data / Others - Fail
+ * @param[in,out] err
+ * @retval 0: Success / 1: Success but no need to transfer data / Others: Fail
  */
 static int __do_chk_before_write_by_token(
-    IN LIO_SE_CMD *se_cmd
-    )
+	IN LIO_SE_CMD *se_cmd,
+	IN OUT int *err
+	)
 {
-    BLK_DEV_RANGE_DESC *start = NULL;
-    WRITE_BY_TOKEN_PARAM *param = NULL;
-    ROD_TOKEN *token = NULL;
-    u8 *cdb = NULL;
-    u16 desc_counts = 0;
-    u32 d_bs_order = 0, list_id = 0;
-    sector_t all_nr_blks = 0;
-    int ret = -1;
+	BLK_DEV_RANGE_DESC *start = NULL;
+	WRITE_BY_TOKEN_PARAM *param = NULL;
+	ROD_TOKEN *token = NULL;
+	u8 *cdb = NULL;
+	u16 desc_counts = 0;
+	u32 d_bs_order = 0, list_id = 0;
+	sector_t all_nr_blks = 0;
+	int ret = -1;
 
-    /**/
-    list_id = get_unaligned_be32(&CMD_TO_TASK_CDB(se_cmd)->t_task_cdb[6]);
+	/**/
+	list_id = get_unaligned_be32(&CMD_TO_TASK_CDB(se_cmd)->t_task_cdb[6]);
 
-    param = (WRITE_BY_TOKEN_PARAM *)transport_kmap_data_sg(se_cmd);
-    if (!param){
-        pr_err("error !! fail to kmap data seg (id:0x%x) !!\n",list_id);
-        goto _SET_ERR_INVALID_PARAM_LIST_;
-    }
+	param = (WRITE_BY_TOKEN_PARAM *)transport_kmap_data_sg(se_cmd);
+	if (!param){
+		pr_err("error !! fail to kmap data seg (id:0x%x) !!\n",list_id);
+		*err = (int)ERR_INVALID_PARAMETER_LIST;
+		goto _EXIT_;
+	}
 
-    /* SBC3R31, page 207, 208 */
-    cdb = CMD_TO_TASK_CDB(se_cmd)->t_task_cdb;
+	/* SBC3R31, page 207, 208 */
+	cdb = CMD_TO_TASK_CDB(se_cmd)->t_task_cdb;
 
-    if (get_unaligned_be32(&cdb[10]) < 552){
-        pr_err("error !! alloc len is smaller than 552 (id:0x%x) !!\n",list_id);
-        goto _SET_ERR_INVALID_PARAM_LIST_;
-    }
+	if (get_unaligned_be32(&cdb[10]) < 552){
+		pr_err("error !! alloc len is smaller than 552 (id:0x%x) !!\n",
+			list_id);
+		*err = (int)ERR_INVALID_PARAMETER_LIST;
+		goto _EXIT_;
+	}
 
-    if (get_unaligned_be16(&param->token_data_len[0]) < 550){
-        pr_err("error !! avaiable data len in param is smaller than 550 "
-                        "(id:0x%x) !!\n",list_id);;
-        goto _SET_ERR_INVALID_PARAM_LIST_;
-    }
+	if (get_unaligned_be16(&param->token_data_len[0]) < 550){
+		pr_err("error !! avaiable data len in param is smaller than 550 "
+			"(id:0x%x) !!\n",list_id);;
+		*err = (int)ERR_INVALID_PARAMETER_LIST;
+		goto _EXIT_;
+	}
 
-    if (get_unaligned_be16(&param->blkdev_range_desc_len[0]) < 0x10){
-        pr_err("error !! blk dev range desc length is not enougth "
-                        "(id:0x%x) !!\n",list_id);
-        goto _SET_ERR_INVALID_PARAM_LIST_;
-    }
+	if (get_unaligned_be16(&param->blkdev_range_desc_len[0]) < 0x10){
+		pr_err("error !! blk dev range desc length is not enougth "
+			"(id:0x%x) !!\n",list_id);
+		*err = (int)ERR_INVALID_PARAMETER_LIST;
+		goto _EXIT_;
+	}
 
-    token= (ROD_TOKEN *)&param->rod_token[0];
-    if (get_unaligned_be16(&token->token_len[0]) != 0x1f8 ){
-        pr_err("error !! token length is NOT 0x1f8 (id:0x%x) !!\n",list_id);
-        __set_err_reason(ERR_INVALID_TOKEN_OP_AND_INVALID_TOKEN_LEN,
-                                &se_cmd->scsi_sense_reason);
-        goto _EXIT_;
-    }
+	token= (ROD_TOKEN *)&param->rod_token[0];
+	if (get_unaligned_be16(&token->token_len[0]) != 0x1f8 ){
+		pr_err("error !! token length is NOT 0x1f8 (id:0x%x) !!\n",list_id);
+		*err = (int)ERR_INVALID_TOKEN_OP_AND_INVALID_TOKEN_LEN;
+		goto _EXIT_;
+	}
 
-    if (__chk_valid_supported_rod_type(get_unaligned_be32(&token->type[0])) == 1){
-        pr_err("error !! unsupported token type (id:0x%x) !!\n",list_id);
-        __set_err_reason(ERR_INVALID_TOKEN_OP_AND_UNSUPPORTED_TOKEN_TYPE,
-                                &se_cmd->scsi_sense_reason);
-        goto _EXIT_;
-    }
+	if (__chk_valid_supported_rod_type(get_unaligned_be32(&token->type[0])) == 1){
+		pr_err("error !! unsupported token type (id:0x%x) !!\n",list_id);
+		*err = (int)ERR_INVALID_TOKEN_OP_AND_UNSUPPORTED_TOKEN_TYPE;
+		goto _EXIT_;
+	}
 
-    /* The block dev range desc length shall be a multiple of 16 */
-    start        = (BLK_DEV_RANGE_DESC *)((u8*)param + sizeof(WRITE_BY_TOKEN_PARAM));
-    desc_counts  = __tpc_get_desc_counts(get_unaligned_be16(&param->blkdev_range_desc_len[0]));
-    all_nr_blks  = __tpc_get_total_nr_blks_by_desc(start, desc_counts);
+	/* The block dev range desc length shall be a multiple of 16 */
+	start        = (BLK_DEV_RANGE_DESC *)((u8*)param + sizeof(WRITE_BY_TOKEN_PARAM));
+	desc_counts  = __tpc_get_desc_counts(get_unaligned_be16(&param->blkdev_range_desc_len[0]));
+	all_nr_blks  = __tpc_get_total_nr_blks_by_desc(start, desc_counts);
 
-    /*
-     * If the NUMBER_OF_LOGICAL_BLOCKS field is set to zero, then the copy
-     * manager should perform no operation for this block device range
-     * descriptor. This condition shall not be considered an error
-     */
-    if (!all_nr_blks){
-        ret = 1;
-        goto _EXIT_;
-    }
+	/*
+	* If the NUMBER_OF_LOGICAL_BLOCKS field is set to zero, then the copy
+	* manager should perform no operation for this block device range
+	* descriptor. This condition shall not be considered an error
+	*/
+	if (!all_nr_blks){
+		ret = 1;
+		goto _EXIT_;
+	}
 
-    if (__do_chk_same_lba_in_desc_list(se_cmd, (void*)start, desc_counts) == 1){
-        pr_err("error !! found same LBA in blk dev range descriptor (id:0x%x) !!\n",list_id);
-        goto _SET_ERR_INVALID_PARAM_LIST_;
-    }
+	if (__do_chk_same_lba_in_desc_list(se_cmd, (void*)start, desc_counts) == 1){
+		pr_err("error !! found same LBA in blk dev range "
+			"descriptor (id:0x%x) !!\n",list_id);
+		*err = (int)ERR_INVALID_PARAMETER_LIST;
+		goto _EXIT_;
+	}
 
-    if (__do_chk_overlap_lba_in_desc_list(se_cmd, start, desc_counts) != 0){
-        pr_err("error !! found overlapped LBA in blk dev range descriptor (id:0x%x) !!\n",list_id);
-        goto _SET_ERR_INVALID_PARAM_LIST_;
-    }
+	if (__do_chk_overlap_lba_in_desc_list(se_cmd, start, desc_counts) != 0){
+		pr_err("error !! found overlapped LBA in blk dev range "
+			"descriptor (id:0x%x) !!\n",list_id);
+		*err = (int)ERR_INVALID_PARAMETER_LIST;
+		goto _EXIT_;
+	}
 
-    if (__do_chk_max_lba_in_desc_list(se_cmd, start, desc_counts) != 0){
-        pr_err("error !! found LBA in blk dev range descriptor execeeds "
-                            "the max LBA of device (id:0x%x) !!\n",list_id);
-        __set_err_reason(ERR_LBA_OUT_OF_RANGE, &se_cmd->scsi_sense_reason);
-        goto _EXIT_;
-    }
+	if (__do_chk_max_lba_in_desc_list(se_cmd, start, desc_counts) != 0){
+		pr_err("error !! found LBA in blk dev range descriptor execeeds "
+			"the max LBA of device (id:0x%x) !!\n",list_id);
+		*err = (int)ERR_LBA_OUT_OF_RANGE;
+		goto _EXIT_;
+	}
 
-    if (desc_counts > __tpc_get_max_supported_blk_dev_range(se_cmd)){
-        pr_err("error !! blk dev range descriptor length exceeds "
-                            "the max value (id:0x%x) !!\n",list_id);
-        __set_err_reason(ERR_TOO_MANY_SEGMENT_DESCRIPTORS, &se_cmd->scsi_sense_reason);
-        goto _EXIT_;
-    }
+	if (desc_counts > __tpc_get_max_supported_blk_dev_range(se_cmd)){
+		pr_err("error !! blk dev range descriptor length exceeds "
+			"the max value (id:0x%x) !!\n",list_id);
+		*err = (int)ERR_TOO_MANY_SEGMENT_DESCRIPTORS;
+		goto _EXIT_;
+	}
 
-    /* SBC3R31, page 209 (FIXED ME !!)
-     *
-     * d). To check the total sum of the NUMBER OF LOGICAL BLOCKS fields in all 
-     *     of the complete block device range descriptors is larger than the
-     *     max bytes in block ROD value in the BLOCK ROD device type specific 
-     *     features descriptor in the ROD token features third-party copy
-     *     descriptors in the third-party copy vpd page or not
-     *
-     * FIXED ME !!
-     *
-     * This setting shall be checked with __build_blkdev_rod_limits_desc() and 
-     * __build_rod_token_feature() again
-     */
-    d_bs_order = ilog2(se_cmd->se_dev->se_sub_dev->se_dev_attrib.block_size);
+	/* SBC3R31, page 209 (FIXED ME !!)
+	*
+	* d). To check the total sum of the NUMBER OF LOGICAL BLOCKS fields in all 
+	*     of the complete block device range descriptors is larger than the
+	*     max bytes in block ROD value in the BLOCK ROD device type specific 
+	*     features descriptor in the ROD token features third-party copy
+	*     descriptors in the third-party copy vpd page or not
+	*
+	* FIXED ME !!
+	*
+	* This setting shall be checked with __build_blkdev_rod_limits_desc()
+	* and __build_rod_token_feature() again
+	*/
+	d_bs_order = ilog2(se_cmd->se_dev->se_sub_dev->se_dev_attrib.block_size);
 
-    if (all_nr_blks > (MAX_TRANSFER_SIZE_IN_BYTES >> d_bs_order)){
-        pr_err("error !! sum of contents in blk dev range descriptor length "
-                            "exceeds the max value (id:0x%x) !!\n",list_id);
-        goto _SET_ERR_INVALID_PARAM_LIST_;
-    }
+	if (all_nr_blks > (MAX_TRANSFER_SIZE_IN_BYTES >> d_bs_order)){
+		pr_err("error !! sum of contents in blk dev range descriptor "
+			"length exceeds the max value (id:0x%x) !!\n",list_id);
+		*err = (int)ERR_INVALID_PARAMETER_LIST;
+		goto _EXIT_;
+	}
 
-    ret = 0;
+	ret = 0;
 
 _EXIT_:
-    if (param)
-        transport_kunmap_data_sg(se_cmd);
+	if (param)
+		transport_kunmap_data_sg(se_cmd);
     
-    return ret;
-
-_SET_ERR_INVALID_PARAM_LIST_:
-    __set_err_reason(ERR_INVALID_PARAMETER_LIST, &se_cmd->scsi_sense_reason);
-    goto _EXIT_;
+	return ret;
 
 }
 
@@ -1699,158 +1757,160 @@ _OUT_:
  *
  * @sa 
  * @param[in] se_cmd
- * @retval 0 -Success / 1 - Success but no need to transfer data / Others - Fail
+ * @param[in,out] err
+ * @retval 0: Success / 1: Success but no need to transfer data / Others: Fail
  */
 static int __do_chk_before_populate_token(
-    IN LIO_SE_CMD *se_cmd
-    )
+	IN LIO_SE_CMD *se_cmd,
+	IN OUT int *err
+	)
 {
-    BLK_DEV_RANGE_DESC *start = NULL;
-    POPULATE_TOKEN_PARAM *param = NULL;
-    u16 desc_counts = 0;
-    u32 timeout = 0, d_bs_order = 0, list_id = 0, rod_type = 0;
-    ERR_REASON_INDEX err = MAX_ERR_REASON_INDEX;
-    int ret = -1;
-    sector_t all_nr_blks = 0;
+	BLK_DEV_RANGE_DESC *start = NULL;
+	POPULATE_TOKEN_PARAM *param = NULL;
+	u16 desc_counts = 0;
+	u32 timeout = 0, d_bs_order = 0, list_id = 0, rod_type = 0;
+	int ret = -1;
+	sector_t all_nr_blks = 0;
 
-    /* check all conditions are valid or not before to execute command */
-    list_id = get_unaligned_be32(&CMD_TO_TASK_CDB(se_cmd)->t_task_cdb[6]);
+	/* check all conditions are valid or not before to execute command */
+	list_id = get_unaligned_be32(&CMD_TO_TASK_CDB(se_cmd)->t_task_cdb[6]);
 
-    param = (POPULATE_TOKEN_PARAM *)transport_kmap_data_sg(se_cmd);
-    if (!param){
-        pr_err("error !! fail to kmap data seg (id:0x%x) !!\n",list_id);
-        err = ERR_INVALID_PARAMETER_LIST;
-        goto _EXIT_;
-    }
+	param = (POPULATE_TOKEN_PARAM *)transport_kmap_data_sg(se_cmd);
+	if (!param){
+		pr_err("error !! fail to kmap data seg (id:0x%x) !!\n",list_id);
+		*err = (int)ERR_INVALID_PARAMETER_LIST;
+		goto _EXIT_;
+	}
 
-    if (param->rtv){
-        /* we don't support to create BLOCK ZERO ROD TOKEN */
-        rod_type = get_unaligned_be32(&param->rod_type[0]);
+	if (param->rtv){
+		/* we don't support to create BLOCK ZERO ROD TOKEN */
+        	rod_type = get_unaligned_be32(&param->rod_type[0]);
 
-        if(__chk_valid_supported_rod_type(rod_type)
-        || (rod_type == ROD_TYPE_BLK_DEV_ZERO)
-        )
-        {
-            pr_err("error !! not supported token type:0x%x "
-                "in PT parameter data (id:0x%x)\n", rod_type, list_id);
-            err = ERR_INVALID_PARAMETER_LIST;
-            goto _EXIT_;
-        }
-    }
+		if(__chk_valid_supported_rod_type(rod_type)
+		|| (rod_type == ROD_TYPE_BLK_DEV_ZERO)
+		)
+		{
+			pr_err("error !! not supported token type:0x%x "
+				"in PT parameter data (id:0x%x)\n", 
+				rod_type, list_id);
+			*err = (int)ERR_INVALID_PARAMETER_LIST;
+			goto _EXIT_;
+		}
+	}
 
-    if ((get_unaligned_be16(&param->token_data_len[0]) < 0x1e)
-    ||  (get_unaligned_be16(&param->blkdev_range_desc_len[0]) < 0x10)
-    )
-    {
-        pr_err("error !! token data length or blk dev range desc length is not enough "
-                            "(id:0x%x) !!\n",list_id);
-        err = ERR_INVALID_PARAMETER_LIST;
-        goto _EXIT_;
-    }
+	if ((get_unaligned_be16(&param->token_data_len[0]) < 0x1e)
+	||  (get_unaligned_be16(&param->blkdev_range_desc_len[0]) < 0x10)
+	)
+	{
+		pr_err("error !! token data length or blk dev range desc "
+			"length is not enough (id:0x%x) !!\n",list_id);
+		*err = (int)ERR_INVALID_PARAMETER_LIST;
+		goto _EXIT_;
+	}
 
-    start         = (BLK_DEV_RANGE_DESC *)((u8*)param + sizeof(POPULATE_TOKEN_PARAM));
-    desc_counts   = __tpc_get_desc_counts(get_unaligned_be16(&param->blkdev_range_desc_len[0]));
-    all_nr_blks   = __tpc_get_total_nr_blks_by_desc(start, desc_counts);
+	start         = (BLK_DEV_RANGE_DESC *)((u8*)param + sizeof(POPULATE_TOKEN_PARAM));
+	desc_counts   = __tpc_get_desc_counts(get_unaligned_be16(&param->blkdev_range_desc_len[0]));
+	all_nr_blks   = __tpc_get_total_nr_blks_by_desc(start, desc_counts);
 
 #if 0
-    pr_err("%s: desc_counts:0x%x\n", __func__, desc_counts);
-    pr_err("%s: all_nr_blks:0x%x\n", __func__, all_nr_blks);
+	pr_info("%s: desc_counts:0x%x\n", __func__, desc_counts);
+	pr_info("%s: all_nr_blks:0x%x\n", __func__, all_nr_blks);
 #endif
 
-    /* SBC3R31, page 130
-     *
-     * If the NUMBER_OF_LOGICAL_BLOCKS field is set to zero, then the copy
-     * manager should perform no operation for this block device range
-     * descriptor. This condition shall not be considered an error
-     */
-    if (!all_nr_blks){
-        ret = 1;
-        goto _EXIT_;
-    }
+	/* SBC3R31, page 130
+	 *
+	 * If the NUMBER_OF_LOGICAL_BLOCKS field is set to zero, then the copy
+	 * manager should perform no operation for this block device range
+	 * descriptor. This condition shall not be considered an error
+	 */
+	if (!all_nr_blks){
+		ret = 1;
+		goto _EXIT_;
+	}
 
-    /* a). To check the LBA value, SBC3R31, page 128 */
-    if (__do_chk_same_lba_in_desc_list(se_cmd, start, desc_counts) != 0){
-        pr_err("error !! found same LBA in blk dev range descriptor "
-                            "(id:0x%x) !!\n",list_id);
-        err = ERR_INVALID_PARAMETER_LIST;
-        goto _EXIT_;
-     }
+	/* a). To check the LBA value, SBC3R31, page 128 */
+	if (__do_chk_same_lba_in_desc_list(se_cmd, start, desc_counts) != 0){
+		pr_err("error !! found same LBA in blk dev range descriptor "
+			"(id:0x%x) !!\n",list_id);
+		*err = (int)ERR_INVALID_PARAMETER_LIST;
+		goto _EXIT_;
+	}
 
-    if (__do_chk_overlap_lba_in_desc_list(se_cmd, start, desc_counts) != 0){
-        pr_err("error !! found overlapped LBA in blk dev range descriptor "
-                            "(id:0x%x) !!\n",list_id);
-        err = ERR_INVALID_PARAMETER_LIST;
-        goto _EXIT_;
-    }
+	if (__do_chk_overlap_lba_in_desc_list(se_cmd, start, desc_counts) != 0){
+		pr_err("error !! found overlapped LBA in blk dev "
+			"range descriptor (id:0x%x) !!\n",list_id);
+		*err = (int)ERR_INVALID_PARAMETER_LIST;
+		goto _EXIT_;
+	}
 
-    /* SBC3R31, page 130 */
-    if (__do_chk_max_lba_in_desc_list(se_cmd, start, desc_counts) != 0){
-        pr_err("error !! found LBA in blk dev range descriptor execeeds "
-                            "the max LBA of device (id:0x%x) !!\n",list_id);
-        err = ERR_LBA_OUT_OF_RANGE;
-        goto _EXIT_;
-    }
+	/* SBC3R31, page 130 */
+	if (__do_chk_max_lba_in_desc_list(se_cmd, start, desc_counts) != 0){
+		pr_err("error !! found LBA in blk dev range descriptor "
+			"execeeds the max LBA of device (id:0x%x) !!\n",list_id);
+		*err = (int)ERR_LBA_OUT_OF_RANGE;
+		goto _EXIT_;
+	}
 
-    /* b). To check timeout value */
-    timeout = get_unaligned_be32(&param->inactivity_timeout[0]);
-    if (timeout > MAX_INACTIVITY_TIMEOUT) {
-        pr_err("error !! timeout value is larger than max-timeout value (id:0x%x) !!\n",list_id);
-        err = ERR_INVALID_PARAMETER_LIST;
-        goto _EXIT_;
-    }
+	/* b). To check timeout value */
+	timeout = get_unaligned_be32(&param->inactivity_timeout[0]);
+	if (timeout > MAX_INACTIVITY_TIMEOUT) {
+		pr_err("error !! timeout value is larger than max-timeout "
+			"value (id:0x%x) !!\n",list_id);
+		*err = (int)ERR_INVALID_PARAMETER_LIST;
+		goto _EXIT_;
+	}
 
-    /* c). To check the block device range descriptor length */
-    if (desc_counts > __tpc_get_max_supported_blk_dev_range(se_cmd)){
-        pr_err("error !! blk dev range descriptor length exceeds the max value "
-                            "(id:0x%x) !!\n",list_id);
-        err = ERR_TOO_MANY_SEGMENT_DESCRIPTORS;
-        goto _EXIT_;
-    }
+	/* c). To check the block device range descriptor length */
+	if (desc_counts > __tpc_get_max_supported_blk_dev_range(se_cmd)){
+		pr_err("error !! blk dev range descriptor length exceeds "
+			"the max value (id:0x%x) !!\n",list_id);
+		*err = (int)ERR_TOO_MANY_SEGMENT_DESCRIPTORS;
+		goto _EXIT_;
+	}
 
-    /* SBC3R31, page 128 (FIXED ME !!)
-     *
-     * d). To check the total sum of the NUMBER OF LOGICAL BLOCKS fields in all 
-     *     of the complete block device range descriptors is larger than the
-     *     max bytes in block ROD value in the BLOCK ROD device type specific 
-     *     features descriptor in the ROD token features third-party copy
-     *     descriptors in the third-party copy vpd page or not
-     *
-     * If the max bytes in block ROD token value in the Block ROD device type
-     * specific features descriptor in the ROD token features 3rd-party copy
-     * descriptor in the 3rd-party copy vpd page is not reported, then the max
-     * token transfer size value in the Block Device ROD Token Limits descriptor
-     * may indicate a different value for the max value.
-     *
-     * FIXED ME !!
-     *
-     * (1) This setting shall be checked with __build_blkdev_rod_limits_desc() and 
-     *      __build_rod_token_feature() again
-     *
-     * (2) I set the max token transfer size value to the same here.
-     *
-     */
-    d_bs_order = ilog2(se_cmd->se_dev->se_sub_dev->se_dev_attrib.block_size);
+	/* SBC3R31, page 128 (FIXED ME !!)
+	 *
+	 * d). To check the total sum of the NUMBER OF LOGICAL BLOCKS fields in
+	 *     all of the complete block device range descriptors is larger than
+	 *     the max bytes in block ROD value in the BLOCK ROD device type
+	 *     specific features descriptor in the ROD token features third-party
+	 *     copy descriptors in the third-party copy vpd page or not
+	 *
+	 * If the max bytes in block ROD token value in the Block ROD device type
+	 * specific features descriptor in the ROD token features 3rd-party copy
+	 * descriptor in the 3rd-party copy vpd page is not reported, then the max
+	 * token transfer size value in the Block Device ROD Token Limits descriptor
+	 * may indicate a different value for the max value.
+	 *
+	 * FIXED ME !!
+	 *
+	 * (1) This setting shall be checked with __build_blkdev_rod_limits_desc()
+	 *     and __build_rod_token_feature() again
+	 *
+	 * (2) I set the max token transfer size value to the same here.
+	 */
+	d_bs_order = ilog2(se_cmd->se_dev->se_sub_dev->se_dev_attrib.block_size);
 
-    DBG_ROD_PRINT("%s: max_transfer_blks:0x%x\n", 
-                    __func__, (MAX_TRANSFER_SIZE_IN_BYTES >> d_bs_order));
+	DBG_ROD_PRINT("%s: max_transfer_blks:0x%x\n", 
+		__func__, (MAX_TRANSFER_SIZE_IN_BYTES >> d_bs_order));
 
-    if (all_nr_blks > (MAX_TRANSFER_SIZE_IN_BYTES >> d_bs_order)){
-        pr_err("error !! sum of contents of NUMBER OF LOGICAL BLOCKS field in "
-                "blk dev range descs length exceeds the max value (id:0x%x) !!\n",list_id);
-        err = ERR_INVALID_PARAMETER_LIST;
-        goto _EXIT_;
-    }
+	if (all_nr_blks > (MAX_TRANSFER_SIZE_IN_BYTES >> d_bs_order)){
+		pr_err("error !! sum of contents of NUMBER OF LOGICAL BLOCKS "
+			"field in blk dev range descs length exceeds the "
+			"max value (id:0x%x) !!\n",list_id);
+		*err = (int)ERR_INVALID_PARAMETER_LIST;
+		goto _EXIT_;
+	}
 
-    ret = 0;
+	ret = 0;
 
 _EXIT_:
-    if (ret == -1)
-        __set_err_reason(err, &se_cmd->scsi_sense_reason);
 
-    if (param)
-        transport_kunmap_data_sg(se_cmd);
 
-    return ret;
+	if (param)
+		transport_kunmap_data_sg(se_cmd);
+
+	return ret;
 }
 
 
@@ -2189,8 +2249,8 @@ _OUT_2_:
 		goto _OUT_;
 
 _EXIT_OBJ_CHECK_:
-		spin_lock_bh(&obj->se_tpg->tpc_obj_list_lock);
-               	__tpc_obj_ref_count_lock_dec(obj);
+		spin_lock_bh(&se_tpg->tpc_obj_list_lock);
+		__tpc_obj_ref_count_lock_dec(obj);
 	}
 
 	/* if not found anything ... */
@@ -2199,7 +2259,8 @@ _EXIT_OBJ_CHECK_:
 	*err = ERR_INVALID_CDB_FIELD;
 
 _OUT_1_:
-	spin_unlock_bh(&obj->se_tpg->tpc_obj_list_lock);
+	spin_unlock_bh(&se_tpg->tpc_obj_list_lock);
+
 
 _OUT_:
 	return ret;
@@ -2315,6 +2376,11 @@ int __do_write_by_token(
 	ERR_REASON_INDEX err = ERR_INVALID_PARAMETER_LIST;
 	T_CMD_STATUS cur_status = T_CMD_COMPLETED_W_ERR;
 	WBT_OBJ wbt_obj;
+/* Jonathan Ho, 20131212, monitor ODX */
+#ifdef SHOW_OFFLOAD_STATS
+	unsigned long start_jiffies = 0;
+	u64 tmp_Xpcmd;
+#endif /* SHOW_OFFLOAD_STATS */
 
 	/* Beware this !!!
 	 *
@@ -2386,6 +2452,12 @@ int __do_write_by_token(
 		dest_lba  = get_unaligned_be64(&s[index].lba[0]);
 		w_nr_bytes = ((u64)get_unaligned_be32(&s[index].nr_blks[0]) << \
 			n_obj->dev_bs_order);
+
+/* Jonathan Ho, 20131212, monitor ODX */
+#ifdef SHOW_OFFLOAD_STATS
+		start_jiffies = jiffies;
+		tmp_Xpcmd = w_nr_bytes;
+#endif /* SHOW_OFFLOAD_STATS */
 
 	        pr_debug("[wrt] (a) index:0x%x, dest_lba:0x%llx, "
         	    "w_nr_bytes:0x%llx, w-dev bs_order:0x%x\n", index,
@@ -2463,6 +2535,14 @@ _DO_AGAIN_:
 		if (w_nr_bytes)
 			goto _DO_AGAIN_;
 
+/* Jonathan Ho, 20131212, monitor ODX */
+#ifdef SHOW_OFFLOAD_STATS
+		if (Xmon_enable) {
+			Xpcmd = tmp_Xpcmd >> 10; /* bytes to KB */
+			Tpcmd = jiffies_to_msecs(jiffies - start_jiffies);
+			cmd_done++;
+		}
+#endif /* SHOW_OFFLOAD_STATS */
 	}
 
 /**/
@@ -2487,7 +2567,6 @@ _OUT_:
 			/* treat it as copy-error if hit no sapce event */
 			n_obj->cp_op_status = OP_COMPLETED_W_ERR;
 			err = ERR_NO_SPACE_WRITE_PROTECT;
-			pr_warn("[write by token] space was full\n");
 		} else {
 
 			n_obj->cp_op_status = OP_COMPLETED_WO_ERR_WITH_ROD_TOKEN_USAGE;
@@ -2792,12 +2871,18 @@ int tpc_write_by_token(
 		goto _EXIT_;
 	}
 
-	ret = se_cmd->se_dev->transport->do_chk_before_wrt(se_cmd);
+	ret = se_cmd->se_dev->transport->do_chk_before_wrt(se_cmd, (int *)&err);
 	if (ret == -1 ||  ret == 1){
+		/* If success but not need to keep to execute cmd, 
+		 * then to exit this function */
 		if (ret == 1)
 			ret = 0;
+		else
+			__set_err_reason(err, &se_cmd->scsi_sense_reason);
+
 		goto _EXIT_;
 	}
+
 
 	/* reset the ret value */
 	ret = 1;
@@ -2933,93 +3018,99 @@ _OBJ_FAIL_:
  * @retval 0  - Success / 1 - Fail for other reason
  */
 int tpc_populate_token(
-  IN LIO_SE_TASK *se_task
-  )
+	IN LIO_SE_TASK *se_task
+	)
 {
-    LIO_SE_CMD *se_cmd = NULL;
-    TPC_OBJ *obj = NULL;
-    u8 *cdb = NULL;
-    ERR_REASON_INDEX err = MAX_ERR_REASON_INDEX;
-    int ret = 1;
+	LIO_SE_CMD *se_cmd = NULL;
+	TPC_OBJ *obj = NULL;
+	u8 *cdb = NULL;
+	ERR_REASON_INDEX err = MAX_ERR_REASON_INDEX;
+	int ret = 1;
 
-    se_cmd = se_task->task_se_cmd;
+	se_cmd = se_task->task_se_cmd;
 
-    /* this is workaround and need to removed in the future */
-    if(__tpc_is_tpg_v_lun0(se_cmd))
-        goto _EXIT_;
+	/* this is workaround and need to removed in the future */
+	if(__tpc_is_tpg_v_lun0(se_cmd))
+		goto _EXIT_;
 
-    DBG_ROD_PRINT("%s - id:0x%x, op_sac:0x%x\n", __func__, se_cmd->t_list_id, se_cmd->t_op_sac);
-    cdb = CMD_TO_TASK_CDB(se_cmd)->t_task_cdb;
+	DBG_ROD_PRINT("%s - id:0x%x, op_sac:0x%x\n", __func__, se_cmd->t_list_id, se_cmd->t_op_sac);
+	cdb = CMD_TO_TASK_CDB(se_cmd)->t_task_cdb;
 
-    /* if length is zero, means no data shall be sent, no treat it as error */
-    if(get_unaligned_be32(&cdb[10]) == 0){
-        DBG_ROD_PRINT("%s: no any data to be transferred !!\n", __func__);
-        ret = 0;
-        goto _EXIT_;
-    }
+	/* if length is zero, means no data shall be sent, no treat it as error */
+	if(get_unaligned_be32(&cdb[10]) == 0){
+		DBG_ROD_PRINT("%s: no any data to be transferred !!\n", __func__);
+		ret = 0;
+		goto _EXIT_;
+	}
 
-    /* To check the parameter data */
-    ret = se_cmd->se_dev->transport->do_chk_before_pt(se_cmd);
-    if (ret == -1 || ret == 1){
-        /* If success but not need to keep to execute cmd, then to exit */
-        if (ret == 1)
-            ret = 0;
-        goto _EXIT_;
-    }
+	/* To check the parameter data */
 
-   /* reset the ret value */
-    ret = 1;
 
-    /*
-     * Check whether there is any reocrd in tpc_obj_list which was matched with
-     * list id in current passing cmd.
-     *
-     * c) If another a 3rd party command that originates a copy operation is
-     *    received on the same I_T nexus and the list id matches the list id
-     *    associated with the ROD token,then the ROD token shall be discard.
-     */
-    if(__tpc_check_duplicated_obj_data(se_cmd) == -1){
-        __set_err_reason(
-                    ERR_LOGICAL_UNIT_COMMUNICATION_FAILURE, 
-                    &se_cmd->scsi_sense_reason
-                    );
-        goto _EXIT_;
-    }
+	ret = se_cmd->se_dev->transport->do_chk_before_pt(se_cmd, (int *)&err);
+	if (ret == -1 || ret == 1){
+		/* If success but not need to keep to execute cmd, 
+		 * then to exit this function */
+		if (ret == 1)
+			ret = 0;
+		else
+			__set_err_reason(err, &se_cmd->scsi_sense_reason);
 
-    /* Create new obj again */
-    obj = __tpc_do_alloc_obj(se_cmd);
-    if (!obj){
-        __set_err_reason(
-                    ERR_INSUFFICIENT_RESOURCES_TO_CREATE_ROD, 
-                    &se_cmd->scsi_sense_reason
-                    );
-        goto _EXIT_;
-    }
+		goto _EXIT_;
+	}
 
-    /* To allocate the rod token data */
-    if (__tpc_do_alloc_token_data(
-                        se_cmd, obj, 
-                        ROD_TYPE_PIT_COPY_D4, ROD_TOKEN_MIN_SIZE, &err) != 0)
-    {
-        __set_err_reason(err, &se_cmd->scsi_sense_reason);
+	/* reset the ret value */
+	ret = 1;
 
-        if (obj->o_token_data)
-            kfree(obj->o_token_data);
-        kfree(obj);
-        goto _EXIT_;
-    }
+	/*
+	 * Check whether there is any reocrd in tpc_obj_list which was matched with
+	 * list id in current passing cmd.
+	 *
+	 * c) If another a 3rd party command that originates a copy operation is
+	 *    received on the same I_T nexus and the list id matches the list id
+	 *    associated with the ROD token,then the ROD token shall be discard.
+	 */
+	if(__tpc_check_duplicated_obj_data(se_cmd) == -1){
+		__set_err_reason(
+			ERR_LOGICAL_UNIT_COMMUNICATION_FAILURE, 
+			&se_cmd->scsi_sense_reason);
+		goto _EXIT_;
+	}
 
-    /* If any error happens during to do POPULATE TOKEN, the resource allocated
-     * before will be free in the do_populate_token()
-     */
-    ret = se_cmd->se_dev->transport->do_pt(se_cmd, (void *)obj);
+	/* Create new obj again */
+	obj = __tpc_do_alloc_obj(se_cmd);
+	if (!obj){
+		__set_err_reason(
+			ERR_INSUFFICIENT_RESOURCES_TO_CREATE_ROD, 
+			&se_cmd->scsi_sense_reason
+		);
+		goto _EXIT_;
+	}
+
+	/* To allocate the rod token data */
+	if (__tpc_do_alloc_token_data(
+		se_cmd, obj, 
+		ROD_TYPE_PIT_COPY_D4, ROD_TOKEN_MIN_SIZE, &err) != 0)
+	{
+		__set_err_reason(err, &se_cmd->scsi_sense_reason);
+
+		if (obj->o_token_data)
+			kfree(obj->o_token_data);
+		kfree(obj);
+		goto _EXIT_;
+	}
+
+	/* If any error happens during to do POPULATE TOKEN, the resource allocated
+	 * before will be free in the do_populate_token()
+	 */
+	ret = se_cmd->se_dev->transport->do_pt(se_cmd, (void *)obj);
 
 _EXIT_:
-    if (ret == 0){
-        se_task->task_scsi_status = GOOD;
-        transport_complete_task(se_task, 1);
-    }
-    return ret;
+	if (ret == 0){
+		se_task->task_scsi_status = GOOD;
+		transport_complete_task(se_task, 1);
+	}
+	return ret;
+
 
 }
 
@@ -3072,13 +3163,15 @@ _EXIT_:
  *
  * @note
  * @param[in] se_cmd
+ * @param[in,out] err
  * @retval 0  - Success / 1 - Fail for other reason
  */
 int iblock_before_write_by_token(
-    IN LIO_SE_CMD *se_cmd
-    )
+	IN LIO_SE_CMD *se_cmd,
+	IN OUT int *err
+	)
 {
-    return __do_chk_before_write_by_token(se_cmd);
+	return __do_chk_before_write_by_token(se_cmd, err);
 }
 EXPORT_SYMBOL(iblock_before_write_by_token);
 
@@ -3089,13 +3182,15 @@ EXPORT_SYMBOL(iblock_before_write_by_token);
  *
  * @note
  * @param[in] se_cmd
+ * @param[in,out] err
  * @retval 0  - Success / 1 - Fail for other reason
  */
 int iblock_before_populate_token(
-    IN LIO_SE_CMD *se_cmd
-    )
+	IN LIO_SE_CMD *se_cmd,
+	IN OUT int *err	
+	)
 {
-    return __do_chk_before_populate_token(se_cmd);
+	return __do_chk_before_populate_token(se_cmd, err);
 }
 EXPORT_SYMBOL(iblock_before_populate_token);
 
@@ -3187,11 +3282,15 @@ EXPORT_SYMBOL(iblock_receive_rod_token);
  *
  * @note
  * @param[in] se_cmd
+ * @param[in,out] err
  * @retval 0  - Success / 1 - Fail for other reason
  */ 
-int fd_before_write_by_token(IN LIO_SE_CMD *se_cmd)
+int fd_before_write_by_token(
+	IN LIO_SE_CMD *se_cmd,
+	IN OUT int *err	
+	)
 {
-    return __do_chk_before_write_by_token(se_cmd);
+	return __do_chk_before_write_by_token(se_cmd, err);
 }
 EXPORT_SYMBOL(fd_before_write_by_token);
 
@@ -3202,11 +3301,15 @@ EXPORT_SYMBOL(fd_before_write_by_token);
  *
  * @note
  * @param[in] se_cmd
+ * @param[in,out] err
  * @retval 0  - Success / 1 - Fail for other reason
  */ 
-int fd_before_populate_token(IN LIO_SE_CMD *se_cmd)
+int fd_before_populate_token(
+	IN LIO_SE_CMD *se_cmd,
+	IN OUT int *err	
+	)
 {
-    return __do_chk_before_populate_token(se_cmd);
+	return __do_chk_before_populate_token(se_cmd, err);
 }
 EXPORT_SYMBOL(fd_before_populate_token);
 

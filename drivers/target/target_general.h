@@ -59,8 +59,12 @@
 #define RET_ZERO_READ_UNMAP_LAB 	1
 #define SUPPORT_ANCH_LBA		0
 
-/* 20140626, adamhsu, redmine 8745,8777,8778 */
-#define	MAX_UNMAP_COUNT_SHIFT	5	/* 2^5 */
+/* 1. 20140626, adamhsu, redmine 8745,8777,8778
+ * 2. 2015/04/13, adamhsu, redmine 11438 
+ */
+#define	MAX_UNMAP_COUNT_SHIFT	10	/* 2^10 */
+#define MAX_UNMAP_DESC_COUNT	16
+
 
 /* 2014/06/26, adamhsu, redmine 8794 (start) */
 #if (BITS_PER_LONG == 64)
@@ -74,6 +78,17 @@
 #define __IS_64BIT_ARCH(len)	(len == 64)
 /* 2014/06/26, adamhsu, redmine 8794 (end) */
 
+
+#define ALIGN_GAP_SIZE_B	(0x100000) /* 512b * 2048 sctors */
+#define POOL_BLK_SIZE_512_KB	(512)
+#define POOL_BLK_SIZE_1024_KB	(1024)
+
+/* TODO
+ * 1. these shall be multiplied by POOL_BLK_SIZE_XXXX_KB 
+ * 2. and, MAX_TRANSFER_LEN_MB >= OPTIMAL_TRANSFER_LEN_MB
+ */
+#define MAX_TRANSFER_LEN_MB	(16)
+#define OPTIMAL_TRANSFER_LEN_MB	(16)
 /** 
  * @enum      ERR_REASON_INDEX
  * @brief     Error condition index value
@@ -183,7 +198,6 @@ typedef struct _bio_data {
 }BIO_DATA;
 
 typedef struct cb_data {
-	void			*pIBlockDev;
 	atomic_t		BioCount;
 	atomic_t		BioErrCount;
 	struct completion	*wait;
@@ -238,7 +252,8 @@ typedef struct gen_rw_task{
 
 typedef struct _io_rec{
 	struct	list_head	node;
-	void			*private_data;
+	void			*pIBlockDev;
+	CB_DATA			*cb_data;
 	u32			nr_blks;
 	bool			transfer_done;
 } IO_REC;
@@ -357,10 +372,8 @@ int __generic_alloc_sg_list(
 	);
 
 int  __submit_bio_wait(
-	struct block_device *bd,
 	struct bio_list *bio_lists,
 	u8 cmd,
-	CB_DATA *cb_data,
 	unsigned long timeout
 	);
 
@@ -425,7 +438,86 @@ int __do_sync_cache_range(
 	loff_t start_byte,
 	loff_t end_byte	
 	);
+
+
+int check_backend_thinpool(struct block_device *bd);
 #endif
+struct t10_pr_backup {
+#define PR_REG_ISID_LEN				16
+	char		initiator_name[256];
+	char		target_name[256];
+	char 		isid[PR_REG_ISID_LEN];
+	u32		tpgt;
+	u32		mapped_lun;
+	struct t10_pr_registration	*pr_reg;
+	u64		pr_res_key;
+	bool		def_pr_registered;
+	bool		need_restore;
+	struct list_head	backup_data_node;
+};
+
+
+int __transport_t10_prb_check_sess_reinstatement_from_nacl(
+	struct se_node_acl *se_nacl
+	);
+
+void *__transport_t10_prb_alloc(void);
+
+void __transport_t10_prb_backup_pr_reg(
+	struct t10_pr_backup *backup,
+	struct t10_pr_registration *pr_reg
+	);
+
+void __transport_t10_prb_restore(
+	struct se_portal_group *se_tpg,
+	struct se_node_acl *se_nacl,
+	struct se_session *se_sess,
+	char *isid_buf
+	);
+
+int transport_check_sectors_exceeds_max_limits_blks(
+	LIO_SE_CMD *se_cmd,
+	u32 sectors
+	);
+
+int transport_set_pool_blk_sectors(
+	LIO_SE_DEVICE *se_dev,
+	struct se_dev_limits *dev_limits
+	);
+
+
+int transport_get_pool_blk_size_kb(void);
+
+int transport_get_max_hw_transfer_sectors(
+	LIO_SE_DEVICE *se_dev
+	);
+
+
+int transport_get_max_transfer_sectors(
+	LIO_SE_DEVICE *se_dev
+	);
+
+int transport_get_opt_transfer_sectors(
+	LIO_SE_DEVICE *se_dev
+	);
+
+void transport_setup_support_fbc(
+	LIO_SE_DEVICE *se_dev
+	);
+
+
+#if (LINUX_VERSION_CODE == KERNEL_VERSION(3,12,6))
+void transport_init_tag_pool(
+	struct se_session *se_sess
+	);
+
+static int transport_free_extra_tag_pool(
+	struct se_session *se_sess
+	);
+#endif
+
+
+
 
 /**/
 extern TPC_CMD                gTpcTable[MAX_TPC_CMD_INDEX];

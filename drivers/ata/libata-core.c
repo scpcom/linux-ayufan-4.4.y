@@ -3603,8 +3603,9 @@ int sata_link_resume(struct ata_link *link, const unsigned long *params,
             mdelay(1000);
             sata_scr_read(link, SCR_STATUS, &sstatus);
         }while ((sstatus & 0xf) == 0x1 && retry++ < 100);
-        if (retry >= 100)
-            ata_link_warn(link, "link still fail after %d retries\n", retry);
+	if (retry >= 100)
+		ata_link_warn(link, "link still fail after %d retries\n", retry);
+	
     }
 #endif
 //////////////////////////////////////

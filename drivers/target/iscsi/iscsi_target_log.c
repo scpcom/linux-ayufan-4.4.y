@@ -1,5 +1,5 @@
 /**
- * $Header: /home/cvsroot/NasX86/Kernel/linux-3.2.26/drivers/target/iscsi/iscsi_target_log.c,v 1.1.2.2 2014/06/20 07:59:01 jonathanho Exp $
+ * $Header: /home/cvsroot/NasX86/Kernel/linux-3.2.26/drivers/target/iscsi/iscsi_target_log.c,v 1.3 2014/06/20 09:30:56 jonathanho Exp $
  *
  * Copyright (c) 2009, 2010 QNAP SYSTEMS, INC.
  *
@@ -21,7 +21,7 @@
  * @author	Nike Chen
  * @date	2009/11/23
  *
- * $Id: iscsi_target_log.c,v 1.1.2.2 2014/06/20 07:59:01 jonathanho Exp $
+ * $Id: iscsi_target_log.c,v 1.3 2014/06/20 09:30:56 jonathanho Exp $
  */
 
 #include <linux/version.h>
@@ -134,14 +134,17 @@ static void iscsi_log_rcv(struct sk_buff *skb)
 int iscsi_log_init()
 {
 
-#if(LINUX_VERSION_CODE == KERNEL_VERSION(3,12,6))
+#if (LINUX_VERSION_CODE == KERNEL_VERSION(3,10,20)) || (LINUX_VERSION_CODE == KERNEL_VERSION(3,12,6))
 	struct netlink_kernel_cfg cfg = {
 		.input		= iscsi_log_rcv,
 		.groups 	= 0,
 		.cb_mutex	= NULL,
 	};
 
-	netlink_sock = netlink_kernel_create(NULL, NETLINK_ISCSI_TARGET, &cfg);
+	/* bug 47438, bug 57880
+	 * Bugfix about stop iscsi service and happen kernel panic 
+	 */
+	netlink_sock = netlink_kernel_create(&init_net, NETLINK_ISCSI_TARGET, &cfg);
 
 #elif (LINUX_VERSION_CODE == KERNEL_VERSION(3,2,26)) || (LINUX_VERSION_CODE == KERNEL_VERSION(3,4,6))
 

@@ -719,12 +719,17 @@ static int snd_pcm_oss_period_size(struct snd_pcm_substream *substream,
 
 	oss_buffer_size = snd_pcm_plug_client_size(substream,
 						   snd_pcm_hw_param_value_max(slave_params, SNDRV_PCM_HW_PARAM_BUFFER_SIZE, NULL)) * oss_frame_size;
+
 	oss_buffer_size = 1 << ld2(oss_buffer_size);
 	if (atomic_read(&substream->mmap_count)) {
 		if (oss_buffer_size > runtime->oss.mmap_bytes)
 			oss_buffer_size = runtime->oss.mmap_bytes;
 	}
-
+#ifdef QNAP
+	//Avoid change audio volume delay issue.
+	if (oss_buffer_size > 128*1024)
+		oss_buffer_size = 128*1024;
+#endif
 	if (substream->oss.setup.period_size > 16)
 		oss_period_size = substream->oss.setup.period_size;
 	else if (runtime->oss.fragshift) {

@@ -78,14 +78,14 @@ struct se_subsystem_api {
 #if defined(SUPPORT_TPC_CMD)
     /* populate token */  
     int   (*do_pt)(struct se_cmd *, void *);
-    int   (*do_chk_before_pt)(struct se_cmd *);
+    int   (*do_chk_before_pt)(struct se_cmd *, int *);
 
     /* write using rod token */
     int   (*do_wrt)(struct se_cmd *, void *token_src_obj, void *new_obj);
 
     /* write using zero rod token */
     int   (*do_wzrt)(struct se_cmd *, void *new_obj);
-    int   (*do_chk_before_wrt)(struct se_cmd *);
+    int   (*do_chk_before_wrt)(struct se_cmd *, int *);
 
     /* receive rod token */
     int   (*do_receive_rt)(struct se_cmd *);
@@ -160,18 +160,18 @@ int __fd_get_lba_map_status(struct se_cmd *se_cmd, sector_t lba,
 #if defined(SUPPORT_TPC_CMD)
 /**/
 int iblock_do_populate_token(struct se_cmd *cmd, void *obj);
-int iblock_before_populate_token(struct se_cmd *cmd);
+int iblock_before_populate_token(struct se_cmd *cmd, int *err);
 int iblock_do_write_by_token(struct se_cmd *cmd, void *token_src_obj, void *new_obj);
 int iblock_do_write_by_zero_rod_token(struct se_cmd *cmd, void *new_obj);
-int iblock_before_write_by_token(struct se_cmd *cmd);
+int iblock_before_write_by_token(struct se_cmd *cmd, int *err);
 int iblock_receive_rod_token(struct se_cmd *cmd);
 
 /**/
 int fd_do_populate_token(struct se_cmd *cmd, void *obj);
-int fd_before_populate_token(struct se_cmd *cmd);
+int fd_before_populate_token(struct se_cmd *cmd, int *err);
 int fd_do_write_by_token(struct se_cmd *cmd, void *token_src_obj, void *new_obj);
 int fd_do_write_by_zero_rod_token(struct se_cmd *cmd, void *new_obj);
-int fd_before_write_by_token(struct se_cmd *cmd);
+int fd_before_write_by_token(struct se_cmd *cmd, int *err);
 int fd_receive_rod_token(struct se_cmd *cmd);
 #endif
 #endif /* CONFIG_MACH_QNAPTS */

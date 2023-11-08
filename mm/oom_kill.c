@@ -34,6 +34,12 @@
 #include <linux/ptrace.h>
 #include <linux/freezer.h>
 
+#if defined(CONFIG_MACH_QNAPTS) && defined(QNAP_HAL)
+// hal_event header
+#include <qnap/hal_event.h>
+extern int send_hal_netlink(NETLINK_EVT *event);
+#endif
+
 int sysctl_panic_on_oom;
 int sysctl_oom_kill_allocating_task;
 int sysctl_oom_dump_tasks = 1;
@@ -432,6 +438,11 @@ static int oom_kill_task(struct task_struct *p, struct mem_cgroup *mem)
 {
 	struct task_struct *q;
 	struct mm_struct *mm;
+#if defined(CONFIG_MACH_QNAPTS) && defined(QNAP_HAL)
+    NETLINK_EVT *hal_event;
+    int pid;
+    char comm[32] = {0};
+#endif
 
 	p = find_lock_task_mm(p);
 	if (!p)
@@ -446,6 +457,11 @@ static int oom_kill_task(struct task_struct *p, struct mem_cgroup *mem)
 		K(get_mm_counter(p->mm, MM_FILEPAGES)));
 	task_unlock(p);
 
+#if defined(CONFIG_MACH_QNAPTS) && defined(QNAP_HAL)
+    pid = task_pid_nr(p);
+    strncpy(comm, p->comm, sizeof(comm));
+    comm[32] = '\0';
+#endif
 	/*
 	 * Kill all user processes sharing p->mm in other thread groups, if any.
 	 * They don't get access to memory reserves or a higher scheduler
@@ -471,6 +487,26 @@ static int oom_kill_task(struct task_struct *p, struct mem_cgroup *mem)
 
 	set_tsk_thread_flag(p, TIF_MEMDIE);
 	force_sig(SIGKILL, p);
+#if defined(CONFIG_MACH_QNAPTS) && defined(QNAP_HAL)
+    // Set hal_event
+    hal_event = kmalloc(sizeof(NETLINK_EVT),GFP_ATOMIC);
+    if (hal_event)
+    {
+        hal_event->type = HAL_EVENT_ENCLOSURE;
+        hal_event->arg.action = OOM_KILLED;
+        hal_event->arg.param.oom_cb.pid = pid;
+        strncpy(hal_event->arg.param.oom_cb.comm, comm, sizeof(hal_event->arg.param.oom_cb.comm));
+        // Send hal_event after killed process
+        send_hal_netlink(hal_event);
+
+        kfree(hal_event);
+    }
+    else
+    {
+        pr_err("Send oom event failed\n");
+    }
+
+#endif
 
 	return 0;
 }

@@ -292,6 +292,8 @@ int vaai_file_do_specific_fast_ws(
 #if defined(SUPPORT_TP)
 	int err_1;
 #endif
+
+
 	/* When code comes here, the subsystem type is file i/o, so to check
 	 * what kind of backing device we need to handle ...
 	 */
@@ -435,13 +437,18 @@ int vaai_file_do_specific_fast_ws(
 					"Ret:%d\n", Ret);		     
 
 #if defined(SUPPORT_TP)
+				/* 2015/01/29, adamhsu, bugzilla 48461 */
 				if (special_ws){
+
+					/* adamhsu, 2015/03/17, redmine 12305 */
 					if (!is_thin_lun(pSeDev))
 						break;
 
-					err_1 = check_dm_thin_cond(pInode->i_bdev);
-					if (err_1 == -ENOSPC){
-						Ret = err_1;
+					if (Ret != -ENOSPC) {
+						err_1 = check_dm_thin_cond(pInode->i_bdev);
+						if (err_1 == -ENOSPC){
+							Ret = err_1;
+						}
 					}
 				}
 #endif

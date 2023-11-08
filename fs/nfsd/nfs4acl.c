@@ -37,7 +37,11 @@
 #include <linux/slab.h>
 #include <linux/nfs_fs.h>
 #include <linux/export.h>
+#ifdef CONFIG_NFSV4_FS_RICHACL
+#include <linux/nfs4_acl.h>
+#else
 #include "acl.h"
+#endif
 
 
 /* mode bit translations: */
@@ -772,6 +776,7 @@ ace2type(struct nfs4_ace *ace)
 EXPORT_SYMBOL(nfs4_acl_posix_to_nfsv4);
 EXPORT_SYMBOL(nfs4_acl_nfsv4_to_posix);
 
+#ifndef CONFIG_NFSV4_FS_RICHACL
 struct nfs4_acl *
 nfs4_acl_new(int n)
 {
@@ -837,3 +842,4 @@ nfs4_acl_write_who(int who, char *p)
 EXPORT_SYMBOL(nfs4_acl_new);
 EXPORT_SYMBOL(nfs4_acl_get_whotype);
 EXPORT_SYMBOL(nfs4_acl_write_who);
+#endif

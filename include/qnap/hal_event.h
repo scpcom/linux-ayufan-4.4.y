@@ -16,9 +16,11 @@ typedef enum
 // #ifdef STORAGE_V2
     HAL_EVENT_LVM,
     HAL_EVENT_ISCSI,
+    HAL_EVENT_HA,
 // #endif
     HAL_EVENT_USB_MTP,
     HAL_EVENT_GPIO,
+    HAL_EVENT_MEM,
     HAL_EVENT_MAX_EVT_NUM,
 } EVT_FUNC_TYPE;
 
@@ -54,7 +56,7 @@ typedef enum
     SET_POWER_BUTTON,       //for hw test
     RELOAD_USB_DRV,
     SET_PIC_WOL,
-    CPU_THERMAL_THROTTLING_EVENT,
+    OOM_KILLED,
 // For GENERAL_DISK
     SELF_TEST = 50,
     SET_PD_STANDBY,         //for netlink
@@ -67,6 +69,7 @@ typedef enum
     REMOVABLE_DRIVE_DETACH,
     SET_NCQ_BY_USER,
     SET_NCQ_BY_KERNEL,
+    GET_PD_SMART,
 
 // For RAID    
     REPAIR_RAID_READ_ERROR = 100,   //1,5,6,10, for netlink,reconstruct
@@ -78,6 +81,9 @@ typedef enum
     REBUILDING_START,               //for netlink
     REBUILDING_SKIP,                //for netlink
     REBUILDING_COMPLETE,            //for netlink
+    RESHAPING_START,                //for netlink
+    RESHAPING_SKIP,                 //for netlink
+    RESHAPING_COMPLETE,             //for netlink
     //[SDMD START] 20130124 by csw: for raid hot-replace event
     HOTREPLACING_START,             //for netlink
     HOTREPLACING_SKIP,              //for netlink
@@ -86,7 +92,6 @@ typedef enum
     BAD_BLOCK_ERROR_DETECT,         //for md badblock
     BAD_BLOCK_ERROR_STRIPE,         //for md badblock
     BAD_BLOCK_ERROR_REBUILD,	    //for md badblock
-    THIN_ERR_VERSION_DETECT,	    //for version-checking of dm-thin
     //[SDMD END]
 // For NET
     BLOCK_IP_FILTER = 150,          //for NVR
@@ -96,8 +101,11 @@ typedef enum
     NET_SCAN,
 // For THIN
     THIN_SB_BACKUP_FAIL = 160,
+    THIN_IO_ERROR,
+    THIN_ERR_VERSION_DETECT,	    //for version-checking of dm-thin
 // For VOLUME
     CHECK_FREE_SIZE = 180,
+    CHECK_LAZY_INIT,
 // #ifdef STORAGE_V2
 // For LVM
     CHECK_LVM_STATUS = 190,
@@ -113,6 +121,11 @@ typedef enum
     PM_PREPARE_SUSPEND_COMP,
     RELOAD_CONF,
     CHECK_GPIO_STATUS,
+    TBT_VIRTUAL_NIC_ADD,
+    TBT_VIRTUAL_NIC_SUSPEND,
+    TBT_VIRTUAL_NIC_RESUME,
+// For memory 
+    FILE_BASED_SWAP,
 } EVT_FUNC_ACTION;
 
 typedef struct
@@ -129,7 +142,7 @@ typedef struct
         {
             int                 action;
             int                 value;
-        }__attribute__ ((__packed__)) vol_free_size;
+        }__attribute__ ((__packed__)) vol_free_size;   
 // #ifdef STORAGE_V2
         struct
         {
@@ -153,7 +166,7 @@ typedef struct
             int                 action;
             int                 value;
         }__attribute__ ((__packed__)) temp_warning;
-       struct
+        struct
         {
             unsigned int flags;
         }__attribute__ ((__packed__)) debug_level;
@@ -183,6 +196,10 @@ typedef struct
             int                 enable;
             int                 timeout;//min
         } __attribute__ ((__packed__)) ident_led;
+        struct
+        {
+            PD_DEV_ID           dev_id;
+        } __attribute__ ((__packed__)) get_pd_smart;
 #endif        
         struct __netlink_enc_cb
         {
@@ -241,16 +258,22 @@ typedef struct
 	} __attribute__ ((__packed__)) iscsi_lun;
         struct __badblock
         {
+            int raid_id;
             char pd_scsi_name[32];
             unsigned long long first_bad;
             unsigned long long bad_sectors;
             unsigned int count;
-            int testMode;
+			int testMode;
         }__attribute__((__packed__)) badblock;
         struct __thin_err_version
         {
             char thin_pool_name[32];
         }__attribute__((__packed__)) thin_err_version;
+        struct __tbt_virtual_nic
+        {
+            char tbt_virtual_nic_name[32];
+            unsigned int nic_up_down_flag;
+        }__attribute__((__packed__)) tbt_virtual_nic;
         struct __cpu_thermal_throttling_event
         {
             int throttle_enable;
@@ -265,6 +288,15 @@ typedef struct
         {
             char pool_name[32];
         } __attribute__ ((__packed__)) pool_message;        
+        struct __oom_cb
+        {
+            unsigned int pid;
+            char comm[32];
+        } __attribute__ ((__packed__)) oom_cb;        
+        struct __netlink_mem_cb
+        {
+            int swap_file_action;
+        } __attribute__ ((__packed__)) netlink_mem;
     } param;
 }__attribute__ ((__packed__))
 EVT_FUNC_ARG;

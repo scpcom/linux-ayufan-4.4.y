@@ -1018,6 +1018,17 @@ void se_dev_set_default_attribs(
 	/*
 	 * max_sectors is based on subsystem plugin dependent requirements.
 	 */
+#if defined(CONFIG_MACH_QNAPTS)
+	/* 1. resetup the max_hw_sectors, max_sectors cause of sector unit for
+	 *    block layer is 512b but we may report 4kb to host side
+	 *
+	 * 2. here to force the max_hw_sectors = max_sectors = pool block sectors
+	 *    since we will set optimal transfer len granularity to pool block sectors
+	 *    and optimal transfer len granularity is basic unit when to transfer data
+	 */
+	limits->max_hw_sectors = transport_get_max_hw_transfer_sectors(dev);
+	limits->max_sectors = transport_get_max_transfer_sectors(dev);
+#endif
 	dev->se_sub_dev->se_dev_attrib.hw_max_sectors = limits->max_hw_sectors;
 	/*
 	 * Align max_sectors down to PAGE_SIZE to follow transport_allocate_data_tasks()
@@ -1034,7 +1045,10 @@ void se_dev_set_default_attribs(
 	 * Set optimal_sectors from fabric_max_sectors, which can be
 	 * lowered via configfs.
 	 */
-	dev->se_sub_dev->se_dev_attrib.optimal_sectors = DA_FABRIC_MAX_SECTORS;
+
+	dev->se_sub_dev->se_dev_attrib.optimal_sectors = 
+			transport_get_opt_transfer_sectors(dev);
+
 	/*
 	 * queue_depth is based on subsystem plugin dependent requirements.
 	 */
@@ -1346,13 +1360,6 @@ int se_dev_set_max_sectors(struct se_device *dev, u32 max_sectors)
 				max_sectors, dev->se_sub_dev->se_dev_attrib.hw_max_sectors);
 			return -EINVAL;
 		}
-		if (max_sectors > DA_STATUS_MAX_SECTORS_MAX) {
-			pr_err("dev[%p]: Passed max_sectors: %u"
-				" greater than DA_STATUS_MAX_SECTORS_MAX:"
-				" %u\n", dev, max_sectors,
-				DA_STATUS_MAX_SECTORS_MAX);
-			return -EINVAL;
-		}
 	}
 	/*
 	 * Align max_sectors down to PAGE_SIZE to follow transport_allocate_data_tasks()
@@ -1433,13 +1440,14 @@ int se_dev_set_optimal_sectors(struct se_device *dev, u32 optimal_sectors)
 				" changed for TCM/pSCSI\n", dev);
 		return -EINVAL;
 	}
-	if (optimal_sectors > dev->se_sub_dev->se_dev_attrib.fabric_max_sectors) {
+
+
+	if (optimal_sectors > dev->se_sub_dev->se_dev_attrib.hw_max_sectors) {
 		pr_err("dev[%p]: Passed optimal_sectors %u cannot be"
-			" greater than fabric_max_sectors: %u\n", dev,
+			" greater than hw_max_sectors: %u\n", dev,
 			optimal_sectors, dev->se_sub_dev->se_dev_attrib.fabric_max_sectors);
 		return -EINVAL;
 	}
-
 	dev->se_sub_dev->se_dev_attrib.optimal_sectors = optimal_sectors;
 	pr_debug("dev[%p]: SE Device optimal_sectors changed to %u\n",
 			dev, optimal_sectors);
@@ -1551,6 +1559,25 @@ int se_dev_set_lun_index(struct se_device *dev, int flag)
 				dev, flag);
 	return 0;
 }
+
+
+int se_dev_set_syswp(
+	LIO_SE_DEVICE *se_dev,
+	u32 val
+	)
+
+{
+	/* this will be called with se_dev_lock locked*/
+	if (val == 0 || val == 1){
+		pr_info("se_dev: update syswp: %d\n", val);
+		se_dev->se_sub_dev->se_dev_attrib.syswp = val;
+		return 0;
+	}
+	pr_err("Illegal value %d for syswp\n", val);
+	return -EINVAL;
+}
+
+
 
 struct se_lun *core_dev_add_lun(
 	struct se_portal_group *tpg,

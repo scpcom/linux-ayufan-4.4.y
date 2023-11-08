@@ -113,7 +113,7 @@ int vaai_do_file_rw(
 	pr_debug("after call %s, u32ByteCounts:0x%x, Ret:0x%zx, Position:0x%llu\n",
                         __func__, u32ByteCounts, Ret, Position);
 
-	/* take care err code for -ENOSPC especially */
+	/* FIXED ME */
 	if ((Ret < 0) && (Ret != -EIO))
 		return Ret;
 

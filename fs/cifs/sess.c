@@ -167,8 +167,14 @@ unicode_oslm_strings(char **pbcc_area, const struct nls_table *nls_cp)
 	int bytes_ret = 0;
 
 	/* Copy OS version */
+#ifdef CONFIG_MACH_QNAPTS
+	/* for File Station remote mount */
+	bytes_ret = cifs_strtoUCS((__le16 *)bcc_ptr, "QTS, Linux version ", 32,
+				  nls_cp);
+#else
 	bytes_ret = cifs_strtoUCS((__le16 *)bcc_ptr, "Linux version ", 32,
 				  nls_cp);
+#endif
 	bcc_ptr += 2 * bytes_ret;
 	bytes_ret = cifs_strtoUCS((__le16 *) bcc_ptr, init_utsname()->release,
 				  32, nls_cp);
@@ -526,10 +532,29 @@ static int build_ntlmssp_auth_blob(unsigned char *pbuffer,
 		tmp += len;
 	}
 
+#ifdef CONFIG_MACH_QNAPTS
+	/* for File Station remote mount */
+	if (ses->netbiosName == NULL) {
+		sec_blob->WorkstationName.BufferOffset = cpu_to_le32(tmp - pbuffer);
+		sec_blob->WorkstationName.Length = 0;
+		sec_blob->WorkstationName.MaximumLength = 0;
+		tmp += 2;
+	} else {
+		int len;
+		len = cifs_strtoUCS((__le16 *)tmp, ses->netbiosName,
+				      MAX_USERNAME_SIZE, nls_cp);
+		len *= 2; /* unicode is 2 bytes each */
+		sec_blob->WorkstationName.BufferOffset = cpu_to_le32(tmp - pbuffer);
+		sec_blob->WorkstationName.Length = cpu_to_le16(len);
+		sec_blob->WorkstationName.MaximumLength = cpu_to_le16(len);
+		tmp += len;
+	}
+#else
 	sec_blob->WorkstationName.BufferOffset = cpu_to_le32(tmp - pbuffer);
 	sec_blob->WorkstationName.Length = 0;
 	sec_blob->WorkstationName.MaximumLength = 0;
 	tmp += 2;
+#endif
 
 	if (((ses->ntlmssp->server_flags & NTLMSSP_NEGOTIATE_KEY_XCH) ||
 		(ses->ntlmssp->server_flags & NTLMSSP_NEGOTIATE_EXTENDED_SEC))

@@ -61,6 +61,8 @@ int	se_dev_set_block_size(struct se_device *, u32);
 int     se_dev_set_tp_threshold_enable(struct se_device *, int);
 int 	se_dev_set_tp_threshold_percent(struct se_device *, int);
 int 	se_dev_set_lun_index(struct se_device *, int);
+int 	se_dev_set_syswp(struct se_device *, u32);
+
 struct se_lun *core_dev_add_lun(struct se_portal_group *, struct se_hba *,
 		struct se_device *, u32);
 int	core_dev_del_lun(struct se_portal_group *, u32);

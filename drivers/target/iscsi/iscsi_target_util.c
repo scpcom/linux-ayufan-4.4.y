@@ -63,6 +63,90 @@ extern spinlock_t tiqn_lock;
 extern spinlock_t cmd_rec_list_lock;
 extern struct list_head cmd_rec_list;
 extern atomic64_t cmd_count;
+
+
+#if (LINUX_VERSION_CODE == KERNEL_VERSION(3,12,6))
+static void iscsit_free_tag(
+	struct se_session *se_sess,
+	struct se_cmd *se_cmd
+	)
+{
+	int i;
+	struct new_tag_pool *new_pool;
+
+	pr_debug("%s: se_cmd:0x%p, tag:%d, tag source:%d\n", 
+		__func__, se_cmd, se_cmd->map_tag, se_cmd->tag_src_pool);
+
+	if (se_cmd->tag_src_pool == TAG_FROM_NATIVE_POOL){
+		percpu_ida_free(&se_sess->sess_tag_pool, se_cmd->map_tag);
+		return;
+	}
+
+	new_pool = &se_sess->tag_pool[se_cmd->tag_src_pool];
+	percpu_ida_free(&new_pool->sess_tag_pool, se_cmd->map_tag);
+
+	spin_lock(&new_pool->tag_count_lock);
+	atomic_dec(&new_pool->tag_count);
+
+	pr_debug("%s: remain tag count:%d on new tag pool %d, on sess:0x%p\n", 
+		__func__, atomic_read(&new_pool->tag_count), 
+		se_cmd->tag_src_pool, se_sess);
+
+	spin_unlock(&new_pool->tag_count_lock);
+	return;
+
+}
+
+
+static int iscsit_alloc_tag(
+	struct iscsi_conn *conn,
+	struct iscsi_cmd *cmd,
+	struct se_session *se_sess
+	)
+{
+	/* This call executed run in iscsit_allocate_cmd(). It may be called
+	 * from software interrupt (timer) context for allocating iSCSI NopINs
+	 */
+	int is_session_reinstatement, print_ok_msg = 0, tag = -1;
+
+	do {
+		spin_lock_bh(&conn->sess->conn_lock);
+		is_session_reinstatement = 
+			atomic_read(&conn->sess->session_reinstatement);
+		spin_unlock_bh(&conn->sess->conn_lock);
+
+		tag = transport_alloc_pool_tag(se_sess, &cmd->se_cmd, 
+				is_session_reinstatement);
+		if (tag >= 0){
+			if (print_ok_msg){
+				print_ok_msg = 0;
+				pr_info("%s: success to alloc tag\n", __func__);
+			}
+			break;
+		}
+		pr_warn("%s: fail to alloc tag, tag:%d, wait next time\n", 
+			__func__, tag);
+		print_ok_msg = 1;
+
+		if (in_interrupt()){
+			/* If comes here, it means we can NOT get any tag
+			 * from sess_tag_pool, sess_tag_pool_1 and
+			 * sess_tag_pool_2. Just to give up ...
+			 */
+			pr_warn("%s: fail to alloc tag in "
+				"interrupt context, give up it ..\n");
+			tag = -ENOSPC;
+			break;
+		}
+
+		/* TODO: try try try ... */
+		schedule_timeout_uninterruptible(msecs_to_jiffies(3*1000));
+	} while (1);
+
+	return tag;
+
+}
+#endif
 #endif
 
 /*
@@ -184,19 +268,22 @@ struct iscsi_cmd *iscsit_allocate_cmd(struct iscsi_conn *conn, gfp_t gfp_mask)
 #ifdef CONFIG_MACH_QNAPTS
 #if (LINUX_VERSION_CODE == KERNEL_VERSION(3,12,6))
 
-	tag = percpu_ida_alloc(&se_sess->sess_tag_pool, gfp_mask);
-
+	tag = iscsit_alloc_tag(conn, cmd, se_sess);
+	if (tag < 0)
+		return NULL;
+#if 0
 	/* TODO:
 	 * To comment this first cause of the iscsi_cmd still be allocated
 	 * from lio_cmd_cache currently. It will be modified in the future
 	 */
-#if 0
 	size = sizeof(struct iscsi_cmd) + conn->conn_transport->priv_size;
 	cmd = (struct iscsi_cmd *)(se_sess->sess_cmd_map + (tag * size));
 	memset(cmd, 0, size);
 #endif
+
 	cmd->se_cmd.map_tag = tag;
 	pr_debug("%s: se_cmd:0x%p, tag:%d\n", __func__, &cmd->se_cmd, tag);
+
 #endif
 #endif
 	cmd->conn	= conn;
@@ -1029,24 +1116,12 @@ void iscsit_release_cmd(struct iscsi_cmd *cmd)
 	/* 20140513, adamhsu, redmine 8253 */
 #if (LINUX_VERSION_CODE == KERNEL_VERSION(3,12,6))
 
-	pr_debug("%s: se_cmd:0x%p, tag:%d\n", __func__, se_cmd, 
-		se_cmd->map_tag);
-
-	percpu_ida_free(&sess->se_sess->sess_tag_pool, se_cmd->map_tag);
+	iscsit_free_tag(sess->se_sess, se_cmd);
 #endif
 
 
-#if 0
-	/* 2014/08/16, adamhsu, redmine 9055,9076,9278 */
-	if ((cmd->se_cmd.transport_state & (CMD_T_ABORTED_1 | CMD_T_ABORTED))
-	|| (cmd->se_cmd.tmf_transport_state & (CMD_T_ABORTED_1 | CMD_T_ABORTED))
-	)
-		pr_info("[%s] free cmd(ITT:0x%8x)\n", __func__, 
-			cmd->init_task_tag);
-#endif
 
 #endif
-
 	kmem_cache_free(lio_cmd_cache, cmd);
 }
 

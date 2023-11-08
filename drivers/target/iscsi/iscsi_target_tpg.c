@@ -167,6 +167,61 @@ struct iscsi_portal_group *iscsit_get_tpg_from_np(
 	return NULL;
 }
 
+/* Jonathan Ho, 20140416,  one target can be logged in from only one initiator IQN */
+#if defined(CONFIG_MACH_QNAPTS) && defined(SUPPORT_SINGLE_INIT_LOGIN)
+int iscsit_search_tiqn_for_initiator(
+	struct iscsi_tiqn *tiqn,
+	char *InitiatorName)
+{
+	struct iscsi_portal_group *tpg = NULL;
+	struct se_portal_group *se_tpg = NULL;
+	struct se_node_acl *acl = NULL;
+	struct se_session *se_sess = NULL;
+	struct iscsi_session *sess = NULL;
+	struct iscsi_sess_ops *sess_ops = NULL;
+
+	pr_debug("search Target: %s for Initiator IQN: %s\n", tiqn->tiqn, InitiatorName);
+	spin_lock(&tiqn->tiqn_tpg_lock);
+	list_for_each_entry(tpg, &tiqn->tiqn_tpg_list, tpg_list) {
+		pr_debug("get Target Portal Group Tag: %hu\n", tpg->tpgt);
+		spin_lock(&tpg->tpg_state_lock);
+		if (tpg->tpg_state == TPG_STATE_FREE) {
+			spin_unlock(&tpg->tpg_state_lock);
+			continue;
+		}
+		spin_unlock(&tpg->tpg_state_lock);
+		
+		se_tpg = &tpg->tpg_se_tpg;
+		
+		spin_lock_bh(&se_tpg->acl_node_lock);
+		list_for_each_entry(acl, &se_tpg->acl_node_list, acl_list) {
+			spin_lock_bh(&acl->nacl_sess_lock);
+			if ((se_sess = acl->nacl_sess)) {
+				sess = (struct iscsi_session *)se_sess->fabric_sess_ptr;
+				sess_ops = sess->sess_ops;
+				if (strcmp(InitiatorName,sess_ops->InitiatorName)) {
+					pr_debug("get different IQN: %s\n", sess_ops->InitiatorName);
+					
+					/* make sure to unlock all spin lock before return */
+					spin_unlock_bh(&acl->nacl_sess_lock);
+					spin_unlock_bh(&se_tpg->acl_node_lock);
+					spin_unlock(&tiqn->tiqn_tpg_lock);
+
+					return -1;
+				} else {
+					pr_debug("get same IQN: %s\n", sess_ops->InitiatorName);
+				}
+			}
+			spin_unlock_bh(&acl->nacl_sess_lock);
+		}
+		spin_unlock_bh(&se_tpg->acl_node_lock);
+	}
+	spin_unlock(&tiqn->tiqn_tpg_lock);
+
+	return 0;
+}
+#endif
+
 int iscsit_get_tpg(
 	struct iscsi_portal_group *tpg)
 {

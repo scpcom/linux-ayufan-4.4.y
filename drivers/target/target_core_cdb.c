@@ -642,15 +642,14 @@ target_emulate_evpd_86(struct se_cmd *cmd, unsigned char *buf)
 	return 0;
 }
 
+#if defined(CONFIG_MACH_QNAPTS)
 /* Block Limits VPD page */
 static int
 target_emulate_evpd_b0(struct se_cmd *cmd, unsigned char *buf)
 {
 	struct se_device *dev = cmd->se_dev;
 	int have_tp = 0;
-#if defined(SUPPORT_FAST_BLOCK_CLONE)
-	int value, bs_order;
-#endif
+	int opt_sectors_granularity;
 
 	/*
 	 * Following sbc3r22 section 6.5.3 Block Limits VPD page, when
@@ -662,8 +661,88 @@ target_emulate_evpd_b0(struct se_cmd *cmd, unsigned char *buf)
 
 	buf[0] = dev->transport->get_device_type(dev);
 
-#if !(defined(CONFIG_MACH_QNAPTS) && defined(SUPPORT_VAAI)) //Benjamin 20121105 sync VAAI support from Adam. 
-    // Benjamin 20121105 FIXME:
+
+
+	/*
+	 * Set OPTIMAL TRANSFER LENGTH GRANULARITY
+	 */
+	opt_sectors_granularity = dev->pool_blk_sectors;
+	put_unaligned_be16((u16)opt_sectors_granularity, &buf[6]);
+
+	/* Set MAXIMUM TRANSFER LENGTH */
+	put_unaligned_be32(dev->se_sub_dev->se_dev_attrib.max_sectors, &buf[8]);
+
+	/*
+	 * Set OPTIMAL TRANSFER LENGTH
+	 */
+	put_unaligned_be32(dev->se_sub_dev->se_dev_attrib.optimal_sectors, &buf[12]);
+
+
+#if defined(SUPPORT_VAAI)
+	/* Here follows the sbc3r31's section 6.5.3 to report the 
+	 * page lenghth to 0x3c. */
+	buf[3] = 0x3c;
+	buf[4] |= u8WriteSameNoZero;
+	buf[5] = MAX_ATS_LEN;
+
+	put_unaligned_be64(u64MaxWSLen, &buf[36]);
+#else
+	buf[3] = have_tp ? 0x3c : 0x10;
+	/* Set WSNZ to 1 */
+	buf[4] = 0x01;
+
+	/* Exit now if we don't support TP */
+	if (!have_tp)
+		return 0;
+#endif
+
+	/*
+	 * Set MAXIMUM UNMAP LBA COUNT
+	 */
+	put_unaligned_be32(dev->se_sub_dev->se_dev_attrib.max_unmap_lba_count, &buf[20]);
+
+	/*
+	 * Set MAXIMUM UNMAP BLOCK DESCRIPTOR COUNT
+	 */
+	put_unaligned_be32(dev->se_sub_dev->se_dev_attrib.max_unmap_block_desc_count,
+			   &buf[24]);
+
+	/*
+	 * Set OPTIMAL UNMAP GRANULARITY
+	 */
+	put_unaligned_be32(dev->se_sub_dev->se_dev_attrib.unmap_granularity, &buf[28]);
+
+	/*
+	 * UNMAP GRANULARITY ALIGNMENT
+	 */
+	put_unaligned_be32(dev->se_sub_dev->se_dev_attrib.unmap_granularity_alignment,
+			   &buf[32]);
+
+	if (dev->se_sub_dev->se_dev_attrib.unmap_granularity_alignment != 0)
+		buf[32] |= 0x80; /* Set the UGAVALID bit */
+
+	return 0;
+}
+
+#else
+/* Block Limits VPD page */
+static int
+target_emulate_evpd_b0(struct se_cmd *cmd, unsigned char *buf)
+{
+	struct se_device *dev = cmd->se_dev;
+	int have_tp = 0;
+
+	/*
+	 * Following sbc3r22 section 6.5.3 Block Limits VPD page, when
+	 * emulate_tpu=1 or emulate_tpws=1 we will be expect a
+	 * different page length for Thin Provisioning.
+	 */
+	if (dev->se_sub_dev->se_dev_attrib.emulate_tpu || dev->se_sub_dev->se_dev_attrib.emulate_tpws)
+		have_tp = 1;
+
+	buf[0] = dev->transport->get_device_type(dev);
+
+	
 	buf[3] = have_tp ? 0x3c : 0x10;
 
 	/* Set WSNZ to 1 */
@@ -711,48 +790,17 @@ target_emulate_evpd_b0(struct se_cmd *cmd, unsigned char *buf)
 	 */
 	put_unaligned_be32(dev->se_sub_dev->se_dev_attrib.unmap_granularity_alignment,
 			   &buf[32]);
-	if (dev->se_sub_dev->se_dev_attrib.unmap_granularity_alignment != 0)
-		buf[32] |= 0x80; /* Set the UGAVALID bit */
-
-#else   /* #if !(defined(CONFIG_MACH_QNAPTS) && defined(SUPPORT_VAAI)) */
-
-	/* Here follows the sbc3r31's section 6.5.3 to report the 
-	 * page lenghth to 0x3c. */
-	buf[3] = 0x3c;
-	buf[4] |= u8WriteSameNoZero;
-	buf[5] = MAX_ATS_LEN;
-
-	/* Set OPTIMAL TRANSFER LENGTH GRANULARITY
-	 * Set MAXIMUM TRANSFER LENGTH
-	 * Set OPTIMAL TRANSFER LENGTH
-	 */
-
-#if defined(SUPPORT_FAST_BLOCK_CLONE)
-	bs_order = ilog2(dev->se_sub_dev->se_dev_attrib.block_size);
-	put_unaligned_be16(((POOL_BLK_SIZE_KB << 10) >> bs_order), &buf[6]);
-
-	value = ((MAX_TRANSFER_LEN_MB << 20) >> bs_order);
-	put_unaligned_be32(value, &buf[8]);
-
-	value = ((OPTIMAL_TRANSFER_LEN_MB << 20) >> bs_order);
-	put_unaligned_be32(value, &buf[12]);
-#else
-	put_unaligned_be16(1, &buf[6]);
-	put_unaligned_be32(dev->se_sub_dev->se_dev_attrib.hw_max_sectors, &buf[8]);
-	put_unaligned_be32(dev->se_sub_dev->se_dev_attrib.hw_max_sectors, &buf[12]);
-#endif
-
-	put_unaligned_be32(dev->se_sub_dev->se_dev_attrib.max_unmap_lba_count, &buf[20]);
-	put_unaligned_be32(dev->se_sub_dev->se_dev_attrib.max_unmap_block_desc_count, &buf[24]);
-	put_unaligned_be32(dev->se_sub_dev->se_dev_attrib.unmap_granularity, &buf[28]);
-	put_unaligned_be32(dev->se_sub_dev->se_dev_attrib.unmap_granularity_alignment, &buf[32]);
-	put_unaligned_be64(u64MaxWSLen, &buf[36]);
 
 	if (dev->se_sub_dev->se_dev_attrib.unmap_granularity_alignment != 0)
 		buf[32] |= 0x80; /* Set the UGAVALID bit */
-#endif
+
 	return 0;
 }
+
+#endif
+
+
+
 
 /* Block Device Characteristics VPD page */
 static int
@@ -1057,7 +1105,10 @@ int target_emulate_readcapacity_16(struct se_task *task)
 	struct se_device *dev = cmd->se_dev;
 	unsigned char *buf;
 	unsigned long long blocks = dev->transport->get_blocks(dev);
-#if defined(SUPPORT_FAST_BLOCK_CLONE)
+
+//#if defined(SUPPORT_FAST_BLOCK_CLONE)
+#if 0
+// Jay Wei,20150303, QKS task #11911, correct the issue that physical block size is 512K
 	int bs_order, value;
 #endif
 
@@ -1099,7 +1150,9 @@ int target_emulate_readcapacity_16(struct se_task *task)
 	}
 #endif
 
-#if defined(SUPPORT_FAST_BLOCK_CLONE)
+//#if defined(SUPPORT_FAST_BLOCK_CLONE)
+#if 0
+// Jay Wei,20150303, QKS task #11911, correct the issue that physical block size is 512K
 	bs_order = ilog2(dev->se_sub_dev->se_dev_attrib.block_size);
 	value = ilog2(((POOL_BLK_SIZE_KB << 10) >> bs_order));
 
@@ -1284,56 +1337,167 @@ int target_emulate_modesense(struct se_task *task)
 {
 	struct se_cmd *cmd = task->task_se_cmd;
 	struct se_device *dev = cmd->se_dev;
-	char *cdb = cmd->t_task_cdb;
+	
+	/* Jay Wei, 20140901, Make the type of *cdb unsigned char
+	    so that its type will be consistent with cmd->t_task_cdb. */
+	unsigned char *cdb = cmd->t_task_cdb;
 	unsigned char *rbuf;
 	int type = dev->transport->get_device_type(dev);
 	int ten = (cmd->t_task_cdb[0] == MODE_SENSE_10);
 	int offset = ten ? 8 : 4;
 	int length = 0;
 	unsigned char buf[SE_MODE_PAGE_BUF];
-#ifdef CONFIG_MACH_QNAPTS  // Benjamin 20110812 for read-only snapshot
-    int mode = ((cmd->se_lun->lun_access & TRANSPORT_LUNFLAGS_READ_ONLY) ||
-                (cmd->se_deve &&
-                (cmd->se_deve->lun_flags & TRANSPORT_LUNFLAGS_READ_ONLY))) ? 
-                1 : 0;
+#ifdef CONFIG_MACH_QNAPTS
+	u32 syswp;
+	unsigned long flags;
+
+	// Benjamin 20110812 for read-only snapshot
+	int mode = ((cmd->se_lun->lun_access & TRANSPORT_LUNFLAGS_READ_ONLY) ||
+		(cmd->se_deve &&
+		(cmd->se_deve->lun_flags & TRANSPORT_LUNFLAGS_READ_ONLY))) ? 
+		1 : 0;
+
+
+	spin_lock_irqsave(&dev->se_sub_dev->se_dev_lock, flags);
+	syswp = dev->se_sub_dev->se_dev_attrib.syswp;
+	spin_unlock_irqrestore(&dev->se_sub_dev->se_dev_lock, flags);
+
+	mode |= ((syswp == 1) ? 1 : 0);
 #endif
 
 	memset(buf, 0, SE_MODE_PAGE_BUF);
 
 	switch (cdb[2] & 0x3f) {
+
+ /* Jay Wei, 20140901, Improve mode sense. Redmine #4947 */
 	case 0x01:
-		if (!dev->se_sub_dev->se_dev_attrib.tp_threshold_enable){
-			length = target_modesense_rwrecovery(&buf[offset]);
+#ifdef CONFIG_MACH_QNAPTS
+
+        /* Jay Wei, 20140901, When subpage is FFh, by rule target needs to return
+                * all implemented subpages of page code 01h.              */                
+		if(cdb[3] == 0x00 || cdb[3] == 0xff) //subpage 00h, FFh
+		{   /* Turn to use "se_dev_provision" to determine. */
+            if(!strcmp(dev->se_sub_dev->se_dev_provision, "thin")){ 
+   				length = target_modesense_rwrecovery_tp_threshold(&buf[offset]);
+    			dev->se_sub_dev->se_dev_attrib.tp_threshold_hit = 0;				
+			}
+			else{
+                length = target_modesense_rwrecovery(&buf[offset]);
+			}
+			break;
 		}
-		else{
-			length = target_modesense_rwrecovery_tp_threshold(&buf[offset]);
-			dev->se_sub_dev->se_dev_attrib.tp_threshold_hit = 0;
-		}
+        else
+            /* Use "goto" to let unimplemented pages go to the default of switch-case,
+                          or they would go through and cause wrong results. */                       
+            goto NOT_SUPPORTED;        
+#else
+		length = target_modesense_rwrecovery(&buf[offset]);
 		break;
+#endif
+
 	case 0x08:
+#ifdef CONFIG_MACH_QNAPTS	
+
+        /* Jay Wei, 20140901, Same story with page 01 */
+		if(cdb[3] == 0x00 || cdb[3] == 0xff) //subpage 00h, FFh
+		{
+			length = target_modesense_caching(dev, &buf[offset]);
+			break;
+		}
+        else
+            goto NOT_SUPPORTED;
+#else
 		length = target_modesense_caching(dev, &buf[offset]);
 		break;
+#endif
+
 	case 0x0a:
 #ifdef CONFIG_MACH_QNAPTS  // Benjamin 20110812 for read-only snapshot
-		length = target_modesense_control(dev, mode, &buf[offset]);
+
+        /* Jay Wei, 20140901, Same story with page 01*/
+		if(cdb[3] == 0x00 || cdb[3] == 0xff) //subpage 00h, FFh
+		{
+			length = target_modesense_control(dev, mode, &buf[offset]);
+			break;
+		}
+        else
+            goto NOT_SUPPORTED;        
+
 #else        
 		length = target_modesense_control(dev, &buf[offset]);
-#endif        
 		break;
+#endif
+
 	case 0x3f:
-		length = target_modesense_rwrecovery(&buf[offset]);
-		length += target_modesense_caching(dev, &buf[offset+length]);
-#ifdef CONFIG_MACH_QNAPTS  // Benjamin 20110812 for read-only snapshot
-		length += target_modesense_control(dev, mode, &buf[offset+length]);
-#else        
-		length += target_modesense_control(dev, &buf[offset+length]);
-#endif        
-		break;
+#ifdef CONFIG_MACH_QNAPTS		
+		if(cdb[3] == 0x00) //subpage 00h. Return all implemented pages with subpage code 00h.
+		{
+            /* 01h,00h */
+            if(!strcmp(dev->se_sub_dev->se_dev_provision, "thin")){
+   				length = target_modesense_rwrecovery_tp_threshold(&buf[offset]);
+			}
+			else{
+                length = target_modesense_rwrecovery(&buf[offset]);
+			}
+            
+            /* 08h,00h */
+			length += target_modesense_caching(dev, &buf[offset+length]);
+            
+			// 0Ah,00h  Benjamin 20110812 for read-only snapshot.   
+			length += target_modesense_control(dev, mode, &buf[offset+length]);
+			break;
+		}
+        
+        /* Jay Wei, 20140901, Return all implemented mode pages with all subpages when subpage is FFh */
+        else if(cdb[3] == 0xff) //subpage FFh
+        {        
+            /* 01h,00h */
+            if(!strcmp(dev->se_sub_dev->se_dev_provision, "thin")){
+   				length = target_modesense_rwrecovery_tp_threshold(&buf[offset]);
+    			dev->se_sub_dev->se_dev_attrib.tp_threshold_hit = 0; 				
+			}
+			else{
+                length = target_modesense_rwrecovery(&buf[offset]);
+			}
+            /* 08h,00h */
+            length += target_modesense_caching(dev, &buf[offset+length]);
+                
+            // Benjamin 20110812 for read-only snapshot.   0Ah,00h
+            length += target_modesense_control(dev, mode, &buf[offset+length]);
+            
+#if defined(SUPPORT_TP) 
+            /* 1Ch,02h */
+            if (dev->se_sub_dev->se_dev_attrib.emulate_tpu
+			|| dev->se_sub_dev->se_dev_attrib.emulate_tpws)
+            {
+        		length += vaai_modesense_lbp(cmd, &buf[offset+length]);
+				break;
+	        }         
+            else
+                break; // Won't print anything because this is for all pages.      
+#endif
+    
+        }
+        else
+            goto NOT_SUPPORTED;        
+
+#endif
+
+/* Jay Wei 20140901, NOTE! Here uses   #ifndef   to keep the primitive LIO code. */    
+#ifndef CONFIG_MACH_QNAPTS       
+
+        length = target_modesense_rwrecovery(&buf[offset]);
+        length += target_modesense_caching(dev, &buf[offset+length]);
+        length += target_modesense_control(dev, &buf[offset+length]);
+		break;        
+#endif
 
 #if defined(CONFIG_MACH_QNAPTS) && defined(SUPPORT_TP)
 //Benjamin 20121105 sync VAAI support from Adam. 
 	case 0x1c:
-		if(cdb[3] == 0x02){
+		/* Jay Wei, 20140901, add subpage 0xff temporary because the behavior
+		  * is equivalent. */
+		if(cdb[3] == 0x02 || cdb[3] == 0xff){
 			if (dev->se_sub_dev->se_dev_attrib.emulate_tpu
 			|| dev->se_sub_dev->se_dev_attrib.emulate_tpws
 			)
@@ -1351,7 +1515,11 @@ int target_emulate_modesense(struct se_task *task)
 				return -EOPNOTSUPP;
 			}
 		}
+        else
+            goto NOT_SUPPORTED;        
 #endif
+
+NOT_SUPPORTED:
 
 	default:
 		pr_err("MODE SENSE: unimplemented page/subpage: 0x%02x/0x%02x\n",
@@ -1371,6 +1539,10 @@ int target_emulate_modesense(struct se_task *task)
 		    (cmd->se_deve->lun_flags & TRANSPORT_LUNFLAGS_READ_ONLY)))
 			target_modesense_write_protect(&buf[3], type);
 
+
+		if (syswp)
+			target_modesense_write_protect(&buf[3], type);
+
 		if ((dev->se_sub_dev->se_dev_attrib.emulate_write_cache > 0) &&
 		    (dev->se_sub_dev->se_dev_attrib.emulate_fua_write > 0))
 			target_modesense_dpofua(&buf[3], type);
@@ -1384,6 +1556,10 @@ int target_emulate_modesense(struct se_task *task)
 		if ((cmd->se_lun->lun_access & TRANSPORT_LUNFLAGS_READ_ONLY) ||
 		    (cmd->se_deve &&
 		    (cmd->se_deve->lun_flags & TRANSPORT_LUNFLAGS_READ_ONLY)))
+			target_modesense_write_protect(&buf[2], type);
+
+
+		if (syswp)
 			target_modesense_write_protect(&buf[2], type);
 
 		if ((dev->se_sub_dev->se_dev_attrib.emulate_write_cache > 0) &&
@@ -1494,47 +1670,190 @@ end:
  * Used for TCM/IBLOCK and TCM/FILEIO for block/blk-lib.c level discard support.
  * Note this is not used for TCM/pSCSI passthrough
  */
+#if defined(CONFIG_MACH_QNAPTS)
+int __target_pre_cond_emulate_unmap(
+	LIO_SE_CMD *se_cmd,
+	unsigned char *buf,
+	ERR_REASON_INDEX *err_idx,
+	int *need_do_cmd
+	)
+{
+	/* buf is parameter data and was mapped by transport_kunmap_data_sg already */
+
+	LIO_SE_DEVICE *se_dev = se_cmd->se_dev;
+	int size = se_cmd->data_length;
+	int dl, bd_dl;
+
+	/* if param list len is zero, means no data shall be transferred */
+	if (!size){
+		*need_do_cmd = 0;
+		return 0;
+	}
+
+	if (!is_thin_lun(se_dev)){
+		pr_err("[%s]: UNMAP emulation can't work on thick LU\n", __func__);
+		*err_idx = ERR_UNKNOWN_SAM_OPCODE;
+		return -EINVAL;
+	}
+	
+	/* sbc3r35, page 186 */
+	if ((se_cmd->t_task_cdb[1] & 0x1) && (bSupportArchorLba == 0)){
+		pr_err("[%s]: Not support ANCHOR in UNMAP emulation\n", __func__);
+		*err_idx = ERR_INVALID_CDB_FIELD;
+		return -EOPNOTSUPP;
+	}
+
+	/* Spec said the param list len shall be large than 8 bytes */
+	if (size < 8){
+		pr_err("[%s]: Param list len shall be large than 8 bytes in "
+				"UNMAP emulation\n", __func__);
+		*err_idx = ERR_PARAMETER_LIST_LEN_ERROR;
+		return -EINVAL;
+	}
+	
+	if (!se_dev->transport->do_discard) {
+		pr_err("[%s]: UNMAP emulation not supported on %s\n", __func__,
+			se_dev->transport->name);
+		*err_idx = ERR_UNKNOWN_SAM_OPCODE;
+		return -ENOSYS;
+	}
+
+
+	dl = get_unaligned_be16(&buf[0]);
+	bd_dl = get_unaligned_be16(&buf[2]);
+
+	/* sbc3r35, page 188 */
+	if (dl != (bd_dl + 6)){
+		pr_err("[%s]: UNMAP data len doesn't equal to UNMAP blk "
+			"desc data len plus 6 bytes in UNMAP emulation\n", __func__);
+		*err_idx = ERR_PARAMETER_LIST_LEN_ERROR;
+		return -EINVAL;
+	}
+
+	/* if UNMAP blk desc data len is zero, means no any unmap operation */
+	if (!bd_dl){
+		*need_do_cmd = 0;
+		return 0;
+	}
+
+	/* sbc3r35, p 164 */
+	size = min(size - 8, bd_dl);
+	
+	if (size < 16){
+		*err_idx = ERR_INVALID_PARAMETER_LIST;
+		return -EINVAL;
+	}
+
+	if (size / 16 > se_dev->se_sub_dev->se_dev_attrib.max_unmap_block_desc_count) {
+		*err_idx = ERR_INVALID_PARAMETER_LIST;
+		return -EINVAL;
+	}
+
+	return 0;
+
+}
+
+
+int target_emulate_unmap(struct se_task *task)
+{
+	struct se_cmd *cmd = task->task_se_cmd;
+	struct se_device *dev = cmd->se_dev;
+	unsigned char *buf = NULL, *ptr = NULL;
+	sector_t lba;
+	int size = cmd->data_length;
+	int dl, bd_dl, need_do_cmd = 1, ret = 0;
+	u32 range;
+	ERR_REASON_INDEX err_idx = MAX_ERR_REASON_INDEX;
+
+	buf = transport_kmap_data_sg(cmd);
+	if (!buf){
+		__set_err_reason(ERR_PARAMETER_LIST_LEN_ERROR, &cmd->scsi_sense_reason);
+		return -ENOMEM;
+	}
+
+	ret = __target_pre_cond_emulate_unmap(cmd, buf, 
+			&err_idx, &need_do_cmd);
+
+	if (ret != 0){
+		__set_err_reason(err_idx, &cmd->scsi_sense_reason);
+		goto _EXIT_;
+	}
+
+	/* please see __target_pre_cond_emulate_unmap */
+	if (need_do_cmd == 0)
+		goto _EXIT_;
+
+	dl = get_unaligned_be16(&buf[0]);
+	bd_dl = get_unaligned_be16(&buf[2]);
+	size = min(size - 8, bd_dl);
+
+	/* First UNMAP block descriptor starts at 8 byte offset */
+	ptr = &buf[8];
+	pr_debug("UNMAP: Sub: %s Using dl: %u bd_dl: %u size: %u"
+		" ptr: %p\n", dev->transport->name, dl, bd_dl, size, ptr);
+
+	while (size >= 16) {
+		lba = get_unaligned_be64(&ptr[0]);
+		range = get_unaligned_be32(&ptr[8]);
+
+		pr_debug("UNMAP: Using lba: %llu and range: %u\n",
+				 (unsigned long long)lba, range);
+
+		/* sbc3r35, p 164 */
+		if (range > dev->se_sub_dev->se_dev_attrib.max_unmap_lba_count) {
+			cmd->scsi_sense_reason = TCM_INVALID_PARAMETER_LIST;
+			ret = -EINVAL;
+			goto _EXIT_;
+		}
+
+		/* sbc3r35, p 164 */
+		if (lba + range > dev->transport->get_blocks(dev) + 1) {
+			cmd->scsi_sense_reason = TCM_ADDRESS_OUT_OF_RANGE;
+			ret = -EINVAL;
+			goto _EXIT_;
+		}
+
+		/* Note:
+		 * We will truncate the page cache under file i/o configuration
+		 * in unmap code. Therefore, we won't convert lba, range
+		 * under 4kb logical block size environment here. 
+		 * We will do it in backend code
+		 */
+
+		/* 20140626, adamhsu, redmine 8745,8777,8778 */
+		ret = dev->transport->do_discard(cmd, lba, range);
+
+		if (ret < 0) {
+			pr_err("transport->do_discard() failed: %d\n", ret);
+			goto _EXIT_;
+		}
+
+		ptr += 16;
+		size -= 16;
+	}
+
+_EXIT_:
+	if (buf)
+		transport_kunmap_data_sg(cmd);
+
+	if (!ret) {
+		task->task_scsi_status = GOOD;
+		transport_complete_task(task, 1);
+	}
+	return ret;
+}
+
+#else
 int target_emulate_unmap(struct se_task *task)
 {
 	struct se_cmd *cmd = task->task_se_cmd;
 	struct se_device *dev = cmd->se_dev;
 	unsigned char *buf, *ptr = NULL;
-
 	sector_t lba;
 	int size = cmd->data_length;
 	u32 range;
 	int ret = 0;
 	int dl, bd_dl;
-
-#if defined(CONFIG_MACH_QNAPTS)
-
-	if (!is_thin_lun(dev)){
-		pr_err("UNMAP emulation can't work on thick LU\n");
-		__set_err_reason(ERR_UNKNOWN_SAM_OPCODE, &cmd->scsi_sense_reason);
-		return -EINVAL;
-	}
-
-	/* sbc3r35, page 186 */
-	if ((cmd->t_task_cdb[1] & 0x1) && (bSupportArchorLba == 0)){
-		pr_err("Not support ANCHOR in UNMAP emulation\n");
-		__set_err_reason(ERR_INVALID_CDB_FIELD, &cmd->scsi_sense_reason);
-		return -EOPNOTSUPP;
-	}
-
-	/* if param list len is zero, means no data shall be transferred */
-	if (!size){
-		task->task_scsi_status = GOOD;
-		transport_complete_task(task, 1);
-		return 0;
-	}
-
-	/* Spec said the param list len shall be large than 8 bytes */
-	if (size < 8){
-		pr_err("Param list len shall be large than 8 bytes in UNMAP emulation\n");
-		__set_err_reason(ERR_PARAMETER_LIST_LEN_ERROR, &cmd->scsi_sense_reason);
-		return -EINVAL;
-	}
-#endif
 
 	if (!dev->transport->do_discard) {
 		pr_err("UNMAP emulation not supported on %s\n",
@@ -1548,32 +1867,7 @@ int target_emulate_unmap(struct se_task *task)
 	dl = get_unaligned_be16(&buf[0]);
 	bd_dl = get_unaligned_be16(&buf[2]);
 
-#if defined(CONFIG_MACH_QNAPTS)
-
-	/* sbc3r35, page 188 */
-	if (dl != (bd_dl + 6)){
-		pr_err("UNMAP data len doesn't equal to UNMAP blk "
-			"desc data len plus 6 bytes in UNMAP emulation\n");
-		cmd->scsi_sense_reason = TCM_INVALID_PARAMETER_LIST;
-		ret = -EINVAL;
-		goto err;
-	}
-
-	/* if UNMAP blk desc data len is zero, means no any unmap operation */
-	if (!bd_dl)
-		goto err;
-#endif
-
-	/* sbc3r35, p 164 */
 	size = min(size - 8, bd_dl);
-
-#if defined(CONFIG_MACH_QNAPTS)
-	if (size < 16){
-		cmd->scsi_sense_reason = TCM_INVALID_PARAMETER_LIST;
-		ret = -EINVAL;
-		goto err;
-	}
-#endif
 
 	if (size / 16 > dev->se_sub_dev->se_dev_attrib.max_unmap_block_desc_count) {
 		cmd->scsi_sense_reason = TCM_INVALID_PARAMETER_LIST;
@@ -1593,33 +1887,20 @@ int target_emulate_unmap(struct se_task *task)
 		pr_debug("UNMAP: Using lba: %llu and range: %u\n",
 				 (unsigned long long)lba, range);
 
-		/* sbc3r35, p 164 */
 		if (range > dev->se_sub_dev->se_dev_attrib.max_unmap_lba_count) {
 			cmd->scsi_sense_reason = TCM_INVALID_PARAMETER_LIST;
 			ret = -EINVAL;
 			goto err;
 		}
 
-		/* sbc3r35, p 164 */
 		if (lba + range > dev->transport->get_blocks(dev) + 1) {
 			cmd->scsi_sense_reason = TCM_ADDRESS_OUT_OF_RANGE;
 			ret = -EINVAL;
 			goto err;
 		}
 
-#if defined(CONFIG_MACH_QNAPTS)
-		/* Note:
-		 * We will truncate the page cache under file i/o configuration
-		 * in unmap code. Therefore, we won't convert lba, range
-		 * under 4kb logical block size environment here. 
-		 * We will do it in backend code
-		 */
-
-		/* 20140626, adamhsu, redmine 8745,8777,8778 */
-		ret = dev->transport->do_discard(cmd, lba, range);
-#else
 		ret = dev->transport->do_discard(dev, lba, range);
-#endif
+
 		if (ret < 0) {
 			pr_err("transport->do_discard() failed: %d\n", ret);
 			goto err;
@@ -1637,7 +1918,7 @@ err:
 	}
 	return ret;
 }
-
+#endif
 
 /*
  * Used for TCM/IBLOCK and TCM/FILEIO for block/blk-lib.c level discard support.

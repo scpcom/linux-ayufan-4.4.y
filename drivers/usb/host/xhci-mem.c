@@ -332,6 +332,9 @@ int xhci_ring_expansion(struct xhci_hcd *xhci, struct xhci_ring *ring,
 	num_segs_needed = (num_trbs + (TRBS_PER_SEGMENT - 1) - 1) /
 				(TRBS_PER_SEGMENT - 1);
 
+	if ((int)num_segs_needed < 0)
+		return -ENOMEM;
+
 	/* Allocate number of segments we needed, or double the ring size */
 	num_segs = ring->num_segs > num_segs_needed ?
 			ring->num_segs : num_segs_needed;

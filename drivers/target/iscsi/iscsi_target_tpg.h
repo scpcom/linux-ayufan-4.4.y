@@ -6,6 +6,10 @@ extern int iscsit_load_discovery_tpg(void);
 extern void iscsit_release_discovery_tpg(void);
 extern struct iscsi_portal_group *iscsit_get_tpg_from_np(struct iscsi_tiqn *,
 			struct iscsi_np *);
+/* Jonathan Ho, 20140416,  one target can be logged in from only one initiator IQN */
+#if defined(CONFIG_MACH_QNAPTS) && defined(SUPPORT_SINGLE_INIT_LOGIN)
+extern int iscsit_search_tiqn_for_initiator(struct iscsi_tiqn *, char *);
+#endif
 extern int iscsit_get_tpg(struct iscsi_portal_group *);
 extern void iscsit_put_tpg(struct iscsi_portal_group *);
 extern void iscsit_clear_tpg_np_login_threads(struct iscsi_portal_group *);

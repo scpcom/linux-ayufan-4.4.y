@@ -120,7 +120,7 @@ static int vaai_block_do_ats(
 
 	/* create tmp page and sg list for r_task */
 	page = alloc_page(GFP_KERNEL | __GFP_ZERO);
-	sgl = kzalloc(GFP_KERNEL, sizeof(struct scatterlist));
+	sgl = kzalloc(sizeof(struct scatterlist), GFP_KERNEL);
 
 	if (!page || !sgl){
 		__set_err_reason(ERR_OUT_OF_RESOURCES, 
@@ -342,6 +342,7 @@ static int vaai_file_do_ats(
 	rw_ret = vfs_writev(fd_file, &iov, 1, &position);
 	set_fs(old_fs);
 
+
 #if defined(SUPPORT_TP)
 	if (rw_ret && is_thin_lun(se_dev)){
 		/* TODO: 
@@ -371,16 +372,16 @@ static int vaai_file_do_ats(
 				 * any block) or something wrong during normal
 				 * sync-cache
 				 */
-
-				/* call again to make sure it is no space
-				 * really or not
-				 */
-				err_1 = check_dm_thin_cond(inode->i_bdev);
-				if (err_1 == -ENOSPC){
-					ret = err_1;
+				if (ret != -ENOSPC){
+					/* call again to make sure it is no space
+					 * really or not
+					 */
+					err_1 = check_dm_thin_cond(inode->i_bdev);
+					if (err_1 == -ENOSPC){
+						ret = err_1;
+					}
+					/* it may something wrong duing sync-cache */
 				}
-
-				/* it may something wrong duing sync-cache */
 				rw_ret = ret;
 				goto _EXIT_1_;
 			}

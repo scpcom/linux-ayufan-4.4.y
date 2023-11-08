@@ -53,6 +53,12 @@
 
 #include "libata.h"
 #include "libata-transport.h"
+//
+//Patch by QNAP: only for HAL application
+#if defined(CONFIG_MACH_QNAPTS)
+#include <qnap/hal_event.h>
+extern int send_hal_netlink(NETLINK_EVT *event);
+#endif
 
 #define ATA_SCSI_RBUF_SIZE	4096
 
@@ -115,6 +121,100 @@ static void ata_port_led(struct ata_port *ap,u8 on)
 	if(retry == SGPIO_RETRY_MAX)
 	    printk("%s:SGPIO always busy\n",__func__);
 }
+#ifdef QNAP_HAL
+// qnap NCQ enable scheme
+static ssize_t ata_scsi_ncq_show(struct device *device, struct device_attribute *attr,
+		char *buf)
+{
+	struct scsi_device *sdev = to_scsi_device(device);
+	struct ata_port *ap;
+	struct ata_device *dev;
+	unsigned long flags;
+    int value = 0;
+	int rc = 0;
+
+	ap = ata_shost_to_port(sdev->host);
+
+	spin_lock_irqsave(ap->lock, flags);
+	dev = ata_scsi_find_dev(ap, sdev);
+	if (!dev) 
+    {
+		rc = -ENODEV;
+	}
+    else
+    {
+        if (!(dev->flags & ATA_DFLAG_NCQ ))
+        {
+            value = -1;
+        }
+        else if (dev->flags & ATA_DFLAG_NCQ_OFF) 
+        {
+            value = 0;
+        }
+        else
+        {
+            value = 1;
+        }
+    }
+
+	spin_unlock_irq(ap->lock);
+
+	return rc < 0 ? rc : snprintf(buf, 20, "%d\n", value);
+}
+
+static ssize_t
+ata_scsi_ncq_store(struct device *device, struct device_attribute *attr,
+	const char *buf, size_t len)
+{
+	struct scsi_device *sdev = to_scsi_device(device);
+	struct ata_port *ap;
+	struct ata_device *dev;
+	long int input;
+	unsigned long flags;
+	int rc;
+
+	rc = kstrtol(buf, 10, &input);
+	if (rc)
+		return rc;
+	if (input < 0)
+		return -EINVAL;
+
+	ap = ata_shost_to_port(sdev->host);
+
+	spin_lock_irqsave(ap->lock, flags);
+	dev = ata_scsi_find_dev(ap, sdev);
+	if (unlikely(!dev)) 
+    {
+		rc = -ENODEV;
+	}
+    else
+    {
+        if (!(dev->flags & ATA_DFLAG_NCQ))
+        {
+            rc = -EINVAL;
+        }
+        else
+        {
+            if (input == 0)
+            {
+                dev->flags |= ATA_DFLAG_NCQ_OFF;
+            }
+            else
+            {
+                dev->flags &= ~ATA_DFLAG_NCQ_OFF;
+            }
+        }
+    }
+	spin_unlock_irqrestore(ap->lock, flags);
+
+
+	return rc ? rc : len;
+}
+
+DEVICE_ATTR(qnap_ncq, S_IRUGO | S_IWUSR,
+	    ata_scsi_ncq_show, ata_scsi_ncq_store);
+EXPORT_SYMBOL_GPL(dev_attr_qnap_ncq);
+#endif
 #endif
 ///////////////////////////////////////////////////////////
 
@@ -1140,6 +1240,10 @@ static int ata_scsi_dev_config(struct scsi_device *sdev,
 			       struct ata_device *dev)
 {
 	struct request_queue *q = sdev->request_queue;
+#if defined(CONFIG_MACH_QNAPTS) && defined(QNAP_HAL)
+    // qnap NCQ enable scheme
+    int ret = 0;
+#endif
 
 	if (!ata_id_has_unload(dev->id))
 		dev->flags |= ATA_DFLAG_NO_UNLOAD;
@@ -1190,6 +1294,11 @@ static int ata_scsi_dev_config(struct scsi_device *sdev,
 
 		depth = min(sdev->host->can_queue, ata_id_queue_depth(dev->id));
 		depth = min(ATA_MAX_QUEUE - 1, depth);
+#if defined(CONFIG_MACH_QNAPTS) && defined(QNAP_HAL)
+        // qnap NCQ enable scheme
+        dev->flags |= ATA_DFLAG_NCQ_OFF;
+        ata_dev_info(dev, "set queue depth = %d\n", depth);
+#endif
 		scsi_adjust_queue_depth(sdev, MSG_SIMPLE_TAG, depth);
 	}
 
@@ -1280,6 +1389,11 @@ int __ata_change_queue_depth(struct ata_port *ap, struct scsi_device *sdev,
 {
 	struct ata_device *dev;
 	unsigned long flags;
+#if defined(CONFIG_MACH_QNAPTS) && defined(QNAP_HAL)
+    // qnap NCQ enable scheme
+    NETLINK_EVT hal_event;
+    struct __netlink_ncq_cb *netlink_ncq;
+#endif
 
 	if (reason != SCSI_QDEPTH_DEFAULT)
 		return -EOPNOTSUPP;
@@ -1298,7 +1412,24 @@ int __ata_change_queue_depth(struct ata_port *ap, struct scsi_device *sdev,
 		dev->flags |= ATA_DFLAG_NCQ_OFF;
 		queue_depth = 1;
 	}
+#if defined(CONFIG_MACH_QNAPTS) && defined(QNAP_HAL)
+    // qnap NCQ enable scheme
+    hal_event.type = HAL_EVENT_GENERAL_DISK;
+    hal_event.arg.action = SET_NCQ_BY_USER;
+    netlink_ncq = &hal_event.arg.param.netlink_ncq;
+    netlink_ncq->scsi_bus[0] = sdev->host->host_no;
+    netlink_ncq->scsi_bus[1] = sdev->channel;
+    netlink_ncq->scsi_bus[2] = sdev->id;
+    netlink_ncq->scsi_bus[3] = sdev->lun;
+    netlink_ncq->on_off = dev->flags & ATA_DFLAG_NCQ_OFF ? 0 : 1;
+#endif
+
 	spin_unlock_irqrestore(ap->lock, flags);
+
+#if defined(CONFIG_MACH_QNAPTS) && defined(QNAP_HAL)
+    // qnap NCQ enable scheme
+    send_hal_netlink(&hal_event);
+#endif
 
 	/* limit and apply queue depth */
 	queue_depth = min(queue_depth, sdev->host->can_queue);

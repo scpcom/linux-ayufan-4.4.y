@@ -2000,7 +2000,11 @@ static unsigned int ata_eh_speed_down(struct ata_device *dev,
 	int xfer_ok = 0;
 	unsigned int verdict;
 	unsigned int action = 0;
-
+#if defined(CONFIG_MACH_QNAPTS) && defined(QNAP_HAL)
+    struct scsi_device *sdev = dev->sdev;
+    NETLINK_EVT hal_event;
+    struct __netlink_ncq_cb *netlink_ncq;
+#endif
 	/* don't bother if Cat-0 error */
 	if (ata_eh_categorize_error(eflags, err_mask, &xfer_ok) == 0)
 		return 0;
@@ -2008,6 +2012,28 @@ static unsigned int ata_eh_speed_down(struct ata_device *dev,
 	/* record error and determine whether speed down is necessary */
 	ata_ering_record(&dev->ering, eflags, err_mask);
 	verdict = ata_eh_speed_down_verdict(dev);
+
+#if defined(CONFIG_MACH_QNAPTS) && defined(QNAP_HAL)
+    // qnap NCQ enable scheme
+    if ((err_mask & AC_ERR_TIMEOUT))
+    {
+        if (!(dev->flags & ATA_DFLAG_NCQ_OFF))
+        {
+            dev->flags |= ATA_DFLAG_NCQ_OFF;
+            ata_dev_warn(dev, "NCQ disabled due to timeout\n");
+            //send event
+            hal_event.type = HAL_EVENT_GENERAL_DISK;
+            hal_event.arg.action = SET_NCQ_BY_KERNEL;
+            netlink_ncq = &hal_event.arg.param.netlink_ncq;
+            netlink_ncq->scsi_bus[0] = sdev->host->host_no;
+            netlink_ncq->scsi_bus[1] = sdev->channel;
+            netlink_ncq->scsi_bus[2] = sdev->id;
+            netlink_ncq->scsi_bus[3] = sdev->lun;
+            netlink_ncq->on_off = 0;
+            send_hal_netlink(&hal_event);
+        }
+    }
+#endif
 
 	/* turn off NCQ? */
 	if ((verdict & ATA_EH_SPDN_NCQ_OFF) &&

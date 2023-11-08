@@ -53,6 +53,12 @@ struct scsi_disk {
 	struct gendisk	*disk;
 	atomic_t	openers;
 	sector_t	capacity;	/* size in 512-byte sectors */
+
+	/* redmine 11885 */
+#ifdef CONFIG_MACH_QNAPTS
+	sector_t	tmp_capacity;
+	spinlock_t	set_capacity_lock;
+#endif
 	u32		max_ws_blocks;
 	u32		max_unmap_blocks;
 	u32		unmap_granularity;

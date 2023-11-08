@@ -22,8 +22,6 @@
 #include "target_general.h"
 #include "tpc_helper.h"
 
-
-
 /**/
 static void __tpc_track_node_lock_add(
     IN LIO_SE_CMD *se_cmd
@@ -2607,6 +2605,7 @@ static void __tpc_track_node_lock_add(
     /**/
     if (!se_cmd->se_lun)
         return;
+
     se_dev = se_cmd->se_lun->lun_se_dev;
     spin_lock_irqsave(&se_dev->se_port_lock, flags);
     spin_lock(&se_cmd->se_lun->lun_sep_lock);
@@ -3359,7 +3358,12 @@ static int __tpc_do_b_zero_w(
 
 	block_lba = task->lba;
 	d_bs_order = task->dev_bs_order;
-	expected_blks = task->nr_blks;
+
+
+	if (task->s_nr_blks)
+		expected_blks = task->s_nr_blks;
+	else
+		expected_blks = task->nr_blks;
 
 	while (expected_blks){
 
@@ -3581,13 +3585,17 @@ static int __tpc_do_f_zero_w(
 				if (!is_thin_lun(task->se_dev))
 					break;
 
-
-				err_1 = check_dm_thin_cond(inode->i_bdev);
-				if (err_1 == -ENOSPC){
+				if (ret != -ENOSPC) {
+					err_1 = check_dm_thin_cond(inode->i_bdev);
+					if (err_1 == -ENOSPC){
+						pr_warn("%s: thin space was full\n", 
+							__func__); 
+						ret = err_1;
+					}
+				} else
 					pr_warn("%s: thin space was full\n", 
 						__func__); 
-					ret = err_1;
-				}
+
 #endif
 				break;
 			}
@@ -3966,4 +3974,5 @@ void __tpc_free_obj_timer(
 	return;
 
 }
+
 

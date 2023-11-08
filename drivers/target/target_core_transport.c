@@ -68,6 +68,9 @@
 #include "vaai_target_struc.h"
 #include "target_general.h"
 
+#if defined(SUPPORT_FAST_BLOCK_CLONE)
+#include "target_fast_clone.h"
+#endif
 #if defined(SUPPORT_VAAI) //Benjamin 20121105 sync VAAI support from Adam. 
 #include "vaai_helper.h"
 #endif
@@ -428,6 +431,16 @@ struct se_session *transport_init_session(void)
 	INIT_LIST_HEAD(&se_sess->sess_cmd_list);
 	INIT_LIST_HEAD(&se_sess->sess_wait_list);
 	spin_lock_init(&se_sess->sess_cmd_lock);
+
+#if defined(CONFIG_MACH_QNAPTS)
+	spin_lock_init(&se_sess->sess_reinstatement_lock);
+
+
+#if (LINUX_VERSION_CODE == KERNEL_VERSION(3,12,6))
+	transport_init_tag_pool(se_sess);
+#endif
+
+#endif
 	kref_init(&se_sess->sess_kref);
 
 	return se_sess;
@@ -466,6 +479,9 @@ void __transport_register_session(
 		}
 		kref_get(&se_nacl->acl_kref);
 
+#if defined(CONFIG_MACH_QNAPTS)
+		__transport_t10_prb_restore(se_tpg, se_nacl, se_sess, buf);
+#endif
 		spin_lock_irq(&se_nacl->nacl_sess_lock);
 		/*
 		 * The se_nacl->nacl_sess pointer will be set to the
@@ -575,6 +591,11 @@ void transport_free_session(struct se_session *se_sess)
 		else
 			kfree(se_sess->sess_cmd_map);
 	}
+
+
+	transport_free_extra_tag_pool(se_sess);
+
+
 #endif
 #endif
 	kmem_cache_free(se_sess_cache, se_sess);
@@ -599,6 +620,12 @@ void transport_deregister_session(struct se_session *se_sess)
 	list_del(&se_sess->sess_list);
 	se_sess->se_tpg = NULL;
 	se_sess->fabric_sess_ptr = NULL;
+#if defined(CONFIG_MACH_QNAPTS)
+	bool sess_reinstatement;
+	spin_lock(&se_sess->sess_reinstatement_lock);
+	sess_reinstatement = se_sess->sess_reinstatement = 1;
+	spin_unlock(&se_sess->sess_reinstatement_lock);
+#endif	
 	spin_unlock_irqrestore(&se_tpg->session_lock, flags);
 
 #ifdef CONFIG_MACH_QNAPTS	// Eric Gu for VMWare 5.0 certification
@@ -633,6 +660,11 @@ void transport_deregister_session(struct se_session *se_sess)
 			se_tpg->num_node_acls--;
 			spin_unlock_irqrestore(&se_tpg->acl_node_lock, flags);
 			core_tpg_wait_for_nacl_pr_ref(se_nacl);
+#if defined(CONFIG_MACH_QNAPTS)
+			spin_lock_irqsave(&se_nacl->node_sess_reinstatement_lock, flags);
+			se_nacl->node_sess_reinstatement = 1;
+			spin_unlock_irqrestore(&se_nacl->node_sess_reinstatement_lock, flags);
+#endif			
 			core_free_device_list_for_node(se_nacl, se_tpg);
 			se_tfo->tpg_release_fabric_acl(se_tpg, se_nacl);
 
@@ -854,15 +886,6 @@ static void transport_add_cmd_to_queue(struct se_cmd *cmd, int t_state,
 	if (t_state) {
 		spin_lock_irqsave(&cmd->t_state_lock, flags);
 		cmd->t_state = t_state;
-
-#if defined(CONFIG_MACH_QNAPTS)
-		/* 2014/08/07, adamhsu, redmine 9055,9076,9278 */
-		if (cmd->t_state == TRANSPORT_PROCESS_WRITE){
-			spin_lock(&cmd->tmf_t_state_lock);
-			cmd->tmf_t_state = TRANSPORT_PROCESS_WRITE;
-			spin_unlock(&cmd->tmf_t_state_lock);
-		}
-#endif
 		cmd->transport_state |= CMD_T_ACTIVE;
 		spin_unlock_irqrestore(&cmd->t_state_lock, flags);
 	}
@@ -949,22 +972,6 @@ EXPORT_SYMBOL(transport_complete_sync_cache);
 static void target_complete_failure_work(struct work_struct *work)
 {
 	struct se_cmd *cmd = container_of(work, struct se_cmd, work);
-
-#if defined(CONFIG_MACH_QNAPTS)
-	/* 2014/08/16, adamhsu, redmine 9055,9076,9278 */
-	if (__do_check_cmd_aborted_func1(cmd)){
-		pr_info("[%s] cmd(ITT:0x%8x) got the ABORT req, to exit "
-			"now\n", __func__, cmd->se_tfo->get_task_tag(cmd));
-		return;
-	}
-
-	if (__do_check_cmd_aborted_func2(cmd)){
-		pr_info("[%s (tmf)] cmd(ITT:0x%8x) got the ABORT req, to exit "
-			"now\n", __func__, cmd->se_tfo->get_task_tag(cmd));
-		return;
-	}
-#endif
-
 	transport_generic_request_failure(cmd);
 }
 
@@ -1031,19 +1038,9 @@ void transport_complete_task(struct se_task *task, int success)
 	 * and transport_wait_for_tasks() will be waiting for completion..
 	 */
 
-
 	/* 2014/08/16, adamhsu, redmine 9055,9076,9278 */
-	if ((cmd->transport_state & (CMD_T_ABORTED
-#if defined(CONFIG_MACH_QNAPTS)
-	| CMD_T_ABORTED_1
-#endif
-	)) 
-	&& cmd->transport_state & CMD_T_STOP
-	)
-	{
-		/* 2014/10/17, adamhsu, solve race condition symptom for task management function */
-		if (!(cmd->transport_state & CMD_T_GOT_ABORTED))
-			cmd->transport_state |= CMD_T_GOT_ABORTED;
+	if ((cmd->transport_state & CMD_T_ABORTED)
+		&& (cmd->transport_state & CMD_T_STOP)){
 
 		spin_unlock_irqrestore(&cmd->t_state_lock, flags);
 		pr_info("[%s] cmd(ITT:0x%8x) got CMD_T_STOP req, "
@@ -1057,33 +1054,6 @@ void transport_complete_task(struct se_task *task, int success)
 
 		return;
 	} 
-#if defined(CONFIG_MACH_QNAPTS)
-	/* 2014/08/16, adamhsu, redmine 9055,9076,9278 */
-	else if (cmd->transport_state & (CMD_T_ABORTED | CMD_T_ABORTED_1)){
-
-		/* 2014/10/17, adamhsu, solve race condition symptom for task management function */
-		if (!(cmd->transport_state & CMD_T_GOT_ABORTED))
-			cmd->transport_state |= CMD_T_GOT_ABORTED;
-
-		spin_unlock_irqrestore(&cmd->t_state_lock, flags);
-		pr_info("[%s] cmd(ITT:0x%8x) got the ABORT req, "
-			"to exit now\n", __func__, 
-			cmd->se_tfo->get_task_tag(cmd));
-		return;
-	}
-	spin_unlock_irqrestore(&cmd->t_state_lock, flags);
-
-	if (__do_check_cmd_aborted_func2(cmd)){
-		pr_info("[%s (tmf)] cmd(ITT:0x%8x) got the ABORT req, to exit "
-			"now\n", __func__, cmd->se_tfo->get_task_tag(cmd));
-		return;
-	}
-
-	spin_lock_irqsave(&cmd->t_state_lock, flags);
-	if (1 == 0){
-		/* nothing */
-	}
-#endif
 	else if (cmd->transport_state & CMD_T_FAILED) {
 		cmd->scsi_sense_reason = TCM_LOGICAL_UNIT_COMMUNICATION_FAILURE;
 		INIT_WORK(&cmd->work, target_complete_failure_work);
@@ -1105,15 +1075,6 @@ void transport_complete_task(struct se_task *task, int success)
 	cmd->transport_state |= (CMD_T_COMPLETE | CMD_T_ACTIVE);
 	spin_unlock_irqrestore(&cmd->t_state_lock, flags);
 
-#if defined(CONFIG_MACH_QNAPTS)
-	/* 2014/08/16, adamhsu, redmine 9055,9076,9278 */
-	spin_lock_irqsave(&cmd->tmf_t_state_lock, flags);
-	spin_lock(&cmd->tmf_data_lock);
-	cmd->tmf_t_state = TRANSPORT_COMPLETE;
-	cmd->tmf_transport_state |= (CMD_T_COMPLETE | CMD_T_ACTIVE);
-	spin_unlock(&cmd->tmf_data_lock);
-	spin_unlock_irqrestore(&cmd->tmf_t_state_lock, flags);
-#endif
 	queue_work(target_completion_wq, &cmd->work);
 }
 EXPORT_SYMBOL(transport_complete_task);
@@ -1704,7 +1665,11 @@ struct se_device *transport_add_device_to_core_hba(
 	spin_lock_init(&dev->qf_cmd_lock);
 	atomic_set(&dev->dev_ordered_id, 0);
 
+
 #if defined(CONFIG_MACH_QNAPTS)
+
+	dev->fast_blk_clone = 0;
+
 	INIT_LIST_HEAD(&dev->cmd_rec_list);
 	spin_lock_init(&dev->cmd_rec_lock);
 	atomic_set(&dev->cmd_rec_count, 0);
@@ -1718,6 +1683,8 @@ struct se_device *transport_add_device_to_core_hba(
     spin_lock_init(&dev->dev_q_task_lock);
     atomic_set(&dev->dev_r_task_cnt, 0);
 #endif
+	transport_setup_support_fbc(dev);
+	transport_set_pool_blk_sectors(dev, dev_limits);
 #endif
 
 	se_dev_set_default_attribs(dev, dev_limits);
@@ -1965,14 +1932,12 @@ void transport_init_se_cmd(
 	cmd->tmf_code = 0;
 	cmd->tmf_resp_tas = 0;
 	cmd->tmf_diff_it_nexus = 0;
-	spin_lock_init(&cmd->tmf_t_state_lock);
+	spin_lock_init(&cmd->tmf_data_lock);
 
 	cmd->byte_err_offset = 0;
 	cmd->cur_se_task = NULL;
 
 #if defined(SUPPORT_CONCURRENT_TASKS)
-	/* 2014/08/16, adamhsu, redmine 9055,9076,9278 */
-	spin_lock_init(&cmd->wq_lock);
 	cmd->use_wq = false;
 #endif
 
@@ -2754,12 +2719,6 @@ static int transport_execute_tasks(struct se_cmd *cmd)
 	 * (2) Not all scsi commands cdb[] field contains the lba / nr blks.
 	 *     This code shall be modified in the future
 	 */
-
-	/* 2014/08/16, adamhsu, redmine 9055,9076,9278 */
-	unsigned long flags;
-	spin_lock_irqsave(&cmd->t_state_lock, flags);
-	spin_lock(&cmd->wq_lock);
-
 	len = (se_dev->prev_len / se_dev->se_sub_dev->se_dev_attrib.block_size);
 	cmd->use_wq = false;
 
@@ -2779,10 +2738,6 @@ static int transport_execute_tasks(struct se_cmd *cmd)
 		se_dev->prev_lba = cmd->t_task_lba;
 		se_dev->prev_len = cmd->data_length;
 	}
-
-	/* 2014/08/16, adamhsu, redmine 9055,9076,9278 */
-	spin_unlock(&cmd->wq_lock);
-	spin_unlock_irqrestore(&cmd->t_state_lock, flags);
 #endif
 
 	/*
@@ -2822,44 +2777,6 @@ static void transport_execute_tasks_wq(struct work_struct *work)
 	int error;
 	unsigned long flags;
 
-#ifdef CONFIG_MACH_QNAPTS
-	/* 2014/04/06, adamhsu, redmine 7904 */
-	/* 2014/08/16, adamhsu, redmine 9055,9076,9278 */
-	int tmf_code, tmf_resp_tas, diff_it_nexus;
-#endif
-
-
-	/* (1)
-	 * 2014/04/06, adamhsu, redmine 7904
-	 * -Add code on wq path during to process TMF
-	 *
-	 * (2) 
-	 * 2014/08/16, adamhsu, redmine 9055,9076,9278
-	 */
-	if(__do_check_cmd_aborted_func1(cmd)
-	|| __do_check_cmd_aborted_func2(cmd)
-	)
-	{
-		tmf_code = cmd->tmf_code;
-		tmf_resp_tas = cmd->tmf_resp_tas;
-		diff_it_nexus = cmd->tmf_diff_it_nexus;
-
-		pr_info("[wq] task:0x%p in cmd(ITT:0x%8x) "
-			"got the ABORT req from TMF(%s it_nexus), "
-			"tmf code:0x%x, %s need to resp TAS. "
-			"t_task_cdbs_left:0x%x\n",
-			task, cmd->se_tfo->get_task_tag(cmd),
-			((diff_it_nexus) ? "diff": "same"), tmf_code, 
-			((tmf_resp_tas) ? "": "not"), 
-			atomic_read(&cmd->t_task_cdbs_left));
-
-		cmd->se_tfo->set_clear_delay_remove(cmd, 1, 1);
-		transport_complete_task(task, 1);
-		return;
-	}
-
-
-
 	if (cmd->execute_task)
 		error = cmd->execute_task(task);
 	else
@@ -2889,12 +2806,6 @@ static int __transport_execute_tasks(struct se_device *dev, struct se_cmd *new_c
 	struct se_cmd *cmd = NULL;
 	struct se_task *task = NULL;
 	unsigned long flags;
-
-#ifdef CONFIG_MACH_QNAPTS
-	/* 2014/04/06, adamhsu , redmine 7904 */
-	/* 2014/08/16, adamhsu, redmine 9055,9076,9278 */
-	int tmf_code, tmf_resp_tas, diff_it_nexus;
-#endif
 
 check_depth:
 	spin_lock_irq(&dev->execute_task_lock);
@@ -2936,10 +2847,47 @@ check_depth:
 
 //        printk("%s: r_cnt:0x%x\n", __func__, atomic_read(&dev->dev_r_task_cnt));
         wake_up_interruptible(&dev->p_task_thread_wq);
-#else
+#endif
+
+
+#if defined(CONFIG_MACH_QNAPTS)
+
+	if (task->task_data_direction == DMA_TO_DEVICE) {
+
+		spin_lock_irqsave(&dev->se_sub_dev->se_dev_lock, flags);
+		if (dev->se_sub_dev->se_dev_attrib.syswp){
+
+			spin_unlock_irqrestore(&dev->se_sub_dev->se_dev_lock, flags);
+
+			/* if now is system write protected case, to skip any
+			 * command for DMA_TO_DEVICE, and treat the cmd resp is
+			 * GOOD. This modification is for host side.
+			 * please refer redmine 12672,12789
+			 */
+			task->task_scsi_status = GOOD;
+			transport_complete_task(task, 1);
+
+			if (cmd->t_state & TRANSPORT_COMPLETE){
+
+				SUBSYSTEM_TYPE type;
+				__do_get_subsystem_dev_type(dev, &type);
+
+				pr_warn("%s: detected write protected "
+				"lu:0x%08x\n", 
+				((type == SUBSYSTEM_BLOCK) ? "IBLOCK": \
+				((type == SUBSYSTEM_FILE) ? "LIO(File I/O)" : \
+				"Unknown Type")),
+				cmd->orig_fe_lun);
+			}
+			new_cmd = NULL;
+			goto check_depth;
+		}
+
+		spin_unlock_irqrestore(&dev->se_sub_dev->se_dev_lock, flags);
+	}
+
 
 #if defined(SUPPORT_CONCURRENT_TASKS)
-
 	/* 20130628, Jonathan Ho, add workqueue for executing iscsi tasks concurrently */
 
 	/* go workqueue if file i/o device */
@@ -2958,40 +2906,8 @@ check_depth:
 	 */
 
 _NON_WQ_PATH_:
-
 #endif
-
-	/* (1)
-	 * 2014/04/06, adamhsu, redmine 7904
-	 * -Add code on non-wq path during to process TMF
-	 *
-	 * (2) 
-	 * 2014/08/16, adamhsu, redmine 9055,9076,9278
-	 */
-	if(__do_check_cmd_aborted_func1(cmd)
-	|| __do_check_cmd_aborted_func2(cmd)
-	)
-	{
-		tmf_code = cmd->tmf_code;
-		tmf_resp_tas = cmd->tmf_resp_tas;
-		diff_it_nexus = cmd->tmf_diff_it_nexus;
-
-		pr_info("[non-wq] task:0x%p in cmd(ITT:0x%8x) "
-			"got the ABORT req from TMF(%s it_nexus), "
-			"tmf code:0x%x, %s need to resp TAS. "
-			"t_task_cdbs_left:0x%x\n",
-			task, cmd->se_tfo->get_task_tag(cmd),
-			((diff_it_nexus) ? "diff": "same"), tmf_code, 
-			((tmf_resp_tas) ? "": "not"), 
-			atomic_read(&cmd->t_task_cdbs_left));
-
-		cmd->se_tfo->set_clear_delay_remove(cmd, 1, 1);
-		transport_complete_task(task, 1);
-		new_cmd = NULL;
-		goto check_depth;
-	}
-
-
+#endif
 	if (cmd->execute_task)
 		error = cmd->execute_task(task);
 	else
@@ -3002,11 +2918,10 @@ _NON_WQ_PATH_:
 		task->task_flags &= ~TF_ACTIVE;
 		cmd->transport_state &= ~CMD_T_SENT;
 		spin_unlock_irqrestore(&cmd->t_state_lock, flags);
-
 		transport_stop_tasks_for_cmd(cmd);
 		transport_generic_request_failure(cmd);
 	}
-#endif
+
 
 
 	new_cmd = NULL;
@@ -3382,6 +3297,7 @@ static int transport_generic_cmd_sequencer(
 		cmd->scsi_sense_reason = TCM_CHECK_CONDITION_UNIT_ATTENTION;
 		return -EINVAL;
 	}
+
 	/*
 	 * Check status of Asymmetric Logical Unit Assignment port
 	 */
@@ -3775,11 +3691,14 @@ static int transport_generic_cmd_sequencer(
 					target_emulate_readcapacity_16;
 			break;
 
-#if defined(CONFIG_MACH_QNAPTS) && defined(SUPPORT_TP) && defined(SUPPORT_VOLUME_BASED)
+#if defined(CONFIG_MACH_QNAPTS) && defined(SUPPORT_TP)
+/* Jonathan Ho, 20141225, GET_LBA_STATUS for X31 without SUPPORT_VOLUME_BASED */
+#if defined(SUPPORT_VOLUME_BASED) || (LINUX_VERSION_CODE == KERNEL_VERSION(3,2,26))
 		case SAI_GET_LBA_STATUS:
 			if (!passthrough)
 				cmd->execute_task = target_emulate_getlbastatus;
 			break;
+#endif /* defined(SUPPORT_VOLUME_BASED) || (LINUX_VERSION_CODE == KERNEL_VERSION(3,2,26)) */
 #endif
 		default:
 			if (passthrough)
@@ -4137,12 +4056,8 @@ static int transport_generic_cmd_sequencer(
 		}
 	}
 
-	if (cmd->se_cmd_flags & SCF_SCSI_DATA_SG_IO_CDB &&
-	    sectors > dev->se_sub_dev->se_dev_attrib.fabric_max_sectors) {
-		printk_ratelimited(KERN_ERR "SCSI OP %02xh with too big sectors %u\n",
-				   cdb[0], sectors);
+	if (transport_check_sectors_exceeds_max_limits_blks(cmd, sectors) < 0)
 		goto out_invalid_cdb_field;
-	}
 
 	/* reject any command that we don't have a handler for */
 	if (!(passthrough || cmd->execute_task ||
@@ -4291,18 +4206,32 @@ static void target_complete_ok_work(struct work_struct *work)
 	 */
 
 #if defined(CONFIG_MACH_QNAPTS)
-	/* 2014/08/16, adamhsu, redmine 9055,9076,9278 */
-	if (__do_check_cmd_aborted_func1(cmd)){
-		pr_info("[%s] cmd(ITT:0x%8x) got the ABORT req, to exit "
-			"now\n", __func__, cmd->se_tfo->get_task_tag(cmd));
+#if defined(SUPPORT_CONCURRENT_TASKS)
+	/* Avoid to access the NULL of se_lun here when code executed
+	 * transport_send_check_condition_and_sense() already under
+	 * concurrent task mechanism
+	 */
+	unsigned long flags;
+	spin_lock_irqsave(&cmd->t_state_lock, flags);
+	if (cmd->se_cmd_flags & SCF_SENT_CHECK_CONDITION){
+		spin_unlock_irqrestore(&cmd->t_state_lock, flags);
+		pr_info("[%s] cmd(ITT:0x%8x) got the "
+			"SCF_SENT_CHECK_CONDITION, to exit\n",
+			__func__, cmd->se_tfo->get_task_tag(cmd));
+		transport_lun_remove_cmd(cmd);
+		transport_cmd_check_stop_to_fabric(cmd);
 		return;
 	}
-	
-	if (__do_check_cmd_aborted_func2(cmd)){
-		pr_info("[%s (tmf)] cmd(ITT:0x%8x) got the ABORT req, to exit "
-			"now\n", __func__, cmd->se_tfo->get_task_tag(cmd));
+	spin_unlock_irqrestore(&cmd->t_state_lock, flags);
+
+	if (!cmd->se_lun){
+		pr_info("[%s] cmd(ITT:0x%8x) se_lun is NULL already, "
+			"to exit\n", __func__, cmd->se_tfo->get_task_tag(cmd));
+		transport_lun_remove_cmd(cmd);
+		transport_cmd_check_stop_to_fabric(cmd);
 		return;
 	}
+#endif
 #endif
 
 	if (cmd->se_dev->dev_task_attr_type == SAM_TASK_ATTR_EMULATED)
@@ -4775,6 +4704,7 @@ transport_allocate_data_tasks(struct se_cmd *cmd,
 	sector_t sectors, dev_max_sectors;
 	u32 sector_size;
 
+
 	if (transport_cmd_get_valid_sectors(cmd) < 0)
 		return -EINVAL;
 
@@ -4833,6 +4763,7 @@ transport_allocate_data_tasks(struct se_cmd *cmd,
 		 * in order to calculate the number per task SGL entries
 		 */
 		task->task_sg_nents = DIV_ROUND_UP(task->task_size, PAGE_SIZE);
+
 		/*
 		 * Check if the fabric module driver is requesting that all
 		 * struct se_task->task_sg[] be chained together..  If so,
@@ -4858,14 +4789,29 @@ transport_allocate_data_tasks(struct se_cmd *cmd,
 		task_size = task->task_size;
 
 		/* Build new sgl, only up to task_size */
+
 		for_each_sg(task->task_sg, sg, task->task_sg_nents, count) {
+
 			if (cmd_sg->length > task_size)
 				break;
 
+
 			*sg = *cmd_sg;
+#if defined(CONFIG_MACH_QNAPTS)
+			/* The sg end bit will be overwrited by 
+			 * '*sg = *cmd_sg'. To mark it again to avoid to access
+			 * the invalid kernel paging request after to call
+			 * sg_next() for last one
+			 */
+			if (task_sg_nents_padded == task->task_sg_nents){
+				if (count == (task->task_sg_nents - 1))
+					sg_mark_end(sg);
+			}
+#endif
 			task_size -= cmd_sg->length;
 			cmd_sg = sg_next(cmd_sg);
 		}
+
 
 		lba += task->task_sectors;
 		sectors -= task->task_sectors;
@@ -5052,13 +4998,6 @@ static int transport_generic_write_pending(struct se_cmd *cmd)
 
 	spin_lock_irqsave(&cmd->t_state_lock, flags);
 	cmd->t_state = TRANSPORT_WRITE_PENDING;
-
-#if defined(CONFIG_MACH_QNAPTS)
-	/* 2014/08/16, adamhsu, redmine 9055,9076,9278 */
-	spin_lock(&cmd->tmf_t_state_lock);
-	cmd->tmf_t_state = TRANSPORT_WRITE_PENDING;
-	spin_unlock(&cmd->tmf_t_state_lock);
-#endif
 	spin_unlock_irqrestore(&cmd->t_state_lock, flags);
 
 	/*
@@ -5496,17 +5435,6 @@ bool transport_wait_for_tasks(struct se_cmd *cmd)
 	}
 
 	if (!(cmd->transport_state & CMD_T_ACTIVE)) {
-		spin_unlock_irqrestore(&cmd->t_state_lock, flags);
-		return false;
-	}
-
-
-	/* 2014/10/17, adamhsu, solve race condition symptom for task management function */
-	if (cmd->transport_state & CMD_T_GOT_ABORTED){
-		pr_info("wait_for_tasks: got CMD_T_GOT_ABORTED for "
-			"cmd(ITT:0x%08x)\n", 
-			cmd->se_tfo->get_task_tag(cmd));
-
 		spin_unlock_irqrestore(&cmd->t_state_lock, flags);
 		return false;
 	}
@@ -6050,62 +5978,6 @@ after_reason:
 }
 EXPORT_SYMBOL(transport_send_check_condition_and_sense);
 
-
-#if defined(CONFIG_MACH_QNAPTS)
-/* 2014/08/16, adamhsu, redmine 9055,9076,9278 (start) */
-int transport_check_aborted_status(struct se_cmd *cmd, int send_status)
-{
-	int ret = 0;
-	unsigned long flags;
-
-	spin_lock_irqsave(&cmd->t_state_lock, flags);
-
-	if (cmd->transport_state & (CMD_T_ABORTED | CMD_T_ABORTED_1)){
-
-		/* 2014/10/17, adamhsu, solve race condition symptom for task management function */
-		if (!(cmd->transport_state & CMD_T_GOT_ABORTED))
-			cmd->transport_state |= CMD_T_GOT_ABORTED;
-
-		pr_info("[%s] cmd(ITT:0x%8x) got CMD_T_ABORTED\n",
-			__func__, cmd->se_tfo->get_task_tag(cmd));
-		ret = 1;
-	}
-
-	if (__do_check_cmd_aborted_func2(cmd)){
-		pr_info("[%s (tmf)] cmd(ITT:0x%8x) got CMD_T_ABORTED\n",
-			__func__, cmd->se_tfo->get_task_tag(cmd));
-		ret = 1;
-	}
-
-	/* 2014/10/17, adamhsu, solve race condition symptom for task management function */
-	if (cmd->transport_state & CMD_T_STOP){
-		spin_unlock_irqrestore(&cmd->t_state_lock, flags);
-
-		pr_info("[%s] got CMD_T_STOP for cmd(ITT:0x%8x)\n", 
-			__func__, cmd->se_tfo->get_task_tag(cmd));
-
-		complete(&cmd->t_transport_stop_comp);
-
-		spin_lock_irqsave(&cmd->t_state_lock, flags);
-	}
-
-	spin_unlock_irqrestore(&cmd->t_state_lock, flags);
-	return ret;
-
-}
-EXPORT_SYMBOL(transport_check_aborted_status);
-
-void transport_send_task_abort(struct se_cmd *cmd)
-{
-
-	pr_info("[%s] cmd(ITT:0x%8x), do nothing\n", __func__,
-		cmd->se_tfo->get_task_tag(cmd));
-
-}
-/* 2014/08/16, adamhsu, redmine 9055,9076,9278 (end) */
-
-
-#else /* !defined(CONFIG_MACH_QNAPTS) */
 int transport_check_aborted_status(struct se_cmd *cmd, int send_status)
 {
 	int ret = 0;
@@ -6129,6 +6001,7 @@ int transport_check_aborted_status(struct se_cmd *cmd, int send_status)
 	return ret;
 }
 EXPORT_SYMBOL(transport_check_aborted_status);
+
 
 void transport_send_task_abort(struct se_cmd *cmd)
 {
@@ -6165,7 +6038,7 @@ void transport_send_task_abort(struct se_cmd *cmd)
 
 }
 
-#endif
+
 
 
 static int transport_generic_do_tmr(struct se_cmd *cmd)
@@ -6620,6 +6493,11 @@ static int transport_processing_thread(void *param)
 	struct se_cmd *cmd;
 	struct se_device *dev = param;
 
+
+#if defined(CONFIG_MACH_QNAPTS)
+	set_user_nice(current, -20);
+#endif
+
 	while (!kthread_should_stop()) {
 		ret = wait_event_interruptible(dev->dev_queue_obj.thread_wq,
 				atomic_read(&dev->dev_queue_obj.queue_cnt) ||
@@ -6686,100 +6564,6 @@ out:
 }
 
 #if defined(CONFIG_MACH_QNAPTS)
-
-/* 2014/08/16, adamhsu, redmine 9055,9076,9278 (start) */
-int __do_check_cmd_aborted_func1(
-	struct se_cmd *se_cmd
-	)
-{
-	unsigned long flags;
-
-	spin_lock_irqsave(&se_cmd->t_state_lock, flags);
-	if (se_cmd->transport_state & (CMD_T_ABORTED | CMD_T_ABORTED_1)){
-
-		/* 2014/10/17, adamhsu, solve race condition symptom for task management function */
-		if (!(se_cmd->transport_state & CMD_T_GOT_ABORTED))
-			se_cmd->transport_state |= CMD_T_GOT_ABORTED;
-
-		spin_unlock_irqrestore(&se_cmd->t_state_lock, flags);
-		return 1;
-	}
-	spin_unlock_irqrestore(&se_cmd->t_state_lock, flags);
-	return 0;
-}
-EXPORT_SYMBOL(__do_check_cmd_aborted_func1);
-
-
-int __do_check_cmd_aborted_func2(
-	struct se_cmd *se_cmd
-	)
-{
-	unsigned long flags;
-
-	spin_lock_irqsave(&se_cmd->tmf_data_lock, flags);
-	if (se_cmd->tmf_transport_state & (CMD_T_ABORTED | CMD_T_ABORTED_1)){
-
-		/* 2014/10/17, adamhsu, solve race condition symptom for task management function */
-		if (!(se_cmd->tmf_transport_state & CMD_T_GOT_ABORTED))
-			se_cmd->tmf_transport_state |= CMD_T_GOT_ABORTED;
-
-		spin_unlock_irqrestore(&se_cmd->tmf_data_lock, flags);
-		return 1;
-	}
-	spin_unlock_irqrestore(&se_cmd->tmf_data_lock, flags);
-	return 0;
-}
-EXPORT_SYMBOL(__do_check_cmd_aborted_func2);
-
-int __do_check_set_send_status_func1(
-	struct se_cmd *se_cmd
-	)
-{
-	unsigned long flags;
-
-	spin_lock_irqsave(&se_cmd->t_state_lock, flags);
-	if (se_cmd->transport_state & (CMD_T_ABORTED_1 | CMD_T_ABORTED)){
-
-		/* 2014/10/17, adamhsu, solve race condition symptom for task management function */
-		if (!(se_cmd->transport_state & CMD_T_GOT_ABORTED))
-			se_cmd->transport_state |= CMD_T_GOT_ABORTED;
-
-		spin_unlock_irqrestore(&se_cmd->t_state_lock, flags);
-		return 1;
-	}
-	se_cmd->transport_state |= CMD_T_SEND_STATUS;
-	spin_unlock_irqrestore(&se_cmd->t_state_lock, flags);
-
-	return 0;
-}
-EXPORT_SYMBOL(__do_check_set_send_status_func1);
-
-int __do_check_set_send_status_func2(
-	struct se_cmd *se_cmd
-	)
-{
-	unsigned long flags;
-
-	spin_lock_irqsave(&se_cmd->tmf_data_lock, flags);
-	if (se_cmd->tmf_transport_state & (CMD_T_ABORTED_1 | CMD_T_ABORTED)){
-
-		/* 2014/10/17, adamhsu, solve race condition symptom for task management function */
-		if (!(se_cmd->tmf_transport_state & CMD_T_GOT_ABORTED))
-			se_cmd->tmf_transport_state |= CMD_T_GOT_ABORTED;
-
-		spin_unlock_irqrestore(&se_cmd->tmf_data_lock, flags);
-		return 1;
-	}
-	se_cmd->tmf_transport_state |= CMD_T_SEND_STATUS;
-	spin_unlock_irqrestore(&se_cmd->tmf_data_lock, flags);
-	return 0;
-
-}
-EXPORT_SYMBOL(__do_check_set_send_status_func2);
-/* 2014/08/16, adamhsu, redmine 9055,9076,9278 (end) */
-
-
-
 //Benjamin 20121105 sync VAAI support from Adam. 
 
 /*
@@ -7045,78 +6829,64 @@ void __init_cb_data(
 	)
 {
 	pData->wait = pContects;
-	pData->pIBlockDev = NULL;
 	pData->nospc_err= 0;
-	atomic_set(&pData->BioCount, 0);
+	atomic_set(&pData->BioCount, 1);
 	atomic_set(&pData->BioErrCount, 0);
 	return;
 }
 
 
+#define D4_T_S	10
+
 int  __submit_bio_wait(
-	struct block_device *bd,
 	struct bio_list *bio_lists,
 	u8 cmd,
-	CB_DATA *cb_data,
 	unsigned long timeout
 	)
 {
-#define D4_T_S	(10)
-
+	DECLARE_COMPLETION_ONSTACK(wait);
+	CB_DATA cb_data;
 	unsigned long t;
+	struct bio *pBio = NULL;
+	struct blk_plug Plug;
+	IO_REC *rec = NULL;
+
+	if (bio_lists == NULL)
+		BUG_ON(TRUE);
 
 	if (timeout)
 		t = timeout;
 	else
-		t = msecs_to_jiffies(D4_T_S*1000);
+		t = msecs_to_jiffies(D4_T_S * 1000);
 
-	/**/
-	__do_pop_submit_bio(bd, bio_lists, cmd);
+	__init_cb_data(&cb_data, &wait);
+	blk_start_plug(&Plug);
+	while (TRUE) {
+		pBio = bio_list_pop(bio_lists);
+		if (!pBio)
+			break;
+		rec = (IO_REC *)pBio->bi_private;
+		rec->cb_data = &cb_data;
+		atomic_inc(&(cb_data.BioCount));
+		submit_bio(cmd, pBio);
+	}
+	blk_finish_plug(&Plug);
 
-	if (atomic_read(&cb_data->BioCount)){
-		while (wait_for_completion_timeout(cb_data->wait, t) == 0)
+	if (!atomic_dec_and_test(&(cb_data.BioCount))) {
+		while (wait_for_completion_timeout(&wait, t) == 0)
 			pr_err("wait bio to be done\n");
 	}
 
-	if (atomic_read(&cb_data->BioErrCount))
-		return 1;
+	if (atomic_read(&cb_data.BioErrCount)) {
+		if (cb_data.nospc_err)
+			return -ENOSPC;
+		else
+			return -EIO;
+	}
 
 	return 0;
 }
 
-/*
- * @fn void __do_pop_submit_bio(IN struct block_device *pBD, IN struct bio_list *pBioList, IN u8 u8Cmd)
- * @brief function to pop bio from bio list and submit bio
- * @param[in] pBD      - block device
- * @param[in] pBioList - bio list data
- * @param[in] u8Cmd    - command of read or write
- * @retval none
- */
-void __do_pop_submit_bio(
-	IN struct block_device *pBD,
-	IN struct bio_list *pBioList,
-	IN u8 u8Cmd
-	)
-{
-
-	struct bio *pBio = NULL;
-	struct blk_plug Plug;
-
-	if(pBD == NULL || pBioList == NULL)
-		BUG_ON(TRUE);
-
-	blk_start_plug(&Plug);
-
-	while (TRUE){
-		pBio = bio_list_pop(pBioList);
-		if(!pBio)
-			break;
-		submit_bio(u8Cmd, pBio);
-	}
-	blk_finish_plug(&Plug);
-	return;
-
-}
 
 void __do_pop_put_bio(
     IN struct bio_list *biolist
@@ -7163,7 +6933,7 @@ struct bio *__get_one_bio(
 
 #if (LINUX_VERSION_CODE == KERNEL_VERSION(3,2,26)) || (LINUX_VERSION_CODE == KERNEL_VERSION(3,4,6))
 	mybio->bi_destructor = bio_data->bi_destructor;
-#elif (LINUX_VERSION_CODE == KERNEL_VERSION(3,12,6))
+#elif (LINUX_VERSION_CODE == KERNEL_VERSION(3,10,20)) || (LINUX_VERSION_CODE == KERNEL_VERSION(3,12,6))
 #else
 #error "Ooo.. what kernel version do you compile ??"
 #endif
@@ -7292,7 +7062,7 @@ _AGAIN_:
 			return -ENOMEM;
 		}
 
-		sgl = kzalloc(GFP_KERNEL, sizeof(struct scatterlist));
+		sgl = kzalloc(sizeof(struct scatterlist), GFP_KERNEL);
 		sg_data = kzalloc(sizeof(TMP_SG_DATA), GFP_KERNEL);
 
 		if (!sg_data || !sgl || !page){
@@ -7567,13 +7337,13 @@ static void __bio_end_io(
 //	pr_err("%s\n", __func__);
 
 	rec = (IO_REC *)bio->bi_private;
-	p = (CB_DATA *)rec->private_data;
+	p = rec->cb_data;
 
 	if (!test_bit(BIO_UPTODATE, &bio->bi_flags) && !err)
 		err = -EIO;
 
 	rec->transfer_done = 1;
-	if(err != 0){
+	if (err != 0) {
 		if (err == -ENOSPC)
 			p->nospc_err = 1;
 
@@ -7582,16 +7352,14 @@ static void __bio_end_io(
 		smp_mb__after_atomic_inc();
 	}
 
-	if (atomic_read(&p->BioErrCount))
-		rec->transfer_done = -1;
+// TODO: REMOVE
+//	if (atomic_read(&p->BioErrCount))
+//		rec->transfer_done = -1;
 
 	bio_put(bio);
-	if (!atomic_dec_and_test(&p->BioCount))
-		return;
+	if (atomic_dec_and_test(&p->BioCount))
+		complete(p->wait);
 
-	/**/
-	pr_debug("total rod bios was done\n");
-	complete(p->wait);
 	return;
 }
 
@@ -7600,14 +7368,12 @@ static void __bio_destructor(
 	struct bio *bio
 	)
 {
-	CB_DATA *p = NULL;
-	IO_REC *rec = NULL;
-	LIO_IBLOCK_DEV *ibd = NULL;
+	IO_REC *rec = (IO_REC *)bio->bi_private;
 
-	rec = (IO_REC *)bio->bi_private;
-	p = (CB_DATA *)rec->private_data;
-	ibd  = (LIO_IBLOCK_DEV *)p->pIBlockDev;
-	bio_free(bio, ibd->ibd_bio_set);
+	if (rec) {
+		LIO_IBLOCK_DEV *ibd = (LIO_IBLOCK_DEV *)rec->pIBlockDev;
+		bio_free(bio, ibd->ibd_bio_set);
+	}
 	return;
 }
 #endif
@@ -7679,8 +7445,8 @@ static int __do_vfs_rw(
 	se_dev = task->se_dev;
 	f_dev = se_dev->dev_ptr;
 
-	/* Here, we do vfs_rw per sg at a time. The reason is we need to 
-	 * compuated the transfer bytes for the result of every i/o.
+	/* Here, we do vfs_rw per sg at a time. The reason is we need to compuated
+	 * the transfer bytes for the result of every i/o.
 	 */
 	for_each_sg(task->sg_list, sg, task->sg_nents, i) {
 
@@ -7701,8 +7467,10 @@ static int __do_vfs_rw(
 
 		/**/
 		pos = (dest_lba << task->dev_bs_order);
+
 		start = pos;
 		end = start + len;
+
 		dest_lba += (len >> task->dev_bs_order);
 		expected_bcs -= len;
 
@@ -7738,16 +7506,16 @@ static int __do_vfs_rw(
 			}
 
 #if defined(SUPPORT_TP)
-			/* 2015/01/29, adamhsu, bugzilla 48461 */
-
 			/* TODO: 
 			 * To sync cache again if write ok and the sync cache
 		  	 * behavior shall work for thin lun only 
 		  	 */
 			if (task->dir != DMA_TO_DEVICE)
 				continue;
+
 			if (!is_thin_lun(se_dev))
 				continue;
+
 
 			inode = f_dev->fd_file->f_mapping->host;
 
@@ -7771,18 +7539,22 @@ static int __do_vfs_rw(
 					 * any block) or something wrong during normal
 					 * sync-cache
 					 */
+					if (err_1 != -ENOSPC){
 
-					/* call again to make sure it is no space
-					 * really or not
-					 */
-					err_2 = check_dm_thin_cond(inode->i_bdev);
-					if (err_2 == -ENOSPC){
+						/* call again to make sure it is no space
+						 * really or not
+						 */
+						err_2 = check_dm_thin_cond(inode->i_bdev);
+						if (err_2 == -ENOSPC){
+							pr_warn("%s: space was full "
+								"already\n", __func__);
+							err_1 = err_2;
+						}		
+						/* it may something wrong duing sync-cache */
+					} else
 						pr_warn("%s: space was full "
 							"already\n", __func__);
-						err_1 = err_2;
-					}
 
-					/* it may something wrong duing sync-cache */
 					code = err_1;
 					break;
 				}
@@ -7793,8 +7565,8 @@ static int __do_vfs_rw(
 		}
 	}
 
-	/**/
 
+	/**/
 	if (task->is_timeout){
 		pr_err("%s - jiffies > cmd expected-timeout value!!\n",
 			__FUNCTION__);
@@ -7828,8 +7600,6 @@ int __do_b_rw(
 	u8 cmd = 0;
 	struct scatterlist *sg = NULL;
 	unsigned bio_cnt = 0;
-	CB_DATA cb_data;
-	struct completion io_wait;
 	struct bio_list bio_lists;
 	struct list_head io_rec_list;
 	int code = -EINVAL;
@@ -7837,7 +7607,7 @@ int __do_b_rw(
 		.bi_end_io = __bio_end_io,
 #if (LINUX_VERSION_CODE == KERNEL_VERSION(3,2,26)) || (LINUX_VERSION_CODE == KERNEL_VERSION(3,4,6))
 		.bi_destructor = __bio_destructor
-#elif (LINUX_VERSION_CODE == KERNEL_VERSION(3,12,6))
+#elif (LINUX_VERSION_CODE == KERNEL_VERSION(3,10,20)) || (LINUX_VERSION_CODE == KERNEL_VERSION(3,12,6))
 #else
 #error "Ooo.. what kernel version do you compile ??"
 #endif
@@ -7867,8 +7637,6 @@ int __do_b_rw(
 	code = 0;
 	INIT_LIST_HEAD(&io_rec_list);
 	bio_list_init(&bio_lists);
-	init_completion(&io_wait);
-	__init_cb_data(&cb_data, (void *)&io_wait);
 
 	/**/
 	for_each_sg(task->sg_list, sg, task->sg_nents, i){
@@ -7908,22 +7676,19 @@ int __do_b_rw(
 		__add_page_to_one_bio(mybio, sg_page(sg), len, sg->offset);
 
 		mybio->bi_private = (void *)rec;
-		rec->private_data = (void *)&cb_data;
+		rec->cb_data = NULL;
 		rec->nr_blks = (len >> dev_bs_order);
+		rec->pIBlockDev = ib_dev;
 		list_add_tail(&rec->node, &io_rec_list);
-
-		/**/
-		cb_data.pIBlockDev = ib_dev;
-		atomic_inc(&cb_data.BioCount);
 
 		pr_debug("[%s] cmd:0x%x, sg->page:0x%p, sg->length:0x%x\n",
 			__FUNCTION__, cmd, sg_page(sg), sg->length);
 
-		pr_debug("[%s] bio count:0x%x, task lba:0x%llx, "
+		pr_debug("[%s] mybio:0x%p, task lba:0x%llx, "
 			"bio block_lba:0x%llx, expected_bcs:0x%llx, "
-			"real len:0x%llx \n", __FUNCTION__, 
-			atomic_read(&cb_data.BioCount),
-			(unsigned long long)t_lba, (unsigned long long)block_lba, 
+			"real len:0x%llx \n", __FUNCTION__,
+			mybio,
+			(unsigned long long)t_lba, (unsigned long long)block_lba,
 			(unsigned long long)expected_bcs, (unsigned long long)len);
 
 		bio_list_add(&bio_lists, mybio);
@@ -7938,20 +7703,17 @@ int __do_b_rw(
 			continue;
 
 _DO_SUBMIT_:
-		err = __submit_bio_wait(ib_dev->ibd_bd, &bio_lists, cmd, 
-				&cb_data, 0);
+		err = __submit_bio_wait(&bio_lists, cmd, 0);
 
 		/* after to submit, we will do ... */
 		done += (u32)__get_done_blks_by_io_rec_list(&io_rec_list);
+		__do_pop_put_bio(&bio_lists);
 		__free_io_rec_by_io_rec_list(&io_rec_list);
 
 		pr_debug("[%s] done blks:0x%x\n", __FUNCTION__, done);
 
 		if (err){
-			if (cb_data.nospc_err)
-				code = -ENOSPC;
-			else
-				code = -EIO;
+			code = err;
 			break;
 		}
 
@@ -7964,8 +7726,6 @@ _DO_SUBMIT_:
 		/**/
 		INIT_LIST_HEAD(&io_rec_list);
 		bio_list_init(&bio_lists);
-		init_completion(&io_wait);
-		__init_cb_data(&cb_data, (void *)&io_wait);
 		bio_cnt = 0;
 	}
 
@@ -7975,15 +7735,17 @@ _EXIT_:
 
 	if (err || task->is_timeout){
 		if (task->is_timeout)
-			pr_err("[%s] jiffies > cmd expected-timeout value !!\n", 
+			pr_err("[%s] jiffies > cmd expected-timeout value !!\n",
 				__FUNCTION__);
 
+#if 0 // TODO: REMOVE
 		if (err && atomic_read(&cb_data.BioErrCount))
 			pr_err("[%s] one of bio was fail !!\n", __FUNCTION__);
 		else
 			pr_err("[%s] other err happens !!\n", __FUNCTION__);
 
 		__do_pop_put_bio(&bio_lists);
+#endif
 		return -1;
 	}
 	return done;
@@ -8289,9 +8051,19 @@ int __get_file_lba_map_status(
 
 		if (likely(file_ext[fe_idx].fe_logical == pos))
 			found_map = 1;
-		else
-			found_map = 0;
-	
+		else {
+			/* the fs block size is 4kb, so the pos may not be 
+			 * aligned by fe_logical value. Just for 1st ext info
+			 * i.e.
+			 * pos: 0x896c00
+			 * fe_logical: 0x896000
+			 */
+			if (fe_idx == 0)
+				found_map = 1;
+			else
+				found_map = 0;
+		}
+
 _PREPARE_:
 		if (found_map){
 			found_map = 0;
@@ -8391,6 +8163,223 @@ EXPORT_SYMBOL(__get_file_lba_map_status);
 /* 20140513, adamhsu, redmine 8253 */
 #if (LINUX_VERSION_CODE == KERNEL_VERSION(3,12,6))
 
+
+
+void transport_init_tag_pool(
+	struct se_session *se_sess
+	)
+{
+	int i;
+	struct new_tag_pool *pool;
+
+	for (i = 0; i < MAX_TAG_POOL; i++){
+		pool = &se_sess->tag_pool[i];
+		spin_lock_init(&pool->tag_count_lock);
+		atomic_set(&pool->tag_count, 0);
+	}
+	return;
+}
+
+
+int transport_alloc_pool_tag(
+	struct se_session *se_sess, 
+	struct se_cmd *se_cmd, 
+	int is_session_reinstatement
+	)
+{
+	int tag = -1, new_pool_idx, from_emergency_pool = 0;
+	struct new_tag_pool *new_pool;
+
+	/* 1.
+	 * Here, we will pass the GFP_ATOMIC to percpu_ida_alloc() only to
+	 * avoid it will be stuck if not found any available tag. So, we can do
+	 * our handling procedure
+	 *
+	 * 2.
+	 * This call may be called from software interrupt (timer) context
+	 * for allocating iSCSI NopINs
+	 */
+	se_cmd->tag_src_pool = TAG_IS_INVALID;
+
+	/* step1: try alloc tag from native code design */
+	if (se_sess->sess_cmd_map){
+		tag = percpu_ida_alloc(&se_sess->sess_tag_pool, GFP_ATOMIC);
+		if (tag >= 0){
+			se_cmd->tag_src_pool = TAG_FROM_NATIVE_POOL;
+			goto _EXIT_;
+		}
+		pr_debug("fail to alloc tag from sess_tag_pool, "
+			"se_sess:0x%p\n", se_sess);
+	}
+
+	/* step2: try alloc from new tag pool */
+	for (new_pool_idx = 0; new_pool_idx < MAX_TAG_POOL; new_pool_idx++){
+
+		if ((MAX_TAG_POOL >= 2) 
+		&& (new_pool_idx == (MAX_TAG_POOL - 1)))
+		{
+			if (!(is_session_reinstatement || in_interrupt()))
+				break;
+
+			/* if new tag pool count >= 2 and now is at final pool,
+			 * try check whether we are in interrupt context or 
+			 * session reinstatement, if yes, try alloc tag from
+			 * final emergency pool
+			 */
+			pr_warn("try alloc tag from emergency tag pool\n");
+			from_emergency_pool = 1;
+		}
+
+		new_pool = &se_sess->tag_pool[new_pool_idx];
+		if (new_pool->sess_cmd_map){
+			if (from_emergency_pool)
+				pr_info("try emergency tag pool %d, "
+				"se_sess:0x%p\n", new_pool_idx, se_sess);
+
+			tag = percpu_ida_alloc(&new_pool->sess_tag_pool, GFP_ATOMIC);
+			if (tag >= 0){
+				spin_lock(&new_pool->tag_count_lock);
+				atomic_inc(&new_pool->tag_count);
+				spin_unlock(&new_pool->tag_count_lock);
+				se_cmd->tag_src_pool = new_pool_idx;
+				goto _EXIT_;
+			}
+
+			if (from_emergency_pool){
+				pr_info("fail to alloc tag from "
+					"emergency tag pool %d, se_sess:0x%p\n", 
+					new_pool_idx, se_sess);
+			}
+		}
+	}
+
+
+	if (se_cmd->tag_src_pool == TAG_IS_INVALID)
+		pr_warn("can not alloc tag from native tag pool, "
+			"new tag pool %s\n", 
+			((from_emergency_pool) ? "and final emergency pool" : ""));
+
+_EXIT_:
+	return tag;
+
+}
+EXPORT_SYMBOL(transport_alloc_pool_tag);
+
+static int transport_free_extra_tag_pool(
+	struct se_session *se_sess
+	)
+{
+	int i, tag_count;
+	struct new_tag_pool *pool;
+
+	for (i = 0; i < MAX_TAG_POOL; i++){
+		pool = &se_sess->tag_pool[i];
+
+		if (pool->sess_cmd_map){
+			spin_lock(&pool->tag_count_lock);
+			tag_count = atomic_read(&pool->tag_count);
+			spin_unlock(&pool->tag_count_lock);
+
+			WARN_ON((tag_count != 0));
+			pr_debug("free new tag pool %d, cmd_map:0x%p, "
+				"remain tag count:%d, on se_sess:0x%p\n", 
+				i, pool->sess_cmd_map, tag_count, se_sess);
+
+			if (is_vmalloc_addr(pool->sess_cmd_map))
+				vfree(pool->sess_cmd_map);
+			else
+				kfree(pool->sess_cmd_map);
+		}
+	}
+
+
+	return 0;
+}
+
+static int __transport_prepare_extra_tag_pool(
+	struct se_session *se_sess,
+	struct new_tag_pool *pool,
+	unsigned int tag_num, 
+	unsigned int tag_size,
+	int pool_num
+	)
+{
+	int rc;
+
+	pool->sess_cmd_map = kzalloc(tag_num * tag_size,
+		GFP_KERNEL | __GFP_NOWARN | __GFP_REPEAT);
+
+	if (!pool->sess_cmd_map) {
+		pool->sess_cmd_map = vzalloc(tag_num * tag_size);
+		if (!pool->sess_cmd_map) {
+			pr_err("unable to allocate cmd_map "
+				"for new tag pool %d by vzalloc()\n", pool_num);
+			return -ENOMEM;
+		}
+	}
+
+	pr_debug("sess_cmd_map:0x%p\n", pool->sess_cmd_map);
+
+	rc = percpu_ida_init(&pool->sess_tag_pool, tag_num);
+	if (rc < 0) {
+		pr_err("unable to init new tag tool %d, tag_num: %u\n", 
+			pool_num, tag_num);
+		if (is_vmalloc_addr(pool->sess_cmd_map))
+			vfree(pool->sess_cmd_map);
+		else
+			kfree(pool->sess_cmd_map);
+		pool->sess_cmd_map = NULL;
+		return -ENOMEM;
+	}
+	
+	return 0;
+
+}
+
+
+int transport_prepare_extra_tag_pool(
+	struct se_session *se_sess,
+	unsigned int tag_num, 
+	unsigned int tag_size
+	)
+{
+	int i, retry_idx, rc;
+	struct new_tag_pool *new_pool;
+
+	for (i = 0; i < MAX_TAG_POOL; i++){
+
+		pr_debug("start to prepare new tag pool %d, se_sess:0x%p\n", 
+			i, se_sess);
+
+		new_pool = &se_sess->tag_pool[i];
+
+		for (retry_idx = 0; retry_idx < RETRY_EXTRA_POOL_ALLOC_COUNT; 
+			retry_idx++)
+		{
+			rc = __transport_prepare_extra_tag_pool(
+				se_sess, new_pool, tag_num, tag_size, i);
+
+			if (rc == 0){
+				pr_debug("done to prepare new tag pool %d, "
+					"se_sess:0x%p\n", i, se_sess);
+				break;
+			}
+		
+			pr_warn("fail to alloc new tag pool %d, try again. "
+				"se_sess:0x%p\n", i, se_sess);
+		}
+
+		if (retry_idx == RETRY_EXTRA_POOL_ALLOC_COUNT)
+			pr_warn("execeed the retry count after "
+				"to alloc new tag pool %d\n", i);
+
+	}
+
+	return 0;
+}
+
+
+
 int transport_alloc_session_tags(struct se_session *se_sess,
 			         unsigned int tag_num, unsigned int tag_size)
 {
@@ -8417,6 +8406,15 @@ int transport_alloc_session_tags(struct se_session *se_sess,
 		se_sess->sess_cmd_map = NULL;
 		return -ENOMEM;
 	}
+
+
+
+	/* come here means we have one sess tag pool at least, now try to
+	 * alloc others again
+	 */
+	transport_prepare_extra_tag_pool(se_sess, tag_num, tag_size);
+
+
 
 	return 0;
 }
@@ -8599,9 +8597,8 @@ void __create_aligned_range_desc(
 	u32 aligned_size
 	)
 {
-	sector_t s_lba, e_lba;
-	u32 nr_blks;
-	u32 e_align_blk_order;
+	u32 aligned_size_order;
+	u64 total_bytes, s_lba_bytes, e_lba_bytes;
 
 	desc->lba = start_lba,
 	desc->nr_blks = nr_blks_range;
@@ -8609,42 +8606,51 @@ void __create_aligned_range_desc(
 	desc->e_align_bytes = aligned_size;
 	desc->is_aligned = 0;
 
-	if ((desc->nr_blks << desc->bs_order) < desc->e_align_bytes)
+	total_bytes = ((u64)nr_blks_range << block_size_order);
+	if (total_bytes < (u64)aligned_size)
 		return;
 
-	e_align_blk_order = ilog2((desc->e_align_bytes >> 9));
+	aligned_size_order = ilog2(aligned_size);
 
-	/* convert to 512b unit first */
-	nr_blks = ((desc->nr_blks << desc->bs_order) >> 9);
-	s_lba = ((desc->lba << desc->bs_order) >> 9);
-	e_lba = s_lba + nr_blks - 1;
+	/* convert to byte unit first */
+	s_lba_bytes = start_lba << block_size_order;
+	e_lba_bytes = s_lba_bytes + total_bytes - (1 << block_size_order);
 
-	pr_debug("%s: s_lba (512b):0x%llx, e_lba:0x%llx, "
-		"nr_blks (512b):0x%x\n", __FUNCTION__, 
-		(unsigned long long)s_lba, (unsigned long long)e_lba, 
-		nr_blks);
+	pr_debug("%s: s_lba_bytes:0x%llx, e_lba_bytes:0x%llx, "
+		"total_bytes:0x%llx\n", __FUNCTION__, 
+		(unsigned long long)s_lba_bytes, 
+		(unsigned long long)e_lba_bytes, 
+		(unsigned long long)total_bytes);
 
-	s_lba = (((s_lba + (desc->e_align_bytes >> 9) - 1) >> \
-			e_align_blk_order) << e_align_blk_order);
+	/* get the new s_lba is aligned by aligned_size */
+	s_lba_bytes =  
+		(((s_lba_bytes + aligned_size - (1 << block_size_order)) >> \
+			aligned_size_order) << aligned_size_order);
 
-	pr_debug("%s: new align s_lba (512b):0x%llx\n", 
-			__FUNCTION__, (unsigned long long)s_lba);
-
-	if ((s_lba > e_lba)
-	|| ((e_lba - s_lba + 1) < (desc->e_align_bytes >> 9))
+	pr_debug("%s: new align s_lba_bytes:0x%llx\n", __FUNCTION__,
+		(unsigned long long)s_lba_bytes);
+	
+	if ((s_lba_bytes > e_lba_bytes)
+	|| ((e_lba_bytes - s_lba_bytes + (1 << block_size_order)) < (u64)aligned_size)
 	)
 		return;
 
-	nr_blks = (((e_lba - s_lba + 1) >> e_align_blk_order) << e_align_blk_order);
-	pr_debug("%s: new align nr_blks (512b):0x%x\n", __FUNCTION__, nr_blks);
+	/* get how many bytes which is multiplied by aligned_size */
+	total_bytes = 
+		(((e_lba_bytes - s_lba_bytes + (1 << block_size_order)) >> \
+		aligned_size_order) << aligned_size_order);
 
+	pr_debug("%s: new align total bytes:0x%llx\n", __FUNCTION__, 
+		(unsigned long long)total_bytes);
+	
 	/* convert to original unit finally */
-	desc->lba = ((s_lba << 9) >> desc->bs_order);
-	desc->nr_blks = ((nr_blks << 9) >> desc->bs_order);
+	desc->lba = (s_lba_bytes >> block_size_order);
+	desc->nr_blks = (total_bytes >> block_size_order);
 	desc->is_aligned = 1;
 
 	pr_debug("%s: desc->align_lba:0x%llx, desc->align_blks:0x%x\n", 
-		__FUNCTION__, (unsigned long long)desc->lba, desc->nr_blks);
+		__FUNCTION__, 	(unsigned long long)desc->lba, 
+		desc->nr_blks);
 
 	return;
 }
@@ -8723,7 +8729,7 @@ int blkdev_issue_special_discard(
 
 	if (!q)
 	    return -ENXIO;
-	
+
 	if (!blk_queue_discard(q))
 	    return -EOPNOTSUPP;
 
@@ -8811,22 +8817,21 @@ EXPORT_SYMBOL(blkdev_issue_special_discard);
 
 
 #if defined(SUPPORT_TP)
-
-
-
 #if defined(SUPPORT_VOLUME_BASED)
-/* 0: normal i/o (not hit sync i/o threshold)
- * 1: hit sync i/o threshold
- * -ENOSPC: pool space is full
- * -EINVAL: wrong parameter to call function
- */
+
 #if ((LINUX_VERSION_CODE == KERNEL_VERSION(3,4,6)) \
 || (LINUX_VERSION_CODE == KERNEL_VERSION(3,10,20)) \
 || (LINUX_VERSION_CODE == KERNEL_VERSION(3,12,6)) \
 )
 
+
 extern int dm_thin_volume_is_full(void *data);
 
+/* 0: normal i/o (not hit sync i/o threshold)
+ * 1: hit sync i/o threshold
+ * -ENOSPC: pool space is full
+ * -EINVAL: wrong parameter to call function
+ */
 int check_dm_thin_cond(
 	struct block_device *bd
 	)
@@ -8844,7 +8849,9 @@ int check_dm_thin_cond(
 }
 EXPORT_SYMBOL(check_dm_thin_cond);
 
+
 #else
+
 /* -EINVAL: always return -EINVAL for non-supported kernel */
 int check_dm_thin_cond(
 	struct block_device *bd
@@ -8857,7 +8864,7 @@ EXPORT_SYMBOL(check_dm_thin_cond);
 #endif
 
 
-#else
+#else  /* !defined(SUPPORT_VOLUME_BASED) */
 /* -EINVAL: always return -EINVAL for 
  * 1. unsupported kernel
  * 2. product w/o dm-thin 
@@ -8908,6 +8915,371 @@ _ERR_SYNC_CACHE_:
 }
 EXPORT_SYMBOL(__do_sync_cache_range);
 #endif
+
+int transport_check_sectors_exceeds_max_limits_blks(
+	LIO_SE_CMD *se_cmd,
+	u32 sectors
+	)
+{
+	int ret = 0, max_transfer_blks;
+	
+	max_transfer_blks = transport_get_max_transfer_sectors(se_cmd->se_dev);
+
+	/* TODO, sbc3r35j, page 287 
+	 * 1. here won't check the WIRTE USING TOKEN command cause of
+	 *    max trnasfer size for WRITE USING TOKEN command we reported is 
+	 *    larger than max transfer len in block limit vpd
+	 */
+	switch(se_cmd->t_task_cdb[0]){
+	case WRITE_6:
+	case WRITE_10:
+	case WRITE_12:
+	case WRITE_16:
+	case READ_6:
+	case READ_10:
+	case READ_12:
+	case READ_16:
+	case VERIFY:
+	case VERIFY_16:
+	case WRITE_VERIFY:
+	case WRITE_VERIFY_12:
+	case WRITE_VERIFY_16:
+	case XDWRITEREAD_10:
+		if (sectors > max_transfer_blks){
+			pr_err("scsi op: %02xh with too big sectors %u "
+				"exceeds the max limits:%d\n",
+				se_cmd->t_task_cdb[0], sectors, 
+				max_transfer_blks);
+
+			__set_err_reason(ERR_INVALID_CDB_FIELD, 
+				&se_cmd->scsi_sense_reason);
+			ret = -EINVAL;
+		}
+		break;
+	default:
+		break;
+	}
+
+	return ret;
+}
+
+
+int transport_get_pool_blk_size_kb()
+{
+	int size_kb;
+
+/* Bug#63140 Use 1024 KB for ATTO Initiator for Mac */
+//#if defined(SUPPORT_FAST_BLOCK_CLONE)
+//	size_kb = POOL_BLK_SIZE_512_KB;
+//#else
+	size_kb = POOL_BLK_SIZE_1024_KB;
+//#endif
+	return size_kb;
+}
+int transport_get_pool_blk_sectors(
+	LIO_SE_DEVICE *se_dev
+	)
+{
+	int pool_sectors, size_kb, bs_order;
+	
+	bs_order = ilog2(se_dev->se_sub_dev->se_dev_attrib.block_size);
+	size_kb = transport_get_pool_blk_size_kb();
+
+	return ((size_kb << 10) >> bs_order);
+}
+
+int transport_set_pool_blk_sectors(
+	LIO_SE_DEVICE *se_dev,
+	struct se_dev_limits *dev_limits
+	)
+{
+	int bs_order, pool_blk_sectors, pool_size_kb;
+
+	/* This function will be called in transport_add_device_to_core_hba(),
+	 * in the other words, it means we can NOT get the se_sub_dev->se_dev_attrib.block_size
+	 * at this stage. The dev_limits->limits.logical_block_size had been setup
+	 * for 512b or 4096b, so it is safe to use it
+	 */
+	bs_order = ilog2(dev_limits->limits.logical_block_size);
+
+	pool_size_kb = transport_get_pool_blk_size_kb();
+	se_dev->pool_blk_sectors = (pool_size_kb << 10) >> bs_order;
+	return 0;
+}
+
+
+int transport_get_max_hw_transfer_sectors(
+	LIO_SE_DEVICE *se_dev
+	)
+{
+	int bs_order;
+	
+	bs_order = ilog2(se_dev->se_sub_dev->se_dev_attrib.block_size);
+	return ((MAX_TRANSFER_LEN_MB << 20) >> bs_order);
+}
+
+
+int transport_get_max_transfer_sectors(
+	LIO_SE_DEVICE *se_dev
+	)
+{
+	int bs_order;
+	int pool_blk_size;
+
+	bs_order = ilog2(se_dev->se_sub_dev->se_dev_attrib.block_size);
+	/* force the max transfer sectors to dm-thin block size */
+	pool_blk_size =  transport_get_pool_blk_size_kb();
+	return ((pool_blk_size << 10) >> bs_order);
+}
+
+
+int transport_get_opt_transfer_sectors(
+	LIO_SE_DEVICE *se_dev
+	)
+{
+	int sectors;
+
+#if defined(CONFIG_MACH_QNAPTS)
+	int bs_order;
+	int pool_blk_size;
+
+	bs_order = ilog2(se_dev->se_sub_dev->se_dev_attrib.block_size);
+
+	/* force the optimal transfer sectors to dm-thin block size */
+	pool_blk_size =  transport_get_pool_blk_size_kb();
+	sectors = ((pool_blk_size << 10) >> bs_order);
+#else
+	sectors = DA_FABRIC_MAX_SECTORS;
+#endif
+	return sectors;
+
+}
+
+
+
+/* 2015/03/10, adamhsu, redmine 12226, bugzilla 58041 
+ * record the backend dev supports fast block-clone or not
+ */
+void transport_setup_support_fbc(
+	LIO_SE_DEVICE *se_dev
+	)
+{
+	int ret;
+	SUBSYSTEM_TYPE type;
+	LIO_IBLOCK_DEV *ib_dev = NULL;
+	LIO_FD_DEV *fd_dev = NULL;
+	struct file *file = NULL;
+	struct block_device *bd = NULL;
+	struct inode *inode = NULL;
+
+	se_dev->fast_blk_clone = 0;
+
+#if defined(SUPPORT_FAST_BLOCK_CLONE)
+
+	ret = __do_get_subsystem_dev_type(se_dev, &type);
+	if (ret == 1)
+		return;
+
+	if (type == SUBSYSTEM_BLOCK) {
+		/* here is for block i/o  */
+		ib_dev = se_dev->dev_ptr;
+		bd =  ib_dev->ibd_bd;
+
+		if (quick_check_support_fbc(bd) == 0){
+			se_dev->fast_blk_clone = 1;
+			pr_info("IBLOCK: support fast clone\n");
+		} else
+			pr_info("IBLOCK: not support fast clone\n");
+
+	} else {
+		/* here is for file i/o */
+		fd_dev = se_dev->dev_ptr;
+		file = fd_dev->fd_file;
+		inode = file->f_mapping->host;
+
+		if (S_ISBLK(inode->i_mode)) {
+			if(quick_check_support_fbc(inode->i_bdev) == 0){
+				se_dev->fast_blk_clone = 1;
+				pr_info("FD: LIO(File I/O) + Block Backend: "
+					"support fast clone\n");
+			} else
+				pr_info("FD: LIO(File I/O) + Block Backend: "
+					"not support fast clone\n");
+		} else
+			pr_info("FD: LIO(File I/O) + File Backend: "
+				"not support fast clone\n");
+	}
+#endif
+
+	return;
+
+}
+
+static DEFINE_SPINLOCK(dev_t10_pr_backup_list_lock);
+static LIST_HEAD(dev_t10_pr_backup_lock_list);
+atomic_t t10_pr_backup_count = ATOMIC_INIT(0);
+
+
+void *__transport_t10_prb_alloc(void)
+{
+	struct t10_pr_backup *backup = NULL;
+
+	while (1){
+		backup = kzalloc(sizeof(struct t10_pr_backup), GFP_KERNEL);
+		if (backup)
+			break;
+
+		/* TODO: shall me keep to try ?? */
+		pr_warn("%s: fail to alloc t10_pr_backup mem, to sleep "
+			"and wait next time\n", __func__);
+		schedule();
+	}
+
+	pr_info("%s: done to alloc t10_pr_backup mem\n", __func__);
+	INIT_LIST_HEAD(&backup->backup_data_node);
+	return (void *)backup;
+}
+
+
+static void __transport_t10_prb_backup_i_t_nexus(
+	struct t10_pr_backup *backup,
+	struct t10_pr_registration *pr_reg	
+	)
+{
+	struct se_node_acl *se_nacl = NULL;
+
+	se_nacl = pr_reg->pr_reg_nacl;
+
+	memcpy(backup->initiator_name,
+		se_nacl->initiatorname, TRANSPORT_IQN_LEN);
+
+	memcpy(backup->isid,
+		pr_reg->pr_reg_isid, sizeof(pr_reg->pr_reg_isid));
+
+	memcpy(backup->target_name,
+		se_nacl->se_tpg->se_tpg_tfo->tpg_get_wwn(se_nacl->se_tpg),
+		strlen(se_nacl->se_tpg->se_tpg_tfo->tpg_get_wwn(se_nacl->se_tpg))
+		);
+	backup->tpgt = 
+		se_nacl->se_tpg->se_tpg_tfo->tpg_get_tag(se_nacl->se_tpg);
+
+	return;
+}
+
+void __transport_t10_prb_backup_pr_reg(
+	struct t10_pr_backup *backup,
+	struct t10_pr_registration *pr_reg
+	)
+{
+	unsigned long flags;
+
+	spin_lock_irqsave(&dev_t10_pr_backup_list_lock, flags);
+
+	__transport_t10_prb_backup_i_t_nexus(backup, pr_reg);
+
+	backup->pr_reg = pr_reg;
+	backup->pr_res_key = pr_reg->pr_reg_deve->pr_res_key;
+	backup->def_pr_registered = pr_reg->pr_reg_deve->def_pr_registered;	
+	backup->need_restore = 1;
+	atomic_inc(&t10_pr_backup_count);
+
+	list_add_tail(&backup->backup_data_node, &dev_t10_pr_backup_lock_list);
+	spin_unlock_irqrestore(&dev_t10_pr_backup_list_lock, flags);
+	return;
+}
+
+
+int __transport_t10_prb_check_sess_reinstatement_from_nacl(
+	struct se_node_acl *se_nacl
+	)
+{
+	unsigned long flags;
+	bool sess_reinstatement;
+
+	spin_lock_irqsave(&se_nacl->node_sess_reinstatement_lock, flags);
+	sess_reinstatement = se_nacl->node_sess_reinstatement;
+	spin_unlock_irqrestore(&se_nacl->node_sess_reinstatement_lock, flags);
+	return sess_reinstatement;
+}
+
+
+void __transport_t10_prb_restore(
+	struct se_portal_group *se_tpg,
+	struct se_node_acl *se_nacl,
+	struct se_session *se_sess,
+	char *isid_buf
+	)
+{
+	unsigned long flags;
+	struct se_dev_entry *deve;
+	struct t10_pr_backup *backup = NULL;
+
+
+	spin_lock_irqsave(&dev_t10_pr_backup_list_lock, flags);
+
+	list_for_each_entry(backup, &dev_t10_pr_backup_lock_list, backup_data_node){
+		if (!backup->need_restore)
+			continue;
+#if 0
+		pr_info(" === pr backup info === \n");
+		pr_info("initiatorname:%s\n", backup->backup);
+		pr_info("isid:%s\n", backup->isid);
+		pr_info("target name:%s\n", backup->target_name);
+		pr_info("tpgt:%d\n", backup->tpgt);
+		pr_info("mapped_lun:%d\n", backup->mapped_lun);
+			
+		pr_info(" === passing node info === \n");
+		pr_info("initiatorname:%s\n", se_nacl->initiatorname);
+		pr_info("isid:%s\n", isid_buf);
+		pr_info("target name:%s\n", se_tpg->se_tpg_tfo->tpg_get_wwn(se_tpg));
+		pr_info("tpgt:%d\n", se_tpg->se_tpg_tfo->tpg_get_tag(se_tpg));
+#endif
+		/* now to check the i_t nexus for passing node is same as
+		 * t10 pr backup information or not.
+		 * i_t nexus is <initiator + isid , target name + tpgt>
+		 */
+		if (memcmp(backup->initiator_name, 
+			se_nacl->initiatorname, sizeof(se_nacl->initiatorname)))
+			continue;
+	
+		if (memcmp(backup->isid, isid_buf, 
+			PR_REG_ISID_LEN))
+			continue;
+
+		if (memcmp(backup->target_name, 
+			se_tpg->se_tpg_tfo->tpg_get_wwn(se_tpg), 
+			strlen(se_tpg->se_tpg_tfo->tpg_get_wwn(se_tpg))))
+			continue;
+	
+		if(backup->tpgt != se_tpg->se_tpg_tfo->tpg_get_tag(se_tpg))
+			continue;
+
+		pr_info(" === t10 PR restore checking passed === \n");
+		spin_lock(&se_sess->se_node_acl->device_list_lock);
+		deve = se_sess->se_node_acl->device_list[backup->mapped_lun];
+		spin_unlock(&se_sess->se_node_acl->device_list_lock);
+
+		pr_info("start to restore registration\n");	
+		deve->pr_res_key = backup->pr_res_key;
+		deve->def_pr_registered = backup->def_pr_registered;
+		backup->pr_reg->pr_reg_deve = deve;
+		backup->pr_reg->pr_reg_nacl = se_nacl;
+		backup->need_restore = 0;
+		pr_info("end to restore registration\n\n");
+
+		list_del_init(&backup->backup_data_node);
+		atomic_dec(&t10_pr_backup_count);
+		kfree(backup);
+
+		pr_info("%s: done to free t10_pr_backup mem, remain "
+			"t10 pr backup count:%d\n", __func__, 
+			atomic_read(&t10_pr_backup_count));
+		break;
+	}
+	spin_unlock_irqrestore(&dev_t10_pr_backup_list_lock, flags);
+	return;
+}
+
 
 #endif  /* #if defined(CONFIG_MACH_QNAPTS) */
 

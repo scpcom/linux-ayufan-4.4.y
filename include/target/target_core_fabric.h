@@ -84,9 +84,6 @@ struct target_core_fabric_ops {
 
 	/* 2014/08/16, adamhsu, redmine 9055,9076,9278 */
 	int (*set_clear_delay_remove)(struct se_cmd *, int, int);
-	int (*tmf_queue_status)(struct se_cmd *);
-
-
 #endif        
 	u32 (*get_task_tag)(struct se_cmd *);
 	int (*get_cmd_state)(struct se_cmd *);
@@ -166,6 +163,12 @@ int	transport_generic_allocate_tasks(struct se_cmd *, unsigned char *);
 /* 20140513, adamhsu, redmine 8253 */
 #ifdef CONFIG_MACH_QNAPTS
 #if (LINUX_VERSION_CODE == KERNEL_VERSION(3,12,6))
+
+int	transport_alloc_pool_tag(struct se_session *se_sess, 
+		struct se_cmd *se_cmd, int is_session_reinstatement);
+
+
+
 int	target_submit_cmd_map_sgls(struct se_cmd *, struct se_session *,
 		unsigned char *, unsigned char *, u32, u32, int, int, int,
 		struct scatterlist *, u32, struct scatterlist *, u32);

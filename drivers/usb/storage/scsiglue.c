@@ -251,6 +251,22 @@ static int slave_configure(struct scsi_device *sdev)
 					US_FL_SCM_MULT_TARG)) &&
 				us->protocol == USB_PR_BULK)
 			us->use_last_sector_hacks = 1;
+#ifdef CONFIG_MACH_QNAPTS 
+		if (us->fflags & US_FL_QNAP_JMS567QUIRK)
+		{                                                        
+			if(le16_to_cpu(us->pusb_dev->parent->descriptor.idVendor) == 0x05e3 &&
+				(le16_to_cpu(us->pusb_dev->parent->descriptor.idProduct) == 0x0616 || 
+				le16_to_cpu(us->pusb_dev->parent->descriptor.idProduct) == 0x0617)) {
+        
+ 				printk(KERN_DEBUG "JMS567QUIRK\n" );                                           
+				blk_queue_max_hw_sectors(sdev->request_queue, QNAP_USB_STOR_MAX_SECTOR);      
+			} else {
+				printk(KERN_DEBUG "JMS567 clear FL JMS567QUIRK\n");
+				us->fflags &= ~US_FL_QNAP_JMS567QUIRK; 
+			}
+		}
+#endif
+  
 	} else {
 
 		/* Non-disk-type devices don't need to blacklist any pages

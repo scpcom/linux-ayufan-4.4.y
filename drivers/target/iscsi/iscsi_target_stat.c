@@ -315,13 +315,22 @@ struct config_item_type iscsi_stat_sess_err_cit = {
  * Target Attributes Table
  */
 CONFIGFS_EATTR_STRUCT(iscsi_stat_tgt_attr, iscsi_wwn_stat_grps);
+/* Jonathan Ho, 20140418, a typing error of LIO code */
+#ifdef CONFIG_MACH_QNAPTS
+#define ISCSI_STAT_TGT_ATTR(_name, _mode)			\
+static struct iscsi_stat_tgt_attr_attribute			\
+			iscsi_stat_tgt_attr_##_name =		\
+	__CONFIGFS_EATTR(_name, _mode,				\
+	iscsi_stat_tgt_attr_show_attr_##_name,			\
+	iscsi_stat_tgt_attr_store_attr_##_name);
+#else
 #define ISCSI_STAT_TGT_ATTR(_name, _mode)			\
 static struct iscsi_stat_tgt_attr_attribute			\
 			iscsi_stat_tgt_attr_##_name =		\
 	__CONFIGFS_EATTR(_name, _mode,				\
 	iscsi_stat_tgt-attr_show_attr_##_name,			\
 	iscsi_stat_tgt_attr_store_attr_##_name);
-
+#endif
 #define ISCSI_STAT_TGT_ATTR_RO(_name)				\
 static struct iscsi_stat_tgt_attr_attribute			\
 			iscsi_stat_tgt_attr_##_name =		\
@@ -414,6 +423,35 @@ static ssize_t iscsi_stat_tgt_attr_show_attr_fail_intr_name(
 }
 ISCSI_STAT_TGT_ATTR_RO(fail_intr_name);
 
+/* Jonathan Ho, 20140418, create a configFS attribute: cluster_enable */
+#if defined(CONFIG_MACH_QNAPTS) && defined(SUPPORT_SINGLE_INIT_LOGIN)
+static ssize_t iscsi_stat_tgt_attr_show_attr_cluster_enable(
+	struct iscsi_wwn_stat_grps *igrps, char *page)
+{
+	struct iscsi_tiqn *tiqn = container_of(igrps,
+				struct iscsi_tiqn, tiqn_stat_grps);
+
+	return snprintf(page, PAGE_SIZE, "%d\n", tiqn->cluster_enable ? 1 : 0);
+}
+static ssize_t iscsi_stat_tgt_attr_store_attr_cluster_enable(
+	struct iscsi_wwn_stat_grps *igrps, const char *page, size_t count)
+{
+	struct iscsi_tiqn *tiqn = container_of(igrps,
+				struct iscsi_tiqn, tiqn_stat_grps);
+	char *endptr;
+	u32 val;
+
+	val = simple_strtoul(page, &endptr, 0);
+	if (val == 0)
+		tiqn->cluster_enable = 0;
+	else
+		tiqn->cluster_enable = 1;
+
+	return count;
+}
+ISCSI_STAT_TGT_ATTR(cluster_enable, 0644);
+#endif
+
 static ssize_t iscsi_stat_tgt_attr_show_attr_fail_intr_addr_type(
 	struct iscsi_wwn_stat_grps *igrps, char *page)
 {
@@ -462,6 +500,10 @@ static struct configfs_attribute *iscsi_stat_tgt_attr_attrs[] = {
 	&iscsi_stat_tgt_attr_fail_intr_name.attr,
 	&iscsi_stat_tgt_attr_fail_intr_addr_type.attr,
 	&iscsi_stat_tgt_attr_fail_intr_addr.attr,
+/* Jonathan Ho, 20140418, create a configFS attribute: cluster_enable */
+#if defined(CONFIG_MACH_QNAPTS) && defined(SUPPORT_SINGLE_INIT_LOGIN)
+	&iscsi_stat_tgt_attr_cluster_enable.attr,
+#endif
 	NULL,
 };
 

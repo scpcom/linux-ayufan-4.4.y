@@ -51,6 +51,7 @@
 #include "target_core_rd.h"
 
 #ifdef CONFIG_MACH_QNAPTS
+#include "vaai_target_struc.h"
 #include "target_core_extern.h"
 #endif
 
@@ -69,6 +70,16 @@ static struct config_group target_core_hbagroup;
 static struct config_group alua_group;
 static struct config_group alua_lu_gps_group;
 
+/* Jonathan Ho, 20131212, monitor ODX */
+#if defined(CONFIG_MACH_QNAPTS) && defined(SHOW_OFFLOAD_STATS)
+int Xmon_enable = 0;					/* Enable data monitor */
+u64 Xpcmd = 0;						/* Trasfer data per command in KB */
+unsigned int Tpcmd = 0;					/* Spend time per command in milliseconds */
+unsigned long cmd_done = 0;				/* Commands done */
+u64 Xtotal = 0;						/* Total transfer data in KB */
+u64 vaai_Xtotal = 0;					/* Total transfer data in KB */
+#endif /* SHOW_OFFLOAD_STATS */
+
 static inline struct se_hba *
 item_to_hba(struct config_item *item)
 {
@@ -82,13 +93,49 @@ static ssize_t target_core_attr_show(struct config_item *item,
 				      struct configfs_attribute *attr,
 				      char *page)
 {
+/* Jonathan Ho, 20140425, move SHOW_OFFLOAD_STATS from procFS to configFS */
+#if defined(CONFIG_MACH_QNAPTS) && defined(SHOW_OFFLOAD_STATS)
+	if (!strcmp(attr->ca_name,"ods")) {
+		return sprintf(page, "%d %llu %u %lu %llu %llu\n", Xmon_enable, Xpcmd, Tpcmd, cmd_done, Xtotal, vaai_Xtotal);
+	}
+#endif /* SHOW_OFFLOAD_STATS */
 	return sprintf(page, "Target Engine Core ConfigFS Infrastructure %s"
 		" on %s/%s on "UTS_RELEASE"\n", TARGET_CORE_CONFIGFS_VERSION,
 		utsname()->sysname, utsname()->machine);
 }
 
+/* Jonathan Ho, 20140425, move SHOW_OFFLOAD_STATS from procFS to configFS */
+#if defined(CONFIG_MACH_QNAPTS) && defined(SHOW_OFFLOAD_STATS)
+static ssize_t target_core_attr_store(struct config_item *item,
+				      struct configfs_attribute *attr,
+				      char *page, size_t count)
+{
+	if (!strcmp(attr->ca_name,"ods")) {
+		int value = 0;
+
+		sscanf(page, "%d", &value);
+		if (value > 0)
+			Xmon_enable = 1;
+		else {
+			Xmon_enable = 0;
+			Xpcmd = 0;
+			Tpcmd = 0;
+			cmd_done = 0;
+			Xtotal = 0;
+			vaai_Xtotal = 0;
+		}
+	}
+
+	return count;
+}
+#endif /* SHOW_OFFLOAD_STATS */
+
 static struct configfs_item_operations target_core_fabric_item_ops = {
 	.show_attribute = target_core_attr_show,
+/* Jonathan Ho, 20140425, move SHOW_OFFLOAD_STATS from procFS to configFS */
+#if defined(CONFIG_MACH_QNAPTS) && defined(SHOW_OFFLOAD_STATS)
+	.store_attribute = target_core_attr_store,
+#endif /* SHOW_OFFLOAD_STATS */
 };
 
 static struct configfs_attribute target_core_item_attr_version = {
@@ -96,6 +143,15 @@ static struct configfs_attribute target_core_item_attr_version = {
 	.ca_name	= "version",
 	.ca_mode	= S_IRUGO,
 };
+
+/* Jonathan Ho, 20140425, move SHOW_OFFLOAD_STATS from procFS to configFS */
+#if defined(CONFIG_MACH_QNAPTS) && defined(SHOW_OFFLOAD_STATS)
+static struct configfs_attribute target_core_item_attr_ods = {
+	.ca_owner	= THIS_MODULE,
+	.ca_name	= "ods",
+	.ca_mode	= (S_IRUGO|S_IWUSR),
+};
+#endif /* SHOW_OFFLOAD_STATS */
 
 static struct target_fabric_configfs *target_core_get_fabric(
 	const char *name)
@@ -251,6 +307,10 @@ static struct configfs_group_operations target_core_fabric_group_ops = {
  */
 static struct configfs_attribute *target_core_fabric_item_attrs[] = {
 	&target_core_item_attr_version,
+/* Jonathan Ho, 20140425, move SHOW_OFFLOAD_STATS from procFS to configFS */
+#if defined(CONFIG_MACH_QNAPTS) && defined(SHOW_OFFLOAD_STATS)
+	&target_core_item_attr_ods,
+#endif /* SHOW_OFFLOAD_STATS */
 	NULL,
 };
 
@@ -616,7 +676,84 @@ static ssize_t target_core_dev_show_attr_for_gui_##_name(			\
 	spin_unlock(&se_dev->se_dev_lock);				\
 	return rb;							\
 }
+static int target_check_syswp_magic_file()
+{
+/* TODO:
+ * this file name shall be matched with iscsi_util tool and shall be
+ * hided from lio iscsi source code
+ */
+#define SYSWP_MAGIC_FILE	"/tmp/syswp_magic_file"
+
+	struct file *fd = NULL;
+		
+	fd = filp_open(SYSWP_MAGIC_FILE, O_RDONLY , S_IRWXU); 
+	if (!IS_ERR (fd)){
+		filp_close(fd, NULL);
+		return 0;
+	}
+	return -1;
+}
+
+#define DEF_DEV_ATTRIB_SHOW_SYSWP(_name) 			\
+static ssize_t target_core_dev_show_syswp_attr_for_##_name(	\
+	struct se_dev_attrib *da,				\
+	char *page)						\
+{								\
+	LIO_SE_DEVICE *se_dev;					\
+	LIO_SE_SUBSYSTEM_DEV *se_sub_dev = da->da_sub_dev;	\
+	ssize_t rb;						\
+								\
+	spin_lock(&se_sub_dev->se_dev_lock);			\
+	se_dev = se_sub_dev->se_dev_ptr;			\
+	if (!se_dev) {						\
+		spin_unlock(&se_sub_dev->se_dev_lock);		\
+		return -ENODEV; 				\
+	}							\
+	rb = snprintf(page, PAGE_SIZE, "%llu\n",		\
+		(u64)se_dev->se_sub_dev->se_dev_attrib._name);	\
+	spin_unlock(&se_sub_dev->se_dev_lock);			\
+	return rb;						\
+}								\
+
+
+
+#define	DEF_DEV_ATTRIB_STORE_SYSWP(_name)			\
+static ssize_t target_core_dev_store_syswp_attr_for_##_name(	\
+	struct se_dev_attrib *da,				\
+	const char *page,					\
+	size_t count)						\
+{								\
+	struct se_device *se_dev;				\
+	struct se_subsystem_dev *se_sub_dev = da->da_sub_dev;	\
+	unsigned long val;					\
+	struct file *file = NULL;				\
+	int ret;						\
+								\
+	if (target_check_syswp_magic_file() < 0){		\
+		return count;	\
+	}	\
+								\
+	spin_lock(&se_sub_dev->se_dev_lock);			\
+	se_dev = se_sub_dev->se_dev_ptr;			\
+	if (!se_dev) {						\
+		spin_unlock(&se_sub_dev->se_dev_lock);		\
+		return -ENODEV; 				\
+	}							\
+	ret = strict_strtoul(page, 0, &val);				\
+	if (ret < 0) {							\
+		spin_unlock(&se_sub_dev->se_dev_lock);			\
+		pr_err("strict_strtoul() failed with"		\
+			" ret: %d\n", ret);				\
+		return -EINVAL; 					\
+	}								\
+	ret = se_dev_set_##_name(se_dev, (u32)val);			\
+	spin_unlock(&se_sub_dev->se_dev_lock);				\
+									\
+	return (!ret) ? count : -EINVAL;				\
+}								\
+
 #endif
+
 
 #define DEF_DEV_ATTRIB_STORE(_name)					\
 static ssize_t target_core_dev_store_attr_##_name(			\
@@ -658,6 +795,14 @@ DEF_DEV_ATTRIB_SHOW(_name);
 #ifdef CONFIG_MACH_QNAPTS
 #define DEF_DEV_ATTRIB_RO_FOR_GUI(_name)					\
 DEF_DEV_ATTRIB_SHOW_FOR_GUI(_name);
+
+
+#define DEF_DEV_ATTRIB_SYSWP(_name)	\
+DEF_DEV_ATTRIB_SHOW_SYSWP(_name);	\
+DEF_DEV_ATTRIB_STORE_SYSWP(_name);
+
+
+
 #endif
 
 CONFIGFS_EATTR_STRUCT(target_core_dev_attrib, se_dev_attrib);
@@ -682,6 +827,15 @@ static struct target_core_dev_attrib_attribute				\
 			target_core_dev_attrib_##_name =		\
 	__CONFIGFS_EATTR_RO(_name,					\
 	target_core_dev_show_attr_for_gui_##_name);
+
+
+#define SE_DEV_ATTR_SYSWP(_name, _mode)		\
+static struct target_core_dev_attrib_attribute		\
+	target_core_dev_attrib_##_name =		\
+		__CONFIGFS_EATTR(_name, _mode,		\
+		target_core_dev_show_syswp_attr_for_##_name,	\
+		target_core_dev_store_syswp_attr_for_##_name);
+
 #endif
 
 DEF_DEV_ATTRIB(emulate_dpo);
@@ -771,6 +925,10 @@ SE_DEV_ATTR_RO_FOR_GUI(allocated);
 DEF_DEV_ATTRIB_RO(allocated);
 SE_DEV_ATTR_RO(allocated);
 #endif
+
+DEF_DEV_ATTRIB_SYSWP(syswp);
+SE_DEV_ATTR_SYSWP(syswp, S_IRUGO | S_IWUSR);
+
 #endif /* CONFIG_MACH_QNAPTS */
 
 CONFIGFS_EATTR_OPS(target_core_dev_attrib, se_dev_attrib, da_group);
@@ -803,6 +961,7 @@ static struct configfs_attribute *target_core_dev_attrib_attrs[] = {
 	&target_core_dev_attrib_tp_threshold_percent.attr,
 	&target_core_dev_attrib_lun_index.attr,
 	&target_core_dev_attrib_allocated.attr,
+	&target_core_dev_attrib_syswp.attr,
 	NULL,
 };
 

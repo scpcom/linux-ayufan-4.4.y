@@ -635,6 +635,10 @@ static struct configfs_attribute *lio_target_nacl_param_attrs[] = {
 
 /* Start items for lio_target_acl_cit */
 
+
+// 2009/09/23 Nike Chen add for default initiator
+#ifdef CONFIG_MACH_QNAPTS
+
 static ssize_t lio_target_nacl_show_info(
 	struct se_node_acl *se_nacl,
 	char *page)
@@ -643,10 +647,11 @@ static ssize_t lio_target_nacl_show_info(
 	struct iscsi_conn *conn;
 	struct se_session *se_sess;
 	ssize_t rb = 0;
-#ifdef CONFIG_MACH_QNAPTS // 2009/09/23 Nike Chen add for default initiator
+
    	struct se_portal_group *se_tpg = NULL;
 	struct se_node_acl *acl;
 	struct iscsi_sess_ops *sess_ops;
+
 #ifdef QNAP_KERNEL_STORAGE_V2
         struct file *fd;
         mm_segment_t fs;
@@ -664,6 +669,7 @@ static ssize_t lio_target_nacl_show_info(
 	}
 
 	if (se_tpg) {
+
 #ifdef QNAP_KERNEL_STORAGE_V2	
 		wwn=se_tpg->se_tpg_wwn;
 		snprintf(path_t,sizeof(path_t),"/tmp/%s/%s/target_info",wwn->wwn_group.cg_item.ci_name,se_nacl->initiatorname);
@@ -683,14 +689,15 @@ static ssize_t lio_target_nacl_show_info(
 	        spin_lock_bh(&se_tpg->acl_node_lock);
 	        list_for_each_entry(acl, &se_tpg->acl_node_list, acl_list) {
 			spin_lock_bh(&acl->nacl_sess_lock);
+
 			if ((se_sess = acl->nacl_sess)) {
 #ifdef QNAP_KERNEL_STORAGE_V2
 				rb=0;
 				memset(data_t,0,PAGE_SIZE);
 #endif
-
 		                sess = (struct iscsi_session *)se_sess->fabric_sess_ptr;
 		                sess_ops = sess->sess_ops;
+
 #ifdef QNAP_KERNEL_STORAGE_V2
 				rb += sprintf(data_t+rb, "SID,%u,%hu,"
 					"%d,", sess->sid, sess->tsih, atomic_read(&sess->nconn));
@@ -773,8 +780,10 @@ static ssize_t lio_target_nacl_show_info(
 					filp_close(fd, NULL);
 					mutex_unlock(&sess->info_mutex);
 				}
-				spin_lock_bh(&acl->nacl_sess_lock);
+
+
 				spin_lock_bh(&se_tpg->acl_node_lock);
+				spin_lock_bh(&acl->nacl_sess_lock);
 #endif
 	
 			}
@@ -786,15 +795,31 @@ static ssize_t lio_target_nacl_show_info(
 #endif
 	        }
 	        spin_unlock_bh(&se_tpg->acl_node_lock);
+
 #ifdef QNAP_KERNEL_STORAGE_V2
 		kfree(data_t);
-	}
-	return 0;
-#else
-	}
 #endif
+	}
 
-#else /* #ifdef CONFIG_MACH_QNAPTS */
+#ifdef QNAP_KERNEL_STORAGE_V2
+	rb = 0;
+#endif
+	return rb;
+}
+
+TF_NACL_BASE_ATTR_RO(lio_target, info);
+
+#else /* !CONFIG_MACH_QNAPTS */
+
+static ssize_t lio_target_nacl_show_info(
+	struct se_node_acl *se_nacl,
+	char *page)
+{
+	struct iscsi_session *sess;
+	struct iscsi_conn *conn;
+	struct se_session *se_sess;
+	ssize_t rb = 0;
+
 	spin_lock_bh(&se_nacl->nacl_sess_lock);
 	se_sess = se_nacl->nacl_sess;
 	if (!se_sess) {
@@ -903,11 +928,12 @@ static ssize_t lio_target_nacl_show_info(
 		spin_unlock(&sess->conn_lock);
 	}
 	spin_unlock_bh(&se_nacl->nacl_sess_lock);
-#endif /* #ifdef CONFIG_MACH_QNAPTS */
+
 	return rb;
 }
 
 TF_NACL_BASE_ATTR_RO(lio_target, info);
+#endif
 
 
 /*
@@ -1503,6 +1529,7 @@ struct se_portal_group *lio_target_tiqn_addtpg(
 			&lio_target_fabric_configfs->tf_ops,
 			wwn, &tpg->tpg_se_tpg, tpg,
 			TRANSPORT_TPG_TYPE_NORMAL);
+
 	if (ret < 0)
 		return NULL;
 
@@ -1852,21 +1879,6 @@ static int lio_queue_status(struct se_cmd *se_cmd)
 
 	struct iscsi_cmd *cmd = container_of(se_cmd, struct iscsi_cmd, se_cmd);
 
-#if defined(CONFIG_MACH_QNAPTS)
-	/* 2014/08/16, adamhsu, redmine 9055,9076,9278 */
-	if (__do_check_set_send_status_func1(se_cmd)){
-		pr_info("[%s] cmd(ITT:0x%8x) got ABORT req, to exit now\n",
-			__func__, cmd->init_task_tag);
-		return 0;
-	}
-
-	if (__do_check_set_send_status_func2(se_cmd)){
-		pr_info("[%s (tmf)] cmd(ITT:0x%8x) got ABORT req, to exit now\n",
-			__func__, cmd->init_task_tag);
-		return 0;
-	}
-#endif
-
 	cmd->i_state = ISTATE_SEND_STATUS;
 #ifdef CONFIG_MACH_QNAPTS // Benjamin 20110822: CONN(cmd) may be NULL !!
     if (cmd->conn)
@@ -2063,7 +2075,6 @@ static void lio_del_cmd_from_conn_list(struct se_cmd *se_cmd)
 	spin_unlock_bh(&conn->cmd_lock);
 }
 
-
 /* 2014/08/16, adamhsu, redmine 9055,9076,9278 (start) */
 static int lio_set_clear_delay_remove(
 	struct se_cmd *se_cmd, 
@@ -2092,25 +2103,6 @@ static int lio_set_clear_delay_remove(
 	}
 	return 0;
 }
-
-
-static int lio_tmf_queue_status(struct se_cmd *se_cmd)
-{
-	struct iscsi_cmd *cmd = container_of(se_cmd, struct iscsi_cmd, se_cmd);
-	
-	cmd->i_state = ISTATE_SEND_STATUS;
-
-	pr_debug("[%s] cmd(ITT:0x%8x), TAS resp:0x%x\n",__func__, 
-		cmd->init_task_tag, cmd->se_cmd.tmf_resp_tas);
-
-	if (cmd->conn)
-		iscsit_add_cmd_to_response_queue(cmd, cmd->conn, cmd->i_state);
-	else
-		pr_warning("%s:cmd->conn is NULL!!\n", __func__);
-
-	return 0;
-}
-/* 2014/08/16, adamhsu, redmine 9055,9076,9278 (end) */
 #endif
 
 static void lio_release_cmd(struct se_cmd *se_cmd)
@@ -2176,7 +2168,6 @@ int iscsi_target_register_configfs(void)
 
 	/* 2014/08/16, adamhsu, redmine 9055,9076,9278 */
 	fabric->tf_ops.set_clear_delay_remove = &lio_set_clear_delay_remove;
-	fabric->tf_ops.tmf_queue_status = &lio_tmf_queue_status;
 #endif	        
 
 

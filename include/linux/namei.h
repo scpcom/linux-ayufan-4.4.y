@@ -93,6 +93,9 @@ extern struct dentry *lookup_one_len(const char *, struct dentry *, int);
 #ifdef CONFIG_MACH_QNAPTS
 extern struct dentry *lookup_one_len_without_acl(const char *, struct dentry *, int);
 #endif
+#ifdef CONFIG_FS_RICHACL
+extern struct dentry *lookup_one_len_nfsv4_racl(const char *, struct dentry *, int);
+#endif
 extern int follow_down_one(struct path *);
 extern int follow_down(struct path *);
 extern int follow_up(struct path *);

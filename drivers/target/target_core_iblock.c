@@ -56,6 +56,11 @@
 #include "vaai_target_struc.h"
 #include "target_general.h"
 
+
+#if defined(SUPPORT_FAST_BLOCK_CLONE)
+#include "target_fast_clone.h"
+#endif
+
 #if defined(SUPPORT_TP)
 /* 2014/06/14, adamhsu, redmine 8530 (start) */
 #include "linux/fiemap.h"
@@ -196,8 +201,8 @@ static struct se_device *iblock_create_virtdevice(
 #endif
         limits->logical_block_size = bdev_logical_block_size(bd);
 
-	limits->max_hw_sectors = UINT_MAX;
-	limits->max_sectors = UINT_MAX;
+	limits->max_hw_sectors = queue_max_hw_sectors(bdev_get_queue(bd));
+	limits->max_sectors = queue_max_sectors(bdev_get_queue(bd));
 	dev_limits.hw_queue_depth = q->nr_requests;
 	dev_limits.queue_depth = q->nr_requests;
 
@@ -221,17 +226,16 @@ static struct se_device *iblock_create_virtdevice(
 	 * the QUEUE_FLAG_DISCARD bit for UNMAP/WRITE_SAME in SCSI + TRIM
 	 * in ATA and we need to set TPE=1
 	 */
-#if defined(CONFIG_MACH_QNAPTS) && defined(SUPPORT_TP)
+#if defined(CONFIG_MACH_QNAPTS)
+#if defined(SUPPORT_TP)
 	if(!strcmp(dev->se_sub_dev->se_dev_provision, "thin"))
 		dev->se_sub_dev->se_dev_attrib.emulate_tpu = 1;
 
 	if (blk_queue_discard(q)) {
 		dev->se_sub_dev->se_dev_attrib.max_unmap_lba_count =
 				q->limits.max_discard_sectors;
-		/*
-		 * Currently hardcoded to 1 in Linux/SCSI code..
-		 */
-		dev->se_sub_dev->se_dev_attrib.max_unmap_block_desc_count = 1;
+
+		dev->se_sub_dev->se_dev_attrib.max_unmap_block_desc_count = MAX_UNMAP_DESC_COUNT;
 		dev->se_sub_dev->se_dev_attrib.unmap_granularity =
 				q->limits.discard_granularity >> 9;
 		dev->se_sub_dev->se_dev_attrib.unmap_granularity_alignment =
@@ -240,6 +244,9 @@ static struct se_device *iblock_create_virtdevice(
 		pr_debug("IBLOCK: BLOCK Discard support available,"
 				" disabled by default\n");
 	}
+
+
+#endif
 #endif
 
 	if (blk_queue_nonrot(q))

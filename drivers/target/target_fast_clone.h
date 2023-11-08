@@ -24,6 +24,8 @@
 #include <linux/blkdev.h>
 #include <linux/fast_clone.h>
 
+
+#include "target_general.h"
 #if defined(SUPPORT_VAAI)
 #include "vaai_helper.h"
 #endif
@@ -33,12 +35,7 @@
 
 
 /* TBD, shall be multuple of 4KB(or 512b) at least */
-#define POOL_BLK_SIZE_KB	(512)
-#define ALIGN_GAP_SIZE_B	(0x100000) /* 512b * 2048 sctors */
-
-/* TBD, the values match to ODX setting currently */
-#define MAX_TRANSFER_LEN_MB	(512)
-#define OPTIMAL_TRANSFER_LEN_MB	(512)
+#define POOL_BLK_SIZE_KB	POOL_BLK_SIZE_512_KB
 
 /* TBD, the value match to ODX setting current */
 #define MAX_FBC_IO		(64*1024*1024)
@@ -46,10 +43,10 @@
 
 /**/
 typedef struct __fast_clone_io_cb_data{
-	atomic_t io_count;
+	atomic_t io_done;
 	atomic_t io_err_count;
 	struct completion *io_wait;
-	
+
 	/* used on thin provisioning case */
 	int nospc_err;
 } FCCB_DATA;
@@ -69,7 +66,6 @@ typedef struct __create_record{
 	sector_t s_lba;
 	sector_t d_lba;
 	u64 transfer_bytes;
-	FCCB_DATA *cb;
 } CREATE_REC;
 
 typedef struct _fast_clone_obj{
@@ -100,6 +96,9 @@ typedef struct __tbc_desc_data{
 
 
 /**/
+int quick_check_support_fbc(struct block_device *bd);
+
+
 int __do_fast_clone(FC_OBJ *fc_obj);
 
 int __create_fast_clone_io_lists(
@@ -107,7 +106,7 @@ int __create_fast_clone_io_lists(
 	CREATE_REC *create_rec
 	);
 
-int __submit_fast_clone_io_lists_wait(struct list_head *io_lists, FCCB_DATA *cb);
+int __submit_fast_clone_io_lists_wait(struct list_head *io_lists);
 void __free_fast_clone_io_lists(struct list_head *io_lists);
 void __fast_clone_cb(int err, THIN_BLOCKCLONE_DESC *clone_desc);
 void __init_fccb_data(FCCB_DATA *fccb_data, struct completion *io_wait);

@@ -2077,6 +2077,9 @@ static void nfs_fill_super(struct super_block *sb,
 		 * so ourselves when necessary.
 		 */
 		sb->s_flags |= MS_POSIXACL;
+#ifdef CONFIG_NFSV4_FS_RICHACL
+                sb->s_flags |= MS_RICHACL;
+#endif
 		sb->s_time_gran = 1;
 	}
 
@@ -2101,6 +2104,9 @@ static void nfs_clone_super(struct super_block *sb,
 		 * so ourselves when necessary.
 		 */
 		sb->s_flags |= MS_POSIXACL;
+#ifdef CONFIG_NFSV4_FS_RICHACL
+        sb->s_flags  |= MS_RICHACL;
+#endif
 		sb->s_time_gran = 1;
 	}
 

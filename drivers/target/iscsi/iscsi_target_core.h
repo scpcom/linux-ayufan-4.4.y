@@ -38,6 +38,12 @@
 #define ISCSIT_MIN_TAGS			16
 #define ISCSIT_EXTRA_TAGS		8
 #endif
+
+#define MAX_FAIL_LOCATE_TIQN_MSG_CNT	10
+#define MAX_FAIL_LOCATE_TPG_MSG_CNT	10
+
+#define FAIL_LOCATE_TIQN_TMP_FNAME	"/tmp/iscsi_fail_tiqn_msg_max_cnt_%s_%s"
+#define FAIL_LOCATE_TPG_TMP_FNAME	"/tmp/iscsi_fail_tpg_msg_max_cnt_%s_%s"
 #endif
 
 /* struct iscsi_node_attrib sanity values */
@@ -105,7 +111,15 @@
 
 #define TA_NETIF_TIMEOUT_MIN		2
 #define TA_GENERATE_NODE_ACLS		0
+
+
+#ifdef CONFIG_MACH_QNAPTS
+/* follow the latest kernel to adjust it */
+#define TA_DEFAULT_CMDSN_DEPTH		64
+#else
 #define TA_DEFAULT_CMDSN_DEPTH		16
+#endif
+
 #define TA_DEFAULT_CMDSN_DEPTH_MAX	512
 #define TA_DEFAULT_CMDSN_DEPTH_MIN	1
 #define TA_CACHE_DYNAMIC_ACLS		0
@@ -194,8 +208,6 @@ enum cmd_flags_table {
 
 #if defined(CONFIG_MACH_QNAPTS)
 	/* 2014/08/16, adamhsu, redmine 9055,9076,9278 */
-	ICF_WENT_SEND_STATUS_IN_TMF_PROC	= 0x20000000,
-	ICF_GOT_LAST_DATAOUT_IN_TMF_PROC	= 0x40000000,
 	ICF_DELAYED_REMOVE			= 0x80000000,
 #endif
 };
@@ -571,6 +583,7 @@ struct iscsi_conn {
      * susceptible to the classic missed wakeup race.
      */
     wait_queue_head_t   queues_wq;
+	struct mutex		locate_failure_cnt_mutex;
 #endif
 
 	/* Authentication Successful for this connection */
@@ -931,6 +944,10 @@ struct iscsi_tiqn {
 	struct iscsi_sess_err_stats  sess_err_stats;
 	struct iscsi_login_stats     login_stats;
 	struct iscsi_logout_stats    logout_stats;
+/* Jonathan Ho, 20140418, create a configFS attribute: cluster_enable */	 
+#if defined(CONFIG_MACH_QNAPTS) && defined(SUPPORT_SINGLE_INIT_LOGIN)	 
+        int cluster_enable;	 
+#endif
 } ____cacheline_aligned;
 
 #define WWN_STAT_GRPS(tiqn)	(&(tiqn)->tiqn_stat_grps)

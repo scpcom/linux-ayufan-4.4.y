@@ -1504,8 +1504,10 @@ static void inet_forward_change(struct net *net)
         else
         {
             // if not bridge interface, enable lro if possible
-            if (!(dev->priv_flags & IFF_BRIDGE_PORT))
+            if (!(dev->priv_flags & IFF_BRIDGE_PORT) && !strncmp(netdev_name(dev),"eth",strlen("eth")))
+            {
                 dev_enable_lro(dev);
+            }
         }
 #endif
 		rcu_read_lock();

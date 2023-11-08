@@ -24,6 +24,12 @@
 #include "target_fast_clone.h"
 #endif
 
+/* Jonathan Ho, 20140108, monitor VAAI */
+#ifdef SHOW_OFFLOAD_STATS
+extern int Xmon_enable;
+extern u64 vaai_Xtotal;
+#endif /* SHOW_OFFLOAD_STATS */
+
 /* This is hard coding currently. Just to match the raid stripe size.
  * It is the same as ODX setting
  */
@@ -586,10 +592,12 @@ static int __do_core_xcopy(
 	sector_t s_lba = obj->s_lba, d_lba = obj->d_lba;
 	int ret;
 
-#if defined(CONFIG_MACH_QNAPTS) && defined(SUPPORT_FAST_BLOCK_CLONE)
+#if defined(CONFIG_MACH_QNAPTS)
+#if defined(SUPPORT_FAST_BLOCK_CLONE)
 	int is_create = 0, do_fbc = 0;
 	FC_OBJ fc_obj;
 	TBC_DESC_DATA tbc_desc_data;
+#endif
 #endif
 	
 	/**/
@@ -598,6 +606,15 @@ static int __do_core_xcopy(
 		e_bytes = data_bytes;
 
 #if defined(CONFIG_MACH_QNAPTS) && defined(SUPPORT_FAST_BLOCK_CLONE)
+
+
+		if (!obj->s_se_dev->fast_blk_clone)
+			goto _NORMAL_RW_;
+
+		if (!obj->d_se_dev->fast_blk_clone)
+			goto _NORMAL_RW_;
+
+
 		if (!is_create){
 			__create_fbc_obj(&fc_obj, obj->s_se_dev, 
 				obj->d_se_dev, s_lba, d_lba, e_bytes);
@@ -626,10 +643,26 @@ static int __do_core_xcopy(
 			if (ret == 0)
 				goto _GO_NEXT_;
 
-			/* exit if fail */
-			ret = 0;
-			goto _EXIT_;
+			/* if found error try to use general read / write
+			 * to do copy operation except the no-space event 
+			 */
+			if (ERR_NO_SPACE_WRITE_PROTECT == obj->err){
+				ret = 0;
+				goto _EXIT_;
+			}
+
+			pr_debug("[XCOPY] fail to execute "
+				"fast-block-clone, try rollback to "
+				"normal read/write, src lba:0x%llx, "
+				"dest lba:0x%llx, bytes:0x%llx\n",
+				(unsigned long long)s_lba, 
+				(unsigned long long)d_lba, 
+				(unsigned long long)e_bytes);
+
+			goto _NORMAL_RW_;
 		}
+
+_NORMAL_RW_:
 #endif
 		ret = __do_normal_b2b_xcopy(obj, s_lba, d_lba, &e_bytes);
 		if (ret != 0){
@@ -641,6 +674,11 @@ _GO_NEXT_:
 		s_lba += (sector_t)(e_bytes >> obj->s_bs_order);
 		d_lba += (sector_t)(e_bytes >> obj->d_bs_order);
 		data_bytes -= e_bytes;
+/* Jonathan Ho, 20140108, monitor VAAI */
+#ifdef SHOW_OFFLOAD_STATS
+		if (Xmon_enable)
+			vaai_Xtotal += e_bytes >> 10; /* bytes to KB */
+#endif /* SHOW_OFFLOAD_STATS */
 
 	}
 
@@ -706,14 +744,11 @@ static int __do_normal_b2b_xcopy(
 #endif
 
 	if((w_done_blks <= 0) || w_task.is_timeout || w_task.ret_code != 0){
-
-		if (w_task.ret_code == -ENOSPC) {
-			pr_err("XCOPY: space was full\n");
+		pr_err("XCOPY: fail to write to copy destination\n");
+		if (w_task.ret_code == -ENOSPC)
 			obj->err = ERR_NO_SPACE_WRITE_PROTECT;
-		} else {
-			pr_err("XCOPY: fail to write to copy destination\n");
+		else
 			obj->err = ERR_3RD_PARTY_DEVICE_FAILURE;
-		}
 		exit_loop = 1;
 		goto _RW_ERR_;
 	}
@@ -797,6 +832,9 @@ static int __b2b_xcopy(
 #endif
 
 	ret = __do_core_xcopy(&obj);
+
+
+
 	__generic_free_sg_list(obj.sg_list, obj.sg_nents);
 
 	if (ret == 0){

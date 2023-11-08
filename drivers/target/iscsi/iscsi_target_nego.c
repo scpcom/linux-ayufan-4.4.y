@@ -1127,8 +1127,27 @@ get_target:
 	 */
 	tiqn = iscsit_get_tiqn_for_login(t_buf);
 	if (!tiqn) {
+#ifdef CONFIG_MACH_QNAPTS
+		int check_ret;
+
+		check_ret = iscsi_check_stop_failure_log(conn, 
+				FAIL_LOCATE_TIQN_TMP_FNAME, t_buf, 
+				conn->login_ip, MAX_FAIL_LOCATE_TIQN_MSG_CNT);
+
+		if (check_ret != 0) {
+			pr_err("Unable to locate Target IQN: %s from "
+				"login ip: %s\n", t_buf, conn->login_ip);
+
+			if (check_ret == 1)
+				pr_warn("hit max login failure msg count when "
+					"to locate Target IQN, stop to "
+					"show message. Please check your "
+					"iscsi system log later\n");
+		}
+#else
 		pr_err("Unable to locate Target IQN: %s in"
 			" Storage Node\n", t_buf);
+#endif
 		iscsit_tx_login_rsp(conn, ISCSI_STATUS_CLS_TARGET_ERR,
 				ISCSI_LOGIN_STATUS_SVC_UNAVAILABLE);
 		ret = -1;
@@ -1136,13 +1155,46 @@ get_target:
 	}
 	pr_debug("Located Storage Object: %s\n", tiqn->tiqn);
 
+/* Jonathan Ho, 20140416,  one target can be logged in from only one initiator IQN */
+#if defined(CONFIG_MACH_QNAPTS) && defined(SUPPORT_SINGLE_INIT_LOGIN)
+	if (!tiqn->cluster_enable) {
+		ret = iscsit_search_tiqn_for_initiator(tiqn, i_buf);
+		if (ret == -1) {
+			pr_err("Target: %s is connected by other initiator, login rejected\n", tiqn->tiqn);
+			iscsit_put_tiqn_for_login(tiqn);
+			iscsit_tx_login_rsp(conn, ISCSI_STATUS_CLS_INITIATOR_ERR,
+					ISCSI_LOGIN_STATUS_TGT_FORBIDDEN);
+			goto out;
+		}
+	}
+#endif
 	/*
 	 * Locate Target Portal Group from Storage Node.
 	 */
 	conn->tpg = iscsit_get_tpg_from_np(tiqn, np);
 	if (!conn->tpg) {
+#ifdef CONFIG_MACH_QNAPTS
+		int check_ret;
+
+		check_ret = iscsi_check_stop_failure_log(conn, 
+			FAIL_LOCATE_TPG_TMP_FNAME, tiqn->tiqn, conn->login_ip,
+			MAX_FAIL_LOCATE_TPG_MSG_CNT);
+
+		if (check_ret != 0) {
+			pr_err("Unable to locate Target Portal Group"
+				" on %s from login ip: %s\n", tiqn->tiqn,
+				conn->login_ip);
+
+			if (check_ret == 1)
+				pr_warn("hit max login failure msg count when "
+					"to locate Target Portal Group, "
+					"stop to show message. Please check "
+					"your iscsi system log later\n");
+		}
+#else
 		pr_err("Unable to locate Target Portal Group"
 				" on %s\n", tiqn->tiqn);
+#endif
 		iscsit_put_tiqn_for_login(tiqn);
 		iscsit_tx_login_rsp(conn, ISCSI_STATUS_CLS_TARGET_ERR,
 				ISCSI_LOGIN_STATUS_SVC_UNAVAILABLE);
@@ -1284,13 +1336,8 @@ struct iscsi_login *iscsi_target_init_negotiation(
 	 *
 	 *	Locates Target Portal from NP -> Target IQN
 	 */
-	if (iscsi_target_locate_portal(np, conn, login) < 0) {
-#if defined(CONFIG_MACH_QNAPTS)
-		/* 2014/11/20, adamhsu, redmine 10761 */
-		pr_err("%s: fail from iscsi_target_locate_portal()\n", __func__);
-#endif
+	if (iscsi_target_locate_portal(np, conn, login) < 0)
 		goto out;
-	}
 
 	return login;
 out:

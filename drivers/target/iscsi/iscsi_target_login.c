@@ -75,6 +75,9 @@ static int iscsi_login_init_conn(struct iscsi_conn *conn)
 	spin_lock_init(&conn->nopin_timer_lock);
 	spin_lock_init(&conn->response_queue_lock);
 	spin_lock_init(&conn->state_lock);
+#ifdef CONFIG_MACH_QNAPTS
+	mutex_init(&conn->locate_failure_cnt_mutex);
+#endif
 
 	if (!zalloc_cpumask_var(&conn->conn_cpumask, GFP_KERNEL)) {
 		pr_err("Unable to allocate conn->conn_cpumask\n");
@@ -627,6 +630,202 @@ int iscsi_post_log(
 			target_iqn);
     
     return 0;
+}
+
+static ssize_t 	__iscsit_vfs_rw_file(
+	struct file *fd,
+	struct iovec *iov,
+	int iov_cnt,
+	int write
+	)
+{
+	ssize_t ret_size = 0;
+	mm_segment_t fs;
+
+	fs = get_fs();
+	set_fs(get_ds());
+
+	if (write)	
+		ret_size = vfs_writev(fd, iov, iov_cnt, &fd->f_pos);
+	else
+		ret_size = vfs_readv(fd, iov, iov_cnt, &fd->f_pos);
+	
+	set_fs(fs);
+
+	if(ret_size <= 0){
+		pr_err("%s: fail to write file\n", __func__);
+		return -EIO;
+	}
+	
+	return ret_size;
+}
+
+static int __iscsi_get_failure_cnt(
+	struct iscsi_conn *conn,
+	struct file *fd
+	)
+{
+	char *data = NULL;
+	struct iovec iov;
+	ssize_t ret_size = 0;
+	int ret = 0, cnt;
+		
+	data = kzalloc(PAGE_SIZE, GFP_KERNEL);
+	if (!data)
+		return -EINVAL;
+	
+	mutex_lock(&conn->locate_failure_cnt_mutex);
+
+	memset(&iov, 0, sizeof(struct iovec));
+	iov.iov_base = data;
+	iov.iov_len = PAGE_SIZE;
+	
+	ret_size = __iscsit_vfs_rw_file(fd, &iov, 1, 0);
+	if(ret_size <= 0){
+		pr_err("%s: fail to read file\n", __func__);
+		ret = -EIO;
+	}
+
+	if (ret == 0)
+		ret = kstrtoint(data, 10, &cnt);
+
+	mutex_unlock(&conn->locate_failure_cnt_mutex);
+	kfree(data);
+
+	if (ret == 0)
+		return cnt;
+
+	return -EINVAL;
+}
+
+static int __iscsi_check_failure_cnt_tmp_file_exists(
+	struct iscsi_conn *conn,
+	char *path
+	)
+{
+	struct file *fd = NULL;
+
+	if (!conn)
+		return -EINVAL;
+	if (!path)
+		return -EINVAL;	
+
+	fd = filp_open(path, O_RDONLY , (S_IRUSR | S_IWUSR));
+	if (IS_ERR(fd))
+		return -EINVAL;
+
+	filp_close(fd, NULL);
+	return 0;
+}
+
+static int __iscsi_update_failure_cnt(
+	struct iscsi_conn *conn,
+	struct file *fd,
+	int val
+	)
+{
+	char *data = NULL;
+	struct iovec iov;
+	ssize_t ret_size = 0;
+	int ret = 0;
+	
+	data = kzalloc(PAGE_SIZE, GFP_KERNEL);
+	if (!data)
+		return -EINVAL;
+
+	mutex_lock(&conn->locate_failure_cnt_mutex);
+
+	sprintf(data, "%d\n", val);
+	memset(&iov, 0, sizeof(struct iovec));
+	iov.iov_base = data;
+	iov.iov_len = PAGE_SIZE;
+
+	ret_size = __iscsit_vfs_rw_file(fd, &iov, 1, 1);
+	if(ret_size <= 0){
+		pr_err("%s: fail to update file\n", __func__);
+		ret = -EIO;
+	}
+
+	mutex_unlock(&conn->locate_failure_cnt_mutex);
+	kfree(data);
+	return ret;
+
+}
+
+int iscsi_check_stop_failure_log(
+	struct iscsi_conn *conn, 
+	char *file_pat,
+	char *m_name,
+	char *t_name,
+	int max_cnt
+	)
+{
+	struct file *fd = NULL;
+	char path[512];
+	int ret, tmp_ret, hit_max = 0;
+
+
+	if (!conn || !file_pat || !m_name || !t_name || (max_cnt == 0))
+		return -EINVAL;
+
+	snprintf(path, sizeof(path), file_pat, m_name, t_name);
+
+	ret = __iscsi_check_failure_cnt_tmp_file_exists(conn, path);
+	if (ret == 0) {
+		/* found file, try get current login fail count */
+		fd = filp_open(path, O_RDONLY , (S_IRUSR | S_IWUSR));
+		ret = __iscsi_get_failure_cnt(conn, fd);
+		filp_close(fd, NULL);
+
+		/* hummmmm .... failure count is zero ... */
+		if (ret == 0) 
+			goto _FIRST_CREATE_;
+
+		if (ret > 0) {
+			if (ret > max_cnt)
+				return 0;
+
+			/* if hit max, to update counter again */
+			if (ret == max_cnt)
+				hit_max = 1;
+
+			ret++;
+			fd = filp_open(path, (O_CREAT | O_WRONLY | O_TRUNC),
+				(S_IRUSR | S_IWUSR));
+			tmp_ret = __iscsi_update_failure_cnt(conn, fd, ret);
+			if (tmp_ret != 0)
+				ret = tmp_ret;
+			else
+				ret = -EINVAL;
+
+			if (hit_max == 1)
+				ret = hit_max;
+
+			filp_close(fd, NULL);
+		}
+		return ret;
+	}
+
+_FIRST_CREATE_:
+	/* not found tmp file, try create it */
+	fd = filp_open(path, (O_CREAT | O_WRONLY | O_TRUNC) , (S_IRUSR | S_IWUSR));
+	if (IS_ERR(fd))
+		return -EINVAL;
+
+	/* since this is first time to create file, it also means this is
+	 * first error message
+	 */
+	ret = __iscsi_update_failure_cnt(conn, fd, 1);
+	if (ret != 0) {
+		/* fail to update cnt */
+		filp_close(fd, NULL);
+		return ret;
+	}
+		
+	/* well... even to update successfully, we still return non-zero
+	 * cause of we doesn't hit the threshold yet */
+	filp_close(fd, NULL);
+	return -EINVAL;
 }
 #endif
 
@@ -1266,11 +1465,6 @@ static int __iscsi_target_login_thread(struct iscsi_np *np)
 	return 1;
 
 new_sess_out:
-#if defined(CONFIG_MACH_QNAPTS)
-	//2014/11/20, adamhsu, redmine 10761
-	pr_err("%s: iSCSI Login negotiation failed.\n", __func__);
-#endif
-
 
 #ifdef CONFIG_MACH_QNAPTS	// 2009/11/30 Nike Chen add connection log
     // Benjamin 20120723: sess is kzalloc in iscsi_login_zero_tsih_s1().
@@ -1369,6 +1563,11 @@ int iscsi_target_login_thread(void *arg)
 {
 	struct iscsi_np *np = arg;
 	int ret;
+
+
+#if defined(CONFIG_MACH_QNAPTS)
+	set_user_nice(current, -20);
+#endif
 
 	allow_signal(SIGINT);
 

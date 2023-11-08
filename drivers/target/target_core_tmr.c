@@ -141,67 +141,11 @@ static int __check_tmf_i_t_nexus(
 		se_cmd->tmf_resp_tas = 0;
 	}
 
-	pr_debug("LUN_RESET: TMF(0x%x) req comes from %s i_t_nexus\n", 
+	pr_debug("TMF(0x%x) req comes from %s i_t_nexus\n", 
 		tmf_code, ((se_cmd->tmf_diff_it_nexus)? "diff": "same"));
 
 	return 0;
 }
-
-
-static void core_tmr_handle_tas_abort(
-	struct se_node_acl *tmr_nacl,
-	struct se_cmd *cmd,
-	int tas,
-	int fe_count,
-	int caller
-	)
-{
-	unsigned long flags;
-	int exit = 0;
-
-
-	spin_lock_irqsave(&cmd->t_state_lock, flags);
-
-
-	/* 2014/10/17, adamhsu */
-	pr_info("LUN_RESET(%s it_nexus): cmd(ITT:0x%08x), cdb:0x%2x. "
-		"This call comes from %s. duration (ms): %d\n", 
-		((cmd->tmf_diff_it_nexus) ? "diff" : "same"),
-		cmd->se_tfo->get_task_tag(cmd), cmd->t_task_cdb[0], 
-		((caller == 1)? "drain_cmd": "drain_task"),
-		jiffies_to_msecs(jiffies - cmd->creation_jiffies));
-
-	pr_debug("LUN_RESET(%s it_nexus): cmd(ITT:0x%08x), i_state:%d, "
-		"t_state:%d, transport_state:0x%x, t_task_cdbs_left:%d, "
-		"t_task_cdbs_sent:%d\n",
-		((cmd->tmf_diff_it_nexus) ? "diff" : "same"), 
-		cmd->se_tfo->get_task_tag(cmd),
-		cmd->se_tfo->get_cmd_state(cmd), cmd->t_state,	
-		cmd->transport_state, atomic_read(&cmd->t_task_cdbs_left),
-		atomic_read(&cmd->t_task_cdbs_sent));
-
-	if (!fe_count) {
-		cmd->tmf_resp_tas = 0;
-		cmd->tmf_diff_it_nexus = 0;
-		spin_unlock_irqrestore(&cmd->t_state_lock, flags);
-
-		transport_cmd_finish_abort(cmd, 1);
-		return;
-	}
-
-	cmd->se_tfo->set_clear_delay_remove(cmd, 1, 0);
-	spin_unlock_irqrestore(&cmd->t_state_lock, flags);
-
-	spin_lock_irqsave(&cmd->t_state_lock, flags);
-	cmd->scsi_status = SAM_STAT_TASK_ABORTED;
-	cmd->se_cmd_flags |= SCF_SENT_DELAYED_TAS;
-	spin_unlock_irqrestore(&cmd->t_state_lock, flags);
-	cmd->se_tfo->tmf_queue_status(cmd);
-
-	transport_cmd_finish_abort(cmd, 0);
-	
-}
-
 
 void core_tmr_abort_task(
 	struct se_device *dev,
@@ -213,11 +157,7 @@ void core_tmr_abort_task(
 	unsigned long flags;
 
 	/* 2014/10/17, adamhsu */
-	int ref_tag, tas, to_wait_tasks = 0, recv_got_aborted = 0;
-
-#if 0
-	struct se_task *task = NULL, *task_tmp = NULL;
-#endif
+	int ref_tag, tas;
 
 	spin_lock_irqsave(&se_sess->sess_cmd_lock, flags);
 	list_for_each_entry_safe(se_cmd, tmp_cmd,
@@ -233,8 +173,7 @@ void core_tmr_abort_task(
 		if (tmr && tmr->task_cmd && tmr->task_cmd->se_sess)
 			tmr_nacl = tmr->task_cmd->se_sess->se_node_acl;
 
-		/* 2014/10/17, adamhsu */
-		pr_info("ABORT_TASK[%s i_t_nexus]: Found referenced %s "
+		pr_info("ABORT_TASK[%s i_t_nexus]: Found ref %s "
 			"task_tag: 0x%8x. duration(ms): %d\n",
 			((tmr_nacl && \
 			(tmr_nacl != se_cmd->se_sess->se_node_acl)) ? \
@@ -244,157 +183,14 @@ void core_tmr_abort_task(
 
 		tas = se_cmd->se_dev->se_sub_dev->se_dev_attrib.emulate_tas;
 
-		if (se_cmd->data_direction == DMA_FROM_DEVICE
-		|| se_cmd->data_direction == DMA_NONE
-		){
-			spin_unlock_irqrestore(&se_sess->sess_cmd_lock, flags);
-			pr_debug("ABORT_TASK[%s i_t_nexus]: skip the ref_tag:0x%8x\n", 
-				((tmr_nacl && \
-				(tmr_nacl != se_cmd->se_sess->se_node_acl)) ? \
-				"diff" : "same"), ref_tag);
-			goto _FUNC_COMPLETE_;
-		}
-
-		spin_lock_irq(&se_cmd->t_state_lock);
-
-		/* RFC3720, p80,
-		 * If the abort request is received and the target can determine
-		 * (based on the Referenced Task Tag) that the command was
-		 * received and executed and also that the response was sent
-		 * prior to the abort, then the target MUST respond with the
-		 * response code of "Task Does Not Exist".
-		 */
-
-		if (se_cmd->transport_state & CMD_T_SEND_STATUS){
-			pr_info("ABORT_TASK[%s i_t_nexus]: ref_tag: "
-			"0x%8x %s, queued status already, "
-			"to skip it\n",
-			((tmr_nacl && \
-			(tmr_nacl != se_cmd->se_sess->se_node_acl)) ? \
-			"diff" : "same"), ref_tag,
-			((se_cmd->t_state == TRANSPORT_COMPLETE) ? \
-			"already complete and": ""));
-
-			spin_unlock_irq(&se_cmd->t_state_lock);
-			spin_unlock_irqrestore(&se_sess->sess_cmd_lock, flags);
-			goto _TASK_NOT_EXIST_;
-		}
-
-
-		if (se_cmd->t_state == TRANSPORT_WRITE_PENDING
-		|| se_cmd->t_state == TRANSPORT_PROCESS_WRITE
-		){
-			pr_info("ABORT_TASK[%s i_t_nexus]: ref_tag: "
-				"0x%8x stay in %s, skip it\n", 
-				((tmr_nacl && \
-				(tmr_nacl != se_cmd->se_sess->se_node_acl)) ? \
-				"diff" : "same"), ref_tag,
-				((se_cmd->t_state == TRANSPORT_WRITE_PENDING) \
-				? "TRANSPORT_WRITE_PENDING" : \
-				"TRANSPORT_PROCESS_WRITE"));
-
-			spin_unlock_irq(&se_cmd->t_state_lock);
-			spin_unlock_irqrestore(&se_sess->sess_cmd_lock, flags);
-
-			/* we are in write processing theread now, so we will 
-			 * not handle the TRANSPORT_WRITE_PENDING and
-			 * TRANSPORT_PROCESS_WRITE. Just treat them as be complete
-			 */
-			goto _FUNC_COMPLETE_;
-
-		} else {
-			pr_info("neither TRANSPORT_WRITE_PENDING nor "
-				"TRANSPORT_PROCESS_WRITE for cmd(ITT:0x%08x), "
-				"i_state:%d, t_state:0x%x\n", 
-				se_cmd->se_tfo->get_task_tag(se_cmd),
-				se_cmd->se_tfo->get_cmd_state(se_cmd), 
-				se_cmd->t_state);
-		}
-
-		se_cmd->transport_state |= (CMD_T_ABORTED_1 | CMD_T_ABORTED);
-
 		spin_lock(&se_cmd->tmf_data_lock);
-		se_cmd->tmf_transport_state |= (CMD_T_ABORTED_1 | CMD_T_ABORTED);
 		__check_tmf_i_t_nexus(TMR_ABORT_TASK, tas, se_cmd, tmr_nacl);
 		spin_unlock(&se_cmd->tmf_data_lock);
 
 		se_cmd->se_tfo->set_clear_delay_remove(se_cmd, 1, 0);
 
-		pr_info("ABORT_TASK[%s i_t_nexus]: cmd(ITT:0x%08x), "
-			"i_state:%d, t_state:%d, transoprt_state:0x%x, "
-			"cdb:0x%02x\n", 
-			((tmr_nacl && \
-			(tmr_nacl != se_cmd->se_sess->se_node_acl)) ? \
-			"diff" : "same"), se_cmd->se_tfo->get_task_tag(se_cmd), 
-			se_cmd->se_tfo->get_cmd_state(se_cmd), se_cmd->t_state, 
-			se_cmd->transport_state, se_cmd->t_task_cdb[0]);
-
-		spin_unlock_irq(&se_cmd->t_state_lock);
-		list_del_init(&se_cmd->se_cmd_list);
-
 		/* not call kref_get() for our modfication here */
 		spin_unlock_irqrestore(&se_sess->sess_cmd_lock, flags);
-
-		cancel_work_sync(&se_cmd->work);
-
-		/* The command may NOT be completed now .... For example,
-		 * the block i/o use the blk end io to check whteher all tasks
-		 * were completed or not. In the other words, it may take long
-		 * time before we got all tasks were completed
-		 */
-
-		spin_lock_irqsave(&se_cmd->t_state_lock, flags);
-
-		if (se_cmd->t_state != TRANSPORT_COMPLETE){
-
-			/* 2014/10/17, adamhsu, solve race condition symptom 
-			 * for task management function 
-			 */
-			if (se_cmd->transport_state & CMD_T_GOT_ABORTED){
-				recv_got_aborted = 1;
-				to_wait_tasks = 0;
-			} else {
-				recv_got_aborted = 0;
-				to_wait_tasks = 1;
-			}
-
-			pr_info("ABORT_TASK[%s i_t_nexus]: "
-				"cmd(ITT:0x%08x), t_state != TRANSPORT_COMPLETE "
-				"%s CMD_T_GOT_ABORTED, %s wait all tasks\n", 
-				((tmr_nacl && \
-				(tmr_nacl != se_cmd->se_sess->se_node_acl)) ? \
-				"diff" : "same"), 
-				se_cmd->se_tfo->get_task_tag(se_cmd),
-				((recv_got_aborted) ? "but GOT ": "and NOT got"),
-				((recv_got_aborted) ? "NOT": "to"));
-
-			spin_unlock_irqrestore(&se_cmd->t_state_lock, flags);
-
-			if (to_wait_tasks)
-				transport_wait_for_tasks(se_cmd);
-
-			spin_lock_irqsave(&se_cmd->t_state_lock, flags);
-
-		}
-
-#if 0
-		list_for_each_entry_safe(task, task_tmp, 
-			&se_cmd->t_task_list, t_list){
-			pr_info("ABORT_TASK: cmd(ITT:0x%8x), "
-				"task->task_flags:0x%x\n", 
-				se_cmd->se_tfo->get_task_tag(se_cmd),
-				task->task_flags);
-		}
-#endif
-
-		se_cmd->scsi_status = SAM_STAT_TASK_ABORTED;
-		se_cmd->se_cmd_flags |= SCF_SENT_DELAYED_TAS;
-
-		spin_unlock_irqrestore(&se_cmd->t_state_lock, flags);
-
-		se_cmd->se_tfo->tmf_queue_status(se_cmd);
-
-		transport_cmd_finish_abort(se_cmd, 0);
 		goto _FUNC_COMPLETE_;
 	}
 	spin_unlock_irqrestore(&se_sess->sess_cmd_lock, flags);
@@ -412,6 +208,7 @@ _FUNC_COMPLETE_:
 	return;
 
 }
+
 
 static void core_tmr_drain_task_list(
 	struct se_device *dev,
@@ -448,14 +245,6 @@ static void core_tmr_drain_task_list(
 	 * in the Control Mode Page.
 	 */
 
-
-	/* TODO, adamhsu
-	 * Current LUN RESET will not handle the DMA_FROM_DEVICE and any
-	 * command works with workqueue. In the other words, it handle the seq
-	 * DMA_TO_DEVICE (i.e. solicited data). This shall be modified in the
-	 * future
-	 */
-
 	spin_lock_irqsave(&dev->execute_task_lock, flags);
 	list_for_each_entry_safe(task, task_tmp, &dev->state_task_list,
 				t_state_list) {
@@ -475,149 +264,16 @@ static void core_tmr_drain_task_list(
 		/* Not aborting PROUT PREEMPT_AND_ABORT CDB.. */
 		if (prout_cmd == cmd)
 			continue;
-	
-		pr_debug("LUN_RESET[drain task-1]: cmd:0x%p, task:0x%p"
-			" ITT:0x%08x, i_state:%d, t_state:%d"
-			" cdb: 0x%02x, t_task_cdbs_left:%d,"
-			" t_task_cdbs_sent:%d, CMD_T_ACTIVE:%d,"
-			" CMD_T_STOP:%d, CMD_T_SENT: %d\n",
-			cmd, task, cmd->se_tfo->get_task_tag(cmd),
-			cmd->se_tfo->get_cmd_state(cmd), cmd->t_state,
-			cmd->t_task_cdb[0], atomic_read(&cmd->t_task_cdbs_left),
-			atomic_read(&cmd->t_task_cdbs_sent), 
-			(cmd->transport_state & CMD_T_ACTIVE) != 0,
-			(cmd->transport_state & CMD_T_STOP) != 0,
-			(cmd->transport_state & CMD_T_SENT) != 0);
 
-	
-		if (cmd->data_direction == DMA_FROM_DEVICE 
-		|| cmd->data_direction == DMA_NONE
-		){
-			pr_debug("LUN_RESET[drain task-1]: cmd(ITT:0x%8x) "
-				"is %s, to skip it\n", 
-				cmd->se_tfo->get_task_tag(cmd),
-				((cmd->data_direction == DMA_FROM_DEVICE) ? \
-				"DMA_FROM_DEVICE" : "DMA_NONE"));
-			continue;
-		}
-
-#if defined(SUPPORT_CONCURRENT_TASKS)	
-		spin_lock(&cmd->wq_lock);
-		if (cmd->use_wq == true){
-			spin_unlock(&cmd->wq_lock);
-			pr_debug("LUN_RESET[drain task-1]: cmd(ITT:0x%8x) "
-				"works by wq, to skit it. "
-				"data_dir:0x%x, i_state:%d, t_state:%d, "
-				"t_task_cdbs_left:%d, t_task_cdbs_sent:%d, "
-				"CMD_T_ACTIVE:%d, CMD_T_STOP:%d, "
-				"CMD_T_SENT: %d\n", 
-				cmd->se_tfo->get_task_tag(cmd), 
-				cmd->data_direction, 
-				cmd->se_tfo->get_cmd_state(cmd), cmd->t_state,
-				atomic_read(&cmd->t_task_cdbs_left),
-				atomic_read(&cmd->t_task_cdbs_sent), 
-				(cmd->transport_state & CMD_T_ACTIVE) != 0,
-				(cmd->transport_state & CMD_T_STOP) != 0,
-				(cmd->transport_state & CMD_T_SENT) != 0);
-	
-	
-			continue;
-		}
-		spin_unlock(&cmd->wq_lock);
-#endif	
-		spin_lock(&cmd->tmf_t_state_lock);
-	
-		if (cmd->tmf_t_state == TRANSPORT_WRITE_PENDING
-		|| cmd->tmf_t_state == TRANSPORT_PROCESS_WRITE
-		|| cmd->tmf_t_state == TRANSPORT_COMPLETE
-		)
-		{
-			pr_debug("LUN_RESET[drain task-1]: found cmd(ITT:0x%8x) "
-				"was %s, to skip it. data_dir:0x%x, "
-				"i_state:%d, t_state:%d, t_task_cdbs_left:%d, "
-				"t_task_cdbs_sent:%d, "
-				"CMD_T_ACTIVE:%d, CMD_T_STOP:%d, "
-				"CMD_T_SENT: %d\n", 
-				cmd->se_tfo->get_task_tag(cmd), 
-				((cmd->tmf_t_state == TRANSPORT_COMPLETE) ? \
-				"completed": \
-				((cmd->tmf_t_state == TRANSPORT_WRITE_PENDING) ? \
-				"TRANSPORT_WRITE_PENDING": "TRANSPORT_PROCESS_WRITE")),
-				cmd->data_direction,
-				cmd->se_tfo->get_cmd_state(cmd), 
-				cmd->tmf_t_state,
-				atomic_read(&cmd->t_task_cdbs_left),
-				atomic_read(&cmd->t_task_cdbs_sent), 
-				(cmd->transport_state & CMD_T_ACTIVE) != 0,
-				(cmd->transport_state & CMD_T_STOP) != 0,
-				(cmd->transport_state & CMD_T_SENT) != 0);
-
-
-			spin_unlock(&cmd->tmf_t_state_lock);
-
-			continue;
-		}
-	
 		spin_lock(&cmd->tmf_data_lock);
-		cmd->tmf_transport_state |= (CMD_T_ABORTED_1 | CMD_T_ABORTED);
 		__check_tmf_i_t_nexus(TMR_LUN_RESET, tas, cmd, tmr_nacl);
 		spin_unlock(&cmd->tmf_data_lock);
 	
 		cmd->se_tfo->set_clear_delay_remove(cmd, 1, 0);
 	
-		list_move_tail(&task->t_state_list, &drain_task_list);
-		task->t_state_active = false;
-		/*
-		 * Remove from task execute list before processing drain_task_list
-		 */
-		if (!list_empty(&task->t_execute_list))
-			__transport_remove_task_from_execute_queue(task, dev);
 	}
 	spin_unlock_irqrestore(&dev->execute_task_lock, flags);
-	
-	while (!list_empty(&drain_task_list)) {
-		task = list_entry(drain_task_list.next, struct se_task, 
-				t_state_list);
-		list_del(&task->t_state_list);
-		cmd = task->task_se_cmd;
-	
-		spin_lock_irqsave(&cmd->t_state_lock, flags);
-		cmd->transport_state |= (CMD_T_ABORTED_1 | CMD_T_ABORTED);
-
-		pr_debug("LUN RESET[drain task-2]: (before) task->task_flags:"
-			"0x%x\n", task->task_flags);
-
-		target_stop_task(task, &flags);
-	
-		pr_debug("LUN RESET[drain task-2]: (after) task->task_flags:"
-			"0x%x\n", task->task_flags);
-
-		if (!atomic_dec_and_test(&cmd->t_task_cdbs_ex_left)) {
-			spin_unlock_irqrestore(&cmd->t_state_lock, flags);
-			pr_debug("LUN_RESET[drain task-2]: Skipping "
-				"task: %p, dev: %p for "
-				"t_task_cdbs_ex_left: %d\n", task, dev,
-				atomic_read(&cmd->t_task_cdbs_ex_left));
-			continue;
-		}
-		fe_count = atomic_read(&cmd->t_fe_count);
-	
-		if (!(cmd->transport_state & CMD_T_ACTIVE)) {
-			pr_debug("LUN_RESET[drain task-2]: got "
-				"CMD_T_ACTIVE for task: %p, "
-				"t_fe_count: %d dev: %p\n", task,
-				fe_count, dev);
-		} else
-			pr_debug("LUN_RESET[drain task-2]: Got "
-				"!CMD_T_ACTIVE for task: %p,  t_fe_count: %d "
-				"dev: %p\n", task, fe_count, dev);
-	
-		spin_unlock_irqrestore(&cmd->t_state_lock, flags);
-	
-		core_tmr_handle_tas_abort(tmr_nacl, cmd, tas, 
-			fe_count, 0);
-	
-	}
+	return;
 }
 
 
@@ -668,41 +324,16 @@ static void core_tmr_drain_cmd_list(
 			continue;
 		}
 
-		pr_debug("LUN_RESET[drain cmd]: found cmd(ITT:0x%08x)\n", 
-			cmd->se_tfo->get_task_tag(cmd));
-
-		cmd->transport_state |= (CMD_T_ABORTED_1 | CMD_T_ABORTED);
-		cmd->transport_state &= ~CMD_T_QUEUED;
-
 		spin_lock(&cmd->tmf_data_lock);
-		cmd->tmf_transport_state |= (CMD_T_ABORTED_1 | CMD_T_ABORTED);
 		__check_tmf_i_t_nexus(TMR_LUN_RESET, tas, cmd, tmr_nacl);
 		spin_unlock(&cmd->tmf_data_lock);
 
-		atomic_dec(&qobj->queue_cnt);
-		list_move_tail(&cmd->se_queue_node, &drain_cmd_list);
+		cmd->se_tfo->set_clear_delay_remove(cmd, 1, 0);
 	}
 
 	spin_unlock_irqrestore(&qobj->cmd_queue_lock, flags);
-
-	while (!list_empty(&drain_cmd_list)) {
-
-		cmd = list_entry(drain_cmd_list.next, struct se_cmd, se_queue_node);
-		list_del_init(&cmd->se_queue_node);
-
-		pr_debug("LUN_RESET: %s from Device Queue: cmd: %p t_state:"
-			" %d t_fe_count: %d, ITT: 0x%8x\n", 
-			(preempt_and_abort_list) ? "Preempt" : "", cmd, cmd->t_state,
-			atomic_read(&cmd->t_fe_count), 
-			cmd->se_tfo->get_task_tag(cmd));
-
-		core_tmr_handle_tas_abort(tmr_nacl, cmd, tas,
-			atomic_read(&cmd->t_fe_count), 1);
-
-	}
+	return;
 }
-/* 2014/08/16, adamhsu, redmine 9055,9076,9278 (end) */
-
 
 /* 2014/11/20, adamhsu, redmine 10760 (start) */
 static void core_tmr_drain_tmr_list(
@@ -1212,6 +843,7 @@ int core_tmr_lun_reset(
 				tmr_nacl->initiatorname);
 		}
 	}
+
 	pr_debug("LUN_RESET: %s starting for [%s], tas: %d\n",
 		(preempt_and_abort_list) ? "Preempt" : "TMR",
 		dev->transport->name, tas);

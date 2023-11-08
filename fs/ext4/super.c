@@ -1343,6 +1343,9 @@ enum {
 	Opt_inode_readahead_blks, Opt_journal_ioprio,
 	Opt_dioread_nolock, Opt_dioread_lock,
 	Opt_discard, Opt_nodiscard, Opt_init_itable, Opt_noinit_itable,
+#ifdef CONFIG_EXT4_FS_RICHACL
+        Opt_richacl,
+#endif
 };
 
 static const match_table_t tokens = {
@@ -1418,6 +1421,9 @@ static const match_table_t tokens = {
 	{Opt_init_itable, "init_itable=%u"},
 	{Opt_init_itable, "init_itable"},
 	{Opt_noinit_itable, "noinit_itable"},
+#ifdef CONFIG_EXT4_FS_RICHACL
+        {Opt_richacl, "richacl"},
+#endif
 	{Opt_err, NULL},
 };
 
@@ -1443,6 +1449,41 @@ static ext4_fsblk_t get_sb_block(void **data)
 
 	return sb_block;
 }
+
+#ifdef CONFIG_EXT4_FS_RICHACL
+static void enable_acl(struct super_block *sb)
+{
+#if !defined(CONFIG_EXT4_FS_POSIX_ACL)
+        ext4_msg(sb, KERN_ERR, "acl options not supported");
+        return;
+#endif
+
+        sb->s_flags &= ~MS_RICHACL;
+        sb->s_flags |= MS_POSIXACL;
+        return;
+}
+
+static void disable_acl(struct super_block *sb)
+{
+#if !defined(CONFIG_EXT4_FS_POSIX_ACL)
+        ext4_msg(sb, KERN_ERR, "acl options not supported");
+        return;
+#endif
+        sb->s_flags &= ~MS_POSIXACL;
+        return;
+}
+
+static void enable_richacl(struct super_block *sb)
+{
+#if !defined(CONFIG_EXT4_FS_RICHACL)
+        ext4_msg(sb, KERN_ERR, "richacl options not supported");
+        return;
+#endif
+        sb->s_flags |= MS_RICHACL;
+        sb->s_flags &= ~MS_POSIXACL;
+        return;
+}
+#endif
 
 #define DEFAULT_JOURNAL_IOPRIO (IOPRIO_PRIO_VALUE(IOPRIO_CLASS_BE, 3))
 static char deprecated_msg[] = "Mount option \"%s\" will be removed by %s\n"
@@ -1516,6 +1557,9 @@ static int parse_options(char *options, struct super_block *sb,
 	substring_t args[MAX_OPT_ARGS];
 	int data_opt = 0;
 	int option;
+#ifdef CONFIG_EXT4_FS_RICHACL
+        int has_acl = 0, has_richacl = 0;
+#endif
 #ifdef CONFIG_QUOTA
 	int qfmt;
 #endif
@@ -1534,6 +1578,27 @@ static int parse_options(char *options, struct super_block *sb,
 		 */
 		args[0].to = args[0].from = NULL;
 		token = match_token(p, tokens, args);
+
+#ifdef CONFIG_EXT4_FS_RICHACL
+                if (token == Opt_richacl)
+                        has_richacl = 1;
+
+                if (token == Opt_acl)
+                        has_acl = 1;
+
+                if (has_richacl && has_acl) {
+                        ext4_msg(sb, KERN_ERR, "[richacl] EXT4-fs: acl and richacl options");
+                        return 0;
+                }
+
+                if (has_richacl && is_remount) {
+                        ext4_msg(sb, KERN_ERR, "[richacl] EXT4-fs: forbid enabling richacl \
+by remount");
+                        return 0;
+                }
+#endif
+
+
 		switch (token) {
 		case Opt_bsd_df:
 			ext4_msg(sb, KERN_WARNING, deprecated_msg, p, "2.6.38");
@@ -1610,6 +1675,19 @@ static int parse_options(char *options, struct super_block *sb,
 			ext4_msg(sb, KERN_ERR, "(no)user_xattr options not supported");
 			break;
 #endif
+
+#ifdef CONFIG_EXT4_FS_RICHACL
+#ifdef CONFIG_EXT4_FS_RICHACL
+        	case Opt_acl:
+                	enable_acl(sb);
+                	break;
+        	case Opt_noacl:
+                	disable_acl(sb);
+                	break;
+#endif
+
+#else
+
 #ifdef CONFIG_EXT4_FS_POSIX_ACL
 		case Opt_acl:
 			set_opt(sb, POSIX_ACL);
@@ -1623,6 +1701,15 @@ static int parse_options(char *options, struct super_block *sb,
 			ext4_msg(sb, KERN_ERR, "(no)acl options not supported");
 			break;
 #endif
+
+#endif /*#CONFIG_EXT4_FS_RICHACL*/
+
+#ifdef CONFIG_EXT4_FS_RICHACL
+        	case Opt_richacl:
+                	enable_richacl(sb);
+                	break;
+#endif
+
 		case Opt_journal_update:
 			/* @@@ FIXME */
 			/* Eventually we will want to be able to create
@@ -3368,7 +3455,11 @@ static int ext4_fill_super(struct super_block *sb, void *data, int silent)
 	set_opt(sb, XATTR_USER);
 #endif
 #ifdef CONFIG_EXT4_FS_POSIX_ACL
-	set_opt(sb, POSIX_ACL);
+#ifdef CONFIG_EXT4_FS_RICHACL
+        enable_acl(sb);
+#else
+        set_opt(sb, POSIX_ACL);
+#endif
 #endif
 	set_opt(sb, MBLK_IO_SUBMIT);
 	if ((def_mount_opts & EXT4_DEFM_JMODE) == EXT4_DEFM_JMODE_DATA)
@@ -3449,8 +3540,11 @@ static int ext4_fill_super(struct super_block *sb, void *data, int silent)
 		}
 	}
 
-	sb->s_flags = (sb->s_flags & ~MS_POSIXACL) |
-		(test_opt(sb, POSIX_ACL) ? MS_POSIXACL : 0);
+#ifdef CONFIG_EXT4_FS_RICHACL
+#else
+        sb->s_flags = (sb->s_flags & ~MS_POSIXACL) |
+                (test_opt(sb, POSIX_ACL) ? MS_POSIXACL : 0);
+#endif
 
 	if (le32_to_cpu(es->s_rev_level) == EXT4_GOOD_OLD_REV &&
 	    (EXT4_HAS_COMPAT_FEATURE(sb, ~0U) ||
@@ -4616,8 +4710,17 @@ static int ext4_remount(struct super_block *sb, int *flags, char *data)
 	if (sbi->s_mount_flags & EXT4_MF_FS_ABORTED)
 		ext4_abort(sb, "Abort forced by user");
 
-	sb->s_flags = (sb->s_flags & ~MS_POSIXACL) |
-		(test_opt(sb, POSIX_ACL) ? MS_POSIXACL : 0);
+
+#ifdef CONFIG_EXT4_FS_RICHACL
+        if(sb->s_flags & MS_RICHACL) { // fix bug: -o remount,richacl 
+        } else {
+                sb->s_flags = (sb->s_flags & ~MS_POSIXACL) |
+                        (test_opt(sb, POSIX_ACL) ? MS_POSIXACL : 0);
+        }
+#else
+        sb->s_flags = (sb->s_flags & ~MS_POSIXACL) |
+                (test_opt(sb, POSIX_ACL) ? MS_POSIXACL : 0);
+#endif
 
 	es = sbi->s_es;
 

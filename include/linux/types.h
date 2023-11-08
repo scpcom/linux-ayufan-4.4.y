@@ -147,7 +147,13 @@ typedef unsigned long blkcnt_t;
  * can override it.
  */
 #ifndef pgoff_t
+#ifdef CONFIG_MACH_QNAPTS
+#define pgoff_t unsigned long long
+#define PGOFF_MAX	ULLONG_MAX
+#else
 #define pgoff_t unsigned long
+#define PGOFF_MAX	ULONG_MAX
+#endif
 #endif
 
 #ifdef CONFIG_ARCH_DMA_ADDR_T_64BIT

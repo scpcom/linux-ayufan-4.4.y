@@ -48,7 +48,11 @@
 #include <linux/sunrpc/svcauth_gss.h>
 
 #include "idmap.h"
+#ifdef CONFIG_NFSV4_FS_RICHACL
+#include <linux/nfs4_acl.h>
+#else
 #include "acl.h"
+#endif
 #include "xdr4.h"
 #include "vfs.h"
 #include "state.h"

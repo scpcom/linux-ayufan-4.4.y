@@ -1621,7 +1621,11 @@ static void do_sync_mmap_readahead(struct vm_area_struct *vma,
 	 * mmap read-around
 	 */
 	ra_pages = max_sane_readahead(ra->ra_pages);
+#ifdef CONFIG_MACH_QNAPTS
+	ra->start = max_t(long long, 0, offset - ra_pages / 2);
+#else
 	ra->start = max_t(long, 0, offset - ra_pages / 2);
+#endif
 	ra->size = ra_pages;
 	ra->async_size = ra_pages / 4;
 	ra_submit(ra, mapping, file);

@@ -43,6 +43,9 @@
 #include "xattr.h"
 #include "acl.h"
 #include "truncate.h"
+#ifdef CONFIG_EXT4_FS_RICHACL
+#include "richacl.h"
+#endif
 
 #include <trace/events/ext4.h>
 
@@ -4328,8 +4331,17 @@ int ext4_setattr(struct dentry *dentry, struct iattr *attr)
 	if (orphan && inode->i_nlink)
 		ext4_orphan_del(NULL, inode);
 
-	if (!rc && (ia_valid & ATTR_MODE))
-		rc = ext4_acl_chmod(inode);
+#ifdef CONFIG_EXT4_FS_RICHACL
+        if (!rc && (ia_valid & ATTR_MODE)){
+                if (EXT4_IS_RICHACL(inode))
+                    rc = ext4_richacl_chmod(inode);
+                else
+                rc = ext4_acl_chmod(inode);
+        }
+#else
+        if (!rc && (ia_valid & ATTR_MODE))
+                rc = ext4_acl_chmod(inode);
+#endif
 
 err_out:
 	ext4_std_error(inode->i_sb, error);

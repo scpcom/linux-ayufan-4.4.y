@@ -52,9 +52,6 @@
 #endif
 #endif
 
-#ifdef CONFIG_MACH_QNAPTS // 2009/09/23 Nike Chen add for default initiator
-#define QNAP_DEFAULT_INITIATOR "iqn.2004-04.com.qnap:all:iscsi.default.ffffff"
-#endif
 
 extern struct se_device *g_lun0_dev;
 
@@ -128,12 +125,14 @@ struct se_node_acl *core_tpg_get_initiator_node_acl(
 	spin_lock_irq(&tpg->acl_node_lock);
 #ifdef CONFIG_MACH_QNAPTS
 // 2009/09/23 Nike Chen add for default initiator
+
     list_for_each_entry(acl, &tpg->acl_node_list, acl_list) {
 		if (!tpg->default_acl && !(strcmp(acl->initiatorname, QNAP_DEFAULT_INITIATOR))) {
 				tpg->default_acl = acl;
 				pr_debug("Get default acl %p for tpg %p.\n", tpg->default_acl, tpg);
 		}
-		if (!strcmp(acl->initiatorname, initiatorname) &&
+		/* Jonathan 2015/05/29 comparison should be case-insensitive */
+		if (!strcasecmp(acl->initiatorname, initiatorname) &&
 				!acl->dynamic_node_acl) {
 			spin_unlock_irq(&tpg->acl_node_lock);
 			return acl;
@@ -376,6 +375,9 @@ struct se_node_acl *core_tpg_check_initiator_node_acl(
     acl->queue_depth = (tpg->default_acl) ? 
                         tpg->default_acl->queue_depth : 
                         tpg->se_tpg_tfo->tpg_get_default_depth(tpg);
+
+	spin_lock_init(&acl->node_sess_reinstatement_lock);
+
 #else        
 	acl->queue_depth = tpg->se_tpg_tfo->tpg_get_default_depth(tpg);
 #endif        
@@ -533,6 +535,10 @@ struct se_node_acl *core_tpg_add_initiator_node_acl(
 	init_completion(&acl->acl_free_comp);
 	spin_lock_init(&acl->device_list_lock);
 	spin_lock_init(&acl->nacl_sess_lock);
+#if defined(CONFIG_MACH_QNAPTS)
+	spin_lock_init(&acl->node_sess_reinstatement_lock);
+#endif
+
 	atomic_set(&acl->acl_pr_ref_count, 0);
 	acl->queue_depth = queue_depth;
 	snprintf(acl->initiatorname, TRANSPORT_IQN_LEN, "%s", initiatorname);

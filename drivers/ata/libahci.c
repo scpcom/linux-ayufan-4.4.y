@@ -136,9 +136,17 @@ struct device_attribute *ahci_shost_attrs[] = {
 };
 EXPORT_SYMBOL_GPL(ahci_shost_attrs);
 
+#if defined(CONFIG_MACH_QNAPTS) && defined(QNAP_HAL)
+// qnap NCQ enable scheme
+extern struct device_attribute dev_attr_qnap_ncq;
+#endif
+
 struct device_attribute *ahci_sdev_attrs[] = {
 	&dev_attr_sw_activity,
 	&dev_attr_unload_heads,
+#if defined(CONFIG_MACH_QNAPTS) && defined(QNAP_HAL)
+    &dev_attr_qnap_ncq,
+#endif
 	NULL
 };
 EXPORT_SYMBOL_GPL(ahci_sdev_attrs);

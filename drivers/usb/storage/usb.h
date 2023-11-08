@@ -77,6 +77,10 @@ struct us_unusual_dev {
 #define US_FLIDX_REDO_READ10	7	/* redo READ(10) command    */
 #define US_FLIDX_READ10_WORKED	8	/* previous READ(10) succeeded */
 
+#ifdef CONFIG_MACH_QNAPTS
+#define QNAP_USB_STOR_JM_QUIRK  98
+#endif
+
 #define USB_STOR_STRING_LEN 32
 
 /*
@@ -201,4 +205,10 @@ extern int usb_stor_probe1(struct us_data **pus,
 extern int usb_stor_probe2(struct us_data *us);
 extern void usb_stor_disconnect(struct usb_interface *intf);
 
+#endif
+
+#ifdef CONFIG_MACH_QNAPTS
+#define QNAP_USB_STOR_MAX_SECTOR 100
+#define QNAP_USB_STOR_JM_QUIRK_MAX_SECTOR  20 /* 20: avoid skipping waitting */
+#define QNAP_JM_QUIRK_US_WAIT 30
 #endif

@@ -29,6 +29,11 @@
 #include "xattr.h"
 #include "acl.h"
 
+#ifdef CONFIG_EXT4_FS_RICHACL
+#include "richacl.h"
+#endif
+
+
 #include <trace/events/ext4.h>
 
 /*
@@ -912,7 +917,15 @@ got:
 	if (err)
 		goto fail_drop;
 
-	err = ext4_init_acl(handle, inode, dir);
+#ifdef CONFIG_EXT4_FS_RICHACL
+        if (EXT4_IS_RICHACL(dir))
+            err = ext4_init_richacl(handle, inode, dir);
+        else
+            err = ext4_init_acl(handle, inode, dir);
+#else
+        err = ext4_init_acl(handle, inode, dir);
+#endif
+
 	if (err)
 		goto fail_free_drop;
 

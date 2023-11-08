@@ -14,7 +14,11 @@
 #define NFSD_MAY_EXEC			0x001 /* == MAY_EXEC */
 #define NFSD_MAY_WRITE			0x002 /* == MAY_WRITE */
 #define NFSD_MAY_READ			0x004 /* == MAY_READ */
-#define NFSD_MAY_SATTR			0x008
+#ifdef CONFIG_NFSV4_FS_RICHACL
+#define NFSD_MAY_TAKE_OWNERSHIP         0x008
+#else
+#define NFSD_MAY_SATTR                  0x008
+#endif
 #define NFSD_MAY_TRUNC			0x010
 #define NFSD_MAY_LOCK			0x020
 #define NFSD_MAY_MASK			0x03f
@@ -26,6 +30,16 @@
 #define NFSD_MAY_NOT_BREAK_LEASE	0x200
 #define NFSD_MAY_BYPASS_GSS		0x400
 #define NFSD_MAY_READ_IF_EXEC		0x800
+#ifdef CONFIG_NFSV4_FS_RICHACL
+#define NFSD_MAY_CREATE_DIR             0x2000
+#define NFSD_MAY_CREATE_FILE            0x4000
+#define NFSD_MAY_CHMOD                  0x8000
+#define NFSD_MAY_SET_TIMES              0x10000
+#define NFSD_MAY_DELETE_CHILD           0x20000
+
+#define NFSD_MAY_SATTR          (NFSD_MAY_TAKE_OWNERSHIP|NFSD_MAY_CHMOD| \
+                                 NFSD_MAY_SET_TIMES)
+#endif
 
 #define NFSD_MAY_CREATE		(NFSD_MAY_EXEC|NFSD_MAY_WRITE)
 #define NFSD_MAY_REMOVE		(NFSD_MAY_EXEC|NFSD_MAY_WRITE|NFSD_MAY_TRUNC)
