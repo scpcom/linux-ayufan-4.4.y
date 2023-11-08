@@ -66,10 +66,14 @@
  * Stripe cache
  */
 //Patch by QNAP:fix raid5 performance
+#if 0
 #ifdef CONFIG_MACH_QNAPTS
 #define NR_STRIPES      1024
 #else
-#define NR_STRIPES		256
+#define NR_STRIPES	256
+#endif
+#else
+#define NR_STRIPES	256
 #endif
 /////////////////////////////////
 

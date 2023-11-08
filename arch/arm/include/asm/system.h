@@ -231,10 +231,23 @@ static inline void set_copro_access(unsigned int val)
  */
 extern struct task_struct *__switch_to(struct task_struct *, struct thread_info *, struct thread_info *);
 
+#ifdef CONFIG_MACH_QNAPTS
+	// Fix ARM reboot
+	// ref: http://lists.infradead.org/pipermail/linux-arm-kernel/2011-October/070261.html
+	#define switch_to(prev,next,last)                                       \
+	do {                                                                    \
+		unsigned long __iflags;             \
+		local_irq_save(__iflags);           \
+		last = __switch_to(prev,task_thread_info(prev), task_thread_info(next));        \
+		local_irq_restore(__iflags);        \
+	} while (0)
+#else
+
 #define switch_to(prev,next,last)					\
 do {									\
 	last = __switch_to(prev,task_thread_info(prev), task_thread_info(next));	\
 } while (0)
+#endif
 
 #if defined(CONFIG_CPU_SA1100) || defined(CONFIG_CPU_SA110)
 /*
