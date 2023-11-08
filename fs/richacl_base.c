@@ -300,6 +300,7 @@ static unsigned int richacl_group_class_allowed(struct richacl *acl)
  * the mask flags allowed by the acl are disabled (for any choice of the
  * file owner or group membership).
  */
+#if 0
 void richacl_compute_max_masks(struct richacl *acl)
 {
 	unsigned int gmask = ~0;
@@ -360,7 +361,46 @@ restart:
 	acl->a_flags &= ~ACL4_MASKED;
 }
 EXPORT_SYMBOL_GPL(richacl_compute_max_masks);
+#endif
 
+/* 
+ * QNAP:
+ * Get the masks from the allow permission instead of
+ * allow and deny permission
+ */
+void richacl_compute_max_masks(struct richacl *acl)
+{
+        struct richace *ace;
+
+        acl->a_owner_mask = 0;
+        acl->a_group_mask = 0;
+        acl->a_other_mask = 0;
+
+        richacl_for_each_entry_reverse(ace, acl) {
+                if (richace_is_inherit_only(ace))
+                        continue;
+
+                if (richace_is_owner(ace)) {
+                        if (richace_is_allow(ace))
+                                acl->a_owner_mask |= ace->e_mask;
+                } else if (richace_is_everyone(ace)) {
+                        if (richace_is_allow(ace)) {
+                                acl->a_owner_mask |= ace->e_mask;
+                                acl->a_group_mask |= ace->e_mask;
+                                acl->a_other_mask |= ace->e_mask;
+                        }
+                } else {
+                        if (richace_is_allow(ace)) {
+                                acl->a_owner_mask |= ace->e_mask;
+                                acl->a_group_mask |= ace->e_mask;
+                                acl->a_other_mask |= ace->e_mask;
+                        }
+                }
+        }
+
+        acl->a_flags &= ~ACL4_MASKED;
+}
+EXPORT_SYMBOL_GPL(richacl_compute_max_masks);
 /**
  * richacl_chmod  -  update the file masks to reflect the new mode
  * @mode:	new file permission bits
@@ -625,6 +665,9 @@ richacl_inherit(const struct richacl *dir_acl, int isdir)
 			if ((dir_ace->e_flags & ACE4_FILE_INHERIT_ACE) &&
 			    !(dir_ace->e_flags & ACE4_DIRECTORY_INHERIT_ACE))
 				ace->e_flags |= ACE4_INHERIT_ONLY_ACE;
+
+			ace->e_flags |= ACE4_INHERITED_ACE; /* Fixed by QNAP */
+
 			ace++;
 		}
 	} else {
@@ -649,6 +692,7 @@ richacl_inherit(const struct richacl *dir_acl, int isdir)
 			 * non-directories, so clear it.
 			 */
 			ace->e_mask &= ~ACE4_DELETE_CHILD;
+			ace->e_flags |= ACE4_INHERITED_ACE; /* Fixed by QNAP */
 			ace++;
 		}
 	}

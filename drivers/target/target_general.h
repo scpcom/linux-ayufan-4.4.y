@@ -45,12 +45,7 @@
 /* max # of bios to submit at a time, please refer the target_core_iblock.c */
 #define BLOCK_MAX_BIO_PER_TASK		32
 #define DEFAULT_IO_TIMEOUT		(2 * 1000)
-
-/* (1) This is hard coding currently. 
- * (2) Just to match the raid stripe size 
- * (3) This parameter will be used in __generic_alloc_sg_list() currently
- */
-#define SG_MAX_IO			(PAGE_SIZE * 16)
+#define SG_MAX_IO			(PAGE_SIZE)
 
 /**/
 #define SCSI_COMPARE_AND_WRITE		0x89
@@ -64,7 +59,7 @@
  */
 #define	MAX_UNMAP_COUNT_SHIFT	10	/* 2^10 */
 #define MAX_UNMAP_DESC_COUNT	16
-
+#define MAX_UNMAP_MB_SIZE	(512)
 
 /* 2014/06/26, adamhsu, redmine 8794 (start) */
 #if (BITS_PER_LONG == 64)
@@ -442,38 +437,6 @@ int __do_sync_cache_range(
 
 int check_backend_thinpool(struct block_device *bd);
 #endif
-struct t10_pr_backup {
-#define PR_REG_ISID_LEN				16
-	char		initiator_name[256];
-	char		target_name[256];
-	char 		isid[PR_REG_ISID_LEN];
-	u32		tpgt;
-	u32		mapped_lun;
-	struct t10_pr_registration	*pr_reg;
-	u64		pr_res_key;
-	bool		def_pr_registered;
-	bool		need_restore;
-	struct list_head	backup_data_node;
-};
-
-
-int __transport_t10_prb_check_sess_reinstatement_from_nacl(
-	struct se_node_acl *se_nacl
-	);
-
-void *__transport_t10_prb_alloc(void);
-
-void __transport_t10_prb_backup_pr_reg(
-	struct t10_pr_backup *backup,
-	struct t10_pr_registration *pr_reg
-	);
-
-void __transport_t10_prb_restore(
-	struct se_portal_group *se_tpg,
-	struct se_node_acl *se_nacl,
-	struct se_session *se_sess,
-	char *isid_buf
-	);
 
 int transport_check_sectors_exceeds_max_limits_blks(
 	LIO_SE_CMD *se_cmd,

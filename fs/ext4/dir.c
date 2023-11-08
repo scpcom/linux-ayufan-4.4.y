@@ -33,7 +33,7 @@ static unsigned char ext4_filetype_table[] = {
 };
 
 static int ext4_dx_readdir(struct file *filp,
-			   void *dirent, filldir_t filldir);
+			void *dirent, filldir_t filldir);
 
 static unsigned char get_dtype(struct super_block *sb, int filetype)
 {
@@ -263,14 +263,14 @@ static inline int is_32bit_api(void)
 }
 
 /*
- * These functions convert from the major/minor hash to an f_pos
- * value for dx directories
- *
- * Upper layer (for example NFS) should specify FMODE_32BITHASH or
- * FMODE_64BITHASH explicitly. On the other hand, we allow ext4 to be mounted
- * directly on both 32-bit and 64-bit nodes, under such case, neither
- * FMODE_32BITHASH nor FMODE_64BITHASH is specified.
- */
+  * These functions convert from the major/minor hash to an f_pos
+  * value for dx directories
+  *
+  * Upper layer (for example NFS) should specify FMODE_32BITHASH or
+  * FMODE_64BITHASH explicitly. On the other hand, we allow ext4 to be mounted
+  * directly on both 32-bit and 64-bit nodes, under such case, neither
+  * FMODE_32BITHASH nor FMODE_64BITHASH is specified.
+  */
 static inline loff_t hash2pos(struct file *filp, __u32 major, __u32 minor)
 {
 	if ((filp->f_mode & FMODE_32BITHASH) ||
@@ -309,7 +309,6 @@ static inline loff_t ext4_get_htree_eof(struct file *filp)
 	else
 		return EXT4_HTREE_EOF_64BIT;
 }
-
 
 /*
  * ext4_dir_llseek() based on generic_file_llseek() to handle both

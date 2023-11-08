@@ -44,10 +44,13 @@ typedef enum
     SET_IDENT,
 // For ENCLOSURE
     SET_FAN_FORCE_SPEED = 10,
+    SET_SCROLLBAR_STEPPING,
     CLEAR_FAN_FORCE_SPEED,
     SET_FAN_MODE_SMART_INTELLIGENT,
+    SET_TFAN_MODE_SMART_INTELLIGENT,
     SET_FAN_MODE_SMART_CUSTOM,
     SET_FAN_MODE_FIXED,
+    SET_TFAN_PARAMETERS,
     SET_MAX_WAKEUP_PD_NUM,  //for netlink
     SET_SMART_TEMP_UNIT,
     SET_PD_STANDBY_TIMEOUT,
@@ -57,6 +60,7 @@ typedef enum
     RELOAD_USB_DRV,
     SET_PIC_WOL,
     OOM_KILLED,
+    IR_INPUT,
 // For GENERAL_DISK
     SELF_TEST = 50,
     SET_PD_STANDBY,         //for netlink
@@ -124,6 +128,7 @@ typedef enum
     TBT_VIRTUAL_NIC_ADD,
     TBT_VIRTUAL_NIC_SUSPEND,
     TBT_VIRTUAL_NIC_RESUME,
+    TBT_VIRTUAL_NIC_ERR_RECOVERY,
 // For memory 
     FILE_BASED_SWAP,
 } EVT_FUNC_ACTION;
@@ -189,7 +194,17 @@ typedef struct
             int custom_stop_temp;
             int custom_low_temp;
             int custom_high_temp;        
+            int stepping;
+            FAN_REGION fan_region;
+            TFAN_MODE tfan_mode;
         } __attribute__ ((__packed__)) fan_control;
+        struct
+        {
+            int temp_critical;
+            int temp_hyst_high;
+            int temp_hyst_low;
+            FAN_REGION fan_region;
+        } __attribute__ ((__packed__)) tfan_parameters;
         struct
         {
             PD_DEV_ID           dev_id;
@@ -273,6 +288,7 @@ typedef struct
         {
             char tbt_virtual_nic_name[32];
             unsigned int nic_up_down_flag;
+            unsigned int err_recovery_type;
         }__attribute__((__packed__)) tbt_virtual_nic;
         struct __cpu_thermal_throttling_event
         {
@@ -297,6 +313,12 @@ typedef struct
         {
             int swap_file_action;
         } __attribute__ ((__packed__)) netlink_mem;
+        struct __ir_input_value
+        {
+            unsigned short type;
+            unsigned short code;
+            int value;
+        } __attribute__ ((__packed__)) ir_input_value;
     } param;
 }__attribute__ ((__packed__))
 EVT_FUNC_ARG;

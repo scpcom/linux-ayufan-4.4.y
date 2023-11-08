@@ -31,7 +31,7 @@
 #define MAX_LOG_IQN_SIZE	256
 
 #ifndef NETLINK_ISCSI_TARGET
-#define	NETLINK_ISCSI_TARGET	20
+#include <qnap/netlink_extern.h>
 #endif
 
 typedef struct _iscsi_conn_log

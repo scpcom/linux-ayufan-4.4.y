@@ -156,17 +156,18 @@ int ext4fs_dirhash(const char *name, int len, struct dx_hash_info *hinfo)
 				str2hashbuf_signed;
 //Patch by QNAP:Search filename use case insensitive method
 #ifdef QNAP_SEARCH_FILENAME_CASE_INSENSITIVE
-    const char *name = d_name;
-    int len = d_len;
-    char case_buffer[EXT4_NAME_LEN];
-    if(case_insensitive){
-        int ret;
-        ret = do_case_folding_transform((__u8 *)name,len,case_buffer,EXT4_NAME_LEN);
-        if(ret > 0){
-            name = case_buffer;
-            len = ret;
-        }
-    }        
+	const char *name = d_name;
+	int len = d_len;
+	char case_buffer[EXT4_NAME_LEN];
+
+	if (case_insensitive) {
+		int ret = do_case_folding_transform((__u8 *)name,len,case_buffer,EXT4_NAME_LEN);
+
+		if (ret > 0) {
+			name = case_buffer;
+			len = ret;
+		}
+	}
 #endif
 ///////////////////////////////////////////////////////////
 	/* Initialize the default seed for the hash checksum functions */

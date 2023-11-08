@@ -42,6 +42,7 @@
 #ifdef CONFIG_MACH_QNAPTS // 2009/11/26 Nike Chen add connection log
 #include <linux/time.h>
 #include "iscsi_target_log.h"
+#include "../target_core_extern.h"
 #endif
 
 extern struct idr sess_idr;
@@ -945,6 +946,12 @@ static int iscsi_post_login_handler(
 	pr_debug("Incremented number of active iSCSI sessions to %u on"
 		" iSCSI Target Portal Group: %hu\n", tpg->nsessions, tpg->tpgt);
 	spin_unlock_bh(&se_tpg->session_lock);
+
+#if defined(CONFIG_MACH_QNAPTS)
+	if (se_sess->se_node_acl)
+		qnap_transport_check_aptpl_registration(se_sess, 
+			se_sess->se_node_acl, &tpg->tpg_se_tpg);
+#endif
 
 	iscsi_post_login_start_timers(conn);
 	iscsi_activate_thread_set(conn, ts);

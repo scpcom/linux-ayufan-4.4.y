@@ -712,6 +712,20 @@ struct iscsi_cmd *iscsit_find_cmd_from_itt(
 	list_for_each_entry(cmd, &conn->conn_cmd_list, i_list) {
 		if (cmd->init_task_tag == init_task_tag) {
 			spin_unlock_bh(&conn->cmd_lock);
+
+#ifdef CONFIG_MACH_QNAPTS
+			/* if found it was aborted already, not pick it up */
+			spin_lock(&cmd->se_cmd.tmf_data_lock);
+			if (cmd->se_cmd.tmf_code == TMR_LUN_RESET 
+			|| cmd->se_cmd.tmf_code == TMR_ABORT_TASK
+			)
+			{
+				spin_unlock(&cmd->se_cmd.tmf_data_lock);
+				spin_lock_bh(&conn->cmd_lock);
+				continue;
+			}
+			spin_unlock(&cmd->se_cmd.tmf_data_lock);
+#endif
 			return cmd;
 		}
 	}

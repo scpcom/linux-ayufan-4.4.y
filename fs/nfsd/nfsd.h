@@ -110,6 +110,9 @@ int nfs4_state_start(void);
 void nfs4_state_shutdown(void);
 void nfs4_reset_lease(time_t leasetime);
 int nfs4_reset_recoverydir(char *recdir);
+int nfs4_reset_v4_bind_ip_list(char *buf);
+char * nfs4_v4_bind_ip_list(void);
+bool is_v4_bind_ip_list(char *ip);
 #else
 static inline int nfs4_state_init(void) { return 0; }
 static inline void nfsd4_free_slabs(void) { }
@@ -117,6 +120,8 @@ static inline int nfs4_state_start(void) { return 0; }
 static inline void nfs4_state_shutdown(void) { }
 static inline void nfs4_reset_lease(time_t leasetime) { }
 static inline int nfs4_reset_recoverydir(char *recdir) { return 0; }
+static inline int nfs4_reset_v4_bind_ip_list(char *buf) { return 0; }
+static inline char * nfs4_v4_bind_ip_list(void){ return NULL; }
 #endif
 
 /*

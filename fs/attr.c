@@ -271,7 +271,14 @@ void setattr_copy(struct inode *inode, const struct iattr *attr)
 
 		if (!in_group_p(inode->i_gid) && !capable(CAP_FSETID))
 			mode &= ~S_ISGID;
+#ifdef CONFIG_FS_RICHACL
+		if (IS_RICHACL(inode))
+			inode->i_mode |= mode;
+		else
+			inode->i_mode = mode;
+#else
 		inode->i_mode = mode;
+#endif
 	}
 }
 EXPORT_SYMBOL(setattr_copy);

@@ -73,6 +73,7 @@ extern int iscsi_log_send_msg(int conn_type, int log_type, char *init_iqn, char 
 	if (!nlh) {
 		printk("Fail to fill with the log buffer, abort the log!!\n");
 		kfree_skb(skb);
+		return ret;
 	}
 	
 	conn_logP = (iscsi_conn_log*) NLMSG_DATA(nlh);

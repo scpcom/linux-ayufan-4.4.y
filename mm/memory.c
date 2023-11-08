@@ -1436,6 +1436,7 @@ static inline bool can_follow_write_pte(pte_t pte, struct page *page,
 	return false;
 }
 
+
 /**
  * follow_page - look up a page descriptor from a user-virtual address
  * @vma: vm_area_struct mapping @address

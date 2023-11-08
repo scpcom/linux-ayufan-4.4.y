@@ -73,34 +73,48 @@ EXPORT_SYMBOL_GPL(richacl_inherit_inode);
 struct richacl *
 richacl_inherit_inode(const struct richacl *dir_acl, struct inode *inode)
 {
-	struct richacl *acl;
-	mode_t mask;
+        struct richacl *acl;
+        mode_t mask;
 
-	acl = richacl_inherit(dir_acl, S_ISDIR(inode->i_mode));
+        acl = richacl_inherit(dir_acl, S_ISDIR(inode->i_mode));
+        if (acl) {
+                /*
+                 * We need to set ACL4_PROTECTED because we are
+                 * doing an implicit chmod
+                 */
+                if (richacl_is_auto_inherit(acl))
+                        acl->a_flags |= ACL4_PROTECTED;
+
+                richacl_compute_max_masks(acl);
+                /*
+                 * Ensure that the acl will not grant any permissions beyond
+                 * the create mode.
+                 */
+                acl->a_flags |= ACL4_MASKED;
+                /*
+                 * QNAP:
+                 * The previleged priority is richacl rather than
+                 * permission mode
+                 */
+                acl->a_owner_mask |= richacl_mode_to_mask(inode->i_mode >> 6) |
+                                        ACE4_POSIX_OWNER_ALLOWED;
+                acl->a_group_mask |= richacl_mode_to_mask(inode->i_mode >> 3);
+                acl->a_other_mask |= richacl_mode_to_mask(inode->i_mode);
+
+                mask = S_IRWXUGO & richacl_masks_to_mode(acl);
+        } else
+                mask = ~current_umask();
+
+        inode->i_mode |= mask;
+
 	if (acl) {
-		/*
-		 * We need to set ACL4_PROTECTED because we are
-		 * doing an implicit chmod
-		 */
-		if (richacl_is_auto_inherit(acl))
-			acl->a_flags |= ACL4_PROTECTED;
+		acl->a_owner_mask |= richacl_mode_to_mask(inode->i_mode >> 6) |
+					ACE4_POSIX_OWNER_ALLOWED;
+		acl->a_group_mask |= richacl_mode_to_mask(inode->i_mode >> 3);
+		acl->a_other_mask |= richacl_mode_to_mask(inode->i_mode);
+	}
 
-		richacl_compute_max_masks(acl);
-		/*
-		 * Ensure that the acl will not grant any permissions beyond
-		 * the create mode.
-		 */
-		acl->a_flags |= ACL4_MASKED;
-		acl->a_owner_mask &= richacl_mode_to_mask(inode->i_mode >> 6) |
-				     ACE4_POSIX_OWNER_ALLOWED;
-		acl->a_group_mask &= richacl_mode_to_mask(inode->i_mode >> 3);
-		acl->a_other_mask &= richacl_mode_to_mask(inode->i_mode);
-		mask = ~S_IRWXUGO | richacl_masks_to_mode(acl);
-	} else
-		mask = ~current_umask();
-
-	inode->i_mode &= mask;
-	return acl;
+        return acl;
 }
 EXPORT_SYMBOL_GPL(richacl_inherit_inode);
 

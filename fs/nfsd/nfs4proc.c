@@ -968,6 +968,46 @@ out_kfree:
 	return status;
 }
 
+static char v4_bind_ip_list[2048] = {0};
+
+bool is_v4_bind_ip_list(char *ip){
+	char *tmp_p=NULL;
+	char *tok=NULL;
+	char *tmp_save=NULL;	
+
+	tmp_save = tmp_p = kstrdup(v4_bind_ip_list,GFP_KERNEL);
+
+	tok=strsep(&tmp_p,",");
+	while(tok!=NULL){
+		if(!strcmp(ip,tok)){
+			kfree(tmp_save);
+			return true;
+		}
+		tok=strsep(&tmp_p,",");
+	}
+	kfree(tmp_save);
+	return false;
+}
+
+char *
+nfs4_v4_bind_ip_list(void)
+{
+        return v4_bind_ip_list;
+}
+
+int
+nfs4_reset_v4_bind_ip_list(char *buf)
+{
+        memset(v4_bind_ip_list,0,sizeof(v4_bind_ip_list));
+
+        if(strlen(buf)>0)
+                strncpy(v4_bind_ip_list, buf, sizeof(v4_bind_ip_list));
+
+
+        return 0;
+}
+
+
 static __be32
 nfsd4_nverify(struct svc_rqst *rqstp, struct nfsd4_compound_state *cstate,
 	      struct nfsd4_verify *verify)

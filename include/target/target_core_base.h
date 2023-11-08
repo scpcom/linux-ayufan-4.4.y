@@ -877,10 +877,6 @@ struct se_node_acl {
 	struct list_head	acl_sess_list;
 	struct completion	acl_free_comp;
 	struct kref		acl_kref;
-#ifdef CONFIG_MACH_QNAPTS
-	spinlock_t		node_sess_reinstatement_lock;
-	bool			node_sess_reinstatement;
-#endif
 
 };
 

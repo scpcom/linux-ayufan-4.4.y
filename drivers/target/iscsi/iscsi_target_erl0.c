@@ -807,6 +807,10 @@ extern void iscsit_start_time2retain_handler(struct iscsi_session *sess)
 #ifdef CONFIG_MACH_QNAPTS
 	if (sess->sess_ops->ErrorRecoveryLevel == 0) {
 		pr_debug("Skip timer and run timer function in process context.\n");
+
+		sess->time2retain_timer_flags &= ~ISCSI_TF_STOP;
+		sess->time2retain_timer_flags |= ISCSI_TF_RUNNING;
+		sess->time2retain_timer.function = NULL;
 		iscsit_handle_time2retain_timeout((unsigned long)sess);
 		return;
 	}
@@ -841,6 +845,16 @@ extern int iscsit_stop_time2retain_timer(struct iscsi_session *sess)
 
 	sess->time2retain_timer_flags |= ISCSI_TF_STOP;
 	spin_unlock_bh(&se_tpg->session_lock);
+
+#ifdef CONFIG_MACH_QNAPTS
+	if (sess->time2retain_timer.function == NULL) {
+		spin_lock_bh(&se_tpg->session_lock);
+		sess->time2retain_timer_flags &= ~ISCSI_TF_RUNNING;
+		pr_debug("Stopped Time2Retain Timer for SID: %u\n",
+				sess->sid);
+		return 0;
+	}
+#endif
 
 	del_timer_sync(&sess->time2retain_timer);
 

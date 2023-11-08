@@ -26,7 +26,6 @@
 
 /* Jonathan Ho, 20131212, monitor ODX */
 #ifdef SHOW_OFFLOAD_STATS
-extern int Xmon_enable;
 extern u64 Xpcmd;
 extern unsigned int Tpcmd;
 extern unsigned long cmd_done;
@@ -333,8 +332,7 @@ _NORMAL_RW_:
 _GO_NEXT_:	
 /* Jonathan Ho, 20131231, change place to get data */
 #ifdef SHOW_OFFLOAD_STATS
-		if (Xmon_enable)
-			Xtotal += e_bytes >> 10; /* bytes to KB */
+		Xtotal += e_bytes >> 10; /* bytes to KB */
 #endif /* SHOW_OFFLOAD_STATS */
 		tmp_w_bytes -= e_bytes;
 		t_off_to_rod += e_bytes;
@@ -2537,11 +2535,9 @@ _DO_AGAIN_:
 
 /* Jonathan Ho, 20131212, monitor ODX */
 #ifdef SHOW_OFFLOAD_STATS
-		if (Xmon_enable) {
-			Xpcmd = tmp_Xpcmd >> 10; /* bytes to KB */
-			Tpcmd = jiffies_to_msecs(jiffies - start_jiffies);
-			cmd_done++;
-		}
+		Xpcmd = tmp_Xpcmd >> 10; /* bytes to KB */
+		Tpcmd = jiffies_to_msecs(jiffies - start_jiffies);
+		cmd_done++;
 #endif /* SHOW_OFFLOAD_STATS */
 	}
 
@@ -2954,6 +2950,11 @@ int tpc_write_by_token(
 			goto _OBJ_FAIL_;
 		}
 
+		/* Actually, NOT find any standard document indicates the token
+		 * used by WRITE USING TOKEN command can work across different
+		 * i_t nexus (session) ...
+		 */
+#if 0
 		/* Found token obj, but need to check the i_t nexus of
 		 * obj whether it equals to passing commannd or not
 		 */
@@ -2964,6 +2965,7 @@ int tpc_write_by_token(
 			err = ERR_UNREACHABLE_COPY_TARGET;
 			goto _OBJ_FAIL_;
 		}
+#endif
 	}
 
 	/* Before to do write by token, let's investigate some conditions again */

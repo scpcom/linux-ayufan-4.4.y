@@ -1447,6 +1447,11 @@ attach_cmd:
 	 * be acknowledged. (See below)
 	 */
 	if (!cmd->immediate_data) {
+#ifdef CONFIG_MACH_QNAPTS
+		if (signal_pending(current))
+			return -1;
+#endif
+
 		cmdsn_ret = iscsit_sequence_cmd(conn, cmd, hdr->cmdsn);
 		if (cmdsn_ret == CMDSN_LOWER_THAN_EXP)
 			return 0;
@@ -1469,6 +1474,10 @@ attach_cmd:
 	 * If no Immediate Data is attached, it's OK to return now.
 	 */
 	if (!cmd->immediate_data) {
+#ifdef CONFIG_MACH_QNAPTS
+		if (signal_pending(current))
+			return -1;
+#endif
 		if (send_check_condition)
 			return 0;
 
@@ -1512,6 +1521,10 @@ after_immediate_data:
 		 * DataCRC, check against ExpCmdSN/MaxCmdSN if
 		 * Immediate Bit is not set.
 		 */
+#ifdef CONFIG_MACH_QNAPTS
+		if (signal_pending(current))
+			return -1;
+#endif
 		cmdsn_ret = iscsit_sequence_cmd(conn, cmd, hdr->cmdsn);
 		/*
 		 * Special case for Unsupported SAM WRITE Opcodes
@@ -1532,6 +1545,10 @@ after_immediate_data:
 			spin_unlock_bh(&cmd->dataout_timeout_lock);
 		}
 
+#ifdef CONFIG_MACH_QNAPTS
+		if (signal_pending(current))
+			return -1;
+#endif
 		if (cmdsn_ret == CMDSN_ERROR_CANNOT_RECOVER){
 
 	                hdr->itt                = be32_to_cpu(hdr->itt);
@@ -3230,6 +3247,40 @@ static int iscsit_send_data_in(
 	struct iscsi_data_rsp *hdr;
 	struct kvec *iov;
 
+
+	int is_tmf = 0;
+
+	spin_lock(&cmd->se_cmd.tmf_data_lock);
+	if (cmd->se_cmd.tmf_code == TMR_LUN_RESET 
+	|| cmd->se_cmd.tmf_code == TMR_ABORT_TASK
+	)
+		is_tmf = 1;
+	spin_unlock(&cmd->se_cmd.tmf_data_lock);
+
+	if ((is_tmf == 1) && (cmd->se_cmd.tmf_resp_tas == 1)) {
+
+		pr_warn("[DATA-IN] got TMF request(op:0x%x): "
+			"iscsi cmd(ITT:0x%8x), diff_it_nexus:0x%x, "
+			"resp TAS:0x%x\n", cmd->se_cmd.tmf_code, 
+			cmd->init_task_tag, 
+			cmd->se_cmd.tmf_diff_it_nexus,
+			cmd->se_cmd.tmf_resp_tas);
+
+		iscsit_free_all_datain_reqs(cmd);
+		
+		if (cmd->se_cmd.se_cmd_flags & SCF_TRANSPORT_TASK_SENSE)
+			cmd->se_cmd.se_cmd_flags &= ~SCF_TRANSPORT_TASK_SENSE;
+		
+		if (!(cmd->se_cmd.scsi_status & SAM_STAT_TASK_ABORTED))
+			cmd->se_cmd.scsi_status |= SAM_STAT_TASK_ABORTED;
+		
+		spin_lock_bh(&cmd->istate_lock);
+		cmd->i_state = ISTATE_SEND_STATUS;
+		spin_unlock_bh(&cmd->istate_lock);
+		*eodr = 2;
+		return 2;
+	}
+
 	memset(&datain, 0, sizeof(struct iscsi_datain));
 	dr = iscsit_get_datain_values(cmd, &datain);
 	if (!dr) {
@@ -3250,15 +3301,19 @@ static int iscsit_send_data_in(
 	}
 
 	/* procedure to handle case we do NOT need to resp the status to host */
+
+	spin_lock(&cmd->se_cmd.tmf_data_lock);
 	if (cmd->se_cmd.tmf_code == TMR_LUN_RESET 
 	|| cmd->se_cmd.tmf_code == TMR_ABORT_TASK
 	)
-	{
-		pr_info("[SEND DATA-IN] got TMF request(op:0x%x): "
-			"iscsi cmd(ITT:0x%8x), %s datain pdu, diff_it_nexus:0x%x, "
+		is_tmf = 1;
+	spin_unlock(&cmd->se_cmd.tmf_data_lock);
+
+	if (is_tmf == 1) {
+		pr_warn("[DATA-IN] got TMF request(op:0x%x): "
+			"iscsi cmd(ITT:0x%8x), diff_it_nexus:0x%x, "
 			"resp TAS:0x%x\n", cmd->se_cmd.tmf_code, 
 			cmd->init_task_tag, 
-			((dr->dr_complete) ? "final": "non-final"),
 			cmd->se_cmd.tmf_diff_it_nexus,
 			cmd->se_cmd.tmf_resp_tas);
 
@@ -3269,12 +3324,12 @@ static int iscsit_send_data_in(
 			/* update eodr and free necessary datain req */
 			*eodr = (cmd->se_cmd.se_cmd_flags & \
 				SCF_TRANSPORT_TASK_SENSE) ? 2 : 1;
-			
+
 			iscsit_free_datain_req(cmd, dr);
 			iscsit_increment_maxcmdsn(cmd, conn->sess);
 
 			spin_lock_bh(&cmd->istate_lock);	
-			pr_debug("[SEND DATA-IN] cmd(ITT:0x%x), cmd_flags:0x%x, "
+			pr_debug("[DATA-IN] cmd(ITT:0x%x), cmd_flags:0x%x, "
 				"TAS resp:0x%x, to clear ICF_DELAYED_REMOVE\n",
 				cmd->init_task_tag, cmd->cmd_flags,
 				cmd->se_cmd.tmf_resp_tas
@@ -3326,18 +3381,6 @@ static int iscsit_send_data_in(
 		}
 	}
 
-
-	/* procedure to handle case we NEED to resp the status to host */
-	if (cmd->se_cmd.tmf_code == TMR_LUN_RESET 
-	|| cmd->se_cmd.tmf_code == TMR_ABORT_TASK
-	)
-	{
-		if (cmd->se_cmd.tmf_resp_tas){
-			if (!cmd->se_cmd.scsi_status & SAM_STAT_TASK_ABORTED)
-				cmd->se_cmd.scsi_status |= SAM_STAT_TASK_ABORTED;
-		}
-		hdr->cmd_status = cmd->se_cmd.scsi_status;
-	}
 
 	hton24(hdr->dlength, datain.length);
 	if (hdr->flags & ISCSI_FLAG_DATA_ACK)
@@ -3989,7 +4032,8 @@ static int iscsit_send_status(
 	|| cmd->se_cmd.tmf_code == TMR_ABORT_TASK
 	)
 	{
-		pr_info("[SEND STATUS]: got TMF request(op:0x%x): "
+		pr_warn("[SEND STATUS]: "
+			"got TMF request(op:0x%x): "
 			"iscsi cmd(ITT:0x%8x), diff_it_nexus:0x%x, "
 			"resp TAS:0x%x\n", cmd->se_cmd.tmf_code, 
 			cmd->init_task_tag, cmd->se_cmd.tmf_diff_it_nexus,
@@ -4043,7 +4087,7 @@ static int iscsit_send_status(
 	)
 	{
 		if (need_to_resp){
-			if (!cmd->se_cmd.scsi_status & SAM_STAT_TASK_ABORTED)
+			if (!(cmd->se_cmd.scsi_status & SAM_STAT_TASK_ABORTED))
 				cmd->se_cmd.scsi_status |= SAM_STAT_TASK_ABORTED;
 		}
 	}
@@ -5638,13 +5682,6 @@ int iscsit_close_session(struct iscsi_session *sess)
 			return 0;
 		}
 	}
-#if defined(CONFIG_MACH_QNAPTS)
-	spin_lock_bh(&se_tpg->session_lock);
-	spin_lock(&sess->se_sess->sess_reinstatement_lock);
-	sess->se_sess->sess_reinstatement = 1;
-	spin_unlock(&sess->se_sess->sess_reinstatement_lock);
-	spin_unlock_bh(&se_tpg->session_lock);
-#endif	
 
 	transport_deregister_session(sess->se_sess);
 

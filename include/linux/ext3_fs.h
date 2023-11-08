@@ -788,8 +788,8 @@ struct dx_hash_info
 
 
 /* 32 and 64 bit signed EOF for dx directories */
-#define EXT3_HTREE_EOF_32BIT   ((1UL  << (32 - 1)) - 1)
-#define EXT3_HTREE_EOF_64BIT   ((1ULL << (64 - 1)) - 1)
+#define EXT3_HTREE_EOF_32BIT	((1UL  << (32 - 1)) - 1)
+#define EXT3_HTREE_EOF_64BIT	((1ULL << (64 - 1)) - 1)
 
 
 /*

@@ -639,13 +639,15 @@ static struct configfs_attribute *lio_target_nacl_param_attrs[] = {
 // 2009/09/23 Nike Chen add for default initiator
 #ifdef CONFIG_MACH_QNAPTS
 
+#define QNAP_DEFAULT_INITIATOR "iqn.2004-04.com.qnap:all:iscsi.default.ffffff"
+
 static ssize_t lio_target_nacl_show_info(
 	struct se_node_acl *se_nacl,
 	char *page)
 {
 	struct iscsi_session *sess;
 	struct iscsi_conn *conn;
-	struct se_session *se_sess;
+	struct se_session *se_sess, *tmp_se_sess;
 	ssize_t rb = 0;
 
    	struct se_portal_group *se_tpg = NULL;
@@ -660,6 +662,7 @@ static ssize_t lio_target_nacl_show_info(
         struct se_wwn *wwn;
 	struct iovec iov[1];
 	int first_conn, rret=0;
+	bool is_default_initiator;
 #endif
 	if (se_nacl)
 		se_tpg = se_nacl->se_tpg;
@@ -671,8 +674,16 @@ static ssize_t lio_target_nacl_show_info(
 	if (se_tpg) {
 
 #ifdef QNAP_KERNEL_STORAGE_V2	
+
+		if (!strcmp(se_nacl->initiatorname, QNAP_DEFAULT_INITIATOR))
+			is_default_initiator = true;
+		else
+			is_default_initiator = false;
+
 		wwn=se_tpg->se_tpg_wwn;
+
 		snprintf(path_t,sizeof(path_t),"/tmp/%s/%s/target_info",wwn->wwn_group.cg_item.ci_name,se_nacl->initiatorname);
+
 		fd = filp_open(path_t, O_CREAT | O_WRONLY | O_TRUNC , S_IRWXU);
 	        if (!IS_ERR (fd))
 	                filp_close(fd, NULL);
@@ -686,11 +697,52 @@ static ssize_t lio_target_nacl_show_info(
 			return 0;
 		}
 #endif
-	        spin_lock_bh(&se_tpg->acl_node_lock);
-	        list_for_each_entry(acl, &se_tpg->acl_node_list, acl_list) {
+		spin_lock_bh(&se_tpg->acl_node_lock);
+		list_for_each_entry(acl, &se_tpg->acl_node_list, acl_list) {
 			spin_lock_bh(&acl->nacl_sess_lock);
 
-			if ((se_sess = acl->nacl_sess)) {
+#ifdef QNAP_KERNEL_STORAGE_V2
+			/* Since we will get EVERY acl node in this tpg, we
+			 * also need check whether passing se_nacl equals to 
+			 * acl node from tpg or not. But, this condition shall
+			 * be skipped for default initiator.
+			 * This shall cowork with solution of bugzilla 79317
+			 */
+			if ((se_nacl != acl) && (is_default_initiator == false)) {
+				spin_unlock_bh(&acl->nacl_sess_lock);
+				continue;
+			}
+#endif
+
+			/* the total acls in se_tpg->acl_node_list contains
+			 * /sys/kernel/config/target/iscsi/<TARGET_IQN>/tpgt_<x>/acls/<TARGET_ACL>
+			 * plus real acl for incoming iscsi initiator
+			 *
+			 * i.e.
+			 * tpgt_1/acls/iqn.default_initiator
+			 * tpgt_1/acls/iqn.aaa
+			 * tpgt_1/acls/iqn.bbb
+			 *
+			 * if now is only iqn.ccc logined, the acls in 
+			 * acl_node_list will be iqn.default_initiator, iqn.aaa,
+			 * iqn.bbb and iqn.ccc (new one)
+			 *
+			 * If the acl didn't be logged-in, its nacl_sess value
+			 * will be null. Actually, null value case includes the
+			 * default initiator 
+			 */
+
+			/* please refer __transport_register_session()
+			 * so we safe do this 
+			 */
+			if (!acl->nacl_sess) {
+				spin_unlock_bh(&acl->nacl_sess_lock);
+				continue;
+			}
+
+			list_for_each_entry_safe(se_sess, tmp_se_sess, 
+					&acl->acl_sess_list, sess_acl_list) 
+			{
 #ifdef QNAP_KERNEL_STORAGE_V2
 				rb=0;
 				memset(data_t,0,PAGE_SIZE);
@@ -785,13 +837,15 @@ static ssize_t lio_target_nacl_show_info(
 				spin_lock_bh(&se_tpg->acl_node_lock);
 				spin_lock_bh(&acl->nacl_sess_lock);
 #endif
-	
 			}
 			spin_unlock_bh(&acl->nacl_sess_lock);
 #ifndef QNAP_KERNEL_STORAGE_V2
-		// Benjamin 20130315 for BUG 31457: fill_read_buffer() in configfs can only read one page. If exceeds, BUG_ON!
-		if (rb + 1024 > PAGE_SIZE)
-			break;
+			/* Benjamin 20130315 for BUG 31457: fill_read_buffer()
+			 * in configfs can only read one page. 
+			 * If exceeds, BUG_ON! 
+			 */
+			if (rb + 1024 > PAGE_SIZE)
+				break;
 #endif
 	        }
 	        spin_unlock_bh(&se_tpg->acl_node_lock);

@@ -294,6 +294,24 @@ nfsd_lookup(struct svc_rqst *rqstp, struct svc_fh *fhp, const char *name,
 	err = check_nfsd_access(exp, rqstp);
 	if (err)
 		goto out;
+#ifdef CONFIG_NFSD_V4
+	if(strlen(nfs4_v4_bind_ip_list())!=0){
+		char  buf[RPC_MAX_ADDRBUFLEN];
+		struct sockaddr *daddr = svc_daddr(rqstp);
+		struct sockaddr_in *sin = (struct sockaddr_in *)daddr;
+		struct sockaddr_in6 *sin6 = (struct sockaddr_in6 *)daddr;
+		if (daddr->sa_family != AF_UNSPEC) {
+			if(daddr->sa_family == AF_INET)
+				snprintf(buf, sizeof(buf), "%pI4", &sin->sin_addr);
+			else if (daddr->sa_family == AF_INET6)
+				snprintf(buf, sizeof(buf), "%pI6c", &sin6->sin6_addr);
+			if(strcmp(buf,"127.0.0.1") && strcmp(buf,"::1") && !is_v4_bind_ip_list(buf)){
+				err = nfserr_noent;
+				goto out;
+			}
+		}
+	}
+#endif
 	/*
 	 * Note: we compose the file handle now, but as the
 	 * dentry may be negative, it may need to be updated.
@@ -1087,10 +1105,9 @@ nfsd_open(struct svc_rqst *rqstp, struct svc_fh *fhp, int type,
 	}
 	*filp = dentry_open(dget(dentry), mntget(fhp->fh_export->ex_path.mnt),
 			    flags, current_cred());
-	if (IS_ERR(*filp)) {
+	if (IS_ERR(*filp))
 		host_err = PTR_ERR(*filp);
-		*filp = NULL;
-	} else {
+	else {
 		host_err = ima_file_check(*filp, may_flags);
 
 		if (may_flags & NFSD_MAY_64BIT_COOKIE)
@@ -2418,8 +2435,11 @@ nfsd_unlink(struct svc_rqst *rqstp, struct svc_fh *fhp, int type,
                  * VFS unlink operation can evaluate the permission
                  * using MAY_DELETE_SELF rule
                  */
-                err = fh_verify(rqstp, fhp, S_IFDIR, NFSD_MAY_EXEC);
-        if (err)
+/*
+ *             Fix bug 82750
+ *             err = fh_verify(rqstp, fhp, S_IFDIR, NFSD_MAY_EXEC);
+ *       if (err)
+*/
                 goto out;
         }
 #else
@@ -2662,7 +2682,7 @@ nfsd_readdir(struct svc_rqst *rqstp, struct svc_fh *fhp, loff_t *offsetp,
 	__be32		err;
 	struct file	*file;
 	loff_t		offset = *offsetp;
-	int             may_flags = NFSD_MAY_READ;
+	int		may_flags = NFSD_MAY_READ;
 
 	/* NFSv2 only supports 32 bit cookies */
 	if (rqstp->rq_vers > 2)

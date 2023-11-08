@@ -40,10 +40,15 @@
 #include "target_core_internal.h"
 #include "target_core_pr.h"
 #include "target_core_ua.h"
+#include <linux/string.h>
+#include <linux/parser.h>
+
 
 #if defined(CONFIG_MACH_QNAPTS)
 #include "target_general.h"
+#include "target_core_extern.h"
 #endif
+
 /*
  * Used for Specify Initiator Ports Capable Bit (SPEC_I_PT)
  */
@@ -1346,86 +1351,129 @@ static void __core_scsi3_free_registration(
 	list_add_tail(&pr_reg->pr_reg_abort_list, preempt_and_abort_list);
 }
 
-#if defined(CONFIG_MACH_QNAPTS)
-void core_scsi3_free_pr_reg_from_nacl(
+
+#ifdef CONFIG_MACH_QNAPTS
+static int __qnap_scsi3_check_aptpl_registration(
 	struct se_device *dev,
-	struct se_node_acl *nacl)
+	struct se_portal_group *tpg,
+	struct se_lun *lun,
+	u32 target_lun,
+	struct se_session *se_sess,
+	struct se_node_acl *nacl,
+	struct se_dev_entry *deve
+	)
 {
 	struct t10_reservation *pr_tmpl = &dev->se_sub_dev->t10_pr;
-	struct t10_pr_registration *pr_reg, *pr_reg_tmp, *pr_res_holder;
-	void *backup = NULL;
-	int sess_reinstatement, release = 1;
+	struct t10_pr_registration *new_pr_reg = NULL;
+	u16 tpgt;
+	struct file *fp = NULL;
+	char *data = NULL;
+	int ret, data_size = (PAGE_SIZE*16); /* TBD */
+	unsigned char s_i_port[PR_APTPL_MAX_IPORT_LEN], d_i_port[PR_APTPL_MAX_IPORT_LEN];
+	unsigned char s_t_port[PR_APTPL_MAX_TPORT_LEN], d_t_port[PR_APTPL_MAX_TPORT_LEN];
+	char s_isid[PR_REG_ISID_LEN], d_isid[PR_REG_ISID_LEN];
+	struct node_info s_data, d_data;
 
-	sess_reinstatement = 
-		__transport_t10_prb_check_sess_reinstatement_from_nacl(nacl);
+	ret = __qnap_scsi3_check_aptpl_metadata_file_exists(dev, &fp);
+	if (ret != 0)
+		return ret;
 
-	/*
-	 * If the passed se_node_acl matches the reservation holder,
-	 * release the reservation.
-	 */
-	spin_lock(&dev->dev_reservation_lock);
-	pr_res_holder = dev->dev_pr_res_holder;
-
-	if ((pr_res_holder != NULL) &&
-	    (pr_res_holder->pr_reg_nacl == nacl)){
-
-		if (sess_reinstatement){
-			release = 0;
-
-			pr_info("i_t nexus for sess reinstatement is the "
-				"same as pr holder, skip the release action\n");
-			pr_info("i_t nexus initiatorname:%s\n",nacl->initiatorname);	
-			pr_info("i_t nexus nacl:0x%p\n",nacl);
-#if 0
-			pr_info("res holder nacl->initiatorname:%s\n",
-				pr_res_holder->pr_reg_nacl->initiatorname);
-			pr_info("res holder nacl:0x%p\n",
-				pr_res_holder->pr_reg_nacl);	
-			pr_info("res holder:0x%p\n", pr_res_holder);
-#endif
-		}
-
-		if (release)
-			__core_scsi3_complete_pro_release(dev, nacl, pr_res_holder, 0);
+	data = vmalloc(data_size);
+	if (!data) {
+		pr_err("%s: fail to allocate tmp buffer\n", __func__);
+		filp_close(fp, NULL);
+		return -ENOMEM;
 	}
 
-	spin_unlock(&dev->dev_reservation_lock);
-	/*
-	 * Release any registration associated with the struct se_node_acl.
-	 */
-	spin_lock(&pr_tmpl->registration_lock);
-	list_for_each_entry_safe(pr_reg, pr_reg_tmp,
-			&pr_tmpl->registration_list, pr_reg_list) {
-
-		if (pr_reg->pr_reg_nacl != nacl)
-			continue;
-
-		if (sess_reinstatement){
-			release = 0;
-
-			pr_info("i_t nexus for sess reinstatement is the same "
-				"as pr registration, skip to free registration\n");
-
-			pr_info("i_t nexus initiatorname:%s\n",	nacl->initiatorname);	
-			pr_info("i_t nexus nacl:0x%p\n",nacl);
-#if 0 
-			pr_info("pr reg nacl->initiatorname:%s\n",
-				pr_reg->pr_reg_nacl->initiatorname);
-			pr_info("pr reg nacl:0x%p\n",pr_reg->pr_reg_nacl);	
-#endif
-			backup = __transport_t10_prb_alloc();
-			__transport_t10_prb_backup_pr_reg(backup, pr_reg);
-		}
-
-
-		if (release)
-			__core_scsi3_free_registration(dev, pr_reg, NULL, 0);
+	ret = kernel_read(fp, 0, data, data_size);
+	if (ret <= 0) {
+		pr_err("%s: fail to read meta file\n", __func__);
+		vfree(data);
+		filp_close(fp, NULL);
+		return -EIO;
 	}
-	spin_unlock(&pr_tmpl->registration_lock);
 
+	/*
+	 * Copy Initiator Port information from struct se_node_acl
+	 */
+
+	memset(&s_i_port[0], 0, PR_APTPL_MAX_IPORT_LEN);
+	memset(&s_t_port[0], 0, PR_APTPL_MAX_TPORT_LEN);
+	memset(&d_i_port[0], 0, PR_APTPL_MAX_IPORT_LEN);
+	memset(&d_t_port[0], 0, PR_APTPL_MAX_TPORT_LEN);
+	memset(&s_isid[0], 0, PR_REG_ISID_LEN);
+	memset(&d_isid[0], 0, PR_REG_ISID_LEN);
+
+	snprintf(s_i_port, PR_APTPL_MAX_IPORT_LEN, "%s", nacl->initiatorname);
+	snprintf(s_t_port, PR_APTPL_MAX_TPORT_LEN, "%s",
+			tpg->se_tpg_tfo->tpg_get_wwn(tpg));
+
+	tpg->se_tpg_tfo->sess_get_initiator_sid(se_sess, &s_isid[0], 
+			PR_REG_ISID_LEN);
+
+	tpgt = tpg->se_tpg_tfo->tpg_get_tag(tpg);
+
+	memset(&s_data, 0, sizeof(struct node_info));
+	memset(&d_data, 0, sizeof(struct node_info));
+
+	d_data.i_port = &d_i_port[0];
+	d_data.t_port = &d_t_port[0];
+	d_data.i_sid = &d_isid[0];
+
+	s_data.i_port = &s_i_port[0];
+	s_data.t_port = &s_t_port[0];
+	s_data.i_sid = &s_isid[0];
+	s_data.tpgt = tpgt; 
+	s_data.target_lun = target_lun;
+	s_data.mapped_lun = deve->mapped_lun;
+
+	if (__qnap_scsi3_parse_aptpl_data(dev, data, &s_data, &d_data) == 0) {
+		new_pr_reg = __core_scsi3_alloc_registration(dev, nacl, deve, 
+				d_data.i_sid, d_data.sa_res_key, 
+				d_data.all_tg_pt, 1);
+	
+		WARN_ON(!new_pr_reg);
+	
+		new_pr_reg->pr_reg_nacl = nacl;
+		new_pr_reg->pr_reg_deve = deve;
+		new_pr_reg->pr_reg_tg_pt_lun = lun;
+		new_pr_reg->pr_res_type = d_data.type;
+		new_pr_reg->pr_res_scope = d_data.scope;
+		
+		__core_scsi3_add_registration(dev, nacl, new_pr_reg, 0, 0);
+	
+		/* If this registration is the reservation holder, make that happen now.. */
+		if (d_data.res_holder)
+			core_scsi3_aptpl_reserve(dev, tpg, nacl, new_pr_reg);
+	}
+
+	vfree(data);
+	filp_close(fp, NULL);
+	return 0;
 }
 
-#else
+int qnap_transport_scsi3_check_aptpl_registration(
+	struct se_device *dev,
+	struct se_portal_group *tpg,
+	struct se_lun *lun,
+	struct se_session *se_sess,
+	struct se_node_acl *nacl,
+	u32 mapped_lun
+	)
+{
+	struct se_subsystem_dev *su_dev = dev->se_sub_dev;
+	struct se_dev_entry *deve = nacl->device_list[mapped_lun];
+
+	if (su_dev->t10_pr.res_type != SPC3_PERSISTENT_RESERVATIONS)
+		return 0;
+
+	__qnap_scsi3_check_aptpl_registration(dev, tpg, lun, 
+			lun->unpacked_lun, se_sess, nacl, deve);
+
+	return 0;
+}
+#endif
+
 void core_scsi3_free_pr_reg_from_nacl(
 	struct se_device *dev,
 	struct se_node_acl *nacl)
@@ -1458,7 +1506,6 @@ void core_scsi3_free_pr_reg_from_nacl(
 	}
 	spin_unlock(&pr_tmpl->registration_lock);
 }
-#endif
 
 void core_scsi3_free_all_registrations(
 	struct se_device *dev)
@@ -3983,6 +4030,11 @@ int target_scsi3_emulate_pr_out(struct se_task *task)
 		aptpl = (buf[17] & 0x01);
 		unreg = (buf[17] & 0x02);
 	}
+
+#ifdef CONFIG_MACH_QNAPTS
+		aptpl = 1;
+#endif
+
 	transport_kunmap_data_sg(cmd);
 	buf = NULL;
 

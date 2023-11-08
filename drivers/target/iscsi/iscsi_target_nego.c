@@ -511,8 +511,17 @@ static int iscsi_target_do_authentication(
 	payload_length = ntoh24(login_req->dlength);
 
 	param = iscsi_find_param_from_key(AUTHMETHOD, conn->param_list);
+
+#ifdef CONFIG_MACH_QNAPTS
+	if (!param) {
+		iscsit_tx_login_rsp(conn, ISCSI_STATUS_CLS_INITIATOR_ERR,
+			ISCSI_LOGIN_STATUS_MISSING_FIELDS);
+		return -1;
+	}
+#else
 	if (!param)
 		return -1;
+#endif
 
 	authret = iscsi_handle_authentication(
 			conn,
@@ -572,8 +581,17 @@ static int iscsi_target_handle_csg_zero(
 	payload_length = ntoh24(login_req->dlength);
 
 	param = iscsi_find_param_from_key(AUTHMETHOD, conn->param_list);
+
+#ifdef CONFIG_MACH_QNAPTS
+	if (!param) {
+		iscsit_tx_login_rsp(conn, ISCSI_STATUS_CLS_INITIATOR_ERR,
+			ISCSI_LOGIN_STATUS_MISSING_FIELDS);
+		return -1;
+	}
+#else
 	if (!param)
 		return -1;
+#endif
 
 	ret = iscsi_decode_text_input(
 			PHASE_SECURITY|PHASE_DECLARATIVE,
@@ -581,8 +599,17 @@ static int iscsi_target_handle_csg_zero(
 			login->req_buf,
 			payload_length,
 			conn->param_list);
+
+#ifdef CONFIG_MACH_QNAPTS
+	if (ret < 0) {
+		iscsit_tx_login_rsp(conn, ISCSI_STATUS_CLS_INITIATOR_ERR,
+			ISCSI_LOGIN_STATUS_MISSING_FIELDS);
+		return -1;
+	}
+#else
 	if (ret < 0)
 		return -1;
+#endif
 
 	if(ret >1){
 		ret=-1;
@@ -610,8 +637,17 @@ static int iscsi_target_handle_csg_zero(
 			login->rsp_buf,
 			&login->rsp_length,
 			conn->param_list);
+
+#ifdef CONFIG_MACH_QNAPTS
+	if (ret < 0) {
+		iscsit_tx_login_rsp(conn, ISCSI_STATUS_CLS_INITIATOR_ERR,
+			ISCSI_LOGIN_STATUS_MISSING_FIELDS);
+		return -1;
+	}
+#else
 	if (ret < 0)
 		return -1;
+#endif
 
 	if (!iscsi_check_negotiated_keys(conn->param_list)) {
 		if (ISCSI_TPG_ATTRIB(ISCSI_TPG_C(conn))->authentication &&
@@ -710,6 +746,10 @@ static int iscsi_target_handle_csg_one(struct iscsi_conn *conn, struct iscsi_log
 	        new_buf = kzalloc(MAX_KEY_VALUE_PAIRS+c_length, GFP_KERNEL);
         	if (!new_buf) {
                 	pr_err("Unable to allocate memory for tmpbuf.\n");
+#ifdef CONFIG_MACH_QNAPTS
+			iscsit_tx_login_rsp(conn, ISCSI_STATUS_CLS_TARGET_ERR,
+					ISCSI_LOGIN_STATUS_NO_RESOURCES);
+#endif
                 	return -1;
         	}
 
@@ -745,8 +785,18 @@ static int iscsi_target_handle_csg_one(struct iscsi_conn *conn, struct iscsi_log
 				payload_length,
 				conn->param_list);
 	}
+
+
+#ifdef CONFIG_MACH_QNAPTS
+	if (!login->cbit && ret < 0) {
+		iscsit_tx_login_rsp(conn, ISCSI_STATUS_CLS_INITIATOR_ERR,
+				ISCSI_LOGIN_STATUS_MISSING_FIELDS);
+		return -1;
+	}
+#else
 	if (!login->cbit && ret < 0)
 		return -1;
+#endif
 
         if(ret >1){
                 int ppp=0;
@@ -764,9 +814,21 @@ static int iscsi_target_handle_csg_one(struct iscsi_conn *conn, struct iscsi_log
 		if (iscsi_target_check_first_request(conn, login) < 0)
 			return -1;
 
+#ifdef CONFIG_MACH_QNAPTS
+	int _ret;
+
+	_ret = iscsi_target_check_for_existing_instances(conn, login);
+	if (_ret < 0) {
+		if (!login->tsih)
+			iscsit_tx_login_rsp(conn, ISCSI_STATUS_CLS_INITIATOR_ERR,
+					ISCSI_LOGIN_STATUS_MISSING_FIELDS);
+		return -1;
+	}
+#else
 	if (iscsi_target_check_for_existing_instances(conn, login) < 0)
 		return -1;
 
+#endif
 
 	if(!login->cbit){
         	pr_debug("Sending Login Response, Flags: 0x%02x, ITT: 0x%08x,"
@@ -781,9 +843,17 @@ static int iscsi_target_handle_csg_one(struct iscsi_conn *conn, struct iscsi_log
 				login->rsp_buf,
 				&login->rsp_length,
 				conn->param_list);
+
+#ifdef CONFIG_MACH_QNAPTS
+		if (ret < 0) {
+			iscsit_tx_login_rsp(conn, ISCSI_STATUS_CLS_INITIATOR_ERR,
+					ISCSI_LOGIN_STATUS_MISSING_FIELDS);
+			return -1;
+		}
+#else
 		if (ret < 0)
 			return -1;
-
+#endif
 	}
 
 
@@ -832,17 +902,10 @@ static int iscsi_target_do_login(struct iscsi_conn *conn, struct iscsi_login *lo
 		switch ((login_req->flags & ISCSI_FLAG_LOGIN_CURRENT_STAGE_MASK) >> 2) {
 		case 0:
 			login_rsp->flags |= (0 & ISCSI_FLAG_LOGIN_CURRENT_STAGE_MASK);
+
+			/* we will put possible resp in code if it is fail */
 			if (iscsi_target_handle_csg_zero(conn, login) < 0)
-#ifdef CONFIG_MACH_QNAPTS //Benjamin 20121120: Patch according to ABC. Add response when CSG 0 negotiation failed.
-			{
-				iscsit_tx_login_rsp(conn, ISCSI_STATUS_CLS_INITIATOR_ERR,
-									ISCSI_LOGIN_STATUS_AUTH_FAILED);
-                
 				return -1;
-			}
-#else                
-				return -1;
-#endif
 			break;
 		case 1:
 			login_rsp->flags |= ISCSI_FLAG_LOGIN_CURRENT_STAGE1;
@@ -852,16 +915,13 @@ static int iscsi_target_do_login(struct iscsi_conn *conn, struct iscsi_login *lo
 				login_rsp->flags &= ~ISCSI_FLAG_LOGIN_CONTINUE;
 				login->cbit=0;
 			}
-			
+
+			/* we will put possible resp in code if it is fail */
 			ret=iscsi_target_handle_csg_one(conn, login);	
 			if (ret < 0){
 				if(ret==-2)
 					iscsit_tx_login_rsp(conn, ISCSI_STATUS_CLS_INITIATOR_ERR, ISCSI_LOGIN_STATUS_NO_VERSION);	
-#ifdef CONFIG_MACH_QNAPTS //Benjamin 20121120: Patch according to ABC. Add response when CSG 1 negotiation failed.
-				else
-					iscsit_tx_login_rsp(conn, ISCSI_STATUS_CLS_INITIATOR_ERR,
-									ISCSI_LOGIN_STATUS_AUTH_FAILED);
-#endif
+
 				return -1;
 			}
 			if (login_rsp->flags & ISCSI_FLAG_LOGIN_TRANSIT) {

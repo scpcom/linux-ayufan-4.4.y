@@ -565,9 +565,11 @@ static TPC_TRACK_DATA *__tpc_alloc_track_data(IN void)
     if((data = kzalloc(sizeof(TPC_TRACK_DATA), GFP_KERNEL)) == NULL)
         return NULL;
 
-    spin_lock_init(&data->t_cmd_asked_act_lock);
-    spin_lock_init(&data->t_status_lock);
-    spin_lock_init(&data->t_count_lock);
+	spin_lock_init(&data->t_cmd_asked_act_lock);
+	spin_lock_init(&data->t_status_lock);
+	spin_lock_init(&data->t_count_lock);
+	spin_lock_init(&data->t_ref_count_lock);
+
     atomic_set(&data->t_ref_count, 0);
 
     data->t_cmd_status         = T_CMD_NOT_START;
@@ -654,10 +656,13 @@ TPC_OBJ *__tpc_do_alloc_obj(
         obj->o_status         = O_STS_ALLOCATED_BUT_NOT_ALIVE;
         obj->o_token_status   = O_TOKEN_STS_NOT_ALLOCATED_AND_NOT_ALIVE;
 
-        spin_lock_init(&obj->o_status_lock);
-        spin_lock_init(&obj->o_token_status_lock);
-        spin_lock_init(&obj->o_data_lock);
-        spin_lock_init(&obj->o_transfer_count_lock);
+	spin_lock_init(&obj->o_status_lock);
+	spin_lock_init(&obj->o_token_status_lock);
+	spin_lock_init(&obj->o_data_lock);
+	spin_lock_init(&obj->o_transfer_count_lock);
+
+	spin_lock_init(&obj->o_ref_count_lock);
+	spin_lock_init(&obj->o_token_ref_count_lock);
 
         atomic_set(&obj->o_ref_count, 0);
         atomic_set(&obj->o_token_ref_count, 0);

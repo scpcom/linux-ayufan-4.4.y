@@ -26,7 +26,6 @@
 
 /* Jonathan Ho, 20140108, monitor VAAI */
 #ifdef SHOW_OFFLOAD_STATS
-extern int Xmon_enable;
 extern u64 vaai_Xtotal;
 #endif /* SHOW_OFFLOAD_STATS */
 
@@ -676,8 +675,7 @@ _GO_NEXT_:
 		data_bytes -= e_bytes;
 /* Jonathan Ho, 20140108, monitor VAAI */
 #ifdef SHOW_OFFLOAD_STATS
-		if (Xmon_enable)
-			vaai_Xtotal += e_bytes >> 10; /* bytes to KB */
+		vaai_Xtotal += e_bytes >> 10; /* bytes to KB */
 #endif /* SHOW_OFFLOAD_STATS */
 
 	}

@@ -67,6 +67,7 @@
 #include "target_core_file.h"
 #include "vaai_target_struc.h"
 #include "target_general.h"
+#include "target_core_extern.h"
 
 #if defined(SUPPORT_FAST_BLOCK_CLONE)
 #include "target_fast_clone.h"
@@ -319,8 +320,10 @@ int init_se_kmem_caches(void)
 	multi_tasks_wq = alloc_workqueue("multi_tasks_wq",
         (WQ_MEM_RECLAIM | WQ_UNBOUND | WQ_NON_REENTRANT), 0);
 
-	if (!multi_tasks_wq)
+	if (!multi_tasks_wq) {
+		destroy_workqueue(target_completion_wq);
 		goto out_free_tg_pt_gp_mem_cache;
+	}
 #endif
 #endif
 
@@ -433,9 +436,6 @@ struct se_session *transport_init_session(void)
 	spin_lock_init(&se_sess->sess_cmd_lock);
 
 #if defined(CONFIG_MACH_QNAPTS)
-	spin_lock_init(&se_sess->sess_reinstatement_lock);
-
-
 #if (LINUX_VERSION_CODE == KERNEL_VERSION(3,12,6))
 	transport_init_tag_pool(se_sess);
 #endif
@@ -479,9 +479,6 @@ void __transport_register_session(
 		}
 		kref_get(&se_nacl->acl_kref);
 
-#if defined(CONFIG_MACH_QNAPTS)
-		__transport_t10_prb_restore(se_tpg, se_nacl, se_sess, buf);
-#endif
 		spin_lock_irq(&se_nacl->nacl_sess_lock);
 		/*
 		 * The se_nacl->nacl_sess pointer will be set to the
@@ -620,12 +617,6 @@ void transport_deregister_session(struct se_session *se_sess)
 	list_del(&se_sess->sess_list);
 	se_sess->se_tpg = NULL;
 	se_sess->fabric_sess_ptr = NULL;
-#if defined(CONFIG_MACH_QNAPTS)
-	bool sess_reinstatement;
-	spin_lock(&se_sess->sess_reinstatement_lock);
-	sess_reinstatement = se_sess->sess_reinstatement = 1;
-	spin_unlock(&se_sess->sess_reinstatement_lock);
-#endif	
 	spin_unlock_irqrestore(&se_tpg->session_lock, flags);
 
 #ifdef CONFIG_MACH_QNAPTS	// Eric Gu for VMWare 5.0 certification
@@ -660,11 +651,6 @@ void transport_deregister_session(struct se_session *se_sess)
 			se_tpg->num_node_acls--;
 			spin_unlock_irqrestore(&se_tpg->acl_node_lock, flags);
 			core_tpg_wait_for_nacl_pr_ref(se_nacl);
-#if defined(CONFIG_MACH_QNAPTS)
-			spin_lock_irqsave(&se_nacl->node_sess_reinstatement_lock, flags);
-			se_nacl->node_sess_reinstatement = 1;
-			spin_unlock_irqrestore(&se_nacl->node_sess_reinstatement_lock, flags);
-#endif			
 			core_free_device_list_for_node(se_nacl, se_tpg);
 			se_tfo->tpg_release_fabric_acl(se_tpg, se_nacl);
 
@@ -8285,6 +8271,8 @@ static int transport_free_extra_tag_pool(
 				"remain tag count:%d, on se_sess:0x%p\n", 
 				i, pool->sess_cmd_map, tag_count, se_sess);
 
+			percpu_ida_destroy(&pool->sess_tag_pool);
+
 			if (is_vmalloc_addr(pool->sess_cmd_map))
 				vfree(pool->sess_cmd_map);
 			else
@@ -9114,172 +9102,6 @@ void transport_setup_support_fbc(
 	return;
 
 }
-
-static DEFINE_SPINLOCK(dev_t10_pr_backup_list_lock);
-static LIST_HEAD(dev_t10_pr_backup_lock_list);
-atomic_t t10_pr_backup_count = ATOMIC_INIT(0);
-
-
-void *__transport_t10_prb_alloc(void)
-{
-	struct t10_pr_backup *backup = NULL;
-
-	while (1){
-		backup = kzalloc(sizeof(struct t10_pr_backup), GFP_KERNEL);
-		if (backup)
-			break;
-
-		/* TODO: shall me keep to try ?? */
-		pr_warn("%s: fail to alloc t10_pr_backup mem, to sleep "
-			"and wait next time\n", __func__);
-		schedule();
-	}
-
-	pr_info("%s: done to alloc t10_pr_backup mem\n", __func__);
-	INIT_LIST_HEAD(&backup->backup_data_node);
-	return (void *)backup;
-}
-
-
-static void __transport_t10_prb_backup_i_t_nexus(
-	struct t10_pr_backup *backup,
-	struct t10_pr_registration *pr_reg	
-	)
-{
-	struct se_node_acl *se_nacl = NULL;
-
-	se_nacl = pr_reg->pr_reg_nacl;
-
-	memcpy(backup->initiator_name,
-		se_nacl->initiatorname, TRANSPORT_IQN_LEN);
-
-	memcpy(backup->isid,
-		pr_reg->pr_reg_isid, sizeof(pr_reg->pr_reg_isid));
-
-	memcpy(backup->target_name,
-		se_nacl->se_tpg->se_tpg_tfo->tpg_get_wwn(se_nacl->se_tpg),
-		strlen(se_nacl->se_tpg->se_tpg_tfo->tpg_get_wwn(se_nacl->se_tpg))
-		);
-	backup->tpgt = 
-		se_nacl->se_tpg->se_tpg_tfo->tpg_get_tag(se_nacl->se_tpg);
-
-	return;
-}
-
-void __transport_t10_prb_backup_pr_reg(
-	struct t10_pr_backup *backup,
-	struct t10_pr_registration *pr_reg
-	)
-{
-	unsigned long flags;
-
-	spin_lock_irqsave(&dev_t10_pr_backup_list_lock, flags);
-
-	__transport_t10_prb_backup_i_t_nexus(backup, pr_reg);
-
-	backup->pr_reg = pr_reg;
-	backup->pr_res_key = pr_reg->pr_reg_deve->pr_res_key;
-	backup->def_pr_registered = pr_reg->pr_reg_deve->def_pr_registered;	
-	backup->need_restore = 1;
-	atomic_inc(&t10_pr_backup_count);
-
-	list_add_tail(&backup->backup_data_node, &dev_t10_pr_backup_lock_list);
-	spin_unlock_irqrestore(&dev_t10_pr_backup_list_lock, flags);
-	return;
-}
-
-
-int __transport_t10_prb_check_sess_reinstatement_from_nacl(
-	struct se_node_acl *se_nacl
-	)
-{
-	unsigned long flags;
-	bool sess_reinstatement;
-
-	spin_lock_irqsave(&se_nacl->node_sess_reinstatement_lock, flags);
-	sess_reinstatement = se_nacl->node_sess_reinstatement;
-	spin_unlock_irqrestore(&se_nacl->node_sess_reinstatement_lock, flags);
-	return sess_reinstatement;
-}
-
-
-void __transport_t10_prb_restore(
-	struct se_portal_group *se_tpg,
-	struct se_node_acl *se_nacl,
-	struct se_session *se_sess,
-	char *isid_buf
-	)
-{
-	unsigned long flags;
-	struct se_dev_entry *deve;
-	struct t10_pr_backup *backup = NULL;
-
-
-	spin_lock_irqsave(&dev_t10_pr_backup_list_lock, flags);
-
-	list_for_each_entry(backup, &dev_t10_pr_backup_lock_list, backup_data_node){
-		if (!backup->need_restore)
-			continue;
-#if 0
-		pr_info(" === pr backup info === \n");
-		pr_info("initiatorname:%s\n", backup->backup);
-		pr_info("isid:%s\n", backup->isid);
-		pr_info("target name:%s\n", backup->target_name);
-		pr_info("tpgt:%d\n", backup->tpgt);
-		pr_info("mapped_lun:%d\n", backup->mapped_lun);
-			
-		pr_info(" === passing node info === \n");
-		pr_info("initiatorname:%s\n", se_nacl->initiatorname);
-		pr_info("isid:%s\n", isid_buf);
-		pr_info("target name:%s\n", se_tpg->se_tpg_tfo->tpg_get_wwn(se_tpg));
-		pr_info("tpgt:%d\n", se_tpg->se_tpg_tfo->tpg_get_tag(se_tpg));
-#endif
-		/* now to check the i_t nexus for passing node is same as
-		 * t10 pr backup information or not.
-		 * i_t nexus is <initiator + isid , target name + tpgt>
-		 */
-		if (memcmp(backup->initiator_name, 
-			se_nacl->initiatorname, sizeof(se_nacl->initiatorname)))
-			continue;
-	
-		if (memcmp(backup->isid, isid_buf, 
-			PR_REG_ISID_LEN))
-			continue;
-
-		if (memcmp(backup->target_name, 
-			se_tpg->se_tpg_tfo->tpg_get_wwn(se_tpg), 
-			strlen(se_tpg->se_tpg_tfo->tpg_get_wwn(se_tpg))))
-			continue;
-	
-		if(backup->tpgt != se_tpg->se_tpg_tfo->tpg_get_tag(se_tpg))
-			continue;
-
-		pr_info(" === t10 PR restore checking passed === \n");
-		spin_lock(&se_sess->se_node_acl->device_list_lock);
-		deve = se_sess->se_node_acl->device_list[backup->mapped_lun];
-		spin_unlock(&se_sess->se_node_acl->device_list_lock);
-
-		pr_info("start to restore registration\n");	
-		deve->pr_res_key = backup->pr_res_key;
-		deve->def_pr_registered = backup->def_pr_registered;
-		backup->pr_reg->pr_reg_deve = deve;
-		backup->pr_reg->pr_reg_nacl = se_nacl;
-		backup->need_restore = 0;
-		pr_info("end to restore registration\n\n");
-
-		list_del_init(&backup->backup_data_node);
-		atomic_dec(&t10_pr_backup_count);
-		kfree(backup);
-
-		pr_info("%s: done to free t10_pr_backup mem, remain "
-			"t10 pr backup count:%d\n", __func__, 
-			atomic_read(&t10_pr_backup_count));
-		break;
-	}
-	spin_unlock_irqrestore(&dev_t10_pr_backup_list_lock, flags);
-	return;
-}
-
 
 #endif  /* #if defined(CONFIG_MACH_QNAPTS) */
 

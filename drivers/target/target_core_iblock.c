@@ -232,12 +232,18 @@ static struct se_device *iblock_create_virtdevice(
 		dev->se_sub_dev->se_dev_attrib.emulate_tpu = 1;
 
 	if (blk_queue_discard(q)) {
+		int bs_order = ilog2(limits->logical_block_size);
 		dev->se_sub_dev->se_dev_attrib.max_unmap_lba_count =
-				q->limits.max_discard_sectors;
+			((MAX_UNMAP_MB_SIZE << 20) >> bs_order);
 
 		dev->se_sub_dev->se_dev_attrib.max_unmap_block_desc_count = MAX_UNMAP_DESC_COUNT;
-		dev->se_sub_dev->se_dev_attrib.unmap_granularity =
-				q->limits.discard_granularity >> 9;
+
+		/* This value shall be multiplied by 4KB. We overwrite it
+		 * here instead of in lower layer driver.
+		 */
+		dev->se_sub_dev->se_dev_attrib.unmap_granularity = 
+			(PAGE_SIZE >> bs_order);
+
 		dev->se_sub_dev->se_dev_attrib.unmap_granularity_alignment =
 				q->limits.discard_alignment;
 
@@ -791,8 +797,7 @@ static int iblock_do_task(struct se_task *task)
 	struct fbdisk_file *pfbfile = NULL;
 	struct inode *pInode = NULL;
 	/* Jonathan Ho, 20141124, use threshold_max to avoid inaccuracy */
-	unsigned long threshold_max;
-	loff_t total = 0, used = 0;
+	loff_t total = 0, used = 0, threshold_max = 0;
 
 #if defined(QNAP_HAL)
 	NETLINK_EVT hal_event;

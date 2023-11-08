@@ -72,7 +72,6 @@ static struct config_group alua_lu_gps_group;
 
 /* Jonathan Ho, 20131212, monitor ODX */
 #if defined(CONFIG_MACH_QNAPTS) && defined(SHOW_OFFLOAD_STATS)
-int Xmon_enable = 0;					/* Enable data monitor */
 u64 Xpcmd = 0;						/* Trasfer data per command in KB */
 unsigned int Tpcmd = 0;					/* Spend time per command in milliseconds */
 unsigned long cmd_done = 0;				/* Commands done */
@@ -96,7 +95,7 @@ static ssize_t target_core_attr_show(struct config_item *item,
 /* Jonathan Ho, 20140425, move SHOW_OFFLOAD_STATS from procFS to configFS */
 #if defined(CONFIG_MACH_QNAPTS) && defined(SHOW_OFFLOAD_STATS)
 	if (!strcmp(attr->ca_name,"ods")) {
-		return sprintf(page, "%d %llu %u %lu %llu %llu\n", Xmon_enable, Xpcmd, Tpcmd, cmd_done, Xtotal, vaai_Xtotal);
+		return sprintf(page, "%llu %u %lu %llu %llu\n", Xpcmd, Tpcmd, cmd_done, Xtotal, vaai_Xtotal);
 	}
 #endif /* SHOW_OFFLOAD_STATS */
 	return sprintf(page, "Target Engine Core ConfigFS Infrastructure %s"
@@ -114,10 +113,7 @@ static ssize_t target_core_attr_store(struct config_item *item,
 		int value = 0;
 
 		sscanf(page, "%d", &value);
-		if (value > 0)
-			Xmon_enable = 1;
-		else {
-			Xmon_enable = 0;
+		if (value == 0) {
 			Xpcmd = 0;
 			Tpcmd = 0;
 			cmd_done = 0;
@@ -2477,6 +2473,9 @@ static struct configfs_attribute *lio_core_dev_attrs[] = {
 
 #if defined(SUPPORT_LOGICAL_BLOCK_4KB_FROM_NAS_GUI)
 	&target_core_attr_dev_qlbs.attr,	
+#endif
+#ifdef QNAP_SHARE_JOURNAL
+	&target_core_attr_dev_bbu_journal.attr,
 #endif
 #endif	
 	NULL,

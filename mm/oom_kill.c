@@ -460,7 +460,7 @@ static int oom_kill_task(struct task_struct *p, struct mem_cgroup *mem)
 #if defined(CONFIG_MACH_QNAPTS) && defined(QNAP_HAL)
     pid = task_pid_nr(p);
     strncpy(comm, p->comm, sizeof(comm));
-    comm[32] = '\0';
+    comm[31] = '\0';
 #endif
 	/*
 	 * Kill all user processes sharing p->mm in other thread groups, if any.

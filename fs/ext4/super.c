@@ -1089,12 +1089,26 @@ static int ext4_show_options(struct seq_file *seq, struct vfsmount *vfs)
 	if (!test_opt(sb, XATTR_USER))
 		seq_puts(seq, ",nouser_xattr");
 #endif
+
 #ifdef CONFIG_EXT4_FS_POSIX_ACL
-	if (test_opt(sb, POSIX_ACL) && !(def_mount_opts & EXT4_DEFM_ACL))
-		seq_puts(seq, ",acl");
-	if (!test_opt(sb, POSIX_ACL) && (def_mount_opts & EXT4_DEFM_ACL))
-		seq_puts(seq, ",noacl");
+#ifdef CONFIG_EXT4_FS_RICHACL
+        if ((sb->s_flags & MS_POSIXACL) && !(def_mount_opts & EXT4_DEFM_ACL))
+                seq_puts(seq, ",acl");
+        if (!(sb->s_flags & MS_POSIXACL) && (def_mount_opts & EXT4_DEFM_ACL))
+                seq_puts(seq, ",noacl");
+#else
+        if (test_opt(sb, POSIX_ACL) && !(def_mount_opts & EXT4_DEFM_ACL))
+                seq_puts(seq, ",acl");
+        if (!test_opt(sb, POSIX_ACL) && (def_mount_opts & EXT4_DEFM_ACL))
+                seq_puts(seq, ",noacl");
 #endif
+#endif /* CONFIG_EXT4_FS_POSIX_ACL */
+
+#ifdef CONFIG_EXT4_FS_RICHACL
+        if (sb->s_flags & MS_RICHACL)
+                seq_puts(seq, ",richacl");
+#endif
+
 	if (sbi->s_commit_interval != JBD2_DEFAULT_MAX_COMMIT_AGE*HZ) {
 		seq_printf(seq, ",commit=%u",
 			   (unsigned) (sbi->s_commit_interval / HZ));
@@ -1457,9 +1471,8 @@ static void enable_acl(struct super_block *sb)
         ext4_msg(sb, KERN_ERR, "acl options not supported");
         return;
 #endif
-
+	sb->s_flags |= MS_POSIXACL;
         sb->s_flags &= ~MS_RICHACL;
-        sb->s_flags |= MS_POSIXACL;
         return;
 }
 
@@ -1469,7 +1482,7 @@ static void disable_acl(struct super_block *sb)
         ext4_msg(sb, KERN_ERR, "acl options not supported");
         return;
 #endif
-        sb->s_flags &= ~MS_POSIXACL;
+        sb->s_flags &= ~(MS_POSIXACL | MS_RICHACL);
         return;
 }
 
@@ -1677,37 +1690,44 @@ by remount");
 #endif
 
 #ifdef CONFIG_EXT4_FS_RICHACL
-#ifdef CONFIG_EXT4_FS_RICHACL
-        	case Opt_acl:
-                	enable_acl(sb);
-                	break;
-        	case Opt_noacl:
-                	disable_acl(sb);
-                	break;
+
+#ifdef CONFIG_EXT4_FS_POSIX_ACL
+                case Opt_acl:
+                        enable_acl(sb);
+                        break;
+                case Opt_noacl:
+                        disable_acl(sb);
+                        break;
+#else
+                case Opt_acl:
+                case Opt_noacl:
+                        ext4_msg(sb, KERN_ERR, "(no)acl options not supported");
+                        break;
 #endif
 
 #else
 
 #ifdef CONFIG_EXT4_FS_POSIX_ACL
-		case Opt_acl:
-			set_opt(sb, POSIX_ACL);
-			break;
-		case Opt_noacl:
-			clear_opt(sb, POSIX_ACL);
-			break;
+                case Opt_acl:
+                        set_opt(sb, POSIX_ACL);
+                        break;
+                case Opt_noacl:
+                        clear_opt(sb, POSIX_ACL);
+                        break;
 #else
-		case Opt_acl:
-		case Opt_noacl:
-			ext4_msg(sb, KERN_ERR, "(no)acl options not supported");
-			break;
+                case Opt_acl:
+                case Opt_noacl:
+                        ext4_msg(sb, KERN_ERR, "(no)acl options not supported");
+                        break;
 #endif
 
-#endif /*#CONFIG_EXT4_FS_RICHACL*/
+#endif /* CONFIG_EXT4_FS_RICHACL */
+
 
 #ifdef CONFIG_EXT4_FS_RICHACL
-        	case Opt_richacl:
-                	enable_richacl(sb);
-                	break;
+                case Opt_richacl:
+                        enable_richacl(sb);
+                        break;
 #endif
 
 		case Opt_journal_update:

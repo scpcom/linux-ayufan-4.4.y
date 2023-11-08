@@ -376,7 +376,6 @@ struct se_node_acl *core_tpg_check_initiator_node_acl(
                         tpg->default_acl->queue_depth : 
                         tpg->se_tpg_tfo->tpg_get_default_depth(tpg);
 
-	spin_lock_init(&acl->node_sess_reinstatement_lock);
 
 #else        
 	acl->queue_depth = tpg->se_tpg_tfo->tpg_get_default_depth(tpg);
@@ -535,9 +534,6 @@ struct se_node_acl *core_tpg_add_initiator_node_acl(
 	init_completion(&acl->acl_free_comp);
 	spin_lock_init(&acl->device_list_lock);
 	spin_lock_init(&acl->nacl_sess_lock);
-#if defined(CONFIG_MACH_QNAPTS)
-	spin_lock_init(&acl->node_sess_reinstatement_lock);
-#endif
 
 	atomic_set(&acl->acl_pr_ref_count, 0);
 	acl->queue_depth = queue_depth;

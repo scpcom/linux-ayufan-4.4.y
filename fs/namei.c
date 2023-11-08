@@ -560,30 +560,17 @@ int qnap_generic_permission(struct inode *inode, int mask, int qnap_type)
 	/*
 	 * Do the basic permission checks.
 	 */
-#ifdef CONFIG_FS_RICHACL
-        if (qnap_type == QNAP_GENERIC_LINUX) {
-                ret = acl_permission_check(inode, mask);
-        } else if (qnap_type == QNAP_NFSV4_RICHACL) {
-                ret = acl_permission_check_nfsv4_racl(inode, mask);
-        }
-#if CONFIG_MACH_QNAPTS
-	else if (qnap_type == QNAP_WITHOUT_ACL) {
+	if (qnap_type == QNAP_GENERIC_LINUX)
+		ret = acl_permission_check(inode, mask);
+#ifdef CONFIG_MACH_QNAPTS
+	else if (qnap_type == QNAP_WITHOUT_ACL)
 		ret = acl_permission_check_without_acl(inode, mask);
-	}
+#endif
+#ifdef CONFIG_FS_RICHACL
+	else if (qnap_type == QNAP_NFSV4_RICHACL)
+		ret = acl_permission_check_nfsv4_racl(inode, mask);
 #endif
 
-#else
-
-        if (qnap_type == QNAP_GENERIC_LINUX) {
-                ret = acl_permission_check(inode, mask);
-        }
-#if CONFIG_MACH_QNAPTS
-	else if (qnap_type == QNAP_WITHOUT_ACL) {
-                ret = acl_permission_check_without_acl(inode, mask);
-        }
-#endif
-
-#endif /* CONFIG_FS_RICHACL */
 	if (ret != -EACCES)
 		return ret;
 
@@ -653,30 +640,18 @@ static inline int qnap_do_inode_permission(struct inode *inode, int mask, int qn
 		spin_unlock(&inode->i_lock);
 	}
 
-#ifdef CONFIG_FS_RICHACL
-        if (qnap_type == QNAP_GENERIC_LINUX) {
-                return generic_permission(inode, mask);
-        } else if (qnap_type == QNAP_NFSV4_RICHACL) {
-                return generic_permission_nfsv4_racl(inode, mask);
-        }
-#if CONFIG_MACH_QNAPTS
-	else if (qnap_type == QNAP_WITHOUT_ACL) {
+	if (qnap_type == QNAP_GENERIC_LINUX)
+		return generic_permission(inode, mask);
+#ifdef CONFIG_MACH_QNAPTS
+	else if (qnap_type == QNAP_WITHOUT_ACL)
 		return generic_permission_without_acl(inode, mask);
-	}
+#endif
+#ifdef CONFIG_FS_RICHACL
+	else if (qnap_type == QNAP_NFSV4_RICHACL)
+		return generic_permission_nfsv4_racl(inode, mask);
 #endif
 
-#else
-
-        if (qnap_type == QNAP_GENERIC_LINUX) {
-                return generic_permission(inode, mask);
-        }
-#if CONFIG_MACH_QNAPTS
-	else if (qnap_type == QNAP_WITHOUT_ACL) {
-                return generic_permission_without_acl(inode, mask);
-        }
-#endif
-
-#endif /* CONFIG_FS_RICHACL */
+	return generic_permission(inode, mask);
 }
 
 static inline int do_inode_permission(struct inode *inode, int mask)
@@ -731,30 +706,16 @@ int qnap_inode_permission(struct inode *inode, int mask, int qnap_type)
 			return -EACCES;
 	}
 
-#ifdef CONFIG_FS_RICHACL
-        if (qnap_type == QNAP_GENERIC_LINUX) {
-                retval = do_inode_permission(inode, mask);
-        } else if (qnap_type == QNAP_NFSV4_RICHACL) {
-                retval = do_inode_permission_nfsv4_racl(inode, mask);
-        }
+	if (qnap_type == QNAP_GENERIC_LINUX)
+		retval = do_inode_permission(inode, mask);
 #ifdef CONFIG_MACH_QNAPTS
-	else if (qnap_type == QNAP_WITHOUT_ACL) {
+	else if (qnap_type == QNAP_WITHOUT_ACL)
 		retval = do_inode_permission_without_acl(inode, mask);
-	}
 #endif
-
-#else
-
-        if (qnap_type == QNAP_GENERIC_LINUX) {
-                retval = do_inode_permission(inode, mask);
-        }
-#ifdef CONFIG_MACH_QNAPTS
-	else if (qnap_type == QNAP_WITHOUT_ACL) {
-                retval = do_inode_permission_without_acl(inode, mask);
-        }
+#ifdef CONFIG_FS_RICHACL
+	else if (qnap_type == QNAP_NFSV4_RICHACL)
+		retval = do_inode_permission_nfsv4_racl(inode, mask);
 #endif
-
-#endif /* CONFIG_FS_RICHACL */
 
 	if (retval)
 		return retval;
@@ -2339,20 +2300,6 @@ static int user_path_parent(int dfd, const char __user *path,
 	return error;
 }
 
-#ifdef CONFIG_FS_RICHACL
-/*
- * We should have exec permission on directory and MAY_DELETE_SELF
- * on the object being deleted.
- */
-static int richacl_may_selfdelete(struct inode *dir,
-                                  struct inode *inode, int replace_mask)
-{
-        return (IS_RICHACL(inode) &&
-                (inode_permission(dir, MAY_EXEC | replace_mask) == 0) &&
-                (inode_permission(inode, MAY_DELETE_SELF) == 0));
-}
-#endif
-
 /*
  * It's inline, so penalty for filesystems that don't use sticky bit is
  * minimal.
@@ -2374,29 +2321,6 @@ other_userns:
 	return !ns_capable(inode_userns(inode), CAP_FOWNER);
 }
 
-#ifdef CONFIG_FS_RICHACL
-static inline int check_sticky_racl(struct inode *dir, struct inode *inode,
-                                int replace_mask)
-{
-        uid_t fsuid = current_fsuid();
-
-        if (!(dir->i_mode & S_ISVTX))
-                return 0;
-        if (current_user_ns() != inode_userns(inode))
-                goto other_userns;
-        if (inode->i_uid == fsuid)
-                return 0;
-        if (dir->i_uid == fsuid)
-                return 0;
-        if (richacl_may_selfdelete(dir, inode, replace_mask))
-                return 0;
-
-other_userns:
-        return !ns_capable(inode_userns(inode), CAP_FOWNER);
-}
-#endif
-
-
 /*
  *	Check whether we can remove a link victim from directory dir, check
  *  whether the type of victim is right.
@@ -2416,9 +2340,11 @@ other_userns:
  * 10. We don't allow removal of NFS sillyrenamed files; it's handled by
  *     nfs_async_unlink().
  */
-static int qnap_may_delete(struct inode *dir,struct dentry *victim,int isdir, int qnap_type)
+static int qnap_may_delete(struct inode *dir,struct dentry *victim,
+			bool isdir, bool replace, int qnap_type)
 {
 	int error = 0;
+	int mask = MAY_WRITE | MAY_EXEC;
 
 	if (!victim->d_inode)
 		return -ENOENT;
@@ -2426,20 +2352,53 @@ static int qnap_may_delete(struct inode *dir,struct dentry *victim,int isdir, in
 	BUG_ON(victim->d_parent->d_inode != dir);
 	audit_inode_child(victim, dir);
 
-        if (qnap_type == QNAP_GENERIC_LINUX) {
-                error = inode_permission(dir, MAY_WRITE | MAY_EXEC);
-        }
+#ifdef CONFIG_FS_RICHACL
+	mask |= MAY_DELETE_CHILD;
+	if (replace)
+		mask |= (isdir ? MAY_CREATE_DIR : MAY_CREATE_FILE);
+#endif
+
+	/* Check permission of dir */
+	if (qnap_type == QNAP_GENERIC_LINUX)
+		error = inode_permission(dir, mask);
 #ifdef CONFIG_MACH_QNAPTS
+	else if (qnap_type == QNAP_WITHOUT_ACL)
+		error = inode_permission_without_acl(dir, mask);
+#endif
+#ifdef CONFIG_FS_RICHACL
+	else if (qnap_type == QNAP_NFSV4_RICHACL)
+		error = inode_permission_nfsv4_racl(dir, mask);
+#endif
+
+	if (!error && check_sticky(dir, victim->d_inode))
+		error = -EPERM;
+
+#ifdef CONFIG_FS_RICHACL
+	/* Check permision of file */
+	if (qnap_type == QNAP_GENERIC_LINUX) {
+		if (error && IS_RICHACL(victim->d_inode) &&
+			inode_permission(victim->d_inode, MAY_DELETE_SELF) == 0)
+			error = 0;
+	}
+# ifdef CONFIG_MACH_QNAPTS
 	else if (qnap_type == QNAP_WITHOUT_ACL) {
-                error = inode_permission_without_acl(dir, MAY_WRITE | MAY_EXEC);
-        }
+		if (error && IS_RICHACL(victim->d_inode) &&
+			inode_permission_without_acl(victim->d_inode, MAY_DELETE_SELF) == 0)
+			error = 0;
+	}
+# endif
+	else if (qnap_type == QNAP_NFSV4_RICHACL) {
+		if (error && IS_RICHACL(victim->d_inode) &&
+			inode_permission_nfsv4_racl(victim->d_inode, MAY_DELETE_SELF) == 0)
+			error = 0;
+	}
 #endif
 
 	if (error)
 		return error;
 	if (IS_APPEND(dir))
 		return -EPERM;
-	if (check_sticky(dir, victim->d_inode)||IS_APPEND(victim->d_inode)||
+	if (IS_APPEND(victim->d_inode)||
 	    IS_IMMUTABLE(victim->d_inode) || IS_SWAPFILE(victim->d_inode))
 		return -EPERM;
 	if (isdir) {
@@ -2456,77 +2415,25 @@ static int qnap_may_delete(struct inode *dir,struct dentry *victim,int isdir, in
 	return 0;
 }
 
-static int may_delete(struct inode *dir,struct dentry *victim, int isdir)
+static int may_delete(struct inode *dir,struct dentry *victim,
+			bool isdir, bool replace)
 {
-        return qnap_may_delete(dir, victim, isdir, QNAP_GENERIC_LINUX);
+        return qnap_may_delete(dir, victim, isdir, replace, QNAP_GENERIC_LINUX);
 }
 
 #ifdef CONFIG_MACH_QNAPTS
-static int may_delete_without_acl(struct inode *dir,struct dentry *victim,int isdir)
+static int may_delete_without_acl(struct inode *dir,struct dentry *victim,
+			bool isdir, bool replace)
 {
-        return qnap_may_delete(dir, victim, isdir, QNAP_WITHOUT_ACL);
+        return qnap_may_delete(dir, victim, isdir, replace, QNAP_WITHOUT_ACL);
 }
 #endif
 
-
 #ifdef CONFIG_FS_RICHACL
-static int qnap_may_delete_racl(struct inode *dir, struct dentry *victim,
-                      int isdir, int replace, int qnap_type)
-{
-        int mask, replace_mask = 0, error = 0;
-        struct inode *inode = victim->d_inode;
-
-        if (!inode)
-                return -ENOENT;
-
-        BUG_ON(victim->d_parent->d_inode != dir);
-	audit_inode_child(victim, dir);
-
-        mask = MAY_WRITE | MAY_EXEC | MAY_DELETE_CHILD;
-        if (replace)
-                replace_mask = S_ISDIR(inode->i_mode) ?
-                                MAY_CREATE_DIR : MAY_CREATE_FILE;
-
-        if (qnap_type == QNAP_GENERIC_LINUX) {
-                error = inode_permission(dir, mask | replace_mask);
-        } else if (qnap_type == QNAP_NFSV4_RICHACL) {
-                error = inode_permission_nfsv4_racl(dir, mask | replace_mask);
-        }
-
-
-        if (error && richacl_may_selfdelete(dir, inode, replace_mask))
-                error = 0;
-        if (error)
-                return error;
-        if (IS_APPEND(dir))
-                return -EPERM;
-        if (check_sticky_racl(dir, inode, replace_mask) || IS_APPEND(inode) ||
-            IS_IMMUTABLE(inode) || IS_SWAPFILE(inode))
-                return -EPERM;
-        if (isdir) {
-                if (!S_ISDIR(inode->i_mode))
-                        return -ENOTDIR;
-                if (IS_ROOT(victim))
-                        return -EBUSY;
-        } else if (S_ISDIR(inode->i_mode))
-                return -EISDIR;
-        if (IS_DEADDIR(dir))
-                return -ENOENT;
-        if (victim->d_flags & DCACHE_NFSFS_RENAMED)
-                return -EBUSY;
-        return 0;
-}
-
-static int may_delete_racl(struct inode *dir, struct dentry *victim,
-                      int isdir, int replace)
-{
-        return qnap_may_delete_racl(dir, victim, isdir, replace, QNAP_GENERIC_LINUX);
-}
-
 static int may_delete_nfsv4_racl(struct inode *dir, struct dentry *victim,
-                      int isdir, int replace)
+			bool isdir, bool replace)
 {
-        return qnap_may_delete_racl(dir, victim, isdir, replace, QNAP_NFSV4_RICHACL);
+	return qnap_may_delete(dir, victim, isdir, replace, QNAP_NFSV4_RICHACL);
 }
 #endif
 
@@ -2538,64 +2445,55 @@ static int may_delete_nfsv4_racl(struct inode *dir, struct dentry *victim,
  *  3. We should have write and exec permissions on dir
  *  4. We can't do it if dir is immutable (done in permission())
  */
-static inline int qnap_may_create(struct inode *dir, struct dentry *child, int qnap_type)
+static inline int qnap_may_create(struct inode *dir, struct dentry *child,
+				bool isdir, int qnap_type)
 {
+	int mask = MAY_WRITE | MAY_EXEC;
+
+#ifdef CONFIG_FS_RICHACL
+	mask |= (isdir ? MAY_CREATE_DIR : MAY_CREATE_FILE);
+#endif
+
 	if (child->d_inode)
 		return -EEXIST;
 	if (IS_DEADDIR(dir))
 		return -ENOENT;
 
-        if (qnap_type == QNAP_GENERIC_LINUX) {
-                return inode_permission(dir, MAY_WRITE | MAY_EXEC);
-        }
+	if (qnap_type == QNAP_GENERIC_LINUX)
+		return inode_permission(dir, mask);
 #ifdef CONFIG_MACH_QNAPTS
-	else if (qnap_type == QNAP_WITHOUT_ACL) {
-                return inode_permission_without_acl(dir, MAY_WRITE | MAY_EXEC);
-        }
+	else if (qnap_type == QNAP_WITHOUT_ACL)
+		return inode_permission_without_acl(dir, mask);
+#endif
+#ifdef CONFIG_FS_RICHACL
+	else if (qnap_type == QNAP_NFSV4_RICHACL)
+		return inode_permission_nfsv4_racl(dir, mask);
 #endif
 
+	return inode_permission(dir, mask);
 }
 
-static inline int may_create(struct inode *dir, struct dentry *child)
+static inline int may_create(struct inode *dir, struct dentry *child,
+				bool isdir)
 {
-        return qnap_may_create(dir, child, QNAP_GENERIC_LINUX);
+        return qnap_may_create(dir, child, isdir, QNAP_GENERIC_LINUX);
 }
 
 #ifdef CONFIG_MACH_QNAPTS
-static inline int may_create_without_acl(struct inode *dir, struct dentry *child)
+static inline int may_create_without_acl(struct inode *dir, struct dentry *child,
+				bool isdir)
 {
-        return qnap_may_create(dir, child, QNAP_WITHOUT_ACL);
+        return qnap_may_create(dir, child, isdir, QNAP_WITHOUT_ACL);
 }
 #endif
 
 #ifdef CONFIG_FS_RICHACL
-static inline int qnap_may_create_racl(struct inode *dir, struct dentry *child, int isdir, int qnap_type)
+static inline int may_create_nfsv4_racl(struct inode *dir, struct dentry *child,
+				bool isdir)
 {
-        int mask = isdir ? MAY_CREATE_DIR : MAY_CREATE_FILE;
-
-        if (child->d_inode)
-                return -EEXIST;
-        if (IS_DEADDIR(dir))
-                return -ENOENT;
-
-        if (qnap_type == QNAP_GENERIC_LINUX) {
-                return inode_permission(dir, MAY_WRITE | MAY_EXEC | mask);
-        } else if (qnap_type == QNAP_NFSV4_RICHACL) {
-                return inode_permission_nfsv4_racl(dir, MAY_WRITE | MAY_EXEC | mask);
-        }
-}
-
-static inline int may_create_racl(struct inode *dir, struct dentry *child, int isdir)
-{
-        return qnap_may_create_racl(dir, child, isdir, QNAP_GENERIC_LINUX);
-}
-
-static inline int may_create_nfsv4_racl(struct inode *dir, struct dentry *child, int isdir)
-{
-        return qnap_may_create_racl(dir, child, isdir, QNAP_NFSV4_RICHACL);
+        return qnap_may_create(dir, child, isdir, QNAP_NFSV4_RICHACL);
 }
 #endif
-
 
 /*
  * p1 and p2 should be directories on the same fs.
@@ -2644,48 +2542,16 @@ int qnap_vfs_create(struct inode *dir, struct dentry *dentry, int mode,
 {
 	int error = 0;
 
+	if (qnap_type == QNAP_GENERIC_LINUX)
+		error = may_create(dir, dentry, false);
 #ifdef CONFIG_FS_RICHACL
-
-        if (qnap_type == QNAP_GENERIC_LINUX) {
-#ifdef CONFIG_FS_RICHACL
-                if (IS_RICHACL(dir)) {
-                        error = may_create_racl(dir, dentry, 0);
-                } else {
-                        error = may_create(dir, dentry);
-                }
-#else
-                error = may_create(dir, dentry);
+	else if (qnap_type == QNAP_NFSV4_RICHACL)
+		error = may_create_nfsv4_racl(dir, dentry, false);
 #endif
-        } else if (qnap_type == QNAP_NFSV4_RICHACL) {
-                error = may_create_nfsv4_racl(dir, dentry, 0);
-        }
 #ifdef CONFIG_MACH_QNAPTS
-	else if (qnap_type == QNAP_WITHOUT_ACL) {
-                error = may_create_without_acl(dir, dentry);
-        }
+	else if (qnap_type == QNAP_WITHOUT_ACL)
+		error = may_create_without_acl(dir, dentry, false);
 #endif
-
-#else
-
-        if (qnap_type == QNAP_GENERIC_LINUX) {
-#ifdef CONFIG_FS_RICHACL
-                if (IS_RICHACL(dir)) {
-                        error = may_create_racl(dir, dentry, 0);
-                } else {
-                        error = may_create(dir, dentry);
-                }
-#else
-                error = may_create(dir, dentry);
-#endif
-        }
-#ifdef CONFIG_MACH_QNAPTS
-	else if (qnap_type == QNAP_WITHOUT_ACL) {
-                error = may_create_without_acl(dir, dentry);
-        }
-#endif
-
-#endif /* CONFIG_FS_RICHACL */
-
 
 	if (error)
 		return error;
@@ -3181,46 +3047,15 @@ int qnap_vfs_mknod(struct inode *dir, struct dentry *dentry, int mode, dev_t dev
 {
 	int error = 0;
 
+	if (qnap_type == QNAP_GENERIC_LINUX)
+		error = may_create(dir, dentry, false);
 #ifdef CONFIG_FS_RICHACL
-
-        if (qnap_type == QNAP_GENERIC_LINUX) {
-#ifdef CONFIG_FS_RICHACL
-                if (IS_RICHACL(dir)) {
-                        error = may_create_racl(dir, dentry, 0);
-                } else {
-                        error = may_create(dir, dentry);
-                }
-#else
-                error = may_create(dir, dentry);
+	else if (qnap_type == QNAP_NFSV4_RICHACL)
+		error = may_create_nfsv4_racl(dir, dentry, false);
 #endif
-        } else if (qnap_type == QNAP_NFSV4_RICHACL) {
-                error = may_create_nfsv4_racl(dir, dentry, 0);
-        }
 #ifdef CONFIG_MACH_QNAPTS
-	else if (qnap_type == QNAP_WITHOUT_ACL) {
-                error = may_create_without_acl(dir, dentry);
-        }
-#endif
-
-#else
-
-        if (qnap_type == QNAP_GENERIC_LINUX) {
-#ifdef CONFIG_FS_RICHACL
-                if (IS_RICHACL(dir)) {
-                        error = may_create_racl(dir, dentry, 0);
-                } else {
-                        error = may_create(dir, dentry);
-                }
-#else
-                error = may_create(dir, dentry);
-#endif
-        }
-#ifdef CONFIG_MACH_QNAPTS
-	else if (qnap_type == QNAP_WITHOUT_ACL) {
-                error = may_create_without_acl(dir, dentry);
-        }
-#endif
-
+	else if (qnap_type == QNAP_WITHOUT_ACL)
+		error = may_create_without_acl(dir, dentry, false);
 #endif
 
 	if (error)
@@ -3265,7 +3100,6 @@ int vfs_mknod_without_acl(struct inode *dir, struct dentry *dentry, int mode, de
         return qnap_vfs_mknod(dir, dentry, mode, dev, QNAP_WITHOUT_ACL);
 }
 #endif
-
 
 static int may_mknod(mode_t mode)
 {
@@ -3346,47 +3180,16 @@ int qnap_vfs_mkdir(struct inode *dir, struct dentry *dentry, int mode, int qnap_
 {
 	int error;
 
-#ifdef CONFIG_FS_RICHACL
-
-        if (qnap_type == QNAP_GENERIC_LINUX) {
-#ifdef CONFIG_FS_RICHACL
-                if (IS_RICHACL(dir)) {
-                        error = may_create_racl(dir, dentry, 1);
-                } else {
-                        error = may_create(dir, dentry);
-                }
-#else
-                error = may_create(dir, dentry);
-#endif
-        } else if (qnap_type == QNAP_NFSV4_RICHACL) {
-                error = may_create_nfsv4_racl(dir, dentry, 1);
-        }
+	if (qnap_type == QNAP_GENERIC_LINUX)
+		error = may_create(dir, dentry, true);
 #ifdef CONFIG_MACH_QNAPTS
-	else if (qnap_type == QNAP_WITHOUT_ACL) {
-		error = may_create_without_acl(dir, dentry);
-	}
+	else if (qnap_type == QNAP_WITHOUT_ACL)
+		error = may_create_without_acl(dir, dentry, true);
 #endif
-
-#else
-
-        if (qnap_type == QNAP_GENERIC_LINUX) {
 #ifdef CONFIG_FS_RICHACL
-                if (IS_RICHACL(dir)) {
-                        error = may_create_racl(dir, dentry, 1);
-                } else {
-                        error = may_create(dir, dentry);
-                }
-#else
-                error = may_create(dir, dentry);
+	else if (qnap_type == QNAP_NFSV4_RICHACL)
+		error = may_create_nfsv4_racl(dir, dentry, true);
 #endif
-        }
-#ifdef CONFIG_MACH_QNAPTS
-	else if (qnap_type == QNAP_WITHOUT_ACL) {
-                error = may_create_without_acl(dir, dentry);
-        }
-#endif
-
-#endif /*CONFIG_FS_RICHACL*/
 
 	if (error)
 		return error;
@@ -3423,8 +3226,6 @@ int vfs_mkdir_without_acl(struct inode *dir, struct dentry *dentry, int mode)
         return qnap_vfs_mkdir(dir, dentry, mode, QNAP_WITHOUT_ACL);
 }
 #endif
-
-
 
 SYSCALL_DEFINE3(mkdirat, int, dfd, const char __user *, pathname, int, mode)
 {
@@ -3503,48 +3304,16 @@ int qnap_vfs_rmdir(struct inode *dir, struct dentry *dentry, int qnap_type)
 {
 	int error;
 
+	if (qnap_type == QNAP_GENERIC_LINUX)
+		error = may_delete(dir, dentry, 1, false);
 #ifdef CONFIG_FS_RICHACL
-
-        if (qnap_type == QNAP_GENERIC_LINUX) {
-#ifdef CONFIG_FS_RICHACL
-                if (IS_RICHACL(dir)) {
-                        error = may_delete_racl(dir, dentry, 1, 0);
-                } else {
-                        error = may_delete(dir, dentry, 1);
-                }
-#else
-                error = may_delete(dir, dentry, 1);
+	else if (qnap_type == QNAP_NFSV4_RICHACL)
+		error = may_delete_nfsv4_racl(dir, dentry, 1, false);
 #endif
-        } else if (qnap_type == QNAP_NFSV4_RICHACL) {
-                error = may_delete_nfsv4_racl(dir, dentry, 1, 0);
-        }
 #ifdef CONFIG_MACH_QNAPTS
-	else if (qnap_type == QNAP_WITHOUT_ACL) {
-                error = may_delete_without_acl(dir, dentry, 1);
-        }
+	else if (qnap_type == QNAP_WITHOUT_ACL)
+		error = may_delete_without_acl(dir, dentry, 1, false);
 #endif
-
-#else
-
-        if (qnap_type == QNAP_GENERIC_LINUX) {
-#ifdef CONFIG_FS_RICHACL
-                if (IS_RICHACL(dir)) {
-                        error = may_delete_racl(dir, dentry, 1, 0);
-                } else {
-                        error = may_delete(dir, dentry, 1);
-                }
-#else
-                error = may_delete(dir, dentry, 1);
-#endif
-        }
-#ifdef CONFIG_MACH_QNAPTS
-	else if (qnap_type == QNAP_WITHOUT_ACL) {
-                error = may_delete_without_acl(dir, dentry, 1);
-        }
-#endif
-
-#endif /*CONFIG_FS_RICHACL*/
-
 
 	if (error)
 		return error;
@@ -3881,47 +3650,16 @@ int qnap_vfs_unlink(struct inode *dir, struct dentry *dentry, int qnap_type)
 {
 	int error;
 
+	if (qnap_type == QNAP_GENERIC_LINUX)
+		error = may_delete(dir, dentry, 0, false);
 #ifdef CONFIG_FS_RICHACL
-
-        if (qnap_type == QNAP_GENERIC_LINUX) {
-#ifdef CONFIG_FS_RICHACL
-                if (IS_RICHACL(dir)) {
-                        error = may_delete_racl(dir, dentry, 0, 0);
-                } else {
-                        error = may_delete(dir, dentry, 0);
-                }
-#else
-                error = may_delete(dir, dentry, 0);
+	else if (qnap_type == QNAP_NFSV4_RICHACL)
+		error = may_delete_nfsv4_racl(dir, dentry, 0, false);
 #endif
-        } else if (qnap_type == QNAP_NFSV4_RICHACL) {
-                error = may_delete_nfsv4_racl(dir, dentry, 0, 0);
-        }
 #ifdef CONFIG_MACH_QNAPTS
-	else if (qnap_type == QNAP_WITHOUT_ACL) {
-                error = may_delete_without_acl(dir, dentry, 0);
-        }
+	else if (qnap_type == QNAP_WITHOUT_ACL)
+		error = may_delete_without_acl(dir, dentry, 0, false);
 #endif
-
-#else
-
-        if (qnap_type == QNAP_GENERIC_LINUX) {
-#ifdef CONFIG_FS_RICHACL
-                if (IS_RICHACL(dir)) {
-                        error = may_delete_racl(dir, dentry, 0, 0);
-                } else {
-                        error = may_delete(dir, dentry, 0);
-                }
-#else
-                error = may_delete(dir, dentry, 0);
-#endif
-        }
-#ifdef CONFIG_MACH_QNAPTS
-	else if (qnap_type == QNAP_WITHOUT_ACL) {
-                error = may_delete_without_acl(dir, dentry, 0);
-        }
-#endif
-
-#endif /* CONFIG_FS_RICHACL */
 
 	if (error)
 		return error;
@@ -4080,47 +3818,16 @@ int qnap_vfs_symlink(struct inode *dir, struct dentry *dentry, const char *oldna
 {
 	int error;
 
-#ifdef CONFIG_FS_RICHACL
-
-        if (qnap_type == QNAP_GENERIC_LINUX) {
-#ifdef CONFIG_FS_RICHACL
-                if (IS_RICHACL(dir)) {
-                        error = may_create_racl(dir, dentry, 0);
-                } else {
-                        error = may_create(dir, dentry);
-                }
-#else
-                error = may_create(dir, dentry);
-#endif
-        } else if (qnap_type == QNAP_NFSV4_RICHACL) {
-                error = may_create_nfsv4_racl(dir, dentry, 0);
-        }
+	if (qnap_type == QNAP_GENERIC_LINUX)
+		error = may_create(dir, dentry, false);
 #ifdef CONFIG_MACH_QNAPTS
-	else if (qnap_type == QNAP_WITHOUT_ACL) {
-		error = may_create_without_acl(dir, dentry);
-	}
+	else if (qnap_type == QNAP_WITHOUT_ACL)
+		error = may_create_without_acl(dir, dentry, false);
 #endif
-
-#else
-
-        if (qnap_type == QNAP_GENERIC_LINUX) {
 #ifdef CONFIG_FS_RICHACL
-                if (IS_RICHACL(dir)) {
-                        error = may_create_racl(dir, dentry, 0);
-                } else {
-                        error = may_create(dir, dentry);
-                }
-#else
-                error = may_create(dir, dentry);
+	else if (qnap_type == QNAP_NFSV4_RICHACL)
+		error = may_create_nfsv4_racl(dir, dentry, false);
 #endif
-        }
-#ifdef CONFIG_MACH_QNAPTS
-	else if (qnap_type == QNAP_WITHOUT_ACL) {
-                error = may_create_without_acl(dir, dentry);
-        }
-#endif
-
-#endif /* CONFIG_FS_RICHACL */
 
 	if (error)
 		return error;
@@ -4216,46 +3923,16 @@ int qnap_vfs_link(struct dentry *old_dentry, struct inode *dir, struct dentry *n
 	if (!inode)
 		return -ENOENT;
 
+	if (qnap_type == QNAP_GENERIC_LINUX)
+		error = may_create(dir, new_dentry, false);
 #ifdef CONFIG_FS_RICHACL
-        if (qnap_type == QNAP_GENERIC_LINUX) {
-#ifdef CONFIG_FS_RICHACL
-                if (IS_RICHACL(dir)) {
-                        error = may_create_racl(dir, new_dentry, 0);
-                } else {
-                        error = may_create(dir, new_dentry);
-                }
-#else
-                error = may_create(dir, new_dentry);
+	else if (qnap_type == QNAP_NFSV4_RICHACL)
+		error = may_create_nfsv4_racl(dir, new_dentry, false);
 #endif
-        } else if (qnap_type == QNAP_NFSV4_RICHACL) {
-                error = may_create_nfsv4_racl(dir, new_dentry, 0);
-        }
 #ifdef CONFIG_MACH_QNAPTS
-	else if (qnap_type == QNAP_WITHOUT_ACL) {
-                error = may_create_without_acl(dir, new_dentry);
-        }
+	else if (qnap_type == QNAP_WITHOUT_ACL)
+		error = may_create_without_acl(dir, new_dentry, false);
 #endif
-
-#else
-
-        if (qnap_type == QNAP_GENERIC_LINUX) {
-#ifdef CONFIG_FS_RICHACL
-                if (IS_RICHACL(dir)) {
-                        error = may_create_racl(dir, new_dentry, 0);
-                } else {
-                        error = may_create(dir, new_dentry);
-                }
-#else
-                error = may_create(dir, new_dentry);
-#endif
-        }
-#ifdef CONFIG_MACH_QNAPTS
-	else if (qnap_type == QNAP_WITHOUT_ACL) {
-                error = may_create_without_acl(dir, new_dentry);
-        }
-#endif
-
-#endif /* CONFIG_FS_RICHACL */
 
 	if (error)
 		return error;
@@ -4427,29 +4104,17 @@ static int qnap_vfs_rename_dir(struct inode *old_dir, struct dentry *old_dentry,
 	 * we'll need to flip '..'.
 	 */
 	if (new_dir != old_dir) {
+		if (qnap_type == QNAP_GENERIC_LINUX)
+			error = inode_permission(old_dentry->d_inode, MAY_WRITE);
 #ifdef CONFIG_FS_RICHACL
-                if (qnap_type == QNAP_GENERIC_LINUX) {
-                        error = inode_permission(old_dentry->d_inode, MAY_WRITE);
-                } else if (qnap_type == QNAP_NFSV4_RICHACL) {
-                        error = inode_permission_nfsv4_racl(old_dentry->d_inode, MAY_WRITE);
-                }
+		else if (qnap_type == QNAP_NFSV4_RICHACL)
+			error = inode_permission_nfsv4_racl(old_dentry->d_inode, MAY_WRITE);
+#endif
 #ifdef CONFIG_MACH_QNAPTS
-		else if (qnap_type == QNAP_WITHOUT_ACL) {
-                        error = inode_permission_without_acl(old_dentry->d_inode, MAY_WRITE);
-                }
+		else if (qnap_type == QNAP_WITHOUT_ACL)
+			error = inode_permission_without_acl(old_dentry->d_inode, MAY_WRITE);
 #endif
 
-#else
-                if (qnap_type == QNAP_GENERIC_LINUX) {
-                        error = inode_permission(old_dentry->d_inode, MAY_WRITE);
-                }
-#ifdef CONFIG_MACH_QNAPTS
-		else if (qnap_type == QNAP_WITHOUT_ACL) {
-                        error = inode_permission_without_acl(old_dentry->d_inode, MAY_WRITE);
-                }
-#endif
-
-#endif /* CONFIG_FS_RICHACL */
 		if (error)
 			return error;
 	}
@@ -4552,65 +4217,41 @@ int qnap_vfs_rename(struct inode *old_dir, struct dentry *old_dentry,
 
 	if (old_dentry->d_inode == new_dentry->d_inode)
  		return 0;
- 
-        if (qnap_type == QNAP_GENERIC_LINUX) {
-#ifdef CONFIG_FS_RICHACL
-                if (IS_RICHACL(old_dir)) {
-                        error = may_delete_racl(old_dir, old_dentry, is_dir, 0);
-                        if (error)
-                                return error;
 
-                        if (!new_dentry->d_inode)
-                                error = may_create_racl(new_dir, new_dentry, is_dir);
-                        else
-                                error = may_delete_racl(new_dir, new_dentry, is_dir, 1);
-                } else {
-                        error = may_delete(old_dir, old_dentry, is_dir);
-                        if (error)
-                                return error;
+	if (qnap_type == QNAP_GENERIC_LINUX) {
+		error = may_delete(old_dir, old_dentry, is_dir, false);
+		if (error)
+			return error;
 
-                        if (!new_dentry->d_inode)
-                                error = may_create(new_dir, new_dentry);
-                        else
-                                error = may_delete(new_dir, new_dentry, is_dir);
-                }
-#else
-                error = may_delete(old_dir, old_dentry, is_dir);
-                if (error)
-                        return error;
-
-                if (!new_dentry->d_inode)
-                        error = may_create(new_dir, new_dentry);
-                else
-                        error = may_delete(new_dir, new_dentry, is_dir);
-#endif /* CONFIG_FS_RICHACL */
-        }
+		if (!new_dentry->d_inode)
+			error = may_create(new_dir, new_dentry, is_dir);
+		else
+			error = may_delete(new_dir, new_dentry, is_dir, true);
+	}
 #ifdef CONFIG_MACH_QNAPTS
 	else if (qnap_type == QNAP_WITHOUT_ACL) {
-                error = may_delete_without_acl(old_dir, old_dentry, is_dir);
-                if (error)
-                        return error;
+		error = may_delete_without_acl(old_dir, old_dentry, is_dir, false);
+		if (error)
+			return error;
 
-                if (!new_dentry->d_inode)
-                        error = may_create_without_acl(new_dir, new_dentry);
-                else
-                        error = may_delete_without_acl(new_dir, new_dentry, is_dir);
-        }
+		if (!new_dentry->d_inode)
+			error = may_create_without_acl(new_dir, new_dentry, is_dir);
+		else
+			error = may_delete_without_acl(new_dir, new_dentry, is_dir, true);
+	}
 #endif
-
 #ifdef CONFIG_FS_RICHACL
-        if (qnap_type == QNAP_NFSV4_RICHACL) {
-                error = may_delete_nfsv4_racl(old_dir, old_dentry, is_dir, 0);
-                if (error)
-                        return error;
+	else if (qnap_type == QNAP_NFSV4_RICHACL) {
+		error = may_delete_nfsv4_racl(old_dir, old_dentry, is_dir, false);
+		if (error)
+			return error;
 
-                if (!new_dentry->d_inode)
-                        error = may_create_nfsv4_racl(new_dir, new_dentry, is_dir);
-                else
-                        error = may_delete_nfsv4_racl(new_dir, new_dentry, is_dir, 1);
-        }
+		if (!new_dentry->d_inode)
+			error = may_create_nfsv4_racl(new_dir, new_dentry, is_dir);
+		else
+			error = may_delete_nfsv4_racl(new_dir, new_dentry, is_dir, true);
+	}
 #endif
-
 
 	if (error)
 		return error;
@@ -4621,30 +4262,16 @@ int qnap_vfs_rename(struct inode *old_dir, struct dentry *old_dentry,
 	old_name = fsnotify_oldname_init(old_dentry->d_name.name);
 
 	if (is_dir) {
+		if (qnap_type == QNAP_GENERIC_LINUX)
+			error = vfs_rename_dir(old_dir,old_dentry,new_dir,new_dentry);
 #ifdef CONFIG_FS_RICHACL
-                if (qnap_type == QNAP_GENERIC_LINUX) {
-                        error = vfs_rename_dir(old_dir,old_dentry,new_dir,new_dentry);
-                } else if (qnap_type == QNAP_NFSV4_RICHACL) {
-                        error = vfs_rename_dir_nfsv4_racl(old_dir,old_dentry,new_dir,new_dentry);
-                }
-#ifdef CONFIG_MACH_QNAPTS
-		else if (qnap_type == QNAP_WITHOUT_ACL) {
-                        error = vfs_rename_dir_without_acl(old_dir,old_dentry,new_dir,new_dentry);
-                }
+		else if (qnap_type == QNAP_NFSV4_RICHACL)
+			error = vfs_rename_dir_nfsv4_racl(old_dir,old_dentry,new_dir,new_dentry);
 #endif
-
-#else
-
-                if (qnap_type == QNAP_GENERIC_LINUX) {
-                        error = vfs_rename_dir(old_dir,old_dentry,new_dir,new_dentry);
-                }
 #ifdef CONFIG_MACH_QNAPTS
-		else if (qnap_type == QNAP_WITHOUT_ACL) {
-                        error = vfs_rename_dir_without_acl(old_dir,old_dentry,new_dir,new_dentry);
-                }
+		else if (qnap_type == QNAP_WITHOUT_ACL)
+			error = vfs_rename_dir_without_acl(old_dir,old_dentry,new_dir,new_dentry);
 #endif
-
-#endif /* CONFIG_FS_RICHACL */
 	} else {
 		error = vfs_rename_other(old_dir,old_dentry,new_dir,new_dentry);
 	}
