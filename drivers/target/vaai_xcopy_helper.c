@@ -626,13 +626,15 @@ static int __do_core_xcopy(
 			if (ret == 0)
 				goto _GO_NEXT_;
 
-			ret = 0; /* return err */
+			/* exit if fail */
+			ret = 0;
 			goto _EXIT_;
 		}
 #endif
 		ret = __do_normal_b2b_xcopy(obj, s_lba, d_lba, &e_bytes);
 		if (ret != 0){
-			ret = 0; /* return err */
+			/* exit if fail */
+			ret = 0;
 			goto _EXIT_;
 		}
 _GO_NEXT_:
@@ -642,6 +644,7 @@ _GO_NEXT_:
 
 	}
 
+	/* everythin is fine */
 	ret = 1;
 _EXIT_:
 	return ret;
@@ -703,11 +706,14 @@ static int __do_normal_b2b_xcopy(
 #endif
 
 	if((w_done_blks <= 0) || w_task.is_timeout || w_task.ret_code != 0){
-		pr_err("XCOPY: fail to write to copy destination\n");
-		if (w_task.ret_code == -ENOSPC)
+
+		if (w_task.ret_code == -ENOSPC) {
+			pr_err("XCOPY: space was full\n");
 			obj->err = ERR_NO_SPACE_WRITE_PROTECT;
-		else
+		} else {
+			pr_err("XCOPY: fail to write to copy destination\n");
 			obj->err = ERR_3RD_PARTY_DEVICE_FAILURE;
+		}
 		exit_loop = 1;
 		goto _RW_ERR_;
 	}
@@ -717,6 +723,7 @@ _RW_ERR_:
 	if (r_task.is_timeout || w_task.is_timeout || exit_loop)
 		goto _EXIT_;
 
+	/* everythin is fine */
 	ret = 0;
 _EXIT_:
 	*data_bytes = ((u64)w_done_blks << obj->d_bs_order);
@@ -788,15 +795,18 @@ static int __b2b_xcopy(
 		b2b_info->num_blks
 		);
 #endif
+
 	ret = __do_core_xcopy(&obj);
-	if (ret != 0){
+	__generic_free_sg_list(obj.sg_list, obj.sg_nents);
+
+	if (ret == 0){
 		if (obj.err != MAX_ERR_REASON_INDEX)
 			__set_err_reason(obj.err, 
 				&se_cmd->scsi_sense_reason);
-	}
+	} else
+		ret = 1;
 
-	__generic_free_sg_list(obj.sg_list, obj.sg_nents);
-	ret = 1;
+
 _EXIT_:
 	return ret;
 }

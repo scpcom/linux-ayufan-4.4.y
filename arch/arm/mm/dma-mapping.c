@@ -40,8 +40,7 @@ extern unsigned long arm_dma_zone_size;
 
 #if defined(CONFIG_COMCERTO_UNCACHED_DMA)
 static pgd_t *shadow_pg_dir;
-static u16 *shadow_pmd_count;
-
+static atomic_t *shadow_pmd_count;
 static int __init init_shadow_page_table(void)
 {
 	pmd_t *pmd, *shadow_pmd;
@@ -53,12 +52,12 @@ static int __init init_shadow_page_table(void)
 	shadow_pg_dir = (pgd_t *)__get_free_pages(GFP_KERNEL | GFP_ATOMIC, get_order(16384));
 	if (!shadow_pg_dir)
 		return -ENOMEM;
-	shadow_pmd_count = (u16 *)__get_free_pages(GFP_KERNEL | GFP_ATOMIC, get_order(sizeof(u16) * PTRS_PER_PGD));
+	shadow_pmd_count = (atomic_t *)__get_free_pages(GFP_KERNEL | GFP_ATOMIC, get_order(sizeof(atomic_t) * PTRS_PER_PGD));
 	if (!shadow_pmd_count)
 		goto err1;
 
 	memset(shadow_pg_dir, 0, 16384);
-	memset(shadow_pmd_count, 0, sizeof(u16) * PTRS_PER_PGD);
+	memset(shadow_pmd_count, 0, sizeof(atomic_t) * PTRS_PER_PGD);
 
 	mt = get_mem_type(MT_MEMORY);
 	start = 0;
@@ -83,7 +82,7 @@ static int __init init_shadow_page_table(void)
 				__pmd_populate(shadow_pmd, __pa(shadow_pte), mt->prot_l1);
 			} else {
 				// Mark the shadow in use, so we never replace the already existing 2nd-level
-				shadow_pmd_count[pgd_index(start)]++;
+				atomic_inc(&shadow_pmd_count[pgd_index(start)]);
 			}
 		}
 	} while (count++, start += PMD_SIZE, count < PTRS_PER_PGD);
@@ -531,23 +530,7 @@ EXPORT_SYMBOL(dma_free_coherent);
 #if defined(CONFIG_COMCERTO_UNCACHED_DMA)
 static inline void shadow_pmd_inc(const void *kaddr, int incr)
 {
-	unsigned long flags;
-
-	spin_lock_irqsave(&init_mm.page_table_lock, flags);
-	shadow_pmd_count[pgd_index((unsigned long) kaddr)] += incr;
-	spin_unlock_irqrestore(&init_mm.page_table_lock, flags);
-}
-
-static inline void copy_pmd_fast(pmd_t *pmdpd, pmd_t *pmdps)
-{
-#if !defined(CONFIG_COMCERTO_64K_PAGES)
-	pmdpd[0] = pmdps[0];
-	pmdpd[1] = pmdps[1];
-#else
-	int i;
-	for(i = 0; i < LINKED_PMDS; i++)
-		pmdpd[i] = pmdps[i];
-#endif
+	atomic_add(incr, &shadow_pmd_count[pgd_index((unsigned long) kaddr)]);
 }
 #endif
 
@@ -575,11 +558,8 @@ static inline void __dmac_map_area(const void *kaddr, size_t size,
 
 		if (nr_pages == 1) { // Optimize for the common case
 			shadow_pmd_inc(kaddr_page, 1);
-			if (pmd_bad(*pmd)) { //No 2nd-level page table, retrieve it from the shadows
-				// Small race condition here, but at worst we'll end up copying the shadow_pmd to the actual pmd twice.
-				// For now, map the whole PMD. TODO: try and map only 1 section (1MB).
-				copy_pmd_fast(pmd, shadow_pmd);
-			}
+			if (pmd_bad(*pmd))  // Skip pmd_bad() area - Wayne.Chou 2014/09/23
+				goto op;
 
 			pte = pte_offset_kernel(pmd, (int) kaddr_page);
 			uncache_pte_ext(pte);
@@ -596,11 +576,8 @@ static inline void __dmac_map_area(const void *kaddr, size_t size,
 
 			shadow_pmd_inc(kaddr_page, nr_pages_pmd);
 
-			if (pmd_bad(*pmd)) { //No 2nd-level page table, retrieve it from the shadows
-				// Small race condition here, but at worst we'll end up copying the shadow_pmd to the actual pmd twice.
-				// For now, map the whole PMD. TODO: try and map only 1 section (1MB).
-				copy_pmd_fast(pmd, shadow_pmd);
-			}
+			if (pmd_bad(*pmd)) // Skip pmd_bad() area - Wayne.Chou 2014/09/23
+				goto op;
 
 			pte = pte_offset_kernel(pmd, (int) kaddr_page);
 			while (nr_pages_pmd) {
@@ -635,14 +612,12 @@ static inline void __dmac_unmap_area(const void *kaddr, size_t size,
 	const struct mem_type *mt;
 	unsigned long pa;
 	const void *kaddr_page;
-	unsigned long flags;
 	unsigned int nr_pages, nr_pages_pmd, page_count;
 
 	if (!shadow_pmd_count)
 		goto op;
 
 	if ((dir == DMA_FROM_DEVICE) && ((((unsigned long) kaddr|size) & ~PAGE_MASK) == 0)) {
-		mt = get_mem_type(MT_MEMORY);
 		kaddr_page = kaddr;
 
 		pmd = pmd_off_k((unsigned long) kaddr_page);
@@ -654,27 +629,20 @@ static inline void __dmac_unmap_area(const void *kaddr, size_t size,
 			if (pmd_bad(*pmd)) // No 2nd-level page table, so page was never made non-cacheable.
 				goto op;
 			pte = pte_offset_kernel(pmd, (int) kaddr_page);
-			set_pte_ext(pte, *pte, 0);
+			set_pte_ext(pte, *pte, 8);
 
-			spin_lock_irqsave(&init_mm.page_table_lock, flags);
-			shadow_pmd_count[pgd_index((unsigned long) kaddr_page)]--;
-			if (shadow_pmd_count[pgd_index((unsigned long) kaddr_page)] == 0) {
+			if (atomic_sub_and_test(1, &shadow_pmd_count[pgd_index((unsigned long) kaddr_page)])) {
 #if !defined(CONFIG_COMCERTO_64K_PAGES)
-				*pmd = __pmd(pa | mt->prot_sect);
 				pmd++;
 				pa += SECTION_SIZE;
-				*pmd = __pmd(pa | mt->prot_sect);
 #else
 				pmd_t *orig_pmd = pmd;
 				while (pmd < (orig_pmd + LINKED_PMDS)) {
-					*pmd = __pmd(pa | mt->prot_sect);
 					pa += SECTION_SIZE;
 					pmd++;
 				}
 #endif
 			}
-			spin_unlock_irqrestore(&init_mm.page_table_lock, flags);
-
 			flush_tlb_kernel_page((unsigned long) kaddr_page);
 			return;
 		}
@@ -690,31 +658,25 @@ static inline void __dmac_unmap_area(const void *kaddr, size_t size,
 			pte = pte_offset_kernel(pmd, (int) kaddr_page);
 			page_count = nr_pages_pmd;
 			while (page_count) {
-				set_pte_ext(pte, *pte, 0);
+				set_pte_ext(pte, *pte, 8);
 				pte++;
 				page_count--;
 			}
 
-			spin_lock_irqsave(&init_mm.page_table_lock, flags);
-			shadow_pmd_count[pgd_index((unsigned long) kaddr_page)] -= nr_pages_pmd;
-			if (shadow_pmd_count[pgd_index((unsigned long) kaddr_page)] == 0) {
+			if (atomic_sub_and_test( nr_pages_pmd, &shadow_pmd_count[pgd_index((unsigned long) kaddr_page)])) {
 #if !defined(CONFIG_COMCERTO_64K_PAGES)
-				*pmd = __pmd(pa | mt->prot_sect);
 				pmd++;
 				pa += SECTION_SIZE;
-				*pmd = __pmd(pa | mt->prot_sect);
 				pmd++;
 				pa += SECTION_SIZE;
 #else
 				pmd_t *orig_pmd = pmd;
 				while (pmd < (orig_pmd + LINKED_PMDS)) {
-					*pmd = __pmd(pa | mt->prot_sect);
 					pmd++;
 					pa += SECTION_SIZE;
 				}
 #endif
 			}
-			spin_unlock_irqrestore(&init_mm.page_table_lock, flags);
 
 			while (nr_pages_pmd) {
 				flush_tlb_kernel_page((unsigned long) kaddr_page);

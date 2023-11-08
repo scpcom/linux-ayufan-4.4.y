@@ -704,7 +704,7 @@ static void iblock_bio_destructor(struct bio *bio)
 
 	bio_free(bio, ib_dev->ibd_bio_set);
 }
-#elif (LINUX_VERSION_CODE == KERNEL_VERSION(3,12,6))
+#elif (LINUX_VERSION_CODE == KERNEL_VERSION(3,10,20)) || (LINUX_VERSION_CODE == KERNEL_VERSION(3,12,6))
 #else
 #error "Ooo.. what kernel version do you compile ??"
 #endif
@@ -738,7 +738,7 @@ iblock_get_bio(struct se_task *task, sector_t lba, u32 sg_num)
 
 #if (LINUX_VERSION_CODE == KERNEL_VERSION(3,2,26)) || (LINUX_VERSION_CODE == KERNEL_VERSION(3,4,6))
 	bio->bi_destructor = iblock_bio_destructor;
-#elif (LINUX_VERSION_CODE == KERNEL_VERSION(3,12,6))
+#elif (LINUX_VERSION_CODE == KERNEL_VERSION(3,10,20)) || (LINUX_VERSION_CODE == KERNEL_VERSION(3,12,6))
 #else
 #error "Ooo.. what kernel version do you compile ??"
 #endif
@@ -783,7 +783,8 @@ static int iblock_do_task(struct se_task *task)
 	struct fbdisk_device *pfbdev = NULL;
 	struct fbdisk_file *pfbfile = NULL;
 	struct inode *pInode = NULL;
-	unsigned long threshold_min;
+	/* Jonathan Ho, 20141124, use threshold_max to avoid inaccuracy */
+	unsigned long threshold_max;
 	loff_t total = 0, used = 0;
 
 #if defined(QNAP_HAL)
@@ -867,11 +868,12 @@ static int iblock_do_task(struct se_task *task)
 			 * avoid this code will be fail to build with 32bit
 			 * compiler environment
 			 */
-			threshold_min = \
+			/* Jonathan Ho, 20141124, use "threshold_max" to avoid inaccuracy */
+			threshold_max = \
 				div_u64((total * dev->se_sub_dev->se_dev_attrib.tp_threshold_percent), 
 				100);
 
-			threshold_min -= \
+			threshold_max += \
 				(((1 << dev->se_sub_dev->se_dev_attrib.tp_threshold_set_size) >> 1) * 512);
 
 #if 0			/* move to function of iblock_update_allocated() */
@@ -886,7 +888,8 @@ static int iblock_do_task(struct se_task *task)
 				(u32)div_u64((u64)((total - (used * 512))), 
 				((1 << (dev->se_sub_dev->se_dev_attrib.tp_threshold_set_size)) * 512));
 
-			if ( (used * 512) >= threshold_min){
+			/* Jonathan Ho, 20141124, use "threshold_max" to avoid inaccuracy */
+			if ( (used * 512) > threshold_max){
 				if ( !dev->se_sub_dev->se_dev_attrib.tp_threshold_hit ){
 
 					dev->se_sub_dev->se_dev_attrib.tp_threshold_hit++;

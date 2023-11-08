@@ -405,7 +405,7 @@ static int bdi_forker_thread(void *ptr)
 	struct bdi_writeback *me = ptr;
 #ifdef CONFIG_MACH_QNAPTS
     // set affinity for flush daemon for X31
-    int cpu = 1;
+    int cpu = 0;
     struct cpumask flush_mask;
 #endif
 

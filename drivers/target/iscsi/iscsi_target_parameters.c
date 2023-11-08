@@ -45,8 +45,12 @@ int iscsi_login_rx_data(
 
 	rx_got = rx_data(conn, &iov, 1, length);
 	if (rx_got != length) {
-		pr_err("rx_data returned %d, expecting %d.\n",
-				rx_got, length);
+#if defined(CONFIG_MACH_QNAPTS)
+		/* 2014/11/20, adamhsu, redmine 10761 */
+		pr_err("%s: rx_data returned %d, expecting %d.\n",
+				__func__, rx_got, length);
+#endif
+
 		return -1;
 	}
 
@@ -79,8 +83,12 @@ int iscsi_login_tx_data(
 
 	tx_sent = tx_data(conn, &iov[0], 2, length);
 	if (tx_sent != length) {
-		pr_err("tx_data returned %d, expecting %d.\n",
-				tx_sent, length);
+#if defined(CONFIG_MACH_QNAPTS)
+		/* 2014/11/20, adamhsu, redmine 10761 */
+		pr_err("%s: tx_data returned %d, expecting %d.\n",
+					__func__, tx_sent, length);
+#endif
+
 		return -1;
 	}
 

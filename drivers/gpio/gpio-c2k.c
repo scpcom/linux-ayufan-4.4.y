@@ -117,15 +117,18 @@ static int c2k_direction_output(struct gpio_chip *chip, unsigned offset, int val
 
 	if (offset < 32) {
 		__raw_writel(__raw_readl(COMCERTO_GPIO_OE_REG) | (0x1 << offset), COMCERTO_GPIO_OE_REG);
+//Patch by QNAP: Board initialization
+#ifndef CONFIG_MACH_QNAPTS
 		__c2k_gpio_set(chip, offset, value);
+#endif
 	} else {
 //Patch by QNAP: Board initialization
 #ifdef CONFIG_MACH_QNAPTS
 		__raw_writel(__raw_readl(COMCERTO_GPIO_63_32_PIN_OUTPUT_EN) & ~(0x1 << (offset - 32)), COMCERTO_GPIO_63_32_PIN_OUTPUT_EN);
 #else
 		__raw_writel(__raw_readl(COMCERTO_GPIO_63_32_PIN_OUTPUT_EN) | (0x1 << (offset - 32)), COMCERTO_GPIO_63_32_PIN_OUTPUT_EN);
-#endif
 		__c2k_gpio_set(chip, offset, value);
+#endif
 	}
 
 	spin_unlock_irqrestore(&c2k_gpio_lock, flags);

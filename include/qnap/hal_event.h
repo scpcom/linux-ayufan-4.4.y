@@ -9,6 +9,7 @@ typedef enum
     HAL_EVENT_GENERAL_DISK = 0,
     HAL_EVENT_ENCLOSURE,
     HAL_EVENT_RAID,
+    HAL_EVENT_THIN,
     HAL_EVENT_NET,
     HAL_EVENT_USB_PRINTER,
     HAL_EVENT_VOLUME,
@@ -17,7 +18,8 @@ typedef enum
     HAL_EVENT_ISCSI,
 // #endif
     HAL_EVENT_USB_MTP,
-    HAL_EVENT_MAX_EVT_NUM
+    HAL_EVENT_GPIO,
+    HAL_EVENT_MAX_EVT_NUM,
 } EVT_FUNC_TYPE;
 
 #ifndef USB_DRV_DEFINED
@@ -63,6 +65,9 @@ typedef enum
     SELF_TEST_SCHEDULE,
     FAIL_DRIVE,
     REMOVABLE_DRIVE_DETACH,
+    SET_NCQ_BY_USER,
+    SET_NCQ_BY_KERNEL,
+
 // For RAID    
     REPAIR_RAID_READ_ERROR = 100,   //1,5,6,10, for netlink,reconstruct
     SET_RAID_PD_ERROR,              //1,5,6,10, for netlink
@@ -89,6 +94,8 @@ typedef enum
     NET_IP_DEL,
     NET_IP_NEW,
     NET_SCAN,
+// For THIN
+    THIN_SB_BACKUP_FAIL = 160,
 // For VOLUME
     CHECK_FREE_SIZE = 180,
 // #ifdef STORAGE_V2
@@ -105,6 +112,7 @@ typedef enum
     PM_EVENT,
     PM_PREPARE_SUSPEND_COMP,
     RELOAD_CONF,
+    CHECK_GPIO_STATUS,
 } EVT_FUNC_ACTION;
 
 typedef struct
@@ -127,6 +135,7 @@ typedef struct
         {
             int                 pool_id;
             int                 vol_id;
+            int                 value;
         }__attribute__ ((__packed__)) check_lvm_status;
 // #endif
         struct
@@ -247,6 +256,15 @@ typedef struct
             int throttle_enable;
             int cpu_id;
         }__attribute__((__packed__)) cpu_thermal_throttling_event;
+        struct __netlink_ncq_cb
+        {
+            int scsi_bus[4];
+            int on_off;
+        } __attribute__ ((__packed__)) netlink_ncq;
+        struct __pool_message
+        {
+            char pool_name[32];
+        } __attribute__ ((__packed__)) pool_message;        
     } param;
 }__attribute__ ((__packed__))
 EVT_FUNC_ARG;

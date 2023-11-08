@@ -51,12 +51,15 @@
 #include "iscsi_target_device.h"
 #include "iscsi_target_stat.h"
 
-#ifdef CONFIG_MACH_QNAPTS   // 2009/11/26 Nike Chen add connection log 
-#include "iscsi_target_log.h"
-#endif
-
 #if defined(CONFIG_MACH_QNAPTS)
-#if defined(SUPPORT_ISCSI_ZERO_COPY)   //20121130, adam hsu support iscsi zero-copy
+// 2009/11/26 Nike Chen add connection log 
+
+#include "iscsi_target_log.h"
+#include "../target_general.h"
+
+
+//20121130, adam hsu support iscsi zero-copy
+#if defined(SUPPORT_ISCSI_ZERO_COPY)
 #include "../target_core_file.h"
 #include <net/sock.h>
 
@@ -449,7 +452,15 @@ int iscsit_access_np(struct iscsi_np *np, struct iscsi_portal_group *tpg)
 	 */
 	ret = mutex_lock_interruptible(&tpg->np_login_lock);
 	if ((ret != 0) || signal_pending(current))
+	{
+#if defined(CONFIG_MACH_QNAPTS)
+		/* 2014/11/20, adamhsu, redmine 10761  */
+		if (signal_pending(current))
+			pr_err("%s: got signal pending\n",__func__);
+#endif
+
 		return -1;
+	}
 
 	spin_lock_bh(&np->np_thread_lock);
 	np->np_login_tpg = tpg;
@@ -803,7 +814,7 @@ static void __exit iscsi_target_cleanup_module(void)
 	struct iscsi_cmd *cmd = NULL, *tmp_cmd = NULL;
 
 	spin_lock(&cmd_rec_list_lock);
-	pr_debug("[%s] before - cmd count:0x%llx\n", __func__, 
+	pr_debug("[%s] before - cmd count:0x%lx\n", __func__, 
 		atomic64_read(&cmd_count));
 
 	list_for_each_entry_safe(cmd, tmp_cmd, 
@@ -818,7 +829,7 @@ static void __exit iscsi_target_cleanup_module(void)
 			atomic_read(&cmd->se_cmd.cmd_kref.refcount)
 			);
 	}
-	pr_debug("[%s] after - cmd count:0x%llx\n",  __func__, atomic64_read(&cmd_count));
+	pr_debug("[%s] after - cmd count:0x%lx\n",  __func__, atomic64_read(&cmd_count));
 	spin_unlock(&cmd_rec_list_lock);
 #endif
 
@@ -1004,8 +1015,10 @@ static void iscsit_ack_from_expstatsn(struct iscsi_conn *conn, u32 exp_statsn)
 
 #if defined(CONFIG_MACH_QNAPTS)
 			/* 2014/08/16, adamhsu, redmine 9055,9076,9278 */
-			if (cmd->cmd_flags & ICF_DELAYED_REMOVE)
+			if (cmd->cmd_flags & ICF_DELAYED_REMOVE){
+				spin_unlock(&cmd->istate_lock);
 				continue;
+			}
 #endif
 
 			cmd->i_state = ISTATE_REMOVE;
@@ -1637,6 +1650,7 @@ static int iscsit_handle_data_out(struct iscsi_conn *conn, unsigned char *buf)
 	unsigned long flags;
 
 #if defined(CONFIG_MACH_QNAPTS)
+	int err_1;
 //20121130, adam hsu support iscsi zero-copy
 #if defined(SUPPORT_ISCSI_ZERO_COPY)
 	struct se_cmd *mse_cmd = NULL;
@@ -1959,10 +1973,31 @@ static int iscsit_handle_data_out(struct iscsi_conn *conn, unsigned char *buf)
 #endif
 	}
 
-#if defined(CONFIG_MACH_QNAPTS) && defined(SUPPORT_ISCSI_ZERO_COPY)   //20121130, adam hsu support iscsi zero-copy
-    mse_dev = mse_cmd->se_dev;
-    mdev = mse_dev->dev_ptr;
-    mfile = mdev->fd_file;
+//20121130, adam hsu support iscsi zero-copy
+#if defined(CONFIG_MACH_QNAPTS) && defined(SUPPORT_ISCSI_ZERO_COPY)
+
+	mse_dev = mse_cmd->se_dev;
+
+	if(!strcmp(mse_dev->transport->name, "fileio")) {
+		mdev = mse_dev->dev_ptr;
+		mfile = mdev->fd_file;
+
+
+#if defined(SUPPORT_TP)
+		/* check whether was no space already ? */
+		if (is_thin_lun(mse_dev)){
+			/* only for file i/o + block-based thin lun */
+			err_1 = check_dm_thin_cond(mfile->f_mapping->host->i_bdev);
+			if ((err_1 == -ENOSPC) || (err_1 == 1)){
+//				pr_warn("%s: convert to sync i/o. ret: %d\n", __func__, err_1);
+				mse_cmd->digest_zero_copy_skip = true;
+			}
+		}
+#endif
+	}
+	/* fall-through for others */
+
+
 	ccc = 0;
 	ppos = (loff_t)hdr->offset;
 	ppos += (mse_cmd->t_task_lba *mse_dev->se_sub_dev->se_dev_attrib.block_size);
@@ -2997,12 +3032,17 @@ static int iscsit_handle_immediate_data(
 	struct iscsi_conn *conn = cmd->conn;
 	struct kvec *iov;
 
-#if defined(CONFIG_MACH_QNAPTS) && defined(SUPPORT_ISCSI_ZERO_COPY)   //20121130, adam hsu support iscsi zero-copy
+#if defined(CONFIG_MACH_QNAPTS) 
+	int err_1;
+
+#if defined(SUPPORT_ISCSI_ZERO_COPY)  
+	//20121130, adam hsu support iscsi zero-copy
 	struct se_cmd *mse_cmd = NULL;
-    struct se_device *mse_dev = NULL;
-    struct fd_dev *mdev = NULL;
-    struct file *mfile = NULL;
+	struct se_device *mse_dev = NULL;
+	struct fd_dev *mdev = NULL;
+	struct file *mfile = NULL;
 	loff_t ppos = 0;
+#endif
 #endif
 
 	iov_ret = iscsit_map_iovec(cmd, cmd->iov_data, cmd->write_data_done, length);
@@ -3052,10 +3092,30 @@ static int iscsit_handle_immediate_data(
 #endif
 	}
 
-#if defined(CONFIG_MACH_QNAPTS) && defined(SUPPORT_ISCSI_ZERO_COPY)   //20121130, adam hsu support iscsi zero-copy
-    mse_dev = mse_cmd->se_dev;
-    mdev = mse_dev->dev_ptr;
-    mfile = mdev->fd_file;
+//20121130, adam hsu support iscsi zero-copy
+#if defined(CONFIG_MACH_QNAPTS) && defined(SUPPORT_ISCSI_ZERO_COPY)
+
+	mse_dev = mse_cmd->se_dev;
+
+	if(!strcmp(mse_dev->transport->name, "fileio")) {
+		mdev = mse_dev->dev_ptr;
+		mfile = mdev->fd_file;
+
+#if defined(SUPPORT_TP)
+		/* check whether was no space already ? */
+		if (is_thin_lun(mse_dev)){
+			/* only for file i/o + block-based thin lun */
+			err_1 = check_dm_thin_cond(mfile->f_mapping->host->i_bdev);
+			if ((err_1 == -ENOSPC) || (err_1 == 1)){
+//				pr_warn("%s: convert to sync i/o. ret: %d\n", __func__, err_1);
+				mse_cmd->digest_zero_copy_skip = true;
+			}
+		}
+#endif
+
+	}
+	/* fall-through for others */
+
 	ppos += (mse_cmd->t_task_lba *mse_dev->se_sub_dev->se_dev_attrib.block_size);
 	if(mse_dev->transport->name[0]=='f'&& !(mse_cmd->digest_zero_copy_skip)){
 		rx_got = (u32)mdo_splice_from_socket(mfile,conn->sock,&ppos,(size_t)rx_size);
@@ -4586,6 +4646,11 @@ get_immediate:
 			}
 
 			if (iscsit_send_tx_data(cmd, conn, 1) < 0) {
+#if defined(CONFIG_MACH_QNAPTS)
+				/* 2014/11/20, adamhsu, redmine 10761 */
+				pr_err("%s: fail from "
+				"iscsit_send_tx_data (immed q)\n", __func__);
+#endif
 				conn->tx_immediate_queue = 0;
 				iscsit_tx_thread_wait_for_tcp(conn);
 				goto transport_err;
@@ -4701,6 +4766,11 @@ check_rsp_state:
 
 			if (map_sg && !conn->conn_ops->IFMarker) {
 				if (iscsit_fe_sendpage_sg(cmd, conn) < 0) {
+
+#if defined(CONFIG_MACH_QNAPTS)
+					/* 2014/11/20, adamhsu, redmine 10761 */
+					pr_err("%s: fail from iscsit_fe_sendpage_sg\n",	__func__);
+#endif
 					conn->tx_response_queue = 0;
 					iscsit_tx_thread_wait_for_tcp(conn);
 					iscsit_unmap_iovec(cmd);
@@ -4708,6 +4778,12 @@ check_rsp_state:
 				}
 			} else {
 				if (iscsit_send_tx_data(cmd, conn, use_misc) < 0) {
+
+#if defined(CONFIG_MACH_QNAPTS)
+					/* 2014/11/20, adamhsu, redmine 10761 */
+					pr_err("%s: fail from "
+					"iscsit_send_tx_data (resp q)\n", __func__);
+#endif
 					conn->tx_response_queue = 0;
 					iscsit_tx_thread_wait_for_tcp(conn);
 					iscsit_unmap_iovec(cmd);
@@ -5138,19 +5214,43 @@ int iscsit_close_connection(
 			kfree(conn->sock->file);
 			conn->sock->file = NULL;
 		}
+
+#ifdef CONFIG_MACH_QNAPTS
+		/* 2014/10/23, adamhsu, redmine 7672 -solve side-effect for 20121123 
+		 * In lock_sock_nested(), it will call might_sleep() but we 
+		 * still stay in locked
+		 */
+		spin_unlock_bh(&sess->conn_lock);
 		sock_release(conn->sock);
+		spin_lock_bh(&sess->conn_lock);
+#else
+		sock_release(conn->sock);
+#endif
+
 	}
 	conn->thread_set = NULL;
 	pr_debug("Moving to TARG_CONN_STATE_FREE.\n");
 	conn->conn_state = TARG_CONN_STATE_FREE;
 
 #ifdef CONFIG_MACH_QNAPTS
-    // 2009/11/26 Nike Chen add connection log
-    // Note that sess should not be NULL, otherwise the following operation will fail.
-    iscsi_post_log(LOGOUT, LOG_INFO, sess, login_ip);
-    // Benjamin 20121123: Solve general protection fault SMP issue when session with multi-connection logout.
-    pr_debug("%s: Call kfree(conn), conn=%p.\n", __func__, conn);    
+	// 2009/11/26 Nike Chen add connection log
+	// Note that sess should not be NULL, otherwise the following operation will fail.
+
+	/* 2014/11/20, adamhsu redmine 10746 
+	 * Solved the message "BUG: scheduling while atomic iscsi_trx/xxxx/yyyy"
+	 * while to use alloc_skb() with GFP_KERNEL
+	 */
+	spin_unlock_bh(&sess->conn_lock);
+
+	iscsi_post_log(LOGOUT, LOG_INFO, sess, login_ip);
+
+	// Benjamin 20121123: Solve general protection fault SMP issue when session with multi-connection logout.
+	pr_debug("%s: Call kfree(conn), conn=%p.\n", __func__, conn);    
 	kfree(conn);
+
+	/* 2014/11/20, adamhsu redmine 10746 */
+	spin_lock_bh(&sess->conn_lock);
+
 	atomic_dec(&sess->nconn);
 #else    
 	kfree(conn);

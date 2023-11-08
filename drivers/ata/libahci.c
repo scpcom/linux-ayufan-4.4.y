@@ -830,9 +830,19 @@ int ahci_reset_controller(struct ata_host *host)
 		 * reset must complete within 1 second, or
 		 * the hardware should be considered fried.
 		 */
+//Patch by QNAP: Fix reset then memory access fail
+#ifdef CONFIG_MACH_QNAPTS
+		tmp = ioread32(mmio + HOST_CTL);
+
+		while ((tmp & HOST_RESET) == HOST_RESET && time_before(jiffies, ata_deadline(jiffies, 1000))) {
+			mdelay(10);
+			tmp = ioread32(mmio + HOST_CTL);
+		}
+#else
 		tmp = ata_wait_register(NULL, mmio + HOST_CTL, HOST_RESET,
 					HOST_RESET, 10, 1000);
-
+#endif
+//////////////////////////////////////////////////////
 		if (tmp & HOST_RESET) {
 			dev_err(host->dev, "controller reset failed (0x%x)\n",
 				tmp);

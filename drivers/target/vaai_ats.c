@@ -249,6 +249,10 @@ static int vaai_file_do_ats(
 	mm_segment_t old_fs;
 	ssize_t rw_ret;
 
+#if defined(SUPPORT_TP)
+	struct inode *inode;
+	int err_1;
+#endif
 	/* SCF_SCSI_CONTROL_SG_IO_CDB */
 	if(pSeCmd->t_task_cdb[13] > MAX_ATS_LEN){
 		__set_err_reason(ERR_INVALID_CDB_FIELD, 
@@ -338,15 +342,73 @@ static int vaai_file_do_ats(
 	rw_ret = vfs_writev(fd_file, &iov, 1, &position);
 	set_fs(old_fs);
 
-	if ((rw_ret < 0) || (rw_ret != total_bytes)){
-		pr_err("[ATS FIO] write fail\n");   
+#if defined(SUPPORT_TP)
+	if (rw_ret && is_thin_lun(se_dev)){
+		/* TODO: 
+		 * To sync cache again if write ok and the sync cache
+		 * behavior shall work for thin lun only 
+		 */
+		inode = fd_file->f_mapping->host;
 
-		if (rw_ret == -ENOSPC)
+		/* check whether was no space already ? */
+		ret = check_dm_thin_cond(inode->i_bdev);
+		if (ret == 0)
+			goto _EXIT_1_;
+
+		/* time to do sync i/o
+		 * 1. hit the sync i/o threshold area
+		 * 2. or, space is full BUT need to handle lba where was mapped
+		 * or not
+		 */
+		if (ret == 1 || ret == -ENOSPC){
+			ret = __do_sync_cache_range(fd_file, 
+				(lba << bs_order), 
+				((lba << bs_order) + total_bytes));
+
+			if (ret != 0){
+				/* TODO:
+				 * thin i/o may go here (lba wasn't mapped to
+				 * any block) or something wrong during normal
+				 * sync-cache
+				 */
+
+				/* call again to make sure it is no space
+				 * really or not
+				 */
+				err_1 = check_dm_thin_cond(inode->i_bdev);
+				if (err_1 == -ENOSPC){
+					ret = err_1;
+				}
+
+				/* it may something wrong duing sync-cache */
+				rw_ret = ret;
+				goto _EXIT_1_;
+			}
+		}
+
+		/* fall-through */
+	}
+
+_EXIT_1_:
+#endif	
+
+	if ((rw_ret < 0) || (rw_ret != total_bytes)){
+
+		if (rw_ret < 0)
+			pr_err("[ATS FIO] write fail, rw_ret:%d\n", rw_ret);
+		else
+			pr_err("[ATS FIO] write fail, write size:%d "
+			"not match to expected size:%d\n", rw_ret, total_bytes);
+
+
+		if (rw_ret == -ENOSPC){
+			pr_warn("[ATS FIO] space was full\n");
 			__set_err_reason(ERR_NO_SPACE_WRITE_PROTECT, 
 				&pSeCmd->scsi_sense_reason);
-		else
+		} else
 			__set_err_reason(ERR_LOGICAL_UNIT_COMMUNICATION_FAILURE, 
 				&pSeCmd->scsi_sense_reason);
+
 		ret = ATS_RET_FAIL;
 		goto _EXIT_;
 	}

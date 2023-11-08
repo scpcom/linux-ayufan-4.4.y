@@ -289,6 +289,9 @@ int vaai_file_do_specific_fast_ws(
 	u64 alloc_bytes = DEFAULT_ALLOC_SIZE;
 	GEN_RW_TASK w_task;
 
+#if defined(SUPPORT_TP)
+	int err_1;
+#endif
 	/* When code comes here, the subsystem type is file i/o, so to check
 	 * what kind of backing device we need to handle ...
 	 */
@@ -427,12 +430,25 @@ int vaai_file_do_specific_fast_ws(
 				first_page_offset, last_page_offset);
 			
 			if (unlikely(Ret)) {
-				pr_err("[fws] fail to exec filemap_write_and_wait_range(), "
-					"Ret:0x%x\n", Ret);		     
+				pr_err("[fws] fail to exec "
+					"filemap_write_and_wait_range(), "
+					"Ret:%d\n", Ret);		     
+
+#if defined(SUPPORT_TP)
+				if (special_ws){
+					if (!is_thin_lun(pSeDev))
+						break;
+
+					err_1 = check_dm_thin_cond(pInode->i_bdev);
+					if (err_1 == -ENOSPC){
+						Ret = err_1;
+					}
+				}
+#endif
 				break;
 			}
 		}
-	
+
 		truncate_pagecache_range(pInode, first_page_offset, 
 			last_page_offset);
 	
@@ -458,7 +474,7 @@ int vaai_file_do_specific_fast_ws(
 			GFP_KERNEL, 0);
 	
 		if (unlikely(Ret)) {
-			pr_err("%s: fail to exec discard_func() Ret:0x%x\n", 
+			pr_err("%s: fail to exec discard_func() Ret:%d\n", 
 				__FUNCTION__, Ret);
 			break;
 		} else
@@ -495,6 +511,7 @@ _NORMAL_IO_:
 			t_range -= tmp;
 		} while (t_range);
 
+		/* break the loop if while (t_range) did not completed */
 		if (t_range)
 			break;
 _GO_NEXT_:
@@ -505,10 +522,11 @@ _GO_NEXT_:
 	__generic_free_sg_list(w_task.sg_list, w_task.sg_nents);
 
 	if (Ret){
-		if (Ret == -ENOSPC)
+		if (Ret == -ENOSPC){
+			pr_warn("[FAST WS FIO] thin space was full\n"); 
 			__set_err_reason(ERR_NO_SPACE_WRITE_PROTECT, 
 				&pSeCmd->scsi_sense_reason);
-		else
+		} else
 			__set_err_reason(ERR_LOGICAL_UNIT_COMMUNICATION_FAILURE, 
 				&pSeCmd->scsi_sense_reason);
 	}

@@ -158,7 +158,8 @@ static int __do_wt_by_normal_rw(
 		pr_err("w_done_blks != expected write blks\n");
 
 _RW_ERR_:
-	__tpc_update_t_cmd_transfer_count(wbt_obj->t_data, (sector_t)w_done_blks);
+	if (wbt_obj->err != ERR_NO_SPACE_WRITE_PROTECT)
+		__tpc_update_t_cmd_transfer_count(wbt_obj->t_data, (sector_t)w_done_blks);
 
 	/* To exit this loop if hit any error */
 	if (r_task.is_timeout || w_task.is_timeout || exit_loop)
@@ -207,22 +208,34 @@ static int __core_do_wt(
 	while (tmp_w_bytes){
 	
 		/* To get the br data location by rod offset */
+		spin_lock_bh(&wbt_obj->s_obj->se_tpg->tpc_obj_list_lock);
 		br_d = __tpc_get_rod_loc_by_rod_off(
 			wbt_obj->s_obj, &bdr_off, t_off_to_rod);
+		spin_unlock_bh(&wbt_obj->s_obj->se_tpg->tpc_obj_list_lock);
+
 
 		if (!br_d){
 			/* FIXED ME */
-			if (t_off_to_rod >= __tpc_get_nr_bytes_by_s_obj(
-					wbt_obj->s_obj, 1))
-				goto _EXIT_;    
+			u64 tmp_nr_bytes;
+
+			spin_lock_bh(&wbt_obj->s_obj->se_tpg->tpc_obj_list_lock);
+			tmp_nr_bytes = __tpc_get_nr_bytes_by_s_obj(wbt_obj->s_obj, 1);
+			spin_unlock_bh(&wbt_obj->s_obj->se_tpg->tpc_obj_list_lock);
+
+			if (t_off_to_rod >= tmp_nr_bytes)
+				goto _EXIT_; 
 		}
 		src_lba = (br_d->lba + bdr_off);
 
 		/* To check source token is invalid or not before to read. If
 		 * the source token is invalid, here won't update any data for 
 		 * s_obj, what we will do is to udpate n_obj only */
+
+		spin_lock_bh(&wbt_obj->s_obj->se_tpg->tpc_obj_list_lock);
 		exit_loop = __tpc_is_token_invalid(wbt_obj->s_obj, 
 				&wbt_obj->err);
+		spin_unlock_bh(&wbt_obj->s_obj->se_tpg->tpc_obj_list_lock);
+
 		if (exit_loop != 0)
 			goto _EXIT_;
 
@@ -261,8 +274,8 @@ static int __core_do_wt(
 			if (ret == 0)
 				goto _GO_NEXT_;
 
-			/* if it is fail */
-			break;
+			/* to exit if fast-clone operation is fail */
+			goto _EXIT_;
 		}
 #endif
 		ret = __do_wt_by_normal_rw(wbt_obj, src_lba, dest_lba, 
@@ -300,8 +313,8 @@ _EXIT_:
  * @retval N/A
  */
 static void __tpc_free_token_timer(
-    IN unsigned long arg
-    )
+	IN unsigned long arg
+	)
 {
 #define TOKEN_NEXT_TIME_OUT    2
 
@@ -309,50 +322,36 @@ static void __tpc_free_token_timer(
 	void *token = NULL;
 	LIST_HEAD(tmp_data_list);
 
-	/* when timer fires, the token status may be ...
-	 * (1) O_TOKEN_STS_ALIVE -> O_TOKEN_STS_FREE_BY_TOKEN_TIMER 
-	 *     -> O_TOKEN_STS_EXPIRED
-	 *
-	 * (2) O_TOKEN_STS_FREE_BY_FREE_PROC -> do nothing and return
-	 *     < this was called by tpc_release_obj_for_se_tpg() currently >
-	 *
-	 * (3) O_TOKEN_STS_ALIVE -> O_TOKEN_STS_FREE_BY_TOKEN_TIMER 
-	 *     -> somebody still use it -> return 
-	 *     -> O_TOKEN_STS_FREE_BY_TOKEN_TIMER -> ...
-	 *
-	 * (4) O_TOKEN_STS_CANCELLED -> free resource -> O_TOKEN_STS_CANCELLED
-	 */
 	spin_lock(&obj->se_tpg->tpc_obj_list_lock);
-	spin_lock(&obj->o_token_status_lock);
 
+	/* check it was taken by someone already? */
+	spin_lock(&obj->o_token_status_lock);
 	if (TOKEN_STS_FREE_BY_PROC(obj->o_token_status)){
+		pr_debug("%s: obj token(id:0x%x, op_sac:0x%x) status was set "
+				"to O_TOKEN_STS_FREE_BY_PROC already !! "
+				"skip it\n", __func__, 
+				obj->list_id, obj->op_sac);
+
 		spin_unlock(&obj->o_token_status_lock);
 		spin_unlock(&obj->se_tpg->tpc_obj_list_lock);
-
-		pr_debug("%s: obj token(id:0x%x, op_sac:0x%x) status was set "
-				"to 0x%x already !! skip it ...\n", __func__, 
-				obj->list_id, obj->op_sac, obj->o_token_status);
 		return;
 	}
 
-	pr_debug("%s: token(id:0x%x, op_sac:0x%x, status:0x%x)\n", 
-		__func__, obj->list_id, obj->op_sac, obj->o_token_status);
-
+	/**/
 	if (TOKEN_STS_ALIVE(obj->o_token_status))
 		obj->o_token_status = O_TOKEN_STS_FREE_BY_TOKEN_TIMER;
 
 	spin_unlock(&obj->o_token_status_lock);
-	spin_unlock(&obj->se_tpg->tpc_obj_list_lock);
 
 	/* check whether somebody still use this token or not */
 	spin_lock(&obj->o_token_ref_count_lock);
-
 	if (atomic_read(&obj->o_token_ref_count)){
 		spin_unlock(&obj->o_token_ref_count_lock);
+		spin_unlock(&obj->se_tpg->tpc_obj_list_lock);
 
 		pr_debug("%s: token is using by "
-			"someone(id:0x%x, op_sac:0x%x)\n", __func__, 
-			obj->list_id, obj->op_sac);
+			"someone(id:0x%x, op_sac:0x%x)\n",
+			__func__, obj->list_id, obj->op_sac);
 
 	        /* Let the obj timer to be the same as token timer which
 	         * will be fired later */
@@ -372,35 +371,27 @@ static void __tpc_free_token_timer(
 	}
 	spin_unlock(&obj->o_token_ref_count_lock);
 
-	/* Nobody use this token anymore and token status may be 
-	 * O_TOKEN_STS_FREE_BY_TOKEN_TIMER or O_TOKEN_STS_CANCELLED here */
-	pr_debug("start free token(id:0x%x, op_sac:0x%x) by token-timer\n",
-			obj->list_id, obj->op_sac);
-
-	/* Please take care the something order here .. */
 	spin_lock(&obj->o_token_status_lock);
 	if (TOKEN_STS_FREE_BY_TOKEN_TIMER(obj->o_token_status))
 		obj->o_token_status = O_TOKEN_STS_EXPIRED;
+	spin_unlock(&obj->o_token_status_lock);	
 
-	/* (1) No token no data, so here to set the token field first 
-	 * (2) Put the data list to tmp data list first
-	 */
-	spin_lock(&obj->o_token_data_lock);
-	spin_lock(&obj->o_data_list_lock);
-
+	spin_lock(&obj->o_data_lock);
 	token = obj->o_token_data;
 	obj->o_token_data = NULL;
 	list_splice_tail_init(&obj->o_data_list, &tmp_data_list);
+	spin_unlock(&obj->o_data_lock);
 
-	spin_unlock(&obj->o_data_list_lock);
-	spin_unlock(&obj->o_token_data_lock);
-	spin_unlock(&obj->o_token_status_lock);
+	spin_unlock(&obj->se_tpg->tpc_obj_list_lock);
+
+	/* start to free necessary token resource */
+	pr_debug("start free token(id:0x%x, op_sac:0x%x) by token-timer\n",
+			obj->list_id, obj->op_sac);
 
 	if (!list_empty(&tmp_data_list))
 		__tpc_free_obj_node_data(&tmp_data_list);
 
 	pr_debug("to free token:0x%p\n", token);
-
 	if (token)
     		kfree(token);
 
@@ -453,8 +444,10 @@ static void __release_token_from_free_obj(
 	)
 {
 	void *token = NULL;
-	struct list_head tmp_data_list;
 	unsigned long flags;
+	LIST_HEAD(tmp_data_list);
+
+
 
 
 	/* This call will be executed from tpc_release_obj_for_se_tpg(). So, it
@@ -463,63 +456,61 @@ static void __release_token_from_free_obj(
 	 * (1) the obj has been removed from list already
 	 * (2) and, the obj status had been changed to O_STS_FREE_BY_PROC
 	 */
-	spin_lock_irqsave(&obj->o_status_lock, flags);
-	if (!OBJ_STS_FREE_BY_PROC(obj->o_status)){
-		spin_unlock_irqrestore(&obj->o_status_lock, flags);
-		BUG_ON(1);
-	}
-	spin_unlock_irqrestore(&obj->o_status_lock, flags);
 
+	spin_lock_bh(&obj->se_tpg->tpc_obj_list_lock);
 
-	/* Remove the token timer and free necessary data if the token
-	 * is still alive */
-	spin_lock_irqsave(&obj->o_token_status_lock, flags);
-	if (!TOKEN_STS_ALIVE(obj->o_token_status)){
-		spin_unlock_irqrestore(&obj->o_token_status_lock, flags);
+	spin_lock(&obj->o_data_lock);
+	if (!obj->o_token_data){
+		spin_unlock(&obj->o_data_lock);	
+		spin_unlock_bh(&obj->se_tpg->tpc_obj_list_lock);
 		return;
 	}
+	spin_unlock(&obj->o_data_lock);	
 
+	spin_lock(&obj->o_token_status_lock);
+	if (TOKEN_STS_FREE_BY_TOKEN_TIMER(obj->o_token_status)){
+		spin_unlock(&obj->o_token_status_lock);
+		spin_unlock_bh(&obj->se_tpg->tpc_obj_list_lock);
+		return;
+	}
 	obj->o_token_status = O_TOKEN_STS_FREE_BY_PROC;
-	spin_unlock_irqrestore(&obj->o_token_status_lock, flags);
+	spin_unlock(&obj->o_token_status_lock);
 
-	BUG_ON(!obj->o_token_data);
-	
-	del_timer_sync(&obj->o_token_timer);
-	INIT_LIST_HEAD(&tmp_data_list);
+	/* check whether someone still use the token data */
+_KEEP_WAIT_:
+	spin_lock(&obj->o_token_ref_count_lock);
+	if (atomic_read(&obj->o_token_ref_count)){
+		spin_unlock(&obj->o_token_ref_count_lock);
+		spin_unlock_bh(&obj->se_tpg->tpc_obj_list_lock);
 
-	/* To wait if someone still use this token */
-	do {
-		spin_lock_irqsave(&obj->o_token_ref_count_lock, flags);
-		if (!atomic_read(&obj->o_token_ref_count)){
-			spin_unlock_irqrestore(
-				&obj->o_token_ref_count_lock, flags);
-			break;
-		}
-		spin_unlock_irqrestore(&obj->o_token_ref_count_lock, flags);
-	
+
 		set_current_state(TASK_INTERRUPTIBLE);
 		schedule_timeout(msecs_to_jiffies(1*1000));
-	} while (1);
 
-	/* To change the token status if nobody use it and 
-	 * put the data_list to another tmp list */
-	BUG_ON((obj->o_data_type == O_DATA_TYPE_NONE));
+		spin_lock_bh(&obj->se_tpg->tpc_obj_list_lock);
+		goto _KEEP_WAIT_;
+	}
+	spin_unlock(&obj->o_token_ref_count_lock);
+	
+	/**/
 	__tpc_update_obj_token_status_lock(obj, O_TOKEN_STS_DELETED);
 
 	/* to free necessary token data and data node list */
-	spin_lock_irqsave(&obj->o_data_list_lock, flags);
-	spin_lock(&obj->o_token_data_lock);
-	
+	spin_lock(&obj->o_data_lock);
 	token = obj->o_token_data;
 	obj->o_token_data = NULL;
 	list_splice_tail_init(&obj->o_data_list, &tmp_data_list);
-	
-	spin_unlock(&obj->o_token_data_lock);
-	spin_unlock_irqrestore(&obj->o_data_list_lock, flags);
+	spin_unlock(&obj->o_data_lock);
+
+	spin_unlock_bh(&obj->se_tpg->tpc_obj_list_lock);
+		
+
+	/* start to free all token source */
+	del_timer_sync(&obj->o_token_timer);
 
 	if (!list_empty(&tmp_data_list))
 		__tpc_free_obj_node_data(&tmp_data_list);
-	
+
 	pr_debug("%s: free token resource:0x%p\n", __func__, token);
 	if (token)
 		kfree(token);
@@ -539,64 +530,65 @@ void tpc_release_obj_for_se_tpg(
     IN LIO_SE_PORTAL_GROUP *se_tpg
     )
 {
+
 	TPC_OBJ *obj = NULL, *tmp_obj = NULL;
 	unsigned long flags = 0;
 
-	/* FIXED ME !!! */
-	spin_lock_irqsave(&se_tpg->tpc_obj_list_lock, flags);
 
+
+	
+	/* FIXED ME !!! */
+	spin_lock_bh(&se_tpg->tpc_obj_list_lock);
 	if (list_empty(&se_tpg->tpc_obj_list)){
-		spin_unlock_irqrestore(&se_tpg->tpc_obj_list_lock, flags);
 		pr_debug("warning: %s - not found any obj, obj_count:0x%x\n", 
 			__func__, atomic_read(&se_tpg->tpc_obj_count));
+
+		spin_unlock_bh(&se_tpg->tpc_obj_list_lock);
 		return;
 	}
 
-	list_for_each_entry_safe(obj, tmp_obj, &se_tpg->tpc_obj_list, o_node){
+	list_for_each_entry(obj, &se_tpg->tpc_obj_list, o_node){
 
- 		/* When the obj in the list, the obj status shall be alive */
-		BUG_ON(!(OBJ_STS_ALIVE(__tpc_get_obj_status_lock(obj))));
-
-		/* To remove obj node first to avoid someuse will uses it by 
-		 * tpc_obj_list and force to change the obj status to notify 
-		 * we will free obj NOW ... 
-		 */
+		/* change the status first to avoid the fimer will
+		 * take everyting */
 		__tpc_update_obj_status_lock(obj, O_STS_FREE_BY_PROC);
+
+		/* If the obj is still used, to wait. This shall be safe
+		 * cause of this code only be called during to delete target
+		 */
+_KEEP_WAIT_:
+		spin_lock(&obj->o_ref_count_lock);
+		if (atomic_read(&obj->o_ref_count)){
+			spin_unlock(&obj->o_ref_count_lock);
+			spin_unlock_bh(&se_tpg->tpc_obj_list_lock);
+
+			set_current_state(TASK_INTERRUPTIBLE);
+			schedule_timeout(msecs_to_jiffies(1*1000));
+
+			spin_lock_bh(&se_tpg->tpc_obj_list_lock);
+			goto _KEEP_WAIT_;
+		}
+		spin_unlock(&obj->o_ref_count_lock);
+
+		__tpc_update_obj_status_lock(obj, O_STS_DELETED);
 		__tpc_obj_node_del(obj);
+		spin_unlock_bh(&se_tpg->tpc_obj_list_lock);
+
 
 		pr_debug("%s: release obj:0x%p(id:0x%x, op_sac:0x%x)\n", 
 			__func__, obj, obj->list_id, obj->op_sac);
 
-		spin_unlock_irqrestore(&se_tpg->tpc_obj_list_lock, flags);
 		del_timer_sync(&obj->o_timer);
 
 		/* To release the token for this obj */
 		__release_token_from_free_obj(obj);
 
-		/* well .. somebody can not find obj from tpc_obj_list anymore 
-		 * BUT the obj may be referred at previous time already. So, to
-		 * wait nobody use this obj */
-
-		do {
-			spin_lock_irqsave(&obj->o_ref_count_lock, flags);
-			if (!atomic_read(&obj->o_ref_count)){
-				spin_unlock_irqrestore(&obj->o_ref_count_lock, flags);
-				break;
-			}
-			spin_unlock_irqrestore(&obj->o_ref_count_lock, flags);
-
-			set_current_state(TASK_INTERRUPTIBLE);
-			schedule_timeout(msecs_to_jiffies(1*1000));
-		} while (1);
-
-		__tpc_update_obj_status_lock(obj, O_STS_DELETED);
-
 		pr_debug("%s: to free obj:0x%p...\n", __func__, obj);
 		kfree(obj);
 
-		spin_lock_irqsave(&se_tpg->tpc_obj_list_lock, flags);
+		spin_lock_bh(&se_tpg->tpc_obj_list_lock);
 	}
-	spin_unlock_irqrestore(&se_tpg->tpc_obj_list_lock, flags);
+	spin_unlock_bh(&se_tpg->tpc_obj_list_lock);
 	return;
 }
 EXPORT_SYMBOL(tpc_release_obj_for_se_tpg);
@@ -618,86 +610,97 @@ EXPORT_SYMBOL(tpc_release_obj_for_se_tpg);
  * @retval 0 - Success / Others - Fail
  */
 static int __tpc_put_rrti_by_obj(
-    IN TPC_OBJ *obj,
-    IN ROD_TOKEN_INFO_PARAM *param,
-    IN bool attached_rod_token,
-    IN u32 alloc_len
-    )
+	IN TPC_OBJ *obj,
+	IN ROD_TOKEN_INFO_PARAM *param,
+	IN bool attached_rod_token,
+	IN u32 alloc_len
+	)
 {
-    u8 *p = NULL;
+	u8 *p = NULL;
 
-    if (obj == NULL || param == NULL)
-        BUG_ON(TRUE);
+	if (obj == NULL || param == NULL)
+		BUG_ON(TRUE);
 
-    if (alloc_len == 0)
-        return 1;
+	if (alloc_len == 0)
+		return 1;
 
-    /* FIXED ME !! */
-    if ((obj->cp_op_status == OP_COMPLETED_WO_ERR)
-    ||  (obj->cp_op_status == OP_COMPLETED_W_ERR)
-    ||  (obj->cp_op_status == OP_COMPLETED_WO_ERR_WITH_ROD_TOKEN_USAGE)
-    ||  (obj->cp_op_status == OP_COMPLETED_WO_ERR_BUT_WITH_RESIDUAL_DATA)
-    ||  (obj->cp_op_status == OP_TERMINATED)
-    )
-    {
-        param->res_to_sac = (u8)obj->op_sac;    
-        param->cp_op_status = obj->cp_op_status;
-        put_unaligned_be16(obj->op_counter, &param->op_counter[0]);
-        put_unaligned_be32(0xfffffffe, &param->estimated_status_update_delay[0]);
+	/* FIXED ME !! */
+	if ((obj->cp_op_status == OP_COMPLETED_WO_ERR)
+	||  (obj->cp_op_status == OP_COMPLETED_W_ERR)
+	||  (obj->cp_op_status == OP_COMPLETED_WO_ERR_WITH_ROD_TOKEN_USAGE)
+	||  (obj->cp_op_status == OP_COMPLETED_WO_ERR_BUT_WITH_RESIDUAL_DATA)
+	||  (obj->cp_op_status == OP_TERMINATED)
+	)
+	{
+		param->res_to_sac = (u8)obj->op_sac;    
+		param->cp_op_status = obj->cp_op_status;
+		put_unaligned_be16(obj->op_counter, &param->op_counter[0]);
+		put_unaligned_be32(0xfffffffe, 
+			&param->estimated_status_update_delay[0]);
 
-        param->extcp_completion_status = obj->completion_status;
+		param->extcp_completion_status = obj->completion_status;
 
-        if (obj->cp_op_status  == OP_TERMINATED)
-            param->sense_data_len_field = param->sense_data_len = 0;
-        else
-            param->sense_data_len_field = param->sense_data_len = ROD_SENSE_DATA_LEN;
+		if (obj->cp_op_status  == OP_TERMINATED)
+			param->sense_data_len_field = param->sense_data_len = 0;
+		else
+			param->sense_data_len_field = param->sense_data_len = ROD_SENSE_DATA_LEN;
 
-        param->transfer_count_units = UNIT_NA;
+		param->transfer_count_units = UNIT_NA;
 
-        put_unaligned_be16(obj->segs_processed, &param->seg_processed[0]);
-        put_unaligned_be64(obj->transfer_count, &param->transfer_count[0]);
+		put_unaligned_be16(obj->segs_processed, &param->seg_processed[0]);
+		put_unaligned_be64(obj->transfer_count, &param->transfer_count[0]);
 
-        /* go to sense data field */
-        p = (u8*)((size_t)param + sizeof(ROD_TOKEN_INFO_PARAM));
-        if ((param->sense_data_len_field != 0) && (param->sense_data_len != 0)){
+		/* go to sense data field */
+		p = (u8*)((size_t)param + sizeof(ROD_TOKEN_INFO_PARAM));
+		if ((param->sense_data_len_field != 0)
+		&& (param->sense_data_len != 0)
+		)
+		{
+  			/* To update the sense data to parameter buffer */
 
-            /* To update the sense data to parameter buffer */
-             __build_big_endian_data(p, &obj->sense_data[0], ROD_SENSE_DATA_LEN);
 
-            /* go to rod token descriptor length field */
-            p = (u8*)((size_t)p + ROD_SENSE_DATA_LEN);
-            put_unaligned_be32(0, &p[0]);
+			memcpy(p, &obj->sense_data[0], ROD_SENSE_DATA_LEN);
 
-            /* SPC4R36, page 431 */
-            if ((obj->cp_op_status == OP_COMPLETED_WO_ERR)
-            ||  (obj->cp_op_status == OP_COMPLETED_WO_ERR_WITH_ROD_TOKEN_USAGE)
-            )
-            {
-                if ((attached_rod_token == 1) && (obj->o_token_data != NULL)){
+			/* go to rod token descriptor length field */
+			p = (u8*)((size_t)p + ROD_SENSE_DATA_LEN);
+			put_unaligned_be32(0, &p[0]);
 
-                    /* To set the rod token descriptor length if cp_op_status
-                     * is w/o any error 
-                     */
-                    put_unaligned_be32((ROD_TOKEN_MIN_SIZE + 2), &p[0]);
+			/* SPC4R36, page 431 */
+			if ((obj->cp_op_status == OP_COMPLETED_WO_ERR)
+			||  (obj->cp_op_status == OP_COMPLETED_WO_ERR_WITH_ROD_TOKEN_USAGE)
+			)
+			{
+				if ((attached_rod_token == 1) 
+				&& (obj->o_token_data != NULL)
+				)
+				{
+					/* To set the rod token descriptor 
+					 * length if cp_op_status is w/o 
+					 * any error */
+					put_unaligned_be32(
+						(ROD_TOKEN_MIN_SIZE + 2), &p[0]);
 
-                    /* SPC4R36, page 431 
-                     *
-                     * If the response to service action field is not 0x0 or 0x1,
-                     * the ID FOR CREATING ROD CSCD DESCRIPTOR field shall be reserved.
-                     */
-                    memcpy(&p[4 + 2], obj->o_token_data, ROD_TOKEN_MIN_SIZE);
-                }
-            }
-        }
+					/* SPC4R36, page 431 
+					 * If the response to service action 
+					 * field is not 0x0 or 0x1, the 
+					 * ID FOR CREATING ROD CSCD DESCRIPTOR 
+					 * field shall be reserved.
+					 */
+					memcpy(&p[4 + 2], obj->o_token_data, 
+						ROD_TOKEN_MIN_SIZE);
+				}
+			}
+		}
 
-        put_unaligned_be32((alloc_len - 4), &param->avaiable_data_len[0]);
-        return 0;
-    }
+		put_unaligned_be32((alloc_len - 4), 
+			&param->avaiable_data_len[0]);
+		return 0;
+	}
 
-    /* The code shall NEVER come here !! */
-    pr_err("error !! wrong way in %s\n", __func__);
-    BUG_ON(TRUE);
-    return 1;
+	/* The code shall NEVER come here !! */
+	pr_err("error !! wrong way in %s\n", __func__);
+	BUG_ON(TRUE);
+	return 1;
 }
 
 /*
@@ -1083,6 +1086,10 @@ static int __do_b_f_wzrt(
 	ERR_REASON_INDEX err = ERR_INVALID_PARAMETER_LIST;
 	GEN_RW_TASK w_task;
 
+	u32 compare_done_blks;
+
+
+
 	/* Beware this !!!
 	 * This call doesn't the same as __do_write_by_token() function. For
 	 * write zero ROD token, we don't need any src obj and src token data.
@@ -1195,14 +1202,28 @@ _DO_AGAIN_:
 			w_task.nr_blks = expected_blks = 
 				(expected_bytes >> d_bs_order);
 
+			/* For thin dev, we have chance to do fast-zero
+			 * otherwise we always will NOT do it
+			 */
+			if (is_thin_dev){
+				w_task.s_nr_blks = (tmp_w_bytes >> d_bs_order);
+				compare_done_blks = (tmp_w_bytes >> d_bs_order);
+			} else {
+				w_task.s_nr_blks = 0;
+				compare_done_blks = expected_blks;
+			}
+
+
 			pr_debug("[wzrt-bf] start rw for device, "
-				"expected blks:0x%x, dev type:0x%x\n", 
-				expected_blks, is_thin_dev);
+				"expected blks:0x%x, s_nr_blks:0x%x, "
+				"dev type:0x%x\n", expected_blks, 
+				w_task.s_nr_blks, is_thin_dev);
 
 			if (!is_thin_dev)
 				w_done = __tpc_do_rw(&w_task);
 			else 
 				w_done = __tpc_do_zero_rod_token_w(&w_task);
+
 
 			if((w_done <= 0) || w_task.is_timeout || w_task.ret_code != 0){
 				if (w_task.ret_code == -ENOSPC)
@@ -1210,13 +1231,13 @@ _DO_AGAIN_:
 				else
 					err = ERR_3RD_PARTY_DEVICE_FAILURE;
 				exit_loop = 1;
-			} else if (w_done != expected_blks)
+			} 
+			else if (w_done != compare_done_blks)
 				pr_err("[wzrt-bf] w_done != expected write blks\n");
 
 			__generic_free_sg_list(w_task.sg_list, w_task.sg_nents);
 
 			/* 20140630, adamhsu, redmine 8826 (end) */
-
 
 			__tpc_update_t_cmd_transfer_count(t_data, (sector_t)w_done);
 
@@ -1228,11 +1249,10 @@ _DO_AGAIN_:
 			 * expectation of write byte counts at this round then
 			 * to break the loop 
 			 */
-			if (w_done != expected_blks)
+			if (w_done != compare_done_blks)
 				goto _OUT_1_;
 
-			/**/
-			tmp_w_bytes -= expected_bytes;
+			tmp_w_bytes -= (compare_done_blks << d_bs_order);
 			dest_lba += (sector_t)w_done;
 
 			pr_debug("[wzrt-bf] w_done:0x%llx, "
@@ -1259,14 +1279,22 @@ _OUT_1_:
 		n_obj->cp_op_status = OP_COMPLETED_WO_ERR;
 	}
 	else{
-		n_obj->cp_op_status = OP_COMPLETED_WO_ERR_WITH_ROD_TOKEN_USAGE;
 		if (param->immed)
 			n_obj->completion_status = SAM_STAT_CHECK_CONDITION;
 
-		if (t_data->t_transfer_count)
-			err = ERR_COPY_ABORT_DATA_UNDERRUN_COPY_TARGET;
-		else
-			err = ERR_ILLEGAL_REQ_DATA_UNDERRUN_COPY_TARGET;
+		if (err == ERR_NO_SPACE_WRITE_PROTECT) {
+			/* treat it as copy-error if hit no sapce event */
+			n_obj->cp_op_status = OP_COMPLETED_W_ERR;
+			err = ERR_NO_SPACE_WRITE_PROTECT;
+			pr_warn("[write by zero token] space was full\n");
+		} else {	
+			n_obj->cp_op_status = OP_COMPLETED_WO_ERR_WITH_ROD_TOKEN_USAGE;
+
+			if (t_data->t_transfer_count)
+				err = ERR_COPY_ABORT_DATA_UNDERRUN_COPY_TARGET;
+			else
+				err = ERR_ILLEGAL_REQ_DATA_UNDERRUN_COPY_TARGET;
+		}
 	}
 
 	__do_get_subsystem_dev_type(se_cmd->se_dev, &n_obj->backend_type);
@@ -1289,10 +1317,15 @@ _OUT_1_:
 		ret = 1;
 	}
 
+	/* not need to protect anything for new obj */
 	__tpc_update_obj_status_lock(n_obj, O_STS_ALIVE);
 	__tpc_update_obj_token_status_lock(n_obj, O_TOKEN_STS_NOT_ALLOCATED_AND_NOT_ALIVE);
 	__tpc_setup_obj_timer(n_obj);
-	__tpc_obj_node_lock_add(n_obj);
+
+	spin_lock_bh(&n_obj->se_tpg->tpc_obj_list_lock);
+	__tpc_obj_node_add(n_obj);
+	spin_unlock_bh(&n_obj->se_tpg->tpc_obj_list_lock);
+
 
 	__tpc_update_t_cmd_status(t_data, cur_status);
 
@@ -1329,81 +1362,70 @@ _OUT_2_:
  *         0  : Found the duplicated obj
  */
 static int __tpc_check_duplicated_obj_data(
-    IN LIO_SE_CMD *se_cmd
-    )
+	IN LIO_SE_CMD *se_cmd
+	)
 {
-    TPC_OBJ *tpc_obj = NULL;
-    LIO_SE_DEVICE *se_dev = NULL;
-    LIO_SE_PORTAL_GROUP *se_tpg = NULL;
-    unsigned long flags = 0;
-    int ret = -1;
+	TPC_OBJ *tpc_obj = NULL;
+	LIO_SE_DEVICE *se_dev = NULL;
+	LIO_SE_PORTAL_GROUP *se_tpg = NULL;
+	unsigned long flags = 0;
+	int ret = -1;
 
-    /**/
-    if (!se_cmd->is_tpc || !se_cmd->se_lun)
-        return ret;
+	/**/
+	if (!se_cmd->is_tpc || !se_cmd->se_lun)
+		return ret;
 
-    /* FIXED ME !! */
+ 	if (!se_cmd->se_lun->lun_se_dev)
+		return ret;
 
-    se_dev = se_cmd->se_lun->lun_se_dev;
-    spin_lock_irqsave(&se_dev->se_port_lock, flags);
-    spin_lock(&se_cmd->se_lun->lun_sep_lock);
+	if (!se_cmd->se_lun->lun_sep)
+		return ret;
+	
+	if (!se_cmd->se_lun->lun_sep->sep_tpg)
+		return ret;
 
-    if (!se_cmd->se_lun->lun_sep){
-        spin_unlock(&se_cmd->se_lun->lun_sep_lock);
-        spin_unlock_irqrestore(&se_dev->se_port_lock, flags);
-        return ret;
-    }
+	se_tpg = se_cmd->se_lun->lun_sep->sep_tpg;
 
-    if (!se_cmd->se_lun->lun_sep->sep_tpg){
-        spin_unlock(&se_cmd->se_lun->lun_sep_lock);
-        spin_unlock_irqrestore(&se_dev->se_port_lock, flags);
-        return ret;
-    }
-    se_tpg = se_cmd->se_lun->lun_sep->sep_tpg;
+	/**/
+	ret = 1;
+	tpc_obj = __tpc_get_obj_by_id_opsac(se_tpg, se_cmd);
 
-    /**/
-    ret = 1;
-    tpc_obj = __tpc_get_obj_by_id_opsac(se_tpg, se_cmd);
-    if (tpc_obj){
-        /* To discard related data. SPC4R36 , page 428 
-         *
-         * Since we found the duplicated obj by same list id and op sac, so to 
-         * delete its node from list and let's its obj timer call to free its
-         * resource.
-         */
-        pr_err("warning: found matched tpc_obj (id:0x%x, op_sac:0x%x) !! to discard the "
-                    "tpc_obj first ...\n", tpc_obj->list_id, tpc_obj->op_sac);
+	if (tpc_obj){
+		/* To discard related data. SPC4R36 , page 428 
+		 *
+		 * Since we found the duplicated obj by same list id and op sac,
+		 * so to delete its node from list and let's its obj timer call
+		 * to free its resource.
+		 */
+		pr_warn("warning: found matched tpc_obj (id:0x%x, op_sac:0x%x), "
+			" to discard the tpc_obj first ...\n", 
+			tpc_obj->list_id, tpc_obj->op_sac);
+	
+		/* To cancel the token here since someone may use it now */
+		spin_lock_bh(&tpc_obj->se_tpg->tpc_obj_list_lock);
 
-        /* To cancel the token here since someone may use it now */
-        spin_lock(&tpc_obj->o_status_lock);
-        spin_lock(&tpc_obj->o_token_status_lock);
+		__tpc_token_ref_count_lock_inc(tpc_obj);
 
-        if (OBJ_STS_ALIVE(tpc_obj->o_status)
-        &&  TOKEN_STS_ALIVE(tpc_obj->o_token_status)
-        )
-        {
-            tpc_obj->o_token_status = O_TOKEN_STS_CANCELLED;
-        }
-        spin_unlock(&tpc_obj->o_token_status_lock);
-        spin_unlock(&tpc_obj->o_status_lock);
+		spin_lock(&tpc_obj->o_token_status_lock);
+		if (TOKEN_STS_ALIVE(tpc_obj->o_token_status))
+			tpc_obj->o_token_status = O_TOKEN_STS_CANCELLED;
+		spin_unlock(&tpc_obj->o_token_status_lock);
 
-        /* To remove the obj */
-        spin_lock(&se_tpg->tpc_obj_list_lock);
-        __tpc_obj_node_del(tpc_obj);
-        spin_unlock(&se_tpg->tpc_obj_list_lock);
+		__tpc_token_ref_count_lock_dec(tpc_obj);
 
-        /* To match the __tpc_obj_ref_count_lock_inc() in 
-         * __tpc_get_obj_by_id_opsac() */
-        __tpc_obj_ref_count_lock_dec(tpc_obj);
+		/* To match the __tpc_obj_ref_count_lock_inc() in 
+		 * __tpc_get_obj_by_id_opsac() 
+		 */
+		__tpc_obj_ref_count_lock_dec(tpc_obj);
+		__tpc_obj_node_del(tpc_obj);
 
-        /* If found duplicated obj data */
-        ret = 0;
-    }
+		spin_unlock_bh(&tpc_obj->se_tpg->tpc_obj_list_lock);
 
-    spin_unlock(&se_cmd->se_lun->lun_sep_lock);
-    spin_unlock_irqrestore(&se_dev->se_port_lock, flags);
-    return ret;
-
+		/* If found duplicated obj data */
+		ret = 0;
+	}
+	
+	return ret;
 }
 
 
@@ -1588,7 +1610,12 @@ static int __do_chk_wt_rod_off_before_wt(
 			get_unaligned_be16(&param->blkdev_range_desc_len[0]));
 
 	d_nr_v = (u64)__tpc_get_total_nr_blks_by_desc(start, desc_counts);
+
+	spin_lock_bh(&s_obj->se_tpg->tpc_obj_list_lock);
 	s_nr_v = (u64)__tpc_get_nr_blks_by_s_obj(s_obj, 0);
+	spin_unlock_bh(&s_obj->se_tpg->tpc_obj_list_lock);
+
+
 	bs_order = ilog2(se_cmd->se_dev->se_sub_dev->se_dev_attrib.block_size);
 
 	/* SBC3R31, page 208 
@@ -1659,13 +1686,8 @@ _OUT_:
 	if (param)
 		transport_kunmap_data_sg(se_cmd);
 
-	if (ret){
+	if (ret)
 		__set_err_reason(err, &se_cmd->scsi_sense_reason);
-
-		/* 2014/08/17, adamhsu, redmine 9007 */
-		__tpc_token_ref_count_lock_dec(token_src_obj);
-		__tpc_obj_ref_count_lock_dec(token_src_obj);
-	}
 
 	return ret;
 
@@ -1850,9 +1872,6 @@ static int __do_rrti_step1(
     IN OUT ERR_REASON_INDEX *err
     )
 {
-#if 0 // debug
-    return 1;
-#else
     TPC_TRACK_DATA *td = NULL;
     LIO_SE_CMD *o_cmd = NULL, *tmp_cmd = NULL;
     LIO_SE_PORTAL_GROUP *se_tpg = NULL;
@@ -1998,7 +2017,7 @@ _OUT_1_:
 _OUT_:
     return ret;
 
-#endif
+
 }
 
 /*
@@ -2017,9 +2036,7 @@ static int __do_rrti_step2(
 	IN OUT ERR_REASON_INDEX *err
 	)
 {
-#if 0 // debug
-    return 1;
-#else
+
 
 	TPC_OBJ *obj = NULL, *tmp_obj = NULL;
 	LIO_SE_PORTAL_GROUP *se_tpg = NULL;
@@ -2050,24 +2067,21 @@ static int __do_rrti_step2(
 	alloc_len_in_cdb = get_unaligned_be32(&cdb[10]);
 
 	/* FIXED ME !! */
-	spin_lock_irqsave(&se_dev->se_port_lock, flags);
-	spin_lock(&se_cmd->se_lun->lun_sep_lock);
-
 	if (!se_cmd->se_lun->lun_sep)
-		goto _OUT_1_;
+		goto _OUT_;
 
 	if (!se_cmd->se_lun->lun_sep->sep_tpg)
-		goto _OUT_1_;
+		goto _OUT_;
 
 	/**/
 	se_tpg = se_cmd->se_lun->lun_sep->sep_tpg;
-	spin_lock(&se_tpg->tpc_obj_list_lock);
 
-	list_for_each_entry_safe(obj, tmp_obj, &se_tpg->tpc_obj_list, o_node){
+	spin_lock_bh(&se_tpg->tpc_obj_list_lock);
+	list_for_each_entry(obj, &se_tpg->tpc_obj_list, o_node){
 
 		/* To indicate we are using obj now */
 		__tpc_obj_ref_count_lock_inc(obj);
-		spin_unlock(&se_tpg->tpc_obj_list_lock);
+		spin_unlock_bh(&se_tpg->tpc_obj_list_lock);
 
 		if (__tpc_is_lun_receive_stop(se_cmd)
 		|| (__is_se_tpg_actived(se_tpg))
@@ -2075,101 +2089,108 @@ static int __do_rrti_step2(
 			if (se_cmd->cur_se_task->task_flags & TF_REQUEST_STOP)
 				transport_complete_task(se_cmd->cur_se_task, 0);
 
+			spin_lock_bh(&se_tpg->tpc_obj_list_lock);	   
 			__tpc_obj_ref_count_lock_dec(obj);
-			goto _OUT_1_;
+			spin_unlock_bh(&se_tpg->tpc_obj_list_lock);
+			goto _OUT_;
 		}
 
 		/* NOTE: 
-		 * (1) The o_data_type of obj for WRITE USING TOKEN is DATA_TYPE_NONE 
+		 * - the o_data_type of obj for WRITE USING TOKEN is DATA_TYPE_NONE 
+		 * - the o_data_type of obj for POPULATE TOKEN is O_DATA_TYPE_ROD
 		 */
-		if ((obj->list_id == cur_list_id) 
+		if (!((obj->list_id == cur_list_id) 
 		&&  (!(IS_HOLD_DATA_TYPE(obj->o_data_type)))
-		&&  (!(__tpc_is_same_i_t_nexus_func1(obj, se_cmd)))
+		&&  (!(__tpc_is_same_i_t_nexus_func1(obj, se_cmd))))
 		)
-		{
-			if (alloc_len_in_cdb == 0){
+			goto _EXIT_OBJ_CHECK_;
 
-				/* FIXED ME !! 
-				 * SPC4R36, page 428
-				 *
-				 * b)
-				 * if a RECEIVE ROD TOKEN INFORMATION command
-				 * has been received on the same I_T nexus with
-				 * a matching list id with the ALLOCATION LENGTH
-				 * field set to zero
-				 */
-				pr_err("warning: discard token "
-					"(id:0x%x, op_sac:0x%x) "
-					"when alloc_len_in_cdb is zero ... \n", 
-					obj->list_id, obj->op_sac);
-
-				spin_lock(&se_tpg->tpc_obj_list_lock);
-				__tpc_obj_node_del(obj);
-				spin_unlock(&se_tpg->tpc_obj_list_lock);
-
-	                	__tpc_obj_ref_count_lock_dec(obj);
-				*err = ERR_INVALID_TOKEN_OP_AND_TOKEN_DELETED;
-				goto _OUT_1_;
-			}
-
-			/* Since found the obj already, here to check the status
-			 * of obj and token before to prepare the parameter
-			 * data for RECEIVE ROD TOKEN INFORMATION command
+		if (alloc_len_in_cdb == 0){
+			/* FIXED ME !! 
+			 * SPC4R36, page 428
+			 *
+			 * b)
+			 * if a RECEIVE ROD TOKEN INFORMATION command
+			 * has been received on the same I_T nexus with
+			 * a matching list id with the ALLOCATION LENGTH
+			 * field set to zero
 			 */
-			ret = __tpc_is_token_invalid(obj, err);
-			if (ret != -1){
-				/* Now, the obj is alive but the token may be
-				 * expired or deleted or cancelled. So we need
-				 * to check token status again.
-				 * If the token is still alive, to increase the
-				 * ref count to notify we will use it.
-				 */
-				if (IS_ROD_TYPE(obj->o_data_type) && (ret == 0))
-				{
-					spin_lock(&obj->o_token_data_lock); 
-					__tpc_token_ref_count_lock_inc(obj);
-					spin_unlock(&obj->o_token_data_lock);
-					attach = 1;
-				} else
-					attach = 0;
+			pr_warn("warning: discard token "
+				"(id:0x%x, op_sac:0x%x) "
+				"when alloc_len_in_cdb is zero ... \n", 
+				obj->list_id, obj->op_sac);
 
-				pr_debug("%s: obj(id:0x%x, op_sac:0x%x, "
-					"type:0x%x) o_status:0x%x, "
-					"token_status:0x%x, "
-					"attach_token:0x%x in step 2\n", 
-					__func__, obj->list_id, obj->op_sac, 
-					obj->o_data_type, obj->o_status, 
-					obj->o_token_status, attach);
-
-				ret = __tpc_put_rrti_by_obj(obj, p, attach, 
-						alloc_len_in_cdb);
-	
-				/* FIXED ME !! If hit error after to build rrti, then
-				 * to report error */
-				if (ret != 0){
-					*err = ERR_INVALID_PARAMETER_LIST;
-					ret = 1;
-				}
-
-				if (attach == 1)
-					__tpc_token_ref_count_lock_dec(obj);
-
-				__tpc_obj_ref_count_lock_dec(obj);
-				goto _OUT_1_;
-			}
-
-			/* Case for obj is NOT alive or token is NOT alive */
-			pr_err("warning: %s - obj(id:0x%x)(or token) "
-				"is NOT alive\n", __func__, obj->list_id);
-
+			spin_lock_bh(&se_tpg->tpc_obj_list_lock);
 			__tpc_obj_ref_count_lock_dec(obj);
+			__tpc_obj_node_del(obj);
+			spin_unlock_bh(&se_tpg->tpc_obj_list_lock);
+			
 			*err = ERR_INVALID_TOKEN_OP_AND_TOKEN_DELETED;
-			goto _OUT_1_;
+			goto _OUT_;
 		}
 
-		/* go to next one */
+		/* Since found the obj already, here to check the status
+		 * of obj and token before to prepare the parameter
+		 * data for RECEIVE ROD TOKEN INFORMATION command
+		 */
+		spin_lock_bh(&obj->se_tpg->tpc_obj_list_lock);
+
+		__tpc_token_ref_count_lock_inc(obj);
+		ret = __tpc_is_token_invalid(obj, err);
+
+		spin_unlock_bh(&obj->se_tpg->tpc_obj_list_lock);
+
+		/* at this time, the ref count for obj and token had
+		 * been increased already
+		 */
+		if (ret != -1){
+			/* Now, the obj is alive but the token may be
+			 * expired or deleted or cancelled. So we need
+			 * to check token status again.
+			 * If the token is still alive, to increase the
+			 * ref count to notify we will use it.
+			 */
+			if (IS_ROD_TYPE(obj->o_data_type) && (ret == 0))
+				attach = 1;
+			else
+				attach = 0;
+
+			pr_debug("%s: obj(id:0x%x, op_sac:0x%x, "
+				"type:0x%x) o_status:0x%x, "
+				"token_status:0x%x, "
+				"attach_token:0x%x in step 2\n", 
+				__func__, obj->list_id, obj->op_sac, 
+				obj->o_data_type, obj->o_status, 
+				obj->o_token_status, attach);
+		
+			ret = __tpc_put_rrti_by_obj(obj, p, attach, 
+					alloc_len_in_cdb);
+
+			/* FIXED ME !! If hit error after to build rrti, then
+			 * to report error */
+			if (ret != 0){
+				*err = ERR_INVALID_PARAMETER_LIST;
+				ret = 1;
+			}
+			goto _OUT_2_;
+		}
+
+		/* Case for obj is NOT alive or token is NOT alive */
+		pr_err("warning: %s - obj(id:0x%x)(or token) "
+			"is NOT alive\n", __func__, obj->list_id);
+
+		*err = ERR_INVALID_TOKEN_OP_AND_TOKEN_DELETED;
+
+_OUT_2_:
+		spin_lock_bh(&obj->se_tpg->tpc_obj_list_lock);
+		__tpc_token_ref_count_lock_dec(obj);
 		__tpc_obj_ref_count_lock_dec(obj);
-		spin_lock(&se_tpg->tpc_obj_list_lock);
+		spin_unlock_bh(&obj->se_tpg->tpc_obj_list_lock);
+		goto _OUT_;
+
+_EXIT_OBJ_CHECK_:
+		spin_lock_bh(&obj->se_tpg->tpc_obj_list_lock);
+               	__tpc_obj_ref_count_lock_dec(obj);
 	}
 
 	/* if not found anything ... */
@@ -2177,17 +2198,11 @@ static int __do_rrti_step2(
 		__func__, cur_list_id);
 	*err = ERR_INVALID_CDB_FIELD;
 
-_OUT_2_:
-	spin_unlock(&se_tpg->tpc_obj_list_lock);
-
 _OUT_1_:
-	spin_unlock(&se_cmd->se_lun->lun_sep_lock);
-	spin_unlock_irqrestore(&se_dev->se_port_lock, flags);
+	spin_unlock_bh(&obj->se_tpg->tpc_obj_list_lock);
 
 _OUT_:
 	return ret;
-
-#endif
 }
 
 /*
@@ -2202,9 +2217,6 @@ int __do_receive_rod_token(
     IN LIO_SE_CMD *se_cmd
     )
 {
-#if 0 // debug
-    return 1;
-#else
     u8 *cdb = NULL;
     ROD_TOKEN_INFO_PARAM *param = NULL;
     int ret = 1;
@@ -2269,7 +2281,7 @@ _EXIT_:
         __set_err_reason(err, &se_cmd->scsi_sense_reason);
 
     return ret;
-#endif
+
 }
 
 /*
@@ -2350,7 +2362,10 @@ int __do_write_by_token(
 		n_obj->dev_bs_order);
 
 	/* To check src obj's health status */
+	spin_lock_bh(&s_obj->se_tpg->tpc_obj_list_lock);
 	ret = __tpc_is_token_invalid(s_obj, &err);
+	spin_unlock_bh(&s_obj->se_tpg->tpc_obj_list_lock);
+
 	if (ret != 0){
 		ret = 1;
 		goto _OUT_FREE_OBJ_;
@@ -2405,7 +2420,11 @@ _DO_AGAIN_:
 			OPTIMAL_TRANSFER_SIZE_IN_BYTES);
 
 		/* get some information for src obj first */
+		spin_lock_bh(&s_obj->se_tpg->tpc_obj_list_lock);
 		s_nr_bytes  = __tpc_get_nr_bytes_by_s_obj(s_obj, 1);
+		spin_unlock_bh(&s_obj->se_tpg->tpc_obj_list_lock);
+
+
 		if (t_off_to_rod >= s_nr_bytes)
 			goto _OUT_;    
 
@@ -2433,7 +2452,6 @@ _DO_AGAIN_:
 			goto _OUT_;
 		}
 
-
 		/* update byte offset to the src ROD */
 		t_off_to_rod += real_w_bytes;
 		dest_lba += (sector_t)(real_w_bytes >> n_obj->dev_bs_order);
@@ -2450,7 +2468,11 @@ _DO_AGAIN_:
 /**/
 _OUT_:
 	__generic_free_sg_list(wbt_obj.sg_list, wbt_obj.sg_nents);
+
+	spin_lock_bh(&s_obj->se_tpg->tpc_obj_list_lock);
 	__tpc_update_br_status(s_obj);
+	spin_unlock_bh(&s_obj->se_tpg->tpc_obj_list_lock);
+
 
 	/* please refer the sbc3r31, page 88 */
 	if (d_nr_blks == t_data->t_transfer_count){
@@ -2458,14 +2480,24 @@ _OUT_:
 		n_obj->cp_op_status = OP_COMPLETED_WO_ERR;
 	}
 	else{
-		n_obj->cp_op_status = OP_COMPLETED_WO_ERR_WITH_ROD_TOKEN_USAGE;
 		if (param->immed)
 			n_obj->completion_status = SAM_STAT_CHECK_CONDITION;
 
-		if (t_data->t_transfer_count)
-			err = ERR_COPY_ABORT_DATA_UNDERRUN_COPY_TARGET;
-		else
-			err = ERR_ILLEGAL_REQ_DATA_UNDERRUN_COPY_TARGET;
+		if (wbt_obj.err == ERR_NO_SPACE_WRITE_PROTECT) {
+			/* treat it as copy-error if hit no sapce event */
+			n_obj->cp_op_status = OP_COMPLETED_W_ERR;
+			err = ERR_NO_SPACE_WRITE_PROTECT;
+			pr_warn("[write by token] space was full\n");
+		} else {
+
+			n_obj->cp_op_status = OP_COMPLETED_WO_ERR_WITH_ROD_TOKEN_USAGE;
+
+			if (t_data->t_transfer_count)
+				err = ERR_COPY_ABORT_DATA_UNDERRUN_COPY_TARGET;
+			else
+				err = ERR_ILLEGAL_REQ_DATA_UNDERRUN_COPY_TARGET;
+		}
+
 	}
 
 	__do_get_subsystem_dev_type(se_cmd->se_dev, &n_obj->backend_type);
@@ -2488,17 +2520,27 @@ _OUT_:
 		ret = 1;
 	}
 
+
 	/* To release the ref count */
+
+
 	/* 2014/08/17, adamhsu, redmine 9007 */
+	spin_lock_bh(&s_obj->se_tpg->tpc_obj_list_lock);
 	__tpc_token_ref_count_lock_dec(s_obj);
 	__tpc_obj_ref_count_lock_dec(s_obj);
-
+	spin_unlock_bh(&s_obj->se_tpg->tpc_obj_list_lock);
+	
+	/* don't need to lock to protect anything for new obj */
 	__tpc_update_obj_status_lock(n_obj, O_STS_ALIVE);
 	__tpc_update_obj_token_status_lock(n_obj, 
         	    O_TOKEN_STS_NOT_ALLOCATED_AND_NOT_ALIVE);
 
 	__tpc_setup_obj_timer(n_obj);
-	__tpc_obj_node_lock_add(n_obj);
+
+	spin_lock_bh(&n_obj->se_tpg->tpc_obj_list_lock);
+	__tpc_obj_node_add(n_obj);
+	spin_unlock_bh(&n_obj->se_tpg->tpc_obj_list_lock);
+
 	__tpc_update_t_cmd_status(t_data, cur_status);
 
 	/* 2014/08/17, adamhsu, redmine 9007 */
@@ -2523,9 +2565,13 @@ _OUT_COMPLETE_REF_:
 	/* To release the ref count of token data and obj since we found
 	 * the them already from __tpc_get_obj_by_token_data() */
 
+
+
 	/* 2014/08/17, adamhsu, redmine 9007 */
+	spin_lock_bh(&s_obj->se_tpg->tpc_obj_list_lock);
 	__tpc_token_ref_count_lock_dec(s_obj);
 	__tpc_obj_ref_count_lock_dec(s_obj);
+	spin_unlock_bh(&s_obj->se_tpg->tpc_obj_list_lock);
 	goto _OUT_1_;
 
 }
@@ -2653,6 +2699,8 @@ int __do_populate_token(
 
 	/* (1) To change the status of obj and obj-otken
 	 * (2) To insert the obj node and fire the timer
+	 *
+	 * here don't need to use lock to protect everything for new obj
 	 */
 	__tpc_update_obj_status_lock(n_obj, O_STS_ALIVE);
 	__tpc_update_obj_token_status_lock(n_obj, O_TOKEN_STS_ALIVE);
@@ -2661,7 +2709,11 @@ int __do_populate_token(
 		get_unaligned_be32(&param->inactivity_timeout[0]));
 
 	__tpc_setup_obj_timer(n_obj);
-	__tpc_obj_node_lock_add(n_obj);
+
+	spin_lock_bh(&n_obj->se_tpg->tpc_obj_list_lock);
+	__tpc_obj_node_add(n_obj);
+	spin_unlock_bh(&n_obj->se_tpg->tpc_obj_list_lock);
+
 
 	/* Always report the command was complete */
 	ret = 0;
@@ -2798,7 +2850,10 @@ int tpc_write_by_token(
 
 	/* FIXED ME */
 	if (!token_src_obj){
-		pr_err("warning: not found matched obj by token data\n");
+		pr_err("warning: not found matched obj by token data. "
+			"PassingCmd(id:0x%x, op sac:0x%x)\n", 
+			se_cmd->t_list_id, se_cmd->t_op_sac);
+
 		kfree(new_obj);
 		__set_err_reason(err, &se_cmd->scsi_sense_reason);
 		goto _EXIT_;
@@ -2807,7 +2862,10 @@ int tpc_write_by_token(
 		if (err != MAX_ERR_REASON_INDEX){
 
 			pr_err("warning: found matched obj by token data. "
-				"but token health status is NG\n");
+				"but token health status is NG. "
+				"PassingCmd(id:0x%x, op sac:0x%x), "
+				"token status:0x%x\n", 
+				se_cmd->t_list_id, se_cmd->t_op_sac, err);
 			goto _OBJ_FAIL_;
 		}
 
@@ -2824,9 +2882,13 @@ int tpc_write_by_token(
 	}
 
 	/* Before to do write by token, let's investigate some conditions again */
-	if(__do_chk_wt_rod_off_before_wt(se_cmd, (void *)token_src_obj) != 0)
+	if(__do_chk_wt_rod_off_before_wt(se_cmd, (void *)token_src_obj) != 0){
+		spin_lock_bh(&token_src_obj->se_tpg->tpc_obj_list_lock);
+		__tpc_token_ref_count_lock_dec(token_src_obj);
+		__tpc_obj_ref_count_lock_dec(token_src_obj);
+		spin_unlock_bh(&token_src_obj->se_tpg->tpc_obj_list_lock);
 		goto _EXIT_;
-
+	}
 
 	pr_debug("found matched obj(id:0x%x) by token data\n", 
 		token_src_obj->list_id);
@@ -2854,8 +2916,10 @@ _OBJ_FAIL_:
 	 */
 
 	/* 2014/08/17, adamhsu, redmine 9007 */
+	spin_lock_bh(&token_src_obj->se_tpg->tpc_obj_list_lock);
 	__tpc_token_ref_count_lock_dec(token_src_obj);
 	__tpc_obj_ref_count_lock_dec(token_src_obj);
+	spin_unlock_bh(&token_src_obj->se_tpg->tpc_obj_list_lock);
 	goto _EXIT_;
 
 }
@@ -2872,9 +2936,6 @@ int tpc_populate_token(
   IN LIO_SE_TASK *se_task
   )
 {
-#if 0
-    return 1;
-#else
     LIO_SE_CMD *se_cmd = NULL;
     TPC_OBJ *obj = NULL;
     u8 *cdb = NULL;
@@ -2959,7 +3020,7 @@ _EXIT_:
         transport_complete_task(se_task, 1);
     }
     return ret;
-#endif
+
 }
 
 /*
@@ -2974,9 +3035,6 @@ int tpc_receive_rod_token_info(
   IN LIO_SE_TASK *se_task
   )
 {
-#if 0
-    return 1;
-#else 
     LIO_SE_CMD *se_cmd = NULL;
     int ret = 1;
 
@@ -2997,7 +3055,7 @@ _EXIT_:
     }
 
     return ret;
-#endif
+
 }
 
 

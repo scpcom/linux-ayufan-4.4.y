@@ -262,6 +262,12 @@ struct iscsi_cmd *iscsit_allocate_se_cmd(
 	}
 
 	se_cmd = &cmd->se_cmd;
+
+#if defined(CONFIG_MACH_QNAPTS)
+	/* 2014/10/17, adamhsu */
+	se_cmd->creation_jiffies = jiffies;	
+#endif
+
 	/*
 	 * Initialize struct se_cmd descriptor from target_core_mod infrastructure
 	 */
@@ -307,6 +313,11 @@ struct iscsi_cmd *iscsit_allocate_se_cmd_for_tmr(
 	 * results the kernel crash
 	 */
 	se_cmd = &cmd->se_cmd;
+
+#if defined(CONFIG_MACH_QNAPTS)
+	/* 2014/10/17, adamhsu */
+	se_cmd->creation_jiffies = jiffies;	
+#endif
 
 	if (function == ISCSI_TM_FUNC_TASK_REASSIGN){
 		transport_init_se_cmd(se_cmd, 
@@ -1465,6 +1476,12 @@ send_data:
 
 	tx_sent = tx_data(conn, &iov[0], iov_count, tx_size);
 	if (tx_size != tx_sent) {
+
+#if defined(CONFIG_MACH_QNAPTS)
+		/* 2014/11/20, adamhsu, redmine 10761 */
+		pr_err("%s: fail from tx_data(), tx_sent:%d, tx_size:%d\n", 
+			__func__, tx_sent, tx_size);
+#endif
 		if (tx_sent == -EAGAIN) {
 			pr_err("tx_data() returned -EAGAIN\n");
 			goto send_data;
@@ -1496,6 +1513,12 @@ send_hdr:
 
 	tx_sent = tx_data(conn, &iov, 1, tx_hdr_size);
 	if (tx_hdr_size != tx_sent) {
+
+#if defined(CONFIG_MACH_QNAPTS)
+		/* 2014/11/20, adamhsu, redmine 10761 */
+		pr_err("%s: fail from tx_data(), tx_sent:%d, tx_hdr_size:%d\n", 
+			__func__, tx_sent, tx_hdr_size);
+#endif
 		if (tx_sent == -EAGAIN) {
 			pr_err("tx_data() returned -EAGAIN\n");
 			goto send_hdr;
@@ -1527,6 +1550,13 @@ send_pg:
 		tx_sent = conn->sock->ops->sendpage(conn->sock,
 					sg_page(sg), sg->offset + offset, sub_len, 0);
 		if (tx_sent != sub_len) {
+
+#if defined(CONFIG_MACH_QNAPTS)
+			/* 2014/11/20, adamhsu, redmine 10761 */
+			pr_err("%s: fail from tcp_sendpage(), tx_sent:%d, "
+				"sub_len:%d\n", __func__, tx_sent, sub_len);
+#endif
+
 			if (tx_sent == -EAGAIN) {
 				pr_err("tcp_sendpage() returned"
 						" -EAGAIN\n");
@@ -1549,6 +1579,13 @@ send_padding:
 
 		tx_sent = tx_data(conn, iov_p, 1, cmd->padding);
 		if (cmd->padding != tx_sent) {
+
+#if defined(CONFIG_MACH_QNAPTS)
+			/* 2014/11/20, adamhsu, redmine 10761 */
+			pr_err("%s: fail from tx_data(), tx_sent:%d, "
+				"padding:%d\n", __func__, tx_sent,
+				cmd->padding);
+#endif
 			if (tx_sent == -EAGAIN) {
 				pr_err("tx_data() returned -EAGAIN\n");
 				goto send_padding;
@@ -1563,6 +1600,13 @@ send_datacrc:
 
 		tx_sent = tx_data(conn, iov_d, 1, ISCSI_CRC_LEN);
 		if (ISCSI_CRC_LEN != tx_sent) {
+
+#if defined(CONFIG_MACH_QNAPTS)
+			/* 2014/11/20, adamhsu, redmine 10761 */
+			pr_err("%s: fail from tx_data(), tx_sent:%d, "
+				"ISCSI_CRC_LEN:%d\n", __func__, tx_sent,
+				ISCSI_CRC_LEN);
+#endif
 			if (tx_sent == -EAGAIN) {
 				pr_err("tx_data() returned -EAGAIN\n");
 				goto send_datacrc;
@@ -1607,7 +1651,13 @@ int iscsit_tx_login_rsp(struct iscsi_conn *conn, u8 status_class, u8 status_deta
 
 	err = tx_data(conn, &iov, 1, ISCSI_HDR_LEN);
 	if (err != ISCSI_HDR_LEN) {
-		pr_err("tx_data returned less than expected\n");
+#if defined(CONFIG_MACH_QNAPTS)
+		/* 2014/11/20, adamhsu, redmine 10761 */
+		pr_err("%s: tx_data returned (err:%d) less than expected\n", 
+			__func__, err);
+#endif
+
+
 		return -1;
 	}
 

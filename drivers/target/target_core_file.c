@@ -544,6 +544,31 @@ static void fd_emulate_sync_cache(struct se_task *task)
 		transport_complete_sync_cache(cmd, ret == 0);
 }
 
+#if defined(CONFIG_MACH_QNAPTS)
+/*
+ * WRITE Force Unit Access (FUA) emulation on a per struct se_task
+ * LBA range basis..
+ */
+static int fd_emulate_write_fua(struct se_cmd *cmd, struct se_task *task)
+
+{
+	struct se_device *dev = cmd->se_dev;
+	struct fd_dev *fd_dev = dev->dev_ptr;
+	loff_t start = task->task_lba * dev->se_sub_dev->se_dev_attrib.block_size;
+	loff_t end = start + task->task_size;
+	int ret;
+
+	pr_debug("FILEIO: FUA WRITE LBA: %llu, bytes: %u\n",
+			task->task_lba, task->task_size);
+
+	ret = vfs_fsync_range(fd_dev->fd_file, start, end, 1);
+	if (ret != 0)
+		pr_err("FILEIO: vfs_fsync_range() failed: %d\n", ret);
+
+	return ret;
+}
+
+#else
 /*
  * WRITE Force Unit Access (FUA) emulation on a per struct se_task
  * LBA range basis..
@@ -563,6 +588,7 @@ static void fd_emulate_write_fua(struct se_cmd *cmd, struct se_task *task)
 	if (ret != 0)
 		pr_err("FILEIO: vfs_fsync_range() failed: %d\n", ret);
 }
+#endif
 
 #if defined(CONFIG_MACH_QNAPTS)
 #if defined(SUPPORT_TP)
@@ -829,7 +855,7 @@ _NORMAL_IO_:
 		do {
 			tmp = min_t(u32, t_range, ((u32)alloc_bytes >> \
 					bs_order));
-			pr_debug("%s: tmp:0x%x\n", tmp);
+			pr_debug("%s: tmp:0x%x\n", __func__, tmp);
 		
 			__make_rw_task(&w_task, dev, t_lba, tmp, 
 				msecs_to_jiffies(NORMAL_IO_TIMEOUT*1000), 
@@ -855,6 +881,7 @@ _NORMAL_IO_:
 			t_range -= tmp;
 		} while (t_range);
 
+		/* break the loop since while (t_range) didn't completed */
 		if (t_range)
 			break;
 _GO_NEXT_:
@@ -1336,7 +1363,18 @@ static int fd_do_task(struct se_task *task)
 	struct se_device *dev = cmd->se_dev;
 	int ret = 0;
 
-#if defined(CONFIG_MACH_QNAPTS) && defined(SUPPORT_TP)
+#if defined(CONFIG_MACH_QNAPTS)
+
+	struct fd_dev *fd_dev = dev->dev_ptr;
+	struct file *fd = fd_dev->fd_file;
+	struct inode *inode = fd->f_mapping->host;
+	struct scatterlist *sg = task->task_sg;
+	int idx, err_1, err_2, err_3;
+	loff_t len = 0, start = 0;
+
+
+#if defined(SUPPORT_TP)
+
 	unsigned long long blocks = dev->transport->get_blocks(dev);
 	/* For run-time capacity change warning and only checking
 	 * for thin-lun
@@ -1349,7 +1387,7 @@ static int fd_do_task(struct se_task *task)
 		}
 	}
 #endif
-
+#endif
 	/*
 	 * Call vectorized fileio functions to map struct scatterlist
 	 * physical memory addresses to struct iovec virtual memory.
@@ -1389,6 +1427,69 @@ static int fd_do_task(struct se_task *task)
 #endif
 		ret = fd_do_writev(task);
 
+#if defined(CONFIG_MACH_QNAPTS)
+		/* 2015/01/29, adamhsu, bugzilla 48461 
+		 * check whether was no space already ? 
+		 */
+#if defined(SUPPORT_ISCSI_ZERO_COPY)
+		if (!cmd->digest_zero_copy_skip)
+			goto _EXIT_1_;
+#endif
+
+#if defined(SUPPORT_TP)
+		if (ret == 1 && is_thin_lun(cmd->se_dev)){
+			/* TODO: 
+			 * To sync cache again if write ok and the sync cache
+		  	 * behavior shall work for thin lun only 
+		  	 */
+			start = (task->task_lba *
+			      dev->se_sub_dev->se_dev_attrib.block_size);
+
+			for_each_sg(task->task_sg, sg, task->task_sg_nents, idx)
+				len += sg->length;
+
+			/* check whether was no space already ? */
+			err_1 = check_dm_thin_cond(inode->i_bdev);
+			if (err_1 == 0)
+				goto _EXIT_1_;
+
+			/* time to do sync i/o
+			 * 1. hit the sync i/o threshold area
+			 * 2. or, space is full BUT need to handle lba where was mapped
+			 * or not
+			 */
+			if (err_1 == 1 || err_1 == -ENOSPC){
+				err_2 = __do_sync_cache_range(fd, 
+					start, (start + len));
+
+				if (err_2 != 0){
+					/* TODO:
+					 * thin i/o may go here (lba wasn't mapped to
+					 * any block) or something wrong during normal
+					 * sync-cache
+					 */
+
+					/* call again to make sure it is no space
+					 * really or not
+					 */
+					err_3 = check_dm_thin_cond(inode->i_bdev);
+					if (err_3 == -ENOSPC){
+						pr_warn("%s: space was full "
+							"already\n",__func__);
+						err_2 = err_3;
+					}
+					/* it may something wrong duing sync-cache */
+					ret = err_2;
+				}
+
+			}
+
+			/* fall-through */
+		}
+#endif
+
+_EXIT_1_:
+#endif
 		if (ret > 0 &&
 		    dev->se_sub_dev->se_dev_attrib.emulate_write_cache > 0 &&
 		    dev->se_sub_dev->se_dev_attrib.emulate_fua_write > 0 &&
@@ -1398,10 +1499,37 @@ static int fd_do_task(struct se_task *task)
 			 * and return some sense data to let the initiator
 			 * know the FUA WRITE cache sync failed..?
 			 */
+
+#if defined(CONFIG_MACH_QNAPTS) && defined(SUPPORT_TP)
+			/* 2015/01/29, adamhsu, bugzilla 48461 */
+			ret = fd_emulate_write_fua(cmd, task);
+			if (ret != 0){
+
+				int err_1;
+
+				if (is_thin_lun(cmd->se_dev)){
+					/* check whether was no space already ? */
+					err_1 = check_dm_thin_cond(inode->i_bdev);
+#if 0
+					pr_info("[%s] after call fd_emulate_write_fua, "
+					"ret:%d, err_1:%d\n", __func__, ret, err_1);
+#endif
+					if (err_1 == -ENOSPC){
+						pr_warn("%s: space was full "
+						"already (FUA bit = 1)\n", __func__);
+						ret = err_1;
+					}
+				}
+			} else
+				ret = 1;
+#else
 			fd_emulate_write_fua(cmd, task);
+#endif
+
 		}
 
 	}
+
 
 	if (ret < 0){
 #if defined(CONFIG_MACH_QNAPTS) && defined(SUPPORT_TP)
@@ -1413,7 +1541,8 @@ static int fd_do_task(struct se_task *task)
 		cmd->scsi_sense_reason = TCM_LOGICAL_UNIT_COMMUNICATION_FAILURE;
 		return ret;
 	}
-	
+
+
 	if (ret) {
 		task->task_scsi_status = GOOD;
 		transport_complete_task(task, 1);

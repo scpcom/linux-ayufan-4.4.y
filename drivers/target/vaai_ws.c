@@ -274,7 +274,61 @@ int vaai_file_do_ws(
 		Ret = vaai_do_file_rw(se_dev, (void*)fd_file, DO_WRITE, 
 				tmp_page_buffer, Lba, u32Tmp);
 
+#if defined(SUPPORT_TP)
+		if ((Ret == 0) && is_thin_lun(se_dev)){
+			int err_1, err_2; 
+			struct inode *inode = fd_file->f_mapping->host;
+
+			/* check whether was no space already ? */
+			err_1 = check_dm_thin_cond(inode->i_bdev);
+			if (err_1 == 0)
+				goto _EXIT_1_;
+
+			/* time to do sync i/o
+			 * 1. hit the sync i/o threshold area
+			 * 2. or, space is full BUT need to handle lba where was mapped
+			 * or not
+			 */
+			if (err_1 == 1 || err_1 == -ENOSPC){
+				err_1 = __do_sync_cache_range(fd_file, 
+					(Lba << bs_order), 
+					((Lba << bs_order) + u32Tmp));
+
+				if (err_1 != 0){
+					/* TODO:
+					 * thin i/o may go here (lba wasn't
+					 * mapped to any block) or something 
+					 * wrong during normal sync-cache
+					 */
+
+					/* call again to make sure it is no space
+					 * really or not
+					 */
+					err_2 = check_dm_thin_cond(inode->i_bdev);
+					if (err_2 == -ENOSPC){
+						err_1 = err_2;
+					}
+					/* it may something wrong duing sync-cache */
+					Ret = err_1;
+					goto _EXIT_1_;
+				}
+			}
+
+			/* fall-through */
+		}
+_EXIT_1_:
+#endif
+
 		if (Ret != 0){
+
+#if defined(SUPPORT_TP)
+			if (Ret == -ENOSPC){
+				pr_warn("[WS FIO] space was full\n");
+				__set_err_reason(ERR_NO_SPACE_WRITE_PROTECT, 
+					&pSeCmd->scsi_sense_reason);
+				goto _EXIT_;
+			}
+#endif
 			pr_err("[WS FIO] fail to write data, "
 				"Ret:0x%x\n", Ret);
 			__set_err_reason(ERR_LOGICAL_UNIT_COMMUNICATION_FAILURE, 

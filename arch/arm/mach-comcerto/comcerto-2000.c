@@ -459,41 +459,18 @@ static int comcerto_ahci_init(struct device *dev, void __iomem *mmio)
         serdes_regs_size = sizeof(sata_phy_reg_file_48);
         printk(KERN_INFO "SATA Serdes: 48Mhz ref clk\n");
     }
-//Patch by QNAP: Fix sometimes can't detect HDD
-#ifdef CONFIG_MACH_QNAPTS
-    c2000_block_reset(COMPONENT_AXI_SATA,1);
-    c2000_block_reset(COMPONENT_SATA_PMU,1);
-    c2000_block_reset(COMPONENT_SATA_OOB,1);
-    mdelay(100);
-#endif    
-/////////////////
-    
     //Take SATA AXI domain out of reset
     c2000_block_reset(COMPONENT_AXI_SATA,0);
     //Bring SATA PMU and OOB out of reset
     c2000_block_reset(COMPONENT_SATA_PMU,0);
     c2000_block_reset(COMPONENT_SATA_OOB,0);
-
     if ( (val & BOOT_SERDES1_CNF_SATA0) || (!(val & BOOT_SERDES2_CNF_SATA1)))
     {
         if (val & BOOT_SERDES1_CNF_SATA0)
         {
-//Patch by QNAP: Fix sometimes can't detect HDD
-#ifdef CONFIG_MACH_QNAPTS
-            c2000_block_reset(COMPONENT_SERDES1,1);
-            mdelay(100);
-#endif            
-            ////////////////
             //Bring Serdes1 out of reset
             c2000_block_reset(COMPONENT_SERDES1,0);
-//Patch by QNAP: Fix sometimes can't detect HDD
-#ifdef CONFIG_MACH_QNAPTS
-            //Bring SATA0 out of reset
-            c2000_block_reset(COMPONENT_SERDES_SATA0,1);
-            mdelay(100);
-            c2000_block_reset(COMPONENT_SERDES_SATA0,0);
             
-#endif
             /* Serdes Initialization. */
             if( serdes_phy_init(SERDES_PHY1,  p_sata_phy_reg_file,
                             serdes_regs_size / sizeof(serdes_regs_t),
@@ -502,25 +479,17 @@ static int comcerto_ahci_init(struct device *dev, void __iomem *mmio)
                 printk(KERN_ERR "%s: Failed to initialize serdes1 !!\n", __func__);
                 return -1;
             }
+
+//Patch by QNAP: Fix TS-131 sometimes link fail
+#ifdef CONFIG_MACH_QNAPTS
+	    c2000_block_reset(COMPONENT_SERDES_SATA0,0);
+#endif
         }
         if (!(val & BOOT_SERDES2_CNF_SATA1))
         {
-//Patch by QNAP: Fix sometimes can't detect HDD
-#ifdef CONFIG_MACH_QNAPTS
-            c2000_block_reset(COMPONENT_SERDES2,1);
-            mdelay(100);
-#endif            
-            ////////////////
             //Bring Serdes2 out of reset
             c2000_block_reset(COMPONENT_SERDES2,0);
-//Patch by QNAP: Fix sometimes can't detect HDD
-#ifdef CONFIG_MACH_QNAPTS
-            //Bring SATA0 out of reset
-            c2000_block_reset(COMPONENT_SERDES_SATA1,1);
-            mdelay(100);
-            //Bring SATA1 out of reset
-            c2000_block_reset(COMPONENT_SERDES_SATA1,0);
-#endif
+
             /* Serdes Initialization. */
             if( serdes_phy_init(SERDES_PHY2,  p_sata_phy_reg_file,
                             serdes_regs_size / sizeof(serdes_regs_t),
@@ -529,6 +498,10 @@ static int comcerto_ahci_init(struct device *dev, void __iomem *mmio)
                 printk(KERN_ERR "%s: Failed to initialize serdes2 !!\n", __func__);
                 return -1;
             }
+//Patch by QNAP: Fix TS-131 sometimes link fail
+#ifdef CONFIG_MACH_QNAPTS
+	    c2000_block_reset(COMPONENT_SERDES_SATA1,0);
+#endif
         }
     } 
     else

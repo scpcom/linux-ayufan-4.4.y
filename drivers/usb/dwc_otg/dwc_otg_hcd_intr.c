@@ -1861,6 +1861,11 @@ static void handle_hc_chhltd_intr_dma(dwc_otg_hcd_t * hcd,
 	hcintmsk_data_t hcintmsk;
 	int out_nak_enh = 0;
 
+//Patch by QNAP: Fix bug #57012
+#ifdef CONFIG_MACH_QNAPTS
+	clear_hc_int(hc_regs, chhltd);
+#endif
+//////////////////
 	/* For core with OUT NAK enhancement, the flow for high-
 	 * speed CONTROL/BULK OUT is handled a little differently.
 	 */

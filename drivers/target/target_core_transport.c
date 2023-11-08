@@ -1041,6 +1041,10 @@ void transport_complete_task(struct se_task *task, int success)
 	&& cmd->transport_state & CMD_T_STOP
 	)
 	{
+		/* 2014/10/17, adamhsu, solve race condition symptom for task management function */
+		if (!(cmd->transport_state & CMD_T_GOT_ABORTED))
+			cmd->transport_state |= CMD_T_GOT_ABORTED;
+
 		spin_unlock_irqrestore(&cmd->t_state_lock, flags);
 		pr_info("[%s] cmd(ITT:0x%8x) got CMD_T_STOP req, "
 			"wait to be completed\n", __func__, 
@@ -1056,6 +1060,11 @@ void transport_complete_task(struct se_task *task, int success)
 #if defined(CONFIG_MACH_QNAPTS)
 	/* 2014/08/16, adamhsu, redmine 9055,9076,9278 */
 	else if (cmd->transport_state & (CMD_T_ABORTED | CMD_T_ABORTED_1)){
+
+		/* 2014/10/17, adamhsu, solve race condition symptom for task management function */
+		if (!(cmd->transport_state & CMD_T_GOT_ABORTED))
+			cmd->transport_state |= CMD_T_GOT_ABORTED;
+
 		spin_unlock_irqrestore(&cmd->t_state_lock, flags);
 		pr_info("[%s] cmd(ITT:0x%8x) got the ABORT req, "
 			"to exit now\n", __func__, 
@@ -5491,6 +5500,17 @@ bool transport_wait_for_tasks(struct se_cmd *cmd)
 		return false;
 	}
 
+
+	/* 2014/10/17, adamhsu, solve race condition symptom for task management function */
+	if (cmd->transport_state & CMD_T_GOT_ABORTED){
+		pr_info("wait_for_tasks: got CMD_T_GOT_ABORTED for "
+			"cmd(ITT:0x%08x)\n", 
+			cmd->se_tfo->get_task_tag(cmd));
+
+		spin_unlock_irqrestore(&cmd->t_state_lock, flags);
+		return false;
+	}
+
 	cmd->transport_state |= CMD_T_STOP;
 
 	pr_debug("wait_for_tasks: Stopping %p ITT: 0x%08x"
@@ -6039,20 +6059,34 @@ int transport_check_aborted_status(struct se_cmd *cmd, int send_status)
 	unsigned long flags;
 
 	spin_lock_irqsave(&cmd->t_state_lock, flags);
-	
-	if (cmd->transport_state & CMD_T_ABORTED
-	|| cmd->transport_state & CMD_T_ABORTED_1
-	)
-	{
+
+	if (cmd->transport_state & (CMD_T_ABORTED | CMD_T_ABORTED_1)){
+
+		/* 2014/10/17, adamhsu, solve race condition symptom for task management function */
+		if (!(cmd->transport_state & CMD_T_GOT_ABORTED))
+			cmd->transport_state |= CMD_T_GOT_ABORTED;
+
 		pr_info("[%s] cmd(ITT:0x%8x) got CMD_T_ABORTED\n",
 			__func__, cmd->se_tfo->get_task_tag(cmd));
 		ret = 1;
 	}
-	
+
 	if (__do_check_cmd_aborted_func2(cmd)){
 		pr_info("[%s (tmf)] cmd(ITT:0x%8x) got CMD_T_ABORTED\n",
 			__func__, cmd->se_tfo->get_task_tag(cmd));
 		ret = 1;
+	}
+
+	/* 2014/10/17, adamhsu, solve race condition symptom for task management function */
+	if (cmd->transport_state & CMD_T_STOP){
+		spin_unlock_irqrestore(&cmd->t_state_lock, flags);
+
+		pr_info("[%s] got CMD_T_STOP for cmd(ITT:0x%8x)\n", 
+			__func__, cmd->se_tfo->get_task_tag(cmd));
+
+		complete(&cmd->t_transport_stop_comp);
+
+		spin_lock_irqsave(&cmd->t_state_lock, flags);
 	}
 
 	spin_unlock_irqrestore(&cmd->t_state_lock, flags);
@@ -6662,6 +6696,11 @@ int __do_check_cmd_aborted_func1(
 
 	spin_lock_irqsave(&se_cmd->t_state_lock, flags);
 	if (se_cmd->transport_state & (CMD_T_ABORTED | CMD_T_ABORTED_1)){
+
+		/* 2014/10/17, adamhsu, solve race condition symptom for task management function */
+		if (!(se_cmd->transport_state & CMD_T_GOT_ABORTED))
+			se_cmd->transport_state |= CMD_T_GOT_ABORTED;
+
 		spin_unlock_irqrestore(&se_cmd->t_state_lock, flags);
 		return 1;
 	}
@@ -6679,6 +6718,11 @@ int __do_check_cmd_aborted_func2(
 
 	spin_lock_irqsave(&se_cmd->tmf_data_lock, flags);
 	if (se_cmd->tmf_transport_state & (CMD_T_ABORTED | CMD_T_ABORTED_1)){
+
+		/* 2014/10/17, adamhsu, solve race condition symptom for task management function */
+		if (!(se_cmd->tmf_transport_state & CMD_T_GOT_ABORTED))
+			se_cmd->tmf_transport_state |= CMD_T_GOT_ABORTED;
+
 		spin_unlock_irqrestore(&se_cmd->tmf_data_lock, flags);
 		return 1;
 	}
@@ -6695,6 +6739,11 @@ int __do_check_set_send_status_func1(
 
 	spin_lock_irqsave(&se_cmd->t_state_lock, flags);
 	if (se_cmd->transport_state & (CMD_T_ABORTED_1 | CMD_T_ABORTED)){
+
+		/* 2014/10/17, adamhsu, solve race condition symptom for task management function */
+		if (!(se_cmd->transport_state & CMD_T_GOT_ABORTED))
+			se_cmd->transport_state |= CMD_T_GOT_ABORTED;
+
 		spin_unlock_irqrestore(&se_cmd->t_state_lock, flags);
 		return 1;
 	}
@@ -6713,6 +6762,11 @@ int __do_check_set_send_status_func2(
 
 	spin_lock_irqsave(&se_cmd->tmf_data_lock, flags);
 	if (se_cmd->tmf_transport_state & (CMD_T_ABORTED_1 | CMD_T_ABORTED)){
+
+		/* 2014/10/17, adamhsu, solve race condition symptom for task management function */
+		if (!(se_cmd->tmf_transport_state & CMD_T_GOT_ABORTED))
+			se_cmd->tmf_transport_state |= CMD_T_GOT_ABORTED;
+
 		spin_unlock_irqrestore(&se_cmd->tmf_data_lock, flags);
 		return 1;
 	}
@@ -6859,19 +6913,15 @@ u32 __call_transport_get_sectors_32(
 
 int is_thin_lun(IN LIO_SE_DEVICE *dev)
 {
-	BUG_ON((dev == NULL));
+	struct se_subsystem_dev *se_sub_dev = dev->se_sub_dev;
 
-	/* FIXED ME !!
-	 * 
-	 * Here to use the emulate_tpu value and emulate_tpws to identify
-	 * this device is thin or think.
-	 */
-	if (dev->se_sub_dev->se_dev_attrib.emulate_tpu
-	|| dev->se_sub_dev->se_dev_attrib.emulate_tpws)
+	if (!strnicmp(se_sub_dev->se_dev_provision, "thin", 
+		sizeof(se_sub_dev->se_dev_provision)))
 	{
-//		pr_err("this is thin lun\n");
+//		pr_info("found thin lun\n");
 		return 1;
 	}
+
 	return 0;
 }
 EXPORT_SYMBOL(is_thin_lun);
@@ -7607,6 +7657,10 @@ static int __do_vfs_rw(
 	struct iovec iov;
 	mm_segment_t old_fs;
 
+	int err_1, err_2;
+	loff_t start, end;
+	struct inode *inode;
+
 	if (!task)
 		goto _EXIT_;
 
@@ -7625,8 +7679,8 @@ static int __do_vfs_rw(
 	se_dev = task->se_dev;
 	f_dev = se_dev->dev_ptr;
 
-	/* Here, we do vfs_rw per sg at a time. The reason is we need to compuated
-	 * the transfer bytes for the result of every i/o.
+	/* Here, we do vfs_rw per sg at a time. The reason is we need to 
+	 * compuated the transfer bytes for the result of every i/o.
 	 */
 	for_each_sg(task->sg_list, sg, task->sg_nents, i) {
 
@@ -7647,6 +7701,8 @@ static int __do_vfs_rw(
 
 		/**/
 		pos = (dest_lba << task->dev_bs_order);
+		start = pos;
+		end = start + len;
 		dest_lba += (len >> task->dev_bs_order);
 		expected_bcs -= len;
 
@@ -7672,8 +7728,7 @@ static int __do_vfs_rw(
 		if (ret <= 0){
 			code = ret;
 			break;
-		}
-		else{
+		} else{
 			done += ((u32)ret >> task->dev_bs_order);
 			pr_debug("%s - dir:0x%x, done blks:0x%x\n", 
 				__FUNCTION__, task->dir, done);
@@ -7681,6 +7736,60 @@ static int __do_vfs_rw(
 				code = -EIO;
 				break;
 			}
+
+#if defined(SUPPORT_TP)
+			/* 2015/01/29, adamhsu, bugzilla 48461 */
+
+			/* TODO: 
+			 * To sync cache again if write ok and the sync cache
+		  	 * behavior shall work for thin lun only 
+		  	 */
+			if (task->dir != DMA_TO_DEVICE)
+				continue;
+			if (!is_thin_lun(se_dev))
+				continue;
+
+			inode = f_dev->fd_file->f_mapping->host;
+
+			/* check whether was no space already ? */
+			err_1 = check_dm_thin_cond(inode->i_bdev);
+			if (err_1 == 0)
+				continue;
+
+			/* time to do sync i/o
+			 * 1. hit the sync i/o threshold area
+			 * 2. or, space is full BUT need to handle lba where
+			 * was mapped or not
+			 */
+			if (err_1 == 1 || err_1 == -ENOSPC){
+				err_1 = __do_sync_cache_range(f_dev->fd_file, 
+					start, end);
+
+				if (err_1 != 0){
+					/* TODO:
+					 * thin i/o may go here (lba wasn't mapped to
+					 * any block) or something wrong during normal
+					 * sync-cache
+					 */
+
+					/* call again to make sure it is no space
+					 * really or not
+					 */
+					err_2 = check_dm_thin_cond(inode->i_bdev);
+					if (err_2 == -ENOSPC){
+						pr_warn("%s: space was full "
+							"already\n", __func__);
+						err_1 = err_2;
+					}
+
+					/* it may something wrong duing sync-cache */
+					code = err_1;
+					break;
+				}
+			}
+
+			/* fall-through */
+#endif
 		}
 	}
 
@@ -7691,11 +7800,11 @@ static int __do_vfs_rw(
 			__FUNCTION__);
 	}
 	if (ret <= 0){
-		pr_err("%s - vfs_rw_func(dir:0x%x) returned 0x%x\n", 
+		pr_err("%s - vfs_rw_func(dir:%d) returned %d\n", 
 			__FUNCTION__, task->dir, ret);
 	}
 	else if (ret != len){
-		pr_err("%s - vfs_rw_func(dir:0x%x) - "
+		pr_err("%s - vfs_rw_func(dir:%d) - "
 			"return size:0x%x != expected len:0x%llx\n",
 			__FUNCTION__, task->dir, ret, len);
 	}
@@ -8700,6 +8809,105 @@ int blkdev_issue_special_discard(
 EXPORT_SYMBOL(blkdev_issue_special_discard);
 
 
+
+#if defined(SUPPORT_TP)
+
+
+
+#if defined(SUPPORT_VOLUME_BASED)
+/* 0: normal i/o (not hit sync i/o threshold)
+ * 1: hit sync i/o threshold
+ * -ENOSPC: pool space is full
+ * -EINVAL: wrong parameter to call function
+ */
+#if ((LINUX_VERSION_CODE == KERNEL_VERSION(3,4,6)) \
+|| (LINUX_VERSION_CODE == KERNEL_VERSION(3,10,20)) \
+|| (LINUX_VERSION_CODE == KERNEL_VERSION(3,12,6)) \
+)
+
+extern int dm_thin_volume_is_full(void *data);
+
+int check_dm_thin_cond(
+	struct block_device *bd
+	)
+{
+	struct request_queue *q = NULL; 
+
+	if (!bd)
+		return -EINVAL;
+
+	q = bdev_get_queue(bd);
+	if (q)
+		return dm_thin_volume_is_full(rq_get_thin_hook(q));
+
+	return -EINVAL;	
+}
+EXPORT_SYMBOL(check_dm_thin_cond);
+
+#else
+/* -EINVAL: always return -EINVAL for non-supported kernel */
+int check_dm_thin_cond(
+	struct block_device *bd
+	)
+{
+//	pr_warn("%s: not supported\n", __func__);
+	return -EINVAL;
+}
+EXPORT_SYMBOL(check_dm_thin_cond);
+#endif
+
+
+#else
+/* -EINVAL: always return -EINVAL for 
+ * 1. unsupported kernel
+ * 2. product w/o dm-thin 
+ */
+int check_dm_thin_cond(
+	struct block_device *bd
+	)
+{
+//	pr_warn("%s: not supported\n", __func__);
+	return -EINVAL;
+}
+EXPORT_SYMBOL(check_dm_thin_cond);
+#endif
+
+
+int __do_sync_cache_range(
+	struct file *file,
+	loff_t start_byte,
+	loff_t end_byte	
+	)
+{
+	int err_1, err_msg;
+
+	err_msg = 1;
+	err_1 = filemap_fdatawrite_range(
+		file->f_mapping, start_byte, end_byte);
+
+	if (unlikely(err_1 != 0))
+		goto _ERR_SYNC_CACHE_;
+
+	err_msg = 2;
+	err_1 = filemap_fdatawait_range(
+		file->f_mapping, start_byte, end_byte);
+
+	if (unlikely(err_1 != 0))
+		goto _ERR_SYNC_CACHE_;
+
+	return 0;
+
+_ERR_SYNC_CACHE_:
+
+#if 0
+	pr_err("%s: %s is failed: %d\n", __func__, 
+		((err_msg == 1) ? "filemap_fdatawrite_range": \
+		"filemap_fdatawait_range"), err_1);
+#endif
+	return err_1;
+}
+EXPORT_SYMBOL(__do_sync_cache_range);
+#endif
 
 #endif  /* #if defined(CONFIG_MACH_QNAPTS) */
 

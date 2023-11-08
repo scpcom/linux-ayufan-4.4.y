@@ -244,8 +244,7 @@ typedef struct tpc_obj{
 	OBJ_TOKEN_STS		o_token_status;
 	spinlock_t		o_status_lock;
 	spinlock_t		o_token_status_lock;
-	spinlock_t		o_data_list_lock;
-	spinlock_t		o_token_data_lock;
+	spinlock_t		o_data_lock;
 	spinlock_t		o_transfer_count_lock;
 
 	/* 2014/08/17, adamhsu, redmine 9007 */

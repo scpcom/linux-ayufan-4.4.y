@@ -747,6 +747,14 @@ struct se_cmd {
 #define CMD_T_ABORTED_1			(1 << 12)
 
 
+ 
+/* 2014/10/17, adamhsu, solve race condition symptom for task management function
+ *
+ * a. CMD_T_ABORTED, CMD_T_ABORTED_1 was set by caller who want to abort the command
+ * b. CMD_T_GOT_ABORTED was set by receiver who got the CMD_T_ABORTED and CMD_T_ABORTED_1
+ */
+#define CMD_T_GOT_ABORTED		(1 << 30)
+
 	/* 2014/08/16, adamhsu, redmine 9055,9076,9278 (start) */
 #define CMD_T_SEND_STATUS		(1 << 31)
 
@@ -788,6 +796,8 @@ struct se_cmd {
 
 #if defined(CONFIG_MACH_QNAPTS)
 
+	/* 2014/10/17, adamhsu */
+	unsigned long 	creation_jiffies;
 #if defined(SUPPORT_CONCURRENT_TASKS)
 	/* 2014/08/16, adamhsu, redmine 9055,9076,9278 */
 	spinlock_t		wq_lock;
@@ -1007,9 +1017,13 @@ struct se_subsystem_dev {
 #define SE_DEV_NAA_LEN	32
 	unsigned char	se_dev_naa[SE_DEV_NAA_LEN];
 
+
+
+	atomic_t    se_dev_provision_write_once;
+
 #if defined(SUPPORT_LOGICAL_BLOCK_4KB_FROM_NAS_GUI)
-    atomic_t    se_dev_qlbs_write_once;
-    u32         se_dev_qlbs;
+	atomic_t    se_dev_qlbs_write_once;
+	u32         se_dev_qlbs;
 #endif
 #endif 
 	u32		su_dev_flags;

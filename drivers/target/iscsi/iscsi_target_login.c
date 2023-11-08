@@ -1065,7 +1065,11 @@ static int __iscsi_target_login_thread(struct iscsi_np *np)
 	iov.iov_len	= ISCSI_HDR_LEN;
 
 	if (rx_data(conn, &iov, 1, ISCSI_HDR_LEN) <= 0) {
-		pr_err("rx_data() returned an error.\n");
+#if defined(CONFIG_MACH_QNAPTS)
+		/* 2014/11/20, adamhsu, redmine 10761 */
+		pr_err("%s: rx_data() returned an error.\n", __func__);
+#endif
+
 		goto new_sess_out;
 	}
 
@@ -1104,7 +1108,12 @@ static int __iscsi_target_login_thread(struct iscsi_np *np)
 
 		if (conn->sock->ops->getname(conn->sock,
 				(struct sockaddr *)&sock_in6, &err, 1) < 0) {
-			pr_err("sock_ops->getname() failed.\n");
+#if defined(CONFIG_MACH_QNAPTS)
+			/* 2014/11/20, adamhsu, redmine 10761 */
+			pr_err("%s: (AF_INET6), (a) sock_ops->getname() "
+				"failed.\n", __func__);
+#endif
+
 			iscsit_tx_login_rsp(conn, ISCSI_STATUS_CLS_TARGET_ERR,
 					ISCSI_LOGIN_STATUS_TARGET_ERROR);
 			goto new_sess_out;
@@ -1115,7 +1124,13 @@ static int __iscsi_target_login_thread(struct iscsi_np *np)
 
 		if (conn->sock->ops->getname(conn->sock,
 				(struct sockaddr *)&sock_in6, &err, 0) < 0) {
-			pr_err("sock_ops->getname() failed.\n");
+
+#if defined(CONFIG_MACH_QNAPTS)
+			/* 2014/11/20, adamhsu, redmine 10761 */
+			pr_err("%s: (AF_INET6), (b) sock_ops->getname() "
+				"failed.\n", __func__);
+#endif
+
 			iscsit_tx_login_rsp(conn, ISCSI_STATUS_CLS_TARGET_ERR,
 					ISCSI_LOGIN_STATUS_TARGET_ERROR);
 			goto new_sess_out;
@@ -1129,7 +1144,12 @@ static int __iscsi_target_login_thread(struct iscsi_np *np)
 
 		if (conn->sock->ops->getname(conn->sock,
 				(struct sockaddr *)&sock_in, &err, 1) < 0) {
-			pr_err("sock_ops->getname() failed.\n");
+#if defined(CONFIG_MACH_QNAPTS)
+			/* 2014/11/20, adamhsu, redmine 10761 */
+			pr_err("%s: (AF_INET4), (c) sock_ops->getname() "
+				"failed.\n",__func__);
+#endif
+
 			iscsit_tx_login_rsp(conn, ISCSI_STATUS_CLS_TARGET_ERR,
 					ISCSI_LOGIN_STATUS_TARGET_ERROR);
 			goto new_sess_out;
@@ -1139,7 +1159,13 @@ static int __iscsi_target_login_thread(struct iscsi_np *np)
 
 		if (conn->sock->ops->getname(conn->sock,
 				(struct sockaddr *)&sock_in, &err, 0) < 0) {
-			pr_err("sock_ops->getname() failed.\n");
+
+#if defined(CONFIG_MACH_QNAPTS)
+			/* 2014/11/20, adamhsu, redmine 10761 */
+			pr_err("%s: (AF_INET4), (d) sock_ops->getname() "
+				"failed.\n", __func__);
+#endif
+
 			iscsit_tx_login_rsp(conn, ISCSI_STATUS_CLS_TARGET_ERR,
 					ISCSI_LOGIN_STATUS_TARGET_ERROR);
 			goto new_sess_out;
@@ -1221,8 +1247,13 @@ static int __iscsi_target_login_thread(struct iscsi_np *np)
 
 	iscsi_stop_login_thread_timer(np);
 
-	if (signal_pending(current))
+	if (signal_pending(current)){
+#if defined(CONFIG_MACH_QNAPTS)
+		/* 2014/11/20, adamhsu, redmine 10761 */
+		pr_err("%s: got signal pending\n", __func__);
+#endif
 		goto new_sess_out;
+	}
 
 	ret = iscsi_post_login_handler(np, conn, zero_tsih);
 
@@ -1235,7 +1266,11 @@ static int __iscsi_target_login_thread(struct iscsi_np *np)
 	return 1;
 
 new_sess_out:
-	pr_err("iSCSI Login negotiation failed.\n");
+#if defined(CONFIG_MACH_QNAPTS)
+	//2014/11/20, adamhsu, redmine 10761
+	pr_err("%s: iSCSI Login negotiation failed.\n", __func__);
+#endif
+
 
 #ifdef CONFIG_MACH_QNAPTS	// 2009/11/30 Nike Chen add connection log
     // Benjamin 20120723: sess is kzalloc in iscsi_login_zero_tsih_s1().

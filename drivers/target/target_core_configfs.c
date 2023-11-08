@@ -1805,12 +1805,44 @@ static ssize_t target_core_store_dev_provision(
 	struct se_hba *hba = se_dev->se_dev_hba;
 	ssize_t read_bytes;
 
+#if defined(CONFIG_MACH_QNAPTS)
+	/* keep se_dev_provision[] to write_once */
+	unsigned char	dev_provision_str[SE_DEV_PROVISION_LEN];
+#endif
+
 	if (count > (SE_DEV_PROVISION_LEN - 1)) {
 		pr_err("provision count: %d exceeds"
 			" SE_DEV_PROVISION_LEN-1: %u\n", (int)count,
 			SE_DEV_PROVISION_LEN - 1);
 		return -EINVAL;
 	}
+
+#if defined(CONFIG_MACH_QNAPTS)
+	if (atomic_read(&se_dev->se_dev_provision_write_once)){
+		pr_err("se_dev_provision was set already. can't update again.\n");
+		return -EINVAL;
+	}
+
+	memset(dev_provision_str, 0, sizeof(dev_provision_str));
+	read_bytes = snprintf(&dev_provision_str[0], SE_DEV_PROVISION_LEN,
+			"%s", page);
+	if (!read_bytes){
+		pr_err("cat't format dev_provision_str string\n");
+		return -EINVAL;
+	}
+
+	if (dev_provision_str[read_bytes - 1] == '\n')
+		dev_provision_str[read_bytes - 1] = '\0';
+
+	/* check the dev provision string format */
+	if (strnicmp(dev_provision_str, "thin", sizeof(dev_provision_str)) 
+	&& strnicmp(dev_provision_str, "thick", sizeof(dev_provision_str))
+	)
+	{
+		pr_err("neither thick nor thin for dev_provision string\n");
+		return -EINVAL;
+	}
+#endif
 
 	read_bytes = snprintf(&se_dev->se_dev_provision[0], SE_DEV_PROVISION_LEN,
 			"%s", page);
@@ -1821,10 +1853,16 @@ static ssize_t target_core_store_dev_provision(
 
 	se_dev->su_dev_flags |= SDF_USING_PROVISION;
 
+
 	pr_debug("Target_Core_ConfigFS: %s/%s set provision: %s\n",
 		config_item_name(&hba->hba_group.cg_item),
 		config_item_name(&se_dev->se_dev_group.cg_item),
 		se_dev->se_dev_provision);
+
+#if defined(CONFIG_MACH_QNAPTS)
+
+	atomic_set(&se_dev->se_dev_provision_write_once, 1);
+#endif
 
 	return read_bytes;
 }
@@ -3054,6 +3092,18 @@ static struct config_group *target_core_make_subdev(
 				" struct se_subsystem_dev\n");
 		goto unlock;
 	}
+
+
+#if defined(CONFIG_MACH_QNAPTS)
+
+	atomic_set(&se_dev->se_dev_provision_write_once, 0);
+
+#if defined(SUPPORT_LOGICAL_BLOCK_4KB_FROM_NAS_GUI)
+	atomic_set(&se_dev->se_dev_qlbs_write_once, 0);
+#endif
+#endif
+
+
 	INIT_LIST_HEAD(&se_dev->t10_wwn.t10_vpd_list);
 	spin_lock_init(&se_dev->t10_wwn.t10_vpd_lock);
 	INIT_LIST_HEAD(&se_dev->t10_pr.registration_list);

@@ -209,17 +209,31 @@ typedef struct __align_desc{
 /**/
 #define TASK_FLAG_DO_FUA        0x1
 typedef struct gen_rw_task{
-	LIO_SE_DEVICE			*se_dev;
-	struct scatterlist		*sg_list;
-	unsigned long			timeout_jiffies;
-	sector_t			lba;
-	u32				sg_nents;
-	u32				task_flag;
-	u32				nr_blks;
-	u32				dev_bs_order;
-	enum dma_data_direction		dir;
-	bool				is_timeout;
-	int				ret_code;
+	LIO_SE_DEVICE		*se_dev;
+	struct scatterlist	*sg_list;
+	unsigned long		timeout_jiffies;
+	sector_t		lba;
+	u32			sg_nents;
+
+	/* 1. (nr_blks << dev_bs_order) = sum of len for all sg elements 
+	 * 2. the purpose of sg lists
+	 * - for read: Usually, they are i/o buffer
+	 * - for write:
+	 * (a) Usually, they are buffer for normal write i/o
+	 * (b) for special write discard, they are buffer for non-aligned /
+	 * non-multipled write data i/o
+	 */
+	u32			nr_blks;
+
+
+	/* s_nr_blks is for discard operation */
+	u32			s_nr_blks;
+
+	u32			dev_bs_order;
+	u32			task_flag;
+	enum dma_data_direction	dir;
+	bool			is_timeout;
+	int			ret_code;
 }__attribute__ ((packed)) GEN_RW_TASK;
 
 typedef struct _io_rec{
@@ -401,6 +415,15 @@ int blkdev_issue_special_discard(
 int __blkio_transfer_task_lba_to_block_lba(
 	IN u32 logical_block_size,
 	IN OUT sector_t *out_lba
+	);
+#endif
+
+#if defined(SUPPORT_TP)
+int check_dm_thin_cond(struct block_device *bd);
+int __do_sync_cache_range(
+	struct file *file,
+	loff_t start_byte,
+	loff_t end_byte	
 	);
 #endif
 

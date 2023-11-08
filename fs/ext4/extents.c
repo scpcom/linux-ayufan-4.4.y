@@ -2566,6 +2566,9 @@ again:
 				err = -EIO;
 				break;
 			}
+			/* Yield here to deal with large extent trees. Should be
+			 * a no-op if we did IO for the above sb_bread. */
+			cond_resched();
 			if (WARN_ON(i + 1 > depth)) {
 				err = -EIO;
 				break;

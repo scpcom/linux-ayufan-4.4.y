@@ -78,13 +78,6 @@
 #define DISABLE_WRITE_CACHE_FWSD18	"SD18"
 #endif
 
-//Patch by QNAP: Fix sometimes can't detect HDD
-#ifdef CONFIG_MACH_QNAPTS
-#include <mach/reset.h>
-#endif
-
-////////////////////////////////////////////////////////////////
-
 /* debounce timing parameters in msecs { interval, duration, timeout } */
 const unsigned long sata_deb_timing_normal[]		= {   5,  100, 2000 };
 const unsigned long sata_deb_timing_hotplug[]		= {  25,  500, 2000 };
@@ -3548,7 +3541,12 @@ int sata_link_resume(struct ata_link *link, const unsigned long *params,
 	int tries = ATA_LINK_RESUME_TRIES;
 	u32 scontrol, serror;
 	int rc;
-
+//Patch by QNAP: Fix TS-131 sometimes link fail
+#ifdef CONFIG_MACH_QNAPTS
+    u32 sstatus;
+    struct ata_port *ap = link->ap;
+    struct Scsi_Host *scsi_host = ap->scsi_host;
+#endif
 	if ((rc = sata_scr_read(link, SCR_CONTROL, &scontrol)))
 		return rc;
 
@@ -3585,7 +3583,31 @@ int sata_link_resume(struct ata_link *link, const unsigned long *params,
 
 	if ((rc = sata_link_debounce(link, params, deadline)))
 		return rc;
-
+//Patch by QNAP: Fix TS-131 sometimes link fail
+#ifdef CONFIG_MACH_QNAPTS
+	if ((rc = sata_scr_read(link, SCR_STATUS, &sstatus)))
+		return rc;
+    if (!strcmp(scsi_host->hostt->name, "ahci_platform") && (sstatus & 0xf) == 0x1)
+    {
+        int retry = 0;
+        do 
+        {
+            sata_scr_write(link, SCR_CONTROL, scontrol | 0x4);
+            ata_msleep(link->ap, 1);
+            sata_scr_read(link, SCR_CONTROL, &scontrol);
+            scontrol = (scontrol & 0x0f0) | 0x301;
+            sata_scr_write_flush(link,SCR_CONTROL, scontrol);
+            ata_msleep(link->ap, 1);
+            scontrol = (scontrol & 0x0f0) | 0x300;
+            sata_scr_write(link, SCR_CONTROL, scontrol);
+            mdelay(1000);
+            sata_scr_read(link, SCR_STATUS, &sstatus);
+        }while ((sstatus & 0xf) == 0x1 && retry++ < 100);
+        if (retry >= 100)
+            ata_link_warn(link, "link still fail after %d retries\n", retry);
+    }
+#endif
+//////////////////////////////////////
 	/* clear SError, some PHYs require this even for SRST to work */
 	if (!(rc = sata_scr_read(link, SCR_ERROR, &serror)))
 		rc = sata_scr_write(link, SCR_ERROR, serror);
@@ -3863,47 +3885,13 @@ int sata_std_hardreset(struct ata_link *link, unsigned int *class,
 void ata_std_postreset(struct ata_link *link, unsigned int *classes)
 {
 	u32 serror;
-//Patch by QNAP: Fix sometimes can't detect HDD
-#ifdef CONFIG_MACH_QNAPTS
-    struct ata_port *ap = link->ap;
-    struct Scsi_Host *scsi_host = ap->scsi_host;
-#endif
+
 	DPRINTK("ENTER\n");
 
 	/* reset complete, clear SError */
 	if (!sata_scr_read(link, SCR_ERROR, &serror))
 		sata_scr_write(link, SCR_ERROR, serror);
-//Patch by QNAP: Fix sometimes can't detect HDD
-#ifdef CONFIG_MACH_QNAPTS
-    if (!strcmp(scsi_host->hostt->name, "ahci_platform"))
-    {
-        u32 sstatus, scontrol;
-        sata_scr_read(link, SCR_STATUS, &sstatus);
-        sata_scr_read(link, SCR_CONTROL, &scontrol);
-        if ((sstatus & 0xf) == 0x1)
-        {
-            if(ap->port_no == 0)
-            {
-                c2000_block_reset(COMPONENT_SERDES_SATA0,1);
-                mdelay(100);
-                c2000_block_reset(COMPONENT_SERDES_SATA0,0);
-                mdelay(100);    
-            }
-            else
-            {
-                c2000_block_reset(COMPONENT_SERDES_SATA1,1);
-                mdelay(100);
-                c2000_block_reset(COMPONENT_SERDES_SATA1,0);
-                mdelay(100);    
-            }
-            sata_scr_write(link, SCR_CONTROL, 0x1);
-            mdelay(100);
-            sata_scr_write(link, SCR_CONTROL, scontrol);
-            mdelay(1000);
-            sata_scr_read(link, SCR_STATUS, &sstatus);
-        }
-    }
-#endif    
+
 	/* print link status */
 	sata_print_link_status(link);
     

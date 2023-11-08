@@ -95,6 +95,9 @@ static int __do_flush_and_drop(
 	loff_t first_page = 0, last_page = 0, start = 0, len = 0;
 	loff_t first_page_offset = 0, last_page_offset = 0;
 
+#if defined(SUPPORT_TP)
+	int err_1;
+#endif
 	/**/
 	inode = fd->f_mapping->host;
 	mapping = inode->i_mapping;
@@ -119,8 +122,20 @@ static int __do_flush_and_drop(
 			first_page_offset, last_page_offset);
 		
 		if (unlikely(ret)) {
-			pr_err("[fbc] fail to exec filemap_write_and_wait_range(), "
-				"ret:0x%x\n", ret);		     
+			pr_err("%s: fail to exec "
+			"filemap_write_and_wait_range(), ret:%d\n", 
+			__func__, ret);
+
+#if defined(SUPPORT_TP)
+			if (!is_thin_lun(se_dev))
+				return ret;
+
+			err_1 = check_dm_thin_cond(inode->i_bdev);
+			if (err_1 == -ENOSPC){
+				pr_warn("%s: space was full\n", __func__); 
+				ret = err_1;
+			}
+#endif
 			return ret;
 		}
 	}
@@ -185,8 +200,16 @@ _EXEC_AGAIN:
 	 * block layer to do fast copy 
 	 */
 	ret = __do_flush_and_drop(d_fd_dev->fd_file, d_lba, d_bs_order, data_bytes);
-	if (ret != 0)
+
+	if (ret != 0){
+#if defined(SUPPORT_TP)
+		/* workaround to check whether thin space is full */
+		if (ret == -ENOSPC)
+			fc_obj->nospc_err= 1;
+#endif
 		return done_blks;
+	}
+
 
 	/* prepare the fbc io, to conver to 512b unit first */
 	s_lba_512 = ((s_lba << s_bs_order) >> 9);
@@ -399,7 +422,8 @@ void __fast_clone_cb(
 
 	rec = container_of(clone_desc, FCIO_REC, desc);
 	cb = (FCCB_DATA *)clone_desc->private_data;
-	
+
+
 	/**/
 	rec->io_done = 1;
 	if (err != 0){
