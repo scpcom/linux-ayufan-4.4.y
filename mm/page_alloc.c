@@ -5228,14 +5228,10 @@ void setup_per_zone_wmarks(void)
 			 */
 			zone->watermark[WMARK_MIN] = tmp;
 		}
-#ifdef CONFIG_MACH_QNAPTS
-		zone->watermark[WMARK_LOW]  = min_wmark_pages(zone) + (tmp >> 1);
-		zone->watermark[WMARK_HIGH] = min_wmark_pages(zone) + (tmp);
-#else
+
 		zone->watermark[WMARK_LOW]  = min_wmark_pages(zone) + (tmp >> 2);
 		zone->watermark[WMARK_HIGH] = min_wmark_pages(zone) + (tmp >> 1);
-#endif
-        setup_zone_migrate_reserve(zone);
+		setup_zone_migrate_reserve(zone);
 		spin_unlock_irqrestore(&zone->lock, flags);
 	}
 

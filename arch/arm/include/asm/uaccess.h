@@ -62,18 +62,8 @@ extern int __put_user_bad(void);
 
 static inline void set_fs(mm_segment_t fs)
 {
-#ifdef CONFIG_MACH_QNAPTS
-	// Fix ARM domain race condition.
-	// ref: http://lists.infradead.org/pipermail/linux-arm-kernel/2011-October/070261.html
-	unsigned long flags;
-	local_irq_save(flags);
-#endif
 	current_thread_info()->addr_limit = fs;
 	modify_domain(DOMAIN_KERNEL, fs ? DOMAIN_CLIENT : DOMAIN_MANAGER);
-
-#ifdef CONFIG_MACH_QNAPTS
-	local_irq_restore(flags);
-#endif
 }
 
 #define segment_eq(a,b)	((a) == (b))

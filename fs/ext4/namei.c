@@ -1319,8 +1319,7 @@ static struct dentry *ext4_lookup(struct inode *dir, struct dentry *dentry, stru
 	}
 //Patch by QNAP:Search filename use case insensitive method
 #ifdef QNAP_SEARCH_FILENAME_CASE_INSENSITIVE
-	if (ntohl(EXT4_SB(dir->i_sb)->s_es->s_hash_magic) == QNAP_SB_HASH)
-		dentry->d_op = &ext4_dentry_operations;
+	dentry->d_op = &ext4_dentry_operations;
 #endif
 	return d_splice_alias(inode, dentry);
 }
