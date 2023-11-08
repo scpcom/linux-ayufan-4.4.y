@@ -59,7 +59,10 @@
 #include <mach/comcerto-2000/clock.h>
 #include <mach/comcerto-2000/pm.h>
 #include <mach/gpio.h>
-
+//Patch by QNAP: build xhci-hcd as module
+#ifdef CONFIG_MACH_QNAPTS
+#include <linux/module.h>
+#endif
 struct c2k_gpio_pin_stat_info c2k_gpio_pin_stat =
 {
 	.c2k_gpio_pins_0_31 = 0x0,
@@ -434,76 +437,104 @@ void comcerto_l2cc_init(void)
 
 static int comcerto_ahci_init(struct device *dev, void __iomem *mmio)
 {
-	struct serdes_regs_s *p_sata_phy_reg_file;
-	int serdes_regs_size;
-        u32 val;
-	int ref_clk_24;
+    struct serdes_regs_s *p_sata_phy_reg_file;
+    int serdes_regs_size;
+    u32 val;
+    int ref_clk_24;
+    /* Move SATA controller to DDRC2 port */
+    writel(readl(COMCERTO_GPIO_FABRIC_CTRL_REG) | 0x2, COMCERTO_GPIO_FABRIC_CTRL_REG);
 
-	/* Move SATA controller to DDRC2 port */
-	writel(readl(COMCERTO_GPIO_FABRIC_CTRL_REG) | 0x2, COMCERTO_GPIO_FABRIC_CTRL_REG);
+    val = readl(COMCERTO_GPIO_SYSTEM_CONFIG);
+    ref_clk_24 = val & (BIT_5_MSK|BIT_7_MSK);
 
-	val = readl(COMCERTO_GPIO_SYSTEM_CONFIG);
-	ref_clk_24 = val & (BIT_5_MSK|BIT_7_MSK);
+    if(ref_clk_24)
+    {
+        p_sata_phy_reg_file = &sata_phy_reg_file_24[0];
+        serdes_regs_size = sizeof(sata_phy_reg_file_24);
+        printk(KERN_INFO "SATA Serdes: 24Mhz ref clk\n");
+    }
+    else
+    {
+        p_sata_phy_reg_file = &sata_phy_reg_file_48[0];
+        serdes_regs_size = sizeof(sata_phy_reg_file_48);
+        printk(KERN_INFO "SATA Serdes: 48Mhz ref clk\n");
+    }
+//Patch by QNAP: Fix sometimes can't detect HDD
+#ifdef CONFIG_MACH_QNAPTS
+    c2000_block_reset(COMPONENT_AXI_SATA,1);
+    c2000_block_reset(COMPONENT_SATA_PMU,1);
+    c2000_block_reset(COMPONENT_SATA_OOB,1);
+    mdelay(100);
+#endif    
+/////////////////
+    
+    //Take SATA AXI domain out of reset
+    c2000_block_reset(COMPONENT_AXI_SATA,0);
+    //Bring SATA PMU and OOB out of reset
+    c2000_block_reset(COMPONENT_SATA_PMU,0);
+    c2000_block_reset(COMPONENT_SATA_OOB,0);
 
-	if(ref_clk_24)
-	{
-		p_sata_phy_reg_file = &sata_phy_reg_file_24[0];
-		serdes_regs_size = sizeof(sata_phy_reg_file_24);
-		printk(KERN_INFO "SATA Serdes: 24Mhz ref clk\n");
-	}
-	else
-	{
-		p_sata_phy_reg_file = &sata_phy_reg_file_48[0];
-		serdes_regs_size = sizeof(sata_phy_reg_file_48);
-		printk(KERN_INFO "SATA Serdes: 48Mhz ref clk\n");
-	}
-
-	//Take SATA AXI domain out of reset
-	c2000_block_reset(COMPONENT_AXI_SATA,0);
-	//Bring SATA PMU and OOB out of reset
-	c2000_block_reset(COMPONENT_SATA_PMU,0);
-	c2000_block_reset(COMPONENT_SATA_OOB,0);
-
-        if ( (val & BOOT_SERDES1_CNF_SATA0) || (!(val & BOOT_SERDES2_CNF_SATA1)))
+    if ( (val & BOOT_SERDES1_CNF_SATA0) || (!(val & BOOT_SERDES2_CNF_SATA1)))
+    {
+        if (val & BOOT_SERDES1_CNF_SATA0)
         {
-                if (val & BOOT_SERDES1_CNF_SATA0)
-                {
-			//Bring Serdes1 out of reset
-			c2000_block_reset(COMPONENT_SERDES1,0);
-			//Bring SATA0 out of reset
-			c2000_block_reset(COMPONENT_SERDES_SATA0,0);
-
-                        /* Serdes Initialization. */
-                        if( serdes_phy_init(SERDES_PHY1,  p_sata_phy_reg_file,
-                                                serdes_regs_size / sizeof(serdes_regs_t),
-                                                SD_DEV_TYPE_SATA) )
-                        {
-                                printk(KERN_ERR "%s: Failed to initialize serdes1 !!\n", __func__);
-                                return -1;
-                        }
-
-                }
-
-                if (!(val & BOOT_SERDES2_CNF_SATA1))
-                {
-			//Bring Serdes2 out of reset
-			c2000_block_reset(COMPONENT_SERDES2,0);
-			//Bring SATA1 out of reset
-			c2000_block_reset(COMPONENT_SERDES_SATA1,0);
-
-                        /* Serdes Initialization. */
-                        if( serdes_phy_init(SERDES_PHY2,  p_sata_phy_reg_file,
-                                                serdes_regs_size / sizeof(serdes_regs_t),
-                                                SD_DEV_TYPE_SATA) )
-                        {
-                                printk(KERN_ERR "%s: Failed to initialize serdes2 !!\n", __func__);
-                                return -1;
-                        }
-                }
-        } else
+//Patch by QNAP: Fix sometimes can't detect HDD
+#ifdef CONFIG_MACH_QNAPTS
+            c2000_block_reset(COMPONENT_SERDES1,1);
+            mdelay(100);
+#endif            
+            ////////////////
+            //Bring Serdes1 out of reset
+            c2000_block_reset(COMPONENT_SERDES1,0);
+//Patch by QNAP: Fix sometimes can't detect HDD
+#ifdef CONFIG_MACH_QNAPTS
+            //Bring SATA0 out of reset
+            c2000_block_reset(COMPONENT_SERDES_SATA0,1);
+            mdelay(100);
+            c2000_block_reset(COMPONENT_SERDES_SATA0,0);
+            
+#endif
+            /* Serdes Initialization. */
+            if( serdes_phy_init(SERDES_PHY1,  p_sata_phy_reg_file,
+                            serdes_regs_size / sizeof(serdes_regs_t),
+                            SD_DEV_TYPE_SATA) )
+            {
+                printk(KERN_ERR "%s: Failed to initialize serdes1 !!\n", __func__);
                 return -1;
+            }
+        }
+        if (!(val & BOOT_SERDES2_CNF_SATA1))
+        {
+//Patch by QNAP: Fix sometimes can't detect HDD
+#ifdef CONFIG_MACH_QNAPTS
+            c2000_block_reset(COMPONENT_SERDES2,1);
+            mdelay(100);
+#endif            
+            ////////////////
+            //Bring Serdes2 out of reset
+            c2000_block_reset(COMPONENT_SERDES2,0);
+//Patch by QNAP: Fix sometimes can't detect HDD
+#ifdef CONFIG_MACH_QNAPTS
+            //Bring SATA0 out of reset
+            c2000_block_reset(COMPONENT_SERDES_SATA1,1);
+            mdelay(100);
+            //Bring SATA1 out of reset
+            c2000_block_reset(COMPONENT_SERDES_SATA1,0);
+#endif
+            /* Serdes Initialization. */
+            if( serdes_phy_init(SERDES_PHY2,  p_sata_phy_reg_file,
+                            serdes_regs_size / sizeof(serdes_regs_t),
+                            SD_DEV_TYPE_SATA) )
+            {
+                printk(KERN_ERR "%s: Failed to initialize serdes2 !!\n", __func__);
+                return -1;
+            }
+        }
+    } 
+    else
+        return -1;
 
-        return 0;
+    return 0;
 }
 #endif
 
@@ -812,7 +843,10 @@ static int __init get_usb3_clk_mode(char *str)
 
         return 1;
 }
-
+//Patch by QNAP: build xhci-hcd as module
+#ifdef CONFIG_MACH_QNAPTS
+EXPORT_SYMBOL(usb3_clk_internal);
+#endif
 __setup("usb3_internal_clk=", get_usb3_clk_mode);
 
 int is_mac_zero(u8 *buf)

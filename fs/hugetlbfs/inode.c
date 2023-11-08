@@ -932,6 +932,10 @@ struct file *hugetlb_file_setup(const char *name, size_t size,
 	root = hugetlbfs_vfsmount->mnt_root;
 	quick_string.name = name;
 	quick_string.len = strlen(quick_string.name);
+//Patch by QNAP:Search filename use case insensitive method
+#ifdef QNAP_SEARCH_FILENAME_CASE_INSENSITIVE
+    quick_string.case_folding = 0;
+#endif    
 	quick_string.hash = 0;
 	path.dentry = d_alloc(root, &quick_string);
 	if (!path.dentry)

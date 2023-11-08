@@ -84,4 +84,10 @@ struct stat64 {
 	unsigned long long	st_ino;
 };
 
+//Patch by QNAP: fix ext3 birthtime issue
+#ifdef CONFIG_FS_QNAP_BIRTHTIME
+#define st_birthtime st_ctime_nsec
+#endif
+////////////////////////////////////
+
 #endif

@@ -100,6 +100,10 @@ extern void mnt_pin(struct vfsmount *mnt);
 extern void mnt_unpin(struct vfsmount *mnt);
 extern int __mnt_is_readonly(struct vfsmount *mnt);
 
+#ifdef CONFIG_MACH_QNAPTS
+extern struct vfsmount *qnap_lookup_vfsmount(struct dentry *dentry);
+#endif
+
 extern struct vfsmount *do_kern_mount(const char *fstype, int flags,
 				      const char *name, void *data);
 

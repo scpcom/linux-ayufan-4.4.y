@@ -104,6 +104,10 @@ struct file *anon_inode_getfile(const char *name,
 	this.name = name;
 	this.len = strlen(name);
 	this.hash = 0;
+//Patch by QNAP:Search filename use case insensitive method
+#ifdef QNAP_SEARCH_FILENAME_CASE_INSENSITIVE
+    this.case_folding = 0;
+#endif    
 	path.dentry = d_alloc_pseudo(anon_inode_mnt->mnt_sb, &this);
 	if (!path.dentry)
 		goto err_module;

@@ -679,6 +679,11 @@ static int create_default_group(struct config_group *parent_group,
 		group->cg_item.ci_name = group->cg_item.ci_namebuf;
 	name.name = group->cg_item.ci_name;
 	name.len = strlen(name.name);
+//Patch by QNAP:Search filename use case insensitive method
+#ifdef QNAP_SEARCH_FILENAME_CASE_INSENSITIVE
+    name.case_folding = 0;
+#endif    
+    
 	name.hash = full_name_hash(name.name, name.len);
 
 	ret = -ENOMEM;
@@ -1697,6 +1702,10 @@ int configfs_register_subsystem(struct configfs_subsystem *subsys)
 
 	name.name = group->cg_item.ci_name;
 	name.len = strlen(name.name);
+//Patch by QNAP:Search filename use case insensitive method
+#ifdef QNAP_SEARCH_FILENAME_CASE_INSENSITIVE
+    name.case_folding = 0;
+#endif    
 	name.hash = full_name_hash(name.name, name.len);
 
 	err = -ENOMEM;

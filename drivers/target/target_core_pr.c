@@ -276,7 +276,13 @@ int target_scsi2_reservation_reserve(struct se_task *task)
 	}
 
 	ret = 0;
+
+#if defined(CONFIG_MACH_QNAPTS)
+	mdelay(10);
+#endif
+
 	spin_lock(&dev->dev_reservation_lock);
+
 	if (dev->dev_reserved_node_acl &&
 	   (dev->dev_reserved_node_acl != sess->se_node_acl)) {
 		pr_err("SCSI-2 RESERVATION CONFLIFT for %s fabric\n",
@@ -2339,6 +2345,23 @@ static int core_scsi3_emulate_pro_register(
 			}
 			spin_unlock(&pr_tmpl->registration_lock);
 
+#if defined(CONFIG_MACH_QNAPTS)
+			/* 2014/01/14
+			 *
+			 * Fixed Persistent Reservation Test (LOGO) will be fail
+			 * on HCK 2.1 (ver:8.100.26063)
+			 *
+			 * (1) Increment PRgeneration counter for struct
+			 * se_device" upon a successful UNREGISTER, please see
+			 * spc4r36e, p371,p384
+			 *
+			 * (2) If the PERSISTENT RESERVE OUT command is 
+			 * terminated due to an error or reservation conflict,
+			 * the PRgeneration counter shall not be incremented
+			 */
+			pr_reg->pr_res_generation = 
+				core_scsi3_pr_generation(cmd->se_dev);
+#endif
 			if (!aptpl) {
 				pr_tmpl->pr_aptpl_active = 0;
 				core_scsi3_update_and_write_aptpl(dev, NULL, 0);
@@ -3985,8 +4008,18 @@ static int core_scsi3_pri_read_keys(struct se_cmd *cmd)
 		 * Check for overflow of 8byte PRI READ_KEYS payload and
 		 * next reservation key list descriptor.
 		 */
+#ifdef CONFIG_MACH_QNAPTS
+		/*
+		 * Benjamin 20130115: 
+		 * PERSISTENT RESERVE IN with service action READ KEYS with minimum ALLOCATION LENGTH 
+		 * should return GOOD status and appropriate ADDITIONAL LENGTH.
+		 */
+		if ((add_len + 8) > (cmd->data_length - 8))
+			goto _PR_READ_KEY_COUNT;
+#else
 		if ((add_len + 8) > (cmd->data_length - 8))
 			break;
+#endif        
 
 		buf[off++] = ((pr_reg->pr_res_key >> 56) & 0xff);
 		buf[off++] = ((pr_reg->pr_res_key >> 48) & 0xff);
@@ -3996,7 +4029,7 @@ static int core_scsi3_pri_read_keys(struct se_cmd *cmd)
 		buf[off++] = ((pr_reg->pr_res_key >> 16) & 0xff);
 		buf[off++] = ((pr_reg->pr_res_key >> 8) & 0xff);
 		buf[off++] = (pr_reg->pr_res_key & 0xff);
-
+_PR_READ_KEY_COUNT:
 		add_len += 8;
 	}
 	spin_unlock(&su_dev->t10_pr.registration_lock);

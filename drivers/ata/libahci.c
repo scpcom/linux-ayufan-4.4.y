@@ -607,11 +607,22 @@ static void ahci_start_fis_rx(struct ata_port *ap)
 	if (hpriv->cap & HOST_CAP_64)
 		writel((pp->cmd_slot_dma >> 16) >> 16,
 		       port_mmio + PORT_LST_ADDR_HI);
+#ifdef CONFIG_MACH_QNAPTS
+	else
+		writel(0x0,
+		       port_mmio + PORT_LST_ADDR_HI);
+#endif    
 	writel(pp->cmd_slot_dma & 0xffffffff, port_mmio + PORT_LST_ADDR);
 
 	if (hpriv->cap & HOST_CAP_64)
 		writel((pp->rx_fis_dma >> 16) >> 16,
 		       port_mmio + PORT_FIS_ADDR_HI);
+#ifdef CONFIG_MACH_QNAPTS
+	else
+		writel(0x0,
+		       port_mmio + PORT_FIS_ADDR_HI);
+#endif
+    
 	writel(pp->rx_fis_dma & 0xffffffff, port_mmio + PORT_FIS_ADDR);
 
 	/* enable FIS reception */
@@ -1743,7 +1754,18 @@ irqreturn_t ahci_interrupt(int irq, void *dev_instance)
 	irq_stat = readl(mmio + HOST_IRQ_STAT);
 	if (!irq_stat)
 		return IRQ_NONE;
-
+    
+//Patch by QNAP:Marvell MV_9235 workaround
+#ifdef CONFIG_MACH_QNAPTS
+	if (hpriv->flags & AHCI_HFLAG_YES_MV9235_FIX) {
+		u32 port_mask[2] = {0x5, 0xa};
+		for (i = 0; i < (host->n_ports/2) ; i++) {
+			if (irq_stat & port_mask[i])	
+				irq_stat |= port_mask[i];
+		}
+	}
+#endif    
+/////////////////////////////////
 	irq_masked = irq_stat & hpriv->port_map;
 
 	spin_lock(&host->lock);

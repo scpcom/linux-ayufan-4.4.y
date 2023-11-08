@@ -33,6 +33,17 @@ void generic_fillattr(struct inode *inode, struct kstat *stat)
 	stat->ctime = inode->i_ctime;
 	stat->blksize = (1 << inode->i_blkbits);
 	stat->blocks = inode->i_blocks;
+//Patch by QNAP: fix ext3 birthtime issue
+#ifdef CONFIG_FS_QNAP_BIRTHTIME
+	/* This statement should be
+	 * stat->birthtime = inode->i_birthtime
+	 * logically, but that doesn't work in TS-109/209/409.
+	 * So we use this statement instead.
+	 */
+	stat->ctime.tv_nsec = inode->i_birthtime.tv_sec;
+	stat->birthtime = inode->i_birthtime;
+#endif    
+/////////////////////////////////////////////////	
 }
 
 EXPORT_SYMBOL(generic_fillattr);
@@ -235,6 +246,11 @@ static int cp_new_stat(struct kstat *stat, struct stat __user *statbuf)
 	tmp.st_mtime_nsec = stat->mtime.tv_nsec;
 	tmp.st_ctime_nsec = stat->ctime.tv_nsec;
 #endif
+//Patch by QNAP: fix ext3 birthtime issue
+#ifdef CONFIG_FS_QNAP_BIRTHTIME
+	tmp.st_birthtime = stat->birthtime.tv_sec;
+#endif
+/////////////
 	tmp.st_blocks = stat->blocks;
 	tmp.st_blksize = stat->blksize;
 	return copy_to_user(statbuf,&tmp,sizeof(tmp)) ? -EFAULT : 0;
@@ -358,6 +374,11 @@ static long cp_new_stat64(struct kstat *stat, struct stat64 __user *statbuf)
 	tmp.st_mtime_nsec = stat->mtime.tv_nsec;
 	tmp.st_ctime = stat->ctime.tv_sec;
 	tmp.st_ctime_nsec = stat->ctime.tv_nsec;
+//Patch by QNAP: fix ext3 birthtime issue
+#ifdef CONFIG_FS_QNAP_BIRTHTIME
+	tmp.st_birthtime = stat->birthtime.tv_sec;
+#endif
+////////////////////////////////
 	tmp.st_size = stat->size;
 	tmp.st_blocks = stat->blocks;
 	tmp.st_blksize = stat->blksize;

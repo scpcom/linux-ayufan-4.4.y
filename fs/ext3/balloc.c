@@ -23,6 +23,14 @@
 #include <linux/blkdev.h>
 #include <trace/events/ext3.h>
 
+//Patch by QNAP:Fix iSCSI kernel thread use reserved block
+#if defined(CONFIG_MACH_QNAPTS)
+#define ISCSI_RESERVED_NAME "fbdisk"
+#define ISCSI_RESERVED_SIZE 32768 //128 MBytes
+#define RTRR_QSYNCD_RESERVED_NAME "qsyncd"
+#endif
+/////////////////////////////////////////////////////////
+
 /*
  * balloc.c contains the blocks allocation and deallocation routines
  */
@@ -1446,6 +1454,19 @@ static int ext3_has_free_blocks(struct ext3_sb_info *sbi, int use_reservation)
 
 	free_blocks = percpu_counter_read_positive(&sbi->s_freeblocks_counter);
 	root_blocks = le32_to_cpu(sbi->s_es->s_r_blocks_count);
+//Patch by QNAP:Fix iSCSI kernel thread use reserved block
+#if defined(CONFIG_MACH_QNAPTS)
+    if (!strncmp(current->comm, ISCSI_RESERVED_NAME , strlen(ISCSI_RESERVED_NAME)) ||
+		!strncmp(current->comm, RTRR_QSYNCD_RESERVED_NAME , strlen(RTRR_QSYNCD_RESERVED_NAME))) 
+    {   
+        if (free_blocks >= (root_blocks + 1 + ISCSI_RESERVED_SIZE))
+            return 1;
+        else 
+            return 0;
+    }
+#endif
+///////////////////////////////////////////////////////////
+    
 	if (free_blocks < root_blocks + 1 && !capable(CAP_SYS_RESOURCE) &&
 		!use_reservation && sbi->s_resuid != current_fsuid() &&
 		(sbi->s_resgid == 0 || !in_group_p (sbi->s_resgid))) {

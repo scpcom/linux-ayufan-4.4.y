@@ -23,6 +23,9 @@ extern int iscsi_target_rx_thread(void *);
 
 #define TARGET_THREAD_SET_COUNT			4
 
+
+
+
 #define ISCSI_RX_THREAD                         1
 #define ISCSI_TX_THREAD                         2
 #define ISCSI_RX_THREAD_NAME			"iscsi_trx"
@@ -65,10 +68,12 @@ struct iscsi_thread_set {
 	struct iscsi_conn	*conn;
 	/* used for controlling ts state accesses */
 	spinlock_t	ts_state_lock;
+
 	/* Used for rx side post startup */
 	struct completion	rx_post_start_comp;
 	/* Used for tx side post startup */
 	struct completion	tx_post_start_comp;
+
 	/* used for restarting thread queue */
 	struct completion	rx_restart_comp;
 	/* used for restarting thread queue */
@@ -83,6 +88,17 @@ struct iscsi_thread_set {
 	struct task_struct	*tx_thread;
 	/* struct iscsi_thread_set in list list head*/
 	struct list_head	ts_list;
+
+#ifdef CONFIG_MACH_QNAPTS
+	/* 2014/03/08, adamhsu, redmine-7554
+	 * make sure tx/rx thread go to sleep at the same time during
+	 * to create new thread set */
+	struct completion	tx_alloc_comp_s0;
+	struct completion	tx_alloc_comp_s1;
+	struct completion	rx_alloc_comp_s0;
+	struct completion	rx_alloc_comp_s1;
+#endif
+
 };
 
 #endif   /*** ISCSI_THREAD_QUEUE_H ***/

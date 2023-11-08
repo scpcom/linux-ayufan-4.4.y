@@ -327,6 +327,12 @@ struct inodes_stat_t {
 #define FITHAW		_IOWR('X', 120, int)	/* Thaw */
 #define FITRIM		_IOWR('X', 121, struct fstrim_range)	/* Trim */
 
+#ifdef CONFIG_MACH_QNAPTS
+#define FS_IOC32_GETTRIMSTATUS	_IOR('X', 200, int)
+#define FS_IOC_GETTRIMSTATUS	_IOR('X', 200, long)
+#define FS_IOC_TRIMASYNC		_IOW('X', 201, struct fstrim_range)	/* Trim */
+#endif
+
 #define	FS_IOC_GETFLAGS			_IOR('f', 1, long)
 #define	FS_IOC_SETFLAGS			_IOW('f', 2, long)
 #define	FS_IOC_GETVERSION		_IOR('v', 1, long)
@@ -373,6 +379,9 @@ struct inodes_stat_t {
 #define SYNC_FILE_RANGE_WAIT_BEFORE	1
 #define SYNC_FILE_RANGE_WRITE		2
 #define SYNC_FILE_RANGE_WAIT_AFTER	4
+//Patch by QNAP:enhance performance from socket to file
+#define MAX_PAGES_PER_RECVFILE 32
+//////////////////////////////////////////////////////
 
 #ifdef __KERNEL__
 
@@ -452,6 +461,11 @@ typedef void (dio_iodone_t)(struct kiocb *iocb, loff_t offset,
 #define ATTR_KILL_PRIV	(1 << 14)
 #define ATTR_OPEN	(1 << 15) /* Truncating from open(O_TRUNC) */
 #define ATTR_TIMES_SET	(1 << 16)
+//Patch by QNAP: fix ext3 birthtime issue
+#ifdef CONFIG_FS_QNAP_BIRTHTIME
+#define ATTR_CREATE_TIME (1 << 17) /* Birth time of file */
+#endif
+///////////////////////////////////////////////////
 
 /*
  * This is the Inode Attributes structure, used for notify_change().  It
@@ -790,6 +804,11 @@ struct inode {
 	struct timespec		i_atime;
 	struct timespec		i_mtime;
 	struct timespec		i_ctime;
+//Patch by QNAP: fix ext3 birthtime issue
+#ifdef CONFIG_FS_QNAP_BIRTHTIME
+	struct timespec     i_birthtime; /* birth time */
+#endif
+////////////////////////////////////////////    
 	spinlock_t		i_lock;	/* i_blocks, i_bytes, maybe i_size */
 	unsigned short          i_bytes;
 	blkcnt_t		i_blocks;
@@ -1463,6 +1482,9 @@ struct super_block {
 	u8 s_uuid[16];				/* UUID */
 
 	void 			*s_fs_info;	/* Filesystem private info */
+#ifdef CONFIG_MACH_QNAPTS
+	unsigned int		s_max_links;
+#endif
 	fmode_t			s_mode;
 
 	/* Granularity of c/m/atime in ns.
@@ -1537,6 +1559,17 @@ extern int vfs_link(struct dentry *, struct inode *, struct dentry *);
 extern int vfs_rmdir(struct inode *, struct dentry *);
 extern int vfs_unlink(struct inode *, struct dentry *);
 extern int vfs_rename(struct inode *, struct dentry *, struct inode *, struct dentry *);
+
+#ifdef CONFIG_MACH_QNAPTS
+extern int vfs_create_without_acl(struct inode *, struct dentry *, umode_t, struct nameidata *);
+extern int vfs_link_without_acl(struct dentry *, struct inode *, struct dentry *);
+extern int vfs_mkdir_without_acl(struct inode *, struct dentry *, umode_t);
+extern int vfs_mknod_without_acl(struct inode *, struct dentry *, umode_t, dev_t);
+extern int vfs_rename_without_acl(struct inode *, struct dentry *, struct inode *, struct dentry *);
+extern int vfs_rmdir_without_acl(struct inode *, struct dentry *);
+extern int vfs_symlink_without_acl(struct inode *, struct dentry *, const char *);
+extern int vfs_unlink_without_acl(struct inode *, struct dentry *);
+#endif
 
 /*
  * VFS dentry helper functions.
@@ -2267,6 +2300,9 @@ extern sector_t bmap(struct inode *, sector_t);
 #endif
 extern int notify_change(struct dentry *, struct iattr *);
 extern int inode_permission(struct inode *, int);
+#ifdef CONFIG_MACH_QNAPTS
+extern int inode_permission_without_acl(struct inode *, int);
+#endif
 extern int generic_permission(struct inode *, int);
 
 static inline bool execute_ok(struct inode *inode)

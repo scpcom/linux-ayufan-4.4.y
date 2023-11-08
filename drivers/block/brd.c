@@ -496,7 +496,6 @@ static struct brd_device *brd_alloc(int i)
 	disk->flags |= GENHD_FL_SUPPRESS_PARTITION_INFO;
 	sprintf(disk->disk_name, "ram%d", i);
 	set_capacity(disk, rd_size * 2);
-
 	return brd;
 
 out_free_queue:

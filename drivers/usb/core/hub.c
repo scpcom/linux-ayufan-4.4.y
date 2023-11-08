@@ -1393,7 +1393,22 @@ hub_ioctl(struct usb_interface *intf, unsigned int code, void *user_data)
 
 		return info->nports + 1;
 		}
+//Patch by QNAP: add a cmd for HW USB Test		
+#if defined(CONFIG_MACH_QNAPTS)
+	case USBDEVFS_HUB_PORT_TEST: {				
+		struct usb_hub *hub = hdev_to_hub(hdev);
+		unsigned char portn = 0;
 
+		if(hub == NULL)
+			return -EINVAL;
+
+		for(portn=1;portn<= hub->descriptor->bNbrPorts;portn++)
+			set_port_feature(hdev,(4 << 8) | portn,USB_PORT_FEAT_TEST);
+
+		printk("Hub Info: max ports is %d from descriptor\n",hub->descriptor->bNbrPorts);
+        return 0;
+		}
+#endif
 	default:
 		return -ENOSYS;
 	}

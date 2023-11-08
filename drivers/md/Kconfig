@@ -200,6 +200,20 @@ config BLK_DEV_DM
 
 	  If unsure, say N.
 
+config DM_QDM
+	tristate "QNAP device mapper module support"
+	depends on BLK_DEV_DM
+	---help---
+	  Enable QNAP Device mapper module support
+	  It contains multiple snapshot feature. 
+
+config DM_QDM_REVERSE_MODULE
+        tristate "QNAP device mapper reverse target"
+        depends on DM_QDM
+	---help---
+          Enable QNAP Device mapper test module support
+          It contains the mirror reverse feature.
+
 config DM_DEBUG
 	boolean "Device mapper debugging support"
 	depends on BLK_DEV_DM

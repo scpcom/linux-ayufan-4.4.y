@@ -34,7 +34,13 @@ struct vfsmount;
  */
 struct qstr {
 	unsigned int hash;
+//Patch by QNAP:Search filename use case insensitive method
+#ifdef QNAP_SEARCH_FILENAME_CASE_INSENSITIVE
+    unsigned short len;
+    unsigned short case_folding;
+#else
 	unsigned int len;
+#endif
 	const unsigned char *name;
 };
 
@@ -346,6 +352,9 @@ extern char *d_path(const struct path *, char *, int);
 extern char *d_path_with_unreachable(const struct path *, char *, int);
 extern char *dentry_path_raw(struct dentry *, char *, int);
 extern char *dentry_path(struct dentry *, char *, int);
+#ifdef CONFIG_MACH_QNAPTS
+extern char *qnap_dentry_path_raw(struct dentry *dentry, char *buf, int buflen);
+#endif
 
 /* Allocation counts.. */
 

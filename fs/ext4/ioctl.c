@@ -379,6 +379,48 @@ group_add_out:
 
 		return 0;
 	}
+#ifdef CONFIG_MACH_QNAPTS
+	case FS_IOC_TRIMASYNC:
+	{
+		struct request_queue *q = bdev_get_queue(sb->s_bdev);
+		struct fstrim_range range;
+
+		if (!capable(CAP_SYS_ADMIN))
+			return -EPERM;
+
+		if (!blk_queue_discard(q))
+			return -EOPNOTSUPP;
+
+		if (EXT4_HAS_RO_COMPAT_FEATURE(sb,
+			       EXT4_FEATURE_RO_COMPAT_BIGALLOC)) {
+			ext4_msg(sb, KERN_ERR,
+				 "FS_IOC_TRIMASYNC not supported with bigalloc");
+			return -EOPNOTSUPP;
+		}
+
+		if (copy_from_user(&range, (struct fstrim_range __user *)arg,
+		    sizeof(range)))
+			return -EFAULT;
+
+		range.minlen = max((unsigned int)range.minlen,
+				   q->limits.discard_granularity);
+		return ext4_trim_fs_async(sb, &range);
+	}
+
+	case EXT4_IOC_GETLAZYINITSTATUS:
+	{
+		struct ext4_sb_info *sbi = EXT4_SB(sb);
+		return put_user(sbi->lazyinit_status, (int __user *) arg);
+		//return 0;
+	}
+
+	case FS_IOC_GETTRIMSTATUS:
+	{
+		struct ext4_sb_info *sbi = EXT4_SB(sb);
+		return put_user(sbi->reclaim_status, (int __user *) arg);
+		//return 0;
+	}
+#endif
 
 	default:
 		return -ENOTTY;
@@ -442,7 +484,18 @@ long ext4_compat_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 	}
 	case EXT4_IOC_MOVE_EXT:
 	case FITRIM:
+#ifdef CONFIG_MACH_QNAPTS
+	case FS_IOC_TRIMASYNC:
+#endif
 		break;
+#ifdef CONFIG_MACH_QNAPTS
+	case EXT4_IOC32_GETLAZYINITSTATUS:
+		cmd = EXT4_IOC_GETLAZYINITSTATUS;
+		break;
+	case FS_IOC32_GETTRIMSTATUS:
+		cmd = FS_IOC_GETTRIMSTATUS;
+		break;
+#endif
 	default:
 		return -ENOIOCTLCMD;
 	}

@@ -306,6 +306,10 @@ xfs_vn_ci_lookup(
 	/* else case-insensitive match... */
 	dname.name = ci_name.name;
 	dname.len = ci_name.len;
+//Patch by QNAP:Search filename use case insensitive method
+#ifdef QNAP_SEARCH_FILENAME_CASE_INSENSITIVE
+    dname.case_folding = 0;
+#endif    
 	dentry = d_add_ci(dentry, VFS_I(ip), &dname);
 	kmem_free(ci_name.name);
 	return dentry;

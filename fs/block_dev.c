@@ -324,6 +324,28 @@ static int blkdev_readpage(struct file * file, struct page * page)
 	return block_read_full_page(page, blkdev_get_block);
 }
 
+//George Wu, 20130629, blkdev_readpages
+#ifdef CONFIG_MACH_QNAPTS
+#ifdef USE_BLKDEV_READPAGES
+static int blkdev_readpages(struct file *file, struct address_space *mapping, 
+                        struct list_head *pages, unsigned nr_pages) 
+{ 
+        return mpage_readpages(mapping, pages, nr_pages, blkdev_get_block); 
+}
+#endif
+#endif
+
+//George Wu, 20130721, blkdev_writepages
+#ifdef CONFIG_MACH_QNAPTS
+#ifdef USE_BLKDEV_WRITEPAGES
+int blkdev_writepages(struct address_space *mapping, struct writeback_control *wbc)
+{
+		//printk(KERN_DEBUG "[BLKDEV_WRITEPAGES] " "enter blkdev_writepages()@block_dev.c.\n");
+        return mpage_writepages(mapping, wbc, blkdev_get_blocks);
+}
+#endif
+#endif
+
 static int blkdev_write_begin(struct file *file, struct address_space *mapping,
 			loff_t pos, unsigned len, unsigned flags,
 			struct page **pagep, void **fsdata)
@@ -1587,6 +1609,12 @@ static const struct address_space_operations def_blk_aops = {
 	.writepage	= blkdev_writepage,
 	.write_begin	= blkdev_write_begin,
 	.write_end	= blkdev_write_end,
+//George Wu, 20130629, blkdev_readpages
+#ifdef CONFIG_MACH_QNAPTS
+#ifdef USE_BLKDEV_READPAGES
+        .readpages      = blkdev_readpages,
+#endif
+#endif	
 	.writepages	= generic_writepages,
 	.releasepage	= blkdev_releasepage,
 	.direct_IO	= blkdev_direct_IO,

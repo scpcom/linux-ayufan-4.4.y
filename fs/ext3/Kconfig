@@ -50,6 +50,13 @@ config EXT3_DEFAULTS_TO_ORDERED
 	  privacy issues of data=writeback and are willing to make
 	  that trade off, answer 'n'.
 
+config FS_QNAP_BIRTHTIME
+	bool "QNAP ext3 file birthtime support"
+	depends on EXT3_FS
+	default n
+	help
+	  If unsure, say N.
+
 config EXT3_FS_XATTR
 	bool "Ext3 extended attributes"
 	depends on EXT3_FS

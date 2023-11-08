@@ -50,6 +50,10 @@
 #include "target_core_pr.h"
 #include "target_core_rd.h"
 
+#ifdef CONFIG_MACH_QNAPTS
+#include "target_core_extern.h"
+#endif
+
 extern struct t10_alua_lu_gp *default_lu_gp;
 
 static LIST_HEAD(g_tf_list);
@@ -583,12 +587,36 @@ static ssize_t target_core_dev_show_attr_##_name(			\
 		spin_unlock(&se_dev->se_dev_lock); 			\
 		return -ENODEV;						\
 	}								\
-	rb = snprintf(page, PAGE_SIZE, "%u\n",				\
-		(u32)dev->se_sub_dev->se_dev_attrib._name);		\
+	rb = snprintf(page, PAGE_SIZE, "%llu\n",				\
+		(u64)dev->se_sub_dev->se_dev_attrib._name);		\
 	spin_unlock(&se_dev->se_dev_lock);				\
-									\
 	return rb;							\
 }
+#ifdef CONFIG_MACH_QNAPTS
+      /* when the file of allocatd is accessed, iscsi iblock will update it*/
+      /* modify by JS Chen 20131021 */
+#define DEF_DEV_ATTRIB_SHOW_FOR_GUI(_name)					\
+static ssize_t target_core_dev_show_attr_for_gui_##_name(			\
+	struct se_dev_attrib *da,					\
+	char *page)							\
+{									\
+	struct se_device *dev;						\
+	struct se_subsystem_dev *se_dev = da->da_sub_dev;			\
+	ssize_t rb;							\
+									\
+	spin_lock(&se_dev->se_dev_lock);				\
+	dev = se_dev->se_dev_ptr;					\
+	if (!dev) {							\
+		spin_unlock(&se_dev->se_dev_lock); 			\
+		return -ENODEV;						\
+	}								\
+	__update_allocated_attr(dev);\
+	rb = snprintf(page, PAGE_SIZE, "%llu\n",				\
+		(u64)dev->se_sub_dev->se_dev_attrib._name);		\
+	spin_unlock(&se_dev->se_dev_lock);				\
+	return rb;							\
+}
+#endif
 
 #define DEF_DEV_ATTRIB_STORE(_name)					\
 static ssize_t target_core_dev_store_attr_##_name(			\
@@ -627,6 +655,11 @@ DEF_DEV_ATTRIB_STORE(_name);
 #define DEF_DEV_ATTRIB_RO(_name)					\
 DEF_DEV_ATTRIB_SHOW(_name);
 
+#ifdef CONFIG_MACH_QNAPTS
+#define DEF_DEV_ATTRIB_RO_FOR_GUI(_name)					\
+DEF_DEV_ATTRIB_SHOW_FOR_GUI(_name);
+#endif
+
 CONFIGFS_EATTR_STRUCT(target_core_dev_attrib, se_dev_attrib);
 #define SE_DEV_ATTR(_name, _mode)					\
 static struct target_core_dev_attrib_attribute				\
@@ -640,6 +673,16 @@ static struct target_core_dev_attrib_attribute				\
 			target_core_dev_attrib_##_name =		\
 	__CONFIGFS_EATTR_RO(_name,					\
 	target_core_dev_show_attr_##_name);
+
+#ifdef CONFIG_MACH_QNAPTS
+      /* when the file of allocatd is accessed, iscsi iblock will update it*/
+      /* modify by JS Chen 20131021 */
+#define SE_DEV_ATTR_RO_FOR_GUI(_name);						\
+static struct target_core_dev_attrib_attribute				\
+			target_core_dev_attrib_##_name =		\
+	__CONFIGFS_EATTR_RO(_name,					\
+	target_core_dev_show_attr_for_gui_##_name);
+#endif
 
 DEF_DEV_ATTRIB(emulate_dpo);
 SE_DEV_ATTR(emulate_dpo, S_IRUGO | S_IWUSR);
@@ -710,6 +753,26 @@ SE_DEV_ATTR(unmap_granularity, S_IRUGO | S_IWUSR);
 DEF_DEV_ATTRIB(unmap_granularity_alignment);
 SE_DEV_ATTR(unmap_granularity_alignment, S_IRUGO | S_IWUSR);
 
+DEF_DEV_ATTRIB(tp_threshold_enable);
+SE_DEV_ATTR(tp_threshold_enable, S_IRUGO | S_IWUSR);
+
+DEF_DEV_ATTRIB(tp_threshold_percent);
+SE_DEV_ATTR(tp_threshold_percent, S_IRUGO | S_IWUSR);
+
+DEF_DEV_ATTRIB(lun_index);
+SE_DEV_ATTR(lun_index, S_IRUGO | S_IWUSR);
+
+#ifdef CONFIG_MACH_QNAPTS
+#if 1 /* when the file of allocatd is accessed, iscsi iblock will update it*/
+      /* modify by JS Chen 20131021 */
+DEF_DEV_ATTRIB_RO_FOR_GUI(allocated);
+SE_DEV_ATTR_RO_FOR_GUI(allocated);
+#else
+DEF_DEV_ATTRIB_RO(allocated);
+SE_DEV_ATTR_RO(allocated);
+#endif
+#endif /* CONFIG_MACH_QNAPTS */
+
 CONFIGFS_EATTR_OPS(target_core_dev_attrib, se_dev_attrib, da_group);
 
 static struct configfs_attribute *target_core_dev_attrib_attrs[] = {
@@ -736,6 +799,10 @@ static struct configfs_attribute *target_core_dev_attrib_attrs[] = {
 	&target_core_dev_attrib_max_unmap_block_desc_count.attr,
 	&target_core_dev_attrib_unmap_granularity.attr,
 	&target_core_dev_attrib_unmap_granularity_alignment.attr,
+	&target_core_dev_attrib_tp_threshold_enable.attr,
+	&target_core_dev_attrib_tp_threshold_percent.attr,
+	&target_core_dev_attrib_lun_index.attr,
+	&target_core_dev_attrib_allocated.attr,
 	NULL,
 };
 
@@ -1717,6 +1784,238 @@ static struct target_core_configfs_attribute target_core_attr_dev_alias = {
 	.store	= target_core_store_dev_alias,
 };
 
+#ifdef CONFIG_MACH_QNAPTS   
+// [S] Benjamin 20121031 for provision configfs
+static ssize_t target_core_show_dev_provision(void *p, char *page)
+{
+	struct se_subsystem_dev *se_dev = p;
+
+	if (!(se_dev->su_dev_flags & SDF_USING_PROVISION))
+		return 0;
+
+	return snprintf(page, PAGE_SIZE, "%s\n", se_dev->se_dev_provision);
+}
+
+static ssize_t target_core_store_dev_provision(
+	void *p,
+	const char *page,
+	size_t count)
+{
+	struct se_subsystem_dev *se_dev = p;
+	struct se_hba *hba = se_dev->se_dev_hba;
+	ssize_t read_bytes;
+
+	if (count > (SE_DEV_PROVISION_LEN - 1)) {
+		pr_err("provision count: %d exceeds"
+			" SE_DEV_PROVISION_LEN-1: %u\n", (int)count,
+			SE_DEV_PROVISION_LEN - 1);
+		return -EINVAL;
+	}
+
+	read_bytes = snprintf(&se_dev->se_dev_provision[0], SE_DEV_PROVISION_LEN,
+			"%s", page);
+	if (!read_bytes)
+		return -EINVAL;
+	if (se_dev->se_dev_provision[read_bytes - 1] == '\n')
+		se_dev->se_dev_provision[read_bytes - 1] = '\0';
+
+	se_dev->su_dev_flags |= SDF_USING_PROVISION;
+
+	pr_debug("Target_Core_ConfigFS: %s/%s set provision: %s\n",
+		config_item_name(&hba->hba_group.cg_item),
+		config_item_name(&se_dev->se_dev_group.cg_item),
+		se_dev->se_dev_provision);
+
+	return read_bytes;
+}
+
+static struct target_core_configfs_attribute target_core_attr_dev_provision = {
+	.attr	= { .ca_owner = THIS_MODULE,
+		    .ca_name = "provision",
+		    .ca_mode =  S_IRUGO | S_IWUSR },
+	.show	= target_core_show_dev_provision,
+	.store	= target_core_store_dev_provision,
+};
+// [E] Benjamin 20121031 for provision configfs
+
+// [S] Benjamin 20130117 for naa configfs
+static ssize_t target_core_show_dev_naa(void *p, char *page)
+{
+	struct se_subsystem_dev *se_dev = p;
+
+	if (!(se_dev->su_dev_flags & SDF_USING_NAA))
+		return 0;
+
+	return snprintf(page, PAGE_SIZE, "%s\n", se_dev->se_dev_naa);
+}
+
+static ssize_t target_core_store_dev_naa(
+	void *p,
+	const char *page,
+	size_t count)
+{
+	struct se_subsystem_dev *se_dev = p;
+	struct se_hba *hba = se_dev->se_dev_hba;
+	ssize_t read_bytes;
+
+	if (count > (SE_DEV_NAA_LEN - 1)) {
+		pr_err("naa count: %d exceeds SE_DEV_NAA_LEN-1: %u\n", 
+			(int)count, SE_DEV_NAA_LEN - 1);
+		return -EINVAL;
+	}
+
+	read_bytes = snprintf(&se_dev->se_dev_naa[0], SE_DEV_NAA_LEN,
+			"%s", page);
+	if (!read_bytes)
+		return -EINVAL;
+	if (se_dev->se_dev_naa[read_bytes - 1] == '\n')
+		se_dev->se_dev_naa[read_bytes - 1] = '\0';
+
+	se_dev->su_dev_flags |= SDF_USING_NAA;
+
+    pr_debug("Target_Core_ConfigFS: %s/%s set naa: %s\n",
+		config_item_name(&hba->hba_group.cg_item),
+		config_item_name(&se_dev->se_dev_group.cg_item),
+		se_dev->se_dev_naa);
+
+	return read_bytes;
+}
+
+static struct target_core_configfs_attribute target_core_attr_dev_naa = {
+	.attr	= { .ca_owner = THIS_MODULE,
+		    .ca_name = "naa",
+		    .ca_mode =  S_IRUGO | S_IWUSR },
+	.show	= target_core_show_dev_naa,
+	.store	= target_core_store_dev_naa,
+};
+// [E] Benjamin 20130117 for naa configfs
+
+
+
+#if defined(SUPPORT_LOGICAL_BLOCK_4KB_FROM_NAS_GUI)
+
+/* adamhsu 2013/06/07 - Support to set the logical block size from NAS GUI.
+ *
+ * Cause of the attribute item information in attrib folder are still not be set
+ * before to enable the LU, we need to put this information into another attribute
+ * item.
+ */
+
+/*
+ * @fn int target_core_show_dev_qlbs (void *p, char *page)
+ *
+ * @brief
+ * @note
+ * @param[in] p
+ * @param[in] page
+ * @retval
+ */
+static ssize_t target_core_show_dev_qlbs(
+    void *p, 
+    char *page
+    )
+{
+    struct se_subsystem_dev *se_sub_dev = p;
+    ssize_t rb;
+
+    /* TODO
+     *
+     * Shall we need to take care something more in this function ??
+     */
+    if (!(se_sub_dev->su_dev_flags & SDF_USING_QLBS))
+        return 0;
+    rb = snprintf(page, PAGE_SIZE, "%llu\n", (u64)se_sub_dev->se_dev_qlbs);
+    return rb;
+}
+
+/*
+ * @fn int target_core_store_dev_qlbs (void *p, char *page, size_t count)
+ *
+ * @brief
+ * @note
+ * @param[in] p
+ * @param[in] page
+ * @param[in] count 
+ * @retval
+ */
+static ssize_t target_core_store_dev_qlbs(
+    void *p,
+    const char *page,
+    size_t count)
+{
+    struct se_subsystem_dev *se_sub_dev = p;
+    struct se_hba *hba = se_sub_dev->se_dev_hba;
+    unsigned long val = 0;
+    int ret = 0;
+
+    /* TODO
+     *
+     * Shall we need to take care something more in this function ??
+     */
+    ret = strict_strtoul(page, 0, &val);
+    if (ret < 0) {
+        pr_err("strict_strtoul() failed with  ret: %d\n", ret);
+        return -EINVAL;
+    }
+
+    /* support 512 / 4096 byte currently */
+    if ((val != 512) && (val != 4096)
+#if 0
+    && (val != 1024) && (val != 2048)
+#endif
+    )
+    {
+        pr_err("se_sub_dev[%p]: Illegal value for block_device: %lu"
+            " for se sub device, must be 512, 1024, 2048 or 4096\n",
+            se_sub_dev, val);
+            return -EINVAL;
+    }
+
+    /**/
+    if (atomic_read(&se_sub_dev->se_dev_qlbs_write_once)){
+        pr_err("qlbs was setup already. Can't update again.\n");
+            return -EINVAL;
+    }
+
+    /* set the qlbs to write-once */
+    atomic_set(&se_sub_dev->se_dev_qlbs_write_once, 1);
+    se_sub_dev->su_dev_flags |= SDF_USING_QLBS;
+    se_sub_dev->se_dev_qlbs = val;
+
+    /* TODO: Actually, we can remove this code ...
+     *
+     * To check need to update the block size / hw block size for se_device or
+     * not since we will use se_dev_qlbs to do main key. Please make sure the
+     * LU was disabled / unmaped already before to update them.
+     */
+    spin_lock(&se_sub_dev->se_dev_lock);
+    if (se_sub_dev->se_dev_ptr){
+    	ret = se_dev_set_block_size(se_sub_dev->se_dev_ptr, (u32)val);
+    }
+    spin_unlock(&se_sub_dev->se_dev_lock);
+
+    /**/
+    pr_debug("Target_Core_ConfigFS: se_sub_dev[%p], %s/%s set qlbs: %u\n",
+        se_sub_dev,
+        config_item_name(&hba->hba_group.cg_item),
+        config_item_name(&se_sub_dev->se_dev_group.cg_item),
+        se_sub_dev->se_dev_qlbs);
+
+    return count;
+
+}
+
+static struct target_core_configfs_attribute target_core_attr_dev_qlbs = {
+	.attr	= { .ca_owner = THIS_MODULE,
+		    .ca_name = "qlbs",
+		    .ca_mode =  S_IRUGO | S_IWUSR },
+	.show	= target_core_show_dev_qlbs,
+	.store	= target_core_store_dev_qlbs,
+};
+#endif
+
+#endif /* #ifdef CONFIG_MACH_QNAPTS */
+
 static ssize_t target_core_show_dev_udev_path(void *p, char *page)
 {
 	struct se_subsystem_dev *se_dev = p;
@@ -1785,11 +2084,22 @@ static ssize_t target_core_store_dev_enable(
 				" is \"1\"\n");
 		return -EINVAL;
 	}
+#ifdef CONFIG_MACH_QNAPTS // 2010/07/20 Nike Chen, support online lun expansion
+	if (se_dev->se_dev_ptr) {
+		pr_warning("se_dev->se_dev_ptr already set for storage"
+				" object, try to change the storage size.\n");
+		if (t && t->change_dev_size)
+		    t->change_dev_size(se_dev->se_dev_ptr);        
+		return -EEXIST;
+	}
+#else
 	if (se_dev->se_dev_ptr) {
 		pr_err("se_dev->se_dev_ptr already set for storage"
 				" object\n");
 		return -EEXIST;
-	}
+	}    
+#endif 
+    
 
 	if (t->check_configfs_dev_params(hba, se_dev) < 0)
 		return -EINVAL;
@@ -1962,6 +2272,16 @@ static struct configfs_attribute *lio_core_dev_attrs[] = {
 	&target_core_attr_dev_udev_path.attr,
 	&target_core_attr_dev_enable.attr,
 	&target_core_attr_dev_alua_lu_gp.attr,
+#ifdef CONFIG_MACH_QNAPTS   
+	//Benjamin 20121031 for provision configfs	
+	&target_core_attr_dev_provision.attr,
+	//Benjamin 20130117 for naa configfs	
+	&target_core_attr_dev_naa.attr,	
+
+#if defined(SUPPORT_LOGICAL_BLOCK_4KB_FROM_NAS_GUI)
+	&target_core_attr_dev_qlbs.attr,	
+#endif
+#endif	
 	NULL,
 };
 

@@ -301,8 +301,14 @@ static inline void flush_anon_page(struct vm_area_struct *vma,
 }
 
 #define ARCH_HAS_FLUSH_KERNEL_DCACHE_PAGE
+// Patch by QNAP: Fix bug#37043, encrypted disk cannot be mounted when try to create an encrtypt disk. the patch is from official linux-3.11.2
+#if defined(CONFIG_MACH_QNAPTS)
 extern void flush_kernel_dcache_page(struct page *);
-
+#else
+static inline void flush_kernel_dcache_page(struct page *page)
+{
+}
+#endif
 #define flush_dcache_mmap_lock(mapping) \
 	spin_lock_irq(&(mapping)->tree_lock)
 #define flush_dcache_mmap_unlock(mapping) \

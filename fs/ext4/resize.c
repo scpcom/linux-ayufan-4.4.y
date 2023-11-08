@@ -661,12 +661,21 @@ exit_free:
  * do not copy the full number of backups at this time.  The resize
  * which changed s_groups_count will backup again.
  */
+ /* Benjamin 20110620: for solving overflow while calling sb_getblk. */
+#ifdef CONFIG_MACH_QNAPTS
+static void update_backups(struct super_block *sb, sector_t blk_off, char *data, int size)
+#else
 static void update_backups(struct super_block *sb,
 			   int blk_off, char *data, int size)
+#endif			   
 {
 	struct ext4_sb_info *sbi = EXT4_SB(sb);
 	const ext4_group_t last = sbi->s_groups_count;
+#ifdef CONFIG_MACH_QNAPTS
+    const ext4_fsblk_t bpg = EXT4_BLOCKS_PER_GROUP(sb);
+#else    
 	const int bpg = EXT4_BLOCKS_PER_GROUP(sb);
+#endif
 	unsigned three = 1;
 	unsigned five = 5;
 	unsigned seven = 7;

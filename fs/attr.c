@@ -153,6 +153,14 @@ void setattr_copy(struct inode *inode, const struct iattr *attr)
 	if (ia_valid & ATTR_CTIME)
 		inode->i_ctime = timespec_trunc(attr->ia_ctime,
 						inode->i_sb->s_time_gran);
+//Patch by QNAP: fix ext3 birthtime issue
+#ifdef CONFIG_FS_QNAP_BIRTHTIME
+	if (ia_valid & ATTR_CREATE_TIME) { /* birth time of file */
+		inode->i_birthtime = timespec_trunc(attr->ia_ctime,
+						inode->i_sb->s_time_gran);
+	}
+#endif
+//////////////////////////////////////////////////    
 	if (ia_valid & ATTR_MODE) {
 		umode_t mode = attr->ia_mode;
 

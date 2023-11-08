@@ -122,9 +122,14 @@ static int ext4_readdir(struct file *filp,
 	int dir_has_error = 0;
 
 	sb = inode->i_sb;
-
+//Patch by QNAP:Search filename use case insensitive method
+#ifdef QNAP_SEARCH_FILENAME_CASE_INSENSITIVE
+    if (((ntohl(EXT4_SB(inode->i_sb)->s_es->s_hash_magic) == QNAP_SB_HASH) ||
+            EXT4_HAS_COMPAT_FEATURE(inode->i_sb, EXT4_FEATURE_COMPAT_DIR_INDEX)) &&
+#else
 	if (EXT4_HAS_COMPAT_FEATURE(inode->i_sb,
 				    EXT4_FEATURE_COMPAT_DIR_INDEX) &&
+#endif				    
 	    ((ext4_test_inode_flag(inode, EXT4_INODE_INDEX)) ||
 	     ((inode->i_size >> sb->s_blocksize_bits) == 1))) {
 		err = ext4_dx_readdir(filp, dirent, filldir);

@@ -48,6 +48,13 @@ void		svc_init_xprt_sock(void);
 void		svc_cleanup_xprt_sock(void);
 struct svc_xprt *svc_sock_create(struct svc_serv *serv, int prot);
 void		svc_sock_destroy(struct svc_xprt *);
+//Patch by QNAP: Setup a interface to rewrite payload size
+#ifdef CONFIG_MACH_QNAPTS
+void svc_tcp_set_payload(uint32_t max_payload);
+void svc_udp_set_payload(uint32_t max_payload);
+uint32_t svc_tcp_read_payload(void);
+uint32_t svc_udp_read_payload(void);
+#endif
 
 /*
  * svc_makesock socket characteristics

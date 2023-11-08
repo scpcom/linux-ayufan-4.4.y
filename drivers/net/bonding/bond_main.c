@@ -185,7 +185,10 @@ MODULE_PARM_DESC(resend_igmp, "Number of IGMP membership reports to send on "
 atomic_t netpoll_block_tx = ATOMIC_INIT(0);
 #endif
 
-int bond_net_id __read_mostly;
+//Patch by QNAP:seperate bonding driver from ipv6
+#ifdef CONFIG_MACH_QNAPTS
+//int bond_net_id __read_mostly;
+#endif
 
 static __be32 arp_target[BOND_MAX_ARP_TARGETS];
 static int arp_ip_count;

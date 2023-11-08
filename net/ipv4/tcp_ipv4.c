@@ -1245,6 +1245,12 @@ struct request_sock_ops tcp_request_sock_ops __read_mostly = {
 	.syn_ack_timeout = 	tcp_syn_ack_timeout,
 };
 
+//Patch by QNAP: Add IP filter
+#ifdef CONFIG_MACH_QNAPTS
+extern int is_filtered_by_ipsec_rules(struct sk_buff *skb);
+#endif
+////////////////////////////////////////////////////////////
+
 #ifdef CONFIG_TCP_MD5SIG
 static const struct tcp_request_sock_ops tcp_request_sock_ipv4_ops = {
 	.md5_lookup	=	tcp_v4_reqsk_md5_lookup,
@@ -1269,6 +1275,15 @@ int tcp_v4_conn_request(struct sock *sk, struct sk_buff *skb)
 	/* Never answer to SYNs send to broadcast or multicast */
 	if (skb_rtable(skb)->rt_flags & (RTCF_BROADCAST | RTCF_MULTICAST))
 		goto drop;
+//Patch by QNAP: Add IP filter
+#ifdef CONFIG_MACH_QNAPTS
+	// added by Jeff on 2007/3/30 for ipsec
+	// all hosts requesting to connect should compliant ipsec rules
+	if( is_filtered_by_ipsec_rules(skb))
+		goto drop;
+	// end added
+#endif
+///////////////////////////////////////////////////////////
 
 	/* TW buckets are converted to open requests without
 	 * limitations, they conserve resources and peer is

@@ -53,6 +53,10 @@ enum {LAST_NORM, LAST_ROOT, LAST_DOT, LAST_DOTDOT, LAST_BIND};
 #define LOOKUP_PARENT		0x0010
 #define LOOKUP_REVAL		0x0020
 #define LOOKUP_RCU		0x0040
+//Patch by QNAP:Search filename use case insensitive method
+#ifdef QNAP_SEARCH_FILENAME_CASE_INSENSITIVE
+#define LOOKUP_CASE_INSENSITIVE 128
+#endif
 
 /*
  * Intent data
@@ -86,7 +90,9 @@ extern struct file *lookup_instantiate_filp(struct nameidata *nd, struct dentry 
 		int (*open)(struct inode *, struct file *));
 
 extern struct dentry *lookup_one_len(const char *, struct dentry *, int);
-
+#ifdef CONFIG_MACH_QNAPTS
+extern struct dentry *lookup_one_len_without_acl(const char *, struct dentry *, int);
+#endif
 extern int follow_down_one(struct path *);
 extern int follow_down(struct path *);
 extern int follow_up(struct path *);

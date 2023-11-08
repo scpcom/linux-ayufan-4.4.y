@@ -10,6 +10,11 @@
 #include <linux/syscalls.h>
 #include <asm/uaccess.h>
 #include <asm/unistd.h>
+//Patch by QNAP: implement fnotify function
+#ifdef	QNAP_FNOTIFY
+#include <linux/fnotify.h>
+#endif	//QNAP_FNOTIFY
+///////////////////////////////////
 
 #ifdef __ARCH_WANT_SYS_UTIME
 
@@ -53,6 +58,17 @@ static int utimes_common(struct path *path, struct timespec *times)
 	int error;
 	struct iattr newattrs;
 	struct inode *inode = path->dentry->d_inode;
+//Patch by QNAP: implement fnotify function
+#ifdef	QNAP_FNOTIFY
+	T_FILE_STATUS  tfsOrg={0};
+	struct timespec  i_mtime={0,0};
+	if (inode)
+	{
+		i_mtime = inode->i_mtime;
+		FILE_STATUS_BY_INODE(inode, tfsOrg);
+	}
+#endif	//QNAP_FNOTIFY
+////////////////////////////////////
 
 	error = mnt_want_write(path->mnt);
 	if (error)
@@ -104,6 +120,12 @@ static int utimes_common(struct path *path, struct timespec *times)
 	mutex_lock(&inode->i_mutex);
 	error = notify_change(path->dentry, &newattrs);
 	mutex_unlock(&inode->i_mutex);
+//Patch by QNAP: implement fnotify function
+#ifdef	QNAP_FNOTIFY
+	if (!error && (FN_CHTIME & msys_nodify))
+		pfn_sys_file_notify(FN_CHTIME, MARG_2xI32, path, NULL, 0, &tfsOrg, i_mtime.tv_nsec, i_mtime.tv_sec, 0, 0);
+#endif	//QNAP_FNOTIFY
+/////////////////////////////////////
 
 mnt_drop_write_and_out:
 	mnt_drop_write(path->mnt);

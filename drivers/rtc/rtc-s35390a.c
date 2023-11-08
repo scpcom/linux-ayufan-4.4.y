@@ -15,6 +15,12 @@
 #include <linux/bitrev.h>
 #include <linux/bcd.h>
 #include <linux/slab.h>
+//Patch by QNAP: Board initialization
+#if defined(CONFIG_MACH_QNAPTS)
+#include <linux/delay.h>	// mdealy
+#define S35390A_CMD_INT2	5
+#endif
+//////////////////
 
 #define S35390A_CMD_STATUS1	0
 #define S35390A_CMD_STATUS2	1
@@ -194,9 +200,104 @@ static int s35390a_rtc_set_time(struct device *dev, struct rtc_time *tm)
 	return s35390a_set_datetime(to_i2c_client(dev), tm);
 }
 
+//Patch by QNAP: Board initialization
+#if defined(CONFIG_MACH_QNAPTS)
+static int alarm_sts = 0;
+static int s35390a_get_alarm_time(struct i2c_client *client, struct rtc_wkalrm *alrm)
+{
+        struct s35390a *s35390a = i2c_get_clientdata(client);
+        int  err;
+        char buf[3];
+        char sts[1];
+
+        sts[0] = 0;
+        s35390a_set_reg(s35390a, S35390A_CMD_STATUS2, sts, sizeof(sts));  // Disable INT2 Alarm interrupt
+        mdelay(10);
+        s35390a_get_reg(s35390a, S35390A_CMD_STATUS1, sts, sizeof(sts)); // clear interrupt
+        mdelay(10);
+
+        sts[0] = 0x02;
+        err = s35390a_set_reg(s35390a, S35390A_CMD_STATUS2, sts, sizeof(sts));  // Set Alarm time
+        if (err < 0)
+                return err;
+
+        mdelay(10);
+        err = s35390a_get_reg(s35390a, S35390A_CMD_INT2, buf, sizeof(buf));
+        if (err < 0)
+                return err;
+        mdelay(10);
+        alrm->time.tm_wday = bcd2bin(bitrev8(buf[0])&0x07);
+        alrm->time.tm_hour = bcd2bin(bitrev8(buf[1])&0x3F);
+        alrm->time.tm_min  = bcd2bin(bitrev8(buf[2])&0x7F);
+        alrm->enabled = alarm_sts;
+
+        if(alarm_sts == 0){ // if disable
+                sts[0] = 0;
+                s35390a_set_reg(s35390a, S35390A_CMD_STATUS2, sts, sizeof(sts));  // Disable INT2 Alarm interrupt
+                mdelay(10);
+        }
+//        printk("RTC Get alarm enable = %d,w:[%02d] [H:M][%02d:%02d]\n", alrm->enabled, alrm->time.tm_wday, alrm->time.tm_hour, alrm->time.tm_min);
+
+	return 0;
+}
+
+static int s35390a_set_alarm_time(struct i2c_client *client, struct rtc_wkalrm *alrm)
+{
+        struct s35390a *s35390a = i2c_get_clientdata(client);
+        char buf[3];
+        char sts[1];
+
+        sts[0] = 0;
+        s35390a_set_reg(s35390a, S35390A_CMD_STATUS2, sts, sizeof(sts));  // Disable INT2 Alarm interrupt
+        mdelay(10);
+        s35390a_get_reg(s35390a, S35390A_CMD_STATUS1, sts, sizeof(sts));  // if interrupt flag is on, it will clear
+        mdelay(10);
+        sts[0] = 0x2;
+        s35390a_set_reg(s35390a, S35390A_CMD_STATUS2, sts, sizeof(sts));  // Enable INT2 Alarm interrupt
+        mdelay(10);
+
+        buf[0] = bitrev8(bin2bcd(alrm->time.tm_wday)) | 0x1;
+        if(alrm->time.tm_hour >= 12)
+                buf[1] = bitrev8(bin2bcd(alrm->time.tm_hour)) | 0x3;
+        else
+                buf[1] = bitrev8(bin2bcd(alrm->time.tm_hour)) | 0x1;
+
+        buf[2] = bitrev8(bin2bcd(alrm->time.tm_min))  | 0x1;
+        s35390a_set_reg(s35390a, S35390A_CMD_INT2, buf, sizeof(buf));
+        mdelay(10);
+
+        alarm_sts = alrm->enabled;
+        if(alarm_sts == 0){ // if disable
+                sts[0] = 0;
+                s35390a_set_reg(s35390a, S35390A_CMD_STATUS2, sts, sizeof(sts));  // Disable INT2 Alarm interrupt
+                mdelay(10);
+        }
+//        printk("Alarm interrupt status : %x\n", alarm_sts);
+//        printk("Set RTC Alarm => w:[%02X] h:m[%02X:%02X]\n", bin2bcd(alrm->time.tm_wday), bin2bcd(alrm->time.tm_hour), bin2bcd(alrm->time.tm_min));
+
+	return 0;
+}
+
+static int s35390a_rtc_set_alarm(struct device *dev, struct rtc_wkalrm *alrm)
+{
+//	printk("=== check: call s35390a_rtc_set_alarm\n"); // debug msg
+	return s35390a_set_alarm_time(to_i2c_client(dev), alrm);
+}
+
+static int s35390a_rtc_read_alarm(struct device *dev, struct rtc_wkalrm *alrm)
+{
+	return s35390a_get_alarm_time(to_i2c_client(dev), alrm);
+}
+#endif // End of #if defined(CONFIG_MACH_QNAPTS) && defined(CONFIG_ARM)
+
 static const struct rtc_class_ops s35390a_rtc_ops = {
 	.read_time	= s35390a_rtc_read_time,
 	.set_time	= s35390a_rtc_set_time,
+//Patch by QNAP: Board initialization
+#if defined(CONFIG_MACH_QNAPTS)
+	.read_alarm	= s35390a_rtc_read_alarm,
+	.set_alarm	= s35390a_rtc_set_alarm,
+#endif	
 };
 
 static struct i2c_driver s35390a_driver;

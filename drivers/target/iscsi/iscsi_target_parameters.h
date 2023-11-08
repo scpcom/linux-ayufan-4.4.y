@@ -18,6 +18,9 @@ struct iscsi_param {
 	u8 use;
 	u16 type_range;
 	u32 state;
+#ifdef CONFIG_MACH_QNAPTS   // Benjamin 20110418 for bug #19339: Broadcom HW Initiator login failure 
+    u32 nego;
+#endif     
 	struct list_head p_list;
 } ____cacheline_aligned;
 
@@ -102,12 +105,31 @@ extern void iscsi_set_session_parameters(struct iscsi_sess_ops *,
 #define INITIAL_AUTHMETHOD			CHAP
 #define INITIAL_HEADERDIGEST			"CRC32C,None"
 #define INITIAL_DATADIGEST			"CRC32C,None"
+#ifdef CONFIG_MACH_QNAPTS
+#define INITIAL_MAXCONNECTIONS			"8"
+#else
 #define INITIAL_MAXCONNECTIONS			"1"
+#endif
+
 #define INITIAL_SENDTARGETS			ALL
+#ifdef CONFIG_MACH_QNAPTS // 2009/10/12 Nike Chen
+#if defined(IS_G) && !defined(Athens)
+#define INITIAL_TARGETNAME			"NAS.Target"
+#define INITIAL_INITIATORNAME			"NAS.Initiator"
+#define INITIAL_TARGETALIAS			"NAS Target"
+#define INITIAL_INITIATORALIAS			"NAS Initiator"
+#else
+#define INITIAL_TARGETNAME			"QNAP.Target"
+#define INITIAL_INITIATORNAME			"QNAP.Initiator"
+#define INITIAL_TARGETALIAS			"QNAP Target"
+#define INITIAL_INITIATORALIAS			"QNAP Initiator"
+#endif /* #if defined(IS_G) && !defined(Athens) */
+#else
 #define INITIAL_TARGETNAME			"LIO.Target"
 #define INITIAL_INITIATORNAME			"LIO.Initiator"
 #define INITIAL_TARGETALIAS			"LIO Target"
 #define INITIAL_INITIATORALIAS			"LIO Initiator"
+#endif /* #ifdef CONFIG_MACH_QNAPTS  */
 #define INITIAL_TARGETADDRESS			"0.0.0.0:0000,0"
 #define INITIAL_TARGETPORTALGROUPTAG		"1"
 #define INITIAL_INITIALR2T			YES
@@ -137,6 +159,10 @@ extern void iscsi_set_session_parameters(struct iscsi_sess_ops *,
  */
 #define DISCOVERY			"Discovery"
 #define NORMAL				"Normal"
+#ifdef CONFIG_MACH_QNAPTS   // Benjamin 20110322
+// RF3720 section 5.3, "The initial Login Request of the first connection of a session MAY include the SessionType key=value pair."
+#define SESSION_TYPE        "SessionType"
+#endif
 
 /*
  * struct iscsi_param->use

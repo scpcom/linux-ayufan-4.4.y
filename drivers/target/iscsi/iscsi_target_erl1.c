@@ -130,6 +130,7 @@ static int iscsit_send_recovery_r2t_for_snack(
 		return 0;
 	}
 	r2t->sent_r2t = 0;
+	r2t->for_snack=1;
 	spin_unlock_bh(&cmd->r2t_lock);
 
 	iscsit_add_cmd_to_immediate_queue(cmd, cmd->conn, ISTATE_SEND_R2T);

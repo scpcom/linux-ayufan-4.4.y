@@ -39,6 +39,65 @@
 
 #include "xattr.h"
 #include "acl.h"
+//Patch by QNAP:Search filename use case insensitive method
+#ifdef QNAP_SEARCH_FILENAME_CASE_INSENSITIVE
+//#define CASE_FOLDING_DEBUG
+#include <linux/namei.h>
+extern int do_case_folding_transform(__u8 *from,int from_len,__u8 *to,int max_len);
+extern int do_case_folding_compare(__u8 *src1, int len1, __u8 *src2,int len2);
+
+/* Hash a string to an integer in a caseless way */
+static int ext4_dentry_hash(const struct dentry *dentry, const struct inode *inode, struct qstr *this)
+{
+    unsigned char case_buffer[EXT4_NAME_LEN];
+    int ret;
+	unsigned long hash = init_name_hash();
+    unsigned char *bufferP=case_buffer;
+    ret = do_case_folding_transform((__u8 *)this->name,(int)this->len,bufferP,EXT4_NAME_LEN);
+    if(ret <= 0)
+        return 0;
+    while(ret--)
+        hash = partial_name_hash(*bufferP++, hash);
+    this->hash = end_name_hash(hash);
+	return 0;
+}
+
+/* return 1 on failure and 0 on success */
+static int ext4_dentry_compare(const struct dentry *parent,
+        const struct inode *pinode, 
+        const struct dentry *dentry, 
+        const struct inode *inode,
+        unsigned int len, 
+        const char *str, 
+        const struct qstr *name)
+{
+//Simple case, convert to upper case to compare
+    if(!name->case_folding)
+	    return (len != name->len) || strncmp(str, name->name,name->len);
+    else
+	    return do_case_folding_compare((__u8 *)str, (int)len, (__u8 *)name->name,(int)name->len);
+}
+
+static int ext4_dentry_revalidate(struct dentry *dentry, struct nameidata *nd)
+{
+    if(nd && nd->flags & LOOKUP_CASE_INSENSITIVE && dentry && dentry->d_inode == NULL){
+#ifdef CASE_FOLDING_DEBUG
+		printk("In %s:%d:name = %s invalidate this dentry\n", __func__, __LINE__, dentry->d_name.name);
+#endif
+        return 0;
+    }
+    else
+        return 1;
+}
+
+struct dentry_operations ext4_dentry_operations =
+{
+	.d_hash		= ext4_dentry_hash,
+	.d_compare	= ext4_dentry_compare,
+	.d_revalidate	= ext4_dentry_revalidate,
+};
+#endif
+//////////////////////////////////////////////////////////////////////////////////////////
 
 #include <trace/events/ext4.h>
 /*
@@ -161,8 +220,14 @@ static struct dx_frame *dx_probe(const struct qstr *d_name,
 				 struct dx_frame *frame,
 				 int *err);
 static void dx_release(struct dx_frame *frames);
+//Patch by QNAP:Search filename use case insensitive method
+#ifdef QNAP_SEARCH_FILENAME_CASE_INSENSITIVE
+static int dx_make_map(struct ext4_dir_entry_2 *de, unsigned blocksize,
+		       struct dx_hash_info *hinfo, struct dx_map_entry map[],int case_insensitive);
+#else
 static int dx_make_map(struct ext4_dir_entry_2 *de, unsigned blocksize,
 		       struct dx_hash_info *hinfo, struct dx_map_entry map[]);
+#endif
 static void dx_sort_map(struct dx_map_entry *map, unsigned count);
 static struct ext4_dir_entry_2 *dx_move_dirents(char *from, char *to,
 		struct dx_map_entry *offsets, int count, unsigned blocksize);
@@ -173,10 +238,19 @@ static int ext4_htree_next_block(struct inode *dir, __u32 hash,
 				 struct dx_frame *frame,
 				 struct dx_frame *frames,
 				 __u32 *start_hash);
+//Patch by QNAP:Search filename use case insensitive method
+#ifdef QNAP_SEARCH_FILENAME_CASE_INSENSITIVE
+static struct buffer_head * ext4_dx_find_entry(struct inode *dir,
+		const struct qstr *d_name,
+		struct ext4_dir_entry_2 **res_dir,
+		int *err,int case_sensitive);
+#else
 static struct buffer_head * ext4_dx_find_entry(struct inode *dir,
 		const struct qstr *d_name,
 		struct ext4_dir_entry_2 **res_dir,
 		int *err);
+#endif
+/////////////////////////////////////////////////////////////////
 static int ext4_dx_add_entry(handle_t *handle, struct dentry *dentry,
 			     struct inode *inode);
 
@@ -269,9 +343,14 @@ struct stats
 	unsigned space;
 	unsigned bcount;
 };
-
+//Patch by QNAP:Search filename use case insensitive method
+#ifdef QNAP_SEARCH_FILENAME_CASE_INSENSITIVE
+static struct stats dx_show_leaf(struct dx_hash_info *hinfo, struct ext4_dir_entry_2 *de,
+				 int size, int show_names,int case_insensitive)
+#else
 static struct stats dx_show_leaf(struct dx_hash_info *hinfo, struct ext4_dir_entry_2 *de,
 				 int size, int show_names)
+#endif				 
 {
 	unsigned names = 0, space = 0;
 	char *base = (char *) de;
@@ -287,7 +366,12 @@ static struct stats dx_show_leaf(struct dx_hash_info *hinfo, struct ext4_dir_ent
 				int len = de->name_len;
 				char *name = de->name;
 				while (len--) printk("%c", *name++);
+//Patch by QNAP:Search filename use case insensitive method
+#ifdef QNAP_SEARCH_FILENAME_CASE_INSENSITIVE
+				ext4fs_dirhash(de->name, de->name_len, &h,case_insensitive);
+#else                
 				ext4fs_dirhash(de->name, de->name_len, &h);
+#endif
 				printk(":%x.%u ", h.hash,
 				       (unsigned) ((char *) de - base));
 			}
@@ -319,7 +403,12 @@ struct stats dx_show_entries(struct dx_hash_info *hinfo, struct inode *dir,
 		if (!(bh = ext4_bread (NULL,dir, block, 0,&err))) continue;
 		stats = levels?
 		   dx_show_entries(hinfo, dir, ((struct dx_node *) bh->b_data)->entries, levels - 1):
+//Patch by QNAP:Search filename use case insensitive method
+#ifdef QNAP_SEARCH_FILENAME_CASE_INSENSITIVE
+		   dx_show_leaf(hinfo, (struct ext4_dir_entry_2 *) bh->b_data, blocksize, 0,ntohl(EXT4_SB(dir->i_sb)->s_es->s_hash_magic) == QNAP_SB_HASH);
+#else		   
 		   dx_show_leaf(hinfo, (struct ext4_dir_entry_2 *) bh->b_data, blocksize, 0);
+#endif
 		names += stats.names;
 		space += stats.space;
 		bcount += stats.bcount;
@@ -371,7 +460,12 @@ dx_probe(const struct qstr *d_name, struct inode *dir,
 		hinfo->hash_version += EXT4_SB(dir->i_sb)->s_hash_unsigned;
 	hinfo->seed = EXT4_SB(dir->i_sb)->s_hash_seed;
 	if (d_name)
+//Patch by QNAP:Search filename use case insensitive method
+#ifdef QNAP_SEARCH_FILENAME_CASE_INSENSITIVE
+		ext4fs_dirhash(d_name->name, d_name->len, hinfo,ntohl(EXT4_SB(dir->i_sb)->s_es->s_hash_magic) == QNAP_SB_HASH);
+#else        
 		ext4fs_dirhash(d_name->name, d_name->len, hinfo);
+#endif
 	hash = hinfo->hash;
 
 	if (root->info.unused_flags & 1) {
@@ -591,7 +685,12 @@ static int htree_dirblock_to_tree(struct file *dir_file,
 			brelse(bh);
 			return count;
 		}
+//Patch by QNAP:Search filename use case insensitive method
+#ifdef QNAP_SEARCH_FILENAME_CASE_INSENSITIVE
+		ext4fs_dirhash(de->name, de->name_len, hinfo,ntohl(EXT4_SB(dir->i_sb)->s_es->s_hash_magic) == QNAP_SB_HASH);
+#else
 		ext4fs_dirhash(de->name, de->name_len, hinfo);
+#endif
 		if ((hinfo->hash < start_hash) ||
 		    ((hinfo->hash == start_hash) &&
 		     (hinfo->minor_hash < start_minor_hash)))
@@ -709,9 +808,16 @@ errout:
  * Create map of hash values, offsets, and sizes, stored at end of block.
  * Returns number of entries mapped.
  */
+//Patch by QNAP:Search filename use case insensitive method
+#ifdef QNAP_SEARCH_FILENAME_CASE_INSENSITIVE
+static int dx_make_map(struct ext4_dir_entry_2 *de, unsigned blocksize,
+		       struct dx_hash_info *hinfo,
+		       struct dx_map_entry *map_tail,int case_insensitive)
+#else		       
 static int dx_make_map(struct ext4_dir_entry_2 *de, unsigned blocksize,
 		       struct dx_hash_info *hinfo,
 		       struct dx_map_entry *map_tail)
+#endif		       
 {
 	int count = 0;
 	char *base = (char *) de;
@@ -719,7 +825,12 @@ static int dx_make_map(struct ext4_dir_entry_2 *de, unsigned blocksize,
 
 	while ((char *) de < base + blocksize) {
 		if (de->name_len && de->inode) {
+//Patch by QNAP:Search filename use case insensitive method
+#ifdef QNAP_SEARCH_FILENAME_CASE_INSENSITIVE
+			ext4fs_dirhash(de->name, de->name_len, &h,case_insensitive);
+#else            
 			ext4fs_dirhash(de->name, de->name_len, &h);
+#endif
 			map_tail--;
 			map_tail->hash = h.hash;
 			map_tail->offs = ((char *) de - base)>>2;
@@ -776,8 +887,14 @@ static void dx_insert_block(struct dx_frame *frame, u32 hash, ext4_lblk_t block)
 
 static void ext4_update_dx_flag(struct inode *inode)
 {
+//Patch by QNAP:Search filename use case insensitive method
+#ifdef QNAP_SEARCH_FILENAME_CASE_INSENSITIVE
+	if (ntohl(EXT4_SB(inode->i_sb)->s_es->s_hash_magic) != QNAP_SB_HASH &&
+	     !EXT4_HAS_COMPAT_FEATURE(inode->i_sb,EXT4_FEATURE_COMPAT_DIR_INDEX))
+#else
 	if (!EXT4_HAS_COMPAT_FEATURE(inode->i_sb,
 				     EXT4_FEATURE_COMPAT_DIR_INDEX))
+#endif				     
 		ext4_clear_inode_flag(inode, EXT4_INODE_INDEX);
 }
 
@@ -787,43 +904,93 @@ static void ext4_update_dx_flag(struct inode *inode)
  * `len <= EXT4_NAME_LEN' is guaranteed by caller.
  * `de != NULL' is guaranteed by caller.
  */
+//Patch by QNAP:Search filename use case insensitive method
+#ifdef QNAP_SEARCH_FILENAME_CASE_INSENSITIVE
+static inline int ext4_match (int len, const char * const name,
+			      struct ext4_dir_entry_2 * de,int case_sensitive)
+#else 
 static inline int ext4_match (int len, const char * const name,
 			      struct ext4_dir_entry_2 * de)
+#endif			      
 {
 	if (len != de->name_len)
 		return 0;
 	if (!de->inode)
 		return 0;
+//Patch by QNAP:Search filename use case insensitive method
+#ifdef QNAP_SEARCH_FILENAME_CASE_INSENSITIVE
+    if(case_sensitive)
+	    return !memcmp(name, de->name,len);
+    else
+	    return !do_case_folding_compare((__u8 *)name,len, de->name,de->name_len);
+#else
 	return !memcmp(name, de->name, len);
+#endif
 }
 
 /*
  * Returns 0 if not found, -1 on failure, and 1 on success
  */
+//Patch by QNAP:Search filename use case insensitive method
+#ifdef QNAP_SEARCH_FILENAME_CASE_INSENSITIVE
+static inline int search_dirblock(struct buffer_head *bh,
+				  struct inode *dir,
+				  const struct qstr *d_name,
+				  unsigned int offset,
+				  struct ext4_dir_entry_2 ** res_dir,int case_sensitive)
+#else 
 static inline int search_dirblock(struct buffer_head *bh,
 				  struct inode *dir,
 				  const struct qstr *d_name,
 				  unsigned int offset,
 				  struct ext4_dir_entry_2 ** res_dir)
+#endif				  
 {
 	struct ext4_dir_entry_2 * de;
 	char * dlimit;
 	int de_len;
 	const char *name = d_name->name;
 	int namelen = d_name->len;
-
+//Patch by QNAP:Search filename use case insensitive method
+#ifdef CASE_FOLDING_DEBUG
+	int debug = 0;
+	if (strncasecmp(d_name->name, "test", strlen("test")) == 0)
+		debug = 1;
+#endif
+/////////////////////////////////////////////////////////
 	de = (struct ext4_dir_entry_2 *) bh->b_data;
 	dlimit = bh->b_data + dir->i_sb->s_blocksize;
 	while ((char *) de < dlimit) {
 		/* this code is executed quadratically often */
 		/* do minimal checking `by hand' */
-
+//Patch by QNAP:Search filename use case insensitive method
+#ifdef CASE_FOLDING_DEBUG
+		if (debug)
+			printk("In %s:%d:name = %s,de->name = %s,de->name_len = %d,case = %d\n", __func__, __LINE__, name, de->name, de->name_len,case_sensitive);
+#endif
 		if ((char *) de + namelen <= dlimit &&
+//Patch by QNAP:Search filename use case insensitive method
+#ifdef QNAP_SEARCH_FILENAME_CASE_INSENSITIVE
+		    ext4_match (namelen, name, de,case_sensitive)) {
+#else
 		    ext4_match (namelen, name, de)) {
+#endif		    
 			/* found a match - just to be sure, do a full check */
 			if (ext4_check_dir_entry(dir, NULL, de, bh, offset))
 				return -1;
 			*res_dir = de;
+//Patch by QNAP:Search filename use case insensitive method
+#ifdef QNAP_SEARCH_FILENAME_CASE_INSENSITIVE
+			if (!case_sensitive && (d_name->len != de->name_len
+				|| memcmp(d_name->name, de->name, de->name_len))) {
+#ifdef CASE_FOLDING_DEBUG
+				if (debug)
+					printk("In %s:%d:found, modify d_name->name from %s to %s\n", __func__, __LINE__, d_name->name, de->name);
+#endif
+				memcpy((unsigned char*)d_name->name, de->name, de->name_len);
+				((struct qstr*)d_name)->len = de->name_len;
+			}
+#endif
 			return 1;
 		}
 		/* prevent looping on a bad block */
@@ -849,9 +1016,16 @@ static inline int search_dirblock(struct buffer_head *bh,
  * The returned buffer_head has ->b_count elevated.  The caller is expected
  * to brelse() it when appropriate.
  */
+//Patch by QNAP:Search filename use case insensitive method
+#ifdef QNAP_SEARCH_FILENAME_CASE_INSENSITIVE
+static struct buffer_head * ext4_find_entry (struct inode *dir,
+					const struct qstr *d_name,
+					struct ext4_dir_entry_2 ** res_dir,int case_sensitive)
+#else
 static struct buffer_head * ext4_find_entry (struct inode *dir,
 					const struct qstr *d_name,
 					struct ext4_dir_entry_2 ** res_dir)
+#endif					
 {
 	struct super_block *sb;
 	struct buffer_head *bh_use[NAMEI_RA_SIZE];
@@ -866,7 +1040,12 @@ static struct buffer_head * ext4_find_entry (struct inode *dir,
 	ext4_lblk_t  nblocks;
 	int i, err;
 	int namelen;
-
+//Patch by QNAP:Search filename use case insensitive method
+#ifdef CASE_FOLDING_DEBUG
+    int debug = 0;
+    if (strncasecmp(d_name->name, "test", strlen("test")) == 0)
+        debug = 1;
+#endif
 	*res_dir = NULL;
 	sb = dir->i_sb;
 	namelen = d_name->len;
@@ -882,15 +1061,40 @@ static struct buffer_head * ext4_find_entry (struct inode *dir,
 		nblocks = 1;
 		goto restart;
 	}
+//Patch by QNAP:Search filename use case insensitive method
+#ifdef CASE_FOLDING_DEBUG
+    if (debug)
+        printk("In %s:%d:name = %s,is_dx(dir) = %d,dir->i_sb = 0x%x,dir->i_flags = 0x%x\n", __func__, __LINE__, d_name->name, is_dx(dir), EXT4_SB(dir->i_sb)->s_es->s_feature_compat, EXT4_I(dir)->i_flags);
+#endif
+//////////////////////////////////////////
 	if (is_dx(dir)) {
+//Patch by QNAP:Search filename use case insensitive method
+#ifdef QNAP_SEARCH_FILENAME_CASE_INSENSITIVE
+		bh = ext4_dx_find_entry(dir, d_name, res_dir, &err,case_sensitive);
+#else        
 		bh = ext4_dx_find_entry(dir, d_name, res_dir, &err);
+#endif
 		/*
 		 * On success, or if the error was file not found,
 		 * return.  Otherwise, fall back to doing a search the
 		 * old fashioned way.
 		 */
+//Patch by QNAP:Search filename use case insensitive method
+#ifdef CASE_FOLDING_DEBUG
+        if (debug) {
+		    if (bh || (err != ERR_BAD_DX_DIR))
+                printk("In %s:%d:name = %s,ext4_find_entry: bh = %p, err = %d\n", __func__, __LINE__, d_name->name, bh, err);
+        }
+#endif
+////////////////////////////////////////////////////////////
 		if (bh || (err != ERR_BAD_DX_DIR))
 			return bh;
+//Patch by QNAP:Search filename use case insensitive method
+#ifdef CASE_FOLDING_DEBUG
+        if (debug)
+        	printk("In %s:%d:name = %s,ext4_find_entry:dx failed falling back\n", __func__, __LINE__, d_name->name);
+#endif
+////////////////////////////////////////////////////////////       
 		dxtrace(printk(KERN_DEBUG "ext4_find_entry: dx failed, "
 			       "falling back\n"));
 	}
@@ -936,8 +1140,14 @@ restart:
 			brelse(bh);
 			goto next;
 		}
+//Patch by QNAP:Search filename use case insensitive method
+#ifdef QNAP_SEARCH_FILENAME_CASE_INSENSITIVE
+		i = search_dirblock(bh, dir, d_name,
+			    block << EXT4_BLOCK_SIZE_BITS(sb), res_dir,case_sensitive);
+#else
 		i = search_dirblock(bh, dir, d_name,
 			    block << EXT4_BLOCK_SIZE_BITS(sb), res_dir);
+#endif
 		if (i == 1) {
 			EXT4_I(dir)->i_dir_start_lookup = block;
 			ret = bh;
@@ -970,8 +1180,14 @@ cleanup_and_exit:
 	return ret;
 }
 
+//Patch by QNAP:Search filename use case insensitive method
+#ifdef QNAP_SEARCH_FILENAME_CASE_INSENSITIVE
+static struct buffer_head * ext4_dx_find_entry(struct inode *dir, const struct qstr *d_name,
+		       struct ext4_dir_entry_2 **res_dir, int *err,int case_sensitive)
+#else
 static struct buffer_head * ext4_dx_find_entry(struct inode *dir, const struct qstr *d_name,
 		       struct ext4_dir_entry_2 **res_dir, int *err)
+#endif		       
 {
 	struct super_block * sb = dir->i_sb;
 	struct dx_hash_info	hinfo;
@@ -987,9 +1203,16 @@ static struct buffer_head * ext4_dx_find_entry(struct inode *dir, const struct q
 		if (!(bh = ext4_bread(NULL, dir, block, 0, err)))
 			goto errout;
 
+#ifdef QNAP_SEARCH_FILENAME_CASE_INSENSITIVE
+        retval = search_dirblock(bh, dir, d_name,
+			 block << EXT4_BLOCK_SIZE_BITS(sb),
+			 res_dir, case_sensitive);
+
+#else
 		retval = search_dirblock(bh, dir, d_name,
 					 block << EXT4_BLOCK_SIZE_BITS(sb),
 					 res_dir);
+#endif
 		if (retval == 1) { 	/* Success! */
 			dx_release(frames);
 			return bh;
@@ -1024,11 +1247,38 @@ static struct dentry *ext4_lookup(struct inode *dir, struct dentry *dentry, stru
 	struct inode *inode;
 	struct ext4_dir_entry_2 *de;
 	struct buffer_head *bh;
-
+//Patch by QNAP:Search filename use case insensitive method
+#ifdef QNAP_SEARCH_FILENAME_CASE_INSENSITIVE
+#ifdef CASE_FOLDING_DEBUG
+	int debug = 0;
+#endif
+    int case_sensitive = 1;
+    if(nd && nd->flags & LOOKUP_CASE_INSENSITIVE){
+        case_sensitive = 0;
+        if((ntohl(EXT4_SB(dir->i_sb)->s_es->s_hash_magic) != QNAP_SB_HASH) &&
+            EXT4_HAS_COMPAT_FEATURE(dir->i_sb, EXT4_FEATURE_COMPAT_DIR_INDEX) &&
+    		(EXT4_I(dir)->i_flags & EXT4_INDEX_FL))
+		return ERR_PTR(-ENXIO);
+    }
+#ifdef CASE_FOLDING_DEBUG
+	if (strncasecmp(dentry->d_name.name, "test", strlen("test")) == 0)
+		debug = 1;
+#endif
+#endif
+///////////////////////////////////////////////////////////////
 	if (dentry->d_name.len > EXT4_NAME_LEN)
 		return ERR_PTR(-ENAMETOOLONG);
 
+//Patch by QNAP:Search filename use case insensitive method
+#ifdef QNAP_SEARCH_FILENAME_CASE_INSENSITIVE
+	bh = ext4_find_entry(dir, &dentry->d_name, &de,case_sensitive);
+#ifdef CASE_FOLDING_DEBUG
+	if (debug)
+		printk("In %s:%d:dentry name = %s ext4_find_entry:bh = %p,dentry = %p\n", __func__, __LINE__, dentry->d_name.name, bh, dentry);
+#endif
+#else
 	bh = ext4_find_entry(dir, &dentry->d_name, &de);
+#endif
 	inode = NULL;
 	if (bh) {
 		__u32 ino = le32_to_cpu(de->inode);
@@ -1051,6 +1301,10 @@ static struct dentry *ext4_lookup(struct inode *dir, struct dentry *dentry, stru
 			return ERR_PTR(-EIO);
 		}
 	}
+//Patch by QNAP:Search filename use case insensitive method
+#ifdef QNAP_SEARCH_FILENAME_CASE_INSENSITIVE
+    dentry->d_op = &ext4_dentry_operations;
+#endif
 	return d_splice_alias(inode, dentry);
 }
 
@@ -1064,8 +1318,12 @@ struct dentry *ext4_get_parent(struct dentry *child)
 	};
 	struct ext4_dir_entry_2 * de;
 	struct buffer_head *bh;
-
+//Patch by QNAP:Search filename use case insensitive method
+#ifdef QNAP_SEARCH_FILENAME_CASE_INSENSITIVE
+	bh = ext4_find_entry(child->d_inode, &dotdot, &de,0);
+#else
 	bh = ext4_find_entry(child->d_inode, &dotdot, &de);
+#endif
 	if (!bh)
 		return ERR_PTR(-ENOENT);
 	ino = le32_to_cpu(de->inode);
@@ -1188,8 +1446,14 @@ static struct ext4_dir_entry_2 *do_split(handle_t *handle, struct inode *dir,
 
 	/* create map in the end of data2 block */
 	map = (struct dx_map_entry *) (data2 + blocksize);
+//Patch by QNAP:Search filename use case insensitive method
+#ifdef QNAP_SEARCH_FILENAME_CASE_INSENSITIVE
+	count = dx_make_map((struct ext4_dir_entry_2 *) data1,
+			     blocksize, hinfo, map,ntohl(EXT4_SB(dir->i_sb)->s_es->s_hash_magic) == QNAP_SB_HASH);
+#else
 	count = dx_make_map((struct ext4_dir_entry_2 *) data1,
 			     blocksize, hinfo, map);
+#endif
 	map -= count;
 	dx_sort_map(map, count);
 	/* Split the existing block in the middle, size-wise */
@@ -1275,7 +1539,12 @@ static int add_dirent_to_buf(handle_t *handle, struct dentry *dentry,
 		while ((char *) de <= top) {
 			if (ext4_check_dir_entry(dir, NULL, de, bh, offset))
 				return -EIO;
+//Patch by QNAP:Search filename use case insensitive method
+#ifdef QNAP_SEARCH_FILENAME_CASE_INSENSITIVE
+			if (ext4_match(namelen, name, de,1))
+#else
 			if (ext4_match(namelen, name, de))
+#endif                
 				return -EEXIST;
 			nlen = EXT4_DIR_REC_LEN(de->name_len);
 			rlen = ext4_rec_len_from_disk(de->rec_len, blocksize);
@@ -1410,7 +1679,12 @@ static int make_indexed_dir(handle_t *handle, struct dentry *dentry,
 	if (hinfo.hash_version <= DX_HASH_TEA)
 		hinfo.hash_version += EXT4_SB(dir->i_sb)->s_hash_unsigned;
 	hinfo.seed = EXT4_SB(dir->i_sb)->s_hash_seed;
+//Patch by QNAP:Search filename use case insensitive method
+#ifdef QNAP_SEARCH_FILENAME_CASE_INSENSITIVE
+	ext4fs_dirhash(name, namelen, &hinfo,ntohl(EXT4_SB(dir->i_sb)->s_es->s_hash_magic) == QNAP_SB_HASH);
+#else
 	ext4fs_dirhash(name, namelen, &hinfo);
+#endif
 	frame = frames;
 	frame->entries = entries;
 	frame->at = entries;
@@ -1484,7 +1758,13 @@ static int ext4_add_entry(handle_t *handle, struct dentry *dentry,
 		}
 
 		if (blocks == 1 && !dx_fallback &&
+//Patch by QNAP:Search filename use case insensitive method
+#ifdef QNAP_SEARCH_FILENAME_CASE_INSENSITIVE
+            ((ntohl(EXT4_SB(dir->i_sb)->s_es->s_hash_magic) == QNAP_SB_HASH)||
+            EXT4_HAS_COMPAT_FEATURE(sb, EXT4_FEATURE_COMPAT_DIR_INDEX)))
+#else
 		    EXT4_HAS_COMPAT_FEATURE(sb, EXT4_FEATURE_COMPAT_DIR_INDEX))
+#endif		    
 			return make_indexed_dir(handle, dentry, inode, bh);
 		brelse(bh);
 	}
@@ -2129,7 +2409,15 @@ static int ext4_rmdir(struct inode *dir, struct dentry *dentry)
 	struct buffer_head *bh;
 	struct ext4_dir_entry_2 *de;
 	handle_t *handle;
-
+//Patch by QNAP:Search filename use case insensitive method
+#ifdef CASE_FOLDING_DEBUG
+	int debug = 0;
+	if (strncasecmp(dentry->d_name.name, "test", strlen("test")) == 0)
+		debug = 1;
+	if (debug)
+		printk("In %s:%d:name = %s\n", __func__, __LINE__, dentry->d_name.name);
+#endif
+///////////////////////////////////////////////////////////////////
 	/* Initialize quotas before so that eventual writes go in
 	 * separate transaction */
 	dquot_initialize(dir);
@@ -2140,7 +2428,16 @@ static int ext4_rmdir(struct inode *dir, struct dentry *dentry)
 		return PTR_ERR(handle);
 
 	retval = -ENOENT;
+//Patch by QNAP:Search filename use case insensitive method
+#ifdef QNAP_SEARCH_FILENAME_CASE_INSENSITIVE
+	bh = ext4_find_entry(dir, &dentry->d_name, &de,1);
+#ifdef CASE_FOLDING_DEBUG
+	if (debug)
+		printk("In %s:%d:name = %s ext4_find_entry:bh = %p\n", __func__, __LINE__, dentry->d_name.name,bh);
+#endif
+#else
 	bh = ext4_find_entry(dir, &dentry->d_name, &de);
+#endif
 	if (!bh)
 		goto end_rmdir;
 
@@ -2205,7 +2502,12 @@ static int ext4_unlink(struct inode *dir, struct dentry *dentry)
 		ext4_handle_sync(handle);
 
 	retval = -ENOENT;
+//Patch by QNAP:Search filename use case insensitive method
+#ifdef QNAP_SEARCH_FILENAME_CASE_INSENSITIVE
+	bh = ext4_find_entry(dir, &dentry->d_name, &de,1);
+#else
 	bh = ext4_find_entry(dir, &dentry->d_name, &de);
+#endif
 	if (!bh)
 		goto end_unlink;
 
@@ -2421,7 +2723,12 @@ static int ext4_rename(struct inode *old_dir, struct dentry *old_dentry,
 	if (IS_DIRSYNC(old_dir) || IS_DIRSYNC(new_dir))
 		ext4_handle_sync(handle);
 
+//Patch by QNAP:Search filename use case insensitive method
+#ifdef QNAP_SEARCH_FILENAME_CASE_INSENSITIVE
+	old_bh = ext4_find_entry(old_dir, &old_dentry->d_name, &old_de,1);
+#else
 	old_bh = ext4_find_entry(old_dir, &old_dentry->d_name, &old_de);
+#endif
 	/*
 	 *  Check for inode number is _not_ due to possible IO errors.
 	 *  We might rmdir the source, keep it as pwd of some process
@@ -2434,7 +2741,12 @@ static int ext4_rename(struct inode *old_dir, struct dentry *old_dentry,
 		goto end_rename;
 
 	new_inode = new_dentry->d_inode;
+//Patch by QNAP:Search filename use case insensitive method
+#ifdef QNAP_SEARCH_FILENAME_CASE_INSENSITIVE
+	new_bh = ext4_find_entry(new_dir, &new_dentry->d_name, &new_de,1);
+#else
 	new_bh = ext4_find_entry(new_dir, &new_dentry->d_name, &new_de);
+#endif
 	if (new_bh) {
 		if (!new_inode) {
 			brelse(new_bh);
@@ -2512,7 +2824,12 @@ static int ext4_rename(struct inode *old_dir, struct dentry *old_dentry,
 		struct buffer_head *old_bh2;
 		struct ext4_dir_entry_2 *old_de2;
 
+//Patch by QNAP:Search filename use case insensitive method
+#ifdef QNAP_SEARCH_FILENAME_CASE_INSENSITIVE
+		old_bh2 = ext4_find_entry(old_dir, &old_dentry->d_name, &old_de2,1);
+#else
 		old_bh2 = ext4_find_entry(old_dir, &old_dentry->d_name, &old_de2);
+#endif
 		if (old_bh2) {
 			retval = ext4_delete_entry(handle, old_dir,
 						   old_de2, old_bh2);

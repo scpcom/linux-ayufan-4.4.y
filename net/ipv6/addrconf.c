@@ -172,7 +172,12 @@ static struct ipv6_devconf ipv6_devconf __read_mostly = {
 	.accept_redirects	= 1,
 	.autoconf		= 1,
 	.force_mld_version	= 0,
+//Patch by QNAP:Support HYBRID_NVR	
+#ifdef QNAP
+	.dad_transmits		= 2,
+#else	
 	.dad_transmits		= 1,
+#endif	
 	.rtr_solicits		= MAX_RTR_SOLICITATIONS,
 	.rtr_solicit_interval	= RTR_SOLICITATION_INTERVAL,
 	.rtr_solicit_delay	= MAX_RTR_SOLICITATION_DELAY,
@@ -195,8 +200,14 @@ static struct ipv6_devconf ipv6_devconf __read_mostly = {
 #endif
 	.proxy_ndp		= 0,
 	.accept_source_route	= 0,	/* we do not accept RH0 by default. */
+//Patch by QNAP:Support HYBRID_NVR	
+#ifdef QNAP
+	.disable_ipv6		= 1,
+	.accept_dad		= 2,
+#else	
 	.disable_ipv6		= 0,
 	.accept_dad		= 1,
+#endif	
 };
 
 static struct ipv6_devconf ipv6_devconf_dflt __read_mostly = {
@@ -206,7 +217,12 @@ static struct ipv6_devconf ipv6_devconf_dflt __read_mostly = {
 	.accept_ra		= 1,
 	.accept_redirects	= 1,
 	.autoconf		= 1,
+//Patch by QNAP:Support HYBRID_NVR	
+#ifdef QNAP
+	.dad_transmits		= 2,
+#else	
 	.dad_transmits		= 1,
+#endif	
 	.rtr_solicits		= MAX_RTR_SOLICITATIONS,
 	.rtr_solicit_interval	= RTR_SOLICITATION_INTERVAL,
 	.rtr_solicit_delay	= MAX_RTR_SOLICITATION_DELAY,
@@ -229,8 +245,14 @@ static struct ipv6_devconf ipv6_devconf_dflt __read_mostly = {
 #endif
 	.proxy_ndp		= 0,
 	.accept_source_route	= 0,	/* we do not accept RH0 by default. */
+	//Patch by QNAP:Support HYBRID_NVR	
+#ifdef QNAP
+	.disable_ipv6		= 1,
+	.accept_dad		= 2,
+#else
 	.disable_ipv6		= 0,
 	.accept_dad		= 1,
+#endif	
 };
 
 /* IPv6 Wildcard Address and Loopback Address defined by RFC2553 */

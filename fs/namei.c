@@ -34,7 +34,12 @@
 #include <linux/fs_struct.h>
 #include <linux/posix_acl.h>
 #include <asm/uaccess.h>
-
+//Patch by QNAP:Search filename use case insensitive method
+#ifdef QNAP_SEARCH_FILENAME_CASE_INSENSITIVE
+//#define CASE_FOLDING_DEBUG
+#include <linux/nls.h>
+#endif
+/////////////////////////////////////////////////////////
 #include "internal.h"
 
 /* [Feb-1997 T. Schoebel-Theuer]
@@ -115,6 +120,219 @@
  * POSIX.1 2.4: an empty pathname is invalid (ENOENT).
  * PATH_MAX includes the nul terminator --RR.
  */
+
+ //Patch by QNAP: implement fnotify function
+#ifdef	QNAP_FNOTIFY
+#include <linux/fnotify.h>
+
+uint32_t  msys_nodify=0;
+
+void (*pfn_sys_file_notify)(int idcode, int margs, const struct path *ppath, const char *pstname, int cbname, PT_FILE_STATUS pfsOrg, int64_t iarg1, int64_t iarg2, uint32_t iarg3, uint32_t iarg4)=NULL;
+void (*pfn_sys_files_notify)(int idcode, const struct path *ppath1, const char *pstname1, int cbname1, const struct path *ppath2, const char *pstname2, int cbname2, PT_FILE_STATUS pfsOrg, PT_FILE_STATUS pfsExt)=NULL;
+
+EXPORT_SYMBOL(msys_nodify);
+EXPORT_SYMBOL(pfn_sys_file_notify);
+EXPORT_SYMBOL(pfn_sys_files_notify);
+#endif	//QNAP_FNOTIFY
+/////////////////////////////////////////
+
+//Patch by QNAP:Search filename use case insensitive method
+#ifdef QNAP_SEARCH_FILENAME_CASE_INSENSITIVE
+/*
+ * upcase.c - Generate the full NTFS Unicode upcase table in little endian.
+ *	      Part of the Linux-NTFS project.
+ *
+ * Copyright (c) 2001 Richard Russon <ntfs@flatcap.org>
+ * Copyright (c) 2001-2006 Anton Altaparmakov
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation; either version 2 of the License, or (at your option)
+ * any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program (in the main directory of the Linux-NTFS source
+ * in the file COPYING); if not, write to the Free Software Foundation,
+ * Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ */
+
+//Simple case folding and range from U+0000 to U+FFFF
+//Reference CaseFolding-6.0.0.txt and fs/ntfs/upcase.c
+
+#define UTF16_MAPPING_TABLE_SIZE 	0x10000		/* 64k chars */
+#define MAX_FILENAME_LEN 256
+static __u16 g_case_folding_array[UTF16_MAPPING_TABLE_SIZE];
+static __u16 *g_case_folding_table;
+ __cacheline_aligned_in_smp DEFINE_SPINLOCK(case_folding_transform_lock);
+ __cacheline_aligned_in_smp DEFINE_SPINLOCK(case_folding_compare_lock);
+
+static __u16 g_utf16_str[MAX_FILENAME_LEN * 2];
+static __u16 g_utf16_str1[MAX_FILENAME_LEN * 2];
+static __u16 g_utf16_str2[MAX_FILENAME_LEN * 2];
+__u16 *get_simple_case_folding_table(void)
+{
+    const int uc_run_table[][3] = { /* Start, End, Add */
+     // 1 byte UTF-8
+    {0x0061, 0x007B,  -32},
+     // 2 bytes UTF-8
+    {0x00E0, 0x00F7,  -32}, {0x00F8, 0x00FF,  -32}, {0x0256, 0x0258, -205},
+    {0x028A, 0x028C, -217}, {0x037B, 0x037E,  130}, {0x03AD, 0x03B0,  -37},
+    {0x03B1, 0x03C2,  -32}, {0x03C3, 0x03CC,  -32},	{0x03CD, 0x03CF,  -63},
+    {0x0430, 0x0450,  -32}, {0x0450, 0x0460,  -80}, {0x0561, 0x0587,  -48},
+     // 3 bytes UTF-8
+    {0x1F00, 0x1F08,    8}, {0x1F10, 0x1F16,    8}, {0x1F20, 0x1F28,    8},
+    {0x1F30, 0x1F38,    8}, {0x1F40, 0x1F46,    8}, {0x1F60, 0x1F68,    8},
+    {0x1F70, 0x1F72,   74}, {0x1F72, 0x1F76,   86}, {0x1F76, 0x1F78,  100},
+    {0x1F78, 0x1F7A,  128}, {0x1F7A, 0x1F7C,  112}, {0x1F7C, 0x1F7E,  126},
+    {0x1F80, 0x1F88,    8}, {0x1F90, 0x1F98,    8}, {0x1FA0, 0x1FA8,    8},
+    {0x1FB0, 0x1FB2,    8}, {0x1FD0, 0x1FD2,    8}, {0x1FE0, 0x1FE2,    8},
+    {0x2170, 0x2180,  -16}, {0x24D0, 0x24EA,  -26}, {0x2C30, 0x2C5F,  -48},
+    {0x2D00, 0x2D26,-7264}, {0xFF41, 0xFF5B,  -32},
+    {0}
+    };
+
+    const int uc_dup_table[][2] = { /* Start, End */
+     // 2 bytes UTF-8
+    {0x0100, 0x012F}, {0x0132, 0x0137}, {0x0139, 0x0148}, {0x014A, 0x0177},
+    {0x0179, 0x017E}, {0x0182, 0x0185},	{0x01A0, 0x01A5}, {0x01B3, 0x01B6},
+    {0x01CD, 0x01DC}, {0x01DE, 0x01EF}, {0x01F8, 0x021F}, {0x0222, 0x0233},
+    {0x0246, 0x024F}, {0x0370, 0x0373}, {0x03D8, 0x03EF}, {0x0460, 0x0481},
+    {0x048A, 0x04BF}, {0x04C1, 0x04CE}, {0x04D0, 0x0527},
+     // 3 bytes UTF-8
+    {0x1E00, 0x1E95}, {0x1EA0, 0x1EFF}, {0x2C67, 0x2C6C}, {0x2C80, 0x2CE3},
+    {0x2CEB, 0x2CEE}, {0xA640, 0xA66D}, {0xA680, 0xA697}, {0xA722, 0xA72F},
+    {0xA732, 0xA76F}, {0xA779, 0xA77C}, {0xA77E, 0xA787}, {0xA7A0, 0xA7A9},
+    {0}
+    };
+
+    const int uc_word_table[][2] = { /* Offset, Value */
+     // 2 bytes UTF-8
+    {0x00B5, 0x039C}, {0x00FF, 0x0178}, {0x0180, 0x0243}, {0x0188, 0x0187},
+    {0x018C, 0x018B}, {0x0192, 0x0191}, {0x0195, 0x01F6}, {0x0199, 0x0198},
+    {0x019A, 0x023D}, {0x019E, 0x0220}, {0x01A8, 0x01A7}, {0x01AD, 0x01AC},
+    {0x01B0, 0x01AF}, {0x01B9, 0x01B8}, {0x01BD, 0x01BC}, {0x01BF, 0x01F7},
+    {0x01C5, 0x01C4}, {0x01C6, 0x01C4}, {0x01C8, 0x01C7}, {0x01C9, 0x01C7},
+    {0x01CB, 0x01CA}, {0x01CC, 0x01CA}, {0x01DD, 0x018E}, {0x01F2, 0x01F1},
+    {0x01F3, 0x01F1}, {0x01F5, 0x01F4}, {0x023C, 0x023B}, {0x0242, 0x0241},
+    {0x0253, 0x0181}, {0x0254, 0x0186}, {0x0259, 0x018F}, {0x025B, 0x0190},
+    {0x0260, 0x0193}, {0x0263, 0x0194}, {0x0268, 0x0197}, {0x0269, 0x0196},
+    {0x026F, 0x019C}, {0x0272, 0x019D}, {0x0275, 0x019F}, {0x0280, 0x01A6},
+    {0x0283, 0x01A9}, {0x0288, 0x01AE}, {0x0289, 0x0244}, {0x028C, 0x0245},
+    {0x0292, 0x01B7}, {0x0345, 0x0399}, {0x0377, 0x0376}, {0x03AC, 0x0386},
+    {0x03C2, 0x03A3}, {0x03CC, 0x038C}, {0x03D0, 0x0392}, {0x03D1, 0x0398},
+    {0x03D5, 0x03A6}, {0x03D6, 0x03A0}, {0x03D7, 0x03CF}, {0x03F0, 0x039A},
+    {0x03F1, 0x03A1}, {0x03F2, 0x03F9}, {0x03F4, 0x0398}, {0x03F5, 0x03A5},
+    {0x03F8, 0x03F7}, {0x03FB, 0x03FA}, {0x04CF, 0x04C0},
+     // 3 bytes UTF-8
+    {0x1D79, 0xA77D}, {0x1D7D, 0x2C63}, {0x1E9B, 0x1E60}, {0x1F51, 0x1F59},
+    {0x1F53, 0x1F5B}, {0x1F55, 0x1F5D}, {0x1F57, 0x1F5F}, {0x1FB3, 0x1FBC},
+    {0x1FBE, 0x0399}, {0x1FC3, 0x1FCC}, {0x1FE5, 0x1FEC}, {0x1FF3, 0x1FFC},
+    {0x214E, 0x2132}, {0x2184, 0x2183}, {0x2C61, 0x2C60}, {0x2C73, 0x2C72},
+    {0x2C76, 0x2C75}, {0xA78C, 0xA78B}, {0xA791, 0xA790},
+    // 2 bytes UTF-8 to 3 bytes UTF-8
+    {0x00DF, 0x1E9E}, {0x023F, 0x2C7E}, {0x0240, 0x2C7F}, {0x0250, 0x2C6F},
+    {0x0251, 0x2C6D}, {0x0252, 0x2C70}, {0x0265, 0xA78D}, {0x026B, 0x2C62},
+    {0x0271, 0x2C6E}, {0x027D, 0x2C64},
+    // 2 bytes UTF-8 to 1 bytes UTF-8
+    {0x0130, 0x0049}, {0x0131, 0x0049}, {0x017F, 0x0053},
+    // 3 bytes UTF-8 to 2 bytes UTF-8
+    {0x2126, 0x03A9}, {0x212B, 0x00C5}, {0x2C65, 0x023A}, {0x2C66, 0x023E},
+    // 3 bytes UTF-8 to 1 bytes UTF-8
+    {0x212A, 0x004B},
+    {0}
+    };
+    int i, r;
+    __u16 *uc = g_case_folding_array;
+
+    for (i = 0; i < UTF16_MAPPING_TABLE_SIZE; i++)
+        uc[i] = cpu_to_le16(i);
+    for (r = 0; uc_run_table[r][0]; r++)
+        for (i = uc_run_table[r][0]; i < uc_run_table[r][1]; i++)
+        	le16_add_cpu(&uc[i], uc_run_table[r][2]);
+    for (r = 0; uc_dup_table[r][0]; r++)
+        for (i = uc_dup_table[r][0]; i < uc_dup_table[r][1]; i += 2)
+        	le16_add_cpu(&uc[i + 1], -1);
+    for (r = 0; uc_word_table[r][0]; r++)
+        uc[uc_word_table[r][0]] = cpu_to_le16(uc_word_table[r][1]);
+    return uc;
+}
+
+__u16 *get_case_folding_table(void)
+{
+    if(g_case_folding_table==NULL)
+        g_case_folding_table = get_simple_case_folding_table();
+
+    return g_case_folding_table;
+}
+
+/*
+input:
+    input:UTF8 input filename
+    input_len: UTF8 input filename length
+    output : UTF8 ouput filename
+    output_max_len : UTF8 output filename length
+
+onput:
+    > 0 : output filename length else return -1
+*/
+int do_case_folding_transform(__u8 *input,int input_len,__u8 *output,int output_max_len)
+{
+    __u16 *table = get_case_folding_table();
+    int ret = -1;
+    int i;
+    if(unlikely(input_len > MAX_FILENAME_LEN)|| unlikely(output_max_len < (input_len + 11))) // 2 bytes UTF8 transform to  3 bytes UTF8 ,and 1 byte to NULL
+        return ret;
+	spin_lock(&case_folding_transform_lock);
+    ret = utf8s_to_utf16s(input,input_len,g_utf16_str);
+    if(unlikely(ret <= 0)){
+        spin_unlock(&case_folding_transform_lock);
+        return ret;
+    }
+    for(i = 0; i < ret; i++)
+        g_utf16_str[i] = table[g_utf16_str[i]];
+    ret = utf16s_to_utf8s(g_utf16_str,ret,UTF16_HOST_ENDIAN,output,output_max_len-1);
+    if(ret <= 0){
+        spin_unlock(&case_folding_transform_lock);
+        return ret;
+    }
+    output[ret] = 0;
+    spin_unlock(&case_folding_transform_lock);
+    return ret;
+}
+
+int do_case_folding_compare(__u8 *src1, int len1, __u8 *src2,int len2)
+{
+    int src1_utf16_len,src2_utf16_len;
+    int i;
+    __u16 *table = get_case_folding_table();
+    if(unlikely(len1 > MAX_FILENAME_LEN)|| unlikely(len2 > MAX_FILENAME_LEN))
+        return -1;
+	spin_lock(&case_folding_compare_lock);
+    src1_utf16_len = utf8s_to_utf16s(src1,len1,g_utf16_str1);
+    src2_utf16_len = utf8s_to_utf16s(src2,len2,g_utf16_str2);
+    if(src1_utf16_len != src2_utf16_len){
+	    spin_unlock(&case_folding_compare_lock);
+        return -1;
+    }
+    for(i = 0; i < src1_utf16_len; i++){
+        if(table[g_utf16_str1[i]] != table[g_utf16_str2[i]]){
+    	    spin_unlock(&case_folding_compare_lock);
+            return -1;
+        }
+    }
+    spin_unlock(&case_folding_compare_lock);
+    return 0;
+}
+EXPORT_SYMBOL(do_case_folding_compare);
+EXPORT_SYMBOL(do_case_folding_transform);
+#endif
+///////////////////////////////////////////////////////////////
+
 static int do_getname(const char __user *filename, char *page)
 {
 	int retval;
@@ -371,6 +589,117 @@ int inode_permission(struct inode *inode, int mask)
 
 	return security_inode_permission(inode, mask);
 }
+
+#ifdef CONFIG_MACH_QNAPTS
+static int acl_permission_check_without_acl(struct inode *inode, int mask)
+{
+	unsigned int mode = inode->i_mode;
+
+	if (current_user_ns() != inode_userns(inode))
+		goto other_perms;
+
+	if (likely(current_fsuid() == inode->i_uid))
+		mode >>= 6;
+	else {
+		if (in_group_p(inode->i_gid))
+			mode >>= 3;
+	}
+
+other_perms:
+	/*
+	 * If the DACs are ok we don't need any capability check.
+	 */
+	if ((mask & ~mode & (MAY_READ | MAY_WRITE | MAY_EXEC)) == 0)
+		return 0;
+	return -EACCES;
+}
+
+int generic_permission_without_acl(struct inode *inode, int mask)
+{
+	int ret;
+
+	/*
+	 * Do the basic permission checks.
+	 */
+	ret = acl_permission_check_without_acl(inode, mask);
+	if (ret != -EACCES)
+		return ret;
+
+	if (S_ISDIR(inode->i_mode)) {
+		/* DACs are overridable for directories */
+		if (ns_capable(inode_userns(inode), CAP_DAC_OVERRIDE))
+			return 0;
+		if (!(mask & MAY_WRITE))
+			if (ns_capable(inode_userns(inode), CAP_DAC_READ_SEARCH))
+				return 0;
+		return -EACCES;
+	}
+	/*
+	 * Read/write DACs are always overridable.
+	 * Executable DACs are overridable when there is
+	 * at least one exec bit set.
+	 */
+	if (!(mask & MAY_EXEC) || (inode->i_mode & S_IXUGO))
+		if (ns_capable(inode_userns(inode), CAP_DAC_OVERRIDE))
+			return 0;
+
+	/*
+	 * Searching includes executable on directories, else just read.
+	 */
+	mask &= MAY_READ | MAY_WRITE | MAY_EXEC;
+	if (mask == MAY_READ)
+		if (ns_capable(inode_userns(inode), CAP_DAC_READ_SEARCH))
+			return 0;
+
+	return -EACCES;
+}
+
+static inline int do_inode_permission_without_acl(struct inode *inode, int mask)
+{
+	if (unlikely(!(inode->i_opflags & IOP_FASTPERM))) {
+		if (likely(inode->i_op->permission))
+			return inode->i_op->permission(inode, mask);
+
+		/* This gets set once for the inode lifetime */
+		spin_lock(&inode->i_lock);
+		inode->i_opflags |= IOP_FASTPERM;
+		spin_unlock(&inode->i_lock);
+	}
+	return generic_permission_without_acl(inode, mask);
+}
+
+int inode_permission_without_acl(struct inode *inode, int mask)
+{
+	int retval;
+
+	if (unlikely(mask & MAY_WRITE)) {
+		umode_t mode = inode->i_mode;
+
+		/*
+		 * Nobody gets write access to a read-only fs.
+		 */
+		if (IS_RDONLY(inode) &&
+		    (S_ISREG(mode) || S_ISDIR(mode) || S_ISLNK(mode)))
+			return -EROFS;
+
+		/*
+		 * Nobody gets write access to an immutable file.
+		 */
+		if (IS_IMMUTABLE(inode))
+			return -EACCES;
+	}
+
+	retval = do_inode_permission_without_acl(inode, mask);
+	if (retval)
+		return retval;
+
+	retval = devcgroup_inode_permission(inode, mask);
+	if (retval)
+		return retval;
+
+	return security_inode_permission(inode, mask);
+}
+#endif
 
 /**
  * path_get - get a reference to a path
@@ -1120,7 +1449,23 @@ static int do_lookup(struct nameidata *nd, struct qstr *name,
 	int need_reval = 1;
 	int status = 1;
 	int err;
-
+//Patch by QNAP:Search filename use case insensitive method
+#ifdef CASE_FOLDING_DEBUG
+    int debug = 0;
+    if (strncasecmp(name->name, "test", strlen("test")) == 0)
+        debug = 1;
+#endif
+#ifdef QNAP_SEARCH_FILENAME_CASE_INSENSITIVE
+    if(nd->flags & LOOKUP_CASE_INSENSITIVE)
+        name->case_folding = 1;
+    else
+        name->case_folding = 0;
+#endif
+#ifdef CASE_FOLDING_DEBUG
+	if (debug)
+		printk("In %s:%d start:name = %s under directory = %s,case_folding = %d,nd->flags = 0x%x,name->hash = %x\n", __func__, __LINE__, name->name, nd->path.dentry->d_name.name, name->case_folding, nd->flags,name->hash);
+#endif
+////////////////////////////////////////////////////////////
 	/*
 	 * Rename seqlock is not required here because in the off chance
 	 * of a false negative due to a concurrent rename, we're going to
@@ -1154,6 +1499,12 @@ static int do_lookup(struct nameidata *nd, struct qstr *name,
 			goto unlazy;
 		if (unlikely(path->dentry->d_flags & DCACHE_NEED_AUTOMOUNT))
 			goto unlazy;
+//Patch by QNAP:Search filename use case insensitive method
+#ifdef CASE_FOLDING_DEBUG
+	    if (debug)
+		    printk("In %s:%d complete:name = %s,dentry=%p,inode=%p\n", __func__, __LINE__, name->name, dentry, *inode);
+#endif
+/////////////////////////////////////////////////////////////
 		return 0;
 unlazy:
 		if (unlazy_walk(nd, dentry))
@@ -1161,7 +1512,16 @@ unlazy:
 	} else {
 		dentry = __d_lookup(parent, name);
 	}
-
+//Patch by QNAP:Search filename use case insensitive method
+#ifdef CASE_FOLDING_DEBUG
+	if (debug) {
+		if (dentry)
+			printk("In %s:%d:name = %s,use __d_lookup to find dentry successfully,dentry->flags = 0x%x,need_retval = %d\n", __func__, __LINE__, name->name, dentry->d_flags,need_reval);
+		else
+			printk("In %s:%d:name = %s,use __d_lookup to find dentry fail,try to read from disk\n", __func__, __LINE__, name->name);
+	}
+#endif
+///////////////////////////////////////////
 	if (dentry && unlikely(d_need_lookup(dentry))) {
 		dput(dentry);
 		dentry = NULL;
@@ -1202,6 +1562,12 @@ retry:
 			return status;
 		}
 		if (!d_invalidate(dentry)) {
+//Patch by QNAP:Search filename use case insensitive method
+#ifdef CASE_FOLDING_DEBUG
+            if (debug)
+                printk("In %s:%d:name = %s, dentry = %p call dput, then goto need_lookup\n", __func__, __LINE__, name->name, dentry);
+#endif
+//////////////////////////////////////////////////////////
 			dput(dentry);
 			dentry = NULL;
 			need_reval = 1;
@@ -1219,6 +1585,12 @@ retry:
 	if (err)
 		nd->flags |= LOOKUP_JUMPED;
 	*inode = path->dentry->d_inode;
+//Patch by QNAP:Search filename use case insensitive method
+#ifdef CASE_FOLDING_DEBUG
+    if (debug)
+        printk("In %s:%d complete:name = %s, err = %d, *inode = %p\n", __func__, __LINE__, name->name, err, *inode);
+#endif
+///////////////////////////////////////////////////////////
 	return 0;
 }
 
@@ -1413,6 +1785,10 @@ static int link_path_walk(const char *name, struct nameidata *nd)
 		} while (c && (c != '/'));
 		this.len = name - (const char *) this.name;
 		this.hash = end_name_hash(hash);
+//Patch by QNAP:Search filename use case insensitive method
+#ifdef QNAP_SEARCH_FILENAME_CASE_INSENSITIVE
+		this.case_folding = 0;
+#endif
 
 		type = LAST_NORM;
 		if (this.name[0] == '.') switch (this.len) {
@@ -1659,6 +2035,15 @@ static int do_path_lookup(int dfd, const char *name,
 	return retval;
 }
 
+#ifdef CONFIG_MACH_QNAPTS
+int path_lookup(const char *name, unsigned int flags,
+			struct nameidata *nd)
+{
+	return do_path_lookup(AT_FDCWD, name, flags, nd);
+}
+#endif
+
+
 int kern_path_parent(const char *name, struct nameidata *nd)
 {
 	return do_path_lookup(AT_FDCWD, name, LOOKUP_PARENT, nd);
@@ -1792,6 +2177,10 @@ struct dentry *lookup_one_len(const char *name, struct dentry *base, int len)
 		hash = partial_name_hash(c, hash);
 	}
 	this.hash = end_name_hash(hash);
+//Patch by QNAP:Search filename use case insensitive method
+#ifdef QNAP_SEARCH_FILENAME_CASE_INSENSITIVE
+	this.case_folding = 0;
+#endif
 	/*
 	 * See if the low-level filesystem might want
 	 * to use its own hash..
@@ -1804,6 +2193,48 @@ struct dentry *lookup_one_len(const char *name, struct dentry *base, int len)
 
 	return __lookup_hash(&this, base, NULL);
 }
+
+#ifdef CONFIG_MACH_QNAPTS
+struct dentry *lookup_one_len_without_acl(const char *name, struct dentry *base, int len)
+{
+	struct qstr this;
+	unsigned int c;
+	int err;
+
+	WARN_ON_ONCE(!mutex_is_locked(&base->d_inode->i_mutex));
+
+	this.name = name;
+	this.len = len;
+	this.hash = full_name_hash(name, len);
+//Patch by QNAP:Search filename use case insensitive method
+#ifdef QNAP_SEARCH_FILENAME_CASE_INSENSITIVE
+	this.case_folding = 0;
+#endif
+	if (!len)
+		return ERR_PTR(-EACCES);
+
+	while (len--) {
+		c = *(const unsigned char *)name++;
+		if (c == '/' || c == '\0')
+			return ERR_PTR(-EACCES);
+	}
+	/*
+	 * See if the low-level filesystem might want
+	 * to use its own hash..
+	 */
+	if (base->d_flags & DCACHE_OP_HASH) {
+		int err = base->d_op->d_hash(base, base->d_inode, &this);
+		if (err < 0)
+			return ERR_PTR(err);
+	}
+
+	err = inode_permission_without_acl(base->d_inode, MAY_EXEC);
+	if (err)
+		return ERR_PTR(err);
+
+	return __lookup_hash(&this, base, NULL);
+}
+#endif
 
 int user_path_at_empty(int dfd, const char __user *name, unsigned flags,
 		 struct path *path, int *empty)
@@ -1919,6 +2350,40 @@ static int may_delete(struct inode *dir,struct dentry *victim,int isdir)
 	return 0;
 }
 
+#ifdef CONFIG_MACH_QNAPTS
+static int may_delete_without_acl(struct inode *dir,struct dentry *victim,int isdir)
+{
+	int error;
+
+	if (!victim->d_inode)
+		return -ENOENT;
+
+	BUG_ON(victim->d_parent->d_inode != dir);
+	audit_inode_child(victim, dir);
+
+	error = inode_permission_without_acl(dir, MAY_WRITE | MAY_EXEC);
+	if (error)
+		return error;
+	if (IS_APPEND(dir))
+		return -EPERM;
+	if (check_sticky(dir, victim->d_inode)||IS_APPEND(victim->d_inode)||
+	    IS_IMMUTABLE(victim->d_inode) || IS_SWAPFILE(victim->d_inode))
+		return -EPERM;
+	if (isdir) {
+		if (!S_ISDIR(victim->d_inode->i_mode))
+			return -ENOTDIR;
+		if (IS_ROOT(victim))
+			return -EBUSY;
+	} else if (S_ISDIR(victim->d_inode->i_mode))
+		return -EISDIR;
+	if (IS_DEADDIR(dir))
+		return -ENOENT;
+	if (victim->d_flags & DCACHE_NFSFS_RENAMED)
+		return -EBUSY;
+	return 0;
+}
+#endif
+
 /*	Check whether we can create an object with dentry child in directory
  *  dir.
  *  1. We can't do it if child already exists (open has special treatment for
@@ -1935,6 +2400,17 @@ static inline int may_create(struct inode *dir, struct dentry *child)
 		return -ENOENT;
 	return inode_permission(dir, MAY_WRITE | MAY_EXEC);
 }
+
+#ifdef CONFIG_MACH_QNAPTS
+static inline int may_create_without_acl(struct inode *dir, struct dentry *child)
+{
+	if (child->d_inode)
+		return -EEXIST;
+	if (IS_DEADDIR(dir))
+		return -ENOENT;
+	return inode_permission_without_acl(dir, MAY_WRITE | MAY_EXEC);
+}
+#endif
 
 /*
  * p1 and p2 should be directories on the same fs.
@@ -1998,6 +2474,29 @@ int vfs_create(struct inode *dir, struct dentry *dentry, int mode,
 		fsnotify_create(dir, dentry);
 	return error;
 }
+
+#ifdef CONFIG_MACH_QNAPTS
+int vfs_create_without_acl(struct inode *dir, struct dentry *dentry, umode_t mode,
+		struct nameidata *nd)
+{
+	int error = may_create_without_acl(dir, dentry);
+
+	if (error)
+		return error;
+
+	if (!dir->i_op->create)
+		return -EACCES;	/* shouldn't it be ENOSYS? */
+	mode &= S_IALLUGO;
+	mode |= S_IFREG;
+	error = security_inode_create(dir, dentry, mode);
+	if (error)
+		return error;
+	error = dir->i_op->create(dir, dentry, mode, nd);
+	if (!error)
+		fsnotify_create(dir, dentry);
+	return error;
+}
+#endif
 
 static int may_open(struct path *path, int acc_mode, int flag)
 {
@@ -2474,6 +2973,36 @@ int vfs_mknod(struct inode *dir, struct dentry *dentry, int mode, dev_t dev)
 	return error;
 }
 
+#ifdef CONFIG_MACH_QNAPTS
+int vfs_mknod_without_acl(struct inode *dir, struct dentry *dentry, umode_t mode, dev_t dev)
+{
+	int error = may_create_without_acl(dir, dentry);
+
+	if (error)
+		return error;
+
+	if ((S_ISCHR(mode) || S_ISBLK(mode)) &&
+	    !ns_capable(inode_userns(dir), CAP_MKNOD))
+		return -EPERM;
+
+	if (!dir->i_op->mknod)
+		return -EPERM;
+
+	error = devcgroup_inode_mknod(mode, dev);
+	if (error)
+		return error;
+
+	error = security_inode_mknod(dir, dentry, mode, dev);
+	if (error)
+		return error;
+
+	error = dir->i_op->mknod(dir, dentry, mode, dev);
+	if (!error)
+		fsnotify_create(dir, dentry);
+	return error;
+}
+#endif
+
 static int may_mknod(mode_t mode)
 {
 	switch (mode & S_IFMT) {
@@ -2564,6 +3093,33 @@ int vfs_mkdir(struct inode *dir, struct dentry *dentry, int mode)
 	return error;
 }
 
+#ifdef CONFIG_MACH_QNAPTS
+int vfs_mkdir_without_acl(struct inode *dir, struct dentry *dentry, umode_t mode)
+{
+	int error = may_create_without_acl(dir, dentry);
+	unsigned max_links = dir->i_sb->s_max_links;
+
+	if (error)
+		return error;
+
+	if (!dir->i_op->mkdir)
+		return -EPERM;
+
+	mode &= (S_IRWXUGO|S_ISVTX);
+	error = security_inode_mkdir(dir, dentry, mode);
+	if (error)
+		return error;
+
+	if (max_links && dir->i_nlink >= max_links)
+		return -EMLINK;
+
+	error = dir->i_op->mkdir(dir, dentry, mode);
+	if (!error)
+		fsnotify_mkdir(dir, dentry);
+	return error;
+}
+#endif
+
 SYSCALL_DEFINE3(mkdirat, int, dfd, const char __user *, pathname, int, mode)
 {
 	struct dentry *dentry;
@@ -2583,6 +3139,17 @@ SYSCALL_DEFINE3(mkdirat, int, dfd, const char __user *, pathname, int, mode)
 	if (error)
 		goto out_drop_write;
 	error = vfs_mkdir(path.dentry->d_inode, dentry, mode);
+//Patch by QNAP: implement fnotify function
+#ifdef	QNAP_FNOTIFY
+	if (!error && (FN_MKDIR & msys_nodify))
+	{
+		T_FILE_STATUS  tfsOrg;
+		FILE_STATUS_BY_INODE(dentry->d_inode, tfsOrg);
+		pfn_sys_file_notify(FN_MKDIR, MARG_1xI32, &path, (const char*)dentry->d_name.name, dentry->d_name.len, &tfsOrg, mode, 0, 0, 0);
+	}
+#endif	//QNAP_FNOTIFY
+////////////////////////////////////
+    
 out_drop_write:
 	mnt_drop_write(path.mnt);
 out_dput:
@@ -2658,12 +3225,56 @@ out:
 	return error;
 }
 
+#ifdef CONFIG_MACH_QNAPTS
+int vfs_rmdir_without_acl(struct inode *dir, struct dentry *dentry)
+{
+	int error = may_delete_without_acl(dir, dentry, 1);
+
+	if (error)
+		return error;
+
+	if (!dir->i_op->rmdir)
+		return -EPERM;
+
+	dget(dentry);
+	mutex_lock(&dentry->d_inode->i_mutex);
+
+	error = -EBUSY;
+	if (d_mountpoint(dentry))
+		goto out;
+
+	error = security_inode_rmdir(dir, dentry);
+	if (error)
+		goto out;
+
+	shrink_dcache_parent(dentry);
+	error = dir->i_op->rmdir(dir, dentry);
+	if (error)
+		goto out;
+
+	dentry->d_inode->i_flags |= S_DEAD;
+	dont_mount(dentry);
+
+out:
+	mutex_unlock(&dentry->d_inode->i_mutex);
+	dput(dentry);
+	if (!error)
+		d_delete(dentry);
+	return error;
+}
+#endif
+
 static long do_rmdir(int dfd, const char __user *pathname)
 {
 	int error = 0;
 	char * name;
 	struct dentry *dentry;
 	struct nameidata nd;
+//Patch by QNAP: implement fnotify function
+#ifdef	QNAP_FNOTIFY
+	T_FILE_STATUS  tfsOrg;
+#endif	//QNAP_FNOTIFY
+////////////////////////////////////
 
 	error = user_path_parent(dfd, pathname, &nd, &name);
 	if (error)
@@ -2698,7 +3309,18 @@ static long do_rmdir(int dfd, const char __user *pathname)
 	error = security_path_rmdir(&nd.path, dentry);
 	if (error)
 		goto exit4;
+//Patch by QNAP: implement fnotify function
+#ifdef	QNAP_FNOTIFY
+	FILE_STATUS_BY_INODE(dentry->d_inode, tfsOrg);
+#endif	//QNAP_FNOTIFY
+////////////////////////////////////////    
 	error = vfs_rmdir(nd.path.dentry->d_inode, dentry);
+//Patch by QNAP: implement fnotify function
+#ifdef	QNAP_FNOTIFY
+	if (!error && (FN_RMDIR & msys_nodify))
+		pfn_sys_file_notify(FN_RMDIR, MARG_0, &nd.path, (const char*)dentry->d_name.name, dentry->d_name.len, &tfsOrg, 0, 0, 0, 0);
+#endif	//QNAP_FNOTIFY
+////////////////////////////////////////
 exit4:
 	mnt_drop_write(nd.path.mnt);
 exit3:
@@ -2715,6 +3337,211 @@ SYSCALL_DEFINE1(rmdir, const char __user *, pathname)
 {
 	return do_rmdir(AT_FDCWD, pathname);
 }
+
+//Patch by QNAP: Add for recycle_bin feature, Review recycle_bin
+#ifdef CONFIG_MACH_QNAPTS
+static long qnap_do_rmdir(int dfd, const char __user *pathname)
+{
+        int error = 0;
+        char * name;
+        struct dentry *dentry;
+        struct nameidata nd;
+//Patch by QNAP: implement fnotify function
+#ifdef	QNAP_FNOTIFY
+		T_FILE_STATUS  tfsOrg;
+#endif	//QNAP_FNOTIFY
+///////////////////////////////////
+        name = getname(pathname);
+        if(IS_ERR(name))
+                return PTR_ERR(name);
+
+        error = do_path_lookup(dfd, name, LOOKUP_PARENT, &nd);
+        if (error)
+                goto exit;
+
+        switch(nd.last_type) {
+                case LAST_DOTDOT:
+                        error = -ENOTEMPTY;
+                        goto exit1;
+                case LAST_DOT:
+                        error = -EINVAL;
+                        goto exit1;
+                case LAST_ROOT:
+                        error = -EBUSY;
+                        goto exit1;
+        }
+    	mutex_lock_nested(&nd.path.dentry->d_inode->i_mutex, I_MUTEX_PARENT);
+        dentry = lookup_hash(&nd);
+        error = PTR_ERR(dentry);
+        if (IS_ERR(dentry))
+                goto exit2;
+        if (!dentry->d_inode) {
+			error = -ENOENT;
+			goto exit3;
+		}
+//Patch by QNAP: implement fnotify function
+#ifdef	QNAP_FNOTIFY
+		FILE_STATUS_BY_INODE(dentry->d_inode, tfsOrg);
+#endif	//QNAP_FNOTIFY
+///////////////////////////////////
+
+    	error = vfs_rmdir(nd.path.dentry->d_inode, dentry);
+
+//Patch by QNAP: implement fnotify function
+#ifdef	QNAP_FNOTIFY
+		if (!error && (FN_RMDIR & msys_nodify))
+			pfn_sys_file_notify(FN_RMDIR, MARG_0, &nd.path, (const char*)dentry->d_name.name, dentry->d_name.len, &tfsOrg, 0, 0, 0, 0);
+#endif	//QNAP_FNOTIFY
+///////////////////////////////////
+exit3:
+        dput(dentry);
+exit2:
+    	mutex_unlock(&nd.path.dentry->d_inode->i_mutex);
+exit1:
+	    path_put(&nd.path);
+exit:
+        putname(name);
+        return error;
+}
+
+static long qnap_do_unlinkat(int dfd, const char __user *pathname)
+{
+    int error = 0;
+    char * name;
+    struct dentry *dentry;
+    struct nameidata nd;
+    struct inode *inode = NULL;
+
+	name = getname(pathname);
+    if(IS_ERR(name))
+        return PTR_ERR(name);
+
+    error = do_path_lookup(dfd, name, LOOKUP_PARENT, &nd);
+    if (error)
+        goto exit;
+    error = -EISDIR;
+    if (nd.last_type != LAST_NORM)
+        goto exit1;
+    mutex_lock_nested(&nd.path.dentry->d_inode->i_mutex, I_MUTEX_PARENT);
+    dentry = lookup_hash(&nd);
+    error = PTR_ERR(dentry);
+    if (!IS_ERR(dentry)) {
+        /* Why not before? Because we want correct error value */
+        if (nd.last.name[nd.last.len])
+            goto slashes;
+        inode = dentry->d_inode;
+        if (!inode)
+			goto slashes;
+		ihold(inode);
+        error = vfs_unlink(nd.path.dentry->d_inode, dentry);
+
+//Patch by QNAP: implement fnotify function
+#ifdef	QNAP_FNOTIFY
+		if (!error && (FN_UNLINK & msys_nodify))
+		{
+			T_FILE_STATUS  tfsOrg;
+			FILE_STATUS_BY_INODE(inode, tfsOrg);
+			pfn_sys_file_notify(FN_UNLINK, MARG_0, &nd.path, (const char*)dentry->d_name.name, dentry->d_name.len, &tfsOrg, 0, 0, 0, 0);
+		}
+#endif	//QNAP_FNOTIFY
+////////////////////////////////////////
+	exit2:
+		dput(dentry);
+    }
+    mutex_unlock(&nd.path.dentry->d_inode->i_mutex);
+    if (inode)
+	    iput(inode);    /* truncate the inode here */
+exit1:
+	path_put(&nd.path);
+exit:
+    putname(name);
+    return error;
+
+slashes:
+    error = !dentry->d_inode ? -ENOENT :
+            S_ISDIR(dentry->d_inode->i_mode) ? -EISDIR : -ENOTDIR;
+    goto exit2;
+}
+//Patch by QNAP: Scan and compare by case insensitive filename
+/**
+ * qanp_do_find_filename - compare filename in a directory
+ *
+ * @dfd:
+ * @path:   relative directory of current working directory
+ * @file:	filename to be compared
+ *
+ * return:
+ *          0: find the filename in case insensitive, and return original filename.
+ *          -ENOENT:can't find the filename in directory
+ */
+static long qnap_do_find_filename(int dfd, const char __user *path,const char __user *file)
+{
+#ifdef QNAP_SEARCH_FILENAME_CASE_INSENSITIVE
+    int error = -ENOENT;
+    char *path_name=NULL,*file_name=NULL;
+    struct inode *dir_inode;
+    struct nameidata nd;
+#ifdef CASE_FOLDING_DEBUG
+    int debug = 0;
+    if(strncasecmp(file,"test",strlen("test")) == 0)
+        debug = 1;
+    if(debug)
+        printk("In %s:%d:path = %s,file =%s\n",__func__,__LINE__,path,file);
+#endif
+	file_name = getname(file);
+    if(IS_ERR(file_name)){
+        return PTR_ERR(file_name);
+    }
+    path_name = getname(path);
+    if(IS_ERR(path_name)){
+        putname(file_name);
+        return PTR_ERR(path_name);
+    }
+
+    error = path_lookup(path_name,LOOKUP_DIRECTORY | LOOKUP_CASE_INSENSITIVE | LOOKUP_FOLLOW,&nd);
+    if(error < 0){
+        goto exit;
+    }
+
+    dir_inode = nd.path.dentry->d_inode;
+    if(dir_inode && strcmp(dir_inode->i_sb->s_type->name,"ext4") != 0){
+        path_put(&nd.path);
+        error =  -ENXIO;;
+        goto exit;
+    }
+    path_put(&nd.path);
+
+    if(strlen(path_name) + strlen(file_name) > PATH_MAX){
+        error = -ENXIO;
+        goto exit;
+    }
+    if(path_name[strlen(path_name) - 1] != '/'){
+        int len = strlen(path_name);
+        path_name[len] = '/';
+        path_name[len + 1] = 0;
+    }
+
+    strcat(path_name,file_name);
+    error = path_lookup(path_name,LOOKUP_CASE_INSENSITIVE | LOOKUP_FOLLOW,&nd);
+#ifdef CASE_FOLDING_DEBUG
+    if(debug)
+        printk("In %s:%d:name = %s,error = %d\n",__func__,__LINE__,path_name,error);
+#endif
+///////////////////////////////
+    if(error){
+        goto exit;
+    }
+    copy_to_user((void *)file,nd.path.dentry->d_name.name,strlen(nd.path.dentry->d_name.name));
+    path_put(&nd.path);
+exit:
+    putname(file_name);
+    putname(path_name);
+#else
+    int error = -ENXIO;;
+#endif
+    return error;
+}
+#endif
 
 int vfs_unlink(struct inode *dir, struct dentry *dentry)
 {
@@ -2747,6 +3574,40 @@ int vfs_unlink(struct inode *dir, struct dentry *dentry)
 
 	return error;
 }
+
+#ifdef CONFIG_MACH_QNAPTS
+int vfs_unlink_without_acl(struct inode *dir, struct dentry *dentry)
+{
+	int error = may_delete_without_acl(dir, dentry, 0);
+
+	if (error)
+		return error;
+
+	if (!dir->i_op->unlink)
+		return -EPERM;
+
+	mutex_lock(&dentry->d_inode->i_mutex);
+	if (d_mountpoint(dentry))
+		error = -EBUSY;
+	else {
+		error = security_inode_unlink(dir, dentry);
+		if (!error) {
+			error = dir->i_op->unlink(dir, dentry);
+			if (!error)
+				dont_mount(dentry);
+		}
+	}
+	mutex_unlock(&dentry->d_inode->i_mutex);
+
+	/* We don't d_delete() NFS sillyrenamed files--they still exist. */
+	if (!error && !(dentry->d_flags & DCACHE_NFSFS_RENAMED)) {
+		fsnotify_link_count(dentry->d_inode);
+		d_delete(dentry);
+	}
+
+	return error;
+}
+#endif
 
 /*
  * Make sure that the actual truncation of the file will occur outside its
@@ -2790,6 +3651,16 @@ static long do_unlinkat(int dfd, const char __user *pathname)
 		if (error)
 			goto exit3;
 		error = vfs_unlink(nd.path.dentry->d_inode, dentry);
+//Patch by QNAP: implement fnotify function
+#ifdef	QNAP_FNOTIFY
+		if (!error && (FN_UNLINK & msys_nodify))
+		{
+			T_FILE_STATUS  tfsOrg;
+			FILE_STATUS_BY_INODE(inode, tfsOrg);
+			pfn_sys_file_notify(FN_UNLINK, MARG_0, &nd.path, (const char*)dentry->d_name.name, dentry->d_name.len, &tfsOrg, 0, 0, 0, 0);
+		}
+#endif	//QNAP_FNOTIFY
+/////////////////////////////////////////
 exit3:
 		mnt_drop_write(nd.path.mnt);
 	exit2:
@@ -2808,6 +3679,25 @@ slashes:
 		S_ISDIR(dentry->d_inode->i_mode) ? -EISDIR : -ENOTDIR;
 	goto exit2;
 }
+
+#ifdef CONFIG_MACH_QNAPTS
+//////////////////////////////////////////////////////////////////
+SYSCALL_DEFINE1(qnap_rmdir, const char __user *, pathname)
+{
+    return qnap_do_rmdir(AT_FDCWD, pathname);
+}
+
+SYSCALL_DEFINE1(qnap_unlink, const char __user *, pathname)
+{
+    return qnap_do_unlinkat(AT_FDCWD, pathname);
+}
+//Patch by QNAP: Scan and compare by case insensitive filename
+SYSCALL_DEFINE2(qnap_find_filename, const char __user *, path,const char __user *,file)
+{
+    return qnap_do_find_filename(AT_FDCWD, path,file);
+}
+////////////////////////////////////////////////////////////////
+#endif
 
 SYSCALL_DEFINE3(unlinkat, int, dfd, const char __user *, pathname, int, flag)
 {
@@ -2845,6 +3735,28 @@ int vfs_symlink(struct inode *dir, struct dentry *dentry, const char *oldname)
 	return error;
 }
 
+#ifdef CONFIG_MACH_QNAPTS
+int vfs_symlink_without_acl(struct inode *dir, struct dentry *dentry, const char *oldname)
+{
+	int error = may_create_without_acl(dir, dentry);
+
+	if (error)
+		return error;
+
+	if (!dir->i_op->symlink)
+		return -EPERM;
+
+	error = security_inode_symlink(dir, dentry, oldname);
+	if (error)
+		return error;
+
+	error = dir->i_op->symlink(dir, dentry, oldname);
+	if (!error)
+		fsnotify_create(dir, dentry);
+	return error;
+}
+#endif
+
 SYSCALL_DEFINE3(symlinkat, const char __user *, oldname,
 		int, newdfd, const char __user *, newname)
 {
@@ -2869,6 +3781,17 @@ SYSCALL_DEFINE3(symlinkat, const char __user *, oldname,
 	if (error)
 		goto out_drop_write;
 	error = vfs_symlink(path.dentry->d_inode, dentry, from);
+//Patch by QNAP: implement fnotify function
+#ifdef	QNAP_FNOTIFY
+	if (!error && (FN_SYMLINK & msys_nodify))
+	{
+		T_FILE_STATUS  tfsOrg, tfsExt;
+		tfsExt.i_mode = 0;
+		FILE_STATUS_BY_INODE(dentry->d_inode, tfsOrg);
+		pfn_sys_files_notify(FN_SYMLINK, NULL, from, strlen(from), &path, dentry->d_name.name, dentry->d_name.len, &tfsOrg, &tfsExt);
+	}
+#endif	//QNAP_FNOTIFY
+////////////////////////////////////////
 out_drop_write:
 	mnt_drop_write(path.mnt);
 out_dput:
@@ -2926,6 +3849,52 @@ int vfs_link(struct dentry *old_dentry, struct inode *dir, struct dentry *new_de
 	return error;
 }
 
+#ifdef CONFIG_MACH_QNAPTS
+int vfs_link_without_acl(struct dentry *old_dentry, struct inode *dir, struct dentry *new_dentry)
+{
+	struct inode *inode = old_dentry->d_inode;
+	unsigned max_links = dir->i_sb->s_max_links;
+	int error;
+
+	if (!inode)
+		return -ENOENT;
+
+	error = may_create_without_acl(dir, new_dentry);
+	if (error)
+		return error;
+
+	if (dir->i_sb != inode->i_sb)
+		return -EXDEV;
+
+	/*
+	 * A link to an append-only or immutable file cannot be created.
+	 */
+	if (IS_APPEND(inode) || IS_IMMUTABLE(inode))
+		return -EPERM;
+	if (!dir->i_op->link)
+		return -EPERM;
+	if (S_ISDIR(inode->i_mode))
+		return -EPERM;
+
+	error = security_inode_link(old_dentry, dir, new_dentry);
+	if (error)
+		return error;
+
+	mutex_lock(&inode->i_mutex);
+	/* Make sure we don't allow creating hardlink to an unlinked file */
+	if (inode->i_nlink == 0)
+		error =  -ENOENT;
+	else if (max_links && inode->i_nlink >= max_links)
+		error = -EMLINK;
+	else
+		error = dir->i_op->link(old_dentry, dir, new_dentry);
+	mutex_unlock(&inode->i_mutex);
+	if (!error)
+		fsnotify_link(dir, inode, new_dentry);
+	return error;
+}
+#endif
+
 /*
  * Hardlinks are often used in delicate situations.  We avoid
  * security-related surprises by not following symlinks on the
@@ -2978,6 +3947,17 @@ SYSCALL_DEFINE5(linkat, int, olddfd, const char __user *, oldname,
 	if (error)
 		goto out_drop_write;
 	error = vfs_link(old_path.dentry, new_path.dentry->d_inode, new_dentry);
+//Patch by QNAP: implement fnotify function
+#ifdef	QNAP_FNOTIFY
+	if (!error && (FN_LINK & msys_nodify))
+	{
+		T_FILE_STATUS  tfsOrg, tfsExt;
+		tfsExt.i_mode = 0;
+		FILE_STATUS_BY_INODE(old_path.dentry->d_inode, tfsOrg);
+		pfn_sys_files_notify(FN_LINK, &old_path, NULL, 0, &new_path, new_dentry->d_name.name, new_dentry->d_name.len, &tfsOrg, &tfsExt);
+	}
+#endif	//QNAP_FNOTIFY
+//////////////////////////////////////
 out_drop_write:
 	mnt_drop_write(new_path.mnt);
 out_dput:
@@ -3070,6 +4050,62 @@ out:
 	return error;
 }
 
+#ifdef CONFIG_MACH_QNAPTS
+static int vfs_rename_dir_without_acl(struct inode *old_dir, struct dentry *old_dentry,
+			  struct inode *new_dir, struct dentry *new_dentry)
+{
+		int error = 0;
+	struct inode *target = new_dentry->d_inode;
+	unsigned max_links = new_dir->i_sb->s_max_links;
+
+	/*
+	 * If we are going to change the parent - check write permissions,
+	 * we'll need to flip '..'.
+	 */
+	if (new_dir != old_dir) {
+		error = inode_permission_without_acl(old_dentry->d_inode, MAY_WRITE);
+		if (error)
+			return error;
+	}
+
+	error = security_inode_rename(old_dir, old_dentry, new_dir, new_dentry);
+	if (error)
+		return error;
+
+	dget(new_dentry);
+	if (target)
+		mutex_lock(&target->i_mutex);
+
+	error = -EBUSY;
+	if (d_mountpoint(old_dentry) || d_mountpoint(new_dentry))
+		goto out;
+
+	error = -EMLINK;
+	if (max_links && !target && new_dir != old_dir &&
+	    new_dir->i_nlink >= max_links)
+		goto out;
+
+	if (target)
+		shrink_dcache_parent(new_dentry);
+	error = old_dir->i_op->rename(old_dir, old_dentry, new_dir, new_dentry);
+	if (error)
+		goto out;
+
+	if (target) {
+		target->i_flags |= S_DEAD;
+		dont_mount(new_dentry);
+	}
+out:
+	if (target)
+		mutex_unlock(&target->i_mutex);
+	dput(new_dentry);
+	if (!error)
+		if (!(old_dir->i_sb->s_type->fs_flags & FS_RENAME_DOES_D_MOVE))
+			d_move(old_dentry,new_dentry);
+	return error;
+}
+#endif
+
 static int vfs_rename_other(struct inode *old_dir, struct dentry *old_dentry,
 			    struct inode *new_dir, struct dentry *new_dentry)
 {
@@ -3140,6 +4176,46 @@ int vfs_rename(struct inode *old_dir, struct dentry *old_dentry,
 
 	return error;
 }
+
+#ifdef CONFIG_MACH_QNAPTS
+int vfs_rename_without_acl(struct inode *old_dir, struct dentry *old_dentry,
+	       struct inode *new_dir, struct dentry *new_dentry)
+{
+	int error;
+	int is_dir = S_ISDIR(old_dentry->d_inode->i_mode);
+	const unsigned char *old_name;
+
+	if (old_dentry->d_inode == new_dentry->d_inode)
+ 		return 0;
+
+	error = may_delete_without_acl(old_dir, old_dentry, is_dir);
+	if (error)
+		return error;
+
+	if (!new_dentry->d_inode)
+		error = may_create_without_acl(new_dir, new_dentry);
+	else
+		error = may_delete_without_acl(new_dir, new_dentry, is_dir);
+	if (error)
+		return error;
+
+	if (!old_dir->i_op->rename)
+		return -EPERM;
+
+	old_name = fsnotify_oldname_init(old_dentry->d_name.name);
+
+	if (is_dir)
+		error = vfs_rename_dir_without_acl(old_dir,old_dentry,new_dir,new_dentry);
+	else
+		error = vfs_rename_other(old_dir,old_dentry,new_dir,new_dentry);
+	if (!error)
+		fsnotify_move(old_dir, new_dir, old_name, is_dir,
+			      new_dentry->d_inode, old_dentry);
+	fsnotify_oldname_free(old_name);
+
+	return error;
+}
+#endif
 
 SYSCALL_DEFINE4(renameat, int, olddfd, const char __user *, oldname,
 		int, newdfd, const char __user *, newname)
@@ -3217,6 +4293,18 @@ SYSCALL_DEFINE4(renameat, int, olddfd, const char __user *, oldname,
 		goto exit6;
 	error = vfs_rename(old_dir->d_inode, old_dentry,
 				   new_dir->d_inode, new_dentry);
+//Patch by QNAP: implement fnotify function
+#ifdef	QNAP_FNOTIFY
+	if (!error && (FN_RENAME & msys_nodify))
+	{
+		T_FILE_STATUS  tfsOrg, tfsExt;
+		tfsExt.i_mode = 0;
+		FILE_STATUS_BY_INODE(old_dentry->d_inode, tfsOrg);
+		if (new_dentry && new_dentry->d_inode)  FILE_STATUS_BY_INODE(new_dentry->d_inode, tfsExt);
+		pfn_sys_files_notify(FN_RENAME, &oldnd.path, oldnd.last.name, oldnd.last.len, &newnd.path, newnd.last.name, newnd.last.len, &tfsOrg, &tfsExt);
+	}
+#endif	//QNAP_FNOTIFY
+///////////////////////////////////////////
 exit6:
 	mnt_drop_write(oldnd.path.mnt);
 exit5:
@@ -3385,6 +4473,9 @@ EXPORT_SYMBOL(get_write_access); /* binfmt_aout */
 EXPORT_SYMBOL(getname);
 EXPORT_SYMBOL(lock_rename);
 EXPORT_SYMBOL(lookup_one_len);
+#ifdef CONFIG_MACH_QNAPTS
+EXPORT_SYMBOL(lookup_one_len_without_acl);
+#endif
 EXPORT_SYMBOL(page_follow_link_light);
 EXPORT_SYMBOL(page_put_link);
 EXPORT_SYMBOL(page_readlink);
@@ -3394,6 +4485,9 @@ EXPORT_SYMBOL(page_symlink_inode_operations);
 EXPORT_SYMBOL(kern_path);
 EXPORT_SYMBOL(vfs_path_lookup);
 EXPORT_SYMBOL(inode_permission);
+#ifdef CONFIG_MACH_QNAPTS
+EXPORT_SYMBOL(inode_permission_without_acl);
+#endif
 EXPORT_SYMBOL(unlock_rename);
 EXPORT_SYMBOL(vfs_create);
 EXPORT_SYMBOL(vfs_follow_link);
@@ -3406,5 +4500,15 @@ EXPORT_SYMBOL(vfs_rename);
 EXPORT_SYMBOL(vfs_rmdir);
 EXPORT_SYMBOL(vfs_symlink);
 EXPORT_SYMBOL(vfs_unlink);
+#ifdef CONFIG_MACH_QNAPTS
+EXPORT_SYMBOL(vfs_create_without_acl);
+EXPORT_SYMBOL(vfs_link_without_acl);
+EXPORT_SYMBOL(vfs_mkdir_without_acl);
+EXPORT_SYMBOL(vfs_mknod_without_acl);
+EXPORT_SYMBOL(vfs_rename_without_acl);
+EXPORT_SYMBOL(vfs_rmdir_without_acl);
+EXPORT_SYMBOL(vfs_symlink_without_acl);
+EXPORT_SYMBOL(vfs_unlink_without_acl);
+#endif
 EXPORT_SYMBOL(dentry_unhash);
 EXPORT_SYMBOL(generic_readlink);

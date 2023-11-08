@@ -993,7 +993,20 @@ prepare0: archprepare FORCE
 
 # All the preparing..
 prepare: prepare0
+# QNAP Patch
+prepare: prepare0
+ifeq ($(ARCH),arm)
+	$(Q)ln -fsn $(srctree)/arch/$(hdr-arch)/include/asm/unistd.h $(srctree)/include/generated/unistd.h
+	$(Q)ln -fsn $(srctree)/arch/$(hdr-arch)/include/asm/swab.h $(srctree)/include/generated/swab.h
+	$(Q)ln -fsn generated include/asm
 
+	$(Q)ln -fsn $(srctree)/include/generated/utsrelease.h include/linux/utsrelease.h
+	$(Q)ln -fsn $(srctree)/include/generated/autoconf.h include/linux/autoconf.h
+else
+	$(Q)ln -fsn $(srctree)/arch/$(hdr-arch)/include/asm include/asm
+	$(Q)ln -fsn $(srctree)/include/generated/utsrelease.h include/linux/utsrelease.h
+	$(Q)ln -fsn $(srctree)/include/generated/autoconf.h include/linux/autoconf.h	
+endif	
 # Generate some files
 # ---------------------------------------------------------------------------
 

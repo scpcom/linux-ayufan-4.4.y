@@ -44,6 +44,18 @@
 
 #include "target_core_internal.h"
 
+#if defined(CONFIG_MACH_QNAPTS)
+#include "vaai_target_struc.h"
+#include "target_general.h"
+#if defined(SUPPORT_TPC_CMD)
+#include "tpc_helper.h"
+#endif
+#endif
+
+#ifdef CONFIG_MACH_QNAPTS // 2009/09/23 Nike Chen add for default initiator
+#define QNAP_DEFAULT_INITIATOR "iqn.2004-04.com.qnap:all:iscsi.default.ffffff"
+#endif
+
 extern struct se_device *g_lun0_dev;
 
 static DEFINE_SPINLOCK(tpg_lock);
@@ -114,13 +126,28 @@ struct se_node_acl *core_tpg_get_initiator_node_acl(
 	struct se_node_acl *acl;
 
 	spin_lock_irq(&tpg->acl_node_lock);
-	list_for_each_entry(acl, &tpg->acl_node_list, acl_list) {
+#ifdef CONFIG_MACH_QNAPTS
+// 2009/09/23 Nike Chen add for default initiator
+    list_for_each_entry(acl, &tpg->acl_node_list, acl_list) {
+		if (!tpg->default_acl && !(strcmp(acl->initiatorname, QNAP_DEFAULT_INITIATOR))) {
+				tpg->default_acl = acl;
+				pr_debug("Get default acl %p for tpg %p.\n", tpg->default_acl, tpg);
+		}
 		if (!strcmp(acl->initiatorname, initiatorname) &&
-		    !acl->dynamic_node_acl) {
+				!acl->dynamic_node_acl) {
 			spin_unlock_irq(&tpg->acl_node_lock);
 			return acl;
 		}
 	}
+#else //CONFIG_MACH_QNAPTS
+	list_for_each_entry(acl, &tpg->acl_node_list, acl_list) {
+		if (!strcmp(acl->initiatorname, initiatorname) &&
+			    !acl->dynamic_node_acl) {
+			spin_unlock_irq(&tpg->acl_node_lock);
+			return acl;
+		}
+	}
+#endif //CONFIG_MACH_QNAPTS
 	spin_unlock_irq(&tpg->acl_node_lock);
 
 	return NULL;
@@ -152,6 +179,14 @@ void core_tpg_add_node_to_devs(
 		 * By default in LIO-Target $FABRIC_MOD,
 		 * demo_mode_write_protect is ON, or READ_ONLY;
 		 */
+#ifdef CONFIG_MACH_QNAPTS // 2009/09/23 Nike Chen add for default initiator
+		if (tpg->default_acl) {
+			lun_access = (dev->transport->get_device_type(dev) != TYPE_DISK) ? 
+				            TRANSPORT_LUNFLAGS_READ_ONLY : 
+				            TRANSPORT_LUNFLAGS_READ_WRITE;
+		}
+		else
+#endif		 		 
 		if (!tpg->se_tpg_tfo->tpg_check_demo_mode_write_protect(tpg)) {
 			if (dev->dev_flags & DF_READ_ONLY)
 				lun_access = TRANSPORT_LUNFLAGS_READ_ONLY;
@@ -181,6 +216,55 @@ void core_tpg_add_node_to_devs(
 	}
 	spin_unlock(&tpg->tpg_lun_lock);
 }
+
+#ifdef CONFIG_MACH_QNAPTS // 2009/09/23 Nike Chen add for default initiator
+/*	core_tpg_copy_node_devs():
+ *
+ *
+ */
+void core_tpg_copy_node_devs(
+	struct se_node_acl *dest_acl,
+	struct se_node_acl *src_acl,
+	struct se_portal_group *tpg)
+{
+	int i = 0;
+	u32 lun_access = 0;
+	struct se_lun *lun = 0;
+	struct se_dev_entry *deve;
+    
+    // Benjamin 20120724:FIXME: why spin_lock_irq but not spin_lock_irqsave?
+    spin_lock_irq(&src_acl->device_list_lock);
+    
+	for (i = 0; i < TRANSPORT_MAX_LUNS_PER_TPG; i++) {
+		deve = src_acl->device_list[i];
+		if (!deve)
+			continue;
+		    
+		lun = deve->se_lun;
+		if (lun) {
+			if (lun->lun_status != TRANSPORT_LUN_STATUS_ACTIVE)
+				continue;
+
+               	lun_access = (deve->lun_flags & TRANSPORT_LUNFLAGS_READ_WRITE) ?
+                                 	TRANSPORT_LUNFLAGS_READ_WRITE :
+                                 	TRANSPORT_LUNFLAGS_READ_ONLY;
+                                 
+		    	pr_debug("TARGET_CORE[%s]->TPG[%u]_LUN[%u] - Copying %s"
+			    	" access for LUN\n",
+			    	tpg->se_tpg_tfo->get_fabric_name(),
+			    	tpg->se_tpg_tfo->tpg_get_tag(tpg), lun->unpacked_lun,
+			    	(lun_access == TRANSPORT_LUNFLAGS_READ_WRITE) ?
+			    	"READ-WRITE" : "READ-ONLY");
+
+		    	core_update_device_list_for_node(lun, NULL, lun->unpacked_lun,
+							lun_access, dest_acl, tpg, 1);			
+		}
+
+	}
+    
+	spin_unlock_irq(&src_acl->device_list_lock);
+}
+#endif
 
 /*      core_set_queue_depth_for_node():
  *
@@ -271,6 +355,9 @@ struct se_node_acl *core_tpg_check_initiator_node_acl(
 	if (acl)
 		return acl;
 
+#ifdef CONFIG_MACH_QNAPTS // 2009/09/23 Nike Chen add for default initiator
+	if (!tpg->default_acl)
+#endif
 	if (!tpg->se_tpg_tfo->tpg_check_demo_mode(tpg))
 		return NULL;
 
@@ -285,15 +372,26 @@ struct se_node_acl *core_tpg_check_initiator_node_acl(
 	spin_lock_init(&acl->device_list_lock);
 	spin_lock_init(&acl->nacl_sess_lock);
 	atomic_set(&acl->acl_pr_ref_count, 0);
+#ifdef CONFIG_MACH_QNAPTS // 2009/09/23 Nike Chen add for default initiator
+    acl->queue_depth = (tpg->default_acl) ? 
+                        tpg->default_acl->queue_depth : 
+                        tpg->se_tpg_tfo->tpg_get_default_depth(tpg);
+#else        
 	acl->queue_depth = tpg->se_tpg_tfo->tpg_get_default_depth(tpg);
+#endif        
 	snprintf(acl->initiatorname, TRANSPORT_IQN_LEN, "%s", initiatorname);
 	acl->se_tpg = tpg;
 	acl->acl_index = scsi_get_new_index(SCSI_AUTH_INTR_INDEX);
 	spin_lock_init(&acl->stats_lock);
 	acl->dynamic_node_acl = 1;
-
-	tpg->se_tpg_tfo->set_default_node_attributes(acl);
-
+#ifdef CONFIG_MACH_QNAPTS // 2009/09/23 Nike Chen add for default initiator
+    if (tpg->default_acl)
+        tpg->se_tpg_tfo->copy_node_attributes(acl, tpg->default_acl);
+    else
+        tpg->se_tpg_tfo->set_default_node_attributes(acl);        
+#else        
+	tpg->se_tpg_tfo->set_default_node_attributes(acl);        
+#endif
 	if (core_create_device_list_for_node(acl) < 0) {
 		tpg->se_tpg_tfo->tpg_release_fabric_acl(tpg, acl);
 		return NULL;
@@ -304,6 +402,26 @@ struct se_node_acl *core_tpg_check_initiator_node_acl(
 		tpg->se_tpg_tfo->tpg_release_fabric_acl(tpg, acl);
 		return NULL;
 	}
+
+#ifdef CONFIG_MACH_QNAPTS // 2009/10/31 Nike Chen add for default initiator
+	if (tpg->default_acl) {
+		/* 
+		 * Jonathan Ho, 20131104, fix incomplete removal of default initiator
+		 * Just double check to avoid similar issue
+		 */
+		if (tpg->default_acl->device_list) {
+			core_tpg_copy_node_devs(acl, tpg->default_acl, tpg);
+		} else {
+			pr_err("device_list is NULL, try to rebuild default_acl...\n");
+			tpg->default_acl = NULL;
+			core_tpg_get_initiator_node_acl(tpg, initiatorname);
+			if ((tpg->default_acl)&&(tpg->default_acl->device_list))
+				core_tpg_copy_node_devs(acl, tpg->default_acl, tpg);
+			else
+				pr_err("cannot rebuild default_acl!\n");
+		}
+	}
+#else	        
 	/*
 	 * Here we only create demo-mode MappedLUNs from the active
 	 * TPG LUNs if the fabric is not explictly asking for
@@ -314,6 +432,7 @@ struct se_node_acl *core_tpg_check_initiator_node_acl(
 		do { ; } while (0);
 	else
 		core_tpg_add_node_to_devs(acl, tpg);
+#endif  /* #ifdef CONFIG_MACH_QNAPTS */
 
 	spin_lock_irq(&tpg->acl_node_lock);
 	list_add_tail(&acl->acl_list, &tpg->acl_node_list);
@@ -509,6 +628,13 @@ int core_tpg_del_initiator_node_acl(
 		tpg->se_tpg_tfo->tpg_get_tag(tpg), acl->queue_depth,
 		tpg->se_tpg_tfo->get_fabric_name(), acl->initiatorname);
 
+/* Jonathan Ho, 20131104, fix incomplete removal of default initiator */
+#ifdef CONFIG_MACH_QNAPTS
+	if (!strcmp(acl->initiatorname, QNAP_DEFAULT_INITIATOR)) {
+		pr_debug("set tpg->default_acl to NULL\n");
+		tpg->default_acl = NULL;
+	}
+#endif
 	return 0;
 }
 EXPORT_SYMBOL(core_tpg_del_initiator_node_acl);
@@ -706,6 +832,21 @@ int core_tpg_register(
 		}
 	}
 
+#if defined(CONFIG_MACH_QNAPTS)
+#if defined(SUPPORT_TPC_CMD)
+	if (se_tpg->se_tpg_type == TRANSPORT_TPG_TYPE_NORMAL) {
+		spin_lock_init(&se_tpg->tpc_cmd_track_list_lock);
+		spin_lock_init(&se_tpg->tpc_obj_list_lock);
+		INIT_LIST_HEAD(&se_tpg->tpc_cmd_track_list);
+		INIT_LIST_HEAD(&se_tpg->tpc_obj_list);
+		atomic_set(&se_tpg->tpc_track_count, 0);
+		atomic_set(&se_tpg->tpc_obj_count, 0);
+		atomic_set(&se_tpg->tpc_se_tpg_ref_count, 0);
+//		pr_err("%s - init tpc member data was done\n", __func__);
+	}
+#endif
+#endif
+
 	spin_lock_bh(&tpg_lock);
 	list_add_tail(&se_tpg->se_tpg_node, &tpg_list);
 	spin_unlock_bh(&tpg_lock);
@@ -734,6 +875,18 @@ int core_tpg_deregister(struct se_portal_group *se_tpg)
 	spin_lock_bh(&tpg_lock);
 	list_del(&se_tpg->se_tpg_node);
 	spin_unlock_bh(&tpg_lock);
+
+#if defined(CONFIG_MACH_QNAPTS)
+#if defined(SUPPORT_TPC_CMD)
+	if (se_tpg->se_tpg_type == TRANSPORT_TPG_TYPE_NORMAL){
+		tpc_release_obj_for_se_tpg(se_tpg);
+
+		/* FIXED ME, to wait if someone refer this tpg */
+		while (atomic_read(&se_tpg->tpc_se_tpg_ref_count))
+			cpu_relax();
+	}
+#endif
+#endif
 
 	while (atomic_read(&se_tpg->tpg_pr_ref_count) != 0)
 		cpu_relax();
@@ -868,3 +1021,19 @@ int core_tpg_post_dellun(
 
 	return 0;
 }
+
+#if defined(CONFIG_MACH_QNAPTS)
+#if defined(SUPPORT_TPC_CMD)
+struct list_head *tpc_get_tpg_list_var(void)
+{
+	return &tpg_list;
+}
+
+void *tpc_get_tpg_lock_var(void)
+{
+	return (void*)&tpg_lock;
+}
+#endif
+#endif
+
+

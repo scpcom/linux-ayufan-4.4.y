@@ -23,6 +23,13 @@
 
 #include <trace/events/ext4.h>
 
+//Patch by QNAP:Fix iSCSI kernel thread use reserved block
+#if defined(CONFIG_MACH_QNAPTS)
+#define ISCSI_RESERVED_NAME "fbdisk"
+#define ISCSI_RESERVED_SIZE 32768 //128 MBytes
+#define RTRR_QSYNCD_RESERVED_NAME "qsyncd"
+#endif
+
 /*
  * balloc.c contains the blocks allocation and deallocation routines
  */
@@ -430,6 +437,20 @@ static int ext4_has_free_clusters(struct ext4_sb_info *sbi,
 	/* Check whether we have space after accounting for current
 	 * dirty clusters & root reserved clusters.
 	 */
+	 
+//Patch by QNAP:Fix iSCSI kernel thread use reserved block
+#if defined(CONFIG_MACH_QNAPTS)
+    if (!strncmp(current->comm, ISCSI_RESERVED_NAME , strlen(ISCSI_RESERVED_NAME)) ||
+		!strncmp(current->comm, RTRR_QSYNCD_RESERVED_NAME , strlen(RTRR_QSYNCD_RESERVED_NAME))) 
+    {   
+        if (free_clusters >= ((root_clusters + nclusters) + dirty_clusters + EXT4_B2C(sbi,ISCSI_RESERVED_SIZE)))
+            return 1;
+        else 
+            return 0;
+    }
+#endif
+///////////////////////////////////////////////////////////
+	 
 	if (free_clusters >= ((root_clusters + nclusters) + dirty_clusters))
 		return 1;
 

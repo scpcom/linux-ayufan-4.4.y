@@ -561,7 +561,8 @@ int iscsi_copy_param_list(
 		if (!leading && (param->scope & SCOPE_SESSION_WIDE)) {
 			if ((strcmp(param->name, "TargetName") != 0) &&
 			    (strcmp(param->name, "InitiatorName") != 0) &&
-			    (strcmp(param->name, "TargetPortalGroupTag") != 0))
+			    (strcmp(param->name, "TargetPortalGroupTag") != 0) &&
+                            (strcmp(param->name, "TargetAlias") != 0))
 				continue;
 		}
 
@@ -650,8 +651,15 @@ struct iscsi_param *iscsi_find_param_from_key(
 	}
 
 	list_for_each_entry(param, &param_list->param_list, p_list) {
+#ifdef CONFIG_MACH_QNAPTS   // Benjamin 20110418 for bug #19339: Broadcom HW Initiator login failure 
+        if (!strcmp(key, param->name)) {
+            param->nego = 1;
+            return param;
+        }
+#else
 		if (!strcmp(key, param->name))
 			return param;
+#endif /* #ifdef CONFIG_MACH_QNAPTS  */                
 	}
 
 	pr_err("Unable to locate key \"%s\".\n", key);
@@ -1148,8 +1156,14 @@ static int iscsi_check_acceptor_state(struct iscsi_param *param, char *value)
 				return -1;
 		}
 
+#ifndef CONFIG_MACH_QNAPTS  // Benjamin 20121017 for BUG 24545: The iSCSI performance tested by AJA test is slow and unstable with 10GbE network
+		/* RFC 3720 Section 5.2.2. Simple-value Negotiations
+		 *  For simple-value negotiations, the accepting party MUST answer with the same key. 
+		 *  The value it selects becomes the negotiation result.
+		 */
 		if (!strcmp(param->name, MAXRECVDATASEGMENTLENGTH))
 			SET_PSTATE_REPLY_OPTIONAL(param);
+#endif        
 	} else if (IS_TYPE_NUMBER_RANGE(param)) {
 		negoitated_value = iscsi_get_value_from_number_range(
 					param, value);
@@ -1546,6 +1560,9 @@ int iscsi_decode_text_input(
 	struct iscsi_param_list *param_list)
 {
 	char *tmpbuf, *start = NULL, *end = NULL;
+#ifdef CONFIG_MACH_QNAPTS   // Benjamin 20110418 for bug #19339: Broadcom HW Initiator login failure 
+	struct iscsi_param *paramP;
+#endif
 
 	tmpbuf = kzalloc(length + 1, GFP_KERNEL);
 	if (!tmpbuf) {
@@ -1558,9 +1575,22 @@ int iscsi_decode_text_input(
 	start = tmpbuf;
 	end = (start + length);
 
+#ifdef CONFIG_MACH_QNAPTS   // Benjamin 20110418 for bug #19339: Broadcom HW Initiator login failure 
+	list_for_each_entry(paramP, &param_list->param_list, p_list) {
+        paramP->nego = 0;
+    }
+#endif
+
 	while (start < end) {
 		char *key, *value;
 		struct iscsi_param *param;
+		char *check=NULL;
+
+		check=strchr(start,0);
+
+		if(check==NULL || ((check-tmpbuf)>=length) )
+			return (end-start)+1;
+
 
 		if (iscsi_extract_key_value(start, &key, &value) < 0) {
 			kfree(tmpbuf);
@@ -1585,6 +1615,22 @@ int iscsi_decode_text_input(
 				kfree(tmpbuf);
 				return -1;
 			}
+#ifdef CONFIG_MACH_QNAPTS   
+			/* Benjamin 20121008 for BUG 27836: Add work-around for Bosch Dinion IPCam
+			 * RFC 3720 section 12.10. InitialR2T :
+			 * The default action is that R2T is required, unless both the initiator and the 
+			 * target send this key-pair attribute specifying InitialR2T=NO. 
+			 *
+			 *  On the other hand, Bosch Dinion IPCam cannot accept InitialR2T=YES. 
+			 *  It's one of the Bosch IPCam's BUGs, we add work-around here.
+			 */
+			if (strstr(key, ".bosch.")) {
+                printk("Work-around for Bosch Dinion IPCam.\n");
+                if ((paramP = iscsi_find_param_from_key(INITIALR2T, param_list))) {
+                    snprintf(paramP->value, sizeof(paramP->value), "%s", "NO");
+                }
+            }
+#endif             
 			start += strlen(key) + strlen(value) + 2;
 			continue;
 		}
@@ -1633,6 +1679,19 @@ int iscsi_encode_text_output(
 	list_for_each_entry(param, &param_list->param_list, p_list) {
 		if (!(param->sender & sender))
 			continue;
+#ifdef CONFIG_MACH_QNAPTS   // Benjamin 20110418 for bug #19339: Broadcom HW Initiator login failure 
+        // Broadcom HW initiator will try to confirm the parameters which are not negotiated yet 
+        // (DefaultTime2Wait and DefaultTime2Retain) in login phase, but both initiator and target
+        // are accept to enter full feature phase. That's why the error occurs. It's Broadcom HW initiator's bug.
+        // Work-around:Use the default values directly instead of returning key-value pairs to 
+        // avoid to trigger the Broadcom HW initiator's bug.
+        if (!(param->nego) && (param->sender != SENDER_TARGET) &&
+            (!strcmp(DEFAULTTIME2WAIT, param->name) || 
+             !strcmp(DEFAULTTIME2RETAIN, param->name))) {
+			pr_debug("Bypass key: %s=%s\n", param->name, param->value);		
+			continue;
+        }        
+#endif        
 		if (IS_PSTATE_ACCEPTOR(param) &&
 		    !IS_PSTATE_RESPONSE_SENT(param) &&
 		    !IS_PSTATE_REPLY_OPTIONAL(param) &&

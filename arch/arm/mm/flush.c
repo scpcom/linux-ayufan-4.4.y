@@ -279,6 +279,10 @@ void __sync_icache_dcache(pte_t pteval)
 }
 #endif
 
+// Patch by QNAP: 
+// fix bug#37043, encrypted dsik cannot be mounted when try to create an encrtypt disk.
+// the patch is from official linux-3.11.2
+#if defined(CONFIG_MACH_QNAPTS)
 /*
  * Ensure cache coherency for the kernel mapping of this page. We can
  * assume that the page is pinned via kmap.
@@ -311,6 +315,8 @@ void flush_kernel_dcache_page(struct page *page)
 	}
 }
 EXPORT_SYMBOL(flush_kernel_dcache_page);
+#endif
+//////////////////////// End of Patch by QNAP
 
 /*
  * Ensure cache coherency between kernel mapping and userspace mapping

@@ -74,6 +74,12 @@ static struct cmdline_mtd_partition *partitions;
 static char *cmdline;
 static int cmdline_parsed = 0;
 
+//Patch by QNAP: Board initialization
+#ifdef CONFIG_MACH_QNAPTS		
+int mtdpart_ignore_ro = 0;
+EXPORT_SYMBOL(mtdpart_ignore_ro);
+#endif
+
 /*
  * Parse one partition definition for an MTD. Since there can be many
  * comma separated partition definitions, this function calls itself
@@ -332,6 +338,14 @@ static int parse_cmdline_partitions(struct mtd_info *master,
 		{
 			for(i = 0, offset = 0; i < part->num_parts; i++)
 			{
+//Patch by QNAP: Board initialization
+#ifdef CONFIG_MACH_QNAPTS		
+                if (mtdpart_ignore_ro == 1)
+                {
+                    if (part->parts[i].mask_flags & MTD_WRITEABLE)
+                        part->parts[i].mask_flags &= ~MTD_WRITEABLE;
+                }
+#endif                    
 				if (part->parts[i].offset == OFFSET_CONTINUOUS)
 				  part->parts[i].offset = offset;
 				else

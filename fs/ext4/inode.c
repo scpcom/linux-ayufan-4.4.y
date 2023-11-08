@@ -48,6 +48,10 @@
 
 #define MPAGE_DA_EXTENT_TAIL 0x01
 
+//Patch by QNAP:fix sendfile quota issue
+#define FIX_QUOTA_ISSUE
+/////////////////////////////////////////////////////////
+
 static inline int ext4_begin_ordered_truncate(struct inode *inode,
 					      loff_t new_size)
 {
@@ -866,7 +870,11 @@ retry:
 
 		ext4_journal_stop(handle);
 		if (pos + len > inode->i_size) {
+//Patch by QNAP:fix sendfile quota issue
+#ifdef FIX_QUOTA_ISSUE
+#else            
 			ext4_truncate_failed_write(inode);
+#endif
 			/*
 			 * If truncate failed early the inode might
 			 * still be on the orphan list; we need to
@@ -2453,8 +2461,12 @@ retry:
 		 * outside i_size.  Trim these off again. Don't need
 		 * i_size_read because we hold i_mutex.
 		 */
+//Patch by QNAP:fix sendfile quota issue
+#ifdef FIX_QUOTA_ISSUE
+#else		 
 		if (pos + len > inode->i_size)
 			ext4_truncate_failed_write(inode);
+#endif        
 	}
 
 	if (ret == -ENOSPC && ext4_should_retry_alloc(inode->i_sb, &retries))

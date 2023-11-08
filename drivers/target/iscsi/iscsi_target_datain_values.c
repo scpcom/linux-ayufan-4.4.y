@@ -513,7 +513,25 @@ struct iscsi_datain_req *iscsit_get_datain_values(
 	struct iscsi_datain *datain)
 {
 	struct iscsi_conn *conn = cmd->conn;
+#ifdef CONFIG_MACH_QNAPTS 
+    struct se_cmd   *se_cmd = &cmd->se_cmd;
+	/* 
+	 * Benjamin 20130115: 
+	 * The Residual Underflow means the DataSegmentLength is less than ExpectedDataSegmentLength.
+	 * The Residual Count indicates the no. of bytes that were not transferred out of the no. of bytes 
+	 * that were expected to be transferred. See RFC 3720 10.4.1
+	 */
+    if (cmd->data_length > se_cmd->data_length) {
+        if (se_cmd->se_cmd_flags & SCF_SCSI_CONTROL_SG_IO_CDB) {
+            pr_debug("%s: cmd->data_length=%u, se_cmd->data_length=%u!\n",
+                __func__, cmd->data_length, se_cmd->data_length);  
 
+            se_cmd->se_cmd_flags |= SCF_UNDERFLOW_BIT;
+            se_cmd->residual_count = cmd->data_length - se_cmd->data_length;
+            cmd->data_length = se_cmd->data_length;
+        }
+    }
+#endif
 	if (conn->sess->sess_ops->DataSequenceInOrder &&
 	    conn->sess->sess_ops->DataPDUInOrder)
 		return iscsit_set_datain_values_yes_and_yes(cmd, datain);

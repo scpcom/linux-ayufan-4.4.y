@@ -375,7 +375,13 @@ struct Scsi_Host *scsi_host_alloc(struct scsi_host_template *sht, int privsize)
 	 * commands, but individual low-level drivers need to certify that
 	 * they actually do something sensible with such commands.
 	 */
+//Patch by QNAP: Support 16-bit SCSI command
+#ifdef CONFIG_MACH_QNAPTS
+	shost->max_cmd_len = 16;
+#else
 	shost->max_cmd_len = 12;
+#endif
+///////////////////////////////////////////    
 	shost->hostt = sht;
 	shost->this_id = sht->this_id;
 	shost->can_queue = sht->can_queue;

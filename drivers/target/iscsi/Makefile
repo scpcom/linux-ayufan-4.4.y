@@ -15,6 +15,11 @@ iscsi_target_mod-y +=		iscsi_target_parameters.o \
 				iscsi_target_util.o \
 				iscsi_target.o \
 				iscsi_target_configfs.o \
-				iscsi_target_stat.o
+				iscsi_target_stat.o \
+				iscsi_target_log.o
 
 obj-$(CONFIG_ISCSI_TARGET)	+= iscsi_target_mod.o
+
+#20121130, adam hsu support iscsi zero-copy
+ccflags-y += -DSUPPORT_ISCSI_ZERO_COPY -DCONFIG_MACH_QNAPTS
+#20121130, adam hsu support iscsi zero-copy

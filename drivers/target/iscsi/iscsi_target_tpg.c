@@ -92,8 +92,18 @@ int iscsit_load_discovery_tpg(void)
 	if (!param)
 		goto out;
 
+#ifdef CONFIG_MACH_QNAPTS   
+/*
+  * Benjamin 20130319 for BUG 31584: 
+  * Citrix Xen server may login failed due to target will return AuthMethod=CHAP 
+  * if the initiator issues the "AuthMethod=CHAP,None" key-value pair.
+  */    
+	if (iscsi_update_param_value(param, "None") < 0)
+		goto out;
+#else
 	if (iscsi_update_param_value(param, "CHAP,None") < 0)
 		goto out;
+#endif
 
 	tpg->tpg_attrib.authentication = 0;
 

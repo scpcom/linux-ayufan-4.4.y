@@ -38,6 +38,15 @@
 #include <linux/net.h>
 #include <linux/genalloc.h>
 
+//Patch by QNAP: implement fnotify function
+#ifdef	QNAP_FNOTIFY
+#include <linux/fnotify.h>
+#endif	//QNAP_FNOTIFY
+///////////////////////////////////
+//Patch by QNAP:enhance performance from socket to file
+#define ENHANCE_PERFORMANCE
+/////////////////////////////////////////////////////////
+
 /*
  * Attempt to steal a page from a pipe buffer. This should perhaps go into
  * a vm helper function, it's already simplified quite a bit by the
@@ -1033,7 +1042,7 @@ write_begin_done:
 	comcerto_dma_wait();
 	comcerto_dma_put();
 
-	comcerto_dma_sg_cleanup(sg, nrbufs_len);
+	comcerto_dma_sg_cleanup(sg);
 #else
 	remaining = nrbufs_len;
 	curbuf = pipe->curbuf;
@@ -1813,7 +1822,11 @@ static long do_splice(struct file *in, loff_t __user *off_in,
 	struct pipe_inode_info *opipe;
 	loff_t offset, *off;
 	long ret;
-
+	//Patch by QNAP: implement fnotify function
+#ifdef	QNAP_FNOTIFY
+		T_FILE_STATUS  tfsOrg;
+#endif	//QNAP_FNOTIF
+	///////////////////////////////////
 	ipipe = get_pipe_info(in);
 	opipe = get_pipe_info(out);
 
@@ -1845,9 +1858,18 @@ static long do_splice(struct file *in, loff_t __user *off_in,
 			off = &offset;
 		} else
 			off = &out->f_pos;
-
+//Patch by QNAP: implement fnotify function
+#ifdef	QNAP_FNOTIFY
+		if ((FN_WRITE & msys_nodify) && out && out->f_path.dentry)  FILE_STATUS_BY_INODE(out->f_path.dentry->d_inode, tfsOrg);
+#endif	//QNAP_FNOTIFY
+////////////////////////////////////
 		ret = do_splice_from(ipipe, out, off, len, flags);
-
+//Patch by QNAP: implement fnotify function
+#ifdef	QNAP_FNOTIFY
+		if ((0 < ret) && (FN_WRITE & msys_nodify) && out)
+			pfn_sys_file_notify(FN_WRITE, MARG_2xI64, &out->f_path, NULL, 0, &tfsOrg, len, *off-len, 0, 0);
+#endif	//QNAP_FNOTIFY
+////////////////////////////////////
 		if (off_out && copy_to_user(off_out, off, sizeof(loff_t)))
 			ret = -EFAULT;
 
@@ -1865,9 +1887,18 @@ static long do_splice(struct file *in, loff_t __user *off_in,
 			off = &offset;
 		} else
 			off = &in->f_pos;
-
+//Patch by QNAP: implement fnotify function
+#ifdef	QNAP_FNOTIFY
+		if ((FN_READ & msys_nodify) && in && in->f_path.dentry)  FILE_STATUS_BY_INODE(in->f_path.dentry->d_inode, tfsOrg);
+#endif	//QNAP_FNOTIFY
+////////////////////////////////////
 		ret = do_splice_to(in, off, opipe, len, flags);
-
+//Patch by QNAP: implement fnotify function
+#ifdef	QNAP_FNOTIFY
+		if ((0 < ret) && (FN_READ & msys_nodify) && in)
+			pfn_sys_file_notify(FN_READ, MARG_2xI64, &in->f_path, NULL, 0, &tfsOrg, len, *off-len, 0, 0);
+#endif	//QNAP_FNOTIFY
+////////////////////////////////////
 		if (off_in && copy_to_user(off_in, off, sizeof(loff_t)))
 			ret = -EFAULT;
 
@@ -1876,6 +1907,161 @@ static long do_splice(struct file *in, loff_t __user *off_in,
 
 	return -EINVAL;
 }
+
+//Patch by QNAP:enhance performance from socket to file
+#ifdef ENHANCE_PERFORMANCE
+#include <net/sock.h>
+struct RECV_FILE_CONTROL_BLOCK
+{
+    struct page *rv_page;
+    loff_t rv_pos;
+    size_t  rv_count;
+    void *rv_fsdata;
+};
+
+static ssize_t do_splice_from_socket(struct file *file, struct socket *sock,loff_t __user *ppos,size_t count)
+{		
+    struct address_space *mapping = file->f_mapping;
+    struct inode	*inode = mapping->host;
+    loff_t pos;
+    int count_tmp;
+    int err = 0;
+    int cPagePtr = 0;		
+    int cPagesAllocated = 0;
+    struct RECV_FILE_CONTROL_BLOCK rv_cb[MAX_PAGES_PER_RECVFILE + 1];
+    struct kvec iov[MAX_PAGES_PER_RECVFILE + 1];
+    struct msghdr msg;
+    long rcvtimeo;
+    int ret;
+//Patch by QNAP: implement fnotify function
+	#ifdef	QNAP_FNOTIFY
+	T_FILE_STATUS  tfsOrg;
+	#endif	//QNAP_FNOTIFY
+///////////////////////////////////
+    if(copy_from_user(&pos, ppos, sizeof(loff_t)))
+        return -EFAULT;
+
+    if(count > MAX_PAGES_PER_RECVFILE * PAGE_SIZE){
+        printk("%s: %d: %s:count(%d) exceed maxinum\n",__FILE__,__LINE__,__func__,count);
+        return -EINVAL;
+    }    
+    mutex_lock(&inode->i_mutex);
+
+    vfs_check_frozen(inode->i_sb, SB_FREEZE_WRITE);
+
+    /* We can write back this queue in page reclaim */
+    current->backing_dev_info = mapping->backing_dev_info;
+
+    err = generic_write_checks(file, &pos, &count, S_ISBLK(inode->i_mode));
+    if (err != 0 || count == 0)
+        goto done;
+
+    file_remove_suid(file);
+    file_update_time(file);	
+
+    count_tmp = count;
+    do {
+        unsigned long bytes;	/* Bytes to write to page */
+        unsigned long offset;	/* Offset into pagecache page */
+        struct page *pageP;
+        void *fsdata;
+
+        offset = (pos & (PAGE_CACHE_SIZE - 1));
+        bytes = PAGE_CACHE_SIZE - offset;
+        if (bytes > count_tmp)
+        bytes = count_tmp;
+
+        ret =  mapping->a_ops->write_begin(file, mapping, pos, bytes, AOP_FLAG_UNINTERRUPTIBLE,&pageP,&fsdata);
+
+        if (unlikely(ret)){
+            err = ret;
+            //-ENOSPC:No space left on device maybe happen
+            //          	printk("%s: %d: %s: error:%d\n",__FILE__,__LINE__,__func__,err);
+            for(cPagePtr = 0; cPagePtr < cPagesAllocated; cPagePtr++){
+                kunmap(rv_cb[cPagePtr].rv_page);
+                ret = mapping->a_ops->write_end(file, mapping, rv_cb[cPagePtr].rv_pos, rv_cb[cPagePtr].rv_count, rv_cb[cPagePtr].rv_count,
+                rv_cb[cPagePtr].rv_page, rv_cb[cPagePtr].rv_fsdata);
+            }
+            goto done;
+        }
+        rv_cb[cPagesAllocated].rv_page = pageP;
+        rv_cb[cPagesAllocated].rv_pos = pos;
+        rv_cb[cPagesAllocated].rv_count = bytes;
+        rv_cb[cPagesAllocated].rv_fsdata = fsdata;
+        iov[cPagesAllocated].iov_base = kmap(pageP) + offset;
+        iov[cPagesAllocated].iov_len = bytes;
+        cPagesAllocated++;
+        count_tmp -= bytes;
+        pos += bytes;
+    } while (count_tmp);
+
+    /* IOV is ready, receive the date from socket now */
+    msg.msg_name = NULL;
+    msg.msg_namelen = 0;
+    msg.msg_iov = (struct iovec *)&iov[0];
+    msg.msg_iovlen = cPagesAllocated ;
+    msg.msg_control = NULL;
+    msg.msg_controllen = 0;
+    msg.msg_flags = MSG_KERNSPACE;
+    rcvtimeo = sock->sk->sk_rcvtimeo;    
+    sock->sk->sk_rcvtimeo = 3 * HZ;
+
+    ret = kernel_recvmsg(sock, &msg, &iov[0], cPagesAllocated, count, MSG_WAITALL | MSG_NOCATCHSIGNAL);
+
+    sock->sk->sk_rcvtimeo = rcvtimeo;
+//Patch by QNAP: implement fnotify function
+#ifdef	QNAP_FNOTIFY
+	if ((FN_WRITE & msys_nodify) && file && file->f_path.dentry)  FILE_STATUS_BY_INODE(file->f_path.dentry->d_inode, tfsOrg);
+#endif	//QNAP_FNOTIFY
+/////////////////////////////////////
+    if(unlikely(ret < 0)){
+        err = ret;
+//        printk("%s: %d: %s: kernel_recvmsg error,estimate %d,real %d\n",__FILE__,__LINE__,__func__,count,err);
+        for(cPagePtr = 0; cPagePtr < cPagesAllocated; cPagePtr++){
+            kunmap(rv_cb[cPagePtr].rv_page);
+            ret = mapping->a_ops->write_end(file, mapping, rv_cb[cPagePtr].rv_pos, rv_cb[cPagePtr].rv_count, rv_cb[cPagePtr].rv_count,
+            rv_cb[cPagePtr].rv_page, rv_cb[cPagePtr].rv_fsdata);
+        }
+        goto done;
+    }
+    else{
+        err = 0;
+//        if(ret != count)
+//            printk("%s: %d: %s: kernel_recvmsg error,estimate %d,real %d\n",__FILE__,__LINE__,__func__,count,ret);
+        pos = pos - count + ret;
+        count = ret;
+    }
+
+    for(cPagePtr=0;cPagePtr < cPagesAllocated;cPagePtr++){
+    //		flush_dcache_page(pageP);
+        kunmap(rv_cb[cPagePtr].rv_page);
+        ret = mapping->a_ops->write_end(file, mapping, rv_cb[cPagePtr].rv_pos, rv_cb[cPagePtr].rv_count, rv_cb[cPagePtr].rv_count,
+        rv_cb[cPagePtr].rv_page, rv_cb[cPagePtr].rv_fsdata);
+
+        if (unlikely(ret < 0))
+            printk("%s: %d: %s: write_end fail,ret = %d\n",__FILE__,__LINE__,__func__,ret);
+        //		cond_resched();
+    }
+    balance_dirty_pages_ratelimited_nr(mapping, cPagesAllocated);
+    copy_to_user(ppos,&pos,sizeof(loff_t));
+    
+//Patch by QNAP: implement fnotify function
+#ifdef	QNAP_FNOTIFY
+    if ((0 < ret) && (FN_WRITE & msys_nodify) && file)
+        pfn_sys_file_notify(FN_WRITE, MARG_2xI64, &file->f_path, NULL, 0, &tfsOrg, count, pos-count, 0, 0);
+#endif	//QNAP_FNOTIFY
+///////////////////////////////////
+done:
+    current->backing_dev_info = NULL;    
+    mutex_unlock(&inode->i_mutex);
+
+    if(err)
+        return err;
+    else 
+        return count;
+}
+#endif
+//////////////////////
 
 /*
  * Map an iov into an array of pages and offset/length tupples. With the
@@ -2203,6 +2389,28 @@ SYSCALL_DEFINE6(splice, int, fd_in, loff_t __user *, off_in,
 		if (sock->sk && out->f_op->splice_from_socket)
 			error = out->f_op->splice_from_socket(out, sock,
 								off_out, len);
+//Patch by QNAP:enhance performance from socket to file
+#ifdef ENHANCE_PERFORMANCE
+        else
+#endif
+#endif
+//Patch by QNAP:enhance performance from socket to file
+#ifdef ENHANCE_PERFORMANCE
+        {
+            out = NULL;
+            if(!sock->sk)
+                goto done;
+            out = fget_light(fd_out, &fput_out);
+
+            if (out) {
+                if (!(out->f_mode & FMODE_WRITE))
+                    goto done;
+                error = do_splice_from_socket(out, sock, off_out,len);
+            }       
+done:
+            if(out)
+                fput_light(out, fput_out);      
+        }
 #endif
 		fput(sock->file);
 	} else

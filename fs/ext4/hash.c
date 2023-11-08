@@ -15,6 +15,10 @@
 #include "ext4.h"
 
 #define DELTA 0x9E3779B9
+//Patch by QNAP:Search filename use case insensitive method
+#ifdef QNAP_SEARCH_FILENAME_CASE_INSENSITIVE
+extern int do_case_folding_transform(__u8 *from,int from_len,__u8 *to,int max_len);
+#endif
 
 static void TEA_transform(__u32 buf[4], __u32 const in[])
 {
@@ -136,7 +140,12 @@ static void str2hashbuf_unsigned(const char *msg, int len, __u32 *buf, int num)
  * represented, and whether or not the returned hash is 32 bits or 64
  * bits.  32 bit hashes will return 0 for the minor hash.
  */
+//Patch by QNAP:Search filename use case insensitive method
+#ifdef QNAP_SEARCH_FILENAME_CASE_INSENSITIVE
+int ext4fs_dirhash(const char *d_name, int d_len, struct dx_hash_info *hinfo,int case_insensitive)
+#else 
 int ext4fs_dirhash(const char *name, int len, struct dx_hash_info *hinfo)
+#endif
 {
 	__u32	hash;
 	__u32	minor_hash = 0;
@@ -145,7 +154,21 @@ int ext4fs_dirhash(const char *name, int len, struct dx_hash_info *hinfo)
 	__u32		in[8], buf[4];
 	void		(*str2hashbuf)(const char *, int, __u32 *, int) =
 				str2hashbuf_signed;
-
+//Patch by QNAP:Search filename use case insensitive method
+#ifdef QNAP_SEARCH_FILENAME_CASE_INSENSITIVE
+    const char *name = d_name;
+    int len = d_len;
+    char case_buffer[EXT4_NAME_LEN];
+    if(case_insensitive){
+        int ret;
+        ret = do_case_folding_transform((__u8 *)name,len,case_buffer,EXT4_NAME_LEN);
+        if(ret > 0){
+            name = case_buffer;
+            len = ret;
+        }
+    }        
+#endif
+///////////////////////////////////////////////////////////
 	/* Initialize the default seed for the hash checksum functions */
 	buf[0] = 0x67452301;
 	buf[1] = 0xefcdab89;

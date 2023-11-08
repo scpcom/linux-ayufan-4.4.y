@@ -177,7 +177,17 @@ ISCSI_STAT_INSTANCE_ATTR_RO(description);
 static ssize_t iscsi_stat_instance_show_attr_vendor(
 	struct iscsi_wwn_stat_grps *igrps, char *page)
 {
+#ifdef CONFIG_MACH_QNAPTS   // Benjamin 20110730 for QNAP ID
+#if defined(Athens)
+	return snprintf(page, PAGE_SIZE, "Cisco Linux-iSCSI Target\n");
+#elif defined(IS_G)
+	return snprintf(page, PAGE_SIZE, "Linux-iSCSI Target\n");
+#else
+	return snprintf(page, PAGE_SIZE, "QNAP Linux-iSCSI Target\n");
+#endif
+#else   /* #ifdef CONFIG_MACH_QNAPTS */
 	return snprintf(page, PAGE_SIZE, "RisingTide Systems iSCSI-Target\n");
+#endif  /* #ifdef CONFIG_MACH_QNAPTS */    
 }
 ISCSI_STAT_INSTANCE_ATTR_RO(vendor);
 

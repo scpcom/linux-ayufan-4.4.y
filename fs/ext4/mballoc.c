@@ -25,6 +25,9 @@
 #include <linux/debugfs.h>
 #include <linux/slab.h>
 #include <trace/events/ext4.h>
+#ifdef CONFIG_MACH_QNAPTS
+#include <linux/kthread.h>
+#endif
 
 /*
  * MUSTDO:
@@ -5013,6 +5016,209 @@ out:
 
 	return count;
 }
+
+#ifdef CONFIG_MACH_QNAPTS
+static void ext4_remove_trim_request(struct ext4_sb_info *sbi)
+{
+	if (!sbi->s_trim_request)
+		return;
+	kfree(sbi->s_trim_request);
+	sbi->s_trim_request = NULL;
+	sbi->reclaim_status = 0;
+}
+
+static int ext4_run_trim_request(struct ext4_trim_request *etr)
+{
+	struct super_block *sb;
+	struct ext4_sb_info *sbi;
+	struct ext4_group_info *grp = NULL;
+	ext4_group_t group;
+	ext4_grpblk_t cnt = 0;
+	int ret = 0, status;
+
+	sb = etr->tr_super;
+	sbi = etr->tr_sbi;
+
+	if (etr->tr_next_group == etr->tr_first_group)
+		printk("EXT4-fs (device %s): ext4trim start (start from %u, total %u)\n", sb->s_id, etr->tr_first_group, etr->tr_last_group + 1 - etr->tr_first_group);
+
+	for (group = etr->tr_next_group; group <= etr->tr_last_group; group++) {
+		grp = ext4_get_group_info(sb, group);
+		if (unlikely(EXT4_MB_GRP_NEED_INIT(grp))) {
+			ret = ext4_mb_init_group(sb, group);
+			if (ret)
+				break;
+		}
+		break;
+	}
+
+	if (group > etr->tr_last_group)
+		ret = 1;
+
+	if (!ret) {
+		if (group == etr->tr_last_group)
+			etr->tr_end = etr->tr_last_cluster;
+
+		if (grp->bb_free >= etr->tr_minlen) {
+			cnt = ext4_trim_all_free(sb, group, etr->tr_first_cluster, etr->tr_end, etr->tr_minlen);
+			if (cnt < 0) {
+				// How about if this group is failed?
+				//ret = cnt;
+			}
+			else
+				etr->trimmed += cnt;
+		}
+
+		etr->tr_first_cluster = 0;
+		etr->tr_next_group = group + 1;
+		// How about if ext4_trim_all_free return error?
+		status = ((100 * (group + 1 - etr->tr_first_group)) / (etr->tr_last_group + 1 - etr->tr_first_group));
+		//printk("EXT4-fs (device %s): ext4trim %u (%d%%)\n", sb->s_id, group, status);
+		if (status == 0)
+			status = 1;
+		sbi->reclaim_status = status;
+	}
+	else {
+		if (ret == 1) {
+			atomic_set(&EXT4_SB(sb)->s_last_trim_minblks, etr->tr_minlen);
+			printk("EXT4-fs (device %s): ext4trimt finish\n", sb->s_id);
+		}
+	}
+
+	return ret;
+}
+
+static int ext4_trim_thread(void *arg)
+{
+	struct ext4_trim_request *etr = (struct ext4_trim_request *)arg;
+	struct super_block *sb;
+	struct ext4_sb_info *sbi;
+	//unsigned long timeout = jiffies + (3 * HZ);
+
+	BUG_ON(NULL == etr);
+
+	sb = etr->tr_super;
+	sbi = etr->tr_sbi;
+
+	while (true) {
+		mutex_lock(&sbi->ext4_trim_mtx);
+		if (ext4_run_trim_request(etr) != 0) {
+			ext4_remove_trim_request(sbi);
+			mutex_unlock(&sbi->ext4_trim_mtx);
+			goto exit_thread;
+		}
+		mutex_unlock(&sbi->ext4_trim_mtx);
+
+		//if (time_after_eq(jiffies, timeout)) {
+		//	schedule_timeout_interruptible(msecs_to_jiffies(1) + 1);
+		//	timeout = jiffies + (3 * HZ);
+		//}
+
+		if (kthread_should_stop()) {
+			mutex_lock(&sbi->ext4_trim_mtx);
+			ext4_remove_trim_request(sbi);
+			mutex_unlock(&sbi->ext4_trim_mtx);
+			goto exit_thread;
+		}
+	}
+
+exit_thread:
+	sbi->ext4_trim_task = NULL;
+	return 0;
+}
+
+void ext4_destroy_trim_thread(struct ext4_sb_info *sbi)
+{
+	if (!sbi->ext4_trim_task)
+		return;
+	kthread_stop(sbi->ext4_trim_task);
+}
+
+static int ext4_run_trim_thread(struct super_block *sb)
+{
+	struct ext4_sb_info *sbi = EXT4_SB(sb);
+
+	if (!sbi->ext4_trim_task) {
+		sbi->ext4_trim_task = kthread_run(ext4_trim_thread, sbi->s_trim_request, "ext4trim/%s", sb->s_id);
+		if (IS_ERR(sbi->ext4_trim_task)) {
+			int err = PTR_ERR(sbi->ext4_trim_task);
+			printk(KERN_CRIT "EXT4-fs: error %d creating trim thread\n", err);
+			return err;
+		}
+	}
+	return 0;
+}
+
+int ext4_trim_fs_async(struct super_block *sb, struct fstrim_range *range)
+{
+	struct ext4_sb_info *sbi = EXT4_SB(sb);
+	ext4_group_t first_group, last_group;
+	ext4_grpblk_t first_cluster, last_cluster;
+	uint64_t start, end, minlen;
+	ext4_fsblk_t first_data_blk = le32_to_cpu(EXT4_SB(sb)->s_es->s_first_data_block);
+	ext4_fsblk_t max_blks = ext4_blocks_count(EXT4_SB(sb)->s_es);
+	int ret = 0;
+	struct ext4_trim_request *etr = NULL;
+
+	mutex_lock(&sbi->ext4_trim_mtx);
+	if (sbi->s_trim_request != NULL) {
+		mutex_unlock(&sbi->ext4_trim_mtx);
+		return -EBUSY;
+	}
+
+	start = range->start >> sb->s_blocksize_bits;
+	end = start + (range->len >> sb->s_blocksize_bits) - 1;
+	minlen = range->minlen >> sb->s_blocksize_bits;
+
+	if (minlen > EXT4_CLUSTERS_PER_GROUP(sb) || start >= max_blks || range->len < sb->s_blocksize) {
+		mutex_unlock(&sbi->ext4_trim_mtx);
+		return -EINVAL;
+	}
+	if (end >= max_blks)
+		end = max_blks - 1;
+	if (end <= first_data_blk) {
+		mutex_unlock(&sbi->ext4_trim_mtx);
+		return -EINVAL;
+	}
+	if (start < first_data_blk)
+		start = first_data_blk;
+
+	ext4_get_group_no_and_offset(sb, (ext4_fsblk_t) start, &first_group, &first_cluster);
+	ext4_get_group_no_and_offset(sb, (ext4_fsblk_t) end, &last_group, &last_cluster);
+
+	end = EXT4_CLUSTERS_PER_GROUP(sb) - 1;
+
+	etr = kzalloc(sizeof(*etr), GFP_KERNEL);
+	if (!etr) {
+		mutex_unlock(&sbi->ext4_trim_mtx);
+		return ENOMEM;
+	}
+
+	etr->tr_super = sb;
+	etr->tr_sbi = sbi;
+	etr->tr_first_group = etr->tr_next_group = first_group;
+	etr->tr_last_group = last_group;
+	etr->tr_first_cluster = first_cluster;
+	etr->tr_last_cluster = last_cluster;
+	etr->tr_end = end;
+	etr->tr_minlen = minlen;
+	etr->trimmed = 0;
+
+	sbi->s_trim_request = etr;
+	ret = ext4_run_trim_thread(sb);
+	if (ret) {
+		kfree(etr);
+		sbi->reclaim_status = -1;
+		sbi->s_trim_request = NULL;
+	}
+	else
+		sbi->reclaim_status = 1;
+	mutex_unlock(&sbi->ext4_trim_mtx);
+
+	return ret;
+}
+#endif
+
 
 /**
  * ext4_trim_fs() -- trim ioctl handle function

@@ -182,8 +182,12 @@ static int fat_cont_expand(struct inode *inode, loff_t size)
 	struct address_space *mapping = inode->i_mapping;
 	loff_t start = inode->i_size, count = size - inode->i_size;
 	int err;
-
+//Patch by QNAP: Ignore to expand file size when open
+#if defined(CONFIG_MACH_QNAPTS)
+    err = inode_newsize_ok(inode, size);
+#else
 	err = generic_cont_expand_simple(inode, size);
+#endif
 	if (err)
 		goto out;
 

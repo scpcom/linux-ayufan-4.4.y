@@ -1117,12 +1117,15 @@ static void comcerto_pcie_rc_init(struct pcie_port *pp)
 			pp->va_app_base + app_reg->cfg0);
 
 
+//Patch by QNAP: Fix Asmedia Gen2 fail
+#ifndef CONFIG_MACH_QNAPTS
 	/**
 	 *FIXME : Bit:15 definition is not clear from document
 	 *	  This register setting is copied from simulation code.
 	 */
 	writel(readl(pp->va_app_base + app_reg->cfg4) | 0x00008000,
 			pp->va_app_base + app_reg->cfg4);
+#endif
 
 	comcerto_dbi_read_reg(pp, PCIE_AFL0L1_REG, 4, &val);
 	val &= ~(0x00FFFF00);

@@ -562,8 +562,14 @@ static inline void blk_clear_queue_full(struct request_queue *q, int sync)
  * mergeable request must not have _NOMERGE or _BARRIER bit set, nor may
  * it already be started by driver.
  */
+//Patch by QNAP: Fix SSD DISCARD command, bug #35484
+#if defined(CONFIG_MACH_QNAPTS)
+#define RQ_NOMERGE_FLAGS	\
+	(REQ_NOMERGE | REQ_STARTED | REQ_SOFTBARRIER | REQ_FLUSH | REQ_FUA | REQ_DISCARD)
+#else
 #define RQ_NOMERGE_FLAGS	\
 	(REQ_NOMERGE | REQ_STARTED | REQ_SOFTBARRIER | REQ_FLUSH | REQ_FUA)
+#endif	
 #define rq_mergeable(rq)	\
 	(!((rq)->cmd_flags & RQ_NOMERGE_FLAGS) && \
 	 (((rq)->cmd_flags & REQ_DISCARD) || \

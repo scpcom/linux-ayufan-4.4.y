@@ -102,6 +102,11 @@ typedef void (*dm_io_hints_fn) (struct dm_target *ti,
  */
 typedef int (*dm_busy_fn) (struct dm_target *ti);
 
+//Patch by QNAP: QDM by Burton
+#ifdef CONFIG_MACH_QNAPTS
+typedef int (*dm_open_count_fn) (struct dm_target *ti);
+#endif 
+
 void dm_error(const char *message);
 
 /*
@@ -147,8 +152,16 @@ struct target_type {
 	dm_status_fn status;
 	dm_message_fn message;
 	dm_ioctl_fn ioctl;
+//Patch by QNAP: flashcache by Johnny
+#ifdef CONFIG_MACH_QNAPTS
+	dm_ioctl_fn compat_ioctl;
+#endif // CONFIG_MACH_QNAPTS
 	dm_merge_fn merge;
 	dm_busy_fn busy;
+//Patch by QNAP: QDM by Burton    
+#ifdef CONFIG_MACH_QNAPTS
+	dm_open_count_fn open_count;
+#endif
 	dm_iterate_devices_fn iterate_devices;
 	dm_io_hints_fn io_hints;
 
@@ -188,8 +201,8 @@ struct dm_target {
 	sector_t begin;
 	sector_t len;
 
-	/* Always a power of 2 */
-	sector_t split_io;
+	/* If non-zero, maximum size of I/O submitted to a target. */
+	uint32_t max_io_len;
 
 	/*
 	 * A number of zero-length barrier requests that will be submitted
@@ -210,6 +223,10 @@ struct dm_target {
 	/* target specific data */
 	void *private;
 
+	/* target specific data for thin pool to indicate the data dev */
+	/* target specific data for thin, qdm and flashcache to indicate the thin target */
+	void *private1;
+
 	/* Used to provide an error string from the ctr */
 	char *error;
 
@@ -217,12 +234,19 @@ struct dm_target {
 	 * Set if this target needs to receive discards regardless of
 	 * whether or not its underlying devices have support.
 	 */
-	unsigned discards_supported:1;
+	bool discards_supported:1;
 
+#ifdef CONFIG_MACH_QNAPTS
+	/*
+	 * Set if the target required discard request to be split
+	 * on max_io_len boundary.
+	 */
+	bool split_discard_requests:1;
+#endif
 	/*
 	 * Set if this target does not return zeroes on discarded blocks.
 	 */
-	unsigned discard_zeroes_data_unsupported:1;
+	bool discard_zeroes_data_unsupported:1;
 };
 
 /* Each target can link one of these into the table */
@@ -360,6 +384,11 @@ void dm_table_add_target_callbacks(struct dm_table *t, struct dm_target_callback
 int dm_table_complete(struct dm_table *t);
 
 /*
+ * Target may require that it is never sent I/O larger than len.
+ */
+int __must_check dm_set_target_max_io_len(struct dm_target *ti, sector_t len);
+
+/*
  * Table reference counting.
  */
 struct dm_table *dm_get_live_table(struct mapped_device *md);
@@ -402,6 +431,18 @@ extern struct ratelimit_state dm_ratelimit_state;
 #define dm_ratelimit()	__ratelimit(&dm_ratelimit_state)
 #else
 #define dm_ratelimit()	0
+#endif
+
+#ifdef QNAP_DM_DEBUG
+#define QDMERR(f, arg...) \
+	do { \
+		printk(KERN_ERR DM_NAME ": " DM_MSG_PREFIX ": " \
+		       f "\n", ## arg); \
+	} while (0)
+#else
+#define QDMERR(f, arg...) \
+	do { \
+	} while (0)
 #endif
 
 #define DMCRIT(f, arg...) \
@@ -501,6 +542,20 @@ static inline sector_t to_sector(unsigned long n)
 static inline unsigned long to_bytes(sector_t n)
 {
 	return (n << SECTOR_SHIFT);
+}
+
+/*
+ * do_div wrappers that don't modify the dividend
+ */
+static inline sector_t dm_do_div(sector_t a, uint32_t b)
+{
+	do_div(a, b);
+	return a;
+}
+
+static inline uint32_t dm_do_mod(sector_t a, uint32_t b)
+{
+	return do_div(a, b);
 }
 
 /*-----------------------------------------------------------------

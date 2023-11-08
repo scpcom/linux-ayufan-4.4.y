@@ -41,10 +41,35 @@
 #include <scsi/scsi.h>
 #include <scsi/scsi_host.h>
 
+#if defined(CONFIG_MACH_QNAPTS) 
+/* 2014/06/14, adamhsu, redmine 8530 (start) */
+#include <asm/unaligned.h>
+#include <target/target_core_fabric.h>
+/* 2014/06/14, adamhsu, redmine 8530 (end) */
+#endif
+
 #include <target/target_core_base.h>
 #include <target/target_core_backend.h>
-
 #include "target_core_iblock.h"
+
+#if defined(CONFIG_MACH_QNAPTS) 
+#include "vaai_target_struc.h"
+#include "target_general.h"
+
+#if defined(SUPPORT_TP)
+/* 2014/06/14, adamhsu, redmine 8530 (start) */
+#include "linux/fiemap.h"
+#include "tp_def.h"
+/* 2014/06/14, adamhsu, redmine 8530 (end) */
+
+#include "fbdisk.h"  // for threhold notification usage
+
+#if defined(QNAP_HAL)
+#include <qnap/hal_event.h>
+extern int send_hal_netlink(NETLINK_EVT *event);
+#endif
+#endif
+#endif /* defined(CONFIG_MACH_QNAPTS) */
 
 #define IBLOCK_MAX_BIO_PER_TASK	 32	/* max # of bios to submit at a time */
 #define IBLOCK_BIO_POOL_SIZE	128
@@ -97,6 +122,9 @@ static struct se_device *iblock_create_virtdevice(
 	struct queue_limits *limits;
 	u32 dev_flags = 0;
 	int ret = -EINVAL;
+#ifdef CONFIG_MACH_QNAPTS   //Benjamin 20120822 for BUG 26582: snapshot lun cannot map into iSCSI target.      
+    fmode_t mode, mode_all = FMODE_WRITE|FMODE_READ|FMODE_EXCL;
+#endif
 
 	if (!ib_dev) {
 		pr_err("Unable to locate struct iblock_dev parameter\n");
@@ -117,10 +145,40 @@ static struct se_device *iblock_create_virtdevice(
 	pr_debug( "IBLOCK: Claiming struct block_device: %s\n",
 			ib_dev->ibd_udev_path);
 
-	bd = blkdev_get_by_path(ib_dev->ibd_udev_path,
-				FMODE_WRITE|FMODE_READ|FMODE_EXCL, ib_dev);
+#ifdef CONFIG_MACH_QNAPTS   //Benjamin 20120822 for BUG 26582: snapshot lun cannot map into iSCSI target.      
+	bd = lookup_bdev(ib_dev->ibd_udev_path);
 	if (IS_ERR(bd)) {
 		ret = PTR_ERR(bd);
+		pr_err("IBLOCK: Fail to lookup block device by %s, PTR_ERR=%d.\n", 
+		        ib_dev->ibd_udev_path, ret);
+		goto failed;
+    }
+
+  	ret = blkdev_get(bd, mode_all, ib_dev);
+	if (ret) {
+		pr_err("IBLOCK: Fail to get block device, PTR_ERR=%d.\n", ret);
+		goto failed;            
+    }
+
+    mode = (bdev_read_only(bd) ? 0 : FMODE_WRITE) | FMODE_READ | FMODE_EXCL;
+    
+	pr_debug("IBLOCK: Succeed to lookup block device by %s with mode 0x%x.\n", 
+	         ib_dev->ibd_udev_path, mode);
+    //Must call blkdev_put() after bdev_read_only().
+    blkdev_put(bd, mode_all);  
+
+	bd = blkdev_get_by_path(ib_dev->ibd_udev_path, mode, ib_dev);
+#else
+	bd = blkdev_get_by_path(ib_dev->ibd_udev_path,
+				FMODE_WRITE|FMODE_READ|FMODE_EXCL, ib_dev);
+#endif
+    
+	if (IS_ERR(bd)) {
+		ret = PTR_ERR(bd);
+#ifdef CONFIG_MACH_QNAPTS   //Benjamin 20120821 for debug.      
+		pr_err("IBLOCK: Fail to get block device by %s, PTR_ERR=%d.\n", 
+		        ib_dev->ibd_udev_path, ret);
+#endif        
 		goto failed;
 	}
 	/*
@@ -129,7 +187,15 @@ static struct se_device *iblock_create_virtdevice(
 	 */
 	q = bdev_get_queue(bd);
 	limits = &dev_limits.limits;
-	limits->logical_block_size = bdev_logical_block_size(bd);
+
+#if defined(CONFIG_MACH_QNAPTS) && defined(SUPPORT_LOGICAL_BLOCK_4KB_FROM_NAS_GUI)
+    /* adamhsu 2013/06/07 - Support to set the logical block size from NAS GUI. */
+    if ((se_dev->su_dev_flags & SDF_USING_QLBS) && se_dev->se_dev_qlbs)
+        limits->logical_block_size = (unsigned short)se_dev->se_dev_qlbs;
+    else
+#endif
+        limits->logical_block_size = bdev_logical_block_size(bd);
+
 	limits->max_hw_sectors = UINT_MAX;
 	limits->max_sectors = UINT_MAX;
 	dev_limits.hw_queue_depth = q->nr_requests;
@@ -137,9 +203,16 @@ static struct se_device *iblock_create_virtdevice(
 
 	ib_dev->ibd_bd = bd;
 
+#ifdef CONFIG_MACH_QNAPTS   // "IBLOCK" --> "iSCSI Storage" 
+	dev = transport_add_device_to_core_hba(hba,
+			&iblock_template, se_dev, dev_flags, ib_dev,
+			&dev_limits, "iSCSI Storage", IBLOCK_VERSION);
+#else
 	dev = transport_add_device_to_core_hba(hba,
 			&iblock_template, se_dev, dev_flags, ib_dev,
 			&dev_limits, "IBLOCK", IBLOCK_VERSION);
+#endif 
+    
 	if (!dev)
 		goto failed;
 
@@ -148,6 +221,10 @@ static struct se_device *iblock_create_virtdevice(
 	 * the QUEUE_FLAG_DISCARD bit for UNMAP/WRITE_SAME in SCSI + TRIM
 	 * in ATA and we need to set TPE=1
 	 */
+#if defined(CONFIG_MACH_QNAPTS) && defined(SUPPORT_TP)
+	if(!strcmp(dev->se_sub_dev->se_dev_provision, "thin"))
+		dev->se_sub_dev->se_dev_attrib.emulate_tpu = 1;
+
 	if (blk_queue_discard(q)) {
 		dev->se_sub_dev->se_dev_attrib.max_unmap_lba_count =
 				q->limits.max_discard_sectors;
@@ -163,6 +240,7 @@ static struct se_device *iblock_create_virtdevice(
 		pr_debug("IBLOCK: BLOCK Discard support available,"
 				" disabled by default\n");
 	}
+#endif
 
 	if (blk_queue_nonrot(q))
 		dev->se_sub_dev->se_dev_attrib.is_nonrot = 1;
@@ -214,9 +292,24 @@ static unsigned long long iblock_emulate_read_cap_with_block_size(
 	struct block_device *bd,
 	struct request_queue *q)
 {
+
+#if defined(CONFIG_MACH_QNAPTS) && defined(SUPPORT_LOGICAL_BLOCK_4KB_FROM_NAS_GUI)
+    /* adamhsu 2013/06/07 - Support to set the logical block size from NAS GUI. */
+	unsigned long long blocks_long = 0;
+	u32 block_size = 0;
+
+    if ((dev->se_sub_dev->su_dev_flags & SDF_USING_QLBS) && dev->se_sub_dev->se_dev_qlbs){
+        blocks_long = (div_u64(i_size_read(bd->bd_inode), dev->se_sub_dev->se_dev_qlbs) - 1);
+        block_size = dev->se_sub_dev->se_dev_qlbs;
+    }else{
+        blocks_long = (div_u64(i_size_read(bd->bd_inode), bdev_logical_block_size(bd)) - 1);
+        block_size = bdev_logical_block_size(bd);
+    }
+#else
 	unsigned long long blocks_long = (div_u64(i_size_read(bd->bd_inode),
 					bdev_logical_block_size(bd)) - 1);
 	u32 block_size = bdev_logical_block_size(bd);
+#endif
 
 	if (block_size == dev->se_sub_dev->se_dev_attrib.block_size)
 		return blocks_long;
@@ -326,6 +419,163 @@ static void iblock_emulate_sync_cache(struct se_task *task)
 	submit_bio(WRITE_FLUSH, bio);
 }
 
+#if defined(CONFIG_MACH_QNAPTS) && defined(SUPPORT_TP)
+struct fbdisk_file* _fbdisk_get_fbdisk_file(
+	struct fbdisk_device *pfbd, 
+	sector_t startlba, 
+	u32 *pu32backingfileindex
+	)
+{
+	u32 u32index = 0;
+	struct fbdisk_file *pfbf = NULL;
+
+	if ((pfbd == NULL) ||(pu32backingfileindex == NULL))
+		BUG_ON(1);
+
+	for (u32index = 0; u32index < (pfbd->fb_file_num); u32index++){
+		pfbf = &pfbd->fb_backing_files_ary[u32index];
+
+		if (((startlba >= pfbf->fb_start_sector) && (startlba < pfbf->fb_end_sector))
+		|| ((startlba >  pfbf->fb_start_sector) && (startlba <= pfbf->fb_end_sector) ) ){
+			pfbf = &pfbd->fb_backing_files_ary[u32index];
+			break;
+		}
+	}
+
+	if (pfbf){
+		*pu32backingfileindex = u32index;
+	}
+
+	return pfbf;
+}
+
+struct fbdisk_file* _fbdisk_get_fbdisk_file2(
+	struct fbdisk_device *pfbd, 
+	u32 pu32backingfileindex
+	)
+{
+	struct fbdisk_file *pfbf = NULL;
+
+	if ( pfbd == NULL )
+		BUG_ON(1);
+
+	pfbf = &pfbd->fb_backing_files_ary[pu32backingfileindex];
+
+	return pfbf;
+}
+
+/* 2014/06/14, adamhsu, redmine 8530 (start) */
+int __iblock_get_lba_map_status(
+	struct se_cmd *se_cmd,
+	sector_t start_lba,
+	u32 desc_count,
+	u8 *param,
+	int *err
+	)
+{
+#define SIZE_ORDER	20
+
+	LIO_SE_DEVICE *se_dev = se_cmd->se_dev;
+	LIO_IBLOCK_DEV *ib_dev = NULL;
+	struct block_device *bd = NULL;
+	struct fbdisk_device *fb_dev = NULL;
+	struct fbdisk_file *fb_file = NULL;
+	u32 idx, count = desc_count;
+	int ret;
+	LBA_STATUS_DESC *desc = NULL;
+
+	/**/
+	desc = kzalloc((count * sizeof(LBA_STATUS_DESC)), GFP_KERNEL);
+	if (!desc){
+		*err = (int)ERR_OUT_OF_RESOURCES;
+		ret = -ENOMEM;
+		goto _EXIT_;
+	}
+
+	ib_dev = (LIO_IBLOCK_DEV *)(se_dev->dev_ptr);
+	bd = ib_dev->ibd_bd;
+
+	/* we only handle fbdisk device for blk i/o ... */
+	if (strncmp(bd->bd_disk->disk_name, "fbdisk", 6)){
+		*err = (int)ERR_LOGICAL_UNIT_COMMUNICATION_FAILURE;
+		ret = -ENODEV;
+		goto _EXIT_;
+	}		
+
+	fb_dev = (struct fbdisk_device *)bd->bd_disk->private_data;
+	fb_file = _fbdisk_get_fbdisk_file(fb_dev, start_lba, &idx);
+	if (!fb_file){
+		*err = (int)ERR_LOGICAL_UNIT_COMMUNICATION_FAILURE;
+		ret = -ENODEV;
+		goto _EXIT_;
+	}		
+
+	ret = __get_file_lba_map_status(se_dev, bd, 
+			fb_file->fb_backing_file->f_mapping->host,
+			start_lba, &count, (u8 *)desc);
+
+	if (ret != 0){
+		pr_err("%s - ret:%d, after exec "
+			"__get_file_lba_map_status()\n", __FUNCTION__, ret);
+
+		*err = (int)ERR_UNKNOWN_SAM_OPCODE;
+	} else {
+		/* update the lba status descriptor */
+		memcpy(&param[8], (u8 *)desc,
+			(count* sizeof(LBA_STATUS_DESC)));
+
+		/* to update PARAMETER DATA LENGTH finally */
+		count = ((count << 4) + 4);
+		put_unaligned_be32(count, &param[0]);
+	}
+
+_EXIT_:
+	if (desc)
+		kfree(desc);
+
+	return ret;
+
+}
+#endif
+
+#if defined(CONFIG_MACH_QNAPTS)
+/* 20140626, adamhsu, redmine 8745,8777,8778 */
+static int iblock_do_discard(struct se_cmd *se_cmd, sector_t lba, u32 range)
+{
+	struct se_device *se_dev = se_cmd->se_dev;
+	struct iblock_dev *ibd = se_dev->dev_ptr;
+	struct block_device *bd = ibd->ibd_bd;
+	int barrier = 0, bs_order, ret;
+
+	bs_order = ilog2(se_dev->se_sub_dev->se_dev_attrib.block_size);
+
+#if defined(SUPPORT_LOGICAL_BLOCK_4KB_FROM_NAS_GUI)
+	/* here needs to depend on the logical blick size to convert value */
+	ret = __blkio_transfer_task_lba_to_block_lba((1 << bs_order), &lba);
+	if (ret != 0){
+		__set_err_reason(ERR_LOGICAL_UNIT_COMMUNICATION_FAILURE, 
+			&se_cmd->scsi_sense_reason);
+		return -EINVAL;
+	}    
+	range *= ((1 << bs_order) >> 9);
+#endif
+
+	ret = blkdev_issue_discard(bd, lba, range, GFP_KERNEL, barrier);
+	if (ret != 0){
+		if (ret == -ENOSPC)
+			__set_err_reason(ERR_NO_SPACE_WRITE_PROTECT, 
+				&se_cmd->scsi_sense_reason);
+		else if (ret == -ENOMEM)
+			__set_err_reason(ERR_OUT_OF_RESOURCES, 
+				&se_cmd->scsi_sense_reason);
+		else
+			__set_err_reason(ERR_LOGICAL_UNIT_COMMUNICATION_FAILURE, 
+				&se_cmd->scsi_sense_reason);
+	}
+	return ret;
+}
+
+#else /* !defined(CONFIG_MACH_QNAPTS) */
 static int iblock_do_discard(struct se_device *dev, sector_t lba, u32 range)
 {
 	struct iblock_dev *ibd = dev->dev_ptr;
@@ -334,6 +584,7 @@ static int iblock_do_discard(struct se_device *dev, sector_t lba, u32 range)
 
 	return blkdev_issue_discard(bd, lba, range, GFP_KERNEL, barrier);
 }
+#endif
 
 static void iblock_free_task(struct se_task *task)
 {
@@ -355,7 +606,7 @@ static ssize_t iblock_set_configfs_dev_params(struct se_hba *hba,
 					       const char *page, ssize_t count)
 {
 	struct iblock_dev *ib_dev = se_dev->se_dev_su_ptr;
-	char *orig, *ptr, *arg_p, *opts;
+	char *orig, *ptr, *opts;
 	substring_t args[MAX_OPT_ARGS];
 	int ret = 0, token;
 
@@ -378,14 +629,11 @@ static ssize_t iblock_set_configfs_dev_params(struct se_hba *hba,
 				ret = -EEXIST;
 				goto out;
 			}
-			arg_p = match_strdup(&args[0]);
-			if (!arg_p) {
-				ret = -ENOMEM;
+			if (match_strlcpy(ib_dev->ibd_udev_path, &args[0],
+				SE_UDEV_PATH_LEN) == 0) {
+				ret = -EINVAL;
 				break;
-			}
-			snprintf(ib_dev->ibd_udev_path, SE_UDEV_PATH_LEN,
-					"%s", arg_p);
-			kfree(arg_p);
+			}                                
 			pr_debug("IBLOCK: Referencing UDEV path: %s\n",
 					ib_dev->ibd_udev_path);
 			ib_dev->ibd_flags |= IBDF_HAS_UDEV_PATH;
@@ -448,6 +696,7 @@ static ssize_t iblock_show_configfs_dev_params(
 	return bl;
 }
 
+#if (LINUX_VERSION_CODE == KERNEL_VERSION(3,2,26)) || (LINUX_VERSION_CODE == KERNEL_VERSION(3,4,6))
 static void iblock_bio_destructor(struct bio *bio)
 {
 	struct se_task *task = bio->bi_private;
@@ -455,6 +704,10 @@ static void iblock_bio_destructor(struct bio *bio)
 
 	bio_free(bio, ib_dev->ibd_bio_set);
 }
+#elif (LINUX_VERSION_CODE == KERNEL_VERSION(3,12,6))
+#else
+#error "Ooo.. what kernel version do you compile ??"
+#endif
 
 static struct bio *
 iblock_get_bio(struct se_task *task, sector_t lba, u32 sg_num)
@@ -482,7 +735,14 @@ iblock_get_bio(struct se_task *task, sector_t lba, u32 sg_num)
 
 	bio->bi_bdev = ib_dev->ibd_bd;
 	bio->bi_private = task;
+
+#if (LINUX_VERSION_CODE == KERNEL_VERSION(3,2,26)) || (LINUX_VERSION_CODE == KERNEL_VERSION(3,4,6))
 	bio->bi_destructor = iblock_bio_destructor;
+#elif (LINUX_VERSION_CODE == KERNEL_VERSION(3,12,6))
+#else
+#error "Ooo.. what kernel version do you compile ??"
+#endif
+
 	bio->bi_end_io = &iblock_bio_done;
 	bio->bi_sector = lba;
 	atomic_inc(&ib_req->pending);
@@ -515,6 +775,35 @@ static int iblock_do_task(struct se_task *task)
 	sector_t block_lba;
 	unsigned bio_cnt;
 	int rw;
+
+	/* for threshold notification usage */
+#if defined(CONFIG_MACH_QNAPTS) && defined(SUPPORT_TP)
+	struct iblock_dev *ibd = dev->dev_ptr;
+	struct block_device *bd = ibd->ibd_bd;
+	struct fbdisk_device *pfbdev = NULL;
+	struct fbdisk_file *pfbfile = NULL;
+	struct inode *pInode = NULL;
+	unsigned long threshold_min;
+	loff_t total = 0, used = 0;
+
+#if defined(QNAP_HAL)
+	NETLINK_EVT hal_event;
+#endif
+	
+#endif	
+
+#if defined(CONFIG_MACH_QNAPTS) && defined(SUPPORT_TP)
+	unsigned long long blocks = dev->transport->get_blocks(dev);
+
+	/* For run-time capacity change warning */
+	if(!strcmp(dev->se_sub_dev->se_dev_provision, "thin")){ // only checking when thin-lun
+		if ( dev->se_sub_dev->se_dev_attrib.lun_blocks != blocks ){
+			dev->se_sub_dev->se_dev_attrib.lun_blocks = blocks;
+			cmd->scsi_sense_reason = TCM_CAPACITY_DATA_HAS_CHANGED;
+			return -ENOSYS;
+		}
+	}
+#endif
 
 	if (task->task_data_direction == DMA_TO_DEVICE) {
 		/*
@@ -549,6 +838,85 @@ static int iblock_do_task(struct se_task *task)
 		cmd->scsi_sense_reason = TCM_LOGICAL_UNIT_COMMUNICATION_FAILURE;
 		return -ENOSYS;
 	}
+
+#if defined(CONFIG_MACH_QNAPTS) && defined(SUPPORT_TP)
+
+	/* Calculate the total and allocated capacity */
+	if (rw){
+			pfbdev = bd->bd_disk->private_data;
+			for ( i = 0; i < pfbdev->fb_file_num; i++ ){ // link all fbdisk files
+				pfbfile = _fbdisk_get_fbdisk_file2(pfbdev, i);
+				pInode = pfbfile->fb_backing_file->f_mapping->host;
+				
+				total += pInode->i_size;
+				used += pInode->i_blocks;
+			}
+
+	}
+
+	/* check capacity threshold reached or not */
+    	if(!strcmp(dev->se_sub_dev->se_dev_provision, "thin")){ // only checking when thin-lun
+
+#if defined(QNAP_HAL)
+		memset(&hal_event, 0, sizeof(NETLINK_EVT));
+		hal_event.type = HAL_EVENT_ISCSI;
+#endif			
+
+		if (rw){
+			/* Here to use div_u64() to make 64 bit division to 
+			 * avoid this code will be fail to build with 32bit
+			 * compiler environment
+			 */
+			threshold_min = \
+				div_u64((total * dev->se_sub_dev->se_dev_attrib.tp_threshold_percent), 
+				100);
+
+			threshold_min -= \
+				(((1 << dev->se_sub_dev->se_dev_attrib.tp_threshold_set_size) >> 1) * 512);
+
+#if 0			/* move to function of iblock_update_allocated() */
+			/* calculate used and available resource count */
+			dev->se_sub_dev->se_dev_attrib.allocated = used * 512;
+#endif
+			dev->se_sub_dev->se_dev_attrib.used = \
+				(u32)div_u64((u64)(used * 512), 
+				((1 << (dev->se_sub_dev->se_dev_attrib.tp_threshold_set_size)) *512));
+
+			dev->se_sub_dev->se_dev_attrib.avail = \
+				(u32)div_u64((u64)((total - (used * 512))), 
+				((1 << (dev->se_sub_dev->se_dev_attrib.tp_threshold_set_size)) * 512));
+
+			if ( (used * 512) >= threshold_min){
+				if ( !dev->se_sub_dev->se_dev_attrib.tp_threshold_hit ){
+
+					dev->se_sub_dev->se_dev_attrib.tp_threshold_hit++;
+					cmd->scsi_sense_reason = TCM_THIN_PROVISIONING_SOFT_THRESHOLD_REACHED;
+
+#if defined(QNAP_HAL)
+					hal_event.arg.action = HIT_LUN_THRESHOLD;
+					hal_event.arg.param.iscsi_lun.lun_index = dev->se_sub_dev->se_dev_attrib.lun_index;
+					hal_event.arg.param.iscsi_lun.tp_threshold = dev->se_sub_dev->se_dev_attrib.tp_threshold_percent;
+					hal_event.arg.param.iscsi_lun.tp_avail = (total - used * 512) >> 30; //unit: GB
+					send_hal_netlink(&hal_event);
+#endif
+					return -ENOSYS;
+				}
+			}
+			else{
+				dev->se_sub_dev->se_dev_attrib.tp_threshold_hit = 0;
+			}
+			
+		}
+   	}
+#if 0	/* move to function of iblock_update_allocated() */
+	else{ // thick LUN
+		if (rw){
+	          dev->se_sub_dev->se_dev_attrib.allocated = used * 512;
+		}
+			
+	}
+#endif
+#endif /*(CONFIG_MACH_QNAPTS) && defined(SUPPORT_TP)*/
 
 	bio = iblock_get_bio(task, block_lba, sg_num);
 	if (!bio) {
@@ -638,6 +1006,9 @@ static void iblock_bio_done(struct bio *bio, int err)
 		 */
 		atomic_inc(&ibr->ib_bio_err_cnt);
 		smp_mb__after_atomic_inc();
+		/* To check no space */
+		if ( err == -ENOSPC )
+			task->task_se_cmd->transport_state = CMD_T_NO_SPACE_IO_FAILED;		
 	}
 
 	bio_put(bio);
@@ -651,6 +1022,51 @@ static void iblock_bio_done(struct bio *bio, int err)
 
 	transport_complete_task(task, !atomic_read(&ibr->ib_bio_err_cnt));
 }
+
+#ifdef CONFIG_MACH_QNAPTS // 2010/12/13 Nike Chen, support online lun expansion
+int iblock_change_dev_size(struct se_device *dev)
+{
+    int ret = 0;
+    struct iblock_dev *ib_dev = dev->dev_ptr;
+    struct block_device *bd = ib_dev->ibd_bd;
+
+#if defined(CONFIG_MACH_QNAPTS) && defined(SUPPORT_LOGICAL_BLOCK_4KB_FROM_NAS_GUI)
+    /* adamhsu 2013/06/07 - Support to set the logical block size from NAS GUI. */
+	unsigned long long blocks_long = 0;
+	u32 block_size = 0;
+
+    if ((dev->se_sub_dev->su_dev_flags & SDF_USING_QLBS) && dev->se_sub_dev->se_dev_qlbs){
+        blocks_long = (div_u64(i_size_read(bd->bd_inode), dev->se_sub_dev->se_dev_qlbs) - 1);
+        block_size = dev->se_sub_dev->se_dev_qlbs;
+    }else{
+        blocks_long = (div_u64(i_size_read(bd->bd_inode), bdev_logical_block_size(bd)) - 1);
+        block_size = bdev_logical_block_size(bd);
+    }
+#else
+    unsigned long long blocks_long = (div_u64(i_size_read(bd->bd_inode),
+                                      bdev_logical_block_size(bd)) - 1);
+    u32 block_size = bdev_logical_block_size(bd);
+#endif
+
+    /*
+        * Determine the number of bytes from i_size_read() minus
+        * one (1) logical sector from underlying struct block_device
+        */
+//        fd_dev->fd_dev_size = (i_size_read(file->f_mapping->host) -
+//                                bdev_logical_block_size(bd));
+    /*
+        * Benjamin 20120601: There is no dev->dev_sectors_total anymore.     
+        * That's why I do not update the sector count (dev->dev_sectors_total) via READ_CAPACITY
+        * As you can see, this function becomes dummy, I keep this function for symmetry only.
+        */
+    pr_debug("iBlock: Using size: %llu bytes from struct"
+            " block_device blocks: %llu logical_block_size: %d\n",
+            blocks_long * block_size, blocks_long,
+            block_size);
+
+        return ret;
+}
+#endif
 
 static struct se_subsystem_api iblock_template = {
 	.name			= "iblock",
@@ -674,6 +1090,41 @@ static struct se_subsystem_api iblock_template = {
 	.get_device_rev		= iblock_get_device_rev,
 	.get_device_type	= iblock_get_device_type,
 	.get_blocks		= iblock_get_blocks,
+#ifdef CONFIG_MACH_QNAPTS // 2010/12/13 Nike Chen, support online lun expansion
+    .change_dev_size    = iblock_change_dev_size,
+#endif	
+
+#if defined(CONFIG_MACH_QNAPTS)
+#if defined(SUPPORT_VAAI)
+	/* api for write same function */
+	.do_prepare_ws_buffer       = do_prepare_ws_buffer,
+	.do_check_before_ws         = do_check_before_ws,
+	.do_check_ws_zero_buffer    = do_check_ws_zero_buffer,
+	.do_ws_wo_unmap             = iblock_do_ws_wo_unmap,
+	.do_ws_w_anchor             = iblock_do_ws_w_anchor,
+	.do_ws_w_unmap              = iblock_do_ws_w_unmap,
+
+	/* api for atomic test and set (ATS) function */
+	.do_check_before_ats        = do_check_before_ats,
+	.do_ats                     = iblock_do_ats,
+#endif
+
+#if defined(SUPPORT_TP)
+/* 2014/06/14, adamhsu, redmine 8530 (start) */
+	.do_get_lba_map_status = __iblock_get_lba_map_status,
+/* 2014/06/14, adamhsu, redmine 8530 (end) */
+#endif
+
+#if defined(SUPPORT_TPC_CMD)
+	/* api for 3rd-party ROD function */    
+	.do_pt                  = iblock_do_populate_token,
+	.do_chk_before_pt       = iblock_before_populate_token,
+	.do_wrt                 = iblock_do_write_by_token,
+	.do_wzrt                = iblock_do_write_by_zero_rod_token,
+	.do_chk_before_wrt      = iblock_before_write_by_token,
+	.do_receive_rt          = iblock_receive_rod_token,
+#endif
+#endif /* defined(CONFIG_MACH_QNAPTS) */
 };
 
 static int __init iblock_module_init(void)

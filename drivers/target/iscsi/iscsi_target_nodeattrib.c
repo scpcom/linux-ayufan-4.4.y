@@ -49,6 +49,44 @@ void iscsit_set_default_node_attribues(
 	a->default_erl = NA_DEFAULT_ERL;
 }
 
+#ifdef CONFIG_MACH_QNAPTS // 2009/09/23 Nike Chen add for default initiator
+/*	
+ *  iscsi_copy_node_attribues():
+ */
+extern void iscsi_copy_node_attribues (
+	struct iscsi_node_acl *dest_acl, struct iscsi_node_acl *src_acl)
+{
+    struct iscsi_node_attrib *src_a = &src_acl->node_attrib;
+    struct iscsi_node_attrib *dest_a = &dest_acl->node_attrib;
+    struct iscsi_node_auth *src_auth = &src_acl->node_auth;
+    struct iscsi_node_auth *dest_auth = &dest_acl->node_auth;
+
+    dest_a->dataout_timeout = src_a->dataout_timeout;
+    dest_a->dataout_timeout_retries = src_a->dataout_timeout_retries;
+    dest_a->nopin_timeout = src_a->nopin_timeout;
+    dest_a->nopin_response_timeout = src_a->nopin_response_timeout;
+    dest_a->random_datain_pdu_offsets = src_a->random_datain_pdu_offsets;
+    dest_a->random_datain_seq_offsets = src_a->random_datain_seq_offsets;
+    dest_a->random_r2t_offsets = src_a->random_r2t_offsets;
+    dest_a->default_erl = src_a->default_erl;
+
+    // should copy the auth parameters as well
+    // struct config_group     auth_attrib_group;
+    dest_auth->naf_flags = src_auth->naf_flags;
+    dest_auth->authenticate_target = src_auth->authenticate_target;
+    strcpy(dest_auth->userid, src_auth->userid);
+    //printk("Nike src_auth = %p, copy userid = %s.\n", src_auth, dest_auth->userid);
+    strcpy(dest_auth->password, src_auth->password);
+    //printk("Nike copy password = %s.\n", dest_auth->password);
+    strcpy(dest_auth->userid_mutual, src_auth->userid_mutual);
+    //printk("Nike copy userid_mutual = %s.\n", dest_auth->userid_mutual);
+    strcpy(dest_auth->password_mutual, src_auth->password_mutual);
+    //printk("Nike copy password_mutual = %s.\n", dest_auth->password_mutual);
+
+    return;
+}
+#endif
+
 int iscsit_na_dataout_timeout(
 	struct iscsi_node_acl *acl,
 	u32 dataout_timeout)

@@ -33,6 +33,12 @@
 #include <scsi/scsi_ioctl.h>
 #include <scsi/scsi_cmnd.h>
 
+#ifdef CONFIG_MACH_QNAPTS
+#include <linux/fd.h>
+#include <linux/mtio.h>
+#include <linux/raid/md_u.h>
+#endif
+
 struct blk_cmd_filter {
 	unsigned long read_ok[BLK_SCSI_CMD_PER_LONG];
 	unsigned long write_ok[BLK_SCSI_CMD_PER_LONG];
@@ -670,7 +676,10 @@ int scsi_cmd_ioctl(struct request_queue *q, struct gendisk *bd_disk, fmode_t mod
 		 * old junk scsi send command ioctl
 		 */
 		case SCSI_IOCTL_SEND_COMMAND:
+//Patch by QNAP: remove redundant warning message        
+#ifndef CONFIG_MACH_QNAPTS            
 			printk(KERN_WARNING "program %s is using a deprecated SCSI ioctl, please convert it to SG_IO\n", current->comm);
+#endif
 			err = -EINVAL;
 			if (!arg)
 				break;
@@ -710,12 +719,35 @@ int scsi_verify_blk_ioctl(struct block_device *bd, unsigned int cmd)
 	case SG_GET_RESERVED_SIZE:
 	case SG_SET_RESERVED_SIZE:
 	case SG_EMULATED_HOST:
+	// Kevin Liao 20120412: Add this to avoid lots of messages shown
+	// when enter or stay in Volume or Raid Management web page...
+	// Please see http://www.spinics.net/lists/raid/msg37770.html
+#ifdef CONFIG_MACH_QNAPTS
+	case BLKFLSBUF:
+	case BLKROSET:
+#endif        
 		return 0;
 	case CDROM_GET_CAPABILITY:
+#ifdef CONFIG_MACH_QNAPTS
+	case CDROM_DRIVE_STATUS:
+	case FDGETPRM:
+	case RAID_VERSION:
+	case MTIOCGET:
+//#ifdef CONFIG_COMPAT
+//	case 0x801c6d02:        /* MTIOCGET32 */
+//#endif
+		/* Keep this until we remove the printk below. udev/dd sends
+		 * these and we do not want to spam dmesg about it. CD-ROMs
+		 * & tapes do not have partitions, so we get here only for
+		 * disks.
+		 */
+#else
+        
 		/* Keep this until we remove the printk below.  udev sends it
 		 * and we do not want to spam dmesg about it.   CD-ROMs do
 		 * not have partitions, so we get here only for disks.
 		 */
+#endif		 
 		return -ENOTTY;
 	default:
 		break;

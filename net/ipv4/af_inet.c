@@ -1802,3 +1802,10 @@ static int __init ipv4_proc_init(void)
 
 MODULE_ALIAS_NETPROTO(PF_INET);
 
+//Patch by QNAP:seperate bonding driver from ipv6
+#ifdef CONFIG_MACH_QNAPTS
+#include "../../drivers/net/bonding/bonding.h"
+int bond_net_id __read_mostly;
+EXPORT_SYMBOL(bond_net_id);
+#endif
+

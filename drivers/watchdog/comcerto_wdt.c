@@ -37,7 +37,12 @@
 #include <mach/reset.h>
 
 #define WDT_NAME					"comcerto_wdt"
+//Patch by QNAP: Board initialization
+#ifdef CONFIG_MACH_QNAPTS
+#define WDT_DEFAULT_TIMEOUT				15
+#else
 #define WDT_DEFAULT_TIMEOUT				5
+#endif
 #define WDT_MAX_TIMEOUT					(0xffffffff / COMCERTO_AHBCLK)
 
 static unsigned long COMCERTO_AHBCLK;
@@ -179,6 +184,10 @@ static int comcerto_wdt_release(struct inode *inode, struct file *file)
 		comcerto_wdt_stop();	/* disable the watchdog when file is closed */
 		clear_bit(0, &comcerto_wdt_busy);
 	} else {
+//Patch by QNAP: Board initialization
+#ifdef CONFIG_MACH_QNAPTS
+		clear_bit(0, &comcerto_wdt_busy);
+#endif
 		printk(KERN_CRIT "%s: closed unexpectedly. WDT will not stop!\n", WDT_NAME);
 	}
 
@@ -244,11 +253,15 @@ static long comcerto_wdt_ioctl(struct file *file, uint cmd, ulong arg)
 		break;
 
 	case WDIOC_SETOPTIONS:
+//Patch by QNAP: Board initialization
+#ifdef CONFIG_MACH_QNAPTS
+		new_value = (int)p;
+#else
 		if (get_user(new_value, p)) {
 			err = -EFAULT;
 			goto err;
 		}
-
+#endif
 		if (new_value & WDIOS_DISABLECARD)
 			comcerto_wdt_stop();
 

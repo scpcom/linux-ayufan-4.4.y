@@ -39,6 +39,10 @@
 #include <linux/ratelimit.h>
 #include "internal.h"
 
+//Patch by QNAP:Search filename use case insensitive method
+//#define CASE_FOLDING_DEBUG
+//////////////////////////////////////////////////////////
+
 /*
  * Usage:
  * dcache->d_inode->i_lock protects:
@@ -1195,20 +1199,35 @@ struct dentry *__d_alloc(struct super_block *sb, const struct qstr *name)
 	dentry = kmem_cache_alloc(dentry_cache, GFP_KERNEL);
 	if (!dentry)
 		return NULL;
-
+//Patch by QNAP:Search filename use case insensitive method
+#ifdef QNAP_SEARCH_FILENAME_CASE_INSENSITIVE
+	if ((name->len + 10) > DNAME_INLINE_LEN-1) {
+		dname = kmalloc(name->len + 1 + 10, GFP_KERNEL);
+		if (!dname) {
+			kmem_cache_free(dentry_cache, dentry);
+			return NULL;
+		}
+	}
+#else
 	if (name->len > DNAME_INLINE_LEN-1) {
 		dname = kmalloc(name->len + 1, GFP_KERNEL);
 		if (!dname) {
 			kmem_cache_free(dentry_cache, dentry); 
 			return NULL;
 		}
-	} else  {
+	}
+#endif    
+    else  {
 		dname = dentry->d_iname;
 	}	
 	dentry->d_name.name = dname;
 
 	dentry->d_name.len = name->len;
 	dentry->d_name.hash = name->hash;
+//Patch by QNAP:Search filename use case insensitive method
+#ifdef QNAP_SEARCH_FILENAME_CASE_INSENSITIVE
+	dentry->d_name.case_folding= name->case_folding;
+#endif    
 	memcpy(dname, name->name, name->len);
 	dname[name->len] = 0;
 
@@ -1277,6 +1296,10 @@ struct dentry *d_alloc_name(struct dentry *parent, const char *name)
 
 	q.name = name;
 	q.len = strlen(name);
+//Patch by QNAP:Search filename use case insensitive method
+#ifdef QNAP_SEARCH_FILENAME_CASE_INSENSITIVE
+    q.case_folding = 0;
+#endif    
 	q.hash = full_name_hash(q.name, q.len);
 	return d_alloc(parent, &q);
 }
@@ -1819,6 +1842,13 @@ struct dentry *__d_lookup(struct dentry *parent, struct qstr *name)
 	struct hlist_bl_node *node;
 	struct dentry *found = NULL;
 	struct dentry *dentry;
+//Patch by QNAP:Search filename use case insensitive method
+#ifdef CASE_FOLDING_DEBUG
+	int debug = 0;
+	if (strncasecmp(name->name, "test", strlen("test")) == 0)
+		debug = 1;
+#endif
+////////////////////////////////////////////
 
 	/*
 	 * Note: There is significant duplication with __d_lookup_rcu which is
@@ -1866,6 +1896,13 @@ struct dentry *__d_lookup(struct dentry *parent, struct qstr *name)
 						dentry, dentry->d_inode,
 						tlen, tname, name))
 				goto next;
+//Patch by QNAP:Search filename use case insensitive method
+#ifdef CASE_FOLDING_DEBUG
+			else if (debug)
+				printk("In %s:%d:d_compare successfully, request name = %s,dentry->name = %s,hash = 0x%x\n", __func__, __LINE__, name->name, tname, name->hash);
+#endif
+///////////////////////////////////////////////////////////////////
+            
 		} else {
 			if (dentry_cmp(tname, tlen, str, len))
 				goto next;
@@ -2696,6 +2733,62 @@ static char *__dentry_path(struct dentry *dentry, char *buf, int buflen)
 Elong:
 	return ERR_PTR(-ENAMETOOLONG);
 }
+
+#ifdef CONFIG_MACH_QNAPTS
+char *qnap_dentry_path_raw(struct dentry *dentry, char *buf, int buflen)
+{
+	char *end = buf + buflen;
+	char *retval;
+	struct vfsmount *vmnt, *parent;
+
+	write_seqlock(&rename_lock);
+	prepend(&end, &buflen, "\0", 1);
+	if (buflen < 1)
+		goto Elong;
+	/* Get '/' right */
+	retval = end - 1;
+	*retval = '/';
+
+retry:
+	while (!IS_ROOT(dentry)) {
+		struct dentry *parent = dentry->d_parent;
+		int error;
+
+		prefetch(parent);
+		spin_lock(&dentry->d_lock);
+		//printk("qnap_dentry_path_raw0: 0x%x, %s\n", dentry->d_flags, dentry->d_name.name);
+		error = prepend_name(&end, &buflen, &dentry->d_name);
+		spin_unlock(&dentry->d_lock);
+		if (error != 0 || prepend(&end, &buflen, "/", 1) != 0)
+			goto Elong;
+		retval = end;
+		dentry = parent;
+	}
+	//printk("qnap_dentry_path_raw1: 0x%x, 0x%x, %s\n", dentry, dentry->d_flags, dentry->d_name.name);
+	br_read_lock(vfsmount_lock);
+	vmnt = qnap_lookup_vfsmount(dentry);
+	br_read_unlock(vfsmount_lock);
+	if (vmnt) {
+		parent = vmnt->mnt_parent;
+		dentry = vmnt->mnt_mountpoint;
+		//printk("qnap_dentry_path_raw2: 0x%x, 0x%x, %s\n", dentry, dentry->d_flags, dentry->d_name.name);
+		//printk("qnap_dentry_path_raw3: 0x%x, 0x%x\n", mnt, parent);
+		//printk("qnap_dentry_path_raw4: 0x%x, 0x%x, 0x%x\n", mnt->mnt.mnt_root, parent->mnt.mnt_root, parent->mnt_mountpoint);
+		if (dentry != parent->mnt_root)
+			goto retry;
+		//else
+		//	printk("qnap_dentry_path_raw5: reach real root\n");
+	}
+	//else
+	//	printk("qnap_dentry_path_raw6: qnap_dentry_path_raw failed\n");
+	write_sequnlock(&rename_lock);
+	return retval;
+Elong:
+	write_sequnlock(&rename_lock);
+	return ERR_PTR(-ENAMETOOLONG);
+}
+EXPORT_SYMBOL(qnap_dentry_path_raw);
+#endif
 
 char *dentry_path_raw(struct dentry *dentry, char *buf, int buflen)
 {

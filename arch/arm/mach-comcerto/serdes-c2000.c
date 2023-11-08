@@ -177,11 +177,21 @@ static int wait_sb_cmu_lane_rdy(u32 sbphy_num, u32 type)
 int serdes_phy_init(int phy_num, struct serdes_regs_s *regs, int size, int type)
 {
 	int ii;
-
 	/* Initilize serdes phy registers */
 	for( ii = 0; ii < size; ii++ )
-		writel(regs[ii].val, COMCERTO_SERDES_REG(phy_num, regs[ii].ofst));
-
+	{
+//Patch by QNAP: Modify TS-131 internal SATA TX_LEV = 9
+#if defined(CONFIG_MACH_QNAPTS)
+		if (type == SD_DEV_TYPE_SATA && phy_num == 1 && regs[ii].ofst == 0x81C)
+		{
+			printk(KERN_INFO "Serdes1: Set TX_LEV = 9\n");
+			writel(0x24, COMCERTO_SERDES_REG(phy_num, regs[ii].ofst));
+		}
+		else
+#endif
+//////////////////////////////
+			writel(regs[ii].val, COMCERTO_SERDES_REG(phy_num, regs[ii].ofst));
+	}
 	/* Wait for the initialization of Serdes-1 Port/Lane to become Ready */
 	return wait_sb_cmu_lane_rdy(phy_num, type);
 }

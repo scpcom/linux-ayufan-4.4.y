@@ -41,6 +41,9 @@
 #include <trace/events/ext3.h>
 #include "xattr.h"
 #include "acl.h"
+//Patch by QNAP:fix sendfile quota issue
+#define FIX_QUOTA_ISSUE
+/////////////////////////////////////////////////////////
 
 static int ext3_writepage_trans_blocks(struct inode *inode);
 static int ext3_block_truncate_page(struct inode *inode, loff_t from);
@@ -1297,13 +1300,21 @@ write_begin_failed:
 		 * finishes. Do this only if ext3_can_truncate() agrees so
 		 * that orphan processing code is happy.
 		 */
+//Patch by QNAP:fix sendfile quota issue
+#ifdef FIX_QUOTA_ISSUE
+#else
 		if (pos + len > inode->i_size && ext3_can_truncate(inode))
 			ext3_orphan_add(handle, inode);
+#endif        
 		ext3_journal_stop(handle);
 		unlock_page(page);
 		page_cache_release(page);
+//Patch by QNAP:fix sendfile quota issue
+#ifdef FIX_QUOTA_ISSUE
+#else
 		if (pos + len > inode->i_size)
 			ext3_truncate_failed_write(inode);
+#endif        
 	}
 	if (ret == -ENOSPC && ext3_should_retry_alloc(inode->i_sb, &retries))
 		goto retry;
@@ -2923,7 +2934,12 @@ struct inode *ext3_iget(struct super_block *sb, unsigned long ino)
 	inode->i_ctime.tv_sec = (signed)le32_to_cpu(raw_inode->i_ctime);
 	inode->i_mtime.tv_sec = (signed)le32_to_cpu(raw_inode->i_mtime);
 	inode->i_atime.tv_nsec = inode->i_ctime.tv_nsec = inode->i_mtime.tv_nsec = 0;
-
+//Patch by QNAP: fix ext3 birthtime issue
+#ifdef CONFIG_FS_QNAP_BIRTHTIME
+	inode->i_birthtime.tv_sec = (signed)le32_to_cpu(raw_inode->ext3_birthtime);
+	inode->i_birthtime.tv_nsec = 0;
+#endif
+//////////////////////////////////////////
 	ei->i_state_flags = 0;
 	ei->i_dir_start_lookup = 0;
 	ei->i_dtime = le32_to_cpu(raw_inode->i_dtime);
@@ -3113,6 +3129,11 @@ again:
 	raw_inode->i_atime = cpu_to_le32(inode->i_atime.tv_sec);
 	raw_inode->i_ctime = cpu_to_le32(inode->i_ctime.tv_sec);
 	raw_inode->i_mtime = cpu_to_le32(inode->i_mtime.tv_sec);
+//Patch by QNAP: fix ext3 birthtime issue
+#ifdef CONFIG_FS_QNAP_BIRTHTIME
+	raw_inode->ext3_birthtime = cpu_to_le32(inode->i_birthtime.tv_sec);
+#endif
+///////////////////////////////////////////////////
 	raw_inode->i_blocks = cpu_to_le32(inode->i_blocks);
 	raw_inode->i_dtime = cpu_to_le32(ei->i_dtime);
 	raw_inode->i_flags = cpu_to_le32(ei->i_flags);

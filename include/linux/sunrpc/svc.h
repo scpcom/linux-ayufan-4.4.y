@@ -136,9 +136,14 @@ static inline void svc_get(struct svc_serv *serv)
  * the point of diminishing returns.
  */
 #define RPCSVC_MAXPAYLOAD	(1*1024*1024u)
+//Patch by QNAP: bug fixed by KenChen
+#ifdef CONFIG_MACH_QNAPTS
+#define RPCSVC_MAXPAYLOAD_TCP	(32*1024u)
+#define RPCSVC_MAXPAYLOAD_UDP	(8*1024u)
+#else
 #define RPCSVC_MAXPAYLOAD_TCP	RPCSVC_MAXPAYLOAD
 #define RPCSVC_MAXPAYLOAD_UDP	(32*1024u)
-
+#endif
 extern u32 svc_max_payload(const struct svc_rqst *rqstp);
 
 /*

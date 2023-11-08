@@ -621,7 +621,11 @@ static long __writeback_inodes_wb(struct bdi_writeback *wb,
 		struct inode *inode = wb_inode(wb->b_io.prev);
 		struct super_block *sb = inode->i_sb;
 
+#ifdef QNAP_SNAPSHOT
+		if ((!grab_super_passive(sb)) || (sb->s_frozen != SB_UNFROZEN)) {
+#else
 		if (!grab_super_passive(sb)) {
+#endif            
 			/*
 			 * grab_super_passive() may fail consistently due to
 			 * s_umount being grabbed by someone else. Don't use

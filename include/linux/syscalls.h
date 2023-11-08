@@ -825,6 +825,15 @@ asmlinkage long sys_fanotify_mark(int fanotify_fd, unsigned int flags,
 				  u64 mask, int fd,
 				  const char  __user *pathname);
 asmlinkage long sys_syncfs(int fd);
+//Patch by QNAP: Add System call
+#ifdef CONFIG_MACH_QNAPTS
+asmlinkage long sys_qnap_rmdir(const char __user * pathname);
+asmlinkage long sys_qnap_unlink(const char __user *pathname);
+asmlinkage long sys_qnap_find_filename(const char __user *path,const char __user *file);
+asmlinkage long sys_set_ipsec_rules(const char __user *arg, int len );
+asmlinkage long sys_get_ipsec_vio_acc_list( char __user *arg, int len );
+#endif
+/////////////////////////////////////////////////////////////////////
 
 int kernel_execve(const char *filename, const char *const argv[], const char *const envp[]);
 

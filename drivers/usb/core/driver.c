@@ -432,8 +432,12 @@ int usb_driver_claim_interface(struct usb_driver *driver,
 	int retval = 0;
 
 	if (dev->driver)
+//Patch by QNAP:fix UPS disconnect and release usbhid driver	
+#ifdef CONFIG_MACH_QNAPTS
+		return 0;
+#else        
 		return -EBUSY;
-
+#endif
 	dev->driver = &driver->drvwrap.driver;
 	usb_set_intfdata(iface, priv);
 	iface->needs_binding = 0;

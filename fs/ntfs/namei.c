@@ -253,6 +253,10 @@ handle_name:
 		err = (signed)nls_name.len;
 		goto err_out;
 	}
+//Patch by QNAP:Search filename use case insensitive method
+#ifdef QNAP_SEARCH_FILENAME_CASE_INSENSITIVE
+    nls_name.case_folding = 0;
+#endif    
 	nls_name.hash = full_name_hash(nls_name.name, nls_name.len);
 
 	dent = d_add_ci(dent, dent_inode, &nls_name);

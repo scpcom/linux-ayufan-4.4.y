@@ -21,6 +21,7 @@
 #include <linux/string.h>
 #include <linux/kthread.h>
 #include <linux/crypto.h>
+#include <linux/idr.h>
 #include <scsi/iscsi_proto.h>
 #include <target/target_core_base.h>
 #include <target/target_core_fabric.h>
@@ -38,12 +39,25 @@
 #include "iscsi_target.h"
 #include "iscsi_target_parameters.h"
 
+#ifdef CONFIG_MACH_QNAPTS // 2009/11/26 Nike Chen add connection log
+#include <linux/time.h>
+#include "iscsi_target_log.h"
+#endif
+
 extern struct idr sess_idr;
 extern struct mutex auth_id_lock;
 extern spinlock_t sess_idr_lock;
 
 static int iscsi_login_init_conn(struct iscsi_conn *conn)
 {
+
+#ifdef CONFIG_MACH_QNAPTS
+    /* Patch about the sleeping code in iscsi_target_tx_thread() is 
+     * susceptible to the classic missed wakeup race.
+     */
+	init_waitqueue_head(&conn->queues_wq);
+#endif
+
 	INIT_LIST_HEAD(&conn->conn_list);
 	INIT_LIST_HEAD(&conn->conn_cmd_list);
 	INIT_LIST_HEAD(&conn->immed_queue_list);
@@ -220,6 +234,7 @@ static int iscsi_login_zero_tsih_s1(
 {
 	struct iscsi_session *sess = NULL;
 	struct iscsi_login_req *pdu = (struct iscsi_login_req *)buf;
+	int ret;
 
 	sess = kzalloc(sizeof(struct iscsi_session), GFP_KERNEL);
 	if (!sess) {
@@ -242,6 +257,9 @@ static int iscsi_login_zero_tsih_s1(
 	init_completion(&sess->session_wait_comp);
 	init_completion(&sess->session_waiting_on_uc_comp);
 	mutex_init(&sess->cmdsn_mutex);
+#ifdef QNAP_KERNEL_STORAGE_V2
+	mutex_init(&sess->info_mutex);
+#endif
 	spin_lock_init(&sess->conn_lock);
 	spin_lock_init(&sess->cr_a_lock);
 	spin_lock_init(&sess->cr_i_lock);
@@ -256,8 +274,17 @@ static int iscsi_login_zero_tsih_s1(
 		return -ENOMEM;
 	}
 	spin_lock(&sess_idr_lock);
-	idr_get_new(&sess_idr, NULL, &sess->session_index);
+	ret = idr_get_new(&sess_idr, NULL, &sess->session_index);
 	spin_unlock(&sess_idr_lock);
+    // Benjamin Wang 20120823:In case the sess_idr space is completely exhausted.
+    // By the way, without CONFIG_MACH_QNAPTS because the patch is sent to NAB.
+	if (ret < 0) {
+		pr_err("idr_get_new() for sess_idr failed\n");
+		iscsit_tx_login_rsp(conn, ISCSI_STATUS_CLS_TARGET_ERR,
+				ISCSI_LOGIN_STATUS_NO_RESOURCES);
+		kfree(sess);
+		return -ENOMEM;
+	}
 
 	sess->creation_time = get_jiffies_64();
 	spin_lock_init(&sess->session_stats_lock);
@@ -575,6 +602,34 @@ static void iscsi_post_login_start_timers(struct iscsi_conn *conn)
 		iscsit_start_nopin_timer(conn);
 }
 
+#ifdef CONFIG_MACH_QNAPTS	// 20120720 Benjamin added for supporting connection log
+// FIXME: Is it needed to add spin lock ? 2.6.33.2 does not...
+int iscsi_post_log(
+    int conn_type, 
+    int log_type,
+    struct iscsi_session *sess, 
+    char *ip)
+{
+    struct iscsi_portal_group *tpg = ISCSI_TPG_S(sess);
+	char *target_iqn = (tpg && tpg->tpg_tiqn && strlen(tpg->tpg_tiqn->tiqn) > 0) ?
+    		            (char *)tpg->tpg_tiqn->tiqn : "Discovery Session";
+    
+    if (LOGIN_OK == conn_type) {
+    	struct timeval cur_time;        
+	    do_gettimeofday(&cur_time);
+    	sess->login_time = cur_time.tv_sec;
+    }
+    
+	iscsi_log_send_msg(conn_type,
+			log_type,
+			sess->sess_ops->InitiatorName,
+			ip,
+			target_iqn);
+    
+    return 0;
+}
+#endif
+
 static int iscsi_post_login_handler(
 	struct iscsi_np *np,
 	struct iscsi_conn *conn,
@@ -586,6 +641,9 @@ static int iscsi_post_login_handler(
 	struct iscsi_portal_group *tpg = ISCSI_TPG_S(sess);
 	struct se_portal_group *se_tpg = &tpg->tpg_se_tpg;
 	struct iscsi_thread_set *ts;
+#ifdef CONFIG_MACH_QNAPTS	// 2009/11/26 Nike Chen add connection log
+    char login_ip[IPV6_ADDRESS_SPACE];
+#endif
 
 	iscsit_inc_conn_usage_count(conn);
 
@@ -644,6 +702,10 @@ static int iscsi_post_login_handler(
 			spin_unlock_bh(&se_tpg->session_lock);
 		}
 		iscsit_dec_session_usage_count(sess);
+#ifdef CONFIG_MACH_QNAPTS	// 2009/11/26 Nike Chen add connection log
+        strcpy(login_ip, conn->login_ip);
+        iscsi_post_log(LOGIN_OK, LOG_INFO, sess, login_ip);
+#endif        
 		return 0;
 	}
 
@@ -695,8 +757,13 @@ static int iscsi_post_login_handler(
 	conn->conn_rx_reset_cpumask = 1;
 	conn->conn_tx_reset_cpumask = 1;
 
-	iscsit_dec_conn_usage_count(conn);
+#ifdef CONFIG_MACH_QNAPTS	// 2009/11/26 Nike Chen add connection log
+    strcpy(login_ip, conn->login_ip);
+    iscsi_post_log(LOGIN_OK, LOG_INFO, sess, login_ip);
+#endif        
 
+	iscsit_dec_conn_usage_count(conn);
+    
 	return 0;
 }
 
@@ -813,6 +880,9 @@ int iscsi_target_setup_login_socket(
 	 * Setup the np->np_sockaddr from the passed sockaddr setup
 	 * in iscsi_target_configfs.c code..
 	 */
+	// Benjamin 20110302: for handling %ethn: 
+	// Unlike kernel 2.6.33.2, since sock_in6->sin6_scope_id in lio_target_call_addnptotpg(), 
+	// and will be copied into np->np_sockaddr. That's why np->np_scope_id (in kernel 2.6.33.2) is not needed any more.	 
 	memcpy(&np->np_sockaddr, sockaddr,
 			sizeof(struct __kernel_sockaddr_storage));
 
@@ -852,6 +922,19 @@ int iscsi_target_setup_login_socket(
 		goto fail;
 	}
 
+#ifdef CONFIG_MACH_QNAPTS  // 2009/10/23 Nike Chen: Allow ipv4 and ipv6 network portal simultaneously.
+    // We have to enable IPV6_V6ONLY option to allow ipv4 and ipv6 network 
+    // portal simultaneously. These two set addresses will bind on the same port.   
+    // If the connection is IPv6, then either returning IPv6 or IPv4 is ok;
+    // if the connection is IPv4, then only return IPv4.
+	if (sockaddr->ss_family == AF_INET6) {
+        opt = 1;
+        if ((ret = kernel_setsockopt(sock, SOL_IPV6, IPV6_V6ONLY, 
+        	(char *)&opt, sizeof(opt))) < 0) {
+        	pr_err("kernel_setsockopt() for IPV6_V6ONLY failed\n");
+        }
+    }
+#endif 
 	ret = kernel_bind(sock, (struct sockaddr *)&np->np_sockaddr, len);
 	if (ret < 0) {
 		pr_err("kernel_bind() failed: %d\n", ret);
@@ -1153,6 +1236,17 @@ static int __iscsi_target_login_thread(struct iscsi_np *np)
 
 new_sess_out:
 	pr_err("iSCSI Login negotiation failed.\n");
+
+#ifdef CONFIG_MACH_QNAPTS	// 2009/11/30 Nike Chen add connection log
+    // Benjamin 20120723: sess is kzalloc in iscsi_login_zero_tsih_s1().
+    if (conn->sess) {
+        char login_ip[IPV6_ADDRESS_SPACE];
+        
+        strcpy(login_ip, conn->login_ip);        
+        iscsi_post_log(LOGIN_FAIL, LOG_ERROR, conn->sess, login_ip);    
+    }
+#endif    
+    
 	iscsit_collect_login_stats(conn, ISCSI_STATUS_CLS_INITIATOR_ERR,
 				  ISCSI_LOGIN_STATUS_INIT_ERR);
 	if (!zero_tsih || !conn->sess)

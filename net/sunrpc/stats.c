@@ -27,6 +27,103 @@
 
 #define RPCDBG_FACILITY	RPCDBG_MISC
 
+//Patch by QNAP: Setup a interface to rewrite payload size
+#ifdef CONFIG_MACH_QNAPTS
+#include <linux/pagemap.h>
+#define TCP_PAYLOAD_NAME "tcp_payload_size"
+#define UDP_PAYLOAD_NAME "udp_payload_size"
+static unsigned int paylod_perm = 0644;
+struct qnap_nfs_payload{
+	char name[128];
+	u32 payload_size;
+};
+
+static int payload_show(struct seq_file *seq, void *v) {
+	const struct qnap_nfs_payload *payload = seq->private;
+	
+	if(!strcmp(payload->name, TCP_PAYLOAD_NAME)) 
+	    seq_printf(seq, "%u\n", svc_tcp_read_payload());
+	else if(!strcmp(payload->name, UDP_PAYLOAD_NAME))
+	    seq_printf(seq, "%u\n", svc_udp_read_payload());
+
+	return 0;
+}
+
+static uint32_t my_atou(const char *name)
+{
+        uint32_t val = 0;
+
+        for (;; name++) {
+                switch (*name) {
+                case '0' ... '9':
+                        val = 10*val+(*name-'0');
+                        break;
+                default:
+                        return val;
+                }
+        }
+}
+
+static int payload_open(struct inode *inode, struct file *file)
+{
+	return single_open(file, payload_show, PDE(inode)->data);
+}
+
+static ssize_t payload_write(struct file *file, const char __user *input,
+	size_t size, loff_t *loff)
+{
+	const struct proc_dir_entry *pde = PDE(file->f_path.dentry->d_inode);
+	struct qnap_nfs_payload *payload = pde->data;
+	char buf[128];
+	uint32_t payload_size;
+	if (size == 0)
+		return 0;
+	memset(buf, 0, sizeof(buf));
+	if (size > sizeof(buf))
+		size = sizeof(buf);
+	if (copy_from_user(buf, input, size) != 0)
+		return -EFAULT;
+
+	if (*loff != 0)
+		return -ESPIPE;
+	payload_size = my_atou(buf);
+	//*loff += size;
+	
+	if((!strcmp(payload->name, TCP_PAYLOAD_NAME)) && 
+		(payload_size >= PAGE_CACHE_SIZE) &&
+		(payload_size <= RPCSVC_MAXPAYLOAD) &&
+		(payload_size % PAGE_CACHE_SIZE == 0))
+	{
+	        payload->payload_size = payload_size;
+		svc_tcp_set_payload(payload->payload_size);
+		return size;
+
+	}else if((!strcmp(payload->name, UDP_PAYLOAD_NAME)) && 
+		(payload_size >= PAGE_CACHE_SIZE) && 
+		(payload_size <= RPCSVC_MAXPAYLOAD ) &&
+		(payload_size % PAGE_CACHE_SIZE == 0))
+	{
+		payload->payload_size = payload_size;
+		svc_udp_set_payload(payload->payload_size);
+		return size;
+	}else{
+		printk("invalid payload size %s (should be multiples of %lu between %lu - %u)\n", 
+			buf, PAGE_CACHE_SIZE, PAGE_CACHE_SIZE, RPCSVC_MAXPAYLOAD);
+		return size;
+	}
+}
+
+static const struct file_operations payload_fops = {
+	.owner = THIS_MODULE,
+	.open = payload_open,
+	.read  = seq_read,
+	.write = payload_write,
+	.llseek = seq_lseek,
+	.release = single_release,
+};
+
+#endif
+
 /*
  * Get RPC client stats
  */
@@ -259,19 +356,52 @@ EXPORT_SYMBOL_GPL(svc_proc_unregister);
 int rpc_proc_init(struct net *net)
 {
 	struct sunrpc_net *sn;
+#ifdef CONFIG_MACH_QNAPTS
+	struct qnap_nfs_payload *tcp_payload, *udp_payload;
+#endif
 
 	dprintk("RPC:       registering /proc/net/rpc\n");
 	sn = net_generic(net, sunrpc_net_id);
 	sn->proc_net_rpc = proc_mkdir("rpc", net->proc_net);
 	if (sn->proc_net_rpc == NULL)
 		return -ENOMEM;
-
+//Patch by QNAP: Setup a interface to rewrite payload size
+#ifdef CONFIG_MACH_QNAPTS
+	// TCP
+	tcp_payload = kmalloc(sizeof(*tcp_payload), GFP_ATOMIC);
+	if(tcp_payload == NULL) {
+		sn->proc_net_rpc_tcp_payload = NULL;
+		return -ENOMEM;
+	}
+	snprintf(tcp_payload->name, sizeof(tcp_payload->name), TCP_PAYLOAD_NAME);
+	sn->proc_net_rpc_tcp_payload = proc_create_data(tcp_payload->name, paylod_perm, sn->proc_net_rpc, &payload_fops, tcp_payload);
+	if(sn->proc_net_rpc_tcp_payload == NULL) {
+		kfree(tcp_payload);
+		return -ENOMEM;
+	}
+	// UDP 
+	udp_payload = kmalloc(sizeof(*udp_payload), GFP_ATOMIC);
+	if(udp_payload == NULL) {
+		sn->proc_net_rpc_udp_payload = NULL;
+		return -ENOMEM;
+	}
+	snprintf(udp_payload->name, sizeof(udp_payload->name), UDP_PAYLOAD_NAME);
+	sn->proc_net_rpc_udp_payload = proc_create_data(udp_payload->name, paylod_perm, sn->proc_net_rpc, &payload_fops, udp_payload);
+	if(sn->proc_net_rpc_udp_payload == NULL) {
+		kfree(udp_payload);
+		return -ENOMEM;
+	}
+#endif
 	return 0;
 }
 
 void rpc_proc_exit(struct net *net)
 {
 	dprintk("RPC:       unregistering /proc/net/rpc\n");
+#ifdef CONFIG_MACH_QNAPTS
+	remove_proc_entry("rpc/tcp_payload_size", net->proc_net);
+	remove_proc_entry("rpc/udp_payload_size", net->proc_net);
+#endif
 	remove_proc_entry("rpc", net->proc_net);
 }
 

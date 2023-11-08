@@ -1647,7 +1647,12 @@ static void scsi_restart_operations(struct Scsi_Host *shost)
 	 */
 	shost_for_each_device(sdev, shost) {
 		if (scsi_device_online(sdev) && sdev->locked)
+//Patch by QNAP: Fix removable disk can't eject when press eject button.
+#if defined(CONFIG_MACH_QNAPTS)
+            ;
+#else            
 			scsi_eh_lock_door(sdev);
+#endif
 	}
 
 	/*

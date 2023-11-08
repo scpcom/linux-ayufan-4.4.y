@@ -50,6 +50,29 @@
 #include "target_core_pr.h"
 #include "target_core_ua.h"
 
+#if defined(CONFIG_MACH_QNAPTS)
+#include "target_core_iblock.h"
+#include "vaai_target_struc.h"
+#include "target_general.h"
+
+#if defined(SUPPORT_VAAI) //Benjamin 20121105 sync VAAI support from Adam. 
+#include "vaai_helper.h"
+#endif
+
+#if defined(SUPPORT_TP) && defined(SUPPORT_VOLUME_BASED)
+#include <linux/device-mapper.h>
+extern int thin_set_dm_monitor(struct dm_target *ti, void *dev, 
+	void (*dm_monitor_fn)(void *dev, int));
+#endif
+
+/* adamhsu, 
+ * (1) redmine bug 6915 - bugzilla 40743
+ * (2) redmine bug 6916 - bugzilla 41183
+ */
+extern void __call_transport_free_dev_tasks(struct se_cmd *cmd);
+
+#endif /* #if defined(CONFIG_MACH_QNAPTS) */
+
 static void se_dev_start(struct se_device *dev);
 static void se_dev_stop(struct se_device *dev);
 
@@ -73,6 +96,7 @@ int transport_lookup_cmd_lun(struct se_cmd *se_cmd, u32 unpacked_lun)
 
 	spin_lock_irqsave(&se_sess->se_node_acl->device_list_lock, flags);
 	se_cmd->se_deve = se_sess->se_node_acl->device_list[unpacked_lun];
+
 	if (se_cmd->se_deve->lun_flags & TRANSPORT_LUNFLAGS_INITIATOR_ACCESS) {
 		struct se_dev_entry *deve = se_cmd->se_deve;
 
@@ -701,12 +725,28 @@ done:
 	return 0;
 }
 
+
 /*	se_release_device_for_hba():
  *
  *
  */
 void se_release_device_for_hba(struct se_device *dev)
 {
+#if defined(CONFIG_MACH_QNAPTS)
+#if defined(SUPPORT_PARALLEL_TASK_WQ)
+        unsigned long flags;
+        LIO_SE_TASK *task, *tmp_task;
+        TASK_REC *t_rec, *tmp_t_rec;
+#endif
+	/* adamhsu, 
+	 * (1) redmine bug 6915 - bugzilla 40743
+	 * (2) redmine bug 6916 - bugzilla 41183
+	 */
+	unsigned long flags;
+	T_CMD_REC *rec, *tmp_rec;
+#endif
+
+
 	struct se_hba *hba = dev->se_hba;
 
 	if ((dev->dev_status & TRANSPORT_DEVICE_ACTIVATED) ||
@@ -715,6 +755,50 @@ void se_release_device_for_hba(struct se_device *dev)
 	    (dev->dev_status & TRANSPORT_DEVICE_OFFLINE_ACTIVATED) ||
 	    (dev->dev_status & TRANSPORT_DEVICE_OFFLINE_DEACTIVATED))
 		se_dev_stop(dev);
+
+#if defined(CONFIG_MACH_QNAPTS)
+#if defined(SUPPORT_PARALLEL_TASK_WQ)
+
+    /**/
+//  printk("%s\n", __func__);
+
+    spin_lock_irqsave(&dev->dev_q_task_lock, flags);
+    list_for_each_entry_safe(task, tmp_task, &dev->dev_q_task_list, t_node){
+        spin_lock(&task->t_rec_lock);
+        list_for_each_entry_safe(t_rec, tmp_t_rec, &task->t_rec_list, rec_node){
+            list_del_init(&t_rec->rec_node);
+            if (t_rec->se_task){
+                printk("start cancel work for se_task(0x%p)\n", t_rec->se_task);
+                cancel_work_sync(&t_rec->se_task->t_work);
+            }
+
+            kfree(t_rec);  
+            printk("done to cancel wq in q list and free t_rec\n");
+        }
+        spin_unlock(&task->t_rec_lock);
+    }
+    spin_unlock_irqrestore(&dev->dev_q_task_lock, flags);
+
+    /**/
+    spin_lock_irqsave(&dev->dev_r_task_lock, flags);
+    list_for_each_entry_safe(task, tmp_task, &dev->dev_r_task_list, t_node){
+        cancel_work_sync(&task->t_work);
+        printk("done to cancel wq in r list\n");
+    }
+    spin_unlock_irqrestore(&dev->dev_r_task_lock, flags);
+
+    /**/
+    if (dev->p_task_work_queue){
+        destroy_workqueue(dev->p_task_work_queue);
+        printk("done to destroy p_task_work_queue..\n");
+    }
+
+    if (dev->p_task_thread){
+        kthread_stop(dev->p_task_thread);
+        printk("done to stop p_task_thread..\n");
+    }
+#endif
+#endif
 
 	if (dev->dev_ptr) {
 		kthread_stop(dev->process_thread);
@@ -729,6 +813,45 @@ void se_release_device_for_hba(struct se_device *dev)
 
 	core_scsi3_free_all_registrations(dev);
 	se_release_vpd_for_dev(dev);
+
+#if defined(CONFIG_MACH_QNAPTS) 
+	/* adamhsu, 
+	 * (1) redmine bug 6915 - bugzilla 40743
+	 * (2) redmine bug 6916 - bugzilla 41183
+	 *
+	 * Before to release se_dev, it will unmap the relationshup between
+	 * se_lun and se_dev. The code path will go target_fabric_port_unlink().
+	 * But, the iscsi_cmd structure may NOT be free completely in one case
+	 * (i.e. to unmap se_lun then to release se_dev without to deactive tpg
+	 * first)
+	 *
+	 * Under this case, we need to find all se_cmds related to this se_dev
+	 * first to do something before to release se_dev
+	 */
+	spin_lock_irqsave(&dev->cmd_rec_lock, flags);
+
+	pr_debug("%s - [before] curr cmd rec count:%d\n", __FUNCTION__, 
+		atomic_read(&dev->cmd_rec_count));
+
+	list_for_each_entry_safe(rec, tmp_rec, &dev->cmd_rec_list, rec_node){
+		if (rec->se_cmd->se_dev == dev){
+			pr_debug("%s - found cmd:0x%p, se_dev:0x%p, cmd state:%d\n",
+				__FUNCTION__, rec->se_cmd, rec->se_cmd->se_dev, 
+				rec->se_cmd->se_tfo->get_cmd_state(rec->se_cmd));
+
+			list_del_init(&rec->rec_node);
+			atomic_dec(&dev->cmd_rec_count);
+			__call_transport_free_dev_tasks(rec->se_cmd);
+			rec->se_cmd->se_dev = NULL;
+			kfree(rec);
+		}
+	}
+
+	pr_debug("%s - [after] curr cmd rec count:%d\n", __FUNCTION__,
+		atomic_read(&dev->cmd_rec_count));
+
+	spin_unlock_irqrestore(&dev->cmd_rec_lock, flags);
+#endif
 
 	kfree(dev);
 }
@@ -755,6 +878,12 @@ int se_free_virtual_device(struct se_device *dev, struct se_hba *hba)
 	if (!list_empty(&dev->dev_sep_list))
 		dump_stack();
 
+#if defined(CONFIG_MACH_QNAPTS) && defined(SUPPORT_TP) && defined(SUPPORT_VOLUME_BASED)
+	/* disable callback function to prevent NULL pointer between dm and lio */
+	if (dev->se_sub_dev->se_dev_attrib.gti != NULL){
+		thin_set_dm_monitor(dev->se_sub_dev->se_dev_attrib.gti, NULL, NULL);
+	}
+#endif
 	core_alua_free_lu_gp_mem(dev);
 	se_release_device_for_hba(dev);
 
@@ -872,6 +1001,15 @@ void se_dev_set_default_attribs(
 	dev->se_sub_dev->se_dev_attrib.unmap_granularity = DA_UNMAP_GRANULARITY_DEFAULT;
 	dev->se_sub_dev->se_dev_attrib.unmap_granularity_alignment =
 				DA_UNMAP_GRANULARITY_ALIGNMENT_DEFAULT;
+	/* 
+	 * for threshold and run-time capacity notification
+	 */	
+	dev->se_sub_dev->se_dev_attrib.tp_threshold_enable = DA_TP_THRESHOLD_ENABLE;
+	dev->se_sub_dev->se_dev_attrib.tp_threshold_percent = DA_TP_THRESHOLD_PERCENT;
+	dev->se_sub_dev->se_dev_attrib.tp_threshold_set_size = DA_TP_THRESHOLD_SET_SIZE;
+	dev->se_sub_dev->se_dev_attrib.lun_blocks = 0; // initialization only
+	dev->se_sub_dev->se_dev_attrib.lun_index = 0;
+
 	/*
 	 * block_size is based on subsystem plugin dependent requirements.
 	 */
@@ -1230,6 +1368,8 @@ int se_dev_set_max_sectors(struct se_device *dev, u32 max_sectors)
 
 int se_dev_set_fabric_max_sectors(struct se_device *dev, u32 fabric_max_sectors)
 {
+	int block_size = dev->se_sub_dev->se_dev_attrib.block_size;
+    
 	if (atomic_read(&dev->dev_export_obj.obj_access_count)) {
 		pr_err("dev[%p]: Unable to change SE Device"
 			" fabric_max_sectors while dev_export_obj: %d count exists\n",
@@ -1267,8 +1407,12 @@ int se_dev_set_fabric_max_sectors(struct se_device *dev, u32 fabric_max_sectors)
 	/*
 	 * Align max_sectors down to PAGE_SIZE to follow transport_allocate_data_tasks()
 	 */
+	if (!block_size) {
+		block_size = 512;
+		pr_warn("Defaulting to 512 for zero block_size\n");
+	}	 
 	fabric_max_sectors = se_dev_align_max_sectors(fabric_max_sectors,
-						      dev->se_sub_dev->se_dev_attrib.block_size);
+						      block_size);
 
 	dev->se_sub_dev->se_dev_attrib.fabric_max_sectors = fabric_max_sectors;
 	pr_debug("dev[%p]: SE Device max_sectors changed to %u\n",
@@ -1311,6 +1455,16 @@ int se_dev_set_block_size(struct se_device *dev, u32 block_size)
 		return -EINVAL;
 	}
 
+
+#if defined(CONFIG_MACH_QNAPTS) && defined(SUPPORT_LOGICAL_BLOCK_4KB_FROM_NAS_GUI)
+    /* now, we support 512 byte / 4096 byte ONLY */
+	if ((block_size != 512) && (block_size != 4096)){
+		pr_err("dev[%p]: Illegal value for block block size: %u"
+			" for SE device, must be 512 or 4096\n",
+			dev, block_size);
+		return -EINVAL;
+	}
+#else
 	if ((block_size != 512) &&
 	    (block_size != 1024) &&
 	    (block_size != 2048) &&
@@ -1320,6 +1474,7 @@ int se_dev_set_block_size(struct se_device *dev, u32 block_size)
 			dev, block_size);
 		return -EINVAL;
 	}
+#endif
 
 	if (dev->transport->transport_type == TRANSPORT_PLUGIN_PHBA_PDEV) {
 		pr_err("dev[%p]: Not allowed to change block_size for"
@@ -1328,9 +1483,72 @@ int se_dev_set_block_size(struct se_device *dev, u32 block_size)
 		return -EINVAL;
 	}
 
+#if defined(CONFIG_MACH_QNAPTS) && defined(SUPPORT_LOGICAL_BLOCK_4KB_FROM_NAS_GUI)
+
+    /* adamhsu 2013/06/07
+     *
+     * To overwrite the passing value if qlbs had been set already. This is to
+     * avoid someone update the value from block_size / hw_block_size directly
+     */
+    if ((dev->se_sub_dev->su_dev_flags & SDF_USING_QLBS) && dev->se_sub_dev->se_dev_qlbs){
+    	pr_err("dev[%p]:SE Device - qlbs was setup already. "
+            "Force block_size changed to qlbs\n", dev);
+        block_size = dev->se_sub_dev->se_dev_qlbs;
+    }
+#endif
+
 	dev->se_sub_dev->se_dev_attrib.block_size = block_size;
 	pr_debug("dev[%p]: SE Device block_size changed to %u\n",
 			dev, block_size);
+	return 0;
+}
+
+/* for threshold notification */
+int se_dev_set_tp_threshold_enable(struct se_device *dev, int flag)
+{
+	if ((flag != 0) && (flag != 1)) {
+		pr_err("Illegal value %d\n", flag);
+		return -EINVAL;
+	}
+	/*
+	 * We expect this value to be non-zero when generic Block Layer
+	 * Discard supported is detected iblock_create_virtdevice().
+	 */
+	if (flag && !dev->se_sub_dev->se_dev_attrib.tp_threshold_percent) {
+		pr_err("TP threshold enable not supported\n");
+		return -ENOSYS;
+	}
+
+	dev->se_sub_dev->se_dev_attrib.tp_threshold_enable = flag;
+	pr_debug("dev[%p]: SE Device Thin Provisioning threshold enable: %d\n",
+				dev, flag);
+	return 0;
+}
+
+/* for threshold notification */
+int se_dev_set_tp_threshold_percent(struct se_device *dev, int flag)
+{
+	if ((flag < 0) && (flag > 100)) {
+		pr_err("Illegal value %d\n", flag);
+		return -EINVAL;
+	}
+
+	dev->se_sub_dev->se_dev_attrib.tp_threshold_percent = flag;
+	pr_debug("dev[%p]: SE Device Thin Provisioning threshold percent: %d\n",
+				dev, flag);
+	return 0;
+}
+
+int se_dev_set_lun_index(struct se_device *dev, int flag)
+{
+	if ((flag < 0) && (flag > 255)) {
+		pr_err("Illegal value %d\n", flag);
+		return -EINVAL;
+	}
+
+	dev->se_sub_dev->se_dev_attrib.lun_index = flag;
+	pr_debug("dev[%p]: SE Device Lun Index: %d\n",
+				dev, flag);
 	return 0;
 }
 
@@ -1367,6 +1585,23 @@ struct se_lun *core_dev_add_lun(
 		" CORE HBA: %u\n", tpg->se_tpg_tfo->get_fabric_name(),
 		tpg->se_tpg_tfo->tpg_get_tag(tpg), lun_p->unpacked_lun,
 		tpg->se_tpg_tfo->get_fabric_name(), hba->hba_id);
+#ifdef CONFIG_MACH_QNAPTS   // 2009/11/23 Nike Chen added for default initiator
+	// Update LUN maps to support hot added lun
+	{
+		struct se_node_acl *acl;
+		spin_lock_irq(&tpg->acl_node_lock);
+		list_for_each_entry(acl, &tpg->acl_node_list, acl_list) {
+            // Benjamin 20120719: Note that acl->dynamic_node_acl should be set 
+            // in core_tpg_check_initiator_node_acl(), and no NAF_DYNAMIC_NODE_ACL anymore.
+			if (acl->dynamic_node_acl) {
+				spin_unlock_irq(&tpg->acl_node_lock);
+				core_tpg_add_node_to_devs(acl, tpg);
+				spin_lock_irq(&tpg->acl_node_lock);
+			}
+		}
+		spin_unlock_irq(&tpg->acl_node_lock);	
+	}
+#else   /* #ifdef CONFIG_MACH_QNAPTS */     
 	/*
 	 * Update LUN maps for dynamically added initiators when
 	 * generate_node_acl is enabled.
@@ -1385,6 +1620,7 @@ struct se_lun *core_dev_add_lun(
 		}
 		spin_unlock_irq(&tpg->acl_node_lock);
 	}
+#endif  /* #ifdef CONFIG_MACH_QNAPTS */
 
 	return lun_p;
 }
@@ -1694,3 +1930,19 @@ void core_dev_release_virtual_lun0(void)
 	kfree(su_dev);
 	core_delete_hba(hba);
 }
+
+#if defined(CONFIG_MACH_QNAPTS) && defined(SUPPORT_VAAI) //Benjamin 20121105 sync VAAI support from Adam. 
+/*
+ * @fn LIO_SE_HBA *vaai_get_vritual_lun0_hba_var(void)
+ * @brief Get the pointer address of hba vaitual lun0
+ *
+ * @sa
+ * @retval 
+ */
+LIO_SE_HBA *vaai_get_vritual_lun0_hba_var(void)
+{
+    return lun0_hba;
+}
+
+#endif  /* #if defined(CONFIG_MACH_QNAPTS) && defined(SUPPORT_VAAI) */
+

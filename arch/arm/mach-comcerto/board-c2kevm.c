@@ -247,6 +247,22 @@ struct spi_controller_data spi_ctrl_data =  {
         .poll_mode = 1,
 };
 
+//Patch by QNAP: Board initialization
+#ifdef CONFIG_MACH_QNAPTS		
+static struct spi_board_info comcerto_spi_board_info[] = {
+	{
+		/* FIXME: for chipselect-0 */
+		.modalias = "en25q80",
+		.chip_select = 0,
+		.max_speed_hz = 4*1000*1000,
+		.bus_num = 0,
+		.irq = -1,
+		.mode = SPI_MODE_3,
+		.platform_data = &spi_pdata,
+        .controller_data = &spi_ctrl_data,
+	},
+};
+#else
 static struct spi_board_info comcerto_spi_board_info[] = {
 	{
 		/* FIXME: for chipselect-0 */
@@ -308,6 +324,7 @@ static struct spi_board_info comcerto_spi_board_info[] = {
 	},
 #endif
 };
+#endif
 #endif
 
 #if defined(CONFIG_SPI_MSPD_HIGH_SPEED)
@@ -603,11 +620,18 @@ static struct comcerto_pfe_platform_data comcerto_pfe_pdata = {
 		.device_flags = CONFIG_COMCERTO_GEMAC,
 		.mii_config = CONFIG_COMCERTO_USE_RGMII,
 		.gemac_mode = GEMAC_SW_CONF | GEMAC_SW_FULL_DUPLEX | GEMAC_SW_SPEED_1G,
-		.phy_flags = GEMAC_NO_PHY,
 		.gem_id = 1,
+//Patch by QNAP: Board initialization
+#ifdef CONFIG_MACH_QNAPTS		
+		.phy_flags = GEMAC_PHY_RGMII_ADD_DELAY,
+		.bus_id = 0,
+		.phy_id = 6,
+#else		
+		.phy_flags = GEMAC_NO_PHY,
+#endif		
+//////////////////////////////////
 		.mac_addr = (u8[])GEM1_MAC,
 	},
-
 	.comcerto_eth_pdata[2] = {
 		.name = GEM2_ITF_NAME,
 		.device_flags = CONFIG_COMCERTO_GEMAC,
@@ -617,7 +641,6 @@ static struct comcerto_pfe_platform_data comcerto_pfe_pdata = {
 		.gem_id = 2,
 		.mac_addr = (u8[])GEM2_MAC,
 	},
-
 	/**
 	 * There is a single mdio bus coming out of C2K.  And that's the one
 	 * connected to GEM0. All PHY's, switchs will be connected to the same
@@ -626,10 +649,19 @@ static struct comcerto_pfe_platform_data comcerto_pfe_pdata = {
 	 */
 	.comcerto_mdio_pdata[0] = {
 		.enabled = 1,
+//Patch by QNAP: Board initialization
+#ifdef CONFIG_MACH_QNAPTS		
+		.phy_mask = 0xFFFFFFAF,
+#else		
 		.phy_mask = 0xFFFFFFEF,
+#endif		
 		.mdc_div = 96,
 		.irq = {
 			[4] = PHY_POLL,
+//Patch by QNAP: Board initialization
+#ifdef CONFIG_MACH_QNAPTS		
+			[6] = PHY_POLL,
+#endif			
 		},
 	},
 };

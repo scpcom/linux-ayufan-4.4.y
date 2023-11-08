@@ -249,6 +249,54 @@ msi_bus_show(struct device *dev, struct device_attribute *attr, char *buf)
 	return sprintf (buf, "%u\n",
 			!(pdev->subordinate->bus_flags & PCI_BUS_FLAGS_NO_MSI));
 }
+//Patch by QNAP:support AHCI sata signal measurement
+#ifdef CONFIG_MACH_QNAPTS
+static ssize_t
+reg_store(struct device *dev, struct device_attribute *attr,
+	      const char *buf, size_t count)
+{
+	struct pci_dev *pdev = to_pci_dev(dev);
+	int i;
+    if (!strncmp (buf, "sata_phy_test", strlen ("sata_phy_test"))){
+		unsigned long ABAR_phy = 0;
+        void __iomem *mmio=NULL;
+        u32  regOff=0;
+        u32  regVal=0;
+        pci_read_config_dword(pdev,0x24, &ABAR_phy);
+		mmio = ioremap(ABAR_phy,0x400);
+        i=sscanf (buf + strlen ("sata_phy_test"), " 0x%x,0x%x\n", &regOff,&regVal);
+        if(i == 1){
+            //Read operation
+            if(regOff < 0x100){
+                //read PCI configuration
+            	pci_read_config_dword(pdev, regOff, &regVal);
+                printk("PCI CONFIGURATION->>OFFSET:VALUE==>0x%x:0x%x\n",regOff,regVal);
+
+            }
+            else{
+                //read AHCI offset register
+                regVal = readl(mmio + (regOff - 0x100));
+                printk("AHCI REGISTER ->>OFFSET:VALUE==>0x%x:0x%x\n",(regOff - 0x100),regVal);
+            }
+        }
+        else{
+            //Write operation
+            if(regOff < 0x100){
+                //Write PCI configuration
+            	pci_write_config_dword(pdev, regOff, regVal);
+            }
+            else{
+                //read AHCI offset register
+                writel(regVal,mmio + (regOff - 0x100));
+            }
+        }
+		iounmap(mmio);
+    }
+	return count;
+}
+#endif
+/////////////////////////////////////////////////////////////////
+
 
 static ssize_t
 msi_bus_store(struct device *dev, struct device_attribute *attr,
@@ -394,6 +442,11 @@ struct device_attribute pci_dev_attrs[] = {
 	__ATTR(broken_parity_status,(S_IRUGO|S_IWUSR),
 		broken_parity_status_show,broken_parity_status_store),
 	__ATTR(msi_bus, 0644, msi_bus_show, msi_bus_store),
+//Patch by QNAP:support AHCI sata signal measurement
+#ifdef CONFIG_MACH_QNAPTS
+	__ATTR(reg_access, 0644, NULL, reg_store),
+#endif	
+/////////////////////////////
 #ifdef CONFIG_HOTPLUG
 	__ATTR(remove, (S_IWUSR|S_IWGRP), NULL, remove_store),
 	__ATTR(rescan, (S_IWUSR|S_IWGRP), NULL, dev_rescan_store),

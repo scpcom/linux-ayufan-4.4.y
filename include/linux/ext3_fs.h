@@ -344,6 +344,11 @@ struct ext3_inode {
 #define i_uid_high	osd2.linux2.l_i_uid_high
 #define i_gid_high	osd2.linux2.l_i_gid_high
 #define i_reserved2	osd2.linux2.l_i_reserved2
+//Patch by QNAP: fix ext3 birthtime issue
+#ifdef CONFIG_FS_QNAP_BIRTHTIME
+#define ext3_birthtime i_reserved1
+#endif
+//////////////////////////////////////////////
 
 #elif defined(__GNU__)
 

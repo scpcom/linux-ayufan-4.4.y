@@ -84,6 +84,14 @@
 
 #define JEDEC_MFR(_jedec_id)	((_jedec_id) >> 16)
 
+//Patch by QNAP: Board initialization
+#ifdef CONFIG_MACH_QNAPTS		
+static int ignore_ro;
+extern int mtdpart_ignore_ro;
+module_param_named(ignore_ro, ignore_ro, int, 0444);
+MODULE_PARM_DESC(ignore_ro, "Ignore read only mode");
+
+#endif
 /****************************************************************************/
 
 struct m25p {
@@ -931,7 +939,10 @@ static const struct spi_device_id m25p_ids[] = {
 	{ "m25p32",  INFO(0x202016,  0,  64 * 1024,  64, 0) },
 	{ "m25p64",  INFO(0x202017,  0,  64 * 1024, 128, 0) },
 	{ "m25p128", INFO(0x202018,  0, 256 * 1024,  64, 0) },
-
+#ifdef CONFIG_MACH_QNAPTS
+	{ "MC N25Q128", INFO(0x20ba18,  0, 64 * 1024,  256, 0) },
+	{ "en25q80", INFO(0x1c3014,  0, 64 * 1024,  16, 0) },        
+#endif
 	{ "m25p05-nonjedec",  INFO(0, 0,  32 * 1024,   2, 0) },
 	{ "m25p10-nonjedec",  INFO(0, 0,  32 * 1024,   4, 0) },
 	{ "m25p20-nonjedec",  INFO(0, 0,  64 * 1024,   4, 0) },
@@ -1049,19 +1060,54 @@ static int __devinit m25p_probe(struct spi_device *spi)
 				continue;
 			break;
 		}
-
 		if (i < ARRAY_SIZE(m25p_ids) - 1)
 			id = plat_id;
+//Patch by QNAP: Board initialization
+#ifndef CONFIG_MACH_QNAPTS		
 		else
 			dev_warn(&spi->dev, "unrecognized id %s\n", data->type);
+#endif
 	}
 
 	info = (void *)id->driver_data;
 
 	if (info->jedec_id) {
 		const struct spi_device_id *jid;
-
+//Patch by QNAP: Fix jid sometimes fail
+#ifdef CONFIG_MACH_QNAPTS
+        int retry = 0,match=0;
+        u32 jedec_id = 0xffffffff;
+        do {
+            jid = jedec_probe(spi);
+            if (IS_ERR(jid))
+            {
+                retry++;
+                msleep(10);
+            }
+            else
+            {
+                info = (void *)jid->driver_data;
+                if (info->jedec_id != jedec_id)
+                {
+                    jedec_id = info->jedec_id;
+                    retry++;
+                    msleep(10);
+                }
+                else
+                {
+                    match = 1;
+                }
+            }
+        } while (retry < 20 && match == 0);
+        if (match == 0)
+        {
+			dev_warn(&spi->dev, "Use jedec_probe fail, use %s\n",
+				  id->name);
+            jid = id;
+        }
+#else
 		jid = jedec_probe(spi);
+#endif
 		if (IS_ERR(jid)) {
 			return PTR_ERR(jid);
 		} else if (jid != id) {
@@ -1170,6 +1216,11 @@ static int __devinit m25p_probe(struct spi_device *spi)
 				flash->mtd.eraseregions[i].erasesize / 1024,
 				flash->mtd.eraseregions[i].numblocks);
 
+//Patch by QNAP: Board initialization
+#ifdef CONFIG_MACH_QNAPTS		
+    if(ignore_ro)
+        mtdpart_ignore_ro = 1;
+#endif
 
 	/* partitions should match sector boundaries; and it may be good to
 	 * use readonly partitions for writeprotected sectors (BP2..BP0).

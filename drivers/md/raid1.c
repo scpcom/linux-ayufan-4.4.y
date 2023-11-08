@@ -41,6 +41,12 @@
 #include "raid1.h"
 #include "bitmap.h"
 
+//Patch by QNAP: Robust RAID - ReadOnly function
+#ifdef CONFIG_MACH_QNAPTS
+#include <linux/fs.h>
+#define QNAP_RAID1_SPEED_LIMIT_MIN 40000 //40MBPS
+#endif
+
 /*
  * Number of guaranteed r1bios in case of extreme VM load:
  */
@@ -295,6 +301,11 @@ static void raid1_end_read_request(struct bio *bio, int error)
 	struct r1bio *r1_bio = bio->bi_private;
 	int mirror;
 	struct r1conf *conf = r1_bio->mddev->private;
+    
+//Patch by QNAP: enhance HAL error handler
+#if defined(CONFIG_MACH_QNAPTS) && defined(QNAP_HAL)
+    NETLINK_EVT hal_event;
+#endif
 
 	mirror = r1_bio->read_disk;
 	/*
@@ -314,7 +325,31 @@ static void raid1_end_read_request(struct bio *bio, int error)
 		if (r1_bio->mddev->degraded == conf->raid_disks ||
 		    (r1_bio->mddev->degraded == conf->raid_disks-1 &&
 		     !test_bit(Faulty, &conf->mirrors[mirror].rdev->flags)))
+		{
 			uptodate = 1;
+//Patch by QNAP: enhance HAL error handler
+#if defined(CONFIG_MACH_QNAPTS) && defined(QNAP_HAL)
+            //initial netlink
+            memset(&hal_event, 0, sizeof(NETLINK_EVT));
+            hal_event.type = HAL_EVENT_RAID;
+
+           	if(!test_bit(QMD_ERR_SENT, &conf->mirrors[mirror].rdev->qflags))
+            {
+                char b[BDEVNAME_SIZE];
+                set_bit(QMD_ERR_SENT, &conf->mirrors[mirror].rdev->qflags);
+                printk(KERN_ALERT "raid1: %s: unrecoverable I/O read error"
+                   " for block %llu\n",
+                   bdevname(conf->mirrors[mirror].rdev->bdev,b),
+                   (unsigned long long)r1_bio->sector);
+                hal_event.arg.action = SET_RAID_RO;
+                hal_event.arg.param.netlink_raid.raid_id = simple_strtol( mdname(r1_bio->mddev) + strlen("md"), NULL, 0);    
+                snprintf(hal_event.arg.param.netlink_raid.pd_scsi_name, 
+                        sizeof(hal_event.arg.param.netlink_raid.pd_scsi_name), "/dev/%s", bdevname(conf->mirrors[mirror].rdev->bdev,b));
+                send_hal_netlink(&hal_event);
+            }
+#endif        
+////////////////////////                                
+		}
 		spin_unlock_irqrestore(&conf->device_lock, flags);
 	}
 
@@ -1217,6 +1252,12 @@ static void error(struct mddev *mddev, struct md_rdev *rdev)
 	char b[BDEVNAME_SIZE];
 	struct r1conf *conf = mddev->private;
 
+//Patch by QNAP: Robust RAID - ReadOnly function
+#if defined(CONFIG_MACH_QNAPTS) && defined(QNAP_HAL)
+    NETLINK_EVT hal_event;
+#endif
+////////////////////////////////////////////////////////
+
 	/*
 	 * If it is not operational, then we have already marked it as dead
 	 * else if it is the last working disks, ignore the error, let the
@@ -1231,8 +1272,29 @@ static void error(struct mddev *mddev, struct md_rdev *rdev)
 		 * However don't try a recovery from this drive as
 		 * it is very likely to fail.
 		 */
+//Patch by QNAP: Robust RAID - ReadOnly function
+//Patch by QNAP: enhance HAL error handler
+#if defined(CONFIG_MACH_QNAPTS) && defined(QNAP_HAL)
+        //initial netlink event
+        memset(&hal_event, 0, sizeof(NETLINK_EVT));
+        hal_event.type = HAL_EVENT_RAID;
+        mddev->recovery_disabled = 1;
+        if(!test_bit(QMD_ERR_SENT, &rdev->qflags))
+        {
+            set_bit(QMD_ERR_SENT, &rdev->qflags);
+
+            hal_event.arg.action = SET_RAID_RO;
+            hal_event.arg.param.netlink_raid.raid_id = simple_strtol(mdname(mddev) + strlen("md"), NULL, 0);    
+            snprintf(hal_event.arg.param.netlink_raid.pd_scsi_name, 
+                    sizeof(hal_event.arg.param.netlink_raid.pd_scsi_name), "/dev/%s", bdevname(rdev->bdev,b));
+            send_hal_netlink(&hal_event);
+        }
+        return;
+#else		 
 		conf->recovery_disabled = mddev->recovery_disabled;
 		return;
+#endif
+////////////////////////////////////////////////////////
 	}
 	set_bit(Blocked, &rdev->flags);
 	if (test_and_clear_bit(In_sync, &rdev->flags)) {
@@ -1253,6 +1315,16 @@ static void error(struct mddev *mddev, struct md_rdev *rdev)
 	       "md/raid1:%s: Operation continuing on %d devices.\n",
 	       mdname(mddev), bdevname(rdev->bdev, b),
 	       mdname(mddev), conf->raid_disks - mddev->degraded);
+//Patch by QNAP: enhance HAL error handler
+#if defined(CONFIG_MACH_QNAPTS) && defined(QNAP_HAL)
+    memset(&hal_event, 0, sizeof(NETLINK_EVT));
+    hal_event.type = HAL_EVENT_RAID;
+    hal_event.arg.action = SET_RAID_PD_ERROR;
+    hal_event.arg.param.netlink_raid.raid_id = simple_strtol(mdname(mddev) + strlen("md"), NULL, 0);    
+    snprintf(hal_event.arg.param.netlink_raid.pd_scsi_name, 
+            sizeof(hal_event.arg.param.netlink_raid.pd_scsi_name), "/dev/%s", bdevname(rdev->bdev,b));
+    send_hal_netlink(&hal_event);
+#endif        
 }
 
 static void print_conf(struct r1conf *conf)
@@ -1295,7 +1367,7 @@ static int raid1_spare_active(struct mddev *mddev)
 	struct r1conf *conf = mddev->private;
 	int count = 0;
 	unsigned long flags;
-
+    
 	/*
 	 * Find all failed disks within the RAID1 configuration 
 	 * and mark them readable.
@@ -1508,7 +1580,10 @@ static int fix_sync_read_error(struct r1bio *r1_bio)
 	sector_t sect = r1_bio->sector;
 	int sectors = r1_bio->sectors;
 	int idx = 0;
-
+//Patch by QNAP: enhance HAL error handler
+#if defined(CONFIG_MACH_QNAPTS) && defined(QNAP_HAL)
+    NETLINK_EVT hal_event;
+#endif
 	while(sectors) {
 		int s = sectors;
 		int d = r1_bio->read_disk;
@@ -1561,6 +1636,22 @@ static int fix_sync_read_error(struct r1bio *r1_bio)
 				conf->recovery_disabled =
 					mddev->recovery_disabled;
 				set_bit(MD_RECOVERY_INTR, &mddev->recovery);
+//Patch by QNAP: Robust RAID - ReadOnly function
+//Patch by QNAP: enhance HAL error handler
+#if defined(CONFIG_MACH_QNAPTS) && defined(QNAP_HAL)
+               	if(!test_bit(QMD_ERR_SENT, &conf->mirrors[r1_bio->read_disk].rdev->qflags))
+                {
+               	    set_bit(QMD_ERR_SENT, &conf->mirrors[r1_bio->read_disk].rdev->qflags);
+                    memset(&hal_event, 0, sizeof(NETLINK_EVT));
+                    hal_event.type = HAL_EVENT_RAID;
+                    hal_event.arg.action = SET_RAID_RO;
+                    hal_event.arg.param.netlink_raid.raid_id = simple_strtol(mdname(mddev) + strlen("md"), NULL, 0);    
+                    snprintf(hal_event.arg.param.netlink_raid.pd_scsi_name, 
+                            sizeof(hal_event.arg.param.netlink_raid.pd_scsi_name), "/dev/%s", bdevname(bio->bi_bdev,b));
+                    send_hal_netlink(&hal_event);
+                }
+#endif
+////////////////////////////////////////////////////				                       
 				md_done_sync(mddev, r1_bio->sectors, 0);
 				put_buf(r1_bio);
 				return 0;
@@ -1599,7 +1690,30 @@ static int fix_sync_read_error(struct r1bio *r1_bio)
 			if (r1_sync_page_io(rdev, sect, s,
 					    bio->bi_io_vec[idx].bv_page,
 					    READ) != 0)
+			{
 				atomic_add(s, &rdev->corrected_errors);
+//Patch by QNAP: enhance error handler
+#if defined(CONFIG_MACH_QNAPTS) && defined(QNAP_HAL)
+                {
+                    char b[BDEVNAME_SIZE];
+                    printk(KERN_INFO
+                        "raid1:%s: read error corrected "
+                        "(%d sectors at %llu on %s)\n",
+                        mdname(mddev), s,
+                        (unsigned long long)(sect +
+                        rdev->data_offset),
+                        bdevname(rdev->bdev, b));
+                    memset(&hal_event, 0, sizeof(NETLINK_EVT));
+                    hal_event.type = HAL_EVENT_RAID;
+                    hal_event.arg.action = REPAIR_RAID_READ_ERROR;
+                    hal_event.arg.param.netlink_raid.raid_id = simple_strtol(mdname(mddev) + strlen("md"), NULL, 0);    
+                    snprintf(hal_event.arg.param.netlink_raid.pd_scsi_name,
+                            sizeof(hal_event.arg.param.netlink_raid.pd_scsi_name), "/dev/%s", bdevname(rdev->bdev, b));
+                    hal_event.arg.param.netlink_raid.pd_repair_sector = (unsigned long long)(sect + rdev->data_offset);
+                    send_hal_netlink(&hal_event);
+                }
+#endif                
+			}
 		}
 		sectors -= s;
 		sect += s;
@@ -1754,6 +1868,10 @@ static void fix_read_error(struct r1conf *conf, int read_disk,
 			   sector_t sect, int sectors)
 {
 	struct mddev *mddev = conf->mddev;
+//Patch by QNAP: enhance error handler
+#if defined(CONFIG_MACH_QNAPTS) && defined(QNAP_HAL)
+    NETLINK_EVT hal_event;
+#endif
 	while(sectors) {
 		int s = sectors;
 		int d = read_disk;
@@ -1826,6 +1944,17 @@ static void fix_read_error(struct r1conf *conf, int read_disk,
 					       (unsigned long long)(sect +
 					           rdev->data_offset),
 					       bdevname(rdev->bdev, b));
+//Patch by QNAP: enhance error handler
+#if defined(CONFIG_MACH_QNAPTS) && defined(QNAP_HAL)
+                    memset(&hal_event, 0, sizeof(NETLINK_EVT));
+                    hal_event.type = HAL_EVENT_RAID;
+                    hal_event.arg.action = REPAIR_RAID_READ_ERROR;
+                    hal_event.arg.param.netlink_raid.raid_id = simple_strtol(mdname(mddev) + strlen("md"), NULL, 0);    
+                    snprintf(hal_event.arg.param.netlink_raid.pd_scsi_name,
+                            sizeof(hal_event.arg.param.netlink_raid.pd_scsi_name), "/dev/%s", bdevname(rdev->bdev, b));
+                    hal_event.arg.param.netlink_raid.pd_repair_sector = (unsigned long long)(sect + rdev->data_offset);
+                    send_hal_netlink(&hal_event);
+#endif                                
 				}
 			}
 		}
@@ -2536,7 +2665,10 @@ static int run(struct mddev *mddev)
 	struct r1conf *conf;
 	int i;
 	struct md_rdev *rdev;
-
+//Patch by QNAP:Fix bug 49330    
+#if defined(CONFIG_MACH_QNAPTS)
+    unsigned int max_hw_sectors = 1024; //512K Bytes
+#endif    
 	if (mddev->level != 1) {
 		printk(KERN_ERR "md/raid1:%s: raid level not set to mirroring (%d)\n",
 		       mdname(mddev), mddev->level);
@@ -2574,6 +2706,10 @@ static int run(struct mddev *mddev)
 			blk_queue_segment_boundary(mddev->queue,
 						   PAGE_CACHE_SIZE - 1);
 		}
+#if defined(CONFIG_MACH_QNAPTS)
+        if (queue_max_hw_sectors(rdev->bdev->bd_disk->queue) < max_hw_sectors)
+            max_hw_sectors = queue_max_hw_sectors(rdev->bdev->bd_disk->queue);
+#endif
 	}
 
 	mddev->degraded = 0;
@@ -2608,6 +2744,12 @@ static int run(struct mddev *mddev)
 		mddev->queue->backing_dev_info.congested_fn = raid1_congested;
 		mddev->queue->backing_dev_info.congested_data = mddev;
 	}
+
+#if defined(CONFIG_MACH_QNAPTS)
+	/*  assign max hw sector for performance because linux-3.2 has such issue */
+	blk_queue_max_hw_sectors(mddev->queue, max_hw_sectors); 
+#endif
+
 	return md_integrity_register(mddev);
 }
 

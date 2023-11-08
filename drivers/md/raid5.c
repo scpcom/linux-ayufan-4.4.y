@@ -57,12 +57,22 @@
 #include "raid5.h"
 #include "raid0.h"
 #include "bitmap.h"
+//Patch by QNAP: Robust RAID - ReadOnly function
+#ifdef CONFIG_MACH_QNAPTS
+#include <linux/fs.h>
+#endif
 
 /*
  * Stripe cache
  */
-
+//Patch by QNAP:fix raid5 performance
+#ifdef CONFIG_MACH_QNAPTS
+#define NR_STRIPES      1024
+#else
 #define NR_STRIPES		256
+#endif
+/////////////////////////////////
+
 #define STRIPE_SIZE		PAGE_SIZE
 #define STRIPE_SHIFT		(PAGE_SHIFT - 9)
 #define STRIPE_SECTORS		(STRIPE_SIZE>>9)
@@ -1735,6 +1745,10 @@ static void raid5_end_read_request(struct bio * bi, int error)
 	int uptodate = test_bit(BIO_UPTODATE, &bi->bi_flags);
 	char b[BDEVNAME_SIZE];
 	struct md_rdev *rdev;
+//Patch by QNAP: Robust RAID - ReadOnly function
+#if defined(CONFIG_MACH_QNAPTS) && defined(QNAP_HAL)
+    NETLINK_EVT hal_event;
+#endif
 
 
 	for (i=0 ; i<disks; i++)
@@ -1764,6 +1778,17 @@ static void raid5_end_read_request(struct bio * bi, int error)
 			atomic_add(STRIPE_SECTORS, &rdev->corrected_errors);
 			clear_bit(R5_ReadError, &sh->dev[i].flags);
 			clear_bit(R5_ReWrite, &sh->dev[i].flags);
+//Patch by QNAP: enhance error handler
+#if defined(CONFIG_MACH_QNAPTS) && defined(QNAP_HAL)
+            memset(&hal_event, 0, sizeof(NETLINK_EVT));
+            hal_event.type = HAL_EVENT_RAID;
+            hal_event.arg.action = REPAIR_RAID_READ_ERROR;
+            hal_event.arg.param.netlink_raid.raid_id = simple_strtol(mdname(conf->mddev) + strlen("md"), NULL, 0);    
+            hal_event.arg.param.netlink_raid.pd_repair_sector = (unsigned long long)(sh->sector + rdev->data_offset);    
+            snprintf(hal_event.arg.param.netlink_raid.pd_scsi_name, 
+                    sizeof(hal_event.arg.param.netlink_raid.pd_scsi_name), "/dev/%s", bdevname(rdev->bdev, b));
+            send_hal_netlink(&hal_event);
+#endif                        
 		}
 		if (atomic_read(&conf->disks[i].rdev->read_errors))
 			atomic_set(&conf->disks[i].rdev->read_errors, 0);
@@ -1803,6 +1828,13 @@ static void raid5_end_read_request(struct bio * bi, int error)
 		if (retry)
 			set_bit(R5_ReadError, &sh->dev[i].flags);
 		else {
+//Patch by QNAP: enhance HAL error handler
+#if defined(CONFIG_MACH_QNAPTS) && defined(QNAP_HAL)
+            if(test_bit(MD_QNAP_FROZEN, &conf->mddev->recovery))
+			    set_bit(R5_ReadError, &sh->dev[i].flags);
+            else 
+#endif            
+/////////////////////                        
 			clear_bit(R5_ReadError, &sh->dev[i].flags);
 			clear_bit(R5_ReWrite, &sh->dev[i].flags);
 			md_error(conf->mddev, rdev);
@@ -1881,6 +1913,52 @@ static void error(struct mddev *mddev, struct md_rdev *rdev)
 {
 	char b[BDEVNAME_SIZE];
 	struct r5conf *conf = mddev->private;
+//Patch by QNAP: Robust RAID - ReadOnly function
+#if defined(CONFIG_MACH_QNAPTS) && defined(QNAP_HAL)
+    NETLINK_EVT hal_event;
+/*
+ * Don't fail the raid device, if it had been in degraded mode.
+ * Added by KenChen@QNAP
+ */
+    if (!test_bit(Faulty, &rdev->flags) && test_bit(In_sync, &rdev->flags)){
+    	if ( (mddev->degraded == 1 && conf->level == 5 ) || (mddev->degraded == 2 && conf->level == 6 ) )
+    	{
+    		char device_name[20];
+    		struct file *pFile;
+    		
+    		printk("raid%d: some error occurred in a active device:%d of %s.\n", conf->level, rdev->raid_disk, mdname(mddev));
+    		sprintf(device_name,"/dev/%s", bdevname(rdev->bdev,b));
+            mddev->recovery_disabled = 1;
+            if (test_bit(MD_RECOVERY_SYNC, &mddev->recovery)){ 
+                printk("raid%d: Resync failed.\n", conf->level ); //This case(sync) should not happen.
+                goto error_normal;
+       	    }
+            else if (mddev->ro)
+                printk("raid%d: read-only.\n", conf->level);
+           	else if (!test_bit(QMD_ERR_SENT, &rdev->qflags)){
+       			int ts_caseno;
+    			printk("raid%d: Keep the raid device active in degraded mode but set readonly.\n", conf->level);   			
+       			set_bit(MD_RECOVERY_FROZEN, &mddev->recovery);
+       			set_bit(MD_QNAP_FROZEN, &mddev->recovery);
+       			set_bit(QMD_ERR_SENT, &rdev->qflags);
+//       			mddev->ro = 1;
+        		sprintf(device_name,"%s", bdevname(rdev->bdev,b));
+        		ts_caseno = device_name[2]-'a';
+                memset(&hal_event, 0, sizeof(NETLINK_EVT));
+                hal_event.type = HAL_EVENT_RAID;
+                hal_event.arg.action = SET_RAID_RO;
+                hal_event.arg.param.netlink_raid.raid_id = simple_strtol(mdname(mddev) + strlen("md"), NULL, 0);    
+                snprintf(hal_event.arg.param.netlink_raid.pd_scsi_name,
+                        sizeof(hal_event.arg.param.netlink_raid.pd_scsi_name), "/dev/%s", bdevname(rdev->bdev, b));
+                send_hal_netlink(&hal_event);
+    		}
+    		return;
+
+    	}
+    }
+error_normal:
+#endif
+////////////////////////////////////////////////////////////////////
 	pr_debug("raid456: error called\n");
 
 	if (test_and_clear_bit(In_sync, &rdev->flags)) {
@@ -1903,6 +1981,16 @@ static void error(struct mddev *mddev, struct md_rdev *rdev)
 	       bdevname(rdev->bdev, b),
 	       mdname(mddev),
 	       conf->raid_disks - mddev->degraded);
+//Patch by QNAP: enhance HAL error handler
+#if defined(CONFIG_MACH_QNAPTS) && defined(QNAP_HAL)
+    memset(&hal_event, 0, sizeof(NETLINK_EVT));
+    hal_event.type = HAL_EVENT_RAID;
+    hal_event.arg.action = SET_RAID_PD_ERROR;
+    hal_event.arg.param.netlink_raid.raid_id = simple_strtol(mdname(mddev) + strlen("md"), NULL, 0);    
+    snprintf(hal_event.arg.param.netlink_raid.pd_scsi_name, 
+            sizeof(hal_event.arg.param.netlink_raid.pd_scsi_name), "/dev/%s", bdevname(rdev->bdev, b));
+    send_hal_netlink(&hal_event);
+#endif        
 }
 
 /*
@@ -3331,6 +3419,15 @@ static void handle_stripe(struct stripe_head *sh)
 	/* check if the array has lost more than max_degraded devices and,
 	 * if so, some requests might need to be failed.
 	 */
+//Patch by QNAP: enhance HAL error handler
+#if defined(CONFIG_MACH_QNAPTS) && defined(QNAP_HAL)
+    if(test_bit(MD_QNAP_FROZEN, &conf->mddev->recovery) && s.syncing)
+    {
+		md_done_sync(conf->mddev, STRIPE_SECTORS,0);
+		clear_bit(STRIPE_SYNCING, &sh->state);
+		s.syncing = 0;
+    }
+#endif    	 
 	if (s.failed > conf->max_degraded) {
 		sh->check_state = 0;
 		sh->reconstruct_state = 0;
@@ -4979,9 +5076,13 @@ static int run(struct mddev *mddev)
 	if (IS_ERR(conf))
 		return PTR_ERR(conf);
 
+	
 	mddev->thread = conf->thread;
 	conf->thread = NULL;
 	mddev->private = conf;
+
+	/* assign max sector size. */
+	blk_queue_max_hw_sectors(mddev->queue, mddev->chunk_sectors);
 
 	/*
 	 * 0 for a fully functional array, 1 or 2 for a degraded array.
@@ -5826,6 +5927,9 @@ static struct md_personality raid6_personality =
 {
 	.name		= "raid6",
 	.level		= 6,
+#ifdef CONFIG_MACH_QNAPTS
+	.qflags		= 1UL << ((QMD_RAID456_FEATURE_ALL) & (~QMD_RAID456_FEATURE_ZONE)),
+#endif
 	.owner		= THIS_MODULE,
 	.make_request	= make_request,
 	.run		= run,
@@ -5848,6 +5952,9 @@ static struct md_personality raid5_personality =
 {
 	.name		= "raid5",
 	.level		= 5,
+#ifdef CONFIG_MACH_QNAPTS
+	.qflags		= 1UL << ((QMD_RAID456_FEATURE_ALL) & (~QMD_RAID456_FEATURE_ZONE)),
+#endif	
 	.owner		= THIS_MODULE,
 	.make_request	= make_request,
 	.run		= run,
@@ -5871,6 +5978,9 @@ static struct md_personality raid4_personality =
 {
 	.name		= "raid4",
 	.level		= 4,
+#ifdef CONFIG_MACH_QNAPTS
+	.qflags		= 1UL << ((QMD_RAID456_FEATURE_ALL) & (~QMD_RAID456_FEATURE_ZONE)),
+#endif
 	.owner		= THIS_MODULE,
 	.make_request	= make_request,
 	.run		= run,

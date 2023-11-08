@@ -558,6 +558,10 @@ static int uas_slave_configure(struct scsi_device *sdev)
 static struct scsi_host_template uas_host_template = {
 	.module = THIS_MODULE,
 	.name = "uas",
+//Patch by QNAP: define proc_name
+#if defined(CONFIG_MACH_QNAPTS)
+    .proc_name = "uas",
+#endif	
 	.queuecommand = uas_queuecommand,
 	.slave_alloc = uas_slave_alloc,
 	.slave_configure = uas_slave_configure,

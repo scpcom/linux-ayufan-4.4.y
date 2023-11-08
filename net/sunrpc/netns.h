@@ -9,6 +9,10 @@ struct cache_detail;
 struct sunrpc_net {
 	struct proc_dir_entry *proc_net_rpc;
 	struct cache_detail *ip_map_cache;
+#ifdef CONFIG_MACH_QNAPTS
+	struct proc_dir_entry *proc_net_rpc_tcp_payload;
+	struct proc_dir_entry *proc_net_rpc_udp_payload;
+#endif
 };
 
 extern int sunrpc_net_id;

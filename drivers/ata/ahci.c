@@ -70,6 +70,10 @@ enum board_ids {
 	board_ahci_sb600,
 	board_ahci_sb700,	/* for SB700 and SB800 */
 	board_ahci_vt8251,
+#ifdef CONFIG_MACH_QNAPTS
+	board_asmedia,
+    board_mv9215,
+#endif
 
 	/* aliases */
 	board_ahci_mcp_linux	= board_ahci_mcp65,
@@ -198,6 +202,24 @@ static const struct ata_port_info ahci_port_info[] = {
 		.udma_mask	= ATA_UDMA6,
 		.port_ops	= &ahci_vt8251_ops,
 	},
+#ifdef CONFIG_MACH_QNAPTS
+	[board_asmedia] =
+	{
+		AHCI_HFLAGS	(AHCI_HFLAG_32BIT_ONLY),
+		.flags		= AHCI_FLAG_COMMON,
+		.pio_mask	= ATA_PIO4,
+		.udma_mask	= ATA_UDMA6,
+		.port_ops	= &ahci_ops,
+	},
+	[board_mv9215] =
+	{
+		AHCI_HFLAGS	(AHCI_HFLAG_32BIT_ONLY),
+		.flags		= AHCI_FLAG_COMMON,
+		.pio_mask	= ATA_PIO4,
+		.udma_mask	= ATA_UDMA6,
+		.port_ops	= &ahci_ops,
+	},
+#endif
 };
 
 static const struct pci_device_id ahci_pci_tbl[] = {
@@ -262,6 +284,12 @@ static const struct pci_device_id ahci_pci_tbl[] = {
 	{ PCI_VDEVICE(INTEL, 0x1e0e), board_ahci }, /* Panther Point RAID */
 
 	/* JMicron 360/1/3/5/6, match class to avoid IDE function */
+//Patch by QNAP:support JM362B & JM362C
+#ifdef CONFIG_MACH_QNAPTS
+    { PCI_VDEVICE(JMICRON, 0x236f), board_ahci_ign_iferr },
+    { PCI_VDEVICE(JMICRON, 0x2362), board_ahci_ign_iferr },
+#endif            
+////////////////////////////////////
 	{ PCI_VENDOR_ID_JMICRON, PCI_ANY_ID, PCI_ANY_ID, PCI_ANY_ID,
 	  PCI_CLASS_STORAGE_SATA_AHCI, 0xffffff, board_ahci_ign_iferr },
 
@@ -393,8 +421,14 @@ static const struct pci_device_id ahci_pci_tbl[] = {
 	{ PCI_VDEVICE(PROMISE, 0x3f20), board_ahci },	/* PDC42819 */
 
 	/* Asmedia */
+#ifdef CONFIG_MACH_QNAPTS
+	/* Asmedia */
+	{ PCI_VDEVICE(ASMEDIA, 0x0612), board_asmedia },	/* ASM1061 */
+    /* Marvell */
+	{ PCI_DEVICE(0x1b4b, 0x9215), .driver_data = board_mv9215 },	/* 88se9215 */
+#else
 	{ PCI_VDEVICE(ASMEDIA, 0x0612), board_ahci },	/* ASM1061 */
-
+#endif
 	/* Generic, PCI class code for AHCI */
 	{ PCI_ANY_ID, PCI_ANY_ID, PCI_ANY_ID, PCI_ANY_ID,
 	  PCI_CLASS_STORAGE_SATA_AHCI, 0xffffff, board_ahci },
@@ -1162,6 +1196,15 @@ static int ahci_init_one(struct pci_dev *pdev, const struct pci_device_id *ent)
 	if (!host)
 		return -ENOMEM;
 	host->private_data = hpriv;
+    
+//Patch by QNAP:Marvell 9235 workaround
+#ifdef CONFIG_MACH_QNAPTS
+	if (pdev->vendor == 0x1b4b && pdev->device == 0x9235) {
+		hpriv->flags |= AHCI_HFLAG_YES_MV9235_FIX;
+		dev_info(&pdev->dev, "enable MV_9235_WORKAROUND\n");
+	}
+#endif    
+////////////////////////////////////
 
 	if (!(hpriv->cap & HOST_CAP_SSS) || ahci_ignore_sss)
 		host->flags |= ATA_HOST_PARALLEL_SCAN;

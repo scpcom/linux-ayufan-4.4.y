@@ -2164,6 +2164,12 @@ irqreturn_t usb_hcd_irq (int irq, void *__hcd)
 EXPORT_SYMBOL_GPL(usb_hcd_irq);
 
 /*-------------------------------------------------------------------------*/
+//Patch by QNAP: reload usb driver when controller is died
+#if defined(CONFIG_MACH_QNAPTS) && defined(QNAP_HAL)
+#include <qnap/hal_event.h>
+extern int send_hal_netlink(NETLINK_EVT *event);
+#endif
+//////////////
 
 /**
  * usb_hc_died - report abnormal shutdown of a host controller (bus glue)
@@ -2180,7 +2186,32 @@ void usb_hc_died (struct usb_hcd *hcd)
 	unsigned long flags;
 
 	dev_err (hcd->self.controller, "HC died; cleaning up\n");
-
+//Patch by QNAP: reload usb driver when controller is died
+#if defined(CONFIG_MACH_QNAPTS) && defined(QNAP_HAL)
+    if (hcd->driver && hcd->driver->description)
+    {
+        NETLINK_EVT hal_event;
+        struct __netlink_usb_drv *usb_drv;
+        USB_DRV_TYPE drv_type = USB_DRV_UNKNOWN_HCD;
+        dev_err(hcd->self.controller,"hcd->irq_descr = %s\n",hcd->driver->description);
+        if(!strncmp(hcd->driver->description,"uhci_hcd",strlen("uhci_hcd")))
+            drv_type = USB_DRV_UHCI_HCD;
+        else if(!strncmp(hcd->driver->description,"ehci_hcd",strlen("ehci_hcd")))
+            drv_type = USB_DRV_EHCI_HCD;
+        else if(!strncmp(hcd->driver->description,"xhci_hcd",strlen("xhci_hcd")))
+            drv_type = USB_DRV_XHCI_HCD;
+        else if(!strncmp(hcd->driver->description,"etxhci_hcd",strlen("etxhci_hcd")))
+            drv_type = USB_DRV_ETXHCI_HCD;
+        else
+            drv_type = USB_DRV_UNKNOWN_HCD;       
+        hal_event.type = HAL_EVENT_ENCLOSURE;
+        hal_event.arg.action = RELOAD_USB_DRV;
+        usb_drv = &hal_event.arg.param.netlink_usb_drv;
+        usb_drv->type = drv_type;
+        send_hal_netlink(&hal_event);
+    }            
+#endif
+////////////////////////////////////////////////////
 	spin_lock_irqsave (&hcd_root_hub_lock, flags);
 	clear_bit(HCD_FLAG_RH_RUNNING, &hcd->flags);
 	set_bit(HCD_FLAG_DEAD, &hcd->flags);

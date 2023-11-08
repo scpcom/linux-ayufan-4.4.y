@@ -587,6 +587,10 @@ ncp_fill_cache(struct file *filp, void *dirent, filldir_t filldir,
 	__u8 __name[NCP_MAXPATHLEN + 1];
 
 	qname.len = sizeof(__name);
+//Patch by QNAP:Search filename use case insensitive method
+#ifdef QNAP_SEARCH_FILENAME_CASE_INSENSITIVE
+    qname.case_folding = 0;
+#endif        
 	if (ncp_vol2io(NCP_SERVER(dir), __name, &qname.len,
 			entry->i.entryName, entry->i.nameLen,
 			!ncp_preserve_entry_case(dir, entry->i.NSCreator)))

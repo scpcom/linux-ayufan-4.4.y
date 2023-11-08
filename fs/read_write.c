@@ -20,6 +20,12 @@
 #include <asm/uaccess.h>
 #include <asm/unistd.h>
 
+//Patch by QNAP: implement fnotify function
+#ifdef	QNAP_FNOTIFY
+#include <linux/fnotify.h>
+#endif	//QNAP_FNOTIFY
+////////////////////////////////////
+
 const struct file_operations generic_ro_fops = {
 	.llseek		= generic_file_llseek,
 	.read		= do_sync_read,
@@ -374,12 +380,24 @@ ssize_t vfs_read(struct file *file, char __user *buf, size_t count, loff_t *pos)
 
 	ret = rw_verify_area(READ, file, pos, count);
 	if (ret >= 0) {
+//Patch by QNAP: implement fnotify function
+#ifdef	QNAP_FNOTIFY
+		T_FILE_STATUS  tfsOrg;
+		if ((FN_READ & msys_nodify) && file->f_path.dentry)  FILE_STATUS_BY_INODE(file->f_path.dentry->d_inode, tfsOrg);
+#endif	//QNAP_FNOTIFY
+//////////////////////////////////		
 		count = ret;
 		if (file->f_op->read)
 			ret = file->f_op->read(file, buf, count, pos);
 		else
 			ret = do_sync_read(file, buf, count, pos);
 		if (ret > 0) {
+//Patch by QNAP: implement fnotify function
+#ifdef	QNAP_FNOTIFY
+			if (FN_READ & msys_nodify)
+				pfn_sys_file_notify(FN_READ, MARG_2xI64, &file->f_path, NULL, 0, &tfsOrg, ret, *pos-ret, 0, 0);
+#endif	//QNAP_FNOTIFY
+//////////////////////////////////		 	
 			fsnotify_access(file);
 			add_rchar(current, ret);
 		}
@@ -430,12 +448,24 @@ ssize_t vfs_write(struct file *file, const char __user *buf, size_t count, loff_
 
 	ret = rw_verify_area(WRITE, file, pos, count);
 	if (ret >= 0) {
+//Patch by QNAP: implement fnotify function
+#ifdef	QNAP_FNOTIFY
+		T_FILE_STATUS  tfsOrg;
+		if ((FN_WRITE & msys_nodify) && file->f_path.dentry)  FILE_STATUS_BY_INODE(file->f_path.dentry->d_inode, tfsOrg);
+#endif	//QNAP_FNOTIFY
+////////////////////////////////////		
 		count = ret;
 		if (file->f_op->write)
 			ret = file->f_op->write(file, buf, count, pos);
 		else
 			ret = do_sync_write(file, buf, count, pos);
 		if (ret > 0) {
+//Patch by QNAP: implement fnotify function
+#ifdef	QNAP_FNOTIFY
+			if (FN_WRITE & msys_nodify)
+				pfn_sys_file_notify(FN_WRITE, MARG_2xI64, &file->f_path, NULL, 0, &tfsOrg, ret, *pos-ret, 0, 0);
+#endif	//QNAP_FNOTIFY
+////////////////////////////////////		 	
 			fsnotify_modify(file);
 			add_wchar(current, ret);
 		}
@@ -716,6 +746,11 @@ static ssize_t do_readv_writev(int type, struct file *file,
 	ssize_t ret;
 	io_fn_t fn;
 	iov_fn_t fnv;
+//Patch by QNAP: implement fnotify function
+#ifdef	QNAP_FNOTIFY
+	T_FILE_STATUS  tfsOrg;
+#endif	//QNAP_FNOTIFY
+///////////////////////////////////
 
 	if (!file->f_op) {
 		ret = -EINVAL;
@@ -736,9 +771,19 @@ static ssize_t do_readv_writev(int type, struct file *file,
 	if (type == READ) {
 		fn = file->f_op->read;
 		fnv = file->f_op->aio_read;
+//Patch by QNAP: implement fnotify function
+#ifdef	QNAP_FNOTIFY
+		if ((FN_READ & msys_nodify) && file->f_path.dentry) FILE_STATUS_BY_INODE(file->f_path.dentry->d_inode, tfsOrg);
+#endif	//QNAP_FNOTIFY
+/////////////////////////////////////        
 	} else {
 		fn = (io_fn_t)file->f_op->write;
 		fnv = file->f_op->aio_write;
+//Patch by QNAP: implement fnotify function
+#ifdef	QNAP_FNOTIFY
+		if ((FN_WRITE & msys_nodify) && file->f_path.dentry) FILE_STATUS_BY_INODE(file->f_path.dentry->d_inode, tfsOrg);
+#endif	//QNAP_FNOTIFY
+/////////////////////////////////////		
 	}
 
 	if (fnv)
@@ -746,6 +791,12 @@ static ssize_t do_readv_writev(int type, struct file *file,
 						pos, fnv);
 	else
 		ret = do_loop_readv_writev(file, iov, nr_segs, pos, fn);
+//Patch by QNAP: implement fnotify function
+#ifdef	QNAP_FNOTIFY
+	if ((0 < ret) && (((READ == type) && (FN_READ & msys_nodify)) || ((WRITE == type) && (FN_WRITE & msys_nodify))))
+		pfn_sys_file_notify((READ == type)?FN_READ:FN_WRITE, MARG_2xI64, &file->f_path, NULL, 0, &tfsOrg, ret, *pos-ret, 0, 0);
+#endif	//QNAP_FNOTIFY
+/////////////////////////////////////
 
 out:
 	if (iov != iovstack)
@@ -891,6 +942,11 @@ static ssize_t do_sendfile(int out_fd, int in_fd, loff_t *ppos,
 	loff_t pos;
 	ssize_t retval;
 	int fput_needed_in, fput_needed_out, fl;
+//Patch by QNAP: implement fnotify function
+#ifdef	QNAP_FNOTIFY
+	T_FILE_STATUS  tfsOrg;
+#endif	//QNAP_FNOTIF
+////////////////////////////////////
 
 	/*
 	 * Get input file, and verify that it is ok..
@@ -951,7 +1007,18 @@ static ssize_t do_sendfile(int out_fd, int in_fd, loff_t *ppos,
 	if (in_file->f_flags & O_NONBLOCK)
 		fl = SPLICE_F_NONBLOCK;
 #endif
+//Patch by QNAP: implement fnotify function
+#ifdef	QNAP_FNOTIFY
+	if ((FN_READ & msys_nodify) && in_file->f_path.dentry) FILE_STATUS_BY_INODE(in_file->f_path.dentry->d_inode, tfsOrg);
+#endif	//QNAP_FNOTIFY
+//////////////////////////////////////	
 	retval = do_splice_direct(in_file, ppos, out_file, count, fl);
+//Patch by QNAP: implement fnotify function
+#ifdef	QNAP_FNOTIFY
+	if (FN_READ & msys_nodify)
+			pfn_sys_file_notify(FN_READ, MARG_2xI64, &in_file->f_path, NULL, 0, &tfsOrg, retval, *ppos-retval, 0, 0);
+#endif	//QNAP_FNOTIFY
+//////////////////////////////////////	 	
 
 	if (retval > 0) {
 		add_rchar(current, retval);

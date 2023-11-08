@@ -184,6 +184,15 @@ typedef int (*writepage_t)(struct page *page, struct writeback_control *wbc,
 
 int generic_writepages(struct address_space *mapping,
 		       struct writeback_control *wbc);
+
+//George Wu, 20130721, blkdev_writepages
+#ifdef CONFIG_MACH_QNAPTS
+#ifdef USE_BLKDEV_WRITEPAGES
+int blkdev_writepages(struct address_space *mapping,
+				struct writeback_control *wbc);
+#endif
+#endif
+
 void tag_pages_for_writeback(struct address_space *mapping,
 			     pgoff_t start, pgoff_t end);
 int write_cache_pages(struct address_space *mapping,

@@ -28,6 +28,10 @@
 #include <asm/uaccess.h>
 #include <linux/exportfs.h>
 #include <linux/writeback.h>
+//Patch by QNAP: Fix ARM compile error
+#ifdef CONFIG_MACH_QNAPTS
+#include <linux/vmalloc.h>
+#endif
 
 #ifdef CONFIG_NFSD_V3
 #include "xdr3.h"
@@ -40,6 +44,19 @@
 
 #include "nfsd.h"
 #include "vfs.h"
+
+//Patch by QNAP: implement fnotify function
+#ifdef	QNAP_FNOTIFY
+#include <linux/module.h>
+#include <linux/fnotify.h>
+
+void (*pfn_nfs_file_notify)(int idcode, int nbargs, struct svc_fh *ptsffile, const char *pszname, int cbname, PT_FILE_STATUS pfsOrg, int64_t iarg1, int64_t iarg2, uint32_t iarg3, uint32_t iarg4)=NULL;
+void (*pfn_nfs_files_notify)(int idcode, struct svc_fh *ptsfold, const char *psznold, int cbnold, struct svc_fh *ptsfnew, const char *psznnew, int cbnnew, PT_FILE_STATUS pfsOrg, PT_FILE_STATUS pfsExt)=NULL;
+
+EXPORT_SYMBOL(pfn_nfs_file_notify);
+EXPORT_SYMBOL(pfn_nfs_files_notify);
+#endif	//QNAP_FNOTIFY
+////////////////////////////////////////
 
 #define NFSDDBG_FACILITY		NFSDDBG_FILEOP
 
@@ -207,7 +224,11 @@ nfsd_lookup_dentry(struct svc_rqst *rqstp, struct svc_fh *fhp,
 		}
 	} else {
 		fh_lock(fhp);
+#ifdef CONFIG_MACH_QNAPTS
+		dentry = lookup_one_len_without_acl(name, dparent, len);
+#else        
 		dentry = lookup_one_len(name, dparent, len);
+#endif
 		host_err = PTR_ERR(dentry);
 		if (IS_ERR(dentry))
 			goto out_nfserr;
@@ -311,6 +332,11 @@ nfsd_setattr(struct svc_rqst *rqstp, struct svc_fh *fhp, struct iattr *iap,
 	__be32		err;
 	int		host_err;
 	int		size_change = 0;
+//Patch by QNAP: implement fnotify function
+#ifdef	QNAP_FNOTIFY
+	T_FILE_STATUS  tfsOrg;
+#endif	//QNAP_FNOTIF
+////////////////////////////////////
 
 	if (iap->ia_valid & (ATTR_ATIME | ATTR_MTIME | ATTR_SIZE))
 		accmode |= NFSD_MAY_WRITE|NFSD_MAY_OWNER_OVERRIDE;
@@ -392,7 +418,11 @@ nfsd_setattr(struct svc_rqst *rqstp, struct svc_fh *fhp, struct iattr *iap,
 			goto out_nfserr;
 		}
 	}
-
+//Patch by QNAP: implement fnotify function
+#ifdef	QNAP_FNOTIFY
+	FILE_STATUS_BY_INODE(inode, tfsOrg);
+#endif	//QNAP_FNOTIFY
+////////////////////////////////////
 	/* sanitize the mode change */
 	if (iap->ia_valid & ATTR_MODE) {
 		iap->ia_mode &= S_IALLUGO;
@@ -434,6 +464,21 @@ nfsd_setattr(struct svc_rqst *rqstp, struct svc_fh *fhp, struct iattr *iap,
 		put_write_access(inode);
 	if (!err)
 		commit_metadata(fhp);
+//Patch by QNAP: implement fnotify function
+#ifdef	QNAP_FNOTIFY
+	if (!err && msys_nodify)
+	{
+		if ((ATTR_MODE & iap->ia_valid) && (FN_CHMOD & msys_nodify))
+			pfn_nfs_file_notify(FN_CHMOD, MARG_1xI32, fhp, NULL, 0, &tfsOrg, 0x1FF & iap->ia_mode, 0, 0, 0);
+		if ((ATTR_SIZE & iap->ia_valid) && (FN_TRUNCATE & msys_nodify))
+			pfn_nfs_file_notify(FN_TRUNCATE, MARG_1xI64, fhp, NULL, 0, &tfsOrg, iap->ia_size, 0, 0, 0);
+		if (((ATTR_UID|ATTR_GID) & iap->ia_valid) && (FN_CHOWN & msys_nodify))
+			pfn_nfs_file_notify(FN_CHOWN, MARG_2xI32, fhp, NULL, 0, &tfsOrg, iap->ia_uid, iap->ia_gid, 0, 0);
+		if (((ATTR_MTIME|ATTR_MTIME_SET) & iap->ia_valid) && (FN_CHTIME & msys_nodify))
+			pfn_nfs_file_notify(FN_CHTIME, MARG_2xI32, fhp, NULL, 0, &tfsOrg, iap->ia_mtime.tv_nsec, iap->ia_mtime.tv_sec, 0, 0);
+	}
+#endif	//QNAP_FNOTIFY
+/////////////////////////////////////	
 out:
 	return err;
 
@@ -898,8 +943,17 @@ nfsd_vfs_read(struct svc_rqst *rqstp, struct svc_fh *fhp, struct file *file,
 	mm_segment_t	oldfs;
 	__be32		err;
 	int		host_err;
+//Patch by QNAP: implement fnotify function
+#ifdef	QNAP_FNOTIFY
+	struct inode *inode;
+#endif
 
 	err = nfserr_perm;
+
+//Patch by QNAP: implement fnotify function
+#ifdef	QNAP_FNOTIFY
+	inode = file->f_path.dentry->d_inode;
+#endif
 
 	if (file->f_op->splice_read && rqstp->rq_splice_ok) {
 		struct splice_desc sd = {
@@ -908,9 +962,21 @@ nfsd_vfs_read(struct svc_rqst *rqstp, struct svc_fh *fhp, struct file *file,
 			.pos		= offset,
 			.u.data		= rqstp,
 		};
-
+//Patch by QNAP: implement fnotify function
+#ifdef	QNAP_FNOTIFY
+		T_FILE_STATUS  tfsOrg;
+		FILE_STATUS_BY_INODE(inode, tfsOrg);
+#endif	//QNAP_FNOTIF
+///////////////////////////////////////
 		rqstp->rq_resused = 1;
 		host_err = splice_direct_to_actor(file, &sd, nfsd_direct_splice_actor);
+//Patch by QNAP: implement fnotify function
+#ifdef	QNAP_FNOTIFY
+		//printk("nfsd_vfs_read -- read: %d, flag: %X, count: %ld, offset: %lld\n", host_err, msys_nodify, *count, offset);
+		if ((0 < host_err) && (FN_READ & msys_nodify))
+			pfn_sys_file_notify(FN_READ, MARG_2xI64, &file->f_path, NULL, 0, &tfsOrg, *count, offset, 0, 0);
+#endif	//QNAP_FNOTIFY
+//////////////////////////////////////		
 	} else {
 		oldfs = get_fs();
 		set_fs(KERNEL_DS);
@@ -1259,7 +1325,11 @@ nfsd_create(struct svc_rqst *rqstp, struct svc_fh *fhp,
 	if (!resfhp->fh_dentry) {
 		/* called from nfsd_proc_mkdir, or possibly nfsd3_proc_create */
 		fh_lock_nested(fhp, I_MUTEX_PARENT);
+#ifdef CONFIG_MACH_QNAPTS
+		dchild = lookup_one_len_without_acl(fname, dentry, flen);
+#else
 		dchild = lookup_one_len(fname, dentry, flen);
+#endif
 		host_err = PTR_ERR(dchild);
 		if (IS_ERR(dchild))
 			goto out_nfserr;
@@ -1310,18 +1380,50 @@ nfsd_create(struct svc_rqst *rqstp, struct svc_fh *fhp,
 	err = 0;
 	switch (type) {
 	case S_IFREG:
+#ifdef CONFIG_MACH_QNAPTS
+		host_err = vfs_create_without_acl(dirp, dchild, iap->ia_mode, NULL);
+#else        
 		host_err = vfs_create(dirp, dchild, iap->ia_mode, NULL);
+#endif
+//Patch by QNAP: implement fnotify function
+#ifdef	QNAP_FNOTIFY
+		if (!host_err && (FN_OPEN & msys_nodify))
+		{
+			T_FILE_STATUS  tfsOrg;
+			if (resfhp && resfhp->fh_dentry)  FILE_STATUS_BY_INODE(resfhp->fh_dentry->d_inode, tfsOrg);
+			pfn_nfs_file_notify(FN_OPEN, MARG_2xI32, resfhp, NULL, 0, &tfsOrg, O_CREAT|O_WRONLY|O_TRUNC, 0x1FF & iap->ia_mode, 0, 0);
+		}
+#endif	//QNAP_FNOTIFY
+/////////////////////////////////////		
 		if (!host_err)
 			nfsd_check_ignore_resizing(iap);
 		break;
 	case S_IFDIR:
+#ifdef CONFIG_MACH_QNAPTS
+		host_err = vfs_mkdir_without_acl(dirp, dchild, iap->ia_mode);
+#else        
 		host_err = vfs_mkdir(dirp, dchild, iap->ia_mode);
+#endif
+//Patch by QNAP: implement fnotify function
+#ifdef	QNAP_FNOTIFY
+		if (!host_err && (FN_MKDIR & msys_nodify))
+		{
+			T_FILE_STATUS  tfsOrg;
+			if (resfhp && resfhp->fh_dentry)  FILE_STATUS_BY_INODE(resfhp->fh_dentry->d_inode, tfsOrg);
+			pfn_nfs_file_notify(FN_MKDIR, MARG_1xI32, resfhp, NULL, 0, &tfsOrg, 0x1FF & iap->ia_mode, 0, 0, 0);
+		}
+#endif	//QNAP_FNOTIFY
+/////////////////////////////////////		
 		break;
 	case S_IFCHR:
 	case S_IFBLK:
 	case S_IFIFO:
 	case S_IFSOCK:
+#ifdef CONFIG_MACH_QNAPTS
+		host_err = vfs_mknod_without_acl(dirp, dchild, iap->ia_mode, rdev);
+#else        
 		host_err = vfs_mknod(dirp, dchild, iap->ia_mode, rdev);
+#endif
 		break;
 	}
 	if (host_err < 0) {
@@ -1403,7 +1505,11 @@ do_nfsd_create(struct svc_rqst *rqstp, struct svc_fh *fhp,
 	/*
 	 * Compose the response file handle.
 	 */
+#ifdef CONFIG_MACH_QNAPTS
+	dchild = lookup_one_len_without_acl(fname, dentry, flen);
+#else	 
 	dchild = lookup_one_len(fname, dentry, flen);
+#endif
 	host_err = PTR_ERR(dchild);
 	if (IS_ERR(dchild))
 		goto out_nfserr;
@@ -1472,8 +1578,21 @@ do_nfsd_create(struct svc_rqst *rqstp, struct svc_fh *fhp,
 		mnt_drop_write(fhp->fh_export->ex_path.mnt);
 		goto out;
 	}
-
+#ifdef CONFIG_MACH_QNAPTS
+	host_err = vfs_create_without_acl(dirp, dchild, iap->ia_mode, NULL);
+#else
 	host_err = vfs_create(dirp, dchild, iap->ia_mode, NULL);
+#endif
+//Patch by QNAP: implement fnotify function
+#ifdef	QNAP_FNOTIFY
+	if (!host_err && (FN_OPEN & msys_nodify))
+	{
+		T_FILE_STATUS  tfsOrg;
+		if (resfhp && resfhp->fh_dentry)  FILE_STATUS_BY_INODE(resfhp->fh_dentry->d_inode, tfsOrg);
+		pfn_nfs_file_notify(FN_OPEN, MARG_2xI32, resfhp, NULL, 0, &tfsOrg, O_CREAT|O_WRONLY|O_TRUNC, iap->ia_mode, 0, 0);
+	}
+#endif	//QNAP_FNOTIFY
+/////////////////////////////////////	
 	if (host_err < 0) {
 		mnt_drop_write(fhp->fh_export->ex_path.mnt);
 		goto out_nfserr;
@@ -1595,7 +1714,11 @@ nfsd_symlink(struct svc_rqst *rqstp, struct svc_fh *fhp,
 		goto out;
 	fh_lock(fhp);
 	dentry = fhp->fh_dentry;
+#ifdef CONFIG_MACH_QNAPTS
+	dnew = lookup_one_len_without_acl(fname, dentry, flen);
+#else    
 	dnew = lookup_one_len(fname, dentry, flen);
+#endif
 	host_err = PTR_ERR(dnew);
 	if (IS_ERR(dnew))
 		goto out_nfserr;
@@ -1611,11 +1734,34 @@ nfsd_symlink(struct svc_rqst *rqstp, struct svc_fh *fhp,
 		else {
 			strncpy(path_alloced, path, plen);
 			path_alloced[plen] = 0;
+#ifdef CONFIG_MACH_QNAPTS
+			host_err = vfs_symlink_without_acl(dentry->d_inode, dnew, path_alloced);
+#else            
 			host_err = vfs_symlink(dentry->d_inode, dnew, path_alloced);
+#endif
 			kfree(path_alloced);
 		}
 	} else
+#ifdef CONFIG_MACH_QNAPTS
+		host_err = vfs_symlink_without_acl(dentry->d_inode, dnew, path);
+#else	
 		host_err = vfs_symlink(dentry->d_inode, dnew, path);
+#endif
+
+//Patch by QNAP: implement fnotify function
+#ifdef	QNAP_FNOTIFY
+	if (!host_err) {
+		if (FN_SYMLINK & msys_nodify)
+		{
+			T_FILE_STATUS  tfsOrg, tfsExt;
+			tfsExt.i_mode = 0;
+			FILE_STATUS_BY_INODE(dnew->d_inode, tfsOrg);
+			pfn_nfs_files_notify(FN_SYMLINK, NULL, path, plen, fhp, dnew->d_name.name, dnew->d_name.len, &tfsOrg, &tfsExt);
+		}
+	}
+#endif	//QNAP_FNOTIFY
+//////////////////////////////////		
+
 	err = nfserrno(host_err);
 	if (!err)
 		err = nfserrno(commit_metadata(fhp));
@@ -1667,7 +1813,11 @@ nfsd_link(struct svc_rqst *rqstp, struct svc_fh *ffhp,
 	ddir = ffhp->fh_dentry;
 	dirp = ddir->d_inode;
 
+#ifdef CONFIG_MACH_QNAPTS
+	dnew = lookup_one_len_without_acl(name, ddir, len);
+#else
 	dnew = lookup_one_len(name, ddir, len);
+#endif
 	host_err = PTR_ERR(dnew);
 	if (IS_ERR(dnew))
 		goto out_nfserr;
@@ -1687,8 +1837,23 @@ nfsd_link(struct svc_rqst *rqstp, struct svc_fh *ffhp,
 		err = nfserrno(host_err);
 		goto out_drop_write;
 	}
+#ifdef CONFIG_MACH_QNAPTS
+	host_err = vfs_link_without_acl(dold, dirp, dnew);
+#else
 	host_err = vfs_link(dold, dirp, dnew);
+#endif
 	if (!host_err) {
+//Patch by QNAP: implement fnotify function
+#ifdef	QNAP_FNOTIFY
+		if (FN_LINK & msys_nodify)
+		{
+			T_FILE_STATUS  tfsOrg, tfsExt;
+			tfsExt.i_mode = 0;
+			FILE_STATUS_BY_INODE(dold->d_inode, tfsOrg);
+			pfn_nfs_files_notify(FN_LINK, tfhp, NULL, 0, ffhp, name, len, &tfsOrg, &tfsExt);
+		}
+#endif	//QNAP_FNOTIFY
+//////////////////////////////////////		
 		err = nfserrno(commit_metadata(ffhp));
 		if (!err)
 			err = nfserrno(commit_metadata(tfhp));
@@ -1752,8 +1917,11 @@ nfsd_rename(struct svc_rqst *rqstp, struct svc_fh *ffhp, char *fname, int flen,
 	ffhp->fh_locked = tfhp->fh_locked = 1;
 	fill_pre_wcc(ffhp);
 	fill_pre_wcc(tfhp);
-
+#ifdef CONFIG_MACH_QNAPTS
+	odentry = lookup_one_len_without_acl(fname, fdentry, flen);
+#else
 	odentry = lookup_one_len(fname, fdentry, flen);
+#endif
 	host_err = PTR_ERR(odentry);
 	if (IS_ERR(odentry))
 		goto out_nfserr;
@@ -1764,8 +1932,11 @@ nfsd_rename(struct svc_rqst *rqstp, struct svc_fh *ffhp, char *fname, int flen,
 	host_err = -EINVAL;
 	if (odentry == trap)
 		goto out_dput_old;
-
+#ifdef CONFIG_MACH_QNAPTS
+	ndentry = lookup_one_len_without_acl(tname, tdentry, tlen);
+#else
 	ndentry = lookup_one_len(tname, tdentry, tlen);
+#endif
 	host_err = PTR_ERR(ndentry);
 	if (IS_ERR(ndentry))
 		goto out_dput_old;
@@ -1788,7 +1959,23 @@ nfsd_rename(struct svc_rqst *rqstp, struct svc_fh *ffhp, char *fname, int flen,
 		if (host_err)
 			goto out_drop_write;
 	}
+#ifdef CONFIG_MACH_QNAPTS
+	host_err = vfs_rename_without_acl(fdir, odentry, tdir, ndentry);
+#else    
 	host_err = vfs_rename(fdir, odentry, tdir, ndentry);
+#endif
+//Patch by QNAP: implement fnotify function
+#ifdef	QNAP_FNOTIFY
+	if (!host_err && (FN_RENAME & msys_nodify))
+	{
+		T_FILE_STATUS  tfsOrg, tfsExt;
+		tfsExt.i_mode = 0;
+		FILE_STATUS_BY_INODE(odentry->d_inode, tfsOrg);
+		if (ndentry && ndentry->d_inode)  FILE_STATUS_BY_INODE(ndentry->d_inode, tfsExt);
+		pfn_nfs_files_notify(FN_RENAME, ffhp, fname, flen, tfhp, tname, tlen, &tfsOrg, &tfsExt);
+	}
+#endif	//QNAP_FNOTIFY
+//////////////////////////////////////////	
 	if (!host_err) {
 		host_err = commit_metadata(tfhp);
 		if (!host_err)
@@ -1839,8 +2026,11 @@ nfsd_unlink(struct svc_rqst *rqstp, struct svc_fh *fhp, int type,
 	fh_lock_nested(fhp, I_MUTEX_PARENT);
 	dentry = fhp->fh_dentry;
 	dirp = dentry->d_inode;
-
+#ifdef CONFIG_MACH_QNAPTS
+	rdentry = lookup_one_len_without_acl(fname, dentry, flen);
+#else
 	rdentry = lookup_one_len(fname, dentry, flen);
+#endif
 	host_err = PTR_ERR(rdentry);
 	if (IS_ERR(rdentry))
 		goto out_nfserr;
@@ -1862,9 +2052,45 @@ nfsd_unlink(struct svc_rqst *rqstp, struct svc_fh *fhp, int type,
 	if (host_err)
 		goto out_drop_write;
 	if (type != S_IFDIR)
+//Patch by QNAP: implement fnotify function
+#ifdef	QNAP_FNOTIFY
+        {
+		T_FILE_STATUS  tfsOrg;
+		FILE_STATUS_BY_INODE(rdentry->d_inode, tfsOrg);
+#endif	//QNAP_FNOTIFY
+///////////////////////////////////	    
+#ifdef CONFIG_MACH_QNAPTS
+		host_err = vfs_unlink_without_acl(dirp, rdentry);
+#else
 		host_err = vfs_unlink(dirp, rdentry);
+#endif
+//Patch by QNAP: implement fnotify function
+#ifdef	QNAP_FNOTIFY
+		if (!host_err && (FN_UNLINK & msys_nodify))
+			pfn_nfs_file_notify(FN_UNLINK, MARG_0, fhp, fname, flen, &tfsOrg, 0, 0, 0, 0);
+        }
+#endif
+///////////////////////////////////		
 	else
+#ifdef	QNAP_FNOTIFY
+	{
+#endif
+#ifdef CONFIG_MACH_QNAPTS_
+		host_err = vfs_rmdir_without_acl(dirp, rdentry);
+#else
 		host_err = vfs_rmdir(dirp, rdentry);
+#endif
+//Patch by QNAP: implement fnotify function
+#ifdef	QNAP_FNOTIFY
+		if (!host_err && (FN_RMDIR & msys_nodify))
+		{
+			T_FILE_STATUS  tfsOrg;
+			FILE_STATUS_BY_INODE(rdentry->d_inode, tfsOrg);
+			pfn_nfs_file_notify(FN_RMDIR, MARG_0, fhp, fname, flen, &tfsOrg, 0, 0, 0, 0);
+		}
+	}
+#endif	//QNAP_FNOTIFY
+////////////////////////////////////		
 	if (!host_err)
 		host_err = commit_metadata(fhp);
 out_drop_write:
@@ -2130,13 +2356,20 @@ nfsd_permission(struct svc_rqst *rqstp, struct svc_export *exp,
 		return 0;
 
 	/* This assumes  NFSD_MAY_{READ,WRITE,EXEC} == MAY_{READ,WRITE,EXEC} */
+#ifdef CONFIG_MACH_QNAPTS
+	err = inode_permission_without_acl(inode, acc & (MAY_READ|MAY_WRITE|MAY_EXEC));
+#else
 	err = inode_permission(inode, acc & (MAY_READ|MAY_WRITE|MAY_EXEC));
-
+#endif
 	/* Allow read access to binaries even when mode 111 */
 	if (err == -EACCES && S_ISREG(inode->i_mode) &&
 	     (acc == (NFSD_MAY_READ | NFSD_MAY_OWNER_OVERRIDE) ||
 	      acc == (NFSD_MAY_READ | NFSD_MAY_READ_IF_EXEC)))
+#ifdef CONFIG_MACH_QNAPTS
+		err = inode_permission_without_acl(inode, MAY_EXEC);
+#else
 		err = inode_permission(inode, MAY_EXEC);
+#endif
 
 	return err? nfserrno(err) : 0;
 }

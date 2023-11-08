@@ -145,6 +145,344 @@
 #include <linux/mroute.h>
 #include <linux/netlink.h>
 
+#if defined(CONFIG_MACH_QNAPTS) && defined(QNAP_HAL)
+#include <qnap/hal_event.h>
+extern int send_hal_netlink(NETLINK_EVT *event);
+void send_hal_ip_block_event(struct sk_buff *skb)
+{
+    NETLINK_EVT hal_event;
+    unsigned short port;
+    struct __netlink_ip_block_cb *ip_block_cb;
+    struct iphdr *iph = ip_hdr(skb);
+    unsigned char *raw = skb_network_header(skb);
+    if (iph->protocol == 0x6 || iph->protocol == 0x11 )
+    {
+        port = ntohs(*(unsigned short *)&raw[22]);
+    }
+    else
+        port = 0;
+    hal_event.type = HAL_EVENT_NET;
+    hal_event.arg.action = BLOCK_IP_FILTER;
+    ip_block_cb = &hal_event.arg.param.netlink_ip_block;
+    ip_block_cb->addr = iph->saddr;
+    ip_block_cb->protocol = iph->protocol;
+    ip_block_cb->port = port;
+    send_hal_netlink(&hal_event);
+}
+#endif
+
+#ifdef CONFIG_MACH_QNAPTS
+#include <linux/syscalls.h>
+
+// IP filter (ip security or ipsec)
+#define MAX_IPSEC_RULE_NUM    2048
+#define MAX_PRIV_NUM          256
+#define MAX_IPSEC_RULE_SIZE   (2+MAX_IPSEC_RULE_NUM*3)
+#define IPSEC_RULE_NUM                ipsec_rules[1]
+#define IPSEC_RULE_TYPE               ipsec_rules[0]
+#define IPSEC_ACCEPT_ALL      0
+#define IPSEC_DEF_ALLOWED     1
+#define IPSEC_DEF_DENIED      2
+#define IPSEC_DEF_PRIV_ALLOWED        3
+
+static int ipsec_init=0;
+static spinlock_t ipsec_lock;
+static unsigned int ipsec_rules[MAX_IPSEC_RULE_SIZE]={0,0};
+static unsigned int privileged_list[MAX_PRIV_NUM];
+// added by Jeff on 2007/3/28 for ipsec control
+
+#define REVERSE(x) ((((x)<<24)&0xff000000) | \
+                    (((x)<<8) &0x00ff0000) | \
+                    (((x)>>8) &0x0000ff00) | \
+                    (((x)>>24)&0x000000ff))
+
+SYSCALL_DEFINE2(set_ipsec_rules,const char __user *, arg , int , len)
+{
+        unsigned int type;
+        if( !ipsec_init )
+        {
+                spin_lock_init(&ipsec_lock);
+                ipsec_init=1;
+                memset( privileged_list, 0, sizeof(privileged_list));
+        }
+        if( len>sizeof(ipsec_rules) )
+        {
+                printk("sys_set_ipsec_rules: len %d is over %d\n", len, sizeof(ipsec_rules));
+		//we only handle the first MAX_IPSEC_RULE_NUM rules
+		len = sizeof(ipsec_rules);
+        }
+        spin_lock_irq(&ipsec_lock);
+        if (copy_from_user( &type, arg, 4))
+        {
+                spin_unlock_irq(&ipsec_lock);
+                printk("sys_set_ipsec_rules: copy_from_user failed!\n");
+                return -EFAULT;
+        }
+        if( type==IPSEC_DEF_PRIV_ALLOWED)
+        {
+                unsigned int a[2];
+                if( len!=12)
+                {
+                        spin_unlock_irq(&ipsec_lock);
+                        return -EFAULT;
+                }
+                if (copy_from_user( a, arg+4, 8))
+                {
+                        spin_unlock_irq(&ipsec_lock);
+                        return -EFAULT;
+                }
+                if( a[0]>=MAX_PRIV_NUM )
+                {
+                        spin_unlock_irq(&ipsec_lock);
+                        return -EFAULT;
+                }
+                privileged_list[a[0]]=a[1];
+                spin_unlock_irq(&ipsec_lock);
+                return 0;
+        }
+        if (copy_from_user( ipsec_rules, arg, len))
+        {
+                spin_unlock_irq(&ipsec_lock);
+                printk("sys_set_ipsec_rules: copy_from_user failed!\n");
+                return -EFAULT;
+        }
+//        IPSEC_RULE_NUM=(len-8)/8;
+
+//	printk("len = %d\n", len);
+	IPSEC_RULE_NUM=((len/4)-2)/3;
+//printk("IPSEC_RULE_NUM = [%d]\n", IPSEC_RULE_NUM);
+#if 1 // dump ipsec rules
+{
+        int i;
+        unsigned int *p=ipsec_rules;
+        printk("rule type=%u, num=%u\n", *p, IPSEC_RULE_NUM);
+        p+=2;
+        for( i=0; i<IPSEC_RULE_NUM; i++ )
+        {
+//		printk("rule %u=[%lX,%08lX, %lX]\n", i, *p, *(p+1), *(p+2));
+                p+=3;
+        }
+}
+#endif
+        spin_unlock_irq(&ipsec_lock);
+        return 0;
+}
+#ifdef __BIG_ENDIAN
+        #define ADDR_TYPE_BIT_MASK      0x80000000
+#else
+        #define ADDR_TYPE_BIT_MASK      0x00000080
+#endif
+// return 1 if violate ipsec rules
+static int filter_by_ipsec_rules(struct sk_buff *skb)
+{
+        struct iphdr *iph = ip_hdr(skb);
+        int i, ret=0;
+        unsigned int *p=&ipsec_rules[2];
+        //struct inet_sock *inet;
+        if( !ipsec_init || iph->saddr==iph->daddr )
+                return ret;
+#if 1
+        // if source=destination always pass
+        if( skb->dev )
+        {
+                struct in_device *in_dev = __in_dev_get_rcu(skb->dev);
+                if( in_dev )
+                {
+                        struct in_ifaddr **ifap = NULL;
+                        struct in_ifaddr *ifa = NULL;
+                        for (ifap = &in_dev->ifa_list; (ifa = *ifap) != NULL; ifap = &ifa->ifa_next)
+                        {
+                                if( iph->saddr==ifa->ifa_address )
+                                return ret;
+                        }
+                }
+        }
+#endif
+#if 0
+        if( iph->saddr==0xAC111606 )
+                return ret;
+        inet = inet_sk(skb->sk);
+        if( inet && iph->saddr==inet->saddr)
+                return ret;
+#endif
+        spin_lock_irq(&ipsec_lock);
+        if(IPSEC_RULE_TYPE==IPSEC_ACCEPT_ALL)
+        {
+                spin_unlock_irq(&ipsec_lock);
+                return ret;
+        }
+// apply privileged rules here
+        for( i=0; i<MAX_PRIV_NUM;i++)
+        {
+                if( privileged_list[i]!=0 && privileged_list[i]==iph->saddr )
+                {
+                        spin_unlock_irq(&ipsec_lock);
+                        return ret;
+                }
+        }
+        for( i=0; i<IPSEC_RULE_NUM; i++, p+=3 )
+        {
+        unsigned int t=*p;
+        unsigned int v=*(p+1);
+		unsigned int type=*(p+2);
+		unsigned int max=0, min=0, addr=0;
+
+//printk("%d. type = [%lX], t = [%8lX], v = [%lX], saddr=[%8X], daddr=[%8X]\n", i, type, t, v, iph->saddr, iph->daddr);
+		if(type==2){
+			min = REVERSE(v);
+			max = REVERSE(t);
+			addr = REVERSE(iph->saddr);
+//printk("%d. type = [%lX], max = [%8lx], min = [%lX], saddr=[%8X], daddr=[%8X]\n", i, type, max, min, iph->saddr, iph->daddr);
+		}
+//		if(type==1){
+//			printk("t&ADDR_TYPE_BIT_MASK = [%lX]\n", t&ADDR_TYPE_BIT_MASK);
+//			printk("iph->saddr&t=[%lX]\n", iph->saddr&t);
+//			printk("v&t=[%lX]\n", v&t);
+//		}
+                if( ((type==0 && (t&ADDR_TYPE_BIT_MASK)==0) && iph->saddr==v) || 
+			((type==1 && (t&ADDR_TYPE_BIT_MASK)==ADDR_TYPE_BIT_MASK) && (iph->saddr&t)==(v&t)) ||
+			(type==2 && addr>=min && addr<=max)) 
+                {
+			if(type==2 && iph->saddr>=min && iph->saddr<=max){
+//				printk("Between ip range\n");
+			}
+//if( (*p&2)==1 )return 0;  // overriding, always allowed
+                        if(IPSEC_RULE_TYPE==IPSEC_DEF_DENIED )
+                                ret=1;
+                        spin_unlock_irq(&ipsec_lock);
+//printk("In the list....and the rule type is [%d], ret = [%d]\n", IPSEC_RULE_TYPE, ret);
+                        return ret;
+                }
+        }
+        if(IPSEC_RULE_TYPE==IPSEC_DEF_ALLOWED)
+                ret=1;
+        spin_unlock_irq(&ipsec_lock);
+#if 0
+        if( ret==0 )
+                printk( "ipsec %08X pass\n", iph->saddr );
+#endif
+        return ret;
+}
+#define MAX_VIOLIST_NUM               256
+static struct violist_st { unsigned int addr; int protocol; int port; u64 tick; } violist[MAX_VIOLIST_NUM];
+static int violist_head=-1, violist_tail=-1;
+
+static void add_to_violated_list(struct sk_buff *skb)
+{
+        struct iphdr *iph = ip_hdr(skb);
+        int port=0;
+        int num=0;
+	unsigned char *raw = skb_network_header(skb);
+#if 0
+        if( iph->protocol==0x6 ) // TCP
+                port=skb->h.th->source;
+        else if( iph->protocol==0x11 ) // UDP
+                port=skb->h.uh->source;
+#else
+        if( iph->protocol==0x6 || iph->protocol==0x11 )
+        {
+                port= (int)*((short *)&raw[22]);
+        }
+#endif
+
+        spin_lock_irq(&ipsec_lock);
+        if( violist_head==-1 ) // empty
+        {
+                violist_head=0;
+                violist_tail=1;
+                violist[0].addr=iph->saddr;
+                violist[0].protocol=iph->protocol;
+                violist[0].tick=jiffies;
+                violist[0].port=port;
+                spin_unlock_irq(&ipsec_lock);
+//printk("addr=%08X(dst=%08X), protocol=%2X, port=%d\n", iph->saddr, iph->daddr, iph->protocol, port);
+                return;
+        }
+        num=(violist_tail-violist_head+MAX_VIOLIST_NUM)%MAX_VIOLIST_NUM;
+        if( num==MAX_VIOLIST_NUM-1 ) // full
+        {
+                violist_head=(violist_head+1)%MAX_VIOLIST_NUM;  //advance head
+        }
+        violist[violist_tail].addr=iph->saddr;
+        violist[violist_tail].protocol=iph->protocol;
+        violist[violist_tail].tick=jiffies;
+        violist[violist_tail].port=port;
+        violist_tail=(violist_tail+1)%MAX_VIOLIST_NUM;  //advance tail
+        spin_unlock_irq(&ipsec_lock);
+//printk("addr=%08X(dst=%08X), protocol=%2X, port=%d\n", iph->saddr, iph->daddr, iph->protocol, port);
+#if 0
+        if( skb->dev )
+        {
+                struct in_device *in_dev = __in_dev_get_rcu(skb->dev);
+                if( in_dev )
+                {
+                        struct in_ifaddr **ifap = NULL;
+                        struct in_ifaddr *ifa = NULL;
+                        int i=0;
+                        for (ifap = &in_dev->ifa_list; (ifa = *ifap) != NULL; ifap = &ifa->ifa_next)
+                        {
+                                printk( "%2d ifa address =%08X\n", i, ifa->ifa_address );
+                        }
+                }
+        }
+#endif
+}
+
+SYSCALL_DEFINE2(get_ipsec_vio_acc_list, char __user *, arg , int , len)
+{
+        int num, i;
+        u64 tick=jiffies;
+
+        if( !ipsec_init )
+                return 0;
+
+        spin_lock_irq(&ipsec_lock);
+        if( violist_head==-1 ) // empty
+        {
+                spin_unlock_irq(&ipsec_lock);
+                return 0;
+        }
+        num=(violist_tail-violist_head+MAX_VIOLIST_NUM)%MAX_VIOLIST_NUM;
+        if( len<sizeof(struct violist_st)*num )
+        {
+                spin_unlock_irq(&ipsec_lock);
+                return -EFAULT;
+        }
+        for( i=0; i<num; i++, arg+=sizeof(struct violist_st) )
+        {
+                violist[violist_head].tick=jiffies_to_msecs(tick-violist[violist_head].tick);
+                if (copy_to_user( arg, &violist[violist_head], sizeof(struct violist_st)))
+                {
+                        spin_unlock_irq(&ipsec_lock);
+                        return -EFAULT;
+                }
+                violist_head=(violist_head+1)%MAX_VIOLIST_NUM;  //advance head
+        }
+        violist_head=-1;
+        violist_tail=-1;
+        spin_unlock_irq(&ipsec_lock);
+        return num;
+}
+int is_filtered_by_ipsec_rules(struct sk_buff *skb)
+{
+        if(filter_by_ipsec_rules(skb))
+        {
+                add_to_violated_list(skb);
+		// Hugo add. notify picd
+#if !defined(QNAP_HAL)		
+		send_message_to_app(QNAP_BLOCK_IP_EVENT);
+#else
+        send_hal_ip_block_event(skb);
+#endif
+		// End
+		return 1;
+        }
+        return 0;
+}
+// End IP filter (ip security or ipsec)
+#endif
+//////////////////////////////////////////////////////////////////////
+
 /*
  *	Process Router Attention IP option (RFC 2113)
  */
@@ -436,6 +774,41 @@ int ip_rcv(struct sk_buff *skb, struct net_device *dev, struct packet_type *pt, 
 
 	/* Remove any debris in the socket control block */
 	memset(IPCB(skb), 0, sizeof(struct inet_skb_parm));
+    
+//Patch by QNAP: Add IP filter
+#ifdef CONFIG_MACH_QNAPTS
+#if 0 // added by Jeff for IP Security
+{
+	char s[16];
+	sprintf( s, "%u.%u.%u.%u", NIPQUAD(iph->saddr));
+	if(!strncmp( s, "172.17.20", 9 )){
+		printk("IP address [%s](%X) no permission to access the site!\n",s, iph->saddr);
+		return NET_RX_DROP;
+	}
+}
+#else
+	if( iph->protocol==0x11 ) {
+		unsigned char *raw = skb_network_header(skb);
+#ifdef __BIG_ENDIAN
+		int port= (int)*((short *)&raw[22]);
+#else
+		int port= (int)(raw[22]<<8 | raw[23]);
+#endif
+//{
+//	char s[16];
+//	sprintf( s, "%u.%u.%u.%u", NIPQUAD(iph->saddr));
+//	printk("IP address [%s](%X),port = %d\n", s, iph->saddr, port);
+//}
+		if( port==9500 || port==1900 || port==8097) {// bcclient(9500, 8097) ssdp(1900)
+			if( is_filtered_by_ipsec_rules(skb)) {
+				kfree_skb(skb);
+				return NET_RX_DROP;
+			}
+		}
+	}
+#endif // End Jeff
+#endif /* CONFIG_MACH_QNAPTS */
+//////////////////////////////////////////////////////////
 
 	/* Must drop socket now because of tproxy. */
 	skb_orphan(skb);

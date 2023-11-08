@@ -50,10 +50,45 @@ extern void iscsi_add_ts_to_inactive_list(struct iscsi_thread_set *ts)
 
 static void iscsi_del_ts_from_active_list(struct iscsi_thread_set *ts)
 {
+#ifdef CONFIG_MACH_QNAPTS
+	/* 2014/03/08, adamhsu, redmine-7493 */
+	struct iscsi_thread_set *got_ts = NULL, *tmp_ts = NULL;
+	int to_sleep = 1;
+#endif
+
 	spin_lock(&active_ts_lock);
+
+
+#ifdef CONFIG_MACH_QNAPTS
+	/* 2014/03/08, adamhsu, redmine-7493 
+	 * When goes here, this call expects the ts was in active_ts_list,
+	 * already. But, it may not true
+	 */
+_AGAIN_:
+	list_for_each_entry_safe(got_ts, tmp_ts, &active_ts_list, ts_list){
+		if (ts == got_ts){
+			to_sleep = 0;
+			break;
+		}
+	}
+
+	if (to_sleep){
+		pr_err("not found ts:0x%p in active_ts_list, sleep 1hz\n", ts);
+		pr_debug("ts_list.next:0x%p, ts_list.prev:0x%p\n",
+			ts->ts_list.next, ts->ts_list.prev);
+
+		spin_unlock(&active_ts_lock);
+
+		schedule_timeout_interruptible(HZ);
+		spin_lock(&active_ts_lock);
+		goto _AGAIN_;
+	}
+#endif
+
 	list_del(&ts->ts_list);
 	iscsit_global->active_ts--;
 	spin_unlock(&active_ts_lock);
+
 }
 
 static struct iscsi_thread_set *iscsi_get_ts_from_inactive_list(void)
@@ -106,6 +141,7 @@ extern int iscsi_allocate_thread_sets(u32 thread_pair_count)
 		ts->status = ISCSI_THREAD_SET_FREE;
 		INIT_LIST_HEAD(&ts->ts_list);
 		spin_lock_init(&ts->ts_state_lock);
+
 		init_completion(&ts->rx_post_start_comp);
 		init_completion(&ts->tx_post_start_comp);
 		init_completion(&ts->rx_restart_comp);
@@ -113,6 +149,13 @@ extern int iscsi_allocate_thread_sets(u32 thread_pair_count)
 		init_completion(&ts->rx_start_comp);
 		init_completion(&ts->tx_start_comp);
 
+#ifdef CONFIG_MACH_QNAPTS
+		/* 2014/03/08, adamhsu, redmine-7554 */
+		init_completion(&ts->tx_alloc_comp_s0);
+		init_completion(&ts->tx_alloc_comp_s1);
+		init_completion(&ts->rx_alloc_comp_s0);
+		init_completion(&ts->rx_alloc_comp_s1);
+#endif
 		ts->create_threads = 1;
 		ts->tx_thread = kthread_run(iscsi_target_tx_thread, ts, "%s",
 					ISCSI_TX_THREAD_NAME);
@@ -122,6 +165,13 @@ extern int iscsi_allocate_thread_sets(u32 thread_pair_count)
 			break;
 		}
 
+#ifdef CONFIG_MACH_QNAPTS
+		/* 2014/03/08, adamhsu, redmine-7554
+		 * make sure tx/rx thread go to sleep at the same time during
+		 * to create new thread set */
+		complete(&ts->tx_alloc_comp_s0);
+		wait_for_completion(&ts->tx_alloc_comp_s1);
+#endif
 		ts->rx_thread = kthread_run(iscsi_target_rx_thread, ts, "%s",
 					ISCSI_RX_THREAD_NAME);
 		if (IS_ERR(ts->rx_thread)) {
@@ -129,6 +179,14 @@ extern int iscsi_allocate_thread_sets(u32 thread_pair_count)
 			pr_err("Unable to start iscsi_target_rx_thread\n");
 			break;
 		}
+
+#ifdef CONFIG_MACH_QNAPTS
+		/* 2014/03/08, adamhsu, redmine-7554
+		 * make sure tx/rx thread go to sleep at the same time during
+		 * to create new thread set */
+		complete(&ts->rx_alloc_comp_s0);
+		wait_for_completion(&ts->rx_alloc_comp_s1);
+#endif
 		ts->create_threads = 0;
 
 		iscsi_add_ts_to_inactive_list(ts);
@@ -159,6 +217,7 @@ extern void iscsi_deallocate_thread_sets(void)
 			send_sig(SIGINT, ts->tx_thread, 1);
 			kthread_stop(ts->tx_thread);
 		}
+
 		/*
 		 * Release this thread_id in the thread_set_bitmap
 		 */
@@ -169,6 +228,7 @@ extern void iscsi_deallocate_thread_sets(void)
 
 		released_count++;
 		kfree(ts);
+
 	}
 
 	if (released_count)
@@ -184,6 +244,7 @@ static void iscsi_deallocate_extra_thread_sets(void)
 	orig_count = TARGET_THREAD_SET_COUNT;
 
 	while ((iscsit_global->inactive_ts + 1) > orig_count) {
+
 		ts = iscsi_get_ts_from_inactive_list();
 		if (!ts)
 			break;
@@ -200,6 +261,7 @@ static void iscsi_deallocate_extra_thread_sets(void)
 			send_sig(SIGINT, ts->tx_thread, 1);
 			kthread_stop(ts->tx_thread);
 		}
+
 		/*
 		 * Release this thread_id in the thread_set_bitmap
 		 */
@@ -210,6 +272,7 @@ static void iscsi_deallocate_extra_thread_sets(void)
 
 		released_count++;
 		kfree(ts);
+
 	}
 
 	if (released_count) {
@@ -232,14 +295,22 @@ void iscsi_activate_thread_set(struct iscsi_conn *conn, struct iscsi_thread_set 
 	 * iscsi_rx_thread_pre_handler().
 	 */
 	complete(&ts->rx_start_comp);
+
 	wait_for_completion(&ts->rx_post_start_comp);
 }
 
 struct iscsi_thread_set *iscsi_get_thread_set(void)
 {
+#ifndef CONFIG_MACH_QNAPTS   // 2010/05/13 Nike Chen for solving VMWare connection issue.
 	int allocate_ts = 0;
 	struct completion comp;
+#endif        
 	struct iscsi_thread_set *ts = NULL;
+
+#ifdef CONFIG_MACH_QNAPTS   // 2010/05/13 Nike Chen for solving VMWare connection issue.
+	while (!(ts = iscsi_get_ts_from_inactive_list()))
+		iscsi_allocate_thread_sets(1);
+#else    
 	/*
 	 * If no inactive thread set is available on the first call to
 	 * iscsi_get_ts_from_inactive_list(), sleep for a second and
@@ -258,13 +329,13 @@ get_set:
 		allocate_ts++;
 		goto get_set;
 	}
+#endif  /* #ifdef CONFIG_MACH_QNAPTS */
 
 	ts->delay_inactive = 1;
 	ts->signal_sent = 0;
 	ts->thread_count = 2;
 	init_completion(&ts->rx_restart_comp);
 	init_completion(&ts->tx_restart_comp);
-
 	return ts;
 }
 
@@ -335,7 +406,9 @@ int iscsi_release_thread_set(struct iscsi_conn *conn)
 		}
 		ts->blocked_threads |= ISCSI_BLOCK_RX_THREAD;
 		spin_unlock_bh(&ts->ts_state_lock);
+
 		wait_for_completion(&ts->rx_restart_comp);
+
 		spin_lock_bh(&ts->ts_state_lock);
 		ts->blocked_threads &= ~ISCSI_BLOCK_RX_THREAD;
 	}
@@ -348,7 +421,9 @@ int iscsi_release_thread_set(struct iscsi_conn *conn)
 		}
 		ts->blocked_threads |= ISCSI_BLOCK_TX_THREAD;
 		spin_unlock_bh(&ts->ts_state_lock);
+
 		wait_for_completion(&ts->tx_restart_comp);
+
 		spin_lock_bh(&ts->ts_state_lock);
 		ts->blocked_threads &= ~ISCSI_BLOCK_TX_THREAD;
 	}
@@ -401,6 +476,7 @@ static void iscsi_check_to_add_additional_sets(void)
 static int iscsi_signal_thread_pre_handler(struct iscsi_thread_set *ts)
 {
 	spin_lock_bh(&ts->ts_state_lock);
+
 	if ((ts->status == ISCSI_THREAD_SET_DIE) || signal_pending(current)) {
 		spin_unlock_bh(&ts->ts_state_lock);
 		return -1;
@@ -417,6 +493,11 @@ struct iscsi_conn *iscsi_rx_thread_pre_handler(struct iscsi_thread_set *ts)
 	spin_lock_bh(&ts->ts_state_lock);
 	if (ts->create_threads) {
 		spin_unlock_bh(&ts->ts_state_lock);
+#ifdef CONFIG_MACH_QNAPTS
+		/* 2014/03/08, adamhsu, redmine-7554 */
+		wait_for_completion(&ts->rx_alloc_comp_s0);
+		complete(&ts->rx_alloc_comp_s1);
+#endif
 		goto sleep;
 	}
 
@@ -424,6 +505,7 @@ struct iscsi_conn *iscsi_rx_thread_pre_handler(struct iscsi_thread_set *ts)
 
 	if (ts->delay_inactive && (--ts->thread_count == 0)) {
 		spin_unlock_bh(&ts->ts_state_lock);
+
 		iscsi_del_ts_from_active_list(ts);
 
 		if (!iscsit_global->in_shutdown)
@@ -439,8 +521,11 @@ struct iscsi_conn *iscsi_rx_thread_pre_handler(struct iscsi_thread_set *ts)
 
 	ts->thread_clear &= ~ISCSI_CLEAR_RX_THREAD;
 	spin_unlock_bh(&ts->ts_state_lock);
+
+
 sleep:
 	ret = wait_for_completion_interruptible(&ts->rx_start_comp);
+
 	if (ret != 0)
 		return NULL;
 
@@ -458,6 +543,7 @@ sleep:
 	 */
 	ts->thread_clear |= ISCSI_CLEAR_RX_THREAD;
 	complete(&ts->tx_start_comp);
+
 	wait_for_completion(&ts->tx_post_start_comp);
 
 	return ts->conn;
@@ -470,6 +556,11 @@ struct iscsi_conn *iscsi_tx_thread_pre_handler(struct iscsi_thread_set *ts)
 	spin_lock_bh(&ts->ts_state_lock);
 	if (ts->create_threads) {
 		spin_unlock_bh(&ts->ts_state_lock);
+#ifdef CONFIG_MACH_QNAPTS
+		/* 2014/03/08, adamhsu, redmine-7554 */
+		wait_for_completion(&ts->tx_alloc_comp_s0);
+		complete(&ts->tx_alloc_comp_s1);
+#endif
 		goto sleep;
 	}
 
@@ -477,6 +568,7 @@ struct iscsi_conn *iscsi_tx_thread_pre_handler(struct iscsi_thread_set *ts)
 
 	if (ts->delay_inactive && (--ts->thread_count == 0)) {
 		spin_unlock_bh(&ts->ts_state_lock);
+
 		iscsi_del_ts_from_active_list(ts);
 
 		if (!iscsit_global->in_shutdown)
@@ -485,14 +577,18 @@ struct iscsi_conn *iscsi_tx_thread_pre_handler(struct iscsi_thread_set *ts)
 		iscsi_add_ts_to_inactive_list(ts);
 		spin_lock_bh(&ts->ts_state_lock);
 	}
+
 	if ((ts->status == ISCSI_THREAD_SET_RESET) &&
 	    (ts->thread_clear & ISCSI_CLEAR_TX_THREAD))
 		complete(&ts->tx_restart_comp);
 
 	ts->thread_clear &= ~ISCSI_CLEAR_TX_THREAD;
 	spin_unlock_bh(&ts->ts_state_lock);
+
 sleep:
+
 	ret = wait_for_completion_interruptible(&ts->tx_start_comp);
+
 	if (ret != 0)
 		return NULL;
 

@@ -442,6 +442,39 @@ out:
 	return r;
 }
 
+#ifdef CONFIG_MACH_QNAPTS
+static int dm_blk_compat_ioctl(struct block_device *bdev, fmode_t mode,
+			unsigned int cmd, unsigned long arg)
+{
+	struct mapped_device *md = bdev->bd_disk->private_data;
+	struct dm_table *map = dm_get_live_table(md);
+	struct dm_target *tgt;
+	int r = -ENOTTY;
+
+	if (!map || !dm_table_get_size(map))
+		goto out;
+
+	/* We only support devices that have a single target */
+	if (dm_table_get_num_targets(map) != 1)
+		goto out;
+
+	tgt = dm_table_get_target(map, 0);
+
+	if (dm_suspended_md(md)) {
+		r = -EAGAIN;
+		goto out;
+	}
+
+	if (tgt->type->compat_ioctl)
+		r = tgt->type->compat_ioctl(tgt, cmd, arg);
+
+out:
+	dm_table_put(map);
+
+	return r;
+}
+#endif // CONFIG_MACH_QNAPTS
+
 static struct dm_io *alloc_io(struct mapped_device *md)
 {
 	return mempool_alloc(md->io_pool, GFP_NOIO);
@@ -556,6 +589,7 @@ struct dm_table *dm_get_live_table(struct mapped_device *md)
 
 	return t;
 }
+EXPORT_SYMBOL(dm_get_live_table); // Add by Burton
 
 /*
  * Get the geometry associated with a dm device
@@ -966,24 +1000,73 @@ static sector_t max_io_len_target_boundary(sector_t sector, struct dm_target *ti
 	return ti->len - target_offset;
 }
 
-static sector_t max_io_len(sector_t sector, struct dm_target *ti)
+static sector_t max_io_len_discard(sector_t sector, struct dm_target *ti)
 {
 	sector_t len = max_io_len_target_boundary(sector, ti);
+	sector_t offset, max_len;
 
 	/*
-	 * Does the target need to split even further ?
+	 * Does the target need to split even further?
 	 */
-	if (ti->split_io) {
-		sector_t boundary;
-		sector_t offset = dm_target_offset(ti, sector);
-		boundary = ((offset + ti->split_io) & ~(ti->split_io - 1))
-			   - offset;
-		if (len > boundary)
-			len = boundary;
+	if (ti->max_io_len) {
+		offset = dm_target_offset(ti, sector);
+		if (unlikely(ti->max_io_len & (ti->max_io_len - 1)))
+			max_len = sector_div(offset, ti->max_io_len);
+		else
+			max_len = offset & (ti->max_io_len - 1);
+		max_len = ti->max_io_len - max_len;
+
+		if (len > max_len)
+			len = max_len;
 	}
 
 	return len;
 }
+
+static sector_t max_io_len(sector_t sector, struct dm_target *ti)
+{
+	sector_t len = max_io_len_target_boundary(sector, ti);
+	sector_t offset, max_len;
+	uint32_t max;
+
+	/*
+	 * Does the target need to split even further ?
+	 */
+	if (ti->max_io_len) {
+		// Kevin Liao 20131119: Remove these because we already have merge functions for all dm layers
+		//if ((strcmp(ti->type->name, "thin") == 0) || (strcmp(ti->type->name, "thick") == 0))
+		//	max = 128; // 64kb for raid chunk size...
+		//else
+			max = ti->max_io_len;
+		offset = dm_target_offset(ti, sector);
+		if (unlikely(max & (max - 1)))
+			max_len = sector_div(offset, max);
+		else
+			max_len = offset & (max - 1);
+		max_len = max - max_len;
+
+		if (len > max_len)
+			len = max_len;
+	}
+	//printk("max_io_len0: %s, %s, %lu, %u\n", dm_device_name(dm_table_get_md(ti->table)), ti->type->name, len, ti->max_io_len);
+
+	return len;
+}
+
+int dm_set_target_max_io_len(struct dm_target *ti, sector_t len)
+{
+	if (len > UINT_MAX) {
+		DMERR("Specified maximum size of target IO (%llu) exceeds limit (%u)",
+		      (unsigned long long)len, UINT_MAX);
+		ti->error = "Maximum size of target IO is too large";
+		return -EINVAL;
+	}
+
+	ti->max_io_len = (uint32_t) len;
+
+	return 0;
+}
+EXPORT_SYMBOL_GPL(dm_set_target_max_io_len);
 
 static void __map_bio(struct dm_target *ti, struct bio *clone,
 		      struct dm_target_io *tio)
@@ -1196,8 +1279,12 @@ static int __clone_and_map_discard(struct clone_info *ci)
 		if (!ti->num_discard_requests)
 			return -EOPNOTSUPP;
 
-		len = min(ci->sector_count, max_io_len_target_boundary(ci->sector, ti));
+		if (!ti->split_discard_requests)
+			len = min(ci->sector_count, max_io_len_target_boundary(ci->sector, ti));
+		else
+			len = min(ci->sector_count, max_io_len_discard(ci->sector, ti));
 
+		//printk("__clone_and_map_discard0: %s, %lu, %lu\n", ti->type->name, ci->sector, len);
 		__issue_target_requests(ci, ti, ti->num_discard_requests, len);
 
 		ci->sector += len;
@@ -2761,6 +2848,9 @@ static const struct block_device_operations dm_blk_dops = {
 	.open = dm_blk_open,
 	.release = dm_blk_close,
 	.ioctl = dm_blk_ioctl,
+#ifdef CONFIG_MACH_QNAPTS
+	.compat_ioctl = dm_blk_compat_ioctl,
+#endif // CONFIG_MACH_QNAPTS	
 	.getgeo = dm_blk_getgeo,
 	.owner = THIS_MODULE
 };

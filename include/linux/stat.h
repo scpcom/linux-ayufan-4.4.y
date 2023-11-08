@@ -71,6 +71,11 @@ struct kstat {
 	struct timespec  atime;
 	struct timespec	mtime;
 	struct timespec	ctime;
+//Patch by QNAP: fix ext3 birthtime issue
+#ifdef CONFIG_FS_QNAP_BIRTHTIME
+	struct timespec birthtime; /* birth time */
+#endif
+///////////////////////////////////
 	unsigned long	blksize;
 	unsigned long long	blocks;
 };

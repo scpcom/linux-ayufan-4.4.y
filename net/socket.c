@@ -1754,6 +1754,11 @@ SYSCALL_DEFINE6(recvfrom, int, fd, void __user *, ubuf, size_t, size,
 	iov.iov_base = ubuf;
 	msg.msg_name = (struct sockaddr *)&address;
 	msg.msg_namelen = sizeof(address);
+//Patch by QNAP:initial msg.msg_flags
+#ifdef CONFIG_MACH_QNAPTS
+    msg.msg_flags = 0;
+#endif
+///////////////////////////////////////        
 	if (sock->file->f_flags & O_NONBLOCK)
 		flags |= MSG_DONTWAIT;
 	err = sock_recvmsg(sock, &msg, size, flags);

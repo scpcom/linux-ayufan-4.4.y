@@ -442,7 +442,6 @@ static void mem_serial_out(struct uart_port *p, int offset, int value)
 {
 	int offset1 = map_8250_out_reg(p, offset) << p->regshift;
 	writeb(value, p->membase + offset1);
-
 #ifdef CONFIG_ARCH_M86XXX
 	/* Make sure LCR write wasn't ignored */
 	if (offset == UART_LCR) {
@@ -453,7 +452,10 @@ static void mem_serial_out(struct uart_port *p, int offset, int value)
 			dw8250_force_idle(p);
 			writeb(value, p->membase + offset1);
 		}
+//Patch by QNAP:Not to set LCR
+#ifndef CONFIG_MACH_QNAPTS
 		dev_err(p->dev, "Couldn't set LCR to %d\n", value);
+#endif
 	}
 #endif
 }
@@ -3307,6 +3309,17 @@ static struct uart_8250_port *serial8250_find_match_or_unused(struct uart_port *
 	return NULL;
 }
 
+//Patch by QNAP:Board initialization
+#ifdef CONFIG_MACH_QNAPTS
+int serial8250_write_char(int port, char val)
+{
+    struct uart_8250_port *up = &serial8250_ports[port];
+    serial_out(up, UART_TX, val);
+    return 0;
+}
+EXPORT_SYMBOL(serial8250_write_char);
+#endif
+//////////////////////////
 /**
  *	serial8250_register_port - register a serial port
  *	@port: serial port template

@@ -393,7 +393,7 @@ static inline int core_alua_state_standby(
 	case RECEIVE_DIAGNOSTIC:
 	case SEND_DIAGNOSTIC:
 	case MAINTENANCE_IN:
-		switch (cdb[1]) {
+		switch (cdb[1] & 0x1f) {
 		case MI_REPORT_TARGET_PGS:
 			return 0;
 		default:
@@ -401,7 +401,7 @@ static inline int core_alua_state_standby(
 			return 1;
 		}
 	case MAINTENANCE_OUT:
-		switch (cdb[1]) {
+		switch (cdb[1] & 0x1f) {
 		case MO_SET_TARGET_PGS:
 			return 0;
 		default:
@@ -435,7 +435,7 @@ static inline int core_alua_state_unavailable(
 	case INQUIRY:
 	case REPORT_LUNS:
 	case MAINTENANCE_IN:
-		switch (cdb[1]) {
+		switch (cdb[1] & 0x1f) {
 		case MI_REPORT_TARGET_PGS:
 			return 0;
 		default:
@@ -443,7 +443,7 @@ static inline int core_alua_state_unavailable(
 			return 1;
 		}
 	case MAINTENANCE_OUT:
-		switch (cdb[1]) {
+		switch (cdb[1] & 0x1f) {
 		case MO_SET_TARGET_PGS:
 			return 0;
 		default:
@@ -475,7 +475,7 @@ static inline int core_alua_state_transition(
 	case INQUIRY:
 	case REPORT_LUNS:
 	case MAINTENANCE_IN:
-		switch (cdb[1]) {
+		switch (cdb[1] & 0x1f) {
 		case MI_REPORT_TARGET_PGS:
 			return 0;
 		default:
@@ -1351,11 +1351,21 @@ struct t10_alua_tg_pt_gp *core_alua_allocate_tg_pt_gp(
 	tg_pt_gp->tg_pt_gp_md_buf_len = ALUA_MD_BUF_LEN;
 	atomic_set(&tg_pt_gp->tg_pt_gp_alua_access_state,
 		ALUA_ACCESS_STATE_ACTIVE_OPTMIZED);
+
+#ifdef CONFIG_MACH_QNAPTS 
+	/* 
+	  * Benjamin 20130111: 
+	  * Support REPORT TARGET PORT GROUP only. SET TARGET PORT GROUPS is not supported.
+	  * That means we can enable implict ALUA support by default. See SPC-4 section 6.4.2
+	  */
+	tg_pt_gp->tg_pt_gp_alua_access_type = TPGS_IMPLICT_ALUA;
+#else
 	/*
 	 * Enable both explict and implict ALUA support by default
 	 */
 	tg_pt_gp->tg_pt_gp_alua_access_type =
 			TPGS_EXPLICT_ALUA | TPGS_IMPLICT_ALUA;
+#endif
 	/*
 	 * Set the default Active/NonOptimized Delay in milliseconds
 	 */

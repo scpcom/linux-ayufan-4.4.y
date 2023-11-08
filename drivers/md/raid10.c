@@ -1238,10 +1238,40 @@ static int enough(struct r10conf *conf, int ignore)
 	return 1;
 }
 
+//Patch by QNAP: enhance HAL error handler
+#if defined(CONFIG_MACH_QNAPTS) && defined(QNAP_HAL)
+static int check_mirror_drive_fail(struct mddev *mddev, struct md_rdev *rdev)
+{
+    int ret = -1;
+    struct r10conf *conf = mddev->private;
+    int raid_disk,mirror_disk;
+
+    raid_disk = rdev->raid_disk;
+
+    if (raid_disk < 0)
+        return 0;
+    
+    mirror_disk = raid_disk ^ 1;
+    if (conf->mirrors != NULL)
+    {
+        if (conf->mirrors[mirror_disk].rdev == NULL)
+            ret = 1;
+        else 
+            ret = 0;
+    }
+    return ret;
+}
+#endif
+
 static void error(struct mddev *mddev, struct md_rdev *rdev)
 {
 	char b[BDEVNAME_SIZE];
 	struct r10conf *conf = mddev->private;
+	unsigned long flags;
+
+#if defined(CONFIG_MACH_QNAPTS) && defined(QNAP_HAL)
+    NETLINK_EVT hal_event;
+#endif
 
 	/*
 	 * If it is not operational, then we have already marked it as dead
@@ -1249,30 +1279,85 @@ static void error(struct mddev *mddev, struct md_rdev *rdev)
 	 * next level up know.
 	 * else mark the drive as failed
 	 */
+	spin_lock_irqsave(&conf->device_lock, flags);
+
+//Patch by QNAP: fix bug #48013 on bugZilla
+//to prevent the system restart issue of raid10 when removing two disks of the same set
+//the In_sync flag of rdev should be cleared when the mirror disk is failed
+#if defined(CONFIG_MACH_QNAPTS)
+	if(check_mirror_drive_fail(mddev,rdev) == 1)
+	{
+		printk(KERN_INFO "md/raid10:%s: the mirror disk of disk %d is failed.\n",mdname(mddev), rdev->raid_disk);
+
+		if (test_and_clear_bit(In_sync, &rdev->flags)) {
+                        printk(KERN_INFO "md/raid10:%s: clear In_sync bit of disk %d when the mirror disk is failed.\n",mdname(mddev),rdev->raid_disk);
+			mddev->degraded++;
+			set_bit(MD_RECOVERY_INTR, &mddev->recovery);
+		}			
+	}
+#endif
+
 	if (test_bit(In_sync, &rdev->flags)
 	    && !enough(conf, rdev->raid_disk))
+	{
 		/*
 		 * Don't fail the drive, just return an IO error.
 		 */
-		return;
-	if (test_and_clear_bit(In_sync, &rdev->flags)) {
-		unsigned long flags;
-		spin_lock_irqsave(&conf->device_lock, flags);
-		mddev->degraded++;
-		spin_unlock_irqrestore(&conf->device_lock, flags);
-		/*
-		 * if recovery is running, make sure it aborts.
-		 */
-		set_bit(MD_RECOVERY_INTR, &mddev->recovery);
+                spin_unlock_irqrestore(&conf->device_lock, flags);
+                return;
 	}
+//Patch by QNAP: enhance HAL error handler
+#if defined(CONFIG_MACH_QNAPTS) && defined(QNAP_HAL)
+    if (check_mirror_drive_fail(mddev,rdev) == 1 || test_bit(MD_RECOVERY_RUNNING, &mddev->recovery))
+    {
+        //initial netlink event
+        mddev->recovery_disabled = 1;
+		set_bit(MD_RECOVERY_INTR, &mddev->recovery);
+        if (!test_bit(QMD_ERR_SENT, &rdev->qflags)){
+	        char b[BDEVNAME_SIZE];
+            set_bit(QMD_ERR_SENT, &rdev->qflags);
+            memset(&hal_event, 0, sizeof(NETLINK_EVT));
+            hal_event.type = HAL_EVENT_RAID;
+            hal_event.arg.action = SET_RAID_RO;
+            hal_event.arg.param.netlink_raid.raid_id = simple_strtol(mdname(mddev) + strlen("md"), NULL, 0);    
+            snprintf(hal_event.arg.param.netlink_raid.pd_scsi_name, 
+                    sizeof(hal_event.arg.param.netlink_raid.pd_scsi_name), "/dev/%s", bdevname(rdev->bdev,b));
+            send_hal_netlink(&hal_event);
+        }
+
+        spin_unlock_irqrestore(&conf->device_lock, flags);
+        return;
+    }
+#endif        
+    if (test_and_clear_bit(In_sync, &rdev->flags)) {
+	    mddev->degraded++;
+	    /*
+	     * if recovery is running, make sure it aborts.
+	     */
+	    set_bit(MD_RECOVERY_INTR, &mddev->recovery);
+
+    }
 	set_bit(Blocked, &rdev->flags);
 	set_bit(Faulty, &rdev->flags);
 	set_bit(MD_CHANGE_DEVS, &mddev->flags);
+        spin_unlock_irqrestore(&conf->device_lock, flags);
+
 	printk(KERN_ALERT
 	       "md/raid10:%s: Disk failure on %s, disabling device.\n"
 	       "md/raid10:%s: Operation continuing on %d devices.\n",
 	       mdname(mddev), bdevname(rdev->bdev, b),
 	       mdname(mddev), conf->raid_disks - mddev->degraded);
+//Patch by QNAP: enhance HAL error handler
+#if defined(CONFIG_MACH_QNAPTS) && defined(QNAP_HAL)
+    memset(&hal_event, 0, sizeof(NETLINK_EVT));
+    hal_event.type = HAL_EVENT_RAID;
+    hal_event.arg.action = SET_RAID_PD_ERROR;
+    hal_event.arg.param.netlink_raid.raid_id = simple_strtol(mdname(mddev) + strlen("md"), NULL, 0);    
+    snprintf(hal_event.arg.param.netlink_raid.pd_scsi_name, 
+            sizeof(hal_event.arg.param.netlink_raid.pd_scsi_name), "/dev/%s", bdevname(rdev->bdev,b));
+    send_hal_netlink(&hal_event);
+#endif        
+    
 }
 
 static void print_conf(struct r10conf *conf)
@@ -1815,6 +1900,10 @@ static void fix_read_error(struct r10conf *conf, struct mddev *mddev, struct r10
 	struct md_rdev*rdev;
 	int max_read_errors = atomic_read(&mddev->max_corr_read_errors);
 	int d = r10_bio->devs[r10_bio->read_slot].devnum;
+//Patch by QNAP: enhance HAL error handler
+#if defined(CONFIG_MACH_QNAPTS) && defined(QNAP_HAL)
+    NETLINK_EVT hal_event;
+#endif
 
 	/* still own a reference to this rdev, so it cannot
 	 * have been cleared recently.
@@ -1982,6 +2071,17 @@ static void fix_read_error(struct r10conf *conf, struct mddev *mddev, struct r10
 					       sect + rdev->data_offset),
 				       bdevname(rdev->bdev, b));
 				atomic_add(s, &rdev->corrected_errors);
+//Patch by QNAP: enhance error handler
+#if defined(CONFIG_MACH_QNAPTS) && defined(QNAP_HAL)
+                memset(&hal_event, 0, sizeof(NETLINK_EVT));
+                hal_event.type = HAL_EVENT_RAID;
+                hal_event.arg.action = REPAIR_RAID_READ_ERROR;
+                hal_event.arg.param.netlink_raid.raid_id = simple_strtol(mdname(mddev) + strlen("md"), NULL, 0);    
+                snprintf(hal_event.arg.param.netlink_raid.pd_scsi_name, 
+                        sizeof(hal_event.arg.param.netlink_raid.pd_scsi_name), "/dev/%s", bdevname(rdev->bdev, b));
+                hal_event.arg.param.netlink_raid.pd_repair_sector = (unsigned long long)(r10_bio->devs[sl].addr + sect + rdev->data_offset);    
+                send_hal_netlink(&hal_event);
+#endif                            
 			}
 
 			rdev_dec_pending(rdev, mddev);
@@ -2117,6 +2217,14 @@ read_more:
 		bio_put(bio);
 	slot = r10_bio->read_slot;
 	rdev = conf->mirrors[mirror].rdev;
+//Patch by QNAP: enhance HAL error handler
+#if defined(CONFIG_MACH_QNAPTS) && defined(QNAP_HAL)
+    if (test_bit(QMD_ERR_SENT, &rdev->qflags))
+    {
+	    raid_end_bio_io(r10_bio);
+        return;
+    }
+#endif                    
 	printk_ratelimited(
 		KERN_ERR
 		"md/raid10:%s: %s: redirecting "
@@ -2901,6 +3009,12 @@ static int run(struct mddev *mddev)
 
 	chunk_size = mddev->chunk_sectors << 9;
 	blk_queue_io_min(mddev->queue, chunk_size);
+
+#if defined(CONFIG_MACH_QNAPTS)
+	/*  assign max hw sector for performance because linux-3.2 has such issue */
+	blk_queue_max_hw_sectors(mddev->queue, mddev->chunk_sectors);
+#endif
+        
 	if (conf->raid_disks % conf->near_copies)
 		blk_queue_io_opt(mddev->queue, chunk_size * conf->raid_disks);
 	else

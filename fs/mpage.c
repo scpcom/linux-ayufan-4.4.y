@@ -475,6 +475,17 @@ static int __mpage_writepage(struct page *page, struct writeback_control *wbc,
 		/* If they're all mapped and dirty, do it */
 		page_block = 0;
 		do {
+			//George Wu, 20130708, BLKDEV_WRITEPAGES work-around
+#ifdef CONFIG_MACH_QNAPTS
+#ifdef USE_BLKDEV_WRITEPAGES			
+			if(buffer_locked(bh))
+			{
+				//printk(KERN_DEBUG "[BLKDEV_WRITEPAGES] " "buffer_locked(%lx)=%d\n", (void *)bh, buffer_locked(bh));
+                wait_on_buffer(bh);
+				//printk(KERN_DEBUG "[BLKDEV_WRITEPAGES] " "wait_on_buffer(%lx) is finished\n", (void *)bh);
+			}
+#endif
+#endif
 			BUG_ON(buffer_locked(bh));
 			if (!buffer_mapped(bh)) {
 				/*

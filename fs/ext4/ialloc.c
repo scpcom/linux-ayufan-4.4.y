@@ -393,7 +393,12 @@ static int find_group_orlov(struct super_block *sb, struct inode *parent,
 		if (qstr) {
 			hinfo.hash_version = DX_HASH_HALF_MD4;
 			hinfo.seed = sbi->s_hash_seed;
+//Patch by QNAP:Search filename use case insensitive method
+#ifdef QNAP_SEARCH_FILENAME_CASE_INSENSITIVE
+			ext4fs_dirhash(qstr->name, qstr->len, &hinfo,ntohl(sbi->s_es->s_hash_magic) == QNAP_SB_HASH);
+#else                        
 			ext4fs_dirhash(qstr->name, qstr->len, &hinfo);
+#endif
 			grp = hinfo.hash;
 		} else
 			get_random_bytes(&grp, sizeof(grp));

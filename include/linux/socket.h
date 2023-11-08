@@ -273,7 +273,11 @@ struct ucred {
 #define MSG_SENDPAGE_NOTLAST 0x20000 /* sendpage() internal : not the last page */
 #if defined(CONFIG_COMCERTO_IMPROVED_SPLICE)
 #define MSG_KERNSPACE   0x40000
-#define MSG_NOCATCHSIG	0x80000
+// MSG_NOCATCHSIG which defined by mindspeed
+// is the same as MSG_NOCATCHSIGNAL which defined by QNAP
+// Change MSG_NOCATCHSIG to MSG_NOCATCHSIGNAL
+//#define MSG_NOCATCHSIG	0x80000
+#define MSG_NOCATCHSIGNAL	0x80000
 #endif
 #define MSG_EOF         MSG_FIN
 
@@ -285,7 +289,6 @@ struct ucred {
 #else
 #define MSG_CMSG_COMPAT	0		/* We never have 32 bit fixups */
 #endif
-
 
 /* Setsockoptions(2) level. Thanks to BSD these must match IPPROTO_xxx */
 #define SOL_IP		0

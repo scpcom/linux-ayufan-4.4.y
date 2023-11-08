@@ -39,6 +39,12 @@
 #include "iscsi_target_stat.h"
 #include "iscsi_target_configfs.h"
 
+
+#if defined(QNAP_HAL)
+#include <qnap/hal_event.h>
+extern int send_hal_netlink(NETLINK_EVT *event);
+#endif
+
 struct target_fabric_configfs *lio_target_fabric_configfs;
 
 struct lio_target_configfs_attribute {
@@ -171,6 +177,9 @@ struct se_tpg_np *lio_target_call_addnptotpg(
 	unsigned long port;
 	int ret;
 	char buf[MAX_PORTAL_LEN + 1];
+#ifdef CONFIG_MACH_QNAPTS // Benjamin 20110302: for handling IPv6 device name(%ethn)
+    char *end_ptr, *ifdev_str = NULL; 
+#endif /* #ifdef CONFIG_MACH_QNAPTS */        
 
 	if (strlen(name) > MAX_PORTAL_LEN) {
 		pr_err("strlen(name): %d exceeds MAX_PORTAL_LEN: %d\n",
@@ -203,7 +212,38 @@ struct se_tpg_np *lio_target_call_addnptotpg(
 		}
 		*port_str = '\0'; /* Terminate string for IP */
 		port_str++; /* Skip over ":" */
-
+#ifdef CONFIG_MACH_QNAPTS // Benjamin 20110302: for handling IPv6 device name(%ethn) 
+        //Remember we manually set %ethn as :n right after portal in iscsi_create_network_portal() in iscsi_util.
+        /*
+                http://tldp.org/HOWTO/Linux+IPv6-HOWTO/chapter-section-using-api.html:
+                The sin6_scope_id field has an odd use, and it seems that the IPv6 designers took a huge step backwards when devising this. 
+                Apparently, 128-bit IPv6 network addresses are not unique. 
+                For example, it is possible to have two hosts, on separate networks, with the same link-local address. 
+                In order to pass information to a specific host, more than just the network address is required; 
+                the scope identifier must also be specified. 
+                In Linux, the network interface name is used for the scope identifier (e.g. ¡§eth0¡¨) 
+                [be warned that the scope identifier is implementation dependent!]. 
+                A colon-hex network address can be augmented with the scope identifier to produce a "scoped address¡¨. 
+                The percent sign ('%') is used to delimit the network address from the scope identifier. 
+                For example, fe80::1%eth0 is a scoped IPv6 address where fe80::1 represents the 128-bit network address 
+                and eth0 is the network interface (i.e. the scope identifier). 
+                Thus, if a host resides on two networks, such as Host B in example below, the user now has to know 
+                which path to take in order to get to a particular host. 
+                Host B addresses Host A using the scoped address fe80::1%eth0, while Host C is addressed with fe80::1%eth1.
+                
+                Host A (fe80::1) ---- eth0 ---- Host B ---- eth1 ---- Host C (fe80::1)
+            */
+        // format example: [fe80::208:9bff:febd:92f5]:3260:2    
+        if((ifdev_str = strstr(port_str, ":"))) {
+            *ifdev_str = '\0'; /* Terminate string for PORT */
+            ifdev_str += 1;    /* Skip over ":" */   
+            snprintf((char *)name, MAX_PORTAL_LEN, "%s]:%s", buf, port_str);   /* Remove the ifdev index */           
+        }        
+#endif /* #ifdef CONFIG_MACH_QNAPTS */        
+        // strict_strtoul converts a string to an unsigned long only if the string is really an unsigned long string, 
+        // any string containing any invalid char at the tail will be rejected and -EINVAL is returned, 
+        // only a newline char at the tail is acceptible because people generally change a module parameter 
+        // by "echo", and echo will append a newline to the tail.        
 		ret = strict_strtoul(port_str, 0, &port);
 		if (ret < 0) {
 			pr_err("strict_strtoul() failed for port_str: %d\n", ret);
@@ -212,6 +252,10 @@ struct se_tpg_np *lio_target_call_addnptotpg(
 		sock_in6 = (struct sockaddr_in6 *)&sockaddr;
 		sock_in6->sin6_family = AF_INET6;
 		sock_in6->sin6_port = htons((unsigned short)port);
+#ifdef CONFIG_MACH_QNAPTS // Benjamin 20110302: for handling IPv6 device name(%ethn) 
+		sock_in6->sin6_scope_id = ifdev_str ? 
+		                          simple_strtoul(ifdev_str, &end_ptr, 0) : 0;
+#endif        
 		ret = in6_pton(str, IPV6_ADDRESS_SPACE,
 				(void *)&sock_in6->sin6_addr.in6_u, -1, &end);
 		if (ret <= 0) {
@@ -599,7 +643,158 @@ static ssize_t lio_target_nacl_show_info(
 	struct iscsi_conn *conn;
 	struct se_session *se_sess;
 	ssize_t rb = 0;
+#ifdef CONFIG_MACH_QNAPTS // 2009/09/23 Nike Chen add for default initiator
+   	struct se_portal_group *se_tpg = NULL;
+	struct se_node_acl *acl;
+	struct iscsi_sess_ops *sess_ops;
+#ifdef QNAP_KERNEL_STORAGE_V2
+        struct file *fd;
+        mm_segment_t fs;
+        char *data_t=NULL;
+        char path_t[512];
+        struct se_wwn *wwn;
+	struct iovec iov[1];
+	int first_conn, rret=0;
+#endif
+	if (se_nacl)
+		se_tpg = se_nacl->se_tpg;
+	else {
+		pr_err("%s:can't get the se_tpg\n", __func__);
+		return rb;
+	}
 
+	if (se_tpg) {
+#ifdef QNAP_KERNEL_STORAGE_V2	
+		wwn=se_tpg->se_tpg_wwn;
+		snprintf(path_t,sizeof(path_t),"/tmp/%s/%s/target_info",wwn->wwn_group.cg_item.ci_name,se_nacl->initiatorname);
+		fd = filp_open(path_t, O_CREAT | O_WRONLY | O_TRUNC , S_IRWXU);
+	        if (!IS_ERR (fd))
+	                filp_close(fd, NULL);
+		else{
+			pr_err("path error:%s< \n",path_t);
+			return rb;
+		}
+		
+		data_t = kzalloc(PAGE_SIZE, GFP_KERNEL);
+		if (!data_t) {
+			return 0;
+		}
+#endif
+	        spin_lock_bh(&se_tpg->acl_node_lock);
+	        list_for_each_entry(acl, &se_tpg->acl_node_list, acl_list) {
+			spin_lock_bh(&acl->nacl_sess_lock);
+			if ((se_sess = acl->nacl_sess)) {
+#ifdef QNAP_KERNEL_STORAGE_V2
+				rb=0;
+				memset(data_t,0,PAGE_SIZE);
+#endif
+
+		                sess = (struct iscsi_session *)se_sess->fabric_sess_ptr;
+		                sess_ops = sess->sess_ops;
+#ifdef QNAP_KERNEL_STORAGE_V2
+				rb += sprintf(data_t+rb, "SID,%u,%hu,"
+					"%d,", sess->sid, sess->tsih, atomic_read(&sess->nconn));
+				rb += sprintf(data_t+rb, "%s,",
+					(sess_ops->SessionType) ? "Discovery" : "Normal");
+				rb += sprintf(data_t+rb, 
+					"%hu,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u\n",
+					sess_ops->TargetPortalGroupTag, sess_ops->InitialR2T, 
+					sess_ops->ImmediateData, sess_ops->MaxOutstandingR2T, 
+					sess_ops->FirstBurstLength, sess_ops->MaxBurstLength,
+					sess_ops->DataSequenceInOrder, sess_ops->DataPDUInOrder,
+					sess_ops->ErrorRecoveryLevel, sess_ops->MaxConnections,
+					sess_ops->DefaultTime2Wait, sess_ops->DefaultTime2Retain);
+#else
+				// Benjamin 20121214 add for showing the smi-s session parameters.
+				rb += sprintf(page+rb, "Session ID=%u,TSIH=%hu,"
+					"CurrentConnections=%d,", sess->sid, sess->tsih, atomic_read(&sess->nconn));
+				rb += sprintf(page+rb, "SessionType=%s,",
+					(sess_ops->SessionType) ? "Discovery" : "Normal");
+				rb += sprintf(page+rb, 
+					TARGETPORTALGROUPTAG"=%hu,"INITIALR2T"=%u,"
+					IMMEDIATEDATA"=%u,"MAXOUTSTANDINGR2T"=%u,"
+					FIRSTBURSTLENGTH"=%u,"MAXBURSTLENGTH"=%u,"
+					DATASEQUENCEINORDER"=%u,"DATAPDUINORDER"=%u,"
+					ERRORRECOVERYLEVEL"=%u,"MAXCONNECTIONS"=%u,"
+					DEFAULTTIME2WAIT"=%u,"DEFAULTTIME2RETAIN"=%u\n",
+					sess_ops->TargetPortalGroupTag, sess_ops->InitialR2T, 
+					sess_ops->ImmediateData, sess_ops->MaxOutstandingR2T, 
+					sess_ops->FirstBurstLength, sess_ops->MaxBurstLength,
+					sess_ops->DataSequenceInOrder, sess_ops->DataPDUInOrder,
+					sess_ops->ErrorRecoveryLevel, sess_ops->MaxConnections,
+					sess_ops->DefaultTime2Wait, sess_ops->DefaultTime2Retain);
+#endif
+				// show the first connection only
+#ifdef QNAP_KERNEL_STORAGE_V2
+				first_conn=0;
+#endif
+				spin_lock(&sess->conn_lock);
+				list_for_each_entry(conn, &sess->sess_conn_list, conn_list) {                
+					if (conn) {
+#ifdef QNAP_KERNEL_STORAGE_V2
+						if(!first_conn){
+							rb += sprintf(data_t + rb, "IQN,%s,%s,%lld\n",
+							sess_ops->InitiatorName, conn->login_ip, sess->login_time);
+							first_conn=1;
+						}else{ 
+							rb += sprintf(data_t + rb, "!,%s\n",conn->login_ip);
+						}
+#else
+						rb += sprintf(page + rb, "InitiatorName=%s,IP=%s,Login=%lld\n",
+							sess_ops->InitiatorName, conn->login_ip, sess->login_time);      
+#endif
+					}
+				}
+				spin_unlock(&sess->conn_lock);
+
+#ifdef QNAP_KERNEL_STORAGE_V2
+				spin_unlock_bh(&acl->nacl_sess_lock);
+				spin_unlock_bh(&se_tpg->acl_node_lock);
+
+				fd = filp_open(path_t, O_CREAT | O_WRONLY | O_APPEND , S_IRWXU);
+	
+				if (!IS_ERR (fd)) {
+					mutex_lock(&sess->info_mutex);
+	                                memset(iov, 0, sizeof(struct iovec));
+	                                iov[0].iov_base = &data_t[0];
+	                                iov[0].iov_len = rb;
+					fs = get_fs();
+					set_fs(get_ds());
+					rret=vfs_writev(fd, &iov[0], 1, &fd->f_pos);
+					set_fs(fs);
+					if(rret < 0){
+						pr_err("vfs_writev error!!");
+						filp_close(fd, NULL);
+						mutex_unlock(&sess->info_mutex);
+						rb=0;
+						kfree(data_t);
+						return rb;
+					}
+					filp_close(fd, NULL);
+					mutex_unlock(&sess->info_mutex);
+				}
+				spin_lock_bh(&acl->nacl_sess_lock);
+				spin_lock_bh(&se_tpg->acl_node_lock);
+#endif
+	
+			}
+			spin_unlock_bh(&acl->nacl_sess_lock);
+#ifndef QNAP_KERNEL_STORAGE_V2
+		// Benjamin 20130315 for BUG 31457: fill_read_buffer() in configfs can only read one page. If exceeds, BUG_ON!
+		if (rb + 1024 > PAGE_SIZE)
+			break;
+#endif
+	        }
+	        spin_unlock_bh(&se_tpg->acl_node_lock);
+#ifdef QNAP_KERNEL_STORAGE_V2
+		kfree(data_t);
+	}
+	return 0;
+#else
+	}
+#endif
+
+#else /* #ifdef CONFIG_MACH_QNAPTS */
 	spin_lock_bh(&se_nacl->nacl_sess_lock);
 	se_sess = se_nacl->nacl_sess;
 	if (!se_sess) {
@@ -708,11 +903,95 @@ static ssize_t lio_target_nacl_show_info(
 		spin_unlock(&sess->conn_lock);
 	}
 	spin_unlock_bh(&se_nacl->nacl_sess_lock);
-
+#endif /* #ifdef CONFIG_MACH_QNAPTS */
 	return rb;
 }
 
 TF_NACL_BASE_ATTR_RO(lio_target, info);
+
+
+/*
+#define TF_NACL_BASE_ATTR_RO_P(name)						\
+static ssize_t lio_target_nacl_show_##name(					\
+	struct se_node_acl *se_nacl,						\
+	char *page)								\
+{										\
+	struct iscsi_session *sess;						\
+	struct iscsi_conn *conn;						\
+	struct se_session *se_sess;						\
+	ssize_t rb = 0;								\
+   	struct se_portal_group *se_tpg = NULL;					\
+	struct se_node_acl *acl;						\
+	struct iscsi_sess_ops *sess_ops;					\
+        int p_length=8;								\
+        int p_num=0;								\
+        int count_t=0;								\
+	int c_p=0;								\
+										\
+	sscanf(__func__, "lio_target_nacl_show_info%d",&p_num);			\
+										\
+    if (se_nacl)								\
+        se_tpg = se_nacl->se_tpg;						\
+    else {									\
+        pr_err("%s:can't get the se_tpg\n", __func__);				\
+        return rb;								\
+    }										\
+            									\
+    if (se_tpg) {								\
+        spin_lock_bh(&se_tpg->acl_node_lock);					\
+										\
+        list_for_each_entry(acl, &se_tpg->acl_node_list, acl_list) {		\
+            spin_lock_bh(&acl->nacl_sess_lock);					\
+            if ((se_sess = acl->nacl_sess)) {					\
+                if(( count_t < (p_length*p_num) ) || (count_t >= (p_length*(p_num+1))) )\
+                        goto skip;						\
+										\
+                sess = (struct iscsi_session *)se_sess->fabric_sess_ptr;	\
+                sess_ops = sess->sess_ops;					\
+                								\
+                rb += sprintf(page+rb, "%u,%hu,"				\
+                        "%d,", sess->sid, sess->tsih, atomic_read(&sess->nconn));\
+                rb += sprintf(page+rb, "%s,",					\
+                        (sess_ops->SessionType) ? "Discovery" : "Normal");	\
+                rb += sprintf(page+rb,					\
+                        "%hu,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,",		\
+                        sess_ops->TargetPortalGroupTag, sess_ops->InitialR2T,	\
+                        sess_ops->ImmediateData, sess_ops->MaxOutstandingR2T,	\
+                        sess_ops->FirstBurstLength, sess_ops->MaxBurstLength,	\
+                        sess_ops->DataSequenceInOrder, sess_ops->DataPDUInOrder,\
+                        sess_ops->ErrorRecoveryLevel, sess_ops->MaxConnections,	\
+                        sess_ops->DefaultTime2Wait, sess_ops->DefaultTime2Retain);\
+										\
+		c_p=0;								\
+                spin_lock(&sess->conn_lock);					\
+                list_for_each_entry(conn, &sess->sess_conn_list, conn_list) {   \
+                    if (conn) {							\
+			if(!c_p){						\
+                        	rb += sprintf(page + rb, "%s,%s,%lld,",		\
+                        	sess_ops->InitiatorName, conn->login_ip, sess->login_time);\
+				c_p++;						\
+			}else							\
+				rb += sprintf(page + rb, "!%s",		\
+				conn->login_ip);				\
+                    }								\
+                }								\
+                spin_unlock(&sess->conn_lock);					\
+skip:										\
+                count_t++;							\
+	    }									\
+            spin_unlock_bh(&acl->nacl_sess_lock);				\
+        }									\
+        spin_unlock_bh(&se_tpg->acl_node_lock);					\
+    }										\
+										\
+	return rb;								\
+}
+
+
+TF_NACL_BASE_ATTR_RO_P(info0);
+TF_NACL_BASE_ATTR_RO(lio_target, info0);
+*/
+
 
 static ssize_t lio_target_nacl_show_cmdsn_depth(
 	struct se_node_acl *se_nacl,
@@ -779,6 +1058,9 @@ TF_NACL_BASE_ATTR(lio_target, cmdsn_depth, S_IRUGO | S_IWUSR);
 static struct configfs_attribute *lio_target_initiator_attrs[] = {
 	&lio_target_nacl_info.attr,
 	&lio_target_nacl_cmdsn_depth.attr,
+/*
+        &lio_target_nacl_info_m.attr,
+*/
 	NULL,
 };
 
@@ -1260,7 +1542,17 @@ static ssize_t lio_target_wwn_show_attr_lio_version(
 	struct target_fabric_configfs *tf,
 	char *page)
 {
+#ifdef CONFIG_MACH_QNAPTS   // Benjamin 20110730 for QNAP ID
+#if defined(Athens)
+	return sprintf(page, "Cisco Linux-iSCSI Target "ISCSIT_VERSION"\n");
+#elif defined(IS_G)
+	return sprintf(page, "Linux-iSCSI Target "ISCSIT_VERSION"\n");
+#else
+	return sprintf(page, "QNAP Linux-iSCSI Target "ISCSIT_VERSION"\n");
+#endif
+#else   /* #ifdef CONFIG_MACH_QNAPTS */
 	return sprintf(page, "RisingTide Systems Linux-iSCSI Target "ISCSIT_VERSION"\n");
+#endif  /* #ifdef CONFIG_MACH_QNAPTS */
 }
 
 TF_WWN_ATTR_RO(lio_target, lio_version);
@@ -1557,10 +1849,33 @@ static int lio_write_pending_status(struct se_cmd *se_cmd)
 
 static int lio_queue_status(struct se_cmd *se_cmd)
 {
+
 	struct iscsi_cmd *cmd = container_of(se_cmd, struct iscsi_cmd, se_cmd);
 
+#if defined(CONFIG_MACH_QNAPTS)
+	/* 2014/08/16, adamhsu, redmine 9055,9076,9278 */
+	if (__do_check_set_send_status_func1(se_cmd)){
+		pr_info("[%s] cmd(ITT:0x%8x) got ABORT req, to exit now\n",
+			__func__, cmd->init_task_tag);
+		return 0;
+	}
+
+	if (__do_check_set_send_status_func2(se_cmd)){
+		pr_info("[%s (tmf)] cmd(ITT:0x%8x) got ABORT req, to exit now\n",
+			__func__, cmd->init_task_tag);
+		return 0;
+	}
+#endif
+
 	cmd->i_state = ISTATE_SEND_STATUS;
+#ifdef CONFIG_MACH_QNAPTS // Benjamin 20110822: CONN(cmd) may be NULL !!
+    if (cmd->conn)
+	    iscsit_add_cmd_to_response_queue(cmd, cmd->conn, cmd->i_state);
+    else
+		pr_warning("%s:cmd->conn is NULL!!\n", __func__);
+#else
 	iscsit_add_cmd_to_response_queue(cmd, cmd->conn, cmd->i_state);
+#endif    
 	return 0;
 }
 
@@ -1712,10 +2027,95 @@ static void lio_set_default_node_attributes(struct se_node_acl *se_acl)
 	iscsit_set_default_node_attribues(acl);
 }
 
-static void lio_release_cmd(struct se_cmd *se_cmd)
+#ifdef CONFIG_MACH_QNAPTS // 2009/09/23 Nike Chen add for default initiator
+extern void lio_copy_node_attributes (struct se_node_acl *dest_se_acl, struct se_node_acl *src_se_acl)
+{
+	struct iscsi_node_acl *dest_acl = container_of(dest_se_acl, struct iscsi_node_acl, se_node_acl);
+	struct iscsi_node_acl *src_acl = container_of(src_se_acl, struct iscsi_node_acl, se_node_acl);
+    
+	ISCSI_NODE_ATTRIB(dest_acl)->nacl = dest_acl;
+	iscsi_copy_node_attribues(dest_acl, src_acl);
+	return;
+}
+
+/* 2014/04/06, adamhsu, redmine 7904 
+ * Add hook code to increase MaxCmdSn
+ */
+static void lio_inc_maxcmdsn(struct se_cmd *se_cmd)
 {
 	struct iscsi_cmd *cmd = container_of(se_cmd, struct iscsi_cmd, se_cmd);
 
+	iscsit_increment_maxcmdsn(cmd, cmd->conn->sess);
+}
+
+/* 2014/04/06, adamhsu, redmine 7923
+ * Add hook code to remove the relationship
+ */
+static void lio_del_cmd_from_conn_list(struct se_cmd *se_cmd)
+{
+	struct iscsi_cmd *cmd = container_of(se_cmd, struct iscsi_cmd, se_cmd);
+	struct iscsi_conn *conn = cmd->conn;
+
+	spin_lock_bh(&conn->cmd_lock);
+	pr_debug("del cmd:0x%p, se_cmd:0x%p from conn list:0x%p\n",
+		cmd, &cmd->se_cmd, conn);
+	list_del_init(&cmd->i_list);
+	spin_unlock_bh(&conn->cmd_lock);
+}
+
+
+/* 2014/08/16, adamhsu, redmine 9055,9076,9278 (start) */
+static int lio_set_clear_delay_remove(
+	struct se_cmd *se_cmd, 
+	int opt, 
+	int to_lock
+	)
+{
+	struct iscsi_cmd *cmd = container_of(se_cmd, struct iscsi_cmd, se_cmd);
+
+	if ((opt == 0 || opt == 1) && (to_lock == 0 || to_lock == 1)){
+
+		if (to_lock)
+			spin_lock_bh(&cmd->istate_lock);
+
+		pr_debug("[%s] %s ICF_DELAYED_REMOVE for cmd(ITT:0x%8x)\n",
+				__func__, ((opt) ? "set" : "clear"), 
+				cmd->init_task_tag);
+
+		if (opt)
+			cmd->cmd_flags |= ICF_DELAYED_REMOVE;
+		else
+			cmd->cmd_flags &= ~ICF_DELAYED_REMOVE;
+
+		if (to_lock)
+			spin_unlock_bh(&cmd->istate_lock);
+	}
+	return 0;
+}
+
+
+static int lio_tmf_queue_status(struct se_cmd *se_cmd)
+{
+	struct iscsi_cmd *cmd = container_of(se_cmd, struct iscsi_cmd, se_cmd);
+	
+	cmd->i_state = ISTATE_SEND_STATUS;
+
+	pr_debug("[%s] cmd(ITT:0x%8x), TAS resp:0x%x\n",__func__, 
+		cmd->init_task_tag, cmd->se_cmd.tmf_resp_tas);
+
+	if (cmd->conn)
+		iscsit_add_cmd_to_response_queue(cmd, cmd->conn, cmd->i_state);
+	else
+		pr_warning("%s:cmd->conn is NULL!!\n", __func__);
+
+	return 0;
+}
+/* 2014/08/16, adamhsu, redmine 9055,9076,9278 (end) */
+#endif
+
+static void lio_release_cmd(struct se_cmd *se_cmd)
+{
+	struct iscsi_cmd *cmd = container_of(se_cmd, struct iscsi_cmd, se_cmd);
 	iscsit_release_cmd(cmd);
 }
 
@@ -1765,6 +2165,21 @@ int iscsi_target_register_configfs(void)
 	fabric->tf_ops.write_pending_status = &lio_write_pending_status;
 	fabric->tf_ops.set_default_node_attributes =
 				&lio_set_default_node_attributes;
+#ifdef CONFIG_MACH_QNAPTS   // 2009/09/23 Nike Chen add for default initiator
+	fabric->tf_ops.copy_node_attributes = &lio_copy_node_attributes;
+
+	/* 2014/04/06, adamhsu, redmine 7904 */
+	fabric->tf_ops.inc_maxcmdsn = &lio_inc_maxcmdsn;
+
+	/* 2014/04/06, adamhsu, redmine 7923 */
+	fabric->tf_ops.del_cmd_from_conn_list = &lio_del_cmd_from_conn_list;
+
+	/* 2014/08/16, adamhsu, redmine 9055,9076,9278 */
+	fabric->tf_ops.set_clear_delay_remove = &lio_set_clear_delay_remove;
+	fabric->tf_ops.tmf_queue_status = &lio_tmf_queue_status;
+#endif	        
+
+
 	fabric->tf_ops.get_task_tag = &iscsi_get_task_tag;
 	fabric->tf_ops.get_cmd_state = &iscsi_get_cmd_state;
 	fabric->tf_ops.queue_data_in = &lio_queue_data_in;

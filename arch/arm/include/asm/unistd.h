@@ -405,6 +405,20 @@
 #define __NR_process_vm_readv		(__NR_SYSCALL_BASE+376)
 #define __NR_process_vm_writev		(__NR_SYSCALL_BASE+377)
 
+
+//#ifdef CONFIG_MACH_QNAPTS
+//Patch by QNAP: Add IP filter
+//Patch by QNAP: Add for recycle_bin feature
+#define __NR_set_ipsec_rules            (__NR_SYSCALL_BASE+378)
+#define __NR_get_ipsec_vio_acc_list     (__NR_SYSCALL_BASE+379)
+#define __NR_qnap_rmdir                 (__NR_SYSCALL_BASE+380)
+#define __NR_qnap_unlink                (__NR_SYSCALL_BASE+381)
+#define __NR_qnap_find_filename         (__NR_SYSCALL_BASE+382)
+///////////////////////////////////////////////////////////////
+//#endif // CONFIG_MACH_QNAPTS
+
+
+
 /*
  * The following SWIs are ARM private.
  */

@@ -1825,8 +1825,11 @@ static ssize_t btrfs_splice_from_socket(struct file *file, struct socket *sock,
 
 	recvtimeo = sock->sk->sk_rcvtimeo;
 	sock->sk->sk_rcvtimeo = 8 * HZ;
+    // MSG_NOCATCHSIG which defined by mindspeed
+    // is the same as MSG_NOCATCHSIGNAL which defined by QNAP
+    // Change MSG_NOCATCHSIG to MSG_NOCATCHSIGNAL
 	copied = kernel_recvmsg(sock, &msg, iov, num_pages, count,
-                             MSG_WAITALL | MSG_NOCATCHSIG);
+                             MSG_WAITALL | MSG_NOCATCHSIGNAL);
 	sock->sk->sk_rcvtimeo = recvtimeo;
 
 	if (copied < 0) {

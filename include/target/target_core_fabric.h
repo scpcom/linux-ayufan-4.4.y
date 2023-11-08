@@ -1,6 +1,11 @@
 #ifndef TARGET_CORE_FABRIC_H
 #define TARGET_CORE_FABRIC_H
 
+/* 20140513, adamhsu, redmine 8253 */
+#ifdef CONFIG_MACH_QNAPTS
+#include <linux/version.h>
+#endif
+
 struct target_core_fabric_ops {
 	struct configfs_subsystem *tf_subsys;
 	/*
@@ -68,6 +73,21 @@ struct target_core_fabric_ops {
 	int (*write_pending)(struct se_cmd *);
 	int (*write_pending_status)(struct se_cmd *);
 	void (*set_default_node_attributes)(struct se_node_acl *);
+#ifdef CONFIG_MACH_QNAPTS   // 2009/09/23 Nike Chen add for default initiator 
+	void (*copy_node_attributes) (struct se_node_acl *, struct se_node_acl *);
+
+	/* 2014/04/06, adamhsu, redmine 7904 */
+	void (*inc_maxcmdsn)(struct se_cmd *);
+
+	/* 2014/04/06, adamhsu, redmine 7923 */
+	void (*del_cmd_from_conn_list)(struct se_cmd *);
+
+	/* 2014/08/16, adamhsu, redmine 9055,9076,9278 */
+	int (*set_clear_delay_remove)(struct se_cmd *, int, int);
+	int (*tmf_queue_status)(struct se_cmd *);
+
+
+#endif        
 	u32 (*get_task_tag)(struct se_cmd *);
 	int (*get_cmd_state)(struct se_cmd *);
 	int (*queue_data_in)(struct se_cmd *);
@@ -97,6 +117,35 @@ struct target_core_fabric_ops {
 };
 
 struct se_session *transport_init_session(void);
+
+
+
+#ifdef CONFIG_MACH_QNAPTS
+
+/* 2014/08/16, adamhsu, redmine 9055,9076,9278 */
+int __do_check_cmd_aborted_func1(struct se_cmd *se_cmd);
+int __do_check_cmd_aborted_func2(struct se_cmd *se_cmd);
+int __do_check_set_send_status_func1(struct se_cmd *se_cmd);
+int __do_check_set_send_status_func2(struct se_cmd *se_cmd);
+
+
+#if defined(SUPPORT_TP)
+/* 2014/06/14, adamhsu, redmine 8530 (start) */
+int __get_file_lba_map_status(struct se_device *se_dev,  
+	struct block_device *bd, struct inode *inode,
+	sector_t lba, u32 *desc_count, u8 *desc_buf);
+
+/* 2014/06/14, adamhsu, redmine 8530 (start) */
+#endif
+
+/* 20140513, adamhsu, redmine 8253 */
+#if (LINUX_VERSION_CODE == KERNEL_VERSION(3,12,6))
+int transport_alloc_session_tags(struct se_session *, unsigned int,
+		unsigned int);
+struct se_session *transport_init_session_tags(unsigned int, unsigned int);
+#endif
+#endif
+
 void	__transport_register_session(struct se_portal_group *,
 		struct se_node_acl *, struct se_session *, void *);
 void	transport_register_session(struct se_portal_group *,
@@ -113,6 +162,18 @@ void	transport_init_se_cmd(struct se_cmd *, struct target_core_fabric_ops *,
 		struct se_session *, u32, int, int, unsigned char *);
 int	transport_lookup_cmd_lun(struct se_cmd *, u32);
 int	transport_generic_allocate_tasks(struct se_cmd *, unsigned char *);
+
+/* 20140513, adamhsu, redmine 8253 */
+#ifdef CONFIG_MACH_QNAPTS
+#if (LINUX_VERSION_CODE == KERNEL_VERSION(3,12,6))
+int	target_submit_cmd_map_sgls(struct se_cmd *, struct se_session *,
+		unsigned char *, unsigned char *, u32, u32, int, int, int,
+		struct scatterlist *, u32, struct scatterlist *, u32);
+
+void	target_execute_cmd(struct se_cmd *cmd);
+#endif
+#endif
+
 void	target_submit_cmd(struct se_cmd *, struct se_session *, unsigned char *,
 		unsigned char *, u32, u32, int, int, int);
 int	target_submit_tmr(struct se_cmd *se_cmd, struct se_session *se_sess,

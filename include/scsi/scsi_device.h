@@ -151,7 +151,12 @@ struct scsi_device {
 	unsigned no_read_disc_info:1;	/* Avoid READ_DISC_INFO cmds */
 	unsigned no_read_capacity_16:1; /* Avoid READ_CAPACITY_16 cmds */
 	unsigned is_visible:1;	/* is the device visible in sysfs */
-
+//Patch by QNAP: only for HAL application
+#if defined(CONFIG_MACH_QNAPTS) && defined(QNAP_HAL)
+    unsigned is_standby:1;
+    unsigned is_wakeup_cmd:1;
+    unsigned hal_enc_id:6;
+#endif
 	DECLARE_BITMAP(supported_events, SDEV_EVT_MAXBITS); /* supported events */
 	struct list_head event_list;	/* asserted events */
 	struct work_struct event_work;

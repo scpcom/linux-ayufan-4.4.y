@@ -76,7 +76,6 @@ static struct nand_ecclayout comcerto_ecc_info_1024_bch = {
 };
 
 #elif CONFIG_NAND_COMCERTO_ECC_8_HW_BCH
-
 /*
  * spare area layout for BCH ECC bytes calculated over 512-Bytes ECC block size
  */
@@ -100,7 +99,6 @@ static struct nand_ecclayout comcerto_ecc_info_1024_bch = {
 		{.offset = 15, .length = 17}
 	}
 };
-
 #else
 
 /*
@@ -493,7 +491,7 @@ static int comcerto_nand_probe(struct platform_device *pdev)
 	struct mtd_info *mtd;
 	struct nand_chip *nand_device;
 	int err = 0;
-
+    
 	/* Allocate memory for info structure */
 	info = kmalloc(sizeof(struct comcerto_nand_info), GFP_KERNEL);
 	if (!info) {
@@ -559,6 +557,8 @@ static int comcerto_nand_probe(struct platform_device *pdev)
 
 	/* 20 us command delay time */
 	nand_device->chip_delay = 20;
+    
+//Patch by QNAP: Board initialization
 
 	nand_device->ecc.mode = NAND_ECC_HW_SYNDROME;
 //	nand_device->ecc.mode = NAND_ECC_SOFT_BCH;
@@ -656,10 +656,13 @@ static int comcerto_nand_probe(struct platform_device *pdev)
 	nand_device->badblock_pattern = &c2000_badblock_pattern;
 	nand_device->bbt_options |= NAND_BBT_USE_FLASH;
 
-	} else {
+	} 
+//Patch by QNAP: Board initialization
+#ifndef CONFIG_MACH_QNAPTS
+    else {
 		nand_device->ecc.mode = NAND_ECC_SOFT;
 	}
-
+#endif /* CONFIG_MACH_QNAPTS */
 #endif
 
 	nand_device->options |= NAND_NO_SUBPAGE_WRITE;

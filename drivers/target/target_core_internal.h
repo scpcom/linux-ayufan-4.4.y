@@ -13,6 +13,8 @@ int	target_emulate_request_sense(struct se_task *task);
 int	target_emulate_unmap(struct se_task *task);
 int	target_emulate_write_same(struct se_task *task);
 int	target_emulate_synchronize_cache(struct se_task *task);
+int	target_emulate_logsense(struct se_task *task);
+int	target_emulate_getlbastatus(struct se_task *task);
 int	target_emulate_noop(struct se_task *task);
 
 /* target_core_device.c */
@@ -56,6 +58,9 @@ int	se_dev_set_max_sectors(struct se_device *, u32);
 int	se_dev_set_fabric_max_sectors(struct se_device *, u32);
 int	se_dev_set_optimal_sectors(struct se_device *, u32);
 int	se_dev_set_block_size(struct se_device *, u32);
+int     se_dev_set_tp_threshold_enable(struct se_device *, int);
+int 	se_dev_set_tp_threshold_percent(struct se_device *, int);
+int 	se_dev_set_lun_index(struct se_device *, int);
 struct se_lun *core_dev_add_lun(struct se_portal_group *, struct se_hba *,
 		struct se_device *, u32);
 int	core_dev_del_lun(struct se_portal_group *, u32);
@@ -74,6 +79,9 @@ void	core_dev_release_virtual_lun0(void);
 /* target_core_hba.c */
 struct se_hba *core_alloc_hba(const char *, u32, u32);
 int	core_delete_hba(struct se_hba *);
+#ifdef CONFIG_MACH_QNAPTS	// Benjamin 20120720 for supporting Eric Gu for VMWare 5.0 certification
+void core_enumerate_hba_for_deregister_session(struct se_session *se_sess);
+#endif 
 
 /* target_core_tmr.c */
 void	core_tmr_abort_task(struct se_device *, struct se_tmr_req *,

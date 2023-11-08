@@ -3,6 +3,9 @@
 
 #define DECIMAL         0
 #define HEX             1
+#ifdef CONFIG_MACH_QNAPTS // 2010/07/16 support the BASE64 encoding
+#define BASE64          2
+#endif
 
 extern void convert_null_to_semi(char *, int);
 extern int extract_param(const char *, const char *, unsigned int, char *,

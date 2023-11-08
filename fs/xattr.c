@@ -20,6 +20,11 @@
 #include <linux/fsnotify.h>
 #include <linux/audit.h>
 #include <asm/uaccess.h>
+//Patch by QNAP: implement fnotify function
+#ifdef	QNAP_FNOTIFY
+#include <linux/fnotify.h>
+#endif	//QNAP_FNOTIFY
+////////////////////////////////////
 
 
 /*
@@ -357,6 +362,16 @@ SYSCALL_DEFINE5(setxattr, const char __user *, pathname,
 	error = mnt_want_write(path.mnt);
 	if (!error) {
 		error = setxattr(path.dentry, name, value, size, flags);
+//Patch by QNAP: implement fnotify function
+#ifdef	QNAP_FNOTIFY
+		if (!error && (FN_XATTR & msys_nodify))
+		{
+			T_FILE_STATUS  tfsOrg;
+			FILE_STATUS_BY_INODE(path.dentry->d_inode, tfsOrg);
+			pfn_sys_file_notify(FN_XATTR, MARG_1xI32, &path, NULL, 0, &tfsOrg, 0, (int64_t)(unsigned int)name, 0, 0);
+		}
+#endif	//QNAP_FNOTIFY
+////////////////////////////////////////
 		mnt_drop_write(path.mnt);
 	}
 	path_put(&path);
@@ -376,6 +391,16 @@ SYSCALL_DEFINE5(lsetxattr, const char __user *, pathname,
 	error = mnt_want_write(path.mnt);
 	if (!error) {
 		error = setxattr(path.dentry, name, value, size, flags);
+//Patch by QNAP: implement fnotify function
+#ifdef	QNAP_FNOTIFY
+		if (!error && (FN_XATTR & msys_nodify))
+		{
+			T_FILE_STATUS  tfsOrg;
+			FILE_STATUS_BY_INODE(path.dentry->d_inode, tfsOrg);
+			pfn_sys_file_notify(FN_XATTR, MARG_1xI32, &path, NULL, 0, &tfsOrg, 0, (int64_t)(unsigned int)name, 0, 0);
+		}
+#endif	//QNAP_FNOTIFY
+////////////////////////////////////////
 		mnt_drop_write(path.mnt);
 	}
 	path_put(&path);
@@ -397,6 +422,16 @@ SYSCALL_DEFINE5(fsetxattr, int, fd, const char __user *, name,
 	error = mnt_want_write_file(f);
 	if (!error) {
 		error = setxattr(dentry, name, value, size, flags);
+//Patch by QNAP: implement fnotify function
+#ifdef	QNAP_FNOTIFY
+		if (!error && (FN_XATTR & msys_nodify))
+		{
+			T_FILE_STATUS  tfsOrg;
+			FILE_STATUS_BY_INODE(f->f_path.dentry->d_inode, tfsOrg);
+			pfn_sys_file_notify(FN_XATTR, MARG_1xI32, &f->f_path, NULL, 0, &tfsOrg, 0, (int64_t)(unsigned int)name, 0, 0);
+		}
+#endif	//QNAP_FNOTIFY
+////////////////////////////////////////
 		mnt_drop_write(f->f_path.mnt);
 	}
 	fput(f);
@@ -586,6 +621,16 @@ SYSCALL_DEFINE2(removexattr, const char __user *, pathname,
 	error = mnt_want_write(path.mnt);
 	if (!error) {
 		error = removexattr(path.dentry, name);
+//Patch by QNAP: implement fnotify function
+#ifdef	QNAP_FNOTIFY
+		if (!error && (FN_XATTR & msys_nodify))
+		{
+			T_FILE_STATUS  tfsOrg;
+			FILE_STATUS_BY_INODE(path.dentry->d_inode, tfsOrg);
+			pfn_sys_file_notify(FN_XATTR, MARG_1xI32, &path, NULL, 0, &tfsOrg, 1, (int64_t)(unsigned int)name, 0, 0);
+		}
+#endif	//QNAP_FNOTIFY
+////////////////////////////////////////
 		mnt_drop_write(path.mnt);
 	}
 	path_put(&path);
@@ -604,6 +649,16 @@ SYSCALL_DEFINE2(lremovexattr, const char __user *, pathname,
 	error = mnt_want_write(path.mnt);
 	if (!error) {
 		error = removexattr(path.dentry, name);
+//Patch by QNAP: implement fnotify function
+#ifdef	QNAP_FNOTIFY
+		if (!error && (FN_XATTR & msys_nodify))
+		{
+			T_FILE_STATUS  tfsOrg;
+			FILE_STATUS_BY_INODE(path.dentry->d_inode, tfsOrg);
+			pfn_sys_file_notify(FN_XATTR, MARG_1xI32, &path, NULL, 0, &tfsOrg, 1, (int64_t)(unsigned int)name, 0, 0);
+		}
+#endif	//QNAP_FNOTIFY
+////////////////////////////////////////
 		mnt_drop_write(path.mnt);
 	}
 	path_put(&path);
@@ -624,6 +679,16 @@ SYSCALL_DEFINE2(fremovexattr, int, fd, const char __user *, name)
 	error = mnt_want_write_file(f);
 	if (!error) {
 		error = removexattr(dentry, name);
+//Patch by QNAP: implement fnotify function
+#ifdef	QNAP_FNOTIFY
+		if (!error && (FN_XATTR & msys_nodify))
+		{
+			T_FILE_STATUS  tfsOrg;
+			FILE_STATUS_BY_INODE(f->f_path.dentry->d_inode, tfsOrg);
+			pfn_sys_file_notify(FN_XATTR, MARG_1xI32, &f->f_path, NULL, 0, &tfsOrg, 1, (int64_t)(unsigned int)name, 0, 0);
+		}
+#endif	//QNAP_FNOTIFY
+////////////////////////////////////////
 		mnt_drop_write(f->f_path.mnt);
 	}
 	fput(f);

@@ -24,6 +24,12 @@
 #include <linux/wait.h>
 #include <linux/workqueue.h>
 
+//Patch by QNAP: enhance error handler
+#if defined(CONFIG_MACH_QNAPTS) && defined(QNAP_HAL)
+#include <qnap/hal_event.h>
+extern int send_hal_netlink(NETLINK_EVT *event);
+#endif
+
 #define MaxSector (~(sector_t)0)
 
 /* Bad block numbers are stored sorted in a single page.
@@ -60,6 +66,15 @@ struct md_rdev {
 	int		preferred_minor;	/* autorun support */
 
 	struct kobject	kobj;
+    
+//Patch by QNAP:by KenChen for Robust RAID - ReadOnly function
+#ifdef CONFIG_MACH_QNAPTS
+	unsigned long	qflags;
+#define	QMD_ERR_SENT				1
+#define QMD_FEATURE_FLEX_RAID		2
+#define QMD_FEATURE_TEST_MODE		3	
+#endif
+//////////////////////////////////////////////////////////
 
 	/* A device can be in one of three states based on two flags:
 	 * Not working:   faulty==1 in_sync==0
@@ -305,6 +320,10 @@ struct mddev {
 #define	MD_RECOVERY_CHECK	7
 #define MD_RECOVERY_RESHAPE	8
 #define	MD_RECOVERY_FROZEN	9
+//Patch by QNAP: enhance HAL error handler
+#if defined(CONFIG_MACH_QNAPTS) && defined(QNAP_HAL)
+#define	MD_QNAP_FROZEN	10 //only use for RAID5/RAID6
+#endif
 
 	unsigned long			recovery;
 	/* If a RAID personality determines that recovery (of a particular
@@ -398,6 +417,16 @@ struct mddev {
 	struct work_struct flush_work;
 	struct work_struct event_work;	/* used by dm to report failure event */
 	void (*sync_super)(struct mddev *mddev, struct md_rdev *rdev);
+/************************************************************
+ * Patch by QNAP:by PekoeChen for Robust RAID 
+ * the valuse to assign qflags shoud use the define of md_rdev->qflags
+ * #define QMD_ERR_SENT
+ * #define QMD_FEATURE_FLEX_RAID
+ * #define QMD_FEATURE_TEST_MODE
+ ************************************************************/
+#ifdef CONFIG_MACH_QNAPTS
+	unsigned long qflags;
+#endif
 };
 
 
@@ -417,6 +446,11 @@ struct md_personality
 {
 	char *name;
 	int level;
+#if defined(CONFIG_MACH_QNAPTS)
+	unsigned long qflags;
+#define QMD_RAID456_FEATURE_ZONE	1
+#define QMD_RAID456_FEATURE_ALL (QMD_RAID456_FEATURE_ZONE)
+#endif    
 	struct list_head list;
 	struct module *owner;
 	void (*make_request)(struct mddev *mddev, struct bio *bio);

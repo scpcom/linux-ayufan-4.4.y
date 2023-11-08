@@ -403,6 +403,11 @@ static void bdi_clear_pending(struct backing_dev_info *bdi)
 static int bdi_forker_thread(void *ptr)
 {
 	struct bdi_writeback *me = ptr;
+#ifdef CONFIG_MACH_QNAPTS
+    // set affinity for flush daemon for X31
+    int cpu = 1;
+    struct cpumask flush_mask;
+#endif
 
 	current->flags |= PF_SWAPWRITE;
 	set_freezable();
@@ -516,6 +521,16 @@ static int bdi_forker_thread(void *ptr)
 				 * And as soon as the bdi thread is visible, we
 				 * can start it.
 				 */
+#ifdef CONFIG_MACH_QNAPTS
+                // set affinity for flush daemon for X31
+                memset(&flush_mask, 0, sizeof(struct cpumask));
+                cpumask_set_cpu(cpu, &flush_mask);
+                if (sched_setaffinity(task->pid, &flush_mask) != 0)
+                {
+                    printk("Set flush-%s affinity failed.\n", dev_name(bdi->dev));
+                }
+
+#endif
 				spin_lock_bh(&bdi->wb_lock);
 				bdi->wb.task = task;
 				spin_unlock_bh(&bdi->wb_lock);

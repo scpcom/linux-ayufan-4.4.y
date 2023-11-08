@@ -229,7 +229,9 @@ enum {
 
 	ATA_PFLAG_PIO32		= (1 << 20),  /* 32bit PIO */
 	ATA_PFLAG_PIO32CHANGE	= (1 << 21),  /* 32bit PIO can be turned on/off */
-
+#if defined(CONFIG_MACH_QNAPTS)	
+	ATA_PFLAG_RESUMING	= (1 << 22), /* fix long resume time issue */
+#endif		
 	/* struct ata_queued_cmd flags */
 	ATA_QCFLAG_ACTIVE	= (1 << 0), /* cmd not yet ack'd to scsi lyer */
 	ATA_QCFLAG_DMAMAP	= (1 << 1), /* SG table is DMA mapped */
@@ -466,6 +468,9 @@ enum ata_completion_errors {
 	AC_ERR_OTHER		= (1 << 8), /* unknown */
 	AC_ERR_NODEV_HINT	= (1 << 9), /* polling device detection hint */
 	AC_ERR_NCQ		= (1 << 10), /* marker for offending NCQ qc */
+#ifdef CONFIG_MACH_QNAPTS
+    AC_ERR_ICRC         = (1 << 11), /* To prograte ICRC error */
+#endif
 };
 
 /*

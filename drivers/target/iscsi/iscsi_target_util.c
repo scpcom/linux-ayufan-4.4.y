@@ -57,6 +57,14 @@
 extern struct list_head g_tiqn_list;
 extern spinlock_t tiqn_lock;
 
+
+#if defined(CONFIG_MACH_QNAPTS)
+/* 2014/08/16, adamhsu, redmine 9055,9076,9278 */
+extern spinlock_t cmd_rec_list_lock;
+extern struct list_head cmd_rec_list;
+extern atomic64_t cmd_count;
+#endif
+
 /*
  *	Called with cmd->r2t_lock held.
  */
@@ -156,12 +164,41 @@ struct iscsi_cmd *iscsit_allocate_cmd(struct iscsi_conn *conn, gfp_t gfp_mask)
 {
 	struct iscsi_cmd *cmd;
 
+#ifdef CONFIG_MACH_QNAPTS
+	/* 20140513, adamhsu, redmine 8253 */
+#if (LINUX_VERSION_CODE == KERNEL_VERSION(3,12,6))
+	struct se_session *se_sess = conn->sess->se_sess;
+	int size = 0, tag = 0;
+#endif
+
+	/* 2014/10/03, adamhsu, fixed system reboot randomly */
+	unsigned long flags;
+#endif
 	cmd = kmem_cache_zalloc(lio_cmd_cache, gfp_mask);
 	if (!cmd) {
 		pr_err("Unable to allocate memory for struct iscsi_cmd.\n");
 		return NULL;
 	}
 
+/* 20140513, adamhsu, redmine 8253 */
+#ifdef CONFIG_MACH_QNAPTS
+#if (LINUX_VERSION_CODE == KERNEL_VERSION(3,12,6))
+
+	tag = percpu_ida_alloc(&se_sess->sess_tag_pool, gfp_mask);
+
+	/* TODO:
+	 * To comment this first cause of the iscsi_cmd still be allocated
+	 * from lio_cmd_cache currently. It will be modified in the future
+	 */
+#if 0
+	size = sizeof(struct iscsi_cmd) + conn->conn_transport->priv_size;
+	cmd = (struct iscsi_cmd *)(se_sess->sess_cmd_map + (tag * size));
+	memset(cmd, 0, size);
+#endif
+	cmd->se_cmd.map_tag = tag;
+	pr_debug("%s: se_cmd:0x%p, tag:%d\n", __func__, &cmd->se_cmd, tag);
+#endif
+#endif
 	cmd->conn	= conn;
 	INIT_LIST_HEAD(&cmd->i_list);
 	INIT_LIST_HEAD(&cmd->datain_list);
@@ -172,6 +209,17 @@ struct iscsi_cmd *iscsit_allocate_cmd(struct iscsi_conn *conn, gfp_t gfp_mask)
 	spin_lock_init(&cmd->istate_lock);
 	spin_lock_init(&cmd->error_lock);
 	spin_lock_init(&cmd->r2t_lock);
+
+#if defined(CONFIG_MACH_QNAPTS)
+	/* 2014/08/16, adamhsu, redmine 9055,9076,9278 */
+	INIT_LIST_HEAD(&cmd->cmd_rec_node);
+
+	/* 2014/10/03, adamhsu, fixed system reboot randomly */
+	spin_lock_irqsave(&cmd_rec_list_lock, flags);
+	list_add_tail(&cmd->cmd_rec_node, &cmd_rec_list);
+	atomic64_inc(&cmd_count);
+	spin_unlock_irqrestore(&cmd_rec_list_lock, flags);
+#endif
 
 	return cmd;
 }
@@ -220,6 +268,9 @@ struct iscsi_cmd *iscsit_allocate_se_cmd(
 	transport_init_se_cmd(se_cmd, &lio_target_fabric_configfs->tf_ops,
 			conn->sess->se_sess, data_length, data_direction,
 			sam_task_attr, &cmd->sense_buffer[0]);
+
+
+	target_get_sess_cmd(conn->sess->se_sess, se_cmd, (0 & TARGET_SCF_ACK_KREF));
 	return cmd;
 }
 
@@ -248,10 +299,37 @@ struct iscsi_cmd *iscsit_allocate_se_cmd_for_tmr(
 	 * TASK_REASSIGN for ERL=2 / connection stays inside of
 	 * LIO-Target $FABRIC_MOD
 	 */
+#ifdef CONFIG_MACH_QNAPTS
+	/* 2014/03/20, adamhsu, redmine 7796
+	 *
+	 * Fixed about the se_tmr_req buffer didn't be allocated but
+	 * it still will be used in iscsit_handle_task_mgt_cmd(). It
+	 * results the kernel crash
+	 */
+	se_cmd = &cmd->se_cmd;
+
+	if (function == ISCSI_TM_FUNC_TASK_REASSIGN){
+		transport_init_se_cmd(se_cmd, 
+			&lio_target_fabric_configfs->tf_ops,
+			conn->sess->se_sess, 0, DMA_NONE,
+			MSG_SIMPLE_TAG, &cmd->sense_buffer[0]);
+
+		/* here don't care the parameter of function for core_tmr_alloc_req */
+		rc = core_tmr_alloc_req(se_cmd, cmd->tmr_req, 
+			ISCSI_TM_FUNC_TASK_REASSIGN, GFP_KERNEL);
+		if (rc < 0)
+			goto out;
+
+		cmd->tmr_req->se_tmr_req = se_cmd->se_tmr_req;
+		return cmd;
+	}
+#else
 	if (function == ISCSI_TM_FUNC_TASK_REASSIGN)
 		return cmd;
 
 	se_cmd = &cmd->se_cmd;
+#endif
+
 	/*
 	 * Initialize struct se_cmd descriptor from target_core_mod infrastructure
 	 */
@@ -413,7 +491,16 @@ static inline int iscsit_check_received_cmdsn(struct iscsi_session *sess, u32 cm
 		ret = CMDSN_ERROR_CANNOT_RECOVER;
 
 	} else if (cmdsn == sess->exp_cmd_sn) {
+/* Jonathan Ho, 20131029, handle immediate cmd as non-immediate cmd */
+#ifdef CONFIG_MACH_QNAPTS
+		if (sess->skip_inc_exp_cmd_sn) {
+			pr_debug("Skip increasing ExpCmdSN for immediate SCSI cmd.\n");
+			sess->skip_inc_exp_cmd_sn = 0;
+		} else
+			sess->exp_cmd_sn++;
+#else
 		sess->exp_cmd_sn++;
+#endif
 		pr_debug("Received CmdSN matches ExpCmdSN,"
 		      " incremented ExpCmdSN to: 0x%08x\n",
 		      sess->exp_cmd_sn);
@@ -656,7 +743,15 @@ void iscsit_add_cmd_to_immediate_queue(
 	atomic_set(&conn->check_immediate_queue, 1);
 	spin_unlock_bh(&conn->immed_queue_lock);
 
-	wake_up_process(conn->thread_set->tx_thread);
+#ifdef CONFIG_MACH_QNAPTS
+    /* Patch about the sleeping code in iscsi_target_tx_thread() is 
+     * susceptible to the classic missed wakeup race.
+     */
+    wake_up(&conn->queues_wq);
+#else
+    wake_up_process(conn->thread_set->tx_thread);
+#endif
+
 }
 
 struct iscsi_queue_req *iscsit_get_cmd_from_immediate_queue(struct iscsi_conn *conn)
@@ -721,16 +816,42 @@ void iscsit_add_cmd_to_response_queue(
 			" struct iscsi_queue_req\n");
 		return;
 	}
+
 	INIT_LIST_HEAD(&qr->qr_list);
 	qr->cmd = cmd;
 	qr->state = state;
-
+    
+#ifdef CONFIG_MACH_QNAPTS // 2010/08/03 Nike Chen 
+    if ((cmd->se_cmd.data_length != cmd->data_length) && 
+        (0 == (conn->sess->sess_ops->InitialR2T))) {
+        // Benjamin 20110822:
+        //
+        // QLogic iSCSI HBA card only accept ExpectedDataTransferLength(request)
+        // =DataSegmentLength (response, i.e.,  cmd->data_length)
+        //
+        // Benjamin 20121008 for BUG 27836: Add work-around for Bosch Dinion IPCam
+        // On the other hand, Bosch Dinion IPCam can only accept 
+        // SE_CMD(cmd)->data_length = cmd->data_length, so we use 
+        // conn->sess->sess_ops->InitialR2T = 0 to judge this special condition.
+//        pr_debug("%s:cmd->se_cmd.data_length(%d)!=cmd->data_length(%d)!\n", 
+//            __func__, cmd->se_cmd.data_length, cmd->data_length);
+        cmd->data_length = cmd->se_cmd.data_length;            
+    }
+#endif
 	spin_lock_bh(&conn->response_queue_lock);
 	list_add_tail(&qr->qr_list, &conn->response_queue_list);
 	atomic_inc(&cmd->response_queue_count);
 	spin_unlock_bh(&conn->response_queue_lock);
 
+#ifdef CONFIG_MACH_QNAPTS
+    /* Patch about the sleeping code in iscsi_target_tx_thread() is 
+     * susceptible to the classic missed wakeup race.
+     */
+    wake_up(&conn->queues_wq);
+#else
 	wake_up_process(conn->thread_set->tx_thread);
+#endif
+
 }
 
 struct iscsi_queue_req *iscsit_get_cmd_from_response_queue(struct iscsi_conn *conn)
@@ -784,6 +905,29 @@ static void iscsit_remove_cmd_from_response_queue(
 	}
 }
 
+#ifdef CONFIG_MACH_QNAPTS
+/* Patch about the sleeping code in iscsi_target_tx_thread() is 
+ * susceptible to the classic missed wakeup race.
+ */
+bool iscsit_conn_all_queues_empty(struct iscsi_conn *conn)
+{
+	bool empty;
+
+	spin_lock_bh(&conn->immed_queue_lock);
+	empty = list_empty(&conn->immed_queue_list);
+	spin_unlock_bh(&conn->immed_queue_lock);
+
+	if (!empty)
+		return empty;
+
+	spin_lock_bh(&conn->response_queue_lock);
+	empty = list_empty(&conn->response_queue_list);
+	spin_unlock_bh(&conn->response_queue_lock);
+
+	return empty;
+}
+#endif
+
 void iscsit_free_queue_reqs_for_conn(struct iscsi_conn *conn)
 {
 	struct iscsi_queue_req *qr, *qr_tmp;
@@ -815,6 +959,40 @@ void iscsit_release_cmd(struct iscsi_cmd *cmd)
 	struct iscsi_conn *conn = cmd->conn;
 	int i;
 
+#ifdef CONFIG_MACH_QNAPTS
+
+	/* 20140513, adamhsu, redmine 8253 */
+#if (LINUX_VERSION_CODE == KERNEL_VERSION(3,12,6))
+	struct se_cmd *se_cmd = &cmd->se_cmd;
+	struct iscsi_session *sess;
+#endif
+
+	/* 2014/10/03, adamhsu, fixed system reboot randomly */
+	unsigned long flags;
+#endif
+
+
+/* 20140513, adamhsu, redmine 8253 */
+#ifdef CONFIG_MACH_QNAPTS
+#if (LINUX_VERSION_CODE == KERNEL_VERSION(3,12,6))
+	if (cmd->conn)
+		sess = cmd->conn->sess;
+	else
+		sess = cmd->sess;
+
+	BUG_ON(!sess || !sess->se_sess);
+#endif
+#endif
+
+#if defined(CONFIG_MACH_QNAPTS)
+
+	/* 2014/10/03, adamhsu, fixed system reboot randomly */
+	spin_lock_irqsave(&cmd_rec_list_lock, flags);
+	list_del_init(&cmd->cmd_rec_node);
+	atomic64_dec(&cmd_count);
+	spin_unlock_irqrestore(&cmd_rec_list_lock, flags);
+#endif
+
 	iscsit_free_r2ts_from_list(cmd);
 	iscsit_free_all_datain_reqs(cmd);
 
@@ -833,6 +1011,30 @@ void iscsit_release_cmd(struct iscsi_cmd *cmd)
 		iscsit_remove_cmd_from_immediate_queue(cmd, conn);
 		iscsit_remove_cmd_from_response_queue(cmd, conn);
 	}
+
+
+
+#ifdef CONFIG_MACH_QNAPTS
+	/* 20140513, adamhsu, redmine 8253 */
+#if (LINUX_VERSION_CODE == KERNEL_VERSION(3,12,6))
+
+	pr_debug("%s: se_cmd:0x%p, tag:%d\n", __func__, se_cmd, 
+		se_cmd->map_tag);
+
+	percpu_ida_free(&sess->se_sess->sess_tag_pool, se_cmd->map_tag);
+#endif
+
+
+#if 0
+	/* 2014/08/16, adamhsu, redmine 9055,9076,9278 */
+	if ((cmd->se_cmd.transport_state & (CMD_T_ABORTED_1 | CMD_T_ABORTED))
+	|| (cmd->se_cmd.tmf_transport_state & (CMD_T_ABORTED_1 | CMD_T_ABORTED))
+	)
+		pr_info("[%s] free cmd(ITT:0x%8x)\n", __func__, 
+			cmd->init_task_tag);
+#endif
+
+#endif
 
 	kmem_cache_free(lio_cmd_cache, cmd);
 }

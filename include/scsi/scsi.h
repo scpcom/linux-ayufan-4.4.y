@@ -142,7 +142,12 @@ struct scsi_cmnd;
 #define WRITE_16              0x8a
 #define READ_ATTRIBUTE        0x8c
 #define WRITE_ATTRIBUTE	      0x8d
+#ifdef CONFIG_MACH_QNAPTS
+// Benjamin 20110815 for "WRITE and VERIFY (16). See SBC3 5.38
+#define WRITE_VERIFY_16       0x8e
+#endif
 #define VERIFY_16	      0x8f
+#define SYNCHRONIZE_CACHE_16  0x91
 #define WRITE_SAME_16	      0x93
 #define SERVICE_ACTION_IN     0x9e
 /* values for service action in */

@@ -1990,7 +1990,10 @@ static int nfs_rename(struct inode *old_dir, struct dentry *old_dentry,
 
 		if (new_dentry->d_count > 2) {
 			int err;
-
+//Patch by QNAP:Search filename use case insensitive method
+#ifdef QNAP_SEARCH_FILENAME_CASE_INSENSITIVE
+            new_dentry->d_name.case_folding = 0;
+#endif    
 			/* copy the target dentry's name */
 			dentry = d_alloc(new_dentry->d_parent,
 					 &new_dentry->d_name);

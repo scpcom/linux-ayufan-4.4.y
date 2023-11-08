@@ -53,6 +53,22 @@ u8 iscsit_tmr_abort_task(
 			(hdr->refcmdsn <= conn->sess->max_cmd_sn)) ?
 			ISCSI_TMF_RSP_COMPLETE : ISCSI_TMF_RSP_NO_TASK;
 	}
+
+#ifdef CONFIG_MACH_QNAPTS
+	/* 2014/03/31, adamhsu, redmine 7880 
+	 * [rfc 3720, section 10.5.1, 10.5.4 and 10.5.5 ]
+	 */
+	if (ref_cmd->immediate_cmd == 1){
+		if (hdr->refcmdsn != hdr->cmdsn) {
+			pr_err("RefCmdSN 0x%08x does not equal to"
+				" CmdSN 0x%08x of TMF itself. "
+				"Rejecting ABORT_TASK.\n",
+				hdr->refcmdsn, hdr->cmdsn);
+			return ISCSI_TMF_RSP_REJECTED;
+		}
+	}
+	else	
+#endif
 	if (ref_cmd->cmd_sn != hdr->refcmdsn) {
 		pr_err("RefCmdSN 0x%08x does not equal"
 			" task's CmdSN 0x%08x. Rejecting ABORT_TASK.\n",

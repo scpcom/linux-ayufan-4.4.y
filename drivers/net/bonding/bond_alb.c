@@ -328,7 +328,12 @@ static void rlb_arp_recv(struct sk_buff *skb, struct bonding *bond,
 		return;
 	}
 
+//Patch by QNAP:fix non-rlb bonding device update rlb table
+#if defined(CONFIG_MACH_QNAPTS)
+	if (arp->op_code == htons(ARPOP_REPLY) && bond->params.mode == BOND_MODE_ALB) {
+#else
 	if (arp->op_code == htons(ARPOP_REPLY)) {
+#endif        
 		/* update rx hash table for this ARP */
 		rlb_update_entry_from_arp(bond, arp);
 		pr_debug("Server received an ARP Reply from client\n");

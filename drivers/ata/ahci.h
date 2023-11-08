@@ -211,6 +211,11 @@ enum {
 	AHCI_HFLAG_NO_FPDMA_AA		= (1 << 13), /* no FPDMA AA */
 	AHCI_HFLAG_YES_FBS		= (1 << 14), /* force FBS cap on */
 
+//Patch by QNAP:Marvell MV_9235 workaround
+#ifdef CONFIG_MACH_QNAPTS
+	AHCI_HFLAG_YES_MV9235_FIX		= (1 << 31), /* port0|port2 , port1|port3 */
+#endif
+////////////////////////////////
 	/* ap->flags bits */
 
 	AHCI_FLAG_COMMON		= ATA_FLAG_SATA | ATA_FLAG_PIO_DMA |

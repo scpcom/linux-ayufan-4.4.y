@@ -578,6 +578,11 @@ struct ext4_new_group_data {
 #define EXT4_IOC_ALLOC_DA_BLKS		_IO('f', 12)
 #define EXT4_IOC_MOVE_EXT		_IOWR('f', 15, struct move_extent)
 
+#ifdef CONFIG_MACH_QNAPTS
+#define EXT4_IOC32_GETLAZYINITSTATUS	_IOR('f', 202, int)
+#define EXT4_IOC_GETLAZYINITSTATUS		_IOR('f', 202, long)
+#endif
+
 #if defined(__KERNEL__) && defined(CONFIG_COMPAT)
 /*
  * ioctl commands in 32 bit emulation
@@ -983,6 +988,11 @@ extern void ext4_set_bits(void *bm, int cur, int len);
 #define EXT4_ERRORS_RO			2	/* Remount fs read-only */
 #define EXT4_ERRORS_PANIC		3	/* Panic */
 #define EXT4_ERRORS_DEFAULT		EXT4_ERRORS_CONTINUE
+//Patch by QNAP:Search filename use case insensitive method
+#ifdef QNAP_SEARCH_FILENAME_CASE_INSENSITIVE
+#define QNAP_SB_HASH 0x514e4150
+#endif
+/////////////////////////////////////////////////////////
 
 /*
  * Structure of the super block
@@ -1096,7 +1106,13 @@ struct ext4_super_block {
 	__le32	s_usr_quota_inum;	/* inode for tracking user quota */
 	__le32	s_grp_quota_inum;	/* inode for tracking group quota */
 	__le32	s_overhead_clusters;	/* overhead blocks/clusters in fs */
+//Patch by QNAP:Search filename use case insensitive method
+#ifdef QNAP_SEARCH_FILENAME_CASE_INSENSITIVE
+    __le32  s_reserved[108];        /* Padding to the end of the block */
+    __u32   s_hash_magic;           /* HTree case insensitive enable flag */
+#else    
 	__le32  s_reserved[109];        /* Padding to the end of the block */
+#endif
 };
 
 #define EXT4_S_ERR_LEN (EXT4_S_ERR_END - EXT4_S_ERR_START)
@@ -1247,6 +1263,15 @@ struct ext4_sb_info {
 
 	/* record the last minlen when FITRIM is called. */
 	atomic_t s_last_trim_minblks;
+
+#ifdef CONFIG_MACH_QNAPTS
+	struct ext4_trim_request *s_trim_request;
+	struct mutex ext4_trim_mtx;
+	struct task_struct *ext4_trim_task;
+	int lazyinit_status;
+	int reclaim_status;
+#endif
+    
 };
 
 static inline struct ext4_sb_info *EXT4_SB(struct super_block *sb)
@@ -1570,10 +1595,16 @@ static inline __le16 ext4_rec_len_to_disk(unsigned len, unsigned blocksize)
  * Hash Tree Directory indexing
  * (c) Daniel Phillips, 2001
  */
-
+//Patch by QNAP:Search filename use case insensitive method
+#ifdef QNAP_SEARCH_FILENAME_CASE_INSENSITIVE
+#define is_dx(dir) (((ntohl(EXT4_SB(dir->i_sb)->s_es->s_hash_magic) == QNAP_SB_HASH) || \
+              EXT4_HAS_COMPAT_FEATURE(dir->i_sb, EXT4_FEATURE_COMPAT_DIR_INDEX)) && \
+		    ext4_test_inode_flag((dir), EXT4_INODE_INDEX))
+#else
 #define is_dx(dir) (EXT4_HAS_COMPAT_FEATURE(dir->i_sb, \
 				      EXT4_FEATURE_COMPAT_DIR_INDEX) && \
 		    ext4_test_inode_flag((dir), EXT4_INODE_INDEX))
+#endif		    
 #define EXT4_DIR_LINK_MAX(dir) (!is_dx(dir) && (dir)->i_nlink >= EXT4_LINK_MAX)
 #define EXT4_DIR_LINK_EMPTY(dir) ((dir)->i_nlink == 2 || (dir)->i_nlink == 1)
 
@@ -1654,10 +1685,32 @@ void ext4_get_group_no_and_offset(struct super_block *sb, ext4_fsblk_t blocknr,
 /*
  * Timeout and state flag for lazy initialization inode thread.
  */
+//Patch by QNAP: Try to shorten the time needed by ext4lazyinit
+#ifdef CONFIG_MACH_QNAPTS
+#define EXT4_DEF_LI_WAIT_MULT			1
+#define EXT4_DEF_LI_MAX_START_DELAY		1
+#else 
 #define EXT4_DEF_LI_WAIT_MULT			10
 #define EXT4_DEF_LI_MAX_START_DELAY		5
+#endif
 #define EXT4_LAZYINIT_QUIT			0x0001
 #define EXT4_LAZYINIT_RUNNING			0x0002
+
+//Patch by QNAP:Trim ioctl support
+#ifdef CONFIG_MACH_QNAPTS
+struct ext4_trim_request {
+	struct super_block	*tr_super;
+	struct ext4_sb_info	*tr_sbi;
+	ext4_group_t		tr_first_group;
+	ext4_group_t		tr_last_group;
+	ext4_group_t		tr_next_group;
+	ext4_grpblk_t		tr_first_cluster;
+	ext4_grpblk_t		tr_last_cluster;
+	uint64_t			tr_end;
+	uint64_t			tr_minlen;
+	uint64_t			trimmed;
+};
+#endif
 
 /*
  * Lazy inode table initialization info
@@ -1675,6 +1728,10 @@ struct ext4_li_request {
 	struct list_head	lr_request;
 	unsigned long		lr_next_sched;
 	unsigned long		lr_timeout;
+#ifdef CONFIG_MACH_QNAPTS
+	ext4_group_t		lr_first_group;
+#endif
+    
 };
 
 struct ext4_features {
@@ -1813,8 +1870,15 @@ extern int ext4_sync_file(struct file *, loff_t, loff_t, int);
 extern int ext4_flush_completed_IO(struct inode *);
 
 /* hash.c */
+//Patch by QNAP:Search filename use case insensitive method
+#ifdef QNAP_SEARCH_FILENAME_CASE_INSENSITIVE
+extern int ext4fs_dirhash(const char *name, int len, struct
+			  dx_hash_info *hinfo,int case_insensitive);
+#else
 extern int ext4fs_dirhash(const char *name, int len, struct
 			  dx_hash_info *hinfo);
+#endif
+//////////////////////////////////////////////////////////
 
 /* ialloc.c */
 extern struct inode *ext4_new_inode(handle_t *, struct inode *, int,
@@ -1828,7 +1892,6 @@ extern void ext4_check_inodes_bitmap(struct super_block *);
 extern void ext4_mark_bitmap_end(int start_bit, int end_bit, char *bitmap);
 extern int ext4_init_inode_table(struct super_block *sb,
 				 ext4_group_t group, int barrier);
-
 /* mballoc.c */
 extern long ext4_mb_stats;
 extern long ext4_mb_max_to_scan;
@@ -1848,6 +1911,11 @@ extern int ext4_mb_add_groupinfo(struct super_block *sb,
 extern int ext4_group_add_blocks(handle_t *handle, struct super_block *sb,
 				ext4_fsblk_t block, unsigned long count);
 extern int ext4_trim_fs(struct super_block *, struct fstrim_range *);
+
+#ifdef CONFIG_MACH_QNAPTS
+extern int ext4_trim_fs_async(struct super_block *, struct fstrim_range *);
+extern void ext4_destroy_trim_thread(struct ext4_sb_info *sbi);
+#endif
 
 /* inode.c */
 struct buffer_head *ext4_getblk(handle_t *, struct inode *,
@@ -2106,7 +2174,11 @@ do {								\
  * counters. So we need to make sure we have free clusters more
  * than percpu_counter_batch  * nr_cpu_ids. Also add a window of 4 times.
  */
+#if defined(CONFIG_MACH_QNAPTS) && defined(QNAP_HAL)
+#define EXT4_FREECLUSTERS_WATERMARK		 	(256 * (percpu_counter_batch * nr_cpu_ids))
+#else
 #define EXT4_FREECLUSTERS_WATERMARK (4 * (percpu_counter_batch * nr_cpu_ids))
+#endif
 #else
 #define EXT4_FREECLUSTERS_WATERMARK 0
 #endif

@@ -72,6 +72,13 @@ static struct ipv4_devconf ipv4_devconf = {
 		[IPV4_DEVCONF_SEND_REDIRECTS - 1] = 1,
 		[IPV4_DEVCONF_SECURE_REDIRECTS - 1] = 1,
 		[IPV4_DEVCONF_SHARED_MEDIA - 1] = 1,
+//Patch by QNAP: Fix arp flux issue
+#ifdef CONFIG_MACH_QNAPTS
+		[IPV4_DEVCONF_ARP_IGNORE - 1] = 2,
+		[IPV4_DEVCONF_ARP_ANNOUNCE - 1] = 2,
+#endif		
+////////////////////////////////////////////
+		
 	},
 };
 
@@ -82,6 +89,13 @@ static struct ipv4_devconf ipv4_devconf_dflt = {
 		[IPV4_DEVCONF_SECURE_REDIRECTS - 1] = 1,
 		[IPV4_DEVCONF_SHARED_MEDIA - 1] = 1,
 		[IPV4_DEVCONF_ACCEPT_SOURCE_ROUTE - 1] = 1,
+//Patch by QNAP: Fix arp flux issue
+#ifdef CONFIG_MACH_QNAPTS
+		[IPV4_DEVCONF_ARP_IGNORE - 1] = 2,
+		[IPV4_DEVCONF_ARP_ANNOUNCE - 1] = 2,
+#endif		
+//////////////////////////////////////////
+		
 	},
 };
 
@@ -1465,6 +1479,12 @@ static void devinet_copy_dflt_conf(struct net *net, int i)
 	rcu_read_unlock();
 }
 
+#ifdef CONFIG_MACH_QNAPTS
+// HQ redmine 1028
+// Re enable lro if ip_forward is disabled
+extern void		dev_enable_lro(struct net_device *dev);
+#endif
+
 /* called with RTNL locked */
 static void inet_forward_change(struct net *net)
 {
@@ -1478,6 +1498,16 @@ static void inet_forward_change(struct net *net)
 		struct in_device *in_dev;
 		if (on)
 			dev_disable_lro(dev);
+#ifdef CONFIG_MACH_QNAPTS
+        // HQ redmine 1028
+        // Re enable lro if ip_forward is disabled
+        else
+        {
+            // if not bridge interface, enable lro if possible
+            if (!(dev->priv_flags & IFF_BRIDGE_PORT))
+                dev_enable_lro(dev);
+        }
+#endif
 		rcu_read_lock();
 		in_dev = __in_dev_get_rcu(dev);
 		if (in_dev)

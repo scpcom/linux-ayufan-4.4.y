@@ -61,6 +61,11 @@
 #include <linux/idr.h>
 #include <linux/slab.h>
 
+// QNAP fix dma crash bug
+#ifdef CONFIG_MACH_QNAPTS
+#include <linux/sched.h>
+#endif
+
 static DEFINE_MUTEX(dma_list_mutex);
 static DEFINE_IDR(dma_idr);
 static LIST_HEAD(dma_device_list);
@@ -256,13 +261,33 @@ enum dma_status dma_sync_wait(struct dma_chan *chan, dma_cookie_t cookie)
 {
 	enum dma_status status;
 	unsigned long dma_sync_wait_timeout = jiffies + msecs_to_jiffies(5000);
+    // QNAP fix dma crash bug
+#ifdef CONFIG_MACH_QNAPTS
+    int error = 0;
+#endif
 
 	dma_async_issue_pending(chan);
 	do {
 		status = dma_async_is_tx_complete(chan, cookie, NULL, NULL);
 		if (time_after_eq(jiffies, dma_sync_wait_timeout)) {
+            // QNAP fix dma crash bug
+#ifdef CONFIG_MACH_QNAPTS
+            error++;
+            if (error < 5)
+            {
+                // reset timeout and schedule out
+                dma_sync_wait_timeout = jiffies + msecs_to_jiffies(5000);
+                yield();
+            }
+            else
+            {
+                printk(KERN_ERR "dma_sync_wait_timeout!\n");
+                return DMA_ERROR;
+            }
+#else
 			printk(KERN_ERR "dma_sync_wait_timeout!\n");
 			return DMA_ERROR;
+#endif
 		}
 	} while (status == DMA_IN_PROGRESS);
 

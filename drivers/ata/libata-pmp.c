@@ -14,6 +14,10 @@
 #include "libata.h"
 #include "libata-transport.h"
 
+#ifdef CONFIG_MACH_QNAPTS
+extern void ata_scsi_remove_dev(struct ata_device *dev);
+#endif
+
 const struct ata_port_operations sata_pmp_port_ops = {
 	.inherits		= &sata_port_ops,
 	.pmp_prereset		= ata_std_prereset,
@@ -938,7 +942,15 @@ static int sata_pmp_eh_recover(struct ata_port *ap)
 				    ops->hardreset, ops->postreset, NULL);
 		if (rc) {
 			ata_for_each_dev(dev, &ap->link, ALL)
+#ifdef CONFIG_MACH_QNAPTS
+            {
+                // QNAP DID_BAD_TARGET
 				ata_dev_disable(dev);
+                ata_eh_detach_dev(dev);
+            }
+#else
+				ata_dev_disable(dev);
+#endif
 			return rc;
 		}
 

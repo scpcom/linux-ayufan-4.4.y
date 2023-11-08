@@ -19,6 +19,11 @@
 #include <linux/delay.h>
 #include <linux/atomic.h>
 
+#include "md.h"
+
+#include <linux/drbd.h>
+#include "../block/drbd/drbd_int.h"
+
 #define DM_MSG_PREFIX "table"
 
 #define MAX_DEPTH 16
@@ -521,9 +526,10 @@ int dm_set_device_limits(struct dm_target *ti, struct dm_dev *dev,
 	struct request_queue *q = bdev_get_queue(bdev);
 	char b[BDEVNAME_SIZE];
 
+	bdevname(bdev, b);
 	if (unlikely(!q)) {
 		DMWARN("%s: Cannot set limits for nonexistent device %s",
-		       dm_device_name(ti->table->md), bdevname(bdev, b));
+		       dm_device_name(ti->table->md), b);
 		return 0;
 	}
 
@@ -531,7 +537,7 @@ int dm_set_device_limits(struct dm_target *ti, struct dm_dev *dev,
 		DMWARN("%s: adding target device %s caused an alignment inconsistency: "
 		       "physical_block_size=%u, logical_block_size=%u, "
 		       "alignment_offset=%u, start=%llu",
-		       dm_device_name(ti->table->md), bdevname(bdev, b),
+		       dm_device_name(ti->table->md), b,
 		       q->limits.physical_block_size,
 		       q->limits.logical_block_size,
 		       q->limits.alignment_offset,
@@ -542,9 +548,121 @@ int dm_set_device_limits(struct dm_target *ti, struct dm_dev *dev,
 	 * If not we'll force DM to use PAGE_SIZE or
 	 * smaller I/O, just to be safe.
 	 */
-	if (dm_queue_merge_is_compulsory(q) && !ti->type->merge)
-		blk_limits_max_hw_sectors(limits,
-					  (unsigned int) (PAGE_SIZE >> 9));
+	if (dm_queue_merge_is_compulsory(q) && !ti->type->merge) {
+		//printk("dm_set_device_limits0: %s %s, 0x%x\n", b, ti->type->name, q);
+#if 1 /* bug 2114 kernel bio too big device after creating volume */
+		// KevinLiao 20130122: For RAID0 & RAID10, we just use the smaller size...
+		if (((strcmp(ti->type->name, "thin") == 0) || (strcmp(ti->type->name, "thick") == 0)) && (strstr(b, "dm-") != NULL)) {
+			//struct mapped_device *pool_md = q->queuedata;
+			//struct dm_table *pool_table = dm_get_live_table(pool_md);
+			//struct dm_target *pool_t = dm_table_get_target(pool_table, 0);
+			//struct dm_dev *data_dev = (struct dm_dev *)pool_t->private1;
+			//struct block_device *data_bdev = data_dev->bdev;
+			//struct request_queue *data_q = bdev_get_queue(data_bdev);
+			//struct mapped_device *data_md = data_q->queuedata;
+			//struct dm_table *data_table = dm_get_live_table(data_md);
+			//struct list_head *data_l = &data_table->devices;
+			//struct dm_dev_internal *data_dd = list_entry(data_l->next, typeof(struct dm_dev_internal), list);
+			//struct block_device *md_bdev = data_dd->dm_dev.bdev;
+			//struct request_queue *md_q = bdev_get_queue(md_bdev);
+			///printk("dm_set_device_limits1: %s\n", bdevname(md_bdev, b1));
+			///if (dm_queue_is_raid0_or_raid10(md_q))
+			///	blk_limits_max_hw_sectors(limits, (unsigned int) (PAGE_SIZE >> 9));
+			//dm_table_put(pool_table);
+			//dm_table_put(data_table);
+		}
+		else if ((strcmp(ti->type->name, "qdm_origin") == 0) && (strstr(b, "dm-") != NULL)) {
+			struct mapped_device *data_md = q->queuedata;
+			struct dm_table *data_table = dm_get_live_table(data_md);
+			struct dm_target *data_t = dm_table_get_target(data_table, 0);
+			//printk("dm_set_device_limits2: %s\n", data_t->type->name);
+			if (strcmp(data_t->type->name, "linear") == 0) {
+				//struct list_head *data_l = &data_table->devices;
+				//struct dm_dev_internal *data_dd = list_entry(data_l->next, typeof(struct dm_dev_internal), list);
+				//struct block_device *md_bdev = data_dd->dm_dev.bdev;
+				//struct request_queue *md_q = bdev_get_queue(md_bdev);
+				///printk("dm_set_device_limits3: %s\n", bdevname(md_bdev, b1));
+				///if (dm_queue_is_raid0_or_raid10(md_q))
+				///	blk_limits_max_hw_sectors(limits, (unsigned int) (PAGE_SIZE >> 9));
+			}
+			else if (strcmp(data_t->type->name, "thin") == 0) {
+				ti->private1 = data_t->private1;
+			}
+			dm_table_put(data_table);
+		}
+		else if ((strcmp(ti->type->name, "flashcache") == 0) && (strstr(b, "dm-") != NULL)) {
+			struct mapped_device *data_md = q->queuedata;
+			struct dm_table *data_table = dm_get_live_table(data_md);
+			struct dm_target *data_t = dm_table_get_target(data_table, 0);
+			//printk("dm_set_device_limits4: %s\n", data_t->type->name);
+			if (strcmp(data_t->type->name, "linear") == 0) {
+				//struct list_head *data_l = &data_table->devices;
+				//struct dm_dev_internal *data_dd = list_entry(data_l->next, typeof(struct dm_dev_internal), list);
+				//struct block_device *md_bdev = data_dd->dm_dev.bdev;
+				//struct request_queue *md_q = bdev_get_queue(md_bdev);
+				///printk("dm_set_device_limits5: %s\n", bdevname(md_bdev, b1));
+				///if (dm_queue_is_raid0_or_raid10(md_q))
+				///	blk_limits_max_hw_sectors(limits, (unsigned int) (PAGE_SIZE >> 9));
+			}
+			else if (strcmp(data_t->type->name, "qdm_origin") == 0 || strcmp(data_t->type->name, "thin") == 0) {
+				ti->private1 = data_t->private1;
+			}
+			dm_table_put(data_table);
+		}
+		else if ((strcmp(ti->type->name, "crypt") == 0) && (strstr(b, "dm-") != NULL)) {
+			struct mapped_device *data_md = q->queuedata;
+			struct dm_table *data_table = dm_get_live_table(data_md);
+			struct dm_target *data_t = dm_table_get_target(data_table, 0);
+			//printk("dm_set_device_limits6: %s\n", data_t->type->name);
+			if (strcmp(data_t->type->name, "linear") == 0) {
+				//struct list_head *data_l = &data_table->devices;
+				//struct dm_dev_internal *data_dd = list_entry(data_l->next, typeof(struct dm_dev_internal), list);
+				//struct block_device *md_bdev = data_dd->dm_dev.bdev;
+				//struct request_queue *md_q = bdev_get_queue(md_bdev);
+				///printk("dm_set_device_limits7: %s\n", bdevname(md_bdev, b1));
+				///if (dm_queue_is_raid0_or_raid10(md_q))
+				///	blk_limits_max_hw_sectors(limits, (unsigned int) (PAGE_SIZE >> 9));
+			}
+			else if (strcmp(data_t->type->name, "flashcache") == 0 || strcmp(data_t->type->name, "qdm_origin") == 0 || strcmp(data_t->type->name, "thin") == 0) {
+				ti->private1 = data_t->private1;
+			}
+			dm_table_put(data_table);
+		}
+		//else
+#endif  
+		//blk_limits_max_hw_sectors(limits,
+		//			  (unsigned int) (PAGE_SIZE >> 9));
+	}
+	else {
+		//printk("dm_set_device_limits8: %s %s, 0x%x\n", b, ti->type->name, q);
+		if (strstr(b, "drbd")) {
+			struct drbd_conf *mdev = q->queuedata;
+		}
+		else if ((strcmp(ti->type->name, "qdm_origin") == 0) && (strstr(b, "dm-") != NULL)) {
+			struct mapped_device *data_md = q->queuedata;
+			struct dm_table *data_table = dm_get_live_table(data_md);
+			struct dm_target *data_t = dm_table_get_target(data_table, 0);
+			if (strcmp(data_t->type->name, "thin") == 0)
+				ti->private1 = data_t->private1;
+			dm_table_put(data_table);
+		}
+		else if ((strcmp(ti->type->name, "flashcache") == 0) && (strstr(b, "dm-") != NULL)) {
+			struct mapped_device *data_md = q->queuedata;
+			struct dm_table *data_table = dm_get_live_table(data_md);
+			struct dm_target *data_t = dm_table_get_target(data_table, 0);
+			if (strcmp(data_t->type->name, "qdm_origin") == 0 || strcmp(data_t->type->name, "thin") == 0)
+				ti->private1 = data_t->private1;
+			dm_table_put(data_table);
+		}
+		else if ((strcmp(ti->type->name, "crypt") == 0) && (strstr(b, "dm-") != NULL)) {
+			struct mapped_device *data_md = q->queuedata;
+			struct dm_table *data_table = dm_get_live_table(data_md);
+			struct dm_target *data_t = dm_table_get_target(data_table, 0);
+			if (strcmp(data_t->type->name, "flashcache") == 0 || strcmp(data_t->type->name, "qdm_origin") == 0 || strcmp(data_t->type->name, "thin") == 0)
+				ti->private1 = data_t->private1;
+			dm_table_put(data_table);
+		}
+	}
 	return 0;
 }
 EXPORT_SYMBOL_GPL(dm_set_device_limits);
@@ -1187,6 +1305,7 @@ struct dm_target *dm_table_get_target(struct dm_table *t, unsigned int index)
 
 	return t->targets + index;
 }
+EXPORT_SYMBOL(dm_table_get_target);
 
 /*
  * Search the btree for the correct target.
@@ -1210,6 +1329,7 @@ struct dm_target *dm_table_find_target(struct dm_table *t, sector_t sector)
 
 	return &t->targets[(KEYS_PER_NODE * n) + k];
 }
+EXPORT_SYMBOL(dm_table_find_target); // Add by Burton
 
 /*
  * Establish the new table's queue_limits and validate them.

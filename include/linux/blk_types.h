@@ -108,6 +108,25 @@ struct bio {
 
 #endif /* CONFIG_BLOCK */
 
+//#if defined(CONFIG_MACH_QNAPTS) && defined(SUPPORT_VAAI)
+/* title: bugzilla #32389 and #32390
+ * bug desc: please refer bugzilla #32389 and #32390
+ * author: adamhsu 2013/04/19
+ * method: to use special flag to indicate this discard bio is special or normal
+ */
+#define QNAP_DISCARD_TYPE_0         0UL 
+#define QNAP_DISCARD_TYPE_1         1UL
+#define QNAP_DISCARD_TYPE_OFFSET    (BIO_POOL_OFFSET - 1) // it will be bit 27 or bit 59
+#define QNAP_DISCARD_TYPE_MASK      (1UL << QNAP_DISCARD_TYPE_OFFSET)
+//#endif
+
+#if defined(CONFIG_MACH_QNAPTS)
+/* special zero bio */
+#define QNAP_ALLOC_ZEROED_OFFSET (BIO_POOL_OFFSET - 1)
+#define QNAP_ALLOC_ZEROED_MASK (1UL << QNAP_ALLOC_ZEROED_OFFSET)
+#endif
+
+
 /*
  * Request flags.  For use in the cmd_flags field of struct request, and in
  * bi_rw of struct bio.  Note that some flags are only valid in either one.
@@ -150,9 +169,16 @@ enum rq_flag_bits {
 	__REQ_FLUSH_SEQ,	/* request for flush sequence */
 	__REQ_IO_STAT,		/* account I/O stat */
 	__REQ_MIXED_MERGE,	/* merge of different types, fail separately */
-	__REQ_NR_BITS,		/* stops here */
+	/* qnap */
+#ifdef CONFIG_MACH_QNAPTS
+	__REQ_QNAP_DIRECT,	/* direct io bit for SSDCache */
+#endif
+    __REQ_NR_BITS,		/* stops here */
 };
-
+	/* qnap */
+#ifdef CONFIG_MACH_QNAPTS
+#define REQ_QNAP_DIRECT		(1 << __REQ_QNAP_DIRECT)
+#endif
 #define REQ_WRITE		(1 << __REQ_WRITE)
 #define REQ_FAILFAST_DEV	(1 << __REQ_FAILFAST_DEV)
 #define REQ_FAILFAST_TRANSPORT	(1 << __REQ_FAILFAST_TRANSPORT)

@@ -55,6 +55,13 @@
 #include "md.h"
 #include "bitmap.h"
 
+//Patch by QNAP: Robust RAID - ReadOnly function
+#ifdef CONFIG_MACH_QNAPTS
+#include <linux/string.h>
+#define QNAP_SPEED_LIMIT_MIN 5000 //5MBPS
+#endif
+/////////////////////////////////////
+
 #ifndef MODULE
 static void autostart_arrays(int part);
 #endif
@@ -80,7 +87,14 @@ static struct workqueue_struct *md_misc_wq;
  * before ejecting it from the array. We divide the read error
  * count by 2 for every hour elapsed between read errors.
  */
+ 
+//Patch by QNAP: enhance HAL error handler
+#if defined(CONFIG_MACH_QNAPTS) && defined(QNAP_HAL)
+#define MD_DEFAULT_MAX_CORRECTED_READ_ERRORS 32
+#else
 #define MD_DEFAULT_MAX_CORRECTED_READ_ERRORS 20
+#endif
+
 /*
  * Current RAID-1,4,5 parallel reconstruction 'guaranteed speed limit'
  * is 1000 KB/sec, so the extra system load does not show up that much.
@@ -93,8 +107,12 @@ static struct workqueue_struct *md_misc_wq;
  * you can change it via /proc/sys/dev/raid/speed_limit_min and _max.
  * or /sys/block/mdX/md/sync_speed_{min,max}
  */
-
+//Patch by QNAP: Robust RAID - ReadOnly function
+#ifdef CONFIG_MACH_QNAPTS	//Modified by KenChen
+static int sysctl_speed_limit_min = QNAP_SPEED_LIMIT_MIN;
+#else
 static int sysctl_speed_limit_min = 1000;
+#endif
 static int sysctl_speed_limit_max = 200000;
 static inline int speed_min(struct mddev *mddev)
 {
@@ -2201,9 +2219,11 @@ static void print_sb_90(mdp_super_t *sb)
 		sb->major_version, sb->minor_version, sb->patch_version,
 		sb->set_uuid0, sb->set_uuid1, sb->set_uuid2, sb->set_uuid3,
 		sb->ctime);
-	printk(KERN_INFO "md:     L%d S%08d ND:%d RD:%d md%d LO:%d CS:%d\n",
+	//Patch by QNAP:  Charley , use unsigned int can support up to 4TB.  
+	printk(KERN_INFO "md:     L%d S%08u ND:%d RD:%d md%d LO:%d CS:%d\n",
 		sb->level, sb->size, sb->nr_disks, sb->raid_disks,
 		sb->md_minor, sb->layout, sb->chunk_size);
+    //////////////////////////////////////
 	printk(KERN_INFO "md:     UT:%08x ST:%d AD:%d WD:%d"
 		" FD:%d SD:%d CSUM:%08x E:%08lx\n",
 		sb->utime, sb->state, sb->active_disks, sb->working_disks,
@@ -3048,6 +3068,12 @@ int md_rdev_init(struct md_rdev *rdev)
 	INIT_LIST_HEAD(&rdev->same_set);
 	init_waitqueue_head(&rdev->blocked_wait);
 
+//Patch by QNAP:Added by KenChen for Robust RAID - ReadOnly function
+#ifdef CONFIG_MACH_QNAPTS
+	rdev->qflags = 0;
+#endif			
+////////////////////////////////////////////////////
+
 	/* Add space to store bad block list.
 	 * This reserves the space even on arrays where it cannot
 	 * be used - I wonder if that matters
@@ -3824,6 +3850,34 @@ static struct md_sysfs_entry max_corr_read_errors =
 __ATTR(max_read_errors, S_IRUGO|S_IWUSR, max_corrected_read_errors_show,
 	max_corrected_read_errors_store);
 
+#ifdef CONFIG_MACH_QNAPTS
+static ssize_t
+md_qnap_testMode_show(struct mddev *mddev, char *page) {
+	return sprintf(page, "%d\n", test_bit(QMD_FEATURE_TEST_MODE, &mddev->qflags));
+}
+
+static ssize_t
+md_qnap_testMode_store(struct mddev *mddev, const char *buf, size_t len)
+{
+	char *e;
+	unsigned long n = simple_strtoul(buf, &e, 10);
+
+	if (!*buf || (*e && *e != '\n'))
+		return -EINVAL;
+
+	if(n==0)
+		clear_bit(QMD_FEATURE_TEST_MODE, &mddev->qflags);
+	else
+ 		set_bit(QMD_FEATURE_TEST_MODE, &mddev->qflags);
+
+	return len;
+}
+
+static struct md_sysfs_entry md_qnap_testMode =
+__ATTR(qnap_testMode, S_IRUGO|S_IWUSR, md_qnap_testMode_show, md_qnap_testMode_store);
+
+#endif
+
 static ssize_t
 null_show(struct mddev *mddev, char *page)
 {
@@ -4205,6 +4259,14 @@ sync_speed_show(struct mddev *mddev, char *page)
 	unsigned long resync, dt, db;
 	if (mddev->curr_resync == 0)
 		return sprintf(page, "none\n");
+//Patch by QNAP: To check md delayed sync
+#if defined(CONFIG_MACH_QNAPTS) && defined(QNAP_HAL)
+	if (mddev->curr_resync == 1 || mddev->curr_resync == 2)
+	{
+		//pending state:
+		return sprintf(page, "%lu\n", (long unsigned int)0); /* K/sec */   
+	}
+#endif		  
 	resync = mddev->curr_mark_cnt - atomic_read(&mddev->recovery_active);
 	dt = (jiffies - mddev->resync_mark) / HZ;
 	if (!dt) dt++;
@@ -4227,7 +4289,12 @@ sync_completed_show(struct mddev *mddev, char *page)
 	else
 		max_sectors = mddev->dev_sectors;
 
+//Patch by QNAP: Get sync progress
+#if defined(CONFIG_MACH_QNAPTS) && defined(QNAP_HAL)
+	resync = mddev->curr_resync - atomic_read(&mddev->recovery_active);
+#else	 
 	resync = mddev->curr_resync_completed;
+#endif
 	return sprintf(page, "%llu / %llu\n", resync, max_sectors);
 }
 
@@ -7024,7 +7091,20 @@ void md_do_sync(struct mddev *mddev)
 	int skipped = 0;
 	struct md_rdev *rdev;
 	char *desc;
-
+/*Patch by QNAP:    
+		20130523
+		SWChen fix bug 33253 
+		enable plug mechanism before resync (blk_start_plug)
+		and disable plug mechanism when resync done (blk_finish_plug)
+		reference: http://lwn.net/Articals/437833/
+*/		
+#ifdef CONFIG_MACH_QNAPTS
+	struct blk_plug plug;
+#ifdef QNAP_HAL
+	NETLINK_EVT hal_event;
+#endif
+#endif
+///////////////////////////////////////
 	/* just incase thread restarts... */
 	if (test_bit(MD_RECOVERY_DONE, &mddev->recovery))
 		return;
@@ -7143,6 +7223,39 @@ void md_do_sync(struct mddev *mddev)
 	printk(KERN_INFO "md: using maximum available idle IO bandwidth "
 	       "(but not more than %d KB/sec) for %s.\n",
 	       speed_max(mddev), desc);
+//Patch by QNAP: Robust RAID - ReadOnly function
+#if defined(CONFIG_MACH_QNAPTS) && defined(QNAP_HAL)
+	//initial netlink event
+	memset(&hal_event, 0, sizeof(NETLINK_EVT));
+	hal_event.type = HAL_EVENT_RAID;
+
+	if ( j !=  MaxSector && (test_bit(MD_RECOVERY_RUNNING, &mddev->recovery) || test_bit(MD_RECOVERY_NEEDED, &mddev->recovery))){
+		if (test_bit(MD_RECOVERY_RESHAPE, &mddev->recovery)){
+			//type = "reshape";
+			printk(KERN_INFO "md: Reshaping started: %s\n", mdname(mddev));
+
+			hal_event.arg.action = REBUILDING_START;
+			hal_event.arg.param.netlink_raid.raid_id = simple_strtol(mdname(mddev) + strlen("md"), NULL, 0);	
+			send_hal_netlink(&hal_event);
+		}
+		else if (test_bit(MD_RECOVERY_SYNC, &mddev->recovery) || test_bit(MD_RECOVERY_REQUESTED, &mddev->recovery)) {
+			//if (!test_bit(MD_RECOVERY_REQUESTED, &mddev->recovery)){
+			//type = "resync";
+			printk(KERN_INFO "md: Resyncing started: %s\n", mdname(mddev));
+
+			hal_event.arg.action = RESYNCING_START;
+			hal_event.arg.param.netlink_raid.raid_id = simple_strtol(mdname(mddev) + strlen("md"), NULL, 0);	
+			send_hal_netlink(&hal_event);
+		} else{
+			//type = "recover";
+			printk(KERN_INFO "md: Recovering started: %s\n", mdname(mddev));
+
+			hal_event.arg.action = REBUILDING_START;
+			hal_event.arg.param.netlink_raid.raid_id = simple_strtol(mdname(mddev) + strlen("md"), NULL, 0);	
+			send_hal_netlink(&hal_event);
+		}
+	}
+#endif
 
 	is_mddev_idle(mddev, 1); /* this initializes IO event counters */
 
@@ -7172,6 +7285,14 @@ void md_do_sync(struct mddev *mddev)
 		mddev->curr_resync = j;
 	}
 	mddev->curr_resync_completed = j;
+    
+	//
+	//	20130523
+	//	SWChen fix bug 33253
+	//
+#ifdef CONFIG_MACH_QNAPTS
+	blk_start_plug(&plug);
+#endif
 
 	while (j < max_sectors) {
 		sector_t sectors;
@@ -7274,10 +7395,52 @@ void md_do_sync(struct mddev *mddev)
 		}
 	}
 	printk(KERN_INFO "md: %s: %s done.\n",mdname(mddev), desc);
+//Patch by QNAP: Robust RAID - ReadOnly function
+#if defined(CONFIG_MACH_QNAPTS) && defined(QNAP_HAL)
+	//initial netlink event
+	memset(&hal_event, 0, sizeof(NETLINK_EVT));
+	hal_event.type = HAL_EVENT_RAID;
+
+	if ( j != MaxSector && (test_bit(MD_RECOVERY_RUNNING, &mddev->recovery) || test_bit(MD_RECOVERY_NEEDED, &mddev->recovery))){
+		if (test_bit(MD_RECOVERY_RESHAPE, &mddev->recovery)){
+			//type = "reshape";
+			printk(KERN_INFO "md: Reshaping done: %s\n", mdname(mddev));
+			
+			hal_event.arg.action = REBUILDING_COMPLETE;
+			hal_event.arg.param.netlink_raid.raid_id = simple_strtol(mdname(mddev) + strlen("md"), NULL, 0);	
+			send_hal_netlink(&hal_event);
+		}
+		else if ((test_bit(MD_RECOVERY_SYNC, &mddev->recovery) || test_bit(MD_RECOVERY_REQUESTED, &mddev->recovery)) && !test_bit(MD_RECOVERY_INTR, &mddev->recovery)) {
+			//if (!test_bit(MD_RECOVERY_REQUESTED, &mddev->recovery)){
+			//type = "resync";
+			printk(KERN_INFO "md: Resyncing done: %s\n", mdname(mddev));
+
+			hal_event.arg.action = RESYNCING_COMPLETE;
+			hal_event.arg.param.netlink_raid.raid_id = simple_strtol(mdname(mddev) + strlen("md"), NULL, 0);	
+			send_hal_netlink(&hal_event);
+		} else if (!test_bit(MD_RECOVERY_INTR, &mddev->recovery)){
+			//type = "recover";
+			printk(KERN_INFO "md: Recovering done: %s, degraded=%d\n", mdname(mddev), mddev->degraded);
+			hal_event.arg.action = REBUILDING_COMPLETE;
+			hal_event.arg.param.netlink_raid.raid_id = simple_strtol(mdname(mddev) + strlen("md"), NULL, 0);	
+			send_hal_netlink(&hal_event);
+		}
+	}
+#endif
+
 	/*
 	 * this also signals 'finished resyncing' to md_stop
 	 */
  out:
+/*
+       Patch by QNAP:	
+       20130523
+	SWChen fix bug 33253
+*/
+#ifdef CONFIG_MACH_QNAPTS
+	blk_finish_plug(&plug);
+#endif
+////////////////////////////////////////////////
 	wait_event(mddev->recovery_wait, !atomic_read(&mddev->recovery_active));
 
 	/* tell personality that we are finished */
@@ -7312,6 +7475,41 @@ void md_do_sync(struct mddev *mddev)
 	set_bit(MD_CHANGE_DEVS, &mddev->flags);
 
  skip:
+//Patch by QNAP: Robust RAID - ReadOnly function
+#if defined(CONFIG_MACH_QNAPTS) && defined(QNAP_HAL)
+	//initial netlink event
+	memset(&hal_event, 0, sizeof(NETLINK_EVT));
+	hal_event.type = HAL_EVENT_RAID;
+
+	if (test_bit(MD_RECOVERY_INTR, &mddev->recovery)){
+		if (test_bit(MD_RECOVERY_RESHAPE, &mddev->recovery)){
+			//type = "reshape";
+			printk(KERN_INFO "md: %s skipped: %s \n", desc, mdname(mddev));
+
+			hal_event.arg.action = REBUILDING_SKIP;
+			hal_event.arg.param.netlink_raid.raid_id = simple_strtol(mdname(mddev) + strlen("md"), NULL, 0);	
+			send_hal_netlink(&hal_event);
+		}
+		else if (test_bit(MD_RECOVERY_SYNC, &mddev->recovery) || test_bit(MD_RECOVERY_REQUESTED, &mddev->recovery)) {
+			//if (!test_bit(MD_RECOVERY_REQUESTED, &mddev->recovery)){
+			//type = "resync";
+			printk(KERN_INFO "md: %s skipped: %s \n", desc, mdname(mddev));
+
+			hal_event.arg.action = RESYNCING_SKIP;
+			hal_event.arg.param.netlink_raid.raid_id = simple_strtol(mdname(mddev) + strlen("md"), NULL, 0);	
+			send_hal_netlink(&hal_event);
+		} 
+		else{
+			//type = "recover";
+			printk(KERN_INFO "md: %s skipped: %s \n", desc, mdname(mddev));
+
+			hal_event.arg.action = REBUILDING_SKIP;
+			hal_event.arg.param.netlink_raid.raid_id = simple_strtol(mdname(mddev) + strlen("md"), NULL, 0);	
+			send_hal_netlink(&hal_event);
+		}
+	}
+#endif
+    
 	if (!test_bit(MD_RECOVERY_INTR, &mddev->recovery)) {
 		/* We completed so min/max setting can be forgotten if used. */
 		if (test_bit(MD_RECOVERY_REQUESTED, &mddev->recovery))

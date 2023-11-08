@@ -795,6 +795,9 @@ static int dev_remove(struct dm_ioctl *param, size_t param_size)
 {
 	struct hash_cell *hc;
 	struct mapped_device *md;
+	struct dm_target *ti;	// Add by Burton
+	struct dm_table *table;	// Add by Burton
+	int num_targets;	// Add by Burton
 	int r;
 
 	down_write(&_hash_lock);
@@ -805,8 +808,28 @@ static int dev_remove(struct dm_ioctl *param, size_t param_size)
 		up_write(&_hash_lock);
 		return -ENXIO;
 	}
-
+	// Add by Burton
 	md = hc->md;
+
+	table = dm_get_live_table(md);
+	if (table) {
+		num_targets = dm_table_get_num_targets(table);
+
+		ti = dm_table_get_target(table, 0);
+		if (ti->type->open_count) {
+		//printk(KERN_ALERT "dm_open_count_fn Exist! open_count is %d", ti->type->open_count(ti));
+
+			if (ti->type->open_count(ti)) {
+			//printk(KERN_ALERT "Unable to remove open device %s", hc->name);
+				up_write(&_hash_lock);
+				dm_put(md);
+				return -EBUSY;
+			}
+		}
+		dm_table_put(table);
+	}
+
+	// Add by Burton
 
 	/*
 	 * Ensure the device is not open and nothing further can open it.

@@ -1250,8 +1250,12 @@ set_qf_format:
 			if (args[0].from) {
 				if (match_int(&args[0], &option))
 					return 0;
-			} else
+			}
+//Patch by QNAP:Kevin Liao 20121130: The default is changed to no barrier for performance issue
+#ifndef CONFIG_MACH_QNAPTS
+            else
 				option = 1;	/* No argument, default to 1 */
+#endif            
 			if (option)
 				set_opt(sbi->s_mount_opt, BARRIER);
 			else
@@ -1731,7 +1735,10 @@ static int ext3_fill_super (struct super_block *sb, void *data, int silent)
 	sbi->s_resgid = le16_to_cpu(es->s_def_resgid);
 
 	/* enable barriers by default */
+//Patch by QNAP: Kevin Liao 20121130: The default is changed to no barrier for performance issue
+#ifndef CONFIG_MACH_QNAPTS
 	set_opt(sbi->s_mount_opt, BARRIER);
+#endif
 	set_opt(sbi->s_mount_opt, RESERVATION);
 
 	if (!parse_options ((char *) data, sb, &journal_inum, &journal_devnum,
@@ -2306,10 +2313,11 @@ static int ext3_load_journal(struct super_block *sb,
 		if (!(journal = ext3_get_dev_journal(sb, journal_dev)))
 			return -EINVAL;
 	}
-
-	if (!(journal->j_flags & JFS_BARRIER))
+//Patch by QNAP: Kevin Liao 20121130: The default is changed to no barrier for performance issue
+#ifndef CONFIG_MACH_QNAPTS
+    if (!(journal->j_flags & JFS_BARRIER))
 		printk(KERN_INFO "EXT3-fs: barriers not enabled\n");
-
+#endif
 	if (!really_read_only && test_opt(sb, UPDATE_JOURNAL)) {
 		err = journal_update_format(journal);
 		if (err)  {

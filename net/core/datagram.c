@@ -201,21 +201,28 @@ int skb_copy_datagram_to_kernel_iovec(const struct sk_buff *skb, int offset,
 				      struct iovec *to, int len)
 {
 	int i, ret, fraglen, copy, o, end = 0;
-	struct sk_buff *next = skb_shinfo(skb)->frag_list;
+	struct sk_buff *next = skb_shinfo(skb)->frag_list, *orig_skb = skb;
 
 	struct comcerto_dma_sg *sg;
+	struct iovec *orig_to = to;
 	unsigned int size;
-	int total_len, input_len;
+	int total_len, input_len, orig_offset = offset, orig_len = len;
 	if (!len)
 		return 0;
 
 	total_len = len;
-	
-	size = sizeof(struct comcerto_dma_sg);
-	sg = kmalloc(size, GFP_ATOMIC);
-	if (!sg)
+//Patch by QNAP for iops performance
+#if defined(CONFIG_MACH_QNAPTS)
+	if (len < 4096)
 		return skb_copy_datagram_to_kernel_iovec_soft (skb, offset, to, len);
-
+#endif
+//////////////////////////
+	size = sizeof(struct comcerto_dma_sg);
+	sg = kzalloc(size, GFP_ATOMIC);
+	if (!sg)
+	{
+		return skb_copy_datagram_to_kernel_iovec_soft (skb, offset, to, len);
+	}
 	comcerto_dma_sg_init(sg);
 
 next_skb:
@@ -235,11 +242,18 @@ current_frag:
 			
 			// preparing input
 			if (i == -1) {
+				if (unlikely(!virt_addr_valid(skb->data + o)))
+					goto fallback;
+
 				ret = comcerto_dma_sg_add_input(sg, skb->data + o, copy, 0);
 			} else {
 				skb_frag_t *frag = &skb_shinfo(skb)->frags[i];
 				struct page *page = skb_frag_page(frag);
 				void *p = page_address(page) + frag->page_offset + o;
+
+				if (unlikely(!virt_addr_valid(p)))
+					goto fallback;
+
 				ret = comcerto_dma_sg_add_input(sg, p, copy, 0);
 			}
 			if (likely(ret == 0)) {
@@ -256,15 +270,13 @@ current_frag:
 					if (to->iov_len) {
 						int copy = min_t(unsigned int, to->iov_len, len);
 
+						if (unlikely(!virt_addr_valid(to->iov_base)))
+							goto fallback;
+
+
 						ret = comcerto_dma_sg_add_output(sg, to->iov_base, copy, 1);
-						if (unlikely(ret)) {
-							/* no clean way out, but this should never happen the way
-							 * skb_copy_datagram_to_kernel_iovec is called currently.
-							 */
-							comcerto_dma_sg_cleanup(sg, input_len);
-							kfree(sg);
-							return -EFAULT;
-						}
+						if (unlikely(ret))
+							goto fallback;
 						len -= copy;
 						to->iov_base += copy;
 						to->iov_len -= copy;
@@ -279,10 +291,11 @@ current_frag:
 				comcerto_dma_start();
 				comcerto_dma_wait();
 				comcerto_dma_put();
-				comcerto_dma_sg_cleanup(sg, input_len);
+				comcerto_dma_sg_cleanup(sg);
 
 				total_len = total_len - input_len;
 				if (total_len) {// Yes => last input fragment failed, add it again
+					len = total_len;
 					comcerto_dma_sg_init(sg);
 					goto current_frag;
 				} else { //Everything copied, exit successfully
@@ -303,9 +316,14 @@ current_frag:
 		goto next_skb;
 	}
 
-	comcerto_dma_sg_cleanup(sg, total_len - len);
+	comcerto_dma_sg_cleanup(sg);
 	kfree(sg);
 	return -EFAULT;
+fallback:
+	comcerto_dma_sg_cleanup(sg);
+	kfree(sg);
+	return skb_copy_datagram_to_kernel_iovec_soft (orig_skb, orig_offset, orig_to, orig_len);
+
 }
 #endif
 #endif

@@ -1440,7 +1440,9 @@ int xhci_drop_endpoint(struct usb_hcd *hcd, struct usb_device *udev,
 	    xhci_get_endpoint_flag(&ep->desc)) {
 		xhci_warn(xhci, "xHCI %s called with disabled ep %p\n",
 				__func__, ep);
+#ifndef CONFIG_MACH_QNAPTS // Fix bug #27933        
 		return 0;
+#endif
 	}
 
 	ctrl_ctx->drop_flags |= cpu_to_le32(drop_flag);
@@ -3539,7 +3541,12 @@ int xhci_address_device(struct usb_hcd *hcd, struct usb_device *udev)
 
 	/* ctrl tx can take up to 5 sec; XXX: need more time for xHC? */
 	timeleft = wait_for_completion_interruptible_timeout(&xhci->addr_dev,
+//Patch by QNAP:Fix bug 39713
+#if defined(CONFIG_MACH_QNAPTS)
+			10000);
+#else	
 			USB_CTRL_SET_TIMEOUT);
+#endif
 	/* FIXME: From section 4.3.4: "Software shall be responsible for timing
 	 * the SetAddress() "recovery interval" required by USB and aborting the
 	 * command on a timeout.

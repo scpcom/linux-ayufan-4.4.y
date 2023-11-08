@@ -565,6 +565,26 @@ static void dentry_reset_mounted(struct vfsmount *mnt, struct dentry *dentry)
 	spin_unlock(&dentry->d_lock);
 }
 
+#ifdef CONFIG_MACH_QNAPTS
+struct vfsmount *qnap_lookup_vfsmount(struct dentry *dentry)
+{
+	unsigned u;
+
+	for (u = 0; u < HASH_SIZE; u++) {
+		struct vfsmount *p;
+
+		// Kevin Liao 20131121: How about if the volume is mounted twice on two different path?
+		list_for_each_entry(p, &mount_hashtable[u], mnt_hash) {
+			if (p->mnt_root == dentry)
+				return p;
+		}
+	}
+	return NULL;
+}
+EXPORT_SYMBOL(qnap_lookup_vfsmount);
+#endif
+
+
 /*
  * vfsmount lock must be held for write
  */

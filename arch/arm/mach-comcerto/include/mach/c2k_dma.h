@@ -212,7 +212,6 @@ static inline void mdma_xor_out_bdesc_ctrl_update(u32 xor_cbuf_wr_cntr,u32 idx, 
 }
 
 /****************** XOR functions end ********************/
-
 extern void comcerto_dma_get(void);
 extern void comcerto_dma_put(void);
 extern void comcerto_dma_set_in_bdesc(u32 idx, u32 addr, u32 ctrl);
@@ -225,7 +224,7 @@ extern void comcerto_do_mdma_memcpy(void);
 int comcerto_dma_sg_add_input(struct comcerto_dma_sg *sg, void *p, unsigned int len, int use_acp);
 int comcerto_dma_sg_add_output(struct comcerto_dma_sg *sg, void *p, unsigned int len, int use_acp);
 void comcerto_dma_sg_setup(struct comcerto_dma_sg *sg, unsigned int len);
-void comcerto_dma_sg_cleanup(struct comcerto_dma_sg *sg, unsigned int len);
+void comcerto_dma_sg_cleanup(struct comcerto_dma_sg *sg);
 
 static inline void comcerto_dma_sg_init(struct comcerto_dma_sg *sg)
 {

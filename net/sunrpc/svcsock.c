@@ -1325,6 +1325,29 @@ static struct svc_xprt_class svc_tcp_class = {
 	.xcl_max_payload = RPCSVC_MAXPAYLOAD_TCP,
 };
 
+//Patch by QNAP: Setup a interface to rewrite payload size
+#ifdef CONFIG_MACH_QNAPTS
+void svc_tcp_set_payload(uint32_t max_payload)
+{
+	svc_tcp_class.xcl_max_payload = max_payload;
+}
+
+uint32_t svc_tcp_read_payload()
+{
+	return svc_tcp_class.xcl_max_payload;
+}
+
+void svc_udp_set_payload(uint32_t max_payload)
+{
+        svc_udp_class.xcl_max_payload = max_payload;
+}
+
+uint32_t svc_udp_read_payload()
+{
+	return svc_udp_class.xcl_max_payload;
+}
+#endif
+
 void svc_init_xprt_sock(void)
 {
 	svc_reg_xprt_class(&svc_tcp_class);

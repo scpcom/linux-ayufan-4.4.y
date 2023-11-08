@@ -2529,6 +2529,10 @@ struct file *shmem_file_setup(const char *name, loff_t size, unsigned long flags
 	error = -ENOMEM;
 	this.name = name;
 	this.len = strlen(name);
+//Patch by QNAP:Search filename use case insensitive method
+#ifdef QNAP_SEARCH_FILENAME_CASE_INSENSITIVE
+    this.case_folding = 0;
+#endif        
 	this.hash = 0; /* will go */
 	root = shm_mnt->mnt_root;
 	path.dentry = d_alloc(root, &this);

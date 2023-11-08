@@ -15,7 +15,6 @@
 #include <linux/circ_buf.h>
 #include <linux/delay.h>
 
-
 #define XOR_MAX_SRC_CNT	6
 
 #define virt_to_xor_dma(pbase, vbase, vaddr)		((pbase + ((unsigned long)vaddr - (unsigned long)vbase)))
@@ -56,6 +55,7 @@ static int xor_sw_wr_prev_idx = 0;
 static int xor_current_batch_count = 0;
 
 #define XOR_FDESC_COUNT 512
+
 #if defined(CONFIG_COMCERTO_64K_PAGES)
 #define XOR_SW_FDESC_COUNT 32
 #else
@@ -303,9 +303,11 @@ static void comcerto_xor_cleanup(void)
 				tx->callback(tx->callback_param);
 				tx->callback = NULL;
 			}
+//Patch by QNAP: mark message
+#ifndef CONFIG_MACH_QNAPTS
 			else
 				printk("No Callback\n");
-
+#endif
 			smp_mb();		
 
 			spin_lock_irqsave(&mdma_lock, flags);
@@ -595,6 +597,10 @@ int comcerto_dma_sg_add_input(struct comcerto_dma_sg *sg, void *p, unsigned int 
 		sg->in_bdesc[sg->input_idx].len = len;
 		sg->input_idx++;
 
+		if (sg->input_idx < MDMA_INBOUND_BUF_DESC)
+			sg->in_bdesc[sg->input_idx].len = 0; // Clean-up will stop when reaching a zero length bdesc
+
+
 		return 0;
 	}
 	else { /* len = MSPD_MDMA_MAX_BUF_SIZE +1, split it in 2 pieces */
@@ -611,6 +617,9 @@ int comcerto_dma_sg_add_input(struct comcerto_dma_sg *sg, void *p, unsigned int 
 		sg->in_bdesc[sg->input_idx].phys_addr = phys_addr + MDMA_SPLIT_BUF_SIZE;
 		sg->in_bdesc[sg->input_idx].len = len - MDMA_SPLIT_BUF_SIZE;
 		sg->input_idx++;
+
+		if (sg->input_idx < MDMA_INBOUND_BUF_DESC)
+			sg->in_bdesc[sg->input_idx].len = 0; // Clean-up will stop when reaching a zero length bdesc
 
 		return 0;
 	}
@@ -637,6 +646,9 @@ int comcerto_dma_sg_add_output(struct comcerto_dma_sg *sg, void *p, unsigned int
 		sg->out_bdesc[sg->output_idx].len = len;
 		sg->output_idx++;
 
+		if (sg->output_idx < MDMA_OUTBOUND_BUF_DESC)
+			sg->out_bdesc[sg->output_idx].len = 0; // Clean-up will stop when reaching a zero length bdesc
+
 		return 0;
 	}
 	else { /* len = MDMA_MAX_BUF_SIZE +1, split it in 2 pieces */
@@ -653,6 +665,9 @@ int comcerto_dma_sg_add_output(struct comcerto_dma_sg *sg, void *p, unsigned int
 		sg->out_bdesc[sg->output_idx].phys_addr = phys_addr + MDMA_SPLIT_BUF_SIZE;
 		sg->out_bdesc[sg->output_idx].len = len - MDMA_SPLIT_BUF_SIZE;
 		sg->output_idx++;
+
+		if (sg->output_idx < MDMA_OUTBOUND_BUF_DESC)
+			sg->out_bdesc[sg->output_idx].len = 0; // Clean-up will stop when reaching a zero length bdesc
 
 		return 0;
 	}
@@ -707,14 +722,12 @@ void comcerto_dma_sg_setup(struct comcerto_dma_sg *sg, unsigned int len)
 }
 EXPORT_SYMBOL(comcerto_dma_sg_setup);
 
-void comcerto_dma_sg_cleanup(struct comcerto_dma_sg *sg, unsigned int len)
+void comcerto_dma_sg_cleanup(struct comcerto_dma_sg *sg)
 {
 	int i;
-	unsigned int remaining;
 
-	remaining = len;
 	i = 0;
-	while (remaining > sg->in_bdesc[i].len) {
+	while ((i < MDMA_INBOUND_BUF_DESC) && sg->in_bdesc[i].len) {
 		if (sg->in_bdesc[i].split) {
 			sg->in_bdesc[i+1].phys_addr = sg->in_bdesc[i].phys_addr;
 			sg->in_bdesc[i+1].len += sg->in_bdesc[i].len;
@@ -722,17 +735,12 @@ void comcerto_dma_sg_cleanup(struct comcerto_dma_sg *sg, unsigned int len)
 		else {
 			if (sg->in_bdesc[i].phys_addr < COMCERTO_AXI_ACP_BASE)
 				dma_unmap_page(NULL, sg->in_bdesc[i].phys_addr, sg->in_bdesc[i].len, DMA_TO_DEVICE);
-			remaining -= sg->in_bdesc[i].len;
 		}
 		i++;
 	}
 
-	if (sg->in_bdesc[i].phys_addr < COMCERTO_AXI_ACP_BASE)
-		dma_unmap_page(NULL, sg->in_bdesc[i].phys_addr, sg->in_bdesc[i].len, DMA_TO_DEVICE);
-
-	remaining = len;
 	i = 0;
-	while (remaining > sg->out_bdesc[i].len) {
+	while ((i < MDMA_OUTBOUND_BUF_DESC) && sg->out_bdesc[i].len) {
 		if (sg->out_bdesc[i].split) {
 			sg->out_bdesc[i+1].phys_addr = sg->out_bdesc[i].phys_addr;
 			sg->out_bdesc[i+1].len += sg->out_bdesc[i].len;
@@ -740,19 +748,14 @@ void comcerto_dma_sg_cleanup(struct comcerto_dma_sg *sg, unsigned int len)
 		else {
 			if (sg->out_bdesc[i].phys_addr < COMCERTO_AXI_ACP_BASE)
 				dma_unmap_page(NULL, sg->out_bdesc[i].phys_addr, sg->out_bdesc[i].len, DMA_FROM_DEVICE);
-			remaining -= sg->out_bdesc[i].len;
 		}
 		i++;
 	}
-
-	if (sg->out_bdesc[i].phys_addr < COMCERTO_AXI_ACP_BASE)
-		dma_unmap_page(NULL, sg->out_bdesc[i].phys_addr, sg->out_bdesc[i].len, DMA_FROM_DEVICE);
 
 
 	comcerto_dma_profiling_end(sg);
 }
 EXPORT_SYMBOL(comcerto_dma_sg_cleanup);
-
 void comcerto_dma_get(void)
 {
 	unsigned long flags;
@@ -786,12 +789,9 @@ void comcerto_dma_put(void)
 {
 #if 0
 	unsigned long flags;
-
 	spin_lock_irqsave(&mdma_lock, flags);
-	mdma_busy = 0;
+	dma_owned = 0;
 	spin_unlock_irqrestore(&mdma_lock, flags);
-
-	wake_up(&mdma_memcpy_busy_queue);
 #endif
 }
 EXPORT_SYMBOL(comcerto_dma_put);

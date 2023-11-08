@@ -1,6 +1,10 @@
 #ifndef ISCSI_TARGET_CORE_H
 #define ISCSI_TARGET_CORE_H
 
+/* 20140513, adamhsu, redmine 8253 */
+#ifdef CONFIG_MACH_QNAPTS
+#include <linux/version.h>
+#endif
 #include <linux/in.h>
 #include <linux/configfs.h>
 #include <net/sock.h>
@@ -11,24 +15,67 @@
 
 #define ISCSIT_VERSION			"v4.1.0-rc2"
 #define ISCSI_MAX_DATASN_MISSING_COUNT	16
+#ifdef CONFIG_MACH_QNAPTS
+#define ISCSI_TX_THREAD_TCP_TIMEOUT 30
+#define ISCSI_RX_THREAD_TCP_TIMEOUT 30	
+#else
 #define ISCSI_TX_THREAD_TCP_TIMEOUT	2
 #define ISCSI_RX_THREAD_TCP_TIMEOUT	2
+#endif
 #define SECONDS_FOR_ASYNC_LOGOUT	10
 #define SECONDS_FOR_ASYNC_TEXT		10
 #define SECONDS_FOR_LOGOUT_COMP		15
 #define WHITE_SPACE			" \t\v\f\n\r"
 
+#ifdef CONFIG_MACH_QNAPTS
+#if (LINUX_VERSION_CODE == KERNEL_VERSION(3,12,6))
+/* 20140513, adamhsu, redmine 8253
+ *
+ * Add code to make compiler happy during to build vhost driver. 
+ * The reason to do this is cause of vhost driver will co-work with LIO
+ * target code
+ */
+#define ISCSIT_MIN_TAGS			16
+#define ISCSIT_EXTRA_TAGS		8
+#endif
+#endif
+
 /* struct iscsi_node_attrib sanity values */
+#ifdef CONFIG_MACH_QNAPTS
+#define NA_DATAOUT_TIMEOUT		45
+#else
 #define NA_DATAOUT_TIMEOUT		3
+#endif
+
 #define NA_DATAOUT_TIMEOUT_MAX		60
 #define NA_DATAOUT_TIMEOUT_MIX		2
 #define NA_DATAOUT_TIMEOUT_RETRIES	5
 #define NA_DATAOUT_TIMEOUT_RETRIES_MAX	15
 #define NA_DATAOUT_TIMEOUT_RETRIES_MIN	1
+#ifdef CONFIG_MACH_QNAPTS
+/* 2014/04/02, adamhsu, redmine 7738
+ * To change the value from 45 secs to 25 secs 
+ * for [iSCT test case: Test 15.2 NOP-In Ping Requeston Timeout]
+ */
+//#define NA_NOPIN_TIMEOUT	       25
+
+/* Jay Wei, 20140910, redmine 8449
+ * Change the value from 25 sec to 10 sec
+ * for Citrix multipath test.
+ */
+#define NA_NOPIN_TIMEOUT		10
+#else
 #define NA_NOPIN_TIMEOUT		5
+#endif
+
 #define NA_NOPIN_TIMEOUT_MAX		60
 #define NA_NOPIN_TIMEOUT_MIN		3
+#ifdef CONFIG_MACH_QNAPTS
+#define NA_NOPIN_RESPONSE_TIMEOUT	45
+#else
 #define NA_NOPIN_RESPONSE_TIMEOUT	5
+#endif
+
 #define NA_NOPIN_RESPONSE_TIMEOUT_MAX	60
 #define NA_NOPIN_RESPONSE_TIMEOUT_MIN	3
 #define NA_RANDOM_DATAIN_PDU_OFFSETS	0
@@ -40,11 +87,22 @@
 
 /* struct iscsi_tpg_attrib sanity values */
 #define TA_AUTHENTICATION		1
+#ifdef CONFIG_MACH_QNAPTS
+#define TA_LOGIN_TIMEOUT		30
+#else
 #define TA_LOGIN_TIMEOUT		15
+#endif
+
 #define TA_LOGIN_TIMEOUT_MAX		30
 #define TA_LOGIN_TIMEOUT_MIN		5
+#ifdef CONFIG_MACH_QNAPTS
+#define TA_NETIF_TIMEOUT		30	
+#define TA_NETIF_TIMEOUT_MAX		60
+#else
 #define TA_NETIF_TIMEOUT		2
 #define TA_NETIF_TIMEOUT_MAX		15
+#endif
+
 #define TA_NETIF_TIMEOUT_MIN		2
 #define TA_GENERATE_NODE_ACLS		0
 #define TA_DEFAULT_CMDSN_DEPTH		16
@@ -133,6 +191,13 @@ enum cmd_flags_table {
 	ICF_ATTACHED_TO_RQUEUE			= 0x00000040,
 	ICF_OOO_CMDSN				= 0x00000080,
 	ICF_REJECT_FAIL_CONN			= 0x00000100,
+
+#if defined(CONFIG_MACH_QNAPTS)
+	/* 2014/08/16, adamhsu, redmine 9055,9076,9278 */
+	ICF_WENT_SEND_STATUS_IN_TMF_PROC	= 0x20000000,
+	ICF_GOT_LAST_DATAOUT_IN_TMF_PROC	= 0x40000000,
+	ICF_DELAYED_REMOVE			= 0x80000000,
+#endif
 };
 
 /* struct iscsi_cmd->i_state */
@@ -329,6 +394,7 @@ struct iscsi_r2t {
 	u32			targ_xfer_tag;
 	u32			xfer_len;
 	struct list_head	r2t_list;
+	u32			for_snack;
 } ____cacheline_aligned;
 
 struct iscsi_cmd {
@@ -435,6 +501,12 @@ struct iscsi_cmd {
 	spinlock_t		error_lock;
 	/* spinlock for adding R2Ts */
 	spinlock_t		r2t_lock;
+
+#if defined(CONFIG_MACH_QNAPTS)
+	/* 2014/08/16, adamhsu, redmine 9055,9076,9278 (debug purpose) */
+	struct list_head	cmd_rec_node;
+#endif
+
 	/* DataIN List */
 	struct list_head	datain_list;
 	/* R2T List */
@@ -480,6 +552,7 @@ struct iscsi_cmd {
 	struct scatterlist	*first_data_sg;
 	u32			first_data_sg_off;
 	u32			kmapped_nents;
+	u32			discoverysession;
 
 }  ____cacheline_aligned;
 
@@ -492,6 +565,14 @@ struct iscsi_tmr_req {
 };
 
 struct iscsi_conn {
+
+#ifdef CONFIG_MACH_QNAPTS
+    /* Patch about the sleeping code in iscsi_target_tx_thread() is 
+     * susceptible to the classic missed wakeup race.
+     */
+    wait_queue_head_t   queues_wq;
+#endif
+
 	/* Authentication Successful for this connection */
 	u8			auth_complete;
 	/* State connection is currently in */
@@ -613,6 +694,9 @@ struct iscsi_session {
 
 	/* protects cmdsn values */
 	struct mutex		cmdsn_mutex;
+#ifdef QNAP_KERNEL_STORAGE_V2
+	struct mutex		info_mutex;
+#endif
 	/* session wide counter: expected command sequence number */
 	u32			exp_cmd_sn;
 	/* session wide counter: maximum allowed command sequence number */
@@ -621,6 +705,12 @@ struct iscsi_session {
 
 	/* LIO specific session ID */
 	u32			sid;
+#ifdef CONFIG_MACH_QNAPTS   // record the exact login time
+    /* record the exact login time */
+	__u64		login_time;
+	/* Jonathan Ho, 20131029, handle immediate cmd as non-immediate cmd */
+	u8			skip_inc_exp_cmd_sn;
+#endif        
 	char			auth_type[8];
 	/* unique within the target */
 	int			session_index;
@@ -681,6 +771,10 @@ struct iscsi_login {
 	char *rsp;
 	char *req_buf;
 	char *rsp_buf;
+	int cbit;
+	char *for_cbit;
+	int authing;
+	
 } ____cacheline_aligned;
 
 struct iscsi_node_attrib {

@@ -66,6 +66,18 @@
 #include "sd.h"
 #include "scsi_logging.h"
 
+//Patch by QNAP:  iSCSI Target support
+#if defined(CONFIG_MACH_QNAPTS) && defined(NAS_VIRTUAL)
+#include <linux/proc_fs.h>
+#define ISCSI_DEV_START_INDEX 598
+#define MAX_ISCSI_DISK 26
+#define Is_iSCSI_Index(index) ((index >= ISCSI_DEV_START_INDEX && index <= (ISCSI_DEV_START_INDEX+MAX_ISCSI_DISK-1))? 1 : 0)
+#define Get_iSCSI_Index(c1, c2) (26*(c1-'a'+1)+c2-'a')
+static int iscsi_dev_arr[MAX_ISCSI_DISK];
+static struct device * iscsi_dev_ptr[MAX_ISCSI_DISK];
+#endif
+////////////////////////////////
+
 MODULE_AUTHOR("Eric Youngdale");
 MODULE_DESCRIPTION("SCSI disk (sd) driver");
 MODULE_LICENSE("GPL");
@@ -113,6 +125,202 @@ static void sd_print_result(struct scsi_disk *, int);
 
 static DEFINE_SPINLOCK(sd_index_lock);
 static DEFINE_IDA(sd_index_ida);
+
+//Patch by QNAP:  iSCSI Target support
+#if defined(CONFIG_MACH_QNAPTS) && defined(NAS_VIRTUAL)
+#define QNAP_DISK_NODE "scsi/qnap_disk_node"
+#define MAX_DISK_NODE_LEN       16
+static char qnap_disk_node[MAX_DISK_NODE_LEN];
+static struct proc_dir_entry *qnap_disk_node_proc_entry;
+
+#ifdef NAS_VIRTUAL_EX
+#define QNAP_IQN_NODE "scsi/qnap_iqn_node"
+#define MAX_IQN_NODE_LEN       260
+#define QNAP_SN_VPD_NODE "scsi/qnap_sn_vpd_node"
+
+static char *iscsi_iqn_arr[MAX_ISCSI_DISK];
+static unsigned char *iscsi_sn_vpd_arr[MAX_ISCSI_DISK];
+
+static char qnap_iqn_node[MAX_IQN_NODE_LEN];
+static struct proc_dir_entry *qnap_iqn_node_proc_entry;
+
+static ssize_t qnap_iqn_node_write( struct file *filp, const char __user *buff, unsigned long len, void *data )
+{
+	int copy_len = 0;
+    printk("qnap_iqn_node_write(%p, %lu, %p)\n", buff, len, data);
+    memset(qnap_iqn_node, 0, sizeof(qnap_iqn_node));
+    if (copy_from_user(qnap_iqn_node, buff, MAX_IQN_NODE_LEN-1)) {
+        return -EFAULT;
+    }
+    qnap_iqn_node[MAX_IQN_NODE_LEN-1] = 0;
+    if (*qnap_iqn_node) {
+        char *ptr = strchr(qnap_iqn_node, '\n');
+        if (ptr) *ptr = 0;
+        copy_len = strlen(qnap_iqn_node);
+        printk("qnap_iqn_node_write copy_len=%d, get %s\n", copy_len, qnap_iqn_node);
+    }
+    return (copy_len > len)?copy_len:len;
+}
+static int qnap_iqn_node_read( char *page, char **start, off_t off, int count, int *eof, void *data )
+{
+    int i, total_count = 0;
+    *eof = 1;
+    for (i = 0; i < MAX_ISCSI_DISK; i ++) {
+        if (iscsi_dev_arr[i] && iscsi_iqn_arr[i]) {
+            int read_count = snprintf(page+total_count, count, "%4d %s #%s\n", i, iscsi_iqn_arr[i], (iscsi_sn_vpd_arr[i])?iscsi_sn_vpd_arr[i]+4:"");
+            total_count += read_count;
+            if ((count -= read_count) <= 0)
+                break;
+        }
+    }
+    if (count) {
+        int read_count = snprintf(page+total_count, count, "END\n");
+        total_count += read_count;
+    }
+    return total_count;
+}
+
+static int QNAP_get_iscsi_free_slot(const char *iqn)
+{
+	int i;
+	if (!iqn || !*iqn)
+		return -1;
+	for (i = 0; i < MAX_ISCSI_DISK; i ++) {
+		if (iscsi_dev_arr[i] == 0) {
+			return i;
+		}
+	}
+	return -1;
+}
+
+#endif //NAS_VIRTUAL_EX
+static ssize_t qnap_disk_node_write( struct file *filp, const char __user *buff, unsigned long len, void *data )
+{
+  if (len > MAX_DISK_NODE_LEN) {
+    printk(KERN_INFO "qnap_disk_node: only can write %d bytes!\n", MAX_DISK_NODE_LEN);
+    return -ENOSPC;
+  }
+  if (copy_from_user(qnap_disk_node, buff, len )) {
+    return -EFAULT;
+  }
+  return len;
+}
+static int qnap_disk_node_read( char *page, char **start, off_t off, int count, int *eof, void *data )
+{
+    *eof = 1;
+    return snprintf(page, count, "%s\n", qnap_disk_node);
+}
+void create_qnap_disk_node_proc(void)
+{
+    qnap_disk_node_proc_entry = create_proc_entry( QNAP_DISK_NODE, 0644, NULL );
+    if (!qnap_disk_node_proc_entry) return ;
+    qnap_disk_node_proc_entry->read_proc = qnap_disk_node_read;
+    qnap_disk_node_proc_entry->write_proc = qnap_disk_node_write;
+#ifdef NAS_VIRTUAL_EX
+    qnap_iqn_node_proc_entry = create_proc_entry( QNAP_IQN_NODE, 0644, NULL );
+    if (!qnap_iqn_node_proc_entry) return ;
+    qnap_iqn_node_proc_entry->read_proc = qnap_iqn_node_read;
+    qnap_iqn_node_proc_entry->write_proc = qnap_iqn_node_write;
+#endif
+}
+void remove_qnap_disk_node_proc(void)
+{
+    remove_proc_entry(QNAP_DISK_NODE, NULL);
+#ifdef NAS_VIRTUAL_EX
+    remove_proc_entry(QNAP_IQN_NODE, NULL);
+#endif
+}
+
+static int is_iscsi_disk(struct scsi_device *sdp)
+{
+    struct scsi_host_template *iscsi_hostt = sdp->host->hostt;
+    printk("Check proc_name[%s].\n", iscsi_hostt->proc_name);
+    if (!strcmp(iscsi_hostt->proc_name, "iscsi_tcp"))
+        return 1;
+    else
+        return 0;
+}
+static int QNAP_get_iscsi_index(struct scsi_device *sdp, u32 *index)
+{
+    int error = -EBUSY;
+#ifdef NAS_VIRTUAL_EX
+    int idx;
+    if ((idx = QNAP_get_iscsi_free_slot(qnap_iqn_node)) >= 0) {
+        *index = Get_iSCSI_Index('w', ('a'+idx));	//sdwX
+        printk("qnap_iqn_node=%s.\n", qnap_iqn_node);
+    }
+    else {
+#endif
+        if (strlen(qnap_disk_node) >= 4 && strncmp(qnap_disk_node, "sd", 2) == 0)
+            *index = Get_iSCSI_Index(qnap_disk_node[2], qnap_disk_node[3]);
+        else
+        	*index = 0;
+#ifdef NAS_VIRTUAL_EX
+    }
+#endif
+    if (!Is_iSCSI_Index(*index)) {
+        return -ENODEV;
+    }
+    printk("Get sd index %d.\n", *index);
+
+#ifdef NAS_VIRTUAL_EX
+    if (Is_iSCSI_Index(*index)) { //sdwa ~ sdwz
+        int ip = *index - ISCSI_DEV_START_INDEX;
+        printk("index of iscsi_dev_arr is %d\n", ip);
+        if (!iscsi_dev_arr[ip]) {
+        	int vpd_len = 64;
+			unsigned char *buffer = kmalloc(vpd_len, GFP_KERNEL);
+			if (buffer) {
+				if (!scsi_get_vpd_page(sdp, 0x80, buffer, vpd_len)) {
+					iscsi_dev_arr[ip] = 1;
+					if (iscsi_iqn_arr[ip])
+		                kfree(iscsi_iqn_arr[ip]);
+		            iscsi_iqn_arr[ip] = kstrdup(qnap_iqn_node, GFP_KERNEL);
+		            if (iscsi_sn_vpd_arr[ip])
+		                kfree(iscsi_sn_vpd_arr[ip]);
+		            iscsi_sn_vpd_arr[ip] = buffer;
+		            vpd_len = iscsi_sn_vpd_arr[ip][3] + 4;
+					iscsi_sn_vpd_arr[ip][vpd_len] = '\0';
+					//iscsi_dev_ptr[ip] = dev;
+					error = 0;
+				}
+				else
+					kfree(buffer);
+			}
+        }
+    }
+#else
+    if ((*index >= ISCSI_DEV_START_INDEX) && (*index < (ISCSI_DEV_START_INDEX+26))) { //sdwa ~ sdwz
+        int ip = *index - ISCSI_DEV_START_INDEX;
+        if (!iscsi_dev_arr[ip]) {
+            iscsi_dev_arr[ip] = 1;
+            error = 0;
+        }
+    }
+#endif
+    return error;
+}
+
+void QNAP_clear_iscsi_index(struct scsi_device *sdp, u32 index)
+{
+	index -= ISCSI_DEV_START_INDEX;
+	iscsi_dev_arr[index]=0;
+#ifdef NAS_VIRTUAL_EX
+	printk("iSCSI LUN %d released\n", index);
+	if (iscsi_iqn_arr[index]) {
+		kfree(iscsi_iqn_arr[index]);
+		iscsi_iqn_arr[index]=NULL;
+	}
+	if (iscsi_sn_vpd_arr[index]) {
+		kfree(iscsi_sn_vpd_arr[index]);
+		iscsi_sn_vpd_arr[index]=NULL;
+	}
+#endif
+}
+
+#endif
+///////////////////////////////////////
+
 
 /* This semaphore is used to mediate the 0->1 reference get in the
  * face of object destruction (i.e. we can't allow a get on an
@@ -977,7 +1185,13 @@ static int sd_open(struct block_device *bdev, fmode_t mode)
 
 	if ((atomic_inc_return(&sdkp->openers) == 1) && sdev->removable) {
 		if (scsi_block_when_processing_errors(sdev))
+//Patch by QNAP: Fix removable disk can't eject when press eject button.
+#if defined(CONFIG_MACH_QNAPTS)
+            ;
+#else            
 			scsi_set_medium_removal(sdev, SCSI_REMOVAL_PREVENT);
+#endif
+////////////////////////////////////////////////////////////
 	}
 
 	return 0;
@@ -2587,7 +2801,16 @@ static int sd_probe(struct device *dev)
 	gd = alloc_disk(SD_MINORS);
 	if (!gd)
 		goto out_free;
-
+//Patch by QNAP: usb and sata device mapping
+#if defined(CONFIG_MACH_QNAPTS)
+#ifdef NAS_VIRTUAL
+    if(is_iscsi_disk(sdp)){
+		spin_lock(&sd_index_lock);
+        error = QNAP_get_iscsi_index(sdp, &index);
+		spin_unlock(&sd_index_lock);
+    }
+    else
+#endif
 	do {
 		if (!ida_pre_get(&sd_index_ida, GFP_KERNEL))
 			goto out_put;
@@ -2596,7 +2819,17 @@ static int sd_probe(struct device *dev)
 		error = ida_get_new(&sd_index_ida, &index);
 		spin_unlock(&sd_index_lock);
 	} while (error == -EAGAIN);
+#else // ------------------------------------------------
+	do {
+		if (!ida_pre_get(&sd_index_ida, GFP_KERNEL))
+			goto out_put;
 
+		spin_lock(&sd_index_lock);
+		error = ida_get_new(&sd_index_ida, &index);
+		spin_unlock(&sd_index_lock);
+	} while (error == -EAGAIN);
+#endif // CONFIG_MACH_QNAPTS
+	/////////////////////////////////////////////////////
 	if (error) {
 		sdev_printk(KERN_WARNING, sdp, "sd_probe: memory exhausted.\n");
 		goto out_put;
@@ -2698,7 +2931,19 @@ static void scsi_disk_release(struct device *dev)
 	struct gendisk *disk = sdkp->disk;
 	
 	spin_lock(&sd_index_lock);
+//Patch by QNAP: usb and sata device mapping
+#ifdef CONFIG_MACH_QNAPTS
+#ifdef NAS_VIRTUAL
+    if(Is_iSCSI_Index(sdkp->index)){
+        QNAP_clear_iscsi_index(sdkp->device, sdkp->index);
+    }
+    else
+#endif
+    ida_remove(&sd_index_ida, sdkp->index);
+#else
 	ida_remove(&sd_index_ida, sdkp->index);
+#endif
+	/////////////////////////////////////////
 	spin_unlock(&sd_index_lock);
 
 	disk->private_data = NULL;
@@ -2841,7 +3086,16 @@ static int __init init_sd(void)
 		printk(KERN_ERR "sd: can't init extended cdb pool\n");
 		goto err_out_cache;
 	}
-
+#if defined(CONFIG_MACH_QNAPTS) && defined(NAS_VIRTUAL)
+#ifdef NAS_VIRTUAL_EX
+        memset(iscsi_dev_arr, 0, sizeof(iscsi_dev_arr));
+        memset(iscsi_iqn_arr, 0, sizeof(iscsi_iqn_arr));
+        memset(iscsi_sn_vpd_arr, 0, sizeof(iscsi_sn_vpd_arr));
+        memset(qnap_disk_node, 0, sizeof(qnap_disk_node));
+        memset(qnap_iqn_node, 0, sizeof(qnap_iqn_node));
+#endif /* NAS_VIRTUAL_EX */
+        create_qnap_disk_node_proc();
+#endif /* defined(CONFIG_MACH_QNAPTS) && defined(NAS_VIRTUAL) */
 	return 0;
 
 err_out_cache:

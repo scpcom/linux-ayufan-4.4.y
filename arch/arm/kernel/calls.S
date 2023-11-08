@@ -387,6 +387,14 @@
 /* 375 */	CALL(sys_setns)
 		CALL(sys_process_vm_readv)
 		CALL(sys_process_vm_writev)
+/* Patch by QNAP: Add IP filter */
+/* Patch by QNAP: Add for recycle_bin feature */
+                CALL(sys_set_ipsec_rules)
+                CALL(sys_get_ipsec_vio_acc_list)
+                CALL(sys_qnap_rmdir)
+                CALL(sys_qnap_unlink)
+                CALL(sys_qnap_find_filename)
+/*//////////////////////////////*/
 #ifndef syscalls_counted
 .equ syscalls_padding, ((NR_syscalls + 3) & ~3) - NR_syscalls
 #define syscalls_counted

@@ -1009,9 +1009,14 @@ static const char *hwcap_str[] = {
 static int c_show(struct seq_file *m, void *v)
 {
 	int i;
-
+//Patch by QNAP: Parse Processor name
+#ifdef CONFIG_MACH_QNAPTS
+	seq_printf(m, "Processor name\t: %s rev %d (%s)\n",
+		   cpu_name, read_cpuid_id() & 15, elf_platform);
+#else
 	seq_printf(m, "Processor\t: %s rev %d (%s)\n",
 		   cpu_name, read_cpuid_id() & 15, elf_platform);
+#endif
 
 #if defined(CONFIG_SMP)
 	for_each_online_cpu(i) {

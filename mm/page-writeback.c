@@ -1673,6 +1673,27 @@ int do_writepages(struct address_space *mapping, struct writeback_control *wbc)
 
 	if (wbc->nr_to_write <= 0)
 		return 0;
+//George Wu, 20130721, blkdev_writepages
+#ifdef CONFIG_MACH_QNAPTS
+#ifdef USE_BLKDEV_WRITEPAGES
+	if (mapping->host)
+	{
+		// Kevin Liao 20130814: Make sure the inode is block device so that i_bdev is valid and it's safe to use it
+	    if (S_ISBLK(mapping->host->i_mode) && mapping->host->i_bdev)
+    	{
+	  	    if (mapping->host->i_bdev->bd_disk)
+  	    	{
+		        if (mapping->host->i_bdev->bd_disk->flags & GENHD_FL_MPAGE)
+	        	{
+			        ret = blkdev_writepages(mapping, wbc);
+                    return ret;
+	        	}
+  	    	}
+    	}
+	}
+#endif
+#endif
+    
 	if (mapping->a_ops->writepages)
 		ret = mapping->a_ops->writepages(mapping, wbc);
 	else

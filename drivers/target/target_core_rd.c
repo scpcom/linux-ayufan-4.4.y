@@ -512,9 +512,25 @@ static ssize_t rd_show_configfs_dev_params(
 	char *b)
 {
 	struct rd_dev *rd_dev = se_dev->se_dev_su_ptr;
+#ifdef CONFIG_MACH_QNAPTS // Benjamin 20120607 change for QNAP ID
+#if defined(Athens)
+	ssize_t bl = sprintf(b, "Cisco RamDisk ID: %u  RamDisk Makeup: %s\n",
+			rd_dev->rd_dev_id, (rd_dev->rd_direct) ?
+			"rd_direct" : "rd_mcp");
+#elif defined(IS_G)
+	ssize_t bl = sprintf(b, "RamDisk ID: %u  RamDisk Makeup: %s\n",
+			rd_dev->rd_dev_id, (rd_dev->rd_direct) ?
+			"rd_direct" : "rd_mcp");
+#else
+	ssize_t bl = sprintf(b, "QNAP RamDisk ID: %u  RamDisk Makeup %s\n",
+			rd_dev->rd_dev_id, (rd_dev->rd_direct) ?
+			"rd_direct" : "rd_mcp");
+#endif /* #if defined(Athens) */
+#else
 	ssize_t bl = sprintf(b, "TCM RamDisk ID: %u  RamDisk Makeup: %s\n",
 			rd_dev->rd_dev_id, (rd_dev->rd_direct) ?
 			"rd_direct" : "rd_mcp");
+#endif /* #ifdef CONFIG_MACH_QNAPTS */        
 	bl += sprintf(b + bl, "        PAGES/PAGE_SIZE: %u*%lu"
 			"  SG_table_count: %u\n", rd_dev->rd_page_count,
 			PAGE_SIZE, rd_dev->sg_table_count);

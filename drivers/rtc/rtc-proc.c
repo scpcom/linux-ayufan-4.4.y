@@ -51,7 +51,11 @@ static int rtc_proc_show(struct seq_file *seq, void *offset)
 			seq_printf(seq, "%02d\n", alrm.time.tm_sec);
 		else
 			seq_printf(seq, "**\n");
-
+//Patch by QNAP: Board initialization        
+#ifdef CONFIG_MACH_QNAPTS
+		seq_printf(seq, "alrm_wday\t: ");
+			seq_printf(seq, "%02d\n", alrm.time.tm_wday);
+#else
 		seq_printf(seq, "alrm_date\t: ");
 		if ((unsigned int)alrm.time.tm_year <= 200)
 			seq_printf(seq, "%04d-", alrm.time.tm_year + 1900);
@@ -65,6 +69,7 @@ static int rtc_proc_show(struct seq_file *seq, void *offset)
 			seq_printf(seq, "%02d\n", alrm.time.tm_mday);
 		else
 			seq_printf(seq, "**\n");
+#endif        
 		seq_printf(seq, "alarm_IRQ\t: %s\n",
 				alrm.enabled ? "yes" : "no");
 		seq_printf(seq, "alrm_pending\t: %s\n",

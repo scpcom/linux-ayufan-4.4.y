@@ -47,6 +47,15 @@
 #include <linux/libata.h>
 
 #include "libata.h"
+//Patch by QNAP: Send event
+#if defined(CONFIG_MACH_QNAPTS) && defined(QNAP_HAL)
+#include <qnap/hal_event.h>
+extern int send_hal_netlink(NETLINK_EVT *event);
+int qnap_ata_reset_to_ms=0;
+int qnap_ata_retry_val=0;
+EXPORT_SYMBOL(qnap_ata_reset_to_ms);
+EXPORT_SYMBOL(qnap_ata_retry_val);
+#endif
 
 enum {
 	/* speed down verdicts */
@@ -87,7 +96,12 @@ enum {
 	ATA_EH_UA_TRIES			= 5,
 
 	/* probe speed down parameters, see ata_eh_schedule_probe() */
+//Patch by QNAP: fix negotiation is 1.5G when plug in < 1 min
+#if defined(CONFIG_MACH_QNAPTS)
+	ATA_EH_PROBE_TRIAL_INTERVAL	= 10000,	/* 10 sec */
+#else	
 	ATA_EH_PROBE_TRIAL_INTERVAL	= 60000,	/* 1 min */
+#endif	
 	ATA_EH_PROBE_TRIALS		= 2,
 };
 
@@ -100,7 +114,9 @@ enum {
 static const unsigned long ata_eh_reset_timeouts[] = {
 	10000,	/* most drives spin up by 10sec */
 	10000,	/* > 99% working drives spin up before 20sec */
-	35000,	/* give > 30 secs of idleness for retarded devices */
+//Patch by QNAP:retry when plug in disk but no link	
+//	35000,	/* give > 30 secs of idleness for retarded devices */
+	10000,	/* give > 30 secs of idleness for retarded devices */
 	 5000,	/* and sweet one last chance */
 	ULONG_MAX, /* > 1 min has elapsed, give up */
 };
@@ -768,6 +784,9 @@ void ata_scsi_port_error_handler(struct Scsi_Host *host, struct ata_port *ap)
 				ata_eh_unload(ap);
 			ata_eh_finish(ap);
 		}
+#if defined(CONFIG_MACH_QNAPTS)	
+		ap->pflags  &= ~ATA_PFLAG_RESUMING;
+#endif	
 
 		/* process port suspend request */
 		ata_eh_handle_port_suspend(ap);
@@ -808,7 +827,12 @@ void ata_scsi_port_error_handler(struct Scsi_Host *host, struct ata_port *ap)
 	}
 
 	scsi_eh_flush_done_q(&ap->eh_done_q);
-
+    
+//Patch by QNAP:fix port disable if plug-in abnormal disk
+	if (ap->pflags & ATA_PFLAG_RECOVERED && ap->pflags & ATA_PFLAG_FROZEN){
+        ata_eh_thaw_port(ap);
+	}
+//////////////////////////////////////////////////////////////
 	/* clean up */
 	spin_lock_irqsave(ap->lock, flags);
 
@@ -2105,6 +2129,12 @@ static void ata_eh_link_autopsy(struct ata_link *link)
 		/* analyze TF */
 		ehc->i.action |= ata_eh_analyze_tf(qc, &qc->result_tf);
 
+#ifdef CONFIG_MACH_QNAPTS
+        // check ICRC error for speed down
+        if ((qc->dev->class == ATA_DEV_ATA) && (qc->result_tf.feature & ATA_ICRC))
+            ehc->i.err_mask |= AC_ERR_ICRC;
+#endif
+
 		/* DEV errors are probably spurious in case of ATA_BUS error */
 		if (qc->err_mask & AC_ERR_ATA_BUS)
 			qc->err_mask &= ~(AC_ERR_DEV | AC_ERR_MEDIA |
@@ -2681,9 +2711,13 @@ int ata_eh_reset(struct ata_link *link, int classify,
 	 */
 	if (ata_is_host_link(link))
 		ata_eh_freeze_port(ap);
-
+// QNAP Patch:deadline need to reset
+#if defined(CONFIG_MACH_QNAPTS)
+	deadline = ata_deadline(jiffies, qnap_ata_reset_to_ms?qnap_ata_reset_to_ms:ata_eh_reset_timeouts[try++]);
+	if(qnap_ata_reset_to_ms) try++;
+#else
 	deadline = ata_deadline(jiffies, ata_eh_reset_timeouts[try++]);
-
+#endif
 	if (reset) {
 		if (verbose)
 			ata_link_info(link, "%s resetting link\n",
@@ -2738,6 +2772,11 @@ int ata_eh_reset(struct ata_link *link, int classify,
 			}
 
 			ata_eh_about_to_do(link, NULL, ATA_EH_RESET);
+//Patch by QNAP:deadline need to reset
+#if defined(CONFIG_MACH_QNAPTS)
+            deadline = ata_deadline(jiffies, 5000);
+#endif
+///////////////////////////////////////////////            
 			rc = ata_do_reset(link, reset, classes, deadline, true);
 			if (rc) {
 				failed_link = link;
@@ -2835,6 +2874,14 @@ int ata_eh_reset(struct ata_link *link, int classify,
 					    "link offline, clearing class %d to NONE\n",
 					    classes[dev->devno]);
 			classes[dev->devno] = ATA_DEV_NONE;
+#if defined(CONFIG_MACH_QNAPTS)		
+			if(!(ap->pflags & ATA_PFLAG_RESUMING)) {
+            			if (!(ap->pflags & ATA_PFLAG_LOADING)) {
+            				if (!(ap->flags & ATA_FLAG_PMP) || !ap->nr_pmp_links)
+                			nr_unknown++;
+            			}
+            		}	
+#endif            
 		} else if (classes[dev->devno] == ATA_DEV_UNKNOWN) {
 			ata_dev_dbg(dev,
 				    "link status unknown, clearing UNKNOWN to NONE\n");
@@ -3589,9 +3636,14 @@ static int ata_eh_handle_dev_fail(struct ata_device *dev, int err)
 		/* disable device if it has used up all its chances */
 		ata_dev_disable(dev);
 
+#ifdef CONFIG_MACH_QNAPTS
 		/* detach if offline */
+        // QNAP Patch for DID_BAD_TARGET, detach dev directly
+        ata_eh_detach_dev(dev);
+#else
 		if (ata_phys_link_offline(ata_dev_phys_link(dev)))
 			ata_eh_detach_dev(dev);
+#endif
 
 		/* schedule probe if necessary */
 		if (ata_eh_schedule_probe(dev)) {
@@ -3658,8 +3710,14 @@ int ata_eh_recover(struct ata_port *ap, ata_prereset_fn_t prereset,
 			if (link->flags & ATA_LFLAG_NO_RETRY)
 				ehc->tries[dev->devno] = 1;
 			else
+			{
+// QNAP Patch
+#if defined(CONFIG_MACH_QNAPTS)				
+				ehc->tries[dev->devno] = qnap_ata_retry_val?qnap_ata_retry_val:ATA_EH_DEV_TRIES; // QNAP Patch
+#else                
 				ehc->tries[dev->devno] = ATA_EH_DEV_TRIES;
-
+#endif
+			}
 			/* collect port action mask recorded in dev actions */
 			ehc->i.action |= ehc->i.dev_action[dev->devno] &
 					 ~ATA_EH_PERDEV_MASK;
@@ -3704,6 +3762,14 @@ int ata_eh_recover(struct ata_port *ap, ata_prereset_fn_t prereset,
 		rc = ata_eh_reset(link, ata_link_nr_vacant(link),
 				  prereset, softreset, hardreset, postreset);
 		if (rc) {
+//Patch by QNAP: Send event
+#if defined(CONFIG_MACH_QNAPTS) && defined(QNAP_HAL)
+            NETLINK_EVT hal_event;
+            hal_event.type = HAL_EVENT_GENERAL_DISK;
+            hal_event.arg.action = FAIL_DRIVE;
+            send_hal_netlink(&hal_event);
+#endif            
+/////////            
 			ata_link_err(link, "reset failed, giving up\n");
 			goto out;
 		}
@@ -4046,6 +4112,10 @@ static void ata_eh_handle_port_resume(struct ata_port *ap)
 			ata_ering_clear(&dev->ering);
 
 	ata_acpi_set_state(ap, PMSG_ON);
+
+#if defined(CONFIG_MACH_QNAPTS)	
+	ap->pflags  |= ATA_PFLAG_RESUMING;
+#endif
 
 	if (ap->ops->port_resume)
 		rc = ap->ops->port_resume(ap);

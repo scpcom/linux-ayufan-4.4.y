@@ -87,6 +87,20 @@ static int async_unlink = 1;
 static int device_setup[SNDRV_CARDS]; /* device parameter for this card */
 static int ignore_ctl_error;
 
+/*Patch by QNAP: fix usb audio's playback device position.
+ *               like playback is /dev/audio0.
+ *                    capture is /dev/audio1.
+                 Kevin Liao 20121011: To support HDMI audio, we change the starting position of USB audio device 
+                 from audio0 to audio1. That is, playback is /dev/audio1 and capture is /dev/audio2
+*/
+#ifdef CONFIG_MACH_QNAPTS
+#define CAPTURE_CARD_NO_START	1
+static unsigned int snd_cards_use = 0;
+static int qnap_start_index = 0;
+module_param(qnap_start_index, int, 0644);
+MODULE_PARM_DESC(qnap_start_index, "USB audio device starting index");
+#endif
+
 module_param_array(index, int, NULL, 0444);
 MODULE_PARM_DESC(index, "Index value for the USB audio adapter.");
 module_param_array(id, charp, NULL, 0444);
@@ -296,12 +310,131 @@ static void remove_trailing_spaces(char *str)
 		*p = 0;
 }
 
+
+/*Patch by QNAP: fix usb audio's playback device position.
+ *               like playback is /dev/audio0.
+ *                    capture is /dev/audio1.
+ */
+#ifdef CONFIG_MACH_QNAPTS
+static void snd_usb_audio_get_stream_type(struct usb_device *dev,
+						int iface_no, int* playback_stream, int* capture_stream)
+{
+
+	/* find audiocontrol interface */
+	struct usb_host_interface* host_iface;
+	unsigned char* p1;
+	int k,z, err=0,d;
+ 	int stream=0;
+
+  	*playback_stream = 0;
+  	*capture_stream = 0;
+
+	host_iface = &usb_ifnum_to_if(dev, iface_no)->altsetting[0];
+	if (!(p1 = snd_usb_find_csint_desc(host_iface->extra, host_iface->extralen, NULL, UAC_HEADER))) {
+		printk(KERN_ALERT "usbauio.c: %s, cannot find HEADER\n",__FUNCTION__);
+		err=1;
+	}
+	if (! p1[7] || p1[0] < 8 + p1[7]) {
+		printk(KERN_ALERT "usbaudio.c: %s, invalid HEADER\n",__FUNCTION__);
+		err=1;
+	}
+	if (err==0)
+	{
+		struct usb_host_interface *talts;
+		struct usb_interface_descriptor *taltsd;
+		struct usb_interface* inface;
+		int setnum;
+
+
+		for (k = 0; k < p1[7]; k++) {
+			z = p1[8 + k];
+			inface = usb_ifnum_to_if(dev, z);
+
+			if (!inface) {
+				snd_printk(KERN_ERR "%s: %s, %d:%u:%d : does not exist\n",__FILE__,__FUNCTION__,
+					dev->devnum, iface_no, z);
+				continue;
+			}
+
+			talts = &inface->altsetting[0];
+			taltsd = get_iface_desc(talts);
+			if ((taltsd->bInterfaceClass == USB_CLASS_AUDIO ||
+				taltsd->bInterfaceClass == USB_CLASS_VENDOR_SPEC) &&
+				taltsd->bInterfaceSubClass == USB_SUBCLASS_MIDISTREAMING) {
+				continue;
+		        }
+			if ((taltsd->bInterfaceClass != USB_CLASS_AUDIO &&
+				taltsd->bInterfaceClass != USB_CLASS_VENDOR_SPEC) ||
+				taltsd->bInterfaceSubClass != USB_SUBCLASS_AUDIOSTREAMING) {
+				printk(KERN_ERR "%s: %s,%d:%u:%d: skipping non-supported interface %d\n",
+				__FILE__,__FUNCTION__, dev->devnum, iface_no, z, taltsd->bInterfaceClass);
+				/* skip non-supported classes */
+				continue;
+			}
+			if (snd_usb_get_speed(dev) == USB_SPEED_LOW) {
+				printk(KERN_ERR "%s: %s,low speed audio streaming not supported\n",__FILE__,__FUNCTION__);
+				continue;
+			}
+
+			/* parse the interface's altsettings */
+			setnum = inface->num_altsetting;
+			for (d = 0; d < setnum; d++) {
+				talts = &inface->altsetting[d];
+				taltsd = get_iface_desc(talts);
+				/* skip invalid one */
+				if ((taltsd->bInterfaceClass != USB_CLASS_AUDIO &&
+					taltsd->bInterfaceClass != USB_CLASS_VENDOR_SPEC) ||
+					(taltsd->bInterfaceSubClass != USB_SUBCLASS_AUDIOSTREAMING &&
+					taltsd->bInterfaceSubClass != USB_SUBCLASS_VENDOR_SPEC) ||
+					taltsd->bNumEndpoints < 1 ||
+					le16_to_cpu(get_endpoint(talts, 0)->wMaxPacketSize) == 0)
+					continue;
+				/* must be isochronous */
+				if ((get_endpoint(talts, 0)->bmAttributes & USB_ENDPOINT_XFERTYPE_MASK) !=
+					USB_ENDPOINT_XFER_ISOC)
+					continue;
+
+				/* check direction */
+				stream = (get_endpoint(talts, 0)->bEndpointAddress & USB_DIR_IN) ?
+					SNDRV_PCM_STREAM_CAPTURE : SNDRV_PCM_STREAM_PLAYBACK;
+
+				switch (stream)
+				{
+					case SNDRV_PCM_STREAM_CAPTURE:
+						(*capture_stream)++;
+						break;
+					case SNDRV_PCM_STREAM_PLAYBACK:
+						(*playback_stream)++;
+						break;
+				}
+			}
+
+		}
+//		    printk(KERN_ALERT"usbaudio.c: %s, playback_stream=>%d, capture_stream=>%d\n", __FUNCTION__,
+//		               *playback_stream, *capture_stream);
+
+	 }
+}
+#endif
+
+
 /*
  * create a chip instance and set its names.
  */
+
+/*Patch by QNAP: fix usb audio's playback device position.
+ *               like playback is /dev/audio0.
+ *                    capture is /dev/audio1.
+ */
+#ifdef CONFIG_MACH_QNAPTS
+static int snd_usb_audio_create(struct usb_device *dev, int idx,
+				const struct snd_usb_audio_quirk *quirk, int iface_no,
+				struct snd_usb_audio **rchip)
+#else
 static int snd_usb_audio_create(struct usb_device *dev, int idx,
 				const struct snd_usb_audio_quirk *quirk,
 				struct snd_usb_audio **rchip)
+#endif
 {
 	struct snd_card *card;
 	struct snd_usb_audio *chip;
@@ -310,6 +443,14 @@ static int snd_usb_audio_create(struct usb_device *dev, int idx,
 	static struct snd_device_ops ops = {
 		.dev_free =	snd_usb_audio_dev_free,
 	};
+/*Patch by QNAP: fix usb audio's playback device position.
+ *               like playback is /dev/audio0.
+ *                    capture is /dev/audio1.
+ */
+#ifdef CONFIG_MACH_QNAPTS
+	int playback_stream,capture_stream;
+ 	int card_no=0, cindex;
+#endif
 
 	*rchip = NULL;
 
@@ -323,8 +464,29 @@ static int snd_usb_audio_create(struct usb_device *dev, int idx,
 		snd_printk(KERN_ERR "unknown device speed %d\n", snd_usb_get_speed(dev));
 		return -ENXIO;
 	}
+/*Patch by QNAP: fix usb audio's playback device position.
+ *               like playback is /dev/audio0.
+ *                    capture is /dev/audio1.
+ */
+#ifdef CONFIG_MACH_QNAPTS
+	snd_usb_audio_get_stream_type(dev,
+						iface_no, &playback_stream, &capture_stream);
+//	printk (KERN_ALERT"usbauio.c: %s, playback_stream=%d, capture_stream=%d, line=%d\n",
+//				 __FUNCTION__, playback_stream, capture_stream, __LINE__);
 
+	for ( cindex= playback_stream? qnap_start_index:CAPTURE_CARD_NO_START+qnap_start_index; cindex < SNDRV_CARDS; cindex++)
+	{
+
+		/* idx == -1 == 0xffff means: take any free slot */
+		if (~snd_cards_use & 1<<cindex) {
+			card_no = cindex;
+			break;
+		}
+	}
+	err = snd_card_create(card_no, id[idx], THIS_MODULE, 0, &card);
+#else
 	err = snd_card_create(index[idx], id[idx], THIS_MODULE, 0, &card);
+#endif
 	if (err < 0) {
 		snd_printk(KERN_ERR "cannot create card instance %d\n", idx);
 		return err;
@@ -335,6 +497,13 @@ static int snd_usb_audio_create(struct usb_device *dev, int idx,
 		snd_card_free(card);
 		return -ENOMEM;
 	}
+/*Patch by QNAP: fix usb audio's playback device position.
+ *               like playback is /dev/audio0.
+ *                    capture is /dev/audio1.
+ */
+#ifdef CONFIG_MACH_QNAPTS
+	snd_cards_use |= 1<<card_no;
+#endif
 
 	mutex_init(&chip->shutdown_mutex);
 	chip->index = idx;
@@ -482,7 +651,15 @@ snd_usb_audio_probe(struct usb_device *dev,
 			if (enable[i] && ! usb_chip[i] &&
 			    (vid[i] == -1 || vid[i] == USB_ID_VENDOR(id)) &&
 			    (pid[i] == -1 || pid[i] == USB_ID_PRODUCT(id))) {
+/*Patch by QNAP: fix usb audio's playback device position.
+ *               like playback is /dev/audio0.
+ *                    capture is /dev/audio1.
+ */
+#ifdef CONFIG_MACH_QNAPTS
+				if (snd_usb_audio_create(dev, i, quirk, ifnum, &chip) < 0) {
+#else                    
 				if (snd_usb_audio_create(dev, i, quirk, &chip) < 0) {
+#endif                    
 					goto __error;
 				}
 				snd_card_set_dev(chip->card, &intf->dev);
@@ -560,6 +737,13 @@ static void snd_usb_audio_disconnect(struct usb_device *dev,
 	chip->shutdown = 1;
 	chip->num_interfaces--;
 	if (chip->num_interfaces <= 0) {
+/*Patch by QNAP: fix usb audio's playback device position.
+ *               like playback is /dev/audio0.
+ *                    capture is /dev/audio1.
+ */
+#ifdef CONFIG_MACH_QNAPTS
+		snd_cards_use &= ~(1<<card->number);
+#endif
 		snd_card_disconnect(card);
 		/* release the pcm resources */
 		list_for_each(p, &chip->pcm_list) {

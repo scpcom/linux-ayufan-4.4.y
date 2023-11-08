@@ -803,6 +803,15 @@ extern void iscsit_start_time2retain_handler(struct iscsi_session *sess)
 	if (sess->time2retain_timer_flags & ISCSI_TF_RUNNING)
 		return;
 
+/* 20130906, Jonathan Ho, fix mutex cause schedule in interrupt context problem */
+#ifdef CONFIG_MACH_QNAPTS
+	if (sess->sess_ops->ErrorRecoveryLevel == 0) {
+		pr_debug("Skip timer and run timer function in process context.\n");
+		iscsit_handle_time2retain_timeout((unsigned long)sess);
+		return;
+	}
+#endif
+
 	pr_debug("Starting Time2Retain timer for %u seconds on"
 		" SID: %u\n", sess->sess_ops->DefaultTime2Retain, sess->sid);
 
@@ -863,6 +872,44 @@ sleep:
 	complete(&conn->conn_post_wait_comp);
 }
 
+#ifdef CONFIG_MACH_QNAPTS   // Benjamin 20121123: Solve general protection fault SMP issue when session with multi-connection logout.
+int iscsit_cause_connection_reinstatement(struct iscsi_conn *conn, int sleep)
+{
+	spin_lock_bh(&conn->state_lock);
+	if (atomic_read(&conn->connection_exit)) {
+		spin_unlock_bh(&conn->state_lock);
+		return 0;
+	}
+
+	if (atomic_read(&conn->transport_failed)) {
+		spin_unlock_bh(&conn->state_lock);
+		return 0;
+	}
+
+	if (atomic_read(&conn->connection_reinstatement)) {
+		spin_unlock_bh(&conn->state_lock);
+		return 0;
+	}
+
+	if (iscsi_thread_set_force_reinstatement(conn) < 0) {
+		spin_unlock_bh(&conn->state_lock);
+		return 0;
+	}
+
+	atomic_set(&conn->connection_reinstatement, 1);
+	if (!sleep) {
+		spin_unlock_bh(&conn->state_lock);
+		return 1;
+	}
+
+	atomic_set(&conn->sleep_on_conn_wait_comp, 1);
+	spin_unlock_bh(&conn->state_lock);
+
+	wait_for_completion(&conn->conn_wait_comp);
+	complete(&conn->conn_post_wait_comp);
+	return 0;    
+}
+#else
 void iscsit_cause_connection_reinstatement(struct iscsi_conn *conn, int sleep)
 {
 	spin_lock_bh(&conn->state_lock);
@@ -898,6 +945,7 @@ void iscsit_cause_connection_reinstatement(struct iscsi_conn *conn, int sleep)
 	wait_for_completion(&conn->conn_wait_comp);
 	complete(&conn->conn_post_wait_comp);
 }
+#endif
 
 void iscsit_fall_back_to_erl0(struct iscsi_session *sess)
 {

@@ -75,6 +75,11 @@ static int ext4_statfs(struct dentry *dentry, struct kstatfs *buf);
 static int ext4_unfreeze(struct super_block *sb);
 static void ext4_write_super(struct super_block *sb);
 static int ext4_freeze(struct super_block *sb);
+//Patch by QNAP:Search filename use case insensitive method
+#ifdef QNAP_SEARCH_FILENAME_CASE_INSENSITIVE
+extern struct dentry_operations ext4_dentry_operations;
+#endif
+/////////////////////////////////////////////////////////////
 static struct dentry *ext4_mount(struct file_system_type *fs_type, int flags,
 		       const char *dev_name, void *data);
 static inline int ext2_feature_set_ok(struct super_block *sb);
@@ -801,6 +806,9 @@ static void ext4_put_super(struct super_block *sb)
 	struct ext4_sb_info *sbi = EXT4_SB(sb);
 	struct ext4_super_block *es = sbi->s_es;
 	int i, err;
+#ifdef CONFIG_MACH_QNAPTS
+	ext4_destroy_trim_thread(sbi);
+#endif
 
 	ext4_unregister_li_request(sb);
 	dquot_disable(sb, -1, DQUOT_USAGE_ENABLED | DQUOT_LIMITS_ENABLED);
@@ -2754,10 +2762,56 @@ static int ext4_run_li_request(struct ext4_li_request *elr)
 	struct super_block *sb;
 	unsigned long timeout = 0;
 	int ret = 0;
+#ifdef CONFIG_MACH_QNAPTS
+	struct ext4_sb_info *sbi;
+	int status;
+#endif
 
 	sb = elr->lr_super;
+	sbi = elr->lr_sbi;
 	ngroups = EXT4_SB(sb)->s_groups_count;
+#ifdef CONFIG_MACH_QNAPTS
+	if (elr->lr_next_group == elr->lr_first_group)
+		printk("EXT4-fs (device %s): ext4lazyinit start (start from %u, total %u)\n", sb->s_id, elr->lr_first_group, ngroups - elr->lr_first_group);
+	for (group = elr->lr_next_group; group < ngroups; group++) {
+		gdp = ext4_get_group_desc(sb, group, NULL);
+		if (!gdp) {
+			ret = 1;
+			break;
+		}
 
+		if (!(gdp->bg_flags & cpu_to_le16(EXT4_BG_INODE_ZEROED)))
+			break;
+	}
+	if (group >= ngroups)
+		ret = 1;
+	if (!ret) {
+		timeout = jiffies;
+		ret = ext4_init_inode_table(sb, group,
+					    elr->lr_timeout ? 0 : 1);
+		if (elr->lr_timeout == 0 || ((elr->lr_next_group % 10) == 0)) {
+			timeout = (jiffies - timeout) *
+				  elr->lr_sbi->s_li_wait_mult;
+			elr->lr_timeout = timeout;
+		}
+#if 1
+		if (elr->lr_timeout > 2)
+			elr->lr_timeout = 2;
+#endif
+		elr->lr_next_sched = jiffies + elr->lr_timeout;
+		//printk("EXT4-fs (device %s): ext4_run_li_request %lu, %lu, %lu\n", sb->s_id, jiffies, elr->lr_next_sched, elr->lr_timeout);
+		elr->lr_next_group = group + 1;
+		// How about if ext4_init_inode_table returns error?
+		status = ((100 * (group + 1 - elr->lr_first_group)) / (ngroups - elr->lr_first_group));
+		//printk("EXT4-fs (device %s): ext4lazyinit %u (%d%%)\n", sb->s_id, group, status);
+		if (status == 0)
+			status = 1;
+		sbi->lazyinit_status = status;
+	}
+	else {
+		printk("EXT4-fs (device %s): ext4lazyinit finish\n", sb->s_id);
+	}
+#else
 	for (group = elr->lr_next_group; group < ngroups; group++) {
 		gdp = ext4_get_group_desc(sb, group, NULL);
 		if (!gdp) {
@@ -2769,7 +2823,7 @@ static int ext4_run_li_request(struct ext4_li_request *elr)
 			break;
 	}
 
-	if (group == ngroups)
+	if (group >= ngroups)
 		ret = 1;
 
 	if (!ret) {
@@ -2784,6 +2838,7 @@ static int ext4_run_li_request(struct ext4_li_request *elr)
 		elr->lr_next_sched = jiffies + elr->lr_timeout;
 		elr->lr_next_group = group + 1;
 	}
+#endif
 
 	return ret;
 }
@@ -2803,6 +2858,9 @@ static void ext4_remove_li_request(struct ext4_li_request *elr)
 
 	list_del(&elr->lr_request);
 	sbi->s_li_request = NULL;
+#ifdef CONFIG_MACH_QNAPTS
+	sbi->lazyinit_status = 0;
+#endif
 	kfree(elr);
 }
 
@@ -2815,6 +2873,7 @@ static void ext4_unregister_li_request(struct super_block *sb)
 	}
 
 	mutex_lock(&ext4_li_info->li_list_mtx);
+	printk("EXT4-fs (device %s): ext4lazyinit exit1\n", sb->s_id);
 	ext4_remove_li_request(EXT4_SB(sb)->s_li_request);
 	mutex_unlock(&ext4_li_info->li_list_mtx);
 	mutex_unlock(&ext4_li_mtx);
@@ -2870,6 +2929,11 @@ cont_thread:
 		if (freezing(current))
 			refrigerator();
 
+		if (kthread_should_stop()) {
+			ext4_clear_request_list();
+			goto exit_thread;
+		}
+
 		cur = jiffies;
 		if ((time_after_eq(cur, next_wakeup)) ||
 		    (MAX_JIFFY_OFFSET == next_wakeup)) {
@@ -2879,10 +2943,10 @@ cont_thread:
 
 		schedule_timeout_interruptible(next_wakeup - cur);
 
-		if (kthread_should_stop()) {
-			ext4_clear_request_list();
-			goto exit_thread;
-		}
+		//if (kthread_should_stop()) {
+		//	ext4_clear_request_list();
+		//	goto exit_thread;
+		//}
 	}
 
 exit_thread:
@@ -2997,6 +3061,10 @@ static struct ext4_li_request *ext4_li_request_new(struct super_block *sb,
 	elr->lr_sbi = sbi;
 	elr->lr_next_group = start;
 
+#ifdef CONFIG_MACH_QNAPTS
+	elr->lr_first_group = start;
+#endif
+
 	/*
 	 * Randomize first schedule time of the request to
 	 * spread the inode table initialization requests
@@ -3013,29 +3081,30 @@ static int ext4_register_li_request(struct super_block *sb,
 				    ext4_group_t first_not_zeroed)
 {
 	struct ext4_sb_info *sbi = EXT4_SB(sb);
-	struct ext4_li_request *elr;
+	struct ext4_li_request *elr = NULL;
 	ext4_group_t ngroups = EXT4_SB(sb)->s_groups_count;
 	int ret = 0;
 
+	mutex_lock(&ext4_li_mtx);
 	if (sbi->s_li_request != NULL) {
 		/*
 		 * Reset timeout so it can be computed again, because
 		 * s_li_wait_mult might have changed.
 		 */
 		sbi->s_li_request->lr_timeout = 0;
-		return 0;
+		goto out;
 	}
 
 	if (first_not_zeroed == ngroups ||
 	    (sb->s_flags & MS_RDONLY) ||
 	    !test_opt(sb, INIT_INODE_TABLE))
-		return 0;
+		goto out;
 
 	elr = ext4_li_request_new(sb, first_not_zeroed);
-	if (!elr)
-		return -ENOMEM;
-
-	mutex_lock(&ext4_li_mtx);
+	if (!elr) {
+		ret = -ENOMEM;
+		goto out;
+	}
 
 	if (NULL == ext4_li_info) {
 		ret = ext4_li_info_new();
@@ -3044,6 +3113,7 @@ static int ext4_register_li_request(struct super_block *sb,
 	}
 
 	mutex_lock(&ext4_li_info->li_list_mtx);
+	sbi->lazyinit_status = 1;
 	list_add(&elr->lr_request, &ext4_li_info->li_request_list);
 	mutex_unlock(&ext4_li_info->li_list_mtx);
 
@@ -3223,6 +3293,10 @@ static int ext4_fill_super(struct super_block *sb, void *data, int silent)
 	sbi = kzalloc(sizeof(*sbi), GFP_KERNEL);
 	if (!sbi)
 		goto out_free_orig;
+    
+#ifdef CONFIG_MACH_QNAPTS
+	mutex_init(&sbi->ext4_trim_mtx);
+#endif
 
 	sbi->s_blockgroup_lock =
 		kzalloc(sizeof(struct blockgroup_lock), GFP_KERNEL);
@@ -3851,7 +3925,12 @@ no_journal:
 		ret = -ENOMEM;
 		goto failed_mount4;
 	}
-
+    
+//Patch by QNAP:Search filename use case insensitive method
+#ifdef QNAP_SEARCH_FILENAME_CASE_INSENSITIVE
+    sb->s_root->d_op = &ext4_dentry_operations;
+    sb->s_d_op = &ext4_dentry_operations;
+#endif
 	if (ext4_setup_super(sb, es, sb->s_flags & MS_RDONLY))
 		sb->s_flags |= MS_RDONLY;
 
@@ -5119,6 +5198,9 @@ static int __init ext4_init_fs(void)
 {
 	int i, err;
 
+	ext4_li_info = NULL;
+	mutex_init(&ext4_li_mtx);
+
 	ext4_check_flag_values();
 
 	for (i = 0; i < EXT4_WQ_HASH_SZ; i++) {
@@ -5157,8 +5239,6 @@ static int __init ext4_init_fs(void)
 	if (err)
 		goto out;
 
-	ext4_li_info = NULL;
-	mutex_init(&ext4_li_mtx);
 	return 0;
 out:
 	unregister_as_ext2();

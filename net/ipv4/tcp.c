@@ -1517,7 +1517,10 @@ int tcp_recvmsg(struct kiocb *iocb, struct sock *sk, struct msghdr *msg,
 		u32 offset;
 
 #if defined(CONFIG_COMCERTO_IMPROVED_SPLICE)
-		if (flags & MSG_NOCATCHSIG) {
+        // MSG_NOCATCHSIG which defined by mindspeed
+        // is the same as MSG_NOCATCHSIGNAL which defined by QNAP
+        // Change MSG_NOCATCHSIG to MSG_NOCATCHSIGNAL
+		if (flags & MSG_NOCATCHSIGNAL) {
 			if (signal_pending(current)) {
 				if (sigismember(&current->pending.signal, SIGQUIT) ||
 				    sigismember(&current->pending.signal, SIGABRT) ||

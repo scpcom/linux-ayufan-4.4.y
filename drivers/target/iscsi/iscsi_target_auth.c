@@ -28,6 +28,89 @@
 #include "iscsi_target_nego.h"
 #include "iscsi_target_auth.h"
 
+
+#ifdef CONFIG_MACH_QNAPTS // 2010/07/16 support the BASE64 encoding
+static unsigned char decode_base64_digit(char base64)
+{
+	switch (base64) {
+	case '=':
+		return 64;
+	case '/':
+		return 63;
+	case '+':
+		return 62;
+	default:
+		if ((base64 >= 'A') && (base64 <= 'Z'))
+			return base64 - 'A';
+		else if ((base64 >= 'a') && (base64 <= 'z'))
+			return 26 + (base64 - 'a');
+		else if ((base64 >= '0') && (base64 <= '9'))
+			return 52 + (base64 - '0');
+		else
+			return -1;
+	}
+}
+
+static void decode_base64_string(char *string, unsigned char *intnum, int int_len)
+{
+	int len;
+	int count;
+	int intptr;
+	unsigned char num[4];
+	int octets;
+
+	if ((string == NULL) || (intnum == NULL))
+		return;
+	len = strlen(string);
+	if (len == 0)
+		return;
+	if ((len % 4) != 0)
+		return;
+	count = 0;
+	intptr = 0;
+	while (count < len - 4) {
+		num[0] = decode_base64_digit(string[count]);
+		num[1] = decode_base64_digit(string[count + 1]);
+		num[2] = decode_base64_digit(string[count + 2]);
+		num[3] = decode_base64_digit(string[count + 3]);
+		if ((num[0] == 65) || (num[1] == 65) || (num[2] == 65) || (num[3] == 65))
+			return;
+		count += 4;
+		octets =
+		    (num[0] << 18) | (num[1] << 12) | (num[2] << 6) | num[3];
+		intnum[intptr] = (octets & 0xFF0000) >> 16;
+		intnum[intptr + 1] = (octets & 0x00FF00) >> 8;
+		intnum[intptr + 2] = octets & 0x0000FF;
+		intptr += 3;
+	}
+	num[0] = decode_base64_digit(string[count]);
+	num[1] = decode_base64_digit(string[count + 1]);
+	num[2] = decode_base64_digit(string[count + 2]);
+	num[3] = decode_base64_digit(string[count + 3]);
+	if ((num[0] == 64) || (num[1] == 64))
+		return;
+	if (num[2] == 64) {
+		if (num[3] != 64)
+			return;
+		intnum[intptr] = (num[0] << 2) | (num[1] >> 4);
+	} else if (num[3] == 64) {
+		intnum[intptr] = (num[0] << 2) | (num[1] >> 4);
+		intnum[intptr + 1] = (num[1] << 4) | (num[2] >> 2);
+	} else {
+		octets =
+		    (num[0] << 18) | (num[1] << 12) | (num[2] << 6) | num[3];
+		intnum[intptr] = (octets & 0xFF0000) >> 16;
+		intnum[intptr + 1] = (octets & 0x00FF00) >> 8;
+		intnum[intptr + 2] = octets & 0x0000FF;
+	}
+}
+
+void chap_base64_to_hex(unsigned char *dst, unsigned char *src, int len)
+{
+	decode_base64_string(src, dst, len);
+}
+#endif /* #ifdef CONFIG_MACH_QNAPTS */
+
 static int chap_string_to_hex(unsigned char *dst, unsigned char *src, int len)
 {
 	int j = DIV_ROUND_UP(len, 2), rc;
@@ -105,7 +188,8 @@ static struct iscsi_chap *chap_server_open(
 	struct iscsi_node_auth *auth,
 	const char *a_str,
 	char *aic_str,
-	unsigned int *aic_len)
+	unsigned int *aic_len,
+	unsigned int *in_len)
 {
 	struct iscsi_chap *chap;
 
@@ -128,6 +212,16 @@ static struct iscsi_chap *chap_server_open(
 		pr_err("CHAP_A is not MD5.\n");
 		return NULL;
 	}
+
+	if(strlen(a_str)<in_len-1){
+		char *c_ptr=a_str;
+		c_ptr += strlen(a_str)+1;
+	        if (!strncmp(c_ptr, "CHAP_I", 6)) {
+	                pr_err("CHAP_I OutOfOrder.\n");
+	                return NULL;
+	        }
+	}
+
 	pr_debug("[server] Got CHAP_A=5\n");
 	/*
 	 * Send back CHAP_A set to MD5.
@@ -211,10 +305,17 @@ static int chap_server_compute_md5(
 		goto out;
 	}
 
+#ifdef CONFIG_MACH_QNAPTS	//Benjamin 20101216: Fix bug 17462
+	if (memcmp(chap_n, auth->userid, strlen(auth->userid)) != 0 || chap_n[strlen(auth->userid)] != '\0') {
+		pr_err("CHAP_N values do not match!\n");
+		goto out;
+	}
+#else 
 	if (memcmp(chap_n, auth->userid, strlen(auth->userid)) != 0) {
 		pr_err("CHAP_N values do not match!\n");
 		goto out;
 	}
+#endif  /* #ifdef CONFIG_MACH_QNAPTS */ 
 	pr_debug("[server] Got CHAP_N=%s\n", chap_n);
 	/*
 	 * Extract CHAP_R.
@@ -224,13 +325,27 @@ static int chap_server_compute_md5(
 		pr_err("Could not find CHAP_R.\n");
 		goto out;
 	}
+#ifdef CONFIG_MACH_QNAPTS // 2010/07/16 support the BASE64 encoding
+	if (type != HEX && type != BASE64) {
+		pr_err("Could not find CHAP_R.\n");
+		goto out;
+	}
+#else
 	if (type != HEX) {
 		pr_err("Could not find CHAP_R.\n");
 		goto out;
 	}
+#endif
 
 	pr_debug("[server] Got CHAP_R=%s\n", chap_r);
+#ifdef CONFIG_MACH_QNAPTS // 2010/07/16 support the BASE64 encoding
+    if(type == HEX)
+        chap_string_to_hex(client_digest, chap_r, strlen(chap_r));
+    else
+        chap_base64_to_hex(client_digest, chap_r, strlen(chap_r));
+#else
 	chap_string_to_hex(client_digest, chap_r, strlen(chap_r));
+#endif
 
 	tfm = crypto_alloc_hash("md5", 0, CRYPTO_ALG_ASYNC);
 	if (IS_ERR(tfm)) {
@@ -246,7 +361,6 @@ static int chap_server_compute_md5(
 		crypto_free_hash(tfm);
 		goto out;
 	}
-
 	sg_init_one(&sg, &chap->id, 1);
 	ret = crypto_hash_update(&desc, &sg, 1);
 	if (ret < 0) {
@@ -305,10 +419,19 @@ static int chap_server_compute_md5(
 		goto out;
 	}
 
-	if (type == HEX)
+	if (type == HEX){
 		id = simple_strtoul(&identifier[2], &endptr, 0);
-	else
+	}else{
+		
 		id = simple_strtoul(identifier, &endptr, 0);
+		
+		char *c_ptr=&identifier[0];
+
+		if(id==0 && c_ptr==endptr)
+			goto out;
+				
+	}
+
 	if (id > 255) {
 		pr_err("chap identifier: %lu greater than 255\n", id);
 		goto out;
@@ -444,7 +567,7 @@ u32 chap_main_loop(
 	struct iscsi_chap *chap = conn->auth_protocol;
 
 	if (!chap) {
-		chap = chap_server_open(conn, auth, in_text, out_text, out_len);
+		chap = chap_server_open(conn, auth, in_text, out_text, out_len, in_len);
 		if (!chap)
 			return 2;
 		chap->chap_state = CHAP_STAGE_SERVER_AIC;

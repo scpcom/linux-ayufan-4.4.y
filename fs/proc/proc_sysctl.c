@@ -248,8 +248,11 @@ static int proc_sys_fill_cache(struct file *filp, void *dirent,
 
 	qname.name = table->procname;
 	qname.len  = strlen(table->procname);
+//Patch by QNAP:Search filename use case insensitive method
+#ifdef QNAP_SEARCH_FILENAME_CASE_INSENSITIVE
+    qname.case_folding = 0;
+#endif    
 	qname.hash = full_name_hash(qname.name, qname.len);
-
 	child = d_lookup(dir, &qname);
 	if (!child) {
 		child = d_alloc(dir, &qname);
