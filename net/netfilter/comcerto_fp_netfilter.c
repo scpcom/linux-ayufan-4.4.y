@@ -53,7 +53,7 @@ static unsigned int fp_netfilter_pre_routing(int family, unsigned int hooknum, s
 		fp_info = &ct->fp_info[IP_CT_DIR_REPLY];
 	}
 
-	if (fp_info->mark && (fp_info->mark != skb->mark))
+	/*if (fp_info->mark && (fp_info->mark != skb->mark))
 		if (printk_ratelimit())
 			printk(KERN_INFO "ct: mark changed %x, %x\n", fp_info->mark, skb->mark);
 
@@ -64,7 +64,7 @@ static unsigned int fp_netfilter_pre_routing(int family, unsigned int hooknum, s
 	if (fp_info->iif && (fp_info->iif != skb->skb_iif))
 		if (printk_ratelimit())
 			printk(KERN_INFO "ct: iif changed %d, %d\n", fp_info->iif, skb->skb_iif);
-
+	*/
 	fp_info->mark = skb->mark;
 	fp_info->ifindex = skb->dev->ifindex;
 	fp_info->iif = skb->skb_iif;
