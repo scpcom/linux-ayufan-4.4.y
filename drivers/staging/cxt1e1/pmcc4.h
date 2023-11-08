@@ -1,5 +1,5 @@
 /*
- * $Id: pmcc4.h,v 1.4 2005/11/01 19:24:48 rickd PMCC4_3_1B $
+ * $Id: pmcc4.h,v 1.1.1.1 2014/01/18 10:08:08 wokes Exp $
  */
 
 #ifndef _INC_PMCC4_H_
@@ -24,11 +24,14 @@
  * SBE, Inc.  San Ramon, California  U.S.A.
  *-----------------------------------------------------------------------------
  * RCS info:
- * RCS revision: $Revision: 1.4 $
- * Last changed on $Date: 2005/11/01 19:24:48 $
- * Changed by $Author: rickd $
+ * RCS revision: $Revision: 1.1.1.1 $
+ * Last changed on $Date: 2014/01/18 10:08:08 $
+ * Changed by $Author: wokes $
  *-----------------------------------------------------------------------------
  * $Log: pmcc4.h,v $
+ * Revision 1.1.1.1  2014/01/18 10:08:08  wokes
+ * MindSpeed linux kernel
+ *
  * Revision 1.4  2005/11/01 19:24:48  rickd
  * Remove de-implement function prototypes.  Several <int> to
  * <status_t> changes for consistent usage of same.

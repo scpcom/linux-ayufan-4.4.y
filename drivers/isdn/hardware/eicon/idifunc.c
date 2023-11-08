@@ -1,4 +1,4 @@
-/* $Id: idifunc.c,v 1.14.4.4 2004/08/28 20:03:53 armin Exp $
+/* $Id: idifunc.c,v 1.1.1.1 2014/01/18 10:08:08 wokes Exp $
  *
  * Driver for Eicon DIVA Server ISDN cards.
  * User Mode IDI Interface 

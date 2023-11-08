@@ -1,4 +1,4 @@
-/* $Id: arcofi.h,v 1.6.6.2 2001/09/23 22:24:46 kai Exp $
+/* $Id: arcofi.h,v 1.1.1.1 2014/01/18 10:08:08 wokes Exp $
  *
  * Ansteuerung ARCOFI 2165
  *

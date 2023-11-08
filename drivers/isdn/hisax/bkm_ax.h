@@ -1,4 +1,4 @@
-/* $Id: bkm_ax.h,v 1.5.6.3 2001/09/23 22:24:46 kai Exp $
+/* $Id: bkm_ax.h,v 1.1.1.1 2014/01/18 10:08:08 wokes Exp $
  *
  * low level decls for T-Berkom cards A4T and Scitel Quadro (4*S0, passive)
  *

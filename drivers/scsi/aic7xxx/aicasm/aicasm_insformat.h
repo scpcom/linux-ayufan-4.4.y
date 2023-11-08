@@ -37,7 +37,7 @@
  * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGES.
  *
- * $Id: //depot/aic7xxx/aic7xxx/aicasm/aicasm_insformat.h#12 $
+ * $Id: aicasm_insformat.h,v 1.1.1.1 2014/01/18 10:08:06 wokes Exp $
  *
  * $FreeBSD$
  */

@@ -30,7 +30,10 @@
  */
 
 /*
- * $Log: cumana_NCR5380.h,v $
+ * $Log: sun3_scsi.h,v $
+ * Revision 1.1.1.1  2014/01/18 10:08:06  wokes
+ * MindSpeed linux kernel
+ *
  */
 
 #ifndef SUN3_NCR5380_H

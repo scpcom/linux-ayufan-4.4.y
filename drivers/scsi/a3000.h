@@ -1,7 +1,7 @@
 #ifndef A3000_H
 #define A3000_H
 
-/* $Id: a3000.h,v 1.4 1997/01/19 23:07:10 davem Exp $
+/* $Id: a3000.h,v 1.1.1.1 2014/01/18 10:08:06 wokes Exp $
  *
  * Header file for the Amiga 3000 built-in SCSI controller for Linux
  *

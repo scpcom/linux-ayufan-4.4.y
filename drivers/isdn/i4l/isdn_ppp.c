@@ -1,4 +1,4 @@
-/* $Id: isdn_ppp.c,v 1.1.2.3 2004/02/10 01:07:13 keil Exp $
+/* $Id: isdn_ppp.c,v 1.1.1.1 2014/01/18 10:08:08 wokes Exp $
  *
  * Linux ISDN subsystem, functions for synchronous PPP (linklevel).
  *
@@ -72,7 +72,7 @@ static void isdn_ppp_mp_cleanup( isdn_net_local * lp );
 static int isdn_ppp_bundle(struct ippp_struct *, int unit);
 #endif	/* CONFIG_ISDN_MPP */
   
-char *isdn_ppp_revision = "$Revision: 1.1.2.3 $";
+char *isdn_ppp_revision = "$Revision: 1.1.1.1 $";
 
 static struct ippp_struct *ippp_table[ISDN_MAX_CHANNELS];
 

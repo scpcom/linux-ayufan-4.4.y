@@ -6,7 +6,7 @@
    the GNU General Public License.
  */
 
-/* $Id: nsp_message.c,v 1.6 2003/07/26 14:21:09 elca Exp $ */
+/* $Id: nsp_message.c,v 1.1.1.1 2014/01/18 10:08:06 wokes Exp $ */
 
 static void nsp_message_in(struct scsi_cmnd *SCpnt)
 {

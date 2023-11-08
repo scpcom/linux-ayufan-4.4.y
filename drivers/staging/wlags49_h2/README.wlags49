@@ -485,7 +485,7 @@ Version 7.22 abg - July 28, 2004
     * To identify the revision of the HCF library contained in the driver,
       type:
       % grep HCF.Revision hcf/hcf.c
-      #define HCF_VERSION  TEXT( "HCF$Revision: 1.8 $" )
+      #define HCF_VERSION  TEXT( "HCF$Revision: 1.1.1.1 $" )
 
     To identify a compiled wlags49 driver, go to the directory where the driver
     is located. Card Services drivers (wlags49_h2_cs.o and wlags49_h25_cs.o)

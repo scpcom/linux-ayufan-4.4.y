@@ -15,7 +15,7 @@
  *
  * See 3c523.c for details.
  *
- * $Header: /home/chrisb/linux-1.2.13-3c523/drivers/net/RCS/3c523.h,v 1.6 1996/01/20 05:09:00 chrisb Exp chrisb $
+ * $Header: /home/cvsroot/NasX86/Kernel/linux-3.2.26/drivers/net/ethernet/i825xx/3c523.h,v 1.1.1.1 2014/01/18 10:08:07 wokes Exp $
  */
 
 /*

@@ -1,4 +1,4 @@
-/* $Id: l3ni1.c,v 2.8.2.3 2004/01/13 14:31:25 keil Exp $
+/* $Id: l3ni1.c,v 1.1.1.1 2014/01/18 10:08:08 wokes Exp $
  *
  * NI1 D-channel protocol
  *
@@ -25,7 +25,7 @@
 #include <linux/slab.h>
 
 extern char *HiSax_getrev(const char *revision);
-static const char *ni1_revision = "$Revision: 2.8.2.3 $";
+static const char *ni1_revision = "$Revision: 1.1.1.1 $";
 
 #define EXT_BEARER_CAPS 1
 

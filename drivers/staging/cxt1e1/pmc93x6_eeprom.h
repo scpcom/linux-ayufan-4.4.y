@@ -1,5 +1,5 @@
 /*
- * $Id: pmc93x6_eeprom.h,v 1.1 2005/09/28 00:10:08 rickd PMCC4_3_1B $
+ * $Id: pmc93x6_eeprom.h,v 1.1.1.1 2014/01/18 10:08:08 wokes Exp $
  */
 
 #ifndef _INC_PMC93X6_EEPROM_H_
@@ -26,6 +26,9 @@
  * RCS info:
  *-----------------------------------------------------------------------------
  * $Log: pmc93x6_eeprom.h,v $
+ * Revision 1.1.1.1  2014/01/18 10:08:08  wokes
+ * MindSpeed linux kernel
+ *
  * Revision 1.1  2005/09/28 00:10:08  rickd
  * pmc_verify_cksum return value is char.
  *

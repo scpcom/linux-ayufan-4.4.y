@@ -1,5 +1,5 @@
 /*
- * $Id: libsbew.h,v 2.1 2005/10/27 18:54:19 rickd PMCC4_3_1B $
+ * $Id: libsbew.h,v 1.1.1.1 2014/01/18 10:08:08 wokes Exp $
  */
 
 #ifndef _INC_LIBSBEW_H_
@@ -26,11 +26,14 @@
  * SBE, Inc.  San Ramon, California  U.S.A.
  *-----------------------------------------------------------------------------
  * RCS info:
- * RCS revision: $Revision: 2.1 $
- * Last changed on $Date: 2005/10/27 18:54:19 $
- * Changed by $Author: rickd $
+ * RCS revision: $Revision: 1.1.1.1 $
+ * Last changed on $Date: 2014/01/18 10:08:08 $
+ * Changed by $Author: wokes $
  *-----------------------------------------------------------------------------
  * $Log: libsbew.h,v $
+ * Revision 1.1.1.1  2014/01/18 10:08:08  wokes
+ * MindSpeed linux kernel
+ *
  * Revision 2.1  2005/10/27 18:54:19  rickd
  * Add E1PLAIN support.
  *

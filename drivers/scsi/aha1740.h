@@ -1,6 +1,6 @@
 #ifndef _AHA1740_H
 
-/* $Id$
+/* $Id: aha1740.h,v 1.1.1.1 2014/01/18 10:08:06 wokes Exp $
  *
  * Header file for the adaptec 1740 driver for Linux
  *

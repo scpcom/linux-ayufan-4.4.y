@@ -1,4 +1,4 @@
-/* $Id: capiutil.h,v 1.5.6.2 2001/09/23 22:24:33 kai Exp $
+/* $Id: capiutil.h,v 1.1.1.1 2014/01/18 10:08:05 wokes Exp $
  *
  * CAPI 2.0 defines & types
  *

@@ -1,4 +1,4 @@
-/* $Id: message.c,v 1.5.8.2 2001/09/23 22:24:59 kai Exp $
+/* $Id: message.c,v 1.1.1.1 2014/01/18 10:08:08 wokes Exp $
  *
  * functions for sending and receiving control messages
  *

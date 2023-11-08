@@ -1,4 +1,4 @@
-/* $Id: hysdn_init.c,v 1.6.6.6 2001/09/23 22:24:54 kai Exp $
+/* $Id: hysdn_init.c,v 1.1.1.1 2014/01/18 10:08:08 wokes Exp $
  *
  * Linux driver for HYSDN cards, init functions.
  *

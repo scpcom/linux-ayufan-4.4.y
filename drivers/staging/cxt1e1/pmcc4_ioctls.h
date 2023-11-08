@@ -1,4 +1,4 @@
-/* RCSid: $Header: /home/rickd/projects/pmcc4/include/pmcc4_ioctls.h,v 2.0 2005/09/28 00:10:09 rickd PMCC4_3_1B $
+/* RCSid: $Header: /home/cvsroot/NasX86/Kernel/linux-3.2.26/drivers/staging/cxt1e1/pmcc4_ioctls.h,v 1.1.1.1 2014/01/18 10:08:08 wokes Exp $
  */
 
 #ifndef _INC_PMCC4_IOCTLS_H_
@@ -23,11 +23,14 @@
  * SBE, Inc.  San Ramon, California  U.S.A.
  *-----------------------------------------------------------------------------
  * RCS info:
- * RCS revision: $Revision: 2.0 $
- * Last changed on $Date: 2005/09/28 00:10:09 $
- * Changed by $Author: rickd $
+ * RCS revision: $Revision: 1.1.1.1 $
+ * Last changed on $Date: 2014/01/18 10:08:08 $
+ * Changed by $Author: wokes $
  *-----------------------------------------------------------------------------
  * $Log: pmcc4_ioctls.h,v $
+ * Revision 1.1.1.1  2014/01/18 10:08:08  wokes
+ * MindSpeed linux kernel
+ *
  * Revision 2.0  2005/09/28 00:10:09  rickd
  * Add GNU license info. Switch Ioctls to sbe_ioc.h usage.
  *

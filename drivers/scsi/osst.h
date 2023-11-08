@@ -1,5 +1,5 @@
 /*
- *	$Header: /cvsroot/osst/Driver/osst.h,v 1.16 2005/01/01 21:13:35 wriede Exp $
+ *	$Header: /home/cvsroot/NasX86/Kernel/linux-3.2.26/drivers/scsi/osst.h,v 1.1.1.1 2014/01/18 10:08:06 wokes Exp $
  */
 
 #include <asm/byteorder.h>

@@ -6,7 +6,7 @@
  *
  * (c) 2002 Wolfgang Scherr <scherr@net4you.at>
  *
- * $Id: videocodec.h,v 1.1.2.4 2003/01/14 21:15:03 rbultje Exp $
+ * $Id: videocodec.h,v 1.1.1.1 2014/01/18 10:08:08 wokes Exp $
  *
  * ------------------------------------------------------------------------
  *

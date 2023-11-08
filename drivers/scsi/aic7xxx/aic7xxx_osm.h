@@ -53,7 +53,7 @@
  * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGES.
  *
- * $Id: //depot/aic7xxx/linux/drivers/scsi/aic7xxx/aic7xxx_osm.h#151 $
+ * $Id: aic7xxx_osm.h,v 1.1.1.1 2014/01/18 10:08:06 wokes Exp $
  *
  */
 #ifndef _AIC7XXX_LINUX_H_

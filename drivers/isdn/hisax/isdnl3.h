@@ -1,4 +1,4 @@
-/* $Id: isdnl3.h,v 2.6.6.2 2001/09/23 22:24:49 kai Exp $
+/* $Id: isdnl3.h,v 1.1.1.1 2014/01/18 10:08:08 wokes Exp $
  *
  * This software may be used and distributed according to the terms
  * of the GNU General Public License, incorporated herein by reference.

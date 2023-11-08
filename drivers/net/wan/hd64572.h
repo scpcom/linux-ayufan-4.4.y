@@ -12,6 +12,9 @@
  *	2 of the License, or (at your option) any later version.
  *
  * $Log: hd64572.h,v $
+ * Revision 1.1.1.1  2014/01/18 10:08:07  wokes
+ * MindSpeed linux kernel
+ *
  * Revision 3.1  2001/06/15 12:41:10  regina
  * upping major version number
  *

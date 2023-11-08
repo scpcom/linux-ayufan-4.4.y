@@ -1,4 +1,4 @@
-/* $Id: sportster.c,v 1.16.2.4 2004/01/13 23:48:39 keil Exp $
+/* $Id: sportster.c,v 1.1.1.1 2014/01/18 10:08:08 wokes Exp $
  *
  * low level stuff for USR Sportster internal TA
  *
@@ -18,7 +18,7 @@
 #include "hscx.h"
 #include "isdnl1.h"
 
-static const char *sportster_revision = "$Revision: 1.16.2.4 $";
+static const char *sportster_revision = "$Revision: 1.1.1.1 $";
 
 #define byteout(addr,val) outb(val,addr)
 #define bytein(addr) inb(addr)

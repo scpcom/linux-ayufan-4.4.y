@@ -1,4 +1,4 @@
-/* $Id: aha1542.c,v 1.1 1992/07/24 06:27:38 root Exp root $
+/* $Id: aha1542.c,v 1.1.1.1 2014/01/18 10:08:06 wokes Exp $
  *  linux/kernel/aha1542.c
  *
  *  Copyright (C) 1992  Tommy Thorn
@@ -61,7 +61,7 @@
 #endif
 
 /*
-   static const char RCSid[] = "$Header: /usr/src/linux/kernel/blk_drv/scsi/RCS/aha1542.c,v 1.1 1992/07/24 06:27:38 root Exp root $";
+   static const char RCSid[] = "$Header: /home/cvsroot/NasX86/Kernel/linux-3.2.26/drivers/scsi/aha1542.c,v 1.1.1.1 2014/01/18 10:08:06 wokes Exp $";
  */
 
 /* The adaptec can be configured for quite a number of addresses, but

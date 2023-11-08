@@ -1,4 +1,4 @@
-$Id: README.aha152x,v 1.2 1999/12/25 15:32:30 fischer Exp fischer $
+$Id: aha152x.txt,v 1.1.1.1 2014/01/18 10:08:09 wokes Exp $
 Adaptec AHA-1520/1522 SCSI driver for Linux (aha152x)
 
 Copyright 1993-1999 Jürgen Fischer <fischer@norbit.de>

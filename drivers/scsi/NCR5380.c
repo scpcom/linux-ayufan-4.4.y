@@ -28,6 +28,9 @@
 
 /*
  * $Log: NCR5380.c,v $
+ * Revision 1.1.1.1  2014/01/18 10:08:06  wokes
+ * MindSpeed linux kernel
+ *
 
  * Revision 1.10 1998/9/2	Alan Cox
  *				(alan@lxorguk.ukuu.org.uk)

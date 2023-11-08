@@ -58,7 +58,7 @@
 
 const char copyright[] =
     "@(#) $Version: unifdef-2.5 $\n"
-    "@(#) $Author: Tony Finch (dot@dotat.at) $\n"
+    "@(#) $Author: wokes $\n"
     "@(#) $URL: http://dotat.at/prog/unifdef $\n"
 ;
 

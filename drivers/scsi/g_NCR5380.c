@@ -79,7 +79,10 @@
  */
 
 /*
- * $Log: generic_NCR5380.c,v $
+ * $Log: g_NCR5380.c,v $
+ * Revision 1.1.1.1  2014/01/18 10:08:06  wokes
+ * MindSpeed linux kernel
+ *
  */
 
 /* settings for DTC3181E card with only Mustek scanner attached */

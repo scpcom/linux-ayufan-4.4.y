@@ -26,7 +26,10 @@
  */
 
 /*
- * $Log: generic_NCR5380.h,v $
+ * $Log: g_NCR5380.h,v $
+ * Revision 1.1.1.1  2014/01/18 10:08:06  wokes
+ * MindSpeed linux kernel
+ *
  */
 
 #ifndef GENERIC_NCR5380_H

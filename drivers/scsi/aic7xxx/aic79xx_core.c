@@ -37,7 +37,7 @@
  * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGES.
  *
- * $Id: //depot/aic7xxx/aic7xxx/aic79xx.c#250 $
+ * $Id: aic79xx_core.c,v 1.1.1.1 2014/01/18 10:08:06 wokes Exp $
  */
 
 #ifdef __linux__

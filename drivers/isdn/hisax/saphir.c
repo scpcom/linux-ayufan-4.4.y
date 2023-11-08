@@ -1,4 +1,4 @@
-/* $Id: saphir.c,v 1.10.2.4 2004/01/13 23:48:39 keil Exp $
+/* $Id: saphir.c,v 1.1.1.1 2014/01/18 10:08:08 wokes Exp $
  *
  * low level stuff for HST Saphir 1
  *
@@ -18,7 +18,7 @@
 #include "hscx.h"
 #include "isdnl1.h"
 
-static char *saphir_rev = "$Revision: 1.10.2.4 $";
+static char *saphir_rev = "$Revision: 1.1.1.1 $";
 
 #define byteout(addr,val) outb(val,addr)
 #define bytein(addr) inb(addr)

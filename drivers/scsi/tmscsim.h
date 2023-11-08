@@ -3,7 +3,7 @@
 ;*		    TEKRAM DC-390(T) PCI SCSI Bus Master Host Adapter  *
 ;*		    Device Driver				       *
 ;***********************************************************************/
-/* $Id: tmscsim.h,v 2.15.2.3 2000/11/17 20:52:27 garloff Exp $ */
+/* $Id: tmscsim.h,v 1.1.1.1 2014/01/18 10:08:06 wokes Exp $ */
 
 #ifndef _TMSCSIM_H
 #define _TMSCSIM_H

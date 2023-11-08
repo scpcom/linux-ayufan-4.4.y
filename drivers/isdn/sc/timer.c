@@ -1,4 +1,4 @@
-/* $Id: timer.c,v 1.3.6.1 2001/09/23 22:24:59 kai Exp $
+/* $Id: timer.c,v 1.1.1.1 2014/01/18 10:08:08 wokes Exp $
  *
  * Copyright (C) 1996  SpellCaster Telecommunications Inc.
  *

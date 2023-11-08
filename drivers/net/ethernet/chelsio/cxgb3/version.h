@@ -29,7 +29,7 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-/* $Date: 2006/10/31 18:57:51 $ $RCSfile: version.h,v $ $Revision: 1.3 $ */
+/* $Date: 2014/01/18 10:08:07 $ $RCSfile: version.h,v $ $Revision: 1.1.1.1 $ */
 #ifndef __CHELSIO_VERSION_H
 #define __CHELSIO_VERSION_H
 #define DRV_DESC "Chelsio T3 Network Driver"

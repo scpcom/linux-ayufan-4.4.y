@@ -1,4 +1,4 @@
-/* $Id: isurf.c,v 1.12.2.4 2004/01/13 21:46:03 keil Exp $
+/* $Id: isurf.c,v 1.1.1.1 2014/01/18 10:08:08 wokes Exp $
  *
  * low level stuff for Siemens I-Surf/I-Talk cards
  *
@@ -17,7 +17,7 @@
 #include "isdnl1.h"
 #include <linux/isapnp.h>
 
-static const char *ISurf_revision = "$Revision: 1.12.2.4 $";
+static const char *ISurf_revision = "$Revision: 1.1.1.1 $";
 
 #define byteout(addr,val) outb(val,addr)
 #define bytein(addr) inb(addr)

@@ -21,7 +21,7 @@ The software is a modified version of wl_lkm_722_abg.tar.gz from the
 Agere Systems website, addapted for Ubuntu 9.04.
 
 Modified for kernel 2.6 by Henk de Groot <pe1dnn@amsat.org>
-Based on 7.18 version by Andrey Borzenkov <arvidjaar@mail.ru> $Revision: 39 $
+Based on 7.18 version by Andrey Borzenkov <arvidjaar@mail.ru> $Revision: 1.1.1.1 $
 
 INSTALLATION
 
