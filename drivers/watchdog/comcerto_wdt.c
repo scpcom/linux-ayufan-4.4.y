@@ -39,7 +39,7 @@
 #define WDT_NAME					"comcerto_wdt"
 //Patch by QNAP: Board initialization
 #ifdef CONFIG_MACH_QNAPTS
-#define WDT_DEFAULT_TIMEOUT				15
+#define WDT_DEFAULT_TIMEOUT				17
 #else
 #define WDT_DEFAULT_TIMEOUT				5
 #endif

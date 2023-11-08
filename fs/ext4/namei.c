@@ -1076,6 +1076,14 @@ static struct buffer_head * ext4_find_entry (struct inode *dir,
 //Patch by QNAP:Search filename use case insensitive method
 #ifdef QNAP_SEARCH_FILENAME_CASE_INSENSITIVE
 		bh = ext4_dx_find_entry(dir, d_name, res_dir, &err,case_sensitive);
+
+		/*
+		 * Bug#125287:
+		 * Due to a race condition bug in the case insensitive patches,
+		 * we need to fallback to traverse through all the entries.
+		 */
+		if (bh == NULL)
+			goto fallback;
 #else        
 		bh = ext4_dx_find_entry(dir, d_name, res_dir, &err);
 #endif
@@ -1103,6 +1111,9 @@ static struct buffer_head * ext4_find_entry (struct inode *dir,
 		dxtrace(printk(KERN_DEBUG "ext4_find_entry: dx failed, "
 			       "falling back\n"));
 	}
+#ifdef QNAP_SEARCH_FILENAME_CASE_INSENSITIVE
+fallback:
+#endif
 	nblocks = dir->i_size >> EXT4_BLOCK_SIZE_BITS(sb);
 	start = EXT4_I(dir)->i_dir_start_lookup;
 	if (start >= nblocks)
@@ -1308,7 +1319,8 @@ static struct dentry *ext4_lookup(struct inode *dir, struct dentry *dentry, stru
 	}
 //Patch by QNAP:Search filename use case insensitive method
 #ifdef QNAP_SEARCH_FILENAME_CASE_INSENSITIVE
-    dentry->d_op = &ext4_dentry_operations;
+	if (ntohl(EXT4_SB(dir->i_sb)->s_es->s_hash_magic) == QNAP_SB_HASH)
+		dentry->d_op = &ext4_dentry_operations;
 #endif
 	return d_splice_alias(inode, dentry);
 }

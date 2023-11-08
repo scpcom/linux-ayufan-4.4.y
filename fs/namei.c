@@ -181,6 +181,7 @@ EXPORT_SYMBOL(pfn_sys_files_notify);
 #define MAX_FILENAME_LEN 256
 static __u16 g_case_folding_array[UTF16_MAPPING_TABLE_SIZE];
 static __u16 *g_case_folding_table;
+ __cacheline_aligned_in_smp DEFINE_SPINLOCK(case_gen_table_lock);
  __cacheline_aligned_in_smp DEFINE_SPINLOCK(case_folding_transform_lock);
  __cacheline_aligned_in_smp DEFINE_SPINLOCK(case_folding_compare_lock);
 
@@ -277,8 +278,10 @@ __u16 *get_simple_case_folding_table(void)
 
 __u16 *get_case_folding_table(void)
 {
+    spin_lock(&case_gen_table_lock);
     if(g_case_folding_table==NULL)
         g_case_folding_table = get_simple_case_folding_table();
+    spin_unlock(&case_gen_table_lock);
 
     return g_case_folding_table;
 }

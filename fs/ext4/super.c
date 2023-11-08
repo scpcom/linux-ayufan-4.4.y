@@ -4061,8 +4061,10 @@ no_journal:
     
 //Patch by QNAP:Search filename use case insensitive method
 #ifdef QNAP_SEARCH_FILENAME_CASE_INSENSITIVE
-    sb->s_root->d_op = &ext4_dentry_operations;
-    sb->s_d_op = &ext4_dentry_operations;
+	if (ntohl(sbi->s_es->s_hash_magic) == QNAP_SB_HASH) {
+		sb->s_root->d_op = &ext4_dentry_operations;
+		sb->s_d_op = &ext4_dentry_operations;
+	}
 #endif
 	if (ext4_setup_super(sb, es, sb->s_flags & MS_RDONLY))
 		sb->s_flags |= MS_RDONLY;
