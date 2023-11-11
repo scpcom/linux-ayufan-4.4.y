@@ -40,6 +40,9 @@
 #include <asm/sizes.h>
 #include <mach/serdes-c2000.h>
 
+#define serdes_readl(r) readl((void*)(r))
+#define serdes_writel(v,r) writel(v, (void*)(r))
+
 #define MAX_LANE_OK_WAIT_JIFFIES	(200 * HZ) / 1000    /* 200ms */
 #define MAX_CMU_OK_WAIT_JIFFIES		(2000 * HZ) / 1000   /* 2 Seconds */
 
@@ -57,7 +60,7 @@ static int wait_lane_ok(u32 sbphy_num)
 	/* Keep looping until you see the lane_ok_o of Serdes */
 	do
 	{
-		rd_data = readl(COMCERTO_SERDES_DWC_CFG_REG( sbphy_num, SD_PHY_STS_REG_OFST));
+		rd_data = serdes_readl(COMCERTO_SERDES_DWC_CFG_REG( sbphy_num, SD_PHY_STS_REG_OFST));
 
 		/* Mask lane_ok Status */
 		masked_data = rd_data & lane_ok_dtctd_mask;
@@ -95,7 +98,7 @@ static int wait_cmu_ok(u32 sbphy_num)
 	/* Keep looping until you see the cmu_ok_o of Serdes */
 	do
 	{
-		rd_data = readl(CMU_Offset);
+		rd_data = serdes_readl(CMU_Offset);
 
 		/* Mask cmu_ok Status */
 		masked_data = rd_data & cmu_ok_dtctd_mask;
@@ -132,27 +135,27 @@ static int wait_sb_cmu_lane_rdy(u32 sbphy_num, u32 type)
 	sd_ctl2_reg_offset = COMCERTO_SERDES_DWC_CFG_REG( sbphy_num, SD_PHY_CTRL2_REG_OFST );
 
 	/* Releasing the CMU Reset */
-	tmp = readl(sd_ctl2_reg_offset);
+	tmp = serdes_readl(sd_ctl2_reg_offset);
 	tmp = tmp & (~cmu_rst_mask);
 	tmp = tmp | cmu_rst_mask;
 
-	writel(tmp, sd_ctl2_reg_offset );
+	serdes_writel(tmp, sd_ctl2_reg_offset );
 
 	/* Waiting for CMU OK */
 	if( !wait_cmu_ok(sbphy_num) )
 		return -1;
 
 	if ( type == SD_DEV_TYPE_PCIE )
-		writel(0xC3, COMCERTO_SERDES_REG(sbphy_num, (SD_COMMON_LANE << 2)));
+		serdes_writel(0xC3, COMCERTO_SERDES_REG(sbphy_num, (SD_COMMON_LANE << 2)));
 	else
-		writel(0x03, COMCERTO_SERDES_REG(sbphy_num, (SD_COMMON_LANE << 2)));
+		serdes_writel(0x03, COMCERTO_SERDES_REG(sbphy_num, (SD_COMMON_LANE << 2)));
 
 	/* Releasing the Lane Reset */
-	tmp = readl(sd_ctl2_reg_offset);
+	tmp = serdes_readl(sd_ctl2_reg_offset);
 	tmp = tmp & (~lane_rst_mask);
 	tmp = tmp | lane_rst_mask;
 
-	writel(tmp, sd_ctl2_reg_offset);
+	serdes_writel(tmp, sd_ctl2_reg_offset);
 
 	/* Waiting for the Lane Ready */
 	if (type != SD_DEV_TYPE_PCIE) {
@@ -180,7 +183,7 @@ int serdes_phy_init(int phy_num, struct serdes_regs_s *regs, int size, int type)
 
 	/* Initilize serdes phy registers */
 	for( ii = 0; ii < size; ii++ )
-		writel(regs[ii].val, COMCERTO_SERDES_REG(phy_num, regs[ii].ofst));
+		serdes_writel(regs[ii].val, COMCERTO_SERDES_REG(phy_num, regs[ii].ofst));
 
 	/* Wait for the initialization of Serdes-1 Port/Lane to become Ready */
 	return wait_sb_cmu_lane_rdy(phy_num, type);
