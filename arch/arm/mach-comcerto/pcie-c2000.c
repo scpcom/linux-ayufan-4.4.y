@@ -56,6 +56,14 @@
 #include <asm/system_info.h>
 #endif
 
+#define pcie_readl(r) readl((void*)(r))
+#define pcie_writel(v,r) writel(v, (void*)(r))
+
+#define pcie_readl_relaxed(r) readl_relaxed((void*)(r))
+#define pcie_writel_relaxed(v,r) writel_relaxed(v, (void*)(r))
+#define pcie_writew_relaxed(v,r) writew_relaxed(v, (void*)(r))
+#define pcie_writeb_relaxed(v,r) writeb_relaxed(v, (void*)(r))
+
 #ifdef CONFIG_PCI_MSI
 static DECLARE_BITMAP(msi_irq_in_use[NUM_PCIE_PORTS], PCIE_NUM_MSI_IRQS);
 static int comcerto_msi_init(struct pcie_port *pp);
@@ -196,7 +204,7 @@ static void pcie_port_set_mode( int nr, int mode  )
 {
 	struct pcie_port *pp= &pcie_port[nr];
 
-	writel( (readl(pp->va_app_base + pp->app_regs->cfg0) & ~0xf) | mode, pp->va_app_base + pp->app_regs->cfg0);
+	pcie_writel( (pcie_readl(pp->va_app_base + pp->app_regs->cfg0) & ~0xf) | mode, pp->va_app_base + pp->app_regs->cfg0);
 }
 
 /**
@@ -207,7 +215,7 @@ static int pcie_port_get_mode( int nr  )
 {
 	struct pcie_port *pp= &pcie_port[nr];
 
-	return ( readl(pp->va_app_base + pp->app_regs->cfg0) &
+	return ( pcie_readl(pp->va_app_base + pp->app_regs->cfg0) &
 			DWC_CFG0_DEV_TYPE_MASK );
 }
 
@@ -221,7 +229,7 @@ static int comcerto_pcie_link_up( struct pcie_port *pp  )
 	unsigned long deadline = jiffies + MAX_LINK_UP_WAIT_JIFFIES;
 
 	do {
-		if (readl( pp->va_app_base + pp->app_regs->sts0 ) & STS0_RDLH_LINK_UP) {
+		if (pcie_readl( pp->va_app_base + pp->app_regs->sts0 ) & STS0_RDLH_LINK_UP) {
 			return 1;
 		}
 
@@ -261,7 +269,7 @@ static void comcerto_dbi_read_reg(struct pcie_port *pp, int where, int size,
 
 	va_address = (u32)pp->va_dbi_base + (where & ~0x3);
 
-	*val = readl_relaxed(va_address);
+	*val = pcie_readl_relaxed(va_address);
 
 	if (size == 1)
 		*val = (*val >> (8 * (where & 3))) & 0xff;
@@ -291,11 +299,11 @@ static void comcerto_dbi_write_reg(struct pcie_port *pp, int where, int size,
 		else if (size == 1)
 			mask = 0xff;
 
-		val1 = readl_relaxed(va_address);
+		val1 = pcie_readl_relaxed(va_address);
 		val1 = ( val1 & ~( mask  << pos ) ) | ( (val & mask) << pos );
 	}
 
-	writel_relaxed(val1, va_address);
+	pcie_writel_relaxed(val1, va_address);
 }
 
 static inline void nop_delay(void)
@@ -336,12 +344,12 @@ static int comcerto_pcie_rd_conf(struct pcie_port *pp, int bus_nr,
 	}
 
 
-	*val = readl_relaxed(address);
+	*val = pcie_readl_relaxed(address);
 
 	/* Because of the imprecise external abort the processor is not able to get the exact instruction 
            which caused the abort and hence when the abort handler tries to restore the PC to the next 
            instruction to resume it is often wrong and it results in skipping few instruction after the 
-           readl_relaxed which has caused abort. So nop instructions are added after readl so that even 
+           pcie_readl_relaxed which has caused abort. So nop instructions are added after pcie_readl so that even 
            if the some instructions are missed out it will miss the nop instruction only.
 	*/
 	nop_delay();
@@ -424,11 +432,11 @@ static int comcerto_pcie_wr_conf(struct pcie_port *pp, int bus_nr,
 	printk(KERN_DEBUG "%s: bus:%d dev:%d where:%d, size:%d addr : %x value:%x\n", __func__, bus_nr, devfn, where, size, address, val);
 #endif
 	if (size == 4)
-		writel_relaxed(val, address);
+		pcie_writel_relaxed(val, address);
 	else if (size == 2)
-		writew_relaxed(val, address + (where & 2));
+		pcie_writew_relaxed(val, address + (where & 2));
 	else if (size == 1)
-		writeb_relaxed(val, address + (where & 3));
+		pcie_writeb_relaxed(val, address + (where & 3));
 	else
 		ret = PCIBIOS_BAD_REGISTER_NUMBER;
 
@@ -611,7 +619,7 @@ static void handle_msi(struct pcie_port *pp)
 	unsigned int pos, mask0;
 
 
-	val = readl_relaxed(pp->va_dbi_base + PCIE_MSI_INTR0_STATUS);
+	val = pcie_readl_relaxed(pp->va_dbi_base + PCIE_MSI_INTR0_STATUS);
 
 continue_handle:
 
@@ -626,10 +634,10 @@ continue_handle:
 			 * Ack and enabling after Ack.
 			 */
 			spin_lock(&pp->intr_lock);
-			mask = readl_relaxed(pp->va_dbi_base + PCIE_MSI_INTR0_ENABLE);
-			writel_relaxed(mask & ~mask0, pp->va_dbi_base + PCIE_MSI_INTR0_ENABLE);
-			writel_relaxed(mask0, pp->va_dbi_base + PCIE_MSI_INTR0_STATUS);
-			writel_relaxed(mask, pp->va_dbi_base + PCIE_MSI_INTR0_ENABLE);
+			mask = pcie_readl_relaxed(pp->va_dbi_base + PCIE_MSI_INTR0_ENABLE);
+			pcie_writel_relaxed(mask & ~mask0, pp->va_dbi_base + PCIE_MSI_INTR0_ENABLE);
+			pcie_writel_relaxed(mask0, pp->va_dbi_base + PCIE_MSI_INTR0_STATUS);
+			pcie_writel_relaxed(mask, pp->va_dbi_base + PCIE_MSI_INTR0_ENABLE);
 			spin_unlock(&pp->intr_lock);
 			generic_handle_irq(pp->msi_base	+ pos);
 			val = val & ~mask0;
@@ -637,13 +645,13 @@ continue_handle:
 		pos++;
 	}
 
-	val = readl_relaxed(pp->va_dbi_base + PCIE_MSI_INTR0_STATUS);
+	val = pcie_readl_relaxed(pp->va_dbi_base + PCIE_MSI_INTR0_STATUS);
 	if(val)
 		goto continue_handle;
 
 #if 0
 	for (i = 0; i < (PCIE_NUM_MSI_IRQS >> 5); i++) {
-		val = readl_relaxed(pp->va_dbi_base + PCIE_MSI_INTR0_STATUS + (i * 12));
+		val = pcie_readl_relaxed(pp->va_dbi_base + PCIE_MSI_INTR0_STATUS + (i * 12));
 		if (val) {
 			pos = 0;
 			while ((pos = find_next_bit(&val, 32, pos)) != 32) {
@@ -652,10 +660,10 @@ continue_handle:
 				 * Ack and enabling after Ack.
 				 */
 				spin_lock(&pp->intr_lock);
-				mask = readl_relaxed(pp->va_dbi_base + PCIE_MSI_INTR0_ENABLE + (i * 12));
-				writel_relaxed(mask & ~(1 << pos), pp->va_dbi_base + PCIE_MSI_INTR0_ENABLE + (i * 12));
-				writel_relaxed((1 << pos), pp->va_dbi_base + PCIE_MSI_INTR0_STATUS + (i * 12));
-				writel_relaxed(mask & (1 << pos), pp->va_dbi_base + PCIE_MSI_INTR0_ENABLE + (i * 12));
+				mask = pcie_readl_relaxed(pp->va_dbi_base + PCIE_MSI_INTR0_ENABLE + (i * 12));
+				pcie_writel_relaxed(mask & ~(1 << pos), pp->va_dbi_base + PCIE_MSI_INTR0_ENABLE + (i * 12));
+				pcie_writel_relaxed((1 << pos), pp->va_dbi_base + PCIE_MSI_INTR0_STATUS + (i * 12));
+				pcie_writel_relaxed(mask & (1 << pos), pp->va_dbi_base + PCIE_MSI_INTR0_ENABLE + (i * 12));
 				spin_unlock(&pp->intr_lock);
 				generic_handle_irq(pp->msi_base	+ (i * 32) + pos);
 				pos++;
@@ -680,10 +688,10 @@ static void comcerto_pcie_int_handler(unsigned int irq, struct irq_desc *desc)
 
 	chip = irq_desc_get_chip(desc);
 	chained_irq_enter(chip, desc);
-	status = readl_relaxed(pp->va_app_base + app_reg->intr_sts);
+	status = pcie_readl_relaxed(pp->va_app_base + app_reg->intr_sts);
 
 	if (status & INTR_CTRL_MSI) {
-		writel_relaxed(INTR_CTRL_MSI, (pp->va_app_base + app_reg->intr_sts));
+		pcie_writel_relaxed(INTR_CTRL_MSI, (pp->va_app_base + app_reg->intr_sts));
 		status &= ~(INTR_CTRL_MSI);
 		handle_msi(pp);
 	}
@@ -694,7 +702,7 @@ static void comcerto_pcie_int_handler(unsigned int irq, struct irq_desc *desc)
 		/* Handle INTx Assert */
 		if (status & (INTR_CTRL_INTA_ASSERT << pos)) {
 			status &= ~(INTR_CTRL_INTA_ASSERT << pos);
-			writel_relaxed((INTR_CTRL_INTA_ASSERT << pos), (pp->va_app_base + app_reg->intr_sts));
+			pcie_writel_relaxed((INTR_CTRL_INTA_ASSERT << pos), (pp->va_app_base + app_reg->intr_sts));
 			generic_handle_irq(pp->intx_base + ii);
 		}
 
@@ -704,7 +712,7 @@ static void comcerto_pcie_int_handler(unsigned int irq, struct irq_desc *desc)
 		/* Handle INTx Deasert */
 		if (status & (INTR_CTRL_INTA_DEASSERT << pos)) {
 			status &= ~(INTR_CTRL_INTA_DEASSERT << pos);
-			writel_relaxed((INTR_CTRL_INTA_DEASSERT << pos), (pp->va_app_base + app_reg->intr_sts));
+			pcie_writel_relaxed((INTR_CTRL_INTA_DEASSERT << pos), (pp->va_app_base + app_reg->intr_sts));
 		}
 #endif
 	}
@@ -712,7 +720,7 @@ static void comcerto_pcie_int_handler(unsigned int irq, struct irq_desc *desc)
 	if (status) {
 		printk(KERN_INFO "%s:Unhandled interrupt %x\n", __func__, status);
 		/* FIXME: HP, AER, PME interrupts need to be handled */
-		writel_relaxed(status, (pp->va_app_base + app_reg->intr_sts));
+		pcie_writel_relaxed(status, (pp->va_app_base + app_reg->intr_sts));
 	}
 
 	chained_irq_exit(chip, desc);
@@ -751,7 +759,7 @@ static void pcie_enable_intx_irq( struct irq_data *data )
 	irq_offset = irq_offset << 1;
 
 	spin_lock_irqsave(&pp->intr_lock, flags);
-	writel_relaxed(readl_relaxed(pp->va_app_base + app_reg->intr_en) | ( INTR_CTRL_INTA_ASSERT << irq_offset),
+	pcie_writel_relaxed(pcie_readl_relaxed(pp->va_app_base + app_reg->intr_en) | ( INTR_CTRL_INTA_ASSERT << irq_offset),
 			(pp->va_app_base + app_reg->intr_en) );
 	spin_unlock_irqrestore(&pp->intr_lock, flags);
 }
@@ -783,7 +791,7 @@ static void pcie_disable_intx_irq( struct irq_data *data )
 	irq_offset = irq_offset << 1;
 
 	spin_lock_irqsave(&pp->intr_lock, flags);
-	writel_relaxed( readl_relaxed(pp->va_app_base + app_reg->intr_en) & ~( INTR_CTRL_INTA_ASSERT << irq_offset),
+	pcie_writel_relaxed( pcie_readl_relaxed(pp->va_app_base + app_reg->intr_en) & ~( INTR_CTRL_INTA_ASSERT << irq_offset),
 			(pp->va_app_base + app_reg->intr_en) );
 	spin_unlock_irqrestore(&pp->intr_lock, flags);
 }
@@ -805,7 +813,7 @@ static int comcerto_pcie_intx_init(struct pcie_port *pp)
 	/* Disable INTX interrupt*/
 	app_reg = pp->app_regs;
 
-	writel(readl(pp->va_app_base + app_reg->intr_en) &
+	pcie_writel(pcie_readl(pp->va_app_base + app_reg->intr_en) &
 			~(INTR_CTRL_INTA_ASSERT |
 				INTR_CTRL_INTB_ASSERT |
 				INTR_CTRL_INTC_ASSERT |
@@ -826,7 +834,7 @@ static int comcerto_pcie_intx_init(struct pcie_port *pp)
 	irq_set_chained_handler(pp->irq, comcerto_pcie_int_handler);
 
 	/* FIXME Added for debuging */
-	writel(readl(pp->va_app_base + app_reg->intr_en) &
+	pcie_writel(pcie_readl(pp->va_app_base + app_reg->intr_en) &
 			~(INTR_CTRL_AER |  INTR_CTRL_PME |
  			 INTR_CTRL_HP  |  INTR_CTRL_LINK_AUTO_BW ),
 			pp->va_app_base + app_reg->intr_en );
@@ -1132,7 +1140,7 @@ static int comcerto_msi_init(struct pcie_port *pp)
 	comcerto_dbi_write_reg(pp, PCIE_MSI_ADDR_LO, 4, pp->msi_mbox_handle);
 	comcerto_dbi_write_reg(pp, PCIE_MSI_ADDR_HI, 4, 0);
 	/* Enbale MSI interrupt*/
-	writel(readl(pp->va_app_base + app_reg->intr_en) | INTR_CTRL_MSI,
+	pcie_writel(pcie_readl(pp->va_app_base + app_reg->intr_en) | INTR_CTRL_MSI,
 			pp->va_app_base + app_reg->intr_en);
 	return 0;
 
@@ -1149,7 +1157,7 @@ static void comcerto_pcie_rc_init(struct pcie_port *pp)
 
 	//FIXME : Bit:27 definition is not clear from document
 	//	  This register setting is copied from simulation code.
-	writel(readl(pp->va_app_base + app_reg->cfg0) | 0x08007FF0,
+	pcie_writel(pcie_readl(pp->va_app_base + app_reg->cfg0) | 0x08007FF0,
 			pp->va_app_base + app_reg->cfg0);
 
 	comcerto_dbi_read_reg(pp, PCIE_AFL0L1_REG, 4, &val);
@@ -1283,10 +1291,10 @@ err0:
 
 #if defined(CONFIG_C2K_EVM) || defined(CONFIG_C2K_ASIC) || defined(CONFIG_SEQUOIA)
 #define PCIE_DEV_EXT_RESET_DEASSERT(_id) \
-	writel(readl(COMCERTO_GPIO_OUTPUT_REG) & ~(GPIO_PIN_27), COMCERTO_GPIO_OUTPUT_REG);
+	pcie_writel(pcie_readl(COMCERTO_GPIO_OUTPUT_REG) & ~(GPIO_PIN_27), COMCERTO_GPIO_OUTPUT_REG);
 
 #define PCIE_DEV_EXT_RESET_ASSERT(_id) \
-	writel(readl(COMCERTO_GPIO_OUTPUT_REG) | (GPIO_PIN_27), COMCERTO_GPIO_OUTPUT_REG);
+	pcie_writel(pcie_readl(COMCERTO_GPIO_OUTPUT_REG) | (GPIO_PIN_27), COMCERTO_GPIO_OUTPUT_REG);
 #else
 /* Board specific */
 #define PCIE_DEV_EXT_RESET_DEASSERT(_id)
@@ -1413,7 +1421,7 @@ static int comcerto_pcie_device_reset_exit(struct pcie_port *pp)
 	comcerto_dbi_write_reg(pp, PCIE_MSI_ADDR_LO, 4, pp->msi_mbox_handle);
 	comcerto_dbi_write_reg(pp, PCIE_MSI_ADDR_HI, 4, 0);
 
-	writel_relaxed(0x7, pp->va_app_base + pp->app_regs->cfg5);
+	pcie_writel_relaxed(0x7, pp->va_app_base + pp->app_regs->cfg5);
 
 	/* Generic PCIe unit setup.*/
 
@@ -1487,7 +1495,7 @@ static ssize_t comcerto_pcie_set_reset(struct device *dev, struct device_attribu
 			/* Wait for link_req_rst_not, to be de-asseted */
 			while (ii--) {
 
-				if (!(readl( pp->va_app_base + pp->app_regs->sts0 ) & STS0_LINK_REQ_RST_NOT)) {
+				if (!(pcie_readl( pp->va_app_base + pp->app_regs->sts0 ) & STS0_LINK_REQ_RST_NOT)) {
 					printk(KERN_INFO "%s : (PCIe%d) link_req_rst_not is de-asseted\n", __func__, pp->port);
 					break;
 				}
@@ -1500,7 +1508,7 @@ static ssize_t comcerto_pcie_set_reset(struct device *dev, struct device_attribu
 
 			pp->reset = 1;
 			/* Disable LTSSM and initiate linkdown reset */
-			writel((readl(pp->va_app_base + pp->app_regs->cfg5) &
+			pcie_writel((pcie_readl(pp->va_app_base + pp->app_regs->cfg5) &
 						~(CFG5_LTSSM_ENABLE)) | CFG5_LINK_DOWN_RST,
 						 pp->va_app_base + pp->app_regs->cfg5);
 			udelay(1000);
@@ -1550,16 +1558,16 @@ static ssize_t comcerto_pcie_serdes_pd(struct device *dev, struct device_attribu
 		printk(KERN_INFO "%s: Putting Serdes to Low Power and CMU Power Off\n", __func__);
 
 		if (pdev->id)
-			writel(readl(USBPHY_SERDES_STAT_BASE+0x44) | ((0x3 << 2)|(0x1 << 7)) , USBPHY_SERDES_STAT_BASE+0x44);
+			pcie_writel(pcie_readl(USBPHY_SERDES_STAT_BASE+0x44) | ((0x3 << 2)|(0x1 << 7)) , USBPHY_SERDES_STAT_BASE+0x44);
 		else
-			writel(readl(USBPHY_SERDES_STAT_BASE+0x34) | ((0x3 << 2)|(0x1 << 7)) , USBPHY_SERDES_STAT_BASE+0x34);
+			pcie_writel(pcie_readl(USBPHY_SERDES_STAT_BASE+0x34) | ((0x3 << 2)|(0x1 << 7)) , USBPHY_SERDES_STAT_BASE+0x34);
 	} else {
 		printk(KERN_INFO "%s: Getting Serdes out of Low Power and CMU Power On\n", __func__);
 
 		if (pdev->id)
-			writel(readl(USBPHY_SERDES_STAT_BASE+0x44) & ~((0x3 << 2)|(0x1 << 7)) , USBPHY_SERDES_STAT_BASE+0x44);
+			pcie_writel(pcie_readl(USBPHY_SERDES_STAT_BASE+0x44) & ~((0x3 << 2)|(0x1 << 7)) , USBPHY_SERDES_STAT_BASE+0x44);
 		else
-			writel(readl(USBPHY_SERDES_STAT_BASE+0x34) & ~((0x3 << 2)|(0x1 << 7)) , USBPHY_SERDES_STAT_BASE+0x34);
+			pcie_writel(pcie_readl(USBPHY_SERDES_STAT_BASE+0x34) & ~((0x3 << 2)|(0x1 << 7)) , USBPHY_SERDES_STAT_BASE+0x34);
 	}
 
 	return count;
@@ -1743,8 +1751,8 @@ static int comcerto_pcie_bsp_link_init(struct pcie_port *pp, int nr, struct serd
 	c2000_block_reset(serdes_component,0);
 
 	/* SW select for ck_soc_div_i SOC clock */
-	writel(0xFF3C, COMCERTO_SERDES_DWC_CFG_REG( nr, SD_PHY_CTRL3_REG_OFST ));
-	writel(readl(COMCERTO_SERDES_DWC_CFG_REG( nr, SD_PHY_CTRL2_REG_OFST )) & ~0x3,
+	pcie_writel(0xFF3C, COMCERTO_SERDES_DWC_CFG_REG( nr, SD_PHY_CTRL3_REG_OFST ));
+	pcie_writel(pcie_readl(COMCERTO_SERDES_DWC_CFG_REG( nr, SD_PHY_CTRL2_REG_OFST )) & ~0x3,
 			COMCERTO_SERDES_DWC_CFG_REG( nr, SD_PHY_CTRL2_REG_OFST ));
 
 	rc = clk_enable(pp->ref_clock);
@@ -1787,13 +1795,13 @@ static int comcerto_pcie_bsp_link_init(struct pcie_port *pp, int nr, struct serd
 	c2000_block_reset(pcie_component,0);
 
 	//Hold the LTSSM in detect state
-	writel(readl(pp->va_app_base + pp->app_regs->cfg5) & ~CFG5_LTSSM_ENABLE,
+	pcie_writel(pcie_readl(pp->va_app_base + pp->app_regs->cfg5) & ~CFG5_LTSSM_ENABLE,
 			pp->va_app_base + pp->app_regs->cfg5);
 
 	comcerto_pcie_rc_init(pp);
 
 	//Enable LTSSM to start link initialization
-	writel(readl(pp->va_app_base + pp->app_regs->cfg5) | (CFG5_APP_INIT_RST | CFG5_LTSSM_ENABLE),
+	pcie_writel(pcie_readl(pp->va_app_base + pp->app_regs->cfg5) | (CFG5_APP_INIT_RST | CFG5_LTSSM_ENABLE),
 			pp->va_app_base + pp->app_regs->cfg5);
 
 	pp->link_state = comcerto_pcie_link_up( &pcie_port[nr] );
@@ -1927,7 +1935,7 @@ static int __init comcerto_pcie_init(void)
 	comcerto_pcie_bsp_init(pp, 0);
 
 	if ( (NUM_PCIE_PORTS == 2)  &&
-                        !(readl(COMCERTO_GPIO_SYSTEM_CONFIG) & BOOT_SERDES1_CNF_SATA0) )
+                        !(pcie_readl(COMCERTO_GPIO_SYSTEM_CONFIG) & BOOT_SERDES1_CNF_SATA0) )
         {
                 num_pcie_port = 2;
 		pp = &pcie_port[1];
