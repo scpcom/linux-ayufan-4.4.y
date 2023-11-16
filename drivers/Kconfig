@@ -180,4 +180,6 @@ source "drivers/mcb/Kconfig"
 
 source "drivers/pfe_ctrl/Kconfig"
 
+source "drivers/epn1802-ocf/Kconfig"
+
 endmenu

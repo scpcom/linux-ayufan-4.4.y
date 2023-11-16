@@ -162,3 +162,4 @@ obj-$(CONFIG_POWERCAP)		+= powercap/
 obj-$(CONFIG_MCB)		+= mcb/
 
 obj-$(CONFIG_PFE_CTRL)		+= pfe_ctrl/
+obj-$(CONFIG_OCF_M86XXX_ELP)	+= epn1802-ocf/
