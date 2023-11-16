@@ -168,3 +168,4 @@ obj-$(CONFIG_CORESIGHT)		+= coresight/
 obj-$(CONFIG_ANDROID)		+= android/
 
 obj-$(CONFIG_PFE_CTRL)		+= pfe_ctrl/
+obj-$(CONFIG_OCF_M86XXX_ELP)	+= epn1802-ocf/
