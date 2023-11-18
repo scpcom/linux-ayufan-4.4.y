@@ -18,6 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#include <linux/version.h>
 #include <linux/sched.h>
 #include <linux/device.h>
 #include <linux/serial_8250.h>
@@ -46,14 +47,18 @@
 #include <mach/irqs.h>
 #include <mach/dma.h>
 #include <mach/reset.h>
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,18,0)
+#include <linux/platform_data/dma-dw.h>
+#else
 #include <linux/dw_dmac.h>
+#endif
 
 #include <linux/clockchips.h>
 #include <linux/init.h>
 #include <linux/smp.h>
 #include <asm/smp_twd.h>
-#include <asm/localtimer.h>
-#include <asm/hardware/gic.h>
+//#include <asm/localtimer.h>
+//#include <asm/hardware/gic.h>
 #include <asm/mach/time.h>
 #include <mach/gpio.h>
 
