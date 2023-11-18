@@ -64,6 +64,7 @@
 
 //#include <mach/comcerto-2000/timer.h>
 extern void comcerto_timer_init(void);
+extern struct smp_operations comcerto_smp_ops;
 
 
 extern void platform_reserve(void);
@@ -742,6 +743,7 @@ static void __init platform_init(void)
 MACHINE_START(COMCERTO, "Comcerto 2000 EVM")
 	/* Mindspeed Technologies Inc. */
 	.atag_offset    = COMCERTO_AXI_DDR_BASE + 0x100,
+	.smp		= smp_ops(comcerto_smp_ops),
 	.reserve	= platform_reserve,
 	.map_io		= platform_map_io,
 	.init_irq	= platform_irq_init,
