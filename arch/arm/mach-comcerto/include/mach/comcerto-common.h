@@ -106,8 +106,8 @@
 
 /* gemac to interface name assignment */
 #define GEM0_ITF_NAME "eth0"
-#define GEM1_ITF_NAME "eth2"
-#define GEM2_ITF_NAME "eth3"
+#define GEM1_ITF_NAME "eth1"
+#define GEM2_ITF_NAME "eth2"
 
 #define GEM0_MAC { 0x00, 0xED, 0xCD, 0xEF, 0xAA, 0xCC }
 #define GEM1_MAC { 0x00, 0x2A, 0x2B, 0x2C, 0x2D, 0x2E }
