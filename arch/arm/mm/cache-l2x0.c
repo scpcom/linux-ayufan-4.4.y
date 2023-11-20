@@ -211,7 +211,9 @@ static void l2c210_flush_all(void)
 {
 	void __iomem *base = l2x0_base;
 
+#ifndef CONFIG_ARCH_COMCERTO
 	BUG_ON(!irqs_disabled());
+#endif
 
 	__l2c_op_way(base + L2X0_CLEAN_INV_WAY);
 	__l2c210_cache_sync(base);
