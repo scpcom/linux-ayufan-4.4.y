@@ -19,7 +19,6 @@ config ARCH_M86XXX
 	select ARM_ERRATA_751472
 	select ARM_ERRATA_754322
 	select ARM_ERRATA_764369 if SMP
-	select MTD_COMCERTO_NOR
 	select COMCERTO_UART1_SUPPORT
 #	select COMCERTO_PFE_UART_SUPPORT
 	select COMCERTO_USB2_SUPPORT
@@ -89,7 +88,7 @@ endchoice
 
 
 config MTD_COMCERTO_NOR
-	bool
+	bool "NOR"
 	default y
 
 config COMCERTO_EXP_BUS_LOCK
