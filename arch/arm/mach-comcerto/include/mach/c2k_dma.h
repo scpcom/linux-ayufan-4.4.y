@@ -218,7 +218,7 @@ extern void comcerto_dma_put(void);
 extern void comcerto_dma_set_in_bdesc(u32 idx, u32 addr, u32 ctrl);
 extern void comcerto_dma_set_out_bdesc(u32 idx, u32 addr, u32 ctrl);
 extern void comcerto_dma_start(void);
-extern void comcerto_dma_wait(void);
+extern int comcerto_dma_wait(void);
 extern void comcerto_do_mdma_xor(unsigned int src_count, unsigned int bytes, dma_addr_t dest, dma_addr_t *srcs);
 extern void comcerto_do_mdma_memcpy(void);
 

@@ -7,7 +7,14 @@
 #include <linux/interrupt.h>
 #include <linux/platform_device.h>
 #include <linux/memory.h>
+#include <linux/version.h>
 #include "comcerto_xor.h"
+
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3, 13, 0)
+#ifndef DMA_SUCCESS
+#define DMA_SUCCESS DMA_COMPLETE
+#endif
+#endif
 
 #define to_comcerto_xor_chan(dma_chan)              \
 	    container_of(dma_chan,struct comcerto_xor_chan, chan)
@@ -149,11 +156,13 @@ static void comcerto_set_buff_info_outbound(struct comcerto_xor_desc_slot *slot,
 
 /* ------- Read inbound frame descriptor ------- */
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(3, 13, 0)
 static u32 comcerto_get_buff_info_inbound(struct comcerto_xor_desc_slot *slot, u16 i)
 {
 	struct comcerto_xor_inbound_desc *hw_desc = slot->hw_desc_inbound;
 	return hw_desc->buff_info[i*2];
 }
+#endif
 
 /* ------- Read outbound frame descriptor ------- */
 
@@ -163,11 +172,13 @@ static u32 comcerto_get_fstatus0_outbound(struct comcerto_xor_desc_slot *slot)
 	return hw_desc->fstatus0;
 }
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(3, 13, 0)
 static u32 comcerto_get_buff_info_outbound(struct comcerto_xor_desc_slot *slot, u16 i)
 {
 	struct comcerto_xor_outbound_desc *hw_desc = slot->hw_desc_outbound;
 	return hw_desc->buff_info[i*2];
 }
+#endif
 
 static void comcerto_xor_inbound_desc_init(struct comcerto_xor_desc_slot *slot,
 		                             dma_addr_t *src)
@@ -344,6 +355,9 @@ static dma_cookie_t comcerto_xor_run_tx_complete_actions(struct comcerto_xor_des
 			slot->async_tx.callback(slot->async_tx.callback_param);
 
 		if(slot->len) {
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3, 13, 0)
+			dma_descriptor_unmap(&slot->async_tx);
+#else
 			struct device *dev = comcerto_xor_ch->device->device.dev;
 			enum dma_ctrl_flags flags = slot->async_tx.flags;
 			dma_addr_t src, dest;
@@ -368,6 +382,7 @@ static dma_cookie_t comcerto_xor_run_tx_complete_actions(struct comcerto_xor_des
 					dma_unmap_page(dev, src, slot->len, DMA_TO_DEVICE);
 				}
 			}
+#endif
 		}
 	}
 	dma_run_dependencies(&slot->async_tx);
@@ -818,7 +833,7 @@ static irqreturn_t comcerto_xor_interrupt_handler(int irq, void *data)
 }
 
 #define COMCERTO_XOR_NUM_SRC_TEST 4
-static int __devinit comcerto_xor_xor_self_test(struct comcerto_xor_device *device)
+static int comcerto_xor_xor_self_test(struct comcerto_xor_device *device)
 {
 	int i, src_idx;
 	struct page *dest;
@@ -965,7 +980,7 @@ out:
 
 }
 
-static int __devinit comcerto_xor_memcpy_self_test(struct comcerto_xor_device *device)
+static int comcerto_xor_memcpy_self_test(struct comcerto_xor_device *device)
 {
 	int i;
 	struct page *dest;
@@ -1045,7 +1060,7 @@ out:
 
 }
 
-static int __devexit comcerto_xor_remove(struct platform_device *pdev)
+static int comcerto_xor_remove(struct platform_device *pdev)
 {
 	struct comcerto_xor_device *comcerto_xor_dev = platform_get_drvdata(pdev);
 	struct dma_device *dma_dev = &comcerto_xor_dev->device;
@@ -1078,7 +1093,7 @@ static int __devexit comcerto_xor_remove(struct platform_device *pdev)
 	return 0;
 }
 
-static int __devinit comcerto_xor_probe(struct platform_device *pdev)
+static int comcerto_xor_probe(struct platform_device *pdev)
 {
 	struct resource      *io;
 	struct dma_device    *dma_dev;

@@ -45,8 +45,8 @@ unsigned long mdma_out_desc_phy;
 EXPORT_SYMBOL(mdma_in_desc_phy);
 EXPORT_SYMBOL(mdma_out_desc_phy);
 
-struct comcerto_xor_inbound_fdesc *mdma_in_desc;
-struct comcerto_xor_outbound_fdesc *mdma_out_desc;
+struct comcerto_memcpy_inbound_fdesc *mdma_in_desc;
+struct comcerto_memcpy_outbound_fdesc *mdma_out_desc;
 
 void comcerto_dma_get(void)
 {
@@ -173,6 +173,7 @@ static void mdma_transfer_single(u32 dst, u32 src, u32 size)
 
 	do_gettimeofday(&t2);
 
+#if 0
 	timersub(&t1, &t0, &diff);
 
 	printk("dma:: %14s: %lu.%06lu [sec]\n", "Dma setup time",
@@ -182,6 +183,7 @@ static void mdma_transfer_single(u32 dst, u32 src, u32 size)
 
 	printk("dma:: %14s: %lu.%06lu [sec]\n", "Dma execution time",
 	diff.tv_sec, (unsigned long) (diff.tv_usec));
+#endif
 
 }
 
@@ -221,10 +223,12 @@ static void start_dma_test(void)
 	memcpy(dst, src, BUF_LEN);
 	do_gettimeofday(&t1);
 
+#if 0
 	timersub(&t1, &t0, &diff);
 
 	printk("dma:: %14s: %lu.%06lu [sec]\n", "memcpy exec time",
 	diff.tv_sec, (unsigned long) (diff.tv_usec));
+#endif
 
 	kfree(dst);
 	kfree(src);
@@ -327,7 +331,7 @@ static irqreturn_t c2k_dma_handle_interrupt(int irq, void *data)
 	return IRQ_HANDLED;
 }
 
-static int __devexit comcerto_dma_remove(struct platform_device *pdev)
+static int comcerto_dma_remove(struct platform_device *pdev)
 {
 	int irq;
 
@@ -342,7 +346,7 @@ static int __devexit comcerto_dma_remove(struct platform_device *pdev)
 	return 0;
 }
 
-static int __devinit comcerto_dma_probe(struct platform_device *pdev)
+static int comcerto_dma_probe(struct platform_device *pdev)
 {
 	struct resource      *io;
 	int                  irq;
