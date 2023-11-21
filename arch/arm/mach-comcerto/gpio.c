@@ -199,9 +199,20 @@ static short bz_time;
 static short bz_timer_status = TIMER_SLEEPING;
 static short bz_type = RING_BRIEF;
 
-dev_t gpio_dev = 0;
-static int gpio_nr_devs = 1;
-struct cdev *gpio_cdev;
+struct gpio_cdev {
+	dev_t dev;
+	unsigned int major;
+	int nr_devs;
+	struct cdev *cdev;
+};
+
+static struct gpio_cdev gpio_chrdev = {
+	dev: 0,
+	major: 253,
+	nr_devs: 1,
+	cdev: NULL,
+};
+
 static int is_mcu_burning = 0;
 
 static struct proc_dir_entry *htp_proc;
@@ -2690,29 +2701,25 @@ static const struct file_operations mcu_wdt_fops = {
 	.write = mcu_wdt_write_fun,
 };
 
+static int __init gpiodev_init(void)
+{
+	int ret;
+
+	ret = __register_chrdev(gpio_chrdev.major, 0, gpio_chrdev.nr_devs, "gpio", &gpio_fops);
+	if (ret < 0)
+		return ret;
+
+	gpio_chrdev.dev = MKDEV(gpio_chrdev.major, 0);
+	printk(KERN_ERR"gpio_dev = %x\n", gpio_chrdev.dev);
+
+	return ret;
+}
+arch_initcall(gpiodev_init);
+
 static int __init gpio_init(void)
 {
 	int result = 0;
-	int err = 0;
-	
-	/* create /dev/gpio for ioctl using */
-	err = alloc_chrdev_region(&gpio_dev, 0, gpio_nr_devs, "gpio");
-	if(err < 0)
-	{
-		printk(KERN_ERR"%s: failed to allocate char dev region\n", __FILE__);
-		return -1;
-	}
-	
-	
-	printk(KERN_ERR"gpio_dev = %x\n", gpio_dev);
-	
-	gpio_cdev = cdev_alloc();
-	gpio_cdev->ops = &gpio_fops;
-	gpio_cdev->owner = THIS_MODULE;
-	err = cdev_add(gpio_cdev, gpio_dev, 1);
-	
-	if(err) printk(KERN_INFO "Error adding device\n");
-	
+
 	/* create /proc/htp_pin */
 	htp_proc = proc_create_data("htp_pin", 0644, NULL, &htp_status_fops, NULL);
 	hdd1_detect_proc = proc_create_data("hdd1_detect", 0644, NULL, &hdd1_status_fops, NULL);
@@ -2782,7 +2789,7 @@ static void __exit gpio_exit(void)
 	if(timer_pending(&btncpy_timer))
 		del_timer(&btncpy_timer);
 
-	unregister_chrdev_region(gpio_dev, gpio_nr_devs);
+	unregister_chrdev_region(gpio_chrdev.dev, gpio_chrdev.nr_devs);
 	destroy_workqueue(btn_workqueue);
 }
 
