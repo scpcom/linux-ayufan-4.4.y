@@ -1103,7 +1103,7 @@ static const struct spi_device_id m25p_ids[] = {
 };
 MODULE_DEVICE_TABLE(spi, m25p_ids);
 
-static const struct spi_device_id *__devinit jedec_probe(struct spi_device *spi, struct m25p *flash)
+static const struct spi_device_id * jedec_probe(struct spi_device *spi, struct m25p *flash)
 {
 	int			tmp, i;
 	u32			jedec;
@@ -1157,7 +1157,7 @@ static const struct spi_device_id *__devinit jedec_probe(struct spi_device *spi,
  * matches what the READ command supports, at least until this driver
  * understands FAST_READ (for clocks over 25 MHz).
  */
-static int __devinit m25p_probe(struct spi_device *spi)
+static int m25p_probe(struct spi_device *spi)
 {
 	const struct spi_device_id	*id = spi_get_device_id(spi);
 	struct flash_platform_data	*data;
@@ -1165,8 +1165,6 @@ static int __devinit m25p_probe(struct spi_device *spi)
 	struct flash_info		*info;
 	unsigned			i;
 	struct mtd_part_parser_data	ppdata;
-	struct resource *res = NULL;
-	unsigned long size;
 	int err;
 
 #ifdef CONFIG_MTD_OF_PARTS
@@ -1181,19 +1179,6 @@ static int __devinit m25p_probe(struct spi_device *spi)
 	 * newer chips, even if we don't recognize the particular chip.
 	 */
 	data = spi->dev.platform_data;
-
-	if(data && data->resource)
-	{
-
-
-		res = data->resource;
-		size = res->end - res->start + 1;
-		if (!request_mem_region(res->start, size, "m25p80_flash")) {
-			dev_err(&spi->dev, "%s: request mem region failed\n",__func__);
-			err = -ENOMEM;
-			goto out_err;
-		}
-	}
 
 	if (data && data->type) {
 		const struct spi_device_id *plat_id;
@@ -1217,7 +1202,7 @@ static int __devinit m25p_probe(struct spi_device *spi)
 	if (!flash)
 	{
 		err = -ENOMEM;
-		goto out_release_mem_region;
+		goto out_err;
 	}
 
 	flash->command = (u8 *)COMCERTO_FASTSPI_IRAM_VADDR;
@@ -1271,14 +1256,14 @@ static int __devinit m25p_probe(struct spi_device *spi)
 	flash->mtd.writesize = 1;
 	flash->mtd.flags = MTD_CAP_NORFLASH;
 	flash->mtd.size = info->sector_size * info->n_sectors;
-	flash->mtd.erase = m25p80_erase;
-	flash->mtd.read = m25p80_read;
+	flash->mtd._erase = m25p80_erase;
+	flash->mtd._read = m25p80_read;
 
 	/* sst flash chips use AAI word program */
 	if (JEDEC_MFR(info->jedec_id) == CFI_MFR_SST)
-		flash->mtd.write = sst_write;
+		flash->mtd._write = sst_write;
 	else
-		flash->mtd.write = m25p80_write;
+		flash->mtd._write = m25p80_write;
 
 	/* prefer "small sector" erase if possible */
 	if (info->flags & SECT_4K) {
@@ -1336,16 +1321,12 @@ static int __devinit m25p_probe(struct spi_device *spi)
 			data ? data->parts : NULL,
 			data ? data->nr_parts : 0);
 
-out_release_mem_region:
-	if (res) {
-		release_mem_region(res->start, size);
-	}
 out_err:
 	return err;
 }
 
 
-static int __devexit m25p_remove(struct spi_device *spi)
+static int m25p_remove(struct spi_device *spi)
 {
 	struct m25p	*flash = dev_get_drvdata(&spi->dev);
 	int		status;
@@ -1368,7 +1349,7 @@ static struct spi_driver m25p80_driver = {
 	},
 	.id_table	= m25p_ids,
 	.probe	= m25p_probe,
-	.remove	= __devexit_p(m25p_remove),
+	.remove	= m25p_remove,
 
 	/* REVISIT: many of these chips have deep power-down modes, which
 	 * should clearly be entered on suspend() to minimize power use.
