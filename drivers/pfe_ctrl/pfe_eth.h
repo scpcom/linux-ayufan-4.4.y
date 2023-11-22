@@ -138,7 +138,7 @@ static struct comcerto_pfe_platform_data comcerto_pfe_pdata = {
 };
 #endif
 
-#define NUM_GEMAC_SUPPORT		3
+
 #define DRV_NAME			"c2000-geth"
 #define COMCERTO_INFOSTR_LEN		32
 #define COMCERTO_TX_RECOVERY_TIMEOUT_MS	500
@@ -317,6 +317,10 @@ typedef struct  pfe_eth_priv_s
 	unsigned int frags_inflight[EMAC_RXQ_CNT + 6];
 	unsigned int frag_count_array[PFE_ETH_FRAGS_MAX + 1];
 
+	// Keeps the most read of the rmon registers as well as a running total.
+	struct gemac_stats rmon_counts;
+	struct gemac_stats rmon_totals;
+	struct net_device_stats rmon_stats;
 }pfe_eth_priv_t;
 
 struct pfe_eth {

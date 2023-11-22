@@ -192,7 +192,7 @@ static int pfe_pcap_rx_poll (struct napi_struct *napi, int budget)
 				printk(KERN_ERR "Dropping big packet\n");
 				goto pkt_drop;
 			}
-			skb = alloc_skb_header(PFE_BUF_SIZE, data_addr, GFP_ATOMIC);
+			skb = build_skb(data_addr, 0);
 
 			if (unlikely(!skb)) {
 				printk(KERN_ERR "Failed to allocate skb header\n");

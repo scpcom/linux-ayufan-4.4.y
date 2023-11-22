@@ -93,7 +93,9 @@ struct vap_cmd_s {
 #define 	CONFIGURE	4
 	int     	ifindex;
 	unsigned short	vapid;
-	unsigned short  direct_rx_path;
+	unsigned short  cmd_flags;
+#define VAP_CMD_ENABLE_DIRECT_PATH_RX (1 << 0)
+#define VAP_CMD_ENABLE_DIRECT_PATH_TX (1 << 1)
 	unsigned char	ifname[IFNAMSIZ];
 	unsigned char	macaddr[ETH_ALEN];
 };

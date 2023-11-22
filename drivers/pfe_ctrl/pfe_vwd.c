@@ -65,7 +65,12 @@ static int pfe_vwd_rx_low_poll(struct napi_struct *napi, int budget);
 static int pfe_vwd_rx_high_poll(struct napi_struct *napi, int budget);
 static void pfe_vwd_sysfs_exit(void);
 static void pfe_vwd_vap_down(struct pfe_vwd_priv_s *priv, struct vap_desc_s *vap);
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,13,0)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,1,0)
+static unsigned int pfe_vwd_nf_route_hook_fn(const struct nf_hook_ops *ops, struct sk_buff *skb,
+	       const struct nf_hook_state *state);
+static unsigned int pfe_vwd_nf_bridge_hook_fn(const struct nf_hook_ops *ops, struct sk_buff *skb,
+	       const struct nf_hook_state *state);
+#elif LINUX_VERSION_CODE >= KERNEL_VERSION(3,13,0)
 static unsigned int pfe_vwd_nf_route_hook_fn(const struct nf_hook_ops *ops, struct sk_buff *skb,
 		const struct net_device *in, const struct net_device *out,
 		int (*okfn)(struct sk_buff *));
@@ -198,7 +203,11 @@ static int vwd_vap_device_event_notifier(struct notifier_block *unused,
 			vap_cmd.ifindex = wifi_dev->ifindex;
 			strcpy(vap_cmd.ifname, wifi_dev->name);
 			memcpy(vap_cmd.macaddr, wifi_dev->dev_addr, 6);
-			vap_cmd.direct_rx_path = vap->direct_rx_path;
+			vap_cmd.cmd_flags = 0;
+			if (vap->direct_rx_path)
+				vap_cmd.cmd_flags |= VAP_CMD_ENABLE_DIRECT_PATH_RX;
+			if (vap->direct_tx_path)
+				vap_cmd.cmd_flags |= VAP_CMD_ENABLE_DIRECT_PATH_TX;
 			if (!pfe_vwd_handle_vap(priv, &vap_cmd))
 				printk(KERN_INFO"%s : VAP name(%s) is UP Successfully\n", __func__, wifi_dev->name);
 			break;
@@ -213,7 +222,11 @@ static int vwd_vap_device_event_notifier(struct notifier_block *unused,
 				vap_cmd.ifindex = wifi_dev->ifindex;
 				strcpy(vap_cmd.ifname, wifi_dev->name);
 				memcpy(vap_cmd.macaddr, wifi_dev->dev_addr, 6);
-				vap_cmd.direct_rx_path = vap->direct_rx_path;
+				vap_cmd.cmd_flags = 0;
+				if (vap->direct_rx_path)
+					vap_cmd.cmd_flags |= VAP_CMD_ENABLE_DIRECT_PATH_RX;
+				if (vap->direct_tx_path)
+					vap_cmd.cmd_flags |= VAP_CMD_ENABLE_DIRECT_PATH_TX;
 				if (!pfe_vwd_handle_vap(priv, &vap_cmd))
 					printk(KERN_INFO"%s : VAP name(%s) is DOWN Successfully\n", __func__, wifi_dev->name);
 			}
@@ -274,7 +287,7 @@ static int pfe_vwd_vap_create(struct device *dev, struct device_attribute *attr,
 		vap_cmd.action = CONFIGURE;
 		vap_cmd.vapid = ii;
 		strcpy(vap_cmd.ifname, name);
-		vap_cmd.direct_rx_path = 0;
+		vap_cmd.cmd_flags = 0;
 		memcpy(priv->vaps[ii].ifname, name, IFNAMSIZ);
 
 
@@ -294,7 +307,7 @@ static int pfe_vwd_vap_create(struct device *dev, struct device_attribute *attr,
 		vap_cmd.ifindex = wifi_dev->ifindex;
 		strcpy(vap_cmd.ifname, name);
 		memcpy(vap_cmd.macaddr, wifi_dev->dev_addr, 6);
-		vap_cmd.direct_rx_path = 0;
+		vap_cmd.cmd_flags = 0;
 
 		if (!pfe_vwd_handle_vap(priv, &vap_cmd)){
 			printk(KERN_INFO"VAP added successfully\n");
@@ -1254,7 +1267,10 @@ end:
 /** vwd_nf_bridge_hook_fn
  *
  */
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,13,0)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,1,0)
+static unsigned int pfe_vwd_nf_bridge_hook_fn(const struct nf_hook_ops *ops, struct sk_buff *skb,
+	       const struct nf_hook_state *state)
+#elif LINUX_VERSION_CODE >= KERNEL_VERSION(3,13,0)
 static unsigned int pfe_vwd_nf_bridge_hook_fn(const struct nf_hook_ops *ops, struct sk_buff *skb,
 		const struct net_device *in, const struct net_device *out,
 		int (*okfn)(struct sk_buff *))
@@ -1295,7 +1311,10 @@ done:
 /** vwd_nf_route_hook_fn
  *
  */
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,13,0)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,1,0)
+static unsigned int pfe_vwd_nf_route_hook_fn(const struct nf_hook_ops *ops, struct sk_buff *skb,
+	       const struct nf_hook_state *state)
+#elif LINUX_VERSION_CODE >= KERNEL_VERSION(3,13,0)
 static unsigned int pfe_vwd_nf_route_hook_fn(const struct nf_hook_ops *ops, struct sk_buff *skb,
 		const struct net_device *in, const struct net_device *out,
 		int (*okfn)(struct sk_buff *))
@@ -1661,7 +1680,11 @@ static struct sk_buff *pfe_vwd_rx_skb(struct vap_desc_s *vap, int qno, unsigned 
 		if (length <= MAX_WIFI_HDR_SIZE) {
 			__memcpy(skb->data, buf_addr + offset, length);
 			skb_put(skb, length);
+#if defined(CONFIG_COMCERTO_DMA_COHERENT_SKB)
+			dma_free_coherent(NULL, PFE_BUF_SIZE, buf_addr, 0);
+#elif
 			kfree(buf_addr);
+#endif
 		}
 		else {
 			__memcpy(skb->data, buf_addr + offset, MAX_WIFI_HDR_SIZE);
@@ -1675,10 +1698,10 @@ static struct sk_buff *pfe_vwd_rx_skb(struct vap_desc_s *vap, int qno, unsigned 
 	else
 #endif
 	if (rx_ctrl & HIF_CTRL_RX_WIFI_EXPT) {
-#if defined(CONFIG_COMCERTO_ZONE_DMA_NCNB)
+#if defined(CONFIG_COMCERTO_ZONE_DMA_NCNB) || defined(CONFIG_COMCERTO_DMA_COHERENT_SKB)
 		skb = dev_alloc_skb(length + offset + 32);
 #else
-		skb = alloc_skb_header(PFE_BUF_SIZE, buf_addr, GFP_ATOMIC);
+		skb = build_skb(buf_addr, 0);
 #endif
 
 		if (unlikely(!skb)) {
@@ -1688,13 +1711,20 @@ static struct sk_buff *pfe_vwd_rx_skb(struct vap_desc_s *vap, int qno, unsigned 
 			goto pkt_drop;
 		}
 
+#if !defined(CONFIG_COMCERTO_ZONE_DMA_NCNB) && !defined(CONFIG_COMCERTO_DMA_COHERENT_SKB)
+		skb->data = buf_addr;
+#endif
 		skb_reserve(skb, offset);
-#if defined(CONFIG_COMCERTO_ZONE_DMA_NCNB)
+#if defined(CONFIG_COMCERTO_ZONE_DMA_NCNB) || defined(CONFIG_COMCERTO_DMA_COHERENT_SKB)
 		/* Since, these packets are going to linux stack, 
                  * to avoid NCNB access overhead copy NCNB to CB buffer.
                  */
 		__memcpy(skb->data, buf_addr + offset, length);
+#if defined(CONFIG_COMCERTO_ZONE_DMA_NCNB)
 		kfree(buf_addr);
+#elif defined(CONFIG_COMCERTO_DMA_COHERENT_SKB)
+		dma_free_coherent(NULL, PFE_BUF_SIZE, buf_addr, 0);
+#endif
 #endif
 		skb_put(skb, length);
 
@@ -1752,14 +1782,21 @@ static struct sk_buff *pfe_vwd_rx_skb(struct vap_desc_s *vap, int qno, unsigned 
 	}
 	else
 	{
-		skb = alloc_skb_header(PFE_BUF_SIZE, buf_addr, GFP_ATOMIC);
-
+#if defined(CONFIG_COMCERTO_DMA_COHERENT_SKB)
+		skb = __build_skb(buf_addr, PFE_BUF_SIZE);
+		if (skb) {
+			skb->dma_coherent = 1;
+		}
+#else
+		skb = build_skb(buf_addr, 0);
+#endif
 		if (unlikely(!skb)) {
 #ifdef VWD_DEBUG_STATS
 			priv->rx_skb_alloc_fail += 1;
 #endif
 			goto pkt_drop;
 		}
+		skb->data = buf_addr;
 
 		skb_reserve(skb, offset);
 		skb_put(skb, length);
@@ -1772,7 +1809,11 @@ pkt_drop:
 	if (skb) {
 		kfree_skb(skb);
 	} else {
+#if defined(CONFIG_COMCERTO_DMA_COHERENT_SKB)
+		dma_free_coherent(NULL, PFE_BUF_SIZE, buf_addr, 0);
+#else
 		kfree(buf_addr);
+#endif
 	}
 
 out:
@@ -1791,7 +1832,8 @@ static void pfe_vwd_send_to_vap(struct vap_desc_s *vap, struct sk_buff *skb, str
 	int cpu, rc;
 
 	if (!vap->direct_tx_path) {
-		original_dev_queue_xmit(skb);
+		dev_queue_xmit(skb);
+		//pr_debug("%s: !vap->direct_tx_path: use slowpath\n", __func__);
 		return;
 	}
 
@@ -1800,10 +1842,12 @@ static void pfe_vwd_send_to_vap(struct vap_desc_s *vap, struct sk_buff *skb, str
          */
         rcu_read_lock_bh();
 
+#if 0
 	if (unlikely(dev->real_num_tx_queues != 1)) {
-		//printk("%s : number of queues : %d\n", __func__, dev->real_num_tx_queues);
+		//pr_debug("%s: number of Tx queues = %d: use slowpath\n", __func__, dev->real_num_tx_queues);
 		goto deliver_slow;
 	}
+#endif
 
 	if (dev->flags & IFF_UP) {
 		skb_set_queue_mapping(skb, 0);
@@ -1815,7 +1859,7 @@ static void pfe_vwd_send_to_vap(struct vap_desc_s *vap, struct sk_buff *skb, str
  			HARD_TX_LOCK(dev, txq, cpu);
 
 			if (unlikely(netif_tx_queue_stopped(txq))) {
-				//printk("%s : stopped \n", __func__);
+				//pr_debug("%s: Tx queue stopped: use slowpath\n", __func__);
  				HARD_TX_UNLOCK(dev, txq);
 				goto deliver_slow;
 			}
@@ -1836,7 +1880,7 @@ static void pfe_vwd_send_to_vap(struct vap_desc_s *vap, struct sk_buff *skb, str
 	return;
 
 done:
-	//printk("%s : devivered packet through fast path\n", __func__);
+	//pr_debug("%s: delivered packet through fastpath\n", __func__);
 	rcu_read_unlock_bh();
 	return;
 
@@ -1845,7 +1889,7 @@ deliver_slow:
 
 	/* deliver packet to vap through stack */
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(3,10,0)
-	//original_dev_queue_xmit(skb); FIXME : Once this function ported into 3.19 kernel, then this #if condition can remove if not required.
+	dev_queue_xmit(skb);
 #else
 	original_dev_queue_xmit(skb);
 #endif
@@ -1897,7 +1941,7 @@ static int pfe_vwd_rx_poll( struct vap_desc_s *vap, struct napi_struct *napi, in
 
 		/*FIXME: Need to handle WiFi to WiFi fast path */
 		if (ctrl & HIF_CTRL_RX_WIFI_EXPT) {
-			//printk("%s : packet sent to expt\n", __func__);
+			//pr_debug("%s: HIF_CTRL_RX_WIFI_EXPT: use slowpath\n", __func__);
 
 			*(unsigned long *)skb->head = 0xdead;
 			skb->protocol = eth_type_trans(skb, dev);
@@ -2330,8 +2374,8 @@ static int pfe_vwd_vap_configure(struct pfe_vwd_priv_s *priv, struct vap_desc_s 
 
 	vap->vapid = cmd->vapid;
 	vap->ifindex = cmd->ifindex;
-	vap->direct_rx_path = cmd->direct_rx_path;
-	vap->direct_tx_path = 0;
+	vap->direct_rx_path = (cmd->cmd_flags & VAP_CMD_ENABLE_DIRECT_PATH_RX) ? 1 : 0;
+	vap->direct_tx_path = (cmd->cmd_flags & VAP_CMD_ENABLE_DIRECT_PATH_TX) ? 1 : 0;
 	memcpy(vap->ifname, cmd->ifname, 12);
 	memcpy(vap->macaddr, cmd->macaddr, ETH_ALEN);
 	vap->dev = dev;
@@ -2414,8 +2458,8 @@ static int pfe_vwd_vap_up(struct pfe_vwd_priv_s *priv, struct vap_desc_s *vap, s
 	printk("%s:%d\n", __func__, __LINE__);
 
 	vap->ifindex = cmd->ifindex;
-	vap->direct_rx_path = cmd->direct_rx_path;
-	vap->direct_tx_path = 0;
+	vap->direct_rx_path = (cmd->cmd_flags & VAP_CMD_ENABLE_DIRECT_PATH_RX) ? 1 : 0;
+	vap->direct_tx_path = (cmd->cmd_flags & VAP_CMD_ENABLE_DIRECT_PATH_TX) ? 1 : 0;
 	memcpy(vap->macaddr, cmd->macaddr, ETH_ALEN);
 
 	vap->wifi_dev = wifi_dev;
@@ -2659,7 +2703,8 @@ static int pfe_vwd_handle_vap( struct pfe_vwd_priv_s *priv, struct vap_cmd_s *cm
 		case UPDATE:
 			printk(KERN_INFO "%s: UPDATE ... %s\n", __func__, cmd->ifname);
 			vap->ifindex = cmd->ifindex;
-			vap->direct_rx_path = cmd->direct_rx_path;
+			vap->direct_rx_path = (cmd->cmd_flags & VAP_CMD_ENABLE_DIRECT_PATH_RX) ? 1 : 0;
+			vap->direct_tx_path = (cmd->cmd_flags & VAP_CMD_ENABLE_DIRECT_PATH_TX) ? 1 : 0;
 			memcpy(vap->macaddr, cmd->macaddr, ETH_ALEN);
 			break;
 

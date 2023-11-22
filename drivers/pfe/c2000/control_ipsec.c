@@ -20,7 +20,8 @@
 
 #include "module_ipsec.h"
 #include "system.h"
-#include <mach/reset.h>
+
+#include <mach/hardware.h>
 
 /*
  * Allocation control mask for SAs. One word describes 32 SAs
@@ -255,9 +256,15 @@ static void elp_start_device(IPSec_hw_context *sc)
 #endif
 	/* Reset the IPSEC block at the time of initialization */
 	/* This is required when we stop and start the driver */
-	c2000_block_reset(COMPONENT_AXI_IPSEC_EAPE, 1);
+
+#define IPSEC_EAPE_AXI_RESET_BIT	(1<<1)
+	/* Put the IPSEC EAPE (AXI clock domain) device in reset state */
+	writel(readl(APB_VADDR(AXI_RESET_1)) | IPSEC_EAPE_AXI_RESET_BIT, APB_VADDR(AXI_RESET_1));
+	// c2000_block_reset(COMPONENT_AXI_IPSEC_EAPE, 1);
 	mdelay(1);
-	c2000_block_reset(COMPONENT_AXI_IPSEC_EAPE, 0);
+	/* Put the IPSEC EAPE devices in Out-Of-Reset state */
+	writel(readl(APB_VADDR(AXI_RESET_1)) & ~IPSEC_EAPE_AXI_RESET_BIT, APB_VADDR(AXI_RESET_1));
+	// c2000_block_reset(COMPONENT_AXI_IPSEC_EAPE, 0);
 
 #ifdef CONTROL_IPSEC_DEBUG
 	printk(KERN_INFO "%s --- Started \n", __func__);

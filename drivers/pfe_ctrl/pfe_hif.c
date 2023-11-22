@@ -28,6 +28,8 @@
 #include <linux/kthread.h>
 #include <linux/slab.h>
 
+#include <linux/of_irq.h>
+
 #include <asm/io.h>
 #include <asm/irq.h>
 #else
@@ -399,7 +401,12 @@ static void *client_put_rxpacket(struct hif_rx_queue *queue, void *pkt, u32 len,
 				*rem_len = pfe_pkt_size;
 			}
 		} else {
+#if defined(CONFIG_COMCERTO_DMA_COHERENT_SKB)
+			dma_addr_t dma_handle;
+			free_pkt = dma_alloc_coherent(NULL, PFE_BUF_SIZE, &dma_handle, GFP_ATOMIC);
+#else
 			free_pkt = kmalloc(PFE_BUF_SIZE, GFP_ATOMIC | GFP_DMA_PFE);
+#endif
 			*rem_len = PFE_BUF_SIZE - pfe_pkt_headroom;
 		}
 
@@ -896,7 +903,19 @@ int pfe_hif_init(struct pfe *pfe)
 	gpi_enable(HGPI_BASE_ADDR);
 
 #ifdef __KERNEL__
-	err = request_irq(hif->irq, hif_isr, IRQF_DISABLED, "pfe_hif", hif);
+	{
+	struct of_phandle_args oirq;
+	oirq.np = of_find_node_by_name(NULL, "interrupt-controller");
+	pr_err("GIC: %p\n", oirq.np);
+	oirq.args_count = 3;
+	oirq.args[0] = 0; // GIC_SPI;
+	oirq.args[1] = 4;
+	oirq.args[2] = IRQ_TYPE_LEVEL_HIGH;
+
+	hif->irq = irq_create_of_mapping(&oirq);
+	pr_err("HIF irq: %d\n", hif->irq);
+	}
+	err = request_irq(hif->irq, hif_isr, 0, "pfe_hif", hif);
 	if (err) {
 		printk(KERN_ERR "%s: failed to get the hif IRQ = %d\n",  __func__, hif->irq);
 		goto err1;

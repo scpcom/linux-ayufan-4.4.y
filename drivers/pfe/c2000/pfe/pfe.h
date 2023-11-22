@@ -19,6 +19,8 @@
 #ifndef _PFE_H_
 #define _PFE_H_
 
+#include <asm/system_info.h>
+
 #define CLASS_DMEM_BASE_ADDR(i)	(0x00000000 | ((i) << 20))
 #define CLASS_IMEM_BASE_ADDR(i)	(0x00000000 | ((i) << 20)) /* Only valid for mem access register interface */
 #define CLASS_DMEM_SIZE		0x00002000

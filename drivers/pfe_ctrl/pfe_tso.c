@@ -69,16 +69,20 @@ static unsigned int pfe_tso_to_desc(struct sk_buff *skb)
 	s_size = sh->gso_size;
 
 	while (len >= s_size) {
+#if 0
 		if (printk_ratelimit())
 			printk(KERN_INFO "%s: remainig leanier len : %d\n", __func__, len);
+#endif
 
 		len -= s_size;
 		n_desc++;
 	}
 
 	if (len) {
+#if 0
 		if (printk_ratelimit())
 			printk(KERN_INFO "%s: remainig leanier len : %d\n", __func__, len);
+#endif
 
 		n_desc++;
 		s_size -= len;
@@ -265,9 +269,11 @@ int pfe_tso( struct sk_buff *skb, struct hif_client_s *client, struct tso_cb_s *
 			if (!s_len)
 				hif_flags |= HIF_LAST_BUFFER;
 
+#if 0
 			if (printk_ratelimit())
 				printk(KERN_INFO "%s: Extra lienear data addr: %p, len: %d, flags: %x\n", __func__,
 							skb->data + off, len, hif_flags);
+#endif
 
 			__hif_lib_xmit_pkt(client, qno,  (void *)((u32)f_dma->data + off),
 									len, 0, hif_flags | HIF_DONT_DMA_MAP, skb);

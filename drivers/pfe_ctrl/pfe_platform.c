@@ -22,6 +22,9 @@
 #include <linux/slab.h>
 #include <linux/clk.h>
 
+#include <mach/hardware.h>
+#include <mach/comcerto-2000/clk-rst.h>
+
 #include "pfe_mod.h"
 
 /**
@@ -56,8 +59,9 @@ static int pfe_platform_probe(struct platform_device *pdev)
 	pfe->ddr_size = resource_size(r);
 
 	pfe->ddr_baseaddr = ioremap(r->start, resource_size(r));
+	pr_err("pfe->ddr_baseaddr = %p size %u\n", pfe->ddr_baseaddr, resource_size(r));
 	if (!pfe->ddr_baseaddr) {
-		printk(KERN_INFO "ioremap() ddr failed\n");
+		printk(KERN_INFO "ioremap(%p %08x) ddr failed\n", (void*) r->start, resource_size(r));
 		rc = -ENOMEM;
 		goto err_ddr;
 	}
@@ -70,6 +74,7 @@ static int pfe_platform_probe(struct platform_device *pdev)
 	}
 
 	pfe->cbus_baseaddr = ioremap(r->start, resource_size(r));
+	pr_err("cbus start %08x size %08x\n", r->start, resource_size(r));
 	if (!pfe->cbus_baseaddr) {
 		printk(KERN_INFO "ioremap() axi failed\n");
 		rc = -ENOMEM;
@@ -125,24 +130,12 @@ static int pfe_platform_probe(struct platform_device *pdev)
 
         printk(KERN_INFO "ipsec: baseaddr :%x --- %x\n",  (u32)pfe->ipsec_phys_baseaddr,  (u32)pfe->ipsec_baseaddr);
 
-	pfe->hif_irq = platform_get_irq_byname(pdev, "hif");
-	if (pfe->hif_irq < 0) {
-		printk(KERN_INFO "platform_get_irq_byname(hif) failed\n");
-		rc = pfe->hif_irq;
-		goto err_hif_irq;
-	}
-
-#if 0
-	pfe->hif_client_irq = platform_get_irq_byname(pdev, "hif_client");
-	if (pfe->hif_client_irq < 0) {
-		printk(KERN_INFO "platform_get_irq_byname(hif_client) failed\n");
-		rc = pfe->hif_client_irq;
-		goto err_hif_irq;
-	}
-#endif
-
 	pfe->dev = &pdev->dev;
 
+	/* FIXME this needs to be done at the BSP level with proper locking */
+	writel(readl(APB_VADDR(AXI_RESET_1)) | (1 << 3), APB_VADDR(AXI_RESET_1));
+	mdelay(1);
+	writel(readl(APB_VADDR(AXI_RESET_1)) & ~(1 << 3), APB_VADDR(AXI_RESET_1));
 
 	/* Get the system clock */
 	clk_axi = clk_get(NULL,"axi");
@@ -151,20 +144,6 @@ static int pfe_platform_probe(struct platform_device *pdev)
 		rc = -ENXIO;
 		goto err_clk;
 	}
-
-	/* HFE core clock */
-	pfe->hfe_clock = clk_get(NULL, "hfe_core");
-	if (IS_ERR(pfe->hfe_clock)) {
-		printk(KERN_INFO "clk_get call failed\n");
-		rc = -ENXIO;
-		goto err_hfe_clock;
-	}
-
-	clk_disable(pfe->hfe_clock);
-	c2000_block_reset(COMPONENT_PFE_SYS, 1);
-	mdelay(1);
-	c2000_block_reset(COMPONENT_PFE_SYS, 0);
-	clk_enable(pfe->hfe_clock);
 
 	pfe->ctrl.clk_axi = clk_axi;
 	pfe->ctrl.sys_clk = clk_get_rate(clk_axi) / 1000;  // save sys_clk value as KHz
@@ -176,11 +155,8 @@ static int pfe_platform_probe(struct platform_device *pdev)
 	return 0;
 
 err_probe:
-	clk_put(pfe->hfe_clock);
-err_hfe_clock:
 	clk_put(clk_axi);
 err_clk:
-err_hif_irq:
         iounmap(pfe->ipsec_baseaddr);
 err_ipsec:
 	iounmap(pfe->iram_baseaddr);
@@ -217,9 +193,9 @@ static int pfe_platform_remove(struct platform_device *pdev)
 
 	rc = pfe_remove(pfe);
 
-	c2000_block_reset(COMPONENT_PFE_SYS, 1);
-	clk_disable(pfe->hfe_clock);
-	clk_put(pfe->hfe_clock);
+	/* FIXME this needs to be done at the BSP level with proper locking */
+	writel(readl(APB_VADDR(AXI_RESET_1)) | (1 << 3), APB_VADDR(AXI_RESET_1));
+
 	clk_put(pfe->ctrl.clk_axi);
 	iounmap(pfe->ipsec_baseaddr);
 	iounmap(pfe->iram_baseaddr);

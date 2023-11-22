@@ -36,6 +36,7 @@
 #include <linux/timer.h>
 #include <linux/hrtimer.h>
 #include <linux/platform_device.h>
+#include <linux/mdio.h>
 
 #include <net/ip.h>
 #include <net/sock.h>
@@ -43,6 +44,8 @@
 #include <asm/io.h>
 #include <asm/irq.h>
 #include <asm/delay.h>
+
+#include <mach/hardware.h>
 
 #if defined(CONFIG_NF_CONNTRACK_MARK)
 #include <net/netfilter/nf_conntrack.h>
@@ -62,7 +65,7 @@ static void *cbus_gpi_base[3];
 /* Forward Declaration */
 static void pfe_eth_exit_one(struct pfe_eth_priv_s *priv);
 static void pfe_eth_flush_tx(struct pfe_eth_priv_s *priv, int force);
-static void pfe_eth_flush_txQ(struct pfe_eth_priv_s *priv, int txQ_num, int from_tx, int n_desc);
+static void pfe_eth_flush_txQ(struct pfe_eth_priv_s *priv, int txQ_num, int from_tx);
 static void pfe_eth_set_device_wakeup(struct pfe *pfe);
 
 #if defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD)
@@ -719,6 +722,22 @@ static void pfe_eth_gstrings(struct net_device *dev, u32 stringset, u8 * buf)
 	}
 }
 
+
+static void pfe_eth_read_rmon_stats(struct net_device *dev) {
+	struct pfe_eth_priv_s *priv = netdev_priv(dev);
+	u32 *counts = (u32*)&priv->rmon_counts;
+	u32 *totals = (u32*)&priv->rmon_totals;
+	u32 tmp;
+	int i;
+
+	for (i=0;i<EMAC_RMON_LEN;i++, counts++, totals++) {
+		tmp = readl(priv->EMAC_baseaddr + EMAC_RMON_BASE_OFST + (i << 2));
+		*counts += tmp;
+		*totals += tmp;
+	}
+}
+
+
 /** 
  * pfe_eth_fill_stats - Fill in an array of 64-bit statistics from 
  *			various sources. This array will be appended 
@@ -729,14 +748,16 @@ static void pfe_eth_fill_stats(struct net_device *dev, struct ethtool_stats *dum
 {
 	struct pfe_eth_priv_s *priv = netdev_priv(dev);
 	int i;
+	u32 *counts = (u32*)&priv->rmon_counts;
+	pfe_eth_read_rmon_stats(dev);
 	for (i=0;i<EMAC_RMON_LEN;i++, buf++) {
-		*buf = readl(priv->EMAC_baseaddr + EMAC_RMON_BASE_OFST + (i << 2));	
+		*buf = counts[i];
 		if ( ( i == EMAC_RMON_TXBYTES_POS ) || ( i == EMAC_RMON_RXBYTES_POS ) ){
 			i++;
-			*buf |= (u64)readl(priv->EMAC_baseaddr + EMAC_RMON_BASE_OFST + (i << 2)) << 32;
+			*buf |= (u64)counts[i] << 32;
 		}
 	}
-
+	memset(&priv->rmon_counts, 0, sizeof(priv->rmon_counts));
 }
 
 /**
@@ -1022,7 +1043,7 @@ int pfe_eth_mdio_reset(struct mii_bus *bus)
 	mutex_lock(&bus->mdio_lock);
 
 	/* Setup the MII Mgmt clock speed */
-	if (priv->mii_bus)
+	if (bus)
 		gemac_set_mdc_div(priv->EMAC_baseaddr, priv->mdc_div);
 
 	/* Reset the management interface */
@@ -1199,6 +1220,10 @@ static phy_interface_t pfe_get_interface(struct net_device *dev)
 				return PHY_INTERFACE_MODE_GMII;
 				break;
 			case CONFIG_COMCERTO_USE_RGMII:
+				if (priv->einfo->phy_flags &
+						GEMAC_PHY_RGMII_ADD_DELAY) {
+					return PHY_INTERFACE_MODE_RGMII_ID;
+				}
 				return PHY_INTERFACE_MODE_RGMII;
 				break;
 			case CONFIG_COMCERTO_USE_RMII:
@@ -1548,6 +1573,7 @@ static int pfe_eth_open(struct net_device *dev)
 	netif_info(priv, drv, dev, "%s: registered client: %p\n", __func__,  client);
 
 	/* Enable gemac tx clock */
+	clk_prepare(priv->gemtx_clk);
 	clk_enable(priv->gemtx_clk);
 
 	pfe_gemac_init(priv);
@@ -1795,7 +1821,7 @@ try_again:
 
 		if (!tried) {
 			hif_tx_unlock(&pfe->hif);
-			pfe_eth_flush_txQ(priv, queuenum, 1, n_desc);
+			pfe_eth_flush_txQ(priv, queuenum, 1);
 			hif_lib_update_credit(&priv->client, queuenum);
 			tried = 1;
 			hif_tx_lock(&pfe->hif);
@@ -1926,11 +1952,10 @@ static void pfe_hif_send_packet( struct sk_buff *skb, struct  pfe_eth_priv_s *pr
 
 /** pfe_eth_flush_txQ
  */
-static void pfe_eth_flush_txQ(struct pfe_eth_priv_s *priv, int txQ_num, int from_tx, int n_desc)
+static void pfe_eth_flush_txQ(struct pfe_eth_priv_s *priv, int txQ_num, int from_tx)
 {
 	struct sk_buff *skb;
 	struct netdev_queue *tx_queue = netdev_get_tx_queue(priv->dev, txQ_num);
-	int count = max(TX_FREE_MAX_COUNT, n_desc);
 	unsigned int flags;
 
 	netif_info(priv, tx_done, priv->dev, "%s\n", __func__);
@@ -1939,7 +1964,7 @@ static void pfe_eth_flush_txQ(struct pfe_eth_priv_s *priv, int txQ_num, int from
 		__netif_tx_lock_bh(tx_queue);
 
 	/* Clean HIF and client queue */
-	while (count && (skb = hif_lib_tx_get_next_complete(&priv->client, txQ_num, &flags, count))) {
+	while ((skb = hif_lib_tx_get_next_complete(&priv->client, txQ_num, &flags, HIF_TX_DESC_NT))) {
 
 		/* FIXME : Invalid data can be skipped in hif_lib itself */
 		if (flags & HIF_DATA_VALID) {
@@ -1951,9 +1976,6 @@ static void pfe_eth_flush_txQ(struct pfe_eth_priv_s *priv, int txQ_num, int from
 			dev_kfree_skb_any(skb);
 
 		}
-		// When called from the timer, flush all descriptors
-		if (from_tx)
-			count--;
 	}
 
 	if (!from_tx)
@@ -1970,7 +1992,7 @@ static void pfe_eth_flush_tx(struct pfe_eth_priv_s *priv, int force)
 
 	for (ii = 0; ii < emac_txq_cnt; ii++) {
 		if (force || (time_after(jiffies, priv->client.tx_q[ii].jiffies_last_packet + (COMCERTO_TX_RECOVERY_TIMEOUT_MS * HZ)/1000))) {
-			pfe_eth_flush_txQ(priv, ii, 0, 0); //We will release everything we can based on from_tx param, so the count param can be set to any value
+			pfe_eth_flush_txQ(priv, ii, 0); //We will release everything we can based on from_tx param, so the count param can be set to any value
 			hif_lib_update_credit(&priv->client, ii);
 		}
 	}
@@ -1983,7 +2005,7 @@ static int pfe_eth_send_packet(struct sk_buff *skb, struct net_device *dev)
 {
 	struct pfe_eth_priv_s *priv = netdev_priv(dev);
 	int txQ_num = skb_get_queue_mapping(skb);
-	int n_desc, n_segs, count;
+	int n_desc, n_segs;
 	struct netdev_queue *tx_queue = netdev_get_tx_queue(priv->dev, txQ_num);
 
 	netif_info(priv, tx_queued, dev, "%s\n", __func__);
@@ -2020,10 +2042,7 @@ static int pfe_eth_send_packet(struct sk_buff *skb, struct net_device *dev)
 
 	dev->trans_start = jiffies;
 
-	// Recycle buffers if a socket's send buffer becomes half full or if the HIF client queue starts filling up
-	if (((count = (hif_lib_tx_pending(&priv->client, txQ_num) - HIF_CL_TX_FLUSH_MARK)) > 0)
-		|| (skb->sk && ((sk_wmem_alloc_get(skb->sk) << 1) > skb->sk->sk_sndbuf)))
-		pfe_eth_flush_txQ(priv, txQ_num, 1, count);
+	pfe_eth_flush_txQ(priv, txQ_num, 1);
 
 #ifdef PFE_ETH_TX_STATS
 	priv->was_stopped[txQ_num] = 0;
@@ -2056,7 +2075,53 @@ static struct net_device_stats *pfe_eth_get_stats(struct net_device *dev)
 
 	netif_info(priv, drv, dev, "%s\n", __func__);
 
-	return &priv->stats;
+	// read the rmon stats.
+	pfe_eth_read_rmon_stats(dev);
+
+	// create net_dev stats from the rmon totals.
+	priv->rmon_stats.rx_packets = priv->rmon_totals.frames_rx;
+	priv->rmon_stats.tx_packets = priv->rmon_totals.frames_tx;
+	priv->rmon_stats.rx_bytes = priv->rmon_totals.octets_rx_bot;
+	priv->rmon_stats.tx_bytes = priv->rmon_totals.octets_tx_bot;
+	priv->rmon_stats.rx_errors =
+			priv->rmon_totals.usize_frames +
+			priv->rmon_totals.excess_length +
+			priv->rmon_totals.jabbers +
+			priv->rmon_totals.fcs_errors +
+			priv->rmon_totals.length_check_errors +
+			priv->rmon_totals.rx_symbol_errors +
+			priv->rmon_totals.align_errors +
+			priv->stats.rx_errors;
+
+	priv->rmon_stats.tx_errors =
+			priv->rmon_totals.excess_col +
+			priv->rmon_totals.late_col +
+			priv->rmon_totals.crs_errors +
+			priv->stats.tx_errors;
+
+	priv->rmon_stats.rx_dropped =
+			priv->stats.rx_dropped +
+			priv->rmon_totals.rx_res_errors +
+			priv->rmon_totals.rx_orun;
+
+	priv->rmon_stats.tx_dropped =
+			priv->stats.tx_dropped +
+			priv->rmon_totals.tx_urun;
+
+	priv->rmon_stats.multicast = priv->rmon_totals.multicast_rx;
+
+	priv->rmon_stats.collisions =
+			priv->rmon_totals.single_col +
+			priv->rmon_totals.multi_col;
+
+	priv->rmon_stats.rx_length_errors =
+			priv->rmon_totals.usize_frames +
+			priv->rmon_totals.excess_length +
+			priv->rmon_totals.length_check_errors;
+
+	priv->rmon_stats.rx_crc_errors = priv->rmon_totals.fcs_errors;
+
+	return &priv->rmon_stats;
 }
 
 
@@ -2392,7 +2457,9 @@ static struct sk_buff *pfe_eth_rx_skb(struct net_device *dev, struct pfe_eth_pri
 	unsigned int rx_ctrl;
 	unsigned int desc_ctrl = 0;
 	struct hif_ipsec_hdr *ipsec_hdr = NULL;
+#if defined(CONFIG_COMCERTO_ZONE_DMA_NCNB) || defined(CONFIG_COMCERTO_DMA_COHERENT_SKB)
 	unsigned int sah_local;
+#endif
 	struct sk_buff *skb;
 	struct sk_buff *skb_frag, *skb_frag_last = NULL;
 	int length = 0, offset;
@@ -2428,22 +2495,26 @@ static struct sk_buff *pfe_eth_rx_skb(struct net_device *dev, struct pfe_eth_pri
 			skb_copy_to_linear_data(skb, buf_addr, length + offset);
 			kfree(buf_addr);
 #else
-#if defined(CONFIG_COMCERTO_ZONE_DMA_NCNB)
+#if defined(CONFIG_COMCERTO_ZONE_DMA_NCNB) || defined(CONFIG_COMCERTO_DMA_COHERENT_SKB)
 			skb = alloc_skb(length + offset + 32, GFP_ATOMIC);
-#else
-			skb = alloc_skb_header(PFE_BUF_SIZE, buf_addr, GFP_ATOMIC);
-#endif
 			if (unlikely(!skb)) {
 				goto pkt_drop;
 			}
+#else
+			skb = build_skb(buf_addr, 0);
+#endif
 #endif
 			skb_reserve(skb, offset);
-#if defined(CONFIG_COMCERTO_ZONE_DMA_NCNB)
+#if defined(CONFIG_COMCERTO_ZONE_DMA_NCNB) || defined(CONFIG_COMCERTO_DMA_COHERENT_SKB)
 			__memcpy(skb->data, buf_addr + offset, length);
 			if (ipsec_hdr) {
 				sah_local = *(unsigned int *)&ipsec_hdr->sa_handle[0];
 			}
+#if defined(CONFIG_COMCERTO_ZONE_DMA_NCNB)
 			kfree(buf_addr);
+#elif defined(CONFIG_COMCERTO_DMA_COHERENT_SKB)
+			dma_free_coherent(NULL, PFE_BUF_SIZE, buf_addr, 0);
+#endif
 #endif
 			skb_put(skb, length);
 			skb->dev = dev;
@@ -2506,20 +2577,28 @@ static struct sk_buff *pfe_eth_rx_skb(struct net_device *dev, struct pfe_eth_pri
 				goto pkt_drop;
 			}
 
-#if defined(CONFIG_COMCERTO_ZONE_DMA_NCNB)
+#if defined(CONFIG_COMCERTO_ZONE_DMA_NCNB) || defined(CONFIG_COMCERTO_DMA_COHERENT_SKB)
 			skb_frag = alloc_skb(length + offset + 32, GFP_ATOMIC);
-#else
-			skb_frag = alloc_skb_header(PFE_BUF_SIZE, buf_addr, GFP_ATOMIC);
-#endif
 			if (unlikely(!skb_frag)) {
+#if defined(CONFIG_COMCERTO_ZONE_DMA_NCNB)
 				kfree(buf_addr);
+#elif defined(CONFIG_COMCERTO_DMA_COHERENT_SKB)
+				dma_free_coherent(NULL, PFE_BUF_SIZE, buf_addr, 0);
+#endif
 				goto pkt_drop;
 			}
+#else
+			skb_frag = build_skb(buf_addr, 0);
+#endif
 
 			skb_reserve(skb_frag, offset);
-#if defined(CONFIG_COMCERTO_ZONE_DMA_NCNB)
+#if defined(CONFIG_COMCERTO_ZONE_DMA_NCNB) || defined(CONFIG_COMCERTO_DMA_COHERENT_SKB)
 			__memcpy(skb_frag->data, buf_addr + offset, length);
+#if defined(CONFIG_COMCERTO_ZONE_DMA_NCNB)
 			kfree(buf_addr);
+#elif defined(CONFIG_COMCERTO_DMA_COHERENT_SKB)
+			dma_free_coherent(NULL, PFE_BUF_SIZE, buf_addr, 0);
+#endif
 #endif
 			skb_put(skb_frag, length);
 
@@ -2550,7 +2629,11 @@ pkt_drop:
 	if (skb) {
 		kfree_skb(skb);
 	} else {
+#if defined(CONFIG_COMCERTO_DMA_COHERENT_SKB)
+		dma_free_coherent(NULL, PFE_BUF_SIZE, buf_addr, 0);
+#else
 		kfree(buf_addr);
+#endif
 	}
 
 	priv->stats.rx_errors++;
@@ -2760,9 +2843,9 @@ static int pfe_eth_poll(struct pfe_eth_priv_s *priv, struct napi_struct *napi, u
 			skb = pfe_eth_rx_page(dev, priv, qno);
 		else
 			skb = pfe_eth_rx_skb(dev, priv, qno);
-
 		if (!skb)
 			break;
+
 
 		len = skb->len;
 
@@ -2840,6 +2923,19 @@ static int pfe_eth_high_poll(struct napi_struct *napi, int budget )
 	return pfe_eth_poll(priv, napi, 0, budget);
 }
 
+static int pfe_eth_ioctl(struct net_device *dev, struct ifreq *req, int cmd)
+{
+	struct pfe_eth_priv_s *priv = netdev_priv(dev);
+
+	if (!netif_running(dev))
+		return -EINVAL;
+
+	if (!priv->phydev)
+		return -ENODEV;
+
+	return phy_mii_ioctl(priv->phydev, req, cmd);
+}
+
 static const struct net_device_ops pfe_netdev_ops = {
 	.ndo_open = pfe_eth_open,
 	.ndo_stop = pfe_eth_close,
@@ -2852,6 +2948,7 @@ static const struct net_device_ops pfe_netdev_ops = {
 	.ndo_set_features = pfe_eth_set_features,
 	.ndo_fix_features = pfe_eth_fix_features,
 	.ndo_validate_addr = eth_validate_addr,
+	.ndo_do_ioctl = pfe_eth_ioctl,
 };
 
 
@@ -2944,6 +3041,25 @@ static int pfe_eth_init_one( struct pfe *pfe, int id )
 	priv->cpu_id = -1;
 
 	pfe_eth_fast_tx_timeout_init(priv);
+	/* Initialize mdio */
+	if (minfo[id].enabled) {
+
+		if ((err = pfe_eth_mdio_init(priv, &minfo[id]))) {
+			netdev_err(dev, "%s: pfe_eth_mdio_init() failed\n", __func__);
+			goto err2;
+		}
+	}
+	/* For unused interface, skip adding the network device. The code is
+	 * added here instead of configuring einfo because:
+	 * - id and gem_id is used interchangeably in the pfe control logic.
+	 * - Even fix the id with gem_id, there is a gotcha, the mdio bus
+	 *   setting is only associated with the first gem register. The logic
+	 *   can be found in gemac_set_mdc_div.
+	 */
+	if (!strcmp(einfo[id].name, "unused")) {
+		netif_info(priv, probe, dev, "%s: Skip unused interface: %d\n", __func__, id);
+		return 0;
+	}
 
 	/* Copy the station address into the dev structure, */
 	memcpy(dev->dev_addr, einfo[id].mac_addr, ETH_ALEN);
@@ -2953,16 +3069,7 @@ static int pfe_eth_init_one( struct pfe *pfe, int id )
 	if (err < 0) {
 		netdev_err(dev, "%s: dev_alloc_name(%s) failed\n", __func__, einfo[id].name);
 		err = -EINVAL;
-		goto err2;
-	}
-
-	/* Initialize mdio */
-	if (minfo[id].enabled) {
-
-		if ((err = pfe_eth_mdio_init(priv, &minfo[id]))) {
-			netdev_err(dev, "%s: pfe_eth_mdio_init() failed\n", __func__);
-			goto err2;
-		}
+		goto err3;
 	}
 
 	dev->mtu = 1500;
@@ -2972,7 +3079,7 @@ static int pfe_eth_init_one( struct pfe *pfe, int id )
 				NETIF_F_SG | NETIF_F_TSO;
 
 	/* enabled by default */
-	dev->features = dev->hw_features;
+	dev->features = dev->hw_features & ~NETIF_F_TSO;
 
 	if (lro_mode) {
 		dev->hw_features |= NETIF_F_LRO;
@@ -3098,4 +3205,3 @@ void pfe_eth_exit(struct pfe *pfe)
 		pfe_eth_exit_one(pfe->eth.eth_priv[ii]);
 	}
 }
-

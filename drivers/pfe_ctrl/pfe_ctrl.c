@@ -556,7 +556,7 @@ static int pfe_ctrl_timer(void *data)
 
 	while (1)
 	{
-		schedule_timeout_uninterruptible(ctrl->timer_period);
+		schedule_timeout_interruptible(ctrl->timer_period);
 
 		mutex_lock(&ctrl->mutex);
 

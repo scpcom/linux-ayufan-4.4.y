@@ -83,7 +83,11 @@ static void pfe_hif_shm_clean(struct hif_shm *hif_shm)
 			if (page_mode) {
 				put_page(virt_to_page(pkt));
 			} else
+#if defined(CONFIG_COMCERTO_DMA_COHERENT_SKB)
+				dma_free_coherent(NULL, PFE_BUF_SIZE, pkt, 0);
+#else
 				kfree(pkt);
+#endif
 		}
 	}
 }
@@ -107,7 +111,14 @@ static int pfe_hif_shm_init(struct hif_shm *hif_shm)
 		if (page_mode) {
 			pkt = (void *)__get_free_page(GFP_KERNEL | GFP_DMA_PFE);
 		} else
+#if defined(CONFIG_COMCERTO_DMA_COHERENT_SKB)
+		{
+			dma_addr_t dma_handle;
+			pkt = dma_alloc_coherent(NULL, PFE_BUF_SIZE, &dma_handle, GFP_ATOMIC);
+		}
+#else
 			pkt = kmalloc(PFE_BUF_SIZE, GFP_KERNEL | GFP_DMA_PFE);
+#endif
 
 		if (pkt)
 			hif_shm->rx_buf_pool[i] = pkt + pfe_pkt_headroom;
@@ -221,7 +232,11 @@ static void hif_lib_client_release_rx_buffers(struct hif_client_s *client)
 				if (page_mode)
 					free_page((unsigned long)buf);
 				else
+#if defined(CONFIG_COMCERTO_DMA_COHERENT_SKB)
+					dma_free_coherent(NULL, PFE_BUF_SIZE, buf, 0);
+#else
 					kfree(buf);
+#endif
 
 				desc->ctrl = 0;
 			}
