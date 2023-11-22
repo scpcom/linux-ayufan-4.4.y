@@ -2274,6 +2274,7 @@ static void set_init_timer(void)
 
 	// init leds timer
 	for (i = 0; i < LED_TOTAL; i++) {
+		spin_lock_init(&(led_set[i].lock));
 		if (led_set[i].presence == 0) continue;
 		
 		init_timer(&led_set[i].timer);
