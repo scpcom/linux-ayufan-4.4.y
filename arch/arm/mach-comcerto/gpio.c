@@ -470,19 +470,37 @@ void set_gpio_input(int gpio_bit)
 	gpio_writel(val, reg);
 }
 
+static int run_usermode_cmd(const char *cmd)
+{
+	char **argv;
+	static char *envp[] = {
+		"HOME=/",
+		"PATH=/sbin:/bin:/usr/sbin:/usr/bin",
+		NULL
+	};
+	int ret;
+	argv = argv_split(GFP_KERNEL, cmd, NULL);
+	if (argv) {
+		ret = call_usermodehelper(argv[0], argv, envp, UMH_WAIT_EXEC);
+		argv_free(argv);
+	} else {
+		ret = -ENOMEM;
+	}
+
+	return ret;
+}
+
 void power_resume_always_on_func(struct work_struct *in)
 {
 	/* setting power resume always on */
 	int ret;
-	char *argv[] = {"/sbin/i2cset", "-y", "0", "0xa", "0xa", "0x0107", "w", NULL};
-	ret = call_usermodehelper(argv[0], argv, NULL, 0);
+	ret = run_usermode_cmd("/sbin/i2cset -y 0 0xa 0xa 0x0107 w");
 }
 
 void mcu_assign_lock_func(struct work_struct *in)
 {
 	int ret;
-	char *argv[] = {"/firmware/sbin/info_setenv", "mcu_lock", "1", NULL};
-	ret = call_usermodehelper(argv[0], argv, NULL, 0);	
+	ret = run_usermode_cmd("/firmware/sbin/info_setenv mcu_lock 1");
 }
 
 void mcu_reset_func(struct work_struct *in)
@@ -1772,23 +1790,20 @@ void nsa_shutdown_func(struct work_struct *in)
 	if(atomic_read(&halt_one_time) == 0)
 	{
 		int ret;
-		char *argv[] = {"/sbin/halt", NULL};
 		atomic_set(&halt_one_time, 1);
 
-		ret = call_usermodehelper("/sbin/halt", argv, NULL, 0);
+		ret = run_usermode_cmd("/sbin/poweroff");
 	}
 }
 
 void Reset_UserInfo_func(struct work_struct *in)
 {
-	char *argv[] = {"/usr/local/btn/reset_userinfo.sh", NULL};
-	
-	call_usermodehelper("/usr/local/btn/reset_userinfo.sh", argv, NULL, 0);
+	run_usermode_cmd("/bin/sh /usr/local/btn/reset_userinfo.sh");
 }
 
 void Open_Backdoor_func(struct work_struct *in)
 {
-	call_usermodehelper("/usr/local/btn/open_back_door.sh", NULL, NULL, 0);
+	run_usermode_cmd("/bin/sh /usr/local/btn/open_back_door.sh");
 }
 
 void Reset_To_Defu_func(struct work_struct *in)
@@ -1803,7 +1818,7 @@ void Reset_To_Defu_func(struct work_struct *in)
 
 	Beep();
 	ssleep(1);
-	call_usermodehelper("/usr/local/btn/reset_and_reboot.sh", NULL, NULL, 0);
+	run_usermode_cmd("/bin/sh /usr/local/btn/reset_and_reboot.sh");
 }
 
 void zyxel_power_off(void)
