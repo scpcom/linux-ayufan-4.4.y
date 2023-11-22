@@ -49,6 +49,7 @@ unsigned int host_utilpe_shared_pmu_bitmask = ~(USB2p0_IRQ|WOL_IRQ) ;
 extern void comcerto_cpu_suspend(int save_state);
 extern	unsigned int * c2k_get_restore_pointer(void);
 extern void comcerto_cpu_restore (void);
+extern void zyxel_power_off(void);
 
 unsigned int c2k_pm_bitmask_show(void)
 {
@@ -416,6 +417,7 @@ static const struct platform_suspend_ops C2k_pm_ops = {
 static int __init C2k_pm_init(void)
 {
 	printk(KERN_INFO "Power Management Mode Support For C2000: \n");
+	pm_power_off = zyxel_power_off;
 
 	suspend_set_ops(&C2k_pm_ops);
         return 0;
