@@ -245,7 +245,9 @@ SYSCALL_DEFINE4(reboot, int, magic1, int, magic2, unsigned int, cmd,
 		break;
 
 	case LINUX_REBOOT_CMD_HALT:
-		kernel_halt();
+		//kernel_halt();
+		/* Let the command 'halt' can power off also. */
+		kernel_power_off();
 		do_exit(0);
 		panic("cannot halt");
 
