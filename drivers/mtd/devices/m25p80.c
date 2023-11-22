@@ -1105,6 +1105,9 @@ MODULE_DEVICE_TABLE(spi, m25p_ids);
 
 static const struct spi_device_id * jedec_probe(struct spi_device *spi, struct m25p *flash)
 {
+	return &m25p_ids[17];
+
+#if 0
 	int			tmp, i;
 	u32			jedec;
 	u16                     ext_jedec;
@@ -1149,6 +1152,7 @@ static const struct spi_device_id * jedec_probe(struct spi_device *spi, struct m
 	}
 	dev_err(&spi->dev, "unrecognized JEDEC id %06x\n", jedec);
 	return ERR_PTR(-ENODEV);
+#endif
 }
 
 
