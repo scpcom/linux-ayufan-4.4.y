@@ -283,7 +283,7 @@ static inline int comcerto_otp_read(loff_t bit_offset, uint8_t *read_data, size_
 
 		bit_offset += 8;
 
-	} while (no_bytes--);
+	} while (--no_bytes);
 
 	/* reading is done make the read_enable low */
 	writel(0x0, COMCERTO_OTP_READEN_INPUT);
