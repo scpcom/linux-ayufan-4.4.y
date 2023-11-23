@@ -38,6 +38,9 @@
 #include <linux/list.h>
 #include <mach/comcerto-2000/clock.h>
 
+#define clock_readl(r) readl((void*)(r))
+#define clock_writel(v,r) writel(v, (void*)(r))
+
 static DEFINE_SPINLOCK(clock_lock);
 
 /* Forward declaration */
@@ -77,9 +80,9 @@ static void local_clk_disable(struct clk *clk)
 
 		/* Apply the Clock register write here */
 		if (clk->enable_reg){
-			val = readl((void *)clk->enable_reg);
+			val = clock_readl((void *)clk->enable_reg);
 			val &= ~clk->enable_mask;
-			writel(val , (void *)clk->enable_reg);
+			clock_writel(val , (void *)clk->enable_reg);
 		}
 	}
 }
@@ -116,9 +119,9 @@ static void __clk_disable_unused(struct clk *clk)
         spin_lock_irqsave(&clock_lock, flags);
 	/* Apply the Clock register write here */
 	if (clk->enable_reg){
-		val = readl(clk->enable_reg);
+		val = clock_readl(clk->enable_reg);
 		val &= ~clk->enable_mask;
-                writel(val , clk->enable_reg);
+                clock_writel(val , clk->enable_reg);
 	}
         spin_unlock_irqrestore(&clock_lock, flags);
 }
@@ -141,9 +144,9 @@ static int local_clk_enable(struct clk *clk)
 				return -EINVAL;
 		}
 		if (clk->enable_reg){
-			val = readl(clk->enable_reg);
+			val = clock_readl(clk->enable_reg);
                 	val |= clk->enable_mask;
-                	writel(val , clk->enable_reg);
+                	clock_writel(val , clk->enable_reg);
 			ret=0;
 		}
 	}
@@ -298,8 +301,8 @@ EXPORT_SYMBOL(clk_set_parent);
 #define CLK_REG_DIV_BUG_SIZE		(PLL0_M_LSB - AXI_CLK_DIV_CNTRL)
 
 static u8 clk_div_backup_table [CLK_REG_DIV_BUG_SIZE];
-#define read_clk_div_bypass_backup(reg) readl(reg - CLK_REG_DIV_BUG_BASE + clk_div_backup_table)
-#define write_clk_div_bypass_backup(val, reg) writel(val, reg - CLK_REG_DIV_BUG_BASE + clk_div_backup_table)
+#define read_clk_div_bypass_backup(reg) clock_readl(reg - CLK_REG_DIV_BUG_BASE + clk_div_backup_table)
+#define write_clk_div_bypass_backup(val, reg) clock_writel(val, reg - CLK_REG_DIV_BUG_BASE + clk_div_backup_table)
 
 void HAL_clk_div_backup_relocate_table (void)
 {
@@ -315,7 +318,7 @@ unsigned long HAL_get_ref_clk (void)
 	unsigned long clock_freq = 0;
 	unsigned int boot_strap, tmp;
 
-	boot_strap = readl(COMCERTO_GPIO_SYSTEM_CONFIG);
+	boot_strap = clock_readl(COMCERTO_GPIO_SYSTEM_CONFIG);
 	tmp = (boot_strap & GPIO_SYS_PLL_REF_CLK_MASK) >> GPIO_SYS_PLL_REF_CLK_SHIFT;
 
 	if ( USB_XTAL_REF_CLK == tmp )
@@ -354,30 +357,30 @@ static unsigned long HAL_get_pll_freq(int pll_no)
 		switch (pll_no)
 		{
 		case PLL0:
-			m = readl(PLL0_M_LSB) & 0xff;
-			m |= (readl(PLL0_M_MSB) & 0x3) << 8;
-			p = readl(PLL0_P) & 0x3f;
-			s = readl(PLL0_S) & 0x7;
+			m = clock_readl(PLL0_M_LSB) & 0xff;
+			m |= (clock_readl(PLL0_M_MSB) & 0x3) << 8;
+			p = clock_readl(PLL0_P) & 0x3f;
+			s = clock_readl(PLL0_S) & 0x7;
 			od = (1 << s); // 2^s;
-			pll_div = readl(PLL0_DIV_CNTRL);
+			pll_div = clock_readl(PLL0_DIV_CNTRL);
 			break;
 
 		case PLL1:
-			m = readl(PLL1_M_LSB) & 0xff;
-			m |= (readl(PLL1_M_MSB) & 0x3) << 8;
-			p = readl(PLL1_P) & 0x3f;
-			s = readl(PLL1_S) & 0x7;
+			m = clock_readl(PLL1_M_LSB) & 0xff;
+			m |= (clock_readl(PLL1_M_MSB) & 0x3) << 8;
+			p = clock_readl(PLL1_P) & 0x3f;
+			s = clock_readl(PLL1_S) & 0x7;
 			od = (1 << s);
-			pll_div = readl(PLL1_DIV_CNTRL);
+			pll_div = clock_readl(PLL1_DIV_CNTRL);
 			break;
 
 		case PLL2:
-			m = readl(PLL2_M_LSB) & 0xff;
-			m |= (readl(PLL2_M_MSB) & 0x3) << 8;
-			p = readl(PLL2_P) & 0x3f;
-			s = readl(PLL2_S) & 0x7;
+			m = clock_readl(PLL2_M_LSB) & 0xff;
+			m |= (clock_readl(PLL2_M_MSB) & 0x3) << 8;
+			p = clock_readl(PLL2_P) & 0x3f;
+			s = clock_readl(PLL2_S) & 0x7;
 			od = (1 << s);
-			pll_div = readl(PLL2_DIV_CNTRL);
+			pll_div = clock_readl(PLL2_DIV_CNTRL);
 			break;
 
 		default:
@@ -399,12 +402,12 @@ static unsigned long HAL_get_pll_freq(int pll_no)
 	}
 	else if (pll_no == PLL3)
 	{
-		m = readl(PLL3_M_LSB) & 0xff;
-		m |= (readl(PLL3_M_MSB) & 0x3) << 8;
-		p = readl(PLL3_P) & 0x3f;
-		s = readl(PLL3_S) & 0x7;
-		k = readl(PLL3_K_LSB) & 0xff;
-		k |= (readl(PLL3_K_MSB) & 0xf) << 8;
+		m = clock_readl(PLL3_M_LSB) & 0xff;
+		m |= (clock_readl(PLL3_M_MSB) & 0x3) << 8;
+		p = clock_readl(PLL3_P) & 0x3f;
+		s = clock_readl(PLL3_S) & 0x7;
+		k = clock_readl(PLL3_K_LSB) & 0xff;
+		k |= (clock_readl(PLL3_K_MSB) & 0xf) << 8;
 		od = (1 << s);
 		pll_clk = (((ref_clk / 1000000) * (m * 1024 + k)) / p / od + 1023) / 1024;
 	}
@@ -420,7 +423,7 @@ static void HAL_set_clk_divider(unsigned long rate,u32 ctrl_reg, u32 div_reg)
 	unsigned long  pll_rate;
 
 	/* Get PLL Source */
-	pll_src = readl(ctrl_reg);
+	pll_src = clock_readl(ctrl_reg);
 	pll_src = (pll_src >> CLK_PLL_SRC_SHIFT) & CLK_PLL_SRC_MASK;
 
 	/* Get PLL Freq */
@@ -432,22 +435,22 @@ static void HAL_set_clk_divider(unsigned long rate,u32 ctrl_reg, u32 div_reg)
 	if ( divider == 1){
 		write_clk_div_bypass_backup(CLK_DIV_BYPASS,div_reg);
 		/* Enable the Bypass bit in Hw reg (clk_div_bypass in div_reg) */
-		val = readl(div_reg);
+		val = clock_readl(div_reg);
 		val |= CLK_DIV_BYPASS;
-		writel(val , div_reg);
+		clock_writel(val , div_reg);
 	}
 	else
 	{
 		write_clk_div_bypass_backup(0,div_reg);
 		/* Write to the divider reg */
-		val = readl(div_reg);
+		val = clock_readl(div_reg);
 		val &= ~0x1f;
 		val |= divider;
-		writel(val, div_reg);
+		clock_writel(val, div_reg);
 		/* Clear the Bypass bit in Hw reg (clk_div_bypass in div_reg) */
-		val = readl(div_reg);
+		val = clock_readl(div_reg);
 		val &= ~CLK_DIV_BYPASS;
-		writel(val , div_reg);
+		clock_writel(val , div_reg);
 	}
 }
 
@@ -456,7 +459,7 @@ static int HAL_get_clock_pll_source(u32 ctrl_reg)
 	int pll_src;
 
 	/* Get PLL source */
-	pll_src = readl(ctrl_reg);
+	pll_src = clock_readl(ctrl_reg);
 	pll_src = (pll_src >> CLK_PLL_SRC_SHIFT) & CLK_PLL_SRC_MASK;
 
 	return pll_src;
@@ -468,17 +471,17 @@ static void HAL_set_clock_pll_source(u32 ctrl_reg,int pll_src){
 	switch(pll_src)
 	{
 		case PLL0:
-			writel(readl(ctrl_reg) | (1 << 0) , ctrl_reg);
+			clock_writel(clock_readl(ctrl_reg) | (1 << 0) , ctrl_reg);
                 	break;
 		case PLL1:
-			writel(readl(ctrl_reg) | (1 << 1) , ctrl_reg);
+			clock_writel(clock_readl(ctrl_reg) | (1 << 1) , ctrl_reg);
                 	break;
 		case PLL3:
-			writel(readl(ctrl_reg) | (1 << 3), ctrl_reg);
+			clock_writel(clock_readl(ctrl_reg) | (1 << 3), ctrl_reg);
                 	break;
 		case PLL2:
 		default:
-			writel(readl(ctrl_reg) | (1 << 2), ctrl_reg);
+			clock_writel(clock_readl(ctrl_reg) | (1 << 2), ctrl_reg);
                 	break;
 	}
 
@@ -493,7 +496,7 @@ static unsigned long HAL_get_clk_freq(u32 ctrl_reg, u32 div_reg)
 	int bypass = 0;
 
 	/* Get PLL Source */
-	pll_src = readl(ctrl_reg);
+	pll_src = clock_readl(ctrl_reg);
 	pll_src = (pll_src >> CLK_PLL_SRC_SHIFT) & CLK_PLL_SRC_MASK;
 
 	/* Get clock divider bypass value from IRAM Clock Divider registers mirror location */
@@ -503,7 +506,7 @@ static unsigned long HAL_get_clk_freq(u32 ctrl_reg, u32 div_reg)
 		bypass = 1;
 	else
 	{
-		clk_div = readl(div_reg);
+		clk_div = clock_readl(div_reg);
 		clk_div &= 0x1f;
 	}
 
