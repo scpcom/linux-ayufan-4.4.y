@@ -66,33 +66,36 @@
 
 
 /*Hardware Timer API*/
+#define timer_readl(r) __raw_readl((void*)(r))
+#define timer_writel(v,r) __raw_writel(v, (void*)(r))
+
 #define COMCERTO_TIMER_RUN_ONCE		(1 << 0)
-#define __comcerto_timer_enable(t)	__raw_writel(__raw_readl(COMCERTO_TIMER_IRQ_MASK) | (1 << (t)), COMCERTO_TIMER_IRQ_MASK)
-#define __comcerto_timer_disable(t)	__raw_writel(__raw_readl(COMCERTO_TIMER_IRQ_MASK) & ~(1 << (t)), COMCERTO_TIMER_IRQ_MASK)
-#define comcerto_timer_ack(t)		__raw_writel(1 << (t), COMCERTO_TIMER_STATUS_CLR)
+#define __comcerto_timer_enable(t)	timer_writel(timer_readl(COMCERTO_TIMER_IRQ_MASK) | (1 << (t)), COMCERTO_TIMER_IRQ_MASK)
+#define __comcerto_timer_disable(t)	timer_writel(timer_readl(COMCERTO_TIMER_IRQ_MASK) & ~(1 << (t)), COMCERTO_TIMER_IRQ_MASK)
+#define comcerto_timer_ack(t)		timer_writel(1 << (t), COMCERTO_TIMER_STATUS_CLR)
 
-#define comcerto_timer0_set(hbound)	__raw_writel((hbound), COMCERTO_TIMER0_HIGH_BOUND)
-#define comcerto_timer0_get()		__raw_readl(COMCERTO_TIMER0_CURRENT_COUNT)
+#define comcerto_timer0_set(hbound)	timer_writel((hbound), COMCERTO_TIMER0_HIGH_BOUND)
+#define comcerto_timer0_get()		timer_readl(COMCERTO_TIMER0_CURRENT_COUNT)
 
-#define comcerto_timer1_set(hbound)	__raw_writel((hbound), COMCERTO_TIMER1_HIGH_BOUND)
-#define comcerto_timer1_get()		__raw_readl(COMCERTO_TIMER1_CURRENT_COUNT)
+#define comcerto_timer1_set(hbound)	timer_writel((hbound), COMCERTO_TIMER1_HIGH_BOUND)
+#define comcerto_timer1_get()		timer_readl(COMCERTO_TIMER1_CURRENT_COUNT)
 
 #define comcerto_timer2_set(lbound, hbound, ctrl)  do {\
-						      __raw_writel((ctrl) & 0x1, COMCERTO_TIMER2_CTRL);	\
-						      __raw_writel((lbound), COMCERTO_TIMER2_LOW_BOUND);	\
-						      __raw_writel((hbound), COMCERTO_TIMER2_HIGH_BOUND);	\
+						      timer_writel((ctrl) & 0x1, COMCERTO_TIMER2_CTRL);	\
+						      timer_writel((lbound), COMCERTO_TIMER2_LOW_BOUND);	\
+						      timer_writel((hbound), COMCERTO_TIMER2_HIGH_BOUND);	\
 						   } while (0)
 
-#define comcerto_timer2_get()		__raw_readl(COMCERTO_TIMER2_CURRENT_COUNT)
+#define comcerto_timer2_get()		timer_readl(COMCERTO_TIMER2_CURRENT_COUNT)
 
 
 #define comcerto_timer3_set(lbound, hbound, ctrl)  do {								\
-						      __raw_writel((ctrl) & 0x1, COMCERTO_TIMER3_CTRL);	\
-						      __raw_writel((lbound), COMCERTO_TIMER3_LOW_BOUND);	\
-						      __raw_writel((hbound), COMCERTO_TIMER3_HIGH_BOUND);	\
+						      timer_writel((ctrl) & 0x1, COMCERTO_TIMER3_CTRL);	\
+						      timer_writel((lbound), COMCERTO_TIMER3_LOW_BOUND);	\
+						      timer_writel((hbound), COMCERTO_TIMER3_HIGH_BOUND);	\
 						   } while(0)
 
-#define comcerto_timer3_get()		__raw_readl(COMCERTO_TIMER3_CURRENT_COUNT)
+#define comcerto_timer3_get()		timer_readl(COMCERTO_TIMER3_CURRENT_COUNT)
 
 #ifndef __ASSEMBLY__
 struct comcerto_timer {

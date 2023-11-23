@@ -158,12 +158,12 @@ static unsigned long __comcerto_timer_chain_get(timer_chain_id chain_id)
 
 	if (chain_id == timer_1_3)
 	{
-		hbound = __raw_readl(COMCERTO_TIMER1_HIGH_BOUND) / axi_rate; /* Period In Microseconds */
+		hbound = timer_readl(COMCERTO_TIMER1_HIGH_BOUND) / axi_rate; /* Period In Microseconds */
 		return comcerto_timer3_get() * hbound; /* Time Elasped In Microseconds */
 	}
 	else if (chain_id == timer_4_5)
 	{
-		hbound = __raw_readl(COMCERTO_TIMER4_HIGH_BOUND) / axi_rate; /* Period In Microseconds */
+		hbound = timer_readl(COMCERTO_TIMER4_HIGH_BOUND) / axi_rate; /* Period In Microseconds */
 		return comcerto_timer5_get() * hbound; /* Time Elasped In Microseconds */
 	}
 	else
@@ -538,7 +538,7 @@ int comcerto_timer_chain_kill(timer_chain_id chain_id)
 	comcerto_timer_chain_stop(&timer_c0, &timer_c1);
 
 	/* Clear any pending PMU interrupts */
-	writel(0xffffffff, COMCERTO_GPIO_PMU_INTR_CLR);
+	writel(0xffffffff, (void*)COMCERTO_GPIO_PMU_INTR_CLR);
 
 	return 0;
 }
@@ -689,7 +689,7 @@ static irqreturn_t comcerto_timer4_interrupt(int irq, void *dev_id)
 	struct comcerto_clock_device *clock = dev_id;
 	struct clock_event_device *dev = &clock->device;
 
-	status = __raw_readl(COMCERTO_TIMER_STATUS) & __raw_readl(COMCERTO_TIMER_IRQ_MASK);
+	status = timer_readl(COMCERTO_TIMER_STATUS) & timer_readl(COMCERTO_TIMER_IRQ_MASK);
 
 	/* timer1 expired */
 	if (status & timer_mask(clock->timer)) {
@@ -712,7 +712,7 @@ irqreturn_t comcerto_timerN_interrupt(int irq, void *dev_id)
 	u32 status;
 	int timer = irq_to_timer(irq);
 
-	status = __raw_readl(COMCERTO_TIMER_STATUS);
+	status = timer_readl(COMCERTO_TIMER_STATUS);
 	if (status & timer_mask(timer)) {
 		comcerto_timer_ack(timer);
 		timer_hw_handler(timer);
@@ -826,7 +826,7 @@ void __init comcerto_hwtimer_init(void)
 	clockevents_register_device(&clock.device);
 
 	/* Clear all the timers except timer0  */
-	__raw_writel(COMCERTO_TIMER_CSP, COMCERTO_TIMER_STATUS);
+	timer_writel(COMCERTO_TIMER_CSP, COMCERTO_TIMER_STATUS);
 
 	/* Register interrupt handler for interrupt on IRQ_TIMERB*/
 	irq_set_irq_type(IRQ_TIMER1, IRQ_TYPE_EDGE_RISING);

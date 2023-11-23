@@ -248,18 +248,18 @@
 #include <mach/comcerto-2000/memory.h>
 #include <mach/c2k_dma.h>
 
-#define comcerto_timer4_set(hbound)	__raw_writel((hbound), COMCERTO_TIMER4_HIGH_BOUND)
+#define comcerto_timer4_set(hbound)	timer_writel((hbound), COMCERTO_TIMER4_HIGH_BOUND)
 
-#define comcerto_timer4_get()		__raw_readl(COMCERTO_TIMER4_CURRENT_COUNT)
+#define comcerto_timer4_get()		timer_readl(COMCERTO_TIMER4_CURRENT_COUNT)
 
 
 #define comcerto_timer5_set(lbound, hbound, ctrl)  do {								\
-						      __raw_writel((ctrl) & 0x1, COMCERTO_TIMER5_CTRL);	\
-						      __raw_writel((lbound), COMCERTO_TIMER5_LOW_BOUND);	\
-						      __raw_writel((hbound), COMCERTO_TIMER5_HIGH_BOUND);	\
+						      timer_writel((ctrl) & 0x1, COMCERTO_TIMER5_CTRL);	\
+						      timer_writel((lbound), COMCERTO_TIMER5_LOW_BOUND);	\
+						      timer_writel((hbound), COMCERTO_TIMER5_HIGH_BOUND);	\
 						   } while(0)
 
-#define comcerto_timer5_get()		__raw_readl(COMCERTO_TIMER5_CURRENT_COUNT)
+#define comcerto_timer5_get()		timer_readl(COMCERTO_TIMER5_CURRENT_COUNT)
 
 /* Number of gemacs supported in comcerto 2000 */
 #define NUM_GEMAC_SUPPORT	3
