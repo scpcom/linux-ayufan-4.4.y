@@ -14,6 +14,8 @@
 #include <mach/reset.h>
 #include <mach/hardware.h>
 
+#define xhci_writel(v,r) writel(v, (void*)(r))
+
 extern int usb3_clk_internal;
 /* USB 3.0 clock */
 static struct clk *usb3_clk;
@@ -106,7 +108,7 @@ static void comcerto_usb3_phy_init(void)
 {
 	u32 val;
 
-        writel(0x00E00080, USB3_PHY_BASE + 0x10);
+        xhci_writel(0x00E00080, USB3_PHY_BASE + 0x10);
 
 	//Configuration for internal clock
 	if(usb3_clk_internal)
@@ -124,10 +126,10 @@ static void comcerto_usb3_phy_init(void)
 		printk(KERN_INFO "%s():: USB3.0 clock selected: external\n", __func__);
 	}
 
-	writel(val, USB3_PHY_BASE + 0x20);
-        writel(0x69C34F53, USB3_PHY_BASE + 0x24);
-        writel(0x0005D815, USB3_PHY_BASE + 0x28);
-        writel(0x00000801, USB3_PHY_BASE + 0x2C);
+	xhci_writel(val, USB3_PHY_BASE + 0x20);
+        xhci_writel(0x69C34F53, USB3_PHY_BASE + 0x24);
+        xhci_writel(0x0005D815, USB3_PHY_BASE + 0x28);
+        xhci_writel(0x00000801, USB3_PHY_BASE + 0x2C);
 }
 
 
