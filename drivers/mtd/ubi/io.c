@@ -707,6 +707,9 @@ bad:
 	return 1;
 }
 
+#define BBT0_MAGIC 0x42627430 // Bbt0
+#define BBT1_MAGIC 0x31746242 // 1tbB
+
 /**
  * ubi_io_read_ec_hdr - read and check an erase counter header.
  * @ubi: UBI device description object
@@ -755,6 +758,12 @@ int ubi_io_read_ec_hdr(struct ubi_device *ubi, int pnum,
 	}
 
 	magic = be32_to_cpu(ec_hdr->magic);
+
+    if (magic == BBT0_MAGIC || magic == BBT1_MAGIC) {
+		ubi_warn(ubi, "PEB %d is BBT", pnum);
+		return UBI_IO_BBT_PEB;
+    }
+
 	if (magic != UBI_EC_HDR_MAGIC) {
 		if (mtd_is_eccerr(read_err))
 			return UBI_IO_BAD_HDR_EBADMSG;

@@ -839,6 +839,9 @@ static int scan_peb(struct ubi_device *ubi, struct ubi_attach_info *ai,
 	switch (err) {
 	case 0:
 		break;
+	case UBI_IO_BBT_PEB:
+		ai->bad_peb_count += 1;
+		return 0;
 	case UBI_IO_BITFLIPS:
 		bitflips = 1;
 		break;
