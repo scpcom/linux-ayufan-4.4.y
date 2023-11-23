@@ -17,6 +17,7 @@
 #include <linux/moduleparam.h>
 #include <linux/jump_label.h>
 #include <linux/export.h>
+#include <crypto/public_key.h>
 
 #include <linux/percpu.h>
 #include <asm/module.h>
@@ -442,6 +443,13 @@ int module_kallsyms_on_each_symbol(int (*fn)(void *, const char *,
 extern void __module_put_and_exit(struct module *mod, long code)
 	__attribute__((noreturn));
 #define module_put_and_exit(code) __module_put_and_exit(THIS_MODULE, code)
+
+#ifdef CONFIG_MODULE_SIG
+extern struct key *request_asymmetric_key(const char *signer, size_t signer_len,
+				const u8 *key_id, size_t key_id_len);
+extern int mod_extract_mpi_array(struct public_key_signature *pks,
+				const void *data, size_t len);
+#endif
 
 #ifdef CONFIG_MODULE_UNLOAD
 int module_refcount(struct module *mod);

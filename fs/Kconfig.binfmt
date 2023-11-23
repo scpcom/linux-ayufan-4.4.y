@@ -23,6 +23,13 @@ config BINFMT_ELF
 	  ld.so (check the file <file:Documentation/Changes> for location and
 	  latest version).
 
+config BINFMT_ELF_SIGNATURE
+	bool "Kernel support for ELF binaries signature verification"
+	depends on BINFMT_ELF && MODULE_SIG
+	default n
+	---help---
+	  ELF binary signature verification support.
+
 config COMPAT_BINFMT_ELF
 	bool
 	depends on COMPAT && BINFMT_ELF

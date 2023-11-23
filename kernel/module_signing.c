@@ -105,7 +105,7 @@ error_no_pks:
  *
  * RSA signatures only have one MPI, so currently we only read one.
  */
-static int mod_extract_mpi_array(struct public_key_signature *pks,
+int mod_extract_mpi_array(struct public_key_signature *pks,
 				 const void *data, size_t len)
 {
 	size_t nbytes;
@@ -130,7 +130,7 @@ static int mod_extract_mpi_array(struct public_key_signature *pks,
 /*
  * Request an asymmetric key.
  */
-static struct key *request_asymmetric_key(const char *signer, size_t signer_len,
+struct key *request_asymmetric_key(const char *signer, size_t signer_len,
 					  const u8 *key_id, size_t key_id_len)
 {
 	key_ref_t key;
