@@ -169,6 +169,9 @@ struct sk_buff *__alloc_skb_head(gfp_t gfp_mask, int node)
 	 * the tail pointer in struct sk_buff!
 	 */
 	memset(skb, 0, offsetof(struct sk_buff, tail));
+#ifdef CONFIG_CPE_FAST_PATH
+	skb->iif_index = 0;
+#endif
 	skb->head = NULL;
 	skb->truesize = sizeof(struct sk_buff);
 	atomic_set(&skb->users, 1);
@@ -253,6 +256,9 @@ struct sk_buff *__alloc_skb(unsigned int size, gfp_t gfp_mask,
 #if defined(CONFIG_COMCERTO_CUSTOM_SKB_LAYOUT)
 	skb->mspd_data = NULL;
 	skb->mspd_len = 0;
+#endif
+#ifdef CONFIG_CPE_FAST_PATH
+	skb->iif_index = 0;
 #endif
 	/* make sure we initialize shinfo sequentially */
 	shinfo = skb_shinfo(skb);
@@ -344,6 +350,9 @@ struct sk_buff *__alloc_skb_header(unsigned int size, void *data, gfp_t gfp_mask
 	skb->mspd_data = NULL;
 	skb->mspd_len = 0;
 #endif
+#ifdef CONFIG_CPE_FAST_PATH
+	skb->iif_index = 0;
+#endif
 
 	/* make sure we initialize shinfo sequentially */
 	shinfo = skb_shinfo(skb);
@@ -399,6 +408,9 @@ struct sk_buff *build_skb(void *data, unsigned int frag_size)
 	size -= SKB_DATA_ALIGN(sizeof(struct skb_shared_info));
 
 	memset(skb, 0, offsetof(struct sk_buff, tail));
+#ifdef CONFIG_CPE_FAST_PATH
+	skb->iif_index = 0;
+#endif
 	skb->truesize = SKB_TRUESIZE(size);
 	skb->head_frag = frag_size != 0;
 	atomic_set(&skb->users, 1);
@@ -906,6 +918,9 @@ static void __copy_skb_header(struct sk_buff *new, const struct sk_buff *old)
 #if defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD)
         new->ipsec_offload      = old->ipsec_offload;
         new->ipsec_xfrm_dir     = old->ipsec_xfrm_dir;
+#endif
+#ifdef CONFIG_CPE_FAST_PATH
+	new->iif_index          = old->iif_index;
 #endif
 	memcpy(&new->headers_start, &old->headers_start,
 	       offsetof(struct sk_buff, headers_end) -
@@ -4293,6 +4308,9 @@ void skb_scrub_packet(struct sk_buff *skb, bool xnet)
 	skb->tstamp.tv64 = 0;
 	skb->pkt_type = PACKET_HOST;
 	skb->skb_iif = 0;
+#ifdef CONFIG_CPE_FAST_PATH
+	skb->iif_index = 0;
+#endif
 	skb->ignore_df = 0;
 	skb_dst_drop(skb);
 	skb->mark = 0;

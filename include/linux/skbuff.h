@@ -472,6 +472,8 @@ static inline u32 skb_mstamp_us_delta(const struct skb_mstamp *t1,
  *	@nfct: Associated connection, if any
  *	@nf_bridge: Saved data about a bridged frame - see br_netfilter.c
  *	@skb_iif: ifindex of device we arrived on
+ *	@iif_index: ifindex of device we arrived on,now skb->skb_iif
+ *	            always tracks skb->dev
  *	@tc_index: Traffic control index
  *	@tc_verd: traffic control verdict
  *	@hash: the packet hash
@@ -670,6 +672,11 @@ struct sk_buff {
 	unsigned char 		*mspd_data;
 	__u32 			mspd_len;
 	__u32 			mspd_ofst;
+#endif
+#ifdef CONFIG_CPE_FAST_PATH
+	/* skb->skb_iif always tracks skb->dev, so a new variable is introduced 
+           to keep incoming interface intact */
+	int			iif_index;
 #endif
 	unsigned int		truesize;
 	atomic_t		users;

@@ -3608,6 +3608,13 @@ static int __netif_receive_skb_core(struct sk_buff *skb, bool pfmemalloc)
 
 	trace_netif_receive_skb(skb);
 
+#ifdef CONFIG_CPE_FAST_PATH
+	/* ifindex of device we arrived on,now skb->skb_iif
+	   always tracks skb->dev */	
+	if (!skb->iif_index)
+		skb->iif_index = skb->dev->ifindex;
+#endif
+
 	orig_dev = skb->dev;
 
 	skb_reset_network_header(skb);
@@ -4153,6 +4160,9 @@ static void napi_reuse_skb(struct napi_struct *napi, struct sk_buff *skb)
 	skb->vlan_tci = 0;
 	skb->dev = napi->dev;
 	skb->skb_iif = 0;
+#ifdef CONFIG_CPE_FAST_PATH
+	skb->iif_index = 0;
+#endif
 	skb->encapsulation = 0;
 	skb_shinfo(skb)->gso_type = 0;
 	skb->truesize = SKB_TRUESIZE(skb_end_offset(skb));
