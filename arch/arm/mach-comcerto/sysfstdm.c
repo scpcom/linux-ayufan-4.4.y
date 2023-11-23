@@ -30,6 +30,9 @@
 #include <linux/clk.h>
 #include <mach/reset.h>
 
+#define tdm_readl(r) readl((void*)(r))
+#define tdm_writel(v,r) writel(v, (void*)(r))
+
 /* Defalult Rate value is in Hz*/
 #define TDMNTG_DEFAULT_REF_CLK 500000000
 
@@ -56,13 +59,13 @@ static void fsync_output_set(unsigned int fsoutput)
 {
 	if (fsoutput)
 	{
-		writel(readl(COMCERTO_GPIO_TDM_MUX) | (1 << 0), COMCERTO_GPIO_TDM_MUX);
-		writel(readl(TDM_FSYNC_GEN_CTRL) | (1 << 0), TDM_FSYNC_GEN_CTRL);
+		tdm_writel(tdm_readl(COMCERTO_GPIO_TDM_MUX) | (1 << 0), COMCERTO_GPIO_TDM_MUX);
+		tdm_writel(tdm_readl(TDM_FSYNC_GEN_CTRL) | (1 << 0), TDM_FSYNC_GEN_CTRL);
 	}
 	else
 	{
-		writel(readl(COMCERTO_GPIO_TDM_MUX) & ~(1 << 0), COMCERTO_GPIO_TDM_MUX);
-		writel(readl(TDM_FSYNC_GEN_CTRL) & ~(1 << 0), TDM_FSYNC_GEN_CTRL);
+		tdm_writel(tdm_readl(COMCERTO_GPIO_TDM_MUX) & ~(1 << 0), COMCERTO_GPIO_TDM_MUX);
+		tdm_writel(tdm_readl(TDM_FSYNC_GEN_CTRL) & ~(1 << 0), TDM_FSYNC_GEN_CTRL);
 	}
 }
 
@@ -70,9 +73,9 @@ static void fsync_polarity_set(unsigned int fspolarity)
 {
 	/* 28 FSYNC_FALL(RISE)_EDGE */
 	if (fspolarity)
-		writel(readl(TDM_FSYNC_GEN_CTRL) | FSYNC_FALL_EDGE, TDM_FSYNC_GEN_CTRL);
+		tdm_writel(tdm_readl(TDM_FSYNC_GEN_CTRL) | FSYNC_FALL_EDGE, TDM_FSYNC_GEN_CTRL);
 	else
-		writel(readl(TDM_FSYNC_GEN_CTRL) & ~FSYNC_FALL_EDGE, TDM_FSYNC_GEN_CTRL);
+		tdm_writel(tdm_readl(TDM_FSYNC_GEN_CTRL) & ~FSYNC_FALL_EDGE, TDM_FSYNC_GEN_CTRL);
 }
 
 static void fsync_lphase_set(u32 fslwidth)
@@ -83,7 +86,7 @@ static void fsync_lphase_set(u32 fslwidth)
 		return;
 	}
 
-	writel(fslwidth, TDM_FSYNC_LOW);
+	tdm_writel(fslwidth, TDM_FSYNC_LOW);
 }
 
 static void fsync_hphase_set(u32 fshwidth)
@@ -94,7 +97,7 @@ static void fsync_hphase_set(u32 fshwidth)
 		return;
 	}
 
-	writel(fshwidth, TDM_FSYNC_HIGH);
+	tdm_writel(fshwidth, TDM_FSYNC_HIGH);
 }
 
 static void clock_frequency_set(unsigned long clockhz)
@@ -114,7 +117,7 @@ static void clock_frequency_set(unsigned long clockhz)
 	/* ntg_incr = 0x10C6F7A for 2.048 MHz */
 	/* ntg_incr = 0xC953969 for 24.576 MHz */
 	/* ntg_incr = 0x192A7371 for 49.152 MHz */
-	writel(ntg_incr, TDM_NTG_INCR);
+	tdm_writel(ntg_incr, TDM_NTG_INCR);
 }
 
 static unsigned long clock_frequency_get(void)
@@ -122,7 +125,7 @@ static unsigned long clock_frequency_get(void)
 	unsigned long long clc_data;
 
 	/* According to the desired TDM clock output frequency, this field should be configured */
-	clc_data = (readl(TDM_NTG_INCR) & 0x3FFFFFFF);/* get frequency from resolution on an 32-bit accumulator */
+	clc_data = (tdm_readl(TDM_NTG_INCR) & 0x3FFFFFFF);/* get frequency from resolution on an 32-bit accumulator */
 	clc_data = (clc_data * tdmntg_ref_clk + (1ULL << 31)) >> 32;
 	/* Divide down the Data with TDM block divider */
 	do_div(clc_data, comcerto_block_clk_div[block_selected]); /* do_div because of 64 bit operation*/
@@ -133,13 +136,13 @@ static void clock_output_set(unsigned long clockout)
 {
 	switch (clockout) {
 	case 0:
-		writel((0x2 << 12) | (readl(COMCERTO_GPIO_BOOTSTRAP_OVERRIDE) & ~(0x3 << 12)), COMCERTO_GPIO_BOOTSTRAP_OVERRIDE);
+		tdm_writel((0x2 << 12) | (tdm_readl(COMCERTO_GPIO_BOOTSTRAP_OVERRIDE) & ~(0x3 << 12)), COMCERTO_GPIO_BOOTSTRAP_OVERRIDE);
 		break;
 	case 1:
-		writel((0x3 << 12) | (readl(COMCERTO_GPIO_BOOTSTRAP_OVERRIDE) &	~(0x3 << 12)), COMCERTO_GPIO_BOOTSTRAP_OVERRIDE);
+		tdm_writel((0x3 << 12) | (tdm_readl(COMCERTO_GPIO_BOOTSTRAP_OVERRIDE) &	~(0x3 << 12)), COMCERTO_GPIO_BOOTSTRAP_OVERRIDE);
 		break;
 	case 2:
-		writel((0x0 << 12) | (readl(COMCERTO_GPIO_BOOTSTRAP_OVERRIDE) &	~(0x3 << 12)), COMCERTO_GPIO_BOOTSTRAP_OVERRIDE);
+		tdm_writel((0x0 << 12) | (tdm_readl(COMCERTO_GPIO_BOOTSTRAP_OVERRIDE) &	~(0x3 << 12)), COMCERTO_GPIO_BOOTSTRAP_OVERRIDE);
 		break;
 	default:
 		printk(KERN_ERR "%s: Unknown clock output value\n", __func__);
@@ -188,7 +191,7 @@ static void clock_ppm_adjust(long ppm)
 		return;
 	}
 
-	writel((clc_data & 0x3FFFFFFF) | (readl(TDM_NTG_INCR) & ~0x3FFFFFFF), TDM_NTG_INCR);
+	tdm_writel((clc_data & 0x3FFFFFFF) | (tdm_readl(TDM_NTG_INCR) & ~0x3FFFFFFF), TDM_NTG_INCR);
 }
 
 static long clock_ppm_get(void)
@@ -225,35 +228,35 @@ static void tdm_mux_set(u32 tdmmux)
 	switch (block_selected){
 	case 0:
 		/* TDM block selected (SiLabs si3227) */
-		writel(TDM_CTLR_RESET_BYPASS, TDM_CLK_CNTRL);    /* bypass TDM divider --> TDM = NTG out, keen ZDS/MSIF Slic reset */
-		writel((0x0 << 4) |(readl(COMCERTO_GPIO_MISC_PIN_SELECT) & ~(0x3 << 4)), COMCERTO_GPIO_MISC_PIN_SELECT);
+		tdm_writel(TDM_CTLR_RESET_BYPASS, TDM_CLK_CNTRL);    /* bypass TDM divider --> TDM = NTG out, keen ZDS/MSIF Slic reset */
+		tdm_writel((0x0 << 4) |(tdm_readl(COMCERTO_GPIO_MISC_PIN_SELECT) & ~(0x3 << 4)), COMCERTO_GPIO_MISC_PIN_SELECT);
 		break;
 
 	case 1:
 		/* ZDS block selected (Zarlink le88264) */
-		writel(TDM_CTRL_SLIC_RESET | COMCERTO_BLOCK_ZDS_DIV, TDM_CLK_CNTRL); /* TDM = NTG out / 24*/
-		writel((0x1 << 4) |(readl(COMCERTO_GPIO_MISC_PIN_SELECT) & ~(0x3 << 4)), COMCERTO_GPIO_MISC_PIN_SELECT);
-		writel(COMCERTO_BLOCK_ZDS_DIV, TDM_CLK_CNTRL); /* Remove out of reset */
+		tdm_writel(TDM_CTRL_SLIC_RESET | COMCERTO_BLOCK_ZDS_DIV, TDM_CLK_CNTRL); /* TDM = NTG out / 24*/
+		tdm_writel((0x1 << 4) |(tdm_readl(COMCERTO_GPIO_MISC_PIN_SELECT) & ~(0x3 << 4)), COMCERTO_GPIO_MISC_PIN_SELECT);
+		tdm_writel(COMCERTO_BLOCK_ZDS_DIV, TDM_CLK_CNTRL); /* Remove out of reset */
 		break;
 
 	case 2:
 		/* GPIO[63:60] signals selected */
-		writel(TDM_CTLR_RESET_BYPASS, TDM_CLK_CNTRL); /* bypass TDM divider --> TDM = NTG out, keen ZDS/MSIF Slic reset */
-		writel((0x2 << 4) |(readl(COMCERTO_GPIO_MISC_PIN_SELECT) & ~(0x3 << 4)), COMCERTO_GPIO_MISC_PIN_SELECT);
+		tdm_writel(TDM_CTLR_RESET_BYPASS, TDM_CLK_CNTRL); /* bypass TDM divider --> TDM = NTG out, keen ZDS/MSIF Slic reset */
+		tdm_writel((0x2 << 4) |(tdm_readl(COMCERTO_GPIO_MISC_PIN_SELECT) & ~(0x3 << 4)), COMCERTO_GPIO_MISC_PIN_SELECT);
 		break;
 
 	case 3:
 		/* MSIF block selected (SiLabs si32268) */
-		writel(TDM_CTRL_SLIC_RESET | COMCERTO_BLOCK_MSIF_DIV, TDM_CLK_CNTRL); /* TDM = NTG out / 12 */
-		writel((0x3 << 4) |(readl(COMCERTO_GPIO_MISC_PIN_SELECT) & ~(0x3 << 4)), COMCERTO_GPIO_MISC_PIN_SELECT);
-		writel(COMCERTO_BLOCK_MSIF_DIV, TDM_CLK_CNTRL); /* Remove out of reset */
+		tdm_writel(TDM_CTRL_SLIC_RESET | COMCERTO_BLOCK_MSIF_DIV, TDM_CLK_CNTRL); /* TDM = NTG out / 12 */
+		tdm_writel((0x3 << 4) |(tdm_readl(COMCERTO_GPIO_MISC_PIN_SELECT) & ~(0x3 << 4)), COMCERTO_GPIO_MISC_PIN_SELECT);
+		tdm_writel(COMCERTO_BLOCK_MSIF_DIV, TDM_CLK_CNTRL); /* Remove out of reset */
 
 		/* Delay 100us after C2k TDM block has been un-reset, before SLIC is un-reset.
 		   Ensures MSIF interface clock is active well before SLIC is un-reset (SiLabs spec). 
 		*/
 		udelay(100);
 
-		writel(0x1 << 30, COMCERTO_GPIO_63_32_PIN_OUTPUT); /* remove slic out of reset */
+		tdm_writel(0x1 << 30, COMCERTO_GPIO_63_32_PIN_OUTPUT); /* remove slic out of reset */
 		break;
 
 	default:
@@ -270,7 +273,7 @@ static void tdm_dr_set(u32 tdmdr)
 		return;
 	}
 
-	writel((tdmdr << 24) |(readl(COMCERTO_GPIO_PAD_CONFIG0) & ~(0x3F << 24)), COMCERTO_GPIO_PAD_CONFIG0);
+	tdm_writel((tdmdr << 24) |(tdm_readl(COMCERTO_GPIO_PAD_CONFIG0) & ~(0x3F << 24)), COMCERTO_GPIO_PAD_CONFIG0);
 }
 
 static void tdm_dx_set(u32 tdmdx)
@@ -281,7 +284,7 @@ static void tdm_dx_set(u32 tdmdx)
 		return;
 	}
 
-	writel((tdmdx << 18) |(readl(COMCERTO_GPIO_PAD_CONFIG0) & ~(0x3F << 18)), COMCERTO_GPIO_PAD_CONFIG0);
+	tdm_writel((tdmdx << 18) |(tdm_readl(COMCERTO_GPIO_PAD_CONFIG0) & ~(0x3F << 18)), COMCERTO_GPIO_PAD_CONFIG0);
 }
 
 static void tdm_fs_set(u32 tdmfs)
@@ -292,7 +295,7 @@ static void tdm_fs_set(u32 tdmfs)
 		return;
 	}
 
-	writel((tdmfs << 12) |(readl(COMCERTO_GPIO_PAD_CONFIG0) & ~(0x3F << 12)), COMCERTO_GPIO_PAD_CONFIG0);
+	tdm_writel((tdmfs << 12) |(tdm_readl(COMCERTO_GPIO_PAD_CONFIG0) & ~(0x3F << 12)), COMCERTO_GPIO_PAD_CONFIG0);
 }
 
 static void tdm_ck_set(u32 tdmck)
@@ -303,7 +306,7 @@ static void tdm_ck_set(u32 tdmck)
 		return;
 	}
 
-	writel((tdmck << 6) |(readl(COMCERTO_GPIO_PAD_CONFIG0) & ~(0x3F << 6)), COMCERTO_GPIO_PAD_CONFIG0);
+	tdm_writel((tdmck << 6) |(tdm_readl(COMCERTO_GPIO_PAD_CONFIG0) & ~(0x3F << 6)), COMCERTO_GPIO_PAD_CONFIG0);
 }
 #endif
 
@@ -370,21 +373,21 @@ static ssize_t tdm_data_read(struct device *dev,
 				  struct device_attribute *attr, char *buf)
 {
 	if (strcmp("fs_polarity", attr->attr.name) == 0) /* FSYNC_FALL(RISE)_EDGE */
-		return sprintf(buf, "%d\n", (readl(TDM_FSYNC_GEN_CTRL) >> 1) & 0x1);
+		return sprintf(buf, "%d\n", (tdm_readl(TDM_FSYNC_GEN_CTRL) >> 1) & 0x1);
 	else if (strcmp("fs_lwidth", attr->attr.name) == 0) /* Low_Phase_Width */
-		return sprintf(buf, "%x\n", (readl(TDM_FSYNC_LOW) & 0x3FF));
+		return sprintf(buf, "%x\n", (tdm_readl(TDM_FSYNC_LOW) & 0x3FF));
 	else if (strcmp("fs_hwidth", attr->attr.name) == 0) /* High_Phase_Width */
-		return sprintf(buf, "%x\n", (readl(TDM_FSYNC_HIGH) & 0x3FF));
+		return sprintf(buf, "%x\n", (tdm_readl(TDM_FSYNC_HIGH) & 0x3FF));
 	else if (strcmp("fs_output", attr->attr.name) == 0) /* Generic Pad Control and Version ID Register[2] */
-		return sprintf(buf, "%d\n", readl(COMCERTO_GPIO_TDM_MUX) & 0x1);
+		return sprintf(buf, "%d\n", tdm_readl(COMCERTO_GPIO_TDM_MUX) & 0x1);
 	else if (strcmp("clock_ppmshift", attr->attr.name) == 0)
 		return sprintf(buf, "%ld\n", clock_ppm_get());
 	else if (strcmp("clock_output", attr->attr.name) == 0)
-		return sprintf(buf, "%d\n", (readl(COMCERTO_GPIO_SYSTEM_CONFIG)	>> 3) & 0x1);
+		return sprintf(buf, "%d\n", (tdm_readl(COMCERTO_GPIO_SYSTEM_CONFIG)	>> 3) & 0x1);
 	else if (strcmp("clock_hz", attr->attr.name) == 0)
 		return sprintf(buf, "%lu\n", clock_frequency_get());
 	else if (strcmp("tdm_mux", attr->attr.name) == 0)
-                return sprintf(buf, "%lu\n", (readl(COMCERTO_GPIO_MISC_PIN_SELECT) >> 4) & 0x3);
+                return sprintf(buf, "%u\n", (tdm_readl(COMCERTO_GPIO_MISC_PIN_SELECT) >> 4) & 0x3);
 	else
 	{
 		printk(KERN_ERR "%s: Unknown file attribute\n", __func__);
@@ -468,7 +471,7 @@ static int comcerto_tdm_probe(struct platform_device *pdev)
  	/*Initialize the tdmntgref clock rate value */ 	
 	tdmntg_ref_clk = clk_get_rate(clk_ntg_ref);
 
-	writel((NTG_DIV_RST_N | NTG_EN), TDM_NTG_CLK_CTRL);
+	tdm_writel((NTG_DIV_RST_N | NTG_EN), TDM_NTG_CLK_CTRL);
 
 	/* Inital configuration of tdm bus */
 	tdm_mux_set(pdata->tdmmux);
