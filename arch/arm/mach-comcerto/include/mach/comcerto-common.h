@@ -66,17 +66,23 @@
 /*
  * GPIO
  */
+#define gpio_readl(r) readl((void*)(r))
+#define gpio_writel(v,r) writel(v, (void*)(r))
+
+#define gpio_raw_readl(r) __raw_readl((void*)(r))
+#define gpio_raw_writel(v,r) __raw_writel(v, (void*)(r))
+
 /* Set gpio pins specified by gpiomask to be outputs */
-#define comcerto_gpio_enable_output(gpiomask)	__raw_writel(__raw_readl(COMCERTO_GPIO_OE_REG) | (gpiomask), COMCERTO_GPIO_OE_REG)
+#define comcerto_gpio_enable_output(gpiomask)	gpio_raw_writel(gpio_raw_readl(COMCERTO_GPIO_OE_REG) | (gpiomask), COMCERTO_GPIO_OE_REG)
 
 /* Set output pins specified by gpiomask to low */
-#define comcerto_gpio_set_0(gpiomask)	__raw_writel(__raw_readl(COMCERTO_GPIO_OUTPUT_REG) & ~(gpiomask), COMCERTO_GPIO_OUTPUT_REG)
+#define comcerto_gpio_set_0(gpiomask)	gpio_raw_writel(gpio_raw_readl(COMCERTO_GPIO_OUTPUT_REG) & ~(gpiomask), COMCERTO_GPIO_OUTPUT_REG)
 
 /* Set output pins specified by gpiomask to high */
-#define comcerto_gpio_set_1(gpiomask)	__raw_writel(__raw_readl(COMCERTO_GPIO_OUTPUT_REG) | (gpiomask), COMCERTO_GPIO_OUTPUT_REG)
+#define comcerto_gpio_set_1(gpiomask)	gpio_raw_writel(gpio_raw_readl(COMCERTO_GPIO_OUTPUT_REG) | (gpiomask), COMCERTO_GPIO_OUTPUT_REG)
 
 /* Read status of input pins specified by gpiomask */
-#define comcerto_gpio_read(gpiomask)	(__raw_readl(COMCERTO_GPIO_INPUT_REG) & (gpiomask))
+#define comcerto_gpio_read(gpiomask)	(gpio_raw_readl(COMCERTO_GPIO_INPUT_REG) & (gpiomask))
 
 
 #ifndef __ASSEMBLY__

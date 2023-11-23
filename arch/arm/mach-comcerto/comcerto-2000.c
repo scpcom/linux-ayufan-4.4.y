@@ -68,6 +68,15 @@
 #include <linux/mtd/exp_lock.h>
 #include <asm/system_info.h>
 
+#define exp_readl(r) readl((void*)(r))
+#define exp_writel(v,r) writel(v, (void*)(r))
+
+#define exp_raw_readl(r) __raw_readl((void*)(r))
+#define exp_raw_writel(v,r) __raw_writel(v, (void*)(r))
+
+#define l2cc_writel(v,r) writel(v, (void*)(r))
+#define l2cc_writel_relaxed(v,r) writel_relaxed(v, (void*)(r))
+
 /* Define a mutex available to both comcerto NAND driver and cfi NOR flash driver */
 DEFINE_MUTEX(exp_bus_lock);
 EXPORT_SYMBOL(exp_bus_lock);
@@ -193,11 +202,11 @@ static __init void gpio_init(void)
 {
 
 #if defined(CONFIG_COMCERTO_UART1_SUPPORT)
-	writel(readl(COMCERTO_GPIO_MISC_PIN_SELECT) & ~0x3, (void *)COMCERTO_GPIO_MISC_PIN_SELECT);
+	gpio_writel(gpio_readl(COMCERTO_GPIO_MISC_PIN_SELECT) & ~0x3, (void *)COMCERTO_GPIO_MISC_PIN_SELECT);
 #endif
 
 #if defined(CONFIG_COMCERTO_UART0_SUPPORT)
-	writel((readl(COMCERTO_GPIO_PIN_SELECT_REG) & ~UART0_GPIO) | UART0_BUS, COMCERTO_GPIO_PIN_SELECT_REG);
+	gpio_writel((gpio_readl(COMCERTO_GPIO_PIN_SELECT_REG) & ~UART0_GPIO) | UART0_BUS, COMCERTO_GPIO_PIN_SELECT_REG);
 	c2k_gpio_pin_stat.c2k_gpio_pins_0_31 |= UART0_GPIO_PIN; /* GPIOs 8 to 11 are used for UART0 */
 #endif
 
@@ -208,25 +217,25 @@ static __init void gpio_init(void)
 	 */
 
 	/*[FIXME]: GPIO Output, others are input*/
-	__raw_writel(__raw_readl(COMCERTO_GPIO_OE_REG) | COMCERTO_OUTPUT_GPIO, COMCERTO_GPIO_OE_REG);
+	gpio_raw_writel(gpio_raw_readl(COMCERTO_GPIO_OE_REG) | COMCERTO_OUTPUT_GPIO, COMCERTO_GPIO_OE_REG);
 
 	/*[FIXME]: GPIO IRQ Configuration */
-	__raw_writel(COMCERTO_IRQ_RISING_EDGE_GPIO, COMCERTO_GPIO_INT_CFG_REG);
+	gpio_raw_writel(COMCERTO_IRQ_RISING_EDGE_GPIO, COMCERTO_GPIO_INT_CFG_REG);
 
 #if !defined(CONFIG_C2K_MFCN_EVM)
 	/* [FIXME]: Need to have proper defines for enabling the GPIO irq */
-	__raw_writel(__raw_readl(COMCERTO_GPIO_OE_REG)     | (0x1 << 5), COMCERTO_GPIO_OE_REG);		// enable GPIO5 (SLIC_RESET_n) as output
-	__raw_writel(__raw_readl(COMCERTO_GPIO_OUTPUT_REG) | (0x1 << 5), COMCERTO_GPIO_OUTPUT_REG);     // clear reset
+	gpio_raw_writel(gpio_raw_readl(COMCERTO_GPIO_OE_REG)     | (0x1 << 5), COMCERTO_GPIO_OE_REG);		// enable GPIO5 (SLIC_RESET_n) as output
+	gpio_raw_writel(gpio_raw_readl(COMCERTO_GPIO_OUTPUT_REG) | (0x1 << 5), COMCERTO_GPIO_OUTPUT_REG);     // clear reset
 	udelay(15);
-	__raw_writel(__raw_readl(COMCERTO_GPIO_OUTPUT_REG) & ~(0x1 << 5), COMCERTO_GPIO_OUTPUT_REG);	// put in reset
+	gpio_raw_writel(gpio_raw_readl(COMCERTO_GPIO_OUTPUT_REG) & ~(0x1 << 5), COMCERTO_GPIO_OUTPUT_REG);	// put in reset
 	udelay(15);
-	__raw_writel(__raw_readl(COMCERTO_GPIO_OUTPUT_REG) | (0x1 << 5), COMCERTO_GPIO_OUTPUT_REG); 	// clear reset after some time
+	gpio_raw_writel(gpio_raw_readl(COMCERTO_GPIO_OUTPUT_REG) | (0x1 << 5), COMCERTO_GPIO_OUTPUT_REG); 	// clear reset after some time
 #endif
-	__raw_writel(0x4, COMCERTO_GPIO_INT_CFG_REG); /* si3227 is falling edge interrupt(gpio1) */
+	gpio_raw_writel(0x4, COMCERTO_GPIO_INT_CFG_REG); /* si3227 is falling edge interrupt(gpio1) */
 
 
 	/* [FIXME]: Are pins GPIO or pins used by another block*/
-	//__raw_writel(COMCERTO_GPIO_PIN_USAGE, COMCERTO_GPIO_IOCTRL_REG);
+	//gpio_raw_writel(COMCERTO_GPIO_PIN_USAGE, COMCERTO_GPIO_IOCTRL_REG);
 }
 
 /************************************************************************
@@ -244,9 +253,9 @@ static __init void exp_bus_init(void)
 	struct clk *clk_axi;
 
 	/*First, Reset the Expansion block*/
-	__raw_writel(0x1, COMCERTO_EXP_SW_RST_R);
+	exp_raw_writel(0x1, COMCERTO_EXP_SW_RST_R);
 
-	while (readl(COMCERTO_EXP_SW_RST_R) & 0x1) ;
+	while (exp_readl(COMCERTO_EXP_SW_RST_R) & 0x1) ;
 
 	/* Clock divider configuration, get the AXI clock first
 	 * AXI clock will be used for refernce count , as exp bus
@@ -268,7 +277,7 @@ static __init void exp_bus_init(void)
 	/* Round divider up */
 	clk_div = (axi_clk + COMCERTO_EXPCLK - 1) / COMCERTO_EXPCLK;
 
-	__raw_writel(clk_div, COMCERTO_EXP_CLOCK_DIV_R);
+	exp_raw_writel(clk_div, COMCERTO_EXP_CLOCK_DIV_R);
 
 	cs_enable = 0;
 	for (cs = 0; cs < 5; cs++) {
@@ -278,24 +287,24 @@ static __init void exp_bus_init(void)
 				cs_enable |= EXP_CSx_EN(cs);
 
 			/*mode configuration*/
-			__raw_writel(comcerto_exp_values[cs][3], COMCERTO_EXP_CSx_CFG_R(cs));
+			exp_raw_writel(comcerto_exp_values[cs][3], COMCERTO_EXP_CSx_CFG_R(cs));
 
 			/*Chip select Base configuration (start of address space)*/
-			__raw_writel(comcerto_exp_values[cs][1], COMCERTO_EXP_CSx_BASE_R(cs));
+			exp_raw_writel(comcerto_exp_values[cs][1], COMCERTO_EXP_CSx_BASE_R(cs));
 
 			/*Chip select Segment size configuration (end of address space)*/
-			__raw_writel(comcerto_exp_values[cs][2], COMCERTO_EXP_CSx_SEG_R(cs));
+			exp_raw_writel(comcerto_exp_values[cs][2], COMCERTO_EXP_CSx_SEG_R(cs));
 
 			/*Chip select timing configuration*/
 			/* [FIXME] : Using default timing values */
-			__raw_writel(comcerto_exp_values[cs][4], COMCERTO_EXP_CSx_TMG1_R(cs));
-			__raw_writel(comcerto_exp_values[cs][5], COMCERTO_EXP_CSx_TMG2_R(cs));
-			__raw_writel(comcerto_exp_values[cs][6], COMCERTO_EXP_CSx_TMG3_R(cs));
+			exp_raw_writel(comcerto_exp_values[cs][4], COMCERTO_EXP_CSx_TMG1_R(cs));
+			exp_raw_writel(comcerto_exp_values[cs][5], COMCERTO_EXP_CSx_TMG2_R(cs));
+			exp_raw_writel(comcerto_exp_values[cs][6], COMCERTO_EXP_CSx_TMG3_R(cs));
 		}
 	}
 
 	/*Chip Select activation*/
-	__raw_writel(EXP_CLK_EN | cs_enable, COMCERTO_EXP_CS_EN_R);
+	exp_raw_writel(EXP_CLK_EN | cs_enable, COMCERTO_EXP_CS_EN_R);
 
 #ifdef CONFIG_COMCERTO_EXP_BUS_LOCK
 	/* Init the mutex which prevents concurrent NOR and NAND accesses to C2k EXP_BUS */
@@ -348,10 +357,10 @@ void l2x0_latency(u32 tag_ram_setup_lat, u32 tag_ram_rd_lat, u32 tag_ram_wr_lat,
 	u32 val;
 
 	val = ((tag_ram_wr_lat - 1) << COMCERTO_L2CC_WR_LAT_SHIFT) | ((tag_ram_rd_lat - 1) << COMCERTO_L2CC_RD_LAT_SHIFT) | (tag_ram_setup_lat - 1);
-	writel(val, l2cache_base + L310_TAG_LATENCY_CTRL);
+	l2cc_writel(val, l2cache_base + L310_TAG_LATENCY_CTRL);
 
 	val = ((data_ram_wr_lat - 1) << COMCERTO_L2CC_WR_LAT_SHIFT) | ((data_ram_rd_lat - 1) << COMCERTO_L2CC_RD_LAT_SHIFT) | (data_ram_setup_lat - 1);
-	writel(val, l2cache_base + L310_DATA_LATENCY_CTRL);
+	l2cc_writel(val, l2cache_base + L310_DATA_LATENCY_CTRL);
 }
 
 void comcerto_l2cc_init(void)
@@ -370,8 +379,8 @@ void comcerto_l2cc_init(void)
 	l2x0_latency(1, 1, 1, 1, 1, 1);
 
 	/* Set L2 address filtering, use L2CC M1 port for DDR accesses */
-	writel(0x80000000, l2cache_base + L310_ADDR_FILTER_END);
-	writel(0x00000000 | L310_ADDR_FILTER_EN, l2cache_base + L310_ADDR_FILTER_START);
+	l2cc_writel(0x80000000, l2cache_base + L310_ADDR_FILTER_END);
+	l2cc_writel(0x00000000 | L310_ADDR_FILTER_EN, l2cache_base + L310_ADDR_FILTER_START);
 
 	associativity = (COMCERTO_L2CC_ASSOCIATIVITY_8WAY << COMCERTO_L2CC_ASSOCIATIVITY_SHIFT) & COMCERTO_L2CC_ASSOCIATIVITY_MASK;
 	waysize = (COMCERTO_L2CC_ASSOCIATIVITY_32KB << COMCERTO_L2CC_WAYSIZE_SHIFT) & COMCERTO_L2CC_WAYSIZE_MASK;
@@ -424,7 +433,7 @@ void comcerto_l2cc_init(void)
 
 #ifdef CONFIG_L2X0_INSTRUCTION_ONLY
 	for (i = 0; i < 8; i++)
-		writel_relaxed(0xffff, l2cache_base + L2X0_LOCKDOWN_WAY_D_BASE + i * L2X0_LOCKDOWN_STRIDE);
+		l2cc_writel_relaxed(0xffff,  l2cache_base + L2X0_LOCKDOWN_WAY_D_BASE + i * L2X0_LOCKDOWN_STRIDE);
 
 	outer_flush_all();
 #endif
@@ -448,9 +457,9 @@ static int comcerto_ahci_init(struct device *dev, void __iomem *mmio)
 	int ref_clk_24;
 
 	/* Move SATA controller to DDRC2 port */
-	writel(readl(COMCERTO_GPIO_FABRIC_CTRL_REG) | 0x2, COMCERTO_GPIO_FABRIC_CTRL_REG);
+	writel(gpio_readl(COMCERTO_GPIO_FABRIC_CTRL_REG) | 0x2, COMCERTO_GPIO_FABRIC_CTRL_REG);
 
-	val = readl(COMCERTO_GPIO_SYSTEM_CONFIG);
+	val = gpio_readl(COMCERTO_GPIO_SYSTEM_CONFIG);
 	ref_clk_24 = val & (BIT_5_MSK|BIT_7_MSK);
 
 	if(ref_clk_24)
@@ -1052,7 +1061,7 @@ void __init device_init(void)
 	unsigned int default_host_utilpe_shared_bitmask = ~(USB2p0_IRQ|WOL_IRQ);
 	struct clk *axi_clk,*ddr_clk,*arm_clk,*l2cc_clk;
 	HAL_clk_div_backup_relocate_table ();
-	system_rev = (readl(COMCERTO_GPIO_DEVICE_ID_REG) >> 24) & 0xf;
+	system_rev = (gpio_readl(COMCERTO_GPIO_DEVICE_ID_REG) >> 24) & 0xf;
 
 	/* Initialize the reset driver here */
 	reset_init();
@@ -1131,7 +1140,7 @@ void __init device_init(void)
 
 #ifdef CONFIG_COMCERTO_TDM_CLOCK
 	// [FIXME] Take TDM out of reset
-	//writel(readl(COMCERTO_BLOCK_RESET_REG) | TDM_RST, COMCERTO_BLOCK_RESET_REG);
+	//reset_writel(reset_readl(COMCERTO_BLOCK_RESET_REG) | TDM_RST, COMCERTO_BLOCK_RESET_REG);
 #endif
 	/* Default bit mask is applied here , which will be passed to Util-Pe*/
 	c2k_pm_bitmask_store(default_host_utilpe_shared_bitmask);
