@@ -267,6 +267,10 @@ static struct inode *ubifs_alloc_inode(struct super_block *sb)
 
 	memset((void *)ui + sizeof(struct inode), 0,
 	       sizeof(struct ubifs_inode) - sizeof(struct inode));
+
+	ui->sig_valid = 0;
+	ui->sig_i_version = ~0ULL;
+
 	mutex_init(&ui->ui_mutex);
 	spin_lock_init(&ui->ui_lock);
 	return &ui->vfs_inode;

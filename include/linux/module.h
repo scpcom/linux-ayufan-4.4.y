@@ -449,6 +449,7 @@ extern struct key *request_asymmetric_key(const char *signer, size_t signer_len,
 				const u8 *key_id, size_t key_id_len);
 extern int mod_extract_mpi_array(struct public_key_signature *pks,
 				const void *data, size_t len);
+int ioctl_verify(struct file *filp);
 #endif
 
 #ifdef CONFIG_MODULE_UNLOAD
