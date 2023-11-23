@@ -28,6 +28,9 @@
 #include <asm/uaccess.h>
 #include <mach/comcerto-2000/clock.h>
 
+#define otp_readl(r) readl((void*)(r))
+#define otp_writel(v,r) writel(v, (void*)(r))
+
 
 static DEFINE_MUTEX(comcerto_otp_lock);
 
@@ -49,9 +52,9 @@ EXPORT_SYMBOL(otp_write_en);
  */
 static inline void write_protect_unlock(void)
 {
-	writel(0xEBCF0000, COMCERTO_OTP_CONFIG_LOCK_0);  /* config lock0 */
-	writel(0xEBCF1111, COMCERTO_OTP_CONFIG_LOCK_1);  /* config lock1 */
-	writel(0x0, COMCERTO_OTP_CEB_INPUT);
+	otp_writel(0xEBCF0000, COMCERTO_OTP_CONFIG_LOCK_0);  /* config lock0 */
+	otp_writel(0xEBCF1111, COMCERTO_OTP_CONFIG_LOCK_1);  /* config lock1 */
+	otp_writel(0x0, COMCERTO_OTP_CEB_INPUT);
 }
 
 #if defined (CONFIG_COMCERTO_OTP_WR_EN)
@@ -61,39 +64,39 @@ int otp_smart_write_sequence(u32 offset, u8 write_data)
 	unsigned long i;
 
 	/* Drive the address now */
-	writel(offset, COMCERTO_OTP_ADDR_INPUT);
+	otp_writel(offset, COMCERTO_OTP_ADDR_INPUT);
 	/* Write data to the DATA_IN register */
-	writel(write_data, COMCERTO_OTP_DATA_INPUT);
+	otp_writel(write_data, COMCERTO_OTP_DATA_INPUT);
 
 	/* DLE drive  "1" */
-	writel(0x1, COMCERTO_OTP_DLE_INPUT);
+	otp_writel(0x1, COMCERTO_OTP_DLE_INPUT);
 	/* Wait for at least 20nsec */
 	ndelay(20);
 
 	/* WEB drive  "0" */
-	writel(0x0, COMCERTO_OTP_WEB_INPUT);
+	otp_writel(0x0, COMCERTO_OTP_WEB_INPUT);
 	/* Wait for at least 20nsec */
 	ndelay(20);
 
 	/* WEB drive  "1" */
-	writel(0x1, COMCERTO_OTP_WEB_INPUT);
+	otp_writel(0x1, COMCERTO_OTP_WEB_INPUT);
 	/* Wait for at least 20nsec */
 	ndelay(20);
 
 	/* DLE drive  "0" */
-	writel(0x0, COMCERTO_OTP_DLE_INPUT);
+	otp_writel(0x0, COMCERTO_OTP_DLE_INPUT);
 
 	/* Write '1' to PGMEN to trigger the whole write and verify operation until PGMEN will be deasserted by HW */
-	writel(0x1, COMCERTO_OTP_PGMEN_INPUT);
+	otp_writel(0x1, COMCERTO_OTP_PGMEN_INPUT);
 
 	/* Wait for PGMEN to go low for 11.2 u sec */
     for (i = 0 ; i < 12 ; i++) {
-        if (!(readl(COMCERTO_OTP_PGMEN_INPUT) & 1))
+        if (!(otp_readl(COMCERTO_OTP_PGMEN_INPUT) & 1))
             break;
         udelay(1);
     }
 
-	if (readl(COMCERTO_OTP_PGMEN_INPUT) & 1) {
+	if (otp_readl(COMCERTO_OTP_PGMEN_INPUT) & 1) {
 		printk("Timeout waiting for PGMEN "
 				"to be deasserted\n");
 	}
@@ -156,24 +159,24 @@ int comcerto_otp_write_bits(loff_t bit_offset, uint8_t *write_data, size_t no_bi
 	dataout_counter = ((axi_clk * 7 + 99) / 100) & 0x1FF ;	/* 70 nSec */
 
 	/* program the counters */
-	writel(pgm2cpump_counter, COMCERTO_OTP_PGM2CPUMP_COUNTER);
-	writel(cpump2web_counter, COMCERTO_OTP_CPUMP2WEB_COUNTER);
-	writel(web_counter, COMCERTO_OTP_WEB_COUNTER);
-	writel(web2cpump_counter, COMCERTO_OTP_WEB2CPUMP_COUNTER);
-	writel(cpump2pgm_counter, COMCERTO_OTP_CPUMP2PGM_COUNTER);
-	writel(dataout_counter, COMCERTO_OTP_DATA_OUT_COUNTER);
+	otp_writel(pgm2cpump_counter, COMCERTO_OTP_PGM2CPUMP_COUNTER);
+	otp_writel(cpump2web_counter, COMCERTO_OTP_CPUMP2WEB_COUNTER);
+	otp_writel(web_counter, COMCERTO_OTP_WEB_COUNTER);
+	otp_writel(web2cpump_counter, COMCERTO_OTP_WEB2CPUMP_COUNTER);
+	otp_writel(cpump2pgm_counter, COMCERTO_OTP_CPUMP2PGM_COUNTER);
+	otp_writel(dataout_counter, COMCERTO_OTP_DATA_OUT_COUNTER);
 
 	write_protect_unlock();
 
 	udelay(1);
 
 	/* rstb drive 0 */
-	writel(0x0, COMCERTO_OTP_RSTB_INPUT);
+	otp_writel(0x0, COMCERTO_OTP_RSTB_INPUT);
 	/* Wait for at least 20nsec */
 	ndelay(20);
 
 	/* rstb drive 1 to have pulse  */
-	writel(0x1, COMCERTO_OTP_RSTB_INPUT);
+	otp_writel(0x1, COMCERTO_OTP_RSTB_INPUT);
 	/* Wait for at least 1usec */
 	udelay(1);
 
@@ -191,7 +194,7 @@ int comcerto_otp_write_bits(loff_t bit_offset, uint8_t *write_data, size_t no_bi
 			otp_smart_write_sequence(bit_offset + i, write_data[i]);
 
 			/* Verify Data */
-			read_data = readl(COMCERTO_OTP_DATA_OUTPUT);
+			read_data = otp_readl(COMCERTO_OTP_DATA_OUTPUT);
 
 			/* Adjust bit offset */
 			read_data = ((read_data >> ((bit_offset+i) & 0x7)) & 0x1);
@@ -254,31 +257,31 @@ static inline int comcerto_otp_read(loff_t bit_offset, uint8_t *read_data, size_
 
 	/* configure the COMCERTO_OTP_DATA_OUT_COUNTER for read operation.
 	    70 nsec is needed except for blank check test, in which 1.5 usec is needed.*/
-	writel(dataout_counter, COMCERTO_OTP_DATA_OUT_COUNTER);
+	otp_writel(dataout_counter, COMCERTO_OTP_DATA_OUT_COUNTER);
 
 	write_protect_unlock();
 	udelay(1);
 
 	/* rstb drive 0 */
-	writel(0x0, COMCERTO_OTP_RSTB_INPUT);
+	otp_writel(0x0, COMCERTO_OTP_RSTB_INPUT);
 	/* Wait for at least 20nsec */
 	ndelay(20);
 	/* rstb drive 1 to have pulse  */
-	writel(0x1, COMCERTO_OTP_RSTB_INPUT);
+	otp_writel(0x1, COMCERTO_OTP_RSTB_INPUT);
 	/* Wait for at least 1usec */
 	udelay(1);
 
 	/* read_enable drive */
-	writel(0x1, COMCERTO_OTP_READEN_INPUT);
+	otp_writel(0x1, COMCERTO_OTP_READEN_INPUT);
 
 	do {
 		/* Write the desired address to the ADDR register */
-		writel(bit_offset, COMCERTO_OTP_ADDR_INPUT);
+		otp_writel(bit_offset, COMCERTO_OTP_ADDR_INPUT);
 
 		/* Wait for at least 70nsec/1.5usec depends on operation type */
 		ndelay(70);
 
-		read_tmp = readl(COMCERTO_OTP_DATA_OUTPUT);
+		read_tmp = otp_readl(COMCERTO_OTP_DATA_OUTPUT);
 		*(read_data + i++) = read_tmp & 0xFF;
 
 		bit_offset += 8;
@@ -286,10 +289,10 @@ static inline int comcerto_otp_read(loff_t bit_offset, uint8_t *read_data, size_
 	} while (no_bytes--);
 
 	/* reading is done make the read_enable low */
-	writel(0x0, COMCERTO_OTP_READEN_INPUT);
+	otp_writel(0x0, COMCERTO_OTP_READEN_INPUT);
 
 	/* lock CEB register, return to standby mode */
-	writel(0x1, COMCERTO_OTP_CEB_INPUT);
+	otp_writel(0x1, COMCERTO_OTP_CEB_INPUT);
 
 	mutex_unlock(&comcerto_otp_lock);
 
