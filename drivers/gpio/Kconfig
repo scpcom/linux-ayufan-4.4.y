@@ -43,6 +43,11 @@ menuconfig GPIOLIB
 
 if GPIOLIB
 
+config GPIO_BOX_RESET
+	def_tristate m
+	depends on GPIO_C2K
+	tristate "BOX reset button, TODO make it builtin"
+
 config GPIO_DEVRES
 	def_bool y
 	depends on HAS_IOMEM

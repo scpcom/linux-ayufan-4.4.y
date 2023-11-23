@@ -2,6 +2,10 @@
 
 ccflags-$(CONFIG_DEBUG_GPIO)	+= -DDEBUG
 
+obj-$(CONFIG_GPIO_BOX_RESET)	+= boxreset.o
+
+boxreset-objs := boxreset-main.o boxreset-uart.o
+
 obj-$(CONFIG_GPIO_DEVRES)	+= devres.o
 obj-$(CONFIG_GPIOLIB)		+= gpiolib.o
 obj-$(CONFIG_GPIOLIB)		+= gpiolib-legacy.o
