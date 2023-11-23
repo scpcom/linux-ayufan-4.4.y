@@ -764,11 +764,15 @@ static int genphy_config_advert(struct phy_device *phydev)
 	adv |= ethtool_adv_to_mii_adv_t(advertise);
 
 	if (adv != oldadv) {
+#ifndef CONFIG_BOXV2
+      		// solves bug 6315 and bug 6321
 		err = phy_write(phydev, MII_ADVERTISE, adv);
 
 		if (err < 0)
 			return err;
+#endif
 		changed = 1;
+
 	}
 
 	bmsr = phy_read(phydev, MII_BMSR);
@@ -796,11 +800,12 @@ static int genphy_config_advert(struct phy_device *phydev)
 		if (adv != oldadv)
 			changed = 1;
 	}
-
+#ifndef CONFIG_BOXV2
+        // solves bug 6315 and bug 6321
 	err = phy_write(phydev, MII_CTRL1000, adv);
 	if (err < 0)
 		return err;
-
+#endif
 	return changed;
 }
 
@@ -885,9 +890,11 @@ int genphy_config_aneg(struct phy_device *phydev)
 	/* Only restart aneg if we are advertising something different
 	 * than we were before.
 	 */
+#ifndef CONFIG_BOXV2
+        // solves bug 6315 and bug 6321
 	if (result > 0)
 		result = genphy_restart_aneg(phydev);
-
+#endif
 	return result;
 }
 EXPORT_SYMBOL(genphy_config_aneg);
@@ -1085,12 +1092,16 @@ static int gen10g_read_status(struct phy_device *phydev)
 int genphy_soft_reset(struct phy_device *phydev)
 {
 	int ret;
-
+#ifndef CONFIG_BOXV2
+        // solves bug 6315 and bug 6321
 	ret = phy_write(phydev, MII_BMCR, BMCR_RESET);
 	if (ret < 0)
 		return ret;
 
 	return phy_poll_reset(phydev);
+#else
+	return 0;
+#endif
 }
 EXPORT_SYMBOL(genphy_soft_reset);
 

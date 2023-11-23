@@ -66,6 +66,13 @@ config C2K_MFCN_EVM
 	help
 	  Say Y here if you intend to run this kernel with a C2K MFCN EVM.
 
+config BOXV2
+        bool "BOXV2"
+        depends on ARCH_M86XXX
+	select COMCERTO_UART0_SUPPORT
+        help
+          Say Y here if you intend to run this kernel with a Bitdefender BOXv2.
+
 config C2K_ASIC
 	bool "ASIC"
 	depends on ARCH_M86XXX
@@ -132,6 +139,12 @@ config COMCERTO_MEMBUF
 	  Linux user space applications setup a physical scatter buffer that can be used
 	  directly by the PFE. Currently the PFE hold tone generation feature requires
 	  this driver to be enabled.
+
+config BOXV2_USBEMMC
+        bool "BOXv2 USB/eMMC support"
+        default n
+        help
+          Say Y if you intend to use USB/eMMC on BOXv2 hardware.
 
 config COMCERTO_NUM_PCIES
 	int "Number of PCIe controllers to be enabled (0-2)"

@@ -262,6 +262,10 @@
 #define comcerto_timer5_get()		__raw_readl(COMCERTO_TIMER5_CURRENT_COUNT)
 
 /* Number of gemacs supported in comcerto 2000 */
+#ifdef CONFIG_BOXV2
+#define NUM_GEMAC_SUPPORT       2
+#else
 #define NUM_GEMAC_SUPPORT	3
+#endif
 
 #endif

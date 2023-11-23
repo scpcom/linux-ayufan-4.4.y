@@ -64,7 +64,10 @@ int ar8x_add_skew(struct phy_device *phydev)
 	tmp |= AR8x_DBG_RGMII_TXCLK_MASK;
 	ar8x_phy_dbg_write(phydev, AR8x_DBG_RGMII_TXCLK_CTRL, tmp);
 
+#ifndef CONFIG_BOXV2
+	// solves bug 6315 and bug 6321
 	err = genphy_restart_aneg(phydev);
+#endif
 
 	if (err < 0)
 		return err;

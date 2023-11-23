@@ -27,6 +27,8 @@
  */
 /* SER-DES Address space */
 
+/* enable or disable PCIe spread spectrum clock */
+#undef BOREA_PCIE_SSC
 
 typedef struct serdes_regs_s
 {
@@ -1673,15 +1675,29 @@ static struct serdes_regs_s pcie_phy_reg_file_24[] =
 	  /* Common CMU block */
   	  { 0x000 << 2, 0x06},
   	  { 0x001 << 2, 0x00},
+#ifdef BOREA_PCIE_SSC
+	  { 0x002 << 2, 0x0d}, // Switch on SSC. Output clock is enabled
+#else
   	  { 0x002 << 2, 0x09}, //
+#endif
  	  { 0x003 << 2, 0x00},
  	  { 0x004 << 2, 0x60}, //
  	  { 0x005 << 2, 0x09}, //
+#ifdef BOREA_PCIE_SSC
+	  { 0x006 << 2, 0x7e}, // Change for SSC
+	  { 0x007 << 2, 0xff}, // Change for SSC
+	  { 0x008 << 2, 0x03}, // Change for SSC
+#else
  	  { 0x006 << 2, 0x0e}, //
  	  { 0x007 << 2, 0x00},
  	  { 0x008 << 2, 0x00},
+#endif
  	  { 0x009 << 2, 0x00},
+#ifdef BOREA_PCIE_SSC
+ 	  { 0x00A << 2, 0x05}, // Change for SSC
+#else
  	  { 0x00A << 2, 0x00},
+#endif
  	  { 0x00B << 2, 0x00},
  	  { 0x00C << 2, 0x00},
  	  { 0x00D << 2, 0x00},

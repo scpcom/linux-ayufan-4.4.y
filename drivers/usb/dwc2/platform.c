@@ -45,8 +45,19 @@
 
 #include <linux/usb/of.h>
 
+#ifdef CONFIG_BOXV2
+#include <mach/reset.h>
+#include <mach/hardware.h>
+#include <linux/clk.h>
+#include <mach/comcerto-2000/pm.h>
+#endif
+
 #include "core.h"
 #include "hcd.h"
+
+#ifdef CONFIG_BOXV2
+static struct clk *usb2_clk;
+#endif
 
 static const char dwc2_driver_name[] = "dwc2";
 
@@ -136,6 +147,88 @@ static const struct of_device_id dwc2_of_match_table[] = {
 };
 MODULE_DEVICE_TABLE(of, dwc2_of_match_table);
 
+#ifdef CONFIG_BOXV2
+/**
+ * Platform specific initialization for USB 2 PHY
+ */
+static void comcerto_usb2_phy_init(void)
+{
+                uint32_t rd_data;
+
+#define COMCERTO_USB0_PHY_CTRL_REG0     (COMCERTO_DWC1_CFG_BASE + 0x000)
+#define COMCERTO_USB0_DWC_CFG_REGF              (USB2_PHY_BASE + 0x03C)
+
+
+                /* take device out of reset , enable clock. */
+                /* Programming the USB0 PHY CONTROL REGISTER */
+                /*      Bit[2]:usb0_vbusvldextsel - The internal Session Valid comparator is used.
+                 * Bit[3]:usb0_vbusvldext - The VBUS signal is not valid, and the pull-up resistor on D+ is disabled.
+                 * Bit[4]:usb0_otgdisable  - TThe OTG block is powered up.
+                 * Bit[17:16]:usb0_refclkdiv - Reference Clock Frequency Select, 48 MHz
+                 * Bit[21:20]:usb0_refclksel - The XO block uses an external, 2.5 V clock supplied on the XO pin.
+                 */
+                if(HAL_get_ref_clk() == REF_CLK_24MHZ)
+                        writel(0x00210000, COMCERTO_USB0_PHY_CTRL_REG0);  //24MHz ref clk
+                else
+                        writel(0x00220000, COMCERTO_USB0_PHY_CTRL_REG0);  //48MHz ref clk
+
+                /* Programming the IDSEL values to USB 2.0 Controller @ DWC_CFG_REGF register */
+                /* Configuring the usb2 controller to select the ID value from register */
+                rd_data = readl(COMCERTO_USB0_DWC_CFG_REGF);
+
+                /*      Bit[8]:usb0_id_sel - Selects from the register bit
+                 *      Bit[9]:usb1_id_sel - Selects from the register bit
+                 */
+                rd_data = ((rd_data & 0xFFFF11FF)| 0x00001100);  //For Host mode.
+                writel (rd_data, COMCERTO_USB0_DWC_CFG_REGF);
+
+
+                /* Programming USB2.0 controller with scale down value. */
+                /* Configuring the usb2 controller in scaledown disable mode */
+                rd_data = readl(COMCERTO_USB0_DWC_CFG_REGF);
+                rd_data = ((rd_data & 0xFFFFFFF0)| 0x0);
+                writel (rd_data, COMCERTO_USB0_DWC_CFG_REGF);
+}
+
+
+/**
+ * Platform specific initialization for Dwc OTG Controller
+ */
+static void comcerto_start_dwc_otg(void)
+{
+        /* Get the FAST-UART clk structure from DUS ,To be used for UART0/UART1 initilization */
+        usb2_clk = clk_get(NULL,"usb0");
+
+        /* Enable the Clock */
+        if (clk_enable(usb2_clk)){
+                pr_err("comcerto_start_dwc_otg:Unable to enable the usb2 clock \n");
+        }
+
+        /* USB 2.0 PHY Initialization */
+        comcerto_usb2_phy_init();
+
+        /* Continuing resets on usb2 controller+phy blocks */
+
+        /* APPLYING THE RESET TO USB2 UTMI */
+        c2000_block_reset(COMPONENT_UTMI_USB0, 1);
+
+        /* APPLYING THE RESET TO USB2 PHY */
+        c2000_block_reset(COMPONENT_USB0_PHY, 1);
+
+        /* APLLYING RESET TO USB2 AXI RESET */
+        c2000_block_reset(COMPONENT_AXI_USB0, 1);
+
+        /* Releasing the (POR) Power on Reset to usb2 nano phy block */
+        c2000_block_reset(COMPONENT_USB0_PHY, 0);
+
+        /* Releasing the UTMI Reset to usb2 controller block */
+        c2000_block_reset(COMPONENT_UTMI_USB0, 0);
+
+        /* Releasing the AHB Reset to usb2 controller block -- Bit[4]-USB3,Bit[3]-USB2 */
+        c2000_block_reset(COMPONENT_AXI_USB0, 0);
+}
+#endif
+
 /**
  * dwc2_driver_probe() - Called when the DWC_otg core is bound to the DWC_otg
  * driver
@@ -206,6 +299,11 @@ static int dwc2_driver_probe(struct platform_device *dev)
 	hsotg->regs = devm_ioremap_resource(&dev->dev, res);
 	if (IS_ERR(hsotg->regs))
 		return PTR_ERR(hsotg->regs);
+
+#ifdef CONFIG_BOXV2
+        /* Platform Specific initialization */
+        comcerto_start_dwc_otg();
+#endif
 
 	dev_dbg(&dev->dev, "mapped PA %08lx to VA %p\n",
 		(unsigned long)res->start, hsotg->regs);

@@ -136,8 +136,13 @@ struct pcie_app_reg app_regs[MAX_PCIE_PORTS] = {
 	}
 };
 
+#ifdef CONFIG_BOXV2
+/* Keeping all DDR area of 1G accesible for inbound transaction */
+#define INBOUND_ADDR_MASK	0x3FFFFFFF
+#else
 /* Keeping all DDR area of 512MB accesible for inbound transaction */
 #define INBOUND_ADDR_MASK	0x1FFFFFFF
+#endif
 
 
 #define PCIE_SETUP_iATU_IB_ENTRY( _pp, _view_port, _base, _limit, _ctl1, _ctl2, _target ) \
@@ -1774,7 +1779,7 @@ static int comcerto_pcie_bsp_link_init(struct pcie_port *pp, int nr, struct serd
 
 	mdelay(1); //After CMU locks wait for sometime
 
-#if defined(CONFIG_C2K_MFCN_EVM)
+#if defined(CONFIG_C2K_MFCN_EVM) || defined(CONFIG_BOXV2)
 	if(nr == 0){
 		GPIO_reset_external_device(COMPONENT_PCIE0,0);
 	}else{

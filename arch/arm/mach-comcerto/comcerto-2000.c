@@ -800,7 +800,7 @@ static struct resource comcerto_dwc_otg_resources[] = {
 };
 
 static struct platform_device comcerto_dwc_otg_device = {
-	.name			= "dwc_otg",
+	.name			= "dwc2",
 	.resource		= comcerto_dwc_otg_resources,
 	.num_resources	= ARRAY_SIZE(comcerto_dwc_otg_resources),
 	.dev = {
@@ -1043,11 +1043,17 @@ static struct platform_device *comcerto_common_devices[] __initdata = {
 	&comcerto_pmu,
 
 #if defined(CONFIG_COMCERTO_USB3_SUPPORT)
+#ifndef CONFIG_BOXV2
+	/* on BOXv2 we will not allow USB3.0 - kernel makefiles are a bit stupid to not disallow USB3 seleciton */
 	&comcerto_device_usb3,
+#endif
 #endif
 
 #if defined(CONFIG_COMCERTO_USB2_SUPPORT)
+#ifdef CONFIG_BOXV2_USBEMMC
+	/* only enable USB when required */
 	&comcerto_dwc_otg_device,
+#endif
 #endif
 
 #if defined(CONFIG_COMCERTO_SATA)

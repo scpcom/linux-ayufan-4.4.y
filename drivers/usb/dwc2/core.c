@@ -53,6 +53,10 @@
 #include <linux/usb/hcd.h>
 #include <linux/usb/ch11.h>
 
+#ifdef CONFIG_BOXV2
+#include <mach/reset.h>
+#endif
+
 #include "core.h"
 #include "hcd.h"
 
@@ -762,6 +766,9 @@ void dwc2_core_host_init(struct dwc2_hsotg *hsotg)
 		if (!(hprt0 & HPRT0_PWR)) {
 			hprt0 |= HPRT0_PWR;
 			writel(hprt0, hsotg->regs + HPRT0);
+#ifdef CONFIG_BOXV2
+			GPIO_reset_external_device(COMPONENT_USB_HUB, 0);
+#endif
 		}
 	}
 

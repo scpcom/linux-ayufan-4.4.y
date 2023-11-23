@@ -903,7 +903,11 @@ void pci_msi_shutdown(struct pci_dev *dev)
 	if (!pci_msi_enable || !dev || !dev->msi_enabled)
 		return;
 
+#ifdef CONFIG_BOXV2
+	BUG_ON(list_empty(dev_to_msi_list(&dev->dev)));
+#else
 	BUG_ON(dev_to_msi_list(&dev->dev));
+#endif
 	desc = first_msi_entry(&dev->dev);
 
 	msi_set_enable(dev, 0);

@@ -130,4 +130,19 @@ typedef enum {
 
 void GPIO_reset_external_device(int block,int state);
 #endif
+
+#if defined(CONFIG_BOXV2)
+/* C2000 device blocks which are to be put
+ * in out of reset(GPIO).
+ */
+typedef enum {
+        COMPONENT_PCIE0=0,
+        COMPONENT_PCIE1,
+        COMPONENT_USB_HUB,
+        COMPONENT_RGMII0,
+        COMPONENT_RGMII1
+}C2000_GEN2_GPIO_RESET_COMPONENT;
+
+void GPIO_reset_external_device(int block,int state);
+#endif
 #endif

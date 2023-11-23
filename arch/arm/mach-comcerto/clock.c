@@ -1012,6 +1012,13 @@ static int __init clk_disable_unused(void)
 		if ( strcmp(clk->name, "hfe_core") &&
 				strcmp(clk->name, "ipsec_eape") &&
 				strcmp(clk->name, "pll3") &&
+#ifdef CONFIG_BOXV2
+				/* on BOXv2 we need Ethernet PHY chip (Atheros AR8031) clock to be provided by LS1024A, so it shall not disable the clocks */
+				strcmp(clk->name, "ext_phy0") &&
+				strcmp(clk->name, "ext_phy1") &&
+				/* PLL2 is used for ext_phy0 and ext_phy1 */
+				strcmp(clk->name, "pll2") &&
+#endif
 				strcmp(clk->name, "arm_peri") )
 		{
 			pr_info("Clocks: disabled unused %s\n", clk->name);

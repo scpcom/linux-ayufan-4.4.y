@@ -544,6 +544,130 @@ void GPIO_reset_external_device(int block,int state)
 EXPORT_SYMBOL(GPIO_reset_external_device);
 #endif
 
+#if defined(CONFIG_BOXV2)
+void GPIO_reset_external_device(int block,int state)
+{
+	unsigned long flags;
+	spin_lock_irqsave(&gpio_lock, flags);
+
+	/* Blocks to be put in out of Reset and reset mode
+	 * 0 ----> out of reset
+	 * 1 ----> reset
+	 */
+	switch (block){
+		case COMPONENT_PCIE0:
+			if (state){
+                /* Wifi 5G DISABLE */
+                writel(readl(COMCERTO_GPIO_63_32_PIN_OUTPUT) & ~GPIO_PIN_57, COMCERTO_GPIO_63_32_PIN_OUTPUT);
+                writel( readl(COMCERTO_GPIO_63_32_PIN_OUTPUT_EN) | GPIO_PIN_57, COMCERTO_GPIO_63_32_PIN_OUTPUT_EN);
+                writel(readl(COMCERTO_GPIO_63_32_PIN_SELECT) & ~GPIO_PIN_57, COMCERTO_GPIO_63_32_PIN_SELECT);
+				/* Wifi 5G RST */
+				writel(readl(COMCERTO_GPIO_63_32_PIN_OUTPUT) & ~GPIO_PIN_59, COMCERTO_GPIO_63_32_PIN_OUTPUT);
+				writel( readl(COMCERTO_GPIO_63_32_PIN_OUTPUT_EN) | GPIO_PIN_59, COMCERTO_GPIO_63_32_PIN_OUTPUT_EN);
+				writel(readl(COMCERTO_GPIO_63_32_PIN_SELECT) & ~GPIO_PIN_59, COMCERTO_GPIO_63_32_PIN_SELECT);
+                /* Wifi 5G PERST */
+				writel(readl(COMCERTO_GPIO_63_32_PIN_OUTPUT) & ~GPIO_PIN_58, COMCERTO_GPIO_63_32_PIN_OUTPUT);
+                writel( readl(COMCERTO_GPIO_63_32_PIN_OUTPUT_EN) | GPIO_PIN_58, COMCERTO_GPIO_63_32_PIN_OUTPUT_EN);
+                writel(readl(COMCERTO_GPIO_63_32_PIN_SELECT) & ~GPIO_PIN_58, COMCERTO_GPIO_63_32_PIN_SELECT);
+
+			}else{
+                /* Wifi 5G DISABLE */
+                writel(readl(COMCERTO_GPIO_63_32_PIN_OUTPUT) & ~GPIO_PIN_57, COMCERTO_GPIO_63_32_PIN_OUTPUT);
+                writel( readl(COMCERTO_GPIO_63_32_PIN_OUTPUT_EN) & ~GPIO_PIN_57, COMCERTO_GPIO_63_32_PIN_OUTPUT_EN);
+                writel(readl(COMCERTO_GPIO_63_32_PIN_OUTPUT) | GPIO_PIN_57, COMCERTO_GPIO_63_32_PIN_OUTPUT);
+                writel(readl(COMCERTO_GPIO_63_32_PIN_SELECT) | GPIO_PIN_57, COMCERTO_GPIO_63_32_PIN_SELECT);
+				/* Wifi 5G RST */
+				writel(readl(COMCERTO_GPIO_63_32_PIN_OUTPUT) & ~GPIO_PIN_59, COMCERTO_GPIO_63_32_PIN_OUTPUT);
+				writel( readl(COMCERTO_GPIO_63_32_PIN_OUTPUT_EN) & ~GPIO_PIN_59, COMCERTO_GPIO_63_32_PIN_OUTPUT_EN);
+				writel(readl(COMCERTO_GPIO_63_32_PIN_OUTPUT) | GPIO_PIN_59, COMCERTO_GPIO_63_32_PIN_OUTPUT);
+				writel(readl(COMCERTO_GPIO_63_32_PIN_SELECT) | GPIO_PIN_59, COMCERTO_GPIO_63_32_PIN_SELECT);
+				/* Wifi 5G PERST */
+                writel(readl(COMCERTO_GPIO_63_32_PIN_OUTPUT) & ~GPIO_PIN_58, COMCERTO_GPIO_63_32_PIN_OUTPUT);
+                writel( readl(COMCERTO_GPIO_63_32_PIN_OUTPUT_EN) & ~GPIO_PIN_58, COMCERTO_GPIO_63_32_PIN_OUTPUT_EN);
+                writel(readl(COMCERTO_GPIO_63_32_PIN_OUTPUT) | GPIO_PIN_58, COMCERTO_GPIO_63_32_PIN_OUTPUT);
+                writel(readl(COMCERTO_GPIO_63_32_PIN_SELECT) | GPIO_PIN_58, COMCERTO_GPIO_63_32_PIN_SELECT);
+			}
+			break;
+		case COMPONENT_PCIE1:
+			if (state){
+				/* Wifi 2,4G DISABLE */
+                writel(readl(COMCERTO_GPIO_63_32_PIN_OUTPUT) & ~GPIO_PIN_53, COMCERTO_GPIO_63_32_PIN_OUTPUT);
+                writel( readl(COMCERTO_GPIO_63_32_PIN_OUTPUT_EN) | GPIO_PIN_53, COMCERTO_GPIO_63_32_PIN_OUTPUT_EN);
+                writel(readl(COMCERTO_GPIO_63_32_PIN_SELECT) & ~GPIO_PIN_53, COMCERTO_GPIO_63_32_PIN_SELECT);
+				/* Wifi 2,4G RST */
+				writel(readl(COMCERTO_GPIO_63_32_PIN_OUTPUT) & ~GPIO_PIN_55, COMCERTO_GPIO_63_32_PIN_OUTPUT);
+				writel( readl(COMCERTO_GPIO_63_32_PIN_OUTPUT_EN) | GPIO_PIN_55, COMCERTO_GPIO_63_32_PIN_OUTPUT_EN);
+				writel(readl(COMCERTO_GPIO_63_32_PIN_SELECT) & ~GPIO_PIN_55, COMCERTO_GPIO_63_32_PIN_SELECT);
+				/* Wifi 2,4G PERST */
+                writel(readl(COMCERTO_GPIO_63_32_PIN_OUTPUT) & ~GPIO_PIN_54, COMCERTO_GPIO_63_32_PIN_OUTPUT);
+                writel( readl(COMCERTO_GPIO_63_32_PIN_OUTPUT_EN) | GPIO_PIN_54, COMCERTO_GPIO_63_32_PIN_OUTPUT_EN);
+                writel(readl(COMCERTO_GPIO_63_32_PIN_SELECT) & ~GPIO_PIN_54, COMCERTO_GPIO_63_32_PIN_SELECT);
+			}else{
+				/* Wifi 2,4G DISABLE */
+                writel(readl(COMCERTO_GPIO_63_32_PIN_OUTPUT) & ~GPIO_PIN_53, COMCERTO_GPIO_63_32_PIN_OUTPUT);
+                writel( readl(COMCERTO_GPIO_63_32_PIN_OUTPUT_EN) & ~GPIO_PIN_53, COMCERTO_GPIO_63_32_PIN_OUTPUT_EN);
+                writel(readl(COMCERTO_GPIO_63_32_PIN_OUTPUT) | GPIO_PIN_53, COMCERTO_GPIO_63_32_PIN_OUTPUT);
+                writel(readl(COMCERTO_GPIO_63_32_PIN_SELECT) | GPIO_PIN_53, COMCERTO_GPIO_63_32_PIN_SELECT);
+				/* Wifi 2,4G RST */
+                writel(readl(COMCERTO_GPIO_63_32_PIN_OUTPUT) & ~GPIO_PIN_55, COMCERTO_GPIO_63_32_PIN_OUTPUT);
+                writel( readl(COMCERTO_GPIO_63_32_PIN_OUTPUT_EN) & ~GPIO_PIN_55, COMCERTO_GPIO_63_32_PIN_OUTPUT_EN);
+                writel(readl(COMCERTO_GPIO_63_32_PIN_OUTPUT) | GPIO_PIN_55, COMCERTO_GPIO_63_32_PIN_OUTPUT);
+                writel(readl(COMCERTO_GPIO_63_32_PIN_SELECT) | GPIO_PIN_55, COMCERTO_GPIO_63_32_PIN_SELECT);
+				/* Wifi 2,4G PERST */
+				writel(readl(COMCERTO_GPIO_63_32_PIN_OUTPUT) & ~GPIO_PIN_54, COMCERTO_GPIO_63_32_PIN_OUTPUT);
+				writel( readl(COMCERTO_GPIO_63_32_PIN_OUTPUT_EN) & ~GPIO_PIN_54, COMCERTO_GPIO_63_32_PIN_OUTPUT_EN);
+				writel(readl(COMCERTO_GPIO_63_32_PIN_OUTPUT) | GPIO_PIN_54, COMCERTO_GPIO_63_32_PIN_OUTPUT);
+				writel(readl(COMCERTO_GPIO_63_32_PIN_SELECT) | GPIO_PIN_54, COMCERTO_GPIO_63_32_PIN_SELECT);
+			}
+			break;
+		case COMPONENT_USB_HUB:
+#ifdef CONFIG_BOXV2_USBEMMC
+/* we just leave USB in reset */
+			if (state){
+#endif
+				writel(readl(COMCERTO_GPIO_63_32_PIN_OUTPUT) & ~GPIO_PIN_50, COMCERTO_GPIO_63_32_PIN_OUTPUT);
+				writel( readl(COMCERTO_GPIO_63_32_PIN_OUTPUT_EN) | GPIO_PIN_50, COMCERTO_GPIO_63_32_PIN_OUTPUT_EN);
+				writel(readl(COMCERTO_GPIO_63_32_PIN_SELECT) & ~GPIO_PIN_50, COMCERTO_GPIO_63_32_PIN_SELECT);
+#ifdef CONFIG_BOXV2_USBEMMC
+			}else{
+				writel(readl(COMCERTO_GPIO_63_32_PIN_OUTPUT) & ~GPIO_PIN_50, COMCERTO_GPIO_63_32_PIN_OUTPUT);
+				writel( readl(COMCERTO_GPIO_63_32_PIN_OUTPUT_EN) & ~GPIO_PIN_50, COMCERTO_GPIO_63_32_PIN_OUTPUT_EN);
+				writel(readl(COMCERTO_GPIO_63_32_PIN_OUTPUT) | GPIO_PIN_50, COMCERTO_GPIO_63_32_PIN_OUTPUT);
+				writel(readl(COMCERTO_GPIO_63_32_PIN_SELECT) | GPIO_PIN_50, COMCERTO_GPIO_63_32_PIN_SELECT);
+			}
+#endif
+			break;
+		case COMPONENT_RGMII0:
+			if (state){
+				writel(readl(COMCERTO_GPIO_PIN_SELECT_REG) & ~((GPIO_PIN_10 << 10) || (GPIO_PIN_10 << 11)), COMCERTO_GPIO_PIN_SELECT_REG);
+				writel( readl(COMCERTO_GPIO_OE_REG) | GPIO_PIN_10, COMCERTO_GPIO_OE_REG);
+				writel(readl(COMCERTO_GPIO_OUTPUT_REG) & ~GPIO_PIN_10, COMCERTO_GPIO_OUTPUT_REG);
+			}else{
+				writel(readl(COMCERTO_GPIO_PIN_SELECT_REG) & ~((GPIO_PIN_10 << 10) || (GPIO_10 << 11)), COMCERTO_GPIO_PIN_SELECT_REG);
+				writel( readl(COMCERTO_GPIO_OE_REG) | GPIO_PIN_10, COMCERTO_GPIO_OE_REG);
+				writel(readl(COMCERTO_GPIO_OUTPUT_REG) | GPIO_PIN_10, COMCERTO_GPIO_OUTPUT_REG);
+			}
+			break;
+		case COMPONENT_RGMII1:
+			if (state){
+				writel(readl(COMCERTO_GPIO_PIN_SELECT_REG) & ~((GPIO_PIN_11 << 11) || (GPIO_PIN_11 << 12)), COMCERTO_GPIO_PIN_SELECT_REG);
+				writel( readl(COMCERTO_GPIO_OE_REG) | GPIO_PIN_11, COMCERTO_GPIO_OE_REG);
+				writel(readl(COMCERTO_GPIO_OUTPUT_REG) & ~GPIO_PIN_11, COMCERTO_GPIO_OUTPUT_REG);
+			}else{
+				writel(readl(COMCERTO_GPIO_PIN_SELECT_REG) & ~((GPIO_PIN_11 << 11) || (GPIO_PIN_11 << 12)), COMCERTO_GPIO_PIN_SELECT_REG);
+				writel( readl(COMCERTO_GPIO_OE_REG) | GPIO_PIN_11, COMCERTO_GPIO_OE_REG);
+				writel(readl(COMCERTO_GPIO_OUTPUT_REG) | GPIO_PIN_11, COMCERTO_GPIO_OUTPUT_REG);
+			}
+			break;
+		default:
+			break;
+	}
+
+	spin_unlock_irqrestore(&gpio_lock,flags);
+}
+EXPORT_SYMBOL(GPIO_reset_external_device);
+#endif
+
 void reset_init(void)
 {
 	spin_lock_init(&reset_lock);
