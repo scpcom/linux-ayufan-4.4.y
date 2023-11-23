@@ -1388,6 +1388,8 @@ static int update_mctime(struct inode *inode)
 
 		mutex_lock(&ui->ui_mutex);
 		inode->i_mtime = inode->i_ctime = ubifs_current_time(inode);
+		if (IS_I_VERSION(inode))
+			inode_inc_iversion(inode);
 		release = ui->dirty;
 		mark_inode_dirty_sync(inode);
 		mutex_unlock(&ui->ui_mutex);
@@ -1514,6 +1516,8 @@ static int ubifs_vm_page_mkwrite(struct vm_area_struct *vma,
 
 		mutex_lock(&ui->ui_mutex);
 		inode->i_mtime = inode->i_ctime = ubifs_current_time(inode);
+		if (IS_I_VERSION(inode))
+			inode_inc_iversion(inode);
 		release = ui->dirty;
 		mark_inode_dirty_sync(inode);
 		mutex_unlock(&ui->ui_mutex);
