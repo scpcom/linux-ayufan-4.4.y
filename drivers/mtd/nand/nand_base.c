@@ -920,7 +920,7 @@ static int nand_wait(struct mtd_info *mtd, struct nand_chip *chip)
 {
 
 	int status, state = chip->state;
-	unsigned long timeo = (state == FL_ERASING ? 400 : 20);
+	unsigned long timeo = (state == FL_ERASING ? 400 : 400);
 
 	led_trigger_event(nand_led_trigger, LED_FULL);
 
