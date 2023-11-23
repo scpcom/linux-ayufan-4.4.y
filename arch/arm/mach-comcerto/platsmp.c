@@ -46,6 +46,9 @@
 #include <linux/workqueue.h>
 #include <linux/pid.h>
 
+#define a9dp_readl(r) __raw_readl((void*)(r))
+#define a9dp_writel(v,r) __raw_writel(v, (void*)(r))
+
 
 extern void comcerto_secondary_startup(void);
 extern void platform_cpu_die(unsigned int cpu);
@@ -111,46 +114,46 @@ int __cpuinit platform_boot_secondary(unsigned int cpu, struct task_struct *idle
 	 * Install the comcerto_secondary_startup pointer at 0x20
 	 * Physical Address
 	 */
-	//__raw_writel(BSYM(virt_to_phys(comcerto_secondary_startup)), phys_to_virt(0x20));
-	__raw_writel(virt_to_phys(comcerto_secondary_startup), phys_to_virt(0x20));	
-	__raw_writel((unsigned int)JUMP_TO_KERNEL_START_1 , phys_to_virt(0x00));
-	__raw_writel((unsigned int)JUMP_TO_KERNEL_START_2 , phys_to_virt(0x04));
+	//a9dp_writel(BSYM(virt_to_phys(comcerto_secondary_startup)), phys_to_virt(0x20));
+	a9dp_writel(virt_to_phys(comcerto_secondary_startup), phys_to_virt(0x20));	
+	a9dp_writel((unsigned int)JUMP_TO_KERNEL_START_1 , phys_to_virt(0x00));
+	a9dp_writel((unsigned int)JUMP_TO_KERNEL_START_2 , phys_to_virt(0x04));
 	smp_wmb();
 	__cpuc_flush_dcache_area((void *)phys_to_virt(0x00), 0x24);
 	outer_clean_range(__pa(phys_to_virt(0x00)), __pa(phys_to_virt(0x24)));
 
 	/* Get CPU 1 out of reset */
-	__raw_writel((__raw_readl(A9DP_PWR_CNTRL) & ~CORE_PWRDWN1), A9DP_PWR_CNTRL);
+	a9dp_writel((a9dp_readl(A9DP_PWR_CNTRL) & ~CORE_PWRDWN1), A9DP_PWR_CNTRL);
 #ifdef CONFIG_NEON
-	__raw_writel((__raw_readl(A9DP_CPU_RESET) | CPU1_RST | NEON1_RST), A9DP_CPU_RESET);
+	a9dp_writel((a9dp_readl(A9DP_CPU_RESET) | CPU1_RST | NEON1_RST), A9DP_CPU_RESET);
 #else
-	__raw_writel((__raw_readl(A9DP_CPU_RESET) | CPU1_RST), A9DP_CPU_RESET);
+	a9dp_writel((a9dp_readl(A9DP_CPU_RESET) | CPU1_RST), A9DP_CPU_RESET);
 #endif
-	__raw_writel((__raw_readl(A9DP_MPU_RESET) | CPU1_DBG_RST), A9DP_MPU_RESET);
+	a9dp_writel((a9dp_readl(A9DP_MPU_RESET) | CPU1_DBG_RST), A9DP_MPU_RESET);
 #ifdef CONFIG_NEON
-	__raw_writel((__raw_readl(A9DP_CPU_CLK_CNTRL) | CPU1_CLK_ENABLE | NEON1_CLK_ENABLE), A9DP_CPU_CLK_CNTRL);
+	a9dp_writel((a9dp_readl(A9DP_CPU_CLK_CNTRL) | CPU1_CLK_ENABLE | NEON1_CLK_ENABLE), A9DP_CPU_CLK_CNTRL);
 #else
-	__raw_writel((__raw_readl(A9DP_CPU_CLK_CNTRL) | CPU1_CLK_ENABLE), A9DP_CPU_CLK_CNTRL);
+	a9dp_writel((a9dp_readl(A9DP_CPU_CLK_CNTRL) | CPU1_CLK_ENABLE), A9DP_CPU_CLK_CNTRL);
 #endif
 	udelay(5); /* tPC = 5us */	
 #ifdef CONFIG_NEON
-	__raw_writel((__raw_readl(A9DP_CPU_CLK_CNTRL) & ~CPU1_CLK_ENABLE & ~NEON1_RST), A9DP_CPU_CLK_CNTRL);
+	a9dp_writel((a9dp_readl(A9DP_CPU_CLK_CNTRL) & ~CPU1_CLK_ENABLE & ~NEON1_RST), A9DP_CPU_CLK_CNTRL);
 #else
-	__raw_writel((__raw_readl(A9DP_CPU_CLK_CNTRL) & ~CPU1_CLK_ENABLE), A9DP_CPU_CLK_CNTRL);
+	a9dp_writel((a9dp_readl(A9DP_CPU_CLK_CNTRL) & ~CPU1_CLK_ENABLE), A9DP_CPU_CLK_CNTRL);
 #endif
 	ndelay(10); /* tCR = 10ns */
-	__raw_writel((__raw_readl(A9DP_MPU_RESET) & ~CPU1_DBG_RST), A9DP_MPU_RESET);
+	a9dp_writel((a9dp_readl(A9DP_MPU_RESET) & ~CPU1_DBG_RST), A9DP_MPU_RESET);
 #ifdef CONFIG_NEON
-	__raw_writel((__raw_readl(A9DP_CPU_RESET) & ~CPU1_RST & ~NEON1_RST), A9DP_CPU_RESET);
+	a9dp_writel((a9dp_readl(A9DP_CPU_RESET) & ~CPU1_RST & ~NEON1_RST), A9DP_CPU_RESET);
 #else
-	__raw_writel((__raw_readl(A9DP_CPU_RESET) & ~CPU1_RST), A9DP_CPU_RESET);
+	a9dp_writel((a9dp_readl(A9DP_CPU_RESET) & ~CPU1_RST), A9DP_CPU_RESET);
 #endif
-	__raw_writel((__raw_readl(A9DP_PWR_CNTRL) & ~CORE_PWRDWN1 & ~CLAMP_CORE1), A9DP_PWR_CNTRL);
+	a9dp_writel((a9dp_readl(A9DP_PWR_CNTRL) & ~CORE_PWRDWN1 & ~CLAMP_CORE1), A9DP_PWR_CNTRL);
 	ndelay(20); /* tRC2 = 20ns */
 #ifdef CONFIG_NEON
-	__raw_writel((__raw_readl(A9DP_CPU_CLK_CNTRL) | CPU1_CLK_ENABLE | NEON1_CLK_ENABLE), A9DP_CPU_CLK_CNTRL);
+	a9dp_writel((a9dp_readl(A9DP_CPU_CLK_CNTRL) | CPU1_CLK_ENABLE | NEON1_CLK_ENABLE), A9DP_CPU_CLK_CNTRL);
 #else
-	__raw_writel((__raw_readl(A9DP_CPU_CLK_CNTRL) | CPU1_CLK_ENABLE), A9DP_CPU_CLK_CNTRL);
+	a9dp_writel((a9dp_readl(A9DP_CPU_CLK_CNTRL) | CPU1_CLK_ENABLE), A9DP_CPU_CLK_CNTRL);
 #endif
 	pr_notice("CPU%d powered up\n", cpu);
 

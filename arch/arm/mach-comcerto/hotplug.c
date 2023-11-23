@@ -37,6 +37,9 @@
 #include <linux/wait.h>
 #include <linux/workqueue.h>
 
+#define a9dp_readl(r) __raw_readl((void*)(r))
+#define a9dp_writel(v,r) __raw_writel(v, (void*)(r))
+
 
 
 extern volatile int pen_release;
@@ -54,7 +57,7 @@ int platform_cpu_kill(unsigned int cpu)
 		int count = 5000;
 
 		do {
-			val = __raw_readl(A9DP_PWR_STAT);
+			val = a9dp_readl(A9DP_PWR_STAT);
 			mdelay(1);
 		} while (count-- && !(val & (1 << 1)));
 
@@ -63,24 +66,24 @@ int platform_cpu_kill(unsigned int cpu)
 			return -1;
 		}
 
-		val = __raw_readl(A9DP_CPU_CLK_CNTRL);
+		val = a9dp_readl(A9DP_CPU_CLK_CNTRL);
 
 #ifdef CONFIG_NEON
 		val &= ~NEON1_CLK_ENABLE;
 #endif
 		val &=  ~CPU1_CLK_ENABLE;
 
-		__raw_writel(val, A9DP_CPU_CLK_CNTRL);
+		a9dp_writel(val, A9DP_CPU_CLK_CNTRL);
 
 		ndelay(10); /* tCC = 10ns */
 
-		val = __raw_readl(A9DP_PWR_CNTRL);
+		val = a9dp_readl(A9DP_PWR_CNTRL);
 
-		__raw_writel(val | CLAMP_CORE1, A9DP_PWR_CNTRL);
+		a9dp_writel(val | CLAMP_CORE1, A9DP_PWR_CNTRL);
 
 		ndelay(20); /* tCP = 20ns */
 
-		__raw_writel(val | CLAMP_CORE1 | CORE_PWRDWN1, A9DP_PWR_CNTRL);
+		a9dp_writel(val | CLAMP_CORE1 | CORE_PWRDWN1, A9DP_PWR_CNTRL);
 
 		pr_notice("CPU%d powered down\n", cpu);
 	}
