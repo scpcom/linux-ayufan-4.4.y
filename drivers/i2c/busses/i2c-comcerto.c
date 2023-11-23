@@ -67,8 +67,8 @@ struct comcerto_i2c
 };
 
 #define REG_ADDR(i2c, offset)		((i2c)->membase + (offset))
-#define RD_REG(i2c, offset)		__raw_readb(REG_ADDR(i2c, offset))
-#define WR_REG(i2c, offset, byte)	__raw_writeb(byte, REG_ADDR(i2c, offset))
+#define RD_REG(i2c, offset)		__raw_readb((void*)REG_ADDR(i2c, offset))
+#define WR_REG(i2c, offset, byte)	__raw_writeb(byte, (void*)REG_ADDR(i2c, offset))
 #define RD_DATA(i2c)			RD_REG(i2c, COMCERTO_I2C_DATA)
 #define WR_DATA(i2c, byte)		WR_REG(i2c, COMCERTO_I2C_DATA, byte)
 #define RD_CNTR(i2c)			RD_REG(i2c, COMCERTO_I2C_CNTR)
