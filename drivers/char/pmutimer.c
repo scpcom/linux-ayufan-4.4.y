@@ -47,6 +47,8 @@
 #include <mach/comcerto-2000/pm.h>
 #include <linux/io.h>
 
+#define pmu_writel_relaxed(v,r) writel_relaxed(v, (void*)(r))
+
 /* name of the device, usually in /dev */
 #define PMUTIMER_NAME 					"pmutimer"
 #define PMUTIMER_DESC 					"C2000 PMU Timer"
@@ -165,7 +167,7 @@ static int pmu_timer_del(struct k_itimer *timr)
 		comcerto_timer_chain_kill(PMUTIMER_CHAIN);
 
 		/* Clear PMU Timer Information to PMU */
-		writel_relaxed(0x0, HOST_UTILPE_SHARED_TIMER_MAGIC);
+		pmu_writel_relaxed(0x0, HOST_UTILPE_SHARED_TIMER_MAGIC);
 	}
 	spin_unlock_irqrestore(&timers[0].lock, irqflags);
 	return 0;
@@ -198,10 +200,10 @@ static int pmu_timer_set(struct k_itimer *timr, int flags,
 
 
 	/* Pass PMU Timer Information to PMU */
-	writel_relaxed(COMCERTO_PMU_TIMER_MAGIC, HOST_UTILPE_SHARED_TIMER_MAGIC);
-	writel_relaxed(PMUTIMER_CHAIN, HOST_UTILPE_SHARED_TIMER_CHAINID);
-	writel_relaxed(period, HOST_UTILPE_SHARED_TIMER_PERIOD);
-	writel_relaxed(when, HOST_UTILPE_SHARED_TIMER_VALUE);
+	pmu_writel_relaxed(COMCERTO_PMU_TIMER_MAGIC, HOST_UTILPE_SHARED_TIMER_MAGIC);
+	pmu_writel_relaxed(PMUTIMER_CHAIN, HOST_UTILPE_SHARED_TIMER_CHAINID);
+	pmu_writel_relaxed(period, HOST_UTILPE_SHARED_TIMER_PERIOD);
+	pmu_writel_relaxed(when, HOST_UTILPE_SHARED_TIMER_VALUE);
 
 	comcerto_timer_chain_run(PMUTIMER_CHAIN, period, when);
 
@@ -269,10 +271,10 @@ static int comcerto_pmutimer_probe(struct platform_device *pdev)
 	posix_timers_register_clock(PMUTIMER_CLOCK, &pmutimer_clock);
 
 	/* Clear PMU Timer Information Area in IRAM */
-	writel_relaxed(0x0, HOST_UTILPE_SHARED_TIMER_MAGIC);
-	writel_relaxed(0x0, HOST_UTILPE_SHARED_TIMER_CHAINID);
-	writel_relaxed(0x0, HOST_UTILPE_SHARED_TIMER_PERIOD);
-	writel_relaxed(0x0, HOST_UTILPE_SHARED_TIMER_VALUE);
+	pmu_writel_relaxed(0x0, HOST_UTILPE_SHARED_TIMER_MAGIC);
+	pmu_writel_relaxed(0x0, HOST_UTILPE_SHARED_TIMER_CHAINID);
+	pmu_writel_relaxed(0x0, HOST_UTILPE_SHARED_TIMER_PERIOD);
+	pmu_writel_relaxed(0x0, HOST_UTILPE_SHARED_TIMER_VALUE);
 
 	printk(KERN_INFO "%s: v%s Initialized.. \n", PMUTIMER_DESC, PMUTIMER_VERSION);
 
