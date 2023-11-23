@@ -581,6 +581,14 @@ int do_vfs_ioctl(struct file *filp, unsigned int fd, unsigned int cmd,
 			error = -ENOTTY;
 		break;
 
+#ifdef CONFIG_BINFMT_ELF_SIGNATURE
+	#define FIOVERIFY 0x545F
+
+	case FIOVERIFY:
+		error = ioctl_verify(filp);
+		break;
+#endif
+
 	case FIFREEZE:
 		error = ioctl_fsfreeze(filp);
 		break;
