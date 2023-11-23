@@ -65,7 +65,7 @@ void c2k_pm_bitmask_store(unsigned int bitmask_value)
 	host_utilpe_shared_pmu_bitmask = bitmask_value;
 
 	/* Pass the bitmask info to UtilPE */
-	writel_relaxed(host_utilpe_shared_pmu_bitmask, HOST_UTILPE_SHARED_BITMASK);
+	writel_relaxed(host_utilpe_shared_pmu_bitmask, (void*)HOST_UTILPE_SHARED_BITMASK);
 }
 
 
@@ -310,20 +310,20 @@ static void C2k_pm_suspend(void)
 
 	p0 = (unsigned int *) comcerto_cpu_restore;
 
-	__raw_writel(virt_to_phys((unsigned int)p0), phys_to_virt(0x20));
+	__raw_writel(virt_to_phys(p0), phys_to_virt(0x20));
 	__raw_writel((unsigned int)JUMP_TO_RESUME_1 , phys_to_virt(0x00));
 	__raw_writel((unsigned int)JUMP_TO_RESUME_2 , phys_to_virt(0x04));
 	smp_wmb();
 	__cpuc_flush_dcache_area((void *)phys_to_virt(0x00), 0x24);
 	outer_clean_range(__pa(phys_to_virt(0x00)), __pa(phys_to_virt(0x24)));
 
-	printk(KERN_INFO "PM: C2000 Jump Location Installed ... -- 0x%x  -- 0x%x  -- 0x%x \n", (unsigned int)p0, (unsigned int)comcerto_cpu_restore, virt_to_phys((unsigned int)p0));
+	printk(KERN_INFO "PM: C2000 Jump Location Installed ... -- 0x%x  -- 0x%x  -- 0x%x \n", (unsigned int)p0, (unsigned int)comcerto_cpu_restore, virt_to_phys(p0));
 
 	printk(KERN_INFO "PM: Saving SCU Context ...\n");
-	save_a9_scu(&scu_data[0], (unsigned int *)COMCERTO_SCU_VADDR);
+	save_a9_scu(&scu_data[0], COMCERTO_SCU_VADDR);
 
 	printk(KERN_INFO "PM: Saving L2 Cache Context ...\n");
-	save_pl310(&pl310_data[0], (unsigned int *)COMCERTO_L310_VADDR);
+	save_pl310(&pl310_data[0], COMCERTO_L310_VADDR);
 
 	/* Pass the bitmask information to the PMU */
 	*(((volatile unsigned int *)(HOST_UTILPE_SHARED_ADDRESS))+4) = host_utilpe_shared_pmu_bitmask;
@@ -335,8 +335,8 @@ static void C2k_pm_suspend(void)
 
 	cpu_suspend(save_state, comcerto_do_sram_idle);
 
-	restore_a9_scu(&scu_data[0], (unsigned int *)COMCERTO_SCU_VADDR);
-	restore_pl310(&pl310_data[0], (unsigned int *)COMCERTO_L310_VADDR);
+	restore_a9_scu(&scu_data[0], COMCERTO_SCU_VADDR);
+	restore_pl310(&pl310_data[0], COMCERTO_L310_VADDR);
 
 	printk(KERN_INFO "PM: C2000  is re-starting from Suspend State ...\n");
 
