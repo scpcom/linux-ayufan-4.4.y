@@ -928,6 +928,7 @@ enum {
 	Opt_chk_data_crc,
 	Opt_no_chk_data_crc,
 	Opt_override_compr,
+	Opt_i_version,
 	Opt_err,
 };
 
@@ -939,6 +940,7 @@ static const match_table_t tokens = {
 	{Opt_chk_data_crc, "chk_data_crc"},
 	{Opt_no_chk_data_crc, "no_chk_data_crc"},
 	{Opt_override_compr, "compr=%s"},
+	{Opt_i_version, "i_version"},
 	{Opt_err, NULL},
 };
 
@@ -982,6 +984,7 @@ static int ubifs_parse_options(struct ubifs_info *c, char *options,
 		return 0;
 
 	while ((p = strsep(&options, ","))) {
+		struct super_block *sb = c->vfs_sb;
 		int token;
 
 		if (!*p)
@@ -1038,10 +1041,12 @@ static int ubifs_parse_options(struct ubifs_info *c, char *options,
 			c->default_compr = c->mount_opts.compr_type;
 			break;
 		}
+		case Opt_i_version:
+			sb->s_flags |= MS_I_VERSION;
+			break;
 		default:
 		{
 			unsigned long flag;
-			struct super_block *sb = c->vfs_sb;
 
 			flag = parse_standard_option(p);
 			if (!flag) {
