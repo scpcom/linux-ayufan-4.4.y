@@ -377,8 +377,11 @@ bool nf_ct_delete(struct nf_conn *ct, u32 portid, int report)
 		rcu_read_unlock();
 		return false;
 		}
-		nf_conntrack_ecache_work(nf_ct_net(ct));
-		set_bit(IPS_DYING_BIT, &ct->status);
+		if(!nf_ct_is_dying(ct))
+		{
+			nf_conntrack_ecache_work(nf_ct_net(ct));
+			set_bit(IPS_DYING_BIT, &ct->status);
+		}
 		nf_ct_delete_from_lists(ct);
 		nf_ct_put(ct);
 	} else {

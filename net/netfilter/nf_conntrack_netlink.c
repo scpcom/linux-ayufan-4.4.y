@@ -1922,6 +1922,7 @@ ctnetlink_new_conntrack(struct sock *ctnl, struct sk_buff *skb,
 		 * message. Don't broadcast the event and don't update the ct */
 		err = ctnetlink_change_permanent(ct, cda);
 		if ((err == 0) || (err == -ENOENT)) {
+			nf_ct_put(ct);
 			spin_unlock_bh(&nf_conntrack_expect_lock);
 			return err;
 		}
