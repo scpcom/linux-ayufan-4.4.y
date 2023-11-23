@@ -62,6 +62,9 @@
 #include <linux/clk.h>
 #include <mach/comcerto-2000/pm.h>
 
+#define usb_readl(r) readl((void*)(r))
+#define usb_writel(v,r) writel(v, (void*)(r))
+
 /* USB 3.0 clock */
 static struct clk *usb2_clk;
 
@@ -576,26 +579,26 @@ static void comcerto_usb2_phy_init(void)
 		 * Bit[21:20]:usb0_refclksel - The XO block uses an external, 2.5 V clock supplied on the XO pin.
 		 */
 		if(HAL_get_ref_clk() == REF_CLK_24MHZ)
-			writel(0x00210000, COMCERTO_USB0_PHY_CTRL_REG0);  //24MHz ref clk
+			usb_writel(0x00210000, COMCERTO_USB0_PHY_CTRL_REG0);  //24MHz ref clk
 		else
-			writel(0x00220000, COMCERTO_USB0_PHY_CTRL_REG0);  //48MHz ref clk
+			usb_writel(0x00220000, COMCERTO_USB0_PHY_CTRL_REG0);  //48MHz ref clk
 
 		/* Programming the IDSEL values to USB 2.0 Controller @ DWC_CFG_REGF register */
 		/* Configuring the usb2 controller to select the ID value from register */
-		rd_data = readl(COMCERTO_USB0_DWC_CFG_REGF);
+		rd_data = usb_readl(COMCERTO_USB0_DWC_CFG_REGF);
 
 		/*	Bit[8]:usb0_id_sel - Selects from the register bit
 		 *	Bit[9]:usb1_id_sel - Selects from the register bit
 		 */
 		rd_data = ((rd_data & 0xFFFF11FF)| 0x00001100);  //For Host mode.
-		writel (rd_data, COMCERTO_USB0_DWC_CFG_REGF);
+		usb_writel (rd_data, COMCERTO_USB0_DWC_CFG_REGF);
 
 
 		/* Programming USB2.0 controller with scale down value. */
 		/* Configuring the usb2 controller in scaledown disable mode */
-		rd_data = readl(COMCERTO_USB0_DWC_CFG_REGF);
+		rd_data = usb_readl(COMCERTO_USB0_DWC_CFG_REGF);
 		rd_data = ((rd_data & 0xFFFFFFF0)| 0x0);
-		writel (rd_data, COMCERTO_USB0_DWC_CFG_REGF);
+		usb_writel (rd_data, COMCERTO_USB0_DWC_CFG_REGF);
 }
 
 
@@ -1179,7 +1182,7 @@ int comcerto_usb2_bus_suspend(struct platform_device * pd, pm_message_t state)
 
 	/* PM Performance Enhancement : USB0 PD */
 	/* Common Block Power-Down Control and powering down all analog blocks */
-	writel(0x01220040, COMCERTO_USB0_PHY_CTRL_REG0);
+	usb_writel(0x01220040, COMCERTO_USB0_PHY_CTRL_REG0);
 
 	return error_status;
 }
@@ -1210,7 +1213,7 @@ int comcerto_usb2_bus_resume(struct platform_device *pd)
 
 	/* PM Performance Enhancement : USB0 PD */
 	/* Common Block Power-Down Control and powering down all analog blocks */
-	writel(0x00220000, COMCERTO_USB0_PHY_CTRL_REG0);
+	usb_writel(0x00220000, COMCERTO_USB0_PHY_CTRL_REG0);
 
 	/* Enable the Clock */
 	if (clk_enable(usb2_clk)){
