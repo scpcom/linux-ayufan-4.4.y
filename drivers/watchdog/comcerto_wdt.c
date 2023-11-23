@@ -69,8 +69,8 @@ static int comcerto_wdt_rst_status(void)
 
 	spin_lock_irqsave(&wdt_lock, flags);
 
-	if(__raw_readl(GNRL_DEVICE_STATUS) & AXI_WD_RST_ACTIVATED) {
-		__raw_writel(WD_STATUS_CLR | __raw_readl(DEVICE_RST_CNTRL), DEVICE_RST_CNTRL);
+	if(timer_readl(GNRL_DEVICE_STATUS) & AXI_WD_RST_ACTIVATED) {
+		timer_writel(WD_STATUS_CLR | timer_readl(DEVICE_RST_CNTRL), DEVICE_RST_CNTRL);
 		ret = 1;
 	}
 
@@ -97,7 +97,7 @@ static int comcerto_wdt_set_heartbeat(int t)
  */
 static void comcerto_wdt_set_timeout(void)
 {
-	__raw_writel(wd_heartbeat * COMCERTO_AHBCLK, COMCERTO_TIMER_WDT_HIGH_BOUND);
+	timer_writel(wd_heartbeat * COMCERTO_AHBCLK, COMCERTO_TIMER_WDT_HIGH_BOUND);
 }
 
 /*
@@ -110,9 +110,9 @@ static void comcerto_wdt_stop(void)
 
 	spin_lock_irqsave(&wdt_lock, flags);
 
-	wdt_control = __raw_readl(COMCERTO_TIMER_WDT_CONTROL);
+	wdt_control = timer_readl(COMCERTO_TIMER_WDT_CONTROL);
 
-	__raw_writel(wdt_control & ~COMCERTO_TIMER_WDT_CONTROL_TIMER_ENABLE, COMCERTO_TIMER_WDT_CONTROL);
+	timer_writel(wdt_control & ~COMCERTO_TIMER_WDT_CONTROL_TIMER_ENABLE, COMCERTO_TIMER_WDT_CONTROL);
 
 	spin_unlock_irqrestore(&wdt_lock, flags);
 
@@ -129,9 +129,9 @@ static void comcerto_wdt_start(void)
 
 	spin_lock_irqsave(&wdt_lock, flags);
 
-	wdt_control = __raw_readl(COMCERTO_TIMER_WDT_CONTROL);
+	wdt_control = timer_readl(COMCERTO_TIMER_WDT_CONTROL);
 
-	__raw_writel(wdt_control | COMCERTO_TIMER_WDT_CONTROL_TIMER_ENABLE, COMCERTO_TIMER_WDT_CONTROL);
+	timer_writel(wdt_control | COMCERTO_TIMER_WDT_CONTROL_TIMER_ENABLE, COMCERTO_TIMER_WDT_CONTROL);
 
 	comcerto_rst_cntrl_set(AXI_WD_RST_EN);
 
@@ -150,7 +150,7 @@ static void comcerto_wdt_config(void)
 {
 	comcerto_wdt_stop();
 
-	__raw_writel(~0, COMCERTO_TIMER_WDT_HIGH_BOUND);			/* write max timout */
+	timer_writel(~0, COMCERTO_TIMER_WDT_HIGH_BOUND);			/* write max timout */
 }
 
 /*
