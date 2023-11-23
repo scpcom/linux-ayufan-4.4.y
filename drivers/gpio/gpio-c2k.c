@@ -7,6 +7,9 @@
 #include <asm/io.h>
 #include <mach/gpio.h>
 
+#define gpio_raw_readl(r) __raw_readl((void*)(r))
+#define gpio_raw_writel(v,r) __raw_writel(v, (void*)(r))
+
 #define DRV_NAME "c2k-gpio"
 static DEFINE_SPINLOCK(c2k_gpio_lock);
 
@@ -27,9 +30,9 @@ static int c2k_is_gpio_rsvd(unsigned offset)
 static int c2k_gpio_get(struct gpio_chip *chip, unsigned offset)
 {
 	if (offset < 32)
-		return __raw_readl(COMCERTO_GPIO_INPUT_REG) & (0x1 << offset);
+		return gpio_raw_readl(COMCERTO_GPIO_INPUT_REG) & (0x1 << offset);
 	else if (offset < 64)
-		return __raw_readl(COMCERTO_GPIO_63_32_PIN_INPUT) & (0x1 << (offset - 32));
+		return gpio_raw_readl(COMCERTO_GPIO_63_32_PIN_INPUT) & (0x1 << (offset - 32));
 	else
 		return -EINVAL;
 }
@@ -39,19 +42,19 @@ static inline void __c2k_gpio_set(struct gpio_chip *chip, unsigned offset, int v
 	u32 data;
 
 	if (offset < 32) {
-		data = __raw_readl(COMCERTO_GPIO_OUTPUT_REG);
+		data = gpio_raw_readl(COMCERTO_GPIO_OUTPUT_REG);
 		if (value)
 			data |= (1 << offset);
 		else
 			data &= ~(1 << offset);
-		__raw_writel(data, COMCERTO_GPIO_OUTPUT_REG);
+		gpio_raw_writel(data, COMCERTO_GPIO_OUTPUT_REG);
 	} else {
-		data = __raw_readl(COMCERTO_GPIO_63_32_PIN_OUTPUT);
+		data = gpio_raw_readl(COMCERTO_GPIO_63_32_PIN_OUTPUT);
 		if (value)
 			data |= (1 << (offset - 32));
 		else
 			data &= ~(1 << (offset - 32));
-		__raw_writel(data, COMCERTO_GPIO_63_32_PIN_OUTPUT);
+		gpio_raw_writel(data, COMCERTO_GPIO_63_32_PIN_OUTPUT);
 	}
 }
 
@@ -84,9 +87,9 @@ static int c2k_direction_input(struct gpio_chip *chip, unsigned offset)
 	spin_lock_irqsave(&c2k_gpio_lock, flags);
 
 	if (offset < 32)
-		__raw_writel(__raw_readl(COMCERTO_GPIO_OE_REG) & ~(0x1 << offset), COMCERTO_GPIO_OE_REG);
+		gpio_raw_writel(gpio_raw_readl(COMCERTO_GPIO_OE_REG) & ~(0x1 << offset), COMCERTO_GPIO_OE_REG);
 	else
-		__raw_writel(__raw_readl(COMCERTO_GPIO_63_32_PIN_OUTPUT_EN) | (0x1 << (offset - 32)), COMCERTO_GPIO_63_32_PIN_OUTPUT_EN);
+		gpio_raw_writel(gpio_raw_readl(COMCERTO_GPIO_63_32_PIN_OUTPUT_EN) | (0x1 << (offset - 32)), COMCERTO_GPIO_63_32_PIN_OUTPUT_EN);
 
 	spin_unlock_irqrestore(&c2k_gpio_lock, flags);
 
@@ -108,10 +111,10 @@ static int c2k_direction_output(struct gpio_chip *chip, unsigned offset, int val
 	spin_lock_irqsave(&c2k_gpio_lock, flags);
 
 	if (offset < 32) {
-		__raw_writel(__raw_readl(COMCERTO_GPIO_OE_REG) | (0x1 << offset), COMCERTO_GPIO_OE_REG);
+		gpio_raw_writel(gpio_raw_readl(COMCERTO_GPIO_OE_REG) | (0x1 << offset), COMCERTO_GPIO_OE_REG);
 		__c2k_gpio_set(chip, offset, value);
 	} else {
-		__raw_writel(__raw_readl(COMCERTO_GPIO_63_32_PIN_OUTPUT_EN) & ~(0x1 << (offset - 32)), COMCERTO_GPIO_63_32_PIN_OUTPUT_EN);
+		gpio_raw_writel(gpio_raw_readl(COMCERTO_GPIO_63_32_PIN_OUTPUT_EN) & ~(0x1 << (offset - 32)), COMCERTO_GPIO_63_32_PIN_OUTPUT_EN);
 		__c2k_gpio_set(chip, offset, value);
 	}
 
