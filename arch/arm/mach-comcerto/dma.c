@@ -11,6 +11,9 @@
 #include <asm/io.h>
 #include <linux/module.h>
 
+#define dma_readl(r) readl((void*)(r))
+#define dma_writel(v,r) writel(v, (void*)(r))
+
 
 
 
@@ -28,7 +31,7 @@ retcode dma_xfer_cmplete_chk(unsigned int ch_no)
 
         while(channel_status != 0x0)
         {
-                channel_status = readl(DW_DMA_DMAC_CH_EN_REG);
+                channel_status = dma_readl(DW_DMA_DMAC_CH_EN_REG);
 		channel_status = channel_status & ((1 << ch_no) & 0xFF);
 	}
 
@@ -54,7 +57,7 @@ void dma_configure(unsigned int source_add, unsigned int target_add, unsigned in
 	unsigned int ch_cfg_h = 0;
 
 	/* DMA enable */
-	writel(DMA_GLOBAL_ENABLE, DW_DMA_DMAC_DMA_CFG_REG);
+	dma_writel(DMA_GLOBAL_ENABLE, DW_DMA_DMAC_DMA_CFG_REG);
 
 	/* verify channel is not busy, done with last transaction */
 	dma_xfer_cmplete_chk(ch_no);
@@ -62,38 +65,38 @@ void dma_configure(unsigned int source_add, unsigned int target_add, unsigned in
 	/* Configure DMA handshaking */
 
 	/* Writing a 1 to the Last Destination Transaction Request Register initiates a transaction. */
-	writel(((dma_channel << DMA_REG_WE_SHIFT) | (0x0 & 0xFF)), DW_DMA_DMAC_LST_DST_REG);
+	dma_writel(((dma_channel << DMA_REG_WE_SHIFT) | (0x0 & 0xFF)), DW_DMA_DMAC_LST_DST_REG);
 
 /* The type of transaction, single or burst, depends on the state of the corresponding channel bit
  * in the Single Source/Destination Transaction Request register.
  */
-	writel(((dma_channel << DMA_REG_WE_SHIFT) | (0x0 & 0xFF)), DW_DMA_DMAC_SGL_REQ_DST_REG);
+	dma_writel(((dma_channel << DMA_REG_WE_SHIFT) | (0x0 & 0xFF)), DW_DMA_DMAC_SGL_REQ_DST_REG);
 
 	/* Clear Interrupts on the channal */
 
 	/* Clear for IntTfr Interrupt */
-	writel(dma_channel, DW_DMA_DMAC_CLEAR_TFR);
+	dma_writel(dma_channel, DW_DMA_DMAC_CLEAR_TFR);
 	/* Clear for IntBlock Interrupt */
-	writel(dma_channel, DW_DMA_DMAC_CLEAR_BLK);
+	dma_writel(dma_channel, DW_DMA_DMAC_CLEAR_BLK);
 	/* Clear for IntSrcTran Interrupts */
-	writel(dma_channel, DW_DMA_DMAC_CLEAR_SRC_TRAN);
+	dma_writel(dma_channel, DW_DMA_DMAC_CLEAR_SRC_TRAN);
 	/* Clear for IntDstTran Interrupt */
-	writel(dma_channel, DW_DMA_DMAC_CLEAR_DST_TRAN);
+	dma_writel(dma_channel, DW_DMA_DMAC_CLEAR_DST_TRAN);
 	/* Clear for IntErr Interrupt */
-	writel(dma_channel, DW_DMA_DMAC_CLEAR_ERR);
+	dma_writel(dma_channel, DW_DMA_DMAC_CLEAR_ERR);
 
 	/* Set up Interrupt Mask registers */
 
 	/* Mask for IntTfr Interrupt */
-	writel(((dma_channel << DMA_REG_WE_SHIFT) | (0x0 & 0xFF)), DW_DMA_DMAC_MASK_TFR);
+	dma_writel(((dma_channel << DMA_REG_WE_SHIFT) | (0x0 & 0xFF)), DW_DMA_DMAC_MASK_TFR);
 	/* Mask for IntBlock Interrupt */
-	writel(((dma_channel << DMA_REG_WE_SHIFT) | dma_channel), DW_DMA_DMAC_MASK_BLOCK);
+	dma_writel(((dma_channel << DMA_REG_WE_SHIFT) | dma_channel), DW_DMA_DMAC_MASK_BLOCK);
 	/* Mask for IntSrcTran Interrupt */
-	writel(((dma_channel << DMA_REG_WE_SHIFT) | dma_channel), DW_DMA_DMAC_MASK_SRC_TRAN);
+	dma_writel(((dma_channel << DMA_REG_WE_SHIFT) | dma_channel), DW_DMA_DMAC_MASK_SRC_TRAN);
 	/* Mask for IntDstTran Interrupt */
-	writel(((dma_channel << DMA_REG_WE_SHIFT) | dma_channel), DW_DMA_DMAC_MASK_DST_TRAN);
+	dma_writel(((dma_channel << DMA_REG_WE_SHIFT) | dma_channel), DW_DMA_DMAC_MASK_DST_TRAN);
 	/* Mask for IntErr Interrupt */
-	writel(((dma_channel << DMA_REG_WE_SHIFT) | (0x0 & 0xFF)), DW_DMA_DMAC_MASK_ERR);
+	dma_writel(((dma_channel << DMA_REG_WE_SHIFT) | (0x0 & 0xFF)), DW_DMA_DMAC_MASK_ERR);
 
 	/* configure channel specific registers */
 	if( ch_no != 0 )
@@ -108,7 +111,7 @@ void dma_configure(unsigned int source_add, unsigned int target_add, unsigned in
  * progress, this register is updated to reflect the source address of the current AHB transfer.
  */
 	/* SAR Address must be alligned to DMA_CTL_SRC_TR_WIDTH boundry */
-	writel(source_add, (DMA_CHANNEL_REG_SAR_BASE + ch_reg_multiplier));
+	dma_writel(source_add, (DMA_CHANNEL_REG_SAR_BASE + ch_reg_multiplier));
 
 	/* configure : Destination Address Register for Channel */
 
@@ -116,14 +119,14 @@ void dma_configure(unsigned int source_add, unsigned int target_add, unsigned in
  * progress, this register is updated to reflect the destination address of the current AHB transfer.
  */
 	/* DAR Address must be alligned to DMA_CTL_DST_TR_WIDTH boundry */
-	writel(target_add, (DMA_CHANNEL_REG_DAR_BASE + ch_reg_multiplier));
+	dma_writel(target_add, (DMA_CHANNEL_REG_DAR_BASE + ch_reg_multiplier));
 
 
 	/* configure : Control Register for Channel [32-63] */
 /* The number programmed into BLOCK_TS indicates the total number of single transactions
  * to perform for every block transfer; a single transaction is mapped to a single AMBA beat.
  */
-	writel(data_len, (DMA_CHANNEL_REG_CTL_BASE + ch_reg_multiplier + ch_no));
+	dma_writel(data_len, (DMA_CHANNEL_REG_CTL_BASE + ch_reg_multiplier + ch_no));
 
 	/* configure : Control Register for Channel [0-31] */
 	ch_ctrl_l = (((DMA_CTL_INT_EN & DMA_CTL_INT_EN_MASK) << DMA_CTL_INT_EN_SHIFT) |
@@ -141,10 +144,10 @@ void dma_configure(unsigned int source_add, unsigned int target_add, unsigned in
 				((DMA_CTL_LLP_DST_EN & DMA_CTL_LLP_DST_EN_MASK) << DMA_CTL_LLP_DST_EN_SHIFT) |
 				((DMA_CTL_LLP_SRC_EN & DMA_CTL_LLP_SRC_EN_MASK) << DMA_CTL_LLP_SRC_EN_SHIFT));
 
-	writel(ch_ctrl_l, (DMA_CHANNEL_REG_CTL_BASE + ch_reg_multiplier));
+	dma_writel(ch_ctrl_l, (DMA_CHANNEL_REG_CTL_BASE + ch_reg_multiplier));
 
 	/* configure : Linked List Pointer Register for Channel */
-	writel(0x0, (DMA_CHANNEL_REG_LLP_BASE + ch_reg_multiplier));
+	dma_writel(0x0, (DMA_CHANNEL_REG_LLP_BASE + ch_reg_multiplier));
 
 	/* configure : Configuration Register for Channel [32-63] */
 	ch_cfg_h = (((DMA_CFG_FCMODE & DMA_CFG_FCMODE_MASK) << DMA_CFG_FCMODE_SHIFT) |
@@ -155,7 +158,7 @@ void dma_configure(unsigned int source_add, unsigned int target_add, unsigned in
 			   ((ch_no /*DMA_CFG_SRC_PER*/ & DMA_CFG_SRC_PER_MASK) << DMA_CFG_SRC_PER_SHIFT) |
 			   ((DMA_CFG_DEST_PER & DMA_CFG_DEST_PER_MASK) << DMA_CFG_DEST_PER_SHIFT));
 
-	writel(ch_cfg_h, (DMA_CHANNEL_REG_CFG_BASE + ch_reg_multiplier + ch_no));
+	dma_writel(ch_cfg_h, (DMA_CHANNEL_REG_CFG_BASE + ch_reg_multiplier + ch_no));
 
 	/* configure : Configuration Register for Channel [0-31] */
 	ch_cfg_l = (((ch_no & DMA_CFG_CH_PRIOR_MASK) << DMA_CFG_CH_PRIOR_SHIFT) |
@@ -173,10 +176,10 @@ void dma_configure(unsigned int source_add, unsigned int target_add, unsigned in
 			   ((DMA_CFG_RELOAD_SRC & DMA_CFG_RELOAD_SRC_MASK) << DMA_CFG_RELOAD_SRC_SHIFT) |
 			   ((DMA_CFG_RELOAD_DST & DMA_CFG_RELOAD_DST_MASK) << DMA_CFG_RELOAD_DST_SHIFT));
 
-	writel(ch_cfg_l, (DMA_CHANNEL_REG_CFG_BASE + ch_reg_multiplier));
+	dma_writel(ch_cfg_l, (DMA_CHANNEL_REG_CFG_BASE + ch_reg_multiplier));
 
 	/* Enable the DMA channel */
-	writel(((dma_channel << DMA_REG_WE_SHIFT) | dma_channel), DW_DMA_DMAC_CH_EN_REG);
+	dma_writel(((dma_channel << DMA_REG_WE_SHIFT) | dma_channel), DW_DMA_DMAC_CH_EN_REG);
 
 	return ;
 }
@@ -194,7 +197,7 @@ int fast_uart_write(unsigned int len, const char *str)
 		else
 			dma_len = len;
 
-		while ((readl(DW_DMA_UART1_BASEADDR + UART_LSR) & LSR_TEMT) == 0) ;
+		while ((dma_readl(DW_DMA_UART1_BASEADDR + UART_LSR) & LSR_TEMT) == 0) ;
 
 		dma_configure((unsigned int) str, DW_DMA_UART1_BASEADDR + UART_THR, dma_len, DMA_CHANNEL_1);
 
