@@ -40,7 +40,7 @@ MODULE_LICENSE("GPL");
 #define SPEED_FULL_KHZ		400
 #define SPEED_NORMAL_KHZ	100
 
-static int force_poll = 0;
+static bool force_poll = false;
 static struct clk *clk_i2c;
 module_param(force_poll, bool, S_IRUGO);
 MODULE_PARM_DESC(force_poll, "Force polling mode: 0=interrupt mode, polling mode otherwise");
@@ -597,7 +597,7 @@ static int comcerto_i2c_probe(struct platform_device *pdev)
 	irq = platform_get_resource(pdev, IORESOURCE_IRQ, 0);
 	if (irq == NULL && !force_poll) {
 		dev_warn(i2c->dev, "%s: no IRQ specified in resources, polling mode forced\n", __FUNCTION__);
-		force_poll = 1;
+		force_poll = true;
 		i2c->irq = -1;
 	}
 
@@ -625,7 +625,7 @@ static int comcerto_i2c_probe(struct platform_device *pdev)
 		res = request_irq(i2c->irq, comcerto_i2c_interrupt, IRQF_SHARED, "I2C", i2c);
 		if (res < 0) {
 			dev_warn(i2c->dev, "%s: failed to request IRQ%d, polling mode forced\n", __FUNCTION__, i2c->irq);
-			force_poll = 1;
+			force_poll = true;
 			i2c->irq = -1;
 		}
 	}
