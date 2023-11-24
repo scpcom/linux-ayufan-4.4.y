@@ -570,24 +570,37 @@ static const struct file_operations disk4_io_err_proc_ops = {
 	write: disk4_io_err_write_proc_func
 };
 
-static int drive_bays_count_read_fun(char *buf, char **start, off_t offset,
-		int count, int *eof, void *data)
+static int drive_bays_count_read_fun(struct file *file, char __user *buff,
+		size_t count, loff_t *pos)
 {
 	int len;
+	char tmpbuf[64];
 
-	len = sprintf(buf, "%i\n", drive_bays);
+	len = sprintf(tmpbuf, "%i\n", drive_bays);
 
-	*eof = 1;
+	if (*pos != 0)
+		len = 0;
+	if (!buff)
+		return len;
+	if (copy_to_user(buff, tmpbuf, len))
+		len = 0;
+	else
+		*pos += len;
 
 	return len;
 }
 
-static int drive_bays_count_write_fun(struct file *file, const char __user *buffer,
-		unsigned long count, void *data)
+static int drive_bays_count_write_fun(struct file *file, const char __user *buff,
+		size_t count, loff_t *pos)
 {
 	/* do nothing */
 	return 0;
 }
+
+static const struct file_operations drive_bays_count_ops = {
+	read: drive_bays_count_read_fun,
+	write: drive_bays_count_write_fun
+};
 
 /* This semaphore is used to mediate the 0->1 reference get in the
  * face of object destruction (i.e. we can't allow a get on an
@@ -3851,12 +3864,7 @@ static int __init init_sd(void)
 	drive_bays_proc_root = proc_mkdir("drive_bays", NULL);
 	if (drive_bays_proc_root != NULL)
 	{
-		drive_bays_count_proc = create_proc_entry("count", 0644, drive_bays_proc_root);
-		if(drive_bays_count_proc != NULL)
-		{
-			drive_bays_count_proc->read_proc = drive_bays_count_read_fun;
-			drive_bays_count_proc->write_proc = drive_bays_count_write_fun;
-		}
+		drive_bays_count_proc = proc_create_data("count", 0644, drive_bays_proc_root, &drive_bays_count_ops, NULL);
 	}
 
 	for (i = 0; i < SD_MAJORS; i++) {
