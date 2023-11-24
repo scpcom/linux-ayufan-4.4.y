@@ -986,12 +986,12 @@ static int __init mac_addr_atoi(u8 mac_addr[], char *mac_addr_str)
 
 u8 c2k_mac_addr[3][14];
 
-static void __init mac_addr_setup(char *str)
+static int __init mac_addr_setup(char *str)
 {
 	int str_incr_cnt = 0;
 
 	if (*str++ != '=' || !*str)  /* No mac addr specified */
-		return;
+		return 0;
 
 	str_incr_cnt = mac_addr_atoi(c2k_mac_addr[0], str);
 
@@ -1002,6 +1002,8 @@ static void __init mac_addr_setup(char *str)
 	str += str_incr_cnt;
 
 	mac_addr_atoi(c2k_mac_addr[2], str);
+
+	return 0;
 }
 __setup("mac_addr", mac_addr_setup);
 
