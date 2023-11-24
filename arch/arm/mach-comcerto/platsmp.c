@@ -52,8 +52,8 @@
 
 extern void comcerto_secondary_startup(void);
 extern void platform_cpu_die(unsigned int cpu);
-extern void platform_cpu_disable(unsigned int cpu);
-extern void platform_cpu_kill(unsigned int cpu);
+extern int platform_cpu_disable(unsigned int cpu);
+extern int platform_cpu_kill(unsigned int cpu);
 
 static void __iomem *scu_base_addr(void)
 {
