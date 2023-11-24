@@ -106,7 +106,7 @@ int comcerto_dma_wait(void)
 
 	while(!status)
 	{
-		status = readl((u32)&mdma_out_desc->fstatus1);
+		status = readl(&mdma_out_desc->fstatus1);
 	}
 	printk("dma:: DMA is completed!!!!\n");
 
@@ -199,7 +199,7 @@ static void start_dma_test(void)
 	dst = kmalloc(BUF_LEN, GFP_DMA);
 	src = kmalloc(BUF_LEN, GFP_DMA);
 
-	printk (KERN_INFO "%s: dst=0x%x src=0x%x\n", __func__, dst, src);
+	printk (KERN_INFO "%s: dst=0x%x src=0x%x\n", __func__, (u32)dst, (u32)src);
 
 	for (i = 0; i < BUF_LEN; i++)
 		((u8 *)src)[i] = i;
@@ -207,7 +207,7 @@ static void start_dma_test(void)
 	dst_pa = __pa(dst);
 	src_pa = __pa(src);
 
-	printk (KERN_INFO "%s: dst=0x%x src=0x%x\n", __func__, dst_pa, src_pa);
+	printk (KERN_INFO "%s: dst=0x%lx src=0x%lx\n", __func__, dst_pa, src_pa);
 
 	mdma_transfer_single(dst_pa, src_pa, BUF_LEN);
 
@@ -296,7 +296,7 @@ static irqreturn_t c2k_dma_handle_interrupt(int irq, void *data)
 	}
 
 	if(intr_cause & IRQ_IRQFDON) {
-		if(readl((u32)&mdma_out_desc->fstatus1))
+		if(readl(&mdma_out_desc->fstatus1))
 		__raw_writel(IRQ_IRQFDON, IO2M_IRQ_STATUS);
 	}
 
@@ -350,7 +350,7 @@ static int comcerto_dma_probe(struct platform_device *pdev)
 {
 	struct resource      *io;
 	int                  irq;
-	void *aram_pool = IRAM_MEMORY_VADDR;
+	void *aram_pool = (void*)IRAM_MEMORY_VADDR;
 	int ret;
 
 	/* Retrieve related resources(mem, irq) from platform_device */
@@ -371,10 +371,10 @@ static int comcerto_dma_probe(struct platform_device *pdev)
 		goto err_ioremap;
 
 	//initializing
-	mdma_in_desc = (struct comcerto_xor_inbound_fdesc *) (aram_pool);
+	mdma_in_desc = (struct comcerto_memcpy_inbound_fdesc *) (aram_pool);
 	aram_pool += sizeof(struct comcerto_xor_inbound_fdesc);
-	aram_pool = (u32)(aram_pool + 15) & ~15;
-	mdma_out_desc = (struct comcerto_xor_outbound_fdesc *) (aram_pool);
+	aram_pool = (void*)((u32)(aram_pool + 15) & ~15);
+	mdma_out_desc = (struct comcerto_memcpy_outbound_fdesc *) (aram_pool);
 
 	mdma_in_desc_phy = virt_to_aram(mdma_in_desc);
 	mdma_out_desc_phy = virt_to_aram(mdma_out_desc);
