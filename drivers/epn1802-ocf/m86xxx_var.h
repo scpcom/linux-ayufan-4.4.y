@@ -22,6 +22,7 @@
 
 #include <asm/io.h>
 #include "m86xxx_utils.h"
+#include "cryptodev.h"
 #include "ocf-compat.h"
 
 
