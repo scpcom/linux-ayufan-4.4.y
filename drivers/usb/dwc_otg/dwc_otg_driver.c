@@ -60,6 +60,8 @@
 #include <mach/hardware.h>
 
 #include <linux/clk.h>
+#include <linux/usb.h>
+#include <linux/usb/hcd.h>
 #include <mach/comcerto-2000/pm.h>
 
 #define usb_readl(r) readl((void*)(r))
