@@ -102,105 +102,105 @@ static void __init board_gpio_init(void)
 	int need_sleep = 0;
 
 #ifdef CONFIG_COMCERTO_PFE_UART_SUPPORT
-	writel((readl(COMCERTO_GPIO_PIN_SELECT_REG) & ~PFE_UART_GPIO) | PFE_UART_BUS, COMCERTO_GPIO_PIN_SELECT_REG);
+	gpio_writel((gpio_readl(COMCERTO_GPIO_PIN_SELECT_REG) & ~PFE_UART_GPIO) | PFE_UART_BUS, COMCERTO_GPIO_PIN_SELECT_REG);
 	c2k_gpio_pin_stat.c2k_gpio_pins_0_31 |= PFE_UART_GPIO_PIN; /* GPIOs 12 & 13 are used for PFE_UART */
 #endif
 
 #if defined(CONFIG_SPI_MSPD_LOW_SPEED) || defined(CONFIG_SPI2_MSPD_LOW_SPEED)
 	/* enable SPI pins */
-	writel((readl(COMCERTO_GPIO_PIN_SELECT_REG1) & ~(SPI_MUX_GPIO_1)) | (SPI_MUX_BUS_1), COMCERTO_GPIO_PIN_SELECT_REG1);
-	writel((readl(COMCERTO_GPIO_63_32_PIN_SELECT) & ~(SPI_MUX_GPIO_2)) | (SPI_MUX_BUS_2), COMCERTO_GPIO_63_32_PIN_SELECT);
+	gpio_writel((gpio_readl(COMCERTO_GPIO_PIN_SELECT_REG1) & ~(SPI_MUX_GPIO_1)) | (SPI_MUX_BUS_1), COMCERTO_GPIO_PIN_SELECT_REG1);
+	gpio_writel((gpio_readl(COMCERTO_GPIO_63_32_PIN_SELECT) & ~(SPI_MUX_GPIO_2)) | (SPI_MUX_BUS_2), COMCERTO_GPIO_63_32_PIN_SELECT);
 	c2k_gpio_pin_stat.c2k_gpio_pins_0_31 |= SPI_MUX_GPIO_1_PIN; /* GPIOs 18,19, 21,22, 30,31 are used for SPI*/
 	c2k_gpio_pin_stat.c2k_gpio_pins_32_63 |= SPI_MUX_GPIO_2_PIN; /* GPIO 32 is used for SPI*/
 #endif
 
 #if defined(CONFIG_SPI_MSPD_HIGH_SPEED)
 	/* enable SPI pins */
-	writel((readl(COMCERTO_GPIO_PIN_SELECT_REG1) & ~(SPI_2_MUX_GPIO_1)) | (SPI_2_MUX_BUS_1), COMCERTO_GPIO_PIN_SELECT_REG1);
-	writel((readl(COMCERTO_GPIO_63_32_PIN_SELECT) & ~(SPI_2_MUX_GPIO_2)) | (SPI_2_MUX_BUS_2), COMCERTO_GPIO_63_32_PIN_SELECT);
+	gpio_writel((gpio_readl(COMCERTO_GPIO_PIN_SELECT_REG1) & ~(SPI_2_MUX_GPIO_1)) | (SPI_2_MUX_BUS_1), COMCERTO_GPIO_PIN_SELECT_REG1);
+	gpio_writel((gpio_readl(COMCERTO_GPIO_63_32_PIN_SELECT) & ~(SPI_2_MUX_GPIO_2)) | (SPI_2_MUX_BUS_2), COMCERTO_GPIO_63_32_PIN_SELECT);
 	c2k_gpio_pin_stat.c2k_gpio_pins_0_31 |= SPI_2_MUX_GPIO_1_PIN;
 	c2k_gpio_pin_stat.c2k_gpio_pins_32_63 |= SPI_2_MUX_GPIO_2_PIN;
 #endif
 
 #if defined(CONFIG_COMCERTO_I2C_SUPPORT)
-	writel((readl(COMCERTO_GPIO_PIN_SELECT_REG1) & ~I2C_GPIO) | I2C_BUS, COMCERTO_GPIO_PIN_SELECT_REG1);
+	gpio_writel((gpio_readl(COMCERTO_GPIO_PIN_SELECT_REG1) & ~I2C_GPIO) | I2C_BUS, COMCERTO_GPIO_PIN_SELECT_REG1);
 	c2k_gpio_pin_stat.c2k_gpio_pins_0_31 |= I2C_GPIO_PIN;
 #endif
 
 #if defined(CONFIG_MTD_NAND_COMCERTO) || defined(CONFIG_MTD_NAND_COMCERTO_MODULE)
-	writel((readl(COMCERTO_GPIO_PIN_SELECT_REG1) & ~NAND_GPIO) | NAND_BUS, COMCERTO_GPIO_PIN_SELECT_REG1);
+	gpio_writel((gpio_readl(COMCERTO_GPIO_PIN_SELECT_REG1) & ~NAND_GPIO) | NAND_BUS, COMCERTO_GPIO_PIN_SELECT_REG1);
 	c2k_gpio_pin_stat.c2k_gpio_pins_0_31 |= NAND_GPIO_PIN;
 #endif
 
 #if defined(CONFIG_MTD_COMCERTO_NOR)
-	writel((readl(COMCERTO_GPIO_PIN_SELECT_REG1) & ~NOR_GPIO) | NOR_BUS, COMCERTO_GPIO_PIN_SELECT_REG1);
+	gpio_writel((gpio_readl(COMCERTO_GPIO_PIN_SELECT_REG1) & ~NOR_GPIO) | NOR_BUS, COMCERTO_GPIO_PIN_SELECT_REG1);
 	c2k_gpio_pin_stat.c2k_gpio_pins_0_31 |= NOR_GPIO_PIN;
 #endif
 
 	// set GPIO pin select for GPIO[15:0]
-	//writel((readl(COMCERTO_GPIO_PIN_SELECT_REG) & ~PFE_UART_GPIO) | PFE_UART_BUS, COMCERTO_GPIO_PIN_SELECT_REG);
-	writel(0x05000000, COMCERTO_GPIO_PIN_SELECT_REG);	// GPIO[12] = PWM[4], GPIO[13] = PWM[5]
+	//gpio_writel((gpio_readl(COMCERTO_GPIO_PIN_SELECT_REG) & ~PFE_UART_GPIO) | PFE_UART_BUS, COMCERTO_GPIO_PIN_SELECT_REG);
+	gpio_writel(0x05000000, COMCERTO_GPIO_PIN_SELECT_REG);	// GPIO[12] = PWM[4], GPIO[13] = PWM[5]
 	c2k_gpio_pin_stat.c2k_gpio_pins_0_31 |= PFE_UART_GPIO_PIN; /* GPIOs 12 & 13 are used for PFE_UART */
 
-	printk(KERN_NOTICE "Pin Select for GPIO[15:0]: %08X\n", readl(COMCERTO_GPIO_PIN_SELECT_REG));
+	printk(KERN_NOTICE "Pin Select for GPIO[15:0]: %08X\n", gpio_readl(COMCERTO_GPIO_PIN_SELECT_REG));
 
 	// set GPIO pin select for GPIO[31:16]
-	//writel((readl(COMCERTO_GPIO_PIN_SELECT_REG1) & ~0xF000003F) | 0x0 , COMCERTO_GPIO_PIN_SELECT_REG1);
-	writel(0x00555540, COMCERTO_GPIO_PIN_SELECT_REG1);		// set all unused pins to "GPIO"
+	//gpio_writel((gpio_readl(COMCERTO_GPIO_PIN_SELECT_REG1) & ~0xF000003F) | 0x0 , COMCERTO_GPIO_PIN_SELECT_REG1);
+	gpio_writel(0x00555540, COMCERTO_GPIO_PIN_SELECT_REG1);		// set all unused pins to "GPIO"
 	c2k_gpio_pin_stat.c2k_gpio_pins_0_31 |= (0xC007 << 16);
 
-	printk(KERN_NOTICE "Pin Select for GPIO[31:16]: %08X\n", readl(COMCERTO_GPIO_PIN_SELECT_REG1));
+	printk(KERN_NOTICE "Pin Select for GPIO[31:16]: %08X\n", gpio_readl(COMCERTO_GPIO_PIN_SELECT_REG1));
 
 	// set Output Enable for GPIO[31:0] (0: Disable (default), 1: Enable)
-	//writel((readl(COMCERTO_GPIO_OE_REG) & ~0xFFFF) | 0xFF00, COMCERTO_GPIO_OE_REG);
-	writel(0xDFFFFF00, COMCERTO_GPIO_OE_REG);		// set all unused GPIO pins to "output"
+	//gpio_writel((gpio_readl(COMCERTO_GPIO_OE_REG) & ~0xFFFF) | 0xFF00, COMCERTO_GPIO_OE_REG);
+	gpio_writel(0xDFFFFF00, COMCERTO_GPIO_OE_REG);		// set all unused GPIO pins to "output"
 
-	printk(KERN_NOTICE "Output Enable for GPIO[31:0]: %08X\n", readl(COMCERTO_GPIO_OE_REG));
+	printk(KERN_NOTICE "Output Enable for GPIO[31:0]: %08X\n", gpio_readl(COMCERTO_GPIO_OE_REG));
 
 
 	// set GPIO pin select for GPIO[59:32]
-	//writel((readl(COMCERTO_GPIO_63_32_PIN_SELECT) & ~0x0FFF0179) | 0x0FFF0178 , COMCERTO_GPIO_63_32_PIN_SELECT);	// GPIO[12] = PWM[4], GPIO[13] = PWM[5]
-	writel(0x0FFFFFFE, COMCERTO_GPIO_63_32_PIN_SELECT);
+	//gpio_writel((gpio_readl(COMCERTO_GPIO_63_32_PIN_SELECT) & ~0x0FFF0179) | 0x0FFF0178 , COMCERTO_GPIO_63_32_PIN_SELECT);	// GPIO[12] = PWM[4], GPIO[13] = PWM[5]
+	gpio_writel(0x0FFFFFFE, COMCERTO_GPIO_63_32_PIN_SELECT);
 	c2k_gpio_pin_stat.c2k_gpio_pins_32_63 |= 0x0FFF0179;
 
-	printk(KERN_NOTICE "Pin Select for GPIO[59:32]: %08X\n", readl(COMCERTO_GPIO_63_32_PIN_SELECT));
+	printk(KERN_NOTICE "Pin Select for GPIO[59:32]: %08X\n", gpio_readl(COMCERTO_GPIO_63_32_PIN_SELECT));
 
 	// set GPIO pin select for GPIO[63:60]
-	writel(0x00000020, COMCERTO_GPIO_MISC_PIN_SELECT);
+	gpio_writel(0x00000020, COMCERTO_GPIO_MISC_PIN_SELECT);
 
-	printk(KERN_NOTICE "Pin Select for GPIO[63:60]: %08X\n", readl(COMCERTO_GPIO_MISC_PIN_SELECT));
+	printk(KERN_NOTICE "Pin Select for GPIO[63:60]: %08X\n", gpio_readl(COMCERTO_GPIO_MISC_PIN_SELECT));
 
 	// set Output Enable for GPIO[63:32] (1: Disable (default), 0: Enable)
-	//writel((readl(COMCERTO_GPIO_63_32_PIN_OUTPUT_EN) & ~0x0FFF0179) | 0x1, COMCERTO_GPIO_63_32_PIN_OUTPUT_EN);
-	writel(0x00000001, COMCERTO_GPIO_63_32_PIN_OUTPUT_EN);
+	//gpio_writel((gpio_readl(COMCERTO_GPIO_63_32_PIN_OUTPUT_EN) & ~0x0FFF0179) | 0x1, COMCERTO_GPIO_63_32_PIN_OUTPUT_EN);
+	gpio_writel(0x00000001, COMCERTO_GPIO_63_32_PIN_OUTPUT_EN);
 
-	printk(KERN_NOTICE "Output Enable for GPIO[63:32]: %08X\n", readl(COMCERTO_GPIO_63_32_PIN_OUTPUT_EN));
+	printk(KERN_NOTICE "Output Enable for GPIO[63:32]: %08X\n", gpio_readl(COMCERTO_GPIO_63_32_PIN_OUTPUT_EN));
 
 	// set CPU_P_RES(GPIO 37) to MCU normal mode(1)
-	writel(readl(COMCERTO_GPIO_63_32_PIN_OUTPUT) | GPIO_PIN_37, COMCERTO_GPIO_63_32_PIN_OUTPUT);
+	gpio_writel(gpio_readl(COMCERTO_GPIO_63_32_PIN_OUTPUT) | GPIO_PIN_37, COMCERTO_GPIO_63_32_PIN_OUTPUT);
 
 
 	// turn off all LEDS
-	writel((readl(COMCERTO_GPIO_63_32_PIN_OUTPUT) & ~ALL_LED_PINS), COMCERTO_GPIO_63_32_PIN_OUTPUT);
+	gpio_writel((gpio_readl(COMCERTO_GPIO_63_32_PIN_OUTPUT) & ~ALL_LED_PINS), COMCERTO_GPIO_63_32_PIN_OUTPUT);
 
 	// turn on sys led (it seems that the kernel timer doesn't work here!? only turn on SYS LED now)
-	writel((readl(COMCERTO_GPIO_63_32_PIN_OUTPUT) | GPIO_LED_SYS_GREEN), COMCERTO_GPIO_63_32_PIN_OUTPUT);
+	gpio_writel((gpio_readl(COMCERTO_GPIO_63_32_PIN_OUTPUT) | GPIO_LED_SYS_GREEN), COMCERTO_GPIO_63_32_PIN_OUTPUT);
 
 
 	// enable HD sequentially
-	if (!(readl(COMCERTO_GPIO_INPUT_REG) & GPIO_PIN_0))	// HD1 inserted
+	if (!(gpio_readl(COMCERTO_GPIO_INPUT_REG) & GPIO_PIN_0))	// HD1 inserted
 	{
 		printk(KERN_WARNING "\033[033mEnable HD1 ...\033[0m\n");
-		writel(readl(COMCERTO_GPIO_OUTPUT_REG) | GPIO_PIN_8, COMCERTO_GPIO_OUTPUT_REG);							// enable HD1
-		writel(readl(COMCERTO_GPIO_63_32_PIN_OUTPUT) | GPIO_LED_HDD1_GREEN, COMCERTO_GPIO_63_32_PIN_OUTPUT);	// set HD1 LED
+		gpio_writel(gpio_readl(COMCERTO_GPIO_OUTPUT_REG) | GPIO_PIN_8, COMCERTO_GPIO_OUTPUT_REG);							// enable HD1
+		gpio_writel(gpio_readl(COMCERTO_GPIO_63_32_PIN_OUTPUT) | GPIO_LED_HDD1_GREEN, COMCERTO_GPIO_63_32_PIN_OUTPUT);	// set HD1 LED
 		need_sleep = 1;
 	}
 
-	if (!(readl(COMCERTO_GPIO_INPUT_REG) & GPIO_PIN_2))	// HD3 inserted
+	if (!(gpio_readl(COMCERTO_GPIO_INPUT_REG) & GPIO_PIN_2))	// HD3 inserted
 	{
 		printk(KERN_WARNING "\033[033mEnable HD3 ...\033[0m\n");
-		writel(readl(COMCERTO_GPIO_OUTPUT_REG) | GPIO_PIN_10, COMCERTO_GPIO_OUTPUT_REG);						// enable HD3
-		writel(readl(COMCERTO_GPIO_63_32_PIN_OUTPUT) | GPIO_LED_HDD3_GREEN, COMCERTO_GPIO_63_32_PIN_OUTPUT);	// set HD3 LED
+		gpio_writel(gpio_readl(COMCERTO_GPIO_OUTPUT_REG) | GPIO_PIN_10, COMCERTO_GPIO_OUTPUT_REG);						// enable HD3
+		gpio_writel(gpio_readl(COMCERTO_GPIO_63_32_PIN_OUTPUT) | GPIO_LED_HDD3_GREEN, COMCERTO_GPIO_63_32_PIN_OUTPUT);	// set HD3 LED
 		need_sleep = 1;
 	}
 
@@ -210,19 +210,19 @@ static void __init board_gpio_init(void)
 		need_sleep = 0;
 	}
 
-	if (!(readl(COMCERTO_GPIO_INPUT_REG) & GPIO_PIN_1))	// HD2 inserted
+	if (!(gpio_readl(COMCERTO_GPIO_INPUT_REG) & GPIO_PIN_1))	// HD2 inserted
 	{
 		printk(KERN_WARNING "\033[033mEnable HD2 ...\033[0m\n");
-		writel(readl(COMCERTO_GPIO_OUTPUT_REG) | GPIO_PIN_9, COMCERTO_GPIO_OUTPUT_REG);							// enable HD2
-		writel(readl(COMCERTO_GPIO_63_32_PIN_OUTPUT) | GPIO_LED_HDD2_GREEN, COMCERTO_GPIO_63_32_PIN_OUTPUT);	// set HD2 LED
+		gpio_writel(gpio_readl(COMCERTO_GPIO_OUTPUT_REG) | GPIO_PIN_9, COMCERTO_GPIO_OUTPUT_REG);							// enable HD2
+		gpio_writel(gpio_readl(COMCERTO_GPIO_63_32_PIN_OUTPUT) | GPIO_LED_HDD2_GREEN, COMCERTO_GPIO_63_32_PIN_OUTPUT);	// set HD2 LED
 		need_sleep = 1;
 	}
 
-	if (!(readl(COMCERTO_GPIO_INPUT_REG) & GPIO_PIN_3))	// HD4 inserted
+	if (!(gpio_readl(COMCERTO_GPIO_INPUT_REG) & GPIO_PIN_3))	// HD4 inserted
 	{
 		printk(KERN_WARNING "\033[033mEnable HD4 ...\033[0m\n");
-		writel(readl(COMCERTO_GPIO_OUTPUT_REG) | GPIO_PIN_11, COMCERTO_GPIO_OUTPUT_REG);						// enable HD4
-		writel(readl(COMCERTO_GPIO_63_32_PIN_OUTPUT) | GPIO_LED_HDD4_GREEN, COMCERTO_GPIO_63_32_PIN_OUTPUT);	// set HD4 LED
+		gpio_writel(gpio_readl(COMCERTO_GPIO_OUTPUT_REG) | GPIO_PIN_11, COMCERTO_GPIO_OUTPUT_REG);						// enable HD4
+		gpio_writel(gpio_readl(COMCERTO_GPIO_63_32_PIN_OUTPUT) | GPIO_LED_HDD4_GREEN, COMCERTO_GPIO_63_32_PIN_OUTPUT);	// set HD4 LED
 		need_sleep = 1;
 	}
 
@@ -235,7 +235,7 @@ static void __init board_gpio_init(void)
 
 	// enable USB
 	printk(KERN_WARNING "\033[033mEnable USB ...\033[0m\n");
-	writel(readl(COMCERTO_GPIO_OUTPUT_REG) | GPIO_PIN_14, COMCERTO_GPIO_OUTPUT_REG);
+	gpio_writel(gpio_readl(COMCERTO_GPIO_OUTPUT_REG) | GPIO_PIN_14, COMCERTO_GPIO_OUTPUT_REG);
 }
 
 /* --------------------------------------------------------------------
