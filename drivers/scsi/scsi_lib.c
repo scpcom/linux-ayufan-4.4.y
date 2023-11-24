@@ -47,7 +47,8 @@
 #endif
 
 extern struct workqueue_struct *hdd_workqueue;
-static DECLARE_WORK(HDD_ERR_DETECT, NULL);
+static void hdd_error_handler(struct work_struct *in);
+static DECLARE_WORK(HDD_ERR_DETECT, hdd_error_handler);
 /*for hdd error*/
 extern atomic_t sata_device_num;
 #define DISK_NO_ERR	0
@@ -124,7 +125,7 @@ static struct scsi_host_sg_pool scsi_sg_pools[] = {
 struct kmem_cache *scsi_sdb_cache;
 
 
-void hdd_error_handler(struct work_struct *in)
+static void hdd_error_handler(struct work_struct *in)
 {
 	int ret;
 	char diskx[10];
@@ -1103,7 +1104,6 @@ void scsi_io_completion(struct scsi_cmnd *cmd, unsigned int good_bytes)
 			*/
 			/* for hdd error hander (send zylog and show fail on gui)*/
 			atomic_set(&sata_device_num, SATA_PORT);
-			PREPARE_WORK(&HDD_ERR_DETECT, hdd_error_handler);
 			queue_work(hdd_workqueue, &HDD_ERR_DETECT);
 		
 		
