@@ -472,7 +472,8 @@ static int comcerto_correct_ecc(struct mtd_info *mtd, uint8_t *dat,
  */
 static int comcerto_nand_write_page_hwecc(struct mtd_info *mtd,
 					struct nand_chip *chip,
-					const uint8_t *buf)
+					const uint8_t *buf,
+					int oob_required)
 {
 	int i, eccsize = chip->ecc.size;
 	int eccbytes = chip->ecc.bytes;
@@ -514,7 +515,8 @@ static int comcerto_nand_write_page_hwecc(struct mtd_info *mtd,
  *
  */
 static int comcerto_nand_read_page_hwecc(struct mtd_info *mtd,
-		struct nand_chip *chip, uint8_t *buf, int page)
+		struct nand_chip *chip, uint8_t *buf,
+		int oob_required, int page)
 {
 	struct nand_chip *nand_device = mtd->priv;
 	int i, eccsize = nand_device->ecc.size;
