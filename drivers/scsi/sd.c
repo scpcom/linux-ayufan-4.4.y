@@ -338,36 +338,89 @@ static void led_blinking_timer(unsigned long in_data)
 
 
 /* read file operations */
-static int disk1_io_err_read_proc_func(char *buf, char **start, off_t off, int count, int *eof, void *data)
+static int disk1_io_err_read_proc_func(struct file *file, char __user *buff,
+		size_t count, loff_t *pos)
 {
 	int len;
-	len = sprintf(buf,"%d\n", atomic_read(&disk1_io_err));
+	char tmpbuf[64];
+
+	len = sprintf(tmpbuf,"%d\n", atomic_read(&disk1_io_err));
+
+	if (*pos != 0)
+		len = 0;
+	if (!buff)
+		return len;
+	if (copy_to_user(buff, tmpbuf, len))
+		len = 0;
+	else
+		*pos += len;
+
 	return len;
 }
 
-static int disk2_io_err_read_proc_func(char *buf, char **start, off_t off, int count, int *eof, void *data)
+static int disk2_io_err_read_proc_func(struct file *file, char __user *buff,
+		size_t count, loff_t *pos)
 {
 	int len;
-	len = sprintf(buf,"%d\n", atomic_read(&disk2_io_err));
+	char tmpbuf[64];
+
+	len = sprintf(tmpbuf,"%d\n", atomic_read(&disk2_io_err));
+
+	if (*pos != 0)
+		len = 0;
+	if (!buff)
+		return len;
+	if (copy_to_user(buff, tmpbuf, len))
+		len = 0;
+	else
+		*pos += len;
+
 	return len;
 }
 
-static int disk3_io_err_read_proc_func(char *buf, char **start, off_t off, int count, int *eof, void *data)
+static int disk3_io_err_read_proc_func(struct file *file, char __user *buff,
+		size_t count, loff_t *pos)
 {
 	int len;
-	len = sprintf(buf,"%d\n", atomic_read(&disk3_io_err));
+	char tmpbuf[64];
+
+	len = sprintf(tmpbuf,"%d\n", atomic_read(&disk3_io_err));
+
+	if (*pos != 0)
+		len = 0;
+	if (!buff)
+		return len;
+	if (copy_to_user(buff, tmpbuf, len))
+		len = 0;
+	else
+		*pos += len;
+
 	return len;
 }
 
-static int disk4_io_err_read_proc_func(char *buf, char **start, off_t off, int count, int *eof, void *data)
+static int disk4_io_err_read_proc_func(struct file *file, char __user *buff,
+		size_t count, loff_t *pos)
 {
 	int len;
-	len = sprintf(buf,"%d\n", atomic_read(&disk4_io_err));
+	char tmpbuf[64];
+
+	len = sprintf(tmpbuf,"%d\n", atomic_read(&disk4_io_err));
+
+	if (*pos != 0)
+		len = 0;
+	if (!buff)
+		return len;
+	if (copy_to_user(buff, tmpbuf, len))
+		len = 0;
+	else
+		*pos += len;
+
 	return len;
 }
 
 /* write file operations */
-static int disk1_io_err_write_proc_func(struct file *file, const char __user *buf, unsigned long count, void *data)
+static int disk1_io_err_write_proc_func(struct file *file, const char __user *buf,
+		size_t count, loff_t *pos)
 {
 	char num[10];
 	int err_num;
@@ -396,7 +449,8 @@ static int disk1_io_err_write_proc_func(struct file *file, const char __user *bu
 	return count;
 }
 
-static int disk2_io_err_write_proc_func(struct file *file, const char __user *buf, unsigned long count, void *data)
+static int disk2_io_err_write_proc_func(struct file *file, const char __user *buf,
+		size_t count, loff_t *pos)
 {
 	char num[10];
 	int err_num;
@@ -427,7 +481,8 @@ static int disk2_io_err_write_proc_func(struct file *file, const char __user *bu
 
 }
 
-static int disk3_io_err_write_proc_func(struct file *file, const char __user *buf, unsigned long count, void *data)
+static int disk3_io_err_write_proc_func(struct file *file, const char __user *buf,
+		size_t count, loff_t *pos)
 {
 	char num[10];
 	int err_num;
@@ -456,7 +511,8 @@ static int disk3_io_err_write_proc_func(struct file *file, const char __user *bu
 	return count;
 }
 
-static int disk4_io_err_write_proc_func(struct file *file, const char __user *buf, unsigned long count, void *data)
+static int disk4_io_err_write_proc_func(struct file *file, const char __user *buf,
+		size_t count, loff_t *pos)
 {
 	char num[10];
 	int err_num;
@@ -486,6 +542,26 @@ static int disk4_io_err_write_proc_func(struct file *file, const char __user *bu
 
 	return count;
 }
+
+static const struct file_operations disk1_io_err_proc_ops = {
+	read: disk1_io_err_read_proc_func,
+	write: disk1_io_err_write_proc_func
+};
+
+static const struct file_operations disk2_io_err_proc_ops = {
+	read: disk2_io_err_read_proc_func,
+	write: disk2_io_err_write_proc_func
+};
+
+static const struct file_operations disk3_io_err_proc_ops = {
+	read: disk3_io_err_read_proc_func,
+	write: disk3_io_err_write_proc_func
+};
+
+static const struct file_operations disk4_io_err_proc_ops = {
+	read: disk4_io_err_read_proc_func,
+	write: disk4_io_err_write_proc_func
+};
 
 
 /* This semaphore is used to mediate the 0->1 reference get in the
@@ -3717,33 +3793,10 @@ static int __init init_sd(void)
 	disk_io_err_proc_root = proc_mkdir("disk_err_detect", NULL);
 	if (disk_io_err_proc_root != NULL)
 	{
-		disk1_io_err_proc = create_proc_entry("disk1_err", 0644, disk_io_err_proc_root);
-		if (disk1_io_err_proc != NULL)
-		{
-			disk1_io_err_proc->read_proc = disk1_io_err_read_proc_func;
-			disk1_io_err_proc->write_proc = disk1_io_err_write_proc_func;
-		}
-		
-		disk2_io_err_proc = create_proc_entry("disk2_err", 0644, disk_io_err_proc_root);
-		if (disk2_io_err_proc != NULL)
-		{
-			disk2_io_err_proc->read_proc = disk2_io_err_read_proc_func;
-			disk2_io_err_proc->write_proc = disk2_io_err_write_proc_func;
-		}
-		
-		disk3_io_err_proc = create_proc_entry("disk3_err", 0644, disk_io_err_proc_root);
-		if (disk3_io_err_proc != NULL)
-		{
-			disk3_io_err_proc->read_proc = disk3_io_err_read_proc_func;
-			disk3_io_err_proc->write_proc = disk3_io_err_write_proc_func;
-		}
-		
-		disk4_io_err_proc = create_proc_entry("disk4_err", 0644, disk_io_err_proc_root);
-		if (disk4_io_err_proc != NULL)
-		{
-			disk4_io_err_proc->read_proc = disk4_io_err_read_proc_func;
-			disk4_io_err_proc->write_proc = disk4_io_err_write_proc_func;
-		}
+		disk1_io_err_proc = proc_create_data("disk1_err", 0644, disk_io_err_proc_root, &disk1_io_err_proc_ops, NULL);
+		disk2_io_err_proc = proc_create_data("disk2_err", 0644, disk_io_err_proc_root, &disk2_io_err_proc_ops, NULL);
+		disk3_io_err_proc = proc_create_data("disk3_err", 0644, disk_io_err_proc_root, &disk3_io_err_proc_ops, NULL);
+		disk4_io_err_proc = proc_create_data("disk4_err", 0644, disk_io_err_proc_root, &disk4_io_err_proc_ops, NULL);
 	}
 
 	for (i = 0; i < SD_MAJORS; i++) {
