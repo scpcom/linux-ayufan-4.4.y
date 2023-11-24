@@ -210,7 +210,7 @@ err:
 
 static int eeprom_remove(struct i2c_client *client)
 {
-	sysfs_remove_bin_file(&client->dev.kobj, &eeprom_attr);
+	sysfs_remove_file(&client->dev.kobj, &eeprom_attr.attr);
 
 	return 0;
 }
