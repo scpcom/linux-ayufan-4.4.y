@@ -18,6 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 #include <linux/module.h>
+#include <linux/skbuff.h>
 
 
 //static int comcerto_wifi_rx_dummy_hdlr(struct sk_buff *skb);
