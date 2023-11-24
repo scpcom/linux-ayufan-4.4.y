@@ -123,6 +123,7 @@ int comcerto_dma_wait(void)
 
 #endif
 #endif
+	return 0;
 }
 
 static void mdma_transfer_single(u32 dst, u32 src, u32 size)
