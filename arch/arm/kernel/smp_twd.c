@@ -267,7 +267,7 @@ static void twd_get_clock(struct device_node *np)
 /*
  * Setup the local clock events for a CPU.
  */
-static int __cpuinit twd_timer_setup(void)
+static void __cpuinit twd_timer_setup(void)
 {
 	struct clock_event_device *clk = __this_cpu_ptr(twd_evt);
 	int cpu = smp_processor_id();
@@ -280,7 +280,7 @@ static int __cpuinit twd_timer_setup(void)
 		writel_relaxed(0, twd_base + TWD_TIMER_CONTROL);
 		clockevents_register_device(clk);
 		enable_percpu_irq(clk->irq, 0);
-		return 0;
+		return;
 	}
 	per_cpu(percpu_setup_called, cpu) = true;
 
@@ -304,8 +304,6 @@ static int __cpuinit twd_timer_setup(void)
 	clockevents_config_and_register(clk, twd_timer_rate,
 					0xf, 0xffffffff);
 	enable_percpu_irq(clk->irq, 0);
-
-	return 0;
 }
 
 static int twd_timer_cpu_notify(struct notifier_block *self,
