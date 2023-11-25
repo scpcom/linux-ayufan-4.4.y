@@ -470,7 +470,7 @@ void set_gpio_input(int gpio_bit)
 	gpio_writel(val, reg);
 }
 
-static int run_usermode_cmd(const char *cmd)
+int run_usermode_cmd(const char *cmd)
 {
 	char **argv;
 	static char *envp[] = {

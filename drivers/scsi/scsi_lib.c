@@ -29,9 +29,6 @@
 #include <scsi/scsi_eh.h>
 #include <scsi/scsi_host.h>
 
-// for call_usermodehelper
-#include <linux/kmod.h>
-
 #include "scsi_priv.h"
 #include "scsi_logging.h"
 
@@ -65,6 +62,8 @@ extern atomic_t disk4_io_err;
 extern atomic_t sata_blinking_times[MAX_HD_NUM];
 extern atomic_t sata_badblock_idf[MAX_HD_NUM];
 extern atomic_t sata_hd_accessing[MAX_HD_NUM];
+
+extern int run_usermode_cmd(const char *cmd);
 
 enum LED_ID {
 	LED_HDD1 = 0,
@@ -131,44 +130,39 @@ static void hdd_error_handler(struct work_struct *in)
 	int ret;
 	char diskx[10];
 	char cmdPath[] = "/usr/local/disk_error_hander.sh";
-	char* cmdArgv[] = {cmdPath, NULL, NULL};
-	char* cmdEnvp[] = {NULL};
+	char cmdLine[64];
 	int diskid = atomic_read(&sata_device_num);
 	
 	sprintf(diskx, "Disk%d", diskid);
-	cmdArgv[1] = diskx;
+	sprintf(cmdLine, "/bin/sh %s %s", cmdPath, diskx);
 	
 	switch(diskid)
 	{
 		case 1:
 			if ( atomic_read(&disk1_io_err) != DISK_ERR )
 			{
-				//cmdArgv and cmdEnvp must end of NULL to count their size
-				ret = call_usermodehelper(cmdPath, cmdArgv, cmdEnvp, UMH_WAIT_EXEC);
+				ret = run_usermode_cmd(cmdLine);
 				atomic_set(&disk1_io_err, DISK_ERR);
 			}
 			break;
 		case 2:
 			if ( atomic_read(&disk2_io_err) != DISK_ERR )
 			{
-				//cmdArgv and cmdEnvp must end of NULL to count their size
-				ret = call_usermodehelper(cmdPath, cmdArgv, cmdEnvp, UMH_WAIT_EXEC);
+				ret = run_usermode_cmd(cmdLine);
 				atomic_set(&disk2_io_err, DISK_ERR);
 			}
 			break;
 		case 3:
 			if ( atomic_read(&disk3_io_err) != DISK_ERR )
 			{
-				//cmdArgv and cmdEnvp must end of NULL to count their size
-				ret = call_usermodehelper(cmdPath, cmdArgv, cmdEnvp, UMH_WAIT_EXEC);
+				ret = run_usermode_cmd(cmdLine);
 				atomic_set(&disk3_io_err, DISK_ERR);
 			}
 			break;
 		case 4:
 			if ( atomic_read(&disk4_io_err) != DISK_ERR )
 			{
-				//cmdArgv and cmdEnvp must end of NULL to count their size
-				ret = call_usermodehelper(cmdPath, cmdArgv, cmdEnvp, UMH_WAIT_EXEC);
+				ret = run_usermode_cmd(cmdLine);
 				atomic_set(&disk4_io_err, DISK_ERR);
 			}
 			break;
