@@ -1010,7 +1010,11 @@ static struct irq_chip comcerto_msi_chip = {
 static int get_irq(int nvec, struct msi_desc *desc, int *pos)
 {
 	int irq, pos0, pos1, i;
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3, 19, 0)
 	struct pci_dev *pdev = container_of(desc->dev, struct pci_dev, dev);
+#else
+	struct pci_dev *pdev = desc->dev;
+#endif
 	struct pcie_port *pp = bus_to_port(pdev->bus->number);
 
 	pos0 = find_first_zero_bit(msi_irq_in_use[pp->port],
