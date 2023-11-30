@@ -206,7 +206,7 @@ static void __init board_gpio_init(void)
 
 	if (need_sleep)
 	{
-		msleep(6000);
+		msleep(8000);
 		need_sleep = 0;
 	}
 
@@ -228,7 +228,7 @@ static void __init board_gpio_init(void)
 
 	if (need_sleep)
 	{
-		msleep(6000);
+		msleep(8000);
 		need_sleep = 0;
 	}
 
