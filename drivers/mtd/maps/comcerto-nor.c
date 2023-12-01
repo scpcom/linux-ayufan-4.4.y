@@ -83,7 +83,7 @@ static int comcertoflash_probe(struct platform_device *pdev)
 
 	platform_set_drvdata(pdev, info);
 
-        err = mtd_device_parse_register(info->mtd, part_probes, pdev->resource->start,
+        err = mtd_device_parse_register(info->mtd, part_probes, (struct mtd_part_parser_data *)pdev->resource->start,
                         pdata->parts, pdata->nr_parts);
         if (err) {
                 printk(KERN_ERR "Could not parse partitions\n");
