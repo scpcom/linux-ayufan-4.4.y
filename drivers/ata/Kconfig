@@ -89,6 +89,15 @@ config SATA_AHCI
 
 	  If unsure, say N.
 
+config SATA_AHCI_MULTI_MSI
+	tristate "AHCI SATA multi MSI support"
+	depends on SATA_AHCI
+	default n
+	help
+	  This option enables multi MSI for AHCI Serial ATA.
+
+	  If unsure, say N.
+
 config SATA_AHCI_PLATFORM
 	tristate "Platform AHCI SATA support"
 	help

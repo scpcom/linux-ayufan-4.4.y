@@ -1424,11 +1424,14 @@ static void acer_sa5_271_workaround(struct ahci_host_priv *hpriv,
 static int ahci_init_interrupts(struct pci_dev *pdev, unsigned int n_ports,
 				struct ahci_host_priv *hpriv)
 {
+#ifdef CONFIG_SATA_AHCI_MULTI_MSI
 	int rc, nvec;
+#endif
 
 	if (hpriv->flags & AHCI_HFLAG_NO_MSI)
 		goto intx;
 
+#ifdef CONFIG_SATA_AHCI_MULTI_MSI
 	nvec = pci_msi_vec_count(pdev);
 	if (nvec < 0)
 		goto intx;
@@ -1457,6 +1460,7 @@ static int ahci_init_interrupts(struct pci_dev *pdev, unsigned int n_ports,
 	return nvec;
 
 single_msi:
+#endif
 	if (pci_enable_msi(pdev))
 		goto intx;
 	return 1;
@@ -1466,6 +1470,7 @@ intx:
 	return 0;
 }
 
+#ifdef CONFIG_SATA_AHCI_MULTI_MSI
 /**
  *	ahci_host_activate - start AHCI host, request IRQs and register it
  *	@host: target ATA host
@@ -1530,6 +1535,7 @@ out_free_irqs:
 
 	return rc;
 }
+#endif
 
 static int ahci_init_one(struct pci_dev *pdev, const struct pci_device_id *ent)
 {
@@ -1692,7 +1698,11 @@ static int ahci_init_one(struct pci_dev *pdev, const struct pci_device_id *ent)
 
 	n_msis = ahci_init_interrupts(pdev, n_ports, hpriv);
 	if (n_msis > 1)
+#ifdef CONFIG_SATA_AHCI_MULTI_MSI
 		hpriv->flags |= AHCI_HFLAG_MULTI_MSI;
+#else
+		return -EINVAL;
+#endif
 
 	host = ata_host_alloc_pinfo(&pdev->dev, ppi, n_ports);
 	if (!host)
@@ -1744,8 +1754,10 @@ static int ahci_init_one(struct pci_dev *pdev, const struct pci_device_id *ent)
 
 	pci_set_master(pdev);
 
+#ifdef CONFIG_SATA_AHCI_MULTI_MSI
 	if (hpriv->flags & AHCI_HFLAG_MULTI_MSI)
 		return ahci_host_activate(host, pdev->irq, n_msis);
+#endif
 
 	return ata_host_activate(host, pdev->irq, ahci_interrupt, IRQF_SHARED,
 				 &ahci_sht);

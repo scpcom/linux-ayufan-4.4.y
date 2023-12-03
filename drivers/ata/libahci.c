@@ -1812,6 +1812,7 @@ static void ahci_port_intr(struct ata_port *ap)
 	ahci_handle_port_interrupt(ap, port_mmio, status);
 }
 
+#ifdef CONFIG_SATA_AHCI_MULTI_MSI
 irqreturn_t ahci_thread_fn(int irq, void *dev_instance)
 {
 	struct ata_port *ap = dev_instance;
@@ -1901,6 +1902,7 @@ irqreturn_t ahci_hw_interrupt(int irq, void *dev_instance)
 	return IRQ_WAKE_THREAD;
 }
 EXPORT_SYMBOL_GPL(ahci_hw_interrupt);
+#endif
 
 irqreturn_t ahci_interrupt(int irq, void *dev_instance)
 {
@@ -2302,6 +2304,7 @@ static int ahci_port_start(struct ata_port *ap)
 	if (!pp)
 		return -ENOMEM;
 
+#ifdef CONFIG_SATA_AHCI_MULTI_MSI
 	if (ap->host->n_ports > 1) {
 		pp->irq_desc = devm_kzalloc(dev, 8, GFP_KERNEL);
 		if (!pp->irq_desc) {
@@ -2311,6 +2314,7 @@ static int ahci_port_start(struct ata_port *ap)
 		snprintf(pp->irq_desc, 8,
 			 "%s%d", dev_driver_string(dev), ap->port_no);
 	}
+#endif
 
 	/* check FBS capability */
 	if ((hpriv->cap & HOST_CAP_FBS) && sata_pmp_supported(ap)) {
@@ -2372,6 +2376,7 @@ static int ahci_port_start(struct ata_port *ap)
 	 */
 	pp->intr_mask = DEF_PORT_IRQ;
 
+#ifdef CONFIG_SATA_AHCI_MULTI_MSI
 	/*
 	 * Switch to per-port locking in case each port has its own MSI vector.
 	 */
@@ -2379,6 +2384,7 @@ static int ahci_port_start(struct ata_port *ap)
 		spin_lock_init(&pp->lock);
 		ap->lock = &pp->lock;
 	}
+#endif
 
 	ap->private_data = pp;
 
