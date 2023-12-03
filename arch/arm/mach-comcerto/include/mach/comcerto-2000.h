@@ -145,7 +145,7 @@
 #define COMCERTO_FASTSPI_IRAM_SIZE		SZ_512
 
 
-/* #define IO_SPACE_LIMIT					0 */
+#define IO_SPACE_LIMIT					0
 
 /* MDMA memory map */
 #define COMCERTO_APB_MDMA_SIZE          SZ_1K+SZ_4
