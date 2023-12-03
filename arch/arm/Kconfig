@@ -330,6 +330,7 @@ config ARCH_INTEGRATOR
 config ARCH_COMCERTO
 	bool "Mindspeed Comcerto"
 	select ARCH_SUPPORTS_MSI
+	select NEED_MACH_IO_H if PCI
 	select NEED_MACH_MEMORY_H
 	select ARCH_REQUIRE_GPIOLIB
 	select MIGHT_HAVE_PCI
