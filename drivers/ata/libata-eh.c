@@ -1,7 +1,7 @@
 /*
  *  libata-eh.c - libata error handling
  *
- *  Maintained by:  Tejun Heo <tj@kernel.org>
+ *  Maintained by:  Jeff Garzik <jgarzik@pobox.com>
  *    		    Please ALWAYS copy linux-ide@vger.kernel.org
  *		    on emails.
  *
@@ -95,13 +95,12 @@ enum {
  * represents timeout for that try.  The first try can be soft or
  * hardreset.  All others are hardreset if available.  In most cases
  * the first reset w/ 10sec timeout should succeed.  Following entries
- * are mostly for error handling, hotplug and those outlier devices that
- * take an exceptionally long time to recover from reset.
+ * are mostly for error handling, hotplug and retarded devices.
  */
 static const unsigned long ata_eh_reset_timeouts[] = {
 	10000,	/* most drives spin up by 10sec */
 	10000,	/* > 99% working drives spin up before 20sec */
-	35000,	/* give > 30 secs of idleness for outlier devices */
+	35000,	/* give > 30 secs of idleness for retarded devices */
 	 5000,	/* and sweet one last chance */
 	ULONG_MAX, /* > 1 min has elapsed, give up */
 };
@@ -605,7 +604,7 @@ void ata_scsi_error(struct Scsi_Host *host)
 	ata_scsi_port_error_handler(host, ap);
 
 	/* finish or retry handled scmd's and clean up */
-	WARN_ON(!list_empty(&eh_work_q));
+	WARN_ON(host->host_failed || !list_empty(&eh_work_q));
 
 	DPRINTK("EXIT\n");
 }
@@ -794,12 +793,12 @@ void ata_scsi_port_error_handler(struct Scsi_Host *host, struct ata_port *ap)
 		ata_for_each_link(link, ap, HOST_FIRST)
 			memset(&link->eh_info, 0, sizeof(link->eh_info));
 
-		/* end eh (clear host_eh_scheduled) while holding
-		 * ap->lock such that if exception occurs after this
-		 * point but before EH completion, SCSI midlayer will
+		/* Clear host_eh_scheduled while holding ap->lock such
+		 * that if exception occurs after this point but
+		 * before EH completion, SCSI midlayer will
 		 * re-initiate EH.
 		 */
-		ap->ops->end_eh(ap);
+		host->host_eh_scheduled = 0;
 
 		spin_unlock_irqrestore(ap->lock, flags);
 		ata_eh_release(ap);
@@ -1812,7 +1811,7 @@ static unsigned int ata_eh_analyze_tf(struct ata_queued_cmd *qc,
 	case ATA_DEV_ATA:
 		if (err & ATA_ICRC)
 			qc->err_mask |= AC_ERR_ATA_BUS;
-		if (err & (ATA_UNC | ATA_AMNF))
+		if (err & ATA_UNC)
 			qc->err_mask |= AC_ERR_MEDIA;
 		if (err & ATA_IDNF)
 			qc->err_mask |= AC_ERR_INVALID;
@@ -2086,26 +2085,6 @@ static unsigned int ata_eh_speed_down(struct ata_device *dev,
 }
 
 /**
- *	ata_eh_worth_retry - analyze error and decide whether to retry
- *	@qc: qc to possibly retry
- *
- *	Look at the cause of the error and decide if a retry
- * 	might be useful or not.  We don't want to retry media errors
- *	because the drive itself has probably already taken 10-30 seconds
- *	doing its own internal retries before reporting the failure.
- */
-static inline int ata_eh_worth_retry(struct ata_queued_cmd *qc)
-{
-	if (qc->err_mask & AC_ERR_MEDIA)
-		return 0;	/* don't retry media errors */
-	if (qc->flags & ATA_QCFLAG_IO)
-		return 1;	/* otherwise retry anything from fs stack */
-	if (qc->err_mask & AC_ERR_INVALID)
-		return 0;	/* don't retry these */
-	return qc->err_mask != AC_ERR_DEV;  /* retry if not dev error */
-}
-
-/**
  *	ata_eh_link_autopsy - analyze error and determine recovery action
  *	@link: host link to perform autopsy on
  *
@@ -2179,7 +2158,9 @@ static void ata_eh_link_autopsy(struct ata_link *link)
 			qc->err_mask &= ~(AC_ERR_DEV | AC_ERR_OTHER);
 
 		/* determine whether the command is worth retrying */
-		if (ata_eh_worth_retry(qc))
+		if (qc->flags & ATA_QCFLAG_IO ||
+		    (!(qc->err_mask & AC_ERR_INVALID) &&
+		     qc->err_mask != AC_ERR_DEV))
 			qc->flags |= ATA_QCFLAG_RETRY;
 
 		/* accumulate error info */
@@ -2404,7 +2385,7 @@ static void ata_eh_link_report(struct ata_link *link)
 	struct ata_port *ap = link->ap;
 	struct ata_eh_context *ehc = &link->eh_context;
 	const char *frozen, *desc;
-	char tries_buf[6] = "";
+	char tries_buf[6];
 	int tag, nr_failed = 0;
 
 	if (ehc->i.flags & ATA_EHI_QUIET)
@@ -2435,8 +2416,9 @@ static void ata_eh_link_report(struct ata_link *link)
 	if (ap->pflags & ATA_PFLAG_FROZEN)
 		frozen = " frozen";
 
+	memset(tries_buf, 0, sizeof(tries_buf));
 	if (ap->eh_tries < ATA_EH_MAX_TRIES)
-		snprintf(tries_buf, sizeof(tries_buf), " t%d",
+		snprintf(tries_buf, sizeof(tries_buf) - 1, " t%d",
 			 ap->eh_tries);
 
 	if (ehc->i.dev) {
@@ -2557,12 +2539,11 @@ static void ata_eh_link_report(struct ata_link *link)
 		}
 
 		if (cmd->command != ATA_CMD_PACKET &&
-		    (res->feature & (ATA_ICRC | ATA_UNC | ATA_AMNF |
-				     ATA_IDNF | ATA_ABORTED)))
-			ata_dev_err(qc->dev, "error: { %s%s%s%s%s}\n",
+		    (res->feature & (ATA_ICRC | ATA_UNC | ATA_IDNF |
+				     ATA_ABORTED)))
+			ata_dev_err(qc->dev, "error: { %s%s%s%s}\n",
 			  res->feature & ATA_ICRC ? "ICRC " : "",
 			  res->feature & ATA_UNC ? "UNC " : "",
-			  res->feature & ATA_AMNF ? "AMNF " : "",
 			  res->feature & ATA_IDNF ? "IDNF " : "",
 			  res->feature & ATA_ABORTED ? "ABRT " : "");
 #endif

@@ -1,7 +1,7 @@
 /*
  *  libahci.c - Common AHCI SATA low-level routines
  *
- *  Maintained by:  Tejun Heo <tj@kernel.org>
+ *  Maintained by:  Jeff Garzik <jgarzik@pobox.com>
  *    		    Please ALWAYS copy linux-ide@vger.kernel.org
  *		    on emails.
  *
@@ -35,6 +35,7 @@
 #include <linux/kernel.h>
 #include <linux/gfp.h>
 #include <linux/module.h>
+#include <linux/init.h>
 #include <linux/blkdev.h>
 #include <linux/delay.h>
 #include <linux/interrupt.h>
@@ -796,16 +797,8 @@ static void ahci_start_port(struct ata_port *ap)
 				rc = ap->ops->transmit_led_message(ap,
 							       emp->led_state,
 							       4);
-				/*
-				 * If busy, give a breather but do not
-				 * release EH ownership by using msleep()
-				 * instead of ata_msleep().  EM Transmit
-				 * bit is busy for the whole host and
-				 * releasing ownership will cause other
-				 * ports to fail the same way.
-				 */
 				if (rc == -EBUSY)
-					msleep(1);
+					ata_msleep(ap, 1);
 				else
 					break;
 			}
@@ -1050,13 +1043,12 @@ static ssize_t ahci_led_show(struct ata_port *ap, char *buf)
 static ssize_t ahci_led_store(struct ata_port *ap, const char *buf,
 				size_t size)
 {
-	unsigned int state;
+	int state;
 	int pmp;
 	struct ahci_port_priv *pp = ap->private_data;
 	struct ahci_em_priv *emp;
 
-	if (kstrtouint(buf, 0, &state) < 0)
-		return -EINVAL;
+	state = simple_strtoul(buf, NULL, 0);
 
 	/* get the slot number from the message */
 	pmp = (state & EM_MSG_LED_PMP_SLOT) >> 8;
@@ -1455,18 +1447,14 @@ static int ahci_hardreset(struct ata_link *link, unsigned int *class,
 	struct ata_port *ap = link->ap;
 	struct ahci_port_priv *pp = ap->private_data;
 	struct ahci_host_priv *hpriv = ap->host->private_data;
-	void __iomem *port_mmio = ahci_port_base(link->ap);
 	u8 *d2h_fis = pp->rx_fis + RX_FIS_D2H_REG;
 	struct ata_taskfile tf;
 	bool online;
 	int rc;
-	u32 save_cmd, tmp;
 
 	DPRINTK("ENTER\n");
 
 	ahci_stop_engine(ap);
-
-	save_cmd = readl(port_mmio + PORT_CMD);
 
 	/* clear D2H reception area to properly wait for D2H FIS */
 	ata_tf_init(link->device, &tf);
@@ -1475,11 +1463,6 @@ static int ahci_hardreset(struct ata_link *link, unsigned int *class,
 
 	rc = sata_link_hardreset(link, timing, deadline, &online,
 				 ahci_check_ready);
-
-	/* Revert the saved cmd value, if not match with original */
-	tmp = readl(port_mmio + PORT_CMD);
-	if (tmp != save_cmd)
-		writel(save_cmd, port_mmio + PORT_CMD);
 
 	hpriv->start_engine(ap);
 
@@ -1965,6 +1948,8 @@ irqreturn_t ahci_interrupt(int irq, void *dev_instance)
 }
 EXPORT_SYMBOL_GPL(ahci_interrupt);
 
+#include <mach/stats.h>
+
 unsigned int ahci_qc_issue(struct ata_queued_cmd *qc)
 {
 	struct ata_port *ap = qc->ap;
@@ -1987,6 +1972,8 @@ unsigned int ahci_qc_issue(struct ata_queued_cmd *qc)
 		writel(fbs, port_mmio + PORT_FBS);
 		pp->fbs_last_dev = qc->dev->link->pmp;
 	}
+
+	ahci_stats_start(ap, qc);
 
 	writel(1 << qc->tag, port_mmio + PORT_CMD_ISSUE);
 
@@ -2284,7 +2271,7 @@ static int ahci_port_suspend(struct ata_port *ap, pm_message_t mesg)
 		ahci_power_down(ap);
 	else {
 		ata_port_err(ap, "%s (%d)\n", emsg, rc);
-		ata_port_freeze(ap);
+		ahci_start_port(ap);
 	}
 
 	return rc;
