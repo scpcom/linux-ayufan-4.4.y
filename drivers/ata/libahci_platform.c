@@ -364,6 +364,12 @@ int ahci_platform_init_host(struct platform_device *pdev,
 		if (ap->flags & ATA_FLAG_EM)
 			ap->em_message_type = hpriv->em_msg_type;
 
+#ifdef CONFIG_ARCH_M86XXX
+		/* Optimized PFE/SATA DDR interaction,
+		limit read burst size of SATA controller */
+		writel(0x41, ahci_port_base(ap) + 0x70);
+#endif
+
 		/* disabled/not-implemented port */
 		if (!(hpriv->port_map & (1 << i)))
 			ap->ops = &ata_dummy_port_ops;

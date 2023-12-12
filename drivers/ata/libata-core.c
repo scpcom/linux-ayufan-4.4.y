@@ -2311,7 +2311,7 @@ int ata_dev_configure(struct ata_device *dev)
 
 		if (ata_id_has_lba(id)) {
 			const char *lba_desc;
-			char ncq_desc[24];
+			char ncq_desc[32];
 
 			lba_desc = "LBA";
 			dev->flags |= ATA_DFLAG_LBA;
@@ -3788,6 +3788,8 @@ int sata_link_hardreset(struct ata_link *link, const unsigned long *timing,
 {
 	u32 scontrol;
 	int rc;
+        int try_count=0;
+        u32 sstatus;
 
 	DPRINTK("ENTER\n");
 
@@ -3811,6 +3813,8 @@ int sata_link_hardreset(struct ata_link *link, const unsigned long *timing,
 		sata_set_spd(link);
 	}
 
+keep_trying:
+
 	/* issue phy wake/reset */
 	if ((rc = sata_scr_read(link, SCR_CONTROL, &scontrol)))
 		goto out;
@@ -3829,6 +3833,20 @@ int sata_link_hardreset(struct ata_link *link, const unsigned long *timing,
 	rc = sata_link_resume(link, timing, deadline);
 	if (rc)
 		goto out;
+
+        try_count++;
+        sata_scr_read(link, SCR_STATUS, &sstatus);
+
+	/*Few HDDs showed issue with the detection.So the WA is it to restart
+        the communication. The following code check the PHY status and does the 
+	SATA port reset when it sees the PHY is not ready. Doing port reset will 
+	invoke a COMRESET on the interface and start a re-establishment of Phy layer 
+	communications*/
+
+        //Check if PHY not ready
+        if (((sstatus & 0xf) == 0x1) && (try_count < 7))
+                goto keep_trying;
+
 	/* if link is offline nothing more to do */
 	if (ata_phys_link_offline(link))
 		goto out;

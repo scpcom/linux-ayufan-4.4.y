@@ -23,6 +23,7 @@
 #include <linux/clk.h>
 #include <mach/reset.h>
 #include "ahci.h"
+
 #ifdef CONFIG_ARCH_M86XXX 
 /* SATA Clocks */
 static struct clk *sata_oob_clk; /* Core clock */
@@ -30,20 +31,48 @@ static struct clk *sata_pmu_clk; /* PMU alive clock */
 static struct clk *sata_clk;	/* Sata AXI ref clock */
 #endif 
 
-
-static const struct ata_port_info ahci_port_info = {
-	.flags		= AHCI_FLAG_COMMON,
-	.pio_mask	= ATA_PIO4,
-	.udma_mask	= ATA_UDMA6,
-	.port_ops	= &ahci_platform_ops,
+enum ahci_type {
+	AHCI,		/* standard platform ahci */
+	IMX53_AHCI,	/* ahci on i.mx53 */
 };
+
+static struct platform_device_id ahci_devtype[] = {
+	{
+		.name = "ahci",
+		.driver_data = AHCI,
+	}, {
+		.name = "imx53-ahci",
+		.driver_data = IMX53_AHCI,
+	}, {
+		/* sentinel */
+	}
+};
+MODULE_DEVICE_TABLE(platform, ahci_devtype);
+
+
+static const struct ata_port_info ahci_port_info[] = {
+	/* by features */
+	[AHCI] = {
+		.flags		= AHCI_FLAG_COMMON,
+		.pio_mask	= ATA_PIO4,
+		.udma_mask	= ATA_UDMA6,
+		.port_ops	= &ahci_ops,
+	},
+	[IMX53_AHCI] = {
+		.flags		= AHCI_FLAG_COMMON,
+		.pio_mask	= ATA_PIO4,
+		.udma_mask	= ATA_UDMA6,
+		.port_ops	= &ahci_pmp_retry_srst_ops,
+	},
+};
+
 #ifdef CONFIG_PM
-static int ahci_platform_suspend(struct platform_device *pdev, pm_message_t state)
+static int sata_ahci_platform_suspend(struct device *dev)
 {
-        struct ata_host *host = platform_get_drvdata(pdev);
+	struct ata_host *host = dev_get_drvdata(dev);
 	int ret=0;
         if (host)
-		ret = ata_host_suspend(host, state);
+		ret = ata_host_suspend(host, PMSG_SUSPEND);
 
 #ifdef CONFIG_ARCH_M86XXX
 	if (!ret) /* sucessfully done the host suspend */
@@ -58,9 +87,9 @@ static int ahci_platform_suspend(struct platform_device *pdev, pm_message_t stat
         return ret;
 }
 
-static int ahci_platform_resume(struct platform_device *pdev)
+static int sata_ahci_platform_resume(struct device *dev)
 {
-        struct ata_host *host = platform_get_drvdata(pdev);
+	struct ata_host *host = dev_get_drvdata(dev);
 
 #ifdef CONFIG_ARCH_M86XXX
 	/* Do the  clock enable here  PMU,OOB,AXI */
@@ -75,14 +104,16 @@ static int ahci_platform_resume(struct platform_device *pdev)
 	return 0;
 }
 #else
-#define ahci_platform_suspend NULL
-#define ahci_platform_resume NULL
+#define sata_ahci_platform_suspend NULL
+#define sata_ahci_platform_resume NULL
 #endif
 
 static int ahci_probe(struct platform_device *pdev)
 {
 	struct device *dev = &pdev->dev;
 	struct ahci_platform_data *pdata = dev_get_platdata(dev);
+	const struct platform_device_id *id = platform_get_device_id(pdev);
+	struct ata_port_info pi = ahci_port_info[id ? id->driver_data : 0];
 	struct ahci_host_priv *hpriv;
 	unsigned long hflags = 0;
 	int rc;
@@ -143,6 +174,11 @@ static int ahci_probe(struct platform_device *pdev)
 	if (rc)
 		return rc;
 
+	if (pdata && pdata->ata_port_info)
+		pi = *pdata->ata_port_info;
+
+	hflags |= (unsigned long)pi.private_data;
+
 	/*
 	 * Some platforms might need to prepare for mmio region access,
 	 * which could be done in the following init call. So, the mmio
@@ -158,8 +194,10 @@ static int ahci_probe(struct platform_device *pdev)
 	if (of_device_is_compatible(dev->of_node, "hisilicon,hisi-ahci"))
 		hflags |= AHCI_HFLAG_NO_FBS | AHCI_HFLAG_NO_NCQ;
 
-	rc = ahci_platform_init_host(pdev, hpriv, &ahci_port_info,
-				     hflags, 0, 0);
+	rc = ahci_platform_init_host(pdev, hpriv, &pi,
+				     hflags,
+				     pdata ? pdata->force_port_map : 0,
+				     pdata ? pdata->mask_port_map  : 0);
 	if (rc)
 		goto pdata_exit;
 
@@ -172,8 +210,43 @@ disable_resources:
 	return rc;
 }
 
-static SIMPLE_DEV_PM_OPS(ahci_pm_ops, ahci_platform_suspend,
-			 ahci_platform_resume);
+static int ahci_remove(struct platform_device *pdev)
+{
+	struct device *dev = &pdev->dev;
+	struct ahci_platform_data *pdata = dev_get_platdata(dev);
+	struct ata_host *host = dev_get_drvdata(dev);
+
+	ata_host_detach(host);
+
+	if (pdata && pdata->exit)
+		pdata->exit(dev);
+#ifdef CONFIG_ARCH_M86XXX
+	/* Disbale the SATA clocks Here */
+	clk_disable(sata_clk);
+	clk_put(sata_clk);
+	clk_disable(sata_oob_clk);
+	clk_put(sata_oob_clk);
+	clk_disable(sata_pmu_clk);
+	clk_put(sata_pmu_clk);
+	/*Putting  SATA in reset state 
+	 * Sata axi clock domain in reset state
+	 * Serdes 1/2 in reset state, this depends upon PCIE1 and SGMII 
+         * sata 0/1 serdes controller in reset state
+	*/
+	c2000_block_reset(COMPONENT_AXI_SATA,1);
+
+	c2000_block_reset(COMPONENT_SERDES1,1);
+	c2000_block_reset(COMPONENT_SERDES_SATA0,1);
+
+	c2000_block_reset(COMPONENT_SERDES2,1);
+	c2000_block_reset(COMPONENT_SERDES_SATA1,1);
+#endif
+
+	return 0;
+}
+
+static SIMPLE_DEV_PM_OPS(ahci_pm_ops, sata_ahci_platform_suspend,
+			 sata_ahci_platform_resume);
 
 static const struct of_device_id ahci_of_match[] = {
 	{ .compatible = "snps,spear-ahci", },
@@ -187,6 +260,7 @@ MODULE_DEVICE_TABLE(of, ahci_of_match);
 
 static struct platform_driver ahci_driver = {
 	.probe = ahci_probe,
+	.remove = ahci_remove,
 	.remove = ata_platform_remove_one,
 	.driver = {
 		.name = "ahci",
@@ -194,6 +268,7 @@ static struct platform_driver ahci_driver = {
 		.of_match_table = ahci_of_match,
 		.pm = &ahci_pm_ops,
 	},
+	.id_table = ahci_devtype,
 };
 module_platform_driver(ahci_driver);
 

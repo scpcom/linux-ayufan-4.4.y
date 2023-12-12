@@ -22,17 +22,14 @@ struct ata_port_info;
 struct ahci_host_priv;
 struct platform_device;
 
-/*
- * Note ahci_platform_data is deprecated, it is only kept around for use
- * by the old da850 and spear13xx ahci code.
- * New drivers should instead declare their own platform_driver struct, and
- * use ahci_platform* functions in their own probe, suspend and resume methods.
- */
 struct ahci_platform_data {
 	int (*init)(struct device *dev, void __iomem *addr);
 	void (*exit)(struct device *dev);
 	int (*suspend)(struct device *dev);
 	int (*resume)(struct device *dev);
+	const struct ata_port_info *ata_port_info;
+	unsigned int force_port_map;
+	unsigned int mask_port_map;
 };
 
 int ahci_platform_enable_clks(struct ahci_host_priv *hpriv);
