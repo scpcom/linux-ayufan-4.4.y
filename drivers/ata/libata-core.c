@@ -1,7 +1,7 @@
 /*
  *  libata-core.c - helper library for ATA
  *
- *  Maintained by:  Jeff Garzik <jgarzik@pobox.com>
+ *  Maintained by:  Tejun Heo <tj@kernel.org>
  *    		    Please ALWAYS copy linux-ide@vger.kernel.org
  *		    on emails.
  *
@@ -569,10 +569,10 @@ void ata_tf_to_fis(const struct ata_taskfile *tf, u8 pmp, int is_cmd, u8 *fis)
 	fis[14] = 0;
 	fis[15] = tf->ctl;
 
-	fis[16] = 0;
-	fis[17] = 0;
-	fis[18] = 0;
-	fis[19] = 0;
+	fis[16] = tf->auxiliary & 0xff;
+	fis[17] = (tf->auxiliary >> 8) & 0xff;
+	fis[18] = (tf->auxiliary >> 16) & 0xff;
+	fis[19] = (tf->auxiliary >> 24) & 0xff;
 }
 
 /**
@@ -2139,6 +2139,29 @@ static int ata_dev_config_ncq(struct ata_device *dev,
 	else
 		snprintf(desc, desc_sz, "NCQ (depth %d/%d)%s", hdepth,
 			ddepth, aa_desc);
+
+	if ((ap->flags & ATA_FLAG_FPDMA_AUX) &&
+	    ata_id_has_ncq_send_and_recv(dev->id)) {
+		err_mask = ata_read_log_page(dev, ATA_LOG_NCQ_SEND_RECV,
+					     0, ap->sector_buf, 1);
+		if (err_mask) {
+			ata_dev_dbg(dev,
+				    "failed to get NCQ Send/Recv Log Emask 0x%x\n",
+				    err_mask);
+		} else {
+			u8 *cmds = dev->ncq_send_recv_cmds;
+
+			dev->flags |= ATA_DFLAG_NCQ_SEND_RECV;
+			memcpy(cmds, ap->sector_buf, ATA_LOG_NCQ_SEND_RECV_SIZE);
+
+			if (dev->horkage & ATA_HORKAGE_NO_NCQ_TRIM) {
+				ata_dev_dbg(dev, "disabling queued TRIM support\n");
+				cmds[ATA_LOG_NCQ_SEND_RECV_DSM_OFFSET] &=
+					~ATA_LOG_NCQ_SEND_RECV_DSM_TRIM;
+			}
+		}
+	}
+
 	return 0;
 }
 
@@ -2201,7 +2224,10 @@ int ata_dev_configure(struct ata_device *dev)
 
 	/* some WD SATA-1 drives have issues with LPM, turn on NOLPM for them */
 	if ((dev->horkage & ATA_HORKAGE_WD_BROKEN_LPM) &&
-	    (id[76] & 0xe) == 0x2)
+	    (id[ATA_ID_SATA_CAPABILITY] & 0xe) == 0x2)
+		dev->horkage |= ATA_HORKAGE_NOLPM;
+
+	if (ap->flags & ATA_FLAG_NO_LPM)
 		dev->horkage |= ATA_HORKAGE_NOLPM;
 
 	if (dev->horkage & ATA_HORKAGE_NOLPM) {
@@ -2285,7 +2311,7 @@ int ata_dev_configure(struct ata_device *dev)
 
 		if (ata_id_has_lba(id)) {
 			const char *lba_desc;
-			char ncq_desc[32];
+			char ncq_desc[24];
 
 			lba_desc = "LBA";
 			dev->flags |= ATA_DFLAG_LBA;
@@ -3310,10 +3336,10 @@ int ata_do_set_mode(struct ata_link *link, struct ata_device **r_failed_dev)
 		ata_force_xfermask(dev);
 
 		pio_mask = ata_pack_xfermask(dev->pio_mask, 0, 0);
-		dma_mask = ata_pack_xfermask(0, dev->mwdma_mask, dev->udma_mask);
 
 		if (libata_dma_mask & mode_mask)
-			dma_mask = ata_pack_xfermask(0, dev->mwdma_mask, dev->udma_mask);
+			dma_mask = ata_pack_xfermask(0, dev->mwdma_mask,
+						     dev->udma_mask);
 		else
 			dma_mask = 0;
 
@@ -3648,7 +3674,7 @@ int sata_link_scr_lpm(struct ata_link *link, enum ata_lpm_policy policy,
 	switch (policy) {
 	case ATA_LPM_MAX_POWER:
 		/* disable all LPM transitions */
-		scontrol |= (0x3 << 8);
+		scontrol |= (0x7 << 8);
 		/* initiate transition to active state */
 		if (spm_wakeup) {
 			scontrol |= (0x4 << 12);
@@ -3658,12 +3684,12 @@ int sata_link_scr_lpm(struct ata_link *link, enum ata_lpm_policy policy,
 	case ATA_LPM_MED_POWER:
 		/* allow LPM to PARTIAL */
 		scontrol &= ~(0x1 << 8);
-		scontrol |= (0x2 << 8);
+		scontrol |= (0x6 << 8);
 		break;
 	case ATA_LPM_MIN_POWER:
 		if (ata_link_nr_enabled(link) > 0)
 			/* no restrictions on LPM transitions */
-			scontrol &= ~(0x3 << 8);
+			scontrol &= ~(0x7 << 8);
 		else {
 			/* empty port, power off */
 			scontrol &= ~0xf;
@@ -3762,8 +3788,6 @@ int sata_link_hardreset(struct ata_link *link, const unsigned long *timing,
 {
 	u32 scontrol;
 	int rc;
-        int try_count=0;
-        u32 sstatus;
 
 	DPRINTK("ENTER\n");
 
@@ -3787,16 +3811,11 @@ int sata_link_hardreset(struct ata_link *link, const unsigned long *timing,
 		sata_set_spd(link);
 	}
 
-keep_trying:
-
 	/* issue phy wake/reset */
 	if ((rc = sata_scr_read(link, SCR_CONTROL, &scontrol)))
 		goto out;
 
 	scontrol = (scontrol & 0x0f0) | 0x301;
-
-        //Limit the max speed to 3GBps
-        scontrol = (scontrol & ~(0xf0)) | 0x20;
 
 	if ((rc = sata_scr_write_flush(link, SCR_CONTROL, scontrol)))
 		goto out;
@@ -3810,20 +3829,6 @@ keep_trying:
 	rc = sata_link_resume(link, timing, deadline);
 	if (rc)
 		goto out;
-
-        try_count++;
-        sata_scr_read(link, SCR_STATUS, &sstatus);
-
-	/*Few HDDs showed issue with the detection.So the WA is it to restart
-        the communication. The following code check the PHY status and does the 
-	SATA port reset when it sees the PHY is not ready. Doing port reset will 
-	invoke a COMRESET on the interface and start a re-establishment of Phy layer 
-	communications*/
-
-        //Check if PHY not ready
-        if (((sstatus & 0xf) == 0x1) && (try_count < 7))
-                goto keep_trying;
-
 	/* if link is offline nothing more to do */
 	if (ata_phys_link_offline(link))
 		goto out;
@@ -4819,13 +4824,6 @@ void swap_buf_le16(u16 *buf, unsigned int buf_words)
 #endif /* __BIG_ENDIAN */
 }
 
-#include <mach/stats.h>
-
-#if defined(CONFIG_COMCERTO_AHCI_PROF)
-struct ahci_port_stats ahci_port_stats[MAX_AHCI_PORTS];
-unsigned int ahci_stats_enable = 0;
-#endif
-
 /**
  *	ata_qc_new - Request an available ATA command, for queueing
  *	@ap: target port
@@ -4917,8 +4915,6 @@ void ata_qc_free(struct ata_queued_cmd *qc)
 	if (likely(ata_tag_valid(tag))) {
 		qc->tag = ATA_TAG_POISON;
 		clear_bit(tag, &ap->qc_allocated);
-
-		ahci_stats_end(ap, qc, tag);
 	}
 }
 
@@ -6145,29 +6141,31 @@ void ata_host_init(struct ata_host *host, struct device *dev,
 	host->ops = ops;
 }
 
+void __ata_port_probe(struct ata_port *ap)
+{
+	struct ata_eh_info *ehi = &ap->link.eh_info;
+	unsigned long flags;
+
+	/* kick EH for boot probing */
+	spin_lock_irqsave(ap->lock, flags);
+
+	ehi->probe_mask |= ATA_ALL_DEVICES;
+	ehi->action |= ATA_EH_RESET;
+	ehi->flags |= ATA_EHI_NO_AUTOPSY | ATA_EHI_QUIET;
+
+	ap->pflags &= ~ATA_PFLAG_INITIALIZING;
+	ap->pflags |= ATA_PFLAG_LOADING;
+	ata_port_schedule_eh(ap);
+
+	spin_unlock_irqrestore(ap->lock, flags);
+}
+
 int ata_port_probe(struct ata_port *ap)
 {
 	int rc = 0;
 
-	/* probe */
 	if (ap->ops->error_handler) {
-		struct ata_eh_info *ehi = &ap->link.eh_info;
-		unsigned long flags;
-
-		/* kick EH for boot probing */
-		spin_lock_irqsave(ap->lock, flags);
-
-		ehi->probe_mask |= ATA_ALL_DEVICES;
-		ehi->action |= ATA_EH_RESET;
-		ehi->flags |= ATA_EHI_NO_AUTOPSY | ATA_EHI_QUIET;
-
-		ap->pflags &= ~ATA_PFLAG_INITIALIZING;
-		ap->pflags |= ATA_PFLAG_LOADING;
-		ata_port_schedule_eh(ap);
-
-		spin_unlock_irqrestore(ap->lock, flags);
-
-		/* wait for EH to finish */
+		__ata_port_probe(ap);
 		ata_port_wait_eh(ap);
 	} else {
 		DPRINTK("ata%u: bus probe begin\n", ap->print_id);
@@ -6400,10 +6398,9 @@ static void ata_port_detach(struct ata_port *ap)
 		for (i = 0; i < SATA_PMP_MAX_PORTS; i++)
 			ata_tlink_delete(&ap->pmp_link[i]);
 	}
-	ata_tport_delete(ap);
-
 	/* remove the associated SCSI host */
 	scsi_remove_host(ap->scsi_host);
+	ata_tport_delete(ap);
 }
 
 /**
