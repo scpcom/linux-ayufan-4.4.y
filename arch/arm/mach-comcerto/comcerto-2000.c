@@ -457,7 +457,7 @@ static int comcerto_ahci_init(struct device *dev, void __iomem *mmio)
 	int ref_clk_24;
 
 	/* Move SATA controller to DDRC2 port */
-	writel(gpio_readl(COMCERTO_GPIO_FABRIC_CTRL_REG) | 0x2, COMCERTO_GPIO_FABRIC_CTRL_REG);
+	gpio_writel(gpio_readl(COMCERTO_GPIO_FABRIC_CTRL_REG) | 0x2, COMCERTO_GPIO_FABRIC_CTRL_REG);
 
 	val = gpio_readl(COMCERTO_GPIO_SYSTEM_CONFIG);
 	ref_clk_24 = val & (BIT_5_MSK|BIT_7_MSK);
