@@ -121,6 +121,15 @@ config SATA_AHCI
 
 	  If unsure, say N.
 
+config SATA_AHCI_MULTI_MSI
+	tristate "AHCI SATA multi MSI support"
+	depends on SATA_AHCI
+	default y
+	help
+	  This option enables multi MSI for AHCI Serial ATA.
+
+	  If unsure, say Y.
+
 config SATA_MOBILE_LPM_POLICY
 	int "Default SATA Link Power Management policy for low power chipsets"
 	range 0 4
