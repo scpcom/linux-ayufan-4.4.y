@@ -6072,28 +6072,6 @@ static void vop2_crtc_destroy(struct drm_crtc *crtc)
 	drm_crtc_cleanup(crtc);
 }
 
-static void vop2_crtc_reset(struct drm_crtc *crtc)
-{
-	struct rockchip_crtc_state *vcstate = to_rockchip_crtc_state(crtc->state);
-
-	if (crtc->state) {
-		__drm_atomic_helper_crtc_destroy_state(crtc->state);
-		kfree(vcstate);
-	}
-
-	vcstate = kzalloc(sizeof(*vcstate), GFP_KERNEL);
-	if (!vcstate)
-		return;
-	crtc->state = &vcstate->base;
-	crtc->state->crtc = crtc;
-
-	vcstate->left_margin = 100;
-	vcstate->right_margin = 100;
-	vcstate->top_margin = 100;
-	vcstate->bottom_margin = 100;
-	vcstate->background = 0;
-}
-
 static struct drm_crtc_state *vop2_crtc_duplicate_state(struct drm_crtc *crtc)
 {
 	struct rockchip_crtc_state *vcstate;
@@ -6281,6 +6259,26 @@ static int vop2_crtc_atomic_set_property(struct drm_crtc *crtc,
 	DRM_ERROR("failed to set vop2 crtc property %s\n", property->name);
 
 	return -EINVAL;
+}
+
+static void vop2_crtc_reset(struct drm_crtc *crtc)
+{
+	struct rockchip_crtc_state *vcstate =
+		kzalloc(sizeof(*vcstate), GFP_KERNEL);
+
+	if (crtc->state)
+		vop2_crtc_destroy_state(crtc, crtc->state);
+
+	if (vcstate) {
+		vcstate->left_margin = 100;
+		vcstate->right_margin = 100;
+		vcstate->top_margin = 100;
+		vcstate->bottom_margin = 100;
+		vcstate->background = 0;
+
+		__drm_atomic_helper_crtc_reset(crtc, &vcstate->base);
+	} else
+		__drm_atomic_helper_crtc_reset(crtc, NULL);
 }
 
 static const struct drm_crtc_funcs vop2_crtc_funcs = {
