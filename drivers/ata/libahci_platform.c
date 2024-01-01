@@ -98,6 +98,33 @@ void ahci_platform_disable_phys(struct ahci_host_priv *hpriv)
 EXPORT_SYMBOL_GPL(ahci_platform_disable_phys);
 
 /**
+ * ahci_platform_find_clk - Find platform clock
+ * @hpriv: host private area to store config values
+ * @con_id: clock connection ID
+ *
+ * This function returns a pointer to the clock descriptor of the clock with
+ * the passed ID.
+ *
+ * RETURNS:
+ * Pointer to the clock descriptor on success otherwise NULL
+ */
+struct clk *ahci_platform_find_clk(struct ahci_host_priv *hpriv, const char *con_id)
+{
+#ifdef CONFIG_ARCH_LS1024A
+	const char *clock_ids[AHCI_MAX_CLKS] = { "axi", "oob", "pmu", NULL, NULL };
+	int i;
+
+	for (i = 0; i < AHCI_MAX_CLKS && hpriv->clks[i]; i++) {
+		if (clock_ids[i] && !strcmp(clock_ids[i], con_id))
+			return hpriv->clks[i];
+	}
+#endif
+
+	return NULL;
+}
+EXPORT_SYMBOL_GPL(ahci_platform_find_clk);
+
+/**
  * ahci_platform_enable_clks - Enable platform clocks
  * @hpriv: host private area to store config values
  *
