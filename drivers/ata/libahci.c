@@ -1953,7 +1953,6 @@ static void ahci_port_intr(struct ata_port *ap)
 	ahci_handle_port_interrupt(ap, port_mmio, status);
 }
 
-#ifdef CONFIG_SATA_AHCI_MULTI_MSI
 static irqreturn_t ahci_multi_irqs_intr_hard(int irq, void *dev_instance)
 {
 	struct ata_port *ap = dev_instance;
@@ -1969,7 +1968,6 @@ static irqreturn_t ahci_multi_irqs_intr_hard(int irq, void *dev_instance)
 
 	return IRQ_HANDLED;
 }
-#endif
 
 u32 ahci_handle_port_intr(struct ata_host *host, u32 irq_masked)
 {
@@ -2465,7 +2463,6 @@ static int ahci_port_start(struct ata_port *ap)
 	 */
 	pp->intr_mask = DEF_PORT_IRQ;
 
-#ifdef CONFIG_SATA_AHCI_MULTI_MSI
 	/*
 	 * Switch to per-port locking in case each port has its own MSI vector.
 	 */
@@ -2473,7 +2470,6 @@ static int ahci_port_start(struct ata_port *ap)
 		spin_lock_init(&pp->lock);
 		ap->lock = &pp->lock;
 	}
-#endif
 
 	ap->private_data = pp;
 
@@ -2599,7 +2595,6 @@ void ahci_set_em_messages(struct ahci_host_priv *hpriv,
 }
 EXPORT_SYMBOL_GPL(ahci_set_em_messages);
 
-#ifdef CONFIG_SATA_AHCI_MULTI_MSI
 static int ahci_host_activate_multi_irqs(struct ata_host *host,
 					 struct scsi_host_template *sht)
 {
@@ -2633,7 +2628,6 @@ static int ahci_host_activate_multi_irqs(struct ata_host *host,
 
 	return ata_host_register(host, sht);
 }
-#endif
 
 /**
  *	ahci_host_activate - start AHCI host, request IRQs and register it
@@ -2653,7 +2647,6 @@ int ahci_host_activate(struct ata_host *host, struct scsi_host_template *sht)
 	int rc;
 
 	if (hpriv->flags & AHCI_HFLAG_MULTI_MSI) {
-#ifdef CONFIG_SATA_AHCI_MULTI_MSI
 		if (hpriv->irq_handler &&
 		    hpriv->irq_handler != ahci_single_level_irq_intr)
 			dev_warn(host->dev,
@@ -2665,9 +2658,6 @@ int ahci_host_activate(struct ata_host *host, struct scsi_host_template *sht)
 		}
 
 		rc = ahci_host_activate_multi_irqs(host, sht);
-#else
-		rc = -EINVAL;
-#endif
 	} else {
 		rc = ata_host_activate(host, irq, hpriv->irq_handler,
 				       IRQF_SHARED, sht);

@@ -1567,12 +1567,10 @@ static void ahci_remap_check(struct pci_dev *pdev, int bar,
 	hpriv->flags |= AHCI_HFLAG_NO_MSI;
 }
 
-#ifdef CONFIG_SATA_AHCI_MULTI_MSI
 static int ahci_get_irq_vector(struct ata_host *host, int port)
 {
 	return pci_irq_vector(to_pci_dev(host->dev), port);
 }
-#endif
 
 static int ahci_init_msi(struct pci_dev *pdev, unsigned int n_ports,
 			struct ahci_host_priv *hpriv)
@@ -1582,7 +1580,6 @@ static int ahci_init_msi(struct pci_dev *pdev, unsigned int n_ports,
 	if (hpriv->flags & AHCI_HFLAG_NO_MSI)
 		return -ENODEV;
 
-#ifdef CONFIG_SATA_AHCI_MULTI_MSI
 	/*
 	 * If number of MSIs is less than number of ports then Sharing Last
 	 * Message mode could be enforced. In this case assume that advantage
@@ -1607,7 +1604,6 @@ static int ahci_init_msi(struct pci_dev *pdev, unsigned int n_ports,
 			pci_free_irq_vectors(pdev);
 		}
 	}
-#endif
 
 	/*
 	 * If the host is not capable of supporting per-port vectors, fall
