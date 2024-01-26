@@ -29,9 +29,9 @@ ifeq ($(CONFIG_ARCH_RV64I),y)
 	KBUILD_AFLAGS += -mabi=lp64
 
 # workaround for C906 ldd performance issue
-ifeq ($(CONFIG_ARCH_CVITEK),y)
-	KBUILD_CFLAGS += -mno-ldd
-endif
+#ifeq ($(CONFIG_ARCH_CVITEK),y)
+#	KBUILD_CFLAGS += -mno-ldd
+#endif
 
 	KBUILD_LDFLAGS += -melf64lriscv
 else
@@ -56,8 +56,8 @@ riscv-march-aflags-$(CONFIG_VECTOR_1_0)		:= $(riscv-march-aflags-y)v
 riscv-march-aflags-$(CONFIG_VECTOR_0_7)		:= $(riscv-march-aflags-y)v0p7
 riscv-march-aflags-$(CONFIG_RISCV_ISA_THEAD)	:= $(riscv-march-aflags-y)xthead
 
-KBUILD_CFLAGS += -march=$(riscv-march-cflags-y) -Wa,-march=$(riscv-march-aflags-y)
-KBUILD_AFLAGS += -march=$(riscv-march-aflags-y)
+KBUILD_CFLAGS += -march=$(riscv-march-cflags-y)_zicsr_zifencei -Wa,-march=$(riscv-march-aflags-y)_zicsr_zifencei
+KBUILD_AFLAGS += -march=$(riscv-march-aflags-y)_zicsr_zifencei
 
 KBUILD_CFLAGS += -mno-save-restore
 KBUILD_CFLAGS += -DCONFIG_PAGE_OFFSET=$(CONFIG_PAGE_OFFSET)

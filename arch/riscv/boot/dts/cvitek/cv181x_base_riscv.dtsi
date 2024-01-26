@@ -4,7 +4,7 @@
 #include <dt-bindings/clock/cv181x-clock.h>
 #include <dt-bindings/thermal/thermal.h>
 #include <dt-bindings/dma/cv181x-dmamap.h>
-#include "cvi_board_memmap.h"
+#include "cv181x_board_memmap.h"
 
 /*
  * OpenSBI will add below subnode into reserved memory automatically
