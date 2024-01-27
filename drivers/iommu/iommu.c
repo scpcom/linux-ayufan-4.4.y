@@ -332,6 +332,8 @@ void iommu_remove_device(struct device *dev)
 	dev_iommu_free(dev);
 }
 
+DEFINE_MUTEX(iommu_probe_device_lock);
+
 static int __iommu_probe_device(struct device *dev, struct list_head *group_list)
 {
 	const struct iommu_ops *ops = dev->bus->iommu_ops;
@@ -406,6 +408,7 @@ int iommu_probe_device(struct device *dev)
 	if (!ops->probe_device)
 		return iommu_add_device(dev);
 
+	mutex_lock(&iommu_probe_device_lock);
 	ret = __iommu_probe_device(dev, NULL);
 	mutex_unlock(&iommu_probe_device_lock);
 	if (ret)
