@@ -93,7 +93,7 @@ send_ipi_message(const struct cpumask *to_whom, enum ipi_message_type operation)
 	for_each_cpu(i, to_whom)
 		set_bit(operation, &per_cpu_ptr(&ipi_data, i)->bits);
 
-	smp_mb();
+	smp_mb();/*memory barrier*/
 	send_arch_ipi(to_whom);
 }
 
@@ -234,7 +234,9 @@ int __cpu_up(unsigned int cpu, struct task_struct *tidle)
 	}
 
 	/* Wait for the cpu online */
+
 	while (!cpu_online(cpu));
+
 
 	secondary_stack = 0;
 

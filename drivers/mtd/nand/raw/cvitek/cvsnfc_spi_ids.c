@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-2.0-only
 #include "linux/types.h"
 #include <linux/mtd/rawnand.h>
 #include <linux/io.h>
@@ -60,7 +61,7 @@ static struct spi_nand_driver  spi_nand_driver_toshiba = {
  */
 
 /* only for 8 bit threshold */
-char ECC_3bits_remap[8] = {0, 1, -1, 4, 0xff, 7, 0xff, 0xff };
+short ECC_3bits_remap[8] = {0, 1, -1, 4, 0xff, 7, 0xff, 0xff };
 
 /*
  *	ECCS1	ECCS0	Description
@@ -70,7 +71,7 @@ char ECC_3bits_remap[8] = {0, 1, -1, 4, 0xff, 7, 0xff, 0xff };
  *	1	1	Bit errors were detected and corrected,Bit errors count was equal
  *				to the threshold bit count (8 bits)
  */
-char ECC_XT26G11C[4] = {0, 1, -1, 8};
+short ECC_XT26G11C[4] = {0, 1, -1, 8};
 
 /*
  *	ECCS1	ECCS0	Description
@@ -79,7 +80,8 @@ char ECC_XT26G11C[4] = {0, 1, -1, 8};
  *	1	0	More than 4-bit error and not corrected.
  *	1	1	Reserved
  */
-char ECC_2bits_remap[4] = {0, 1, -1, 0xff};
+short ECC_2bits_remap[4] = {0, 1, -1, 0xff};
+short ECC_1bits_remap[4] = {0, 1, -1, -1};
 
 /*
  *	ECCS1	ECCS0	ECCSE1	ECCSE0	Description
@@ -93,11 +95,62 @@ char ECC_2bits_remap[4] = {0, 1, -1, 0xff};
  *	ECCS0-ECCS1 is located in field 4-5 of addr of 0xC0
  *	ECCSE0-ECCSE1 is located in field 4-5 of addr of 0xF0
  */
-char ECC_GD_4bit_remap[16] = {0, 0, 0, 0, 1, 2, 3, 4, 0, 0, 0, 0, 0xff, 0xff, 0xff, 0xff};
-char ECC_GD_8bit_remap[16] = {0, 0, 0, 0, 4, 5, 6, 7, 0, 0, 0, 0, 8, 8, 8, 8};
-char ECC_HYF2G_remap[4] = {0, 1, -1, 14};
+short ECC_GD_4bit_remap[16] = {0, 0, 0, 0, 1, 2, 3, 4, 0, 0, 0, 0, 0xff, 0xff, 0xff, 0xff};
+short ECC_GD_8bit_remap[16] = {0, 0, 0, 0, 4, 5, 6, 7, 0, 0, 0, 0, 8, 8, 8, 8};
+short ECC_HYF2G_remap[4] = {0, 1, -1, 14};
 
 struct cvsnfc_chip_info nand_flash_cvitek_supported_ids[] = {
+	{
+		{	.name = "GSS01GSAK1",
+			.id = {0x52, 0xba, 0x13},
+			.pagesize = SZ_2K,
+			.chipsize = SZ_128,
+			.erasesize = SZ_128K,
+			.options = 0,
+			.id_len = 3,
+			.oobsize = 64,
+			{	.strength_ds = 4,
+				.step_ds = 512
+			},
+		},
+
+		{	.ecc_sr_addr = 0xc0,
+			.ecc_mbf_addr = 0,
+			.read_ecc_opcode = 0,
+			.ecc_bits = 2,
+			.ecc_bit_shift = 4,
+			.uncorr_val = 0x2,
+			.remap = ECC_2bits_remap,
+		},
+		.driver = &spi_nand_driver_general,
+		.flags = 0
+	},
+
+	{
+		{	.name = "GSS02GSAK1",
+			.id = {0x52, 0xba, 0x23},
+			.pagesize = SZ_2K,
+			.chipsize = SZ_256,
+			.erasesize = SZ_128K,
+			.options = 0,
+			.id_len = 3,
+			.oobsize = 128,
+			{	.strength_ds = 4,
+				.step_ds = 512
+			},
+		},
+
+		{	.ecc_sr_addr = 0xc0,
+			.ecc_mbf_addr = 0,
+			.read_ecc_opcode = 0,
+			.ecc_bits = 2,
+			.ecc_bit_shift = 4,
+			.uncorr_val = 0x2,
+			.remap = ECC_2bits_remap,
+		},
+		.driver = &spi_nand_driver_general,
+		.flags = 0
+	},
 
 	{
 		{	.name = "F50L1G41LB",
@@ -524,7 +577,7 @@ struct cvsnfc_chip_info nand_flash_cvitek_supported_ids[] = {
 			.options = 0,
 			.id_len = 2,
 			.oobsize = SZ_64,
-			{	.strength_ds = 8,
+			{	.strength_ds = 4,
 				.step_ds = SZ_512
 			},
 		},
@@ -535,7 +588,7 @@ struct cvsnfc_chip_info nand_flash_cvitek_supported_ids[] = {
 			.ecc_bits = 2,
 			.ecc_bit_shift = 4,
 			.uncorr_val = 0x2,
-			.remap = ECC_GD_8bit_remap
+			.remap = ECC_GD_4bit_remap
 		},
 		.driver = &spi_nand_driver_gd,
 		.flags = 0
@@ -1220,6 +1273,84 @@ struct cvsnfc_chip_info nand_flash_cvitek_supported_ids[] = {
 		.flags = 0
 	},
 
+	{
+		{	.name = "FM25S01A",
+			.id = {0xA1, 0xE4},
+			.pagesize = SZ_2K,
+			.chipsize = SZ_128,
+			.erasesize = SZ_128K,
+			.options = 0,
+			.id_len = 2,
+			.oobsize = SZ_64,
+			{	.strength_ds = 1,
+				.step_ds = SZ_512
+			},
+		},
+
+		{	.ecc_sr_addr = 0xc0,
+			.ecc_mbf_addr = 0x0,
+			.read_ecc_opcode = 0,
+			.ecc_bits = 2,
+			.ecc_bit_shift = 4,
+			.uncorr_val = 0x2,
+			.remap = ECC_1bits_remap
+		},
+		.driver = &spi_nand_driver_gd,
+		.flags = 0
+	},
+
+	{
+		{	.name = "FM25S02A",
+			.id = {0xA1, 0xE5},
+			.pagesize = SZ_2K,
+			.chipsize = SZ_256,
+			.erasesize = SZ_128K,
+			.options = 0,
+			.id_len = 2,
+			.oobsize = SZ_64,
+			{	.strength_ds = 1,
+				.step_ds = SZ_512
+			},
+		},
+
+		{	.ecc_sr_addr = 0xc0,
+			.ecc_mbf_addr = 0x0,
+			.read_ecc_opcode = 0,
+			.ecc_bits = 2,
+			.ecc_bit_shift = 4,
+			.uncorr_val = 0x2,
+			.remap = ECC_1bits_remap
+		},
+		.driver = &spi_nand_driver_gd,
+		.flags = 0
+	},
+
+	{
+		{	.name = "FM25S01B",
+			.id = {0xA1, 0xD4},
+			.pagesize = SZ_2K,
+			.chipsize = SZ_128,
+			.erasesize = SZ_128K,
+			.options = 0,
+			.id_len = 2,
+			.oobsize = SZ_128,
+			{	.strength_ds = 8,
+				.step_ds = SZ_512
+			},
+		},
+
+		{	.ecc_sr_addr = 0xc0,
+			.ecc_mbf_addr = 0x0,
+			.read_ecc_opcode = 0,
+			.ecc_bits = 3,
+			.ecc_bit_shift = 4,
+			.uncorr_val = 0x2,
+			.remap = ECC_3bits_remap
+		},
+		.driver = &spi_nand_driver_gd,
+		.flags = 0
+	},
+
 	{ NULL }
 };
 
@@ -1306,9 +1437,8 @@ static int spi_nand_winbond_select_die(struct cvsnfc_host *host, unsigned int id
 {
 	static uint8_t pre_id = 0xff;
 
-	if (id == pre_id) {
+	if (id == pre_id)
 		return 0;
-	}
 
 	// Select Die
 	cvsfc_write(host, REG_SPI_NAND_TRX_CTRL2, 0x1);

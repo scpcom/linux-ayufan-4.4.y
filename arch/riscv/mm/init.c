@@ -171,6 +171,7 @@ void __init setup_bootmem(void)
 	/* Find the memory region containing the kernel */
 	for_each_mem_range(i, &start, &end) {
 		phys_addr_t size = end - start;
+
 		if (!mem_start)
 			mem_start = start;
 		if (start <= vmlinux_start && vmlinux_end <= end)

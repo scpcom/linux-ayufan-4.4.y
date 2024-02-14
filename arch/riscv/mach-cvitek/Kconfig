@@ -1,9 +1,9 @@
 config ARCH_CVITEK
-    bool "Cvitek SoC Family"
+	bool "Cvitek SoC Family"
 	select ION_CVITEK
 	select SCHED_CVITEK
 	help
-      This enables support for Cvitek SoC family.
+	  This enables support for Cvitek SoC family.
 
 if ARCH_CVITEK
 choice

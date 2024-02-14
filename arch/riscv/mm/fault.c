@@ -163,19 +163,16 @@ static inline bool access_error(unsigned long cause, struct vm_area_struct *vma)
 {
 	switch (cause) {
 	case EXC_INST_PAGE_FAULT:
-		if (!(vma->vm_flags & VM_EXEC)) {
+		if (!(vma->vm_flags & VM_EXEC))
 			return true;
-		}
 		break;
 	case EXC_LOAD_PAGE_FAULT:
-		if (!(vma->vm_flags & VM_READ)) {
+		if (!(vma->vm_flags & VM_READ))
 			return true;
-		}
 		break;
 	case EXC_STORE_PAGE_FAULT:
-		if (!(vma->vm_flags & VM_WRITE)) {
+		if (!(vma->vm_flags & VM_WRITE))
 			return true;
-		}
 		break;
 	default:
 		panic("%s: unhandled cause %lu", __func__, cause);

@@ -19,7 +19,7 @@
 #define KSPTOUSP
 #define USPTOKSP
 
-#define usp cr<14, 1>
+#define(usp) cr < 14, 1 >
 
 .macro SAVE_ALL epc_inc
 	subi    sp, 152
@@ -37,12 +37,14 @@
 	mfcr	lr, epsr
 	stw	lr, (sp, 12)
 	btsti   lr, 31
+
 	bf      1f
 	addi    lr, sp, 152
+
 	br	2f
-1:
+1 :
 	mfcr	lr, usp
-2:
+2 :
 	stw	lr, (sp, 16)
 
 	stw     a0, (sp, 20)
@@ -52,13 +54,16 @@
 	stw     a3, (sp, 36)
 
 	addi	sp, 40
+
 	stm	r4-r13, (sp)
 
 	addi    sp, 40
+
 	stm     r16-r30, (sp)
 #ifdef CONFIG_CPU_HAS_HILO
 	mfhi	lr
 	stw	lr, (sp, 60)
+
 	mflo	lr
 	stw	lr, (sp, 64)
 	mfcr	lr, cr14
@@ -81,8 +86,10 @@
 
 #ifdef CONFIG_CPU_HAS_HILO
 	ldw	a0, (sp, 140)
+
 	mthi	a0
 	ldw	a0, (sp, 144)
+
 	mtlo	a0
 	ldw	a0, (sp, 148)
 	mtcr	a0, cr14
@@ -94,13 +101,16 @@
 	ldw     a3, (sp, 36)
 
 	addi	sp, 40
+
 	ldm	r4-r13, (sp)
 	addi    sp, 40
+
 	ldm     r16-r30, (sp)
 	addi    sp, 72
+
 	bf	1f
 	mfcr	sp, ss0
-1:
+1 :
 	rte
 .endm
 
@@ -122,13 +132,16 @@
 	stw     a3, (sp, 36)
 
 	addi	sp, 40
+
 	stm	r4-r13, (sp)
 
 	addi    sp, 40
+
 	stm     r16-r30, (sp)
 #ifdef CONFIG_CPU_HAS_HILO
 	mfhi	lr
 	stw	lr, (sp, 60)
+
 	mflo	lr
 	stw	lr, (sp, 64)
 	mfcr	lr, cr14
@@ -142,10 +155,13 @@
 
 #ifdef CONFIG_CPU_HAS_HILO
 	ldw	a0, (sp, 140)
+
 	mthi	a0
 	ldw	a0, (sp, 144)
+
 	mtlo	a0
 	ldw	a0, (sp, 148)
+
 	mtcr	a0, cr14
 #endif
 
@@ -155,14 +171,17 @@
 	ldw     a3, (sp, 36)
 
 	addi	sp, 40
+
 	ldm	r4-r13, (sp)
 	addi    sp, 40
+
 	ldm     r16-r30, (sp)
 	addi    sp, 72
 .endm
 
 .macro SAVE_SWITCH_STACK
 	subi    sp, 64
+
 	stm	r4-r11, (sp)
 	stw	lr,  (sp, 32)
 	stw	r16, (sp, 36)
@@ -174,10 +193,13 @@
 	stw	r30, (sp, 60)
 #ifdef CONFIG_CPU_HAS_HILO
 	subi	sp, 16
+
 	mfhi	lr
 	stw	lr, (sp, 0)
+
 	mflo	lr
 	stw	lr, (sp, 4)
+
 	mfcr	lr, cr14
 	stw	lr, (sp, 8)
 #endif
@@ -186,8 +208,10 @@
 .macro RESTORE_SWITCH_STACK
 #ifdef CONFIG_CPU_HAS_HILO
 	ldw	lr, (sp, 0)
+
 	mthi	lr
 	ldw	lr, (sp, 4)
+
 	mtlo	lr
 	ldw	lr, (sp, 8)
 	mtcr	lr, cr14
@@ -207,47 +231,48 @@
 
 /* MMU registers operators. */
 .macro RD_MIR rx
-	mfcr	\rx, cr<0, 15>
+	mfcr	\rx, cr < 0, 15 >
 .endm
 
 .macro RD_MEH rx
-	mfcr	\rx, cr<4, 15>
+	mfcr	\rx, cr < 4, 15 >
 .endm
 
 .macro RD_MCIR rx
-	mfcr	\rx, cr<8, 15>
+	mfcr	\rx, cr < 8, 15 >
 .endm
 
 .macro RD_PGDR rx
-	mfcr	\rx, cr<29, 15>
+	mfcr	\rx, cr < 29, 15 >
 .endm
 
 .macro RD_PGDR_K rx
-	mfcr	\rx, cr<28, 15>
+	mfcr	\rx, cr < 28, 15 >
 .endm
 
 .macro WR_MEH rx
-	mtcr	\rx, cr<4, 15>
+	mtcr	\rx, cr < 4, 15 >
 .endm
 
 .macro WR_MCIR rx
-	mtcr	\rx, cr<8, 15>
+	mtcr	\rx, cr < 8, 15 >
 .endm
 
 #ifdef CONFIG_PAGE_OFFSET_80000000
-#define MSA_SET cr<30, 15>
-#define MSA_CLR cr<31, 15>
+#define(MSA_SET) cr < 30, 15 >
+#define(MSA_CLR) cr < 31, 15 >
 #endif
 
 #ifdef CONFIG_PAGE_OFFSET_A0000000
-#define MSA_SET cr<31, 15>
-#define MSA_CLR cr<30, 15>
+#define(MSA_SET) cr < 31, 15 >
+#define(MSA_CLR) (cr) < 30, 15 >
 #endif
 
 .macro SETUP_MMU
 	/* Init psr and enable ee */
 	lrw	r6, DEFAULT_PSR_VALUE
 	mtcr    r6, psr
+
 	psrset  ee
 
 	/* Invalid I/Dcache BTB BHT */
@@ -258,35 +283,36 @@
 
 	/* Invalid all TLB */
 	bgeni   r6, 26
-	mtcr	r6, cr<8, 15> /* Set MCIR */
+	mtcr	r6, cr < 8, 15 > /* Set MCIR */
 
 	/* Check MMU on/off */
 	mfcr	r6, cr18
 	btsti	r6, 0
+
 	bt	1f
 
 	/* MMU off: setup mapping tlb entry */
 	movi	r6, 0
-	mtcr	r6, cr<6, 15> /* Set MPR with 4K page size */
+	mtcr	r6, cr < 6, 15 > /* Set MPR with 4K page size */
 
 	grs	r6, 1f /* Get current pa by PC */
 	bmaski  r7, (PAGE_SHIFT + 1) /* r7 = 0x1fff */
 	andn    r6, r7
-	mtcr	r6, cr<4, 15> /* Set MEH */
+	mtcr	r6, cr < 4, 15 > /* Set MEH */
 
 	mov	r8, r6
 	movi    r7, 0x00000006
 	or      r8, r7
-	mtcr	r8, cr<2, 15> /* Set MEL0 */
+	mtcr	r8, cr < 2, 15 > /* Set MEL0 */
 	movi    r7, 0x00001006
 	or      r8, r7
-	mtcr	r8, cr<3, 15> /* Set MEL1 */
+	mtcr	r8, cr < 3, 15 > /* Set MEL1 */
 
 	bgeni   r8, 28
-	mtcr	r8, cr<8, 15> /* Set MCIR to write TLB */
+	mtcr	r8, cr < 8, 15 > /* Set MCIR to write TLB */
 
 	br	2f
-1:
+1 :
 	/*
 	 * MMU on: use origin MSA value from bootloader
 	 *
@@ -295,7 +321,7 @@
 	 *   BA     Reserved  SH  WA  B   SO SEC  C   D   V
 	 */
 	mfcr	r6, MSA_SET /* Get MSA */
-2:
+2 :
 	lsri	r6, 29
 	lsli	r6, 29
 	addi	r6, 0x1ce
@@ -310,6 +336,6 @@
 	mtcr    r6, cr18
 
 	jmpi	3f /* jump to va */
-3:
+3 :
 .endm
 #endif /* __ASM_CSKY_ENTRY_H */

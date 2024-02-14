@@ -18,18 +18,18 @@
 	__atomic_pre_full_fence();					\
 									\
 	__asm__ __volatile__ (						\
-	"1:	ldex.w	%[ov], %[u]			\n"		\
-	"	"insn"					\n"		\
-	"2:	stex.w	%[t], %[u]			\n"		\
-	"	bez	%[t], 1b			\n"		\
-	"	br	4f				\n"		\
-	"3:	mov	%[r], %[e]			\n"		\
-	"4:						\n"		\
-	"	.section __ex_table,\"a\"		\n"		\
-	"	.balign 4				\n"		\
-	"	.long	1b, 3b				\n"		\
-	"	.long	2b, 3b				\n"		\
-	"	.previous				\n"		\
+	"1:	ldex.w	%[ov], %[u]\n"		\
+	"	"insn"\n"		\
+	"2:	stex.w	%[t], %[u]\n"		\
+	"	bez	%[t], 1b\n"		\
+	"	br	4f\n"		\
+	"3:	mov	%[r], %[e]\n"		\
+	"4:\n"		\
+	"	.section __ex_table,\"a\"\n"		\
+	"	.balign 4\n"		\
+	"	.long	1b, 3b\n"		\
+	"	.long	2b, 3b\n"		\
+	"	.previous\n"		\
 	: [r] "+r" (ret), [ov] "=&r" (oldval),				\
 	  [u] "+m" (*uaddr), [t] "=&r" (tmp)				\
 	: [op] "Jr" (oparg), [e] "jr" (-EFAULT)				\
@@ -92,20 +92,20 @@ futex_atomic_cmpxchg_inatomic(u32 *uval, u32 __user *uaddr,
 	__atomic_pre_full_fence();
 
 	__asm__ __volatile__ (
-	"1:	ldex.w	%[v], %[u]			\n"
-	"	cmpne	%[v], %[ov]			\n"
-	"	bt	4f				\n"
-	"	mov	%[t], %[nv]			\n"
-	"2:	stex.w	%[t], %[u]			\n"
-	"	bez	%[t], 1b			\n"
-	"	br	4f				\n"
-	"3:	mov	%[r], %[e]			\n"
-	"4:						\n"
-	"	.section __ex_table,\"a\"		\n"
-	"	.balign 4				\n"
-	"	.long	1b, 3b				\n"
-	"	.long	2b, 3b				\n"
-	"	.previous				\n"
+	"1:	ldex.w	%[v], %[u]\n"
+	"	cmpne	%[v], %[ov]\n"
+	"	bt	4f\n"
+	"	mov	%[t], %[nv]\n"
+	"2:	stex.w	%[t], %[u]\n"
+	"	bez	%[t], 1b\n"
+	"	br	4f\n"
+	"3:	mov	%[r], %[e]\n"
+	"4:\n"
+	"	.section __ex_table,\"a\"\n"
+	"	.balign 4\n"
+	"	.long	1b, 3b\n"
+	"	.long	2b, 3b\n"
+	"	.previous\n"
 	: [r] "+r" (ret), [v] "=&r" (val), [u] "+m" (*uaddr),
 	  [t] "=&r" (tmp)
 	: [ov] "Jr" (oldval), [nv] "Jr" (newval), [e] "Jr" (-EFAULT)

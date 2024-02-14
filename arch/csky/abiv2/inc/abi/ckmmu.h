@@ -80,8 +80,8 @@ static inline void tlb_invalid_all(void)
 #ifdef CONFIG_CPU_HAS_TLBI
 	sync_is();
 	asm volatile(
-		"tlbi.alls	\n"
-		"sync.i		\n"
+		"tlbi.alls\n"
+		"sync.i\n"
 		:
 		:
 		: "memory");
@@ -95,8 +95,8 @@ static inline void local_tlb_invalid_all(void)
 #ifdef CONFIG_CPU_HAS_TLBI
 	sync_is();
 	asm volatile(
-		"tlbi.all	\n"
-		"sync.i		\n"
+		"tlbi.all\n"
+		"sync.i\n"
 		:
 		:
 		: "memory");
@@ -117,20 +117,20 @@ static inline void setup_pgd(pgd_t *pgd, int asid)
 #ifdef CONFIG_CPU_HAS_TLBI
 	sync_is();
 #else
-	mb();
+	mb();/* memory barrier */
 #endif
 	asm volatile(
 #ifdef CONFIG_CPU_HAS_TLBI
-		"mtcr %1, cr<28, 15>	\n"
+		"mtcr %1, cr<28, 15>\n"
 #endif
-		"mtcr %1, cr<29, 15>	\n"
-		"mtcr %0, cr< 4, 15>	\n"
-		".rept 64		\n"
+		"mtcr %1, cr<29, 15>\n"
+		"mtcr %0, cr< 4, 15>\n"
+		".rept 64\n"
 		NOP32
-		".endr			\n"
+		".endr\n"
 		:
-		:"r"(asid), "r"(__pa(pgd) | BIT(0))
-		:"memory");
+		: "r"(asid), "r"(__pa(pgd) | BIT(0))
+		: "memory");
 }
 
 static inline pgd_t *get_pgd(void)

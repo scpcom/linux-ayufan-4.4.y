@@ -1,8 +1,9 @@
+// SPDX-License-Identifier: GPL-2.0-only
 #include <linux/module.h>
 #include <linux/platform_device.h>
 #include <linux/io.h>
 #include <linux/of.h>
-#include "pinctrl-cv181x.h"
+#include "pinctrl-athena2.h"
 
 struct cvitek_pinctrl {
 	struct device *dev;

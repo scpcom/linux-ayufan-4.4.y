@@ -17,10 +17,10 @@ extern void __bad_xchg(void);
 	switch (size) {						\
 	case 4:							\
 		asm volatile (					\
-		"1:	ldex.w		%0, (%3) \n"		\
-		"	mov		%1, %2   \n"		\
-		"	stex.w		%1, (%3) \n"		\
-		"	bez		%1, 1b   \n"		\
+		"1:	ldex.w		%0, (%3)\n"		\
+		"	mov		%1, %2\n"		\
+		"	stex.w		%1, (%3)\n"		\
+		"	bez		%1, 1b\n"		\
 			: "=&r" (__ret), "=&r" (tmp)		\
 			: "r" (__new), "r"(__ptr)		\
 			:);					\
@@ -44,13 +44,13 @@ extern void __bad_xchg(void);
 	switch (size) {						\
 	case 4:							\
 		asm volatile (					\
-		"1:	ldex.w		%0, (%3) \n"		\
-		"	cmpne		%0, %4   \n"		\
-		"	bt		2f       \n"		\
-		"	mov		%1, %2   \n"		\
-		"	stex.w		%1, (%3) \n"		\
-		"	bez		%1, 1b   \n"		\
-		"2:				 \n"		\
+		"1:	ldex.w		%0, (%3)\n"		\
+		"	cmpne		%0, %4\n"		\
+		"	bt		2f\n"		\
+		"	mov		%1, %2\n"		\
+		"	stex.w		%1, (%3)\n"		\
+		"	bez		%1, 1b\n"		\
+		"2:\n"		\
 			: "=&r" (__ret), "=&r" (__tmp)		\
 			: "r" (__new), "r"(__ptr), "r"(__old)	\
 			:);					\
@@ -64,7 +64,7 @@ extern void __bad_xchg(void);
 #define cmpxchg_relaxed(ptr, o, n) \
 	(__cmpxchg_relaxed((ptr), (o), (n), sizeof(*(ptr))))
 
-#define cmpxchg(ptr, o, n) 					\
+#define cmpxchg(ptr, o, n)					\
 ({								\
 	__typeof__(*(ptr)) __ret;				\
 	__smp_release_fence();					\

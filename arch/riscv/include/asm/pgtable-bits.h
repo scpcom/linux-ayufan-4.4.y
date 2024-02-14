@@ -48,6 +48,6 @@
 					  _PAGE_USER | _PAGE_GLOBAL |	\
 					  _PAGE_SEC | _PAGE_SHARE |	\
 					  _PAGE_BUF | _PAGE_CACHE |	\
-					  _PAGE_SO ))
+					  _PAGE_SO))
 
 #endif /* _ASM_RISCV_PGTABLE_BITS_H */

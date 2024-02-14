@@ -29,6 +29,7 @@ void notrace walk_stackframe(struct task_struct *task, struct pt_regs *regs,
 		pc = instruction_pointer(regs);
 	} else if (task == NULL || task == current) {
 		const register unsigned long current_sp = sp_in_global;
+
 		fp = (unsigned long)__builtin_frame_address(0);
 		sp = current_sp;
 		pc = (unsigned long)walk_stackframe;

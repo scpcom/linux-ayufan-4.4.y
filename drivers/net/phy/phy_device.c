@@ -1162,7 +1162,7 @@ char *phy_attached_info_irq(struct phy_device *phydev)
 	char *irq_str;
 	char irq_num[8];
 
-	switch(phydev->irq) {
+	switch (phydev->irq) {
 	case PHY_POLL:
 		irq_str = "POLL";
 		break;
@@ -2860,15 +2860,14 @@ static int phy_probe(struct device *dev)
 	 * a controller will attach, and may modify one
 	 * or both of these values
 	 */
-	if (phydrv->features) {
+	if (phydrv->features)
 		linkmode_copy(phydev->supported, phydrv->features);
-	} else if (phydrv->get_features) {
+	else if (phydrv->get_features)
 		err = phydrv->get_features(phydev);
-	} else if (phydev->is_c45) {
+	else if (phydev->is_c45)
 		err = genphy_c45_pma_read_abilities(phydev);
-	} else {
+	else
 		err = genphy_read_abilities(phydev);
-	}
 
 	if (err)
 		goto out;

@@ -5,7 +5,7 @@
 #include <linux/sched.h>
 
 #define XUANTIE
-#ifdef  XUANTIE
+#ifdef XUANTIE
 #include <asm/mmu_context.h>
 
 void flush_tlb_all(void)

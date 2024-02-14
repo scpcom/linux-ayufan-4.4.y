@@ -17,11 +17,11 @@ static inline void arch_spin_lock(arch_spinlock_t *lock)
 	u32 tmp;
 
 	asm volatile (
-		"1:	ldex.w		%0, (%2) \n"
-		"	mov		%1, %0	 \n"
-		"	add		%0, %3	 \n"
-		"	stex.w		%0, (%2) \n"
-		"	bez		%0, 1b   \n"
+		"1:	ldex.w		%0, (%2)\n"
+		"	mov		%1, %0\n"
+		"	add		%0, %3\n"
+		"	stex.w		%0, (%2)\n"
+		"	bez		%0, 1b\n"
 		: "=&r" (tmp), "=&r" (lockval)
 		: "r"(p), "r"(ticket_next)
 		: "cc");
@@ -29,7 +29,7 @@ static inline void arch_spin_lock(arch_spinlock_t *lock)
 	while (lockval.tickets.next != lockval.tickets.owner)
 		lockval.tickets.owner = READ_ONCE(lock->tickets.owner);
 
-	smp_mb();
+	smp_mb();/*memory barrier*/
 }
 
 static inline int arch_spin_trylock(arch_spinlock_t *lock)
@@ -40,29 +40,29 @@ static inline int arch_spin_trylock(arch_spinlock_t *lock)
 
 	do {
 		asm volatile (
-		"	ldex.w		%0, (%3)   \n"
-		"	movi		%2, 1	   \n"
-		"	rotli		%1, %0, 16 \n"
-		"	cmpne		%1, %0     \n"
-		"	bt		1f         \n"
-		"	movi		%2, 0	   \n"
-		"	add		%0, %0, %4 \n"
-		"	stex.w		%0, (%3)   \n"
-		"1:				   \n"
+		"	ldex.w		%0, (%3)\n"
+		"	movi		%2, 0\n"
+		"	rotli		%1, %0, 16\n"
+		"	cmpne		%1, %0\n"
+		"	bt		1f\n"
+		"	movi		%2, 0\n"
+		"	add		%0, %0, %4\n"
+		"	stex.w		%0, (%3)\n"
+		"1:\n"
 		: "=&r" (res), "=&r" (tmp), "=&r" (contended)
 		: "r"(p), "r"(ticket_next)
 		: "cc");
 	} while (!res);
 
 	if (!contended)
-		smp_mb();
+		smp_mb();/*memory barrier*/
 
 	return !contended;
 }
 
 static inline void arch_spin_unlock(arch_spinlock_t *lock)
 {
-	smp_mb();
+	smp_mb();/*memory barrier*/
 	WRITE_ONCE(lock->tickets.owner, lock->tickets.owner + 1);
 }
 

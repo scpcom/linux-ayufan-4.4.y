@@ -17,8 +17,8 @@
 #define ASID_MASK		((1 << CONFIG_CPU_ASID_BITS) - 1)
 #define cpu_asid(mm)		(atomic64_read(&mm->context.asid) & ASID_MASK)
 
-#define init_new_context(tsk,mm)	({ atomic64_set(&(mm)->context.asid, 0); 0; })
-#define activate_mm(prev,next)		switch_mm(prev, next, current)
+#define init_new_context(tsk, mm)	({ atomic64_set(&(mm)->context.asid, 0); 0; })
+#define activate_mm(prev, next)		switch_mm(prev, next, current)
 
 #define destroy_context(mm)		do {} while (0)
 #define enter_lazy_tlb(mm, tsk)		do {} while (0)

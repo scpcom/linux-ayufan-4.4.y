@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: GPL-2.0-only */
 /*
  * Copyright (C) Cvitek Co., Ltd. 2019-2020. All rights reserved.
  *
@@ -5,12 +6,12 @@
  * Description:
  */
 
-#ifndef __PINCTRL_CV180X_H__
-#define __PINCTRL_CV180X_H__
+#ifndef __PINCTRL_CV181X_H__
+#define __PINCTRL_CV181X_H__
 
 #include "../core.h"
-#include "cv180x_pinlist_swconfig.h"
-#include "cv180x_reg_fmux_gpio.h"
+#include "cv181x_pinlist_swconfig.h"
+#include "cv181x_reg_fmux_gpio.h"
 
 #define CVITEK_PINMUX_REG_LAST (FMUX_GPIO_FUNCSEL_PAD_AUD_AOUTR + 4)
 
@@ -27,8 +28,17 @@ static inline void mmio_clrsetbits_32(uintptr_t addr,
 				      uint32_t clear,
 				      uint32_t set)
 {
-	iowrite32((ioread32(ioremap(addr, 0x4)) & ~clear) | set,
-		  ioremap(addr, 0x4));
+	void __iomem *tpreg;
+
+	tpreg = ioremap(addr, 0x4);
+	if (IS_ERR(tpreg)) {
+		pr_err("ioremap %p failed\n", (void *)addr);
+		return;
+	}
+
+	iowrite32((ioread32(tpreg) & ~clear) | set, tpreg);
+
+	iounmap(tpreg);
 }
 
-#endif /* __PINCTRL_CV180X_H__ */
+#endif /* __PINCTRL_CV181X_H__ */
