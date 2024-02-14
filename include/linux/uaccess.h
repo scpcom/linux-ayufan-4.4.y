@@ -11,6 +11,7 @@
 #include <asm/uaccess.h>
 
 #ifdef CONFIG_SET_FS
+
 /*
  * Force the uaccess routines to be wired up for actual userspace access,
  * overriding any possible set_fs(KERNEL_DS) still lingering around.  Undone

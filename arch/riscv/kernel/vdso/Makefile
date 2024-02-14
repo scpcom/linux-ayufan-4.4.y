@@ -32,6 +32,9 @@ CPPFLAGS_vdso.lds += -P -C -U$(ARCH)
 # Disable -pg to prevent insert call site
 CFLAGS_REMOVE_vgettimeofday.o = $(CC_FLAGS_FTRACE) -Os
 
+# Kernel must build with -Ox
+CFLAGS_vgettimeofday.o += -O2
+
 # Disable gcov profiling for VDSO code
 GCOV_PROFILE := n
 KCOV_INSTRUMENT := n

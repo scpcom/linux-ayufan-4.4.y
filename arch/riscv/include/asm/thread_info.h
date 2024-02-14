@@ -24,6 +24,10 @@
 #include <asm/processor.h>
 #include <asm/csr.h>
 
+#ifdef CONFIG_SET_FS
+typedef unsigned long mm_segment_t;
+#endif
+
 /*
  * low level task data that entry.S needs immediate access to
  * - this struct should fit entirely inside of one cache line
@@ -34,6 +38,9 @@
  */
 struct thread_info {
 	unsigned long		flags;		/* low level flags */
+#ifdef CONFIG_SET_FS
+	mm_segment_t            addr_limit;     /* address limit */
+#endif
 	int                     preempt_count;  /* 0=>preemptible, <0=>BUG */
 	/*
 	 * These stack pointers are overwritten on every system call or
@@ -50,11 +57,20 @@ struct thread_info {
  *
  * preempt_count needs to be 1 initially, until the scheduler is functional.
  */
+#ifdef CONFIG_SET_FS /* CONFIG_SET_FS */
+#define INIT_THREAD_INFO(tsk)			\
+{						\
+	.flags		= 0,			\
+	.preempt_count	= INIT_PREEMPT_COUNT,	\
+	.addr_limit	= KERNEL_DS,		\
+}
+#else /* CONFIG_SET_FS */
 #define INIT_THREAD_INFO(tsk)			\
 {						\
 	.flags		= 0,			\
 	.preempt_count	= INIT_PREEMPT_COUNT,	\
 }
+#endif /* CONFIG_SET_FS */
 
 #endif /* !__ASSEMBLY__ */
 
