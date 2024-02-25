@@ -221,6 +221,7 @@ struct rk3x_i2c {
 	struct clk *clk;
 	struct clk *pclk;
 	struct notifier_block clk_rate_nb;
+	int irq;
 	bool autostop_supported;
 
 	/* Settings */
@@ -1194,8 +1195,6 @@ static int rk3x_i2c_xfer_common(struct i2c_adapter *adap,
 
 		if (i + ret >= num)
 			i2c->is_last_msg = true;
-
-		rk3x_i2c_start(i2c);
 
 		spin_unlock_irqrestore(&i2c->lock, flags);
 
