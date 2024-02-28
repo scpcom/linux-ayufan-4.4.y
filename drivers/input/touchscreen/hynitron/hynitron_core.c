@@ -1046,7 +1046,7 @@ KEY_PROCESS:
     goto END;
 
 CLR_POINT:
-	HYN_ERROR(" CLEAR POINT.\n"); 
+	//HYN_ERROR(" CLEAR POINT.\n"); 
 #if HYN_MT_PROTOCOL_B_EN
 	for(i=0; i<=10; i++) {	
 		input_mt_slot(hyn_ts_data->input_dev, i);
