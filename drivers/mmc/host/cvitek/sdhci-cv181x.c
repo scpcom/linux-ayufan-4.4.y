@@ -318,7 +318,8 @@ static void sdhci_cv181x_sd_setup_pad(struct sdhci_host *host, bool bunplug)
 	else
 		writeb(0x0, cvi_host->pinmuxbase + 0x34);
 
-	writeb(0x0, cvi_host->pinmuxbase + 0x38);
+	// on licheervnano, this pin use for led
+	//writeb(0x0, cvi_host->pinmuxbase + 0x38);
 	writeb(val, cvi_host->pinmuxbase + 0x1C);
 	writeb(val, cvi_host->pinmuxbase + 0x20);
 	writeb(val, cvi_host->pinmuxbase + 0x24);
