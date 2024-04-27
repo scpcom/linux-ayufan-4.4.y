@@ -81,7 +81,6 @@ struct rk_i2s_tdm_dev {
 	void __iomem *cru_base;
 	bool is_master_mode;
 	bool io_multiplex;
-	bool mclk_calibrate;
 	bool tdm_mode;
 	bool tdm_fsync_half_frame;
 	unsigned int mclk_rx_freq;
@@ -1039,15 +1038,13 @@ static int rockchip_i2s_tdm_hw_params(struct snd_pcm_substream *substream,
 				      struct snd_soc_dai *dai)
 {
 	struct rk_i2s_tdm_dev *i2s_tdm = to_info(dai);
-	struct clk *mclk;
-	int ret = 0;
 	unsigned int val = 0;
 	unsigned int mclk_rate, bclk_rate, div_bclk = 4, div_lrck = 64;
+	int err;
 
 	if (i2s_tdm->is_master_mode) {
-		if (i2s_tdm->mclk_calibrate)
-			rockchip_i2s_tdm_calibrate_mclk(i2s_tdm, substream,
-							params_rate(params));
+		struct clk *mclk = (substream->stream == SNDRV_PCM_STREAM_PLAYBACK) ?
+			i2s_tdm->mclk_tx : i2s_tdm->mclk_rx;
 
 		ret = rockchip_i2s_tdm_set_mclk(i2s_tdm, substream, &mclk);
 		if (ret)
@@ -1240,9 +1237,6 @@ static int rockchip_i2s_tdm_dai_probe(struct snd_soc_dai *dai)
 
 	snd_soc_dai_dma_data_set(dai, SNDRV_PCM_STREAM_CAPTURE, &i2s_tdm->capture_dma_data);
 	snd_soc_dai_dma_data_set(dai, SNDRV_PCM_STREAM_PLAYBACK, &i2s_tdm->playback_dma_data);
-
-	if (i2s_tdm->mclk_calibrate)
-		snd_soc_add_dai_controls(dai, &rockchip_i2s_tdm_compensation_control, 1);
 
 	return 0;
 }
