@@ -85,7 +85,7 @@ static int sbi_suspend_finisher(unsigned long suspend_type,
 	return (ret.error) ? sbi_err_map_linux_errno(ret.error) : 0;
 }
 
-static int sbi_suspend(u32 state)
+static int sbi_do_suspend(u32 state)
 {
 	if (state & SBI_HSM_SUSP_NON_RET_BIT)
 		return cpu_suspend(state, sbi_suspend_finisher);
@@ -100,9 +100,9 @@ static __cpuidle int sbi_cpuidle_enter_state(struct cpuidle_device *dev,
 	u32 state = states[idx];
 
 	if (state & SBI_HSM_SUSP_NON_RET_BIT)
-		return CPU_PM_CPU_IDLE_ENTER_PARAM(sbi_suspend, idx, state);
+		return CPU_PM_CPU_IDLE_ENTER_PARAM(sbi_do_suspend, idx, state);
 	else
-		return CPU_PM_CPU_IDLE_ENTER_RETENTION_PARAM(sbi_suspend,
+		return CPU_PM_CPU_IDLE_ENTER_RETENTION_PARAM(sbi_do_suspend,
 							     idx, state);
 }
 
@@ -133,7 +133,7 @@ static __cpuidle int __sbi_enter_domain_idle_state(struct cpuidle_device *dev,
 	else
 		state = states[idx];
 
-	ret = sbi_suspend(state) ? -1 : idx;
+	ret = sbi_do_suspend(state) ? -1 : idx;
 
 	ct_cpuidle_exit();
 
