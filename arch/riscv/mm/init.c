@@ -20,6 +20,7 @@
 #include <linux/dma-map-ops.h>
 #include <linux/crash_dump.h>
 #include <linux/hugetlb.h>
+#include <linux/efi.h>
 #ifdef CONFIG_RELOCATABLE
 #include <linux/elf.h>
 #endif
@@ -230,7 +231,7 @@ static void __init setup_bootmem(void)
 	 * In 64-bit, any use of __va/__pa before this point is wrong as we
 	 * did not know the start of DRAM before.
 	 */
-	if (IS_ENABLED(CONFIG_64BIT) && !IS_ENABLED(CONFIG_RISCV_EARLY_VA))
+	if (IS_ENABLED(CONFIG_64BIT) && !EARLY_VA_ENABLED)
 		kernel_map.va_pa_offset = PAGE_OFFSET - phys_ram_base;
 
 	/*
@@ -667,7 +668,9 @@ void __init create_pgd_mapping(pgd_t *pgdp,
 static uintptr_t __init best_map_size(phys_addr_t pa, uintptr_t va,
 				      phys_addr_t size)
 {
-#if !IS_ENABLED(CONFIG_RISCV_EARLY_VA)
+	if (EARLY_VA_ENABLED)
+		goto pmd_map_size;
+
 	if (!(pa & (PGDIR_SIZE - 1)) && !(va & (PGDIR_SIZE - 1)) && size >= PGDIR_SIZE)
 		return PGDIR_SIZE;
 
@@ -676,8 +679,8 @@ static uintptr_t __init best_map_size(phys_addr_t pa, uintptr_t va,
 
 	if (!(pa & (PUD_SIZE - 1)) && !(va & (PUD_SIZE - 1)) && size >= PUD_SIZE)
 		return PUD_SIZE;
-#endif
 
+	pmd_map_size:
 	if (!(pa & (PMD_SIZE - 1)) && !(va & (PMD_SIZE - 1)) && size >= PMD_SIZE)
 		return PMD_SIZE;
 
@@ -1095,7 +1098,7 @@ asmlinkage void __init setup_vm(uintptr_t dtb_pa)
 	 * physical addresses (if the start of dram is different from the
 	 * kernel physical address start).
 	 */
-	kernel_map.va_pa_offset = (IS_ENABLED(CONFIG_64BIT) && !IS_ENABLED(CONFIG_RISCV_EARLY_VA)) ?
+	kernel_map.va_pa_offset = (IS_ENABLED(CONFIG_64BIT) && !EARLY_VA_ENABLED) ?
 				0UL : PAGE_OFFSET - kernel_map.phys_addr;
 	kernel_map.va_kernel_pa_offset = kernel_map.virt_addr - kernel_map.phys_addr;
 
