@@ -789,8 +789,6 @@ static int sunxi_udc_get_status(struct sunxi_udc *dev, struct usb_ctrlrequest *c
 	u8  ep_num  = crq->wIndex & 0x7F;
 	u8  is_in   = crq->wIndex & USB_DIR_IN;
 	void __iomem *fifo = 0;
-	u8 old_ep_index = 0;
-	int  ret = 0;
 
 	switch (crq->bRequestType & USB_RECIP_MASK) {
 	case USB_RECIP_INTERFACE:
@@ -809,19 +807,15 @@ static int sunxi_udc_get_status(struct sunxi_udc *dev, struct usb_ctrlrequest *c
 			return 1;
 		}
 
-		old_ep_index = USBC_GetActiveEp(g_sunxi_udc_io.usb_bsp_hdle);
 		USBC_SelectActiveEp(g_sunxi_udc_io.usb_bsp_hdle, ep_num);
 		if (ep_num == 0) {
 			status = USBC_Dev_IsEpStall(g_sunxi_udc_io.usb_bsp_hdle, USBC_EP_TYPE_EP0);
 		} else {
 			if (is_in) {
-				ret = readw(g_sunxi_udc_io.usb_vbase + USBC_REG_o_TXCSR);
-				status = ret & (0x1 << USBC_BP_TXCSR_D_SEND_STALL);
+				status = USBC_Dev_IsEpStall(g_sunxi_udc_io.usb_bsp_hdle, USBC_EP_TYPE_TX);
 			} else {
-				ret = readw(g_sunxi_udc_io.usb_vbase + USBC_REG_o_RXCSR);
-				status = ret & (0x1 << USBC_BP_RXCSR_D_SEND_STALL);
+				status = USBC_Dev_IsEpStall(g_sunxi_udc_io.usb_bsp_hdle, USBC_EP_TYPE_RX);
 			}
-
 		}
 		status = status ? 1 : 0;
 		if (status) {
@@ -831,7 +825,6 @@ static int sunxi_udc_get_status(struct sunxi_udc *dev, struct usb_ctrlrequest *c
 			buf[0] = 0x00;
 			buf[1] = 0x00;
 		}
-		USBC_SelectActiveEp(g_sunxi_udc_io.usb_bsp_hdle, old_ep_index);
 		break;
 
 	default:
@@ -850,7 +843,7 @@ static int sunxi_udc_get_status(struct sunxi_udc *dev, struct usb_ctrlrequest *c
 }
 
 static int sunxi_udc_set_halt(struct usb_ep *_ep, int value);
-static int sunxi_udc_set_halt_ex(struct usb_ep *_ep, int value, int is_in);
+static int sunxi_udc_set_halt_ex(struct usb_ep *_ep, int value);
 
 static void sunxi_udc_handle_ep0_idle(struct sunxi_udc *dev,
 						struct sunxi_udc_ep *ep,
@@ -858,7 +851,6 @@ static void sunxi_udc_handle_ep0_idle(struct sunxi_udc *dev,
 						u32 ep0csr)
 {
 	int len = 0, ret = 0, tmp = 0;
-	int is_in = 0;
 
 	/* start control request? */
 	if (!USBC_Dev_IsReadDataReady(g_sunxi_udc_io.usb_bsp_hdle, USBC_EP_TYPE_EP0)) {
@@ -945,8 +937,7 @@ static void sunxi_udc_handle_ep0_idle(struct sunxi_udc *dev,
 				}else{
 					int k = 0;
 					for(k = 0;k < SW_UDC_ENDPOINTS;k++){
-						is_in = crq->wIndex & USB_DIR_IN;
-						sunxi_udc_set_halt_ex(&dev->ep[k].ep, 0, is_in);
+						sunxi_udc_set_halt_ex(&dev->ep[k].ep, 0);
 					}
 				}
 
@@ -963,8 +954,7 @@ static void sunxi_udc_handle_ep0_idle(struct sunxi_udc *dev,
 				if(crq->wValue){
 					dev->devstatus &= ~(1 << USB_DEVICE_REMOTE_WAKEUP);
 				}else{
-					is_in = crq->wIndex & USB_DIR_IN;
-					sunxi_udc_set_halt_ex(&dev->ep[crq->wIndex & 0x7f].ep, 0, is_in);
+					sunxi_udc_set_halt_ex(&dev->ep[crq->wIndex & 0x7f].ep, 0);
 				}
 
 			}else{
@@ -1027,10 +1017,8 @@ static void sunxi_udc_handle_ep0_idle(struct sunxi_udc *dev,
 
 			}else if(crq->bRequestType == USB_RECIP_ENDPOINT){
 				//--<3>--forbidden ep
-
-				is_in = crq->wIndex & USB_DIR_IN;
 				USBC_Dev_ReadDataStatus(g_sunxi_udc_io.usb_bsp_hdle, USBC_EP_TYPE_EP0, 1);
-				sunxi_udc_set_halt_ex(&dev->ep[crq->wIndex & 0x7f].ep, 1, is_in);
+						sunxi_udc_set_halt_ex(&dev->ep[crq->wIndex & 0x7f].ep, 1);
 			}else{
 				DMSG_PANIC("PANIC : nonsupport set feature request. (%d)\n", crq->bRequestType);
 
@@ -2219,7 +2207,7 @@ static int sunxi_udc_dequeue(struct usb_ep *_ep, struct usb_request *_req)
 	return retval;
 }
 
-static int sunxi_udc_set_halt_ex(struct usb_ep *_ep, int value, int is_in)
+static int sunxi_udc_set_halt_ex(struct usb_ep *_ep, int value)
 {
 	struct sunxi_udc_ep *ep = NULL;
 	u32 idx = 0;
@@ -2254,7 +2242,7 @@ static int sunxi_udc_set_halt_ex(struct usb_ep *_ep, int value, int is_in)
 	if (idx == 0) {
 		USBC_Dev_EpClearStall(g_sunxi_udc_io.usb_bsp_hdle, USBC_EP_TYPE_EP0);
 	} else {
-		if (is_in) {
+		if ((ep->bEndpointAddress & USB_DIR_IN) != 0) {
 			if (value) {
 				USBC_Dev_EpSendStall(g_sunxi_udc_io.usb_bsp_hdle, USBC_EP_TYPE_TX);
 			} else {
@@ -2543,9 +2531,10 @@ static void sunxi_udc_enable(struct sunxi_udc *dev)
 	USBC_Dev_ConfigTransferMode(g_sunxi_udc_io.usb_bsp_hdle, USBC_TS_TYPE_BULK, USBC_TS_MODE_HS);
 
 	/* Enable reset and suspend interrupt interrupts */
-	USBC_INT_EnableUsbMiscUint(g_sunxi_udc_io.usb_bsp_hdle, USBC_INTUSB_SUSPEND);
-	USBC_INT_EnableUsbMiscUint(g_sunxi_udc_io.usb_bsp_hdle, USBC_INTUSB_RESUME);
-	USBC_INT_EnableUsbMiscUint(g_sunxi_udc_io.usb_bsp_hdle, USBC_INTUSB_RESET);
+	USBC_INT_EnableUsbMiscUint(g_sunxi_udc_io.usb_bsp_hdle, USBC_BP_INTUSB_SUSPEND);
+	USBC_INT_EnableUsbMiscUint(g_sunxi_udc_io.usb_bsp_hdle, USBC_BP_INTUSB_RESUME);
+	USBC_INT_EnableUsbMiscUint(g_sunxi_udc_io.usb_bsp_hdle, USBC_BP_INTUSB_RESET);
+	USBC_INT_EnableUsbMiscUint(g_sunxi_udc_io.usb_bsp_hdle, USBC_BP_INTUSB_DISCONNECT);
 
 	/* Enable ep0 interrupt */
 	USBC_INT_EnableEp(g_sunxi_udc_io.usb_bsp_hdle, USBC_EP_TYPE_TX, 0);

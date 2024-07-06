@@ -6,3 +6,4 @@ config SUNXI_RFKILL
   depends on COMPAT_WIRELESS || WIRELESS || RFKILL
   help
     allwinner rfkill driver
+

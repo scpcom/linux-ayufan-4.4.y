@@ -123,7 +123,6 @@
 #define TCON_LCD0_CFG       0x0B60
 #define TCON_LCD1_CFG       0x0B64
 #define TCON_LCD_GATE       0x0B7C
-#define LVDS_GATE           0x0BAC
 #define EDP_CFG             0x0BE0
 #define EDP_GATE            0x0BEC
 #define CSI_MISC_CFG        0x0C00

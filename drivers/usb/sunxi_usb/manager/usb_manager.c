@@ -362,7 +362,6 @@ static int sunxi_otg_manager_probe(struct platform_device *pdev)
 	create_node_file(pdev);
 
 	if (g_usb_cfg.port.port_type == USB_PORT_TYPE_DEVICE) {
-		set_usb_role_ex(USB_ROLE_DEVICE);
 
 		thread_device_run_flag = 1;
 		device_th = kthread_create(usb_device_scan_thread, NULL, "usb_device_chose");
@@ -378,7 +377,7 @@ static int sunxi_otg_manager_probe(struct platform_device *pdev)
 
 		set_usb_role_ex(USB_ROLE_HOST);
 
-		thread_host_run_flag = 0;
+		thread_host_run_flag = 1;
 		host_th = kthread_create(usb_host_scan_thread, NULL, "usb_host_chose");
 		if (IS_ERR(host_th)) {
 			DMSG_PANIC("ERR: host kthread_create failed\n");

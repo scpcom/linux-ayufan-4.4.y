@@ -1,13 +1,3 @@
-/*
- *
- * Copyright (c) 2016 Allwinnertech Co., Ltd.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- */
 #ifndef __SUNXI_DISPLAY2_H__
 #define __SUNXI_DISPLAY2_H__
 
@@ -164,7 +154,6 @@ enum disp_tv_mode
 	DISP_TV_MOD_3840_2160P_30HZ     = 0x1c,
 	DISP_TV_MOD_3840_2160P_25HZ     = 0x1d,
 	DISP_TV_MOD_3840_2160P_24HZ     = 0x1e,
-	DISP_TV_MOD_4096_2160P_24HZ     = 0x1f,
 	/* vga */
 	DISP_VGA_MOD_640_480P_60         = 0x50,
 	DISP_VGA_MOD_800_600P_60         = 0x51,
@@ -541,7 +530,6 @@ enum tag_DISP_CMD
 	DISP_EINK_UPDATE  = 0x402,
 	DISP_EINK_SET_TEMP = 0x403,
 	DISP_EINK_GET_TEMP = 0x404,
-	DISP_EINK_OVERLAP_SKIP = 0x405,
 };
 
 #define FBIOGET_LAYER_HDL_0 0x4700

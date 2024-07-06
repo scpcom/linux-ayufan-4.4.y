@@ -20,7 +20,6 @@
 #include <linux/of.h>
 #include <linux/of_address.h>
 #include <linux/err.h>
-#include <linux/sunxi-smc.h>
 
 #include <linux/sunxi-sid.h>
 #include "sunxi-sid-efuse.h"
@@ -30,21 +29,42 @@
 
 #if defined(CONFIG_ARCH_SUN50I)
 #define SUNXI_SECURITY_SUPPORT	1
+
+#define SUNXI_VER_REG_BASE		"allwinner,sram_ctrl"
+#define SUNXI_VER_REG_OFFSET	0x24
+#define SUNXI_VER_REG_MASK		0xFF
+#endif
+
+#ifdef SUNXI_SECURITY_SUPPORT
+#ifdef CONFIG_ARCH_SUN50IW2
+#define SUNXI_SECURITY_ENABLE_REG_BASE  "allwinner,sunxi-sid"
+#define SUNXI_SECURITY_ENABLE_REG       0xA0
+#define SUNXI_SECURITY_ENABLE_BIT_SHIFT 0
+#else
+#define SUNXI_SECURITY_ENABLE_REG_BASE  "allwinner,sunxi-chipid"
+#define SUNXI_SECURITY_ENABLE_REG       0xF4
+#define SUNXI_SECURITY_ENABLE_BIT_SHIFT 11
+#endif
+#endif
+
+#if defined(CONFIG_ARCH_SUN8IW10)
+#define SUNXI_SOC_VER_IN_SID
+
+#define SUNXI_VER_REG_BASE		"allwinner,sram_ctrl"
+#define SUNXI_VER_REG_OFFSET	0x24
+#define SUNXI_VER_REG_MASK		0x7
+#endif
+
+#if defined(CONFIG_ARCH_SUN8IW11)
+#define SUNXI_VER_REG_BASE		"allwinner,sunxi-sid"
+#define SUNXI_VER_REG_OFFSET	0x88
+#define SUNXI_VER_REG_MASK		0x1
 #endif
 
 #define SUNXI_VER_MAX_NUM	8
 struct soc_ver_map {
 	u32 id;
 	u32 rev[SUNXI_VER_MAX_NUM];
-};
-
-#define SUNXI_SOC_ID_INDEX		1
-#define SUNXI_SECURITY_ENABLE_INDEX	2
-struct soc_ver_reg {
-	s8 compatile[48];
-	u32 offset;
-	u32 mask;
-	u32 shift;
 };
 
 #ifdef CONFIG_ARCH_SUN8IW10
@@ -61,12 +81,6 @@ static struct soc_ver_map soc_ver[] = {
 		{0xFF, {0} },
 	};
 
-static struct soc_ver_reg soc_ver_regs[] = {
-		{"allwinner,sram_ctrl", 0x24, 0x7},
-		{EFUSE_CHIPID_BASE,     0x64, 0xF}
-};
-#define SUNXI_SOC_ID_IN_SID
-
 #elif defined(CONFIG_ARCH_SUN8IW11)
 
 static struct soc_ver_map soc_ver[] = {
@@ -77,11 +91,8 @@ static struct soc_ver_map soc_ver[] = {
 		{0xFF, {0} },
 	};
 
-static struct soc_ver_reg soc_ver_regs[] = {{EFUSE_SID_BASE, 0x88, 1, 0} };
-
 #elif defined(CONFIG_ARCH_SUN50IW1)
 
-#define SUNXI_GET_CHIPID_BY_SMC
 static struct soc_ver_map soc_ver[] = {
 		{0, {SUN50IW1P1_REV_A} },
 		{0xFF, {0} },
@@ -89,7 +100,6 @@ static struct soc_ver_map soc_ver[] = {
 
 #elif defined(CONFIG_ARCH_SUN50IW2)
 
-#define SUNXI_GET_CHIPID_BY_SMC
 static struct soc_ver_map soc_ver[] = {
 		{0, {SUN50IW2P1_REV_A} },
 		{0xFF, {0} },
@@ -114,29 +124,7 @@ static struct soc_ver_map soc_ver[] = {
 static struct soc_ver_map soc_ver[] = {
 		{0xFF, {0} },
 };
-static struct soc_ver_reg soc_ver_regs[] = {{"", 0,  0, 0} };
 
-#endif
-
-#if defined(CONFIG_ARCH_SUN50IW1)
-static struct soc_ver_reg soc_ver_regs[] = {
-	{"allwinner,sram_ctrl", 0x24, 0xFF, 0},
-	{"",                    0,    0,    0},
-	{EFUSE_CHIPID_BASE,     0xF4, 1,    11},
-};
-#elif defined(CONFIG_ARCH_SUN50IW2)
-static struct soc_ver_reg soc_ver_regs[] = {
-	{"allwinner,sram_ctrl", 0x24, 0xFF, 0},
-	{"",                    0,    0,    0},
-	{EFUSE_SID_BASE,        0xA0, 0x1,  0},
-};
-#elif defined(CONFIG_ARCH_SUN50IW3) || defined(CONFIG_ARCH_SUN50IW6)
-static struct soc_ver_reg soc_ver_regs[] = {
-	{"allwinner,sram_ctrl", 0x24,  0x7, 0},
-	{EFUSE_SID_BASE,        0x100, 0xF, 0},
-	{EFUSE_SID_BASE,        0xA0,  0x1, 0},
-};
-#define SUNXI_SOC_ID_IN_SID
 #endif
 
 static unsigned int sunxi_soc_chipid[4];
@@ -160,19 +148,6 @@ static s32 sid_get_base(struct device_node **pnode,
 		return -ENXIO;
 	}
 	SID_DBG("Base addr of \"%s\" is %p\n", compatible, *base);
-	return 0;
-}
-
-__maybe_unused
-static s32  sid_get_phy_base(struct device_node *pnode, phys_addr_t *phy_base)
-{
-	struct resource res = {0};
-	if (of_address_to_resource(pnode, 0, &res)) {
-		SID_ERR("Failed to get sid base address\n");
-		return -ENXIO;
-	}
-
-	*phy_base = (phys_addr_t)res.start;
 	return 0;
 }
 
@@ -206,9 +181,9 @@ void sid_rd_ver_reg(u32 id)
 {
 	s32 i = 0;
 	u32 ver = 0;
-	struct soc_ver_reg *reg = &soc_ver_regs[0];
 
-	ver = sid_rd_bits(reg->compatile, reg->offset, reg->shift, reg->mask);
+	ver = sid_rd_bits(SUNXI_VER_REG_BASE, SUNXI_VER_REG_OFFSET, 0,
+						SUNXI_VER_REG_MASK);
 	WARN_ON(ver >= SUNXI_VER_MAX_NUM/2);
 	BUG_ON(ver >= SUNXI_VER_MAX_NUM);
 
@@ -222,14 +197,13 @@ void sid_rd_ver_reg(u32 id)
 	SID_DBG("%d-%d: soc_ver %#x\n", i, ver, sunxi_soc_ver);
 }
 
-#ifdef SUNXI_SOC_ID_IN_SID
+#ifdef SUNXI_SOC_VER_IN_SID
 
 static s32 sid_rd_soc_ver_from_sid(void)
 {
 	u32 id = 0;
-	struct soc_ver_reg *reg = &soc_ver_regs[SUNXI_SOC_ID_INDEX];
 
-	id = sid_rd_bits(reg->compatile, reg->offset, reg->shift, reg->mask);
+	id = sid_rd_bits("allwinner,sunxi-chipid", 0x64, 0, 0xF);
 	sid_rd_ver_reg(id);
 
 	return 0;
@@ -291,7 +265,7 @@ static void sid_soc_ver_init(void)
 		return;
 	}
 
-#ifdef SUNXI_SOC_ID_IN_SID
+#ifdef SUNXI_SOC_VER_IN_SID
 	sid_rd_soc_ver_from_sid();
 #else
 	sid_rd_soc_ver_from_ce();
@@ -307,28 +281,19 @@ static void sid_chipid_init(void)
 	static s32 init_flag;
 	void __iomem *sid_base = NULL;
 	struct device_node *sid_node = NULL;
-	phys_addr_t sid_phy_addr __maybe_unused = 0;
 
 	if (init_flag == 1) {
 		SID_DBG("It's already inited.\n");
 		return;
 	}
 
-	if (sid_get_base(&sid_node, &sid_base, EFUSE_CHIPID_BASE))
+	if (sid_get_base(&sid_node, &sid_base, "allwinner,sunxi-chipid"))
 		goto sid_chipid_init_failed;
-#ifdef SUNXI_GET_CHIPID_BY_SMC
-	if (sid_get_phy_base(sid_node, &sid_phy_addr))
-		goto sid_chipid_init_failed;
-	sunxi_soc_chipid[0] = sunxi_smc_readl(sid_phy_addr);
-	sunxi_soc_chipid[1] = sunxi_smc_readl(sid_phy_addr + 0x4);
-	sunxi_soc_chipid[2] = sunxi_smc_readl(sid_phy_addr + 0x8);
-	sunxi_soc_chipid[3] = sunxi_smc_readl(sid_phy_addr + 0xc);
-#else
+
 	sunxi_soc_chipid[0] = readl(sid_base);
 	sunxi_soc_chipid[1] = readl(sid_base + 0x4);
 	sunxi_soc_chipid[2] = readl(sid_base + 0x8);
 	sunxi_soc_chipid[3] = readl(sid_base + 0xc);
-#endif
 	sunxi_serial[0] = sunxi_soc_chipid[3];
 	sunxi_serial[1] = sunxi_soc_chipid[2];
 	sunxi_serial[2] = (sunxi_soc_chipid[1] >> 16) & 0x0FFFF;
@@ -361,17 +326,17 @@ void sid_rd_soc_secure_status(void)
 	static s32 init_flag;
 	void __iomem *base = NULL;
 	struct device_node *node = NULL;
-	struct soc_ver_reg *reg = &soc_ver_regs[SUNXI_SECURITY_ENABLE_INDEX];
 
 	if (init_flag == 1) {
 		SID_DBG("It's already inited.\n");
 		return;
 	}
 
-	if (sid_get_base(&node, &base, reg->compatile))
+	if (sid_get_base(&node, &base, SUNXI_SECURITY_ENABLE_REG_BASE))
 		return;
 
-	sunxi_soc_secure = ((readl(base + reg->offset))>>reg->shift)&reg->mask;
+	sunxi_soc_secure = ((readl(base + SUNXI_SECURITY_ENABLE_REG))
+						>> SUNXI_SECURITY_ENABLE_BIT_SHIFT) & 1;
 
 	sid_put_base(node, base);
 	init_flag = 1;
@@ -455,42 +420,33 @@ EXPORT_SYMBOL(sunxi_get_soc_ver);
 /* Return 0, unreadable; 1, readable. */
 int sid_efuse_key_is_readable(struct efuse_key_map *key_map)
 {
-#ifndef EFUSE_HAS_NO_RW_PROTECT
 	u32 value = 0;
+	u32 offset = EFUSE_CTRL_REG;
 	void __iomem *base = NULL;
 	struct device_node *node = NULL;
-#endif
 
-#ifndef EFUSE_IS_PUBLIC
-	if (key_map->public == 1)
+	if (offset == 0)
 		return 1;
 
-	if (sunxi_soc_is_secure())
-		return 0;
-#endif
-
-#ifndef EFUSE_HAS_NO_RW_PROTECT
 	if (key_map->read_flag_shift < 0)
 		return 1;
 
-	if (sid_get_base(&node, &base, EFUSE_CHIPID_BASE))
+	if (sid_get_base(&node, &base, EFUSE_CTRL_BASE))
 		return 0;
 
-	/* TODO: Check the protection of wr/rd_protect register. */
-	value = readl_relaxed(base + key_map_rd_pro.offset);
+	value = readl_relaxed(base + offset);
+
 	if ((value >> key_map->read_flag_shift) & 1) {
 		SID_ERR("The key %s is unreadable!\n", key_map->name);
 		return 0;
 	}
 
-	value = readl_relaxed(base + key_map_wr_pro.offset);
 	if (((value >> key_map->burn_flag_shift) & 1) == 0) {
 		SID_ERR("The key %s has not been burned.\n", key_map->name);
 		return 0;
 	}
 
 	sid_put_base(node, base);
-#endif
 	return 1;
 }
 
@@ -504,7 +460,7 @@ void sid_efuse_key_rd(struct efuse_key_map *key_map, void *buf, u32 n)
 	void __iomem *base = NULL;
 	struct device_node *node = NULL;
 
-	if (sid_get_base(&node, &base, EFUSE_CHIPID_BASE))
+	if (sid_get_base(&node, &base, "allwinner,sunxi-chipid"))
 		return;
 
 	key_size = key_map->size / 8;
@@ -515,7 +471,7 @@ void sid_efuse_key_rd(struct efuse_key_map *key_map, void *buf, u32 n)
 	SID_DBG("Read the key %s, len: %d\n", key_map->name, remainder);
 	for (i = 0; i < key_size/4; i++) {
 		value = readl_relaxed(base + key_map->offset + i*4);
-		pr_debug("0x%p: 0x%08x\n", base + key_map->offset + i*4, value);
+		pr_debug("0x%02x ", value);
 		if (remainder <= 4) {
 			memcpy(&dst[i], &value, remainder);
 			break;

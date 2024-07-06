@@ -116,9 +116,6 @@
 								|| (type == SS_METHOD_DES) \
 								|| (type == SS_METHOD_3DES))
 
-#define CE_METHOD_IS_HMAC(type) ((type == SS_METHOD_HMAC_SHA1) \
-			|| (type == SS_METHOD_HMAC_SHA256))
-
 /* About the symmetric control word */
 
 #define CE_KEY_SELECT_INPUT			0
@@ -156,11 +153,6 @@
 
 #define CE_SYM_CTL_AES_CTS_LAST		BIT(16)
 
-#ifndef SS_SUPPORT_CE_V3_1
-#define CE_SYM_CTL_AES_XTS_LAST		BIT(13)
-#define CE_SYM_CTL_AES_XTS_FIRST	BIT(12)
-#endif
-
 #define SS_AES_MODE_ECB				0
 #define SS_AES_MODE_CBC				1
 #define SS_AES_MODE_CTR				2
@@ -168,7 +160,7 @@
 #define SS_AES_MODE_OFB				4
 #define SS_AES_MODE_CFB				5
 #define SS_AES_MODE_CBC_MAC			6
-#define SS_AES_MODE_XTS				9
+#define SS_AES_MODE_XTS				5
 #define CE_SYM_CTL_OP_MODE_SHIFT	8
 
 #define CE_CTR_SIZE_16				0
@@ -182,28 +174,17 @@
 #define CE_AES_KEY_SIZE_256			2
 #define CE_SYM_CTL_KEY_SIZE_SHIFT	0
 
-#define CE_IS_AES_MODE(type, mode, M) (CE_METHOD_IS_AES(type) \
-					&& (mode == SS_AES_MODE_##M))
-
 /* About the asymmetric control word */
 
-#ifdef SS_SUPPORT_CE_V3_1
 #define CE_RSA_PUB_MODULUS_WIDTH_512	0
 #define CE_RSA_PUB_MODULUS_WIDTH_1024	1
 #define CE_RSA_PUB_MODULUS_WIDTH_2048	2
 #define CE_RSA_PUB_MODULUS_WIDTH_3072	3
 #define CE_RSA_PUB_MODULUS_WIDTH_4096	4
 #define CE_ASYM_CTL_RSA_PM_WIDTH_SHIFT	28
-#endif
 
 #define CE_RSA_OP_M_EXP					0 /* modular exponentiation */
-#ifdef SS_SUPPORT_CE_V3_1
 #define CE_RSA_OP_M_MUL					2 /* modular multiplication */
-#else
-#define CE_RSA_OP_M_ADD                 1 /* modular add */
-#define CE_RSA_OP_M_MINUS               2 /* modular minus */
-#define CE_RSA_OP_M_MUL                 3 /* modular multiplication */
-#endif
 #define CE_ASYM_CTL_RSA_OP_SHIFT		16
 
 #define CE_ECC_PARA_WIDTH_160			0
@@ -212,7 +193,6 @@
 #define CE_ECC_PARA_WIDTH_521			5
 #define CE_ASYM_CTL_ECC_PARA_WIDTH_SHIFT	12
 
-#ifdef SS_SUPPORT_CE_V3_1
 #define CE_ECC_OP_POINT_MUL				0
 #define CE_ECC_OP_POINT_ADD				1
 #define CE_ECC_OP_POINT_DBL				2
@@ -221,16 +201,6 @@
 #define CE_ECC_OP_DEC					5
 #define CE_ECC_OP_SIGN					6
 #define CE_ASYM_CTL_ECC_OP_SHIFT		4
-#else
-#define CE_ECC_OP_POINT_ADD             0 /* point add */
-#define CE_ECC_OP_POINT_DBL             1 /* point double */
-#define CE_ECC_OP_POINT_MUL             2 /* point multiplication */
-#define CE_ECC_OP_POINT_VER             3 /* point verification */
-#define CE_ECC_OP_ENC                   4 /* encryption */
-#define CE_ECC_OP_DEC                   5 /* decryption */
-#define CE_ECC_OP_SIGN                  6 /* sign */
-#define CE_ECC_OP_VERIFY                7 /* verification */
-#endif
 
 #define SS_SEED_SIZE			24
 
@@ -264,9 +234,6 @@ void ss_ecc_op_mode_set(int mode, ce_task_desc_t *task);
 
 void ss_cts_last(ce_task_desc_t *task);
 void ss_hmac_sha1_last(ce_task_desc_t *task);
-
-void ss_xts_first(ce_task_desc_t *task);
-void ss_xts_last(ce_task_desc_t *task);
 
 void ss_method_set(int dir, int type, ce_task_desc_t *task);
 

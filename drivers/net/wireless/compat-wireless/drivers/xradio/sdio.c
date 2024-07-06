@@ -40,27 +40,13 @@ static const struct sdio_device_id xradio_sdio_ids[] = {
 static int sdio_data_read(struct sbus_priv *self, unsigned int addr,
 			  void *dst, int count)
 {
-	int ret = 0;
-	ret = sdio_memcpy_fromio(self->func, dst, addr, count);
-	if (ret < 0) {
-		sbus_printk(XRADIO_DBG_ERROR, "%s: sdio read error %d\n",
-			__func__, ret);
-		ret = sdio_memcpy_fromio(self->func, dst, addr, count);
-	}
-	return ret;
+	return sdio_memcpy_fromio(self->func, dst, addr, count);
 }
 
 static int sdio_data_write(struct sbus_priv *self, unsigned int addr,
 			   const void *src, int count)
 {
-	int ret = 0;
-	ret = sdio_memcpy_toio(self->func, addr, (void *)src, count);
-	if (ret < 0) {
-		sbus_printk(XRADIO_DBG_ERROR, "%s: sdio write error %d\n",
-			__func__, ret);
-		ret = sdio_memcpy_toio(self->func, addr, (void *)src, count);
-	}
-	return ret;
+	return sdio_memcpy_toio(self->func, addr, (void *)src, count);
 }
 
 static void sdio_lock(struct sbus_priv *self)

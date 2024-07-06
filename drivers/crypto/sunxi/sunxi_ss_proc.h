@@ -47,6 +47,7 @@ int ss_aes_crypt(struct ablkcipher_request *req, int dir, int method, int mode);
 
 void ss_hash_swap(char *data, int len);
 int ss_hash_blk_size(int type);
+int ss_hash_padding(ss_hash_ctx_t *ctx, int type);
 void ss_hash_padding_sg_prepare(struct scatterlist *last, int total);
 int ss_hash_update(struct ahash_request *req);
 int ss_hash_final(struct ahash_request *req);

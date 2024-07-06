@@ -843,8 +843,6 @@ int xradio_core_reinit(struct xradio_common *hw_priv)
 	int ret = 0;
 	u16 ctrl_reg;
 	int if_id;
-	int  i = 0;
-	struct xradio_vif *priv = NULL;
 	struct wsm_operational_mode mode = {
 		.power_mode = wsm_power_mode_quiescent,
 		.disableMoreFlagUsage = true,
@@ -854,27 +852,10 @@ int xradio_core_reinit(struct xradio_common *hw_priv)
 		xradio_dbg(XRADIO_DBG_ERROR, "%s hw_priv is NULL!\n", __func__);
 		return -1;
 	}
-
+	xradio_unregister_common(hw_priv->hw);
 #ifdef CONFIG_PM
 	xradio_pm_stay_awake(&hw_priv->pm_state, 5*HZ);
 #endif
-	/* Disconnect with AP or STAs. */
-	xradio_for_each_vif(hw_priv, priv, i) {
-#ifdef P2P_MULTIVIF
-		if ((i == (XRWL_MAX_VIFS - 1)) || !priv)
-#else
-		if (!priv)
-#endif
-			continue;
-		if (priv->join_status == XRADIO_JOIN_STATUS_STA) {
-			ieee80211_connection_loss(priv->vif);
-			msleep(200);
-		} else if (priv->join_status == XRADIO_JOIN_STATUS_AP) {
-			wms_send_disassoc_to_self(hw_priv, priv);
-			msleep(200);
-		}
-	}
-	xradio_unregister_common(hw_priv->hw);
 
 	/*deinit dev */
 	xradio_dev_deinit(hw_priv);
@@ -948,19 +929,6 @@ int xradio_core_reinit(struct xradio_common *hw_priv)
 		SYS_WARN(wsm_use_multi_tx_conf(hw_priv, true, if_id));
 	}
 
-	/*
-	  * fix super standby hang in scan interface.
-	  * Since resume from super standby, mac system will register ieee80211_hw to
-	  * subsystem, and the wiphy->max_scan_ie_len will decrease 47 every round whose
-	  * inital value is IEEE80211_MAX_DATA_LEN, after about 40~50 round, this value will
-	  * under 143, and the 143 is the defaule scan ie length from supplicant, this will return
-	  * -22 in nl80211.c
-	  * if (n_ssids > wiphy->max_scan_ssids) {
-	  * 	return -EINVAL;
-	  * }
-	  * we need to reinit this vaule in super standby recovery.
-	  */
-	hw_priv->hw->wiphy->max_scan_ie_len = IEEE80211_MAX_DATA_LEN;
 	/* re-Register wireless net device. */
 	ret = xradio_register_common(hw_priv->hw);
 
@@ -1071,10 +1039,11 @@ int xradio_core_init(void)
 			   "xradio_register_common failed(%d)!\n", err);
 		goto err5;
 	}
+
 	return err;
 
 err5:
-	xradio_dev_deinit(hw_priv);
+	hw_priv->sbus_ops->irq_unsubscribe(hw_priv->sbus_priv);
 err4:
 	xradio_unregister_bh(hw_priv);
 err3:

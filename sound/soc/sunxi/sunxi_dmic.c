@@ -132,7 +132,7 @@ static int sunxi_dmic_hw_params(struct snd_pcm_substream *substream,
 
 	for (i = 0; i < ARRAY_SIZE(dmic_rate_s); i++) {
 		if (dmic_rate_s[i].samplerate == params_rate(params)) {
-			regmap_update_bits(sunxi_dmic->regmap, SUNXI_DMIC_SR,
+			regmap_update_bits(sunxi_dmic->regmap, SUNXI_DMIC_CTR,
 			(7<<DMIC_SR), (dmic_rate_s[i].rate_bit<<DMIC_SR));
 			break;
 		}

@@ -1,14 +1,4 @@
 /*
- *
- * Copyright (c) 2016 Allwinnertech Co., Ltd.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- */
-/*
  * A V4L2 driver for ov5640 cameras.
  *
  */
@@ -41,7 +31,7 @@ int A80_VERSION;
 
 #define VREF_POL          V4L2_MBUS_VSYNC_ACTIVE_HIGH
 #define HREF_POL          V4L2_MBUS_HSYNC_ACTIVE_HIGH
-#define CLK_POL           V4L2_MBUS_PCLK_SAMPLE_FALLING
+#define CLK_POL           V4L2_MBUS_PCLK_SAMPLE_RISING
 #define V4L2_IDENT_SENSOR 0x5640
 
 #define SENSOR_NAME "ov5640"
@@ -2266,10 +2256,6 @@ static struct regval_list sensor_fmt_yuv422_uyvy[] = {
 	{0x4300, 0x32},
 };
 
-static struct regval_list sensor_fmt_raw[] = {
-	{0x4300, 0x00},
-};
-
 static struct regval_list ae_average_tbl[] = {
 	/* Whole Image Average */
 	{0x5688, 0x11},		/* Zone 1/Zone 0 weight */
@@ -3235,63 +3221,6 @@ static int sensor_s_autowb(struct v4l2_subdev *sd, int value)
 	return 0;
 }
 
-int ov5640_sensor_vts;
-static int sensor_s_exp_gain(struct v4l2_subdev *sd,
-			     struct sensor_exp_gain *exp_gain)
-{
-	int exp_val, gain_val, frame_length, shutter;
-	unsigned char explow = 0, expmid = 0, exphigh = 0;
-	unsigned char gainlow = 0, gainhigh = 0;
-	struct sensor_info *info = to_state(sd);
-
-	exp_val = exp_gain->exp_val;
-	gain_val = exp_gain->gain_val;
-
-	sensor_print("exp_val %d, gain_val %d\n", exp_val, gain_val);
-
-	if (gain_val < 1 * 16)
-		gain_val = 16;
-	if (gain_val > 64 * 16 - 1)
-		gain_val = 64 * 16 - 1;
-
-	if (exp_val > 0xfffff)
-		exp_val = 0xfffff;
-
-	gainlow = (unsigned char)(gain_val & 0xff);
-	gainhigh = (unsigned char)((gain_val >> 8) & 0x3);
-
-	exphigh = (unsigned char)((0x0f0000 & exp_val) >> 16);
-	expmid = (unsigned char)((0x00ff00 & exp_val) >> 8);
-	explow = (unsigned char)((0x0000ff & exp_val));
-	shutter = exp_val / 16;
-
-
-	if (shutter > ov5640_sensor_vts - 4)
-		frame_length = shutter + 4;
-	else
-		frame_length = ov5640_sensor_vts;
-
-
-	sensor_write(sd, 0x3208, 0x00);
-
-	sensor_write(sd, 0x3503, 0x07);
-
-	sensor_write(sd, 0x380f, (frame_length & 0xff));
-	sensor_write(sd, 0x380e, (frame_length >> 8));
-
-	sensor_write(sd, 0x350b, gainlow);
-	sensor_write(sd, 0x350a, gainhigh);
-
-	sensor_write(sd, 0x3502, explow);
-	sensor_write(sd, 0x3501, expmid);
-	sensor_write(sd, 0x3500, exphigh);
-	sensor_write(sd, 0x3208, 0x10);
-	sensor_write(sd, 0x3208, 0xa0);
-	info->exp = exp_val;
-	info->gain = gain_val;
-	return 0;
-}
-
 static int sensor_g_hue(struct v4l2_subdev *sd, __s32 *value)
 {
 	return -EINVAL;
@@ -3543,7 +3472,7 @@ static int sensor_s_flash_mode(struct v4l2_subdev *sd,
 			       enum v4l2_flash_led_mode value)
 {
 	struct sensor_info *info = to_state(sd);
-	sensor_dbg("sensor_s_flash_mode[%d]!\n", value);
+	sensor_dbg("sensor_s_flash_mode[0x%d]!\n", value);
 
 	info->flash_mode = value;
 	return 0;
@@ -3792,9 +3721,6 @@ static long sensor_ioctl(struct v4l2_subdev *sd, unsigned int cmd, void *arg)
 	case SET_AUTO_EXPOSURE_WIN:
 		sensor_s_ae_win(sd, (struct v4l2_win_setting *)arg);
 		break;
-	case VIDIOC_VIN_SENSOR_EXP_GAIN:
-		sensor_s_exp_gain(sd, (struct sensor_exp_gain *)arg);
-		break;
 	case VIDIOC_VIN_SENSOR_CFG_REQ:
 		sensor_cfg_req(sd, (struct sensor_config *)arg);
 		break;
@@ -3839,12 +3765,6 @@ static struct sensor_format_struct {
 		.regs = sensor_fmt_yuv422_vyuy,
 		.regs_size = ARRAY_SIZE(sensor_fmt_yuv422_vyuy),
 		.bpp = 2,
-	}, {
-		.desc = "Raw RGB Bayer",
-		.mbus_code = V4L2_MBUS_FMT_SBGGR8_1X8,
-		.regs = sensor_fmt_raw,
-		.regs_size = ARRAY_SIZE(sensor_fmt_raw),
-		.bpp = 1
 	},
 };
 
@@ -3911,15 +3831,6 @@ static struct sensor_win_size sensor_win_sizes[] = {
 	 .height = HD720_HEIGHT,
 	 .hoffset = 0,
 	 .voffset = 0,
-	 .hts = 1750,
-	 .vts = 800,
-	 .pclk = 42 * 1000 * 1000,
-	 .fps_fixed = 1,
-	 .bin_factor = 1,
-	 .intg_min = 1,
-	 .intg_max = 800 << 4,
-	 .gain_min = 1 << 4,
-	 .gain_max = 10 << 4,
 	 .regs = sensor_720p_regs,
 	 .regs_size = ARRAY_SIZE(sensor_720p_regs),
 	 .set_size = NULL,
@@ -3950,15 +3861,6 @@ static struct sensor_win_size sensor_win_sizes[] = {
 	 .height = VGA_HEIGHT,
 	 .hoffset = 0,
 	 .voffset = 0,
-	 .hts = 640,
-	 .vts = 480,
-	 .pclk = 9216 * 1000,
-	 .fps_fixed = 1,
-	 .bin_factor = 1,
-	 .intg_min = 1,
-	 .intg_max = 480 << 4,
-	 .gain_min = 1 << 4,
-	 .gain_max = 10 << 4,
 	 .regs = sensor_vga_regs,
 	 .regs_size = ARRAY_SIZE(sensor_vga_regs),
 	 .set_size = NULL,
@@ -4006,6 +3908,11 @@ static int sensor_s_parm(struct v4l2_subdev *sd, struct v4l2_streamparm *parms)
 	data_type div;
 
 	sensor_dbg("sensor_s_parm\n");
+
+	if (parms->type != V4L2_BUF_TYPE_VIDEO_CAPTURE) {
+		sensor_dbg("parms->type!=V4L2_BUF_TYPE_VIDEO_CAPTURE\n");
+		return -EINVAL;
+	}
 
 	if (info->tpf.numerator == 0) {
 		sensor_dbg("info->tpf.numerator == 0\n");
@@ -4386,7 +4293,6 @@ static int sensor_reg_init(struct sensor_info *info)
 	info->fmt = sensor_fmt;
 	info->width = wsize->width;
 	info->height = wsize->height;
-	ov5640_sensor_vts = wsize->vts;
 	sensor_print("s_fmt set width = %d, height = %d\n", wsize->width,
 		      wsize->height);
 	sensor_write_array(sd, sensor_oe_enable_regs,

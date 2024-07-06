@@ -340,8 +340,7 @@ preload_continue:
 	ldr r1, [r0]
 	ldr r0, =IO_ADDRESS(AW_SRAM_A3_BASE + 0x3000)  /*°üº¬SRAM_A4 3K*/
 	ldr r1, [r0]
-#elif defined(CONFIG_ARCH_SUN50IW1P1) || defined(CONFIG_ARCH_SUN50IW2P1) || \
-	defined(CONFIG_ARCH_SUN50IW3P1) || defined(CONFIG_ARCH_SUN50IW6P1)
+#elif defined(CONFIG_ARCH_SUN50IW1P1) || defined(CONFIG_ARCH_SUN50IW2P1)
 	/*80k*/
 	ldr r0, =IO_ADDRESS(AW_SRAM_A2_BASE)
 	ldr r1, [r0]

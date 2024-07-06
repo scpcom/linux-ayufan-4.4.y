@@ -1304,7 +1304,9 @@ void wms_send_deauth_to_self(struct xradio_common *hw_priv,
 					return;
 				}
 				deauth->frame_control =
-				    cpu_to_le16(IEEE80211_FTYPE_MGMT | IEEE80211_STYPE_DEAUTH);
+				    cpu_to_le16(IEEE80211_FTYPE_MGMT   |
+						IEEE80211_STYPE_DEAUTH |
+						IEEE80211_FCTL_TODS);
 				deauth->duration = 0;
 				memcpy(deauth->da, priv->vif->addr, ETH_ALEN);
 				memcpy(deauth->sa, priv->link_id_db[i].mac, ETH_ALEN);
@@ -1327,7 +1329,9 @@ void wms_send_deauth_to_self(struct xradio_common *hw_priv,
 			return;
 		}
 		deauth->frame_control =
-		    cpu_to_le16(IEEE80211_FTYPE_MGMT | IEEE80211_STYPE_DEAUTH);
+		    cpu_to_le16(IEEE80211_FTYPE_MGMT |
+				IEEE80211_STYPE_DEAUTH |
+				IEEE80211_FCTL_FROMDS);
 		deauth->duration = 0;
 		memcpy(deauth->da, priv->vif->addr, ETH_ALEN);
 		memcpy(deauth->sa, priv->join_bssid, ETH_ALEN);
@@ -1385,7 +1389,9 @@ void wms_send_disassoc_to_self(struct xradio_common *hw_priv,
 			return;
 		}
 		disassoc->frame_control =
-		     cpu_to_le16(IEEE80211_FTYPE_MGMT | IEEE80211_STYPE_DISASSOC);
+		     cpu_to_le16(IEEE80211_FTYPE_MGMT |
+				 IEEE80211_STYPE_DISASSOC |
+				 IEEE80211_FCTL_FROMDS);
 		disassoc->duration = 0;
 		memcpy(disassoc->da, priv->vif->addr, ETH_ALEN);
 		memcpy(disassoc->sa, priv->join_bssid, ETH_ALEN);
@@ -1800,11 +1806,7 @@ int wsm_cmd_send(struct xradio_common *hw_priv,
 		return 0;  /*return success, don't process cmd in power off.*/
 	}
 #endif
-	if (unlikely(hw_priv->bh_error)) {
-		wsm_buf_reset(buf);
-		wsm_printk(XRADIO_DBG_ERROR, "bh error!>>> 0x%.4x (%d)\n", cmd, buf_len);
-		return -ETIMEDOUT;
-	}
+
 	/* Fill HI message header */
 	/* BH will add sequence number */
 
@@ -1873,8 +1875,8 @@ int wsm_cmd_send(struct xradio_common *hw_priv,
 		spin_unlock(&hw_priv->wsm_cmd.lock);
 
 		wsm_printk(XRADIO_DBG_ERROR,
-			   "***CMD timeout!>>> 0x%.4X (%d), buf_use=%d, bh_state=%d\n",
-			   cmd, buf_len, hw_priv->hw_bufs_used, hw_priv->bh_error);
+			   "***CMD timeout!>>> 0x%.4X (%d), buf_use=%d\n",
+			   cmd, buf_len, hw_priv->hw_bufs_used);
 		/* Race condition check to make sure _confirm is not called
 		 * after exit of _send */
 		if (raceCheck == 0xFFFF) {

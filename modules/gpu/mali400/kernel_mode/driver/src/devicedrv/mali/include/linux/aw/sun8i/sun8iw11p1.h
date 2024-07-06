@@ -27,17 +27,14 @@ aw_private_data aw_private = {
 		.regulator      = NULL,
 		.regulator_id   = "vdd-gpu",
 		.clk[0]         = {
-			.clk_name       = "pll",
-			.clk_handle     = NULL,
-			.parent_clk_num = -1,
-			.need_set_freq  = 1
+			.clk_name   = "pll",
+			.clk_handle = NULL,
 		},
 		.clk[1]         = {
-			.clk_name       = "mali",
-			.clk_handle     = NULL,
-			.parent_clk_num = 0,
-			.need_set_freq  = 1
+			.clk_name   = "mali",
+			.clk_handle = NULL,
 		},
+		.dvfs_status   = 0,
 		.vf_table[0]   = {
 			.vol  = 0,
 			.freq = 144,
@@ -73,4 +70,4 @@ aw_private_data aw_private = {
 	}
 };
 
-#endif /* _MALI_SUN8I_W11P1_H_ */
+#endif

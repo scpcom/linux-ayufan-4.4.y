@@ -24,7 +24,7 @@ EXPORT_SYMBOL_GPL(vin_log_mask);
 
 int os_gpio_request(struct gpio_config *pin_cfg, __u32 group_count_max)
 {
-#ifndef FPGA_VER
+#ifdef VIN_GPIO
 	int ret = 0;
 	char pin_name[32];
 
@@ -48,7 +48,7 @@ int os_gpio_request(struct gpio_config *pin_cfg, __u32 group_count_max)
 EXPORT_SYMBOL_GPL(os_gpio_request);
 int os_gpio_set(struct gpio_config *pin_cfg, __u32 group_count_max)
 {
-#ifndef FPGA_VER
+#ifdef VIN_GPIO
 	char pin_name[32];
 	__u32 config;
 
@@ -106,7 +106,7 @@ EXPORT_SYMBOL_GPL(os_gpio_set);
 
 int os_gpio_release(u32 p_handler, __s32 if_release_to_default_status)
 {
-#ifndef FPGA_VER
+#ifdef VIN_GPIO
 	if (p_handler != GPIO_INDEX_INVALID) {
 		gpio_free(p_handler);
 	} else {
@@ -121,7 +121,7 @@ EXPORT_SYMBOL_GPL(os_gpio_release);
 int os_gpio_write(u32 p_handler, __u32 value_to_gpio, const char *gpio_name,
 		  int force_value_flag)
 {
-#ifndef FPGA_VER
+#ifdef VIN_GPIO
 	if (1 == force_value_flag) {
 		if (p_handler != GPIO_INDEX_INVALID)
 			__gpio_set_value(p_handler, value_to_gpio);
@@ -149,7 +149,7 @@ int os_gpio_set_status(u32 p_handler, __u32 if_set_to_output_status,
 		       const char *gpio_name)
 {
 	int ret = 0;
-#ifndef FPGA_VER
+#ifdef VIN_GPIO
 	if (p_handler != GPIO_INDEX_INVALID) {
 		if (if_set_to_output_status) {
 			ret = gpio_direction_output(p_handler, 0);
@@ -217,7 +217,8 @@ err_client:
 					(dma_addr_t *)&mem_man->phy_addr,
 					GFP_KERNEL);
 	if (!mem_man->vir_addr) {
-		vin_err("dma_alloc_coherent memory alloc failed\n");
+		vin_err("dma_alloc_coherent memory alloc size %d failed\n",
+			mem_man->size);
 		return -ENOMEM;
 	}
 	mem_man->dma_addr =

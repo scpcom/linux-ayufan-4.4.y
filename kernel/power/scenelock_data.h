@@ -7,10 +7,6 @@
 #include "scenelock_data_sun50iw1p1.h"
 #elif defined(CONFIG_ARCH_SUN50IW2P1)
 #include "scenelock_data_sun50iw2p1.h"
-#elif defined(CONFIG_ARCH_SUN50IW3P1)
-#include "scenelock_data_sun50iw3p1.h"
-#elif defined(CONFIG_ARCH_SUN50IW6P1)
-#include "scenelock_data_sun50iw6p1.h"
 #elif defined(CONFIG_ARCH_SUN8IW6P1)
 #include "scenelock_data_sun8iw6p1.h"
 #elif defined(CONFIG_ARCH_SUN8IW8P1)

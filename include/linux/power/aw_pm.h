@@ -77,8 +77,6 @@
 #if defined(CONFIG_ARCH_SUN8IW6P1) || defined(CONFIG_ARCH_SUN8IW8P1) \
 	|| defined(CONFIG_ARCH_SUN50IW1P1) \
 	|| defined(CONFIG_ARCH_SUN50IW2P1) \
-	|| defined(CONFIG_ARCH_SUN50IW3P1) \
-	|| defined(CONFIG_ARCH_SUN50IW6P1) \
 	|| defined(CONFIG_ARCH_SUN8IW10P1) \
 	|| defined(CONFIG_ARCH_SUN8IW11P1)
 #define IO_NUM (2)
@@ -102,9 +100,7 @@ typedef struct {
 	defined(CONFIG_ARCH_SUN8IW10P1) || \
 	defined(CONFIG_ARCH_SUN8IW11P1)  || \
 	defined(CONFIG_ARCH_SUN50IW1P1) || \
-	defined(CONFIG_ARCH_SUN50IW2P1) || \
-	defined(CONFIG_ARCH_SUN50IW3P1) || \
-	defined(CONFIG_ARCH_SUN50IW6P1)
+	defined(CONFIG_ARCH_SUN50IW2P1)
 typedef struct {
 	unsigned int factor1;
 	unsigned int factor2;

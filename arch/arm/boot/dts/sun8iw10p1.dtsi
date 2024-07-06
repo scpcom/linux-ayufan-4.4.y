@@ -264,7 +264,7 @@
 		};
 
 		mbus0:mbus-controller@01c62000 {
-			compatible = "allwinner,sun8i-mbus";
+			compatible = "allwinner,sun8i-b100-mbus";
 			reg = <0x0 0x01c62000 0x0 0x110>;
 			#mbus-cells = <1>;
 		};
@@ -1303,15 +1303,15 @@
 			clocks = <&clk_keyadc>;
 			status = "okay";
 			key_cnt = <9>;
-			key0 = <190 115>;
-			key1 = <390 114>;
-			key2 = <600 0x1ac>;
-			key3 = <800 28>;
-			key4 = <980 102>;
-			key5 = <1180 0x192>;
-			key6 = <1400 0x193>;
-			key7 = <1600 9>;
-			key8 = <1800 10>;
+			key1 = <240 115>;
+			key2 = <500 114>;
+			key3 = <700 0x1ac>;
+			key4 = <890 28>;
+			key5 = <1100 102>;
+			key6 = <1300 0x192>;
+			key7 = <1500 0x193>;
+			key8 = <1700 9>;
+			key9 = <2000 10>;
 		};
 
 		wlan:wlan {

@@ -271,7 +271,7 @@ int xradio_queue_clear(struct xradio_queue *queue, int if_id)
 		}
 	}
 	queue->num_queued -= cnt;
-	queue->num_pending = 0;
+	queue->num_pending -= cnt;
 	if (XRWL_ALL_IFS != if_id) {
 		queue->num_queued_vif[if_id] = 0;
 		queue->num_pending_vif[if_id] = 0;

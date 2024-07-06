@@ -11,9 +11,7 @@
 #if defined(CONFIG_ARCH_SUN8IW10P1) || \
 	defined(CONFIG_ARCH_SUN8IW11P1) || \
 	defined(CONFIG_ARCH_SUN50IW1P1) || \
-	defined(CONFIG_ARCH_SUN50IW2P1) || \
-	defined(CONFIG_ARCH_SUN50IW3P1) || \
-	defined(CONFIG_ARCH_SUN50IW6P1)
+	defined(CONFIG_ARCH_SUN50IW2P1)
 #include "pm_types.h"
 #include "pm_config.h"
 #include "pm_errcode.h"

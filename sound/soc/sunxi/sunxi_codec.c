@@ -2355,14 +2355,12 @@ static int sunxi_internal_codec_probe(struct platform_device *pdev)
 		ret = PTR_ERR(sunxi_internal_codec->srcclk);
 		goto err1;
 	}
-#ifdef CONFIG_ARCH_SUN50IW1
 	sunxi_internal_codec->hp_en = of_clk_get(node,1);
 	if (IS_ERR(sunxi_internal_codec->hp_en)){
 		dev_err(&pdev->dev, "[audio-codec]Can't get hp_en clocks\n");
 		ret = PTR_ERR(sunxi_internal_codec->hp_en);
 		goto err1;
 	}
-#endif
 	/*initial speaker gpio */
 	spk_gpio.gpio = of_get_named_gpio_flags(node, "gpio-spk", 0, (enum of_gpio_flags *)&config);
 	if (!gpio_is_valid(spk_gpio.gpio)) {

@@ -1223,7 +1223,7 @@ void xradio_flush(struct ieee80211_hw *hw, struct ieee80211_vif *vif,
 
 	if (!(hw_priv->if_id_slot & BIT(priv->if_id)))
 		return;
-	__xradio_flush(hw_priv, drop, priv->if_id);
+	SYS_WARN(__xradio_flush(hw_priv, drop, priv->if_id));
 
 	return;
 }
@@ -1515,8 +1515,6 @@ void xradio_event_handler(struct work_struct *work)
 				break;
 			}
 		case WSM_EVENT_PS_MODE_ERROR:
-			sta_printk(XRADIO_DBG_WARN, "%s EVENT_PS_MODE_ERROR\n", __func__);
-#if 0
 			{
 				if (!priv->uapsd_info.uapsdFlags &&
 					(priv->user_pm_mode != WSM_PSM_PS)) {
@@ -1530,9 +1528,6 @@ void xradio_event_handler(struct work_struct *work)
 				}
 				break;
 			}
-#else
-			break;
-#endif
 		}
 	}
 	mutex_unlock(&hw_priv->conf_mutex);
@@ -2382,8 +2377,9 @@ int xradio_vif_setup(struct xradio_vif *priv)
 	priv->power_set_true = 0;
 	priv->user_power_set_true = 0;
 	priv->user_pm_mode = 0;
-	SYS_WARN(xradio_debug_init_priv(hw_priv, priv));
-
+	ret = xradio_debug_init_priv(hw_priv, priv);
+	if (SYS_WARN(ret))
+		goto out;
 
 	/* Initialising the broadcast filter */
 	memset(priv->broadcast_filter.MacAddr, 0xFF, ETH_ALEN);

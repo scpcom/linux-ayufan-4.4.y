@@ -16,7 +16,7 @@
 #include <linux/fb.h>
 #include <linux/memblock.h>
 
-#define VSYNC_NUM 4
+
 typedef struct
 {
 	struct device           *dev;
@@ -30,10 +30,7 @@ typedef struct
 	wait_queue_head_t       wait[3];
 	unsigned long           wait_count[3];
 	struct task_struct      *vsync_task[3];
-	spinlock_t              slock[DISP_SCREEN_NUM];
-	ktime_t                 vsync_timestamp[DISP_SCREEN_NUM][VSYNC_NUM];
-	u32                     vsync_timestamp_head[DISP_SCREEN_NUM];
-	u32                     vsync_timestamp_tail[DISP_SCREEN_NUM];
+	ktime_t                 vsync_timestamp[3];
 
 	int                     blank[3];
 }fb_info_t;
@@ -127,14 +124,11 @@ s32 fb_draw_gray_pictures(char * base, u32 width, u32 height, struct fb_var_scre
 	return 0;
 }
 
-static int fb_map_video_memory(struct fb_info *info)
+static int Fb_map_video_memory(struct fb_info *info)
 {
 	info->screen_base = (char __iomem *)disp_malloc(info->fix.smem_len, (u32 *)(&info->fix.smem_start));
 	if (info->screen_base)	{
-		__inf("%s(reserve),va=0x%p, pa=0x%p size:0x%x\n", __func__,
-		    (void *)info->screen_base,
-		    (void *)info->fix.smem_start,
-		    (unsigned int)info->fix.smem_len);
+		__inf("Fb_map_video_memory(reserve), pa=0x%p size:0x%x\n",(void*)info->fix.smem_start, (unsigned int)info->fix.smem_len);
 		memset((void* __force)info->screen_base,0x0,info->fix.smem_len);
 
 		g_fb_addr.fb_paddr = (uintptr_t)info->fix.smem_start;
@@ -150,21 +144,9 @@ static int fb_map_video_memory(struct fb_info *info)
 }
 
 
-static inline void fb_unmap_video_memory(struct fb_info *info)
+static inline void Fb_unmap_video_memory(struct fb_info *info)
 {
-	if (!info->screen_base) {
-		__wrn("%s: screen_base is null\n", __func__);
-		return;
-	}
-	__inf("%s: screen_base=0x%p, smem=0x%p, len=0x%x\n", __func__,
-	    (void *)info->screen_base,
-	    (void *)info->fix.smem_start,
-	    info->fix.smem_len);
 	disp_free((void * __force)info->screen_base, (void*)info->fix.smem_start, info->fix.smem_len);
-	info->screen_base = 0;
-	info->fix.smem_start = 0;
-	g_fb_addr.fb_paddr = 0;
-	g_fb_addr.fb_size = 0;
 }
 
 static void *Fb_map_kernel(unsigned long phys_addr, unsigned long size)
@@ -727,82 +709,26 @@ static int sunxi_fb_mmap(struct fb_info *info, struct vm_area_struct *vma)
 	return vm_iomap_memory(vma, start, len);
 }
 
-/**
- * drv_disp_vsync_event - wakeup vsync thread
- * @sel: the index of display manager
- *
- * Get the current time, push it into the cirular queue,
- * and then wakeup the vsync thread.
- */
 s32 drv_disp_vsync_event(u32 sel)
 {
-	unsigned long flags;
-	ktime_t now;
-	unsigned int head, tail, next;
-	bool full = false;
-
-	now = ktime_get();
-	spin_lock_irqsave(&g_fbi.slock[sel], flags);
-	head = g_fbi.vsync_timestamp_head[sel];
-	tail = g_fbi.vsync_timestamp_tail[sel];
-	next = tail + 1;
-	next = (next >= VSYNC_NUM) ? 0 : next;
-	if (next == head)
-		full = true;
-
-	if (!full) {
-		g_fbi.vsync_timestamp[sel][tail] = now;
-		g_fbi.vsync_timestamp_tail[sel] = next;
-	}
-	spin_unlock_irqrestore(&g_fbi.slock[sel], flags);
+	g_fbi.vsync_timestamp[sel] = ktime_get();
 
 	if (g_fbi.vsync_task[sel])
 		wake_up_process(g_fbi.vsync_task[sel]);
 
-	if (full)
-		pr_warn("%s(): disp %d's vsync timestamp list is full!\n",
-		    __func__, sel);
-
 	return 0;
 }
 
-/**
- * vsync_proc - sends vsync message
- * @disp: the index of display manager
- *
- * Get the timestamp from the circular queue,
- * And send it widthin vsync message to the userland.
- */
 static int vsync_proc(u32 disp)
 {
 	char buf[64];
 	char *envp[2];
-	unsigned long flags;
-	unsigned int head, tail, next;
-	ktime_t time;
 
-	spin_lock_irqsave(&g_fbi.slock[disp], flags);
-	head = g_fbi.vsync_timestamp_head[disp];
-	tail = g_fbi.vsync_timestamp_tail[disp];
-	while (head != tail) {
-		time = g_fbi.vsync_timestamp[disp][head];
-		next = head + 1;
-		next = (next >= VSYNC_NUM) ? 0 : next;
-		g_fbi.vsync_timestamp_head[disp] =  next;
-		spin_unlock_irqrestore(&g_fbi.slock[disp], flags);
-
-		snprintf(buf, sizeof(buf), "VSYNC%d=%llu", disp,
-		    ktime_to_ns(time));
-		envp[0] = buf;
-		envp[1] = NULL;
-		kobject_uevent_env(&g_fbi.dev->kobj, KOBJ_CHANGE, envp);
-
-		spin_lock_irqsave(&g_fbi.slock[disp], flags);
-		head = g_fbi.vsync_timestamp_head[disp];
-		tail = g_fbi.vsync_timestamp_tail[disp];
-	}
-
-	spin_unlock_irqrestore(&g_fbi.slock[disp], flags);
+	snprintf(buf, sizeof(buf), "VSYNC%d=%llu", disp,
+	    ktime_to_ns(g_fbi.vsync_timestamp[disp]));
+	envp[0] = buf;
+	envp[1] = NULL;
+	kobject_uevent_env(&g_fbi.dev->kobj, KOBJ_CHANGE, envp);
 
 	return 0;
 }
@@ -943,57 +869,6 @@ static int sunxi_fb_ioctl(struct fb_info *info, unsigned int cmd,unsigned long a
 		break;
 	}
 
-	case FBIO_FREE:
-	{
-		int fb_id = 0; /* fb0 */
-		struct fb_info *fbinfo = g_fbi.fbinfo[fb_id];
-
-		if ((!g_fbi.fb_enable[fb_id])
-		    || (fbinfo != info)) {
-			__wrn("%s, fb%d already release ?"
-			    " or fb_info mismatch: fbinfo=0x%p, info=0x%p\n",
-			    __func__, fb_id, fbinfo, info);
-			return -1;
-		}
-
-		__inf("### FBIO_FREE ###\n");
-
-		fb_unmap_video_memory(fbinfo);
-
-		/* unbound fb0 from layer(1,0)  */
-		g_fbi.layer_hdl[fb_id][0] = 0;
-		g_fbi.layer_hdl[fb_id][1] = 0;
-		g_fbi.fb_mode[fb_id] = 0;
-		g_fbi.fb_enable[fb_id] = 0;
-		break;
-	}
-
-	case FBIO_ALLOC:
-	{
-		int fb_id = 0; /* fb0 */
-		struct fb_info *fbinfo = g_fbi.fbinfo[fb_id];
-
-		if (g_fbi.fb_enable[fb_id]
-		    || (fbinfo != info)) {
-			__wrn("%s, fb%d already enable ?"
-			    " or fb_info mismatch: fbinfo=0x%p, info=0x%p\n",
-			    __func__, fb_id, fbinfo, info);
-			return -1;
-		}
-
-		__inf("### FBIO_ALLOC ###\n");
-
-		/* fb0 bound to layer(1,0)  */
-		g_fbi.layer_hdl[fb_id][0] = 1;
-		g_fbi.layer_hdl[fb_id][1] = 0;
-
-		fb_map_video_memory(fbinfo);
-
-		g_fbi.fb_mode[fb_id] = g_fbi.fb_para[fb_id].fb_mode;
-		g_fbi.fb_enable[fb_id] = 1;
-		break;
-	}
-
 	default:
 		break;
 	}
@@ -1010,7 +885,9 @@ static struct fb_ops dispfb_ops =
 	.fb_check_var   = sunxi_fb_check_var,
 	.fb_set_par     = sunxi_fb_set_par,
 	.fb_blank       = sunxi_fb_blank,
+#ifdef BPI-M2U	// DO NOT define BPI-M2U, turn off sunxi_fb_cursor
 	.fb_cursor      = sunxi_fb_cursor,
+#endif	
 	.fb_mmap        = sunxi_fb_mmap,
 #if defined(CONFIG_FB_CONSOLE_SUNXI)
 	.fb_fillrect    = cfb_fillrect,
@@ -1342,7 +1219,7 @@ static s32 display_fb_request(u32 fb_id, struct disp_fb_create_info *fb_para)
 	info->fix.smem_len      = info->fix.line_length * fb_para->height * fb_para->buffer_num;
 	if (0 != info->fix.line_length)
 		info->var.yres_virtual  = info->fix.smem_len / info->fix.line_length;
-	fb_map_video_memory(info);
+	Fb_map_video_memory(info);
 
 	for (sel = 0; sel < num_screens; sel++) {
 		if (sel == fb_para->fb_mode)	{
@@ -1403,10 +1280,8 @@ static s32 display_fb_request(u32 fb_id, struct disp_fb_create_info *fb_para)
 			config.info.fb.size[2].height = fb_para->height;
 			config.info.fb.color_space = DISP_BT601;
 
-#if !defined(CONFIG_EINK_PANEL_USED)
 			if (mgr && mgr->set_layer_config)
 				mgr->set_layer_config(mgr, &config, 1);
-#endif
 		}
 	}
 
@@ -1450,7 +1325,7 @@ static s32 display_fb_release(u32 fb_id)
 #if defined(CONFIG_FB_CONSOLE_SUNXI)
 		fb_dealloc_cmap(&info->cmap);
 #endif
-		fb_unmap_video_memory(info);
+		Fb_unmap_video_memory(info);
 
 		return 0;
 	}	else {
@@ -1534,7 +1409,6 @@ s32 fb_init(struct platform_device *pdev)
 	for (i=0; i<num_screens; i++) {
 		char task_name[25];
 
-		spin_lock_init(&g_fbi.slock[i]);
 		sprintf(task_name, "vsync proc %ld", i);
 		g_fbi.vsync_task[i] = kthread_create(vsync_thread, (void*)i, task_name);
 		if (IS_ERR(g_fbi.vsync_task[i])) {

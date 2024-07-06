@@ -1428,7 +1428,7 @@ static int sw_uart_probe(struct platform_device *pdev)
 	port->type = PORT_SUNXI;
 	port->flags = UPF_BOOT_AUTOCONF;
 	port->ops = &sw_uart_ops;
-	port->fifosize = SUNXI_UART_FIFO_SIZE;
+	port->fifosize = 64;
 	platform_set_drvdata(pdev, port);
 
 	sunxi_uart_sysfs(pdev);

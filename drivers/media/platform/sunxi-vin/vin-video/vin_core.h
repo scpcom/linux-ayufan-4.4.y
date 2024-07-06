@@ -35,6 +35,7 @@
 #include "../vin-csi/bsp_csi.h"
 #include "../vin-mipi/bsp_mipi_csi.h"
 #include "../vin-isp/bsp_isp.h"
+#include "../vin-isp/bsp_isp_algo.h"
 #include "../utility/vin_supply.h"
 #include "vin_video.h"
 
@@ -104,8 +105,6 @@ struct sensor_list {
 	int detect_num;
 	char sensor_pos[32];
 	int valid_idx;
-	int valid_cnt;
-	int valid[MAX_DETECT_NUM];
 	struct vin_power power[ENUM_MAX_REGU];
 	struct gpio_config gpio[MAX_GPIO_NUM];
 	struct sensor_instance inst[MAX_DETECT_NUM];
@@ -152,26 +151,32 @@ struct modules_config {
 	int act_used;
 };
 
+struct vin_pipeline_cfg {
+	int mipi_ind;
+	int csi_ind;
+	int isp_ind;
+	int scaler_ind;
+};
+
 struct vin_core {
 	struct platform_device *pdev;
 	int id;
-	void __iomem *base;
 	/* various device info */
 	struct vin_vid_cap vid_cap;
 	/* about system resource */
 	struct regulator *vin_system_power[3];
-	/* about vin channel */
+	int vin_sensor_power_cnt;
+	/* about vfe channel */
 	unsigned int cur_ch;
 	/* about some global info */
 	enum v4l2_mbus_type mbus_type;
 	unsigned int csi_sel;
 	unsigned int mipi_sel;
-	unsigned int isp_sel;
-	unsigned int vipp_sel;
-	unsigned int hflip;
-	unsigned int vflip;
+	unsigned int scaler_sel;
 	struct modules_config modu_cfg;
 	unsigned int platform_id;
+	struct vin_pipeline_cfg pipe_cfg;
+
 	struct v4l2_device *v4l2_dev;
 	const struct vin_pipeline_ops *pipeline_ops;
 	int support_raw;

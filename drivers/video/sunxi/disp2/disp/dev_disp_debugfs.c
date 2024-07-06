@@ -220,6 +220,8 @@ static void dispdbg_process(void)
 			area.x_bottom= simple_strtoul(next,NULL,0);
 			next = strsep(&tosearch, " ");
 			area.y_bottom = simple_strtoul(next,NULL,0);
+			if (eink_manager->eink_update)
+				eink_manager->eink_update(eink_manager, 0, mode, area);
 
 		} else if (!strncmp(dispdbg_priv.command,"disable",7)) {
 			if (eink_manager->disable)

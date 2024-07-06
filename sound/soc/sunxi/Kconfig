@@ -19,7 +19,7 @@ menuconfig SND_SUNXI_SOC
 if SND_SUNXI_SOC
 config SND_SUNXI_SOC_INTERNAL_AUDIOCODEC
 	tristate "ASoC support for audiocodec"
-	depends on ARCH_SUN50IW1P1 || ARCH_SUN50IW3P1
+	depends on ARCH_SUN50IW1P1
 	select SND_SUNXI_SOC_RW
 	help
 	  Say Y or M if you want to add support for codecs attached to the
@@ -27,7 +27,7 @@ config SND_SUNXI_SOC_INTERNAL_AUDIOCODEC
 
 config SND_SUNXI_SOC_INTERNAL_I2S
 	tristate "ASoC support for internal-i2s"
-	depends on ARCH_SUN50IW1P1 || ARCH_SUN50IW3P1
+	depends on ARCH_SUN50IW1P1
 	select SND_SUNXI_SOC_RW
 	help
 	  Say Y or M if you want to add support for codecs attached to the
@@ -35,7 +35,7 @@ config SND_SUNXI_SOC_INTERNAL_I2S
 
 config SND_SUNXI_SOC_AUDIO_CODEC_MACHINE
 	tristate "ASoC support for audiocodec machine"
-	depends on ARCH_SUN50IW1P1 || ARCH_SUN50IW3P1
+	depends on ARCH_SUN50IW1P1
 	select SND_SUNXI_SOC_RW
 	help
 	  Say Y or M if you want to add support for codecs attached to the
@@ -123,7 +123,7 @@ config SND_SUNXI_SOC_DMIC
 	tristate "ASoC support for dmic."
 	select REGMAP_MMIO
 	select SND_SOC_DMIC
-	depends on ARCH_SUN8IW10 || ARCH_SUN50IW3
+	depends on ARCH_SUN8IW10
 	help
  	  Say Y or M if you want to add the dmic interface.
 
@@ -145,7 +145,6 @@ config SND_SUNXI_SOC_SPDIF
 	tristate "ASoC support for spdif soundcard"
 	select REGMAP_MMIO
 	select SND_SUNXI_SOC_SPDIF_UTILS
-	depends on ARCH_SUN8IW10 || ARCH_SUN8IW11 || ARCH_SUN50IW2 || ARCH_SUN50IW1
 	help
  	  Say Y or M if you want to add the spdif soundcard include macheine plarform.
 

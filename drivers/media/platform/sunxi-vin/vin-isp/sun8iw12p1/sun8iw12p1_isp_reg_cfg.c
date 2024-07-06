@@ -20,10 +20,15 @@
 #include "sun8iw12p1_isp_reg.h"
 #include "sun8iw12p1_isp_reg_cfg.h"
 
+
 #include <linux/kernel.h>
 
-/*#define USE_DEF_PARA*/
+#define  REG_FUNCTION_LOG do { \
+		printk("%s, line: %d\n", __FUNCTION__, __LINE__); \
+	} while (0)
 
+#define ABS(x)	((x) > 0 ? (x) : -(x))
+#define MAX(a, b) (((a) > (b)) ? (a) : (b))
 #define SUN8IW12P1_ISP_MAX_NUM 2
 
 /*
@@ -47,11 +52,6 @@ struct sun8iw12p1_isp_reg {
 	SUN8IW12P1_ISP_VER_CFG_REG_t *sun8iw12p1_isp_ver_cfg;
 	SUN8IW12P1_ISP_SRAM_RW_OFFSET_REG_t *sun8iw12p1_isp_sram_rw_offset;
 	SUN8IW12P1_ISP_SRAM_RW_DATA_REG_t *sun8iw12p1_isp_sram_rw_data;
-	SUN8IW12P1_ISP_EN_REG_t *sun8iw12p1_isp_en;
-	SUN8IW12P1_ISP_MODE_REG_t *sun8iw12p1_isp_mode;
-	SUN8IW12P1_ISP_OB_SIZE_REG_t *sun8iw12p1_isp_ob_size;
-	SUN8IW12P1_ISP_OB_VALID_REG_t *sun8iw12p1_isp_ob_valid;
-	SUN8IW12P1_ISP_OB_VALID_START_REG_t *sun8iw12p1_isp_ob_valid_start;
 };
 
 struct sun8iw12p1_isp_reg sun8iw12p1_isp_regs[SUN8IW12P1_ISP_MAX_NUM];
@@ -80,14 +80,6 @@ void sun8iw12p1_map_reg_addr(unsigned long id, unsigned long isp_reg_base)
 
 	sun8iw12p1_isp_regs[id].sun8iw12p1_isp_sram_rw_offset = (SUN8IW12P1_ISP_SRAM_RW_OFFSET_REG_t *) (isp_reg_base + SUN8IW12P1_ISP_SRAM_RW_OFFSET_REG_OFF);
 	sun8iw12p1_isp_regs[id].sun8iw12p1_isp_sram_rw_data = (SUN8IW12P1_ISP_SRAM_RW_DATA_REG_t *) (isp_reg_base + SUN8IW12P1_ISP_SRAM_RW_DATA_REG_OFF);
-
-#ifdef USE_DEF_PARA
-	sun8iw12p1_isp_regs[id].sun8iw12p1_isp_en = (SUN8IW12P1_ISP_EN_REG_t *) (isp_reg_base + SUN8IW12P1_ISP_EN_REG_OFF);
-	sun8iw12p1_isp_regs[id].sun8iw12p1_isp_mode = (SUN8IW12P1_ISP_MODE_REG_t *) (isp_reg_base + SUN8IW12P1_ISP_MODE_REG_OFF);
-	sun8iw12p1_isp_regs[id].sun8iw12p1_isp_ob_size = (SUN8IW12P1_ISP_OB_SIZE_REG_t *) (isp_reg_base + SUN8IW12P1_ISP_OB_SIZE_REG_OFF);
-	sun8iw12p1_isp_regs[id].sun8iw12p1_isp_ob_valid = (SUN8IW12P1_ISP_OB_VALID_REG_t *) (isp_reg_base + SUN8IW12P1_ISP_OB_VALID_REG_OFF);
-	sun8iw12p1_isp_regs[id].sun8iw12p1_isp_ob_valid_start = (SUN8IW12P1_ISP_OB_VALID_START_REG_t *) (isp_reg_base + SUN8IW12P1_ISP_OB_VALID_START_REG_OFF);
-#endif
 }
 
 /*
@@ -96,13 +88,7 @@ void sun8iw12p1_map_reg_addr(unsigned long id, unsigned long isp_reg_base)
 
 void sun8iw12p1_map_load_dram_addr(unsigned long id, unsigned long isp_load_dram_base)
 {
-#ifndef USE_DEF_PARA
-	sun8iw12p1_isp_regs[id].sun8iw12p1_isp_en = (SUN8IW12P1_ISP_EN_REG_t *) (isp_load_dram_base + SUN8IW12P1_ISP_EN_REG_OFF);
-	sun8iw12p1_isp_regs[id].sun8iw12p1_isp_mode = (SUN8IW12P1_ISP_MODE_REG_t *) (isp_load_dram_base + SUN8IW12P1_ISP_MODE_REG_OFF);
-	sun8iw12p1_isp_regs[id].sun8iw12p1_isp_ob_size = (SUN8IW12P1_ISP_OB_SIZE_REG_t *) (isp_load_dram_base + SUN8IW12P1_ISP_OB_SIZE_REG_OFF);
-	sun8iw12p1_isp_regs[id].sun8iw12p1_isp_ob_valid = (SUN8IW12P1_ISP_OB_VALID_REG_t *) (isp_load_dram_base + SUN8IW12P1_ISP_OB_VALID_REG_OFF);
-	sun8iw12p1_isp_regs[id].sun8iw12p1_isp_ob_valid_start = (SUN8IW12P1_ISP_OB_VALID_START_REG_t *) (isp_load_dram_base + SUN8IW12P1_ISP_OB_VALID_START_REG_OFF);
-#endif
+
 }
 
 /*
@@ -155,12 +141,10 @@ void sun8iw12p1_isp_wdr_ch_seq(unsigned long id, int seq)
 }
 void sun8iw12p1_isp_set_para_ready(unsigned long id, enum ready_flag ready)
 {
-#ifndef USE_DEF_PARA
 	if (ready == PARA_READY)
 		sun8iw12p1_isp_regs[id].sun8iw12p1_isp_fe_ctrl->bits.para_ready = 1;
 	else
 		sun8iw12p1_isp_regs[id].sun8iw12p1_isp_fe_ctrl->bits.para_ready = 0;
-#endif
 }
 
 unsigned int sun8iw12p1_isp_get_para_ready(unsigned long id)
@@ -221,14 +205,16 @@ void sun8iw12p1_isp_update_table(unsigned long id, unsigned short table_update)
 	else
 		sun8iw12p1_isp_regs[id].sun8iw12p1_isp_fe_ctrl->bits.cem_update = 0;
 }
-void sun8iw12p1_isp_capture_start(unsigned long id)
+void sun8iw12p1_isp_capture_start(unsigned long id, int vcap_read_start)
 {
 	sun8iw12p1_isp_regs[id].sun8iw12p1_isp_fe_ctrl->bits.cap_en = 1;
+	sun8iw12p1_isp_regs[id].sun8iw12p1_isp_fe_ctrl->bits.vcap_read_start = vcap_read_start;
 }
 
-void sun8iw12p1_isp_capture_stop(unsigned long id)
+void sun8iw12p1_isp_capture_stop(unsigned long id, int vcap_read_start)
 {
 	sun8iw12p1_isp_regs[id].sun8iw12p1_isp_fe_ctrl->bits.cap_en = 0;
+	sun8iw12p1_isp_regs[id].sun8iw12p1_isp_fe_ctrl->bits.vcap_read_start = vcap_read_start;
 }
 
 void sun8iw12p1_isp_irq_enable(unsigned long id, unsigned int irq_flag)
@@ -271,7 +257,7 @@ void sun8iw12p1_isp_set_last_blank_cycle(unsigned long id, unsigned int last_bla
 	sun8iw12p1_isp_regs[id].sun8iw12p1_isp_line_int_num->bits.last_blank_cycle = last_blank_cycle;
 }
 
-void sun8iw12p1_isp_set_speed_mode(unsigned long id, unsigned int speed_mode)
+void sun8iw12p1_isp_set_rot_of_line_num(unsigned long id, unsigned int speed_mode)
 {
 	sun8iw12p1_isp_regs[id].sun8iw12p1_isp_rot_of_cfg->bits.speed_mode = speed_mode;
 }
@@ -313,26 +299,6 @@ unsigned int sun8iw12p1_isp_get_isp_ver(unsigned long id, unsigned int *major, u
 	return sun8iw12p1_isp_regs[id].sun8iw12p1_isp_ver_cfg->dwval;
 }
 
-void sun8iw12p1_isp_src0_en(unsigned long id, unsigned int en)
-{
-	sun8iw12p1_isp_regs[id].sun8iw12p1_isp_en->bits.src0_en = en;
-}
-
-void sun8iw12p1_isp_set_input_fmt(unsigned long id, unsigned int fmt)
-{
-	sun8iw12p1_isp_regs[id].sun8iw12p1_isp_mode->bits.input_fmt = fmt;
-}
-
-void sun8iw12p1_isp_set_size(unsigned long id, struct isp_size *black,
-		struct isp_size *valid, struct coor *xy)
-{
-	sun8iw12p1_isp_regs[id].sun8iw12p1_isp_ob_size->bits.ob_width = black->width;
-	sun8iw12p1_isp_regs[id].sun8iw12p1_isp_ob_size->bits.ob_height = black->height;
-	sun8iw12p1_isp_regs[id].sun8iw12p1_isp_ob_valid->bits.ob_valid_width = valid->width;
-	sun8iw12p1_isp_regs[id].sun8iw12p1_isp_ob_valid->bits.ob_valid_height = valid->height;
-	sun8iw12p1_isp_regs[id].sun8iw12p1_isp_ob_valid_start->bits.ob_hor_start = xy->hor;
-	sun8iw12p1_isp_regs[id].sun8iw12p1_isp_ob_valid_start->bits.ob_ver_start = xy->ver;
-}
 
 static struct isp_bsp_fun_array sun8iw12p1_fun_array = {
 	.map_reg_addr =	sun8iw12p1_map_reg_addr,
@@ -353,7 +319,7 @@ static struct isp_bsp_fun_array sun8iw12p1_fun_array = {
 	.isp_debug_output_cfg = sun8iw12p1_isp_debug_output_cfg,
 	.isp_int_get_enable = sun8iw12p1_isp_int_get_enable,
 	.isp_set_line_int_num =	sun8iw12p1_isp_set_line_int_num,
-	.isp_set_speed_mode = sun8iw12p1_isp_set_speed_mode,
+	.isp_set_rot_of_line_num = sun8iw12p1_isp_set_rot_of_line_num,
 	.isp_set_load_addr = sun8iw12p1_isp_set_load_addr,
 	.isp_set_saved_addr = sun8iw12p1_isp_set_saved_addr,
 	.isp_set_table_addr = sun8iw12p1_isp_set_table_addr,
@@ -361,13 +327,10 @@ static struct isp_bsp_fun_array sun8iw12p1_fun_array = {
 	.isp_update_table = sun8iw12p1_isp_update_table,
 	.isp_set_output_speed = NULL,
 	.isp_get_isp_ver = sun8iw12p1_isp_get_isp_ver,
-	.isp_src0_en = sun8iw12p1_isp_src0_en,
-	.isp_set_input_fmt = sun8iw12p1_isp_set_input_fmt,
-	.isp_set_size = sun8iw12p1_isp_set_size,
 };
 
 struct isp_platform_drv sun8iw12p1_isp_drv = {
-	.platform_id = ISP_PLATFORM_SUN8IW12P1,
+	.platform_id = ISP_PLATFORM_SUN8IW7P1,
 	.fun_array = &sun8iw12p1_fun_array,
 };
 

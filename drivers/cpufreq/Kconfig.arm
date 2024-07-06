@@ -10,6 +10,15 @@ config ARM_SUNXI_CPUFREQ
 
 	  If in doubt, say N.
 
+config CPU_VOLTAGE_SCALING
+	bool "CPU voltage change with frequency"
+	depends on ARM_SUNXI_CPUFREQ && AW_AXP
+	depends on !SUNXI_ARISC
+	help
+	  This will allow cpu voltage dynamic changed when the frequency is changed.
+
+	  If in doubt, say N.
+
 config ARM_BIG_LITTLE_CPUFREQ
 	tristate "Generic ARM big LITTLE CPUfreq driver"
 	depends on (ARM_CPU_TOPOLOGY && BIG_LITTLE) || (ARM64 && SMP)

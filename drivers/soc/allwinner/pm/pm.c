@@ -71,9 +71,7 @@ static int aw_pm_valid(suspend_state_t state)
 	defined(CONFIG_ARCH_SUN8IW5P1) || \
 	defined(CONFIG_ARCH_SUN8IW6P1) || \
 	defined(CONFIG_ARCH_SUN50IW1P1) || \
-	defined(CONFIG_ARCH_SUN50IW2P1) || \
-	defined(CONFIG_ARCH_SUN50IW3P1) || \
-	defined(CONFIG_ARCH_SUN50IW6P1)
+	defined(CONFIG_ARCH_SUN50IW2P1)
 	if (NORMAL_STANDBY == standby_type) {
 		printk
 		    ("Notice: sun9i & sun8iw5 & sun50i not need support normal standby, \
@@ -577,9 +575,7 @@ static int aw_pm_enter(suspend_state_t state)
 #if (defined(CONFIG_ARCH_SUN8IW8P1) || \
 	defined(CONFIG_ARCH_SUN8IW6P1) || \
 	defined(CONFIG_ARCH_SUN50IW1P1) || \
-	defined(CONFIG_ARCH_SUN50IW2P1) || \
-	defined(CONFIG_ARCH_SUN50IW3P1) || \
-	defined(CONFIG_ARCH_SUN50IW6P1)) && \
+	defined(CONFIG_ARCH_SUN50IW2P1)) && \
 	defined(CONFIG_AW_AXP)
 	if (unlikely(debug_mask & PM_STANDBY_PRINT_PWR_STATUS)) {
 		printk(KERN_INFO "power status as follow:");
@@ -622,11 +618,9 @@ static int aw_pm_enter(suspend_state_t state)
 	aw_pm_show_dev_status();
 
 #if (defined(CONFIG_ARCH_SUN8IW8P1) || \
-	defined(CONFIG_ARCH_SUN8IW6P1) || \
-	defined(CONFIG_ARCH_SUN50IW1P1) || \
-	defined(CONFIG_ARCH_SUN50IW2P1) || \
-	defined(CONFIG_ARCH_SUN50IW3P1) || \
-	defined(CONFIG_ARCH_SUN50IW6P1)) && \
+		defined(CONFIG_ARCH_SUN8IW6P1) || \
+		defined(CONFIG_ARCH_SUN50IW1P1) || \
+		defined(CONFIG_ARCH_SUN50IW2P1)) && \
 	defined(CONFIG_AW_AXP)
 	resume_sys_pwr_state();
 #endif
@@ -837,9 +831,7 @@ static int __init aw_pm_init(void)
 	defined(CONFIG_ARCH_SUN8IW10P1) || \
 	defined(CONFIG_ARCH_SUN8IW11P1) || \
 	defined(CONFIG_ARCH_SUN50IW1P1) || \
-	defined(CONFIG_ARCH_SUN50IW2P1) || \
-	defined(CONFIG_ARCH_SUN50IW3P1) || \
-	defined(CONFIG_ARCH_SUN50IW6P1)) && \
+	defined(CONFIG_ARCH_SUN50IW2P1)) && \
 	defined(CONFIG_AW_AXP)
 	config_pmu_para();
 	/*init sys_pwr_dm */

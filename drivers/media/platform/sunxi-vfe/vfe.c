@@ -1,14 +1,4 @@
 /*
- *
- * Copyright (c) 2016 Allwinnertech Co., Ltd.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- */
-/*
  * sunxi Camera Interface  driver
  * Author: raymonxiu
  */
@@ -79,7 +69,6 @@
 #define DUMP_ISP      (1 << 1)
 
 //#define _REGULATOR_CHANGE_
-struct vfe_dev *vfe_dev_gbl[2];
 
 static char ccm[I2C_NAME_SIZE] = "";
 static uint i2c_addr = 0xff;
@@ -688,35 +677,32 @@ static void update_isp_setting(struct vfe_dev *dev)
 		bsp_isp_update_drc_table(&dev->isp_tbl_addr[dev->input]);
 }
 
+//static int isp_addr_curr = 0;
+//static int isp_addr_pst = 0;
 static inline void vfe_set_addr(struct vfe_dev *dev,struct vfe_buffer *buffer)
 {
+	struct vfe_buffer *buf = buffer;
 	dma_addr_t addr_org;
-	struct vb2_buffer *vb_buf = &buffer->vb;
-
-	if (dev->special_active == 1) {
-		if (buffer == NULL || buffer->paddr == NULL) {
-			vfe_err("%s buffer is NULL!\n", __func__);
-			return;
-		}
-	} else {
-		if (vb_buf == NULL || vb_buf->planes[0].mem_priv == NULL) {
-			vfe_err("vb_buf->priv is NULL!\n");
-			return;
-		}
+	struct vb2_buffer *vb_buf = &buf->vb;
+	if(vb_buf == NULL || vb_buf->planes[0].mem_priv == NULL)
+	{
+		vfe_err("vb_buf->priv is NULL!\n");
+		return;
 	}
-
-	if (dev->special_active == 1)
-		addr_org = (dma_addr_t)buffer->paddr;
-	else
-		addr_org = vb2_dma_contig_plane_dma_addr(vb_buf, 0)
-				- CPU_DRAM_PADDR_ORG + HW_DMA_OFFSET;
-
+	//vfe_dbg(3,"buf ptr=%p\n",buf);
+	addr_org = vb2_dma_contig_plane_dma_addr(vb_buf, 0) - CPU_DRAM_PADDR_ORG + HW_DMA_OFFSET;
+	//isp_addr_curr = vfe_reg_readl((volatile void __iomem*)(0xf1cb8210));
+	//if(isp_addr_pst != isp_addr_curr)
+	//{
+	//	vfe_warn("isp_addr_pst = %d, isp_addr_curr = %d.......\n", isp_addr_pst, isp_addr_curr);
+	//}
+	//isp_addr_pst = addr_org /4;
 	if(dev->is_isp_used) {
 		sunxi_isp_set_output_addr(dev->isp_sd, addr_org);
 	} else {
 		bsp_csi_set_addr(dev->csi_sel, addr_org);
 	}
-	vfe_dbg(3, "csi_buf_addr_orginal=%pa\n", &addr_org);
+	vfe_dbg(3,"csi_buf_addr_orginal=%pa\n", &addr_org);//=>vfe_dbg(3,"csi_buf_addr_orginal=0x%016llx\n", addr_org);
 }
 
 static void vfe_init_isp_log(struct vfe_dev *dev)
@@ -1068,6 +1054,35 @@ static void vfe_isp_stat_parse(struct isp_gen_settings * isp_gen)
 	isp_gen->stat.awb_win_buf = (void*) (buffer_addr + ISP_STAT_AWB_WIN_MEM_OFS);
 }
 
+void vfe_csi_isp_reset(unsigned long data)
+{
+	struct vfe_dev *dev = (struct vfe_dev *)data;
+	mod_timer(&dev->timer_for_reset, jiffies + HZ);
+
+	bsp_csi_enable(dev->csi_sel);
+	bsp_csi_disable(dev->csi_sel);
+	bsp_csi_enable(dev->csi_sel);
+	if(dev->is_isp_used)
+	{
+		bsp_isp_enable();
+		bsp_isp_disable();
+		bsp_isp_enable();
+	}
+	vfe_print("cs/isp reset after csi/isp interrupt timeout!\n");
+}
+
+#if 0
+static int vfe_timer_init(struct vfe_dev *dev)
+{
+	init_timer(&dev->timer_for_reset);
+	dev->timer_for_reset.data = (unsigned long)dev;
+	dev->timer_for_reset.expires = jiffies + 2*HZ;
+	dev->timer_for_reset.function = vfe_csi_isp_reset;
+	add_timer(&dev->timer_for_reset);
+	return 0;
+}
+#endif
+
 /*
  *  the interrupt routine
  */
@@ -1079,20 +1094,11 @@ static irqreturn_t vfe_isr(int irq, void *priv)
 	struct vfe_buffer *buf;
 	struct vfe_dev *dev = (struct vfe_dev *)priv;
 	struct vfe_dmaqueue *dma_q = &dev->vidq;
-	struct vfe_dmaqueue *done = NULL;
-	int need_callback = 0;
 	struct csi_int_status status;
 	struct vfe_isp_stat_buf_queue *isp_stat_bq = &dev->isp_stat_bq;
 	struct vfe_isp_stat_buf *stat_buf_pt;
 	FUNCTION_LOG;
 	vfe_dbg(0,"vfe interrupt!!!\n");
-
-	if (dev->special_active == 1) {
-		dma_q = &dev->vidq_special;
-		done = &dev->done_special;
-		need_callback = 0;
-	}
-
 	if(vfe_is_generating(dev) == 0)
 	{
 		bsp_csi_int_clear_status(dev->csi_sel, dev->cur_ch,CSI_INT_ALL);
@@ -1132,6 +1138,7 @@ static irqreturn_t vfe_isr(int irq, void *priv)
 		}
 	}
 	frame_cnt++;
+	/*mod_timer(&dev->timer_for_reset, jiffies + HZ );*/
 
 	FUNCTION_LOG;
 	spin_lock_irqsave(&dev->slock, flags);
@@ -1174,12 +1181,7 @@ isp_exp_handle:
 		vfe_print("capture image mode!\n");
 		buf = list_entry(dma_q->active.next,struct vfe_buffer, list);
 		list_del(&buf->list);
-		if (dev->special_active == 1) {
-			list_add_tail(&buf->list, &done->active);
-			need_callback = 1;
-		} else {
-			vb2_buffer_done(&buf->vb, VB2_BUF_STATE_DONE);
-		}
+		vb2_buffer_done(&buf->vb, VB2_BUF_STATE_DONE);
 		goto unlock;
 	} else {
 		if(dev->is_isp_used)
@@ -1205,10 +1207,8 @@ isp_exp_handle:
 		buf = list_entry(dma_q->active.next,struct vfe_buffer, list);
 
 		/* Nobody is waiting on this buffer*/
-		if (!dev->special_active) {
-			if (!waitqueue_active(&buf->vb.vb2_queue->done_wq)) {
-				vfe_warn(" Nobody is waiting on this video buffer,buf = 0x%p\n", buf);
-			}
+		if (!waitqueue_active(&buf->vb.vb2_queue->done_wq)) {
+			vfe_warn(" Nobody is waiting on this video buffer,buf = 0x%p\n",buf);
 		}
 		list_del(&buf->list);
 		v4l2_get_timestamp(&buf->vb.v4l2_buf.timestamp);
@@ -1221,12 +1221,7 @@ isp_exp_handle:
 		dev->jiffies = jiffies;
 		buf->vb.image_quality = dev->isp_3a_result_pt->image_quality.dwval;
 
-		if (dev->special_active == 1) {
-			list_add_tail(&buf->list, &done->active);
-			need_callback = 1;
-		} else {
-			vb2_buffer_done(&buf->vb, VB2_BUF_STATE_DONE);
-		}
+		vb2_buffer_done(&buf->vb, VB2_BUF_STATE_DONE);
 		//isp_stat_handle:
 
 		if(dev->is_isp_used && dev->is_bayer_raw) {
@@ -1296,13 +1291,10 @@ set_next_output_addr:
 		goto unlock;
 	}
 	buf = list_entry(dma_q->active.next->next,struct vfe_buffer, list);
-	vfe_set_addr(dev, buf);
+	vfe_set_addr(dev,buf);
 
 unlock:
 	spin_unlock_irqrestore(&dev->slock, flags);
-
-	if (dev->special_active && need_callback && dev->vfe_buffer_process)
-		dev->vfe_buffer_process(dev->id);
 
 	if ( ( (dev->capture_mode == V4L2_MODE_VIDEO)||(dev->capture_mode == V4L2_MODE_PREVIEW) )
 							&& dev->is_isp_used && bsp_isp_get_irq_status(FINISH_INT_EN))
@@ -1644,9 +1636,10 @@ static int vidioc_try_fmt_vid_cap(struct file *file, void *priv,
 	return 0;
 }
 
-static int s_fmt_internal(struct vfe_dev *dev, void *priv,
-		struct v4l2_format *f)
+static int vidioc_s_fmt_vid_cap(struct file *file, void *priv,
+          struct v4l2_format *f)
 {
+	struct vfe_dev *dev = video_drvdata(file);
 	struct v4l2_mbus_framefmt ccm_fmt;
 	struct v4l2_mbus_config mbus_cfg;
 	enum v4l2_mbus_pixelcode *bus_pix_code;
@@ -1822,13 +1815,6 @@ out:
 	return ret;
 }
 
-static int vidioc_s_fmt_vid_cap(struct file *file, void *priv,
-			struct v4l2_format *f)
-{
-	struct vfe_dev *dev = video_drvdata(file);
-	return s_fmt_internal(dev, priv, f);
-}
-
 static int vidioc_reqbufs(struct file *file, void *priv,
         struct v4l2_requestbuffers *p)
 {
@@ -1863,11 +1849,12 @@ static int vidioc_dqbuf(struct file *file, void *priv, struct v4l2_buffer *p)
 	return ret;
 }
 
-static int __vfe_streamon(struct vfe_dev *dev, void *priv, enum v4l2_buf_type i)
+static int vidioc_streamon(struct file *file, void *priv, enum v4l2_buf_type i)
 {
+	struct vfe_dev *dev = video_drvdata(file);
 	struct vfe_dmaqueue *dma_q = &dev->vidq;
 	struct vfe_isp_stat_buf_queue *isp_stat_bq = &dev->isp_stat_bq;
-	struct vfe_buffer *buf = NULL;
+	struct vfe_buffer *buf;
 	struct vfe_isp_stat_buf *stat_buf_pt;
 
 	int ret = 0;
@@ -1895,6 +1882,9 @@ static int __vfe_streamon(struct vfe_dev *dev, void *priv, enum v4l2_buf_type i)
 	dev->ms = 0;
 	dev->jiffies = jiffies;
 
+	dma_q->frame = 0;
+	dma_q->ini_jiffies = jiffies;
+
 	if (dev->is_isp_used && dev->is_bayer_raw) {
 		/* initial for isp statistic buffer queue */
 		INIT_LIST_HEAD(&isp_stat_bq->active);
@@ -1905,24 +1895,12 @@ static int __vfe_streamon(struct vfe_dev *dev, void *priv, enum v4l2_buf_type i)
 		}
 	}
 
-	if (dev->special_active == 1) {
-		dma_q = &dev->vidq_special;
-		vfe_start_generating(dev);
-	} else {
-		ret = vb2_streamon(&dev->vb_vidq, i);
-		if (ret)
-			goto streamon_unlock;
-	}
-
-	if (!list_empty(&dma_q->active)) {
-		buf = list_entry(dma_q->active.next, struct vfe_buffer, list);
-	} else {
-		vfe_err("stream on, but no buffer now.\n");
+	ret = vb2_streamon(&dev->vb_vidq, i);
+	if (ret)
 		goto streamon_unlock;
-	}
+
+	buf = list_entry(dma_q->active.next,struct vfe_buffer, list);
 	vfe_set_addr(dev,buf);
-
-
 	if (dev->is_isp_used && dev->is_bayer_raw) {
 		stat_buf_pt = list_entry(isp_stat_bq->active.next, struct vfe_isp_stat_buf, queue);
 		if(NULL == stat_buf_pt){
@@ -1978,19 +1956,10 @@ streamon_unlock:
 	return ret;
 }
 
-static int vidioc_streamon(struct file *file, void *priv, enum v4l2_buf_type i)
+static int vidioc_streamoff(struct file *file, void *priv, enum v4l2_buf_type i)
 {
 	struct vfe_dev *dev = video_drvdata(file);
-
-	return __vfe_streamon(dev, priv, i);
-}
-
-static int __vfe_streamoff(struct vfe_dev *dev, void *priv, enum v4l2_buf_type i)
-{
 	struct vfe_dmaqueue *dma_q = &dev->vidq;
-	struct vfe_dmaqueue *donelist = NULL;
-	struct vfe_buffer *buffer = NULL;
-	unsigned long flags = 0;
 	int ret = 0;
 	mutex_lock(&dev->stream_lock);
 	vfe_dbg(0,"video stream off\n");
@@ -2003,6 +1972,9 @@ static int __vfe_streamoff(struct vfe_dev *dev, void *priv, enum v4l2_buf_type i
 	/* Resets frame counters */
 	dev->ms = 0;
 	dev->jiffies = jiffies;
+
+	dma_q->frame = 0;
+	dma_q->ini_jiffies = jiffies;
 
 	if (dev->is_isp_used) {
 		vfe_dbg(0,"disable isp int in streamoff\n");
@@ -2031,25 +2003,11 @@ static int __vfe_streamoff(struct vfe_dev *dev, void *priv, enum v4l2_buf_type i
 	if(dev->mbus_type == V4L2_MBUS_CSI2)
 		bsp_mipi_csi_protocol_disable(dev->mipi_sel);
 
-	if (dev->special_active == 1) {
-		dma_q = &dev->vidq_special;
-		donelist = &dev->done_special;
-		vfe_stop_generating(dev);
-		spin_lock_irqsave(&dev->slock, flags);
-		while (!list_empty(&dma_q->active)) {
-			buffer = list_first_entry(&dma_q->active, struct vfe_buffer, list);
-			list_del(&buffer->list);
-			list_add(&buffer->list, &donelist->active);
-		}
-		spin_unlock_irqrestore(&dev->slock, flags);
-	} else {
-		ret = vb2_streamoff(&dev->vb_vidq, i);
-		if (ret != 0) {
-			vfe_err("videobu_streamoff error!\n");
-			goto streamoff_unlock;
-		}
+	ret = vb2_streamoff(&dev->vb_vidq, i);
+	if (ret!=0) {
+		vfe_err("videobu_streamoff error!\n");
+		goto streamoff_unlock;
 	}
-
 	if(dev->is_isp_used)
 		bsp_isp_disable();
 	bsp_csi_disable(dev->csi_sel);
@@ -2057,13 +2015,6 @@ streamoff_unlock:
 	mutex_unlock(&dev->stream_lock);
 
 	return ret;
-}
-
-static int vidioc_streamoff(struct file *file, void *priv, enum v4l2_buf_type i)
-{
-	struct vfe_dev *dev = video_drvdata(file);
-
-	return __vfe_streamoff(dev, priv, i);
 }
 
 static int vidioc_enum_input(struct file *file, void *priv,
@@ -2816,9 +2767,9 @@ void vfe_clk_close(struct vfe_dev *dev)
 }
 static void vfe_suspend_trip(struct vfe_dev *dev);
 static void vfe_resume_trip(struct vfe_dev *dev);
-
-static int __vfe_open(struct vfe_dev *dev)
+static int vfe_open(struct file *file)
 {
+	struct vfe_dev *dev = video_drvdata(file);
 	int ret;//,input_num;
 
 	vfe_print("vfe_open\n");
@@ -2828,7 +2779,7 @@ static int __vfe_open(struct vfe_dev *dev)
 		goto open_end;
 	}
 #ifdef CONFIG_DEVFREQ_DRAM_FREQ_WITH_SOFT_NOTIFY
-	dramfreq_master_access(MASTER_CSI, true);
+	dramfreq_master_access(MASTER_CSI, true);	//Notification for DRAM dynamic frequency
 #endif
 	vfe_resume_trip(dev);
 #ifdef USE_SPECIFIC_CCI
@@ -2852,7 +2803,7 @@ static int __vfe_open(struct vfe_dev *dev)
 		INIT_WORK(&dev->isp_isr_bh_task, isp_isr_bh_handle);
 		INIT_WORK(&dev->isp_isr_set_sensor_task, isp_isr_set_sensor_handle);
 	}
-	dev->input = -1;
+	dev->input = -1;//default input null
 	dev->first_flag = 0;
 	vfe_start_opened(dev);
 	vfe_init_isp_log(dev);
@@ -2867,18 +2818,13 @@ open_end:
 	return ret;
 }
 
-static int vfe_open(struct file *file)
+static int vfe_close(struct file *file)
 {
 	struct vfe_dev *dev = video_drvdata(file);
-	dev->special_active = 0;
-	return __vfe_open(dev);
-}
-
-static int __vfe_close(struct vfe_dev *dev)
-{
 	int ret;
 	vfe_print("vfe_close\n");
 	//device
+	del_timer(&dev->timer_for_reset);
 	vfe_stop_generating(dev);
 	if(dev->vfe_s_input_flag == 1)
 	{
@@ -2928,15 +2874,9 @@ static int __vfe_close(struct vfe_dev *dev)
 	vfe_print("vfe_close end\n");
 	vfe_exit_isp_log(dev);
 #ifdef CONFIG_DEVFREQ_DRAM_FREQ_WITH_SOFT_NOTIFY
-	dramfreq_master_access(MASTER_CSI, false);
+	dramfreq_master_access(MASTER_CSI, false);	//Notification for DRAM dynamic frequency
 #endif
 	return 0;
-}
-
-static int vfe_close(struct file *file)
-{
-	struct vfe_dev *dev = video_drvdata(file);
-	return __vfe_close(dev);
 }
 
 static int vfe_mmap(struct file *file, struct vm_area_struct *vma)
@@ -3050,10 +2990,11 @@ static int vfe_s_ctrl(struct v4l2_ctrl *ctrl)
 	int ret = 0;
 	struct actuator_ctrl_word_t vcm_ctrl;
 	struct v4l2_control c;
+	unsigned long flags = 0;
 	c.id = ctrl->id;
 	c.value = ctrl->val;
 	vfe_dbg(0,"s_ctrl: %s, set value: 0x%x\n",ctrl->name,ctrl->val);
-
+	spin_lock_irqsave(&dev->slock, flags);
 	if(dev->is_isp_used && dev->is_bayer_raw) {
 		switch (ctrl->id) {
 		case V4L2_CID_BRIGHTNESS:
@@ -3270,6 +3211,7 @@ static int vfe_s_ctrl(struct v4l2_ctrl *ctrl)
 		if (ret < 0)
 			vfe_warn("v4l2 sensor s_ctrl fail!\n");
 	}
+	spin_unlock_irqrestore(&dev->slock, flags);
 	return ret;
 }
 #ifdef CONFIG_COMPAT
@@ -3350,124 +3292,6 @@ static long vfe_compat_ioctl32(struct file *file, unsigned int cmd, unsigned lon
 	return err;
 }
 #endif
-
-int vfe_open_special(int id)
-{
-	struct vfe_dev *dev = vfe_dev_gbl[id];
-	struct vfe_dmaqueue *active = &dev->vidq_special;
-	struct vfe_dmaqueue *done = &dev->done_special;
-	INIT_LIST_HEAD(&active->active);
-	INIT_LIST_HEAD(&done->active);
-	dev->special_active = 1;
-	return __vfe_open(dev);
-}
-EXPORT_SYMBOL(vfe_open_special);
-
-int vfe_s_input_special(int id, int sel)
-{
-	struct vfe_dev *dev = vfe_dev_gbl[id];
-
-	return internal_s_input(dev, sel);
-}
-EXPORT_SYMBOL(vfe_s_input_special);
-
-int vfe_close_special(int id)
-{
-	struct vfe_dev *dev = vfe_dev_gbl[id];
-	struct vfe_dmaqueue *active = &dev->vidq_special;
-	struct vfe_dmaqueue *done = &dev->done_special;
-	INIT_LIST_HEAD(&active->active);
-	INIT_LIST_HEAD(&done->active);
-	dev->special_active = 0;
-
-	return __vfe_close(dev);
-}
-EXPORT_SYMBOL(vfe_close_special);
-
-int vfe_s_fmt_special(int id, struct v4l2_format *f)
-{
-	struct vfe_dev *dev = vfe_dev_gbl[id];
-	return s_fmt_internal(dev, NULL, f);
-}
-EXPORT_SYMBOL(vfe_s_fmt_special);
-
-int vfe_g_fmt_special(int id, struct v4l2_format *f)
-{
-	struct vfe_dev *dev = vfe_dev_gbl[id];
-
-	f->fmt.pix.width        = dev->width;
-	f->fmt.pix.height       = dev->height;
-	f->fmt.pix.field	= dev->fmt.field;
-	f->fmt.pix.pixelformat  = dev->fmt.bus_pix_code;
-
-	return 0;
-}
-EXPORT_SYMBOL(vfe_g_fmt_special);
-
-int vfe_dqbuffer_special(int id, struct vfe_buffer **buf)
-{
-	int ret = 0;
-	unsigned long flags = 0;
-	struct vfe_dev *dev = vfe_dev_gbl[id];
-	struct vfe_dmaqueue *done = &dev->done_special;
-
-	spin_lock_irqsave(&dev->slock, flags);
-	if (!list_empty(&done->active)) {
-		*buf = list_first_entry(&done->active, struct vfe_buffer, list);
-		list_del(&((*buf)->list));
-		(*buf)->state = VB2_BUF_STATE_DEQUEUED;
-	} else {
-		vfe_err("there is no done buf, please wait\n");
-		ret = -1;
-	}
-	spin_unlock_irqrestore(&dev->slock, flags);
-
-	return ret;
-}
-EXPORT_SYMBOL(vfe_dqbuffer_special);
-
-int vfe_qbuffer_special(int id, struct vfe_buffer *buf)
-{
-	struct vfe_dev *dev = vfe_dev_gbl[id];
-	struct vfe_dmaqueue *vidq = &dev->vidq_special;
-	unsigned long flags = 0;
-
-	if (buf == NULL) {
-		vfe_err("buf is NULL, cannot qbuf\n");
-		return -1;
-	}
-
-	spin_lock_irqsave(&dev->slock, flags);
-	list_add_tail(&buf->list, &vidq->active);
-	buf->state = VB2_BUF_STATE_QUEUED;
-	spin_unlock_irqrestore(&dev->slock, flags);
-
-	return 0;
-}
-EXPORT_SYMBOL(vfe_qbuffer_special);
-
-int vfe_streamon_special(int id, enum v4l2_buf_type i)
-{
-	struct vfe_dev *dev = vfe_dev_gbl[id];
-
-	return __vfe_streamon(dev, NULL, i);
-}
-EXPORT_SYMBOL(vfe_streamon_special);
-
-int vfe_streamoff_special(int id, enum v4l2_buf_type i)
-{
-	struct vfe_dev *dev = vfe_dev_gbl[id];
-	return __vfe_streamoff(dev, NULL, i);
-}
-EXPORT_SYMBOL(vfe_streamoff_special);
-
-void vfe_register_buffer_done_callback(int id, void *func)
-{
-	struct vfe_dev *dev = vfe_dev_gbl[id];
-	dev->vfe_buffer_process = func;
-}
-EXPORT_SYMBOL(vfe_register_buffer_done_callback);
-
 /* ------------------------------------------------------------------
 	File operations for the device
    ------------------------------------------------------------------*/
@@ -4353,7 +4177,7 @@ static void probe_work_handle(struct work_struct *work)
 	sunxi_mipi_get_subdev(&dev->mipi_sd, dev->mipi_sel);
 	sunxi_mipi_register_subdev(&dev->v4l2_dev, dev->mipi_sd);
 	/*Register flash subdev*/
-	if (dev->ccm_cfg[0]->flash_used || dev->ccm_cfg[1]->flash_used) {
+	if (1 == dev->flash_used) {
 		sunxi_flash_get_subdev(&dev->flash_sd, dev->flash_sel);
 		sunxi_flash_register_subdev(&dev->v4l2_dev, dev->flash_sd);
 	}
@@ -4545,8 +4369,6 @@ static int vfe_probe(struct platform_device *pdev)
 	vfe_print("dev->csi_sel = %d\n",dev->csi_sel);
 	vfe_print("dev->mipi_sel = %d\n",dev->mipi_sel);
 	vfe_print("dev->isp_sel = %d\n",dev->isp_sel);
-
-	vfe_dev_gbl[dev->id] = dev;
 
 	spin_lock_init(&dev->slock);
 	vfe_dbg(0,"fetch sys_config\n");

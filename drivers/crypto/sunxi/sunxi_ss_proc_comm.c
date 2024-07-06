@@ -123,13 +123,14 @@ void ss_hash_padding_sg_prepare(struct scatterlist *last, int total)
 	WARN_ON(sg_dma_len(last) > total);
 }
 
-int ss_hash_hw_padding(ss_hash_ctx_t *ctx, int type)
+#ifdef SS_HASH_HW_PADDING
+int ss_hash_padding(ss_hash_ctx_t *ctx, int type)
 {
 	SS_DBG("type: %d, n: %d, cnt: %d\n", type, ctx->tail_len, ctx->cnt);
-	return SS_HASH_PAD_SIZE;
+	return 0;
 }
-
-int ss_hash_sw_padding(ss_hash_ctx_t *ctx, int type)
+#else
+int ss_hash_padding(ss_hash_ctx_t *ctx, int type)
 {
 	int blk_size = ss_hash_blk_size(type);
 	int len_threshold = blk_size == SHA512_BLOCK_SIZE ? 112 : 56;
@@ -175,19 +176,7 @@ int ss_hash_sw_padding(ss_hash_ctx_t *ctx, int type)
 
 	return p + 8 - ctx->pad;
 }
-
-int ss_hash_padding(ss_hash_ctx_t *ctx, int type)
-{
-#ifdef SS_HASH_HW_PADDING
-#ifdef SS_HASH_HW_PADDING_ALIGN_CASE
-	if (ctx->tail_len == 0)
-		return ss_hash_sw_padding(ctx, type);
 #endif
-	return ss_hash_hw_padding(ctx, type);
-#else
-	return ss_hash_sw_padding(ctx, type);
-#endif
-}
 
 static int ss_hash_one_req(sunxi_ss_t *sss, struct ahash_request *req)
 {
@@ -280,17 +269,17 @@ int ss_hash_final(struct ahash_request *req)
 	SS_DBG("Pad len: %d\n", pad_len);
 	req_ctx->dma_src.sg = &last;
 	sg_init_table(&last, 1);
-	sg_set_buf(&last, ctx->pad, pad_len);
+#ifdef SS_HASH_HW_PADDING
+	if (pad_len == 0)
+		sg_set_buf(&last, ctx->pad, SS_HASH_PAD_SIZE);
+	else
+#endif
+		sg_set_buf(&last, ctx->pad, pad_len);
 
 	SS_DBG("Padding data:\n");
 	ss_print_hex((s8 *)ctx->pad, 128, ctx->pad);
 	ss_dev_lock();
-#ifdef SS_HASH_HW_PADDING_ALIGN_CASE
-	if (ctx->tail_len == 0)
-		ss_hash_start(ctx, req_ctx, pad_len, 0);
-	else
-#endif
-		ss_hash_start(ctx, req_ctx, pad_len, 1);
+	ss_hash_start(ctx, req_ctx, pad_len, 1);
 
 	ss_sha_final();
 

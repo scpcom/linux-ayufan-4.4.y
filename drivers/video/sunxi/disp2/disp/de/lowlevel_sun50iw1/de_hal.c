@@ -1,13 +1,3 @@
-/*
- *
- * Copyright (c) 2016 Allwinnertech Co., Ltd.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- */
 #include "de_hal.h"
 
 static unsigned int g_device_fps[DEVICE_NUM] = {60, 60};
@@ -290,9 +280,7 @@ int de_al_lyr_apply(unsigned int screen_id, struct disp_layer_config_data *data,
 		format[j] = 0;
 		for (i=0;i<layno;i++)
 		{
-			if ((data[k].config.enable == 1) &&
-			    (data[k].config.info.fb.format >=
-			     DISP_FORMAT_YUV422_I_YVYU))
+			if (data[k].config.info.fb.format>= DISP_FORMAT_YUV422_I_YVYU)
 				format[j] = data[k].config.info.fb.format;
 			k++;
 		}

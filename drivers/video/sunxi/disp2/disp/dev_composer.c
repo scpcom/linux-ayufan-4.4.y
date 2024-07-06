@@ -1,13 +1,3 @@
-/*
- *
- * Copyright (c) 2016 Allwinnertech Co., Ltd.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- */
 #ifndef DEV_COMPOSER_C_C
 #define DEV_COMPOSER_C_C
 
@@ -198,6 +188,7 @@ int dispc_gralloc_queue(struct disp_layer_config *commit_layer,
     disp_drv_info *psg_disp_drv = composer_priv.psg_disp_drv;
     struct disp_manager *disp_mgr = NULL;
     struct disp_capture *write_back = NULL;
+	struct disp_device *disp_device = NULL;
 
     disp_mgr = psg_disp_drv->mgr[disp];
     if( disp_mgr != NULL )
@@ -219,15 +210,18 @@ int dispc_gralloc_queue(struct disp_layer_config *commit_layer,
                 composer_priv.wb_status = 0;
             }
         }
-        disp_mgr->set_layer_config(disp_mgr, commit_layer, disp ? 8 : 16);
-        bsp_disp_shadow_protect(disp, false);
+        disp_mgr->set_layer_config(disp_mgr, commit_layer, disp?8:16);
+        bsp_disp_shadow_protect(disp,false);
+
+	disp_device = disp_mgr->device;
     }
     composer_frame_checkin(2);
     composer_priv.cur_write_cnt[disp] = hwc_sync;
-    if(composer_priv.display_sync[disp].active == HWC_VSYNC_ACTIVE_1)
-    {
-        composer_priv.display_sync[disp].active = HWC_VSYNC_ACTIVE_2;
-    }
+
+	if (disp_device && (0 == disp_device->is_enabled(disp_device)))
+		composer_priv.cur_disp_cnt[disp] =
+		    composer_priv.cur_write_cnt[disp];
+
     return 0;
 }
 
@@ -338,6 +332,11 @@ static bool hwc_fence_get(void *user_fence)
 #endif
                     composer_priv.display_sync[i].timeline = NULL;
                 }
+#if defined(CONFIG_SW_SYNC)
+                sync_timeline_destroy(&composer_priv.display_sync[i]->timeline->obj);
+#endif
+                /*kfree(composer_priv.display_sync[i]);*/
+                /*composer_priv.display_sync[i] = NULL;*/
                 mutex_unlock(&composer_priv.sync_lock);
                 composer_priv.display_sync[i].timeline_count = 0;
             }

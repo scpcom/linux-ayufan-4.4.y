@@ -15,8 +15,7 @@
 #if defined(CONFIG_ARCH_SUN8IW1P1) || defined(CONFIG_ARCH_SUN8IW3P1) \
 	|| defined(CONFIG_ARCH_SUN8IW5P1) || defined(CONFIG_ARCH_SUN8IW6P1) \
 	|| defined(CONFIG_ARCH_SUN8IW8P1) || defined(CONFIG_ARCH_SUN9IW1P1) \
-	|| defined(CONFIG_ARCH_SUN50IW1P1) || defined(CONFIG_ARCH_SUN50IW2P1) \
-	|| defined(CONFIG_ARCH_SUN50IW3P1) || defined(CONFIG_ARCH_SUN50IW6P1)
+	|| defined(CONFIG_ARCH_SUN50IW1P1) || defined(CONFIG_ARCH_SUN50IW2P1)
 #include "pm_config_common.h"
 #endif
 
@@ -41,10 +40,6 @@
 #include "pm_config-sun50iw1p1.h"
 #elif defined CONFIG_ARCH_SUN50IW2P1
 #include "pm_config-sun50iw2p1.h"
-#elif defined CONFIG_ARCH_SUN50IW3P1
-#include "pm_config-sun50iw3p1.h"
-#elif defined CONFIG_ARCH_SUN50IW6P1
-#include "pm_config-sun50iw6p1.h"
 #endif
 
 /*#define CHECK_IC_VERSION*/

@@ -233,13 +233,10 @@ inline void csi_int_clear_status(unsigned int sel, unsigned int ch,
 #elif defined CONFIG_ARCH_SUN8IW9P1
 #define ADDR_BIT_R_SHIFT 2
 #define CLK_POL 1
-#elif defined CONFIG_ARCH_SUN50IW1P1
+#elif defined CONFIG_ARCH_SUN50I
 #define ADDR_BIT_R_SHIFT 2
 #define CLK_POL 1
 #elif defined CONFIG_ARCH_SUN8IW10P1
-#define ADDR_BIT_R_SHIFT 2
-#define CLK_POL 1
-#else
 #define ADDR_BIT_R_SHIFT 2
 #define CLK_POL 1
 #endif

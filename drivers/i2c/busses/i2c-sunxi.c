@@ -409,11 +409,7 @@ static int twi_stop(void __iomem *base_addr, int bus_num)
 	}
 
 	timeout = 0xff;
-	while ((TWI_LCR_IDLE_STATUS != readl(base_addr + TWI_LCR_REG)
-		&& TWI_LCR_NORM_STATUS != readl(base_addr + TWI_LCR_REG))
-		&& (--timeout))
-		;
-
+	while((TWI_LCR_IDLE_STATUS != readl(base_addr + TWI_LCR_REG))&&(--timeout));
 	if (timeout == 0) {
 		I2C_ERR("[i2c%d] i2c lcr(0x%08x) isn't idle(0x3a)\n", bus_num, readl(base_addr + TWI_LCR_REG));
 		return SUNXI_I2C_TFAIL;

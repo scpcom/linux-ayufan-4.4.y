@@ -35,6 +35,11 @@ typedef enum tag_CAMERA_IO_CMD {
 	GET_FLASH_FLAG,
 } __camera_cmd_t;
 
+struct sensor_exp_gain {
+	int exp_val;
+	int gain_val;
+};
+
 struct sensor_exif_attribute {
 	__u32 exposure_time_num;
 	__u32 exposure_time_den;

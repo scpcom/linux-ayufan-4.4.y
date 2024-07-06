@@ -8,10 +8,7 @@
 #include <linux/semaphore.h>
 #include <linux/mutex.h>
 #include <linux/interrupt.h>
-//Justin Porting 20160811 Start
-//#include <mach/irqs.h>
-#include <asm/irq.h>
-//Justin Porting 20160811 End
+#include <mach/irqs.h>
 
 #include <linux/syscalls.h>
 #include <asm/unistd.h>
@@ -41,7 +38,7 @@
 *
 *
 */
-int ft5x02_i2c_Read(struct i2c_client *client,  char * writebuf, int writelen,
+int ft5x02_i2c_Read(struct i2c_client *client,  char * writebuf, int writelen, 
 							char *readbuf, int readlen)
 {
 	int ret;
@@ -81,7 +78,7 @@ int ft5x02_i2c_Read(struct i2c_client *client,  char * writebuf, int writelen,
 	return ret;
 }
 /*
-*write data by i2c
+*write data by i2c 
 */
 int ft5x02_i2c_Write(struct i2c_client *client, char *writebuf, int writelen)
 {
@@ -156,7 +153,7 @@ static int ft5x02_get_tx_order(struct i2c_client * client, u8 txNO, u8 *pTxNo)
 		if(ReCode >= 0)
 			ReCode =  ft5x02_read_reg(client,
 					FT5x02_REG_TX_ORDER_START + txNO - FT5x02_TX_TEST_MODE_1,
-					pTxNo);
+					pTxNo);	
 		ft5x02_write_reg(client, FT5x02_REG_DEVICE_MODE,
 			FT5x02_REG_TEST_MODE<<4);	/*enter Test mode*/
 	}
@@ -164,7 +161,7 @@ static int ft5x02_get_tx_order(struct i2c_client * client, u8 txNO, u8 *pTxNo)
 }
 
 /*set tx cap
-*@txNO:		tx NO.
+*@txNO: 	tx NO.
 *@cap_value:	value of cap
 */
 static int ft5x02_set_tx_cap(struct i2c_client * client, u8 txNO, u8 cap_value)
@@ -218,11 +215,11 @@ static int ft5x02_set_tx_offset(struct i2c_client * client, u8 txNO, u8 offset_v
 			if (txNO%2 == 0)
 				ReCode = ft5x02_write_reg(client,
 							FT5x02_REG_TX_OFFSET_START + (txNO>>1),
-							(temp&0xf0) + (offset_value&0x0f));
+							(temp&0xf0) + (offset_value&0x0f));	
 			else
 				ReCode = ft5x02_write_reg(client,
 							FT5x02_REG_TX_OFFSET_START + (txNO>>1),
-							(temp&0x0f) + (offset_value<<4));
+							(temp&0x0f) + (offset_value<<4));	
 		}
 	} else {
 		ReCode = ft5x02_write_reg(client, FT5x02_REG_DEVICE_MODE,
@@ -235,17 +232,17 @@ static int ft5x02_set_tx_offset(struct i2c_client * client, u8 txNO, u8 offset_v
 				if(txNO%2 == 0)
 					ReCode = ft5x02_write_reg(client,
 						FT5x02_REG_TX_OFFSET_START+((txNO-FT5x02_TX_TEST_MODE_1)>>1),
-						(temp&0xf0)+(offset_value&0x0f));
+						(temp&0xf0)+(offset_value&0x0f));	
 				else
 					ReCode = ft5x02_write_reg(client,
 						FT5x02_REG_TX_OFFSET_START+((txNO-FT5x02_TX_TEST_MODE_1)>>1),
-						(temp&0xf0)+(offset_value<<4));
+						(temp&0xf0)+(offset_value<<4));	
 			}
 		}
 		ft5x02_write_reg(client, FT5x02_REG_DEVICE_MODE,
 			FT5x02_REG_TEST_MODE<<4);	/*enter Test mode*/
 	}
-
+	
 	return ReCode;
 }
 
@@ -308,7 +305,7 @@ static int ft5x02_set_rx_cap(struct i2c_client * client, u8 rxNO, u8 cap_value)
 		ft5x02_write_reg(client, FT5x02_REG_DEVICE_MODE,
 			FT5x02_REG_TEST_MODE<<4);	/*enter Test mode*/
 	}
-
+	
 	return ReCode;
 }
 
@@ -329,7 +326,7 @@ static int ft5x02_get_rx_cap(struct i2c_client * client, u8 rxNO, u8 *pCap)
 		ft5x02_write_reg(client, FT5x02_REG_DEVICE_MODE,
 			FT5x02_REG_TEST_MODE<<4);	/*enter Test mode*/
 	}
-
+	
 	return ReCode;
 }
 
@@ -345,11 +342,11 @@ static int ft5x02_set_rx_offset(struct i2c_client * client, u8 rxNO, u8 offset_v
 			if (rxNO%2 == 0)
 				ReCode = ft5x02_write_reg(client,
 							FT5x02_REG_RX_OFFSET_START + (rxNO>>1),
-							(temp&0xf0) + (offset_value&0x0f));
+							(temp&0xf0) + (offset_value&0x0f));	
 			else
 				ReCode = ft5x02_write_reg(client,
 							FT5x02_REG_RX_OFFSET_START + (rxNO>>1),
-							(temp&0x0f) + (offset_value<<4));
+							(temp&0x0f) + (offset_value<<4));	
 		}
 	}
 	else {
@@ -363,17 +360,17 @@ static int ft5x02_set_rx_offset(struct i2c_client * client, u8 rxNO, u8 offset_v
 				if (rxNO%2 == 0)
 					ReCode = ft5x02_write_reg(client,
 						FT5x02_REG_RX_OFFSET_START+((rxNO-FT5x02_RX_TEST_MODE_1)>>1),
-						(temp&0xf0)+(offset_value&0x0f));
+						(temp&0xf0)+(offset_value&0x0f));	
 				else
 					ReCode = ft5x02_write_reg(client,
 						FT5x02_REG_RX_OFFSET_START+((rxNO-FT5x02_RX_TEST_MODE_1)>>1),
-						(temp&0xf0)+(offset_value<<4));
+						(temp&0xf0)+(offset_value<<4));	
 			}
 		}
 		ft5x02_write_reg(client, FT5x02_REG_DEVICE_MODE,
 			FT5x02_REG_TEST_MODE<<4);	/*enter Test mode*/
 	}
-
+	
 	return ReCode;
 }
 
@@ -392,7 +389,7 @@ static int ft5x02_get_rx_offset(struct i2c_client * client, u8 rxNO, u8 *pOffset
 			ReCode = ft5x02_read_reg(client,
 						FT5x02_REG_RX_OFFSET_START+((rxNO-FT5x02_RX_TEST_MODE_1)>>1),
 						&temp);
-
+		
 		ft5x02_write_reg(client, FT5x02_REG_DEVICE_MODE,
 			FT5x02_REG_TEST_MODE<<4);	/*enter Test mode*/
 	}
@@ -403,7 +400,7 @@ static int ft5x02_get_rx_offset(struct i2c_client * client, u8 rxNO, u8 *pOffset
 		else
 			*pOffset = (temp>>4);
 	}
-
+	
 	return ReCode;
 }
 
@@ -517,7 +514,7 @@ static int ft5x02_get_face_detect_num(struct i2c_client *client, u8 *pnum)
 			pnum);
 }
 
-static int ft5x02_set_face_detect_last_time(struct i2c_client *client, u8 lasttime_h,
+static int ft5x02_set_face_detect_last_time(struct i2c_client *client, u8 lasttime_h, 
 			u8 lasttime_l)
 {
 	int err = 0;
@@ -776,7 +773,7 @@ static int ft5x02_set_other_param(struct i2c_client *client)
 		dev_err(&client->dev, "%s:write THDIFF failed.\n", __func__);
 		return err;
 	}
-	err = ft5x02_write_reg(client, FT5X02_REG_PWMODE_CTRL,
+	err = ft5x02_write_reg(client, FT5X02_REG_PWMODE_CTRL, 
 		g_param_ft5x02.ft5x02_PWMODE_CTRL);
 	if (err < 0) {
 		dev_err(&client->dev, "%s:write PERIOD_CTRL failed.\n", __func__);
@@ -794,21 +791,21 @@ static int ft5x02_set_other_param(struct i2c_client *client)
 		dev_err(&client->dev, "%s:write PERIOD_ACTIVE failed.\n", __func__);
 		return err;
 	}
-
+	
 	err = ft5x02_write_reg(client, FT5X02_REG_FACE_DETECT_STATISTICS_TX_NUM,
 			g_param_ft5x02.ft5x02_FACE_DETECT_STATISTICS_TX_NUM);
 	if (err < 0) {
 		dev_err(&client->dev, "%s:write FACE_DETECT_STATISTICS_TX_NUM failed.\n", __func__);
 		return err;
 	}
-
+	
 	err = ft5x02_write_reg(client, FT5X02_REG_PERIOD_MONITOR,
 			g_param_ft5x02.ft5x02_PERIOD_MONITOR);
 	if (err < 0) {
 		dev_err(&client->dev, "%s:write PERIOD_MONITOR failed.\n", __func__);
 		return err;
 	}
-
+	
 	err = ft5x02_write_reg(client, FT5X02_REG_AUTO_CLB_MODE,
 			g_param_ft5x02.ft5x02_AUTO_CLB_MODE);
 	if (err < 0) {
@@ -836,7 +833,7 @@ static int ft5x02_set_other_param(struct i2c_client *client)
 		dev_err(&client->dev, "%s:write STATE failed.\n", __func__);
 		return err;
 	}
-
+	
 	err = ft5x02_write_reg(client, FT5X02_REG_MAX_TOUCH_VALUE_HIGH,
 			g_param_ft5x02.ft5x02_MAX_TOUCH_VALUE>>8);
 	if (err < 0) {
@@ -849,7 +846,7 @@ static int ft5x02_set_other_param(struct i2c_client *client)
 		dev_err(&client->dev, "%s:write MAX_TOUCH_VALUE_LOW failed.\n", __func__);
 		return err;
 	}
-
+	
 	err = ft5x02_write_reg(client, FT5X02_REG_FACE_DETECT_MODE,
 			g_param_ft5x02.ft5x02_FACE_DETECT_MODE);
 	if (err < 0) {
@@ -924,7 +921,7 @@ static int ft5x02_set_other_param(struct i2c_client *client)
 		dev_err(&client->dev, "%s:write FILTER_FRAME_NOISE failed.\n", __func__);
 		return err;
 	}
-
+	
 	err = ft5x02_write_reg(client, FT5X02_REG_KX_LR_H,
 			g_param_ft5x02.ft5x02_KX_LR>>8);
 	if (err < 0) {
@@ -978,7 +975,7 @@ static int ft5x02_set_other_param(struct i2c_client *client)
 		dev_err(&client->dev, "%s:write ft5x02_MOVSTH_N failed.\n", __func__);
 		return err;
 	}
-
+	
 	return err;
 }
 
@@ -1029,7 +1026,7 @@ static int ft5x02_get_other_param(struct i2c_client *client)
 		return -1;
 	}
 
-	err = ft5x02_read_reg(client, FT5X02_REG_PWMODE_CTRL,
+	err = ft5x02_read_reg(client, FT5X02_REG_PWMODE_CTRL, 
 		&value);
 	if (err < 0) {
 		dev_err(&client->dev, "%s:read PERIOD_CTRL failed.\n", __func__);
@@ -1061,7 +1058,7 @@ static int ft5x02_get_other_param(struct i2c_client *client)
 		if(value != g_param_ft5x02.ft5x02_PERIOD_ACTIVE)
 			return -1;
 	}
-
+	
 	err = ft5x02_read_reg(client, FT5X02_REG_FACE_DETECT_STATISTICS_TX_NUM,
 			&value);
 	if (err < 0) {
@@ -1072,7 +1069,7 @@ static int ft5x02_get_other_param(struct i2c_client *client)
 		if(value != g_param_ft5x02.ft5x02_FACE_DETECT_STATISTICS_TX_NUM)
 			return -1;
 	}
-
+	
 	err = ft5x02_read_reg(client, FT5X02_REG_PERIOD_MONITOR,
 			&value);
 	if (err < 0) {
@@ -1083,7 +1080,7 @@ static int ft5x02_get_other_param(struct i2c_client *client)
 		if(value != g_param_ft5x02.ft5x02_PERIOD_MONITOR)
 			return -1;
 	}
-
+	
 	err = ft5x02_read_reg(client, FT5X02_REG_AUTO_CLB_MODE,
 			&value);
 	if (err < 0) {
@@ -1131,7 +1128,7 @@ static int ft5x02_get_other_param(struct i2c_client *client)
 		if(value != g_param_ft5x02.ft5x02_STATE)
 			return -1;
 	}
-
+	
 	err = ft5x02_read_reg(client, FT5X02_REG_MAX_TOUCH_VALUE_HIGH,
 			&value);//g_param_ft5x02.ft5x02_MAX_TOUCH_VALUE>>8);
 	if (err < 0) {
@@ -1152,7 +1149,7 @@ static int ft5x02_get_other_param(struct i2c_client *client)
 		if(value != (g_param_ft5x02.ft5x02_MAX_TOUCH_VALUE&0x00FF))
 			return -1;
 	}
-
+	
 	err = ft5x02_read_reg(client, FT5X02_REG_FACE_DETECT_MODE,
 			&value);
 	if (err < 0) {
@@ -1271,7 +1268,7 @@ static int ft5x02_get_other_param(struct i2c_client *client)
 		if(value != g_param_ft5x02.ft5x02_FILTER_FRAME_NOISE)
 			return -1;
 	}
-
+	
 	err = ft5x02_read_reg(client, FT5X02_REG_KX_LR_H,
 			&value);//g_param_ft5x02.ft5x02_KX_LR>>8);
 	if (err < 0) {
@@ -1357,7 +1354,7 @@ static int ft5x02_get_other_param(struct i2c_client *client)
 		if(value != g_param_ft5x02.ft5x02_MOVSTH_N)
 			return -1;
 	}
-
+	
 	return err;
 }
 
@@ -1367,14 +1364,14 @@ int ft5x02_get_ic_param(struct i2c_client *client)
 	int i = 0;
 	u8 value = 0x00;
 	u16 xvalue = 0x0000, yvalue = 0x0000;
-
+	
 	/*enter factory mode*/
 	err = ft5x02_write_reg(client, FT5x02_REG_DEVICE_MODE, FT5x02_FACTORYMODE_VALUE);
 	if (err < 0) {
 		dev_err(&client->dev, "%s:enter factory mode failed.\n", __func__);
 		goto ERR_EXIT;
 	}
-
+	
 	for (i = 0; i < g_ft5x02_tx_num; i++) {
 		DBG("tx%d:", i);
 		/*get tx order*/
@@ -1433,7 +1430,7 @@ int ft5x02_get_ic_param(struct i2c_client *client)
 		DBG("cap=%02x ", value);
 		if(value != g_ft5x02_rx_cap[i])
 			goto ERR_EXIT;
-
+		
 		err = ft5x02_get_rx_offset(client, i, &value);
 		if (err < 0) {
 			dev_err(&client->dev, "%s:could not get rx offset.\n",
@@ -1463,7 +1460,7 @@ int ft5x02_get_ic_param(struct i2c_client *client)
 		if(value != g_ft5x02_scanselect)
 			goto ERR_EXIT;
 	}
-
+	
 	/*get tx number*/
 	err = ft5x02_get_tx_num(client, &value);
 	if (err < 0) {
@@ -1486,7 +1483,7 @@ int ft5x02_get_ic_param(struct i2c_client *client)
 		if(value != g_ft5x02_rx_num)
 			goto ERR_EXIT;
 	}
-
+	
 	/*get gain*/
 	err = ft5x02_get_gain(client, &value);
 	if (err < 0) {
@@ -1509,7 +1506,7 @@ int ft5x02_get_ic_param(struct i2c_client *client)
 		if(value != g_ft5x02_voltage)
 			goto ERR_EXIT;
 	}
-
+	
 	err = ft5x02_read_reg(client, FT5X02_REG_ADC_TARGET_HIGH,
 			&value);
 	if (err < 0) {
@@ -1530,8 +1527,8 @@ int ft5x02_get_ic_param(struct i2c_client *client)
 		if(value != (g_param_ft5x02.ft5x02_ADC_TARGET&0x00FF))
 			goto ERR_EXIT;
 	}
-
-//RETURN_WORK:
+	
+//RETURN_WORK:	
 	/*enter work mode*/
 	err = ft5x02_write_reg(client, FT5x02_REG_DEVICE_MODE, FT5x02_WORKMODE_VALUE);
 	if (err < 0) {
@@ -1588,7 +1585,7 @@ int ft5x02_get_ic_param(struct i2c_client *client)
 		if(value != g_param_ft5x02.ft5x02_FACE_DETECT_LAST_TIME)
 			goto ERR_EXIT;
 	}
-
+	
 	/*get min peak value*/
 	err = ft5x02_get_peak_value_min(client,
 			&value);
@@ -1613,7 +1610,7 @@ int ft5x02_get_ic_param(struct i2c_client *client)
 		if(value != g_param_ft5x02.ft5x02_BIGAREA_DIFF_VALUE_OVER_NUM)
 			goto ERR_EXIT;
 	}
-
+	
 	/*get point auto clear time*/
 	err = ft5x02_get_point_auto_clear_time(client,
 			&xvalue);
@@ -1685,7 +1682,7 @@ int ft5x02_get_ic_param(struct i2c_client *client)
 	}
 
 	err = ft5x02_get_other_param(client);
-
+	
 ERR_EXIT:
 	return err;
 }
@@ -1694,14 +1691,14 @@ int ft5x02_Init_IC_Param(struct i2c_client *client)
 {
 	int err = 0;
 	int i = 0;
-
+	
 	/*enter factory mode*/
 	err = ft5x02_write_reg(client, FT5x02_REG_DEVICE_MODE, FT5x02_FACTORYMODE_VALUE);
 	if (err < 0) {
 		dev_err(&client->dev, "%s:enter factory mode failed.\n", __func__);
 		goto RETURN_WORK;
 	}
-
+	
 	for (i = 0; i < g_ft5x02_tx_num; i++) {
 		if (g_ft5x02_tx_order[i] != 0xFF) {
 			/*set tx order*/
@@ -1767,7 +1764,7 @@ int ft5x02_Init_IC_Param(struct i2c_client *client)
 			__func__);
 		goto RETURN_WORK;
 	}
-
+	
 	/*set tx number*/
 	err = ft5x02_set_tx_num(client, g_ft5x02_tx_num);
 	if (err < 0) {
@@ -1782,7 +1779,7 @@ int ft5x02_Init_IC_Param(struct i2c_client *client)
 			__func__);
 		goto RETURN_WORK;
 	}
-
+	
 	/*set gain*/
 	err = ft5x02_set_gain(client, g_ft5x02_gain);
 	if (err < 0) {
@@ -1811,7 +1808,7 @@ int ft5x02_Init_IC_Param(struct i2c_client *client)
 		return err;
 	}
 
-RETURN_WORK:
+RETURN_WORK:	
 	/*enter work mode*/
 	err = ft5x02_write_reg(client, FT5x02_REG_DEVICE_MODE, FT5x02_WORKMODE_VALUE);
 	if (err < 0) {
@@ -1920,7 +1917,7 @@ RETURN_WORK:
 	}
 
 	err = ft5x02_set_other_param(client);
-
+	
 ERR_EXIT:
 	return err;
 }
@@ -2020,7 +2017,7 @@ int ft5x02_Get_Param_From_Ini(char *config_name)
 	unsigned char legal_byte2 = 0x00;
 
 	int inisize = ft5x02_GetInISize(config_name);
-
+	
 	if (inisize <= 0) {
 		pr_err("%s ERROR:Get firmware size failed\n",
 					__func__);
@@ -2028,7 +2025,7 @@ int ft5x02_Get_Param_From_Ini(char *config_name)
 	}
 
 	filedata = kmalloc(inisize + 1, GFP_ATOMIC);
-
+		
 	if (ft5x0x_ReadInIData(config_name, filedata)) {
 		pr_err("%s() - ERROR: request_firmware failed\n",
 					__func__);
@@ -2058,7 +2055,7 @@ int ft5x02_Get_Param_From_Ini(char *config_name)
 
 	/*get ini param*/
 	sprintf(section, "%s", FT5X02_APP_NAME);
-
+		
 	sprintf(key, "%s", String_Param_FT5X02[i]);
 	if (ini_get_key(filedata,section,key,value)<0)
 		goto ERROR_RETURN;
@@ -2093,14 +2090,14 @@ int ft5x02_Get_Param_From_Ini(char *config_name)
 	i++;
 	g_param_ft5x02.ft5x02_RESOLUTION_X = atoi(value);
 	DBG("ft5x02_RESOLUTION_X=%s\n", value);
-
+	
 	sprintf(key, "%s", String_Param_FT5X02[i]);
 	if (ini_get_key(filedata,section,key,value)<0)
 		goto ERROR_RETURN;
 	i++;
 	g_param_ft5x02.ft5x02_RESOLUTION_Y = atoi(value);
 	DBG("ft5x02_RESOLUTION_Y=%s\n", value);
-
+	
 	sprintf(key, "%s", String_Param_FT5X02[i]);
 	if (ini_get_key(filedata,section,key,value)<0)
 		goto ERROR_RETURN;
@@ -2108,7 +2105,7 @@ int ft5x02_Get_Param_From_Ini(char *config_name)
 	g_param_ft5x02.ft5x02_DIRECTION= atoi(value);
 	DBG("ft5x02_DIRECTION=%s\n", value);
 
-
+	
 	sprintf(key, "%s", String_Param_FT5X02[i]);
 	if (ini_get_key(filedata,section,key,value)<0)
 		goto ERROR_RETURN;
@@ -2116,28 +2113,28 @@ int ft5x02_Get_Param_From_Ini(char *config_name)
 	g_param_ft5x02.ft5x02_FACE_DETECT_PRE_VALUE = atoi(value);
 	DBG("ft5x02_FACE_DETECT_PRE_VALUE=%s\n", value);
 
-
+	
 	sprintf(key, "%s", String_Param_FT5X02[i]);
 	if (ini_get_key(filedata,section,key,value)<0)
 		goto ERROR_RETURN;
 	i++;
 	g_param_ft5x02.ft5x02_FACE_DETECT_NUM = atoi(value);
 	DBG("ft5x02_FACE_DETECT_NUM=%s\n", value);
-
+	
 	sprintf(key, "%s", String_Param_FT5X02[i]);
 	if (ini_get_key(filedata,section,key,value)<0)
 		goto ERROR_RETURN;
 	i++;
 	g_param_ft5x02.ft5x02_BIGAREA_PEAK_VALUE_MIN = atoi(value);/*The min value to be decided as the big point*/
 	DBG("ft5x02_BIGAREA_PEAK_VALUE_MIN=%s\n", value);
-
+	
 	sprintf(key, "%s", String_Param_FT5X02[i]);
 	if (ini_get_key(filedata,section,key,value)<0)
 		goto ERROR_RETURN;
 	i++;
 	g_param_ft5x02.ft5x02_BIGAREA_DIFF_VALUE_OVER_NUM = atoi(value);/*The min big points of the big area*/
 	DBG("ft5x02_BIGAREA_DIFF_VALUE_OVER_NUM=%s\n", value);
-
+	
 	sprintf(key, "%s", String_Param_FT5X02[i]);
 	if (ini_get_key(filedata,section,key,value)<0)
 		goto ERROR_RETURN;
@@ -2151,43 +2148,43 @@ int ft5x02_Get_Param_From_Ini(char *config_name)
 	i++;
 	g_param_ft5x02.ft5x02_FACE_DETECT_LAST_TIME = atoi(value);
 	DBG("ft5x02_FACE_DETECT_LAST_TIME=%s\n", value);
-
-
+	
+	
 	sprintf(key, "%s", String_Param_FT5X02[i]);
 	if (ini_get_key(filedata,section,key,value)<0)
 		goto ERROR_RETURN;
 	i++;
 	g_param_ft5x02.ft5x02_MODE = atoi(value);
 	DBG("ft5x02_MODE=%s\n", value);
-
+	
 	sprintf(key, "%s", String_Param_FT5X02[i]);
 	if (ini_get_key(filedata,section,key,value)<0)
 		goto ERROR_RETURN;
 	i++;
 	g_param_ft5x02.ft5x02_PMODE = atoi(value);
 	DBG("ft5x02_PMODE=%s\n", value);
-
+	
 	sprintf(key, "%s", String_Param_FT5X02[i]);
 	if (ini_get_key(filedata,section,key,value)<0)
 		goto ERROR_RETURN;
 	i++;
 	g_param_ft5x02.ft5x02_FIRMWARE_ID = atoi(value);
 	DBG("ft5x02_FIRMWARE_ID=%s\n", value);
-
+	
 	sprintf(key, "%s", String_Param_FT5X02[i]);
 	if (ini_get_key(filedata,section,key,value)<0)
 		goto ERROR_RETURN;
 	i++;
 	g_param_ft5x02.ft5x02_STATE = atoi(value);
 	DBG("ft5x02_STATE=%s\n", value);
-
+	
 	sprintf(key, "%s", String_Param_FT5X02[i]);
 	if (ini_get_key(filedata,section,key,value)<0)
 		goto ERROR_RETURN;
 	i++;
 	g_param_ft5x02.ft5x02_CUSTOMER_ID = atoi(value);
 	DBG("ft5x02_CUSTOM_ID=%s\n", value);
-
+	
 	sprintf(key, "%s", String_Param_FT5X02[i]);
 	if (ini_get_key(filedata,section,key,value)<0)
 		goto ERROR_RETURN;
@@ -2202,7 +2199,7 @@ int ft5x02_Get_Param_From_Ini(char *config_name)
 	g_param_ft5x02.ft5x02_FACE_DETECT_STATISTICS_TX_NUM = atoi(value);
 	DBG("ft5x02_FACE_DETECT_STATISTICS_TX_NUM=%s\n", value);
 
-
+	
 	sprintf(key, "%s", String_Param_FT5X02[i]);
 	if (ini_get_key(filedata,section,key,value)<0)
 		goto ERROR_RETURN;
@@ -2210,7 +2207,7 @@ int ft5x02_Get_Param_From_Ini(char *config_name)
 	g_param_ft5x02.ft5x02_THGROUP = atoi(value);
 	DBG("ft5x02_THGROUP=%s\n", value);
 
-
+	
 	sprintf(key, "%s", String_Param_FT5X02[i]);
 	if (ini_get_key(filedata,section,key,value)<0)
 		goto ERROR_RETURN;
@@ -2218,7 +2215,7 @@ int ft5x02_Get_Param_From_Ini(char *config_name)
 	g_param_ft5x02.ft5x02_THPEAK = atoi(value);
 	DBG("ft5x02_THPEAK=%s\n", value);
 
-
+	
 	sprintf(key, "%s", String_Param_FT5X02[i]);
 	if (ini_get_key(filedata,section,key,value)<0)
 		goto ERROR_RETURN;
@@ -2226,7 +2223,7 @@ int ft5x02_Get_Param_From_Ini(char *config_name)
 	g_param_ft5x02.ft5x02_FACE_DETECT_MODE = atoi(value);
 	DBG("ft5x02_FACE_DETECT_MODE=%s\n", value);
 
-
+	
 	sprintf(key, "%s", String_Param_FT5X02[i]);
 	if (ini_get_key(filedata,section,key,value)<0)
 		goto ERROR_RETURN;
@@ -2234,7 +2231,7 @@ int ft5x02_Get_Param_From_Ini(char *config_name)
 	g_param_ft5x02.ft5x02_MAX_TOUCH_VALUE = atoi(value);
 	DBG("ft5x02_MAX_TOUCH_VALUE=%s\n", value);
 
-
+	
 	sprintf(key, "%s", String_Param_FT5X02[i]);
 	if (ini_get_key(filedata,section,key,value)<0)
 		goto ERROR_RETURN;
@@ -2242,7 +2239,7 @@ int ft5x02_Get_Param_From_Ini(char *config_name)
 	g_param_ft5x02.ft5x02_THFALSE_TOUCH_PEAK = atoi(value);
 	DBG("ft5x02_THFALSE_TOUCH_PEAK=%s\n", value);
 
-
+	
 	sprintf(key, "%s", String_Param_FT5X02[i]);
 	if (ini_get_key(filedata,section,key,value)<0)
 		goto ERROR_RETURN;
@@ -2250,7 +2247,7 @@ int ft5x02_Get_Param_From_Ini(char *config_name)
 	g_param_ft5x02.ft5x02_THDIFF = atoi(value);
 	DBG("ft5x02_THDIFF=%s\n", value);
 
-
+	
 	sprintf(key, "%s", String_Param_FT5X02[i]);
 	if (ini_get_key(filedata,section,key,value)<0)
 		goto ERROR_RETURN;
@@ -2258,7 +2255,7 @@ int ft5x02_Get_Param_From_Ini(char *config_name)
 	g_param_ft5x02.ft5x02_PWMODE_CTRL= atoi(value);
 	DBG("ft5x02_PWMODE_CTRL=%s\n", value);
 
-
+	
 	sprintf(key, "%s", String_Param_FT5X02[i]);
 	if (ini_get_key(filedata,section,key,value)<0)
 		goto ERROR_RETURN;
@@ -2275,7 +2272,7 @@ int ft5x02_Get_Param_From_Ini(char *config_name)
 	g_param_ft5x02.ft5x02_PERIOD_MONITOR = atoi(value);
 	DBG("ft5x02_PERIOD_MONITOR=%s\n", value);
 
-
+	
 	sprintf(key, "%s", String_Param_FT5X02[i]);
 	if (ini_get_key(filedata,section,key,value)<0)
 		goto ERROR_RETURN;
@@ -2283,7 +2280,7 @@ int ft5x02_Get_Param_From_Ini(char *config_name)
 	g_param_ft5x02.ft5x02_AUTO_CLB_MODE = atoi(value);
 	DBG("ft5x02_AUTO_CLB_MODE=%s\n", value);
 
-
+	
 	sprintf(key, "%s", String_Param_FT5X02[i]);
 	if (ini_get_key(filedata,section,key,value)<0)
 		goto ERROR_RETURN;
@@ -2291,7 +2288,7 @@ int ft5x02_Get_Param_From_Ini(char *config_name)
 	g_param_ft5x02.ft5x02_DRAW_LINE_TH = atoi(value);
 	DBG("ft5x02_DRAW_LINE_TH=%s\n", value);
 
-
+	
 	sprintf(key, "%s", String_Param_FT5X02[i]);
 	if (ini_get_key(filedata,section,key,value)<0)
 		goto ERROR_RETURN;
@@ -2319,7 +2316,7 @@ int ft5x02_Get_Param_From_Ini(char *config_name)
 	i++;
 	g_param_ft5x02.ft5x02_ABNORMAL_DIFF_LAST_FRAME = atoi(value);
 	DBG("ft5x02_ABNORMAL_DIFF_LAST_FRAME=%s\n", value);
-
+	
 
 	sprintf(key, "%s", String_Param_FT5X02[i]);
 	if (ini_get_key(filedata,section,key,value)<0)
@@ -2341,7 +2338,7 @@ int ft5x02_Get_Param_From_Ini(char *config_name)
 	i++;
 	g_param_ft5x02.ft5x02_MOVSTH_N= atoi(value);
 	DBG("ft5x02_MOVSTH_N=%s\n", value);
-
+	
 /****************************************************************/
 	sprintf(key, "%s", String_Param_FT5X02[i]);
 	if (ini_get_key(filedata,section,key,value)<0)
@@ -2375,7 +2372,7 @@ int ft5x02_Get_Param_From_Ini(char *config_name)
 	if (ini_get_key(filedata,section,key,value)<0)
 		goto ERROR_RETURN;
 	i++;
-
+	
 	g_param_ft5x02.ft5x02_ADC_TARGET = atoi(value);
 	DBG("ft5x02_ADC_TARGET=%s\n", value);
 
@@ -2383,7 +2380,7 @@ int ft5x02_Get_Param_From_Ini(char *config_name)
 	if (ini_get_key(filedata,section,key,value)<0)
 		goto ERROR_RETURN;
 	i++;
-
+	
 	g_param_ft5x02.ft5x02_FILTER_FRAME_NOISE = atoi(value);
 	DBG("ft5x02_FILTER_FRAME_NOISE=%s\n", value);
 
@@ -2391,7 +2388,7 @@ int ft5x02_Get_Param_From_Ini(char *config_name)
 	if (ini_get_key(filedata,section,key,value)<0)
 		goto ERROR_RETURN;
 	i++;
-
+	
 	g_param_ft5x02.ft5x02_POWERNOISE_FILTER_TH= atoi(value);
 	DBG("ft5x02_POWERNOISE_FILTER_TH=%s\n", value);
 
@@ -2399,7 +2396,7 @@ int ft5x02_Get_Param_From_Ini(char *config_name)
 	if (ini_get_key(filedata,section,key,value)<0)
 		goto ERROR_RETURN;
 	i++;
-
+	
 	g_param_ft5x02.ft5x02_KX_LR= atoi(value);
 	DBG("ft5x02_KX_LR=%s\n", value);
 
@@ -2407,7 +2404,7 @@ int ft5x02_Get_Param_From_Ini(char *config_name)
 	if (ini_get_key(filedata,section,key,value)<0)
 		goto ERROR_RETURN;
 	i++;
-
+	
 	g_param_ft5x02.ft5x02_KY_UD= atoi(value);
 	DBG("ft5x02_KY_UD=%s\n", value);
 
@@ -2415,11 +2412,11 @@ int ft5x02_Get_Param_From_Ini(char *config_name)
 	if (ini_get_key(filedata,section,key,value)<0)
 		goto ERROR_RETURN;
 	i++;
-
+	
 	g_param_ft5x02.ft5x02_ESD_FILTER_FRAME = atoi(value);
 	DBG("ft5x02_ESD_FILTER_FRAME=%s\n", value);
 
-/*********************************************************************/
+/*********************************************************************/	
 	sprintf(key, "%s", String_Param_FT5X02[i]);
 	if (ini_get_key(filedata,section,key,value)<0)
 		goto ERROR_RETURN;
@@ -2427,28 +2424,28 @@ int ft5x02_Get_Param_From_Ini(char *config_name)
 	g_ft5x02_tx_num = atoi(value);
 	DBG("ft5x02_tx_num=%s\n", value);
 
-
+	
 	sprintf(key, "%s", String_Param_FT5X02[i]);
 	if (ini_get_key(filedata,section,key,value)<0)
 		goto ERROR_RETURN;
 	i++;
 	g_ft5x02_rx_num = atoi(value);
 	DBG("ft5x02_rx_num=%s\n", value);
-
+	
 	sprintf(key, "%s", String_Param_FT5X02[i]);
 	if (ini_get_key(filedata,section,key,value)<0)
 		goto ERROR_RETURN;
 	i++;
 	g_ft5x02_gain = atoi(value);
 	DBG("ft5x02_gain=%s\n", value);
-
+	
 	sprintf(key, "%s", String_Param_FT5X02[i]);
 	if (ini_get_key(filedata,section,key,value)<0)
 		goto ERROR_RETURN;
 	i++;
 	g_ft5x02_voltage = atoi(value);
 	DBG("ft5x02_voltage=%s\n", value);
-
+	
 	sprintf(key, "%s", String_Param_FT5X02[i]);
 	if (ini_get_key(filedata,section,key,value)<0)
 		goto ERROR_RETURN;
@@ -2456,7 +2453,7 @@ int ft5x02_Get_Param_From_Ini(char *config_name)
 	g_ft5x02_scanselect = atoi(value);
 	DBG("ft5x02_scanselect=%s\n", value);
 
-
+	
 	sprintf(key, "%s", String_Param_FT5X02[i]);
 	if (ini_get_key(filedata,section,key,value)<0)
 		goto ERROR_RETURN;
@@ -2467,14 +2464,14 @@ int ft5x02_Get_Param_From_Ini(char *config_name)
 	}
 	DBG("ft5x02_tx_order=%s\n", value);
 
-
+	
 	sprintf(key, "%s", String_Param_FT5X02[i]);
 	if (ini_get_key(filedata,section,key,value)<0)
 		goto ERROR_RETURN;
 	i++;
 	g_ft5x02_tx_offset = atoi(value);
 	DBG("ft5x02_tx_offset=%s\n", value);
-
+	
 	sprintf(key, "%s", String_Param_FT5X02[i]);
 	if (ini_get_key(filedata,section,key,value)<0)
 		goto ERROR_RETURN;
@@ -2485,7 +2482,7 @@ int ft5x02_Get_Param_From_Ini(char *config_name)
 	}
 	DBG("ft5x02_tx_cap=%s\n", value);
 
-
+	
 	sprintf(key, "%s", String_Param_FT5X02[i]);
 	if (ini_get_key(filedata,section,key,value)<0)
 		goto ERROR_RETURN;
@@ -2496,7 +2493,7 @@ int ft5x02_Get_Param_From_Ini(char *config_name)
 	}
 	DBG("ft5x02_rx_order=%s\n", value);
 
-
+	
 	sprintf(key, "%s", String_Param_FT5X02[i]);
 	if (ini_get_key(filedata,section,key,value)<0)
 		goto ERROR_RETURN;
@@ -2507,7 +2504,7 @@ int ft5x02_Get_Param_From_Ini(char *config_name)
 	}
 	DBG("ft5x02_rx_offset=%s\n", value);
 
-
+	
 	sprintf(key, "%s", String_Param_FT5X02[i]);
 	if (ini_get_key(filedata,section,key,value)<0)
 		goto ERROR_RETURN;
@@ -2517,12 +2514,13 @@ int ft5x02_Get_Param_From_Ini(char *config_name)
 		g_ft5x02_rx_cap[j] = atoi(ft5x02_sub_str(psrc, j+1));
 	}
 	DBG("ft5x02_rx_cap=%s\n", value);
-
-	if (filedata)
+	
+	if (filedata) 
 		kfree(filedata);
 	return 0;
 ERROR_RETURN:
-	if (filedata)
+	if (filedata) 
 		kfree(filedata);
 	return -1;
 }
+

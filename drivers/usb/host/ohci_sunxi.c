@@ -370,10 +370,11 @@ static int sunxi_ohci_hcd_probe(struct platform_device *pdev)
 	ret = init_sunxi_hci(pdev, SUNXI_USB_OHCI);
 	if(ret != 0){
 		dev_err(&pdev->dev, "init_sunxi_hci is fail\n");
-		return -1;
+		return 0;
 	}
 
 	sunxi_insmod_ohci(pdev);
+
 
 	sunxi_ohci = pdev->dev.platform_data;
 	if(sunxi_ohci == NULL){
@@ -416,7 +417,7 @@ static void sunxi_ohci_hcd_shutdown(struct platform_device* pdev)
 
 	sunxi_ohci = pdev->dev.platform_data;
 	if(sunxi_ohci == NULL){
-		DMSG_PANIC("ERR: %s sunxi_ohci is null\n", __func__);
+		DMSG_PANIC("ERR: sunxi_ohci is null\n");
 		return ;
 	}
 
@@ -425,7 +426,7 @@ static void sunxi_ohci_hcd_shutdown(struct platform_device* pdev)
 		return ;
 	}
 
-	pr_debug("[%s]: ohci shutdown start\n", sunxi_ohci->hci_name);
+	DMSG_INFO("[%s]: ohci shutdown start\n", sunxi_ohci->hci_name);
 
 #ifdef	CONFIG_PM
 	if(sunxi_ohci->wakeup_suspend){
@@ -435,13 +436,13 @@ static void sunxi_ohci_hcd_shutdown(struct platform_device* pdev)
 	usb_hcd_platform_shutdown(pdev);
 
 	/* disable usb otg INTUSBE, To solve usb0 device mode catch audio udev on reboot system is fail*/
-	if (sunxi_ohci->usbc_no == 0)
-		if (sunxi_ohci->otg_vbase) {
-			writel(0, (sunxi_ohci->otg_vbase
-						+ SUNXI_USBC_REG_INTUSBE));
-		}
+	if(sunxi_ohci->otg_vbase){
+		USBC_Writel(0, (sunxi_ohci->otg_vbase + SUNXI_USBC_REG_INTUSBE));
+	}
 
-	pr_debug("[%s]: ohci shutdown end\n", sunxi_ohci->hci_name);
+	sunxi_stop_ohci(sunxi_ohci);
+
+	DMSG_INFO("[%s]: ohci shutdown end\n", sunxi_ohci->hci_name);
 
 	return;
 }

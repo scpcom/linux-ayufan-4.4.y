@@ -194,8 +194,8 @@ int de_enhance_apply(unsigned int screen_id,
 	       sizeof(struct disp_enhance_config));
 	de_enhance_set_mode(g_format[screen_id], config);
 	for (ch_id = 0; ch_id < chno; ch_id++) {
-		auto_contrast_dirty = (config[0].flags & ENH_ENABLE_DIRTY) ?
-		    1 : 0;
+		auto_contrast_dirty =
+		    (config[0].flags & ENHANCE_ENABLE_DIRTY) ? 1 : 0;
 
 		/* disp_enhance_info -> vep_config_data */
 		de_enhance_info2data(&config[0], data,

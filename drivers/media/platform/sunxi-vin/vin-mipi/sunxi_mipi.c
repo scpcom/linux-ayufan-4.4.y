@@ -48,7 +48,7 @@ static char *clk_name[MIPI_CLK_NUM] = {
 
 static int __mipi_clk_get(struct mipi_dev *dev)
 {
-#ifndef FPGA_VER
+#ifdef VIN_CLK
 	int i;
 	int clk_index[MIPI_CLK_NUM];
 	struct device_node *np = dev->pdev->dev.of_node;
@@ -59,6 +59,8 @@ static int __mipi_clk_get(struct mipi_dev *dev)
 			if (IS_ERR_OR_NULL(dev->clock[i]))
 				vin_warn("Get clk Index:%d, Name:%s is NULL!\n",
 				     (int)clk_index[i], clk_name[i]);
+			vin_log(VIN_LOG_MIPI, "Get clk Name:%s\n",
+				dev->clock[i]->name);
 		}
 	}
 #endif
@@ -67,7 +69,7 @@ static int __mipi_clk_get(struct mipi_dev *dev)
 
 static int __mipi_dphy_clk_set(struct mipi_dev *dev, unsigned long freq)
 {
-#ifndef FPGA_VER
+#ifdef VIN_CLK
 	if (dev->clock[MIPI_DPHY_CLK] && dev->clock[MIPI_DPHY_CLK_SRC]) {
 		if (clk_set_parent
 		    (dev->clock[MIPI_DPHY_CLK],
@@ -90,7 +92,7 @@ static int __mipi_dphy_clk_set(struct mipi_dev *dev, unsigned long freq)
 static int __mipi_clk_enable(struct mipi_dev *dev)
 {
 	int ret = 0;
-#ifndef FPGA_VER
+#ifdef VIN_CLK
 	int i;
 	for (i = 0; i < MIPI_CSI_CLK_SRC; i++) {
 		if (dev->clock[i]) {
@@ -109,7 +111,7 @@ static int __mipi_clk_enable(struct mipi_dev *dev)
 
 static void __mipi_clk_disable(struct mipi_dev *dev)
 {
-#ifndef FPGA_VER
+#ifdef VIN_CLK
 	int i;
 	for (i = 0; i < MIPI_CSI_CLK_SRC; i++) {
 		if (dev->clock[i])
@@ -122,7 +124,7 @@ static void __mipi_clk_disable(struct mipi_dev *dev)
 
 static void __mipi_clk_release(struct mipi_dev *dev)
 {
-#ifndef FPGA_VER
+#ifdef VIN_CLK
 	int i;
 	for (i = 0; i < MIPI_CLK_NUM; i++) {
 		if (dev->clock[i])
@@ -165,7 +167,8 @@ static enum pkt_fmt get_pkt_fmt(enum v4l2_mbus_pixelcode code)
 static int sunxi_mipi_subdev_s_power(struct v4l2_subdev *sd, int enable)
 {
 	struct mipi_dev *mipi = v4l2_get_subdevdata(sd);
-
+	if (mipi->use_cnt > 1)
+		return 0;
 	if (enable) {
 		__mipi_dphy_clk_set(mipi, DPHY_CLK);
 		__mipi_clk_enable(mipi);
@@ -179,11 +182,12 @@ static int sunxi_mipi_subdev_s_stream(struct v4l2_subdev *sd, int enable)
 {
 	struct mipi_dev *mipi = v4l2_get_subdevdata(sd);
 	struct v4l2_mbus_framefmt *mf = &mipi->format;
-	struct mbus_framefmt_res *res = (void *)mf->reserved;
 
 	int i;
+	if (mipi->use_cnt > 1)
+		return 0;
 
-	mipi->mipi_para.bps = res->res_mipi_bps;
+	mipi->mipi_para.bps = mf->reserved[0];
 	mipi->mipi_para.auto_check_bps = 0;
 	mipi->mipi_para.dphy_freq = DPHY_CLK;
 
@@ -309,7 +313,12 @@ static int sunxi_mipi_subdev_set_fmt(struct v4l2_subdev *sd,
 	return 0;
 }
 
-int sunxi_mipi_subdev_init(struct v4l2_subdev *sd, u32 val)
+int sunxi_mipi_addr_init(struct v4l2_subdev *sd, u32 val)
+{
+	return 0;
+}
+static int sunxi_mipi_subdev_cropcap(struct v4l2_subdev *sd,
+				     struct v4l2_cropcap *a)
 {
 	return 0;
 }
@@ -349,11 +358,12 @@ static int sunxi_mipi_s_mbus_config(struct v4l2_subdev *sd,
 
 static const struct v4l2_subdev_core_ops sunxi_mipi_core_ops = {
 	.s_power = sunxi_mipi_subdev_s_power,
-	.init = sunxi_mipi_subdev_init,
+	.init = sunxi_mipi_addr_init,
 };
 
 static const struct v4l2_subdev_video_ops sunxi_mipi_subdev_video_ops = {
 	.s_stream = sunxi_mipi_subdev_s_stream,
+	.cropcap = sunxi_mipi_subdev_cropcap,
 	.s_mbus_config = sunxi_mipi_s_mbus_config,
 };
 
@@ -369,7 +379,7 @@ static struct v4l2_subdev_ops sunxi_mipi_subdev_ops = {
 	.pad = &sunxi_mipi_subdev_pad_ops,
 };
 
-static int __mipi_init_subdev(struct mipi_dev *mipi)
+static int sunxi_mipi_subdev_init(struct mipi_dev *mipi)
 {
 	struct v4l2_subdev *sd = &mipi->subdev;
 	int ret;
@@ -408,9 +418,9 @@ static int mipi_probe(struct platform_device *pdev)
 		goto ekzalloc;
 	}
 
-	of_property_read_u32(np, "device_id", &pdev->id);
+	pdev->id = of_alias_get_id(np, "mipi");
 	if (pdev->id < 0) {
-		vin_err("MIPI failed to get device id\n");
+		vin_err("MIPI failed to get alias id\n");
 		ret = -EINVAL;
 		goto freedev;
 	}
@@ -431,7 +441,7 @@ static int mipi_probe(struct platform_device *pdev)
 	    bsp_mipi_dphy_set_base_addr(mipi->id,
 					(unsigned long)mipi->base + 0x1000);
 	if (ret < 0)
-		goto unmap;
+		goto ehwinit;
 
 	if (__mipi_clk_get(mipi)) {
 		vin_err("mipi clock get failed!\n");
@@ -439,13 +449,13 @@ static int mipi_probe(struct platform_device *pdev)
 	}
 
 	list_add_tail(&mipi->mipi_list, &mipi_drv_list);
-	__mipi_init_subdev(mipi);
+	sunxi_mipi_subdev_init(mipi);
 
 	platform_set_drvdata(pdev, mipi);
 	vin_print("mipi %d probe end!\n", mipi->id);
 	return 0;
 
-unmap:
+ehwinit:
 	iounmap(mipi->base);
 freedev:
 	kfree(mipi);

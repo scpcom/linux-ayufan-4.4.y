@@ -61,9 +61,9 @@ static int cci_probe(struct platform_device *pdev)
 	}
 	pdev->dev.platform_data = pdata;
 
-	of_property_read_u32(np, "device_id", &pdev->id);
+	pdev->id = of_alias_get_id(np, "cci");
 	if (pdev->id < 0) {
-		vin_err("CCI failed to get device id\n");
+		vin_err("CCI failed to get alias id\n");
 		ret = -EINVAL;
 		goto freepdata;
 	}
@@ -90,24 +90,24 @@ static int cci_probe(struct platform_device *pdev)
 				IRQF_DISABLED, CCI_MODULE_NAME, cci);
 	if (ret) {
 		vin_err("[CCI%d] requeset irq failed!\n", cci->cci_sel);
-		goto unmap;
+		goto ereqirq;
 	}
 #endif
 	ret = bsp_csi_cci_set_base_addr(0, (unsigned long)cci->base);
 	if (ret < 0)
-		goto freeirq;
+		goto ehwinit;
 	ret = bsp_csi_cci_set_base_addr(1, (unsigned long)cci->base);
 	if (ret < 0)
-		goto freeirq;
+		goto ehwinit;
 	platform_set_drvdata(pdev, cci);
 	vin_print("cci probe end cci_sel = %d!\n", pdata->cci_sel);
 
 	return 0;
 
-freeirq:
+ehwinit:
 #ifdef CCI_IRQ
 	free_irq(irq, cci);
-unmap:
+ereqirq:
 #endif
 	iounmap(cci->base);
 freepdata:

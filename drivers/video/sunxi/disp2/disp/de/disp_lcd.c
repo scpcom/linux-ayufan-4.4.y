@@ -1,13 +1,3 @@
-/*
- *
- * Copyright (c) 2016 Allwinnertech Co., Ltd.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- */
 #include "disp_lcd.h"
 
 struct disp_lcd_private_data
@@ -1422,9 +1412,10 @@ static s32 disp_lcd_event_proc(void *parg)
 {
 	struct disp_device *lcd = (struct disp_device*)parg;
 	struct disp_lcd_private_data *lcdp = NULL;
-	struct disp_manager *mgr = NULL;
 #if defined(SUPPORT_EINK) && defined(CONFIG_EINK_PANEL_USED)
 	struct disp_eink_manager* eink_manager = NULL;
+#else
+	struct disp_manager *mgr = NULL;
 #endif
 	u32 hwdev_index;
 	u32 irq_flag = 0;

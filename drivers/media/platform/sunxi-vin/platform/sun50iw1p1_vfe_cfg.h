@@ -19,6 +19,8 @@
 #define _SUN50IW1P1_VFE_CFG_H_
 
 #define MIPI_CSI_NOT_EXIST
+#define VFE_ISP_REGULATOR				""
+#define VFE_CSI_REGULATOR				""
 
 #define CSI0_REGS_BASE          		0x01cb0000
 
@@ -53,59 +55,39 @@
 
 /*stat size configs*/
 
-#define ISP_STAT_TOTAL_SIZE         0xAB00
+#define ISP_STAT_TOTAL_SIZE         0x2100
 
 #define ISP_STAT_HIST_MEM_SIZE      0x0200
-#define ISP_STAT_AE_MEM_SIZE        0x4800
-#define ISP_STAT_AF_MEM_SIZE        0x0500
+#define ISP_STAT_AE_MEM_SIZE        0x0c00
+#define ISP_STAT_AWB_MEM_SIZE       0x0500
+#define ISP_STAT_AF_MEM_SIZE        0x0200
 #define ISP_STAT_AFS_MEM_SIZE       0x0200
-#define ISP_STAT_AWB_RGB_MEM_SIZE   0x4800
-#define ISP_STAT_AWB_CNT_MEM_SIZE   0x0C00
-#define ISP_STAT_PLTM_LST_MEM_SIZE  0x0600
+#define ISP_STAT_AWB_WIN_MEM_SIZE   0x0000
 
-#define ISP_STAT_HIST_MEM_OFS       0x0000
-#define ISP_STAT_AE_MEM_OFS         0x0200
-#define ISP_STAT_AF_MEM_OFS         0x4a00
-#define ISP_STAT_AFS_MEM_OFS        0x4f00
-#define ISP_STAT_AWB_MEM_OFS        0x5100
-#define ISP_STAT_PLTM_LST_MEM_OFS   0xa500
+#define ISP_STAT_HIST_MEM_OFS	0x0
+#define ISP_STAT_AE_MEM_OFS	(ISP_STAT_HIST_MEM_OFS + ISP_STAT_HIST_MEM_SIZE)
+#define ISP_STAT_AWB_MEM_OFS	(ISP_STAT_AE_MEM_OFS + ISP_STAT_AE_MEM_SIZE)
+#define ISP_STAT_AF_MEM_OFS	(ISP_STAT_AWB_MEM_OFS + ISP_STAT_AWB_MEM_SIZE)
+#define ISP_STAT_AFS_MEM_OFS	(ISP_STAT_AF_MEM_OFS + ISP_STAT_AF_MEM_SIZE)
+#define ISP_STAT_AWB_WIN_MEM_OFS (ISP_STAT_AFS_MEM_OFS + ISP_STAT_AFS_MEM_SIZE)
 
 /*table size configs*/
 
-#define ISP_TABLE_MAPPING1_SIZE		0x14000
-#define ISP_LSC_MEM_SIZE		(256*8)
-#define ISP_GAMMA_MEM_SIZE		(256*4)
-#define ISP_LINEAR_MEM_SIZE		(256*6)
-#define ISP_WDR_GAMMA_FE_MEM_SIZE	(4096*2)
-#define ISP_WDR_GAMMA_BE_MEM_SIZE	(4096*2)
-#define ISP_TDNF_DIFF_MEM_SIZE		(256*1)
-#define ISP_PLTM_H_MEM_SIZE		(256*1)
-#define ISP_PLTM_V_MEM_SIZE		(256*1)
-#define ISP_PLTM_POW_MEM_SIZE		(256*2)
-#define ISP_PLTM_F_MEM_SIZE		(256*2)
-#define ISP_CONTRAST_PE_MEM_SIZE	(256*1)
+#define ISP_LINEAR_LUT_LENS_GAMMA_MEM_SIZE 0x1000
+#define ISP_LUT_MEM_SIZE            0x0400
+#define ISP_LENS_MEM_SIZE           0x0600
+#define ISP_GAMMA_MEM_SIZE          0x0200
+#define ISP_LINEAR_MEM_SIZE         0x0
 
-#define ISP_TABLE_MAPPING2_SIZE		0x1b00
-#define ISP_DRC_MEM_SIZE		(256*2)
-#define ISP_SATURATION_MEM_SIZE		(256*2)
-#define ISP_CEM_MEM_SIZE		(736*8)
-
-#define ISP_LSC_MEM_OFS			0x0
-#define ISP_GAMMA_MEM_OFS		(256*8)
-#define ISP_LINEAR_MEM_OFS		(256*12)
-#define ISP_WDR_GAMMA_FE_MEM_OFS	(256*18)
-#define ISP_WDR_GAMMA_BE_MEM_OFS	(256*18 + 4096*2)
-#define ISP_TDNF_DIFF_MEM_OFS		(256*18 + 4096*4)
-#define ISP_PLTM_H_MEM_OFS		(256*19 + 4096*4)
-#define ISP_PLTM_V_MEM_OFS		(256*20 + 4096*4)
-#define ISP_PLTM_POW_MEM_OFS		(256*21 + 4096*4)
-#define ISP_PLTM_F_MEM_OFS		(256*23 + 4096*4)
-#define ISP_CONTRAST_PE_MEM_OFS		(256*25 + 4096*4)
-
-#define ISP_DRC_MEM_OFS			0x0
-#define ISP_SATURATION_MEM_OFS		(256*2)
-#define ISP_CEM_MEM_OFS			(256*4)
+#define ISP_DRC_DISC_MEM_SIZE       0x0200
+#define ISP_DRC_MEM_SIZE            0x0200
+#define ISP_DISC_MEM_SIZE           0
 
 #define MAX_CH_NUM      4
+#define MAX_ISP_STAT_BUF  5	/*the max num of isp statistic buffer*/
+#define MAX_DETECT_NUM 3/*the max num of detect sensor on the same bus*/
+
+#define MAX_AF_WIN_NUM 1
+#define MAX_AE_WIN_NUM 1
 
 #endif /*_SUN50IW1P1_VFE_CFG_H_*/

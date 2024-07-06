@@ -326,7 +326,7 @@
 		};
 
 		mbus0:mbus-controller@01c62000 {
-			compatible = "allwinner,sun8i-mbus";
+			compatible = "allwinner,sun8i-b100-mbus";
 			reg = <0x0 0x01c62000 0x0 0x110>;
 			#mbus-cells = <1>;
 		};
@@ -1208,19 +1208,6 @@
 			status = "okay";
 		};
 
-		v4in1: v4in1@01c30000 {
-			compatible = "allwinner,sunxi-v4in1";
-			reg = <0x0 0x01c30000 0x0 0x00010000>,/*tvd top*/
-				  <0x0 0x01c31000 0x0 0x00010000>,/*tvd0*/
-				  <0x0 0x01c32000 0x0 0x00010000>,/*tvd1*/
-				  <0x0 0x01c33000 0x0 0x00010000>,/*tvd2*/
-				  <0x0 0x01c34000 0x0 0x00010000>;/*tvd3*/
-			clocks = <&clk_tvd_top>, <&clk_tvd0>, <&clk_tvd1>,
-					 <&clk_tvd2>, <&clk_tvd3>;
-			interrupts = <GIC_SPI 97 0x0104>;
-			status = "okay";
-		};
-
 		soc_tr: tr@01000000 {
 			compatible = "allwinner,sun8iw11-tr";
 			reg = <0x0 0x01000000 0x0 0x000200bc>;
@@ -1565,17 +1552,17 @@
 			clocks = <&clk_deinterlace> ,<&clk_pll_periph0>;
 			status = "okay";
 		};
-		scr0:smartcard@0x01c2c400{
+		smc:smartcard@0x01c2c400{
 			#address-cells = <1>;
 			#size-cells = <0>;
 			compatible = "allwinner,sunxi-scr";
 			reg = <0x0 0x01c2c400 0x0 0x400>;
 			interrupts = <GIC_SPI 41 IRQ_TYPE_LEVEL_HIGH>;
-			clocks = <&clk_scr0>, <&clk_apb2>;
+			clocks = <&clk_scr>, <&clk_apb2>;
 			clock-frequency = <24000000>;
 			pinctrl-names = "default", "sleep";
-			pinctrl-0 = <&scr0_pins_a>;
-			pinctrl-1 = <&scr0_pins_b>;
+			pinctrl-0 = <&scr_pins_a>;
+			pinctrl-1 = <&scr_pins_b>;
 			status = "okay";
 		};
 		nmi:nmi@0{
@@ -1678,31 +1665,26 @@
 						hysteresis = <0>;
 					};
 					cpu_trip3:t3{
-						temperature = <114>;
+						temperature = <115>;
 						type = "passive";
 						hysteresis = <0>;
 					};
-                                        cpu_trip4:t4{
-                                                temperature = <117>;
-                                                type = "passive";
-                                                hysteresis = <0>;
-                                        };
-					gpu_trip0:t5{
+					gpu_trip0:t4{
 						temperature = <90>;
 						type = "passive";
 						hysteresis = <0>;
 					};
-					gpu_trip1:t6{
+					gpu_trip1:t5{
 						temperature = <100>;
 						type = "passive";
 						hysteresis = <0>;
 					};
-					gpu_trip2:t7{
+					gpu_trip2:t6{
 						temperature = <110>;
 						type = "passive";
 						hysteresis = <0>;
 					};
-					crt_trip:t8{
+					crt_trip:t7{
 						temperature = <120>;
 						type = "critical";
 						hysteresis = <0>;
@@ -1728,24 +1710,19 @@
 					bind3{
 						contribution = <0>;
 						trip = <&cpu_trip3>;
-						cooling-device = <&cpu_budget_cooling 4 4>;
+						cooling-device = <&cpu_budget_cooling 4 6>;
 					};
-                                        bind4{
-                                                contribution = <0>;
-                                                trip = <&cpu_trip4>;
-                                                cooling-device = <&cpu_budget_cooling 5 6>;
-                                        };
-					bind5{
+					bind4{
 						contribution = <0>;
 						trip = <&gpu_trip0>;
 						cooling-device = <&gpu_cooling 1 1>;
 					};
-					bind6{
+					bind5{
 						contribution = <0>;
 						trip = <&gpu_trip1>;
 						cooling-device = <&gpu_cooling 2 2>;
 					};
-					bind7{
+					bind6{
 						contribution = <0>;
 						trip = <&gpu_trip2>;
 						cooling-device = <&gpu_cooling 3 3>;
@@ -1760,11 +1737,11 @@
 			interrupts = <GIC_SPI 31 IRQ_TYPE_NONE>;
 			status = "okay";
 			key_cnt = <5>;
-			key0 = <190 115>;
-			key1 = <390 114>;
-			key2 = <600 139>;
-			key3 = <800 28>;
-			key4 = <980 102>;
+			key1 = <240 115>;
+			key2 = <500 114>;
+			key3 = <700 139>;
+			key4 = <890 28>;
+			key5 = <2000 102>;
 		};
 		keypad0:keypad{
 			compatible = "allwinner,keypad";
@@ -1826,9 +1803,9 @@
 			tx-delay = <7>;
 			rx-delay = <31>;
 			phy-rst;
-			gmac-power0;
-			gmac-power1;
-			gmac-power2;
+			gmac_power1 = "";
+			gmac_power2 = "";
+			gmac_power3 = "";
 			status = "disabled";
 		};
 

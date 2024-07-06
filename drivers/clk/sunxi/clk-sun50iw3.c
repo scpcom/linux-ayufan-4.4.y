@@ -377,7 +377,6 @@ static const char *usbohci_12m_parents[] = {"osc48md4", "hoscd2", "losc", ""};
 static const char *mipi_dphy_parents[] = {"pll_video0", "pll_video0x4", "pll_video1", ""};
 static const char *mipi_host_parents[] = {"pll_periph0", "pll_periph0x2", "hosc", ""};
 static const char *tcon_lcd_parents[] = {"pll_video0", "pll_video0x4", "pll_video1", "", "", "", "", ""};
-static const char *lvds0_parents[] = {"tcon_lcd0"};
 static const char *csi_top_parents[] = {"pll_video0", "", "pll_ve", "pll_periph0", "", "", "", ""};
 static const char *csi_master_parents[] = {"hosc", "pll_video0", "pll_periph0", "pll_periph0", "", "", "", ""};
 static const char *cpurcpus_pll_parents[] = {"pll_periph0"};
@@ -472,7 +471,6 @@ SUNXI_CLK_PERIPH(mipi_host1,     MIPI_HOST1_CFG,  24,      2,            MIPI_HO
 SUNXI_CLK_PERIPH(display_top,    0,               0,       0,            0,                  0,         0,          0,          0,          0,          0,               DISPLAY_TOP_GATE, DISPLAY_TOP_GATE, 0,         0,          16,         0,            0,              &clk_lock, NULL,             0);
 SUNXI_CLK_PERIPH(tcon_lcd0,      TCON_LCD0_CFG,   24,      3,            0,                  0,         0,          0,          0,          0,          TCON_LCD0_CFG,   TCON_LCD_GATE,   TCON_LCD_GATE, 0,             31,         16,         0,             0,             &clk_lock, NULL,             0);
 SUNXI_CLK_PERIPH(tcon_lcd1,      TCON_LCD1_CFG,   24,      3,            0,                  0,         0,          0,          0,          0,          TCON_LCD1_CFG,   TCON_LCD_GATE,   TCON_LCD_GATE, 0,             31,         17,         1,             0,             &clk_lock, NULL,             0);
-SUNXI_CLK_PERIPH(lvds0,                      0,    0,      0,            0,                  0,         0,          0,          0,          0,                      0,       LVDS_GATE,               0, 0,              0,         16,         0,             0,             &clk_lock, NULL,             0);
 SUNXI_CLK_PERIPH(edp,            EDP_CFG,         0,       0,            0,                  0,         0,          0,          0,          0,          EDP_CFG,         EDP_GATE,        EDP_GATE,      0,             31,         16,         0,             0,             &clk_lock, NULL,             0);
 SUNXI_CLK_PERIPH(csi_misc,       0,               0,       0,            0,                  0,         0,          0,          0,          0,          CSI_MISC_CFG,    CSI_GATE,        CSI_GATE,      MBUS_GATE,     0,          16,         0,             8,             &clk_lock, &com_gates[4],    0);
 SUNXI_CLK_PERIPH(csi_top,        CSI_TOP_CFG,     24,      3,            CSI_TOP_CFG,        0,         4,          0,          0,          0,          CSI_TOP_CFG,     CSI_GATE,        CSI_GATE,      MBUS_GATE,     31,         16,         0,             8,             &clk_lock, &com_gates[4],    1);
@@ -541,9 +539,9 @@ struct periph_init_data sunxi_periphs_init[] = {
 	{"i2s0",           0,                    audio_parents,          ARRAY_SIZE(audio_parents),          &sunxi_clk_periph_i2s0             },
 	{"i2s1",           0,                    audio_parents,          ARRAY_SIZE(audio_parents),          &sunxi_clk_periph_i2s1             },
 	{"i2s2",           0,                    audio_parents,          ARRAY_SIZE(audio_parents),          &sunxi_clk_periph_i2s2             },
-	{"dmic",           0,                    audio_parents,          ARRAY_SIZE(audio_parents),          &sunxi_clk_periph_dmic             },
-	{"codec_1x",       0,                    audio_parents,          ARRAY_SIZE(audio_parents),          &sunxi_clk_periph_codec_1x         },
-	{"codec_4x",       0,                    audio_parents,          ARRAY_SIZE(audio_parents),          &sunxi_clk_periph_codec_4x         },
+	{"dmic",           0,                    audio_parents,          ARRAY_SIZE(audio_parents),          &sunxi_clk_periph_codec_1x         },
+	{"codec_1x",       0,                    audio_parents,          ARRAY_SIZE(audio_parents),          &sunxi_clk_periph_codec_4x         },
+	{"codec_4x",       0,                    audio_parents,          ARRAY_SIZE(audio_parents),          &sunxi_clk_periph_dmic             },
 	{"usbphy0",        0,                    hosc_parents,           ARRAY_SIZE(hosc_parents),           &sunxi_clk_periph_usbphy0          },
 	{"usbphy1",        0,                    hosc_parents,           ARRAY_SIZE(hosc_parents),           &sunxi_clk_periph_usbphy1          },
 	{"usbohci0",       0,                    ahb3mod_parents,        ARRAY_SIZE(ahb3mod_parents),        &sunxi_clk_periph_usbohci0         },
@@ -560,7 +558,6 @@ struct periph_init_data sunxi_periphs_init[] = {
 	{"display_top",    0,                    ahb3mod_parents,        ARRAY_SIZE(ahb3mod_parents),        &sunxi_clk_periph_display_top      },
 	{"tcon_lcd0",      0,                    tcon_lcd_parents,       ARRAY_SIZE(tcon_lcd_parents),       &sunxi_clk_periph_tcon_lcd0        },
 	{"tcon_lcd1",      0,                    tcon_lcd_parents,       ARRAY_SIZE(tcon_lcd_parents),       &sunxi_clk_periph_tcon_lcd1        },
-	{"lvds0",          0,                    lvds0_parents,          ARRAY_SIZE(lvds0_parents),          &sunxi_clk_periph_lvds0            },
 	{"edp",            0,                    hosc_parents,           ARRAY_SIZE(hosc_parents),           &sunxi_clk_periph_edp              },
 	{"csi_misc",       0,                    hosc_parents,           ARRAY_SIZE(hosc_parents),           &sunxi_clk_periph_csi_misc         },
 	{"csi_top",        0,                    csi_top_parents,        ARRAY_SIZE(csi_top_parents),        &sunxi_clk_periph_csi_top          },

@@ -1,14 +1,4 @@
 /*
- *
- * Copyright (c) 2016 Allwinnertech Co., Ltd.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- */
-/*
  * vin_3a.c
  *
  */
@@ -25,14 +15,13 @@
 static void h3a_setup_regs(struct isp_stat *h3a, void *priv)
 {
 	struct vin_isp_h3a_config *conf = priv;
-	struct isp_dev *isp = container_of(h3a, struct isp_dev, h3a_stat);
-	dma_addr_t dma_addr = (dma_addr_t)(h3a->active_buf->dma_addr);
-
 	if (h3a->state == ISPSTAT_DISABLED)
 		return;
-
-	bsp_isp_set_statistics_addr(isp->id, dma_addr);
-
+#if 0
+	bsp_isp_set_statistics_addr((unsigned int)(h3a->active_buf->dma_addr));
+	vin_print("%s active buf addr is 0x%x\n", __func__,
+		 (int)h3a->active_buf->dma_addr);
+#endif
 	if (!h3a->update)
 		return;
 

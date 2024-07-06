@@ -188,13 +188,6 @@ struct sw_uart_port {
 #define SUNXI_UART_NUM			1
 #endif
 
-#if defined(CONFIG_ARCH_SUN50IW3) \
-	|| defined(CONFIG_ARCH_SUN50IW6)
-#define SUNXI_UART_FIFO_SIZE		256
-#else
-#define SUNXI_UART_FIFO_SIZE		64
-#endif
-
 #define SUNXI_UART_DEV_NAME			"uart"
 
 struct platform_device *sw_uart_get_pdev(int uart_id);

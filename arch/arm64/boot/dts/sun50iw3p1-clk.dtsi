@@ -226,8 +226,6 @@ clocks {
 		clk_de: de {
 			#clock-cells = <0>;
 			compatible = "allwinner,sunxi-periph-clock";
-			assigned-clock-parents = <&clk_pll_de>;
-			assigned-clock-rates = <432000000>;
 			clock-output-names = "de";
 		};
 		clk_gpu: gpu {
@@ -528,20 +526,12 @@ clocks {
 		clk_tcon_lcd0: tcon_lcd0 {
 			#clock-cells = <0>;
 			compatible = "allwinner,sunxi-periph-clock";
-			assigned-clock-parents = <&clk_pll_video0>;
 			clock-output-names = "tcon_lcd0";
 		};
 		clk_tcon_lcd1: tcon_lcd1 {
 			#clock-cells = <0>;
 			compatible = "allwinner,sunxi-periph-clock";
-			assigned-clock-parents = <&clk_pll_video1>;
 			clock-output-names = "tcon_lcd1";
-		};
-		clk_lvds0: lvds0 {
-			#clock-cells = <0>;
-			compatible = "allwinner,sunxi-periph-clock";
-			assigned-clock-parents = <&clk_tcon_lcd0>;
-			clock-output-names = "lvds0";
 		};
 		clk_edp: edp {
 			#clock-cells = <0>;

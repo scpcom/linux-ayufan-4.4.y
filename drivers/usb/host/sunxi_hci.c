@@ -1278,13 +1278,12 @@ int init_sunxi_hci(struct platform_device *pdev, int usbc_type)
 	}
 
 	ret = sunxi_get_hci_resource(pdev, sunxi_hci, usbc_no);
-	if (ret != 0)
-		return ret;
-
 
 	if(usbc_type == SUNXI_USB_OHCI){
 		ret = sunxi_get_ohci_clock_src(pdev, sunxi_hci);
 	}
+
+
 
 	return ret;
 }

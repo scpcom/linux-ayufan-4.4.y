@@ -158,20 +158,6 @@ static int ss_aes_cts_decrypt(struct ablkcipher_request *req)
 }
 #endif
 
-#ifdef SS_XTS_MODE_ENABLE
-static int ss_aes_xts_encrypt(struct ablkcipher_request *req)
-{
-	return ss_aes_crypt(req,
-			SS_DIR_ENCRYPT, SS_METHOD_AES, SS_AES_MODE_XTS);
-}
-
-static int ss_aes_xts_decrypt(struct ablkcipher_request *req)
-{
-	return ss_aes_crypt(req,
-			SS_DIR_DECRYPT, SS_METHOD_AES, SS_AES_MODE_XTS);
-}
-#endif
-
 #ifdef SS_OFB_MODE_ENABLE
 static int ss_aes_ofb_encrypt(struct ablkcipher_request *req)
 {
@@ -598,13 +584,7 @@ static int ss_sha512_init(struct ahash_request *req)
 		.ivsize 	 = iv_size, \
 	}, \
 }
-#ifdef SS_SUPPORT_CE_V3_1
-#define DECLARE_SS_RSA_ALG(type, bitwidth) \
-		DECLARE_SS_ASYM_ALG(type, bitwidth, (bitwidth/8), (bitwidth/8))
-#else
-#define DECLARE_SS_RSA_ALG(type, bitwidth) \
-		DECLARE_SS_ASYM_ALG(type, bitwidth, (bitwidth/8), 0)
-#endif
+#define DECLARE_SS_RSA_ALG(type, bitwidth)	DECLARE_SS_ASYM_ALG(type, bitwidth, (bitwidth/8), (bitwidth/8))
 #define DECLARE_SS_DH_ALG(type, bitwidth)	DECLARE_SS_RSA_ALG(type, bitwidth)
 
 #define DECLARE_SS_RNG_ALG(ltype) \
@@ -629,9 +609,6 @@ static struct crypto_alg sunxi_ss_algs[] =
 #endif
 #ifdef SS_CTS_MODE_ENABLE
 	DECLARE_SS_AES_ALG(AES, aes, cts, 1, AES_MIN_KEY_SIZE),
-#endif
-#ifdef SS_XTS_MODE_ENABLE
-	DECLARE_SS_AES_ALG(AES, aes, xts, 1, AES_MIN_KEY_SIZE),
 #endif
 #ifdef SS_OFB_MODE_ENABLE
 	DECLARE_SS_AES_ALG(AES, aes, ofb, AES_BLOCK_SIZE, AES_MIN_KEY_SIZE),
@@ -677,7 +654,6 @@ static struct crypto_alg sunxi_ss_algs[] =
 	DECLARE_SS_DH_ALG(dh, 4096),
 #endif
 #ifdef SS_ECC_ENABLE
-#ifdef SS_SUPPORT_CE_V3_1
 	DECLARE_SS_ASYM_ALG(ecdh, 160, 160/8, 160/8),
 	DECLARE_SS_ASYM_ALG(ecdh, 224, 224/8, 224/8),
 	DECLARE_SS_ASYM_ALG(ecdh, 256, 256/8, 256/8),
@@ -686,16 +662,6 @@ static struct crypto_alg sunxi_ss_algs[] =
 	DECLARE_SS_ASYM_ALG(ecc_sign, 224, 224/8, (224/8)*2),
 	DECLARE_SS_ASYM_ALG(ecc_sign, 256, 256/8, (256/8)*2),
 	DECLARE_SS_ASYM_ALG(ecc_sign, 521, ((521+31)/32)*4, ((521+31)/32)*4*2),
-#else
-	DECLARE_SS_ASYM_ALG(ecdh, 160, 160/8, 0),
-	DECLARE_SS_ASYM_ALG(ecdh, 224, 224/8, 0),
-	DECLARE_SS_ASYM_ALG(ecdh, 256, 256/8, 0),
-	DECLARE_SS_ASYM_ALG(ecdh, 521, ((521+31)/32)*4, 0),
-	DECLARE_SS_ASYM_ALG(ecc_sign, 160, 160/8, 0),
-	DECLARE_SS_ASYM_ALG(ecc_sign, 224, 224/8, 0),
-	DECLARE_SS_ASYM_ALG(ecc_sign, 256, 256/8, 0),
-	DECLARE_SS_ASYM_ALG(ecc_sign, 521, ((521+31)/32)*4, 0),
-#endif
 	DECLARE_SS_RSA_ALG(ecc_verify, 512),
 	DECLARE_SS_RSA_ALG(ecc_verify, 1024),
 #endif

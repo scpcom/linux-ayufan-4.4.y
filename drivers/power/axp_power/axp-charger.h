@@ -17,7 +17,6 @@
 #define INTCHGCSTTIME   480         /* set initial pre-charging time */
 #define BATMAXVOL       4200000     /* set battery max design volatge */
 #define BATMINVOL       3500000     /* set battery min design volatge */
-#define UPDATEMINTIME   30          /* set bat percent update min time */
 
 #define OCVREG0         0x00        /* 2.99V */
 #define OCVREG1         0x00        /* 3.13V */
@@ -151,9 +150,6 @@ struct axp_config_info {
 	u32 power_start;
 	u32 pmu_as_slave;
 	u32 pmu_bat_unused;
-	u32 pmu_ocv_en;
-	u32 pmu_cou_en;
-	u32 pmu_update_min_time;
 
 	u32 pmu_bat_temp_enable;
 	u32 pmu_bat_charge_ltf;

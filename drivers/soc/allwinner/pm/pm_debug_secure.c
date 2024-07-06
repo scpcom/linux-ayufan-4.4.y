@@ -190,9 +190,7 @@ void save_pm_secure_mem_status_nommu(volatile __u32 val)
 	defined(CONFIG_ARCH_SUN8IW10P1) || \
 	defined(CONFIG_ARCH_SUN8IW11P1) || \
 	defined(CONFIG_ARCH_SUN50IW1P1) || \
-	defined(CONFIG_ARCH_SUN50IW2P1) || \
-	defined(CONFIG_ARCH_SUN50IW3P1) || \
-	defined(CONFIG_ARCH_SUN50IW6P1)
+	defined(CONFIG_ARCH_SUN50IW2P1)
 
 void pm_secure_mem_status_init(char *name)
 {

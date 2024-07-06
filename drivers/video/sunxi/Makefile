@@ -4,4 +4,6 @@
 
 obj-$(CONFIG_DISP2_SUNXI) += disp2/disp/
 
+obj-$(CONFIG_HDMI_DISP2_SUNXI) += disp2/hdmi/
+
 obj-$(CONFIG_TV_DISP2_SUNXI) += disp2/tv/

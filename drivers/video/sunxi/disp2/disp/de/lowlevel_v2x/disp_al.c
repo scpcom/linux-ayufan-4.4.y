@@ -1,13 +1,3 @@
-/*
- *
- * Copyright (c) 2016 Allwinnertech Co., Ltd.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- */
 #include "disp_al.h"
 #include "de_hal.h"
 
@@ -248,7 +238,7 @@ int disp_al_manager_disable_irq(unsigned int disp)
 
 int disp_al_enhance_apply(unsigned int disp, struct disp_enhance_config *config)
 {
-	if (config->flags & ENH_MODE_DIRTY) {
+	if (config->flags & ENHANCE_MODE_DIRTY) {
 		struct disp_csc_config csc_config;
 
 		de_dcsc_get_config(disp, &csc_config);

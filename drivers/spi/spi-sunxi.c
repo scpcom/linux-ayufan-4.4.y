@@ -389,8 +389,6 @@ static void spi_set_bc_tc_stc(u32 tx_len, u32 rx_len, u32 stc_len, u32 dummy_cnt
 	reg_val = readl(base_addr + SPI_BCC_REG);
 	reg_val &= ~SPI_BCC_STC_MASK;
 	reg_val |= (SPI_BCC_STC_MASK & stc_len);
-	reg_val &= ~(0xf << 24);
-	reg_val |= (dummy_cnt << 24);
 	writel(reg_val, base_addr + SPI_BCC_REG);
 	//SPI_DBG("\n-- STC = %d --\n", readl(base_addr + SPI_BCC_REG));
 }
@@ -425,13 +423,6 @@ static void spi_set_all_burst_received(void __iomem *base_addr)
 	u32 reg_val = readl(base_addr+SPI_TC_REG);
 	reg_val &= ~SPI_TC_DHB;
 	writel(reg_val, base_addr + SPI_TC_REG);
-}
-
-static void spi_clear_dual_read(void __iomem  *base_addr)
-{
-	u32 reg_val = readl(base_addr+SPI_BCC_REG);
-	reg_val &= ~SPI_BCC_DUAL_MOD_RX_EN;
-	writel(reg_val, base_addr + SPI_BCC_REG);
 }
 
 static void spi_set_dual_read(void __iomem  *base_addr)
@@ -864,80 +855,6 @@ static int sunxi_spi_xfer_setup(struct spi_device *spi, struct spi_transfer *t)
 	return 0;
 }
 
-static int sunxi_spi_mode_check(struct sunxi_spi *sspi, struct spi_device *spi, struct spi_transfer *t)
-{
-	unsigned long flags = 0;
-	static int dual_mode_enable;
-	struct sunxi_dual_mode_dev_data *dual_mode_cfg = (struct sunxi_dual_mode_dev_data *)spi->dev.platform_data;
-
-	if (sspi->mode_type != MODE_TYPE_NULL)
-		return -EINVAL;
-
-	SPI_DBG("dual_mode_cfg = %p\n", dual_mode_cfg);
-
-	/* dual spi mode */
-	if ((dual_mode_cfg != NULL) && (dual_mode_cfg->dual_mode == 1)) {
-		SPI_DBG("in dual SPI mode\n");
-		if (t->tx_buf && t->rx_buf) {
-			SPI_ERR("full duplex is not support in dual spi mode\n");
-			return -1;
-		}
-
-		/* half duplex transmit(dual mode) */
-		if (t->tx_buf) {
-			/* If the command is Dual Mode Read. */
-			if (*(const u8 *)t->tx_buf == 0x3b) {
-				dual_mode_enable = 1;
-				spi_set_dual_read(sspi->base_addr);
-				spi_set_bc_tc_stc(t->len, 0, t->len, dual_mode_cfg->dummy_cnt, sspi->base_addr);
-			} else {
-				dual_mode_enable = 0;
-				spi_clear_dual_read(sspi->base_addr);
-				spi_set_bc_tc_stc(t->len, 0, t->len, 0, sspi->base_addr);
-			}
-
-			spin_lock_irqsave(&sspi->lock, flags);
-			sspi->mode_type = SINGLE_HALF_DUPLEX_TX;
-			spin_unlock_irqrestore(&sspi->lock, flags);
-		} /* half duplex receive(dual mode) */
-		else if (t->rx_buf) {
-			spin_lock_irqsave(&sspi->lock, flags);
-			if (dual_mode_enable == 1) {
-				spi_set_bc_tc_stc(dual_mode_cfg->single_cnt, t->len,
-					dual_mode_cfg->single_cnt, 0, sspi->base_addr);
-				sspi->mode_type = DUAL_HALF_DUPLEX_RX;
-			} else {
-				spi_set_bc_tc_stc(0, t->len, 0, 0, sspi->base_addr);
-				sspi->mode_type = SINGLE_HALF_DUPLEX_RX;
-			}
-			spin_unlock_irqrestore(&sspi->lock, flags);
-		}
-		return 0;
-	}
-
-	/* single spi mode */
-	SPI_DBG("in single SPI mode\n");
-	spin_lock_irqsave(&sspi->lock, flags);
-	if (t->tx_buf && t->rx_buf) {
-		/* full duplex */
-		spi_set_all_burst_received(sspi->base_addr);
-		spi_set_bc_tc_stc(t->len, 0, t->len, 0, sspi->base_addr);
-		sspi->mode_type = SINGLE_FULL_DUPLEX_RX_TX;
-	} else {
-		/* half duplex transmit(single mode) */
-		if (t->tx_buf) {
-			spi_set_bc_tc_stc(t->len, 0, t->len, 0, sspi->base_addr);
-			sspi->mode_type = SINGLE_HALF_DUPLEX_TX;
-		} /* half duplex receive(single mode) */
-		else if (t->rx_buf) {
-			spi_set_bc_tc_stc(0, t->len, 0, 0, sspi->base_addr);
-			sspi->mode_type = SINGLE_HALF_DUPLEX_RX;
-		}
-	}
-	spin_unlock_irqrestore(&sspi->lock, flags);
-
-	return 0;
-}
 /*
  * < 64 : cpu ;  >= 64 : dma
  * wait for done completion in this function, wakup in the irq hanlder
@@ -951,6 +868,7 @@ static int sunxi_spi_xfer(struct spi_device *spi, struct spi_transfer *t)
 	unsigned rx_len = t->len;	/* number of bytes sent */
 	unsigned char *rx_buf = (unsigned char *)t->rx_buf;
 	unsigned char *tx_buf = (unsigned char *)t->tx_buf;
+	struct sunxi_dual_mode_dev_data *dual_mode_cfg = (struct sunxi_dual_mode_dev_data *)spi->dev.platform_data;
 	int ret = 0;
 
 	SPI_DBG("[spi-%d]: begin transfer, txbuf %p, rxbuf %p, len %d, mode %d\n", 
@@ -965,12 +883,68 @@ static int sunxi_spi_xfer(struct spi_device *spi, struct spi_transfer *t)
 	/* reset tx/rx fifo */
 	spi_reset_fifo(base_addr);
 
-	if (sunxi_spi_mode_check(sspi, spi, t))
+	if(sspi->mode_type != MODE_TYPE_NULL)
 		return -EINVAL;
 
-	/* 1. Tx/Rx error irq,process in IRQ;
-	 * 2. Transfer Complete Interrupt Enable
-	 */
+	SPI_DBG("dual_mode_cfg = %p \n", dual_mode_cfg);
+	/* single spi mode */
+	if(!dual_mode_cfg || dual_mode_cfg->dual_mode == 0) {
+		SPI_DBG("in single SPI mode\n");
+		/* full duplex */
+		spin_lock_irqsave(&sspi->lock, flags);
+		if(tx_buf && rx_buf) {
+			spi_set_all_burst_received(sspi->base_addr);
+			spi_set_bc_tc_stc(tx_len, 0, tx_len, 0, base_addr);
+			sspi->mode_type = SINGLE_FULL_DUPLEX_RX_TX;
+		} else {
+			/* half duplex transmit(single mode) */
+			if(tx_buf) {
+				spi_set_bc_tc_stc(tx_len, 0, tx_len, 0, base_addr);
+				sspi->mode_type = SINGLE_HALF_DUPLEX_TX;
+			}/* half duplex receive(single mode) */
+			else if(rx_buf) {
+				spi_set_bc_tc_stc(0, rx_len, 0, 0, base_addr);
+				sspi->mode_type = SINGLE_HALF_DUPLEX_RX;
+			}
+		}
+		spin_unlock_irqrestore(&sspi->lock, flags);
+	} else {
+		/* dual spi mode */
+		if(dual_mode_cfg->dual_mode == 1){
+			SPI_DBG("in dual SPI mode\n");
+			if(tx_buf && rx_buf) {
+				SPI_ERR("full duplex is not support in dual spi mode\n");
+				return -1;
+			} else {
+				/* half duplex transmit(dual mode) */
+				if(tx_buf) {
+					if(dual_mode_cfg->single_cnt >= tx_len){
+						SPI_ERR("single tranmit count must be less than total transmit count in dual spi mode\n");
+						return -1;
+					}
+					spin_lock_irqsave(&sspi->lock, flags);
+					spi_set_bc_tc_stc(tx_len, 0, dual_mode_cfg->single_cnt, 0, base_addr);
+					sspi->mode_type = DUAL_HALF_DUPLEX_TX;
+					spin_unlock_irqrestore(&sspi->lock, flags);
+				}/* half duplex receive(dual mode) */
+				else if(rx_buf) {
+					spin_lock_irqsave(&sspi->lock, flags);
+					spi_set_dual_read(base_addr);
+					spi_set_bc_tc_stc(dual_mode_cfg->single_cnt, rx_len, dual_mode_cfg->single_cnt, dual_mode_cfg->dummy_cnt, base_addr);
+					sspi->mode_type = DUAL_HALF_DUPLEX_RX;
+					spin_unlock_irqrestore(&sspi->lock, flags);
+				}
+			}
+		} else {
+			SPI_ERR("dual_mode %d is invalid!\n", dual_mode_cfg->dual_mode);
+			return -1;
+		}
+	}
+
+	/*
+	* 1. Tx/Rx error irq,process in IRQ;
+	* 2. Transfer Complete Interrupt Enable
+	*/
 	spi_enable_irq(SPI_INTEN_TC|SPI_INTEN_ERR, base_addr);
 
 	/* >64 use DMA transfer, or use cpu */
@@ -978,7 +952,6 @@ static int sunxi_spi_xfer(struct spi_device *spi, struct spi_transfer *t)
 #ifdef CONFIG_DMA_ENGINE
 		switch(sspi->mode_type) {
 		case SINGLE_HALF_DUPLEX_RX:
-		case DUAL_HALF_DUPLEX_RX:
 		{
 			SPI_DBG(" rx -> by dma\n");
 			/* For Rx mode, the DMA end(not TC flag) is real end. */
@@ -1043,6 +1016,11 @@ static int sunxi_spi_xfer(struct spi_device *spi, struct spi_transfer *t)
 			sunxi_spi_start_dma(&sspi->dma_tx);
 			break;
 		}
+		case DUAL_HALF_DUPLEX_RX:
+		{
+			SPI_ERR("dual half duplex rx -> by dma (not support now)\n");
+			break;
+		}
 		case DUAL_HALF_DUPLEX_TX:
 		{
 			SPI_ERR("dual half duplex tx -> by dma (not support now)\n");
@@ -1055,7 +1033,6 @@ static int sunxi_spi_xfer(struct spi_device *spi, struct spi_transfer *t)
 	} else {
 		switch(sspi->mode_type) {
 		case SINGLE_HALF_DUPLEX_RX:
-		case DUAL_HALF_DUPLEX_RX:
 		{
 			unsigned int poll_time = 0x7ffff;
 			SPI_DBG(" rx -> by ahb\n");
@@ -1126,6 +1103,11 @@ static int sunxi_spi_xfer(struct spi_device *spi, struct spi_transfer *t)
 				SPI_ERR("cpu receive data time out!\n");
 				return -1;
 			}
+			break;
+		}
+		case DUAL_HALF_DUPLEX_RX:
+		{
+			SPI_ERR("dual half duplex rx -> by ahb (not support now)\n");
 			break;
 		}
 		case DUAL_HALF_DUPLEX_TX:

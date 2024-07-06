@@ -1,7 +1,7 @@
 /*
  * Allwinner sun50iw3p1 SoCs R_PIO pinctrl driver.
  *
- * Copyright(c) 2016-2020 Allwinnertech Co., Ltd.
+ * Copyright(c) 2012-2016 Allwinnertech Co., Ltd.
  * Author: WimHuang <huangwei@allwinnertech.com>
  *
  * This file is licensed under the terms of the GNU General Public
@@ -116,67 +116,13 @@ static const struct sunxi_desc_pin sun50iw3p1_r_pins[] = {
 		SUNXI_FUNCTION(0x2, "s_spi1"),		/* MISO */
 		SUNXI_FUNCTION(0x7, "io_disabled"),
 		SUNXI_FUNCTION_IRQ_BANK(0x6, 0, 15)),
-	SUNXI_PIN(SUNXI_PINCTRL_PIN(L, 16),
-		SUNXI_FUNCTION(0x0, "gpio_in"),
-		SUNXI_FUNCTION(0x1, "gpio_out"),
-		SUNXI_FUNCTION(0x2, "s_pwm0"),		/* PWM */
-		SUNXI_FUNCTION(0x7, "io_disabled"),
-		SUNXI_FUNCTION_IRQ_BANK(0x6, 0, 16)),
-	SUNXI_PIN(SUNXI_PINCTRL_PIN(L, 17),
-		SUNXI_FUNCTION(0x0, "gpio_in"),
-		SUNXI_FUNCTION(0x1, "gpio_out"),
-		SUNXI_FUNCTION(0x2, "s_cpu"),		/* CUR_W */
-		SUNXI_FUNCTION(0x7, "io_disabled"),
-		SUNXI_FUNCTION_IRQ_BANK(0x6, 0, 17)),
-	SUNXI_PIN(SUNXI_PINCTRL_PIN(L, 18),
-		SUNXI_FUNCTION(0x0, "gpio_in"),
-		SUNXI_FUNCTION(0x1, "gpio_out"),
-		SUNXI_FUNCTION(0x7, "io_disabled"),
-		SUNXI_FUNCTION_IRQ_BANK(0x6, 0, 18)),
-	SUNXI_PIN(SUNXI_PINCTRL_PIN(L, 19),
-		SUNXI_FUNCTION(0x0, "gpio_in"),
-		SUNXI_FUNCTION(0x1, "gpio_out"),
-		SUNXI_FUNCTION(0x7, "io_disabled"),
-		SUNXI_FUNCTION_IRQ_BANK(0x6, 0, 19)),
-
-	/* Hole */
-	SUNXI_PIN(SUNXI_PINCTRL_PIN(M, 0),
-		SUNXI_FUNCTION(0x0, "gpio_in"),
-		SUNXI_FUNCTION(0x1, "gpio_out"),
-		SUNXI_FUNCTION(0x7, "io_disabled"),
-		SUNXI_FUNCTION_IRQ_BANK(0x6, 1, 0)),
-	SUNXI_PIN(SUNXI_PINCTRL_PIN(M, 1),
-		SUNXI_FUNCTION(0x0, "gpio_in"),
-		SUNXI_FUNCTION(0x1, "gpio_out"),
-		SUNXI_FUNCTION(0x7, "io_disabled"),
-		SUNXI_FUNCTION_IRQ_BANK(0x6, 1, 1)),
-	SUNXI_PIN(SUNXI_PINCTRL_PIN(M, 2),
-		SUNXI_FUNCTION(0x0, "gpio_in"),
-		SUNXI_FUNCTION(0x1, "gpio_out"),
-		SUNXI_FUNCTION(0x7, "io_disabled"),
-		SUNXI_FUNCTION_IRQ_BANK(0x6, 1, 2)),
-	SUNXI_PIN(SUNXI_PINCTRL_PIN(M, 3),
-		SUNXI_FUNCTION(0x0, "gpio_in"),
-		SUNXI_FUNCTION(0x1, "gpio_out"),
-		SUNXI_FUNCTION(0x7, "io_disabled"),
-		SUNXI_FUNCTION_IRQ_BANK(0x6, 1, 3)),
-	SUNXI_PIN(SUNXI_PINCTRL_PIN(M, 4),
-		SUNXI_FUNCTION(0x0, "gpio_in"),
-		SUNXI_FUNCTION(0x1, "gpio_out"),
-		SUNXI_FUNCTION(0x7, "io_disabled"),
-		SUNXI_FUNCTION_IRQ_BANK(0x6, 1, 4)),
-	SUNXI_PIN(SUNXI_PINCTRL_PIN(M, 5),
-		SUNXI_FUNCTION(0x0, "gpio_in"),
-		SUNXI_FUNCTION(0x1, "gpio_out"),
-		SUNXI_FUNCTION(0x7, "io_disabled"),
-		SUNXI_FUNCTION_IRQ_BANK(0x6, 1, 5)),
 };
 
 static const struct sunxi_pinctrl_desc sun50iw3p1_r_pinctrl_data = {
 	.pins = sun50iw3p1_r_pins,
 	.npins = ARRAY_SIZE(sun50iw3p1_r_pins),
 	.pin_base = PL_BASE,
-	.irq_banks = 2,
+	.irq_banks = 1,
 };
 
 static int sun50iw3p1_r_pinctrl_probe(struct platform_device *pdev)

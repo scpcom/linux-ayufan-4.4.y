@@ -19,7 +19,6 @@
 #define _SUNXI_CSI_H_
 
 #include "../platform/platform_cfg.h"
-#include "parser_reg.h"
 
 #define VIDIOC_SUNXI_CSI_SET_CORE_CLK 			1
 #define VIDIOC_SUNXI_CSI_SET_M_CLK 			2
@@ -44,12 +43,11 @@ enum {
 
 #define NOCLK 			0xff
 
-struct csi_format {
-	unsigned int wd_align;
+struct csi_pix_format {
+	unsigned int pix_width_alignment;
 	enum v4l2_mbus_pixelcode code;
-	enum input_seq seq;
-	enum prs_input_fmt infmt;
-	unsigned int data_width;
+	u32 fmt_reg;
+	u8 data_alignment;
 };
 
 struct csi_dev {
@@ -71,12 +69,12 @@ struct csi_dev {
 	struct list_head csi_list;
 	struct pinctrl *pctrl;
 	struct clk *clock[CSI_CLK_NUM];
-	struct v4l2_mbus_framefmt mf;
-	struct prs_output_size out_size;
-	struct csi_format *csi_fmt;
-	struct prs_ncsi_if_cfg ncsi_if;
+	struct v4l2_mbus_framefmt format;
+	struct csi_pix_format *csi_fmt;
+
 };
 
+void sunxi_csi_set_output_fmt(struct v4l2_subdev *sd, __u32 pixelformat);
 void sunxi_csi_dump_regs(struct v4l2_subdev *sd);
 struct v4l2_subdev *sunxi_csi_get_subdev(int id);
 int sunxi_csi_platform_register(void);

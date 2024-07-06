@@ -22,6 +22,7 @@
 #include "isp_platform_drv.h"
 
 #include "bsp_isp_comm.h"
+#include "bsp_isp_algo.h"
 
 #define  Q16_1_1                  ((1 << 16) >> 0)
 #define  Q16_1_2                  ((1 << 16) >> 1)
@@ -48,15 +49,28 @@ void bsp_isp_channel_disable(unsigned long id, enum isp_channel ch)
 {
 	fun_array_curr->isp_ch_enable(id, ch, 0);
 }
-
-void bsp_isp_capture_start(unsigned long id)
+void bsp_isp_video_capture_start(unsigned long id)
 {
-	fun_array_curr->isp_capture_start(id);
+
+	fun_array_curr->isp_capture_start(id, VCAP_EN);
 }
 
-void bsp_isp_capture_stop(unsigned long id)
+void bsp_isp_video_capture_stop(unsigned long id)
 {
-	fun_array_curr->isp_capture_stop(id);
+
+	fun_array_curr->isp_capture_stop(id, VCAP_EN);
+}
+
+void bsp_isp_image_capture_start(unsigned long id)
+{
+
+	fun_array_curr->isp_capture_start(id, SCAP_EN);
+}
+
+void bsp_isp_image_capture_stop(unsigned long id)
+{
+
+	fun_array_curr->isp_capture_stop(id, SCAP_EN);
 }
 
 unsigned int bsp_isp_get_para_ready(unsigned long id)
@@ -100,7 +114,7 @@ int bsp_isp_int_get_enable(unsigned long id)
 }
 
 
-void bsp_isp_set_statistics_addr(unsigned long id, dma_addr_t addr)
+void bsp_isp_set_statistics_addr(unsigned long id, unsigned int addr)
 {
 	fun_array_curr->isp_set_statistics_addr(id, addr);
 }
@@ -133,33 +147,13 @@ void bsp_isp_set_map_saved_addr(unsigned long id, unsigned long vaddr)
 void bsp_isp_update_lut_lens_gamma_table(unsigned long id, struct isp_table_addr *tbl_addr)
 {
 	fun_array_curr->isp_set_table_addr(id, LUT_LENS_GAMMA_TABLE,
-		(unsigned long)(tbl_addr->isp_lsc_tbl_dma_addr));
+		(unsigned long)(tbl_addr->isp_def_lut_tbl_dma_addr));
 }
 
 void bsp_isp_update_drc_table(unsigned long id, struct isp_table_addr *tbl_addr)
 {
 	fun_array_curr->isp_set_table_addr(id, DRC_TABLE,
 		(unsigned long)(tbl_addr->isp_drc_tbl_dma_addr));
-}
-
-void bsp_isp_src0_enable(unsigned long id)
-{
-	fun_array_curr->isp_src0_en(id, 1);
-}
-
-void bsp_isp_src0_disable(unsigned long id)
-{
-	fun_array_curr->isp_src0_en(id, 0);
-}
-void bsp_isp_set_input_fmt(unsigned long id, enum isp_input_seq fmt)
-{
-	fun_array_curr->isp_set_input_fmt(id, (unsigned int)fmt);
-}
-
-void bsp_isp_set_ob_zone(unsigned long id, struct isp_size *black,
-		struct isp_size *valid, struct coor *xy)
-{
-	fun_array_curr->isp_set_size(id, black, valid, xy);
 }
 
 void bsp_isp_init(unsigned long id, struct isp_init_para *para)
@@ -196,6 +190,7 @@ void bsp_isp_exit(unsigned long id)
 {
 	bsp_isp_disable(id);
 	bsp_isp_irq_disable(id, ISP_IRQ_EN_ALL);
+	bsp_isp_video_capture_stop(id);
 }
 
 

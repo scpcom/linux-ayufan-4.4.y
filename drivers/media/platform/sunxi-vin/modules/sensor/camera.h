@@ -97,7 +97,6 @@ struct sensor_info {
 	struct v4l2_fract tpf;
 	struct sensor_win_size *current_wins;
 	unsigned int magic_num;
-	unsigned int is_stream;
 };
 
 #define SENSOR_ENUM_MBUS_CODE \
@@ -168,15 +167,9 @@ static void sensor_try_format(struct sensor_info *info, \
 { \
 	u32 code = V4L2_MBUS_FMT_YUYV8_2X8; \
 	if (fmt->pad == SENSOR_PAD_SOURCE) { \
-		if (info->is_stream) { \
-			code = info->fmt->mbus_code; \
-			*ws = info->current_wins; \
-			*sf = info->fmt; \
-		} else { \
-			*ws = sensor_find_frame_size(&fmt->format); \
-			*sf = sensor_find_mbus_code(&fmt->format); \
-			code = (*sf)->mbus_code; \
-		} \
+		*ws = sensor_find_frame_size(&fmt->format); \
+		*sf = sensor_find_mbus_code(&fmt->format); \
+		code = (*sf)->mbus_code; \
 	} \
 	sensor_fill_mbus_fmt(&fmt->format, *ws, code); \
 }

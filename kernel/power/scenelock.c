@@ -317,9 +317,7 @@ EXPORT_SYMBOL(standby_show_state);
 	defined(CONFIG_ARCH_SUN8IW10P1) || \
 	defined(CONFIG_ARCH_SUN8IW11P1) || \
 	defined(CONFIG_ARCH_SUN50IW1P1) || \
-	defined(CONFIG_ARCH_SUN50IW2P1) || \
-	defined(CONFIG_ARCH_SUN50IW3P1) || \
-	defined(CONFIG_ARCH_SUN50IW6P1))
+	defined(CONFIG_ARCH_SUN50IW2P1))
 /**
  *	extended_standby_set_volt   -     set  suspend volt.
  *

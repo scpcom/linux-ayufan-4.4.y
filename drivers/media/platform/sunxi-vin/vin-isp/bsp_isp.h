@@ -41,6 +41,9 @@ struct isp_init_para {
 };
 
 struct isp_table_addr {
+	void *isp_def_lut_tbl_vaddr;
+	void *isp_def_lut_tbl_paddr;
+	void *isp_def_lut_tbl_dma_addr;
 	void *isp_lsc_tbl_vaddr;
 	void *isp_lsc_tbl_paddr;
 	void *isp_lsc_tbl_dma_addr;
@@ -54,9 +57,9 @@ struct isp_table_addr {
 	void *isp_drc_tbl_vaddr;
 	void *isp_drc_tbl_paddr;
 	void *isp_drc_tbl_dma_addr;
-	void *isp_saturation_tbl_vaddr;
-	void *isp_saturation_tbl_paddr;
-	void *isp_saturation_tbl_dma_addr;
+	void *isp_disc_tbl_vaddr;
+	void *isp_disc_tbl_paddr;
+	void *isp_disc_tbl_dma_addr;
 };
 
 void bsp_isp_enable(unsigned long id);
@@ -65,8 +68,10 @@ void bsp_isp_disable(unsigned long id);
 void bsp_isp_channel_enable(unsigned long id, enum isp_channel ch);
 void bsp_isp_channel_disable(unsigned long id, enum isp_channel ch);
 
-void bsp_isp_capture_start(unsigned long id);
-void bsp_isp_capture_stop(unsigned long id);
+void bsp_isp_video_capture_start(unsigned long id);
+void bsp_isp_video_capture_stop(unsigned long id);
+void bsp_isp_image_capture_start(unsigned long id);
+void bsp_isp_image_capture_stop(unsigned long id);
 unsigned int bsp_isp_get_para_ready(unsigned long id);
 void bsp_isp_set_para_ready(unsigned long id);
 void bsp_isp_clr_para_ready(unsigned long id);
@@ -77,16 +82,19 @@ unsigned int bsp_isp_get_irq_status(unsigned long id, unsigned int irq);
 int bsp_isp_int_get_enable(unsigned long id);
 
 void bsp_isp_clr_irq_status(unsigned long id, unsigned int irq);
-void bsp_isp_set_statistics_addr(unsigned long id, dma_addr_t addr);
+void bsp_isp_set_statistics_addr(unsigned long id, unsigned int addr);
 
 void bsp_isp_set_flip(unsigned long id, enum isp_channel ch, enum enable_flag on_off);
 void bsp_isp_set_mirror(unsigned long id, enum isp_channel ch, enum enable_flag on_off);
 
-void bsp_isp_src0_enable(unsigned long id);
-void bsp_isp_src0_disable(unsigned long id);
-void bsp_isp_set_input_fmt(unsigned long id, enum isp_input_seq fmt);
-void bsp_isp_set_ob_zone(unsigned long id, struct isp_size *black,
-			struct isp_size *valid, struct coor *xy);
+void bsp_isp_set_input_fmt(unsigned long id, enum isp_input_fmt fmt, enum isp_input_seq seq_t);
+
+void bsp_isp_set_output_fmt(unsigned long id, enum isp_output_fmt isp_fmt,
+			    enum isp_output_seq seq_t, enum isp_channel ch);
+int min_scale_w_shift(int x_ratio, int y_ratio);
+void bsp_isp_set_ob_zone(unsigned long id, struct isp_size *black, struct isp_size *valid,
+			 struct coor *xy, enum isp_src obc_valid_src);
+
 
 void bsp_isp_set_base_addr(unsigned long id, unsigned long vaddr);
 void bsp_isp_set_dma_load_addr(unsigned long id, unsigned long dma_addr);
@@ -95,10 +103,11 @@ void bsp_isp_set_map_load_addr(unsigned long id, unsigned long vaddr);
 void bsp_isp_set_map_saved_addr(unsigned long id, unsigned long vaddr);
 void bsp_isp_update_lut_lens_gamma_table(unsigned long id, struct isp_table_addr *tbl_addr);
 void bsp_isp_update_drc_table(unsigned long id, struct isp_table_addr *tbl_addr);
-
 void bsp_isp_init_platform(unsigned int platform_id);
 void bsp_isp_init(unsigned long id, struct isp_init_para *para);
 void bsp_isp_exit(unsigned long id);
 
+void bsp_isp_module_enable(unsigned long id, unsigned int module);
+void bsp_isp_module_disable(unsigned long id, unsigned int module);
 
 #endif

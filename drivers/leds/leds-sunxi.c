@@ -173,17 +173,30 @@ static inline int sizeof_gpio_leds_priv(int num_leds)
 
 static int gpio_led_probe(struct platform_device *pdev)
 {
+	pr_info("%s start\n", __func__);
 	struct device_node *np = pdev->dev.of_node;
 	struct gpio_leds_priv *priv;
 	int i, ret = -1;
 
 	u32 val;
+	u32 led_used = 0;
 	char trigger_name[32];
 	struct gpio_config config;
-	const char *trigger_str;
-	char (*led_name)[8];
+	char *trigger_str;
 
-	ret = of_property_read_u32(np, "leds_num", &val);
+	ret = of_property_read_u32(np, "led_used", &val);
+	if (ret < 0) {
+		pr_err("%s: led_used get err.\n", __func__);
+		return ret;
+	}
+	led_used = val;
+
+	if (1 != led_used) {
+		pr_err("%s: led is unused.\n", __func__);
+		return ret;
+	}
+
+	ret = of_property_read_u32(np, "led_num", &val);
 	if (ret < 0) {
 		pr_err("%s: led_num get err.\n", __func__);
 		return ret;
@@ -196,12 +209,13 @@ static int gpio_led_probe(struct platform_device *pdev)
 		return -ENOMEM;
 	}
 	gpio_leds = (struct gpio_led *) led_list_head;
-	led_list_name = kzalloc(led_num * sizeof(char[8]), GFP_KERNEL);
+	char (*led_name)[5];
+	led_list_name = kzalloc(led_num * sizeof(char[5]), GFP_KERNEL);
 	if (led_list_name == NULL) {
 		pr_err("%s: kzalloc led list name failed.\n", __func__);
 		return -ENOMEM;
 	}
-	led_name = (char (*)[8]) led_list_name;
+	led_name = (char (*)[5]) led_list_name;
 
 	for (i = 0; i < led_num; i++) {
 		sprintf(led_name[i], "%s%d", "led", i+1);

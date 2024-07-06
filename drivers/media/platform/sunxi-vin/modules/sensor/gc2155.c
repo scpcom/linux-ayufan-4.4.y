@@ -1,14 +1,4 @@
 /*
- *
- * Copyright (c) 2016 Allwinnertech Co., Ltd.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- */
-/*
  * A V4L2 driver for GalaxyCore gc2155 cameras.
  *
  */
@@ -2390,13 +2380,9 @@ static int sensor_s_stream(struct v4l2_subdev *sd, int enable)
 		  info->current_wins->width,
 		  info->current_wins->height, info->fmt->mbus_code);
 
-	if (enable) {
-		info->is_stream = 1;
-		return sensor_reg_init(info);
-	} else {
-		info->is_stream = 0;
+	if (!enable)
 		return 0;
-	}
+	return sensor_reg_init(info);
 }
 
 static int sensor_g_mbus_config(struct v4l2_subdev *sd,

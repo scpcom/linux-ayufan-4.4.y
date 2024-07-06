@@ -158,20 +158,6 @@ void ss_cts_last(ce_task_desc_t *task)
 	task->sym_ctl |= CE_SYM_CTL_AES_CTS_LAST;
 }
 
-#ifndef SS_SUPPORT_CE_V3_1
-
-void ss_xts_first(ce_task_desc_t *task)
-{
-	task->sym_ctl |= CE_SYM_CTL_AES_XTS_FIRST;
-}
-
-void ss_xts_last(ce_task_desc_t *task)
-{
-	task->sym_ctl |= CE_SYM_CTL_AES_XTS_LAST;
-}
-
-#endif
-
 void ss_hmac_sha1_last(ce_task_desc_t *task)
 {
 	task->comm_ctl |= CE_HMAC_SHA1_LAST;
@@ -223,7 +209,6 @@ void ss_check_sha_end(void)
 
 void ss_rsa_width_set(int size, ce_task_desc_t *task)
 {
-#ifdef SS_SUPPORT_CE_V3_1
 	int width_type = CE_RSA_PUB_MODULUS_WIDTH_512;
 
 	switch (size*8) {
@@ -247,9 +232,6 @@ void ss_rsa_width_set(int size, ce_task_desc_t *task)
 	}
 
 	task->asym_ctl |= width_type<<CE_ASYM_CTL_RSA_PM_WIDTH_SHIFT;
-#else
-	task->asym_ctl |= DIV_ROUND_UP(size, 4);
-#endif
 }
 
 void ss_rsa_op_mode_set(int mode, ce_task_desc_t *task)
@@ -284,11 +266,7 @@ void ss_ecc_width_set(int size, ce_task_desc_t *task)
 
 void ss_ecc_op_mode_set(int mode, ce_task_desc_t *task)
 {
-#ifdef SS_SUPPORT_CE_V3_1
 	task->asym_ctl |= mode<<CE_ASYM_CTL_ECC_OP_SHIFT;
-#else
-	task->asym_ctl |= mode<<CE_ASYM_CTL_RSA_OP_SHIFT;
-#endif
 }
 
 void ss_ctrl_start(ce_task_desc_t *task)
@@ -301,7 +279,7 @@ void ss_ctrl_start(ce_task_desc_t *task)
 #ifdef SS_SUPPORT_CE_V3_1
 	ss_writel(CE_REG_TLR, 0x1);
 #else
-	ss_writel(CE_REG_TLR, 0x1|(method<<CE_REG_TLR_METHOD_TYPE_SHIFT));
+	ss_writel(CE_REG_TLR, 0x1&(method<<CE_REG_TLR_METHOD_TYPE_SHIFT));
 #endif
 }
 

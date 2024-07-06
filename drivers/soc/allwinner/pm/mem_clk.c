@@ -50,9 +50,7 @@ __ccmu_reg_list_t *mem_get_ba(void)
 
 #if defined(CONFIG_ARCH_SUN8I) || \
 	defined(CONFIG_ARCH_SUN50IW1P1) || \
-	defined(CONFIG_ARCH_SUN50IW2P1) || \
-	defined(CONFIG_ARCH_SUN50IW3P1) || \
-	defined(CONFIG_ARCH_SUN50IW6P1)
+	defined(CONFIG_ARCH_SUN50IW2P1)
 static __ccmu_pll1_reg0000_t CmuReg_Pll1Ctl_tmp;
 static __ccmu_sysclk_ratio_reg0050_t CmuReg_SysClkDiv_tmp;
 

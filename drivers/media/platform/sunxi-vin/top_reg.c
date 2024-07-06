@@ -67,6 +67,7 @@ void csic_top_version_read_en(unsigned int sel, unsigned int en)
 			CSIC_VER_EN_MASK, en << CSIC_VER_EN);
 }
 
+#ifdef ISP_VIPP_SEL_SEPARATE
 void csic_isp0_input0_select(unsigned int sel, enum isp0_input0 isp0_in0)
 {
 	vin_reg_writel(csic_top_base[sel] + CSIC_ISP0_IN0_REG_OFF, isp0_in0);
@@ -127,69 +128,52 @@ void csic_vipp3_input_select(unsigned int sel, enum vipp3_input vipp3_in)
 	vin_reg_writel(csic_top_base[sel] + CSIC_VIPP3_IN_REG_OFF, vipp3_in);
 }
 
-void csic_isp_input_select(unsigned int sel, unsigned int isp, unsigned int in,
-				unsigned int psr, unsigned int ch)
+#else
+void csic_isp_input_select(unsigned int sel, unsigned int x, unsigned int y,
+				union csic_isp_input isp_in)
 {
-	if (0 == isp) {
-		switch (in) {
+	int i = 0;
+
+	if (0 == x) {
+		switch (y) {
 		case 0:
-			if ((psr == 0) && (ch == 0))
-				csic_isp0_input0_select(sel, ISP_INPUT(0, 0, 0, 0));
-			else if ((psr == 1) && (ch == 0))
-				csic_isp0_input0_select(sel, ISP_INPUT(0, 0, 1, 0));
-			else if ((psr == 1) && (ch == 0))
-				csic_isp0_input0_select(sel, ISP_INPUT(0, 0, 1, 0));
+			vin_reg_writel(csic_top_base[sel] + CSIC_ISP0_IN0_REG_OFF,
+					isp_in.isp0_in0);
 			break;
 		case 1:
-			if ((psr == 0) && (ch == 1))
-				csic_isp0_input1_select(sel, ISP_INPUT(0, 1, 0, 1));
-			else if ((psr == 1) && (ch == 1))
-				csic_isp0_input1_select(sel, ISP_INPUT(0, 1, 1, 1));
+			vin_reg_writel(csic_top_base[sel] + CSIC_ISP0_IN1_REG_OFF,
+					isp_in.isp0_in1);
 			break;
 
 		case 2:
-			if ((psr == 0) && (ch == 2))
-				csic_isp0_input2_select(sel, ISP_INPUT(0, 2, 0, 2));
-			else if ((psr == 1) && (ch == 2))
-				csic_isp0_input2_select(sel, ISP_INPUT(0, 2, 1, 2));
+			vin_reg_writel(csic_top_base[sel] + CSIC_ISP0_IN2_REG_OFF,
+					isp_in.isp0_in2);
 			break;
 		case 3:
-			if ((psr == 0) && (ch == 3))
-				csic_isp0_input3_select(sel, ISP_INPUT(0, 3, 0, 3));
-			else if ((psr == 1) && (ch == 3))
-				csic_isp0_input3_select(sel, ISP_INPUT(0, 3, 1, 3));
+			vin_reg_writel(csic_top_base[sel] + CSIC_ISP0_IN3_REG_OFF,
+					isp_in.isp0_in3);
 			break;
 		default:
 			break;
 		}
-	} else if (1 == isp) {
-		switch (in) {
+	} else if (1 == x) {
+		switch (y) {
 		case 0:
-			if ((psr == 1) && (ch == 0))
-				csic_isp1_input0_select(sel, ISP_INPUT(1, 0, 1, 0));
-			else if ((psr == 0) && (ch == 0))
-				csic_isp1_input0_select(sel, ISP_INPUT(1, 0, 0, 0));
-			else if ((psr == 0) && (ch == 1))
-				csic_isp1_input0_select(sel, ISP_INPUT(1, 0, 0, 1));
+			vin_reg_writel(csic_top_base[sel] + CSIC_ISP1_IN0_REG_OFF,
+					isp_in.isp1_in0);
 			break;
 		case 1:
-			if ((psr == 0) && (ch == 1))
-				csic_isp1_input1_select(sel, ISP_INPUT(1, 1, 0, 1));
-			else if ((psr == 1) && (ch == 1))
-				csic_isp1_input1_select(sel, ISP_INPUT(1, 1, 1, 1));
+			vin_reg_writel(csic_top_base[sel] + CSIC_ISP1_IN1_REG_OFF,
+					isp_in.isp1_in1);
 			break;
 
 		case 2:
-			if ((psr == 0) && (ch == 2))
-				csic_isp1_input2_select(sel, ISP_INPUT(1, 2, 0, 2));
-			else if ((psr == 1) && (ch == 2))
-				csic_isp1_input2_select(sel, ISP_INPUT(1, 2, 1, 2));
+			vin_reg_writel(csic_top_base[sel] + CSIC_ISP1_IN2_REG_OFF,
+					isp_in.isp1_in2);
 			break;
 		case 3:
-			if ((psr == 0) && (ch == 3))
-				csic_isp1_input3_select(sel, ISP_INPUT(1, 3, 0, 3));
-			else if ((psr == 1) && (ch == 3))
-				csic_isp1_input3_select(sel, ISP_INPUT(1, 3, 1, 3));
+			vin_reg_writel(csic_top_base[sel] + CSIC_ISP1_IN3_REG_OFF,
+					isp_in.isp1_in3);
 			break;
 		default:
 			break;
@@ -197,52 +181,32 @@ void csic_isp_input_select(unsigned int sel, unsigned int isp, unsigned int in,
 	}
 }
 
-void csic_vipp_input_select(unsigned int sel, unsigned int vipp,
-				unsigned int isp, unsigned int ch)
+void csic_vipp_input_select(unsigned int sel, unsigned int x,
+				union csic_vipp_input vipp_in)
 {
-	switch (vipp) {
+	switch (x) {
 	case 0:
-		if ((isp == 0) && (ch == 0))
-			csic_vipp0_input_select(sel, VIPP_INPUT(0, 0, 0));
-		else if ((isp == 1) && (ch == 0))
-			csic_vipp0_input_select(sel, VIPP_INPUT(0, 1, 0));
+		vin_reg_writel(csic_top_base[sel] + CSIC_VIPP0_IN_REG_OFF,
+				vipp_in.vipp0_in);
 		break;
 	case 1:
-		if ((isp == 0) && (ch == 0))
-			csic_vipp1_input_select(sel, VIPP_INPUT(1, 0, 0));
-		else if ((isp == 1) && (ch == 0))
-			csic_vipp1_input_select(sel, VIPP_INPUT(1, 1, 0));
-		else if ((isp == 0) && (ch == 1))
-			csic_vipp1_input_select(sel, VIPP_INPUT(1, 0, 1));
-		else if ((isp == 1) && (ch == 1))
-			csic_vipp1_input_select(sel, VIPP_INPUT(1, 1, 1));
+		vin_reg_writel(csic_top_base[sel] + CSIC_VIPP1_IN_REG_OFF,
+				vipp_in.vipp1_in);
 		break;
+
 	case 2:
-		if ((isp == 0) && (ch == 0))
-			csic_vipp2_input_select(sel, VIPP_INPUT(2, 0, 0));
-		else if ((isp == 1) && (ch == 0))
-			csic_vipp2_input_select(sel, VIPP_INPUT(2, 1, 0));
-		else if ((isp == 0) && (ch == 2))
-			csic_vipp2_input_select(sel, VIPP_INPUT(2, 0, 2));
-		else if ((isp == 1) && (ch == 2))
-			csic_vipp2_input_select(sel, VIPP_INPUT(2, 1, 2));
+		vin_reg_writel(csic_top_base[sel] + CSIC_VIPP2_IN_REG_OFF,
+				vipp_in.vipp2_in);
 		break;
 	case 3:
-		if ((isp == 0) && (ch == 0))
-			csic_vipp3_input_select(sel, VIPP_INPUT(3, 0, 0));
-		else if ((isp == 1) && (ch == 0))
-			csic_vipp3_input_select(sel, VIPP_INPUT(3, 1, 0));
-		else if ((isp == 0) && (ch == 3))
-			csic_vipp3_input_select(sel, VIPP_INPUT(3, 0, 3));
-		else if ((isp == 1) && (ch == 3))
-			csic_vipp3_input_select(sel, VIPP_INPUT(3, 1, 3));
-		else if ((isp == 1) && (ch == 1))
-			csic_vipp3_input_select(sel, VIPP_INPUT(3, 1, 1));
+		vin_reg_writel(csic_top_base[sel] + CSIC_VIPP3_IN_REG_OFF,
+				vipp_in.vipp3_in);
 		break;
 	default:
 		break;
 	}
 }
+#endif
 
 void csic_feature_list_get(unsigned int sel, struct csic_feature_list *fl)
 {

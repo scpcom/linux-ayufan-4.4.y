@@ -33,8 +33,15 @@ struct vin_core *sd_to_vin_core(struct v4l2_subdev *sd)
 	struct vin_md *vind =
 	    (struct vin_md *)dev_get_drvdata(sd->v4l2_dev->dev);
 	struct vin_core *vinc = NULL;
+	struct vin_pipeline *pipe = NULL;
+	struct vin_vid_cap *cap = NULL;
 	int i, j;
 
+	if (NULL != sd->entity.pipe) {
+		pipe = to_vin_pipeline(&sd->entity);
+		cap = pipe_to_vin_video(pipe);
+		return cap->vinc;
+	}
 	for (i = 0; i < VIN_MAX_DEV; i++) {
 		vinc = vind->vinc[i];
 		if (NULL == vinc)
@@ -67,12 +74,12 @@ EXPORT_SYMBOL_GPL(sd_to_vin_core);
 int vin_set_pmu_channel(struct v4l2_subdev *sd, enum pmic_channel pmic_ch,
 			enum on_off on_off)
 {
-	int ret = 0;
-#ifndef FPGA_VER
+#ifdef VIN_PMU
 	struct vin_core *vinc = sd_to_vin_core(sd);
 	static int def_vol[MAX_POW_NUM] = {3300000, 3300000, 1800000,
 					3300000, 3300000};
 	struct vin_power *power = NULL;
+	int ret = 0;
 	if (NULL == vinc) {
 		vin_err("cannot find the vin_core is %s in\n", sd->name);
 		return -1;
@@ -127,7 +134,7 @@ EXPORT_SYMBOL_GPL(vin_set_pmu_channel);
  */
 int vin_set_mclk(struct v4l2_subdev *sd, enum on_off on_off)
 {
-#ifndef FPGA_VER
+#ifdef VIN_CLK
 	struct vin_core *vinc = sd_to_vin_core(sd);
 	struct csi_dev *csi = NULL;
 	if (NULL == vinc) {
@@ -177,7 +184,7 @@ EXPORT_SYMBOL_GPL(vin_set_mclk);
  */
 int vin_set_mclk_freq(struct v4l2_subdev *sd, unsigned long freq)
 {
-#ifndef FPGA_VER
+#ifdef VIN_CLK
 	struct vin_core *vinc = sd_to_vin_core(sd);
 	struct csi_dev *csi = NULL;
 	struct clk *mclk_src;
@@ -234,7 +241,7 @@ EXPORT_SYMBOL_GPL(vin_set_mclk_freq);
 int vin_gpio_write(struct v4l2_subdev *sd, enum gpio_type gpio_type,
 		   unsigned int status)
 {
-#ifndef FPGA_VER
+#ifdef VIN_GPIO
 	int force_value_flag = 1;
 	struct vin_core *vinc = sd_to_vin_core(sd);
 	struct gpio_config *gpio = NULL;
@@ -259,7 +266,7 @@ EXPORT_SYMBOL_GPL(vin_gpio_write);
 int vin_gpio_set_status(struct v4l2_subdev *sd, enum gpio_type gpio_type,
 			unsigned int status)
 {
-#ifndef FPGA_VER
+#ifdef VIN_GPIO
 	struct vin_core *vinc = sd_to_vin_core(sd);
 	struct gpio_config *gpio = NULL;
 	if (NULL == vinc) {

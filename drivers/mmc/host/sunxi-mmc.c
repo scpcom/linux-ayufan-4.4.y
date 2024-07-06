@@ -58,8 +58,6 @@
 
 /**default retry times ****/
 #define SUNXI_DEF_RETRY_TIMES		6
-/*10 min = 600000 ms,warning,not less then 20**/
-#define SUNXI_MAX_R1B_TIMEOUT_MS (600000U)
 
 
 static void sunxi_mmc_regs_save(struct sunxi_mmc_host *host);
@@ -302,7 +300,6 @@ static void sunxi_mmc_send_manual_stop(struct sunxi_mmc_host *host,
 	}
 
 	mmc_writel(host, REG_CARG, arg);
-	wmb();
 	mmc_writel(host, REG_CMDR, cmd_val);
 
 	do {
@@ -494,7 +491,6 @@ static irqreturn_t sunxi_mmc_irq(int irq, void *dev_id)
 	if (finalize)
 		ret = sunxi_mmc_finalize_request(host);
       out:
-	smp_wmb();
 	spin_unlock(&host->lock);
 
 	if (finalize && ret == IRQ_HANDLED)
@@ -525,15 +521,12 @@ int sunxi_check_r1_ready(struct sunxi_mmc_host *smc_host, unsigned ms)
 	}
 }
 
-
 static int sunxi_check_r1_ready_may_sleep(struct sunxi_mmc_host *smc_host)
 {
 	unsigned int cnt = 0;
-	/**SUNXI_MAX_R1B_TIMEOUT-10ms(dead wait)-(10)(wait interval 10us,all wait 10*1000 us=10ms)***/
-	unsigned int delay_max_cnt[] = { 1000, SUNXI_MAX_R1B_TIMEOUT_MS-10-10 };
+	const unsigned int delay_max_cnt[] = { 1000, 0x7fffffff };
 	int i = 0;
 	unsigned long expire = jiffies + msecs_to_jiffies(10);
-
 
 	/*****dead wait******/
 	do {
@@ -546,11 +539,6 @@ static int sunxi_check_r1_ready_may_sleep(struct sunxi_mmc_host *smc_host)
 		return 0;
 	}
 
-	/**If set this bit,when use sunxi_check_r1_ready_may_sleep,we will wait 0xFFFFFFFF ms, for debug use***/
-	if (smc_host->ctl_spec_cap & SUNXI_R1B_WAIT_MAX) {
-		delay_max_cnt[1] = 0xFFFFFFFF;
-		/*dev_err(mmc_dev(smc_host->mmc), "all wait %x\n",delay_max_cnt[1] );*/
-	}
 	/*****no dead wait*****/
 	for (i = 0; i < 2; i++, cnt = 0) {
 		do {
@@ -558,28 +546,19 @@ static int sunxi_check_r1_ready_may_sleep(struct sunxi_mmc_host *smc_host)
 			    (mmc_readl(smc_host, REG_STAS) &
 			     SDXC_CARD_DATA_BUSY)) {
 				dev_dbg(mmc_dev(smc_host->mmc),
-					"cmd%d Wait r1 rdy ok c%d i%d \n", mmc_readl(smc_host, REG_CMDR)&0x3F, cnt, i);
+					"Wait r1 rdy ok c%d i%d \n", cnt, i);
 				return 0;
 			}
-
-			/* wait data0 busy... */
-			if (i == 0) {
-				if (((cnt % 500000) == 0) && cnt) {
-					dev_info(mmc_dev(smc_host->mmc),
-					 "cmd%d Has wait r1 rdy c%d i%d\n",  mmc_readl(smc_host, REG_CMDR)&0x3F, cnt, i);
-				}
-				usleep_range(10, 20);
-			} else {
-				if (((cnt % 5000) == 0) && cnt) {
-					dev_info(mmc_dev(smc_host->mmc),
-					 "cmd%d Has wait r1 rdy c%d i%d\n",  mmc_readl(smc_host, REG_CMDR)&0x3F, cnt, i);
-				}
-				usleep_range(1000, 1200);
+			if (i ? cnt / 5000 : cnt / 500000) {
+				//print to tell that we are waiting busy
+				dev_info(mmc_dev(smc_host->mmc),
+					 "Has wait r1 rdy c%d i%d\n", cnt, i);
 			}
+			i ? usleep_range(1000, 1200) : usleep_range(10, 20);
 		} while ((cnt++) < delay_max_cnt[i]);
 	}
 
-	dev_err(mmc_dev(smc_host->mmc), "cmd%d Wait r1 rdy timeout\n", mmc_readl(smc_host, REG_CMDR)&0x3F);
+	dev_err(mmc_dev(smc_host->mmc), "Wait r1 rdy timeout\n");
 	return -1;
 }
 
@@ -603,20 +582,12 @@ static irqreturn_t sunxi_mmc_handle_bottom_half(int irq, void *dev_id)
 		/*
 		*Here,we don't use the timeout value in mrq_busy->busy_timeout
 		*Because this value may not right for example when useing TRIM
-		*So we use 10min wait time max and print time value every 5 second
-		*
+		*So we use max wait time and print time value every 1 second
+		*sunxi_check_r1_ready_may_sleep(host,0x7ffffff);
 		*/
-		rval = sunxi_check_r1_ready_may_sleep(host);
+		sunxi_check_r1_ready_may_sleep(host);
 		spin_lock_irqsave(&host->lock, iflags);
-		if (rval) {
-			mrq_busy->cmd->error = -ETIMEDOUT;
-			if (mrq_busy->data)
-				mrq_busy->data->error = -ETIMEDOUT;
-			if (mrq_busy->stop)
-				mrq_busy->stop->error = -ETIMEDOUT;
-		}
 		host->mrq_busy = NULL;
-		smp_wmb();
 		spin_unlock_irqrestore(&host->lock, iflags);
 		mmc_request_done(mmc, mrq_busy);
 		return IRQ_HANDLED;
@@ -657,7 +628,6 @@ static irqreturn_t sunxi_mmc_handle_bottom_half(int irq, void *dev_id)
 
 		spin_lock_irqsave(&host->lock, iflags);
 		host->manual_stop_mrq = NULL;
-		smp_wmb();
 		spin_unlock_irqrestore(&host->lock, iflags);
 
 		mmc_request_done(mmc, mrq_stop);
@@ -739,7 +709,6 @@ static irqreturn_t sunxi_mmc_handle_bottom_half(int irq, void *dev_id)
 		host->retry_cnt++;
 		sunxi_mmc_exe_cmd(host, cmd , cmd_val , imask);
 		dev_info(mmc_dev(host->mmc) , "*****retry:re-send cmd*****\n");
-		smp_wmb();
 		spin_unlock_irqrestore(&host->lock, iflags);
 		return IRQ_HANDLED;
 reupdate_clk:
@@ -756,7 +725,6 @@ retry_giveup:
 		data->error = -ETIMEDOUT;
 		if (mrq_retry->stop)
 			mrq_retry->stop->error = -ETIMEDOUT;
-		smp_wmb();
 		spin_unlock_irqrestore(&host->lock , iflags);
 		mmc_request_done(host->mmc , mrq_retry);
 		return IRQ_HANDLED;
@@ -777,15 +745,12 @@ s32 sunxi_mmc_update_clk(struct sunxi_mmc_host *host)
 	unsigned long expire = jiffies + msecs_to_jiffies(1000);	//1000ms timeout
 	s32 ret = 0;
 
-	/* mask data0 when update clock */
-	mmc_writel(host, REG_CLKCR, mmc_readl(host, REG_CLKCR) | SDXC_MASK_DATA0);
-
 	rval = SDXC_START | SDXC_UPCLK_ONLY | SDXC_WAIT_PRE_OVER;
 	/*
-	if (smc_host->voltage_switching)
-		rval |= SDXC_VolSwitch;
-	*/
-	mmc_writel(host, REG_CMDR, rval);
+    if (smc_host->voltage_switching)
+	      rval |= SDXC_VolSwitch;
+    */
+    mmc_writel(host, REG_CMDR, rval);
 
 	do {
 		rval = mmc_readl(host, REG_CMDR);
@@ -796,9 +761,6 @@ s32 sunxi_mmc_update_clk(struct sunxi_mmc_host *host)
 			"update clock timeout, fatal error!!!\n");
 		ret = -EIO;
 	}
-
-	/* release data0 after update clock */
-	mmc_writel(host, REG_CLKCR, mmc_readl(host, REG_CLKCR) & (~SDXC_MASK_DATA0));
 
 	return ret;
 }
@@ -1211,7 +1173,6 @@ static void sunxi_mmc_exe_cmd(struct sunxi_mmc_host *host, struct mmc_command *c
 	mmc_writel(host, REG_IMASK,
 		   host->sdio_imask | host->dat3_imask | imask);
 	mmc_writel(host, REG_CARG, cmd->arg);
-	wmb();
 	mmc_writel(host, REG_CMDR, cmd_val);
 }
 
@@ -1276,7 +1237,7 @@ static void sunxi_mmc_request(struct mmc_host *mmc, struct mmc_request *mrq)
 	host->mrq = mrq;
 	host->wait_dma = wait_dma;
 	sunxi_mmc_exe_cmd(host, cmd , cmd_val , imask);
-	smp_wmb();
+
 	spin_unlock_irqrestore(&host->lock, iflags);
 }
 
@@ -1565,7 +1526,6 @@ static int sunxi_mmc_resource_request(struct sunxi_mmc_host *host,
 			host->sunxi_mmc_shutdown = sunxi_mmc_do_shutdown_com;
 		}
 		host->phy_index = 2;
-		host->sunxi_mmc_oclk_en = sunxi_mmc_oclk_onoff_sdmmc2;
 	}
 #endif
 
@@ -1584,7 +1544,6 @@ static int sunxi_mmc_resource_request(struct sunxi_mmc_host *host,
 		sunxi_mmc_reg_ex_res_inter(host, 0);
 		host->sunxi_mmc_set_acmda = sunxi_mmc_set_a12a;
 		host->phy_index = 0;
-		host->sunxi_mmc_oclk_en = sunxi_mmc_oclk_onoff_sdmmc0;
 	}
 #endif
 
@@ -1604,7 +1563,6 @@ static int sunxi_mmc_resource_request(struct sunxi_mmc_host *host,
 		sunxi_mmc_reg_ex_res_inter(host, 1);
 		host->sunxi_mmc_set_acmda = sunxi_mmc_set_a12a;
 		host->phy_index = 1;
-		host->sunxi_mmc_oclk_en = sunxi_mmc_oclk_onoff_sdmmc1;
 	}
 #endif
 	if (of_device_is_compatible(np, "allwinner,sunxi-mmc-v4p1x"))	{
@@ -1832,7 +1790,7 @@ static int sunxi_mmc_probe(struct platform_device *pdev)
 	mmc->caps |=
 	    MMC_CAP_MMC_HIGHSPEED | MMC_CAP_SD_HIGHSPEED | MMC_CAP_ERASE |
 	    MMC_CAP_WAIT_WHILE_BUSY;
-	mmc->max_busy_timeout = SUNXI_MAX_R1B_TIMEOUT_MS;	/*ms*/
+	mmc->max_busy_timeout = 0x7ffffff;	/*ms*/
 
 #ifndef CONFIG_REGULATOR
 	//Because fpga has no regulator,so we add it manully

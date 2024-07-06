@@ -1,13 +1,3 @@
-/*
- *
- * Copyright (c) 2016 Allwinnertech Co., Ltd.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- */
 #include <linux/clk.h>
 #include <linux/clk/sunxi.h>
 
@@ -36,7 +26,7 @@
 
 
 #define DRIVER_NAME "sunxi-mmc"
-#define DRIVER_RIVISION "v0.64 2016-11-17 11:56"
+#define DRIVER_RIVISION "v0.59 2016-08-17 15:15"
 #define DRIVER_VERSION "SD/MMC/SDIO Host Controller Driver(" DRIVER_RIVISION ")" \
 			" Compiled in " __DATE__ " at " __TIME__""
 
@@ -316,8 +306,6 @@ struct sunxi_mmc_host {
 	#define NO_REINIT_SHUTDOWN			   0x2
 	#define CARD_PWR_GPIO_HIGH_ACTIVE	   0x4
 	#define SUNXI_SC_EN_RETRY					0x8
-	/**If set this bit,when use sunxi_check_r1_ready_may_sleep,we will wait 0xFFFFFFFF ms, for debug use***/
-	#define SUNXI_R1B_WAIT_MAX					0x10
 	u32 ctl_spec_cap;//control specal function control,for customer need
 
 	int card_pwr_gpio;

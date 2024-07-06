@@ -127,7 +127,7 @@ static int xradio_scan_start(struct xradio_vif *priv, struct wsm_scan *scan)
 	if (unlikely(ret)) {
 		scan_printk(XRADIO_DBG_WARN, "%s,wsm_scan failed!\n", __func__);
 		atomic_set(&hw_priv->scan.in_progress, 0);
-		cancel_delayed_work(&hw_priv->scan.timeout);
+		cancel_delayed_work_sync(&hw_priv->scan.timeout);
 		xradio_scan_restart_delayed(priv);
 	}
 	return ret;
@@ -171,11 +171,6 @@ int xradio_hw_scan(struct ieee80211_hw *hw,
 		scan_printk(XRADIO_DBG_WARN, "%s, can't scan in AP mode!\n",
 			    __func__);
 		return -EOPNOTSUPP;
-	}
-
-	if (hw_priv->bh_error) {
-		scan_printk(XRADIO_DBG_WARN, "Ignoring scan bh error occur!\n");
-		return -EBUSY;
 	}
 
 	if (work_pending(&priv->offchannel_work) ||
@@ -751,8 +746,7 @@ void xradio_scan_work(struct work_struct *work)
 fail:
 	hw_priv->scan.curr = hw_priv->scan.end;
 	mutex_unlock(&hw_priv->conf_mutex);
-	if (queue_work(hw_priv->workqueue, &hw_priv->scan.work) <= 0)
-		scan_printk(XRADIO_DBG_ERROR, "%s queue scan work failed\n", __func__);
+	queue_work(hw_priv->workqueue, &hw_priv->scan.work);
 	return;
 }
 
@@ -899,10 +893,10 @@ static void xradio_scan_complete(struct xradio_common *hw_priv, int if_id)
 		mutex_lock(&hw_priv->conf_mutex);
 		priv = __xrwl_hwpriv_to_vifpriv(hw_priv, if_id);
 		if (priv) {
-			scan_printk(XRADIO_DBG_NIY, "Direct probe complete.\n");
+			scan_printk(XRADIO_DBG_MSG, "Direct probe complete.\n");
 			xradio_scan_restart_delayed(priv);
 		} else {
-			scan_printk(XRADIO_DBG_WARN,
+			scan_printk(XRADIO_DBG_MSG,
 				    "Direct probe complete without interface!\n");
 		}
 		mutex_unlock(&hw_priv->conf_mutex);
@@ -1054,7 +1048,7 @@ void xradio_probe_work(struct work_struct *work)
 	u8 *ies;
 	size_t ies_len;
 	int ret = 1;
-	scan_printk(XRADIO_DBG_NIY, "%s:Direct probe.\n", __func__);
+	scan_printk(XRADIO_DBG_MSG, "%s:Direct probe.\n", __func__);
 
 	SYS_BUG(queueId >= 4);
 	SYS_BUG(!hw_priv->channel);

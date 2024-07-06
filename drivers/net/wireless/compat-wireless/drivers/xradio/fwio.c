@@ -85,7 +85,7 @@ static int xradio_get_hw_type(u32 config_reg_val, int *major_revision)
  */
 static int xradio_parse_sdd(struct xradio_common *hw_priv, u32 *dpll)
 {
-	int ret = 0;
+	int ret = -1;
 	const char *sdd_path = NULL;
 	struct xradio_sdd *pElement = NULL;
 	int parsedLength = 0;
@@ -109,7 +109,7 @@ static int xradio_parse_sdd(struct xradio_common *hw_priv, u32 *dpll)
 	if (unlikely(!hw_priv->sdd)) {
 		xradio_dbg(XRADIO_DBG_ERROR, "%s: can't load sdd file %s.\n",
 			   __func__, sdd_path);
-		return -ENOENT;
+		return ret;
 	}
 #else
 	ret = request_firmware(&hw_priv->sdd, sdd_path, hw_priv->pdev);
@@ -302,6 +302,21 @@ static int xradio_firmware(struct xradio_common *hw_priv)
 			goto error;
 		}
 
+		/* loop until put - get <= 24K */
+		for (i = 0; i < 100; i++) {
+			APB_READ(DOWNLOAD_GET_REG, get);
+			if ((put - get) <= (DOWNLOAD_FIFO_SIZE - DOWNLOAD_BLOCK_SIZE))
+				break;
+			mdelay(i);
+		}
+
+		if ((put - get) > (DOWNLOAD_FIFO_SIZE - DOWNLOAD_BLOCK_SIZE)) {
+			xradio_dbg(XRADIO_DBG_ERROR, "%s: Timeout waiting for FIFO.\n",
+				   __func__);
+			ret = -ETIMEDOUT;
+			goto error;
+		}
+
 		/* calculate the block size */
 		tx_size = block_size = min((size_t)(firmware->size - put),
 					   (size_t)DOWNLOAD_BLOCK_SIZE);
@@ -318,21 +333,6 @@ static int xradio_firmware(struct xradio_common *hw_priv)
 		if (block_size < DOWNLOAD_BLOCK_SIZE) {
 			memset(&buf[block_size], 0, DOWNLOAD_BLOCK_SIZE - block_size);
 			tx_size = DOWNLOAD_BLOCK_SIZE;
-		}
-
-		/* loop until put - get <= 24K */
-		for (i = 0; i < 100; i++) {
-			APB_READ(DOWNLOAD_GET_REG, get);
-			if ((put - get) <= (DOWNLOAD_FIFO_SIZE - DOWNLOAD_BLOCK_SIZE))
-				break;
-			mdelay(i);
-		}
-
-		if ((put - get) > (DOWNLOAD_FIFO_SIZE - DOWNLOAD_BLOCK_SIZE)) {
-			xradio_dbg(XRADIO_DBG_ERROR, "%s: Timeout waiting for FIFO.\n",
-				   __func__);
-			ret = -ETIMEDOUT;
-			goto error;
 		}
 
 		/* send the block to sram */
@@ -461,7 +461,7 @@ int xradio_load_firmware(struct xradio_common *hw_priv)
 		xradio_dbg(XRADIO_DBG_ERROR,
 			   "%s: can't read config register, err=%d.\n",
 			   __func__, ret);
-		return ret;
+		goto out;
 	}
 	/*check hardware type and revision.*/
 	hw_priv->hw_type = xradio_get_hw_type(val32, &major_revision);
@@ -473,7 +473,8 @@ int xradio_load_firmware(struct xradio_common *hw_priv)
 	default:
 		xradio_dbg(XRADIO_DBG_ERROR, "%s: Unknown hardware: %d.\n",
 			   __func__, hw_priv->hw_type);
-		return -ENOTSUPP;
+		ret = -ENOTSUPP;
+		goto out;
 	}
 	if (major_revision == 4) {
 		hw_priv->hw_revision = XR819_HW_REV0;
@@ -481,14 +482,12 @@ int xradio_load_firmware(struct xradio_common *hw_priv)
 	} else {
 		xradio_dbg(XRADIO_DBG_ERROR, "%s: Unsupported major revision %d.\n",
 			   __func__, major_revision);
-		return -ENOTSUPP;
+		ret = -ENOTSUPP;
+		goto out;
 	}
 
 	/*load sdd file, and get config from it.*/
 	ret = xradio_parse_sdd(hw_priv, &dpll);
-	if (ret < 0) {
-		return ret;
-	}
 
 	/*set dpll initial value and check.*/
 	ret = xradio_reg_write_32(hw_priv, HIF_TSET_GEN_R_W_REG_ID, dpll);
@@ -646,19 +645,12 @@ int xradio_load_firmware(struct xradio_common *hw_priv)
 	 * not able to get an interrupt */
 	mdelay(10);
 	xradio_reg_read_32(hw_priv, HIF_CONFIG_REG_ID, &val32);
-	return 0;
+
+out:
+	return ret;
 
 unsubscribe:
 	hw_priv->sbus_ops->irq_unsubscribe(hw_priv->sbus_priv);
-out:
-	if (hw_priv->sdd) {
-#ifdef USE_VFS_FIRMWARE
-		xr_fileclose(hw_priv->sdd);
-#else
-		release_firmware(hw_priv->sdd);
-#endif
-		hw_priv->sdd = NULL;
-	}
 	return ret;
 }
 
@@ -666,11 +658,11 @@ int xradio_dev_deinit(struct xradio_common *hw_priv)
 {
 	hw_priv->sbus_ops->irq_unsubscribe(hw_priv->sbus_priv);
 	if (hw_priv->sdd) {
-#ifdef USE_VFS_FIRMWARE
+	#ifdef USE_VFS_FIRMWARE
 		xr_fileclose(hw_priv->sdd);
-#else
+	#else
 		release_firmware(hw_priv->sdd);
-#endif
+	#endif
 		hw_priv->sdd = NULL;
 	}
 	return 0;

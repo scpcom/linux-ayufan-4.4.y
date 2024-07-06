@@ -1,13 +1,3 @@
-/*
- *
- * Copyright (c) 2016 Allwinnertech Co., Ltd.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- */
 #ifndef __DMA_sun50iw3__
 #define __DMA_sun50iw3__
 
@@ -27,7 +17,7 @@
 #define DRQSRC_DAI2_RX		DRQSRC_DAUDIO_2_RX
 #define DRQSRC_AUDIO_CODEC	6
 #define DRQSRC_CODEC		DRQSRC_AUDIO_CODEC
-#define DRQSRC_DMIC_RX		7
+#define DRQSRC_DMIC		7
 /* #define DRQSRC_RESEVER	8 */
 #define DRQSRC_SS		9
 #define DRQSRC_CE_RX		DRQSRC_SS

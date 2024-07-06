@@ -17,7 +17,7 @@
 #define _MALI_SUN8I_W7P1_H_
 
 #define MALI_PP_CORES_NUM 2
-#define AW_MALI_GPU_RESOURCES_MALI400_MPX MALI_GPU_RESOURCES_MALI400_MP2
+#define AW_MALI_GPU_RESOURCES_MALI400_MPX_PMU MALI_GPU_RESOURCES_MALI400_MP2_PMU
 
 #define GPU_PBASE           SUNXI_GPU_PBASE
 #define IRQ_GPU_GP          SUNXI_IRQ_GPU_GP
@@ -35,19 +35,16 @@ aw_private_data aw_private = {
 		.regulator      = NULL,
 		.regulator_id   = "vdd-gpu",
 		.clk[0]         = {
-			.clk_name       = "pll",
-			.clk_id         = PLL_GPU_CLK,
-			.clk_handle     = NULL,
-			.parent_clk_num = -1,
-			.need_set_freq  = 1
+			.clk_name   = "pll",
+			.clk_id     = PLL_GPU_CLK,
+			.clk_handle = NULL,
 		},
 		.clk[1]         = {
-			.clk_name       = "mali",
-			.clk_id         = GPU_CLK,
-			.clk_handle     = NULL,
-			.parent_clk_num = 0,
-			.need_set_freq  = 1
+			.clk_name   = "mali",
+			.clk_id     = GPU_CLK,
+			.clk_handle = NULL,
 		},
+		.dvfs_status   = 0,
 		.vf_table[0]   = {
 			.vol  = 1200,
 			.freq = 144,
@@ -87,4 +84,4 @@ aw_private_data aw_private = {
 	}
 };
 
-#endif /* _MALI_SUN8I_W7P1_H_ */
+#endif

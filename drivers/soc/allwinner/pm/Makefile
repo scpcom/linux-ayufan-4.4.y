@@ -59,7 +59,7 @@ pm_tmp-y +=	mem_ccu-sun8iw10.o      \
 		standby.o
 endif
 
-ifneq ($(strip $(CONFIG_ARCH_SUN8IW6) $(CONFIG_ARCH_SUN8IW8) $(CONFIG_ARCH_SUN50IW1P1) $(CONFIG_ARCH_SUN50IW2P1) $(CONFIG_ARCH_SUN50IW3P1) $(CONFIG_ARCH_SUN50IW6P1)),)
+ifneq ($(strip $(CONFIG_ARCH_SUN8IW6) $(CONFIG_ARCH_SUN8IW8) $(CONFIG_ARCH_SUN50IW1P1) $(CONFIG_ARCH_SUN50IW2P1)),)
 pm_tmp-y +=	extended_standby-sun8iw6.o
 pm_tmp-y +=	pm_debug_io.o
 pm_tmp-y +=	pm_debug_sun8i50i.o

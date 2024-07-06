@@ -563,28 +563,12 @@ struct sensor_config {
 	unsigned int gain_max;	/*sensor gain max, Q4               */
 };
 
-struct sensor_exp_gain {
-	int exp_val;
-	int gain_val;
-};
-
-struct isp_load_reg {
-	unsigned long addr;
-	unsigned int size;
-};
-
 /*
  * Camera Sensor IOCTLs
  */
 
 #define VIDIOC_VIN_SENSOR_CFG_REQ \
 	_IOWR('V', BASE_VIDIOC_PRIVATE + 60, struct sensor_config)
-
-#define VIDIOC_VIN_SENSOR_EXP_GAIN \
-	_IOWR('V', BASE_VIDIOC_PRIVATE + 61, struct sensor_exp_gain)
-
-#define VIDIOC_VIN_ISP_LOAD_REG \
-	_IOWR('V', BASE_VIDIOC_PRIVATE + 70, struct isp_load_reg)
 
 
 #endif /*_SUNXI_CAMERA_H_*/

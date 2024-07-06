@@ -323,8 +323,8 @@ struct sensor_list sensors_def = {
 		  [FLVDD] = {NULL, 3300000, ""},
 		  },
 	.gpio = {
-		 [RESET] = {GPIOE(14), 1, 0, 1, 0,},
-		 [PWDN] = {GPIOE(15), 1, 0, 1, 0,},
+		 [RESET] = {GPIOE(14) /*142 */ , 1, 0, 1, 0,},
+		 [PWDN] = {GPIOE(15) /*143 */ , 1, 0, 1, 0,},
 		 [POWER_EN] = {GPIO_INDEX_INVALID, 0, 0, 0, 0,},
 		 [FLASH_EN] = {GPIO_INDEX_INVALID, 0, 0, 0, 0,},
 		 [FLASH_MODE] = {GPIO_INDEX_INVALID, 0, 0, 0, 0,},
@@ -335,7 +335,7 @@ struct sensor_list sensors_def = {
 			       .cam_name = "ov5640",
 			       .cam_addr = 0x78,
 			       .cam_type = 0,
-			       .is_isp_used = 0,
+			       .is_isp_used = 1,
 			       .is_bayer_raw = 0,
 			       .vflip = 0,
 			       .hflip = 0,
@@ -615,7 +615,7 @@ int parse_device_tree(struct vin_core *vinc)
 	struct sensor_list *sensors = &modu_cfg->sensors;
 	struct sensor_instance *inst = &sensors->inst[0];
 
-	/*get isp node */
+	/*get camera node */
 	list = of_get_property(parent, "isp_handle", &size);
 	if ((!list) || (0 == size)) {
 		vin_warn("missing isp_handle property in node %s\n",
@@ -631,8 +631,10 @@ int parse_device_tree(struct vin_core *vinc)
 					 "isp_handle", i);
 				return -EINVAL;
 			} else if (of_device_is_available(isp_np)) {
-				of_property_read_u32(isp_np, "device_id", &vinc->isp_sel);
-				vin_print("isp_sel = %d\n", vinc->isp_sel);
+				vinc->vid_cap.isp_sel =
+				    of_alias_get_id(isp_np, isp_np->name);
+				vin_print("isp_sel = %d\n",
+					  vinc->vid_cap.isp_sel);
 			}
 		}
 	}

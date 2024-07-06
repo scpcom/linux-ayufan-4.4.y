@@ -1,14 +1,4 @@
 /*
- *
- * Copyright (c) 2016 Allwinnertech Co., Ltd.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- */
-/*
  * vin_ispstat.c
  *
  */
@@ -118,7 +108,7 @@ static void isp_stat_buf_release(struct isp_stat *stat)
 static struct ispstat_buffer *isp_stat_buf_get(struct isp_stat *stat,
 					       struct vin_isp_stat_data *data)
 {
-	int rval = 0;
+	int rval = 0, i = 0, *tmp_data;
 	unsigned long flags;
 	struct ispstat_buffer *buf;
 
@@ -145,8 +135,13 @@ static struct ispstat_buffer *isp_stat_buf_get(struct isp_stat *stat,
 			isp_stat_buf_release(stat);
 			return ERR_PTR(-EINVAL);
 		}
-
-		rval = copy_to_user(data->buf, buf->virt_addr, buf->buf_size);
+		tmp_data = (int *)buf->virt_addr;
+		for (i = 0; i < buf->buf_size/(sizeof(int)); i++) {
+			tmp_data[i] = 65535;
+		}
+		rval = copy_to_user(data->buf,
+				    buf->virt_addr,
+				    buf->buf_size);
 
 		if (rval) {
 			vin_print("%s: failed copying %d bytes of stat data\n",
@@ -527,6 +522,7 @@ static void __stat_isr(struct isp_stat *stat)
 	int ret = STAT_BUF_DONE;
 	int buf_processing;
 	unsigned long irqflags;
+	struct vin_pipeline *pipe;
 	vin_log(VIN_LOG_STAT, "%s buf state is %d, frame number is %d "
 		"0x%x %d %d %d %d %d\n", __func__,
 		stat->state, stat->frame_number,
@@ -550,6 +546,13 @@ static void __stat_isr(struct isp_stat *stat)
 			/* Module still need to copy data to buffer. */
 			ret = stat->ops->buf_process(stat);
 		spin_lock_irqsave(&stat->isp->slock, irqflags);
+
+		pipe = to_vin_pipeline(&stat->sd.entity);
+		if (pipe == NULL) {
+			vin_err("stat subdev is not in any pipeline!\n");
+			return;
+		}
+		stat->frame_number = atomic_read(&pipe->frame_number);
 
 		ret = isp_stat_buf_process(stat, ret);
 

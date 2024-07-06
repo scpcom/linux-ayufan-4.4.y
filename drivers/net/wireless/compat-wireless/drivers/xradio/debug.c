@@ -145,6 +145,7 @@ static const struct file_operations fops_version = {
 #if (DGB_XRADIO_QC)
 static int xradio_hwinfo_show(struct seq_file *seq, void *v)
 {
+	int ret;
 	struct xradio_common *hw_priv = seq->private;
 	u32 hw_arry[8] = { 0 };
 
@@ -1040,7 +1041,7 @@ static ssize_t xradio_ampdu_len_write(struct file *file,
 		return -EINVAL;
 	if (copy_from_user(buf, user_buf, count))
 		return -EFAULT;
-	if_id = simple_strtoul(buf, &endptr, 10);
+	if_id = (simple_strtoul(buf, &endptr, 10) == 0);
 	ampdu_len[if_id] = simple_strtoul(endptr + 1, NULL, 10);
 
 	xradio_dbg(XRADIO_DBG_ALWY, "vif=%d, ampdu_len = %d\n",

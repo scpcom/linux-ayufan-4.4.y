@@ -783,11 +783,10 @@ static int xradio_poweroff_suspend(struct xradio_common *hw_priv)
 static int xradio_poweroff_resume(struct xradio_common *hw_priv)
 {
 	pm_printk(XRADIO_DBG_NIY, "%s\n", __func__);
-	/* Revert locks */
-	wsm_unlock_tx(hw_priv);
 	up(&hw_priv->scan.lock);
+	wsm_unlock_tx(hw_priv);
+	/* Unlock configuration mutex */
 	mutex_unlock(&hw_priv->conf_mutex);
-	mutex_unlock(&hw_priv->wsm_oper_lock);
 	if (schedule_work(&hw_priv->hw_restart_work) <= 0)
 		pm_printk(XRADIO_DBG_ERROR, "%s power_work failed!\n", __func__);
 	return 0;

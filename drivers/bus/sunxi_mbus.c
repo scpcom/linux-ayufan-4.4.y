@@ -26,84 +26,53 @@
 #include <asm/cacheflush.h>
 #include <asm/smp_plat.h>
 
+
 #define DRIVER_NAME          "MBUS"
 #define DRIVER_NAME_PMU      DRIVER_NAME"_PMU"
 
-#define MBUS_MAST_TMR_REG(n)        (0x000c) /* Time Measurement Register           */
-
-#if (defined CONFIG_ARCH_SUN50IW3)
-#define MBUS_MAST_CFG0_REG(n)       (0x0210 + (0x10 * n)) /* Master N Configuration Register 0 */
-#define MBUS_MAST_CFG1_REG(n)       (0x0214 + (0x10 * n)) /* Master N Configuration Register 1 */
-#else
-#define MBUS_MAST_CFG0_REG(n)       (0x0010 + (0x8 * n))  /* Master N Configuration Register 0 */
-#define MBUS_MAST_CFG1_REG(n)       (0x0014 + (0x8 * n))  /* Master N Configuration Register 1 */
-#endif
-
-#if (defined CONFIG_ARCH_SUN50IW3)
-#define MBUS_BW_CFG_REG             (0x0200) /* Bandwith Window base on MCLK cycles */
-#else
+#define MBUS_MAST_TMR_REG(n)        (0x000c) /* Config n = 0 ~ 15(w5)/13(w6)        */
+#define MBUS_MAST_CFG0_REG(n)       (0x0010 + (0x8 * n)) /* Config n = 0 ~ /13)     */
+#define MBUS_MAST_CFG1_REG(n)       (0x0014 + (0x8 * n)) /* BWL Config n = 0 ~ 13   */
 #define MBUS_BW_CFG_REG             (0x0090) /* Bandwith Window base on MCLK cycles */
-#endif
-
-#if (defined CONFIG_ARCH_SUN50IW3)
-#define MBUS_MAST_ACEN_CFG_REG(n)   (0x0020 + (0x04 * n)) /* Master Access Enable, 0:dis, 1:en   */
-#else
-#define MBUS_MAST_ACEN_CFG_REG(n)   (0x0094 + (0x04 * n)) /* Master Access Enable, 0:dis, 1:en   */
-#endif
-
-/* Some platform implement master access priority in register MBUS_MAST_CFG0_REG(n) */
-#if (!defined CONFIG_ARCH_SUN50IW3)
+#define MBUS_MAST_ACEN_CFG_REG      (0x0094) /* Master Access Enable, 0:dis, 1:en   */
 #define MBUS_MAST_ACPR_CFG_REG      (0x0098) /* Master Access Priority, 0:low, 1:hg */
-#endif
-
 #define MBUS_PMU_CNTEB_CFG_REG      (0x009c) /* Counter Enable, 0x0001:enable all   */
 #define MBUS_PMU_CNT_REG(n)         (0x00a0 + (0x4 * n)) /* Counter n = 0 ~ 7       */
-
-#if (defined CONFIG_ARCH_SUN50IW3)
-#define MBUS_SW_CLK_ON_REG          (0x0030) /* Software Clock ON, 0:open by hws    */
-#define MBUS_SW_CLK_OFF_REG         (0x0040) /* Sofrware Clock OFF, 1:dis-access    */
-#else
+/* generaly, the below registers are not needed to modify */
 #define MBUS_SW_CLK_ON_REG          (0x00c0) /* Software Clock ON, 0:open by hws    */
 #define MBUS_SW_CLK_OFF_REG         (0x00c4) /* Sofrware Clock OFF, 1:dis-access    */
 #define MBUS_RESOURCE_SIZE          (MBUS_SW_CLK_OFF_REG)
-#endif
 
 /* for register MBUS_MAST_CFG0_REG(n) */
 #define MBUS_QOS_MAX            0x03
-#define MBUS_WT_MAX             0x0f  /* wait time, based on MCLK */
 #define MBUS_ACS_MAX            0x0ff /* access commands sequence */
+#define MBUS_WT_MAX             0x0f  /* wait time, based on MCLK */
 #define MBUS_BWL_MAX            0x0ffff
 
 #define MBUS_BWLEN_SHIFT        0  /* shirft, Bandwidth Limit function Enable, 0:dis   */
-#define MBUS_PRI_SHIFT          1  /* shirft, Priority, 0:low   */
 #define MBUS_QOS_SHIFT          2  /* shirft, QoS value, 0:lowest, 3:highest           */
 #define MBUS_WT_SHIFT           4  /* shirft, wait time, overflow, pr will be promoted */
 #define MBUS_ACS_SHIFT          8  /* shirft, command number, overflow, CN will be 0   */
 #define MBUS_BWL0_SHIFT         16 /* shirft, Bandwidth Limit in MB/S, 0: no limit     */
 #define MBUS_BWL1_SHIFT         0
 #define MBUS_BWL2_SHIFT         16
+#define MBUS_PRI_SHIFT          1  /* shirft, Priority, 0:low   */
 
 /* for register MBUS_BW_CFG_REG */
-#define MBUS_BWSIZE_MAX         0x0f
+#define MBUS_BWSIZE_MAX         0x0ffff
 #define MBUS_BWEN_SHIFT         16
 
 /* MBUS PMU ids */
-enum mbus_pmu {
+typedef enum mbus_pmu{
 	MBUS_PMU_CPU    = 0,    /* CPU bandwidth */
-#if !(defined CONFIG_ARCH_SUN8IW10)
 	MBUS_PMU_GPU    = 1,    /* GPU bandwidth */
 	MBUS_PMU_VE     = 2,    /* VE            */
 	MBUS_PMU_DISP   = 3,    /* DISPLAY       */
-#else
-	MBUS_PMU_EINK0  = 1,
-	MBUS_PMU_EDMA   = 2,
-	MBUS_PMU_MAHB   = 3,
-#endif
 	MBUS_PMU_OTH    = 4,    /* other masters */
 	MBUS_PMU_TOTAL  = 5,    /* total masters */
-	MBUS_PMU_CSI    = 6,    /* csi masters   */
+	MBUS_PMU_CSI    = 6,    /* total masters */
 	MBUS_PMU_MAX    = 7,    /* max masters   */
-};
+}mbus_pmu_e;
 
 #define MBUS_PORT_PRI           (MBUS_PMU_MAX + 0)
 #define MBUS_PORT_QOS           (MBUS_PMU_MAX + 1)
@@ -170,17 +139,10 @@ int notrace mbus_port_setpri(mbus_port_e port, bool pri)
 		return -ENODEV;
 
 	mutex_lock(&mbus_seting);
-#if (defined MBUS_MAST_ACPR_CFG_REG)
-	value = readl_relaxed(mbus_ctrl_base + MBUS_MAST_ACPR_CFG_REG);
-	value &= ~(1 << port);
-	writel_relaxed(value | (pri << port), \
-			mbus_ctrl_base + MBUS_MAST_ACPR_CFG_REG);
-#else
 	value = readl_relaxed(mbus_ctrl_base + MBUS_MAST_CFG0_REG(port));
 	value &= ~(1 << MBUS_PRI_SHIFT);
 	writel_relaxed(value | (pri << MBUS_PRI_SHIFT), \
-			mbus_ctrl_base + MBUS_MAST_CFG0_REG(port));
-#endif
+	               mbus_ctrl_base + MBUS_MAST_CFG0_REG(port));
 	mutex_unlock(&mbus_seting);
 
 	return 0;
@@ -421,10 +383,7 @@ EXPORT_SYMBOL_GPL(mbus_set_bwlwsiz);
  */
 static void notrace mbus_port_control(mbus_port_e port, bool enable)
 {
-	unsigned int value, reg, pos;
-
-	reg = (port <= 31) ? MBUS_MAST_ACEN_CFG_REG(0) : MBUS_MAST_ACEN_CFG_REG(1);
-	pos = (port <= 31) ? port : (port - 31);
+	unsigned int value;
 
 	/*
 	 * This function is called from power down procedures
@@ -435,13 +394,13 @@ static void notrace mbus_port_control(mbus_port_e port, bool enable)
 	 * disruptive operations.
 	 */
 	mutex_lock(&mbus_seting);
-	value = readl_relaxed(mbus_ctrl_base + reg);
+	value = readl_relaxed(mbus_ctrl_base + MBUS_MAST_ACEN_CFG_REG);
 	if (enable) {
-		value |= (1 << pos);
+		value |= (1 << port);
 	} else {
-		value &= ~(1 << pos);
+		value &= ~(1 << port);
 	}
-	writel_relaxed(value, mbus_ctrl_base + reg);
+	writel_relaxed(value, mbus_ctrl_base + MBUS_MAST_ACEN_CFG_REG);
 	mutex_unlock(&mbus_seting);
 }
 
@@ -471,7 +430,7 @@ int notrace mbus_port_control_by_index(mbus_port_e port, bool enable)
 EXPORT_SYMBOL_GPL(mbus_port_control_by_index);
 
 static const struct of_device_id sunxi_mbus_matches[] = {
-	{.compatible = "allwinner,sun8i-mbus", },
+	{.compatible = "allwinner,sun8i-b100-mbus", },
 	{.compatible = "allwinner,sun50i-mbus", },
 	{},
 };
@@ -563,8 +522,7 @@ struct mbus_data {
 
 static struct mbus_data hw_mbus_pmu;
 
-static unsigned int mbus_update_device(struct mbus_data *data,
-				       enum mbus_pmu port)
+static unsigned int mbus_update_device(struct mbus_data *data, mbus_pmu_e port)
 {
 	unsigned int value = 0;
 
@@ -791,29 +749,24 @@ static ssize_t mbus_store_value(struct device *dev, \
 
 /* CPU bandwidth of DDR channel 0 */
 static SENSOR_DEVICE_ATTR(pmu_cpuddr, S_IRUGO, mbus_show_value, NULL, MBUS_PMU_CPU);
-
 #if !(defined CONFIG_ARCH_SUN8IW10)
 /* GPU bandwidth of DDR channel 0 */
 static SENSOR_DEVICE_ATTR(pmu_gpuddr, S_IRUGO, mbus_show_value, NULL, MBUS_PMU_GPU);
-/* VE & CSI & FD bandwidth of DDR channel 0 */
-static SENSOR_DEVICE_ATTR(pmu_ve_ddr, S_IRUGO, mbus_show_value, NULL, MBUS_PMU_VE);
 /* DE bandwidth of DDR channel 0 */
-static SENSOR_DEVICE_ATTR(pmu_de_ddr, S_IRUGO, mbus_show_value, NULL, MBUS_PMU_DISP);
-#else
-static SENSOR_DEVICE_ATTR(pmu_eink0_ddr, S_IRUGO, mbus_show_value, NULL, MBUS_PMU_EINK0);
-static SENSOR_DEVICE_ATTR(pmu_edma_ddr, S_IRUGO, mbus_show_value, NULL, MBUS_PMU_EDMA);
-static SENSOR_DEVICE_ATTR(pmu_mahb_ddr, S_IRUGO, mbus_show_value, NULL, MBUS_PMU_MAHB);
+static SENSOR_DEVICE_ATTR(pmu_ve_ddr, S_IRUGO, mbus_show_value, NULL, MBUS_PMU_VE);
 #endif
-
+/* VE & CSI & FD bandwidth of DDR channel 0 */
+static SENSOR_DEVICE_ATTR(pmu_de_ddr, S_IRUGO, mbus_show_value, NULL, MBUS_PMU_DISP);
 /* other master bandwidth of DDR channel 0 */
 static SENSOR_DEVICE_ATTR(pmu_othddr, S_IRUGO, mbus_show_value, NULL, MBUS_PMU_OTH);
 /* total bandwidth of DDR channel 0 */
 static SENSOR_DEVICE_ATTR(pmu_totddr, S_IRUGO, mbus_show_value, NULL, MBUS_PMU_TOTAL);
+#if !(defined CONFIG_ARCH_SUN8IW10)
 /* csi bandwidth of CSI channel 0 */
 static SENSOR_DEVICE_ATTR(pmu_csiddr, S_IRUGO, mbus_show_value, NULL, MBUS_PMU_CSI);
-
 /* get all masters' priority or set a master's priority */
 static SENSOR_DEVICE_ATTR(port_prio, S_IRUGO | S_IWUSR, mbus_show_value, mbus_store_value, MBUS_PORT_PRI);
+#endif
 /* get all masterss' qos or set a master's qos */
 static SENSOR_DEVICE_ATTR(port_qos, S_IRUGO | S_IWUSR, mbus_show_value, mbus_store_value, MBUS_PORT_QOS);
 /* get all masterss' threshold or set a master's threshold */
@@ -832,22 +785,17 @@ static SENSOR_DEVICE_ATTR(port_bwlen, S_IRUGO | S_IWUSR, mbus_show_value, mbus_s
 /* pointers to created device attributes */
 static struct attribute *mbus_attributes[] = {
 	&sensor_dev_attr_pmu_cpuddr.dev_attr.attr,
-
 #if !(defined CONFIG_ARCH_SUN8IW10)
 	&sensor_dev_attr_pmu_gpuddr.dev_attr.attr,
 	&sensor_dev_attr_pmu_ve_ddr.dev_attr.attr,
-	&sensor_dev_attr_pmu_de_ddr.dev_attr.attr,
-#else
-	&sensor_dev_attr_pmu_eink0_ddr.dev_attr.attr,
-	&sensor_dev_attr_pmu_edma_ddr.dev_attr.attr,
-	&sensor_dev_attr_pmu_mahb_ddr.dev_attr.attr,
 #endif
-
+	&sensor_dev_attr_pmu_de_ddr.dev_attr.attr,
 	&sensor_dev_attr_pmu_othddr.dev_attr.attr,
 	&sensor_dev_attr_pmu_totddr.dev_attr.attr,
+#if !(defined CONFIG_ARCH_SUN8IW10)
 	&sensor_dev_attr_pmu_csiddr.dev_attr.attr,
-
 	&sensor_dev_attr_port_prio.dev_attr.attr,
+#endif
 	&sensor_dev_attr_port_qos.dev_attr.attr,
 	&sensor_dev_attr_port_watt.dev_attr.attr,
 	&sensor_dev_attr_port_acs.dev_attr.attr,
@@ -933,6 +881,7 @@ static struct platform_driver mbus_pmu_driver = {
 	.probe = mbus_pmu_probe,
 	.remove = mbus_pmu_remove,
 };
+
 
 static int __init mbus_pmu_init(void)
 {

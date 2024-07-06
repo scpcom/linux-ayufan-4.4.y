@@ -35,20 +35,7 @@
 #define VIN_MAX_MIPI			2
 #define VIN_MAX_ISP			2
 #define VIN_MAX_SCALER			4
-
-enum {
-	VIN_TOP_CLK = 0,
-	VIN_TOP_CLK_SRC,
-	VIN_MISC_CLK,
-	VIN_MAX_CLK,
-};
-
-#define VIN_CLK_RATE (300*1000*1000)
-
-struct vin_valid_sensor {
-	struct v4l2_subdev *sd;
-	char *name;
-};
+#define VIN_MAX_CLK			1
 
 struct vin_csi_info {
 	struct v4l2_subdev *sd;
@@ -95,12 +82,15 @@ struct vin_md {
 	struct vin_scaler_info scaler[VIN_MAX_SCALER];
 	struct vin_core *vinc[VIN_MAX_DEV];
 	struct vin_clk_info clk[VIN_MAX_CLK];
-	unsigned int id;
-	int use_count;
-	void __iomem *base;
+	bool isp_used;
+
+	struct device *pmf;
 	struct media_device media_dev;
 	struct v4l2_device v4l2_dev;
 	struct platform_device *pdev;
+	struct vin_pinctrl {
+		struct pinctrl *pinctrl;
+	} pinctl;
 	bool user_subdev_api;
 	spinlock_t slock;
 };

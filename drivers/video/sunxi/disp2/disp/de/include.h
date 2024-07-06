@@ -1,13 +1,3 @@
-/*
- *
- * Copyright (c) 2016 Allwinnertech Co., Ltd.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- */
 #ifndef _DISP_INCLUDE_H_
 #define _DISP_INCLUDE_H_
 
@@ -260,23 +250,13 @@ struct disp_clk_info
 
 struct disp_enhance_info
 {
-	/*
-	 * enhance parameters : 0~10, bigger value, stronger enhance level
-	 * mode : combination of enhance_mode and dev_type
-	 * enhance_mode : bit31~bit16 of mode
-	 *              : 0-disable; 1-enable; 2-demo(enable half window)
-	 * dev_type : bit15~bit0 of mode
-	 *          : 0-lcd; 1-tv(hdmi, cvbs, vga, ypbpr)
-	 */
-
+	//basic adjust
 	u32         bright;
 	u32         contrast;
 	u32         saturation;
 	u32         hue;
-	u32         edge;
-	u32         detail;
-	u32         denoise;
 	u32         mode;
+	//ehnance
 	u32         sharp;	//0-off; 1~3-on.
 	u32         auto_contrast;	//0-off; 1~3-on.
 	u32					auto_color;	//0-off; 1-on.
@@ -291,20 +271,14 @@ struct disp_enhance_info
 
 typedef enum
 {
-	ENH_NONE_DIRTY       = 0x0,
-	ENH_ENABLE_DIRTY     = 0x1 << 0,  /* enable dirty */
-	ENH_SIZE_DIRTY       = 0x1 << 1,  /* size dirty */
-	ENH_FORMAT_DIRTY     = 0x1 << 2,  /* overlay format dirty */
-	ENH_INIT_DIRTY       = 0x1 << 3,  /* initial parameters dirty */
-	ENH_MODE_DIRTY       = 0X1 << 4,  /* enhance mode dirty */
-	ENH_BRIGHT_DIRTY     = 0x1 << 5,  /* brightness level dirty */
-	ENH_CONTRAST_DIRTY   = 0x1 << 6,  /* contrast level dirty */
-	ENH_EDGE_DIRTY       = 0x1 << 7,  /* edge level dirty */
-	ENH_DETAIL_DIRTY     = 0x1 << 8,  /* detail level dirty */
-	ENH_SAT_DIRTY        = 0x1 << 9,  /* saturation level dirty */
-	ENH_DNS_DIRTY        = 0x1 << 10, /* de-noise level dirty */
-	ENH_USER_DIRTY       = 0x7f8,     /* dirty by user */
-	ENH_ALL_DIRTY        = 0x7ff      /* all dirty */
+	ENHANCE_NONE_DIRTY   = 0x0,
+	ENHANCE_ENABLE_DIRTY = 0x1 << 0,
+	ENHANCE_BRIGHT_DIRTY = 0x1 << 1,
+	ENHANCE_SHARP_DIRTY  = 0x1 << 2,
+	ENHANCE_SIZE_DIRTY   = 0x1 << 3,
+	ENHANCE_MODE_DIRTY   = 0X1 << 4,
+	ENHANCE_DEMO_DIRTY   = 0x1 << 5,
+	ENHANCE_ALL_DIRTY    = 0x3f,
 }disp_enhance_dirty_flags;
 
 struct disp_enhance_config
@@ -337,7 +311,6 @@ struct disp_csc_config
 {
 	u32 in_fmt;
 	u32 in_mode;
-	u32 in_color_range;
 	u32 out_fmt;
 	u32 out_mode;
 	u32 out_color_range;
@@ -957,18 +930,12 @@ struct disp_enhance {
 	s32 (*set_saturation)(struct disp_enhance* enhance, u32 val);
 	s32 (*set_contrast)(struct disp_enhance* enhance, u32 val);
 	s32 (*set_hue)(struct disp_enhance* enhance, u32 val);
-	s32 (*set_edge)(struct disp_enhance *enhance, u32 val);
-	s32 (*set_detail)(struct disp_enhance *enhance, u32 val);
-	s32 (*set_denoise)(struct disp_enhance *enhance, u32 val);
 	s32 (*set_mode)(struct disp_enhance* enhance, u32 val);
 	s32 (*set_window)(struct disp_enhance* enhance, struct disp_rect *window);
 	s32 (*get_bright)(struct disp_enhance* enhance);
 	s32 (*get_saturation)(struct disp_enhance* enhance);
 	s32 (*get_contrast)(struct disp_enhance* enhance);
 	s32 (*get_hue)(struct disp_enhance* enhance);
-	s32 (*get_edge)(struct disp_enhance *enhance);
-	s32 (*get_detail)(struct disp_enhance *enhance);
-	s32 (*get_denoise)(struct disp_enhance *enhance);
 	s32 (*get_mode)(struct disp_enhance* enhance);
 	s32 (*get_window)(struct disp_enhance* enhance, struct disp_rect *window);
 	s32 (*set_para)(struct disp_enhance *enhance, disp_enhance_para *para);
@@ -1106,14 +1073,9 @@ struct disp_eink_manager {
 	struct task_struct * 	   detect_fresh_task;
 	struct task_struct * 	   debug_task;
 	struct mutex standby_lock;
-	int (*eink_update)(struct disp_eink_manager *manager,
-				struct disp_layer_config *config,
-				unsigned int layer_num,
-				enum eink_update_mode mode,
-				struct area_info update_area);
+	int (*eink_update)(struct disp_eink_manager*, void*, enum eink_update_mode, struct area_info);
 	int (*enable)(struct disp_eink_manager *);
 	int (*disable)(struct disp_eink_manager *);
-	int (*op_skip)(struct disp_eink_manager *manager, u32 skip);
 	int (*suspend)(struct disp_eink_manager *);
 	int (*resume)(struct disp_eink_manager *);
 	void (*clearwd)(struct disp_eink_manager *, int);
@@ -1140,8 +1102,7 @@ struct format_manager {
 	struct clk* clk;
 	int (*enable)(unsigned int id);
 	int (*disable)(unsigned int id);
-	int (*start_convert)(unsigned int id, struct disp_layer_config *config,
-			unsigned int layer_num, struct image_format *dest);
+	int (*start_convert)(unsigned int id, struct image_format *src, struct image_format *dest);
 };
 
 #endif

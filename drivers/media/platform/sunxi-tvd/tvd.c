@@ -1273,19 +1273,17 @@ static int tvd_open(struct file *file)
 	struct tvd_dev *dev = video_drvdata(file);
 	int ret = -1;
 	int i = 0;
+
 	pr_debug("%s:\n", __func__);
+
+	if (tvd_hot_plug)
+		__tvd_auto_plug_disable(dev);
 
 	if (tvd_is_opened(dev)) {
 		pr_err("%s: device open busy\n", __func__);
 		return -EBUSY;
 	}
-
-	if (tvd_hot_plug)
-		__tvd_auto_plug_disable(dev);
-
 	dev->system = NTSC;
-	/* register irq */
-	ret = request_irq(dev->irq, tvd_isr, IRQF_DISABLED, dev->name, dev);
 
 	/* gpio power, open only once */
 	mutex_lock(&power_lock);
@@ -1330,7 +1328,6 @@ static int tvd_close(struct file *file)
 	vb2_queue_release(&dev->vb_vidq);
 	tvd_stop_opened(dev);
 
-	free_irq(dev->irq, dev);
 	mutex_lock(&fliter_lock);
 	if (fliter_count > 0 && dev->fliter.used) {
 		__tvd_3d_comp_mem_free(dev);
@@ -2157,7 +2154,7 @@ static int __tvd_auto_plug_disable(struct tvd_dev *dev)
 #endif
 
 static void __iomem  *tvd_top;
-static struct clk *tvd_clk_top;
+struct clk* tvd_clk_top;
 
 static int __tvd_probe_init(int sel, struct platform_device *pdev)
 {
@@ -2201,7 +2198,6 @@ static int __tvd_probe_init(int sel, struct platform_device *pdev)
 
 	tvd[dev->id] = dev;
 	tvd_count++;
-	memcpy(dev->name, pdev->name, sizeof(pdev->name) + 1);
 	dev->irq = irq_of_parse_and_map(np, 0);
 	if (dev->irq <= 0) {
 		pr_err("failed to get IRQ resource\n");
@@ -2217,6 +2213,9 @@ static int __tvd_probe_init(int sel, struct platform_device *pdev)
 	}
 	dev->regs_top = tvd_top;
 	dev->clk_top = tvd_clk_top;
+
+	/* register irq */
+	ret = request_irq(dev->irq, tvd_isr, IRQF_DISABLED, pdev->name, dev);
 
 	/* get tvd clk ,name fix */
 	dev->clk = of_clk_get(np, 0);//fix

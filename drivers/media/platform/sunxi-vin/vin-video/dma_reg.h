@@ -1,13 +1,3 @@
-/*
- *
- * Copyright (c) 2016 Allwinnertech Co., Ltd.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- */
 
 #ifndef __CSIC__DMA__REG__H__
 #define __CSIC__DMA__REG__H__
@@ -53,6 +43,17 @@ enum output_fmt {
 	FIELD_UV_CB_YUV420_10 = 13,
 	FIELD_VU_CB_YUV422_10 = 14,
 	FIELD_VU_CB_YUV420_10 = 15,
+#if 0
+	/* only when input is yuv420 */
+	FIELD_PLANAR_YUV420 = 1,
+	FRAME_PLANAR_YUV420 = 2,
+	FIELD_UV_CB_YUV420 = 5,
+	FRAME_UV_CB_YUV420 = 6,
+	FIELD_VU_CB_YUV420 = 9,
+	FRAME_VU_CB_YUV420 = 10,
+	FIELD_UV_CB_YUV420_10 = 13,
+	FIELD_VU_CB_YUV420_10 = 15,
+#endif
 };
 
 /*

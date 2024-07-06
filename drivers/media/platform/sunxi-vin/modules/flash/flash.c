@@ -313,9 +313,9 @@ static int flash_probe(struct platform_device *pdev)
 		goto ekzalloc;
 	}
 
-	of_property_read_u32(np, "device_id", &pdev->id);
+	pdev->id = of_alias_get_id(np, "flash");
 	if (pdev->id < 0) {
-		vin_err("flash failed to get device id\n");
+		vin_err("flash failed to get alias id\n");
 		ret = -EINVAL;
 		goto freedev;
 	}

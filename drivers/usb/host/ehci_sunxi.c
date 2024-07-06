@@ -653,7 +653,7 @@ static int sunxi_ehci_hcd_probe(struct platform_device *pdev)
 	ret = init_sunxi_hci(pdev, SUNXI_USB_EHCI);
 	if(ret != 0){
 		dev_err(&pdev->dev, "init_sunxi_hci is fail\n");
-		return -1;
+		return 0;
 	}
 
 	sunxi_insmod_ehci(pdev);
@@ -715,7 +715,7 @@ static void sunxi_ehci_hcd_shutdown(struct platform_device* pdev)
 		return;
 	}
 
-	pr_debug("[%s]: ehci shutdown start\n", sunxi_ehci->hci_name);
+	DMSG_INFO("[%s]: ehci shutdown start\n", sunxi_ehci->hci_name);
 #ifdef CONFIG_PM
 	if(sunxi_ehci->wakeup_suspend){
 		scene_lock_destroy(&ehci_standby_lock[sunxi_ehci->usbc_no]);
@@ -724,13 +724,13 @@ static void sunxi_ehci_hcd_shutdown(struct platform_device* pdev)
 	usb_hcd_platform_shutdown(pdev);
 
 	/* disable usb otg INTUSBE, To solve usb0 device mode catch audio udev on reboot system is fail*/
-	if (sunxi_ehci->usbc_no == 0)
-		if (sunxi_ehci->otg_vbase) {
-			writel(0, (sunxi_ehci->otg_vbase
-						+ SUNXI_USBC_REG_INTUSBE));
-		}
+	if(sunxi_ehci->otg_vbase){
+		USBC_Writel(0, (sunxi_ehci->otg_vbase + SUNXI_USBC_REG_INTUSBE));
+	}
 
-	pr_debug("[%s]: ehci shutdown end\n", sunxi_ehci->hci_name);
+	sunxi_stop_ehci(sunxi_ehci);
+
+	DMSG_INFO("[%s]: ehci shutdown end\n", sunxi_ehci->hci_name);
 
 	return ;
 }

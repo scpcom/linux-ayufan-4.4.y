@@ -1271,7 +1271,7 @@ SUNXI_CLK_PERIPH(gmac, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, BUS_RST1, BUS_GATE1,
 SUNXI_CLK_PERIPH(can, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, BUS_RST4,
 			BUS_GATE3, 0, 0, 4, 4, 0, &clk_lock, NULL, 0);
 
-SUNXI_CLK_PERIPH(scr0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, BUS_RST4,
+SUNXI_CLK_PERIPH(scr, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, BUS_RST4,
 			BUS_GATE3, 0, 0, 5, 5, 0, &clk_lock, NULL, 0);
 
 SUNXI_CLK_PERIPH(pio, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, BUS_GATE2,
@@ -1466,7 +1466,7 @@ struct periph_init_data sunxi_periphs_init[] = {
 
 	{"can", 0, apb2mod_parents, ARRAY_SIZE(apb2mod_parents), &sunxi_clk_periph_can},
 
-	{"scr0", 0, apb2mod_parents, ARRAY_SIZE(apb2mod_parents), &sunxi_clk_periph_scr0},
+	{"scr", 0, apb2mod_parents, ARRAY_SIZE(apb2mod_parents), &sunxi_clk_periph_scr},
 
 	{"pio", 0, apb1mod_parents, ARRAY_SIZE(apb1mod_parents), &sunxi_clk_periph_pio},
 

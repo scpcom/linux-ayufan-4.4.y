@@ -22,7 +22,7 @@
 
 volatile void __iomem *csic_prs_base[MAX_CSIC_PRS_NUM];
 
-int csic_prs_set_base_addr(unsigned int sel, unsigned long addr)
+int csic_prs_base_addr(unsigned int sel, unsigned long addr)
 {
 	if (sel > MAX_CSIC_PRS_NUM - 1)
 		return -1;
@@ -82,6 +82,14 @@ void csic_prs_ncsi_if_cfg(unsigned int sel, struct prs_ncsi_if_cfg *if_cfg)
 		if_cfg->seq << PRS_NCSIC_IF_INPUT_SEQ);
 
 	vin_reg_clr_set(csic_prs_base[sel] + PRS_NCSIC_IF_CFG_REG_OFF,
+		PRS_NCSIC_IF_DATA_WIDTH_MASK,
+		if_cfg->dw << PRS_NCSIC_IF_DATA_WIDTH);
+
+	vin_reg_clr_set(csic_prs_base[sel] + PRS_NCSIC_IF_CFG_REG_OFF,
+		PRS_NCSIC_IF_FIELD_DT_MASK,
+		if_cfg->field_dt << PRS_NCSIC_IF_FIELD_DT);
+
+	vin_reg_clr_set(csic_prs_base[sel] + PRS_NCSIC_IF_CFG_REG_OFF,
 		PRS_NCSIC_IF_CLK_POL_MASK,
 		if_cfg->clk << PRS_NCSIC_IF_CLK_POL);
 
@@ -106,25 +114,18 @@ void csic_prs_mcsi_if_cfg(unsigned int sel, struct prs_mcsi_if_cfg *if_cfg)
 {
 	vin_reg_clr_set(csic_prs_base[sel] + PRS_MCSIC_IF_CFG_REG_OFF,
 		PRS_MCSIC_IF_INPUT_SEQ_MASK,
-		if_cfg->seq << PRS_MCSIC_IF_INPUT_SEQ);
+		if_cfg->input_seq << PRS_MCSIC_IF_INPUT_SEQ);
 	vin_reg_clr_set(csic_prs_base[sel] + PRS_MCSIC_IF_CFG_REG_OFF,
 		PRS_MCSIC_IF_OUTPUT_MODE_MASK,
-		if_cfg->mode << PRS_MCSIC_IF_OUTPUT_MODE);
+		if_cfg->output_mode << PRS_MCSIC_IF_OUTPUT_MODE);
 }
 
-void csic_prs_capture_start(unsigned int sel, unsigned int ch_total_num,
+void csic_prs_capture(unsigned int sel, unsigned int ch,
 			struct prs_cap_mode *mode)
 {
-	u32 reg_val = (((ch_total_num == 4) ? mode->mode : 0) << 24) +
-	    (((ch_total_num == 3) ? mode->mode : 0) << 16) +
-	    (((ch_total_num == 2) ? mode->mode : 0) << 8) +
-	    (((ch_total_num == 1) ? mode->mode : 0));
+	unsigned int reg_val = mode->mode << (CH0_SCAP_ON + ch * 8);
+	reg_val = reg_val | (mode->cap_mask << (CH0_CAP_MASK + ch * 8));
 	vin_reg_writel(csic_prs_base[sel] + PRS_CAP_REG_OFF, reg_val);
-}
-
-void csic_prs_capture_stop(unsigned int sel)
-{
-	vin_reg_writel(csic_prs_base[sel] + PRS_CAP_REG_OFF, 0);
 }
 
 void csic_prs_signal_status(unsigned int sel, struct prs_signal_status *status)

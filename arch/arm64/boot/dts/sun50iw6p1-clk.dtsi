@@ -212,8 +212,6 @@ clocks {
 		clk_de: de {
 			#clock-cells = <0>;
 			compatible = "allwinner,sunxi-periph-clock";
-			assigned-clock-parents = <&clk_pll_de>;
-			assigned-clock-rates = <432000000>;
 			clock-output-names = "de";
 		};
 		clk_di: di {

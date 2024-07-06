@@ -60,6 +60,8 @@ struct cfg_array {		/* coming later */
 	struct regval_list *regs;
 	int size;
 };
+static int sensor_init_common(struct v4l2_subdev *sd, u32 val);
+
 static inline struct sensor_info *to_state(struct v4l2_subdev *sd)
 {
 	return container_of(sd, struct sensor_info, sd);
@@ -3821,6 +3823,19 @@ static int sensor_detect(struct v4l2_subdev *sd)
 	return 0;
 }
 
+static int sensor_init_common(struct v4l2_subdev *sd, u32 val)
+{
+	int ret;
+	sensor_dbg("sensor_init_restart\n");
+	ret = sensor_write_array(sd, sensor_default_regs, ARRAY_SIZE(sensor_default_regs));
+	if (ret < 0) {
+		sensor_err("write sensor_default_regs error\n");
+		return ret;
+	}
+
+	return 0;
+}
+
 static int sensor_init(struct v4l2_subdev *sd, u32 val)
 {
 	int ret;
@@ -3855,6 +3870,11 @@ static int sensor_init(struct v4l2_subdev *sd, u32 val)
 	info->tpf.numerator = 1;
 	info->tpf.denominator = 25;
 
+	ret = sensor_init_common(sd, val);
+	if (ret < 0) {
+		sensor_err("write sensor_default_regs error\n");
+		return ret;
+	}
 
 	sensor_debug(sd);
 #if 0
@@ -4106,17 +4126,9 @@ static int sensor_g_chip_ident(struct v4l2_subdev *sd,
 
 static int sensor_reg_init(struct sensor_info *info)
 {
-	int ret;
 	struct v4l2_subdev *sd = &info->sd;
 	struct sensor_format_struct *sensor_fmt = info->fmt;
 	struct sensor_win_size *wsize = info->current_wins;
-
-	ret = sensor_write_array(sd, sensor_default_regs,
-			ARRAY_SIZE(sensor_default_regs));
-	if (ret < 0) {
-		sensor_err("write sensor_default_regs error\n");
-		return ret;
-	}
 
 	sensor_dbg("sensor_reg_init\n");
 	sensor_write_array(sd, sensor_fmt->regs, sensor_fmt->regs_size);

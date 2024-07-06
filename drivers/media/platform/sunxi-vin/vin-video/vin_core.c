@@ -45,6 +45,7 @@
 
 #include "vin_core.h"
 #include "../utility/bsp_common.h"
+#include "../vin-isp/bsp_isp_algo.h"
 #include "../vin-cci/bsp_cci.h"
 #include "../vin-cci/cci_helper.h"
 #include "../utility/config.h"
@@ -56,7 +57,6 @@
 #include "../vin-vipp/sunxi_scaler.h"
 #include "../vin-mipi/sunxi_mipi.h"
 #include "../vin.h"
-#include "dma_reg.h"
 
 #define VIN_CORE_NAME "sunxi-vin-core"
 
@@ -147,7 +147,7 @@ static struct vin_fmt vin_formats[] = {
 		.colplanes	= 1,
 		.flags		= VIN_FMT_RGB,
 	}, {
-		.name		= "ARGB1555, 16 bpp",
+		.name		= "ARGB1555, 32 bpp",
 		.fourcc		= V4L2_PIX_FMT_RGB555,
 		.depth		= { 16 },
 		.color		= V4L2_COLORSPACE_SRGB,
@@ -155,7 +155,7 @@ static struct vin_fmt vin_formats[] = {
 		.colplanes	= 1,
 		.flags		= VIN_FMT_RGB | VIN_FMT_OSD,
 	}, {
-		.name		= "ARGB4444, 16 bpp",
+		.name		= "ARGB4444, ",
 		.fourcc		= V4L2_PIX_FMT_RGB444,
 		.depth		= { 16 },
 		.color		= V4L2_COLORSPACE_SRGB,
@@ -163,7 +163,7 @@ static struct vin_fmt vin_formats[] = {
 		.colplanes	= 1,
 		.flags		= VIN_FMT_RGB | VIN_FMT_OSD,
 	}, {
-		.name		= "ARGB8888, 32 bpp",
+		.name		= "ARGB888, 32 bpp",
 		.fourcc		= V4L2_PIX_FMT_RGB32,
 		.depth		= { 32 },
 		.color		= V4L2_COLORSPACE_SRGB,
@@ -173,7 +173,7 @@ static struct vin_fmt vin_formats[] = {
 	}, {
 		.name		= "YUV 4:2:2 planar, Y/Cb/Cr",
 		.fourcc		= V4L2_PIX_FMT_YUV422P,
-		.depth		= { 16 },
+		.depth		= { 12 },
 		.color		= V4L2_COLORSPACE_JPEG,
 		.memplanes	= 1,
 		.colplanes	= 3,
@@ -301,7 +301,7 @@ static struct vin_fmt vin_formats[] = {
 	}, {
 		.name		= "RAW Bayer BGGR 10bit",
 		.fourcc		= V4L2_PIX_FMT_SBGGR10,
-		.depth		= { 16 },
+		.depth		= { 8 },
 		.memplanes	= 1,
 		.colplanes	= 1,
 		.mbus_code	= V4L2_MBUS_FMT_SBGGR10_1X10,
@@ -309,7 +309,7 @@ static struct vin_fmt vin_formats[] = {
 	}, {
 		.name		= "RAW Bayer GBRG 10bit",
 		.fourcc		= V4L2_PIX_FMT_SGBRG10,
-		.depth		= { 16 },
+		.depth		= { 8 },
 		.memplanes	= 1,
 		.colplanes	= 1,
 		.mbus_code	= V4L2_MBUS_FMT_SGBRG10_1X10,
@@ -317,7 +317,7 @@ static struct vin_fmt vin_formats[] = {
 	}, {
 		.name		= "RAW Bayer GRBG 10bit",
 		.fourcc		= V4L2_PIX_FMT_SGRBG10,
-		.depth		= { 16 },
+		.depth		= { 8 },
 		.memplanes	= 1,
 		.colplanes	= 1,
 		.mbus_code	= V4L2_MBUS_FMT_SGRBG10_1X10,
@@ -325,7 +325,7 @@ static struct vin_fmt vin_formats[] = {
 	}, {
 		.name		= "RAW Bayer RGGB 10bit",
 		.fourcc		= V4L2_PIX_FMT_SGRBG10,
-		.depth		= { 16 },
+		.depth		= { 8 },
 		.memplanes	= 1,
 		.colplanes	= 1,
 		.mbus_code	= V4L2_MBUS_FMT_SGRBG10_1X10,
@@ -333,7 +333,7 @@ static struct vin_fmt vin_formats[] = {
 	}, {
 		.name		= "RAW Bayer BGGR 12bit",
 		.fourcc		= V4L2_PIX_FMT_SBGGR12,
-		.depth		= { 16 },
+		.depth		= { 8 },
 		.memplanes	= 1,
 		.colplanes	= 1,
 		.mbus_code	= V4L2_MBUS_FMT_SBGGR12_1X12,
@@ -341,7 +341,7 @@ static struct vin_fmt vin_formats[] = {
 	}, {
 		.name		= "RAW Bayer GBRG 12bit",
 		.fourcc		= V4L2_PIX_FMT_SGBRG12,
-		.depth		= { 16 },
+		.depth		= { 8 },
 		.memplanes	= 1,
 		.colplanes	= 1,
 		.mbus_code	= V4L2_MBUS_FMT_SGBRG12_1X12,
@@ -349,7 +349,7 @@ static struct vin_fmt vin_formats[] = {
 	}, {
 		.name		= "RAW Bayer GRBG 12bit",
 		.fourcc		= V4L2_PIX_FMT_SGRBG12,
-		.depth		= { 16 },
+		.depth		= { 8 },
 		.memplanes	= 1,
 		.colplanes	= 1,
 		.mbus_code	= V4L2_MBUS_FMT_SGRBG12_1X12,
@@ -357,7 +357,7 @@ static struct vin_fmt vin_formats[] = {
 	}, {
 		.name		= "RAW Bayer RGGB 12bit",
 		.fourcc		= V4L2_PIX_FMT_SGRBG12,
-		.depth		= { 16 },
+		.depth		= { 8 },
 		.memplanes	= 1,
 		.colplanes	= 1,
 		.mbus_code	= V4L2_MBUS_FMT_SGRBG12_1X12,
@@ -371,6 +371,7 @@ static struct vin_fmt vin_formats[] = {
 		.colplanes	= 1,
 		.mbus_code	= V4L2_MBUS_FMT_YUYV8_2X8,
 		.flags		= VIN_FMT_YUV,
+
 	}, {
 		.name		= "YUV 4:2:2 packed, CbYCrY",
 		.fourcc		= V4L2_PIX_FMT_UYVY,
@@ -571,9 +572,9 @@ static const struct file_operations vin_debugfs_fops = {
 /*
  *  the interrupt routine
  */
+
 static irqreturn_t vin_isr(int irq, void *priv)
 {
-#if defined (CONFIG_ARCH_SUN8IW11P1) || defined (CONFIG_ARCH_SUN50IW1P1)
 	unsigned long flags;
 	struct vin_buffer *buf;
 	struct vin_vid_cap *cap = (struct vin_vid_cap *)priv;
@@ -582,9 +583,9 @@ static irqreturn_t vin_isr(int irq, void *priv)
 	struct sensor_instance *inst = get_valid_sensor(vinc);
 	struct list_head *buf_next = NULL;
 
-	vin_log(VIN_LOG_VIDEO, "vin interrupt!!!\n");
-
-	if (vin_streaming(cap) == 0) {
+	FUNCTION_LOG;
+	vin_log(VIN_LOG_VIDEO, "vfe interrupt!!!\n");
+	if (vin_is_generating(cap) == 0) {
 		bsp_csi_int_clear_status(vinc->csi_sel, vinc->cur_ch,
 					 CSI_INT_ALL);
 		return IRQ_HANDLED;
@@ -592,7 +593,7 @@ static irqreturn_t vin_isr(int irq, void *priv)
 	bsp_csi_int_get_status(vinc->csi_sel, vinc->cur_ch, &status);
 	if ((status.capture_done == 0) && (status.frame_done == 0)
 	    && (status.vsync_trig == 0)) {
-		vin_print("enter vin int for nothing\n");
+		vin_print("enter vfe int for nothing\n");
 		bsp_csi_int_clear_status(vinc->csi_sel, vinc->cur_ch,
 					 CSI_INT_ALL);
 		return IRQ_HANDLED;
@@ -618,7 +619,9 @@ static irqreturn_t vin_isr(int irq, void *priv)
 			sunxi_isp_dump_regs(vinc->vid_cap.pipe.sd[VIN_IND_ISP]);
 	vinc->vin_status.frame_cnt++;
 
+	FUNCTION_LOG;
 	spin_lock_irqsave(&cap->slock, flags);
+	FUNCTION_LOG;
 
 	/* exception handle */
 	if ((status.buf_0_overflow) || (status.buf_1_overflow) ||
@@ -638,9 +641,12 @@ static irqreturn_t vin_isr(int irq, void *priv)
 		}
 		vin_err("reset csi module\n");
 		bsp_csi_reset(vinc->csi_sel);
-		goto unlock;
+		if (inst->is_isp_used)
+			goto isp_exp_handle;
+		else
+			goto unlock;
 	}
-
+isp_exp_handle:
 	if (cap->capture_mode == V4L2_MODE_IMAGE) {
 		bsp_csi_int_disable(vinc->csi_sel, vinc->cur_ch,
 					    CSI_INT_CAPTURE_DONE);
@@ -725,148 +731,6 @@ unlock:
 
 	sunxi_isp_frame_sync_isr(cap->pipe.sd[VIN_IND_ISP]);
 	return IRQ_HANDLED;
-#else
-	unsigned long flags;
-	struct vin_buffer *buf;
-	struct vin_vid_cap *cap = (struct vin_vid_cap *)priv;
-	struct vin_core *vinc = cap->vinc;
-	struct dma_int_status status;
-	struct sensor_instance *inst = get_valid_sensor(vinc);
-	struct list_head *buf_next = NULL;
-
-	vin_log(VIN_LOG_VIDEO, "vin interrupt!!!\n");
-
-	if (vin_streaming(cap) == 0) {
-		csic_dma_int_clear_status(vinc->vipp_sel, DMA_INT_ALL);
-		return IRQ_HANDLED;
-	}
-	csic_dma_int_get_status(vinc->vipp_sel, &status);
-	if ((status.capture_done == 0) && (status.frame_done == 0)
-	    && (status.vsync_trig == 0)) {
-		vin_print("enter vin int for nothing\n");
-		csic_dma_int_clear_status(vinc->vipp_sel, DMA_INT_ALL);
-		return IRQ_HANDLED;
-	}
-
-	if (inst->is_isp_used && inst->is_bayer_raw) {
-		/* update_sensor_setting */
-		if (status.vsync_trig) {
-			csic_dma_int_clear_status(vinc->vipp_sel, DMA_INT_VSYNC_TRIG);
-			return IRQ_HANDLED;
-		}
-	}
-
-	if (vin_dump & DUMP_CSI)
-		if (5 == vinc->vin_status.frame_cnt % 10)
-			sunxi_csi_dump_regs(vinc->vid_cap.pipe.sd[VIN_IND_CSI]);
-	if (vin_dump & DUMP_ISP)
-		if (9 == (vinc->vin_status.frame_cnt % 10))
-			sunxi_isp_dump_regs(vinc->vid_cap.pipe.sd[VIN_IND_ISP]);
-	vinc->vin_status.frame_cnt++;
-
-	spin_lock_irqsave(&cap->slock, flags);
-
-	/* exception handle */
-	if ((status.buf_0_overflow) || (status.buf_1_overflow) ||
-	    (status.buf_2_overflow) || (status.hblank_overflow)) {
-		if ((status.buf_0_overflow) || (status.buf_1_overflow) ||
-		    (status.buf_2_overflow)) {
-			csic_dma_int_clear_status(vinc->vipp_sel,
-						 DMA_INT_BUF_0_OVERFLOW |
-						 DMA_INT_BUF_1_OVERFLOW |
-						 DMA_INT_BUF_2_OVERFLOW);
-			vin_err("fifo overflow\n");
-		}
-		if (status.hblank_overflow) {
-			csic_dma_int_clear_status(vinc->vipp_sel,
-						 DMA_INT_HBLANK_OVERFLOW);
-			vin_err("hblank overflow\n");
-		}
-		vin_err("reset csi module\n");
-		csic_dma_disable(vinc->vipp_sel);
-		csic_dma_enable(vinc->vipp_sel);
-		goto unlock;
-	}
-
-	if (cap->capture_mode == V4L2_MODE_IMAGE) {
-		csic_dma_int_disable(vinc->vipp_sel, DMA_INT_CAPTURE_DONE);
-		vin_print("capture image mode!\n");
-		buf = list_entry(cap->vidq_active.next, struct vin_buffer, list);
-		list_del(&buf->list);
-		vb2_buffer_done(&buf->vb, VB2_BUF_STATE_DONE);
-		goto unlock;
-	} else {
-		csic_dma_int_disable(vinc->vipp_sel, DMA_INT_FRAME_DONE);
-		if (cap->first_flag == 0) {
-			cap->first_flag++;
-			v4l2_get_timestamp(&cap->ts);
-			vin_print("capture video mode!\n");
-			goto set_next_output_addr;
-		}
-		if (cap->first_flag == 1) {
-			cap->first_flag++;
-			vin_print("capture video first frame done!\n");
-		}
-
-		vinc->vin_status.buf_rest = 2;
-		buf_next = cap->vidq_active.next->next->next;
-		while ((&cap->vidq_active) != buf_next) {
-			vinc->vin_status.buf_rest++;
-			buf_next = buf_next->next;
-			if (vinc->vin_status.buf_rest > 20)
-				break;
-		}
-
-		/* video buffer handle */
-		if ((&cap->vidq_active) == cap->vidq_active.next->next->next) {
-			vin_warn("Only two buffer left for csi\n");
-			cap->first_flag = 0;
-			goto unlock;
-		}
-		buf = list_entry(cap->vidq_active.next, struct vin_buffer, list);
-
-		/* Nobody is waiting on this buffer */
-		if (!waitqueue_active(&buf->vb.vb2_queue->done_wq)) {
-			vin_warn("Nobody is waiting on this video buffer,"
-				"buf = 0x%p\n", buf);
-		}
-		list_del(&buf->list);
-		v4l2_get_timestamp(&buf->vb.v4l2_buf.timestamp);
-		vinc->vin_status.frame_internal = buf->vb.v4l2_buf.timestamp.tv_sec * 1000000 +
-			buf->vb.v4l2_buf.timestamp.tv_usec -
-			cap->ts.tv_sec * 1000000 - cap->ts.tv_usec;
-
-		if (vinc->vin_status.frame_internal > vinc->vin_status.max_internal)
-			vinc->vin_status.max_internal = vinc->vin_status.frame_internal;
-		if ((vinc->vin_status.frame_internal < vinc->vin_status.min_internal) ||
-		    (vinc->vin_status.min_internal == 0))
-			vinc->vin_status.min_internal = vinc->vin_status.frame_internal;
-
-		vin_log(VIN_LOG_VIDEO, "video buffer frame interval = %d\n",
-			vinc->vin_status.frame_internal);
-		cap->ts = buf->vb.v4l2_buf.timestamp;
-		vb2_buffer_done(&buf->vb, VB2_BUF_STATE_DONE);
-	}
-set_next_output_addr:
-	if (list_empty(&cap->vidq_active)
-	    || cap->vidq_active.next->next == (&cap->vidq_active)) {
-		vin_print("No active queue to serve\n");
-		goto unlock;
-	}
-	buf = list_entry(cap->vidq_active.next->next, struct vin_buffer, list);
-	vin_set_addr(vinc, &buf->vb, &vinc->vid_cap.frame,
-			&vinc->vid_cap.frame.paddr);
-
-unlock:
-	spin_unlock_irqrestore(&cap->slock, flags);
-
-	csic_dma_int_clear_status(vinc->vipp_sel, DMA_INT_FRAME_DONE);
-	if ((cap->capture_mode == V4L2_MODE_VIDEO)
-	    || (cap->capture_mode == V4L2_MODE_PREVIEW))
-		csic_dma_int_enable(vinc->vipp_sel, DMA_INT_FRAME_DONE);
-
-	return IRQ_HANDLED;
-#endif
 }
 
 static int vin_irq_request(struct vin_core *vinc, int i)
@@ -877,7 +741,7 @@ static int vin_irq_request(struct vin_core *vinc, int i)
 	/*get irq resource */
 	vinc->irq = irq_of_parse_and_map(np, i);
 	if (vinc->irq <= 0) {
-		vin_err("failed to get CSI DMA IRQ resource\n");
+		vin_err("failed to get IRQ resource\n");
 		return -ENXIO;
 	}
 #ifndef FPGA_VER
@@ -888,7 +752,7 @@ static int vin_irq_request(struct vin_core *vinc, int i)
 			vinc->pdev->name, &vinc->vid_cap);
 #endif
 	if (ret) {
-		vin_err("failed to install CSI DMA irq (%d)\n", ret);
+		vin_err("failed to install irq (%d)\n", ret);
 		return -ENXIO;
 	}
 	return 0;
@@ -902,7 +766,7 @@ static void vin_irq_release(struct vin_core *vinc)
 
 int __vin_request_gpio(struct vin_core *vinc)
 {
-#ifndef FPGA_VER
+#ifdef VIN_GPIO
 	unsigned int j;
 	for (j = 0; j < MAX_GPIO_NUM; j++) {
 		os_gpio_request(&vinc->modu_cfg.sensors.gpio[j], 1);
@@ -911,9 +775,62 @@ int __vin_request_gpio(struct vin_core *vinc)
 	return 0;
 }
 
+static const char *vin_regulator_name[] = {
+	VFE_ISP_REGULATOR,
+	VFE_CSI_REGULATOR,
+};
+
+int __vin_enable_regulator_all(struct vin_core *vinc)
+{
+	struct regulator *regul;
+	unsigned int i, ret = -1;
+	for (i = 0; i < ARRAY_SIZE(vin_regulator_name); ++i) {
+		if (strcmp(vin_regulator_name[i], "") != 0) {
+			regul = regulator_get(NULL, vin_regulator_name[i]);
+			if (IS_ERR_OR_NULL(regul)) {
+				vin_err("get regulator error, i = %d!\n", i);
+				regul = NULL;
+			}
+		} else {
+			regul = NULL;
+		}
+		vinc->vin_system_power[i] = regul;
+		if (vinc->vin_system_power[i] != NULL) {
+			ret = regulator_enable(vinc->vin_system_power[i]);
+		}
+	}
+	usleep_range(5000, 6000);
+	return ret;
+}
+
+int __vin_disable_regulator_all(struct vin_core *vinc)
+{
+	unsigned int i, ret = -1;
+	for (i = 0; i < ARRAY_SIZE(vin_regulator_name); ++i) {
+		if (vinc->vin_system_power[i] != NULL) {
+			ret = regulator_disable(vinc->vin_system_power[i]);
+			regulator_put(vinc->vin_system_power[i]);
+		}
+	}
+	return ret;
+}
+
+void __vin_clk_open(struct vin_core *vinc)
+{
+	vin_print("%s\n", __func__);
+	v4l2_subdev_call(vinc->vid_cap.pipe.sd[VIN_IND_CSI], core, s_power, 1);
+	v4l2_subdev_call(vinc->vid_cap.pipe.sd[VIN_IND_MIPI], core, s_power, 1);
+}
+void __vin_clk_close(struct vin_core *vinc)
+{
+	vin_print("%s\n", __func__);
+	v4l2_subdev_call(vinc->vid_cap.pipe.sd[VIN_IND_CSI], core, s_power, 0);
+	v4l2_subdev_call(vinc->vid_cap.pipe.sd[VIN_IND_MIPI], core, s_power, 0);
+}
+
 int __vin_gpio_config(struct vin_core *vinc, int bon)
 {
-#ifndef FPGA_VER
+#ifdef VIN_GPIO
 	unsigned int j;
 	struct gpio_config gpio_item;
 	for (j = 0; j < MAX_GPIO_NUM; j++) {
@@ -929,7 +846,7 @@ int __vin_gpio_config(struct vin_core *vinc, int bon)
 
 void vin_gpio_release(struct vin_core *vinc)
 {
-#ifndef FPGA_VER
+#ifdef VIN_GPIO
 	unsigned int j;
 	for (j = 0; j < MAX_GPIO_NUM; j++)
 		os_gpio_release(vinc->modu_cfg.sensors.gpio[j].gpio, 1);
@@ -943,15 +860,14 @@ int vin_core_suspend(struct device *d)
 	vin_print("%s\n", __func__);
 	if (!vinc->vid_cap.registered)
 		return 0;
-	if (test_and_set_bit(VIN_LPM, &vinc->vid_cap.state))
-		return 0;
-
-	if (vin_busy(&vinc->vid_cap)) {
-		vin_err("FIXME: %s, camera should close first when calling %s.",
+	if (vin_is_opened(&vinc->vid_cap)) {
+		vin_err("FIXME: vinc %s, err happened when calling %s.",
 			dev_name(&vinc->pdev->dev), __func__);
 		return -1;
 	}
-
+	__vin_clk_close(vinc);
+	__vin_disable_regulator_all(vinc);
+	__vin_gpio_config(vinc, 0);
 	return 0;
 }
 int vin_core_resume(struct device *d)
@@ -960,12 +876,9 @@ int vin_core_resume(struct device *d)
 	vin_print("%s\n", __func__);
 	if (!vinc->vid_cap.registered)
 		return 0;
-
-	if (!test_and_clear_bit(VIN_LPM, &vinc->vid_cap.state)) {
-		vin_print("VIN not suspend!\n");
-		return 0;
-	}
-
+	__vin_gpio_config(vinc, 1);
+	__vin_enable_regulator_all(vinc);
+	__vin_clk_open(vinc);
 	return 0;
 }
 #endif
@@ -975,6 +888,8 @@ int vin_core_runtime_suspend(struct device *d)
 {
 	struct vin_core *vinc = (struct vin_core *)dev_get_drvdata(d);
 	vin_print("%s\n", __func__);
+	__vin_clk_close(vinc);
+	__vin_disable_regulator_all(vinc);
 	__vin_gpio_config(vinc, 0);
 	return 0;
 }
@@ -983,6 +898,8 @@ int vin_core_runtime_resume(struct device *d)
 	struct vin_core *vinc = (struct vin_core *)dev_get_drvdata(d);
 	vin_print("%s\n", __func__);
 	__vin_gpio_config(vinc, 1);
+	__vin_enable_regulator_all(vinc);
+	__vin_clk_open(vinc);
 	return 0;
 }
 int vin_core_runtime_idle(struct device *d)
@@ -1002,6 +919,8 @@ static void vin_core_shutdown(struct platform_device *pdev)
 	vin_print("Defined suspend!\n");
 #else
 	struct vin_core *vinc = (struct vin_core *)dev_get_drvdata(&pdev->dev);
+	__vin_clk_close(vinc);
+	__vin_disable_regulator_all(vinc);
 	__vin_gpio_config(vinc, 0);
 #endif
 	vin_print("%s\n", __func__);
@@ -1030,9 +949,9 @@ static int vin_core_probe(struct platform_device *pdev)
 		goto ekzalloc;
 	}
 
-	of_property_read_u32(np, "device_id", &pdev->id);
+	pdev->id = of_alias_get_id(np, "vinc");
 	if (pdev->id < 0) {
-		vin_err("vin core failed to get device id\n");
+		vin_err("failed to get alias id\n");
 		ret = -EINVAL;
 		goto freedev;
 	}
@@ -1043,44 +962,38 @@ static int vin_core_probe(struct platform_device *pdev)
 		vinc->csi_sel = 0;
 	if (of_property_read_u32(np, "mipi_sel", &vinc->mipi_sel))
 		vinc->mipi_sel = 0xff;
-	if (of_property_read_u32(np, "isp_sel", &vinc->isp_sel))
-		vinc->isp_sel = 0;
-	if (of_property_read_u32(np, "scaler_sel", &vinc->vipp_sel))
-		vinc->vipp_sel = 0;
+	if (of_property_read_u32(np, "isp_sel", &vinc->vid_cap.isp_sel))
+		vinc->vid_cap.isp_sel = 0xff;
+	if (of_property_read_u32(np, "scaler_sel", &vinc->scaler_sel))
+		vinc->scaler_sel = 0;
 
+	vinc->pipe_cfg.mipi_ind = vinc->mipi_sel;
+	vinc->pipe_cfg.csi_ind = vinc->csi_sel;
+	vinc->pipe_cfg.isp_ind = vinc->vid_cap.isp_sel;
+	vinc->pipe_cfg.scaler_ind = vinc->scaler_sel;
 #if defined(CONFIG_CCI_MODULE) || defined (CONFIG_CCI)
 	type = VIN_MODULE_TYPE_CCI;
 #elif defined(CONFIG_I2C)
 	type = VIN_MODULE_TYPE_I2C;
 #endif
-	for (i = 0; i < MAX_DETECT_NUM; i++) {
-		vinc->modu_cfg.modules.sensor[i].type = type;
-		vinc->modu_cfg.modules.act[i].type = type;
-	}
+	vinc->modu_cfg.modules.sensor[0].type = type;
+	vinc->modu_cfg.modules.sensor[1].type = type;
+	vinc->modu_cfg.modules.sensor[2].type = type;
+	vinc->modu_cfg.modules.act[0].type = type;
 	vinc->modu_cfg.modules.flash.type = type;
 	vinc->platform_id = SUNXI_PLATFORM_ID;
 
 	vinc->id = pdev->id;
 	vinc->pdev = pdev;
-#ifdef DEFINE_VINC_REGS
-	vinc->base = of_iomap(np, 0);
-#else
-	vinc->base = kzalloc(0x100, GFP_KERNEL);
-#endif
-	if (!vinc->base) {
-		ret = -EIO;
-		goto freedev;
-	}
-	csic_dma_set_base_addr(vinc->id, (unsigned long)vinc->base);
-
+	vinc->vin_sensor_power_cnt = 0;
 	dev_set_drvdata(&vinc->pdev->dev, vinc);
 
 	vin_print("pdev->id = %d\n", pdev->id);
 	vin_print("cci_i2c_sel = %d\n", vinc->modu_cfg.bus_sel);
 	vin_print("csi_sel = %d\n", vinc->csi_sel);
 	vin_print("mipi_sel = %d\n", vinc->mipi_sel);
-	vin_print("isp_sel = %d\n", vinc->isp_sel);
-	vin_print("vipp_sel = %d\n", vinc->vipp_sel);
+	vin_print("isp_sel = %d\n", vinc->vid_cap.isp_sel);
+	vin_print("scaler_sel = %d\n", vinc->scaler_sel);
 
 	vin_log(VIN_LOG_VIDEO, "parse device tree!\n");
 	/* parse device tree */
@@ -1133,7 +1046,8 @@ static int vin_core_remove(struct platform_device *pdev)
 {
 	struct vin_core *vinc = (struct vin_core *)dev_get_drvdata(&pdev->dev);
 
-	mutex_destroy(&vinc->vid_cap.lock);
+	mutex_destroy(&vinc->vid_cap.stream_lock);
+	mutex_destroy(&vinc->vid_cap.opened_lock);
 	sysfs_remove_group(&vinc->pdev->dev.kobj, &vin_attribute_group);
 #ifdef CONFIG_PM_RUNTIME
 	pm_runtime_disable(&vinc->pdev->dev);
@@ -1141,13 +1055,6 @@ static int vin_core_remove(struct platform_device *pdev)
 	vin_gpio_release(vinc);
 	vin_irq_release(vinc);
 	vin_cleanup_capture_subdev(vinc);
-#ifdef DEFINE_VINC_REGS
-	if (vinc->base)
-		iounmap(vinc->base);
-#else
-	if (vinc->base)
-		kfree(vinc->base);
-#endif
 	kfree(vinc);
 	vin_print("%s end\n", __func__);
 	return 0;
@@ -1251,12 +1158,11 @@ int vin_core_check_sensor_list(struct vin_core *vinc, int i)
 		goto check_end;
 	}
 	v4l2_subdev_call(csi, core, s_power, 1);
+	__vin_enable_regulator_all(vinc);
 	__vin_gpio_config(vinc, 1);
 	csi_cci_init_helper(vinc->modu_cfg.bus_sel);
 	if (!__vin_core_sensor_verify(sensor)) {
 		sensors->valid_idx = i;
-		sensors->valid[sensors->valid_cnt] = i;
-		sensors->valid_cnt++;
 	} else {
 		sensors->valid_idx = -1;
 	}
@@ -1264,6 +1170,7 @@ int vin_core_check_sensor_list(struct vin_core *vinc, int i)
 		goto check_end;
 	csi_cci_exit_helper(vinc->modu_cfg.bus_sel);
 	__vin_gpio_config(vinc, 0);
+	__vin_disable_regulator_all(vinc);
 	v4l2_subdev_call(csi, core, s_power, 0);
 check_end:
 	vin_print("the final valid index is %d\n", sensors->valid_idx);

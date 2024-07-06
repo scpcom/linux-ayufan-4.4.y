@@ -45,9 +45,9 @@ static int ss_sg_len(struct scatterlist *sg, int total)
 
 static int ss_aes_align_size(int type, int mode)
 {
-	if ((type == SS_METHOD_ECC) || CE_METHOD_IS_HMAC(type)
-		|| (CE_IS_AES_MODE(type, mode, CTS))
-		|| (CE_IS_AES_MODE(type, mode, XTS)))
+	if ((type == SS_METHOD_ECC) || (type == SS_METHOD_HMAC_SHA1)
+		|| (type == SS_METHOD_HMAC_SHA256)
+		|| (CE_METHOD_IS_AES(type) && (mode == SS_AES_MODE_CTS)))
 		return 4;
 	else if ((type == SS_METHOD_DES) || (type == SS_METHOD_3DES))
 		return DES_BLOCK_SIZE;
@@ -110,14 +110,6 @@ static int ss_sg_config(ce_scatter_t *scatter, ss_dma_info_t *info, int type, in
 		cnt++;
 		cur = sg_next(cur);
 	}
-
-#ifdef SS_HASH_HW_PADDING
-	if (CE_METHOD_IS_HMAC(type)) {
-		scatter[cnt-1].len += (tail+3)/4;
-		info->has_padding = 0;
-		return 0;
-	}
-#endif
 
 	info->nents = cnt;
 	if (tail == 0) {
@@ -197,9 +189,6 @@ static void ss_aes_unmap_padding(ce_scatter_t *scatter, ss_dma_info_t *info, int
 
 static int ss_aes_start(ss_aes_ctx_t *ctx, ss_aes_req_ctx_t *req_ctx, int len)
 {
-#ifdef SS_HASH_HW_PADDING
-	int total_len = 0;
-#endif
 	int ret = 0;
 	int src_len = len;
 	int align_size = 0;
@@ -211,28 +200,20 @@ static int ss_aes_start(ss_aes_ctx_t *ctx, ss_aes_req_ctx_t *req_ctx, int len)
 
 	ss_pending_clear(flow);
 	ss_irq_enable(flow);
-
-#ifdef SS_XTS_MODE_ENABLE
-	if (CE_IS_AES_MODE(req_ctx->type, req_ctx->mode, XTS))
-		ss_method_set(req_ctx->dir, SS_METHOD_RAES, task);
-	else
-#endif
-		ss_method_set(req_ctx->dir, req_ctx->type, task);
-
+	
+	ss_method_set(req_ctx->dir, req_ctx->type, task);
 	if ((req_ctx->type == SS_METHOD_RSA) || (req_ctx->type == SS_METHOD_DH)) {
-#ifdef SS_SUPPORT_CE_V3_1
 		if (req_ctx->mode == CE_RSA_OP_M_MUL)
 			ss_rsa_width_set(ctx->iv_size, task);
 		else
 			ss_rsa_width_set(ctx->key_size, task);
-#else
-		ss_rsa_width_set(len, task);
-#endif
 		ss_rsa_op_mode_set(req_ctx->mode, task);
-	} else if (req_ctx->type == SS_METHOD_ECC) {
+	}
+	else if (req_ctx->type == SS_METHOD_ECC) {
 		ss_ecc_width_set(ctx->key_size, task);
 		ss_ecc_op_mode_set(req_ctx->mode, task);
-	} else if (CE_METHOD_IS_HMAC(req_ctx->type))
+	}
+	else if ((req_ctx->type == SS_METHOD_HMAC_SHA1) || (req_ctx->type == SS_METHOD_HMAC_SHA256))
 		ss_hmac_sha1_last(task);
 	else
 		ss_aes_mode_set(req_ctx->mode, task);
@@ -250,16 +231,7 @@ static int ss_aes_start(ss_aes_ctx_t *ctx, ss_aes_req_ctx_t *req_ctx, int len)
 	phy_addr = virt_to_phys(task);
 	SS_DBG("Task addr, vir = 0x%p, phy = 0x%pa\n", task, &phy_addr);
 
-#ifdef SS_XTS_MODE_ENABLE
-	SS_DBG("The current Key:\n");
-	ss_print_hex(ctx->key, ctx->key_size, ctx->key);
-
-	if (CE_IS_AES_MODE(req_ctx->type, req_ctx->mode, XTS))
-		ss_key_set(ctx->key, ctx->key_size/2, task);
-	else
-#endif
-		ss_key_set(ctx->key, ctx->key_size, task);
-
+	ss_key_set(ctx->key, ctx->key_size, task);
 	ctx->comm.flags &= ~SS_FLAG_NEW_KEY;
 	dma_map_single(&ss_dev->pdev->dev, ctx->key, ctx->key_size, DMA_MEM_TO_DEV);
 
@@ -279,7 +251,8 @@ static int ss_aes_start(ss_aes_ctx_t *ctx, ss_aes_req_ctx_t *req_ctx, int len)
 
 	/* Prepare the src scatterlist */
 	req_ctx->dma_src.nents = ss_sg_cnt(req_ctx->dma_src.sg, src_len);
-	if ((req_ctx->type == SS_METHOD_ECC) || CE_METHOD_IS_HMAC(req_ctx->type)
+	if ((req_ctx->type == SS_METHOD_ECC) || (req_ctx->type == SS_METHOD_HMAC_SHA1)
+		|| (req_ctx->type == SS_METHOD_HMAC_SHA256)
 		|| ((req_ctx->type == SS_METHOD_RSA) && (req_ctx->mode == CE_RSA_OP_M_MUL)))
 		src_len = ss_sg_len(req_ctx->dma_src.sg, len);
 	dma_map_sg(&ss_dev->pdev->dev, req_ctx->dma_src.sg, req_ctx->dma_src.nents, DMA_MEM_TO_DEV);
@@ -293,7 +266,7 @@ static int ss_aes_start(ss_aes_ctx_t *ctx, ss_aes_req_ctx_t *req_ctx, int len)
 	ss_aes_map_padding(task->dst, &req_ctx->dma_dst, req_ctx->mode, DMA_DEV_TO_MEM);
 
 #ifdef SS_SUPPORT_CE_V3_1
-	if (CE_IS_AES_MODE(req_ctx->type, req_ctx->mode, CTS)) {
+	if ((req_ctx->type == SS_METHOD_AES) && (req_ctx->mode == SS_AES_MODE_CTS)) {
 		ss_data_len_set(len, task);
 /*		if (len < SZ_4K)  A bad way to determin the last packet of CTS mode. */
 			ss_cts_last(task);
@@ -301,29 +274,7 @@ static int ss_aes_start(ss_aes_ctx_t *ctx, ss_aes_req_ctx_t *req_ctx, int len)
 	else
 		ss_data_len_set(DIV_ROUND_UP(src_len, align_size)*align_size/4, task);
 #else
-	if (CE_IS_AES_MODE(req_ctx->type, req_ctx->mode, CTS)) {
-		/* A bad way to determin the last packet. */
-		/* if (len < SZ_4K) */
-			ss_cts_last(task);
-		ss_data_len_set(src_len, task);
-	} else if (CE_IS_AES_MODE(req_ctx->type, req_ctx->mode, XTS)) {
-		ss_xts_first(task);
-		ss_xts_last(task);
-		ss_data_len_set(src_len, task);
-	} else if (CE_METHOD_IS_HMAC(req_ctx->type)) {
-		total_len = src_len * 8;
-		ss_data_len_set(total_len, task);
-		task->ctr_addr = task->key_addr;
-		dma_map_single(&ss_dev->pdev->dev, &total_len,
-			4, DMA_MEM_TO_DEV);
-		task->key_addr = virt_to_phys(&total_len);
-		SS_DBG("Total_len: %d/%#x(%p)\n", total_len, total_len,
-			&total_len);
-	} else if (req_ctx->type == SS_METHOD_RSA)
-		ss_data_len_set(len*3, task);
-	else
-		ss_data_len_set(DIV_ROUND_UP(src_len, align_size)*align_size,
-			task);
+	ss_data_len_set(len, task);
 #endif
 
 	/* Start CE controller. */
@@ -357,24 +308,16 @@ static int ss_aes_start(ss_aes_ctx_t *ctx, ss_aes_req_ctx_t *req_ctx, int len)
 		dma_unmap_single(&ss_dev->pdev->dev, virt_to_phys(ctx->iv), ctx->iv_size, DMA_MEM_TO_DEV);
 		dma_unmap_single(&ss_dev->pdev->dev, virt_to_phys(ctx->next_iv), ctx->iv_size, DMA_DEV_TO_MEM);
 	}
-	/* Backup the next IV from ctr_descriptor, except CBC/CTS/XTS mode. */
+	/* Backup the next IV from ctr_descriptor, except CBC/CTS mode. */
 	if (CE_METHOD_IS_AES(req_ctx->type) && (req_ctx->mode != SS_AES_MODE_CBC)
-					&& (req_ctx->mode != SS_AES_MODE_CTS)
-					&& (req_ctx->mode != SS_AES_MODE_XTS))
+										&& (req_ctx->mode != SS_AES_MODE_CTS))
 		memcpy(ctx->iv, ctx->next_iv, ctx->iv_size);
 
 	dma_unmap_single(&ss_dev->pdev->dev, virt_to_phys(ctx->key), ctx->key_size, DMA_MEM_TO_DEV);
 
-#ifdef SS_HASH_HW_PADDING
-	if (CE_METHOD_IS_HMAC(req_ctx->type)) {
-		dma_unmap_single(&ss_dev->pdev->dev, virt_to_phys(&total_len),
-			4, DMA_MEM_TO_DEV);
-	}
-#endif
-
 	SS_DBG("After CE, TSR: 0x%08x, ERR: 0x%08x\n", ss_reg_rd(CE_REG_TSR), ss_reg_rd(CE_REG_ERR));
 	if (ss_flow_err(flow)) {
-		SS_ERR("CE return error: %d\n", ss_flow_err(flow));
+		SS_ERR("CE return error: %d \n", ss_flow_err(flow));
 		return -EINVAL;
 	}
 
@@ -565,7 +508,7 @@ u32 ss_hash_start(ss_hash_ctx_t *ctx,
 	ce_task_desc_t *task = &ss_dev->flows[flow].task;
 
 	/* Total len is too small, so process it in the padding data later. */
-	if ((last == 0) && (len > 0) && (len < blk_size)) {
+	if ((len > 0) && (len < blk_size)) {
 		ctx->cnt += len;
 		return 0;
 	}
@@ -583,9 +526,8 @@ u32 ss_hash_start(ss_hash_ctx_t *ctx,
 
 	ss_method_set(req_ctx->dir, req_ctx->type, task);
 
-	SS_DBG("Flow %d, Dir %d, Method %d, Mode %d, len %d/%d, last %d\n",
-		flow, req_ctx->dir, req_ctx->type, req_ctx->mode,
-		len, ctx->cnt, last);
+	SS_DBG("Flow: %d, Dir: %d, Method: %d, Mode: %d, len: %d / %d \n", flow,
+			req_ctx->dir, req_ctx->type, req_ctx->mode, len, ctx->cnt);
 	SS_DBG("IV address = 0x%p, size = %d\n", ctx->md, ctx->md_size);
 	phy_addr = virt_to_phys(task);
 	SS_DBG("Task addr, vir = 0x%p, phy = %pa\n", task, &phy_addr);
@@ -599,28 +541,19 @@ u32 ss_hash_start(ss_hash_ctx_t *ctx,
 #else
 	if (last == 1) {
 		ss_hmac_sha1_last(task);
-		ss_data_len_set(ctx->tail_len*8, task);
-	} else
+		ss_data_len_set(len*8, task);
+		if (len == 0)
+			len = SS_HASH_PAD_SIZE;
+	} else {
 		ss_data_len_set((len - len%blk_size)*8, task);
+	}
 #endif
 
 	/* Prepare the src scatterlist */
 	req_ctx->dma_src.nents = ss_sg_cnt(req_ctx->dma_src.sg, len);
-	dma_map_sg(&ss_dev->pdev->dev, req_ctx->dma_src.sg,
-		req_ctx->dma_src.nents, DMA_MEM_TO_DEV);
+	dma_map_sg(&ss_dev->pdev->dev, req_ctx->dma_src.sg, req_ctx->dma_src.nents, DMA_MEM_TO_DEV);
 	ss_sg_config(task->src,
 		&req_ctx->dma_src, req_ctx->type, 0, len%blk_size);
-
-#ifdef SS_HASH_HW_PADDING
-	if (last == 1) {
-		task->src[0].len = (ctx->tail_len + 3)/4;
-		SS_DBG("cnt %d, tail_len %d.\n", ctx->cnt, ctx->tail_len);
-		ctx->cnt <<= 3; /* Translate to bits in the last pakcket */
-		dma_map_single(&ss_dev->pdev->dev, &ctx->cnt, 4,
-			DMA_MEM_TO_DEV);
-		task->key_addr = virt_to_phys(&ctx->cnt);
-	}
-#endif
 
 	/* Prepare the dst scatterlist */
 	task->dst[0].addr = virt_to_phys(digest);
@@ -648,16 +581,9 @@ u32 ss_hash_start(ss_hash_ctx_t *ctx,
 	dma_unmap_single(&ss_dev->pdev->dev, virt_to_phys(digest), SHA512_DIGEST_SIZE, DMA_DEV_TO_MEM);
 	dma_unmap_single(&ss_dev->pdev->dev, virt_to_phys(ctx->md), ctx->md_size, DMA_MEM_TO_DEV);
 	dma_unmap_sg(&ss_dev->pdev->dev, req_ctx->dma_src.sg, req_ctx->dma_src.nents, DMA_MEM_TO_DEV);
-#ifdef SS_HASH_HW_PADDING
-	if (last == 1) {
-		dma_unmap_single(&ss_dev->pdev->dev, virt_to_phys(&ctx->cnt), 4,
-			DMA_MEM_TO_DEV);
-		ctx->cnt >>= 3;
-	}
-#endif
 
 	SS_DBG("After CE, TSR: 0x%08x, ERR: 0x%08x\n", ss_reg_rd(CE_REG_TSR), ss_reg_rd(CE_REG_ERR));
-	SS_DBG("After CE, dst data:\n");
+	SS_DBG("After CE, dst data: \n");
 	ss_print_hex(digest, SHA512_DIGEST_SIZE, digest);
 
 	if (ss_flow_err(flow)) {
@@ -687,8 +613,8 @@ void ss_load_iv(ss_aes_ctx_t *ctx, ss_aes_req_ctx_t *req_ctx, char *buf, int siz
 
 	/* CBC/CTS need update the IV eachtime. */
 	if ((ctx->cnt == 0)
-		|| (CE_IS_AES_MODE(req_ctx->type, req_ctx->mode, CBC))
-		|| (CE_IS_AES_MODE(req_ctx->type, req_ctx->mode, CTS))) {
+		|| (CE_METHOD_IS_AES(req_ctx->type) && (req_ctx->mode == SS_AES_MODE_CBC))
+		|| (CE_METHOD_IS_AES(req_ctx->type) && (req_ctx->mode == SS_AES_MODE_CTS))) {
 		SS_DBG("IV address = %p, size = %d\n", buf, size);
 		ctx->iv_size = size;
 		memcpy(ctx->iv, buf, ctx->iv_size);

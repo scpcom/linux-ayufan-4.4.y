@@ -357,82 +357,62 @@ void xradio_debug_release_priv(struct xradio_vif *priv);
 
 static inline void xradio_debug_txed(struct xradio_vif *priv)
 {
-	if (!priv->debug)
-		return;
 	++priv->debug->tx;
 }
 
 static inline void xradio_debug_txed_agg(struct xradio_vif *priv)
 {
-	if (!priv->debug)
-		return;
 	++priv->debug->tx_agg;
 }
 
 static inline void xradio_debug_txed_multi(struct xradio_vif *priv,
 					   int count)
 {
-	if (!priv->debug)
-		return;
 	++priv->debug->tx_multi;
 	priv->debug->tx_multi_frames += count;
 }
 
 static inline void xradio_debug_rxed(struct xradio_vif *priv)
 {
-	if (!priv->debug)
-		return;
 	++priv->debug->rx;
 }
 
 static inline void xradio_debug_rxed_agg(struct xradio_vif *priv)
 {
-	if (!priv->debug)
-		return;
 	++priv->debug->rx_agg;
 }
 
-static inline void xradio_debug_tx_cache_miss(struct xradio_common *hw_priv)
+static inline void xradio_debug_tx_cache_miss(struct xradio_common *common)
 {
-	if (!hw_priv->debug)
-		return;
-	++hw_priv->debug->tx_cache_miss;
+	++common->debug->tx_cache_miss;
 }
 
 static inline void xradio_debug_tx_align(struct xradio_vif *priv)
 {
-	if (!priv->debug)
-		return;
 	++priv->debug->tx_align;
 }
 
 static inline void xradio_debug_tx_ttl(struct xradio_vif *priv)
 {
-	if (!priv->debug)
-		return;
 	++priv->debug->tx_ttl;
 }
 
 static inline void xradio_debug_tx_burst(struct xradio_common *hw_priv)
 {
-	if (!hw_priv->debug)
-		return;
-	++hw_priv->debug->tx_burst;
+	if (!!hw_priv->debug)
+		++hw_priv->debug->tx_burst;
 }
 
 static inline void xradio_debug_rx_burst(struct xradio_common *hw_priv)
 {
-	if (!hw_priv->debug)
-		return;
-	++hw_priv->debug->rx_burst;
+	if (!!hw_priv->debug)
+		++hw_priv->debug->rx_burst;
 }
 
 static inline void xradio_debug_ba(struct xradio_common *hw_priv,
 				   int ba_cnt, int ba_acc, int ba_cnt_rx,
 				   int ba_acc_rx)
 {
-	if (!hw_priv->debug)
-		return;
 	hw_priv->debug->ba_cnt = ba_cnt;
 	hw_priv->debug->ba_acc = ba_acc;
 	hw_priv->debug->ba_cnt_rx = ba_cnt_rx;
@@ -489,7 +469,7 @@ static inline void xradio_debug_rxed_agg(struct xradio_vif *priv)
 {
 }
 
-static inline void xradio_debug_tx_cache_miss(struct xradio_common *hw_priv)
+static inline void xradio_debug_tx_cache_miss(struct xradio_common *common)
 {
 }
 

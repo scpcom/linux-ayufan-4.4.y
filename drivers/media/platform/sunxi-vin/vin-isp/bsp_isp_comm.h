@@ -21,9 +21,6 @@
 #define ALIGN_4K(x)	(((x) + (4095)) & ~(4095))
 #define ALIGN_32B(x)	(((x) + (31)) & ~(31))
 #define ALIGN_16B(x)	(((x) + (15)) & ~(15))
-#define MAX(a, b)	(((a) > (b)) ? (a) : (b))
-#define MIN(a, b)	(((a) < (b)) ? (a) : (b))
-#define CLIP(a, i, s)	(((a) > (s)) ? (s) : MAX(a, i))
 
 enum isp_platform {
 	ISP_PLATFORM_SUN8IW1P1 = 0,
@@ -96,6 +93,9 @@ enum isp_platform {
 #define PARA_SAVE_INT_EN	(1 << 2)
 #define PARA_LOAD_INT_EN	(1 << 3)
 #define SRC0_FIFO_INT_EN	(1 << 4)
+#define SRC1_FIFO_INT_EN	(1 << 5)
+#define DISC_FIFO_INT_EN	(1 << 5)
+#define ROT_FINISH_INT_EN	(1 << 6)
 #define N_LINE_START_INT_EN	(1 << 7)
 #define FRAME_ERROR_INT_EN	(1 << 8)
 #define FRAME_LOST_INT_EN	(1 << 14)

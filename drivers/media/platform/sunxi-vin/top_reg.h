@@ -1,13 +1,3 @@
-/*
- *
- * Copyright (c) 2016 Allwinnertech Co., Ltd.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- */
 
 #ifndef __CSIC__TOP__REG__H__
 #define __CSIC__TOP__REG__H__
@@ -17,6 +7,8 @@
 #define MAX_CSIC_TOP_NUM 2
 #define ISP_INPUT(x, y, i, j) ISP##x##_INPUT##y##_PARSER##i##_CH##j
 #define VIPP_INPUT(x, i, j) VIPP##x##_INPUT_ISP##i##_CH##j
+
+#define ISP_VIPP_SEL_SEPARATE
 
 /*register value*/
 
@@ -97,6 +89,26 @@ enum vipp3_input {
 
 /*register data struct*/
 
+#ifdef ISP_VIPP_SEL_SEPARATE
+union csic_isp_input {
+	enum isp0_input0 isp0_in0;
+	enum isp0_input1 isp0_in1;
+	enum isp0_input2 isp0_in2;
+	enum isp0_input3 isp0_in3;
+	enum isp1_input0 isp1_in0;
+	enum isp1_input1 isp1_in1;
+	enum isp1_input2 isp1_in2;
+	enum isp1_input3 isp1_in3;
+};
+#else
+union csic_vipp_input {
+	enum vipp0_input vipp0_in;
+	enum vipp1_input vipp1_in;
+	enum vipp2_input vipp2_in;
+	enum vipp3_input vipp3_in;
+};
+#endif
+
 struct csic_feature_list {
 	unsigned int dma_num;
 	unsigned int vipp_num;
@@ -118,7 +130,7 @@ void csic_top_wdr_mode(unsigned int sel, unsigned int en);
 void csic_top_sram_pwdn(unsigned int sel, unsigned int en);
 void csic_top_switch_ncsi(unsigned int sel, unsigned int en);
 void csic_top_version_read_en(unsigned int sel, unsigned int en);
-
+#ifdef ISP_VIPP_SEL_SEPARATE
 void csic_isp0_input0_select(unsigned int sel, enum isp0_input0 isp0_in0);
 void csic_isp0_input1_select(unsigned int sel, enum isp0_input1 isp0_in1);
 void csic_isp0_input2_select(unsigned int sel, enum isp0_input2 isp0_in2);
@@ -133,11 +145,12 @@ void csic_vipp0_input_select(unsigned int sel, enum vipp0_input vipp0_in);
 void csic_vipp1_input_select(unsigned int sel, enum vipp1_input vipp1_in);
 void csic_vipp2_input_select(unsigned int sel, enum vipp2_input vipp2_in);
 void csic_vipp3_input_select(unsigned int sel, enum vipp3_input vipp3_in);
-
-void csic_isp_input_select(unsigned int sel, unsigned int isp, unsigned int in,
-				unsigned int psr, unsigned int ch);
-void csic_vipp_input_select(unsigned int sel, unsigned int vipp,
-				unsigned int isp, unsigned int ch);
+#else
+void csic_isp_input_select(unsigned int sel, unsigned int x, unsigned int y,
+				union csic_isp_input isp_in);
+void csic_vipp_input_select(unsigned int sel, unsigned int x,
+				union csic_vipp_input vipp_in);
+#endif
 
 void csic_feature_list_get(unsigned int sel, struct csic_feature_list *fl);
 void csic_version_get(unsigned int sel, struct csic_version *v);
