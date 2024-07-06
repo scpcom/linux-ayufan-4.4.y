@@ -54,6 +54,10 @@
  * data stored stored in the BSS struct, since the beacon IEs are
  * also linked into the probe response struct.
  */
+static int bss_entries_limit = 1000;
+module_param(bss_entries_limit, int, 0644);
+MODULE_PARM_DESC(bss_entries_limit,
+		"limit to number of scan BSS entries (per wiphy, default 1000)");
 
 #define IEEE80211_SCAN_RESULT_EXPIRE	(7 * HZ)
 
