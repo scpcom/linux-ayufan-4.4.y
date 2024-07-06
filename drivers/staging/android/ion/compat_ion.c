@@ -17,6 +17,7 @@
 #include <linux/compat.h>
 #include <linux/fs.h>
 #include <linux/uaccess.h>
+#include <asm/cacheflush.h>
 
 #include "ion.h"
 #include "compat_ion.h"
@@ -183,6 +184,27 @@ long compat_ion_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 		return filp->f_op->unlocked_ioctl(filp, ION_IOC_CUSTOM,
 							(unsigned long)data);
 	}
+       case COMPAT_ION_IOC_SUNXI_FLUSH_RANGE:
+       {
+               compat_sunxi_cache_range data;
+
+               if(copy_from_user(&data, (void __user *)arg, sizeof(compat_sunxi_cache_range)))
+                       return -EFAULT;
+		if (IS_ERR((void*)(unsigned long)(unsigned int)data.start) ||
+			IS_ERR((void*)(unsigned long)(unsigned int)data.end)) {
+			ION_DEBUG(ION_ERR," flush 0x%x ~ 0x%x fault user virtual address!\n",
+				(unsigned int)data.start, (unsigned int)data.end);
+			return -EFAULT;
+		}
+		ION_DEBUG(ION_ALL, "compat flush range start:0x%x end:0x%x size:0x%x\n",
+			   data.start, data.end, ((unsigned int)data.end - (unsigned int)data.start));
+               __dma_flush_range( (void*)(unsigned long)(unsigned int)data.start , (void*)(unsigned long)(unsigned int)data.end );
+
+               if(copy_to_user((void __user *)arg, &data, sizeof(data)))
+                       return -EFAULT;
+
+               break;
+       }
 	case ION_IOC_SHARE:
 	case ION_IOC_MAP:
 	case ION_IOC_IMPORT:
@@ -192,4 +214,6 @@ long compat_ion_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 	default:
 		return -ENOIOCTLCMD;
 	}
+
+       return 0;
 }

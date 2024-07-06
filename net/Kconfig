@@ -334,14 +334,16 @@ config FIB_RULES
 menuconfig WIRELESS
 	bool "Wireless"
 	depends on !S390
-	default y
+	default n
 
+if !COMPAT_WIRELESS
 if WIRELESS
 
 source "net/wireless/Kconfig"
 source "net/mac80211/Kconfig"
 
 endif # WIRELESS
+endif # !COMPAT_WIRELESS
 
 source "net/wimax/Kconfig"
 
@@ -350,7 +352,6 @@ source "net/9p/Kconfig"
 source "net/caif/Kconfig"
 source "net/ceph/Kconfig"
 source "net/nfc/Kconfig"
-
 
 endif   # if NET
 

@@ -70,6 +70,7 @@ config ARM
 	  <http://www.arm.linux.org.uk/>.
 
 config ARM_HAS_SG_CHAIN
+	select ARCH_HAS_SG_CHAIN
 	bool
 
 config NEED_SG_DMA_LENGTH
@@ -347,6 +348,19 @@ config ARCH_VERSATILE
 	select VERSATILE_FPGA_IRQ
 	help
 	  This enables support for ARM Ltd Versatile board.
+
+config ARCH_SUNXI
+	bool "Allwinner Ltd. SUNXI family"
+	#select ARM_AMBA
+	select CLKSRC_MMIO
+	select GENERIC_CLOCKEVENTS
+	select HAVE_CLK
+	select NEED_MACH_MEMORY_H
+	select ARCH_HAVE_CUSTOM_GPIO_H
+	select ARCH_HAS_CPUFREQ
+	select ARCH_HAS_SG_CHAIN
+	help
+	  This enables support for systems based on sunxi soc.
 
 config ARCH_AT91
 	bool "Atmel AT91"
@@ -1007,7 +1021,9 @@ source "arch/arm/mach-exynos/Kconfig"
 
 source "arch/arm/mach-shmobile/Kconfig"
 
+if ARCH_SUNXI
 source "arch/arm/mach-sunxi/Kconfig"
+endif
 
 source "arch/arm/mach-prima2/Kconfig"
 
@@ -1716,7 +1732,7 @@ config ARCH_NR_GPIO
 	default 512 if SOC_OMAP5
 	default 392 if ARCH_U8500
 	default 352 if ARCH_VT8500
-	default 288 if ARCH_SUNXI
+	default 2048 if ARCH_SUNXI
 	default 264 if MACH_H4700
 	default 0
 	help

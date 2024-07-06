@@ -45,6 +45,9 @@ struct wb_writeback_work {
 	unsigned int for_kupdate:1;
 	unsigned int range_cyclic:1;
 	unsigned int for_background:1;
+#ifdef CONFIG_FILE_DIRTY_LIMIT
+	unsigned for_file:1;		/* A big file writeback */
+#endif
 	enum wb_reason reason;		/* why was writeback initiated? */
 
 	struct list_head list;		/* pending work list */
@@ -289,6 +292,47 @@ out:
 	return moved;
 }
 
+#ifdef CONFIG_FILE_DIRTY_LIMIT
+static inline bool should_limit_file_dirties(struct inode *inode)
+{
+	unsigned long file_dirty;
+	unsigned long file_limit;
+	struct backing_dev_info *bdi = inode->i_sb->s_bdi;
+	file_limit = bdi_file_limit(bdi);
+	file_dirty = inode->i_mapping->nrdirty + inode->i_mapping->nrwriteback;
+	if (inode->i_mapping->nrdirty < bdi->writeback_batch + 32 ||
+			file_dirty < file_limit ||
+			inode->i_mapping->nrwriteback >
+			file_limit - (file_limit >> 2))
+		return false;
+
+	return true;
+}
+
+static int move_bigfile_inodes(struct list_head *fetch_queue,
+			       struct list_head *dispatch_queue,
+			       struct wb_writeback_work *work)
+{
+	struct list_head *pos, *node;
+	struct inode *inode;
+	int moved = 0;
+
+	list_for_each_prev_safe(pos, node, fetch_queue) {
+		inode = wb_inode(pos);
+		if (inode->i_ino == 0)
+			continue;
+
+		if (!should_limit_file_dirties(inode))
+			continue;
+		list_move_tail(&inode->i_wb_list, dispatch_queue);
+		moved++;
+		break;
+	}
+
+	return moved;
+}
+#endif
+
 /*
  * Queue all expired dirty inodes for io, eldest first.
  * Before
@@ -308,6 +352,21 @@ static void queue_io(struct bdi_writeback *wb, struct wb_writeback_work *work)
 	moved = move_expired_inodes(&wb->b_dirty, &wb->b_io, work);
 	trace_writeback_queue_io(wb, work, moved);
 }
+
+#ifdef CONFIG_FILE_DIRTY_LIMIT
+static int queue_file_io(struct bdi_writeback *wb, struct wb_writeback_work *work)
+{
+	int moved;
+	assert_spin_locked(&wb->list_lock);
+
+	moved = move_bigfile_inodes(&wb->b_dirty, &wb->b_io, work);
+	if (moved == 0)
+		moved = move_bigfile_inodes(&wb->b_io, &wb->b_io, work);
+	if (moved == 0)
+		moved = move_bigfile_inodes(&wb->b_more_io, &wb->b_io, work);
+	return moved;
+}
+#endif
 
 static int write_inode(struct inode *inode, struct writeback_control *wbc)
 {
@@ -408,10 +467,18 @@ static void requeue_inode(struct inode *inode, struct bdi_writeback *wb,
 		 * We didn't write back all the pages.  nfs_writepages()
 		 * sometimes bales out without doing anything.
 		 */
+#ifdef CONFIG_FILE_DIRTY_LIMIT
+		if (wbc->nr_to_write <= 0 && !wbc->for_file) {
+#else
 		if (wbc->nr_to_write <= 0) {
+#endif
 			/* Slice used up. Queue for next turn. */
 			requeue_io(inode, wb);
 		} else {
+#ifdef CONFIG_FILE_DIRTY_LIMIT
+		if (wbc->for_file)
+			inode->dirtied_when = jiffies;
+#endif
 			/*
 			 * Writeback blocked by something other than
 			 * congestion. Delay the inode for some time to
@@ -422,6 +489,10 @@ static void requeue_inode(struct inode *inode, struct bdi_writeback *wb,
 			redirty_tail(inode, wb);
 		}
 	} else if (inode->i_state & I_DIRTY) {
+#ifdef CONFIG_FILE_DIRTY_LIMIT
+		if (wbc->for_file)
+			inode->dirtied_when = jiffies;
+#endif
 		/*
 		 * Filesystems can dirty the inode during writeback operations,
 		 * such as delayed allocation during submission or metadata
@@ -583,8 +654,15 @@ static long writeback_chunk_size(struct backing_dev_info *bdi,
 	 *                   (quickly) tag currently dirty pages
 	 *                   (maybe slowly) sync all tagged pages
 	 */
+#ifndef CONFIG_FILE_DIRTY_LIMIT
 	if (work->sync_mode == WB_SYNC_ALL || work->tagged_writepages)
 		pages = LONG_MAX;
+#else
+	if (work->for_file)
+		pages = work->nr_pages;
+	else if (work->sync_mode == WB_SYNC_ALL || work->tagged_writepages)
+		pages = LONG_MAX;
+#endif
 	else {
 		pages = min(bdi->avg_write_bandwidth / 2,
 			    global_dirty_limit / DIRTY_SCOPE);
@@ -610,6 +688,9 @@ static long writeback_sb_inodes(struct super_block *sb,
 		.tagged_writepages	= work->tagged_writepages,
 		.for_kupdate		= work->for_kupdate,
 		.for_background		= work->for_background,
+#ifdef CONFIG_FILE_DIRTY_LIMIT
+		.for_file		= work->for_file,
+#endif
 		.range_cyclic		= work->range_cyclic,
 		.range_start		= 0,
 		.range_end		= LLONG_MAX,
@@ -651,6 +732,14 @@ static long writeback_sb_inodes(struct super_block *sb,
 			redirty_tail(inode, wb);
 			continue;
 		}
+#ifdef CONFIG_FILE_DIRTY_LIMIT
+		if (work->for_file) {
+			if (!should_limit_file_dirties(inode)) {
+				spin_unlock(&inode->i_lock);
+				break;
+			}
+		}
+#endif
 		if ((inode->i_state & I_SYNC) && wbc.sync_mode != WB_SYNC_ALL) {
 			/*
 			 * If this inode is locked for writeback and we are not
@@ -713,6 +802,10 @@ static long writeback_sb_inodes(struct super_block *sb,
 			if (work->nr_pages <= 0)
 				break;
 		}
+#ifdef CONFIG_FILE_DIRTY_LIMIT
+		if (work->for_file)
+			break;
+#endif
 	}
 	return wrote;
 }
@@ -746,6 +839,10 @@ static long __writeback_inodes_wb(struct bdi_writeback *wb,
 			if (work->nr_pages <= 0)
 				break;
 		}
+#ifdef CONFIG_FILE_DIRTY_LIMIT
+		if (work->for_file)
+			break;
+#endif
 	}
 	/* Leave any unwritten inodes on b_io */
 	return wrote;
@@ -862,8 +959,17 @@ static long wb_writeback(struct bdi_writeback *wb,
 			oldest_jif = jiffies;
 
 		trace_writeback_start(wb->bdi, work);
+
+#ifdef CONFIG_FILE_DIRTY_LIMIT
+		if (work->for_file) {
+			if (queue_file_io(wb, work) == 0)
+				break;
+		} else if (list_empty(&wb->b_io))
+			queue_io(wb, work);
+#else
 		if (list_empty(&wb->b_io))
 			queue_io(wb, work);
+#endif
 		if (work->sb)
 			progress = writeback_sb_inodes(work->sb, wb, work);
 		else
@@ -871,7 +977,10 @@ static long wb_writeback(struct bdi_writeback *wb,
 		trace_writeback_written(wb->bdi, work);
 
 		wb_update_bandwidth(wb, wb_start);
-
+#ifdef CONFIG_FILE_DIRTY_LIMIT
+		if (work->for_file)
+			break;
+#endif
 		/*
 		 * Did we write something? Try for more
 		 *
@@ -988,6 +1097,29 @@ static long wb_check_old_data_flush(struct bdi_writeback *wb)
 	return 0;
 }
 
+#ifdef CONFIG_FILE_DIRTY_LIMIT
+static long wb_file_flush(struct bdi_writeback *wb)
+{
+	long nr_pages;
+
+	nr_pages = get_nr_dirty_pages();
+
+	if (nr_pages) {
+		struct wb_writeback_work work = {
+			.nr_pages	= MIN_WRITEBACK_PAGES,
+			.sync_mode	= WB_SYNC_NONE,
+			.for_file	= 1,
+			.range_cyclic	= 1,
+			.reason		= WB_REASON_DOWNGRADE_FILEDIRTY,
+		};
+
+		return wb_writeback(wb, &work);
+	}
+
+	return 0;
+}
+#endif
+
 /*
  * Retrieve work items and do the writeback they describe
  */
@@ -1019,7 +1151,10 @@ long wb_do_writeback(struct bdi_writeback *wb, int force_wait)
 		else
 			kfree(work);
 	}
-
+#ifdef CONFIG_FILE_DIRTY_LIMIT
+	if (limit_file_dirty)
+		wrote += wb_file_flush(wb);
+#endif
 	/*
 	 * Check for periodic writeback, kupdated() style
 	 */

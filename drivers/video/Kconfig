@@ -17,6 +17,8 @@ config SH_LCD_MIPI_DSI
 
 source "drivers/char/agp/Kconfig"
 
+source "modules/gpu/Kconfig"
+
 source "drivers/gpu/vga/Kconfig"
 
 source "drivers/gpu/drm/Kconfig"
@@ -261,6 +263,8 @@ config FB_TILEBLITTING
 
 comment "Frame buffer hardware drivers"
 	depends on FB
+
+source "drivers/video/sunxi/Kconfig"
 
 config FB_GRVGA
 	tristate "Aeroflex Gaisler framebuffer support"

@@ -815,23 +815,29 @@ EXPORT_SYMBOL_GPL(usb_add_config);
 static void unbind_config(struct usb_composite_dev *cdev,
 			      struct usb_configuration *config)
 {
-	while (!list_empty(&config->functions)) {
-		struct usb_function		*f;
+	if(config->cdev != NULL){
+		while (!list_empty(&config->functions)) {
+			struct usb_function		*f;
 
-		f = list_first_entry(&config->functions,
-				struct usb_function, list);
-		list_del(&f->list);
-		if (f->unbind) {
-			DBG(cdev, "unbind function '%s'/%p\n", f->name, f);
-			f->unbind(config, f);
-			/* may free memory for "f" */
+			f = list_first_entry(&config->functions,
+					struct usb_function, list);
+			list_del(&f->list);
+			if (f->unbind) {
+				DBG(cdev, "unbind function '%s'/%p\n", f->name, f);
+				f->unbind(config, f);
+				/* may free memory for "f" */
+			}
+		}
+		if (config->unbind) {
+			DBG(cdev, "unbind config '%s'/%p\n", config->label, config);
+			config->unbind(config);
+				/* may free memory for "c" */
 		}
 	}
-	if (config->unbind) {
-		DBG(cdev, "unbind config '%s'/%p\n", config->label, config);
-		config->unbind(config);
-			/* may free memory for "c" */
-	}
+
+#ifdef CONFIG_USB_SUNXI_UDC0
+	usb_ep_autoconfig_reset(cdev->gadget);
+#endif
 }
 
 /**
@@ -1421,6 +1427,19 @@ unknown:
 			ctrl->bRequestType, ctrl->bRequest,
 			w_value, w_index, w_length);
 
+#ifdef CONFIG_USB_SUNXI_G_WEBCAM
+		/* getcur request about request error code of webcam. */
+		if (ctrl->bRequest == 0x81 && ctrl->bRequestType == 0xa1
+		    && ctrl->wLength == 0x1 && ctrl->wValue == 0x200
+		    && ctrl->wIndex == 0x0) {
+			u8 ret_data = 0x06;
+
+			value = min_t(w_length, (u16) 1);
+			memcpy(req->buf, &ret_data, value);
+			break;
+		}
+#endif
+
 		/* functions always handle their interfaces and endpoints...
 		 * punt other recipients (other, WUSB, ...) to the current
 		 * configuration code.
@@ -1526,7 +1545,7 @@ static void __composite_unbind(struct usb_gadget *gadget, bool unbind_driver)
 		struct usb_configuration	*c;
 		c = list_first_entry(&cdev->configs,
 				struct usb_configuration, list);
-		list_del(&c->list);
+		//list_del(&c->list);
 		unbind_config(cdev, c);
 	}
 	if (cdev->driver->unbind && unbind_driver)

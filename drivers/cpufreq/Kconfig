@@ -188,6 +188,35 @@ config CPU_FREQ_GOV_INTERACTIVE
 
 	  If in doubt, say N.
 
+config CPU_AUTOHOTPLUG
+	tristate "CPU autohotplug support"
+	  depends on SCHED_HMP || SCHED_SMP_DCMP || SMP
+	  depends on HOTPLUG_CPU && !BL_SWITCHER
+	  default n
+
+config CPU_AUTOHOTPLUG_ROOMAGE
+	  tristate "CPU autohotplug support roomage limit"
+	  depends on CPU_AUTOHOTPLUG
+	  default y
+
+config CPU_AUTOHOTPLUG_STATS
+	tristate "CPU autohotplug statistics"
+	depends on CPU_AUTOHOTPLUG
+	default y
+	help
+	  Enable up/down count and total time plugged statistics per CPU.
+
+	  If in doubt say N.
+
+config CPU_AUTOHOTPLUG_INPUT_EVNT_NOTIFY
+	bool "CPU autohotplug input event notify"
+	depends on INPUT && CPU_AUTOHOTPLUG
+	help
+	  This will allow input sub-system notify autohotplug that some user event has happened,
+	  need change cpu up threshold to response it.
+
+	  If in doubt, say N.
+
 config CPU_FREQ_GOV_CONSERVATIVE
 	tristate "'conservative' cpufreq governor"
 	depends on CPU_FREQ
@@ -220,6 +249,15 @@ config GENERIC_CPUFREQ_CPU0
 	  This adds a generic cpufreq driver for CPU0 frequency management.
 	  It supports both uniprocessor (UP) and symmetric multiprocessor (SMP)
 	  systems which share clock and voltage across all CPUs.
+
+	  If in doubt, say N.
+
+config CPU_FREQ_INPUT_EVNT_NOTIFY
+	bool "CPU frequency input event notify"
+	depends on INPUT && CPU_FREQ_GOV_INTERACTIVE
+	help
+	  This will allow input sub-system notify cpufreq that some user event has happend,
+	  need up cpu frequency to response it.
 
 	  If in doubt, say N.
 

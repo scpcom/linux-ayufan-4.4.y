@@ -13,6 +13,8 @@ if BLOCK
 source "fs/ext2/Kconfig"
 source "fs/ext3/Kconfig"
 source "fs/ext4/Kconfig"
+source "fs/sdcardfs/Kconfig"
+source "fs/msdcardfs/Kconfig"
 
 config FS_XIP
 # execute in place
@@ -67,6 +69,7 @@ source "fs/quota/Kconfig"
 
 source "fs/autofs4/Kconfig"
 source "fs/fuse/Kconfig"
+source "fs/overlayfs/Kconfig"
 
 config GENERIC_ACL
 	bool
@@ -267,5 +270,10 @@ endif # NETWORK_FILESYSTEMS
 
 source "fs/nls/Kconfig"
 source "fs/dlm/Kconfig"
+
+
+# for fs compat
+source "fs/fs_compat.kconfig"
+
 
 endmenu

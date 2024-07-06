@@ -94,7 +94,7 @@ module_param (log2_irq_thresh, int, S_IRUGO);
 MODULE_PARM_DESC (log2_irq_thresh, "log2 IRQ latency, 1-64 microframes");
 
 /* initial park setting:  slower than hw default */
-static unsigned park = 0;
+static unsigned park = 3;
 module_param (park, uint, S_IRUGO);
 MODULE_PARM_DESC (park, "park setting; 1-3 back-to-back async packets");
 
@@ -770,6 +770,16 @@ static irqreturn_t ehci_irq (struct usb_hcd *hcd)
 	if (status & STS_PCD) {
 		unsigned	i = HCS_N_PORTS (ehci->hcs_params);
 		u32		ppcd = ~0;
+{
+		int pstatus0 = 0;
+		pstatus0 = ehci_readl(ehci, &ehci->regs->port_status[0]);
+
+		if((pstatus0 & PORT_CONNECT) && (pstatus0 & PORT_CSC)){
+			printk("ehci_irq: highspeed device connect\n");
+		}else if(!(pstatus0 & PORT_CONNECT) && (pstatus0 & PORT_CSC)){
+			printk("ehci_irq: highspeed device disconnect\n");
+		}
+}
 
 		/* kick root hub later */
 		pcd_status = status;
@@ -1294,6 +1304,11 @@ MODULE_LICENSE ("GPL");
 #ifdef CONFIG_MIPS_SEAD3
 #include "ehci-sead3.c"
 #define	PLATFORM_DRIVER		ehci_hcd_sead3_driver
+#endif
+
+#ifdef CONFIG_USB_SUNXI_HCI
+#include "ehci_sunxi.c"
+#define	PLATFORM_DRIVER		sunxi_ehci_hcd_driver
 #endif
 
 static int __init ehci_hcd_init(void)

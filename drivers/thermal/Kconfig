@@ -192,4 +192,69 @@ config INTEL_POWERCLAMP
 	  enforce idle time which results in more package C-state residency. The
 	  user interface is exposed via generic thermal framework.
 
+config SUNXI_THERMAL
+	tristate "Temperature sensor on ALLWINNERTECH"
+	depends on ARCH_SUNXI
+	depends on THERMAL_OF
+	help
+	  If you say yes here you get support for (Thermal Management
+	  Unit) on ALLWINEER series of SoC.
+
+config SUN50IW1P1_THERMAL
+	tristate "Temperature sensor on SUN50IW1P1"
+	depends on SUNXI_THERMAL
+	depends on ARCH_SUN50IW1P1
+	help
+	  Temperature sensor on SUN50IW1P1
+
+config SUN8IW10P1_THERMAL
+	tristate "Temperature sensor on SUN8IW10P1"
+	depends on SUNXI_THERMAL
+	depends on ARCH_SUN8IW10P1
+	help
+	  Temperature sensor on SUN8IW10P1
+
+config SUN8IW11P1_THERMAL
+	tristate "Temperature sensor on SUN8IW11P1"
+	depends on SUNXI_THERMAL
+	depends on ARCH_SUN8IW11P1
+	help
+	  Temperature sensor on SUN8IW11P1
+
+config SUN50IW2P1_THERMAL
+	tristate "Temperature sensor on SUN50IW2P1"
+	depends on SUNXI_THERMAL
+	depends on ARCH_SUN50IW2P1
+	help
+	  Temperature sensor on SUN50IW2P1
+
+config SUNXI_BUDGET_COOLING
+	tristate "sunxi budget cooling"
+	depends on ARCH_SUNXI
+	depends on THERMAL_OF
+	depends on CPU_FREQ
+	help
+	  Adds sunxi cpu budget cooling devices, and these cooling devices can be
+	  bound to thermal zone trip points. When a trip point reached, the
+	  bound cpufreq cooling device turns active to set CPU frequency low to
+	  cool down the CPU.
+
+config BUDGET_HOTPLUG_CPU
+	bool "sunxi budget cooling use autoplug limit"
+	depends on ARCH_SUNXI
+	depends on SMP
+	depends on THERMAL_OF
+	depends on SUNXI_BUDGET_COOLING
+	help
+	  sunxi budget cooling use autoplug limit
+
+config SUNXI_GPU_COOLING
+	tristate "sunxi gpu cooling"
+	depends on ARCH_SUNXI
+	depends on THERMAL_OF
+	help
+	  Adds sunxi gpu cooling devices, and these cooling devices can be
+	  bound to thermal zone trip points. When a trip point reached, the
+	  gpu cooling device turns active to set gpu frequency low to
+	  cool down the CPU.
 endif

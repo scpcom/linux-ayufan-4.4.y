@@ -236,6 +236,37 @@ static void check_is_cell(struct check *c, struct node *root,
  * Structural check functions
  */
 
+static void check_duplicate_type_names(struct check *c, struct node *dt,
+				       struct node *node)
+{
+	struct property *prop;
+	struct node *othernode = NULL;
+
+	prop = get_property(node, "device_type");
+	if (!prop)
+		return;
+
+	/*
+	 * Node "/cpus" have multiple children node "cpu" on smp, who have the
+	 * same device_type "cpu". But node "/cpus" doesn't have compatible
+	 * property, kernel won't create platform_device for these "cpu" nodes.
+	 * So it's allowed that "cpu" node have the same device_type.
+	 */
+	if (node->parent
+	    && streq(prop->val.val, "cpu")
+	    && streq(node->parent->fullpath, "/cpus"))
+		return;
+
+	othernode = get_node_by_type(dt, prop->val.val);
+	if (!othernode)
+		return;
+
+	if (othernode != node)
+		FAIL(c, "Duplicate device_type name %s in %s and %s",
+			prop->val.val, node->fullpath, othernode->fullpath);
+}
+NODE_ERROR(duplicate_type_names, NULL);
+
 static void check_duplicate_node_names(struct check *c, struct node *dt,
 				       struct node *node)
 {
@@ -652,6 +683,7 @@ static void check_obsolete_chosen_interrupt_controller(struct check *c,
 TREE_WARNING(obsolete_chosen_interrupt_controller, NULL);
 
 static struct check *check_table[] = {
+	&duplicate_type_names,
 	&duplicate_node_names, &duplicate_property_names,
 	&node_name_chars, &node_name_format, &property_name_chars,
 	&name_is_string, &name_properties,
@@ -731,6 +763,28 @@ void parse_checks_option(bool warn, bool error, const char *optarg)
 	}
 
 	die("Unrecognized check name \"%s\"\n", name);
+}
+
+static void mark_unchecked(struct check *c)
+{
+	int j;
+
+	c->status = UNCHECKED;
+
+	for (j = 0; j < c->num_prereqs; j++) {
+		struct check *prq = c->prereq[j];
+		mark_unchecked(prq);
+	}
+}
+
+void dirty_checks(void)
+{
+	int i;
+
+	for (i = 0; i < ARRAY_SIZE(check_table); i++) {
+		struct check *c = check_table[i];
+		mark_unchecked(c);
+	}
 }
 
 void process_checks(int force, struct boot_info *bi)

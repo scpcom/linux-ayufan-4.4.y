@@ -23,11 +23,8 @@
 #include <linux/genalloc.h>
 #include <linux/dma-mapping.h>
 #include <linux/dma-contiguous.h>
-#include <linux/of.h>
-#include <linux/platform_device.h>
 #include <linux/vmalloc.h>
 #include <linux/swiotlb.h>
-#include <linux/amba/bus.h>
 
 #include <asm/cacheflush.h>
 
@@ -37,10 +34,8 @@ EXPORT_SYMBOL(dma_ops);
 static pgprot_t __get_dma_pgprot(struct dma_attrs *attrs, pgprot_t prot,
 				 bool coherent)
 {
-	if (dma_get_attr(DMA_ATTR_WRITE_COMBINE, attrs))
+	if (!coherent || dma_get_attr(DMA_ATTR_WRITE_COMBINE, attrs))
 		return pgprot_writecombine(prot);
-	else if (!coherent)
-		return pgprot_dmacoherent(prot);
 	return prot;
 }
 
@@ -96,6 +91,11 @@ static void *__dma_alloc_coherent(struct device *dev, size_t size,
 				  dma_addr_t *dma_handle, gfp_t flags,
 				  struct dma_attrs *attrs)
 {
+	if (dev == NULL) {
+		WARN_ONCE(1, "Use an actual device structure for DMA allocation\n");
+		return NULL;
+	}
+
 	if (IS_ENABLED(CONFIG_ZONE_DMA) &&
 	    dev->coherent_dma_mask <= DMA_BIT_MASK(32))
 		flags |= GFP_DMA;
@@ -175,7 +175,7 @@ static void *__dma_alloc_noncoherent(struct device *dev, size_t size,
 no_map:
 	__dma_free_coherent(dev, size, ptr, *dma_handle, attrs);
 no_mem:
-	*dma_handle = ~0;
+	*dma_handle = DMA_ERROR_CODE;
 	return NULL;
 }
 
@@ -360,28 +360,6 @@ struct dma_map_ops coherent_swiotlb_dma_ops = {
 };
 EXPORT_SYMBOL(coherent_swiotlb_dma_ops);
 
-static int dma_bus_notifier(struct notifier_block *nb,
-			    unsigned long event, void *_dev)
-{
-	struct device *dev = _dev;
-
-	if (event != BUS_NOTIFY_ADD_DEVICE)
-		return NOTIFY_DONE;
-
-	if (of_property_read_bool(dev->of_node, "dma-coherent"))
-		set_dma_ops(dev, &coherent_swiotlb_dma_ops);
-
-	return NOTIFY_OK;
-}
-
-static struct notifier_block platform_bus_nb = {
-	.notifier_call = dma_bus_notifier,
-};
-
-static struct notifier_block amba_bus_nb = {
-	.notifier_call = dma_bus_notifier,
-};
-
 extern int swiotlb_late_init_with_default_size(size_t default_size);
 
 static int __init atomic_pool_init(void)
@@ -448,12 +426,6 @@ out:
 static int __init swiotlb_late_init(void)
 {
 	size_t swiotlb_size = min(SZ_64M, MAX_ORDER_NR_PAGES << PAGE_SHIFT);
-
-	/*
-	 * These must be registered before of_platform_populate().
-	 */
-	bus_register_notifier(&platform_bus_type, &platform_bus_nb);
-	bus_register_notifier(&amba_bustype, &amba_bus_nb);
 
 	dma_ops = &noncoherent_swiotlb_dma_ops;
 

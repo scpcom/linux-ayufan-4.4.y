@@ -37,7 +37,11 @@ uvc_send_response(struct uvc_device *uvc, struct uvc_request_data *data)
 	struct usb_request *req = uvc->control_req;
 
 	if (data->length < 0)
+#ifdef CONFIG_USB_SUNXI_G_WEBCAM
+		return 0;
+#else
 		return usb_ep_set_halt(cdev->gadget->ep0);
+#endif
 
 	req->length = min_t(unsigned int, uvc->event_length, data->length);
 	req->zero = data->length < uvc->event_length;
@@ -58,7 +62,9 @@ struct uvc_format
 };
 
 static struct uvc_format uvc_formats[] = {
+#ifndef CONFIG_USB_SUNXI_G_WEBCAM
 	{ 16, V4L2_PIX_FMT_YUYV  },
+#endif
 	{ 0,  V4L2_PIX_FMT_MJPEG },
 };
 
@@ -132,19 +138,26 @@ uvc_v4l2_open(struct file *file)
 	handle->device = &uvc->video;
 	file->private_data = &handle->vfh;
 
+#ifndef CONFIG_USB_SUNXI_G_WEBCAM
 	uvc_function_connect(uvc);
+#endif
+
 	return 0;
 }
 
 static int
 uvc_v4l2_release(struct file *file)
 {
+#ifndef CONFIG_USB_SUNXI_G_WEBCAM
 	struct video_device *vdev = video_devdata(file);
 	struct uvc_device *uvc = video_get_drvdata(vdev);
+#endif
 	struct uvc_file_handle *handle = to_uvc_file_handle(file->private_data);
 	struct uvc_video *video = handle->device;
 
+#ifndef CONFIG_USB_SUNXI_G_WEBCAM
 	uvc_function_disconnect(uvc);
+#endif
 
 	uvc_video_enable(video, 0);
 	uvc_free_buffers(&video->queue);

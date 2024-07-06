@@ -39,6 +39,8 @@ struct ion_cma_buffer_info {
 	struct sg_table *table;
 };
 
+extern int dma_contiguous_area_maps(struct seq_file *s);
+
 /*
  * Create scatter-list for the already allocated DMA buffer.
  * This function could be replaced by dma_common_get_sgtable
@@ -47,7 +49,7 @@ struct ion_cma_buffer_info {
 static int ion_cma_get_sgtable(struct device *dev, struct sg_table *sgt,
 			       void *cpu_addr, dma_addr_t handle, size_t size)
 {
-	struct page *page = virt_to_page(cpu_addr);
+	struct page *page = phys_to_page(handle);
 	int ret;
 
 	ret = sg_alloc_table(sgt, 1, GFP_KERNEL);
@@ -68,12 +70,6 @@ static int ion_cma_allocate(struct ion_heap *heap, struct ion_buffer *buffer,
 	struct ion_cma_buffer_info *info;
 
 	dev_dbg(dev, "Request buffer allocation len %ld\n", len);
-
-	if (buffer->flags & ION_FLAG_CACHED)
-		return -EINVAL;
-
-	if (align > PAGE_SIZE)
-		return -EINVAL;
 
 	info = kzalloc(sizeof(struct ion_cma_buffer_info), GFP_KERNEL);
 	if (!info) {
@@ -161,12 +157,14 @@ static void ion_cma_heap_unmap_dma(struct ion_heap *heap,
 static int ion_cma_mmap(struct ion_heap *mapper, struct ion_buffer *buffer,
 			struct vm_area_struct *vma)
 {
-	struct ion_cma_heap *cma_heap = to_cma_heap(buffer->heap);
-	struct device *dev = cma_heap->dev;
 	struct ion_cma_buffer_info *info = buffer->priv_virt;
-
-	return dma_mmap_coherent(dev, vma, info->cpu_addr, info->handle,
-				 buffer->size);
+	/* we need cached map in most case, so donot use dma_mmap_coherent */
+	/*return dma_mmap_coherent(dev, vma, info->cpu_addr, info->handle,
+				 buffer->size);*/
+       return remap_pfn_range(vma, vma->vm_start,
+                              __phys_to_pfn((u32)info->handle) + vma->vm_pgoff,
+                              vma->vm_end - vma->vm_start,
+                              vma->vm_page_prot);
 }
 
 static void *ion_cma_map_kernel(struct ion_heap *heap,
@@ -193,6 +191,15 @@ static struct ion_heap_ops ion_cma_ops = {
 	.unmap_kernel = ion_cma_unmap_kernel,
 };
 
+static int ion_cma_debug_show(struct ion_heap *heap, struct seq_file *sq, void *para)
+{
+	if (!heap || !sq)
+		return (-EINVAL);
+	if (heap->type != ION_HEAP_TYPE_DMA)
+		return (-ENODEV);
+	return dma_contiguous_area_maps(sq);
+}
+
 struct ion_heap *ion_cma_heap_create(struct ion_platform_heap *data)
 {
 	struct ion_cma_heap *cma_heap;
@@ -207,6 +214,7 @@ struct ion_heap *ion_cma_heap_create(struct ion_platform_heap *data)
 	 * used to make the link with reserved CMA memory */
 	cma_heap->dev = data->priv;
 	cma_heap->heap.type = ION_HEAP_TYPE_DMA;
+	cma_heap->heap.debug_show = ion_cma_debug_show;
 	return &cma_heap->heap;
 }
 

@@ -1,6 +1,7 @@
 config ARM64
 	def_bool y
 	select ARCH_HAS_ATOMIC64_DEC_IF_POSITIVE
+	select ARCH_HAS_SG_CHAIN	
 	select ARCH_HAS_OPP
 	select ARCH_USE_CMPXCHG_LOCKREF
 	select ARCH_HAS_OPP
@@ -70,6 +71,7 @@ config ARM64
 	select RTC_LIB
 	select SPARSE_IRQ
 	select SYSCTL_EXCEPTION_TRACE
+	select CLOCKSOURCE_VALIDATE_LAST_CYCLE
 	help
 	  ARM 64-bit (AArch64) Linux support.
 
@@ -127,6 +129,9 @@ config IOMMU_HELPER
 config FIX_EARLYCON_MEM
 	def_bool y
 
+config KERNEL_MODE_NEON
+	def_bool y
+
 source "init/Kconfig"
 
 source "kernel/Kconfig.freezer"
@@ -148,6 +153,146 @@ config ARCH_XGENE
 	help
 	  This enables support for AppliedMicro X-Gene SOC Family
 
+config ARCH_SUNXI
+	bool "Allwinner SoC Family"
+	select PINCTRL
+	select SUNXI_TIMER
+	help
+	  This enables support for Allwinner SUNXI SoC family
+
+if ARCH_SUNXI
+
+choice
+	prompt "Select the architecture of SoC"
+	default ARCH_SUN50I
+	help
+	  Select the architecture for SoC
+	  sunxi
+	  `-- sun50i ----- Cortex-A53 based Family SoCs
+
+	config ARCH_SUN50I
+	bool "Allwinner SUN50I"
+endchoice
+
+# Select the wafer with sun50i
+
+if ARCH_SUN50I
+choice
+	prompt "Select the wafer with arch sun50i"
+	default ARCH_SUN50IW1
+	help
+	  Select the wafer with arch sun50i
+
+config ARCH_SUN50IW1
+	bool "Allwinner SUN50IW1 SoCs"
+	help
+	  Support for Allwinner SUN50IW1 SoC family
+
+config ARCH_SUN50IW2
+	bool "Allwinner SUN50IW2 SoCs"
+	help
+	  Support for Allwinner SUN50IW2 SoC family
+
+config ARCH_SUN50IW3
+	bool "Allwinner SUN50IW3 SoCs"
+	help
+	  Support for Allwinner SUN50IW3 SoC family
+
+config ARCH_SUN50IW6
+	bool "Allwinner SUN50IW6 SoCs"
+	help
+	  Support for Allwinner SUN50IW6 SoC family
+endchoice
+endif
+
+# Select the SoC with specific arch and wafer
+
+if ARCH_SUN50IW1
+choice
+	prompt "Select the SoC with wafer ARCH_SUN50IW1"
+	default ARCH_SUN50IW1P1
+	help
+	  Select the SoC with wafer ARCH_SUN50IW1
+
+config ARCH_SUN50IW1P1
+	bool "Allwinner SUN50IW1P1"
+	select HAVE_UNSTABLE_SCHED_CLOCK
+	select SUNXI_SMC
+endchoice
+endif
+
+if ARCH_SUN50IW2
+choice
+	prompt "Select the SoC with wafer ARCH_SUN50IW2"
+	default ARCH_SUN50IW2P1
+	help
+	  Select the SoC with wafer ARCH_SUN50IW2
+
+config ARCH_SUN50IW2P1
+	bool "Allwinner SUN50IW2P1"
+	select HAVE_UNSTABLE_SCHED_CLOCK
+	select SUNXI_SMC
+endchoice
+endif
+
+if ARCH_SUN50IW3
+choice
+	prompt "Select the SoC with wafer ARCH_SUN50IW3"
+	default ARCH_SUN50IW3P1
+	help
+	  Select the SoC with wafer ARCH_SUN50IW3
+
+config ARCH_SUN50IW3P1
+	bool "Allwinner SUN50IW3P1"
+	select HAVE_UNSTABLE_SCHED_CLOCK
+	select SUNXI_SMC
+endchoice
+endif
+
+if ARCH_SUN50IW6
+choice
+	prompt "Select the SoC with wafer ARCH_SUN50IW6"
+	default ARCH_SUN50IW6P1
+	help
+	  Select the SoC with wafer ARCH_SUN50IW6
+
+config ARCH_SUN50IW6P1
+	bool "Allwinner SUN50IW6P1"
+	select HAVE_UNSTABLE_SCHED_CLOCK
+	select SUNXI_SMC
+endchoice
+endif
+
+# Select the board between FPGA and EVB
+
+choice
+	prompt "Allwinner development boards"
+	depends on ARCH_SUNXI
+	default FPGA_V4_PLATFORM
+
+config FPGA_V4_PLATFORM
+	bool "FPGAv4 board"
+	help
+	  Support for Allwinner's FPGAv4 board
+
+	config FPGA_V7_PLATFORM
+	bool "FPGAv7 board"
+	help
+	  Support for Allwinner's FPGAv7 board
+
+	config EVB_PLATFORM
+	bool "EVB board"
+	help
+	  Support for Allwinner's EVB board
+endchoice
+
+config SUNXI_SOC_NAME
+	string "The name of SUNXI SoC"
+	default ""
+	help
+	  Used for /sysfs/.../sysinfo.
+
+endif # end of ARCH_SUNXI
 endmenu
 
 menu "Bus support"
@@ -158,6 +303,32 @@ config ARM_AMBA
 endmenu
 
 menu "Kernel Features"
+
+menu "ARM errata workarounds"
+
+config ARM64_ERRATUM_845719
+	bool "Cortex-A53: 845719: a load might read incorrect data"
+	depends on COMPAT
+	default n
+	help
+	  This option adds an alternative code sequence to work around ARM
+	  erratum 845719 on Cortex-A53 parts up to r0p4.
+
+	  When running a compat (AArch32) userspace on an affected Cortex-A53
+	  part, a load at EL0 from a virtual address that matches the bottom 32
+	  bits of the virtual address used by a recent load at (AArch64) EL1
+	  might return incorrect data.
+
+	  The workaround is to write the contextidr_el1 register on exception
+	  return to a 32-bit task.
+	  Please note that this does not necessarily enable the workaround,
+	  as it depends on the alternative framework, which will only patch
+	  the kernel if an affected CPU is detected.
+
+	  If unsure, say Y.
+
+endmenu
+
 
 config ARM64_64K_PAGES
 	bool "Enable 64KB pages support"
@@ -193,6 +364,12 @@ config SCHED_MC
 	  Multi-core scheduler support improves the CPU scheduler's decision
 	  making when dealing with multi-core CPU chips at a cost of slightly
 	  increased overhead in some places. If unsure say N here.
+
+config CPU_OPS_SUNXI
+	bool "Use SUNXI cpu ops instead of psci"
+	depends on SMP && ARCH_SUN50I
+	help
+	  Use sunxi cpu ops for SMP. If use psci say N here.
 
 config SCHED_SMT
 	bool "SMT scheduler support"
@@ -420,6 +597,17 @@ config SECCOMP
 	  and the task is only allowed to execute a few safe syscalls
 	  defined by each seccomp mode.
 
+config CC_STACKPROTECTOR
+	bool "Enable -fstack-protector buffer overflow detection (EXPERIMENTAL)"
+	help
+	  This option turns on the -fstack-protector GCC feature. This
+	  feature puts, at the beginning of functions, a canary value on
+	  the stack just before the return address, and validates
+	  the value just before actually returning.  Stack based buffer
+	  overflows (that need to overwrite this return address) now also
+	  overwrite the canary, which gets detected and the attack is then
+	  neutralized via a kernel panic.
+	  This feature requires gcc version 4.2 or above.
 endmenu
 
 menu "Boot options"

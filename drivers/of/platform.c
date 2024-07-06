@@ -80,6 +80,7 @@ void of_device_make_bus_id(struct device *dev)
 	u64 addr;
 	const __be32 *addrp;
 	int magic;
+	const char __maybe_unused *name;
 
 #ifdef CONFIG_PPC_DCR
 	/*
@@ -100,6 +101,21 @@ void of_device_make_bus_id(struct device *dev)
 #endif /* !CONFIG_PPC_DCR_NATIVE */
 	}
 #endif /* CONFIG_PPC_DCR */
+
+#if defined(CONFIG_ARCH_SUNXI) && !defined(CONFIG_ARCH_SUN50IW1)
+	/*
+	 * In sunxi platform, we have used "device_type" property as an unique
+	 * name for each platform device.
+	 */
+	name = of_get_property(node, "device_name", NULL);
+	if (!name)
+		name = of_get_property(node, "device_type", NULL);
+
+	if (name) {
+		dev_set_name(dev, "%s", name);
+		return;
+	}
+#endif
 
 	/*
 	 * For MMIO, get the physical address

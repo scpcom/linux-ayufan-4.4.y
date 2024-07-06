@@ -32,6 +32,15 @@ modules.builtin
 *.lzo
 *.patch
 *.gcno
+standby.code
+resume1.code
+
+#
+# Gcov files
+#
+*.gcda
+*.gcno
+*.gcov
 
 #
 # Top-level generic files
@@ -91,3 +100,14 @@ extra_certificates
 signing_key.priv
 signing_key.x509
 x509.genkey
+
+# lichee ingnore files
+skel/
+output/
+user_headers/
+bImage
+*.swp
+rootfs.cpio.gz
+drivers/arisc/binary/arisc
+modules/eurasia_km/eurasiacon/binary2_sunxi_android_release/
+tools/perf-target

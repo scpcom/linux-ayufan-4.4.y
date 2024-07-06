@@ -641,4 +641,16 @@ config KEYBOARD_CROS_EC
 	  To compile this driver as a module, choose M here: the
 	  module will be called cros_ec_keyb.
 
+config KEYBOARD_SUNXI
+	tristate "softwinnner KEY BOARD support"
+	help
+		Say Y here to enable the keyboard, support 7 keys.
+		based on verify board.
+
+config KEYPAD_SUNXI
+	tristate "softwinnner KEY PAD support"
+	depends on ARCH_SUN8IW11
+	help
+		Say Y here to enable the keyboard, support 8x8 keys.
+		based on verify board.
 endif

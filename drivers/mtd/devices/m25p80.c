@@ -41,6 +41,7 @@
 #define	OPCODE_WRSR		0x01	/* Write status register 1 byte */
 #define	OPCODE_NORM_READ	0x03	/* Read data bytes (low frequency) */
 #define	OPCODE_FAST_READ	0x0b	/* Read data bytes (high frequency) */
+#define	OPCODE_DUAL_MODE_READ	0x3B	/* Read data bytes in Dual Mode */
 #define	OPCODE_PP		0x02	/* Page program (up to 256 bytes) */
 #define	OPCODE_BE_4K		0x20	/* Erase 4KiB block */
 #define	OPCODE_BE_32K		0x52	/* Erase 32KiB block */
@@ -73,6 +74,17 @@
 #define	MAX_READY_WAIT_JIFFIES	(40 * HZ)	/* M25P16 specs 40s max chip erase */
 #define	MAX_CMD_SIZE		5
 
+#if defined(CONFIG_M25PXX_USE_DUAL_MODE_READ)
+#define OPCODE_READ	OPCODE_DUAL_MODE_READ
+#define FAST_READ_DUMMY_BYTE 0
+#elif defined(CONFIG_M25PXX_USE_FAST_READ)
+#define OPCODE_READ	OPCODE_FAST_READ
+#define FAST_READ_DUMMY_BYTE 1
+#else
+#define OPCODE_READ	OPCODE_NORM_READ
+#define FAST_READ_DUMMY_BYTE 0
+#endif
+
 #define JEDEC_MFR(_jedec_id)	((_jedec_id) >> 16)
 
 /****************************************************************************/
@@ -87,6 +99,19 @@ struct m25p {
 	u8			*command;
 	bool			fast_read;
 };
+#ifdef CONFIG_M25PXX_USE_DUAL_MODE_READ
+/* spi device data, used in dual spi mode */
+struct sunxi_dual_mode_dev_data {
+	/* dual SPI mode, 0:single_mode(1 wire), 1:dual_mode(2 wire) */
+	int dual_mode;
+	/* single mode transmit counter */
+	int single_cnt;
+	/* dummy counter should be sent before receive in dual mode */
+	int dummy_cnt;
+};
+/* dummy_cnt value should be 1 in normal */
+struct sunxi_dual_mode_dev_data dual_mode_cfg = {1, 0, 1};
+#endif
 
 static inline struct m25p *mtd_to_m25p(struct mtd_info *mtd)
 {
@@ -336,7 +361,6 @@ static int m25p80_read(struct mtd_info *mtd, loff_t from, size_t len,
 	struct m25p *flash = mtd_to_m25p(mtd);
 	struct spi_transfer t[2];
 	struct spi_message m;
-	uint8_t opcode;
 
 	pr_debug("%s: %s from 0x%08x, len %zd\n", dev_name(&flash->spi->dev),
 			__func__, (u32)from, len);
@@ -349,7 +373,7 @@ static int m25p80_read(struct mtd_info *mtd, loff_t from, size_t len,
 	 * Should add 1 byte DUMMY_BYTE.
 	 */
 	t[0].tx_buf = flash->command;
-	t[0].len = m25p_cmdsz(flash) + (flash->fast_read ? 1 : 0);
+	t[0].len = m25p_cmdsz(flash) + FAST_READ_DUMMY_BYTE;
 	spi_message_add_tail(&t[0], &m);
 
 	t[1].rx_buf = buf;
@@ -371,14 +395,13 @@ static int m25p80_read(struct mtd_info *mtd, loff_t from, size_t len,
 	 */
 
 	/* Set up the write data buffer. */
-	opcode = flash->fast_read ? OPCODE_FAST_READ : OPCODE_NORM_READ;
-	flash->command[0] = opcode;
+	flash->command[0] = OPCODE_READ;
+
 	m25p_addr2cmd(flash, from, flash->command);
 
 	spi_sync(flash->spi, &m);
 
-	*retlen = m.actual_length - m25p_cmdsz(flash) -
-			(flash->fast_read ? 1 : 0);
+	*retlen = m.actual_length - m25p_cmdsz(flash) - FAST_READ_DUMMY_BYTE;
 
 	mutex_unlock(&flash->lock);
 
@@ -721,6 +744,9 @@ static const struct spi_device_id m25p_ids[] = {
 	{ "at26df161a", INFO(0x1f4601, 0, 64 * 1024, 32, SECT_4K) },
 	{ "at26df321",  INFO(0x1f4700, 0, 64 * 1024, 64, SECT_4K) },
 
+	/* ISSI */
+	{ "ic25lp064a", INFO(0x9d6017, 0, 64 * 1024, 128, SECT_4K) },
+
 	{ "at45db081d", INFO(0x1f2500, 0, 64 * 1024, 16, SECT_4K) },
 
 	/* EON -- en25xxx */
@@ -894,6 +920,8 @@ static const struct spi_device_id *jedec_probe(struct spi_device *spi)
 	return ERR_PTR(-ENODEV);
 }
 
+static const char * const part_probe_types[] = {
+	"cmdlinepart", "ofpart", "sunxipart", NULL };
 
 /*
  * board specific setup should have ensured the SPI clock used here
@@ -903,7 +931,9 @@ static const struct spi_device_id *jedec_probe(struct spi_device *spi)
 static int m25p_probe(struct spi_device *spi)
 {
 	const struct spi_device_id	*id = spi_get_device_id(spi);
-	struct flash_platform_data	*data;
+#ifndef CONFIG_M25PXX_USE_DUAL_MODE_READ
+	struct flash_platform_data	*data = NULL;
+#endif
 	struct m25p			*flash;
 	struct flash_info		*info;
 	unsigned			i;
@@ -920,6 +950,9 @@ static int m25p_probe(struct spi_device *spi)
 	 * a chip ID, try the JEDEC id commands; they'll work for most
 	 * newer chips, even if we don't recognize the particular chip.
 	 */
+#ifdef CONFIG_M25PXX_USE_DUAL_MODE_READ
+	spi->dev.platform_data = &dual_mode_cfg;
+#else
 	data = spi->dev.platform_data;
 	if (data && data->type) {
 		const struct spi_device_id *plat_id;
@@ -936,6 +969,7 @@ static int m25p_probe(struct spi_device *spi)
 		else
 			dev_warn(&spi->dev, "unrecognized id %s\n", data->type);
 	}
+#endif
 
 	info = (void *)id->driver_data;
 
@@ -963,8 +997,7 @@ static int m25p_probe(struct spi_device *spi)
 	flash = kzalloc(sizeof *flash, GFP_KERNEL);
 	if (!flash)
 		return -ENOMEM;
-	flash->command = kmalloc(MAX_CMD_SIZE + (flash->fast_read ? 1 : 0),
-					GFP_KERNEL);
+	flash->command = kmalloc(MAX_CMD_SIZE + FAST_READ_DUMMY_BYTE, GFP_KERNEL);
 	if (!flash->command) {
 		kfree(flash);
 		return -ENOMEM;
@@ -986,10 +1019,13 @@ static int m25p_probe(struct spi_device *spi)
 		write_sr(flash, 0);
 	}
 
+#ifndef CONFIG_M25PXX_USE_DUAL_MODE_READ
 	if (data && data->name)
 		flash->mtd.name = data->name;
 	else
+#else
 		flash->mtd.name = dev_name(&spi->dev);
+#endif
 
 	flash->mtd.type = MTD_NORFLASH;
 	flash->mtd.writesize = 1;
@@ -1068,13 +1104,16 @@ static int m25p_probe(struct spi_device *spi)
 				flash->mtd.eraseregions[i].erasesize / 1024,
 				flash->mtd.eraseregions[i].numblocks);
 
-
 	/* partitions should match sector boundaries; and it may be good to
 	 * use readonly partitions for writeprotected sectors (BP2..BP0).
 	 */
-	return mtd_device_parse_register(&flash->mtd, NULL, &ppdata,
+#ifndef CONFIG_M25PXX_USE_DUAL_MODE_READ
+	return mtd_device_parse_register(&flash->mtd, part_probe_types, &ppdata,
 			data ? data->parts : NULL,
 			data ? data->nr_parts : 0);
+#else
+return mtd_device_parse_register(&flash->mtd, part_probe_types, &ppdata, NULL, 0);
+#endif
 }
 
 
@@ -1089,6 +1128,8 @@ static int m25p_remove(struct spi_device *spi)
 		kfree(flash->command);
 		kfree(flash);
 	}
+
+	spi->dev.platform_data = NULL;
 	return 0;
 }
 

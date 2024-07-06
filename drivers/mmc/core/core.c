@@ -35,6 +35,7 @@
 #include <linux/mmc/host.h>
 #include <linux/mmc/mmc.h>
 #include <linux/mmc/sd.h>
+#include <linux/mmc/slot-gpio.h>
 
 #include "core.h"
 #include "bus.h"
@@ -44,6 +45,10 @@
 #include "mmc_ops.h"
 #include "sd_ops.h"
 #include "sdio_ops.h"
+
+void sunxi_dump_reg(struct mmc_host *mmc);
+#define SUNXI_TIMEOUT_INT_MS  (60*1000)
+
 
 /* If the device is not responding */
 #define MMC_CORE_TIMEOUT_MS	(10 * 60 * 1000) /* 10 minute timeout */
@@ -304,7 +309,8 @@ void mmc_start_bkops(struct mmc_card *card, bool from_exception)
 	}
 
 	err = __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-			EXT_CSD_BKOPS_START, 1, timeout, use_busy_signal);
+			EXT_CSD_BKOPS_START, 1, timeout,
+			use_busy_signal, true, false);
 	if (err) {
 		pr_warn("%s: Error %d starting bkops\n",
 			mmc_hostname(card->host), err);
@@ -394,11 +400,35 @@ static int mmc_wait_for_data_req_done(struct mmc_host *host,
 	struct mmc_context_info *context_info = &host->context_info;
 	int err;
 	unsigned long flags;
+	int ret = 0;
 
 	while (1) {
+		/*
 		wait_event_interruptible(context_info->wait,
 				(context_info->is_done_rcv ||
 				 context_info->is_new_req));
+		*/
+		do{
+			ret = wait_event_interruptible_timeout(context_info->wait,
+					(context_info->is_done_rcv ||
+					 context_info->is_new_req),msecs_to_jiffies(SUNXI_TIMEOUT_INT_MS));
+			if(ret == 0){
+				pr_err("****%s:data req timeout (CMD%u): err %d retry****\n",
+					mmc_hostname(host),
+					mrq->cmd->opcode, mrq->cmd->error);
+				sunxi_dump_reg(host);
+			}else if(ret > 0){
+				break;
+			}else if(ret == -ERESTARTSYS){
+				pr_err("****%s: data req interrupted by signal (CMD%u): err %d retry****\n",
+					mmc_hostname(host),
+					mrq->cmd->opcode, mrq->cmd->error);				
+			}else{
+				pr_err("****%s: data req unknow err (CMD%u): %d ret err %d retry****\n",
+					mmc_hostname(host),
+					mrq->cmd->opcode, mrq->cmd->error,ret);				
+			}
+		}while(1);
 		spin_lock_irqsave(&context_info->lock, flags);
 		context_info->is_waiting_last_req = false;
 		spin_unlock_irqrestore(&context_info->lock, flags);
@@ -435,11 +465,28 @@ static void mmc_wait_for_req_done(struct mmc_host *host,
 				  struct mmc_request *mrq)
 {
 	struct mmc_command *cmd;
+	int ret = 0;
 
 	while (1) {
-		wait_for_completion(&mrq->completion);
-
+		//wait_for_completion(&mrq->completion);
 		cmd = mrq->cmd;
+		do{
+			ret = wait_for_completion_timeout(&mrq->completion, msecs_to_jiffies(SUNXI_TIMEOUT_INT_MS));
+			if (ret == 0){
+				pr_err("****%s:req timout (CMD%u): err %d, retry****\n",
+					mmc_hostname(host), 
+					cmd->opcode, cmd->error);				
+				sunxi_dump_reg(host);
+			}else if(ret > 0){
+				break;
+			}else{
+				pr_err("****%s:unknow req err (CMD%u): err %d, ret %x retry****\n",
+					mmc_hostname(host), 
+					cmd->opcode, cmd->error,ret);					
+			}
+		}while(1);
+		
+
 		if (!cmd->error || !cmd->retries ||
 		    mmc_card_removed(host->card))
 			break;
@@ -1243,7 +1290,9 @@ int mmc_regulator_set_ocr(struct mmc_host *mmc,
 		 */
 		voltage = regulator_get_voltage(supply);
 
+#ifndef CONFIG_ARCH_SUNXI
 		if (!regulator_can_change_voltage(supply))
+#endif
 			min_uV = max_uV = voltage;
 
 		if (voltage < 0)
@@ -1280,6 +1329,7 @@ int mmc_regulator_get_supply(struct mmc_host *mmc)
 	supply = devm_regulator_get(dev, "vmmc");
 	mmc->supply.vmmc = supply;
 	mmc->supply.vqmmc = devm_regulator_get(dev, "vqmmc");
+	mmc->supply.vdmmc = devm_regulator_get(dev, "vdmmc");
 
 	if (IS_ERR(supply))
 		return PTR_ERR(supply);
@@ -1695,7 +1745,9 @@ void mmc_detect_change(struct mmc_host *host, unsigned long delay)
 #endif
 	host->detect_change = 1;
 
-	wake_lock(&host->detect_wake_lock);
+	//wake_lock(&host->detect_wake_lock);
+	if(!(host->caps&MMC_CAP_NEEDS_POLL))
+		wake_lock(&host->detect_wake_lock);
 	mmc_schedule_delayed_work(&host->detect, delay);
 }
 
@@ -1892,6 +1944,8 @@ static int mmc_do_erase(struct mmc_card *card, unsigned int from,
 		to <<= 9;
 	}
 
+	pr_info("%s:%s: erase from %d to %d arg 0x%08x\n",
+		mmc_hostname(card->host), __func__, from, to, arg);
 	if (mmc_card_sd(card))
 		cmd.opcode = SD_ERASE_WR_BLK_START;
 	else
@@ -1925,7 +1979,7 @@ static int mmc_do_erase(struct mmc_card *card, unsigned int from,
 	cmd.opcode = MMC_ERASE;
 	cmd.arg = arg;
 	cmd.flags = MMC_RSP_SPI_R1B | MMC_RSP_R1B | MMC_CMD_AC;
-	cmd.cmd_timeout_ms = mmc_erase_timeout(card, arg, qty);
+	cmd.busy_timeout = mmc_erase_timeout(card, arg, qty);
 	err = mmc_wait_for_cmd(card->host, &cmd, 0);
 	if (err) {
 		pr_err("mmc_erase: erase error %d, status %#x\n",
@@ -2114,7 +2168,7 @@ static unsigned int mmc_do_calc_max_discard(struct mmc_card *card,
 		y = 0;
 		for (x = 1; x && x <= max_qty && max_qty - x >= qty; x <<= 1) {
 			timeout = mmc_erase_timeout(card, arg, qty + x);
-			if (timeout > host->max_discard_to)
+			if (timeout > host->max_busy_timeout)
 				break;
 			if (timeout < last_timeout)
 				break;
@@ -2146,7 +2200,7 @@ unsigned int mmc_calc_max_discard(struct mmc_card *card)
 	struct mmc_host *host = card->host;
 	unsigned int max_discard, max_trim;
 
-	if (!host->max_discard_to)
+	if (!host->max_busy_timeout)
 		return UINT_MAX;
 
 	/*
@@ -2166,7 +2220,7 @@ unsigned int mmc_calc_max_discard(struct mmc_card *card)
 		max_discard = 0;
 	}
 	pr_debug("%s: calculated max. discard sectors %u for timeout %u ms\n",
-		 mmc_hostname(host), max_discard, host->max_discard_to);
+		 mmc_hostname(host), max_discard, host->max_busy_timeout);
 	return max_discard;
 }
 EXPORT_SYMBOL(mmc_calc_max_discard);
@@ -2393,23 +2447,64 @@ int mmc_detect_card_removed(struct mmc_host *host)
 }
 EXPORT_SYMBOL(mmc_detect_card_removed);
 
+
+static int sunxi_mmc_debdetect(struct mmc_host *host)
+{
+	u32 present = 0;
+	int i = 0;
+	int gpio_val = 0;
+	pr_debug("***%s %s %d***\n",mmc_hostname(host),__FUNCTION__,__LINE__);
+
+	for (i=0; i<5; i++) {
+		gpio_val += host->ops->get_cd(host);
+		msleep(1);
+	}
+
+    if (gpio_val==5) {
+        present = 1;
+    } else if (gpio_val==0){
+        present = 0;
+    }
+
+	pr_debug("***%s %s %d***\n",mmc_hostname(host),__FUNCTION__,__LINE__);
+	return present;
+}
+
 void mmc_rescan(struct work_struct *work)
 {
 	struct mmc_host *host =
 		container_of(work, struct mmc_host, detect.work);
 	int i;
 	bool extend_wakelock = false;
+	bool present         = false;
+	struct mmc_bus_ops * pre_bus_ops = NULL;			
 
 	if (host->rescan_disable)
 		return;
 
 	/* If there is a non-removable card registered, only scan once */
-	if ((host->caps & MMC_CAP_NONREMOVABLE) && host->rescan_entered)
+	if ((host->caps & MMC_CAP_NONREMOVABLE) && host->rescan_entered){
+		wake_unlock(&host->detect_wake_lock);
 		return;
+	}
 	host->rescan_entered = 1;
 
 	mmc_bus_get(host);
 
+/*
+	if((host->caps&MMC_CAP_NEEDS_POLL)){
+		 if((host->ops->get_cd)\
+			&&(host->rescan_pre_state^sunxi_mmc_debdetect(host))){
+				wake_lock(&host->detect_wake_lock);
+			}else{
+				mmc_bus_put(host);
+				mmc_schedule_delayed_work(&host->detect, HZ);
+				return;
+			}
+	}
+*/
+		
+	pre_bus_ops = (struct mmc_bus_ops *)host->bus_ops;
 	/*
 	 * if there is a _removable_ card registered, check whether it is
 	 * still present
@@ -2420,11 +2515,14 @@ void mmc_rescan(struct work_struct *work)
 
 	host->detect_change = 0;
 
+
 	/* If the card was removed the bus will be marked
 	 * as dead - extend the wakelock so userspace
 	 * can respond */
-	if (host->bus_dead)
+	if (host->bus_dead){
 		extend_wakelock = 1;
+		present = false;
+	}
 
 	/*
 	 * Let mmc_bus_put() free the bus/bus_ops if we've found that
@@ -2433,9 +2531,34 @@ void mmc_rescan(struct work_struct *work)
 	mmc_bus_put(host);
 	mmc_bus_get(host);
 
+	if((host->caps&MMC_CAP_NEEDS_POLL)){
+		int cd_sta = sunxi_mmc_debdetect(host);
+		 if((host->ops->get_cd)\
+			&&(host->rescan_pre_state^cd_sta)){
+				host->rescan_pre_state =  cd_sta;
+				pr_err("*%s detect cd change*\n",mmc_hostname(host));
+				wake_lock(&host->detect_wake_lock);
+				pr_err("*%s lock*\n",mmc_hostname(host));
+			}else if((pre_bus_ops != NULL) \
+						&& (host->bus_ops == NULL)){
+				//If card insert and put out so quict,get_cd function maybe not effective
+				//So we use host->bus_ops->detect(host)  to find if the card is in or in idle state
+				//If card is not in or in idle state,we must rescan it
+				pr_err("*%s detect card change*\n",mmc_hostname(host));
+				wake_lock(&host->detect_wake_lock);
+				pr_err("*%s lock*\n",mmc_hostname(host));
+			}else{
+				mmc_bus_put(host);
+				mmc_schedule_delayed_work(&host->detect, HZ);
+				return;
+			}
+	}
+
+
 	/* if there still is a card present, stop here */
 	if (host->bus_ops != NULL) {
 		mmc_bus_put(host);
+		present = true;
 		goto out;
 	}
 
@@ -2449,6 +2572,7 @@ void mmc_rescan(struct work_struct *work)
 		mmc_claim_host(host);
 		mmc_power_off(host);
 		mmc_release_host(host);
+		present = false;
 		goto out;
 	}
 
@@ -2456,6 +2580,7 @@ void mmc_rescan(struct work_struct *work)
 	for (i = 0; i < ARRAY_SIZE(freqs); i++) {
 		if (!mmc_rescan_try_freq(host, max(freqs[i], host->f_min))) {
 			extend_wakelock = true;
+			present = true;
 			break;
 		}
 		if (freqs[i] <= host->f_min)
@@ -2464,12 +2589,16 @@ void mmc_rescan(struct work_struct *work)
 	mmc_release_host(host);
 
  out:
-	if (extend_wakelock)
+	if (extend_wakelock){
 		wake_lock_timeout(&host->detect_wake_lock, HZ / 2);
-	else
+		pr_debug("*%s lock timeout*\n", mmc_hostname(host));
+	}else{
 		wake_unlock(&host->detect_wake_lock);
+		pr_debug("*%s unlock*\n", mmc_hostname(host));
+	}
 	if (host->caps & MMC_CAP_NEEDS_POLL) {
-		wake_lock(&host->detect_wake_lock);
+		/*host->rescan_pre_state = present;*/
+		//wake_lock(&host->detect_wake_lock);
 		mmc_schedule_delayed_work(&host->detect, HZ);
 	}
 }
@@ -2480,8 +2609,11 @@ void mmc_start_host(struct mmc_host *host)
 	host->rescan_disable = 0;
 	if (host->caps2 & MMC_CAP2_NO_PRESCAN_POWERUP)
 		mmc_power_off(host);
-	else
-		mmc_power_up(host);
+	else{
+		if(!(host->caps&MMC_CAP_NEEDS_POLL))
+			mmc_power_up(host);
+	}
+	mmc_gpiod_request_cd_irq(host);
 	mmc_detect_change(host, 0);
 }
 
@@ -2493,10 +2625,14 @@ void mmc_stop_host(struct mmc_host *host)
 	host->removed = 1;
 	spin_unlock_irqrestore(&host->lock, flags);
 #endif
+	if (host->slot.cd_irq >= 0)
+		disable_irq(host->slot.cd_irq);
 
 	host->rescan_disable = 1;
-	if (cancel_delayed_work_sync(&host->detect))
-		wake_unlock(&host->detect_wake_lock);
+	if (cancel_delayed_work_sync(&host->detect)){
+		if(!(host->caps&MMC_CAP_NEEDS_POLL))
+			wake_unlock(&host->detect_wake_lock);
+	}
 	mmc_flush_scheduled_work();
 
 	/* clear pm flags now and let card drivers set them as needed */
@@ -2674,6 +2810,9 @@ int mmc_cache_ctrl(struct mmc_host *host, u8 enable)
 						err);
 			else
 				card->ext_csd.cache_ctrl = enable;
+			pr_info("***%s: Turn cache %s***\n",
+						mmc_hostname(card->host),
+						enable ? "on" : "off");			
 		}
 	}
 
@@ -2694,8 +2833,10 @@ int mmc_suspend_host(struct mmc_host *host)
 	if (mmc_bus_needs_resume(host))
 		return 0;
 
-	if (cancel_delayed_work(&host->detect))
-		wake_unlock(&host->detect_wake_lock);
+	if (cancel_delayed_work(&host->detect)){
+		if(!(host->caps&MMC_CAP_NEEDS_POLL))
+			wake_unlock(&host->detect_wake_lock);
+	}
 	mmc_flush_scheduled_work();
 
 	mmc_bus_get(host);
@@ -2818,8 +2959,10 @@ int mmc_pm_notify(struct notifier_block *notify_block,
 		}
 		host->rescan_disable = 1;
 		spin_unlock_irqrestore(&host->lock, flags);
-		if (cancel_delayed_work_sync(&host->detect))
-			wake_unlock(&host->detect_wake_lock);
+		if (cancel_delayed_work_sync(&host->detect)){
+			if(!(host->caps&MMC_CAP_NEEDS_POLL))
+				wake_unlock(&host->detect_wake_lock);
+		}
 
 		if (!host->bus_ops || host->bus_ops->suspend)
 			break;
@@ -2853,6 +2996,49 @@ int mmc_pm_notify(struct notifier_block *notify_block,
 	return 0;
 }
 #endif
+
+/**
+ * mmc_manual_remove_card- manual removed card
+ * @host: mmc host
+ * @card: mmc_card
+ * Use for some wifi that will respone even if it has been reseted
+ * In these situation,we can not remove it from system using mmc_detect_change
+ * So we use mmc_manual_remove_card instead
+ * add by sunxi
+ */
+void mmc_manual_remove_card(struct mmc_host *host , struct mmc_card *card)
+{
+		unsigned long flags = 0;
+		pr_info("%s: Starting manual remove\n", mmc_hostname(host));
+		/***disable any detect work,for that card->state may be change by rescan*****/
+		spin_lock_irqsave(&host->lock, flags);
+		host->rescan_disable = 1;
+		spin_unlock_irqrestore(&host->lock, flags);
+		if (cancel_delayed_work_sync(&host->detect)) {
+				wake_unlock(&host->detect_wake_lock);
+		}
+
+		mmc_claim_host(host);
+		/****maual set card remove****/
+		/*We maual set card remove for that some wifi will response to our cmd even it has been reseted*/
+		/*We claim host here for that card->state may be change by other theoretically,so we claim here for save*/
+		mmc_card_set_removed(card);
+		mmc_release_host(host);
+
+		/****use detect function to remove card*****/
+		mmc_bus_get(host);
+		if (host->bus_ops->detect && !host->bus_dead)
+			host->bus_ops->detect(host);
+		mmc_bus_put(host);
+
+		/***re-enalbe detect work*****/
+		spin_lock_irqsave(&host->lock, flags);
+		host->rescan_disable = 0;
+		spin_unlock_irqrestore(&host->lock, flags);
+		pr_info("%s: Manual remove completed\n", mmc_hostname(host));
+}
+EXPORT_SYMBOL(mmc_manual_remove_card);
+
 
 /**
  * mmc_init_context_info() - init synchronization context

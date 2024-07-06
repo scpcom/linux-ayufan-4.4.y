@@ -85,6 +85,11 @@ ep_matches (
 				if (gadget_is_pxa (gadget)
 						&& 'i' == tmp [1])
 					return 0;
+#ifdef CONFIG_USB_SUNXI_UDC0
+			if(gadget_is_softwinner_otg(gadget) && 'n' != tmp [2]){
+				return 0;
+			}
+#endif
 				break;
 			case USB_ENDPOINT_XFER_BULK:
 				if ('b' != tmp[1])	// != "-bulk"

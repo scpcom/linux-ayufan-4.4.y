@@ -536,6 +536,78 @@ static int clk_disable_unused(void)
 }
 late_initcall(clk_disable_unused);
 
+#ifdef CONFIG_COMMON_CLK_ENABLE_SYNCBOOT
+/* caller must hold prepare_lock */
+static void clk_syncboot_subtree(struct clk *clk)
+{
+	struct clk *child;
+	struct clk *parent;
+	unsigned long flags;
+
+	if (!clk)
+		goto out;
+
+	hlist_for_each_entry(child, &clk->children, child_node)
+		clk_syncboot_subtree(child);
+
+	spin_lock_irqsave(&enable_lock, flags);
+
+	if (clk->enable_count)
+		goto unlock_out;
+
+	if (!(clk->flags & CLK_IGNORE_SYNCBOOT) && __clk_is_enabled(clk) && clk->ops->enable && (!clk->ops->prepare))
+	{
+		//printk(KERN_INFO "try to syncboot of clk %s\n",clk->name);
+		if((!clk->prepare_count) && (!clk->enable_count))
+		{
+
+			clk->ops->enable(clk->hw);
+			clk->prepare_count++;
+			clk->enable_count++;
+			parent = clk->parent;
+			while(parent)
+			{
+				parent->enable_count++;
+				parent->prepare_count++;
+				parent = parent->parent;
+			}
+		}
+	}
+unlock_out:
+	spin_unlock_irqrestore(&enable_lock, flags);
+
+out:
+	return;
+}
+#ifdef CONFIG_COMMON_CLK_ENABLE_SYNCBOOT_EARLY
+int clk_syncboot(void);
+int clk_syncboot(void)
+#else
+static int clk_syncboot(void)
+#endif
+{
+	struct clk *clk;
+
+	mutex_lock(&prepare_lock);
+
+	hlist_for_each_entry(clk, &clk_root_list, child_node)
+		clk_syncboot_subtree(clk);
+
+	hlist_for_each_entry(clk, &clk_orphan_list, child_node)
+		clk_syncboot_subtree(clk);
+
+	mutex_unlock(&prepare_lock);
+
+	return 0;
+}
+#ifdef CONFIG_COMMON_CLK_ENABLE_SYNCBOOT_EARLY
+EXPORT_SYMBOL_GPL(clk_syncboot);
+#else
+postcore_initcall(clk_syncboot);
+#endif
+#else
+static inline int clk_syncboot(struct clk *clk) { return 0; }
+#endif /* CONFIG_COMMON_CLK_DISABLE_UNUSED */
 /***    helper functions   ***/
 
 const char *__clk_get_name(struct clk *clk)
@@ -678,6 +750,7 @@ struct clk *__clk_lookup(const char *name)
 
 	return NULL;
 }
+EXPORT_SYMBOL(__clk_lookup);
 
 /***        clk api        ***/
 
@@ -2127,10 +2200,11 @@ void __init of_clk_init(const struct of_device_id *matches)
 
 	if (!matches)
 		matches = __clk_of_table;
-
+	pr_debug("[%s][%d]match-name:%s\n", __func__, __LINE__, matches->name);
 	for_each_matching_node(np, matches) {
 		const struct of_device_id *match = of_match_node(matches, np);
 		of_clk_init_cb_t clk_init_cb = match->data;
+		pr_debug("[%s][%d]match-name:%s\n", __func__, __LINE__, matches->name);
 		clk_init_cb(np);
 	}
 }

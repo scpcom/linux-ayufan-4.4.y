@@ -592,7 +592,7 @@ config USB_SL811_HCD
 	help
 	  The SL811HS is a single-port USB controller that supports either
 	  host side or peripheral side roles.  Enable this option if your
-	  board has this chip, and you want to use it as a host controller. 
+	  board has this chip, and you want to use it as a host controller.
 	  If unsure, say N.
 
 	  To compile this driver as a module, choose M here: the
@@ -706,3 +706,68 @@ config USB_HCD_SSB
 	  for ehci and ohci.
 
 	  If unsure, say N.
+
+#-----------------------------------------------------
+#
+# SUNXI USB Host Controller Drivers
+#
+#-----------------------------------------------------
+config USB_SUNXI_HCD
+    tristate "SoftWinner SUNXI USB Host Controller support"
+	depends on USB
+	help
+	    SoftWinner SUNXI USB2.0 Host Controller support.
+
+config USB_SUNXI_HCI
+    tristate "SoftWinner SUNXI USB HCI"
+	depends on USB_SUNXI_HCD
+	help
+	    SoftWinner SUNXI USB HCI.
+
+config USB_SUNXI_EHCI0
+    tristate "SoftWinner SUNXI USB EHCI0"
+	depends on USB_SUNXI_HCI
+	help
+	    SoftWinner SUNXI USB EHCI0.
+
+config USB_SUNXI_EHCI1
+    tristate "SoftWinner SUNXI USB EHCI1"
+	depends on USB_SUNXI_HCI
+	help
+	    SoftWinner SUNXI USB EHCI1.
+
+config USB_SUNXI_EHCI2
+    tristate "SoftWinner SUNXI USB EHCI2"
+	depends on USB_SUNXI_HCI && (ARCH_SUN8IW11 || ARCH_SUN50IW2)
+	help
+	    SoftWinner SUNXI USB EHCI2.
+
+config USB_SUNXI_EHCI3
+    tristate "SoftWinner SUNXI USB EHCI3"
+	depends on USB_SUNXI_HCI && ARCH_SUN50IW2
+	help
+	    SoftWinner SUNXI USB EHCI3.
+
+config USB_SUNXI_OHCI0
+    tristate "SoftWinner SUNXI USB OHCI0"
+	depends on USB_SUNXI_HCI
+	help
+	    SoftWinner SUNXI USB OHCI0.
+
+config USB_SUNXI_OHCI1
+    tristate "SoftWinner SUNXI USB OHCI1"
+	depends on USB_SUNXI_HCI
+	help
+	    SoftWinner SUNXI USB OHCI1.
+
+config USB_SUNXI_OHCI2
+    tristate "SoftWinner SUNXI USB OHCI2"
+	depends on USB_SUNXI_HCI && (ARCH_SUN8IW11 || ARCH_SUN50IW2)
+	help
+	    SoftWinner SUNXI USB OHCI2.
+
+config USB_SUNXI_OHCI3
+    tristate "SoftWinner SUNXI USB OHCI3"
+	depends on USB_SUNXI_HCI && ARCH_SUN50IW2
+	help
+	    SoftWinner SUNXI USB OHCI3.

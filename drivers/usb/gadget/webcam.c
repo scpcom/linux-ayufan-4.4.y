@@ -16,6 +16,12 @@
 
 #include "f_uvc.h"
 
+#ifdef CONFIG_USB_SUNXI_G_WEBCAM
+#undef INFO
+#define INFO(d, fmt, args...) \
+	dev_info(&(d)->gadget->dev , fmt , ## args)
+#endif
+
 /*
  * Kbuild is not very cooperative with respect to linking separately
  * compiled library objects into one module.  So for now we won't use
@@ -33,6 +39,7 @@ USB_GADGET_COMPOSITE_OPTIONS();
  * Device descriptor
  */
 
+#ifndef CONFIG_USB_SUNXI_G_WEBCAM
 #define WEBCAM_VENDOR_ID		0x1d6b	/* Linux Foundation */
 #define WEBCAM_PRODUCT_ID		0x0102	/* Webcam A/V gadget */
 #define WEBCAM_DEVICE_BCD		0x0010	/* 0.10 */
@@ -79,6 +86,7 @@ static struct usb_device_descriptor webcam_device_descriptor = {
 	.iSerialNumber		= 0, /* dynamic */
 	.bNumConfigurations	= 0, /* dynamic */
 };
+#endif
 
 DECLARE_UVC_HEADER_DESCRIPTOR(1);
 
@@ -153,6 +161,7 @@ static const struct UVC_INPUT_HEADER_DESCRIPTOR(1, 2) uvc_input_header = {
 	.bmaControls[1][0]	= 4,
 };
 
+#ifndef CONFIG_USB_SUNXI_G_WEBCAM
 static const struct uvc_format_uncompressed uvc_format_yuv = {
 	.bLength		= UVC_DT_FORMAT_UNCOMPRESSED_SIZE,
 	.bDescriptorType	= USB_DT_CS_INTERFACE,
@@ -206,13 +215,18 @@ static const struct UVC_FRAME_UNCOMPRESSED(1) uvc_frame_yuv_720p = {
 	.bFrameIntervalType	= 1,
 	.dwFrameInterval[0]	= cpu_to_le32(5000000),
 };
+#endif
 
 static const struct uvc_format_mjpeg uvc_format_mjpg = {
 	.bLength		= UVC_DT_FORMAT_MJPEG_SIZE,
 	.bDescriptorType	= USB_DT_CS_INTERFACE,
 	.bDescriptorSubType	= UVC_VS_FORMAT_MJPEG,
 	.bFormatIndex		= 2,
+#ifdef CONFIG_USB_SUNXI_G_WEBCAM
+	.bNumFrameDescriptors	= 1,
+#else
 	.bNumFrameDescriptors	= 2,
+#endif
 	.bmFlags		= 0,
 	.bDefaultFrameIndex	= 1,
 	.bAspectRatioX		= 0,
@@ -250,12 +264,25 @@ static const struct UVC_FRAME_MJPEG(1) uvc_frame_mjpg_720p = {
 	.bmCapabilities		= 0,
 	.wWidth			= cpu_to_le16(1280),
 	.wHeight		= cpu_to_le16(720),
+#ifdef CONFIG_USB_SUNXI_G_WEBCAM
+	.dwMinBitRate		= cpu_to_le32(442368000),
+	.dwMaxBitRate		= cpu_to_le32(442368000),
+#else
 	.dwMinBitRate		= cpu_to_le32(29491200),
 	.dwMaxBitRate		= cpu_to_le32(29491200),
+#endif
 	.dwMaxVideoFrameBufferSize	= cpu_to_le32(1843200),
+#ifdef CONFIG_USB_SUNXI_G_WEBCAM
+	.dwDefaultFrameInterval	= cpu_to_le32(333333),
+#else
 	.dwDefaultFrameInterval	= cpu_to_le32(5000000),
+#endif
 	.bFrameIntervalType	= 1,
+#ifdef CONFIG_USB_SUNXI_G_WEBCAM
+	.dwFrameInterval[0]	= cpu_to_le32(333333),
+#else
 	.dwFrameInterval[0]	= cpu_to_le32(5000000),
+#endif
 };
 
 static const struct uvc_color_matching_descriptor uvc_color_matching = {
@@ -285,11 +312,15 @@ static const struct uvc_descriptor_header * const uvc_ss_control_cls[] = {
 
 static const struct uvc_descriptor_header * const uvc_fs_streaming_cls[] = {
 	(const struct uvc_descriptor_header *) &uvc_input_header,
+#ifndef CONFIG_USB_SUNXI_G_WEBCAM
 	(const struct uvc_descriptor_header *) &uvc_format_yuv,
 	(const struct uvc_descriptor_header *) &uvc_frame_yuv_360p,
 	(const struct uvc_descriptor_header *) &uvc_frame_yuv_720p,
+#endif
 	(const struct uvc_descriptor_header *) &uvc_format_mjpg,
+#ifndef CONFIG_USB_SUNXI_G_WEBCAM
 	(const struct uvc_descriptor_header *) &uvc_frame_mjpg_360p,
+#endif
 	(const struct uvc_descriptor_header *) &uvc_frame_mjpg_720p,
 	(const struct uvc_descriptor_header *) &uvc_color_matching,
 	NULL,
@@ -297,11 +328,15 @@ static const struct uvc_descriptor_header * const uvc_fs_streaming_cls[] = {
 
 static const struct uvc_descriptor_header * const uvc_hs_streaming_cls[] = {
 	(const struct uvc_descriptor_header *) &uvc_input_header,
+#ifndef CONFIG_USB_SUNXI_G_WEBCAM
 	(const struct uvc_descriptor_header *) &uvc_format_yuv,
 	(const struct uvc_descriptor_header *) &uvc_frame_yuv_360p,
 	(const struct uvc_descriptor_header *) &uvc_frame_yuv_720p,
+#endif
 	(const struct uvc_descriptor_header *) &uvc_format_mjpg,
+#ifndef CONFIG_USB_SUNXI_G_WEBCAM
 	(const struct uvc_descriptor_header *) &uvc_frame_mjpg_360p,
+#endif
 	(const struct uvc_descriptor_header *) &uvc_frame_mjpg_720p,
 	(const struct uvc_descriptor_header *) &uvc_color_matching,
 	NULL,
@@ -309,11 +344,15 @@ static const struct uvc_descriptor_header * const uvc_hs_streaming_cls[] = {
 
 static const struct uvc_descriptor_header * const uvc_ss_streaming_cls[] = {
 	(const struct uvc_descriptor_header *) &uvc_input_header,
+#ifndef CONFIG_USB_SUNXI_G_WEBCAM
 	(const struct uvc_descriptor_header *) &uvc_format_yuv,
 	(const struct uvc_descriptor_header *) &uvc_frame_yuv_360p,
 	(const struct uvc_descriptor_header *) &uvc_frame_yuv_720p,
+#endif
 	(const struct uvc_descriptor_header *) &uvc_format_mjpg,
+#ifndef CONFIG_USB_SUNXI_G_WEBCAM
 	(const struct uvc_descriptor_header *) &uvc_frame_mjpg_360p,
+#endif
 	(const struct uvc_descriptor_header *) &uvc_frame_mjpg_720p,
 	(const struct uvc_descriptor_header *) &uvc_color_matching,
 	NULL,
@@ -323,7 +362,7 @@ static const struct uvc_descriptor_header * const uvc_ss_streaming_cls[] = {
  * USB configuration
  */
 
-static int __init
+static int /* __init */
 webcam_config_bind(struct usb_configuration *c)
 {
 	return uvc_bind_config(c, uvc_fs_control_cls, uvc_ss_control_cls,
@@ -331,6 +370,7 @@ webcam_config_bind(struct usb_configuration *c)
 		uvc_ss_streaming_cls);
 }
 
+#ifndef CONFIG_USB_SUNXI_G_WEBCAM
 static struct usb_configuration webcam_config_driver = {
 	.label			= webcam_config_label,
 	.bConfigurationValue	= 1,
@@ -409,4 +449,5 @@ MODULE_AUTHOR("Laurent Pinchart");
 MODULE_DESCRIPTION("Webcam Video Gadget");
 MODULE_LICENSE("GPL");
 MODULE_VERSION("0.1.0");
+#endif
 

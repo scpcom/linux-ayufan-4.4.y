@@ -1186,6 +1186,17 @@ static struct ctl_table vm_table[] = {
 		.mode           = 0444 /* read-only */,
 		.proc_handler   = pdflush_proc_obsolete,
 	},
+#ifdef CONFIG_FILE_DIRTY_LIMIT
+	{
+		.procname	= "limit_file_dirty",
+		.data		= &limit_file_dirty,
+		.maxlen		= sizeof(limit_file_dirty),
+		.mode		= 0644,
+		.proc_handler	= proc_dointvec_minmax,
+		.extra1		= &zero,
+		.extra2		= &one,
+	},
+#endif
 	{
 		.procname	= "swappiness",
 		.data		= &vm_swappiness,

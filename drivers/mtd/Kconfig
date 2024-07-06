@@ -155,6 +155,13 @@ config MTD_BCM47XX_PARTS
 	  This provides partitions parser for devices based on BCM47xx
 	  boards.
 
+config MTD_SUNXI_PARTS
+	tristate "SUNXI partitioning support"
+	depends on ARCH_SUNXI
+	help
+	  This provides partitions parser for devices based on SUNXI
+	  boards.
+
 comment "User Modules And Translation Layers"
 
 config MTD_BLKDEVS

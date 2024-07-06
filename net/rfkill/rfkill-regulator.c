@@ -30,6 +30,7 @@ struct rfkill_regulator_data {
 static int rfkill_regulator_set_block(void *data, bool blocked)
 {
 	struct rfkill_regulator_data *rfkill_data = data;
+	int error;
 
 	pr_debug("%s: blocked: %d\n", __func__, blocked);
 
@@ -40,7 +41,10 @@ static int rfkill_regulator_set_block(void *data, bool blocked)
 		}
 	} else {
 		if (!rfkill_data->reg_enabled) {
-			regulator_enable(rfkill_data->vcc);
+			error = regulator_enable(rfkill_data->vcc);
+			if (error) {
+				pr_err("Failed to enable avdd: %d\n", error);
+			}
 			rfkill_data->reg_enabled = true;
 		}
 	}

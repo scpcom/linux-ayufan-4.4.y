@@ -134,12 +134,25 @@ EXPORT_SYMBOL_GPL(snd_dmaengine_pcm_set_config_from_dai_data);
 
 static void dmaengine_pcm_dma_complete(void *arg)
 {
-	struct snd_pcm_substream *substream = arg;
-	struct dmaengine_pcm_runtime_data *prtd = substream_to_prtd(substream);
+	struct snd_pcm_substream *substream = NULL;
+	struct dmaengine_pcm_runtime_data *prtd = NULL;
+	unsigned long flags;
+
+	substream = arg;
+	if (!substream) {
+		return;
+	}
+	snd_pcm_stream_lock_irqsave(substream, flags);
+	if (!substream->runtime) {
+		snd_pcm_stream_unlock_irqrestore(substream, flags);
+		return;
+	}
+	prtd = substream_to_prtd(substream);
 
 	prtd->pos += snd_pcm_lib_period_bytes(substream);
 	if (prtd->pos >= snd_pcm_lib_buffer_bytes(substream))
 		prtd->pos = 0;
+	snd_pcm_stream_unlock_irqrestore(substream, flags);
 
 	snd_pcm_period_elapsed(substream);
 }
@@ -158,11 +171,17 @@ static int dmaengine_pcm_prepare_and_submit(struct snd_pcm_substream *substream)
 		flags |= DMA_PREP_INTERRUPT;
 
 	prtd->pos = 0;
-	desc = dmaengine_prep_dma_cyclic(chan,
-		substream->runtime->dma_addr,
-		snd_pcm_lib_buffer_bytes(substream),
-		snd_pcm_lib_period_bytes(substream), direction, flags);
-
+	if (!strcmp(substream->pcm->card->id, "sndhdmiraw")) {
+			desc = dmaengine_prep_dma_cyclic(chan,
+				substream->runtime->dma_addr,
+				2*snd_pcm_lib_buffer_bytes(substream),
+				2*snd_pcm_lib_period_bytes(substream), direction, flags);
+	} else {
+		desc = dmaengine_prep_dma_cyclic(chan,
+			substream->runtime->dma_addr,
+			snd_pcm_lib_buffer_bytes(substream),
+			snd_pcm_lib_period_bytes(substream), direction, flags);
+	}
 	if (!desc)
 		return -ENOMEM;
 

@@ -160,6 +160,7 @@ static int __init cma_activate_area(struct cma *cma)
 		}
 		init_cma_reserved_pageblock(pfn_to_page(base_pfn));
 	} while (--i);
+	adjust_managed_cma_page_count(zone, cma->count, 1);
 
 	return 0;
 }
@@ -307,6 +308,7 @@ struct page *dma_alloc_from_contiguous(struct device *dev, int count,
 		if (ret == 0) {
 			bitmap_set(cma->bitmap, pageno, count);
 			page = pfn_to_page(pfn);
+			adjust_managed_cma_page_count(page_zone(page), count, 0);
 			break;
 		} else if (ret != -EBUSY) {
 			break;
@@ -353,7 +355,53 @@ bool dma_release_from_contiguous(struct device *dev, struct page *pages,
 	mutex_lock(&cma_mutex);
 	bitmap_clear(cma->bitmap, pfn - cma->base_pfn, count);
 	free_contig_range(pfn, count);
+	adjust_managed_cma_page_count(page_zone(pages), count, 1);
 	mutex_unlock(&cma_mutex);
 
 	return true;
 }
+#define MAPS_AREA_RANGE		((1U<<20)*20)
+#define MAPS_UNIT_BLOCK		0X100	//  1MB /4KB =256
+#define MAPS_AREA_BLOCK		(MAPS_AREA_RANGE>>PAGE_SHIFT)  // 20MB/4KB  = 5120
+int dma_contiguous_area_maps(struct seq_file *s)
+{
+	unsigned int i;
+	unsigned int active_bit = 0;
+	unsigned int free_bit = 0;
+	unsigned long base_offset = 0;
+	unsigned long end_offset = 0;
+
+	struct cma *cma = dev_get_cma_area(NULL);
+	if (!cma || !cma->count)
+		return (-EINVAL);
+
+	base_offset = cma->base_pfn<<PAGE_SHIFT;
+	end_offset = (cma->base_pfn + cma->count)<<PAGE_SHIFT;
+	seq_printf(s, "\n 0x%lx: ", base_offset);
+	for (i=0; i<cma->count; i++) {
+		if (((i+1)%MAPS_UNIT_BLOCK) == 0) {
+			if ((i+1)%MAPS_AREA_BLOCK == 0) {
+				if (active_bit)
+					seq_printf(s, " %2x \n", active_bit-1);
+				else
+					seq_printf(s, " %s \n", "00");
+				seq_printf(s, " 0x%lx: ", base_offset+(i+1)/MAPS_AREA_BLOCK*MAPS_AREA_RANGE);
+			} else {
+				if (active_bit)
+					seq_printf(s, " %2x", active_bit-1);
+				else
+					seq_printf(s, " %s", "00");
+			}
+			active_bit = 0;
+		}
+		if (test_bit(i, cma->bitmap))
+			active_bit++;
+		else
+			free_bit++;
+	}
+	seq_printf(s, "\n Cma area start:0x%lx end:0x%lx\n", base_offset, end_offset);
+	seq_printf(s, " Cma area Total:%uMB Free:%uKB ~= %uMB \n", (unsigned int)(cma->count<<PAGE_SHIFT)>>20,
+				(free_bit<<PAGE_SHIFT)/1024, (free_bit<<PAGE_SHIFT)>>20);
+	return 0;
+}
+EXPORT_SYMBOL(dma_contiguous_area_maps);

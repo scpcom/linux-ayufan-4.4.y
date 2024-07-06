@@ -48,6 +48,9 @@ enum wb_reason {
 	WB_REASON_FREE_MORE_MEM,
 	WB_REASON_FS_FREE_SPACE,
 	WB_REASON_FORKER_THREAD,
+#ifdef CONFIG_FILE_DIRTY_LIMIT
+	WB_REASON_DOWNGRADE_FILEDIRTY,
+#endif
 
 	WB_REASON_MAX,
 };
@@ -75,6 +78,9 @@ struct writeback_control {
 
 	unsigned for_kupdate:1;		/* A kupdate writeback */
 	unsigned for_background:1;	/* A background writeback */
+#ifdef CONFIG_FILE_DIRTY_LIMIT
+	unsigned for_file:1;		/* A big file writeback */
+#endif
 	unsigned tagged_writepages:1;	/* tag-and-write to avoid livelock */
 	unsigned for_reclaim:1;		/* Invoked from the page allocator */
 	unsigned range_cyclic:1;	/* range_start is cyclic */
@@ -131,6 +137,9 @@ extern unsigned int dirty_expire_interval;
 extern int vm_highmem_is_dirtyable;
 extern int block_dump;
 extern int laptop_mode;
+#ifdef CONFIG_FILE_DIRTY_LIMIT
+extern int limit_file_dirty;
+#endif
 
 extern int dirty_background_ratio_handler(struct ctl_table *table, int write,
 		void __user *buffer, size_t *lenp,
