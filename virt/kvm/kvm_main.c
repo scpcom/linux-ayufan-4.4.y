@@ -2867,8 +2867,6 @@ int kvm_io_bus_write(struct kvm *kvm, enum kvm_bus bus_idx, gpa_t addr,
 	};
 
 	bus = srcu_dereference(kvm->buses[bus_idx], &kvm->srcu);
-	if (!bus)
-		return -ENOMEM;
 	idx = kvm_io_bus_get_first_dev(bus, addr, len);
 	if (idx < 0)
 		return -EOPNOTSUPP;
@@ -2897,6 +2895,8 @@ int kvm_io_bus_read(struct kvm *kvm, enum kvm_bus bus_idx, gpa_t addr,
 	};
 
 	bus = srcu_dereference(kvm->buses[bus_idx], &kvm->srcu);
+	if (!bus)
+		return -ENOMEM;
 	if (!bus)
 		return -ENOMEM;
 	idx = kvm_io_bus_get_first_dev(bus, addr, len);
