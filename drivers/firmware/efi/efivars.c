@@ -419,6 +419,7 @@ static ssize_t efivar_create(struct file *filp, struct kobject *kobj,
 	struct efivar_entry *new_entry;
 	bool need_compat = is_compat();
 	efi_char16_t *name;
+	efi_guid_t *guid;
 	unsigned long size;
 	u32 attributes;
 	u8 *data;
@@ -435,6 +436,7 @@ static ssize_t efivar_create(struct file *filp, struct kobject *kobj,
 		name = compat->VariableName;
 		size = compat->DataSize;
 		data = compat->Data;
+		guid = compat->VendorGuid;
 	} else {
 		if (count != sizeof(*new_var))
 			return -EINVAL;
@@ -443,10 +445,11 @@ static ssize_t efivar_create(struct file *filp, struct kobject *kobj,
 		name = new_var->VariableName;
 		size = new_var->DataSize;
 		data = new_var->Data;
+		guid = new_var->VendorGuid;
 	}
 
 	if ((attributes & ~EFI_VARIABLE_MASK) != 0 ||
-	    efivar_validate(name, data, size) == false) {
+	    efivar_validate(guid, name, data, size) == false) {
 		printk(KERN_ERR "efivars: Malformed variable content\n");
 		return -EINVAL;
 	}

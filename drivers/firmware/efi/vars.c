@@ -168,7 +168,7 @@ struct variable_validate {
 	efi_guid_t vendor;
 	char *name;
 	bool (*validate)(efi_char16_t *var_name, int match, u8 *data,
-			 unsigned long len);
+                         unsigned long len);
 };
 
 /*
@@ -182,6 +182,7 @@ struct variable_validate {
  * Note that it's sorted by {vendor,name}, but globbed names must come after
  * any other name with the same prefix.
  */
+
 static const struct variable_validate variable_validate[] = {
 	{ EFI_GLOBAL_VARIABLE_GUID, "BootNext", validate_uint16 },
 	{ EFI_GLOBAL_VARIABLE_GUID, "BootOrder", validate_boot_order },
@@ -204,60 +205,55 @@ static const struct variable_validate variable_validate[] = {
 
 static bool
 variable_matches(const char *var_name, size_t len, const char *match_name,
-		 int *match)
+                int *match)
 {
-	for (*match = 0; ; (*match)++) {
-		char c = match_name[*match];
-		char u = var_name[*match];
+       for (*match = 0; ; (*match)++) {
+               char c = match_name[*match];
+               char u = var_name[*match];
 
-		/* Wildcard in the matching name means we've matched */
-		if (c == '*')
-			return true;
+               /* Wildcard in the matching name means we've matched */
+               if (c == '*')
+                       return true;
 
-		/* Case sensitive match */
-		if (!c && *match == len)
-			return true;
+               /* Case sensitive match */
+               if (!c && *match == len)
+                       return true;
 
-		if (c != u)
-			return false;
+               if (c != u)
+                       return false;
 
-		if (!c)
-			return true;
-	}
-	return true;
+               if (!c)
+                       return true;
+       }
+       return true;
 }
 
 bool
-efivar_validate(efi_char16_t *var_name, u8 *data, unsigned long len)
+efivar_validate(efi_guid_t vendor, efi_char16_t *var_name, u8 *data,
+		unsigned long data_size)
 {
 	int i;
-	u16 *unicode_name = var_name;
+	unsigned long utf8_size;
+	u8 *utf8_name;
 
 	utf8_size = ucs2_utf8size(var_name);
 	utf8_name = kmalloc(utf8_size + 1, GFP_KERNEL);
 	if (!utf8_name)
 		return false;
-
-	ucs2_as_utf8(utf8_name, var_name, utf8_size);
-	utf8_name[utf8_size] = '\0';
+			ucs2_as_utf8(utf8_name, var_name, utf8_size);
+			utf8_name[utf8_size] = '\0';
 
 	for (i = 0; variable_validate[i].name[0] != '\0'; i++) {
 		const char *name = variable_validate[i].name;
 		int match = 0;
-
-			/* Wildcard in the matching name means we've matched */
-			if (c == '*')
-				return variable_validate[i].validate(var_name,
-							     match, data, len);
-
-		if (variable_matches(utf8_name, utf8_size+1, name, &match)) {
-			if (variable_validate[i].validate == NULL)
-				break;
-
-			/* Reached the end of the string while matching */
-			if (!c)
-				return variable_validate[i].validate(var_name,
-							     match, data, len);
+	if (efi_guidcmp(vendor, variable_validate[i].vendor))
+		continue;
+	if (variable_matches(utf8_name, utf8_size+1, name, &match)) {
+		if (variable_validate[i].validate == NULL)
+			break;
+	kfree(utf8_name);
+	return variable_validate[i].validate(var_name, match,
+						data, data_size);
 		}
 	}
 	kfree(utf8_name);
@@ -267,32 +263,33 @@ EXPORT_SYMBOL_GPL(efivar_validate);
 
 bool
 efivar_variable_is_removable(efi_guid_t vendor, const char *var_name,
-			     size_t len)
+                            size_t len)
 {
-	int i;
-	bool found = false;
-	int match = 0;
+       int i;
+       bool found = false;
+       int match = 0;
 
-	/*
-	 * Check if our variable is in the validated variables list
-	 */
-	for (i = 0; variable_validate[i].name[0] != '\0'; i++) {
-		if (efi_guidcmp(variable_validate[i].vendor, vendor))
-			continue;
+       /*
+        * Check if our variable is in the validated variables list
+        */
+       for (i = 0; variable_validate[i].name[0] != '\0'; i++) {
+               if (efi_guidcmp(variable_validate[i].vendor, vendor))
+                       continue;
 
-		if (variable_matches(var_name, len,
-				     variable_validate[i].name, &match)) {
-			found = true;
-			break;
-		}
-	}
+               if (variable_matches(var_name, len,
+                                    variable_validate[i].name, &match)) {
+                       found = true;
+                       break;
+               }
+       }
 
-	/*
-	 * If it's in our list, it is removable.
-	 */
-	return found;
+       /*
+        * If it's in our list, it is removable.
+        */
+       return found;
 }
 EXPORT_SYMBOL_GPL(efivar_variable_is_removable);
+
 
 static efi_status_t
 check_var_size(u32 attributes, unsigned long size)
@@ -873,7 +870,7 @@ int efivar_entry_set_get_size(struct efivar_entry *entry, u32 attributes,
 
 	*set = false;
 
-	if (efivar_validate(name, data, *size) == false)
+	if (efivar_validate(*vendor, name, data, *size) == false)
 		return -EINVAL;
 
 	/*
