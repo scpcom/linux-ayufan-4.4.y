@@ -949,10 +949,10 @@ int inet_ioctl(struct socket *sock, unsigned int cmd, unsigned long arg)
 	case SIOCGIFNETMASK:
 	case SIOCGIFDSTADDR:
 	case SIOCGIFPFLAGS:
-		if (get_user_ifreq(&ifr, NULL, p))
+		if (copy_from_user(&ifr, p, sizeof(struct ifreq)))
 			return -EFAULT;
 		err = devinet_ioctl(net, cmd, &ifr);
-		if (!err && put_user_ifreq(&ifr, p))
+		if (!err && copy_to_user(p, &ifr, sizeof(struct ifreq)))
 			err = -EFAULT;
 		break;
 
@@ -962,7 +962,7 @@ int inet_ioctl(struct socket *sock, unsigned int cmd, unsigned long arg)
 	case SIOCSIFDSTADDR:
 	case SIOCSIFPFLAGS:
 	case SIOCSIFFLAGS:
-		if (get_user_ifreq(&ifr, NULL, p))
+		if (copy_from_user(&ifr, p, sizeof(struct ifreq)))
 			return -EFAULT;
 		err = devinet_ioctl(net, cmd, &ifr);
 		break;
