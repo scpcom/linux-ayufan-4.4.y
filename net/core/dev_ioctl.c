@@ -36,7 +36,7 @@ int dev_ifconf(struct net *net, struct ifconf __user *uifc)
 	struct net_device *dev;
 	void __user *pos;
 	size_t size;
-	int i, len, total = 0;
+	int len, total = 0;
 
 #ifdef CONFIG_COMPAT
 	/* both the ifconf and the ifreq structures are slightly different */
@@ -65,21 +65,17 @@ int dev_ifconf(struct net *net, struct ifconf __user *uifc)
 	/* Loop over the interfaces, and write an info block for each. */
 	rtnl_lock();
 	for_each_netdev(net, dev) {
-		for (i = 0; i < NPROTO; i++) {
-			if (gifconf_list[i]) {
-				int done;
-				if (!pos)
-					done = gifconf_list[i](dev, NULL, 0, size);
-				else
-					done = gifconf_list[i](dev, pos + total,
-							       len - total, size);
-				if (done < 0) {
-					rtnl_unlock();
-					return -EFAULT;
-				}
-				total += done;
-			}
+		int done;
+		if (!pos)
+			done = inet_gifconf(dev, NULL, 0, size);
+		else
+			done = inet_gifconf(dev, pos + total,
+					    len - total, size);
+		if (done < 0) {
+			rtnl_unlock();
+			return -EFAULT;
 		}
+		total += done;
 	}
 	rtnl_unlock();
 
