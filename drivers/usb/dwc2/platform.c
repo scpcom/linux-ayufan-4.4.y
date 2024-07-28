@@ -131,13 +131,6 @@ static int dwc2_get_dr_mode(struct dwc2_hsotg *hsotg)
 	return 0;
 }
 
-static void __dwc2_disable_regulators(void *data)
-{
-	struct dwc2_hsotg *hsotg = data;
-
-	regulator_bulk_disable(ARRAY_SIZE(hsotg->supplies), hsotg->supplies);
-}
-
 #if IS_ENABLED(CONFIG_ARCH_CVITEK)
 static void dwc2_set_hw_id(struct dwc2_hsotg *hsotg, int is_dev)
 {
