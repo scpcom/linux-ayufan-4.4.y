@@ -20,6 +20,7 @@ struct f_hid_opts {
 	int				minor;
 	unsigned char			subclass;
 	unsigned char			protocol;
+	unsigned char			no_out_endpoint;
 	unsigned char			wakeup_on_write;
 	unsigned short			report_length;
 	unsigned short			report_desc_length;
