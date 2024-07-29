@@ -8,7 +8,8 @@
 #include <linux/percpu.h>
 #include <linux/spinlock.h>
 
-struct asid_info {
+struct asid_info
+{
 	atomic64_t	generation;
 	unsigned long	*map;
 	atomic64_t __percpu	*active;
