@@ -413,9 +413,8 @@ int apply_relocate_add(Elf_Shdr *sechdrs, const char *strtab,
 						found = apply_calc_pcrel_lo12(sechdrs, rel, sym, j,
 							symindex, relsec, me, &v);
 					}
-					if (found) {
+					if (found)
 						break;
-					}
 				}
 			}
 			if (j == sechdrs[relsec].sh_size / sizeof(*rel)) {

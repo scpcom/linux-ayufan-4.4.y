@@ -131,7 +131,8 @@ void riscv_fill_hwcap(void)
 	}
 
 	/* We don't support systems with F but without D, so mask those out
-	 * here. */
+	 * here.
+	 */
 	if ((elf_hwcap & COMPAT_HWCAP_ISA_F) && !(elf_hwcap & COMPAT_HWCAP_ISA_D)) {
 		pr_info("This kernel does not support systems with F but not D\n");
 		elf_hwcap &= ~COMPAT_HWCAP_ISA_F;
