@@ -74,7 +74,6 @@ void __init fdt_reserved_mem_save_node(unsigned long node, const char *uname,
 	rmem->size = size;
 
 	reserved_mem_count++;
-	return;
 }
 
 /**
