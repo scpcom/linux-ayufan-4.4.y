@@ -6,7 +6,6 @@
 
 #include <linux/of_clk.h>
 #include <linux/clocksource.h>
-#include <linux/of_clk.h>
 #include <linux/delay.h>
 #include <asm/sbi.h>
 #include <asm/processor.h>
@@ -24,8 +23,6 @@ void __init time_init(void)
 		panic(KERN_WARNING "RISC-V system with no 'timebase-frequency' in DTS\n");
 	of_node_put(cpu);
 	riscv_timebase = prop;
-
-	of_clk_init(NULL);
 
 	lpj_fine = riscv_timebase / HZ;
 
