@@ -216,6 +216,7 @@ struct otg_fsm {
 	struct mutex lock;
 	u8 *host_req_flag;
 	struct delayed_work hnp_polling_work;
+	bool hnp_work_inited;
 	bool state_changed;
 #if defined(CONFIG_CVITEK_USB_LEGACY)
 	/* for debug prints */
