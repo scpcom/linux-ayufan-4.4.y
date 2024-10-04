@@ -67,6 +67,9 @@ void asm_offsets(void)
 	OFFSET(TASK_THREAD_F30, task_struct, thread.fstate.f[30]);
 	OFFSET(TASK_THREAD_F31, task_struct, thread.fstate.f[31]);
 	OFFSET(TASK_THREAD_FCSR, task_struct, thread.fstate.fcsr);
+#ifdef CONFIG_STACKPROTECTOR
+	OFFSET(TSK_STACK_CANARY, task_struct, stack_canary);
+#endif
 
 	OFFSET(TASK_THREAD_V0,  task_struct, thread.vstate.v[0]);
 	OFFSET(TASK_THREAD_V1,  task_struct, thread.vstate.v[1]);
