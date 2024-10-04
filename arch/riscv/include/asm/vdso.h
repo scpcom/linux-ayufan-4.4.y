@@ -11,7 +11,7 @@
 #include <linux/types.h>
 #include <generated/vdso-offsets.h>
 
-#ifndef GENERIC_TIME_VSYSCALL
+#ifndef CONFIG_GENERIC_TIME_VSYSCALL
 struct vdso_data {
 };
 #endif
