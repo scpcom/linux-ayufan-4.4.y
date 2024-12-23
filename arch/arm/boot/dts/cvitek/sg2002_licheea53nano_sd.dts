@@ -8,7 +8,7 @@
 #include <dt-bindings/gpio/gpio.h>
 
 &i2c0 {
-        status = "disabled";
+        status = "okay";
         /delete-property/ scl-pinmux;
         /delete-property/ sda-pinmux;
         /delete-property/ scl-gpios;
@@ -16,7 +16,7 @@
 };
 
 &i2c1 {
-        status = "disabled";
+        status = "okay";
         /delete-property/ scl-pinmux;
         /delete-property/ sda-pinmux;
         /delete-property/ scl-gpios;
@@ -57,8 +57,27 @@
         status = "okay";
 };
 
+&uart0 {
+	clocks = <&clk CV181X_CLK_UART0>;
+	/delete-property/ clock-frequency;
+};
+
 &uart1 {
+        clocks = <&clk CV181X_CLK_UART1>;
+        /delete-property/ clock-frequency;
         status = "okay";
+};
+
+&uart2 {
+        clocks = <&clk CV181X_CLK_UART2>;
+        /delete-property/ clock-frequency;
+        status = "okay";
+};
+
+&uart3 {
+        clocks = <&clk CV181X_CLK_UART3>;
+        /delete-property/ clock-frequency;
+	status = "okay";
 };
 
 &pwm0 {
@@ -82,7 +101,7 @@
 };
 
 &i2c3 {
-        status = "disabled";
+        status = "okay";
         /delete-property/ scl-pinmux;
         /delete-property/ sda-pinmux;
         /delete-property/ scl-gpios;
@@ -90,7 +109,7 @@
 };
 
 &i2c4 {
-        statuc = "okay";
+        status = "okay";
         gt9xx: gt9xx@14 {
                 compatible = "goodix,gt9xx";
                 reg = <0x14>;
@@ -98,15 +117,38 @@
                 goodix,rst-gpio = <&porte 4 0>;
                 status = "okay";
         };
-	hytr: hynitron@5a {
-		compatible = "hynitron,hyn_ts";
-		reg = <0x5a>;
-		hynitron,irq-gpio = <&porte 3 0>;
-		hynitron,reset-gpio = <&porte 4 0>;
-		hynitron,max-touch-number = <5>;
-		hynitron,display-coords = <368 552>;
+        hynitron: hynitron@5a {
+                compatible = "hynitron,hyn_ts", "hyn,7xx";
+                reg = <0x5a>;
+                irq-gpio = <&porte 3 0>;
+                hynitron,irq-gpio = <&porte 3 0>;
+                reset-gpio = <&porte 4 0>;
+                hynitron,reset-gpio = <&porte 4 0>;
+                max-touch-number = <5>;
+                hynitron,max-touch-number = <5>;
+                display-coords = <0 0 480 640>;
+                hynitron,display-coords = <368 552>;
+                pos-swap = <0>;
+                posx-reverse = <0>;
+                posy-reverse = <0>;
                 status = "okay";
-	};
+        };
+};
+
+&spi0 {
+	status = "okay";
+};
+
+&spi1 {
+	status = "okay";
+};
+
+&spi2 {
+	status = "okay";
+};
+
+&spi3 {
+	status = "okay";
 };
 
 &dac {
@@ -129,6 +171,29 @@
 / {
         model = "LicheeRv Nano";
 
+	spi4: spi4@gpio {
+		compatible = "spi-gpio";
+		sck-gpio = <&porta 22 0>;
+		miso-gpio = <&porta 23 0>;
+		mosi-gpio = <&porta 25 0>;
+		cs-gpio = <&porta 24 GPIO_ACTIVE_LOW>;
+		num-chipselects = <1>;
+		status = "okay";
+
+		spidev@0 {
+			compatible = "spidev";
+			reg = <0>;
+		};
+	};
+
+	i2c5: i2c5@gpio {
+		compatible = "i2c-gpio";
+                scl-gpios = <&porta 15 (GPIO_ACTIVE_HIGH | GPIO_OPEN_DRAIN)>;
+                sda-gpios = <&porta 27 (GPIO_ACTIVE_HIGH | GPIO_OPEN_DRAIN)>;
+                i2c-gpio,delay-us = <5>;
+                status = "okay";
+	};
+
         gpio-keys {
                 compatible = "gpio-keys";
                 key-user {
@@ -148,12 +213,16 @@
 		};
 	};
 
+	// buggy pwm driver, not working, please use userspace pwm api
+	/*
 	lcd0_backlight: pwm-backlight@0 {
 		compatible = "pwm-backlight";
+		pwm-names = "backlight";
 		pwms = <&pwm2 2 50000000>; // 20Khz
 		brightness-levels = <0 2 4 8 16 32 64 128 255>;
 		default-brightness-level = <4>;
 	};
+	*/
 
         wifisd:wifi-sd@4320000 {                                                    
                 compatible = "cvitek,cv181x-sdio";                                  
@@ -162,12 +231,12 @@
                 reg_names = "core_mem";                                             
                 src-frequency = <375000000>;                                        
                 min-frequency = <400000>; // 400Khz                                 
-                //max-frequency = <50000000>; // 50Mhz                              
+                max-frequency = <50000000>; // 50Mhz                              
                 //max-frequency = <45000000>; // 45Mhz                              
                 //max-frequency = <40000000>; // 40Mhz                              
                 //max-frequency = <35000000>; // 35Mhz                              
                 //max-frequency = <30000000>; // 30Mhz                              
-                max-frequency = <25000000>; // 25Mhz                                
+                //max-frequency = <25000000>; // 25Mhz                                
                 //max-frequency = <20000000>; // 20Mhz                              
                 //max-frequency = <15000000>; // 15Mhz                              
                 //max-frequency = <10000000>; // 10Mhz                              
