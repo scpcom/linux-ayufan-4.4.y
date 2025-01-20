@@ -17,7 +17,6 @@ obj-$(CONFIG_MMU) += extable.o fault.o pageattr.o
 obj-$(CONFIG_MMU) += mmu.o
 obj-y += cacheflush.o
 obj-y += context.o
-obj-y += pgtable.o
 obj-y += pmem.o
 
 ifeq ($(CONFIG_MMU),y)
